@@ -60,7 +60,7 @@ func (ws *LoadDistributionSorter) SortRoutes(ctx *context.Context, prflID string
 		}
 		srtRoute := &SortedRoute{
 			RouteID: route.ID,
-			SortingData: map[string]interface{}{
+			SortingData: map[string]any{
 				utils.Weight: route.Weight,
 			},
 			sortingDataDecimal: map[string]*utils.Decimal{

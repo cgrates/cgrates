@@ -50,10 +50,10 @@ func TestACHTTPPostExecute(t *testing.T) {
 	}
 
 	dataStorage := utils.MapStorage{
-		utils.MetaReq: map[string]interface{}{
+		utils.MetaReq: map[string]any{
 			utils.AccountField: "1001",
 		},
-		utils.MetaOpts: map[string]interface{}{
+		utils.MetaOpts: map[string]any{
 			utils.Usage: 10 * time.Minute,
 		},
 	}
@@ -80,11 +80,11 @@ func TestACHTTPPostExecute(t *testing.T) {
 	}
 
 	dataStorage = utils.MapStorage{
-		utils.MetaOpts: map[string]interface{}{
+		utils.MetaOpts: map[string]any{
 			utils.MetaAsync: 10 * time.Minute,
 		},
 	}
-	http.aCfg.Opts = make(map[string]interface{})
+	http.aCfg.Opts = make(map[string]any)
 	http.aCfg.Opts[utils.MetaAsync] = true
 	http.config.EFsCfg().FailedPostsDir = utils.MetaNone
 	if err := http.execute(context.Background(), dataStorage, utils.EmptyString); err != nil {
@@ -112,7 +112,7 @@ func TestACHTTPPostValues(t *testing.T) {
 		t.Error(err)
 	}
 	dataStorage := utils.MapStorage{
-		utils.MetaReq: map[string]interface{}{
+		utils.MetaReq: map[string]any{
 			utils.AccountField: 1003,
 		},
 	}

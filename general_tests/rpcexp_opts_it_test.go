@@ -209,13 +209,13 @@ func testRPCExpProcessEventWithConfigOpts(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "ThresholdProcessEv1",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.AccountField: "1001",
 			},
-			APIOpts: map[string]interface{}{},
+			APIOpts: map[string]any{},
 		},
 	}
-	var reply map[string]map[string]interface{}
+	var reply map[string]map[string]any
 	if err := ng1RPC.Call(context.Background(), utils.EeSv1ProcessEvent, args, &reply); err != nil {
 		t.Error(err)
 	}
@@ -227,10 +227,10 @@ func testRPCExpGetThresholdsAfterFirstEvent(t *testing.T) {
 	args := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "ThresholdEventTest1",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1001",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsThresholdsProfileIDs: []string{"THD_1", "THD_2", "THD_3"},
 		},
 	}
@@ -276,15 +276,15 @@ func testRPCExpProcessEventWithAPIOpts(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "ThresholdProcessEv2",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.AccountField: "1001",
 			},
-			APIOpts: map[string]interface{}{
+			APIOpts: map[string]any{
 				utils.OptsThresholdsProfileIDs: []string{"THD_2"},
 			},
 		},
 	}
-	var reply map[string]map[string]interface{}
+	var reply map[string]map[string]any
 	if err := ng1RPC.Call(context.Background(), utils.EeSv1ProcessEvent, args, &reply); err != nil {
 		t.Error(err)
 	}
@@ -295,10 +295,10 @@ func testRPCExpGetThresholdsAfterSecondEvent(t *testing.T) {
 	args := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "ThresholdEventTest2",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1001",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsThresholdsProfileIDs: []string{"THD_1", "THD_2", "THD_3"},
 		},
 	}
@@ -344,15 +344,15 @@ func testRPCExpProcessEventWithRPCAPIOpts(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "ThresholdProcessEv3",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.AccountField: "1001",
 			},
-			APIOpts: map[string]interface{}{
+			APIOpts: map[string]any{
 				utils.OptsThresholdsProfileIDs: []string{"THD_2"},
 			},
 		},
 	}
-	var reply map[string]map[string]interface{}
+	var reply map[string]map[string]any
 	if err := ng1RPC.Call(context.Background(), utils.EeSv1ProcessEvent, args, &reply); err != nil {
 		t.Error(err)
 	}
@@ -363,10 +363,10 @@ func testRPCExpGetThresholdsAfterThirdEvent(t *testing.T) {
 	args := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "ThresholdEventTest3",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1001",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsThresholdsProfileIDs: []string{"THD_1", "THD_2", "THD_3"},
 		},
 	}

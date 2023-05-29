@@ -435,7 +435,7 @@ func TestThresholdsGetThresholdProfileIDsGetOptsErr(t *testing.T) {
 	if err := adms.GetThresholdProfileIDs(context.Background(),
 		&utils.ArgsItemIDs{
 			Tenant: "cgrates.org",
-			APIOpts: map[string]interface{}{
+			APIOpts: map[string]any{
 				utils.PageLimitOpt: true,
 			},
 		}, &reply); err == nil || err.Error() != experr {
@@ -480,7 +480,7 @@ func TestThresholdsGetThresholdProfileIDsPaginateErr(t *testing.T) {
 	if err := adms.GetThresholdProfileIDs(context.Background(),
 		&utils.ArgsItemIDs{
 			Tenant: "cgrates.org",
-			APIOpts: map[string]interface{}{
+			APIOpts: map[string]any{
 				utils.PageLimitOpt:    2,
 				utils.PageOffsetOpt:   4,
 				utils.PageMaxItemsOpt: 5,
@@ -591,17 +591,17 @@ func TestThresholdsAPIs(t *testing.T) {
 	expEv := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "EventTest",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1001",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsThresholdsProfileIDs: []string{"thd1", "thd2"},
 			utils.OptsActionsProfileIDs:    []string{"actPrfID"},
 		},
 	}
 	mCC := &mockClientConn{
-		calls: map[string]func(*context.Context, interface{}, interface{}) error{
-			utils.ActionSv1ExecuteActions: func(ctx *context.Context, args, reply interface{}) error {
+		calls: map[string]func(*context.Context, any, any) error{
+			utils.ActionSv1ExecuteActions: func(ctx *context.Context, args, reply any) error {
 				if !reflect.DeepEqual(args, expEv) {
 					return fmt.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ToJSON(expEv), utils.ToJSON(args))
 				}
@@ -682,11 +682,11 @@ func TestThresholdsAPIs(t *testing.T) {
 	tSv1 := NewThresholdSv1(tS)
 	args := &utils.CGREvent{
 		Tenant: "cgrates.org",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1001",
 		},
 		ID: "EventTest",
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsThresholdsProfileIDs: []string{"thd1", "thd2"},
 		},
 	}
@@ -920,7 +920,7 @@ func TestThresholdsGetThresholdProfilesGetIDsErr(t *testing.T) {
 	argsGet := &utils.ArgsItemIDs{
 		Tenant:      "cgrates.org",
 		ItemsPrefix: "test_ID",
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.PageLimitOpt:    2,
 			utils.PageOffsetOpt:   4,
 			utils.PageMaxItemsOpt: 5,

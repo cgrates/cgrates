@@ -36,12 +36,12 @@ func TestRemoveWhiteSpaces(t *testing.T) {
 }
 
 func TestEncodeBase64JSON(t *testing.T) {
-	var args interface{}
+	var args any
 	args = math.NaN()
 	if _, err := EncodeBase64JSON(args); err == nil {
 		t.Errorf("Expected error")
 	}
-	args = map[string]interface{}{"Q": 1}
+	args = map[string]any{"Q": 1}
 	expected := `eyJRIjoxfQ`
 	if rply, err := EncodeBase64JSON(args); err != nil {
 		t.Error(err)
@@ -56,8 +56,8 @@ func TestDecodeBase64JSON(t *testing.T) {
 	if err := DecodeBase64JSON(args, &rply1); err == nil {
 		t.Errorf("Expected error")
 	}
-	var rply2 map[string]interface{}
-	expected := map[string]interface{}{"Q": 1.}
+	var rply2 map[string]any
+	expected := map[string]any{"Q": 1.}
 	if err := DecodeBase64JSON(args, &rply2); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, rply2) {

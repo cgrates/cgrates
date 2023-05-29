@@ -115,7 +115,7 @@ func (admS *AdminSv1) GetChargerProfilesCount(ctx *context.Context, args *utils.
 
 type ChargerWithAPIOpts struct {
 	*engine.ChargerProfile
-	APIOpts map[string]interface{}
+	APIOpts map[string]any
 }
 
 // SetChargerProfile add/update a new Charger Profile

@@ -216,7 +216,7 @@ func mergePartialEvents(cgrEvs []*utils.CGREvent, cfg *config.EventReaderCfg, fl
 		}
 
 		// get the field as interface in a slice
-		fields := make([]interface{}, len(cgrEvs))
+		fields := make([]any, len(cgrEvs))
 		for i, ev := range cgrEvs {
 			if fields[i], err = ordPath.ParseDataProviderWithInterfaces(ev.AsDataProvider()); err != nil {
 				return
@@ -241,8 +241,8 @@ func mergePartialEvents(cgrEvs []*utils.CGREvent, cfg *config.EventReaderCfg, fl
 		cgrEv = &utils.CGREvent{
 			Tenant:  cgrEvs[0].Tenant,
 			ID:      utils.UUIDSha1Prefix(),
-			Event:   make(map[string]interface{}),
-			APIOpts: make(map[string]interface{}),
+			Event:   make(map[string]any),
+			APIOpts: make(map[string]any),
 		}
 		for _, ev := range cgrEvs { // merge the maps
 			for key, value := range ev.Event {

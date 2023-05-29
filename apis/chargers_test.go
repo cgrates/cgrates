@@ -370,7 +370,7 @@ func TestChargerSSetGetRmvGetChargerProfile(t *testing.T) {
 				Tenant: "cgrates.org",
 				ID:     "1001",
 			},
-			APIOpts: map[string]interface{}{},
+			APIOpts: map[string]any{},
 		}, &getRply)
 	if err != nil {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
@@ -415,7 +415,7 @@ func TestChargerSSetGetRmvGetChargerProfile(t *testing.T) {
 				Tenant: "cgrates.org",
 				ID:     "1001",
 			},
-			APIOpts: map[string]interface{}{},
+			APIOpts: map[string]any{},
 		}, &getRply2)
 	if err == nil || err.Error() != "NOT_FOUND" {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", "NOT_FOUND", err)
@@ -459,7 +459,7 @@ func TestChargerSSetGetRmvGetChargerProfileNoTenant(t *testing.T) {
 				Tenant: "cgrates.org",
 				ID:     "1001",
 			},
-			APIOpts: map[string]interface{}{},
+			APIOpts: map[string]any{},
 		}, &getRply)
 	if err != nil {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
@@ -503,7 +503,7 @@ func TestChargerSSetGetRmvGetChargerProfileNoTenant(t *testing.T) {
 				Tenant: "cgrates.org",
 				ID:     "1001",
 			},
-			APIOpts: map[string]interface{}{},
+			APIOpts: map[string]any{},
 		}, &getRply2)
 	if err == nil || err.Error() != "NOT_FOUND" {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", "NOT_FOUND", err)
@@ -787,7 +787,7 @@ func TestChargersGetChargerProfilesGetIDsErr(t *testing.T) {
 	argsGet := &utils.ArgsItemIDs{
 		Tenant:      "cgrates.org",
 		ItemsPrefix: "test_ID",
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.PageLimitOpt:    2,
 			utils.PageOffsetOpt:   4,
 			utils.PageMaxItemsOpt: 5,
@@ -871,7 +871,7 @@ func TestChargersGetChargerProfileIDsGetOptsErr(t *testing.T) {
 	if err := adms.GetChargerProfileIDs(context.Background(),
 		&utils.ArgsItemIDs{
 			Tenant: "cgrates.org",
-			APIOpts: map[string]interface{}{
+			APIOpts: map[string]any{
 				utils.PageLimitOpt: true,
 			},
 		}, &reply); err == nil || err.Error() != experr {
@@ -916,7 +916,7 @@ func TestChargersGetChargerProfileIDsPaginateErr(t *testing.T) {
 	if err := adms.GetChargerProfileIDs(context.Background(),
 		&utils.ArgsItemIDs{
 			Tenant: "cgrates.org",
-			APIOpts: map[string]interface{}{
+			APIOpts: map[string]any{
 				utils.PageLimitOpt:    2,
 				utils.PageOffsetOpt:   4,
 				utils.PageMaxItemsOpt: 5,
@@ -1132,10 +1132,10 @@ func TestChargersAPIs(t *testing.T) {
 	expEv := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "EventTest",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1001",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsAttributesProfileIDs: []string{"ATTR1", "ATTR2"},
 			utils.MetaChargeID:             "",
 			utils.OptsContext:              utils.MetaChargers,
@@ -1145,8 +1145,8 @@ func TestChargersAPIs(t *testing.T) {
 	}
 
 	mCC := &mockClientConn{
-		calls: map[string]func(*context.Context, interface{}, interface{}) error{
-			utils.AttributeSv1ProcessEvent: func(ctx *context.Context, args, reply interface{}) error {
+		calls: map[string]func(*context.Context, any, any) error{
+			utils.AttributeSv1ProcessEvent: func(ctx *context.Context, args, reply any) error {
 				expEv.APIOpts[utils.MetaChargeID] = args.(*utils.CGREvent).APIOpts[utils.MetaChargeID]
 				if !reflect.DeepEqual(args, expEv) {
 					return fmt.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ToJSON(expEv), utils.ToJSON(args))
@@ -1216,10 +1216,10 @@ func TestChargersAPIs(t *testing.T) {
 	argsGetForEvent := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "EventTest",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1001",
 		},
-		APIOpts: map[string]interface{}{},
+		APIOpts: map[string]any{},
 	}
 	exp := engine.ChargerProfiles{
 		{
@@ -1282,10 +1282,10 @@ func TestChargersAPIs(t *testing.T) {
 	argsProcessEv := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "EventTest",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1001",
 		},
-		APIOpts: map[string]interface{}{},
+		APIOpts: map[string]any{},
 	}
 	expProcessEv := []*engine.ChrgSProcessEventReply{
 		{
@@ -1299,10 +1299,10 @@ func TestChargersAPIs(t *testing.T) {
 			CGREvent: &utils.CGREvent{
 				Tenant: "cgrates.org",
 				ID:     "EventTest",
-				Event: map[string]interface{}{
+				Event: map[string]any{
 					utils.AccountField: "1001",
 				},
-				APIOpts: map[string]interface{}{
+				APIOpts: map[string]any{
 					utils.OptsAttributesProfileIDs: []string{"ATTR1", "ATTR2"},
 					utils.MetaChargeID:             "",
 					utils.OptsContext:              utils.MetaChargers,

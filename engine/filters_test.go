@@ -42,7 +42,7 @@ func TestRatesCostFiltering(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestEv1",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				"Account":     "1001",
 				"Destination": "1002",
 				"OriginID":    "TestEv1",
@@ -51,13 +51,13 @@ func TestRatesCostFiltering(t *testing.T) {
 				"ToR":         "*voice",
 				"Usage":       60000000000,
 			},
-			APIOpts: map[string]interface{}{
-				utils.MetaRateSCost: map[string]interface{}{
+			APIOpts: map[string]any{
+				utils.MetaRateSCost: map[string]any{
 					utils.Cost: 0.4,
-					"CostIntervals": []map[string]interface{}{
+					"CostIntervals": []map[string]any{
 						{
 							"CompressFactor": 1,
-							"Increments": []map[string]interface{}{
+							"Increments": []map[string]any{
 								{
 									"CompressFactor":    2,
 									"RateID":            "Rate1",
@@ -68,8 +68,8 @@ func TestRatesCostFiltering(t *testing.T) {
 						},
 					},
 					"ID": "RT_RETAIL1",
-					"Rates": map[string]interface{}{
-						"Rate1": map[string]interface{}{
+					"Rates": map[string]any{
+						"Rate1": map[string]any{
 							"Increment":     30000000000,
 							"IntervalStart": 0,
 							"RecurrentFee":  0.4,
@@ -392,10 +392,10 @@ func TestInlineFilterPassFiltersForEvent(t *testing.T) {
 		cfg: cfg,
 		dm:  dmFilterPass,
 	}
-	failEvent := map[string]interface{}{
+	failEvent := map[string]any{
 		"Account": "1001",
 	}
-	passEvent := map[string]interface{}{
+	passEvent := map[string]any{
 		"Account": "1007",
 	}
 	fEv := utils.MapStorage{}
@@ -427,10 +427,10 @@ func TestInlineFilterPassFiltersForEvent(t *testing.T) {
 	} else if pass {
 		t.Errorf("Expecting: %+v, received: %+v", false, pass)
 	}
-	failEvent = map[string]interface{}{
+	failEvent = map[string]any{
 		"Account": "2001",
 	}
-	passEvent = map[string]interface{}{
+	passEvent = map[string]any{
 		"Account": "1007",
 	}
 	fEv = utils.MapStorage{}
@@ -468,10 +468,10 @@ func TestInlineFilterPassFiltersForEvent(t *testing.T) {
 	} else if pass {
 		t.Errorf("Expecting: %+v, received: %+v", false, pass)
 	}
-	failEvent = map[string]interface{}{
+	failEvent = map[string]any{
 		"Tenant": "anotherTenant.org",
 	}
-	passEvent = map[string]interface{}{
+	passEvent = map[string]any{
 		"Tenant": "cgrates.org",
 	}
 	fEv = utils.MapStorage{}
@@ -497,10 +497,10 @@ func TestInlineFilterPassFiltersForEvent(t *testing.T) {
 	} else if pass {
 		t.Errorf("Expecting: %+v, received: %+v", false, pass)
 	}
-	failEvent = map[string]interface{}{
+	failEvent = map[string]any{
 		utils.Weight: 10,
 	}
-	passEvent = map[string]interface{}{
+	passEvent = map[string]any{
 		utils.Weight: 20,
 	}
 	fEv = utils.MapStorage{}
@@ -520,7 +520,7 @@ func TestInlineFilterPassFiltersForEvent(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", true, pass)
 	}
 
-	failEvent = map[string]interface{}{
+	failEvent = map[string]any{
 		"EmptyString":   "nonEmpty",
 		"EmptySlice":    []string{""},
 		"EmptyMap":      map[string]string{"": ""},
@@ -528,7 +528,7 @@ func TestInlineFilterPassFiltersForEvent(t *testing.T) {
 		"EmptyPtrMap":   &map[string]string{"": ""},
 	}
 	var testnil *struct{} = nil
-	passEvent = map[string]interface{}{
+	passEvent = map[string]any{
 		"EmptyString":   "",
 		"EmptySlice":    []string{},
 		"EmptyMap":      map[string]string{},
@@ -569,10 +569,10 @@ func TestInlineFilterPassFiltersForEvent(t *testing.T) {
 		t.Errorf("For NewKey expecting: %+v, received: %+v", true, pass)
 	}
 
-	failEvent = map[string]interface{}{
+	failEvent = map[string]any{
 		"Account": "1001",
 	}
-	passEvent = map[string]interface{}{
+	passEvent = map[string]any{
 		"Account": "1007",
 	}
 	fEv = utils.MapStorage{}
@@ -643,13 +643,13 @@ func TestPassFiltersForEventWithEmptyFilter(t *testing.T) {
 		cfg: cfg,
 		dm:  dmFilterPass,
 	}
-	passEvent1 := map[string]interface{}{
+	passEvent1 := map[string]any{
 		utils.Tenant:       "cgrates.org",
 		utils.AccountField: "1010",
 		utils.Destination:  "+49",
 		utils.Weight:       10,
 	}
-	passEvent2 := map[string]interface{}{
+	passEvent2 := map[string]any{
 		utils.Tenant:       "itsyscom.com",
 		utils.AccountField: "dan",
 		utils.Destination:  "+4986517174963",
@@ -671,7 +671,7 @@ func TestPassFiltersForEventWithEmptyFilter(t *testing.T) {
 	} else if !pass {
 		t.Errorf("Expecting: %+v, received: %+v", true, pass)
 	}
-	ev := map[string]interface{}{
+	ev := map[string]any{
 		"Test": "MultipleCharacter",
 	}
 	pEv := utils.MapStorage{}
@@ -682,7 +682,7 @@ func TestPassFiltersForEventWithEmptyFilter(t *testing.T) {
 	} else if pass {
 		t.Errorf("Expecting: %+v, received: %+v", false, pass)
 	}
-	ev = map[string]interface{}{
+	ev = map[string]any{
 		"Test": "MultipleCharacter123456789MoreThan30Character",
 	}
 	pEv = utils.MapStorage{}
@@ -694,8 +694,8 @@ func TestPassFiltersForEventWithEmptyFilter(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", true, pass)
 	}
 
-	ev = map[string]interface{}{
-		"Test": map[string]interface{}{
+	ev = map[string]any{
+		"Test": map[string]any{
 			"Test2": "MultipleCharacter",
 		},
 	}
@@ -707,8 +707,8 @@ func TestPassFiltersForEventWithEmptyFilter(t *testing.T) {
 	} else if pass {
 		t.Errorf("Expecting: %+v, received: %+v", false, pass)
 	}
-	ev = map[string]interface{}{
-		"Test": map[string]interface{}{
+	ev = map[string]any{
+		"Test": map[string]any{
 			"Test2": "MultipleCharacter123456789MoreThan30Character",
 		},
 	}
@@ -721,7 +721,7 @@ func TestPassFiltersForEventWithEmptyFilter(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", false, pass)
 	}
 
-	ev = map[string]interface{}{
+	ev = map[string]any{
 		utils.AccountField: "1003",
 		utils.Subject:      "1003",
 		utils.Destination:  "1002",
@@ -752,7 +752,7 @@ func TestPassFilterMaxCost(t *testing.T) {
 		dm:  dmFilterPass,
 	}
 	//check with max usage -1 should fail
-	passEvent1 := map[string]interface{}{
+	passEvent1 := map[string]any{
 		"MaxUsage": -1,
 	}
 	pEv := utils.MapStorage{}
@@ -764,7 +764,7 @@ func TestPassFilterMaxCost(t *testing.T) {
 		t.Errorf("Expecting: false , received: %+v", pass)
 	}
 	//check with max usage 0 should fail
-	passEvent2 := map[string]interface{}{
+	passEvent2 := map[string]any{
 		"MaxUsage": 0,
 	}
 	pEv = utils.MapStorage{}
@@ -776,7 +776,7 @@ func TestPassFilterMaxCost(t *testing.T) {
 		t.Errorf("Expecting: false, received: %+v", pass)
 	}
 	//check with max usage 123 should pass
-	passEvent3 := map[string]interface{}{
+	passEvent3 := map[string]any{
 		"MaxUsage": 123,
 	}
 	pEv = utils.MapStorage{}
@@ -804,7 +804,7 @@ func TestPassFilterMissingField(t *testing.T) {
 		dm:  dmFilterPass,
 	}
 
-	passEvent1 := map[string]interface{}{
+	passEvent1 := map[string]any{
 		"test": "call",
 	}
 	pEv := utils.MapStorage{}
@@ -816,7 +816,7 @@ func TestPassFilterMissingField(t *testing.T) {
 		t.Errorf("Expecting: true , received: %+v", pass)
 	}
 
-	passEvent2 := map[string]interface{}{
+	passEvent2 := map[string]any{
 		"Category": "",
 	}
 	pEv = utils.MapStorage{}
@@ -828,7 +828,7 @@ func TestPassFilterMissingField(t *testing.T) {
 		t.Errorf("Expecting: true , received: %+v", pass)
 	}
 
-	passEvent3 := map[string]interface{}{
+	passEvent3 := map[string]any{
 		"Category": "call",
 	}
 	pEv = utils.MapStorage{}
@@ -901,7 +901,7 @@ func TestPassPartial(t *testing.T) {
 		cfg: cfg,
 		dm:  dmFilterPass,
 	}
-	passEvent := map[string]interface{}{
+	passEvent := map[string]any{
 		"Account": "1007",
 	}
 	fEv := utils.MapStorage{}
@@ -981,7 +981,7 @@ func TestActivationIntervalPass(t *testing.T) {
 		cfg: cfg,
 		dm:  dmFilterPass,
 	}
-	passEvent := map[string]interface{}{
+	passEvent := map[string]any{
 		"CustomTime": time.Date(2013, time.July, 1, 0, 0, 0, 0, time.UTC),
 	}
 	fEv := utils.MapStorage{}
@@ -1359,7 +1359,7 @@ func TestFiltersPassGreaterThanErrIncomparable(t *testing.T) {
 		t.Fatal(err)
 	}
 	ev := utils.MapStorage{
-		utils.MetaReq: map[string]interface{}{
+		utils.MetaReq: map[string]any{
 			utils.Usage: nil,
 		},
 	}
@@ -2078,7 +2078,7 @@ func TestPassPartialErr(t *testing.T) {
 		cfg: cfg,
 		dm:  dmFilterPass,
 	}
-	passEvent := map[string]interface{}{
+	passEvent := map[string]any{
 		"Account": "1007",
 	}
 	fEv := utils.MapStorage{}

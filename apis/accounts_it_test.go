@@ -160,7 +160,7 @@ func testAccSetAccProfile(t *testing.T) {
 		Account: &utils.Account{
 			Tenant: "cgrates.org",
 			ID:     "TEST_ACC_IT_TEST",
-			Opts:   map[string]interface{}{},
+			Opts:   map[string]any{},
 			Balances: map[string]*utils.Balance{
 				"VoiceBalance": {
 					ID:        "VoiceBalance",
@@ -171,7 +171,7 @@ func testAccSetAccProfile(t *testing.T) {
 						},
 					},
 					Type: "*abstract",
-					Opts: map[string]interface{}{
+					Opts: map[string]any{
 						"Destination": "10",
 					},
 					Units: utils.NewDecimal(0, 0),
@@ -196,7 +196,7 @@ func testAccSetAccProfile(t *testing.T) {
 	expectedAcc := utils.Account{
 		Tenant: "cgrates.org",
 		ID:     "TEST_ACC_IT_TEST",
-		Opts:   map[string]interface{}{},
+		Opts:   map[string]any{},
 		Balances: map[string]*utils.Balance{
 			"VoiceBalance": {
 				ID:        "VoiceBalance",
@@ -208,7 +208,7 @@ func testAccSetAccProfile(t *testing.T) {
 					},
 				},
 				Type: "*abstract",
-				Opts: map[string]interface{}{
+				Opts: map[string]any{
 					"Destination": "10",
 				},
 				Units: utils.NewDecimal(0, 0),
@@ -256,7 +256,7 @@ func testAccGetAccs(t *testing.T) {
 		{
 			Tenant: "cgrates.org",
 			ID:     "TEST_ACC_IT_TEST",
-			Opts:   map[string]interface{}{},
+			Opts:   map[string]any{},
 			Balances: map[string]*utils.Balance{
 				"VoiceBalance": {
 					ID:        "VoiceBalance",
@@ -268,7 +268,7 @@ func testAccGetAccs(t *testing.T) {
 						},
 					},
 					Type: "*abstract",
-					Opts: map[string]interface{}{
+					Opts: map[string]any{
 						"Destination": "10",
 					},
 					Units: utils.NewDecimal(0, 0),
@@ -322,7 +322,7 @@ func testAccSetAcc2(t *testing.T) {
 		Account: &utils.Account{
 			Tenant: "cgrates.org",
 			ID:     "TEST_ACC_IT_TEST2",
-			Opts:   map[string]interface{}{},
+			Opts:   map[string]any{},
 			Balances: map[string]*utils.Balance{
 				"VoiceBalance": {
 					ID:        "VoiceBalance",
@@ -333,7 +333,7 @@ func testAccSetAcc2(t *testing.T) {
 						},
 					},
 					Type: "*abstract",
-					Opts: map[string]interface{}{
+					Opts: map[string]any{
 						"Destination": "10",
 					},
 					Units: utils.NewDecimal(0, 0),
@@ -358,7 +358,7 @@ func testAccSetAcc2(t *testing.T) {
 	expectedAcc := utils.Account{
 		Tenant: "cgrates.org",
 		ID:     "TEST_ACC_IT_TEST2",
-		Opts:   map[string]interface{}{},
+		Opts:   map[string]any{},
 		Balances: map[string]*utils.Balance{
 			"VoiceBalance": {
 				ID:        "VoiceBalance",
@@ -370,7 +370,7 @@ func testAccSetAcc2(t *testing.T) {
 					},
 				},
 				Type: "*abstract",
-				Opts: map[string]interface{}{
+				Opts: map[string]any{
 					"Destination": "10",
 				},
 				Units: utils.NewDecimal(0, 0),
@@ -418,7 +418,7 @@ func testAccGetAccs2(t *testing.T) {
 		{
 			Tenant: "cgrates.org",
 			ID:     "TEST_ACC_IT_TEST",
-			Opts:   map[string]interface{}{},
+			Opts:   map[string]any{},
 			Balances: map[string]*utils.Balance{
 				"VoiceBalance": {
 					ID:        "VoiceBalance",
@@ -430,7 +430,7 @@ func testAccGetAccs2(t *testing.T) {
 						},
 					},
 					Type: "*abstract",
-					Opts: map[string]interface{}{
+					Opts: map[string]any{
 						"Destination": "10",
 					},
 					Units: utils.NewDecimal(0, 0),
@@ -446,7 +446,7 @@ func testAccGetAccs2(t *testing.T) {
 		{
 			Tenant: "cgrates.org",
 			ID:     "TEST_ACC_IT_TEST2",
-			Opts:   map[string]interface{}{},
+			Opts:   map[string]any{},
 			Balances: map[string]*utils.Balance{
 				"VoiceBalance": {
 					ID:        "VoiceBalance",
@@ -458,7 +458,7 @@ func testAccGetAccs2(t *testing.T) {
 						},
 					},
 					Type: "*abstract",
-					Opts: map[string]interface{}{
+					Opts: map[string]any{
 						"Destination": "10",
 					},
 					Units: utils.NewDecimal(0, 0),
@@ -534,7 +534,7 @@ func testAccGetAccs3(t *testing.T) {
 		{
 			Tenant: "cgrates.org",
 			ID:     "TEST_ACC_IT_TEST",
-			Opts:   map[string]interface{}{},
+			Opts:   map[string]any{},
 			Balances: map[string]*utils.Balance{
 				"VoiceBalance": {
 					ID:        "VoiceBalance",
@@ -546,7 +546,7 @@ func testAccGetAccs3(t *testing.T) {
 						},
 					},
 					Type: "*abstract",
-					Opts: map[string]interface{}{
+					Opts: map[string]any{
 						"Destination": "10",
 					},
 					Units: utils.NewDecimal(0, 0),
@@ -572,7 +572,7 @@ func testAccGetAccsWithPrefix(t *testing.T) {
 		Account: &utils.Account{
 			Tenant: "cgrates.org",
 			ID:     "aTEST_ACC_IT_TEST2",
-			Opts:   map[string]interface{}{},
+			Opts:   map[string]any{},
 			Balances: map[string]*utils.Balance{
 				"VoiceBalance": {
 					ID:        "VoiceBalance",
@@ -583,7 +583,7 @@ func testAccGetAccsWithPrefix(t *testing.T) {
 						},
 					},
 					Type: "*abstract",
-					Opts: map[string]interface{}{
+					Opts: map[string]any{
 						"Destination": "10",
 					},
 					Units: utils.NewDecimal(0, 0),
@@ -608,7 +608,7 @@ func testAccGetAccsWithPrefix(t *testing.T) {
 	expectedAcc := utils.Account{
 		Tenant: "cgrates.org",
 		ID:     "aTEST_ACC_IT_TEST2",
-		Opts:   map[string]interface{}{},
+		Opts:   map[string]any{},
 		Balances: map[string]*utils.Balance{
 			"VoiceBalance": {
 				ID:        "VoiceBalance",
@@ -620,7 +620,7 @@ func testAccGetAccsWithPrefix(t *testing.T) {
 					},
 				},
 				Type: "*abstract",
-				Opts: map[string]interface{}{
+				Opts: map[string]any{
 					"Destination": "10",
 				},
 				Units: utils.NewDecimal(0, 0),
@@ -654,7 +654,7 @@ func testAccGetAccsWithPrefix(t *testing.T) {
 		{
 			Tenant: "cgrates.org",
 			ID:     "aTEST_ACC_IT_TEST2",
-			Opts:   map[string]interface{}{},
+			Opts:   map[string]any{},
 			Balances: map[string]*utils.Balance{
 				"VoiceBalance": {
 					ID:        "VoiceBalance",
@@ -666,7 +666,7 @@ func testAccGetAccsWithPrefix(t *testing.T) {
 						},
 					},
 					Type: "*abstract",
-					Opts: map[string]interface{}{
+					Opts: map[string]any{
 						"Destination": "10",
 					},
 					Units: utils.NewDecimal(0, 0),
@@ -694,7 +694,7 @@ func testAccGetAccountsForEvent(t *testing.T) {
 		{
 			Tenant: "cgrates.org",
 			ID:     "TEST_ACC_IT_TEST",
-			Opts:   map[string]interface{}{},
+			Opts:   map[string]any{},
 			Balances: map[string]*utils.Balance{
 				"VoiceBalance": {
 					ID:        "VoiceBalance",
@@ -706,7 +706,7 @@ func testAccGetAccountsForEvent(t *testing.T) {
 						},
 					},
 					Type: "*abstract",
-					Opts: map[string]interface{}{
+					Opts: map[string]any{
 						"Destination": "10",
 					},
 					Units: utils.NewDecimal(0, 0),
@@ -723,10 +723,10 @@ func testAccGetAccountsForEvent(t *testing.T) {
 	ev := &utils.CGREvent{
 		Tenant: utils.CGRateSorg,
 		ID:     "testIDEvent",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.Usage: 20 * time.Second,
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsAccountsProfileIDs: "TEST_ACC_IT_TEST",
 		},
 	}
@@ -799,10 +799,10 @@ func testAccMaxAbstracts(t *testing.T) {
 	ev2 := &utils.CGREvent{
 		Tenant: utils.CGRateSorg,
 		ID:     "testIDEvent",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1004",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaUsage:              "27s",
 			utils.OptsAccountsProfileIDs: "TEST_ACC_IT_TEST4",
 		},
@@ -955,10 +955,10 @@ func testAccDebitAbstracts(t *testing.T) {
 	ev2 := &utils.CGREvent{
 		Tenant: utils.CGRateSorg,
 		ID:     "testIDEvent",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1004",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaUsage:              "27s",
 			utils.OptsAccountsProfileIDs: "TEST_ACC_IT_TEST5",
 		},
@@ -1106,10 +1106,10 @@ func testAccMaxConcretes(t *testing.T) {
 	ev2 := &utils.CGREvent{
 		Tenant: utils.CGRateSorg,
 		ID:     "testIDEvent",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1004",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsRatesIntervalStart: "27s",
 			utils.OptsAccountsProfileIDs: "TEST_ACC_IT_TEST6",
 		},
@@ -1268,10 +1268,10 @@ func testAccDebitConcretes(t *testing.T) {
 	ev2 := &utils.CGREvent{
 		Tenant: utils.CGRateSorg,
 		ID:     "testIDEvent",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1004",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsAccountsUsage:      "27s",
 			utils.OptsAccountsProfileIDs: "TEST_ACC_IT_TEST7",
 		},
@@ -1401,7 +1401,7 @@ func testAccRefundCharges(t *testing.T) {
 							Factor: utils.NewDecimal(10, 0),
 						},
 					},
-					Opts: map[string]interface{}{
+					Opts: map[string]any{
 						utils.MetaBalanceLimit: -100.0,
 					},
 					CostIncrements: []*utils.CostIncrement{
@@ -1448,11 +1448,11 @@ func testAccRefundCharges(t *testing.T) {
 	ev := &utils.CGREvent{
 		Tenant: utils.CGRateSorg,
 		ID:     "tesRefundCHarges",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1001",
 			utils.Destination:  "1004",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsAccountsUsage:      "3m27s",
 			utils.OptsAccountsProfileIDs: "AccountRefundCharges",
 		},
@@ -1529,7 +1529,7 @@ func testAccActionSetRmvBalance(t *testing.T) {
 		Account: &utils.Account{
 			Tenant: "cgrates.org",
 			ID:     "TEST_ACC_IT_TEST8",
-			Opts:   map[string]interface{}{},
+			Opts:   map[string]any{},
 			Balances: map[string]*utils.Balance{
 				"VoiceBalance": {
 					ID:        "VoiceBalance",
@@ -1540,7 +1540,7 @@ func testAccActionSetRmvBalance(t *testing.T) {
 						},
 					},
 					Type: "*abstract",
-					Opts: map[string]interface{}{
+					Opts: map[string]any{
 						"Destination": "10",
 					},
 					Units: utils.NewDecimal(0, 0),
@@ -1582,7 +1582,7 @@ func testAccActionSetRmvBalance(t *testing.T) {
 	expectedAcc := utils.Account{
 		Tenant: "cgrates.org",
 		ID:     "TEST_ACC_IT_TEST8",
-		Opts:   map[string]interface{}{},
+		Opts:   map[string]any{},
 		Balances: map[string]*utils.Balance{
 			"AbstractBalance3": {
 				ID:    "AbstractBalance3",
@@ -1615,7 +1615,7 @@ func testAccActionSetRmvBalance(t *testing.T) {
 					},
 				},
 				Type: "*abstract",
-				Opts: map[string]interface{}{
+				Opts: map[string]any{
 					"Destination": "10",
 				},
 				Units: utils.NewDecimal(0, 0),
@@ -1657,7 +1657,7 @@ func testAccActionSetRmvBalance(t *testing.T) {
 	expectedAcc2 := utils.Account{
 		Tenant: "cgrates.org",
 		ID:     "TEST_ACC_IT_TEST8",
-		Opts:   map[string]interface{}{},
+		Opts:   map[string]any{},
 		Balances: map[string]*utils.Balance{
 			"VoiceBalance": {
 				ID:        "VoiceBalance",
@@ -1669,7 +1669,7 @@ func testAccActionSetRmvBalance(t *testing.T) {
 					},
 				},
 				Type: "*abstract",
-				Opts: map[string]interface{}{
+				Opts: map[string]any{
 					"Destination": "10",
 				},
 				Units: utils.NewDecimal(0, 0),
@@ -1873,12 +1873,12 @@ func testAccDebitAbstractWithoutBlockers(t *testing.T) {
 	ev2 := &utils.CGREvent{
 		Tenant: utils.CGRateSorg,
 		ID:     "testIDEvent",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			"Blockers":         "*exists",
 			utils.AccountField: "101223",
 			utils.Destination:  "1002",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaUsage: 90 * time.Second,
 		},
 	}
@@ -1902,11 +1902,11 @@ func testAccDebitAbstractWithBlockers(t *testing.T) {
 	ev2 := &utils.CGREvent{
 		Tenant: utils.CGRateSorg,
 		ID:     "testIDEvent",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			"Blockers":         "*exists",
 			utils.AccountField: "101223",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaUsage: 90 * time.Second,
 		},
 	}
@@ -1930,12 +1930,12 @@ func testAccDebitAbstractWithBlockersOnBalance(t *testing.T) {
 	ev2 := &utils.CGREvent{
 		Tenant: utils.CGRateSorg,
 		ID:     "testIDEvent",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			"Blockers":         "*exists",
 			utils.AccountField: "101223",
 			"BlockerAbstract":  "yes",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaUsage: 90 * time.Second,
 		},
 	}

@@ -113,7 +113,7 @@ func testRPCStartEngine(t *testing.T) {
 func testRPCLoadData(t *testing.T) {
 	var reply string
 	if err := rpcsRPC.Call(context.Background(), utils.LoaderSv1Run, &loaders.ArgsProcessFolder{
-		APIOpts: map[string]interface{}{utils.MetaCache: utils.MetaReload},
+		APIOpts: map[string]any{utils.MetaCache: utils.MetaReload},
 	}, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
@@ -125,10 +125,10 @@ func testRPCLoadData(t *testing.T) {
 func testRPCChargerSNoAttr(t *testing.T) {
 	cgrEv := &utils.CGREvent{ // matching Charger1
 		Tenant: "cgrates.org",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1010",
 		},
-		APIOpts: map[string]interface{}{utils.OptsAttributesProcessRuns: 1.},
+		APIOpts: map[string]any{utils.OptsAttributesProcessRuns: 1.},
 	}
 	expErr := utils.NewErrServerError(rpcclient.ErrDisconnected).Error()
 	var rply []*engine.ChrgSProcessEventReply
@@ -148,10 +148,10 @@ func testRPCStartRegc(t *testing.T) {
 func testRPCChargerSWithAttr(t *testing.T) {
 	cgrEv := &utils.CGREvent{ // matching Charger1
 		Tenant: "cgrates.org",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1010",
 		},
-		APIOpts: map[string]interface{}{utils.OptsAttributesProcessRuns: 1.},
+		APIOpts: map[string]any{utils.OptsAttributesProcessRuns: 1.},
 	}
 
 	processedEv := []*engine.ChrgSProcessEventReply{
@@ -165,10 +165,10 @@ func testRPCChargerSWithAttr(t *testing.T) {
 			},
 			CGREvent: &utils.CGREvent{
 				Tenant: "cgrates.org",
-				Event: map[string]interface{}{
+				Event: map[string]any{
 					"Account": "1010",
 				},
-				APIOpts: map[string]interface{}{
+				APIOpts: map[string]any{
 					"*chargeID":        "908bd346b2203977a829c917ba25d1cd784842be",
 					"*attrProcessRuns": 1.,
 					"*subsys":          "*chargers",
@@ -189,16 +189,16 @@ func testRPCChargerSWithAttr(t *testing.T) {
 			},
 			CGREvent: &utils.CGREvent{
 				Tenant: "cgrates.org",
-				Event: map[string]interface{}{
+				Event: map[string]any{
 					"Account":     "1010",
 					"RequestType": "*none",
 				},
-				APIOpts: map[string]interface{}{
+				APIOpts: map[string]any{
 					"*chargeID":        "ce15802a8c5e8e9db0ffaf10130ef265296e9ea4",
 					"*attrProcessRuns": 1.,
 					"*subsys":          "*chargers",
 					"*runID":           "raw",
-					"*attrProfileIDs":  []interface{}{"*constant:*req.RequestType:*none"},
+					"*attrProfileIDs":  []any{"*constant:*req.RequestType:*none"},
 					"*context":         "*chargers",
 				},
 			},
@@ -215,17 +215,17 @@ func testRPCChargerSWithAttr(t *testing.T) {
 			},
 			CGREvent: &utils.CGREvent{
 				Tenant: "cgrates.org",
-				Event: map[string]interface{}{
+				Event: map[string]any{
 					"Account": "1010",
 					"Subject": "SUPPLIER1",
 				},
-				APIOpts: map[string]interface{}{
+				APIOpts: map[string]any{
 					"*chargeID":        "c0766c230f77b0ee496629be7efa0db24e208cfe",
 					"*context":         "*chargers",
 					"*attrProcessRuns": 1.,
 					"*subsys":          "*chargers",
 					"*runID":           "SupplierCharges",
-					"*attrProfileIDs":  []interface{}{"ATTR_SUPPLIER1"},
+					"*attrProfileIDs":  []any{"ATTR_SUPPLIER1"},
 				},
 			},
 		},

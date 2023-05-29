@@ -1192,7 +1192,7 @@ func (ms *MongoStorage) RemoveLoadIDsDrv() (err error) {
 }
 
 func (ms *MongoStorage) GetRateProfileDrv(ctx *context.Context, tenant, id string) (rpp *utils.RateProfile, err error) {
-	mapRP := make(map[string]interface{})
+	mapRP := make(map[string]any)
 	err = ms.query(ctx, func(sctx mongo.SessionContext) (err error) {
 		cur := ms.getCol(ColRpp).FindOne(sctx, bson.M{"tenant": tenant, "id": id})
 		if err := cur.Decode(mapRP); err != nil {

@@ -181,7 +181,7 @@ type loader struct {
 	Locker
 }
 
-func (l *loader) process(ctx *context.Context, obj profile, lType, action string, opts map[string]interface{}, withIndex, partialRates bool) (err error) {
+func (l *loader) process(ctx *context.Context, obj profile, lType, action string, opts map[string]any, withIndex, partialRates bool) (err error) {
 	switch action {
 	case utils.MetaParse:
 		return
@@ -244,7 +244,7 @@ func (l *loader) process(ctx *context.Context, obj profile, lType, action string
 		cacheArgs, cacheIDs, opts, false, l.ldrCfg.Tenant)
 }
 
-func (l *loader) processData(ctx *context.Context, csv *CSVFile, tmpls []*config.FCTemplate, lType, action string, opts map[string]interface{}, withIndex, partialRates bool) (err error) {
+func (l *loader) processData(ctx *context.Context, csv *CSVFile, tmpls []*config.FCTemplate, lType, action string, opts map[string]any, withIndex, partialRates bool) (err error) {
 	newPrf := newProfileFunc(lType)
 	obj := newPrf()
 	var prevTntID string
@@ -287,7 +287,7 @@ func (l *loader) processData(ctx *context.Context, csv *CSVFile, tmpls []*config
 	return
 }
 
-func (l *loader) processFile(ctx *context.Context, cfg *config.LoaderDataType, inPath, outPath, action string, opts map[string]interface{}, withIndex bool, prv CSVProvider) (err error) {
+func (l *loader) processFile(ctx *context.Context, cfg *config.LoaderDataType, inPath, outPath, action string, opts map[string]any, withIndex bool, prv CSVProvider) (err error) {
 	var csv *CSVFile
 	if csv, err = NewCSVReader(prv, inPath, cfg.Filename, rune(l.ldrCfg.FieldSeparator[0]), 0); err != nil {
 		return
@@ -327,7 +327,7 @@ func (l *loader) processIFile(_, fileName string) (err error) {
 	return l.processFile(context.Background(), cfg, l.ldrCfg.TpInDir, l.ldrCfg.TpOutDir, l.ldrCfg.Action, nil, l.ldrCfg.Opts.WithIndex, fileProvider{})
 }
 
-func (l *loader) processFolder(ctx *context.Context, opts map[string]interface{}, withIndex, stopOnError bool) (err error) {
+func (l *loader) processFolder(ctx *context.Context, opts map[string]any, withIndex, stopOnError bool) (err error) {
 	if err = l.Lock(); err != nil {
 		return
 	}
@@ -401,7 +401,7 @@ func (l *loader) ListenAndServe(stopChan chan struct{}) (err error) {
 	return
 }
 
-func (l *loader) processZip(ctx *context.Context, opts map[string]interface{}, withIndex, stopOnError bool, zipR *zip.Reader) (err error) {
+func (l *loader) processZip(ctx *context.Context, opts map[string]any, withIndex, stopOnError bool, zipR *zip.Reader) (err error) {
 	if err = l.Lock(); err != nil {
 		return
 	}

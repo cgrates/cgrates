@@ -50,7 +50,7 @@ func (qos *QOSRouteSorter) SortRoutes(ctx *context.Context, prflID string, route
 	for _, route := range routes {
 		srtRoute := &SortedRoute{
 			RouteID: route.ID,
-			SortingData: map[string]interface{}{
+			SortingData: map[string]any{
 				utils.Weight: route.Weight,
 			},
 			sortingDataDecimal: map[string]*utils.Decimal{

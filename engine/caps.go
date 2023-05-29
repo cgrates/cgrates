@@ -84,7 +84,7 @@ type CapsStats struct {
 }
 
 // OnEvict the function that should be called on cache eviction
-func (cs *CapsStats) OnEvict(itmID string, value interface{}) {
+func (cs *CapsStats) OnEvict(itmID string, value any) {
 	cs.st.RemEvent(itmID)
 }
 
@@ -130,6 +130,6 @@ func (cs *CapsStats) GetAverage() (avg float64) {
 // floatDP should be only used by capstats
 type floatDP float64
 
-func (f floatDP) String() string                                         { return strconv.FormatFloat(float64(f), 'f', -1, 64) }
-func (f floatDP) FieldAsInterface(fldPath []string) (interface{}, error) { return float64(f), nil }
-func (f floatDP) FieldAsString(fldPath []string) (string, error)         { return f.String(), nil }
+func (f floatDP) String() string                                 { return strconv.FormatFloat(float64(f), 'f', -1, 64) }
+func (f floatDP) FieldAsInterface(fldPath []string) (any, error) { return float64(f), nil }
+func (f floatDP) FieldAsString(fldPath []string) (string, error) { return f.String(), nil }

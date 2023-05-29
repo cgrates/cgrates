@@ -28,9 +28,9 @@ import (
 
 // CallCache caching the item based on CacheOpt
 func (admS *AdminSv1) CallCache(ctx *context.Context, cacheopt string, tnt, cacheID, itemID, groupID string,
-	filters *[]string, opts map[string]interface{}) (err error) {
+	filters *[]string, opts map[string]any) (err error) {
 	var reply, method string
-	var args interface{}
+	var args any
 	switch utils.FirstNonEmpty(cacheopt, admS.cfg.GeneralCfg().DefaultCaching) {
 	case utils.MetaNone:
 		return
@@ -151,9 +151,9 @@ func (admS *AdminSv1) composeArgsReload(ctx *context.Context, tnt, cacheID, item
 
 // callCacheForIndexes will only call CacheClear because don't have access at ItemID
 func (admS *AdminSv1) callCacheForRemoveIndexes(ctx *context.Context, cacheopt string, tnt, cacheID string,
-	itemIDs []string, opts map[string]interface{}) (err error) {
+	itemIDs []string, opts map[string]any) (err error) {
 	var reply, method string
-	var args interface{} = utils.NewAttrReloadCacheWithOptsFromMap(map[string][]string{cacheID: itemIDs}, tnt, opts)
+	var args any = utils.NewAttrReloadCacheWithOptsFromMap(map[string][]string{cacheID: itemIDs}, tnt, opts)
 	switch utils.FirstNonEmpty(cacheopt, admS.cfg.GeneralCfg().DefaultCaching) {
 	case utils.MetaNone:
 		return
@@ -176,9 +176,9 @@ func (admS *AdminSv1) callCacheForRemoveIndexes(ctx *context.Context, cacheopt s
 }
 
 func (admS *AdminSv1) callCacheForComputeIndexes(ctx *context.Context, cacheopt, tnt string,
-	cacheItems map[string][]string, opts map[string]interface{}) (err error) {
+	cacheItems map[string][]string, opts map[string]any) (err error) {
 	var reply, method string
-	var args interface{} = utils.NewAttrReloadCacheWithOptsFromMap(cacheItems, tnt, opts)
+	var args any = utils.NewAttrReloadCacheWithOptsFromMap(cacheItems, tnt, opts)
 	switch utils.FirstNonEmpty(cacheopt, admS.cfg.GeneralCfg().DefaultCaching) {
 	case utils.MetaNone:
 		return
@@ -205,12 +205,12 @@ func (admS *AdminSv1) callCacheForComputeIndexes(ctx *context.Context, cacheopt,
 }
 
 // callCacheRevDestinations used for reverse destination, loadIDs and indexes replication
-func (admS *AdminSv1) callCacheMultiple(ctx *context.Context, cacheopt, tnt, cacheID string, itemIDs []string, opts map[string]interface{}) (err error) {
+func (admS *AdminSv1) callCacheMultiple(ctx *context.Context, cacheopt, tnt, cacheID string, itemIDs []string, opts map[string]any) (err error) {
 	if len(itemIDs) == 0 {
 		return
 	}
 	var reply, method string
-	var args interface{}
+	var args any
 	switch utils.FirstNonEmpty(cacheopt, admS.cfg.GeneralCfg().DefaultCaching) {
 	case utils.MetaNone:
 		return
@@ -279,9 +279,9 @@ func composeCacheArgsForFilter(dm *engine.DataManager, ctx *context.Context, flt
 
 // callCacheForFilter will call the cache for filter
 func callCacheForFilter(connMgr *engine.ConnManager, cacheConns []string, ctx *context.Context, cacheopt, dftCache, tnt string,
-	argC map[string][]string, opts map[string]interface{}) (err error) {
+	argC map[string][]string, opts map[string]any) (err error) {
 	var reply, method string
-	var args interface{} = utils.NewAttrReloadCacheWithOptsFromMap(argC, tnt, opts)
+	var args any = utils.NewAttrReloadCacheWithOptsFromMap(argC, tnt, opts)
 	switch utils.FirstNonEmpty(cacheopt, dftCache) {
 	case utils.MetaNone:
 		return

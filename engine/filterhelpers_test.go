@@ -100,7 +100,7 @@ func TestBlockerFromDynamicsErr(t *testing.T) {
 
 func TestMatchingItemIDsForEventGetKeysForPrefixErr(t *testing.T) {
 
-	matchEV = utils.MapStorage{utils.MetaReq: map[string]interface{}{
+	matchEV = utils.MapStorage{utils.MetaReq: map[string]any{
 		utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
 		"Field":          "profile",
 	}}
@@ -119,7 +119,7 @@ func TestMatchingItemIDsForEventGetKeysForPrefixErr(t *testing.T) {
 }
 
 func TestMatchingItemIDsForEventFilterIndexTypeNotNone(t *testing.T) {
-	matchEV = utils.MapStorage{utils.MetaReq: map[string]interface{}{
+	matchEV = utils.MapStorage{utils.MetaReq: map[string]any{
 		utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
 		"Fiel..d":        "profile",
 	}}

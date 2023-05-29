@@ -951,10 +951,10 @@ func TestERsCfgAsMapInterfaceCase1(t *testing.T) {
 		],
 	}
 }`
-	eMap := map[string]interface{}{
+	eMap := map[string]any{
 		utils.EnabledCfg:       true,
 		utils.SessionSConnsCfg: []string{"conn1", "conn3"},
-		utils.ReadersCfg: []map[string]interface{}{
+		utils.ReadersCfg: []map[string]any{
 			{
 				utils.FiltersCfg:             []string{},
 				utils.FlagsCfg:               []string{},
@@ -964,11 +964,11 @@ func TestERsCfgAsMapInterfaceCase1(t *testing.T) {
 				utils.SourcePathCfg:          "/var/spool/cgrates/ers/in",
 				utils.TenantCfg:              "",
 				utils.TimezoneCfg:            "",
-				utils.CacheDumpFieldsCfg:     []map[string]interface{}{},
-				utils.PartialCommitFieldsCfg: []map[string]interface{}{},
+				utils.CacheDumpFieldsCfg:     []map[string]any{},
+				utils.PartialCommitFieldsCfg: []map[string]any{},
 				utils.ConcurrentRequestsCfg:  1024,
 				utils.TypeCfg:                "*none",
-				utils.FieldsCfg: []map[string]interface{}{
+				utils.FieldsCfg: []map[string]any{
 					{utils.MandatoryCfg: true, utils.PathCfg: "*cgreq.ToR", utils.TagCfg: "ToR", utils.TypeCfg: "*variable", utils.ValueCfg: "~*req.2"},
 					{utils.MandatoryCfg: true, utils.PathCfg: "*cgreq.OriginID", utils.TagCfg: "OriginID", utils.TypeCfg: "*variable", utils.ValueCfg: "~*req.3"},
 					{utils.MandatoryCfg: true, utils.PathCfg: "*cgreq.RequestType", utils.TagCfg: "RequestType", utils.TypeCfg: "*variable", utils.ValueCfg: "~*req.4"},
@@ -981,7 +981,7 @@ func TestERsCfgAsMapInterfaceCase1(t *testing.T) {
 					{utils.MandatoryCfg: true, utils.PathCfg: "*cgreq.AnswerTime", utils.TagCfg: "AnswerTime", utils.TypeCfg: "*variable", utils.ValueCfg: "~*req.12"},
 					{utils.MandatoryCfg: true, utils.PathCfg: "*cgreq.Usage", utils.TagCfg: "Usage", utils.TypeCfg: "*variable", utils.ValueCfg: "~*req.13"},
 				},
-				utils.OptsCfg: map[string]interface{}{
+				utils.OptsCfg: map[string]any{
 					utils.CSVFieldSepOpt:        ",",
 					utils.HeaderDefineCharOpt:   ":",
 					utils.CSVRowLengthOpt:       0,
@@ -992,11 +992,11 @@ func TestERsCfgAsMapInterfaceCase1(t *testing.T) {
 				},
 			},
 			{
-				utils.CacheDumpFieldsCfg:     []map[string]interface{}{},
-				utils.PartialCommitFieldsCfg: []map[string]interface{}{},
+				utils.CacheDumpFieldsCfg:     []map[string]any{},
+				utils.PartialCommitFieldsCfg: []map[string]any{},
 				utils.ConcurrentRequestsCfg:  1024,
 				utils.TypeCfg:                "*fileCSV",
-				utils.FieldsCfg: []map[string]interface{}{
+				utils.FieldsCfg: []map[string]any{
 					{utils.MandatoryCfg: true, utils.PathCfg: "*cgreq.ToR", utils.TagCfg: "ToR", utils.TypeCfg: "*variable", utils.ValueCfg: "~*req.2"},
 					{utils.MandatoryCfg: true, utils.PathCfg: "*cgreq.OriginID", utils.TagCfg: "OriginID", utils.TypeCfg: "*variable", utils.ValueCfg: "~*req.3"},
 					{utils.MandatoryCfg: true, utils.PathCfg: "*cgreq.RequestType", utils.TagCfg: "RequestType", utils.TypeCfg: "*variable", utils.ValueCfg: "~*req.4"},
@@ -1017,7 +1017,7 @@ func TestERsCfgAsMapInterfaceCase1(t *testing.T) {
 				utils.SourcePathCfg:    "/tmp/ers/in",
 				utils.TenantCfg:        "~*req.Destination1",
 				utils.TimezoneCfg:      "",
-				utils.OptsCfg: map[string]interface{}{
+				utils.OptsCfg: map[string]any{
 					utils.CSVFieldSepOpt:        ",",
 					utils.HeaderDefineCharOpt:   ":",
 					utils.CSVRowLengthOpt:       0,
@@ -1070,10 +1070,10 @@ func TestERSCfgAsMapInterfaceCase2(t *testing.T) {
 		],
 	}
 }`
-	eMap := map[string]interface{}{
+	eMap := map[string]any{
 		utils.EnabledCfg:       true,
 		utils.SessionSConnsCfg: []string{"conn1", "conn3"},
-		utils.ReadersCfg: []map[string]interface{}{
+		utils.ReadersCfg: []map[string]any{
 			{
 				utils.FiltersCfg:             []string{},
 				utils.FlagsCfg:               []string{},
@@ -1083,11 +1083,11 @@ func TestERSCfgAsMapInterfaceCase2(t *testing.T) {
 				utils.SourcePathCfg:          "/var/spool/cgrates/ers/in",
 				utils.TenantCfg:              "",
 				utils.TimezoneCfg:            "",
-				utils.CacheDumpFieldsCfg:     []map[string]interface{}{},
-				utils.PartialCommitFieldsCfg: []map[string]interface{}{},
+				utils.CacheDumpFieldsCfg:     []map[string]any{},
+				utils.PartialCommitFieldsCfg: []map[string]any{},
 				utils.ConcurrentRequestsCfg:  1024,
 				utils.TypeCfg:                "*none",
-				utils.FieldsCfg: []map[string]interface{}{
+				utils.FieldsCfg: []map[string]any{
 					{utils.MandatoryCfg: true, utils.PathCfg: "*cgreq.ToR", utils.TagCfg: "ToR", utils.TypeCfg: "*variable", utils.ValueCfg: "~*req.2"},
 					{utils.MandatoryCfg: true, utils.PathCfg: "*cgreq.OriginID", utils.TagCfg: "OriginID", utils.TypeCfg: "*variable", utils.ValueCfg: "~*req.3"},
 					{utils.MandatoryCfg: true, utils.PathCfg: "*cgreq.RequestType", utils.TagCfg: "RequestType", utils.TypeCfg: "*variable", utils.ValueCfg: "~*req.4"},
@@ -1100,7 +1100,7 @@ func TestERSCfgAsMapInterfaceCase2(t *testing.T) {
 					{utils.MandatoryCfg: true, utils.PathCfg: "*cgreq.AnswerTime", utils.TagCfg: "AnswerTime", utils.TypeCfg: "*variable", utils.ValueCfg: "~*req.12"},
 					{utils.MandatoryCfg: true, utils.PathCfg: "*cgreq.Usage", utils.TagCfg: "Usage", utils.TypeCfg: "*variable", utils.ValueCfg: "~*req.13"},
 				},
-				utils.OptsCfg: map[string]interface{}{
+				utils.OptsCfg: map[string]any{
 					utils.CSVFieldSepOpt:        ",",
 					utils.HeaderDefineCharOpt:   ":",
 					utils.CSVRowLengthOpt:       0,
@@ -1111,10 +1111,10 @@ func TestERSCfgAsMapInterfaceCase2(t *testing.T) {
 				},
 			},
 			{
-				utils.CacheDumpFieldsCfg: []map[string]interface{}{
+				utils.CacheDumpFieldsCfg: []map[string]any{
 					{utils.MandatoryCfg: true, utils.PathCfg: "*cgreq.ToR", utils.TagCfg: "ToR", utils.TypeCfg: "*variable", utils.ValueCfg: "~*req.2"},
 				},
-				utils.PartialCommitFieldsCfg: []map[string]interface{}{
+				utils.PartialCommitFieldsCfg: []map[string]any{
 					{
 						"mandatory": true,
 						"path":      "*cgreq.ToR",
@@ -1125,7 +1125,7 @@ func TestERSCfgAsMapInterfaceCase2(t *testing.T) {
 				},
 				utils.ConcurrentRequestsCfg: 1024,
 				utils.TypeCfg:               "*fileCSV",
-				utils.FieldsCfg: []map[string]interface{}{
+				utils.FieldsCfg: []map[string]any{
 					{utils.MandatoryCfg: true, utils.PathCfg: "*cgreq.ToR", utils.TagCfg: "ToR", utils.TypeCfg: "*variable", utils.ValueCfg: "~*req.2"},
 					{utils.MandatoryCfg: true, utils.PathCfg: "*cgreq.OriginID", utils.TagCfg: "OriginID", utils.TypeCfg: "*variable", utils.ValueCfg: "~*req.3"},
 					{utils.MandatoryCfg: true, utils.PathCfg: "*cgreq.RequestType", utils.TagCfg: "RequestType", utils.TypeCfg: "*variable", utils.ValueCfg: "~*req.4"},
@@ -1146,7 +1146,7 @@ func TestERSCfgAsMapInterfaceCase2(t *testing.T) {
 				utils.SourcePathCfg:    "/tmp/ers/in",
 				utils.TenantCfg:        "~*req.Destination1",
 				utils.TimezoneCfg:      "",
-				utils.OptsCfg: map[string]interface{}{
+				utils.OptsCfg: map[string]any{
 					utils.KafkaGroupID:          "test",
 					utils.CSVFieldSepOpt:        ",",
 					utils.HeaderDefineCharOpt:   ":",
@@ -2191,8 +2191,8 @@ func TestERsAsMapInterface(t *testing.T) {
 		},
 	}
 
-	exp := map[string]interface{}{
-		"opts": map[string]interface{}{
+	exp := map[string]any{
+		"opts": map[string]any{
 			"amqpConsumerTag":                   "consumer_tag",
 			"amqpExchange":                      "exchange",
 			"amqpExchangeProcessed":             "exchange_processed",

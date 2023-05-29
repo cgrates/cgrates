@@ -65,9 +65,9 @@ func (rp *RequestProcessor) loadFromJSONCfg(jsnCfg *ReqProcessorJsnCfg, sep stri
 	return
 }
 
-// AsMapInterface returns the config as a map[string]interface{}
-func (rp *RequestProcessor) AsMapInterface(separator string) (initialMP map[string]interface{}) {
-	initialMP = map[string]interface{}{
+// AsMapInterface returns the config as a map[string]any
+func (rp *RequestProcessor) AsMapInterface(separator string) (initialMP map[string]any) {
+	initialMP = map[string]any{
 		utils.IDCfg:       rp.ID,
 		utils.FiltersCfg:  utils.CloneStringSlice(rp.Filters),
 		utils.FlagsCfg:    rp.Flags.SliceFlags(),
@@ -77,14 +77,14 @@ func (rp *RequestProcessor) AsMapInterface(separator string) (initialMP map[stri
 		initialMP[utils.TenantCfg] = rp.Tenant.GetRule(separator)
 	}
 	if rp.RequestFields != nil {
-		requestFields := make([]map[string]interface{}, len(rp.RequestFields))
+		requestFields := make([]map[string]any, len(rp.RequestFields))
 		for i, item := range rp.RequestFields {
 			requestFields[i] = item.AsMapInterface(separator)
 		}
 		initialMP[utils.RequestFieldsCfg] = requestFields
 	}
 	if rp.ReplyFields != nil {
-		replyFields := make([]map[string]interface{}, len(rp.ReplyFields))
+		replyFields := make([]map[string]any, len(rp.ReplyFields))
 		for i, item := range rp.ReplyFields {
 			replyFields[i] = item.AsMapInterface(separator)
 		}

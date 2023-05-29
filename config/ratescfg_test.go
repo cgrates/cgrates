@@ -86,7 +86,7 @@ func TestRatesCfgAsMapInterface(t *testing.T) {
 	cfgJSONStr := `{
       "rates": {}
 }`
-	eMap := map[string]interface{}{
+	eMap := map[string]any{
 		utils.EnabledCfg:                    false,
 		utils.IndexedSelectsCfg:             true,
 		utils.PrefixIndexedFieldsCfg:        []string{},
@@ -101,7 +101,7 @@ func TestRatesCfgAsMapInterface(t *testing.T) {
 		utils.RateNotExistsIndexedFieldsCfg: []string{},
 		utils.RateNestedFieldsCfg:           false,
 		utils.Verbosity:                     1000,
-		utils.OptsCfg: map[string]interface{}{
+		utils.OptsCfg: map[string]any{
 			utils.MetaProfileIDs:           []*utils.DynamicStringSliceOpt{},
 			utils.MetaStartTime:            []*utils.DynamicStringOpt{},
 			utils.MetaUsage:                []*utils.DynamicDecimalBigOpt{},
@@ -136,7 +136,7 @@ func TestRatesCfgAsMapInterface1(t *testing.T) {
 	        "rate_nested_fields": true,			
      },
 }`
-	eMap := map[string]interface{}{
+	eMap := map[string]any{
 		utils.EnabledCfg:                    true,
 		utils.IndexedSelectsCfg:             false,
 		utils.StringIndexedFieldsCfg:        []string{"*req.index1"},
@@ -153,7 +153,7 @@ func TestRatesCfgAsMapInterface1(t *testing.T) {
 		utils.RateNotExistsIndexedFieldsCfg: []string{"*req.index1"},
 		utils.RateNestedFieldsCfg:           true,
 		utils.Verbosity:                     1000,
-		utils.OptsCfg: map[string]interface{}{
+		utils.OptsCfg: map[string]any{
 			utils.MetaProfileIDs:           []*utils.DynamicStringSliceOpt{},
 			utils.MetaStartTime:            []*utils.DynamicStringOpt{},
 			utils.MetaUsage:                []*utils.DynamicDecimalBigOpt{},

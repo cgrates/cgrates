@@ -97,7 +97,7 @@ func (ar *AgentRequest) String() string {
 }
 
 // FieldAsInterface implements utils.DataProvider
-func (ar *AgentRequest) FieldAsInterface(fldPath []string) (val interface{}, err error) {
+func (ar *AgentRequest) FieldAsInterface(fldPath []string) (val any, err error) {
 	switch fldPath[0] {
 	default:
 		dp, has := ar.ExtraDP[fldPath[0]]
@@ -182,7 +182,7 @@ func (ar *AgentRequest) FieldAsInterface(fldPath []string) (val interface{}, err
 
 // FieldAsString implements utils.DataProvider
 func (ar *AgentRequest) FieldAsString(fldPath []string) (val string, err error) {
-	var iface interface{}
+	var iface any
 	if iface, err = ar.FieldAsInterface(fldPath); err != nil {
 		return
 	}
@@ -213,7 +213,7 @@ func (ar *AgentRequest) SetFields(tplFlds []*config.FCTemplate) (err error) {
 				return
 			}
 		default:
-			var out interface{}
+			var out any
 			out, err = ar.ParseField(tplFld)
 			if err != nil {
 				if err == utils.ErrNotFound {
@@ -350,7 +350,7 @@ func (ar *AgentRequest) Remove(fullPath *utils.FullPath) error {
 
 // ParseField outputs the value based on the template item
 func (ar *AgentRequest) ParseField(
-	cfgFld *config.FCTemplate) (out interface{}, err error) {
+	cfgFld *config.FCTemplate) (out any, err error) {
 	tmpType := cfgFld.Type
 	switch tmpType {
 	case utils.MetaFiller:
@@ -457,7 +457,7 @@ func (ar *AgentRequest) Compose(fullPath *utils.FullPath, val *utils.DataLeaf) (
 	case utils.MetaTmp:
 		return ar.tmp.Compose(fullPath.PathSlice[1:], val)
 	case utils.MetaOpts:
-		var prv interface{}
+		var prv any
 		if prv, err = ar.Opts.FieldAsInterface(fullPath.PathSlice[1:]); err != nil {
 			if err != utils.ErrNotFound {
 				return
@@ -470,7 +470,7 @@ func (ar *AgentRequest) Compose(fullPath *utils.FullPath, val *utils.DataLeaf) (
 
 	case utils.MetaUCH:
 		path := fullPath.Path[5:]
-		var prv interface{}
+		var prv any
 		if prvI, ok := engine.Cache.Get(utils.CacheUCH, path); !ok {
 			prv = val.Data
 		} else {

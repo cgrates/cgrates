@@ -167,12 +167,12 @@ func (gencfg *GeneralCfg) loadFromJSONCfg(jsnGeneralCfg *GeneralJsonCfg) (err er
 	return
 }
 
-// AsMapInterface returns the config as a map[string]interface{}
-func (gencfg GeneralCfg) AsMapInterface(string) interface{} {
-	opts := map[string]interface{}{
+// AsMapInterface returns the config as a map[string]any
+func (gencfg GeneralCfg) AsMapInterface(string) any {
+	opts := map[string]any{
 		utils.MetaExporterIDs: gencfg.Opts.ExporterIDs,
 	}
-	mp := map[string]interface{}{
+	mp := map[string]any{
 		utils.NodeIDCfg:               gencfg.NodeID,
 		utils.RoundingDecimalsCfg:     gencfg.RoundingDecimals,
 		utils.DBDataEncodingCfg:       utils.Meta + gencfg.DBDataEncoding,

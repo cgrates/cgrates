@@ -66,7 +66,7 @@ func TestReplicatorGetAccount(t *testing.T) {
 	acc := &utils.Account{
 		Tenant: "cgrates.org",
 		ID:     "Account_simple",
-		Opts:   map[string]interface{}{},
+		Opts:   map[string]any{},
 		Balances: map[string]*utils.Balance{
 			"VoiceBalance": {
 				ID:        "VoiceBalance",
@@ -77,7 +77,7 @@ func TestReplicatorGetAccount(t *testing.T) {
 					},
 				},
 				Type: "*abstract",
-				Opts: map[string]interface{}{
+				Opts: map[string]any{
 					"Destination": "10",
 				},
 				Units: utils.NewDecimal(0, 0),
@@ -118,7 +118,7 @@ func TestReplicatorGetAccountError(t *testing.T) {
 	acc := &utils.Account{
 		Tenant: "cgrates.org",
 		ID:     "Account_simple_2",
-		Opts:   map[string]interface{}{},
+		Opts:   map[string]any{},
 		Balances: map[string]*utils.Balance{
 			"VoiceBalance": {
 				ID:        "VoiceBalance",
@@ -129,7 +129,7 @@ func TestReplicatorGetAccountError(t *testing.T) {
 					},
 				},
 				Type: "*abstract",
-				Opts: map[string]interface{}{
+				Opts: map[string]any{
 					"Destination": "10",
 				},
 				Units: utils.NewDecimal(0, 0),
@@ -864,7 +864,7 @@ func TestReplicatorGetDispatcherProfile(t *testing.T) {
 		ID:        "Dsp1",
 		FilterIDs: []string{"*string:~*req.Account:1001", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z"},
 		Strategy:  utils.MetaFirst,
-		StrategyParams: map[string]interface{}{
+		StrategyParams: map[string]any{
 			utils.MetaDefaultRatio: "false",
 		},
 		Weight: 20,
@@ -873,7 +873,7 @@ func TestReplicatorGetDispatcherProfile(t *testing.T) {
 				ID:        "C1",
 				FilterIDs: []string{},
 				Weight:    10,
-				Params:    map[string]interface{}{"0": "192.168.54.203"},
+				Params:    map[string]any{"0": "192.168.54.203"},
 				Blocker:   false,
 			},
 		},
@@ -908,7 +908,7 @@ func TestReplicatorGetDispatcherProfileError(t *testing.T) {
 		ID:        "Dsp5",
 		FilterIDs: []string{"*string:~*req.Account:1001", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z"},
 		Strategy:  utils.MetaFirst,
-		StrategyParams: map[string]interface{}{
+		StrategyParams: map[string]any{
 			utils.MetaDefaultRatio: "false",
 		},
 		Weight: 20,
@@ -917,7 +917,7 @@ func TestReplicatorGetDispatcherProfileError(t *testing.T) {
 				ID:        "C1",
 				FilterIDs: []string{},
 				Weight:    10,
-				Params:    map[string]interface{}{"0": "192.168.54.203"},
+				Params:    map[string]any{"0": "192.168.54.203"},
 				Blocker:   false,
 			},
 		},
@@ -1089,7 +1089,7 @@ func TestReplicatorSetThresholdProfile(t *testing.T) {
 			},
 			Async: true,
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaCache: utils.MetaNone,
 		},
 	}
@@ -1147,7 +1147,7 @@ func TestReplicatorSetThresholdProfileErr1(t *testing.T) {
 			},
 			Async: true,
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaCache: utils.OK,
 		},
 	}
@@ -1174,7 +1174,7 @@ func TestReplicatorSetAccount(t *testing.T) {
 		Account: &utils.Account{
 			Tenant: "cgrates.org",
 			ID:     "Account_simple1",
-			Opts:   map[string]interface{}{},
+			Opts:   map[string]any{},
 			Balances: map[string]*utils.Balance{
 				"VoiceBalance": {
 					ID:        "VoiceBalance",
@@ -1185,7 +1185,7 @@ func TestReplicatorSetAccount(t *testing.T) {
 						},
 					},
 					Type: "*abstract",
-					Opts: map[string]interface{}{
+					Opts: map[string]any{
 						"Destination": "10",
 					},
 					Units: utils.NewDecimal(0, 0),
@@ -1197,7 +1197,7 @@ func TestReplicatorSetAccount(t *testing.T) {
 				},
 			},
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaCache: utils.MetaNone,
 		},
 	}
@@ -1211,7 +1211,7 @@ func TestReplicatorSetAccount(t *testing.T) {
 	exp := &utils.Account{
 		Tenant: "cgrates.org",
 		ID:     "Account_simple1",
-		Opts:   map[string]interface{}{},
+		Opts:   map[string]any{},
 		Balances: map[string]*utils.Balance{
 			"VoiceBalance": {
 				ID:        "VoiceBalance",
@@ -1222,7 +1222,7 @@ func TestReplicatorSetAccount(t *testing.T) {
 					},
 				},
 				Type: "*abstract",
-				Opts: map[string]interface{}{
+				Opts: map[string]any{
 					"Destination": "10",
 				},
 				Units: utils.NewDecimal(0, 0),
@@ -1258,7 +1258,7 @@ func TestReplicatorSetThreshold(t *testing.T) {
 			ID:     "THD_20",
 			Hits:   0,
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaCache: utils.MetaNone,
 		},
 	}
@@ -1298,7 +1298,7 @@ func TestReplicatorSetThresholdErr1(t *testing.T) {
 			ID:     "THD_20",
 			Hits:   0,
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaCache: utils.OK,
 		},
 	}
@@ -1350,7 +1350,7 @@ func TestReplicatorSetStatQueueProfile(t *testing.T) {
 			},
 			ThresholdIDs: []string{utils.MetaNone},
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaCache: utils.MetaNone,
 		},
 	}
@@ -1408,7 +1408,7 @@ func TestReplicatorSetStatQueueProfileErr1(t *testing.T) {
 			},
 			ThresholdIDs: []string{utils.MetaNone},
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaCache: utils.OK,
 		},
 	}
@@ -1439,7 +1439,7 @@ func TestReplicatorSetStatQueue(t *testing.T) {
 				utils.MetaTCD: engine.NewTCD(0, "", nil),
 			},
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaCache: utils.MetaNone,
 		},
 	}
@@ -1494,7 +1494,7 @@ func TestReplicatorSetFilter(t *testing.T) {
 				},
 			},
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaCache: utils.MetaNone,
 		},
 	}
@@ -1549,7 +1549,7 @@ func TestReplicatorSetFilterErr1(t *testing.T) {
 				},
 			},
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaCache: utils.OK,
 		},
 	}
@@ -1585,7 +1585,7 @@ func TestReplicatorSetResourceProfile(t *testing.T) {
 				}},
 			ThresholdIDs: []string{utils.MetaNone},
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaCache: utils.MetaNone,
 		},
 	}
@@ -1627,7 +1627,7 @@ func TestReplicatorSetResourceProfileErr1(t *testing.T) {
 				}},
 			ThresholdIDs: []string{utils.MetaNone},
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaCache: utils.OK,
 		},
 	}
@@ -1656,7 +1656,7 @@ func TestReplicatorSetResource(t *testing.T) {
 			ID:     "ResGroup2",
 			Usages: make(map[string]*engine.ResourceUsage),
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaCache: utils.MetaNone,
 		},
 	}
@@ -1691,7 +1691,7 @@ func TestReplicatorSetResourceErr1(t *testing.T) {
 			ID:     "ResGroup2",
 			Usages: make(map[string]*engine.ResourceUsage),
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaCache: utils.OK,
 		},
 	}
@@ -1735,7 +1735,7 @@ func TestReplicatorSetRouteProfile(t *testing.T) {
 				},
 			},
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaCache: utils.MetaNone,
 		},
 	}
@@ -1786,7 +1786,7 @@ func TestReplicatorSetRouteProfileErr1(t *testing.T) {
 				},
 			},
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaCache: utils.OK,
 		},
 	}
@@ -1832,7 +1832,7 @@ func TestReplicatorSetAttributeProfile(t *testing.T) {
 				},
 			},
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaCache: utils.MetaNone,
 		},
 	}
@@ -1884,7 +1884,7 @@ func TestReplicatorSetAttributeProfileErr1(t *testing.T) {
 				},
 			},
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaCache: utils.OK,
 		},
 	}
@@ -1919,7 +1919,7 @@ func TestReplicatorChargerProfile(t *testing.T) {
 				},
 			},
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaCache: utils.MetaNone,
 		},
 	}
@@ -1960,7 +1960,7 @@ func TestReplicatorChargerProfileErr1(t *testing.T) {
 				},
 			},
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaCache: utils.OK,
 		},
 	}
@@ -1989,7 +1989,7 @@ func TestReplicatorSetDispatcherProfile(t *testing.T) {
 			ID:        "Dsp1",
 			FilterIDs: []string{"*string:~*req.Account:1001", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z"},
 			Strategy:  utils.MetaFirst,
-			StrategyParams: map[string]interface{}{
+			StrategyParams: map[string]any{
 				utils.MetaDefaultRatio: "false",
 			},
 			Weight: 20,
@@ -1998,12 +1998,12 @@ func TestReplicatorSetDispatcherProfile(t *testing.T) {
 					ID:        "C1",
 					FilterIDs: []string{},
 					Weight:    10,
-					Params:    map[string]interface{}{"0": "192.168.54.203"},
+					Params:    map[string]any{"0": "192.168.54.203"},
 					Blocker:   false,
 				},
 			},
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaCache: utils.MetaNone,
 		},
 	}
@@ -2038,7 +2038,7 @@ func TestReplicatorSetDispatcherProfileErr1(t *testing.T) {
 			ID:        "Dsp1",
 			FilterIDs: []string{"*string:~*req.Account:1001", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z"},
 			Strategy:  utils.MetaFirst,
-			StrategyParams: map[string]interface{}{
+			StrategyParams: map[string]any{
 				utils.MetaDefaultRatio: "false",
 			},
 			Weight: 20,
@@ -2047,12 +2047,12 @@ func TestReplicatorSetDispatcherProfileErr1(t *testing.T) {
 					ID:        "C1",
 					FilterIDs: []string{},
 					Weight:    10,
-					Params:    map[string]interface{}{"0": "192.168.54.203"},
+					Params:    map[string]any{"0": "192.168.54.203"},
 					Blocker:   false,
 				},
 			},
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaCache: utils.OK,
 		},
 	}
@@ -2087,7 +2087,7 @@ func TestReplicatorSetDispatcherHost(t *testing.T) {
 				ReplyTimeout:    2 * time.Minute,
 			},
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaCache: utils.MetaNone,
 		},
 	}
@@ -2128,7 +2128,7 @@ func TestReplicatorSetDispatcherHostErr1(t *testing.T) {
 				ReplyTimeout:    2 * time.Minute,
 			},
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaCache: utils.OK,
 		},
 	}
@@ -2161,7 +2161,7 @@ func TestReplicatorRemoveThreshold(t *testing.T) {
 	}
 	args := &utils.TenantIDWithAPIOpts{
 		TenantID: utils.NewTenantID("cgrates.org:THD_2"),
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaCache: utils.MetaNone,
 		},
 	}
@@ -2197,7 +2197,7 @@ func TestReplicatorRemoveThresholdErr(t *testing.T) {
 	}
 	args := &utils.TenantIDWithAPIOpts{
 		TenantID: utils.NewTenantID("cgrates.org:THD_2"),
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaCache: utils.OK,
 		},
 	}
@@ -2223,7 +2223,7 @@ func TestReplicatorRemoveAccount(t *testing.T) {
 	acc := &utils.Account{
 		Tenant: "cgrates.org",
 		ID:     "Account_simple",
-		Opts:   map[string]interface{}{},
+		Opts:   map[string]any{},
 		Balances: map[string]*utils.Balance{
 			"VoiceBalance": {
 				ID:        "VoiceBalance",
@@ -2234,7 +2234,7 @@ func TestReplicatorRemoveAccount(t *testing.T) {
 					},
 				},
 				Type: "*abstract",
-				Opts: map[string]interface{}{
+				Opts: map[string]any{
 					"Destination": "10",
 				},
 				Units: utils.NewDecimal(0, 0),
@@ -2251,7 +2251,7 @@ func TestReplicatorRemoveAccount(t *testing.T) {
 	}
 	args := &utils.TenantIDWithAPIOpts{
 		TenantID: utils.NewTenantID("cgrates.org:Account_simple"),
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaCache: utils.MetaNone,
 		},
 	}
@@ -2290,7 +2290,7 @@ func TestReplicatorRemoveStatQueue(t *testing.T) {
 	}
 	args := &utils.TenantIDWithAPIOpts{
 		TenantID: utils.NewTenantID("cgrates.org:sq11"),
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaCache: utils.MetaNone,
 		},
 	}
@@ -2329,7 +2329,7 @@ func TestReplicatorRemoveStatQueueErr(t *testing.T) {
 	}
 	args := &utils.TenantIDWithAPIOpts{
 		TenantID: utils.NewTenantID("cgrates.org:sq11"),
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaCache: utils.OK,
 		},
 	}
@@ -2382,7 +2382,7 @@ func TestReplicatorRemoveFilter(t *testing.T) {
 	}
 	args := &utils.TenantIDWithAPIOpts{
 		TenantID: utils.NewTenantID("cgrates.org:fltr_for_prf"),
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaCache: utils.MetaNone,
 		},
 	}
@@ -2438,7 +2438,7 @@ func TestReplicatorRemoveFilterErr(t *testing.T) {
 	}
 	args := &utils.TenantIDWithAPIOpts{
 		TenantID: utils.NewTenantID("cgrates.org:fltr_for_prf"),
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaCache: utils.OK,
 		},
 	}
@@ -2480,7 +2480,7 @@ func TestReplicatorRemoveThresholdProfile(t *testing.T) {
 	}
 	args := &utils.TenantIDWithAPIOpts{
 		TenantID: utils.NewTenantID("cgrates.org:THD_2"),
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaCache: utils.MetaNone,
 		},
 	}
@@ -2525,7 +2525,7 @@ func TestReplicatorRemoveThresholdProfileErr(t *testing.T) {
 	}
 	args := &utils.TenantIDWithAPIOpts{
 		TenantID: utils.NewTenantID("cgrates.org:THD_2"),
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaCache: utils.OK,
 		},
 	}
@@ -2581,7 +2581,7 @@ func TestReplicatorRemoveStatQueueProfile(t *testing.T) {
 	}
 	args := &utils.TenantIDWithAPIOpts{
 		TenantID: utils.NewTenantID("cgrates.org:SQ_20"),
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaCache: utils.MetaNone,
 		},
 	}
@@ -2640,7 +2640,7 @@ func TestReplicatorRemoveStatQueueProfileErr(t *testing.T) {
 	}
 	args := &utils.TenantIDWithAPIOpts{
 		TenantID: utils.NewTenantID("cgrates.org:SQ_20"),
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaCache: utils.OK,
 		},
 	}
@@ -2673,7 +2673,7 @@ func TestReplicatorRemoveResource(t *testing.T) {
 	}
 	args := &utils.TenantIDWithAPIOpts{
 		TenantID: utils.NewTenantID("cgrates.org:ResGroup2"),
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaCache: utils.MetaNone,
 		},
 	}
@@ -2709,7 +2709,7 @@ func TestReplicatorRemoveResourceErr(t *testing.T) {
 	}
 	args := &utils.TenantIDWithAPIOpts{
 		TenantID: utils.NewTenantID("cgrates.org:ResGroup2"),
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaCache: utils.OK,
 		},
 	}
@@ -2750,7 +2750,7 @@ func TestReplicatorRemoveResourceProfile(t *testing.T) {
 	}
 	args := &utils.TenantIDWithAPIOpts{
 		TenantID: utils.NewTenantID("cgrates.org:ResGroup1"),
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaCache: utils.MetaNone,
 		},
 	}
@@ -2793,7 +2793,7 @@ func TestReplicatorRemoveResourceProfileErr(t *testing.T) {
 	}
 	args := &utils.TenantIDWithAPIOpts{
 		TenantID: utils.NewTenantID("cgrates.org:ResGroup1"),
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaCache: utils.OK,
 		},
 	}
@@ -2843,7 +2843,7 @@ func TestReplicatorRemoveRouteProfile(t *testing.T) {
 	}
 	args := &utils.TenantIDWithAPIOpts{
 		TenantID: utils.NewTenantID("cgrates.org:ROUTE_2003"),
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaCache: utils.MetaNone,
 		},
 	}
@@ -2895,7 +2895,7 @@ func TestReplicatorRemoveRouteProfileErr(t *testing.T) {
 	}
 	args := &utils.TenantIDWithAPIOpts{
 		TenantID: utils.NewTenantID("cgrates.org:ROUTE_2003"),
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaCache: utils.OK,
 		},
 	}
@@ -2946,7 +2946,7 @@ func TestReplicatorRemoveAttributeProfile(t *testing.T) {
 	}
 	args := &utils.TenantIDWithAPIOpts{
 		TenantID: utils.NewTenantID("cgrates.org:TEST_ATTRIBUTES_TEST"),
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaCache: utils.MetaNone,
 		},
 	}
@@ -2999,7 +2999,7 @@ func TestReplicatorRemoveAttributeProfileErr(t *testing.T) {
 	}
 	args := &utils.TenantIDWithAPIOpts{
 		TenantID: utils.NewTenantID("cgrates.org:TEST_ATTRIBUTES_TEST"),
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaCache: utils.OK,
 		},
 	}
@@ -3039,7 +3039,7 @@ func TestReplicatorRemoveChargerProfile(t *testing.T) {
 	}
 	args := &utils.TenantIDWithAPIOpts{
 		TenantID: utils.NewTenantID("cgrates.org:Chargers1"),
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaCache: utils.MetaNone,
 		},
 	}
@@ -3081,7 +3081,7 @@ func TestReplicatorRemoveChargerProfileErr(t *testing.T) {
 	}
 	args := &utils.TenantIDWithAPIOpts{
 		TenantID: utils.NewTenantID("cgrates.org:Chargers1"),
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaCache: utils.OK,
 		},
 	}
@@ -3110,7 +3110,7 @@ func TestReplicatorRemoveDispatcherProfile(t *testing.T) {
 		ID:        "Dsp1",
 		FilterIDs: []string{"*string:~*req.Account:1001", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z"},
 		Strategy:  utils.MetaFirst,
-		StrategyParams: map[string]interface{}{
+		StrategyParams: map[string]any{
 			utils.MetaDefaultRatio: "false",
 		},
 		Weight: 20,
@@ -3119,7 +3119,7 @@ func TestReplicatorRemoveDispatcherProfile(t *testing.T) {
 				ID:        "C1",
 				FilterIDs: []string{},
 				Weight:    10,
-				Params:    map[string]interface{}{"0": "192.168.54.203"},
+				Params:    map[string]any{"0": "192.168.54.203"},
 				Blocker:   false,
 			},
 		},
@@ -3129,7 +3129,7 @@ func TestReplicatorRemoveDispatcherProfile(t *testing.T) {
 	}
 	args := &utils.TenantIDWithAPIOpts{
 		TenantID: utils.NewTenantID("cgrates.org:Dsp1"),
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaCache: utils.MetaNone,
 		},
 	}
@@ -3160,7 +3160,7 @@ func TestReplicatorRemoveDispatcherProfileErr(t *testing.T) {
 		ID:        "Dsp1",
 		FilterIDs: []string{"*string:~*req.Account:1001", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z"},
 		Strategy:  utils.MetaFirst,
-		StrategyParams: map[string]interface{}{
+		StrategyParams: map[string]any{
 			utils.MetaDefaultRatio: "false",
 		},
 		Weight: 20,
@@ -3169,7 +3169,7 @@ func TestReplicatorRemoveDispatcherProfileErr(t *testing.T) {
 				ID:        "C1",
 				FilterIDs: []string{},
 				Weight:    10,
-				Params:    map[string]interface{}{"0": "192.168.54.203"},
+				Params:    map[string]any{"0": "192.168.54.203"},
 				Blocker:   false,
 			},
 		},
@@ -3179,7 +3179,7 @@ func TestReplicatorRemoveDispatcherProfileErr(t *testing.T) {
 	}
 	args := &utils.TenantIDWithAPIOpts{
 		TenantID: utils.NewTenantID("cgrates.org:Dsp1"),
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaCache: utils.OK,
 		},
 	}
@@ -3219,7 +3219,7 @@ func TestReplicatorRemoveDispatcherHost(t *testing.T) {
 	}
 	args := &utils.TenantIDWithAPIOpts{
 		TenantID: utils.NewTenantID("cgrates.org:DSH1"),
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaCache: utils.MetaNone,
 		},
 	}
@@ -3261,7 +3261,7 @@ func TestReplicatorRemoveDispatcherHostErr(t *testing.T) {
 	}
 	args := &utils.TenantIDWithAPIOpts{
 		TenantID: utils.NewTenantID("cgrates.org:DSH1"),
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaCache: utils.OK,
 		},
 	}
@@ -3536,7 +3536,7 @@ func TestReplicatorSetRateProfile(t *testing.T) {
 				},
 			},
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaCache: utils.MetaNone,
 		},
 	}
@@ -3606,7 +3606,7 @@ func TestReplicatorSetRateProfileErr(t *testing.T) {
 				},
 			},
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaCache: utils.OK,
 		},
 	}
@@ -3647,7 +3647,7 @@ func TestReplicatorSetActionProfile(t *testing.T) {
 				},
 			},
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaCache: utils.MetaNone,
 		},
 	}
@@ -3693,7 +3693,7 @@ func TestReplicatorSetActionProfileErr(t *testing.T) {
 				},
 			},
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaCache: utils.OK,
 		},
 	}
@@ -3761,7 +3761,7 @@ func TestReplicatorRemoveRateProfile(t *testing.T) {
 	}
 	args := &utils.TenantIDWithAPIOpts{
 		TenantID: utils.NewTenantID("cgrates.org:RP1"),
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaCache: utils.MetaNone,
 		},
 	}
@@ -3832,7 +3832,7 @@ func TestReplicatorRemoveRateProfileErr(t *testing.T) {
 	}
 	args := &utils.TenantIDWithAPIOpts{
 		TenantID: utils.NewTenantID("cgrates.org:RP1"),
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaCache: utils.OK,
 		},
 	}
@@ -3877,7 +3877,7 @@ func TestReplicatorRemoveActionProfile(t *testing.T) {
 	}
 	args := &utils.TenantIDWithAPIOpts{
 		TenantID: utils.NewTenantID("cgrates.org:AP1"),
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaCache: utils.MetaNone,
 		},
 	}
@@ -3924,7 +3924,7 @@ func TestReplicatorRemoveActionProfileErr(t *testing.T) {
 	}
 	args := &utils.TenantIDWithAPIOpts{
 		TenantID: utils.NewTenantID("cgrates.org:AP1"),
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaCache: utils.OK,
 		},
 	}

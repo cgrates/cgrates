@@ -67,7 +67,7 @@ func testDspAccPrfPing(t *testing.T) {
 	}
 	if err := dispEngine.RPC.Call(utils.AccountSv1Ping, &utils.CGREvent{
 		Tenant: "cgrates.org",
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsAPIKey: "accPrf12345",
 		},
 	}, &reply); err != nil {

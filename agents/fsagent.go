@@ -244,7 +244,7 @@ func (fsa *FSsessions) onChannelAnswer(fsev FSEvent, connIdx int) {
 
 	cgrEv := fsev.AsCGREvent(config.CgrConfig().GeneralCfg().DefaultTimezone)
 	if cgrEv.APIOpts == nil {
-		cgrEv.APIOpts = map[string]interface{}{utils.OptsSesInitiate: true}
+		cgrEv.APIOpts = map[string]any{utils.OptsSesInitiate: true}
 	}
 	cgrEv.Event[FsConnID] = connIdx // Attach the connection ID so we can properly disconnect later
 	var initReply sessions.V1InitSessionReply
@@ -272,7 +272,7 @@ func (fsa *FSsessions) onChannelHangupComplete(fsev FSEvent, connIdx int) {
 	if fsev[VarAnswerEpoch] != "0" {                                                                              // call was answered
 		cgrEv := fsev.AsCGREvent(config.CgrConfig().GeneralCfg().DefaultTimezone)
 		if cgrEv.APIOpts == nil {
-			cgrEv.APIOpts = map[string]interface{}{utils.OptsSesTerminate: true}
+			cgrEv.APIOpts = map[string]any{utils.OptsSesTerminate: true}
 		}
 		cgrEv.Event[FsConnID] = connIdx // Attach the connection ID in case we need to create a session and disconnect it
 		if err := fsa.connMgr.Call(fsa.ctx, fsa.cfg.SessionSConns, utils.SessionSv1TerminateSession,
@@ -462,7 +462,7 @@ func (*FSsessions) V1DisconnectPeer(ctx *context.Context, args *utils.DPRArgs, r
 }
 
 // V1WarnDisconnect is called when call goes under the minimum duration threshold, so FreeSWITCH can play an announcement message
-func (fsa *FSsessions) V1WarnDisconnect(ctx *context.Context, args map[string]interface{}, reply *string) (err error) {
+func (fsa *FSsessions) V1WarnDisconnect(ctx *context.Context, args map[string]any, reply *string) (err error) {
 	if fsa.cfg.LowBalanceAnnFile == utils.EmptyString {
 		*reply = utils.OK
 		return

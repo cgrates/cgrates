@@ -42,20 +42,20 @@ type LogEE struct {
 
 func (vEe *LogEE) Cfg() *config.EventExporterCfg { return vEe.cfg }
 func (vEe *LogEE) Connect() error                { return nil }
-func (vEe *LogEE) ExportEvent(_ *context.Context, mp, _ interface{}) error {
+func (vEe *LogEE) ExportEvent(_ *context.Context, mp, _ any) error {
 	utils.Logger.Info(
 		fmt.Sprintf("<%s> <%s> exported: <%s>",
 			utils.EEs, vEe.Cfg().ID, utils.ToJSON(mp)))
 	return nil
 }
-func (vEe *LogEE) Close() error                             { return nil }
-func (vEe *LogEE) GetMetrics() *utils.SafeMapStorage        { return vEe.dc }
-func (vEe *LogEE) ExtraData(ev *utils.CGREvent) interface{} { return nil }
-func (vEe *LogEE) PrepareMap(mp *utils.CGREvent) (interface{}, error) {
+func (vEe *LogEE) Close() error                      { return nil }
+func (vEe *LogEE) GetMetrics() *utils.SafeMapStorage { return vEe.dc }
+func (vEe *LogEE) ExtraData(ev *utils.CGREvent) any  { return nil }
+func (vEe *LogEE) PrepareMap(mp *utils.CGREvent) (any, error) {
 	return mp.Event, nil
 }
-func (vEe *LogEE) PrepareOrderMap(mp *utils.OrderedNavigableMap) (interface{}, error) {
-	valMp := make(map[string]interface{})
+func (vEe *LogEE) PrepareOrderMap(mp *utils.OrderedNavigableMap) (any, error) {
+	valMp := make(map[string]any)
 	for el := mp.GetFirstElement(); el != nil; el = el.Next() {
 		path := el.Value
 		nmIt, _ := mp.Field(path)

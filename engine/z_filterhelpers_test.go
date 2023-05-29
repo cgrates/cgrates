@@ -27,7 +27,7 @@ import (
 )
 
 var (
-	matchEV map[string]interface{}
+	matchEV map[string]any
 	dmMatch *DataManager
 )
 
@@ -97,7 +97,7 @@ func TestFilterMatchingItemIDsForEvent(t *testing.T) {
 	}
 	tntCtx := utils.ConcatenatedKey(tnt, ctx)
 
-	matchEV = utils.MapStorage{utils.MetaReq: map[string]interface{}{
+	matchEV = utils.MapStorage{utils.MetaReq: map[string]any{
 		utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
 		"Field":          "profile",
 	}}
@@ -111,7 +111,7 @@ func TestFilterMatchingItemIDsForEvent(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", stringFilterID, aPrflIDs)
 	}
 
-	matchEV = utils.MapStorage{utils.MetaReq: map[string]interface{}{
+	matchEV = utils.MapStorage{utils.MetaReq: map[string]any{
 		"Field": "profilePrefix",
 	}}
 	aPrflIDs, err = MatchingItemIDsForEvent(context.TODO(), matchEV, nil, nil, nil, nil, nil,
@@ -124,7 +124,7 @@ func TestFilterMatchingItemIDsForEvent(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", prefixFilterID, aPrflIDs)
 	}
 
-	matchEV = utils.MapStorage{utils.MetaReq: map[string]interface{}{
+	matchEV = utils.MapStorage{utils.MetaReq: map[string]any{
 		"Field": "profilePrefix",
 	}}
 	aPrflIDs, err = MatchingItemIDsForEvent(context.TODO(), matchEV, nil, nil, nil, nil, nil,
@@ -190,9 +190,9 @@ func TestFilterMatchingItemIDsForEvent2(t *testing.T) {
 	}
 	tntCtx := utils.ConcatenatedKey(config.CgrConfig().GeneralCfg().DefaultTenant, ctx)
 
-	matchEV = utils.MapStorage{utils.MetaReq: map[string]interface{}{
+	matchEV = utils.MapStorage{utils.MetaReq: map[string]any{
 		utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
-		"CallCost":       map[string]interface{}{"Account": 1001},
+		"CallCost":       map[string]any{"Account": 1001},
 	}}
 	aPrflIDs, err := MatchingItemIDsForEvent(context.TODO(), matchEV, nil, nil, nil, nil, nil,
 		dmMatch, utils.CacheAttributeFilterIndexes, tntCtx, true, true)
@@ -203,8 +203,8 @@ func TestFilterMatchingItemIDsForEvent2(t *testing.T) {
 	if !has {
 		t.Errorf("Expecting: %+v, received: %+v", stringFilterID, aPrflIDs)
 	}
-	matchEV = utils.MapStorage{utils.MetaReq: map[string]interface{}{
-		"CallCost": map[string]interface{}{"Field": "profilePrefix"},
+	matchEV = utils.MapStorage{utils.MetaReq: map[string]any{
+		"CallCost": map[string]any{"Field": "profilePrefix"},
 	}}
 	aPrflIDs, err = MatchingItemIDsForEvent(context.TODO(), matchEV, nil, nil, nil, nil, nil,
 		dmMatch, utils.CacheAttributeFilterIndexes, tntCtx, true, true)

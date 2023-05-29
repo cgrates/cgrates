@@ -474,10 +474,10 @@ func testActionsExecuteActionsHTTPPost(t *testing.T) {
 	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "EventExecuteActions",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1001",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsActionsProfileIDs: []string{"actPrfID"},
 		},
 	}
@@ -560,10 +560,10 @@ func testActionsStatProcessEvent(t *testing.T) {
 	args := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "StatsEventTest",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1001",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsStatsProfileIDs: []string{"SQ_ID"},
 			utils.MetaUsage:           30 * time.Second,
 		},
@@ -629,10 +629,10 @@ func testActionsScheduleActionsResetSQ(t *testing.T) {
 	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "EventExecuteActions",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1001",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsActionsProfileIDs: []string{"actPrfID"},
 		},
 	}
@@ -805,10 +805,10 @@ func testActionsExecuteActions(t *testing.T) {
 	args := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "EventExecuteActions",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			"TestCase": "ActionProfileBlockerBehaviour",
 		},
-		APIOpts: map[string]interface{}{},
+		APIOpts: map[string]any{},
 	}
 	var reply string
 	if err := actRPC.Call(context.Background(), utils.ActionSv1ExecuteActions, args, &reply); err != nil {

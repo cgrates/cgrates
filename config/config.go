@@ -1021,8 +1021,8 @@ func (cfg *CGRConfig) reloadSections(sections ...string) {
 	}
 }
 
-// AsMapInterface returns the config as a map[string]interface{}
-func (cfg *CGRConfig) AsMapInterface(separator string) (mp map[string]interface{}) {
+// AsMapInterface returns the config as a map[string]any
+func (cfg *CGRConfig) AsMapInterface(separator string) (mp map[string]any) {
 	return cfg.sections.AsMapInterface(separator)
 }
 

@@ -48,7 +48,7 @@ func (self *CmdRoutesSort) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdRoutesSort) RpcParams(reset bool) interface{} {
+func (self *CmdRoutesSort) RpcParams(reset bool) any {
 	if reset || self.rpcParams == nil {
 		self.rpcParams = &utils.CGREvent{}
 	}
@@ -59,7 +59,7 @@ func (self *CmdRoutesSort) PostprocessRpcParams() error {
 	return nil
 }
 
-func (self *CmdRoutesSort) RpcResult() interface{} {
+func (self *CmdRoutesSort) RpcResult() any {
 	var atr engine.SortedRoutesList
 	return &atr
 }

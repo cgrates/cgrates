@@ -147,7 +147,7 @@ func cgrRunPreload(ctx *context.Context, cfg *config.CGRConfig, loaderIDs string
 	var reply string
 	for _, loaderID := range strings.Split(loaderIDs, utils.FieldsSep) {
 		if err = loader.GetLoaderS().V1Run(ctx, &loaders.ArgsProcessFolder{
-			APIOpts: map[string]interface{}{
+			APIOpts: map[string]any{
 				utils.MetaForceLock:   true, // force lock will unlock the file in case is locked and return error
 				utils.MetaStopOnError: true,
 			},

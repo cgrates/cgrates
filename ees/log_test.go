@@ -54,7 +54,7 @@ func TestLogEEExportEvent(t *testing.T) {
 		t.Error(err)
 	}
 	logEE := NewLogEE(cfg.EEsCfg().GetDefaultExporter(), dc)
-	mp := map[string]interface{}{
+	mp := map[string]any{
 		"field1": 2,
 		"field2": "value",
 	}
@@ -101,7 +101,7 @@ func TestLogEEPrepareMap(t *testing.T) {
 	}
 	logEE := NewLogEE(cfg.EEsCfg().GetDefaultExporter(), dc)
 	mp := &utils.CGREvent{
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			"field1": 2,
 			"field2": "value",
 		},
@@ -129,7 +129,7 @@ func TestLogEEPrepareOrderMap(t *testing.T) {
 	}
 	mp.Append(fullPath, val)
 	rcv, _ := logEE.PrepareOrderMap(mp)
-	expected := make(map[string]interface{})
+	expected := make(map[string]any)
 	expected["*path1"] = "payload"
 	if !reflect.DeepEqual(rcv, expected) {
 		t.Errorf("Expected %v \n but received \n %v", mp, rcv)

@@ -61,7 +61,7 @@ type SQLEe struct {
 
 type sqlPosterRequest struct {
 	Querry string
-	Values []interface{}
+	Values []any
 }
 
 func (sqlEe *SQLEe) initDialector() (err error) {
@@ -132,7 +132,7 @@ func (sqlEe *SQLEe) Connect() (err error) {
 	return
 }
 
-func (sqlEe *SQLEe) ExportEvent(_ *context.Context, req, _ interface{}) error {
+func (sqlEe *SQLEe) ExportEvent(_ *context.Context, req, _ any) error {
 	sqlEe.reqs.get()
 	sqlEe.RLock()
 	defer func() {
@@ -159,12 +159,12 @@ func (sqlEe *SQLEe) Close() (err error) {
 
 func (sqlEe *SQLEe) GetMetrics() *utils.SafeMapStorage { return sqlEe.dc }
 
-func (sqlEe *SQLEe) ExtraData(ev *utils.CGREvent) interface{} { return nil }
+func (sqlEe *SQLEe) ExtraData(ev *utils.CGREvent) any { return nil }
 
-func (sqlEe *SQLEe) PrepareMap(mp *utils.CGREvent) (interface{}, error) { return nil, nil }
+func (sqlEe *SQLEe) PrepareMap(mp *utils.CGREvent) (any, error) { return nil, nil }
 
-func (sqlEe *SQLEe) PrepareOrderMap(mp *utils.OrderedNavigableMap) (interface{}, error) {
-	var vals []interface{}
+func (sqlEe *SQLEe) PrepareOrderMap(mp *utils.OrderedNavigableMap) (any, error) {
+	var vals []any
 	var colNames []string
 	for el := mp.GetFirstElement(); el != nil; el = el.Next() {
 		nmIt, _ := mp.Field(el.Value)

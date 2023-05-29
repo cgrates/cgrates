@@ -164,16 +164,16 @@ func (rCfg *RateSCfg) loadFromJSONCfg(jsnCfg *RateSJsonCfg) (err error) {
 	return
 }
 
-// AsMapInterface returns the config as a map[string]interface{}
-func (rCfg RateSCfg) AsMapInterface(string) interface{} {
-	opts := map[string]interface{}{
+// AsMapInterface returns the config as a map[string]any
+func (rCfg RateSCfg) AsMapInterface(string) any {
+	opts := map[string]any{
 		utils.MetaProfileIDs:           rCfg.Opts.ProfileIDs,
 		utils.MetaStartTime:            rCfg.Opts.StartTime,
 		utils.MetaUsage:                rCfg.Opts.Usage,
 		utils.MetaIntervalStartCfg:     rCfg.Opts.IntervalStart,
 		utils.MetaProfileIgnoreFilters: rCfg.Opts.ProfileIgnoreFilters,
 	}
-	mp := map[string]interface{}{
+	mp := map[string]any{
 		utils.EnabledCfg:            rCfg.Enabled,
 		utils.IndexedSelectsCfg:     rCfg.IndexedSelects,
 		utils.NestedFieldsCfg:       rCfg.NestedFields,

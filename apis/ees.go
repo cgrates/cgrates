@@ -35,7 +35,7 @@ type EeSv1 struct {
 }
 
 // ProcessEvent triggers exports on EEs side
-func (cS *EeSv1) ProcessEvent(ctx *context.Context, cgrEv *utils.CGREventWithEeIDs, rply *map[string]map[string]interface{}) error {
+func (cS *EeSv1) ProcessEvent(ctx *context.Context, cgrEv *utils.CGREventWithEeIDs, rply *map[string]map[string]any) error {
 	return cS.ees.V1ProcessEvent(ctx, cgrEv, rply)
 }
 

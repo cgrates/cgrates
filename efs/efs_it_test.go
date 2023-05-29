@@ -155,14 +155,14 @@ func testEfsProcessEvent(t *testing.T) {
 		Path:   "localhost:9092",
 		Event: &utils.CGREvent{
 			Tenant: "cgrates.org",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.AccountField: "1002",
 				utils.Destination:  "1003",
 			},
 		},
 		FailedDir: "/var/spool/cgrates/failed_posts",
 		Module:    utils.Kafka,
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.Level:          efsCfg.LoggerCfg().Level,
 			utils.Format:         "TutorialTopic",
 			utils.Conn:           "localhost:9092",

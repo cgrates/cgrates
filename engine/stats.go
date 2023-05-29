@@ -277,12 +277,12 @@ func (sS *StatS) storeStatQueue(ctx *context.Context, sq *StatQueue) {
 }
 
 // processThresholds will pass the event for statQueue to ThresholdS
-func (sS *StatS) processThresholds(ctx *context.Context, sQs StatQueues, opts map[string]interface{}) (err error) {
+func (sS *StatS) processThresholds(ctx *context.Context, sQs StatQueues, opts map[string]any) (err error) {
 	if len(sS.cfg.StatSCfg().ThresholdSConns) == 0 {
 		return
 	}
 	if opts == nil {
-		opts = make(map[string]interface{})
+		opts = make(map[string]any)
 	}
 	opts[utils.MetaEventType] = utils.StatUpdate
 	var withErrs bool
@@ -295,7 +295,7 @@ func (sS *StatS) processThresholds(ctx *context.Context, sQs StatQueues, opts ma
 		thEv := &utils.CGREvent{
 			Tenant: sq.Tenant,
 			ID:     utils.GenUUID(),
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.EventType: utils.StatUpdate,
 				utils.StatID:    sq.ID,
 			},

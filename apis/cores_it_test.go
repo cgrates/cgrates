@@ -344,7 +344,7 @@ func testCoreItStartMemoryProfiling(t *testing.T) {
 
 func testCoreItStatus(t *testing.T) {
 	args := &utils.TenantIDWithAPIOpts{}
-	var reply map[string]interface{}
+	var reply map[string]any
 	if err := coreSBiRpc.Call(context.Background(), utils.CoreSv1Status,
 		args, &reply); err != nil {
 		t.Fatal(err)

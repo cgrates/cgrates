@@ -320,10 +320,10 @@ func testCacheRplAAAddData(t *testing.T) {
 }
 
 func testCacheRplPing(t *testing.T) {
-	var reply map[string]interface{}
+	var reply map[string]any
 	ev := utils.TenantWithAPIOpts{
 		Tenant: "cgrates.org",
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsRouteID: "testRoute123",
 		},
 	}
@@ -337,7 +337,7 @@ func testCacheRplPing(t *testing.T) {
 	if err := dspEngine1RPC.Call(context.Background(), utils.AttributeSv1Ping, &utils.CGREvent{
 		Tenant: "cgrates.org",
 
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsRouteID: "testRoute123",
 		},
 	}, &rpl); err != nil {
@@ -348,7 +348,7 @@ func testCacheRplPing(t *testing.T) {
 }
 
 func testCacheRplCheckReplication(t *testing.T) {
-	var reply map[string]interface{}
+	var reply map[string]any
 	ev := utils.TenantWithAPIOpts{
 		Tenant: "cgrates.org",
 	}
@@ -377,7 +377,7 @@ func testCacheRplCheckReplication(t *testing.T) {
 	var rpl string
 	if err := dspEngine2RPC.Call(context.Background(), utils.AttributeSv1Ping, &utils.CGREvent{
 		Tenant: "cgrates.org",
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsRouteID: "testRoute123",
 		},
 	}, &rpl); err != nil {
@@ -408,7 +408,7 @@ func testCacheRplAACheckReplication(t *testing.T) {
 	if err := dspEngine2RPC.Call(context.Background(), utils.AttributeSv1Ping, &utils.CGREvent{
 		Tenant: "cgrates.org",
 
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsRouteID: "testRouteFromDispatcher2",
 		},
 	}, &rpl); err != nil {
@@ -419,7 +419,7 @@ func testCacheRplAACheckReplication(t *testing.T) {
 
 	if err := dspEngine1RPC.Call(context.Background(), utils.AttributeSv1Ping, &utils.CGREvent{
 		Tenant: "cgrates.org",
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsRouteID: "testRouteFromDispatcher1",
 		},
 	}, &rpl); err != nil {
@@ -477,13 +477,13 @@ func testCacheRplAACheckLoadReplication(t *testing.T) {
 			if err := dspEngine1RPC.Call(context.Background(), utils.ChargerSv1ProcessEvent, &utils.CGREvent{
 				Tenant: "cgrates.org",
 				ID:     "testCacheRplAACheckLoadReplication",
-				Event: map[string]interface{}{
+				Event: map[string]any{
 					utils.AccountField: "1007",
 					utils.Destination:  "+491511231234",
 					"EventName":        "TestLoad",
 				},
 
-				APIOpts: map[string]interface{}{
+				APIOpts: map[string]any{
 					utils.OptsRouteID: "testRouteFromDispatcher1",
 				},
 			}, &rpl); err != nil {
@@ -499,13 +499,13 @@ func testCacheRplAACheckLoadReplication(t *testing.T) {
 
 				Tenant: "cgrates.org",
 				ID:     "testCacheRplAACheckLoadReplication",
-				Event: map[string]interface{}{
+				Event: map[string]any{
 					utils.AccountField: "1007",
 					utils.Destination:  "+491511231234",
 					"EventName":        "TestLoad",
 				},
 
-				APIOpts: map[string]interface{}{
+				APIOpts: map[string]any{
 					utils.OptsRouteID: "testRouteFromDispatcher2",
 				},
 			}, &rpl); err != nil {
@@ -590,13 +590,13 @@ func testCacheRplCheckLoadReplication(t *testing.T) {
 
 				Tenant: "cgrates.org",
 				ID:     "testCacheRplCheckLoadReplication",
-				Event: map[string]interface{}{
+				Event: map[string]any{
 					utils.AccountField: "1007",
 					utils.Destination:  "+491511231234",
 					"EventName":        "TestLoad",
 				},
 
-				APIOpts: map[string]interface{}{
+				APIOpts: map[string]any{
 					utils.OptsRouteID: "testRoute123",
 				},
 			}, &rpl); err != nil {

@@ -49,7 +49,7 @@ func (self *CmdGetFilters) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdGetFilters) RpcParams(reset bool) interface{} {
+func (self *CmdGetFilters) RpcParams(reset bool) any {
 	if reset || self.rpcParams == nil {
 		self.rpcParams = &utils.ArgsItemIDs{}
 	}
@@ -60,7 +60,7 @@ func (self *CmdGetFilters) PostprocessRpcParams() error {
 	return nil
 }
 
-func (self *CmdGetFilters) RpcResult() interface{} {
+func (self *CmdGetFilters) RpcResult() any {
 	var atr []*engine.Filter
 	return &atr
 }

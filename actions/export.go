@@ -112,15 +112,15 @@ func (aL *actExport) execute(ctx *context.Context, data utils.MapStorage, _ stri
 	if expIDs, has := aL.cfg().Opts[utils.MetaExporterIDs]; has {
 		exporterIDs = strings.Split(utils.IfaceAsString(expIDs), utils.InfieldSep)
 	}
-	var rply map[string]map[string]interface{}
+	var rply map[string]map[string]any
 	return aL.connMgr.Call(ctx, aL.config.ActionSCfg().EEsConns,
 		utils.EeSv1ProcessEvent, &utils.CGREventWithEeIDs{
 			EeIDs: exporterIDs,
 			CGREvent: &utils.CGREvent{
 				Tenant:  aL.tnt,
 				ID:      utils.GenUUID(),
-				Event:   data[utils.MetaReq].(map[string]interface{}),
-				APIOpts: data[utils.MetaOpts].(map[string]interface{}),
+				Event:   data[utils.MetaReq].(map[string]any),
+				APIOpts: data[utils.MetaOpts].(map[string]any),
 			},
 		}, &rply)
 }

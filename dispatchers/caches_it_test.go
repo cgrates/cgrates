@@ -85,7 +85,7 @@ func testDspChcPing(t *testing.T) {
 
 		Tenant: "cgrates.org",
 
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsAPIKey: "chc12345",
 		},
 	}, &reply); err != nil {
@@ -99,7 +99,7 @@ func testDspChcLoadAfterFolder(t *testing.T) {
 	var rcvStats map[string]*ltcache.CacheStats
 	expStats := engine.GetDefaultEmptyCacheStats()
 	args := utils.AttrCacheIDsWithAPIOpts{
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsAPIKey: "chc12345",
 		},
 		Tenant: "cgrates.org",
@@ -112,7 +112,7 @@ func testDspChcLoadAfterFolder(t *testing.T) {
 	reply := ""
 	// Simple test that command is executed without errors
 	argsR := utils.NewAttrReloadCacheWithOpts()
-	argsR.APIOpts = map[string]interface{}{
+	argsR.APIOpts = map[string]any{
 		utils.OptsAPIKey: "chc12345",
 	}
 	argsR.Tenant = "cgrates.org"
@@ -207,7 +207,7 @@ func testDspChcPrecacheStatus(t *testing.T) {
 	}
 
 	if err := dispEngine.RPC.Call(utils.CacheSv1PrecacheStatus, utils.AttrCacheIDsWithAPIOpts{
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsAPIKey: "chc12345",
 		},
 		Tenant: "cgrates.org",
@@ -225,7 +225,7 @@ func testDspChcGetItemIDs(t *testing.T) {
 		ArgsGetCacheItemIDs: utils.ArgsGetCacheItemIDs{
 			CacheID: utils.CacheChargerProfiles,
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsAPIKey: "chc12345",
 		},
 		Tenant: "cgrates.org",
@@ -247,7 +247,7 @@ func testDspChcHasItem(t *testing.T) {
 			CacheID: utils.CacheChargerProfiles,
 			ItemID:  "cgrates.org:DEFAULT",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsAPIKey: "chc12345",
 		},
 		Tenant: "cgrates.org",
@@ -267,7 +267,7 @@ func testDspChcGetItemExpiryTime(t *testing.T) {
 			CacheID: utils.CacheChargerProfiles,
 			ItemID:  "cgrates.org:DEFAULT",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsAPIKey: "chc12345",
 		},
 		Tenant: "cgrates.org",
@@ -282,7 +282,7 @@ func testDspChcGetItemExpiryTime(t *testing.T) {
 func testDspChcReloadCache(t *testing.T) {
 	reply := ""
 	if err := dispEngine.RPC.Call(utils.CacheSv1ReloadCache, &utils.AttrReloadCacheWithAPIOpts{
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsAPIKey: "chc12345",
 		},
 		Tenant: "cgrates.org",
@@ -300,7 +300,7 @@ func testDspChcRemoveItem(t *testing.T) {
 			CacheID: utils.CacheChargerProfiles,
 			ItemID:  "cgrates.org:DEFAULT",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsAPIKey: "chc12345",
 		},
 		Tenant: "cgrates.org",
@@ -326,7 +326,7 @@ func testDspChcRemoveItem(t *testing.T) {
 func testDspChcClear(t *testing.T) {
 	reply := ""
 	if err := dispEngine.RPC.Call(utils.CacheSv1Clear, utils.AttrCacheIDsWithAPIOpts{
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsAPIKey: "chc12345",
 		},
 		Tenant: "cgrates.org",
@@ -338,7 +338,7 @@ func testDspChcClear(t *testing.T) {
 	var rcvStats map[string]*ltcache.CacheStats
 	expStats := engine.GetDefaultEmptyCacheStats()
 	if err := dispEngine.RPC.Call(utils.CacheSv1GetCacheStats, utils.AttrCacheIDsWithAPIOpts{
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsAPIKey: "chc12345",
 		},
 		Tenant: "cgrates.org",

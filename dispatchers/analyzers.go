@@ -30,19 +30,19 @@ func (dS *DispatcherService) AnalyzerSv1Ping(ctx *context.Context, args *utils.C
 	if args != nil && len(args.Tenant) != 0 {
 		tnt = args.Tenant
 	}
-	ev := make(map[string]interface{})
+	ev := make(map[string]any)
 	if args != nil {
 		ev = args.Event
 	}
-	opts := make(map[string]interface{})
+	opts := make(map[string]any)
 	if args != nil {
 		opts = args.APIOpts
 	}
 	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaAnalyzer, utils.AnalyzerSv1Ping, args, reply)
 }
-func (dS *DispatcherService) AnalyzerSv1StringQuery(ctx *context.Context, args *analyzers.QueryArgs, reply *[]map[string]interface{}) (err error) {
+func (dS *DispatcherService) AnalyzerSv1StringQuery(ctx *context.Context, args *analyzers.QueryArgs, reply *[]map[string]any) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
-	ev := make(map[string]interface{})
-	opts := make(map[string]interface{})
+	ev := make(map[string]any)
+	opts := make(map[string]any)
 	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaAnalyzer, utils.AnalyzerSv1StringQuery, args, reply)
 }

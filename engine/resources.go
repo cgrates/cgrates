@@ -56,7 +56,7 @@ type ResourceProfile struct {
 // ResourceProfileWithAPIOpts is used in replicatorV1 for dispatcher
 type ResourceProfileWithAPIOpts struct {
 	*ResourceProfile
-	APIOpts map[string]interface{}
+	APIOpts map[string]any
 }
 
 // TenantID returns unique identifier of the ResourceProfile in a multi-tenant environment
@@ -167,7 +167,7 @@ func (r *Resource) isLocked() bool {
 // ResourceWithAPIOpts is used in replicatorV1 for dispatcher
 type ResourceWithAPIOpts struct {
 	*Resource
-	APIOpts map[string]interface{}
+	APIOpts map[string]any
 }
 
 // TenantID returns the unique ID in a multi-tenant environment
@@ -513,12 +513,12 @@ func (rS *ResourceS) storeMatchedResources(ctx *context.Context, mtcRLs Resource
 }
 
 // processThresholds will pass the event for resource to ThresholdS
-func (rS *ResourceS) processThresholds(ctx *context.Context, rs Resources, opts map[string]interface{}) (err error) {
+func (rS *ResourceS) processThresholds(ctx *context.Context, rs Resources, opts map[string]any) (err error) {
 	if len(rS.cfg.ResourceSCfg().ThresholdSConns) == 0 {
 		return
 	}
 	if opts == nil {
-		opts = make(map[string]interface{})
+		opts = make(map[string]any)
 	}
 	opts[utils.MetaEventType] = utils.ResourceUpdate
 
@@ -533,7 +533,7 @@ func (rS *ResourceS) processThresholds(ctx *context.Context, rs Resources, opts 
 		thEv := &utils.CGREvent{
 			Tenant: r.Tenant,
 			ID:     utils.GenUUID(),
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.EventType:  utils.ResourceUpdate,
 				utils.ResourceID: r.ID,
 				utils.Usage:      r.TotalUsage(),
@@ -1030,7 +1030,7 @@ func (rS *ResourceS) V1GetResourceWithConfig(ctx *context.Context, arg *utils.Te
 	return
 }
 
-func (rp *ResourceProfile) Set(path []string, val interface{}, _ bool, _ string) (err error) {
+func (rp *ResourceProfile) Set(path []string, val any, _ bool, _ string) (err error) {
 	if len(path) != 1 {
 		return utils.ErrWrongPath
 	}
@@ -1069,7 +1069,7 @@ func (rp *ResourceProfile) Set(path []string, val interface{}, _ bool, _ string)
 	return
 }
 
-func (rp *ResourceProfile) Merge(v2 interface{}) {
+func (rp *ResourceProfile) Merge(v2 any) {
 	vi := v2.(*ResourceProfile)
 	if len(vi.Tenant) != 0 {
 		rp.Tenant = vi.Tenant
@@ -1099,13 +1099,13 @@ func (rp *ResourceProfile) Merge(v2 interface{}) {
 
 func (rp *ResourceProfile) String() string { return utils.ToJSON(rp) }
 func (rp *ResourceProfile) FieldAsString(fldPath []string) (_ string, err error) {
-	var val interface{}
+	var val any
 	if val, err = rp.FieldAsInterface(fldPath); err != nil {
 		return
 	}
 	return utils.IfaceAsString(val), nil
 }
-func (rp *ResourceProfile) FieldAsInterface(fldPath []string) (_ interface{}, err error) {
+func (rp *ResourceProfile) FieldAsInterface(fldPath []string) (_ any, err error) {
 	if len(fldPath) != 1 {
 		return nil, utils.ErrNotFound
 	}

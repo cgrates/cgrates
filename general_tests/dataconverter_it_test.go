@@ -174,7 +174,7 @@ func testDCLoaderRun(t *testing.T) {
 	var reply string
 	if err := dcRPC.Call(context.Background(), utils.LoaderSv1Run,
 		&loaders.ArgsProcessFolder{
-			APIOpts: map[string]interface{}{
+			APIOpts: map[string]any{
 				utils.MetaCache:       utils.MetaReload,
 				utils.MetaStopOnError: false,
 			},
@@ -199,7 +199,7 @@ func testDCAttributeProcessEvent(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "DCEvent",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				"Account":            1001,
 				"DivideVariable":     "2",
 				"DurationVariable":   "5s",
@@ -214,7 +214,7 @@ func testDCAttributeProcessEvent(t *testing.T) {
 				"UnixTimeVariable":   "1704067200",
 				"VariableInSeconds":  "3600",
 			},
-			APIOpts: map[string]interface{}{
+			APIOpts: map[string]any{
 				"variable01": time.Hour,
 				"variable02": 10,
 				"variable03": 2.4,
@@ -234,10 +234,10 @@ func testDCAttributeProcessEvent(t *testing.T) {
 	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "DCEvent",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: 1001,
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			"variable01": time.Hour,
 			"variable02": 10,
 			"variable03": 2.4,

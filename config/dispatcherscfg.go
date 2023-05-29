@@ -100,12 +100,12 @@ func (dps *DispatcherSCfg) loadFromJSONCfg(jsnCfg *DispatcherSJsonCfg) (err erro
 	return
 }
 
-// AsMapInterface returns the config as a map[string]interface{}
-func (dps DispatcherSCfg) AsMapInterface(string) interface{} {
-	opts := map[string]interface{}{
+// AsMapInterface returns the config as a map[string]any
+func (dps DispatcherSCfg) AsMapInterface(string) any {
+	opts := map[string]any{
 		utils.MetaDispatcherSCfg: dps.Opts.Dispatchers,
 	}
-	mp := map[string]interface{}{
+	mp := map[string]any{
 		utils.EnabledCfg:        dps.Enabled,
 		utils.IndexedSelectsCfg: dps.IndexedSelects,
 		utils.NestedFieldsCfg:   dps.NestedFields,

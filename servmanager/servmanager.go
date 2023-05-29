@@ -167,7 +167,7 @@ type Service interface {
 // ArgsServiceID are passed to Start/Stop/Status RPC methods
 type ArgsServiceID struct {
 	ServiceID string
-	APIOpts   map[string]interface{}
+	APIOpts   map[string]any
 }
 
 // V1StartService starts a service with ID

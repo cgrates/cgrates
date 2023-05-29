@@ -64,13 +64,13 @@ func TestChargersmatchingChargerProfilesForEventErrPass(t *testing.T) {
 	cgrEv := &utils.CGREvent{
 		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:     "cgrEvID",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			"Charger":        "ChargerProfile1",
 			utils.AnswerTime: time.Date(2021, 4, 19, 12, 0, 0, 0, time.UTC),
 			"UsageInterval":  "10s",
 			utils.Weight:     "10.0",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaSubsys: utils.MetaChargers,
 		},
 	}
@@ -107,8 +107,8 @@ func TestChargersprocessEventCallNilErr(t *testing.T) {
 	}
 
 	ccM := &ccMock{
-		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
-			utils.AttributeSv1ProcessEvent: func(ctx *context.Context, args, reply interface{}) error {
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.AttributeSv1ProcessEvent: func(ctx *context.Context, args, reply any) error {
 				rply := AttrSProcessEventReply{
 					AlteredFields: []*FieldsAltered{{
 						MatchedProfileID: "attr1",
@@ -117,7 +117,7 @@ func TestChargersprocessEventCallNilErr(t *testing.T) {
 					CGREvent: &utils.CGREvent{
 						Tenant: "cgrates.org",
 						ID:     "cgrEvID",
-						Event: map[string]interface{}{
+						Event: map[string]any{
 							utils.AccountField: "1002",
 						},
 					},
@@ -143,7 +143,7 @@ func TestChargersprocessEventCallNilErr(t *testing.T) {
 	cgrEv := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "cgrEvID",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1001",
 		},
 	}
@@ -164,7 +164,7 @@ func TestChargersprocessEventCallNilErr(t *testing.T) {
 			CGREvent: &utils.CGREvent{
 				Tenant: "cgrates.org",
 				ID:     "cgrEvID",
-				Event: map[string]interface{}{
+				Event: map[string]any{
 					utils.AccountField: "1002",
 				},
 			},
@@ -205,8 +205,8 @@ func TestChargersprocessEventCallErr(t *testing.T) {
 	}
 
 	ccM := &ccMock{
-		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
-			utils.AttributeSv1ProcessEvent: func(ctx *context.Context, args, reply interface{}) error {
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.AttributeSv1ProcessEvent: func(ctx *context.Context, args, reply any) error {
 				return utils.ErrNotFound
 			},
 		},
@@ -227,7 +227,7 @@ func TestChargersprocessEventCallErr(t *testing.T) {
 	cgrEv := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "cgrEvID",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1001",
 		},
 	}
@@ -244,10 +244,10 @@ func TestChargersprocessEventCallErr(t *testing.T) {
 			CGREvent: &utils.CGREvent{
 				Tenant: "cgrates.org",
 				ID:     "cgrEvID",
-				Event: map[string]interface{}{
+				Event: map[string]any{
 					utils.AccountField: "1001",
 				},
-				APIOpts: map[string]interface{}{
+				APIOpts: map[string]any{
 					utils.OptsAttributesProfileIDs: []string{},
 					utils.OptsContext:              "*chargers",
 					utils.MetaRunID:                "*default",
@@ -294,8 +294,8 @@ func TestChargersV1ProcessEventErrNotFound(t *testing.T) {
 	}
 
 	ccM := &ccMock{
-		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
-			utils.AttributeSv1ProcessEvent: func(ctx *context.Context, args, reply interface{}) error {
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.AttributeSv1ProcessEvent: func(ctx *context.Context, args, reply any) error {
 				rply := AttrSProcessEventReply{
 					AlteredFields: []*FieldsAltered{{
 						Fields: []string{utils.AccountField},
@@ -303,7 +303,7 @@ func TestChargersV1ProcessEventErrNotFound(t *testing.T) {
 					CGREvent: &utils.CGREvent{
 						Tenant: "cgrates.org",
 						ID:     "cgrEvID",
-						Event: map[string]interface{}{
+						Event: map[string]any{
 							utils.AccountField: "1001",
 						},
 					},
@@ -328,7 +328,7 @@ func TestChargersV1ProcessEventErrNotFound(t *testing.T) {
 	cS.connMgr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes), utils.AttributeSv1, rpcInternal)
 	args := &utils.CGREvent{
 		ID: "cgrEvID",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1002",
 		},
 	}
@@ -366,8 +366,8 @@ func TestChargersV1ProcessEventErrOther(t *testing.T) {
 	}
 
 	ccM := &ccMock{
-		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
-			"invalidMethod": func(ctx *context.Context, args, reply interface{}) error {
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			"invalidMethod": func(ctx *context.Context, args, reply any) error {
 				rply := AttrSProcessEventReply{
 					AlteredFields: []*FieldsAltered{{
 						Fields: []string{utils.AccountField},
@@ -375,7 +375,7 @@ func TestChargersV1ProcessEventErrOther(t *testing.T) {
 					CGREvent: &utils.CGREvent{
 						Tenant: "cgrates.org",
 						ID:     "cgrEvID",
-						Event: map[string]interface{}{
+						Event: map[string]any{
 							utils.AccountField: "1001",
 						},
 					},
@@ -400,7 +400,7 @@ func TestChargersV1ProcessEventErrOther(t *testing.T) {
 	cS.connMgr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes), utils.AttributeSv1, rpcInternal)
 	args := &utils.CGREvent{
 		ID: "cgrEvID",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1001",
 		},
 	}
@@ -444,8 +444,8 @@ func TestChargersV1ProcessEvent(t *testing.T) {
 	}
 
 	ccM := &ccMock{
-		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
-			utils.AttributeSv1ProcessEvent: func(ctx *context.Context, args, reply interface{}) error {
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.AttributeSv1ProcessEvent: func(ctx *context.Context, args, reply any) error {
 				rply := AttrSProcessEventReply{
 					AlteredFields: []*FieldsAltered{{
 						MatchedProfileID: "attr2",
@@ -454,10 +454,10 @@ func TestChargersV1ProcessEvent(t *testing.T) {
 					CGREvent: &utils.CGREvent{
 						Tenant: "cgrates.org",
 						ID:     "cgrEvID",
-						Event: map[string]interface{}{
+						Event: map[string]any{
 							utils.AccountField: "1007",
 						},
-						APIOpts: map[string]interface{}{
+						APIOpts: map[string]any{
 							utils.OptsAttributesProfileIDs: []string{},
 							utils.OptsContext:              "*chargers",
 							utils.MetaRunID:                "*default",
@@ -485,7 +485,7 @@ func TestChargersV1ProcessEvent(t *testing.T) {
 	cS.connMgr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes), utils.AttributeSv1, rpcInternal)
 	args := &utils.CGREvent{
 		ID: "cgrEvID",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1001",
 		},
 	}
@@ -507,10 +507,10 @@ func TestChargersV1ProcessEvent(t *testing.T) {
 			CGREvent: &utils.CGREvent{
 				Tenant: "cgrates.org",
 				ID:     "cgrEvID",
-				Event: map[string]interface{}{
+				Event: map[string]any{
 					utils.AccountField: "1007",
 				},
-				APIOpts: map[string]interface{}{
+				APIOpts: map[string]any{
 					utils.OptsAttributesProfileIDs: []string{},
 					utils.OptsContext:              "*chargers",
 					utils.MetaRunID:                "*default",
@@ -565,7 +565,7 @@ func TestChargersV1GetChargersForEventNilErr(t *testing.T) {
 	}
 	args := &utils.CGREvent{
 		ID: "cgrEvID",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1001",
 		},
 	}
@@ -617,7 +617,7 @@ func TestChargersV1GetChargersForEventErr(t *testing.T) {
 	}
 	args := &utils.CGREvent{
 		ID: "cgrEvID",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1001",
 		},
 	}

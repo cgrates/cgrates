@@ -37,13 +37,13 @@ type VirtualEE struct {
 	dc  *utils.SafeMapStorage
 }
 
-func (vEe *VirtualEE) Cfg() *config.EventExporterCfg                                { return vEe.cfg }
-func (vEe *VirtualEE) Connect() error                                               { return nil }
-func (vEe *VirtualEE) ExportEvent(*context.Context, interface{}, interface{}) error { return nil }
-func (vEe *VirtualEE) Close() error                                                 { return nil }
-func (vEe *VirtualEE) GetMetrics() *utils.SafeMapStorage                            { return vEe.dc }
-func (vEe *VirtualEE) ExtraData(*utils.CGREvent) interface{}                        { return nil }
-func (vEe *VirtualEE) PrepareMap(mp *utils.CGREvent) (interface{}, error)           { return nil, nil }
-func (vEe *VirtualEE) PrepareOrderMap(*utils.OrderedNavigableMap) (interface{}, error) {
+func (vEe *VirtualEE) Cfg() *config.EventExporterCfg                { return vEe.cfg }
+func (vEe *VirtualEE) Connect() error                               { return nil }
+func (vEe *VirtualEE) ExportEvent(*context.Context, any, any) error { return nil }
+func (vEe *VirtualEE) Close() error                                 { return nil }
+func (vEe *VirtualEE) GetMetrics() *utils.SafeMapStorage            { return vEe.dc }
+func (vEe *VirtualEE) ExtraData(*utils.CGREvent) any                { return nil }
+func (vEe *VirtualEE) PrepareMap(mp *utils.CGREvent) (any, error)   { return nil, nil }
+func (vEe *VirtualEE) PrepareOrderMap(*utils.OrderedNavigableMap) (any, error) {
 	return nil, nil
 }

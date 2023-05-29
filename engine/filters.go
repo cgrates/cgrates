@@ -203,7 +203,7 @@ type Filter struct {
 // FilterWithOpts the arguments for the replication
 type FilterWithAPIOpts struct {
 	*Filter
-	APIOpts map[string]interface{}
+	APIOpts map[string]any
 }
 
 // TenantID returns the tenant wit the ID
@@ -714,7 +714,7 @@ func (fltr *FilterRule) passNever(dDP utils.DataProvider) (bool, error) {
 	return false, nil
 }
 
-func (fltr *Filter) Set(path []string, val interface{}, newBranch bool, _ string) (err error) {
+func (fltr *Filter) Set(path []string, val any, newBranch bool, _ string) (err error) {
 	switch len(path) {
 	default:
 		return utils.ErrWrongPath
@@ -762,7 +762,7 @@ func (fltr *Filter) Compress() {
 	fltr.Rules = newRules
 }
 
-func (fltr *Filter) Merge(v2 interface{}) {
+func (fltr *Filter) Merge(v2 any) {
 	vi := v2.(*Filter)
 	if len(vi.Tenant) != 0 {
 		fltr.Tenant = vi.Tenant
@@ -779,13 +779,13 @@ func (fltr *Filter) Merge(v2 interface{}) {
 
 func (fltr *Filter) String() string { return utils.ToJSON(fltr) }
 func (fltr *Filter) FieldAsString(fldPath []string) (_ string, err error) {
-	var val interface{}
+	var val any
 	if val, err = fltr.FieldAsInterface(fldPath); err != nil {
 		return
 	}
 	return utils.IfaceAsString(val), nil
 }
-func (fltr *Filter) FieldAsInterface(fldPath []string) (_ interface{}, err error) {
+func (fltr *Filter) FieldAsInterface(fldPath []string) (_ any, err error) {
 	if len(fldPath) == 1 {
 		switch fldPath[0] {
 		default:
@@ -820,13 +820,13 @@ func (fltr *Filter) FieldAsInterface(fldPath []string) (_ interface{}, err error
 
 func (fltr *FilterRule) String() string { return utils.ToJSON(fltr) }
 func (fltr *FilterRule) FieldAsString(fldPath []string) (_ string, err error) {
-	var val interface{}
+	var val any
 	if val, err = fltr.FieldAsInterface(fldPath); err != nil {
 		return
 	}
 	return utils.IfaceAsString(val), nil
 }
-func (fltr *FilterRule) FieldAsInterface(fldPath []string) (_ interface{}, err error) {
+func (fltr *FilterRule) FieldAsInterface(fldPath []string) (_ any, err error) {
 	if len(fldPath) != 1 {
 		return nil, utils.ErrNotFound
 	}

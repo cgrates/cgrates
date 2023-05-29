@@ -45,11 +45,11 @@ func TestMatchingActionProfilesForEvent(t *testing.T) {
 	acts := NewActionS(cfg, filters, dm, nil)
 
 	evNM := utils.MapStorage{
-		utils.MetaReq: map[string]interface{}{
+		utils.MetaReq: map[string]any{
 			utils.AccountField: "1001",
 			utils.Destination:  1002,
 		},
-		utils.MetaOpts: map[string]interface{}{},
+		utils.MetaOpts: map[string]any{},
 	}
 
 	actPrf := &engine.ActionProfile{
@@ -83,10 +83,10 @@ func TestMatchingActionProfilesForEvent(t *testing.T) {
 	}
 
 	evNM = utils.MapStorage{
-		utils.MetaReq: map[string]interface{}{
+		utils.MetaReq: map[string]any{
 			utils.AccountField: "10",
 		},
-		utils.MetaOpts: map[string]interface{}{},
+		utils.MetaOpts: map[string]any{},
 	}
 	//This Event is not matching with our filter
 	if _, err := acts.matchingActionProfilesForEvent(context.Background(), "cgrates.org",
@@ -95,10 +95,10 @@ func TestMatchingActionProfilesForEvent(t *testing.T) {
 	}
 
 	evNM = utils.MapStorage{
-		utils.MetaReq: map[string]interface{}{
+		utils.MetaReq: map[string]any{
 			utils.AccountField: "1001",
 		},
-		utils.MetaOpts: map[string]interface{}{},
+		utils.MetaOpts: map[string]any{},
 	}
 	actPrfIDs := []string{"inexisting_id"}
 	//Unable to get from database an ActionProfile if the ID won't match
@@ -155,14 +155,14 @@ func TestScheduledActions(t *testing.T) {
 	cgrEv := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "TEST_ACTIONS1",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1001",
 			utils.Destination:  1002,
 		},
 	}
 	evNM := utils.MapStorage{
 		utils.MetaReq:  cgrEv.Event,
-		utils.MetaOpts: map[string]interface{}{},
+		utils.MetaOpts: map[string]any{},
 	}
 
 	actPrf := &engine.ActionProfile{
@@ -199,7 +199,7 @@ func TestScheduledActions(t *testing.T) {
 	cgrEv = &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "TEST_ACTIONS1",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.Accounts: "10",
 		},
 	}
@@ -220,7 +220,7 @@ func TestScheduleAction(t *testing.T) {
 		{
 			Tenant: "cgrates.org",
 			ID:     "TEST_ACTIONS1",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.AccountField: "1001",
 				utils.Destination:  1002,
 			},
@@ -287,7 +287,7 @@ func TestAsapExecuteActions(t *testing.T) {
 		{
 			Tenant: "cgrates.org",
 			ID:     "CHANGED_ID",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.AccountField: "1001",
 				utils.Destination:  1002,
 			},
@@ -296,7 +296,7 @@ func TestAsapExecuteActions(t *testing.T) {
 
 	evNM := utils.MapStorage{
 		utils.MetaReq:  cgrEv[0].Event,
-		utils.MetaOpts: map[string]interface{}{},
+		utils.MetaOpts: map[string]any{},
 	}
 
 	expSchedActs := newScheduledActs(context.Background(), cgrEv[0].Tenant, cgrEv[0].ID, utils.MetaNone, utils.EmptyString,
@@ -354,11 +354,11 @@ func TestV1ScheduleActions(t *testing.T) {
 	var reply string
 	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1001",
 			utils.Destination:  1002,
 		},
-		APIOpts: map[string]interface{}{},
+		APIOpts: map[string]any{},
 	}
 
 	actPrf := &engine.ActionProfile{
@@ -410,11 +410,11 @@ func TestV1ExecuteActions(t *testing.T) {
 	var reply string
 	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1001",
 			utils.Destination:  1002,
 		},
-		APIOpts: map[string]interface{}{},
+		APIOpts: map[string]any{},
 	}
 
 	actPrf := &engine.ActionProfile{
@@ -518,10 +518,10 @@ func (dbM *dataDBMockError) GetIndexesDrv(ctx *context.Context, idxItmType, tntC
 
 func TestLogActionExecute(t *testing.T) {
 	evNM := utils.MapStorage{
-		utils.MetaReq: map[string]interface{}{
+		utils.MetaReq: map[string]any{
 			utils.AccountField: "10",
 		},
-		utils.MetaOpts: map[string]interface{}{},
+		utils.MetaOpts: map[string]any{},
 	}
 
 	tmpLogger := utils.Logger
@@ -543,10 +543,10 @@ func TestLogActionExecute(t *testing.T) {
 }
 
 type testMockCDRsConn struct {
-	calls map[string]func(_ *context.Context, _, _ interface{}) error
+	calls map[string]func(_ *context.Context, _, _ any) error
 }
 
-func (s *testMockCDRsConn) Call(ctx *context.Context, method string, arg, rply interface{}) error {
+func (s *testMockCDRsConn) Call(ctx *context.Context, method string, arg, rply any) error {
 	call, has := s.calls[method]
 	if !has {
 		return rpcclient.ErrUnsupporteServiceMethod
@@ -556,8 +556,8 @@ func (s *testMockCDRsConn) Call(ctx *context.Context, method string, arg, rply i
 
 func TestCDRLogActionExecute(t *testing.T) {
 	sMock := &testMockCDRsConn{
-		calls: map[string]func(_ *context.Context, _, _ interface{}) error{
-			utils.CDRsV1ProcessEvent: func(_ *context.Context, arg, rply interface{}) error {
+		calls: map[string]func(_ *context.Context, _, _ any) error{
+			utils.CDRsV1ProcessEvent: func(_ *context.Context, arg, rply any) error {
 				argConv, can := arg.(*utils.CGREvent)
 				if !can {
 					return fmt.Errorf("Wrong argument type: %T", arg)
@@ -609,14 +609,14 @@ func TestCDRLogActionExecute(t *testing.T) {
 		aCfg:    apA,
 	}
 	evNM := utils.MapStorage{
-		utils.MetaReq: map[string]interface{}{
+		utils.MetaReq: map[string]any{
 			utils.AccountField: "10",
 			utils.Tenant:       "cgrates.org",
 			utils.BalanceType:  utils.MetaConcrete,
 			utils.Cost:         0.15,
 			utils.ActionType:   utils.MetaTopUp,
 		},
-		utils.MetaOpts: map[string]interface{}{},
+		utils.MetaOpts: map[string]any{},
 	}
 	if err := cdrLogAction.execute(context.Background(), evNM, utils.MetaNone); err != nil {
 		t.Error(err)
@@ -627,8 +627,8 @@ func TestCDRLogActionWithOpts(t *testing.T) {
 	// Clear cache because connManager sets the internal connection in cache
 	engine.Cache.Clear([]string{utils.CacheRPCConnections})
 	sMock2 := &testMockCDRsConn{
-		calls: map[string]func(_ *context.Context, _, _ interface{}) error{
-			utils.CDRsV1ProcessEvent: func(_ *context.Context, arg, rply interface{}) error {
+		calls: map[string]func(_ *context.Context, _, _ any) error{
+			utils.CDRsV1ProcessEvent: func(_ *context.Context, arg, rply any) error {
 				argConv, can := arg.(*utils.CGREvent)
 				if !can {
 					return fmt.Errorf("Wrong argument type: %T", arg)
@@ -706,7 +706,7 @@ func TestCDRLogActionWithOpts(t *testing.T) {
 	apA := &engine.APAction{
 		ID:   "ACT_CDRLOG2",
 		Type: utils.MetaCdrLog,
-		Opts: map[string]interface{}{
+		Opts: map[string]any{
 			utils.MetaTemplateID: "CustomTemplate",
 		},
 	}
@@ -717,14 +717,14 @@ func TestCDRLogActionWithOpts(t *testing.T) {
 		aCfg:    apA,
 	}
 	evNM := utils.MapStorage{
-		utils.MetaReq: map[string]interface{}{
+		utils.MetaReq: map[string]any{
 			utils.AccountField: "10",
 			utils.Tenant:       "cgrates.org",
 			utils.BalanceType:  utils.MetaConcrete,
 			utils.Cost:         0.15,
 			utils.ActionType:   utils.MetaTopUp,
 		},
-		utils.MetaOpts: map[string]interface{}{
+		utils.MetaOpts: map[string]any{
 			"EventFieldOpt": "eventValue",
 		},
 	}
@@ -737,8 +737,8 @@ func TestExportAction(t *testing.T) {
 	// Clear cache because connManager sets the internal connection in cache
 	engine.Cache.Clear([]string{utils.CacheRPCConnections})
 	sMock2 := &testMockCDRsConn{
-		calls: map[string]func(_ *context.Context, _, _ interface{}) error{
-			utils.EeSv1ProcessEvent: func(_ *context.Context, arg, rply interface{}) error {
+		calls: map[string]func(_ *context.Context, _, _ any) error{
+			utils.EeSv1ProcessEvent: func(_ *context.Context, arg, rply any) error {
 				argConv, can := arg.(*utils.CGREventWithEeIDs)
 				if !can {
 					return fmt.Errorf("Wrong argument type: %T", arg)
@@ -768,14 +768,14 @@ func TestExportAction(t *testing.T) {
 		aCfg:    apA,
 	}
 	evNM := utils.MapStorage{
-		utils.MetaReq: map[string]interface{}{
+		utils.MetaReq: map[string]any{
 			utils.AccountField: "10",
 			utils.Tenant:       "cgrates.org",
 			utils.BalanceType:  utils.MetaConcrete,
 			utils.Cost:         0.15,
 			utils.ActionType:   utils.MetaTopUp,
 		},
-		utils.MetaOpts: map[string]interface{}{
+		utils.MetaOpts: map[string]any{
 			"EventFieldOpt": "eventValue",
 		},
 	}
@@ -788,8 +788,8 @@ func TestExportActionWithEeIDs(t *testing.T) {
 	// Clear cache because connManager sets the internal connection in cache
 	engine.Cache.Clear([]string{utils.CacheRPCConnections})
 	sMock2 := &testMockCDRsConn{
-		calls: map[string]func(_ *context.Context, _, _ interface{}) error{
-			utils.EeSv1ProcessEvent: func(_ *context.Context, arg, rply interface{}) error {
+		calls: map[string]func(_ *context.Context, _, _ any) error{
+			utils.EeSv1ProcessEvent: func(_ *context.Context, arg, rply any) error {
 				argConv, can := arg.(*utils.CGREventWithEeIDs)
 				if !can {
 					return fmt.Errorf("Wrong argument type: %T", arg)
@@ -814,7 +814,7 @@ func TestExportActionWithEeIDs(t *testing.T) {
 	apA := &engine.APAction{
 		ID:   "ACT_CDRLOG2",
 		Type: utils.MetaExport,
-		Opts: map[string]interface{}{
+		Opts: map[string]any{
 			utils.MetaExporterIDs: "Exporter1;Exporter2;Exporter3",
 		},
 	}
@@ -825,14 +825,14 @@ func TestExportActionWithEeIDs(t *testing.T) {
 		aCfg:    apA,
 	}
 	evNM := utils.MapStorage{
-		utils.MetaReq: map[string]interface{}{
+		utils.MetaReq: map[string]any{
 			utils.AccountField: "10",
 			utils.Tenant:       "cgrates.org",
 			utils.BalanceType:  utils.MetaConcrete,
 			utils.Cost:         0.15,
 			utils.ActionType:   utils.MetaTopUp,
 		},
-		utils.MetaOpts: map[string]interface{}{
+		utils.MetaOpts: map[string]any{
 			"EventFieldOpt": "eventValue",
 		},
 	}
@@ -845,8 +845,8 @@ func TestExportActionResetThresholdStaticTenantID(t *testing.T) {
 	// Clear cache because connManager sets the internal connection in cache
 	engine.Cache.Clear([]string{utils.CacheRPCConnections})
 	sMock2 := &testMockCDRsConn{
-		calls: map[string]func(_ *context.Context, _, _ interface{}) error{
-			utils.ThresholdSv1ResetThreshold: func(_ *context.Context, arg, rply interface{}) error {
+		calls: map[string]func(_ *context.Context, _, _ any) error{
+			utils.ThresholdSv1ResetThreshold: func(_ *context.Context, arg, rply any) error {
 				argConv, can := arg.(*utils.TenantIDWithAPIOpts)
 				if !can {
 					return fmt.Errorf("Wrong argument type: %T", arg)
@@ -880,7 +880,7 @@ func TestExportActionResetThresholdStaticTenantID(t *testing.T) {
 		aCfg:    apA,
 	}
 	evNM := utils.MapStorage{
-		utils.MetaOpts: map[string]interface{}{},
+		utils.MetaOpts: map[string]any{},
 	}
 	if err := exportAction.execute(context.Background(), evNM, "cgrates.org:TH1"); err != nil {
 		t.Error(err)
@@ -891,8 +891,8 @@ func TestExportActionResetThresholdStaticID(t *testing.T) {
 	// Clear cache because connManager sets the internal connection in cache
 	engine.Cache.Clear([]string{utils.CacheRPCConnections})
 	sMock2 := &testMockCDRsConn{
-		calls: map[string]func(_ *context.Context, _, _ interface{}) error{
-			utils.ThresholdSv1ResetThreshold: func(_ *context.Context, arg, rply interface{}) error {
+		calls: map[string]func(_ *context.Context, _, _ any) error{
+			utils.ThresholdSv1ResetThreshold: func(_ *context.Context, arg, rply any) error {
 				argConv, can := arg.(*utils.TenantIDWithAPIOpts)
 				if !can {
 					return fmt.Errorf("Wrong argument type: %T", arg)
@@ -926,7 +926,7 @@ func TestExportActionResetThresholdStaticID(t *testing.T) {
 		aCfg:    apA,
 	}
 	evNM := utils.MapStorage{
-		utils.MetaOpts: map[string]interface{}{},
+		utils.MetaOpts: map[string]any{},
 	}
 	if err := exportAction.execute(context.Background(), evNM, "TH1"); err != nil {
 		t.Error(err)
@@ -937,8 +937,8 @@ func TestExportActionResetStatStaticTenantID(t *testing.T) {
 	// Clear cache because connManager sets the internal connection in cache
 	engine.Cache.Clear([]string{utils.CacheRPCConnections})
 	sMock2 := &testMockCDRsConn{
-		calls: map[string]func(_ *context.Context, _, _ interface{}) error{
-			utils.StatSv1ResetStatQueue: func(_ *context.Context, arg, rply interface{}) error {
+		calls: map[string]func(_ *context.Context, _, _ any) error{
+			utils.StatSv1ResetStatQueue: func(_ *context.Context, arg, rply any) error {
 				argConv, can := arg.(*utils.TenantIDWithAPIOpts)
 				if !can {
 					return fmt.Errorf("Wrong argument type: %T", arg)
@@ -972,7 +972,7 @@ func TestExportActionResetStatStaticTenantID(t *testing.T) {
 		aCfg:    apA,
 	}
 	evNM := utils.MapStorage{
-		utils.MetaOpts: map[string]interface{}{},
+		utils.MetaOpts: map[string]any{},
 	}
 	if err := exportAction.execute(context.Background(), evNM, "cgrates.org:ST1"); err != nil {
 		t.Error(err)
@@ -983,8 +983,8 @@ func TestExportActionResetStatStaticID(t *testing.T) {
 	// Clear cache because connManager sets the internal connection in cache
 	engine.Cache.Clear([]string{utils.CacheRPCConnections})
 	sMock2 := &testMockCDRsConn{
-		calls: map[string]func(_ *context.Context, _, _ interface{}) error{
-			utils.StatSv1ResetStatQueue: func(_ *context.Context, arg, rply interface{}) error {
+		calls: map[string]func(_ *context.Context, _, _ any) error{
+			utils.StatSv1ResetStatQueue: func(_ *context.Context, arg, rply any) error {
 				argConv, can := arg.(*utils.TenantIDWithAPIOpts)
 				if !can {
 					return fmt.Errorf("Wrong argument type: %T", arg)
@@ -1020,7 +1020,7 @@ func TestExportActionResetStatStaticID(t *testing.T) {
 		aCfg:    apA,
 	}
 	evNM := utils.MapStorage{
-		utils.MetaOpts: map[string]interface{}{},
+		utils.MetaOpts: map[string]any{},
 	}
 	if err := exportAction.execute(context.Background(), evNM, "ST1"); err != nil {
 		t.Error(err)
@@ -1055,7 +1055,7 @@ func TestACScheduledActions(t *testing.T) {
 
 	cgrEv := &utils.CGREvent{
 		Tenant: "cgrates.org",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.Destination: "1005",
 		},
 	}
@@ -1137,11 +1137,11 @@ func TestV1ScheduleActionsProfileIgnoreFilters(t *testing.T) {
 	var reply string
 	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1001",
 			utils.Destination:  1002,
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsActionsProfileIDs:    []string{"AP7"},
 			utils.MetaProfileIgnoreFilters: true,
 			"testFieldIgnore":              "testValue",
@@ -1192,11 +1192,11 @@ func TestV1ExecuteActionsProfileIgnoreFilters(t *testing.T) {
 	var reply string
 	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1001",
 			utils.Destination:  1002,
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsActionsProfileIDs:    []string{"AP8"},
 			utils.MetaProfileIgnoreFilters: true,
 			"testFieldIgnore":              "testValue",

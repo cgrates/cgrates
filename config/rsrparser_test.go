@@ -571,7 +571,7 @@ func TestRSRParsersGetIfaceFromValues(t *testing.T) {
 			utils.Category: "call",
 		},
 	}
-	exp := []interface{}{"*rated", "call"}
+	exp := []any{"*rated", "call"}
 	if rply, err := NewRSRParsersMustCompile("*rated;~*req.Category", utils.InfieldSep).GetIfaceFromValues(dp); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(exp, rply) {

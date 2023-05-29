@@ -33,9 +33,9 @@ import (
 type DispatcherHostProfile struct {
 	ID        string
 	FilterIDs []string
-	Weight    float64                // applied in case of multiple connections need to be ordered
-	Params    map[string]interface{} // additional parameters stored for a session
-	Blocker   bool                   // no connection after this one
+	Weight    float64        // applied in case of multiple connections need to be ordered
+	Params    map[string]any // additional parameters stored for a session
+	Blocker   bool           // no connection after this one
 }
 
 func (dC *DispatcherHostProfile) Clone() (cln *DispatcherHostProfile) {
@@ -48,7 +48,7 @@ func (dC *DispatcherHostProfile) Clone() (cln *DispatcherHostProfile) {
 		cln.FilterIDs = utils.CloneStringSlice(dC.FilterIDs)
 	}
 	if dC.Params != nil {
-		cln.Params = make(map[string]interface{})
+		cln.Params = make(map[string]any)
 		for k, v := range dC.Params {
 			cln.Params[k] = v
 		}
@@ -104,7 +104,7 @@ type DispatcherProfile struct {
 	ID             string
 	FilterIDs      []string
 	Strategy       string
-	StrategyParams map[string]interface{} // ie for distribution, set here the pool weights
+	StrategyParams map[string]any         // ie for distribution, set here the pool weights
 	Weight         float64                // used for profile sorting on match
 	Hosts          DispatcherHostProfiles // dispatch to these connections
 }
@@ -112,7 +112,7 @@ type DispatcherProfile struct {
 // DispatcherProfileWithAPIOpts is used in replicatorV1 for dispatcher
 type DispatcherProfileWithAPIOpts struct {
 	*DispatcherProfile
-	APIOpts map[string]interface{}
+	APIOpts map[string]any
 }
 
 func (dP *DispatcherProfile) TenantID() string {
@@ -137,7 +137,7 @@ type DispatcherHost struct {
 // DispatcherHostWithOpts is used in replicatorV1 for dispatcher
 type DispatcherHostWithAPIOpts struct {
 	*DispatcherHost
-	APIOpts map[string]interface{}
+	APIOpts map[string]any
 }
 
 // TenantID returns the tenant concatenated with the ID
@@ -190,7 +190,7 @@ func (dHPrflIDs DispatcherHostIDs) Clone() (cln DispatcherHostIDs) {
 	return
 }
 
-func (dP *DispatcherProfile) Set(path []string, val interface{}, newBranch bool, _ string) (err error) {
+func (dP *DispatcherProfile) Set(path []string, val any, newBranch bool, _ string) (err error) {
 	switch len(path) {
 	default:
 		return utils.ErrWrongPath
@@ -228,7 +228,7 @@ func (dP *DispatcherProfile) Set(path []string, val interface{}, newBranch bool,
 			dP.StrategyParams[path[1]] = val
 		case utils.Hosts:
 			if len(dP.Hosts) == 0 || newBranch {
-				dP.Hosts = append(dP.Hosts, &DispatcherHostProfile{Params: make(map[string]interface{})})
+				dP.Hosts = append(dP.Hosts, &DispatcherHostProfile{Params: make(map[string]any)})
 			}
 			switch path[1] {
 			case utils.ID:
@@ -260,14 +260,14 @@ func (dP *DispatcherProfile) Set(path []string, val interface{}, newBranch bool,
 			return utils.ErrWrongPath
 		}
 		if len(dP.Hosts) == 0 || newBranch {
-			dP.Hosts = append(dP.Hosts, &DispatcherHostProfile{Params: make(map[string]interface{})})
+			dP.Hosts = append(dP.Hosts, &DispatcherHostProfile{Params: make(map[string]any)})
 		}
 		dP.Hosts[len(dP.Hosts)-1].Params[path[2]] = val
 	}
 	return
 }
 
-func (dH *DispatcherHost) Set(path []string, val interface{}, newBranch bool, _ string) (err error) {
+func (dH *DispatcherHost) Set(path []string, val any, newBranch bool, _ string) (err error) {
 	if len(path) != 1 {
 		return utils.ErrWrongPath
 	}
@@ -310,7 +310,7 @@ func (dH *DispatcherHost) Set(path []string, val interface{}, newBranch bool, _ 
 	return
 }
 
-func (dP *DispatcherProfile) Merge(v2 interface{}) {
+func (dP *DispatcherProfile) Merge(v2 any) {
 	vi := v2.(*DispatcherProfile)
 	if len(vi.Tenant) != 0 {
 		dP.Tenant = vi.Tenant
@@ -363,7 +363,7 @@ func (dspHost *DispatcherHostProfile) Merge(v2 *DispatcherHostProfile) {
 	}
 }
 
-func (dH *DispatcherHost) Merge(v2 interface{}) {
+func (dH *DispatcherHost) Merge(v2 any) {
 	vi := v2.(*DispatcherHost)
 	if len(vi.Tenant) != 0 {
 		dH.Tenant = vi.Tenant
@@ -408,13 +408,13 @@ func (dH *DispatcherHost) Merge(v2 interface{}) {
 
 func (dH *DispatcherHost) String() string { return utils.ToJSON(dH) }
 func (dH *DispatcherHost) FieldAsString(fldPath []string) (_ string, err error) {
-	var val interface{}
+	var val any
 	if val, err = dH.FieldAsInterface(fldPath); err != nil {
 		return
 	}
 	return utils.IfaceAsString(val), nil
 }
-func (dH *DispatcherHost) FieldAsInterface(fldPath []string) (_ interface{}, err error) {
+func (dH *DispatcherHost) FieldAsInterface(fldPath []string) (_ any, err error) {
 	if len(fldPath) != 1 {
 		return nil, utils.ErrNotFound
 	}
@@ -452,13 +452,13 @@ func (dH *DispatcherHost) FieldAsInterface(fldPath []string) (_ interface{}, err
 
 func (dP *DispatcherProfile) String() string { return utils.ToJSON(dP) }
 func (dP *DispatcherProfile) FieldAsString(fldPath []string) (_ string, err error) {
-	var val interface{}
+	var val any
 	if val, err = dP.FieldAsInterface(fldPath); err != nil {
 		return
 	}
 	return utils.IfaceAsString(val), nil
 }
-func (dP *DispatcherProfile) FieldAsInterface(fldPath []string) (_ interface{}, err error) {
+func (dP *DispatcherProfile) FieldAsInterface(fldPath []string) (_ any, err error) {
 	if len(fldPath) == 1 {
 		switch fldPath[0] {
 		default:
@@ -530,13 +530,13 @@ func (dP *DispatcherProfile) FieldAsInterface(fldPath []string) (_ interface{}, 
 
 func (dC *DispatcherHostProfile) String() string { return utils.ToJSON(dC) }
 func (dC *DispatcherHostProfile) FieldAsString(fldPath []string) (_ string, err error) {
-	var val interface{}
+	var val any
 	if val, err = dC.FieldAsInterface(fldPath); err != nil {
 		return
 	}
 	return utils.IfaceAsString(val), nil
 }
-func (dC *DispatcherHostProfile) FieldAsInterface(fldPath []string) (_ interface{}, err error) {
+func (dC *DispatcherHostProfile) FieldAsInterface(fldPath []string) (_ any, err error) {
 	if len(fldPath) == 1 {
 		switch fldPath[0] {
 		default:

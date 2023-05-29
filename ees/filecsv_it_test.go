@@ -113,7 +113,7 @@ func testCsvExportEvent(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "voiceEvent",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.ToR:          utils.MetaVoice,
 				utils.OriginID:     "dsafdsaf",
 				utils.OriginHost:   "192.168.1.1",
@@ -129,7 +129,7 @@ func testCsvExportEvent(t *testing.T) {
 				utils.RunID:        utils.MetaDefault,
 				utils.Cost:         1.01,
 			},
-			APIOpts: map[string]interface{}{
+			APIOpts: map[string]any{
 				utils.MetaOriginID: utils.Sha1("dsafdsaf", time.Unix(1383813745, 0).UTC().String()),
 			},
 		},
@@ -140,7 +140,7 @@ func testCsvExportEvent(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "dataEvent",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 
 				utils.ToR:          utils.MetaData,
 				utils.OriginID:     "abcdef",
@@ -157,7 +157,7 @@ func testCsvExportEvent(t *testing.T) {
 				utils.RunID:        utils.MetaDefault,
 				utils.Cost:         0.012,
 			},
-			APIOpts: map[string]interface{}{
+			APIOpts: map[string]any{
 				utils.MetaOriginID: utils.Sha1("abcdef", time.Unix(1383813745, 0).UTC().String()),
 			},
 		},
@@ -168,7 +168,7 @@ func testCsvExportEvent(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "SMSEvent",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.ToR:          utils.MetaSMS,
 				utils.OriginID:     "sdfwer",
 				utils.OriginHost:   "192.168.1.1",
@@ -184,7 +184,7 @@ func testCsvExportEvent(t *testing.T) {
 				utils.RunID:        utils.MetaDefault,
 				utils.Cost:         0.15,
 			},
-			APIOpts: map[string]interface{}{
+			APIOpts: map[string]any{
 				utils.MetaOriginID: utils.Sha1("sdfwer", time.Unix(1383813745, 0).UTC().String()),
 			},
 		},
@@ -236,7 +236,7 @@ func testCsvExportComposedEvent(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "voiceEvent",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.ToR:           utils.MetaVoice,
 				"ComposedOriginID1": "dsaf",
 				"ComposedOriginID2": "dsaf",
@@ -255,7 +255,7 @@ func testCsvExportComposedEvent(t *testing.T) {
 				"ExtraFields": map[string]string{"extra1": "val_extra1",
 					"extra2": "val_extra2", "extra3": "val_extra3"},
 			},
-			APIOpts: map[string]interface{}{
+			APIOpts: map[string]any{
 				utils.MetaOriginID: utils.Sha1("dsafdsaf", time.Unix(1383813745, 0).UTC().String()),
 			},
 		},
@@ -266,7 +266,7 @@ func testCsvExportComposedEvent(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "SMSEvent",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.ToR:           utils.MetaSMS,
 				"ComposedOriginID1": "sdf",
 				"ComposedOriginID2": "wer",
@@ -285,7 +285,7 @@ func testCsvExportComposedEvent(t *testing.T) {
 				"ExtraFields": map[string]string{"extra1": "val_extra1",
 					"extra2": "val_extra2", "extra3": "val_extra3"},
 			},
-			APIOpts: map[string]interface{}{
+			APIOpts: map[string]any{
 				utils.MetaOriginID: utils.Sha1("sdfwer", time.Unix(1383813745, 0).UTC().String()),
 			},
 		},
@@ -328,13 +328,13 @@ func testCsvVerifyComposedExports(t *testing.T) {
 func testCsvExportBufferedEvent(t *testing.T) {
 	eventVoice := &ArchiveEventsArgs{
 		Tenant: "cgrates.org",
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaExporterID: "CSVExporterBuffered",
 			utils.MetaUsage:      123 * time.Nanosecond,
 		},
 		Events: []*utils.EventsWithOpts{
 			{
-				Event: map[string]interface{}{
+				Event: map[string]any{
 
 					utils.ToR:           utils.MetaVoice,
 					"ComposedOriginID1": "dsaf",
@@ -354,14 +354,14 @@ func testCsvExportBufferedEvent(t *testing.T) {
 					"ExtraFields": map[string]string{"extra1": "val_extra1",
 						"extra2": "val_extra2", "extra3": "val_extra3"},
 				},
-				Opts: map[string]interface{}{
+				Opts: map[string]any{
 					utils.MetaOriginID: utils.Sha1("dsafdsaf", time.Unix(1383813745, 0).UTC().String()),
 					utils.MetaChargers: true,
 					utils.MetaRunID:    "random_runID",
 				},
 			},
 			{
-				Event: map[string]interface{}{
+				Event: map[string]any{
 
 					utils.ToR:          utils.MetaData,
 					utils.OriginHost:   "192.168.1.1",
@@ -379,14 +379,14 @@ func testCsvExportBufferedEvent(t *testing.T) {
 					"ExtraFields": map[string]string{"extra1": "val_extra1",
 						"extra2": "val_extra2", "extra3": "val_extra3"},
 				},
-				Opts: map[string]interface{}{
+				Opts: map[string]any{
 					utils.MetaOriginID: utils.Sha1("abcdef", time.Unix(1383813745, 0).UTC().String()),
 					utils.MetaUsage:    200 * time.Second,
 				},
 			},
 			// this one will not match, because opts got another another ExporterID and it will be changed from the initial opt
 			{
-				Event: map[string]interface{}{
+				Event: map[string]any{
 
 					utils.AccountField: "1005",
 					utils.Subject:      "1005",
@@ -395,13 +395,13 @@ func testCsvExportBufferedEvent(t *testing.T) {
 					utils.RunID:        "Default_charging_id22",
 					utils.Cost:         0,
 				},
-				Opts: map[string]interface{}{
+				Opts: map[string]any{
 					utils.MetaOriginID:   utils.Sha1("qwertyiopuu", time.Unix(1383813745, 0).UTC().String()),
 					utils.MetaExporterID: "CSVExporterBuffered_CHanged",
 				},
 			},
 			{
-				Event: map[string]interface{}{
+				Event: map[string]any{
 
 					utils.ToR:           utils.MetaData,
 					"ComposedOriginID1": "abcdefghh",
@@ -419,13 +419,13 @@ func testCsvExportBufferedEvent(t *testing.T) {
 					"ExtraFields": map[string]string{"extra1": "val_extra1",
 						"extra2": "val_extra2", "extra3": "val_extra3"},
 				},
-				Opts: map[string]interface{}{
+				Opts: map[string]any{
 					utils.MetaOriginID: utils.Sha1("nlllo", time.Unix(1383813745, 0).UTC().String()),
 					utils.MetaRates:    true,
 				},
 			},
 			{
-				Event: map[string]interface{}{
+				Event: map[string]any{
 
 					utils.OriginHost:   "127.0.0.1",
 					utils.RequestType:  utils.MetaPrepaid,
@@ -440,7 +440,7 @@ func testCsvExportBufferedEvent(t *testing.T) {
 					utils.RunID:        "Default_charging_id",
 					utils.Cost:         1.442234,
 				},
-				Opts: map[string]interface{}{
+				Opts: map[string]any{
 					utils.MetaOriginID:  utils.Sha1("qwert", time.Unix(1383813745, 0).UTC().String()),
 					utils.MetaStartTime: time.Date(2020, time.January, 7, 16, 60, 0, 0, time.UTC),
 				},
@@ -491,12 +491,12 @@ func testCsvExportBufferedEventNoExports(t *testing.T) {
 	// in this case, exported does not exist in config
 	eventVoice := &ArchiveEventsArgs{
 		Tenant: "cgrates.org",
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaExporterID: "InexistentExport",
 		},
 		Events: []*utils.EventsWithOpts{
 			{
-				Event: map[string]interface{}{
+				Event: map[string]any{
 					utils.AccountField: "not_exported_Acc",
 				},
 			},
@@ -512,12 +512,12 @@ func testCsvExportBufferedEventNoExports(t *testing.T) {
 	// in this case, exporter exists but the events will not match our filters (filter for Account)
 	eventVoice = &ArchiveEventsArgs{
 		Tenant: "cgrates.org",
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaExporterID: "CSVExporterBuffered",
 		},
 		Events: []*utils.EventsWithOpts{
 			{
-				Event: map[string]interface{}{
+				Event: map[string]any{
 
 					utils.ToR:           utils.MetaVoice,
 					"ComposedOriginID1": "dsaf",
@@ -528,12 +528,12 @@ func testCsvExportBufferedEventNoExports(t *testing.T) {
 					utils.Category:      "call",
 					utils.AccountField:  "DifferentAccount12",
 				},
-				Opts: map[string]interface{}{
+				Opts: map[string]any{
 					utils.MetaOriginID: utils.Sha1("dsafdsaf", time.Unix(1383813745, 0).UTC().String()),
 				},
 			},
 			{
-				Event: map[string]interface{}{
+				Event: map[string]any{
 
 					utils.ToR:          utils.MetaData,
 					utils.OriginHost:   "192.168.1.1",
@@ -542,7 +542,7 @@ func testCsvExportBufferedEventNoExports(t *testing.T) {
 					utils.Category:     "call", //for data CDR use different Tenant
 					utils.AccountField: "DifferentAccount10",
 				},
-				Opts: map[string]interface{}{
+				Opts: map[string]any{
 					utils.MetaOriginID: utils.Sha1("abcdef", time.Unix(1383813745, 0).UTC().String()),
 				},
 			},
@@ -561,7 +561,7 @@ func testCsvExportEventWithInflateTemplate(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "voiceEvent",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 
 				utils.ToR:          utils.MetaVoice,
 				utils.OriginID:     "dsafdsaf",
@@ -580,7 +580,7 @@ func testCsvExportEventWithInflateTemplate(t *testing.T) {
 				"ExtraFields": map[string]string{"extra1": "val_extra1",
 					"extra2": "val_extra2", "extra3": "val_extra3"},
 			},
-			APIOpts: map[string]interface{}{
+			APIOpts: map[string]any{
 				utils.MetaOriginID: utils.Sha1("dsafdsaf", time.Unix(1383813745, 0).UTC().String()),
 			},
 		},
@@ -591,7 +591,7 @@ func testCsvExportEventWithInflateTemplate(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "dataEvent",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 
 				utils.ToR:          utils.MetaData,
 				utils.OriginID:     "abcdef",
@@ -610,7 +610,7 @@ func testCsvExportEventWithInflateTemplate(t *testing.T) {
 				"ExtraFields": map[string]string{"extra1": "val_extra1",
 					"extra2": "val_extra2", "extra3": "val_extra3"},
 			},
-			APIOpts: map[string]interface{}{
+			APIOpts: map[string]any{
 				utils.MetaOriginID: utils.Sha1("abcdef", time.Unix(1383813745, 0).UTC().String()),
 			},
 		},
@@ -621,7 +621,7 @@ func testCsvExportEventWithInflateTemplate(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "SMSEvent",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 
 				utils.ToR:          utils.MetaSMS,
 				utils.OriginID:     "sdfwer",
@@ -640,7 +640,7 @@ func testCsvExportEventWithInflateTemplate(t *testing.T) {
 				"ExtraFields": map[string]string{"extra1": "val_extra1",
 					"extra2": "val_extra2", "extra3": "val_extra3"},
 			},
-			APIOpts: map[string]interface{}{
+			APIOpts: map[string]any{
 				utils.MetaOriginID: utils.Sha1("sdfwer", time.Unix(1383813745, 0).UTC().String()),
 			},
 		},
@@ -691,7 +691,7 @@ func testCsvExportNotFoundExporter(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "voiceEvent",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 
 				utils.ToR:          utils.MetaVoice,
 				utils.OriginID:     "dsafdsaf",
@@ -710,7 +710,7 @@ func testCsvExportNotFoundExporter(t *testing.T) {
 				"ExtraFields": map[string]string{"extra1": "val_extra1",
 					"extra2": "val_extra2", "extra3": "val_extra3"},
 			},
-			APIOpts: map[string]interface{}{
+			APIOpts: map[string]any{
 				utils.MetaOriginID: utils.Sha1("dsafdsaf", time.Unix(1383813745, 0).UTC().String()),
 			},
 		},

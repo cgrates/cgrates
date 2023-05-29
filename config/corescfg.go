@@ -69,9 +69,9 @@ func (cS *CoreSCfg) loadFromJSONCfg(jsnCfg *CoreSJsonCfg) (err error) {
 	return
 }
 
-// AsMapInterface returns the config as a map[string]interface{}
-func (cS CoreSCfg) AsMapInterface(string) interface{} {
-	mp := map[string]interface{}{
+// AsMapInterface returns the config as a map[string]any
+func (cS CoreSCfg) AsMapInterface(string) any {
+	mp := map[string]any{
 		utils.CapsCfg:              cS.Caps,
 		utils.CapsStrategyCfg:      cS.CapsStrategy,
 		utils.CapsStatsIntervalCfg: cS.CapsStatsInterval.String(),

@@ -27,9 +27,9 @@ func TestDPDynamicInterface(t *testing.T) {
 		"Field1": "1001",
 		"Field2": "1003",
 		"Field3": MapStorage{"Field4": "Val"},
-		"Field5": []interface{}{10, 101},
+		"Field5": []any{10, 101},
 	}
-	var expected interface{} = "Field5[1]"
+	var expected any = "Field5[1]"
 	if rply, err := DPDynamicInterface("Field5[1]", nm); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, rply) {
@@ -50,9 +50,9 @@ func TestDPDynamicString(t *testing.T) {
 		"Field1": "1001",
 		"Field2": "1003",
 		"Field3": MapStorage{"Field4": "Val"},
-		"Field5": []interface{}{10, 101},
+		"Field5": []any{10, 101},
 	}
-	var expected interface{} = "Field5[1]"
+	var expected any = "Field5[1]"
 	if rply, err := DPDynamicString("Field5[1]", nm); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, rply) {

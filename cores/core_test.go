@@ -57,13 +57,13 @@ func TestCoreServiceStatus(t *testing.T) {
 	cfg.CoreSCfg().CapsStatsInterval = 1
 	cores := NewCoreService(cfg, engine.NewCaps(1, utils.MetaBusy), nil, "/tmp", nil, nil, nil, func() {})
 
-	var reply map[string]interface{}
+	var reply map[string]any
 	cfgVrs, err := utils.GetCGRVersion()
 	if err != nil {
 		t.Error(err)
 	}
 
-	expected := map[string]interface{}{
+	expected := map[string]any{
 		utils.GoVersion:        runtime.Version(),
 		utils.RunningSince:     "TIME_CHANGED",
 		utils.VersionName:      cfgVrs,

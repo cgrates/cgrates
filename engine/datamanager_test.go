@@ -922,7 +922,7 @@ func TestDMSetAccountcheckFiltersErr(t *testing.T) {
 				Blocker:   true,
 			},
 		},
-		Opts:         make(map[string]interface{}),
+		Opts:         make(map[string]any),
 		ThresholdIDs: []string{utils.MetaNone},
 	}
 
@@ -983,7 +983,7 @@ func TestDMSetAccountGetAccountErr(t *testing.T) {
 				Blocker:   true,
 			},
 		},
-		Opts:         make(map[string]interface{}),
+		Opts:         make(map[string]any),
 		ThresholdIDs: []string{utils.MetaNone},
 	}
 
@@ -1049,7 +1049,7 @@ func TestDMSetAccountSetAccountDrvErr(t *testing.T) {
 				Blocker:   true,
 			},
 		},
-		Opts:         make(map[string]interface{}),
+		Opts:         make(map[string]any),
 		ThresholdIDs: []string{utils.MetaNone},
 	}
 
@@ -1115,7 +1115,7 @@ func TestDMSetAccountupdatedIndexesErr(t *testing.T) {
 				Blocker:   true,
 			},
 		},
-		Opts:         make(map[string]interface{}),
+		Opts:         make(map[string]any),
 		ThresholdIDs: []string{utils.MetaNone},
 	}
 
@@ -1184,7 +1184,7 @@ func TestDMSetAccountReplicateTrue(t *testing.T) {
 				Blocker:   true,
 			},
 		},
-		Opts:         make(map[string]interface{}),
+		Opts:         make(map[string]any),
 		ThresholdIDs: []string{utils.MetaNone},
 	}
 	// tests replicete
@@ -1540,8 +1540,8 @@ func TestDMGetThresholdCacheGetErr(t *testing.T) {
 // 	}
 
 // 	cc := &ccMock{
-// 		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
-// 			utils.ReplicatorSv1GetThreshold: func(ctx *context.Context, args, reply interface{}) error {
+// 		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+// 			utils.ReplicatorSv1GetThreshold: func(ctx *context.Context, args, reply any) error {
 // 				rplCast, canCast := reply.(*Threshold)
 // 				if !canCast {
 // 					t.Errorf("Wrong argument type : %T", reply)
@@ -1583,8 +1583,8 @@ func TestDMGetThresholdSetThCacheSetErr(t *testing.T) {
 	cc := make(chan birpc.ClientConnector, 1)
 	cc <- &ccMock{
 
-		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
-			utils.CacheSv1ReplicateSet: func(ctx *context.Context, args, reply interface{}) error {
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.CacheSv1ReplicateSet: func(ctx *context.Context, args, reply any) error {
 
 				return utils.ErrNotImplemented
 			},
@@ -1764,8 +1764,8 @@ func TestDMRemoveStatQueueReplicate(t *testing.T) {
 	cc := make(chan birpc.ClientConnector, 1)
 	cc <- &ccMock{
 
-		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
-			utils.ReplicatorSv1SetStatQueue: func(ctx *context.Context, args, reply interface{}) error {
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.ReplicatorSv1SetStatQueue: func(ctx *context.Context, args, reply any) error {
 
 				return nil
 			},
@@ -1841,7 +1841,7 @@ func TestDMGetStatQueueProfileErrNilCacheRead(t *testing.T) {
 
 	tntID := utils.ConcatenatedKey(utils.CGRateSorg, "sqp99")
 
-	var setVal interface{}
+	var setVal any
 	if err := Cache.Set(context.Background(), utils.CacheStatQueueProfiles, tntID, setVal, []string{}, true, utils.NonTransactional); err != nil {
 		t.Error(err)
 	}
@@ -1872,8 +1872,8 @@ func TestDMGetStatQueueProfileErrRemote(t *testing.T) {
 	cc := make(chan birpc.ClientConnector, 1)
 	cc <- &ccMock{
 
-		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
-			utils.ReplicatorSv1GetStatQueueProfile: func(ctx *context.Context, args, reply interface{}) error {
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.ReplicatorSv1GetStatQueueProfile: func(ctx *context.Context, args, reply any) error {
 
 				return nil
 			},
@@ -1937,8 +1937,8 @@ func TestDMGetStatQueueProfileErrCacheWrite(t *testing.T) {
 	cc := make(chan birpc.ClientConnector, 1)
 	cc <- &ccMock{
 
-		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
-			utils.CacheSv1ReplicateSet: func(ctx *context.Context, args, reply interface{}) error { return utils.ErrNotImplemented },
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.CacheSv1ReplicateSet: func(ctx *context.Context, args, reply any) error { return utils.ErrNotImplemented },
 		},
 	}
 
@@ -2001,8 +2001,8 @@ func TestDMGetStatQueueProfileErr2CacheWrite(t *testing.T) {
 	cc := make(chan birpc.ClientConnector, 1)
 	cc <- &ccMock{
 
-		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
-			utils.CacheSv1ReplicateSet: func(ctx *context.Context, args, reply interface{}) error { return utils.ErrNotImplemented },
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.CacheSv1ReplicateSet: func(ctx *context.Context, args, reply any) error { return utils.ErrNotImplemented },
 		},
 	}
 
@@ -2062,8 +2062,8 @@ func TestDMGetThresholdProfileSetThErr2(t *testing.T) {
 	cc := make(chan birpc.ClientConnector, 1)
 	cc <- &ccMock{
 
-		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
-			utils.CacheSv1ReplicateSet: func(ctx *context.Context, args, reply interface{}) error {
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.CacheSv1ReplicateSet: func(ctx *context.Context, args, reply any) error {
 
 				return utils.ErrNotImplemented
 			},
@@ -2153,8 +2153,8 @@ func TestDMGetThresholdProfileDMErr(t *testing.T) {
 // 	}
 
 // 	cc := &ccMock{
-// 		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
-// 			utils.ReplicatorSv1GetThresholdProfile: func(ctx *context.Context, args, reply interface{}) error {
+// 		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+// 			utils.ReplicatorSv1GetThresholdProfile: func(ctx *context.Context, args, reply any) error {
 // 				rplCast, canCast := reply.(*Threshold)
 // 				if !canCast {
 // 					t.Errorf("Wrong argument type : %T", reply)
@@ -2196,8 +2196,8 @@ func TestDMGetThresholdProfileSetThPrfErr(t *testing.T) {
 	cc := make(chan birpc.ClientConnector, 1)
 	cc <- &ccMock{
 
-		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
-			utils.CacheSv1ReplicateSet: func(ctx *context.Context, args, reply interface{}) error {
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.CacheSv1ReplicateSet: func(ctx *context.Context, args, reply any) error {
 
 				return utils.ErrNotImplemented
 			},
@@ -2234,8 +2234,8 @@ func TestDMGetThresholdProfileSetThPrfErr2(t *testing.T) {
 	cc := make(chan birpc.ClientConnector, 1)
 	cc <- &ccMock{
 
-		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
-			utils.CacheSv1ReplicateSet: func(ctx *context.Context, args, reply interface{}) error {
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.CacheSv1ReplicateSet: func(ctx *context.Context, args, reply any) error {
 
 				return utils.ErrNotImplemented
 			},
@@ -2697,13 +2697,13 @@ func TestDMCacheDataFromDBDispatcherProfilePrefix(t *testing.T) {
 		FilterIDs:      []string{"fltr1"},
 		Weight:         65,
 		Strategy:       utils.MetaLoad,
-		StrategyParams: map[string]interface{}{"k": "v"},
+		StrategyParams: map[string]any{"k": "v"},
 		Hosts: DispatcherHostProfiles{
 			{
 				ID:        "C3",
 				FilterIDs: []string{"fltr2"},
 				Weight:    20,
-				Params:    map[string]interface{}{},
+				Params:    map[string]any{},
 				Blocker:   true,
 			},
 		},
@@ -3479,8 +3479,8 @@ func TestDMGetAccountReplicate(t *testing.T) {
 	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 
 	cc := &ccMock{
-		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
-			utils.ReplicatorSv1GetAccount: func(ctx *context.Context, args, reply interface{}) error {
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.ReplicatorSv1GetAccount: func(ctx *context.Context, args, reply any) error {
 				return nil
 			},
 		},
@@ -3526,7 +3526,7 @@ func TestDMGetAccountReplicate(t *testing.T) {
 				Blocker:   true,
 			},
 		},
-		Opts:         make(map[string]interface{}),
+		Opts:         make(map[string]any),
 		ThresholdIDs: []string{utils.MetaNone},
 	}
 
@@ -3718,7 +3718,7 @@ func TestDMCheckFiltersErrBrokenReferenceCache(t *testing.T) {
 	cM := NewConnManager(cfg)
 	dm := NewDataManager(data, cfg.CacheCfg(), cM)
 
-	var val interface{}
+	var val any
 	if err := Cache.Set(context.Background(), utils.CacheFilters, utils.ConcatenatedKey(utils.CGRateSorg, "fltr1"), val, []string{}, true, utils.NonTransactional); err != nil {
 		t.Error(err)
 	}
@@ -3812,8 +3812,8 @@ func TestGetAPIBanErrSingleCacheWrite(t *testing.T) {
 	cc := make(chan birpc.ClientConnector, 1)
 	cc <- &ccMock{
 
-		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
-			utils.CacheSv1ReplicateSet: func(ctx *context.Context, args, reply interface{}) error {
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.CacheSv1ReplicateSet: func(ctx *context.Context, args, reply any) error {
 
 				return utils.ErrNotImplemented
 			},
@@ -3882,8 +3882,8 @@ func TestGetAPIBanErrMultipleCacheWrite(t *testing.T) {
 	cc := make(chan birpc.ClientConnector, 1)
 	cc <- &ccMock{
 
-		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
-			utils.CacheSv1ReplicateSet: func(ctx *context.Context, args, reply interface{}) error {
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.CacheSv1ReplicateSet: func(ctx *context.Context, args, reply any) error {
 
 				return utils.ErrNotImplemented
 			},
@@ -3953,8 +3953,8 @@ func TestGetAPIBanErrNoBanCacheSet(t *testing.T) {
 	cc := make(chan birpc.ClientConnector, 1)
 	cc <- &ccMock{
 
-		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
-			utils.CacheSv1ReplicateSet: func(ctx *context.Context, args, reply interface{}) error {
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.CacheSv1ReplicateSet: func(ctx *context.Context, args, reply any) error {
 
 				return utils.ErrNotImplemented
 			},
@@ -4076,8 +4076,8 @@ func TestDMSetIndexesReplicate(t *testing.T) {
 	cc := make(chan birpc.ClientConnector, 1)
 	cc <- &ccMock{
 
-		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
-			utils.ReplicatorSv1SetIndexes: func(ctx *context.Context, args, reply interface{}) error {
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.ReplicatorSv1SetIndexes: func(ctx *context.Context, args, reply any) error {
 				return nil
 
 			},
@@ -4119,8 +4119,8 @@ func TestDMGetIndexesErrSetIdxDrv(t *testing.T) {
 	cc := make(chan birpc.ClientConnector, 1)
 	cc <- &ccMock{
 
-		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
-			utils.ReplicatorSv1GetIndexes: func(ctx *context.Context, args, reply interface{}) error {
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.ReplicatorSv1GetIndexes: func(ctx *context.Context, args, reply any) error {
 				return nil
 
 			},
@@ -4169,8 +4169,8 @@ func TestDMGetIndexesErrCacheSet(t *testing.T) {
 	cc := make(chan birpc.ClientConnector, 1)
 	cc <- &ccMock{
 
-		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
-			utils.CacheSv1ReplicateSet: func(ctx *context.Context, args, reply interface{}) error {
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.CacheSv1ReplicateSet: func(ctx *context.Context, args, reply any) error {
 
 				return utils.ErrNotImplemented
 			},
@@ -4206,8 +4206,8 @@ func TestDMGetIndexesErrCacheWriteSet(t *testing.T) {
 	cc := make(chan birpc.ClientConnector, 1)
 	cc <- &ccMock{
 
-		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
-			utils.CacheSv1ReplicateSet: func(ctx *context.Context, args, reply interface{}) error {
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.CacheSv1ReplicateSet: func(ctx *context.Context, args, reply any) error {
 
 				return utils.ErrNotImplemented
 			},
@@ -4379,8 +4379,8 @@ func TestDMGetThresholdSetThPrflDrvErr(t *testing.T) {
 	cc := make(chan birpc.ClientConnector, 1)
 	cc <- &ccMock{
 
-		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
-			utils.ReplicatorSv1GetThresholdProfile: func(ctx *context.Context, args, reply interface{}) error { return nil },
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.ReplicatorSv1GetThresholdProfile: func(ctx *context.Context, args, reply any) error { return nil },
 		},
 	}
 
@@ -4616,8 +4616,8 @@ func TestDMSetThresholdProfileReplicateErr(t *testing.T) {
 	cc := make(chan birpc.ClientConnector, 1)
 	cc <- &ccMock{
 
-		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
-			utils.ReplicatorSv1SetThresholdProfile: func(ctx *context.Context, args, reply interface{}) error { return utils.ErrNotImplemented },
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.ReplicatorSv1SetThresholdProfile: func(ctx *context.Context, args, reply any) error { return utils.ErrNotImplemented },
 		},
 	}
 
@@ -4700,8 +4700,8 @@ func TestDMGetStatQueueNewStoredStatQueueErr(t *testing.T) {
 	cc := make(chan birpc.ClientConnector, 1)
 	cc <- &ccMock{
 
-		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
-			utils.ReplicatorSv1GetStatQueue: func(ctx *context.Context, args, reply interface{}) error {
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.ReplicatorSv1GetStatQueue: func(ctx *context.Context, args, reply any) error {
 				return nil
 			},
 		},
@@ -4753,8 +4753,8 @@ func TestDMGetStatQueueSetStatQueueDrvErr(t *testing.T) {
 	cc := make(chan birpc.ClientConnector, 1)
 	cc <- &ccMock{
 
-		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
-			utils.ReplicatorSv1GetStatQueue: func(ctx *context.Context, args, reply interface{}) error {
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.ReplicatorSv1GetStatQueue: func(ctx *context.Context, args, reply any) error {
 				return nil
 			},
 		},
@@ -4797,8 +4797,8 @@ func TestDMGetStatQueueCacheWriteErr(t *testing.T) {
 	cc := make(chan birpc.ClientConnector, 1)
 	cc <- &ccMock{
 
-		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
-			utils.CacheSv1ReplicateSet: func(ctx *context.Context, args, reply interface{}) error { return utils.ErrNotImplemented },
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.CacheSv1ReplicateSet: func(ctx *context.Context, args, reply any) error { return utils.ErrNotImplemented },
 		},
 	}
 
@@ -5094,8 +5094,8 @@ func TestDMGetResourceSetResourceDrvErr(t *testing.T) {
 	cc := make(chan birpc.ClientConnector, 1)
 	cc <- &ccMock{
 
-		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
-			utils.ReplicatorSv1GetResource: func(ctx *context.Context, args, reply interface{}) error {
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.ReplicatorSv1GetResource: func(ctx *context.Context, args, reply any) error {
 				return nil
 			},
 		},
@@ -5138,8 +5138,8 @@ func TestDMGetResourceCacheWriteErr1(t *testing.T) {
 	cc := make(chan birpc.ClientConnector, 1)
 	cc <- &ccMock{
 
-		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
-			utils.CacheSv1ReplicateSet: func(ctx *context.Context, args, reply interface{}) error { return utils.ErrNotImplemented },
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.CacheSv1ReplicateSet: func(ctx *context.Context, args, reply any) error { return utils.ErrNotImplemented },
 		},
 	}
 
@@ -5175,8 +5175,8 @@ func TestDMGetResourceCacheWriteErr2(t *testing.T) {
 	cc := make(chan birpc.ClientConnector, 1)
 	cc <- &ccMock{
 
-		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
-			utils.CacheSv1ReplicateSet: func(ctx *context.Context, args, reply interface{}) error { return utils.ErrNotImplemented },
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.CacheSv1ReplicateSet: func(ctx *context.Context, args, reply any) error { return utils.ErrNotImplemented },
 		},
 	}
 
@@ -5294,8 +5294,8 @@ func TestDMRemoveResourceReplicateErr(t *testing.T) {
 	cc := make(chan birpc.ClientConnector, 1)
 	cc <- &ccMock{
 
-		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
-			utils.ReplicatorSv1RemoveResource: func(ctx *context.Context, args, reply interface{}) error {
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.ReplicatorSv1RemoveResource: func(ctx *context.Context, args, reply any) error {
 				return nil
 			},
 		},
@@ -5362,8 +5362,8 @@ func TestDMGetResourceProfileSetResourceProfileDrvErr(t *testing.T) {
 	cc := make(chan birpc.ClientConnector, 1)
 	cc <- &ccMock{
 
-		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
-			utils.ReplicatorSv1GetResourceProfile: func(ctx *context.Context, args, reply interface{}) error {
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.ReplicatorSv1GetResourceProfile: func(ctx *context.Context, args, reply any) error {
 				return nil
 			},
 		},
@@ -5406,8 +5406,8 @@ func TestDMGetResourceProfileCacheWriteErr1(t *testing.T) {
 	cc := make(chan birpc.ClientConnector, 1)
 	cc <- &ccMock{
 
-		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
-			utils.CacheSv1ReplicateSet: func(ctx *context.Context, args, reply interface{}) error { return utils.ErrNotImplemented },
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.CacheSv1ReplicateSet: func(ctx *context.Context, args, reply any) error { return utils.ErrNotImplemented },
 		},
 	}
 
@@ -5443,8 +5443,8 @@ func TestDMGetResourceProfileCacheWriteErr2(t *testing.T) {
 	cc := make(chan birpc.ClientConnector, 1)
 	cc <- &ccMock{
 
-		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
-			utils.CacheSv1ReplicateSet: func(ctx *context.Context, args, reply interface{}) error { return utils.ErrNotImplemented },
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.CacheSv1ReplicateSet: func(ctx *context.Context, args, reply any) error { return utils.ErrNotImplemented },
 		},
 	}
 
@@ -5495,8 +5495,8 @@ func TestDMGetFilterSetFilterDrvErr(t *testing.T) {
 	cc := make(chan birpc.ClientConnector, 1)
 	cc <- &ccMock{
 
-		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
-			utils.ReplicatorSv1GetFilter: func(ctx *context.Context, args, reply interface{}) error { return nil },
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.ReplicatorSv1GetFilter: func(ctx *context.Context, args, reply any) error { return nil },
 		},
 	}
 
@@ -5536,8 +5536,8 @@ func TestDMGetFilterCacheWriteErr1(t *testing.T) {
 	cc := make(chan birpc.ClientConnector, 1)
 	cc <- &ccMock{
 
-		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
-			utils.CacheSv1ReplicateSet: func(ctx *context.Context, args, reply interface{}) error { return utils.ErrNotImplemented },
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.CacheSv1ReplicateSet: func(ctx *context.Context, args, reply any) error { return utils.ErrNotImplemented },
 		},
 	}
 
@@ -5573,8 +5573,8 @@ func TestDMGetFilterCacheWriteErr2(t *testing.T) {
 	cc := make(chan birpc.ClientConnector, 1)
 	cc <- &ccMock{
 
-		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
-			utils.CacheSv1ReplicateSet: func(ctx *context.Context, args, reply interface{}) error { return utils.ErrNotImplemented },
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.CacheSv1ReplicateSet: func(ctx *context.Context, args, reply any) error { return utils.ErrNotImplemented },
 		},
 	}
 
@@ -5623,8 +5623,8 @@ func TestDMGetThresholdSetThresholdDrvErr(t *testing.T) {
 	cc := make(chan birpc.ClientConnector, 1)
 	cc <- &ccMock{
 
-		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
-			utils.ReplicatorSv1GetThreshold: func(ctx *context.Context, args, reply interface{}) error { return nil },
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.ReplicatorSv1GetThreshold: func(ctx *context.Context, args, reply any) error { return nil },
 		},
 	}
 
@@ -5759,8 +5759,8 @@ func TestDMSetResourceProfileErr(t *testing.T) {
 	cc := make(chan birpc.ClientConnector, 1)
 	cc <- &ccMock{
 
-		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
-			utils.ReplicatorSv1SetResourceProfile: func(ctx *context.Context, args, reply interface{}) error { return utils.ErrNotImplemented },
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.ReplicatorSv1SetResourceProfile: func(ctx *context.Context, args, reply any) error { return utils.ErrNotImplemented },
 		},
 	}
 
@@ -5961,8 +5961,8 @@ func TestDMRemoveResourceProfileReplicate(t *testing.T) {
 	cc := make(chan birpc.ClientConnector, 1)
 	cc <- &ccMock{
 
-		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
-			utils.ReplicatorSv1SetResourceProfile: func(ctx *context.Context, args, reply interface{}) error { return utils.ErrNotImplemented },
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.ReplicatorSv1SetResourceProfile: func(ctx *context.Context, args, reply any) error { return utils.ErrNotImplemented },
 		},
 	}
 
@@ -6105,8 +6105,8 @@ func TestDMGetRouteProfileSetRouteProfileDrvErr(t *testing.T) {
 	cc := make(chan birpc.ClientConnector, 1)
 	cc <- &ccMock{
 
-		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
-			utils.ReplicatorSv1GetRouteProfile: func(ctx *context.Context, args, reply interface{}) error { return nil },
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.ReplicatorSv1GetRouteProfile: func(ctx *context.Context, args, reply any) error { return nil },
 		},
 	}
 
@@ -6167,8 +6167,8 @@ func TestDMGetRouteProfileCacheWriteErr1(t *testing.T) {
 	cc := make(chan birpc.ClientConnector, 1)
 	cc <- &ccMock{
 
-		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
-			utils.CacheSv1ReplicateSet: func(ctx *context.Context, args, reply interface{}) error {
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.CacheSv1ReplicateSet: func(ctx *context.Context, args, reply any) error {
 
 				return utils.ErrNotImplemented
 			},
@@ -6211,8 +6211,8 @@ func TestDMGetRouteProfileCacheWriteErr2(t *testing.T) {
 	cc := make(chan birpc.ClientConnector, 1)
 	cc <- &ccMock{
 
-		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
-			utils.CacheSv1ReplicateSet: func(ctx *context.Context, args, reply interface{}) error { return utils.ErrNotImplemented },
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.CacheSv1ReplicateSet: func(ctx *context.Context, args, reply any) error { return utils.ErrNotImplemented },
 		},
 	}
 
@@ -6490,8 +6490,8 @@ func TestDMSetRouteProfileReplicate(t *testing.T) {
 	cc := make(chan birpc.ClientConnector, 1)
 	cc <- &ccMock{
 
-		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
-			utils.ReplicatorSv1SetRouteProfile: func(ctx *context.Context, args, reply interface{}) error { return utils.ErrNotImplemented },
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.ReplicatorSv1SetRouteProfile: func(ctx *context.Context, args, reply any) error { return utils.ErrNotImplemented },
 		},
 	}
 
@@ -6754,8 +6754,8 @@ func TestDMRemoveRouteProfileReplicate(t *testing.T) {
 	cc := make(chan birpc.ClientConnector, 1)
 	cc <- &ccMock{
 
-		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
-			utils.ReplicatorSv1RemoveRouteProfile: func(ctx *context.Context, args, reply interface{}) error { return utils.ErrNotImplemented },
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.ReplicatorSv1RemoveRouteProfile: func(ctx *context.Context, args, reply any) error { return utils.ErrNotImplemented },
 		},
 	}
 
@@ -6961,8 +6961,8 @@ func TestDMRemoveAttributeProfileReplicate(t *testing.T) {
 	cc := make(chan birpc.ClientConnector, 1)
 	cc <- &ccMock{
 
-		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
-			utils.ReplicatorSv1RemoveRouteProfile: func(ctx *context.Context, args, reply interface{}) error { return utils.ErrNotImplemented },
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.ReplicatorSv1RemoveRouteProfile: func(ctx *context.Context, args, reply any) error { return utils.ErrNotImplemented },
 		},
 	}
 
@@ -7171,8 +7171,8 @@ func TestDMRemoveChargerProfileReplicate(t *testing.T) {
 	cc := make(chan birpc.ClientConnector, 1)
 	cc <- &ccMock{
 
-		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
-			utils.ReplicatorSv1RemoveChargerProfile: func(ctx *context.Context, args, reply interface{}) error { return utils.ErrNotImplemented },
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.ReplicatorSv1RemoveChargerProfile: func(ctx *context.Context, args, reply any) error { return utils.ErrNotImplemented },
 		},
 	}
 
@@ -7219,13 +7219,13 @@ func TestDMRemoveDispatcherProfileGetDispatcherProfileErr(t *testing.T) {
 		FilterIDs:      []string{"fltr1"},
 		Weight:         65,
 		Strategy:       utils.MetaLoad,
-		StrategyParams: map[string]interface{}{"k": "v"},
+		StrategyParams: map[string]any{"k": "v"},
 		Hosts: DispatcherHostProfiles{
 			{
 				ID:        "C3",
 				FilterIDs: []string{"fltr2"},
 				Weight:    20,
-				Params:    map[string]interface{}{},
+				Params:    map[string]any{},
 				Blocker:   true,
 			},
 		},
@@ -7258,13 +7258,13 @@ func TestDMRemoveDispatcherProfileRemoveDispatcherProfileDrvErr(t *testing.T) {
 		FilterIDs:      []string{"fltr1"},
 		Weight:         65,
 		Strategy:       utils.MetaLoad,
-		StrategyParams: map[string]interface{}{"k": "v"},
+		StrategyParams: map[string]any{"k": "v"},
 		Hosts: DispatcherHostProfiles{
 			{
 				ID:        "C3",
 				FilterIDs: []string{"fltr2"},
 				Weight:    20,
-				Params:    map[string]interface{}{},
+				Params:    map[string]any{},
 				Blocker:   true,
 			},
 		},
@@ -7316,13 +7316,13 @@ func TestDMRemoveDispatcherProfileRmvItemFromFiltrIndexErr(t *testing.T) {
 		FilterIDs:      []string{"fltr1"},
 		Weight:         65,
 		Strategy:       utils.MetaLoad,
-		StrategyParams: map[string]interface{}{"k": "v"},
+		StrategyParams: map[string]any{"k": "v"},
 		Hosts: DispatcherHostProfiles{
 			{
 				ID:        "C3",
 				FilterIDs: []string{"fltr2"},
 				Weight:    20,
-				Params:    map[string]interface{}{},
+				Params:    map[string]any{},
 				Blocker:   true,
 			},
 		},
@@ -7346,13 +7346,13 @@ func TestDMRemoveDispatcherProfileRmvIndexFiltersItemErr(t *testing.T) {
 		FilterIDs:      []string{"fltr1"},
 		Weight:         65,
 		Strategy:       utils.MetaLoad,
-		StrategyParams: map[string]interface{}{"k": "v"},
+		StrategyParams: map[string]any{"k": "v"},
 		Hosts: DispatcherHostProfiles{
 			{
 				ID:        "C3",
 				FilterIDs: []string{"fltr2"},
 				Weight:    20,
-				Params:    map[string]interface{}{},
+				Params:    map[string]any{},
 				Blocker:   true,
 			},
 		},
@@ -7389,13 +7389,13 @@ func TestDMRemoveDispatcherProfileReplicate(t *testing.T) {
 		FilterIDs:      []string{"fltr1"},
 		Weight:         65,
 		Strategy:       utils.MetaLoad,
-		StrategyParams: map[string]interface{}{"k": "v"},
+		StrategyParams: map[string]any{"k": "v"},
 		Hosts: DispatcherHostProfiles{
 			{
 				ID:        "C3",
 				FilterIDs: []string{"fltr2"},
 				Weight:    20,
-				Params:    map[string]interface{}{},
+				Params:    map[string]any{},
 				Blocker:   true,
 			},
 		},
@@ -7409,8 +7409,8 @@ func TestDMRemoveDispatcherProfileReplicate(t *testing.T) {
 	cc := make(chan birpc.ClientConnector, 1)
 	cc <- &ccMock{
 
-		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
-			utils.ReplicatorSv1RemoveDispatcherProfile: func(ctx *context.Context, args, reply interface{}) error { return utils.ErrNotImplemented },
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.ReplicatorSv1RemoveDispatcherProfile: func(ctx *context.Context, args, reply any) error { return utils.ErrNotImplemented },
 		},
 	}
 
@@ -7715,8 +7715,8 @@ func TestDMRemoveRateProfileReplicate(t *testing.T) {
 	cc := make(chan birpc.ClientConnector, 1)
 	cc <- &ccMock{
 
-		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
-			utils.ReplicatorSv1RemoveRateProfile: func(ctx *context.Context, args, reply interface{}) error { return utils.ErrNotImplemented },
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.ReplicatorSv1RemoveRateProfile: func(ctx *context.Context, args, reply any) error { return utils.ErrNotImplemented },
 		},
 	}
 
@@ -7853,8 +7853,8 @@ func TestDMRemoveActionProfileReplicate(t *testing.T) {
 	cc := make(chan birpc.ClientConnector, 1)
 	cc <- &ccMock{
 
-		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
-			utils.ReplicatorSv1RemoveActionProfile: func(ctx *context.Context, args, reply interface{}) error { return utils.ErrNotImplemented },
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.ReplicatorSv1RemoveActionProfile: func(ctx *context.Context, args, reply any) error { return utils.ErrNotImplemented },
 		},
 	}
 
@@ -8024,8 +8024,8 @@ func TestDMSetAttributeProfileReplicate(t *testing.T) {
 	cc := make(chan birpc.ClientConnector, 1)
 	cc <- &ccMock{
 
-		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
-			utils.ReplicatorSv1SetAttributeProfile: func(ctx *context.Context, args, reply interface{}) error { return utils.ErrNotImplemented },
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.ReplicatorSv1SetAttributeProfile: func(ctx *context.Context, args, reply any) error { return utils.ErrNotImplemented },
 		},
 	}
 
@@ -8085,8 +8085,8 @@ func TestDMGetAttributeProfileSetAttributeProfileDrvErr(t *testing.T) {
 	cc := make(chan birpc.ClientConnector, 1)
 	cc <- &ccMock{
 
-		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
-			utils.ReplicatorSv1GetAttributeProfile: func(ctx *context.Context, args, reply interface{}) error { return nil },
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.ReplicatorSv1GetAttributeProfile: func(ctx *context.Context, args, reply any) error { return nil },
 		},
 	}
 
@@ -8298,8 +8298,8 @@ func TestDMSetChargerProfileReplicate(t *testing.T) {
 	cc := make(chan birpc.ClientConnector, 1)
 	cc <- &ccMock{
 
-		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
-			utils.ReplicatorSv1SetChargerProfile: func(ctx *context.Context, args, reply interface{}) error { return utils.ErrNotImplemented },
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.ReplicatorSv1SetChargerProfile: func(ctx *context.Context, args, reply any) error { return utils.ErrNotImplemented },
 		},
 	}
 
@@ -8343,13 +8343,13 @@ func TestDMSetDispatcherProfileCheckFiltersErr(t *testing.T) {
 		FilterIDs:      []string{"*string*req.Account1001"},
 		Weight:         65,
 		Strategy:       utils.MetaLoad,
-		StrategyParams: map[string]interface{}{"k": "v"},
+		StrategyParams: map[string]any{"k": "v"},
 		Hosts: DispatcherHostProfiles{
 			{
 				ID:        "C3",
 				FilterIDs: []string{"fltr2"},
 				Weight:    20,
-				Params:    map[string]interface{}{},
+				Params:    map[string]any{},
 				Blocker:   true,
 			},
 		},
@@ -8379,13 +8379,13 @@ func TestDMSetDispatcherProfileGetDispatcherProfileErr(t *testing.T) {
 		FilterIDs:      []string{"*string*req.Account1001"},
 		Weight:         65,
 		Strategy:       utils.MetaLoad,
-		StrategyParams: map[string]interface{}{"k": "v"},
+		StrategyParams: map[string]any{"k": "v"},
 		Hosts: DispatcherHostProfiles{
 			{
 				ID:        "C3",
 				FilterIDs: []string{"fltr2"},
 				Weight:    20,
-				Params:    map[string]interface{}{},
+				Params:    map[string]any{},
 				Blocker:   true,
 			},
 		},
@@ -8414,13 +8414,13 @@ func TestDMSetDispatcherProfileSetDispatcherProfileDrvErr(t *testing.T) {
 		FilterIDs:      []string{"*string*req.Account1001"},
 		Weight:         65,
 		Strategy:       utils.MetaLoad,
-		StrategyParams: map[string]interface{}{"k": "v"},
+		StrategyParams: map[string]any{"k": "v"},
 		Hosts: DispatcherHostProfiles{
 			{
 				ID:        "C3",
 				FilterIDs: []string{"fltr2"},
 				Weight:    20,
-				Params:    map[string]interface{}{},
+				Params:    map[string]any{},
 				Blocker:   true,
 			},
 		},
@@ -8450,13 +8450,13 @@ func TestDMSetDispatcherProfileUpdatedIndexesErr(t *testing.T) {
 		FilterIDs:      []string{"*string:~*req.Account:1001"},
 		Weight:         65,
 		Strategy:       utils.MetaLoad,
-		StrategyParams: map[string]interface{}{"k": "v"},
+		StrategyParams: map[string]any{"k": "v"},
 		Hosts: DispatcherHostProfiles{
 			{
 				ID:        "C3",
 				FilterIDs: []string{"fltr2"},
 				Weight:    20,
-				Params:    map[string]interface{}{},
+				Params:    map[string]any{},
 				Blocker:   true,
 			},
 		},
@@ -8481,13 +8481,13 @@ func TestDMSetDispatcherProfileReplicate(t *testing.T) {
 		FilterIDs:      []string{"*string:~*req.Account:1001"},
 		Weight:         65,
 		Strategy:       utils.MetaLoad,
-		StrategyParams: map[string]interface{}{"k": "v"},
+		StrategyParams: map[string]any{"k": "v"},
 		Hosts: DispatcherHostProfiles{
 			{
 				ID:        "C3",
 				FilterIDs: []string{"fltr2"},
 				Weight:    20,
-				Params:    map[string]interface{}{},
+				Params:    map[string]any{},
 				Blocker:   true,
 			},
 		},
@@ -8501,8 +8501,8 @@ func TestDMSetDispatcherProfileReplicate(t *testing.T) {
 	cc := make(chan birpc.ClientConnector, 1)
 	cc <- &ccMock{
 
-		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
-			utils.ReplicatorSv1SetDispatcherProfile: func(ctx *context.Context, args, reply interface{}) error { return utils.ErrNotImplemented },
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.ReplicatorSv1SetDispatcherProfile: func(ctx *context.Context, args, reply any) error { return utils.ErrNotImplemented },
 		},
 	}
 
@@ -8689,8 +8689,8 @@ func TestDMSetActionProfileReplicate(t *testing.T) {
 	cc := make(chan birpc.ClientConnector, 1)
 	cc <- &ccMock{
 
-		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
-			utils.ReplicatorSv1SetActionProfile: func(ctx *context.Context, args, reply interface{}) error { return utils.ErrNotImplemented },
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.ReplicatorSv1SetActionProfile: func(ctx *context.Context, args, reply any) error { return utils.ErrNotImplemented },
 		},
 	}
 
@@ -8910,8 +8910,8 @@ func TestDMSetRateProfileReplicate(t *testing.T) {
 	cc := make(chan birpc.ClientConnector, 1)
 	cc <- &ccMock{
 
-		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
-			utils.ReplicatorSv1SetRateProfile: func(ctx *context.Context, args, reply interface{}) error { return utils.ErrNotImplemented },
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.ReplicatorSv1SetRateProfile: func(ctx *context.Context, args, reply any) error { return utils.ErrNotImplemented },
 		},
 	}
 
@@ -9025,8 +9025,8 @@ func TestDMGetActionProfileSetActionProfileDrvErr(t *testing.T) {
 	cc := make(chan birpc.ClientConnector, 1)
 	cc <- &ccMock{
 
-		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
-			utils.ReplicatorSv1GetActionProfile: func(ctx *context.Context, args, reply interface{}) error { return nil },
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.ReplicatorSv1GetActionProfile: func(ctx *context.Context, args, reply any) error { return nil },
 		},
 	}
 
@@ -9075,8 +9075,8 @@ func TestDMGetActionProfileCacheWriteErr1(t *testing.T) {
 	cc := make(chan birpc.ClientConnector, 1)
 	cc <- &ccMock{
 
-		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
-			utils.CacheSv1ReplicateSet: func(ctx *context.Context, args, reply interface{}) error {
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.CacheSv1ReplicateSet: func(ctx *context.Context, args, reply any) error {
 
 				return utils.ErrNotImplemented
 			},
@@ -9117,8 +9117,8 @@ func TestDMGetActionProfileCacheWriteErr2(t *testing.T) {
 	cc := make(chan birpc.ClientConnector, 1)
 	cc <- &ccMock{
 
-		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
-			utils.CacheSv1ReplicateSet: func(ctx *context.Context, args, reply interface{}) error { return utils.ErrNotImplemented },
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.CacheSv1ReplicateSet: func(ctx *context.Context, args, reply any) error { return utils.ErrNotImplemented },
 		},
 	}
 
@@ -9201,8 +9201,8 @@ func TestDMGetAttributeProfileCacheWriteErr1(t *testing.T) {
 	cc := make(chan birpc.ClientConnector, 1)
 	cc <- &ccMock{
 
-		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
-			utils.CacheSv1ReplicateSet: func(ctx *context.Context, args, reply interface{}) error {
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.CacheSv1ReplicateSet: func(ctx *context.Context, args, reply any) error {
 
 				return utils.ErrNotImplemented
 			},
@@ -9245,8 +9245,8 @@ func TestDMGetAttributeProfileCacheWriteErr2(t *testing.T) {
 	cc := make(chan birpc.ClientConnector, 1)
 	cc <- &ccMock{
 
-		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
-			utils.CacheSv1ReplicateSet: func(ctx *context.Context, args, reply interface{}) error { return utils.ErrNotImplemented },
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.CacheSv1ReplicateSet: func(ctx *context.Context, args, reply any) error { return utils.ErrNotImplemented },
 		},
 	}
 
@@ -9386,8 +9386,8 @@ func TestDMSetStatQueueProfileReplicate(t *testing.T) {
 	cc := make(chan birpc.ClientConnector, 1)
 	cc <- &ccMock{
 
-		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
-			utils.ReplicatorSv1SetStatQueueProfile: func(ctx *context.Context, args, reply interface{}) error { return utils.ErrNotImplemented },
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.ReplicatorSv1SetStatQueueProfile: func(ctx *context.Context, args, reply any) error { return utils.ErrNotImplemented },
 		},
 	}
 
@@ -9717,8 +9717,8 @@ func TestDMRemoveStatQueueProfileReplicate(t *testing.T) {
 	cc := make(chan birpc.ClientConnector, 1)
 	cc <- &ccMock{
 
-		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
-			utils.ReplicatorSv1RemoveStatQueueProfile: func(ctx *context.Context, args, reply interface{}) error { return utils.ErrNotImplemented },
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.ReplicatorSv1RemoveStatQueueProfile: func(ctx *context.Context, args, reply any) error { return utils.ErrNotImplemented },
 		},
 	}
 
@@ -9764,8 +9764,8 @@ func TestDMGetStatQueueCacheWriteErr1(t *testing.T) {
 	cc := make(chan birpc.ClientConnector, 1)
 	cc <- &ccMock{
 
-		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
-			utils.CacheSv1ReplicateSet: func(ctx *context.Context, args, reply interface{}) error {
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.CacheSv1ReplicateSet: func(ctx *context.Context, args, reply any) error {
 
 				return utils.ErrNotImplemented
 			},
@@ -9818,8 +9818,8 @@ func TestDMGetChargerProfileSetChargerProfileDrvErr(t *testing.T) {
 	cc := make(chan birpc.ClientConnector, 1)
 	cc <- &ccMock{
 
-		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
-			utils.ReplicatorSv1GetChargerProfile: func(ctx *context.Context, args, reply interface{}) error { return nil },
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.ReplicatorSv1GetChargerProfile: func(ctx *context.Context, args, reply any) error { return nil },
 		},
 	}
 
@@ -9867,8 +9867,8 @@ func TestDMGetChargerProfileCacheWriteErr1(t *testing.T) {
 	cc := make(chan birpc.ClientConnector, 1)
 	cc <- &ccMock{
 
-		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
-			utils.CacheSv1ReplicateSet: func(ctx *context.Context, args, reply interface{}) error {
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.CacheSv1ReplicateSet: func(ctx *context.Context, args, reply any) error {
 
 				return utils.ErrNotImplemented
 			},
@@ -9909,8 +9909,8 @@ func TestDMGetChargerProfileCacheWriteErr2(t *testing.T) {
 	cc := make(chan birpc.ClientConnector, 1)
 	cc <- &ccMock{
 
-		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
-			utils.CacheSv1ReplicateSet: func(ctx *context.Context, args, reply interface{}) error { return utils.ErrNotImplemented },
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.CacheSv1ReplicateSet: func(ctx *context.Context, args, reply any) error { return utils.ErrNotImplemented },
 		},
 	}
 
@@ -9982,13 +9982,13 @@ func TestDMGetDispatcherProfileCacheGet(t *testing.T) {
 		FilterIDs:      []string{"*string:~*req.Account:1001"},
 		Weight:         65,
 		Strategy:       utils.MetaLoad,
-		StrategyParams: map[string]interface{}{"k": "v"},
+		StrategyParams: map[string]any{"k": "v"},
 		Hosts: DispatcherHostProfiles{
 			{
 				ID:        "C3",
 				FilterIDs: []string{"fltr2"},
 				Weight:    20,
-				Params:    map[string]interface{}{},
+				Params:    map[string]any{},
 				Blocker:   true,
 			},
 		},
@@ -10030,13 +10030,13 @@ func TestDMGetDispatcherProfileSetDispatcherProfileDrvErr(t *testing.T) {
 		FilterIDs:      []string{"*string:~*req.Account:1001"},
 		Weight:         65,
 		Strategy:       utils.MetaLoad,
-		StrategyParams: map[string]interface{}{"k": "v"},
+		StrategyParams: map[string]any{"k": "v"},
 		Hosts: DispatcherHostProfiles{
 			{
 				ID:        "C3",
 				FilterIDs: []string{"fltr2"},
 				Weight:    20,
-				Params:    map[string]interface{}{},
+				Params:    map[string]any{},
 				Blocker:   true,
 			},
 		},
@@ -10050,8 +10050,8 @@ func TestDMGetDispatcherProfileSetDispatcherProfileDrvErr(t *testing.T) {
 	cc := make(chan birpc.ClientConnector, 1)
 	cc <- &ccMock{
 
-		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
-			utils.ReplicatorSv1GetDispatcherProfile: func(ctx *context.Context, args, reply interface{}) error { return nil },
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.ReplicatorSv1GetDispatcherProfile: func(ctx *context.Context, args, reply any) error { return nil },
 		},
 	}
 
@@ -10079,13 +10079,13 @@ func TestDMGetDispatcherProfileCacheWriteErr1(t *testing.T) {
 		FilterIDs:      []string{"*string:~*req.Account:1001"},
 		Weight:         65,
 		Strategy:       utils.MetaLoad,
-		StrategyParams: map[string]interface{}{"k": "v"},
+		StrategyParams: map[string]any{"k": "v"},
 		Hosts: DispatcherHostProfiles{
 			{
 				ID:        "C3",
 				FilterIDs: []string{"fltr2"},
 				Weight:    20,
-				Params:    map[string]interface{}{},
+				Params:    map[string]any{},
 				Blocker:   true,
 			},
 		},
@@ -10105,8 +10105,8 @@ func TestDMGetDispatcherProfileCacheWriteErr1(t *testing.T) {
 	cc := make(chan birpc.ClientConnector, 1)
 	cc <- &ccMock{
 
-		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
-			utils.CacheSv1ReplicateSet: func(ctx *context.Context, args, reply interface{}) error {
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.CacheSv1ReplicateSet: func(ctx *context.Context, args, reply any) error {
 
 				return utils.ErrNotImplemented
 			},
@@ -10149,8 +10149,8 @@ func TestDMGetDispatcherProfileCacheWriteErr2(t *testing.T) {
 	cc := make(chan birpc.ClientConnector, 1)
 	cc <- &ccMock{
 
-		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
-			utils.CacheSv1ReplicateSet: func(ctx *context.Context, args, reply interface{}) error { return utils.ErrNotImplemented },
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.CacheSv1ReplicateSet: func(ctx *context.Context, args, reply any) error { return utils.ErrNotImplemented },
 		},
 	}
 
@@ -10164,13 +10164,13 @@ func TestDMGetDispatcherProfileCacheWriteErr2(t *testing.T) {
 		FilterIDs:      []string{"*string:~*req.Account:1001"},
 		Weight:         65,
 		Strategy:       utils.MetaLoad,
-		StrategyParams: map[string]interface{}{"k": "v"},
+		StrategyParams: map[string]any{"k": "v"},
 		Hosts: DispatcherHostProfiles{
 			{
 				ID:        "C3",
 				FilterIDs: []string{"fltr2"},
 				Weight:    20,
-				Params:    map[string]interface{}{},
+				Params:    map[string]any{},
 				Blocker:   true,
 			},
 		},
@@ -10295,8 +10295,8 @@ func TestDMGetDispatcherHostSetDispatcherHostDrvErr(t *testing.T) {
 	cc := make(chan birpc.ClientConnector, 1)
 	cc <- &ccMock{
 
-		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
-			utils.ReplicatorSv1GetDispatcherHost: func(ctx *context.Context, args, reply interface{}) error { return nil },
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.ReplicatorSv1GetDispatcherHost: func(ctx *context.Context, args, reply any) error { return nil },
 		},
 	}
 
@@ -10350,8 +10350,8 @@ func TestDMGetDispatcherHostCacheWriteErr1(t *testing.T) {
 	cc := make(chan birpc.ClientConnector, 1)
 	cc <- &ccMock{
 
-		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
-			utils.CacheSv1ReplicateSet: func(ctx *context.Context, args, reply interface{}) error {
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.CacheSv1ReplicateSet: func(ctx *context.Context, args, reply any) error {
 
 				return utils.ErrNotImplemented
 			},
@@ -10394,8 +10394,8 @@ func TestDMGetDispatcherHostCacheWriteErr2(t *testing.T) {
 	cc := make(chan birpc.ClientConnector, 1)
 	cc <- &ccMock{
 
-		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
-			utils.CacheSv1ReplicateSet: func(ctx *context.Context, args, reply interface{}) error { return utils.ErrNotImplemented },
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.CacheSv1ReplicateSet: func(ctx *context.Context, args, reply any) error { return utils.ErrNotImplemented },
 		},
 	}
 
@@ -10461,8 +10461,8 @@ func TestDMGetItemLoadIDsSetSetLoadIDsDrvErr(t *testing.T) {
 	cc := make(chan birpc.ClientConnector, 1)
 	cc <- &ccMock{
 
-		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
-			utils.ReplicatorSv1GetItemLoadIDs: func(ctx *context.Context, args, reply interface{}) error { return nil },
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.ReplicatorSv1GetItemLoadIDs: func(ctx *context.Context, args, reply any) error { return nil },
 		},
 	}
 
@@ -10506,8 +10506,8 @@ func TestDMGetItemLoadIDsCacheWriteErr1(t *testing.T) {
 	cc := make(chan birpc.ClientConnector, 1)
 	cc <- &ccMock{
 
-		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
-			utils.CacheSv1ReplicateSet: func(ctx *context.Context, args, reply interface{}) error {
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.CacheSv1ReplicateSet: func(ctx *context.Context, args, reply any) error {
 
 				return utils.ErrNotImplemented
 			},
@@ -10551,8 +10551,8 @@ func TestDMGetItemLoadIDsCacheWriteErr2(t *testing.T) {
 	cc := make(chan birpc.ClientConnector, 1)
 	cc <- &ccMock{
 
-		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
-			utils.CacheSv1ReplicateSet: func(ctx *context.Context, args, reply interface{}) error { return utils.ErrNotImplemented },
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.CacheSv1ReplicateSet: func(ctx *context.Context, args, reply any) error { return utils.ErrNotImplemented },
 		},
 	}
 

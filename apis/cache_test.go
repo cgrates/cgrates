@@ -297,7 +297,7 @@ func TestGetCacheStats(t *testing.T) {
 
 	args := &utils.AttrCacheIDsWithAPIOpts{
 		Tenant:   "cgrates.org",
-		APIOpts:  map[string]interface{}{},
+		APIOpts:  map[string]any{},
 		CacheIDs: []string{utils.CacheAttributeProfiles},
 	}
 	if err := cache.GetCacheStats(context.Background(), args, &reply); err != nil {
@@ -321,7 +321,7 @@ func TestPrecacheStatus(t *testing.T) {
 
 	args := &utils.AttrCacheIDsWithAPIOpts{
 		Tenant:   "cgrates.org",
-		APIOpts:  map[string]interface{}{},
+		APIOpts:  map[string]any{},
 		CacheIDs: []string{utils.CacheAttributeProfiles},
 	}
 	if err := cache.PrecacheStatus(context.Background(), args, &reply); err != nil {
@@ -348,7 +348,7 @@ func TestHasGroup(t *testing.T) {
 
 	args := &utils.ArgsGetGroupWithAPIOpts{
 		Tenant:  "cgrates.org",
-		APIOpts: map[string]interface{}{},
+		APIOpts: map[string]any{},
 		ArgsGetGroup: utils.ArgsGetGroup{
 			CacheID: utils.CacheAttributeProfiles,
 			GroupID: "Group",
@@ -377,7 +377,7 @@ func TestGetGroupItemIDs(t *testing.T) {
 
 	args := &utils.ArgsGetGroupWithAPIOpts{
 		Tenant:  "cgrates.org",
-		APIOpts: map[string]interface{}{},
+		APIOpts: map[string]any{},
 		ArgsGetGroup: utils.ArgsGetGroup{
 			CacheID: utils.CacheAttributeProfiles,
 			GroupID: "AttrGroup",
@@ -406,7 +406,7 @@ func TestRemoveGroup(t *testing.T) {
 
 	args := &utils.ArgsGetGroupWithAPIOpts{
 		Tenant:  "cgrates.org",
-		APIOpts: map[string]interface{}{},
+		APIOpts: map[string]any{},
 		ArgsGetGroup: utils.ArgsGetGroup{
 			CacheID: utils.CacheAttributeProfiles,
 			GroupID: "AttrGroup",

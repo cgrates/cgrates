@@ -130,7 +130,7 @@ func TestGeneralCfgAsMapInterface(t *testing.T) {
 			"max_parallel_conns": 100,								
 		},
 	}`
-	eMap := map[string]interface{}{
+	eMap := map[string]any{
 		utils.NodeIDCfg:               "cgrates",
 		utils.RoundingDecimalsCfg:     5,
 		utils.DBDataEncodingCfg:       "*msgpack",
@@ -154,7 +154,7 @@ func TestGeneralCfgAsMapInterface(t *testing.T) {
 		utils.DecimalMinScaleCfg:      0,
 		utils.DecimalPrecisionCfg:     0,
 		utils.DecimalRoundingModeCfg:  "*toNearestEven",
-		utils.OptsCfg: map[string]interface{}{
+		utils.OptsCfg: map[string]any{
 			utils.MetaExporterIDs: []*utils.DynamicStringSliceOpt{},
 		},
 	}
@@ -176,7 +176,7 @@ func TestGeneralCfgAsMapInterface1(t *testing.T) {
             "max_call_duration": "0"
         }
 }`
-	eMap := map[string]interface{}{
+	eMap := map[string]any{
 		utils.NodeIDCfg:               "ENGINE1",
 		utils.RoundingDecimalsCfg:     5,
 		utils.DBDataEncodingCfg:       "*msgpack",
@@ -200,7 +200,7 @@ func TestGeneralCfgAsMapInterface1(t *testing.T) {
 		utils.DecimalMinScaleCfg:      0,
 		utils.DecimalPrecisionCfg:     0,
 		utils.DecimalRoundingModeCfg:  "*toNearestEven",
-		utils.OptsCfg: map[string]interface{}{
+		utils.OptsCfg: map[string]any{
 			utils.MetaExporterIDs: []*utils.DynamicStringSliceOpt{},
 		},
 	}

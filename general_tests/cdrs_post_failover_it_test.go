@@ -120,7 +120,7 @@ func testCDRsPostFailoverLoadTariffPlanFromFolder(t *testing.T) {
 	var reply string
 	if err := cdrsPostFailRpc.Call(context.Background(), utils.LoaderSv1Run,
 		&loaders.ArgsProcessFolder{
-			APIOpts: map[string]interface{}{
+			APIOpts: map[string]any{
 				utils.MetaStopOnError: true,
 				utils.MetaCache:       caching,
 			},
@@ -150,7 +150,7 @@ func testCDRsPostFailoverProcessCDR(t *testing.T) {
 	args := &utils.CGREvent{
 		ID:     "1",
 		Tenant: "cgrates.org",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.OriginID:     "testCDRsPostFailoverProcessCDR",
 			utils.OriginHost:   "192.168.1.1",
 			utils.Source:       "testCDRsPostFailoverProcessCDR",
@@ -164,7 +164,7 @@ func testCDRsPostFailoverProcessCDR(t *testing.T) {
 			"field_extr1":      "val_extr1",
 			"fieldextr2":       "valextr2",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsCDRsExport: true,
 			utils.MetaAttributes: false,
 			utils.MetaChargers:   false,

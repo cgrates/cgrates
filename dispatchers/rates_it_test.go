@@ -70,7 +70,7 @@ func testDspRPrfPing(t *testing.T) {
 	}
 	if err := dispEngine.RPC.Call(utils.RateSv1Ping, utils.CGREvent{
 		Tenant: "cgrates.org",
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsAPIKey: "rPrf12345",
 		},
 	}, &reply); err != nil {
@@ -149,11 +149,11 @@ func testDspRPrfCostForEvent(t *testing.T) {
 	if err := dispEngine.RPC.Call(utils.RateSv1CostForEvent, &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "DefaultRate",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.Subject: "1001",
 		},
 
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsAPIKey: "rPrf12345",
 		}}, &rpCost); err != nil {
 		t.Error(err)
@@ -230,10 +230,10 @@ func testDspRPrfCostForEventWithoutFilters(t *testing.T) {
 	if err := dispEngine.RPC.Call(utils.RateSv1CostForEvent, &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "EVENT_RATE",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.Subject: "1002",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsAPIKey: "rPrf12345",
 		}}, &rpCost); err != nil {
 		t.Error(err)

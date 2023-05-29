@@ -642,7 +642,7 @@ func testTPeSetAccount(t *testing.T) {
 		Account: &utils.Account{
 			Tenant: "cgrates.org",
 			ID:     "Account_simple",
-			Opts:   map[string]interface{}{},
+			Opts:   map[string]any{},
 			Balances: map[string]*utils.Balance{
 				"VoiceBalance": {
 					ID:        "VoiceBalance",
@@ -662,7 +662,7 @@ func testTPeSetAccount(t *testing.T) {
 						},
 					},
 					Type: "*abstract",
-					Opts: map[string]interface{}{
+					Opts: map[string]any{
 						"Destination": "10",
 					},
 					Units: utils.NewDecimal(0, 0),
@@ -732,7 +732,7 @@ func testTPeSetAccount(t *testing.T) {
 							Weight: 30,
 						},
 					},
-					Opts: map[string]interface{}{
+					Opts: map[string]any{
 						utils.MetaBalanceLimit: -200.0,
 					},
 					CostIncrements: []*utils.CostIncrement{
@@ -897,7 +897,7 @@ func testTPeSetActions(t *testing.T) {
 				},
 			},
 		},
-		APIOpts: map[string]interface{}{},
+		APIOpts: map[string]any{},
 	}
 	var reply string
 	if err := tpeSRPC.Call(context.Background(), utils.AdminSv1SetActionProfile,
@@ -989,7 +989,7 @@ func testTPeSetDispatcherProfiles(t *testing.T) {
 			ID:        "Dsp1",
 			FilterIDs: []string{"*string:~*req.Account:1001", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z"},
 			Strategy:  utils.MetaFirst,
-			StrategyParams: map[string]interface{}{
+			StrategyParams: map[string]any{
 				utils.MetaDefaultRatio: "false",
 			},
 			Weight: 20,
@@ -998,7 +998,7 @@ func testTPeSetDispatcherProfiles(t *testing.T) {
 					ID:        "C1",
 					FilterIDs: []string{},
 					Weight:    10,
-					Params:    map[string]interface{}{"0": "192.168.54.203"},
+					Params:    map[string]any{"0": "192.168.54.203"},
 					Blocker:   false,
 				},
 			},
@@ -1023,7 +1023,7 @@ func testTPeSetDispatcherProfiles(t *testing.T) {
 				{
 					ID:        "Conn2",
 					FilterIDs: []string{"*suffix:~*opts.*answerTime:45T"},
-					Params:    map[string]interface{}{utils.MetaRatio: 1},
+					Params:    map[string]any{utils.MetaRatio: 1},
 					Blocker:   false,
 				},
 			},

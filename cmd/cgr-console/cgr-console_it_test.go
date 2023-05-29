@@ -315,7 +315,7 @@ func testConsoleItStatsMetrics(t *testing.T) {
 	cmd := exec.Command("cgr-console", "stats_metrics", `ID="Stats2"`)
 	output := bytes.NewBuffer(nil)
 	cmd.Stdout = output
-	expected := map[string]interface{}{
+	expected := map[string]any{
 		"*tcc": "N/A",
 		"*tcd": "N/A",
 	}
@@ -324,7 +324,7 @@ func testConsoleItStatsMetrics(t *testing.T) {
 		t.Log(output.String())
 		t.Fatal(err)
 	}
-	var rcv map[string]interface{}
+	var rcv map[string]any
 	if err := json.NewDecoder(output).Decode(&rcv); err != nil {
 		t.Log(output.String())
 		t.Fatal(err)
@@ -338,8 +338,8 @@ func testConsoleItGetJsonSection(t *testing.T) {
 	cmd := exec.Command("cgr-console", "get_json_section", `Sections=["cores"]`)
 	output := bytes.NewBuffer(nil)
 	cmd.Stdout = output
-	expected := map[string]interface{}{
-		"cores": map[string]interface{}{
+	expected := map[string]any{
+		"cores": map[string]any{
 			"caps":                0.,
 			"caps_stats_interval": "0",
 			"caps_strategy":       "*busy",
@@ -351,7 +351,7 @@ func testConsoleItGetJsonSection(t *testing.T) {
 		t.Log(output.String())
 		t.Fatal(err)
 	}
-	var rcv map[string]interface{}
+	var rcv map[string]any
 	if err := json.NewDecoder(output).Decode(&rcv); err != nil {
 		t.Error(output.String())
 		t.Fatal(err)
@@ -486,16 +486,16 @@ func testConsoleItStatsProfile(t *testing.T) {
 	cmd := exec.Command("cgr-console", "stats_profile", `Tenant="cgrates.org"`, `ID="Stats2"`)
 	output := bytes.NewBuffer(nil)
 	cmd.Stdout = output
-	expected := map[string]interface{}{
+	expected := map[string]any{
 		"Blocker":   true,
-		"FilterIDs": []interface{}{"FLTR_ACNT_1001_1002"},
+		"FilterIDs": []any{"FLTR_ACNT_1001_1002"},
 		"ID":        "Stats2",
-		"Metrics": []interface{}{
-			map[string]interface{}{
+		"Metrics": []any{
+			map[string]any{
 				"FilterIDs": nil,
 				"MetricID":  "*tcc",
 			},
-			map[string]interface{}{
+			map[string]any{
 				"FilterIDs": nil,
 				"MetricID":  "*tcd",
 			},
@@ -505,7 +505,7 @@ func testConsoleItStatsProfile(t *testing.T) {
 		"Stored":       false,
 		"TTL":          "-1ns",
 		"Tenant":       "cgrates.org",
-		"ThresholdIDs": []interface{}{"*none"},
+		"ThresholdIDs": []any{"*none"},
 		"Weight":       30.,
 	}
 	if err := cmd.Run(); err != nil {
@@ -513,12 +513,12 @@ func testConsoleItStatsProfile(t *testing.T) {
 		t.Log(output.String())
 		t.Fatal(err)
 	}
-	var rcv map[string]interface{}
+	var rcv map[string]any
 	if err := json.NewDecoder(output).Decode(&rcv); err != nil {
 		t.Error(err)
 	}
-	sort.Slice(rcv["Metrics"].([]interface{}), func(i, j int) bool {
-		return utils.IfaceAsString((rcv["Metrics"].([]interface{})[i].(map[string]interface{}))["MetricID"]) < utils.IfaceAsString((rcv["Metrics"].([]interface{})[j].(map[string]interface{}))["MetricID"])
+	sort.Slice(rcv["Metrics"].([]any), func(i, j int) bool {
+		return utils.IfaceAsString((rcv["Metrics"].([]any)[i].(map[string]any))["MetricID"]) < utils.IfaceAsString((rcv["Metrics"].([]any)[j].(map[string]any))["MetricID"])
 	})
 
 	if !reflect.DeepEqual(rcv, expected) {
@@ -593,7 +593,7 @@ func testConsoleItThreshold(t *testing.T) {
 	cmd := exec.Command("cgr-console", "threshold", `Tenant="cgrates.org"`, `ID="THD_ACNT_1001"`)
 	output := bytes.NewBuffer(nil)
 	cmd.Stdout = output
-	expected := map[string]interface{}{
+	expected := map[string]any{
 		"Hits":   0.,
 		"ID":     "THD_ACNT_1001",
 		"Snooze": "0001-01-01T00:00:00Z",
@@ -604,7 +604,7 @@ func testConsoleItThreshold(t *testing.T) {
 		t.Log(output.String())
 		t.Fatal(err)
 	}
-	var rcv map[string]interface{}
+	var rcv map[string]any
 	if err := json.NewDecoder(output).Decode(&rcv); err != nil {
 		t.Error(err)
 	}
@@ -636,11 +636,11 @@ func testConsoleItThresholdsProfile(t *testing.T) {
 	cmd := exec.Command("cgr-console", "thresholds_profile", `Tenant="cgrates.org"`, `ID="THD_ACNT_1001"`)
 	output := bytes.NewBuffer(nil)
 	cmd.Stdout = output
-	expected := map[string]interface{}{
-		"ActionProfileIDs": []interface{}{"ACT_LOG_WARNING"},
+	expected := map[string]any{
+		"ActionProfileIDs": []any{"ACT_LOG_WARNING"},
 		"Async":            true,
 		"Blocker":          false,
-		"FilterIDs":        []interface{}{"FLTR_ACNT_1001"},
+		"FilterIDs":        []any{"FLTR_ACNT_1001"},
 		"ID":               "THD_ACNT_1001",
 		"MaxHits":          1.,
 		"MinHits":          1.,
@@ -653,7 +653,7 @@ func testConsoleItThresholdsProfile(t *testing.T) {
 		t.Log(output.String())
 		t.Fatal(err)
 	}
-	var rcv map[string]interface{}
+	var rcv map[string]any
 	if err := json.NewDecoder(output).Decode(&rcv); err != nil {
 		t.Error(err)
 	}
@@ -665,14 +665,14 @@ func testConsoleItThresholdsProfile(t *testing.T) {
 func testConsoleItRatesProfileIds(t *testing.T) {
 	cmd := exec.Command("cgr-console", "rates_profile_ids", `Tenant="cgrates.org"`)
 	output := bytes.NewBuffer(nil)
-	expected := []interface{}{"123"}
+	expected := []any{"123"}
 	cmd.Stdout = output
 	if err := cmd.Run(); err != nil {
 		t.Log(cmd.Args)
 		t.Log(output.String())
 		t.Fatal(err)
 	}
-	var rcv []interface{}
+	var rcv []any
 	if err := json.NewDecoder(output).Decode(&rcv); err != nil {
 		t.Log(output.String())
 		t.Error(err)
@@ -685,14 +685,14 @@ func testConsoleItRatesProfileIds(t *testing.T) {
 func testConsoleItStatsProfileIds(t *testing.T) {
 	cmd := exec.Command("cgr-console", "stats_profile_ids", `Tenant="cgrates.org"`)
 	output := bytes.NewBuffer(nil)
-	expected := []interface{}{"123", "Stats2", "Stats2_1"}
+	expected := []any{"123", "Stats2", "Stats2_1"}
 	cmd.Stdout = output
 	if err := cmd.Run(); err != nil {
 		t.Log(cmd.Args)
 		t.Log(output.String())
 		t.Fatal(err)
 	}
-	var rcv []interface{}
+	var rcv []any
 	if err := json.NewDecoder(output).Decode(&rcv); err != nil {
 		t.Error(err)
 	}
@@ -719,240 +719,240 @@ func testConsoleItCacheStats(t *testing.T) {
 	cmd := exec.Command("cgr-console", "cache_stats")
 	output := bytes.NewBuffer(nil)
 	cmd.Stdout = output
-	expected := map[string]interface{}{
-		"*account_filter_indexes": map[string]interface{}{
+	expected := map[string]any{
+		"*account_filter_indexes": map[string]any{
 			"Items":  0.,
 			"Groups": 0.,
 		},
-		"*accounts": map[string]interface{}{
+		"*accounts": map[string]any{
 			"Items":  0.,
 			"Groups": 0.,
 		},
-		"*action_profile_filter_indexes": map[string]interface{}{
+		"*action_profile_filter_indexes": map[string]any{
 			"Items":  0.,
 			"Groups": 0.,
 		},
-		"*action_profiles": map[string]interface{}{
+		"*action_profiles": map[string]any{
 			"Items":  0.,
 			"Groups": 0.,
 		},
-		"*apiban": map[string]interface{}{
+		"*apiban": map[string]any{
 			"Items":  0.,
 			"Groups": 0.,
 		},
-		"*attribute_filter_indexes": map[string]interface{}{
+		"*attribute_filter_indexes": map[string]any{
 			"Items":  0.,
 			"Groups": 0.,
 		},
-		"*attribute_profiles": map[string]interface{}{
+		"*attribute_profiles": map[string]any{
 			"Items":  0.,
 			"Groups": 0.,
 		},
-		"*caps_events": map[string]interface{}{
+		"*caps_events": map[string]any{
 			"Items":  0.,
 			"Groups": 0.,
 		},
-		"*cdr_ids": map[string]interface{}{
+		"*cdr_ids": map[string]any{
 			"Items":  0.,
 			"Groups": 0.,
 		},
-		"*cdrs": map[string]interface{}{
+		"*cdrs": map[string]any{
 			"Items":  0.,
 			"Groups": 0.,
 		},
-		"*charger_filter_indexes": map[string]interface{}{
+		"*charger_filter_indexes": map[string]any{
 			"Items":  0.,
 			"Groups": 0.,
 		},
-		"*charger_profiles": map[string]interface{}{
+		"*charger_profiles": map[string]any{
 			"Items":  0.,
 			"Groups": 0.,
 		},
-		"*closed_sessions": map[string]interface{}{
+		"*closed_sessions": map[string]any{
 			"Items":  0.,
 			"Groups": 0.,
 		},
-		"*default": map[string]interface{}{
+		"*default": map[string]any{
 			"Items":  0.,
 			"Groups": 0.,
 		},
-		"*diameter_messages": map[string]interface{}{
+		"*diameter_messages": map[string]any{
 			"Items":  0.,
 			"Groups": 0.,
 		},
-		"*dispatcher_filter_indexes": map[string]interface{}{
+		"*dispatcher_filter_indexes": map[string]any{
 			"Items":  0.,
 			"Groups": 0.,
 		},
-		"*dispatcher_hosts": map[string]interface{}{
+		"*dispatcher_hosts": map[string]any{
 			"Items":  0.,
 			"Groups": 0.,
 		},
-		"*dispatcher_loads": map[string]interface{}{
+		"*dispatcher_loads": map[string]any{
 			"Items":  0.,
 			"Groups": 0.,
 		},
-		"*dispatcher_profiles": map[string]interface{}{
+		"*dispatcher_profiles": map[string]any{
 			"Items":  0.,
 			"Groups": 0.,
 		},
-		"*dispatcher_routes": map[string]interface{}{
+		"*dispatcher_routes": map[string]any{
 			"Items":  0.,
 			"Groups": 0.,
 		},
-		"*dispatchers": map[string]interface{}{
+		"*dispatchers": map[string]any{
 			"Items":  0.,
 			"Groups": 0.,
 		},
-		"*event_charges": map[string]interface{}{
+		"*event_charges": map[string]any{
 			"Items":  0.,
 			"Groups": 0.,
 		},
-		"*event_resources": map[string]interface{}{
+		"*event_resources": map[string]any{
 			"Items":  1.,
 			"Groups": 0.,
 		},
-		"*filters": map[string]interface{}{
+		"*filters": map[string]any{
 			"Items":  3.,
 			"Groups": 0.,
 		},
-		"*load_ids": map[string]interface{}{
+		"*load_ids": map[string]any{
 			"Items":  13.,
 			"Groups": 0.,
 		},
-		"*rate_filter_indexes": map[string]interface{}{
+		"*rate_filter_indexes": map[string]any{
 			"Items":  0.,
 			"Groups": 0.,
 		},
-		"*rate_profile_filter_indexes": map[string]interface{}{
+		"*rate_profile_filter_indexes": map[string]any{
 			"Items":  0.,
 			"Groups": 0.,
 		},
-		"*rate_profiles": map[string]interface{}{
+		"*rate_profiles": map[string]any{
 			"Items":  0.,
 			"Groups": 0.,
 		},
-		"*replication_hosts": map[string]interface{}{
+		"*replication_hosts": map[string]any{
 			"Items":  0.,
 			"Groups": 0.,
 		},
-		"*resource_filter_indexes": map[string]interface{}{
+		"*resource_filter_indexes": map[string]any{
 			"Items":  2.,
 			"Groups": 1.,
 		},
-		"*resource_profiles": map[string]interface{}{
+		"*resource_profiles": map[string]any{
 			"Items":  2.,
 			"Groups": 0.,
 		},
-		"*resources": map[string]interface{}{
+		"*resources": map[string]any{
 			"Items":  2.,
 			"Groups": 0.,
 		},
-		"*reverse_filter_indexes": map[string]interface{}{
+		"*reverse_filter_indexes": map[string]any{
 			"Items":  0.,
 			"Groups": 0.,
 		},
-		"*route_filter_indexes": map[string]interface{}{
+		"*route_filter_indexes": map[string]any{
 			"Items":  3.,
 			"Groups": 1.,
 		},
-		"*route_profiles": map[string]interface{}{
+		"*route_profiles": map[string]any{
 			"Items":  1.,
 			"Groups": 0.,
 		},
-		"*rpc_connections": map[string]interface{}{
+		"*rpc_connections": map[string]any{
 			"Items":  2.,
 			"Groups": 0.,
 		},
-		"*rpc_responses": map[string]interface{}{
+		"*rpc_responses": map[string]any{
 			"Items":  0.,
 			"Groups": 0.,
 		},
-		"*session_costs": map[string]interface{}{
+		"*session_costs": map[string]any{
 			"Items":  0.,
 			"Groups": 0.,
 		},
-		"*stat_filter_indexes": map[string]interface{}{
+		"*stat_filter_indexes": map[string]any{
 			"Items":  2.,
 			"Groups": 1.,
 		},
-		"*statqueue_profiles": map[string]interface{}{
+		"*statqueue_profiles": map[string]any{
 			"Items":  2.,
 			"Groups": 0.,
 		},
-		"*statqueues": map[string]interface{}{
+		"*statqueues": map[string]any{
 			"Items":  2.,
 			"Groups": 0.,
 		},
-		"*stir": map[string]interface{}{
+		"*stir": map[string]any{
 			"Items":  0.,
 			"Groups": 0.,
 		},
-		"*threshold_filter_indexes": map[string]interface{}{
+		"*threshold_filter_indexes": map[string]any{
 			"Items":  9.,
 			"Groups": 1.,
 		},
-		"*threshold_profiles": map[string]interface{}{
+		"*threshold_profiles": map[string]any{
 			"Items":  2.,
 			"Groups": 0.,
 		},
-		"*thresholds": map[string]interface{}{
+		"*thresholds": map[string]any{
 			"Items":  2.,
 			"Groups": 0.,
 		},
-		"*tp_accounts": map[string]interface{}{
+		"*tp_accounts": map[string]any{
 			"Items":  0.,
 			"Groups": 0.,
 		},
-		"*tp_action_profiles": map[string]interface{}{
+		"*tp_action_profiles": map[string]any{
 			"Items":  0.,
 			"Groups": 0.,
 		},
-		"*tp_attributes": map[string]interface{}{
+		"*tp_attributes": map[string]any{
 			"Items":  0.,
 			"Groups": 0.,
 		},
-		"*tp_chargers": map[string]interface{}{
+		"*tp_chargers": map[string]any{
 			"Items":  0.,
 			"Groups": 0.,
 		},
-		"*tp_dispatcher_hosts": map[string]interface{}{
+		"*tp_dispatcher_hosts": map[string]any{
 			"Items":  0.,
 			"Groups": 0.,
 		},
-		"*tp_dispatcher_profiles": map[string]interface{}{
+		"*tp_dispatcher_profiles": map[string]any{
 			"Items":  0.,
 			"Groups": 0.,
 		},
-		"*tp_filters": map[string]interface{}{
+		"*tp_filters": map[string]any{
 			"Items":  0.,
 			"Groups": 0.,
 		},
-		"*tp_rate_profiles": map[string]interface{}{
+		"*tp_rate_profiles": map[string]any{
 			"Items":  0.,
 			"Groups": 0.,
 		},
-		"*tp_resources": map[string]interface{}{
+		"*tp_resources": map[string]any{
 			"Items":  0.,
 			"Groups": 0.,
 		},
-		"*tp_routes": map[string]interface{}{
+		"*tp_routes": map[string]any{
 			"Items":  0.,
 			"Groups": 0.,
 		},
-		"*tp_stats": map[string]interface{}{
+		"*tp_stats": map[string]any{
 			"Items":  0.,
 			"Groups": 0.,
 		},
-		"*tp_thresholds": map[string]interface{}{
+		"*tp_thresholds": map[string]any{
 			"Items":  0.,
 			"Groups": 0.,
 		},
-		"*uch": map[string]interface{}{
+		"*uch": map[string]any{
 			"Items":  0.,
 			"Groups": 0.,
 		},
-		"*versions": map[string]interface{}{
+		"*versions": map[string]any{
 			"Items":  0.,
 			"Groups": 0.,
 		},
@@ -963,7 +963,7 @@ func testConsoleItCacheStats(t *testing.T) {
 		t.Log(output.String())
 		t.Fatal(err)
 	}
-	var rcv map[string]interface{}
+	var rcv map[string]any
 	if err := json.NewDecoder(output).Decode(&rcv); err != nil {
 		t.Error(err)
 	}
@@ -1016,17 +1016,17 @@ func testConsoleItResourcesForEvent(t *testing.T) {
 	cmd := exec.Command("cgr-console", "resources_for_event", `Tenant="cgrates.org"`, `ID="123"`, `Event={"Account":"1001"}`, `UsageID="usageID"`)
 	output := bytes.NewBuffer(nil)
 	cmd.Stdout = output
-	expected := []interface{}{
-		map[string]interface{}{
+	expected := []any{
+		map[string]any{
 			"Tenant": "cgrates.org",
 			"ID":     "ResGroup1",
-			"Usages": map[string]interface{}{},
+			"Usages": map[string]any{},
 			"TTLIdx": nil,
 		},
-		map[string]interface{}{
+		map[string]any{
 			"Tenant": "cgrates.org",
 			"ID":     "123",
-			"Usages": map[string]interface{}{},
+			"Usages": map[string]any{},
 			"TTLIdx": nil,
 		},
 	}
@@ -1035,7 +1035,7 @@ func testConsoleItResourcesForEvent(t *testing.T) {
 		t.Log(output.String())
 		t.Fatal(err)
 	}
-	var rcv []interface{}
+	var rcv []any
 	if err := json.NewDecoder(output).Decode(&rcv); err != nil {
 		t.Error(output.String())
 		t.Fatal(err)
@@ -1049,13 +1049,13 @@ func testConsoleItAttributesProfileIds(t *testing.T) {
 	cmd := exec.Command("cgr-console", "attributes_profile_ids", `Tenant="cgrates.org"`)
 	output := bytes.NewBuffer(nil)
 	cmd.Stdout = output
-	expected := []interface{}{"ATTR_1001_SESSIONAUTH", "ATTR_1001_SIMPLEAUTH", "ATTR_1002_SESSIONAUTH", "ATTR_1002_SIMPLEAUTH", "ATTR_1003_SESSIONAUTH", "ATTR_1003_SIMPLEAUTH", "ATTR_ACC_ALIAS"}
+	expected := []any{"ATTR_1001_SESSIONAUTH", "ATTR_1001_SIMPLEAUTH", "ATTR_1002_SESSIONAUTH", "ATTR_1002_SIMPLEAUTH", "ATTR_1003_SESSIONAUTH", "ATTR_1003_SIMPLEAUTH", "ATTR_ACC_ALIAS"}
 	if err := cmd.Run(); err != nil {
 		t.Log(cmd.Args)
 		t.Log(output.String())
 		t.Fatal(err)
 	}
-	var rcv []interface{}
+	var rcv []any
 	if err := json.NewDecoder(output).Decode(&rcv); err != nil {
 		t.Error(output.String())
 		t.Fatal(err)
@@ -1072,13 +1072,13 @@ func testConsoleItThresholdsProcessEvent(t *testing.T) {
 	cmd := exec.Command("cgr-console", "thresholds_process_event", `ID="123"`, `Event={"Account":"1001"}`)
 	output := bytes.NewBuffer(nil)
 	cmd.Stdout = output
-	expected := []interface{}{"123", "THD_ACNT_1001"}
+	expected := []any{"123", "THD_ACNT_1001"}
 	if err := cmd.Run(); err != nil {
 		t.Log(cmd.Args)
 		t.Log(output.String())
 		t.Fatal(err)
 	}
-	var rcv []interface{}
+	var rcv []any
 	if err := json.NewDecoder(output).Decode(&rcv); err != nil {
 		t.Error(output.String())
 		t.Fatal(err)
@@ -1135,11 +1135,11 @@ func testConsoleItResources(t *testing.T) {
 	cmd := exec.Command("cgr-console", "resources", `ID="ResGroup1"`)
 	output := bytes.NewBuffer(nil)
 	cmd.Stdout = output
-	expected := map[string]interface{}{
+	expected := map[string]any{
 		"Tenant": "cgrates.org",
 		"ID":     "ResGroup1",
-		"Usages": map[string]interface{}{
-			"usageID": map[string]interface{}{
+		"Usages": map[string]any{
+			"usageID": map[string]any{
 				"Tenant":     "cgrates.org",
 				"ID":         "usageID",
 				"ExpiryTime": "0001-01-01T00:00:00Z",
@@ -1153,7 +1153,7 @@ func testConsoleItResources(t *testing.T) {
 		t.Log(output.String())
 		t.Fatal(err)
 	}
-	var rcv map[string]interface{}
+	var rcv map[string]any
 	if err := json.NewDecoder(output).Decode(&rcv); err != nil {
 		t.Error(output.String())
 		t.Fatal(err)
@@ -1167,15 +1167,15 @@ func testConsoleItResourcesProfile(t *testing.T) {
 	cmd := exec.Command("cgr-console", "resources_profile", `ID="ResGroup1"`)
 	output := bytes.NewBuffer(nil)
 	cmd.Stdout = output
-	expected := map[string]interface{}{
+	expected := map[string]any{
 		"AllocationMessage": "",
 		"Blocker":           false,
-		"FilterIDs":         []interface{}{"FLTR_RES"},
+		"FilterIDs":         []any{"FLTR_RES"},
 		"ID":                "ResGroup1",
 		"Limit":             7.,
 		"Stored":            true,
 		"Tenant":            "cgrates.org",
-		"ThresholdIDs":      []interface{}{"*none"},
+		"ThresholdIDs":      []any{"*none"},
 		"UsageTTL":          "-1ns",
 		"Weight":            10.,
 	}
@@ -1184,7 +1184,7 @@ func testConsoleItResourcesProfile(t *testing.T) {
 		t.Log(output.String())
 		t.Fatal(err)
 	}
-	var rcv map[string]interface{}
+	var rcv map[string]any
 	if err := json.NewDecoder(output).Decode(&rcv); err != nil {
 		t.Error(output.String())
 		t.Fatal(err)
@@ -1218,22 +1218,22 @@ func testConsoleItRoutes(t *testing.T) {
 	cmd := exec.Command("cgr-console", "routes", `ID="ROUTE_ACNT_1001"`, `Event={"Account":"1001"}`)
 	output := bytes.NewBuffer(nil)
 	cmd.Stdout = output
-	expected := []interface{}{
-		map[string]interface{}{
+	expected := []any{
+		map[string]any{
 			"ProfileID": "ROUTE_ACNT_1001",
 			"Sorting":   "*weight",
-			"Routes": []interface{}{
-				map[string]interface{}{
+			"Routes": []any{
+				map[string]any{
 					"RouteID":         "route2",
 					"RouteParameters": "",
-					"SortingData": map[string]interface{}{
+					"SortingData": map[string]any{
 						"Weight": 20.,
 					},
 				},
-				map[string]interface{}{
+				map[string]any{
 					"RouteID":         "route1",
 					"RouteParameters": "",
-					"SortingData": map[string]interface{}{
+					"SortingData": map[string]any{
 						"Weight": 10.,
 					},
 				},
@@ -1245,14 +1245,14 @@ func testConsoleItRoutes(t *testing.T) {
 		t.Log(output.String())
 		t.Fatal(err)
 	}
-	var rcv []interface{}
+	var rcv []any
 	if err := json.NewDecoder(output).Decode(&rcv); err != nil {
 		t.Error(output.String())
 		t.Fatal(err)
 	}
 	sort.Slice(rcv, func(i, j int) bool {
-		return utils.IfaceAsString((rcv[0].(map[string]interface{})["Routes"].([]interface{})[i].(map[string]interface{})["RouteID"])) < utils.IfaceAsString((rcv[0].(map[string]interface{})["Routes"].([]interface{})[j].(map[string]interface{})["RouteID"]))
-		// return utils.IfaceAsString((rcv["Metrics"].([]interface{})[i].(map[string]interface{}))["MetricID"]) < utils.IfaceAsString((rcv["Metrics"].([]interface{})[j].(map[string]interface{}))["MetricID"])
+		return utils.IfaceAsString((rcv[0].(map[string]any)["Routes"].([]any)[i].(map[string]any)["RouteID"])) < utils.IfaceAsString((rcv[0].(map[string]any)["Routes"].([]any)[j].(map[string]any)["RouteID"]))
+		// return utils.IfaceAsString((rcv["Metrics"].([]any)[i].(map[string]any))["MetricID"]) < utils.IfaceAsString((rcv["Metrics"].([]any)[j].(map[string]any))["MetricID"])
 	})
 	if !reflect.DeepEqual(rcv, expected) {
 		t.Fatalf("Expected %+v \n but received \n %+v", utils.ToJSON(expected), utils.ToJSON(rcv))
@@ -1263,14 +1263,14 @@ func testConsoleItFilter(t *testing.T) {
 	cmd := exec.Command("cgr-console", "filter", `ID="FLTR_RES"`)
 	output := bytes.NewBuffer(nil)
 	cmd.Stdout = output
-	expected := map[string]interface{}{
+	expected := map[string]any{
 		"Tenant": "cgrates.org",
 		"ID":     "FLTR_RES",
-		"Rules": []interface{}{
-			map[string]interface{}{
+		"Rules": []any{
+			map[string]any{
 				"Type":    "*string",
 				"Element": "~*req.Account",
-				"Values":  []interface{}{"1001", "1002", "1003"},
+				"Values":  []any{"1001", "1002", "1003"},
 			},
 		},
 	}
@@ -1279,7 +1279,7 @@ func testConsoleItFilter(t *testing.T) {
 		t.Log(output.String())
 		t.Fatal(err)
 	}
-	var rcv map[string]interface{}
+	var rcv map[string]any
 	if err := json.NewDecoder(output).Decode(&rcv); err != nil {
 		t.Error(output.String())
 		t.Fatal(err)
@@ -1294,8 +1294,8 @@ func testConsoleItThresholdsForEvent(t *testing.T) {
 	cmd := exec.Command("cgr-console", "thresholds_for_event", `Tenant="cgrates.org"`, `ID="123"`, `Event={"Account":"1001"}`, `UsageID="usageID"`)
 	output := bytes.NewBuffer(nil)
 	cmd.Stdout = output
-	expected := []interface{}{
-		map[string]interface{}{
+	expected := []any{
+		map[string]any{
 			"Tenant": "cgrates.org",
 			"ID":     "123",
 			"Hits":   1.,
@@ -1307,12 +1307,12 @@ func testConsoleItThresholdsForEvent(t *testing.T) {
 		t.Log(output.String())
 		t.Fatal(err)
 	}
-	var rcv []interface{}
+	var rcv []any
 	if err := json.NewDecoder(output).Decode(&rcv); err != nil {
 		t.Error(output.String())
 		t.Fatal(err)
 	}
-	rcv[0].(map[string]interface{})["Snooze"] = ""
+	rcv[0].(map[string]any)["Snooze"] = ""
 
 	if !reflect.DeepEqual(rcv, expected) {
 		t.Fatalf("Expected %+v \n but received \n %+v", utils.ToJSON(expected), utils.ToJSON(rcv))
@@ -1323,13 +1323,13 @@ func testConsoleItStatsForEvent(t *testing.T) {
 	cmd := exec.Command("cgr-console", "stats_for_event", `Tenant="cgrates.org"`, `ID="Stats2"`, `Event={"Account":"1001"}`)
 	output := bytes.NewBuffer(nil)
 	cmd.Stdout = output
-	expected := []interface{}{"123"}
+	expected := []any{"123"}
 	if err := cmd.Run(); err != nil {
 		t.Log(cmd.Args)
 		t.Log(output.String())
 		t.Fatal(err)
 	}
-	var rcv []interface{}
+	var rcv []any
 	if err := json.NewDecoder(output).Decode(&rcv); err != nil {
 		t.Error(output.String())
 		t.Fatal(err)
@@ -1343,13 +1343,13 @@ func testConsoleItStatsProcessEvent(t *testing.T) {
 	cmd := exec.Command("cgr-console", "stats_process_event", `Tenant="cgrates.org"`, `ID="123"`, `Event={"Account":"1001"}`)
 	output := bytes.NewBuffer(nil)
 	cmd.Stdout = output
-	expected := []interface{}{"123"}
+	expected := []any{"123"}
 	if err := cmd.Run(); err != nil {
 		t.Log(cmd.Args)
 		t.Log(output.String())
 		t.Fatal(err)
 	}
-	var rcv []interface{}
+	var rcv []any
 	if err := json.NewDecoder(output).Decode(&rcv); err != nil {
 		t.Error(output.String())
 		t.Fatal(err)

@@ -118,7 +118,7 @@ func TestThresholdSCfgAsMapInterfaceCase1(t *testing.T) {
 	cfgJSONStr := `{
 		"thresholds": {},		
 }`
-	eMap := map[string]interface{}{
+	eMap := map[string]any{
 		utils.EnabledCfg:                false,
 		utils.StoreIntervalCfg:          "",
 		utils.IndexedSelectsCfg:         true,
@@ -128,7 +128,7 @@ func TestThresholdSCfgAsMapInterfaceCase1(t *testing.T) {
 		utils.NotExistsIndexedFieldsCfg: []string{},
 		utils.NestedFieldsCfg:           false,
 		utils.ActionSConnsCfg:           []string{},
-		utils.OptsCfg: map[string]interface{}{
+		utils.OptsCfg: map[string]any{
 			utils.MetaProfileIDs:           []*utils.DynamicStringSliceOpt{},
 			utils.MetaProfileIgnoreFilters: []*utils.DynamicBoolOpt{},
 		},
@@ -155,7 +155,7 @@ func TestThresholdSCfgAsMapInterfaceCase2(t *testing.T) {
 			"actions_conns": ["*internal"],
 		},		
 }`
-	eMap := map[string]interface{}{
+	eMap := map[string]any{
 		utils.EnabledCfg:                true,
 		utils.StoreIntervalCfg:          "96h0m0s",
 		utils.IndexedSelectsCfg:         false,
@@ -166,7 +166,7 @@ func TestThresholdSCfgAsMapInterfaceCase2(t *testing.T) {
 		utils.NotExistsIndexedFieldsCfg: []string{},
 		utils.NestedFieldsCfg:           true,
 		utils.ActionSConnsCfg:           []string{utils.MetaInternal},
-		utils.OptsCfg: map[string]interface{}{
+		utils.OptsCfg: map[string]any{
 			utils.MetaProfileIDs:           []*utils.DynamicStringSliceOpt{},
 			utils.MetaProfileIgnoreFilters: []*utils.DynamicBoolOpt{},
 		},

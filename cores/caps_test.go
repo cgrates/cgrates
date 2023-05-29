@@ -39,10 +39,10 @@ func (c *mockServerCodec) ReadRequestHeader(r *birpc.Request) (err error) {
 	return
 }
 
-func (c *mockServerCodec) ReadRequestBody(x interface{}) (err error) {
+func (c *mockServerCodec) ReadRequestBody(x any) (err error) {
 	return utils.ErrNotImplemented
 }
-func (c *mockServerCodec) WriteResponse(r *birpc.Response, x interface{}) error {
+func (c *mockServerCodec) WriteResponse(r *birpc.Response, x any) error {
 	return nil
 }
 func (c *mockServerCodec) Close() error { return nil }
@@ -143,11 +143,11 @@ func (mockBiRPCCodec) ReadHeader(r *birpc.Request, _ *birpc.Response) error {
 	r.ServiceMethod = utils.CoreSv1Ping
 	return nil
 }
-func (mockBiRPCCodec) ReadRequestBody(interface{}) error                { return utils.ErrNotImplemented }
-func (mockBiRPCCodec) ReadResponseBody(interface{}) error               { return nil }
-func (mockBiRPCCodec) WriteRequest(*birpc.Request, interface{}) error   { return nil }
-func (mockBiRPCCodec) WriteResponse(*birpc.Response, interface{}) error { return nil }
-func (mockBiRPCCodec) Close() error                                     { return nil }
+func (mockBiRPCCodec) ReadRequestBody(any) error                { return utils.ErrNotImplemented }
+func (mockBiRPCCodec) ReadResponseBody(any) error               { return nil }
+func (mockBiRPCCodec) WriteRequest(*birpc.Request, any) error   { return nil }
+func (mockBiRPCCodec) WriteResponse(*birpc.Response, any) error { return nil }
+func (mockBiRPCCodec) Close() error                             { return nil }
 
 func TestNewCapsBiRPCCodec(t *testing.T) {
 	mk := new(mockBiRPCCodec)

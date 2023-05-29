@@ -60,7 +60,7 @@ type TestRPC struct {
 
 var testRPCrt1 TestRPC
 
-func (rpc *TestRPC) ProcessEvent(ctx *context.Context, cgrEv *utils.CGREventWithEeIDs, rply *map[string]map[string]interface{}) (err error) {
+func (rpc *TestRPC) ProcessEvent(ctx *context.Context, cgrEv *utils.CGREventWithEeIDs, rply *map[string]map[string]any) (err error) {
 	rpc.Event = cgrEv
 	return nil
 }
@@ -134,7 +134,7 @@ func testLdPrMatchRtLoadTP(t *testing.T) {
 	var reply string
 	if err := testLdPrMatchRtRPC.Call(context.Background(), utils.LoaderSv1Run,
 		&loaders.ArgsProcessFolder{
-			APIOpts: map[string]interface{}{
+			APIOpts: map[string]any{
 				utils.MetaStopOnError: true,
 				utils.MetaCache:       utils.MetaReload,
 			},
@@ -149,7 +149,7 @@ func testLdPrMatchRtCDRSProcessEvent(t *testing.T) {
 	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "TestEv1",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.ToR:          utils.MetaVoice,
 			utils.OriginID:     "TestEv1",
 			utils.RequestType:  utils.MetaPrepaid,
@@ -158,7 +158,7 @@ func testLdPrMatchRtCDRSProcessEvent(t *testing.T) {
 			utils.Destination:  "1002",
 			utils.Usage:        time.Minute,
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaRates:      true,
 			utils.OptsCDRsExport: true,
 			utils.MetaAccounts:   false,
@@ -176,13 +176,13 @@ func testLdPrMatchRtCDRSProcessEvent(t *testing.T) {
 	if testRPCrt1.Event == nil {
 		t.Fatal("The rpc was not called")
 	}
-	costIntervalRatesID := testRPCrt1.Event.APIOpts[utils.MetaRateSCost].(map[string]interface{})["CostIntervals"].([]interface{})[0].(map[string]interface{})["Increments"].([]interface{})[0].(map[string]interface{})["RateID"]
+	costIntervalRatesID := testRPCrt1.Event.APIOpts[utils.MetaRateSCost].(map[string]any)["CostIntervals"].([]any)[0].(map[string]any)["Increments"].([]any)[0].(map[string]any)["RateID"]
 	expected2 := &utils.CGREventWithEeIDs{
 		EeIDs: nil,
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestEv1",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				"Account":     "1001",
 				"Destination": "1002",
 				"OriginID":    "TestEv1",
@@ -191,15 +191,15 @@ func testLdPrMatchRtCDRSProcessEvent(t *testing.T) {
 				"ToR":         "*voice",
 				"Usage":       60000000000,
 			},
-			APIOpts: map[string]interface{}{
+			APIOpts: map[string]any{
 				utils.MetaCost: 0.4,
-				utils.MetaRateSCost: map[string]interface{}{
+				utils.MetaRateSCost: map[string]any{
 					"Altered":  nil,
 					utils.Cost: 0.4,
-					"CostIntervals": []map[string]interface{}{
+					"CostIntervals": []map[string]any{
 						{
 							"CompressFactor": 1,
-							"Increments": []map[string]interface{}{
+							"Increments": []map[string]any{
 								{
 									"CompressFactor":    2,
 									"RateID":            costIntervalRatesID,
@@ -213,8 +213,8 @@ func testLdPrMatchRtCDRSProcessEvent(t *testing.T) {
 					"MaxCost":         0,
 					"MaxCostStrategy": "",
 					"MinCost":         0,
-					"Rates": map[string]interface{}{
-						utils.IfaceAsString(costIntervalRatesID): map[string]interface{}{
+					"Rates": map[string]any{
+						utils.IfaceAsString(costIntervalRatesID): map[string]any{
 							"FixedFee":      0,
 							"Increment":     30000000000,
 							"IntervalStart": 0,

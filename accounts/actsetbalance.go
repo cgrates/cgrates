@@ -89,7 +89,7 @@ func actSetAccountFields(ac *utils.Account, path []string, value string) (err er
 		ac.Weights, err = utils.NewDynamicWeightsFromString(value, utils.InfieldSep, utils.ANDSep)
 	case utils.Opts:
 		if ac.Opts == nil { // if the options are not initialized already init them here
-			ac.Opts = make(map[string]interface{})
+			ac.Opts = make(map[string]any)
 		}
 		err = utils.MapStorage(ac.Opts).Set(path[1:], value)
 	case utils.ThresholdIDs:
@@ -143,7 +143,7 @@ func actSetBalance(bal *utils.Balance, path []string, value string, reset bool) 
 		}
 	case utils.Opts:
 		if bal.Opts == nil { // if the options are not initilized already init them here
-			bal.Opts = make(map[string]interface{})
+			bal.Opts = make(map[string]any)
 		}
 		err = utils.MapStorage(bal.Opts).Set(path[1:], value)
 	case utils.CostIncrements:

@@ -62,7 +62,7 @@ func (c *AnalyzerServerCodec) ReadRequestHeader(r *birpc.Request) (err error) {
 	return
 }
 
-func (c *AnalyzerServerCodec) ReadRequestBody(x interface{}) (err error) {
+func (c *AnalyzerServerCodec) ReadRequestBody(x any) (err error) {
 	err = c.sc.ReadRequestBody(x)
 	c.reqsLk.Lock()
 	c.reqs[c.reqIdx].Params = x
@@ -70,7 +70,7 @@ func (c *AnalyzerServerCodec) ReadRequestBody(x interface{}) (err error) {
 	return
 }
 
-func (c *AnalyzerServerCodec) WriteResponse(r *birpc.Response, x interface{}) error {
+func (c *AnalyzerServerCodec) WriteResponse(r *birpc.Response, x any) error {
 	c.reqsLk.Lock()
 	api := c.reqs[r.Seq]
 	delete(c.reqs, r.Seq)
@@ -133,7 +133,7 @@ func (c *AnalyzerBiRPCCodec) ReadHeader(req *birpc.Request, resp *birpc.Response
 }
 
 // ReadRequestBody into args argument of handler function.
-func (c *AnalyzerBiRPCCodec) ReadRequestBody(x interface{}) (err error) {
+func (c *AnalyzerBiRPCCodec) ReadRequestBody(x any) (err error) {
 	err = c.sc.ReadRequestBody(x)
 	c.reqsLk.Lock()
 	c.reqs[c.reqIdx].Params = x
@@ -142,7 +142,7 @@ func (c *AnalyzerBiRPCCodec) ReadRequestBody(x interface{}) (err error) {
 }
 
 // ReadResponseBody into reply argument of handler function.
-func (c *AnalyzerBiRPCCodec) ReadResponseBody(x interface{}) (err error) {
+func (c *AnalyzerBiRPCCodec) ReadResponseBody(x any) (err error) {
 	err = c.sc.ReadResponseBody(x)
 	c.repsLk.Lock()
 	api := c.reps[c.repIdx]
@@ -153,7 +153,7 @@ func (c *AnalyzerBiRPCCodec) ReadResponseBody(x interface{}) (err error) {
 }
 
 // WriteRequest must be safe for concurrent use by multiple goroutines.
-func (c *AnalyzerBiRPCCodec) WriteRequest(req *birpc.Request, x interface{}) error {
+func (c *AnalyzerBiRPCCodec) WriteRequest(req *birpc.Request, x any) error {
 	c.repsLk.Lock()
 	c.repIdx = req.Seq
 	c.reps[c.repIdx] = &rpcAPI{
@@ -166,7 +166,7 @@ func (c *AnalyzerBiRPCCodec) WriteRequest(req *birpc.Request, x interface{}) err
 }
 
 // WriteResponse must be safe for concurrent use by multiple goroutines.
-func (c *AnalyzerBiRPCCodec) WriteResponse(r *birpc.Response, x interface{}) error {
+func (c *AnalyzerBiRPCCodec) WriteResponse(r *birpc.Response, x any) error {
 	c.reqsLk.Lock()
 	api := c.reqs[r.Seq]
 	delete(c.reqs, r.Seq)

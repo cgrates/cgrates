@@ -30,7 +30,7 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-func csvLoad(s interface{}, values []string) (interface{}, error) {
+func csvLoad(s any, values []string) (any, error) {
 	fieldValueMap := make(map[string]string)
 	st := reflect.TypeOf(s)
 	numFields := st.NumField()
@@ -92,7 +92,7 @@ func csvLoad(s interface{}, values []string) (interface{}, error) {
 }
 
 // CsvDump receive and interface and convert it to a slice of string
-func CsvDump(s interface{}) ([]string, error) {
+func CsvDump(s any) ([]string, error) {
 	fieldIndexMap := make(map[string]int)
 	st := reflect.ValueOf(s)
 	if st.Kind() == reflect.Ptr {
@@ -131,7 +131,7 @@ func CsvDump(s interface{}) ([]string, error) {
 	return result, nil
 }
 
-func getColumnCount(s interface{}) int {
+func getColumnCount(s any) int {
 	st := reflect.TypeOf(s)
 	numFields := st.NumField()
 	count := 0
@@ -1476,7 +1476,7 @@ func (tps DispatcherProfileMdls) AsTPDispatcherProfiles() (result []*utils.TPDis
 	return
 }
 
-func paramsToString(sp []interface{}) (strategy string) {
+func paramsToString(sp []any) (strategy string) {
 	if len(sp) != 0 {
 		strategy = sp[0].(string)
 		for i := 1; i < len(sp); i++ {
@@ -1551,7 +1551,7 @@ func APItoDispatcherProfile(tpDPP *utils.TPDispatcherProfile, timezone string) (
 		Weight:         tpDPP.Weight,
 		Strategy:       tpDPP.Strategy,
 		FilterIDs:      make([]string, len(tpDPP.FilterIDs)),
-		StrategyParams: make(map[string]interface{}),
+		StrategyParams: make(map[string]any),
 		Hosts:          make(DispatcherHostProfiles, len(tpDPP.Hosts)),
 	}
 	copy(dpp.FilterIDs, tpDPP.FilterIDs)
@@ -1566,7 +1566,7 @@ func APItoDispatcherProfile(tpDPP *utils.TPDispatcherProfile, timezone string) (
 			Weight:    conn.Weight,
 			Blocker:   conn.Blocker,
 			FilterIDs: make([]string, len(conn.FilterIDs)),
-			Params:    make(map[string]interface{}),
+			Params:    make(map[string]any),
 		}
 		copy(dpp.Hosts[i].FilterIDs, conn.FilterIDs)
 		for j, param := range conn.Params {
@@ -1590,7 +1590,7 @@ func DispatcherProfileToAPI(dpp *DispatcherProfile) (tpDPP *utils.TPDispatcherPr
 		ID:             dpp.ID,
 		FilterIDs:      make([]string, len(dpp.FilterIDs)),
 		Strategy:       dpp.Strategy,
-		StrategyParams: make([]interface{}, len(dpp.StrategyParams)),
+		StrategyParams: make([]any, len(dpp.StrategyParams)),
 		Weight:         dpp.Weight,
 		Hosts:          make([]*utils.TPDispatcherHostProfile, len(dpp.Hosts)),
 	}
@@ -1607,7 +1607,7 @@ func DispatcherProfileToAPI(dpp *DispatcherProfile) (tpDPP *utils.TPDispatcherPr
 			ID:        host.ID,
 			FilterIDs: utils.CloneStringSlice(host.FilterIDs),
 			Weight:    host.Weight,
-			Params:    make([]interface{}, len(host.Params)),
+			Params:    make([]any, len(host.Params)),
 			Blocker:   host.Blocker,
 		}
 		idx := 0
@@ -2174,7 +2174,7 @@ func APItoActionProfile(tpAp *utils.TPActionProfile, timezone string) (ap *Actio
 			return
 		}
 		if act.Opts != utils.EmptyString {
-			ap.Actions[i].Opts = make(map[string]interface{})
+			ap.Actions[i].Opts = make(map[string]any)
 			for _, opt := range strings.Split(act.Opts, utils.InfieldSep) { // example of opts: key1:val1;key2:val2;key3:val3
 				keyValSls := utils.SplitConcatenatedKey(opt)
 				if len(keyValSls) != 2 {
@@ -2466,7 +2466,7 @@ func APItoAccount(tpAcc *utils.TPAccount, timezone string) (acc *utils.Account, 
 			}
 		}
 		if bal.Opts != utils.EmptyString {
-			acc.Balances[id].Opts = make(map[string]interface{})
+			acc.Balances[id].Opts = make(map[string]any)
 			for _, opt := range strings.Split(bal.Opts, utils.InfieldSep) { // example of opts: key1:val1;key2:val2;key3:val3
 				keyValSls := utils.SplitConcatenatedKey(opt)
 				if len(keyValSls) != 2 {

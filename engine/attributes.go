@@ -195,7 +195,7 @@ func (alS *AttributeS) processEvent(ctx *context.Context, tnt string, args *util
 				continue
 			}
 		}
-		var out interface{}
+		var out any
 		if out, err = ParseAttribute(dynDP, utils.FirstNonEmpty(attribute.Type, utils.MetaVariable), utils.DynamicDataPrefix+attribute.Path, attribute.Value, alS.cfg.GeneralCfg().RoundingDecimals, alS.cfg.GeneralCfg().DefaultTimezone, time.RFC3339, alS.cfg.GeneralCfg().RSRSep); err != nil {
 			rply = nil
 			return
@@ -370,7 +370,7 @@ func (alS *AttributeS) V1ProcessEvent(ctx *context.Context, args *utils.CGREvent
 }
 
 func ParseAttribute(dp utils.DataProvider, attrType, path string, value config.RSRParsers, roundingDec int, timeZone, layout, rsrSep string) (
-	out interface{}, err error) {
+	out any, err error) {
 	switch attrType {
 	case utils.MetaNone:
 		return
@@ -403,25 +403,25 @@ func ParseAttribute(dp utils.DataProvider, attrType, path string, value config.R
 		}
 		out = tEnd.Sub(tStart).String()
 	case utils.MetaSum:
-		var ifaceVals []interface{}
+		var ifaceVals []any
 		if ifaceVals, err = value.GetIfaceFromValues(dp); err != nil {
 			return
 		}
 		out, err = utils.Sum(ifaceVals...)
 	case utils.MetaDifference:
-		var ifaceVals []interface{}
+		var ifaceVals []any
 		if ifaceVals, err = value.GetIfaceFromValues(dp); err != nil {
 			return
 		}
 		out, err = utils.Difference(timeZone, ifaceVals...)
 	case utils.MetaMultiply:
-		var ifaceVals []interface{}
+		var ifaceVals []any
 		if ifaceVals, err = value.GetIfaceFromValues(dp); err != nil {
 			return
 		}
 		out, err = utils.Multiply(ifaceVals...)
 	case utils.MetaDivide:
-		var ifaceVals []interface{}
+		var ifaceVals []any
 		if ifaceVals, err = value.GetIfaceFromValues(dp); err != nil {
 			return
 		}

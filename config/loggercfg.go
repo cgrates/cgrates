@@ -59,9 +59,9 @@ func (loggCfg *LoggerCfg) loadFromJSONCfg(jsnLoggerCfg *LoggerJsonCfg) (err erro
 	return
 }
 
-// AsMapInterface returns the config of logger as a map[string]interface{}
-func (loggCfg *LoggerCfg) AsMapInterface(string) interface{} {
-	mp := map[string]interface{}{
+// AsMapInterface returns the config of logger as a map[string]any
+func (loggCfg *LoggerCfg) AsMapInterface(string) any {
+	mp := map[string]any{
 		utils.TypeCfg:  loggCfg.Type,
 		utils.LevelCfg: loggCfg.Level,
 		utils.OptsCfg:  loggCfg.Opts.AsMapInterface(),
@@ -114,9 +114,9 @@ func (loggOpts *LoggerOptsCfg) loadFromJSONCfg(jsnCfg *LoggerOptsJson) {
 	}
 }
 
-// AsMapInterface returns the config of logger OPTS as a map[string]interface{}
-func (loggOpts *LoggerOptsCfg) AsMapInterface() interface{} {
-	return map[string]interface{}{
+// AsMapInterface returns the config of logger OPTS as a map[string]any
+func (loggOpts *LoggerOptsCfg) AsMapInterface() any {
+	return map[string]any{
 		utils.KafkaConnCfg:      loggOpts.KafkaConn,
 		utils.KafkaTopicCfg:     loggOpts.KafkaTopic,
 		utils.KafkaAttemptsCfg:  loggOpts.KafkaAttempts,

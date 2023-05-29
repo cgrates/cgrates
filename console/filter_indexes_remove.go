@@ -45,7 +45,7 @@ func (self *CmdRemoveFilterIndexes) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdRemoveFilterIndexes) RpcParams(reset bool) interface{} {
+func (self *CmdRemoveFilterIndexes) RpcParams(reset bool) any {
 	if reset || self.rpcParams == nil {
 		self.rpcParams = &v1.AttrRemFilterIndexes{}
 	}
@@ -56,7 +56,7 @@ func (self *CmdRemoveFilterIndexes) PostprocessRpcParams() error {
 	return nil
 }
 
-func (self *CmdRemoveFilterIndexes) RpcResult() interface{} {
+func (self *CmdRemoveFilterIndexes) RpcResult() any {
 	var atr string
 	return &atr
 }

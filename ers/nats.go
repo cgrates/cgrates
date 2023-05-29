@@ -159,7 +159,7 @@ func (rdr *NatsER) Serve() (err error) {
 }
 
 func (rdr *NatsER) processMessage(msg []byte) (err error) {
-	var decodedMessage map[string]interface{}
+	var decodedMessage map[string]any
 	if err = json.Unmarshal(msg, &decodedMessage); err != nil {
 		return
 	}

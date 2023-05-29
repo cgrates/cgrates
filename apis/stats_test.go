@@ -433,7 +433,7 @@ func TestStatQueuesGetStatQueueProfileIDsGetOptsErr(t *testing.T) {
 	if err := adms.GetStatQueueProfileIDs(context.Background(),
 		&utils.ArgsItemIDs{
 			Tenant: "cgrates.org",
-			APIOpts: map[string]interface{}{
+			APIOpts: map[string]any{
 				utils.PageLimitOpt: true,
 			},
 		}, &reply); err == nil || err.Error() != experr {
@@ -478,7 +478,7 @@ func TestStatQueuesGetStatQueueProfileIDsPaginateErr(t *testing.T) {
 	if err := adms.GetStatQueueProfileIDs(context.Background(),
 		&utils.ArgsItemIDs{
 			Tenant: "cgrates.org",
-			APIOpts: map[string]interface{}{
+			APIOpts: map[string]any{
 				utils.PageLimitOpt:    2,
 				utils.PageOffsetOpt:   4,
 				utils.PageMaxItemsOpt: 5,
@@ -589,14 +589,14 @@ func TestStatsAPIs(t *testing.T) {
 
 	expThEv := &utils.CGREvent{
 		Tenant: "cgrates.org",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.MetaACD:   utils.NewDecimalFromStringIgnoreError("3E+3"),
 			utils.MetaASR:   utils.NewDecimal(0, 0),
 			utils.MetaTCD:   utils.NewDecimal(3000, 0),
 			utils.EventType: utils.StatUpdate,
 			utils.StatID:    "sq2",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaUsage:                3000,
 			utils.MetaEventType:            utils.StatUpdate,
 			utils.OptsThresholdsProfileIDs: []string{"thdID"},
@@ -604,8 +604,8 @@ func TestStatsAPIs(t *testing.T) {
 		},
 	}
 	mCC := &mockClientConn{
-		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
-			utils.ThresholdSv1ProcessEvent: func(ctx *context.Context, args, reply interface{}) error {
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.ThresholdSv1ProcessEvent: func(ctx *context.Context, args, reply any) error {
 				expThEv.ID = args.(*utils.CGREvent).ID
 				if !reflect.DeepEqual(args.(*utils.CGREvent), expThEv) {
 					t.Errorf("expected: <%+v>, \nreceived: <%+v>",
@@ -753,11 +753,11 @@ func TestStatsAPIs(t *testing.T) {
 	args := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "StatsEventTest",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1002",
 			//utils.Usage:        3000,
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaUsage:           3000,
 			utils.OptsStatsProfileIDs: []string{"sq1", "sq2"},
 		},
@@ -1042,7 +1042,7 @@ func TestStatQueuesGetStatQueueProfilesGetIDsErr(t *testing.T) {
 	argsGet := &utils.ArgsItemIDs{
 		Tenant:      "cgrates.org",
 		ItemsPrefix: "test_ID",
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.PageLimitOpt:    2,
 			utils.PageOffsetOpt:   4,
 			utils.PageMaxItemsOpt: 5,

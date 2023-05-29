@@ -64,7 +64,7 @@ func NewDataNode(path []string) (n *DataNode) {
 }
 
 // NewLeafNode creates a leaf node with given value
-func NewLeafNode(val interface{}) *DataNode {
+func NewLeafNode(val any) *DataNode {
 	return &DataNode{
 		Type: NMDataType,
 		Value: &DataLeaf{
@@ -83,7 +83,7 @@ type DataNode struct {
 
 // DataLeaf is an item in the DataNode
 type DataLeaf struct {
-	Data interface{} // value of the element
+	Data any // value of the element
 	// the config of the leaf
 	NewBranch   bool   `json:",omitempty"`
 	AttributeID string `json:",omitempty"`
@@ -138,13 +138,13 @@ func (n *DataNode) Field(path []string) (*DataLeaf, error) {
 // FieldAsInterface will compile the given path
 // and return the node value at the end of the path
 // this function is used most probably by filters so expect the path to not be compiled
-func (n *DataNode) FieldAsInterface(path []string) (interface{}, error) {
+func (n *DataNode) FieldAsInterface(path []string) (any, error) {
 	return n.fieldAsInterface(CompilePathSlice(path))
 }
 
 // fieldAsInterface return ill the node value at the end of the path
 // but will not compile the path
-func (n *DataNode) fieldAsInterface(path []string) (interface{}, error) {
+func (n *DataNode) fieldAsInterface(path []string) (any, error) {
 	switch n.Type { // based on current type return the value
 	case NMDataType:
 		if len(path) != 0 { // only return if the path is empty
@@ -185,7 +185,7 @@ func (n *DataNode) fieldAsInterface(path []string) (interface{}, error) {
 
 // Set will set the value at de specified path
 // the path should be in the same format as the path given to Field
-func (n *DataNode) Set(path []string, val interface{}) (addedNew bool, err error) {
+func (n *DataNode) Set(path []string, val any) (addedNew bool, err error) {
 	if len(path) == 0 { // the path is empty so overwrite curent node data
 		switch v := val.(type) { // cast the value to see if is a supported type for node
 		case map[string]*DataNode:

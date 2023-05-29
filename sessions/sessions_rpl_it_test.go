@@ -149,7 +149,7 @@ func testSessionSRplInitiate(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSessionSRplInitiate",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.EventName:    "TEST_EVENT",
 				utils.Tenant:       "cgrates.org",
 				utils.OriginID:     "123451",
@@ -215,7 +215,7 @@ func testSessionSRplUpdate(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSessionSRplUpdate",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.EventName:    "TEST_EVENT",
 				utils.Tenant:       "cgrates.org",
 				utils.OriginID:     "123451",
@@ -293,7 +293,7 @@ func testSessionSRplTerminate(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSessionSRplTerminate",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.EventName:    "TEST_EVENT",
 				utils.Tenant:       "cgrates.org",
 				utils.OriginID:     "123451",
@@ -356,7 +356,7 @@ func testSessionSRplManualReplicate(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSSv1ItAuth",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.EventName:    "TEST_EVENT",
 				utils.Tenant:       "cgrates.org",
 				utils.OriginID:     "123451",
@@ -378,7 +378,7 @@ func testSessionSRplManualReplicate(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSSv1ItAuth2",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.EventName:    "TEST_EVENT",
 				utils.Tenant:       "cgrates.org",
 				utils.OriginID:     "123481",
@@ -452,7 +452,7 @@ func testSessionSRplManualReplicate(t *testing.T) {
 	if err := masterProc.Process.Kill(); err != nil {
 		t.Errorf("Failed to kill process, error: %v", err.Error())
 	}
-	var status map[string]interface{}
+	var status map[string]any
 	if err := smgRplcMstrRPC.Call(utils.CoreSv1Status, utils.TenantWithAPIOpts{}, &status); err == nil { // master should not longer be reachable
 		t.Error(err, status)
 	}

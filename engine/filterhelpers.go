@@ -57,7 +57,7 @@ func MatchingItemIDsForEvent(ctx *context.Context, ev utils.MapStorage, stringFl
 				fieldIDs = &allFieldIDs
 			}
 			for _, fldName := range *fieldIDs {
-				var fieldValIf interface{}
+				var fieldValIf any
 				fieldValIf, err = ev.FieldAsInterface(utils.SplitPath(fldName, utils.NestingSep[0], -1))
 				if err == nil && filterIndexTypes[i] == utils.MetaNotExists {
 					continue // field should not exist in our event in order to check index

@@ -39,7 +39,7 @@ type ChargerProfile struct {
 // ChargerProfileWithAPIOpts is used in replicatorV1 for dispatcher
 type ChargerProfileWithAPIOpts struct {
 	*ChargerProfile
-	APIOpts map[string]interface{}
+	APIOpts map[string]any
 }
 
 func (cP *ChargerProfile) TenantID() string {
@@ -54,7 +54,7 @@ func (cps ChargerProfiles) Sort() {
 	sort.Slice(cps, func(i, j int) bool { return cps[i].weight > cps[j].weight })
 }
 
-func (cp *ChargerProfile) Set(path []string, val interface{}, newBranch bool, _ string) (err error) {
+func (cp *ChargerProfile) Set(path []string, val any, newBranch bool, _ string) (err error) {
 	if len(path) != 1 {
 		return utils.ErrWrongPath
 	}
@@ -87,7 +87,7 @@ func (cp *ChargerProfile) Set(path []string, val interface{}, newBranch bool, _ 
 	return
 }
 
-func (cp *ChargerProfile) Merge(v2 interface{}) {
+func (cp *ChargerProfile) Merge(v2 any) {
 	vi := v2.(*ChargerProfile)
 	if len(vi.Tenant) != 0 {
 		cp.Tenant = vi.Tenant
@@ -106,13 +106,13 @@ func (cp *ChargerProfile) Merge(v2 interface{}) {
 
 func (cp *ChargerProfile) String() string { return utils.ToJSON(cp) }
 func (cp *ChargerProfile) FieldAsString(fldPath []string) (_ string, err error) {
-	var val interface{}
+	var val any
 	if val, err = cp.FieldAsInterface(fldPath); err != nil {
 		return
 	}
 	return utils.IfaceAsString(val), nil
 }
-func (cp *ChargerProfile) FieldAsInterface(fldPath []string) (_ interface{}, err error) {
+func (cp *ChargerProfile) FieldAsInterface(fldPath []string) (_ any, err error) {
 	if len(fldPath) != 1 {
 		return nil, utils.ErrNotFound
 	}

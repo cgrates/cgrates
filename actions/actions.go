@@ -86,7 +86,7 @@ func (aS *ActionS) schedInit() {
 	for i, tnt := range tnts {
 		cgrEvs[i] = &utils.CGREvent{
 			Tenant: tnt,
-			APIOpts: map[string]interface{}{
+			APIOpts: map[string]any{
 				utils.EventType: utils.SchedulerInit,
 				utils.NodeID:    aS.cfg.GeneralCfg().NodeID,
 			},

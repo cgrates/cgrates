@@ -33,13 +33,13 @@ func TestDispatcherHostProfileClone(t *testing.T) {
 		ID:        "DSP_1",
 		Weight:    30,
 		FilterIDs: []string{"*string:Usage:10"},
-		Params:    map[string]interface{}{"param1": 1},
+		Params:    map[string]any{"param1": 1},
 	}
 	eConn := &DispatcherHostProfile{
 		ID:        "DSP_1",
 		Weight:    30,
 		FilterIDs: []string{"*string:Usage:10"},
-		Params:    map[string]interface{}{"param1": 1},
+		Params:    map[string]any{"param1": 1},
 	}
 	d2Conn := dConn.Clone()
 	d2Conn.ID = "DSP_4"
@@ -278,7 +278,7 @@ func TestDispatcherProfileSet(t *testing.T) {
 		FilterIDs: []string{"fltr1", "*string:~*req.Account:1001"},
 		Weight:    10,
 		Strategy:  utils.MetaRandom,
-		StrategyParams: map[string]interface{}{
+		StrategyParams: map[string]any{
 			"opt1": "val1",
 			"opt2": "val1",
 			"opt3": "val1",
@@ -289,13 +289,13 @@ func TestDispatcherProfileSet(t *testing.T) {
 				FilterIDs: []string{"fltr1"},
 				Weight:    10,
 				Blocker:   true,
-				Params: map[string]interface{}{
+				Params: map[string]any{
 					"param1": "val1",
 					"param2": "val1",
 				},
 			},
 			{
-				Params: map[string]interface{}{
+				Params: map[string]any{
 					"param3": "val1",
 				},
 			},
@@ -451,7 +451,7 @@ func TestDispatcherProfileAsInterface(t *testing.T) {
 		FilterIDs: []string{"fltr1", "*string:~*req.Account:1001"},
 		Weight:    10,
 		Strategy:  utils.MetaRandom,
-		StrategyParams: map[string]interface{}{
+		StrategyParams: map[string]any{
 			"opt1": "val1",
 			"opt2": "val1",
 			"opt3": "val1",
@@ -462,13 +462,13 @@ func TestDispatcherProfileAsInterface(t *testing.T) {
 				FilterIDs: []string{"fltr1"},
 				Weight:    10,
 				Blocker:   true,
-				Params: map[string]interface{}{
+				Params: map[string]any{
 					"param1": "val1",
 					"param2": "val1",
 				},
 			},
 			{
-				Params: map[string]interface{}{
+				Params: map[string]any{
 					"param3": "val1",
 				},
 			},
@@ -621,7 +621,7 @@ func TestDispatcherProfileAsInterface(t *testing.T) {
 
 func TestDispatcherProfileMerge(t *testing.T) {
 	dp := &DispatcherProfile{
-		StrategyParams: make(map[string]interface{}),
+		StrategyParams: make(map[string]any),
 	}
 	exp := &DispatcherProfile{
 		Tenant:         "cgrates.org",
@@ -629,20 +629,20 @@ func TestDispatcherProfileMerge(t *testing.T) {
 		FilterIDs:      []string{"fltr1"},
 		Weight:         65,
 		Strategy:       utils.MetaLoad,
-		StrategyParams: map[string]interface{}{"k": "v"},
+		StrategyParams: map[string]any{"k": "v"},
 		Hosts: DispatcherHostProfiles{
 			{
 				ID:        "C3",
 				FilterIDs: []string{"fltr2"},
 				Weight:    20,
-				Params:    map[string]interface{}{},
+				Params:    map[string]any{},
 				Blocker:   true,
 			},
 			{
 				ID:        "C2",
 				FilterIDs: []string{"fltr3"},
 				Weight:    10,
-				Params: map[string]interface{}{
+				Params: map[string]any{
 					"param3": "value3",
 				},
 				Blocker: false,
@@ -655,20 +655,20 @@ func TestDispatcherProfileMerge(t *testing.T) {
 		FilterIDs:      []string{"fltr1"},
 		Weight:         65,
 		Strategy:       utils.MetaLoad,
-		StrategyParams: map[string]interface{}{"k": "v"},
+		StrategyParams: map[string]any{"k": "v"},
 		Hosts: DispatcherHostProfiles{
 			{
 				ID:        "C3",
 				FilterIDs: []string{"fltr2"},
 				Weight:    20,
-				Params:    map[string]interface{}{},
+				Params:    map[string]any{},
 				Blocker:   true,
 			},
 			{
 				ID:        "C2",
 				FilterIDs: []string{"fltr3"},
 				Weight:    10,
-				Params: map[string]interface{}{
+				Params: map[string]any{
 					"param3": "value3",
 				},
 				Blocker: false,
@@ -681,7 +681,7 @@ func TestDispatcherProfileMerge(t *testing.T) {
 
 func TestDispatcherProfileMergeEmptyHostId(t *testing.T) {
 	dp := &DispatcherProfile{
-		StrategyParams: make(map[string]interface{}),
+		StrategyParams: make(map[string]any),
 		Hosts: DispatcherHostProfiles{
 			{
 				ID: utils.EmptyString,
@@ -694,13 +694,13 @@ func TestDispatcherProfileMergeEmptyHostId(t *testing.T) {
 		FilterIDs:      []string{"fltr1"},
 		Weight:         65,
 		Strategy:       utils.MetaLoad,
-		StrategyParams: map[string]interface{}{"k": "v"},
+		StrategyParams: map[string]any{"k": "v"},
 		Hosts: DispatcherHostProfiles{
 			{
 				ID:        "C3",
 				FilterIDs: []string{"fltr2"},
 				Weight:    20,
-				Params: map[string]interface{}{
+				Params: map[string]any{
 					"param4": "value4",
 				},
 				Blocker: false,
@@ -713,13 +713,13 @@ func TestDispatcherProfileMergeEmptyHostId(t *testing.T) {
 		FilterIDs:      []string{"fltr1"},
 		Weight:         65,
 		Strategy:       utils.MetaLoad,
-		StrategyParams: map[string]interface{}{"k": "v"},
+		StrategyParams: map[string]any{"k": "v"},
 		Hosts: DispatcherHostProfiles{
 			{
 				ID:        "C3",
 				FilterIDs: []string{"fltr2"},
 				Weight:    20,
-				Params: map[string]interface{}{
+				Params: map[string]any{
 					"param4": "value4",
 				},
 				Blocker: false,
@@ -731,13 +731,13 @@ func TestDispatcherProfileMergeEmptyHostId(t *testing.T) {
 }
 func TestDispatcherProfileMergeEqualHosts(t *testing.T) {
 	dp := &DispatcherProfile{
-		StrategyParams: make(map[string]interface{}),
+		StrategyParams: make(map[string]any),
 		Hosts: DispatcherHostProfiles{
 			{
 				ID:        "C3",
 				FilterIDs: []string{"dpFltr1"},
 				Weight:    20,
-				Params: map[string]interface{}{
+				Params: map[string]any{
 					"param4": "value4",
 				},
 				Blocker: false,
@@ -750,13 +750,13 @@ func TestDispatcherProfileMergeEqualHosts(t *testing.T) {
 		FilterIDs:      []string{"fltr1"},
 		Weight:         65,
 		Strategy:       utils.MetaLoad,
-		StrategyParams: map[string]interface{}{"k": "v"},
+		StrategyParams: map[string]any{"k": "v"},
 		Hosts: DispatcherHostProfiles{
 			{
 				ID:        "C3",
 				FilterIDs: []string{"dpFltr1", "newFltr2"},
 				Weight:    20,
-				Params: map[string]interface{}{
+				Params: map[string]any{
 					"param4": "value4",
 				},
 				Blocker: false,
@@ -769,13 +769,13 @@ func TestDispatcherProfileMergeEqualHosts(t *testing.T) {
 		FilterIDs:      []string{"fltr1"},
 		Weight:         65,
 		Strategy:       utils.MetaLoad,
-		StrategyParams: map[string]interface{}{"k": "v"},
+		StrategyParams: map[string]any{"k": "v"},
 		Hosts: DispatcherHostProfiles{
 			{
 				ID:        "C3",
 				FilterIDs: []string{"newFltr2"},
 				Weight:    20,
-				Params: map[string]interface{}{
+				Params: map[string]any{
 					"param4": "value4",
 				},
 				Blocker: false,
@@ -947,14 +947,14 @@ func TestDispatcherHostGetConnErr(t *testing.T) {
 func TestDispatcherHostProfileMerge(t *testing.T) {
 
 	dspHost := &DispatcherHostProfile{
-		Params: map[string]interface{}{
+		Params: map[string]any{
 			"opt1": "val1",
 		},
 	}
 
 	dspHostV2 := &DispatcherHostProfile{
 		ID: "DispatcherId",
-		Params: map[string]interface{}{
+		Params: map[string]any{
 
 			"opt1": "val1",
 			"opt2": "val1",
@@ -976,7 +976,7 @@ type cMock struct {
 	rcvM string
 }
 
-func (*cMock) Call(ctx *context.Context, serviceMethod string, args, reply interface{}) error {
+func (*cMock) Call(ctx *context.Context, serviceMethod string, args, reply any) error {
 	return nil
 }
 func TestDispatcherHostGetConnExistingConn(t *testing.T) {

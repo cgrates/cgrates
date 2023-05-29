@@ -143,7 +143,7 @@ func (s StringSet) Equals(s2 StringSet) bool {
 func (s StringSet) String() string { return ToJSON(s.AsSlice()) }
 
 // FieldAsInterface returns an empty structure if the path exists else ErrNotFound
-func (s StringSet) FieldAsInterface(fldPath []string) (interface{}, error) {
+func (s StringSet) FieldAsInterface(fldPath []string) (any, error) {
 	if len(fldPath) != 1 {
 		return nil, ErrNotFound
 	}

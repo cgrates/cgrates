@@ -123,7 +123,7 @@ func testTpLoadTariffPlanFromFolder(t *testing.T) {
 	var reply string
 	if err := tpRPC.Call(context.Background(), utils.LoaderSv1Run,
 		&loaders.ArgsProcessFolder{
-			APIOpts: map[string]interface{}{
+			APIOpts: map[string]any{
 				utils.MetaCache:       caching,
 				utils.MetaStopOnError: true,
 			},
@@ -173,7 +173,7 @@ func testTpLoadTariffPlanFromFolder(t *testing.T) {
 // 	if err := tpRPC.Call(utils.APIerSv1SetActionTrigger, v1.AttrSetActionTrigger{
 // 		GroupID:  "TestATR",
 // 		UniqueID: "Unique atr id",
-// 		ActionTrigger: map[string]interface{}{
+// 		ActionTrigger: map[string]any{
 // 			utils.BalanceID: utils.StringPointer("BID1"),
 // 		},
 // 	}, &reply); err != nil {

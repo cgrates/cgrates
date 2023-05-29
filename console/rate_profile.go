@@ -48,7 +48,7 @@ func (self *CmdGetRateProfile) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdGetRateProfile) RpcParams(reset bool) interface{} {
+func (self *CmdGetRateProfile) RpcParams(reset bool) any {
 	if reset || self.rpcParams == nil {
 		self.rpcParams = &utils.TenantIDWithAPIOpts{}
 	}
@@ -59,7 +59,7 @@ func (self *CmdGetRateProfile) PostprocessRpcParams() error {
 	return nil
 }
 
-func (self *CmdGetRateProfile) RpcResult() interface{} {
+func (self *CmdGetRateProfile) RpcResult() any {
 	var atr utils.RateProfile
 	return &atr
 }

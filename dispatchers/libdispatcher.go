@@ -84,7 +84,7 @@ type Dispatcher interface {
 	Dispatch(dm *engine.DataManager, flts *engine.FilterS, cfg *config.CGRConfig,
 		ctx *context.Context, iPRCCh chan birpc.ClientConnector,
 		ev utils.DataProvider, tnt, routeID string, dR *DispatcherRoute,
-		serviceMethod string, args interface{}, reply interface{}) (err error)
+		serviceMethod string, args any, reply any) (err error)
 }
 
 // newDispatcher constructs instances of Dispatcher
@@ -178,7 +178,7 @@ func (rs *roundRobinSort) Sort(fltrs *engine.FilterS, ev utils.DataProvider,
 }
 
 // newSingleDispatcher is the constructor for singleDispatcher struct.
-func newSingleDispatcher(hosts engine.DispatcherHostProfiles, params map[string]interface{},
+func newSingleDispatcher(hosts engine.DispatcherHostProfiles, params map[string]any,
 	tntID string, sorter hostSorter) (_ Dispatcher, err error) {
 	if dflt, has := params[utils.MetaDefaultRatio]; has {
 		var ratio int64
@@ -218,7 +218,7 @@ type singleResultDispatcher struct {
 func (sd *singleResultDispatcher) Dispatch(dm *engine.DataManager, flts *engine.FilterS, cfg *config.CGRConfig,
 	ctx *context.Context, iPRCCh chan birpc.ClientConnector,
 	ev utils.DataProvider, tnt, routeID string, dR *DispatcherRoute,
-	serviceMethod string, args interface{}, reply interface{}) (err error) {
+	serviceMethod string, args any, reply any) (err error) {
 	if dR != nil && dR.HostID != utils.EmptyString { // route to previously discovered route
 		return callDHwithID(ctx, tnt, dR.HostID, routeID, dR, dm,
 			cfg, iPRCCh, serviceMethod, args, reply)
@@ -263,7 +263,7 @@ type broadcastDispatcher struct {
 func (b *broadcastDispatcher) Dispatch(dm *engine.DataManager, flts *engine.FilterS, cfg *config.CGRConfig,
 	ctx *context.Context, iPRCCh chan birpc.ClientConnector,
 	ev utils.DataProvider, tnt, routeID string, dR *DispatcherRoute,
-	serviceMethod string, args interface{}, reply interface{}) (err error) {
+	serviceMethod string, args any, reply any) (err error) {
 	var hostIDs []string
 	if hostIDs, err = getDispatcherHosts(flts, ev, ctx, tnt, b.hosts); err != nil {
 		return
@@ -314,7 +314,7 @@ type loadDispatcher struct {
 func (ld *loadDispatcher) Dispatch(dm *engine.DataManager, flts *engine.FilterS, cfg *config.CGRConfig,
 	ctx *context.Context, iPRCCh chan birpc.ClientConnector,
 	ev utils.DataProvider, tnt, routeID string, dR *DispatcherRoute,
-	serviceMethod string, args interface{}, reply interface{}) (err error) {
+	serviceMethod string, args any, reply any) (err error) {
 
 	var lM *LoadMetrics
 	if x, ok := engine.Cache.Get(utils.CacheDispatcherLoads, ld.tntID); ok && x != nil {
@@ -450,7 +450,7 @@ func (lM *LoadMetrics) decrementLoad(ctx *context.Context, hostID, tntID string)
 // if routeID provided, will also cache once the call is successful
 func callDHwithID(ctx *context.Context, tnt, hostID, routeID string, dR *DispatcherRoute,
 	dm *engine.DataManager, cfg *config.CGRConfig, iPRCCh chan birpc.ClientConnector,
-	serviceMethod string, args, reply interface{}) (err error) {
+	serviceMethod string, args, reply any) (err error) {
 	var dH *engine.DispatcherHost
 	if dH, err = dm.GetDispatcherHost(ctx, tnt, hostID, true, true, utils.NonTransactional); err != nil {
 		return
@@ -464,11 +464,11 @@ func callDHwithID(ctx *context.Context, tnt, hostID, routeID string, dR *Dispatc
 func callDH(ctx *context.Context,
 	dh *engine.DispatcherHost, routeID string, dR *DispatcherRoute,
 	cfg *config.CGRConfig, iPRCCh chan birpc.ClientConnector,
-	method string, args, reply interface{}) (err error) {
+	method string, args, reply any) (err error) {
 	if routeID != utils.EmptyString { // cache the discovered route before dispatching
 		argsCache := &utils.ArgCacheReplicateSet{
 			Tenant: dh.Tenant,
-			APIOpts: map[string]interface{}{
+			APIOpts: map[string]any{
 				utils.MetaSubsys: utils.MetaDispatchers,
 				utils.MetaNodeID: cfg.GeneralCfg().NodeID,
 			},
@@ -505,7 +505,7 @@ type lazyDH struct {
 	dR      *DispatcherRoute
 }
 
-func (l *lazyDH) Call(ctx *context.Context, method string, args, reply interface{}) (err error) {
+func (l *lazyDH) Call(ctx *context.Context, method string, args, reply any) (err error) {
 	return callDH(ctx, l.dh, l.routeID, l.dR, l.cfg, l.iPRCCh, method, args, reply)
 }
 

@@ -46,7 +46,7 @@ func (cmd *CmdShutdown) RpcMethod() string {
 	return cmd.rpcMethod
 }
 
-func (cmd *CmdShutdown) RpcParams(reset bool) interface{} {
+func (cmd *CmdShutdown) RpcParams(reset bool) any {
 	if reset || cmd.rpcParams == nil {
 		cmd.rpcParams = &utils.CGREvent{}
 	}
@@ -57,7 +57,7 @@ func (cmd *CmdShutdown) PostprocessRpcParams() error {
 	return nil
 }
 
-func (cmd *CmdShutdown) RpcResult() interface{} {
+func (cmd *CmdShutdown) RpcResult() any {
 	var atr string
 	return &atr
 }

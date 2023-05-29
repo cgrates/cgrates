@@ -92,7 +92,7 @@ func TestHTTPCfgAsMapInterface(t *testing.T) {
 	cfgJSONStr := `{
 	"http": {},
 }`
-	eMap := map[string]interface{}{
+	eMap := map[string]any{
 		utils.HTTPJsonRPCURLCfg:        "/jsonrpc",
 		utils.RegistrarSURLCfg:         "/registrar",
 		utils.PrometheusURLCfg:         "/prometheus",
@@ -101,7 +101,7 @@ func TestHTTPCfgAsMapInterface(t *testing.T) {
 		utils.HTTPCDRsURLCfg:           "/cdr_http",
 		utils.HTTPUseBasicAuthCfg:      false,
 		utils.HTTPAuthUsersCfg:         map[string]string{},
-		utils.HTTPClientOptsCfg: map[string]interface{}{
+		utils.HTTPClientOptsCfg: map[string]any{
 			utils.HTTPClientSkipTLSVerificationCfg:   false,
 			utils.HTTPClientTLSHandshakeTimeoutCfg:   "10s",
 			utils.HTTPClientDisableKeepAlivesCfg:     false,
@@ -134,7 +134,7 @@ func TestHTTPCfgAsMapInterface1(t *testing.T) {
 	   "auth_users": {"user1": "authenticated", "user2": "authenticated"},
      },
 }`
-	eMap := map[string]interface{}{
+	eMap := map[string]any{
 		utils.HTTPJsonRPCURLCfg:        "/rpc",
 		utils.RegistrarSURLCfg:         "/registrar",
 		utils.PrometheusURLCfg:         "/prometheus",
@@ -146,7 +146,7 @@ func TestHTTPCfgAsMapInterface1(t *testing.T) {
 			"user1": "authenticated",
 			"user2": "authenticated",
 		},
-		utils.HTTPClientOptsCfg: map[string]interface{}{
+		utils.HTTPClientOptsCfg: map[string]any{
 			utils.HTTPClientSkipTLSVerificationCfg:   false,
 			utils.HTTPClientTLSHandshakeTimeoutCfg:   "10s",
 			utils.HTTPClientDisableKeepAlivesCfg:     false,

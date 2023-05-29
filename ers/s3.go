@@ -115,7 +115,7 @@ func (rdr *S3ER) Serve() (err error) {
 }
 
 func (rdr *S3ER) processMessage(body []byte) (err error) {
-	var decodedMessage map[string]interface{}
+	var decodedMessage map[string]any
 	if err = json.Unmarshal(body, &decodedMessage); err != nil {
 		return
 	}

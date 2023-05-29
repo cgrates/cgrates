@@ -47,7 +47,7 @@ func (self *CmdGetThresholdProfileIDs) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdGetThresholdProfileIDs) RpcParams(reset bool) interface{} {
+func (self *CmdGetThresholdProfileIDs) RpcParams(reset bool) any {
 	if reset || self.rpcParams == nil {
 		self.rpcParams = &utils.ArgsItemIDs{}
 	}
@@ -58,7 +58,7 @@ func (self *CmdGetThresholdProfileIDs) PostprocessRpcParams() error {
 	return nil
 }
 
-func (self *CmdGetThresholdProfileIDs) RpcResult() interface{} {
+func (self *CmdGetThresholdProfileIDs) RpcResult() any {
 	var atr []string
 	return &atr
 }

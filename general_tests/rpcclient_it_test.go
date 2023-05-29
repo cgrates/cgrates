@@ -135,7 +135,7 @@ package general_tests
 
 // // Connect rpc client to rater
 // func testRPCITLclStatusSecondEngine(t *testing.T) {
-// 	var status map[string]interface{}
+// 	var status map[string]any
 // 	if err := rpcPoolFirst.Call(utils.CoreSv1Status, utils.TenantWithAPIOpts{}, &status); err != nil {
 // 		t.Error(err)
 // 	} else if status[utils.NodeID].(string) == "" {
@@ -157,7 +157,7 @@ package general_tests
 
 // // Connect rpc client to rater
 // func testRPCITLclStatusFirstInitial(t *testing.T) {
-// 	var status map[string]interface{}
+// 	var status map[string]any
 // 	if err := rpcPoolFirst.Call(utils.CoreSv1Status, utils.TenantWithAPIOpts{}, &status); err != nil {
 // 		t.Error(err)
 // 	} else if status[utils.NodeID].(string) == "" {
@@ -178,7 +178,7 @@ package general_tests
 // 		t.Error(err)
 // 	}
 // 	time.Sleep(time.Duration(*waitRater) * time.Millisecond)
-// 	var status map[string]interface{}
+// 	var status map[string]any
 // 	if err := rpcPoolFirst.Call(utils.CoreSv1Status, utils.TenantWithAPIOpts{}, &status); err != nil {
 // 		t.Error(err)
 // 	} else if status[utils.NodeID].(string) == "" {
@@ -197,7 +197,7 @@ package general_tests
 // 	if ral1, err = engine.StartEngine(rpcITCfgPath1, *waitRater); err != nil {
 // 		t.Fatal(err)
 // 	}
-// 	var status map[string]interface{}
+// 	var status map[string]any
 // 	if err := rpcPoolFirst.Call(utils.CoreSv1Status, utils.TenantWithAPIOpts{}, &status); err != nil {
 // 		t.Error(err)
 // 	} else if status[utils.NodeID].(string) == node2 {
@@ -219,7 +219,7 @@ package general_tests
 // }
 
 // // func testRPCITLclTimeout(t *testing.T) {
-// // 	var status map[string]interface{}
+// // 	var status map[string]any
 // // 	if err := rpcPoolFirst.Call(utils.CoreSv1Status, "10s", &status); err == nil {
 // // 		t.Error("Expecting timeout")
 // // 	} else if err.Error() != rpcclient.ErrReplyTimeout.Error() {
@@ -235,7 +235,7 @@ package general_tests
 // }
 
 // func testRPCITLclBcastStatusInitial(t *testing.T) {
-// 	var status map[string]interface{}
+// 	var status map[string]any
 // 	if err := rpcPoolBroadcast.Call(utils.CoreSv1Status, utils.TenantWithAPIOpts{}, &status); err != nil {
 // 		t.Error(err)
 // 	} else if status[utils.NodeID].(string) == "" {
@@ -253,7 +253,7 @@ package general_tests
 // 		t.Error(err)
 // 	}
 // 	time.Sleep(time.Duration(*waitRater) * time.Millisecond)
-// 	var status map[string]interface{}
+// 	var status map[string]any
 // 	if err := rpcPoolBroadcast.Call(utils.CoreSv1Status, utils.TenantWithAPIOpts{}, &status); err != nil {
 // 		t.Error(err)
 // 	} else if status[utils.NodeID].(string) == "" {
@@ -271,7 +271,7 @@ package general_tests
 // 		t.Error(err)
 // 	}
 // 	time.Sleep(time.Duration(*waitRater) * time.Millisecond)
-// 	var status map[string]interface{}
+// 	var status map[string]any
 // 	if err := rpcPoolBroadcast.Call(utils.CoreSv1Status, utils.TenantWithAPIOpts{}, &status); err == nil {
 // 		t.Error("Should get error")
 // 	}
@@ -281,7 +281,7 @@ package general_tests
 // 	if ral2, err = engine.StartEngine(rpcITCfgPath2, *waitRater); err != nil {
 // 		t.Fatal(err)
 // 	}
-// 	var status map[string]interface{}
+// 	var status map[string]any
 // 	if err := rpcPoolBroadcast.Call(utils.CoreSv1Status, utils.TenantWithAPIOpts{}, &status); err != nil {
 // 		t.Error(err)
 // 	} else if status[utils.NodeID].(string) == "" {
@@ -298,7 +298,7 @@ package general_tests
 // 	if ral1, err = engine.StartEngine(rpcITCfgPath1, *waitRater); err != nil {
 // 		t.Fatal(err)
 // 	}
-// 	var status map[string]interface{}
+// 	var status map[string]any
 // 	if err := rpcPoolBroadcast.Call(utils.CoreSv1Status, utils.TenantWithAPIOpts{}, &status); err != nil {
 // 		t.Error(err)
 // 	} else if status[utils.NodeID].(string) == "" {
@@ -371,7 +371,7 @@ package general_tests
 // 	if !*testRemoteRALs {
 // 		return
 // 	}
-// 	var status map[string]interface{}
+// 	var status map[string]any
 // 	if err := rpcPoolFirst.Call(utils.CoreSv1Status, utils.TenantWithAPIOpts{}, &status); err != nil {
 // 		t.Error(err)
 // 	} else if status[utils.NodeID].(string) == "" {
@@ -395,7 +395,7 @@ package general_tests
 // 		time.Sleep(time.Second)
 // 	}
 // 	fmt.Println("\n\nExecuting query ...")
-// 	var status map[string]interface{}
+// 	var status map[string]any
 // 	if err := rpcPoolFirst.Call(utils.CoreSv1Status, utils.TenantWithAPIOpts{}, &status); err != nil {
 // 		t.Error(err)
 // 	} else if status[utils.NodeID].(string) == "" {
@@ -423,7 +423,7 @@ package general_tests
 // 		time.Sleep(time.Second)
 // 	}
 // 	fmt.Println("\n\nExecuting query ...")
-// 	var status map[string]interface{}
+// 	var status map[string]any
 // 	if err := rpcPoolFirst.Call(utils.CoreSv1Status, utils.TenantWithAPIOpts{}, &status); err != nil {
 // 		t.Error(err)
 // 	} else if status[utils.NodeID].(string) == "" {

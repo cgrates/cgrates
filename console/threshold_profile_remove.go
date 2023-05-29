@@ -45,9 +45,9 @@ func (self *CmdRemoveThresholdProfile) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdRemoveThresholdProfile) RpcParams(reset bool) interface{} {
+func (self *CmdRemoveThresholdProfile) RpcParams(reset bool) any {
 	if reset || self.rpcParams == nil {
-		self.rpcParams = &utils.TenantIDWithAPIOpts{APIOpts: make(map[string]interface{})}
+		self.rpcParams = &utils.TenantIDWithAPIOpts{APIOpts: make(map[string]any)}
 	}
 	return self.rpcParams
 }
@@ -56,7 +56,7 @@ func (self *CmdRemoveThresholdProfile) PostprocessRpcParams() error {
 	return nil
 }
 
-func (self *CmdRemoveThresholdProfile) RpcResult() interface{} {
+func (self *CmdRemoveThresholdProfile) RpcResult() any {
 	var s string
 	return &s
 }

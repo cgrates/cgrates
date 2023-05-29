@@ -92,13 +92,13 @@ func (c *capsServerCodec) ReadRequestHeader(r *birpc.Request) error {
 	return c.sc.ReadRequestHeader(r)
 }
 
-func (c *capsServerCodec) ReadRequestBody(x interface{}) error {
+func (c *capsServerCodec) ReadRequestBody(x any) error {
 	if err := c.caps.Allocate(); err != nil {
 		return err
 	}
 	return c.sc.ReadRequestBody(x)
 }
-func (c *capsServerCodec) WriteResponse(r *birpc.Response, x interface{}) error {
+func (c *capsServerCodec) WriteResponse(r *birpc.Response, x any) error {
 	if r.Error == utils.ErrMaxConcurentRPCExceededNoCaps.Error() {
 		r.Error = utils.ErrMaxConcurentRPCExceeded.Error()
 	} else {
@@ -166,7 +166,7 @@ func (c *capsBiRPCCodec) ReadHeader(req *birpc.Request, resp *birpc.Response) (e
 }
 
 // ReadRequestBody into args argument of handler function.
-func (c *capsBiRPCCodec) ReadRequestBody(x interface{}) (err error) {
+func (c *capsBiRPCCodec) ReadRequestBody(x any) (err error) {
 	if err = c.caps.Allocate(); err != nil {
 		return
 	}
@@ -174,17 +174,17 @@ func (c *capsBiRPCCodec) ReadRequestBody(x interface{}) (err error) {
 }
 
 // ReadResponseBody into reply argument of handler function.
-func (c *capsBiRPCCodec) ReadResponseBody(x interface{}) error {
+func (c *capsBiRPCCodec) ReadResponseBody(x any) error {
 	return c.sc.ReadResponseBody(x)
 }
 
 // WriteRequest must be safe for concurrent use by multiple goroutines.
-func (c *capsBiRPCCodec) WriteRequest(req *birpc.Request, x interface{}) error {
+func (c *capsBiRPCCodec) WriteRequest(req *birpc.Request, x any) error {
 	return c.sc.WriteRequest(req, x)
 }
 
 // WriteResponse must be safe for concurrent use by multiple goroutines.
-func (c *capsBiRPCCodec) WriteResponse(r *birpc.Response, x interface{}) error {
+func (c *capsBiRPCCodec) WriteResponse(r *birpc.Response, x any) error {
 	if r.Error == utils.ErrMaxConcurentRPCExceededNoCaps.Error() {
 		r.Error = utils.ErrMaxConcurentRPCExceeded.Error()
 	} else {

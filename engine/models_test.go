@@ -53,7 +53,7 @@ func TestModelsAsMapStringInterface(t *testing.T) {
 		UpdatedAt:   time.Date(2021, 3, 3, 3, 3, 3, 3, time.UTC),
 		DeletedAt:   utils.TimePointer(time.Date(2021, 3, 3, 3, 3, 3, 3, time.UTC)),
 	}
-	expected := map[string]interface{}{
+	expected := map[string]any{
 		// "cgrid":        testCdrSql.Cgrid,
 		"run_id":       testCdrSql.RunID,
 		"origin_host":  testCdrSql.OriginHost,

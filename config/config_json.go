@@ -114,8 +114,8 @@ var (
 )
 
 type ConfigDB interface {
-	GetSection(ctx *context.Context, section string, val interface{}) error // in this case value must be a not nil pointer
-	SetSection(ctx *context.Context, section string, val interface{}) error
+	GetSection(ctx *context.Context, section string, val any) error // in this case value must be a not nil pointer
+	SetSection(ctx *context.Context, section string, val any) error
 }
 
 // Loads the json config out of io.Reader, eg other sources than file, maybe over http
@@ -128,14 +128,14 @@ func NewCgrJsonCfgFromBytes(buf []byte) (cgrJsonCfg *CgrJsonCfg, err error) {
 // Main object holding the loaded config as section raw messages
 type CgrJsonCfg map[string]json.RawMessage
 
-func (jsnCfg CgrJsonCfg) GetSection(ctx *context.Context, section string, val interface{}) (err error) {
+func (jsnCfg CgrJsonCfg) GetSection(ctx *context.Context, section string, val any) (err error) {
 	if rawCfg, hasKey := jsnCfg[section]; hasKey {
 		err = json.Unmarshal(rawCfg, val)
 	}
 	return
 }
 
-func (jsnCfg CgrJsonCfg) SetSection(_ *context.Context, section string, jsn interface{}) (_ error) {
+func (jsnCfg CgrJsonCfg) SetSection(_ *context.Context, section string, jsn any) (_ error) {
 	data, err := json.Marshal(jsn)
 	if err != nil {
 		return err
@@ -147,7 +147,7 @@ func (jsnCfg CgrJsonCfg) SetSection(_ *context.Context, section string, jsn inte
 type Section interface {
 	SName() string
 	Load(*context.Context, ConfigDB, *CGRConfig) error
-	AsMapInterface(string) interface{}
+	AsMapInterface(string) any
 	CloneSection() Section
 	// UpdateDB(*context.Context) // not know
 }
@@ -234,8 +234,8 @@ func (r Sections) LoadWithout(ctx *context.Context, db ConfigDB, cfg *CGRConfig,
 	}
 	return
 }
-func (r Sections) AsMapInterface(sep string) (m map[string]interface{}) {
-	m = make(map[string]interface{})
+func (r Sections) AsMapInterface(sep string) (m map[string]any) {
+	m = make(map[string]any)
 	for _, sec := range r {
 		m[sec.SName()] = sec.AsMapInterface(sep)
 	}

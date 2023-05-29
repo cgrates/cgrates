@@ -177,8 +177,8 @@ func GetBoolOpts(ctx *context.Context, tnt string, dP utils.DataProvider, fS *Fi
 	if err != nil {
 		return false, err
 	}
-	var opts map[string]interface{}
-	opts, canCast := values.(map[string]interface{})
+	var opts map[string]any
+	opts, canCast := values.(map[string]any)
 	if !canCast {
 		return false, utils.ErrCastFailed
 	}
@@ -223,10 +223,10 @@ func GetDecimalBigOpts(ctx *context.Context, tnt string, ev *utils.CGREvent, fS 
 	return dftOpt, nil // return the default value if there are no options and none of the filters pass
 }
 
-// GetInterfaceOpts checks the specified option names in order among the keys in APIOpts returning the first value it finds as interface{}, otherwise it
+// GetInterfaceOpts checks the specified option names in order among the keys in APIOpts returning the first value it finds as any, otherwise it
 // returns the config option if at least one filter passes or the default value if none of them do
 func GetInterfaceOpts(ctx *context.Context, tnt string, ev *utils.CGREvent, fS *FilterS, dynOpts []*utils.DynamicInterfaceOpt,
-	dftOpt interface{}, optNames ...string) (cfgOpt interface{}, err error) {
+	dftOpt any, optNames ...string) (cfgOpt any, err error) {
 	for _, optName := range optNames {
 		if opt, has := ev.APIOpts[optName]; has {
 			return opt, nil
@@ -275,7 +275,7 @@ func GetIntPointerOpts(ctx *context.Context, tnt string, ev *utils.CGREvent, fS 
 
 // GetDurationPointerOptsFromMultipleMaps checks the specified option names in order among the keys in APIOpts, then in startOpts, returning the first value it finds as *time.Duration,
 // otherwise it returns the config option if at least one filter passes or NOT_FOUND if none of them do
-func GetDurationPointerOptsFromMultipleMaps(ctx *context.Context, tnt string, eventStart, apiOpts, startOpts map[string]interface{}, fS *FilterS,
+func GetDurationPointerOptsFromMultipleMaps(ctx *context.Context, tnt string, eventStart, apiOpts, startOpts map[string]any, fS *FilterS,
 	dynOpts []*utils.DynamicDurationPointerOpt, optName string) (cfgOpt *time.Duration, err error) {
 	var value time.Duration
 	if opt, has := apiOpts[optName]; has {
@@ -308,7 +308,7 @@ func GetDurationPointerOptsFromMultipleMaps(ctx *context.Context, tnt string, ev
 
 // GetDurationOptsFromMultipleMaps checks the specified option names in order among the keys in APIOpts, then in startOpts, returning the first value it finds as time.Duration,
 // otherwise it returns the config option if at least one filter passes or the default one if none of them do
-func GetDurationOptsFromMultipleMaps(ctx *context.Context, tnt string, eventStart, apiOpts, startOpts map[string]interface{}, fS *FilterS, dynOpts []*utils.DynamicDurationOpt,
+func GetDurationOptsFromMultipleMaps(ctx *context.Context, tnt string, eventStart, apiOpts, startOpts map[string]any, fS *FilterS, dynOpts []*utils.DynamicDurationOpt,
 	dftOpt time.Duration, optName string) (cfgOpt time.Duration, err error) {
 	var value time.Duration
 	if opt, has := apiOpts[optName]; has {

@@ -138,7 +138,7 @@ func testExpLoadTPFromFolder(t *testing.T) {
 	var reply string
 	if err := expRpc.Call(context.Background(), utils.LoaderSv1Run,
 		&loaders.ArgsProcessFolder{
-			APIOpts: map[string]interface{}{
+			APIOpts: map[string]any{
 				utils.MetaCache:       caching,
 				utils.MetaStopOnError: true,
 			},
@@ -217,7 +217,7 @@ func testExpLoadTPFromExported(t *testing.T) {
 	if err := expRpc.Call(context.Background(), utils.LoaderSv1Run,
 		&loaders.ArgsProcessFolder{
 			LoaderID: "exported_ldr",
-			APIOpts: map[string]interface{}{
+			APIOpts: map[string]any{
 				utils.MetaCache: caching,
 			},
 		}, &reply); err != nil {

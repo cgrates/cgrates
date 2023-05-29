@@ -46,7 +46,7 @@ func TestTPReaderCallCacheNoCaching(t *testing.T) {
 		utils.CacheFilters:   {"cgrates.org:FLTR_ID1", "cgrates.org:FLTR_ID2"},
 		utils.CacheResources: {},
 	}
-	opts := map[string]interface{}{
+	opts := map[string]any{
 		utils.MetaSubsys: utils.MetaChargers,
 	}
 	ctx := context.Background()
@@ -71,10 +71,10 @@ func TestTPReaderCallCacheReloadCacheFirstCallErr(t *testing.T) {
 	cacheConns := []string{"cacheConn1"}
 	client := make(chan birpc.ClientConnector, 1)
 	mCC := &ccMock{
-		calls: map[string]func(_ *context.Context, args interface{}, reply interface{}) error{
-			utils.CacheSv1ReloadCache: func(_ *context.Context, args, reply interface{}) error {
+		calls: map[string]func(_ *context.Context, args any, reply any) error{
+			utils.CacheSv1ReloadCache: func(_ *context.Context, args, reply any) error {
 				expArgs := &utils.AttrReloadCacheWithAPIOpts{
-					APIOpts: map[string]interface{}{
+					APIOpts: map[string]any{
 						utils.MetaSubsys: utils.MetaChargers,
 					},
 					FilterIDs: []string{"cgrates.org:FLTR_ID1", "cgrates.org:FLTR_ID2"},
@@ -100,7 +100,7 @@ func TestTPReaderCallCacheReloadCacheFirstCallErr(t *testing.T) {
 		utils.CacheFilters: {"cgrates.org:FLTR_ID1", "cgrates.org:FLTR_ID2"},
 	}
 	cacheIDs := []string{}
-	opts := map[string]interface{}{
+	opts := map[string]any{
 		utils.MetaSubsys: utils.MetaChargers,
 	}
 	ctx := context.Background()
@@ -137,13 +137,13 @@ func TestTPReaderCallCacheReloadCacheSecondCallErr(t *testing.T) {
 	cacheConns := []string{"cacheConn1"}
 	client := make(chan birpc.ClientConnector, 1)
 	mCC := &ccMock{
-		calls: map[string]func(_ *context.Context, args interface{}, reply interface{}) error{
-			utils.CacheSv1ReloadCache: func(_ *context.Context, args, reply interface{}) error {
+		calls: map[string]func(_ *context.Context, args any, reply any) error{
+			utils.CacheSv1ReloadCache: func(_ *context.Context, args, reply any) error {
 				return nil
 			},
-			utils.CacheSv1Clear: func(_ *context.Context, args, reply interface{}) error {
+			utils.CacheSv1Clear: func(_ *context.Context, args, reply any) error {
 				expArgs := &utils.AttrCacheIDsWithAPIOpts{
-					APIOpts: map[string]interface{}{
+					APIOpts: map[string]any{
 						utils.MetaSubsys: utils.MetaChargers,
 					},
 					CacheIDs: []string{"cacheID"},
@@ -169,7 +169,7 @@ func TestTPReaderCallCacheReloadCacheSecondCallErr(t *testing.T) {
 		utils.CacheFilters: {"cgrates.org:FLTR_ID1", "cgrates.org:FLTR_ID2"},
 	}
 	cacheIDs := []string{"cacheID"}
-	opts := map[string]interface{}{
+	opts := map[string]any{
 		utils.MetaSubsys: utils.MetaChargers,
 	}
 	ctx := context.Background()
@@ -218,10 +218,10 @@ func TestTPReaderCallCacheLoadCache(t *testing.T) {
 	cacheConns := []string{"cacheConn1"}
 	client := make(chan birpc.ClientConnector, 1)
 	mCC := &ccMock{
-		calls: map[string]func(_ *context.Context, args interface{}, reply interface{}) error{
-			utils.CacheSv1LoadCache: func(_ *context.Context, args, reply interface{}) error {
+		calls: map[string]func(_ *context.Context, args any, reply any) error{
+			utils.CacheSv1LoadCache: func(_ *context.Context, args, reply any) error {
 				expArgs := &utils.AttrReloadCacheWithAPIOpts{
-					APIOpts: map[string]interface{}{
+					APIOpts: map[string]any{
 						utils.MetaSubsys: utils.MetaChargers,
 					},
 					FilterIDs: []string{"cgrates.org:FLTR_ID1", "cgrates.org:FLTR_ID2"},
@@ -236,9 +236,9 @@ func TestTPReaderCallCacheLoadCache(t *testing.T) {
 				}
 				return nil
 			},
-			utils.CacheSv1Clear: func(_ *context.Context, args, reply interface{}) error {
+			utils.CacheSv1Clear: func(_ *context.Context, args, reply any) error {
 				expArgs := &utils.AttrCacheIDsWithAPIOpts{
-					APIOpts: map[string]interface{}{
+					APIOpts: map[string]any{
 						utils.MetaSubsys: utils.MetaChargers,
 					},
 					CacheIDs: []string{"cacheID"},
@@ -264,7 +264,7 @@ func TestTPReaderCallCacheLoadCache(t *testing.T) {
 		utils.CacheFilters: {"cgrates.org:FLTR_ID1", "cgrates.org:FLTR_ID2"},
 	}
 	cacheIDs := []string{"cacheID"}
-	opts := map[string]interface{}{
+	opts := map[string]any{
 		utils.MetaSubsys: utils.MetaChargers,
 	}
 	ctx := context.Background()
@@ -288,10 +288,10 @@ func TestTPReaderCallCacheRemoveItems(t *testing.T) {
 	cacheConns := []string{"cacheConn1"}
 	client := make(chan birpc.ClientConnector, 1)
 	mCC := &ccMock{
-		calls: map[string]func(_ *context.Context, args interface{}, reply interface{}) error{
-			utils.CacheSv1RemoveItems: func(_ *context.Context, args, reply interface{}) error {
+		calls: map[string]func(_ *context.Context, args any, reply any) error{
+			utils.CacheSv1RemoveItems: func(_ *context.Context, args, reply any) error {
 				expArgs := &utils.AttrReloadCacheWithAPIOpts{
-					APIOpts: map[string]interface{}{
+					APIOpts: map[string]any{
 						utils.MetaSubsys: utils.MetaChargers,
 					},
 					FilterIDs: []string{"cgrates.org:FLTR_ID1", "cgrates.org:FLTR_ID2"},
@@ -306,9 +306,9 @@ func TestTPReaderCallCacheRemoveItems(t *testing.T) {
 				}
 				return nil
 			},
-			utils.CacheSv1Clear: func(_ *context.Context, args, reply interface{}) error {
+			utils.CacheSv1Clear: func(_ *context.Context, args, reply any) error {
 				expArgs := &utils.AttrCacheIDsWithAPIOpts{
-					APIOpts: map[string]interface{}{
+					APIOpts: map[string]any{
 						utils.MetaSubsys: utils.MetaChargers,
 					},
 					CacheIDs: []string{"cacheID"},
@@ -334,7 +334,7 @@ func TestTPReaderCallCacheRemoveItems(t *testing.T) {
 		utils.CacheFilters: {"cgrates.org:FLTR_ID1", "cgrates.org:FLTR_ID2"},
 	}
 	cacheIDs := []string{"cacheID"}
-	opts := map[string]interface{}{
+	opts := map[string]any{
 		utils.MetaSubsys: utils.MetaChargers,
 	}
 	ctx := context.Background()
@@ -358,10 +358,10 @@ func TestTPReaderCallCacheClear(t *testing.T) {
 	cacheConns := []string{"cacheConn1"}
 	client := make(chan birpc.ClientConnector, 1)
 	mCC := &ccMock{
-		calls: map[string]func(_ *context.Context, args interface{}, reply interface{}) error{
-			utils.CacheSv1Clear: func(_ *context.Context, args, reply interface{}) error {
+		calls: map[string]func(_ *context.Context, args any, reply any) error{
+			utils.CacheSv1Clear: func(_ *context.Context, args, reply any) error {
 				expArgs := &utils.AttrCacheIDsWithAPIOpts{
-					APIOpts: map[string]interface{}{
+					APIOpts: map[string]any{
 						utils.MetaSubsys: utils.MetaChargers,
 					},
 					Tenant: "cgrates.org",
@@ -386,7 +386,7 @@ func TestTPReaderCallCacheClear(t *testing.T) {
 		utils.CacheFilters: {"cgrates.org:FLTR_ID1", "cgrates.org:FLTR_ID2"},
 	}
 	cacheIDs := []string{}
-	opts := map[string]interface{}{
+	opts := map[string]any{
 		utils.MetaSubsys: utils.MetaChargers,
 	}
 	ctx := context.Background()
@@ -633,7 +633,7 @@ func TestTPReaderReloadCache(t *testing.T) {
 	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	data.SetLoadIDsDrv(nil, make(map[string]int64))
 	argExpect := &utils.AttrReloadCacheWithAPIOpts{
-		APIOpts:              map[string]interface{}{},
+		APIOpts:              map[string]any{},
 		Tenant:               "cgrates.org",
 		ResourceProfileIDs:   []string{"cgrates.org:resourceProfilesID"},
 		StatsQueueProfileIDs: []string{"cgrates.org:statProfilesID"},
@@ -653,14 +653,14 @@ func TestTPReaderReloadCache(t *testing.T) {
 	}
 	rpcInternal := make(chan birpc.ClientConnector, 1)
 	rpcInternal <- &ccMock{
-		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
-			utils.CacheSv1ReloadCache: func(ctx *context.Context, args interface{}, reply interface{}) error {
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.CacheSv1ReloadCache: func(ctx *context.Context, args any, reply any) error {
 				if !reflect.DeepEqual(args, argExpect) {
 					t.Errorf("Expected %v \nbut received %v", utils.ToJSON(argExpect), utils.ToJSON(args))
 				}
 				return nil
 			},
-			utils.CacheSv1Clear: func(ctx *context.Context, args interface{}, reply interface{}) error {
+			utils.CacheSv1Clear: func(ctx *context.Context, args any, reply any) error {
 				return nil
 			},
 		},
@@ -699,7 +699,7 @@ func TestTPReaderReloadCache(t *testing.T) {
 		dm:         NewDataManager(data, config.CgrConfig().CacheCfg(), cnMgr),
 		cacheConns: []string{connID},
 	}
-	if err := tpr.ReloadCache(context.Background(), utils.MetaReload, false, make(map[string]interface{}), "cgrates.org"); err != nil {
+	if err := tpr.ReloadCache(context.Background(), utils.MetaReload, false, make(map[string]any), "cgrates.org"); err != nil {
 		t.Error(err)
 	}
 }

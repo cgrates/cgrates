@@ -44,7 +44,7 @@ type AnalyzerConnector struct {
 	to   string
 }
 
-func (c *AnalyzerConnector) Call(ctx *context.Context, serviceMethod string, args, reply interface{}) (err error) {
+func (c *AnalyzerConnector) Call(ctx *context.Context, serviceMethod string, args, reply any) (err error) {
 	sTime := time.Now()
 	err = c.conn.Call(ctx, serviceMethod, args, reply)
 	go c.aS.logTrafic(0, serviceMethod, args, reply, err, c.enc, c.from, c.to, sTime, time.Now())

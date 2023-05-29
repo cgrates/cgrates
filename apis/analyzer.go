@@ -32,6 +32,6 @@ type AnalyzerSv1 struct {
 	ping
 }
 
-func (aSv1 *AnalyzerSv1) StringQuery(ctx *context.Context, search *analyzers.QueryArgs, reply *[]map[string]interface{}) error {
+func (aSv1 *AnalyzerSv1) StringQuery(ctx *context.Context, search *analyzers.QueryArgs, reply *[]map[string]any) error {
 	return aSv1.aS.V1StringQuery(ctx, search, reply)
 }

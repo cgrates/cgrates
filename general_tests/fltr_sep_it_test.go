@@ -143,7 +143,7 @@ func testFltrSepLoadTarrifPlans(t *testing.T) {
 	var reply string
 	if err := fltrSepRPC.Call(context.Background(), utils.LoaderSv1Run,
 		&loaders.ArgsProcessFolder{
-			APIOpts: map[string]interface{}{
+			APIOpts: map[string]any{
 				utils.MetaCache:       utils.MetaReload,
 				utils.MetaStopOnError: false,
 			},
@@ -158,10 +158,10 @@ func testFltrSepFilterSeparation(t *testing.T) {
 	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "filter_separation_test",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1001",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsContext: utils.MetaAny,
 		},
 	}

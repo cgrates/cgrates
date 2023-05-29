@@ -188,7 +188,7 @@ func TestActionProfileSet(t *testing.T) {
 			Type:      "val1",
 			FilterIDs: []string{"fltr1"},
 			TTL:       10,
-			Opts: map[string]interface{}{
+			Opts: map[string]any{
 				"opt0": "val1",
 				"opt1": "val1",
 				"opt2": "val1",
@@ -311,7 +311,7 @@ func TestActionProfileFieldAsInterface(t *testing.T) {
 			Type:      "val1",
 			FilterIDs: []string{"fltr1"},
 			TTL:       10,
-			Opts: map[string]interface{}{
+			Opts: map[string]any{
 				"opt0": "val1",
 				"opt1": "val1",
 				"opt2": "val1",
@@ -593,7 +593,7 @@ func TestActionProfileMergeAPActionMerge(t *testing.T) {
 				FilterIDs: []string{"FLTR1", "FLTR2", "FLTR3"},
 				TTL:       time.Minute,
 				Type:      "type2",
-				Opts: map[string]interface{}{
+				Opts: map[string]any{
 					"key1": "value1",
 					"key2": "value2",
 				},
@@ -622,7 +622,7 @@ func TestActionProfileMergeAPActionMerge(t *testing.T) {
 				FilterIDs: []string{"FLTR1", "FLTR2", "FLTR3", "FLTR4"},
 				TTL:       time.Minute,
 				Type:      "type2",
-				Opts: map[string]interface{}{
+				Opts: map[string]any{
 					"key1": "value1",
 					"key2": "value3",
 				},
@@ -656,7 +656,7 @@ func TestActionProfileMergeAPActionMerge(t *testing.T) {
 				ID:        "APAct1",
 				FilterIDs: []string{"FLTR4"},
 				Type:      "",
-				Opts: map[string]interface{}{
+				Opts: map[string]any{
 					"key2": "value3",
 				},
 				Diktats: []*APDiktat{
@@ -678,7 +678,7 @@ func TestActionProfileAPActionMergeEmptyV2(t *testing.T) {
 		FilterIDs: []string{"FLTR1"},
 		TTL:       time.Second,
 		Type:      "type",
-		Opts: map[string]interface{}{
+		Opts: map[string]any{
 			"key": "value",
 		},
 		Diktats: []*APDiktat{
@@ -693,7 +693,7 @@ func TestActionProfileAPActionMergeEmptyV2(t *testing.T) {
 		FilterIDs: []string{"FLTR1"},
 		TTL:       time.Second,
 		Type:      "type",
-		Opts: map[string]interface{}{
+		Opts: map[string]any{
 			"key": "value",
 		},
 		Diktats: []*APDiktat{
@@ -713,14 +713,14 @@ func TestActionProfileAPActionMergeEmptyV2(t *testing.T) {
 
 func TestActionProfileAPActionMergeEmptyV1(t *testing.T) {
 	apAct := &APAction{
-		Opts: make(map[string]interface{}),
+		Opts: make(map[string]any),
 	}
 	expected := &APAction{
 		ID:        "APAct1",
 		FilterIDs: []string{"FLTR1"},
 		TTL:       time.Second,
 		Type:      "type",
-		Opts: map[string]interface{}{
+		Opts: map[string]any{
 			"key": "value",
 		},
 		Diktats: []*APDiktat{
@@ -736,7 +736,7 @@ func TestActionProfileAPActionMergeEmptyV1(t *testing.T) {
 		FilterIDs: []string{"FLTR1"},
 		TTL:       time.Second,
 		Type:      "type",
-		Opts: map[string]interface{}{
+		Opts: map[string]any{
 			"key": "value",
 		},
 		Diktats: []*APDiktat{
@@ -758,7 +758,7 @@ func TestActionProfileAPActionMerge(t *testing.T) {
 		FilterIDs: []string{"FLTR1"},
 		TTL:       time.Second,
 		Type:      "type1",
-		Opts: map[string]interface{}{
+		Opts: map[string]any{
 			"key1": "value1",
 		},
 		Diktats: []*APDiktat{
@@ -773,7 +773,7 @@ func TestActionProfileAPActionMerge(t *testing.T) {
 		FilterIDs: []string{"FLTR1", "FLTR2", "FLTR3"},
 		TTL:       time.Minute,
 		Type:      "type2",
-		Opts: map[string]interface{}{
+		Opts: map[string]any{
 			"key1": "value1",
 			"key2": "value2",
 		},
@@ -785,7 +785,7 @@ func TestActionProfileAPActionMerge(t *testing.T) {
 		FilterIDs: []string{"FLTR2", "FLTR3"},
 		TTL:       time.Minute,
 		Type:      "type2",
-		Opts: map[string]interface{}{
+		Opts: map[string]any{
 			"key2": "value2",
 		},
 		Diktats: []*APDiktat{
@@ -805,7 +805,7 @@ func TestActionProfileAPActionMerge(t *testing.T) {
 		FilterIDs: []string{"FLTR1", "FLTR2", "FLTR3", "FLTR4"},
 		TTL:       time.Minute,
 		Type:      "type2",
-		Opts: map[string]interface{}{
+		Opts: map[string]any{
 			"key1": "value1",
 			"key2": "value3",
 		},
@@ -821,7 +821,7 @@ func TestActionProfileAPActionMerge(t *testing.T) {
 		ID:        "APAct1",
 		FilterIDs: []string{"FLTR4"},
 		Type:      "",
-		Opts: map[string]interface{}{
+		Opts: map[string]any{
 			"key2": "value3",
 		},
 		Diktats: []*APDiktat{

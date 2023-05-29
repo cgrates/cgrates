@@ -76,10 +76,10 @@ func (dS *DispatcherService) authorize(ctx *context.Context, method, tenant stri
 	ev := &utils.CGREvent{
 		Tenant: tenant,
 		ID:     utils.UUIDSha1Prefix(),
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.APIKey: apiKey,
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaSubsys:  utils.MetaDispatchers,
 			utils.OptsContext: utils.MetaAuth,
 		},
@@ -161,7 +161,7 @@ func (dS *DispatcherService) dispatcherProfilesForEvent(ctx *context.Context, tn
 
 // Dispatch is the method forwarding the request towards the right connection
 func (dS *DispatcherService) Dispatch(ctx *context.Context, ev *utils.CGREvent, subsys string,
-	serviceMethod string, args, reply interface{}) (err error) {
+	serviceMethod string, args, reply any) (err error) {
 	tnt := ev.Tenant
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(ctx, serviceMethod, tnt, utils.IfaceAsString(ev.APIOpts[utils.OptsAPIKey])); err != nil {
@@ -176,7 +176,7 @@ func (dS *DispatcherService) Dispatch(ctx *context.Context, ev *utils.CGREvent, 
 			utils.MetaMethod: serviceMethod,
 		},
 	}
-	dspLoopAPIOpts := map[string]interface{}{
+	dspLoopAPIOpts := map[string]any{
 		utils.MetaSubsys: utils.MetaDispatchers,
 		utils.MetaNodeID: dS.cfg.GeneralCfg().NodeID,
 	}
@@ -210,7 +210,7 @@ func (dS *DispatcherService) Dispatch(ctx *context.Context, ev *utils.CGREvent, 
 				CacheID: utils.CacheDispatcherRoutes,
 				ItemID:  routeID,
 			}}
-		var itmRemote interface{}
+		var itmRemote any
 		if itmRemote, err = engine.Cache.GetWithRemote(ctx, argsCache); err == nil && itmRemote != nil {
 			var canCast bool
 			if dR, canCast = itmRemote.(*DispatcherRoute); !canCast {
@@ -248,7 +248,7 @@ func (dS *DispatcherService) Dispatch(ctx *context.Context, ev *utils.CGREvent, 
 			serviceMethod, args, reply)
 	}
 	if ev.APIOpts == nil {
-		ev.APIOpts = make(map[string]interface{})
+		ev.APIOpts = make(map[string]any)
 	}
 	ev.APIOpts[utils.MetaSubsys] = utils.MetaDispatchers // inject into args
 	ev.APIOpts[utils.MetaNodeID] = dS.cfg.GeneralCfg().NodeID
@@ -312,7 +312,7 @@ func (dS *DispatcherService) ping(ctx *context.Context, subsys, method string, a
 }
 
 func (dS *DispatcherService) DispatcherSv1RemoteStatus(ctx *context.Context, args *utils.TenantWithAPIOpts,
-	reply *map[string]interface{}) (err error) {
+	reply *map[string]any) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
 	if args.Tenant != utils.EmptyString {
 		tnt = args.Tenant

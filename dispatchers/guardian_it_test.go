@@ -72,7 +72,7 @@ func testDspGrdPing(t *testing.T) {
 	if err := dispEngine.RPC.Call(utils.GuardianSv1Ping, &utils.CGREvent{
 		Tenant: "cgrates.org",
 
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsAPIKey: "grd12345",
 		},
 	}, &reply); err != nil {
@@ -93,7 +93,7 @@ func testDspGrdLock(t *testing.T) {
 	if err := dispEngine.RPC.Call(utils.GuardianSv1RemoteLock, &guardian.AttrRemoteLockWithAPIOpts{
 		AttrRemoteLock: args,
 		Tenant:         "cgrates.org",
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsAPIKey: "grd12345",
 		},
 	}, &reply); err != nil {
@@ -104,7 +104,7 @@ func testDspGrdLock(t *testing.T) {
 	if err := dispEngine.RPC.Call(utils.GuardianSv1RemoteUnlock, &guardian.AttrRemoteUnlockWithAPIOpts{
 		RefID:  reply,
 		Tenant: "cgrates.org",
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsAPIKey: "grd12345",
 		},
 	}, &unlockReply); err != nil {

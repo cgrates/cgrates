@@ -1132,7 +1132,7 @@ func TestLoaderCfgAsMapInterfaceCase1(t *testing.T) {
 	],	
 }`
 	var flags []string
-	eMap := []map[string]interface{}{
+	eMap := []map[string]any{
 		{
 			utils.IDCfg:           "*default",
 			utils.EnabledCfg:      false,
@@ -1144,18 +1144,18 @@ func TestLoaderCfgAsMapInterfaceCase1(t *testing.T) {
 			utils.TpInDirCfg:      "/var/spool/cgrates/loader/in",
 			utils.TpOutDirCfg:     "/var/spool/cgrates/loader/out",
 			utils.ActionCfg:       utils.MetaStore,
-			utils.OptsCfg: map[string]interface{}{
+			utils.OptsCfg: map[string]any{
 				utils.MetaCache:       "",
 				utils.MetaStopOnError: false,
 				utils.MetaForceLock:   false,
 				utils.MetaWithIndex:   true,
 			},
-			utils.DataCfg: []map[string]interface{}{
+			utils.DataCfg: []map[string]any{
 				{
 					utils.TypeCfg:     "*filters",
 					utils.FilenameCfg: "Filters.csv",
 					utils.FlagsCfg:    flags,
-					utils.FieldsCfg: []map[string]interface{}{
+					utils.FieldsCfg: []map[string]any{
 						{
 							utils.TagCfg:       "Tenant",
 							utils.PathCfg:      "Tenant",
@@ -1195,7 +1195,7 @@ func TestLoaderCfgAsMapInterfaceCase1(t *testing.T) {
 					utils.TypeCfg:     "*attributes",
 					utils.FilenameCfg: "Attributes.csv",
 					utils.FlagsCfg:    flags,
-					utils.FieldsCfg: []map[string]interface{}{
+					utils.FieldsCfg: []map[string]any{
 						{
 							utils.TagCfg:       "TenantID",
 							utils.PathCfg:      "Tenant",
@@ -1215,7 +1215,7 @@ func TestLoaderCfgAsMapInterfaceCase1(t *testing.T) {
 					utils.TypeCfg:     "*resources",
 					utils.FilenameCfg: "Resources.csv",
 					utils.FlagsCfg:    flags,
-					utils.FieldsCfg: []map[string]interface{}{
+					utils.FieldsCfg: []map[string]any{
 						{
 							utils.TagCfg:       "Tenant",
 							utils.PathCfg:      "Tenant",
@@ -1284,7 +1284,7 @@ func TestLoaderCfgAsMapInterfaceCase1(t *testing.T) {
 					utils.TypeCfg:     "*stats",
 					utils.FilenameCfg: "Stats.csv",
 					utils.FlagsCfg:    flags,
-					utils.FieldsCfg: []map[string]interface{}{
+					utils.FieldsCfg: []map[string]any{
 						{
 							utils.TagCfg:       "Tenant",
 							utils.PathCfg:      "Tenant",
@@ -1372,7 +1372,7 @@ func TestLoaderCfgAsMapInterfaceCase1(t *testing.T) {
 					utils.TypeCfg:     "*thresholds",
 					utils.FilenameCfg: "Thresholds.csv",
 					utils.FlagsCfg:    flags,
-					utils.FieldsCfg: []map[string]interface{}{
+					utils.FieldsCfg: []map[string]any{
 						{
 							utils.TagCfg:       "Tenant",
 							utils.PathCfg:      "Tenant",
@@ -1441,7 +1441,7 @@ func TestLoaderCfgAsMapInterfaceCase1(t *testing.T) {
 					utils.TypeCfg:     "*routes",
 					utils.FilenameCfg: "Routes.csv",
 					utils.FlagsCfg:    flags,
-					utils.FieldsCfg: []map[string]interface{}{
+					utils.FieldsCfg: []map[string]any{
 						{
 							utils.TagCfg:       "Tenant",
 							utils.PathCfg:      "Tenant",
@@ -1547,7 +1547,7 @@ func TestLoaderCfgAsMapInterfaceCase1(t *testing.T) {
 					utils.TypeCfg:     "*chargers",
 					utils.FilenameCfg: "Chargers.csv",
 					utils.FlagsCfg:    flags,
-					utils.FieldsCfg: []map[string]interface{}{
+					utils.FieldsCfg: []map[string]any{
 						{
 							utils.TagCfg:       "Tenant",
 							utils.PathCfg:      "Tenant",
@@ -1598,7 +1598,7 @@ func TestLoaderCfgAsMapInterfaceCase1(t *testing.T) {
 					utils.TypeCfg:     "*dispatchers",
 					utils.FilenameCfg: "DispatcherProfiles.csv",
 					utils.FlagsCfg:    flags,
-					utils.FieldsCfg: []map[string]interface{}{
+					utils.FieldsCfg: []map[string]any{
 						{
 							utils.TagCfg:       "Tenant",
 							utils.PathCfg:      "Tenant",
@@ -1674,7 +1674,7 @@ func TestLoaderCfgAsMapInterfaceCase1(t *testing.T) {
 					utils.TypeCfg:     "*dispatcher_hosts",
 					utils.FilenameCfg: "DispatcherHosts.csv",
 					utils.FlagsCfg:    flags,
-					utils.FieldsCfg: []map[string]interface{}{
+					utils.FieldsCfg: []map[string]any{
 						{
 							utils.TagCfg:       "Tenant",
 							utils.PathCfg:      "Tenant",
@@ -1761,7 +1761,7 @@ func TestLoaderCfgAsMapInterfaceCase1(t *testing.T) {
 					utils.TypeCfg:     "*rate_profiles",
 					utils.FilenameCfg: "Rates.csv",
 					utils.FlagsCfg:    flags,
-					utils.FieldsCfg: []map[string]interface{}{
+					utils.FieldsCfg: []map[string]any{
 						{
 							utils.TagCfg:       "Tenant",
 							utils.PathCfg:      "Tenant",
@@ -1876,7 +1876,7 @@ func TestLoaderCfgAsMapInterfaceCase1(t *testing.T) {
 					utils.TypeCfg:     "*action_profiles",
 					utils.FilenameCfg: "Actions.csv",
 					utils.FlagsCfg:    flags,
-					utils.FieldsCfg: []map[string]interface{}{
+					utils.FieldsCfg: []map[string]any{
 						{
 							utils.TagCfg:       "Tenant",
 							utils.PathCfg:      "Tenant",
@@ -1970,7 +1970,7 @@ func TestLoaderCfgAsMapInterfaceCase1(t *testing.T) {
 					utils.TypeCfg:     "*accounts",
 					utils.FilenameCfg: "Accounts.csv",
 					utils.FlagsCfg:    flags,
-					utils.FieldsCfg: []map[string]interface{}{
+					utils.FieldsCfg: []map[string]any{
 						{
 							utils.TagCfg:       "Tenant",
 							utils.PathCfg:      "Tenant",
@@ -2088,19 +2088,19 @@ func TestLoaderCfgAsMapInterfaceCase1(t *testing.T) {
 					},
 				},
 			},
-			utils.CacheCfg: map[string]interface{}{
-				utils.MetaFilters:         map[string]interface{}{utils.LimitCfg: -1, utils.TTLCfg: "5s", utils.PrecacheCfg: false, utils.RemoteCfg: false, utils.ReplicateCfg: false, utils.StaticTTLCfg: false},
-				utils.MetaAttributes:      map[string]interface{}{utils.LimitCfg: -1, utils.TTLCfg: "5s", utils.PrecacheCfg: false, utils.RemoteCfg: false, utils.ReplicateCfg: false, utils.StaticTTLCfg: false},
-				utils.MetaResources:       map[string]interface{}{utils.LimitCfg: -1, utils.TTLCfg: "5s", utils.PrecacheCfg: false, utils.RemoteCfg: false, utils.ReplicateCfg: false, utils.StaticTTLCfg: false},
-				utils.MetaStats:           map[string]interface{}{utils.LimitCfg: -1, utils.TTLCfg: "5s", utils.PrecacheCfg: false, utils.RemoteCfg: false, utils.ReplicateCfg: false, utils.StaticTTLCfg: false},
-				utils.MetaThresholds:      map[string]interface{}{utils.LimitCfg: -1, utils.TTLCfg: "5s", utils.PrecacheCfg: false, utils.RemoteCfg: false, utils.ReplicateCfg: false, utils.StaticTTLCfg: false},
-				utils.MetaRoutes:          map[string]interface{}{utils.LimitCfg: -1, utils.TTLCfg: "5s", utils.PrecacheCfg: false, utils.RemoteCfg: false, utils.ReplicateCfg: false, utils.StaticTTLCfg: false},
-				utils.MetaChargers:        map[string]interface{}{utils.LimitCfg: -1, utils.TTLCfg: "5s", utils.PrecacheCfg: false, utils.RemoteCfg: false, utils.ReplicateCfg: false, utils.StaticTTLCfg: false},
-				utils.MetaDispatchers:     map[string]interface{}{utils.LimitCfg: -1, utils.TTLCfg: "5s", utils.PrecacheCfg: false, utils.RemoteCfg: false, utils.ReplicateCfg: false, utils.StaticTTLCfg: false},
-				utils.MetaDispatcherHosts: map[string]interface{}{utils.LimitCfg: -1, utils.TTLCfg: "5s", utils.PrecacheCfg: false, utils.RemoteCfg: false, utils.ReplicateCfg: false, utils.StaticTTLCfg: false},
-				utils.MetaRateProfiles:    map[string]interface{}{utils.LimitCfg: -1, utils.TTLCfg: "5s", utils.PrecacheCfg: false, utils.RemoteCfg: false, utils.ReplicateCfg: false, utils.StaticTTLCfg: false},
-				utils.MetaActionProfiles:  map[string]interface{}{utils.LimitCfg: -1, utils.TTLCfg: "5s", utils.PrecacheCfg: false, utils.RemoteCfg: false, utils.ReplicateCfg: false, utils.StaticTTLCfg: false},
-				utils.MetaAccounts:        map[string]interface{}{utils.LimitCfg: -1, utils.TTLCfg: "5s", utils.PrecacheCfg: false, utils.RemoteCfg: false, utils.ReplicateCfg: false, utils.StaticTTLCfg: false},
+			utils.CacheCfg: map[string]any{
+				utils.MetaFilters:         map[string]any{utils.LimitCfg: -1, utils.TTLCfg: "5s", utils.PrecacheCfg: false, utils.RemoteCfg: false, utils.ReplicateCfg: false, utils.StaticTTLCfg: false},
+				utils.MetaAttributes:      map[string]any{utils.LimitCfg: -1, utils.TTLCfg: "5s", utils.PrecacheCfg: false, utils.RemoteCfg: false, utils.ReplicateCfg: false, utils.StaticTTLCfg: false},
+				utils.MetaResources:       map[string]any{utils.LimitCfg: -1, utils.TTLCfg: "5s", utils.PrecacheCfg: false, utils.RemoteCfg: false, utils.ReplicateCfg: false, utils.StaticTTLCfg: false},
+				utils.MetaStats:           map[string]any{utils.LimitCfg: -1, utils.TTLCfg: "5s", utils.PrecacheCfg: false, utils.RemoteCfg: false, utils.ReplicateCfg: false, utils.StaticTTLCfg: false},
+				utils.MetaThresholds:      map[string]any{utils.LimitCfg: -1, utils.TTLCfg: "5s", utils.PrecacheCfg: false, utils.RemoteCfg: false, utils.ReplicateCfg: false, utils.StaticTTLCfg: false},
+				utils.MetaRoutes:          map[string]any{utils.LimitCfg: -1, utils.TTLCfg: "5s", utils.PrecacheCfg: false, utils.RemoteCfg: false, utils.ReplicateCfg: false, utils.StaticTTLCfg: false},
+				utils.MetaChargers:        map[string]any{utils.LimitCfg: -1, utils.TTLCfg: "5s", utils.PrecacheCfg: false, utils.RemoteCfg: false, utils.ReplicateCfg: false, utils.StaticTTLCfg: false},
+				utils.MetaDispatchers:     map[string]any{utils.LimitCfg: -1, utils.TTLCfg: "5s", utils.PrecacheCfg: false, utils.RemoteCfg: false, utils.ReplicateCfg: false, utils.StaticTTLCfg: false},
+				utils.MetaDispatcherHosts: map[string]any{utils.LimitCfg: -1, utils.TTLCfg: "5s", utils.PrecacheCfg: false, utils.RemoteCfg: false, utils.ReplicateCfg: false, utils.StaticTTLCfg: false},
+				utils.MetaRateProfiles:    map[string]any{utils.LimitCfg: -1, utils.TTLCfg: "5s", utils.PrecacheCfg: false, utils.RemoteCfg: false, utils.ReplicateCfg: false, utils.StaticTTLCfg: false},
+				utils.MetaActionProfiles:  map[string]any{utils.LimitCfg: -1, utils.TTLCfg: "5s", utils.PrecacheCfg: false, utils.RemoteCfg: false, utils.ReplicateCfg: false, utils.StaticTTLCfg: false},
+				utils.MetaAccounts:        map[string]any{utils.LimitCfg: -1, utils.TTLCfg: "5s", utils.PrecacheCfg: false, utils.RemoteCfg: false, utils.ReplicateCfg: false, utils.StaticTTLCfg: false},
 			},
 		},
 	}
@@ -2142,7 +2142,7 @@ func TestLoaderCfgAsMapInterfaceCase2(t *testing.T) {
 		},
 	],	
 }`
-	eMap := []map[string]interface{}{
+	eMap := []map[string]any{
 		{
 			utils.IDCfg:           "*default",
 			utils.EnabledCfg:      false,
@@ -2153,11 +2153,11 @@ func TestLoaderCfgAsMapInterfaceCase2(t *testing.T) {
 			utils.FieldSepCfg:     ",",
 			utils.TpInDirCfg:      "/var/spool/cgrates/loader/in",
 			utils.TpOutDirCfg:     "/var/spool/cgrates/loader/out",
-			utils.DataCfg: []map[string]interface{}{
+			utils.DataCfg: []map[string]any{
 				{
 					utils.TypeCfg:     "*attributes",
 					utils.FilenameCfg: "Attributes.csv",
-					utils.FieldsCfg: []map[string]interface{}{
+					utils.FieldsCfg: []map[string]any{
 						{
 							utils.TagCfg:       "TenantID",
 							utils.PathCfg:      "Tenant",
@@ -2178,7 +2178,7 @@ func TestLoaderCfgAsMapInterfaceCase2(t *testing.T) {
 	}
 	if jsonCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
-	} else if rcv := jsonCfg.loaderCfg.AsMapInterface(jsonCfg.generalCfg.RSRSep).([]map[string]interface{}); !reflect.DeepEqual(rcv[0][utils.Tenant], eMap[0][utils.Tenant]) {
+	} else if rcv := jsonCfg.loaderCfg.AsMapInterface(jsonCfg.generalCfg.RSRSep).([]map[string]any); !reflect.DeepEqual(rcv[0][utils.Tenant], eMap[0][utils.Tenant]) {
 		t.Errorf("Expected %+v, received %+v", rcv[0][utils.Tenant], eMap[0][utils.Tenant])
 	}
 }

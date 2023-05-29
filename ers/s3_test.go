@@ -84,10 +84,10 @@ func TestS3ERProcessMessage(t *testing.T) {
 	}
 	expEvent := &utils.CGREvent{
 		Tenant: "cgrates.org",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.Destination: "testdest",
 		},
-		APIOpts: map[string]interface{}{},
+		APIOpts: map[string]any{},
 	}
 	body := []byte(`{"Destination":"testdest"}`)
 	rdr.Config().Fields = []*config.FCTemplate{

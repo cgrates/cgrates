@@ -112,7 +112,7 @@ func (fFwv *FileFWVee) Cfg() *config.EventExporterCfg { return fFwv.cfg }
 
 func (fFwv *FileFWVee) Connect() (_ error) { return }
 
-func (fFwv *FileFWVee) ExportEvent(_ *context.Context, records, _ interface{}) (err error) {
+func (fFwv *FileFWVee) ExportEvent(_ *context.Context, records, _ any) (err error) {
 	fFwv.Lock() // make sure that only one event is writen in file at once
 	defer fFwv.Unlock()
 	for _, record := range records.([]string) {
@@ -141,4 +141,4 @@ func (fFwv *FileFWVee) Close() (err error) {
 
 func (fFwv *FileFWVee) GetMetrics() *utils.SafeMapStorage { return fFwv.dc }
 
-func (fFwv *FileFWVee) ExtraData(ev *utils.CGREvent) interface{} { return nil }
+func (fFwv *FileFWVee) ExtraData(ev *utils.CGREvent) any { return nil }

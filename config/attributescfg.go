@@ -124,15 +124,15 @@ func (alS *AttributeSCfg) loadFromJSONCfg(jsnCfg *AttributeSJsonCfg) (err error)
 	return
 }
 
-// AsMapInterface returns the config as a map[string]interface{}
-func (alS AttributeSCfg) AsMapInterface(string) interface{} {
-	opts := map[string]interface{}{
+// AsMapInterface returns the config as a map[string]any
+func (alS AttributeSCfg) AsMapInterface(string) any {
+	opts := map[string]any{
 		utils.MetaProfileIDs:           alS.Opts.ProfileIDs,
 		utils.MetaProcessRunsCfg:       alS.Opts.ProcessRuns,
 		utils.MetaProfileRunsCfg:       alS.Opts.ProfileRuns,
 		utils.MetaProfileIgnoreFilters: alS.Opts.ProfileIgnoreFilters,
 	}
-	mp := map[string]interface{}{
+	mp := map[string]any{
 		utils.EnabledCfg:        alS.Enabled,
 		utils.IndexedSelectsCfg: alS.IndexedSelects,
 		utils.NestedFieldsCfg:   alS.NestedFields,

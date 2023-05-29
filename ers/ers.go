@@ -307,7 +307,7 @@ func (erS *ERService) processPartialEvent(ev *utils.CGREvent, rdrCfg *config.Eve
 }
 
 // onEvicted the function that is called when a element is removed from cache
-func (erS *ERService) onEvicted(id string, value interface{}) {
+func (erS *ERService) onEvicted(id string, value any) {
 	if value == nil { // is already complete and sent to erS
 		return
 	}
@@ -417,7 +417,7 @@ func (erS *ERService) onEvicted(id string, value interface{}) {
 					utils.ERs, utils.ToJSON(eEvs.events), err.Error()))
 			return
 		}
-		var record map[string]interface{}
+		var record map[string]any
 		if len(eEvs.rdrCfg.CacheDumpFields) != 0 {
 			// convert the event to record
 			eeReq := engine.NewExportRequest(map[string]utils.DataStorage{
@@ -436,7 +436,7 @@ func (erS *ERService) onEvicted(id string, value interface{}) {
 				return
 			}
 
-			record = make(map[string]interface{})
+			record = make(map[string]any)
 			for el := eeReq.ExpData[utils.MetaExp].GetFirstElement(); el != nil; el = el.Next() {
 				path := el.Value
 				nmIt, _ := eeReq.ExpData[utils.MetaExp].Field(path)

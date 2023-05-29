@@ -306,7 +306,7 @@ func TestEventChargesEquals(t *testing.T) {
 						FilterIDs: []string{"*string:~*req.Account:1002"},
 					},
 				},
-				Opts: map[string]interface{}{
+				Opts: map[string]any{
 					MetaSubsys: MetaSessionS,
 				},
 				Balances: map[string]*Balance{
@@ -381,7 +381,7 @@ func TestEventChargesEquals(t *testing.T) {
 					},
 				},
 				FilterIDs: []string{"*ai:~*req.AnswerTime:2020-10-10T10:00:00Z"},
-				Opts: map[string]interface{}{
+				Opts: map[string]any{
 					MetaSubsys: MetaSessionS,
 				},
 				ThresholdIDs: []string{},
@@ -483,7 +483,7 @@ func TestEventChargesEquals(t *testing.T) {
 						FilterIDs: []string{"*string:~*req.Account:1002"},
 					},
 				},
-				Opts: map[string]interface{}{
+				Opts: map[string]any{
 					MetaSubsys: MetaSessionS,
 				},
 				Balances: map[string]*Balance{
@@ -558,7 +558,7 @@ func TestEventChargesEquals(t *testing.T) {
 					},
 				},
 				FilterIDs: []string{"*ai:~*req.AnswerTime:2020-10-10T10:00:00Z"},
-				Opts: map[string]interface{}{
+				Opts: map[string]any{
 					MetaSubsys: MetaSessionS,
 				},
 				ThresholdIDs: []string{},
@@ -694,7 +694,7 @@ func TestEventChargerMerge(t *testing.T) {
 						FilterIDs: []string{"*string:~*req.Account:1002"},
 					},
 				},
-				Opts: map[string]interface{}{
+				Opts: map[string]any{
 					MetaSubsys: MetaSessionS,
 				},
 				Balances: map[string]*Balance{
@@ -769,7 +769,7 @@ func TestEventChargerMerge(t *testing.T) {
 					},
 				},
 				FilterIDs: []string{"*ai:~*req.AnswerTime:2020-10-10T10:00:00Z"},
-				Opts: map[string]interface{}{
+				Opts: map[string]any{
 					MetaSubsys: MetaSessionS,
 				},
 				ThresholdIDs: []string{},
@@ -831,7 +831,7 @@ func TestEventChargerMerge(t *testing.T) {
 					},
 				},
 				FilterIDs: []string{"*ai:~*req.AnswerTime:2020-10-10T10:00:00Z"},
-				Opts: map[string]interface{}{
+				Opts: map[string]any{
 					MetaSubsys: MetaSessionS,
 				},
 				ThresholdIDs: []string{},
@@ -974,7 +974,7 @@ func TestEventChargerMerge(t *testing.T) {
 						FilterIDs: []string{"*string:~*req.Account:1002"},
 					},
 				},
-				Opts: map[string]interface{}{
+				Opts: map[string]any{
 					MetaSubsys: MetaSessionS,
 				},
 				Balances: map[string]*Balance{
@@ -1049,7 +1049,7 @@ func TestEventChargerMerge(t *testing.T) {
 					},
 				},
 				FilterIDs: []string{"*ai:~*req.AnswerTime:2020-10-10T10:00:00Z"},
-				Opts: map[string]interface{}{
+				Opts: map[string]any{
 					MetaSubsys: MetaSessionS,
 				},
 				ThresholdIDs: []string{},
@@ -1063,7 +1063,7 @@ func TestEventChargerMerge(t *testing.T) {
 					},
 				},
 				FilterIDs: []string{"*ai:~*req.AnswerTime:2020-10-10T10:00:00Z"},
-				Opts: map[string]interface{}{
+				Opts: map[string]any{
 					MetaSubsys: MetaSessionS,
 				},
 				ThresholdIDs: []string{},
@@ -1119,7 +1119,7 @@ func TestEventChargesAppendChargeEntry(t *testing.T) {
 					},
 				},
 				FilterIDs: []string{"*ai:~*req.AnswerTime:2020-10-10T10:00:00Z"},
-				Opts: map[string]interface{}{
+				Opts: map[string]any{
 					MetaSubsys: MetaSessionS,
 				},
 				ThresholdIDs: []string{},
@@ -1206,7 +1206,7 @@ func TestEventChargesAppendChargeEntryNonEmptyCharges(t *testing.T) {
 					},
 				},
 				FilterIDs: []string{"*ai:~*req.AnswerTime:2020-10-10T10:00:00Z"},
-				Opts: map[string]interface{}{
+				Opts: map[string]any{
 					MetaSubsys: MetaSessionS,
 				},
 				ThresholdIDs: []string{},
@@ -1498,7 +1498,7 @@ func TestECEventChargesClone(t *testing.T) {
 						Weight:    20,
 					},
 				},
-				Opts: map[string]interface{}{
+				Opts: map[string]any{
 					"optName": "optValue",
 				},
 				Balances: map[string]*Balance{
@@ -1526,7 +1526,7 @@ func TestECEventChargesClone(t *testing.T) {
 								Factor:    NewDecimalFromFloat64(123.4),
 							},
 						},
-						Opts: map[string]interface{}{
+						Opts: map[string]any{
 							"optName": "optValue",
 						},
 						CostIncrements: []*CostIncrement{
@@ -1564,7 +1564,7 @@ func TestECEventChargesClone(t *testing.T) {
 								Factor:    NewDecimalFromFloat64(123.4),
 							},
 						},
-						Opts: map[string]interface{}{
+						Opts: map[string]any{
 							"optName": "optValue",
 						},
 						CostIncrements: []*CostIncrement{
@@ -1593,7 +1593,7 @@ func TestECEventChargesClone(t *testing.T) {
 						Weight:    25,
 					},
 				},
-				Opts: map[string]interface{}{
+				Opts: map[string]any{
 					"optName": "optValue",
 				},
 				Balances: map[string]*Balance{
@@ -1621,7 +1621,7 @@ func TestECEventChargesClone(t *testing.T) {
 								Factor:    NewDecimalFromFloat64(123.4),
 							},
 						},
-						Opts: map[string]interface{}{
+						Opts: map[string]any{
 							"optName": "optValue",
 						},
 						CostIncrements: []*CostIncrement{
@@ -1659,7 +1659,7 @@ func TestECEventChargesClone(t *testing.T) {
 								Factor:    NewDecimalFromFloat64(123.4),
 							},
 						},
-						Opts: map[string]interface{}{
+						Opts: map[string]any{
 							"optName": "optValue",
 						},
 						CostIncrements: []*CostIncrement{

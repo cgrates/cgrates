@@ -33,7 +33,7 @@ type CoreSv1 struct {
 	ping
 }
 
-func (cS *CoreSv1) Status(ctx *context.Context, arg *utils.TenantWithAPIOpts, reply *map[string]interface{}) error {
+func (cS *CoreSv1) Status(ctx *context.Context, arg *utils.TenantWithAPIOpts, reply *map[string]any) error {
 	return cS.cS.V1Status(ctx, arg, reply)
 }
 

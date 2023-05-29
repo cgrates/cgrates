@@ -34,7 +34,7 @@ import (
 )
 
 // onCacheEvicted is called by ltcache when evicting an item
-func onCacheEvicted(_ string, value interface{}) {
+func onCacheEvicted(_ string, value any) {
 	value.(EventExporter).Close()
 }
 
@@ -102,7 +102,7 @@ func (eeS *EeS) setupCache(chCfgs map[string]*config.CacheParamCfg) {
 func (eeS *EeS) attrSProcessEvent(ctx *context.Context, cgrEv *utils.CGREvent, attrIDs []string, attributeSCtx string) (err error) {
 	var rplyEv engine.AttrSProcessEventReply
 	if cgrEv.APIOpts == nil {
-		cgrEv.APIOpts = make(map[string]interface{})
+		cgrEv.APIOpts = make(map[string]any)
 	}
 	cgrEv.APIOpts[utils.MetaSubsys] = utils.MetaEEs
 	cgrEv.APIOpts[utils.OptsContext] = utils.FirstNonEmpty(
@@ -122,7 +122,7 @@ func (eeS *EeS) attrSProcessEvent(ctx *context.Context, cgrEv *utils.CGREvent, a
 	return
 }
 
-func (eeS *EeS) V1ProcessEvent(ctx *context.Context, cgrEv *utils.CGREventWithEeIDs, rply *map[string]map[string]interface{}) (err error) {
+func (eeS *EeS) V1ProcessEvent(ctx *context.Context, cgrEv *utils.CGREventWithEeIDs, rply *map[string]map[string]any) (err error) {
 	eeS.cfg.RLocks(config.EEsJSON)
 	defer eeS.cfg.RUnlocks(config.EEsJSON)
 
@@ -167,7 +167,7 @@ func (eeS *EeS) V1ProcessEvent(ctx *context.Context, cgrEv *utils.CGREventWithEe
 		var isCached bool
 		var ee EventExporter
 		if hasCache {
-			var x interface{}
+			var x any
 			if x, isCached = eeCache.Get(eeCfg.ID); isCached {
 				ee = x.(EventExporter)
 			}
@@ -219,16 +219,16 @@ func (eeS *EeS) V1ProcessEvent(ctx *context.Context, cgrEv *utils.CGREventWithEe
 		return
 	}
 
-	*rply = make(map[string]map[string]interface{})
+	*rply = make(map[string]map[string]any)
 	metricMapLock.Lock()
 	for exporterID, metrics := range metricsMap {
-		(*rply)[exporterID] = make(map[string]interface{})
+		(*rply)[exporterID] = make(map[string]any)
 		for key, val := range metrics {
 			switch key {
 			case utils.PositiveExports, utils.NegativeExports:
 				slsVal, canCast := val.(utils.StringSet)
 				if !canCast {
-					return fmt.Errorf("cannot cast to map[string]interface{} %+v for positive exports", val)
+					return fmt.Errorf("cannot cast to map[string]any %+v for positive exports", val)
 				}
 				(*rply)[exporterID][key] = slsVal.AsSlice()
 			default:
@@ -252,7 +252,7 @@ func exportEventWithExporter(ctx *context.Context, exp EventExporter, connMngr *
 			exp.Close()
 		}
 	}()
-	var eEv interface{}
+	var eEv any
 
 	exp.GetMetrics().Lock()
 	exp.GetMetrics().MapStorage[utils.NumberOfEvents] = exp.GetMetrics().MapStorage[utils.NumberOfEvents].(int64) + 1
@@ -280,7 +280,7 @@ func exportEventWithExporter(ctx *context.Context, exp EventExporter, connMngr *
 	return ExportWithAttempts(ctx, exp, eEv, extraData, connMngr, tnt)
 }
 
-func ExportWithAttempts(ctx *context.Context, exp EventExporter, eEv interface{}, key interface{},
+func ExportWithAttempts(ctx *context.Context, exp EventExporter, eEv any, key any,
 	connMngr *engine.ConnManager, tnt string) (err error) {
 	if exp.Cfg().FailedPostsDir != utils.MetaNone {
 		defer func() {
@@ -338,7 +338,7 @@ func ExportWithAttempts(ctx *context.Context, exp EventExporter, eEv interface{}
 
 type ArchiveEventsArgs struct {
 	Tenant  string
-	APIOpts map[string]interface{}
+	APIOpts map[string]any
 	Events  []*utils.EventsWithOpts
 }
 
@@ -432,7 +432,7 @@ func (eeS *EeS) V1ArchiveEventsInReply(ctx *context.Context, args *ArchiveEvents
 			ID:      utils.UUIDSha1Prefix(),
 			Tenant:  tnt,
 			Event:   event.Event,
-			APIOpts: make(map[string]interface{}),
+			APIOpts: make(map[string]any),
 		}
 		// here we will join the APIOpts from the initial args and Opts from every CDR(EventsWithOPts)
 		for key, val := range args.APIOpts {

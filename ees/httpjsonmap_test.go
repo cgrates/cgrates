@@ -64,12 +64,12 @@ func TestHttpJsonMapExportEvent2(t *testing.T) {
 	cgrCfg := config.NewDefaultCGRConfig()
 	cgrCfg.EEsCfg().Exporters[0].Type = utils.MetaSQSjsonMap
 
-	bodyExpect := map[string]interface{}{
+	bodyExpect := map[string]any{
 		"2": "*req.field2",
 	}
 	srv := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
 		defer r.Body.Close()
-		var body map[string]interface{}
+		var body map[string]any
 		if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
 			t.Fatal(err)
 		}

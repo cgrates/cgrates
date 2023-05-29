@@ -37,9 +37,9 @@ func TestCoreSStatus(t *testing.T) {
 	cS := NewCoreSv1(coreService)
 	arg := &utils.TenantWithAPIOpts{
 		Tenant:  "cgrates.org",
-		APIOpts: map[string]interface{}{},
+		APIOpts: map[string]any{},
 	}
-	var reply map[string]interface{}
+	var reply map[string]any
 	if err := cS.Status(context.Background(), arg, &reply); err != nil {
 		t.Error(err)
 	}
@@ -86,7 +86,7 @@ func TestStartCPUProfiling(t *testing.T) {
 	cS := NewCoreSv1(coreService)
 	args := &utils.DirectoryArgs{
 		DirPath: "dir_path",
-		APIOpts: map[string]interface{}{},
+		APIOpts: map[string]any{},
 		Tenant:  "cgrates.org",
 	}
 
@@ -104,7 +104,7 @@ func TestStopCPUProfiling(t *testing.T) {
 	cS := NewCoreSv1(coreService)
 	args := &utils.TenantWithAPIOpts{
 		Tenant:  "cgrates.org",
-		APIOpts: map[string]interface{}{},
+		APIOpts: map[string]any{},
 	}
 	var reply string
 	errExp := " cannot stop because CPUProfiling is not active"
@@ -138,7 +138,7 @@ func TestStopMemoryProfiling(t *testing.T) {
 	cS := NewCoreSv1(coreService)
 	args := &utils.TenantWithAPIOpts{
 		Tenant:  "cgrates.org",
-		APIOpts: map[string]interface{}{},
+		APIOpts: map[string]any{},
 	}
 	var reply string
 	errExp := "Memory Profiling is not started"

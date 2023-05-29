@@ -794,12 +794,12 @@ func testAttributeSGetAttributeForEventAnyContext(t *testing.T) {
 	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "testAttributeSGetAttributeForEventWihMetaAnyContext",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "dan",
 			utils.Destination:  "+491511231234",
 			utils.ToR:          "*voice",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaUsage:   10 * time.Second,
 			utils.OptsContext: utils.MetaCDRs,
 		},
@@ -870,11 +870,11 @@ func testAttributeSGetAttributeForEventSameAnyContext(t *testing.T) {
 	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "testAttributeSGetAttributeForEventWihMetaAnyContext",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "dan",
 			utils.Destination:  "+491511231234",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaUsage: 10 * time.Second,
 		},
 	}
@@ -910,11 +910,11 @@ func testAttributeSGetAttributeForEventNotFound(t *testing.T) {
 	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "testAttributeSGetAttributeForEventWihMetaAnyContext",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "dann",
 			utils.Destination:  "+491511231234",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsContext: utils.MetaCDRs,
 		},
 	}
@@ -929,11 +929,11 @@ func testAttributeSGetAttributeForEvent(t *testing.T) {
 	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "testAttributeSGetAttributeForEvent",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1007",
 			utils.Destination:  "+491511231234",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaUsage:   10 * time.Second,
 			utils.OptsContext: utils.MetaSessionS,
 		},
@@ -1100,11 +1100,11 @@ func testAttributeProcessEvent(t *testing.T) {
 		t.Fatal(err)
 	}
 	args := &utils.CGREvent{
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.ToR:          utils.MetaVoice,
 			utils.AccountField: "1002",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaUsage:   10 * time.Second,
 			utils.OptsContext: utils.MetaCDRs,
 		},
@@ -1118,11 +1118,11 @@ func testAttributeProcessEvent(t *testing.T) {
 		},
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.itsyscom",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.AccountField: "1002",
 				utils.ToR:          utils.MetaVoice,
 			},
-			APIOpts: map[string]interface{}{
+			APIOpts: map[string]any{
 				utils.MetaUsage:   float64(10 * time.Second),
 				utils.OptsContext: utils.MetaCDRs,
 			},
@@ -1175,10 +1175,10 @@ func testAttributeProcessEventWithSearchAndReplace(t *testing.T) {
 	attrArgs := &utils.CGREvent{
 		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:     "HeaderEventForAttribute",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			"Category": "call",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaUsage:   10 * time.Second,
 			utils.OptsContext: utils.MetaSessionS,
 		},
@@ -1193,10 +1193,10 @@ func testAttributeProcessEventWithSearchAndReplace(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:     "HeaderEventForAttribute",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				"Category": "call_suffix",
 			},
-			APIOpts: map[string]interface{}{
+			APIOpts: map[string]any{
 				utils.MetaUsage:   float64(10 * time.Second),
 				utils.OptsContext: utils.MetaSessionS,
 			},
@@ -1290,10 +1290,10 @@ func testAttributeSProcessWithMultipleRuns(t *testing.T) {
 	attrArgs := &utils.CGREvent{
 		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:     utils.GenUUID(),
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			"InitialField": "InitialValue",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaUsage:                 10 * time.Second,
 			utils.OptsContext:               utils.MetaSessionS,
 			utils.OptsAttributesProcessRuns: 4,
@@ -1321,7 +1321,7 @@ func testAttributeSProcessWithMultipleRuns(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:     utils.GenUUID(),
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				"InitialField": "InitialValue",
 				"Field1":       "Value1",
 				"Field2":       "Value2",
@@ -1419,10 +1419,10 @@ func testAttributeSProcessWithMultipleRuns2(t *testing.T) {
 	attrArgs := &utils.CGREvent{
 		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:     utils.GenUUID(),
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			"InitialField": "InitialValue",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaUsage:                 10 * time.Second,
 			utils.OptsContext:               utils.MetaSessionS,
 			utils.OptsAttributesProcessRuns: 4,
@@ -1450,13 +1450,13 @@ func testAttributeSProcessWithMultipleRuns2(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:     utils.GenUUID(),
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				"InitialField": "InitialValue",
 				"Field1":       "Value1",
 				"Field2":       "Value2",
 				"Field3":       "Value3",
 			},
-			APIOpts: map[string]interface{}{
+			APIOpts: map[string]any{
 				utils.MetaUsage:                 10 * time.Second,
 				utils.OptsContext:               utils.MetaSessionS,
 				utils.OptsAttributesProcessRuns: 4,
@@ -1704,12 +1704,12 @@ func testAttributeSetAttributeProfileWithAttrBlockers(t *testing.T) {
 	// first we will process the second attribute with true BLOCKER on profile, but true on Attributes if the Destination prefix is 4433(FOR NOW THE DESTINATION WILL BE EMPTY)
 	args := &utils.CGREvent{
 		Tenant: "cgrates.org",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.ToR:          utils.MetaVoice,
 			utils.AccountField: "1002",
 			"Blockers":         "*exists",
 		},
-		APIOpts: map[string]interface{}{},
+		APIOpts: map[string]any{},
 	}
 	expEvReply := &engine.AttrSProcessEventReply{
 		AlteredFields: []*engine.FieldsAltered{
@@ -1720,12 +1720,12 @@ func testAttributeSetAttributeProfileWithAttrBlockers(t *testing.T) {
 		},
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.ToR:          utils.MetaVoice,
 				utils.AccountField: "10093",
 				"Blockers":         "*exists",
 			},
-			APIOpts: map[string]interface{}{
+			APIOpts: map[string]any{
 				utils.MetaRates: "true",
 			},
 		},
@@ -1747,13 +1747,13 @@ func testAttributeSetAttributeProfileWithAttrBlockers2(t *testing.T) {
 	// first we will process the second attribute with true BLOCKER on profile, but true on Attributes if the Destination prefix is 4433(NOW WE WILL POPULATE THE DESTINATION, AND THE BLOCKER WILL STOP THE NEXT ATTRIBUTES)
 	args := &utils.CGREvent{
 		Tenant: "cgrates.org",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.ToR:          utils.MetaVoice,
 			utils.AccountField: "1002",
 			"Blockers":         "*exists",
 			utils.Destination:  "4433254",
 		},
-		APIOpts: map[string]interface{}{},
+		APIOpts: map[string]any{},
 	}
 	expEvReply := &engine.AttrSProcessEventReply{
 		AlteredFields: []*engine.FieldsAltered{
@@ -1764,14 +1764,14 @@ func testAttributeSetAttributeProfileWithAttrBlockers2(t *testing.T) {
 		},
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.ToR:          utils.MetaVoice,
 				utils.AccountField: "10093",
 				"Blockers":         "*exists",
 				utils.Destination:  "4433254",
 			},
 			// now *rates was not processde ebcause the blocker amtched the filter of Destination
-			APIOpts: map[string]interface{}{},
+			APIOpts: map[string]any{},
 		},
 	}
 	evRply := &engine.AttrSProcessEventReply{}
@@ -1791,13 +1791,13 @@ func testAttributeSetAttributeProfileBlockersBothProfilesProcessRuns(t *testing.
 	// now we will process both attributes that matched, but blokcers on the attributes will be felt and not all attributes from the list were processed
 	args := &utils.CGREvent{
 		Tenant: "cgrates.org",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.ToR:          utils.MetaVoice,
 			utils.AccountField: "1002",
 			"Blockers":         "*exists",
 			utils.Destination:  "4433254",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsAttributesProcessRuns: 2,
 		},
 	}
@@ -1814,7 +1814,7 @@ func testAttributeSetAttributeProfileBlockersBothProfilesProcessRuns(t *testing.
 		},
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.ToR:          "*sms",
 				utils.AccountField: "10093",
 				"Blockers":         "*exists",
@@ -1822,7 +1822,7 @@ func testAttributeSetAttributeProfileBlockersBothProfilesProcessRuns(t *testing.
 				utils.RequestType:  "*rated",
 			},
 			// now *rates was not processde ebcause the blocker amtched the filter of Destination
-			APIOpts: map[string]interface{}{
+			APIOpts: map[string]any{
 				utils.OptsAttributesProcessRuns: 2.,
 				utils.MetaChargers:              "true",
 			},
@@ -1864,13 +1864,13 @@ func testAttributeSSetNonIndexedTypeFilter(t *testing.T) {
 	}
 
 	args := &utils.CGREvent{
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.ToR:          utils.MetaVoice,
 			utils.AccountField: "1002",
 			"Blockers":         "*exists",
 			utils.Destination:  "44322",
 		},
-		APIOpts: map[string]interface{}{},
+		APIOpts: map[string]any{},
 	}
 	expEvReply := &engine.AttrSProcessEventReply{
 		AlteredFields: []*engine.FieldsAltered{
@@ -1881,13 +1881,13 @@ func testAttributeSSetNonIndexedTypeFilter(t *testing.T) {
 		},
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.ToR:          utils.MetaVoice,
 				utils.AccountField: "10093",
 				"Blockers":         "*exists",
 				utils.Destination:  "44322",
 			},
-			APIOpts: map[string]interface{}{
+			APIOpts: map[string]any{
 				utils.MetaRates: "true",
 			},
 		},

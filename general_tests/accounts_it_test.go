@@ -135,7 +135,7 @@ func testV1AccLoadTarrifPlans(t *testing.T) {
 	var reply string
 	if err := accRpc.Call(context.Background(), utils.LoaderSv1Run,
 		&loaders.ArgsProcessFolder{
-			APIOpts: map[string]interface{}{
+			APIOpts: map[string]any{
 				utils.MetaStopOnError: true,
 				utils.MetaCache:       caching,
 			},

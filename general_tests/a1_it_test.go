@@ -155,7 +155,7 @@ package general_tests
 // 		Account:     "rpdata1",
 // 		BalanceType: utils.MetaData,
 // 		Value:       10000000000,
-// 		Balance: map[string]interface{}{
+// 		Balance: map[string]any{
 // 			utils.ID: "rpdata1_test",
 // 		},
 // 	}
@@ -183,7 +183,7 @@ package general_tests
 // 		CGREvent: &utils.CGREvent{
 // 			Tenant: "cgrates.org",
 // 			ID:     "TestA1itDataSession1",
-// 			Event: map[string]interface{}{
+// 			Event: map[string]any{
 // 				utils.EventName:    "INITIATE_SESSION",
 // 				utils.ToR:          utils.MetaData,
 // 				utils.OriginID:     "504966119",
@@ -197,7 +197,7 @@ package general_tests
 // 				utils.AnswerTime:   "2017-03-03 11:39:32 +0100 CET",
 // 				utils.Usage:        "10240",
 // 			},
-// 			APIOpts: map[string]interface{}{
+// 			APIOpts: map[string]any{
 // 				utils.OptsSesTTL:         "28800s",
 // 				utils.OptsSesTTLLastUsed: "0s",
 // 				utils.OptsSesTTLUsage:    "0s",
@@ -220,7 +220,7 @@ package general_tests
 // 		CGREvent: &utils.CGREvent{
 // 			Tenant: "cgrates.org",
 // 			ID:     "TestSessionsVoiceLastUsed",
-// 			Event: map[string]interface{}{
+// 			Event: map[string]any{
 // 				utils.EventName:       "UPDATE_SESSION",
 // 				utils.AccountField:    "rpdata1",
 // 				utils.Category:        "data1",
@@ -236,7 +236,7 @@ package general_tests
 // 				utils.AnswerTime:      "2017-03-03 11:39:32 +0100 CET",
 // 				utils.Usage:           "2097152",
 // 			},
-// 			APIOpts: map[string]interface{}{
+// 			APIOpts: map[string]any{
 // 				utils.OptsSesTTL:         "28800s",
 // 				utils.OptsSesTTLLastUsed: "2097152s",
 // 				utils.OptsSesTTLUsage:    "0s",
@@ -259,7 +259,7 @@ package general_tests
 // 		CGREvent: &utils.CGREvent{
 // 			Tenant: "cgrates.org",
 // 			ID:     "TestSessionsVoiceLastUsed",
-// 			Event: map[string]interface{}{
+// 			Event: map[string]any{
 // 				utils.EventName:      "TERMINATE_SESSION",
 // 				utils.AccountField:   "rpdata1",
 // 				utils.Category:       "data1",

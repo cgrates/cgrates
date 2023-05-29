@@ -27,8 +27,8 @@ import (
 type CGREvent struct {
 	Tenant  string
 	ID      string
-	Event   map[string]interface{}
-	APIOpts map[string]interface{}
+	Event   map[string]any
+	APIOpts map[string]any
 	clnb    bool //rpcclonable
 }
 
@@ -88,8 +88,8 @@ func (ev *CGREvent) Clone() (clned *CGREvent) {
 	clned = &CGREvent{
 		Tenant:  ev.Tenant,
 		ID:      ev.ID,
-		Event:   make(map[string]interface{}), // a bit forced but safe
-		APIOpts: make(map[string]interface{}),
+		Event:   make(map[string]any),
+		APIOpts: make(map[string]any),
 	}
 	for k, v := range ev.Event {
 		clned.Event[k] = v
@@ -117,8 +117,8 @@ type CGREventWithRateProfile struct {
 }
 
 type EventsWithOpts struct {
-	Event map[string]interface{}
-	Opts  map[string]interface{}
+	Event map[string]any
+	Opts  map[string]any
 }
 
 // CGREventWithEeIDs is the CGREventWithOpts with EventExporterIDs
@@ -130,7 +130,7 @@ type CGREventWithEeIDs struct {
 func (CGREventWithEeIDs) RPCClone() {} // disable rpcClonable from CGREvent
 
 // NMAsCGREvent builds a CGREvent considering Time as time.Now()
-// and Event as linear map[string]interface{} with joined paths
+// and Event as linear map[string]any with joined paths
 // treats particular case when the value of map is []*NMItem - used in agents/AgentRequest
 func NMAsCGREvent(nM *OrderedNavigableMap, tnt string, pathSep string, opts MapStorage) (cgrEv *CGREvent) {
 	if nM == nil {
@@ -144,7 +144,7 @@ func NMAsCGREvent(nM *OrderedNavigableMap, tnt string, pathSep string, opts MapS
 	cgrEv = &CGREvent{
 		Tenant:  tnt,
 		ID:      UUIDSha1Prefix(),
-		Event:   make(map[string]interface{}),
+		Event:   make(map[string]any),
 		APIOpts: opts,
 	}
 	for ; el != nil; el = el.Next() {
@@ -168,7 +168,7 @@ func (attr *CGREvent) SetCloneable(rpcCloneable bool) {
 }
 
 // RPCClone implements rpcclient.RPCCloner interface
-func (attr *CGREvent) RPCClone() (interface{}, error) {
+func (attr *CGREvent) RPCClone() (any, error) {
 	if !attr.clnb {
 		return attr, nil
 	}

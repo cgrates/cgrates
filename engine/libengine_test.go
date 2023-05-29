@@ -107,14 +107,14 @@ func TestLibengineNewRPCConnectionInternal(t *testing.T) {
 
 type TestRPCSrvMock struct{} // exported for service
 
-func (TestRPCSrvMock) Do(*context.Context, interface{}, *string) error   { return nil }
-func (TestRPCSrvMock) V1Do(*context.Context, interface{}, *string) error { return nil }
-func (TestRPCSrvMock) V2Do(*context.Context, interface{}, *string) error { return nil }
+func (TestRPCSrvMock) Do(*context.Context, any, *string) error   { return nil }
+func (TestRPCSrvMock) V1Do(*context.Context, any, *string) error { return nil }
+func (TestRPCSrvMock) V2Do(*context.Context, any, *string) error { return nil }
 
 type TestRPCSrvMockS struct{} // exported for service
 
-func (TestRPCSrvMockS) V1Do(*context.Context, interface{}, *string) error { return nil }
-func (TestRPCSrvMockS) V2Do(*context.Context, interface{}, *string) error { return nil }
+func (TestRPCSrvMockS) V1Do(*context.Context, any, *string) error { return nil }
+func (TestRPCSrvMockS) V2Do(*context.Context, any, *string) error { return nil }
 
 func getMethods(s IntService) (methods map[string][]string) {
 	methods = map[string][]string{}
@@ -184,28 +184,28 @@ func TestIntServiceNewService(t *testing.T) {
 
 type TestRPCDspMock struct{} // exported for service
 
-func (TestRPCDspMock) AccountSv1Do(*context.Context, interface{}, *string) error       { return nil }
-func (TestRPCDspMock) ActionSv1Do(*context.Context, interface{}, *string) error        { return nil }
-func (TestRPCDspMock) AttributeSv1Do(*context.Context, interface{}, *string) error     { return nil }
-func (TestRPCDspMock) CacheSv1Do(*context.Context, interface{}, *string) error         { return nil }
-func (TestRPCDspMock) ChargerSv1Do(*context.Context, interface{}, *string) error       { return nil }
-func (TestRPCDspMock) ConfigSv1Do(*context.Context, interface{}, *string) error        { return nil }
-func (TestRPCDspMock) DispatcherSv1Do(*context.Context, interface{}, *string) error    { return nil }
-func (TestRPCDspMock) GuardianSv1Do(*context.Context, interface{}, *string) error      { return nil }
-func (TestRPCDspMock) RateSv1Do(*context.Context, interface{}, *string) error          { return nil }
-func (TestRPCDspMock) ReplicatorSv1Do(*context.Context, interface{}, *string) error    { return nil }
-func (TestRPCDspMock) ResourceSv1Do(*context.Context, interface{}, *string) error      { return nil }
-func (TestRPCDspMock) RouteSv1Do(*context.Context, interface{}, *string) error         { return nil }
-func (TestRPCDspMock) SessionSv1Do(*context.Context, interface{}, *string) error       { return nil }
-func (TestRPCDspMock) StatSv1Do(*context.Context, interface{}, *string) error          { return nil }
-func (TestRPCDspMock) ThresholdSv1Do(*context.Context, interface{}, *string) error     { return nil }
-func (TestRPCDspMock) CDRsv1Do(*context.Context, interface{}, *string) error           { return nil }
-func (TestRPCDspMock) EeSv1Do(*context.Context, interface{}, *string) error            { return nil }
-func (TestRPCDspMock) CoreSv1Do(*context.Context, interface{}, *string) error          { return nil }
-func (TestRPCDspMock) AnalyzerSv1Do(*context.Context, interface{}, *string) error      { return nil }
-func (TestRPCDspMock) AdminSv1Do(*context.Context, interface{}, *string) error         { return nil }
-func (TestRPCDspMock) LoaderSv1Do(*context.Context, interface{}, *string) error        { return nil }
-func (TestRPCDspMock) ServiceManagerv1Do(*context.Context, interface{}, *string) error { return nil }
+func (TestRPCDspMock) AccountSv1Do(*context.Context, any, *string) error       { return nil }
+func (TestRPCDspMock) ActionSv1Do(*context.Context, any, *string) error        { return nil }
+func (TestRPCDspMock) AttributeSv1Do(*context.Context, any, *string) error     { return nil }
+func (TestRPCDspMock) CacheSv1Do(*context.Context, any, *string) error         { return nil }
+func (TestRPCDspMock) ChargerSv1Do(*context.Context, any, *string) error       { return nil }
+func (TestRPCDspMock) ConfigSv1Do(*context.Context, any, *string) error        { return nil }
+func (TestRPCDspMock) DispatcherSv1Do(*context.Context, any, *string) error    { return nil }
+func (TestRPCDspMock) GuardianSv1Do(*context.Context, any, *string) error      { return nil }
+func (TestRPCDspMock) RateSv1Do(*context.Context, any, *string) error          { return nil }
+func (TestRPCDspMock) ReplicatorSv1Do(*context.Context, any, *string) error    { return nil }
+func (TestRPCDspMock) ResourceSv1Do(*context.Context, any, *string) error      { return nil }
+func (TestRPCDspMock) RouteSv1Do(*context.Context, any, *string) error         { return nil }
+func (TestRPCDspMock) SessionSv1Do(*context.Context, any, *string) error       { return nil }
+func (TestRPCDspMock) StatSv1Do(*context.Context, any, *string) error          { return nil }
+func (TestRPCDspMock) ThresholdSv1Do(*context.Context, any, *string) error     { return nil }
+func (TestRPCDspMock) CDRsv1Do(*context.Context, any, *string) error           { return nil }
+func (TestRPCDspMock) EeSv1Do(*context.Context, any, *string) error            { return nil }
+func (TestRPCDspMock) CoreSv1Do(*context.Context, any, *string) error          { return nil }
+func (TestRPCDspMock) AnalyzerSv1Do(*context.Context, any, *string) error      { return nil }
+func (TestRPCDspMock) AdminSv1Do(*context.Context, any, *string) error         { return nil }
+func (TestRPCDspMock) LoaderSv1Do(*context.Context, any, *string) error        { return nil }
+func (TestRPCDspMock) ServiceManagerv1Do(*context.Context, any, *string) error { return nil }
 
 func TestIntServiceNewDispatcherService(t *testing.T) {
 	expErrMsg := `rpc.Register: no service name for type struct {}`
@@ -358,8 +358,8 @@ func TestRPCClientSetCallErrCtxTimeOut(t *testing.T) {
 	cfg.GeneralCfg().ConnectTimeout = 1 * time.Millisecond
 	config.SetCgrConfig(cfg)
 
-	var args interface{}
-	var reply interface{}
+	var args any
+	var reply any
 	expErr := "context deadline exceeded"
 	if err := s.Call(context.Background(), "test.bad", args, reply); err == nil || expErr != err.Error() {
 		t.Errorf("Expected error <%v>, Received error <%v>", expErr, err)
@@ -374,8 +374,8 @@ func TestRPCClientSetCallErrBadMethod(t *testing.T) {
 		"test": connChan,
 	}
 
-	var args interface{}
-	var reply interface{}
+	var args any
+	var reply any
 	expErr := rpcclient.ErrUnsupporteServiceMethod
 	if err := s.Call(context.Background(), "bad method", args, reply); err == nil || expErr != err {
 		t.Errorf("Expected error <%v>, Received error <%v>", expErr, err)
@@ -390,8 +390,8 @@ func TestRPCClientSetCallErr2BadMethod(t *testing.T) {
 		"test": connChan,
 	}
 
-	var args interface{}
-	var reply interface{}
+	var args any
+	var reply any
 	expErr := rpcclient.ErrUnsupporteServiceMethod
 	if err := s.Call(context.Background(), "bad.method", args, reply); err == nil || expErr != err {
 		t.Errorf("Expected error <%v>, Received error <%v>", expErr, err)

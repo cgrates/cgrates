@@ -77,7 +77,7 @@ func testDspThPingFailover(t *testing.T) {
 	ev := utils.CGREvent{
 		Tenant: "cgrates.org",
 
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsAPIKey: "thr12345",
 		},
 	}
@@ -106,11 +106,11 @@ func testDspThProcessEventFailover(t *testing.T) {
 	args := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     utils.UUIDSha1Prefix(),
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.EventName:    "Event1",
 			utils.AccountField: "1001"},
 
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsAPIKey: "thr12345",
 		},
 	}
@@ -138,7 +138,7 @@ func testDspThPing(t *testing.T) {
 	if err := dispEngine.RPC.Call(utils.ThresholdSv1Ping, &utils.CGREvent{
 		Tenant: "cgrates.org",
 
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsAPIKey: "thr12345",
 		},
 	}, &reply); err != nil {
@@ -153,10 +153,10 @@ func testDspThTestAuthKey(t *testing.T) {
 	args := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     utils.UUIDSha1Prefix(),
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1002"},
 
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsAPIKey: "12345",
 		},
 	}
@@ -178,10 +178,10 @@ func testDspThTestAuthKey2(t *testing.T) {
 	args := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     utils.UUIDSha1Prefix(),
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1002"},
 
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsAPIKey: "thr12345",
 		},
 	}
@@ -222,7 +222,7 @@ func testDspThTestAuthKey3(t *testing.T) {
 			Tenant: "cgrates.org",
 			ID:     "THD_ACNT_1002",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsAPIKey: "thr12345",
 		},
 	}, &th); err != nil {
@@ -240,7 +240,7 @@ func testDspThTestAuthKey3(t *testing.T) {
 
 	if err := dispEngine.RPC.Call(utils.ThresholdSv1GetThresholdIDs, &utils.TenantWithAPIOpts{
 		Tenant: "cgrates.org",
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsAPIKey: "thr12345",
 		},
 	}, &ids); err != nil {

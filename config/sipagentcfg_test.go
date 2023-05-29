@@ -160,14 +160,14 @@ func TestSIPAgentCfgAsMapInterface(t *testing.T) {
 		],
 	},
 }`
-	eMap := map[string]interface{}{
+	eMap := map[string]any{
 		utils.EnabledCfg:             false,
 		utils.ListenCfg:              "127.0.0.1:5060",
 		utils.ListenNetCfg:           "udp",
 		utils.SessionSConnsCfg:       []string{"*internal"},
 		utils.TimezoneCfg:            "",
 		utils.RetransmissionTimerCfg: "2s",
-		utils.RequestProcessorsCfg:   []map[string]interface{}{},
+		utils.RequestProcessorsCfg:   []map[string]any{},
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
@@ -210,22 +210,22 @@ func TestSIPAgentCfgAsMapInterface1(t *testing.T) {
 			],
 		},
 	}`
-	eMap := map[string]interface{}{
+	eMap := map[string]any{
 		utils.EnabledCfg:             false,
 		utils.ListenCfg:              "127.0.0.1:5060",
 		utils.ListenNetCfg:           "udp",
 		utils.SessionSConnsCfg:       []string{"*internal"},
 		utils.TimezoneCfg:            "UTC",
 		utils.RetransmissionTimerCfg: "5s",
-		utils.RequestProcessorsCfg: []map[string]interface{}{
+		utils.RequestProcessorsCfg: []map[string]any{
 			{
 				utils.IDCfg:            "OutboundAUTHDryRun",
 				utils.FiltersCfg:       []string{"*string:~*req.request_type:OutboundAUTH", "*string:~*req.Msisdn:497700056231"},
 				utils.TenantCfg:        "cgrates.org",
 				utils.FlagsCfg:         []string{"*dryRun"},
 				utils.TimezoneCfg:      "",
-				utils.RequestFieldsCfg: []map[string]interface{}{},
-				utils.ReplyFieldsCfg: []map[string]interface{}{
+				utils.RequestFieldsCfg: []map[string]any{},
+				utils.ReplyFieldsCfg: []map[string]any{
 					{utils.TagCfg: "Allow", utils.PathCfg: "*rep.response.Allow", utils.TypeCfg: "*constant", utils.ValueCfg: "1", utils.MandatoryCfg: true},
 					{utils.TagCfg: "Concatenated1", utils.PathCfg: "*rep.response.Concatenated", utils.TypeCfg: "*composed", utils.ValueCfg: "~*req.MCC;/", utils.MandatoryCfg: true},
 					{utils.TagCfg: "Concatenated2", utils.PathCfg: "*rep.response.Concatenated", utils.TypeCfg: "*composed", utils.ValueCfg: "Val1"},
@@ -264,22 +264,22 @@ func TestSIPAgentCfgAsMapInterface2(t *testing.T) {
 
 	}
 }`
-	eMap := map[string]interface{}{
+	eMap := map[string]any{
 		utils.EnabledCfg:             true,
 		utils.ListenCfg:              "",
 		utils.ListenNetCfg:           "udp",
 		utils.SessionSConnsCfg:       []string{"*conn1", "*conn2"},
 		utils.TimezoneCfg:            "",
 		utils.RetransmissionTimerCfg: "1s",
-		utils.RequestProcessorsCfg: []map[string]interface{}{
+		utils.RequestProcessorsCfg: []map[string]any{
 			{
 				utils.IDCfg:            "Register",
 				utils.FiltersCfg:       []string{"*notstring:~*vars.Method:INVITE"},
 				utils.TenantCfg:        "cgrates.org",
 				utils.FlagsCfg:         []string{"*none"},
 				utils.TimezoneCfg:      "",
-				utils.RequestFieldsCfg: []map[string]interface{}{},
-				utils.ReplyFieldsCfg: []map[string]interface{}{
+				utils.RequestFieldsCfg: []map[string]any{},
+				utils.ReplyFieldsCfg: []map[string]any{
 					{utils.TagCfg: "Request", utils.PathCfg: "*rep.Request", utils.TypeCfg: "*constant", utils.ValueCfg: "SIP/2.0 405 Method Not Allowed"},
 				},
 			},

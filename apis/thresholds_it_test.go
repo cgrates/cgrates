@@ -437,10 +437,10 @@ func testThresholdsGetThresholdsForEvent(t *testing.T) {
 	args := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "GetThresholdEventTest",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1001",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsThresholdsProfileIDs: []string{"THD_1", "THD_2"},
 		},
 	}
@@ -497,10 +497,10 @@ func testThresholdsGetThresholdsAfterRemove(t *testing.T) {
 	args := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "RemThresholdEventTest",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1001",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsThresholdsProfileIDs: []string{"THD_1", "THD_2"},
 		},
 	}
@@ -594,10 +594,10 @@ func testThresholdsProcessEvent(t *testing.T) {
 	args := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "ThresholdProcessEv",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1001",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsThresholdsProfileIDs: []string{"THD_1", "THD_2"},
 		},
 	}
@@ -619,10 +619,10 @@ func testThresholdsGetThresholdsAfterFirstEvent(t *testing.T) {
 	args := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "ThresholdEventTest",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1001",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsThresholdsProfileIDs: []string{"THD_1", "THD_2"},
 		},
 	}
@@ -658,10 +658,10 @@ func testThresholdsGetThresholdsAfterSecondEvent(t *testing.T) {
 	args := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "ThresholdEventTest",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1001",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsThresholdsProfileIDs: []string{"THD_1", "THD_2"},
 		},
 	}

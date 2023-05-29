@@ -48,7 +48,7 @@ func (self *CmdSetAttributeProfile) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdSetAttributeProfile) RpcParams(reset bool) interface{} {
+func (self *CmdSetAttributeProfile) RpcParams(reset bool) any {
 	if reset || self.rpcParams == nil {
 		self.rpcParams = &engine.APIAttributeProfileWithAPIOpts{APIAttributeProfile: new(engine.APIAttributeProfile)}
 	}
@@ -59,7 +59,7 @@ func (self *CmdSetAttributeProfile) PostprocessRpcParams() error {
 	return nil
 }
 
-func (self *CmdSetAttributeProfile) RpcResult() interface{} {
+func (self *CmdSetAttributeProfile) RpcResult() any {
 	var s string
 	return &s
 }

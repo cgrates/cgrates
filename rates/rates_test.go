@@ -103,7 +103,7 @@ func TestRateProfileCostForEvent(t *testing.T) {
 	if _, err := rateS.rateProfileCostForEvent(context.Background(), rPrf, &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "RATE_1",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1001"}}, rateS.cfg.RateSCfg().Verbosity); err == nil || err != utils.ErrNotFound {
 		t.Error(err)
 	}
@@ -141,7 +141,7 @@ func TestRateProfileCostForEvent(t *testing.T) {
 	if rcv, err := rateS.rateProfileCostForEvent(context.Background(), rPrf, &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "RATE_1",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1001"}}, rateS.cfg.RateSCfg().Verbosity); err != nil {
 		t.Error(err)
 	} else {
@@ -169,7 +169,7 @@ func TestRateProfileCostForEvent(t *testing.T) {
 	if err := rateS.V1CostForEvent(context.Background(), &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "RATE_1",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1001"}}, expectedRPCost); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expectedRPCost, expRpCostAfterV1) {
@@ -251,7 +251,7 @@ func TestRateProfileCostForEventUnmatchEvent(t *testing.T) {
 	if _, err := rateS.rateProfileCostForEvent(context.Background(), rPrf, &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "RATE_1",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1001",
 			utils.Destination:  "10",
 			utils.Cost:         1002,
@@ -263,7 +263,7 @@ func TestRateProfileCostForEventUnmatchEvent(t *testing.T) {
 	if _, err := rateS.rateProfileCostForEvent(context.Background(), rPrf, &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "RATE_1",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1001",
 			utils.Destination:  "10",
 			utils.Cost:         1002,
@@ -306,7 +306,7 @@ func TestMatchingRateProfileEvent(t *testing.T) {
 		&utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "CACHE1",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.AccountField: "1001",
 				utils.Destination:  1002,
 				utils.AnswerTime:   t1.Add(-10 * time.Second),
@@ -321,7 +321,7 @@ func TestMatchingRateProfileEvent(t *testing.T) {
 		&utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "CACHE1",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.AccountField: "1001",
 				utils.Destination:  2002,
 				utils.AnswerTime:   t1.Add(-10 * time.Second),
@@ -333,7 +333,7 @@ func TestMatchingRateProfileEvent(t *testing.T) {
 		&utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "CACHE1",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.AccountField: "1001",
 				utils.Destination:  2002,
 				utils.AnswerTime:   t1.Add(10 * time.Second),
@@ -345,7 +345,7 @@ func TestMatchingRateProfileEvent(t *testing.T) {
 		&utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "CACHE1",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.AccountField: "1007",
 				utils.Destination:  1002,
 				utils.AnswerTime:   t1.Add(-10 * time.Second),
@@ -358,7 +358,7 @@ func TestMatchingRateProfileEvent(t *testing.T) {
 		&utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "CACHE1",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.AccountField: "1007",
 				utils.Destination:  1002,
 				utils.AnswerTime:   t1.Add(-10 * time.Second),
@@ -371,7 +371,7 @@ func TestMatchingRateProfileEvent(t *testing.T) {
 		&utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "CACHE1",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.AccountField: "1001",
 				utils.Cost:         1002,
 				utils.AnswerTime:   t1.Add(-10 * time.Second),
@@ -386,7 +386,7 @@ func TestMatchingRateProfileEvent(t *testing.T) {
 		&utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "CACHE1",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.AccountField: "1007",
 				utils.Destination:  1002,
 				utils.AnswerTime:   t1.Add(-10 * time.Second),
@@ -448,7 +448,7 @@ func TestV1CostForEventError(t *testing.T) {
 	rcv, err := rateS.rateProfileCostForEvent(context.Background(), rPrf, &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "RATE_1",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1001"}}, rateS.cfg.RateSCfg().Verbosity)
 	if err != nil {
 		t.Error(err)
@@ -459,9 +459,9 @@ func TestV1CostForEventError(t *testing.T) {
 	if err := rateS.V1CostForEvent(context.Background(), &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "RATE_1",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1001"},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsRatesProfileIDs: []string{"RATE_1"},
 		},
 	}, rcv); err == nil || err.Error() != expectedErr {
@@ -474,9 +474,9 @@ func TestV1CostForEventError(t *testing.T) {
 	if err := rateS.V1CostForEvent(context.Background(), &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "RATE_1",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.Destination: "10"},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsRatesProfileIDs: []string{"RATE_1"},
 		}}, rcv); err == nil || err.Error() != expectedErr {
 		t.Errorf("Expected %+v, received %+v", expectedErr, err)
@@ -573,10 +573,10 @@ func BenchmarkRateS_V1CostForEvent(b *testing.B) {
 	argsRt := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     utils.UUIDSha1Prefix(),
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.Subject: "1010",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsRatesStartTime: time.Date(2020, 12, 23, 59, 0, 0, 0, time.UTC),
 			utils.OptsRatesUsage:     "2h",
 		},
@@ -662,10 +662,10 @@ func BenchmarkRateS_V1CostForEventSingleRate(b *testing.B) {
 	argsRt := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     utils.UUIDSha1Prefix(),
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.Subject: "1001",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsRatesStartTime: time.Date(2020, 12, 23, 59, 0, 0, 0, time.UTC),
 			utils.OptsRatesUsage:     "2h",
 		},
@@ -737,9 +737,9 @@ func TestRateProfileCostForEventInvalidUsage(t *testing.T) {
 	if _, err := rateS.rateProfileCostForEvent(context.Background(), rPrf, &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "RATE_1",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1001"},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsRatesUsage: "invalidUsageFormat",
 		}}, rateS.cfg.RateSCfg().Verbosity); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
@@ -749,9 +749,9 @@ func TestRateProfileCostForEventInvalidUsage(t *testing.T) {
 	if _, err := rateS.rateProfileCostForEvent(context.Background(), rPrf, &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "RATE_1",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1001"},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsRatesStartTime: "invalidStartTimeFormat",
 		}}, rateS.cfg.RateSCfg().Verbosity); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
@@ -811,9 +811,9 @@ func TestRateProfileCostForEventZeroIncrement(t *testing.T) {
 	if _, err := rateS.rateProfileCostForEvent(context.Background(), rPrf, &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "RATE_1",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1001"},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsRatesUsage: "100m",
 		}}, rateS.cfg.RateSCfg().Verbosity); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
@@ -872,9 +872,9 @@ func TestRateProfileCostForEventMaximumIterations(t *testing.T) {
 	if _, err := rateS.rateProfileCostForEvent(context.Background(), rPrf, &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "RATE_1",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1001"},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsRatesUsage: "10000m",
 		}}, rateS.cfg.RateSCfg().Verbosity); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
@@ -917,7 +917,7 @@ func TestRateSMatchingRateProfileForEventErrFltr(t *testing.T) {
 		&utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "CACHE1",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.AccountField: "1001",
 				utils.Destination:  1002,
 				utils.AnswerTime:   time.Date(9999, 7, 21, 10, 0, 0, 0, time.UTC).Add(-10 * time.Second),
@@ -974,7 +974,7 @@ func TestRateSRateProfileCostForEventErrFltr(t *testing.T) {
 	if _, err := rateS.rateProfileCostForEvent(context.Background(), rPrf, &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "RATE_1",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1001"}}, rateS.cfg.RateSCfg().Verbosity); err == nil || err != utils.ErrNotFound {
 		t.Error(err)
 	}
@@ -987,7 +987,7 @@ func TestRateSRateProfileCostForEventErrFltr(t *testing.T) {
 	if _, err := rateS.rateProfileCostForEvent(context.Background(), rPrf, &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "RATE_1",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1001"}}, rateS.cfg.RateSCfg().Verbosity); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v\n, received %+v", expected, err)
 	}
@@ -1040,10 +1040,10 @@ func TestRateSRateProfileCostForEventErrInterval(t *testing.T) {
 	if _, err := rateS.rateProfileCostForEvent(context.Background(), rPrf, &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "RATE_1",
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsRatesIntervalStart: "wrongValue",
 		},
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1001"}}, rateS.cfg.RateSCfg().Verbosity); err == nil || err.Error() != expected {
 		t.Error(err)
 	}
@@ -1125,10 +1125,10 @@ func TestCDRProcessRatesCostForEvent(t *testing.T) {
 	cgrEv := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "TestCDRProcessRatesCostForEvent",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1001",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaUsage: 15 * time.Second,
 		},
 	}
@@ -1144,10 +1144,10 @@ func TestCDRProcessRatesCostForEvent(t *testing.T) {
 	expCgrEv := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "TestCDRProcessRatesCostForEvent",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1001",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaRateSCost: utils.RateProfileCost{
 				ID:   "TEST_RATE_PROCESS_CDR",
 				Cost: utils.NewDecimal(int64(15*time.Second)/10, 0),
@@ -1234,7 +1234,7 @@ func TestRateProfileCostForEventProfileIgnoreFilters(t *testing.T) {
 	if _, err := rateS.rateProfileCostForEvent(context.Background(), rPrf, &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "RATE_1",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1001"}}, rateS.cfg.RateSCfg().Verbosity); err == nil || err != utils.ErrNotFound {
 		t.Error(err)
 	}
@@ -1272,7 +1272,7 @@ func TestRateProfileCostForEventProfileIgnoreFilters(t *testing.T) {
 	if rcv, err := rateS.rateProfileCostForEvent(context.Background(), rPrf, &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "RATE_1",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1001"}}, rateS.cfg.RateSCfg().Verbosity); err != nil {
 		t.Error(err)
 	} else {
@@ -1298,11 +1298,11 @@ func TestRateProfileCostForEventProfileIgnoreFilters(t *testing.T) {
 	event := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "RATE_1",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1001",
 			"TestField":        "testValue1",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsRatesProfileIDs:      []string{"RATE_1"},
 			utils.MetaProfileIgnoreFilters: true,
 		},

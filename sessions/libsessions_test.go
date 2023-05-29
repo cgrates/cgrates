@@ -32,7 +32,7 @@ import (
 )
 
 func TestLibSessionSGetSetOptsOriginID(t *testing.T) {
-	sEv := engine.NewMapEvent(map[string]interface{}{
+	sEv := engine.NewMapEvent(map[string]any{
 		utils.EventName:       "TEST_EVENT",
 		utils.ToR:             "*voice",
 		utils.OriginID:        "12345",
@@ -52,7 +52,7 @@ func TestLibSessionSGetSetOptsOriginID(t *testing.T) {
 		utils.OriginHost:      "127.0.0.1",
 	})
 	//Empty originID in event
-	opt := map[string]interface{}{}
+	opt := map[string]any{}
 	originID := GetSetOptsOriginID(sEv, opt)
 	if len(originID) == 0 {
 		t.Errorf("Unexpected originID: %+v", originID)

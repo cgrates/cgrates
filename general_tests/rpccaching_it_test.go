@@ -129,7 +129,7 @@ func testRPCMethodsFromFolder(t *testing.T) {
 	if err := rpcRpc.Call(context.Background(), utils.LoaderSv1Run,
 		&loaders.ArgsProcessFolder{
 			// StopOnError: true,
-			APIOpts: map[string]interface{}{utils.MetaCache: caching},
+			APIOpts: map[string]any{utils.MetaCache: caching},
 		}, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
@@ -236,7 +236,7 @@ func testRPCMethodsAuthorizeSession(t *testing.T) {
 	args := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "testRPCMethodsAuthorizeSession",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.Tenant:       "cgrates.org",
 			utils.ToR:          utils.MetaVoice,
 			utils.OriginID:     "testRPCMethodsAuthorizeSession",
@@ -247,7 +247,7 @@ func testRPCMethodsAuthorizeSession(t *testing.T) {
 			utils.SetupTime:    time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
 			utils.Usage:        authUsage,
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsSesMaxUsage: true,
 			utils.MetaUsage:       authUsage,
 			utils.MetaAccounts:    true,
@@ -267,7 +267,7 @@ func testRPCMethodsAuthorizeSession(t *testing.T) {
 	thEvent := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "DisableAccount",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1001",
 			"DisableAction":    "DisableAction",
 		},
@@ -315,7 +315,7 @@ func testRPCMethodsAuthorizeSession(t *testing.T) {
 	thEvent = &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "EnableAccount",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1001",
 			"EnableAction":     "EnableAction",
 		},
@@ -333,7 +333,7 @@ func testRPCMethodsInitSession(t *testing.T) {
 	args := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "testRPCMethodsInitSession",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.Tenant:       "cgrates.org",
 			utils.ToR:          utils.MetaVoice,
 			utils.OriginID:     "testRPCMethodsInitSession",
@@ -345,7 +345,7 @@ func testRPCMethodsInitSession(t *testing.T) {
 			utils.AnswerTime:   time.Date(2018, time.January, 7, 16, 60, 10, 0, time.UTC),
 			utils.Usage:        initUsage,
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsSesInitiate: true,
 			utils.MetaUsage:       initUsage,
 		},
@@ -364,7 +364,7 @@ func testRPCMethodsInitSession(t *testing.T) {
 	thEvent := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "DisableAccount",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1001",
 			"DisableAction":    "DisableAction",
 		},
@@ -413,7 +413,7 @@ func testRPCMethodsInitSession(t *testing.T) {
 	thEvent = &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "EnableAccount",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1001",
 			"EnableAction":     "EnableAction",
 		},
@@ -431,7 +431,7 @@ func testRPCMethodsUpdateSession(t *testing.T) {
 	args := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "testRPCMethodsUpdateSession",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.Tenant:       "cgrates.org",
 			utils.ToR:          utils.MetaVoice,
 			utils.OriginID:     "testRPCMethodsUpdateSession",
@@ -443,7 +443,7 @@ func testRPCMethodsUpdateSession(t *testing.T) {
 			utils.AnswerTime:   time.Date(2018, time.January, 7, 16, 60, 10, 0, time.UTC),
 			utils.Usage:        reqUsage,
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsSesUpdate: true,
 			utils.MetaUsage:     reqUsage,
 		},
@@ -462,7 +462,7 @@ func testRPCMethodsUpdateSession(t *testing.T) {
 	thEvent := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "DisableAccount",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1001",
 			"DisableAction":    "DisableAction",
 		},
@@ -510,7 +510,7 @@ func testRPCMethodsUpdateSession(t *testing.T) {
 	thEvent = &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "EnableAccount",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1001",
 			"EnableAction":     "EnableAction",
 		},
@@ -527,7 +527,7 @@ func testRPCMethodsTerminateSession(t *testing.T) {
 	args := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "testRPCMethodsTerminateSession",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.Tenant:       "cgrates.org",
 			utils.ToR:          utils.MetaVoice,
 			utils.OriginID:     "testRPCMethodsTerminateSession",
@@ -539,7 +539,7 @@ func testRPCMethodsTerminateSession(t *testing.T) {
 			utils.AnswerTime:   time.Date(2018, time.January, 7, 16, 60, 10, 0, time.UTC),
 			utils.Usage:        10 * time.Minute,
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsSesTerminate: true,
 			utils.MetaUsage:        10 * time.Minute,
 		},
@@ -553,7 +553,7 @@ func testRPCMethodsTerminateSession(t *testing.T) {
 	}
 
 	//replace event with empty
-	args.Event = map[string]interface{}{}
+	args.Event = map[string]any{}
 
 	if err := rpcRpc.Call(context.Background(), utils.SessionSv1TerminateSession,
 		args, &rply); err != nil {
@@ -576,7 +576,7 @@ func testRPCMethodsTerminateSession(t *testing.T) {
 // 	args := &utils.CGREvent{
 // 		Tenant: "cgrates.org",
 // 		ID:     "testRPCMethodsProcessCDR",
-// 		Event: map[string]interface{}{
+// 		Event: map[string]any{
 // 			utils.Tenant:       "cgrates.org",
 // 			utils.ToR:          utils.MetaVoice,
 // 			utils.OriginID:     "testRPCMethodsProcessCDR",
@@ -647,7 +647,7 @@ func testRPCMethodsProcessEvent(t *testing.T) {
 	args := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "testRPCMethodsProcessEvent",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.Tenant:       "cgrates.org",
 			utils.ToR:          utils.MetaVoice,
 			utils.OriginID:     "testRPCMethodsProcessEvent",
@@ -659,7 +659,7 @@ func testRPCMethodsProcessEvent(t *testing.T) {
 			utils.AnswerTime:   time.Date(2018, time.January, 7, 16, 60, 10, 0, time.UTC),
 			utils.Usage:        initUsage,
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsSesMessage: true,
 			utils.MetaUsage:      initUsage,
 		},
@@ -677,7 +677,7 @@ func testRPCMethodsProcessEvent(t *testing.T) {
 	thEvent := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "DisableAccount",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1001",
 			"DisableAction":    "DisableAction",
 		},
@@ -726,7 +726,7 @@ func testRPCMethodsProcessEvent(t *testing.T) {
 	thEvent = &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "EnableAccount",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1001",
 			"EnableAction":     "EnableAction",
 		},
@@ -743,7 +743,7 @@ func testRPCMethodsProcessEvent(t *testing.T) {
 // 	args := &utils.CGREvent{
 // 		Tenant: "cgrates.org",
 // 		ID:     "testRPCMethodsCdrsProcessCDR",
-// 		Event: map[string]interface{}{
+// 		Event: map[string]any{
 // 			utils.Tenant:       "cgrates.org",
 // 			utils.ToR:          utils.MetaVoice,
 // 			utils.OriginHost:   "host",

@@ -128,7 +128,7 @@ package general_tests
 // 		CGREvent: &utils.CGREvent{
 // 			Tenant: "cgrates.org",
 // 			ID:     "TestSSv1ItProcessEvent",
-// 			Event: map[string]interface{}{
+// 			Event: map[string]any{
 // 				utils.CGRID:        "c87609aa1cb6e9529ab1836cfeeebaab7aa7ebaf",
 // 				utils.Tenant:       "cgrates.org",
 // 				utils.Category:     "call",
@@ -141,7 +141,7 @@ package general_tests
 // 				utils.AnswerTime:   time.Date(2018, time.January, 7, 16, 60, 10, 0, time.UTC),
 // 				utils.Usage:        initUsage,
 // 			},
-// 			APIOpts: map[string]interface{}{
+// 			APIOpts: map[string]any{
 // 				utils.OptsAPIKey: "ses12345",
 // 			},
 // 		},
@@ -164,7 +164,7 @@ package general_tests
 // 		CGREvent: &utils.CGREvent{
 // 			Tenant: "cgrates.org",
 // 			ID:     "TestSSv1ItProcessEvent",
-// 			Event: map[string]interface{}{
+// 			Event: map[string]any{
 // 				utils.CGRID:        "c87609aa1cb6e9529ab1836cfeeebaab7aa7ebaf",
 // 				utils.Tenant:       "cgrates.org",
 // 				utils.Category:     "call",
@@ -178,7 +178,7 @@ package general_tests
 // 				utils.AnswerTime:   "2018-01-07T17:00:10Z",
 // 				utils.Usage:        300000000000.0,
 // 			},
-// 			APIOpts: map[string]interface{}{
+// 			APIOpts: map[string]any{
 // 				utils.Subsys:        utils.MetaSessionS,
 // 				utils.OptsAPIKey:    "ses12345",
 // 				utils.MetaEventType: utils.StatUpdate,
@@ -266,7 +266,7 @@ package general_tests
 // 		Account:     "1002",
 // 		BalanceType: utils.MetaVoice,
 // 		Value:       5 * float64(time.Second),
-// 		Balance: map[string]interface{}{
+// 		Balance: map[string]any{
 // 			utils.ID:            "TestDynamicDebitBalance",
 // 			utils.RatingSubject: "*zero5ms",
 // 		},
@@ -298,7 +298,7 @@ package general_tests
 // 			CGREvent: &utils.CGREvent{
 // 				Tenant: "cgrates.org",
 // 				ID:     "TestSesItUpdateSession",
-// 				Event: map[string]interface{}{
+// 				Event: map[string]any{
 // 					utils.Tenant:       "cgrates.org",
 // 					utils.Category:     "call",
 // 					utils.ToR:          utils.MetaVoice,
@@ -329,7 +329,7 @@ package general_tests
 // 		CGREvent: &utils.CGREvent{
 // 			Tenant: "cgrates.org",
 // 			ID:     "TestSesItInitiateSession",
-// 			Event: map[string]interface{}{
+// 			Event: map[string]any{
 // 				utils.Tenant:       "cgrates.org",
 // 				utils.Category:     "call",
 // 				utils.ToR:          utils.MetaVoice,
@@ -379,7 +379,7 @@ package general_tests
 // 	if err := ses3RPC.Call(utils.SessionSv1ProcessCDR, &utils.CGREvent{
 // 		Tenant: "cgrates.org",
 // 		ID:     "TestSesItProccesCDR",
-// 		Event: map[string]interface{}{
+// 		Event: map[string]any{
 // 			utils.Tenant:       "cgrates.org",
 // 			utils.Category:     "call",
 // 			utils.ToR:          utils.MetaVoice,

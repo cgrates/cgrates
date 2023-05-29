@@ -30,11 +30,11 @@ func (dS *DispatcherService) ResourceSv1AllocateResources(ctx *context.Context, 
 	if args != nil && len(args.Tenant) != 0 {
 		tnt = args.Tenant
 	}
-	ev := make(map[string]interface{})
+	ev := make(map[string]any)
 	if args != nil {
 		ev = args.Event
 	}
-	opts := make(map[string]interface{})
+	opts := make(map[string]any)
 	if args != nil {
 		opts = args.APIOpts
 	}
@@ -45,11 +45,11 @@ func (dS *DispatcherService) ResourceSv1AuthorizeResources(ctx *context.Context,
 	if args != nil && len(args.Tenant) != 0 {
 		tnt = args.Tenant
 	}
-	ev := make(map[string]interface{})
+	ev := make(map[string]any)
 	if args != nil {
 		ev = args.Event
 	}
-	opts := make(map[string]interface{})
+	opts := make(map[string]any)
 	if args != nil {
 		opts = args.APIOpts
 	}
@@ -60,8 +60,8 @@ func (dS *DispatcherService) ResourceSv1GetResource(ctx *context.Context, args *
 	if args != nil && (args.TenantID != nil && len(args.TenantID.Tenant) != 0) {
 		tnt = args.TenantID.Tenant
 	}
-	ev := make(map[string]interface{})
-	opts := make(map[string]interface{})
+	ev := make(map[string]any)
+	opts := make(map[string]any)
 	if args != nil {
 		opts = args.APIOpts
 	}
@@ -72,8 +72,8 @@ func (dS *DispatcherService) ResourceSv1GetResourceWithConfig(ctx *context.Conte
 	if args != nil && (args.TenantID != nil && len(args.TenantID.Tenant) != 0) {
 		tnt = args.TenantID.Tenant
 	}
-	ev := make(map[string]interface{})
-	opts := make(map[string]interface{})
+	ev := make(map[string]any)
+	opts := make(map[string]any)
 	if args != nil {
 		opts = args.APIOpts
 	}
@@ -84,11 +84,11 @@ func (dS *DispatcherService) ResourceSv1GetResourcesForEvent(ctx *context.Contex
 	if args != nil && len(args.Tenant) != 0 {
 		tnt = args.Tenant
 	}
-	ev := make(map[string]interface{})
+	ev := make(map[string]any)
 	if args != nil {
 		ev = args.Event
 	}
-	opts := make(map[string]interface{})
+	opts := make(map[string]any)
 	if args != nil {
 		opts = args.APIOpts
 	}
@@ -99,11 +99,11 @@ func (dS *DispatcherService) ResourceSv1Ping(ctx *context.Context, args *utils.C
 	if args != nil && len(args.Tenant) != 0 {
 		tnt = args.Tenant
 	}
-	ev := make(map[string]interface{})
+	ev := make(map[string]any)
 	if args != nil {
 		ev = args.Event
 	}
-	opts := make(map[string]interface{})
+	opts := make(map[string]any)
 	if args != nil {
 		opts = args.APIOpts
 	}
@@ -114,11 +114,11 @@ func (dS *DispatcherService) ResourceSv1ReleaseResources(ctx *context.Context, a
 	if args != nil && len(args.Tenant) != 0 {
 		tnt = args.Tenant
 	}
-	ev := make(map[string]interface{})
+	ev := make(map[string]any)
 	if args != nil {
 		ev = args.Event
 	}
-	opts := make(map[string]interface{})
+	opts := make(map[string]any)
 	if args != nil {
 		opts = args.APIOpts
 	}

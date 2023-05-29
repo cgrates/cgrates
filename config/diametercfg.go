@@ -101,9 +101,9 @@ func (da *DiameterAgentCfg) loadFromJSONCfg(jsnCfg *DiameterAgentJsonCfg, separa
 	return
 }
 
-// AsMapInterface returns the config as a map[string]interface{}
-func (da DiameterAgentCfg) AsMapInterface(separator string) interface{} {
-	mp := map[string]interface{}{
+// AsMapInterface returns the config as a map[string]any
+func (da DiameterAgentCfg) AsMapInterface(separator string) any {
+	mp := map[string]any{
 		utils.EnabledCfg:            da.Enabled,
 		utils.ListenNetCfg:          da.ListenNet,
 		utils.ListenCfg:             da.Listen,
@@ -119,7 +119,7 @@ func (da DiameterAgentCfg) AsMapInterface(separator string) interface{} {
 		utils.ForcedDisconnectCfg:   da.ForcedDisconnect,
 	}
 
-	requestProcessors := make([]map[string]interface{}, len(da.RequestProcessors))
+	requestProcessors := make([]map[string]any, len(da.RequestProcessors))
 	for i, item := range da.RequestProcessors {
 		requestProcessors[i] = item.AsMapInterface(separator)
 	}

@@ -31,14 +31,14 @@ import (
 )
 
 type EventExporter interface {
-	Cfg() *config.EventExporterCfg                                                      // return the config
-	Connect() error                                                                     // called before exporting an event to make sure it is connected
-	ExportEvent(ctx *context.Context, content interface{}, extraData interface{}) error // called on each event to be exported
-	Close() error                                                                       // called when the exporter needs to terminate
-	GetMetrics() *utils.SafeMapStorage                                                  // called to get metrics
-	PrepareMap(*utils.CGREvent) (interface{}, error)
-	PrepareOrderMap(*utils.OrderedNavigableMap) (interface{}, error)
-	ExtraData(*utils.CGREvent) interface{}
+	Cfg() *config.EventExporterCfg                                      // return the config
+	Connect() error                                                     // called before exporting an event to make sure it is connected
+	ExportEvent(ctx *context.Context, content any, extraData any) error // called on each event to be exported
+	Close() error                                                       // called when the exporter needs to terminate
+	GetMetrics() *utils.SafeMapStorage                                  // called to get metrics
+	PrepareMap(*utils.CGREvent) (any, error)
+	PrepareOrderMap(*utils.OrderedNavigableMap) (any, error)
+	ExtraData(*utils.CGREvent) any
 }
 
 // NewEventExporter produces exporters
@@ -219,11 +219,11 @@ func updateEEMetrics(dc *utils.SafeMapStorage, originID string, ev engine.MapEve
 
 type bytePreparing struct{}
 
-func (bytePreparing) PrepareMap(mp *utils.CGREvent) (interface{}, error) {
+func (bytePreparing) PrepareMap(mp *utils.CGREvent) (any, error) {
 	return json.Marshal(mp.Event)
 }
-func (bytePreparing) PrepareOrderMap(mp *utils.OrderedNavigableMap) (interface{}, error) {
-	valMp := make(map[string]interface{})
+func (bytePreparing) PrepareOrderMap(mp *utils.OrderedNavigableMap) (any, error) {
+	valMp := make(map[string]any)
 	for el := mp.GetFirstElement(); el != nil; el = el.Next() {
 		path := el.Value
 		nmIt, _ := mp.Field(path)
@@ -235,7 +235,7 @@ func (bytePreparing) PrepareOrderMap(mp *utils.OrderedNavigableMap) (interface{}
 
 type slicePreparing struct{}
 
-func (slicePreparing) PrepareMap(mp *utils.CGREvent) (interface{}, error) {
+func (slicePreparing) PrepareMap(mp *utils.CGREvent) (any, error) {
 	csvRecord := make([]string, 0, len(mp.Event))
 	for _, val := range mp.Event {
 		csvRecord = append(csvRecord, utils.IfaceAsString(val))
@@ -243,6 +243,6 @@ func (slicePreparing) PrepareMap(mp *utils.CGREvent) (interface{}, error) {
 	return csvRecord, nil
 }
 
-func (slicePreparing) PrepareOrderMap(mp *utils.OrderedNavigableMap) (interface{}, error) {
+func (slicePreparing) PrepareOrderMap(mp *utils.OrderedNavigableMap) (any, error) {
 	return mp.OrderedFieldsAsStrings(), nil
 }

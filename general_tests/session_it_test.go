@@ -128,7 +128,7 @@ package general_tests
 // 		Account:     sesAccount,
 // 		BalanceType: utils.MetaMonetary,
 // 		Value:       0,
-// 		Balance: map[string]interface{}{
+// 		Balance: map[string]any{
 // 			utils.ID:            "TestDynamicDebitBalance",
 // 			utils.RatingSubject: "*zero1s",
 // 		},
@@ -148,7 +148,7 @@ package general_tests
 // 		CGREvent: &utils.CGREvent{
 // 			Tenant: sesTenant,
 // 			ID:     "TestSesItInitiateSession",
-// 			Event: map[string]interface{}{
+// 			Event: map[string]any{
 // 				utils.Tenant:       sesTenant,
 // 				utils.Category:     "call",
 // 				utils.ToR:          utils.MetaVoice,
@@ -180,7 +180,7 @@ package general_tests
 // 		CGREvent: &utils.CGREvent{
 // 			Tenant: sesTenant,
 // 			ID:     "TestSesItUpdateSession",
-// 			Event: map[string]interface{}{
+// 			Event: map[string]any{
 // 				utils.Tenant:       sesTenant,
 // 				utils.Category:     "call",
 // 				utils.ToR:          utils.MetaVoice,

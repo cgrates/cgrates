@@ -30,8 +30,8 @@ func (dS *DispatcherService) EeSv1ArchiveEventsInReply(ctx *context.Context, arg
 	if args != nil && len(args.Tenant) != 0 {
 		tnt = args.Tenant
 	}
-	ev := make(map[string]interface{})
-	opts := make(map[string]interface{})
+	ev := make(map[string]any)
+	opts := make(map[string]any)
 	if args != nil {
 		opts = args.APIOpts
 	}
@@ -42,26 +42,26 @@ func (dS *DispatcherService) EeSv1Ping(ctx *context.Context, args *utils.CGREven
 	if args != nil && len(args.Tenant) != 0 {
 		tnt = args.Tenant
 	}
-	ev := make(map[string]interface{})
+	ev := make(map[string]any)
 	if args != nil {
 		ev = args.Event
 	}
-	opts := make(map[string]interface{})
+	opts := make(map[string]any)
 	if args != nil {
 		opts = args.APIOpts
 	}
 	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaEEs, utils.EeSv1Ping, args, reply)
 }
-func (dS *DispatcherService) EeSv1ProcessEvent(ctx *context.Context, args *utils.CGREventWithEeIDs, reply *map[string]map[string]interface{}) (err error) {
+func (dS *DispatcherService) EeSv1ProcessEvent(ctx *context.Context, args *utils.CGREventWithEeIDs, reply *map[string]map[string]any) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
 	if args != nil && (args.CGREvent != nil && len(args.CGREvent.Tenant) != 0) {
 		tnt = args.CGREvent.Tenant
 	}
-	ev := make(map[string]interface{})
+	ev := make(map[string]any)
 	if args != nil && args.CGREvent != nil {
 		ev = args.CGREvent.Event
 	}
-	opts := make(map[string]interface{})
+	opts := make(map[string]any)
 	if args != nil && args.CGREvent != nil {
 		opts = args.CGREvent.APIOpts
 	}

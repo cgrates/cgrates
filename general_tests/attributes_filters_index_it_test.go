@@ -159,10 +159,10 @@ func testAttributeSetProfile(t *testing.T) {
 
 	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			"Subject": "44",
 		},
-		APIOpts: map[string]interface{}{},
+		APIOpts: map[string]any{},
 	}
 	var rplyEv engine.AttrSProcessEventReply
 	if err := attrFltrRPC.Call(context.Background(), utils.AttributeSv1ProcessEvent,
@@ -206,10 +206,10 @@ func testAttributeSetFltr2(t *testing.T) {
 	//same event for process
 	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			"Subject": "4444",
 		},
-		APIOpts: map[string]interface{}{},
+		APIOpts: map[string]any{},
 	}
 	exp := engine.AttrSProcessEventReply{
 		AlteredFields: []*engine.FieldsAltered{
@@ -220,11 +220,11 @@ func testAttributeSetFltr2(t *testing.T) {
 		},
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				"Subject": "4444",
 				"FL1":     "Al1",
 			},
-			APIOpts: map[string]interface{}{},
+			APIOpts: map[string]any{},
 		},
 	}
 	var rplyEv engine.AttrSProcessEventReply

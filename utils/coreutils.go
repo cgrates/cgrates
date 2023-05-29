@@ -491,17 +491,17 @@ func SliceStringPointer(d []string) *[]string {
 	return &d
 }
 
-func ToIJSON(v interface{}) string {
+func ToIJSON(v any) string {
 	b, _ := json.MarshalIndent(v, "", " ")
 	return string(b)
 }
 
-func ToJSON(v interface{}) string {
+func ToJSON(v any) string {
 	b, _ := json.Marshal(v)
 	return string(b)
 }
 
-func ToUnescapedJSON(value interface{}) (bts []byte, err error) {
+func ToUnescapedJSON(value any) (bts []byte, err error) {
 	buf := &bytes.Buffer{}
 	enc := json.NewEncoder(buf)
 	enc.SetEscapeHTML(false)
@@ -705,7 +705,7 @@ type TenantID struct {
 
 type TenantIDWithAPIOpts struct {
 	*TenantID
-	APIOpts map[string]interface{}
+	APIOpts map[string]any
 }
 
 func (tID *TenantID) TenantID() string {
@@ -720,12 +720,12 @@ func (tID *TenantID) Equal(tID2 *TenantID) bool {
 
 type TenantWithAPIOpts struct {
 	Tenant  string
-	APIOpts map[string]interface{}
+	APIOpts map[string]any
 }
 
 // CachedRPCResponse is used to cache a RPC response
 type CachedRPCResponse struct {
-	Result interface{}
+	Result any
 	Error  error
 }
 
@@ -759,7 +759,7 @@ func GetUrlRawArguments(dialURL string) (out map[string]string) {
 }
 
 type StringWithAPIOpts struct {
-	APIOpts map[string]interface{}
+	APIOpts map[string]any
 	Tenant  string
 	Arg     string
 }
@@ -780,7 +780,7 @@ func RandomInteger(min, max int) int {
 type LoadIDsWithAPIOpts struct {
 	LoadIDs map[string]int64
 	Tenant  string
-	APIOpts map[string]interface{}
+	APIOpts map[string]any
 }
 
 // IsURL returns if the path is an URL
@@ -791,11 +791,11 @@ func IsURL(path string) bool {
 
 type ArgsFailedPosts struct {
 	Tenant    string
-	Path      string                 // Path of the exported type
-	Event     interface{}            // Event that must be written in file
-	FailedDir string                 // Directory that contains the file with Failed post
-	Module    string                 // Type of efs <*ees|*kafkaLogger>
-	APIOpts   map[string]interface{} // Specially for the meta
+	Path      string         // Path of the exported type
+	Event     any            // Event that must be written in file
+	FailedDir string         // Directory that contains the file with Failed post
+	Module    string         // Type of efs <*ees|*kafkaLogger>
+	APIOpts   map[string]any // Specially for the meta
 }
 
 type ArgsReplayFailedPosts struct {
@@ -812,7 +812,7 @@ type GetIndexesArg struct {
 	TntCtx     string
 	IdxKey     string
 	Tenant     string
-	APIOpts    map[string]interface{}
+	APIOpts    map[string]any
 }
 
 type MemoryPrf struct {
@@ -820,12 +820,12 @@ type MemoryPrf struct {
 	DirPath  string
 	Interval time.Duration
 	NrFiles  int
-	APIOpts  map[string]interface{}
+	APIOpts  map[string]any
 }
 
 type PanicMessageArgs struct {
 	Tenant  string
-	APIOpts map[string]interface{}
+	APIOpts map[string]any
 	Message string
 }
 
@@ -835,18 +835,18 @@ type SetIndexesArg struct {
 	TntCtx     string
 	Indexes    map[string]StringSet
 	Tenant     string
-	APIOpts    map[string]interface{}
+	APIOpts    map[string]any
 }
 
 type DurationArgs struct {
 	Duration time.Duration
-	APIOpts  map[string]interface{}
+	APIOpts  map[string]any
 	Tenant   string
 }
 
 type DirectoryArgs struct {
 	DirPath string
-	APIOpts map[string]interface{}
+	APIOpts map[string]any
 	Tenant  string
 }
 
@@ -924,8 +924,8 @@ func (b *boolGen) RandomBool() bool {
 
 // GenerateDBItemOpts will create the options for DB replication
 // if they are empty they should be omitted
-func GenerateDBItemOpts(apiKey, routeID, cache, rmtHost string) (mp map[string]interface{}) {
-	mp = make(map[string]interface{})
+func GenerateDBItemOpts(apiKey, routeID, cache, rmtHost string) (mp map[string]any) {
+	mp = make(map[string]any)
 	if apiKey != EmptyString {
 		mp[OptsAPIKey] = apiKey
 	}
@@ -1011,7 +1011,7 @@ func (pgnt Paginator) Clone() Paginator {
 }
 
 // GetPaginateOpts retrieves paginate options from the APIOpts map
-func GetPaginateOpts(opts map[string]interface{}) (limit, offset, maxItems int, err error) {
+func GetPaginateOpts(opts map[string]any) (limit, offset, maxItems int, err error) {
 	if limitIface, has := opts[PageLimitOpt]; has {
 		if limit, err = IfaceAsInt(limitIface); err != nil {
 			return

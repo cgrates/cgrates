@@ -492,7 +492,7 @@ func TestERsProcessEvent3(t *testing.T) {
 		},
 	}
 	cgrEvent := &utils.CGREvent{
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsRoutesLimit: true,
 		},
 	}
@@ -519,7 +519,7 @@ func TestERsProcessEvent4(t *testing.T) {
 		},
 	}
 	cgrEvent := &utils.CGREvent{
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsRoutesLimit: true,
 		},
 	}
@@ -549,7 +549,7 @@ func TestERsProcessEvent5(t *testing.T) {
 		Tenant: "",
 		ID:     "",
 		Event:  nil,
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsRoutesLimit: true,
 		},
 	}
@@ -576,7 +576,7 @@ func TestERsProcessEvent6(t *testing.T) {
 		},
 	}
 	cgrEvent := &utils.CGREvent{
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsRoutesLimit: true,
 		},
 	}
@@ -602,7 +602,7 @@ func TestERsProcessEvent7(t *testing.T) {
 		},
 	}
 	cgrEvent := &utils.CGREvent{
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsRoutesLimit: true,
 		},
 	}
@@ -631,7 +631,7 @@ func TestERsProcessEvent8(t *testing.T) {
 		Tenant: "",
 		ID:     "",
 		Event:  nil,
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsRoutesLimit: true,
 		},
 	}
@@ -661,7 +661,7 @@ func TestERsProcessEvent9(t *testing.T) {
 		Tenant: "",
 		ID:     "",
 		Event:  nil,
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsRoutesLimit: true,
 		},
 	}
@@ -691,10 +691,10 @@ func TestERsProcessEvent10(t *testing.T) {
 	cgrEvent := &utils.CGREvent{
 		Tenant: "",
 		ID:     "",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.Usage: time.Second,
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsRoutesLimit: true,
 		},
 	}
@@ -705,10 +705,10 @@ func TestERsProcessEvent10(t *testing.T) {
 }
 
 type testMockClients struct {
-	calls map[string]func(ctx *context.Context, args, reply interface{}) error
+	calls map[string]func(ctx *context.Context, args, reply any) error
 }
 
-func (sT *testMockClients) Call(ctx *context.Context, method string, arg interface{}, rply interface{}) error {
+func (sT *testMockClients) Call(ctx *context.Context, method string, arg any, rply any) error {
 	if call, has := sT.calls[method]; !has {
 		return rpcclient.ErrUnsupporteServiceMethod
 	} else {
@@ -727,8 +727,8 @@ func TestERsProcessEvent11(t *testing.T) {
 	cfg.ERsCfg().SessionSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS)}
 	fltrS := &engine.FilterS{}
 	testMockClient := &testMockClients{
-		calls: map[string]func(ctx *context.Context, args, reply interface{}) error{
-			utils.SessionSv1ProcessMessage: func(ctx *context.Context, args, reply interface{}) error {
+		calls: map[string]func(ctx *context.Context, args, reply any) error{
+			utils.SessionSv1ProcessMessage: func(ctx *context.Context, args, reply any) error {
 				return errors.New("RALS_ERROR")
 			},
 		},
@@ -746,10 +746,10 @@ func TestERsProcessEvent11(t *testing.T) {
 	cgrEvent := &utils.CGREvent{
 		Tenant: "",
 		ID:     "",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.Usage: 0,
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsRoutesLimit: true,
 		},
 	}
@@ -772,7 +772,7 @@ func TestErsOnEvictedMetaDumpToFileOK(t *testing.T) {
 			{
 				Tenant: "cgrates.org",
 				ID:     "EventErsOnEvicted",
-				Event: map[string]interface{}{
+				Event: map[string]any{
 					utils.AccountField: "1001",
 				},
 			},
@@ -824,7 +824,7 @@ func TestErsOnEvictedMetaDumpToFileCSVWriteErr(t *testing.T) {
 			{
 				Tenant: "cgrates.org",
 				ID:     "EventErsOnEvicted",
-				Event: map[string]interface{}{
+				Event: map[string]any{
 					utils.AccountField: "1001",
 				},
 			},
@@ -878,7 +878,7 @@ func TestErsOnEvictedMetaDumpToFileCreateErr(t *testing.T) {
 			{
 				Tenant: "cgrates.org",
 				ID:     "EventErsOnEvicted",
-				Event: map[string]interface{}{
+				Event: map[string]any{
 					utils.AccountField: "1001",
 				},
 			},
@@ -926,7 +926,7 @@ func TestErsOnEvictedNoCacheDumpFields(t *testing.T) {
 			{
 				Tenant: "cgrates.org",
 				ID:     "EventErsOnEvicted",
-				Event: map[string]interface{}{
+				Event: map[string]any{
 					utils.AccountField: "1001",
 					utils.Usage:        "10s",
 					utils.Category:     "call",
@@ -937,7 +937,7 @@ func TestErsOnEvictedNoCacheDumpFields(t *testing.T) {
 					utils.Password:     "secure_pass",
 					"Additional_Field": "Additional_Value",
 				},
-				APIOpts: map[string]interface{}{
+				APIOpts: map[string]any{
 					utils.MetaOriginID: "1133dc80896edf5049b46aa911cb9085eeb27f4c",
 				},
 			},
@@ -958,7 +958,7 @@ func TestErsOnEvictedNoCacheDumpFields(t *testing.T) {
 			{
 				Tenant: "cgrates.org",
 				ID:     "EventErsOnEvicted",
-				Event: map[string]interface{}{
+				Event: map[string]any{
 					utils.AccountField: "1002",
 					utils.Usage:        "12s",
 					utils.Category:     "call",
@@ -968,7 +968,7 @@ func TestErsOnEvictedNoCacheDumpFields(t *testing.T) {
 					utils.Password:     "secure_password",
 					"Additional_Field": "Additional_Value2",
 				},
-				APIOpts: map[string]interface{}{
+				APIOpts: map[string]any{
 					utils.MetaOriginID: "1133dc80896edf5049b46aa911cb9085eeb27f4d",
 				},
 			},
@@ -1038,7 +1038,7 @@ func TestERsOnEvictedDumpToJSON(t *testing.T) {
 			{
 				Tenant: "cgrates.org",
 				ID:     "EventErsOnEvicted",
-				Event: map[string]interface{}{
+				Event: map[string]any{
 					utils.AccountField: "1001",
 					utils.Usage:        "10s",
 					utils.Category:     "call",
@@ -1050,7 +1050,7 @@ func TestERsOnEvictedDumpToJSON(t *testing.T) {
 					utils.Password:     "secure_pass",
 					"Additional_Field": "Additional_Value",
 				},
-				APIOpts: map[string]interface{}{
+				APIOpts: map[string]any{
 					utils.MetaOriginID: "1133dc80896edf5049b46aa911cb9085eeb27f4c",
 				},
 			},
@@ -1089,7 +1089,7 @@ func TestERsOnEvictedDumpToJSON(t *testing.T) {
 		t.Error(err)
 	}
 
-	var compare map[string]interface{}
+	var compare map[string]any
 	// compare = make(map[int][]string, 2)
 	dataJSON, err := os.ReadFile(files[0])
 	if err != nil {
@@ -1100,7 +1100,7 @@ func TestERsOnEvictedDumpToJSON(t *testing.T) {
 		t.Error(err)
 	}
 
-	exp := map[string]interface{}{
+	exp := map[string]any{
 		utils.AccountField: "1001",
 		utils.Usage:        "10s",
 		utils.Category:     "call",
@@ -1127,7 +1127,7 @@ func TestErsOnEvictedDumpToJSONNoPath(t *testing.T) {
 			{
 				Tenant: "cgrates.org",
 				ID:     "EventErsOnEvicted",
-				Event: map[string]interface{}{
+				Event: map[string]any{
 					utils.AccountField: "1001",
 					utils.Usage:        "10s",
 					utils.Category:     "call",
@@ -1139,7 +1139,7 @@ func TestErsOnEvictedDumpToJSONNoPath(t *testing.T) {
 					utils.Password:     "secure_pass",
 					"Additional_Field": "Additional_Value",
 				},
-				APIOpts: map[string]interface{}{
+				APIOpts: map[string]any{
 					utils.MetaOriginID: "1133dc80896edf5049b46aa911cb9085eeb27f4c",
 				},
 			},
@@ -1189,7 +1189,7 @@ func TestErsOnEvictedDumpToJSONMergeError(t *testing.T) {
 			{
 				Tenant: "cgrates.org",
 				ID:     "EventErsOnEvicted",
-				Event: map[string]interface{}{
+				Event: map[string]any{
 					utils.AccountField: "1001",
 					utils.Usage:        "10s",
 					utils.Category:     "call",
@@ -1202,14 +1202,14 @@ func TestErsOnEvictedDumpToJSONMergeError(t *testing.T) {
 					"Additional_Field": "Additional_Value",
 					utils.AnswerTime:   time.Date(2021, 6, 1, 12, 0, 0, 0, time.UTC),
 				},
-				APIOpts: map[string]interface{}{
+				APIOpts: map[string]any{
 					utils.MetaOriginID: "1133dc80896edf5049b46aa911cb9085eeb27f4c",
 				},
 			},
 			{
 				Tenant: "cgrates.org",
 				ID:     "EventErsOnEvicted2",
-				Event: map[string]interface{}{
+				Event: map[string]any{
 					utils.AccountField: "1002",
 					utils.Usage:        "12s",
 					utils.Category:     "call",
@@ -1220,7 +1220,7 @@ func TestErsOnEvictedDumpToJSONMergeError(t *testing.T) {
 					"Additional_Field": "Additional_Value2",
 					utils.AnswerTime:   time.Date(2021, 6, 1, 13, 0, 0, 0, time.UTC),
 				},
-				APIOpts: map[string]interface{}{
+				APIOpts: map[string]any{
 					utils.MetaOriginID: "1133dc80896edf5049b46aa911cb9085eeb27f4d",
 				},
 			},
@@ -1275,7 +1275,7 @@ func TestERsOnEvictedDumpToJSONWithCacheDumpFieldsErrPrefix(t *testing.T) {
 			{
 				Tenant: "cgrates.org",
 				ID:     "EventErsOnEvicted",
-				Event: map[string]interface{}{
+				Event: map[string]any{
 					utils.AccountField: "1001",
 					utils.Usage:        "10s",
 					utils.Category:     "call",
@@ -1287,7 +1287,7 @@ func TestERsOnEvictedDumpToJSONWithCacheDumpFieldsErrPrefix(t *testing.T) {
 					utils.Password:     "secure_pass",
 					"Additional_Field": "Additional_Value",
 				},
-				APIOpts: map[string]interface{}{
+				APIOpts: map[string]any{
 					utils.MetaOriginID: "1133dc80896edf5049b46aa911cb9085eeb27f4c",
 				},
 			},
@@ -1349,7 +1349,7 @@ func TestERsOnEvictedDumpToJSONWithCacheDumpFields(t *testing.T) {
 			{
 				Tenant: "cgrates.org",
 				ID:     "EventErsOnEvicted",
-				Event: map[string]interface{}{
+				Event: map[string]any{
 					utils.AccountField: "1001",
 					utils.Usage:        "10s",
 					utils.Category:     "call",
@@ -1361,7 +1361,7 @@ func TestERsOnEvictedDumpToJSONWithCacheDumpFields(t *testing.T) {
 					utils.Password:     "secure_pass",
 					"Additional_Field": "Additional_Value",
 				},
-				APIOpts: map[string]interface{}{
+				APIOpts: map[string]any{
 					utils.MetaOriginID: "1133dc80896edf5049b46aa911cb9085eeb27f4c",
 				},
 			},
@@ -1412,7 +1412,7 @@ func TestERsOnEvictedDumpToJSONWithCacheDumpFields(t *testing.T) {
 		return nil
 	})
 
-	var compare map[string]interface{}
+	var compare map[string]any
 	dataJSON, err := os.ReadFile(files[0])
 	if err != nil {
 		t.Error(err)
@@ -1421,7 +1421,7 @@ func TestERsOnEvictedDumpToJSONWithCacheDumpFields(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	exp := map[string]interface{}{
+	exp := map[string]any{
 		utils.OriginID: "25160047719:0",
 	}
 	if !reflect.DeepEqual(exp, compare) {
@@ -1450,7 +1450,7 @@ func TestErsOnEvictedDumpToJSONInvalidPath(t *testing.T) {
 			{
 				Tenant: "cgrates.org",
 				ID:     "EventErsOnEvicted",
-				Event: map[string]interface{}{
+				Event: map[string]any{
 					utils.AccountField: "1001",
 					utils.Usage:        "10s",
 					utils.Category:     "call",
@@ -1462,7 +1462,7 @@ func TestErsOnEvictedDumpToJSONInvalidPath(t *testing.T) {
 					utils.Password:     "secure_pass",
 					"Additional_Field": "Additional_Value",
 				},
-				APIOpts: map[string]interface{}{
+				APIOpts: map[string]any{
 					utils.MetaOriginID: "1133dc80896edf5049b46aa911cb9085eeb27f4c",
 				},
 			},
@@ -1517,7 +1517,7 @@ func TestErsOnEvictedDumpToJSONEncodeErr(t *testing.T) {
 			{
 				Tenant: "cgrates.org",
 				ID:     "EventErsOnEvicted",
-				Event: map[string]interface{}{
+				Event: map[string]any{
 					utils.AccountField: "1001",
 					utils.Usage:        "10s",
 					utils.Category:     "call",
@@ -1532,7 +1532,7 @@ func TestErsOnEvictedDumpToJSONEncodeErr(t *testing.T) {
 
 					},
 				},
-				APIOpts: map[string]interface{}{
+				APIOpts: map[string]any{
 					utils.MetaOriginID: "1133dc80896edf5049b46aa911cb9085eeb27f4c",
 				},
 			},

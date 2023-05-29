@@ -232,7 +232,7 @@ func testGOCSAuthSession(t *testing.T) {
 	args := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "TestSSv1ItAuth",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.Tenant:       "cgrates.org",
 			utils.ToR:          utils.MetaVoice,
 			utils.OriginID:     "testGOCS",
@@ -244,7 +244,7 @@ func testGOCSAuthSession(t *testing.T) {
 			utils.SetupTime:    time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
 			utils.Usage:        authUsage,
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsSesMaxUsage: true,
 		},
 	}
@@ -262,7 +262,7 @@ func testGOCSInitSession(t *testing.T) {
 	args := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "TestSSv1ItInitiateSession",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.Tenant:       "cgrates.org",
 			utils.ToR:          utils.MetaVoice,
 			utils.OriginID:     "testGOCS",
@@ -275,7 +275,7 @@ func testGOCSInitSession(t *testing.T) {
 			utils.AnswerTime:   time.Date(2018, time.January, 7, 16, 60, 10, 0, time.UTC),
 			utils.Usage:        initUsage,
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsSesInitiate: true,
 		},
 	}
@@ -341,7 +341,7 @@ func testGOCSUpdateSession(t *testing.T) {
 	args := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "TestSSv1ItUpdateSession",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.Tenant:       "cgrates.org",
 			utils.ToR:          utils.MetaVoice,
 			utils.OriginID:     "testGOCS",
@@ -354,7 +354,7 @@ func testGOCSUpdateSession(t *testing.T) {
 			utils.AnswerTime:   time.Date(2018, time.January, 7, 16, 60, 10, 0, time.UTC),
 			utils.Usage:        reqUsage,
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsSesUpdate: true,
 		},
 	}
@@ -424,7 +424,7 @@ func testGOCSUpdateSession2(t *testing.T) {
 	args := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "TestSSv1ItUpdateSession2",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.Tenant:       "cgrates.org",
 			utils.ToR:          utils.MetaVoice,
 			utils.OriginID:     "testGOCS",
@@ -437,7 +437,7 @@ func testGOCSUpdateSession2(t *testing.T) {
 			utils.AnswerTime:   time.Date(2018, time.January, 7, 16, 60, 10, 0, time.UTC),
 			utils.Usage:        reqUsage,
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsSesUpdate: true,
 		},
 	}
@@ -499,7 +499,7 @@ func testGOCSTerminateSession(t *testing.T) {
 	args := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "testGOCSTerminateSession",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.Tenant:       "cgrates.org",
 			utils.ToR:          utils.MetaVoice,
 			utils.OriginID:     "testGOCS",
@@ -512,7 +512,7 @@ func testGOCSTerminateSession(t *testing.T) {
 			utils.AnswerTime:   time.Date(2018, time.January, 7, 16, 60, 10, 0, time.UTC),
 			utils.Usage:        15 * time.Minute,
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsSesTerminate: true,
 		},
 	}
@@ -564,7 +564,7 @@ func testGOCSProcessCDR(t *testing.T) {
 
 		Tenant: "cgrates.org",
 		ID:     "TestSSv1ItProcessCDR",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.Tenant:       "cgrates.org",
 			utils.ToR:          utils.MetaVoice,
 			utils.OriginID:     "testGOCS",

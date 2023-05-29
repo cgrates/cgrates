@@ -50,7 +50,7 @@ func populateCostForRoutes(ctx *context.Context, cfg *config.CGRConfig, connMgr 
 		}
 		srtRoute := &SortedRoute{
 			RouteID: route.ID,
-			SortingData: map[string]interface{}{
+			SortingData: map[string]any{
 				utils.Weight: route.Weight,
 			},
 			sortingDataDecimal: map[string]*utils.Decimal{

@@ -785,10 +785,10 @@ func TestFiltersRemoveFilterRemoveFilterError(t *testing.T) {
 }
 
 type mockClientConn struct {
-	calls map[string]func(*context.Context, interface{}, interface{}) error
+	calls map[string]func(*context.Context, any, any) error
 }
 
-func (mCC *mockClientConn) Call(ctx *context.Context, serviceMethod string, args interface{}, reply interface{}) (err error) {
+func (mCC *mockClientConn) Call(ctx *context.Context, serviceMethod string, args any, reply any) (err error) {
 	if call, has := mCC.calls[serviceMethod]; has {
 		return call(ctx, args, reply)
 	}
@@ -803,15 +803,15 @@ func TestFiltersSetFilterReloadCache(t *testing.T) {
 	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(dataDB, cfg.CacheCfg(), nil)
 	expArgs := &utils.AttrReloadCacheWithAPIOpts{
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaCache: utils.MetaReload,
 		},
 		Tenant:    "cgrates.org",
 		FilterIDs: []string{"cgrates.org:FLTR_ID"},
 	}
 	ccM := &mockClientConn{
-		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
-			utils.CacheSv1ReloadCache: func(ctx *context.Context, args, reply interface{}) error {
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.CacheSv1ReloadCache: func(ctx *context.Context, args, reply any) error {
 				if !reflect.DeepEqual(args, expArgs) {
 					return fmt.Errorf("expected: <%+v>,\nreceived: <%+v>", utils.ToJSON(expArgs), utils.ToJSON(args))
 				}
@@ -839,7 +839,7 @@ func TestFiltersSetFilterReloadCache(t *testing.T) {
 				},
 			},
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaCache: utils.MetaReload,
 		},
 	}
@@ -866,7 +866,7 @@ func TestFiltersSetFilterReloadCache(t *testing.T) {
 				},
 			},
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaCache: utils.MetaNone,
 		},
 	}
@@ -886,7 +886,7 @@ func TestFiltersSetFilterReloadCache(t *testing.T) {
 				},
 			},
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaCache: utils.MetaNone,
 		},
 	}
@@ -904,7 +904,7 @@ func TestFiltersSetFilterReloadCache(t *testing.T) {
 					Weight: 10,
 				}},
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaCache: utils.MetaNone,
 		},
 	}
@@ -923,7 +923,7 @@ func TestFiltersSetFilterReloadCache(t *testing.T) {
 				},
 			},
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaCache: utils.MetaNone,
 		},
 	}
@@ -943,12 +943,12 @@ func TestFiltersSetFilterReloadCache(t *testing.T) {
 				},
 			},
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaCache: utils.MetaReload,
 		},
 	}
 	expArgs = &utils.AttrReloadCacheWithAPIOpts{
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaCache: utils.MetaReload,
 		},
 		Tenant:                  "cgrates.org",
@@ -974,15 +974,15 @@ func TestFiltersSetFilterClearCache(t *testing.T) {
 	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(dataDB, cfg.CacheCfg(), nil)
 	expArgs := &utils.AttrCacheIDsWithAPIOpts{
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaCache: utils.MetaClear,
 		},
 		Tenant:   "cgrates.org",
 		CacheIDs: []string{utils.CacheFilters},
 	}
 	ccM := &mockClientConn{
-		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
-			utils.CacheSv1Clear: func(ctx *context.Context, args, reply interface{}) error {
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.CacheSv1Clear: func(ctx *context.Context, args, reply any) error {
 				sort.Strings(args.(*utils.AttrCacheIDsWithAPIOpts).CacheIDs)
 				if !reflect.DeepEqual(args, expArgs) {
 					return fmt.Errorf("expected: <%+v>,\nreceived: <%+v>", utils.ToJSON(expArgs), utils.ToJSON(args))
@@ -1011,7 +1011,7 @@ func TestFiltersSetFilterClearCache(t *testing.T) {
 				},
 			},
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaCache: utils.MetaClear,
 		},
 	}
@@ -1038,7 +1038,7 @@ func TestFiltersSetFilterClearCache(t *testing.T) {
 				},
 			},
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaCache: utils.MetaNone,
 		},
 	}
@@ -1058,7 +1058,7 @@ func TestFiltersSetFilterClearCache(t *testing.T) {
 				},
 			},
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaCache: utils.MetaNone,
 		},
 	}
@@ -1076,7 +1076,7 @@ func TestFiltersSetFilterClearCache(t *testing.T) {
 					Weight: 10,
 				}},
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaCache: utils.MetaNone,
 		},
 	}
@@ -1095,7 +1095,7 @@ func TestFiltersSetFilterClearCache(t *testing.T) {
 				},
 			},
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaCache: utils.MetaNone,
 		},
 	}
@@ -1115,12 +1115,12 @@ func TestFiltersSetFilterClearCache(t *testing.T) {
 				},
 			},
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaCache: utils.MetaClear,
 		},
 	}
 	expArgs = &utils.AttrCacheIDsWithAPIOpts{
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaCache: utils.MetaClear,
 		},
 		Tenant: "cgrates.org",
@@ -1306,7 +1306,7 @@ func TestFiltersFiltersMatchTrue(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "EventTest",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.AccountField: "1001",
 				utils.Destination:  "1002",
 			},
@@ -1336,7 +1336,7 @@ func TestFiltersFiltersMatchFalse(t *testing.T) {
 	args := &engine.ArgsFiltersMatch{
 		CGREvent: &utils.CGREvent{
 			ID: "EventTest",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.AccountField: "1001",
 				utils.Destination:  "2002",
 			},
@@ -1367,7 +1367,7 @@ func TestFiltersFiltersMatchErr(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "EventTest",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.AccountField: "1001",
 				utils.Destination:  "1002",
 			},
@@ -1535,7 +1535,7 @@ func TestFiltersGetFiltersGetIDsErr(t *testing.T) {
 	argsGet := &utils.ArgsItemIDs{
 		Tenant:      "cgrates.org",
 		ItemsPrefix: "test_ID",
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.PageLimitOpt:    2,
 			utils.PageOffsetOpt:   4,
 			utils.PageMaxItemsOpt: 5,
@@ -1619,7 +1619,7 @@ func TestFiltersGetFilterIDsGetOptsErr(t *testing.T) {
 	if err := adms.GetFilterIDs(context.Background(),
 		&utils.ArgsItemIDs{
 			Tenant: "cgrates.org",
-			APIOpts: map[string]interface{}{
+			APIOpts: map[string]any{
 				utils.PageLimitOpt: true,
 			},
 		}, &reply); err == nil || err.Error() != experr {
@@ -1664,7 +1664,7 @@ func TestFiltersGetFilterIDsPaginateErr(t *testing.T) {
 	if err := adms.GetFilterIDs(context.Background(),
 		&utils.ArgsItemIDs{
 			Tenant: "cgrates.org",
-			APIOpts: map[string]interface{}{
+			APIOpts: map[string]any{
 				utils.PageLimitOpt:    2,
 				utils.PageOffsetOpt:   4,
 				utils.PageMaxItemsOpt: 5,

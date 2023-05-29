@@ -39,10 +39,10 @@ func (c *mockServerCodec) ReadRequestHeader(r *birpc.Request) (err error) {
 	return
 }
 
-func (c *mockServerCodec) ReadRequestBody(_ interface{}) (err error) {
+func (c *mockServerCodec) ReadRequestBody(_ any) (err error) {
 	return
 }
-func (c *mockServerCodec) WriteResponse(_ *birpc.Response, _ interface{}) error {
+func (c *mockServerCodec) WriteResponse(_ *birpc.Response, _ any) error {
 	return nil
 }
 func (c *mockServerCodec) Close() error { return nil }
@@ -105,11 +105,11 @@ func (mockBiRPCCodec) ReadHeader(r *birpc.Request, _ *birpc.Response) error {
 	r.ServiceMethod = utils.CoreSv1Ping
 	return nil
 }
-func (mockBiRPCCodec) ReadRequestBody(interface{}) error                { return nil }
-func (mockBiRPCCodec) ReadResponseBody(interface{}) error               { return nil }
-func (mockBiRPCCodec) WriteRequest(*birpc.Request, interface{}) error   { return nil }
-func (mockBiRPCCodec) WriteResponse(*birpc.Response, interface{}) error { return nil }
-func (mockBiRPCCodec) Close() error                                     { return nil }
+func (mockBiRPCCodec) ReadRequestBody(any) error                { return nil }
+func (mockBiRPCCodec) ReadResponseBody(any) error               { return nil }
+func (mockBiRPCCodec) WriteRequest(*birpc.Request, any) error   { return nil }
+func (mockBiRPCCodec) WriteResponse(*birpc.Response, any) error { return nil }
+func (mockBiRPCCodec) Close() error                             { return nil }
 
 func TestNewBiRPCCodec(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
@@ -169,11 +169,11 @@ func (mockBiRPCCodec2) ReadHeader(_ *birpc.Request, r *birpc.Response) error {
 	r.Error = "error"
 	return nil
 }
-func (mockBiRPCCodec2) ReadRequestBody(interface{}) error                { return nil }
-func (mockBiRPCCodec2) ReadResponseBody(interface{}) error               { return nil }
-func (mockBiRPCCodec2) WriteRequest(*birpc.Request, interface{}) error   { return nil }
-func (mockBiRPCCodec2) WriteResponse(*birpc.Response, interface{}) error { return nil }
-func (mockBiRPCCodec2) Close() error                                     { return nil }
+func (mockBiRPCCodec2) ReadRequestBody(any) error                { return nil }
+func (mockBiRPCCodec2) ReadResponseBody(any) error               { return nil }
+func (mockBiRPCCodec2) WriteRequest(*birpc.Request, any) error   { return nil }
+func (mockBiRPCCodec2) WriteResponse(*birpc.Response, any) error { return nil }
+func (mockBiRPCCodec2) Close() error                             { return nil }
 
 func TestNewBiRPCCodec2(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()

@@ -155,7 +155,7 @@ package general_tests
 // 	argsEv := &utils.CGREvent{
 // 		Tenant: "cgrates.org",
 // 		ID:     "test1",
-// 		Event: map[string]interface{}{
+// 		Event: map[string]any{
 // 			utils.RunID:        "testv1",
 // 			utils.OriginID:     "test1_processEvent",
 // 			utils.OriginHost:   "OriginHost1",
@@ -165,7 +165,7 @@ package general_tests
 // 			utils.AnswerTime:   time.Date(2019, 11, 27, 12, 21, 26, 0, time.UTC),
 // 			utils.Usage:        2 * time.Minute,
 // 		},
-// 		APIOpts: map[string]interface{}{
+// 		APIOpts: map[string]any{
 // 			utils.MetaUsage:      2 * time.Minute,
 // 			utils.OptsAttributeS: true,
 // 			utils.OptsChargerS:   false,
@@ -246,7 +246,7 @@ package general_tests
 // 	argsEv := &utils.CGREvent{
 // 		Tenant: "cgrates.org",
 // 		ID:     "test2",
-// 		Event: map[string]interface{}{
+// 		Event: map[string]any{
 // 			utils.RunID:        "testv1",
 // 			utils.OriginID:     "test2_processEvent",
 // 			utils.OriginHost:   "OriginHost2",
@@ -256,7 +256,7 @@ package general_tests
 // 			utils.AnswerTime:   time.Date(2019, 11, 27, 12, 21, 26, 0, time.UTC),
 // 			utils.Usage:        2 * time.Minute,
 // 		},
-// 		APIOpts: map[string]interface{}{
+// 		APIOpts: map[string]any{
 // 			utils.MetaUsage:      2 * time.Minute,
 // 			utils.OptsChargerS:   true,
 // 			utils.OptsAttributeS: false,
@@ -292,7 +292,7 @@ package general_tests
 // 	argsEv := &utils.CGREvent{
 // 		Tenant: "cgrates.org",
 // 		ID:     "test3",
-// 		Event: map[string]interface{}{
+// 		Event: map[string]any{
 // 			utils.RunID:        "testv1",
 // 			utils.OriginID:     "test3_processEvent",
 // 			utils.OriginHost:   "OriginHost3",
@@ -302,7 +302,7 @@ package general_tests
 // 			utils.AnswerTime:   time.Date(2019, 11, 27, 12, 21, 26, 0, time.UTC),
 // 			utils.Usage:        2 * time.Minute,
 // 		},
-// 		APIOpts: map[string]interface{}{
+// 		APIOpts: map[string]any{
 // 			utils.MetaUsage:      2 * time.Minute,
 // 			utils.OptsRateS:      true,
 // 			utils.OptsChargerS:   false,
@@ -331,7 +331,7 @@ package general_tests
 // 	argsEv := &utils.CGREvent{
 // 		Tenant: "cgrates.org",
 // 		ID:     "test4",
-// 		Event: map[string]interface{}{
+// 		Event: map[string]any{
 // 			utils.RunID:        "testv1",
 // 			utils.Tenant:       "cgrates.org",
 // 			utils.Category:     "call",
@@ -345,7 +345,7 @@ package general_tests
 // 			utils.AnswerTime:   time.Date(2018, time.January, 7, 16, 60, 10, 0, time.UTC),
 // 			utils.Usage:        5 * time.Minute,
 // 		},
-// 		APIOpts: map[string]interface{}{
+// 		APIOpts: map[string]any{
 // 			utils.MetaOriginID:   "c87609aa1cb6e9529ab1836cfeeebaab7aa7ebaf",
 // 			utils.OptsStatS:      true,
 // 			utils.OptsRateS:      false,
@@ -421,7 +421,7 @@ package general_tests
 // 	argsEv := &utils.CGREvent{
 // 		Tenant: "cgrates.org",
 // 		ID:     "test5",
-// 		Event: map[string]interface{}{
+// 		Event: map[string]any{
 // 			utils.RunID:        "testv1",
 // 			utils.OriginID:     "test5_processEvent",
 // 			utils.OriginHost:   "OriginHost5",
@@ -431,7 +431,7 @@ package general_tests
 // 			utils.AnswerTime:   time.Date(2019, 11, 27, 12, 21, 26, 0, time.UTC),
 // 			utils.Usage:        2 * time.Minute,
 // 		},
-// 		APIOpts: map[string]interface{}{
+// 		APIOpts: map[string]any{
 // 			utils.MetaUsage:      2 * time.Minute,
 // 			utils.OptsAttributeS: false,
 // 			utils.OptsChargerS:   false,
@@ -524,7 +524,7 @@ package general_tests
 // 	// 	Account:     "1005",
 // 	// 	BalanceType: utils.MetaMonetary,
 // 	// 	Value:       1,
-// 	// 	Balance: map[string]interface{}{
+// 	// 	Balance: map[string]any{
 // 	// 		utils.ID:     utils.MetaDefault,
 // 	// 		utils.Weight: 10.0,
 // 	// 	},
@@ -545,7 +545,7 @@ package general_tests
 // 	}
 // 	args := &utils.CGREvent{
 // 		Tenant: "cgrates.org",
-// 		Event: map[string]interface{}{
+// 		Event: map[string]any{
 // 			utils.OriginID:     "testV2CDRsProcessCDRWithThreshold",
 // 			utils.OriginHost:   "OriginHost6",
 // 			utils.Source:       "testV2CDRsProcessCDRWithThreshold",
@@ -559,7 +559,7 @@ package general_tests
 // 			"field_extr1":      "val_extr1",
 // 			"fieldextr2":       "valextr2",
 // 		},
-// 		APIOpts: map[string]interface{}{
+// 		APIOpts: map[string]any{
 // 			utils.MetaUsage:      2 * time.Minute,
 // 			utils.OptsThresholdS: true,
 // 			utils.OptsRateS:      true,
@@ -607,7 +607,7 @@ package general_tests
 // 	args := &utils.CGREvent{
 // 		Tenant: "cgrates.org",
 // 		ID:     "test7",
-// 		Event: map[string]interface{}{
+// 		Event: map[string]any{
 // 			utils.RunID:        "testv1",
 // 			utils.OriginID:     "test7_processEvent",
 // 			utils.OriginHost:   "OriginHost7",
@@ -617,7 +617,7 @@ package general_tests
 // 			utils.AnswerTime:   time.Date(2019, 11, 27, 12, 21, 26, 0, time.UTC),
 // 			utils.Usage:        2 * time.Minute,
 // 		},
-// 		APIOpts: map[string]interface{}{
+// 		APIOpts: map[string]any{
 // 			utils.MetaUsage:      2 * time.Minute,
 // 			utils.OptsThresholdS: false,
 // 			utils.OptsChargerS:   false,
@@ -665,7 +665,7 @@ package general_tests
 // 	argsEv := &utils.CGREvent{
 // 		Tenant: "cgrates.org",
 // 		ID:     "test101",
-// 		Event: map[string]interface{}{
+// 		Event: map[string]any{
 // 			utils.RunID:        "testv1",
 // 			utils.OriginID:     "test3_v2processEvent",
 // 			utils.OriginHost:   "OriginHost101",
@@ -675,7 +675,7 @@ package general_tests
 // 			utils.AnswerTime:   time.Date(2019, 11, 27, 12, 21, 26, 0, time.UTC),
 // 			utils.Usage:        2 * time.Minute,
 // 		},
-// 		APIOpts: map[string]interface{}{
+// 		APIOpts: map[string]any{
 // 			utils.MetaUsage:      2 * time.Minute,
 // 			utils.OptsChargerS:   false,
 // 			utils.OptsCDRsExport: true,
@@ -686,7 +686,7 @@ package general_tests
 // 	expRply := []*utils.EventWithFlags{
 // 		{
 // 			Flags: []string{},
-// 			Event: map[string]interface{}{
+// 			Event: map[string]any{
 // 				"Account":     "1001",
 // 				"AnswerTime":  "2019-11-27T12:21:26Z",
 // 				"CGRID":       "d13c705aa38164aaf297fb77d7700565a3cea04b",

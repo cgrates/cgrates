@@ -49,11 +49,11 @@ func (self *CmdSetDispatcherHost) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdSetDispatcherHost) RpcParams(reset bool) interface{} {
+func (self *CmdSetDispatcherHost) RpcParams(reset bool) any {
 	if reset || self.rpcParams == nil {
 		self.rpcParams = &engine.DispatcherHostWithAPIOpts{
 			DispatcherHost: new(engine.DispatcherHost),
-			APIOpts:        make(map[string]interface{}),
+			APIOpts:        make(map[string]any),
 		}
 	}
 	return self.rpcParams
@@ -63,7 +63,7 @@ func (self *CmdSetDispatcherHost) PostprocessRpcParams() error {
 	return nil
 }
 
-func (self *CmdSetDispatcherHost) RpcResult() interface{} {
+func (self *CmdSetDispatcherHost) RpcResult() any {
 	var s string
 	return &s
 }

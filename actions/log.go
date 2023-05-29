@@ -72,8 +72,8 @@ func (aL *actCDRLog) execute(ctx *context.Context, data utils.MapStorage, _ stri
 		template = aL.config.TemplatesCfg()[utils.IfaceAsString(id)]
 	}
 	// split the data into Request and Opts to send as parameters to AgentRequest
-	reqNm := utils.MapStorage(data[utils.MetaReq].(map[string]interface{})).Clone()
-	optsMS := utils.MapStorage(data[utils.MetaOpts].(map[string]interface{})).Clone()
+	reqNm := utils.MapStorage(data[utils.MetaReq].(map[string]any)).Clone()
+	optsMS := utils.MapStorage(data[utils.MetaOpts].(map[string]any)).Clone()
 	if optsMS == nil {
 		optsMS = utils.MapStorage{}
 	}

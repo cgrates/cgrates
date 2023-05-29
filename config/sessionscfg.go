@@ -357,8 +357,8 @@ func (scfg SessionSCfg) GetDefaultUsage(tor string) time.Duration {
 	return scfg.DefaultUsage[tor]
 }
 
-// AsMapInterface returns the config as a map[string]interface{}
-func (scfg SessionSCfg) AsMapInterface(string) interface{} {
+// AsMapInterface returns the config as a map[string]any
+func (scfg SessionSCfg) AsMapInterface(string) any {
 	maxComputed := make(map[string]string)
 	for key, item := range scfg.DefaultUsage {
 		if key == utils.MetaAny || key == utils.MetaVoice {
@@ -367,7 +367,7 @@ func (scfg SessionSCfg) AsMapInterface(string) interface{} {
 			maxComputed[key] = strconv.Itoa(int(item))
 		}
 	}
-	opts := map[string]interface{}{
+	opts := map[string]any{
 		utils.MetaAccounts:                  scfg.Opts.Accounts,
 		utils.MetaAttributes:                scfg.Opts.Attributes,
 		utils.MetaCDRs:                      scfg.Opts.CDRs,
@@ -400,7 +400,7 @@ func (scfg SessionSCfg) AsMapInterface(string) interface{} {
 		utils.MetaTTLMaxDelayCfg:            scfg.Opts.TTLMaxDelay,
 		utils.MetaTTLUsageCfg:               scfg.Opts.TTLUsage,
 	}
-	mp := map[string]interface{}{
+	mp := map[string]any{
 		utils.EnabledCfg:             scfg.Enabled,
 		utils.ListenBijsonCfg:        scfg.ListenBijson,
 		utils.ListenBigobCfg:         scfg.ListenBigob,
@@ -708,9 +708,9 @@ func (stirCfg *STIRcfg) loadFromJSONCfg(jsnCfg *STIRJsonCfg) (err error) {
 	return nil
 }
 
-// AsMapInterface returns the config as a map[string]interface{}
-func (stirCfg *STIRcfg) AsMapInterface() (initialMP map[string]interface{}) {
-	initialMP = map[string]interface{}{
+// AsMapInterface returns the config as a map[string]any
+func (stirCfg *STIRcfg) AsMapInterface() (initialMP map[string]any) {
+	initialMP = map[string]any{
 		utils.DefaultAttestCfg:      stirCfg.DefaultAttest,
 		utils.PublicKeyPathCfg:      stirCfg.PublicKeyPath,
 		utils.PrivateKeyPathCfg:     stirCfg.PrivateKeyPath,

@@ -55,7 +55,7 @@ func TestFilterSCfgAsMapInterface(t *testing.T) {
             "accounts_conns": ["*internal:*apier", "*conn1"],
 	},
 }`
-	eMap := map[string]interface{}{
+	eMap := map[string]any{
 		utils.StatSConnsCfg:     []string{utils.MetaInternal, "*conn1"},
 		utils.ResourceSConnsCfg: []string{utils.MetaInternal, "*conn1"},
 		utils.AccountSConnsCfg:  []string{utils.MetaInternal, "*conn1"},
@@ -71,7 +71,7 @@ func TestFilterSCfgAsMapInterface2(t *testing.T) {
 	cfgJSONStr := `{
       "filters": {}
 }`
-	eMap := map[string]interface{}{
+	eMap := map[string]any{
 		utils.StatSConnsCfg:     []string{},
 		utils.ResourceSConnsCfg: []string{},
 		utils.AccountSConnsCfg:  []string{},

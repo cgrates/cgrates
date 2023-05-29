@@ -104,7 +104,7 @@ func TestRouteSCfgAsMapInterface(t *testing.T) {
 	cfgJSONStr := `{
 	"routes": {},
 }`
-	eMap := map[string]interface{}{
+	eMap := map[string]any{
 		utils.EnabledCfg:                false,
 		utils.IndexedSelectsCfg:         true,
 		utils.PrefixIndexedFieldsCfg:    []string{},
@@ -118,7 +118,7 @@ func TestRouteSCfgAsMapInterface(t *testing.T) {
 		utils.RateSConnsCfg:             []string{},
 		utils.AccountSConnsCfg:          []string{},
 		utils.DefaultRatioCfg:           1,
-		utils.OptsCfg: map[string]interface{}{
+		utils.OptsCfg: map[string]any{
 			utils.OptsContext:         []*utils.DynamicStringOpt{},
 			utils.MetaLimitCfg:        []*utils.DynamicIntPointerOpt{},
 			utils.MetaOffsetCfg:       []*utils.DynamicIntPointerOpt{},
@@ -155,7 +155,7 @@ func TestRouteSCfgAsMapInterface1(t *testing.T) {
 			"default_ratio":2,
 		},
 	}`
-	eMap := map[string]interface{}{
+	eMap := map[string]any{
 		utils.EnabledCfg:                true,
 		utils.IndexedSelectsCfg:         false,
 		utils.StringIndexedFieldsCfg:    []string{"*req.string"},
@@ -170,7 +170,7 @@ func TestRouteSCfgAsMapInterface1(t *testing.T) {
 		utils.RateSConnsCfg:             []string{utils.MetaInternal, "conn1"},
 		utils.AccountSConnsCfg:          []string{utils.MetaInternal, "conn1"},
 		utils.DefaultRatioCfg:           2,
-		utils.OptsCfg: map[string]interface{}{
+		utils.OptsCfg: map[string]any{
 			utils.OptsContext:         []*utils.DynamicStringOpt{},
 			utils.MetaLimitCfg:        []*utils.DynamicIntPointerOpt{},
 			utils.MetaOffsetCfg:       []*utils.DynamicIntPointerOpt{},

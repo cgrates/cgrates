@@ -160,7 +160,7 @@ func unitFactor(ctx *context.Context, cfgUnitFactors []*utils.UnitFactor,
 }
 
 // balanceLimit returns the balance limit based on configuration
-func balanceLimit(optsCfg map[string]interface{}) (bL *utils.Decimal, err error) {
+func balanceLimit(optsCfg map[string]any) (bL *utils.Decimal, err error) {
 	if _, isUnlimited := optsCfg[utils.MetaBalanceUnlimited]; isUnlimited {
 		return // unlimited is nil pointer
 	}

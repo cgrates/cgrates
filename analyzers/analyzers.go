@@ -129,7 +129,7 @@ func (aS *AnalyzerS) Shutdown() error {
 }
 
 func (aS *AnalyzerS) logTrafic(id uint64, method string,
-	params, result, err interface{},
+	params, result, err any,
 	enc, from, to string, sTime, eTime time.Time) error {
 	if strings.HasPrefix(method, utils.AnalyzerSv1) {
 		return nil
@@ -147,7 +147,7 @@ type QueryArgs struct {
 }
 
 // V1StringQuery returns a list of API that match the query
-func (aS *AnalyzerS) V1StringQuery(ctx *context.Context, args *QueryArgs, reply *[]map[string]interface{}) error {
+func (aS *AnalyzerS) V1StringQuery(ctx *context.Context, args *QueryArgs, reply *[]map[string]any) error {
 	var q query.Query
 	if args.HeaderFilters == utils.EmptyString {
 		q = bleve.NewMatchAllQuery()
@@ -160,7 +160,7 @@ func (aS *AnalyzerS) V1StringQuery(ctx *context.Context, args *QueryArgs, reply 
 	if err != nil {
 		return err
 	}
-	rply := make([]map[string]interface{}, 0, searchResults.Hits.Len())
+	rply := make([]map[string]any, 0, searchResults.Hits.Len())
 	lenContentFltrs := len(args.ContentFilters)
 	for _, obj := range searchResults.Hits {
 		// make sure that the result is corectly marshaled

@@ -107,7 +107,7 @@ func testAMQPExportEvent(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "AMQPEvent",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.ToR:          utils.MetaVoice,
 				utils.OriginID:     "abcdef",
 				utils.OriginHost:   "192.168.1.1",
@@ -126,7 +126,7 @@ func testAMQPExportEvent(t *testing.T) {
 		},
 	}
 
-	var reply map[string]map[string]interface{}
+	var reply map[string]map[string]any
 	if err := amqpRPC.Call(utils.EeSv1ProcessEvent, event, &reply); err != nil {
 		t.Error(err)
 	}

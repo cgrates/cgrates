@@ -467,13 +467,13 @@ func TestAttributeProfileForEventWeightFromDynamicsErr(t *testing.T) {
 
 		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:     utils.GenUUID(),
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			"Attribute":      "AttributeProfile1",
 			utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
 			"UsageInterval":  "1s",
 			utils.Weight:     "20.0",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsContext: utils.MetaSessionS,
 		},
 	}
@@ -536,14 +536,14 @@ func TestAttributeProcessEventBlockerFromDynamicsErr(t *testing.T) {
 
 		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:     utils.GenUUID(),
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			"Attribute":      "AttributeProfile1",
 			"Account":        "1010",
 			utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
 			"UsageInterval":  "1s",
 			utils.Weight:     "20.0",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsContext: utils.MetaSessionS,
 		},
 	}
@@ -600,10 +600,10 @@ func TestAttributeSProcessEventPassErr(t *testing.T) {
 	ev := &utils.CGREvent{
 		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:     utils.GenUUID(),
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			"PassField": "Test",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsContext: utils.MetaSessionS,
 		},
 	}
@@ -667,10 +667,10 @@ func TestAttributeSProcessAttrBlockerFromDynamicsErr(t *testing.T) {
 	ev := &utils.CGREvent{
 		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:     utils.GenUUID(),
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			"PassField": "Test",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsContext: utils.MetaSessionS,
 		},
 	}
@@ -733,10 +733,10 @@ func TestAttributeSProcessSubstituteRmvBlockerTrue(t *testing.T) {
 	ev := &utils.CGREvent{
 		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:     utils.GenUUID(),
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			"PassField": "Test",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsContext: utils.MetaSessionS,
 		},
 	}
@@ -805,10 +805,10 @@ func TestV1GetAttributeForEventAttrProfEventErr(t *testing.T) {
 	ev := &utils.CGREvent{
 		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:     utils.GenUUID(),
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			"Attribute": "AttributeProfile1",
 		},
-		APIOpts: map[string]interface{}{},
+		APIOpts: map[string]any{},
 	}
 	var rply APIAttributeProfile
 	expErr := "SERVER_ERROR: NOT_IMPLEMENTED:*stirng"
@@ -854,10 +854,10 @@ func TestAttributesV1ProcessEventFieldMissingErr(t *testing.T) {
 	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "123",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			"testfield": utils.MetaAttributes,
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsAttributesProcessRuns: 2,
 		},
 	}

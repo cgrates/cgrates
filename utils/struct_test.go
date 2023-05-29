@@ -37,7 +37,7 @@ func TestMissingStructFieldsCorrect(t *testing.T) {
 
 func TestMissingStructFieldsNilCorporate(t *testing.T) {
 	tst := &TenantIDWithAPIOpts{
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			OptsAPIKey: "attr1234",
 		},
 	}
@@ -49,11 +49,11 @@ func TestMissingStructFieldsNilCorporate(t *testing.T) {
 
 func TestMissingStructFieldsNilCorporateTwoStructs(t *testing.T) {
 	tst := &struct {
-		APIOpts map[string]interface{}
+		APIOpts map[string]any
 		*TenantID
 		*TenantWithAPIOpts
 	}{
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			OptsAPIKey: "attr1234",
 		},
 		TenantID: &TenantID{
@@ -74,7 +74,7 @@ func TestUpdateStructWithIfaceMap(t *testing.T) {
 		Int    int64
 	}
 	s := new(myStruct)
-	mp := map[string]interface{}{
+	mp := map[string]any{
 		"String": "s",
 		"Bool":   true,
 		"Float":  6.4,
@@ -91,7 +91,7 @@ func TestUpdateStructWithIfaceMap(t *testing.T) {
 	} else if !reflect.DeepEqual(eStruct, s) {
 		t.Errorf("expecting: %+v, received: %+v", eStruct, s)
 	}
-	mp = map[string]interface{}{
+	mp = map[string]any{
 		"String": "aaa",
 		"Bool":   false,
 	}
@@ -129,7 +129,7 @@ func TestUpdateStructWithIfaceMapValEmpty(t *testing.T) {
 		Int    int64
 	}
 	s := new(myStruct)
-	mp := map[string]interface{}{
+	mp := map[string]any{
 		"String": "",
 		"Bool":   "",
 		"Float":  "",
@@ -155,7 +155,7 @@ func TestUpdateStructWithIfaceMapErrorBol(t *testing.T) {
 		Int    int64
 	}
 	s := new(myStruct)
-	mp := map[string]interface{}{
+	mp := map[string]any{
 		"String": "string",
 		"Bool":   "cat",
 		"Float":  1.2,
@@ -175,7 +175,7 @@ func TestUpdateStructWithIfaceMapErrorInt(t *testing.T) {
 		Int    int64
 	}
 	s := new(myStruct)
-	mp := map[string]interface{}{
+	mp := map[string]any{
 		"String": "string",
 		"Bool":   true,
 		"Float":  1.2,
@@ -195,7 +195,7 @@ func TestUpdateStructWithIfaceMapErrorFloat(t *testing.T) {
 		Int    int64
 	}
 	s := new(myStruct)
-	mp := map[string]interface{}{
+	mp := map[string]any{
 		"String": "string",
 		"Bool":   true,
 		"Float":  "cat",
@@ -212,7 +212,7 @@ func TestUpdateStructWithIfaceMapErrorDefault(t *testing.T) {
 		wrongField1 complex128
 	}
 	s := new(myStruct)
-	mp := map[string]interface{}{
+	mp := map[string]any{
 		"wrongField1": cmplx.Sqrt(-5 + 12i),
 	}
 	err := UpdateStructWithIfaceMap(s, mp)

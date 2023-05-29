@@ -530,31 +530,31 @@ func TestDataDbCfgAsMapInterface(t *testing.T) {
 		},
 	},		
 }`
-	eMap := map[string]interface{}{
+	eMap := map[string]any{
 		utils.DataDbTypeCfg: "*redis",
 		utils.DataDbHostCfg: "127.0.0.1",
 		utils.DataDbPortCfg: 6379,
 		utils.DataDbNameCfg: "10",
 		utils.DataDbUserCfg: "cgrates",
 		utils.DataDbPassCfg: "",
-		utils.OptsCfg: map[string]interface{}{
+		utils.OptsCfg: map[string]any{
 			utils.RedisSentinelNameCfg: "",
 			utils.MongoQueryTimeoutCfg: "10s",
 		},
 		utils.RemoteConnsCfg:      []string{},
 		utils.ReplicationConnsCfg: []string{},
-		utils.ItemsCfg: map[string]interface{}{
-			utils.MetaAccounts: map[string]interface{}{utils.RemoteCfg: true, utils.ReplicateCfg: false, utils.APIKeyCfg: "randomVal", utils.RouteIDCfg: "randomVal", utils.LimitCfg: -1, utils.StaticTTLCfg: false},
+		utils.ItemsCfg: map[string]any{
+			utils.MetaAccounts: map[string]any{utils.RemoteCfg: true, utils.ReplicateCfg: false, utils.APIKeyCfg: "randomVal", utils.RouteIDCfg: "randomVal", utils.LimitCfg: -1, utils.StaticTTLCfg: false},
 		},
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
 	} else {
-		rcv := cgrCfg.dataDbCfg.AsMapInterface("").(map[string]interface{})
-		if !reflect.DeepEqual(eMap[utils.ItemsCfg].(map[string]interface{})[utils.MetaAccounts],
-			rcv[utils.ItemsCfg].(map[string]interface{})[utils.MetaAccounts]) {
-			t.Errorf("Expected %+v, received %+v", eMap[utils.ItemsCfg].(map[string]interface{})[utils.MetaAccounts],
-				rcv[utils.ItemsCfg].(map[string]interface{})[utils.MetaAccounts])
+		rcv := cgrCfg.dataDbCfg.AsMapInterface("").(map[string]any)
+		if !reflect.DeepEqual(eMap[utils.ItemsCfg].(map[string]any)[utils.MetaAccounts],
+			rcv[utils.ItemsCfg].(map[string]any)[utils.MetaAccounts]) {
+			t.Errorf("Expected %+v, received %+v", eMap[utils.ItemsCfg].(map[string]any)[utils.MetaAccounts],
+				rcv[utils.ItemsCfg].(map[string]any)[utils.MetaAccounts])
 		}
 	}
 }
@@ -931,7 +931,7 @@ func TestItemOptsAsMapInterface(t *testing.T) {
 		TTL: 1,
 	}
 
-	exp := map[string]interface{}{
+	exp := map[string]any{
 		"limit":      0,
 		"remote":     false,
 		"replicate":  false,

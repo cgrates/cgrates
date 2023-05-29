@@ -32,7 +32,7 @@ import (
 type SortedRoute struct {
 	RouteID            string
 	RouteParameters    string
-	SortingData        map[string]interface{}    // store here extra info like cost or stats (can contain the data that we do not use to sort after)
+	SortingData        map[string]any            // store here extra info like cost or stats (can contain the data that we do not use to sort after)
 	sortingDataDecimal map[string]*utils.Decimal // only the data we sort after
 }
 

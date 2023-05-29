@@ -120,23 +120,23 @@ func (eeS EEsCfg) Clone() (cln *EEsCfg) {
 	return
 }
 
-// AsMapInterface returns the config as a map[string]interface{}
-func (eeS EEsCfg) AsMapInterface(separator string) interface{} {
-	mp := map[string]interface{}{
+// AsMapInterface returns the config as a map[string]any
+func (eeS EEsCfg) AsMapInterface(separator string) any {
+	mp := map[string]any{
 		utils.EnabledCfg: eeS.Enabled,
 	}
 	if eeS.AttributeSConns != nil {
 		mp[utils.AttributeSConnsCfg] = getInternalJSONConns(eeS.AttributeSConns)
 	}
 	if eeS.Cache != nil {
-		cache := make(map[string]interface{}, len(eeS.Cache))
+		cache := make(map[string]any, len(eeS.Cache))
 		for key, value := range eeS.Cache {
 			cache[key] = value.AsMapInterface()
 		}
 		mp[utils.CacheCfg] = cache
 	}
 	if eeS.Exporters != nil {
-		exporters := make([]map[string]interface{}, len(eeS.Exporters))
+		exporters := make([]map[string]any, len(eeS.Exporters))
 		for i, item := range eeS.Exporters {
 			exporters[i] = item.AsMapInterface(separator)
 		}
@@ -198,7 +198,7 @@ type EventExporterOpts struct {
 	ConnIDs                  *[]string
 	RPCConnTimeout           *time.Duration
 	RPCReplyTimeout          *time.Duration
-	RPCAPIOpts               map[string]interface{}
+	RPCAPIOpts               map[string]any
 }
 
 // EventExporterCfg the config for a Event Exporter
@@ -422,7 +422,7 @@ func (eeOpts *EventExporterOpts) loadFromJSONCfg(jsnCfg *EventExporterOptsJson) 
 		eeOpts.RPCReplyTimeout = utils.DurationPointer(rpcReplyTimeout)
 	}
 	if jsnCfg.RPCAPIOpts != nil {
-		eeOpts.RPCAPIOpts = make(map[string]interface{})
+		eeOpts.RPCAPIOpts = make(map[string]any)
 		eeOpts.RPCAPIOpts = jsnCfg.RPCAPIOpts
 	}
 	return
@@ -735,7 +735,7 @@ func (eeOpts *EventExporterOpts) Clone() *EventExporterOpts {
 		*cln.RPCReplyTimeout = *eeOpts.RPCReplyTimeout
 	}
 	if eeOpts.RPCAPIOpts != nil {
-		cln.RPCAPIOpts = make(map[string]interface{})
+		cln.RPCAPIOpts = make(map[string]any)
 		cln.RPCAPIOpts = eeOpts.RPCAPIOpts
 	}
 	return cln
@@ -786,13 +786,13 @@ func (eeC EventExporterCfg) Clone() (cln *EventExporterCfg) {
 	return
 }
 
-// AsMapInterface returns the config as a map[string]interface{}
-func (eeC *EventExporterCfg) AsMapInterface(separator string) (initialMP map[string]interface{}) {
+// AsMapInterface returns the config as a map[string]any
+func (eeC *EventExporterCfg) AsMapInterface(separator string) (initialMP map[string]any) {
 	flgs := eeC.Flags.SliceFlags()
 	if flgs == nil {
 		flgs = []string{}
 	}
-	initialMP = map[string]interface{}{
+	initialMP = map[string]any{
 		utils.IDCfg:                 eeC.ID,
 		utils.TypeCfg:               eeC.Type,
 		utils.ExportPathCfg:         eeC.ExportPath,
@@ -812,7 +812,7 @@ func (eeC *EventExporterCfg) AsMapInterface(separator string) (initialMP map[str
 		initialMP[utils.EFsConnsCfg] = getInternalJSONConns(eeC.EFsConns)
 	}
 	if eeC.Fields != nil {
-		fields := make([]map[string]interface{}, 0, len(eeC.Fields))
+		fields := make([]map[string]any, 0, len(eeC.Fields))
 		for _, fld := range eeC.Fields {
 			fields = append(fields, fld.AsMapInterface(separator))
 		}
@@ -821,8 +821,8 @@ func (eeC *EventExporterCfg) AsMapInterface(separator string) (initialMP map[str
 	return
 }
 
-func (optsEes *EventExporterOpts) AsMapInterface() map[string]interface{} {
-	opts := map[string]interface{}{}
+func (optsEes *EventExporterOpts) AsMapInterface() map[string]any {
+	opts := map[string]any{}
 	if optsEes.CSVFieldSeparator != nil {
 		opts[utils.CSVFieldSepOpt] = *optsEes.CSVFieldSeparator
 	}
@@ -986,59 +986,59 @@ func (optsEes *EventExporterOpts) AsMapInterface() map[string]interface{} {
 }
 
 type EventExporterOptsJson struct {
-	CSVFieldSeparator        *string                `json:"csvFieldSeparator"`
-	ElsIndex                 *string                `json:"elsIndex"`
-	ElsIfPrimaryTerm         *int                   `json:"elsIfPrimaryTerm"`
-	ElsIfSeqNo               *int                   `json:"elsIfSeqNo"`
-	ElsOpType                *string                `json:"elsOpType"`
-	ElsPipeline              *string                `json:"elsPipeline"`
-	ElsRouting               *string                `json:"elsRouting"`
-	ElsTimeout               *string                `json:"elsTimeout"`
-	ElsVersion               *int                   `json:"elsVersion"`
-	ElsVersionType           *string                `json:"elsVersionType"`
-	ElsWaitForActiveShards   *string                `json:"elsWaitForActiveShards"`
-	SQLMaxIdleConns          *int                   `json:"sqlMaxIdleConns"`
-	SQLMaxOpenConns          *int                   `json:"sqlMaxOpenConns"`
-	SQLConnMaxLifetime       *string                `json:"sqlConnMaxLifetime"`
-	MYSQLDSNParams           map[string]string      `json:"mysqlDSNParams"`
-	SQLTableName             *string                `json:"sqlTableName"`
-	SQLDBName                *string                `json:"sqlDBName"`
-	PgSSLMode                *string                `json:"pgSSLMode"`
-	KafkaTopic               *string                `json:"kafkaTopic"`
-	KafkaTLS                 *bool                  `json:"kafkaTLS"`
-	KafkaCAPath              *string                `json:"kafkaCAPath"`
-	KafkaSkipTLSVerify       *bool                  `json:"kafkaSkipTLSVerify"`
-	AMQPQueueID              *string                `json:"amqpQueueID"`
-	AMQPRoutingKey           *string                `json:"amqpRoutingKey"`
-	AMQPExchange             *string                `json:"amqpExchange"`
-	AMQPExchangeType         *string                `json:"amqpExchangeType"`
-	AMQPUsername             *string                `json:"amqpUsername"`
-	AMQPPassword             *string                `json:"amqpPassword"`
-	AWSRegion                *string                `json:"awsRegion"`
-	AWSKey                   *string                `json:"awsKey"`
-	AWSSecret                *string                `json:"awsSecret"`
-	AWSToken                 *string                `json:"awsToken"`
-	SQSQueueID               *string                `json:"sqsQueueID"`
-	S3BucketID               *string                `json:"s3BucketID"`
-	S3FolderPath             *string                `json:"s3FolderPath"`
-	NATSJetStream            *bool                  `json:"natsJetStream"`
-	NATSSubject              *string                `json:"natsSubject"`
-	NATSJWTFile              *string                `json:"natsJWTFile"`
-	NATSSeedFile             *string                `json:"natsSeedFile"`
-	NATSCertificateAuthority *string                `json:"natsCertificateAuthority"`
-	NATSClientCertificate    *string                `json:"natsClientCertificate"`
-	NATSClientKey            *string                `json:"natsClientKey"`
-	NATSJetStreamMaxWait     *string                `json:"natsJetStreamMaxWait"`
-	RPCCodec                 *string                `json:"rpcCodec"`
-	ServiceMethod            *string                `json:"serviceMethod"`
-	KeyPath                  *string                `json:"keyPath"`
-	CertPath                 *string                `json:"certPath"`
-	CAPath                   *string                `json:"caPath"`
-	ConnIDs                  *[]string              `json:"connIDs"`
-	TLS                      *bool                  `json:"tls"`
-	RPCConnTimeout           *string                `json:"rpcConnTimeout"`
-	RPCReplyTimeout          *string                `json:"rpcReplyTimeout"`
-	RPCAPIOpts               map[string]interface{} `json:"rpcAPIOpts"`
+	CSVFieldSeparator        *string           `json:"csvFieldSeparator"`
+	ElsIndex                 *string           `json:"elsIndex"`
+	ElsIfPrimaryTerm         *int              `json:"elsIfPrimaryTerm"`
+	ElsIfSeqNo               *int              `json:"elsIfSeqNo"`
+	ElsOpType                *string           `json:"elsOpType"`
+	ElsPipeline              *string           `json:"elsPipeline"`
+	ElsRouting               *string           `json:"elsRouting"`
+	ElsTimeout               *string           `json:"elsTimeout"`
+	ElsVersion               *int              `json:"elsVersion"`
+	ElsVersionType           *string           `json:"elsVersionType"`
+	ElsWaitForActiveShards   *string           `json:"elsWaitForActiveShards"`
+	SQLMaxIdleConns          *int              `json:"sqlMaxIdleConns"`
+	SQLMaxOpenConns          *int              `json:"sqlMaxOpenConns"`
+	SQLConnMaxLifetime       *string           `json:"sqlConnMaxLifetime"`
+	MYSQLDSNParams           map[string]string `json:"mysqlDSNParams"`
+	SQLTableName             *string           `json:"sqlTableName"`
+	SQLDBName                *string           `json:"sqlDBName"`
+	PgSSLMode                *string           `json:"pgSSLMode"`
+	KafkaTopic               *string           `json:"kafkaTopic"`
+	KafkaTLS                 *bool             `json:"kafkaTLS"`
+	KafkaCAPath              *string           `json:"kafkaCAPath"`
+	KafkaSkipTLSVerify       *bool             `json:"kafkaSkipTLSVerify"`
+	AMQPQueueID              *string           `json:"amqpQueueID"`
+	AMQPRoutingKey           *string           `json:"amqpRoutingKey"`
+	AMQPExchange             *string           `json:"amqpExchange"`
+	AMQPExchangeType         *string           `json:"amqpExchangeType"`
+	AMQPUsername             *string           `json:"amqpUsername"`
+	AMQPPassword             *string           `json:"amqpPassword"`
+	AWSRegion                *string           `json:"awsRegion"`
+	AWSKey                   *string           `json:"awsKey"`
+	AWSSecret                *string           `json:"awsSecret"`
+	AWSToken                 *string           `json:"awsToken"`
+	SQSQueueID               *string           `json:"sqsQueueID"`
+	S3BucketID               *string           `json:"s3BucketID"`
+	S3FolderPath             *string           `json:"s3FolderPath"`
+	NATSJetStream            *bool             `json:"natsJetStream"`
+	NATSSubject              *string           `json:"natsSubject"`
+	NATSJWTFile              *string           `json:"natsJWTFile"`
+	NATSSeedFile             *string           `json:"natsSeedFile"`
+	NATSCertificateAuthority *string           `json:"natsCertificateAuthority"`
+	NATSClientCertificate    *string           `json:"natsClientCertificate"`
+	NATSClientKey            *string           `json:"natsClientKey"`
+	NATSJetStreamMaxWait     *string           `json:"natsJetStreamMaxWait"`
+	RPCCodec                 *string           `json:"rpcCodec"`
+	ServiceMethod            *string           `json:"serviceMethod"`
+	KeyPath                  *string           `json:"keyPath"`
+	CertPath                 *string           `json:"certPath"`
+	CAPath                   *string           `json:"caPath"`
+	ConnIDs                  *[]string         `json:"connIDs"`
+	TLS                      *bool             `json:"tls"`
+	RPCConnTimeout           *string           `json:"rpcConnTimeout"`
+	RPCReplyTimeout          *string           `json:"rpcReplyTimeout"`
+	RPCAPIOpts               map[string]any    `json:"rpcAPIOpts"`
 }
 
 // EventExporterJsonCfg is the configuration of a single EventExporter

@@ -36,7 +36,7 @@ import (
 func NewRegisterArgs(cfg *config.CGRConfig, tnt string, hostCfgs []*config.RemoteHost) (rargs *RegisterArgs, err error) {
 	rargs = &RegisterArgs{
 		Tenant: tnt,
-		Opts:   make(map[string]interface{}),
+		Opts:   make(map[string]any),
 		Hosts:  make([]*RegisterHostCfg, len(hostCfgs)),
 	}
 	for i, hostCfg := range hostCfgs {
@@ -61,7 +61,7 @@ func NewRegisterArgs(cfg *config.CGRConfig, tnt string, hostCfgs []*config.Remot
 // RegisterArgs the arguments to register the dispacher host
 type RegisterArgs struct {
 	Tenant string
-	Opts   map[string]interface{}
+	Opts   map[string]any
 	Hosts  []*RegisterHostCfg
 }
 
@@ -100,7 +100,7 @@ func (rhc *RegisterHostCfg) AsDispatcherHost(tnt, ip string) *engine.DispatcherH
 func NewUnregisterArgs(tnt string, hostCfgs []*config.RemoteHost) (uargs *UnregisterArgs) {
 	uargs = &UnregisterArgs{
 		Tenant: tnt,
-		Opts:   make(map[string]interface{}),
+		Opts:   make(map[string]any),
 		IDs:    make([]string, len(hostCfgs)),
 	}
 	for i, hostCfg := range hostCfgs {
@@ -112,7 +112,7 @@ func NewUnregisterArgs(tnt string, hostCfgs []*config.RemoteHost) (uargs *Unregi
 // UnregisterArgs the arguments to unregister the dispacher host
 type UnregisterArgs struct {
 	Tenant string
-	Opts   map[string]interface{}
+	Opts   map[string]any
 	IDs    []string
 }
 
@@ -120,8 +120,8 @@ type UnregisterArgs struct {
 func Registrar(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 	w.Header().Set("Content-Type", "application/json")
-	var result interface{} = utils.OK
-	var errMessage interface{}
+	var result any = utils.OK
+	var errMessage any
 	var err error
 	var id *json.RawMessage
 	if id, err = register(r); err != nil {
@@ -150,7 +150,7 @@ func register(req *http.Request) (*json.RawMessage, error) {
 		return sReq.Id, err
 	case utils.RegistrarSv1UnregisterDispatcherHosts:
 		var args UnregisterArgs
-		params := []interface{}{&args}
+		params := []any{&args}
 		if err = json.Unmarshal(*sReq.Params, &params); err != nil {
 			utils.Logger.Warning(fmt.Sprintf("<%s> Failed to decode params because: %s",
 				utils.RegistrarC, err))
@@ -183,7 +183,7 @@ func register(req *http.Request) (*json.RawMessage, error) {
 
 	case utils.RegistrarSv1UnregisterRPCHosts:
 		var args UnregisterArgs
-		params := []interface{}{&args}
+		params := []any{&args}
 		if err = json.Unmarshal(*sReq.Params, &params); err != nil {
 			utils.Logger.Warning(fmt.Sprintf("<%s> Failed to decode params because: %s",
 				utils.RegistrarC, err))
@@ -264,7 +264,7 @@ func getConnPort(cfg *config.CGRConfig, transport string, tls bool) (port string
 
 func unmarshallRegisterArgs(req *http.Request, reqParams json.RawMessage) (dH []*engine.DispatcherHost, err error) {
 	var dHs RegisterArgs
-	params := []interface{}{&dHs}
+	params := []any{&dHs}
 	if err = json.Unmarshal(reqParams, &params); err != nil {
 		utils.Logger.Warning(fmt.Sprintf("<%s> Failed to decode params because: %s",
 			utils.RegistrarC, err))

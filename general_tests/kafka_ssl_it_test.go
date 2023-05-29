@@ -123,7 +123,7 @@ func testKafkaSSLExportEvent(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "KafkaEvent",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.ToR:          utils.MetaVoice,
 				utils.OriginID:     "abcdef",
 				utils.OriginHost:   "192.168.1.1",
@@ -142,7 +142,7 @@ func testKafkaSSLExportEvent(t *testing.T) {
 		},
 	}
 
-	var reply map[string]map[string]interface{}
+	var reply map[string]map[string]any
 	if err := kafkaSSLRpc.Call(context.Background(), utils.EeSv1ProcessEvent, event, &reply); err != nil {
 		t.Error(err)
 	}

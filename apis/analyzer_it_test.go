@@ -120,7 +120,7 @@ func testAnalyzerSLoad(t *testing.T) {
 	var reply string
 
 	if err := anzBiRPC.Call(context.Background(), utils.LoaderSv1Run, &loaders.ArgsProcessFolder{
-		APIOpts: map[string]interface{}{utils.MetaCache: utils.MetaReload},
+		APIOpts: map[string]any{utils.MetaCache: utils.MetaReload},
 	}, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
@@ -142,7 +142,7 @@ func testAnalyzerSChargerSv1ProcessEvent(t *testing.T) {
 	cgrEv := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "event1",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1010",
 			utils.Subject:      "Something_inter",
 			utils.Destination:  "999",
@@ -157,7 +157,7 @@ func testAnalyzerSChargerSv1ProcessEvent(t *testing.T) {
 
 func testAnalyzerSSearchCall1(t *testing.T) {
 	time.Sleep(10 * time.Millisecond)
-	var result []map[string]interface{}
+	var result []map[string]any
 	queryArgs := &analyzers.QueryArgs{
 		HeaderFilters: `+RequestEncoding:\*internal +RequestMethod:AttributeSv1\.ProcessEvent`,
 	}
@@ -169,7 +169,7 @@ func testAnalyzerSSearchCall1(t *testing.T) {
 }
 
 func testAnalyzerSSearchCall2(t *testing.T) {
-	var result []map[string]interface{}
+	var result []map[string]any
 	queryArgs := &analyzers.QueryArgs{
 		HeaderFilters: `+RequestEncoding:\*internal +RequestMethod:ChargerSv1\.ProcessEvent`,
 	}
@@ -202,7 +202,7 @@ func testAnalyzerSGetFilterIDs(t *testing.T) {
 			Tenant: "cgrates.org",
 			ID:     filterIDs[0],
 		},
-		APIOpts: map[string]interface{}{},
+		APIOpts: map[string]any{},
 	}
 	if err := anzBiRPC.Call(context.Background(), utils.AdminSv1GetFilter, args, &result); err != nil {
 		t.Error(err)
@@ -225,7 +225,7 @@ func testAnalyzerSGetFilterIDs(t *testing.T) {
 }
 
 func testAnalyzerSSearchCall3(t *testing.T) {
-	var result []map[string]interface{}
+	var result []map[string]any
 	queryArgs := &analyzers.QueryArgs{
 		HeaderFilters: `+RequestEncoding:\*json +RequestMethod:AdminSv1\.GetFilter`,
 	}

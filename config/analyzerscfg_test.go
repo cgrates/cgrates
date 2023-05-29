@@ -57,14 +57,14 @@ func TestAnalyzerSCfgAsMapInterface(t *testing.T) {
 		"analyzers":{},
     }
 }`
-	eMap := map[string]interface{}{
+	eMap := map[string]any{
 		utils.EnabledCfg:         false,
 		utils.CleanupIntervalCfg: "1h0m0s",
 		utils.DBPathCfg:          "/var/spool/cgrates/analyzers",
 		utils.IndexTypeCfg:       utils.MetaScorch,
 		utils.EEsConnsCfg:        []string{},
 		utils.TTLCfg:             "24h0m0s",
-		utils.OptsCfg: map[string]interface{}{
+		utils.OptsCfg: map[string]any{
 			utils.MetaExporterIDs: []*utils.DynamicStringSliceOpt{},
 		},
 	}
@@ -83,14 +83,14 @@ func TestAnalyzerSCfgAsMapInterface1(t *testing.T) {
         },
     }
 }`
-	eMap := map[string]interface{}{
+	eMap := map[string]any{
 		utils.EnabledCfg:         true,
 		utils.CleanupIntervalCfg: "1h0m0s",
 		utils.DBPathCfg:          "/var/spool/cgrates/analyzers",
 		utils.IndexTypeCfg:       utils.MetaScorch,
 		utils.EEsConnsCfg:        []string{"*localhost"},
 		utils.TTLCfg:             "24h0m0s",
-		utils.OptsCfg: map[string]interface{}{
+		utils.OptsCfg: map[string]any{
 			utils.MetaExporterIDs: []*utils.DynamicStringSliceOpt{},
 		},
 	}

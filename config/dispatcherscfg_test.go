@@ -77,7 +77,7 @@ func TestDispatcherSCfgAsMapInterface(t *testing.T) {
 		},
 		
 }`
-	eMap := map[string]interface{}{
+	eMap := map[string]any{
 		utils.EnabledCfg:                false,
 		utils.IndexedSelectsCfg:         true,
 		utils.PrefixIndexedFieldsCfg:    []string{},
@@ -86,7 +86,7 @@ func TestDispatcherSCfgAsMapInterface(t *testing.T) {
 		utils.NotExistsIndexedFieldsCfg: []string{},
 		utils.NestedFieldsCfg:           false,
 		utils.AttributeSConnsCfg:        []string{},
-		utils.OptsCfg: map[string]interface{}{
+		utils.OptsCfg: map[string]any{
 			utils.MetaDispatcherSCfg: []*utils.DynamicBoolOpt{},
 		},
 	}
@@ -112,7 +112,7 @@ func TestDispatcherSCfgAsMapInterface1(t *testing.T) {
 		},
 		
 }`
-	eMap := map[string]interface{}{
+	eMap := map[string]any{
 		utils.EnabledCfg:                false,
 		utils.IndexedSelectsCfg:         true,
 		utils.StringIndexedFieldsCfg:    []string{"*req.prefix"},
@@ -122,7 +122,7 @@ func TestDispatcherSCfgAsMapInterface1(t *testing.T) {
 		utils.NotExistsIndexedFieldsCfg: []string{"*req.prefix"},
 		utils.NestedFieldsCfg:           false,
 		utils.AttributeSConnsCfg:        []string{"*internal", "*conn1"},
-		utils.OptsCfg: map[string]interface{}{
+		utils.OptsCfg: map[string]any{
 			utils.MetaDispatcherSCfg: []*utils.DynamicBoolOpt{},
 		},
 	}
@@ -137,7 +137,7 @@ func TestDispatcherSCfgAsMapInterface2(t *testing.T) {
 	cfgJSONStr := `{
 		"dispatchers":{},
 }`
-	eMap := map[string]interface{}{
+	eMap := map[string]any{
 		utils.EnabledCfg:                false,
 		utils.IndexedSelectsCfg:         true,
 		utils.PrefixIndexedFieldsCfg:    []string{},
@@ -146,7 +146,7 @@ func TestDispatcherSCfgAsMapInterface2(t *testing.T) {
 		utils.NotExistsIndexedFieldsCfg: []string{},
 		utils.NestedFieldsCfg:           false,
 		utils.AttributeSConnsCfg:        []string{},
-		utils.OptsCfg: map[string]interface{}{
+		utils.OptsCfg: map[string]any{
 			utils.MetaDispatcherSCfg: []*utils.DynamicBoolOpt{},
 		},
 	}

@@ -72,7 +72,7 @@ func TestLibSuppliersSortCost(t *testing.T) {
 					utils.Cost:   utils.NewDecimalFromFloat64(0.1),
 					utils.Weight: utils.NewDecimalFromFloat64(10.0),
 				},
-				SortingData: map[string]interface{}{
+				SortingData: map[string]any{
 					utils.Cost:   0.1,
 					utils.Weight: 10.0,
 				},
@@ -84,7 +84,7 @@ func TestLibSuppliersSortCost(t *testing.T) {
 					utils.Cost:   utils.NewDecimalFromFloat64(0.1),
 					utils.Weight: utils.NewDecimalFromFloat64(20.0),
 				},
-				SortingData: map[string]interface{}{
+				SortingData: map[string]any{
 					utils.Cost:   0.1,
 					utils.Weight: 20.0,
 				},
@@ -96,7 +96,7 @@ func TestLibSuppliersSortCost(t *testing.T) {
 					utils.Cost:   utils.NewDecimalFromFloat64(0.05),
 					utils.Weight: utils.NewDecimalFromFloat64(10.0),
 				},
-				SortingData: map[string]interface{}{
+				SortingData: map[string]any{
 					utils.Cost:   0.05,
 					utils.Weight: 10.0,
 				},
@@ -113,7 +113,7 @@ func TestLibSuppliersSortCost(t *testing.T) {
 					utils.Cost:   utils.NewDecimalFromFloat64(0.05),
 					utils.Weight: utils.NewDecimalFromFloat64(10.0),
 				},
-				SortingData: map[string]interface{}{
+				SortingData: map[string]any{
 					utils.Cost:   0.05,
 					utils.Weight: 10.0,
 				},
@@ -125,7 +125,7 @@ func TestLibSuppliersSortCost(t *testing.T) {
 					utils.Cost:   utils.NewDecimalFromFloat64(0.1),
 					utils.Weight: utils.NewDecimalFromFloat64(20.0),
 				},
-				SortingData: map[string]interface{}{
+				SortingData: map[string]any{
 					utils.Cost:   0.1,
 					utils.Weight: 20.0,
 				},
@@ -137,7 +137,7 @@ func TestLibSuppliersSortCost(t *testing.T) {
 					utils.Cost:   utils.NewDecimalFromFloat64(0.1),
 					utils.Weight: utils.NewDecimalFromFloat64(10.0),
 				},
-				SortingData: map[string]interface{}{
+				SortingData: map[string]any{
 					utils.Cost:   0.1,
 					utils.Weight: 10.0,
 				},
@@ -159,7 +159,7 @@ func TestLibRoutesSortWeight(t *testing.T) {
 				sortingDataDecimal: map[string]*utils.Decimal{
 					utils.Weight: utils.NewDecimalFromFloat64(10.0),
 				},
-				SortingData: map[string]interface{}{
+				SortingData: map[string]any{
 					utils.Weight: 10.0,
 				},
 				RouteParameters: "param1",
@@ -169,7 +169,7 @@ func TestLibRoutesSortWeight(t *testing.T) {
 				sortingDataDecimal: map[string]*utils.Decimal{
 					utils.Weight: utils.NewDecimalFromFloat64(20.0),
 				},
-				SortingData: map[string]interface{}{
+				SortingData: map[string]any{
 					utils.Weight: 20.0,
 				},
 				RouteParameters: "param2",
@@ -179,7 +179,7 @@ func TestLibRoutesSortWeight(t *testing.T) {
 				sortingDataDecimal: map[string]*utils.Decimal{
 					utils.Weight: utils.NewDecimalFromFloat64(10.5),
 				},
-				SortingData: map[string]interface{}{
+				SortingData: map[string]any{
 					utils.Weight: 10.5,
 				},
 				RouteParameters: "param3",
@@ -194,7 +194,7 @@ func TestLibRoutesSortWeight(t *testing.T) {
 				sortingDataDecimal: map[string]*utils.Decimal{
 					utils.Weight: utils.NewDecimalFromFloat64(20.0),
 				},
-				SortingData: map[string]interface{}{
+				SortingData: map[string]any{
 					utils.Weight: 20.0,
 				},
 				RouteParameters: "param2",
@@ -204,7 +204,7 @@ func TestLibRoutesSortWeight(t *testing.T) {
 				sortingDataDecimal: map[string]*utils.Decimal{
 					utils.Weight: utils.NewDecimalFromFloat64(10.5),
 				},
-				SortingData: map[string]interface{}{
+				SortingData: map[string]any{
 					utils.Weight: 10.5,
 				},
 				RouteParameters: "param3",
@@ -214,7 +214,7 @@ func TestLibRoutesSortWeight(t *testing.T) {
 				sortingDataDecimal: map[string]*utils.Decimal{
 					utils.Weight: utils.NewDecimalFromFloat64(10.0),
 				},
-				SortingData: map[string]interface{}{
+				SortingData: map[string]any{
 					utils.Weight: 10.0,
 				},
 				RouteParameters: "param1",
@@ -237,7 +237,7 @@ func TestSortedRoutesDigest(t *testing.T) {
 				sortingDataDecimal: map[string]*utils.Decimal{
 					utils.Weight: utils.NewDecimalFromFloat64(20.0),
 				},
-				SortingData: map[string]interface{}{
+				SortingData: map[string]any{
 					utils.Weight: 20.0,
 				},
 				RouteParameters: "param2",
@@ -247,7 +247,7 @@ func TestSortedRoutesDigest(t *testing.T) {
 				sortingDataDecimal: map[string]*utils.Decimal{
 					utils.Weight: utils.NewDecimalFromFloat64(10.0),
 				},
-				SortingData: map[string]interface{}{
+				SortingData: map[string]any{
 					utils.Weight: 10.0,
 				},
 				RouteParameters: "param1",
@@ -271,7 +271,7 @@ func TestSortedRoutesDigest2(t *testing.T) {
 				sortingDataDecimal: map[string]*utils.Decimal{
 					utils.Weight: utils.NewDecimalFromFloat64(30.0),
 				},
-				SortingData: map[string]interface{}{
+				SortingData: map[string]any{
 					utils.Weight: 30.0,
 				},
 				RouteParameters: "param1",
@@ -281,7 +281,7 @@ func TestSortedRoutesDigest2(t *testing.T) {
 				sortingDataDecimal: map[string]*utils.Decimal{
 					utils.Weight: utils.NewDecimalFromFloat64(20.0),
 				},
-				SortingData: map[string]interface{}{
+				SortingData: map[string]any{
 					utils.Weight: 20.0,
 				},
 				RouteParameters: "param2",
@@ -317,7 +317,7 @@ func TestLibRoutesSortHighestCost(t *testing.T) {
 					utils.Cost:   utils.NewDecimalFromFloat64(0.1),
 					utils.Weight: utils.NewDecimalFromFloat64(15.0),
 				},
-				SortingData: map[string]interface{}{
+				SortingData: map[string]any{
 					utils.Cost:   0.1,
 					utils.Weight: 15.0,
 				},
@@ -329,7 +329,7 @@ func TestLibRoutesSortHighestCost(t *testing.T) {
 					utils.Cost:   utils.NewDecimalFromFloat64(0.2),
 					utils.Weight: utils.NewDecimalFromFloat64(20.0),
 				},
-				SortingData: map[string]interface{}{
+				SortingData: map[string]any{
 					utils.Cost:   0.2,
 					utils.Weight: 20.0,
 				},
@@ -341,7 +341,7 @@ func TestLibRoutesSortHighestCost(t *testing.T) {
 					utils.Cost:   utils.NewDecimalFromFloat64(0.05),
 					utils.Weight: utils.NewDecimalFromFloat64(10.0),
 				},
-				SortingData: map[string]interface{}{
+				SortingData: map[string]any{
 					utils.Cost:   0.05,
 					utils.Weight: 10.0,
 				},
@@ -358,7 +358,7 @@ func TestLibRoutesSortHighestCost(t *testing.T) {
 					utils.Cost:   utils.NewDecimalFromFloat64(0.2),
 					utils.Weight: utils.NewDecimalFromFloat64(20.0),
 				},
-				SortingData: map[string]interface{}{
+				SortingData: map[string]any{
 					utils.Cost:   0.2,
 					utils.Weight: 20.0,
 				},
@@ -370,7 +370,7 @@ func TestLibRoutesSortHighestCost(t *testing.T) {
 					utils.Cost:   utils.NewDecimalFromFloat64(0.1),
 					utils.Weight: utils.NewDecimalFromFloat64(15.0),
 				},
-				SortingData: map[string]interface{}{
+				SortingData: map[string]any{
 					utils.Cost:   0.1,
 					utils.Weight: 15.0,
 				},
@@ -382,7 +382,7 @@ func TestLibRoutesSortHighestCost(t *testing.T) {
 					utils.Cost:   utils.NewDecimalFromFloat64(0.05),
 					utils.Weight: utils.NewDecimalFromFloat64(10.0),
 				},
-				SortingData: map[string]interface{}{
+				SortingData: map[string]any{
 					utils.Cost:   0.05,
 					utils.Weight: 10.0,
 				},
@@ -409,7 +409,7 @@ func TestLibRoutesSortQOS(t *testing.T) {
 					utils.MetaACD: utils.NewDecimalFromFloat64(0.5),
 					utils.MetaTCD: utils.NewDecimalFromFloat64(1.1),
 				},
-				SortingData: map[string]interface{}{
+				SortingData: map[string]any{
 					utils.Cost:    0.5,
 					utils.Weight:  10.0,
 					utils.MetaACD: 0.5,
@@ -425,7 +425,7 @@ func TestLibRoutesSortQOS(t *testing.T) {
 					utils.MetaACD: utils.NewDecimalFromFloat64(0.5),
 					utils.MetaTCD: utils.NewDecimalFromFloat64(4.1),
 				},
-				SortingData: map[string]interface{}{
+				SortingData: map[string]any{
 					utils.Cost:    0.1,
 					utils.Weight:  15.0,
 					utils.MetaACD: 0.5,
@@ -441,7 +441,7 @@ func TestLibRoutesSortQOS(t *testing.T) {
 					utils.MetaACD: utils.NewDecimalFromFloat64(0.4),
 					utils.MetaTCD: utils.NewDecimalFromFloat64(5.1),
 				},
-				SortingData: map[string]interface{}{
+				SortingData: map[string]any{
 					utils.Cost:    1.1,
 					utils.Weight:  17.8,
 					utils.MetaACD: 0.4,
@@ -477,7 +477,7 @@ func TestLibRoutesSortQOS2(t *testing.T) {
 					utils.MetaACD: utils.NewDecimalFromFloat64(0.5),
 					utils.MetaTCD: utils.NewDecimalFromFloat64(1.1),
 				},
-				SortingData: map[string]interface{}{
+				SortingData: map[string]any{
 					utils.Weight:  10.0,
 					utils.MetaACD: 0.5,
 					utils.MetaTCD: 1.1,
@@ -493,7 +493,7 @@ func TestLibRoutesSortQOS2(t *testing.T) {
 					utils.MetaACD: utils.NewDecimalFromFloat64(0.5),
 					utils.MetaTCD: utils.NewDecimalFromFloat64(1.1),
 				},
-				SortingData: map[string]interface{}{
+				SortingData: map[string]any{
 					utils.Weight:  17.0,
 					utils.MetaACD: 0.5,
 					utils.MetaTCD: 1.1,
@@ -507,7 +507,7 @@ func TestLibRoutesSortQOS2(t *testing.T) {
 					utils.MetaACD: utils.NewDecimalFromFloat64(0.7),
 					utils.MetaTCD: utils.NewDecimalFromFloat64(1.1),
 				},
-				SortingData: map[string]interface{}{
+				SortingData: map[string]any{
 					utils.Cost:    0.5,
 					utils.Weight:  10.0,
 					utils.MetaACD: 0.7,
@@ -543,7 +543,7 @@ func TestLibRoutesSortQOS3(t *testing.T) {
 					utils.MetaPDD: utils.NewDecimalFromFloat64(0.7),
 					utils.MetaTCD: utils.NewDecimalFromFloat64(1.1),
 				},
-				SortingData: map[string]interface{}{
+				SortingData: map[string]any{
 					utils.Weight:  15.0,
 					utils.MetaPDD: 0.7,
 					utils.MetaTCD: 1.1,
@@ -557,7 +557,7 @@ func TestLibRoutesSortQOS3(t *testing.T) {
 					utils.MetaPDD: utils.NewDecimalFromFloat64(1.2),
 					utils.MetaTCD: utils.NewDecimalFromFloat64(1.1),
 				},
-				SortingData: map[string]interface{}{
+				SortingData: map[string]any{
 					utils.Weight:  10.0,
 					utils.MetaPDD: 1.2,
 					utils.MetaTCD: 1.1,
@@ -571,7 +571,7 @@ func TestLibRoutesSortQOS3(t *testing.T) {
 					utils.MetaPDD: utils.NewDecimalFromFloat64(0.7),
 					utils.MetaTCD: utils.NewDecimalFromFloat64(10.1),
 				},
-				SortingData: map[string]interface{}{
+				SortingData: map[string]any{
 					utils.Weight:  10.0,
 					utils.MetaPDD: 0.7,
 					utils.MetaTCD: 10.1,
@@ -602,7 +602,7 @@ func TestLibRoutesSortQOS4(t *testing.T) {
 					utils.MetaTCD: utils.NewDecimalFromFloat64(15.0),
 					utils.MetaASR: utils.NewDecimalFromFloat64(1.2),
 				},
-				SortingData: map[string]interface{}{
+				SortingData: map[string]any{
 					utils.MetaACD: 0.2,
 					utils.MetaTCD: 15.0,
 					utils.MetaASR: 1.2,
@@ -615,7 +615,7 @@ func TestLibRoutesSortQOS4(t *testing.T) {
 					utils.MetaTCD: utils.NewDecimalFromFloat64(20.0),
 					utils.MetaASR: utils.NewDecimalFromFloat64(-1.0),
 				},
-				SortingData: map[string]interface{}{
+				SortingData: map[string]any{
 					utils.MetaACD: 0.2,
 					utils.MetaTCD: 20.0,
 					utils.MetaASR: -1.0,
@@ -628,7 +628,7 @@ func TestLibRoutesSortQOS4(t *testing.T) {
 					utils.MetaTCD: utils.NewDecimalFromFloat64(10.0),
 					utils.MetaASR: utils.NewDecimalFromFloat64(1.2),
 				},
-				SortingData: map[string]interface{}{
+				SortingData: map[string]any{
 					utils.MetaACD: 0.1,
 					utils.MetaTCD: 10.0,
 					utils.MetaASR: 1.2,
@@ -660,7 +660,7 @@ func TestLibRoutesSortQOS5(t *testing.T) {
 					utils.MetaASR: utils.NewDecimalFromFloat64(-1.0),
 					utils.MetaTCC: utils.NewDecimalFromFloat64(10.1),
 				},
-				SortingData: map[string]interface{}{
+				SortingData: map[string]any{
 					utils.MetaACD: 0.2,
 					utils.MetaTCD: 15.0,
 					utils.MetaASR: -1.0,
@@ -675,7 +675,7 @@ func TestLibRoutesSortQOS5(t *testing.T) {
 					utils.MetaASR: utils.NewDecimalFromFloat64(1.2),
 					utils.MetaTCC: utils.NewDecimalFromFloat64(10.1),
 				},
-				SortingData: map[string]interface{}{
+				SortingData: map[string]any{
 					utils.MetaACD: 0.2,
 					utils.MetaTCD: 20.0,
 					utils.MetaASR: 1.2,
@@ -690,7 +690,7 @@ func TestLibRoutesSortQOS5(t *testing.T) {
 					utils.MetaASR: utils.NewDecimalFromFloat64(1.2),
 					utils.MetaTCC: utils.NewDecimalFromFloat64(10.1),
 				},
-				SortingData: map[string]interface{}{
+				SortingData: map[string]any{
 					utils.MetaACD: 0.1,
 					utils.MetaTCD: 10.0,
 					utils.MetaASR: 1.2,
@@ -721,7 +721,7 @@ func TestLibRoutesSortQOS6(t *testing.T) {
 					utils.Weight:  utils.NewDecimalFromFloat64(15.0),
 					utils.MetaACD: utils.NewDecimalFromFloat64(0.2),
 				},
-				SortingData: map[string]interface{}{
+				SortingData: map[string]any{
 					utils.Weight:  15.0,
 					utils.MetaACD: 0.2,
 				},
@@ -732,7 +732,7 @@ func TestLibRoutesSortQOS6(t *testing.T) {
 					utils.Weight:  utils.NewDecimalFromFloat64(25.0),
 					utils.MetaACD: utils.NewDecimalFromFloat64(0.2),
 				},
-				SortingData: map[string]interface{}{
+				SortingData: map[string]any{
 					utils.Weight:  25.0,
 					utils.MetaACD: 0.2,
 				},
@@ -743,7 +743,7 @@ func TestLibRoutesSortQOS6(t *testing.T) {
 					utils.Weight:  utils.NewDecimalFromFloat64(20.0),
 					utils.MetaACD: utils.NewDecimalFromFloat64(0.1),
 				},
-				SortingData: map[string]interface{}{
+				SortingData: map[string]any{
 					utils.Weight:  20.0,
 					utils.MetaACD: 0.1,
 				},
@@ -772,7 +772,7 @@ func TestLibRoutesSortQOS7(t *testing.T) {
 					utils.Weight:  utils.NewDecimalFromFloat64(15.0),
 					utils.MetaACD: utils.NewDecimalFromFloat64(-1.0),
 				},
-				SortingData: map[string]interface{}{
+				SortingData: map[string]any{
 					utils.Weight:  15.0,
 					utils.MetaACD: -1.0,
 				},
@@ -783,7 +783,7 @@ func TestLibRoutesSortQOS7(t *testing.T) {
 					utils.Weight:  utils.NewDecimalFromFloat64(25.0),
 					utils.MetaACD: utils.NewDecimalFromFloat64(-1.0),
 				},
-				SortingData: map[string]interface{}{
+				SortingData: map[string]any{
 					utils.Weight:  25.0,
 					utils.MetaACD: -1.0,
 				},
@@ -794,7 +794,7 @@ func TestLibRoutesSortQOS7(t *testing.T) {
 					utils.Weight:  utils.NewDecimalFromFloat64(20.0),
 					utils.MetaACD: utils.NewDecimalFromFloat64(-1.0),
 				},
-				SortingData: map[string]interface{}{
+				SortingData: map[string]any{
 					utils.Weight:  20.0,
 					utils.MetaACD: -1.0,
 				},
@@ -823,7 +823,7 @@ func TestLibRoutesSortQOS8(t *testing.T) {
 					utils.Weight:  utils.NewDecimalFromFloat64(15.0),
 					utils.MetaACD: utils.NewDecimalFromFloat64(-1.0),
 				},
-				SortingData: map[string]interface{}{
+				SortingData: map[string]any{
 					utils.Weight:  15.0,
 					utils.MetaACD: -1.0,
 				},
@@ -834,7 +834,7 @@ func TestLibRoutesSortQOS8(t *testing.T) {
 					utils.Weight:  utils.NewDecimalFromFloat64(25.0),
 					utils.MetaACD: utils.NewDecimalFromFloat64(-1.0),
 				},
-				SortingData: map[string]interface{}{
+				SortingData: map[string]any{
 					utils.Weight:  25.0,
 					utils.MetaACD: -1.0,
 				},
@@ -845,7 +845,7 @@ func TestLibRoutesSortQOS8(t *testing.T) {
 					utils.Weight:  utils.NewDecimalFromFloat64(20.0),
 					utils.MetaACD: utils.NewDecimalFromFloat64(10.0),
 				},
-				SortingData: map[string]interface{}{
+				SortingData: map[string]any{
 					utils.Weight:  20.0,
 					utils.MetaACD: 10.0,
 				},
@@ -875,7 +875,7 @@ func TestLibRoutesSortLoadDistribution(t *testing.T) {
 					utils.Ratio:  utils.NewDecimalFromFloat64(4.0),
 					utils.Load:   utils.NewDecimalFromFloat64(3.0),
 				},
-				SortingData: map[string]interface{}{
+				SortingData: map[string]any{
 					utils.Weight: 25.0,
 					utils.Ratio:  4.0,
 					utils.Load:   3.0,
@@ -888,7 +888,7 @@ func TestLibRoutesSortLoadDistribution(t *testing.T) {
 					utils.Ratio:  utils.NewDecimalFromFloat64(10.0),
 					utils.Load:   utils.NewDecimalFromFloat64(5.0),
 				},
-				SortingData: map[string]interface{}{
+				SortingData: map[string]any{
 					utils.Weight: 15.0,
 					utils.Ratio:  10.0,
 					utils.Load:   5.0,
@@ -901,7 +901,7 @@ func TestLibRoutesSortLoadDistribution(t *testing.T) {
 					utils.Ratio:  utils.NewDecimalFromFloat64(1.0),
 					utils.Load:   utils.NewDecimalFromFloat64(1.0),
 				},
-				SortingData: map[string]interface{}{
+				SortingData: map[string]any{
 					utils.Weight: 25.0,
 					utils.Ratio:  1.0,
 					utils.Load:   1.0,
@@ -925,7 +925,7 @@ func TestLibRoutesLCSameWeight(t *testing.T) {
 	sSpls := &SortedRoutes{}
 	sortedSlice := &SortedRoutes{}
 	for i := 0; i <= 10; i++ {
-		route := &SortedRoute{RouteID: strconv.Itoa(i), SortingData: map[string]interface{}{
+		route := &SortedRoute{RouteID: strconv.Itoa(i), SortingData: map[string]any{
 			utils.Cost:   0.1,
 			utils.Weight: 10.0,
 		}}
@@ -947,7 +947,7 @@ func TestLibRoutesHCSameWeight(t *testing.T) {
 	sSpls := &SortedRoutes{}
 	sortedSlice := &SortedRoutes{}
 	for i := 0; i <= 10; i++ {
-		route := &SortedRoute{RouteID: strconv.Itoa(i), SortingData: map[string]interface{}{
+		route := &SortedRoute{RouteID: strconv.Itoa(i), SortingData: map[string]any{
 			utils.Cost:   0.1,
 			utils.Weight: 10.0,
 		}}
@@ -975,7 +975,7 @@ func TestLibRoutesResAscSameWeight(t *testing.T) {
 				utils.ResourceUsage: utils.NewDecimalFromFloat64(5.0),
 				utils.Weight:        utils.NewDecimalFromFloat64(10.0),
 			},
-			SortingData: map[string]interface{}{
+			SortingData: map[string]any{
 				utils.ResourceUsage: 5.0,
 				utils.Weight:        10.0,
 			},
@@ -1004,7 +1004,7 @@ func TestLibRoutesResDescSameWeight(t *testing.T) {
 				utils.ResourceUsage: utils.NewDecimalFromFloat64(5.0),
 				utils.Weight:        utils.NewDecimalFromFloat64(10.0),
 			},
-			SortingData: map[string]interface{}{
+			SortingData: map[string]any{
 				utils.ResourceUsage: 5.0,
 				utils.Weight:        10.0,
 			},
@@ -1035,7 +1035,7 @@ func TestLibRoutesLoadDistSameWeight(t *testing.T) {
 				utils.Load:   utils.NewDecimalFromFloat64(3.0),
 				utils.Weight: utils.NewDecimalFromFloat64(10.0),
 			},
-			SortingData: map[string]interface{}{
+			SortingData: map[string]any{
 				utils.Ratio:  4.0,
 				utils.Load:   3.0,
 				utils.Weight: 10.0,
@@ -1059,7 +1059,7 @@ func TestLibRoutesQOSSameWeight(t *testing.T) {
 	sSpls := &SortedRoutes{}
 	sortedSlice := &SortedRoutes{}
 	for i := 0; i <= 10; i++ {
-		route := &SortedRoute{RouteID: strconv.Itoa(i), SortingData: map[string]interface{}{
+		route := &SortedRoute{RouteID: strconv.Itoa(i), SortingData: map[string]any{
 			utils.Weight:  10.0,
 			utils.MetaACD: -1.0,
 		}}
@@ -1081,7 +1081,7 @@ func TestLibRoutesSameWeight(t *testing.T) {
 	sSpls := &SortedRoutes{}
 	sortedSlice := &SortedRoutes{}
 	for i := 0; i <= 10; i++ {
-		route := &SortedRoute{RouteID: strconv.Itoa(i), SortingData: map[string]interface{}{
+		route := &SortedRoute{RouteID: strconv.Itoa(i), SortingData: map[string]any{
 			utils.Weight: 10.0,
 		}}
 		sSpls.Routes = append(sSpls.Routes, route)
@@ -1107,7 +1107,7 @@ func BenchmarkRouteSortCost(b *testing.B) {
 					utils.Cost:   utils.NewDecimalFromFloat64(0.1),
 					utils.Weight: utils.NewDecimalFromFloat64(10.0),
 				},
-				SortingData: map[string]interface{}{
+				SortingData: map[string]any{
 					utils.Cost:   0.1,
 					utils.Weight: 10.0,
 				},
@@ -1119,7 +1119,7 @@ func BenchmarkRouteSortCost(b *testing.B) {
 					utils.Cost:   utils.NewDecimalFromFloat64(0.1),
 					utils.Weight: utils.NewDecimalFromFloat64(10.0),
 				},
-				SortingData: map[string]interface{}{
+				SortingData: map[string]any{
 					utils.Cost:   0.1,
 					utils.Weight: 10.0,
 				},
@@ -1131,7 +1131,7 @@ func BenchmarkRouteSortCost(b *testing.B) {
 					utils.Cost:   utils.NewDecimalFromFloat64(0.1),
 					utils.Weight: utils.NewDecimalFromFloat64(10.0),
 				},
-				SortingData: map[string]interface{}{
+				SortingData: map[string]any{
 					utils.Cost:   0.1,
 					utils.Weight: 10.0,
 				},
@@ -1154,7 +1154,7 @@ func TestRouteIDsGetIDs(t *testing.T) {
 					utils.Cost:   utils.NewDecimalFromFloat64(0.1),
 					utils.Weight: utils.NewDecimalFromFloat64(10.0),
 				},
-				SortingData: map[string]interface{}{
+				SortingData: map[string]any{
 					utils.Cost:   0.1,
 					utils.Weight: 10.0,
 				},
@@ -1166,7 +1166,7 @@ func TestRouteIDsGetIDs(t *testing.T) {
 					utils.Cost:   utils.NewDecimalFromFloat64(0.1),
 					utils.Weight: utils.NewDecimalFromFloat64(10.0),
 				},
-				SortingData: map[string]interface{}{
+				SortingData: map[string]any{
 					utils.Cost:   0.1,
 					utils.Weight: 10.0,
 				},
@@ -1178,7 +1178,7 @@ func TestRouteIDsGetIDs(t *testing.T) {
 					utils.Cost:   utils.NewDecimalFromFloat64(0.1),
 					utils.Weight: utils.NewDecimalFromFloat64(10.0),
 				},
-				SortingData: map[string]interface{}{
+				SortingData: map[string]any{
 					utils.Cost:   0.1,
 					utils.Weight: 10.0,
 				},
@@ -1204,7 +1204,7 @@ func TestSortHighestCost(t *testing.T) {
 					utils.Cost:   utils.NewDecimalFromFloat64(0.1),
 					utils.Weight: utils.NewDecimalFromFloat64(11.0),
 				},
-				SortingData: map[string]interface{}{
+				SortingData: map[string]any{
 					utils.Cost:   0.1,
 					utils.Weight: 11.0,
 				},
@@ -1215,7 +1215,7 @@ func TestSortHighestCost(t *testing.T) {
 					utils.Cost:   utils.NewDecimalFromFloat64(0.1),
 					utils.Weight: utils.NewDecimalFromFloat64(10.0),
 				},
-				SortingData: map[string]interface{}{
+				SortingData: map[string]any{
 					utils.Cost:   0.1,
 					utils.Weight: 10.0,
 				},
@@ -1238,7 +1238,7 @@ func TestSortResourceAscendentDescendent(t *testing.T) {
 					utils.ResourceUsage: utils.NewDecimalFromFloat64(10.0),
 					utils.Weight:        utils.NewDecimalFromFloat64(10.0),
 				},
-				SortingData: map[string]interface{}{
+				SortingData: map[string]any{
 					utils.ResourceUsage: 10.0,
 					utils.Weight:        10.0,
 				},
@@ -1249,7 +1249,7 @@ func TestSortResourceAscendentDescendent(t *testing.T) {
 					utils.ResourceUsage: utils.NewDecimalFromFloat64(10.0),
 					utils.Weight:        utils.NewDecimalFromFloat64(11.0),
 				},
-				SortingData: map[string]interface{}{
+				SortingData: map[string]any{
 					utils.ResourceUsage: 10.0,
 					utils.Weight:        11.0,
 				},
@@ -1294,7 +1294,7 @@ func TestSortLoadDistribution(t *testing.T) {
 					utils.Load:   utils.NewDecimalFromFloat64(10.0),
 					utils.Weight: utils.NewDecimalFromFloat64(15.5),
 				},
-				SortingData: map[string]interface{}{
+				SortingData: map[string]any{
 					utils.Ratio:  6.0,
 					utils.Load:   10.0,
 					utils.Weight: 15.5,
@@ -1307,7 +1307,7 @@ func TestSortLoadDistribution(t *testing.T) {
 					utils.Load:   utils.NewDecimalFromFloat64(10.0),
 					utils.Weight: utils.NewDecimalFromFloat64(14.5),
 				},
-				SortingData: map[string]interface{}{
+				SortingData: map[string]any{
 					utils.Ratio:  6.0,
 					utils.Load:   10.0,
 					utils.Weight: 14.5,
@@ -1331,7 +1331,7 @@ func TestSortedRouteAsNavigableMap(t *testing.T) {
 			utils.Load:   utils.NewDecimalFromFloat64(10.0),
 			utils.Weight: utils.NewDecimalFromFloat64(15.5),
 		},
-		SortingData: map[string]interface{}{
+		SortingData: map[string]any{
 			utils.Ratio:  6.0,
 			utils.Load:   10.0,
 			utils.Weight: 15.5,
@@ -1370,7 +1370,7 @@ func TestSortedRoutesAsNavigableMap(t *testing.T) {
 					utils.Load:   utils.NewDecimalFromFloat64(10.0),
 					utils.Weight: utils.NewDecimalFromFloat64(15.5),
 				},
-				SortingData: map[string]interface{}{
+				SortingData: map[string]any{
 					utils.Ratio:  6.0,
 					utils.Load:   10.0,
 					utils.Weight: 15.5,
@@ -1383,7 +1383,7 @@ func TestSortedRoutesAsNavigableMap(t *testing.T) {
 					utils.Ratio: utils.NewDecimalFromFloat64(7.0),
 					utils.Load:  utils.NewDecimalFromFloat64(10.0),
 				},
-				SortingData: map[string]interface{}{
+				SortingData: map[string]any{
 					utils.Ratio: 7.0,
 					utils.Load:  10.0,
 				},
@@ -1579,7 +1579,7 @@ func TestRouteLazyPassErr(t *testing.T) {
 
 	ev := new(utils.CGREvent)
 	data := utils.MapStorage{
-		"FirstLevel":        map[string]interface{}{},
+		"FirstLevel":        map[string]any{},
 		"AnotherFirstLevel": "ValAnotherFirstLevel",
 	}
 

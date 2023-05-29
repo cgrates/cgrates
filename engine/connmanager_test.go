@@ -496,8 +496,8 @@ func TestCMCallWithConnIDsErrNotNetwork(t *testing.T) {
 	}
 
 	ccM := &ccMock{
-		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
-			"testMethod": func(ctx *context.Context, args, reply interface{}) error {
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			"testMethod": func(ctx *context.Context, args, reply any) error {
 				return utils.ErrExists
 			},
 		},

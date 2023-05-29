@@ -29,7 +29,7 @@ const (
 	ColCfg = "config"
 )
 
-func (ms *MongoStorage) GetSection(ctx *context.Context, section string, val interface{}) error {
+func (ms *MongoStorage) GetSection(ctx *context.Context, section string, val any) error {
 	return ms.query(context.TODO(), func(sctx mongo.SessionContext) (err error) {
 		cur := ms.getCol(ColCfg).FindOne(sctx, bson.M{"section": section},
 			options.FindOne().SetProjection(bson.M{"cfg": 1, "_id": 0 /*"section": 0, */}))
@@ -44,7 +44,7 @@ func (ms *MongoStorage) GetSection(ctx *context.Context, section string, val int
 	})
 }
 
-func (ms *MongoStorage) SetSection(ctx *context.Context, section string, jsn interface{}) (err error) {
+func (ms *MongoStorage) SetSection(ctx *context.Context, section string, jsn any) (err error) {
 	return ms.query(ctx, func(sctx mongo.SessionContext) (err error) {
 		_, err = ms.getCol(ColCfg).UpdateOne(sctx, bson.M{"section": section},
 			bson.M{"$set": bson.M{

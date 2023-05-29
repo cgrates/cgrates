@@ -835,7 +835,7 @@ func testRateRemoveRateProfileRates(t *testing.T) {
 				},
 			},
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaRateSOverwrite: true,
 		},
 	}
@@ -1974,7 +1974,7 @@ func testRateProfileUpdateProfileRatesOverwrite(t *testing.T) {
 				},
 			},
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaRateSOverwrite: true,
 		},
 	}
@@ -2165,7 +2165,7 @@ func testRateProfilesForEventMatchingEvents(t *testing.T) {
 	if err := rateSRPC.Call(context.Background(), utils.RateSv1RateProfilesForEvent,
 		&utils.CGREvent{
 			Tenant: "cgrates.org",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				"Destination": "2004",
 			},
 		}, &rtPrfIDs); err != nil {
@@ -2186,7 +2186,7 @@ func testRateProfilesForEventMatchingEvents(t *testing.T) {
 	if err := rateSRPC.Call(context.Background(), utils.RateSv1RateProfilesForEvent,
 		&utils.CGREvent{
 			Tenant: "cgrates.org",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				"Account":     "1445",
 				"Destination": "2004",
 			},
@@ -2208,7 +2208,7 @@ func testRateProfilesForEventMatchingEvents(t *testing.T) {
 	if err := rateSRPC.Call(context.Background(), utils.RateSv1RateProfilesForEvent,
 		&utils.CGREvent{
 			Tenant: "cgrates.org",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				"Account":     "1445",
 				"MonthToRate": "july",
 				"Destination": "2004",
@@ -2308,11 +2308,11 @@ func testRateProfileRatesForEventMatchingEvents(t *testing.T) {
 			RateProfileID: "RT_CGR202",
 			CGREvent: &utils.CGREvent{
 				Tenant: "cgrates.org",
-				Event: map[string]interface{}{
+				Event: map[string]any{
 					"ToR":     "*voice",
 					"Account": "2021",
 				},
-				APIOpts: map[string]interface{}{
+				APIOpts: map[string]any{
 					utils.MetaUsage: "1m",
 				},
 			},
@@ -2336,12 +2336,12 @@ func testRateProfileRatesForEventMatchingEvents(t *testing.T) {
 			RateProfileID: "RT_CGR202",
 			CGREvent: &utils.CGREvent{
 				Tenant: "cgrates.org",
-				Event: map[string]interface{}{
+				Event: map[string]any{
 					"ToR":         "*voice",
 					"Account":     "2021",
 					"Destination": "2023",
 				},
-				APIOpts: map[string]interface{}{
+				APIOpts: map[string]any{
 					utils.MetaUsage: "3m",
 				},
 			},
@@ -2365,12 +2365,12 @@ func testRateProfileRatesForEventMatchingEvents(t *testing.T) {
 			RateProfileID: "RT_CGR202",
 			CGREvent: &utils.CGREvent{
 				Tenant: "cgrates.org",
-				Event: map[string]interface{}{
+				Event: map[string]any{
 					"ToR":         "*voice",
 					"Account":     "2021",
 					"Destination": "2023",
 				},
-				APIOpts: map[string]interface{}{
+				APIOpts: map[string]any{
 					utils.MetaUsage: "1m",
 				},
 			},
@@ -2486,7 +2486,7 @@ func testRateSPaginateGetRateProfile1(t *testing.T) {
 		TenantID: &utils.TenantID{
 			ID: "RATE_PROFILE",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.PageLimitOpt:   4,
 			utils.PageOffsetOpt:  1,
 			utils.ItemsPrefixOpt: "RateB",
@@ -2553,7 +2553,7 @@ func testRateSPaginateGetRateProfile2(t *testing.T) {
 		TenantID: &utils.TenantID{
 			ID: "RATE_PROFILE",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.PageLimitOpt:   4,
 			utils.PageOffsetOpt:  1,
 			utils.ItemsPrefixOpt: "RateA",
@@ -2607,7 +2607,7 @@ func testRateSPaginateGetRateProfile3(t *testing.T) {
 		TenantID: &utils.TenantID{
 			ID: "RATE_PROFILE",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.PageOffsetOpt: 1,
 		},
 	}

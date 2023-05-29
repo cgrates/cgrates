@@ -49,7 +49,7 @@ func (self *CmdGetDispatcherHost) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdGetDispatcherHost) RpcParams(reset bool) interface{} {
+func (self *CmdGetDispatcherHost) RpcParams(reset bool) any {
 	if reset || self.rpcParams == nil {
 		self.rpcParams = new(utils.TenantIDWithAPIOpts)
 	}
@@ -60,7 +60,7 @@ func (self *CmdGetDispatcherHost) PostprocessRpcParams() error {
 	return nil
 }
 
-func (self *CmdGetDispatcherHost) RpcResult() interface{} {
+func (self *CmdGetDispatcherHost) RpcResult() any {
 	var s engine.DispatcherHost
 	return &s
 }

@@ -73,7 +73,7 @@ func TestServerIT(t *testing.T) {
 
 type mockRegister struct{}
 
-func (*mockRegister) ForTest(ctx *context.Context, args, reply interface{}) error {
+func (*mockRegister) ForTest(ctx *context.Context, args, reply any) error {
 	return nil
 }
 

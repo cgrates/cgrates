@@ -780,11 +780,11 @@ func testChargersGetChargersForEvent(t *testing.T) {
 	cgrEv := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "eventCharger",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1001",
 			utils.Destination:  "1002",
 		},
-		APIOpts: map[string]interface{}{},
+		APIOpts: map[string]any{},
 	}
 	reply := &engine.ChargerProfiles{}
 	if err := chargersRPC.Call(context.Background(), utils.ChargerSv1GetChargersForEvent,
@@ -808,11 +808,11 @@ func testChargersProcessEvent(t *testing.T) {
 			CGREvent: &utils.CGREvent{
 				Tenant: "cgrates.org",
 				ID:     "eventCharger",
-				Event: map[string]interface{}{
+				Event: map[string]any{
 					utils.AccountField: "1001",
 					utils.Destination:  "1002",
 				},
-				APIOpts: map[string]interface{}{
+				APIOpts: map[string]any{
 					utils.MetaChargeID: utils.UUIDSha1Prefix(),
 					"*subsys":          "*chargers",
 					utils.MetaRunID:    utils.MetaDefault,
@@ -823,11 +823,11 @@ func testChargersProcessEvent(t *testing.T) {
 	cgrEv := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "eventCharger",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1001",
 			utils.Destination:  "1002",
 		},
-		APIOpts: map[string]interface{}{},
+		APIOpts: map[string]any{},
 	}
 	reply := &[]*engine.ChrgSProcessEventReply{}
 	if err := chargersRPC.Call(context.Background(), utils.ChargerSv1ProcessEvent,
@@ -954,10 +954,10 @@ func testChargersBlockerGetChargersForEvent(t *testing.T) {
 	args := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "EventGetChargerProfiles",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			"TestCase": "BlockerBehaviour",
 		},
-		APIOpts: map[string]interface{}{},
+		APIOpts: map[string]any{},
 	}
 	expected := engine.ChargerProfiles{
 		{

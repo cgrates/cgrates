@@ -48,7 +48,7 @@ func (self *CmdGetAttributeForEvent) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdGetAttributeForEvent) RpcParams(reset bool) interface{} {
+func (self *CmdGetAttributeForEvent) RpcParams(reset bool) any {
 	if reset || self.rpcParams == nil {
 		self.rpcParams = new(utils.CGREvent)
 	}
@@ -59,7 +59,7 @@ func (self *CmdGetAttributeForEvent) PostprocessRpcParams() error {
 	return nil
 }
 
-func (self *CmdGetAttributeForEvent) RpcResult() interface{} {
+func (self *CmdGetAttributeForEvent) RpcResult() any {
 	var atr engine.AttributeProfile
 	return &atr
 }

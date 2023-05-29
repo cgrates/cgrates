@@ -34,7 +34,7 @@ import (
 // ThresholdProfileWithAPIOpts is used in replicatorV1 for dispatcher
 type ThresholdProfileWithAPIOpts struct {
 	*ThresholdProfile
-	APIOpts map[string]interface{}
+	APIOpts map[string]any
 }
 
 // ThresholdProfile the profile for threshold
@@ -91,7 +91,7 @@ func (tp *ThresholdProfile) isLocked() bool {
 // ThresholdWithAPIOpts is used in replicatorV1 for dispatcher
 type ThresholdWithAPIOpts struct {
 	*Threshold
-	APIOpts map[string]interface{}
+	APIOpts map[string]any
 }
 
 // Threshold is the unit matched by filters
@@ -154,7 +154,7 @@ func processEventWithThreshold(ctx *context.Context, connMgr *ConnManager, actio
 	}
 
 	if args.APIOpts == nil {
-		args.APIOpts = make(map[string]interface{})
+		args.APIOpts = make(map[string]any)
 	}
 
 	args.APIOpts[utils.OptsActionsProfileIDs] = t.tPrfl.ActionProfileIDs
@@ -598,7 +598,7 @@ func (tS *ThresholdS) V1ResetThreshold(ctx *context.Context, tntID *utils.Tenant
 	return
 }
 
-func (tp *ThresholdProfile) Set(path []string, val interface{}, _ bool, _ string) (err error) {
+func (tp *ThresholdProfile) Set(path []string, val any, _ bool, _ string) (err error) {
 	if len(path) != 1 {
 		return utils.ErrWrongPath
 	}
@@ -640,7 +640,7 @@ func (tp *ThresholdProfile) Set(path []string, val interface{}, _ bool, _ string
 	return
 }
 
-func (tp *ThresholdProfile) Merge(v2 interface{}) {
+func (tp *ThresholdProfile) Merge(v2 any) {
 	vi := v2.(*ThresholdProfile)
 	if len(vi.Tenant) != 0 {
 		tp.Tenant = vi.Tenant
@@ -670,13 +670,13 @@ func (tp *ThresholdProfile) Merge(v2 interface{}) {
 
 func (tp *ThresholdProfile) String() string { return utils.ToJSON(tp) }
 func (tp *ThresholdProfile) FieldAsString(fldPath []string) (_ string, err error) {
-	var val interface{}
+	var val any
 	if val, err = tp.FieldAsInterface(fldPath); err != nil {
 		return
 	}
 	return utils.IfaceAsString(val), nil
 }
-func (tp *ThresholdProfile) FieldAsInterface(fldPath []string) (_ interface{}, err error) {
+func (tp *ThresholdProfile) FieldAsInterface(fldPath []string) (_ any, err error) {
 	if len(fldPath) != 1 {
 		return nil, utils.ErrNotFound
 	}

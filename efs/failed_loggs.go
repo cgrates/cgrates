@@ -35,9 +35,9 @@ import (
 type FailedExportersLogg struct {
 	lk             sync.RWMutex
 	Path           string
-	Opts           map[string]interface{} // this is meta
+	Opts           map[string]any // this is meta
 	Format         string
-	Events         []interface{}
+	Events         []any
 	FailedPostsDir string
 	Module         string
 
@@ -46,7 +46,7 @@ type FailedExportersLogg struct {
 }
 
 // AddEvent adds one event
-func (expEv *FailedExportersLogg) AddEvent(ev interface{}) {
+func (expEv *FailedExportersLogg) AddEvent(ev any) {
 	expEv.lk.Lock()
 	expEv.Events = append(expEv.Events, ev)
 	expEv.lk.Unlock()

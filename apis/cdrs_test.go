@@ -42,7 +42,7 @@ func TestCDRsProcessEvent(t *testing.T) {
 	args := &utils.CGREvent{
 		ID:     "TestMatchingAccountsForEvent",
 		Tenant: "cgrates.org",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1001",
 		},
 	}
@@ -69,7 +69,7 @@ func TestCDRsProcessEventWithGet(t *testing.T) {
 	args := &utils.CGREvent{
 		ID:     "TestMatchingAccountsForEvent",
 		Tenant: "cgrates.org",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1001",
 		},
 	}
@@ -79,10 +79,10 @@ func TestCDRsProcessEventWithGet(t *testing.T) {
 	}
 	exp := []utils.EventsWithOpts{
 		{
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.AccountField: "1001",
 			},
-			Opts: map[string]interface{}{},
+			Opts: map[string]any{},
 		},
 	}
 	if !reflect.DeepEqual(exp[0].Event, reply[0].Event) {

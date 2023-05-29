@@ -40,7 +40,7 @@ func TestTPEnewTPDispatchers(t *testing.T) {
 				ID:        "Dsp1",
 				FilterIDs: []string{"*string:~*req.Account:1001", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z"},
 				Strategy:  utils.MetaFirst,
-				StrategyParams: map[string]interface{}{
+				StrategyParams: map[string]any{
 					utils.MetaDefaultRatio: "false",
 				},
 				Weight: 20,
@@ -49,7 +49,7 @@ func TestTPEnewTPDispatchers(t *testing.T) {
 						ID:        "C1",
 						FilterIDs: []string{},
 						Weight:    10,
-						Params:    map[string]interface{}{"0": "192.168.54.203"},
+						Params:    map[string]any{"0": "192.168.54.203"},
 						Blocker:   false,
 					},
 				},
@@ -79,7 +79,7 @@ func TestTPEExportItemsDispatchers(t *testing.T) {
 		ID:        "Dsp1",
 		FilterIDs: []string{"*string:~*req.Account:1001", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z"},
 		Strategy:  utils.MetaFirst,
-		StrategyParams: map[string]interface{}{
+		StrategyParams: map[string]any{
 			utils.MetaDefaultRatio: "false",
 		},
 		Weight: 20,
@@ -88,7 +88,7 @@ func TestTPEExportItemsDispatchers(t *testing.T) {
 				ID:        "C1",
 				FilterIDs: []string{},
 				Weight:    10,
-				Params:    map[string]interface{}{"0": "192.168.54.203"},
+				Params:    map[string]any{"0": "192.168.54.203"},
 				Blocker:   false,
 			},
 		},
@@ -111,7 +111,7 @@ func TestTPEExportItemsDispatchersNoDbConn(t *testing.T) {
 		ID:        "Dsp1",
 		FilterIDs: []string{"*string:~*req.Account:1001", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z"},
 		Strategy:  utils.MetaFirst,
-		StrategyParams: map[string]interface{}{
+		StrategyParams: map[string]any{
 			utils.MetaDefaultRatio: "false",
 		},
 		Weight: 20,
@@ -120,7 +120,7 @@ func TestTPEExportItemsDispatchersNoDbConn(t *testing.T) {
 				ID:        "C1",
 				FilterIDs: []string{},
 				Weight:    10,
-				Params:    map[string]interface{}{"0": "192.168.54.203"},
+				Params:    map[string]any{"0": "192.168.54.203"},
 				Blocker:   false,
 			},
 		},
@@ -145,7 +145,7 @@ func TestTPEExportItemsDispatchersIDNotFound(t *testing.T) {
 		ID:        "Dsp1",
 		FilterIDs: []string{"*string:~*req.Account:1001", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z"},
 		Strategy:  utils.MetaFirst,
-		StrategyParams: map[string]interface{}{
+		StrategyParams: map[string]any{
 			utils.MetaDefaultRatio: "false",
 		},
 		Weight: 20,
@@ -154,7 +154,7 @@ func TestTPEExportItemsDispatchersIDNotFound(t *testing.T) {
 				ID:        "C1",
 				FilterIDs: []string{},
 				Weight:    10,
-				Params:    map[string]interface{}{"0": "192.168.54.203"},
+				Params:    map[string]any{"0": "192.168.54.203"},
 				Blocker:   false,
 			},
 		},

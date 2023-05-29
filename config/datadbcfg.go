@@ -288,9 +288,9 @@ func (dbcfg DataDbCfg) Clone() (cln *DataDbCfg) {
 	return
 }
 
-// AsMapInterface returns the config as a map[string]interface{}
-func (dbcfg DataDbCfg) AsMapInterface(string) interface{} {
-	opts := map[string]interface{}{
+// AsMapInterface returns the config as a map[string]any
+func (dbcfg DataDbCfg) AsMapInterface(string) any {
+	opts := map[string]any{
 		utils.RedisMaxConnsCfg:           dbcfg.Opts.RedisMaxConns,
 		utils.RedisConnectAttemptsCfg:    dbcfg.Opts.RedisConnectAttempts,
 		utils.RedisSentinelNameCfg:       dbcfg.Opts.RedisSentinel,
@@ -306,7 +306,7 @@ func (dbcfg DataDbCfg) AsMapInterface(string) interface{} {
 		utils.RedisClientKeyCfg:          dbcfg.Opts.RedisClientKey,
 		utils.RedisCACertificateCfg:      dbcfg.Opts.RedisCACertificate,
 	}
-	mp := map[string]interface{}{
+	mp := map[string]any{
 		utils.DataDbTypeCfg:          dbcfg.Type,
 		utils.DataDbHostCfg:          dbcfg.Host,
 		utils.DataDbNameCfg:          dbcfg.Name,
@@ -320,7 +320,7 @@ func (dbcfg DataDbCfg) AsMapInterface(string) interface{} {
 		utils.OptsCfg:                opts,
 	}
 	if dbcfg.Items != nil {
-		items := make(map[string]interface{})
+		items := make(map[string]any)
 		for key, item := range dbcfg.Items {
 			items[key] = item.AsMapInterface()
 		}
@@ -344,9 +344,9 @@ type ItemOpts struct {
 	APIKey  string
 }
 
-// AsMapInterface returns the config as a map[string]interface{}
-func (itm *ItemOpts) AsMapInterface() (initialMP map[string]interface{}) {
-	initialMP = map[string]interface{}{
+// AsMapInterface returns the config as a map[string]any
+func (itm *ItemOpts) AsMapInterface() (initialMP map[string]any) {
+	initialMP = map[string]any{
 		utils.RemoteCfg:    itm.Remote,
 		utils.ReplicateCfg: itm.Replicate,
 		utils.LimitCfg:     itm.Limit,

@@ -855,10 +855,10 @@ func testRoutesBlockerGetRouteProfilesForEvent(t *testing.T) {
 	args := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "EventGetRouteProfiles",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			"TestCase": "RouteProfileBlockerBehaviour",
 		},
-		APIOpts: map[string]interface{}{},
+		APIOpts: map[string]any{},
 	}
 	expected := []*engine.RouteProfile{
 		{
@@ -1004,10 +1004,10 @@ func testRoutesBlockerGetRoutes(t *testing.T) {
 	args := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "EventGetRoutes",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			"TestCase": "RouteBlockerBehaviour",
 		},
-		APIOpts: map[string]interface{}{},
+		APIOpts: map[string]any{},
 	}
 	expected := engine.SortedRoutesList{
 		{
@@ -1017,21 +1017,21 @@ func testRoutesBlockerGetRoutes(t *testing.T) {
 				{
 					RouteID:         "route3",
 					RouteParameters: utils.EmptyString,
-					SortingData: map[string]interface{}{
+					SortingData: map[string]any{
 						utils.Weight: 40.,
 					},
 				},
 				{
 					RouteID:         "route4",
 					RouteParameters: utils.EmptyString,
-					SortingData: map[string]interface{}{
+					SortingData: map[string]any{
 						utils.Weight: 35.,
 					},
 				},
 				{
 					RouteID:         "route2",
 					RouteParameters: utils.EmptyString,
-					SortingData: map[string]interface{}{
+					SortingData: map[string]any{
 						utils.Weight:  20.,
 						utils.Blocker: true,
 					},

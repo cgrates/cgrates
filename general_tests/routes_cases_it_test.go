@@ -99,11 +99,11 @@ func BenchmarkV1RtsCasesSortingRoutesLowestCost(t *testing.B) {
 	ev := &utils.CGREvent{
 		ID:     "LC_SORT",
 		Tenant: "cgrates.org",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "acnt22",
 			utils.Destination:  "104423",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaStartTime: "2013-06-01T05:00:00Z",
 			utils.MetaUsage:     "50s",
 		},
@@ -115,33 +115,33 @@ func BenchmarkV1RtsCasesSortingRoutesLowestCost(t *testing.B) {
 			Routes: []*engine.SortedRoute{
 				{
 					RouteID: "route4",
-					SortingData: map[string]interface{}{
+					SortingData: map[string]any{
 						utils.Cost:       nil,
-						utils.AccountIDs: []interface{}{"ACCNT_ROUTES2"},
+						utils.AccountIDs: []any{"ACCNT_ROUTES2"},
 						utils.Weight:     55.,
 					},
 				},
 				{
 					RouteID: "route1",
-					SortingData: map[string]interface{}{
+					SortingData: map[string]any{
 						utils.Cost:       5.,
-						utils.AccountIDs: []interface{}{"ACCNT_ROUTES1"},
+						utils.AccountIDs: []any{"ACCNT_ROUTES1"},
 						utils.Weight:     20.,
 					},
 				},
 				{
 					RouteID: "route2",
-					SortingData: map[string]interface{}{
+					SortingData: map[string]any{
 						utils.Cost:       5.,
-						utils.AccountIDs: []interface{}{"ACCNT_ROUTES1"},
+						utils.AccountIDs: []any{"ACCNT_ROUTES1"},
 						utils.Weight:     15.,
 					},
 				},
 				{
 					RouteID: "route3",
-					SortingData: map[string]interface{}{
+					SortingData: map[string]any{
 						utils.Cost:       5.,
-						utils.AccountIDs: []interface{}{"ACCNT_ROUTES1"},
+						utils.AccountIDs: []any{"ACCNT_ROUTES1"},
 						utils.Weight:     10.,
 					},
 				},
@@ -227,7 +227,7 @@ func testV1RtsCaseFromFolder(t *testing.T) {
 	if err := rtsCaseSv1BiRpc.Call(context.Background(), utils.LoaderSv1Run,
 		&loaders.ArgsProcessFolder{
 			// StopOnError: true,
-			APIOpts: map[string]interface{}{utils.MetaCache: caching},
+			APIOpts: map[string]any{utils.MetaCache: caching},
 		}, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
@@ -560,7 +560,7 @@ func testV1RtsCasesSortingRoutesWeightAccountValue(t *testing.T) {
 	ev := &utils.CGREvent{
 		ID:     "WEIGHT_SORT",
 		Tenant: "cgrates.org",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1001",
 		},
 	}
@@ -571,13 +571,13 @@ func testV1RtsCasesSortingRoutesWeightAccountValue(t *testing.T) {
 			Routes: []*engine.SortedRoute{
 				{
 					RouteID: "vendor4",
-					SortingData: map[string]interface{}{
+					SortingData: map[string]any{
 						utils.Weight: 35.,
 					},
 				},
 				{
 					RouteID: "vendor2",
-					SortingData: map[string]interface{}{
+					SortingData: map[string]any{
 						utils.Weight: 20.,
 					},
 				},
@@ -597,7 +597,7 @@ func testV1RtsCasesSortingRoutesWeightAllRoutes(t *testing.T) {
 	ev := &utils.CGREvent{
 		ID:     "WEIGHT_SORT",
 		Tenant: "cgrates.org",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1001",
 			utils.Destination:  "1003",
 		},
@@ -609,25 +609,25 @@ func testV1RtsCasesSortingRoutesWeightAllRoutes(t *testing.T) {
 			Routes: []*engine.SortedRoute{
 				{
 					RouteID: "vendor3",
-					SortingData: map[string]interface{}{
+					SortingData: map[string]any{
 						utils.Weight: 40.,
 					},
 				},
 				{
 					RouteID: "vendor4",
-					SortingData: map[string]interface{}{
+					SortingData: map[string]any{
 						utils.Weight: 35.,
 					},
 				},
 				{
 					RouteID: "vendor2",
-					SortingData: map[string]interface{}{
+					SortingData: map[string]any{
 						utils.Weight: 20.,
 					},
 				},
 				{
 					RouteID: "vendor1",
-					SortingData: map[string]interface{}{
+					SortingData: map[string]any{
 						utils.Weight: 10.,
 					},
 				},
@@ -667,7 +667,7 @@ func testV1RtsCasesSortingRoutesWeightNotMatchingValue(t *testing.T) {
 	ev := &utils.CGREvent{
 		ID:     "WEIGHT_SORT",
 		Tenant: "cgrates.org",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1001",
 			utils.Destination:  "1003",
 		},
@@ -679,19 +679,19 @@ func testV1RtsCasesSortingRoutesWeightNotMatchingValue(t *testing.T) {
 			Routes: []*engine.SortedRoute{
 				{
 					RouteID: "vendor3",
-					SortingData: map[string]interface{}{
+					SortingData: map[string]any{
 						utils.Weight: 40.,
 					},
 				},
 				{
 					RouteID: "vendor4",
-					SortingData: map[string]interface{}{
+					SortingData: map[string]any{
 						utils.Weight: 35.,
 					},
 				},
 				{
 					RouteID: "vendor1",
-					SortingData: map[string]interface{}{
+					SortingData: map[string]any{
 						utils.Weight: 10.,
 					},
 				},
@@ -711,11 +711,11 @@ func testV1RtsCasesSortingRoutesLowestCost(t *testing.T) {
 	ev := &utils.CGREvent{
 		ID:     "LC_SORT",
 		Tenant: "cgrates.org",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1002",
 			utils.Destination:  "1003",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaUsage: "2m30s",
 		},
 	}
@@ -726,7 +726,7 @@ func testV1RtsCasesSortingRoutesLowestCost(t *testing.T) {
 			Routes: []*engine.SortedRoute{
 				{
 					RouteID: "vendor3",
-					SortingData: map[string]interface{}{
+					SortingData: map[string]any{
 						utils.Cost:          0.125,
 						utils.RateProfileID: "RP_VENDOR2",
 						utils.Weight:        10.,
@@ -734,7 +734,7 @@ func testV1RtsCasesSortingRoutesLowestCost(t *testing.T) {
 				},
 				{
 					RouteID: "vendor1",
-					SortingData: map[string]interface{}{
+					SortingData: map[string]any{
 						utils.Cost:          0.25,
 						utils.RateProfileID: "RP_VENDOR1",
 						utils.Weight:        0.,
@@ -758,11 +758,11 @@ func testV1RtsCasesSortingRoutesLowestCostDefaultUsage(t *testing.T) {
 	ev := &utils.CGREvent{
 		ID:     "LC_SORT",
 		Tenant: "cgrates.org",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1002",
 			utils.Destination:  "1003",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaStartTime: "2013-06-01T05:00:00Z",
 		},
 	}
@@ -773,7 +773,7 @@ func testV1RtsCasesSortingRoutesLowestCostDefaultUsage(t *testing.T) {
 			Routes: []*engine.SortedRoute{
 				{
 					RouteID: "vendor3",
-					SortingData: map[string]interface{}{
+					SortingData: map[string]any{
 						utils.Cost:          0.05,
 						utils.RateProfileID: "RP_VENDOR2",
 						utils.Weight:        10.,
@@ -781,7 +781,7 @@ func testV1RtsCasesSortingRoutesLowestCostDefaultUsage(t *testing.T) {
 				},
 				{
 					RouteID: "vendor1",
-					SortingData: map[string]interface{}{
+					SortingData: map[string]any{
 						utils.Cost:          0.1,
 						utils.RateProfileID: "RP_VENDOR1",
 						utils.Weight:        0.,
@@ -789,7 +789,7 @@ func testV1RtsCasesSortingRoutesLowestCostDefaultUsage(t *testing.T) {
 				},
 				{
 					RouteID: "vendor4",
-					SortingData: map[string]interface{}{
+					SortingData: map[string]any{
 						utils.Cost:          0.6,
 						utils.RateProfileID: "RP_STANDARD",
 						utils.Weight:        30.,
@@ -813,10 +813,10 @@ func testV1RtsCasesSortingRoutesLCSetStatsAndResForMatching(t *testing.T) {
 	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     utils.UUIDSha1Prefix(),
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			"Account": "1002",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsResourcesUsageID: "651a8db2-4f67-4cf8-b622-169e8a482e51",
 			utils.OptsResourcesUnits:   6,
 		},
@@ -835,11 +835,11 @@ func testV1RtsCasesSortingRoutesLCSetStatsAndResForMatching(t *testing.T) {
 	ev1 := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "event1",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1004",
 			utils.Category:     "vendor2",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaStartTime: "2013-06-01T05:00:00Z",
 			utils.MetaCost:      1.0,
 			utils.MetaUsage:     "2m30s",
@@ -861,11 +861,11 @@ func testV1RtsCasesSortingRoutesLowestCostStats(t *testing.T) {
 	ev := &utils.CGREvent{
 		ID:     "LC_SORT",
 		Tenant: "cgrates.org",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1002",
 			utils.Destination:  "1003",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaStartTime: "2013-06-01T05:00:00Z",
 			utils.MetaUsage:     "2m30s",
 		},
@@ -877,7 +877,7 @@ func testV1RtsCasesSortingRoutesLowestCostStats(t *testing.T) {
 			Routes: []*engine.SortedRoute{
 				{
 					RouteID: "vendor3",
-					SortingData: map[string]interface{}{
+					SortingData: map[string]any{
 						utils.Cost:          0.125,
 						utils.RateProfileID: "RP_VENDOR2",
 						utils.Weight:        10.,
@@ -885,7 +885,7 @@ func testV1RtsCasesSortingRoutesLowestCostStats(t *testing.T) {
 				},
 				{
 					RouteID: "vendor2",
-					SortingData: map[string]interface{}{
+					SortingData: map[string]any{
 						utils.Cost:          0.125,
 						utils.RateProfileID: "RP_VENDOR2",
 						utils.Weight:        0.,
@@ -893,7 +893,7 @@ func testV1RtsCasesSortingRoutesLowestCostStats(t *testing.T) {
 				},
 				{
 					RouteID: "vendor4",
-					SortingData: map[string]interface{}{
+					SortingData: map[string]any{
 						utils.Cost:          1.5,
 						utils.RateProfileID: "RP_STANDARD",
 						utils.Weight:        30.,
@@ -917,10 +917,10 @@ func testV1RtsCasesSortingRoutesLowestCosMatchingAllRoutes(t *testing.T) {
 	evRes := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     utils.UUIDSha1Prefix(),
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			"Account": "1002",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsResourcesUsageID: "651a8db2-4f67-4cf8-b622-169e8a482e51",
 			utils.OptsResourcesUnits:   4,
 		},
@@ -936,11 +936,11 @@ func testV1RtsCasesSortingRoutesLowestCosMatchingAllRoutes(t *testing.T) {
 	ev := &utils.CGREvent{
 		ID:     "LC_SORT",
 		Tenant: "cgrates.org",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1002",
 			utils.Destination:  "1003",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaStartTime: "2013-06-01T05:00:00Z",
 			utils.MetaUsage:     "2m30s",
 		},
@@ -952,7 +952,7 @@ func testV1RtsCasesSortingRoutesLowestCosMatchingAllRoutes(t *testing.T) {
 			Routes: []*engine.SortedRoute{
 				{
 					RouteID: "vendor3",
-					SortingData: map[string]interface{}{
+					SortingData: map[string]any{
 						utils.Cost:          0.125,
 						utils.RateProfileID: "RP_VENDOR2",
 						utils.Weight:        10.,
@@ -960,7 +960,7 @@ func testV1RtsCasesSortingRoutesLowestCosMatchingAllRoutes(t *testing.T) {
 				},
 				{
 					RouteID: "vendor2",
-					SortingData: map[string]interface{}{
+					SortingData: map[string]any{
 						utils.Cost:          0.125,
 						utils.RateProfileID: "RP_VENDOR2",
 						utils.Weight:        0.,
@@ -968,7 +968,7 @@ func testV1RtsCasesSortingRoutesLowestCosMatchingAllRoutes(t *testing.T) {
 				},
 				{
 					RouteID: "vendor1",
-					SortingData: map[string]interface{}{
+					SortingData: map[string]any{
 						utils.Cost:          0.25,
 						utils.RateProfileID: "RP_VENDOR1",
 						utils.Weight:        0.,
@@ -976,7 +976,7 @@ func testV1RtsCasesSortingRoutesLowestCosMatchingAllRoutes(t *testing.T) {
 				},
 				{
 					RouteID: "vendor4",
-					SortingData: map[string]interface{}{
+					SortingData: map[string]any{
 						utils.Cost:          1.5,
 						utils.RateProfileID: "RP_STANDARD",
 						utils.Weight:        30.,
@@ -998,11 +998,11 @@ func testV1RtsCasesSortingRoutesLowestCosMaxCost(t *testing.T) {
 	ev := &utils.CGREvent{
 		ID:     "LC_SORT",
 		Tenant: "cgrates.org",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1002",
 			utils.Destination:  "1003",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaStartTime:     "2013-06-01T05:00:00Z",
 			utils.OptsRoutesMaxCost: "0.35",
 			utils.MetaUsage:         "2m30s",
@@ -1015,7 +1015,7 @@ func testV1RtsCasesSortingRoutesLowestCosMaxCost(t *testing.T) {
 			Routes: []*engine.SortedRoute{
 				{
 					RouteID: "vendor3",
-					SortingData: map[string]interface{}{
+					SortingData: map[string]any{
 						utils.Cost:          0.125,
 						utils.RateProfileID: "RP_VENDOR2",
 						utils.Weight:        10.,
@@ -1023,7 +1023,7 @@ func testV1RtsCasesSortingRoutesLowestCosMaxCost(t *testing.T) {
 				},
 				{
 					RouteID: "vendor2",
-					SortingData: map[string]interface{}{
+					SortingData: map[string]any{
 						utils.Cost:          0.125,
 						utils.RateProfileID: "RP_VENDOR2",
 						utils.Weight:        0.,
@@ -1031,7 +1031,7 @@ func testV1RtsCasesSortingRoutesLowestCosMaxCost(t *testing.T) {
 				},
 				{
 					RouteID: "vendor1",
-					SortingData: map[string]interface{}{
+					SortingData: map[string]any{
 						utils.Cost:          0.25,
 						utils.RateProfileID: "RP_VENDOR1",
 						utils.Weight:        0.,
@@ -1053,11 +1053,11 @@ func testV1RtsCasesSortingRoutesLowestCosMaxCostNotMatch(t *testing.T) {
 	ev := &utils.CGREvent{
 		ID:     "LC_SORT",
 		Tenant: "cgrates.org",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1002",
 			utils.Destination:  "1003",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaStartTime:     "2013-06-01T05:00:00Z",
 			utils.OptsRoutesMaxCost: "0.05",
 			utils.MetaUsage:         "2m30s",
@@ -1077,11 +1077,11 @@ func testV1RtsCasesSortingRoutesProcessMetrics(t *testing.T) {
 	ev1 := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "event1",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1004",
 			utils.Category:     "vendor2",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaStartTime: "2013-06-01T05:00:00Z",
 			utils.MetaCost:      1.0,
 			utils.MetaUsage:     "2m30s",
@@ -1112,11 +1112,11 @@ func testV1RtsCasesSortingRoutesProcessMetrics(t *testing.T) {
 	ev1 = &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "event1",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1004",
 			utils.Category:     "vendor1",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaStartTime: "2013-06-01T05:00:00Z",
 			utils.MetaCost:      1.0,
 			utils.MetaUsage:     "2m30s",
@@ -1147,11 +1147,11 @@ func testV1RtsCasesSortingRoutesQOS(t *testing.T) {
 	ev := &utils.CGREvent{
 		ID:     "LC_SORT",
 		Tenant: "cgrates.org",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1003",
 			utils.Destination:  "1007",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaStartTime: "2013-06-01T05:00:00Z",
 			utils.MetaUsage:     "50s",
 		},
@@ -1163,7 +1163,7 @@ func testV1RtsCasesSortingRoutesQOS(t *testing.T) {
 			Routes: []*engine.SortedRoute{
 				{
 					RouteID: "vendor2",
-					SortingData: map[string]interface{}{
+					SortingData: map[string]any{
 						utils.MetaACC:             1.,
 						utils.MetaACD:             150. * 1e9,
 						"*sum#1":                  3.,
@@ -1175,7 +1175,7 @@ func testV1RtsCasesSortingRoutesQOS(t *testing.T) {
 				},
 				{
 					RouteID: "vendor1",
-					SortingData: map[string]interface{}{
+					SortingData: map[string]any{
 						utils.MetaACC: 1.,
 						utils.MetaACD: 150. * 1e9,
 						"*sum#1":      2.,
@@ -1201,11 +1201,11 @@ func testV1RtsCasesSortingRoutesQOSAllRoutes(t *testing.T) {
 	ev1 := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "event1",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1004",
 			utils.Category:     "vendor1",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaStartTime: "2013-06-01T05:00:00Z",
 			utils.MetaCost:      10.0,
 			utils.MetaUsage:     "2m30s",
@@ -1220,11 +1220,11 @@ func testV1RtsCasesSortingRoutesQOSAllRoutes(t *testing.T) {
 	ev := &utils.CGREvent{
 		ID:     "LC_SORT",
 		Tenant: "cgrates.org",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1003",
 			utils.Destination:  "1007",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaStartTime: "2013-06-01T05:00:00Z",
 			utils.MetaUsage:     "50s",
 		},
@@ -1236,7 +1236,7 @@ func testV1RtsCasesSortingRoutesQOSAllRoutes(t *testing.T) {
 			Routes: []*engine.SortedRoute{
 				{
 					RouteID: "vendor3",
-					SortingData: map[string]interface{}{
+					SortingData: map[string]any{
 						utils.MetaACC: 4.,
 						utils.MetaACD: 150. * 1e9,
 						"*sum#1":      3.,
@@ -1247,7 +1247,7 @@ func testV1RtsCasesSortingRoutesQOSAllRoutes(t *testing.T) {
 				},
 				{
 					RouteID: "vendor1",
-					SortingData: map[string]interface{}{
+					SortingData: map[string]any{
 						utils.MetaACC: 4.,
 						utils.MetaACD: 150. * 1e9,
 						"*sum#1":      3.,
@@ -1258,7 +1258,7 @@ func testV1RtsCasesSortingRoutesQOSAllRoutes(t *testing.T) {
 				},
 				{
 					RouteID: "vendor2",
-					SortingData: map[string]interface{}{
+					SortingData: map[string]any{
 						utils.MetaACC:             1.,
 						utils.MetaACD:             150. * 1e9,
 						"*sum#1":                  3.,
@@ -1284,11 +1284,11 @@ func testV1RtsCasesSortingRoutesQOSNotFound(t *testing.T) {
 	ev := &utils.CGREvent{
 		ID:     "LC_SORT",
 		Tenant: "cgrates.org",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1008",
 			utils.Destination:  "1007",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaStartTime: "2013-06-01T05:00:00Z",
 			utils.MetaUsage:     "50s",
 		},
@@ -1304,10 +1304,10 @@ func testV1RtsCasesSortingRoutesAllocateResources(t *testing.T) {
 	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     utils.UUIDSha1Prefix(),
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			"Account": "1002",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsResourcesUsageID: "651a8db2-4f67-4cf8-b622-169e8a482e51",
 			utils.OptsResourcesUnits:   6,
 		},
@@ -1323,10 +1323,10 @@ func testV1RtsCasesSortingRoutesAllocateResources(t *testing.T) {
 	ev = &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     utils.UUIDSha1Prefix(),
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			"Account": "1004",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsResourcesUsageID: "651a8db2-4f67-4cf8-b622-169e8a482e31",
 			utils.OptsResourcesUnits:   7,
 		},
@@ -1343,7 +1343,7 @@ func testV1RtsCasesSortingRoutesReasNotAllRoutes(t *testing.T) {
 	ev := &utils.CGREvent{
 		ID:     "LC_SORT",
 		Tenant: "cgrates.org",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1004",
 			utils.Destination:  "1007",
 		},
@@ -1355,14 +1355,14 @@ func testV1RtsCasesSortingRoutesReasNotAllRoutes(t *testing.T) {
 			Routes: []*engine.SortedRoute{
 				{
 					RouteID: "vendor1",
-					SortingData: map[string]interface{}{
+					SortingData: map[string]any{
 						utils.ResourceUsage: 6.0,
 						utils.Weight:        0.,
 					},
 				},
 				{
 					RouteID: "vendor2",
-					SortingData: map[string]interface{}{
+					SortingData: map[string]any{
 						utils.ResourceUsage: 7.0,
 						utils.Weight:        0.,
 					},
@@ -1383,10 +1383,10 @@ func testV1RtsCasesSortingRoutesReasAllRoutes(t *testing.T) {
 	evRs := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     utils.UUIDSha1Prefix(),
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			"Account": "1002",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsResourcesUsageID: "651a8db2-4f67-4cf8-b622-169e8a482e51",
 			utils.OptsResourcesUnits:   9,
 		},
@@ -1402,7 +1402,7 @@ func testV1RtsCasesSortingRoutesReasAllRoutes(t *testing.T) {
 	ev := &utils.CGREvent{
 		ID:     "LC_SORT",
 		Tenant: "cgrates.org",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1004",
 			utils.Destination:  "1007",
 		},
@@ -1414,21 +1414,21 @@ func testV1RtsCasesSortingRoutesReasAllRoutes(t *testing.T) {
 			Routes: []*engine.SortedRoute{
 				{
 					RouteID: "vendor3",
-					SortingData: map[string]interface{}{
+					SortingData: map[string]any{
 						utils.ResourceUsage: 7.0,
 						utils.Weight:        10.,
 					},
 				},
 				{
 					RouteID: "vendor2",
-					SortingData: map[string]interface{}{
+					SortingData: map[string]any{
 						utils.ResourceUsage: 7.0,
 						utils.Weight:        0.,
 					},
 				},
 				{
 					RouteID: "vendor1",
-					SortingData: map[string]interface{}{
+					SortingData: map[string]any{
 						utils.ResourceUsage: 9.0,
 						utils.Weight:        0.,
 					},
@@ -1452,10 +1452,10 @@ func testV1RtsCasesRoutesProcessStatsForLoadRtsSorting(t *testing.T) {
 	ev1 := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "event1",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.Category: "vendor1",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaStartTime: "2013-06-01T05:00:00Z",
 			utils.MetaCost:      1.8,
 			utils.MetaUsage:     "1m20s",
@@ -1476,10 +1476,10 @@ func testV1RtsCasesRoutesProcessStatsForLoadRtsSorting(t *testing.T) {
 	ev1 = &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "event1",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.Category: "vendor1",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaUsage:     "20s",
 			utils.MetaStartTime: "2013-06-01T05:00:00Z",
 			utils.MetaCost:      1.8,
@@ -1502,10 +1502,10 @@ func testV1RtsCasesRoutesProcessStatsForLoadRtsSorting(t *testing.T) {
 	ev1 = &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "event1",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.Category: "vendor2",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaStartTime: "2013-06-01T05:00:00Z",
 			utils.MetaCost:      0.77,
 			utils.MetaUsage:     "30s",
@@ -1526,7 +1526,7 @@ func testV1RtsCasesRoutesLoadRtsSorting(t *testing.T) {
 	ev := &utils.CGREvent{
 		ID:     "LC_SORT",
 		Tenant: "cgrates.org",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1005",
 			//utils.Destination:  "1007",
 		},
@@ -1538,7 +1538,7 @@ func testV1RtsCasesRoutesLoadRtsSorting(t *testing.T) {
 			Routes: []*engine.SortedRoute{
 				{
 					RouteID: "vendor3",
-					SortingData: map[string]interface{}{
+					SortingData: map[string]any{
 						utils.Load:   2.,
 						utils.Ratio:  "2",
 						utils.Weight: 0.,
@@ -1546,7 +1546,7 @@ func testV1RtsCasesRoutesLoadRtsSorting(t *testing.T) {
 				},
 				{
 					RouteID: "vendor2",
-					SortingData: map[string]interface{}{
+					SortingData: map[string]any{
 						utils.Load:   4.,
 						utils.Ratio:  "2",
 						utils.Weight: 10.,
@@ -1554,7 +1554,7 @@ func testV1RtsCasesRoutesLoadRtsSorting(t *testing.T) {
 				},
 				{
 					RouteID: "vendor1",
-					SortingData: map[string]interface{}{
+					SortingData: map[string]any{
 						utils.Load:   7.,
 						utils.Ratio:  "3",
 						utils.Weight: 0.,
@@ -1576,11 +1576,11 @@ func testV1RtsCasesSortRoutesHigherCostV2V3(t *testing.T) {
 	ev := &utils.CGREvent{
 		ID:     "LC_SORT",
 		Tenant: "cgrates.org",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1008",
 			utils.Destination:  "1007",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaUsage: "3m25s",
 		},
 	}
@@ -1591,7 +1591,7 @@ func testV1RtsCasesSortRoutesHigherCostV2V3(t *testing.T) {
 			Routes: []*engine.SortedRoute{
 				{
 					RouteID: "route2",
-					SortingData: map[string]interface{}{
+					SortingData: map[string]any{
 						utils.Cost:          0.3416666666666667,
 						utils.RateProfileID: "RP_VENDOR1",
 						utils.Weight:        20.,
@@ -1599,7 +1599,7 @@ func testV1RtsCasesSortRoutesHigherCostV2V3(t *testing.T) {
 				},
 				{
 					RouteID: "route3",
-					SortingData: map[string]interface{}{
+					SortingData: map[string]any{
 						utils.Cost:          0.3416666666666667,
 						utils.RateProfileID: "RP_VENDOR1",
 						utils.Weight:        10.,
@@ -1624,10 +1624,10 @@ func testV1RtsCasesSortRoutesHigherCostAllocateRes(t *testing.T) {
 	evRs := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     utils.UUIDSha1Prefix(),
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			"Account": "1004",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsResourcesUsageID: "651a8db2-4f67-4cf8-b622-169e8a482e31",
 			utils.OptsResourcesUnits:   7,
 		},
@@ -1642,10 +1642,10 @@ func testV1RtsCasesSortRoutesHigherCostAllocateRes(t *testing.T) {
 	evRs = &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     utils.UUIDSha1Prefix(),
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			"Account": "1002",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsResourcesUsageID: "651a8db2-4f67-4cf8-b622-169e8a482e51",
 			utils.OptsResourcesUnits:   7,
 		},
@@ -1660,10 +1660,10 @@ func testV1RtsCasesSortRoutesHigherCostAllocateRes(t *testing.T) {
 	evRs = &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     utils.UUIDSha1Prefix(),
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			"Account": "1004",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsResourcesUsageID: "651a8db2-4f67-4cf8-b622-169e8a482e31",
 			utils.OptsResourcesUnits:   1,
 		},
@@ -1679,10 +1679,10 @@ func testV1RtsCasesSortRoutesHigherCostAllocateRes(t *testing.T) {
 	evRs = &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     utils.UUIDSha1Prefix(),
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			"Account": "1002",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsResourcesUsageID: "651a8db2-4f67-4cf8-b622-169e8a482e51",
 			utils.OptsResourcesUnits:   4,
 		},
@@ -1699,11 +1699,11 @@ func testV1RtsCasesSortRoutesHigherCostV1V3(t *testing.T) {
 	ev := &utils.CGREvent{
 		ID:     "LC_SORT",
 		Tenant: "cgrates.org",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1008",
 			utils.Destination:  "1007",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaUsage: "3m25s",
 		},
 	}
@@ -1714,7 +1714,7 @@ func testV1RtsCasesSortRoutesHigherCostV1V3(t *testing.T) {
 			Routes: []*engine.SortedRoute{
 				{
 					RouteID: "route3",
-					SortingData: map[string]interface{}{
+					SortingData: map[string]any{
 						utils.Cost:          0.3416666666666667,
 						utils.RateProfileID: "RP_VENDOR1",
 						utils.Weight:        10.,
@@ -1722,7 +1722,7 @@ func testV1RtsCasesSortRoutesHigherCostV1V3(t *testing.T) {
 				},
 				{
 					RouteID: "route1",
-					SortingData: map[string]interface{}{
+					SortingData: map[string]any{
 						utils.Cost:          0.1708333333333333,
 						utils.RateProfileID: "RP_VENDOR2",
 						utils.Weight:        20.,
@@ -1745,10 +1745,10 @@ func testV1RtsCasesSortRoutesHigherCostAllRoutes(t *testing.T) {
 	evRs := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     utils.UUIDSha1Prefix(),
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			"Account": "1002",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsResourcesUsageID: "651a8db2-4f67-4cf8-b622-169e8a482e51",
 			utils.OptsResourcesUnits:   9,
 		},
@@ -1763,11 +1763,11 @@ func testV1RtsCasesSortRoutesHigherCostAllRoutes(t *testing.T) {
 	ev := &utils.CGREvent{
 		ID:     "LC_SORT",
 		Tenant: "cgrates.org",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1008",
 			utils.Destination:  "1007",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaUsage: "3m25s",
 		},
 	}
@@ -1778,7 +1778,7 @@ func testV1RtsCasesSortRoutesHigherCostAllRoutes(t *testing.T) {
 			Routes: []*engine.SortedRoute{
 				{
 					RouteID: "route2",
-					SortingData: map[string]interface{}{
+					SortingData: map[string]any{
 						utils.Cost:          0.3416666666666667,
 						utils.RateProfileID: "RP_VENDOR1",
 						utils.Weight:        20.,
@@ -1786,7 +1786,7 @@ func testV1RtsCasesSortRoutesHigherCostAllRoutes(t *testing.T) {
 				},
 				{
 					RouteID: "route3",
-					SortingData: map[string]interface{}{
+					SortingData: map[string]any{
 						utils.Cost:          0.3416666666666667,
 						utils.RateProfileID: "RP_VENDOR1",
 						utils.Weight:        10.,
@@ -1794,7 +1794,7 @@ func testV1RtsCasesSortRoutesHigherCostAllRoutes(t *testing.T) {
 				},
 				{
 					RouteID: "route1",
-					SortingData: map[string]interface{}{
+					SortingData: map[string]any{
 						utils.Cost:          0.1708333333333333,
 						utils.RateProfileID: "RP_VENDOR2",
 						utils.Weight:        20.,
@@ -1817,11 +1817,11 @@ func testV1RtsCasesSortingRoutesLowestCostAccounts(t *testing.T) {
 	ev := &utils.CGREvent{
 		ID:     "LC_SORT",
 		Tenant: "cgrates.org",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "acnt22",
 			utils.Destination:  "104423",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaStartTime: "2013-06-01T05:00:00Z",
 			utils.MetaUsage:     "50s",
 		},
@@ -1833,33 +1833,33 @@ func testV1RtsCasesSortingRoutesLowestCostAccounts(t *testing.T) {
 			Routes: []*engine.SortedRoute{
 				{
 					RouteID: "route4",
-					SortingData: map[string]interface{}{
+					SortingData: map[string]any{
 						utils.Cost:       nil,
-						utils.AccountIDs: []interface{}{"ACCNT_ROUTES2"},
+						utils.AccountIDs: []any{"ACCNT_ROUTES2"},
 						utils.Weight:     55.,
 					},
 				},
 				{
 					RouteID: "route1",
-					SortingData: map[string]interface{}{
+					SortingData: map[string]any{
 						utils.Cost:       5.,
-						utils.AccountIDs: []interface{}{"ACCNT_ROUTES1"},
+						utils.AccountIDs: []any{"ACCNT_ROUTES1"},
 						utils.Weight:     20.,
 					},
 				},
 				{
 					RouteID: "route2",
-					SortingData: map[string]interface{}{
+					SortingData: map[string]any{
 						utils.Cost:       5.,
-						utils.AccountIDs: []interface{}{"ACCNT_ROUTES1"},
+						utils.AccountIDs: []any{"ACCNT_ROUTES1"},
 						utils.Weight:     15.,
 					},
 				},
 				{
 					RouteID: "route3",
-					SortingData: map[string]interface{}{
+					SortingData: map[string]any{
 						utils.Cost:       5.,
-						utils.AccountIDs: []interface{}{"ACCNT_ROUTES1"},
+						utils.AccountIDs: []any{"ACCNT_ROUTES1"},
 						utils.Weight:     10.,
 					},
 				},

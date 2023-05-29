@@ -430,7 +430,7 @@ func (v4AttrPrf v4AttributeProfile) AsAttributeProfile() (attrPrf *v6AttributePr
 
 type v2Attribute struct {
 	FieldName  string
-	Initial    interface{}
+	Initial    any
 	Substitute config.RSRParsers
 	Append     bool
 }

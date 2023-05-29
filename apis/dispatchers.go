@@ -114,7 +114,7 @@ func (admS *AdminSv1) GetDispatcherProfilesCount(ctx *context.Context, args *uti
 
 type DispatcherWithAPIOpts struct {
 	*engine.DispatcherProfile
-	APIOpts map[string]interface{}
+	APIOpts map[string]any
 }
 
 // SetDispatcherProfile add/update a new Dispatcher Profile
@@ -331,7 +331,7 @@ type DispatcherSv1 struct {
 // 	return dSv1.dS.V1GetProfilesForEvent(ctx, ev, dPrfl)
 // }
 
-// func (dS *DispatcherSv1) RemoteStatus(args *utils.TenantWithAPIOpts, reply *map[string]interface{}) (err error) {
+// func (dS *DispatcherSv1) RemoteStatus(args *utils.TenantWithAPIOpts, reply *map[string]any) (err error) {
 // 	return dS.dS.DispatcherSv1RemoteStatus(args, reply)
 // }
 

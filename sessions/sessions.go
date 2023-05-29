@@ -335,7 +335,7 @@ func (sS *SessionS) forceSTerminate(ctx *context.Context, s *Session, extraUsage
 		var reply string
 		for _, cgrEv := range s.asCGREvents() {
 			if cgrEv.APIOpts == nil {
-				cgrEv.APIOpts = make(map[string]interface{})
+				cgrEv.APIOpts = make(map[string]any)
 			}
 			cgrEv.APIOpts[utils.MetaAttributes] = false
 			cgrEv.APIOpts[utils.MetaChargers] = false
@@ -528,7 +528,7 @@ func (sS *SessionS) disconnectSession(s *Session, rsn string) (err error) {
 
 // warnSession will send warning from SessionS to clients
 // regarding low balance
-func (sS *SessionS) warnSession(connID string, ev map[string]interface{}, opt map[string]interface{}) (err error) {
+func (sS *SessionS) warnSession(connID string, ev map[string]any, opt map[string]any) (err error) {
 	clnt := sS.biJClnt(connID)
 	if clnt == nil {
 		return fmt.Errorf("calling %s requires bidirectional JSON connection, connID: <%s>",
@@ -557,7 +557,7 @@ func (sS *SessionS) replicateSessions(ctx *context.Context, originID string, psv
 		// session scheduled to be removed from remote (initiate also the EventStart to avoid the panic)
 		ss = []*Session{{
 			EventStart: make(engine.MapEvent),
-			OptsStart: engine.NewMapEvent(map[string]interface{}{
+			OptsStart: engine.NewMapEvent(map[string]any{
 				utils.MetaOriginID: originID,
 			}),
 		}}
@@ -1356,7 +1356,7 @@ func (sS *SessionS) endSession(ctx *context.Context, s *Session, tUsage, lastUsa
 
 		// 	// set cost fields
 		// 	sr.Event[utils.Cost] = sr.EventCost.GetCost()
-		// 	sr.Event[utils.CostDetails] = utils.ToJSON(sr.EventCost) // avoid map[string]interface{} when decoding
+		// 	sr.Event[utils.CostDetails] = utils.ToJSON(sr.EventCost) // avoid map[string]any when decoding
 		// 	sr.Event[utils.CostSource] = utils.MetaSessionS
 		// }
 		// Set Usage field
@@ -1577,11 +1577,11 @@ func (sS *SessionS) BiRPCv1AuthorizeEvent(ctx *context.Context,
 		return // Nothing to do
 	}
 	if args.APIOpts == nil {
-		args.APIOpts = make(map[string]interface{})
+		args.APIOpts = make(map[string]any)
 	}
 	if attrS {
 		if args.APIOpts == nil {
-			args.APIOpts = make(map[string]interface{})
+			args.APIOpts = make(map[string]any)
 		}
 		rplyAttr, err := sS.processAttributes(ctx, args)
 		if err == nil {
@@ -2956,7 +2956,7 @@ func (sS *SessionS) processCDR(ctx *context.Context, cgrEv *utils.CGREvent, rply
 	var withErrors bool
 	for _, cgrEv := range s.asCGREvents() {
 		if cgrEv.APIOpts == nil {
-			cgrEv.APIOpts = make(map[string]interface{})
+			cgrEv.APIOpts = make(map[string]any)
 		}
 		cgrEv.APIOpts[utils.MetaAttributes] = false
 		cgrEv.APIOpts[utils.MetaChargers] = false

@@ -46,10 +46,10 @@ func TestACExecuteAccountsSetBalance(t *testing.T) {
 	}
 
 	dataStorage := utils.MapStorage{
-		utils.MetaReq: map[string]interface{}{
+		utils.MetaReq: map[string]any{
 			utils.AccountField: "1001",
 		},
-		utils.MetaOpts: map[string]interface{}{
+		utils.MetaOpts: map[string]any{
 			utils.Usage: 10 * time.Minute,
 		},
 	}

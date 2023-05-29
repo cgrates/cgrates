@@ -42,7 +42,7 @@ func TestAuthorizeEvent(t *testing.T) {
 	args := &utils.CGREvent{
 		ID:     "TestMatchingAccountsForEvent",
 		Tenant: "cgrates.org",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1001",
 		},
 	}
@@ -64,7 +64,7 @@ func TestAuthorizeEventWithDigest(t *testing.T) {
 	args := &utils.CGREvent{
 		ID:     "TestMatchingAccountsForEvent",
 		Tenant: "cgrates.org",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1001",
 		},
 	}
@@ -86,7 +86,7 @@ func TestInitiateSession(t *testing.T) {
 	args := &utils.CGREvent{
 		ID:     "TestMatchingAccountsForEvent",
 		Tenant: "cgrates.org",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1001",
 		},
 	}
@@ -108,7 +108,7 @@ func TestInitiateSessionWithDigest(t *testing.T) {
 	args := &utils.CGREvent{
 		ID:     "TestMatchingAccountsForEvent",
 		Tenant: "cgrates.org",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1001",
 		},
 	}
@@ -130,7 +130,7 @@ func TestUpdateSession(t *testing.T) {
 	args := &utils.CGREvent{
 		ID:     "TestMatchingAccountsForEvent",
 		Tenant: "cgrates.org",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1001",
 		},
 	}
@@ -173,7 +173,7 @@ func TestTerminateSessions(t *testing.T) {
 	args := &utils.CGREvent{
 		ID:     "TestMatchingAccountsForEvent",
 		Tenant: "cgrates.org",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1001",
 		},
 	}
@@ -197,10 +197,10 @@ func TestProcessCDR(t *testing.T) {
 	args := &utils.CGREvent{
 		ID:     "TestMatchingAccountsForEvent",
 		Tenant: "cgrates.org",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1001",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaOriginID: utils.Sha1("dsafdsaf", time.Unix(1383813745, 0).UTC().String()),
 		},
 	}
@@ -226,7 +226,7 @@ func TestProcessMessage(t *testing.T) {
 	args := &utils.CGREvent{
 		ID:     "TestMatchingAccountsForEvent",
 		Tenant: "cgrates.org",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1001",
 		},
 	}
@@ -250,7 +250,7 @@ func TestProcessEvent(t *testing.T) {
 	args := &utils.CGREvent{
 		ID:     "TestMatchingAccountsForEvent",
 		Tenant: "cgrates.org",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1001",
 		},
 	}
@@ -275,7 +275,7 @@ func TestGetActiveSessions(t *testing.T) {
 		Limit:   utils.IntPointer(2),
 		Filters: []string{},
 		Tenant:  "cgrates.org",
-		APIOpts: map[string]interface{}{},
+		APIOpts: map[string]any{},
 	}
 	if err := ssv1.GetActiveSessions(context.Background(), args, &reply); err != utils.ErrNotFound {
 		t.Errorf("Expected %v\n but received %v", utils.ErrNotFound, err)
@@ -298,7 +298,7 @@ func TestGetActiveSessionsCount(t *testing.T) {
 		Limit:   utils.IntPointer(2),
 		Filters: []string{},
 		Tenant:  "cgrates.org",
-		APIOpts: map[string]interface{}{},
+		APIOpts: map[string]any{},
 	}
 	if err := ssv1.GetActiveSessionsCount(context.Background(), args, &reply); err != nil {
 		t.Error(err)
@@ -324,7 +324,7 @@ func TestForceDisconnect(t *testing.T) {
 		Limit:   utils.IntPointer(2),
 		Filters: []string{},
 		Tenant:  "cgrates.org",
-		APIOpts: map[string]interface{}{},
+		APIOpts: map[string]any{},
 	}
 	if err := ssv1.ForceDisconnect(context.Background(), args, &reply); err != utils.ErrNotFound {
 		t.Errorf("Expected %v\n but received %v", utils.ErrNotFound, err)
@@ -347,7 +347,7 @@ func TestGetPassiveSessions(t *testing.T) {
 		Limit:   utils.IntPointer(2),
 		Filters: []string{},
 		Tenant:  "cgrates.org",
-		APIOpts: map[string]interface{}{},
+		APIOpts: map[string]any{},
 	}
 	if err := ssv1.GetPassiveSessions(context.Background(), args, &reply); err != utils.ErrNotFound {
 		t.Errorf("Expected %v\n but received %v", utils.ErrNotFound, err)
@@ -370,7 +370,7 @@ func TestGetPassiveSessionsCount(t *testing.T) {
 		Limit:   utils.IntPointer(2),
 		Filters: []string{},
 		Tenant:  "cgrates.org",
-		APIOpts: map[string]interface{}{},
+		APIOpts: map[string]any{},
 	}
 	if err := ssv1.GetPassiveSessionsCount(context.Background(), args, &reply); err != nil {
 		t.Error(err)
@@ -456,7 +456,7 @@ func TestReAuthorize(t *testing.T) {
 		Limit:   utils.IntPointer(2),
 		Filters: []string{},
 		Tenant:  "cgrates.org",
-		APIOpts: map[string]interface{}{},
+		APIOpts: map[string]any{},
 	}
 	if err := ssv1.ReAuthorize(context.Background(), args, &reply); err != utils.ErrNotFound {
 		t.Errorf("Expected %v\n but received %v", utils.ErrNotFound, err)

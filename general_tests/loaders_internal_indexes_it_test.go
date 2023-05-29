@@ -115,7 +115,7 @@ func testLoadersIDBIdxItLoad(t *testing.T) {
 	var reply string
 	if err := loadersIDBIdxRPCInternal.Call(context.Background(), utils.LoaderSv1Run,
 		&loaders.ArgsProcessFolder{
-			APIOpts: map[string]interface{}{
+			APIOpts: map[string]any{
 				utils.MetaStopOnError: false,
 				utils.MetaCache:       utils.MetaReload,
 			},

@@ -101,7 +101,7 @@ func testVirtExportSupplierEvent(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "supplierEvent",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 
 				utils.ToR:          utils.MetaVoice,
 				utils.OriginID:     "dsafdsaf",
@@ -118,7 +118,7 @@ func testVirtExportSupplierEvent(t *testing.T) {
 				utils.RunID:        "SupplierRun",
 				utils.Cost:         1.23,
 			},
-			APIOpts: map[string]interface{}{
+			APIOpts: map[string]any{
 				utils.MetaOriginID: utils.Sha1("dsafdsaf", time.Unix(1383813745, 0).UTC().String()),
 			},
 		},
@@ -137,7 +137,7 @@ func testVirtExportEvents(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "voiceEvent",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.MetaOriginID: utils.Sha1("dsafdsaf", time.Unix(1383813745, 0).UTC().String()),
 				utils.ToR:          utils.MetaVoice,
 				utils.OriginID:     "dsafdsaf",
@@ -154,7 +154,7 @@ func testVirtExportEvents(t *testing.T) {
 				utils.RunID:        "SupplierRun",
 				utils.Cost:         1.01,
 			},
-			APIOpts: map[string]interface{}{
+			APIOpts: map[string]any{
 				utils.MetaOriginID: utils.Sha1("dsafdsaf", time.Unix(1383813745, 0).UTC().String()),
 			},
 		},

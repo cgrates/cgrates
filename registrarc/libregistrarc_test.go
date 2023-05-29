@@ -50,7 +50,7 @@ func TestRegisterArgsAsDispatcherHosts(t *testing.T) {
 				Transport: utils.MetaGOB,
 			},
 		},
-		Opts: make(map[string]interface{}),
+		Opts: make(map[string]any),
 	}
 	exp := []*engine.DispatcherHost{
 		{
@@ -141,9 +141,9 @@ func TestRegister(t *testing.T) {
 				Transport: utils.MetaGOB,
 			},
 		},
-		Opts: make(map[string]interface{}),
+		Opts: make(map[string]any),
 	}
-	raJSON, err := json.Marshal([]interface{}{ra})
+	raJSON, err := json.Marshal([]any{ra})
 	id := json.RawMessage("1")
 	if err != nil {
 		t.Fatal(err)
@@ -202,9 +202,9 @@ func TestRegister(t *testing.T) {
 	ua := &UnregisterArgs{
 		Tenant: "cgrates.org",
 		IDs:    []string{"Host1", "Host2"},
-		Opts:   make(map[string]interface{}),
+		Opts:   make(map[string]any),
 	}
-	uaJSON, err := json.Marshal([]interface{}{ua})
+	uaJSON, err := json.Marshal([]any{ua})
 	id = json.RawMessage("2")
 	if err != nil {
 		t.Fatal(err)
@@ -347,9 +347,9 @@ func TestRegistrar(t *testing.T) {
 				Transport: utils.MetaGOB,
 			},
 		},
-		Opts: make(map[string]interface{}),
+		Opts: make(map[string]any),
 	}
-	raJSON, err := json.Marshal([]interface{}{ra})
+	raJSON, err := json.Marshal([]any{ra})
 	id := json.RawMessage("1")
 	if err != nil {
 		t.Fatal(err)
@@ -456,9 +456,9 @@ func TestRegisterRegistrarSv1UnregisterRPCHosts(t *testing.T) {
 				Transport: utils.MetaGOB,
 			},
 		},
-		Opts: make(map[string]interface{}),
+		Opts: make(map[string]any),
 	}
-	raJSON, err := json.Marshal([]interface{}{ra})
+	raJSON, err := json.Marshal([]any{ra})
 	id := json.RawMessage("1")
 	if err != nil {
 		t.Fatal(err)
@@ -485,9 +485,9 @@ func TestRegisterRegistrarSv1UnregisterRPCHostsError(t *testing.T) {
 	ra := &UnregisterArgs{
 		IDs:    []string{"Host1"},
 		Tenant: "cgrates.org",
-		Opts:   make(map[string]interface{}),
+		Opts:   make(map[string]any),
 	}
-	raJSON, err := json.Marshal([]interface{}{ra})
+	raJSON, err := json.Marshal([]any{ra})
 	id := json.RawMessage("1")
 	if err != nil {
 		t.Fatal(err)
@@ -544,9 +544,9 @@ func TestRegisterRegistrarSv1RegisterRPCHosts(t *testing.T) {
 				Transport: utils.MetaGOB,
 			},
 		},
-		Opts: make(map[string]interface{}),
+		Opts: make(map[string]any),
 	}
-	raJSON, err := json.Marshal([]interface{}{ra})
+	raJSON, err := json.Marshal([]any{ra})
 	id := json.RawMessage("1")
 	if err != nil {
 		t.Fatal(err)
@@ -586,9 +586,9 @@ func TestRegisterRegistrarSv1RegisterRPCHostsError(t *testing.T) {
 				Transport: utils.MetaGOB,
 			},
 		},
-		Opts: make(map[string]interface{}),
+		Opts: make(map[string]any),
 	}
-	raJSON, err := json.Marshal([]interface{}{ra})
+	raJSON, err := json.Marshal([]any{ra})
 	id := json.RawMessage("1")
 	if err != nil {
 		t.Fatal(err)

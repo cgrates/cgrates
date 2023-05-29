@@ -48,7 +48,7 @@ func (self *CmdClear) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdClear) RpcParams(reset bool) interface{} {
+func (self *CmdClear) RpcParams(reset bool) any {
 	if reset || self.rpcParams == nil {
 		self.rpcParams = new(utils.AttrCacheIDsWithAPIOpts)
 	}
@@ -59,7 +59,7 @@ func (self *CmdClear) PostprocessRpcParams() error {
 	return nil
 }
 
-func (self *CmdClear) RpcResult() interface{} {
+func (self *CmdClear) RpcResult() any {
 	var reply string
 	return &reply
 }

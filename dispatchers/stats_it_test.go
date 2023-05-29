@@ -76,7 +76,7 @@ func testDspStsPingFailover(t *testing.T) {
 	}
 	ev := utils.CGREvent{
 		Tenant: "cgrates.org",
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsAPIKey: "stat12345",
 		},
 	}
@@ -106,13 +106,13 @@ func testDspStsGetStatFailover(t *testing.T) {
 	args := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "event1",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.EventName:    "Event1",
 			utils.AccountField: "1001",
 			utils.Destination:  "1002",
 			utils.RunID:        utils.MetaDefault,
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaStartTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 			utils.MetaUsage:     135 * time.Second,
 			utils.MetaCost:      123.0,
@@ -126,7 +126,7 @@ func testDspStsGetStatFailover(t *testing.T) {
 	}
 
 	args2 := utils.TenantIDWithAPIOpts{
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsAPIKey: "stat12345",
 		},
 		TenantID: &utils.TenantID{
@@ -159,7 +159,7 @@ func testDspStsPing(t *testing.T) {
 	}
 	if err := dispEngine.RPC.Call(utils.StatSv1Ping, &utils.CGREvent{
 		Tenant: "cgrates.org",
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsAPIKey: "stat12345",
 		},
 	}, &reply); err != nil {
@@ -174,10 +174,10 @@ func testDspStsTestAuthKey(t *testing.T) {
 	args := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "event1",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1001",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaStartTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 			utils.MetaUsage:     135 * time.Second,
 			utils.MetaCost:      123.0,
@@ -191,7 +191,7 @@ func testDspStsTestAuthKey(t *testing.T) {
 	}
 
 	args2 := utils.TenantIDWithAPIOpts{
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsAPIKey: "12345",
 		},
 		TenantID: &utils.TenantID{
@@ -214,12 +214,12 @@ func testDspStsTestAuthKey2(t *testing.T) {
 	args := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "event1",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1001",
 			utils.RunID:        utils.MetaDefault,
 			utils.Destination:  "1002",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaStartTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 			utils.MetaUsage:     135 * time.Second,
 			utils.MetaCost:      123.0,
@@ -233,7 +233,7 @@ func testDspStsTestAuthKey2(t *testing.T) {
 	}
 
 	args2 := utils.TenantIDWithAPIOpts{
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsAPIKey: "stat12345",
 		},
 		TenantID: &utils.TenantID{
@@ -256,12 +256,12 @@ func testDspStsTestAuthKey2(t *testing.T) {
 	args = &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "event1",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1002",
 			utils.Destination:  "1001",
 			utils.RunID:        utils.MetaDefault,
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaStartTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 			utils.MetaUsage:     45 * time.Second,
 			utils.MetaCost:      10.0,
@@ -291,7 +291,7 @@ func testDspStsTestAuthKey3(t *testing.T) {
 	var metrics map[string]float64
 
 	args2 := utils.TenantIDWithAPIOpts{
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsAPIKey: "stat12345",
 		},
 		TenantID: &utils.TenantID{
@@ -315,7 +315,7 @@ func testDspStsTestAuthKey3(t *testing.T) {
 	if err := dispEngine.RPC.Call(utils.StatSv1GetQueueIDs,
 		&utils.TenantWithAPIOpts{
 			Tenant: "cgrates.org",
-			APIOpts: map[string]interface{}{
+			APIOpts: map[string]any{
 				utils.OptsAPIKey: "stat12345",
 			},
 		}, &reply); err != nil {
@@ -332,12 +332,12 @@ func testDspStsTestAuthKey3(t *testing.T) {
 		&utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "GetStats",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.AccountField: "1002",
 				utils.Destination:  "1001",
 				utils.RunID:        utils.MetaDefault,
 			},
-			APIOpts: map[string]interface{}{
+			APIOpts: map[string]any{
 				utils.MetaStartTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 				utils.MetaUsage:     45 * time.Second,
 				utils.MetaCost:      10.0,

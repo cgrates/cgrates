@@ -38,7 +38,7 @@ import (
 func NewRPCPool(ctx *context.Context, dispatchStrategy string, keyPath, certPath, caPath string, connAttempts, reconnects int,
 	maxReconnectInterval, connectTimeout, replyTimeout time.Duration, rpcConnCfgs []*config.RemoteHost,
 	internalConnChan chan birpc.ClientConnector, lazyConnect bool,
-	biRPCClient interface{}, poolID string, connCache *ltcache.Cache) (rpcPool *rpcclient.RPCPool, err error) {
+	biRPCClient any, poolID string, connCache *ltcache.Cache) (rpcPool *rpcclient.RPCPool, err error) {
 	var rpcClient birpc.ClientConnector
 	var atLestOneConnected bool // If one connected we don't longer return errors
 	rpcPool = rpcclient.NewRPCPool(dispatchStrategy, replyTimeout)
@@ -69,7 +69,7 @@ func NewRPCPool(ctx *context.Context, dispatchStrategy string, keyPath, certPath
 // connCache is used to cache the connection with ID
 func NewRPCConnection(ctx *context.Context, cfg *config.RemoteHost, keyPath, certPath, caPath string, connAttempts, reconnects int,
 	maxReconnectInterval, connectTimeout, replyTimeout time.Duration, internalConnChan chan birpc.ClientConnector, lazyConnect bool,
-	biRPCClient interface{}, poolID, connID string, connCache *ltcache.Cache) (client birpc.ClientConnector, err error) {
+	biRPCClient any, poolID, connID string, connCache *ltcache.Cache) (client birpc.ClientConnector, err error) {
 	var id string
 	if connID != utils.EmptyString {
 		id = poolID + utils.ConcatenatedKeySep + connID
@@ -121,7 +121,7 @@ func (s RPCClientSet) GetInternalChanel() chan birpc.ClientConnector {
 }
 
 // Call the implementation of the birpc.ClientConnector interface
-func (s RPCClientSet) Call(ctx *context.Context, method string, args interface{}, reply interface{}) error {
+func (s RPCClientSet) Call(ctx *context.Context, method string, args any, reply any) error {
 	methodSplit := strings.Split(method, ".")
 	if len(methodSplit) != 2 {
 		return rpcclient.ErrUnsupporteServiceMethod
@@ -145,11 +145,11 @@ func (s RPCClientSet) Call(ctx *context.Context, method string, args interface{}
 	return conn.Call(ctx, method, args, reply)
 }
 
-func NewService(val interface{}) (_ IntService, err error) {
+func NewService(val any) (_ IntService, err error) {
 	return NewServiceWithName(val, utils.EmptyString, false)
 }
 
-func NewServiceWithName(val interface{}, name string, useName bool) (_ IntService, err error) {
+func NewServiceWithName(val any, name string, useName bool) (_ IntService, err error) {
 	var srv *birpc.Service
 	if srv, err = birpc.NewService(val, name, useName); err != nil {
 		return
@@ -182,7 +182,7 @@ func NewServiceWithName(val interface{}, name string, useName bool) (_ IntServic
 	return s, nil
 }
 
-func NewDispatcherService(val interface{}) (_ IntService, err error) {
+func NewDispatcherService(val any) (_ IntService, err error) {
 	var srv *birpc.Service
 	if srv, err = birpc.NewService(val, utils.EmptyString, false); err != nil {
 		return
@@ -283,7 +283,7 @@ func NewDispatcherService(val interface{}) (_ IntService, err error) {
 
 type IntService map[string]*birpc.Service
 
-func (s IntService) Call(ctx *context.Context, serviceMethod string, args, reply interface{}) error {
+func (s IntService) Call(ctx *context.Context, serviceMethod string, args, reply any) error {
 	service, has := s[strings.Split(serviceMethod, utils.NestingSep)[0]]
 	if !has {
 		return errors.New("rpc: can't find service " + serviceMethod)
@@ -291,7 +291,7 @@ func (s IntService) Call(ctx *context.Context, serviceMethod string, args, reply
 	return service.Call(ctx, serviceMethod, args, reply)
 }
 
-func ping(_ interface{}, _ *context.Context, _ *utils.CGREvent, reply *string) error {
+func ping(_ any, _ *context.Context, _ *utils.CGREvent, reply *string) error {
 	*reply = utils.Pong
 	return nil
 }

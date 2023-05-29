@@ -32,7 +32,7 @@ import (
 
 type mockConnector struct{}
 
-func (c *mockConnector) Call(_ *context.Context, _ string, _, _ interface{}) (err error) {
+func (c *mockConnector) Call(_ *context.Context, _ string, _, _ any) (err error) {
 	return errors.New("error")
 }
 func TestNewAnalyzeConnector(t *testing.T) {

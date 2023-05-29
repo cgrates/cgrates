@@ -62,9 +62,9 @@ func (cParam *CacheParamCfg) loadFromJSONCfg(jsnCfg *CacheParamJsonCfg) (err err
 	return
 }
 
-// AsMapInterface returns the config as a map[string]interface{}
-func (cParam *CacheParamCfg) AsMapInterface() (initialMP map[string]interface{}) {
-	initialMP = map[string]interface{}{
+// AsMapInterface returns the config as a map[string]any
+func (cParam *CacheParamCfg) AsMapInterface() (initialMP map[string]any) {
+	initialMP = map[string]any{
 		utils.LimitCfg:     cParam.Limit,
 		utils.StaticTTLCfg: cParam.StaticTTL,
 		utils.PrecacheCfg:  cParam.Precache,
@@ -147,13 +147,13 @@ func (cCfg CacheCfg) AsTransCacheConfig() (tcCfg map[string]*ltcache.CacheConfig
 	return
 }
 
-// AsMapInterface returns the config as a map[string]interface{}
-func (cCfg CacheCfg) AsMapInterface(string) interface{} {
-	partitions := make(map[string]interface{}, len(cCfg.Partitions))
+// AsMapInterface returns the config as a map[string]any
+func (cCfg CacheCfg) AsMapInterface(string) any {
+	partitions := make(map[string]any, len(cCfg.Partitions))
 	for key, value := range cCfg.Partitions {
 		partitions[key] = value.AsMapInterface()
 	}
-	mp := map[string]interface{}{utils.PartitionsCfg: partitions}
+	mp := map[string]any{utils.PartitionsCfg: partitions}
 	if cCfg.ReplicationConns != nil {
 		mp[utils.ReplicationConnsCfg] = cCfg.ReplicationConns
 	}

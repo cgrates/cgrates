@@ -61,14 +61,14 @@ var (
 	ev1 = &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "Event1",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1001",
 		},
 	}
 	ev2 = &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "Event2",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1002",
 		},
 	}
@@ -160,7 +160,7 @@ func testFilterUpdateSetFilterE1(t *testing.T) {
 				},
 			},
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaCache: utils.MetaLoad,
 		},
 	}
@@ -200,7 +200,7 @@ func testFilterUpdateSetAttrProfileE1(t *testing.T) {
 				},
 			},
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaCache: utils.MetaNone,
 		},
 	}
@@ -350,7 +350,7 @@ func testFilterUpdateSetFilterAfterAttrE1(t *testing.T) {
 				},
 			},
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaCache: utils.MetaLoad,
 		},
 	}

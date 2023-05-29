@@ -62,9 +62,9 @@ func (hcfgs *HTTPAgentCfgs) loadFromJSONCfg(jsnHTTPAgntCfg *[]*HttpAgentJsonCfg,
 	return nil
 }
 
-// AsMapInterface returns the config as a map[string]interface{}
-func (hcfgs HTTPAgentCfgs) AsMapInterface(separator string) interface{} {
-	mp := make([]map[string]interface{}, len(hcfgs))
+// AsMapInterface returns the config as a map[string]any
+func (hcfgs HTTPAgentCfgs) AsMapInterface(separator string) any {
+	mp := make([]map[string]any, len(hcfgs))
 	for i, item := range hcfgs {
 		mp[i] = item.AsMapInterface(separator)
 	}
@@ -124,9 +124,9 @@ func (ha *HTTPAgentCfg) loadFromJSONCfg(jsnCfg *HttpAgentJsonCfg, separator stri
 	return
 }
 
-// AsMapInterface returns the config as a map[string]interface{}
-func (ha *HTTPAgentCfg) AsMapInterface(separator string) (initialMP map[string]interface{}) {
-	initialMP = map[string]interface{}{
+// AsMapInterface returns the config as a map[string]any
+func (ha *HTTPAgentCfg) AsMapInterface(separator string) (initialMP map[string]any) {
+	initialMP = map[string]any{
 		utils.IDCfg:             ha.ID,
 		utils.URLCfg:            ha.URL,
 		utils.RequestPayloadCfg: ha.RequestPayload,
@@ -145,7 +145,7 @@ func (ha *HTTPAgentCfg) AsMapInterface(separator string) (initialMP map[string]i
 		}
 		initialMP[utils.SessionSConnsCfg] = sessionSConns
 	}
-	requestProcessors := make([]map[string]interface{}, len(ha.RequestProcessors))
+	requestProcessors := make([]map[string]any, len(ha.RequestProcessors))
 	for i, item := range ha.RequestProcessors {
 		requestProcessors[i] = item.AsMapInterface(separator)
 	}

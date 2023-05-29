@@ -135,7 +135,7 @@ func testSessVolDiscLoadersLoad(t *testing.T) {
 	var reply string
 	if err := tSessVolDiscBiRPC.Call(context.Background(), utils.LoaderSv1Run,
 		&loaders.ArgsProcessFolder{
-			APIOpts: map[string]interface{}{utils.MetaCache: caching},
+			APIOpts: map[string]any{utils.MetaCache: caching},
 		}, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
@@ -152,15 +152,15 @@ func testSessVolDiscAuthorizeEventSortRoutes1Min30Sec(t *testing.T) {
 				Routes: []*engine.SortedRoute{
 					{
 						RouteID: "supplier1",
-						SortingData: map[string]interface{}{
-							"AccountIDs": []interface{}{"ACNT_VOL1"},
+						SortingData: map[string]any{
+							"AccountIDs": []any{"ACNT_VOL1"},
 							"Cost":       nil, // returns from accounts null concretes, so the cost will be null,
 							"Weight":     float64(0),
 						},
 					},
 					{
 						RouteID: "supplier2",
-						SortingData: map[string]interface{}{
+						SortingData: map[string]any{
 							"Cost":              float64(1.2),
 							utils.RateProfileID: "RP_SUPPLIER2",
 							"Weight":            float64(0),
@@ -168,7 +168,7 @@ func testSessVolDiscAuthorizeEventSortRoutes1Min30Sec(t *testing.T) {
 					},
 					{
 						RouteID: "supplier4",
-						SortingData: map[string]interface{}{
+						SortingData: map[string]any{
 							"Cost":              float64(1.365),
 							utils.RateProfileID: "RP_SUPPLIER4",
 							"Weight":            float64(0),
@@ -176,7 +176,7 @@ func testSessVolDiscAuthorizeEventSortRoutes1Min30Sec(t *testing.T) {
 					},
 					{
 						RouteID: "supplier3",
-						SortingData: map[string]interface{}{
+						SortingData: map[string]any{
 							"Cost":              float64(1.425),
 							utils.RateProfileID: "RP_SUPPLIER3",
 							"Weight":            float64(0),
@@ -189,12 +189,12 @@ func testSessVolDiscAuthorizeEventSortRoutes1Min30Sec(t *testing.T) {
 	args := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "testSessVolDiscAuthorizeEvent1",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1001",
 			utils.Category:     "call",
 			utils.ToR:          "*voice",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaUsage:                time.Minute + 30*time.Second,
 			utils.MetaRoutes:               true,
 			utils.MetaProfileIgnoreFilters: true,
@@ -219,15 +219,15 @@ func testSessVolDiscAuthorizeEventSortRoutes11Min10Sec(t *testing.T) {
 				Routes: []*engine.SortedRoute{
 					{
 						RouteID: "supplier1",
-						SortingData: map[string]interface{}{
-							"AccountIDs": []interface{}{"ACNT_VOL1"},
+						SortingData: map[string]any{
+							"AccountIDs": []any{"ACNT_VOL1"},
 							"Cost":       float64(8.521666666666668), // returns from accounts null concretes, so the cost will be null,
 							"Weight":     float64(0),
 						},
 					},
 					{
 						RouteID: "supplier2",
-						SortingData: map[string]interface{}{
+						SortingData: map[string]any{
 							"Cost":              float64(8.933333333333332),
 							utils.RateProfileID: "RP_SUPPLIER2",
 							"Weight":            float64(0),
@@ -235,7 +235,7 @@ func testSessVolDiscAuthorizeEventSortRoutes11Min10Sec(t *testing.T) {
 					},
 					{
 						RouteID: "supplier4",
-						SortingData: map[string]interface{}{
+						SortingData: map[string]any{
 							"Cost":              float64(10.16166666666667),
 							utils.RateProfileID: "RP_SUPPLIER4",
 							"Weight":            float64(0),
@@ -243,7 +243,7 @@ func testSessVolDiscAuthorizeEventSortRoutes11Min10Sec(t *testing.T) {
 					},
 					{
 						RouteID: "supplier3",
-						SortingData: map[string]interface{}{
+						SortingData: map[string]any{
 							"Cost":              float64(10.60833333333333),
 							utils.RateProfileID: "RP_SUPPLIER3",
 							"Weight":            float64(0),
@@ -256,12 +256,12 @@ func testSessVolDiscAuthorizeEventSortRoutes11Min10Sec(t *testing.T) {
 	args := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "testSessVolDiscAuthorizeEvent1",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1001",
 			utils.Category:     "call",
 			utils.ToR:          "*voice",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaUsage:                11*time.Minute + 10*time.Second,
 			utils.MetaRoutes:               true,
 			utils.MetaProfileIgnoreFilters: true,
@@ -286,7 +286,7 @@ func testSessVolDiscAuthorizeEventSortRoutes20Min(t *testing.T) {
 				Routes: []*engine.SortedRoute{
 					{
 						RouteID: "supplier2",
-						SortingData: map[string]interface{}{
+						SortingData: map[string]any{
 							utils.RateProfileID: "RP_SUPPLIER2",
 							"Cost":              float64(16), // returns from accounts null concretes, so the cost will be null,
 							"Weight":            float64(0),
@@ -294,15 +294,15 @@ func testSessVolDiscAuthorizeEventSortRoutes20Min(t *testing.T) {
 					},
 					{
 						RouteID: "supplier1",
-						SortingData: map[string]interface{}{
+						SortingData: map[string]any{
 							"Cost":       float64(17.09),
-							"AccountIDs": []interface{}{"ACNT_VOL1"},
+							"AccountIDs": []any{"ACNT_VOL1"},
 							"Weight":     float64(0),
 						},
 					},
 					{
 						RouteID: "supplier4",
-						SortingData: map[string]interface{}{
+						SortingData: map[string]any{
 							"Cost":              float64(18.2),
 							utils.RateProfileID: "RP_SUPPLIER4",
 							"Weight":            float64(0),
@@ -310,7 +310,7 @@ func testSessVolDiscAuthorizeEventSortRoutes20Min(t *testing.T) {
 					},
 					{
 						RouteID: "supplier3",
-						SortingData: map[string]interface{}{
+						SortingData: map[string]any{
 							"Cost":              float64(19),
 							utils.RateProfileID: "RP_SUPPLIER3",
 							"Weight":            float64(0),
@@ -323,12 +323,12 @@ func testSessVolDiscAuthorizeEventSortRoutes20Min(t *testing.T) {
 	args := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "testSessVolDiscAuthorizeEvent1",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1001",
 			utils.Category:     "call",
 			utils.ToR:          "*voice",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaUsage:                20 * time.Minute,
 			utils.MetaRoutes:               true,
 			utils.MetaProfileIgnoreFilters: true,
@@ -348,12 +348,12 @@ func testSessVolDiscProcessCDRSupplier(t *testing.T) {
 	args := utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "TestSSv1ItProcessCDR",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1001",
 			utils.Destination:  "1002",
 			utils.RouteID:      "supplier1",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.StartTime: time.Date(2020, time.January, 7, 16, 60, 0, 0, time.UTC),
 			utils.MetaUsage: 15 * time.Minute,
 		},
@@ -373,12 +373,12 @@ func testSessVolDiscProcessCDRCustomer(t *testing.T) {
 	args := utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "TestSSv1ItProcessCDR",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "DifferentAccount",
 			utils.Destination:  "1002",
 			utils.RouteID:      "supplier1",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.StartTime: time.Date(2020, time.January, 7, 16, 60, 0, 0, time.UTC),
 			utils.MetaUsage: 15 * time.Minute,
 		},
@@ -398,7 +398,7 @@ func testSessVolDiscAccountAfterDebiting(t *testing.T) {
 	expectedAcc := utils.Account{
 		Tenant: "cgrates.org",
 		ID:     "ACNT_VOL1",
-		Opts:   make(map[string]interface{}),
+		Opts:   make(map[string]any),
 		Balances: map[string]*utils.Balance{
 			"ABS_VOLUME1": {
 				ID: "ABS_VOLUME1",
@@ -408,7 +408,7 @@ func testSessVolDiscAccountAfterDebiting(t *testing.T) {
 						Weight:    30,
 					},
 				},
-				Opts:  make(map[string]interface{}),
+				Opts:  make(map[string]any),
 				Type:  "*abstract",
 				Units: utils.SumDecimal(&utils.Decimal{utils.NewDecimal(0, 0).Neg(utils.NewDecimal(1, 0).Big)}, utils.NewDecimal(1, 0)), // this should be -0
 				CostIncrements: []*utils.CostIncrement{
@@ -426,7 +426,7 @@ func testSessVolDiscAccountAfterDebiting(t *testing.T) {
 						Weight:    20,
 					},
 				},
-				Opts:  make(map[string]interface{}),
+				Opts:  make(map[string]any),
 				Type:  "*abstract",
 				Units: utils.SumDecimal(&utils.Decimal{utils.NewDecimal(0, 0).Neg(utils.NewDecimal(1, 0).Big)}, utils.NewDecimal(1, 0)),
 				CostIncrements: []*utils.CostIncrement{
@@ -444,7 +444,7 @@ func testSessVolDiscAccountAfterDebiting(t *testing.T) {
 						Weight:    10,
 					},
 				},
-				Opts: map[string]interface{}{
+				Opts: map[string]any{
 					utils.MetaBalanceUnlimited: "true",
 				},
 				Type:  "*concrete",
@@ -481,7 +481,7 @@ func testSessVolDiscAuthorizeEventSortRoutes1Min30SecAfterDebiting(t *testing.T)
 				Routes: []*engine.SortedRoute{
 					{
 						RouteID: "supplier2",
-						SortingData: map[string]interface{}{
+						SortingData: map[string]any{
 							"Cost":              float64(1.2),
 							utils.RateProfileID: "RP_SUPPLIER2",
 							"Weight":            float64(0),
@@ -489,7 +489,7 @@ func testSessVolDiscAuthorizeEventSortRoutes1Min30SecAfterDebiting(t *testing.T)
 					},
 					{
 						RouteID: "supplier4",
-						SortingData: map[string]interface{}{
+						SortingData: map[string]any{
 							"Cost":              float64(1.365),
 							utils.RateProfileID: "RP_SUPPLIER4",
 							"Weight":            float64(0),
@@ -497,7 +497,7 @@ func testSessVolDiscAuthorizeEventSortRoutes1Min30SecAfterDebiting(t *testing.T)
 					},
 					{
 						RouteID: "supplier3",
-						SortingData: map[string]interface{}{
+						SortingData: map[string]any{
 							"Cost":              float64(1.425),
 							utils.RateProfileID: "RP_SUPPLIER3",
 							"Weight":            float64(0),
@@ -505,8 +505,8 @@ func testSessVolDiscAuthorizeEventSortRoutes1Min30SecAfterDebiting(t *testing.T)
 					},
 					{
 						RouteID: "supplier1",
-						SortingData: map[string]interface{}{
-							"AccountIDs": []interface{}{"ACNT_VOL1"},
+						SortingData: map[string]any{
+							"AccountIDs": []any{"ACNT_VOL1"},
 							"Cost":       float64(1.455), // returns from accounts null concretes, so the cost will be null,
 							"Weight":     float64(0),
 						},
@@ -518,12 +518,12 @@ func testSessVolDiscAuthorizeEventSortRoutes1Min30SecAfterDebiting(t *testing.T)
 	args := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "testSessVolDiscAuthorizeEvent1",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1001",
 			utils.Category:     "call",
 			utils.ToR:          "*voice",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaUsage:                time.Minute + 30*time.Second,
 			utils.MetaRoutes:               true,
 			utils.MetaProfileIgnoreFilters: true,

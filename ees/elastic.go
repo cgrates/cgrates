@@ -101,7 +101,7 @@ func (eEe *ElasticEE) Connect() (err error) {
 }
 
 // ExportEvent implements EventExporter
-func (eEe *ElasticEE) ExportEvent(ctx *context.Context, ev, extraData interface{}) (err error) {
+func (eEe *ElasticEE) ExportEvent(ctx *context.Context, ev, extraData any) (err error) {
 	eEe.reqs.get()
 	eEe.RLock()
 	defer func() {
@@ -135,7 +135,7 @@ func (eEe *ElasticEE) ExportEvent(ctx *context.Context, ev, extraData interface{
 	}
 	defer resp.Body.Close()
 	if resp.IsError() {
-		var e map[string]interface{}
+		var e map[string]any
 		if err = json.NewDecoder(resp.Body).Decode(&e); err != nil {
 			return
 		}
@@ -154,7 +154,7 @@ func (eEe *ElasticEE) Close() (_ error) {
 
 func (eEe *ElasticEE) GetMetrics() *utils.SafeMapStorage { return eEe.dc }
 
-func (eEE *ElasticEE) ExtraData(ev *utils.CGREvent) interface{} {
+func (eEE *ElasticEE) ExtraData(ev *utils.CGREvent) any {
 	return utils.ConcatenatedKey(
 		utils.FirstNonEmpty(engine.MapEvent(ev.APIOpts).GetStringIgnoreErrors(utils.MetaOriginID), utils.GenUUID()),
 		utils.FirstNonEmpty(engine.MapEvent(ev.APIOpts).GetStringIgnoreErrors(utils.MetaRunID), utils.MetaDefault),

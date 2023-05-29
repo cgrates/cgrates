@@ -118,7 +118,7 @@ func TestStatSCfgAsMapInterface(t *testing.T) {
 	cfgJSONStr := `{
 		"stats": {},	
 }`
-	eMap := map[string]interface{}{
+	eMap := map[string]any{
 		utils.EnabledCfg:                false,
 		utils.StoreIntervalCfg:          utils.EmptyString,
 		utils.StoreUncompressedLimitCfg: 0,
@@ -129,7 +129,7 @@ func TestStatSCfgAsMapInterface(t *testing.T) {
 		utils.ExistsIndexedFieldsCfg:    []string{},
 		utils.NotExistsIndexedFieldsCfg: []string{},
 		utils.NestedFieldsCfg:           false,
-		utils.OptsCfg: map[string]interface{}{
+		utils.OptsCfg: map[string]any{
 			utils.MetaProfileIDs:           []*utils.DynamicStringSliceOpt{},
 			utils.MetaProfileIgnoreFilters: []*utils.DynamicBoolOpt{},
 			utils.OptsRoundingDecimals:     []*utils.DynamicIntOpt{},
@@ -159,7 +159,7 @@ func TestStatSCfgAsMapInterface1(t *testing.T) {
 			"nested_fields": true,	
 		},	
 }`
-	eMap := map[string]interface{}{
+	eMap := map[string]any{
 		utils.EnabledCfg:                true,
 		utils.StoreIntervalCfg:          "72h0m0s",
 		utils.StoreUncompressedLimitCfg: 1,
@@ -171,7 +171,7 @@ func TestStatSCfgAsMapInterface1(t *testing.T) {
 		utils.ExistsIndexedFieldsCfg:    []string{"*req.exists_indexed_fields"},
 		utils.NotExistsIndexedFieldsCfg: []string{"*req.notexists_indexed_fields"},
 		utils.NestedFieldsCfg:           true,
-		utils.OptsCfg: map[string]interface{}{
+		utils.OptsCfg: map[string]any{
 			utils.MetaProfileIDs:           []*utils.DynamicStringSliceOpt{},
 			utils.MetaProfileIgnoreFilters: []*utils.DynamicBoolOpt{},
 			utils.OptsRoundingDecimals:     []*utils.DynamicIntOpt{},

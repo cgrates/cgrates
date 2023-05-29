@@ -598,7 +598,7 @@ func testV1FIdxAttributeSRemoveComputedIndexesIDs(t *testing.T) {
 		&AttrRemFilterIndexes{
 			Tenant:   utils.CGRateSorg,
 			ItemType: utils.MetaAttributes,
-			APIOpts: map[string]interface{}{
+			APIOpts: map[string]any{
 				utils.MetaCache: utils.MetaClear,
 			},
 		},
@@ -691,7 +691,7 @@ func testV1FIdxAttributeRemoveIndexesComputeIndexesAllProfiles(t *testing.T) {
 		&AttrRemFilterIndexes{
 			Tenant:   utils.CGRateSorg,
 			ItemType: utils.MetaAttributes,
-			APIOpts: map[string]interface{}{
+			APIOpts: map[string]any{
 				utils.MetaCache: utils.MetaClear,
 			},
 		},
@@ -745,7 +745,7 @@ func testV1FIdxAttributesRemoveProfilesNoIndexes(t *testing.T) {
 	var reply string
 	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1RemoveAttributeProfile,
 		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{ID: "TEST_ATTRIBUTES_IT_TEST",
-			Tenant: utils.CGRateSorg}, APIOpts: map[string]interface{}{
+			Tenant: utils.CGRateSorg}, APIOpts: map[string]any{
 			utils.MetaCache: utils.MetaClear,
 		}}, &reply); err != nil {
 		t.Error(err)
@@ -754,7 +754,7 @@ func testV1FIdxAttributesRemoveProfilesNoIndexes(t *testing.T) {
 	}
 	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1RemoveAttributeProfile,
 		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{ID: "TEST_ATTRIBUTE3",
-			Tenant: utils.CGRateSorg}, APIOpts: map[string]interface{}{
+			Tenant: utils.CGRateSorg}, APIOpts: map[string]any{
 			utils.MetaCache: utils.MetaClear,
 		}}, &reply); err != nil {
 		t.Error(err)
@@ -763,7 +763,7 @@ func testV1FIdxAttributesRemoveProfilesNoIndexes(t *testing.T) {
 	}
 	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1RemoveAttributeProfile,
 		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{ID: "TEST_ATTRIBUTES_new_fltr",
-			Tenant: utils.CGRateSorg}, APIOpts: map[string]interface{}{
+			Tenant: utils.CGRateSorg}, APIOpts: map[string]any{
 			utils.MetaCache: utils.MetaClear,
 		}}, &reply); err != nil {
 		t.Error(err)
@@ -773,7 +773,7 @@ func testV1FIdxAttributesRemoveProfilesNoIndexes(t *testing.T) {
 
 	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1RemoveFilter,
 		utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: utils.CGRateSorg,
-			ID: "fltr_for_attr"}, APIOpts: map[string]interface{}{
+			ID: "fltr_for_attr"}, APIOpts: map[string]any{
 			utils.MetaCache: utils.MetaClear,
 		}}, &reply); err != nil {
 		t.Error(err)
@@ -1149,7 +1149,7 @@ func testV1FIdxAccountSRemoveComputedIndexesIDs(t *testing.T) {
 		&AttrRemFilterIndexes{
 			Tenant:   utils.CGRateSorg,
 			ItemType: utils.MetaAccounts,
-			APIOpts: map[string]interface{}{
+			APIOpts: map[string]any{
 				utils.MetaCache: utils.MetaClear,
 			}},
 		&reply); err != nil {
@@ -1333,7 +1333,7 @@ func testV1FIdxSetActionProfileWithFltr(t *testing.T) {
 				},
 			},
 		},
-		APIOpts: map[string]interface{}{},
+		APIOpts: map[string]any{},
 	}
 	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1SetActionProfile,
 		actPrf, &reply); err != nil {
@@ -1444,7 +1444,7 @@ func testV1FIdxSetActionProfileMoreFltrsMoreIndexing(t *testing.T) {
 				},
 			},
 		},
-		APIOpts: map[string]interface{}{},
+		APIOpts: map[string]any{},
 	}
 	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1SetActionProfile,
 		actPrf, &reply); err != nil {
@@ -1559,7 +1559,7 @@ func testV1FIdxActionMoreProfileForFilters(t *testing.T) {
 				},
 			},
 		},
-		APIOpts: map[string]interface{}{},
+		APIOpts: map[string]any{},
 	}
 	actPrf3 := &engine.ActionProfileWithAPIOpts{
 		ActionProfile: &engine.ActionProfile{
@@ -1586,7 +1586,7 @@ func testV1FIdxActionMoreProfileForFilters(t *testing.T) {
 				},
 			},
 		},
-		APIOpts: map[string]interface{}{},
+		APIOpts: map[string]any{},
 	}
 	var reply string
 	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1SetActionProfile,
@@ -1644,7 +1644,7 @@ func testV1FIdxActionSRemoveComputedIndexesIDs(t *testing.T) {
 		&AttrRemFilterIndexes{
 			Tenant:   utils.CGRateSorg,
 			ItemType: utils.MetaActions,
-			APIOpts: map[string]interface{}{
+			APIOpts: map[string]any{
 				utils.MetaCache: utils.MetaClear,
 			},
 		},
@@ -2087,7 +2087,7 @@ func testV1FIdxChargerSRemoveComputedIndexesIDs(t *testing.T) {
 		&AttrRemFilterIndexes{
 			Tenant:   utils.CGRateSorg,
 			ItemType: utils.MetaChargers,
-			APIOpts: map[string]interface{}{
+			APIOpts: map[string]any{
 				utils.MetaCache: utils.MetaClear,
 			},
 		},
@@ -2564,7 +2564,7 @@ func testV1FIdxRateSRemoveComputedIndexesIDs(t *testing.T) {
 		&AttrRemFilterIndexes{
 			Tenant:   utils.CGRateSorg,
 			ItemType: utils.MetaRateProfiles,
-			APIOpts: map[string]interface{}{
+			APIOpts: map[string]any{
 				utils.MetaCache: utils.MetaClear,
 			},
 		},
@@ -3122,7 +3122,7 @@ func testV1FIdxRateProfileRatesRemoveComputedIndexesIDs(t *testing.T) {
 			Tenant:   utils.CGRateSorg,
 			ItemType: utils.MetaRateProfileRates,
 			Context:  "RATE_1",
-			APIOpts: map[string]interface{}{
+			APIOpts: map[string]any{
 				utils.MetaCache: utils.MetaClear,
 			},
 		},
@@ -3630,7 +3630,7 @@ func testV1FIdxResourceSRemoveComputedIndexesIDs(t *testing.T) {
 		&AttrRemFilterIndexes{
 			Tenant:   utils.CGRateSorg,
 			ItemType: utils.MetaResources,
-			APIOpts: map[string]interface{}{
+			APIOpts: map[string]any{
 				utils.MetaCache: utils.MetaClear,
 			},
 		},
@@ -4129,7 +4129,7 @@ func testV1FIdxRouteSRemoveComputedIndexesIDs(t *testing.T) {
 		&AttrRemFilterIndexes{
 			Tenant:   utils.CGRateSorg,
 			ItemType: utils.MetaRoutes,
-			APIOpts: map[string]interface{}{
+			APIOpts: map[string]any{
 				utils.MetaCache: utils.MetaClear,
 			},
 		},
@@ -4598,7 +4598,7 @@ func testV1FIdxStatSRemoveComputedIndexesIDs(t *testing.T) {
 		&AttrRemFilterIndexes{
 			Tenant:   utils.CGRateSorg,
 			ItemType: utils.MetaStats,
-			APIOpts: map[string]interface{}{
+			APIOpts: map[string]any{
 				utils.MetaCache: utils.MetaClear,
 			},
 		},

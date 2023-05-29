@@ -112,7 +112,7 @@ func TestCallCache(t *testing.T) {
 	fltrs := engine.NewFilterS(cfg, connMgr, dm)
 	admS := NewAdminSv1(cfg, dm, connMgr, fltrs)
 	admS.cfg.AdminSCfg().CachesConns = []string{"*internal"}
-	opts := map[string]interface{}{
+	opts := map[string]any{
 		utils.MetaCache: utils.MetaNone,
 	}
 	errExp := "UNSUPPORTED_SERVICE_METHOD"
@@ -152,7 +152,7 @@ func TestCallCacheForRemoveIndexes(t *testing.T) {
 	fltrs := engine.NewFilterS(cfg, connMgr, dm)
 	admS := NewAdminSv1(cfg, dm, connMgr, fltrs)
 	admS.cfg.AdminSCfg().CachesConns = []string{"*internal"}
-	opts := map[string]interface{}{
+	opts := map[string]any{
 		utils.MetaCache: utils.MetaNone,
 	}
 	errExp := "UNSUPPORTED_SERVICE_METHOD"
@@ -186,7 +186,7 @@ func TestCallCacheForComputeIndexes(t *testing.T) {
 	fltrs := engine.NewFilterS(cfg, connMgr, dm)
 	admS := NewAdminSv1(cfg, dm, connMgr, fltrs)
 	admS.cfg.AdminSCfg().CachesConns = []string{"*internal"}
-	opts := map[string]interface{}{
+	opts := map[string]any{
 		utils.MetaCache: utils.MetaNone,
 	}
 	errExp := "UNSUPPORTED_SERVICE_METHOD"
@@ -220,7 +220,7 @@ func TestCallCacheMultiple(t *testing.T) {
 	fltrs := engine.NewFilterS(cfg, connMgr, dm)
 	admS := NewAdminSv1(cfg, dm, connMgr, fltrs)
 	admS.cfg.AdminSCfg().CachesConns = []string{"*internal"}
-	opts := map[string]interface{}{
+	opts := map[string]any{
 		utils.MetaCache: utils.MetaNone,
 	}
 	errExp := "UNSUPPORTED_SERVICE_METHOD"

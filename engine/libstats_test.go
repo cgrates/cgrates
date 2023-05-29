@@ -248,10 +248,10 @@ func TestStatAddStatEvent(t *testing.T) {
 		t.Errorf("ASR: %v", asrMetric)
 	}
 	/*
-		ev1.Event = map[string]interface{}{
+		ev1.Event = map[string]any{
 			utils.AnswerTime: time.Now()}
 	*/
-	ev1.APIOpts = map[string]interface{}{
+	ev1.APIOpts = map[string]any{
 		utils.MetaStartTime: time.Now()}
 	sq.addStatEvent(context.Background(), ev1.Tenant, ev1.ID, nil, utils.MapStorage{utils.MetaOpts: ev1.APIOpts})
 	if asr := asrMetric.GetValue(); asr.Compare(utils.NewDecimalFromFloat64(66.66666666666667)) != 0 {
@@ -828,8 +828,8 @@ func (sMM statMetricMock) Clone() StatMetric {
 
 type mockMarshal string
 
-func (m mockMarshal) Marshal(v interface{}) ([]byte, error)      { return nil, errors.New(string(m)) }
-func (m mockMarshal) Unmarshal(data []byte, v interface{}) error { return errors.New(string(m)) }
+func (m mockMarshal) Marshal(v any) ([]byte, error)      { return nil, errors.New(string(m)) }
+func (m mockMarshal) Unmarshal(data []byte, v any) error { return errors.New(string(m)) }
 func TestStatQueueNewStoredStatQueue(t *testing.T) {
 	sq := &StatQueue{
 		SQMetrics: map[string]StatMetric{
@@ -1288,7 +1288,7 @@ func TestStatQueueWithAPIOptsJSONMarshall(t *testing.T) {
 	}, 1)
 	exp2 := &StatQueueWithAPIOpts{
 		StatQueue: exp,
-		APIOpts:   map[string]interface{}{"a": "a"},
+		APIOpts:   map[string]any{"a": "a"},
 	}
 	if err != nil {
 		t.Fatal(err)
@@ -1696,7 +1696,7 @@ func TestStatQueueProfile_Set(t *testing.T) {
 	}
 	type args struct {
 		path      []string
-		val       interface{}
+		val       any
 		newBranch bool
 		in3       string
 	}

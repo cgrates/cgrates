@@ -47,9 +47,9 @@ func (cmd *CmdSessionsForceDisconnect) RpcMethod() string {
 	return cmd.rpcMethod
 }
 
-func (cmd *CmdSessionsForceDisconnect) RpcParams(reset bool) interface{} {
+func (cmd *CmdSessionsForceDisconnect) RpcParams(reset bool) any {
 	if reset || cmd.rpcParams == nil {
-		cmd.rpcParams = &utils.SessionFilter{APIOpts: make(map[string]interface{})}
+		cmd.rpcParams = &utils.SessionFilter{APIOpts: make(map[string]any)}
 	}
 	return cmd.rpcParams
 }
@@ -60,12 +60,12 @@ func (cmd *CmdSessionsForceDisconnect) PostprocessRpcParams() error {
 	return nil
 }
 
-func (cmd *CmdSessionsForceDisconnect) RpcResult() interface{} {
+func (cmd *CmdSessionsForceDisconnect) RpcResult() any {
 	var sessions string
 	return &sessions
 }
 
-func (cmd *CmdSessionsForceDisconnect) GetFormatedResult(result interface{}) string {
+func (cmd *CmdSessionsForceDisconnect) GetFormatedResult(result any) string {
 	return GetFormatedSliceResult(result, utils.StringSet{
 		utils.Usage:         {},
 		utils.DurationIndex: {},

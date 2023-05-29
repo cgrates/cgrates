@@ -29,11 +29,11 @@ func (dS *DispatcherService) RateSv1CostForEvent(ctx *context.Context, args *uti
 	if args != nil && len(args.Tenant) != 0 {
 		tnt = args.Tenant
 	}
-	ev := make(map[string]interface{})
+	ev := make(map[string]any)
 	if args != nil {
 		ev = args.Event
 	}
-	opts := make(map[string]interface{})
+	opts := make(map[string]any)
 	if args != nil {
 		opts = args.APIOpts
 	}
@@ -44,11 +44,11 @@ func (dS *DispatcherService) RateSv1Ping(ctx *context.Context, args *utils.CGREv
 	if args != nil && len(args.Tenant) != 0 {
 		tnt = args.Tenant
 	}
-	ev := make(map[string]interface{})
+	ev := make(map[string]any)
 	if args != nil {
 		ev = args.Event
 	}
-	opts := make(map[string]interface{})
+	opts := make(map[string]any)
 	if args != nil {
 		opts = args.APIOpts
 	}
@@ -59,11 +59,11 @@ func (dS *DispatcherService) RateSv1RateProfileRatesForEvent(ctx *context.Contex
 	if args != nil && (args.CGREvent != nil && len(args.CGREvent.Tenant) != 0) {
 		tnt = args.CGREvent.Tenant
 	}
-	ev := make(map[string]interface{})
+	ev := make(map[string]any)
 	if args != nil && args.CGREvent != nil {
 		ev = args.CGREvent.Event
 	}
-	opts := make(map[string]interface{})
+	opts := make(map[string]any)
 	if args != nil && args.CGREvent != nil {
 		opts = args.CGREvent.APIOpts
 	}
@@ -74,11 +74,11 @@ func (dS *DispatcherService) RateSv1RateProfilesForEvent(ctx *context.Context, a
 	if args != nil && len(args.Tenant) != 0 {
 		tnt = args.Tenant
 	}
-	ev := make(map[string]interface{})
+	ev := make(map[string]any)
 	if args != nil {
 		ev = args.Event
 	}
-	opts := make(map[string]interface{})
+	opts := make(map[string]any)
 	if args != nil {
 		opts = args.APIOpts
 	}

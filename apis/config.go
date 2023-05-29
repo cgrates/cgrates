@@ -38,7 +38,7 @@ type ConfigSv1 struct {
 
 // GetConfig will return the CGRConfig section as a map
 // if the section is empty or *all all config is returned
-func (cSv1 *ConfigSv1) GetConfig(ctx *context.Context, section *config.SectionWithAPIOpts, reply *map[string]interface{}) (err error) {
+func (cSv1 *ConfigSv1) GetConfig(ctx *context.Context, section *config.SectionWithAPIOpts, reply *map[string]any) (err error) {
 	return cSv1.cfg.V1GetConfig(ctx, section, reply)
 }
 

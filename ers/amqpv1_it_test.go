@@ -118,7 +118,7 @@ func TestAMQPERv1(t *testing.T) {
 		expected := &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     ev.cgrEvent.ID,
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				"OriginID": randomOriginID,
 			},
 		}

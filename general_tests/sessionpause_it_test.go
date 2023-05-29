@@ -117,7 +117,7 @@ package general_tests
 // 		InitSession: true,
 // 		CGREvent: &utils.CGREvent{
 // 			Tenant: "cgrates.org",
-// 			Event: map[string]interface{}{
+// 			Event: map[string]any{
 // 				utils.CGRID:        cgrID,
 // 				utils.Category:     utils.Call,
 // 				utils.ToR:          utils.MetaVoice,
@@ -130,7 +130,7 @@ package general_tests
 // 				utils.AnswerTime:   time.Date(2018, time.January, 7, 16, 60, 10, 0, time.UTC),
 // 				utils.Usage:        usage,
 // 			},
-// 			APIOpts: map[string]interface{}{
+// 			APIOpts: map[string]any{
 // 				utils.OptsSesDebitInterval: "0s",
 // 				utils.OptsSesChargeable:    chargeable,
 // 			},
@@ -151,7 +151,7 @@ package general_tests
 // 		UpdateSession: true,
 // 		CGREvent: &utils.CGREvent{
 // 			Tenant: "cgrates.org",
-// 			Event: map[string]interface{}{
+// 			Event: map[string]any{
 // 				utils.CGRID:        cgrID,
 // 				utils.Category:     utils.Call,
 // 				utils.ToR:          utils.MetaVoice,
@@ -164,7 +164,7 @@ package general_tests
 // 				utils.AnswerTime:   time.Date(2018, time.January, 7, 16, 60, 10, 0, time.UTC),
 // 				utils.Usage:        usage,
 // 			},
-// 			APIOpts: map[string]interface{}{
+// 			APIOpts: map[string]any{
 // 				utils.OptsSesChargeable: chargeable,
 // 			},
 // 		},
@@ -184,7 +184,7 @@ package general_tests
 // 		TerminateSession: true,
 // 		CGREvent: &utils.CGREvent{
 // 			Tenant: "cgrates.org",
-// 			Event: map[string]interface{}{
+// 			Event: map[string]any{
 // 				utils.CGRID:        cgrID,
 // 				utils.Category:     utils.Call,
 // 				utils.ToR:          utils.MetaVoice,
@@ -197,7 +197,7 @@ package general_tests
 // 				utils.AnswerTime:   time.Date(2018, time.January, 7, 16, 60, 10, 0, time.UTC),
 // 				utils.Usage:        usage,
 // 			},
-// 			APIOpts: map[string]interface{}{
+// 			APIOpts: map[string]any{
 // 				utils.OptsSesChargeable: chargeable,
 // 			},
 // 		},
@@ -213,7 +213,7 @@ package general_tests
 // 	if err := sesPauseRPC.Call(utils.SessionSv1ProcessCDR, &utils.CGREvent{
 // 		Tenant: "cgrates.org",
 // 		ID:     "testSesPauseItProccesCDR",
-// 		Event: map[string]interface{}{
+// 		Event: map[string]any{
 // 			utils.CGRID:        cgrID,
 // 			utils.Category:     utils.Call,
 // 			utils.ToR:          utils.MetaVoice,

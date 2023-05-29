@@ -161,9 +161,9 @@ func (httpcfg *HTTPCfg) loadFromJSONCfg(jsnHTTPCfg *HTTPJsonCfg) (err error) {
 	return
 }
 
-// AsMapInterface returns the config as a map[string]interface{}
-func (httpcfg HTTPCfg) AsMapInterface(string) interface{} {
-	clientOpts := map[string]interface{}{
+// AsMapInterface returns the config as a map[string]any
+func (httpcfg HTTPCfg) AsMapInterface(string) any {
+	clientOpts := map[string]any{
 		utils.HTTPClientSkipTLSVerificationCfg:   false,
 		utils.HTTPClientTLSHandshakeTimeoutCfg:   httpcfg.ClientOpts.TLSHandshakeTimeout.String(),
 		utils.HTTPClientDisableKeepAlivesCfg:     httpcfg.ClientOpts.DisableKeepAlives,
@@ -182,7 +182,7 @@ func (httpcfg HTTPCfg) AsMapInterface(string) interface{} {
 	if httpcfg.ClientOpts.TLSClientConfig != nil {
 		clientOpts[utils.HTTPClientSkipTLSVerificationCfg] = httpcfg.ClientOpts.TLSClientConfig.InsecureSkipVerify
 	}
-	return map[string]interface{}{
+	return map[string]any{
 		utils.HTTPJsonRPCURLCfg:        httpcfg.JsonRPCURL,
 		utils.RegistrarSURLCfg:         httpcfg.RegistrarSURL,
 		utils.PrometheusURLCfg:         httpcfg.PrometheusURL,

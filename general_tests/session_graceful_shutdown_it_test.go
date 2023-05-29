@@ -190,13 +190,13 @@ func testSessionSRplcApierGetInitateSessions(t *testing.T) {
 	args := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "TestSSv1ItInitiateSession",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.Tenant:      "cgrates.org",
 			utils.RequestType: utils.MetaNone,
 
 			utils.OriginID: "testSessionRplORIGINID",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaOriginID:    "testSessionRploriginID",
 			utils.OptsSesInitiate: true,
 		},

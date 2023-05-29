@@ -50,7 +50,7 @@ func (onm *OrderedNavigableMap) GetFirstElement() *PathItemElement {
 }
 
 // Interface returns navigble map that's inside
-func (onm *OrderedNavigableMap) Interface() interface{} {
+func (onm *OrderedNavigableMap) Interface() any {
 	return onm.nm
 }
 
@@ -96,7 +96,7 @@ func (onm *OrderedNavigableMap) Remove(fullPath *FullPath) (err error) {
 // Set sets the value at the given path
 // this used with full path and the processed path to not calculate them for every set
 // used in tests
-func (onm *OrderedNavigableMap) Set(fullPath *FullPath, val interface{}) (err error) {
+func (onm *OrderedNavigableMap) Set(fullPath *FullPath, val any) (err error) {
 	if fullPath == nil || len(fullPath.PathSlice) == 0 {
 		return ErrWrongPath
 	}
@@ -144,7 +144,7 @@ func (onm *OrderedNavigableMap) SetAsSlice(fullPath *FullPath, vals []*DataNode)
 
 // FieldAsString returns the value from path as string
 func (onm *OrderedNavigableMap) FieldAsString(fldPath []string) (str string, err error) {
-	var val interface{}
+	var val any
 	if val, err = onm.FieldAsInterface(fldPath); err != nil {
 		return
 	}
@@ -152,7 +152,7 @@ func (onm *OrderedNavigableMap) FieldAsString(fldPath []string) (str string, err
 }
 
 // FieldAsInterface returns the interface at the path
-func (onm *OrderedNavigableMap) FieldAsInterface(fldPath []string) (iface interface{}, err error) {
+func (onm *OrderedNavigableMap) FieldAsInterface(fldPath []string) (iface any, err error) {
 	return onm.nm.FieldAsInterface(fldPath)
 }
 
@@ -165,8 +165,8 @@ func (onm *OrderedNavigableMap) GetOrder() (order [][]string) {
 }
 
 // OrderedFields returns the elements in order they were inserted
-func (onm *OrderedNavigableMap) OrderedFields() (flds []interface{}) {
-	flds = make([]interface{}, 0, len(onm.nm.Map))
+func (onm *OrderedNavigableMap) OrderedFields() (flds []any) {
+	flds = make([]any, 0, len(onm.nm.Map))
 	for el := onm.GetFirstElement(); el != nil; el = el.Next() {
 		fld, _ := onm.Field(el.Value)
 		flds = append(flds, fld.Data)

@@ -41,7 +41,7 @@ var attrs = &engine.AttrSProcessEventReply{
 	CGREvent: &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "TestSSv1ItAuth",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 
 			utils.Tenant:       "cgrates.org",
 			utils.Category:     "call",
@@ -55,7 +55,7 @@ var attrs = &engine.AttrSProcessEventReply{
 			utils.SetupTime:    "2018-01-07T17:00:00Z",
 			utils.Usage:        300000000000.0,
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaOriginID: "5668666d6b8e44eb949042f25ce0796ec3592ff9",
 		},
 	},
@@ -65,44 +65,44 @@ func TestIsIndexed(t *testing.T) {
 	sS := &SessionS{}
 	if sS.isIndexed(&Session{
 
-		OptsStart: map[string]interface{}{
+		OptsStart: map[string]any{
 			utils.MetaOriginID: "test",
 		},
 	}, true) {
 		t.Error("Expecting: false, received: true")
 	}
-	if sS.isIndexed(&Session{OptsStart: map[string]interface{}{
+	if sS.isIndexed(&Session{OptsStart: map[string]any{
 		utils.MetaOriginID: "test",
 	}}, false) {
 		t.Error("Expecting: false, received: true")
 	}
 	sS = &SessionS{
-		aSessions: map[string]*Session{"test": {OptsStart: map[string]interface{}{
+		aSessions: map[string]*Session{"test": {OptsStart: map[string]any{
 			utils.MetaOriginID: "test",
 		}}},
 	}
-	if !sS.isIndexed(&Session{OptsStart: map[string]interface{}{
+	if !sS.isIndexed(&Session{OptsStart: map[string]any{
 		utils.MetaOriginID: "test",
 	}}, false) {
 		t.Error("Expecting: true, received: false")
 	}
-	if sS.isIndexed(&Session{OptsStart: map[string]interface{}{
+	if sS.isIndexed(&Session{OptsStart: map[string]any{
 		utils.MetaOriginID: "test",
 	}}, true) {
 		t.Error("Expecting: true, received: false")
 	}
 
 	sS = &SessionS{
-		pSessions: map[string]*Session{"test": {OptsStart: map[string]interface{}{
+		pSessions: map[string]*Session{"test": {OptsStart: map[string]any{
 			utils.MetaOriginID: "test",
 		}}},
 	}
-	if !sS.isIndexed(&Session{OptsStart: map[string]interface{}{
+	if !sS.isIndexed(&Session{OptsStart: map[string]any{
 		utils.MetaOriginID: "test",
 	}}, true) {
 		t.Error("Expecting: false, received: true")
 	}
-	if sS.isIndexed(&Session{OptsStart: map[string]interface{}{
+	if sS.isIndexed(&Session{OptsStart: map[string]any{
 		utils.MetaOriginID: "test",
 	}}, false) {
 		t.Error("Expecting: false, received: true")
@@ -165,7 +165,7 @@ func TestSessionSIndexAndUnindexSessions(t *testing.T) {
 		"Extra4":  {},
 	}
 	sS := NewSessionS(cfg, nil, nil)
-	sEv := engine.NewMapEvent(map[string]interface{}{
+	sEv := engine.NewMapEvent(map[string]any{
 		utils.EventName:       "TEST_EVENT",
 		utils.ToR:             "*voice",
 		utils.OriginID:        "12345",
@@ -244,7 +244,7 @@ func TestSessionSIndexAndUnindexSessions(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", eRIdxes, sS.aSessionsRIdx)
 	}
 	// Index second session
-	sSEv2 := engine.NewMapEvent(map[string]interface{}{
+	sSEv2 := engine.NewMapEvent(map[string]any{
 		utils.EventName:    "TEST_EVENT2",
 		utils.OriginID:     "12346",
 		utils.AccountField: "account2",
@@ -264,7 +264,7 @@ func TestSessionSIndexAndUnindexSessions(t *testing.T) {
 		},
 	}
 	sS.indexSession(session2, false)
-	sSEv3 := engine.NewMapEvent(map[string]interface{}{
+	sSEv3 := engine.NewMapEvent(map[string]any{
 		utils.EventName:    "TEST_EVENT3",
 		utils.Tenant:       "cgrates.org",
 		utils.OriginID:     "12347",
@@ -475,7 +475,7 @@ func TestSessionSIndexAndUnindexSessions(t *testing.T) {
 func TestSessionSRegisterAndUnregisterASessions(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	sS := NewSessionS(cfg, nil, nil)
-	sSEv := engine.NewMapEvent(map[string]interface{}{
+	sSEv := engine.NewMapEvent(map[string]any{
 		utils.EventName:    "TEST_EVENT",
 		utils.ToR:          "*voice",
 		utils.OriginID:     "111",
@@ -532,7 +532,7 @@ func TestSessionSRegisterAndUnregisterASessions(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", eRIdxes, sS.aSessionsRIdx)
 	}
 
-	sSEv2 := engine.NewMapEvent(map[string]interface{}{
+	sSEv2 := engine.NewMapEvent(map[string]any{
 		utils.EventName:    "TEST_EVENT",
 		utils.ToR:          "*voice",
 		utils.OriginID:     "222",
@@ -595,7 +595,7 @@ func TestSessionSRegisterAndUnregisterASessions(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", eRIdxes, sS.aSessionsRIdx)
 	}
 
-	sSEv3 := engine.NewMapEvent(map[string]interface{}{
+	sSEv3 := engine.NewMapEvent(map[string]any{
 		utils.EventName:       "TEST_EVENT",
 		utils.ToR:             "*voice",
 		utils.OriginID:        "111",
@@ -684,7 +684,7 @@ func TestSessionSRegisterAndUnregisterASessions(t *testing.T) {
 func TestSessionSRegisterAndUnregisterPSessions(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	sS := NewSessionS(cfg, nil, nil)
-	sSEv := engine.NewMapEvent(map[string]interface{}{
+	sSEv := engine.NewMapEvent(map[string]any{
 		utils.EventName:    "TEST_EVENT",
 		utils.ToR:          "*voice",
 		utils.OriginID:     "111",
@@ -744,7 +744,7 @@ func TestSessionSRegisterAndUnregisterPSessions(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", eRIdxes, sS.pSessionsRIdx)
 	}
 
-	sSEv2 := engine.NewMapEvent(map[string]interface{}{
+	sSEv2 := engine.NewMapEvent(map[string]any{
 		utils.EventName:    "TEST_EVENT",
 		utils.ToR:          "*voice",
 		utils.OriginID:     "222",
@@ -807,7 +807,7 @@ func TestSessionSRegisterAndUnregisterPSessions(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", eRIdxes, sS.pSessionsRIdx)
 	}
 
-	sSEv3 := engine.NewMapEvent(map[string]interface{}{
+	sSEv3 := engine.NewMapEvent(map[string]any{
 		utils.EventName:       "TEST_EVENT",
 		utils.ToR:             "*voice",
 		utils.OriginID:        "111",
@@ -892,7 +892,7 @@ func TestSessionSNewV1AuthorizeArgs(t *testing.T) {
 	cgrEv := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "Event",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1001",
 			utils.Destination:  "1002",
 		},
@@ -976,13 +976,13 @@ func TestSessionSV1AuthorizeReplyAsNavigableMap(t *testing.T) {
 			Routes: []*engine.SortedRoute{
 				{
 					RouteID: "supplier1",
-					SortingData: map[string]interface{}{
+					SortingData: map[string]any{
 						"Weight": 20.0,
 					},
 				},
 				{
 					RouteID: "supplier2",
-					SortingData: map[string]interface{}{
+					SortingData: map[string]any{
 						"Weight": 10.0,
 					},
 				},
@@ -1274,7 +1274,7 @@ func TestV1ProcessEventReplyAsNavigableMap(t *testing.T) {
 func TestSessionStransitSState(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	sS := NewSessionS(cfg, nil, nil, nil)
-	sSEv := engine.NewMapEvent(map[string]interface{}{
+	sSEv := engine.NewMapEvent(map[string]any{
 		utils.EventName:    "TEST_EVENT",
 		utils.ToR:          "*voice",
 		utils.OriginID:     "111",
@@ -1293,7 +1293,7 @@ func TestSessionStransitSState(t *testing.T) {
 		utils.OriginHost:   "127.0.0.1",
 	})
 	s := &Session{
-		OptsStart: map[string]interface{}{
+		OptsStart: map[string]any{
 			utils.MetaOriginID: "session1",
 		},
 		EventStart: sSEv,
@@ -1322,7 +1322,7 @@ func TestSessionStransitSState(t *testing.T) {
 func TestSessionSrelocateSessionS(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	sS := NewSessionS(cfg, nil, nil, nil)
-	sSEv := engine.NewMapEvent(map[string]interface{}{
+	sSEv := engine.NewMapEvent(map[string]any{
 		utils.EventName:    "TEST_EVENT",
 		utils.ToR:          "*voice",
 		utils.OriginID:     "111",
@@ -1340,11 +1340,11 @@ func TestSessionSrelocateSessionS(t *testing.T) {
 		utils.Route:        "supplier1",
 		utils.OriginHost:   "127.0.0.1",
 	})
-	opt := make(map[string]interface{})
+	opt := make(map[string]any)
 	initialOriginID := GetSetOptsOriginID(sSEv, opt)
 	s := &Session{
 		EventStart: sSEv,
-		OptsStart: map[string]interface{}{
+		OptsStart: map[string]any{
 			utils.MetaOriginID: initialOriginID,
 		},
 	}
@@ -1362,10 +1362,10 @@ func TestSessionSrelocateSessionS(t *testing.T) {
 	if len(rcvS) != 0 {
 		t.Errorf("Expecting 0, received: %+v", len(rcvS))
 	}
-	ev := engine.NewMapEvent(map[string]interface{}{
+	ev := engine.NewMapEvent(map[string]any{
 		utils.OriginID:   "222",
 		utils.OriginHost: "127.0.0.1"})
-	opt2 := make(map[string]interface{})
+	opt2 := make(map[string]any)
 	originID := GetSetOptsOriginID(ev, opt2)
 	//check the session with new originID
 	rcvS = sS.getSessions(originID, false)
@@ -1430,7 +1430,7 @@ func TestSessionSgetSessionIDsMatchingIndexes(t *testing.T) {
 		"ToR": {},
 	}
 	sS := NewSessionS(cfg, nil, nil)
-	sEv := engine.NewMapEvent(map[string]interface{}{
+	sEv := engine.NewMapEvent(map[string]any{
 		utils.EventName:       "TEST_EVENT",
 		utils.ToR:             "*voice",
 		utils.OriginID:        "12345",
@@ -1497,7 +1497,7 @@ func TestSessionSgetSessionIDsMatchingIndexes(t *testing.T) {
 			Event: sEv,
 		},
 		{
-			Event: engine.NewMapEvent(map[string]interface{}{
+			Event: engine.NewMapEvent(map[string]any{
 				utils.EventName: "TEST_EVENT",
 				utils.ToR:       "*voice"}),
 		},
@@ -1526,7 +1526,7 @@ func TestSessionSgetSessionIDsMatchingIndexes(t *testing.T) {
 
 type testRPCClientConnection struct{}
 
-func (*testRPCClientConnection) Call(string, interface{}, interface{}) error { return nil }
+func (*testRPCClientConnection) Call(string, any, any) error { return nil }
 
 func TestNewSessionS(t *testing.T) {
 	cgrCGF := config.NewDefaultCGRConfig()
@@ -1601,7 +1601,7 @@ func TestV1InitSessionArgsParseFlags(t *testing.T) {
 func TestSessionSgetSession(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	sS := NewSessionS(cfg, nil, nil, nil)
-	sSEv := engine.NewMapEvent(map[string]interface{}{
+	sSEv := engine.NewMapEvent(map[string]any{
 		utils.EventName:    "TEST_EVENT",
 		utils.ToR:          "*voice",
 		utils.OriginID:     "111",
@@ -1626,7 +1626,7 @@ func TestSessionSgetSession(t *testing.T) {
 				Event: sSEv,
 			},
 		},
-		OptsStart: map[string]interface{}{
+		OptsStart: map[string]any{
 			utils.MetaOriginID: "session1",
 		},
 	}
@@ -1648,7 +1648,7 @@ func TestSessionSfilterSessions(t *testing.T) {
 		"ToR": {},
 	}
 	sS := NewSessionS(cfg, nil, nil)
-	sEv := engine.NewMapEvent(map[string]interface{}{
+	sEv := engine.NewMapEvent(map[string]any{
 		utils.EventName:       "TEST_EVENT",
 		utils.ToR:             "*voice",
 		utils.OriginID:        "12345",
@@ -1817,7 +1817,7 @@ func TestSessionSfilterSessionsCount(t *testing.T) {
 		"ToR": {},
 	}
 	sS := NewSessionS(cfg, nil, nil)
-	sEv := engine.NewMapEvent(map[string]interface{}{
+	sEv := engine.NewMapEvent(map[string]any{
 		utils.EventName:       "TEST_EVENT",
 		utils.ToR:             "*voice",
 		utils.OriginID:        "12345",
@@ -2013,7 +2013,7 @@ type mockConnWarnDisconnect1 struct {
 	*testRPCClientConnection
 }
 
-func (mk *mockConnWarnDisconnect1) Call(method string, args interface{}, rply interface{}) error {
+func (mk *mockConnWarnDisconnect1) Call(method string, args any, rply any) error {
 	return utils.ErrNotImplemented
 }
 
@@ -2021,7 +2021,7 @@ type mockConnWarnDisconnect2 struct {
 	*testRPCClientConnection
 }
 
-func (mk *mockConnWarnDisconnect2) Call(method string, args interface{}, rply interface{}) error {
+func (mk *mockConnWarnDisconnect2) Call(method string, args any, rply any) error {
 	return utils.ErrNoActiveSession
 }
 
@@ -2049,16 +2049,16 @@ func TestWarnSession(t *testing.T) {
 	}
 }
 
-type clMock func(_ string, _ interface{}, _ interface{}) error
+type clMock func(_ string, _ any, _ any) error
 
-func (c clMock) Call(m string, a interface{}, r interface{}) error {
+func (c clMock) Call(m string, a any, r any) error {
 	return c(m, a, r)
 }
 func TestInitSession(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.SessionSCfg().ChargerSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers)}
 	clientConect := make(chan birpc.ClientConnector, 1)
-	clientConect <- clMock(func(_ string, args interface{}, reply interface{}) error {
+	clientConect <- clMock(func(_ string, args any, reply any) error {
 		rply, cancast := reply.(*[]*engine.ChrgSProcessEventReply)
 		if !cancast {
 			return fmt.Errorf("can't cast")
@@ -2079,7 +2079,7 @@ func TestInitSession(t *testing.T) {
 	sS := NewSessionS(cfg, nil, conMng)
 	s, err := sS.initSession(&utils.CGREvent{
 		Tenant: "cgrates.org",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.Category:     "call",
 			utils.ToR:          utils.MetaVoice,
 			utils.OriginID:     "TestTerminate",

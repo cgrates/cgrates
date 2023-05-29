@@ -169,7 +169,7 @@ func TestActSetAccountFields(t *testing.T) {
 				Weight: 10,
 			},
 		},
-		Opts: map[string]interface{}{
+		Opts: map[string]any{
 			utils.AccountField: "1004",
 		},
 		ThresholdIDs: []string{"TH_ID1"},
@@ -215,7 +215,7 @@ func TestActSetBalanceFields(t *testing.T) {
 				Factor:    &utils.Decimal{decimal.New(100, 0)},
 			},
 		},
-		Opts: map[string]interface{}{
+		Opts: map[string]any{
 			utils.AccountField: "1004",
 		},
 		CostIncrements: []*utils.CostIncrement{

@@ -25,7 +25,7 @@ func TestCBDebitUnits(t *testing.T) {
 		blnCfg: &utils.Balance{
 			ID:   "TestCBDebitUnits",
 			Type: utils.MetaConcrete,
-			Opts: map[string]interface{}{
+			Opts: map[string]any{
 				utils.MetaBalanceLimit: -200.0,
 			},
 			UnitFactors: []*utils.UnitFactor{
@@ -60,7 +60,7 @@ func TestCBDebitUnits(t *testing.T) {
 		blnCfg: &utils.Balance{
 			ID:   "TestCBDebitUnits",
 			Type: utils.MetaConcrete,
-			Opts: map[string]interface{}{
+			Opts: map[string]any{
 				utils.MetaBalanceLimit: -1.0,
 			},
 			Units: utils.NewDecimal(125, 2), // 1.25
@@ -82,7 +82,7 @@ func TestCBDebitUnits(t *testing.T) {
 		blnCfg: &utils.Balance{
 			ID:   "TestCBDebitUnits",
 			Type: utils.MetaConcrete,
-			Opts: map[string]interface{}{
+			Opts: map[string]any{
 				utils.MetaBalanceUnlimited: true,
 			},
 			Units: utils.NewDecimal(125, 2), // 1.25
@@ -104,7 +104,7 @@ func TestCBDebitUnits(t *testing.T) {
 		blnCfg: &utils.Balance{
 			ID:   "TestCBDebitUnits",
 			Type: utils.MetaConcrete,
-			Opts: map[string]interface{}{
+			Opts: map[string]any{
 				utils.MetaBalanceLimit: 0.5, // 0.5 as limit
 			},
 			Units: utils.NewDecimal(125, 2), // 1.25
@@ -169,7 +169,7 @@ func TestCBDebitUnlimited(t *testing.T) {
 		blnCfg: &utils.Balance{
 			ID:   "CB",
 			Type: utils.MetaConcrete,
-			Opts: map[string]interface{}{
+			Opts: map[string]any{
 				utils.MetaBalanceUnlimited: true,
 			},
 			Units: utils.NewDecimal(100, 0),
@@ -192,7 +192,7 @@ func TestCBDebitLimit(t *testing.T) {
 		blnCfg: &utils.Balance{
 			ID:   "CB",
 			Type: utils.MetaConcrete,
-			Opts: map[string]interface{}{
+			Opts: map[string]any{
 				utils.MetaBalanceLimit: 300.0, // 300 as limit
 			},
 			Units: utils.NewDecimal(500, 0), // 500 Units
@@ -216,7 +216,7 @@ func TestCBDebitLimitExceed(t *testing.T) {
 		blnCfg: &utils.Balance{
 			ID:   "CB",
 			Type: utils.MetaConcrete,
-			Opts: map[string]interface{}{
+			Opts: map[string]any{
 				utils.MetaBalanceLimit: 300.0, // 300 as limit
 			},
 			Units: utils.NewDecimal(500, 0), // 500 Units
@@ -239,7 +239,7 @@ func TestCBDebitLimitExceed2(t *testing.T) {
 		blnCfg: &utils.Balance{
 			ID:   "CB",
 			Type: utils.MetaConcrete,
-			Opts: map[string]interface{}{
+			Opts: map[string]any{
 				utils.MetaBalanceLimit: 300.0, // 300 as limit
 			},
 			Units: utils.NewDecimal(500, 0), // 500 Units
@@ -293,7 +293,7 @@ func TestCBDebitWithUnitFactorWithLimit(t *testing.T) {
 					Factor: utils.NewDecimal(100, 0),
 				},
 			},
-			Opts: map[string]interface{}{
+			Opts: map[string]any{
 				utils.MetaBalanceLimit: 300.0, // 300 as limit
 			},
 			Units: utils.NewDecimal(500, 0), // 500 Units
@@ -321,7 +321,7 @@ func TestCBDebitWithUnitFactorWithUnlimited(t *testing.T) {
 					Factor: utils.NewDecimal(100, 0),
 				},
 			},
-			Opts: map[string]interface{}{
+			Opts: map[string]any{
 				utils.MetaBalanceUnlimited: true,
 			},
 			Units: utils.NewDecimal(500, 0), // 500 Units
@@ -354,7 +354,7 @@ func TestCBDebitWithUnitFactorWithFilters1(t *testing.T) {
 					Factor:    utils.NewDecimal(100, 0),
 				},
 			},
-			Opts: map[string]interface{}{
+			Opts: map[string]any{
 				utils.MetaBalanceUnlimited: true,
 			},
 			Units: utils.NewDecimal(500, 0), // 500 Units
@@ -363,7 +363,7 @@ func TestCBDebitWithUnitFactorWithFilters1(t *testing.T) {
 	}
 
 	cgrEvent := &utils.CGREvent{
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			"CustomField": "CustomValueee",
 		},
 	}
@@ -393,7 +393,7 @@ func TestCBDebitWithUnitFactorWithFiltersWithLimit(t *testing.T) {
 					Factor:    utils.NewDecimal(100, 0),
 				},
 			},
-			Opts: map[string]interface{}{
+			Opts: map[string]any{
 				utils.MetaBalanceLimit: 300.0, // 300 as limit
 			},
 			Units: utils.NewDecimal(500, 0), // 500 Units
@@ -401,7 +401,7 @@ func TestCBDebitWithUnitFactorWithFiltersWithLimit(t *testing.T) {
 		fltrS: filterS,
 	}
 	cgrEvent := &utils.CGREvent{
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			"CustomField": "CustomValue",
 		},
 	}
@@ -440,7 +440,7 @@ func TestCBDebitWithMultipleUnitFactor(t *testing.T) {
 		fltrS: filterS,
 	}
 	cgrEvent := &utils.CGREvent{
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			"CustomField2": "CustomValue2",
 		},
 	}
@@ -470,7 +470,7 @@ func TestCBDebitWithBalanceFilter(t *testing.T) {
 		fltrS: filterS,
 	}
 	cgrEvent := &utils.CGREvent{
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			"CustomField": "CustomValue",
 		},
 	}
@@ -500,7 +500,7 @@ func TestCBDebitWithBalanceFilterNotPassing(t *testing.T) {
 		fltrS: filterS,
 	}
 	cgrEvent := &utils.CGREvent{
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			"CustomField": "CustomValue",
 		},
 	}
@@ -526,7 +526,7 @@ func TestCBDebitWithBalanceInvalidFilter(t *testing.T) {
 		fltrS: filterS,
 	}
 	cgrEvent := &utils.CGREvent{
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			"CustomField": "CustomValue",
 		},
 	}
@@ -557,7 +557,7 @@ func TestCBDebitWithInvalidUnitFactorFilter(t *testing.T) {
 		fltrS: filterS,
 	}
 	cgrEvent := &utils.CGREvent{
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			"CustomField": "CustomValue",
 		},
 	}
@@ -577,7 +577,7 @@ func TestCBDebitWithInvalidLimit(t *testing.T) {
 		blnCfg: &utils.Balance{
 			ID:   "CB",
 			Type: utils.MetaConcrete,
-			Opts: map[string]interface{}{
+			Opts: map[string]any{
 				utils.MetaBalanceLimit: "invalid",
 			},
 			Units: utils.NewDecimal(500, 0), // 500 Units
@@ -585,7 +585,7 @@ func TestCBDebitWithInvalidLimit(t *testing.T) {
 		fltrS: filterS,
 	}
 	cgrEvent := &utils.CGREvent{
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			"CustomField": "CustomValue",
 		},
 	}
@@ -674,7 +674,7 @@ func TestCBSDebitAbstractsNoMatchFilter(t *testing.T) {
 	cgrEv := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "EV",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			"CustomField2": "CustomValue2",
 		},
 	}
@@ -722,8 +722,8 @@ func TestCBSDebitAbstractsCoverProcessAttributes(t *testing.T) { // coverage pur
 	engine.Cache.Clear(nil)
 
 	sTestMock := &testMockCall{
-		calls: map[string]func(_ *context.Context, _, _ interface{}) error{
-			utils.AttributeSv1ProcessEvent: func(_ *context.Context, _, _ interface{}) error {
+		calls: map[string]func(_ *context.Context, _, _ any) error{
+			utils.AttributeSv1ProcessEvent: func(_ *context.Context, _, _ any) error {
 				return utils.ErrNotImplemented
 			},
 		},
@@ -766,8 +766,8 @@ func TestCBSDebitAbstractsCoverProcessAttributes2(t *testing.T) { // coverage pu
 	engine.Cache.Clear(nil)
 
 	sTestMock := &testMockCall{
-		calls: map[string]func(_ *context.Context, _, _ interface{}) error{
-			utils.AttributeSv1ProcessEvent: func(_ *context.Context, args, reply interface{}) error {
+		calls: map[string]func(_ *context.Context, _, _ any) error{
+			utils.AttributeSv1ProcessEvent: func(_ *context.Context, args, reply any) error {
 				rplCast, canCast := reply.(*engine.AttrSProcessEventReply)
 				if !canCast {
 					t.Errorf("Wrong argument type : %T", reply)
@@ -779,10 +779,10 @@ func TestCBSDebitAbstractsCoverProcessAttributes2(t *testing.T) { // coverage pu
 					CGREvent: &utils.CGREvent{
 						Tenant: "cgrates.org",
 						ID:     "EV",
-						Event: map[string]interface{}{
+						Event: map[string]any{
 							"CustomField2": "CustomValue2",
 						},
-						APIOpts: map[string]interface{}{},
+						APIOpts: map[string]any{},
 					},
 				}
 				*rplCast = *customEv

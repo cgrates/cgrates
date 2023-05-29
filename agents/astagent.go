@@ -75,7 +75,7 @@ type AsteriskAgent struct {
 	connMgr     *engine.ConnManager
 	astConnIdx  int
 	astConn     *aringo.ARInGO
-	astEvChan   chan map[string]interface{}
+	astEvChan   chan map[string]any
 	astErrChan  chan error
 	eventsCache map[string]*utils.CGREvent // used to gather information about events during various phases
 	evCacheMux  sync.RWMutex               // Protect eventsCache
@@ -84,7 +84,7 @@ type AsteriskAgent struct {
 
 func (sma *AsteriskAgent) connectAsterisk(stopChan <-chan struct{}) (err error) {
 	connCfg := sma.cgrCfg.AsteriskAgentCfg().AsteriskConns[sma.astConnIdx]
-	sma.astEvChan = make(chan map[string]interface{})
+	sma.astEvChan = make(chan map[string]any)
 	sma.astErrChan = make(chan error)
 	sma.astConn, err = aringo.NewARInGO(fmt.Sprintf("ws://%s/ari/events?api_key=%s:%s&app=%s",
 		connCfg.Address, connCfg.User, connCfg.Password, CGRAuthAPP), "http://cgrates.org",
@@ -262,7 +262,7 @@ func (sma *AsteriskAgent) handleChannelStateChange(ev *SMAsteriskEvent) {
 	var initS bool
 	if cgrEvDisp.APIOpts == nil {
 		initS = true
-		cgrEvDisp.APIOpts = map[string]interface{}{utils.OptsSesInitiate: true}
+		cgrEvDisp.APIOpts = map[string]any{utils.OptsSesInitiate: true}
 	} else {
 		initS = utils.OptAsBool(cgrEvDisp.APIOpts, utils.OptsSesInitiate)
 	}
@@ -303,7 +303,7 @@ func (sma *AsteriskAgent) handleChannelDestroyed(ev *SMAsteriskEvent) {
 	}
 	// populate terminate session args
 	if cgrEvDisp.APIOpts == nil {
-		cgrEvDisp.APIOpts = map[string]interface{}{utils.OptsSesTerminate: true}
+		cgrEvDisp.APIOpts = map[string]any{utils.OptsSesTerminate: true}
 	}
 
 	var reply string
@@ -335,7 +335,7 @@ func (sma *AsteriskAgent) V1DisconnectSession(_ *context.Context, args utils.Att
 // V1GetActiveSessionIDs is internal method to  get all active sessions in asterisk
 func (sma *AsteriskAgent) V1GetActiveSessionIDs(_ *context.Context, _ string,
 	sessionIDs *[]*sessions.SessionID) error {
-	var slMpIface []map[string]interface{} // decode the result from ari into a slice of map[string]interface{}
+	var slMpIface []map[string]any // decode the result from ari into a slice of map[string]any
 	if byts, err := sma.astConn.Call(
 		aringo.HTTP_GET,
 		fmt.Sprintf("http://%s/ari/channels",
@@ -371,6 +371,6 @@ func (*AsteriskAgent) V1DisconnectPeer(_ *context.Context, args *utils.DPRArgs, 
 }
 
 // V1WarnDisconnect is used to implement the sessions.BiRPClient interface
-func (sma *AsteriskAgent) V1WarnDisconnect(_ *context.Context, args map[string]interface{}, reply *string) (err error) {
+func (sma *AsteriskAgent) V1WarnDisconnect(_ *context.Context, args map[string]any, reply *string) (err error) {
 	return utils.ErrNotImplemented
 }
