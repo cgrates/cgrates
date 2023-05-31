@@ -160,7 +160,9 @@ func TestQOSRouteSorterRoutesOK(t *testing.T) {
 		APIOpts: map[string]interface{}{},
 	}
 
-	extraOpts := &optsGetRoutes{}
+	extraOpts := &optsGetRoutes{
+		sortingParameters: []string{"param1", utils.MetaTCD, utils.MetaPDD},
+	}
 
 	exp := &SortedRoutes{
 		ProfileID: "prfId",
@@ -169,9 +171,11 @@ func TestQOSRouteSorterRoutesOK(t *testing.T) {
 			RouteID:         "local",
 			RouteParameters: "",
 			SortingData: map[string]interface{}{
+				utils.MetaPDD: 1.7976931348623157e+308,
 				utils.Blocker: true,
 				utils.MetaTCD: 5,
 				utils.Weight:  10,
+				"param1":      -1,
 			},
 		},
 		},
