@@ -192,13 +192,13 @@ func processRequest(reqProcessor *config.RequestProcessor, agReq *AgentRequest,
 	}
 	if reqProcessor.Flags.Has(utils.MetaLog) {
 		utils.Logger.Info(
-			fmt.Sprintf("<%s> LOG, Diameter reply: %s",
-				agentName, agReq.Reply))
+			fmt.Sprintf("<%s> LOG, %s reply: %s",
+				agentName, agentName[:len(agentName)-5], agReq.Reply))
 	}
 	if reqType == utils.MetaDryRun {
 		utils.Logger.Info(
-			fmt.Sprintf("<%s> DRY_RUN, Diameter reply: %s",
-				agentName, agReq.Reply))
+			fmt.Sprintf("<%s> DRY_RUN, %s reply: %s",
+				agentName, agentName[:len(agentName)-5], agReq.Reply))
 	}
 	return true, nil
 }
