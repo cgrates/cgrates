@@ -1,26 +1,8 @@
 ---
 - hosts: ci
   vars:
-    ansible_python_interpreter: auto # to disable deprication warning related to the use of python2
-    ###############################################################
-    ##################### Golang Vars #############################
-    ###############################################################
-    # Go language SDK version number
-    golang_version: '1.18'
-    go_version_target: "go version go{{ golang_version }} linux/amd64"
-    # Mirror to download the Go language SDK redistributable package from
-    golang_mirror: 'https://storage.googleapis.com/golang'
-    # Base installation directory the Go language SDK distribution
-    golang_install_dir: '/usr/local/go'
-    # Directory to store files downloaded for Go language SDK installation
-    golang_download_dir: "{{ x_ansible_download_dir | default(ansible_env.HOME + '/.ansible/tmp/downloads') }}"
-    # Location for GOPATH environment variable
-    golang_gopath: "/home/{{ user }}/go"
-    # Filename of Go language SDK redistributable package
-    golang_redis_filename: 'go{{ golang_version }}.linux-amd64.tar.gz'
-
     #################################################################
-    cgrates_dir: "{{ golang_gopath }}/src/github.com/cgrates/cgrates"
+    cgrates_dir: "/home/{{ user }}/go/src/github.com/cgrates/cgrates"
     #################################################################
     drone_dir: "/home/{{ user }}/go/src/github.com/drone/drone"
 
@@ -65,18 +47,10 @@
       include: docker.yaml
 ###########################################################################################################################
 ###########################################################################################################################
-# Install Golang
-    - name: install unarchive dependencies (zypper)
-      become: yes
-      zypper:
-        name:
-          - gzip
-          - tar
-        state: present
-      when: ansible_pkg_mgr == 'zypper'
-
-    - name: Install golang
-      include: go.yaml
+# Install Go
+    - name: Install Go
+      import_role:
+        name: ../roles/install_go
 
 ###########################################################################################################################
 ###########################################################################################################################
@@ -84,13 +58,13 @@
       become: yes
       shell: "go clean --cache"
       environment:
-        PATH: "{{ lookup('env','PATH') }}:{{ golang_gopath }}/bin:/usr/local/go/bin:{{ ansible_env.PATH }}"
+        PATH: "{{ lookup('env','PATH') }}:/home/{{ user }}/go/bin:/usr/local/go/bin:{{ ansible_env.PATH }}"
 
     - name: clean go modcache
       become: yes
       shell: "go clean --modcache"
       environment:
-        PATH: "{{ lookup('env','PATH') }}:{{ golang_gopath }}/bin:/usr/local/go/bin:{{ ansible_env.PATH }}"
+        PATH: "{{ lookup('env','PATH') }}:/home/{{ user }}/go/bin:/usr/local/go/bin:{{ ansible_env.PATH }}"
 
     - name: create mailer directory
       become: yes
@@ -99,13 +73,13 @@
         mode: 'u=rwx,go=rx'
         owner: "{{ user }}"
         group: "{{ user }}"
-        dest: '{{ golang_gopath }}/src/github.com/Trial97/drone-email'
+        dest: '/home/{{ user }}/go/src/github.com/Trial97/drone-email'
       become_user: "{{ user }}"
 
     - name: git clone mailer
       git:
         repo: https://github.com/Trial97/drone-email.git
-        dest: '{{ golang_gopath }}/src/github.com/Trial97/drone-email'
+        dest: '/home/{{ user }}/go/src/github.com/Trial97/drone-email'
         update: yes
         force: yes
         version: "master"
@@ -114,9 +88,9 @@
 
     - name: build Docker image for mail plugin
       become: yes
-      shell: docker build -t trial97/drone-email {{ golang_gopath }}/src/github.com/Trial97/drone-email
+      shell: docker build -t trial97/drone-email /home/{{ user }}/go/src/github.com/Trial97/drone-email
       args:
-        chdir: '{{ golang_gopath }}/src/github.com/Trial97/drone-email'
+        chdir: '/home/{{ user }}/go/src/github.com/Trial97/drone-email'
 
 
     - name: create drone-cli directory
@@ -126,13 +100,13 @@
         mode: 'u=rwx,go=rx'
         owner: "{{ user }}"
         group: "{{ user }}"
-        dest: '{{ golang_gopath }}/src/github.com/drone/drone-cli'
+        dest: '/home/{{ user }}/go/src/github.com/drone/drone-cli'
       become_user: "{{ user }}"
 
     - name: git clone mailer
       git:
         repo: https://github.com/drone/drone-cli.git
-        dest: '{{ golang_gopath }}/src/github.com/drone/drone-cli'
+        dest: '/home/{{ user }}/go/src/github.com/drone/drone-cli'
         update: yes
         force: yes
         version: "master"
@@ -140,11 +114,11 @@
       become_user: "{{ user }}"
 
     - name: build drone-cli
-      shell: go build -o {{ golang_gopath }}/bin/drone-cli ./main.go
+      shell: go build -o /home/{{ user }}/go/bin/drone-cli ./main.go
       args:
-        chdir: '{{ golang_gopath }}/src/github.com/drone/drone-cli/drone'
+        chdir: '/home/{{ user }}/go/src/github.com/drone/drone-cli/drone'
       environment:
-        PATH: "{{ lookup('env','PATH') }}:{{ golang_gopath }}/bin:/usr/local/go/bin:{{ ansible_env.PATH }}"
+        PATH: "{{ lookup('env','PATH') }}:/home/{{ user }}/go/bin:/usr/local/go/bin:{{ ansible_env.PATH }}"
 
     - name: create cgrates directory
       become: yes
@@ -207,14 +181,14 @@
     - name: build drone
       shell: "go install github.com/drone/drone/cmd/drone-server"
       environment:
-        PATH: "{{ lookup('env','PATH') }}:{{ golang_gopath }}/bin:/usr/local/go/bin:{{ ansible_env.PATH }}"
+        PATH: "{{ lookup('env','PATH') }}:/home/{{ user }}/go/bin:/usr/local/go/bin:{{ ansible_env.PATH }}"
       args:
         chdir: '{{ drone_dir }}'
 
     - name: install validate plugin
       shell: "go get github.com/Trial97/droneAuth"
       environment:
-        PATH: "{{ lookup('env','PATH') }}:{{ golang_gopath }}/bin:/usr/local/go/bin:{{ ansible_env.PATH }}"
+        PATH: "{{ lookup('env','PATH') }}:/home/{{ user }}/go/bin:/usr/local/go/bin:{{ ansible_env.PATH }}"
 
     - name: export users
       template:
@@ -240,7 +214,7 @@
       async: 10
       poll: 0
       environment:
-        PATH: "{{ lookup('env','PATH') }}:{{ golang_gopath }}/bin:/usr/local/go/bin:{{ ansible_env.PATH }}"
+        PATH: "{{ lookup('env','PATH') }}:/home/{{ user }}/go/bin:/usr/local/go/bin:{{ ansible_env.PATH }}"
     
     - name: start drone
       become: yes
@@ -248,7 +222,7 @@
       async: 10
       poll: 0
       environment:
-        PATH: "{{ lookup('env','PATH') }}:{{ golang_gopath }}/bin:/usr/local/go/bin:{{ ansible_env.PATH }}"
+        PATH: "{{ lookup('env','PATH') }}:/home/{{ user }}/go/bin:/usr/local/go/bin:{{ ansible_env.PATH }}"
     
     - name: Check if drone-runner is running
       become: yes
@@ -276,7 +250,7 @@
         drone-cli orgsecret add {{ item }} credentials @/home/{{ user }}/credentials.json --allow-pull-request;
         drone-cli orgsecret add {{ item }} token @/home/{{ user }}/token.json --allow-pull-request;
       environment:
-        PATH: "{{ lookup('env','PATH') }}:{{ golang_gopath }}/bin:/usr/local/go/bin:{{ ansible_env.PATH }}"
+        PATH: "{{ lookup('env','PATH') }}:/home/{{ user }}/go/bin:/usr/local/go/bin:{{ ansible_env.PATH }}"
         DRONE_SERVER: "https://{{ drone_server_host }}"
         DRONE_TOKEN: "{{ drone_token.stdout }}"
       with_items: '{{ drone_user_filter }}'
