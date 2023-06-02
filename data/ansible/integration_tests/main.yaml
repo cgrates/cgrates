@@ -5,13 +5,21 @@
     import_role:
       name: ../roles/install_rabbitmq
 
-  - name: Install nats
-    become: yes
-    apt:
-      deb: https://github.com/nats-io/nats-server/releases/download/v2.3.0/nats-server-v2.3.0-amd64.deb
+  - name: Install NATS
+    import_role:
+      name: ../roles/nats
 
   - name: Install ElasticSearch
-    include: elasic.yaml
+    import_role:
+      name: ../roles/elasticsearch
+    vars:
+      auto_create_index: ".monitoring*,.watches,.triggered_watches,.watcher-history*,.ml*,cdrs"
+
+  # # Trying for now to overwrite the auto_create_index defaults.
+  # # In case of failure, we will be using the commented task below:
+  # - name: Create 'cdrs' index in Elasticsearch for CGRateS integration tests
+  #   command: 'curl -X PUT "localhost:9200/cdrs?pretty"'    
+  #   ignore_errors: yes
 
   - name: Install Kafka
     import_role:
