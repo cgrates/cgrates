@@ -1,0 +1,39 @@
+---
+- name: Create user and group for NATS
+  become: yes
+  block:
+  - group:
+      name: "{{ nats_group }}"
+      state: present
+  - user:
+      name: "{{ nats_user }}"
+      group: "{{ nats_group }}"
+      system: yes
+      state: present
+
+- name: Download NATS server
+  get_url:
+    url: "https://github.com/nats-io/nats-server/releases/download/v{{ nats_version }}/nats-server-v{{ nats_version }}-linux-amd64.tar.gz"
+    dest: "/tmp/nats-server-v{{ nats_version }}-linux-amd64.tar.gz"
+    mode: '0755'
+
+- name: Extract NATS server archive
+  unarchive:
+    src: "/tmp/nats-server-v{{ nats_version }}-linux-amd64.tar.gz"
+    dest: "/opt/nats"
+    remote_src: yes
+
+- name: Create systemd service file for NATS
+  template:
+    src: nats.service.j2
+    dest: /etc/systemd/system/nats.service
+
+- name: Reload systemd daemon
+  systemd:
+    daemon_reload: yes
+
+- name: Set NATS service state
+  systemd:
+    name: nats
+    enabled: "{{ service_enabled }}"
+    state: "{{ service_state }}"

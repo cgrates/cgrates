@@ -1,0 +1,8 @@
+---
+nats_version: 2.9.17
+
+nats_user: nats
+nats_group: nats
+
+service_enabled: true
+service_state: started
