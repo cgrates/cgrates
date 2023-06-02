@@ -1,0 +1,8 @@
+---
+cluster.name: "elasticsearch"
+node.name: "{{ inventory_hostname }}"
+path.data: "/var/lib/elasticsearch"
+path.logs: "/var/log/elasticsearch"
+network.host: "127.0.0.1"
+http.port: 9200
+action.auto_create_index: "{{ auto_create_index }}"
