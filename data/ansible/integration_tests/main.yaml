@@ -1,23 +1,6 @@
 ---
 - hosts: local
   vars:
-    ansible_python_interpreter: auto # to disable deprication warning related to the use of python2
-    ###############################################################
-    ##################### Golang Vars #############################
-    ###############################################################
-    # Go language SDK version number
-    golang_version: '1.18'
-    go_version_target: "go version go{{ golang_version }} linux/amd64"
-    # Mirror to download the Go language SDK redistributable package from
-    golang_mirror: 'https://storage.googleapis.com/golang'
-    # Base installation directory the Go language SDK distribution
-    golang_install_dir: '/usr/local/go'
-    # Directory to store files downloaded for Go language SDK installation
-    golang_download_dir: "{{ x_ansible_download_dir | default(ansible_env.HOME + '/.ansible/tmp/downloads') }}"
-    # Location for GOPATH environment variable
-    golang_gopath: "/home/{{ user }}/go"
-    # Filename of Go language SDK redistributable package
-    golang_redis_filename: 'go{{ golang_version }}.linux-amd64.tar.gz'
     ###############################################################
     ###################### Kafka Vars #############################
     ###############################################################
@@ -33,7 +16,7 @@
 
     ###############################################################
     # CGRateS location
-    cgrates_dir: "{{ golang_gopath }}/src/github.com/cgrates/cgrates"
+    cgrates_dir: "/home/{{ user }}/go/src/github.com/cgrates/cgrates"
     ###############################################################
   remote_user: root
   tasks:
@@ -93,18 +76,9 @@
 ###########################################################################################################################
 
 ###########################################################################################################################
-  # install golang
-  - name: install unarchive dependencies (zypper)
-    become: yes
-    zypper:
-      name:
-        - gzip
-        - tar
-      state: present
-    when: ansible_pkg_mgr == 'zypper'
-
-  - name: Install golang
-    include: go.yaml
+  - name: Install Go
+    import_role:
+      name: ../roles/install_go
 
 ###########################################################################################################################
 
@@ -129,7 +103,7 @@
   - name:  build cgrates
     command: 'sh {{ cgrates_dir }}/build.sh'
     environment:
-      PATH: "{{ lookup('env','PATH') }}:{{ golang_gopath }}/bin:/usr/local/go/bin:{{ ansible_env.PATH }}"
+      PATH: "{{ lookup('env','PATH') }}:/home/{{ user }}/go/bin:/usr/local/go/bin:{{ ansible_env.PATH }}"
     args:
       chdir: '{{ cgrates_dir }}'
 
@@ -176,4 +150,4 @@
   - name:  set versions
     command: 'cgr-migrator -exec=*set_versions -config_path=/usr/share/cgrates/conf/samples/tutmysql'
     environment:
-      PATH: "{{ lookup('env','PATH') }}:{{ golang_gopath }}/bin:/usr/local/go/bin:{{ ansible_env.PATH }}"
+      PATH: "{{ lookup('env','PATH') }}:/home/{{ user }}/go/bin:/usr/local/go/bin:{{ ansible_env.PATH }}"
