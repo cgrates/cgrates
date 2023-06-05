@@ -36,6 +36,58 @@ import (
 	"github.com/cgrates/rpcclient"
 )
 
+func TestDNSAgentStartReloadShut(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfg.SessionSCfg().Enabled = true
+	cfg.SessionSCfg().ListenBijson = ""
+	cfg.DNSAgentCfg().Enabled = true
+	cfg.DNSAgentCfg().Listeners = []config.Listener{
+		{
+			Network: "udp",
+			Address: ":2055",
+		},
+		{
+			Network: "tcp",
+			Address: ":2056",
+		},
+	}
+	utils.Logger, _ = utils.Newlogger(utils.MetaSysLog, cfg.GeneralCfg().NodeID)
+	utils.Logger.SetLogLevel(7)
+	filterSChan := make(chan *engine.FilterS, 1)
+	filterSChan <- nil
+	shdChan := utils.NewSyncedChan()
+	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
+	srv := NewDNSAgent(cfg, filterSChan, shdChan, nil, srvDep)
+	shdWg := new(sync.WaitGroup)
+	srvMngr := servmanager.NewServiceManager(cfg, shdChan, shdWg, nil)
+	engine.NewConnManager(cfg, nil)
+	db := NewDataDBService(cfg, nil, srvDep)
+	server := cores.NewServer(nil)
+	anz := NewAnalyzerService(cfg, server, filterSChan, shdChan, make(chan rpcclient.ClientConnector, 1), srvDep)
+	sS := NewSessionService(cfg, db, server, make(chan rpcclient.ClientConnector, 1),
+		shdChan, nil, anz, srvDep)
+	srvMngr.AddServices(srv, sS,
+		NewLoaderService(cfg, db, filterSChan, server, make(chan rpcclient.ClientConnector, 1), nil, anz, srvDep), db)
+	runtime.Gosched()
+	time.Sleep(10 * time.Millisecond) //need to switch to gorutine
+
+	if err := srv.Start(); err != nil {
+		t.Error(err)
+	}
+	time.Sleep(1 * time.Millisecond)
+	if err := srv.Reload(); err != nil {
+		t.Error(err)
+	}
+	time.Sleep(10 * time.Millisecond)
+	if err := srv.Shutdown(); err != nil {
+		t.Error(err)
+	}
+	time.Sleep(10 * time.Millisecond)
+	if srv.IsRunning() {
+		t.Errorf("service is still running")
+	}
+}
+
 func TestDNSAgentReload(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.SessionSCfg().Enabled = true
@@ -114,8 +166,8 @@ func TestDNSAgentReload2(t *testing.T) {
 	cfg.SessionSCfg().Enabled = true
 	cfg.SessionSCfg().ListenBijson = ""
 	cfg.DNSAgentCfg().Enabled = true
-	cfg.DNSAgentCfg().ListenNet = "test"
-	cfg.DNSAgentCfg().Listen = "test"
+	cfg.DNSAgentCfg().Listeners[0].Network = "test"
+	cfg.DNSAgentCfg().Listeners[0].Address = "test"
 	utils.Logger, _ = utils.Newlogger(utils.MetaSysLog, cfg.GeneralCfg().NodeID)
 	utils.Logger.SetLogLevel(7)
 	filterSChan := make(chan *engine.FilterS, 1)
@@ -140,8 +192,8 @@ func TestDNSAgentReload3(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.SessionSCfg().Enabled = true
 	cfg.DNSAgentCfg().Enabled = true
-	cfg.DNSAgentCfg().ListenNet = "test"
-	cfg.DNSAgentCfg().Listen = "test"
+	cfg.DNSAgentCfg().Listeners[0].Network = "test"
+	cfg.DNSAgentCfg().Listeners[0].Address = "test"
 	utils.Logger, _ = utils.Newlogger(utils.MetaSysLog, cfg.GeneralCfg().NodeID)
 	utils.Logger.SetLogLevel(7)
 	filterSChan := make(chan *engine.FilterS, 1)
@@ -166,7 +218,7 @@ func TestDNSAgentReload4(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.SessionSCfg().Enabled = true
 	cfg.DNSAgentCfg().Enabled = true
-	cfg.DNSAgentCfg().ListenNet = "tls"
+	cfg.DNSAgentCfg().Listeners[0].Network = "tls"
 	cfg.TLSCfg().ServerCerificate = "bad_certificate"
 	cfg.TLSCfg().ServerKey = "bad_key"
 	utils.Logger, _ = utils.Newlogger(utils.MetaSysLog, cfg.GeneralCfg().NodeID)
@@ -225,13 +277,13 @@ func TestDNSAgentReload6(t *testing.T) {
 	shdChan := utils.NewSyncedChan()
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
 	srv := NewDNSAgent(cfg, filterSChan, shdChan, nil, srvDep)
-	cfg.DNSAgentCfg().Listen = "127.0.0.1:0"
+	cfg.DNSAgentCfg().Listeners[0].Address = "127.0.0.1:0"
 	err := srv.Start()
 	if err != nil {
 		t.Fatalf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
 	}
 	srv.(*DNSAgent).oldListen = "127.0.0.1:2093"
-	cfg.DNSAgentCfg().ListenNet = "tls"
+	cfg.DNSAgentCfg().Listeners[0].Network = "tls"
 	cfg.TLSCfg().ServerCerificate = "bad_certificate"
 	cfg.TLSCfg().ServerKey = "bad_key"
 	time.Sleep(10 * time.Millisecond)

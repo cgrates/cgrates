@@ -1011,9 +1011,13 @@ func TestHttpAgentJsonCfg(t *testing.T) {
 
 func TestDNSAgentJsonCfg(t *testing.T) {
 	eCfg := &DNSAgentJsonCfg{
-		Enabled:            utils.BoolPointer(false),
-		Listen_net:         utils.StringPointer("udp"),
-		Listen:             utils.StringPointer("127.0.0.1:2053"),
+		Enabled: utils.BoolPointer(false),
+		Listeners: &[]*ListenerJsnCfg{
+			{
+				Network: utils.StringPointer("udp"),
+				Address: utils.StringPointer("127.0.0.1:2053"),
+			},
+		},
 		Sessions_conns:     &[]string{utils.ConcatenatedKey(utils.MetaInternal)},
 		Timezone:           utils.StringPointer(""),
 		Request_processors: &[]*ReqProcessorJsnCfg{},

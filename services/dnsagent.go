@@ -56,7 +56,7 @@ type DNSAgent struct {
 	oldListen string
 }
 
-// Start should handle the sercive start
+// Start should handle the service start
 func (dns *DNSAgent) Start() (err error) {
 	if dns.IsRunning() {
 		return utils.ErrServiceAlreadyRunning
@@ -66,32 +66,32 @@ func (dns *DNSAgent) Start() (err error) {
 
 	dns.Lock()
 	defer dns.Unlock()
-	dns.oldListen = dns.cfg.DNSAgentCfg().Listen
 	dns.dns, err = agents.NewDNSAgent(dns.cfg, filterS, dns.connMgr)
 	if err != nil {
 		utils.Logger.Err(fmt.Sprintf("<%s> error: <%s>", utils.DNSAgent, err.Error()))
 		dns.dns = nil
 		return
 	}
-	go dns.listenAndServe()
+	if err := dns.listenAndServe(); err != nil {
+		return err
+	}
 	return
 }
 
 // Reload handles the change of config
 func (dns *DNSAgent) Reload() (err error) {
-	if dns.oldListen == dns.cfg.DNSAgentCfg().Listen {
-		return
-	}
+
 	dns.Lock()
 	defer dns.Unlock()
 	if err = dns.dns.Shutdown(); err != nil {
 		return
 	}
-	dns.oldListen = dns.cfg.DNSAgentCfg().Listen
 	if err = dns.dns.Reload(); err != nil {
 		return
 	}
-	go dns.listenAndServe()
+	if err := dns.listenAndServe(); err != nil {
+		return err
+	}
 	return
 }
 
@@ -118,7 +118,7 @@ func (dns *DNSAgent) Shutdown() (err error) {
 func (dns *DNSAgent) IsRunning() bool {
 	dns.RLock()
 	defer dns.RUnlock()
-	return dns != nil && dns.dns != nil
+	return dns.dns != nil
 }
 
 // ServiceName returns the service name

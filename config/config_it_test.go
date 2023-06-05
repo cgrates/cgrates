@@ -647,9 +647,13 @@ func testCGRConfigReloadDNSAgent(t *testing.T) {
 		t.Errorf("Expected OK received: %s", reply)
 	}
 	expAttr := &DNSAgentCfg{
-		Enabled:       true,
-		Listen:        ":2053",
-		ListenNet:     "udp",
+		Enabled: true,
+		Listeners: []Listener{
+			{
+				Address: ":2053",
+				Network: "udp",
+			},
+		},
 		SessionSConns: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS)},
 		// Timezone          string
 		// RequestProcessors []*RequestProcessor

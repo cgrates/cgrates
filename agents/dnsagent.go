@@ -22,6 +22,7 @@ import (
 	"crypto/tls"
 	"fmt"
 	"strings"
+	"sync"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
@@ -41,37 +42,49 @@ func NewDNSAgent(cgrCfg *config.CGRConfig, fltrS *engine.FilterS,
 type DNSAgent struct {
 	cgrCfg  *config.CGRConfig // loaded CGRateS configuration
 	fltrS   *engine.FilterS   // connection towards FilterS
-	server  *dns.Server
+	servers []*dns.Server
 	connMgr *engine.ConnManager
 }
 
 // initDNSServer instantiates the DNS server
 func (da *DNSAgent) initDNSServer() (_ error) {
-	da.server = &dns.Server{
-		Addr: da.cgrCfg.DNSAgentCfg().Listen,
-		Net:  da.cgrCfg.DNSAgentCfg().ListenNet,
-		Handler: dns.HandlerFunc(func(w dns.ResponseWriter, m *dns.Msg) {
-			go da.handleMessage(w, m)
-		}),
-	}
-	if strings.HasSuffix(da.cgrCfg.DNSAgentCfg().ListenNet, utils.TLSNoCaps) {
-		cert, err := tls.LoadX509KeyPair(da.cgrCfg.TLSCfg().ServerCerificate, da.cgrCfg.TLSCfg().ServerKey)
-		if err != nil {
-			return err
-		}
-		da.server.Net = "tcp-tls"
-		da.server.TLSConfig = &tls.Config{
-			Certificates: []tls.Certificate{cert},
+	da.servers = make([]*dns.Server, 0, len(da.cgrCfg.DNSAgentCfg().Listeners))
+	for i := range da.cgrCfg.DNSAgentCfg().Listeners {
+		da.servers = append(da.servers, &dns.Server{
+			Addr: da.cgrCfg.DNSAgentCfg().Listeners[i].Address,
+			Net:  da.cgrCfg.DNSAgentCfg().Listeners[i].Network,
+			Handler: dns.HandlerFunc(func(w dns.ResponseWriter, m *dns.Msg) {
+				go da.handleMessage(w, m)
+			}),
+		})
+		if strings.HasSuffix(da.cgrCfg.DNSAgentCfg().Listeners[i].Network, utils.TLSNoCaps) {
+			cert, err := tls.LoadX509KeyPair(da.cgrCfg.TLSCfg().ServerCerificate, da.cgrCfg.TLSCfg().ServerKey)
+			if err != nil {
+				return err
+			}
+			da.servers[i].Net = "tcp-tls"
+			da.servers[i].TLSConfig = &tls.Config{
+				Certificates: []tls.Certificate{cert},
+			}
 		}
 	}
 	return
 }
 
 // ListenAndServe will run the DNS handler doing also the connection to listen address
-func (da *DNSAgent) ListenAndServe() (err error) {
-	utils.Logger.Info(fmt.Sprintf("<%s> start listening on <%s:%s>",
-		utils.DNSAgent, da.cgrCfg.DNSAgentCfg().ListenNet, da.cgrCfg.DNSAgentCfg().Listen))
-	return da.server.ListenAndServe()
+func (da *DNSAgent) ListenAndServe() error {
+	for _, server := range da.servers {
+		utils.Logger.Info(fmt.Sprintf("<%s> start listening on <%s:%s>",
+			utils.DNSAgent, server.Net, server.Addr))
+		go func(srv *dns.Server) {
+			err := srv.ListenAndServe()
+			if err != nil {
+				utils.Logger.Warning(fmt.Sprintf("<%s> error <%v>, on ListenAndServe <%s:%s>",
+					utils.DNSAgent, err, srv.Net, srv.Addr))
+			}
+		}(server)
+	}
+	return nil
 }
 
 // Reload will reinitialize the server
@@ -106,7 +119,20 @@ func (da *DNSAgent) handleMessage(w dns.ResponseWriter, req *dns.Msg) {
 
 // Shutdown stops the DNS server
 func (da *DNSAgent) Shutdown() error {
-	return da.server.Shutdown()
+	var wg sync.WaitGroup
+	for _, server := range da.servers {
+		wg.Add(1)
+		go func(srv *dns.Server) {
+			defer wg.Done()
+			err := srv.Shutdown()
+			if err != nil {
+				utils.Logger.Warning(fmt.Sprintf("<%s> error <%v>, on Shutdown <%s:%s>",
+					utils.DNSAgent, err, srv.Net, srv.Addr))
+			}
+		}(server)
+	}
+	wg.Wait()
+	return nil
 }
 
 // handleMessage is the entry point of all DNS requests

@@ -2172,6 +2172,8 @@ const (
 
 	// DiameterAgentCfg
 	ListenNetCfg          = "listen_net"
+	NetworkCfg            = "network"
+	ListenersCfg          = "listeners"
 	ConcurrentRequestsCfg = "concurrent_requests"
 	ListenCfg             = "listen"
 	DictionariesPathCfg   = "dictionaries_path"

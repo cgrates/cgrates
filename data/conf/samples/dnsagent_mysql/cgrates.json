@@ -61,7 +61,12 @@
 
 "dns_agent": {
 	"enabled": true,
-	"listen": ":2053",
+	"listeners":[
+        {
+            "address":":2053",
+			"network":"udp"
+        }
+    ],
 	"sessions_conns": ["*localhost"],
 },
 
