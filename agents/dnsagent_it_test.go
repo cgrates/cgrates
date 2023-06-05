@@ -125,7 +125,7 @@ func testDNSitTPFromFolder(t *testing.T) {
 func testDNSitClntConn(t *testing.T) {
 	c := new(dns.Client)
 	var err error
-	if dnsClnt, err = c.Dial(dnsCfg.DNSAgentCfg().Listen); err != nil { // just testing the connection, not not saving it
+	if dnsClnt, err = c.Dial(dnsCfg.DNSAgentCfg().Listeners[0].Address); err != nil { // just testing the connection, not not saving it
 		t.Fatal(err)
 	} else if dnsClnt == nil {
 		t.Fatalf("conn is nil")

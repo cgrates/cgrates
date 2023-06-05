@@ -558,11 +558,15 @@ type HttpAgentJsonCfg struct {
 	Request_processors *[]*ReqProcessorJsnCfg
 }
 
+type ListenerJsnCfg struct {
+	Address *string
+	Network *string
+}
+
 // DNSAgentJsonCfg
 type DNSAgentJsonCfg struct {
 	Enabled            *bool
-	Listen             *string
-	Listen_net         *string
+	Listeners          *[]*ListenerJsnCfg
 	Sessions_conns     *[]string
 	Timezone           *string
 	Request_processors *[]*ReqProcessorJsnCfg

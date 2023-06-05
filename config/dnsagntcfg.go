@@ -22,11 +22,15 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
+type Listener struct {
+	Address string
+	Network string // udp or tcp
+}
+
 // DNSAgentCfg the config section that describes the DNS Agent
 type DNSAgentCfg struct {
 	Enabled           bool
-	Listen            string
-	ListenNet         string // udp or tcp
+	Listeners         []Listener
 	SessionSConns     []string
 	Timezone          string
 	RequestProcessors []*RequestProcessor
@@ -39,12 +43,26 @@ func (da *DNSAgentCfg) loadFromJSONCfg(jsnCfg *DNSAgentJsonCfg, sep string) (err
 	if jsnCfg.Enabled != nil {
 		da.Enabled = *jsnCfg.Enabled
 	}
-	if jsnCfg.Listen_net != nil {
-		da.ListenNet = *jsnCfg.Listen_net
+
+	if jsnCfg.Listeners != nil {
+		da.Listeners = make([]Listener, 0, len(*jsnCfg.Listeners))
+		for _, listnr := range *jsnCfg.Listeners {
+			var ls Listener
+			if listnr.Address != nil {
+				ls.Address = *listnr.Address
+			}
+			if listnr.Network != nil {
+				ls.Network = *listnr.Network
+			}
+			da.Listeners = append(da.Listeners, ls)
+		}
 	}
-	if jsnCfg.Listen != nil {
-		da.Listen = *jsnCfg.Listen
-	}
+	// if jsnCfg.Listen_net != nil {
+	// 	da.ListenNet = *jsnCfg.Listen_net
+	// }
+	// if jsnCfg.Listen != nil {
+	// 	da.Listen = *jsnCfg.Listen
+	// }
 	if jsnCfg.Timezone != nil {
 		da.Timezone = *jsnCfg.Timezone
 	}
@@ -81,13 +99,28 @@ func (da *DNSAgentCfg) loadFromJSONCfg(jsnCfg *DNSAgentJsonCfg, sep string) (err
 }
 
 // AsMapInterface returns the config as a map[string]any
+func (lstn *Listener) AsMapInterface(separator string) map[string]any {
+	return map[string]any{
+		utils.AddressCfg: lstn.Address,
+		utils.NetworkCfg: lstn.Network,
+	}
+
+}
+
+// AsMapInterface returns the config as a map[string]any
 func (da *DNSAgentCfg) AsMapInterface(separator string) (initialMP map[string]any) {
 	initialMP = map[string]any{
-		utils.EnabledCfg:   da.Enabled,
-		utils.ListenCfg:    da.Listen,
-		utils.ListenNetCfg: da.ListenNet,
-		utils.TimezoneCfg:  da.Timezone,
+		utils.EnabledCfg: da.Enabled,
+		// utils.ListenCfg:    da.Listen,
+		// utils.ListenNetCfg: da.ListenNet,
+		utils.TimezoneCfg: da.Timezone,
 	}
+
+	listeners := make([]map[string]any, len(da.Listeners))
+	for i, item := range da.Listeners {
+		listeners[i] = item.AsMapInterface(separator)
+	}
+	initialMP[utils.ListenersCfg] = listeners
 
 	requestProcessors := make([]map[string]any, len(da.RequestProcessors))
 	for i, item := range da.RequestProcessors {
@@ -112,10 +145,17 @@ func (da *DNSAgentCfg) AsMapInterface(separator string) (initialMP map[string]an
 func (da DNSAgentCfg) Clone() (cln *DNSAgentCfg) {
 	cln = &DNSAgentCfg{
 		Enabled:   da.Enabled,
-		Listen:    da.Listen,
-		ListenNet: da.ListenNet,
-		Timezone:  da.Timezone,
+		Listeners: da.Listeners,
+		// Listen:    da.Listen,
+		// ListenNet: da.ListenNet,
+		Timezone: da.Timezone,
 	}
+
+	if da.Listeners != nil {
+		cln.Listeners = make([]Listener, len(da.Listeners))
+		copy(cln.Listeners, da.Listeners)
+	}
+
 	if da.SessionSConns != nil {
 		cln.SessionSConns = make([]string, len(da.SessionSConns))
 		for i, con := range da.SessionSConns {
