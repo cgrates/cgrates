@@ -913,7 +913,7 @@ func testV2CDRsRerate(t *testing.T) {
 	}
 
 	args := &engine.ArgV1ProcessEvent{
-		Flags: []string{utils.MetaRerate},
+		Flags: []string{utils.MetaRALs},
 		CGREvent: utils.CGREvent{
 			Tenant: "cgrates.org",
 			Event: map[string]any{

@@ -1364,11 +1364,11 @@ func TestErsOnEvictedDumpToJSONInvalidPath(t *testing.T) {
 		log.SetOutput(os.Stderr)
 	}()
 
-	dirPath := "/tmp/TestErsOnEvictedDumpToJSON"
-	err := os.MkdirAll(dirPath, 0755)
-	if err != nil {
-		t.Error(err)
-	}
+	// dirPath := "/tmp/TestErsOnEvictedDumpToJSON"
+	// err := os.MkdirAll(dirPath, 0755)
+	// if err != nil {
+	// 	t.Error(err)
+	// }
 	value := &erEvents{
 		events: []*utils.CGREvent{
 			{
@@ -1393,7 +1393,7 @@ func TestErsOnEvictedDumpToJSONInvalidPath(t *testing.T) {
 			Type: utils.MetaNone,
 			Opts: &config.EventReaderOpts{
 				PartialCacheAction: utils.StringPointer(utils.MetaDumpToJSON),
-				PartialPath:        utils.StringPointer(dirPath),
+				PartialPath:        utils.StringPointer("invalid path"),
 				PartialOrderField:  utils.StringPointer("2"),
 			},
 		},
@@ -1416,9 +1416,9 @@ func TestErsOnEvictedDumpToJSONInvalidPath(t *testing.T) {
 		t.Errorf("expected <%+v> to be included in: <%+v>", expLog, rcvLog)
 	}
 	utils.Logger.SetLogLevel(0)
-	if err := os.RemoveAll(dirPath); err != nil {
-		t.Error(err)
-	}
+	// if err := os.RemoveAll(dirPath); err != nil {
+	// 	t.Error(err)
+	// }
 }
 
 func TestErsOnEvictedDumpToJSONEncodeErr(t *testing.T) {
