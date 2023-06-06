@@ -11,6 +11,7 @@
   become: true
   apt_key:
     url: "{{ elasticsearch_gpg_key_url }}"
+    keyring: "{{ elasticsearch_gpg_keyring }}"
     state: present
 
 - name: Add Elasticsearch APT repository
