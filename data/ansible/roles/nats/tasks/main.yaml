@@ -17,22 +17,32 @@
     dest: "/tmp/nats-server-v{{ nats_version }}-linux-amd64.tar.gz"
     mode: '0755'
 
+- name: Create NATS install directory
+  become: yes
+  file:
+    path: "{{ nats_install_dir }}"
+    state: directory
+
 - name: Extract NATS server archive
+  become: yes
   unarchive:
     src: "/tmp/nats-server-v{{ nats_version }}-linux-amd64.tar.gz"
-    dest: "/opt/nats"
+    dest: "{{ nats_install_dir }}"
     remote_src: yes
 
 - name: Create systemd service file for NATS
+  become: yes
   template:
     src: nats.service.j2
     dest: /etc/systemd/system/nats.service
 
 - name: Reload systemd daemon
+  become: yes
   systemd:
     daemon_reload: yes
 
 - name: Set NATS service state
+  become: yes
   systemd:
     name: nats
     enabled: "{{ service_enabled }}"
