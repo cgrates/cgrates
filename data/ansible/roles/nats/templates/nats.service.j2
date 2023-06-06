@@ -3,7 +3,7 @@ Description=NATS Server
 After=network.target
 
 [Service]
-ExecStart=/opt/nats/nats-server-v{{ nats_version }}-linux-amd64/nats-server
+ExecStart={{ nats_install_dir }}/nats-server-v{{ nats_version }}-linux-amd64/nats-server
 User={{ nats_user }}
 Group={{ nats_group }}
 Restart=on-failure
