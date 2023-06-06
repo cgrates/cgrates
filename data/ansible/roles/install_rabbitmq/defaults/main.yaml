@@ -5,6 +5,12 @@ rabbitmq_dependencies:
   - debian-keyring
   - debian-archive-keyring
   - apt-transport-https
+rabbitmq_main_key: "0A9AF2115F4687BD29803A206B73A36E6026DFCA"
+rabbitmq_main_keyring: "/usr/share/keyrings/com.rabbitmq.team.gpg"
+erlang_key: "f77f1eda57ebb1cc"
+erlang_keyring: "/usr/share/keyrings/net.launchpad.ppa.rabbitmq.erlang.gpg"
+rabbitmq_repo_key_url: "https://packagecloud.io/rabbitmq/rabbitmq-server/gpgkey"
+rabbitmq_repo_keyring: "/usr/share/keyrings/io.packagecloud.rabbitmq.gpg"
 erlang_packages:
   - erlang-base
   - erlang-asn1
