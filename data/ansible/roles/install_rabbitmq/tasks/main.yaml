@@ -1,4 +1,3 @@
-# tasks/main.yml
 ---
 - name: Install RabbitMQ dependencies
   become: yes
@@ -10,18 +9,23 @@
 
 - name: Import RabbitMQ's main signing key
   become: yes
-  shell: |
-    curl -1sLf "https://keys.openpgp.org/vks/v1/by-fingerprint/0A9AF2115F4687BD29803A206B73A36E6026DFCA" | sudo gpg --dearmor | sudo tee /usr/share/keyrings/com.rabbitmq.team.gpg > /dev/null
+  apt_key:
+    id: "{{ rabbitmq_main_key }}"
+    keyring: "{{ rabbitmq_main_keyring }}"
+    url: "https://keys.openpgp.org/vks/v1/by-fingerprint/{{ rabbitmq_main_key }}"
 
-- name: Download Erlang GPG key
+- name: Import Erlang GPG key
   become: yes
-  shell: |
-    curl -1sLf "https://keyserver.ubuntu.com/pks/lookup?op=get&search=0xf77f1eda57ebb1cc" | sudo gpg --dearmor | sudo tee /usr/share/keyrings/net.launchpad.ppa.rabbitmq.erlang.gpg > /dev/null
+  apt_key:
+    id: "{{ erlang_key }}"
+    keyring: "{{ erlang_keyring }}"
+    url: "https://keyserver.ubuntu.com/pks/lookup?op=get&search=0x{{ erlang_key }}"
 
 - name: Import PackageCloud RabbitMQ repository
   become: yes
-  shell: |
-    curl -1sLf "https://packagecloud.io/rabbitmq/rabbitmq-server/gpgkey" | sudo gpg --dearmor | sudo tee /usr/share/keyrings/io.packagecloud.rabbitmq.gpg > /dev/null
+  apt_key:
+    url: "{{ rabbitmq_repo_key_url }}"
+    keyring: "{{ rabbitmq_repo_keyring }}"
 
 - name: Add apt repositories maintained by Team RabbitMQ
   become: yes
