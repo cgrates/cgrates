@@ -7,7 +7,7 @@ jobs:
   trigger: commit
   owner: cgrates
   branch : master
-  project: cgr-master
+  project: master
   preserve_project : True
   enable_net: True
   targets:
