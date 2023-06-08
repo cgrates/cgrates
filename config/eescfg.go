@@ -157,6 +157,8 @@ type EventExporterOpts struct {
 	CSVFieldSeparator        *string
 	ElsIndex                 *string
 	ElsIfPrimaryTerm         *int
+	DiscoverNodesOnStart     *bool
+	DiscoverNodesInterval    *time.Duration
 	ElsIfSeqNo               *int
 	ElsOpType                *string
 	ElsPipeline              *string
@@ -249,6 +251,16 @@ func (eeOpts *EventExporterOpts) loadFromJSONCfg(jsnCfg *EventExporterOptsJson) 
 	}
 	if jsnCfg.CSVFieldSeparator != nil {
 		eeOpts.CSVFieldSeparator = jsnCfg.CSVFieldSeparator
+	}
+	if jsnCfg.DiscoverNodesOnStart != nil {
+		eeOpts.DiscoverNodesOnStart = jsnCfg.DiscoverNodesOnStart
+	}
+	if jsnCfg.DiscoverNodesInterval != nil {
+		var discoverNodesInterval time.Duration
+		if discoverNodesInterval, err = utils.ParseDurationWithSecs(*jsnCfg.DiscoverNodesInterval); err != nil {
+			return
+		}
+		eeOpts.DiscoverNodesInterval = utils.DurationPointer(discoverNodesInterval)
 	}
 	if jsnCfg.ElsIndex != nil {
 		eeOpts.ElsIndex = jsnCfg.ElsIndex

@@ -506,7 +506,9 @@ const CGRATES_CFG_JSON = `
 				// "csvFieldSeparator": ",",					// separator used when reading the fields
 
 				
-				// Elasticsearch options
+ 				// Elasticsearch options
+				"discoverNodesInterval":"",
+				"discoverNodesOnStart":false
 				// "elsIndex": "",								// ElsIndex               	
 				// "elsIfPrimaryTerm": 0,						// ElsIfPrimaryTerm
  				// "elsIfSeqNo": 0,								// ElsIfSeqNo

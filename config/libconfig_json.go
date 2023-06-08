@@ -299,6 +299,8 @@ type EEsJsonCfg struct {
 
 type EventExporterOptsJson struct {
 	CSVFieldSeparator        *string           `json:"csvFieldSeparator"`
+	DiscoverNodesInterval    *string           `json:"discoverNodesInterval"`
+	DiscoverNodesOnStart     *bool             `json:"discoverNodesOnStart"`
 	ElsIndex                 *string           `json:"elsIndex"`
 	ElsIfPrimaryTerm         *int              `json:"elsIfPrimaryTerm"`
 	ElsIfSeqNo               *int              `json:"elsIfSeqNo"`

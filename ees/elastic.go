@@ -26,11 +26,11 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/elastic/go-elasticsearch/esapi"
+	"github.com/elastic/go-elasticsearch/v8/esapi"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
-	elasticsearch "github.com/elastic/go-elasticsearch"
+	elasticsearch "github.com/elastic/go-elasticsearch/v8"
 )
 
 func NewElasticEE(cfg *config.EventExporterCfg, dc *utils.SafeMapStorage) (eEe *ElasticEE, err error) {
@@ -92,7 +92,10 @@ func (eEe *ElasticEE) Connect() (err error) {
 	// create the client
 	if eEe.eClnt == nil {
 		eEe.eClnt, err = elasticsearch.NewClient(
-			elasticsearch.Config{Addresses: strings.Split(eEe.Cfg().ExportPath, utils.InfieldSep)},
+			elasticsearch.Config{
+				DiscoverNodesInterval: *eEe.Cfg().Opts.DiscoverNodesInterval,
+				DiscoverNodesOnStart:  *eEe.Cfg().Opts.DiscoverNodesOnStart,
+				Addresses:             strings.Split(eEe.Cfg().ExportPath, utils.InfieldSep)},
 		)
 	}
 	eEe.Unlock()
@@ -118,7 +121,6 @@ func (eEe *ElasticEE) ExportEvent(ev any, key string) (err error) {
 		IfPrimaryTerm:       eEe.opts.IfPrimaryTerm,
 		IfSeqNo:             eEe.opts.IfSeqNo,
 		OpType:              eEe.opts.OpType,
-		Parent:              eEe.opts.Parent,
 		Pipeline:            eEe.opts.Pipeline,
 		Routing:             eEe.opts.Routing,
 		Timeout:             eEe.opts.Timeout,
