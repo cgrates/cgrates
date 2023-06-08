@@ -38,7 +38,7 @@
   become: yes
   loop:
     - { src: "{{ cgrates_dir }}/data", dest: "/usr/share/cgrates" }
-    - { src: "{{ golang_gopath }}/bin/cgr-engine", dest: "/usr/bin/cgr-engine" }
+    - { src: "{{ golang_gopath }}/bin/cgr-engine", dest: "/usr/local/bin/cgr-engine" }
 
 - name: Run post install scripts
   ansible.builtin.shell:
