@@ -36,7 +36,7 @@ require (
 	github.com/go-sql-driver/mysql v1.5.0
 	github.com/gorhill/cronexpr v0.0.0-20180427100037-88b0669f7d75
 	github.com/mediocregopher/radix/v3 v3.8.1
-	github.com/miekg/dns v1.1.44-0.20210927135021-1630ffe2ca11
+	github.com/miekg/dns v1.1.54
 	github.com/mitchellh/mapstructure v1.4.0
 	github.com/nats-io/nats.go v1.11.0
 	github.com/nyaruka/phonenumbers v1.0.75
@@ -45,7 +45,7 @@ require (
 	github.com/segmentio/kafka-go v0.4.8
 	go.mongodb.org/mongo-driver v1.11.0
 	golang.org/x/crypto v0.0.0-20220622213112-05595931fe9d
-	golang.org/x/net v0.0.0-20220524220425-1d687d428aca
+	golang.org/x/net v0.10.0
 	golang.org/x/oauth2 v0.0.0-20201208152858-08078c50e5b5
 	google.golang.org/api v0.36.0
 	gorm.io/driver/mysql v1.0.3
@@ -112,11 +112,11 @@ require (
 	github.com/youmark/pkcs8 v0.0.0-20181117223130-1be2e3e5546d // indirect
 	go.etcd.io/bbolt v1.3.5 // indirect
 	go.opencensus.io v0.22.5 // indirect
-	golang.org/x/mod v0.6.0-dev.0.20220106191415-9b9b3d81d5e3 // indirect
-	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c // indirect
-	golang.org/x/sys v0.0.0-20211216021012-1d35b9e2eb4e // indirect
-	golang.org/x/text v0.3.7 // indirect
-	golang.org/x/tools v0.1.10 // indirect
+	golang.org/x/mod v0.10.0 // indirect
+	golang.org/x/sync v0.2.0 // indirect
+	golang.org/x/sys v0.8.0 // indirect
+	golang.org/x/text v0.9.0 // indirect
+	golang.org/x/tools v0.9.3 // indirect
 	golang.org/x/xerrors v0.0.0-20200804184101-5ec99f83aff1 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
 	google.golang.org/genproto v0.0.0-20210111234610-22ae2b108f89 // indirect
