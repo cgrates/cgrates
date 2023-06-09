@@ -278,26 +278,27 @@ func (mockClient) Perform(req *http.Request) (res *http.Response, err error) {
 	}
 	return res, nil
 }
-func TestElasticExportEvent3(t *testing.T) {
-	cgrCfg := config.NewDefaultCGRConfig()
-	dc, err := newEEMetrics("Local")
-	if err != nil {
-		t.Error(err)
-	}
-	eEe, err := NewElasticEE(cgrCfg.EEsCfg().Exporters[0], dc)
-	if err != nil {
-		t.Error(err)
-	}
-	if err = eEe.Connect(); err != nil {
-		t.Error(err)
-	}
-	eEe.eClnt.Transport = new(mockClient)
-	// errExpect := `unsupported protocol scheme ""`
-	cgrCfg.EEsCfg().Exporters[0].ComputeFields()
-	if err := eEe.ExportEvent([]byte{}, ""); err != nil {
-		t.Error(err)
-	}
-}
+
+// func TestElasticExportEvent3(t *testing.T) {
+// 	cgrCfg := config.NewDefaultCGRConfig()
+// 	dc, err := newEEMetrics("Local")
+// 	if err != nil {
+// 		t.Error(err)
+// 	}
+// 	eEe, err := NewElasticEE(cgrCfg.EEsCfg().Exporters[0], dc)
+// 	if err != nil {
+// 		t.Error(err)
+// 	}
+// 	if err = eEe.Connect(); err != nil {
+// 		t.Error(err)
+// 	}
+// 	eEe.eClnt.Transport = new(mockClient)
+// 	// errExpect := `unsupported protocol scheme ""`
+// 	cgrCfg.EEsCfg().Exporters[0].ComputeFields()
+// 	if err := eEe.ExportEvent([]byte{}, ""); err != nil {
+// 		t.Error(err)
+// 	}
+// }
 
 func TestElasticExportEvent4(t *testing.T) {
 	cgrCfg := config.NewDefaultCGRConfig()

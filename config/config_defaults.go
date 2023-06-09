@@ -507,7 +507,10 @@ const CGRATES_CFG_JSON = `
 
 				
  				// Elasticsearch options
-				"discoverNodesInterval":"",
+				"elsCloudID":"",                                 //ELS Cloud Endpoint
+				"elsApiKey": "",
+				"elsUsername":"",
+			    "elsPassword":"",
 				"discoverNodesOnStart":false
 				// "elsIndex": "",								// ElsIndex               	
 				// "elsIfPrimaryTerm": 0,						// ElsIfPrimaryTerm
