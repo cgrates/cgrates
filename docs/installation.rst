@@ -14,7 +14,7 @@ Installation
 
 CGRateS can be installed either via packages or through an automated Go source installation. We recommend the latter for advanced users familiar with Go programming, and package installations for those not wanting to engage in the code building process.
 
-After completing the installation, you need to perform the :ref:`post-install configuration <post_install>` steps to set up CGRateS properly and prepare it to run. After these steps, CGRateS will be configured in **/etc/cgrates/cgrates.json** and enabled in **/etc/default/cgrates**.
+After completing the installation, you need to perform the :ref:`post-install configuration <post_install>` steps to set up CGRateS properly and prepare it to run. After these steps, CGRateS will be configured in **/etc/cgrates/cgrates.json** and the service can be managed using the **systemctl** command.
 
 Package Installation
 --------------------
@@ -55,7 +55,7 @@ Alternatively, you can manually install a specific .deb package as follows:
 Redhat-based Distributions
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-For .rpm distros, we are using Fedora Copr to manage the CGRateS packages:
+For .rpm distros, we are using copr to manage the CGRateS packages:
 
 .. code-block:: bash
 
@@ -72,18 +72,19 @@ To install a specific version of the package, run:
 .. note::
    The entire archive of CGRateS rpm packages is available at https://copr.fedorainfracloud.org/coprs/cgrates/v0.10/packages/.
 
-Building from Source
---------------------
+Installing from Source
+----------------------
 
 Prerequisites:
+^^^^^^^^^^^^^^
 
-- Git
+- **Git**
 
 .. code-block:: bash
 
    sudo apt install git
 
-- Go (refer to the official Go installation docs: https://go.dev/doc/install)
+- **Go** (refer to the official Go installation docs: https://go.dev/doc/install)
 
 To install the latest Go version at the time of writing this documentation, run:
 
@@ -96,7 +97,8 @@ To install the latest Go version at the time of writing this documentation, run:
    sudo tar -C /usr/local -xzf go1.20.5.linux-amd64.tar.gz
    export PATH=$PATH:/usr/local/go/bin
 
-Configure the project using the following commands:
+Installation:
+^^^^^^^^^^^^^
 
 .. code-block:: bash
 
@@ -124,7 +126,7 @@ Creating Your Own Packages
 After compiling the source code, you may choose to create your own packages.
 
 For Debian-based distros:
-~~~~~~~~~~~~~~~~~~~~~~~~
+^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. code-block:: bash
 
@@ -149,7 +151,7 @@ To install the generated package, run:
    sudo dpkg -i cgrates_*.deb
 
 For Redhat-based distros:
-~~~~~~~~~~~~~~~~~~~~~~~~~
+^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. code-block:: bash
 

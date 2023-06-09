@@ -37,8 +37,11 @@ snowballstemmer==2.2.0
 sphinx==6.2.1
     # via
     #   -r requirements.in
+    #   sphinx-copybutton
     #   sphinx-rtd-theme
     #   sphinxcontrib-jquery
+sphinx-copybutton==0.5.2
+    # via -r requirements.in
 sphinx-rtd-theme==1.2.0
     # via -r requirements.in
 sphinxcontrib-applehelp==1.0.4
