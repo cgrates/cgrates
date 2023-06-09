@@ -363,8 +363,7 @@
 			"attempts": 1,
 			"opts": {
 					"elsIndex": "cdrs",
-					"discoverNodesInterval":"30s",
-					"discoverNodesOnStart":true,
+					"discoverNodesOnStart":false,
 					//"elsIfPrimaryTerm": 0,
 					//"elsIfSeqNo": 0,
 					"elsOpType": "",

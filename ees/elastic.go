@@ -91,12 +91,22 @@ func (eEe *ElasticEE) Connect() (err error) {
 	eEe.Lock()
 	// create the client
 	if eEe.eClnt == nil {
-		eEe.eClnt, err = elasticsearch.NewClient(
-			elasticsearch.Config{
-				DiscoverNodesInterval: *eEe.Cfg().Opts.DiscoverNodesInterval,
-				DiscoverNodesOnStart:  *eEe.Cfg().Opts.DiscoverNodesOnStart,
-				Addresses:             strings.Split(eEe.Cfg().ExportPath, utils.InfieldSep)},
-		)
+		if *eEe.Cfg().Opts.ElsCloudID != "" {
+			eEe.eClnt, err = elasticsearch.NewClient(
+				elasticsearch.Config{
+					CloudID:              *eEe.Cfg().Opts.ElsCloudID,
+					APIKey:               *eEe.Cfg().Opts.ElsAPIKey,
+					Username:             *eEe.Cfg().Opts.ElsUsername,
+					Password:             *eEe.Cfg().Opts.ElsPassword,
+					DiscoverNodesOnStart: *eEe.Cfg().Opts.DiscoverNodesOnStart})
+		} else {
+			eEe.eClnt, err = elasticsearch.NewClient(
+				elasticsearch.Config{
+					DiscoverNodesOnStart: *eEe.Cfg().Opts.DiscoverNodesOnStart,
+					Addresses:            strings.Split(eEe.Cfg().ExportPath, utils.InfieldSep),
+				},
+			)
+		}
 	}
 	eEe.Unlock()
 	return
