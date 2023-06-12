@@ -115,16 +115,6 @@ func (sm StringMap) Includes(om StringMap) bool {
 	return true
 }
 
-func (sm StringMap) Slice() []string {
-	result := make([]string, len(sm))
-	i := 0
-	for k := range sm {
-		result[i] = k
-		i++
-	}
-	return result
-}
-
 func (sm StringMap) IsEmpty() bool {
 	return len(sm) == 0 || sm[ANY]
 }
@@ -180,14 +170,14 @@ func (sm StringMap) HasKey(key string) (has bool) {
 	return
 }
 
-func (sm StringMap) GetSlice() (result []string) {
-	result = make([]string, len(sm))
+func (sm StringMap) Slice() []string {
+	result := make([]string, len(sm))
 	i := 0
 	for k := range sm {
 		result[i] = k
-		i += 1
+		i++
 	}
-	return
+	return result
 }
 
 // Used to merge multiple maps (eg: output of struct having ExtraFields)
