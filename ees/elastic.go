@@ -45,11 +45,12 @@ func NewElasticEE(cfg *config.EventExporterCfg, dc *utils.SafeMapStorage) (eEe *
 
 // ElasticEE implements EventExporter interface for ElasticSearch export
 type ElasticEE struct {
-	cfg   *config.EventExporterCfg
-	eClnt *elasticsearch.Client
-	dc    *utils.SafeMapStorage
-	opts  esapi.IndexRequest // this variable is used only for storing the options from OptsMap
-	reqs  *concReq
+	cfg      *config.EventExporterCfg
+	eClnt    *elasticsearch.Client
+	dc       *utils.SafeMapStorage
+	indxOpts esapi.IndexRequest // this variable is used only for storing the options from OptsMap
+	reqs     *concReq
+	clnOpts  elasticsearch.Config
 	sync.RWMutex
 	bytePreparing
 }
@@ -57,30 +58,52 @@ type ElasticEE struct {
 // init will create all the necessary dependencies, including opening the file
 func (eEe *ElasticEE) prepareOpts() (err error) {
 	//parse opts
-	eEe.opts.Index = utils.CDRsTBL
+	eEe.indxOpts.Index = utils.CDRsTBL
 	if eEe.Cfg().Opts.ElsIndex != nil {
-		eEe.opts.Index = *eEe.Cfg().Opts.ElsIndex
+		eEe.indxOpts.Index = *eEe.Cfg().Opts.ElsIndex
 	}
-	eEe.opts.IfPrimaryTerm = eEe.Cfg().Opts.ElsIfPrimaryTerm
-	eEe.opts.IfSeqNo = eEe.Cfg().Opts.ElsIfSeqNo
+	eEe.indxOpts.IfPrimaryTerm = eEe.Cfg().Opts.ElsIfPrimaryTerm
+	eEe.indxOpts.IfSeqNo = eEe.Cfg().Opts.ElsIfSeqNo
 	if eEe.Cfg().Opts.ElsOpType != nil {
-		eEe.opts.OpType = *eEe.Cfg().Opts.ElsOpType
+		eEe.indxOpts.OpType = *eEe.Cfg().Opts.ElsOpType
 	}
 	if eEe.Cfg().Opts.ElsPipeline != nil {
-		eEe.opts.Pipeline = *eEe.Cfg().Opts.ElsPipeline
+		eEe.indxOpts.Pipeline = *eEe.Cfg().Opts.ElsPipeline
 	}
 	if eEe.Cfg().Opts.ElsRouting != nil {
-		eEe.opts.Routing = *eEe.Cfg().Opts.ElsRouting
+		eEe.indxOpts.Routing = *eEe.Cfg().Opts.ElsRouting
 	}
 	if eEe.Cfg().Opts.ElsTimeout != nil {
-		eEe.opts.Timeout = *eEe.Cfg().Opts.ElsTimeout
+		eEe.indxOpts.Timeout = *eEe.Cfg().Opts.ElsTimeout
 	}
-	eEe.opts.Version = eEe.Cfg().Opts.ElsVersion
+	eEe.indxOpts.Version = eEe.Cfg().Opts.ElsVersion
 	if eEe.Cfg().Opts.ElsVersionType != nil {
-		eEe.opts.VersionType = *eEe.Cfg().Opts.ElsVersionType
+		eEe.indxOpts.VersionType = *eEe.Cfg().Opts.ElsVersionType
 	}
 	if eEe.Cfg().Opts.ElsWaitForActiveShards != nil {
-		eEe.opts.WaitForActiveShards = *eEe.Cfg().Opts.ElsWaitForActiveShards
+		eEe.indxOpts.WaitForActiveShards = *eEe.Cfg().Opts.ElsWaitForActiveShards
+	}
+
+	//client config
+	if eEe.Cfg().Opts.ElsCloud != nil && *eEe.Cfg().Opts.ElsCloud {
+		eEe.clnOpts.CloudID = eEe.Cfg().ExportPath
+	} else {
+		eEe.clnOpts.Addresses = strings.Split(eEe.Cfg().ExportPath, utils.InfieldSep)
+	}
+	if eEe.Cfg().Opts.ElsUsername != nil {
+		eEe.clnOpts.Username = *eEe.Cfg().Opts.ElsUsername
+	}
+	if eEe.Cfg().Opts.ElsPassword != nil {
+		eEe.clnOpts.Password = *eEe.Cfg().Opts.ElsPassword
+	}
+	if eEe.Cfg().Opts.ElsAPIKey != nil {
+		eEe.clnOpts.APIKey = *eEe.Cfg().Opts.ElsAPIKey
+	}
+	if eEe.Cfg().Opts.ElsDiscoverNodesOnStart != nil {
+		eEe.clnOpts.DiscoverNodesOnStart = *eEe.Cfg().Opts.ElsDiscoverNodesOnStart
+	}
+	if eEe.Cfg().Opts.ElsDiscoverNodeInterval != nil {
+		eEe.clnOpts.DiscoverNodesInterval = *eEe.Cfg().Opts.ElsDiscoverNodeInterval
 	}
 	return
 }
@@ -90,24 +113,10 @@ func (eEe *ElasticEE) Cfg() *config.EventExporterCfg { return eEe.cfg }
 func (eEe *ElasticEE) Connect() (err error) {
 	eEe.Lock()
 	// create the client
-	if eEe.eClnt == nil {
-		if *eEe.Cfg().Opts.ElsCloudID != "" {
-			eEe.eClnt, err = elasticsearch.NewClient(
-				elasticsearch.Config{
-					CloudID:              *eEe.Cfg().Opts.ElsCloudID,
-					APIKey:               *eEe.Cfg().Opts.ElsAPIKey,
-					Username:             *eEe.Cfg().Opts.ElsUsername,
-					Password:             *eEe.Cfg().Opts.ElsPassword,
-					DiscoverNodesOnStart: *eEe.Cfg().Opts.DiscoverNodesOnStart})
-		} else {
-			eEe.eClnt, err = elasticsearch.NewClient(
-				elasticsearch.Config{
-					DiscoverNodesOnStart: *eEe.Cfg().Opts.DiscoverNodesOnStart,
-					Addresses:            strings.Split(eEe.Cfg().ExportPath, utils.InfieldSep),
-				},
-			)
-		}
+	if eEe.eClnt != nil {
+		return
 	}
+	eEe.eClnt, err = elasticsearch.NewClient(eEe.clnOpts)
 	eEe.Unlock()
 	return
 }
@@ -124,19 +133,19 @@ func (eEe *ElasticEE) ExportEvent(ev any, key string) (err error) {
 		return utils.ErrDisconnected
 	}
 	eReq := esapi.IndexRequest{
-		Index:               eEe.opts.Index,
+		Index:               eEe.indxOpts.Index,
 		DocumentID:          key,
 		Body:                bytes.NewReader(ev.([]byte)),
 		Refresh:             "true",
-		IfPrimaryTerm:       eEe.opts.IfPrimaryTerm,
-		IfSeqNo:             eEe.opts.IfSeqNo,
-		OpType:              eEe.opts.OpType,
-		Pipeline:            eEe.opts.Pipeline,
-		Routing:             eEe.opts.Routing,
-		Timeout:             eEe.opts.Timeout,
-		Version:             eEe.opts.Version,
-		VersionType:         eEe.opts.VersionType,
-		WaitForActiveShards: eEe.opts.WaitForActiveShards,
+		IfPrimaryTerm:       eEe.indxOpts.IfPrimaryTerm,
+		IfSeqNo:             eEe.indxOpts.IfSeqNo,
+		OpType:              eEe.indxOpts.OpType,
+		Pipeline:            eEe.indxOpts.Pipeline,
+		Routing:             eEe.indxOpts.Routing,
+		Timeout:             eEe.indxOpts.Timeout,
+		Version:             eEe.indxOpts.Version,
+		VersionType:         eEe.indxOpts.VersionType,
+		WaitForActiveShards: eEe.indxOpts.WaitForActiveShards,
 	}
 
 	var resp *esapi.Response
