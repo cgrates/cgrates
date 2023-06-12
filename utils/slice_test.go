@@ -91,6 +91,57 @@ func TestAvg(t *testing.T) {
 	}
 }
 
+func TestAvgNegative(t *testing.T) {
+	tests := []struct {
+		name string
+		args []float64
+		want float64
+	}{
+		{
+			name: "no data",
+			args: []float64{},
+			want: -1,
+		},
+		{
+			name: "testing AvgNegative",
+			args: []float64{-1,0,4},
+			want: 1,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := AvgNegative(tt.args); got != tt.want {
+				t.Errorf("AvgNegative() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestPrefixSliceItems(t *testing.T) {
+	type args struct {
+			slc  []string
+			prfx string
+	}
+	tests := []struct {
+			name    string
+			args    args
+			wantOut []string
+	}{
+			{
+				name: "testing PrefixSliceItems",
+				args: args{[]string{"test1", "test2"}, "!"},
+				wantOut: []string{"!test1", "!test2"},
+			},
+	}
+	for _, tt := range tests {
+			t.Run(tt.name, func(t *testing.T) {
+					if gotOut := PrefixSliceItems(tt.args.slc, tt.args.prfx); !reflect.DeepEqual(gotOut, tt.wantOut) {
+							t.Errorf("PrefixSliceItems() = %v, want %v", gotOut, tt.wantOut)
+					}
+			})
+	}
+}
+
 func TestAvgEmpty(t *testing.T) {
 	values := []float64{}
 	result := Avg(values)
