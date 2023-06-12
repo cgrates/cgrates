@@ -59,8 +59,8 @@ For .rpm distros, we are using copr to manage the CGRateS packages:
 
 .. code-block:: bash
 
-   sudo dnf install -y dnf-plugins-core
-   sudo dnf copr enable cgrates/v0.10
+   sudo dnf install -y dnf-plugins-core 
+   sudo dnf copr -y enable cgrates/v0.10 
    sudo dnf install -y cgrates
 
 To install a specific version of the package, run:
@@ -82,7 +82,8 @@ Prerequisites:
 
 .. code-block:: bash
 
-   sudo apt install git
+   sudo apt-get install -y git
+   # sudo dnf install -y git for .rpm distros
 
 - **Go** (refer to the official Go installation docs: https://go.dev/doc/install)
 
@@ -90,7 +91,8 @@ To install the latest Go version at the time of writing this documentation, run:
 
 .. code-block:: bash
 
-   sudo apt install wget -y
+   sudo apt-get install -y wget tar 
+   # sudo dnf install -y wget tar for .rpm distros
    sudo rm -rf /usr/local/go
    cd /tmp
    wget https://go.dev/dl/go1.20.5.linux-amd64.tar.gz
@@ -102,23 +104,26 @@ Installation:
 
 .. code-block:: bash
 
-   mkdir -p ~/go/src/github.com/cgrates/cgrates
-   git clone https://github.com/cgrates/cgrates.git ~/go/src/github.com/cgrates/cgrates
-   cd ~/go/src/github.com/cgrates/cgrates
+   mkdir -p $HOME/go/src/github.com/cgrates/cgrates
+   git clone https://github.com/cgrates/cgrates.git $HOME/go/src/github.com/cgrates/cgrates
+   cd $HOME/go/src/github.com/cgrates/cgrates
+
+   # Switch to v0.10 branch
+   git checkout v0.10
 
    # Compile the binaries and move them to $GOPATH/bin
    ./build.sh
 
    # Create a symbolic link to the data folder
-   sudo ln -s ~/go/src/github.com/cgrates/cgrates/data /usr/share/cgrates
+   sudo ln -s $HOME/go/src/github.com/cgrates/cgrates/data /usr/share/cgrates
 
    # Make cgr-engine binary available system-wide
-   sudo ln -s ~/go/bin/cgr-engine /usr/local/bin/cgr-engine
+   sudo ln -s $HOME/go/bin/cgr-engine /usr/local/bin/cgr-engine
 
    # Optional: Additional useful symbolic links
-   sudo ln -s ~/go/bin/cgr-loader /usr/local/bin/cgr-loader
-   sudo ln -s ~/go/bin/cgr-migrator /usr/local/bin/cgr-migrator
-   sudo ln -s ~/go/bin/cgr-console /usr/local/bin/cgr-console
+   sudo ln -s $HOME/go/bin/cgr-loader /usr/local/bin/cgr-loader
+   sudo ln -s $HOME/go/bin/cgr-migrator /usr/local/bin/cgr-migrator
+   sudo ln -s $HOME/go/bin/cgr-console /usr/local/bin/cgr-console
 
 Creating Your Own Packages
 --------------------------
@@ -133,10 +138,10 @@ For Debian-based distros:
    # Install dependencies
    sudo apt-get install build-essential fakeroot dh-systemd -y
 
-   cd ~/go/src/github.com/cgrates/cgrates/packages
+   cd $HOME/go/src/github.com/cgrates/cgrates/packages
 
    # Delete old ones, if any
-   rm -rf ~/go/src/github.com/cgrates/*.deb
+   rm -rf $HOME/go/src/github.com/cgrates/*.deb
 
    make deb
 
@@ -147,7 +152,7 @@ To install the generated package, run:
 
 .. code-block:: bash
 
-   cd ~/go/src/github.com/cgrates
+   cd $HOME/go/src/github.com/cgrates
    sudo dpkg -i cgrates_*.deb
 
 For Redhat-based distros:
@@ -155,15 +160,15 @@ For Redhat-based distros:
 
 .. code-block:: bash
 
-   sudo apt-get install rpm
-   cd ~/go/src/github.com/cgrates/cgrates
+   sudo dnf install -y rpm-build
+   cd $HOME/go/src/github.com/cgrates/cgrates
    export gitLastCommit=$(git rev-parse HEAD)
    export rpmTag=$(git log -1 --format=%ci | date +%Y%m%d%H%M%S)+$(git rev-parse --short HEAD)
-   mkdir -p ~/cgr_build/{BUILD,RPMS,SOURCES,SPECS,SRPMS}
-   wget -P ~/cgr_build/SOURCES https://github.com/cgrates/cgrates/archive/$gitLastCommit.tar.gz
-   cp ~/go/src/github.com/cgrates/cgrates/packages/redhat_fedora/cgrates.spec ~/cgr_build/SPECS
-   cd ~/cgr_build
-   rpmbuild -bb --define "_topdir ~/cgr_build" SPECS/cgrates.spec
+   mkdir -p $HOME/cgr_build/{BUILD,RPMS,SOURCES,SPECS,SRPMS}
+   wget -P $HOME/cgr_build/SOURCES https://github.com/cgrates/cgrates/archive/$gitLastCommit.tar.gz
+   cp $HOME/go/src/github.com/cgrates/cgrates/packages/redhat_fedora/cgrates.spec $HOME/cgr_build/SPECS
+   cd $HOME/cgr_build
+   rpmbuild -bb --define "_topdir $HOME/cgr_build" SPECS/cgrates.spec
 
 .. _post_install:
 

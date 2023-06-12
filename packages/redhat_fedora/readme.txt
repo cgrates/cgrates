@@ -1,16 +1,12 @@
 Building package for RHEL/Centos/Oracle Linux/Scientific Linux/Fedora
 
 PREREQUISITES
-1. Go 1.5 or newer:
-    # wget https://storage.googleapis.com/golang/go1.5.1.linux-amd64.tar.gz
-    # tar -C /usr/local -xzf go1.5.1.linux-amd64.tar.gz
-    # export GOROOT=/usr/local/go
-    # export PATH=$GOROOT/bin:$GOPATH/bin:$PATH
+1. Go
 
-2. Git 1.8 or newer for older systems.
+2. Git
 
 3. rpm-build and make packages.
-    # yum install rpm-build make
+    # dnf install rpm-build make
 
 BUILD
 1. Create build environment:
