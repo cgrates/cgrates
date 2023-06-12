@@ -363,7 +363,10 @@
 			"attempts": 1,
 			"opts": {
 					"elsIndex": "cdrs",
-					"discoverNodesOnStart":true,
+					"elsDiscoverNodesOnStart":true,
+					//"elsCloud":false,
+					// "elsUsername":"",
+					// "elsPassword":"",
 					//"elsIfPrimaryTerm": 0,
 					//"elsIfSeqNo": 0,
 					"elsOpType": "",

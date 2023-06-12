@@ -299,11 +299,12 @@ type EEsJsonCfg struct {
 
 type EventExporterOptsJson struct {
 	CSVFieldSeparator        *string           `json:"csvFieldSeparator"`
-	ElsCloudID               *string           `json:"elsCloudID"`
+	ElsCloud                 *bool             `json:"elsCloud"`
 	ElsAPIKey                *string           `json:"elsApiKey"`
 	ElsUsername              *string           `json:"elsUsername"`
 	ElsPassword              *string           `json:"elsPassword"`
-	DiscoverNodesOnStart     *bool             `json:"discoverNodesOnStart"`
+	ElsDiscoverNodesOnStart  *bool             `json:"elsDiscoverNodesOnStart"`
+	ElsDiscoverNodesInterval *string           `json:"elsDiscoverNodesInterval"`
 	ElsIndex                 *string           `json:"elsIndex"`
 	ElsIfPrimaryTerm         *int              `json:"elsIfPrimaryTerm"`
 	ElsIfSeqNo               *int              `json:"elsIfSeqNo"`

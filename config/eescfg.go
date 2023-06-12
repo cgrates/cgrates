@@ -157,8 +157,9 @@ type EventExporterOpts struct {
 	CSVFieldSeparator        *string
 	ElsIndex                 *string
 	ElsIfPrimaryTerm         *int
-	DiscoverNodesOnStart     *bool
-	ElsCloudID               *string
+	ElsDiscoverNodesOnStart  *bool
+	ElsDiscoverNodeInterval  *time.Duration
+	ElsCloud                 *bool
 	ElsAPIKey                *string
 	ElsUsername              *string // Username for HTTP Basic Authentication.
 	ElsPassword              *string
@@ -255,8 +256,8 @@ func (eeOpts *EventExporterOpts) loadFromJSONCfg(jsnCfg *EventExporterOptsJson) 
 	if jsnCfg.CSVFieldSeparator != nil {
 		eeOpts.CSVFieldSeparator = jsnCfg.CSVFieldSeparator
 	}
-	if jsnCfg.ElsCloudID != nil {
-		eeOpts.ElsCloudID = jsnCfg.ElsCloudID
+	if jsnCfg.ElsCloud != nil {
+		eeOpts.ElsCloud = jsnCfg.ElsCloud
 	}
 	if jsnCfg.ElsAPIKey != nil {
 		eeOpts.ElsAPIKey = jsnCfg.ElsAPIKey
@@ -267,8 +268,15 @@ func (eeOpts *EventExporterOpts) loadFromJSONCfg(jsnCfg *EventExporterOptsJson) 
 	if jsnCfg.ElsPassword != nil {
 		eeOpts.ElsPassword = jsnCfg.ElsPassword
 	}
-	if jsnCfg.DiscoverNodesOnStart != nil {
-		eeOpts.DiscoverNodesOnStart = jsnCfg.DiscoverNodesOnStart
+	if jsnCfg.ElsDiscoverNodesOnStart != nil {
+		eeOpts.ElsDiscoverNodesOnStart = jsnCfg.ElsDiscoverNodesOnStart
+	}
+	if jsnCfg.ElsDiscoverNodesInterval != nil {
+		var nodesInterval time.Duration
+		if nodesInterval, err = utils.ParseDurationWithSecs(*jsnCfg.ElsDiscoverNodesInterval); err != nil {
+			return
+		}
+		eeOpts.ElsDiscoverNodeInterval = utils.DurationPointer(nodesInterval)
 	}
 	if jsnCfg.ElsIndex != nil {
 		eeOpts.ElsIndex = jsnCfg.ElsIndex
