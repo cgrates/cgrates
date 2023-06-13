@@ -97,7 +97,7 @@ func TestNewDataConverter(t *testing.T) {
 	if !reflect.DeepEqual(a, b) {
 		t.Error("Error reflect")
 	}
-	if a, err = NewDataConverter(MetaMultiply); err == nil || err != ErrMandatoryIeMissingNoCaps {
+	if _, err = NewDataConverter(MetaMultiply); err == nil || err != ErrMandatoryIeMissingNoCaps {
 		t.Error(err)
 	}
 	a, err = NewDataConverter("*multiply:3.3")
@@ -111,7 +111,7 @@ func TestNewDataConverter(t *testing.T) {
 	if !reflect.DeepEqual(a, b) {
 		t.Error("Error reflect")
 	}
-	if a, err = NewDataConverter(MetaDivide); err == nil || err != ErrMandatoryIeMissingNoCaps {
+	if _, err = NewDataConverter(MetaDivide); err == nil || err != ErrMandatoryIeMissingNoCaps {
 		t.Error(err)
 	}
 	a, err = NewDataConverter("*divide:3.3")
@@ -125,7 +125,7 @@ func TestNewDataConverter(t *testing.T) {
 	if !reflect.DeepEqual(a, b) {
 		t.Error("Error reflect")
 	}
-	if a, err = NewDataConverter(MetaLibPhoneNumber); err == nil || err.Error() != "unsupported *libphonenumber converter parameters: <>" {
+	if _, err = NewDataConverter(MetaLibPhoneNumber); err == nil || err.Error() != "unsupported *libphonenumber converter parameters: <>" {
 		t.Error(err)
 	}
 	a, err = NewDataConverter("*libphonenumber:US")
@@ -140,6 +140,7 @@ func TestNewDataConverter(t *testing.T) {
 		t.Error("Error reflect")
 	}
 	if _, err := NewDataConverter("unsupported"); err == nil || err.Error() != "unsupported converter definition: <unsupported>" {
+		t.Error(err)
 	}
 
 	hex, err := NewDataConverter(MetaString2Hex)
@@ -150,6 +151,14 @@ func TestNewDataConverter(t *testing.T) {
 	if !reflect.DeepEqual(hex, exp) {
 		t.Errorf("Expected %+v received: %+v", exp, hex)
 	}
+	a, err = NewDataConverter(MetaIP2Hex)
+	if err != nil {
+		t.Fatal(err)
+	}
+	b = new(IP2HexConverter)
+	if !reflect.DeepEqual(a, b) {
+		t.Errorf("got %v, want %v", a, b)
+	}
 }
 
 func TestNewDataConverterMustCompile(t *testing.T) {
@@ -157,6 +166,20 @@ func TestNewDataConverterMustCompile(t *testing.T) {
 	if rcv := NewDataConverterMustCompile(MetaDurationSeconds); rcv != eOut {
 		t.Errorf("Expecting:  received: %+q", rcv)
 	}
+
+	t.Run("check panic", func(t *testing.T) {
+		shouldPanic(t, NewDataConverterMustCompile)
+	})
+}
+
+func shouldPanic(t *testing.T, f func(string) DataConverter) {
+	t.Helper()
+	defer func() {
+		_ = recover()
+	}()
+
+	NewDataConverterMustCompile("!£$%&/()=?123")
+	t.Error("should have panicked")
 }
 
 func TestNewDurationSecondsConverter(t *testing.T) {
@@ -707,5 +730,48 @@ func TestStringHexConvertor(t *testing.T) {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, rpl) {
 		t.Errorf("expecting: %+v, received: %+v", expected, rpl)
+	}
+}
+
+func TestConvertString(t *testing.T) {
+	tests := []struct{
+		name string
+		arg string
+		want string
+		err bool
+	}{
+		{
+			name: "check error",
+			arg: "!£$%&/()=?^",
+			want: "",
+			err: true,
+		},
+		{
+			name: "check error",
+			arg: "1.5",
+			want: "1.5",
+			err: false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			dc := DataConverters{&RoundConverter{}}
+			rcv, err := dc.ConvertString(tt.arg)
+
+			if tt.err {
+				if err == nil {
+					t.Error("was expecting an error but didnt get one")
+				}
+			} else {
+				if err != nil {
+					t.Errorf("was not expecting an error %s", err)
+				}
+			} 
+
+
+			if tt.want != rcv {
+				t.Errorf("recived %v, expected %v", rcv, tt.want)
+			}
+		})
 	}
 }
