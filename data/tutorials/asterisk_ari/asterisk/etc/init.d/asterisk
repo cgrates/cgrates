@@ -1,4 +1,4 @@
-#! /bin/sh
+#!/bin/bash
 # $Id$
 #
 # Mon Jun 04 2007 Iñaki Baz Castillo <ibc@in.ilimit.es>

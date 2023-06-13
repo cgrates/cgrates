@@ -1,4 +1,4 @@
-#! /usr/bin/env sh
+#!/bin/bash
 
 WORK_DIR=/tmp/cgrates
 rm -rf $WORK_DIR

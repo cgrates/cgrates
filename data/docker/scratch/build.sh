@@ -1,4 +1,4 @@
-#! /usr/bin/env sh
+#!/bin/bash
 echo "Static building CGRateS..."
 
 GIT_LAST_LOG=$(git log -1 | tr -d "'")
