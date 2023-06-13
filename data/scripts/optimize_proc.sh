@@ -1,4 +1,4 @@
-#! /usr/bin/env sh
+#!/bin/bash
 
 for i in /sys/devices/system/cpu/cpu[0-9]
 do

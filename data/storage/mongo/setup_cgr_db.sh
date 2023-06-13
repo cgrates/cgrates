@@ -1,4 +1,4 @@
-#! /usr/bin/env sh
+#!/bin/bash
 
 
 mongo --quiet create_user.js

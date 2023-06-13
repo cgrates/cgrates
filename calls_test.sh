@@ -1,4 +1,4 @@
-#! /usr/bin/env sh
+#!/bin/bash
 
 # ./local_test.sh
 # lcl=$?

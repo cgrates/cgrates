@@ -1,4 +1,4 @@
-#! /usr/bin/env sh
+#!/bin/bash
 	echo "rc7_to_rc8.sh"
 #settings
 

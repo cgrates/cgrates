@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 # Generate self signed root CA cert
 openssl req -nodes -x509 -newkey rsa:2048 -days 3650 -keyout ca.key -out ca.crt -extensions root_ca_extensions -config ./ca.cnf

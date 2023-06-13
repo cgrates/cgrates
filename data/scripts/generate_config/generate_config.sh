@@ -1,3 +1,3 @@
-#! /usr/bin/env sh
+#!/bin/bash
 
 go run generate.go $@

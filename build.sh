@@ -1,4 +1,4 @@
-#! /usr/bin/env sh
+#!/bin/bash
 echo "Building CGRateS ..."
 
 GIT_LAST_LOG=$(git log -1 | tr -d "'")
