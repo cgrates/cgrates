@@ -154,62 +154,68 @@ func (eeS *EEsCfg) AsMapInterface(separator string) (initialMP map[string]any) {
 }
 
 type EventExporterOpts struct {
-	CSVFieldSeparator        *string
-	ElsIndex                 *string
-	ElsIfPrimaryTerm         *int
-	ElsDiscoverNodesOnStart  *bool
-	ElsDiscoverNodeInterval  *time.Duration
-	ElsCloud                 *bool
-	ElsAPIKey                *string
-	ElsUsername              *string // Username for HTTP Basic Authentication.
-	ElsPassword              *string
-	ElsIfSeqNo               *int
-	ElsOpType                *string
-	ElsPipeline              *string
-	ElsRouting               *string
-	ElsTimeout               *time.Duration
-	ElsVersion               *int
-	ElsVersionType           *string
-	ElsWaitForActiveShards   *string
-	SQLMaxIdleConns          *int
-	SQLMaxOpenConns          *int
-	SQLConnMaxLifetime       *time.Duration
-	MYSQLDSNParams           map[string]string
-	SQLTableName             *string
-	SQLDBName                *string
-	PgSSLMode                *string
-	KafkaTopic               *string
-	AMQPRoutingKey           *string
-	AMQPQueueID              *string
-	AMQPExchange             *string
-	AMQPExchangeType         *string
-	AMQPUsername             *string
-	AMQPPassword             *string
-	AWSRegion                *string
-	AWSKey                   *string
-	AWSSecret                *string
-	AWSToken                 *string
-	SQSQueueID               *string
-	S3BucketID               *string
-	S3FolderPath             *string
-	NATSJetStream            *bool
-	NATSSubject              *string
-	NATSJWTFile              *string
-	NATSSeedFile             *string
-	NATSCertificateAuthority *string
-	NATSClientCertificate    *string
-	NATSClientKey            *string
-	NATSJetStreamMaxWait     *time.Duration
-	RPCCodec                 *string
-	ServiceMethod            *string
-	KeyPath                  *string
-	CertPath                 *string
-	CAPath                   *string
-	TLS                      *bool
-	ConnIDs                  *[]string
-	RPCConnTimeout           *time.Duration
-	RPCReplyTimeout          *time.Duration
-	RPCAPIOpts               map[string]any
+	CSVFieldSeparator         *string
+	ElsIndex                  *string
+	ElsIfPrimaryTerm          *int
+	ElsDiscoverNodesOnStart   *bool
+	ElsDiscoverNodeInterval   *time.Duration
+	ElsCloud                  *bool
+	ElsAPIKey                 *string
+	ElsCACert                 *string
+	ElsCertificateFingerprint *string
+	ElsServiceToken           *string
+	ElsUsername               *string // Username for HTTP Basic Authentication.
+	ElsPassword               *string
+	ElsEnableDebugLogger      *bool
+	ElsCompressRequestBody    *bool
+	ElsRetryOnStatus          *[]int
+	ElsIfSeqNo                *int
+	ElsOpType                 *string
+	ElsPipeline               *string
+	ElsRouting                *string
+	ElsTimeout                *time.Duration
+	ElsVersion                *int
+	ElsVersionType            *string
+	ElsWaitForActiveShards    *string
+	SQLMaxIdleConns           *int
+	SQLMaxOpenConns           *int
+	SQLConnMaxLifetime        *time.Duration
+	MYSQLDSNParams            map[string]string
+	SQLTableName              *string
+	SQLDBName                 *string
+	PgSSLMode                 *string
+	KafkaTopic                *string
+	AMQPRoutingKey            *string
+	AMQPQueueID               *string
+	AMQPExchange              *string
+	AMQPExchangeType          *string
+	AMQPUsername              *string
+	AMQPPassword              *string
+	AWSRegion                 *string
+	AWSKey                    *string
+	AWSSecret                 *string
+	AWSToken                  *string
+	SQSQueueID                *string
+	S3BucketID                *string
+	S3FolderPath              *string
+	NATSJetStream             *bool
+	NATSSubject               *string
+	NATSJWTFile               *string
+	NATSSeedFile              *string
+	NATSCertificateAuthority  *string
+	NATSClientCertificate     *string
+	NATSClientKey             *string
+	NATSJetStreamMaxWait      *time.Duration
+	RPCCodec                  *string
+	ServiceMethod             *string
+	KeyPath                   *string
+	CertPath                  *string
+	CAPath                    *string
+	TLS                       *bool
+	ConnIDs                   *[]string
+	RPCConnTimeout            *time.Duration
+	RPCReplyTimeout           *time.Duration
+	RPCAPIOpts                map[string]any
 }
 
 // EventExporterCfg the config for a Event Exporter
@@ -262,6 +268,21 @@ func (eeOpts *EventExporterOpts) loadFromJSONCfg(jsnCfg *EventExporterOptsJson) 
 	if jsnCfg.ElsAPIKey != nil {
 		eeOpts.ElsAPIKey = jsnCfg.ElsAPIKey
 	}
+	if jsnCfg.CAPath != nil {
+		eeOpts.CAPath = jsnCfg.CAPath
+	}
+	if jsnCfg.ElsServiceToken != nil {
+		eeOpts.ElsServiceToken = jsnCfg.ElsServiceToken
+	}
+	if jsnCfg.ElsCertificateFingerprint != nil {
+		eeOpts.ElsCertificateFingerprint = jsnCfg.ElsCertificateFingerprint
+	}
+	if jsnCfg.ElsEnableDebugLogger != nil {
+		eeOpts.ElsEnableDebugLogger = jsnCfg.ElsEnableDebugLogger
+	}
+	if jsnCfg.ElsCompressRequestBody != nil {
+		eeOpts.ElsCompressRequestBody = jsnCfg.ElsCompressRequestBody
+	}
 	if jsnCfg.ElsUsername != nil {
 		eeOpts.ElsUsername = jsnCfg.ElsUsername
 	}
@@ -277,6 +298,9 @@ func (eeOpts *EventExporterOpts) loadFromJSONCfg(jsnCfg *EventExporterOptsJson) 
 			return
 		}
 		eeOpts.ElsDiscoverNodeInterval = utils.DurationPointer(nodesInterval)
+	}
+	if jsnCfg.ElsRetryOnStatus != nil {
+		eeOpts.ElsRetryOnStatus = jsnCfg.ElsRetryOnStatus
 	}
 	if jsnCfg.ElsIndex != nil {
 		eeOpts.ElsIndex = jsnCfg.ElsIndex

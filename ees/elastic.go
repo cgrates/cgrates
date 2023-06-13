@@ -23,6 +23,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"os"
 	"strings"
 	"sync"
 
@@ -99,11 +100,34 @@ func (eEe *ElasticEE) prepareOpts() (err error) {
 	if eEe.Cfg().Opts.ElsAPIKey != nil {
 		eEe.clnOpts.APIKey = *eEe.Cfg().Opts.ElsAPIKey
 	}
+	if eEe.Cfg().Opts.ElsCACert != nil {
+		var cacert []byte
+		cacert, err = os.ReadFile(*eEe.Cfg().Opts.ElsCACert)
+		if err != nil {
+			return
+		}
+		eEe.clnOpts.CACert = cacert
+	}
+	if eEe.Cfg().Opts.ElsCertificateFingerprint != nil {
+		eEe.clnOpts.CertificateFingerprint = *eEe.Cfg().Opts.ElsCertificateFingerprint
+	}
+	if eEe.Cfg().Opts.ElsServiceToken != nil {
+		eEe.clnOpts.ServiceToken = *eEe.Cfg().Opts.ElsServiceToken
+	}
 	if eEe.Cfg().Opts.ElsDiscoverNodesOnStart != nil {
 		eEe.clnOpts.DiscoverNodesOnStart = *eEe.Cfg().Opts.ElsDiscoverNodesOnStart
 	}
 	if eEe.Cfg().Opts.ElsDiscoverNodeInterval != nil {
 		eEe.clnOpts.DiscoverNodesInterval = *eEe.Cfg().Opts.ElsDiscoverNodeInterval
+	}
+	if eEe.Cfg().Opts.ElsEnableDebugLogger != nil {
+		eEe.clnOpts.EnableDebugLogger = *eEe.Cfg().Opts.ElsEnableDebugLogger
+	}
+	if eEe.Cfg().Opts.ElsCompressRequestBody != nil {
+		eEe.clnOpts.CompressRequestBody = *eEe.Cfg().Opts.ElsCompressRequestBody
+	}
+	if eEe.Cfg().Opts.ElsRetryOnStatus != nil {
+		eEe.clnOpts.RetryOnStatus = *eEe.Cfg().Opts.ElsRetryOnStatus
 	}
 	return
 }
