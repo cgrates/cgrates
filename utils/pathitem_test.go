@@ -145,3 +145,79 @@ func TestPathItemsClone(t *testing.T) {
 		t.Errorf("Expected: %s, received: %s", ToJSON(expected), ToJSON(rply))
 	}
 }
+
+func TestGetIndexPath(t *testing.T) {
+	type want struct {
+		opath string
+		idx   int
+	}
+	tests := []struct {
+		name string
+		arg string
+		want want
+		returnNil bool
+	}{
+		{
+			name: "argument does not have square brackets",
+			arg: "1",
+			want: want{opath: "1"},
+			returnNil: true, 
+		},
+		{
+			name: "check error from strings.Atoi",
+			arg: "[a, b, c]",
+			want: want{opath: "[a, b, c]"},
+			returnNil: true,
+		},
+		{
+			name: "testing GetPathIndex",
+			arg: "test[1]",
+			want: want{opath: "test", idx: 1},
+			returnNil: false, 
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			opath, idx := GetPathIndex(tt.arg)
+
+			if tt.returnNil {
+				if opath != tt.want.opath || idx != nil {
+					t.Errorf("recived '%s' and %v, expexted '%s' and %v", opath, idx, tt.want.opath, tt.want.idx)
+				}
+			} else {
+				expInx := *idx
+				if opath != tt.want.opath || expInx != tt.want.idx {
+					t.Errorf("recived '%s' and %v, expexted '%s' and %v", opath, expInx, tt.want.opath, tt.want.idx)
+				}
+			}
+		})
+	}
+}
+
+func TestGetPathWithoutIndex(t *testing.T) {
+	tests := []struct {
+		name string
+		arg string
+		want string
+	}{
+		{
+			name: "argument does not have square brackets",
+			arg: "test",
+			want: "test",
+		},
+		{
+			name: "testing GetPathIndex",
+			arg: "test[1]",
+			want: "test",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			opath := GetPathWithoutIndex(tt.arg)
+
+				if opath != tt.want {
+					t.Errorf("recived '%s', expexted '%s'", opath, tt.want)
+				}
+		})
+	}
+}
