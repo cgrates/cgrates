@@ -27,6 +27,7 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/elastic/elastic-transport-go/v8/elastictransport"
 	"github.com/elastic/go-elasticsearch/v8/esapi"
 
 	"github.com/cgrates/cgrates/config"
@@ -100,9 +101,9 @@ func (eEe *ElasticEE) prepareOpts() (err error) {
 	if eEe.Cfg().Opts.ElsAPIKey != nil {
 		eEe.clnOpts.APIKey = *eEe.Cfg().Opts.ElsAPIKey
 	}
-	if eEe.Cfg().Opts.ElsCACert != nil {
+	if eEe.Cfg().Opts.CAPath != nil {
 		var cacert []byte
-		cacert, err = os.ReadFile(*eEe.Cfg().Opts.ElsCACert)
+		cacert, err = os.ReadFile(*eEe.Cfg().Opts.CAPath)
 		if err != nil {
 			return
 		}
@@ -123,11 +124,34 @@ func (eEe *ElasticEE) prepareOpts() (err error) {
 	if eEe.Cfg().Opts.ElsEnableDebugLogger != nil {
 		eEe.clnOpts.EnableDebugLogger = *eEe.Cfg().Opts.ElsEnableDebugLogger
 	}
+	if loggerType := eEe.Cfg().Opts.ElsLogger; loggerType != nil {
+		var logger elastictransport.Logger
+		switch *loggerType {
+		case utils.ElsJson:
+			logger = &elastictransport.JSONLogger{Output: os.Stdout, EnableRequestBody: true, EnableResponseBody: true}
+		case utils.ElsColor:
+			logger = &elastictransport.ColorLogger{Output: os.Stdout, EnableRequestBody: true, EnableResponseBody: true}
+		case utils.ElsText:
+			logger = &elastictransport.TextLogger{Output: os.Stdout, EnableRequestBody: true, EnableResponseBody: true}
+		default:
+			return
+		}
+		eEe.clnOpts.Logger = logger
+	}
 	if eEe.Cfg().Opts.ElsCompressRequestBody != nil {
 		eEe.clnOpts.CompressRequestBody = *eEe.Cfg().Opts.ElsCompressRequestBody
 	}
 	if eEe.Cfg().Opts.ElsRetryOnStatus != nil {
 		eEe.clnOpts.RetryOnStatus = *eEe.Cfg().Opts.ElsRetryOnStatus
+	}
+	if eEe.Cfg().Opts.ElsMaxRetries != nil {
+		eEe.clnOpts.MaxRetries = *eEe.Cfg().Opts.ElsMaxRetries
+	}
+	if eEe.Cfg().Opts.ElsDisableRetry != nil {
+		eEe.clnOpts.DisableRetry = *eEe.Cfg().Opts.ElsDisableRetry
+	}
+	if eEe.Cfg().Opts.ElsCompressRequestBodyLevel != nil {
+		eEe.clnOpts.CompressRequestBodyLevel = *eEe.Cfg().Opts.ElsCompressRequestBodyLevel
 	}
 	return
 }

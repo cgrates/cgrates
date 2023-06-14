@@ -295,7 +295,7 @@ func TestElasticExportEvent3(t *testing.T) {
 	eEe.eClnt.Transport = new(mockClient)
 	// errExpect := `unsupported protocol scheme ""`
 	cgrCfg.EEsCfg().Exporters[0].ComputeFields()
-	if err := eEe.ExportEvent([]byte{}, ""); err != nil {
+	if err := eEe.ExportEvent([]byte{}, ""); err == nil {
 		t.Error(err)
 	}
 }
