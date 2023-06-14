@@ -76,6 +76,220 @@ func TestReflectFieldAsStringOnStruct(t *testing.T) {
 	}
 }
 
+func TestReflectFieldInterface(t *testing.T) {
+	type args struct {
+		intf any
+		fldName string
+		extraFieldsLabel string
+	}
+	type want struct {
+		retIf any
+		err error
+	}
+	tests := []struct{
+		name string
+		args args
+		want want
+	}{
+		{
+			name: "pointer map with unmatching filed name",
+			args: args{intf: &map[string]int{"test": 1,}, fldName: "test1", extraFieldsLabel: ""},
+			want: want{retIf: nil, err: ErrNotFound},
+		},
+		{
+			name: "string as argument",
+			args: args{intf: "testtest", fldName: "test1", extraFieldsLabel: ""},
+			want: want{retIf: nil, err: fmt.Errorf("Unsupported field kind: string")},
+		},
+		{
+			name: "struct with unmatching field name and extra field label as empty string",
+			args: args{intf: struct{Test string}{Test: "test"}, fldName: "Test1", extraFieldsLabel: ""},
+			want: want{retIf: nil, err: ErrNotFound},
+		},
+		{
+			name: "struct with unmatching field name and unmatching extra field label",
+			args: args{intf: struct{Test string}{Test: "test"}, fldName: "Test1", extraFieldsLabel: "Test2"},
+			want: want{retIf: nil, err: ErrNotFound},
+		},
+		{
+			name: "struct with unmatching field name and unmatching extra field label",
+			args: args{intf: struct{Test map[string]string}{Test: map[string]string{"Test": "test"}}, fldName: "Test1", extraFieldsLabel: "Test"},
+			want: want{retIf: nil, err: ErrNotFound},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			rcv, err := ReflectFieldInterface(tt.args.intf, tt.args.fldName, tt.args.extraFieldsLabel)
+
+			if err.Error() != tt.want.err.Error() {
+				t.Fatal("wrong error message or no error")
+			}
+
+			if rcv != tt.want.retIf {
+				t.Errorf("reciving %v, expected %v", rcv, tt.want.retIf)
+			}
+		})
+	}
+}
+
+func TestReflectFieldAsString(t *testing.T) {
+
+	type args struct {
+		intf any
+		fldName string
+		extraFieldsLabel string
+	}
+	type want struct {
+		value string
+		err error
+	}
+	tests := []struct{
+		name string
+		args args
+		want want
+	}{
+		{
+			name: "check error",
+			args: args{intf: struct{Test string}{Test: "test"}, fldName: "Test1", extraFieldsLabel: "Test2"},
+			want: want{value: "", err: ErrNotFound},
+		},
+		{
+			name: "check second error",
+			args: args{intf: struct{Test bool}{Test: false}, fldName: "Test", extraFieldsLabel: ""},
+			want: want{value: "", err: fmt.Errorf("Cannot convert to string field type: bool")},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			rcv, err := ReflectFieldAsString(tt.args.intf, tt.args.fldName, tt.args.extraFieldsLabel)
+
+			if err.Error() != tt.want.err.Error() {
+				t.Fatal("wrong error message or no error recived")
+			}
+
+			if rcv != tt.want.value {
+				t.Errorf("reciving %v, expected %v", rcv, tt.want.value)
+			}
+		})
+	}
+}
+
+func TestIfaceAsDuration(t *testing.T) {
+	type want struct {
+		d time.Duration
+		err error
+	}
+	var i8 int8 = 1
+	var i16 int16 = 1
+	var i32 int32 = 1
+	var i64 int64 = 1
+	var ui uint = 1
+	var ui8 uint8 = 1
+	var ui16 uint16 = 1
+	var ui32 uint32 = 1
+	var ui64 uint64 = 1
+	var f32 float32 = 1.5
+	var f64 float32 = 1.5
+	tests := []struct{
+		name string
+		arg any
+		want want
+	}{
+		{
+			name: "time.Duration",
+			arg: 1 * time.Second,
+			want: want{d: 1 * time.Second, err: nil},
+		},
+		{
+			name: "int",
+			arg: 1,
+			want: want{d: time.Duration(int64(1)), err: nil},
+		},
+		{
+			name: "int8",
+			arg: i8,
+			want: want{d: time.Duration(int64(i8)), err: nil},
+		},
+		{
+			name: "int16",
+			arg: i16,
+			want: want{d: time.Duration(int64(i16)), err: nil},
+		},
+		{
+			name: "int32",
+			arg: i32,
+			want: want{d: time.Duration(int64(i32)), err: nil},
+		},
+		{
+			name: "int64",
+			arg: i64,
+			want: want{d: time.Duration(int64(i64)), err: nil},
+		},
+		{
+			name: "uint",
+			arg: ui,
+			want: want{d: time.Duration(int64(ui)), err: nil},
+		},
+		{
+			name: "uint8",
+			arg: ui8,
+			want: want{d: time.Duration(int64(ui8)), err: nil},
+		},
+		{
+			name: "uint16",
+			arg: ui16,
+			want: want{d: time.Duration(int64(ui16)), err: nil},
+		},
+		{
+			name: "uint32",
+			arg: ui32,
+			want: want{d: time.Duration(int64(ui32)), err: nil},
+		},
+		{
+			name: "uint64",
+			arg: ui64,
+			want: want{d: time.Duration(int64(ui64)), err: nil},
+		},
+		{
+			name: "float32",
+			arg: f32,
+			want: want{d: time.Duration(int64(f32)), err: nil},
+		},
+		{
+			name: "float64",
+			arg: f64,
+			want: want{d: time.Duration(int64(f64)), err: nil},
+		},
+		{
+			name: "check error(default)",
+			arg: false,
+			want: want{d: 0, err: fmt.Errorf("cannot convert field: %+v to time.Duration", false)},
+		},
+	}
+
+	for i, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			rcv, err := IfaceAsDuration(tt.arg)
+
+			if i == len(tests) - 1 {
+				if err == nil {
+					t.Fatal("no error recived")
+				}
+			} else {
+				if err != tt.want.err {
+					t.Fatal("wrong error message or no error recived")
+				}
+			}
+
+			if rcv != tt.want.d {
+				t.Errorf("recived %v, expected %v", rcv, tt.want.d)
+			}
+		})
+	}
+}
+
 func TestReflectFieldAsStringOnMap(t *testing.T) {
 	myMap := map[string]any{"Title": "Title1", "Count": 5, "Count64": int64(6), "Val": 7.3,
 		"a": "Title2", "b": 15, "c": int64(16), "d": 17.3}
@@ -286,6 +500,30 @@ func TestIfaceAsString(t *testing.T) {
 	if rply := IfaceAsString(val); rply != "2009-11-10T23:00:00Z" {
 		t.Errorf("Expeced  ,recived %+v", rply)
 	}
+	val = any(int32(123))
+	if rply := IfaceAsString(val); rply != "123" {
+		t.Errorf("Expeced 123 ,recived %+v", rply)
+	}
+	val = any(int64(123))
+	if rply := IfaceAsString(val); rply != "123" {
+		t.Errorf("Expeced 123 ,recived %+v", rply)
+	}
+	val = any(uint32(123))
+	if rply := IfaceAsString(val); rply != "123" {
+		t.Errorf("Expeced 123 ,recived %+v", rply)
+	}
+	val = any(uint64(123))
+	if rply := IfaceAsString(val); rply != "123" {
+		t.Errorf("Expeced 123 ,recived %+v", rply)
+	}
+	val = any(float32(123.5))
+	if rply := IfaceAsString(val); rply != "123.5" {
+		t.Errorf("Expeced 123 ,recived %+v", rply)
+	}
+	val = any(uint8(1))
+	if rply := IfaceAsString(val); rply != "1" {
+		t.Errorf("Expeced 123 ,recived %+v", rply)
+	}
 }
 
 func TestIfaceAsTime(t *testing.T) {
@@ -302,41 +540,9 @@ func TestIfaceAsTime(t *testing.T) {
 	} else if itmConvert != timeDate {
 		t.Errorf("received: %+v", itmConvert)
 	}
-	val = any("This is not a time")
-	if _, err := IfaceAsTime(val, "UTC"); err == nil {
+	val = any(1)
+	if _, err := IfaceAsTime(val, "test"); err == nil {
 		t.Error("There should be error")
-	}
-}
-
-func TestIfaceAsDuration(t *testing.T) {
-	eItm := time.Duration(time.Second)
-	if itmConvert, err := IfaceAsDuration(any(time.Duration(time.Second))); err != nil {
-		t.Error(err)
-	} else if eItm != itmConvert {
-		t.Errorf("received: %+v", itmConvert)
-	}
-	if itmConvert, err := IfaceAsDuration(any(float64(1000000000.0))); err != nil {
-		t.Error(err)
-	} else if eItm != itmConvert {
-		t.Errorf("received: %+v", itmConvert)
-	}
-	if itmConvert, err := IfaceAsDuration(any(int64(1000000000))); err != nil {
-		t.Error(err)
-	} else if eItm != itmConvert {
-		t.Errorf("received: %+v", itmConvert)
-	}
-	if itmConvert, err := IfaceAsDuration(any(int(1000000000))); err != nil {
-		t.Error(err)
-	} else if eItm != itmConvert {
-		t.Errorf("received: %+v", itmConvert)
-	}
-	if itmConvert, err := IfaceAsDuration(any(string("1s"))); err != nil {
-		t.Error(err)
-	} else if eItm != itmConvert {
-		t.Errorf("received: %+v", itmConvert)
-	}
-	if _, err := IfaceAsDuration(any(string("s1s"))); err == nil {
-		t.Error("empty error")
 	}
 }
 
@@ -374,7 +580,7 @@ func TestIfaceAsFloat64(t *testing.T) {
 
 func TestIfaceAsInt64(t *testing.T) {
 	eInt := int64(3)
-	val := any(3)
+	val := any(int32(3))
 	if itmConvert, err := IfaceAsInt64(val); err != nil {
 		t.Error(err)
 	} else if itmConvert != eInt {
@@ -448,7 +654,7 @@ func TestIfaceAsTInt64(t *testing.T) {
 	} else if itmConvert != eInt {
 		t.Errorf("received: %+v", itmConvert)
 	}
-	val = any("This is not an integer")
+	val = any(false)
 	if _, err := IfaceAsTInt64(val); err == nil {
 		t.Error("expecting error")
 	}
@@ -473,7 +679,7 @@ func TestIfaceAsBool(t *testing.T) {
 	} else if itmConvert != false {
 		t.Errorf("received: %+v", itmConvert)
 	}
-	val = any(1)
+	val = any(int64(1))
 	if itmConvert, err := IfaceAsBool(val); err != nil {
 		t.Error(err)
 	} else if itmConvert != true {
@@ -491,7 +697,7 @@ func TestIfaceAsBool(t *testing.T) {
 	} else if itmConvert != true {
 		t.Errorf("received: %+v", itmConvert)
 	}
-	val = any("This is not a bool")
+	val = any(int8(1))
 	if _, err := IfaceAsBool(val); err == nil {
 		t.Error("expecting error")
 	}
@@ -586,6 +792,43 @@ func TestGetUniformType(t *testing.T) {
 	arg = "String"
 	if _, err := GetUniformType(arg); err == nil || err.Error() != "incomparable" {
 		t.Errorf("Exppected \"incomparable\" error received:%v ", err)
+	}
+}
+
+func TestGetBasicType(t *testing.T) {
+	var want64 int64 = 1
+	var argu uint = 1
+	var wantu64 uint64 = 1
+	tests := []struct{
+		name string
+		arg any 
+		want any
+	}{
+		{
+			name: "int argument",
+			arg: 1,
+			want: want64,
+		},
+		{
+			name: "int argument",
+			arg: argu,
+			want: wantu64,
+		},
+		{
+			name: "int argument",
+			arg: 1.5,
+			want: 1.5,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			rcv := GetBasicType(tt.arg)
+
+			if rcv != tt.want {
+				t.Errorf("recived %T, expected %T", rcv, tt.want)
+			}
+		})
 	}
 }
 
@@ -864,5 +1107,38 @@ func TestIfaceAsSliceString(t *testing.T) {
 	expError := fmt.Errorf("cannot convert field: %T to []string", attrs)
 	if _, err := IfaceAsSliceString(attrs); err == nil || err.Error() != expError.Error() {
 		t.Errorf("Expected error %s ,received: %v", expError, err)
+	}
+}
+
+func TestAsMapStringIface(t *testing.T) {
+	str := "arg"
+	type want struct {
+		out map[string]any
+		err error
+	}
+	tests := []struct{
+		name string
+		arg any
+		want want
+	}{
+		{
+			name: "pointer non struct argument",
+			arg: &str,
+			want: want{out: nil, err: fmt.Errorf("AsMapStringIface only accepts structs; got %T", str)},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			rcv, err := AsMapStringIface(tt.arg)
+
+			if err == nil{
+				t.Fatalf("wrong error message, expected %s, recived %s", tt.want.err, err)
+			}
+
+			if rcv != nil {
+				t.Errorf("expected %v, recived %v", tt.want.out, rcv)
+			}
+		})
 	}
 }
