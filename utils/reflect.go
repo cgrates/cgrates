@@ -68,6 +68,7 @@ func ReflectFieldInterface(intf any, fldName, extraFieldsLabel string) (retIf an
 	case reflect.Map:
 		field = v.MapIndex(reflect.ValueOf(fldName))
 		if !field.IsValid() { // Not looking in extra fields anymore
+
 			return nil, ErrNotFound
 		}
 	default:
