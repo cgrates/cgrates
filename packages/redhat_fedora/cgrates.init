@@ -39,16 +39,13 @@ start() {
 		return 0
 	fi
 
-	mkdir -p $piddir
-	chown cgrates:cgrates $piddir
-	su cgrates -s /bin/sh -c "cgr-engine -pid=$pidfile $OPTIONS" 2>/dev/null &
+	mkdir -p $piddir && chown cgrates:cgrates $piddir
 	RETVAL=$?
-	if [ $RETVAL = 0 ]; then
-		touch $lockfile
-		echo_success
-	else
-		echo_failure
-	fi
+	[ $RETVAL -ne 0 ] && echo_failure && return $RETVAL
+
+	daemon --user=cgrates --pidfile=$pidfile cgr-engine $OPTIONS &
+	RETVAL=$?
+	[ $RETVAL -eq 0 ] && touch $lockfile && echo_success || echo_failure
 	echo
 	return $RETVAL
 }
@@ -61,10 +58,10 @@ stop() {
 		return 0
 	fi
 
-	killproc cgr-engine 2> /dev/null
+	killproc -p $pidfile cgr-engine 2> /dev/null
 	RETVAL=$?
+	[ $RETVAL -eq 0 ] && rm -f $lockfile $pidfile
 	echo
-	[ $RETVAL = 0 ] && rm -f $lockfile $pidfile
 	return $RETVAL
 }
 
