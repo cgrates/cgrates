@@ -78,22 +78,22 @@ func TestReflectFieldAsStringOnStruct(t *testing.T) {
 
 func TestReflectFieldInterface(t *testing.T) {
 	type args struct {
-		intf any
-		fldName string
+		intf             any
+		fldName          string
 		extraFieldsLabel string
 	}
 	type want struct {
 		retIf any
-		err error
+		err   error
 	}
-	tests := []struct{
+	tests := []struct {
 		name string
 		args args
 		want want
 	}{
 		{
 			name: "pointer map with unmatching filed name",
-			args: args{intf: &map[string]int{"test": 1,}, fldName: "test1", extraFieldsLabel: ""},
+			args: args{intf: &map[string]int{"test": 1}, fldName: "test1", extraFieldsLabel: ""},
 			want: want{retIf: nil, err: ErrNotFound},
 		},
 		{
@@ -103,17 +103,17 @@ func TestReflectFieldInterface(t *testing.T) {
 		},
 		{
 			name: "struct with unmatching field name and extra field label as empty string",
-			args: args{intf: struct{Test string}{Test: "test"}, fldName: "Test1", extraFieldsLabel: ""},
+			args: args{intf: struct{ Test string }{Test: "test"}, fldName: "Test1", extraFieldsLabel: ""},
 			want: want{retIf: nil, err: ErrNotFound},
 		},
 		{
 			name: "struct with unmatching field name and unmatching extra field label",
-			args: args{intf: struct{Test string}{Test: "test"}, fldName: "Test1", extraFieldsLabel: "Test2"},
+			args: args{intf: struct{ Test string }{Test: "test"}, fldName: "Test1", extraFieldsLabel: "Test2"},
 			want: want{retIf: nil, err: ErrNotFound},
 		},
 		{
 			name: "struct with unmatching field name and unmatching extra field label",
-			args: args{intf: struct{Test map[string]string}{Test: map[string]string{"Test": "test"}}, fldName: "Test1", extraFieldsLabel: "Test"},
+			args: args{intf: struct{ Test map[string]string }{Test: map[string]string{"Test": "test"}}, fldName: "Test1", extraFieldsLabel: "Test"},
 			want: want{retIf: nil, err: ErrNotFound},
 		},
 	}
@@ -131,46 +131,74 @@ func TestReflectFieldInterface(t *testing.T) {
 			}
 		})
 	}
+
+
 }
+
+type MyInterface interface {
+	MyMethod() string
+}
+
+type MyStruct struct {
+	Value MyInterface
+}
+
+type MyType string
+
+func (mt MyType) MyMethod() string {
+	return "string(mt)"
+}
+var s MyType
 
 func TestReflectFieldAsString(t *testing.T) {
 
+	type Iface interface{}
+
+	var a map[string]any = map[string]any{"test": "test1"} 
+
 	type args struct {
-		intf any
-		fldName string
+		intf             any
+		fldName          string
 		extraFieldsLabel string
 	}
-	type want struct {
-		value string
-		err error
-	}
-	tests := []struct{
+	tests := []struct {
 		name string
 		args args
-		want want
+		want string
 	}{
 		{
 			name: "check error",
-			args: args{intf: struct{Test string}{Test: "test"}, fldName: "Test1", extraFieldsLabel: "Test2"},
-			want: want{value: "", err: ErrNotFound},
+			args: args{intf: struct{ Test string }{Test: "test"}, fldName: "Test1", extraFieldsLabel: "Test2"},
+			want: "",
 		},
 		{
 			name: "check second error",
-			args: args{intf: struct{Test bool}{Test: false}, fldName: "Test", extraFieldsLabel: ""},
-			want: want{value: "", err: fmt.Errorf("Cannot convert to string field type: bool")},
+			args: args{struct{ Test bool }{Test: false}, "Test", ""},
+			want: "",
+		},
+		{
+			name: "interface",
+			args: args{a, "test", ""},
+			want: "test1",
 		},
 	}
 
-	for _, tt := range tests {
+	for i, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			rcv, err := ReflectFieldAsString(tt.args.intf, tt.args.fldName, tt.args.extraFieldsLabel)
 
-			if err.Error() != tt.want.err.Error() {
-				t.Fatal("wrong error message or no error recived")
+			if i == len(tests) - 1 {
+				if err != nil {
+					t.Fatal("was not expecting an error", err)
+				}
+			} else {
+				if err == nil {
+					t.Fatal("was expecting an error")
+				}
 			}
 
-			if rcv != tt.want.value {
-				t.Errorf("reciving %v, expected %v", rcv, tt.want.value)
+			if rcv != tt.want {
+				t.Errorf("reciving %v, expected %v", rcv, tt.want)
 			}
 		})
 	}
@@ -178,7 +206,7 @@ func TestReflectFieldAsString(t *testing.T) {
 
 func TestIfaceAsDuration(t *testing.T) {
 	type want struct {
-		d time.Duration
+		d   time.Duration
 		err error
 	}
 	var i8 int8 = 1
@@ -192,79 +220,79 @@ func TestIfaceAsDuration(t *testing.T) {
 	var ui64 uint64 = 1
 	var f32 float32 = 1.5
 	var f64 float32 = 1.5
-	tests := []struct{
+	tests := []struct {
 		name string
-		arg any
+		arg  any
 		want want
 	}{
 		{
 			name: "time.Duration",
-			arg: 1 * time.Second,
+			arg:  1 * time.Second,
 			want: want{d: 1 * time.Second, err: nil},
 		},
 		{
 			name: "int",
-			arg: 1,
+			arg:  1,
 			want: want{d: time.Duration(int64(1)), err: nil},
 		},
 		{
 			name: "int8",
-			arg: i8,
+			arg:  i8,
 			want: want{d: time.Duration(int64(i8)), err: nil},
 		},
 		{
 			name: "int16",
-			arg: i16,
+			arg:  i16,
 			want: want{d: time.Duration(int64(i16)), err: nil},
 		},
 		{
 			name: "int32",
-			arg: i32,
+			arg:  i32,
 			want: want{d: time.Duration(int64(i32)), err: nil},
 		},
 		{
 			name: "int64",
-			arg: i64,
+			arg:  i64,
 			want: want{d: time.Duration(int64(i64)), err: nil},
 		},
 		{
 			name: "uint",
-			arg: ui,
+			arg:  ui,
 			want: want{d: time.Duration(int64(ui)), err: nil},
 		},
 		{
 			name: "uint8",
-			arg: ui8,
+			arg:  ui8,
 			want: want{d: time.Duration(int64(ui8)), err: nil},
 		},
 		{
 			name: "uint16",
-			arg: ui16,
+			arg:  ui16,
 			want: want{d: time.Duration(int64(ui16)), err: nil},
 		},
 		{
 			name: "uint32",
-			arg: ui32,
+			arg:  ui32,
 			want: want{d: time.Duration(int64(ui32)), err: nil},
 		},
 		{
 			name: "uint64",
-			arg: ui64,
+			arg:  ui64,
 			want: want{d: time.Duration(int64(ui64)), err: nil},
 		},
 		{
 			name: "float32",
-			arg: f32,
+			arg:  f32,
 			want: want{d: time.Duration(int64(f32)), err: nil},
 		},
 		{
 			name: "float64",
-			arg: f64,
+			arg:  f64,
 			want: want{d: time.Duration(int64(f64)), err: nil},
 		},
 		{
 			name: "check error(default)",
-			arg: false,
+			arg:  false,
 			want: want{d: 0, err: fmt.Errorf("cannot convert field: %+v to time.Duration", false)},
 		},
 	}
@@ -273,7 +301,7 @@ func TestIfaceAsDuration(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			rcv, err := IfaceAsDuration(tt.arg)
 
-			if i == len(tests) - 1 {
+			if i == len(tests)-1 {
 				if err == nil {
 					t.Fatal("no error recived")
 				}
@@ -364,7 +392,7 @@ func TestGreaterThan(t *testing.T) {
 		t.Error("should be not greater than")
 	}
 	if _, err := GreaterThan(struct{}{},
-		map[string]any{"a": "a"}, false); err == nil ||
+		map[string]any{"a": false}, false); err == nil ||
 		!strings.HasPrefix(err.Error(), "incomparable") {
 		t.Error(err)
 	}
@@ -438,6 +466,19 @@ func TestGreaterThan(t *testing.T) {
 		t.Error(err)
 	} else if !gte {
 		t.Error("should be equal")
+	}
+	if gte, err := GreaterThan(uint(1), uint(2), false); err != nil {
+		t.Error(err)
+	} else if gte {
+		t.Error("should be greater than")
+	}
+	if gte, err := GreaterThan(uint(1), uint(1), true); err != nil {
+		t.Error(err)
+	} else if !gte {
+		t.Error("should be equal")
+	}
+	if _, err := GreaterThan(true, true, true); err == nil {
+		t.Error("was expecting an error")
 	}
 }
 
@@ -522,6 +563,10 @@ func TestIfaceAsString(t *testing.T) {
 	}
 	val = any(uint8(1))
 	if rply := IfaceAsString(val); rply != "1" {
+		t.Errorf("Expeced 123 ,recived %+v", rply)
+	}
+	val = NewNMData(123)
+	if rply := IfaceAsString(val); rply != "123" {
 		t.Errorf("Expeced 123 ,recived %+v", rply)
 	}
 }
@@ -725,17 +770,39 @@ func TestSum(t *testing.T) {
 	} else if sum != 17.069999999999997 {
 		t.Errorf("Expecting: 17.069999999999997, received: %+v", sum)
 	}
-	if sum, err := Sum(2*time.Second, 1*time.Second, 2*time.Second,
-		5*time.Second, 4*time.Millisecond); err != nil {
-		t.Error(err)
-	} else if sum != 10*time.Second+4*time.Millisecond {
-		t.Errorf("Expecting: 10.004s, received: %+v", sum)
+	now := time.Now()
+	then := time.Date(2009, 11, 17, 20, 34, 58, 651387237, time.UTC)
+	if _, err := Sum(now, then); err == nil {
+		t.Fatal("was expecting an error")
 	}
-	if sum, err := Sum(time.Duration(2*time.Second),
-		time.Duration(10*time.Millisecond)); err != nil {
+	sum, err := Sum(then, time.Duration(1*time.Second))
+	str := sum.(time.Time).String()
+	if err != nil {
+		t.Error(err)
+	} else if str != "2009-11-17 20:34:59.651387237 +0000 UTC" {
+		t.Errorf("Expecting: 2009-11-17 20:34:59.651387237 +0000 UTC , received: %v", str)
+	}
+	if sum, err := Sum(time.Duration(2*time.Second), time.Duration(10*time.Millisecond)); err != nil {
 		t.Error(err)
 	} else if sum != time.Duration(2*time.Second+10*time.Millisecond) {
 		t.Errorf("Expecting: 2s10ms, received: %+v", sum)
+	}
+	if _, err := Sum(time.Duration(2*time.Second), false); err == nil {
+		t.Fatal("was expecting an error")
+	}
+	if _, err := Sum(1.2, 1.2, 1.2, ""); err == nil {
+		t.Error("was expecting an error")
+	}
+	if sum, err := Sum(int64(2), int64(4)); err != nil {
+		t.Error(err)
+	} else if sum != int64(6) {
+		t.Errorf("Expecting: 20, received: %+v", sum)
+	}
+	if _, err := Sum(int64(2), "int64(4)"); err == nil {
+		t.Error("was expecting an error")
+	}
+	if _, err := Sum(int(2), "int64(4)"); err == nil {
+		t.Error("was expecting an error")
 	}
 }
 
@@ -796,27 +863,27 @@ func TestGetUniformType(t *testing.T) {
 }
 
 func TestGetBasicType(t *testing.T) {
-	var want64 int64 = 1
+	var wantInt64 int64 = 1
 	var argu uint = 1
 	var wantu64 uint64 = 1
-	tests := []struct{
+	tests := []struct {
 		name string
-		arg any 
+		arg  any
 		want any
 	}{
 		{
 			name: "int argument",
-			arg: 1,
-			want: want64,
+			arg:  1,
+			want: wantInt64,
 		},
 		{
-			name: "int argument",
-			arg: argu,
+			name: "uint argument",
+			arg:  argu,
 			want: wantu64,
 		},
 		{
-			name: "int argument",
-			arg: 1.5,
+			name: "float argument",
+			arg:  1.5,
 			want: 1.5,
 		},
 	}
@@ -867,7 +934,9 @@ func TestDifference(t *testing.T) {
 	} else if diff != time.Duration(1*time.Second+990*time.Millisecond) {
 		t.Errorf("Expecting: 1.99s, received: %+v", diff)
 	}
-
+	if _, err := Difference(time.Duration(2*time.Second), false); err == nil {
+		t.Fatal("was expecting an error")
+	}
 	if diff, err := Difference(time.Date(2009, 11, 10, 23, 0, 0, 0, time.UTC),
 		time.Duration(10*time.Second)); err != nil {
 		t.Error(err)
@@ -881,7 +950,23 @@ func TestDifference(t *testing.T) {
 	} else if diff != time.Date(2009, 11, 10, 22, 59, 40, 0, time.UTC) {
 		t.Errorf("Expecting: %+v, received: %+v", time.Date(2009, 11, 10, 22, 59, 40, 0, time.UTC), diff)
 	}
-
+	if _, err := Difference(time.Date(2009, 11, 10, 23, 0, 0, 0, time.UTC), false); err == nil {
+		t.Fatal("was expecting an error")
+	}
+	if _, err := Difference(1.5, false); err == nil {
+		t.Fatal("was expecting an error")
+	}
+	if diff, err := Difference(int64(2), int64(1)); err != nil {
+		t.Error(err)
+	} else if diff != int64(1) {
+		t.Errorf("Expecting: 1, received: %+v", diff)
+	}
+	if _, err := Difference(int64(1), false); err == nil {
+		t.Fatal("was expecting an error")
+	}
+	if _, err := Difference(uint8(1), false); err == nil {
+		t.Fatal("was expecting an error")
+	}
 }
 
 func TestEqualTo(t *testing.T) {
@@ -937,6 +1022,19 @@ func TestEqualTo(t *testing.T) {
 	} else if !gte {
 		t.Error("should be equal")
 	}
+	if gte, err := EqualTo("test", "test"); err != nil {
+		t.Error(err)
+	} else if !gte {
+		t.Error("should be equal")
+	}
+	if gte, err := EqualTo(uint64(1), uint64(1)); err != nil {
+		t.Error(err)
+	} else if !gte {
+		t.Error("should be equal")
+	}
+	if _, err := EqualTo(true, true); err == nil {
+		t.Fatal("expected an error")
+	}
 }
 
 type TestA struct {
@@ -956,8 +1054,17 @@ func (_ *TestA) TestFuncWithParam(param string) string {
 func (_ *TestA) TestFuncWithError() (string, error) {
 	return "TestFuncWithError", nil
 }
+
+func (_ *TestA) TestFuncWithPtrError() (string, *error) {
+	return "TestFuncWithError", nil
+}
+
 func (_ *TestA) TestFuncWithError2() (string, error) {
 	return "TestFuncWithError2", ErrPartiallyExecuted
+}
+
+func (_ *TestA) TestFuncWithThree() (string, int, error) {
+	return "TestFuncWithError", 1, nil
 }
 
 func TestReflectFieldMethodInterface(t *testing.T) {
@@ -984,9 +1091,52 @@ func TestReflectFieldMethodInterface(t *testing.T) {
 	} else if ifValue != "TestFuncWithError" {
 		t.Errorf("Expecting: TestFuncWithError, received: %+v", ifValue)
 	}
-	ifValue, err = ReflectFieldMethodInterface(a, "TestFuncWithError2")
-	if err == nil || err != ErrPartiallyExecuted {
+	ifValue, err = ReflectFieldMethodInterface(map[string]string{}, "TestFuncWithError2")
+	if err == nil || err != ErrNotFound {
 		t.Error(err)
+	}
+	ifValue, err = ReflectFieldMethodInterface(a, "TestFunc")
+	if err != nil {
+		t.Error(err)
+	} else if ifValue != "This is a test function on a structure" {
+		t.Errorf("Expecting: This is a test function on a structure, received: %+v", ifValue)
+	}
+	ifValue, err = ReflectFieldMethodInterface([]string{}, "TestFuncWithError2")
+	if err == nil {
+		t.Error(err)
+	}
+	ifValue, err = ReflectFieldMethodInterface([]string{"test"}, "1")
+	if err == nil {
+		t.Error(err)
+	}
+	ifValue, err = ReflectFieldMethodInterface([]string{"test"}, "0")
+	if err != nil {
+		t.Error(err)
+	} else if ifValue != "test" {
+		t.Errorf("Expecting: test, received: %+v", ifValue)
+	}
+	ifValue, err = ReflectFieldMethodInterface(1, "1")
+	if err == nil {
+		t.Error(err)
+	}
+	ifValue, err = ReflectFieldMethodInterface(a, "TestFuncWithParam")
+	if err == nil {
+		t.Fatal("was expecting an error")
+	}
+	ifValue, err = ReflectFieldMethodInterface(a, "TestFuncWithThree")
+	if err == nil {
+		t.Fatal("was expecting an error")
+	}
+	ifValue, err = ReflectFieldMethodInterface(a, "TestFuncWithPtrError")
+	if err == nil {
+		t.Fatal("was expecting an error")
+	}
+	ifValue, err = ReflectFieldMethodInterface(a, "TestFuncWithError2")
+	if err == nil {
+		t.Fatal("was expecting a error")
+	}
+	if ifValue != "TestFuncWithError2" {
+		t.Errorf("Expecting: TestFuncWithError2, received: %+v", ifValue)
 	}
 }
 
@@ -1116,14 +1266,14 @@ func TestAsMapStringIface(t *testing.T) {
 		out map[string]any
 		err error
 	}
-	tests := []struct{
+	tests := []struct {
 		name string
-		arg any
+		arg  any
 		want want
 	}{
 		{
 			name: "pointer non struct argument",
-			arg: &str,
+			arg:  &str,
 			want: want{out: nil, err: fmt.Errorf("AsMapStringIface only accepts structs; got %T", str)},
 		},
 	}
@@ -1132,7 +1282,7 @@ func TestAsMapStringIface(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			rcv, err := AsMapStringIface(tt.arg)
 
-			if err == nil{
+			if err == nil {
 				t.Fatalf("wrong error message, expected %s, recived %s", tt.want.err, err)
 			}
 
