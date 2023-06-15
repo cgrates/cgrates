@@ -1,3 +1,4 @@
+#!/bin/bash
 
 # extra DB for ers
 sudo -u postgres dropdb -e cgrates2
