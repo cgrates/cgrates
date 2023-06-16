@@ -135,6 +135,21 @@ func TestComposeNavMapVal(t *testing.T) {
 	if err := ComposeNavMapVal(onm, &FullPath{Path: "Field5", PathItems: PathItems{{Field: "Field5"}}}, &mockNMInterface{data: 10}); err != ErrNotImplemented {
 		t.Error(err)
 	}
+
+	nm = NavigableMap2{
+		"Field4": NewNMData(1),
+		"Field5": &NMSlice{NewNMData(10), NewNMData(101)},
+	}
+	if err := ComposeNavMapVal(onm, &FullPath{}, NewNMData(10)); err == nil {
+		t.Error("was expecting an error")
+	}
+
+	onm = NewOrderedNavigableMap()
+	nm = NavigableMap2{
+	}
+	if err := ComposeNavMapVal(onm, &FullPath{Path: "Field", PathItems: PathItems{}}, NewNMData(18)); err == nil {
+		t.Error("was expecting an error")
+	}
 }
 
 // mock NMInterface structure
