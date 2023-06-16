@@ -217,6 +217,17 @@ func TestIsNetworkError(t *testing.T) {
 		t.Errorf("%s error should be consider a network error", err)
 	}
 
+	err = &net.DNSError{
+		Err:         "DNS error",
+		Name:        "example.com",
+		Server:      "8.8.8.8:53",
+		IsTimeout:   true,
+		IsTemporary: true,
+	}
+	if !IsNetworkError(err) {
+		t.Errorf("%s error should be consider a network error", err)
+	}
+
 }
 
 func TestErrPathNotReachable(t *testing.T) {
@@ -228,5 +239,15 @@ func TestErrPathNotReachable(t *testing.T) {
 func TestErrNotConvertibleTF(t *testing.T) {
 	if rcv := ErrNotConvertibleTF("test_type1", "test_type2"); rcv.Error() != `not convertible : from: test_type1 to:test_type2` {
 		t.Errorf("Expecting: not convertible : from: test_type1 to:test_type2, received: %+v", rcv)
+	}
+}
+
+func TestNewErrChargerS(t *testing.T) {
+	arg := fmt.Errorf("test")
+	exp := fmt.Errorf("CHARGERS_ERROR:%s", arg)
+	rcv := NewErrChargerS(arg)
+
+	if exp.Error() != rcv.Error() {
+		t.Errorf("recived %s, expected %s", rcv, exp)
 	}
 }
