@@ -61,70 +61,70 @@ type ElasticEE struct {
 func (eEe *ElasticEE) prepareOpts() (err error) {
 	//parse opts
 	eEe.indxOpts.Index = utils.CDRsTBL
-	if eEe.Cfg().Opts.ElsIndex != nil {
-		eEe.indxOpts.Index = *eEe.Cfg().Opts.ElsIndex
+	if eEe.Cfg().Opts.Els.Index != nil {
+		eEe.indxOpts.Index = *eEe.Cfg().Opts.Els.Index
 	}
-	eEe.indxOpts.IfPrimaryTerm = eEe.Cfg().Opts.ElsIfPrimaryTerm
-	eEe.indxOpts.IfSeqNo = eEe.Cfg().Opts.ElsIfSeqNo
-	if eEe.Cfg().Opts.ElsOpType != nil {
-		eEe.indxOpts.OpType = *eEe.Cfg().Opts.ElsOpType
+	eEe.indxOpts.IfPrimaryTerm = eEe.Cfg().Opts.Els.IfPrimaryTerm
+	eEe.indxOpts.IfSeqNo = eEe.Cfg().Opts.Els.IfSeqNo
+	if eEe.Cfg().Opts.Els.OpType != nil {
+		eEe.indxOpts.OpType = *eEe.Cfg().Opts.Els.OpType
 	}
-	if eEe.Cfg().Opts.ElsPipeline != nil {
-		eEe.indxOpts.Pipeline = *eEe.Cfg().Opts.ElsPipeline
+	if eEe.Cfg().Opts.Els.Pipeline != nil {
+		eEe.indxOpts.Pipeline = *eEe.Cfg().Opts.Els.Pipeline
 	}
-	if eEe.Cfg().Opts.ElsRouting != nil {
-		eEe.indxOpts.Routing = *eEe.Cfg().Opts.ElsRouting
+	if eEe.Cfg().Opts.Els.Routing != nil {
+		eEe.indxOpts.Routing = *eEe.Cfg().Opts.Els.Routing
 	}
-	if eEe.Cfg().Opts.ElsTimeout != nil {
-		eEe.indxOpts.Timeout = *eEe.Cfg().Opts.ElsTimeout
+	if eEe.Cfg().Opts.Els.Timeout != nil {
+		eEe.indxOpts.Timeout = *eEe.Cfg().Opts.Els.Timeout
 	}
-	eEe.indxOpts.Version = eEe.Cfg().Opts.ElsVersion
-	if eEe.Cfg().Opts.ElsVersionType != nil {
-		eEe.indxOpts.VersionType = *eEe.Cfg().Opts.ElsVersionType
+	eEe.indxOpts.Version = eEe.Cfg().Opts.Els.Version
+	if eEe.Cfg().Opts.Els.VersionType != nil {
+		eEe.indxOpts.VersionType = *eEe.Cfg().Opts.Els.VersionType
 	}
-	if eEe.Cfg().Opts.ElsWaitForActiveShards != nil {
-		eEe.indxOpts.WaitForActiveShards = *eEe.Cfg().Opts.ElsWaitForActiveShards
+	if eEe.Cfg().Opts.Els.WaitForActiveShards != nil {
+		eEe.indxOpts.WaitForActiveShards = *eEe.Cfg().Opts.Els.WaitForActiveShards
 	}
 
 	//client config
-	if eEe.Cfg().Opts.ElsCloud != nil && *eEe.Cfg().Opts.ElsCloud {
+	if eEe.Cfg().Opts.Els.Cloud != nil && *eEe.Cfg().Opts.Els.Cloud {
 		eEe.clnOpts.CloudID = eEe.Cfg().ExportPath
 	} else {
 		eEe.clnOpts.Addresses = strings.Split(eEe.Cfg().ExportPath, utils.InfieldSep)
 	}
-	if eEe.Cfg().Opts.ElsUsername != nil {
-		eEe.clnOpts.Username = *eEe.Cfg().Opts.ElsUsername
+	if eEe.Cfg().Opts.Els.Username != nil {
+		eEe.clnOpts.Username = *eEe.Cfg().Opts.Els.Username
 	}
-	if eEe.Cfg().Opts.ElsPassword != nil {
-		eEe.clnOpts.Password = *eEe.Cfg().Opts.ElsPassword
+	if eEe.Cfg().Opts.Els.Password != nil {
+		eEe.clnOpts.Password = *eEe.Cfg().Opts.Els.Password
 	}
-	if eEe.Cfg().Opts.ElsAPIKey != nil {
-		eEe.clnOpts.APIKey = *eEe.Cfg().Opts.ElsAPIKey
+	if eEe.Cfg().Opts.Els.APIKey != nil {
+		eEe.clnOpts.APIKey = *eEe.Cfg().Opts.Els.APIKey
 	}
-	if eEe.Cfg().Opts.CAPath != nil {
+	if eEe.Cfg().Opts.RPC.CAPath != nil {
 		var cacert []byte
-		cacert, err = os.ReadFile(*eEe.Cfg().Opts.CAPath)
+		cacert, err = os.ReadFile(*eEe.Cfg().Opts.RPC.CAPath)
 		if err != nil {
 			return
 		}
 		eEe.clnOpts.CACert = cacert
 	}
-	if eEe.Cfg().Opts.ElsCertificateFingerprint != nil {
-		eEe.clnOpts.CertificateFingerprint = *eEe.Cfg().Opts.ElsCertificateFingerprint
+	if eEe.Cfg().Opts.Els.CertificateFingerprint != nil {
+		eEe.clnOpts.CertificateFingerprint = *eEe.Cfg().Opts.Els.CertificateFingerprint
 	}
-	if eEe.Cfg().Opts.ElsServiceToken != nil {
-		eEe.clnOpts.ServiceToken = *eEe.Cfg().Opts.ElsServiceToken
+	if eEe.Cfg().Opts.Els.ServiceToken != nil {
+		eEe.clnOpts.ServiceToken = *eEe.Cfg().Opts.Els.ServiceToken
 	}
-	if eEe.Cfg().Opts.ElsDiscoverNodesOnStart != nil {
-		eEe.clnOpts.DiscoverNodesOnStart = *eEe.Cfg().Opts.ElsDiscoverNodesOnStart
+	if eEe.Cfg().Opts.Els.DiscoverNodesOnStart != nil {
+		eEe.clnOpts.DiscoverNodesOnStart = *eEe.Cfg().Opts.Els.DiscoverNodesOnStart
 	}
-	if eEe.Cfg().Opts.ElsDiscoverNodeInterval != nil {
-		eEe.clnOpts.DiscoverNodesInterval = *eEe.Cfg().Opts.ElsDiscoverNodeInterval
+	if eEe.Cfg().Opts.Els.DiscoverNodeInterval != nil {
+		eEe.clnOpts.DiscoverNodesInterval = *eEe.Cfg().Opts.Els.DiscoverNodeInterval
 	}
-	if eEe.Cfg().Opts.ElsEnableDebugLogger != nil {
-		eEe.clnOpts.EnableDebugLogger = *eEe.Cfg().Opts.ElsEnableDebugLogger
+	if eEe.Cfg().Opts.Els.EnableDebugLogger != nil {
+		eEe.clnOpts.EnableDebugLogger = *eEe.Cfg().Opts.Els.EnableDebugLogger
 	}
-	if loggerType := eEe.Cfg().Opts.ElsLogger; loggerType != nil {
+	if loggerType := eEe.Cfg().Opts.Els.Logger; loggerType != nil {
 		var logger elastictransport.Logger
 		switch *loggerType {
 		case utils.ElsJson:
@@ -138,20 +138,20 @@ func (eEe *ElasticEE) prepareOpts() (err error) {
 		}
 		eEe.clnOpts.Logger = logger
 	}
-	if eEe.Cfg().Opts.ElsCompressRequestBody != nil {
-		eEe.clnOpts.CompressRequestBody = *eEe.Cfg().Opts.ElsCompressRequestBody
+	if eEe.Cfg().Opts.Els.CompressRequestBody != nil {
+		eEe.clnOpts.CompressRequestBody = *eEe.Cfg().Opts.Els.CompressRequestBody
 	}
-	if eEe.Cfg().Opts.ElsRetryOnStatus != nil {
-		eEe.clnOpts.RetryOnStatus = *eEe.Cfg().Opts.ElsRetryOnStatus
+	if eEe.Cfg().Opts.Els.RetryOnStatus != nil {
+		eEe.clnOpts.RetryOnStatus = *eEe.Cfg().Opts.Els.RetryOnStatus
 	}
-	if eEe.Cfg().Opts.ElsMaxRetries != nil {
-		eEe.clnOpts.MaxRetries = *eEe.Cfg().Opts.ElsMaxRetries
+	if eEe.Cfg().Opts.Els.MaxRetries != nil {
+		eEe.clnOpts.MaxRetries = *eEe.Cfg().Opts.Els.MaxRetries
 	}
-	if eEe.Cfg().Opts.ElsDisableRetry != nil {
-		eEe.clnOpts.DisableRetry = *eEe.Cfg().Opts.ElsDisableRetry
+	if eEe.Cfg().Opts.Els.DisableRetry != nil {
+		eEe.clnOpts.DisableRetry = *eEe.Cfg().Opts.Els.DisableRetry
 	}
-	if eEe.Cfg().Opts.ElsCompressRequestBodyLevel != nil {
-		eEe.clnOpts.CompressRequestBodyLevel = *eEe.Cfg().Opts.ElsCompressRequestBodyLevel
+	if eEe.Cfg().Opts.Els.CompressRequestBodyLevel != nil {
+		eEe.clnOpts.CompressRequestBodyLevel = *eEe.Cfg().Opts.Els.CompressRequestBodyLevel
 	}
 	return
 }

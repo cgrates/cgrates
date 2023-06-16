@@ -77,8 +77,8 @@ func testS3LoadConfig(t *testing.T) {
 	}
 	for _, value := range s3Cfg.EEsCfg().Exporters {
 		if value.ID == "sqs_test_file" {
-			awsKey = *value.Opts.AWSKey
-			awsSecret = *value.Opts.AWSSecret
+			awsKey = *value.Opts.AWS.Key
+			awsSecret = *value.Opts.AWS.Secret
 		}
 	}
 }

@@ -34,8 +34,10 @@ func NewKafkaEE(cfg *config.EventExporterCfg, dc *utils.SafeMapStorage) *KafkaEE
 		topic: utils.DefaultQueueID,
 		reqs:  newConcReq(cfg.ConcurrentRequests),
 	}
-	if cfg.Opts.KafkaTopic != nil {
-		kfkPstr.topic = *cfg.Opts.KafkaTopic
+	if kafkaOpts := cfg.Opts.Kafka; kafkaOpts != nil {
+		if kafkaOpts.KafkaTopic != nil {
+			kfkPstr.topic = *cfg.Opts.Kafka.KafkaTopic
+		}
 	}
 	return kfkPstr
 }
@@ -62,11 +64,6 @@ func (pstr *KafkaEE) Connect() (_ error) {
 			Topic:       pstr.topic,
 			MaxAttempts: pstr.Cfg().Attempts,
 		}
-		// pstr.writer = kafka.NewWriter(kafka.WriterConfig{
-		// Brokers:     []string{pstr.Cfg().ExportPath},
-		// MaxAttempts: pstr.Cfg().Attempts,
-		// Topic:       pstr.topic,
-		// })
 	}
 	pstr.Unlock()
 	return

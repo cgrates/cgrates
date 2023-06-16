@@ -34,7 +34,14 @@ func TestNewNatsEE(t *testing.T) {
 		Type:               "nats",
 		Attempts:           2,
 		ConcurrentRequests: 2,
-		Opts:               &config.EventExporterOpts{},
+		Opts: &config.EventExporterOpts{
+			AMQP:  &config.AMQPOpts{},
+			Els:   &config.ElsOpts{},
+			AWS:   &config.AWSOpts{},
+			NATS:  &config.NATSOpts{},
+			Kafka: &config.KafkaOpts{},
+			RPC:   &config.RPCOpts{},
+		},
 	}
 	nodeID := "node_id1"
 	connTimeout := 2 * time.Second
@@ -73,7 +80,14 @@ func TestParseOpt(t *testing.T) {
 		Type:               "nats",
 		Attempts:           2,
 		ConcurrentRequests: 2,
-		Opts:               &config.EventExporterOpts{},
+		Opts: &config.EventExporterOpts{
+			AMQP:  &config.AMQPOpts{},
+			Els:   &config.ElsOpts{},
+			AWS:   &config.AWSOpts{},
+			NATS:  &config.NATSOpts{},
+			Kafka: &config.KafkaOpts{},
+			RPC:   &config.RPCOpts{},
+		},
 	}
 	opts := &config.EventExporterOpts{}
 	nodeID := "node_id1"
@@ -100,10 +114,18 @@ func TestParseOptJetStream(t *testing.T) {
 		Type:               "nats",
 		Attempts:           2,
 		ConcurrentRequests: 2,
-		Opts:               &config.EventExporterOpts{},
+		Opts: &config.EventExporterOpts{
+			AMQP:  &config.AMQPOpts{},
+			Els:   &config.ElsOpts{},
+			AWS:   &config.AWSOpts{},
+			NATS:  &config.NATSOpts{},
+			Kafka: &config.KafkaOpts{},
+			RPC:   &config.RPCOpts{},
+		},
 	}
 	opts := &config.EventExporterOpts{
-		NATSJetStream: utils.BoolPointer(true),
+		NATS: &config.NATSOpts{
+			JetStream: utils.BoolPointer(true)},
 	}
 	nodeID := "node_id1"
 	connTimeout := 2 * time.Second
@@ -132,12 +154,20 @@ func TestParseOptJetStreamMaxWait(t *testing.T) {
 		Type:               "nats",
 		Attempts:           2,
 		ConcurrentRequests: 2,
-		Opts:               &config.EventExporterOpts{},
+		Opts: &config.EventExporterOpts{
+			AMQP:  &config.AMQPOpts{},
+			Els:   &config.ElsOpts{},
+			AWS:   &config.AWSOpts{},
+			NATS:  &config.NATSOpts{},
+			Kafka: &config.KafkaOpts{},
+			RPC:   &config.RPCOpts{},
+		},
 	}
 	opts := &config.EventExporterOpts{
-		NATSJetStream:        utils.BoolPointer(true),
-		NATSJetStreamMaxWait: utils.DurationPointer(2),
-	}
+		NATS: &config.NATSOpts{
+			JetStream:        utils.BoolPointer(true),
+			JetStreamMaxWait: utils.DurationPointer(2),
+		}}
 	nodeID := "node_id1"
 	connTimeout := 2 * time.Second
 	dc, err := newEEMetrics("Local")
@@ -165,11 +195,19 @@ func TestParseOptSubject(t *testing.T) {
 		Type:               "nats",
 		Attempts:           2,
 		ConcurrentRequests: 2,
-		Opts:               &config.EventExporterOpts{},
+		Opts: &config.EventExporterOpts{
+			AMQP:  &config.AMQPOpts{},
+			Els:   &config.ElsOpts{},
+			AWS:   &config.AWSOpts{},
+			NATS:  &config.NATSOpts{},
+			Kafka: &config.KafkaOpts{},
+			RPC:   &config.RPCOpts{},
+		},
 	}
 	opts := &config.EventExporterOpts{
-		NATSSubject: utils.StringPointer("nats_subject"),
-	}
+		NATS: &config.NATSOpts{
+			Subject: utils.StringPointer("nats_subject"),
+		}}
 	nodeID := "node_id1"
 	connTimeout := 2 * time.Second
 	dc, err := newEEMetrics("Local")
@@ -186,14 +224,14 @@ func TestParseOptSubject(t *testing.T) {
 		t.Error(err)
 	}
 
-	if opts.NATSSubject == nil || pstr.subject != *opts.NATSSubject {
-		t.Errorf("Expected %v \n but received \n %v", *opts.NATSSubject, pstr.subject)
+	if opts.NATS.Subject == nil || pstr.subject != *opts.NATS.Subject {
+		t.Errorf("Expected %v \n but received \n %v", *opts.NATS.Subject, pstr.subject)
 	}
 }
 
 func TestGetNatsOptsJWT(t *testing.T) {
-	opts := &config.EventExporterOpts{
-		NATSJWTFile: utils.StringPointer("jwtfile"),
+	opts := &config.NATSOpts{
+		JWTFile: utils.StringPointer("jwtfile"),
 	}
 
 	nodeID := "node_id1"
@@ -206,9 +244,9 @@ func TestGetNatsOptsJWT(t *testing.T) {
 }
 
 func TestGetNatsOptsClientCert(t *testing.T) {
-	opts := &config.EventExporterOpts{
-		NATSClientCertificate: utils.StringPointer("client_cert"),
-		NATSClientKey:         utils.StringPointer("client_key"),
+	opts := &config.NATSOpts{
+		ClientCertificate: utils.StringPointer("client_cert"),
+		ClientKey:         utils.StringPointer("client_key"),
 	}
 	nodeID := "node_id1"
 	connTimeout := 2 * time.Second
@@ -227,8 +265,8 @@ func TestGetNatsOptsClientCert(t *testing.T) {
 	// }
 
 	// no key error
-	opts = &config.EventExporterOpts{
-		NATSClientCertificate: utils.StringPointer("client_cert"),
+	opts = &config.NATSOpts{
+		ClientCertificate: utils.StringPointer("client_cert"),
 	}
 	_, err = GetNatsOpts(opts, nodeID, connTimeout)
 	if err.Error() != "has certificate but no key" {
@@ -236,8 +274,8 @@ func TestGetNatsOptsClientCert(t *testing.T) {
 	}
 
 	// no certificate error
-	opts = &config.EventExporterOpts{
-		NATSClientKey: utils.StringPointer("client_key"),
+	opts = &config.NATSOpts{
+		ClientKey: utils.StringPointer("client_key"),
 	}
 	_, err = GetNatsOpts(opts, nodeID, connTimeout)
 	if err.Error() != "has key but no certificate" {

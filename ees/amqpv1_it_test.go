@@ -74,9 +74,9 @@ func testAMQPv1LoadConfig(t *testing.T) {
 	for _, value := range amqpv1Cfg.EEsCfg().Exporters {
 		if value.ID == "amqpv1_test_file" {
 			amqpv1DialURL = value.ExportPath
-			if value.Opts.AMQPUsername != nil && value.Opts.AMQPPassword != nil {
+			if value.Opts.AMQP.Username != nil && value.Opts.AMQP.Password != nil {
 				amqpv1ConnOpts = &amqpv1.ConnOptions{
-					SASLType: amqpv1.SASLTypePlain(*value.Opts.AMQPUsername, *value.Opts.AMQPPassword),
+					SASLType: amqpv1.SASLTypePlain(*value.Opts.AMQP.Username, *value.Opts.AMQP.Password),
 				}
 			}
 		}

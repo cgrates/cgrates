@@ -35,12 +35,14 @@ func NewAMQPv1EE(cfg *config.EventExporterCfg, dc *utils.SafeMapStorage) *AMQPv1
 		queueID: "/" + utils.DefaultQueueID,
 		reqs:    newConcReq(cfg.ConcurrentRequests),
 	}
-	if cfg.Opts.AMQPQueueID != nil {
-		pstr.queueID = "/" + *cfg.Opts.AMQPQueueID
-	}
-	if cfg.Opts.AMQPUsername != nil && cfg.Opts.AMQPPassword != nil {
-		pstr.connOpts = &amqpv1.ConnOptions{
-			SASLType: amqpv1.SASLTypePlain(*cfg.Opts.AMQPUsername, *cfg.Opts.AMQPPassword),
+	if amqp := cfg.Opts.AMQP; amqp != nil {
+		if amqp.QueueID != nil {
+			pstr.queueID = "/" + *amqp.QueueID
+		}
+		if amqp.Username != nil && amqp.Password != nil {
+			pstr.connOpts = &amqpv1.ConnOptions{
+				SASLType: amqpv1.SASLTypePlain(*amqp.Username, *amqp.Password),
+			}
 		}
 	}
 	return pstr

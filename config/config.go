@@ -176,7 +176,15 @@ func newCGRConfig(config []byte) (cfg *CGRConfig, err error) {
 	cfg.configSCfg = new(ConfigSCfg)
 	cfg.apiBanCfg = new(APIBanCfg)
 	cfg.coreSCfg = new(CoreSCfg)
-	cfg.dfltEvExp = &EventExporterCfg{Opts: &EventExporterOpts{}}
+	cfg.dfltEvExp = &EventExporterCfg{Opts: &EventExporterOpts{
+		Els:   new(ElsOpts),
+		SQL:   new(SQLOpts),
+		AMQP:  new(AMQPOpts),
+		AWS:   new(AWSOpts),
+		NATS:  new(NATSOpts),
+		RPC:   new(RPCOpts),
+		Kafka: new(KafkaOpts),
+	}}
 	cfg.dfltEvRdr = &EventReaderCfg{Opts: &EventReaderOpts{}}
 
 	cfg.cacheDP = make(map[string]utils.MapStorage)

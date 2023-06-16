@@ -39,7 +39,14 @@ func TestSetFldPostCacheTTL(t *testing.T) {
 
 func TestAddFldPost(t *testing.T) {
 	SetFailedPostCacheTTL(5 * time.Second)
-	AddFailedPost("", "path1", "format1", "1", &config.EventExporterOpts{})
+	AddFailedPost("", "path1", "format1", "1", &config.EventExporterOpts{
+		AMQP:  &config.AMQPOpts{},
+		Els:   &config.ElsOpts{},
+		AWS:   &config.AWSOpts{},
+		NATS:  &config.NATSOpts{},
+		Kafka: &config.KafkaOpts{},
+		RPC:   &config.RPCOpts{},
+	})
 	x, ok := failedPostCache.Get(utils.ConcatenatedKey("", "path1", "format1"))
 	if !ok {
 		t.Error("Error reading from cache")
@@ -56,14 +63,35 @@ func TestAddFldPost(t *testing.T) {
 		Path:   "path1",
 		Format: "format1",
 		Events: []any{"1"},
-		Opts:   &config.EventExporterOpts{},
+		Opts: &config.EventExporterOpts{
+			AMQP:  &config.AMQPOpts{},
+			Els:   &config.ElsOpts{},
+			AWS:   &config.AWSOpts{},
+			NATS:  &config.NATSOpts{},
+			Kafka: &config.KafkaOpts{},
+			RPC:   &config.RPCOpts{},
+		},
 	}
 	if !reflect.DeepEqual(eOut, failedPost) {
 		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(eOut), utils.ToJSON(failedPost))
 	}
-	AddFailedPost("", "path1", "format1", "2", &config.EventExporterOpts{})
+	AddFailedPost("", "path1", "format1", "2", &config.EventExporterOpts{
+		AMQP:  &config.AMQPOpts{},
+		Els:   &config.ElsOpts{},
+		AWS:   &config.AWSOpts{},
+		NATS:  &config.NATSOpts{},
+		Kafka: &config.KafkaOpts{},
+		RPC:   &config.RPCOpts{},
+	})
 	AddFailedPost("", "path2", "format2", "3", &config.EventExporterOpts{
-		SQSQueueID: utils.StringPointer("qID"),
+		AWS: &config.AWSOpts{
+			SQSQueueID: utils.StringPointer("qID"),
+		},
+		NATS:  &config.NATSOpts{},
+		Kafka: &config.KafkaOpts{},
+		RPC:   &config.RPCOpts{},
+		AMQP:  &config.AMQPOpts{},
+		Els:   &config.ElsOpts{},
 	})
 	x, ok = failedPostCache.Get(utils.ConcatenatedKey("", "path1", "format1"))
 	if !ok {
@@ -80,7 +108,14 @@ func TestAddFldPost(t *testing.T) {
 		Path:   "path1",
 		Format: "format1",
 		Events: []any{"1", "2"},
-		Opts:   &config.EventExporterOpts{},
+		Opts: &config.EventExporterOpts{
+			AMQP:  &config.AMQPOpts{},
+			Els:   &config.ElsOpts{},
+			AWS:   &config.AWSOpts{},
+			NATS:  &config.NATSOpts{},
+			Kafka: &config.KafkaOpts{},
+			RPC:   &config.RPCOpts{},
+		},
 	}
 	if !reflect.DeepEqual(eOut, failedPost) {
 		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(eOut), utils.ToJSON(failedPost))
@@ -101,7 +136,8 @@ func TestAddFldPost(t *testing.T) {
 		Format: "format2",
 		Events: []any{"3"},
 		Opts: &config.EventExporterOpts{
-			SQSQueueID: utils.StringPointer("qID"),
+			AWS: &config.AWSOpts{
+				SQSQueueID: utils.StringPointer("qID")},
 		},
 	}
 	if !reflect.DeepEqual(eOut, failedPost) {

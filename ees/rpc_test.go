@@ -195,15 +195,17 @@ func TestRPCParseOpts(t *testing.T) {
 	rpcEE := &RPCee{
 		cfg: &config.EventExporterCfg{
 			Opts: &config.EventExporterOpts{
-				RPCCodec:        utils.StringPointer("RPCCodec"),
-				ServiceMethod:   utils.StringPointer("ServiceMethod"),
-				KeyPath:         utils.StringPointer("KeyPath"),
-				CertPath:        utils.StringPointer("CertPath"),
-				CAPath:          utils.StringPointer("CAPath"),
-				TLS:             utils.BoolPointer(true),
-				ConnIDs:         utils.SliceStringPointer([]string{"ConnID"}),
-				RPCConnTimeout:  utils.DurationPointer(time.Second),
-				RPCReplyTimeout: utils.DurationPointer(time.Minute),
+				RPC: &config.RPCOpts{
+					RPCCodec:        utils.StringPointer("RPCCodec"),
+					ServiceMethod:   utils.StringPointer("ServiceMethod"),
+					KeyPath:         utils.StringPointer("KeyPath"),
+					CertPath:        utils.StringPointer("CertPath"),
+					CAPath:          utils.StringPointer("CAPath"),
+					TLS:             utils.BoolPointer(true),
+					ConnIDs:         utils.SliceStringPointer([]string{"ConnID"}),
+					RPCConnTimeout:  utils.DurationPointer(time.Second),
+					RPCReplyTimeout: utils.DurationPointer(time.Minute),
+				},
 			},
 		},
 	}
@@ -211,15 +213,17 @@ func TestRPCParseOpts(t *testing.T) {
 	exp := &RPCee{
 		cfg: &config.EventExporterCfg{
 			Opts: &config.EventExporterOpts{
-				RPCCodec:        utils.StringPointer("RPCCodec"),
-				ServiceMethod:   utils.StringPointer("ServiceMethod"),
-				KeyPath:         utils.StringPointer("KeyPath"),
-				CertPath:        utils.StringPointer("CertPath"),
-				CAPath:          utils.StringPointer("CAPath"),
-				TLS:             utils.BoolPointer(true),
-				ConnIDs:         utils.SliceStringPointer([]string{"ConnID"}),
-				RPCConnTimeout:  utils.DurationPointer(time.Second),
-				RPCReplyTimeout: utils.DurationPointer(time.Minute),
+				RPC: &config.RPCOpts{
+					RPCCodec:        utils.StringPointer("RPCCodec"),
+					ServiceMethod:   utils.StringPointer("ServiceMethod"),
+					KeyPath:         utils.StringPointer("KeyPath"),
+					CertPath:        utils.StringPointer("CertPath"),
+					CAPath:          utils.StringPointer("CAPath"),
+					TLS:             utils.BoolPointer(true),
+					ConnIDs:         utils.SliceStringPointer([]string{"ConnID"}),
+					RPCConnTimeout:  utils.DurationPointer(time.Second),
+					RPCReplyTimeout: utils.DurationPointer(time.Minute),
+				},
 			},
 		},
 		codec:         "RPCCodec",
