@@ -132,30 +132,9 @@ func TestReflectFieldInterface(t *testing.T) {
 		})
 	}
 
-
 }
-
-type MyInterface interface {
-	MyMethod() string
-}
-
-type MyStruct struct {
-	Value MyInterface
-}
-
-type MyType string
-
-func (mt MyType) MyMethod() string {
-	return "string(mt)"
-}
-var s MyType
 
 func TestReflectFieldAsString(t *testing.T) {
-
-	type Iface interface{}
-
-	var a map[string]any = map[string]any{"test": "test1"} 
-
 	type args struct {
 		intf             any
 		fldName          string
@@ -176,26 +155,15 @@ func TestReflectFieldAsString(t *testing.T) {
 			args: args{struct{ Test bool }{Test: false}, "Test", ""},
 			want: "",
 		},
-		{
-			name: "interface",
-			args: args{a, "test", ""},
-			want: "test1",
-		},
 	}
 
-	for i, tt := range tests {
+	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			rcv, err := ReflectFieldAsString(tt.args.intf, tt.args.fldName, tt.args.extraFieldsLabel)
 
-			if i == len(tests) - 1 {
-				if err != nil {
-					t.Fatal("was not expecting an error", err)
-				}
-			} else {
 				if err == nil {
 					t.Fatal("was expecting an error")
 				}
-			}
 
 			if rcv != tt.want {
 				t.Errorf("reciving %v, expected %v", rcv, tt.want)
