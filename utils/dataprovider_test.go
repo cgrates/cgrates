@@ -88,6 +88,9 @@ func TestAppendNavMapVal(t *testing.T) {
 	} else if !reflect.DeepEqual(expected, onm.nm) {
 		t.Errorf("Expected %v ,received: %v", expected, onm.nm)
 	}
+	if err := AppendNavMapVal(onm, &FullPath{}, NewNMData(18)); err == nil {
+		t.Fatal("was expecting an error")
+	}
 }
 
 func TestComposeNavMapVal(t *testing.T) {
