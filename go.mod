@@ -6,8 +6,8 @@ go 1.20
 // replace github.com/cgrates/rpcclient => ../rpcclient
 
 require (
-	github.com/antchfx/xmlquery v1.3.16
-	github.com/aws/aws-sdk-go v1.44.279
+	github.com/antchfx/xmlquery v1.3.17
+	github.com/aws/aws-sdk-go v1.44.283
 	github.com/cenkalti/rpc2 v0.0.0-20210604223624-c1acbc6ec984
 	github.com/cgrates/aringo v0.0.0-20220525160735-b5990313d99e
 	github.com/cgrates/fsock v0.0.0-20230123160954-12cae14030cc
@@ -30,9 +30,9 @@ require (
 	github.com/segmentio/kafka-go v0.4.40
 	github.com/ugorji/go/codec v1.2.11
 	go.mongodb.org/mongo-driver v1.11.7
-	golang.org/x/net v0.10.0
-	golang.org/x/oauth2 v0.8.0
-	google.golang.org/api v0.126.0
+	golang.org/x/net v0.11.0
+	golang.org/x/oauth2 v0.9.0
+	google.golang.org/api v0.128.0
 )
 
 require github.com/Azure/go-amqp v1.0.1
@@ -54,14 +54,14 @@ require (
 	github.com/golang/snappy v0.0.4 // indirect
 	github.com/google/uuid v1.3.0 // indirect
 	github.com/googleapis/enterprise-certificate-proxy v0.2.4 // indirect
-	github.com/googleapis/gax-go/v2 v2.10.0 // indirect
+	github.com/googleapis/gax-go/v2 v2.11.0 // indirect
 	github.com/ishidawataru/sctp v0.0.0-20230406120618-7ff4192f6ff2 // indirect
 	github.com/jinzhu/inflection v1.0.0 // indirect
 	github.com/jmespath/go-jmespath v0.4.0 // indirect
-	github.com/klauspost/compress v1.16.5 // indirect
+	github.com/klauspost/compress v1.16.6 // indirect
 	github.com/mattn/go-runewidth v0.0.14 // indirect
 	github.com/montanaflynn/stats v0.7.1 // indirect
-	github.com/pierrec/lz4/v4 v4.1.17 // indirect
+	github.com/pierrec/lz4/v4 v4.1.18 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/rabbitmq/amqp091-go v1.8.1
 	github.com/rivo/uniseg v0.4.4 // indirect
@@ -70,13 +70,13 @@ require (
 	github.com/xdg-go/stringprep v1.0.4 // indirect
 	github.com/youmark/pkcs8 v0.0.0-20201027041543-1326539a0a0a // indirect
 	go.opencensus.io v0.24.0 // indirect
-	golang.org/x/crypto v0.9.0 // indirect
-	golang.org/x/mod v0.10.0 // indirect
-	golang.org/x/sync v0.2.0 // indirect
-	golang.org/x/sys v0.8.0 // indirect
-	golang.org/x/text v0.9.0 // indirect
-	golang.org/x/tools v0.9.3 // indirect
+	golang.org/x/crypto v0.10.0 // indirect
+	golang.org/x/mod v0.11.0 // indirect
+	golang.org/x/sync v0.3.0 // indirect
+	golang.org/x/sys v0.9.0 // indirect
+	golang.org/x/text v0.10.0 // indirect
+	golang.org/x/tools v0.10.0 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
-	google.golang.org/grpc v1.55.0 // indirect
+	google.golang.org/grpc v1.56.0 // indirect
 	google.golang.org/protobuf v1.30.0 // indirect
 )
