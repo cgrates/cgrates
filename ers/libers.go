@@ -31,156 +31,158 @@ import (
 
 // getProcessOptions assigns all non-nil fields ending in "Processed" from EventReaderOpts to their counterparts in EventExporterOpts
 func getProcessOptions(erOpts *config.EventReaderOpts) (eeOpts *config.EventExporterOpts) {
+	eeOpts = new(config.EventExporterOpts)
 	if erOpts.AMQPExchangeProcessed != nil {
-		if eeOpts == nil {
-			eeOpts = new(config.EventExporterOpts)
+		if eeOpts.AMQP == nil {
+			eeOpts.AMQP = new(config.AMQPOpts)
 		}
-		eeOpts.AMQPExchange = erOpts.AMQPExchangeProcessed
+		eeOpts.AMQP.Exchange = erOpts.AMQPExchangeProcessed
 	}
 	if erOpts.AMQPExchangeTypeProcessed != nil {
-		if eeOpts == nil {
-			eeOpts = new(config.EventExporterOpts)
+		if eeOpts.AMQP == nil {
+			eeOpts.AMQP = new(config.AMQPOpts)
 		}
-		eeOpts.AMQPExchangeType = erOpts.AMQPExchangeTypeProcessed
+		eeOpts.AMQP.ExchangeType = erOpts.AMQPExchangeTypeProcessed
 	}
 	if erOpts.AMQPQueueIDProcessed != nil {
-		if eeOpts == nil {
-			eeOpts = new(config.EventExporterOpts)
+		if eeOpts.AMQP == nil {
+			eeOpts.AMQP = new(config.AMQPOpts)
 		}
-		eeOpts.AMQPQueueID = erOpts.AMQPQueueIDProcessed
+		eeOpts.AMQP.QueueID = erOpts.AMQPQueueIDProcessed
 	}
 	if erOpts.AMQPRoutingKeyProcessed != nil {
-		if eeOpts == nil {
-			eeOpts = new(config.EventExporterOpts)
+		if eeOpts.AMQP == nil {
+			eeOpts.AMQP = new(config.AMQPOpts)
 		}
-		eeOpts.AMQPRoutingKey = erOpts.AMQPRoutingKeyProcessed
+		eeOpts.AMQP.RoutingKey = erOpts.AMQPRoutingKeyProcessed
 	}
 	if erOpts.AMQPUsernameProcessed != nil {
-		if eeOpts == nil {
-			eeOpts = new(config.EventExporterOpts)
+		if eeOpts.AMQP == nil {
+			eeOpts.AMQP = new(config.AMQPOpts)
 		}
-		eeOpts.AMQPUsername = erOpts.AMQPUsernameProcessed
+		eeOpts.AMQP.Username = erOpts.AMQPUsernameProcessed
 	}
 	if erOpts.AMQPPasswordProcessed != nil {
-		if eeOpts == nil {
-			eeOpts = new(config.EventExporterOpts)
+		if eeOpts.AMQP == nil {
+			eeOpts.AMQP = new(config.AMQPOpts)
 		}
-		eeOpts.AMQPPassword = erOpts.AMQPPasswordProcessed
+		eeOpts.AMQP.Password = erOpts.AMQPPasswordProcessed
 	}
 	if erOpts.AWSKeyProcessed != nil {
-		if eeOpts == nil {
-			eeOpts = new(config.EventExporterOpts)
+		if eeOpts.AWS == nil {
+			eeOpts.AWS = new(config.AWSOpts)
 		}
-		eeOpts.AWSKey = erOpts.AWSKeyProcessed
+		eeOpts.AWS.Key = erOpts.AWSKeyProcessed
 	}
 	if erOpts.AWSRegionProcessed != nil {
-		if eeOpts == nil {
-			eeOpts = new(config.EventExporterOpts)
+		if eeOpts.AWS == nil {
+			eeOpts.AWS = new(config.AWSOpts)
 		}
-		eeOpts.AWSRegion = erOpts.AWSRegionProcessed
+		eeOpts.AWS.Region = erOpts.AWSRegionProcessed
 	}
 	if erOpts.AWSSecretProcessed != nil {
-		if eeOpts == nil {
-			eeOpts = new(config.EventExporterOpts)
+		if eeOpts.AWS == nil {
+			eeOpts.AWS = new(config.AWSOpts)
 		}
-		eeOpts.AWSSecret = erOpts.AWSSecretProcessed
+		eeOpts.AWS.Secret = erOpts.AWSSecretProcessed
 	}
 	if erOpts.AWSTokenProcessed != nil {
-		if eeOpts == nil {
-			eeOpts = new(config.EventExporterOpts)
+		if eeOpts.AWS == nil {
+			eeOpts.AWS = new(config.AWSOpts)
 		}
-		eeOpts.AWSToken = erOpts.AWSTokenProcessed
+		eeOpts.AWS.Token = erOpts.AWSTokenProcessed
 	}
 	if erOpts.KafkaTopicProcessed != nil {
-		if eeOpts == nil {
-			eeOpts = new(config.EventExporterOpts)
+		if eeOpts.Kafka == nil {
+			eeOpts.Kafka = new(config.KafkaOpts)
 		}
-		eeOpts.KafkaTopic = erOpts.KafkaTopicProcessed
+		eeOpts.Kafka.KafkaTopic = erOpts.KafkaTopicProcessed
 	}
 	if erOpts.NATSCertificateAuthorityProcessed != nil {
-		if eeOpts == nil {
-			eeOpts = new(config.EventExporterOpts)
+		if eeOpts.NATS == nil {
+			eeOpts.NATS = new(config.NATSOpts)
 		}
-		eeOpts.NATSCertificateAuthority = erOpts.NATSCertificateAuthorityProcessed
+		eeOpts.NATS.CertificateAuthority = erOpts.NATSCertificateAuthorityProcessed
 	}
 	if erOpts.NATSClientCertificateProcessed != nil {
-		if eeOpts == nil {
-			eeOpts = new(config.EventExporterOpts)
+		if eeOpts.NATS == nil {
+			eeOpts.NATS = new(config.NATSOpts)
 		}
-		eeOpts.NATSClientCertificate = erOpts.NATSClientCertificateProcessed
+		eeOpts.NATS.ClientCertificate = erOpts.NATSClientCertificateProcessed
 	}
 	if erOpts.NATSClientKeyProcessed != nil {
-		if eeOpts == nil {
-			eeOpts = new(config.EventExporterOpts)
+		if eeOpts.NATS == nil {
+			eeOpts.NATS = new(config.NATSOpts)
 		}
-		eeOpts.NATSClientKey = erOpts.NATSClientKeyProcessed
+		eeOpts.NATS.ClientKey = erOpts.NATSClientKeyProcessed
 	}
 	if erOpts.NATSJWTFileProcessed != nil {
-		if eeOpts == nil {
-			eeOpts = new(config.EventExporterOpts)
+		if eeOpts.NATS == nil {
+			eeOpts.NATS = new(config.NATSOpts)
 		}
-		eeOpts.NATSJWTFile = erOpts.NATSJWTFileProcessed
+		eeOpts.NATS.JWTFile = erOpts.NATSJWTFileProcessed
 	}
 	if erOpts.NATSJetStreamMaxWaitProcessed != nil {
-		if eeOpts == nil {
-			eeOpts = new(config.EventExporterOpts)
+		if eeOpts.NATS == nil {
+			eeOpts.NATS = new(config.NATSOpts)
 		}
-		eeOpts.NATSJetStreamMaxWait = erOpts.NATSJetStreamMaxWaitProcessed
+		eeOpts.NATS.JetStreamMaxWait = erOpts.NATSJetStreamMaxWaitProcessed
 	}
 	if erOpts.NATSJetStreamProcessed != nil {
-		if eeOpts == nil {
-			eeOpts = new(config.EventExporterOpts)
+		if eeOpts.NATS == nil {
+			eeOpts.NATS = new(config.NATSOpts)
 		}
-		eeOpts.NATSJetStream = erOpts.NATSJetStreamProcessed
+		eeOpts.NATS.JetStream = erOpts.NATSJetStreamProcessed
 	}
 	if erOpts.NATSSeedFileProcessed != nil {
-		if eeOpts == nil {
-			eeOpts = new(config.EventExporterOpts)
+		if eeOpts.NATS == nil {
+			eeOpts.NATS = new(config.NATSOpts)
 		}
-		eeOpts.NATSSeedFile = erOpts.NATSSeedFileProcessed
+		eeOpts.NATS.SeedFile = erOpts.NATSSeedFileProcessed
 	}
 	if erOpts.NATSSubjectProcessed != nil {
-		if eeOpts == nil {
-			eeOpts = new(config.EventExporterOpts)
+		if eeOpts.NATS == nil {
+			eeOpts.NATS = new(config.NATSOpts)
 		}
-		eeOpts.NATSSubject = erOpts.NATSSubjectProcessed
+		eeOpts.NATS.Subject = erOpts.NATSSubjectProcessed
 	}
 	if erOpts.S3BucketIDProcessed != nil {
-		if eeOpts == nil {
-			eeOpts = new(config.EventExporterOpts)
+		if eeOpts.AWS == nil {
+			eeOpts.AWS = new(config.AWSOpts)
 		}
-		eeOpts.S3BucketID = erOpts.S3BucketIDProcessed
+		eeOpts.AWS.S3BucketID = erOpts.S3BucketIDProcessed
 	}
 	if erOpts.S3FolderPathProcessed != nil {
-		if eeOpts == nil {
-			eeOpts = new(config.EventExporterOpts)
+		if eeOpts.AWS == nil {
+			eeOpts.AWS = new(config.AWSOpts)
 		}
-		eeOpts.S3FolderPath = erOpts.S3FolderPathProcessed
+		eeOpts.AWS.S3FolderPath = erOpts.S3FolderPathProcessed
 	}
 	if erOpts.SQLDBNameProcessed != nil {
-		if eeOpts == nil {
-			eeOpts = new(config.EventExporterOpts)
+		if eeOpts.SQL == nil {
+			eeOpts.SQL = new(config.SQLOpts)
 		}
-		eeOpts.SQLDBName = erOpts.SQLDBNameProcessed
+		eeOpts.SQL.DBName = erOpts.SQLDBNameProcessed
 	}
 	if erOpts.SQLTableNameProcessed != nil {
-		if eeOpts == nil {
-			eeOpts = new(config.EventExporterOpts)
+		if eeOpts.SQL == nil {
+			eeOpts.SQL = new(config.SQLOpts)
 		}
-		eeOpts.SQLTableName = erOpts.SQLTableNameProcessed
+		eeOpts.SQL.TableName = erOpts.SQLTableNameProcessed
 	}
 	if erOpts.SQSQueueIDProcessed != nil {
-		if eeOpts == nil {
-			eeOpts = new(config.EventExporterOpts)
+		if eeOpts.AWS == nil {
+			eeOpts.AWS = new(config.AWSOpts)
 		}
-		eeOpts.SQSQueueID = erOpts.SQSQueueIDProcessed
+		eeOpts.AWS.SQSQueueID = erOpts.SQSQueueIDProcessed
 	}
 	if erOpts.PgSSLModeProcessed != nil {
-		if eeOpts == nil {
-			eeOpts = new(config.EventExporterOpts)
+		if eeOpts.SQL == nil {
+			eeOpts.SQL = new(config.SQLOpts)
 		}
-		eeOpts.PgSSLMode = erOpts.PgSSLModeProcessed
+		eeOpts.SQL.PgSSLMode = erOpts.PgSSLModeProcessed
 	}
+	fmt.Println(utils.ToJSON(eeOpts))
 	return
 }
 

@@ -72,16 +72,16 @@ func (sqlEe *SQLEe) initDialector() (err error) {
 	password, _ := u.User.Password()
 
 	dbname := utils.SQLDefaultDBName
-	if sqlEe.Cfg().Opts.SQLDBName != nil {
-		dbname = *sqlEe.Cfg().Opts.SQLDBName
+	if sqlEe.Cfg().Opts.SQL.DBName != nil {
+		dbname = *sqlEe.Cfg().Opts.SQL.DBName
 	}
 	ssl := utils.SQLDefaultSSLMode
-	if sqlEe.Cfg().Opts.PgSSLMode != nil {
-		ssl = *sqlEe.Cfg().Opts.PgSSLMode
+	if sqlEe.Cfg().Opts.SQL.PgSSLMode != nil {
+		ssl = *sqlEe.Cfg().Opts.SQL.PgSSLMode
 	}
 	// tableName is mandatory in opts
-	if sqlEe.Cfg().Opts.SQLTableName != nil {
-		sqlEe.tableName = *sqlEe.Cfg().Opts.SQLTableName
+	if sqlEe.Cfg().Opts.SQL.TableName != nil {
+		sqlEe.tableName = *sqlEe.Cfg().Opts.SQL.TableName
 	} else {
 		return utils.NewErrMandatoryIeMissing(utils.SQLTableNameOpt)
 	}
@@ -90,7 +90,7 @@ func (sqlEe *SQLEe) initDialector() (err error) {
 	switch u.Scheme {
 	case utils.MySQL:
 		sqlEe.dialect = mysql.Open(fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8&loc=Local&parseTime=true&sql_mode='ALLOW_INVALID_DATES'",
-			u.User.Username(), password, u.Hostname(), u.Port(), dbname) + engine.AppendToMysqlDSNOpts(sqlEe.Cfg().Opts.MYSQLDSNParams))
+			u.User.Username(), password, u.Hostname(), u.Port(), dbname) + engine.AppendToMysqlDSNOpts(sqlEe.Cfg().Opts.SQL.MYSQLDSNParams))
 	case utils.Postgres:
 		sqlEe.dialect = postgres.Open(fmt.Sprintf("host=%s port=%s dbname=%s user=%s password=%s sslmode=%s", u.Hostname(), u.Port(), dbname, u.User.Username(), password, ssl))
 	default:
@@ -99,7 +99,7 @@ func (sqlEe *SQLEe) initDialector() (err error) {
 	return
 }
 
-func openDB(dialect gorm.Dialector, opts *config.EventExporterOpts) (db *gorm.DB, sqlDB *sql.DB, err error) {
+func openDB(dialect gorm.Dialector, opts *config.SQLOpts) (db *gorm.DB, sqlDB *sql.DB, err error) {
 	if db, err = gorm.Open(dialect, &gorm.Config{AllowGlobalUpdate: true}); err != nil {
 		return
 	}
@@ -107,14 +107,14 @@ func openDB(dialect gorm.Dialector, opts *config.EventExporterOpts) (db *gorm.DB
 		return
 	}
 
-	if opts.SQLMaxIdleConns != nil {
-		sqlDB.SetMaxIdleConns(*opts.SQLMaxIdleConns)
+	if opts.MaxIdleConns != nil {
+		sqlDB.SetMaxIdleConns(*opts.MaxIdleConns)
 	}
-	if opts.SQLMaxOpenConns != nil {
-		sqlDB.SetMaxOpenConns(*opts.SQLMaxOpenConns)
+	if opts.MaxOpenConns != nil {
+		sqlDB.SetMaxOpenConns(*opts.MaxOpenConns)
 	}
-	if opts.SQLConnMaxLifetime != nil {
-		sqlDB.SetConnMaxLifetime(*opts.SQLConnMaxLifetime)
+	if opts.ConnMaxLifetime != nil {
+		sqlDB.SetConnMaxLifetime(*opts.ConnMaxLifetime)
 	}
 
 	return
@@ -125,7 +125,7 @@ func (sqlEe *SQLEe) Cfg() *config.EventExporterCfg { return sqlEe.cfg }
 func (sqlEe *SQLEe) Connect() (err error) {
 	sqlEe.Lock()
 	if sqlEe.db == nil || sqlEe.sqldb == nil {
-		sqlEe.db, sqlEe.sqldb, err = openDB(sqlEe.dialect, sqlEe.Cfg().Opts)
+		sqlEe.db, sqlEe.sqldb, err = openDB(sqlEe.dialect, sqlEe.Cfg().Opts.SQL)
 	}
 	sqlEe.Unlock()
 	return

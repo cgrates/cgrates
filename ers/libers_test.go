@@ -32,7 +32,9 @@ func TestGetProcessOptions(t *testing.T) {
 	}
 	result := getProcessOptions(opts)
 	expected := &config.EventExporterOpts{
-		AMQPQueueID: utils.StringPointer("processed"),
+		AMQP: &config.AMQPOpts{
+			QueueID: utils.StringPointer("processed"),
+		},
 	}
 	if !reflect.DeepEqual(result, expected) {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)

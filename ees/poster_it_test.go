@@ -73,7 +73,14 @@ func TestHttpJsonPoster(t *testing.T) {
 		ExportPath:     "http://localhost:8080/invalid",
 		Attempts:       3,
 		FailedPostsDir: "/tmp",
-		Opts:           &config.EventExporterOpts{},
+		Opts: &config.EventExporterOpts{
+			AMQP:  &config.AMQPOpts{},
+			Els:   &config.ElsOpts{},
+			AWS:   &config.AWSOpts{},
+			NATS:  &config.NATSOpts{},
+			Kafka: &config.KafkaOpts{},
+			RPC:   &config.RPCOpts{},
+		},
 	}, config.CgrConfig(), nil, nil)
 	if err != nil {
 		t.Error(err)
@@ -81,7 +88,14 @@ func TestHttpJsonPoster(t *testing.T) {
 	if err = ExportWithAttempts(pstr, &HTTPPosterRequest{Body: jsn, Header: make(http.Header)}, ""); err == nil {
 		t.Error("Expected error")
 	}
-	AddFailedPost("/tmp", "http://localhost:8080/invalid", utils.MetaHTTPjsonMap, jsn, &config.EventExporterOpts{})
+	AddFailedPost("/tmp", "http://localhost:8080/invalid", utils.MetaHTTPjsonMap, jsn, &config.EventExporterOpts{
+		AMQP:  &config.AMQPOpts{},
+		Els:   &config.ElsOpts{},
+		AWS:   &config.AWSOpts{},
+		NATS:  &config.NATSOpts{},
+		Kafka: &config.KafkaOpts{},
+		RPC:   &config.RPCOpts{},
+	})
 	time.Sleep(5 * time.Millisecond)
 	fs, err := filepath.Glob("/tmp/EEs*")
 	if err != nil {
@@ -111,7 +125,14 @@ func TestHttpBytesPoster(t *testing.T) {
 		ExportPath:     "http://localhost:8080/invalid",
 		Attempts:       3,
 		FailedPostsDir: "/tmp",
-		Opts:           &config.EventExporterOpts{},
+		Opts: &config.EventExporterOpts{
+			AMQP:  &config.AMQPOpts{},
+			Els:   &config.ElsOpts{},
+			AWS:   &config.AWSOpts{},
+			NATS:  &config.NATSOpts{},
+			Kafka: &config.KafkaOpts{},
+			RPC:   &config.RPCOpts{},
+		},
 	}, config.CgrConfig(), nil, nil)
 	if err != nil {
 		t.Error(err)
@@ -119,7 +140,14 @@ func TestHttpBytesPoster(t *testing.T) {
 	if err = ExportWithAttempts(pstr, &HTTPPosterRequest{Body: content, Header: make(http.Header)}, ""); err == nil {
 		t.Error("Expected error")
 	}
-	AddFailedPost("/tmp", "http://localhost:8080/invalid", utils.ContentJSON, content, &config.EventExporterOpts{})
+	AddFailedPost("/tmp", "http://localhost:8080/invalid", utils.ContentJSON, content, &config.EventExporterOpts{
+		AMQP:  &config.AMQPOpts{},
+		Els:   &config.ElsOpts{},
+		AWS:   &config.AWSOpts{},
+		NATS:  &config.NATSOpts{},
+		Kafka: &config.KafkaOpts{},
+		RPC:   &config.RPCOpts{},
+	})
 	time.Sleep(5 * time.Millisecond)
 	fs, err := filepath.Glob("/tmp/test2*")
 	if err != nil {
@@ -156,10 +184,10 @@ func TestSQSPoster(t *testing.T) {
 	awsSecret := "replace-this-with-your-secret"
 	qname := "cgrates-cdrs"
 
-	opts := &config.EventExporterOpts{
-		AWSRegion:  utils.StringPointer(region),
-		AWSKey:     utils.StringPointer(awsKey),
-		AWSSecret:  utils.StringPointer(awsSecret),
+	opts := &config.AWSOpts{
+		Region:     utils.StringPointer(region),
+		Key:        utils.StringPointer(awsKey),
+		Secret:     utils.StringPointer(awsSecret),
 		SQSQueueID: utils.StringPointer(qname),
 	}
 	//#####################################
@@ -169,7 +197,9 @@ func TestSQSPoster(t *testing.T) {
 	pstr := NewSQSee(&config.EventExporterCfg{
 		ExportPath: endpoint,
 		Attempts:   5,
-		Opts:       opts,
+		Opts: &config.EventExporterOpts{
+			AWS: opts,
+		},
 	}, nil)
 	if err := ExportWithAttempts(pstr, []byte(body), ""); err != nil {
 		t.Fatal(err)
@@ -239,10 +269,10 @@ func TestS3Poster(t *testing.T) {
 	awsSecret := "replace-this-with-your-secret"
 	qname := "cgrates-cdrs"
 
-	opts := &config.EventExporterOpts{
-		AWSRegion:  utils.StringPointer(region),
-		AWSKey:     utils.StringPointer(awsKey),
-		AWSSecret:  utils.StringPointer(awsSecret),
+	opts := &config.AWSOpts{
+		Region:     utils.StringPointer(region),
+		Key:        utils.StringPointer(awsKey),
+		Secret:     utils.StringPointer(awsSecret),
 		SQSQueueID: utils.StringPointer(qname),
 	}
 	//#####################################
@@ -252,7 +282,9 @@ func TestS3Poster(t *testing.T) {
 	pstr := NewS3EE(&config.EventExporterCfg{
 		ExportPath: endpoint,
 		Attempts:   5,
-		Opts:       opts,
+		Opts: &config.EventExporterOpts{
+			AWS: opts,
+		},
 	}, nil)
 	if err := ExportWithAttempts(pstr, []byte(body), key); err != nil {
 		t.Fatal(err)
@@ -302,7 +334,9 @@ func TestAMQPv1Poster(t *testing.T) {
 	endpoint := "amqps://RootManageSharedAccessKey:UlfIJ%2But11L0ZzA%2Fgpje8biFJeQihpWibJsUhaOi1DU%3D@cdrscgrates.servicebus.windows.net"
 	qname := "cgrates-cdrs"
 	opts := &config.EventExporterOpts{
-		AMQPQueueID: utils.StringPointer(qname),
+		AMQP: &config.AMQPOpts{
+			QueueID: utils.StringPointer(qname),
+		},
 	}
 	//#####################################
 

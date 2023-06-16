@@ -325,19 +325,20 @@ func (rdr *SQLEventReader) setURL(inURL, outURL string, opts *config.EventReader
 		outPort = oURL.Port()
 	}
 
-	outDBname = utils.SQLDefaultDBName
-	if processedOpt.SQLDBName != nil {
-		outDBname = *processedOpt.SQLDBName
+	if processedSql := processedOpt.SQL; processedSql != nil {
+		outDBname = utils.SQLDefaultDBName
+		if processedSql.DBName != nil {
+			outDBname = *processedSql.DBName
+		}
+		outSSL = utils.SQLDefaultSSLMode
+		if processedSql.PgSSLMode != nil {
+			outSSL = *processedSql.PgSSLMode
+		}
+		rdr.expTableName = utils.CDRsTBL
+		if processedSql.TableName != nil {
+			rdr.expTableName = *processedSql.TableName
+		}
 	}
-	outSSL = utils.SQLDefaultSSLMode
-	if processedOpt.PgSSLMode != nil {
-		outSSL = *processedOpt.PgSSLMode
-	}
-	rdr.expTableName = utils.CDRsTBL
-	if processedOpt.SQLTableName != nil {
-		rdr.expTableName = *processedOpt.SQLTableName
-	}
-
 	switch rdr.expConnType {
 	case utils.MySQL:
 		rdr.expConnString = fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8&loc=Local&parseTime=true&sql_mode='ALLOW_INVALID_DATES'",

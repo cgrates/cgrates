@@ -58,7 +58,7 @@ func TestNatsEEJetStream(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	nop, err := GetNatsOpts(cfg.Opts, "natsTest", time.Second)
+	nop, err := GetNatsOpts(cfg.Opts.NATS, "natsTest", time.Second)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -148,7 +148,7 @@ func TestNatsEE(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	nop, err := GetNatsOpts(cfg.Opts, "natsTest", time.Second)
+	nop, err := GetNatsOpts(cfg.Opts.NATS, "natsTest", time.Second)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -196,8 +196,8 @@ func TestGetNatsOptsSeedFile(t *testing.T) {
 	nkey := "SUACSSL3UAHUDXKFSNVUZRF5UHPMWZ6BFDTJ7M6USDXIEDNPPQYYYCU3VY"
 	os.WriteFile("/tmp/nkey.txt", []byte(nkey), 0777)
 
-	opts := &config.EventExporterOpts{
-		NATSSeedFile: utils.StringPointer("/tmp/nkey.txt"),
+	opts := &config.NATSOpts{
+		SeedFile: utils.StringPointer("/tmp/nkey.txt"),
 	}
 
 	nodeID := "node_id1"

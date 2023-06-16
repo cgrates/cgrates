@@ -63,17 +63,25 @@ func AddFailedPost(failedPostsDir, expPath, format string, ev any, opts *config.
 	var s3BucketID string
 	var sqsQueueID string
 	var kafkaTopic string
-	if opts.AMQPQueueID != nil {
-		amqpQueueID = *opts.AMQPQueueID
+
+	if amqpOpts := opts.AMQP; amqpOpts != nil {
+		if opts.AMQP.QueueID != nil {
+			amqpQueueID = *opts.AMQP.QueueID
+		}
 	}
-	if opts.S3BucketID != nil {
-		s3BucketID = *opts.S3BucketID
+
+	if awsOpts := opts.AWS; awsOpts != nil {
+		if opts.AWS.S3BucketID != nil {
+			s3BucketID = *opts.AWS.S3BucketID
+		}
+		if opts.AWS.SQSQueueID != nil {
+			sqsQueueID = *opts.AWS.SQSQueueID
+		}
 	}
-	if opts.SQSQueueID != nil {
-		sqsQueueID = *opts.SQSQueueID
-	}
-	if opts.KafkaTopic != nil {
-		kafkaTopic = *opts.KafkaTopic
+	if kfkOpts := opts.Kafka; kfkOpts != nil {
+		if opts.Kafka.KafkaTopic != nil {
+			kafkaTopic = *opts.Kafka.KafkaTopic
+		}
 	}
 	if qID := utils.FirstNonEmpty(amqpQueueID, s3BucketID, sqsQueueID,
 		kafkaTopic); len(qID) != 0 {

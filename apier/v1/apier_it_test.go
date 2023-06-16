@@ -2173,7 +2173,8 @@ func testApierReplayFldPosts(t *testing.T) {
 	ev = &ees.ExportEvents{
 		Path: "amqp://guest:guest@localhost:5672/",
 		Opts: &config.EventExporterOpts{
-			AMQPQueueID: utils.StringPointer("cgrates_cdrs"),
+			AMQP: &config.AMQPOpts{
+				QueueID: utils.StringPointer("cgrates_cdrs")},
 		},
 		Format: utils.MetaAMQPjsonMap,
 		Events: []any{bev},

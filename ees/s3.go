@@ -62,23 +62,25 @@ type S3EE struct {
 
 func (pstr *S3EE) parseOpts(opts *config.EventExporterOpts) {
 	pstr.bucket = utils.DefaultQueueID
-	if opts.S3BucketID != nil {
-		pstr.bucket = *opts.S3BucketID
-	}
-	if opts.S3FolderPath != nil {
-		pstr.folderPath = *opts.S3FolderPath
-	}
-	if opts.AWSRegion != nil {
-		pstr.awsRegion = *opts.AWSRegion
-	}
-	if opts.AWSKey != nil {
-		pstr.awsID = *opts.AWSKey
-	}
-	if opts.AWSSecret != nil {
-		pstr.awsKey = *opts.AWSSecret
-	}
-	if opts.AWSToken != nil {
-		pstr.awsToken = *opts.AWSToken
+	if s3Opts := opts.AWS; s3Opts != nil {
+		if s3Opts.S3BucketID != nil {
+			pstr.bucket = *s3Opts.S3BucketID
+		}
+		if s3Opts.S3FolderPath != nil {
+			pstr.folderPath = *s3Opts.S3FolderPath
+		}
+		if s3Opts.Region != nil {
+			pstr.awsRegion = *s3Opts.Region
+		}
+		if s3Opts.Key != nil {
+			pstr.awsID = *s3Opts.Key
+		}
+		if s3Opts.Secret != nil {
+			pstr.awsKey = *s3Opts.Secret
+		}
+		if s3Opts.Token != nil {
+			pstr.awsToken = *s3Opts.Token
+		}
 	}
 }
 

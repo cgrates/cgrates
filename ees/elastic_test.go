@@ -57,7 +57,8 @@ func TestInitCase1(t *testing.T) {
 	ee := &ElasticEE{
 		cfg: &config.EventExporterCfg{
 			Opts: &config.EventExporterOpts{
-				ElsIndex: utils.StringPointer("test"),
+				Els: &config.ElsOpts{Index: utils.StringPointer("test")},
+				RPC: &config.RPCOpts{},
 			},
 		},
 	}
@@ -74,7 +75,9 @@ func TestInitCase2(t *testing.T) {
 	ee := &ElasticEE{
 		cfg: &config.EventExporterCfg{
 			Opts: &config.EventExporterOpts{
-				ElsIfPrimaryTerm: utils.IntPointer(20),
+				Els: &config.ElsOpts{
+					IfPrimaryTerm: utils.IntPointer(20)},
+				RPC: &config.RPCOpts{},
 			},
 		},
 	}
@@ -91,7 +94,9 @@ func TestInitCase3(t *testing.T) {
 	ee := &ElasticEE{
 		cfg: &config.EventExporterCfg{
 			Opts: &config.EventExporterOpts{
-				ElsIfSeqNo: utils.IntPointer(20),
+				Els: &config.ElsOpts{
+					IfSeqNo: utils.IntPointer(20)},
+				RPC: &config.RPCOpts{},
 			},
 		},
 	}
@@ -108,7 +113,9 @@ func TestInitCase4(t *testing.T) {
 	ee := &ElasticEE{
 		cfg: &config.EventExporterCfg{
 			Opts: &config.EventExporterOpts{
-				ElsOpType: utils.StringPointer("test"),
+				Els: &config.ElsOpts{
+					OpType: utils.StringPointer("test")},
+				RPC: &config.RPCOpts{},
 			},
 		},
 	}
@@ -125,7 +132,9 @@ func TestInitCase5(t *testing.T) {
 	ee := &ElasticEE{
 		cfg: &config.EventExporterCfg{
 			Opts: &config.EventExporterOpts{
-				ElsPipeline: utils.StringPointer("test"),
+				Els: &config.ElsOpts{
+					Pipeline: utils.StringPointer("test")},
+				RPC: &config.RPCOpts{},
 			},
 		},
 	}
@@ -142,7 +151,9 @@ func TestInitCase6(t *testing.T) {
 	ee := &ElasticEE{
 		cfg: &config.EventExporterCfg{
 			Opts: &config.EventExporterOpts{
-				ElsRouting: utils.StringPointer("test"),
+				Els: &config.ElsOpts{
+					Routing: utils.StringPointer("test")},
+				RPC: &config.RPCOpts{},
 			},
 		},
 	}
@@ -159,7 +170,10 @@ func TestInitCase8(t *testing.T) {
 	ee := &ElasticEE{
 		cfg: &config.EventExporterCfg{
 			Opts: &config.EventExporterOpts{
-				ElsVersion: utils.IntPointer(20),
+				Els: &config.ElsOpts{
+					Version: utils.IntPointer(20),
+				},
+				RPC: &config.RPCOpts{},
 			},
 		},
 	}
@@ -176,7 +190,10 @@ func TestInitCase9(t *testing.T) {
 	ee := &ElasticEE{
 		cfg: &config.EventExporterCfg{
 			Opts: &config.EventExporterOpts{
-				ElsVersionType: utils.StringPointer("test"),
+				Els: &config.ElsOpts{
+					VersionType: utils.StringPointer("test"),
+				},
+				RPC: &config.RPCOpts{},
 			},
 		},
 	}
@@ -193,7 +210,9 @@ func TestInitCase10(t *testing.T) {
 	ee := &ElasticEE{
 		cfg: &config.EventExporterCfg{
 			Opts: &config.EventExporterOpts{
-				ElsWaitForActiveShards: utils.StringPointer("test"),
+				Els: &config.ElsOpts{
+					WaitForActiveShards: utils.StringPointer("test")},
+				RPC: &config.RPCOpts{},
 			},
 		},
 	}

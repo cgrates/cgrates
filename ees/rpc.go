@@ -91,7 +91,8 @@ func (e *RPCee) PrepareMap(mp *utils.CGREvent) (any, error) {
 	if mp.APIOpts == nil {
 		mp.APIOpts = make(map[string]any)
 	}
-	for i, v := range e.Cfg().Opts.RPCAPIOpts {
+
+	for i, v := range e.Cfg().Opts.RPC.RPCAPIOpts {
 		mp.APIOpts[i] = v
 	}
 	return mp, nil
@@ -115,32 +116,33 @@ func (e *RPCee) PrepareOrderMap(oMp *utils.OrderedNavigableMap) (any, error) {
 }
 
 func (e *RPCee) parseOpts() (err error) {
-	if e.cfg.Opts.RPCCodec != nil {
-		e.codec = *e.cfg.Opts.RPCCodec
+
+	if e.cfg.Opts.RPC.RPCCodec != nil {
+		e.codec = *e.cfg.Opts.RPC.RPCCodec
 	}
-	if e.cfg.Opts.ServiceMethod != nil {
-		e.serviceMethod = *e.cfg.Opts.ServiceMethod
+	if e.cfg.Opts.RPC.ServiceMethod != nil {
+		e.serviceMethod = *e.cfg.Opts.RPC.ServiceMethod
 	}
-	if e.cfg.Opts.KeyPath != nil {
-		e.keyPath = *e.cfg.Opts.KeyPath
+	if e.cfg.Opts.RPC.KeyPath != nil {
+		e.keyPath = *e.cfg.Opts.RPC.KeyPath
 	}
-	if e.cfg.Opts.CertPath != nil {
-		e.certPath = *e.cfg.Opts.CertPath
+	if e.cfg.Opts.RPC.CertPath != nil {
+		e.certPath = *e.cfg.Opts.RPC.CertPath
 	}
-	if e.cfg.Opts.CAPath != nil {
-		e.caPath = *e.cfg.Opts.CAPath
+	if e.cfg.Opts.RPC.CAPath != nil {
+		e.caPath = *e.cfg.Opts.RPC.CAPath
 	}
-	if e.cfg.Opts.TLS != nil {
-		e.tls = *e.cfg.Opts.TLS
+	if e.cfg.Opts.RPC.TLS != nil {
+		e.tls = *e.cfg.Opts.RPC.TLS
 	}
-	if e.cfg.Opts.ConnIDs != nil {
-		e.connIDs = *e.cfg.Opts.ConnIDs
+	if e.cfg.Opts.RPC.ConnIDs != nil {
+		e.connIDs = *e.cfg.Opts.RPC.ConnIDs
 	}
-	if e.cfg.Opts.RPCConnTimeout != nil {
-		e.connTimeout = *e.cfg.Opts.RPCConnTimeout
+	if e.cfg.Opts.RPC.RPCConnTimeout != nil {
+		e.connTimeout = *e.cfg.Opts.RPC.RPCConnTimeout
 	}
-	if e.cfg.Opts.RPCReplyTimeout != nil {
-		e.replyTimeout = *e.cfg.Opts.RPCReplyTimeout
+	if e.cfg.Opts.RPC.RPCReplyTimeout != nil {
+		e.replyTimeout = *e.cfg.Opts.RPC.RPCReplyTimeout
 	}
 	return
 }

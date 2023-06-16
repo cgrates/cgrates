@@ -46,9 +46,9 @@ func TestSqlGetMetrics(t *testing.T) {
 
 func TestNewSQLeUrl(t *testing.T) {
 	cgrCfg := config.NewDefaultCGRConfig()
-	cgrCfg.EEsCfg().Exporters[0].Opts.SQLTableName = utils.StringPointer("expTable")
-	cgrCfg.EEsCfg().Exporters[0].Opts.SQLDBName = utils.StringPointer("postgres")
-	cgrCfg.EEsCfg().Exporters[0].Opts.PgSSLMode = utils.StringPointer("test")
+	cgrCfg.EEsCfg().Exporters[0].Opts.SQL.TableName = utils.StringPointer("expTable")
+	cgrCfg.EEsCfg().Exporters[0].Opts.SQL.DBName = utils.StringPointer("postgres")
+	cgrCfg.EEsCfg().Exporters[0].Opts.SQL.PgSSLMode = utils.StringPointer("test")
 	sqlEe := &SQLEe{
 		cfg:  cgrCfg.EEsCfg().Exporters[0],
 		reqs: newConcReq(0),
@@ -61,8 +61,8 @@ func TestNewSQLeUrl(t *testing.T) {
 
 func TestNewSQLeUrlSQL(t *testing.T) {
 	cgrCfg := config.NewDefaultCGRConfig()
-	cgrCfg.EEsCfg().Exporters[0].Opts.SQLTableName = utils.StringPointer("expTable")
-	cgrCfg.EEsCfg().Exporters[0].Opts.SQLDBName = utils.StringPointer("mysql")
+	cgrCfg.EEsCfg().Exporters[0].Opts.SQL.TableName = utils.StringPointer("expTable")
+	cgrCfg.EEsCfg().Exporters[0].Opts.SQL.DBName = utils.StringPointer("mysql")
 	cgrCfg.EEsCfg().Exporters[0].ExportPath = `mysql://cgrates:CGRateS.org@127.0.0.1:3306`
 	sqlEe := &SQLEe{
 		cfg:  cgrCfg.EEsCfg().Exporters[0],
@@ -79,8 +79,8 @@ func TestNewSQLeUrlSQL(t *testing.T) {
 
 func TestNewSQLeUrlPostgres(t *testing.T) {
 	cgrCfg := config.NewDefaultCGRConfig()
-	cgrCfg.EEsCfg().Exporters[0].Opts.SQLTableName = utils.StringPointer("expTable")
-	cgrCfg.EEsCfg().Exporters[0].Opts.SQLDBName = utils.StringPointer("postgres")
+	cgrCfg.EEsCfg().Exporters[0].Opts.SQL.TableName = utils.StringPointer("expTable")
+	cgrCfg.EEsCfg().Exporters[0].Opts.SQL.DBName = utils.StringPointer("postgres")
 	cgrCfg.EEsCfg().Exporters[0].ExportPath = `postgres://cgrates:CGRateS.org@127.0.0.1:3306`
 	sqlEe := &SQLEe{
 		cfg:  cgrCfg.EEsCfg().Exporters[0],
@@ -97,8 +97,8 @@ func TestNewSQLeUrlPostgres(t *testing.T) {
 
 func TestNewSQLeExportPathError(t *testing.T) {
 	cgrCfg := config.NewDefaultCGRConfig()
-	cgrCfg.EEsCfg().Exporters[0].Opts.SQLTableName = utils.StringPointer("expTable")
-	cgrCfg.EEsCfg().Exporters[0].Opts.SQLDBName = utils.StringPointer("postgres")
+	cgrCfg.EEsCfg().Exporters[0].Opts.SQL.TableName = utils.StringPointer("expTable")
+	cgrCfg.EEsCfg().Exporters[0].Opts.SQL.DBName = utils.StringPointer("postgres")
 	cgrCfg.EEsCfg().Exporters[0].ExportPath = ":foo"
 	sqlEe := &SQLEe{
 		cfg:  cgrCfg.EEsCfg().Exporters[0],
@@ -120,7 +120,7 @@ func TestOpenDBError2(t *testing.T) {
 	tmp := logger.Default
 	logger.Default = logger.Default.LogMode(logger.Silent)
 	mckDialect := new(mockDialect2)
-	_, _, err := openDB(mckDialect, &config.EventExporterOpts{})
+	_, _, err := openDB(mckDialect, &config.SQLOpts{})
 	errExpect := "invalid db"
 	if err == nil || err.Error() != errExpect {
 		t.Errorf("Expected %v but received %v", errExpect, err)
@@ -140,7 +140,7 @@ func TestOpenDBError3(t *testing.T) {
 	tmp := logger.Default
 	logger.Default = logger.Default.LogMode(logger.Silent)
 	mckDialect := new(mockDialectErr)
-	_, _, err := openDB(mckDialect, &config.EventExporterOpts{})
+	_, _, err := openDB(mckDialect, &config.SQLOpts{})
 	errExpect := "NOT_FOUND"
 	if err == nil || err.Error() != errExpect {
 		t.Errorf("Expected %v but received %v", errExpect, err)
