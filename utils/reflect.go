@@ -547,6 +547,7 @@ func Sum(items ...any) (sum any, err error) {
 			}
 		}
 	case int:
+		// need explicit conversion for int
 		sum = int64(dt)
 		for _, item := range items[1:] {
 			if itmVal, err := IfaceAsInt64(item); err != nil {
@@ -604,6 +605,7 @@ func Difference(items ...any) (diff any, err error) {
 			}
 		}
 	case int:
+		// need explicit conversion for int
 		diff = int64(dt)
 		for _, item := range items[1:] {
 			if itmVal, err := IfaceAsInt64(item); err != nil {
