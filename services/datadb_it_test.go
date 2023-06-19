@@ -648,7 +648,7 @@ func TestDataDBReloadCastError(t *testing.T) {
 
 	db.dm = nil
 	err = db.Reload()
-	if err == nil || err.Error() != "can't conver DataDB of type mongo to MongoStorage" {
+	if err == nil || err.Error() != "can't conver DataDB of type *mongo to MongoStorage" {
 		t.Fatal(err)
 	}
 

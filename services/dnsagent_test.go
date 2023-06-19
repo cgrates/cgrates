@@ -49,6 +49,7 @@ func TestDNSAgentCoverage(t *testing.T) {
 		cfg:         cfg,
 		filterSChan: filterSChan,
 		shdChan:     shdChan,
+		stopChan:    make(chan struct{}),
 		connMgr:     nil,
 		srvDep:      srvDep,
 		dns:         dns,

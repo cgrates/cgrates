@@ -22,7 +22,6 @@ import (
 	"crypto/tls"
 	"fmt"
 	"strings"
-	"sync"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
@@ -72,7 +71,8 @@ func (da *DNSAgent) initDNSServer() (_ error) {
 }
 
 // ListenAndServe will run the DNS handler doing also the connection to listen address
-func (da *DNSAgent) ListenAndServe() error {
+func (da *DNSAgent) ListenAndServe(stopChan chan struct{}) error {
+	errChan := make(chan error)
 	for _, server := range da.servers {
 		utils.Logger.Info(fmt.Sprintf("<%s> start listening on <%s:%s>",
 			utils.DNSAgent, server.Net, server.Addr))
@@ -81,10 +81,21 @@ func (da *DNSAgent) ListenAndServe() error {
 			if err != nil {
 				utils.Logger.Warning(fmt.Sprintf("<%s> error <%v>, on ListenAndServe <%s:%s>",
 					utils.DNSAgent, err, srv.Net, srv.Addr))
+				errChan <- err
 			}
 		}(server)
 	}
-	return nil
+
+	select {
+	case <-stopChan:
+		return da.Shutdown()
+	case err := <-errChan:
+		if shtdErr := da.Shutdown(); shtdErr != nil {
+			return shtdErr
+		}
+		return err
+	}
+
 }
 
 // Reload will reinitialize the server
@@ -119,20 +130,19 @@ func (da *DNSAgent) handleMessage(w dns.ResponseWriter, req *dns.Msg) {
 
 // Shutdown stops the DNS server
 func (da *DNSAgent) Shutdown() error {
-	var wg sync.WaitGroup
+	var err error
 	for _, server := range da.servers {
-		wg.Add(1)
-		go func(srv *dns.Server) {
-			defer wg.Done()
-			err := srv.Shutdown()
-			if err != nil {
-				utils.Logger.Warning(fmt.Sprintf("<%s> error <%v>, on Shutdown <%s:%s>",
-					utils.DNSAgent, err, srv.Net, srv.Addr))
-			}
-		}(server)
+		shtdErr := server.Shutdown()
+		if shtdErr == nil {
+			continue
+		}
+		utils.Logger.Warning(fmt.Sprintf("<%s> error <%v>, on Shutdown <%s:%s>",
+			utils.DNSAgent, shtdErr, server.Net, server.Addr))
+		if shtdErr.Error() != "dns: server not started" {
+			err = shtdErr
+		}
 	}
-	wg.Wait()
-	return nil
+	return err
 }
 
 // handleMessage is the entry point of all DNS requests

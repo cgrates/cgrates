@@ -1015,7 +1015,7 @@ func TestDNSAgentJsonCfg(t *testing.T) {
 		Listeners: &[]*ListenerJsnCfg{
 			{
 				Network: utils.StringPointer("udp"),
-				Address: utils.StringPointer("127.0.0.1:2053"),
+				Address: utils.StringPointer("127.0.0.1:53"),
 			},
 		},
 		Sessions_conns:     &[]string{utils.ConcatenatedKey(utils.MetaInternal)},
