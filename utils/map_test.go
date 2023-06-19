@@ -369,18 +369,20 @@ func TestMapString(t *testing.T) {
 	tests := []struct {
 		name string
 		sm   StringMap
-		want string
+		want1 string
+		want2 string
 	}{
 		{
 			name: "testing string",
 			sm: StringMap{"test1": true, "test2": false},
-			want: "test1;test2",
+			want1: "test1;test2",
+			want2: "test2;test1",
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := tt.sm.String(); got != tt.want {
-					t.Errorf("StringMap.String() = %v, want %v", got, tt.want)
+			if got := tt.sm.String(); got != tt.want1 && got != tt.want2 {
+					t.Errorf("StringMap.String() = %v", got)
 			}
 		})
 	}

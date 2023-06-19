@@ -238,60 +238,129 @@ func TestNavMapGetField(t *testing.T) {
 }
 
 func TestNavMapFieldAsInterface(t *testing.T) {
-	nM := MapStorage{
-		"FirstLevel": map[string]any{
-			"SecondLevel": []map[string]any{
-				{
-					"ThirdLevel": map[string]any{
-						"Fld1": "Val1",
-					},
-				},
-				{
-					"Count": 10,
-					"ThirdLevel2": map[string]any{
-						"Fld2": []string{"Val1", "Val2", "Val3"},
-					},
-				},
-			},
+	nm := MapStorage{
+		"SlcString": []string{"val1", "val2"},
+		"SlcAny": []any{"val1"},
+		"MapPtr": &map[string]any{"test1": 1},
+		"Array": [1]string{"val1"},
+		"DP": MapStorage{"test": "val1"},
+		"MapInt": map[string]int{"test": 1},
+		"SlcDP": []DataProvider{MapStorage{"test": "val1"}},
+		"SlcMS": []MapStorage{{"test": "val1"}},
+		"SlcMapAny": []map[string]any{{"test": "val1"}},
+		"SlcAnyMap": []any{map[string]any{"test": "val1"}},
+		"SlcAnyDP": []any{MapStorage{"test": "val1"}},
+	}
+
+	type exp struct {
+		val any
+		err error
+	}
+
+	tests := []struct {
+		name string
+		arg  []string
+		exp  exp
+	}{
+		{
+			name: "empty argument",
+			arg:  []string{},
+			exp:  exp{nil, ErrEmptyFieldPath},
 		},
-		"AnotherFirstLevel": "ValAnotherFirstLevel",
+		{
+			name: "field is slice of strings, index not found",
+			arg: []string{"SlcString[3]"},
+			exp: exp{nil, ErrNotFound},
+		},
+		{
+			name: "field is slice of strings",
+			arg: []string{"SlcString[1]"},
+			exp: exp{"val2", nil},
+		},
+		{
+			name: "field is slice of any",
+			arg: []string{"SlcAny[1]"},
+			exp: exp{nil, ErrNotFound},
+		},
+		{
+			name: "not slice or array and ptr",
+			arg: []string{"MapPtr[1]"},
+			exp: exp{nil, ErrNotFound},
+		},
+		{
+			name: "array",
+			arg: []string{"Array[1]"},
+			exp: exp{nil, ErrNotFound},
+		},
+		{
+			name: "array",
+			arg: []string{"Array[0]"},
+			exp: exp{"val1", nil},
+		},
+		{
+			name: "data storage",
+			arg: []string{"DP","test"},
+			exp: exp{"val1", nil},
+		},
+		{
+			name: "map of int",
+			arg: []string{"MapInt","test"},
+			exp: exp{map[string]int{"test": 1}, ErrWrongPath},
+		},
+		{
+			name: "slice of DataProvider not found",
+			arg: []string{"SlcDP[1]", "test"},
+			exp: exp{nil, ErrNotFound},
+		},
+		{
+			name: "slice of DataProvider",
+			arg: []string{"SlcDP[0]", "test"},
+			exp: exp{"val1", nil},
+		},
+		{
+			name: "slice of MapStorage not found",
+			arg: []string{"SlcMS[1]", "test"},
+			exp: exp{nil, ErrNotFound},
+		},
+		{
+			name: "slice of MapStorage",
+			arg: []string{"SlcMS[0]", "test"},
+			exp: exp{"val1", nil},
+		},
+		{
+			name: "slice of map[string]any not found",
+			arg: []string{"SlcMapAny[1]", "test"},
+			exp: exp{nil, ErrNotFound},
+		},
+		{
+			name: "slice of any",
+			arg: []string{"SlcAnyMap[1]", "test"},
+			exp: exp{nil, ErrNotFound},
+		},
+		{
+			name: "slice of any map",
+			arg: []string{"SlcAnyMap[0]", "test"},
+			exp: exp{"val1", nil},
+		},
+		{
+			name: "slice of any data provider",
+			arg: []string{"SlcAnyDP[0]", "test"},
+			exp: exp{"val1", nil},
+		},
 	}
 
-	path := []string{"FirstLevel", "SecondLevel[0]", "Count"}
-	expErr := ErrNotFound
-	var eVal any = nil
-	if _, err := nM.FieldAsInterface(path); err != nil && err.Error() != expErr.Error() {
-		t.Errorf("Expected error: %s, received error: %v", expErr.Error(), err)
-	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			rcv, err := nm.FieldAsInterface(tt.arg)
 
-	path = []string{"AnotherFirstLevel", "SecondLevel", "Count"}
-	expErr = ErrWrongPath
-	if _, err := nM.FieldAsInterface(path); err != nil && err.Error() != expErr.Error() {
-		t.Errorf("Expected error: %s, received error: %v", expErr.Error(), err)
-	}
+			if err != tt.exp.err {
+				t.Fatalf("recived %s, expected %s", err, tt.exp.err)
+			}
 
-	path = []string{"FirstLevel", "SecondLevel[1]", "Count"}
-	eVal = 10
-	if rplyVal, err := nM.FieldAsInterface(path); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(eVal, rplyVal) {
-		t.Errorf("Expected: %s , received: %s", ToJSON(eVal), ToJSON(rplyVal))
-	}
-
-	path = []string{"FirstLevel", "SecondLevel[1]", "ThirdLevel2", "Fld2"}
-	eVal = []string{"Val1", "Val2", "Val3"}
-	if rplyVal, err := nM.FieldAsInterface(path); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(eVal, rplyVal) {
-		t.Errorf("Expected: %s , received: %s", ToJSON(eVal), ToJSON(rplyVal))
-	}
-
-	path = []string{"FirstLevel", "SecondLevel[1]", "ThirdLevel2", "Fld2[2]"}
-	eVal = "Val3"
-	if rplyVal, err := nM.FieldAsInterface(path); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(eVal, rplyVal) {
-		t.Errorf("Expected: %s , received: %s", ToJSON(eVal), ToJSON(rplyVal))
+			if !reflect.DeepEqual(rcv, tt.exp.val) {
+				t.Errorf("recived %v, expected %v", rcv, tt.exp.val)
+			}
+		})
 	}
 }
 
@@ -475,29 +544,29 @@ func TestRemoteHost(t *testing.T) {
 }
 
 func TestNavMapSet(t *testing.T) {
-	tests := []struct{
+	tests := []struct {
 		name string
 		path []string
-		val any
-		err error
+		val  any
+		err  error
 	}{
 		{
 			name: "empty path",
 			path: []string{},
-			val: 1,
-			err: ErrWrongPath,
+			val:  1,
+			err:  ErrWrongPath,
 		},
 		{
 			name: "non supported data type",
 			path: []string{"Test", "test"},
-			val: 1,
-			err: ErrWrongPath,
+			val:  1,
+			err:  ErrWrongPath,
 		},
 		{
 			name: "non supported data type",
 			path: []string{"MP", "test"},
-			val: 1,
-			err: nil,
+			val:  1,
+			err:  nil,
 		},
 	}
 

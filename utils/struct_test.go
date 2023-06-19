@@ -168,3 +168,136 @@ func TestMissingMapFields(t *testing.T) {
 		t.Errorf("Expected %s ,received: %s", expected, missing)
 	}
 }
+
+func TestToMapStringString(t *testing.T) {
+
+	tests := []struct{
+		name string
+		arg any
+		exp map[string]string
+	}{
+		{
+			name: "struct to map",
+			arg: &struct{
+				name string
+				surname string
+			}{"test", "test2"},
+			exp: map[string]string{"name": "test", "surname": "test2"},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			rcv := ToMapStringString(tt.arg)
+
+			if !reflect.DeepEqual(rcv, tt.exp) {
+				t.Errorf("expected %v, recived %v", tt.exp, rcv)
+			}
+		})
+	}
+}
+
+func TestGetMapExtraFields(t *testing.T) {
+
+	type in struct {
+		mapAny map[string]string
+	}
+
+	type args struct {
+		in any
+		extraFields string
+	}
+
+	tests := []struct{
+		name string
+		args args
+		exp map[string]string
+	}{
+		{
+			name: "tests get map extra fields",
+			args: args{&in{map[string]string{"test": "val1"}}, "mapAny"},
+			exp: map[string]string{"test": "val1"},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			rcv := GetMapExtraFields(tt.args.in, tt.args.extraFields)
+
+			if !reflect.DeepEqual(rcv, tt.exp) {
+				t.Errorf("recived %v, expected %v", rcv, tt.exp)
+			}
+		})
+	}
+}
+
+func TestSetMapExtraFields(t *testing.T) {
+
+	type in struct {
+		Field map[string]string
+	}
+	
+	type args struct {
+		Values map[string]string
+		extraFields string
+	}
+
+	tests := []struct{
+		name string
+		args args
+	}{
+		{
+			name: "set map extra fields",
+			args: args{map[string]string{"test": ""}, "Field"},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			argIn := in{map[string]string{"test": "val1"}}
+			SetMapExtraFields(&argIn , tt.args.Values, tt.args.extraFields)
+
+
+			if argIn.Field["test"] != "" {
+				t.Errorf("map value didn't change: %s, expected %s", argIn.Field["test"], tt.args.Values["test"])
+			}
+		})
+	}
+}
+
+func TestFromMapStringString(t *testing.T) {
+
+	type args struct {
+		m map[string]string
+		in any
+	}
+
+	type in struct {
+		field string
+	}
+
+	inArg := in{""}
+
+	tests := []struct{
+		name string
+		args args
+		exp in
+	}{
+		{
+			name: "test map string string",
+			args: args{map[string]string{"field": "test1"}, &inArg},
+			exp: in{field: ""},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+
+			FromMapStringString(tt.args.m, tt.args.in)
+
+			if !reflect.DeepEqual(tt.exp, inArg) {
+				t.Errorf("expected %v, reciving %v", tt.exp, inArg)
+			}
+		})
+	}
+}
