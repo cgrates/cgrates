@@ -42,10 +42,12 @@ type MapStorage map[string]any
 // String returns the map as json string
 func (ms MapStorage) String() string { return ToJSON(ms) }
 
+var ErrEmptyFieldPath error = errors.New("empty field path")
+
 // FieldAsInterface returns the value from the path
 func (ms MapStorage) FieldAsInterface(fldPath []string) (val any, err error) {
 	if len(fldPath) == 0 {
-		err = errors.New("empty field path")
+		err = ErrEmptyFieldPath
 		return
 
 	}
