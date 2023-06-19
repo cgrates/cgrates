@@ -66,12 +66,16 @@
 "dns_agent": {
 	"enabled": true,
 	"listeners":[
-        {
-            "address":":2053",
+		{
+			"address":":2053",
+			"network":"tcp"
+        },
+		{
+			"address":":2053",
 			"network":"udp"
-        }
+		}
     ],
-	"sessions_conns": ["*localhost"],
+	"sessions_conns": ["*localhost"]
 },
 
 

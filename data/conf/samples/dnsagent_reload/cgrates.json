@@ -43,11 +43,6 @@
     "enabled": true
 },
 
-// "tls": {
-// 	"server_certificate" : "d",
-//     "server_key":"2"
-// },
-
 "dns_agent": {
     "enabled": true,
     "listeners":[

@@ -74,8 +74,7 @@ func (db *DataDBService) Start() (err error) {
 	db.dm = engine.NewDataManager(d, db.cfg.CacheCfg(), db.connMgr)
 	engine.SetDataStorage(db.dm)
 	if err = engine.CheckVersions(db.dm.DataDB()); err != nil {
-		fmt.Println(err)
-		return
+		return err
 	}
 	db.dbchan <- db.dm
 	return
