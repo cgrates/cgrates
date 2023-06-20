@@ -31,12 +31,12 @@ func TestSureTaxCfgloadFromJsonCfg(t *testing.T) {
 	if err := sureTaxCfg.loadFromJsonCfg(nil); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(sureTaxCfg, expected) {
-		t.Errorf("Expected: %+v ,recived: %+v", expected, sureTaxCfg)
+		t.Errorf("Expected: %+v ,received: %+v", expected, sureTaxCfg)
 	}
 	if err := sureTaxCfg.loadFromJsonCfg(new(SureTaxJsonCfg)); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(sureTaxCfg, expected) {
-		t.Errorf("Expected: %+v ,recived: %+v", expected, sureTaxCfg)
+		t.Errorf("Expected: %+v ,received: %+v", expected, sureTaxCfg)
 	}
 	cfgJSONStr := `{
 	"suretax": {
@@ -103,7 +103,7 @@ func TestSureTaxCfgloadFromJsonCfg(t *testing.T) {
 	} else if err = sureTaxCfg.loadFromJsonCfg(sureTax); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, sureTaxCfg) {
-		t.Errorf("Expected: %+v,\nRecived: %+v", utils.ToJSON(expected), utils.ToJSON(sureTaxCfg))
+		t.Errorf("Expected: %+v,\nReceived: %+v", utils.ToJSON(expected), utils.ToJSON(sureTaxCfg))
 	}
 }
 
@@ -174,6 +174,6 @@ func TestSureTaxCfgAsMapInterface(t *testing.T) {
 	} else if err = sureTaxCfg.loadFromJsonCfg(sureTax); err != nil {
 		t.Error(err)
 	} else if rcv := sureTaxCfg.AsMapInterface(utils.EmptyString); !reflect.DeepEqual(eMap, rcv) {
-		t.Errorf("\nExpected: %+v\nRecived: %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
+		t.Errorf("\nExpected: %+v\nReceived: %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
 	}
 }

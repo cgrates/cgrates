@@ -240,7 +240,7 @@ func TestTimespanGetCostIntervals(t *testing.T) {
 		ts.Increments[i] = &Increment{Cost: 0.02}
 	}
 	if ts.CalculateCost() != 0.22 {
-		t.Error("Error caclulating timespan cost: ", ts.CalculateCost())
+		t.Error("Error calculating timespan cost: ", ts.CalculateCost())
 	}
 }
 
@@ -1176,7 +1176,7 @@ func TestOverlapWithTimeSpansMiddleLong(t *testing.T) {
 		for _, ts := range tss {
 			t.Logf("TS: %v", ts)
 		}
-		t.Error("Error overlaping with timespans timespans: ", tss)
+		t.Error("Error overlapping with timespans timespans: ", tss)
 	}
 }
 
@@ -1214,7 +1214,7 @@ func TestOverlapWithTimeSpansMiddleMedium(t *testing.T) {
 		for _, ts := range tss {
 			t.Logf("TS: %v", ts)
 		}
-		t.Error("Error overlaping with timespans timespans: ", tss)
+		t.Error("Error overlapping with timespans timespans: ", tss)
 	}
 }
 
@@ -1253,7 +1253,7 @@ func TestOverlapWithTimeSpansMiddleShort(t *testing.T) {
 		for _, ts := range tss {
 			t.Logf("TS: %v", ts)
 		}
-		t.Error("Error overlaping with timespans timespans: ", tss)
+		t.Error("Error overlapping with timespans timespans: ", tss)
 	}
 }
 
@@ -1290,7 +1290,7 @@ func TestOverlapWithTimeSpansStart(t *testing.T) {
 		for _, ts := range tss {
 			t.Logf("TS: %v", ts)
 		}
-		t.Error("Error overlaping with timespans timespans: ", tss)
+		t.Error("Error overlapping with timespans timespans: ", tss)
 	}
 }
 
@@ -1329,7 +1329,7 @@ func TestOverlapWithTimeSpansAlmostEnd(t *testing.T) {
 		for _, ts := range tss {
 			t.Logf("TS: %v", ts)
 		}
-		t.Error("Error overlaping with timespans timespans: ", tss)
+		t.Error("Error overlapping with timespans timespans: ", tss)
 	}
 }
 
@@ -1367,7 +1367,7 @@ func TestOverlapWithTimeSpansEnd(t *testing.T) {
 		for _, ts := range tss {
 			t.Logf("TS: %v", ts)
 		}
-		t.Error("Error overlaping with timespans timespans: ", tss)
+		t.Error("Error overlapping with timespans timespans: ", tss)
 	}
 }
 
@@ -1405,7 +1405,7 @@ func TestOverlapWithTimeSpansPastEnd(t *testing.T) {
 		for _, ts := range tss {
 			t.Logf("TS: %v", ts)
 		}
-		t.Error("Error overlaping with timespans timespans: ", tss)
+		t.Error("Error overlapping with timespans timespans: ", tss)
 	}
 }
 
@@ -1441,7 +1441,7 @@ func TestOverlapWithTimeSpansAll(t *testing.T) {
 		for _, ts := range tss {
 			t.Logf("TS: %v", ts)
 		}
-		t.Error("Error overlaping with timespans timespans: ", tss)
+		t.Error("Error overlapping with timespans timespans: ", tss)
 	}
 }
 
@@ -1477,7 +1477,7 @@ func TestOverlapWithTimeSpansAllPast(t *testing.T) {
 		for _, ts := range tss {
 			t.Logf("TS: %v", ts)
 		}
-		t.Error("Error overlaping with timespans timespans: ", tss)
+		t.Error("Error overlapping with timespans timespans: ", tss)
 	}
 }
 
@@ -1501,7 +1501,7 @@ func TestOverlapWithTimeSpansOne(t *testing.T) {
 		for _, ts := range tss {
 			t.Logf("TS: %v", ts)
 		}
-		t.Error("Error overlaping with timespans timespans: ", tss)
+		t.Error("Error overlapping with timespans timespans: ", tss)
 	}
 }
 

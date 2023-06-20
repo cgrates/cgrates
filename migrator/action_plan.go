@@ -97,7 +97,7 @@ func (m *Migrator) migrateV1ActionPlans() (err error) {
 	if m.dryRun {
 		return
 	}
-	// All done, update version wtih current one
+	// All done, update version with current one
 	vrs := engine.Versions{utils.ActionPlans: engine.CurrentDataDBVersions()[utils.ActionPlans]}
 	if err = m.dmOut.DataManager().DataDB().SetVersions(vrs, false); err != nil {
 		return utils.NewCGRError(utils.Migrator,
@@ -141,7 +141,7 @@ func (m *Migrator) migrateActionPlans() (err error) {
 			return err
 		}
 	case 2: // neded to rebuild action plan indexes for redis
-		// All done, update version wtih current one
+		// All done, update version with current one
 		vrs := engine.Versions{utils.ActionPlans: engine.CurrentDataDBVersions()[utils.ActionPlans]}
 		if err = m.dmOut.DataManager().DataDB().SetVersions(vrs, false); err != nil {
 			return utils.NewCGRError(utils.Migrator,

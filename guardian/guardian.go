@@ -161,7 +161,7 @@ func (gl *GuardianLocker) Guard(handler func() (any, error), timeout time.Durati
 }
 
 // GuardIDs aquires a lock for duration
-// returns the reference ID for the lock group aquired
+// returns the reference ID for the lock group acquired
 func (gl *GuardianLocker) GuardIDs(refID string, timeout time.Duration, lkIDs ...string) (retRefID string) {
 	retRefID = gl.lockWithReference(refID, lkIDs)
 	if timeout != 0 && retRefID != "" {

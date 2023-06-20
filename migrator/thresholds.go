@@ -134,7 +134,7 @@ func (m *Migrator) migrateV2ActionTriggers() (err error) {
 	if m.dryRun {
 		return
 	}
-	// All done, update version wtih current one
+	// All done, update version with current one
 	vrs := engine.Versions{utils.Thresholds: engine.CurrentStorDBVersions()[utils.Thresholds]}
 	if err = m.dmOut.DataManager().DataDB().SetVersions(vrs, false); err != nil {
 		return utils.NewCGRError(utils.Migrator,
@@ -171,7 +171,7 @@ func (m *Migrator) migrateV2Thresholds() (err error) {
 	if m.dryRun {
 		return
 	}
-	// All done, update version wtih current one
+	// All done, update version with current one
 	vrs := engine.Versions{utils.Thresholds: engine.CurrentDataDBVersions()[utils.Thresholds]}
 	if err = m.dmOut.DataManager().DataDB().SetVersions(vrs, false); err != nil {
 		return utils.NewCGRError(utils.Migrator,
@@ -322,7 +322,7 @@ func (m *Migrator) SasThreshold(v2ATR *engine.ActionTrigger) (err error) {
 		}
 		m.stats[utils.Thresholds] += 1
 	}
-	// All done, update version wtih current one
+	// All done, update version with current one
 	vrs = engine.Versions{utils.Thresholds: engine.CurrentStorDBVersions()[utils.Thresholds]}
 	if err = m.dmOut.DataManager().DataDB().SetVersions(vrs, false); err != nil {
 		return utils.NewCGRError(utils.Migrator,

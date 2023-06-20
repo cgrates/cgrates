@@ -188,7 +188,7 @@ func testRtPlITMigrateAndMove(t *testing.T) {
 		DestinationRates: map[string]engine.RPRateList{},
 	}
 	switch rtplAction {
-	case utils.Migrate: // for the momment only one version of rating plans exists
+	case utils.Migrate: // for the moment only one version of rating plans exists
 	case utils.Move:
 		if err := rtplMigrator.dmIN.DataManager().SetRatingPlan(rtplPlan, utils.NonTransactional); err != nil {
 			t.Error(err)

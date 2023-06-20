@@ -97,7 +97,7 @@ func TestFieldinfo2Attribute(t *testing.T) {
 	}
 	for i, v := range tests {
 		if rply := fieldinfo2Attribute(v.Initial, v.Path, v.FieldInfo); !reflect.DeepEqual(v.Expected, rply) {
-			t.Errorf("For %v expected: %s ,recieved: %s", i, utils.ToJSON(v.Expected), utils.ToJSON(rply))
+			t.Errorf("For %v expected: %s ,received: %s", i, utils.ToJSON(v.Expected), utils.ToJSON(rply))
 		}
 	}
 }
@@ -188,7 +188,7 @@ func TestDerivedChargers2AttributeProfile(t *testing.T) {
 	}
 	for i, v := range tests {
 		if rply := derivedChargers2AttributeProfile(v.DC, v.Tenant, v.Key, v.Filters); !reflect.DeepEqual(v.Expected, rply) {
-			t.Errorf("For %v expected: %s ,recieved: %s", i, utils.ToJSON(v.Expected), utils.ToJSON(rply))
+			t.Errorf("For %v expected: %s ,received: %s", i, utils.ToJSON(v.Expected), utils.ToJSON(rply))
 		}
 	}
 }
@@ -252,7 +252,7 @@ func TestDerivedChargers2Charger(t *testing.T) {
 	}
 	for i, v := range tests {
 		if rply := derivedChargers2Charger(v.DC, v.Tenant, v.Key, v.Filters); !reflect.DeepEqual(v.Expected, rply) {
-			t.Errorf("For %v expected: %s ,\n recieved: %s", i, utils.ToJSON(v.Expected), utils.ToJSON(rply))
+			t.Errorf("For %v expected: %s ,\n received: %s", i, utils.ToJSON(v.Expected), utils.ToJSON(rply))
 		}
 	}
 }

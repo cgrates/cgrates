@@ -105,10 +105,10 @@ func testVrsITFlush(t *testing.T) {
 	vrsMigrator.storDBOut.StorDB().Flush((path.Join(vrsCfg.DataFolderPath, "storage",
 		dbPath(vrsCfg.StorDbCfg().Type))))
 	if vrs, err := vrsMigrator.dmOut.DataManager().DataDB().GetVersions(""); err == nil || err.Error() != utils.ErrNotFound.Error() {
-		t.Errorf("Expected err=%s recived err=%v and rply=%s", utils.ErrNotFound.Error(), err, utils.ToJSON(vrs))
+		t.Errorf("Expected err=%s received err=%v and rply=%s", utils.ErrNotFound.Error(), err, utils.ToJSON(vrs))
 	}
 	if vrs, err := vrsMigrator.storDBOut.StorDB().GetVersions(""); err == nil || err.Error() != utils.ErrNotFound.Error() {
-		t.Errorf("Expected err=%s recived err=%v and rply=%s", utils.ErrNotFound.Error(), err, utils.ToJSON(vrs))
+		t.Errorf("Expected err=%s received err=%v and rply=%s", utils.ErrNotFound.Error(), err, utils.ToJSON(vrs))
 	}
 }
 
@@ -122,21 +122,21 @@ func testVrsITMigrate(t *testing.T) {
 		if vrs, err := vrsMigrator.dmOut.DataManager().DataDB().GetVersions(""); err != nil {
 			t.Error(err)
 		} else if !reflect.DeepEqual(expVrs, vrs) {
-			t.Errorf("Expected %s recived %s", utils.ToJSON(expVrs), utils.ToJSON(vrs))
+			t.Errorf("Expected %s received %s", utils.ToJSON(expVrs), utils.ToJSON(vrs))
 		}
 	} else {
 		expVrs := engine.CurrentDataDBVersions()
 		if vrs, err := vrsMigrator.dmOut.DataManager().DataDB().GetVersions(""); err != nil {
 			t.Error(err)
 		} else if !reflect.DeepEqual(expVrs, vrs) {
-			t.Errorf("Expected %s recived %s", utils.ToJSON(expVrs), utils.ToJSON(vrs))
+			t.Errorf("Expected %s received %s", utils.ToJSON(expVrs), utils.ToJSON(vrs))
 		}
 
 		expVrs = engine.CurrentStorDBVersions()
 		if vrs, err := vrsMigrator.storDBOut.StorDB().GetVersions(""); err != nil {
 			t.Error(err)
 		} else if !reflect.DeepEqual(expVrs, vrs) {
-			t.Errorf("Expected %s recived %s", utils.ToJSON(expVrs), utils.ToJSON(vrs))
+			t.Errorf("Expected %s received %s", utils.ToJSON(expVrs), utils.ToJSON(vrs))
 		}
 	}
 
@@ -156,21 +156,21 @@ func testVrsITMigrate(t *testing.T) {
 		if vrs, err := vrsMigrator.dmOut.DataManager().DataDB().GetVersions(""); err != nil {
 			t.Error(err)
 		} else if !reflect.DeepEqual(expVrs, vrs) {
-			t.Errorf("Expected %s recived %s", utils.ToJSON(expVrs), utils.ToJSON(vrs))
+			t.Errorf("Expected %s received %s", utils.ToJSON(expVrs), utils.ToJSON(vrs))
 		}
 	} else {
 		expVrs := engine.CurrentDataDBVersions()
 		if vrs, err := vrsMigrator.dmOut.DataManager().DataDB().GetVersions(""); err != nil {
 			t.Error(err)
 		} else if !reflect.DeepEqual(expVrs, vrs) {
-			t.Errorf("Expected %s recived %s", utils.ToJSON(expVrs), utils.ToJSON(vrs))
+			t.Errorf("Expected %s received %s", utils.ToJSON(expVrs), utils.ToJSON(vrs))
 		}
 
 		expVrs = engine.CurrentStorDBVersions()
 		if vrs, err := vrsMigrator.storDBOut.StorDB().GetVersions(""); err != nil {
 			t.Error(err)
 		} else if !reflect.DeepEqual(expVrs, vrs) {
-			t.Errorf("Expected %s recived %s", utils.ToJSON(expVrs), utils.ToJSON(vrs))
+			t.Errorf("Expected %s received %s", utils.ToJSON(expVrs), utils.ToJSON(vrs))
 		}
 	}
 }

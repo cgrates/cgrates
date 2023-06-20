@@ -29,12 +29,12 @@ func TestAnalyzerSCfgloadFromJsonCfg(t *testing.T) {
 	if err := alS.loadFromJsonCfg(nil); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(alS, expected) {
-		t.Errorf("Expected: %+v ,recived: %+v", expected, alS)
+		t.Errorf("Expected: %+v ,received: %+v", expected, alS)
 	}
 	if err := alS.loadFromJsonCfg(new(AnalyzerSJsonCfg)); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(alS, expected) {
-		t.Errorf("Expected: %+v ,recived: %+v", expected, alS)
+		t.Errorf("Expected: %+v ,received: %+v", expected, alS)
 	}
 	cfgJSONStr := `{
 		"analyzers":{								// AnalyzerS config
@@ -52,7 +52,7 @@ func TestAnalyzerSCfgloadFromJsonCfg(t *testing.T) {
 	} else if err = alS.loadFromJsonCfg(jsnalS); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, alS) {
-		t.Errorf("Expected: %+v , recived: %+v", expected, alS)
+		t.Errorf("Expected: %+v , received: %+v", expected, alS)
 	}
 }
 
@@ -74,6 +74,6 @@ func TestAnalyzerSCfgAsMapInterface(t *testing.T) {
 	} else if err = alS.loadFromJsonCfg(jsnalS); err != nil {
 		t.Error(err)
 	} else if rcv := alS.AsMapInterface(); !reflect.DeepEqual(eMap, rcv) {
-		t.Errorf("\nExpected: %+v\nRecived: %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
+		t.Errorf("\nExpected: %+v\nReceived: %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
 	}
 }

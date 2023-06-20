@@ -137,7 +137,7 @@ func (onm *OrderedNavigableMap) Set(fullPath *FullPath, val NMInterface) (addedN
 	return
 }
 
-// Len returns the lenght of the map
+// Len returns the length of the map
 func (onm OrderedNavigableMap) Len() int {
 	return onm.nm.Len()
 }

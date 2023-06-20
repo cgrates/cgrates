@@ -312,7 +312,7 @@ func TestAlias2AtttributeProfile(t *testing.T) {
 			return rply.Attributes[i].Path < rply.Attributes[j].Path
 		}) // only for test; map returns random keys
 		if !reflect.DeepEqual(expected[i], rply) {
-			t.Errorf("For %v expected: %s ,recived: %s ", i, utils.ToJSON(expected[i]), utils.ToJSON(rply))
+			t.Errorf("For %v expected: %s ,received: %s ", i, utils.ToJSON(expected[i]), utils.ToJSON(rply))
 		}
 	}
 }

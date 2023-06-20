@@ -1390,7 +1390,7 @@ func TestResourceAuthorizeResources22(t *testing.T) {
 		}}
 	dm.SetFilter(fltr)
 
-	resourse := &ResourceProfile{
+	resource := &ResourceProfile{
 		Tenant:            "cgrates.org",
 		ID:                "RES20",
 		FilterIDs:         []string{"FLTR_RES_1"},
@@ -1400,7 +1400,7 @@ func TestResourceAuthorizeResources22(t *testing.T) {
 		Weight:            20.00,
 		ThresholdIDs:      []string{utils.META_NONE},
 	}
-	dm.SetResourceProfile(resourse, true)
+	dm.SetResourceProfile(resource, true)
 	dm.SetResource(&Resource{Tenant: "cgrates.org", ID: "RES20"})
 	var reply string
 	if err := rS.V1AuthorizeResources(args, &reply); err != nil {

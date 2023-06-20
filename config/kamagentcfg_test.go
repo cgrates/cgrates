@@ -29,12 +29,12 @@ func TestKamAgentCfgloadFromJsonCfg(t *testing.T) {
 	if err := kamagcfg.loadFromJsonCfg(nil); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(kamagcfg, expected) {
-		t.Errorf("Expected: %+v ,recived: %+v", expected, kamagcfg)
+		t.Errorf("Expected: %+v ,received: %+v", expected, kamagcfg)
 	}
 	if err := kamagcfg.loadFromJsonCfg(new(KamAgentJsonCfg)); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(kamagcfg, expected) {
-		t.Errorf("Expected: %+v ,recived: %+v", expected, kamagcfg)
+		t.Errorf("Expected: %+v ,received: %+v", expected, kamagcfg)
 	}
 	cfgJSONStr := `{
 "kamailio_agent": {
@@ -58,7 +58,7 @@ func TestKamAgentCfgloadFromJsonCfg(t *testing.T) {
 	} else if err = kamagcfg.loadFromJsonCfg(jsnKamAgCfg); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, kamagcfg) {
-		t.Errorf("Expected: %+v , recived: %+v", utils.ToJSON(expected), utils.ToJSON(kamagcfg))
+		t.Errorf("Expected: %+v , received: %+v", utils.ToJSON(expected), utils.ToJSON(kamagcfg))
 	}
 }
 
@@ -67,12 +67,12 @@ func TestKamConnCfgloadFromJsonCfg(t *testing.T) {
 	if err := kamcocfg.loadFromJsonCfg(nil); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(kamcocfg, expected) {
-		t.Errorf("Expected: %+v ,recived: %+v", expected, kamcocfg)
+		t.Errorf("Expected: %+v ,received: %+v", expected, kamcocfg)
 	}
 	if err := kamcocfg.loadFromJsonCfg(new(KamConnJsonCfg)); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(kamcocfg, expected) {
-		t.Errorf("Expected: %+v ,recived: %+v", expected, kamcocfg)
+		t.Errorf("Expected: %+v ,received: %+v", expected, kamcocfg)
 	}
 	json := &KamConnJsonCfg{
 		Address:    utils.StringPointer("127.0.0.1:8448"),
@@ -85,7 +85,7 @@ func TestKamConnCfgloadFromJsonCfg(t *testing.T) {
 	if err = kamcocfg.loadFromJsonCfg(json); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, kamcocfg) {
-		t.Errorf("Expected: %+v , recived: %+v", utils.ToJSON(expected), utils.ToJSON(kamcocfg))
+		t.Errorf("Expected: %+v , received: %+v", utils.ToJSON(expected), utils.ToJSON(kamcocfg))
 	}
 }
 
@@ -118,7 +118,7 @@ func TestKamAgentCfgAsMapInterface(t *testing.T) {
 	} else if err = kamagcfg.loadFromJsonCfg(jsnKamAgCfg); err != nil {
 		t.Error(err)
 	} else if rcv := kamagcfg.AsMapInterface(); !reflect.DeepEqual(eMap, rcv) {
-		t.Errorf("\nExpected: %+v\nRecived: %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
+		t.Errorf("\nExpected: %+v\nReceived: %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
 	}
 
 	cfgJSONStr = `{
@@ -148,6 +148,6 @@ func TestKamAgentCfgAsMapInterface(t *testing.T) {
 	} else if err = kamagcfg.loadFromJsonCfg(jsnKamAgCfg); err != nil {
 		t.Error(err)
 	} else if rcv := kamagcfg.AsMapInterface(); !reflect.DeepEqual(eMap, rcv) {
-		t.Errorf("\nExpected: %+v\nRecived: %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
+		t.Errorf("\nExpected: %+v\nReceived: %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
 	}
 }

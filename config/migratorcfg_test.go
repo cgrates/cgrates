@@ -29,12 +29,12 @@ func TestMigratorCgrCfgloadFromJsonCfg(t *testing.T) {
 	if err := migcfg.loadFromJsonCfg(nil); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(migcfg, expected) {
-		t.Errorf("Expected: %+v ,recived: %+v", expected, migcfg)
+		t.Errorf("Expected: %+v ,received: %+v", expected, migcfg)
 	}
 	if err := migcfg.loadFromJsonCfg(new(MigratorCfgJson)); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(migcfg, expected) {
-		t.Errorf("Expected: %+v ,recived: %+v", expected, migcfg)
+		t.Errorf("Expected: %+v ,received: %+v", expected, migcfg)
 	}
 	cfgJSONStr := `{
 "migrator": {
@@ -75,7 +75,7 @@ func TestMigratorCgrCfgloadFromJsonCfg(t *testing.T) {
 	} else if err = migcfg.loadFromJsonCfg(jsnThSCfg); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, migcfg) {
-		t.Errorf("Expected: %+v , recived: %+v", expected, migcfg)
+		t.Errorf("Expected: %+v , received: %+v", expected, migcfg)
 	}
 }
 
@@ -124,7 +124,7 @@ func TestMigratorCgrCfgAsMapInterface(t *testing.T) {
 	} else if err = migcfg.loadFromJsonCfg(jsnThSCfg); err != nil {
 		t.Error(err)
 	} else if rcv := migcfg.AsMapInterface(); !reflect.DeepEqual(eMap, rcv) {
-		t.Errorf("\nExpected: %+v\nRecived: %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
+		t.Errorf("\nExpected: %+v\nReceived: %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
 	}
 	cfgJSONStr = `{
 		"migrator": {
@@ -170,7 +170,7 @@ func TestMigratorCgrCfgAsMapInterface(t *testing.T) {
 	} else if err = migcfg.loadFromJsonCfg(jsnThSCfg); err != nil {
 		t.Error(err)
 	} else if rcv := migcfg.AsMapInterface(); !reflect.DeepEqual(eMap, rcv) {
-		t.Errorf("\nExpected: %+v\nRecived: %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
+		t.Errorf("\nExpected: %+v\nReceived: %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
 	}
 
 }

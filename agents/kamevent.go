@@ -72,12 +72,12 @@ func (self *KamSessionDisconnect) String() string {
 }
 
 // NewKamEvent parses bytes received over the wire from Kamailio into KamEvent
-func NewKamEvent(kamEvData []byte, alias, adress string) (KamEvent, error) {
+func NewKamEvent(kamEvData []byte, alias, address string) (KamEvent, error) {
 	kev := make(map[string]string)
 	if err := json.Unmarshal(kamEvData, &kev); err != nil {
 		return nil, err
 	}
-	kev[utils.OriginHost] = utils.FirstNonEmpty(kev[utils.OriginHost], alias, adress)
+	kev[utils.OriginHost] = utils.FirstNonEmpty(kev[utils.OriginHost], alias, address)
 	return kev, nil
 }
 

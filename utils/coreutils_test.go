@@ -106,31 +106,31 @@ func TestRound(t *testing.T) {
 	result := Round(12.49, 1, ROUNDING_UP)
 	expected := 12.5
 	if result != expected {
-		t.Errorf("Error rounding up: sould be %v was %v", expected, result)
+		t.Errorf("Error rounding up: should be %v was %v", expected, result)
 	}
 
 	result = Round(12.21, 1, ROUNDING_UP)
 	expected = 12.3
 	if result != expected {
-		t.Errorf("Error rounding up: sould be %v was %v", expected, result)
+		t.Errorf("Error rounding up: should be %v was %v", expected, result)
 	}
 
 	result = Round(0.0701, 2, ROUNDING_UP)
 	expected = 0.08
 	if result != expected {
-		t.Errorf("Error rounding up: sould be %v was %v", expected, result)
+		t.Errorf("Error rounding up: should be %v was %v", expected, result)
 	}
 
 	result = Round(12.49, 1, ROUNDING_DOWN)
 	expected = 12.4
 	if result != expected {
-		t.Errorf("Error rounding down: sould be %v was %v", expected, result)
+		t.Errorf("Error rounding down: should be %v was %v", expected, result)
 	}
 
 	result = Round(12.21, 1, ROUNDING_DOWN)
 	expected = 12.2
 	if result != expected {
-		t.Errorf("Error rounding up: sould be %v was %v", expected, result)
+		t.Errorf("Error rounding up: should be %v was %v", expected, result)
 	}
 
 	//AlredyHavingPrecision

@@ -226,10 +226,10 @@ func testCDReProcessExternalCdr(t *testing.T) {
 	} else {
 		for _, c := range cdrs {
 			if c.RunID == utils.MetaRaw && c.Cost != -1 {
-				t.Errorf("Expected for %s cdr cost to be -1, recived: %v", utils.MetaRaw, c.Cost)
+				t.Errorf("Expected for %s cdr cost to be -1, received: %v", utils.MetaRaw, c.Cost)
 			}
 			if c.RunID == utils.MetaDefault && c.Cost != 0.3 {
-				t.Errorf("Expected for *default cdr cost to be 0.3, recived: %v", c.Cost)
+				t.Errorf("Expected for *default cdr cost to be 0.3, received: %v", c.Cost)
 			}
 			if c.RunID == utils.MetaDefault {
 				acdr, err := engine.NewCDRFromExternalCDR(c, "")
@@ -242,38 +242,38 @@ func testCDReProcessExternalCdr(t *testing.T) {
 					return
 				}
 				if acdr.CostDetails.Usage == nil {
-					t.Errorf("CostDetails for procesed cdr has usage nil")
+					t.Errorf("CostDetails for processed cdr has usage nil")
 				}
 				if acdr.CostDetails.Cost == nil {
-					t.Errorf("CostDetails for procesed cdr has cost nil")
+					t.Errorf("CostDetails for processed cdr has cost nil")
 				}
 			}
 			if c.Usage != "1s" {
-				t.Errorf("Expected 1s,recived %s", c.Usage)
+				t.Errorf("Expected 1s,received %s", c.Usage)
 			}
 			if c.Source != utils.UNIT_TEST {
-				t.Errorf("Expected %s,recived %s", utils.UNIT_TEST, c.Source)
+				t.Errorf("Expected %s,received %s", utils.UNIT_TEST, c.Source)
 			}
 			if c.ToR != utils.VOICE {
-				t.Errorf("Expected %s,recived %s", utils.VOICE, c.ToR)
+				t.Errorf("Expected %s,received %s", utils.VOICE, c.ToR)
 			}
 			if c.RequestType != utils.META_RATED {
-				t.Errorf("Expected %s,recived %s", utils.META_RATED, c.RequestType)
+				t.Errorf("Expected %s,received %s", utils.META_RATED, c.RequestType)
 			}
 			if c.Category != "call" {
-				t.Errorf("Expected call,recived %s", c.Category)
+				t.Errorf("Expected call,received %s", c.Category)
 			}
 			if c.Account != "1003" {
-				t.Errorf("Expected 1003,recived %s", c.Account)
+				t.Errorf("Expected 1003,received %s", c.Account)
 			}
 			if c.Subject != "1003" {
-				t.Errorf("Expected 1003,recived %s", c.Subject)
+				t.Errorf("Expected 1003,received %s", c.Subject)
 			}
 			if c.Destination != "1001" {
-				t.Errorf("Expected 1001,recived %s", c.Destination)
+				t.Errorf("Expected 1001,received %s", c.Destination)
 			}
 			if !reflect.DeepEqual(c.ExtraFields, cdr.ExtraFields) {
-				t.Errorf("Expected %s,recived %s", utils.ToJSON(c.ExtraFields), utils.ToJSON(cdr.ExtraFields))
+				t.Errorf("Expected %s,received %s", utils.ToJSON(c.ExtraFields), utils.ToJSON(cdr.ExtraFields))
 			}
 		}
 	}

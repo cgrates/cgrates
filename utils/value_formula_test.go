@@ -30,7 +30,7 @@ func TestValueFormulaDayWeek(t *testing.T) {
 		t.Error("error unmarshalling params: ", err)
 	}
 	if x := incrementalFormula(params); x != 10/7.0 {
-		t.Error("error caclulating value using formula: ", x)
+		t.Error("error calculating value using formula: ", x)
 	}
 }
 
@@ -41,7 +41,7 @@ func TestValueFormulaDayMonth(t *testing.T) {
 	}
 	now := time.Now()
 	if x := incrementalFormula(params); x != 10/DaysInMonth(now.Year(), now.Month()) {
-		t.Error("error caclulating value using formula: ", x)
+		t.Error("error calculating value using formula: ", x)
 	}
 }
 
@@ -52,7 +52,7 @@ func TestValueFormulaDayYear(t *testing.T) {
 	}
 	now := time.Now()
 	if x := incrementalFormula(params); x != 10/DaysInYear(now.Year()) {
-		t.Error("error caclulating value using formula: ", x)
+		t.Error("error calculating value using formula: ", x)
 	}
 }
 

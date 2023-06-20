@@ -380,7 +380,7 @@ func (cdre *CDRExporter) processCDR(cdr *CDR) (err error) {
 	return
 }
 
-// processCDRs proccess every cdr
+// processCDRs processes every cdr
 func (cdre *CDRExporter) processCDRs() (err error) {
 	var wg sync.WaitGroup
 	isSync := cdre.exportTemplate.Synchronous ||

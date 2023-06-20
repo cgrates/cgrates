@@ -38,7 +38,7 @@ type ChargingInterval struct {
 	cost           *float64       // cache cost calculation on this interval
 }
 
-// PartiallyEquals does not compare CompressFactor, usefull for Merge
+// PartiallyEquals does not compare CompressFactor, useful for Merge
 func (cIl *ChargingInterval) PartiallyEquals(oCIl *ChargingInterval) bool {
 	if equals := cIl.RatingID == oCIl.RatingID &&
 		len(cIl.Increments) == len(oCIl.Increments); !equals {

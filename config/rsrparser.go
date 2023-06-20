@@ -91,7 +91,7 @@ func NewRSRParsersFromSlice(parsersRules []string, allFiltersMatch bool) (prsrs 
 		if rsrPrsr, err := NewRSRParser(rlStr, allFiltersMatch); err != nil {
 			return nil, err
 		} else if rsrPrsr == nil {
-			return nil, fmt.Errorf("emtpy RSRParser in rule: <%s>", rlStr)
+			return nil, fmt.Errorf("empty RSRParser in rule: <%s>", rlStr)
 		} else {
 			prsrs[i] = rsrPrsr
 		}

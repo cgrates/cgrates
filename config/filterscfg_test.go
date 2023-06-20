@@ -29,12 +29,12 @@ func TestFilterSCfgloadFromJsonCfg(t *testing.T) {
 	if err := fscfg.loadFromJsonCfg(nil); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(fscfg, expected) {
-		t.Errorf("Expected: %+v ,recived: %+v", expected, fscfg)
+		t.Errorf("Expected: %+v ,received: %+v", expected, fscfg)
 	}
 	if err := fscfg.loadFromJsonCfg(new(FilterSJsonCfg)); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(fscfg, expected) {
-		t.Errorf("Expected: %+v ,recived: %+v", expected, fscfg)
+		t.Errorf("Expected: %+v ,received: %+v", expected, fscfg)
 	}
 	cfgJSONStr := `{
 "filters": {								// Filters configuration (*new)
@@ -51,7 +51,7 @@ func TestFilterSCfgloadFromJsonCfg(t *testing.T) {
 	} else if err = fscfg.loadFromJsonCfg(jsnFsCfg); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, fscfg) {
-		t.Errorf("Expected: %+v , recived: %+v", utils.ToJSON(expected), utils.ToJSON(fscfg))
+		t.Errorf("Expected: %+v , received: %+v", utils.ToJSON(expected), utils.ToJSON(fscfg))
 	}
 }
 
@@ -77,6 +77,6 @@ func TestFilterSCfgAsMapInterface(t *testing.T) {
 	} else if err = fscfg.loadFromJsonCfg(jsnFsCfg); err != nil {
 		t.Error(err)
 	} else if rcv := fscfg.AsMapInterface(); reflect.DeepEqual(eMap, rcv) {
-		t.Errorf("Expected: %+v ,\n recived: %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
+		t.Errorf("Expected: %+v ,\n received: %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
 	}
 }

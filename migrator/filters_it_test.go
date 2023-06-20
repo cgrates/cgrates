@@ -244,7 +244,7 @@ func testFltrITMigrateAndMove(t *testing.T) {
 		if fltridx, err := fltrMigrator.dmOut.DataManager().GetFilterIndexes(utils.PrefixToIndexCache[utils.AttributeProfilePrefix], utils.ConcatenatedKey(attrProf.Tenant, utils.META_ANY), utils.MetaString, nil); err != nil {
 			t.Error(err)
 		} else if !reflect.DeepEqual(expFltrIdx, fltridx) {
-			t.Errorf("Expected %v, recived: %v", utils.ToJSON(expFltrIdx), utils.ToJSON(fltridx))
+			t.Errorf("Expected %v, received: %v", utils.ToJSON(expFltrIdx), utils.ToJSON(fltridx))
 		}
 	case utils.Move:
 		if err := fltrMigrator.dmIN.DataManager().SetFilter(expFilters); err != nil {
@@ -411,7 +411,7 @@ func testFltrITMigratev2(t *testing.T) {
 	if fltridx, err := fltrMigrator.dmOut.DataManager().GetFilterIndexes(utils.PrefixToIndexCache[utils.AttributeProfilePrefix], utils.ConcatenatedKey(attrProf.Tenant, utils.META_ANY), utils.MetaString, nil); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expFltrIdx, fltridx) {
-		t.Errorf("Expected %v, recived: %v", utils.ToJSON(expFltrIdx), utils.ToJSON(fltridx))
+		t.Errorf("Expected %v, received: %v", utils.ToJSON(expFltrIdx), utils.ToJSON(fltridx))
 	}
 }
 

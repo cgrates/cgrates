@@ -29,12 +29,12 @@ func TestApierCfgloadFromJsonCfg(t *testing.T) {
 	if err := aCfg.loadFromJsonCfg(nil); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(aCfg, expected) {
-		t.Errorf("Expected: %+v ,recived: %+v", expected, aCfg)
+		t.Errorf("Expected: %+v ,received: %+v", expected, aCfg)
 	}
 	if err := aCfg.loadFromJsonCfg(new(ApierJsonCfg)); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(aCfg, expected) {
-		t.Errorf("Expected: %+v ,recived: %+v", expected, aCfg)
+		t.Errorf("Expected: %+v ,received: %+v", expected, aCfg)
 	}
 	cfgJSONStr := `{
 	"apiers": {
@@ -57,7 +57,7 @@ func TestApierCfgloadFromJsonCfg(t *testing.T) {
 	} else if err = aCfg.loadFromJsonCfg(jsnaCfg); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, aCfg) {
-		t.Errorf("Expected: %+v , recived: %+v", expected, aCfg)
+		t.Errorf("Expected: %+v , received: %+v", expected, aCfg)
 	}
 }
 
@@ -84,7 +84,7 @@ func TestApierCfgAsMapInterface(t *testing.T) {
 	} else if err = aCfg.loadFromJsonCfg(jsnaCfg); err != nil {
 		t.Error(err)
 	} else if rcv := aCfg.AsMapInterface(); !reflect.DeepEqual(eMap, rcv) {
-		t.Errorf("\nExpected: %+v\nRecived: %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
+		t.Errorf("\nExpected: %+v\nReceived: %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
 	}
 
 	cfgJSONStr = `{
@@ -108,6 +108,6 @@ func TestApierCfgAsMapInterface(t *testing.T) {
 	} else if err = aCfg.loadFromJsonCfg(jsnaCfg); err != nil {
 		t.Error(err)
 	} else if rcv := aCfg.AsMapInterface(); !reflect.DeepEqual(eMap, rcv) {
-		t.Errorf("\nExpected: %+v\nRecived: %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
+		t.Errorf("\nExpected: %+v\nReceived: %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
 	}
 }

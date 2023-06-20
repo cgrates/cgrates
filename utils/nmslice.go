@@ -134,7 +134,7 @@ func (nms NMSlice) Empty() bool {
 	return len(nms) == 0
 }
 
-// Len returns the lenght of the slice
+// Len returns the length of the slice
 func (nms *NMSlice) Len() int {
 	return len(*nms)
 }

@@ -29,12 +29,12 @@ func TestHTTPCfgloadFromJsonCfg(t *testing.T) {
 	if err := httpcfg.loadFromJsonCfg(nil); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(httpcfg, expected) {
-		t.Errorf("Expected: %+v ,recived: %+v", expected, httpcfg)
+		t.Errorf("Expected: %+v ,received: %+v", expected, httpcfg)
 	}
 	if err := httpcfg.loadFromJsonCfg(new(HTTPJsonCfg)); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(httpcfg, expected) {
-		t.Errorf("Expected: %+v ,recived: %+v", expected, httpcfg)
+		t.Errorf("Expected: %+v ,received: %+v", expected, httpcfg)
 	}
 	cfgJSONStr := `{
 "http": {										// HTTP server configuration
@@ -61,7 +61,7 @@ func TestHTTPCfgloadFromJsonCfg(t *testing.T) {
 	} else if err = httpcfg.loadFromJsonCfg(jsnhttpCfg); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, httpcfg) {
-		t.Errorf("Expected: %+v , recived: %+v", expected, httpcfg)
+		t.Errorf("Expected: %+v , received: %+v", expected, httpcfg)
 	}
 }
 
@@ -94,6 +94,6 @@ func TestHTTPCfgAsMapInterface(t *testing.T) {
 	} else if err = httpcfg.loadFromJsonCfg(jsnhttpCfg); err != nil {
 		t.Error(err)
 	} else if rcv := httpcfg.AsMapInterface(); !reflect.DeepEqual(eMap, rcv) {
-		t.Errorf("Expected: %+v ,\n recived: %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
+		t.Errorf("Expected: %+v ,\n received: %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
 	}
 }

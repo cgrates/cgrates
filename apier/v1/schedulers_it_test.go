@@ -91,7 +91,7 @@ func TestSchedWithFiltersSingleAccount(t *testing.T) {
 	}
 }
 
-// TestSchedWithFilters2 will execute actions for accounts 1002 and 1003 ( 1001 will be skiped )
+// TestSchedWithFilters2 will execute actions for accounts 1002 and 1003 ( 1001 will be skipped )
 func TestSchedWithFilters2(t *testing.T) {
 	switch *dbType {
 	case utils.MetaInternal:

@@ -310,7 +310,7 @@ func (acc *Account) getBalancesForPrefix(prefix, category, tor,
 							allInclude = allInclude && inclDest
 						}
 					}
-					// check wheter all destination ids in the balance were exclusions
+					// check whether all destination ids in the balance were exclusions
 					allExclude := true
 					for _, inclDest := range b.DestinationIDs {
 						if inclDest {

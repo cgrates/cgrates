@@ -3,7 +3,7 @@
 
 "diameter_agent": {
 	"request_processors": [
-		{   // this request proccessor is only used to test that an error message
+		{   // this request processor is only used to test that an error message
 			// is sent if one is raised when proccesing the request
 			"id": "ErrorProcessing",
 			"filters": [

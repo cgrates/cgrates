@@ -26,7 +26,7 @@ type TPReader interface {
 
 // TPLoader will read a record from TPReader and write it out to dataManager
 type TPLoader struct {
-	srcType    string       // needed by Load for choosing destiantion
+	srcType    string       // needed by Load for choosing destination
 	dataReader TPReader     // provides data to load
 	dm         *DataManager // writes data to load
 }

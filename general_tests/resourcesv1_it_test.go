@@ -192,7 +192,7 @@ func testV1RsAuthorize(t *testing.T) {
 		t.Errorf("Expecting reply to not be nil")
 		// reply shoud not be nil so exit function
 		// to avoid nil segmentation fault;
-		// if this happens try to run this test manualy
+		// if this happens try to run this test manually
 		return
 	}
 	if len(*reply) != 1 {

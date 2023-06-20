@@ -30,12 +30,12 @@ func TestThresholdSCfgloadFromJsonCfg(t *testing.T) {
 	if err := thscfg.loadFromJsonCfg(nil); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(thscfg, expected) {
-		t.Errorf("Expected: %+v ,recived: %+v", expected, thscfg)
+		t.Errorf("Expected: %+v ,received: %+v", expected, thscfg)
 	}
 	if err := thscfg.loadFromJsonCfg(new(ThresholdSJsonCfg)); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(thscfg, expected) {
-		t.Errorf("Expected: %+v ,recived: %+v", expected, thscfg)
+		t.Errorf("Expected: %+v ,received: %+v", expected, thscfg)
 	}
 	cfgJSONStr := `{
 "thresholds": {								// Threshold service (*new)
@@ -56,7 +56,7 @@ func TestThresholdSCfgloadFromJsonCfg(t *testing.T) {
 	} else if err = thscfg.loadFromJsonCfg(jsnThSCfg); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, thscfg) {
-		t.Errorf("Expected: %+v , recived: %+v", expected, thscfg)
+		t.Errorf("Expected: %+v , received: %+v", expected, thscfg)
 	}
 }
 
@@ -87,7 +87,7 @@ func TestThresholdSCfgAsMapInterface(t *testing.T) {
 	} else if err = thscfg.loadFromJsonCfg(jsnThSCfg); err != nil {
 		t.Error(err)
 	} else if rcv := thscfg.AsMapInterface(); !reflect.DeepEqual(eMap, rcv) {
-		t.Errorf("\nExpected: %+v\nRecived: %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
+		t.Errorf("\nExpected: %+v\nReceived: %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
 	}
 
 	cfgJSONStr = `{
@@ -115,6 +115,6 @@ func TestThresholdSCfgAsMapInterface(t *testing.T) {
 	} else if err = thscfg.loadFromJsonCfg(jsnThSCfg); err != nil {
 		t.Error(err)
 	} else if rcv := thscfg.AsMapInterface(); !reflect.DeepEqual(eMap, rcv) {
-		t.Errorf("\nExpected: %+v\nRecived: %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
+		t.Errorf("\nExpected: %+v\nReceived: %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
 	}
 }

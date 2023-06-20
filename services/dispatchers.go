@@ -142,7 +142,7 @@ func (dspS *DispatcherService) Start() (err error) {
 
 // Reload handles the change of config
 func (dspS *DispatcherService) Reload() (err error) {
-	return // for the momment nothing to reload
+	return // for the moment nothing to reload
 }
 
 // Shutdown stops the service

@@ -325,7 +325,7 @@ func resetCountersAction(ub *Account, a *Action, acs Actions, extraData any) (er
 }
 
 func genericMakeNegative(a *Action) {
-	if a.Balance != nil && a.Balance.GetValue() > 0 { // only apply if not allready negative
+	if a.Balance != nil && a.Balance.GetValue() > 0 { // only apply if not already negative
 		a.Balance.SetValue(-a.Balance.GetValue())
 	}
 }
@@ -734,7 +734,7 @@ Please also note the initial dot .
 Currently there are following objects that can be used:
 
 Account -  the account that this action is called on
-Action - the action with all it's attributs
+Action - the action with all its attributes
 Actions - the list of actions in the current action set
 Sq - CDRStatsQueueTriggered object
 

@@ -153,7 +153,7 @@ func testV1RsGetResourcesForEvent(t *testing.T) {
 		t.Errorf("Expecting reply to not be nil")
 		// reply shoud not be nil so exit function
 		// to avoid nil segmentation fault;
-		// if this happens try to run this test manualy
+		// if this happens try to run this test manually
 		return
 	}
 	if len(*reply) != 1 {
@@ -505,7 +505,7 @@ func testV1RsReleaseResource(t *testing.T) {
 		t.Errorf("Expecting rs to not be nil")
 		// rs shoud not be nil so exit function
 		// to avoid nil segmentation fault;
-		// if this happens try to run this test manualy
+		// if this happens try to run this test manually
 		return
 	}
 	// make sure Resource1 have no more active resources
@@ -561,7 +561,7 @@ func testV1RsDBStore(t *testing.T) {
 		t.Errorf("Expecting rs to not be nil")
 		// rs shoud not be nil so exit function
 		// to avoid nil segmentation fault;
-		// if this happens try to run this test manualy
+		// if this happens try to run this test manually
 		return
 	}
 	// count resources before restart
@@ -709,7 +709,7 @@ func testV1RsRemResourceProfile(t *testing.T) {
 	}
 	if err := rlsV1Rpc.Call(utils.APIerSv1RemoveResourceProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: rlsConfig.ID}, &resp); err.Error() != utils.ErrNotFound.Error() {
-		t.Errorf("Expected error: %v recived: %v", utils.ErrNotFound, err)
+		t.Errorf("Expected error: %v received: %v", utils.ErrNotFound, err)
 	}
 }
 

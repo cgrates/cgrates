@@ -159,7 +159,7 @@ func (m *Migrator) migrateV1CDRSTATS() (err error) {
 	if m.dryRun {
 		return
 	}
-	// All done, update version wtih current one
+	// All done, update version with current one
 	vrs := engine.Versions{utils.StatS: engine.CurrentDataDBVersions()[utils.StatS]}
 	if err = m.dmOut.DataManager().DataDB().SetVersions(vrs, false); err != nil {
 		return utils.NewCGRError(utils.Migrator,
@@ -218,7 +218,7 @@ func (m *Migrator) migrateV2Stats() (err error) {
 	if m.dryRun {
 		return
 	}
-	// All done, update version wtih current one
+	// All done, update version with current one
 	vrs := engine.Versions{utils.StatS: engine.CurrentDataDBVersions()[utils.StatS]}
 	if err = m.dmOut.DataManager().DataDB().SetVersions(vrs, false); err != nil {
 		return utils.NewCGRError(utils.Migrator,

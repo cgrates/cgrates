@@ -419,7 +419,7 @@ func (rS *ResourceService) runBackup() {
 // storeResources represents one task of complete backup
 func (rS *ResourceService) storeResources() {
 	var failedRIDs []string
-	for { // don't stop untill we store all dirty resources
+	for { // don't stop until we store all dirty resources
 		rS.srMux.Lock()
 		rID := rS.storedResources.GetOne()
 		if rID != "" {

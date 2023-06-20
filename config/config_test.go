@@ -313,61 +313,61 @@ func TestCgrCfgJSONDefaultsListen(t *testing.T) {
 
 func TestCgrCfgJSONDefaultsjsnDataDb(t *testing.T) {
 	if cgrCfg.DataDbCfg().DataDbType != "*redis" {
-		t.Errorf("Expecting: redis , recived: %+v", cgrCfg.DataDbCfg().DataDbType)
+		t.Errorf("Expecting: redis , received: %+v", cgrCfg.DataDbCfg().DataDbType)
 	}
 	if cgrCfg.DataDbCfg().DataDbHost != "127.0.0.1" {
-		t.Errorf("Expecting: 127.0.0.1 , recived: %+v", cgrCfg.DataDbCfg().DataDbHost)
+		t.Errorf("Expecting: 127.0.0.1 , received: %+v", cgrCfg.DataDbCfg().DataDbHost)
 	}
 	if cgrCfg.DataDbCfg().DataDbPort != "6379" {
-		t.Errorf("Expecting: 6379 , recived: %+v", cgrCfg.DataDbCfg().DataDbPort)
+		t.Errorf("Expecting: 6379 , received: %+v", cgrCfg.DataDbCfg().DataDbPort)
 	}
 	if cgrCfg.DataDbCfg().DataDbName != "10" {
-		t.Errorf("Expecting: 10 , recived: %+v", cgrCfg.DataDbCfg().DataDbName)
+		t.Errorf("Expecting: 10 , received: %+v", cgrCfg.DataDbCfg().DataDbName)
 	}
 	if cgrCfg.DataDbCfg().DataDbUser != "cgrates" {
-		t.Errorf("Expecting: cgrates , recived: %+v", cgrCfg.DataDbCfg().DataDbUser)
+		t.Errorf("Expecting: cgrates , received: %+v", cgrCfg.DataDbCfg().DataDbUser)
 	}
 	if cgrCfg.DataDbCfg().DataDbPass != "" {
-		t.Errorf("Expecting:  , recived: %+v", cgrCfg.DataDbCfg().DataDbPass)
+		t.Errorf("Expecting:  , received: %+v", cgrCfg.DataDbCfg().DataDbPass)
 	}
 	if len(cgrCfg.DataDbCfg().RmtConns) != 0 {
-		t.Errorf("Expecting:  0, recived: %+v", len(cgrCfg.DataDbCfg().RmtConns))
+		t.Errorf("Expecting:  0, received: %+v", len(cgrCfg.DataDbCfg().RmtConns))
 	}
 	if len(cgrCfg.DataDbCfg().RplConns) != 0 {
-		t.Errorf("Expecting:  0, recived: %+v", len(cgrCfg.DataDbCfg().RplConns))
+		t.Errorf("Expecting:  0, received: %+v", len(cgrCfg.DataDbCfg().RplConns))
 	}
 }
 
 func TestCgrCfgJSONDefaultsStorDB(t *testing.T) {
 	if cgrCfg.StorDbCfg().Type != "*mysql" {
-		t.Errorf("Expecting: mysql , recived: %+v", cgrCfg.StorDbCfg().Type)
+		t.Errorf("Expecting: mysql , received: %+v", cgrCfg.StorDbCfg().Type)
 	}
 	if cgrCfg.StorDbCfg().Host != "127.0.0.1" {
-		t.Errorf("Expecting: 127.0.0.1 , recived: %+v", cgrCfg.StorDbCfg().Host)
+		t.Errorf("Expecting: 127.0.0.1 , received: %+v", cgrCfg.StorDbCfg().Host)
 	}
 	if cgrCfg.StorDbCfg().Port != "3306" {
-		t.Errorf("Expecting: 3306 , recived: %+v", cgrCfg.StorDbCfg().Port)
+		t.Errorf("Expecting: 3306 , received: %+v", cgrCfg.StorDbCfg().Port)
 	}
 	if cgrCfg.StorDbCfg().Name != "cgrates" {
-		t.Errorf("Expecting: cgrates , recived: %+v", cgrCfg.StorDbCfg().Name)
+		t.Errorf("Expecting: cgrates , received: %+v", cgrCfg.StorDbCfg().Name)
 	}
 	if cgrCfg.StorDbCfg().User != "cgrates" {
-		t.Errorf("Expecting: cgrates , recived: %+v", cgrCfg.StorDbCfg().User)
+		t.Errorf("Expecting: cgrates , received: %+v", cgrCfg.StorDbCfg().User)
 	}
 	if cgrCfg.StorDbCfg().Password != "" {
-		t.Errorf("Expecting: , recived: %+v", cgrCfg.StorDbCfg().Password)
+		t.Errorf("Expecting: , received: %+v", cgrCfg.StorDbCfg().Password)
 	}
 	if cgrCfg.StorDbCfg().MaxOpenConns != 100 {
-		t.Errorf("Expecting: 100 , recived: %+v", cgrCfg.StorDbCfg().MaxOpenConns)
+		t.Errorf("Expecting: 100 , received: %+v", cgrCfg.StorDbCfg().MaxOpenConns)
 	}
 	if cgrCfg.StorDbCfg().MaxIdleConns != 10 {
-		t.Errorf("Expecting: 10 , recived: %+v", cgrCfg.StorDbCfg().MaxIdleConns)
+		t.Errorf("Expecting: 10 , received: %+v", cgrCfg.StorDbCfg().MaxIdleConns)
 	}
 	if !reflect.DeepEqual(cgrCfg.StorDbCfg().StringIndexedFields, []string{}) {
-		t.Errorf("Expecting: %+v , recived: %+v", []string{}, cgrCfg.StorDbCfg().StringIndexedFields)
+		t.Errorf("Expecting: %+v , received: %+v", []string{}, cgrCfg.StorDbCfg().StringIndexedFields)
 	}
 	if !reflect.DeepEqual(cgrCfg.StorDbCfg().PrefixIndexedFields, []string{}) {
-		t.Errorf("Expecting: %+v , recived: %+v", []string{}, cgrCfg.StorDbCfg().PrefixIndexedFields)
+		t.Errorf("Expecting: %+v , received: %+v", []string{}, cgrCfg.StorDbCfg().PrefixIndexedFields)
 	}
 }
 
@@ -1944,6 +1944,6 @@ func TestGeneralCfg(t *testing.T) {
 	} else if err = gencfg.loadFromJsonCfg(jsnGenCfg); err != nil {
 		t.Error(err)
 	} else if rcv := gencfg.AsMapInterface(); !reflect.DeepEqual(eMap, rcv) {
-		t.Errorf("Expected: %+v\nRecived: %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
+		t.Errorf("Expected: %+v\nReceived: %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
 	}
 }

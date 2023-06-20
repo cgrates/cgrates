@@ -24,7 +24,7 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-// NewSchedulerSv1 retuns the API for SchedulerS
+// NewSchedulerSv1 returns the API for SchedulerS
 func NewSchedulerSv1(cgrcfg *config.CGRConfig) *SchedulerSv1 {
 	return &SchedulerSv1{cgrcfg: cgrcfg}
 }

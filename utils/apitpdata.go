@@ -562,7 +562,7 @@ type ExportedFileCdrs struct {
 	TotalRecords              int               // Number of CDRs to be exported
 	TotalCost                 float64           // Sum of all costs in exported CDRs
 	FirstOrderId, LastOrderId int64             // The order id of the last exported CDR
-	ExportedCgrIds            []string          // List of successfuly exported cgrids in the file
+	ExportedCgrIds            []string          // List of successfully exported cgrids in the file
 	UnexportedCgrIds          map[string]string // Map of errored CDRs, map key is cgrid, value will be the error string
 }
 

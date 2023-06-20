@@ -29,12 +29,12 @@ func TestChargerSCfgloadFromJsonCfg(t *testing.T) {
 	if err := chgscfg.loadFromJsonCfg(nil); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(chgscfg, expected) {
-		t.Errorf("Expected: %+v ,recived: %+v", expected, chgscfg)
+		t.Errorf("Expected: %+v ,received: %+v", expected, chgscfg)
 	}
 	if err := chgscfg.loadFromJsonCfg(new(ChargerSJsonCfg)); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(chgscfg, expected) {
-		t.Errorf("Expected: %+v ,recived: %+v", expected, chgscfg)
+		t.Errorf("Expected: %+v ,received: %+v", expected, chgscfg)
 	}
 	cfgJSONStr := `{
 "chargers": {								// Charger service
@@ -56,7 +56,7 @@ func TestChargerSCfgloadFromJsonCfg(t *testing.T) {
 	} else if err = chgscfg.loadFromJsonCfg(jsnChgCfg); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, chgscfg) {
-		t.Errorf("Expected: %+v , recived: %+v", expected, chgscfg)
+		t.Errorf("Expected: %+v , received: %+v", expected, chgscfg)
 	}
 }
 
@@ -86,7 +86,7 @@ func TestChargerSCfgAsMapInterface(t *testing.T) {
 	} else if err = chgscfg.loadFromJsonCfg(jsnChgCfg); err != nil {
 		t.Error(err)
 	} else if rcv := chgscfg.AsMapInterface(); !reflect.DeepEqual(eMap, rcv) {
-		t.Errorf("\nExpected: %+v\nRecived: %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
+		t.Errorf("\nExpected: %+v\nReceived: %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
 	}
 
 	cfgJSONStr = `{
@@ -113,6 +113,6 @@ func TestChargerSCfgAsMapInterface(t *testing.T) {
 	} else if err = chgscfg.loadFromJsonCfg(jsnChgCfg); err != nil {
 		t.Error(err)
 	} else if rcv := chgscfg.AsMapInterface(); !reflect.DeepEqual(eMap, rcv) {
-		t.Errorf("\nExpected: %+v\nRecived: %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
+		t.Errorf("\nExpected: %+v\nReceived: %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
 	}
 }

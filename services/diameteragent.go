@@ -87,7 +87,7 @@ func (da *DiameterAgent) Reload() (err error) {
 
 // Shutdown stops the service
 func (da *DiameterAgent) Shutdown() (err error) {
-	return // no shutdown for the momment
+	return // no shutdown for the moment
 }
 
 // IsRunning returns if the service is running

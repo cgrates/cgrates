@@ -29,12 +29,12 @@ func TestRadiusAgentCfgloadFromJsonCfg(t *testing.T) {
 	if err := racfg.loadFromJsonCfg(nil, utils.INFIELD_SEP); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(racfg, expected) {
-		t.Errorf("Expected: %+v ,recived: %+v", expected, racfg)
+		t.Errorf("Expected: %+v ,received: %+v", expected, racfg)
 	}
 	if err := racfg.loadFromJsonCfg(new(RadiusAgentJsonCfg), utils.INFIELD_SEP); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(racfg, expected) {
-		t.Errorf("Expected: %+v ,recived: %+v", expected, racfg)
+		t.Errorf("Expected: %+v ,received: %+v", expected, racfg)
 	}
 	cfgJSONStr := `{
 "radius_agent": {
@@ -67,7 +67,7 @@ func TestRadiusAgentCfgloadFromJsonCfg(t *testing.T) {
 	} else if err = racfg.loadFromJsonCfg(jsnRaCfg, utils.INFIELD_SEP); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, racfg) {
-		t.Errorf("Expected: %+v , recived: %+v", utils.ToJSON(expected), utils.ToJSON(racfg))
+		t.Errorf("Expected: %+v , received: %+v", utils.ToJSON(expected), utils.ToJSON(racfg))
 	}
 }
 
@@ -111,6 +111,6 @@ func TestRadiusAgentCfgAsMapInterface(t *testing.T) {
 	} else if err = racfg.loadFromJsonCfg(jsnRaCfg, utils.INFIELD_SEP); err != nil {
 		t.Error(err)
 	} else if rcv := racfg.AsMapInterface(utils.EmptyString); !reflect.DeepEqual(eMap, rcv) {
-		t.Errorf("\nExpected: %+v\nRecived: %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
+		t.Errorf("\nExpected: %+v\nReceived: %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
 	}
 }

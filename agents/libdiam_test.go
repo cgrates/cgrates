@@ -357,7 +357,7 @@ func TestMessageSetAVPsWithPath5(t *testing.T) {
 	}
 
 	if !reflect.DeepEqual(eMessage.String(), m.String()) {
-		t.Errorf("Expected %s, recived %s", utils.ToJSON(eMessage), utils.ToJSON(m))
+		t.Errorf("Expected %s, received %s", utils.ToJSON(eMessage), utils.ToJSON(m))
 		// t.Errorf("Expecting: %+v \n, received: %+v \n", eMessage, m)
 	}
 }
@@ -461,7 +461,7 @@ func TestUpdateDiamMsgFromNavMap1(t *testing.T) {
 		t.Error(err)
 	}
 	if !reflect.DeepEqual(eMessage.String(), m2.String()) {
-		t.Errorf("Expected %s, recived %s", utils.ToJSON(eMessage), utils.ToJSON(m2))
+		t.Errorf("Expected %s, received %s", utils.ToJSON(eMessage), utils.ToJSON(m2))
 	}
 }
 
@@ -555,7 +555,7 @@ func TestUpdateDiamMsgFromNavMap2(t *testing.T) {
 		t.Error(err)
 	}
 	if !reflect.DeepEqual(eMessage.String(), m2.String()) {
-		t.Errorf("Expected %s, recived %s", utils.ToJSON(eMessage), utils.ToJSON(m2))
+		t.Errorf("Expected %s, received %s", utils.ToJSON(eMessage), utils.ToJSON(m2))
 	}
 }
 
@@ -626,7 +626,7 @@ func TestUpdateDiamMsgFromNavMap3(t *testing.T) {
 		t.Error(err)
 	}
 	if !reflect.DeepEqual(eMessage.String(), m2.String()) {
-		t.Errorf("Expected %s, recived %s", utils.ToJSON(eMessage), utils.ToJSON(m2))
+		t.Errorf("Expected %s, received %s", utils.ToJSON(eMessage), utils.ToJSON(m2))
 	}
 }
 
@@ -738,7 +738,7 @@ func TestUpdateDiamMsgFromNavMap4(t *testing.T) {
 		t.Error(err)
 	}
 	if !reflect.DeepEqual(eMessage.String(), m2.String()) {
-		t.Errorf("Expected %s, recived %s", utils.ToJSON(eMessage), utils.ToJSON(m2))
+		t.Errorf("Expected %s, received %s", utils.ToJSON(eMessage), utils.ToJSON(m2))
 	}
 }
 

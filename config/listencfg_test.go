@@ -27,12 +27,12 @@ func TestListenCfgloadFromJsonCfg(t *testing.T) {
 	if err := lstcfg.loadFromJsonCfg(nil); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(lstcfg, expected) {
-		t.Errorf("Expected: %+v ,recived: %+v", expected, lstcfg)
+		t.Errorf("Expected: %+v ,received: %+v", expected, lstcfg)
 	}
 	if err := lstcfg.loadFromJsonCfg(new(ListenJsonCfg)); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(lstcfg, expected) {
-		t.Errorf("Expected: %+v ,recived: %+v", expected, lstcfg)
+		t.Errorf("Expected: %+v ,received: %+v", expected, lstcfg)
 	}
 	cfgJSONStr := `{
 "listen": {
@@ -59,6 +59,6 @@ func TestListenCfgloadFromJsonCfg(t *testing.T) {
 	} else if err = lstcfg.loadFromJsonCfg(jsnLstCfg); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, lstcfg) {
-		t.Errorf("Expected: %+v , recived: %+v", expected, lstcfg)
+		t.Errorf("Expected: %+v , received: %+v", expected, lstcfg)
 	}
 }

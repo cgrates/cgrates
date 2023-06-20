@@ -29,12 +29,12 @@ func TestSchedulerCfgloadFromJsonCfg(t *testing.T) {
 	if err := schdcfg.loadFromJsonCfg(nil); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(schdcfg, expected) {
-		t.Errorf("Expected: %+v ,recived: %+v", expected, schdcfg)
+		t.Errorf("Expected: %+v ,received: %+v", expected, schdcfg)
 	}
 	if err := schdcfg.loadFromJsonCfg(new(SchedulerJsonCfg)); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(schdcfg, expected) {
-		t.Errorf("Expected: %+v ,recived: %+v", expected, schdcfg)
+		t.Errorf("Expected: %+v ,received: %+v", expected, schdcfg)
 	}
 	cfgJSONStr := `{
 "schedulers": {
@@ -53,7 +53,7 @@ func TestSchedulerCfgloadFromJsonCfg(t *testing.T) {
 	} else if err = schdcfg.loadFromJsonCfg(jsnSchCfg); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, schdcfg) {
-		t.Errorf("Expected: %+v , recived: %+v", expected, schdcfg)
+		t.Errorf("Expected: %+v , received: %+v", expected, schdcfg)
 	}
 }
 
@@ -78,6 +78,6 @@ func TestSchedulerCfgAsMapInterface(t *testing.T) {
 	} else if err = schdcfg.loadFromJsonCfg(jsnSchCfg); err != nil {
 		t.Error(err)
 	} else if rcv := schdcfg.AsMapInterface(); !reflect.DeepEqual(eMap, rcv) {
-		t.Errorf("\nExpected: %+v\nRecived: %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
+		t.Errorf("\nExpected: %+v\nReceived: %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
 	}
 }

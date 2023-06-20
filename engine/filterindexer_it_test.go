@@ -197,7 +197,7 @@ func testITGetFilterIndexes(t *testing.T) {
 	} else if !reflect.DeepEqual(eIdxes, rcv) {
 		t.Errorf("Expecting: %+v, received: %+v", eIdxes, rcv)
 	}
-	if _, err := dataManager.GetFilterIndexes("unknown_key", "unkonwn_tenant", utils.EmptyString, nil); err == nil || err != utils.ErrNotFound {
+	if _, err := dataManager.GetFilterIndexes("unknown_key", "unknown_tenant", utils.EmptyString, nil); err == nil || err != utils.ErrNotFound {
 		t.Error(err)
 	}
 }

@@ -27,7 +27,7 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-// NewBareEventCost will intialize the EventCost with minimum information
+// NewBareEventCost will initialize the EventCost with minimum information
 func NewBareEventCost() *EventCost {
 	return &EventCost{
 		Rating:        make(Rating),
@@ -514,7 +514,7 @@ func (ec *EventCost) appendCIlFromEC(oEC *EventCost, cIlIdx int) {
 		ec.Charges = append(ec.Charges, cIl)
 		if *idxLastCF > 1 { // add the remaining part out of original ChargingInterval
 			cIlCln.CompressFactor = *idxLastCF - 1
-			// append the cloned charge in order to not keep refrences
+			// append the cloned charge in order to not keep references
 			// of the increments used for previous charge
 			ec.Charges = append(ec.Charges, cIlCln.Clone())
 		}

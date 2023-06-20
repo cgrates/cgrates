@@ -334,7 +334,7 @@ func testSessionsVoiceMixedRefund(t *testing.T) {
 		t.Error(err)
 	} else if acnt.BalanceMap[utils.VOICE].GetTotalValue() != eVoiceVal ||
 		acnt.BalanceMap[utils.MONETARY].GetTotalValue() != eMoneyVal {
-		t.Errorf("Expected: %f, received: %f, expetced money: %f, recieved money : %f",
+		t.Errorf("Expected: %f, received: %f, expetced money: %f, received money : %f",
 			eVoiceVal, acnt.BalanceMap[utils.VOICE].GetTotalValue(),
 			eMoneyVal, acnt.BalanceMap[utils.MONETARY].GetTotalValue())
 	}

@@ -124,7 +124,7 @@ func testSes4SetAccount(t *testing.T) {
 }
 
 func testSes4CDRsProcessCDR(t *testing.T) {
-	// proccess twice the postpaid event that doesn't cost
+	// process twice the postpaid event that doesn't cost
 	// this reproduce the issue #2123:
 	// rerate a free postpaid event in the CDRServer
 	// will make the BalanceInfo nil and result in a panic

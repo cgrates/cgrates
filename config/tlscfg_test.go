@@ -29,12 +29,12 @@ func TestTlsCfgloadFromJsonCfg(t *testing.T) {
 	if err := tlscfg.loadFromJsonCfg(nil); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(tlscfg, expected) {
-		t.Errorf("Expected: %+v ,recived: %+v", expected, tlscfg)
+		t.Errorf("Expected: %+v ,received: %+v", expected, tlscfg)
 	}
 	if err := tlscfg.loadFromJsonCfg(new(TlsJsonCfg)); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(tlscfg, expected) {
-		t.Errorf("Expected: %+v ,recived: %+v", expected, tlscfg)
+		t.Errorf("Expected: %+v ,received: %+v", expected, tlscfg)
 	}
 	cfgJSONStr := `	{
 	"tls":{
@@ -64,7 +64,7 @@ func TestTlsCfgloadFromJsonCfg(t *testing.T) {
 	} else if err = tlscfg.loadFromJsonCfg(jsntlsCfg); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, tlscfg) {
-		t.Errorf("Expected: %+v , recived: %+v", expected, tlscfg)
+		t.Errorf("Expected: %+v , received: %+v", expected, tlscfg)
 	}
 }
 func TestTlsCfgAsMapInterface(t *testing.T) {
@@ -97,7 +97,7 @@ func TestTlsCfgAsMapInterface(t *testing.T) {
 	} else if err = tlscfg.loadFromJsonCfg(jsntlsCfg); err != nil {
 		t.Error(err)
 	} else if rcv := tlscfg.AsMapInterface(); !reflect.DeepEqual(eMap, rcv) {
-		t.Errorf("Expected: %+v,\nRecived: %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
+		t.Errorf("Expected: %+v,\nReceived: %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
 	}
 
 	cfgJSONStr = `	{
@@ -128,6 +128,6 @@ func TestTlsCfgAsMapInterface(t *testing.T) {
 	} else if err = tlscfg.loadFromJsonCfg(jsntlsCfg); err != nil {
 		t.Error(err)
 	} else if rcv := tlscfg.AsMapInterface(); !reflect.DeepEqual(eMap, rcv) {
-		t.Errorf("Expected: %+v,\nRecived: %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
+		t.Errorf("Expected: %+v,\nReceived: %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
 	}
 }

@@ -92,7 +92,7 @@ type RatingInfo struct {
 func (ri RatingInfo) SelectRatingIntevalsForTimespan(ts *TimeSpan) (result RateIntervalList) {
 	sorter := &RateIntervalTimeSorter{referenceTime: ts.TimeStart, ris: ri.RateIntervals}
 	rateIntervals := sorter.Sort()
-	// get the rating interval closest to begining of timespan
+	// get the rating interval closest to beginning of timespan
 	var delta time.Duration = -1
 	var bestRateIntervalIndex int
 	var bestIntervalWeight float64

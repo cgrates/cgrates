@@ -123,7 +123,7 @@ func (rit *RITiming) CronString() string {
 }
 
 /*
-Returns a time object that represents the end of the interval realtive to the received time
+Returns a time object that represents the end of the interval relative to the received time
 */
 func (rit *RITiming) getRightMargin(t time.Time) (rigthtTime time.Time) {
 	year, month, day := t.Year(), t.Month(), t.Day()
@@ -141,7 +141,7 @@ func (rit *RITiming) getRightMargin(t time.Time) (rigthtTime time.Time) {
 	return time.Date(year, month, day, hour, min, sec, nsec, loc).Add(time.Second)
 }
 
-// Returns a time object that represents the start of the interval realtive to the received time
+// Returns a time object that represents the start of the interval relative to the received time
 func (rit *RITiming) getLeftMargin(t time.Time) (rigthtTime time.Time) {
 	year, month, day := t.Year(), t.Month(), t.Day()
 	hour, min, sec, nsec := 0, 0, 0, 0
@@ -156,7 +156,7 @@ func (rit *RITiming) getLeftMargin(t time.Time) (rigthtTime time.Time) {
 	return time.Date(year, month, day, hour, min, sec, nsec, loc)
 }
 
-// Returns wheter the Timing is active at the specified time
+// Returns whether the Timing is active at the specified time
 func (rit *RITiming) IsActiveAt(t time.Time) bool {
 	// check for years
 	if len(rit.Years) > 0 && !rit.Years.Contains(t.Year()) {
@@ -190,7 +190,7 @@ func (rit *RITiming) IsActiveAt(t time.Time) bool {
 	return true
 }
 
-// IsActive returns wheter the Timing is active now
+// IsActive returns whether the Timing is active now
 func (rit *RITiming) IsActive() bool {
 	return rit.IsActiveAt(time.Now())
 }

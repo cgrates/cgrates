@@ -30,12 +30,12 @@ func TestGeneralCfgloadFromJsonCfg(t *testing.T) {
 	if err := gencfg.loadFromJsonCfg(nil); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(gencfg, expected) {
-		t.Errorf("Expected: %+v ,recived: %+v", expected, gencfg)
+		t.Errorf("Expected: %+v ,received: %+v", expected, gencfg)
 	}
 	if err := gencfg.loadFromJsonCfg(new(GeneralJsonCfg)); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(gencfg, expected) {
-		t.Errorf("Expected: %+v ,recived: %+v", expected, gencfg)
+		t.Errorf("Expected: %+v ,received: %+v", expected, gencfg)
 	}
 	cfgJSONStr := `{
 "general": {
@@ -94,7 +94,7 @@ func TestGeneralCfgloadFromJsonCfg(t *testing.T) {
 	} else if err = gencfg.loadFromJsonCfg(jsnGenCfg); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, gencfg) {
-		t.Errorf("Expected: %+v , recived: %+v", expected, gencfg)
+		t.Errorf("Expected: %+v , received: %+v", expected, gencfg)
 	}
 }
 
@@ -165,6 +165,6 @@ func TestGeneralCfgAsMapInterface(t *testing.T) {
 	} else if err = gencfg.loadFromJsonCfg(jsnGenCfg); err != nil {
 		t.Error(err)
 	} else if rcv := gencfg.AsMapInterface(); !reflect.DeepEqual(eMap, rcv) {
-		t.Errorf("\nExpected: %+v\nRecived: %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
+		t.Errorf("\nExpected: %+v\nReceived: %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
 	}
 }

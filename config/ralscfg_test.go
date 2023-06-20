@@ -30,12 +30,12 @@ func TestRalsCfgFromJsonCfg(t *testing.T) {
 	if err := ralscfg.loadFromJsonCfg(nil); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(ralscfg, expected) {
-		t.Errorf("Expected: %+v ,recived: %+v", expected, ralscfg)
+		t.Errorf("Expected: %+v ,received: %+v", expected, ralscfg)
 	}
 	if err := ralscfg.loadFromJsonCfg(new(RalsJsonCfg)); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(ralscfg, expected) {
-		t.Errorf("Expected: %+v ,recived: %+v", expected, ralscfg)
+		t.Errorf("Expected: %+v ,received: %+v", expected, ralscfg)
 	}
 	cfgJSONStr := `{
 "rals": {
@@ -72,7 +72,7 @@ func TestRalsCfgFromJsonCfg(t *testing.T) {
 	} else if err = ralscfg.loadFromJsonCfg(jsnRalsCfg); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, ralscfg) {
-		t.Errorf("Expected: %+v , recived: %+v", utils.ToJSON(expected), utils.ToJSON(ralscfg))
+		t.Errorf("Expected: %+v , received: %+v", utils.ToJSON(expected), utils.ToJSON(ralscfg))
 	}
 }
 
@@ -129,6 +129,6 @@ func TestRalsCfgAsMapInterface(t *testing.T) {
 	} else if err = ralscfg.loadFromJsonCfg(jsnRalsCfg); err != nil {
 		t.Error(err)
 	} else if rcv := ralscfg.AsMapInterface(); !reflect.DeepEqual(eMap, rcv) {
-		t.Errorf("Expected: %+v ,\n recived: %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
+		t.Errorf("Expected: %+v ,\n received: %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
 	}
 }

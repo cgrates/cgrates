@@ -120,7 +120,7 @@ func (m *Migrator) migrateV2SessionSCosts() (err error) {
 	if m.dryRun {
 		return
 	}
-	// All done, update version wtih current one
+	// All done, update version with current one
 	vrs := engine.Versions{utils.SessionSCosts: engine.CurrentStorDBVersions()[utils.SessionSCosts]}
 	if err = m.storDBOut.StorDB().SetVersions(vrs, false); err != nil {
 		return utils.NewCGRError(utils.Migrator,

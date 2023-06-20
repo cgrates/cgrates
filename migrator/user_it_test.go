@@ -203,6 +203,6 @@ func testUsrITMigrateAndMove(t *testing.T) {
 		utils.ConcatenatedKey("cgrates.org", utils.META_ANY), utils.MetaString, nil); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expUsrIdx, usridx) {
-		t.Errorf("Expected %v, recived: %v", utils.ToJSON(expUsrIdx), utils.ToJSON(usridx))
+		t.Errorf("Expected %v, received: %v", utils.ToJSON(expUsrIdx), utils.ToJSON(usridx))
 	}
 }

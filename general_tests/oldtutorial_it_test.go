@@ -127,7 +127,7 @@ package general_tests
 // 			t.Errorf("Expecting rcvKeys.DestinationIDs to not be nil")
 // 			// rcvKeys.DestinationIDs shoud not be nil so exit function
 // 			// to avoid nil segmentation fault;
-// 			// if this happens try to run this test manualy
+// 			// if this happens try to run this test manually
 // 			return
 // 		}
 // 		if len(*expKeys.DestinationIDs) != len(*rcvKeys.DestinationIDs) {
@@ -973,7 +973,7 @@ package general_tests
 // 			t.Error("Unexpected reply received: ", reply)
 // 		}
 // 	}
-// 	// Based on stats, supplier1 should always be better since he has a higer ACD
+// 	// Based on stats, supplier1 should always be better since he has a higher ACD
 // 	eStLcr = &engine.LCRCost{
 // 		Entry: &engine.LCREntry{DestinationId: utils.ANY,
 // 			RPCategory: "lcr_profile1", Strategy: engine.LCR_STRATEGY_QOS,

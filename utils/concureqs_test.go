@@ -34,7 +34,7 @@ func TestConcureqsNewConReqs(t *testing.T) {
 	rcv := NewConReqs(5, MetaBusy)
 
 	if rcv.limit != expected.limit || rcv.strategy != expected.strategy || len(rcv.aReqs) != len(expected.aReqs) {
-		t.Errorf("expected: <%+v>, \nrecived: <%+v>", expected, rcv)
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", expected, rcv)
 	}
 }
 
@@ -48,25 +48,25 @@ func TestConcureqsAllocate(t *testing.T) {
 		err          error
 	}{
 		{
-			name: "if limit is equal to 0",
-			limit: 0,
-			rcv: 0,
+			name:         "if limit is equal to 0",
+			limit:        0,
+			rcv:          0,
 			emptyChannel: false,
-			err: nil,
+			err:          nil,
 		},
 		{
-			name: "limit more than 0",
-			limit: 5,
-			rcv: 4,
+			name:         "limit more than 0",
+			limit:        5,
+			rcv:          4,
 			emptyChannel: false,
-			err: nil,
+			err:          nil,
 		},
 		{
-			name: "limit more than 0 but channel is empty",
-			limit: 5,
-			rcv: 0,
+			name:         "limit more than 0 but channel is empty",
+			limit:        5,
+			rcv:          0,
 			emptyChannel: true,
-			err: errDeny,
+			err:          errDeny,
 		},
 	}
 
@@ -87,7 +87,7 @@ func TestConcureqsAllocate(t *testing.T) {
 			}
 
 			if len(cr.aReqs) != c.rcv {
-				t.Errorf("expected: <%+v>, recived: <%+v>", len(cr.aReqs), c.rcv)
+				t.Errorf("expected: <%+v>, received: <%+v>", len(cr.aReqs), c.rcv)
 			}
 		})
 	}
@@ -96,15 +96,15 @@ func TestConcureqsAllocate(t *testing.T) {
 func TestConcureqsDeallocate(t *testing.T) {
 
 	cases := []struct {
-		name     string
-		limit    int
+		name  string
+		limit int
 	}{
 		{
-			name: "limit is 0",
+			name:  "limit is 0",
 			limit: 0,
 		},
 		{
-			name: "limit is not 0",
+			name:  "limit is not 0",
 			limit: 5,
 		},
 	}
@@ -124,7 +124,7 @@ func TestConcureqsDeallocate(t *testing.T) {
 				cr.Deallocate()
 
 				if len(cr.aReqs) != c.limit {
-					t.Errorf("expected: <%+v>, recived: <%+v>", len(cr.aReqs), c.limit)
+					t.Errorf("expected: <%+v>, received: <%+v>", len(cr.aReqs), c.limit)
 				}
 			}
 

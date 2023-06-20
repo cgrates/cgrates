@@ -93,7 +93,7 @@ func (m *Migrator) migrateV1CDRs() (err error) {
 	if m.dryRun {
 		return
 	}
-	// All done, update version wtih current one
+	// All done, update version with current one
 	vrs := engine.Versions{utils.CDRs: engine.CurrentStorDBVersions()[utils.CDRs]}
 	if err = m.storDBOut.StorDB().SetVersions(vrs, false); err != nil {
 		return utils.NewCGRError(utils.Migrator,
