@@ -218,6 +218,8 @@ func FromMapStringString(m map[string]string, in any) {
 	}
 }
 
+var ErrTypeDidntMatch error = errors.New("Provided value type didn't match obj field type")
+
 func FromMapStringInterface(m map[string]any, in any) error {
 	v := reflect.ValueOf(in)
 	if v.Kind() == reflect.Ptr {
@@ -232,7 +234,7 @@ func FromMapStringInterface(m map[string]any, in any) error {
 			structFieldType := field.Type()
 			val := reflect.ValueOf(fieldValue)
 			if structFieldType != val.Type() {
-				return errors.New("Provided value type didn't match obj field type")
+				return ErrTypeDidntMatch
 			}
 			field.Set(val)
 		}
