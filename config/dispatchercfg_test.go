@@ -30,12 +30,12 @@ func TestDispatcherSCfgloadFromJsonCfg(t *testing.T) {
 	if err := daCfg.loadFromJsonCfg(nil); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(daCfg, expected) {
-		t.Errorf("Expected: %+v ,recived: %+v", expected, daCfg)
+		t.Errorf("Expected: %+v ,received: %+v", expected, daCfg)
 	}
 	if err := daCfg.loadFromJsonCfg(new(DispatcherSJsonCfg)); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(daCfg, expected) {
-		t.Errorf("Expected: %+v ,recived: %+v", expected, daCfg)
+		t.Errorf("Expected: %+v ,received: %+v", expected, daCfg)
 	}
 	cfgJSONStr := `{
 		"dispatchers":{
@@ -62,7 +62,7 @@ func TestDispatcherSCfgloadFromJsonCfg(t *testing.T) {
 	} else if err = daCfg.loadFromJsonCfg(jsnDaCfg); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, daCfg) {
-		t.Errorf("Expected: %+v,\nRecived: %+v", utils.ToJSON(expected), utils.ToJSON(daCfg))
+		t.Errorf("Expected: %+v,\nReceived: %+v", utils.ToJSON(expected), utils.ToJSON(daCfg))
 	}
 }
 
@@ -71,12 +71,12 @@ func TestDispatcherSCfgAsMapInterface(t *testing.T) {
 	if err := daCfg.loadFromJsonCfg(nil); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(daCfg, expected) {
-		t.Errorf("Expected: %+v ,recived: %+v", expected, daCfg)
+		t.Errorf("Expected: %+v ,received: %+v", expected, daCfg)
 	}
 	if err := daCfg.loadFromJsonCfg(new(DispatcherSJsonCfg)); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(daCfg, expected) {
-		t.Errorf("Expected: %+v ,recived: %+v", expected, daCfg)
+		t.Errorf("Expected: %+v ,received: %+v", expected, daCfg)
 	}
 	cfgJSONStr := `{
 		"dispatchers":{
@@ -104,7 +104,7 @@ func TestDispatcherSCfgAsMapInterface(t *testing.T) {
 	} else if err = daCfg.loadFromJsonCfg(jsnDaCfg); err != nil {
 		t.Error(err)
 	} else if rcv := daCfg.AsMapInterface(); !reflect.DeepEqual(eMap, rcv) {
-		t.Errorf("\nExpected: %+v\nRecived: %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
+		t.Errorf("\nExpected: %+v\nReceived: %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
 	}
 
 	cfgJSONStr = `{
@@ -133,6 +133,6 @@ func TestDispatcherSCfgAsMapInterface(t *testing.T) {
 	} else if err = daCfg.loadFromJsonCfg(jsnDaCfg); err != nil {
 		t.Error(err)
 	} else if rcv := daCfg.AsMapInterface(); !reflect.DeepEqual(eMap, rcv) {
-		t.Errorf("\nExpected: %+v\nRecived: %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
+		t.Errorf("\nExpected: %+v\nReceived: %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
 	}
 }

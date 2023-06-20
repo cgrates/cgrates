@@ -215,7 +215,7 @@ func (cM *ConnManager) getConnWithConfig(connID string, connCfg *config.RPCConn,
 			return
 		}
 	case connCfg.Strategy == rpcclient.PoolParallel:
-		rpcConnCfg := connCfg.Conns[0] // for parrallel we need only the first connection
+		rpcConnCfg := connCfg.Conns[0] // for parallel we need only the first connection
 		codec := rpcclient.GOBrpc
 		switch {
 		case rpcConnCfg.Address == rpcclient.InternalRPC:

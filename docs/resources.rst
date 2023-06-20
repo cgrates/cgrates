@@ -70,7 +70,7 @@ AllocationMessage
 	The message returned when this resource is responsible for allocation.
 
 Blocker
-	When specified, no futher resources are processed after this one.
+	When specified, no further resources are processed after this one.
 
 Stored
 	Enable offline backups for this resource

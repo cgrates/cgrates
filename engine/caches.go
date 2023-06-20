@@ -52,7 +52,7 @@ func init() {
 	gob.Register(new(StatDistinct))
 }
 
-// InitCache will instantiate the cache with specific or default configuraiton
+// InitCache will instantiate the cache with specific or default configuration
 func InitCache(cfg config.CacheCfg) {
 	if cfg == nil {
 		cfg = config.CgrConfig().CacheCfg()

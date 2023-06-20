@@ -73,7 +73,7 @@ func (m *Migrator) migrateV1SharedGroups() (err error) {
 		}
 		m.stats[utils.SharedGroups] += 1
 	}
-	// All done, update version wtih current one
+	// All done, update version with current one
 	vrs := engine.Versions{utils.SharedGroups: engine.CurrentStorDBVersions()[utils.SharedGroups]}
 	if err = m.dmOut.DataManager().DataDB().SetVersions(vrs, false); err != nil {
 		return utils.NewCGRError(utils.Migrator,

@@ -29,12 +29,12 @@ func TestLoaderCgrCfgloadFromJsonCfg(t *testing.T) {
 	if err := loadscfg.loadFromJsonCfg(nil); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(loadscfg, expected) {
-		t.Errorf("Expected: %+v ,recived: %+v", expected, loadscfg)
+		t.Errorf("Expected: %+v ,received: %+v", expected, loadscfg)
 	}
 	if err := loadscfg.loadFromJsonCfg(new(LoaderCfgJson)); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(loadscfg, expected) {
-		t.Errorf("Expected: %+v ,recived: %+v", expected, loadscfg)
+		t.Errorf("Expected: %+v ,received: %+v", expected, loadscfg)
 	}
 	cfgJSONStr := `{
 "loader": {									// loader for tariff plans out of .csv files
@@ -58,7 +58,7 @@ func TestLoaderCgrCfgloadFromJsonCfg(t *testing.T) {
 	} else if err = loadscfg.loadFromJsonCfg(jsnLoadersCfg); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, loadscfg) {
-		t.Errorf("Expected: %+v , recived: %+v", utils.ToJSON(expected), utils.ToJSON(loadscfg))
+		t.Errorf("Expected: %+v , received: %+v", utils.ToJSON(expected), utils.ToJSON(loadscfg))
 	}
 }
 
@@ -93,16 +93,16 @@ func TestLoaderCgrCfgAsMapInterface(t *testing.T) {
 	} else if err = loadscfg.loadFromJsonCfg(jsnLoadersCfg); err != nil {
 		t.Error(err)
 	} else if rcv := loadscfg.AsMapInterface(); !reflect.DeepEqual(eMap["tpid"], rcv["tpid"]) {
-		t.Errorf("Expected: %+v, Recived: %+v, at field: '%s'", utils.ToJSON(eMap["tpid"]), utils.ToJSON(rcv["tpid"]), "tpid")
+		t.Errorf("Expected: %+v, Received: %+v, at field: '%s'", utils.ToJSON(eMap["tpid"]), utils.ToJSON(rcv["tpid"]), "tpid")
 	} else if !reflect.DeepEqual(eMap["data_path"], rcv["data_path"]) {
-		t.Errorf("Expected: %+v, Recived: %+v, at field: %s", utils.ToJSON(eMap["data_path"]), utils.ToJSON(rcv["data_path"]), "data_path")
+		t.Errorf("Expected: %+v, Received: %+v, at field: %s", utils.ToJSON(eMap["data_path"]), utils.ToJSON(rcv["data_path"]), "data_path")
 	} else if !reflect.DeepEqual(eMap["disable_reverse"], rcv["disable_reverse"]) {
-		t.Errorf("Expected: %+v, Recived: %+v, at field: %s", utils.ToJSON(eMap["disable_reverse"]), utils.ToJSON(rcv["disable_reverse"]), "disable_reverse")
+		t.Errorf("Expected: %+v, Received: %+v, at field: %s", utils.ToJSON(eMap["disable_reverse"]), utils.ToJSON(rcv["disable_reverse"]), "disable_reverse")
 	} else if !reflect.DeepEqual(eMap["field_separator"], rcv["field_separator"]) {
-		t.Errorf("Expected: %+v, Recived: %+v, at field: %s", utils.ToJSON(eMap["field_separator"]), utils.ToJSON(rcv["field_separator"]), "field_separator")
+		t.Errorf("Expected: %+v, Received: %+v, at field: %s", utils.ToJSON(eMap["field_separator"]), utils.ToJSON(rcv["field_separator"]), "field_separator")
 	} else if !reflect.DeepEqual(eMap["caches_conns"], rcv["caches_conns"]) {
-		t.Errorf("Expected: %+v, Recived: %+v, at field: %s", utils.ToJSON(eMap["caches_conns"]), utils.ToJSON(rcv["caches_conns"]), "caches_conns")
+		t.Errorf("Expected: %+v, Received: %+v, at field: %s", utils.ToJSON(eMap["caches_conns"]), utils.ToJSON(rcv["caches_conns"]), "caches_conns")
 	} else if !reflect.DeepEqual(eMap["scheduler_conns"], rcv["scheduler_conns"]) {
-		t.Errorf("Expected: %+v, Recived: %+v, at field: %s", utils.ToJSON(eMap["scheduler_conns"]), utils.ToJSON(rcv["scheduler_conns"]), "scheduler_conns")
+		t.Errorf("Expected: %+v, Received: %+v, at field: %s", utils.ToJSON(eMap["scheduler_conns"]), utils.ToJSON(rcv["scheduler_conns"]), "scheduler_conns")
 	}
 }

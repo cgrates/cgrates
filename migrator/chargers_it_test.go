@@ -198,7 +198,7 @@ func testChrgITMigrateAndMove(t *testing.T) {
 		Weight:       20,
 	}
 	switch chrgAction {
-	case utils.Migrate: // for the momment only one version of chargers exists
+	case utils.Migrate: // for the moment only one version of chargers exists
 	case utils.Move:
 		if err := chrgMigrator.dmIN.DataManager().SetChargerProfile(chrgPrf, false); err != nil {
 			t.Error(err)

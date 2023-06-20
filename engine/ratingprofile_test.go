@@ -34,11 +34,11 @@ func TestGetRatingProfileForPrefix(t *testing.T) {
 		Destination: "0256098",
 	}
 	cd.LoadRatingPlans()
-	if len(cd.RatingInfos) != 3 || !cd.continousRatingInfos() {
+	if len(cd.RatingInfos) != 3 || !cd.continuousRatingInfos() {
 		t.Logf("0: %+v", cd.RatingInfos[0])
 		t.Logf("1: %+v", cd.RatingInfos[1])
 		t.Logf("2: %+v", cd.RatingInfos[2])
-		t.Errorf("Error loading rating information: %+v %+v", cd.RatingInfos, cd.continousRatingInfos())
+		t.Errorf("Error loading rating information: %+v %+v", cd.RatingInfos, cd.continuousRatingInfos())
 	}
 }
 
@@ -52,12 +52,12 @@ func TestGetRatingProfileForPrefixFirstEmpty(t *testing.T) {
 		Destination: "0256098",
 	}
 	cd.LoadRatingPlans()
-	if len(cd.RatingInfos) != 4 || !cd.continousRatingInfos() {
+	if len(cd.RatingInfos) != 4 || !cd.continuousRatingInfos() {
 		t.Logf("0: %+v", cd.RatingInfos[0])
 		t.Logf("1: %+v", cd.RatingInfos[1])
 		t.Logf("2: %+v", cd.RatingInfos[2])
 		t.Logf("3: %+v", cd.RatingInfos[3])
-		t.Errorf("Error loading rating information: %+v %+v", cd.RatingInfos, cd.continousRatingInfos())
+		t.Errorf("Error loading rating information: %+v %+v", cd.RatingInfos, cd.continuousRatingInfos())
 	}
 }
 
@@ -71,8 +71,8 @@ func TestGetRatingProfileNotFound(t *testing.T) {
 		Destination: "0256098",
 	}
 	cd.LoadRatingPlans()
-	if len(cd.RatingInfos) != 1 || !cd.continousRatingInfos() {
-		t.Errorf("Error loading rating information: %+v %+v", cd.RatingInfos, cd.continousRatingInfos())
+	if len(cd.RatingInfos) != 1 || !cd.continuousRatingInfos() {
+		t.Errorf("Error loading rating information: %+v %+v", cd.RatingInfos, cd.continuousRatingInfos())
 	}
 }
 
@@ -87,7 +87,7 @@ func TestGetRatingProfileFoundButNoDestination(t *testing.T) {
 	}
 	cd.LoadRatingPlans()
 	if len(cd.RatingInfos) != 0 {
-		t.Errorf("Error loading rating information: %+v %+v", cd.RatingInfos, cd.continousRatingInfos())
+		t.Errorf("Error loading rating information: %+v %+v", cd.RatingInfos, cd.continuousRatingInfos())
 	}
 }
 

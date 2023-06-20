@@ -121,7 +121,7 @@ func NewCallDescriptorFromCGREvent(cgrEv *utils.CGREvent,
 		timezone); err != nil {
 		return nil, err
 	}
-	if _, has := cgrEv.Event[utils.AnswerTime]; has { // AnswerTime takes precendence for TimeStart
+	if _, has := cgrEv.Event[utils.AnswerTime]; has { // AnswerTime takes precedence for TimeStart
 		if aTime, err := cgrEv.FieldAsTime(utils.AnswerTime,
 			timezone); err != nil {
 			return nil, err
@@ -143,7 +143,7 @@ func NewCallDescriptorFromCGREvent(cgrEv *utils.CGREvent,
 }
 
 /*
-The input stucture that contains call information.
+The input structure that contains call information.
 */
 type CallDescriptor struct {
 	Category        string
@@ -284,7 +284,7 @@ func (cd *CallDescriptor) LoadRatingPlans() (err error) {
 	var rec int
 	err, rec = cd.getRatingPlansForPrefix(cd.GetKey(cd.Subject), 1)
 	if err == utils.ErrNotFound && rec == 1 {
-		//if err != nil || !cd.continousRatingInfos() {
+		//if err != nil || !cd.continuousRatingInfos() {
 		// use the default subject only if the initial one was not found
 		err, _ = cd.getRatingPlansForPrefix(cd.GetKey(FALLBACK_SUBJECT), 1)
 	}
@@ -294,7 +294,7 @@ func (cd *CallDescriptor) LoadRatingPlans() (err error) {
 		return utils.ErrRatingPlanNotFound
 
 	}
-	if !cd.continousRatingInfos() {
+	if !cd.continuousRatingInfos() {
 		utils.Logger.Err(fmt.Sprintf("Destination %s not authorized for account: %s, subject: %s", cd.Destination, cd.GetAccountKey(), cd.GetKey(cd.Subject)))
 		return utils.ErrUnauthorizedDestination
 	}
@@ -311,7 +311,7 @@ func (cd *CallDescriptor) getRatingPlansForPrefix(key string, recursionDepth int
 	if err != nil || rpf == nil {
 		return utils.ErrNotFound, recursionDepth
 	}
-	if err = rpf.GetRatingPlansForPrefix(cd); err != nil || !cd.continousRatingInfos() {
+	if err = rpf.GetRatingPlansForPrefix(cd); err != nil || !cd.continuousRatingInfos() {
 		// try rating profile fallback
 		recursionDepth++
 		for index := 0; index < len(cd.RatingInfos); index++ {
@@ -358,7 +358,7 @@ func (cd *CallDescriptor) getRatingPlansForPrefix(key string, recursionDepth int
 					}
 					// if this fallbackey covered the interval than skip
 					// the other fallback keys
-					if tempCD.continousRatingInfos() {
+					if tempCD.continuousRatingInfos() {
 						break
 					}
 				}
@@ -369,7 +369,7 @@ func (cd *CallDescriptor) getRatingPlansForPrefix(key string, recursionDepth int
 }
 
 // checks if there is rating info for the entire call duration
-func (cd *CallDescriptor) continousRatingInfos() bool {
+func (cd *CallDescriptor) continuousRatingInfos() bool {
 	if len(cd.RatingInfos) == 0 || cd.RatingInfos[0].ActivationTime.After(cd.TimeStart) {
 		return false
 	}
@@ -413,7 +413,7 @@ func (cd *CallDescriptor) GetKey(subject string) string {
 	return utils.ConcatenatedKey(utils.META_OUT, cd.Tenant, cd.Category, subject)
 }
 
-// GetAccountKey returns the key used to retrive the user balance involved in this call
+// GetAccountKey returns the key used to retrieve the user balance involved in this call
 func (cd *CallDescriptor) GetAccountKey() string {
 	subj := cd.Subject
 	if cd.Account != "" {
@@ -515,7 +515,7 @@ func (cd *CallDescriptor) splitInTimeSpans() (timespans []*TimeSpan) {
 }
 
 // if the rate interval for any timespan has a RatingIncrement larger than the timespan duration
-// the timespan must expand potentially overlaping folowing timespans and may exceed call
+// the timespan must expand potentially overlapping following timespans and may exceed call
 // descriptor's initial duration
 func (cd *CallDescriptor) roundTimeSpansToIncrement(timespans TimeSpans) []*TimeSpan {
 	for i := 0; i < len(timespans); i++ {
@@ -556,7 +556,7 @@ func (cd *CallDescriptor) GetCost() (*CallCost, error) {
 	for i, ts := range cc.Timespans {
 		// only add connect fee if this is the first/only call cost request
 		if cd.LoopIndex == 0 && i == 0 && ts.RateInterval != nil {
-			//Add the ConnectFee increment at the beggining
+			//Add the ConnectFee increment at the beginning
 			ts.Increments = append(Increments{&Increment{
 				Duration:       0,
 				Cost:           ts.RateInterval.Rating.ConnectFee,
@@ -646,7 +646,7 @@ func (cd *CallDescriptor) getCost() (*CallCost, error) {
 /*
 Returns the approximate max allowed session for user balance. It will try the max amount received in the call descriptor
 If the user has no credit then it will return 0.
-If the user has postpayed plan it returns -1.
+If the user has postpaid plan it returns -1.
 */
 func (origCD *CallDescriptor) getMaxSessionDuration(origAcc *Account) (time.Duration, error) {
 	// clone the account for discarding chenges on debit dry run
@@ -665,7 +665,7 @@ func (origCD *CallDescriptor) getMaxSessionDuration(origAcc *Account) (time.Dura
 	initialDuration := cd.TimeEnd.Sub(cd.TimeStart)
 	defaultBalance := account.GetDefaultMoneyBalance()
 
-	//use this to check what increment was payed with debt
+	//use this to check what increment was paid with debt
 	initialDefaultBalanceValue := defaultBalance.GetValue()
 
 	cc, err := cd.debit(account, true, false)
@@ -696,7 +696,7 @@ func (origCD *CallDescriptor) getMaxSessionDuration(origAcc *Account) (time.Dura
 			if incr.BalanceInfo.Monetary != nil && incr.BalanceInfo.Monetary.UUID == defaultBalance.Uuid {
 				initialDefaultBalanceValue -= incr.Cost
 				if initialDefaultBalanceValue < 0 {
-					// this increment was payed with debt
+					// this increment was paid with debt
 					// TODO: improve this check
 					return utils.MinDuration(initialDuration, totalDuration), nil
 
@@ -738,7 +738,7 @@ func (cd *CallDescriptor) GetMaxSessionDuration() (duration time.Duration, err e
 	return
 }
 
-// Interface method used to add/substract an amount of cents or bonus seconds (as returned by GetCost method)
+// Interface method used to add/subtract an amount of cents or bonus seconds (as returned by GetCost method)
 // from user's money balance.
 func (cd *CallDescriptor) debit(account *Account, dryRun bool, goNegative bool) (cc *CallCost, err error) {
 	if cd.GetDuration() == 0 {
@@ -815,7 +815,7 @@ func (cd *CallDescriptor) Debit() (cc *CallCost, err error) {
 	return
 }
 
-// Interface method used to add/substract an amount of cents or bonus seconds (as returned by GetCost method)
+// Interface method used to add/subtract an amount of cents or bonus seconds (as returned by GetCost method)
 // from user's money balance.
 // This methods combines the Debit and GetMaxSessionDuration and will debit the max available time as returned
 // by the GetMaxSessionDuration method. The amount filed has to be filled in call descriptor.

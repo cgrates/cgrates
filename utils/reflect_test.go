@@ -161,9 +161,9 @@ func TestReflectFieldAsString(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			rcv, err := ReflectFieldAsString(tt.args.intf, tt.args.fldName, tt.args.extraFieldsLabel)
 
-				if err == nil {
-					t.Fatal("was expecting an error")
-				}
+			if err == nil {
+				t.Fatal("was expecting an error")
+			}
 
 			if rcv != tt.want {
 				t.Errorf("reciving %v, expected %v", rcv, tt.want)
@@ -271,16 +271,16 @@ func TestIfaceAsDuration(t *testing.T) {
 
 			if i == len(tests)-1 {
 				if err == nil {
-					t.Fatal("no error recived")
+					t.Fatal("no error received")
 				}
 			} else {
 				if err != tt.want.err {
-					t.Fatal("wrong error message or no error recived")
+					t.Fatal("wrong error message or no error received")
 				}
 			}
 
 			if rcv != tt.want.d {
-				t.Errorf("recived %v, expected %v", rcv, tt.want.d)
+				t.Errorf("received %v, expected %v", rcv, tt.want.d)
 			}
 		})
 	}
@@ -477,65 +477,65 @@ func TestStringToInterface(t *testing.T) {
 func TestIfaceAsString(t *testing.T) {
 	val := any("string1")
 	if rply := IfaceAsString(val); rply != "string1" {
-		t.Errorf("Expeced string1 ,recived %+v", rply)
+		t.Errorf("Expected string1 ,received %+v", rply)
 	}
 	val = any(123)
 	if rply := IfaceAsString(val); rply != "123" {
-		t.Errorf("Expeced 123 ,recived %+v", rply)
+		t.Errorf("Expected 123 ,received %+v", rply)
 	}
 	val = any([]byte("byte_val"))
 	if rply := IfaceAsString(val); rply != "byte_val" {
-		t.Errorf("Expeced byte_val ,recived %+v", rply)
+		t.Errorf("Expected byte_val ,received %+v", rply)
 	}
 	val = any(true)
 	if rply := IfaceAsString(val); rply != "true" {
-		t.Errorf("Expeced true ,recived %+v", rply)
+		t.Errorf("Expected true ,received %+v", rply)
 	}
 	if rply := IfaceAsString(time.Duration(1 * time.Second)); rply != "1s" {
-		t.Errorf("Expeced 1s ,recived %+v", rply)
+		t.Errorf("Expected 1s ,received %+v", rply)
 	}
 	if rply := IfaceAsString(nil); rply != "" {
-		t.Errorf("Expeced  ,recived %+v", rply)
+		t.Errorf("Expected  ,received %+v", rply)
 	}
 	val = any(net.ParseIP("127.0.0.1"))
 	if rply := IfaceAsString(val); rply != "127.0.0.1" {
-		t.Errorf("Expeced  ,recived %+v", rply)
+		t.Errorf("Expected  ,received %+v", rply)
 	}
 	val = any(10.23)
 	if rply := IfaceAsString(val); rply != "10.23" {
-		t.Errorf("Expeced  ,recived %+v", rply)
+		t.Errorf("Expected  ,received %+v", rply)
 	}
 	val = any(time.Date(2009, 11, 10, 23, 0, 0, 0, time.UTC))
 	if rply := IfaceAsString(val); rply != "2009-11-10T23:00:00Z" {
-		t.Errorf("Expeced  ,recived %+v", rply)
+		t.Errorf("Expected  ,received %+v", rply)
 	}
 	val = any(int32(123))
 	if rply := IfaceAsString(val); rply != "123" {
-		t.Errorf("Expeced 123 ,recived %+v", rply)
+		t.Errorf("Expected 123 ,received %+v", rply)
 	}
 	val = any(int64(123))
 	if rply := IfaceAsString(val); rply != "123" {
-		t.Errorf("Expeced 123 ,recived %+v", rply)
+		t.Errorf("Expected 123 ,received %+v", rply)
 	}
 	val = any(uint32(123))
 	if rply := IfaceAsString(val); rply != "123" {
-		t.Errorf("Expeced 123 ,recived %+v", rply)
+		t.Errorf("Expected 123 ,received %+v", rply)
 	}
 	val = any(uint64(123))
 	if rply := IfaceAsString(val); rply != "123" {
-		t.Errorf("Expeced 123 ,recived %+v", rply)
+		t.Errorf("Expected 123 ,received %+v", rply)
 	}
 	val = any(float32(123.5))
 	if rply := IfaceAsString(val); rply != "123.5" {
-		t.Errorf("Expeced 123 ,recived %+v", rply)
+		t.Errorf("Expected 123 ,received %+v", rply)
 	}
 	val = any(uint8(1))
 	if rply := IfaceAsString(val); rply != "1" {
-		t.Errorf("Expeced 123 ,recived %+v", rply)
+		t.Errorf("Expected 123 ,received %+v", rply)
 	}
 	val = NewNMData(123)
 	if rply := IfaceAsString(val); rply != "123" {
-		t.Errorf("Expeced 123 ,recived %+v", rply)
+		t.Errorf("Expected 123 ,received %+v", rply)
 	}
 }
 
@@ -781,20 +781,20 @@ func TestGetUniformType(t *testing.T) {
 	if rply, err := GetUniformType(arg); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rply, expected) {
-		t.Errorf("Expected: %v of type %T, recived: %v of type %T", expected, expected, rply, rply)
+		t.Errorf("Expected: %v of type %T, received: %v of type %T", expected, expected, rply, rply)
 	}
 	arg = uint(10)
 	expected = float64(10)
 	if rply, err := GetUniformType(arg); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rply, expected) {
-		t.Errorf("Expected: %v of type %T, recived: %v of type %T", expected, expected, rply, rply)
+		t.Errorf("Expected: %v of type %T, received: %v of type %T", expected, expected, rply, rply)
 	}
 	arg = int64(10)
 	if rply, err := GetUniformType(arg); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rply, expected) {
-		t.Errorf("Expected: %v of type %T, recived: %v of type %T", expected, expected, rply, rply)
+		t.Errorf("Expected: %v of type %T, received: %v of type %T", expected, expected, rply, rply)
 	}
 
 	arg = time.Now()
@@ -802,14 +802,14 @@ func TestGetUniformType(t *testing.T) {
 	if rply, err := GetUniformType(arg); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rply, expected) {
-		t.Errorf("Expected: %v of type %T, recived: %v of type %T", expected, expected, rply, rply)
+		t.Errorf("Expected: %v of type %T, received: %v of type %T", expected, expected, rply, rply)
 	}
 	arg = struct{ b int }{b: 10}
 	expected = arg
 	if rply, err := GetUniformType(arg); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rply, expected) {
-		t.Errorf("Expected: %v of type %T, recived: %v of type %T", expected, expected, rply, rply)
+		t.Errorf("Expected: %v of type %T, received: %v of type %T", expected, expected, rply, rply)
 	}
 
 	arg = time.Now()
@@ -861,7 +861,7 @@ func TestGetBasicType(t *testing.T) {
 			rcv := GetBasicType(tt.arg)
 
 			if rcv != tt.want {
-				t.Errorf("recived %T, expected %T", rcv, tt.want)
+				t.Errorf("received %T, expected %T", rcv, tt.want)
 			}
 		})
 	}
@@ -1251,11 +1251,11 @@ func TestAsMapStringIface(t *testing.T) {
 			rcv, err := AsMapStringIface(tt.arg)
 
 			if err == nil {
-				t.Fatalf("wrong error message, expected %s, recived %s", tt.want.err, err)
+				t.Fatalf("wrong error message, expected %s, received %s", tt.want.err, err)
 			}
 
 			if rcv != nil {
-				t.Errorf("expected %v, recived %v", tt.want.out, rcv)
+				t.Errorf("expected %v, received %v", tt.want.out, rcv)
 			}
 		})
 	}

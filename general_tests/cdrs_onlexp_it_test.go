@@ -447,7 +447,7 @@ func testCDRsOnExpAMQPReplication(t *testing.T) {
 			t.Error(err)
 		}
 		if rcvCDR[utils.CGRID] != testCdr.CGRID {
-			t.Errorf("Unexpected CDR received: %s expeced: %s", utils.ToJSON(rcvCDR), utils.ToJSON(testCdr))
+			t.Errorf("Unexpected CDR received: %s expected: %s", utils.ToJSON(rcvCDR), utils.ToJSON(testCdr))
 		}
 	case <-time.After(2 * time.Second):
 		t.Error("No message received from RabbitMQ")

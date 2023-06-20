@@ -94,7 +94,7 @@ func (api *APIerSv1) ExportCdrsToZipString(attr utils.AttrExpFileCdrs, reply *st
 // Deprecated by AttrExportCDRsToFile
 func (api *APIerSv1) ExportCdrsToFile(attr utils.AttrExpFileCdrs, reply *utils.ExportedFileCdrs) (err error) {
 	exportTemplate := api.Config.CdreProfiles[utils.MetaDefault]
-	if attr.ExportTemplate != nil && len(*attr.ExportTemplate) != 0 { // Export template prefered, use it
+	if attr.ExportTemplate != nil && len(*attr.ExportTemplate) != 0 { // Export template preferred, use it
 		var hasIt bool
 		if exportTemplate, hasIt = api.Config.CdreProfiles[*attr.ExportTemplate]; !hasIt {
 			return fmt.Errorf("%s:ExportTemplate", utils.ErrNotFound.Error())
@@ -203,7 +203,7 @@ type RplExportedCDRs struct {
 	TotalRecords              int               // Number of CDRs to be exported
 	TotalCost                 float64           // Sum of all costs in exported CDRs
 	FirstOrderID, LastOrderID int64             // The order id of the last exported CDR
-	ExportedCGRIDs            []string          // List of successfuly exported cgrids in the file
+	ExportedCGRIDs            []string          // List of successfully exported cgrids in the file
 	UnexportedCGRIDs          map[string]string // Map of errored CDRs, map key is cgrid, value will be the error string
 }
 

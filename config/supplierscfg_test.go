@@ -29,12 +29,12 @@ func TestSupplierSCfgloadFromJsonCfg(t *testing.T) {
 	if err := supscfg.loadFromJsonCfg(nil); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(supscfg, expected) {
-		t.Errorf("Expected: %+v ,recived: %+v", expected, supscfg)
+		t.Errorf("Expected: %+v ,received: %+v", expected, supscfg)
 	}
 	if err := supscfg.loadFromJsonCfg(new(SupplierSJsonCfg)); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(supscfg, expected) {
-		t.Errorf("Expected: %+v ,recived: %+v", expected, supscfg)
+		t.Errorf("Expected: %+v ,received: %+v", expected, supscfg)
 	}
 	cfgJSONStr := `{
 "suppliers": {								// Supplier service (*new)
@@ -61,7 +61,7 @@ func TestSupplierSCfgloadFromJsonCfg(t *testing.T) {
 	} else if err = supscfg.loadFromJsonCfg(jsnSupSCfg); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, supscfg) {
-		t.Errorf("Expected: %+v , recived: %+v", expected, supscfg)
+		t.Errorf("Expected: %+v , received: %+v", expected, supscfg)
 	}
 }
 
@@ -98,7 +98,7 @@ func TestSupplierSCfgAsMapInterface(t *testing.T) {
 	} else if err = supscfg.loadFromJsonCfg(jsnSupSCfg); err != nil {
 		t.Error(err)
 	} else if rcv := supscfg.AsMapInterface(); !reflect.DeepEqual(eMap, rcv) {
-		t.Errorf("\nExpected: %+v\nRecived: %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
+		t.Errorf("\nExpected: %+v\nReceived: %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
 	}
 
 	cfgJSONStr = `{
@@ -132,6 +132,6 @@ func TestSupplierSCfgAsMapInterface(t *testing.T) {
 	} else if err = supscfg.loadFromJsonCfg(jsnSupSCfg); err != nil {
 		t.Error(err)
 	} else if rcv := supscfg.AsMapInterface(); !reflect.DeepEqual(eMap, rcv) {
-		t.Errorf("\nExpected: %+v\nRecived: %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
+		t.Errorf("\nExpected: %+v\nReceived: %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
 	}
 }

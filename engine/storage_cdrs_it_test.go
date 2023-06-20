@@ -786,7 +786,7 @@ func testGetCDRs(cfg *config.CGRConfig) error {
 				break
 			}
 			if CDRs[i].OrderID > CDRs[i+1].OrderID {
-				return fmt.Errorf("testGetCDRs #96 %+v sould be smaller than %+v \n", CDRs[i].OrderID, CDRs[i+1].OrderID)
+				return fmt.Errorf("testGetCDRs #96 %+v should be smaller than %+v \n", CDRs[i].OrderID, CDRs[i+1].OrderID)
 			}
 		}
 	}
@@ -812,7 +812,7 @@ func testGetCDRs(cfg *config.CGRConfig) error {
 				break
 			}
 			if CDRs[i].Cost > CDRs[i+1].Cost {
-				return fmt.Errorf("testGetCDRs #98 %+v sould be smaller than %+v \n", CDRs[i].Cost, CDRs[i+1].Cost)
+				return fmt.Errorf("testGetCDRs #98 %+v should be smaller than %+v \n", CDRs[i].Cost, CDRs[i+1].Cost)
 			}
 		}
 	}

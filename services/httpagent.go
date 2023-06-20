@@ -78,7 +78,7 @@ func (ha *HTTPAgent) Reload() (err error) {
 
 // Shutdown stops the service
 func (ha *HTTPAgent) Shutdown() (err error) {
-	return // no shutdown for the momment
+	return // no shutdown for the moment
 }
 
 // IsRunning returns if the service is running

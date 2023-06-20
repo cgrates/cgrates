@@ -186,7 +186,7 @@ func testRtPrfITMigrateAndMove(t *testing.T) {
 		},
 	}
 	switch rtprflAction {
-	case utils.Migrate: // for the momment only one version of rating plans exists
+	case utils.Migrate: // for the moment only one version of rating plans exists
 	case utils.Move:
 		if err := rtprflMigrator.dmIN.DataManager().SetRatingProfile(rtprfl, utils.NonTransactional); err != nil {
 			t.Error(err)

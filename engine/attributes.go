@@ -125,7 +125,7 @@ func (alS *AttributeService) attributeProfileForEvent(args *AttrArgsProcessEvent
 	return
 }
 
-// AttrSProcessEventReply reply used for proccess event
+// AttrSProcessEventReply reply used for process event
 type AttrSProcessEventReply struct {
 	MatchedProfiles []string
 	AlteredFields   []string
@@ -150,7 +150,7 @@ func (attrReply *AttrSProcessEventReply) Digest() (rplyDigest string) {
 	return
 }
 
-// AttrArgsProcessEvent arguments used for proccess event
+// AttrArgsProcessEvent arguments used for process event
 type AttrArgsProcessEvent struct {
 	AttributeIDs []string
 	Context      *string // attach the event to a context
@@ -317,7 +317,7 @@ func (alS *AttributeService) V1GetAttributeForEvent(args *AttrArgsProcessEvent,
 	return
 }
 
-// V1ProcessEvent proccess the event and returns the result
+// V1ProcessEvent processes the event and returns the result
 func (alS *AttributeService) V1ProcessEvent(args *AttrArgsProcessEvent,
 	reply *AttrSProcessEventReply) (err error) {
 	if args.CGREvent == nil {

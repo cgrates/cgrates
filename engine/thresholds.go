@@ -178,7 +178,7 @@ func (tS *ThresholdService) runBackup() {
 // storeThresholds represents one task of complete backup
 func (tS *ThresholdService) storeThresholds() {
 	var failedTdIDs []string
-	for { // don't stop untill we store all dirty resources
+	for { // don't stop until we store all dirty resources
 		tS.stMux.Lock()
 		tID := tS.storedTdIDs.GetOne()
 		if tID != "" {

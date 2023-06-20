@@ -175,7 +175,7 @@ func TestCacheSV1FlushCache(t *testing.T) {
 	if err := chS.V1FlushCache(args, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
-		t.Errorf("Expected ok,recieved %v", reply)
+		t.Errorf("Expected ok,received %v", reply)
 	}
 	for id := range loadIds {
 		if _, has := Cache.Get(utils.CacheLoadIDs, id); !has {

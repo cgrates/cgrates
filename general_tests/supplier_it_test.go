@@ -176,7 +176,7 @@ func testV1SplSSetSupplierProfilesWithoutRatingPlanIDs(t *testing.T) {
 	var suplsReply engine.SortedSuppliers
 	if err := splSv1Rpc.Call(utils.SupplierSv1GetSuppliers,
 		ev, &suplsReply); err.Error() != utils.NewErrServerError(utils.NewErrMandatoryIeMissing("RatingPlanIDs")).Error() {
-		t.Errorf("Expected error MANDATORY_IE_MISSING: [RatingPlanIDs] recieved:%v\n", err)
+		t.Errorf("Expected error MANDATORY_IE_MISSING: [RatingPlanIDs] received:%v\n", err)
 	}
 	if err := splSv1Rpc.Call(utils.APIerSv1RemoveSupplierProfile, utils.TenantID{
 		Tenant: splPrf.Tenant,

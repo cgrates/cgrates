@@ -935,7 +935,7 @@ func TestLoadAccountActions(t *testing.T) {
 		},
 		ActionTriggers: csvr.actionsTriggers["STANDARD_TRIGGER"],
 	}
-	// set propper uuid
+	// set proper uuid
 	for i, atr := range aa.ActionTriggers {
 		csvr.actionsTriggers["STANDARD_TRIGGER"][i].ID = atr.ID
 	}

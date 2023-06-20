@@ -152,28 +152,28 @@ func TestGetIndexPath(t *testing.T) {
 		idx   int
 	}
 	tests := []struct {
-		name string
-		arg string
-		want want
+		name      string
+		arg       string
+		want      want
 		returnNil bool
 	}{
 		{
-			name: "argument does not have square brackets",
-			arg: "1",
-			want: want{opath: "1"},
-			returnNil: true, 
-		},
-		{
-			name: "check error from strings.Atoi",
-			arg: "[a, b, c]",
-			want: want{opath: "[a, b, c]"},
+			name:      "argument does not have square brackets",
+			arg:       "1",
+			want:      want{opath: "1"},
 			returnNil: true,
 		},
 		{
-			name: "testing GetPathIndex",
-			arg: "test[1]",
-			want: want{opath: "test", idx: 1},
-			returnNil: false, 
+			name:      "check error from strings.Atoi",
+			arg:       "[a, b, c]",
+			want:      want{opath: "[a, b, c]"},
+			returnNil: true,
+		},
+		{
+			name:      "testing GetPathIndex",
+			arg:       "test[1]",
+			want:      want{opath: "test", idx: 1},
+			returnNil: false,
 		},
 	}
 	for _, tt := range tests {
@@ -182,12 +182,12 @@ func TestGetIndexPath(t *testing.T) {
 
 			if tt.returnNil {
 				if opath != tt.want.opath || idx != nil {
-					t.Errorf("recived '%s' and %v, expexted '%s' and %v", opath, idx, tt.want.opath, tt.want.idx)
+					t.Errorf("received '%s' and %v, expexted '%s' and %v", opath, idx, tt.want.opath, tt.want.idx)
 				}
 			} else {
 				expInx := *idx
 				if opath != tt.want.opath || expInx != tt.want.idx {
-					t.Errorf("recived '%s' and %v, expexted '%s' and %v", opath, expInx, tt.want.opath, tt.want.idx)
+					t.Errorf("received '%s' and %v, expexted '%s' and %v", opath, expInx, tt.want.opath, tt.want.idx)
 				}
 			}
 		})
@@ -197,17 +197,17 @@ func TestGetIndexPath(t *testing.T) {
 func TestGetPathWithoutIndex(t *testing.T) {
 	tests := []struct {
 		name string
-		arg string
+		arg  string
 		want string
 	}{
 		{
 			name: "argument does not have square brackets",
-			arg: "test",
+			arg:  "test",
 			want: "test",
 		},
 		{
 			name: "testing GetPathIndex",
-			arg: "test[1]",
+			arg:  "test[1]",
 			want: "test",
 		},
 	}
@@ -215,9 +215,9 @@ func TestGetPathWithoutIndex(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			opath := GetPathWithoutIndex(tt.arg)
 
-				if opath != tt.want {
-					t.Errorf("recived '%s', expexted '%s'", opath, tt.want)
-				}
+			if opath != tt.want {
+				t.Errorf("received '%s', expexted '%s'", opath, tt.want)
+			}
 		})
 	}
 }

@@ -26,7 +26,7 @@ Able to read the configuration from either a local directory  of *.json* files w
   -memprof_dir string
       write memory profile to file
   -memprof_interval duration
-      Time betwen memory profile saves (default 5s)
+      Time between memory profile saves (default 5s)
   -memprof_nrfiles int
       Number of memory profile to write (default 1)
   -node_id string

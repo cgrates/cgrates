@@ -95,7 +95,7 @@ func (sS *StatService) runBackup() {
 // storeResources represents one task of complete backup
 func (sS *StatService) storeStats() {
 	var failedSqIDs []string
-	for { // don't stop untill we store all dirty statQueues
+	for { // don't stop until we store all dirty statQueues
 		sS.ssqMux.Lock()
 		sID := sS.storedStatQueues.GetOne()
 		if sID != "" {

@@ -94,7 +94,7 @@ func testDspResPingFailover(t *testing.T) {
 	}
 	allEngine2.stopEngine(t)
 	if err := dispEngine.RPC.Call(utils.ResourceSv1Ping, &ev, &reply); err == nil {
-		t.Errorf("Expected error but recived %v and reply %v\n", err, reply)
+		t.Errorf("Expected error but received %v and reply %v\n", err, reply)
 	}
 	allEngine.startEngine(t)
 	allEngine2.startEngine(t)
@@ -302,7 +302,7 @@ func testDspResTestAuthKey3(t *testing.T) {
 		t.Errorf("Expecting rs to not be nil")
 		// rs shoud not be nil so exit function
 		// to avoid nil segmentation fault;
-		// if this happens try to run this test manualy
+		// if this happens try to run this test manually
 		return
 	}
 	// make sure Resource1 have no more active resources

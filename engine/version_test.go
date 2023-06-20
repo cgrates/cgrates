@@ -47,27 +47,27 @@ func TestVersionCompare(t *testing.T) {
 		utils.SessionSCosts: 2}
 	message1 := y.Compare(x, utils.MetaMongo, true)
 	if message1 != "cgr-migrator -exec=*accounts" {
-		t.Errorf("Error failed to compare to curent version expected: %s received: %s", "cgr-migrator -exec=*accounts", message1)
+		t.Errorf("Error failed to compare to current version expected: %s received: %s", "cgr-migrator -exec=*accounts", message1)
 	}
 	message2 := z.Compare(x, utils.MetaMongo, true)
 	if message2 != "cgr-migrator -exec=*action_plans" {
-		t.Errorf("Error failed to compare to curent version expected: %s received: %s", "cgr-migrator -exec=*action_plans", message2)
+		t.Errorf("Error failed to compare to current version expected: %s received: %s", "cgr-migrator -exec=*action_plans", message2)
 	}
 	message3 := q.Compare(x, utils.MetaMongo, true)
 	if message3 != "cgr-migrator -exec=*shared_groups" {
-		t.Errorf("Error failed to compare to curent version expected: %s received: %s", "cgr-migrator -exec=*shared_groups", message3)
+		t.Errorf("Error failed to compare to current version expected: %s received: %s", "cgr-migrator -exec=*shared_groups", message3)
 	}
 	message4 := c.Compare(x, utils.MetaMongo, false)
 	if message4 != "cgr-migrator -exec=*cost_details" {
-		t.Errorf("Error failed to compare to curent version expected: %s received: %s", "cgr-migrator -exec=*cost_details", message4)
+		t.Errorf("Error failed to compare to current version expected: %s received: %s", "cgr-migrator -exec=*cost_details", message4)
 	}
 	message5 := a.Compare(b, utils.MetaMySQL, false)
 	if message5 != "cgr-migrator -exec=*sessions_costs" {
-		t.Errorf("Error failed to compare to curent version expected: %s received: %s", "cgr-migrator -exec=*sessions_costs", message5)
+		t.Errorf("Error failed to compare to current version expected: %s received: %s", "cgr-migrator -exec=*sessions_costs", message5)
 	}
 	message6 := a.Compare(b, utils.MetaPostgres, false)
 	if message6 != "cgr-migrator -exec=*sessions_costs" {
-		t.Errorf("Error failed to compare to curent version expected: %s received: %s", "cgr-migrator -exec=*sessions_costs", message6)
+		t.Errorf("Error failed to compare to current version expected: %s received: %s", "cgr-migrator -exec=*sessions_costs", message6)
 	}
 
 }

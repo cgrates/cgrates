@@ -82,7 +82,7 @@ func TestKafkaER(t *testing.T) {
 	randomCGRID := utils.UUIDSha1Prefix()
 	w.WriteMessages(context.Background(),
 		kafka.Message{
-			Key:   []byte(randomCGRID), // for the momment we do not proccess the key
+			Key:   []byte(randomCGRID), // for the moment we do not process the key
 			Value: []byte(fmt.Sprintf(`{"CGRID": "%s"}`, randomCGRID)),
 		},
 	)

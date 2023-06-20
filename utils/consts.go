@@ -340,7 +340,6 @@ const (
 	SessionTTLLastUsed          = "SessionTTLLastUsed"
 	SessionTTLUsage             = "SessionTTLUsage"
 	SessionTTLLastUsage         = "SessionTTLLastUsage"
-	HandlerSubstractUsage       = "*substract_usage"
 	XML                         = "xml"
 	MetaGOB                     = "*gob"
 	MetaJSON                    = "*json"

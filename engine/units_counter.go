@@ -22,7 +22,7 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-// Amount of a trafic of a certain type
+// Amount of a traffic of a certain type
 type UnitCounter struct {
 	CounterType string         // *event or *balance
 	Counters    CounterFilters // first balance is the general one (no destination)

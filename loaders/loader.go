@@ -233,7 +233,7 @@ func (ldr *Loader) processContent(loaderType, caching string) (err error) {
 		}
 		tntID := lData.TenantID()
 		if _, has := ldr.bufLoaderData[tntID]; !has &&
-			len(ldr.bufLoaderData) == 1 { // process previous records before going futher
+			len(ldr.bufLoaderData) == 1 { // process previous records before going further
 			var prevTntID string
 			for prevTntID = range ldr.bufLoaderData {
 				break // have stolen the existing key in buffer
@@ -626,7 +626,7 @@ func (ldr *Loader) removeContent(loaderType, caching string) (err error) {
 		}
 		tntID := lData.TenantID()
 		if _, has := ldr.bufLoaderData[tntID]; !has &&
-			len(ldr.bufLoaderData) == 1 { // process previous records before going futher
+			len(ldr.bufLoaderData) == 1 { // process previous records before going further
 			var prevTntID string
 			for prevTntID = range ldr.bufLoaderData {
 				break // have stolen the existing key in buffer

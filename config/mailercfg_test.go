@@ -29,12 +29,12 @@ func TestMailerCfgloadFromJsonCfg(t *testing.T) {
 	if err := mailcfg.loadFromJsonCfg(nil); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(mailcfg, expected) {
-		t.Errorf("Expected: %+v ,recived: %+v", expected, mailcfg)
+		t.Errorf("Expected: %+v ,received: %+v", expected, mailcfg)
 	}
 	if err := mailcfg.loadFromJsonCfg(new(MailerJsonCfg)); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(mailcfg, expected) {
-		t.Errorf("Expected: %+v ,recived: %+v", expected, mailcfg)
+		t.Errorf("Expected: %+v ,received: %+v", expected, mailcfg)
 	}
 	cfgJSONStr := `{
 "mailer": {
@@ -57,7 +57,7 @@ func TestMailerCfgloadFromJsonCfg(t *testing.T) {
 	} else if err = mailcfg.loadFromJsonCfg(jsnMailCfg); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, mailcfg) {
-		t.Errorf("Expected: %+v , recived: %+v", expected, mailcfg)
+		t.Errorf("Expected: %+v , received: %+v", expected, mailcfg)
 	}
 }
 
@@ -84,7 +84,7 @@ func TestMailerCfgAsMapInterface(t *testing.T) {
 	} else if err = mailcfg.loadFromJsonCfg(jsnMailCfg); err != nil {
 		t.Error(err)
 	} else if rcv := mailcfg.AsMapInterface(); !reflect.DeepEqual(eMap, rcv) {
-		t.Errorf("\nExpected: %+v\nRecived: %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
+		t.Errorf("\nExpected: %+v\nReceived: %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
 	}
 
 	cfgJSONStr = `{
@@ -108,6 +108,6 @@ func TestMailerCfgAsMapInterface(t *testing.T) {
 	} else if err = mailcfg.loadFromJsonCfg(jsnMailCfg); err != nil {
 		t.Error(err)
 	} else if rcv := mailcfg.AsMapInterface(); !reflect.DeepEqual(eMap, rcv) {
-		t.Errorf("\nExpected: %+v\nRecived: %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
+		t.Errorf("\nExpected: %+v\nReceived: %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
 	}
 }

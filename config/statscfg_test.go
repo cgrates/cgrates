@@ -30,12 +30,12 @@ func TestStatSCfgloadFromJsonCfg(t *testing.T) {
 	if err := statscfg.loadFromJsonCfg(nil); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(statscfg, expected) {
-		t.Errorf("Expected: %+v ,recived: %+v", expected, statscfg)
+		t.Errorf("Expected: %+v ,received: %+v", expected, statscfg)
 	}
 	if err := statscfg.loadFromJsonCfg(new(StatServJsonCfg)); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(statscfg, expected) {
-		t.Errorf("Expected: %+v ,recived: %+v", expected, statscfg)
+		t.Errorf("Expected: %+v ,received: %+v", expected, statscfg)
 	}
 	cfgJSONStr := `{
 "stats": {									// Stat service (*new)
@@ -58,7 +58,7 @@ func TestStatSCfgloadFromJsonCfg(t *testing.T) {
 	} else if err = statscfg.loadFromJsonCfg(jsnStatSCfg); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, statscfg) {
-		t.Errorf("Expected: %+v , recived: %+v", expected, statscfg)
+		t.Errorf("Expected: %+v , received: %+v", expected, statscfg)
 	}
 }
 
@@ -67,12 +67,12 @@ func TestStatSCfgAsMapInterface(t *testing.T) {
 	if err := statscfg.loadFromJsonCfg(nil); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(statscfg, expected) {
-		t.Errorf("Expected: %+v ,recived: %+v", expected, statscfg)
+		t.Errorf("Expected: %+v ,received: %+v", expected, statscfg)
 	}
 	if err := statscfg.loadFromJsonCfg(new(StatServJsonCfg)); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(statscfg, expected) {
-		t.Errorf("Expected: %+v ,recived: %+v", expected, statscfg)
+		t.Errorf("Expected: %+v ,received: %+v", expected, statscfg)
 	}
 	cfgJSONStr := `{
 		"stats": {							
@@ -102,7 +102,7 @@ func TestStatSCfgAsMapInterface(t *testing.T) {
 	} else if err = statscfg.loadFromJsonCfg(jsnStatSCfg); err != nil {
 		t.Error(err)
 	} else if rcv := statscfg.AsMapInterface(); !reflect.DeepEqual(eMap, rcv) {
-		t.Errorf("\nExpected: %+v\nRecived: %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
+		t.Errorf("\nExpected: %+v\nReceived: %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
 	}
 
 	cfgJSONStr = `{
@@ -133,6 +133,6 @@ func TestStatSCfgAsMapInterface(t *testing.T) {
 	} else if err = statscfg.loadFromJsonCfg(jsnStatSCfg); err != nil {
 		t.Error(err)
 	} else if rcv := statscfg.AsMapInterface(); !reflect.DeepEqual(eMap, rcv) {
-		t.Errorf("\nExpected: %+v\nRecived: %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
+		t.Errorf("\nExpected: %+v\nReceived: %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
 	}
 }

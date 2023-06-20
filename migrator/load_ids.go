@@ -37,7 +37,7 @@ func (m *Migrator) migrateLoadIDs() (err error) {
 		if err = m.dmOut.DataManager().DataDB().RemoveLoadIDsDrv(); err != nil {
 			return
 		}
-		// All done, update version wtih current one
+		// All done, update version with current one
 		vrs := engine.Versions{utils.LoadIDsVrs: engine.CurrentDataDBVersions()[utils.LoadIDsVrs]}
 		if err = m.dmOut.DataManager().DataDB().SetVersions(vrs, false); err != nil {
 			return utils.NewCGRError(utils.Migrator,

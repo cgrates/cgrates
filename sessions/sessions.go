@@ -1716,7 +1716,7 @@ func (sS *SessionS) BiRPCv1SetPassiveSession(clnt birpc.ClientConnector,
 	return
 }
 
-// ArgsReplicateSessions used to specify wich Session to replicate over the given connections
+// ArgsReplicateSessions used to specify which Session to replicate over the given connections
 type ArgsReplicateSessions struct {
 	CGRID   string
 	Passive bool

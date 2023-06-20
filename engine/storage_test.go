@@ -1423,7 +1423,7 @@ func TestTpReaderIsValid(t *testing.T) {
 	}
 
 	if valid := tpr.IsValid(); !valid {
-		t.Error("RatingPlan is not continous")
+		t.Error("RatingPlan is not continuous")
 	}
 
 	timings = []*utils.ApierTPTiming{
@@ -1445,7 +1445,7 @@ func TestTpReaderIsValid(t *testing.T) {
 	}
 
 	if valid := tpr.IsValid(); !valid {
-		t.Error("RatingPlan is not continous")
+		t.Error("RatingPlan is not continuous")
 	}
 
 }

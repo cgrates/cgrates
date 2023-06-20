@@ -46,7 +46,7 @@ func (apiv2 *APIerSv2) ExportCdrsToFile(attr AttrExportCdrsToFile, reply *utils.
 	cdreReloadStruct := <-apiv2.Config.ConfigReloads[utils.CDRE]                  // Read the content of the channel, locking it
 	defer func() { apiv2.Config.ConfigReloads[utils.CDRE] <- cdreReloadStruct }() // Unlock reloads at exit
 	exportTemplate := apiv2.Config.CdreProfiles[utils.MetaDefault]
-	if attr.ExportTemplate != nil && len(*attr.ExportTemplate) != 0 { // Export template prefered, use it
+	if attr.ExportTemplate != nil && len(*attr.ExportTemplate) != 0 { // Export template preferred, use it
 		var hasIt bool
 		if exportTemplate, hasIt = apiv2.Config.CdreProfiles[*attr.ExportTemplate]; !hasIt {
 			return fmt.Errorf("%s:ExportTemplate", utils.ErrNotFound)

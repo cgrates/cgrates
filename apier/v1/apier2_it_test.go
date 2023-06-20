@@ -189,7 +189,7 @@ func testAPIerVerifyAttributesAfterLoad(t *testing.T) {
 		t.Errorf("Expecting attrReply to not be nil")
 		// attrReply shoud not be nil so exit function
 		// to avoid nil segmentation fault;
-		// if this happens try to run this test manualy
+		// if this happens try to run this test manually
 		return
 	}
 	attrReply.Compile() // Populate private variables in RSRParsers

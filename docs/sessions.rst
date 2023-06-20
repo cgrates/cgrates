@@ -235,7 +235,7 @@ TerminateSession
 	* Cache the session for later CDRs if configured.
 
 ReleaseResources
-	Will release the aquired resources within :ref:`ResourceS`.
+	Will release the acquired resources within :ref:`ResourceS`.
 
 ProcessThresholds
 	Send the event to :ref:`ThresholdS` for monitoring.

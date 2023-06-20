@@ -734,23 +734,23 @@ func TestStringHexConvertor(t *testing.T) {
 }
 
 func TestConvertString(t *testing.T) {
-	tests := []struct{
+	tests := []struct {
 		name string
-		arg string
+		arg  string
 		want string
-		err bool
+		err  bool
 	}{
 		{
 			name: "check error",
-			arg: "!£$%&/()=?^",
+			arg:  "!£$%&/()=?^",
 			want: "",
-			err: true,
+			err:  true,
 		},
 		{
 			name: "check error",
-			arg: "1.5",
+			arg:  "1.5",
 			want: "1.5",
-			err: false,
+			err:  false,
 		},
 	}
 	for _, tt := range tests {
@@ -766,11 +766,10 @@ func TestConvertString(t *testing.T) {
 				if err != nil {
 					t.Errorf("was not expecting an error %s", err)
 				}
-			} 
-
+			}
 
 			if tt.want != rcv {
-				t.Errorf("recived %v, expected %v", rcv, tt.want)
+				t.Errorf("received %v, expected %v", rcv, tt.want)
 			}
 		})
 	}

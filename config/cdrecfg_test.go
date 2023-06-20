@@ -90,12 +90,12 @@ func TestCdreCfgloadFromJsonCfg(t *testing.T) {
 	if err := lstcfg.loadFromJsonCfg(nil, utils.INFIELD_SEP); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(lstcfg, expected) {
-		t.Errorf("Expected: %+v ,recived: %+v", expected, lstcfg)
+		t.Errorf("Expected: %+v ,received: %+v", expected, lstcfg)
 	}
 	if err := lstcfg.loadFromJsonCfg(new(CdreJsonCfg), utils.INFIELD_SEP); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(lstcfg, expected) {
-		t.Errorf("Expected: %+v ,recived: %+v", expected, lstcfg)
+		t.Errorf("Expected: %+v ,received: %+v", expected, lstcfg)
 	}
 	cfgJSONStr := `{
 "cdre": {
@@ -139,7 +139,7 @@ func TestCdreCfgloadFromJsonCfg(t *testing.T) {
 	} else if err = lstcfg.loadFromJsonCfg(jsnCdreCfg[utils.MetaDefault], utils.INFIELD_SEP); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, lstcfg) {
-		t.Errorf("Expected: %+v , recived: %+v", utils.ToJSON(expected), utils.ToJSON(lstcfg))
+		t.Errorf("Expected: %+v , received: %+v", utils.ToJSON(expected), utils.ToJSON(lstcfg))
 	}
 }
 
@@ -188,7 +188,7 @@ func TestCdreCfgAsMapInterface(t *testing.T) {
 	} else if err = cdre.loadFromJsonCfg(cdreCfg["*default"], utils.EmptyString); err != nil {
 		t.Error(err)
 	} else if rcv := cdre.AsMapInterface(""); !reflect.DeepEqual(eMap, rcv) {
-		t.Errorf("\nExpected: %+v\nRecived: %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
+		t.Errorf("\nExpected: %+v\nReceived: %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
 	}
 
 }

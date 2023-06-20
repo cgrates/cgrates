@@ -353,7 +353,7 @@ type objFIH struct {
 }
 
 // getIHObjFromCache returns all information that is needed from the mentioned object
-// uses an extra cache(controled by the API) to optimize data management
+// uses an extra cache(controlled by the API) to optimize data management
 func getIHObjFromCache(dm *DataManager, objCache *ltcache.Cache, indxType, tnt, id string) (obj *objFIH, err error) {
 	cacheKey := utils.ConcatenatedKey(tnt, id)
 	if objVal, ok := objCache.Get(cacheKey); ok {
@@ -379,7 +379,7 @@ func getIHObjFromCache(dm *DataManager, objCache *ltcache.Cache, indxType, tnt, 
 }
 
 // getIHFltrFromCache returns the Filter
-// uses an extra cache(controled by the API) to optimize data management
+// uses an extra cache(controlled by the API) to optimize data management
 func getIHFltrFromCache(dm *DataManager, fltrCache *ltcache.Cache, tnt, id string) (fltr *Filter, err error) {
 	cacheKey := utils.ConcatenatedKey(tnt, id)
 	if fltrVal, ok := fltrCache.Get(cacheKey); ok {
@@ -400,7 +400,7 @@ func getIHFltrFromCache(dm *DataManager, fltrCache *ltcache.Cache, tnt, id strin
 }
 
 // getIHFltrIdxFromCache returns the Filter index
-// uses an extra cache(controled by the API) to optimize data management
+// uses an extra cache(controlled by the API) to optimize data management
 func getIHFltrIdxFromCache(dm *DataManager, fltrIdxCache *ltcache.Cache, idxItmType, tntCtx, fltrType, fldName, fldValue string) (idx utils.StringMap, err error) {
 	idxKey := utils.ConcatenatedKey(fltrType, fldName, fldValue)
 	cacheKey := utils.ConcatenatedKey(tntCtx, idxKey)

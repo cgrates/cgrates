@@ -246,7 +246,7 @@ func (b *Balance) GetMinutesForCredit(origCD *CallDescriptor, initialCredit floa
 }
 
 // Gets the cost using balance RatingSubject if present otherwize
-// retuns a callcost obtained using standard rating
+// returns a callcost obtained using standard rating
 func (b *Balance) GetCost(cd *CallDescriptor, getStandardIfEmpty bool) (*CallCost, error) {
 	// testing only
 	if cd.testCallcost != nil {

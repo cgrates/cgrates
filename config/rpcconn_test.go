@@ -53,6 +53,6 @@ func TestRPCConnsAsMapInterface(t *testing.T) {
 	} else if err = cfg.loadFromJsonCfg(jsnRPCCfg["*localhost"]); err != nil {
 		t.Error(err)
 	} else if rcv := cfg.AsMapInterface(); !reflect.DeepEqual(eMap, rcv) {
-		t.Errorf("\nExpected: %+v\nRecived: %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
+		t.Errorf("\nExpected: %+v\nReceived: %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
 	}
 }

@@ -29,12 +29,12 @@ func TestDiameterAgentCfgloadFromJsonCfg(t *testing.T) {
 	if err := dacfg.loadFromJsonCfg(nil, utils.INFIELD_SEP); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(dacfg, expected) {
-		t.Errorf("Expected: %+v ,recived: %+v", expected, dacfg)
+		t.Errorf("Expected: %+v ,received: %+v", expected, dacfg)
 	}
 	if err := dacfg.loadFromJsonCfg(new(DiameterAgentJsonCfg), utils.INFIELD_SEP); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(dacfg, expected) {
-		t.Errorf("Expected: %+v ,recived: %+v", expected, dacfg)
+		t.Errorf("Expected: %+v ,received: %+v", expected, dacfg)
 	}
 	cfgJSONStr := `{
 "diameter_agent": {
@@ -69,7 +69,7 @@ func TestDiameterAgentCfgloadFromJsonCfg(t *testing.T) {
 	} else if err = dacfg.loadFromJsonCfg(jsnDaCfg, utils.INFIELD_SEP); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, dacfg) {
-		t.Errorf("Expected: %+v , recived: %+v", utils.ToJSON(expected), utils.ToJSON(dacfg))
+		t.Errorf("Expected: %+v , received: %+v", utils.ToJSON(expected), utils.ToJSON(dacfg))
 	}
 }
 
@@ -113,6 +113,6 @@ func TestDiameterAgentCfgAsMapInterface(t *testing.T) {
 	} else if err = dacfg.loadFromJsonCfg(jsnDaCfg, utils.INFIELD_SEP); err != nil {
 		t.Error(err)
 	} else if rcv := dacfg.AsMapInterface(utils.EmptyString); !reflect.DeepEqual(eMap, rcv) {
-		t.Errorf("Expected: %+v,\nRecived: %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
+		t.Errorf("Expected: %+v,\nReceived: %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
 	}
 }

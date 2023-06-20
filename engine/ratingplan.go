@@ -59,7 +59,7 @@ func (rp *RatingPlan) RateIntervalList(dId string) RateIntervalList {
 // no sorter because it's sorted with RateIntervalTimeSorter
 
 /*
-Adds one ore more intervals to the internal interval list only if it is not allready in the list.
+Adds one ore more intervals to the internal interval list only if it is not already in the list.
 */
 func (rp *RatingPlan) AddRateInterval(dId string, ris ...*RateInterval) {
 	if rp.DestinationRates == nil {
@@ -96,7 +96,7 @@ func (rp *RatingPlan) Equal(o *RatingPlan) bool {
 	return rp.Id == o.Id
 }
 
-// IsValid determines if the rating plan covers a continous period of time
+// IsValid determines if the rating plan covers a continuous period of time
 func (rp *RatingPlan) isContinous() bool {
 	weekdays := make([]int, 7)
 	for _, tm := range rp.Timings {

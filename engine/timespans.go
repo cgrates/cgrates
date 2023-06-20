@@ -465,7 +465,7 @@ func (ts *TimeSpan) createIncrementsSlice() {
 	ts.Increments = make([]*Increment, 0)
 	// create rated units series
 	_, rateIncrement, _ := ts.RateInterval.GetRateParameters(ts.GetGroupStart())
-	// we will use the calculated cost and devide by nb of increments
+	// we will use the calculated cost and divide by nb of increments
 	// because ts cost is rounded
 	//incrementCost := rate / rateUnit.Seconds() * rateIncrement.Seconds()
 	nbIncrements := int(ts.GetDuration() / rateIncrement)

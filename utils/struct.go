@@ -296,7 +296,7 @@ func UpdateStructWithStrMap(s any, m map[string]string) []string { // Not tested
 }
 
 // UpdateStructWithIfaceMap will update struct fields with values coming from map
-// if map values are not matching the ones in struct convertion is being attempted
+// if map values are not matching the ones in struct conversion is being attempted
 // ToDo: add here more fields
 func UpdateStructWithIfaceMap(s any, mp map[string]any) (err error) {
 	for key, val := range mp {

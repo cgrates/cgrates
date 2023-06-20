@@ -29,12 +29,12 @@ func TestDataDbCfgloadFromJsonCfg(t *testing.T) {
 	if err := dbcfg.loadFromJsonCfg(nil); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(dbcfg, expected) {
-		t.Errorf("Expected: %+v ,recived: %+v", expected, dbcfg)
+		t.Errorf("Expected: %+v ,received: %+v", expected, dbcfg)
 	}
 	if err := dbcfg.loadFromJsonCfg(new(DbJsonCfg)); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(dbcfg, expected) {
-		t.Errorf("Expected: %+v ,recived: %+v", expected, dbcfg)
+		t.Errorf("Expected: %+v ,received: %+v", expected, dbcfg)
 	}
 	cfgJSONStr := `{
 "data_db": {								// database used to store runtime data (eg: accounts, cdr stats)
@@ -63,7 +63,7 @@ func TestDataDbCfgloadFromJsonCfg(t *testing.T) {
 	} else if err = dbcfg.loadFromJsonCfg(jsnDataDbCfg); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, dbcfg) {
-		t.Errorf("Expected: %+v , recived: %+v", expected, dbcfg)
+		t.Errorf("Expected: %+v , received: %+v", expected, dbcfg)
 	}
 }
 func TestDataDbCfgloadFromJsonCfgPort(t *testing.T) {
@@ -83,7 +83,7 @@ func TestDataDbCfgloadFromJsonCfgPort(t *testing.T) {
 	} else if err = dbcfg.loadFromJsonCfg(jsnDataDbCfg); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, dbcfg) {
-		t.Errorf("Expected: %+v , recived: %+v", expected, dbcfg)
+		t.Errorf("Expected: %+v , received: %+v", expected, dbcfg)
 	}
 	cfgJSONStr = `{
 "data_db": {
@@ -102,7 +102,7 @@ func TestDataDbCfgloadFromJsonCfgPort(t *testing.T) {
 	} else if err = dbcfg.loadFromJsonCfg(jsnDataDbCfg); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, dbcfg) {
-		t.Errorf("Expected: %+v , recived: %+v", expected, dbcfg)
+		t.Errorf("Expected: %+v , received: %+v", expected, dbcfg)
 	}
 	cfgJSONStr = `{
 "data_db": {
@@ -121,7 +121,7 @@ func TestDataDbCfgloadFromJsonCfgPort(t *testing.T) {
 	} else if err = dbcfg.loadFromJsonCfg(jsnDataDbCfg); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, dbcfg) {
-		t.Errorf("Expected: %+v , recived: %+v", expected, dbcfg)
+		t.Errorf("Expected: %+v , received: %+v", expected, dbcfg)
 	}
 }
 
@@ -157,7 +157,7 @@ func TestDataDBRemoteReplication(t *testing.T) {
 	} else if err = dbcfg.loadFromJsonCfg(jsnDataDbCfg); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, dbcfg) {
-		t.Errorf("Expected: %+v ,\n recived: %+v", utils.ToJSON(expected), utils.ToJSON(dbcfg))
+		t.Errorf("Expected: %+v ,\n received: %+v", utils.ToJSON(expected), utils.ToJSON(dbcfg))
 	}
 
 	cfgJSONStr = `{
@@ -186,7 +186,7 @@ func TestDataDBRemoteReplication(t *testing.T) {
 	} else if err = dbcfg.loadFromJsonCfg(jsnDataDbCfg); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, dbcfg) {
-		t.Errorf("Expected: %+v ,\n recived: %+v", utils.ToJSON(expected), utils.ToJSON(dbcfg))
+		t.Errorf("Expected: %+v ,\n received: %+v", utils.ToJSON(expected), utils.ToJSON(dbcfg))
 	}
 
 	cfgJSONStr = `{
@@ -215,7 +215,7 @@ func TestDataDBRemoteReplication(t *testing.T) {
 	} else if err = dbcfg.loadFromJsonCfg(jsnDataDbCfg); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, dbcfg) {
-		t.Errorf("Expected: %+v ,\n recived: %+v", utils.ToJSON(expected), utils.ToJSON(dbcfg))
+		t.Errorf("Expected: %+v ,\n received: %+v", utils.ToJSON(expected), utils.ToJSON(dbcfg))
 	}
 }
 
@@ -270,7 +270,7 @@ func TestDataDbCfgloadFromJsonCfgItems(t *testing.T) {
 	} else if err = dbcfg.loadFromJsonCfg(jsnDataDbCfg); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, dbcfg) {
-		t.Errorf("Expected: %+v ,\n recived: %+v", utils.ToJSON(expected), utils.ToJSON(dbcfg))
+		t.Errorf("Expected: %+v ,\n received: %+v", utils.ToJSON(expected), utils.ToJSON(dbcfg))
 	}
 
 	cfgJSONStr = `{
@@ -330,7 +330,7 @@ func TestDataDbCfgloadFromJsonCfgItems(t *testing.T) {
 	} else if err = dbcfg.loadFromJsonCfg(jsnDataDbCfg); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, dbcfg) {
-		t.Errorf("Expected: %+v ,\n recived: %+v", utils.ToJSON(expected), utils.ToJSON(dbcfg))
+		t.Errorf("Expected: %+v ,\n received: %+v", utils.ToJSON(expected), utils.ToJSON(dbcfg))
 	}
 
 	cfgJSONStr = `{
@@ -392,7 +392,7 @@ func TestDataDbCfgloadFromJsonCfgItems(t *testing.T) {
 	} else if err = dbcfg.loadFromJsonCfg(jsnDataDbCfg); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, dbcfg) {
-		t.Errorf("Expected: %+v ,\n recived: %+v", utils.ToJSON(expected), utils.ToJSON(dbcfg))
+		t.Errorf("Expected: %+v ,\n received: %+v", utils.ToJSON(expected), utils.ToJSON(dbcfg))
 	}
 }
 
@@ -441,6 +441,6 @@ func TestDataDbCfgAsMapInterface(t *testing.T) {
 	} else if err = dbcfg.loadFromJsonCfg(jsnDataDbCfg); err != nil {
 		t.Error(err)
 	} else if rcv := dbcfg.AsMapInterface(); !reflect.DeepEqual(eMap, rcv) {
-		t.Errorf("Expected: %+v ,\n recived: %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
+		t.Errorf("Expected: %+v ,\n received: %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
 	}
 }

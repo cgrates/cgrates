@@ -29,12 +29,12 @@ func TestCdrsCfgloadFromJsonCfg(t *testing.T) {
 	if err := cdrscfg.loadFromJsonCfg(nil); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(cdrscfg, expected) {
-		t.Errorf("Expected: %+v ,recived: %+v", expected, cdrscfg)
+		t.Errorf("Expected: %+v ,received: %+v", expected, cdrscfg)
 	}
 	if err := cdrscfg.loadFromJsonCfg(new(CdrsJsonCfg)); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(cdrscfg, expected) {
-		t.Errorf("Expected: %+v ,recived: %+v", expected, cdrscfg)
+		t.Errorf("Expected: %+v ,received: %+v", expected, cdrscfg)
 	}
 	cfgJSONStr := `{
 "cdrs": {
@@ -66,7 +66,7 @@ func TestCdrsCfgloadFromJsonCfg(t *testing.T) {
 	} else if err = cdrscfg.loadFromJsonCfg(jsnCdrsCfg); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, cdrscfg) {
-		t.Errorf("Expected: %+v , recived: %+v", utils.ToJSON(expected), utils.ToJSON(cdrscfg))
+		t.Errorf("Expected: %+v , received: %+v", utils.ToJSON(expected), utils.ToJSON(cdrscfg))
 	}
 }
 
@@ -129,7 +129,7 @@ func TestCdrsCfgAsMapInterface(t *testing.T) {
 	} else if err = cdrscfg.loadFromJsonCfg(jsnCdrsCfg); err != nil {
 		t.Error(err)
 	} else if rcv := cdrscfg.AsMapInterface(); !reflect.DeepEqual(eMap, rcv) {
-		t.Errorf("\nExpected: %+v\nRecived: %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
+		t.Errorf("\nExpected: %+v\nReceived: %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
 	}
 
 	cfgJSONStr = `{
@@ -166,6 +166,6 @@ func TestCdrsCfgAsMapInterface(t *testing.T) {
 	} else if err = cdrscfg.loadFromJsonCfg(jsnCdrsCfg); err != nil {
 		t.Error(err)
 	} else if rcv := cdrscfg.AsMapInterface(); !reflect.DeepEqual(eMap, rcv) {
-		t.Errorf("\nExpected: %+v\nRecived: %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
+		t.Errorf("\nExpected: %+v\nReceived: %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
 	}
 }

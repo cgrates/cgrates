@@ -30,12 +30,12 @@ func TestResourceSConfigloadFromJsonCfg(t *testing.T) {
 	if err := rlcfg.loadFromJsonCfg(nil); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rlcfg, expected) {
-		t.Errorf("Expected: %+v ,recived: %+v", expected, rlcfg)
+		t.Errorf("Expected: %+v ,received: %+v", expected, rlcfg)
 	}
 	if err := rlcfg.loadFromJsonCfg(new(ResourceSJsonCfg)); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rlcfg, expected) {
-		t.Errorf("Expected: %+v ,recived: %+v", expected, rlcfg)
+		t.Errorf("Expected: %+v ,received: %+v", expected, rlcfg)
 	}
 	cfgJSONStr := `{
 "resources": {								// Resource service (*new)
@@ -59,7 +59,7 @@ func TestResourceSConfigloadFromJsonCfg(t *testing.T) {
 	} else if err = rlcfg.loadFromJsonCfg(jsnRlcCfg); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, rlcfg) {
-		t.Errorf("Expected: %+v , recived: %+v", expected, rlcfg)
+		t.Errorf("Expected: %+v , received: %+v", expected, rlcfg)
 	}
 }
 
@@ -92,7 +92,7 @@ func TestResourceSConfigAsMapInterface(t *testing.T) {
 	} else if err = rlcfg.loadFromJsonCfg(jsnRlcCfg); err != nil {
 		t.Error(err)
 	} else if rcv := rlcfg.AsMapInterface(); !reflect.DeepEqual(eMap, rcv) {
-		t.Errorf("\nExpected: %+v\nRecived: %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
+		t.Errorf("\nExpected: %+v\nReceived: %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
 	}
 
 	cfgJSONStr = `{
@@ -121,6 +121,6 @@ func TestResourceSConfigAsMapInterface(t *testing.T) {
 	} else if err = rlcfg.loadFromJsonCfg(jsnRlcCfg); err != nil {
 		t.Error(err)
 	} else if rcv := rlcfg.AsMapInterface(); !reflect.DeepEqual(eMap, rcv) {
-		t.Errorf("\nExpected: %+v\nRecived: %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
+		t.Errorf("\nExpected: %+v\nReceived: %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
 	}
 }

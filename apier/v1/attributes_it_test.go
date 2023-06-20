@@ -210,7 +210,7 @@ func testAttributeSGetAttributeForEvent(t *testing.T) {
 		t.Errorf("Expecting attrReply to not be nil")
 		// attrReply shoud not be nil so exit function
 		// to avoid nil segmentation fault;
-		// if this happens try to run this test manualy
+		// if this happens try to run this test manually
 		return
 	}
 	attrReply.Compile() // Populate private variables in RSRParsers
@@ -696,7 +696,7 @@ func testAttributeSGetAttPrfIDs(t *testing.T) {
 	var result []string
 	if err := attrSRPC.Call(utils.APIerSv1GetAttributeProfileIDs, utils.TenantArgWithPaginator{}, &result); err == nil ||
 		err.Error() != utils.NewErrMandatoryIeMissing("Tenant").Error() {
-		t.Errorf("Expected error recived reply %+v with err=%v", result, err)
+		t.Errorf("Expected error received reply %+v with err=%v", result, err)
 	}
 	if err := attrSRPC.Call(utils.APIerSv1GetAttributeProfileIDs, utils.TenantArgWithPaginator{TenantArg: utils.TenantArg{Tenant: "cgrates.org"}}, &result); err != nil {
 		t.Error(err)
@@ -802,7 +802,7 @@ func testAttributeSRemAlsPrf(t *testing.T) {
 	resp = ""
 	if err := attrSRPC.Call(utils.APIerSv1RemoveAttributeProfile,
 		&utils.TenantIDWithCache{Tenant: alsPrf.Tenant, ID: alsPrf.ID}, &resp); err.Error() != utils.ErrNotFound.Error() {
-		t.Errorf("Expected error: %v recived: %v", utils.ErrNotFound, err)
+		t.Errorf("Expected error: %v received: %v", utils.ErrNotFound, err)
 	}
 }
 

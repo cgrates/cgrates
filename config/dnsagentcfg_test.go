@@ -29,12 +29,12 @@ func TestDNSAgentCfgloadFromJsonCfg(t *testing.T) {
 	if err := dnsCfg.loadFromJsonCfg(nil, utils.INFIELD_SEP); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(dnsCfg, expected) {
-		t.Errorf("Expected: %+v ,recived: %+v", expected, dnsCfg)
+		t.Errorf("Expected: %+v ,received: %+v", expected, dnsCfg)
 	}
 	if err := dnsCfg.loadFromJsonCfg(new(DNSAgentJsonCfg), utils.INFIELD_SEP); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(dnsCfg, expected) {
-		t.Errorf("Expected: %+v ,recived: %+v", expected, dnsCfg)
+		t.Errorf("Expected: %+v ,received: %+v", expected, dnsCfg)
 	}
 	cfgJSONStr := `{
 "dns_agent": {
@@ -60,7 +60,7 @@ func TestDNSAgentCfgloadFromJsonCfg(t *testing.T) {
 	} else if err = dnsCfg.loadFromJsonCfg(jsnDaCfg, utils.INFIELD_SEP); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, dnsCfg) {
-		t.Errorf("Expected: %+v , recived: %+v", utils.ToJSON(expected), utils.ToJSON(dnsCfg))
+		t.Errorf("Expected: %+v , received: %+v", utils.ToJSON(expected), utils.ToJSON(dnsCfg))
 	}
 }
 
@@ -69,12 +69,12 @@ func TestRequestProcessorloadFromJsonCfg(t *testing.T) {
 	if err := dareq.loadFromJsonCfg(nil, utils.INFIELD_SEP); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(dareq, expected) {
-		t.Errorf("Expected: %+v ,recived: %+v", expected, dareq)
+		t.Errorf("Expected: %+v ,received: %+v", expected, dareq)
 	}
 	if err := dareq.loadFromJsonCfg(new(ReqProcessorJsnCfg), utils.INFIELD_SEP); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(dareq, expected) {
-		t.Errorf("Expected: %+v ,recived: %+v", expected, dareq)
+		t.Errorf("Expected: %+v ,received: %+v", expected, dareq)
 	}
 	json := &ReqProcessorJsnCfg{
 		ID:      utils.StringPointer("cgrates"),
@@ -91,7 +91,7 @@ func TestRequestProcessorloadFromJsonCfg(t *testing.T) {
 	if err = dareq.loadFromJsonCfg(json, utils.INFIELD_SEP); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, dareq) {
-		t.Errorf("Expected: %+v , recived: %+v", utils.ToJSON(expected), utils.ToJSON(dareq))
+		t.Errorf("Expected: %+v , received: %+v", utils.ToJSON(expected), utils.ToJSON(dareq))
 	}
 }
 
@@ -123,7 +123,7 @@ func TestDNSAgentCfgAsMapInterface(t *testing.T) {
 	} else if err = dnsCfg.loadFromJsonCfg(jsnDaCfg, utils.INFIELD_SEP); err != nil {
 		t.Error(err)
 	} else if rcv := dnsCfg.AsMapInterface(utils.EmptyString); !reflect.DeepEqual(eMap, rcv) {
-		t.Errorf("\nExpected: %+v\nRecived: %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
+		t.Errorf("\nExpected: %+v\nReceived: %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
 	}
 
 	cfgJSONStr = `{
@@ -188,7 +188,7 @@ func TestDNSAgentCfgAsMapInterface(t *testing.T) {
 	} else if err = dnsCfg.loadFromJsonCfg(jsnDaCfg, utils.INFIELD_SEP); err != nil {
 		t.Error(err)
 	} else if rcv := dnsCfg.AsMapInterface(";"); !reflect.DeepEqual(eMap, rcv) {
-		t.Errorf("\nExpected: %+v\nRecived: %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
+		t.Errorf("\nExpected: %+v\nReceived: %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
 	}
 
 }

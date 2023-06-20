@@ -2608,7 +2608,7 @@ type TPDispatcherHosts []*TPDispatcherHost
 func (tps TPDispatcherHosts) AsTPDispatcherHosts() (result []*utils.TPDispatcherHost) {
 	hostsMap := make(map[string]*utils.TPDispatcherHost)
 	for _, tp := range tps {
-		if len(tp.Address) == 0 { // empty addres do not populate conns
+		if len(tp.Address) == 0 { // empty address do not populate conns
 			continue
 		}
 		if len(tp.Transport) == 0 {

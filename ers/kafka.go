@@ -83,7 +83,7 @@ type KafkaER struct {
 	cap       chan struct{}
 }
 
-// Config returns the curent configuration
+// Config returns the current configuration
 func (rdr *KafkaER) Config() *config.EventReaderCfg {
 	return rdr.cgrCfg.ERsCfg().Readers[rdr.cfgIdx]
 }

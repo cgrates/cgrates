@@ -192,7 +192,7 @@ func testTpActionTriggers(t *testing.T) {
 		t.Errorf("Expecting atrs to not be nil")
 		// atrs shoud not be nil so exit function
 		// to avoid nil segmentation fault;
-		// if this happens try to run this test manualy
+		// if this happens try to run this test manually
 		return
 	}
 	if atrs[0].ID != "TestATR" ||
@@ -212,7 +212,7 @@ func testTpZeroCost(t *testing.T) {
 		t.Errorf("Expecting acnt to not be nil")
 		// acnt shoud not be nil so exit function
 		// to avoid nil segmentation fault;
-		// if this happens try to run this test manualy
+		// if this happens try to run this test manually
 		return
 	}
 	balanceValueBefore := acnt.BalanceMap[utils.MONETARY][0].Value

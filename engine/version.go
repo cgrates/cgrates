@@ -115,7 +115,7 @@ func OverwriteDBVersions(storage Storage) (err error) {
 }
 
 // Compare returns the migration message if the versions are not the latest
-func (vers Versions) Compare(curent Versions, storType string, isDataDB bool) string {
+func (vers Versions) Compare(current Versions, storType string, isDataDB bool) string {
 	var message map[string]string
 	switch storType {
 	case utils.MetaMongo:
@@ -132,7 +132,7 @@ func (vers Versions) Compare(curent Versions, storType string, isDataDB bool) st
 		message = dataDBVers
 	}
 	for subsis, reason := range message {
-		if vers[subsis] != curent[subsis] {
+		if vers[subsis] != current[subsis] {
 			return reason
 		}
 	}

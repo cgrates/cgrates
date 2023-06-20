@@ -29,12 +29,12 @@ func TestAttributeSCfgloadFromJsonCfg(t *testing.T) {
 	if err := attscfg.loadFromJsonCfg(nil); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(attscfg, expected) {
-		t.Errorf("Expected: %+v ,recived: %+v", expected, attscfg)
+		t.Errorf("Expected: %+v ,received: %+v", expected, attscfg)
 	}
 	if err := attscfg.loadFromJsonCfg(new(AttributeSJsonCfg)); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(attscfg, expected) {
-		t.Errorf("Expected: %+v ,recived: %+v", expected, attscfg)
+		t.Errorf("Expected: %+v ,received: %+v", expected, attscfg)
 	}
 	cfgJSONStr := `{
 "attributes": {								// Attribute service
@@ -56,7 +56,7 @@ func TestAttributeSCfgloadFromJsonCfg(t *testing.T) {
 	} else if err = attscfg.loadFromJsonCfg(jsnAttSCfg); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, attscfg) {
-		t.Errorf("Expected: %+v , recived: %+v", expected, attscfg)
+		t.Errorf("Expected: %+v , received: %+v", expected, attscfg)
 	}
 }
 
@@ -84,6 +84,6 @@ func TestAttributeSCfgAsMapInterface(t *testing.T) {
 	} else if err = attscfg.loadFromJsonCfg(jsnAttSCfg); err != nil {
 		t.Error(err)
 	} else if rcv := attscfg.AsMapInterface(); !reflect.DeepEqual(eMap, rcv) {
-		t.Errorf("\nExpected: %+v\nRecived: %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
+		t.Errorf("\nExpected: %+v\nReceived: %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
 	}
 }

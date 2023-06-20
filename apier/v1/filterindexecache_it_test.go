@@ -368,7 +368,7 @@ func testV1FIdxCaUpdateThresholdProfileFromTP(t *testing.T) {
 		t.Errorf("Expecting reply to not be nil")
 		// reply shoud not be nil so exit function
 		// to avoid nil segmentation fault;
-		// if this happens try to run this test manualy
+		// if this happens try to run this test manually
 		return
 	}
 	reply.FilterIDs = []string{"TestFilter3"}

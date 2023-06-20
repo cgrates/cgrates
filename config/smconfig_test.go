@@ -56,7 +56,7 @@ func TestFsAgentCfgloadFromJsonCfg1(t *testing.T) {
 	if err := fsAgentCfg.loadFromJsonCfg(fsAgentJsnCfg); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eFsAgentConfig, fsAgentCfg) {
-		t.Errorf("Expected: %+v , recived: %+v", utils.ToJSON(eFsAgentConfig), utils.ToJSON(fsAgentCfg))
+		t.Errorf("Expected: %+v , received: %+v", utils.ToJSON(eFsAgentConfig), utils.ToJSON(fsAgentCfg))
 	}
 }
 
@@ -65,12 +65,12 @@ func TestSessionSCfgloadFromJsonCfg(t *testing.T) {
 	if err := sescfg.loadFromJsonCfg(nil); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(sescfg, expected) {
-		t.Errorf("Expected: %+v ,recived: %+v", expected, sescfg)
+		t.Errorf("Expected: %+v ,received: %+v", expected, sescfg)
 	}
 	if err := sescfg.loadFromJsonCfg(new(SessionSJsonCfg)); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(sescfg, expected) {
-		t.Errorf("Expected: %+v ,recived: %+v", expected, sescfg)
+		t.Errorf("Expected: %+v ,received: %+v", expected, sescfg)
 	}
 	sescfg.DefaultUsage = make(map[string]time.Duration)
 	cfgJSONStr := `{
@@ -129,7 +129,7 @@ func TestSessionSCfgloadFromJsonCfg(t *testing.T) {
 	} else if err = sescfg.loadFromJsonCfg(jsnSesCfg); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, sescfg) {
-		t.Errorf("Expected: %+v , recived: %+v", utils.ToJSON(expected), utils.ToJSON(sescfg))
+		t.Errorf("Expected: %+v , received: %+v", utils.ToJSON(expected), utils.ToJSON(sescfg))
 	}
 }
 
@@ -211,7 +211,7 @@ func TestSessionSCfgAsMapInterface(t *testing.T) {
 	} else if err = sescfg.loadFromJsonCfg(jsnSesCfg); err != nil {
 		t.Error(err)
 	} else if rcv := sescfg.AsMapInterface(); !reflect.DeepEqual(eMap, rcv) {
-		t.Errorf("\nExpected: %+v\nRecived: %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
+		t.Errorf("\nExpected: %+v\nReceived: %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
 	}
 	cfgJSONStr = `{
 		"sessions": {
@@ -290,7 +290,7 @@ func TestSessionSCfgAsMapInterface(t *testing.T) {
 	} else if err = sescfg.loadFromJsonCfg(jsnSesCfg); err != nil {
 		t.Error(err)
 	} else if rcv := sescfg.AsMapInterface(); !reflect.DeepEqual(eMap, rcv) {
-		t.Errorf("\nExpected: %+v\nRecived: %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
+		t.Errorf("\nExpected: %+v\nReceived: %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
 	}
 }
 
@@ -299,12 +299,12 @@ func TestFsAgentCfgloadFromJsonCfg2(t *testing.T) {
 	if err := fsagcfg.loadFromJsonCfg(nil); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(fsagcfg, expected) {
-		t.Errorf("Expected: %+v ,recived: %+v", expected, fsagcfg)
+		t.Errorf("Expected: %+v ,received: %+v", expected, fsagcfg)
 	}
 	if err := fsagcfg.loadFromJsonCfg(new(FreeswitchAgentJsonCfg)); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(fsagcfg, expected) {
-		t.Errorf("Expected: %+v ,recived: %+v", expected, fsagcfg)
+		t.Errorf("Expected: %+v ,received: %+v", expected, fsagcfg)
 	}
 	cfgJSONStr := `{
 "freeswitch_agent": {
@@ -342,7 +342,7 @@ func TestFsAgentCfgloadFromJsonCfg2(t *testing.T) {
 	} else if err = fsagcfg.loadFromJsonCfg(jsnFsAgCfg); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, fsagcfg) {
-		t.Errorf("Expected: %+v , recived: %+v", utils.ToJSON(expected), utils.ToJSON(fsagcfg))
+		t.Errorf("Expected: %+v , received: %+v", utils.ToJSON(expected), utils.ToJSON(fsagcfg))
 	}
 }
 
@@ -385,7 +385,7 @@ func TestFsAgentCfgAsMapInterface(t *testing.T) {
 	} else if err = fsagcfg.loadFromJsonCfg(jsnFsAgCfg); err != nil {
 		t.Error(err)
 	} else if rcv := fsagcfg.AsMapInterface(""); !reflect.DeepEqual(eMap, rcv) {
-		t.Errorf("\nExpected: %+v\nRecived: %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
+		t.Errorf("\nExpected: %+v\nReceived: %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
 	}
 }
 
@@ -394,12 +394,12 @@ func TestFsConnCfgloadFromJsonCfg(t *testing.T) {
 	if err := fscocfg.loadFromJsonCfg(nil); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(fscocfg, expected) {
-		t.Errorf("Expected: %+v ,recived: %+v", expected, fscocfg)
+		t.Errorf("Expected: %+v ,received: %+v", expected, fscocfg)
 	}
 	if err := fscocfg.loadFromJsonCfg(new(FsConnJsonCfg)); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(fscocfg, expected) {
-		t.Errorf("Expected: %+v ,recived: %+v", expected, fscocfg)
+		t.Errorf("Expected: %+v ,received: %+v", expected, fscocfg)
 	}
 	json := &FsConnJsonCfg{
 		Address:    utils.StringPointer("127.0.0.1:8448"),
@@ -415,7 +415,7 @@ func TestFsConnCfgloadFromJsonCfg(t *testing.T) {
 	if err = fscocfg.loadFromJsonCfg(json); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, fscocfg) {
-		t.Errorf("Expected: %+v , recived: %+v", utils.ToJSON(expected), utils.ToJSON(fscocfg))
+		t.Errorf("Expected: %+v , received: %+v", utils.ToJSON(expected), utils.ToJSON(fscocfg))
 	}
 }
 
@@ -424,12 +424,12 @@ func TestRemoteHostloadFromJsonCfg(t *testing.T) {
 	if err := hpoolcfg.loadFromJsonCfg(nil); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(hpoolcfg, expected) {
-		t.Errorf("Expected: %+v ,recived: %+v", expected, hpoolcfg)
+		t.Errorf("Expected: %+v ,received: %+v", expected, hpoolcfg)
 	}
 	if err := hpoolcfg.loadFromJsonCfg(new(RemoteHostJson)); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(hpoolcfg, expected) {
-		t.Errorf("Expected: %+v ,recived: %+v", expected, hpoolcfg)
+		t.Errorf("Expected: %+v ,received: %+v", expected, hpoolcfg)
 	}
 	json := &RemoteHostJson{
 		Address:     utils.StringPointer("127.0.0.1:8448"),
@@ -442,7 +442,7 @@ func TestRemoteHostloadFromJsonCfg(t *testing.T) {
 	if err = hpoolcfg.loadFromJsonCfg(json); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, hpoolcfg) {
-		t.Errorf("Expected: %+v , recived: %+v", utils.ToJSON(expected), utils.ToJSON(hpoolcfg))
+		t.Errorf("Expected: %+v , received: %+v", utils.ToJSON(expected), utils.ToJSON(hpoolcfg))
 	}
 }
 
@@ -451,12 +451,12 @@ func TestAsteriskAgentCfgloadFromJsonCfg(t *testing.T) {
 	if err := asagcfg.loadFromJsonCfg(nil); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(asagcfg, expected) {
-		t.Errorf("Expected: %+v ,recived: %+v", expected, asagcfg)
+		t.Errorf("Expected: %+v ,received: %+v", expected, asagcfg)
 	}
 	if err := asagcfg.loadFromJsonCfg(new(AsteriskAgentJsonCfg)); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(asagcfg, expected) {
-		t.Errorf("Expected: %+v ,recived: %+v", expected, asagcfg)
+		t.Errorf("Expected: %+v ,received: %+v", expected, asagcfg)
 	}
 	cfgJSONStr := `{
 "asterisk_agent": {
@@ -486,7 +486,7 @@ func TestAsteriskAgentCfgloadFromJsonCfg(t *testing.T) {
 	} else if err = asagcfg.loadFromJsonCfg(jsnAsAgCfg); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, asagcfg) {
-		t.Errorf("Expected: %+v , recived: %+v", utils.ToJSON(expected), utils.ToJSON(asagcfg))
+		t.Errorf("Expected: %+v , received: %+v", utils.ToJSON(expected), utils.ToJSON(asagcfg))
 	}
 }
 
@@ -517,7 +517,7 @@ func TestAsteriskAgentCfgAsMapInterface(t *testing.T) {
 	} else if err = asagcfg.loadFromJsonCfg(jsnAsAgCfg); err != nil {
 		t.Error(err)
 	} else if rcv := asagcfg.AsMapInterface(); !reflect.DeepEqual(eMap, rcv) {
-		t.Errorf("\nExpected: %+v\nRecived: %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
+		t.Errorf("\nExpected: %+v\nReceived: %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
 	}
 }
 
@@ -526,12 +526,12 @@ func TestAsteriskConnCfgloadFromJsonCfg(t *testing.T) {
 	if err := asconcfg.loadFromJsonCfg(nil); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(asconcfg, expected) {
-		t.Errorf("Expected: %+v ,recived: %+v", expected, asconcfg)
+		t.Errorf("Expected: %+v ,received: %+v", expected, asconcfg)
 	}
 	if err := asconcfg.loadFromJsonCfg(new(AstConnJsonCfg)); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(asconcfg, expected) {
-		t.Errorf("Expected: %+v ,recived: %+v", expected, asconcfg)
+		t.Errorf("Expected: %+v ,received: %+v", expected, asconcfg)
 	}
 	json := &AstConnJsonCfg{
 		Address:          utils.StringPointer("127.0.0.1:8088"),
@@ -550,6 +550,6 @@ func TestAsteriskConnCfgloadFromJsonCfg(t *testing.T) {
 	if err = asconcfg.loadFromJsonCfg(json); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, asconcfg) {
-		t.Errorf("Expected: %+v , recived: %+v", utils.ToJSON(expected), utils.ToJSON(asconcfg))
+		t.Errorf("Expected: %+v , received: %+v", utils.ToJSON(expected), utils.ToJSON(asconcfg))
 	}
 }

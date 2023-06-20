@@ -167,7 +167,7 @@ func (nm NavigableMap2) Empty() bool {
 	return len(nm) == 0
 }
 
-// Len returns the lenght of the map
+// Len returns the length of the map
 func (nm NavigableMap2) Len() int {
 	return len(nm)
 }
