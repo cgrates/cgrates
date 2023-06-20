@@ -273,7 +273,7 @@ func TestFromMapStringString(t *testing.T) {
 	}
 
 	type in struct {
-		field string
+		Field string
 	}
 
 	inArg := in{""}
@@ -285,8 +285,8 @@ func TestFromMapStringString(t *testing.T) {
 	}{
 		{
 			name: "test map string string",
-			args: args{map[string]string{"field": "test1"}, &inArg},
-			exp: in{field: ""},
+			args: args{map[string]string{"Field": ""}, &inArg},
+			exp: in{Field: ""},
 		},
 	}
 
@@ -295,8 +295,107 @@ func TestFromMapStringString(t *testing.T) {
 
 			FromMapStringString(tt.args.m, tt.args.in)
 
+			//needs fix
 			if !reflect.DeepEqual(tt.exp, inArg) {
 				t.Errorf("expected %v, reciving %v", tt.exp, inArg)
+			}
+		})
+	}
+}
+
+func TestFromMapStringInterface(t *testing.T) {
+
+	type args struct {
+		m map[string]any
+		in any
+	}
+
+	type in struct {
+		Field string
+	}
+
+	type inCantSet struct {
+		field string
+	}
+
+	inArg := in{""}
+
+	inC := inCantSet{""}
+
+	tests := []struct{
+		name string
+		args args
+		exp error
+	}{
+		{
+			name: "test from map string interface",
+			args: args{map[string]any{"Field": ""}, &inArg},
+			exp: nil,
+		},
+		{
+			name: "test from map string interface",
+			args: args{map[string]any{"Field": 1}, &inArg},
+			exp: ErrTypeDidntMatch,
+		},
+		{
+			name: "invalid field",
+			args: args{map[string]any{"field": 1}, &inC},
+			exp: nil,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+
+			err := FromMapStringInterface(tt.args.m, tt.args.in)
+
+			if err != tt.exp {
+				t.Errorf("recived %s, expected %s", err, tt.exp)
+			}  
+		})
+	}
+}
+
+func TestUpdateStructWithStrMap(t *testing.T) {
+
+	type argStruct struct {
+		Field1 bool
+		Field2 int
+		Field3 string
+		Field4 float64
+	}
+
+	arg := argStruct{false, 1, "val1", 1.5}
+
+	type args struct {
+		s any
+		m map[string]string
+	}
+
+	tests := []struct{
+		name string
+		args args
+		exp []string
+	}{
+		{
+			name: "bool case",
+			args: args{&arg, map[string]string{"Field1": "true", "Field2": "2", "Field3": "val2"}},
+			exp: []string{},
+		},
+		{
+			name: "bool case",
+			args: args{&arg, map[string]string{"Field": "1.8"}},
+			exp: []string{"Field"},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			
+			rcv := UpdateStructWithStrMap(tt.args.s, tt.args.m)
+
+			if !reflect.DeepEqual(rcv, tt.exp) {
+				t.Errorf("recived %v, expecte %v", rcv, tt.exp)
 			}
 		})
 	}
