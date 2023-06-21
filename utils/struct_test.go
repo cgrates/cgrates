@@ -114,6 +114,7 @@ func TestNonemptyStructFields(t *testing.T) {
 		Account         string
 		Type            string
 		ActionTimingsId string
+		//Amount			int
 	}{"bevoip.eu", true, "testaccount", META_PREPAID, ""}
 	mapStruct := NonemptyStructFields(&attr)
 	expMapStruct := map[string]any{
@@ -121,6 +122,7 @@ func TestNonemptyStructFields(t *testing.T) {
 		"Direction": true,
 		"Account":   "testaccount",
 		"Type":      META_PREPAID,
+		//"Amount":	 10,
 	}
 	if !reflect.DeepEqual(expMapStruct, mapStruct) {
 		t.Errorf("expecting: %+v, received: %+v", expMapStruct, mapStruct)

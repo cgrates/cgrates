@@ -33,7 +33,6 @@ func fieldByIndexIsEmpty(v reflect.Value, index []int) bool {
 	for i, x := range index {
 		if i > 0 {
 			if v.Kind() == reflect.Ptr && v.Type().Elem().Kind() == reflect.Struct {
-				//impossible to get here
 				if v.IsNil() {
 					return true
 				}

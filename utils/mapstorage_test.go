@@ -493,11 +493,11 @@ func TestGetPathFromValue(t *testing.T) {
 			args: args{reflect.ValueOf(&[]string{"test"}), "test"},
 			exp:  []string{"test[0]"},
 		},
-		/*{
+		{
 			name: "map",
 			args: args{reflect.ValueOf(map[string]string{"test": "test"}), "test"},
 			exp: []string{"testtest"},
-		},*/
+		},
 		{
 			name: "struct",
 			args: args{reflect.ValueOf(struct{ test string }{"test"}), "test"},
