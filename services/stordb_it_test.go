@@ -223,13 +223,13 @@ func TestStorDBReloadVersion1(t *testing.T) {
 	}
 	stordb.db = nil
 	err = stordb.Reload()
-	if err == nil || err.Error() != "can't conver StorDB of type mongo to MongoStorage" {
+	if err == nil || err.Error() != "can't conver StorDB of type *mongo to MongoStorage" {
 		t.Fatal(err)
 	}
 
 	cfg.CdrsCfg().Enabled = false
 	err = stordb.Reload()
-	if err == nil || err.Error() != "can't conver StorDB of type mongo to MongoStorage" {
+	if err == nil || err.Error() != "can't conver StorDB of type *mongo to MongoStorage" {
 		t.Fatal(err)
 	}
 	time.Sleep(10 * time.Millisecond)
@@ -305,13 +305,13 @@ func TestStorDBReloadVersion2(t *testing.T) {
 	}
 	stordb.db = nil
 	err = stordb.Reload()
-	if err == nil || err.Error() != "can't conver StorDB of type mysql to SQLStorage" {
-		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", "can't convert StorDB of type mysql to SQLStorage", err)
+	if err == nil || err.Error() != "can't conver StorDB of type *mysql to SQLStorage" {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", "can't convert StorDB of type *mysql to SQLStorage", err)
 	}
 	cfg.CdrsCfg().Enabled = false
 	err = stordb.Reload()
-	if err == nil || err.Error() != "can't conver StorDB of type mysql to SQLStorage" {
-		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", "can't convert StorDB of type mysql to SQLStorage", err)
+	if err == nil || err.Error() != "can't conver StorDB of type *mysql to SQLStorage" {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", "can't convert StorDB of type *mysql to SQLStorage", err)
 
 		time.Sleep(10 * time.Millisecond)
 		shdChan.CloseOnce()
@@ -376,7 +376,7 @@ func TestStorDBReloadVersion3(t *testing.T) {
 	stordb.oldDBCfg = cfg.StorDbCfg().Clone()
 	stordb.db = nil
 	err = stordb.Reload()
-	if err == nil || err.Error() != "can't conver StorDB of type internal to InternalDB" {
+	if err == nil || err.Error() != "can't conver StorDB of type *internal to InternalDB" {
 		t.Fatal(err)
 	}
 	/* the internal now uses its own cache
@@ -416,8 +416,8 @@ func TestStorDBReloadNewStorDBConnError(t *testing.T) {
 	}
 	cfg.StorDbCfg().Type = "badType"
 	err := stordb.Reload()
-	if err == nil || err.Error() != "unknown db 'badType' valid options are [mysql, mongo, postgres, internal]" {
-		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", "unknown db 'badType' valid options are [mysql, mongo, postgres, internal]", err)
+	if err == nil || err.Error() != "unknown db 'badType' valid options are [*mysql, *mongo, *postgres, *internal]" {
+		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", "unknown db 'badType' valid options are [*mysql, *mongo, *postgres, *internal]", err)
 	}
 	shdChan.CloseOnce()
 }
@@ -435,7 +435,7 @@ func TestStorDBReloadStartDBError(t *testing.T) {
 	stordb := NewStorDBService(cfg, srvDep)
 	cfg.StorDbCfg().Type = "badType"
 	err := stordb.Start()
-	expected := "unknown db 'badType' valid options are [mysql, mongo, postgres, internal]"
+	expected := "unknown db 'badType' valid options are [*mysql, *mongo, *postgres, *internal]"
 	if err == nil || err.Error() != expected {
 		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", expected, err)
 	}

@@ -68,14 +68,11 @@
 	"listeners":[
 		{
 			"address":":2053",
-			"network":"tcp"
-        },
-		{
-			"address":":2053",
 			"network":"udp"
-		}
+		},
     ],
-	"sessions_conns": ["*localhost"]
+	"sessions_conns": ["*localhost"],
+
 },
 
 

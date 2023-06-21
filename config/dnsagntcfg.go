@@ -57,12 +57,6 @@ func (da *DNSAgentCfg) loadFromJSONCfg(jsnCfg *DNSAgentJsonCfg, sep string) (err
 			da.Listeners = append(da.Listeners, ls)
 		}
 	}
-	// if jsnCfg.Listen_net != nil {
-	// 	da.ListenNet = *jsnCfg.Listen_net
-	// }
-	// if jsnCfg.Listen != nil {
-	// 	da.Listen = *jsnCfg.Listen
-	// }
 	if jsnCfg.Timezone != nil {
 		da.Timezone = *jsnCfg.Timezone
 	}
@@ -110,9 +104,7 @@ func (lstn *Listener) AsMapInterface(separator string) map[string]any {
 // AsMapInterface returns the config as a map[string]any
 func (da *DNSAgentCfg) AsMapInterface(separator string) (initialMP map[string]any) {
 	initialMP = map[string]any{
-		utils.EnabledCfg: da.Enabled,
-		// utils.ListenCfg:    da.Listen,
-		// utils.ListenNetCfg: da.ListenNet,
+		utils.EnabledCfg:  da.Enabled,
 		utils.TimezoneCfg: da.Timezone,
 	}
 
@@ -146,9 +138,7 @@ func (da DNSAgentCfg) Clone() (cln *DNSAgentCfg) {
 	cln = &DNSAgentCfg{
 		Enabled:   da.Enabled,
 		Listeners: da.Listeners,
-		// Listen:    da.Listen,
-		// ListenNet: da.ListenNet,
-		Timezone: da.Timezone,
+		Timezone:  da.Timezone,
 	}
 
 	if da.Listeners != nil {

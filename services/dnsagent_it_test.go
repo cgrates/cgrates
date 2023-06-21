@@ -21,6 +21,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package services
 
 import (
+	"path"
 	"runtime"
 	"sync"
 	"testing"
@@ -69,11 +70,14 @@ func TestDNSAgentStartReloadShut(t *testing.T) {
 		NewLoaderService(cfg, db, filterSChan, server, make(chan rpcclient.ClientConnector, 1), nil, anz, srvDep), db)
 	runtime.Gosched()
 	time.Sleep(10 * time.Millisecond) //need to switch to gorutine
-
+	if err := srv.Shutdown(); err != nil {
+		t.Error(err)
+	}
+	time.Sleep(10 * time.Millisecond)
 	if err := srv.Start(); err != nil {
 		t.Error(err)
 	}
-	time.Sleep(1 * time.Millisecond)
+	time.Sleep(10 * time.Millisecond)
 	if err := srv.Reload(); err != nil {
 		t.Error(err)
 	}
@@ -87,93 +91,87 @@ func TestDNSAgentStartReloadShut(t *testing.T) {
 	}
 }
 
-// func TestDNSAgentReloadFirst(t *testing.T) {
-// 	cfg := config.NewDefaultCGRConfig()
-// 	cfg.SessionSCfg().Enabled = true
-// 	cfg.SessionSCfg().ListenBijson = ""
-// 	utils.Logger, _ = utils.Newlogger(utils.MetaSysLog, cfg.GeneralCfg().NodeID)
-// 	utils.Logger.SetLogLevel(7)
-// 	filterSChan := make(chan *engine.FilterS, 1)
-// 	filterSChan <- nil
-// 	shdChan := utils.NewSyncedChan()
-// 	defer func() {
-// 		shdChan.CloseOnce()
-// 		time.Sleep(10 * time.Millisecond)
-// 	}()
-// 	shdWg := new(sync.WaitGroup)
-// 	chS := engine.NewCacheS(cfg, nil, nil)
+func TestDNSAgentReloadFirst(t *testing.T) {
 
-// 	cacheSChan := make(chan rpcclient.ClientConnector, 1)
-// 	cacheSChan <- chS
+	cfg := config.NewDefaultCGRConfig()
+	cfg.SessionSCfg().Enabled = true
+	cfg.SessionSCfg().ListenBijson = ""
+	utils.Logger, _ = utils.Newlogger(utils.MetaSysLog, cfg.GeneralCfg().NodeID)
+	utils.Logger.SetLogLevel(7)
+	filterSChan := make(chan *engine.FilterS, 1)
+	filterSChan <- nil
+	shdChan := utils.NewSyncedChan()
+	defer func() {
+		shdChan.CloseOnce()
+		time.Sleep(10 * time.Millisecond)
+	}()
+	shdWg := new(sync.WaitGroup)
+	chS := engine.NewCacheS(cfg, nil, nil)
 
-// 	server := cores.NewServer(nil)
-// 	srvMngr := servmanager.NewServiceManager(cfg, shdChan, shdWg, nil)
-// 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
-// 	db := NewDataDBService(cfg, nil, srvDep)
-// 	anz := NewAnalyzerService(cfg, server, filterSChan, shdChan, make(chan rpcclient.ClientConnector, 1), srvDep)
-// 	sS := NewSessionService(cfg, db, server, make(chan rpcclient.ClientConnector, 1),
-// 		shdChan, nil, anz, srvDep)
-// 	srv := NewDNSAgent(cfg, filterSChan, shdChan, nil, srvDep)
-// 	engine.NewConnManager(cfg, nil)
-// 	srvMngr.AddServices(srv, sS,
-// 		NewLoaderService(cfg, db, filterSChan, server, make(chan rpcclient.ClientConnector, 1), nil, anz, srvDep), db)
-// 	if err := srvMngr.StartServices(); err != nil {
-// 		t.Fatal(err)
-// 	}
-// 	time.Sleep(1000 * time.Millisecond)
-// 	if srv.IsRunning() {
-// 		t.Fatalf("Expected service to be down")
-// 	}
-// 	var reply string
-// 	if err := cfg.V1ReloadConfig(&config.ReloadArgs{
-// 		Path:    path.Join("/usr", "share", "cgrates", "conf", "samples", "dnsagent_reload"),
-// 		Section: config.DNSAgentJson,
-// 	}, &reply); err != nil {
-// 		t.Fatal(err)
-// 	} else if reply != utils.OK {
-// 		t.Fatalf("Expecting OK ,received %s", reply)
-// 	}
-// 	runtime.Gosched()
-// 	time.Sleep(1000 * time.Millisecond) //need to switch to gorutine
-// 	if !srv.IsRunning() {
-// 		t.Fatalf("Expected service to be running")
-// 	}
-// 	err := srv.Start()
-// 	if err == nil || err != utils.ErrServiceAlreadyRunning {
-// 		t.Fatalf("\nExpecting <%+v>,\n Received <%+v>", utils.ErrServiceAlreadyRunning, err)
-// 	}
-// 	fmt.Println("1")
-// 	time.Sleep(1000 * time.Millisecond)
-// 	err = srv.Reload()
-// 	if err != nil {
-// 		t.Fatalf("\nExpecting <nil>,\n Received <%+v>", err)
-// 	}
-// 	time.Sleep(10 * time.Second)
-// 	fmt.Println("2")
+	cacheSChan := make(chan rpcclient.ClientConnector, 1)
+	cacheSChan <- chS
 
-// 	if !srv.IsRunning() {
-// 		fmt.Println("2.2")
-// 		t.Fatalf("Expected service to be up")
-// 	}
-
-// 	err = srv.Reload()
-// 	if err != nil {
-// 		t.Fatalf("\nExpecting <nil>,\n Received <%+v>", err)
-// 	}
-// 	fmt.Println("3")
-// 	cfg.DNSAgentCfg().Enabled = false
-// 	fmt.Println("4")
-// 	cfg.GetReloadChan(config.DNSAgentJson) <- struct{}{}
-// 	fmt.Println("5")
-// 	time.Sleep(1000 * time.Millisecond)
-// 	fmt.Println("6")
-// 	if srv.IsRunning() {
-// 		fmt.Println("7")
-// 		t.Fatalf("Expected service to be down")
-// 	}
-// 	fmt.Println("8")
-
-// }
+	server := cores.NewServer(nil)
+	srvMngr := servmanager.NewServiceManager(cfg, shdChan, shdWg, nil)
+	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
+	db := NewDataDBService(cfg, nil, srvDep)
+	anz := NewAnalyzerService(cfg, server, filterSChan, shdChan, make(chan rpcclient.ClientConnector, 1), srvDep)
+	sS := NewSessionService(cfg, db, server, make(chan rpcclient.ClientConnector, 1),
+		shdChan, nil, anz, srvDep)
+	srv := NewDNSAgent(cfg, filterSChan, shdChan, nil, srvDep)
+	engine.NewConnManager(cfg, nil)
+	srvMngr.AddServices(srv, sS,
+		NewLoaderService(cfg, db, filterSChan, server, make(chan rpcclient.ClientConnector, 1), nil, anz, srvDep), db)
+	if err := srvMngr.StartServices(); err != nil {
+		t.Fatal(err)
+	}
+	time.Sleep(100 * time.Millisecond)
+	if srv.IsRunning() {
+		t.Fatalf("Expected service to be down")
+	}
+	var reply string
+	if err := cfg.V1ReloadConfig(&config.ReloadArgs{
+		Path:    path.Join("/usr", "share", "cgrates", "conf", "samples", "dnsagent_reload"),
+		Section: config.DNSAgentJson,
+	}, &reply); err != nil {
+		t.Fatal(err)
+	} else if reply != utils.OK {
+		t.Fatalf("Expecting OK ,received %s", reply)
+	}
+	runtime.Gosched()
+	time.Sleep(10 * time.Millisecond) //need to switch to gorutine
+	if !srv.IsRunning() {
+		t.Fatalf("Expected service to be running")
+	}
+	err := srv.Start()
+	if err == nil || err != utils.ErrServiceAlreadyRunning {
+		t.Fatalf("\nExpecting <%+v>,\n Received <%+v>", utils.ErrServiceAlreadyRunning, err)
+	}
+	if err := cfg.V1ReloadConfig(&config.ReloadArgs{
+		Path:    path.Join("/usr", "share", "cgrates", "conf", "samples", "dnsagent_reload"),
+		Section: config.DNSAgentJson,
+	}, &reply); err != nil {
+		t.Fatal(err)
+	} else if reply != utils.OK {
+		t.Fatalf("Expecting OK ,received %s", reply)
+	}
+	if err := cfg.V1ReloadConfig(&config.ReloadArgs{
+		Path:    path.Join("/usr", "share", "cgrates", "conf", "samples", "dnsagent_reload"),
+		Section: config.DNSAgentJson,
+	}, &reply); err != nil {
+		t.Fatal(err)
+	} else if reply != utils.OK {
+		t.Fatalf("Expecting OK ,received %s", reply)
+	}
+	time.Sleep(10 * time.Millisecond)
+	cfg.DNSAgentCfg().Enabled = false
+	time.Sleep(10 * time.Millisecond)
+	cfg.GetReloadChan(config.DNSAgentJson) <- struct{}{}
+	time.Sleep(100 * time.Millisecond)
+	if srv.IsRunning() {
+		t.Fatalf("Expected service to be down")
+	}
+}
 
 func TestDNSAgentReload2(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
@@ -196,9 +194,10 @@ func TestDNSAgentReload2(t *testing.T) {
 	runtime.Gosched()
 	dnsSrv := srv.(*DNSAgent)
 	dnsSrv.dns = agentSrv
+
 	err = dnsSrv.listenAndServe(make(chan struct{}))
 	if err == nil || err.Error() != "dns: bad network" {
-		t.Fatalf("\nExpected <%+v>, \nReceived <%+v>", "dns: bad network", err)
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", "dns: bad network", err)
 	}
 }
 
@@ -220,11 +219,13 @@ func TestDNSAgentReload4(t *testing.T) {
 	runtime.Gosched()
 	dnsSrv := srv.(*DNSAgent)
 	dnsSrv.dns = nil
+
 	err := dnsSrv.Start()
 	if err == nil || err.Error() != "open bad_certificate: no such file or directory" {
-		t.Fatalf("\nExpected <%+v>, \nReceived <%+v>", "open bad_certificate: no such file or directory", err)
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", "open bad_certificate: no such file or directory", err)
 	}
 	dnsSrv.dns = nil
+
 }
 
 func TestDNSAgentReload5(t *testing.T) {
@@ -246,10 +247,12 @@ func TestDNSAgentReload5(t *testing.T) {
 	time.Sleep(10 * time.Millisecond)
 	runtime.Gosched()
 	runtime.Gosched()
+
 	err = srv.Reload()
 	if err != nil {
-		t.Fatalf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
 	}
+
 }
 
 func TestDNSAgentReload6(t *testing.T) {
@@ -263,20 +266,25 @@ func TestDNSAgentReload6(t *testing.T) {
 	filterSChan <- nil
 	shdChan := utils.NewSyncedChan()
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
-	srv := NewDNSAgent(cfg, filterSChan, shdChan, nil, srvDep)
 	cfg.DNSAgentCfg().Listeners[0].Address = "127.0.0.1:0"
+	srv := NewDNSAgent(cfg, filterSChan, shdChan, nil, srvDep)
+	time.Sleep(10 * time.Millisecond)
+
 	err := srv.Start()
 	if err != nil {
-		t.Fatalf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
 	}
-	cfg.DNSAgentCfg().Listeners[0].Network = "tls"
-	cfg.TLSCfg().ServerCerificate = "bad_certificate"
-	cfg.TLSCfg().ServerKey = "bad_key"
+
 	time.Sleep(10 * time.Millisecond)
 	runtime.Gosched()
 	runtime.Gosched()
+
+	cfg.DNSAgentCfg().Listeners[0].Network = "tls"
+	cfg.TLSCfg().ServerCerificate = "bad_certificate"
+	cfg.TLSCfg().ServerKey = "bad_key"
 	err = srv.Reload()
 	if err == nil || err.Error() != "open bad_certificate: no such file or directory" {
-		t.Fatalf("\nExpected <%+v>, \nReceived <%+v>", "open bad_certificate: no such file or directory", err)
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", "open bad_certificate: no such file or directory", err)
 	}
+
 }

@@ -1,5 +1,4 @@
 {
-
 "dns_agent": {
 	"request_processors": [
 		{
@@ -20,5 +19,4 @@
 		},
 	],
 },
-
 }
