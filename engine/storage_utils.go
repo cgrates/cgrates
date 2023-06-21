@@ -75,7 +75,7 @@ func NewStorDBConn(dbType, host, port, name, user, pass, marshaler string,
 	case utils.MetaInternal:
 		db = NewInternalDB(stringIndexedFields, prefixIndexedFields, false, itmsCfg)
 	default:
-		err = fmt.Errorf("unknown db 1'%s' valid options are [%s, %s, %s, %s]",
+		err = fmt.Errorf("unknown db '%s' valid options are [%s, %s, %s, %s]",
 			dbType, utils.MetaMySQL, utils.MetaMongo, utils.MetaPostgres, utils.MetaInternal)
 	}
 	return

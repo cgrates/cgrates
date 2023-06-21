@@ -22,6 +22,7 @@ import (
 	"crypto/tls"
 	"fmt"
 	"strings"
+	"sync"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
@@ -39,6 +40,7 @@ func NewDNSAgent(cgrCfg *config.CGRConfig, fltrS *engine.FilterS,
 
 // DNSAgent translates DNS requests towards CGRateS infrastructure
 type DNSAgent struct {
+	sync.RWMutex
 	cgrCfg  *config.CGRConfig // loaded CGRateS configuration
 	fltrS   *engine.FilterS   // connection towards FilterS
 	servers []*dns.Server
@@ -81,6 +83,9 @@ func (da *DNSAgent) ListenAndServe(stopChan chan struct{}) error {
 			if err != nil {
 				utils.Logger.Warning(fmt.Sprintf("<%s> error <%v>, on ListenAndServe <%s:%s>",
 					utils.DNSAgent, err, srv.Net, srv.Addr))
+				if strings.Contains(err.Error(), "address already in use") {
+					return
+				}
 				errChan <- err
 			}
 		}(server)
