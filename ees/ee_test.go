@@ -290,3 +290,35 @@ func TestEEPrepareOrderMap(t *testing.T) {
 		t.Errorf("Expected %v \n but received \n %v", utils.IfaceAsString(body), utils.IfaceAsString(rcv))
 	}
 }
+
+func TestExportRequestTenant(t *testing.T) {
+	bP := new(bytePreparing)
+	inData := map[string]utils.DataStorage{
+		utils.MetaVars: utils.MapStorage{
+			utils.MetaTenant: "cgrates.org"},
+	}
+	expNM := utils.NewOrderedNavigableMap()
+	tpFields := []*config.FCTemplate{
+		{
+			Tag:   "Tenant",
+			Path:  utils.MetaExp + utils.NestingSep + utils.Tenant,
+			Type:  utils.MetaVariable,
+			Value: config.NewRSRParsersMustCompile(utils.DynamicDataPrefix+utils.MetaVars+utils.NestingSep+utils.MetaTenant, utils.InfieldSep),
+		},
+	}
+	tpFields[0].ComputePath()
+	if err := engine.NewExportRequest(inData, "cgrates.org", nil, map[string]*utils.OrderedNavigableMap{utils.MetaExp: expNM}).SetFields(tpFields); err != nil {
+		t.Error(err)
+	}
+	rcv, err := bP.PrepareOrderMap(expNM)
+	if err != nil {
+		t.Error(err)
+	}
+	valMp := map[string]any{
+		"Tenant": "cgrates.org",
+	}
+	body, _ := json.Marshal(valMp)
+	if !reflect.DeepEqual(rcv, body) {
+		t.Errorf("Expected %v \n but received \n %v", utils.IfaceAsString(body), utils.IfaceAsString(rcv))
+	}
+}

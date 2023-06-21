@@ -266,12 +266,12 @@ func exportEventWithExporter(exp EventExporter, ev *utils.CGREvent, oneTime bool
 	} else {
 		expNM := utils.NewOrderedNavigableMap()
 		err = engine.NewExportRequest(map[string]utils.DataStorage{
-			utils.MetaReq:    utils.MapStorage(ev.Event),
-			utils.MetaDC:     exp.GetMetrics(),
-			utils.MetaOpts:   utils.MapStorage(ev.APIOpts),
-			utils.MetaCfg:    cfg.GetDataProvider(),
-			utils.MetaEC:     utils.MapStorage{utils.CostDetails: ev.Event[utils.CostDetails]},
-			utils.MetaTenant: utils.MapStorage{utils.Tenant: ev.Tenant},
+			utils.MetaReq:  utils.MapStorage(ev.Event),
+			utils.MetaDC:   exp.GetMetrics(),
+			utils.MetaOpts: utils.MapStorage(ev.APIOpts),
+			utils.MetaCfg:  cfg.GetDataProvider(),
+			utils.MetaEC:   utils.MapStorage{utils.CostDetails: ev.Event[utils.CostDetails]},
+			utils.MetaVars: utils.MapStorage{utils.MetaTenant: ev.Tenant},
 		}, utils.FirstNonEmpty(ev.Tenant, cfg.GeneralCfg().DefaultTenant),
 			filterS,
 			map[string]*utils.OrderedNavigableMap{utils.MetaExp: expNM}).SetFields(exp.Cfg().ContentFields())
