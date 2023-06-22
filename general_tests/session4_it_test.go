@@ -129,7 +129,7 @@ func testSes4CDRsProcessCDR(t *testing.T) {
 	// rerate a free postpaid event in the CDRServer
 	// will make the BalanceInfo nil and result in a panic
 	args := &engine.ArgV1ProcessEvent{
-		Flags: []string{utils.MetaRALs, utils.MetaStore, "*routes:false", utils.MetaRerate},
+		Flags: []string{utils.MetaRALs, utils.MetaStore, "*routes:false"},
 		CGREvent: utils.CGREvent{
 			Tenant: "cgrates.org",
 			Event: map[string]any{
@@ -147,6 +147,7 @@ func testSes4CDRsProcessCDR(t *testing.T) {
 		},
 	}
 
+	// Process and store the given CDR.
 	var reply string
 	if err := ses4RPC.Call(utils.CDRsV1ProcessEvent, args, &reply); err != nil {
 		t.Error("Unexpected error: ", err.Error())
@@ -154,6 +155,8 @@ func testSes4CDRsProcessCDR(t *testing.T) {
 		t.Error("Unexpected reply received: ", reply)
 	}
 
+	// Process the CDR again, after adding the *rerate flag.
+	args.Flags = append(args.Flags, utils.MetaRerate)
 	if err := ses4RPC.Call(utils.CDRsV1ProcessEvent, args, &reply); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if reply != utils.OK {
