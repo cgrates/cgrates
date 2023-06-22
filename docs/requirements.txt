@@ -16,6 +16,7 @@ docutils==0.18.1
     # via
     #   sphinx
     #   sphinx-rtd-theme
+    #   sphinx-tabs
 idna==3.4
     # via requests
 imagesize==1.4.1
@@ -29,7 +30,9 @@ markupsafe==2.1.2
 packaging==23.1
     # via sphinx
 pygments==2.15.1
-    # via sphinx
+    # via
+    #   sphinx
+    #   sphinx-tabs
 requests==2.30.0
     # via sphinx
 snowballstemmer==2.2.0
@@ -39,10 +42,13 @@ sphinx==6.2.1
     #   -r requirements.in
     #   sphinx-copybutton
     #   sphinx-rtd-theme
+    #   sphinx-tabs
     #   sphinxcontrib-jquery
 sphinx-copybutton==0.5.2
     # via -r requirements.in
 sphinx-rtd-theme==1.2.0
+    # via -r requirements.in
+sphinx-tabs==3.4.1
     # via -r requirements.in
 sphinxcontrib-applehelp==1.0.4
     # via sphinx

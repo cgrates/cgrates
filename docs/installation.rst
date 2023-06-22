@@ -36,7 +36,7 @@ You can add the CGRateS repository to your system's sources list as follows:
    sudo mv apt.cgrates.org.asc /etc/apt/trusted.gpg.d/
 
    # Add the repository to the apt sources list
-   echo "deb http://apt.cgrates.org/debian/ v0.10 main" | sudo tee /etc/apt/sources.list.d/cgrates.list
+   echo "deb http://apt.cgrates.org/debian/ nightly main" | sudo tee /etc/apt/sources.list.d/cgrates.list
 
    # Update the system repository and install CGRateS
    sudo apt-get update -y
@@ -46,7 +46,7 @@ Alternatively, you can manually install a specific .deb package as follows:
 
 .. code-block:: bash
 
-   wget http://pkg.cgrates.org/deb/v0.10/cgrates_current_amd64.deb
+   wget http://pkg.cgrates.org/deb/nightly/cgrates_current_amd64.deb
    sudo dpkg -i ./cgrates_current_amd64.deb
 
 .. note::
@@ -63,7 +63,7 @@ For .rpm distros, we are using copr to manage the CGRateS packages:
 
       # sudo yum install -y dnf-plugins-core on RHEL 8 or CentOS Stream
       sudo dnf install -y dnf-plugins-core 
-      sudo dnf copr -y enable cgrates/v0.10 
+      sudo dnf copr -y enable cgrates/master 
       sudo dnf install -y cgrates
 
 -  For older distributions: 
@@ -71,7 +71,7 @@ For .rpm distros, we are using copr to manage the CGRateS packages:
    .. code-block:: bash
 
       sudo yum install -y yum-plugin-copr
-      sudo yum copr -y enable cgrates/v0.10
+      sudo yum copr -y enable cgrates/master
       sudo yum install -y cgrates
 
 To install a specific version of the package, run:
@@ -81,7 +81,7 @@ To install a specific version of the package, run:
    sudo dnf install -y cgrates-<version>.x86_64
 
 .. note::
-   The entire archive of CGRateS rpm packages is available at https://copr.fedorainfracloud.org/coprs/cgrates/v0.10/packages/.
+   The entire archive of CGRateS rpm packages is available at https://copr.fedorainfracloud.org/coprs/cgrates/master/packages/.
 
 Installing from Source
 ----------------------
