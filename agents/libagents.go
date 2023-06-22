@@ -20,6 +20,7 @@ package agents
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
@@ -61,8 +62,8 @@ func processRequest(reqProcessor *config.RequestProcessor, agReq *AgentRequest,
 
 	if reqProcessor.Flags.Has(utils.MetaLog) {
 		utils.Logger.Info(
-			fmt.Sprintf("<%s> LOG, processorID: %s, diameter message: %s",
-				agentName, reqProcessor.ID, agReq.Request.String()))
+			fmt.Sprintf("<%s> LOG, processorID: %s, %s message: %s",
+				agentName, reqProcessor.ID, strings.ToLower(agentName[:len(agentName)-5]), agReq.Request.String()))
 	}
 	switch reqType {
 	default:
@@ -70,8 +71,8 @@ func processRequest(reqProcessor *config.RequestProcessor, agReq *AgentRequest,
 	case utils.MetaNone: // do nothing on CGRateS side
 	case utils.MetaDryRun:
 		utils.Logger.Info(
-			fmt.Sprintf("<%s> DRY_RUN, processorID: %s, DiameterMessage: %s",
-				agentName, reqProcessor.ID, agReq.Request.String()))
+			fmt.Sprintf("<%s> DRY_RUN, processorID: %s, %sMessage: %s",
+				agentName, reqProcessor.ID, agentName[:len(agentName)-5], agReq.Request.String()))
 	case utils.MetaAuthorize:
 		authArgs := sessions.NewV1AuthorizeArgs(
 			reqProcessor.Flags.GetBool(utils.MetaAttributes),
