@@ -41,7 +41,7 @@ func TestDataConvertersConvertString(t *testing.T) {
 	}
 }
 
-func TestNewDataConverter(t *testing.T) {
+func TestDataConverterNewDataConverter(t *testing.T) {
 	a, err := NewDataConverter(MetaDurationSeconds)
 	if err != nil {
 		t.Error(err)
@@ -182,7 +182,7 @@ func shouldPanic(t *testing.T, f func(string) DataConverter) {
 	t.Error("should have panicked")
 }
 
-func TestNewDurationSecondsConverter(t *testing.T) {
+func TestDataConverterNewDurationSecondsConverter(t *testing.T) {
 	eOut := DurationSecondsConverter{}
 	if rcv, err := NewDurationSecondsConverter("test"); err != nil {
 		t.Error(err)
@@ -191,20 +191,20 @@ func TestNewDurationSecondsConverter(t *testing.T) {
 	}
 }
 
-func TestDurationSecondsConverterConvert(t *testing.T) {
+func TestDataConverterDurationSecondsConverterConvert(t *testing.T) {
 	mS := &DurationSecondsConverter{}
 	if _, err := mS.Convert("string"); err.Error() != "time: invalid duration \"string\"" {
 		t.Error(err)
 	}
 }
 
-func TestDurationNanosecondsConverterConvert(t *testing.T) {
+func TestDataConverterDurationNanosecondsConverterConvert(t *testing.T) {
 	nS := &DurationNanosecondsConverter{}
 	if _, err := nS.Convert("string"); err.Error() != "time: invalid duration \"string\"" {
 		t.Error(err)
 	}
 }
-func TestNewRoundConverter(t *testing.T) {
+func TestDataConverterNewRoundConverter(t *testing.T) {
 	if _, err := NewRoundConverter("test"); err == nil || err.Error() != "*round converter needs integer as decimals, have: <test>" {
 		t.Error(err)
 	}
@@ -258,7 +258,7 @@ func TestNewRoundConverter(t *testing.T) {
 
 }
 
-func TestRoundConverterConvert(t *testing.T) {
+func TestDataConverterRoundConverterConvert(t *testing.T) {
 	rnd := &RoundConverter{}
 	if rcv, err := rnd.Convert("string_test"); err == nil || err.Error() != `strconv.ParseFloat: parsing "string_test": invalid syntax` {
 		t.Error(err)
@@ -273,7 +273,7 @@ func TestRoundConverterConvert(t *testing.T) {
 	}
 }
 
-func TestNewMultiplyConverter(t *testing.T) {
+func TestDataConverterNewMultiplyConverter(t *testing.T) {
 	if rcv, err := NewMultiplyConverter(EmptyString); err == nil || err != ErrMandatoryIeMissingNoCaps {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rcv, nil) {
@@ -292,7 +292,7 @@ func TestNewMultiplyConverter(t *testing.T) {
 	}
 }
 
-func TestMultiplyConverterConvert(t *testing.T) {
+func TestDataConverterMultiplyConverterConvert(t *testing.T) {
 	m := &MultiplyConverter{}
 	if rcv, err := m.Convert(EmptyString); err == nil || err.Error() != `strconv.ParseFloat: parsing "": invalid syntax` {
 		t.Error(err)
@@ -318,7 +318,7 @@ func TestMultiplyConverterConvert(t *testing.T) {
 	}
 }
 
-func TestNewDivideConverter(t *testing.T) {
+func TestDataConverterNewDivideConverter(t *testing.T) {
 	if rcv, err := NewDivideConverter(EmptyString); err == nil || err != ErrMandatoryIeMissingNoCaps {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rcv, nil) {
@@ -337,7 +337,7 @@ func TestNewDivideConverter(t *testing.T) {
 	}
 }
 
-func TestDivideConverterConvert(t *testing.T) {
+func TestDataConverterDivideConverterConvert(t *testing.T) {
 	m := DivideConverter{}
 	if rcv, err := m.Convert("string_test"); err == nil || err.Error() != `strconv.ParseFloat: parsing "string_test": invalid syntax` {
 		t.Error(err)
@@ -365,7 +365,7 @@ func TestDivideConverterConvert(t *testing.T) {
 	}
 }
 
-func TestNewDurationConverter(t *testing.T) {
+func TestDataConverterNewDurationConverter(t *testing.T) {
 	nS := &DurationConverter{}
 	eOut := time.Duration(0 * time.Second)
 	if rcv, err := nS.Convert(EmptyString); err != nil {
@@ -381,7 +381,7 @@ func TestNewDurationConverter(t *testing.T) {
 	}
 }
 
-func TestConvertFloatToSeconds(t *testing.T) {
+func TestDataConverterConvertFloatToSeconds(t *testing.T) {
 	b, err := NewDataConverter(MetaDurationSeconds)
 	if err != nil {
 		t.Error(err.Error())
@@ -396,7 +396,7 @@ func TestConvertFloatToSeconds(t *testing.T) {
 	}
 }
 
-func TestConvertDurNanoseconds(t *testing.T) {
+func TestDataConverterConvertDurNanoseconds(t *testing.T) {
 	d, err := NewDataConverter(MetaDurationNanoseconds)
 	if err != nil {
 		t.Error(err.Error())
@@ -409,7 +409,7 @@ func TestConvertDurNanoseconds(t *testing.T) {
 	}
 }
 
-func TestRoundConverterFloat64(t *testing.T) {
+func TestDataConverterRoundConverterFloat64(t *testing.T) {
 	b, err := NewDataConverter("*round:2")
 	if err != nil {
 		t.Error(err.Error())
@@ -433,7 +433,7 @@ func TestRoundConverterFloat64(t *testing.T) {
 
 //testRoundconv string / float / int / time
 
-func TestRoundConverterString(t *testing.T) {
+func TestDataConverterRoundConverterString(t *testing.T) {
 	b, err := NewDataConverter("*round:2")
 	if err != nil {
 		t.Error(err.Error())
@@ -455,7 +455,7 @@ func TestRoundConverterString(t *testing.T) {
 	}
 }
 
-func TestRoundConverterInt64(t *testing.T) {
+func TestDataConverterRoundConverterInt64(t *testing.T) {
 	b, err := NewDataConverter("*round:2")
 	if err != nil {
 		t.Error(err.Error())
@@ -477,7 +477,7 @@ func TestRoundConverterInt64(t *testing.T) {
 	}
 }
 
-func TestRoundConverterTime(t *testing.T) {
+func TestDataConverterRoundConverterTime(t *testing.T) {
 	b, err := NewDataConverter("*round:2")
 	if err != nil {
 		t.Error(err.Error())
@@ -499,7 +499,7 @@ func TestRoundConverterTime(t *testing.T) {
 	}
 }
 
-func TestMultiplyConverter(t *testing.T) {
+func TestDataConverterMultiplyConverter(t *testing.T) {
 	eMpl := &MultiplyConverter{1024.0}
 	m, err := NewDataConverter("*multiply:1024.0")
 	if err != nil {
@@ -521,7 +521,7 @@ func TestMultiplyConverter(t *testing.T) {
 	}
 }
 
-func TestDivideConverter(t *testing.T) {
+func TestDataConverterDivideConverter(t *testing.T) {
 	eDvd := &DivideConverter{1024.0}
 	d, err := NewDataConverter("*divide:1024.0")
 	if err != nil {
@@ -546,7 +546,7 @@ func TestDivideConverter(t *testing.T) {
 	}
 }
 
-func TestDurationConverter(t *testing.T) {
+func TestDataConverterDurationConverter(t *testing.T) {
 	d, err := NewDataConverter(MetaDuration)
 	if err != nil {
 		t.Error(err.Error())
@@ -574,7 +574,7 @@ func TestDurationConverter(t *testing.T) {
 	}
 }
 
-func TestPhoneNumberConverter(t *testing.T) {
+func TestDataConverterPhoneNumberConverter(t *testing.T) {
 	// test for error
 	if rcv, err := NewDataConverter("*libphonenumber:US:1:2:error"); err == nil || err.Error() != "unsupported *libphonenumber converter parameters: <US:1:2:error>" {
 		t.Error(err)
@@ -651,7 +651,7 @@ func TestPhoneNumberConverter(t *testing.T) {
 	}
 }
 
-func TestHexConvertor(t *testing.T) {
+func TestDataConverterHexConvertor(t *testing.T) {
 	hx := IP2HexConverter{}
 	val := "127.0.0.1"
 	expected := "0x7f000001"
@@ -691,7 +691,7 @@ func TestHexConvertor(t *testing.T) {
 	}
 }
 
-func TestStringHexConvertor(t *testing.T) {
+func TestDataConverterStringHexConvertor(t *testing.T) {
 	hx := new(String2HexConverter)
 	val := "127.0.0.1"
 	expected := "0x3132372e302e302e31"
@@ -733,7 +733,7 @@ func TestStringHexConvertor(t *testing.T) {
 	}
 }
 
-func TestConvertString(t *testing.T) {
+func TestDataConverterConvertString(t *testing.T) {
 	tests := []struct {
 		name string
 		arg  string

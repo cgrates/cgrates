@@ -272,7 +272,7 @@ func TestMapSlice(t *testing.T) {
 	}
 }
 
-func TestStringMap_Copy(t *testing.T) {
+func TestMapStringMap_Copy(t *testing.T) {
 	tests := []struct {
 		name string
 		sm   StringMap

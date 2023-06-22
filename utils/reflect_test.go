@@ -172,7 +172,7 @@ func TestReflectFieldAsString(t *testing.T) {
 	}
 }
 
-func TestIfaceAsDuration(t *testing.T) {
+func TestReflectIfaceAsDuration(t *testing.T) {
 	type want struct {
 		d   time.Duration
 		err error
@@ -353,7 +353,7 @@ func TestReflectAsMapStringIface(t *testing.T) {
 	}
 }
 
-func TestGreaterThan(t *testing.T) {
+func TestReflectGreaterThan(t *testing.T) {
 	if gte, err := GreaterThan(1, 1.2, false); err != nil {
 		t.Error(err)
 	} else if gte {
@@ -450,7 +450,7 @@ func TestGreaterThan(t *testing.T) {
 	}
 }
 
-func TestStringToInterface(t *testing.T) {
+func TestReflectStringToInterface(t *testing.T) {
 	if res := StringToInterface("1"); res != int64(1) {
 		t.Error("not parsing int")
 	}
@@ -474,7 +474,7 @@ func TestStringToInterface(t *testing.T) {
 	}
 }
 
-func TestIfaceAsString(t *testing.T) {
+func TestReflectIfaceAsString(t *testing.T) {
 	val := any("string1")
 	if rply := IfaceAsString(val); rply != "string1" {
 		t.Errorf("Expected string1 ,received %+v", rply)
@@ -539,7 +539,7 @@ func TestIfaceAsString(t *testing.T) {
 	}
 }
 
-func TestIfaceAsTime(t *testing.T) {
+func TestReflectIfaceAsTime(t *testing.T) {
 	timeDate := time.Date(2009, 11, 10, 23, 0, 0, 0, time.UTC)
 	val := any("2009-11-10T23:00:00Z")
 	if itmConvert, err := IfaceAsTime(val, "UTC"); err != nil {
@@ -559,7 +559,7 @@ func TestIfaceAsTime(t *testing.T) {
 	}
 }
 
-func TestIfaceAsFloat64(t *testing.T) {
+func TestReflectIfaceAsFloat64(t *testing.T) {
 	eFloat := 6.0
 	val := any(6.0)
 	if itmConvert, err := IfaceAsFloat64(val); err != nil {
@@ -591,7 +591,7 @@ func TestIfaceAsFloat64(t *testing.T) {
 	}
 }
 
-func TestIfaceAsInt64(t *testing.T) {
+func TestReflectIfaceAsInt64(t *testing.T) {
 	eInt := int64(3)
 	val := any(int32(3))
 	if itmConvert, err := IfaceAsInt64(val); err != nil {
@@ -623,7 +623,7 @@ func TestIfaceAsInt64(t *testing.T) {
 	}
 }
 
-func TestIfaceAsTInt64(t *testing.T) {
+func TestReflectIfaceAsTInt64(t *testing.T) {
 	eInt := int64(3)
 	val := any(3)
 	if itmConvert, err := IfaceAsTInt64(val); err != nil {
@@ -673,7 +673,7 @@ func TestIfaceAsTInt64(t *testing.T) {
 	}
 }
 
-func TestIfaceAsBool(t *testing.T) {
+func TestReflectIfaceAsBool(t *testing.T) {
 	val := any(true)
 	if itmConvert, err := IfaceAsBool(val); err != nil {
 		t.Error(err)
@@ -716,7 +716,7 @@ func TestIfaceAsBool(t *testing.T) {
 	}
 }
 
-func TestSum(t *testing.T) {
+func TestReflectSum(t *testing.T) {
 	if _, err := Sum(1); err == nil || err != ErrNotEnoughParameters {
 		t.Error(err)
 	}
@@ -774,7 +774,7 @@ func TestSum(t *testing.T) {
 	}
 }
 
-func TestGetUniformType(t *testing.T) {
+func TestReflectGetUniformType(t *testing.T) {
 	var arg, expected any
 	arg = time.Second
 	expected = float64(time.Second)
@@ -830,7 +830,7 @@ func TestGetUniformType(t *testing.T) {
 	}
 }
 
-func TestGetBasicType(t *testing.T) {
+func TestReflectGetBasicType(t *testing.T) {
 	var wantInt64 int64 = 1
 	var argu uint = 1
 	var wantu64 uint64 = 1
@@ -867,7 +867,7 @@ func TestGetBasicType(t *testing.T) {
 	}
 }
 
-func TestDifference(t *testing.T) {
+func TestReflectDifference(t *testing.T) {
 	if _, err := Difference(10); err == nil || err != ErrNotEnoughParameters {
 		t.Error(err)
 	}
@@ -937,7 +937,7 @@ func TestDifference(t *testing.T) {
 	}
 }
 
-func TestEqualTo(t *testing.T) {
+func TestReflectEqualTo(t *testing.T) {
 	if gte, err := EqualTo(1, 1.2); err != nil {
 		t.Error(err)
 	} else if gte {
@@ -1108,7 +1108,7 @@ func TestReflectFieldMethodInterface(t *testing.T) {
 	}
 }
 
-func TestIfaceAsSliceString(t *testing.T) {
+func TestReflectIfaceAsSliceString(t *testing.T) {
 	var attrs any
 	var expected []string
 	if rply, err := IfaceAsSliceString(attrs); err != nil {
@@ -1228,7 +1228,7 @@ func TestIfaceAsSliceString(t *testing.T) {
 	}
 }
 
-func TestAsMapStringIface(t *testing.T) {
+func TestReflecttAsMapStringIface(t *testing.T) {
 	str := "arg"
 	type want struct {
 		out map[string]any

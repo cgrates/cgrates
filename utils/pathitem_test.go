@@ -146,7 +146,7 @@ func TestPathItemsClone(t *testing.T) {
 	}
 }
 
-func TestGetIndexPath(t *testing.T) {
+func TestPathItemGetIndexPath(t *testing.T) {
 	type want struct {
 		opath string
 		idx   int
@@ -194,7 +194,7 @@ func TestGetIndexPath(t *testing.T) {
 	}
 }
 
-func TestGetPathWithoutIndex(t *testing.T) {
+func TestPathItemGetPathWithoutIndex(t *testing.T) {
 	tests := []struct {
 		name string
 		arg  string

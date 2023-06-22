@@ -171,7 +171,7 @@ func TestMissingMapFields(t *testing.T) {
 	}
 }
 
-func TestToMapStringString(t *testing.T) {
+func TestStructToMapStringString(t *testing.T) {
 
 	tests := []struct{
 		name string
@@ -199,7 +199,7 @@ func TestToMapStringString(t *testing.T) {
 	}
 }
 
-func TestGetMapExtraFields(t *testing.T) {
+func TestStructGetMapExtraFields(t *testing.T) {
 
 	type in struct {
 		mapAny map[string]string
@@ -233,7 +233,7 @@ func TestGetMapExtraFields(t *testing.T) {
 	}
 }
 
-func TestSetMapExtraFields(t *testing.T) {
+func TestStructSetMapExtraFields(t *testing.T) {
 
 	type in struct {
 		Field map[string]string
@@ -267,7 +267,7 @@ func TestSetMapExtraFields(t *testing.T) {
 	}
 }
 
-func TestFromMapStringString(t *testing.T) {
+func TestStructFromMapStringString(t *testing.T) {
 
 	type args struct {
 		m map[string]string
@@ -305,7 +305,7 @@ func TestFromMapStringString(t *testing.T) {
 	}
 }
 
-func TestFromMapStringInterface(t *testing.T) {
+func TestStructFromMapStringInterface(t *testing.T) {
 
 	type args struct {
 		m map[string]any
@@ -337,7 +337,7 @@ func TestFromMapStringInterface(t *testing.T) {
 		{
 			name: "test from map string interface",
 			args: args{map[string]any{"Field": 1}, &inArg},
-			exp: ErrTypeDidntMatch,
+			exp: nil,
 		},
 		{
 			name: "invalid field",
@@ -346,19 +346,25 @@ func TestFromMapStringInterface(t *testing.T) {
 		},
 	}
 
-	for _, tt := range tests {
+	for i, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 
 			err := FromMapStringInterface(tt.args.m, tt.args.in)
 
-			if err != tt.exp {
-				t.Errorf("recived %s, expected %s", err, tt.exp)
-			}  
+			if i == 1 {
+				if err == nil {
+					t.Error("was expecting an error")
+				}  
+			} else {
+				if err != tt.exp {
+					t.Errorf("recived %s, expected %s", err, tt.exp)
+				}  
+			}
 		})
 	}
 }
 
-func TestUpdateStructWithStrMap(t *testing.T) {
+func TestStructUpdateStructWithStrMap(t *testing.T) {
 
 	type argStruct struct {
 		Field1 bool

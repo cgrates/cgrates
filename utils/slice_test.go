@@ -91,7 +91,7 @@ func TestAvg(t *testing.T) {
 	}
 }
 
-func TestAvgNegative(t *testing.T) {
+func TestSliceAvgNegative(t *testing.T) {
 	tests := []struct {
 		name string
 		args []float64
@@ -117,7 +117,7 @@ func TestAvgNegative(t *testing.T) {
 	}
 }
 
-func TestPrefixSliceItems(t *testing.T) {
+func TestSliceAPrefixSliceItems(t *testing.T) {
 	type args struct {
 			slc  []string
 			prfx string

@@ -25,7 +25,7 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-func TestNewFWVProvider(t *testing.T) {
+func TestFVWDPNewFWVProvider(t *testing.T) {
 
 	dP := NewFWVProvider("test")
 
@@ -45,9 +45,9 @@ func TestFwvdpString(t *testing.T) {
 	}
 }
 
-func TestFWVFieldAsInterface(t *testing.T) {
+func TestFWVDPFieldAsInterface(t *testing.T) {
 
-	dP := FWVProvider{req: "test", cache: utils.MapStorage{"0-4": "test"}}
+	dP := FWVProvider{req: "test", cache: utils.MapStorage{"test": "test"}}
 
 	tests := []struct{
 		name string 
@@ -60,6 +60,30 @@ func TestFWVFieldAsInterface(t *testing.T) {
 			arg: []string{},
 			exp: nil,
 			err: false,
+		},
+		{
+			name: "empty field path",
+			arg: []string{"a-b"},
+			exp: nil,
+			err: true,
+		},
+		{
+			name: "empty field path",
+			arg: []string{"5-6"},
+			exp: "",
+			err: true,
+		},
+		{
+			name: "empty field path",
+			arg: []string{"0-a"},
+			exp: nil,
+			err: true,
+		},
+		{
+			name: "empty field path",
+			arg: []string{"0-6"},
+			exp: "",
+			err: true,
 		},
 	}
 
@@ -85,7 +109,7 @@ func TestFWVFieldAsInterface(t *testing.T) {
 	}
 }
 
-func TestFWVFieldAsString(t *testing.T) {
+func TestFVWDPFieldAsString(t *testing.T) {
 
 	dP := NewFWVProvider("test")
 
@@ -133,7 +157,7 @@ func TestFWVFieldAsString(t *testing.T) {
 	}
 }
 
-func TestFWVRemoteHost(t *testing.T) {
+func TestFVWDPRemoteHost(t *testing.T) {
 
 	dP := NewFWVProvider("test")
 

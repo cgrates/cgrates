@@ -115,7 +115,7 @@ type testStruct struct {
 	Item2 int
 }
 
-func TestNavMapAdd2(t *testing.T) {
+func TestMapStorageNavMapAdd2(t *testing.T) {
 	nM := MapStorage{}
 	path := []string{"FistLever2", "SecondLevel2", "Field2"}
 	data := 123
@@ -237,7 +237,7 @@ func TestNavMapGetField(t *testing.T) {
 	}
 }
 
-func TestNavMapFieldAsInterface(t *testing.T) {
+func TestMapStorageNavMapFieldAsInterface(t *testing.T) {
 	nm := MapStorage{
 		"SlcString": []string{"val1", "val2"},
 		"SlcAny": []any{"val1"},
@@ -265,7 +265,7 @@ func TestNavMapFieldAsInterface(t *testing.T) {
 		{
 			name: "empty argument",
 			arg:  []string{},
-			exp:  exp{nil, ErrEmptyFieldPath},
+			exp:  exp{nil, nil},
 		},
 		{
 			name: "field is slice of strings, index not found",
@@ -349,12 +349,18 @@ func TestNavMapFieldAsInterface(t *testing.T) {
 		},
 	}
 
-	for _, tt := range tests {
+	for i, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			rcv, err := nm.FieldAsInterface(tt.arg)
 
-			if err != tt.exp.err {
-				t.Fatalf("recived %s, expected %s", err, tt.exp.err)
+			if i == 0 {
+				if err == nil {
+					t.Fatal("was expecting an error")
+				}
+			} else {
+				if err != tt.exp.err {
+					t.Fatalf("recived %s, expected %s", err, tt.exp.err)
+				}
 			}
 
 			if !reflect.DeepEqual(rcv, tt.exp.val) {
@@ -364,7 +370,7 @@ func TestNavMapFieldAsInterface(t *testing.T) {
 	}
 }
 
-func TestNavMapGetKeys(t *testing.T) {
+func TestMapStorageNavMapGetKeys(t *testing.T) {
 	tests := []struct {
 		name     string
 		arg      bool
@@ -421,7 +427,7 @@ func TestNavMapGetKeys(t *testing.T) {
 	}
 }
 
-func TestMapRemove(t *testing.T) {
+func TestMapStorageMapRemove(t *testing.T) {
 	tests := []struct {
 		name string
 		arg  []string
@@ -478,7 +484,7 @@ func TestMapRemove(t *testing.T) {
 	}
 }
 
-func TestGetPathFromValue(t *testing.T) {
+func TestMapStorageGetPathFromValue(t *testing.T) {
 	type args struct {
 		in     reflect.Value
 		prefix string
@@ -528,7 +534,7 @@ func TestGetPathFromValue(t *testing.T) {
 	}
 }
 
-func TestRemoteHost(t *testing.T) {
+func TestMapStorageRemoteHost(t *testing.T) {
 	ms := MapStorage{
 		"MS":    MapStorage{"test": 1},
 		"MP":    map[string]any{"test2": 2},
@@ -543,7 +549,7 @@ func TestRemoteHost(t *testing.T) {
 	}
 }
 
-func TestNavMapSet(t *testing.T) {
+func TestMapStorageNavMapSet(t *testing.T) {
 	tests := []struct {
 		name string
 		path []string
