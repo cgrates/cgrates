@@ -25,7 +25,10 @@ import sys, os
 
 # Add any Sphinx extension module names here, as strings. They can be extensions
 # coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
-extensions = ['sphinx.ext.todo']
+extensions = [
+  'sphinx.ext.todo', 
+  'sphinx_copybutton'
+]
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -41,7 +44,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'CGRateS'
-copyright = u'2012-2020, ITsysCOM GmbH'
+copyright = u'2012-2023, ITsysCOM GmbH'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
