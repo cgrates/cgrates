@@ -20,6 +20,7 @@ package agents
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
@@ -52,8 +53,8 @@ func processRequest(ctx *context.Context, reqProcessor *config.RequestProcessor,
 	}
 	if reqProcessor.Flags.Has(utils.MetaLog) {
 		utils.Logger.Info(
-			fmt.Sprintf("<%s> LOG, processorID: %s, diameter message: %s",
-				agentName, reqProcessor.ID, agReq.Request.String()))
+			fmt.Sprintf("<%s> LOG, processorID: %s, %s message: %s",
+				agentName, reqProcessor.ID, strings.ToLower(agentName[:len(agentName)-5]), agReq.Request.String()))
 	}
 	switch reqType {
 	default:
@@ -61,8 +62,8 @@ func processRequest(ctx *context.Context, reqProcessor *config.RequestProcessor,
 	case utils.MetaNone: // do nothing on CGRateS side
 	case utils.MetaDryRun:
 		utils.Logger.Info(
-			fmt.Sprintf("<%s> DRY_RUN, processorID: %s, DiameterMessage: %s",
-				agentName, reqProcessor.ID, agReq.Request.String()))
+			fmt.Sprintf("<%s> DRY_RUN, processorID: %s, %sMessage: %s",
+				agentName, reqProcessor.ID, agentName[:len(agentName)-5], agReq.Request.String()))
 	case utils.MetaAuthorize:
 		rply := new(sessions.V1AuthorizeReply)
 		err = connMgr.Call(ctx, sessionsConns, utils.SessionSv1AuthorizeEvent,
@@ -124,13 +125,13 @@ func processRequest(ctx *context.Context, reqProcessor *config.RequestProcessor,
 	}
 	if reqProcessor.Flags.Has(utils.MetaLog) {
 		utils.Logger.Info(
-			fmt.Sprintf("<%s> LOG, Diameter reply: %s",
-				agentName, agReq.Reply))
+			fmt.Sprintf("<%s> LOG, %s reply: %s",
+				agentName, agentName[:len(agentName)-5], agReq.Reply))
 	}
 	if reqType == utils.MetaDryRun {
 		utils.Logger.Info(
-			fmt.Sprintf("<%s> DRY_RUN, Diameter reply: %s",
-				agentName, agReq.Reply))
+			fmt.Sprintf("<%s> DRY_RUN, %s reply: %s",
+				agentName, agentName[:len(agentName)-5], agReq.Reply))
 	}
 	return true, nil
 }
