@@ -68,7 +68,7 @@ func TestDPDynamicString(t *testing.T) {
 
 }
 
-func TestAppendNavMapVal(t *testing.T) {
+func TestDPAppendNavMapVal(t *testing.T) {
 	onm := NewOrderedNavigableMap()
 	nm := NavigableMap2{
 		"Field1": NewNMData("1001"),
@@ -93,7 +93,7 @@ func TestAppendNavMapVal(t *testing.T) {
 	}
 }
 
-func TestComposeNavMapVal(t *testing.T) {
+func TestDPComposeNavMapVal(t *testing.T) {
 	onm := NewOrderedNavigableMap()
 	nm := NavigableMap2{
 		"Field4": &NMSlice{},
