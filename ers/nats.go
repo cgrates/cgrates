@@ -199,25 +199,25 @@ func (rdr *NatsER) createPoster() (err error) {
 }
 
 func (rdr *NatsER) processOpts() (err error) {
-	if rdr.Config().Opts.NATSSubject != nil {
-		rdr.subject = *rdr.Config().Opts.NATSSubject
+	if rdr.Config().Opts.NATSOpts.NATSSubject != nil {
+		rdr.subject = *rdr.Config().Opts.NATSOpts.NATSSubject
 	}
 	var queueID string
-	if rdr.Config().Opts.NATSQueueID != nil {
-		queueID = *rdr.Config().Opts.NATSQueueID
+	if rdr.Config().Opts.NATSOpts.NATSQueueID != nil {
+		queueID = *rdr.Config().Opts.NATSOpts.NATSQueueID
 	}
 	rdr.queueID = utils.FirstNonEmpty(queueID, rdr.cgrCfg.GeneralCfg().NodeID)
 	var consumerName string
-	if rdr.Config().Opts.NATSConsumerName != nil {
-		consumerName = *rdr.Config().Opts.NATSConsumerName
+	if rdr.Config().Opts.NATSOpts.NATSConsumerName != nil {
+		consumerName = *rdr.Config().Opts.NATSOpts.NATSConsumerName
 	}
 	rdr.consumerName = utils.FirstNonEmpty(consumerName, utils.CGRateSLwr)
-	if rdr.Config().Opts.NATSJetStream != nil {
-		rdr.jetStream = *rdr.Config().Opts.NATSJetStream
+	if rdr.Config().Opts.NATSOpts.NATSJetStream != nil {
+		rdr.jetStream = *rdr.Config().Opts.NATSOpts.NATSJetStream
 	}
 	if rdr.jetStream {
-		if rdr.Config().Opts.NATSJetStreamMaxWait != nil {
-			rdr.jsOpts = []nats.JSOpt{nats.MaxWait(*rdr.Config().Opts.NATSJetStreamMaxWait)}
+		if rdr.Config().Opts.NATSOpts.NATSJetStreamMaxWait != nil {
+			rdr.jsOpts = []nats.JSOpt{nats.MaxWait(*rdr.Config().Opts.NATSOpts.NATSJetStreamMaxWait)}
 		}
 	}
 	rdr.opts, err = GetNatsOpts(rdr.Config().Opts,
@@ -231,46 +231,46 @@ func GetNatsOpts(opts *config.EventReaderOpts, nodeID string, connTimeout time.D
 	nop = append(nop, nats.Name(utils.CGRateSLwr+nodeID),
 		nats.Timeout(connTimeout),
 		nats.DrainTimeout(time.Second))
-	if opts.NATSJWTFile != nil {
+	if opts.NATSOpts.NATSJWTFile != nil {
 		keys := make([]string, 0, 1)
-		if opts.NATSSeedFile != nil {
-			keys = append(keys, *opts.NATSSeedFile)
+		if opts.NATSOpts.NATSSeedFile != nil {
+			keys = append(keys, *opts.NATSOpts.NATSSeedFile)
 		}
-		nop = append(nop, nats.UserCredentials(*opts.NATSJWTFile, keys...))
+		nop = append(nop, nats.UserCredentials(*opts.NATSOpts.NATSJWTFile, keys...))
 	}
-	if opts.NATSSeedFile != nil {
-		opt, err := nats.NkeyOptionFromSeed(*opts.NATSSeedFile)
+	if opts.NATSOpts.NATSSeedFile != nil {
+		opt, err := nats.NkeyOptionFromSeed(*opts.NATSOpts.NATSSeedFile)
 		if err != nil {
 			return nil, err
 		}
 		nop = append(nop, opt)
 	}
-	if opts.NATSClientCertificate != nil {
-		if opts.NATSClientKey == nil {
+	if opts.NATSOpts.NATSClientCertificate != nil {
+		if opts.NATSOpts.NATSClientKey == nil {
 			err = fmt.Errorf("has certificate but no key")
 			return
 		}
-		nop = append(nop, nats.ClientCert(*opts.NATSClientCertificate, *opts.NATSClientKey))
-	} else if opts.NATSClientKey != nil {
+		nop = append(nop, nats.ClientCert(*opts.NATSOpts.NATSClientCertificate, *opts.NATSOpts.NATSClientKey))
+	} else if opts.NATSOpts.NATSClientKey != nil {
 		err = fmt.Errorf("has key but no certificate")
 		return
 	}
 
-	if opts.NATSCertificateAuthority != nil {
+	if opts.NATSOpts.NATSCertificateAuthority != nil {
 		nop = append(nop,
 			func(o *nats.Options) error {
 				pool, err := x509.SystemCertPool()
 				if err != nil {
 					return err
 				}
-				rootPEM, err := ioutil.ReadFile(*opts.NATSCertificateAuthority)
+				rootPEM, err := ioutil.ReadFile(*opts.NATSOpts.NATSCertificateAuthority)
 				if err != nil || rootPEM == nil {
 					return fmt.Errorf("nats: error loading or parsing rootCA file: %v", err)
 				}
 				ok := pool.AppendCertsFromPEM(rootPEM)
 				if !ok {
 					return fmt.Errorf("nats: failed to parse root certificate from %q",
-						*opts.NATSCertificateAuthority)
+						*opts.NATSOpts.NATSCertificateAuthority)
 				}
 				if o.TLSConfig == nil {
 					o.TLSConfig = &tls.Config{MinVersion: tls.VersionTLS12}

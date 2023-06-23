@@ -227,18 +227,20 @@ func TestS3ERParseOpts(t *testing.T) {
 	}
 
 	opts := &config.EventReaderOpts{
-		S3BucketID: utils.StringPointer("QueueID"),
-		AWSRegion:  utils.StringPointer("AWSRegion"),
-		AWSKey:     utils.StringPointer("AWSKey"),
-		AWSSecret:  utils.StringPointer("AWSSecret"),
-		AWSToken:   utils.StringPointer("AWSToken"),
+		AWSOpts: &config.AWSROpts{
+			S3BucketID: utils.StringPointer("QueueID"),
+			AWSRegion:  utils.StringPointer("AWSRegion"),
+			AWSKey:     utils.StringPointer("AWSKey"),
+			AWSSecret:  utils.StringPointer("AWSSecret"),
+			AWSToken:   utils.StringPointer("AWSToken"),
+		},
 	}
 	rdr.parseOpts(opts)
-	if rdr.bucket != *opts.S3BucketID ||
-		rdr.awsRegion != *opts.AWSRegion ||
-		rdr.awsID != *opts.AWSKey ||
-		rdr.awsKey != *opts.AWSSecret ||
-		rdr.awsToken != *opts.AWSToken {
+	if rdr.bucket != *opts.AWSOpts.S3BucketID ||
+		rdr.awsRegion != *opts.AWSOpts.AWSRegion ||
+		rdr.awsID != *opts.AWSOpts.AWSKey ||
+		rdr.awsKey != *opts.AWSOpts.AWSSecret ||
+		rdr.awsToken != *opts.AWSOpts.AWSToken {
 		t.Error("Fields do not corespond")
 	}
 	rdr.Config().Opts = &config.EventReaderOpts{}

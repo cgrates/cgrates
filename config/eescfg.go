@@ -986,16 +986,16 @@ func (eeC *EventExporterCfg) AsMapInterface(separator string) (initialMP map[str
 			opts[utils.ElsOpType] = *elsOpts.OpType
 		}
 		if elsOpts.Pipeline != nil {
-			opts[utils.ElsPipeline] = *elsOpts.OpType
+			opts[utils.ElsPipeline] = *elsOpts.Pipeline
 		}
 		if elsOpts.Routing != nil {
 			opts[utils.ElsRouting] = *elsOpts.Routing
 		}
 		if elsOpts.Timeout != nil {
-			opts[utils.ElsTimeout] = *elsOpts.Timeout
+			opts[utils.ElsTimeout] = elsOpts.Timeout.String()
 		}
 		if elsOpts.Version != nil {
-			opts[utils.ElsVersionLow] = *elsOpts.VersionType
+			opts[utils.ElsVersionLow] = *elsOpts.Version
 		}
 		if elsOpts.VersionType != nil {
 			opts[utils.ElsVersionType] = *elsOpts.VersionType
@@ -1012,7 +1012,7 @@ func (eeC *EventExporterCfg) AsMapInterface(separator string) (initialMP map[str
 			opts[utils.SQLMaxOpenConns] = *sqlOpts.MaxOpenConns
 		}
 		if sqlOpts.ConnMaxLifetime != nil {
-			opts[utils.SQLConnMaxLifetime] = *sqlOpts.ConnMaxLifetime
+			opts[utils.SQLConnMaxLifetime] = sqlOpts.ConnMaxLifetime.String()
 		}
 		if sqlOpts.MYSQLDSNParams != nil {
 			opts[utils.MYSQLDSNParams] = sqlOpts.MYSQLDSNParams

@@ -32,157 +32,170 @@ import (
 // getProcessOptions assigns all non-nil fields ending in "Processed" from EventReaderOpts to their counterparts in EventExporterOpts
 func getProcessOptions(erOpts *config.EventReaderOpts) (eeOpts *config.EventExporterOpts) {
 	eeOpts = new(config.EventExporterOpts)
-	if erOpts.AMQPExchangeProcessed != nil {
-		if eeOpts.AMQP == nil {
-			eeOpts.AMQP = new(config.AMQPOpts)
+	if amqOpts := erOpts.AMQPOpts; amqOpts != nil {
+		if amqOpts.AMQPExchangeProcessed != nil {
+			if eeOpts.AMQP == nil {
+				eeOpts.AMQP = new(config.AMQPOpts)
+			}
+			eeOpts.AMQP.Exchange = amqOpts.AMQPExchangeProcessed
 		}
-		eeOpts.AMQP.Exchange = erOpts.AMQPExchangeProcessed
-	}
-	if erOpts.AMQPExchangeTypeProcessed != nil {
-		if eeOpts.AMQP == nil {
-			eeOpts.AMQP = new(config.AMQPOpts)
+		if amqOpts.AMQPExchangeTypeProcessed != nil {
+			if eeOpts.AMQP == nil {
+				eeOpts.AMQP = new(config.AMQPOpts)
+			}
+			eeOpts.AMQP.ExchangeType = amqOpts.AMQPExchangeTypeProcessed
 		}
-		eeOpts.AMQP.ExchangeType = erOpts.AMQPExchangeTypeProcessed
-	}
-	if erOpts.AMQPQueueIDProcessed != nil {
-		if eeOpts.AMQP == nil {
-			eeOpts.AMQP = new(config.AMQPOpts)
+		if amqOpts.AMQPQueueIDProcessed != nil {
+			if eeOpts.AMQP == nil {
+				eeOpts.AMQP = new(config.AMQPOpts)
+			}
+			eeOpts.AMQP.QueueID = amqOpts.AMQPQueueIDProcessed
 		}
-		eeOpts.AMQP.QueueID = erOpts.AMQPQueueIDProcessed
-	}
-	if erOpts.AMQPRoutingKeyProcessed != nil {
-		if eeOpts.AMQP == nil {
-			eeOpts.AMQP = new(config.AMQPOpts)
+		if amqOpts.AMQPRoutingKeyProcessed != nil {
+			if eeOpts.AMQP == nil {
+				eeOpts.AMQP = new(config.AMQPOpts)
+			}
+			eeOpts.AMQP.RoutingKey = amqOpts.AMQPRoutingKeyProcessed
 		}
-		eeOpts.AMQP.RoutingKey = erOpts.AMQPRoutingKeyProcessed
-	}
-	if erOpts.AMQPUsernameProcessed != nil {
-		if eeOpts.AMQP == nil {
-			eeOpts.AMQP = new(config.AMQPOpts)
+		if amqOpts.AMQPUsernameProcessed != nil {
+			if eeOpts.AMQP == nil {
+				eeOpts.AMQP = new(config.AMQPOpts)
+			}
+			eeOpts.AMQP.Username = amqOpts.AMQPUsernameProcessed
 		}
-		eeOpts.AMQP.Username = erOpts.AMQPUsernameProcessed
-	}
-	if erOpts.AMQPPasswordProcessed != nil {
-		if eeOpts.AMQP == nil {
-			eeOpts.AMQP = new(config.AMQPOpts)
+		if amqOpts.AMQPPasswordProcessed != nil {
+			if eeOpts.AMQP == nil {
+				eeOpts.AMQP = new(config.AMQPOpts)
+			}
+			eeOpts.AMQP.Password = amqOpts.AMQPPasswordProcessed
 		}
-		eeOpts.AMQP.Password = erOpts.AMQPPasswordProcessed
 	}
-	if erOpts.AWSKeyProcessed != nil {
-		if eeOpts.AWS == nil {
-			eeOpts.AWS = new(config.AWSOpts)
+	if awsOpts := erOpts.AWSOpts; awsOpts != nil {
+		if awsOpts.AWSKeyProcessed != nil {
+			if eeOpts.AWS == nil {
+				eeOpts.AWS = new(config.AWSOpts)
+			}
+			eeOpts.AWS.Key = awsOpts.AWSKeyProcessed
 		}
-		eeOpts.AWS.Key = erOpts.AWSKeyProcessed
-	}
-	if erOpts.AWSRegionProcessed != nil {
-		if eeOpts.AWS == nil {
-			eeOpts.AWS = new(config.AWSOpts)
+		if awsOpts.AWSRegionProcessed != nil {
+			if eeOpts.AWS == nil {
+				eeOpts.AWS = new(config.AWSOpts)
+			}
+			eeOpts.AWS.Region = awsOpts.AWSRegionProcessed
 		}
-		eeOpts.AWS.Region = erOpts.AWSRegionProcessed
-	}
-	if erOpts.AWSSecretProcessed != nil {
-		if eeOpts.AWS == nil {
-			eeOpts.AWS = new(config.AWSOpts)
+		if awsOpts.AWSSecretProcessed != nil {
+			if eeOpts.AWS == nil {
+				eeOpts.AWS = new(config.AWSOpts)
+			}
+			eeOpts.AWS.Secret = awsOpts.AWSSecretProcessed
 		}
-		eeOpts.AWS.Secret = erOpts.AWSSecretProcessed
-	}
-	if erOpts.AWSTokenProcessed != nil {
-		if eeOpts.AWS == nil {
-			eeOpts.AWS = new(config.AWSOpts)
+		if awsOpts.AWSTokenProcessed != nil {
+			if eeOpts.AWS == nil {
+				eeOpts.AWS = new(config.AWSOpts)
+			}
+			eeOpts.AWS.Token = awsOpts.AWSTokenProcessed
 		}
-		eeOpts.AWS.Token = erOpts.AWSTokenProcessed
-	}
-	if erOpts.KafkaTopicProcessed != nil {
-		if eeOpts.Kafka == nil {
-			eeOpts.Kafka = new(config.KafkaOpts)
+		if awsOpts.S3BucketIDProcessed != nil {
+			if eeOpts.AWS == nil {
+				eeOpts.AWS = new(config.AWSOpts)
+			}
+			eeOpts.AWS.S3BucketID = awsOpts.S3BucketIDProcessed
 		}
-		eeOpts.Kafka.KafkaTopic = erOpts.KafkaTopicProcessed
-	}
-	if erOpts.NATSCertificateAuthorityProcessed != nil {
-		if eeOpts.NATS == nil {
-			eeOpts.NATS = new(config.NATSOpts)
+		if awsOpts.S3FolderPathProcessed != nil {
+			if eeOpts.AWS == nil {
+				eeOpts.AWS = new(config.AWSOpts)
+			}
+			eeOpts.AWS.S3FolderPath = awsOpts.S3FolderPathProcessed
 		}
-		eeOpts.NATS.CertificateAuthority = erOpts.NATSCertificateAuthorityProcessed
-	}
-	if erOpts.NATSClientCertificateProcessed != nil {
-		if eeOpts.NATS == nil {
-			eeOpts.NATS = new(config.NATSOpts)
+		if awsOpts.SQSQueueIDProcessed != nil {
+			if eeOpts.AWS == nil {
+				eeOpts.AWS = new(config.AWSOpts)
+			}
+			eeOpts.AWS.SQSQueueID = awsOpts.SQSQueueIDProcessed
 		}
-		eeOpts.NATS.ClientCertificate = erOpts.NATSClientCertificateProcessed
 	}
-	if erOpts.NATSClientKeyProcessed != nil {
-		if eeOpts.NATS == nil {
-			eeOpts.NATS = new(config.NATSOpts)
+
+	if kfkOpts := erOpts.KafkaOpts; kfkOpts != nil {
+		if kfkOpts.KafkaTopicProcessed != nil {
+			if eeOpts.Kafka == nil {
+				eeOpts.Kafka = new(config.KafkaOpts)
+			}
+			eeOpts.Kafka.KafkaTopic = kfkOpts.KafkaTopicProcessed
 		}
-		eeOpts.NATS.ClientKey = erOpts.NATSClientKeyProcessed
 	}
-	if erOpts.NATSJWTFileProcessed != nil {
-		if eeOpts.NATS == nil {
-			eeOpts.NATS = new(config.NATSOpts)
+	if natsOpts := erOpts.NATSOpts; natsOpts != nil {
+		if natsOpts.NATSCertificateAuthorityProcessed != nil {
+			if eeOpts.NATS == nil {
+				eeOpts.NATS = new(config.NATSOpts)
+			}
+			eeOpts.NATS.CertificateAuthority = natsOpts.NATSCertificateAuthorityProcessed
 		}
-		eeOpts.NATS.JWTFile = erOpts.NATSJWTFileProcessed
-	}
-	if erOpts.NATSJetStreamMaxWaitProcessed != nil {
-		if eeOpts.NATS == nil {
-			eeOpts.NATS = new(config.NATSOpts)
+		if natsOpts.NATSClientCertificateProcessed != nil {
+			if eeOpts.NATS == nil {
+				eeOpts.NATS = new(config.NATSOpts)
+			}
+			eeOpts.NATS.ClientCertificate = natsOpts.NATSClientCertificateProcessed
 		}
-		eeOpts.NATS.JetStreamMaxWait = erOpts.NATSJetStreamMaxWaitProcessed
-	}
-	if erOpts.NATSJetStreamProcessed != nil {
-		if eeOpts.NATS == nil {
-			eeOpts.NATS = new(config.NATSOpts)
+		if natsOpts.NATSClientKeyProcessed != nil {
+			if eeOpts.NATS == nil {
+				eeOpts.NATS = new(config.NATSOpts)
+			}
+			eeOpts.NATS.ClientKey = natsOpts.NATSClientKeyProcessed
 		}
-		eeOpts.NATS.JetStream = erOpts.NATSJetStreamProcessed
-	}
-	if erOpts.NATSSeedFileProcessed != nil {
-		if eeOpts.NATS == nil {
-			eeOpts.NATS = new(config.NATSOpts)
+		if natsOpts.NATSJWTFileProcessed != nil {
+			if eeOpts.NATS == nil {
+				eeOpts.NATS = new(config.NATSOpts)
+			}
+			eeOpts.NATS.JWTFile = natsOpts.NATSJWTFileProcessed
 		}
-		eeOpts.NATS.SeedFile = erOpts.NATSSeedFileProcessed
-	}
-	if erOpts.NATSSubjectProcessed != nil {
-		if eeOpts.NATS == nil {
-			eeOpts.NATS = new(config.NATSOpts)
+		if natsOpts.NATSJetStreamMaxWaitProcessed != nil {
+			if eeOpts.NATS == nil {
+				eeOpts.NATS = new(config.NATSOpts)
+			}
+			eeOpts.NATS.JetStreamMaxWait = natsOpts.NATSJetStreamMaxWaitProcessed
 		}
-		eeOpts.NATS.Subject = erOpts.NATSSubjectProcessed
-	}
-	if erOpts.S3BucketIDProcessed != nil {
-		if eeOpts.AWS == nil {
-			eeOpts.AWS = new(config.AWSOpts)
+		if natsOpts.NATSJetStreamProcessed != nil {
+			if eeOpts.NATS == nil {
+				eeOpts.NATS = new(config.NATSOpts)
+			}
+			eeOpts.NATS.JetStream = natsOpts.NATSJetStreamProcessed
 		}
-		eeOpts.AWS.S3BucketID = erOpts.S3BucketIDProcessed
-	}
-	if erOpts.S3FolderPathProcessed != nil {
-		if eeOpts.AWS == nil {
-			eeOpts.AWS = new(config.AWSOpts)
+		if natsOpts.NATSSeedFileProcessed != nil {
+			if eeOpts.NATS == nil {
+				eeOpts.NATS = new(config.NATSOpts)
+			}
+			eeOpts.NATS.SeedFile = natsOpts.NATSSeedFileProcessed
 		}
-		eeOpts.AWS.S3FolderPath = erOpts.S3FolderPathProcessed
-	}
-	if erOpts.SQLDBNameProcessed != nil {
-		if eeOpts.SQL == nil {
-			eeOpts.SQL = new(config.SQLOpts)
+		if natsOpts.NATSSubjectProcessed != nil {
+			if eeOpts.NATS == nil {
+				eeOpts.NATS = new(config.NATSOpts)
+			}
+			eeOpts.NATS.Subject = natsOpts.NATSSubjectProcessed
 		}
-		eeOpts.SQL.DBName = erOpts.SQLDBNameProcessed
 	}
-	if erOpts.SQLTableNameProcessed != nil {
-		if eeOpts.SQL == nil {
-			eeOpts.SQL = new(config.SQLOpts)
+
+	if sqlOpts := erOpts.SQLOpts; sqlOpts != nil {
+		if sqlOpts.SQLDBNameProcessed != nil {
+			if eeOpts.SQL == nil {
+				eeOpts.SQL = new(config.SQLOpts)
+			}
+			eeOpts.SQL.DBName = sqlOpts.SQLDBNameProcessed
 		}
-		eeOpts.SQL.TableName = erOpts.SQLTableNameProcessed
-	}
-	if erOpts.SQSQueueIDProcessed != nil {
-		if eeOpts.AWS == nil {
-			eeOpts.AWS = new(config.AWSOpts)
+		if sqlOpts.SQLTableNameProcessed != nil {
+			if eeOpts.SQL == nil {
+				eeOpts.SQL = new(config.SQLOpts)
+			}
+			eeOpts.SQL.TableName = sqlOpts.SQLTableNameProcessed
 		}
-		eeOpts.AWS.SQSQueueID = erOpts.SQSQueueIDProcessed
-	}
-	if erOpts.PgSSLModeProcessed != nil {
-		if eeOpts.SQL == nil {
-			eeOpts.SQL = new(config.SQLOpts)
+		if sqlOpts.PgSSLModeProcessed != nil {
+			if eeOpts.SQL == nil {
+				eeOpts.SQL = new(config.SQLOpts)
+			}
+			eeOpts.SQL.PgSSLMode = sqlOpts.PgSSLModeProcessed
 		}
-		eeOpts.SQL.PgSSLMode = erOpts.PgSSLModeProcessed
+
 	}
-	fmt.Println(utils.ToJSON(eeOpts))
+
 	return
 }
 

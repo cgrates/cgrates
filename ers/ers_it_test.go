@@ -794,6 +794,7 @@ func TestErsOnEvictedMetaDumpToFileOK(t *testing.T) {
 			Opts: &config.EventReaderOpts{
 				PartialCacheAction: utils.StringPointer(utils.MetaDumpToFile),
 				PartialPath:        utils.StringPointer(dirPath),
+				CSVOpts:            &config.CSVROpts{},
 			},
 			CacheDumpFields: []*config.FCTemplate{
 				{
@@ -875,9 +876,10 @@ func TestErsOnEvictedMetaDumpToFileCSVWriteErr(t *testing.T) {
 			ID:   "ER1",
 			Type: utils.MetaNone,
 			Opts: &config.EventReaderOpts{
-				PartialCacheAction:       utils.StringPointer(utils.MetaDumpToFile),
-				PartialPath:              utils.StringPointer(dirPath),
-				PartialCSVFieldSeparator: utils.StringPointer("\""),
+				PartialCacheAction: utils.StringPointer(utils.MetaDumpToFile),
+				PartialPath:        utils.StringPointer(dirPath),
+				CSVOpts: &config.CSVROpts{
+					PartialCSVFieldSeparator: utils.StringPointer("\"")},
 			},
 		},
 	}

@@ -1249,7 +1249,9 @@ func TestConfigSanityEventReader(t *testing.T) {
 		ProcessedPath: "/",
 		SourcePath:    "/",
 		Opts: &EventReaderOpts{
-			CSVFieldSeparator:  utils.StringPointer(utils.EmptyString),
+			CSVOpts: &CSVROpts{
+				CSVFieldSeparator: utils.StringPointer(utils.EmptyString),
+			},
 			PartialCacheAction: utils.StringPointer(utils.MetaNone),
 		},
 	}}
@@ -1262,7 +1264,9 @@ func TestConfigSanityEventReader(t *testing.T) {
 		Type:     utils.MetaKafkajsonMap,
 		RunDelay: 1,
 		Opts: &EventReaderOpts{
-			CSVFieldSeparator:  utils.StringPointer(utils.FieldsSep),
+			CSVOpts: &CSVROpts{
+				CSVFieldSeparator: utils.StringPointer(utils.FieldsSep),
+			},
 			PartialCacheAction: utils.StringPointer(utils.MetaNone),
 		},
 	}
@@ -2013,8 +2017,10 @@ func TestConfigSanityErs(t *testing.T) {
 	}
 
 	cfg.ersCfg.Readers[0].Opts = &EventReaderOpts{
-		PartialCacheAction:       utils.StringPointer(utils.MetaDumpToFile),
-		PartialCSVFieldSeparator: utils.StringPointer(utils.EmptyString),
+		PartialCacheAction: utils.StringPointer(utils.MetaDumpToFile),
+		CSVOpts: &CSVROpts{
+			PartialCSVFieldSeparator: utils.StringPointer(utils.EmptyString),
+		},
 	}
 	cfg.ersCfg.Readers[0].ProcessedPath = "/tmp"
 	expected = "<ERs> empty partialcsvFieldSeparator for reader with ID: rdrID"

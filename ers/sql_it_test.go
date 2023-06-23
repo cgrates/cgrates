@@ -677,7 +677,9 @@ func TestErsSqlPostCDRS(t *testing.T) {
 	reader.ID = "file_reader"
 	reader.ConcurrentReqs = -1
 	reader.Opts = &config.EventReaderOpts{
-		SQLDBName: utils.StringPointer("cgrates2"),
+		SQLOpts: &config.SQLROpts{
+			SQLDBName: utils.StringPointer("cgrates2"),
+		},
 	}
 	reader.SourcePath = "*mysql://cgrates:CGRateS.org@127.0.0.1:3306"
 	reader.ProcessedPath = ""

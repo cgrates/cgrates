@@ -28,7 +28,9 @@ import (
 
 func TestGetProcessOptions(t *testing.T) {
 	opts := &config.EventReaderOpts{
-		AMQPQueueIDProcessed: utils.StringPointer("processed"),
+		AMQPOpts: &config.AMQPROpts{
+			AMQPQueueIDProcessed: utils.StringPointer("processed"),
+		},
 	}
 	result := getProcessOptions(opts)
 	expected := &config.EventExporterOpts{
