@@ -747,6 +747,24 @@ func TestOrderedNavigableRemote(t *testing.T) {
 	}
 }
 
+func TestONMRemoveAll(t *testing.T) {
+	p := PathItemList{
+		root: PathItemElement{},
+		len: 0,
+	}
+	onm := OrderedNavigableMap{
+		nm: &NMData{"test"},
+		orderIdx: &p,
+		orderRef: map[string][]*PathItemElement{},
+	}
+	
+	onm.RemoveAll()
+
+	if onm.nm.String() != "{}" {
+		t.Error("didn't remove all", onm.nm.String())
+	}
+}
+
 /*
 func BenchmarkOrderdNavigableMapSet(b *testing.B) {
 	nm := NewOrderedNavigableMap()
