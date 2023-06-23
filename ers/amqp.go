@@ -215,22 +215,24 @@ func (rdr *AMQPER) processMessage(msg []byte) (err error) {
 
 func (rdr *AMQPER) setOpts(opts *config.EventReaderOpts) {
 	rdr.queueID = utils.DefaultQueueID
-	if opts.AMQPQueueID != nil {
-		rdr.queueID = *opts.AMQPQueueID
-	}
-	rdr.tag = utils.AMQPDefaultConsumerTag
-	if opts.AMQPConsumerTag != nil {
-		rdr.tag = *opts.AMQPConsumerTag
-	}
-	if opts.AMQPRoutingKey != nil {
-		rdr.routingKey = *opts.AMQPRoutingKey
-	}
-	if opts.AMQPExchange != nil {
-		rdr.exchange = *opts.AMQPExchange
-		rdr.exchangeType = utils.DefaultExchangeType
-	}
-	if opts.AMQPExchangeType != nil {
-		rdr.exchangeType = *opts.AMQPExchangeType
+	if amqpOpts := opts.AMQPOpts; amqpOpts != nil {
+		if opts.AMQPOpts.AMQPQueueID != nil {
+			rdr.queueID = *opts.AMQPOpts.AMQPQueueID
+		}
+		rdr.tag = utils.AMQPDefaultConsumerTag
+		if opts.AMQPOpts.AMQPConsumerTag != nil {
+			rdr.tag = *opts.AMQPOpts.AMQPConsumerTag
+		}
+		if opts.AMQPOpts.AMQPRoutingKey != nil {
+			rdr.routingKey = *opts.AMQPOpts.AMQPRoutingKey
+		}
+		if opts.AMQPOpts.AMQPExchange != nil {
+			rdr.exchange = *opts.AMQPOpts.AMQPExchange
+			rdr.exchangeType = utils.DefaultExchangeType
+		}
+		if opts.AMQPOpts.AMQPExchangeType != nil {
+			rdr.exchangeType = *opts.AMQPOpts.AMQPExchangeType
+		}
 	}
 }
 

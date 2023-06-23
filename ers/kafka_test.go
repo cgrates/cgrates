@@ -40,9 +40,11 @@ func TestKafkasetOpts(t *testing.T) {
 	}
 
 	if err := k.setOpts(&config.EventReaderOpts{
-		KafkaTopic:   utils.StringPointer("cdrs"),
-		KafkaGroupID: utils.StringPointer("new"),
-		KafkaMaxWait: utils.DurationPointer(time.Second),
+		KafkaOpts: &config.KafkaROpts{
+			KafkaTopic:   utils.StringPointer("cdrs"),
+			KafkaGroupID: utils.StringPointer("new"),
+			KafkaMaxWait: utils.DurationPointer(time.Second),
+		},
 	}); err != nil {
 		t.Fatal(err)
 	} else if expKafka.dialURL != k.dialURL {
@@ -83,9 +85,11 @@ func TestKafkasetOpts(t *testing.T) {
 		maxWait: time.Second,
 	}
 	if err := k.setOpts(&config.EventReaderOpts{
-		KafkaTopic:   utils.StringPointer("cdrs"),
-		KafkaGroupID: utils.StringPointer("new"),
-		KafkaMaxWait: utils.DurationPointer(time.Second),
+		KafkaOpts: &config.KafkaROpts{
+			KafkaTopic:   utils.StringPointer("cdrs"),
+			KafkaGroupID: utils.StringPointer("new"),
+			KafkaMaxWait: utils.DurationPointer(time.Second),
+		},
 	}); err != nil {
 		t.Fatal(err)
 	} else if expKafka.dialURL != k.dialURL {

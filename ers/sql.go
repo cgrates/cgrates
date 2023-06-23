@@ -275,17 +275,20 @@ func (rdr *SQLEventReader) setURL(inURL, outURL string, opts *config.EventReader
 	rdr.connType = u.Scheme
 
 	dbname := utils.SQLDefaultDBName
-	if opts.SQLDBName != nil {
-		dbname = *opts.SQLDBName
-	}
 	ssl := utils.SQLDefaultSSLMode
-	if opts.PgSSLMode != nil {
-		ssl = *opts.PgSSLMode
-	}
+	if sqlOpts := opts.SQLOpts; sqlOpts != nil {
+		if sqlOpts.SQLDBName != nil {
+			dbname = *sqlOpts.SQLDBName
+		}
 
-	rdr.tableName = utils.CDRsTBL
-	if opts.SQLTableName != nil {
-		rdr.tableName = *opts.SQLTableName
+		if sqlOpts.PgSSLMode != nil {
+			ssl = *sqlOpts.PgSSLMode
+		}
+
+		rdr.tableName = utils.CDRsTBL
+		if sqlOpts.SQLTableName != nil {
+			rdr.tableName = *sqlOpts.SQLTableName
+		}
 	}
 	switch rdr.connType {
 	case utils.MySQL:

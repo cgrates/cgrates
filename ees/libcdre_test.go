@@ -46,6 +46,7 @@ func TestAddFldPost(t *testing.T) {
 		NATS:  &config.NATSOpts{},
 		Kafka: &config.KafkaOpts{},
 		RPC:   &config.RPCOpts{},
+		SQL:   &config.SQLOpts{},
 	})
 	x, ok := failedPostCache.Get(utils.ConcatenatedKey("", "path1", "format1"))
 	if !ok {
@@ -70,6 +71,7 @@ func TestAddFldPost(t *testing.T) {
 			NATS:  &config.NATSOpts{},
 			Kafka: &config.KafkaOpts{},
 			RPC:   &config.RPCOpts{},
+			SQL:   &config.SQLOpts{},
 		},
 	}
 	if !reflect.DeepEqual(eOut, failedPost) {
@@ -82,6 +84,7 @@ func TestAddFldPost(t *testing.T) {
 		NATS:  &config.NATSOpts{},
 		Kafka: &config.KafkaOpts{},
 		RPC:   &config.RPCOpts{},
+		SQL:   &config.SQLOpts{},
 	})
 	AddFailedPost("", "path2", "format2", "3", &config.EventExporterOpts{
 		AWS: &config.AWSOpts{
@@ -92,6 +95,7 @@ func TestAddFldPost(t *testing.T) {
 		RPC:   &config.RPCOpts{},
 		AMQP:  &config.AMQPOpts{},
 		Els:   &config.ElsOpts{},
+		SQL:   &config.SQLOpts{},
 	})
 	x, ok = failedPostCache.Get(utils.ConcatenatedKey("", "path1", "format1"))
 	if !ok {
@@ -115,6 +119,7 @@ func TestAddFldPost(t *testing.T) {
 			NATS:  &config.NATSOpts{},
 			Kafka: &config.KafkaOpts{},
 			RPC:   &config.RPCOpts{},
+			SQL:   &config.SQLOpts{},
 		},
 	}
 	if !reflect.DeepEqual(eOut, failedPost) {
@@ -136,6 +141,12 @@ func TestAddFldPost(t *testing.T) {
 		Format: "format2",
 		Events: []any{"3"},
 		Opts: &config.EventExporterOpts{
+			Els:   &config.ElsOpts{},
+			NATS:  &config.NATSOpts{},
+			SQL:   &config.SQLOpts{},
+			AMQP:  &config.AMQPOpts{},
+			RPC:   &config.RPCOpts{},
+			Kafka: &config.KafkaOpts{},
 			AWS: &config.AWSOpts{
 				SQSQueueID: utils.StringPointer("qID")},
 		},

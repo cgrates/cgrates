@@ -103,7 +103,9 @@ func TestNewSQLReader(t *testing.T) {
 	reader.ID = "file_reader"
 	reader.ConcurrentReqs = -1
 	reader.Opts = &config.EventReaderOpts{
-		SQLDBName: utils.StringPointer("cgrates2"),
+		SQLOpts: &config.SQLROpts{
+			SQLDBName: utils.StringPointer("cgrates2"),
+		},
 	}
 	reader.SourcePath = "*mysql://cgrates:CGRateS.org@127.0.0.1:3306"
 	reader.ProcessedPath = ""
@@ -130,7 +132,7 @@ func TestNewSQLReaderError(t *testing.T) {
 	reader.ID = "file_reader"
 	reader.ConcurrentReqs = -1
 	reader.Opts = &config.EventReaderOpts{
-		SQLDBName: utils.StringPointer("cgrates2"),
+		SQLOpts: &config.SQLROpts{SQLDBName: utils.StringPointer("cgrates2")},
 	}
 	reader.SourcePath = "#"
 	reader.ProcessedPath = ""
@@ -216,14 +218,21 @@ func TestNewAMQPReader(t *testing.T) {
 	}
 	exp.dialURL = exp.Config().SourcePath
 	exp.Config().ProcessedPath = ""
-	exp.setOpts(&config.EventReaderOpts{})
+	exp.setOpts(&config.EventReaderOpts{
+		CSVOpts:   &config.CSVROpts{},
+		AMQPOpts:  &config.AMQPROpts{},
+		SQLOpts:   &config.SQLROpts{},
+		AWSOpts:   &config.AWSROpts{},
+		NATSOpts:  &config.NATSROpts{},
+		KafkaOpts: &config.KafkaROpts{},
+	})
 	exp.createPoster()
 	var expected EventReader = exp
 	rcv, err := NewEventReader(cfg, 0, nil, nil, nil, fltr, nil)
 	if err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, rcv) {
-		t.Errorf("Expected %v but received %v", expected, rcv)
+		t.Errorf("Expected %v but received %v", utils.ToJSON(expected), utils.ToJSON(rcv))
 	}
 }
 

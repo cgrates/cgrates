@@ -51,12 +51,15 @@ func NewAMQPv1ER(cfg *config.CGRConfig, cfgIdx int,
 			rdr.cap <- struct{}{}
 		}
 	}
-	if rdr.Config().Opts.AMQPQueueID != nil {
-		rdr.queueID = "/" + *rdr.Config().Opts.AMQPQueueID
-	}
-	if rdr.Config().Opts.AMQPUsername != nil && rdr.Config().Opts.AMQPPassword != nil {
-		rdr.connOpts = &amqpv1.ConnOptions{
-			SASLType: amqpv1.SASLTypePlain(*rdr.Config().Opts.AMQPUsername, *rdr.Config().Opts.AMQPPassword),
+
+	if amqOpts := rdr.Config().Opts.AMQPOpts; amqOpts != nil {
+		if amqOpts.AMQPQueueID != nil {
+			rdr.queueID = "/" + *amqOpts.AMQPQueueID
+		}
+		if amqOpts.AMQPUsername != nil && amqOpts.AMQPPassword != nil {
+			rdr.connOpts = &amqpv1.ConnOptions{
+				SASLType: amqpv1.SASLTypePlain(*amqOpts.AMQPUsername, *amqOpts.AMQPPassword),
+			}
 		}
 	}
 	rdr.createPoster()
