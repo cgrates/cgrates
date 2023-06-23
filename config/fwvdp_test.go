@@ -49,41 +49,41 @@ func TestFWVDPFieldAsInterface(t *testing.T) {
 
 	dP := FWVProvider{req: "test", cache: utils.MapStorage{"test": "test"}}
 
-	tests := []struct{
-		name string 
-		arg []string 
-		exp any
-		err bool
+	tests := []struct {
+		name string
+		arg  []string
+		exp  any
+		err  bool
 	}{
 		{
 			name: "empty field path",
-			arg: []string{},
-			exp: nil,
-			err: false,
+			arg:  []string{},
+			exp:  nil,
+			err:  false,
 		},
 		{
 			name: "empty field path",
-			arg: []string{"a-b"},
-			exp: nil,
-			err: true,
+			arg:  []string{"a-b"},
+			exp:  nil,
+			err:  true,
 		},
 		{
 			name: "empty field path",
-			arg: []string{"5-6"},
-			exp: "",
-			err: true,
+			arg:  []string{"5-6"},
+			exp:  "",
+			err:  true,
 		},
 		{
 			name: "empty field path",
-			arg: []string{"0-a"},
-			exp: nil,
-			err: true,
+			arg:  []string{"0-a"},
+			exp:  nil,
+			err:  true,
 		},
 		{
 			name: "empty field path",
-			arg: []string{"0-6"},
-			exp: "",
-			err: true,
+			arg:  []string{"0-6"},
+			exp:  "",
+			err:  true,
 		},
 	}
 

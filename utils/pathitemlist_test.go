@@ -165,32 +165,31 @@ func TestPathItemListInsertBefore(t *testing.T) {
 		list: nil,
 	}
 
-
 	type args struct {
-		v PathItems
+		v    PathItems
 		mark *PathItemElement
 	}
 
-	tests := []struct{
+	tests := []struct {
 		name string
 		args args
-		exp *PathItemElement
+		exp  *PathItemElement
 	}{
 		{
 			name: "different path item lists",
 			args: args{ps, &pTest},
-			exp: nil,
+			exp:  nil,
 		},
 		{
 			name: "returns new path item element",
 			args: args{ps, &p3},
-			exp: nil,
+			exp:  nil,
 		},
 	}
 
 	for i, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			
+
 			rcv := pl.InsertBefore(tt.args.v, tt.args.mark)
 
 			if i < 1 {
@@ -237,13 +236,12 @@ func TestPathItemListInsertAfter(t *testing.T) {
 		list: nil,
 	}
 
-
 	type args struct {
-		v PathItems
+		v    PathItems
 		mark *PathItemElement
 	}
 
-	tests := []struct{
+	tests := []struct {
 		name string
 		args args
 	}{
@@ -259,7 +257,7 @@ func TestPathItemListInsertAfter(t *testing.T) {
 
 	for i, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			
+
 			rcv := pl.InsertAfter(tt.args.v, tt.args.mark)
 
 			if i < 1 {
@@ -346,7 +344,7 @@ func TestPathItemListPushFront(t *testing.T) {
 func TestPathItemListLen(t *testing.T) {
 
 	pl := PathItemList{
-		len:  3,
+		len: 3,
 	}
 
 	rcv := pl.Len()
@@ -354,4 +352,154 @@ func TestPathItemListLen(t *testing.T) {
 	if rcv != 3 {
 		t.Errorf("recived %d, expected 3", rcv)
 	}
+}
+
+func TestPathItemListMoveToFront(t *testing.T) {
+
+	pr := PathItemElement{
+		Value: PathItems{PathItem{Field: "test"}},
+	}
+
+	pl := PathItemList{
+		root: pr,
+		len:  3,
+	}
+
+	pr.list = &pl
+
+	p2 := PathItemElement{
+		prev: &pr,
+		list: &pl,
+	}
+
+	p3 := PathItemElement{
+		prev: &p2,
+		list: &pl,
+	}
+
+	p2.next = &p3
+
+	p := PathItemElement{
+		Value: PathItems{PathItem{Field: "test"}},
+	}
+
+	pl.MoveToFront(&p)
+}
+
+func TestPathItemListMoveBefore(t *testing.T) {
+	pr := PathItemElement{}
+
+	pl := PathItemList{
+		root: pr,
+		len:  3,
+	}
+
+	pr.list = &pl
+
+	p2 := PathItemElement{
+		prev: &pr,
+		list: &pl,
+	}
+
+	p3 := PathItemElement{
+		prev: &p2,
+		list: &pl,
+	}
+
+	p2.next = &p3
+
+	p := PathItemElement{
+		Value: PathItems{PathItem{Field: "test"}},
+	}
+
+	pl.MoveBefore(&p, &p2)
+
+	if len(p2.prev.Value) != 0 {
+		t.Error("moved before")
+	}
+}
+
+func TestPathItemListMoveAfter(t *testing.T) {
+
+	pr := PathItemElement{}
+
+	pl := PathItemList{
+		root: pr,
+		len:  3,
+	}
+
+	pr.list = &pl
+
+	p2 := PathItemElement{
+		prev: &pr,
+		list: &pl,
+	}
+
+	p3 := PathItemElement{
+		prev: &p2,
+		list: &pl,
+	}
+
+	p2.next = &p3
+
+	p := PathItemElement{
+		Value: PathItems{PathItem{Field: "test"}},
+	}
+
+	pl.MoveAfter(&p, &p2)
+
+	if len(p2.prev.Value) != 0 {
+		t.Error("moved after")
+	}
+}
+
+func TestPathItemList(t *testing.T) {
+
+	p1 := PathItemElement{}
+
+	pl := PathItemList{
+		root: p1,
+		len:  3,
+	}
+
+	p1.list = &pl
+
+	p2 := PathItemElement{
+		next: &p1,
+		list: &pl,
+	}
+
+	p1.prev = &p2
+
+	p3 := PathItemElement{
+		next: &p2,
+		list: &pl,
+	}
+
+	p2.prev = &p3
+
+	pr4 := PathItemElement{}
+
+	pl2 := PathItemList{
+		root: pr4,
+		len:  3,
+	}
+
+	pr4.list = &pl2
+
+	p5 := PathItemElement{
+		next: &pr4,
+		list: &pl2,
+	}
+
+	p6 := PathItemElement{
+		next: &p5,
+		list: &pl2,
+	}
+
+	p5.prev = &p6
+
+	//uncompleted
+	//pl.PushBackList(&pl2)
+
 }

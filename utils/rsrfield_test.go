@@ -739,3 +739,42 @@ func TestRSRFldParse(t *testing.T) {
 		t.Errorf("expecting: %s, received: %s", eOut, out)
 	}
 }
+
+func TestRsrFieldNewRSRFieldMustCompile(t *testing.T) {
+
+	tests := []struct {
+		name string
+		arg  string
+		exp  *RSRField
+	}{
+		{
+			name: "nil return",
+			arg:  "",
+			exp:  nil,
+		},
+		{
+			name: "nil return",
+			arg:  ")",
+			exp:  nil,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			rcv := NewRSRFieldMustCompile(tt.arg)
+
+			if !reflect.DeepEqual(rcv, tt.exp) {
+				t.Errorf("recived %v, expected %v", rcv, tt.exp)
+			}
+		})
+	}
+}
+
+func TestRSRFieldNewRSRFilterdMustCompile(t *testing.T) {
+
+	rcv := NewRSRFilterMustCompile("test")
+
+	if rcv.filterRule != "test" {
+		t.Error("didn't create RSRFilter", rcv)
+	}
+}

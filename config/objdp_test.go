@@ -168,7 +168,7 @@ func TestObjDPFieldAsInterface(t *testing.T) {
 			slcPrfx: []string{"!", "."},
 		},
 		{
-			name: "has selector",
+			name: "has selector with error",
 			arg: []string{"test[0", "."},
 			exp: exp{data: nil, err: true},
 			slcPrfx: []string{},

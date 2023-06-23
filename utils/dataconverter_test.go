@@ -178,7 +178,7 @@ func shouldPanic(t *testing.T, f func(string) DataConverter) {
 		_ = recover()
 	}()
 
-	NewDataConverterMustCompile("!£$%&/()=?123")
+	f("!£$%&/()=?123")
 	t.Error("should have panicked")
 }
 
