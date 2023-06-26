@@ -115,6 +115,72 @@ func TestCacheParamCfgloadFromJsonCfg(t *testing.T) {
 	}
 }
 
+func TestCacheCFGAsMapInterface(t *testing.T) {
+	c := CacheParamCfg{
+		Limit:     1,
+		TTL:       1 * time.Second,
+		StaticTTL: true,
+		Precache: false,
+	}
+
+	rcv := c.AsMapInterface()
+	exp := map[string]any{
+		utils.LimitCfg:     1,
+		utils.TTLCfg:       "1s",
+		utils.StaticTTLCfg: true,
+		utils.PrecacheCfg:  false,
+	}
+
+	if !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("recived %v, expected %v", rcv, exp)
+	}
+}
+
+
+
+func TestCacheCFGAddTmpCaches(t *testing.T) {
+	c := CacheParamCfg{
+		Limit:     1,
+		TTL:       1 * time.Second,
+		StaticTTL: true,
+		Precache: false,
+	}
+
+	cc := CacheCfg{"test": &c}
+
+	cc.AddTmpCaches()
+
+	rcv := cc[utils.CacheRatingProfilesTmp]
+	exp := &CacheParamCfg{
+		Limit: -1,
+		TTL:   time.Minute,
+	}
+
+	if !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("recived %v, expected %v", rcv, exp)
+	}
+}
+
+func TestCacheCFGAsMappInterface(t *testing.T) {
+	c := CacheParamCfg{
+		Limit:     1,
+		TTL:       1 * time.Second,
+		StaticTTL: true,
+		Precache: false,
+	}
+
+	cc := CacheCfg{"test": &c}
+
+	exp := c.AsMapInterface()
+	rcv := cc.AsMapInterface()["test"]
+
+	if !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("recived %v, expected %v", rcv, exp)
+	}
+
+}
+
+
 /*
 func TestCacheCfgAsMapInterface(t *testing.T) {
 	var cachecfg *CacheCfg

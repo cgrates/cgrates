@@ -329,3 +329,43 @@ func TestFCTemplateClone(t *testing.T) {
 		t.Errorf("expected: %s ,received: %s", utils.ToJSON(initialSmpl), utils.ToJSON(cloned))
 	}
 }
+
+func TestFCTemplateGetPathSlice(t *testing.T) {
+	fc := FCTemplate{
+		Tag:     "Elem1",
+		Type:    "*composed",
+		Path:    "Elem1",
+		Filters: []string{"Filter1", "Filter2"},
+		Value:   NewRSRParsersMustCompile("Elem1", true, utils.INFIELD_SEP),
+		pathItems:        utils.PathItems{utils.PathItem{Field: "test"}},
+		pathSlice:        []string{"val1", "val2"}, 
+	}
+
+	rcv := fc.GetPathSlice()
+	exp := []string{"val1", "val2"}
+
+	if !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("recived %v, expected %v", rcv, exp)
+	}
+
+}
+
+func TestFCTemplateGetPathItems(t *testing.T) {
+	fc := FCTemplate{
+		Tag:     "Elem1",
+		Type:    "*composed",
+		Path:    "Elem1",
+		Filters: []string{"Filter1", "Filter2"},
+		Value:   NewRSRParsersMustCompile("Elem1", true, utils.INFIELD_SEP),
+		pathItems:        utils.PathItems{utils.PathItem{Field: "test"}},
+		pathSlice:        []string{"val1", "val2"}, 
+	}
+
+	rcv := fc.GetPathItems()
+	exp := utils.PathItems{utils.PathItem{Field: "test"}}
+
+	if !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("recived %v, expected %v", rcv, exp)
+	}
+
+}
