@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package config
 
 import (
+	"errors"
 	"reflect"
 	"regexp"
 	"testing"
@@ -179,5 +180,134 @@ func TestRSRParserCompileConstant(t *testing.T) {
 		t.Error(err)
 	} else if !reflect.DeepEqual(ePrsr, prsr) {
 		t.Errorf("expecting: %+v, received: %+v", ePrsr, prsr)
+	}
+}
+
+func TestRSRParserGetRule(t *testing.T) {
+	p := RSRParser{
+		Rules: "Test",
+	}
+	p2 := RSRParser{
+		Rules: "Test2",
+	}
+
+	pp := RSRParsers{&p, &p2}
+
+	rcv := pp.GetRule()
+	exp := "Test.Test2"
+
+	if rcv != exp {
+		t.Errorf("expecting: %+v, received: %+v", exp, rcv)
+	}
+
+}
+
+func TestRSRParsersCompile(t *testing.T) {
+
+	p := RSRParser{
+		Rules: "Test",
+	}
+	p2 := RSRParser{
+		Rules: "Test2",
+	}
+
+	pp := RSRParsers{&p, &p2}
+
+	rcv := pp.Compile()
+
+	if rcv != nil {
+		t.Errorf("expecting: %+v, received: %+v", nil, rcv)
+	}
+}
+
+func TestRSRParserParseDataProviderWithInterface(t *testing.T) {
+
+	p := RSRParser{
+		Rules: "Test",
+	}
+	p2 := RSRParser{
+		Rules: "Test2",
+	}
+
+	pp := RSRParsers{&p, &p2}
+
+	rcv, err := pp.ParseDataProviderWithInterfaces(utils.MapStorage{}, ".")
+	exp := "TestTest2"
+	var expErr error = nil
+
+	if err != expErr {
+		t.Fatalf("recived %v, expected %v", err, expErr)
+	}
+
+	if rcv != exp {
+		t.Errorf("recived %s, expected %s", rcv, exp)
+	}
+
+}
+
+func TestRSRParserNewParserMustCompile(t *testing.T) {
+
+	rcv := NewRSRParserMustCompile("test", false)
+	exp, _ := NewRSRParser("test", false)
+
+	if !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("recived %v, expected %v", rcv, exp)
+	}
+}
+
+func TestRSRParserregexpMatched(t *testing.T) {
+
+	p := RSRParser{
+		Rules: "Test",
+	}
+
+	rcv := p.RegexpMatched()
+
+	if rcv {
+		t.Error("was expecting false")
+	}
+}
+
+func TestRSRParserParseDataProviderAsFloat64(t *testing.T) {
+
+	type args struct {
+		dP        utils.DataProvider
+		separator string
+	}
+
+	type exp struct {
+		val float64
+		err error
+	}
+
+	tests := []struct {
+		name string
+		args args
+		exp  exp
+	}{
+		{
+			name: "",
+			args: args{dP: utils.MapStorage{}, separator: "."},
+			exp:  exp{val: 0, err: errors.New("empty path in parser")},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+
+			p := RSRParser{
+				Rules: "Test",
+			}
+
+			rcv, err := p.ParseDataProviderAsFloat64(tt.args.dP, tt.args.separator)
+
+			if err.Error() != tt.exp.err.Error() {
+				t.Fatalf("recived %s, expected %s", err, tt.exp.err)
+			}
+
+			if rcv != tt.exp.val {
+				t.Errorf("recived %v, expected %v", rcv, tt.exp.val)
+			}
+		})
 	}
 }

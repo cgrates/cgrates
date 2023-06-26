@@ -20,6 +20,7 @@ package config
 import (
 	"reflect"
 	"testing"
+	"time"
 
 	"github.com/cgrates/cgrates/utils"
 )
@@ -442,5 +443,25 @@ func TestDataDbCfgAsMapInterface(t *testing.T) {
 		t.Error(err)
 	} else if rcv := dbcfg.AsMapInterface(); !reflect.DeepEqual(eMap, rcv) {
 		t.Errorf("Expected: %+v ,\n received: %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
+	}
+}
+
+func TestDataDBCFGClone(t *testing.T) {
+	d := &DataDbCfg{
+		DataDbType:              "*redis",
+		DataDbHost:              "127.0.0.1",
+		DataDbPort:              "6379",
+		DataDbName:              "10",
+		DataDbUser:              "cgrates",
+		DataDbPass:          "",
+		DataDbSentinelName:       "",
+		QueryTimeout:        10 * time.Second,
+		RplFiltered: false,
+	}
+
+	rcv := d.Clone()
+
+	if !reflect.DeepEqual(rcv, d) {
+		t.Errorf("recived %v, expected %v", rcv, d)
 	}
 }

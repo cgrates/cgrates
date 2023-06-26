@@ -329,3 +329,22 @@ func TestERsCfgAsMapInterface(t *testing.T) {
 		t.Errorf("\nExpected: %+v\nReceived: %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
 	}
 }
+
+func TestERSCFGClone(t *testing.T) {
+	ev := EventReaderCfg{}
+	ev2 := EventReaderCfg{}
+	
+	e := ERsCfg{
+		Enabled:       true,
+		SessionSConns: []string{"val1", "val2"},
+		Readers:       []*EventReaderCfg{&ev, &ev2},
+	}
+
+	rcv := e.Clone()
+	exp := &e
+
+	if rcv.Enabled != exp.Enabled && !reflect.DeepEqual(rcv.SessionSConns, exp.SessionSConns) && !reflect.DeepEqual(rcv.Readers, exp.Readers) {
+		t.Errorf("recived %v, expected %v", rcv, exp)
+	}
+	
+}
