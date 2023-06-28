@@ -1,0 +1,5 @@
+{{ ansible_managed | comment }}
+# Prioritize stronger algorithms for new keys.
+default-preference-list SHA512 SHA384 SHA256 SHA224 AES256 AES192 AES CAST5 BZIP2 ZLIB ZIP Uncompressed
+# Use a stronger digest than the default SHA1 for certifications.
+cert-digest-algo SHA512

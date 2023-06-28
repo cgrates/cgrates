@@ -1,0 +1,13 @@
+%echo Generating a basic OpenPGP key
+Key-Type: default
+Key-Length: {{ gpg_keylength }}
+Subkey-Type: default
+Subkey-Length: {{ gpg_subkeylength }}
+Name-Real: {{ gpg_realname }}
+Name-Email: {{ gpg_useremail }}
+Expire-Date: {{ gpg_expire }}
+Passphrase: 
+%pubring {{ gpg_home }}/.gnupg/pubring.kbx
+%secring {{ gpg_home }}/.gnupg/private-keys-v1.d
+%commit
+%echo done

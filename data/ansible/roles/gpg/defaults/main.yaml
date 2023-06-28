@@ -1,0 +1,8 @@
+---
+gpg_home: "/root"
+gpg_realname: "CGRateS"
+gpg_useremail: "cgrates@itsyscom.com"
+gpg_pubkeyfileexport: "apt.cgrates.org.gpg.key"
+gpg_keylength: 2048
+gpg_subkeylength: 2048
+gpg_expire: 360
