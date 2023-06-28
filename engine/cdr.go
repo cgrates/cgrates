@@ -434,11 +434,13 @@ func (cdr *CDR) AsExportRecord(exportFields []*config.FCTemplate,
 		if !strings.HasPrefix(cfgFld.Path, utils.MetaExp+utils.NestingSep) {
 			continue
 		}
-		if pass, err := filterS.Pass(cdr.Tenant,
-			cfgFld.Filters, nM); err != nil {
-			return []string{}, err
-		} else if !pass {
-			continue
+		if cfgFld.Type != utils.META_COMBIMED { // *combimed will apply it's filters lazy
+			if pass, err := filterS.Pass(cdr.Tenant,
+				cfgFld.Filters, nM); err != nil {
+				return []string{}, err
+			} else if !pass {
+				continue
+			}
 		}
 		fmtOut, err := cdr.formatField(cfgFld, httpSkipTLSCheck, groupedCDRs, filterS)
 		if err != nil {
