@@ -1,0 +1,20 @@
+---
+- name: set default gpg options
+  template:
+    src: gpg.conf.j2
+    dest: "{{ gpg_home }}/.gnupg/gpg.conf"
+    mode: '0600'
+    owner: root
+
+- name: copy default template for gpg
+  template:
+    src: gen-key-script.j2
+    dest: "{{ gpg_home }}/gen-key-script"
+    mode: '0700'
+    owner: root
+
+- name: generate gpg keys
+  command: gpg --batch --gen-key gen-key-script
+  args:
+    chdir: "{{ gpg_home }}"
+  notify: Restart gpg-agent
