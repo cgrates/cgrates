@@ -1454,7 +1454,7 @@ func TestCDRcombimedCdrFieldVal(t *testing.T) {
 	tpFld := &config.FCTemplate{
 		Tag:     "TestCombiMed",
 		Type:    utils.META_COMBIMED,
-		Filters: []string{"*string:~*cmedreq.RunID:*default", "*string:~*req.RunID:testRun1"},
+		Filters: []string{"*string:~*req.RunID:*default", "*string:~*cmedreq.RunID:testRun1"},
 		Value:   config.NewRSRParsersMustCompile("~*req.Cost", true, utils.INFIELD_SEP),
 	}
 	cfg, err := config.NewDefaultCGRConfig()
@@ -1471,7 +1471,7 @@ func TestCDRcombimedCdrFieldVal(t *testing.T) {
 	tpFld = &config.FCTemplate{
 		Tag:     "TestCombiMedFail",
 		Type:    utils.META_COMBIMED,
-		Filters: []string{"*string:~*cmedreq.RunID:*notdefault", "*string:~*req.RunID:testRun1"},
+		Filters: []string{"*string:~*req.RunID:*notdefault", "*string:~*cmedreq.RunID:testRun1"},
 		Value:   config.NewRSRParsersMustCompile("~*req.Cost", true, utils.INFIELD_SEP),
 	}
 	cfg, err = config.NewDefaultCGRConfig()
