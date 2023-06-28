@@ -305,12 +305,14 @@ func (cdr *CDR) String() string {
 // combimedCdrFieldVal groups together CDRs with same CGRID and combines their values matching filter field ID
 func (cdr *CDR) combimedCdrFieldVal(cfgCdrFld *config.FCTemplate, groupCDRs []*CDR, filterS *FilterS) (string, error) {
 	var combimedVal string // Will result as combination of the field values, filters must match
-
+	cmbReqMp := cdr.AsMapStorage()[utils.MetaReq]
 	for _, grpCDR := range groupCDRs {
 		if cdr.CGRID != grpCDR.CGRID {
 			continue // We only care about cdrs with same primary cdr behind
 		}
-		if pass, err := filterS.Pass(grpCDR.Tenant, cfgCdrFld.Filters, grpCDR.AsMapStorage()); err != nil {
+		fltrMp := grpCDR.AsMapStorage()
+		fltrMp[utils.MetaCmedReq] = cmbReqMp // so we can relate in filters
+		if pass, err := filterS.Pass(grpCDR.Tenant, cfgCdrFld.Filters, fltrMp); err != nil {
 			return utils.EmptyString, err
 		} else if !pass {
 			continue

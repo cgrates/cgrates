@@ -1454,7 +1454,7 @@ func TestCDRcombimedCdrFieldVal(t *testing.T) {
 	tpFld := &config.FCTemplate{
 		Tag:     "TestCombiMed",
 		Type:    utils.META_COMBIMED,
-		Filters: []string{"*string:~*req.RunID:testRun1"},
+		Filters: []string{"*string:~*cmedreq.RunID:*default", "*string:~*req.RunID:testRun1"},
 		Value:   config.NewRSRParsersMustCompile("~*req.Cost", true, utils.INFIELD_SEP),
 	}
 	cfg, err := config.NewDefaultCGRConfig()
@@ -1466,6 +1466,23 @@ func TestCDRcombimedCdrFieldVal(t *testing.T) {
 		t.Error(err)
 	} else if out != "1.22" {
 		t.Errorf("Expected : %+v, received: %+v", "1.22", out)
+	}
+
+	tpFld = &config.FCTemplate{
+		Tag:     "TestCombiMedFail",
+		Type:    utils.META_COMBIMED,
+		Filters: []string{"*string:~*cmedreq.RunID:*notdefault", "*string:~*req.RunID:testRun1"},
+		Value:   config.NewRSRParsersMustCompile("~*req.Cost", true, utils.INFIELD_SEP),
+	}
+	cfg, err = config.NewDefaultCGRConfig()
+	if err != nil {
+		t.Errorf("Error: %+v", err)
+	}
+
+	if out, err := cdr.combimedCdrFieldVal(tpFld, groupCDRs, &FilterS{cfg: cfg}); err != nil {
+		t.Error(err)
+	} else if out != utils.EmptyString {
+		t.Errorf("Expected : %+v, received: %+v", utils.EmptyString, out)
 	}
 
 }

@@ -560,6 +560,7 @@ const (
 	MetaHdr                     = "*hdr"
 	MetaTrl                     = "*trl"
 	MetaTmp                     = "*tmp"
+	MetaCmedReq                 = "*cmedreq" // used with combinedMediation
 	CGROriginHost               = "cgr_originhost"
 	MetaInitiate                = "*initiate"
 	MetaFD                      = "*fd"
