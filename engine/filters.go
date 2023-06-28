@@ -52,6 +52,9 @@ type FilterS struct {
 // receives the event as DataProvider so we can accept undecoded data (ie: HttpRequest)
 func (fS *FilterS) Pass(tenant string, filterIDs []string,
 	ev utils.DataProvider) (pass bool, err error) {
+	defer func() {
+		fmt.Printf("Pass event: %+v with filters: %+v, pass: %+v, err: %+v", utils.ToIJSON(ev), utils.ToIJSON(filterIDs), pass, err)
+	}()
 	var fieldNameDP utils.DataProvider
 	var fieldValuesDP []utils.DataProvider
 	if len(filterIDs) == 0 {
