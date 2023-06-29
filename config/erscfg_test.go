@@ -18,6 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package config
 
 import (
+	"fmt"
 	"reflect"
 	"testing"
 	"time"
@@ -331,9 +332,13 @@ func TestERsCfgAsMapInterface(t *testing.T) {
 }
 
 func TestERSCFGClone(t *testing.T) {
-	ev := EventReaderCfg{}
+	ev := EventReaderCfg{
+		CacheDumpFields:          []*FCTemplate{
+			{Tag: "test"},
+		},
+	}
 	ev2 := EventReaderCfg{}
-	
+
 	e := ERsCfg{
 		Enabled:       true,
 		SessionSConns: []string{"val1", "val2"},
@@ -346,5 +351,236 @@ func TestERSCFGClone(t *testing.T) {
 	if rcv.Enabled != exp.Enabled && !reflect.DeepEqual(rcv.SessionSConns, exp.SessionSConns) && !reflect.DeepEqual(rcv.Readers, exp.Readers) {
 		t.Errorf("recived %v, expected %v", rcv, exp)
 	}
-	
+
+}
+
+func TestEventReadersCFGAppendERsReaders(t *testing.T) {
+
+	er := EventReaderCfg{
+		ID: "test",
+	}
+
+	e := ERsCfg{
+		Enabled:       false,
+		SessionSConns: []string{},
+		Readers:       []*EventReaderCfg{&er},
+	}
+
+	id := "test"
+	ten := "`test"
+
+	ej := EventReaderJsonCfg{
+		Id:     &id,
+		Tenant: &ten,
+	}
+
+	erj := []*EventReaderJsonCfg{&ej}
+
+	type args struct {
+		jsnReaders *[]*EventReaderJsonCfg
+		sep        string
+		dfltRdrCfg *EventReaderCfg
+	}
+
+	tests := []struct {
+		name string
+		args args
+		exp  error
+	}{
+		{
+			name: "nil return",
+			args: args{jsnReaders: nil, sep: "", dfltRdrCfg: nil},
+			exp:  nil,
+		},
+		{
+			name: "nil return",
+			args: args{jsnReaders: &erj, sep: "", dfltRdrCfg: nil},
+			exp:  fmt.Errorf("Unclosed unspilit syntax"),
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			rcv := e.appendERsReaders(tt.args.jsnReaders, tt.args.sep, tt.args.dfltRdrCfg)
+
+			if err != nil {
+				if rcv.Error() != tt.exp.Error() {
+					t.Errorf("recived %v, expected %v", rcv, tt.exp)
+				}
+			}
+		})
+	}
+}
+
+func TestEventReaderLoadFromJSON2(t *testing.T) {
+
+	er := EventReaderCfg{
+		ID: "test",
+	}
+
+	rn := "test"
+
+	ej1 := EventReaderJsonCfg{
+		Run_delay: &rn,
+	}
+
+	flt := []string{"val1", "val2"}
+	flg := []string{"1:2:3:4:5"}
+
+	ej2 := EventReaderJsonCfg{
+		Filters: &flt,
+		Flags:   &flg,
+	}
+
+	fcp := "test"
+	prc := "test"
+
+	ej3 := EventReaderJsonCfg{
+		Failed_calls_prefix:  &fcp,
+		Partial_record_cache: &prc,
+	}
+
+	vl := "`test"
+
+	fcT := FcTemplateJsonCfg{
+		Value: &vl,
+	}
+
+	pcea := "test"
+	flds := []*FcTemplateJsonCfg{&fcT}
+
+	ej4 := EventReaderJsonCfg{
+		Partial_cache_expiry_action: &pcea,
+		Fields:                      &flds,
+	}
+
+	ej5 := EventReaderJsonCfg{
+		Cache_dump_fields: &flds,
+	}
+
+	type args struct {
+		jsnCfg *EventReaderJsonCfg
+		sep    string
+	}
+
+	tests := []struct {
+		name string
+		args args
+		exp  error
+	}{
+		{
+			name: "nil return",
+			args: args{jsnCfg: nil, sep: ""},
+			exp:  nil,
+		},
+		{
+			name: "check error invalid duration",
+			args: args{jsnCfg: &ej1, sep: ""},
+			exp:  fmt.Errorf(`time: invalid duration "test"`),
+		},
+		{
+			name: "check error unsupported format",
+			args: args{jsnCfg: &ej2, sep: ""},
+			exp:  utils.ErrUnsupportedFormat,
+		},
+		{
+			name: "check error invalid duration",
+			args: args{jsnCfg: &ej3, sep: ""},
+			exp:  fmt.Errorf(`time: invalid duration "test"`),
+		},
+		{
+			name: "check error in Fields",
+			args: args{jsnCfg: &ej4, sep: ""},
+			exp:  fmt.Errorf("Unclosed unspilit syntax"),
+		},
+		{
+			name: "check error in cache dump fields",
+			args: args{jsnCfg: &ej5, sep: ""},
+			exp:  fmt.Errorf("Unclosed unspilit syntax"),
+		},
+	}
+
+	for _, tt := range tests {
+		rcv := er.loadFromJsonCfg(tt.args.jsnCfg, tt.args.sep)
+
+		if rcv != nil {
+			if rcv.Error() != tt.exp.Error() {
+				t.Errorf("recived %v, expected %v", rcv, tt.exp)
+			}
+		}
+	}
+}
+
+func TestEventReeadersCFGAsMapInterface(t *testing.T) {
+
+	fct := FCTemplate{
+		Tag: "test",
+	}
+
+	er := EventReaderCfg{
+		Tenant: RSRParsers{&RSRParser{
+			Rules: "test",
+		}},
+		Flags: utils.FlagsWithParams{"test": []string{"val1", "val2"}},
+		CacheDumpFields: []*FCTemplate{
+			&fct,
+		},
+		RunDelay:                 1 * time.Second,
+		PartialRecordCache:       1 * time.Millisecond,
+		ID:                       "test",
+		Type:                     "test",
+		RowLength:                1,
+		FieldSep:                 "test",
+		ConcurrentReqs:           1,
+		SourcePath:               "test",
+		ProcessedPath:            "test",
+		XmlRootPath:              []string{},
+		Timezone:                 "test",
+		Filters:                  []string{},
+		FailedCallsPrefix:        "!",
+		PartialCacheExpiryAction: "test",
+	}
+
+	mp := map[string]any{
+		utils.IDCfg:                       er.ID,
+		utils.TypeCfg:                     er.Type,
+		utils.RowLengthCfg:                er.RowLength,
+		utils.FieldSepCfg:                 er.FieldSep,
+		utils.RunDelayCfg:                 "1s",
+		utils.ConcurrentReqsCfg:           er.ConcurrentReqs,
+		utils.SourcePathCfg:               er.SourcePath,
+		utils.ProcessedPathCfg:            er.ProcessedPath,
+		utils.XmlRootPathCfg:              []string{},
+		utils.TenantCfg:                   "test",
+		utils.TimezoneCfg:                 er.Timezone,
+		utils.FiltersCfg:                  er.Filters,
+		utils.FlagsCfg:                    map[string][]any{"test": {"val1", "val2"}},
+		utils.FailedCallsPrefixCfg:        er.FailedCallsPrefix,
+		utils.PartialRecordCacheCfg:       "1ms",
+		utils.PartialCacheExpiryActionCfg: er.PartialCacheExpiryAction,
+		utils.FieldsCfg:                   []map[string]any{},
+		utils.CacheDumpFieldsCfg:          []map[string]any{fct.AsMapInterface("")},
+	}
+
+	tests := []struct {
+		name string
+		arg  string
+		exp  map[string]any
+	}{
+		{
+			name: "test ErsCFG as map interface",
+			arg:  "",
+			exp:  mp,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			rcv := er.AsMapInterface(tt.arg)
+
+			if !reflect.DeepEqual(rcv, tt.exp) {
+				t.Errorf("recived %v, expected %v", rcv, tt.exp)
+			}
+		})
+	}
 }

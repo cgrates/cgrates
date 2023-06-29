@@ -18,6 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package config
 
 import (
+	"fmt"
 	"reflect"
 	"testing"
 
@@ -178,4 +179,95 @@ func TestLoaderCfgAsMapInterface(t *testing.T) {
 		t.Errorf("\nExpected: %+v\nReceived: %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
 	}
 
+}
+
+func TestLoadersCFGEnable(t *testing.T) {
+
+	lt := LoaderSCfg{
+		Enabled: true,
+	}
+	lf := LoaderSCfg{
+		Enabled: false,
+	}
+
+	lst := LoaderSCfgs{&lt}
+	lsf := LoaderSCfgs{&lf}
+
+	tests := []struct{
+		name string 
+		loader LoaderSCfgs 
+		exp bool 
+	}{
+		{
+			name: "return true",
+			loader: lst,
+			exp: true,
+		},
+		{
+			name: "return false",
+			loader: lsf,
+			exp: false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			rcv := tt.loader.Enabled()
+
+			if rcv != tt.exp {
+				t.Errorf("recived %v, expected %v", rcv, tt.exp)
+			}
+		})
+	}
+}
+
+func TestLoadersCFGLoadFromJsonCfg(t *testing.T) {
+
+	ld := LoaderDataType{
+		Type:     "test",
+		Filename: "test",
+		Fields:   []*FCTemplate{},
+	}
+
+	str := "`test"
+
+	ljd := LoaderJsonDataType{
+		Fields:    &[]*FcTemplateJsonCfg{
+			{Value: &str,},
+		},
+	}
+
+	type args struct {
+		jsnCfg *LoaderJsonDataType
+		separator string
+	}
+
+	tests := []struct{
+		name string 
+		args args 
+		exp error 
+	}{
+		{
+			name: "nil return",
+			args: args{jsnCfg: nil, separator: ""},
+			exp: nil,
+		},
+		{
+			name: "error check",
+			args: args{&ljd, ""},
+			exp: fmt.Errorf("Unclosed unspilit syntax"),
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			rcv := ld.loadFromJsonCfg(tt.args.jsnCfg, tt.args.separator)
+
+			if rcv != nil {
+				if rcv.Error() != tt.exp.Error() {
+					t.Errorf("recived %v, expected %v", rcv, tt.exp)
+				}
+			}
+		})
+	}
 }
