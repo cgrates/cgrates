@@ -310,6 +310,7 @@ func (cdr *CDR) combimedCdrFieldVal(cfgCdrFld *config.FCTemplate, groupCDRs []*C
 		if cdr.CGRID != grpCDR.CGRID {
 			continue // We only care about cdrs with same primary cdr behind
 		}
+		fmt.Printf("### grpCDR: %+v\n", utils.ToIJSON(grpCDR))
 		fltrMp[utils.MetaCmedReq] = grpCDR.AsMapStorage()[utils.MetaReq] // so we can relate in filters
 		if pass, err := filterS.Pass(grpCDR.Tenant, cfgCdrFld.Filters, fltrMp); err != nil {
 			return utils.EmptyString, err
@@ -317,6 +318,7 @@ func (cdr *CDR) combimedCdrFieldVal(cfgCdrFld *config.FCTemplate, groupCDRs []*C
 			continue
 		}
 		combimedVal += grpCDR.FieldsAsString(cfgCdrFld.Value)
+		fmt.Printf("### Adding to combimedVal: <%s>, field: %+v\n", combimedVal, cfgCdrFld)
 
 	}
 	return combimedVal, nil
