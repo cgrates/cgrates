@@ -16,6 +16,8 @@ jobs:
     - epel-9-x86_64 
 
 actions:
+  create-archive:
+      - bash -c "git_last_commit=$(git rev-parse HEAD) && tar -czvf /tmp/${git_last_commit}.tar.gz  . && echo /tmp/${git_last_commit}.tar.gz"
   fix-spec-file:
     - bash -c "git_last_commit=$(git rev-parse HEAD) && sed -i 's|{{{git_commit}}}|'\"${git_last_commit}\"'|' packages/copr.fedorainfracloud.org/cgrates.spec"
     - bash -c "release_tag=$(git log -1 --format=%ci | date +%Y%m%d%H%M%S)+$(git rev-parse --short HEAD) && sed -i 's|{{{releaseTag}}}|'\"${release_tag}\"'|' packages/copr.fedorainfracloud.org/cgrates.spec"

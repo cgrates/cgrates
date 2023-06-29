@@ -45,7 +45,7 @@ fi
 
 %build
 # In the build phase, the CGRateS binaries are built
-export GOPATH=%{_builddir}/%{name}-%{version}
+export GOPATH=%{_builddir}/%{name}-%{version}/go
 cd %{_builddir}/%{name}-%{version}/src/github.com/cgrates/cgrates
 export PATH=$PATH:%{_builddir}/go/bin
 ./build.sh
@@ -65,11 +65,11 @@ cp -rpf src/github.com/cgrates/cgrates/data/storage/mongo %{buildroot}%{_dataroo
 cp -rpf src/github.com/cgrates/cgrates/data/storage/mysql %{buildroot}%{_datarootdir}/%{name}/storage
 cp -rpf src/github.com/cgrates/cgrates/data/storage/postgres %{buildroot}%{_datarootdir}/%{name}/storage
 install -D -m 0644 -p src/github.com/cgrates/cgrates/data/conf/%{name}/%{name}.json %{buildroot}%{_sysconfdir}/%{name}/%{name}.json
-install -D -m 0755 -p bin/cgr-console %{buildroot}%{_bindir}/cgr-console
-install -D -m 0755 -p bin/cgr-engine %{buildroot}%{_bindir}/cgr-engine
-install -D -m 0755 -p bin/cgr-loader %{buildroot}%{_bindir}/cgr-loader
-install -D -m 0755 -p bin/cgr-tester %{buildroot}%{_bindir}/cgr-tester
-install -D -m 0755 -p bin/cgr-migrator %{buildroot}%{_bindir}/cgr-migrator
+install -D -m 0755 -p go/bin/cgr-console %{buildroot}%{_bindir}/cgr-console
+install -D -m 0755 -p go/bin/cgr-engine %{buildroot}%{_bindir}/cgr-engine
+install -D -m 0755 -p go/bin/cgr-loader %{buildroot}%{_bindir}/cgr-loader
+install -D -m 0755 -p go/bin/cgr-tester %{buildroot}%{_bindir}/cgr-tester
+install -D -m 0755 -p go/bin/cgr-migrator %{buildroot}%{_bindir}/cgr-migrator
 mkdir -p %{buildroot}%{_logdir}/cdre/csv
 mkdir -p %{buildroot}%{_logdir}/cdre/fwv
 mkdir -p %{buildroot}%{_spooldir}/cdre/csv
