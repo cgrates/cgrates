@@ -305,21 +305,25 @@ func (cdr *CDR) String() string {
 // combimedCdrFieldVal groups together CDRs with same CGRID and combines their values matching filter field ID
 func (cdr *CDR) combimedCdrFieldVal(cfgCdrFld *config.FCTemplate, groupCDRs []*CDR, filterS *FilterS) (string, error) {
 	var combimedVal string // Will result as combination of the field values, filters must match
+	var hasVal bool
 	fltrMp := cdr.AsMapStorage()
 	for _, grpCDR := range groupCDRs {
 		if cdr.CGRID != grpCDR.CGRID {
 			continue // We only care about cdrs with same primary cdr behind
 		}
-		fmt.Printf("### grpCDR: %+v\n", utils.ToIJSON(grpCDR))
 		fltrMp[utils.MetaCmedReq] = grpCDR.AsMapStorage()[utils.MetaReq] // so we can relate in filters
 		if pass, err := filterS.Pass(grpCDR.Tenant, cfgCdrFld.Filters, fltrMp); err != nil {
 			return utils.EmptyString, err
 		} else if !pass {
 			continue
 		}
+		if !hasVal {
+			hasVal = true
+		}
 		combimedVal += grpCDR.FieldsAsString(cfgCdrFld.Value)
-		fmt.Printf("### Adding to combimedVal: <%s>, field: %+v\n", combimedVal, cfgCdrFld)
-
+	}
+	if !hasVal {
+		return utils.EmptyString, utils.ErrCombimedNotFound
 	}
 	return combimedVal, nil
 }
@@ -446,6 +450,9 @@ func (cdr *CDR) AsExportRecord(exportFields []*config.FCTemplate,
 		}
 		fmtOut, err := cdr.formatField(cfgFld, httpSkipTLSCheck, groupedCDRs, filterS)
 		if err != nil {
+			if err == utils.ErrCombimedNotFound {
+				continue
+			}
 			utils.Logger.Warning(fmt.Sprintf("<CDR> error: %s exporting field: %s, CDR: %s\n",
 				err.Error(), utils.ToJSON(cfgFld), utils.ToJSON(cdr)))
 			return nil, err

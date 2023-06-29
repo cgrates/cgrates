@@ -71,6 +71,7 @@ var (
 	ErrIndexOutOfBounds         = errors.New("INDEX_OUT_OF_BOUNDS")
 	ErrWrongPath                = errors.New("WRONG_PATH")
 	ErrServiceAlreadyRunning    = fmt.Errorf("service already running")
+	ErrCombimedNotFound         = errors.New("COMBIMED_NOT_FOUND")
 
 	ErrMap = map[string]error{
 		ErrNoMoreData.Error():              ErrNoMoreData,

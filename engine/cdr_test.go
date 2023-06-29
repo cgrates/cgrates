@@ -1479,10 +1479,8 @@ func TestCDRcombimedCdrFieldVal(t *testing.T) {
 		t.Errorf("Error: %+v", err)
 	}
 
-	if out, err := cdr.combimedCdrFieldVal(tpFld, groupCDRs, &FilterS{cfg: cfg}); err != nil {
-		t.Error(err)
-	} else if out != utils.EmptyString {
-		t.Errorf("Expected : %+v, received: %+v", utils.EmptyString, out)
+	if out, err := cdr.combimedCdrFieldVal(tpFld, groupCDRs, &FilterS{cfg: cfg}); err == nil {
+		t.Errorf("Expected error %v, received: %+v", utils.ErrCombimedNotFound, out)
 	}
 
 }
