@@ -19,7 +19,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package config
 
 import (
+	"fmt"
 	"path"
+	"reflect"
 	"strings"
 	"testing"
 
@@ -434,5 +436,94 @@ func TestXMLIndexes(t *testing.T) {
 		t.Error(err)
 	} else if data != "37" {
 		t.Errorf("expecting: 37, received: <%s>", data)
+	}
+}
+
+func TestXmlProviderString(t *testing.T) {
+	x := XmlProvider{}
+
+	rcv := x.String()
+	exp := utils.ToJSON(x)
+
+	if !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("recived %v, expected %v", rcv, exp)
+	}
+}
+
+func TestXmlProviderRemoteHost(t *testing.T) {
+	x := XmlProvider{}
+
+	rcv := x.RemoteHost()
+	exp := utils.LocalAddr()
+
+	if rcv.String() != exp.String() {
+		t.Errorf("recived %v, expected %v", rcv, exp)
+	}
+}
+
+func TestXmlProviderFieldAsInterface(t *testing.T) {
+
+	x := XmlProvider{
+		cache: utils.MapStorage{"test": "val1"},
+	}
+
+	type exp struct {
+		data any
+		err  error
+	}
+
+	tests := []struct {
+		name string
+		arg  []string
+		exp  exp
+	}{
+		{
+			name: "check error not found",
+			arg:  []string{},
+			exp:  exp{data: nil, err: utils.ErrNotFound},
+		},
+		{
+			name: "item found in cache",
+			arg:  []string{"test"},
+			exp:  exp{data: "val1", err: nil},
+		},
+		{
+			name: "check error filter rule needs to end in ]",
+			arg:  []string{"test[0"},
+			exp:  exp{data: nil, err: fmt.Errorf("filter rule <[0> needs to end in ]")},
+		},
+		{
+			name: "check strconv.Atoi error",
+			arg:  []string{"test[a]"},
+			exp:  exp{data: nil, err: fmt.Errorf(`strconv.Atoi: parsing "a": invalid syntax`)},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+
+			rcv, err := x.FieldAsInterface(tt.arg)
+
+			if err != nil {
+				if err.Error() != tt.exp.err.Error() {
+					t.Fatalf("recived %s, expected %s", err, tt.exp.err)
+				}
+			}
+
+			if !reflect.DeepEqual(rcv, tt.exp.data) {
+				t.Errorf("recived %s, expected %s", rcv, tt.exp.data)
+			}
+		})
+	}
+}
+
+func TestXmlProviderFieldAsString(t *testing.T) {
+	x := XmlProvider{}
+
+	_, err := x.FieldAsString([]string{})
+	exp := utils.ErrNotFound
+
+	if err.Error() != exp.Error() {
+		t.Fatalf("recived %d, expected %s", err, exp)
 	}
 }
