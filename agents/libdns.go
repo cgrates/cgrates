@@ -595,6 +595,8 @@ func updateDnsAnswer(q []dns.RR, qType uint16, qName string, path []string, valu
 	switch v := q[idx].(type) {
 	case *dns.NAPTR:
 		err = updateDnsNAPTRAnswer(v, path, value)
+	case *dns.SRV:
+		err = updateDnsSRVAnswer(v, path, value)
 	case *dns.A:
 		if len(path) < 1 ||
 			(path[0] != utils.DNSHdr && len(path) != 1) ||
@@ -606,7 +608,12 @@ func updateDnsAnswer(q []dns.RR, qType uint16, qName string, path []string, valu
 		case utils.DNSHdr:
 			err = updateDnsRRHeader(&v.Hdr, path[1:], value)
 		case utils.DNSA:
-			v.A = net.IP(utils.IfaceAsString(value))
+			v.A = net.ParseIP(utils.IfaceAsString(value))
+			if v.A == nil {
+				err = fmt.Errorf("invalid IP address <%v>",
+					utils.IfaceAsString(value))
+				return
+			}
 		default:
 			err = utils.ErrWrongPath
 		}
@@ -632,8 +639,46 @@ func newDNSAnswer(qType uint16, qName string) (a dns.RR, err error) {
 		a = &dns.A{Hdr: hdr}
 	case dns.TypeNAPTR:
 		a = &dns.NAPTR{Hdr: hdr}
+	case dns.TypeSRV:
+		a = &dns.SRV{Hdr: hdr}
 	default:
 		err = fmt.Errorf("unsupported DNS type: <%v>", dns.TypeToString[qType])
+	}
+	return
+}
+
+func updateDnsSRVAnswer(v *dns.SRV, path []string, value any) (err error) {
+	if len(path) < 1 ||
+		(path[0] != utils.DNSHdr && len(path) != 1) ||
+		(path[0] == utils.DNSHdr && len(path) != 2) {
+		err = utils.ErrWrongPath
+		return
+	}
+	switch path[0] {
+	case utils.DNSHdr:
+		err = updateDnsRRHeader(&v.Hdr, path[1:], value)
+	case utils.DNSPriority:
+		var vItm int64
+		if vItm, err = utils.IfaceAsTInt64(value); err != nil {
+			return
+		}
+		v.Priority = uint16(vItm)
+	case utils.Weight:
+		var vItm int64
+		if vItm, err = utils.IfaceAsTInt64(value); err != nil {
+			return
+		}
+		v.Weight = uint16(vItm)
+	case utils.DNSPort:
+		var vItm int64
+		if vItm, err = utils.IfaceAsTInt64(value); err != nil {
+			return
+		}
+		v.Port = uint16(vItm)
+	case utils.DNSTarget:
+		v.Target = utils.IfaceAsString(value)
+	default:
+		err = utils.ErrWrongPath
 	}
 	return
 }
