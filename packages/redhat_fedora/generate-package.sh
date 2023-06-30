@@ -2,7 +2,7 @@
 set -e
 
 # Default values
-BUILD_DIR_DEFAULT=$HOME/cgr_build
+BUILD_DIR_DEFAULT=$HOME/rpmbuild
 SRCDIR_DEFAULT=$HOME/go/src/github.com/cgrates/cgrates
 
 # Parse options
@@ -46,7 +46,8 @@ fetch_source() {
     export gitLastCommit=$(git rev-parse HEAD)
     export rpmTag=$(git log -1 --format=%ci | date +%Y%m%d%H%M%S)+$(git rev-parse --short HEAD)
     if [ ! -f $BUILD_DIR/SOURCES/$gitLastCommit.tar.gz ]; then
-        wget -P $BUILD_DIR/SOURCES https://github.com/cgrates/cgrates/archive/$gitLastCommit.tar.gz
+           cd $SRCDIR_DEFAULT && cd ..
+           tar -czvf    $BUILD_DIR/SOURCES/$gitLastCommit.tar.gz  cgrates
     fi
 }
 

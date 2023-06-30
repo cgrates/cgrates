@@ -18,7 +18,7 @@ Release:        rc1.%{releaseTag}
 Summary:        Carrier Grade Real-time Charging System
 License:        GPLv3
 URL:            https://github.com/cgrates/cgrates
-Source0:        https://github.com/cgrates/cgrates/archive/%{git_commit}.tar.gz
+Source0:        %{git_commit}.tar.gz
 BuildRequires:  git curl tar
 Requires(pre):  shadow-utils
 
@@ -33,7 +33,7 @@ CGRateS is a very fast and easy scalable real-time charging system for Telecom e
 # In the prep phase, the source is unpacked and set up for the build
 %setup -q -n %{name}-%{version} -c
 mkdir -p src/github.com/cgrates
-ln -sf ../../../$(ls |grep %{name}-) src/github.com/cgrates/cgrates
+ln -sf ../../../$(ls |grep %{name}) src/github.com/cgrates/cgrates
 curl -LO https://golang.org/dl/go%{go_version}.linux-amd64.tar.gz
 tar -xzf go%{go_version}.linux-amd64.tar.gz -C %{_builddir}
 
