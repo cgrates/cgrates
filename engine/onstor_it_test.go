@@ -109,8 +109,7 @@ func TestOnStorIT(t *testing.T) {
 		if mgoITdb, err = NewMongoStorage(mgoITCfg.StorDbCfg().Host,
 			mgoITCfg.StorDbCfg().Port, mgoITCfg.StorDbCfg().Name,
 			mgoITCfg.StorDbCfg().User, mgoITCfg.StorDbCfg().Password,
-			mgoITCfg.GeneralCfg().DBDataEncoding,
-			utils.StorDB, nil, false); err != nil {
+			mgoITCfg.GeneralCfg().DBDataEncoding, nil, false); err != nil {
 			t.Fatal(err)
 		}
 		onStorCfg = mgoITCfg.StorDbCfg().Name

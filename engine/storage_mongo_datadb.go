@@ -40,7 +40,6 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
-	"go.mongodb.org/mongo-driver/x/bsonx"
 )
 
 // Mongo collections names
@@ -102,102 +101,96 @@ var (
 	DestinationLow     = strings.ToLower(utils.Destination)
 	CostLow            = strings.ToLower(utils.COST)
 	CostSourceLow      = strings.ToLower(utils.CostSource)
-
-	tTime = reflect.TypeOf(time.Time{})
 )
 
-func TimeDecodeValue1(dc bsoncodec.DecodeContext, vr bsonrw.ValueReader, val reflect.Value) error {
-	if vr.Type() != bsontype.DateTime {
+func decodeTimeValue(dc bsoncodec.DecodeContext, vr bsonrw.ValueReader, val reflect.Value) error {
+	timeType := reflect.TypeOf(time.Time{})
+	switch vr.Type() {
+	case bsontype.Null: // handle nil values
+		val.Set(reflect.ValueOf(time.Time{}))
+		return vr.ReadNull()
+
+	case bsontype.DateTime:
+		dt, err := vr.ReadDateTime()
+		if err != nil {
+			return err
+		}
+		if !val.CanSet() || val.Type() != timeType {
+			return bsoncodec.ValueDecoderError{Name: "decodeTimeValue", Types: []reflect.Type{timeType}, Received: val}
+		}
+		val.Set(reflect.ValueOf(time.Unix(dt/1000, dt%1000*1000000).UTC()))
+		return nil
+
+	default:
 		return fmt.Errorf("cannot decode %v into a time.Time", vr.Type())
 	}
-
-	dt, err := vr.ReadDateTime()
-	if err != nil {
-		return err
-	}
-
-	if !val.CanSet() || val.Type() != tTime {
-		return bsoncodec.ValueDecoderError{Name: "TimeDecodeValue", Types: []reflect.Type{tTime}, Received: val}
-	}
-	val.Set(reflect.ValueOf(time.Unix(dt/1000, dt%1000*1000000).UTC()))
-	return nil
 }
 
-// NewMongoStorage givese new mongo driver
-func NewMongoStorage(host, port, db, user, pass, mrshlerStr, storageType string, cdrsIndexes []string,
-	isDataDB bool) (ms *MongoStorage, err error) {
-	url := host
-	if port != "0" {
-		url += ":" + port
-	}
-	if user != "" && pass != "" {
-		url = fmt.Sprintf("%s:%s@%s", user, pass, url)
-	}
-	var dbName string
-	if db != "" {
-		url += "/" + db
-		dbName = strings.Split(db, "?")[0] // remove extra info after ?
-	}
-	ctx := context.Background()
-	ttl := config.CgrConfig().DataDbCfg().QueryTimeout
-	if !isDataDB {
-		ttl = config.CgrConfig().StorDbCfg().QueryTimeout
-	}
-	url = "mongodb://" + url
-	reg := bson.NewRegistryBuilder().RegisterDecoder(tTime, bsoncodec.ValueDecoderFunc(TimeDecodeValue1)).Build()
-	opt := options.Client().
-		ApplyURI(url).
-		SetRegistry(reg).
-		SetServerSelectionTimeout(ttl).
-		SetRetryWrites(false) // set this option to false because as default it is on true
-
-	client, err := mongo.NewClient(opt)
-	// client, err := mongo.NewClient(url)
-
+// NewMongoStorage initializes a new MongoDB storage instance with provided connection parameters and settings.
+// Returns an error if the setup fails.
+func NewMongoStorage(host, port, db, user, pass, mrshlerStr string, cdrsIndexes []string,
+	isDataDB bool) (*MongoStorage, error) {
+	url, err := buildURL("mongodb", host, port, db, user, pass)
 	if err != nil {
 		return nil, err
 	}
-	err = client.Connect(ctx)
-	if err != nil {
-		return nil, err
-	}
-	mrshler, err := NewMarshaler(mrshlerStr)
-	if err != nil {
-		return nil, err
-	}
-
-	ms = &MongoStorage{
-		client:      client,
-		ctx:         ctx,
-		ctxTTL:      ttl,
-		db:          dbName,
-		storageType: storageType,
-		ms:          mrshler,
+	mongoStorage := &MongoStorage{
+		ctx:         context.TODO(),
 		cdrsIndexes: cdrsIndexes,
 		isDataDB:    isDataDB,
+		counter:     utils.NewCounter(time.Now().UnixNano(), 0),
+	}
+	mongoStorage.ctxTTL = config.CgrConfig().DataDbCfg().QueryTimeout
+	if !isDataDB {
+		mongoStorage.ctxTTL = config.CgrConfig().StorDbCfg().QueryTimeout
+	}
+	timeType := reflect.TypeOf(time.Time{})
+	reg := bson.NewRegistryBuilder().RegisterTypeDecoder(timeType, bsoncodec.ValueDecoderFunc(decodeTimeValue)).Build()
+	// serverAPI := options.ServerAPI(options.ServerAPIVersion1).SetStrict(true).SetDeprecationErrors(true)
+	opts := options.Client().
+		ApplyURI(url.String()).
+		SetRegistry(reg).
+		SetServerSelectionTimeout(mongoStorage.ctxTTL).
+		SetRetryWrites(false) // default is true
+		// SetServerAPIOptions(serverAPI)
+
+	// Create a new client and connect to the server
+	mongoStorage.client, err = mongo.Connect(mongoStorage.ctx, opts)
+	if err != nil {
+		return nil, err
 	}
 
-	if err = ms.query(func(sctx mongo.SessionContext) error {
-		cols, err := ms.client.Database(dbName).ListCollectionNames(sctx, bson.D{})
+	mongoStorage.ms, err = NewMarshaler(mrshlerStr)
+	if err != nil {
+		return nil, err
+	}
+	if db != "" {
+		// Populate ms.db with the url path after trimming everything after '?'.
+		mongoStorage.db = strings.Split(db, "?")[0]
+	}
+
+	if err = mongoStorage.query(func(sctx mongo.SessionContext) error {
+		// Create indexes only if the database is empty or only the version table is present.
+		cols, err := mongoStorage.client.Database(mongoStorage.db).
+			ListCollectionNames(sctx, bson.D{})
 		if err != nil {
 			return err
 		}
 		empty := true
-		for _, col := range cols { // create indexes only if database is empty or only version table is present
+		for _, col := range cols {
 			if col != ColVer {
 				empty = false
 				break
 			}
 		}
 		if empty {
-			return ms.EnsureIndexes()
+			return mongoStorage.EnsureIndexes()
 		}
 		return nil
 	}); err != nil {
 		return nil, err
 	}
-	ms.cnter = utils.NewCounter(time.Now().UnixNano(), 0)
-	return
+	return mongoStorage, nil
 }
 
 // MongoStorage struct for new mongo driver
@@ -207,10 +200,9 @@ type MongoStorage struct {
 	ctxTTL      time.Duration
 	ctxTTLMutex sync.RWMutex // used for TTL reload
 	db          string
-	storageType string // datadb, stordb
 	ms          Marshaler
 	cdrsIndexes []string
-	cnter       *utils.Counter
+	counter     *utils.Counter
 	isDataDB    bool
 }
 
@@ -337,38 +329,25 @@ func (ms *MongoStorage) ensureIndexesForCol(col string) (err error) { // exporte
 }
 
 // EnsureIndexes creates db indexes
-func (ms *MongoStorage) EnsureIndexes(cols ...string) (err error) {
-	if len(cols) != 0 {
-		for _, col := range cols {
-			if err = ms.ensureIndexesForCol(col); err != nil {
-				return
-			}
-		}
-		return
-	}
-	if ms.storageType == utils.DataDB {
-		for _, col := range []string{ColAct, ColApl, ColAAp, ColAtr,
-			ColRpl, ColDst, ColRds, ColLht, ColRFI, ColRsP, ColRes, ColSqs, ColSqp,
-			ColTps, ColThs, ColSpp, ColAttr, ColFlt, ColCpp, ColDpp,
-			ColRpf, ColShg, ColAcc} {
-			if err = ms.ensureIndexesForCol(col); err != nil {
-				return
-			}
+func (ms *MongoStorage) EnsureIndexes(cols ...string) error {
+	if len(cols) == 0 {
+		if ms.isDataDB {
+			cols = []string{ColAct, ColApl, ColAAp, ColAtr, ColRpl, ColDst, ColRds, ColLht, ColRFI,
+				ColRsP, ColRes, ColSqs, ColSqp, ColTps, ColThs, ColSpp, ColAttr, ColFlt, ColCpp,
+				ColDpp, ColRpf, ColShg, ColAcc}
+		} else {
+			cols = []string{utils.TBLTPTimings, utils.TBLTPDestinations, utils.TBLTPDestinationRates,
+				utils.TBLTPRatingPlans, utils.TBLTPSharedGroups, utils.TBLTPActions, utils.TBLTPActionPlans,
+				utils.TBLTPActionTriggers, utils.TBLTPStats, utils.TBLTPResources, utils.TBLTPRateProfiles,
+				utils.CDRsTBL, utils.SessionCostsTBL}
 		}
 	}
-	if ms.storageType == utils.StorDB {
-		for _, col := range []string{utils.TBLTPTimings, utils.TBLTPDestinations,
-			utils.TBLTPDestinationRates, utils.TBLTPRatingPlans,
-			utils.TBLTPSharedGroups, utils.TBLTPActions,
-			utils.TBLTPActionPlans, utils.TBLTPActionTriggers,
-			utils.TBLTPStats, utils.TBLTPResources,
-			utils.TBLTPRateProfiles, utils.CDRsTBL, utils.SessionCostsTBL} {
-			if err = ms.ensureIndexesForCol(col); err != nil {
-				return
-			}
+	for _, col := range cols {
+		if err := ms.ensureIndexesForCol(col); err != nil {
+			return err
 		}
 	}
-	return
+	return nil
 }
 
 func (ms *MongoStorage) getColNameForPrefix(prefix string) (string, bool) {
@@ -509,12 +488,18 @@ func (ms *MongoStorage) IsDBEmpty() (resp bool, err error) {
 	return resp, err
 }
 
-func (ms *MongoStorage) getField(sctx mongo.SessionContext, col, prefix, subject, field string) (result []string, err error) {
+func (ms *MongoStorage) getAllKeysMatchingField(sctx mongo.SessionContext, col, prefix, subject, field string) (result []string, err error) {
 	fieldResult := bson.D{}
 	iter, err := ms.getCol(col).Find(sctx,
-		bson.M{field: bsonx.Regex(subject, "")},
+		bson.M{
+			field: primitive.Regex{
+				Pattern: subject,
+			},
+		},
 		options.Find().SetProjection(
-			bson.M{field: 1},
+			bson.M{
+				field: 1,
+			},
 		),
 	)
 	if err != nil {
@@ -530,14 +515,16 @@ func (ms *MongoStorage) getField(sctx mongo.SessionContext, col, prefix, subject
 	return result, iter.Close(sctx)
 }
 
-func (ms *MongoStorage) getField2(sctx mongo.SessionContext, col, prefix, subject string, tntID *utils.TenantID) (result []string, err error) {
+func (ms *MongoStorage) getAllKeysMatchingTenantID(sctx mongo.SessionContext, col, prefix, subject string, tntID *utils.TenantID) (result []string, err error) {
 	idResult := struct{ Tenant, Id string }{}
 	elem := bson.M{}
 	if tntID.Tenant != "" {
 		elem["tenant"] = tntID.Tenant
 	}
 	if tntID.ID != "" {
-		elem["id"] = bsonx.Regex(subject, "")
+		elem["id"] = primitive.Regex{
+			Pattern: subject,
+		}
 	}
 	iter, err := ms.getCol(col).Find(sctx, elem,
 		options.Find().SetProjection(bson.M{"tenant": 1, "id": 1}),
@@ -555,10 +542,14 @@ func (ms *MongoStorage) getField2(sctx mongo.SessionContext, col, prefix, subjec
 	return result, iter.Close(sctx)
 }
 
-func (ms *MongoStorage) getField3(sctx mongo.SessionContext, col, prefix, field string) (result []string, err error) {
+func (ms *MongoStorage) getAllIndexKeys(sctx mongo.SessionContext, col, prefix, field string) (result []string, err error) {
 	fieldResult := bson.D{}
 	iter, err := ms.getCol(col).Find(sctx,
-		bson.M{field: bsonx.Regex(fmt.Sprintf("^%s", prefix), "")},
+		bson.M{
+			field: primitive.Regex{
+				Pattern: "^" + prefix,
+			},
+		},
 		options.Find().SetProjection(
 			bson.M{field: 1},
 		),
@@ -585,72 +576,73 @@ func (ms *MongoStorage) GetKeysForPrefix(prefix string) (result []string, err er
 	}
 	category = prefix[:keyLen] // prefix length
 	tntID := utils.NewTenantID(prefix[keyLen:])
-	subject = fmt.Sprintf("^%s", prefix[keyLen:]) // old way, no tenant support
+	subject = "^" + prefix[keyLen:] // old way, no tenant support
 	err = ms.query(func(sctx mongo.SessionContext) (err error) {
 		switch category {
 		case utils.DESTINATION_PREFIX:
-			result, err = ms.getField(sctx, ColDst, utils.DESTINATION_PREFIX, subject, "key")
+			result, err = ms.getAllKeysMatchingField(sctx, ColDst, utils.DESTINATION_PREFIX, subject, "key")
 		case utils.REVERSE_DESTINATION_PREFIX:
-			result, err = ms.getField(sctx, ColRds, utils.REVERSE_DESTINATION_PREFIX, subject, "key")
+			result, err = ms.getAllKeysMatchingField(sctx, ColRds, utils.REVERSE_DESTINATION_PREFIX, subject, "key")
 		case utils.RATING_PLAN_PREFIX:
-			result, err = ms.getField(sctx, ColRpl, utils.RATING_PLAN_PREFIX, subject, "key")
+			result, err = ms.getAllKeysMatchingField(sctx, ColRpl, utils.RATING_PLAN_PREFIX, subject, "key")
 		case utils.RATING_PROFILE_PREFIX:
 			if strings.HasPrefix(prefix[keyLen:], utils.META_OUT) {
-				subject = fmt.Sprintf("^\\%s", prefix[keyLen:]) // rewrite the id cause it start with * from `*out`
+				// Rewrite the id as it starts with '*' (from "*out").
+				subject = "^\\" + prefix[keyLen:]
 			}
-			result, err = ms.getField(sctx, ColRpf, utils.RATING_PROFILE_PREFIX, subject, "id")
+			result, err = ms.getAllKeysMatchingField(sctx, ColRpf, utils.RATING_PROFILE_PREFIX, subject, "id")
 		case utils.ACTION_PREFIX:
-			result, err = ms.getField(sctx, ColAct, utils.ACTION_PREFIX, subject, "key")
+			result, err = ms.getAllKeysMatchingField(sctx, ColAct, utils.ACTION_PREFIX, subject, "key")
 		case utils.ACTION_PLAN_PREFIX:
-			result, err = ms.getField(sctx, ColApl, utils.ACTION_PLAN_PREFIX, subject, "key")
+			result, err = ms.getAllKeysMatchingField(sctx, ColApl, utils.ACTION_PLAN_PREFIX, subject, "key")
 		case utils.ACTION_TRIGGER_PREFIX:
-			result, err = ms.getField(sctx, ColAtr, utils.ACTION_TRIGGER_PREFIX, subject, "key")
+			result, err = ms.getAllKeysMatchingField(sctx, ColAtr, utils.ACTION_TRIGGER_PREFIX, subject, "key")
 		case utils.SHARED_GROUP_PREFIX:
-			result, err = ms.getField(sctx, ColShg, utils.SHARED_GROUP_PREFIX, subject, "id")
+			result, err = ms.getAllKeysMatchingField(sctx, ColShg, utils.SHARED_GROUP_PREFIX, subject, "id")
 		case utils.ACCOUNT_PREFIX:
-			result, err = ms.getField(sctx, ColAcc, utils.ACCOUNT_PREFIX, subject, "id")
+			result, err = ms.getAllKeysMatchingField(sctx, ColAcc, utils.ACCOUNT_PREFIX, subject, "id")
 		case utils.ResourceProfilesPrefix:
-			result, err = ms.getField2(sctx, ColRsP, utils.ResourceProfilesPrefix, subject, tntID)
+			result, err = ms.getAllKeysMatchingTenantID(sctx, ColRsP, utils.ResourceProfilesPrefix, subject, tntID)
 		case utils.ResourcesPrefix:
-			result, err = ms.getField2(sctx, ColRes, utils.ResourcesPrefix, subject, tntID)
+			result, err = ms.getAllKeysMatchingTenantID(sctx, ColRes, utils.ResourcesPrefix, subject, tntID)
 		case utils.StatQueuePrefix:
-			result, err = ms.getField2(sctx, ColSqs, utils.StatQueuePrefix, subject, tntID)
+			result, err = ms.getAllKeysMatchingTenantID(sctx, ColSqs, utils.StatQueuePrefix, subject, tntID)
 		case utils.StatQueueProfilePrefix:
-			result, err = ms.getField2(sctx, ColSqp, utils.StatQueueProfilePrefix, subject, tntID)
+			result, err = ms.getAllKeysMatchingTenantID(sctx, ColSqp, utils.StatQueueProfilePrefix, subject, tntID)
 		case utils.AccountActionPlansPrefix:
-			result, err = ms.getField(sctx, ColAAp, utils.AccountActionPlansPrefix, subject, "key")
+			result, err = ms.getAllKeysMatchingField(sctx, ColAAp, utils.AccountActionPlansPrefix, subject, "key")
 		case utils.TimingsPrefix:
-			result, err = ms.getField(sctx, ColTmg, utils.TimingsPrefix, subject, "id")
+			result, err = ms.getAllKeysMatchingField(sctx, ColTmg, utils.TimingsPrefix, subject, "id")
 		case utils.FilterPrefix:
-			result, err = ms.getField2(sctx, ColFlt, utils.FilterPrefix, subject, tntID)
+			result, err = ms.getAllKeysMatchingTenantID(sctx, ColFlt, utils.FilterPrefix, subject, tntID)
 		case utils.ThresholdPrefix:
-			result, err = ms.getField2(sctx, ColThs, utils.ThresholdPrefix, subject, tntID)
+			result, err = ms.getAllKeysMatchingTenantID(sctx, ColThs, utils.ThresholdPrefix, subject, tntID)
 		case utils.ThresholdProfilePrefix:
-			result, err = ms.getField2(sctx, ColTps, utils.ThresholdProfilePrefix, subject, tntID)
+			result, err = ms.getAllKeysMatchingTenantID(sctx, ColTps, utils.ThresholdProfilePrefix, subject, tntID)
 		case utils.SupplierProfilePrefix:
-			result, err = ms.getField2(sctx, ColSpp, utils.SupplierProfilePrefix, subject, tntID)
+			result, err = ms.getAllKeysMatchingTenantID(sctx, ColSpp, utils.SupplierProfilePrefix, subject, tntID)
 		case utils.AttributeProfilePrefix:
-			result, err = ms.getField2(sctx, ColAttr, utils.AttributeProfilePrefix, subject, tntID)
+			result, err = ms.getAllKeysMatchingTenantID(sctx, ColAttr, utils.AttributeProfilePrefix, subject, tntID)
 		case utils.ChargerProfilePrefix:
-			result, err = ms.getField2(sctx, ColCpp, utils.ChargerProfilePrefix, subject, tntID)
+			result, err = ms.getAllKeysMatchingTenantID(sctx, ColCpp, utils.ChargerProfilePrefix, subject, tntID)
 		case utils.DispatcherProfilePrefix:
-			result, err = ms.getField2(sctx, ColDpp, utils.DispatcherProfilePrefix, subject, tntID)
+			result, err = ms.getAllKeysMatchingTenantID(sctx, ColDpp, utils.DispatcherProfilePrefix, subject, tntID)
 		case utils.DispatcherHostPrefix:
-			result, err = ms.getField2(sctx, ColDph, utils.DispatcherHostPrefix, subject, tntID)
+			result, err = ms.getAllKeysMatchingTenantID(sctx, ColDph, utils.DispatcherHostPrefix, subject, tntID)
 		case utils.AttributeFilterIndexes:
-			result, err = ms.getField3(sctx, ColRFI, utils.AttributeFilterIndexes, "key")
+			result, err = ms.getAllIndexKeys(sctx, ColRFI, utils.AttributeFilterIndexes, "key")
 		case utils.ResourceFilterIndexes:
-			result, err = ms.getField3(sctx, ColRFI, utils.ResourceFilterIndexes, "key")
+			result, err = ms.getAllIndexKeys(sctx, ColRFI, utils.ResourceFilterIndexes, "key")
 		case utils.StatFilterIndexes:
-			result, err = ms.getField3(sctx, ColRFI, utils.StatFilterIndexes, "key")
+			result, err = ms.getAllIndexKeys(sctx, ColRFI, utils.StatFilterIndexes, "key")
 		case utils.ThresholdFilterIndexes:
-			result, err = ms.getField3(sctx, ColRFI, utils.ThresholdFilterIndexes, "key")
+			result, err = ms.getAllIndexKeys(sctx, ColRFI, utils.ThresholdFilterIndexes, "key")
 		case utils.SupplierFilterIndexes:
-			result, err = ms.getField3(sctx, ColRFI, utils.SupplierFilterIndexes, "key")
+			result, err = ms.getAllIndexKeys(sctx, ColRFI, utils.SupplierFilterIndexes, "key")
 		case utils.ChargerFilterIndexes:
-			result, err = ms.getField3(sctx, ColRFI, utils.ChargerFilterIndexes, "key")
+			result, err = ms.getAllIndexKeys(sctx, ColRFI, utils.ChargerFilterIndexes, "key")
 		case utils.DispatcherFilterIndexes:
-			result, err = ms.getField3(sctx, ColRFI, utils.DispatcherFilterIndexes, "key")
+			result, err = ms.getAllIndexKeys(sctx, ColRFI, utils.DispatcherFilterIndexes, "key")
 		default:
 			err = fmt.Errorf("unsupported prefix in GetKeysForPrefix: %s", prefix)
 		}
@@ -1572,7 +1564,8 @@ func (ms *MongoStorage) GetFilterIndexesDrv(cacheID, itemIDPrefix, filterType st
 	}
 	var results []result
 	dbKey := utils.CacheInstanceToPrefix[cacheID] + itemIDPrefix
-	// case for reverse filter indexes, key is different, must not use regex finding for key
+	// If dealing with reverse filter indexes, the key differs and therefore
+	// we shouldn't use regex to search for it.
 	if strings.HasPrefix(dbKey, utils.ReverseFilterIndexes) {
 		if err = ms.query(func(sctx mongo.SessionContext) (err error) {
 			cur, err := ms.getCol(ColRFI).Find(sctx,
@@ -1621,9 +1614,14 @@ func (ms *MongoStorage) GetFilterIndexesDrv(cacheID, itemIDPrefix, filterType st
 		for _, character := range []string{".", "*"} {
 			dbKey = strings.Replace(dbKey, character, `\`+character, strings.Count(dbKey, character))
 		}
-		//inside bson.RegEx add carrot to match the prefix (optimization)
+		// For optimization, use a caret (^) in the regex pattern.
 		if err = ms.query(func(sctx mongo.SessionContext) (err error) {
-			cur, err := ms.getCol(ColRFI).Find(sctx, bson.M{"key": bsonx.Regex("^"+dbKey, "")})
+			cur, err := ms.getCol(ColRFI).Find(sctx,
+				bson.M{
+					"key": primitive.Regex{
+						Pattern: "^" + dbKey},
+				},
+			)
 			if err != nil {
 				return err
 			}
@@ -1693,9 +1691,15 @@ func (ms *MongoStorage) SetFilterIndexesDrv(cacheID, itemIDPrefix string,
 		for _, character := range []string{".", "*"} {
 			regexKey = strings.Replace(regexKey, character, `\`+character, strings.Count(regexKey, character))
 		}
-		//inside bson.RegEx add carrot to match the prefix (optimization)
+		// For optimization, use a caret (^) in the regex pattern.
 		if err = ms.query(func(sctx mongo.SessionContext) (err error) {
-			_, err = ms.getCol(ColRFI).DeleteMany(sctx, bson.M{"key": bsonx.Regex("^"+regexKey, "")})
+			_, err = ms.getCol(ColRFI).DeleteMany(sctx,
+				bson.M{
+					"key": primitive.Regex{
+						Pattern: "^" + regexKey,
+					},
+				},
+			)
 			return err
 		}); err != nil {
 			return err
@@ -1719,9 +1723,15 @@ func (ms *MongoStorage) SetFilterIndexesDrv(cacheID, itemIDPrefix string,
 		for _, character := range []string{".", "*"} {
 			oldKey = strings.Replace(oldKey, character, `\`+character, strings.Count(oldKey, character))
 		}
-		//inside bson.RegEx add carrot to match the prefix (optimization)
+		// For optimization, use a caret (^) in the regex pattern.
 		return ms.query(func(sctx mongo.SessionContext) (err error) {
-			_, err = ms.getCol(ColRFI).DeleteMany(sctx, bson.M{"key": bsonx.Regex("^"+oldKey, "")})
+			_, err = ms.getCol(ColRFI).DeleteMany(sctx,
+				bson.M{
+					"key": primitive.Regex{
+						Pattern: "^" + oldKey,
+					},
+				},
+			)
 			return err
 		})
 	} else {
@@ -1780,9 +1790,15 @@ func (ms *MongoStorage) RemoveFilterIndexesDrv(cacheID, itemIDPrefix string) (er
 	for _, character := range []string{".", "*"} {
 		regexKey = strings.Replace(regexKey, character, `\`+character, strings.Count(regexKey, character))
 	}
-	//inside bson.RegEx add carrot to match the prefix (optimization)
-	return ms.query(func(sctx mongo.SessionContext) (err error) {
-		_, err = ms.getCol(ColRFI).DeleteMany(sctx, bson.M{"key": bsonx.Regex("^"+regexKey, "")})
+	// For optimization, use a caret (^) in the regex pattern.
+	return ms.query(func(sctx mongo.SessionContext) error {
+		_, err := ms.getCol(ColRFI).DeleteMany(sctx,
+			bson.M{
+				"key": primitive.Regex{
+					Pattern: "^" + regexKey,
+				},
+			},
+		)
 		return err
 	})
 }
