@@ -20,6 +20,9 @@ package engine
 
 import (
 	"fmt"
+	"net"
+	"net/url"
+	"path"
 	"strconv"
 	"strings"
 	"time"
@@ -43,12 +46,12 @@ func NewDataDBConn(dbType, host, port, name, user,
 			utils.Logger.Crit("Redis db name must be an integer!")
 			return nil, err
 		}
-		if port != "" && strings.Index(host, ":") == -1 {
+		if port != "" && !strings.Contains(host, ":") {
 			host += ":" + port
 		}
 		d, err = NewRedisStorage(host, dbNo, pass, marshaler, utils.REDIS_MAX_CONNS, sentinelName)
 	case utils.MetaMongo:
-		d, err = NewMongoStorage(host, port, name, user, pass, marshaler, utils.DataDB, nil, true)
+		d, err = NewMongoStorage(host, port, name, user, pass, marshaler, nil, true)
 	case utils.MetaInternal:
 		d = NewInternalDB(nil, nil, true, itemsCacheCfg)
 	default:
@@ -64,7 +67,7 @@ func NewStorDBConn(dbType, host, port, name, user, pass, marshaler, sslmode stri
 	itemsCacheCfg map[string]*config.ItemOpt) (db StorDB, err error) {
 	switch dbType {
 	case utils.MetaMongo:
-		db, err = NewMongoStorage(host, port, name, user, pass, marshaler, utils.StorDB, stringIndexedFields, false)
+		db, err = NewMongoStorage(host, port, name, user, pass, marshaler, stringIndexedFields, false)
 	case utils.MetaPostgres:
 		db, err = NewPostgresStorage(host, port, name, user, pass, sslmode, maxConn, maxIdleConn, connMaxLifetime)
 	case utils.MetaMySQL:
@@ -76,6 +79,24 @@ func NewStorDBConn(dbType, host, port, name, user, pass, marshaler, sslmode stri
 			dbType, utils.MetaMySQL, utils.MetaMongo, utils.MetaPostgres, utils.MetaInternal)
 	}
 	return
+}
+
+func buildURL(scheme, host, port, db, user, pass string) (*url.URL, error) {
+	u, err := url.Parse("//" + host)
+	if err != nil {
+		return nil, err
+	}
+	if port != "0" {
+		u.Host = net.JoinHostPort(u.Host, port)
+	}
+	if user != "" && pass != "" {
+		u.User = url.UserPassword(user, pass)
+	}
+	if db != "" {
+		u.Path = path.Join(u.Path, db)
+	}
+	u.Scheme = scheme
+	return u, nil
 }
 
 // SMCost stores one Cost coming from SM

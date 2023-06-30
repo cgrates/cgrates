@@ -28,9 +28,9 @@ import (
 	"github.com/cgrates/cgrates/utils"
 
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
-	"go.mongodb.org/mongo-driver/x/bsonx"
 )
 
 func (ms *MongoStorage) GetTpIds(colName string) (tpids []string, err error) {
@@ -81,7 +81,7 @@ func (ms *MongoStorage) GetTpIds(colName string) (tpids []string, err error) {
 	return tpids, nil
 }
 
-func (ms *MongoStorage) GetTpTableIds(tpid, table string, distinct utils.TPDistinctIds,
+func (ms *MongoStorage) GetTpTableIds(tpid, table string, distinctIDs utils.TPDistinctIds,
 	filter map[string]string, pag *utils.PaginatorWithSearch) ([]string, error) {
 	findMap := bson.M{}
 	if tpid != "" {
@@ -97,11 +97,16 @@ func (ms *MongoStorage) GetTpTableIds(tpid, table string, distinct utils.TPDisti
 	if pag != nil {
 		if pag.Search != "" {
 			var searchItems []bson.M
-			for _, d := range distinct {
-				searchItems = append(searchItems, bson.M{d: bsonx.Regex(".*"+regexp.QuoteMeta(pag.Search)+".*", "")})
+			for _, distinctID := range distinctIDs {
+				searchItems = append(searchItems,
+					bson.M{
+						distinctID: primitive.Regex{
+							Pattern: ".*" + regexp.QuoteMeta(pag.Search) + ".*",
+						},
+					},
+				)
 			}
-			// findMap["$and"] = []bson.M{{"$or": searchItems}} //before
-			findMap["$or"] = searchItems // after
+			findMap["$or"] = searchItems
 		}
 		if pag.Paginator != nil {
 			if pag.Limit != nil {
@@ -114,11 +119,12 @@ func (ms *MongoStorage) GetTpTableIds(tpid, table string, distinct utils.TPDisti
 	}
 
 	selectors := bson.M{"_id": 0}
-	for i, d := range distinct {
-		if d == "tag" { // convert the tag used in SQL into id used here
-			distinct[i] = "id"
+	for i, distinctID := range distinctIDs {
+		// Convert "tag" from SQL to "id" in this context.
+		if distinctID == "tag" {
+			distinctIDs[i] = "id"
 		}
-		selectors[distinct[i]] = 1
+		selectors[distinctIDs[i]] = 1
 	}
 	fop.SetProjection(selectors)
 
@@ -137,8 +143,8 @@ func (ms *MongoStorage) GetTpTableIds(tpid, table string, distinct utils.TPDisti
 			item := elem.Map()
 
 			var id string
-			last := len(distinct) - 1
-			for i, d := range distinct {
+			last := len(distinctIDs) - 1
+			for i, d := range distinctIDs {
 				if distinctValue, ok := item[d]; ok {
 					id += distinctValue.(string)
 				}
@@ -892,7 +898,9 @@ func (ms *MongoStorage) GetSMCosts(cgrid, runid, originHost, originIDPrefix stri
 		filter[OriginHostLow] = originHost
 	}
 	if originIDPrefix != "" {
-		filter[OriginIDLow] = bsonx.Regex(fmt.Sprintf("^%s", originIDPrefix), "")
+		filter[OriginIDLow] = primitive.Regex{
+			Pattern: "^" + originIDPrefix,
+		}
 	}
 	err = ms.query(func(sctx mongo.SessionContext) (err error) {
 		cur, err := ms.getCol(utils.SessionCostsTBL).Find(sctx, filter)
@@ -936,7 +944,7 @@ func (ms *MongoStorage) RemoveSMCosts(qryFltr *utils.SMCostFilter) error {
 
 func (ms *MongoStorage) SetCDR(cdr *CDR, allowUpdate bool) error {
 	if cdr.OrderID == 0 {
-		cdr.OrderID = ms.cnter.Next()
+		cdr.OrderID = ms.counter.Next()
 	}
 	return ms.query(func(sctx mongo.SessionContext) (err error) {
 		if allowUpdate {
@@ -1041,7 +1049,14 @@ func (ms *MongoStorage) GetCDRs(qryFltr *utils.CDRsFilter, remove bool) ([]*CDR,
 		if _, hasIt := filters["$and"]; !hasIt {
 			filters["$and"] = make([]bson.M, 0)
 		}
-		filters["$and"] = append(filters["$and"].([]bson.M), bson.M{DestinationLow: bsonx.Regex(regexpRule, "")}) // $and gathers all rules not fitting top level query
+		// The "$and" operator is used to include additional query conditions that cannot be
+		// represented at the top level of the query.
+		filters["$and"] = append(filters["$and"].([]bson.M), bson.M{
+			DestinationLow: primitive.Regex{
+				Pattern: regexpRule,
+			},
+		},
+		)
 	}
 	if len(qryFltr.NotDestinationPrefixes) != 0 {
 		if _, hasIt := filters["$and"]; !hasIt {
@@ -1051,7 +1066,13 @@ func (ms *MongoStorage) GetCDRs(qryFltr *utils.CDRsFilter, remove bool) ([]*CDR,
 			if len(prefix) == 0 {
 				continue
 			}
-			filters["$and"] = append(filters["$and"].([]bson.M), bson.M{DestinationLow: bsonx.Regex("^(?!"+prefix+")", "")})
+			filters["$and"] = append(filters["$and"].([]bson.M),
+				bson.M{
+					DestinationLow: primitive.Regex{
+						Pattern: "^(?!" + prefix + ")",
+					},
+				},
+			)
 		}
 	}
 

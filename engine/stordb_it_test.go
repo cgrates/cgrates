@@ -87,8 +87,8 @@ func TestStorDBit(t *testing.T) {
 		if storDB, err = NewMongoStorage(cfg.StorDbCfg().Host,
 			cfg.StorDbCfg().Port, cfg.StorDbCfg().Name,
 			cfg.StorDbCfg().User, cfg.StorDbCfg().Password,
-			cfg.GeneralCfg().DBDataEncoding,
-			utils.StorDB, cfg.StorDbCfg().StringIndexedFields, false); err != nil {
+			cfg.GeneralCfg().DBDataEncoding, cfg.StorDbCfg().StringIndexedFields,
+			false); err != nil {
 			t.Fatal(err)
 		}
 	case utils.MetaPostgres:
