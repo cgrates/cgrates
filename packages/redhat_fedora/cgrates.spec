@@ -1,4 +1,5 @@
 %global version 0.11.0~dev
+%global go_version 1.20.5
 %global git_commit %(echo $gitLastCommit)
 %global releaseTag %(echo $rpmTag)
 
@@ -13,10 +14,9 @@ Release:        %{releaseTag}
 Summary:        Carrier Grade Real-time Charging System
 License:        GPLv3
 URL:            https://github.com/cgrates/cgrates
-Source0:        https://github.com/cgrates/cgrates/archive/%{git_commit}.tar.gz
+Source0:        %{git_commit}.tar.gz
 
 %if 0%{?fedora} > 16 || 0%{?rhel} > 6
-Requires(pre): shadow-utils
 Requires(post): systemd
 Requires(preun): systemd
 Requires(postun): systemd
@@ -26,13 +26,20 @@ Requires(preun):chkconfig
 Requires(preun):initscripts
 %endif
 
+Requires(pre):  shadow-utils
+BuildRequires:git curl tar
+%{?systemd_requires}
+BuildRequires:  systemd-rpm-macros
+
 %description
 CGRateS is a very fast and easy scalable real-time charging system for Telecom environments.
 
 %prep
 %setup -q -n %{name}-%{version} -c
 mkdir -p src/github.com/cgrates
-ln -sf ../../../$(ls |grep %{name}-) src/github.com/cgrates/cgrates
+ln -sf ../../../$(ls |grep %{name}) src/github.com/cgrates/cgrates
+curl -LO https://golang.org/dl/go%{go_version}.linux-amd64.tar.gz
+tar -xzf go%{go_version}.linux-amd64.tar.gz -C %{_builddir}
 
 %pre
 getent group %{name} >/dev/null || groupadd -r %{name}
@@ -71,6 +78,7 @@ fi
 %build
 export GOPATH=$RPM_BUILD_DIR/%{name}-%{version}
 cd $RPM_BUILD_DIR/%{name}-%{version}/src/github.com/cgrates/cgrates
+export PATH=$PATH:%{_builddir}/go/bin
 ./build.sh
 
 %install
