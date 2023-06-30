@@ -171,20 +171,23 @@ For Redhat-based distros:
    sudo dnf install -y rpm-build wget curl tar
 
    # Create build directories
-   mkdir -p $HOME/cgr_build/{BUILD,RPMS,SOURCES,SPECS,SRPMS}
+   mkdir -p $HOME/rpmbuild/{BUILD,RPMS,SOURCES,SPECS,SRPMS}
 
    # Fetch source code
    cd $HOME/go/src/github.com/cgrates/cgrates
    export gitLastCommit=$(git rev-parse HEAD)
    export rpmTag=$(git log -1 --format=%ci | date +%Y%m%d%H%M%S)+$(git rev-parse --short HEAD)
-   wget -P $HOME/cgr_build/SOURCES https://github.com/cgrates/cgrates/archive/$gitLastCommit.tar.gz
+
+   #Create the tarball from the source code
+   cd ..
+   tar -czvf  $HOME/rpmbuild/SOURCES/$gitLastCommit.tar.gz cgrates
 
    # Copy RPM spec file
-   cp $HOME/go/src/github.com/cgrates/cgrates/packages/redhat_fedora/cgrates.spec $HOME/cgr_build/SPECS
+   cp $HOME/go/src/github.com/cgrates/cgrates/packages/redhat_fedora/cgrates.spec $HOME/rpmbuild/SPECS
 
    # Build RPM package
-   cd $HOME/cgr_build
-   rpmbuild -bb --define "_topdir $HOME/cgr_build" SPECS/cgrates.spec
+   cd $HOME/rpmbuild
+   rpmbuild -bb  SPECS/cgrates.spec
 
 .. _post_install:
 
