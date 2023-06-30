@@ -24,7 +24,6 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"reflect"
 	"strings"
 	"sync"
 	"time"
@@ -34,9 +33,6 @@ import (
 	"github.com/cgrates/cgrates/utils"
 
 	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/bson/bsoncodec"
-	"go.mongodb.org/mongo-driver/bson/bsonrw"
-	"go.mongodb.org/mongo-driver/bson/bsontype"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -103,29 +99,6 @@ var (
 	CostSourceLow      = strings.ToLower(utils.CostSource)
 )
 
-func decodeTimeValue(dc bsoncodec.DecodeContext, vr bsonrw.ValueReader, val reflect.Value) error {
-	timeType := reflect.TypeOf(time.Time{})
-	switch vr.Type() {
-	case bsontype.Null: // handle nil values
-		val.Set(reflect.ValueOf(time.Time{}))
-		return vr.ReadNull()
-
-	case bsontype.DateTime:
-		dt, err := vr.ReadDateTime()
-		if err != nil {
-			return err
-		}
-		if !val.CanSet() || val.Type() != timeType {
-			return bsoncodec.ValueDecoderError{Name: "decodeTimeValue", Types: []reflect.Type{timeType}, Received: val}
-		}
-		val.Set(reflect.ValueOf(time.Unix(dt/1000, dt%1000*1000000).UTC()))
-		return nil
-
-	default:
-		return fmt.Errorf("cannot decode %v into a time.Time", vr.Type())
-	}
-}
-
 // NewMongoStorage initializes a new MongoDB storage instance with provided connection parameters and settings.
 // Returns an error if the setup fails.
 func NewMongoStorage(host, port, db, user, pass, mrshlerStr string, cdrsIndexes []string,
@@ -144,12 +117,9 @@ func NewMongoStorage(host, port, db, user, pass, mrshlerStr string, cdrsIndexes 
 	if !isDataDB {
 		mongoStorage.ctxTTL = config.CgrConfig().StorDbCfg().QueryTimeout
 	}
-	timeType := reflect.TypeOf(time.Time{})
-	reg := bson.NewRegistryBuilder().RegisterTypeDecoder(timeType, bsoncodec.ValueDecoderFunc(decodeTimeValue)).Build()
 	// serverAPI := options.ServerAPI(options.ServerAPIVersion1).SetStrict(true).SetDeprecationErrors(true)
 	opts := options.Client().
 		ApplyURI(url.String()).
-		SetRegistry(reg).
 		SetServerSelectionTimeout(mongoStorage.ctxTTL).
 		SetRetryWrites(false) // default is true
 		// SetServerAPIOptions(serverAPI)
