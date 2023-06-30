@@ -22,16 +22,18 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"os"
 	"strings"
 	"sync"
 
-	"github.com/elastic/go-elasticsearch/esapi"
+	"github.com/elastic/elastic-transport-go/v8/elastictransport"
+	"github.com/elastic/go-elasticsearch/v8/esapi"
 
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
-	elasticsearch "github.com/elastic/go-elasticsearch"
+	elasticsearch "github.com/elastic/go-elasticsearch/v8"
 )
 
 func NewElasticEE(cfg *config.EventExporterCfg, dc *utils.SafeMapStorage) (eEe *ElasticEE, err error) {
@@ -46,11 +48,12 @@ func NewElasticEE(cfg *config.EventExporterCfg, dc *utils.SafeMapStorage) (eEe *
 
 // ElasticEE implements EventExporter interface for ElasticSearch export
 type ElasticEE struct {
-	cfg   *config.EventExporterCfg
-	eClnt *elasticsearch.Client
-	dc    *utils.SafeMapStorage
-	opts  esapi.IndexRequest // this variable is used only for storing the options from OptsMap
-	reqs  *concReq
+	cfg      *config.EventExporterCfg
+	eClnt    *elasticsearch.Client
+	dc       *utils.SafeMapStorage
+	opts     esapi.IndexRequest // this variable is used only for storing the options from OptsMap
+	clntOpts elasticsearch.Config
+	reqs     *concReq
 	sync.RWMutex
 	bytePreparing
 }
@@ -83,6 +86,74 @@ func (eEe *ElasticEE) prepareOpts() (err error) {
 	if eEe.Cfg().Opts.ElsWaitForActiveShards != nil {
 		eEe.opts.WaitForActiveShards = *eEe.Cfg().Opts.ElsWaitForActiveShards
 	}
+
+	//client opts
+	if eEe.Cfg().Opts.ElsCloud != nil && *eEe.Cfg().Opts.ElsCloud {
+		eEe.clntOpts.CloudID = eEe.Cfg().ExportPath
+	} else {
+		eEe.clntOpts.Addresses = strings.Split(eEe.Cfg().ExportPath, utils.InfieldSep)
+	}
+	if eEe.Cfg().Opts.ElsUsername != nil {
+		eEe.clntOpts.Username = *eEe.Cfg().Opts.ElsUsername
+	}
+	if eEe.Cfg().Opts.ElsPassword != nil {
+		eEe.clntOpts.Password = *eEe.Cfg().Opts.ElsPassword
+	}
+	if eEe.Cfg().Opts.ElsAPIKey != nil {
+		eEe.clntOpts.APIKey = *eEe.Cfg().Opts.ElsAPIKey
+	}
+	if eEe.Cfg().Opts.CAPath != nil {
+		var cacert []byte
+		cacert, err = os.ReadFile(*eEe.Cfg().Opts.CAPath)
+		if err != nil {
+			return
+		}
+		eEe.clntOpts.CACert = cacert
+	}
+	if eEe.Cfg().Opts.ElsCertificateFingerprint != nil {
+		eEe.clntOpts.CertificateFingerprint = *eEe.Cfg().Opts.ElsCertificateFingerprint
+	}
+	if eEe.Cfg().Opts.ElsServiceToken != nil {
+		eEe.clntOpts.ServiceToken = *eEe.Cfg().Opts.ElsServiceToken
+	}
+	if eEe.Cfg().Opts.ElsDiscoverNodesOnStart != nil {
+		eEe.clntOpts.DiscoverNodesOnStart = *eEe.Cfg().Opts.ElsDiscoverNodesOnStart
+	}
+	if eEe.Cfg().Opts.ElsDiscoverNodeInterval != nil {
+		eEe.clntOpts.DiscoverNodesInterval = *eEe.Cfg().Opts.ElsDiscoverNodeInterval
+	}
+	if eEe.Cfg().Opts.ElsEnableDebugLogger != nil {
+		eEe.clntOpts.EnableDebugLogger = *eEe.Cfg().Opts.ElsEnableDebugLogger
+	}
+	if loggerType := eEe.Cfg().Opts.ElsLogger; loggerType != nil {
+		var logger elastictransport.Logger
+		switch *loggerType {
+		case utils.ElsJson:
+			logger = &elastictransport.JSONLogger{Output: os.Stdout, EnableRequestBody: true, EnableResponseBody: true}
+		case utils.ElsColor:
+			logger = &elastictransport.ColorLogger{Output: os.Stdout, EnableRequestBody: true, EnableResponseBody: true}
+		case utils.ElsText:
+			logger = &elastictransport.TextLogger{Output: os.Stdout, EnableRequestBody: true, EnableResponseBody: true}
+		default:
+			return
+		}
+		eEe.clntOpts.Logger = logger
+	}
+	if eEe.Cfg().Opts.ElsCompressRequestBody != nil {
+		eEe.clntOpts.CompressRequestBody = *eEe.Cfg().Opts.ElsCompressRequestBody
+	}
+	if eEe.Cfg().Opts.ElsRetryOnStatus != nil {
+		eEe.clntOpts.RetryOnStatus = *eEe.Cfg().Opts.ElsRetryOnStatus
+	}
+	if eEe.Cfg().Opts.ElsMaxRetries != nil {
+		eEe.clntOpts.MaxRetries = *eEe.Cfg().Opts.ElsMaxRetries
+	}
+	if eEe.Cfg().Opts.ElsDisableRetry != nil {
+		eEe.clntOpts.DisableRetry = *eEe.Cfg().Opts.ElsDisableRetry
+	}
+	if eEe.Cfg().Opts.ElsCompressRequestBodyLevel != nil {
+		eEe.clntOpts.CompressRequestBodyLevel = *eEe.Cfg().Opts.ElsCompressRequestBodyLevel
+	}
 	return
 }
 
@@ -91,11 +162,10 @@ func (eEe *ElasticEE) Cfg() *config.EventExporterCfg { return eEe.cfg }
 func (eEe *ElasticEE) Connect() (err error) {
 	eEe.Lock()
 	// create the client
-	if eEe.eClnt == nil {
-		eEe.eClnt, err = elasticsearch.NewClient(
-			elasticsearch.Config{Addresses: strings.Split(eEe.Cfg().ExportPath, utils.InfieldSep)},
-		)
+	if eEe.eClnt != nil {
+		return
 	}
+	eEe.eClnt, err = elasticsearch.NewClient(eEe.clntOpts)
 	eEe.Unlock()
 	return
 }
@@ -120,7 +190,6 @@ func (eEe *ElasticEE) ExportEvent(ctx *context.Context, ev, extraData any) (err 
 		IfPrimaryTerm:       eEe.opts.IfPrimaryTerm,
 		IfSeqNo:             eEe.opts.IfSeqNo,
 		OpType:              eEe.opts.OpType,
-		Parent:              eEe.opts.Parent,
 		Pipeline:            eEe.opts.Pipeline,
 		Routing:             eEe.opts.Routing,
 		Timeout:             eEe.opts.Timeout,

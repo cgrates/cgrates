@@ -25,7 +25,7 @@ require (
 	github.com/cgrates/ugocodec v0.0.0-20201023092048-df93d0123f60
 	github.com/creack/pty v1.1.18
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
-	github.com/elastic/go-elasticsearch v0.0.0
+	github.com/elastic/go-elasticsearch/v8 v8.8.0
 	github.com/ericlagergren/decimal v0.0.0-20211103172832-aca2edc11f73
 	github.com/fiorix/go-diameter/v4 v4.0.4
 	github.com/fsnotify/fsnotify v1.5.4
@@ -114,6 +114,7 @@ require (
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/bits-and-blooms/bitset v1.2.2 // indirect
 	github.com/cespare/xxhash/v2 v2.1.2 // indirect
+	github.com/elastic/elastic-transport-go/v8 v8.0.0-20230329154755-1a3c63de0db6 // indirect
 	github.com/google/uuid v1.3.0 // indirect
 	github.com/googleapis/enterprise-certificate-proxy v0.1.0 // indirect
 	github.com/matttproud/golang_protobuf_extensions v1.0.1 // indirect

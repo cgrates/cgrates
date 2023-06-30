@@ -268,6 +268,7 @@ func exportEventWithExporter(ctx *context.Context, exp EventExporter, connMngr *
 			utils.MetaDC:   exp.GetMetrics(),
 			utils.MetaOpts: utils.MapStorage(ev.APIOpts),
 			utils.MetaCfg:  cfg.GetDataProvider(),
+			utils.MetaVars: utils.MapStorage{utils.MetaTenant: ev.Tenant},
 		}, utils.FirstNonEmpty(ev.Tenant, cfg.GeneralCfg().DefaultTenant),
 			filterS,
 			map[string]*utils.OrderedNavigableMap{utils.MetaExp: expNM}).SetFields(ctx, exp.Cfg().ContentFields())
