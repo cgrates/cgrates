@@ -2,4 +2,9 @@
 cgrates.org,ROUTE_ACNT_1001,*string:~*req.Account:1001,,*weight,,,,,,,,,,,10
 cgrates.org,ROUTE_ACNT_1001,,,,,route1,,,,,,10,,!^(.*)$!sip:\1@172.16.1.11!,
 cgrates.org,ROUTE_ACNT_1001,,,,,route2,,,,,,5,,!^(.*)$!sip:\1@172.16.1.12!,
-
+cgrates.org,ROUTE_ACNT_1002,*string:~*req.Account:1002,,*weight,,,,,,,,,,,10
+cgrates.org,ROUTE_ACNT_1002,,,,,aroute1,,,,,,10,,216.239.32.21,
+cgrates.org,ROUTE_ACNT_1002,,,,,aroute2,,,,,,5,,216.239.34.21,
+cgrates.org,ROUTE_ACNT_1003,*string:~*req.Account:1003,,*weight,,,,,,,,,,,10
+cgrates.org,ROUTE_ACNT_1003,,,,,srvroute1,,,,,,10,,xmpp.xmpp.org.,
+cgrates.org,ROUTE_ACNT_1003,,,,,srvroute2,,,,,,5,,xmpp.xmpp.com.,

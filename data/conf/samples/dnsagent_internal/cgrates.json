@@ -8,22 +8,22 @@
 
 
 "general": {
-	"log_level": 7,											// control the level of messages logged (0-emerg to 7-debug)
+	"log_level": 7			// control the level of messages logged (0-emerg to 7-debug)
 },
 
 "data_db": {
-	"db_type": "*internal",	
+	"db_type": "*internal"
 },
 
 
 "stor_db": {
-	"db_type": "*internal",	
+	"db_type": "*internal"
 },
 
 
 "schedulers": {
 	"enabled": true,
-	"cdrs_conns": ["*internal"],
+	"cdrs_conns": ["*internal"]
 },
 
 
@@ -33,41 +33,41 @@
 	"rals_conns": ["*internal"],
 	"cdrs_conns": ["*internal"],
 	"chargers_conns": ["*internal"],
-	"routes_conns": ["*localhost"],
+	"routes_conns": ["*localhost"]
 },
 
 
 "rals": {
-	"enabled": true,
+	"enabled": true
 },
 
 
 "cdrs": {
 	"enabled": true,
-	"rals_conns": ["*internal"],
+	"rals_conns": ["*internal"]
 },
 
 
 "chargers": {
-	"enabled": true,
+	"enabled": true
 },
 
 
 "attributes": {
-	"enabled": true,
+	"enabled": true
 },
 
 
 "routes": {
-	"enabled": true,
+	"enabled": true
 },
 
 "tls": {
-	"server_certificate" : "/usr/share/cgrates/tls/server.crt",			// path to server certificate(must conatin server.crt + ca.crt)
-	"server_key":"/usr/share/cgrates/tls/server.key",					// path to server key
-	"client_certificate" : "/usr/share/cgrates/tls/client.crt",			// path to client certificate(must conatin client.crt + ca.crt)
-	"client_key":"/usr/share/cgrates/tls/client.key",					// path to client key
-	"ca_certificate":"/usr/share/cgrates/tls/ca.crt",
+	"server_certificate" : "/usr/share/cgrates/tls/server.crt",		
+	"server_key":"/usr/share/cgrates/tls/server.key",				
+	"client_certificate" : "/usr/share/cgrates/tls/client.crt",			
+	"client_key":"/usr/share/cgrates/tls/client.key",					
+	"ca_certificate":"/usr/share/cgrates/tls/ca.crt"
 },
 
 "dns_agent": {
@@ -84,15 +84,14 @@
 		{
 			"address":":2054",
 			"network":"tcp-tls"
-		},
+		}
     ],
-	"sessions_conns": ["*localhost"],
-
+	"sessions_conns": ["*localhost"]
 },
 
 
 "apiers": {
 	"enabled": true,
-	"scheduler_conns": ["*internal"],
-},
+	"scheduler_conns": ["*internal"]
+}
 }
