@@ -535,6 +535,21 @@ const CGRATES_CFG_JSON = `
 
 				
 				// Elasticsearch options
+				// "elsCloud":true,                             //ExportPath will be  an CLoud ID deployment
+				// "elsApiKey": "",                             // Base64-encoded token for authorization; if set, overrides username/password and service token.
+				// "elsUsername":"",                            // Username for HTTP Basic Authentication.
+			    // "elsPassword":"",                            // Password for HTTP Basic Authentication.
+				// "elsServiceToken":""                         // Service token for authorization; if set, overrides username/password.
+				// "elsCertificateFingerPrint":""               // SHA256 hex fingerprint given by Elasticsearch on first launch.
+				// "elsDiscoverNodesOnStart":false,             // Discover nodes when initializing the client. Default: false.
+				// "elsDiscoverNodesInterval":"10s",            // Discover nodes periodically. Default: disabled.
+				// "elsEnableDebugLogger":"false",              // Enable the debug logging.
+				// "elsLogger":"",                              //The logger type can either be elsJson,elsColor and elsText
+				// "elsCompressRequestBody":false,              //Enable compression on requests
+				// "elsCompressRequestBodyLevel":0,             //Default: gzip.DefaultCompression, 9:BestCompression,-2:HuffmanOnly,1:BestSpeed
+				// "elsRetryOnStatus":[],                       // List of status codes for retry. Default: 502, 503, 504.
+				// "elsMaxRetries": 0,                          // Default: 3.
+				// "elsDisableRetry": false,                    // Default: false.
 				// "elsIndex": "",								// ElsIndex               	
 				// "elsIfPrimaryTerm": 0,						// ElsIfPrimaryTerm
  				// "elsIfSeqNo": 0,								// ElsIfSeqNo

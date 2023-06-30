@@ -2496,6 +2496,10 @@ const (
 	ElsVersionLow          = "elsVersion"
 	ElsVersionType         = "elsVersionType"
 	ElsWaitForActiveShards = "elsWaitForActiveShards"
+	//EES ElasticSearch Logger Options
+	ElsJson  = "elsJson"
+	ElsColor = "elsColor"
+	ElsText  = "elsText"
 	// nats
 	NatsSubject              = "natsSubject"
 	NatsQueueID              = "natsQueueID"
