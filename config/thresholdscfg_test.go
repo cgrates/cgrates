@@ -18,6 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package config
 
 import (
+	"fmt"
 	"reflect"
 	"testing"
 	"time"
@@ -116,5 +117,22 @@ func TestThresholdSCfgAsMapInterface(t *testing.T) {
 		t.Error(err)
 	} else if rcv := thscfg.AsMapInterface(); !reflect.DeepEqual(eMap, rcv) {
 		t.Errorf("\nExpected: %+v\nReceived: %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
+	}
+}
+
+func TestThresholdCFGLoadFromJsonCFG(t *testing.T) {
+	str := "test"
+
+	to := ThresholdSCfg{}
+
+	toj := ThresholdSJsonCfg{
+		Store_interval: &str,
+	}
+
+	err := to.loadFromJsonCfg(&toj)
+	exp := fmt.Errorf(`time: invalid duration "test"`)
+
+	if err.Error() != exp.Error() {
+		t.Fatalf("recived %s, expected %s", err, exp)
 	}
 }

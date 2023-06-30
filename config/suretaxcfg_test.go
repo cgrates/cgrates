@@ -19,6 +19,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package config
 
 import (
+	"errors"
+	"fmt"
 	"reflect"
 	"testing"
 	"time"
@@ -175,5 +177,227 @@ func TestSureTaxCfgAsMapInterface(t *testing.T) {
 		t.Error(err)
 	} else if rcv := sureTaxCfg.AsMapInterface(utils.EmptyString); !reflect.DeepEqual(eMap, rcv) {
 		t.Errorf("\nExpected: %+v\nReceived: %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
+	}
+}
+
+func TestSureTaxCFGLoadFromJsonCFG(t *testing.T) {
+
+	str := "test`"
+
+	st := SureTaxCfg{}
+
+	stjCT := SureTaxJsonCfg{
+		Client_tracking: &str,
+	}
+
+	stjCN := SureTaxJsonCfg{
+		Customer_number: &str,
+	}
+
+	stjON := SureTaxJsonCfg{
+		Orig_number: &str,
+	}
+
+	stjTN := SureTaxJsonCfg{
+		Term_number: &str,
+	}
+
+	stjBTN := SureTaxJsonCfg{
+		Bill_to_number: &str,
+	}
+
+	stjZ := SureTaxJsonCfg{
+		Zipcode: &str,
+	}
+
+	stjPP4 := SureTaxJsonCfg{
+		P2PPlus4: &str,
+	}
+
+	stjU := SureTaxJsonCfg{
+		Units: &str,
+	}
+
+	stjUT := SureTaxJsonCfg{
+		Unit_type: &str,
+	}
+
+	stjTI := SureTaxJsonCfg{
+		Tax_included: &str,
+	}
+
+	stjTSR := SureTaxJsonCfg{
+		Tax_situs_rule: &str,
+	}
+
+	stjTTC := SureTaxJsonCfg{
+		Trans_type_code: &str,
+	}
+
+	stjSTC := SureTaxJsonCfg{
+		Sales_type_code: &str,
+	}
+
+	stjTECL := SureTaxJsonCfg{
+		Tax_exemption_code_list: &str,
+	}
+
+	stjPPZ := SureTaxJsonCfg{
+		P2PZipcode: &str,
+	}
+
+	stjP4 := SureTaxJsonCfg{
+		Plus4: &str,
+	}
+
+	tests := []struct {
+		name string
+		arg  *SureTaxJsonCfg
+	}{
+		{
+			arg: &stjCT,
+		},
+		{
+			arg: &stjCN,
+		},
+		{
+			arg: &stjON,
+		},
+		{
+			arg: &stjTN,
+		},
+		{
+			arg: &stjBTN,
+		},
+		{
+			arg: &stjZ,
+		},
+		{
+			arg: &stjPP4,
+		},
+		{
+			arg: &stjU,
+		},
+		{
+			arg: &stjUT,
+		},
+		{
+			arg: &stjTI,
+		},
+		{
+			arg: &stjTSR,
+		},
+		{
+			arg: &stjTTC,
+		},
+		{
+			arg: &stjSTC,
+		},
+		{
+			arg: &stjTECL,
+		},
+		{
+			arg: &stjPPZ,
+		},
+		{
+			arg: &stjP4,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run("check errors", func(t *testing.T) {
+			err := st.loadFromJsonCfg(tt.arg)
+			exp := fmt.Errorf("Unclosed unspilit syntax")
+
+			if err.Error() != exp.Error() {
+				t.Fatalf("recived %s, expected %s", err, exp)
+			}
+		})
+	}
+
+	t.Run("check timezone error", func(t *testing.T) {
+		str := "\\test"
+
+		st := SureTaxCfg{}
+
+		stjT := SureTaxJsonCfg{
+			Timezone: &str,
+		}
+
+		err := st.loadFromJsonCfg(&stjT)
+		exp := errors.New("time: invalid location name")
+
+		if err.Error() != exp.Error() {
+			t.Fatalf("recived %s, expected %s", err, exp)
+		}
+	})
+}
+
+func TestSureTaxCFGAsMapInterface(t *testing.T) {
+	str := "test"
+	rsr, _ := NewRSRParsers(str, true, "")
+
+	st := SureTaxCfg{
+		Url:                  str,
+		ClientNumber:         str,
+		ValidationKey:        str,
+		BusinessUnit:         str,
+		Timezone:             &time.Location{},
+		IncludeLocalCost:     false,
+		ReturnFileCode:       str,
+		ResponseGroup:        str,
+		ResponseType:         str,
+		RegulatoryCode:       str,
+		ClientTracking:       rsr,
+		CustomerNumber:       rsr,
+		OrigNumber:           rsr,
+		TermNumber:           rsr,
+		BillToNumber:         rsr,
+		Zipcode:              rsr,
+		Plus4:                rsr,
+		P2PZipcode:           rsr,
+		P2PPlus4:             rsr,
+		Units:                rsr,
+		UnitType:             rsr,
+		TaxIncluded:          rsr,
+		TaxSitusRule:         rsr,
+		TransTypeCode:        rsr,
+		SalesTypeCode:        rsr,
+		TaxExemptionCodeList: rsr,
+	}
+
+	mp := map[string]any{
+		utils.UrlCfg:                  st.Url,
+		utils.ClientNumberCfg:         st.ClientNumber,
+		utils.ValidationKeyCfg:        st.ValidationKey,
+		utils.BusinessUnitCfg:         st.BusinessUnit,
+		utils.TimezoneCfg:             st.Timezone.String(),
+		utils.IncludeLocalCostCfg:     st.IncludeLocalCost,
+		utils.ReturnFileCodeCfg:       st.ReturnFileCode,
+		utils.ResponseGroupCfg:        st.ResponseGroup,
+		utils.ResponseTypeCfg:         st.ResponseType,
+		utils.RegulatoryCodeCfg:       st.RegulatoryCode,
+		utils.ClientTrackingCfg:       str,
+		utils.CustomerNumberCfg:       str,
+		utils.OrigNumberCfg:           str,
+		utils.TermNumberCfg:           str,
+		utils.BillToNumberCfg:         str,
+		utils.ZipcodeCfg:              str,
+		utils.Plus4Cfg:                str,
+		utils.P2PZipcodeCfg:           str,
+		utils.P2PPlus4Cfg:             str,
+		utils.UnitsCfg:                str,
+		utils.UnitTypeCfg:             str,
+		utils.TaxIncludedCfg:          str,
+		utils.TaxSitusRuleCfg:         str,
+		utils.TransTypeCodeCfg:        str,
+		utils.SalesTypeCodeCfg:        str,
+		utils.TaxExemptionCodeListCfg: str,
+	}
+
+	rcv := st.AsMapInterface("")
+
+	if !reflect.DeepEqual(rcv, mp) {
+		t.Errorf("recived %v, expected %v", rcv, mp)
 	}
 }
