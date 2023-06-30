@@ -1,4 +1,5 @@
 %global version 0.11.0~dev
+%global go_version 1.20.5
 
 %define debug_package  %{nil}
 %global _logdir	       /var/log/%name
@@ -12,10 +13,8 @@ Summary:        Carrier Grade Real-time Charging System
 License:        GPLv3
 URL:            https://github.com/cgrates/cgrates
 Source0:        https://github.com/cgrates/cgrates/archive/{{{git_commit}}}.tar.gz
-BuildRequires:git
-BuildRequires:golang
+
 %if 0%{?fedora} > 16 || 0%{?rhel} > 6
-Requires(pre): shadow-utils
 Requires(post): systemd
 Requires(preun): systemd
 Requires(postun): systemd
@@ -24,9 +23,11 @@ Requires(post): chkconfig
 Requires(preun):chkconfig
 Requires(preun):initscripts
 %endif
-%if 0%{?rhel}>7
-BuildRequires: systemd-rpm-macros
-%endif
+
+Requires(pre):  shadow-utils
+BuildRequires:git curl tar
+%{?systemd_requires}
+BuildRequires:  systemd-rpm-macros
 
 %description
 CGRateS is a very fast and easy scalable real-time charging system for Telecom environments.
@@ -35,6 +36,8 @@ CGRateS is a very fast and easy scalable real-time charging system for Telecom e
 %setup -q -n %{name}-%{version} -c
 mkdir -p src/github.com/cgrates
 ln -sf ../../../$(ls |grep %{name}-) src/github.com/cgrates/cgrates
+curl -LO https://golang.org/dl/go%{go_version}.linux-amd64.tar.gz
+tar -xzf go%{go_version}.linux-amd64.tar.gz -C %{_builddir}
 
 %pre
 getent group %{name} >/dev/null || groupadd -r %{name}
@@ -71,8 +74,9 @@ fi
 %endif
 
 %build
-export GOPATH=$RPM_BUILD_DIR/%{name}-%{version}
+export GOPATH=$RPM_BUILD_DIR/%{name}-%{version}/go
 cd $RPM_BUILD_DIR/%{name}-%{version}/src/github.com/cgrates/cgrates
+export PATH=$PATH:%{_builddir}/go/bin
 ./build.sh
 
 %install
@@ -89,11 +93,11 @@ cp -rpf src/github.com/cgrates/cgrates/data/storage/mongo $RPM_BUILD_ROOT%{_data
 cp -rpf src/github.com/cgrates/cgrates/data/storage/mysql $RPM_BUILD_ROOT%{_datarootdir}/%{name}/storage
 cp -rpf src/github.com/cgrates/cgrates/data/storage/postgres $RPM_BUILD_ROOT%{_datarootdir}/%{name}/storage
 install -D -m 0644 -p src/github.com/cgrates/cgrates/data/conf/%{name}/%{name}.json $RPM_BUILD_ROOT%{_sysconfdir}/%{name}/%{name}.json
-install -D -m 0755 -p bin/cgr-console $RPM_BUILD_ROOT%{_bindir}/cgr-console
-install -D -m 0755 -p bin/cgr-engine $RPM_BUILD_ROOT%{_bindir}/cgr-engine
-install -D -m 0755 -p bin/cgr-loader $RPM_BUILD_ROOT%{_bindir}/cgr-loader
-install -D -m 0755 -p bin/cgr-tester $RPM_BUILD_ROOT%{_bindir}/cgr-tester
-install -D -m 0755 -p bin/cgr-migrator $RPM_BUILD_ROOT%{_bindir}/cgr-migrator
+install -D -m 0755 -p go/bin/cgr-console $RPM_BUILD_ROOT%{_bindir}/cgr-console
+install -D -m 0755 -p go/bin/cgr-engine $RPM_BUILD_ROOT%{_bindir}/cgr-engine
+install -D -m 0755 -p go/bin/cgr-loader $RPM_BUILD_ROOT%{_bindir}/cgr-loader
+install -D -m 0755 -p go/bin/cgr-tester $RPM_BUILD_ROOT%{_bindir}/cgr-tester
+install -D -m 0755 -p go/bin/cgr-migrator $RPM_BUILD_ROOT%{_bindir}/cgr-migrator
 mkdir -p $RPM_BUILD_ROOT%{_logdir}/cdre/csv
 mkdir -p $RPM_BUILD_ROOT%{_logdir}/cdre/fwv
 mkdir -p $RPM_BUILD_ROOT%{_spooldir}/cdre/csv
