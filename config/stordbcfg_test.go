@@ -20,6 +20,7 @@ package config
 import (
 	"reflect"
 	"testing"
+	"time"
 
 	"github.com/cgrates/cgrates/utils"
 )
@@ -185,5 +186,32 @@ func TestStorDbCfgAsMapInterface(t *testing.T) {
 		t.Error(err)
 	} else if rcv := dbcfg.AsMapInterface(); !reflect.DeepEqual(eMap, rcv) {
 		t.Errorf("Expected: %+v ,\n received: %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
+	}
+}
+
+func TestStorDbCfgClone(t *testing.T) {
+	str := "test"
+	nm := 1
+	db := &StorDbCfg{
+		Type:                str,
+		Host:                str,
+		Port:                str,
+		Name:                str,
+		User:                str,
+		Password:            str,
+		MaxOpenConns:        nm,
+		MaxIdleConns:        nm,
+		ConnMaxLifetime:     nm,
+		StringIndexedFields: []string{"val1", "val2"},
+		PrefixIndexedFields: []string{"val3", "val4"},
+		QueryTimeout:        1 * time.Millisecond,
+		SSLMode:             str,
+		Items:               map[string]*ItemOpt{},
+	}
+
+	rcv := db.Clone()
+
+	if !reflect.DeepEqual(rcv, db) {
+		t.Errorf("didn't clone, recived %v", rcv)
 	}
 }

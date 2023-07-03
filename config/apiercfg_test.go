@@ -111,3 +111,60 @@ func TestApierCfgAsMapInterface(t *testing.T) {
 		t.Errorf("\nExpected: %+v\nReceived: %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
 	}
 }
+
+func TestApierCfgloadFromJsonCfg2(t *testing.T) {
+	bl := true
+	slc := []string{"val1", "val2"}
+
+	a := ApierCfg{}
+
+	js := ApierJsonCfg{
+		Enabled:          &bl,
+		Caches_conns:     &slc,
+		Scheduler_conns:  &slc,
+		Attributes_conns: &slc,
+	}
+
+	exp := ApierCfg{
+		Enabled: bl,
+		CachesConns: slc,
+        SchedulerConns: slc,
+		AttributeSConns: slc,
+	}
+
+	err := a.loadFromJsonCfg(&js) 
+
+	if err != nil {
+		t.Fatal("was not expecting an error", err)
+	}
+
+	if !reflect.DeepEqual(a, exp) {
+		t.Errorf("recived %v, expected %v", a, exp)
+	}
+
+}
+
+func TestApierCfgAsMapInterface2(t *testing.T) {
+	bl := true
+	slc := []string{"val1", "val2"}
+
+	a := ApierCfg{
+		Enabled: bl,
+		CachesConns: slc,
+        SchedulerConns: slc,
+		AttributeSConns: slc,
+	}
+
+	exp := map[string]any{
+		utils.EnabledCfg:         a.Enabled,
+		utils.CachesConnsCfg:     slc,
+		utils.SchedulerConnsCfg:  slc,
+		utils.AttributeSConnsCfg: slc,
+	}
+
+	rcv := a.AsMapInterface() 
+
+	if !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("recived %v, expected %v", rcv, exp)
+	}
+}
