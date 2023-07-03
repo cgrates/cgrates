@@ -357,15 +357,13 @@ func TestGetNextStartTimeOld(t *testing.T) {
 		ActionsID: "MINI",
 	}
 
-	loc, _ := time.LoadLocation("America/New_York")
-
 	tests := []struct {
 		name     string
 		expected time.Time
 	}{
 		{
-			name:     "Test Case 1",
-			expected: time.Date(2023, 1, 1, 0, 0, 0, 0, loc),
+			name:     "get next start time 2023 ASAP",
+			expected: time.Date(2023, 1, 1, 0, 0, 0, 0, time.Local),
 		},
 	}
 
