@@ -135,3 +135,95 @@ func TestSupplierSCfgAsMapInterface(t *testing.T) {
 		t.Errorf("\nExpected: %+v\nReceived: %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
 	}
 }
+
+func TestSupplierSCfgloadFromJsonCfg2(t *testing.T) {
+	slc := []string{"val1", "val2"}
+
+	spl := SupplierSCfg{
+		Enabled:             false,
+		IndexedSelects:      false,
+		StringIndexedFields: &slc,
+		PrefixIndexedFields: &slc,
+		AttributeSConns:     []string{"val1", "val2"},
+		ResourceSConns:      []string{"val1", "val2"},
+		StatSConns:          []string{"val1", "val2"},
+		RALsConns:           []string{"val1", "val2"},
+		DefaultRatio:        1,
+		NestedFields:        false,
+	}
+
+	bl := true
+	nm := 2
+	slc2 := []string{"val3", "val4"}
+
+	js := SupplierSJsonCfg{
+		Enabled:               &bl,
+		Indexed_selects:       &bl,
+		String_indexed_fields: &slc2,
+		Prefix_indexed_fields: &slc2,
+		Nested_fields:         &bl,
+		Attributes_conns:      &slc2,
+		Resources_conns:       &slc2,
+		Stats_conns:           &slc2,
+		Rals_conns:            &slc2,
+		Default_ratio:         &nm,
+	}
+
+	exp := SupplierSCfg{
+		Enabled:             true,
+		IndexedSelects:      true,
+		StringIndexedFields: &slc2,
+		PrefixIndexedFields: &slc2,
+		AttributeSConns:     []string{"val3", "val4"},
+		ResourceSConns:      []string{"val3", "val4"},
+		StatSConns:          []string{"val3", "val4"},
+		RALsConns:           []string{"val3", "val4"},
+		DefaultRatio:        2,
+		NestedFields:        true,
+	}
+
+	err := spl.loadFromJsonCfg(&js)
+
+	if err != nil {
+		t.Error("was not exoecting an error")
+	}
+
+	if !reflect.DeepEqual(spl, exp) {
+		t.Errorf("expected %v, recived %v", exp, spl)
+	}
+}
+
+func TestSupplierSCfgAsMapInterface2(t *testing.T) {
+	slc := []string{"val1", "val2"}
+
+	spl := SupplierSCfg{
+		Enabled:             true,
+		IndexedSelects:      true,
+		StringIndexedFields: &slc,
+		PrefixIndexedFields: &slc,
+		AttributeSConns:     []string{"val1", "val2"},
+		ResourceSConns:      []string{"val1", "val2"},
+		StatSConns:          []string{"val1", "val2"},
+		RALsConns:           []string{"val1", "val2"},
+		DefaultRatio:        1,
+		NestedFields:        false,
+	}
+
+	exp := map[string]any{
+		utils.EnabledCfg:             spl.Enabled,
+		utils.IndexedSelectsCfg:      spl.IndexedSelects,
+		utils.StringIndexedFieldsCfg: []string{"val1", "val2"},
+		utils.PrefixIndexedFieldsCfg: []string{"val1", "val2"},
+		utils.AttributeSConnsCfg:     []string{"val1", "val2"},
+		utils.ResourceSConnsCfg:      []string{"val1", "val2"},
+		utils.StatSConnsCfg:          []string{"val1", "val2"},
+		utils.DefaultRatioCfg:        spl.DefaultRatio,
+		utils.NestedFieldsCfg:        spl.NestedFields,
+	}
+
+	rcv := spl.AsMapInterface()
+
+	if !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("expected %+v, recived %+v", exp, rcv)
+	}
+}

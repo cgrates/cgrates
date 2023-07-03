@@ -553,3 +553,73 @@ func TestAsteriskConnCfgloadFromJsonCfg(t *testing.T) {
 		t.Errorf("Expected: %+v , received: %+v", utils.ToJSON(expected), utils.ToJSON(asconcfg))
 	}
 }
+
+func TestSessionSCfgAsMapInterface2(t *testing.T) {
+	bl := false
+	str := "test"
+	slc := []string{"val1"}
+	dr := 1 * time.Millisecond
+	drs := "1ms"
+	fl := 1.2
+	nm := 1
+
+	scfg := SessionSCfg{
+		Enabled:             bl,
+		ListenBijson:        str,
+		ChargerSConns:       slc,
+		RALsConns:           slc,
+		ResSConns:           slc,
+		ThreshSConns:        slc,
+		StatSConns:          slc,
+		SupplSConns:         slc,
+		AttrSConns:          slc,
+		CDRsConns:           slc,
+		ReplicationConns:    slc,
+		DebitInterval:       dr,
+		StoreSCosts:         bl,
+		SessionTTL:          dr,
+		SessionTTLMaxDelay:  &dr,
+		SessionTTLLastUsed:  &dr,
+		SessionTTLUsage:     &dr,
+		SessionTTLLastUsage: &dr,
+		SessionIndexes:      utils.StringMap{},
+		ClientProtocol:      fl,
+		ChannelSyncInterval: dr,
+		TerminateAttempts:   nm,
+		AlterableFields:     utils.StringSet{},
+		DefaultUsage:        map[string]time.Duration{},
+	}
+
+	exp := map[string]any{
+		utils.EnabledCfg:             scfg.Enabled,
+		utils.ListenBijsonCfg:        scfg.ListenBijson,
+		utils.ChargerSConnsCfg:       slc,
+		utils.RALsConnsCfg:           slc,
+		utils.ResSConnsCfg:           slc,
+		utils.ThreshSConnsCfg:        slc,
+		utils.StatSConnsCfg:          slc,
+		utils.SupplSConnsCfg:         slc,
+		utils.AttrSConnsCfg:          slc,
+		utils.CDRsConnsCfg:           slc,
+		utils.ReplicationConnsCfg:    scfg.ReplicationConns,
+		utils.DebitIntervalCfg:       drs,
+		utils.StoreSCostsCfg:         scfg.StoreSCosts,
+		utils.SessionTTLCfg:          drs,
+		utils.SessionTTLMaxDelayCfg:  drs,
+		utils.SessionTTLLastUsedCfg:  drs,
+		utils.SessionTTLUsageCfg:     drs,
+		utils.SessionTTLLastUsageCfg: drs,
+		utils.SessionIndexesCfg:      scfg.SessionIndexes.Slice(),
+		utils.ClientProtocolCfg:      scfg.ClientProtocol,
+		utils.ChannelSyncIntervalCfg: drs,
+		utils.TerminateAttemptsCfg:   scfg.TerminateAttempts,
+		utils.AlterableFieldsCfg:     scfg.AlterableFields.AsSlice(),
+		utils.DefaultUsageCfg:        map[string]any{},
+	}
+
+	rcv := scfg.AsMapInterface()
+
+	if !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("expected %v, recived %v", exp, rcv)
+	}
+}

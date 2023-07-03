@@ -18,6 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package config
 
 import (
+	"fmt"
 	"reflect"
 	"testing"
 	"time"
@@ -134,5 +135,92 @@ func TestStatSCfgAsMapInterface(t *testing.T) {
 		t.Error(err)
 	} else if rcv := statscfg.AsMapInterface(); !reflect.DeepEqual(eMap, rcv) {
 		t.Errorf("\nExpected: %+v\nReceived: %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
+	}
+}
+
+func TestStatSCfgloadFromJsonCfg2(t *testing.T) {
+	st := StatSCfg{}
+
+	bl := true
+	nm := 1
+	dr := "1ns"
+	slc := []string{"val1", "val2"}
+
+	js := StatServJsonCfg{
+		Enabled:                  &bl,
+		Indexed_selects:          &bl,
+		Store_interval:           &dr,
+		Store_uncompressed_limit: &nm,
+		Thresholds_conns:         &slc,
+		String_indexed_fields:    &slc,
+		Prefix_indexed_fields:    &slc,
+		Nested_fields:            &bl,
+	}
+
+	exp := StatSCfg{
+		Enabled:                true,
+		IndexedSelects:         true,
+		StoreInterval:          1 * time.Nanosecond,
+		StoreUncompressedLimit: 1,
+		ThresholdSConns:        slc,
+		StringIndexedFields:    &slc,
+		PrefixIndexedFields:    &slc,
+		NestedFields:           true,
+	}
+
+	err := st.loadFromJsonCfg(&js)
+
+	if err != nil {
+		t.Errorf("didn't expect an error: %s", err)
+	}
+
+	if !reflect.DeepEqual(st, exp) {
+		t.Errorf("expected %v, recived %v", exp, st)
+	}
+
+	t.Run("check error in parse duration with nanosecs", func(t *testing.T) {
+		str := "test"
+
+		js := StatServJsonCfg{
+			Store_interval: &str,
+		}
+
+		err := st.loadFromJsonCfg(&js)
+		exp := fmt.Errorf(`time: invalid duration "test"`)
+
+		if err.Error() != exp.Error() {
+			t.Errorf("recived %s, expected %s", err, exp)
+		}
+	})
+}
+
+func TestStatSCfgAsMapInterface2(t *testing.T) {
+
+	st := StatSCfg{
+		Enabled:                false,
+		IndexedSelects:         false,
+		StoreInterval:          1 * time.Second,
+		StoreUncompressedLimit: 1,
+		ThresholdSConns:        []string{"val1", "val2"},
+		StringIndexedFields:    &[]string{"val1", "val2"},
+		PrefixIndexedFields:    &[]string{"val1", "val2"},
+		NestedFields:           true,
+	}
+
+	exp := map[string]any{
+		utils.EnabledCfg:                st.Enabled,
+		utils.IndexedSelectsCfg:         st.IndexedSelects,
+		utils.StoreIntervalCfg:          "1s",
+		utils.StoreUncompressedLimitCfg: st.StoreUncompressedLimit,
+		utils.ThresholdSConnsCfg:        []string{"val1", "val2"},
+		utils.StringIndexedFieldsCfg:    []string{"val1", "val2"},
+		utils.PrefixIndexedFieldsCfg:    []string{"val1", "val2"},
+		utils.NestedFieldsCfg:           st.NestedFields,
+	}
+
+	rcv := st.AsMapInterface()
+
+	if !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("recived %v, expected %v", rcv, exp)
 	}
 }
