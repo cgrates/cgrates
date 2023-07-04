@@ -19,6 +19,7 @@ package utils
 
 import (
 	"encoding/json"
+	"errors"
 	"reflect"
 	"testing"
 	"time"
@@ -74,5 +75,136 @@ func TestValueFormulaParseBalanceFilterValue(t *testing.T) {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eVF, vf) {
 		t.Errorf("Expecting: %+v, received: %+v", eVF, vf)
+	}
+}
+
+func TestValueFormulaString(t *testing.T) {
+	vf := ValueFormula{
+		Method: "test",
+		Params: map[string]any{"test": "val1"},
+		Static: 1.2,
+	}
+
+	rcv := vf.String()
+	exp := `{"Method":"test","Params":{"test":"val1"},"Static":1.2}`
+
+	if rcv != exp {
+		t.Errorf("recived %s, expected %s", rcv, exp)
+	}
+}
+
+func TestValueFormulaParseBalanceFilterValue2(t *testing.T) {
+	vf := ValueFormula{
+		Method: "test",
+		Params: map[string]any{"test": "val1"},
+		Static: 1.2,
+	}
+
+	type args struct {
+		tor string
+		val string
+	}
+
+	type exp struct {
+		val *ValueFormula
+		err error
+	}
+	tests := []struct {
+		name string
+		args args
+		exp  exp
+	}{
+		{
+			name: "json unmarshal error case",
+			args: args{tor: "*voice", val: "test"},
+			exp:  exp{val: nil, err: errors.New("Invalid value: " + "test")},
+		},
+		{
+			name: "json unmarshal case",
+			args: args{tor: "*voice", val: `{"Method":"test","Params":{"test":"val1"},"Static":1.2}`},
+			exp:  exp{val: &vf, err: nil},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			rcv, err := ParseBalanceFilterValue(tt.args.tor, tt.args.val)
+
+			if err != nil {
+				if err.Error() != tt.exp.err.Error() {
+					t.Fatalf("recived %s, expected %s", err, tt.exp.err)
+				}
+			}
+
+			if !reflect.DeepEqual(rcv, tt.exp.val) {
+				t.Errorf("recived %s, expected %s", rcv, tt.exp.val)
+			}
+		})
+	}
+}
+
+func TestValueFormulaIncremetalFormula(t *testing.T) {
+	now := time.Now()
+
+	tests := []struct {
+		name string
+		arg  map[string]any
+		exp  float64
+	}{
+		{
+			name: "keys not found",
+			arg:  map[string]any{},
+			exp:  0.0,
+		},
+		{
+			name: "units is not a float64",
+			arg:  map[string]any{"Units": "test", "Interval": "test", "Increment": "test"},
+			exp:  0.0,
+		},
+		{
+			name: "type []byte",
+			arg:  map[string]any{"Units": 1.2, "Interval": []byte{1, 2}, "Increment": []byte{1, 2}},
+			exp:  0.0,
+		},
+		{
+			name: "default interval",
+			arg:  map[string]any{"Units": 1.2, "Interval": 1, "Increment": 1},
+			exp:  0.0,
+		},
+		{
+			name: "default increment",
+			arg:  map[string]any{"Units": 1.2, "Interval": []byte{1, 2}, "Increment": 1},
+			exp:  0.0,
+		},
+		{
+			name: "hour day",
+			arg:  map[string]any{"Units": 1.5, "Interval": "day", "Increment": "hour"},
+			exp:  1.5 / 24,
+		},
+		{
+			name: "hour month",
+			arg:  map[string]any{"Units": 1.5, "Interval": "month", "Increment": "hour"},
+			exp:  1.5 / (DaysInMonth(now.Year(), now.Month()) * 24),
+		},
+		{
+			name: "hour year",
+			arg:  map[string]any{"Units": 1.5, "Interval": "year", "Increment": "hour"},
+			exp:  1.5 / (DaysInYear(now.Year()) * 24),
+		},
+		{
+			name: "minute hour",
+			arg:  map[string]any{"Units": 1.5, "Interval": "hour", "Increment": "minute"},
+			exp:  1.5 / 60,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			rcv := incrementalFormula(tt.arg)
+
+			if rcv != tt.exp {
+				t.Errorf("recived %v, expected %v", rcv, tt.exp)
+			}
+		})
 	}
 }
