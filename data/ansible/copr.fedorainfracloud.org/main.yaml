@@ -16,7 +16,7 @@
         state: present
     - name:  Install Go
       import_role: 
-        name: ../roles/install_go
+        name: ../roles/go
 
     - name: Create coprgate directory
       become: yes

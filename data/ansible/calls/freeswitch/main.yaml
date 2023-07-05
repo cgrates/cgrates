@@ -7,7 +7,7 @@
         name: ../../roles/install_freeswitch
     - name: Install Go
       import_role:
-        name: ../../roles/install_go
+        name: ../../roles/go
 
     - name: Install and config CGRateS
       import_role:

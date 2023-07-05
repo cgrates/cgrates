@@ -4,13 +4,21 @@
   ignore_errors: true
   register: go_version_output
 
-- name: Install Go dependencies
+- name: Install Go dependencies with apt
   become: yes
   apt:
     name: '{{ go_dependencies }}'
     state: present
     update_cache: yes
-    cache_valid_time: 86400
+  when: package_manager == 'apt'
+
+- name: Install Go dependencies with dnf
+  become: yes
+  dnf:
+    name: '{{ go_dependencies }}'
+    state: present
+    update_cache: yes
+  when: package_manager == 'dnf'
 
 - name: Remove old installation of Go if needed
   become: yes
