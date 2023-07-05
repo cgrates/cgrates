@@ -138,7 +138,6 @@
 ###########################################################################################################################
 # Generate package
     - name:  Generate package
-      become: yes
       command: 'sudo env "PATH={{ customPath }}" make deb'
       args:
         chdir: '{{ cgrates_dir }}/packages'
