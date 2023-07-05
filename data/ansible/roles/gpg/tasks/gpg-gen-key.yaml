@@ -1,5 +1,6 @@
 ---
 - name: set default gpg options
+  become: yes
   template:
     src: gpg.conf.j2
     dest: "{{ gpg_home }}/.gnupg/gpg.conf"
@@ -7,6 +8,7 @@
     owner: root
 
 - name: copy default template for gpg
+  become: yes
   template:
     src: gen-key-script.j2
     dest: "{{ gpg_home }}/gen-key-script"
@@ -14,6 +16,7 @@
     owner: root
 
 - name: generate gpg keys
+  become: yes
   command: gpg --batch --gen-key gen-key-script
   args:
     chdir: "{{ gpg_home }}"
