@@ -31,7 +31,7 @@
 
   - name: Install Go
     import_role:
-      name: ../roles/install_go
+      name: ../roles/go
 
   - name: Install and configure CGRateS
     import_role:

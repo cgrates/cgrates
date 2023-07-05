@@ -1,8 +1,9 @@
 ---
-# defaults for install_go
+# Package manager to use
+package_manager: apt
 
 # Go version to install
-golang_version: 1.20.4
+golang_version: 1.20.5
 
 # Expected go version output
 go_version_target: "go version go{{ golang_version }} linux/amd64"
