@@ -175,11 +175,42 @@ func TestCacheCFGAsMappInterface(t *testing.T) {
 	rcv := cc.AsMapInterface()["test"]
 
 	if !reflect.DeepEqual(rcv, exp) {
-		t.Errorf("recived %v, expected %v", rcv, exp)
+		t.Errorf("received %v, expected %v", rcv, exp)
 	}
 
 }
 
+func TestCacheParamCfgloadFromJsonCfg2(t *testing.T) {
+	c := CacheParamCfg{}
+
+	str := "test"
+	js := CacheParamJsonCfg{
+		Ttl: &str,
+	}
+
+	err := c.loadFromJsonCfg(&js)
+	exp := `time: invalid duration "test"`
+	if err.Error() != exp {
+		t.Errorf("received %s, expected %s", err.Error(), exp)
+	}
+}
+
+func TestCacheCfgloadFromJsonCfg2(t *testing.T) {
+	c := CacheCfg{}
+
+	str := "test"
+	js := CacheJsonCfg{
+		"test": &CacheParamJsonCfg{
+			Ttl: &str,
+		},
+	}
+
+	err := c.loadFromJsonCfg(&js)
+	exp := `time: invalid duration "test"`
+	if err.Error() != exp {
+		t.Errorf("received %s, expected %s", err.Error(), exp)
+	}
+}
 
 /*
 func TestCacheCfgAsMapInterface(t *testing.T) {

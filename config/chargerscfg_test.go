@@ -116,3 +116,66 @@ func TestChargerSCfgAsMapInterface(t *testing.T) {
 		t.Errorf("\nExpected: %+v\nReceived: %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
 	}
 }
+
+func TestChargerSCfgloadFromJsonCfg2(t *testing.T) {
+	bl := false
+	slc := []string{"val1", "val2"}
+
+	c := ChargerSCfg{}
+
+	js := ChargerSJsonCfg{
+		Enabled:               &bl,
+		Indexed_selects:       &bl,
+		Attributes_conns:      &slc,
+		String_indexed_fields: &slc,
+		Prefix_indexed_fields: &slc,
+		Nested_fields:         &bl,
+	}
+
+	err := c.loadFromJsonCfg(&js)
+	if err != nil {
+		t.Error(err)
+	}
+
+	exp := ChargerSCfg{
+		Enabled:             bl,
+		IndexedSelects:      bl,
+		AttributeSConns:     slc,
+		StringIndexedFields: &slc,
+		PrefixIndexedFields: &slc,
+		NestedFields:        bl,
+	}
+
+	if !reflect.DeepEqual(c, exp) {
+		t.Errorf("received %v, expected %v", c, exp)
+	}
+}
+
+func TestChargerSCfgAsMapInterface2(t *testing.T) {
+	bl := false
+	slc := []string{"val1", "val2"}
+
+	cS := ChargerSCfg{
+		Enabled:             bl,
+		IndexedSelects:      bl,
+		AttributeSConns:     slc,
+		StringIndexedFields: &slc,
+		PrefixIndexedFields: &slc,
+		NestedFields:        bl,
+	}
+
+	rcv := cS.AsMapInterface()
+
+	exp := map[string]any{
+		utils.EnabledCfg:             cS.Enabled,
+		utils.IndexedSelectsCfg:      cS.IndexedSelects,
+		utils.AttributeSConnsCfg:     slc,
+		utils.StringIndexedFieldsCfg: slc,
+		utils.PrefixIndexedFieldsCfg: slc,
+		utils.NestedFieldsCfg:        cS.NestedFields,
+	}
+
+	if !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("received %v, expected %v", rcv, exp)
+	}
+}

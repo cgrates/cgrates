@@ -448,20 +448,179 @@ func TestDataDbCfgAsMapInterface(t *testing.T) {
 
 func TestDataDBCFGClone(t *testing.T) {
 	d := &DataDbCfg{
-		DataDbType:              "*redis",
-		DataDbHost:              "127.0.0.1",
-		DataDbPort:              "6379",
-		DataDbName:              "10",
-		DataDbUser:              "cgrates",
-		DataDbPass:          "",
-		DataDbSentinelName:       "",
-		QueryTimeout:        10 * time.Second,
-		RplFiltered: false,
+		DataDbType:         "*redis",
+		DataDbHost:         "127.0.0.1",
+		DataDbPort:         "6379",
+		DataDbName:         "10",
+		DataDbUser:         "cgrates",
+		DataDbPass:         "",
+		DataDbSentinelName: "",
+		QueryTimeout:       10 * time.Second,
+		RplFiltered:        false,
 	}
 
 	rcv := d.Clone()
 
 	if !reflect.DeepEqual(rcv, d) {
 		t.Errorf("recived %v, expected %v", rcv, d)
+	}
+}
+
+func TestDataDbCfgloadFromJsonCfg2(t *testing.T) {
+	bl := false
+
+	d := DataDbCfg{}
+
+	js := DbJsonCfg{
+		Replication_filtered: &bl,
+	}
+
+	exp := DataDbCfg{
+		RplFiltered: bl,
+	}
+
+	err := d.loadFromJsonCfg(&js)
+	if err != nil {
+		t.Error(err)
+	}
+
+	if !reflect.DeepEqual(d, exp) {
+		t.Errorf("received %v, expected %v", d, exp)
+	}
+}
+
+func TestDataDbCfgloadFromJsonCfgErrors(t *testing.T) {
+	str := "test`"
+
+	js := DbJsonCfg{
+		Query_timeout: &str,
+	}
+
+	js2 := DbJsonCfg{
+		Replication_conns: &[]string{"*internal"},
+	}
+
+	js3 := DbJsonCfg{
+		Remote_conns: &[]string{"*internal"},
+	}
+	js4 := DbJsonCfg{
+		Items: &map[string]*ItemOptJson{
+			"test": {
+				Ttl: &str,
+			},
+		},
+	}
+
+	d := DataDbCfg{}
+
+	tests := []struct {
+		name string
+		arg  *DbJsonCfg
+		exp  string
+	}{
+		{
+			name: "Query Timeout error",
+			arg:  &js,
+			exp:  "time: invalid duration " + `"` + str + `"`,
+		},
+		{
+			name: "Replication conns error",
+			arg:  &js2,
+			exp:  "Replication connection ID needs to be different than *internal",
+		},
+		{
+			name: "Remote conns error",
+			arg:  &js3,
+			exp:  "Remote connection ID needs to be different than *internal",
+		},
+		{
+			name: "Items error",
+			arg:  &js4,
+			exp:  "time: invalid duration " + `"` + str + `"`,
+		},
+	}
+
+	for _, tt := range tests {
+		err := d.loadFromJsonCfg(tt.arg)
+
+		if err != nil {
+			if err.Error() != tt.exp {
+				t.Errorf("received %s, expected %s", err, tt.exp)
+			}
+		}
+	}
+}
+
+func TestDataDbCfgAsMapInterfaceItemOpt(t *testing.T) {
+	bl := false
+	tm := 1 * time.Millisecond
+	nm := 1
+	str := "test"
+
+	itm := ItemOpt{
+		Remote:    bl,
+		Replicate: bl,
+		TTL:       tm,
+		Limit:     nm,
+		StaticTTL: bl,
+		RouteID:   str,
+		APIKey:    str,
+	}
+
+	exp := map[string]any{
+		utils.RemoteCfg:    itm.Remote,
+		utils.ReplicateCfg: itm.Replicate,
+		utils.LimitCfg:     itm.Limit,
+		utils.TTLCfg:       "1ms",
+		utils.StaticTTLCfg: itm.StaticTTL,
+	}
+
+	rcv := itm.AsMapInterface()
+
+	if !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("received %v, expected %v", rcv, exp)
+	}
+}
+
+func TestDataDbCfgloadFromJsonCfgItems2(t *testing.T) {
+	i := ItemOpt{}
+	str := "test"
+
+	js := ItemOptJson{
+		Route_id: &str,
+		Api_key:  &str,
+	}
+
+	tests := []struct {
+		name string
+		arg  *ItemOptJson
+		exp  error
+	}{
+		{
+			name: "nil return",
+			arg:  nil,
+			exp:  nil,
+		},
+		{
+			name: "api key and route id",
+			arg:  &js,
+			exp:  nil,
+		},
+	}
+
+	for idx, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			err := i.loadFromJsonCfg(tt.arg)
+
+			if err != tt.exp {
+				t.Fatal(err)
+			}
+
+			if idx == 1 {
+				if i.APIKey != str || i.RouteID != str {
+					t.Errorf("recived %v %v, expected %v", i.APIKey, i.RouteID, str)
+				}
+			}
+		})
 	}
 }

@@ -169,3 +169,87 @@ func TestCdrsCfgAsMapInterface(t *testing.T) {
 		t.Errorf("\nExpected: %+v\nReceived: %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
 	}
 }
+
+func TestCdrsCfgloadFromJsonCfg2(t *testing.T) {
+	c := CdrsCfg{}
+	slc := []string{"val1", "val2"}
+
+	js := CdrsJsonCfg{
+		Chargers_conns:     &slc,
+		Rals_conns:         &slc,
+		Attributes_conns:   &slc,
+		Thresholds_conns:   &slc,
+		Stats_conns:        &slc,
+		Online_cdr_exports: &slc,
+	}
+
+	err := c.loadFromJsonCfg(&js)
+
+	if err != nil {
+		t.Error(err)
+	}
+
+	exp := CdrsCfg{
+		ChargerSConns:    slc,
+		RaterConns:       slc,
+		AttributeSConns:  slc,
+		ThresholdSConns:  slc,
+		StatSConns:       slc,
+		OnlineCDRExports: slc,
+	}
+
+	if !reflect.DeepEqual(c, exp) {
+		t.Errorf("\nExpected: %+v\nReceived: %+v", c, exp)
+	}
+
+	jse := CdrsJsonCfg{
+		Extra_fields: &[]string{""},
+	}
+
+	err = c.loadFromJsonCfg(&jse)
+
+	if err != nil {
+		if err.Error() != "Empty RSRField in rule: " {
+			t.Error(err)
+		}
+	}
+}
+
+func TestCdrsCfgAsMapInterface2(t *testing.T) {
+	slc := []string{"val1", "val2"}
+	bl := false
+	nm := 1
+	ex := []*utils.RSRField{}
+
+	cdrscfg := CdrsCfg{
+		Enabled:          bl,
+		ExtraFields:      ex,
+		StoreCdrs:        bl,
+		SMCostRetries:    nm,
+		ChargerSConns:    slc,
+		RaterConns:       slc,
+		AttributeSConns:  slc,
+		ThresholdSConns:  slc,
+		StatSConns:       slc,
+		OnlineCDRExports: slc,
+	}
+
+	exp := map[string]any {
+		utils.EnabledCfg:          cdrscfg.Enabled,
+		utils.ExtraFieldsCfg:      []string{},
+		utils.StoreCdrsCfg:        cdrscfg.StoreCdrs,
+		utils.SMCostRetriesCfg:    cdrscfg.SMCostRetries,
+		utils.ChargerSConnsCfg:    slc,
+		utils.RALsConnsCfg:        slc,
+		utils.AttributeSConnsCfg:  slc,
+		utils.ThresholdSConnsCfg:  slc,
+		utils.StatSConnsCfg:       slc,
+		utils.OnlineCDRExportsCfg: slc,
+	}
+
+	rcv := cdrscfg.AsMapInterface()
+
+	if !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("\nExpected: %+v\nReceived: %+v", rcv, exp)
+	}
+}

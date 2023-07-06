@@ -192,3 +192,74 @@ func TestCdreCfgAsMapInterface(t *testing.T) {
 	}
 
 }
+
+func TestCdreCfgloadFromJsonCfg2(t *testing.T) {
+	type args struct {
+		js  *CdreJsonCfg
+		sep string
+	}
+
+	s := CdreCfg{}
+	str := "test`"
+	js := CdreJsonCfg{
+		Filters: &[]string{"val1", "val2"},
+		Fields: &[]*FcTemplateJsonCfg{
+			{
+				Value: &str,
+			},
+		},
+	}
+
+	tests := []struct {
+		name string
+		args args
+		exp  string
+	}{
+		{
+			name: "populate filters",
+			args: args{js: &js, sep: ""},
+			exp:  "Unclosed unspilit syntax",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			err := s.loadFromJsonCfg(tt.args.js, tt.args.sep)
+
+			if err.Error() != tt.exp {
+				t.Errorf("received %s, expected %s", err, tt.exp)
+			}
+
+			exp := []string{"val1", "val2"}
+			if !reflect.DeepEqual(s.Filters, exp) {
+				t.Errorf("received %v, expected %v", s.Filters, exp)
+			}
+		})
+	}
+}
+
+func TestCdreCfgClone2(t *testing.T) {
+	str := "test"
+	slc := []string{"val1", "val2"}
+	bl := false
+	nm := 1
+	rn := 'a'
+
+	s := CdreCfg{
+		ExportFormat:      str,
+		ExportPath:        str,
+		Filters:           slc,
+		Tenant:            str,
+		AttributeSContext: "",
+		Synchronous:       bl,
+		Attempts:          nm,
+		FieldSeparator:    rn,
+		Fields:            []*FCTemplate{},
+	}
+
+	rcv := s.Clone()
+
+	if !reflect.DeepEqual(*rcv, s) {
+		t.Errorf("received %v, expected %v", *rcv, s)
+	}
+}

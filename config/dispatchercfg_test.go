@@ -136,3 +136,35 @@ func TestDispatcherSCfgAsMapInterface(t *testing.T) {
 		t.Errorf("\nExpected: %+v\nReceived: %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
 	}
 }
+
+func TestDispatcherSCfgloadFromJsonCfg2(t *testing.T) {
+	d := DiameterAgentCfg{}
+
+	tests := []struct{
+		name string 
+		js *DiameterAgentJsonCfg
+		sep string 
+		exp string
+	}{
+		{
+			name: "session conns",
+			js: &DiameterAgentJsonCfg{
+				Sessions_conns:       &[]string{"val1", "val2"},
+			},
+			sep: "",
+			exp: "",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			err := d.loadFromJsonCfg(tt.js, tt.sep)
+
+			if err != nil {
+				if err.Error() != tt.exp {
+					t.Fatal(err)
+				}
+			}
+		})
+	}
+}

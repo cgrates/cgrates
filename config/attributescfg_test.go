@@ -87,3 +87,35 @@ func TestAttributeSCfgAsMapInterface(t *testing.T) {
 		t.Errorf("\nExpected: %+v\nReceived: %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
 	}
 }
+
+func TestAttributeSCfgloadFromJsonCfg2(t *testing.T) {
+	alS := AttributeSCfg{}
+
+	js := AttributeSJsonCfg{
+		String_indexed_fields: &[]string{"val1", "val2"},
+	}
+
+	err := alS.loadFromJsonCfg(&js)
+	if err != nil {
+		t.Error(err)
+	}
+
+	exp := &[]string{"val1", "val2"}
+
+	if !reflect.DeepEqual(alS.StringIndexedFields, exp) {
+		t.Errorf("recived %v, expected %v", alS.StringIndexedFields, exp)
+	}
+}
+
+func TestAttributeSCfgAsMapInterface2(t *testing.T) {
+	alS := AttributeSCfg{
+		StringIndexedFields: &[]string{"val1", "val2"},
+	}
+
+	rcv := alS.AsMapInterface()
+	exp := []string{"val1", "val2"}
+
+	if !reflect.DeepEqual(rcv["string_indexed_fields"], exp) {
+		t.Errorf("recived %v, expected %v", rcv["string_indexed_fields"], exp)
+	}
+}
