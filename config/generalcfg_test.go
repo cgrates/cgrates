@@ -168,3 +168,81 @@ func TestGeneralCfgAsMapInterface(t *testing.T) {
 		t.Errorf("\nExpected: %+v\nReceived: %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
 	}
 }
+
+func TestGeneralCfgloadFromJsonCfg2(t *testing.T) {
+	id := "id"
+	g := GeneralCfg{}
+
+	js := GeneralJsonCfg{
+		Node_id: &id,
+	}
+
+	err := g.loadFromJsonCfg(&js)
+	if err != nil {
+		t.Error(err)
+	}
+
+	if g.NodeID != id {
+		t.Errorf("received %s", g.NodeID)
+	}
+}
+
+func TestGeneralCfgloadFromJsonCfgErrors(t *testing.T) {
+	strErr := "test"
+	g := GeneralCfg{}
+
+	tests := []struct{
+		name string 
+		arg *GeneralJsonCfg
+		err string
+	}{
+		{
+			name: "Connect timeout error check",
+			arg: &GeneralJsonCfg{
+				Connect_timeout: &strErr,
+			},
+			err: `time: invalid duration "test"`,
+		},
+		{
+			name: "Reply timeout error check",
+			arg: &GeneralJsonCfg{
+				Reply_timeout: &strErr,
+			},
+			err: `time: invalid duration "test"`,
+		},
+		{
+			name: "Failed posts ttl error check",
+			arg: &GeneralJsonCfg{
+				Failed_posts_ttl: &strErr,
+			},
+			err: `time: invalid duration "test"`,
+		},
+		{
+			name: "Locking timeout error check",
+			arg: &GeneralJsonCfg{
+				Locking_timeout: &strErr,
+			},
+			err: `time: invalid duration "test"`,
+		},
+	}
+
+	for _, tt := range tests {
+		err := g.loadFromJsonCfg(tt.arg)
+
+		if err.Error() != tt.err {
+			t.Errorf("received %s, expecting %s", err, tt.err)
+		}
+	}
+}
+
+func TestGeneralCfgAsMapInterface2(t *testing.T) {
+	g := GeneralCfg{
+		LockingTimeout: 1 * time.Millisecond,
+	}
+
+	rcv := g.AsMapInterface()
+
+	if rcv["locking_timeout"] != "1ms" {
+		t.Errorf("received %s, expected %s", rcv["locking_timeout"], "1ms")
+	}
+}

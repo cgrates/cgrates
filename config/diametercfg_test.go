@@ -117,4 +117,162 @@ func TestDiameterAgentCfgAsMapInterface(t *testing.T) {
 	}
 }
 
+func TestDiameterCfgloadFromJsonCfg(t *testing.T) {
+	strErr := "test`"
+	id := "t"
+	str := "test"
+	slc := []string{"val1", "val2"}
+	fcs := []*FcTemplateJsonCfg{{Value: &str}}
 
+	d := DiameterAgentCfg{
+		RequestProcessors: []*RequestProcessor{
+			{
+				ID: str,
+			},
+		},
+	}
+
+	tests := []struct {
+		name string
+		js   *DiameterAgentJsonCfg
+		sep  string
+		exp  string
+	}{
+		{
+			name: "session conns",
+			js: &DiameterAgentJsonCfg{
+				Sessions_conns: &[]string{"val1", "val2"},
+			},
+			sep: "",
+			exp: "",
+		},
+		{
+			name: "Templates error",
+			js: &DiameterAgentJsonCfg{
+				Templates: map[string][]*FcTemplateJsonCfg{"test": {{Value: &strErr}}},
+			},
+			sep: "",
+			exp: "Unclosed unspilit syntax",
+		},
+		{
+			name: "Request processors",
+			js: &DiameterAgentJsonCfg{
+				Request_processors: &[]*ReqProcessorJsnCfg{{
+					ID:             &id,
+					Filters:        &slc,
+					Tenant:         &str,
+					Timezone:       &str,
+					Flags:          &slc,
+					Request_fields: &fcs,
+					Reply_fields:   &fcs,
+				}},
+			},
+			sep: "",
+			exp: "",
+		},
+		{
+			name: "Request processors load data into one set",
+			js: &DiameterAgentJsonCfg{
+				Request_processors: &[]*ReqProcessorJsnCfg{{
+					ID:             &str,
+					Filters:        &slc,
+					Tenant:         &str,
+					Timezone:       &str,
+					Flags:          &slc,
+					Request_fields: &fcs,
+					Reply_fields:   &fcs,
+				}},
+			},
+			sep: "",
+			exp: "",
+		},
+		{
+			name: "Request processors error",
+			js: &DiameterAgentJsonCfg{
+				Request_processors: &[]*ReqProcessorJsnCfg{{
+					ID:             &str,
+					Filters:        &slc,
+					Tenant:         &strErr,
+					Timezone:       &str,
+					Flags:          &slc,
+					Request_fields: &fcs,
+					Reply_fields:   &fcs,
+				}},
+			},
+			sep: "",
+			exp: "Unclosed unspilit syntax",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			err := d.loadFromJsonCfg(tt.js, tt.sep)
+
+			if err != nil {
+				if err.Error() != tt.exp {
+					t.Fatal(err)
+				}
+			}
+		})
+	}
+}
+
+func TestDiameterAgentCfgAsMapInterface2(t *testing.T) {
+	str := "test"
+	slc := []string{"val1", "val2"}
+	bl := false
+
+	ds := DiameterAgentCfg{
+		Enabled:          bl,
+		ListenNet:        str,
+		Listen:           str,
+		DictionariesPath: str,
+		SessionSConns:    slc,
+		OriginHost:       str,
+		OriginRealm:      str,
+		VendorId:         1,
+		ProductName:      str,
+		ConcurrentReqs:   1,
+		SyncedConnReqs:   bl,
+		ASRTemplate:      str,
+		Templates: map[string][]*FCTemplate{
+			"test": {{Value: RSRParsers{{Rules: "test"}}}},
+		},
+		RequestProcessors: []*RequestProcessor{{}},
+	}
+
+	exp := map[string]any{
+		utils.EnabledCfg:          ds.Enabled,
+		utils.ListenNetCfg:        ds.ListenNet,
+		utils.ListenCfg:           ds.Listen,
+		utils.DictionariesPathCfg: ds.DictionariesPath,
+		utils.SessionSConnsCfg:    slc,
+		utils.OriginHostCfg:       ds.OriginHost,
+		utils.OriginRealmCfg:      ds.OriginRealm,
+		utils.VendorIdCfg:         ds.VendorId,
+		utils.ProductNameCfg:      ds.ProductName,
+		utils.ConcurrentReqsCfg:   ds.ConcurrentReqs,
+		utils.SyncedConnReqsCfg:   ds.SyncedConnReqs,
+		utils.ASRTemplateCfg:      ds.ASRTemplate,
+		utils.TemplatesCfg: map[string][]map[string]any{
+			"test": {{"value": "test"}},
+		},
+		utils.RequestProcessorsCfg: []map[string]any{
+			{
+				utils.IDCfg:            "",
+				utils.TenantCfg:        "",
+				utils.FiltersCfg:       []string{},
+				utils.FlagsCfg:         map[string][]string{},
+				utils.TimezoneCfgC:     "",
+				utils.RequestFieldsCfg: []map[string]any{},
+				utils.ReplyFieldsCfg:   []map[string]any{},
+			},
+		},
+	}
+
+	rcv := ds.AsMapInterface("")
+
+	if rcv == nil {
+		t.Errorf("recived %v, expected %v", rcv, exp)
+	}
+}
