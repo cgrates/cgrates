@@ -52,12 +52,14 @@ var (
 		// Test sets the charger and attribute profiles.
 		testSharedClientLockSetProfiles,
 
-		// Test simulates a scenario that is occurring when using an older rpcclient library version where a request is dispatched from CDRs to ChargerS via a *localhost connection.
-		// The connection is read-locked until ChargerS responds. ChargerS, in turn, sends a request to AttributeS using
-		// the same *localhost connection. However, AttributeS is currently unavailable, leading to a "can't find rpc service" error.
+		// Test simulates a scenario that is occurring when using an older rpcclient library version
+		// where a request is dispatched from CDRs to ChargerS via a *localhost connection.
+		// The connection is read-locked until ChargerS responds. ChargerS, in turn, sends a request
+		// to AttributeS using the same *localhost connection. However, AttributeS is currently unavailable,
+		// leading to a "can't find rpc service" error.
 		// This error is considered a network error, which prompts a reconnection attempt. The reconnection process
-		// involves a lock operation during the disconnect function. As the connection is already read-locked from the initial request,
-		// this results in a deadlock and the original request will time out.
+		// involves a lock operation during the disconnect function. As the connection is already read-locked from
+		// the initial request, this results in a deadlock and the original request will time out.
 		testSharedClientLockCDRsProcessEvent,
 		testSharedClientLockStopEngine,
 	}
