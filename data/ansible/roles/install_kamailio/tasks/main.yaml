@@ -1,4 +1,11 @@
 ---
+- name: Install necessary dependencies for Kamailio
+  become: yes
+  apt:
+    name: "{{ kamailio_dependencies }}"
+    state: present
+    update_cache: yes
+
 - name: Add Kamailio repository key
   become: yes
   apt_key:

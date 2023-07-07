@@ -7,3 +7,5 @@ kamailio_packages:
   - kamailio
   - kamailio-extra-modules
   - kamailio-json-modules
+kamailio_dependencies:
+  - gnupg
