@@ -262,11 +262,13 @@ type CodecMsgpackMarshaler struct {
 }
 
 func NewCodecMsgpackMarshaler() *CodecMsgpackMarshaler {
-	cmm := &CodecMsgpackMarshaler{new(codec.MsgpackHandle)}
-	mh := cmm.mh
+	mh := new(codec.MsgpackHandle)
 	mh.MapType = reflect.TypeOf(map[string]any(nil))
 	mh.RawToString = true
-	return cmm
+	mh.BasicHandle = codec.BasicHandle{
+		TimeNotBuiltin: true,
+	}
+	return &CodecMsgpackMarshaler{mh}
 }
 
 func (cmm *CodecMsgpackMarshaler) Marshal(v any) (b []byte, err error) {
@@ -277,7 +279,7 @@ func (cmm *CodecMsgpackMarshaler) Marshal(v any) (b []byte, err error) {
 
 func (cmm *CodecMsgpackMarshaler) Unmarshal(data []byte, v any) error {
 	dec := codec.NewDecoderBytes(data, cmm.mh)
-	return dec.Decode(&v)
+	return dec.Decode(v)
 }
 
 type BincMarshaler struct {
@@ -296,7 +298,7 @@ func (bm *BincMarshaler) Marshal(v any) (b []byte, err error) {
 
 func (bm *BincMarshaler) Unmarshal(data []byte, v any) error {
 	dec := codec.NewDecoderBytes(data, bm.bh)
-	return dec.Decode(&v)
+	return dec.Decode(v)
 }
 
 type GOBMarshaler struct{}
