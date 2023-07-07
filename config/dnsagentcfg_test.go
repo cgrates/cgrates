@@ -192,3 +192,191 @@ func TestDNSAgentCfgAsMapInterface(t *testing.T) {
 	}
 
 }
+
+func TestDNSAgentCfgloadFromJsonCfg2(t *testing.T) {
+	bl := false
+	str := "test"
+	slc := []string{"val1", "val2"}
+	eslc := []string{}
+	estr := ""
+
+	da := DNSAgentCfg{
+		RequestProcessors: []*RequestProcessor{{
+			ID: str,
+		}},
+	}
+
+	js := DNSAgentJsonCfg{
+		Enabled:        &bl,
+		Listen:         &str,
+		Listen_net:     &str,
+		Sessions_conns: &slc,
+		Timezone:       &str,
+		Request_processors: &[]*ReqProcessorJsnCfg{{
+			ID:             &str,
+			Filters:        &slc,
+			Tenant:         &estr,
+			Timezone:       &str,
+			Flags:          &eslc,
+			Request_fields: &[]*FcTemplateJsonCfg{},
+			Reply_fields:   &[]*FcTemplateJsonCfg{},
+		}},
+	}
+
+	exp := DNSAgentCfg{
+		Enabled:       bl,
+		Listen:        str,
+		ListenNet:     str,
+		SessionSConns: slc,
+		Timezone:      str,
+		RequestProcessors: []*RequestProcessor{{
+			ID:            str,
+			Tenant:        RSRParsers{},
+			Filters:       slc,
+			Flags:         utils.FlagsWithParams{},
+			Timezone:      str,
+			RequestFields: []*FCTemplate{},
+			ReplyFields:   []*FCTemplate{},
+		}},
+	}
+
+	err := da.loadFromJsonCfg(&js, "")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if da.RequestProcessors == nil {
+		t.Errorf("received %v, expected %v", da, exp)
+	}
+}
+
+func TestDNSAgentCfgloadFromJsonCfgError(t *testing.T) {
+	strErr := "test`"
+	da := DNSAgentCfg{}
+
+	js := DNSAgentJsonCfg{
+		Request_processors: &[]*ReqProcessorJsnCfg{
+			{
+				Tenant: &strErr,
+			},
+		},
+	}
+
+	err := da.loadFromJsonCfg(&js, "")
+	if err != nil {
+		t.Error(err)
+	}
+}
+
+func TestDNSAgentCfgAsMapInterface2(t *testing.T) {
+	da := DNSAgentCfg{
+		Enabled:           false,
+		Listen:            "test",
+		ListenNet:         "test",
+		SessionSConns:     []string{"val1", "val2"},
+		Timezone:          "test",
+		RequestProcessors: []*RequestProcessor{},
+	}
+
+	exp := map[string]any{
+		utils.EnabledCfg:           da.Enabled,
+		utils.ListenCfg:            da.Listen,
+		utils.ListenNetCfg:         da.ListenNet,
+		utils.SessionSConnsCfg:     []string{"val1", "val2"},
+		utils.TimezoneCfg:          da.Timezone,
+		utils.RequestProcessorsCfg: []map[string]any{},
+	}
+
+	rcv := da.AsMapInterface("")
+
+	if !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("received %v, expected %v", rcv, exp)
+	}
+}
+
+func TestDNSAgentCfgloadFromJsonCfgRPErrors(t *testing.T) {
+	strErr := "test`"
+	type args struct {
+		js  *ReqProcessorJsnCfg
+		sep string
+	}
+
+	rp := RequestProcessor{}
+
+	tests := []struct {
+		name string
+		args args
+		err  string
+	}{
+		{
+			name: "flags error",
+			args: args{js: &ReqProcessorJsnCfg{
+				Flags: &[]string{"test:test:test:test"},
+			}, sep: ""},
+			err: utils.ErrUnsupportedFormat.Error(),
+		},
+		{
+			name: "Request fields error",
+			args: args{js: &ReqProcessorJsnCfg{
+				Request_fields: &[]*FcTemplateJsonCfg{
+					{
+						Value: &strErr,
+					},
+				},
+			}, sep: ""},
+			err: "Unclosed unspilit syntax",
+		},
+		{
+			name: "Reply fields error",
+			args: args{js: &ReqProcessorJsnCfg{
+				Reply_fields: &[]*FcTemplateJsonCfg{
+					{
+						Value: &strErr,
+					},
+				},
+			}, sep: ""},
+			err: "Unclosed unspilit syntax",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			err := rp.loadFromJsonCfg(tt.args.js, tt.args.sep)
+
+			if err.Error() != tt.err {
+				t.Errorf("received %s, expected %s", err.Error(), tt.err)
+			}
+		})
+	}
+}
+
+func TestDNSAgentCfgAsMapInterfaceRP(t *testing.T) {
+	str := "test"
+	slc := []string{"val1", "val2"}
+
+	rp := RequestProcessor{
+		ID:            str,
+		Tenant:        RSRParsers{},
+		Filters:       slc,
+		Flags:         utils.FlagsWithParams{},
+		Timezone:      str,
+		RequestFields: []*FCTemplate{{}},
+		ReplyFields:   []*FCTemplate{},
+	}
+
+	exp := map[string]any{
+		utils.IDCfg:            rp.ID,
+		utils.TenantCfg:        "",
+		utils.FiltersCfg:       rp.Filters,
+		utils.FlagsCfg:         map[string][]string{},
+		utils.TimezoneCfgC:     rp.Timezone,
+		utils.RequestFieldsCfg: []map[string]any{{}},
+		utils.ReplyFieldsCfg:   []map[string]any{},
+	}
+
+	rcv := rp.AsMapInterface("")
+
+	if !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("received %v, expected %v", rcv, exp)
+	}
+}

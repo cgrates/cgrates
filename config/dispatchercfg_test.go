@@ -137,34 +137,65 @@ func TestDispatcherSCfgAsMapInterface(t *testing.T) {
 	}
 }
 
-func TestDispatcherSCfgloadFromJsonCfg2(t *testing.T) {
-	d := DiameterAgentCfg{}
+func TestDispatcherCfgloadFromJsonCfg(t *testing.T) {
+	bl := false
+	slc := []string{"val1", "val2"}
 
-	tests := []struct{
-		name string 
-		js *DiameterAgentJsonCfg
-		sep string 
-		exp string
-	}{
-		{
-			name: "session conns",
-			js: &DiameterAgentJsonCfg{
-				Sessions_conns:       &[]string{"val1", "val2"},
-			},
-			sep: "",
-			exp: "",
-		},
+	d := DispatcherSCfg{}
+
+	js := DispatcherSJsonCfg{
+		Enabled:               &bl,
+		Indexed_selects:       &bl,
+		String_indexed_fields: &slc,
+		Prefix_indexed_fields: &slc,
+		Nested_fields:         &bl,
+		Attributes_conns:      &slc,
 	}
 
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			err := d.loadFromJsonCfg(tt.js, tt.sep)
+	exp := DispatcherSCfg{
+		Enabled  :           bl,
+		IndexedSelects  :    bl,
+		StringIndexedFields : &slc,
+		PrefixIndexedFields : &slc,
+		AttributeSConns  :   slc,
+		NestedFields    :    bl,
+	}
 
-			if err != nil {
-				if err.Error() != tt.exp {
-					t.Fatal(err)
-				}
-			}
-		})
+	err := d.loadFromJsonCfg(&js)
+	if err != nil {
+		t.Error(err)
+	}
+
+	if !reflect.DeepEqual(d, exp) {
+		t.Errorf("received %v, expected %v", d, exp)
+	}
+}
+
+func TestDispatcherSCfgAsMapInterface2(t *testing.T) {
+	bl := false
+	slc := []string{"val1", "val2"}
+
+	dsp := DispatcherSCfg{
+		Enabled  :           bl,
+		IndexedSelects  :    bl,
+		StringIndexedFields : &slc,
+		PrefixIndexedFields : &slc,
+		AttributeSConns  :   slc,
+		NestedFields    :    bl,
+	}
+
+	exp := map[string]any{
+		utils.EnabledCfg:             bl,
+		utils.IndexedSelectsCfg:      bl,
+		utils.StringIndexedFieldsCfg: slc,
+		utils.PrefixIndexedFieldsCfg: slc,
+		utils.AttributeSConnsCfg:     slc,
+		utils.NestedFieldsCfg:        bl,
+	}
+
+	rcv := dsp.AsMapInterface()
+
+	if !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("received %v, expected %v", rcv, exp)
 	}
 }

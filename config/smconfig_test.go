@@ -623,3 +623,14 @@ func TestSessionSCfgAsMapInterface2(t *testing.T) {
 		t.Errorf("expected %v, recived %v", exp, rcv)
 	}
 }
+
+func TestSMConfigGetDefaultUsage(t *testing.T) {
+	s := SessionSCfg{}
+
+	rcv := s.GetDefaultUsage("")
+	exp := s.DefaultUsage["*any"]
+
+	if rcv != exp {
+		t.Errorf("received %v, expected %v", rcv, exp)
+	}
+}

@@ -215,3 +215,44 @@ func TestStorDbCfgClone(t *testing.T) {
 		t.Errorf("didn't clone, recived %v", rcv)
 	}
 }
+
+func TestStoreDbCfgloadFromJsonCfgErrors(t *testing.T) {
+	strErr := "test"
+
+	s := StorDbCfg{}
+
+	tests := []struct {
+		name string
+		arg  *DbJsonCfg
+		err  string
+	}{
+		{
+			name: "Query timeout error",
+			arg: &DbJsonCfg{
+				Query_timeout: &strErr,
+			},
+			err: `time: invalid duration "test"`,
+		},
+		{
+			name: "Items error",
+			arg: &DbJsonCfg{
+				Items: &map[string]*ItemOptJson{
+					"test": {
+						Ttl: &strErr,
+					},
+				},
+			},
+			err: `time: invalid duration "test"`,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			err := s.loadFromJsonCfg(tt.arg)
+
+			if err.Error() != tt.err {
+				t.Errorf("received %s, expected %s", err, tt.err)
+			}
+		})
+	}
+}
