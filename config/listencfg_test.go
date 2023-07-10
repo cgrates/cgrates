@@ -20,6 +20,8 @@ package config
 import (
 	"reflect"
 	"testing"
+
+	"github.com/cgrates/cgrates/utils"
 )
 
 func TestListenCfgloadFromJsonCfg(t *testing.T) {
@@ -60,5 +62,33 @@ func TestListenCfgloadFromJsonCfg(t *testing.T) {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, lstcfg) {
 		t.Errorf("Expected: %+v , received: %+v", expected, lstcfg)
+	}
+}
+
+func TestListenCfgAsMapInterface(t *testing.T) {
+	str := "test"
+
+	lstcfg := ListenCfg{
+		RPCJSONListen:    str,
+		RPCGOBListen:     str,
+		HTTPListen:       str,
+		RPCJSONTLSListen: str,
+		RPCGOBTLSListen:  str,
+		HTTPTLSListen:    str,
+	}
+
+	exp := map[string]any{
+		utils.RPCJSONListenCfg:    lstcfg.RPCJSONListen,
+		utils.RPCGOBListenCfg:     lstcfg.RPCGOBListen,
+		utils.HTTPListenCfg:       lstcfg.HTTPListen,
+		utils.RPCJSONTLSListenCfg: lstcfg.RPCJSONTLSListen,
+		utils.RPCGOBTLSListenCfg:  lstcfg.RPCGOBTLSListen,
+		utils.HTTPTLSListenCfg:    lstcfg.HTTPTLSListen,
+	}
+
+	rcv := lstcfg.AsMapInterface()
+
+	if !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("Expected: %+v , received: %+v", exp, rcv)
 	}
 }
