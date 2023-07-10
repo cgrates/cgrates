@@ -1,5 +1,5 @@
 ---
-- hosts: local
+- hosts: all
   tasks:
   - name: Install RabbitMQ
     import_role:
@@ -7,7 +7,7 @@
 
   - name: Install Kafka
     import_role:
-      name: ../roles/install_kafka
+      name: ../roles/kafka
 
   - name: Install MongoDB
     import_role:
