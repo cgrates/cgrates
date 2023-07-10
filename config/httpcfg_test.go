@@ -97,3 +97,33 @@ func TestHTTPCfgAsMapInterface(t *testing.T) {
 		t.Errorf("Expected: %+v ,\n received: %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
 	}
 }
+
+func TestHTTPCfgAsMapInterface2(t *testing.T) {
+	str := "test"
+	bl := true
+	mp := map[string]string{"test1": "val1", "test": "val2"}
+
+	httpcfg := HTTPCfg{
+		HTTPJsonRPCURL:        str,
+		HTTPWSURL:             str,
+		HTTPFreeswitchCDRsURL: str,
+		HTTPCDRsURL:           str,
+		HTTPUseBasicAuth:      bl,
+		HTTPAuthUsers:         mp,
+	}
+
+	exp := map[string]any{
+		utils.HTTPJsonRPCURLCfg:        httpcfg.HTTPJsonRPCURL,
+		utils.HTTPWSURLCfg:             httpcfg.HTTPWSURL,
+		utils.HTTPFreeswitchCDRsURLCfg: httpcfg.HTTPFreeswitchCDRsURL,
+		utils.HTTPCDRsURLCfg:           httpcfg.HTTPCDRsURL,
+		utils.HTTPUseBasicAuthCfg:      httpcfg.HTTPUseBasicAuth,
+		utils.HTTPAuthUsersCfg:         map[string]any{"test1": "val1", "test": "val2"},
+	}
+
+	rcv := httpcfg.AsMapInterface()
+
+	if !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("Expected: %+v ,\n received: %+v", exp, rcv)
+	}
+}

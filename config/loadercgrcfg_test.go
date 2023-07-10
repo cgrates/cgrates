@@ -106,3 +106,40 @@ func TestLoaderCgrCfgAsMapInterface(t *testing.T) {
 		t.Errorf("Expected: %+v, Received: %+v, at field: %s", utils.ToJSON(eMap["scheduler_conns"]), utils.ToJSON(rcv["scheduler_conns"]), "scheduler_conns")
 	}
 }
+
+func TestLoaderCgrCfgloadFromJsonCfg2(t *testing.T) {
+	str := "test"
+	bl := false
+	slc := []string{"val1", utils.MetaInternal}
+	ld := LoaderCgrCfg{}
+
+	js := LoaderCfgJson{
+		Tpid:            &str,
+		Data_path:       &str,
+		Disable_reverse: &bl,
+		Field_separator: &str,
+		Caches_conns:    &slc,
+		Scheduler_conns: &slc,
+	}
+
+	slc2 := []string{"val1", utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)}
+	slc3 := []string{"val1", utils.ConcatenatedKey(utils.MetaInternal, utils.MetaScheduler)}
+
+	exp := LoaderCgrCfg{
+		TpID:           str,
+		DataPath:       str,
+		DisableReverse: bl,
+		FieldSeparator: 't',
+		CachesConns:    slc2,
+		SchedulerConns: slc3,
+	}
+
+	err := ld.loadFromJsonCfg(&js)
+	if err != nil {
+		t.Error(err)
+	}
+
+	if !reflect.DeepEqual(ld, exp) {
+		t.Errorf("Expected: %+v , received: %+v", exp, ld)
+	}
+}

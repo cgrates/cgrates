@@ -151,3 +151,30 @@ func TestKamAgentCfgAsMapInterface(t *testing.T) {
 		t.Errorf("\nExpected: %+v\nReceived: %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
 	}
 }
+
+func TestKamAgentCfgloadFromJsonCfg2(t *testing.T) {
+	nm := 1
+	str := "test"
+	self := KamConnCfg{}
+
+	js := KamConnJsonCfg{
+		Alias:      &str,
+		Address:    &str,
+		Reconnects: &nm,
+	}
+
+	exp := KamConnCfg{
+		Alias:      str,
+		Address:    str,
+		Reconnects: nm,
+	}
+
+	err := self.loadFromJsonCfg(&js)
+	if err != nil {
+		t.Error(err)
+	}
+
+	if !reflect.DeepEqual(self, exp) {
+		t.Errorf("\nExpected: %+v\nReceived: %+v", exp, self)
+	}
+}

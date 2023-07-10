@@ -124,3 +124,70 @@ func TestResourceSConfigAsMapInterface(t *testing.T) {
 		t.Errorf("\nExpected: %+v\nReceived: %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
 	}
 }
+
+func TestResourcesCfgloadFromJson(t *testing.T) {
+	str := "err"
+	s := ResourceSConfig{}
+
+	tests := []struct {
+		name string
+		arg  *ResourceSJsonCfg
+		err  string
+	}{
+		{
+			name: "conns different from *internal",
+			arg:  &ResourceSJsonCfg{Thresholds_conns: &[]string{str}},
+			err:  "",
+		},
+		{
+			name: "conns different from *internal",
+			arg:  &ResourceSJsonCfg{Store_interval: &str},
+			err:  `time: invalid duration "err"`,
+		},
+		{
+			name: "conns different from *internal",
+			arg:  &ResourceSJsonCfg{String_indexed_fields: &[]string{str}},
+			err:  "",
+		},
+	}
+
+	for _, tt := range tests {
+		err := s.loadFromJsonCfg(tt.arg)
+
+		if err != nil {
+			if err.Error() != tt.err {
+				t.Errorf("\nExpected: %+v\nReceived: %+v", tt.err, err)
+			}
+		}
+	}
+}
+
+func TestResourcesCfgAsMapInterface(t *testing.T) {
+	slc := []string{"test"}
+
+	rlcfg := ResourceSConfig{
+		Enabled:             true,
+		IndexedSelects:      true,
+		ThresholdSConns:     slc,
+		StoreInterval:       1 * time.Second,
+		StringIndexedFields: &slc,
+		PrefixIndexedFields: &slc,
+		NestedFields:        true,
+	}
+
+	exp := map[string]any{
+		utils.EnabledCfg:             rlcfg.Enabled,
+		utils.IndexedSelectsCfg:      rlcfg.IndexedSelects,
+		utils.ThresholdSConnsCfg:     slc,
+		utils.StoreIntervalCfg:       "1s",
+		utils.StringIndexedFieldsCfg: slc,
+		utils.PrefixIndexedFieldsCfg: slc,
+		utils.NestedFieldsCfg:        rlcfg.NestedFields,
+	}
+
+	rcv := rlcfg.AsMapInterface()
+
+	if !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("\nExpected: %+v\nReceived: %+v", exp, rcv)
+	}
+}

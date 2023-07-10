@@ -18,6 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package config
 
 import (
+	"encoding/json"
 	"path"
 	"reflect"
 	"testing"
@@ -1945,5 +1946,235 @@ func TestGeneralCfg(t *testing.T) {
 		t.Error(err)
 	} else if rcv := gencfg.AsMapInterface(); !reflect.DeepEqual(eMap, rcv) {
 		t.Errorf("Expected: %+v\nReceived: %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
+	}
+}
+
+func TestConfigDBFields(t *testing.T) {
+	d := dbDefaults{}
+	str := "test"
+
+	tests := []struct {
+		name string
+		rcv  any
+		exp  any
+	}{
+		{
+			name: "dbName diff from dynamic",
+			rcv:  d.dbName(str, str),
+			exp:  str,
+		},
+		{
+			name: "dbUser diff from dynamic",
+			rcv:  d.dbUser(str, str),
+			exp:  str,
+		},
+		{
+			name: "dbHost diff from dynamic",
+			rcv:  d.dbHost(str, str),
+			exp:  str,
+		},
+		{
+			name: "dbPass diff from dynamic",
+			rcv:  d.dbPass(str, str),
+			exp:  str,
+		},
+		{
+			name: "isHidden true",
+			rcv:  isHidden(".test"),
+			exp:  true,
+		},
+		{
+			name: "isHidden false",
+			rcv:  isHidden("."),
+			exp:  false,
+		},
+	}
+
+	for _, tt := range tests {
+		if tt.rcv != tt.exp {
+			t.Errorf("Expected: %+v\nReceived: %+v", tt.exp, tt.rcv)
+		}
+	}
+}
+
+func TestConfigLoadErrors(t *testing.T) {
+	c := CGRConfig{}
+	js := json.RawMessage([]byte(`test`))
+
+	tests := []struct {
+		name string
+		rcv  error
+		exp  string
+	}{
+		{
+			name: "load general cfg error check",
+			rcv:  c.loadGeneralCfg(&CgrJsonCfg{GENERAL_JSN: &js}),
+			exp:  "invalid character 'e' in literal true (expecting 'r')",
+		},
+		{
+			name: "load cache cfg error check",
+			rcv:  c.loadCacheCfg(&CgrJsonCfg{CACHE_JSN: &js}),
+			exp:  "invalid character 'e' in literal true (expecting 'r')",
+		},
+		{
+			name: "load listen cfg error check",
+			rcv:  c.loadListenCfg(&CgrJsonCfg{LISTEN_JSN: &js}),
+			exp:  "invalid character 'e' in literal true (expecting 'r')",
+		},
+		{
+			name: "load HTTP cfg error check",
+			rcv:  c.loadHTTPCfg(&CgrJsonCfg{HTTP_JSN: &js}),
+			exp:  "invalid character 'e' in literal true (expecting 'r')",
+		},
+		{
+			name: "load StorDB cfg error check",
+			rcv:  c.loadStorDBCfg(&CgrJsonCfg{STORDB_JSN: &js}),
+			exp:  "invalid character 'e' in literal true (expecting 'r')",
+		},
+		{
+			name: "load FilterS cfg error check",
+			rcv:  c.loadFilterSCfg(&CgrJsonCfg{FilterSjsn: &js}),
+			exp:  "invalid character 'e' in literal true (expecting 'r')",
+		},
+		{
+			name: "load RalS cfg error check",
+			rcv:  c.loadRalSCfg(&CgrJsonCfg{RALS_JSN: &js}),
+			exp:  "invalid character 'e' in literal true (expecting 'r')",
+		},
+		{
+			name: "load Scheduler cfg error check",
+			rcv:  c.loadSchedulerCfg(&CgrJsonCfg{SCHEDULER_JSN: &js}),
+			exp:  "invalid character 'e' in literal true (expecting 'r')",
+		},
+		{
+			name: "load drs cfg error check",
+			rcv:  c.loadCdrsCfg(&CgrJsonCfg{CDRS_JSN: &js}),
+			exp:  "invalid character 'e' in literal true (expecting 'r')",
+		},
+		{
+			name: "load SessionS cfg error check",
+			rcv:  c.loadSessionSCfg(&CgrJsonCfg{SessionSJson: &js}),
+			exp:  "invalid character 'e' in literal true (expecting 'r')",
+		},
+		{
+			name: "load KamAgent cfg error check",
+			rcv:  c.loadKamAgentCfg(&CgrJsonCfg{KamailioAgentJSN: &js}),
+			exp:  "invalid character 'e' in literal true (expecting 'r')",
+		},
+		{
+			name: "load FreeswitchAgent cfg error check",
+			rcv:  c.loadFreeswitchAgentCfg(&CgrJsonCfg{FreeSWITCHAgentJSN: &js}),
+			exp:  "invalid character 'e' in literal true (expecting 'r')",
+		},
+		{
+			name: "load AsteriskAgent cfg error check",
+			rcv:  c.loadAsteriskAgentCfg(&CgrJsonCfg{AsteriskAgentJSN: &js}),
+			exp:  "invalid character 'e' in literal true (expecting 'r')",
+		},
+		{
+			name: "load DiameterAgent cfg error check",
+			rcv:  c.loadDiameterAgentCfg(&CgrJsonCfg{DA_JSN: &js}),
+			exp:  "invalid character 'e' in literal true (expecting 'r')",
+		},
+		{
+			name: "load RadiusAgent cfg error check",
+			rcv:  c.loadRadiusAgentCfg(&CgrJsonCfg{RA_JSN: &js}),
+			exp:  "invalid character 'e' in literal true (expecting 'r')",
+		},
+		{
+			name: "load DNSAgent cfg error check",
+			rcv:  c.loadDNSAgentCfg(&CgrJsonCfg{DNSAgentJson: &js}),
+			exp:  "invalid character 'e' in literal true (expecting 'r')",
+		},
+		{
+			name: "load HttpAgent cfg error check",
+			rcv:  c.loadHttpAgentCfg(&CgrJsonCfg{HttpAgentJson: &js}),
+			exp:  "invalid character 'e' in literal true (expecting 'r')",
+		},
+		{
+			name: "load AttributeS cfg error check",
+			rcv:  c.loadAttributeSCfg(&CgrJsonCfg{ATTRIBUTE_JSN: &js}),
+			exp:  "invalid character 'e' in literal true (expecting 'r')",
+		},
+		{
+			name: "load ChargerS cfg error check",
+			rcv:  c.loadChargerSCfg(&CgrJsonCfg{ChargerSCfgJson: &js}),
+			exp:  "invalid character 'e' in literal true (expecting 'r')",
+		},
+		{
+			name: "load ResourceS cfg error check",
+			rcv:  c.loadResourceSCfg(&CgrJsonCfg{RESOURCES_JSON: &js}),
+			exp:  "invalid character 'e' in literal true (expecting 'r')",
+		},
+		{
+			name: "load StatS cfg error check",
+			rcv:  c.loadStatSCfg(&CgrJsonCfg{STATS_JSON: &js}),
+			exp:  "invalid character 'e' in literal true (expecting 'r')",
+		},
+		{
+			name: "load ThresholdS cfg error check",
+			rcv:  c.loadThresholdSCfg(&CgrJsonCfg{THRESHOLDS_JSON: &js}),
+			exp:  "invalid character 'e' in literal true (expecting 'r')",
+		},
+		{
+			name: "load SupplierS cfg error check",
+			rcv:  c.loadSupplierSCfg(&CgrJsonCfg{SupplierSJson: &js}),
+			exp:  "invalid character 'e' in literal true (expecting 'r')",
+		},
+		{
+			name: "load Mailer cfg error check",
+			rcv:  c.loadMailerCfg(&CgrJsonCfg{MAILER_JSN: &js}),
+			exp:  "invalid character 'e' in literal true (expecting 'r')",
+		},
+		{
+			name: "load SureTax cfg error check",
+			rcv:  c.loadSureTaxCfg(&CgrJsonCfg{SURETAX_JSON: &js}),
+			exp:  "invalid character 'e' in literal true (expecting 'r')",
+		},
+		{
+			name: "load DispatcherS cfg error check",
+			rcv:  c.loadDispatcherSCfg(&CgrJsonCfg{DispatcherSJson: &js}),
+			exp:  "invalid character 'e' in literal true (expecting 'r')",
+		},
+		{
+			name: "load MigratorCgr cfg error check",
+			rcv:  c.loadMigratorCgrCfg(&CgrJsonCfg{CgrMigratorCfgJson: &js}),
+			exp:  "invalid character 'e' in literal true (expecting 'r')",
+		},
+		{
+			name: "load TlsCgr cfg error check",
+			rcv:  c.loadTlsCgrCfg(&CgrJsonCfg{TlsCfgJson: &js}),
+			exp:  "invalid character 'e' in literal true (expecting 'r')",
+		},
+		{
+			name: "load AnalyzerCgr cfg error check",
+			rcv:  c.loadAnalyzerCgrCfg(&CgrJsonCfg{AnalyzerCfgJson: &js}),
+			exp:  "invalid character 'e' in literal true (expecting 'r')",
+		},
+		{
+			name: "load Apier cfg error check",
+			rcv:  c.loadApierCfg(&CgrJsonCfg{ApierS: &js}),
+			exp:  "invalid character 'e' in literal true (expecting 'r')",
+		},
+		{
+			name: "load Apier cfg error check",
+			rcv:  c.loadApierCfg(&CgrJsonCfg{ApierS: &js}),
+			exp:  "invalid character 'e' in literal true (expecting 'r')",
+		},
+		{
+			name: "load Ers cfg error check",
+			rcv:  c.loadErsCfg(&CgrJsonCfg{ERsJson: &js}),
+			exp:  "invalid character 'e' in literal true (expecting 'r')",
+		},
+	}
+
+	for _, tt := range tests {
+		if tt.rcv != nil {
+			if tt.rcv.Error() != tt.exp {
+				t.Errorf("Expected: %+v\nReceived: %+v", tt.exp, tt.rcv)
+			}
+		} else {
+			t.Error("was expecting an error")
+		}
 	}
 }

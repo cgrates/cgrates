@@ -81,3 +81,41 @@ func TestSchedulerCfgAsMapInterface(t *testing.T) {
 		t.Errorf("\nExpected: %+v\nReceived: %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
 	}
 }
+
+func TestSchedulerCfgloadFromJsonCfg2(t *testing.T) {
+	s := SchedulerCfg{}
+
+	tests := []struct{
+		name string
+		arg *SchedulerJsonCfg
+		err string
+	}{
+		{
+			name: "cdrs conns diff from *internal",
+			arg: &SchedulerJsonCfg{Cdrs_conns: &[]string{"test"}},
+			err: "",
+		},
+		{
+			name: "cdrs conns equal to *internal",
+			arg: &SchedulerJsonCfg{Cdrs_conns: &[]string{"*internal"}},
+			err: "",
+		},
+		{
+			name: "filers with value",
+			arg: &SchedulerJsonCfg{Filters: &[]string{"test"}},
+			err: "",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			err := s.loadFromJsonCfg(tt.arg)
+
+			if err != nil {
+				if err.Error() != tt.err {
+					t.Errorf("\nExpected: %+v\nReceived: %+v", tt.err, err)
+				}
+			}
+		})
+	}
+}
