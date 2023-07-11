@@ -1,0 +1,20 @@
+---
+- name: Create the PostgreSQL repository configuration
+  become: yes
+  ansible.builtin.copy:
+    content: "deb {{ postgresql_repo }} {{ ansible_distribution_release }}-pgdg main"
+    dest: /etc/apt/sources.list.d/pgdg.list
+  when: not (ansible.builtin.stat.exists is defined and ansible.builtin.stat.exists)
+
+- name: Import the PostgreSQL repository signing key
+  become: yes
+  ansible.builtin.apt_key:
+    url: "{{ postgresql_key_url }}"
+    state: present
+
+- name: Update the package lists and ensure PostgreSQL is the latest version
+  become: yes
+  ansible.builtin.apt:
+    name: "{{ postgresql_version }}"
+    state: latest
+    update_cache: yes
