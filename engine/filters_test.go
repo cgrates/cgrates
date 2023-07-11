@@ -2579,3 +2579,416 @@ func TestComputeResourceIndexesErrs(t *testing.T) {
 		})
 	}
 }
+
+func TestFiltersPassErrors(t *testing.T) {
+
+	type args struct {
+		rf   string
+		fn   string
+		vals []string
+	}
+
+	type exp struct {
+		rcv *FilterRule
+		err string
+	}
+
+	tests := []struct {
+		name string
+		args args
+		exp  exp
+	}{
+		{
+			name: "unsupported filters error",
+			args: args{rf: "test", fn: "test", vals: []string{"val1"}},
+			exp:  exp{rcv: nil, err: "Unsupported filter Type: test"},
+		},
+		{
+			name: "element is mandatory error",
+			args: args{rf: "*string", fn: "", vals: []string{"val1"}},
+			exp:  exp{rcv: nil, err: "Element is mandatory for Type: *string"},
+		},
+		{
+			name: "values is mandatory error",
+			args: args{rf: "*string", fn: "test", vals: []string{}},
+			exp:  exp{rcv: nil, err: "Values is mandatory for Type: *string"},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			rcv, err := NewFilterRule(tt.args.rf, tt.args.fn, tt.args.vals)
+
+			if err != nil {
+				if err.Error() != tt.exp.err {
+					t.Errorf("expected error: %v, received: %v", tt.exp.err, err)
+				}
+			}
+
+			if rcv != nil {
+				t.Error(rcv)
+			}
+		})
+	}
+}
+
+func TestFiltersPass(t *testing.T) {
+	type args struct {
+		fln *utils.MapStorage
+		flv []utils.DataProvider
+	}
+	type exp struct {
+		r   bool
+		err string
+	}
+
+	f := FilterRule{
+		Type: "*timings",
+	}
+	f2 := FilterRule{
+		Type: "*test",
+	}
+
+	tests := []struct {
+		name string
+		args args
+		exp  exp
+	}{
+		{
+			name: "meta timing error",
+			args: args{nil, nil},
+			exp:  exp{false, "NOT_IMPLEMENTED"},
+		},
+		{
+			name: "default error",
+			args: args{nil, nil},
+			exp:  exp{false, "NOT_IMPLEMENTED:*test"},
+		},
+	}
+
+	for i, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			var rcv bool
+			var err error
+			if i == 0 {
+				rcv, err = f.Pass(tt.args.fln, tt.args.flv)
+			} else {
+				rcv, err = f2.Pass(tt.args.fln, tt.args.flv)
+			}
+
+			if err != nil {
+				if err.Error() != tt.exp.err {
+					t.Errorf("expected error: %v, received: %v", tt.exp.err, err)
+				}
+			}
+
+			if rcv != tt.exp.r {
+				t.Error(rcv)
+			}
+		})
+	}
+}
+
+func TestFilterspassString(t *testing.T) {
+	f := FilterRule{
+		Element: "~test.test[0` ",
+	}
+
+	rcv, err := f.passString(utils.MapStorage{}, []utils.DataProvider{})
+
+	if err != nil {
+		if err.Error() != "" {
+			t.Error(err)
+		}
+	}
+
+	if rcv != false {
+		t.Error("Recived:", rcv)
+	}
+
+	f2 := FilterRule{
+		Element: "~test.test",
+	}
+
+	rcv, err = f2.passString(utils.MapStorage{"test": "test"}, []utils.DataProvider{})
+
+	if err != nil {
+		if err.Error() != "WRONG_PATH" {
+			t.Error(err)
+		}
+	}
+
+	if rcv != false {
+		t.Error("Recived:", rcv)
+	}
+}
+
+func TestFilterspassExists(t *testing.T) {
+	f := FilterRule{
+		Element: "~test.test",
+	}
+
+	rcv, err := f.passExists(utils.MapStorage{"test": "test"})
+
+	if err != nil {
+		if err.Error() != "WRONG_PATH" {
+			t.Error(err)
+		}
+	}
+
+	if rcv != false {
+		t.Error("Recived:", rcv)
+	}
+}
+
+func TestFilterspassEmpty(t *testing.T) {
+	f := FilterRule{
+		Element: "~test.test[0` ",
+	}
+
+	rcv, err := f.passEmpty(utils.MapStorage{})
+
+	if err != nil {
+		if err.Error() != "" {
+			t.Error(err)
+		}
+	}
+
+	if rcv != true {
+		t.Error("Recived:", rcv)
+	}
+
+	f2 := FilterRule{
+		Element: "~test.test",
+	}
+
+	rcv, err = f2.passEmpty(utils.MapStorage{"test": "test"})
+
+	if err != nil {
+		if err.Error() != "WRONG_PATH" {
+			t.Error(err)
+		}
+	}
+
+	if rcv != false {
+		t.Error("Recived:", rcv)
+	}
+}
+
+func TestFilterspassStringPrefix(t *testing.T) {
+	f := FilterRule{
+		Element: "~test.test",
+	}
+
+	rcv, err := f.passStringPrefix(utils.MapStorage{"test": "test"}, []utils.DataProvider{})
+
+	if err != nil {
+		if err.Error() != "WRONG_PATH" {
+			t.Error(err)
+		}
+	}
+
+	if rcv != false {
+		t.Error("Recived:", rcv)
+	}
+
+	f2 := FilterRule {
+		Values:    []string{"~test.test"},
+	}
+
+	rcv, err = f2.passStringPrefix(utils.MapStorage{"test": "test"}, []utils.DataProvider{utils.MapStorage{"test": "test"}})
+
+	if err != nil {
+		if err.Error() != "" {
+			t.Error(err)
+		}
+	}
+
+	if rcv != false {
+		t.Error("Recived:", rcv)
+	}
+}
+
+func TestFilterspassStringSuffix(t *testing.T) {
+	f := FilterRule{
+		Element: "~test.test",
+	}
+
+	rcv, err := f.passStringSuffix(utils.MapStorage{"test": "test"}, []utils.DataProvider{})
+
+	if err != nil {
+		if err.Error() != "WRONG_PATH" {
+			t.Error(err)
+		}
+	}
+
+	if rcv != false {
+		t.Error("Recived:", rcv)
+	}
+
+	f2 := FilterRule {
+		Values:    []string{"~test.test"},
+	}
+
+	rcv, err = f2.passStringSuffix(utils.MapStorage{"test": "test"}, []utils.DataProvider{utils.MapStorage{"test": "test"}})
+
+	if err != nil {
+		if err.Error() != "" {
+			t.Error(err)
+		}
+	}
+
+	if rcv != false {
+		t.Error("Recived:", rcv)
+	}
+}
+
+func TestFilterspassDestination(t *testing.T) {
+	f := FilterRule{
+		Element: "~test.test",
+	}
+
+	rcv, err := f.passDestinations(utils.MapStorage{"test": "test"}, []utils.DataProvider{})
+
+	if err != nil {
+		if err.Error() != "WRONG_PATH" {
+			t.Error(err)
+		}
+	}
+
+	if rcv != false {
+		t.Error("Recived:", rcv)
+	}
+
+	f2 := FilterRule{
+		Element: "~test.test[0` ",
+	}
+
+	rcv, err = f2.passDestinations(utils.MapStorage{}, []utils.DataProvider{})
+
+	if err != nil {
+		if err.Error() != "" {
+			t.Error(err)
+		}
+	}
+
+	if rcv != false {
+		t.Error("Recived:", rcv)
+	}
+}
+
+func TestFilterspassGreaterThan(t *testing.T) {
+	f := FilterRule{
+		Element: "~test.test",
+	}
+
+	rcv, err := f.passGreaterThan(utils.MapStorage{"test": "test"}, []utils.DataProvider{})
+
+	if err != nil {
+		if err.Error() != "WRONG_PATH" {
+			t.Error(err)
+		}
+	}
+
+	if rcv != false {
+		t.Error("Recived:", rcv)
+	}
+
+	f2 := FilterRule{
+		Values: []string{"~test.test"},
+	}
+
+	rcv, err = f2.passGreaterThan(utils.MapStorage{"test": "test"}, []utils.DataProvider{utils.MapStorage{"test": "test"}})
+
+	if err != nil {
+		if err.Error() != "WRONG_PATH" {
+			t.Error(err)
+		}
+	}
+
+	if rcv != false {
+		t.Error("Recived:", rcv)
+	}
+
+	f4 := FilterRule{
+		Values: []string{"val1", "val2"},
+	}
+
+	rcv, err = f4.passGreaterThan(utils.MapStorage{}, []utils.DataProvider{utils.MapStorage{"test": "test"}})
+
+	if err != nil {
+		if err.Error() != "incomparable: <0001-01-01 00:00:00 +0000 UTC> with <<nil>>" {
+			t.Error(err)
+		}
+	}
+
+	if rcv != false {
+		t.Error("Recived:", rcv)
+	}
+}
+
+func TestFilterspassEqualTo(t *testing.T) {
+	f := FilterRule{
+		Element: "~test.test",
+	}
+
+	rcv, err := f.passEqualTo(utils.MapStorage{"test": "test"}, []utils.DataProvider{})
+
+	if err != nil {
+		if err.Error() != "WRONG_PATH" {
+			t.Error(err)
+		}
+	}
+
+	if rcv != false {
+		t.Error("Recived:", rcv)
+	}
+
+	f2 := FilterRule{
+		Values: []string{"~test.test"},
+	}
+
+	rcv, err = f2.passEqualTo(utils.MapStorage{"test": "test"}, []utils.DataProvider{utils.MapStorage{"test": "test"}})
+
+	if err != nil {
+		if err.Error() != "WRONG_PATH" {
+			t.Error(err)
+		}
+	}
+
+	if rcv != false {
+		t.Error("Recived:", rcv)
+	}
+
+	f3 := FilterRule{
+		Element: "~test.test",
+	}
+
+	rcv, err = f3.passEqualTo(utils.MapStorage{}, []utils.DataProvider{utils.MapStorage{"test": "test"}})
+
+	if err != nil {
+		if err.Error() != "WRONG_PATH" {
+			t.Error(err)
+		}
+	}
+
+	if rcv != false {
+		t.Error("Recived:", rcv)
+	}
+
+	f4 := FilterRule{
+		Values: []string{"val1", "val2"},
+	}
+
+	rcv, err = f4.passEqualTo(utils.MapStorage{}, []utils.DataProvider{utils.MapStorage{"test": "test"}})
+
+	if err != nil {
+		if err.Error() != "incomparable: <0001-01-01 00:00:00 +0000 UTC> with <<nil>>" {
+			t.Error(err)
+		}
+	}
+
+	if rcv != false {
+		t.Error("Recived:", rcv)
+	}
+}
