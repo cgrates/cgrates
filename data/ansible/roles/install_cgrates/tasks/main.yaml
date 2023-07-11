@@ -47,8 +47,8 @@
   loop:
     - { db: "mysql", cmd: "sh setup_ers_db.sh root CGRateS.org localhost" }
     - { db: "mysql", cmd: "sh setup_cgr_db.sh root CGRateS.org localhost" }
-    - { db: "postgres", cmd: "sh create_db_with_users.sh" }
-    - { db: "postgres", cmd: "sh create_ers_db.sh" }
+    - { db: "postgres", cmd: "sh setup_cgr_db.sh" }
+    # - { db: "postgres", cmd: "sh create_ers_db.sh" }
     - { db: "mongo", cmd: "sh setup_cgr_db.sh" }
 
 - name: Set versions
