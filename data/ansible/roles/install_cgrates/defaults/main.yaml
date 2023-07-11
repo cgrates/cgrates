@@ -9,7 +9,5 @@ cgrates_dependencies:
   - git
   - redis-server
   - mariadb-server
-  - postgresql
-  - postgresql-contrib
   - make
   - gcc
