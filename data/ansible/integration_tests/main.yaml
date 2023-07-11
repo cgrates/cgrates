@@ -13,6 +13,10 @@
     import_role:
       name: ../roles/install_mongodb
 
+  - name: Install PostgreSQL
+    import_role:
+      name: ../roles/postgresql
+
   - name: Install Go
     import_role:
       name: ../roles/install_go
