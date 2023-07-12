@@ -876,6 +876,11 @@ type APIBanJsonCfg struct {
 	Keys    *[]string
 }
 
+type SentryPeerJsonCfg struct {
+	Token *string
+	Addr  *string
+}
+
 type CoreSJsonCfg struct {
 	Caps                *int
 	Caps_strategy       *string

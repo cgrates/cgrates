@@ -1157,6 +1157,7 @@ const (
 	MetaEqual              = "*eq"
 	MetaIPNet              = "*ipnet"
 	MetaAPIBan             = "*apiban"
+	MetaSentryPeer         = "*sentrypeer"
 	MetaActivationInterval = "*ai"
 	MetaRegex              = "*regex"
 
@@ -1173,6 +1174,7 @@ const (
 	MetaNotEqual              = "*noteq"
 	MetaNotIPNet              = "*notipnet"
 	MetaNotAPIBan             = "*notapiban"
+	MetaNotSentryPeer         = "*notsentrypeer"
 	MetaNotActivationInterval = "*notai"
 	MetaNotRegex              = "*notregex"
 
