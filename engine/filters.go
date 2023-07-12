@@ -351,6 +351,8 @@ func (fltr *FilterRule) Pass(dDP utils.DataProvider) (result bool, err error) {
 		result, err = fltr.passIPNet(dDP)
 	case utils.MetaAPIBan, utils.MetaNotAPIBan:
 		result, err = fltr.passAPIBan(dDP)
+	case utils.MetaSentryPeer, utils.MetaNotSentryPeer:
+		result, err = fltr.passSentryPeer(dDP)
 	case utils.MetaActivationInterval, utils.MetaNotActivationInterval:
 		result, err = fltr.passActivationInterval(dDP)
 	case utils.MetaRegex, utils.MetaNotRegex:
@@ -644,6 +646,20 @@ func (fltr *FilterRule) passAPIBan(dDP utils.DataProvider) (bool, error) {
 		return false, fmt.Errorf("invalid value for apiban filter: <%s>", fltr.Values[0])
 	}
 	return dm.GetAPIBan(strVal, config.CgrConfig().APIBanCfg().Keys, fltr.Values[0] != utils.MetaAll, true, true)
+}
+
+func (fltr *FilterRule) passSentryPeer(dDP utils.DataProvider) (bool, error) {
+	strVal, err := fltr.rsrElement.ParseDataProvider(dDP)
+	if err != nil {
+		if err == utils.ErrNotFound {
+			return false, nil
+		}
+		return false, err
+	}
+	if fltr.Values[0] != "phone-numbers" && fltr.Values[0] != "ip-addresses" {
+		return false, fmt.Errorf("invalid value for sentrypeer filter: <%s>", fltr.Values[0])
+	}
+	return GetSentryPeer(strVal, config.CgrConfig().SentryPeerCfg().Addr, config.CgrConfig().SentryPeerCfg().Token, fltr.Values[0], true, true)
 }
 
 func parseTime(rsr *config.RSRParser, dDp utils.DataProvider) (_ time.Time, err error) {

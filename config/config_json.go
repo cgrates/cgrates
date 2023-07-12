@@ -64,6 +64,7 @@ const (
 	TemplatesJson      = "templates"
 	ConfigSJson        = "configs"
 	APIBanCfgJson      = "apiban"
+	SentryPeerCfgJson  = "sentrypeer"
 	CoreSCfgJson       = "cores"
 )
 
@@ -72,7 +73,7 @@ var (
 		CACHE_JSN, FilterSjsn, RALS_JSN, CDRS_JSN, ERsJson, SessionSJson, AsteriskAgentJSN, FreeSWITCHAgentJSN,
 		KamailioAgentJSN, DA_JSN, RA_JSN, HttpAgentJson, DNSAgentJson, ATTRIBUTE_JSN, ChargerSCfgJson, RESOURCES_JSON, STATS_JSON,
 		THRESHOLDS_JSON, RouteSJson, LoaderJson, MAILER_JSN, SURETAX_JSON, CgrLoaderCfgJson, CgrMigratorCfgJson, DispatcherSJson,
-		AnalyzerCfgJson, ApierS, EEsJson, SIPAgentJson, RegistrarCJson, TemplatesJson, ConfigSJson, APIBanCfgJson, CoreSCfgJson}
+		AnalyzerCfgJson, ApierS, EEsJson, SIPAgentJson, RegistrarCJson, TemplatesJson, ConfigSJson, APIBanCfgJson, SentryPeerCfgJson, CoreSCfgJson}
 )
 
 // Loads the json config out of io.Reader, eg other sources than file, maybe over http
@@ -553,6 +554,18 @@ func (jsnCfg CgrJsonCfg) ApiBanCfgJson() (*APIBanJsonCfg, error) {
 		return nil, nil
 	}
 	cfg := new(APIBanJsonCfg)
+	if err := json.Unmarshal(*rawCfg, cfg); err != nil {
+		return nil, err
+	}
+	return cfg, nil
+}
+
+func (jsnCfg CgrJsonCfg) SentryPeerJson() (*SentryPeerJsonCfg, error) {
+	rawCfg, hasKey := jsnCfg[SentryPeerCfgJson]
+	if !hasKey {
+		return nil, nil
+	}
+	cfg := new(SentryPeerJsonCfg)
 	if err := json.Unmarshal(*rawCfg, cfg); err != nil {
 		return nil, err
 	}

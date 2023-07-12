@@ -175,6 +175,7 @@ func newCGRConfig(config []byte) (cfg *CGRConfig, err error) {
 	cfg.sipAgentCfg = new(SIPAgentCfg)
 	cfg.configSCfg = new(ConfigSCfg)
 	cfg.apiBanCfg = new(APIBanCfg)
+	cfg.sentryPeerCfg = new(SentryPeerCfg)
 	cfg.coreSCfg = new(CoreSCfg)
 	cfg.dfltEvExp = &EventExporterCfg{Opts: &EventExporterOpts{
 		Els:   new(ElsOpts),
@@ -325,6 +326,7 @@ type CGRConfig struct {
 	sipAgentCfg      *SIPAgentCfg      // SIPAgent config
 	configSCfg       *ConfigSCfg       // ConfigS config
 	apiBanCfg        *APIBanCfg        // APIBan config
+	sentryPeerCfg    *SentryPeerCfg    //SentryPeer config
 	coreSCfg         *CoreSCfg         // CoreS config
 
 	cacheDP    map[string]utils.MapStorage
@@ -398,7 +400,7 @@ func (cfg *CGRConfig) loadFromJSONCfg(jsnCfg *CgrJsonCfg) (err error) {
 		cfg.loadLoaderCgrCfg, cfg.loadMigratorCgrCfg, cfg.loadTLSCgrCfg,
 		cfg.loadAnalyzerCgrCfg, cfg.loadApierCfg, cfg.loadErsCfg, cfg.loadEesCfg,
 		cfg.loadSIPAgentCfg, cfg.loadRegistrarCCfg,
-		cfg.loadConfigSCfg, cfg.loadAPIBanCgrCfg, cfg.loadCoreSCfg} {
+		cfg.loadConfigSCfg, cfg.loadAPIBanCgrCfg, cfg.loadSentryPeerCgrCfg, cfg.loadCoreSCfg} {
 		if err = loadFunc(jsnCfg); err != nil {
 			return
 		}
@@ -777,6 +779,13 @@ func (cfg *CGRConfig) loadAPIBanCgrCfg(jsnCfg *CgrJsonCfg) (err error) {
 	}
 	return cfg.apiBanCfg.loadFromJSONCfg(jsnAPIBanCfg)
 }
+func (cfg *CGRConfig) loadSentryPeerCgrCfg(jsnCfg *CgrJsonCfg) (err error) {
+	var jsnSentryPeerCfg *SentryPeerJsonCfg
+	if jsnSentryPeerCfg, err = jsnCfg.SentryPeerJson(); err != nil {
+		return
+	}
+	return cfg.sentryPeerCfg.loadFromJSONCfg(jsnSentryPeerCfg)
+}
 
 // loadApierCfg loads the Apier section of the configuration
 func (cfg *CGRConfig) loadApierCfg(jsnCfg *CgrJsonCfg) (err error) {
@@ -1136,6 +1145,11 @@ func (cfg *CGRConfig) APIBanCfg() *APIBanCfg {
 	defer cfg.lks[APIBanCfgJson].Unlock()
 	return cfg.apiBanCfg
 }
+func (cfg *CGRConfig) SentryPeerCfg() *SentryPeerCfg {
+	cfg.lks[SentryPeerCfgJson].Lock()
+	defer cfg.lks[SentryPeerCfgJson].Unlock()
+	return cfg.sentryPeerCfg
+}
 
 // CoreSCfg reads the CoreS configuration
 func (cfg *CGRConfig) CoreSCfg() *CoreSCfg {
@@ -1254,6 +1268,7 @@ func (cfg *CGRConfig) getLoadFunctions() map[string]func(*CgrJsonCfg) error {
 		TemplatesJson:      cfg.loadTemplateSCfg,
 		ConfigSJson:        cfg.loadConfigSCfg,
 		APIBanCfgJson:      cfg.loadAPIBanCgrCfg,
+		SentryPeerCfgJson:  cfg.loadSentryPeerCgrCfg,
 		CoreSCfgJson:       cfg.loadCoreSCfg,
 	}
 }
@@ -1450,6 +1465,7 @@ func (cfg *CGRConfig) reloadSections(sections ...string) {
 		case TemplatesJson:
 		case TlsCfgJson: // nothing to reload
 		case APIBanCfgJson: // nothing to reload
+		case SentryPeerCfgJson:
 		case CoreSCfgJson: // nothing to reload
 		case HTTP_JSN:
 			cfg.rldChans[HTTP_JSN] <- struct{}{}
@@ -1547,6 +1563,7 @@ func (cfg *CGRConfig) AsMapInterface(separator string) (mp map[string]any) {
 		ApierS:             cfg.apier.AsMapInterface(),
 		ERsJson:            cfg.ersCfg.AsMapInterface(separator),
 		APIBanCfgJson:      cfg.apiBanCfg.AsMapInterface(),
+		SentryPeerCfgJson:  cfg.sentryPeerCfg.AsMapInterface(),
 		EEsJson:            cfg.eesCfg.AsMapInterface(separator),
 		SIPAgentJson:       cfg.sipAgentCfg.AsMapInterface(separator),
 		TemplatesJson:      cfg.templates.AsMapInterface(separator),
@@ -1704,6 +1721,8 @@ func (cfg *CGRConfig) V1GetConfig(args *SectionWithAPIOpts, reply *map[string]an
 		mp = cfg.ConfigSCfg().AsMapInterface()
 	case APIBanCfgJson:
 		mp = cfg.APIBanCfg().AsMapInterface()
+	case SentryPeerCfgJson:
+		mp = cfg.SentryPeerCfg().AsMapInterface()
 	case HttpAgentJson:
 		mp = cfg.HTTPAgentCfg().AsMapInterface(cfg.GeneralCfg().RSRSep)
 	case MAILER_JSN:

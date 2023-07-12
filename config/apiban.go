@@ -61,3 +61,36 @@ func (ban APIBanCfg) Clone() (cln *APIBanCfg) {
 	}
 	return
 }
+
+type SentryPeerCfg struct {
+	Token string
+	Addr  string
+}
+
+func (sp *SentryPeerCfg) loadFromJSONCfg(jsnCfg *SentryPeerJsonCfg) (err error) {
+	if jsnCfg == nil {
+		return
+	}
+	if jsnCfg.Addr != nil {
+		sp.Addr = *jsnCfg.Addr
+	}
+	if jsnCfg.Token != nil {
+		sp.Token = *jsnCfg.Token
+	}
+	return
+}
+
+func (sp *SentryPeerCfg) AsMapInterface() map[string]any {
+	return map[string]any{
+		"Addres": sp.Addr,
+		"Token":  sp.Token,
+	}
+}
+
+func (sp *SentryPeerCfg) Clone() (cln *SentryPeerCfg) {
+	cln = &SentryPeerCfg{
+		Addr:  sp.Addr,
+		Token: sp.Token,
+	}
+	return
+}

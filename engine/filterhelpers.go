@@ -19,6 +19,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"fmt"
+	"net/http"
+
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/guardian"
 	"github.com/cgrates/cgrates/utils"
@@ -116,4 +119,53 @@ func WeightFromDynamics(dWs []*utils.DynamicWeight,
 		}
 	}
 	return 0.0, nil
+}
+
+func GetSentryPeer(val, addr, token, path string, cacheRead, cacheWrite bool) (found bool, err error) {
+	valpath := utils.ConcatenatedKey(path, val)
+	if cacheRead {
+		if x, ok := Cache.Get(utils.MetaSentryPeer, valpath); ok && x != nil { // Attempt to find in cache first
+			return x.(bool), nil
+		}
+	}
+	var req *http.Request
+	if req, err = http.NewRequest("GET", addr+path+"/"+val, nil); err != nil {
+		return
+	}
+	req.Header = http.Header{
+		"Authorization": {fmt.Sprintf("Bearer %s", token)},
+	}
+	var resp *http.Response
+	resp, err = http.DefaultClient.Do(req)
+	if err != nil {
+		return false, err
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode >= 200 && resp.StatusCode < 300 {
+		if cacheWrite {
+			if err = Cache.Set(utils.MetaSentryPeer, valpath, true, nil, true, utils.NonTransactional); err != nil {
+				return false, err
+			}
+		}
+		return true, nil
+	} else {
+		switch {
+		case resp.StatusCode == http.StatusNotFound:
+			if cacheWrite {
+				if err = Cache.Set(utils.MetaSentryPeer, valpath, false, nil, true, utils.NonTransactional); err != nil {
+					return false, err
+				}
+			}
+			return
+		case resp.StatusCode >= 400 && resp.StatusCode < 500:
+			err = fmt.Errorf("client error<%s>", resp.Status)
+			return
+		case resp.StatusCode >= 500:
+			err = fmt.Errorf("server error<%s>", resp.Status)
+			return
+		default:
+			err = fmt.Errorf("unexpected status code<%s>", resp.Status)
+		}
+	}
+	return
 }
