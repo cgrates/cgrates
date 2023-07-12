@@ -28,6 +28,7 @@ import (
 	"os"
 	"runtime"
 	"runtime/pprof"
+	"sync"
 	"time"
 
 	"github.com/cgrates/cgrates/config"
@@ -73,17 +74,22 @@ var (
 		"The amount of wait time until timeout for reading operations")
 	dbRedisWriteTimeout = cgrTesterFlags.Duration(utils.RedisWriteTimeoutCfg, cgrConfig.DataDbCfg().Opts.RedisWriteTimeout,
 		"The amount of wait time until timeout for writing operations")
-	raterAddress = cgrTesterFlags.String("rater_address", "", "Rater address for remote tests. Empty for internal rater.")
-	tor          = cgrTesterFlags.String("tor", utils.MetaVoice, "The type of record to use in queries.")
-	category     = cgrTesterFlags.String("category", "call", "The Record category to test.")
-	tenant       = cgrTesterFlags.String("tenant", "cgrates.org", "The type of record to use in queries.")
-	subject      = cgrTesterFlags.String("subject", "1001", "The rating subject to use in queries.")
-	destination  = cgrTesterFlags.String("destination", "1002", "The destination to use in queries.")
-	json         = cgrTesterFlags.Bool("json", false, "Use JSON RPC")
-	version      = cgrTesterFlags.Bool("version", false, "Prints the application version.")
-	usage        = cgrTesterFlags.String("usage", "1m", "The duration to use in call simulation.")
-	fPath        = cgrTesterFlags.String("file_path", "", "read requests from file with path")
-	reqSep       = cgrTesterFlags.String("req_separator", "\n\n", "separator for requests in file")
+	raterAddress   = cgrTesterFlags.String("rater_address", "", "Rater address for remote tests. Empty for internal rater.")
+	cps            = cgrTesterFlags.Int("cps", 100, "Number of calls to be initiated/second.")
+	minUsage       = cgrTesterFlags.Duration("min_usage", 1*time.Second, "Minimum usage a session can have")
+	maxUsage       = cgrTesterFlags.Duration("max_usage", 5*time.Second, "Maximum usage a session can have")
+	updateInterval = cgrTesterFlags.Duration("update_interval", 1*time.Second, "Time duration added for each session update")
+
+	tor         = cgrTesterFlags.String("tor", utils.MetaVoice, "The type of record to use in queries.")
+	category    = cgrTesterFlags.String("category", "call", "The Record category to test.")
+	tenant      = cgrTesterFlags.String("tenant", "cgrates.org", "The type of record to use in queries.")
+	subject     = cgrTesterFlags.String("subject", "1001", "The rating subject to use in queries.")
+	destination = cgrTesterFlags.String("destination", "1002", "The destination to use in queries.")
+	json        = cgrTesterFlags.Bool("json", false, "Use JSON RPC")
+	version     = cgrTesterFlags.Bool("version", false, "Prints the application version.")
+	usage       = cgrTesterFlags.String("usage", "1m", "The duration to use in call simulation.")
+	fPath       = cgrTesterFlags.String("file_path", "", "read requests from file with path")
+	reqSep      = cgrTesterFlags.String("req_separator", "\n\n", "separator for requests in file")
 
 	err error
 )
@@ -108,6 +114,9 @@ func durInternalRater(cd *engine.CallDescriptorWithAPIOpts) (time.Duration, erro
 	start := time.Now()
 	for i := 0; i < *runs; i++ {
 		result, err = cd.GetCost()
+		if err != nil {
+			return 0, err
+		}
 		if *memprofile != "" {
 			runtime.MemProfileRate = 1
 			runtime.GC()
@@ -265,6 +274,9 @@ func main() {
 	var err error
 	tstart := time.Now()
 	timeparsed, err = utils.ParseDurationWithNanosecs(*usage)
+	if err != nil {
+		return
+	}
 	tend := tstart.Add(timeparsed)
 	cd := &engine.CallDescriptorWithAPIOpts{
 		CallDescriptor: &engine.CallDescriptor{
@@ -289,4 +301,18 @@ func main() {
 	} else {
 		log.Printf("Elapsed: %s resulted: %f req/s.", duration, float64(*runs)/duration.Seconds())
 	}
+
+	var wg sync.WaitGroup
+	for i := 0; i < *cps; i++ {
+		wg.Add(1)
+		log.Println("run num: ", i)
+
+		go func() {
+			defer wg.Done()
+			if err = callSession(); err != nil {
+				log.Fatal(err.Error())
+			}
+		}()
+	}
+	wg.Wait()
 }

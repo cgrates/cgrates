@@ -453,7 +453,7 @@ func (rC *RandomConverter) Convert(in any) (
 		if rC.end == 0 {
 			return rand.Int() + rC.begin, nil
 		} else {
-			return RandomInteger(rC.begin, rC.end), nil
+			return int(RandomInteger(int64(rC.begin), int64(rC.end))), nil
 		}
 	}
 }
