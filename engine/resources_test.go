@@ -1489,3 +1489,115 @@ func TestRSProcessThreshold(t *testing.T) {
 		t.Error(err)
 	}
 }
+
+func TestResourcesLockUnlock(t *testing.T) {
+	rp := ResourceProfile{
+		Tenant: "",
+		ID:     "",
+	}
+
+	rp.lock("")
+
+	if rp.lkID == "" {
+		t.Error("didn't lock")
+	}
+
+	rp.lkID = ""
+
+	rp.unlock()
+}
+
+func TestResourcesLockUnlock2(t *testing.T) {
+	rp := Resource{
+		Tenant: "",
+		ID:     "",
+	}
+
+	rp.lock("")
+
+	if rp.lkID == "" {
+		t.Error("didn't lock")
+	}
+
+	rp.lkID = ""
+
+	rp.unlock()
+}
+
+func TestResourcesRecordUsage(t *testing.T) {
+	tm := 0 * time.Millisecond
+	r := Resource{
+		ttl: &tm,
+	}
+
+	ru := ResourceUsage{}
+
+	err := r.recordUsage(&ru)
+	if err != nil {
+		t.Error(err)
+	}
+}
+
+func TestResourcesrecordUsage(t *testing.T) {
+	r := Resource{
+		Usages: map[string]*ResourceUsage{"tes": {ID: "tes"}},
+	}
+	r2 := Resource{
+		Usages: map[string]*ResourceUsage{"test": {ID: "test"}},
+	}
+	r3 := Resource{
+		Usages: map[string]*ResourceUsage{"test": {ID: "test"}},
+	}
+
+	rs := Resources{&r, &r2, &r3}
+	ru := ResourceUsage{ID: "test"}
+
+	err := rs.recordUsage(&ru)
+	if err.Error() != "duplicate resource usage with id: :test" {
+		t.Error(err)
+	}
+}
+
+func TestResourcesClearUsage(t *testing.T) {
+	tm := 1 * time.Millisecond
+	r := Resource{
+		ttl: &tm,
+	}
+	rs := Resources{&r}
+
+	err := rs.clearUsage("test")
+
+	if err.Error() != "cannot find usage record with id: test" {
+		t.Error(err)
+	}
+}
+
+func TestResourcesAllocateReource(t *testing.T) {
+	rs := Resources{}
+
+	rcv, err := rs.allocateResource(nil, false)
+
+	if err.Error() != utils.ErrResourceUnavailable.Error() {
+		t.Error(err)
+	}
+
+	if rcv != "" {
+		t.Errorf("expected %s\n, recived %s\n", rcv, "")
+	}
+
+	r := Resource{}
+	rs2 := Resources{&r}
+	ru := ResourceUsage{
+		ID: "test",
+	}
+
+	rcv, err = rs2.allocateResource(&ru, true)
+
+	if err.Error() != "empty configuration for resourceID: :" {
+		t.Error(err)
+	}
+
+	if rcv != "" {
+		t.Errorf("expected %s\n, recived %s\n", rcv, "")
+	}
+}

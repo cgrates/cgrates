@@ -1478,3 +1478,132 @@ func TestTpReaderIsValid(t *testing.T) {
 	}
 
 }
+
+func TestStorageUtilsNewDataDBConn(t *testing.T) {
+	str := "test"
+	strn := "1"
+
+	type args struct {
+		dbType, host, port, name, user,
+		pass, marshaler, sentinelName string
+		itemsCacheCfg map[string]*config.ItemOpt
+	}
+
+	ms, _ := NewMongoStorage(str, str, str, str, str, str, nil, true)
+
+	type exp struct {
+		d   DataDB
+		err string
+	}
+
+	tests := []struct {
+		name string
+		args args
+		exp  exp
+	}{
+		{
+			name: "default error",
+			args: args{str, str, str, str, str, str, str, str, map[string]*config.ItemOpt{}},
+			exp:  exp{nil, "unsupported db_type <test>"},
+		},
+		{
+			name: "atoi error",
+			args: args{"*redis", str, str, str, str, str, str, str, map[string]*config.ItemOpt{}},
+			exp:  exp{nil, `strconv.Atoi: parsing "test": invalid syntax`},
+		},
+		{
+			name: "meta mongo case",
+			args: args{"*mongo", strn, strn, strn, str, str, str, str, map[string]*config.ItemOpt{}},
+			exp:  exp{ms, "Unsupported marshaler: test"},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			rcv, err := NewDataDBConn(tt.args.dbType, tt.args.host, tt.args.port, tt.args.name, tt.args.user,
+				tt.args.pass, tt.args.marshaler, tt.args.sentinelName, tt.args.itemsCacheCfg)
+
+			if err != nil {
+				if err.Error() != tt.exp.err {
+					t.Error(err)
+				}
+			}
+
+			if !reflect.DeepEqual(rcv, tt.exp.d) {
+				t.Errorf("received %v, expected %v", rcv, tt.exp.d)
+			}
+		})
+	}
+}
+
+func TestStorageUtilsNewStorDBConn(t *testing.T) {
+	str := "test"
+
+	type args struct {
+		dbType, host, port, name, user, pass, marshaler, sslmode string
+        maxConn, maxIdleConn, connMaxLifetime int
+		stringIndexedFields, prefixIndexedFields []string
+		itemsCacheCfg map[string]*config.ItemOpt
+	}
+
+	type exp struct {
+		db StorDB
+		err string
+	}
+
+	db, err := NewMongoStorage("1", "1", "1", str, str, str, []string{"test"}, false)
+	db2, err2 := NewPostgresStorage("1", "1", "1", str, str, str, 1, 1, 1)
+	db3, err3 := NewMySQLStorage("1", "1", "1", str, str, 1, 1, 1)
+
+	tests := []struct{
+		name string 
+		args args 
+		exp exp
+	}{
+		{
+			name: "case mongo",
+			args: args{"*mongo", "1", "1", "1", str, str, str, str, 1, 1, 1, []string{"test"}, []string{"test2"}, map[string]*config.ItemOpt{}},
+			exp: exp{db, err.Error()},
+		},
+		{
+			name: "case postgres",
+			args: args{"*postgres", "1", "1", "1", str, str, str, str, 1, 1, 1, []string{"test"}, []string{"test2"}, map[string]*config.ItemOpt{}},
+			exp: exp{db2, err2.Error()},
+		},
+		{
+			name: "case MySQL",
+			args: args{"*mysql", "1", "1", "1", str, str, str, str, 1, 1, 1, []string{"test"}, []string{"test2"}, map[string]*config.ItemOpt{}},
+			exp: exp{db3, err3.Error()},
+		},
+		{
+			name: "case default",
+			args: args{"test", "1", "1", "1", str, str, str, str, 1, 1, 1, []string{"test"}, []string{"test2"}, map[string]*config.ItemOpt{}},
+			exp: exp{nil, "unknown db 'test' valid options are [*mysql, *mongo, *postgres, *internal]"},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			rcv, err := NewStorDBConn(tt.args.dbType, tt.args.host, tt.args.port, tt.args.name, tt.args.user,
+				                      tt.args.pass, tt.args.marshaler, tt.args.sslmode, tt.args.maxConn,
+				                      tt.args.maxIdleConn, tt.args.connMaxLifetime, tt.args.stringIndexedFields,
+									  tt.args.prefixIndexedFields, tt.args.itemsCacheCfg)
+			
+			if err.Error() != tt.exp.err {
+				t.Error(err)
+			} 
+
+			if !reflect.DeepEqual(rcv, tt.exp.db) {
+				t.Errorf("received %v, expected %v", rcv, tt.exp.db)
+			}
+		})
+	}
+}
+
+func TestStorageUtilsBuildURL(t *testing.T) {
+	s := "test"
+	_, err := buildURL(s, "!£%$%$£&$%/&%(/&)&)", s, s, s, s)
+	if err.Error() != `parse "//!£%$%$£&$%/&%(/&)&)": invalid URL escape "%$%"` {
+		t.Error(err)
+	}
+}
