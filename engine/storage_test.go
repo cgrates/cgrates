@@ -80,6 +80,35 @@ func TestMsgpackTime(t *testing.T) {
 	}
 }
 
+func TestStorageDecodeIntoNilIface(t *testing.T) {
+	ms := NewCodecMsgpackMarshaler()
+
+	mp := map[string]any{
+		"key1": "value1",
+		"key2": 2.,
+	}
+	expBytes := []byte{130, 164, 107, 101, 121, 49, 166, 118, 97, 108, 117, 101, 49, 164, 107, 101, 121, 50, 203, 64, 0, 0, 0, 0, 0, 0, 0}
+	b, err := ms.Marshal(mp)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !bytes.Equal(b, expBytes) {
+		t.Fatalf("expected: %+v,\nreceived: <%+v>", expBytes, b)
+	}
+
+	decodedMap := make(map[string]any)
+	err = ms.Unmarshal(b, &decodedMap)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for key, value := range decodedMap {
+		if value != mp[key] {
+			t.Fatalf("for key %s, expected: %+v,\nreceived: %+v",
+				key, mp[key], value)
+		}
+	}
+}
+
 func TestStorageDestinationContainsPrefixShort(t *testing.T) {
 	dest, err := dm.GetDestination("NAT", true, utils.NonTransactional)
 	precision := dest.containsPrefix("0723")
