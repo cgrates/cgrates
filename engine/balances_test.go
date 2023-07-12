@@ -436,3 +436,115 @@ func TestBalancePublish(t *testing.T) {
 	}
 
 }
+
+func TestBalancesMatchFilter(t *testing.T) {
+	b := Balance{
+		ID: "test",
+	}
+
+	rcv := b.MatchFilter(nil, false, false)
+
+	if rcv != true {
+		t.Error(rcv)
+	}
+
+	str := "test"
+	bf := BalanceFilter{
+		ID:   &str,
+		Uuid: &str,
+	}
+
+	rcv = b.MatchFilter(&bf, false, false)
+
+	if rcv != false {
+		t.Error(rcv)
+	}
+}
+
+func TestBalancesHardMatchFilter(t *testing.T) {
+	b := Balance{
+		ID: "test",
+	}
+
+	rcv := b.HardMatchFilter(nil, false)
+
+	if rcv != true {
+		t.Error(rcv)
+	}
+
+	str := "test"
+	bf := BalanceFilter{
+		ID:   &str,
+		Uuid: &str,
+	}
+
+	rcv = b.HardMatchFilter(&bf, false)
+
+	if rcv != false {
+		t.Error(rcv)
+	}
+}
+
+func TestBalancesIsActive(t *testing.T) {
+	b := Balance{
+		Disabled: true,
+	}
+
+	tm := time.Now()
+	rcv := b.IsActiveAt(tm)
+
+	if rcv != false {
+		t.Error(rcv)
+	}
+
+	b2 := Balance{
+		Disabled: false,
+		Timings: []*RITiming{
+			{
+				Years:      utils.Years{2020, 2022},
+				Months:     utils.Months{time.Now().Month()},
+				MonthDays:  utils.MonthDays{time.Now().Day()},
+				WeekDays:   utils.WeekDays{time.Now().Weekday()},
+				StartTime:  "00:00:00",
+				EndTime:    "00:00:01",
+				cronString: "test",
+				tag:        "test",
+			},
+		},
+	}
+
+	tm2 := time.Now()
+	rcv = b2.IsActiveAt(tm2)
+
+	if rcv != false {
+		t.Error(rcv)
+	}
+}
+
+func TestBalancesHasDestination(t *testing.T) {
+	b := Balance{
+		DestinationIDs: utils.StringMap{"*any": false},
+	}
+
+	rcv := b.HasDestination()
+
+	if rcv != true {
+		t.Error(rcv)
+	}
+}
+
+func TestBalancesMatchDestination(t *testing.T) {
+	
+	b := Balance{
+		DestinationIDs: utils.StringMap{
+			"*any": false,
+			"test": true,
+		},
+	}
+
+	rcv := b.MatchDestination("test")
+
+	if rcv != true {
+		t.Error(rcv)
+	}
+}
