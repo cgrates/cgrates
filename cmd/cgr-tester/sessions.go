@@ -20,7 +20,6 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"time"
 
 	"github.com/cenkalti/rpc2"
@@ -31,7 +30,6 @@ import (
 var (
 	brpc             *rpc2.Client
 	disconnectEvChan = make(chan *utils.AttrDisconnectSession, 1)
-	cpsCounter       int
 )
 
 func handleDisconnectSession(clnt *rpc2.Client,
@@ -43,11 +41,6 @@ func handleDisconnectSession(clnt *rpc2.Client,
 
 func callSession() (err error) {
 
-	var currentUsage time.Duration
-
-	st := time.Now().Add(2 * time.Second)
-	at := time.Now().Add(10 * time.Second)
-
 	event := &utils.CGREvent{
 		Tenant: *tenant,
 		ID:     "TheEventID100000",
@@ -55,25 +48,19 @@ func callSession() (err error) {
 		Event: map[string]any{
 			utils.AccountField: *subject,
 			utils.Destination:  *destination,
-			utils.OriginHost:   "local",
-			utils.RequestType:  utils.MetaRated,
-			utils.SetupTime:    st,
-			utils.Source:       "cgr_tester",
+			utils.OriginHost:   utils.Local,
+			utils.RequestType:  *requestType,
+			utils.Source:       utils.CGRTester,
 			utils.OriginID:     utils.GenUUID(),
 		},
 		APIOpts: map[string]any{},
 	}
-
-	cpsCounter += 1
-	log.Printf("current call number: %+v", cpsCounter)
 
 	if *updateInterval > *maxUsage {
 		return fmt.Errorf(`"update_interval" should be smaller than "max_usage"`)
 	} else if *maxUsage <= *minUsage {
 		return fmt.Errorf(`"min_usage" should be smaller than "max_usage"`)
 	}
-
-	tstCfg.SessionSCfg().DebitInterval = 0
 
 	clntHandlers := map[string]any{utils.SessionSv1DisconnectSession: handleDisconnectSession}
 	brpc, err = utils.NewBiJSONrpcClient(tstCfg.SessionSCfg().ListenBijson, clntHandlers)
@@ -84,6 +71,7 @@ func callSession() (err error) {
 	//
 	// SessionSv1AuthorizeEvent
 	//
+	event.Event[utils.SetupTime] = time.Now()
 	authArgs := &sessions.V1AuthorizeArgs{
 		GetMaxUsage: true,
 		CGREvent:    event,
@@ -92,13 +80,14 @@ func callSession() (err error) {
 	if err = brpc.Call(utils.SessionSv1AuthorizeEvent, authArgs, &authRply); err != nil {
 		return
 	}
-	// log.Printf("auth: %+v", utils.ToJSON(authRply))
+
+	// Delay between authorize and initiation for a more realistic case
+	time.Sleep(time.Duration(utils.RandomInteger(1, 5)) * time.Second)
 
 	//
 	// SessionSv1InitiateSession
 	//
-	event.Event[utils.AnswerTime] = at
-	event.Event[utils.RequestType] = utils.MetaRated
+	event.Event[utils.AnswerTime] = time.Now()
 
 	initArgs := &sessions.V1InitSessionArgs{
 		InitSession: true,
@@ -109,21 +98,14 @@ func callSession() (err error) {
 	if err = brpc.Call(utils.SessionSv1InitiateSession, initArgs, &initRply); err != nil {
 		return
 	}
-	// log.Printf("init: %+v.", utils.ToJSON(initRply))
 
 	//
 	// SessionSv1UpdateSession
 	//
 	totalUsage := time.Duration(utils.RandomInteger(int64(*minUsage), int64(*maxUsage)))
-	log.Println("randUsage", totalUsage)
-	for currentUsage < totalUsage {
-		// log.Println("currentUsage", currentUsage)
-		currentUsage += *updateInterval
-		if currentUsage >= totalUsage {
-			break
-		}
-		event.Event[utils.Usage] = currentUsage.String()
+	for currentUsage := time.Duration(0); currentUsage < totalUsage; currentUsage += *updateInterval {
 
+		event.Event[utils.Usage] = currentUsage.String()
 		upArgs := &sessions.V1UpdateSessionArgs{
 			GetAttributes: true,
 			UpdateSession: true,
@@ -133,8 +115,10 @@ func callSession() (err error) {
 		if err = brpc.Call(utils.SessionSv1UpdateSession, upArgs, &upRply); err != nil {
 			return
 		}
-		// log.Printf("update: %+v.", utils.ToJSON(upRply))
 	}
+
+	// Delay between last update and termination for a more realistic case
+	time.Sleep(time.Duration(utils.RandomInteger(10, 20)) * time.Millisecond)
 
 	//
 	// SessionSv1TerminateSession
@@ -149,7 +133,9 @@ func callSession() (err error) {
 	if err = brpc.Call(utils.SessionSv1TerminateSession, tArgs, &tRply); err != nil {
 		return
 	}
-	// log.Printf("terminate: %+v.", utils.ToJSON(tRply))
+
+	// Delay between terminate and processCDR for a more realistic case
+	time.Sleep(time.Duration(utils.RandomInteger(1, 3)) * time.Millisecond)
 
 	//
 	// SessionSv1ProcessCDR
@@ -159,7 +145,6 @@ func callSession() (err error) {
 	if err = brpc.Call(utils.SessionSv1ProcessCDR, procArgs, &pRply); err != nil {
 		return
 	}
-	// log.Printf("process: %+v.", utils.ToJSON(pRply))
 
 	return
 }

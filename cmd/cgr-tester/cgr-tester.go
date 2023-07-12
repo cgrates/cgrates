@@ -28,6 +28,7 @@ import (
 	"os"
 	"runtime"
 	"runtime/pprof"
+	"strings"
 	"sync"
 	"time"
 
@@ -46,7 +47,8 @@ var (
 
 	cfgPath = cgrTesterFlags.String("config_path", "",
 		"Configuration directory path.")
-
+	exec = cgrTesterFlags.String(utils.ExecCgr, utils.EmptyString, "Pick what you want to test "+
+		"<*cps|*get_cost>")
 	parallel        = cgrTesterFlags.Int("parallel", 0, "run n requests in parallel")
 	datadbType      = cgrTesterFlags.String("datadb_type", cgrConfig.DataDbCfg().Type, "The type of the DataDb database <redis>")
 	datadbHost      = cgrTesterFlags.String("datadb_host", cgrConfig.DataDbCfg().Host, "The DataDb host to connect to.")
@@ -79,6 +81,7 @@ var (
 	minUsage       = cgrTesterFlags.Duration("min_usage", 1*time.Second, "Minimum usage a session can have")
 	maxUsage       = cgrTesterFlags.Duration("max_usage", 5*time.Second, "Maximum usage a session can have")
 	updateInterval = cgrTesterFlags.Duration("update_interval", 1*time.Second, "Time duration added for each session update")
+	requestType    = cgrTesterFlags.String("request_type", utils.MetaRated, "Request type of the call")
 
 	tor         = cgrTesterFlags.String("tor", utils.MetaVoice, "The type of record to use in queries.")
 	category    = cgrTesterFlags.String("category", "call", "The Record category to test.")
@@ -91,6 +94,7 @@ var (
 	fPath       = cgrTesterFlags.String("file_path", "", "read requests from file with path")
 	reqSep      = cgrTesterFlags.String("req_separator", "\n\n", "separator for requests in file")
 
+	mu  sync.RWMutex
 	err error
 )
 
@@ -270,49 +274,68 @@ func main() {
 		return
 	}
 
-	var timeparsed time.Duration
-	var err error
-	tstart := time.Now()
-	timeparsed, err = utils.ParseDurationWithNanosecs(*usage)
-	if err != nil {
-		return
-	}
-	tend := tstart.Add(timeparsed)
-	cd := &engine.CallDescriptorWithAPIOpts{
-		CallDescriptor: &engine.CallDescriptor{
-			TimeStart:     tstart,
-			TimeEnd:       tend,
-			DurationIndex: 60 * time.Second,
-			ToR:           *tor,
-			Category:      *category,
-			Tenant:        *tenant,
-			Subject:       *subject,
-			Destination:   *destination,
-		},
-	}
-	var duration time.Duration
-	if len(*raterAddress) == 0 {
-		duration, err = durInternalRater(cd)
-	} else {
-		duration, err = durRemoteRater(cd)
-	}
-	if err != nil {
-		log.Fatal(err.Error())
-	} else {
-		log.Printf("Elapsed: %s resulted: %f req/s.", duration, float64(*runs)/duration.Seconds())
-	}
+	if exec != nil && *exec != utils.EmptyString {
+		tasks := strings.Split(*exec, utils.FieldsSep)
+		for _, taskID := range tasks {
+			switch taskID {
+			default: // unsupported taskID
+				err = fmt.Errorf("task <%s> is not a supported tester task", taskID)
+			case utils.MetaCPS:
+				var wg sync.WaitGroup
+				rplyNr := 0
+				for i := 0; i < *cps; i++ {
+					wg.Add(1)
+					go func() {
+						defer wg.Done()
+						if err := callSession(); err != nil {
+							log.Fatal(err.Error())
+						}
+						mu.Lock()
+						rplyNr++
+						mu.Unlock()
 
-	var wg sync.WaitGroup
-	for i := 0; i < *cps; i++ {
-		wg.Add(1)
-		log.Println("run num: ", i)
-
-		go func() {
-			defer wg.Done()
-			if err = callSession(); err != nil {
-				log.Fatal(err.Error())
+					}()
+				}
+				wg.Wait()
+				log.Printf("Number of successful calls: %v", rplyNr)
+			case utils.MetaGetCost:
+				var timeparsed time.Duration
+				var err error
+				tstart := time.Now()
+				timeparsed, err = utils.ParseDurationWithNanosecs(*usage)
+				if err != nil {
+					return
+				}
+				tend := tstart.Add(timeparsed)
+				cd := &engine.CallDescriptorWithAPIOpts{
+					CallDescriptor: &engine.CallDescriptor{
+						TimeStart:     tstart,
+						TimeEnd:       tend,
+						DurationIndex: 60 * time.Second,
+						ToR:           *tor,
+						Category:      *category,
+						Tenant:        *tenant,
+						Subject:       *subject,
+						Destination:   *destination,
+					},
+				}
+				var duration time.Duration
+				if len(*raterAddress) == 0 {
+					duration, err = durInternalRater(cd)
+				} else {
+					duration, err = durRemoteRater(cd)
+				}
+				if err != nil {
+					log.Fatal(err.Error())
+				} else {
+					log.Printf("Elapsed: %s resulted: %f req/s.", duration, float64(*runs)/duration.Seconds())
+				}
 			}
-		}()
+			if err != nil {
+				log.Fatal(err)
+				break
+			}
+		}
 	}
-	wg.Wait()
+
 }
