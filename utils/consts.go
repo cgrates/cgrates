@@ -1086,6 +1086,13 @@ const (
 	CapStatQueues           = "StatQueues"
 )
 
+// cgr-tester Metas
+const (
+	MetaGetCost = "*get_cost"
+	MetaCPS     = "*cps"
+	CGRTester   = "CGRTester"
+)
+
 const (
 	TpRatingPlans        = "TpRatingPlans"
 	TpFilters            = "TpFilters"
