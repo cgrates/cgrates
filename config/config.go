@@ -1883,6 +1883,8 @@ func (cfg *CGRConfig) V1GetConfigAsJSON(args *SectionWithAPIOpts, reply *string)
 		mp = cfg.ConfigSCfg().AsMapInterface()
 	case APIBanCfgJson:
 		mp = cfg.APIBanCfg().AsMapInterface()
+	case SentryPeerCfgJson:
+		mp = cfg.SentryPeerCfg().AsMapInterface()
 	case RPCConnsJsonName:
 		mp = cfg.RPCConns().AsMapInterface()
 	case TemplatesJson:
@@ -1990,6 +1992,7 @@ func (cfg *CGRConfig) Clone() (cln *CGRConfig) {
 		sipAgentCfg:      cfg.sipAgentCfg.Clone(),
 		configSCfg:       cfg.configSCfg.Clone(),
 		apiBanCfg:        cfg.apiBanCfg.Clone(),
+		sentryPeerCfg:    cfg.sentryPeerCfg.Clone(),
 		coreSCfg:         cfg.coreSCfg.Clone(),
 
 		cacheDP: make(map[string]utils.MapStorage),

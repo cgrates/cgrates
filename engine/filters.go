@@ -228,19 +228,19 @@ var supportedFiltersType utils.StringSet = utils.NewStringSet([]string{
 	utils.MetaTimings, utils.MetaRSR, utils.MetaDestinations,
 	utils.MetaEmpty, utils.MetaExists, utils.MetaLessThan, utils.MetaLessOrEqual,
 	utils.MetaGreaterThan, utils.MetaGreaterOrEqual, utils.MetaEqual,
-	utils.MetaIPNet, utils.MetaAPIBan, utils.MetaActivationInterval,
+	utils.MetaIPNet, utils.MetaAPIBan, utils.MetaSentryPeer, utils.MetaActivationInterval,
 	utils.MetaRegex})
 var needsFieldName utils.StringSet = utils.NewStringSet([]string{
 	utils.MetaString, utils.MetaPrefix, utils.MetaSuffix,
 	utils.MetaTimings, utils.MetaRSR, utils.MetaDestinations, utils.MetaLessThan,
 	utils.MetaEmpty, utils.MetaExists, utils.MetaLessOrEqual, utils.MetaGreaterThan,
-	utils.MetaGreaterOrEqual, utils.MetaEqual, utils.MetaIPNet, utils.MetaAPIBan,
+	utils.MetaGreaterOrEqual, utils.MetaEqual, utils.MetaIPNet, utils.MetaAPIBan, utils.MetaSentryPeer,
 	utils.MetaActivationInterval,
 	utils.MetaRegex})
 var needsValues utils.StringSet = utils.NewStringSet([]string{utils.MetaString, utils.MetaPrefix,
 	utils.MetaSuffix, utils.MetaTimings, utils.MetaRSR, utils.MetaDestinations,
 	utils.MetaLessThan, utils.MetaLessOrEqual, utils.MetaGreaterThan, utils.MetaGreaterOrEqual,
-	utils.MetaEqual, utils.MetaIPNet, utils.MetaAPIBan, utils.MetaActivationInterval,
+	utils.MetaEqual, utils.MetaIPNet, utils.MetaAPIBan, utils.MetaSentryPeer, utils.MetaActivationInterval,
 	utils.MetaRegex})
 
 // NewFilterRule returns a new filter

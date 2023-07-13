@@ -743,6 +743,80 @@ func testAttributeSProcessEventWithHeader(t *testing.T) {
 	}
 }
 
+// func testAttributeSProcessEventSentryPeer(t *testing.T) {
+// 	attrPrf1 := &engine.AttributeProfileWithAPIOpts{
+// 		AttributeProfile: &engine.AttributeProfile{
+// 			Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
+// 			ID:        "ATTR_SENTRY",
+// 			Contexts:  []string{utils.MetaAny},
+// 			FilterIDs: []string{"*sentrypeer:~*req.IP:ip-addresses"},
+// 			ActivationInterval: &utils.ActivationInterval{
+// 				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+// 			},
+// 			Attributes: []*engine.Attribute{
+// 				{
+// 					Path:  utils.MetaReq + utils.NestingSep + "Field2",
+// 					Value: config.NewRSRParsersMustCompile("BLACKLIST", utils.InfieldSep),
+// 					Type:  utils.MetaConstant,
+// 				},
+// 			},
+// 			Blocker: true,
+// 			Weight:  5,
+// 		},
+// 	}
+// 	var result string
+// 	if err := attrSRPC.Call(utils.APIerSv1SetAttributeProfile, attrPrf1, &result); err != nil {
+// 		t.Error(err)
+// 	} else if result != utils.OK {
+// 		t.Error("Unexpected reply returned", result)
+// 	}
+
+// 	var reply *engine.AttributeProfile
+// 	if err := attrSRPC.Call(utils.APIerSv1GetAttributeProfile,
+// 		utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ATTR_SENTRY"}}, &reply); err != nil {
+// 		t.Fatal(err)
+// 	}
+// 	reply.Compile()
+// 	if !reflect.DeepEqual(attrPrf1.AttributeProfile, reply) {
+// 		t.Errorf("Expecting : %+v, received: %+v", alsPrf.AttributeProfile, reply)
+// 	}
+// 	attrArgs := &utils.CGREvent{
+// 		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
+// 		ID:     "HAttribute",
+// 		Event: map[string]any{
+// 			"IP": "45.155.91.135",
+// 		},
+// 		APIOpts: map[string]any{
+// 			utils.OptsAttributesProcessRuns: 1.,
+// 			utils.OptsContext:               utils.MetaAny,
+// 		},
+// 	}
+// 	eRply := &engine.AttrSProcessEventReply{
+// 		MatchedProfiles: []string{"cgrates.org:ATTR_SENTRY"},
+// 		AlteredFields:   []string{"*req.Field2"},
+// 		CGREvent: &utils.CGREvent{
+// 			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
+// 			ID:     "HAttribute",
+// 			Event: map[string]any{
+// 				"Field2": "BLACKLIST",
+// 				"IP":     "45.155.91.135",
+// 			},
+// 			APIOpts: map[string]any{
+// 				utils.OptsAttributesProcessRuns: 1.,
+// 				utils.OptsContext:               utils.MetaAny,
+// 			},
+// 		},
+// 	}
+// 	var rplyEv engine.AttrSProcessEventReply
+// 	if err := attrSRPC.Call(utils.AttributeSv1ProcessEvent,
+// 		attrArgs, &rplyEv); err != nil {
+// 		t.Error(err)
+// 	} else if !reflect.DeepEqual(eRply, &rplyEv) {
+// 		t.Errorf("Expecting: %s, received: %s",
+// 			utils.ToJSON(eRply), utils.ToJSON(rplyEv))
+// 	}
+// }
+
 func testAttributeSGetAttPrfIDs(t *testing.T) {
 	expected := []string{"ATTR_2", "ATTR_PASS", "ATTR_1", "ATTR_3", "ATTR_Header", "AttributeWithNonSubstitute"}
 	var result []string

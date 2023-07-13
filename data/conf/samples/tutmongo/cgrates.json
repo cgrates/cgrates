@@ -4,7 +4,7 @@
 
 "general": {
 	"log_level": 7,
-	"reply_timeout": "30s",
+	"reply_timeout": "1h",
 },
 
 
@@ -54,7 +54,7 @@
 	"stats_conns": ["*localhost"],
 	"resources_conns": ["*localhost"],
 	"apiers_conns": ["*localhost"],
-	//"indexed_selects": false,
+	"indexed_selects": false,
 },
 
 
@@ -127,5 +127,9 @@
 	"apiers_conns": ["*internal"],
 },
 
+// "sentrypeer":{
+// "addr":"https://sentrypeer.com/api/",
+// "token":"put token here",
+// },
 
 }

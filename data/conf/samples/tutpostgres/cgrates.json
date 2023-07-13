@@ -103,4 +103,9 @@
 	"apiers_conns": ["*internal"],
 },
 
+// "sentrypeer":{
+// "addr":"https://sentrypeer.com/api/",
+// "token":"put token here",
+// },
+
 }
