@@ -534,7 +534,7 @@ func TestBalancesHasDestination(t *testing.T) {
 }
 
 func TestBalancesMatchDestination(t *testing.T) {
-	
+
 	b := Balance{
 		DestinationIDs: utils.StringMap{
 			"*any": false,
@@ -543,6 +543,116 @@ func TestBalancesMatchDestination(t *testing.T) {
 	}
 
 	rcv := b.MatchDestination("test")
+
+	if rcv != true {
+		t.Error(rcv)
+	}
+}
+
+func TestBalancegetMatchingPrefixAndDestID(t *testing.T) {
+	b := Balance{}
+
+	pre, dest := b.getMatchingPrefixAndDestID("")
+
+	if pre != "" && dest != "" {
+		t.Error(pre, dest)
+	}
+}
+
+func TestBalancesEqual(t *testing.T) {
+	b := Balances{}
+
+	o := Balances{{}, {}}
+
+	rcv := b.Equal(o)
+
+	if rcv != false {
+		t.Error(rcv)
+	}
+
+	b2 := Balances{{
+		Uuid: "test",
+		ID:   "test",
+	}}
+
+	o2 := Balances{{
+		Uuid: "test2",
+		ID:   "test2",
+	}}
+
+	rcv = b2.Equal(o2)
+
+	if rcv != false {
+		t.Error(rcv)
+	}
+}
+
+func TestBalanceHasBalance(t *testing.T) {
+	bc := Balances{}
+	b := Balance{}
+
+	rcv := bc.HasBalance(&b) 
+
+	if rcv != false {
+		t.Error(rcv)
+	}
+
+	bc2 := Balances{&b}
+
+	rcv = bc2.HasBalance(&b) 
+
+	if rcv != true {
+		t.Error(rcv)
+	}
+}
+
+func TestBalancesGetValue(t *testing.T) {
+	f := ValueFactor{}
+
+	rcv := f.GetValue("test")
+
+	if rcv != 1.0 {
+		t.Error(rcv)
+	}
+}
+
+func TestBalancesFieldAsInterface(t *testing.T) {
+	bl := BalanceSummary{}
+	flp := []string{}
+
+	rcv, err := bl.FieldAsInterface(flp)
+
+	if err != utils.ErrNotFound {
+		t.Fatal(err)
+	}
+
+	if rcv != nil {
+		t.Error(rcv)
+	}
+
+	bl2 := BalanceSummary{}
+	flp2 := []string{"test"}
+
+	rcv, err = bl2.FieldAsInterface(flp2)
+
+	if err.Error() != "unsupported field prefix: <test>" {
+		t.Fatal(err)
+	}
+
+	if rcv != nil {
+		t.Error(rcv)
+	}
+
+	bl3 := BalanceSummary{
+		Disabled: true,
+	}
+	flp3 := []string{"Disabled"}
+
+	rcv, err = bl3.FieldAsInterface(flp3)
+
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	if rcv != true {
 		t.Error(rcv)
