@@ -538,6 +538,7 @@ func GetDefaultEmptyCacheStats() map[string]*ltcache.CacheStats {
 		utils.CacheEventCharges:            {},
 		utils.CacheReverseFilterIndexes:    {},
 		utils.MetaAPIBan:                   {},
+		utils.MetaSentryPeer:               {},
 		utils.CacheCapsEvents:              {},
 		utils.CacheReplicationHosts:        {},
 	}

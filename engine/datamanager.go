@@ -75,6 +75,7 @@ var (
 		utils.DispatcherFilterIndexes:  {},
 		utils.FilterIndexPrfx:          {},
 		utils.MetaAPIBan:               {}, // not realy a prefix as this is not stored in DB
+		utils.MetaNotSentryPeer:        {},
 	}
 )
 
@@ -119,7 +120,7 @@ func (dm *DataManager) CacheDataFromDB(prfx string, ids []string, mustBeCached b
 	if dm.cacheCfg.Partitions[utils.CachePrefixToInstance[prfx]].Limit == 0 {
 		return
 	}
-	if prfx == utils.MetaAPIBan || prfx == utils.MetaDispatchers { // no need for ids in this case
+	if prfx == utils.MetaAPIBan || prfx == utils.MetaSentryPeer || prfx == utils.MetaDispatchers { // no need for ids in this case
 		ids = []string{utils.EmptyString}
 	} else if len(ids) != 0 && ids[0] == utils.MetaAny {
 		if mustBeCached {
@@ -268,6 +269,8 @@ func (dm *DataManager) CacheDataFromDB(prfx string, ids []string, mustBeCached b
 			_, err = dm.GetItemLoadIDs(utils.EmptyString, true)
 		case utils.MetaAPIBan:
 			_, err = dm.GetAPIBan(utils.EmptyString, config.CgrConfig().APIBanCfg().Keys, false, false, true)
+		case utils.MetaSentryPeer:
+			_, err = GetSentryPeer(utils.EmptyString, config.CgrConfig().SentryPeerCfg().Addr, config.CgrConfig().SentryPeerCfg().Token, utils.EmptyString, false, true)
 		}
 		if err != nil {
 			if err != utils.ErrNotFound && err != utils.ErrDSPProfileNotFound && err != utils.ErrDSPHostNotFound {
