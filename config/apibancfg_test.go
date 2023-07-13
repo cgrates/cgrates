@@ -44,8 +44,7 @@ func TestAPIBanCfgloadFromJsonCfg(t *testing.T) {
 		
 }`
 	expected = APIBanCfg{
-		Enabled: false,
-		Keys:    []string{"key1", "key2"},
+		Keys: []string{"key1", "key2"},
 	}
 	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)
@@ -84,8 +83,7 @@ func TestAPIBanCfgAsMapInterface(t *testing.T) {
 
 func TestAPIBanCfgClone(t *testing.T) {
 	ban := &APIBanCfg{
-		Enabled: false,
-		Keys:    []string{"key1", "key2"},
+		Keys: []string{"key1", "key2"},
 	}
 	rcv := ban.Clone()
 	if !reflect.DeepEqual(ban, rcv) {

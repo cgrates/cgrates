@@ -656,10 +656,10 @@ func (fltr *FilterRule) passSentryPeer(dDP utils.DataProvider) (bool, error) {
 		}
 		return false, err
 	}
-	if fltr.Values[0] != "phone-numbers" && fltr.Values[0] != "ip-addresses" {
+	if fltr.Values[0] != "*number" && fltr.Values[0] != "*ip" {
 		return false, fmt.Errorf("invalid value for sentrypeer filter: <%s>", fltr.Values[0])
 	}
-	return GetSentryPeer(strVal, config.CgrConfig().SentryPeerCfg().Addr, config.CgrConfig().SentryPeerCfg().Token, fltr.Values[0], true, true)
+	return GetSentryPeer(strVal, config.CgrConfig().SentryPeerCfg().Url, config.CgrConfig().SentryPeerCfg().Token, fltr.Values[0], true, true)
 }
 
 func parseTime(rsr *config.RSRParser, dDp utils.DataProvider) (_ time.Time, err error) {

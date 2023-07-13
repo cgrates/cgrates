@@ -878,7 +878,7 @@ type APIBanJsonCfg struct {
 
 type SentryPeerJsonCfg struct {
 	Token *string
-	Addr  *string
+	Url   *string
 }
 
 type CoreSJsonCfg struct {

@@ -54,7 +54,7 @@
 	"stats_conns": ["*localhost"],
 	"resources_conns": ["*localhost"],
 	"apiers_conns": ["*localhost"],
-	"indexed_selects": false,
+//	"indexed_selects": false,
 },
 
 
@@ -127,9 +127,9 @@
 	"apiers_conns": ["*internal"],
 },
 
-// "sentrypeer":{
-// "addr":"https://sentrypeer.com/api/",
-// "token":"put token here",
-// },
+ //"sentrypeer":{
+ //"url":"https://sentrypeer.com/api/",
+ //"token":""
+ //},
 
 }

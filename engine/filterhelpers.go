@@ -121,19 +121,27 @@ func WeightFromDynamics(dWs []*utils.DynamicWeight,
 	return 0.0, nil
 }
 
-func GetSentryPeer(val, addr, token, path string, cacheRead, cacheWrite bool) (found bool, err error) {
+func GetSentryPeer(val, url, token, path string, cacheRead, cacheWrite bool) (found bool, err error) {
 	valpath := utils.ConcatenatedKey(path, val)
 	if cacheRead {
 		if x, ok := Cache.Get(utils.MetaSentryPeer, valpath); ok && x != nil { // Attempt to find in cache first
 			return x.(bool), nil
 		}
 	}
+	switch path {
+	case "*ip":
+		url += "ip-addresses/"
+	case "*number":
+		url += "phone-numbers/"
+	}
 	var req *http.Request
-	if req, err = http.NewRequest("GET", addr+path+"/"+val, nil); err != nil {
+	if req, err = http.NewRequest("GET", url+val, nil); err != nil {
 		return
 	}
-	req.Header = http.Header{
-		"Authorization": {fmt.Sprintf("Bearer %s", token)},
+	if token != "" {
+		req.Header = http.Header{
+			"Authorization": {fmt.Sprintf("Bearer %s", token)},
+		}
 	}
 	var resp *http.Response
 	resp, err = http.DefaultClient.Do(req)

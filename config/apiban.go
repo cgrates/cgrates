@@ -22,16 +22,12 @@ import "github.com/cgrates/cgrates/utils"
 
 // APIBanCfg the config for the APIBan Keys
 type APIBanCfg struct {
-	Enabled bool
-	Keys    []string
+	Keys []string
 }
 
 func (ban *APIBanCfg) loadFromJSONCfg(jsnCfg *APIBanJsonCfg) (err error) {
 	if jsnCfg == nil {
 		return
-	}
-	if jsnCfg.Enabled != nil {
-		ban.Enabled = *jsnCfg.Enabled
 	}
 	if jsnCfg.Keys != nil {
 		ban.Keys = make([]string, len(*jsnCfg.Keys))
@@ -45,16 +41,14 @@ func (ban *APIBanCfg) loadFromJSONCfg(jsnCfg *APIBanJsonCfg) (err error) {
 // AsMapInterface returns the config as a map[string]any
 func (ban *APIBanCfg) AsMapInterface() map[string]any {
 	return map[string]any{
-		utils.EnabledCfg: ban.Enabled,
-		utils.KeysCfg:    ban.Keys,
+		utils.KeysCfg: ban.Keys,
 	}
 }
 
 // Clone returns a deep copy of APIBanCfg
 func (ban APIBanCfg) Clone() (cln *APIBanCfg) {
 	cln = &APIBanCfg{
-		Enabled: ban.Enabled,
-		Keys:    make([]string, len(ban.Keys)),
+		Keys: make([]string, len(ban.Keys)),
 	}
 	for i, k := range ban.Keys {
 		cln.Keys[i] = k
@@ -64,15 +58,15 @@ func (ban APIBanCfg) Clone() (cln *APIBanCfg) {
 
 type SentryPeerCfg struct {
 	Token string
-	Addr  string
+	Url   string
 }
 
 func (sp *SentryPeerCfg) loadFromJSONCfg(jsnCfg *SentryPeerJsonCfg) (err error) {
 	if jsnCfg == nil {
 		return
 	}
-	if jsnCfg.Addr != nil {
-		sp.Addr = *jsnCfg.Addr
+	if jsnCfg.Url != nil {
+		sp.Url = *jsnCfg.Url
 	}
 	if jsnCfg.Token != nil {
 		sp.Token = *jsnCfg.Token
@@ -82,14 +76,14 @@ func (sp *SentryPeerCfg) loadFromJSONCfg(jsnCfg *SentryPeerJsonCfg) (err error) 
 
 func (sp *SentryPeerCfg) AsMapInterface() map[string]any {
 	return map[string]any{
-		"Addres": sp.Addr,
-		"Token":  sp.Token,
+		"URL":   sp.Url,
+		"Token": sp.Token,
 	}
 }
 
 func (sp *SentryPeerCfg) Clone() (cln *SentryPeerCfg) {
 	cln = &SentryPeerCfg{
-		Addr:  sp.Addr,
+		Url:   sp.Url,
 		Token: sp.Token,
 	}
 	return
