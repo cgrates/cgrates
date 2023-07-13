@@ -112,7 +112,7 @@
 }
 
 // "sentrypeer":{
-// "addr":"https://sentrypeer.com/api/",
+// "url":"https://sentrypeer.com/api/",
 // "token":"put token here",
 // },
 

@@ -58,6 +58,7 @@ var (
 		testAttributeSProcessEventWithNoneSubstitute2,
 		testAttributeSProcessEventWithNoneSubstitute3,
 		testAttributeSProcessEventWithHeader,
+		//testAttributeSProcessEventSentryPeer,
 		testAttributeSGetAttPrfIDs,
 		testAttributeSSetAlsPrfBrokenReference,
 		testAttributeSGetAlsPrfBeforeSet,
@@ -747,16 +748,16 @@ func testAttributeSProcessEventWithHeader(t *testing.T) {
 // 	attrPrf1 := &engine.AttributeProfileWithAPIOpts{
 // 		AttributeProfile: &engine.AttributeProfile{
 // 			Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
-// 			ID:        "ATTR_SENTRY",
+// 			ID:        "ATTR_SENTRY_IP",
 // 			Contexts:  []string{utils.MetaAny},
-// 			FilterIDs: []string{"*sentrypeer:~*req.IP:ip-addresses"},
+// 			FilterIDs: []string{"*sentrypeer:~*req.IP:*ip"},
 // 			ActivationInterval: &utils.ActivationInterval{
 // 				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 // 			},
 // 			Attributes: []*engine.Attribute{
 // 				{
-// 					Path:  utils.MetaReq + utils.NestingSep + "Field2",
-// 					Value: config.NewRSRParsersMustCompile("BLACKLIST", utils.InfieldSep),
+// 					Path:  utils.MetaReq + utils.NestingSep + "IP",
+// 					Value: config.NewRSRParsersMustCompile("BLACKLIST_IP", utils.InfieldSep),
 // 					Type:  utils.MetaConstant,
 // 				},
 // 			},
@@ -770,21 +771,57 @@ func testAttributeSProcessEventWithHeader(t *testing.T) {
 // 	} else if result != utils.OK {
 // 		t.Error("Unexpected reply returned", result)
 // 	}
+// 	attrPrf2 := &engine.AttributeProfileWithAPIOpts{
+// 		AttributeProfile: &engine.AttributeProfile{
+// 			Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
+// 			ID:        "ATTR_SENTRY_NUMBER",
+// 			Contexts:  []string{utils.MetaAny},
+// 			FilterIDs: []string{"*sentrypeer:~*req.Destination:*number"},
+// 			ActivationInterval: &utils.ActivationInterval{
+// 				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+// 			},
+// 			Attributes: []*engine.Attribute{
+// 				{
+// 					Path:  utils.MetaReq + utils.NestingSep + utils.Destination,
+// 					Value: config.NewRSRParsersMustCompile("BLACKLIST_DEST", utils.InfieldSep),
+// 					Type:  utils.MetaConstant,
+// 				},
+// 			},
+// 			Blocker: true,
+// 			Weight:  5,
+// 		},
+// 	}
+// 	if err := attrSRPC.Call(utils.APIerSv1SetAttributeProfile, attrPrf2, &result); err != nil {
+// 		t.Error(err)
+// 	} else if result != utils.OK {
+// 		t.Error("Unexpected reply returned", result)
+// 	}
 
 // 	var reply *engine.AttributeProfile
 // 	if err := attrSRPC.Call(utils.APIerSv1GetAttributeProfile,
-// 		utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ATTR_SENTRY"}}, &reply); err != nil {
+// 		utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ATTR_SENTRY_IP"}}, &reply); err != nil {
 // 		t.Fatal(err)
 // 	}
 // 	reply.Compile()
 // 	if !reflect.DeepEqual(attrPrf1.AttributeProfile, reply) {
 // 		t.Errorf("Expecting : %+v, received: %+v", alsPrf.AttributeProfile, reply)
 // 	}
+
+// 	if err := attrSRPC.Call(utils.APIerSv1GetAttributeProfile,
+// 		utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ATTR_SENTRY_NUMBER"}}, &reply); err != nil {
+// 		t.Fatal(err)
+// 	}
+// 	reply.Compile()
+// 	if !reflect.DeepEqual(attrPrf2.AttributeProfile, reply) {
+// 		t.Errorf("Expecting : %+v, received: %+v", alsPrf.AttributeProfile, reply)
+// 	}
+
 // 	attrArgs := &utils.CGREvent{
 // 		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 // 		ID:     "HAttribute",
 // 		Event: map[string]any{
-// 			"IP": "45.155.91.135",
+// 			"IP":              "45.155.91.135",
+// 			utils.Destination: "46423112877",
 // 		},
 // 		APIOpts: map[string]any{
 // 			utils.OptsAttributesProcessRuns: 1.,
@@ -792,14 +829,14 @@ func testAttributeSProcessEventWithHeader(t *testing.T) {
 // 		},
 // 	}
 // 	eRply := &engine.AttrSProcessEventReply{
-// 		MatchedProfiles: []string{"cgrates.org:ATTR_SENTRY"},
-// 		AlteredFields:   []string{"*req.Field2"},
+// 		MatchedProfiles: []string{"cgrates.org:ATTR_SENTRY_IP"},
+// 		AlteredFields:   []string{"*req.IP"},
 // 		CGREvent: &utils.CGREvent{
 // 			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 // 			ID:     "HAttribute",
 // 			Event: map[string]any{
-// 				"Field2": "BLACKLIST",
-// 				"IP":     "45.155.91.135",
+// 				"IP":              "BLACKLIST_IP",
+// 				utils.Destination: "46423112877",
 // 			},
 // 			APIOpts: map[string]any{
 // 				utils.OptsAttributesProcessRuns: 1.,

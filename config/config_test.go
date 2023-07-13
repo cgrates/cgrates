@@ -2585,8 +2585,7 @@ func TestConfigsConfig(t *testing.T) {
 
 func TestAPIBanConfig(t *testing.T) {
 	expected := &APIBanCfg{
-		Enabled: false,
-		Keys:    []string{},
+		Keys: []string{},
 	}
 	cgrConfig := NewDefaultCGRConfig()
 	if err != nil {

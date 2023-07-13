@@ -1267,7 +1267,7 @@ const CGRATES_CFG_JSON = `
 	"keys": [],
 },
 "sentrypeer":{
-	"addr":"",
+	"url":"",
 	"token":"",
 }
 
