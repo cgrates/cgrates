@@ -1,0 +1,68 @@
+name: Build & Unit Tests
+
+permissions: {} # no need any permissions
+
+on:
+  push:
+    branches: [v0.10]
+  pull_request:
+    branches: [v0.10]
+
+jobs:
+  
+  pre_job:
+    # continue-on-error: true # Uncomment once integration is finished
+    runs-on: ubuntu-latest
+    outputs:
+      should_skip: ${{ steps.skip_check.outputs.should_skip }}
+    steps:
+      - id: skip_check
+        uses: fkirc/skip-duplicate-actions@v5
+        with:
+          concurrent_skipping: 'never'
+          skip_after_successful_duplicate: 'true'
+          paths_ignore: '["v0.10/docs/**"]'
+          paths: '["v0.10/**.go", "v0.10/.github"]'
+
+  main_job:
+    name: Build
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    strategy:
+      fail-fast: true
+      matrix:
+        go: ['stable', 'oldstable']
+
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v3
+
+      - name: Install Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: ${{ matrix.go }}
+          check-latest: true
+
+      - name: Go Format
+        run: gofmt -s -w . && git diff --exit-code
+
+      - name: Go Vet
+        run: go vet ./...
+
+      - name: Go Tidy
+        run: go mod tidy && git diff --exit-code
+
+      - name: Go Mod
+        run: go mod download
+
+      - name: Go Mod Verify
+        run: go mod verify
+
+      - name: Go Build
+        run: ./build.sh
+
+      - name: Go Test
+        run: go test -v -count=1 ./... # should probably also add -race flag in the future
+
+      - name: Go Benchmark
+        run: go test -v -run=- -bench=. -benchtime=1x ./...
