@@ -333,7 +333,7 @@ func TestERsCfgAsMapInterface(t *testing.T) {
 
 func TestERSCFGClone(t *testing.T) {
 	ev := EventReaderCfg{
-		CacheDumpFields:          []*FCTemplate{
+		CacheDumpFields: []*FCTemplate{
 			{Tag: "test"},
 		},
 	}

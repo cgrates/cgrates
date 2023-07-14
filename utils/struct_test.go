@@ -173,15 +173,15 @@ func TestMissingMapFields(t *testing.T) {
 
 func TestStructToMapStringString(t *testing.T) {
 
-	tests := []struct{
+	tests := []struct {
 		name string
-		arg any
-		exp map[string]string
+		arg  any
+		exp  map[string]string
 	}{
 		{
 			name: "struct to map",
-			arg: &struct{
-				name string
+			arg: &struct {
+				name    string
 				surname string
 			}{"test", "test2"},
 			exp: map[string]string{"name": "test", "surname": "test2"},
@@ -206,19 +206,19 @@ func TestStructGetMapExtraFields(t *testing.T) {
 	}
 
 	type args struct {
-		in any
+		in          any
 		extraFields string
 	}
 
-	tests := []struct{
+	tests := []struct {
 		name string
 		args args
-		exp map[string]string
+		exp  map[string]string
 	}{
 		{
 			name: "tests get map extra fields",
 			args: args{&in{map[string]string{"test": "val1"}}, "mapAny"},
-			exp: map[string]string{"test": "val1"},
+			exp:  map[string]string{"test": "val1"},
 		},
 	}
 
@@ -238,13 +238,13 @@ func TestStructSetMapExtraFields(t *testing.T) {
 	type in struct {
 		Field map[string]string
 	}
-	
+
 	type args struct {
-		Values map[string]string
+		Values      map[string]string
 		extraFields string
 	}
 
-	tests := []struct{
+	tests := []struct {
 		name string
 		args args
 	}{
@@ -257,8 +257,7 @@ func TestStructSetMapExtraFields(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			argIn := in{map[string]string{"test": "val1"}}
-			SetMapExtraFields(&argIn , tt.args.Values, tt.args.extraFields)
-
+			SetMapExtraFields(&argIn, tt.args.Values, tt.args.extraFields)
 
 			if argIn.Field["test"] != "" {
 				t.Errorf("map value didn't change: %s, expected %s", argIn.Field["test"], tt.args.Values["test"])
@@ -270,7 +269,7 @@ func TestStructSetMapExtraFields(t *testing.T) {
 func TestStructFromMapStringString(t *testing.T) {
 
 	type args struct {
-		m map[string]string
+		m  map[string]string
 		in any
 	}
 
@@ -280,15 +279,15 @@ func TestStructFromMapStringString(t *testing.T) {
 
 	inArg := in{""}
 
-	tests := []struct{
+	tests := []struct {
 		name string
 		args args
-		exp in
+		exp  in
 	}{
 		{
 			name: "test map string string",
 			args: args{map[string]string{"Field": ""}, &inArg},
-			exp: in{Field: ""},
+			exp:  in{Field: ""},
 		},
 	}
 
@@ -308,7 +307,7 @@ func TestStructFromMapStringString(t *testing.T) {
 func TestStructFromMapStringInterface(t *testing.T) {
 
 	type args struct {
-		m map[string]any
+		m  map[string]any
 		in any
 	}
 
@@ -324,25 +323,25 @@ func TestStructFromMapStringInterface(t *testing.T) {
 
 	inC := inCantSet{""}
 
-	tests := []struct{
+	tests := []struct {
 		name string
 		args args
-		exp error
+		exp  error
 	}{
 		{
 			name: "test from map string interface",
 			args: args{map[string]any{"Field": ""}, &inArg},
-			exp: nil,
+			exp:  nil,
 		},
 		{
 			name: "test from map string interface",
 			args: args{map[string]any{"Field": 1}, &inArg},
-			exp: nil,
+			exp:  nil,
 		},
 		{
 			name: "invalid field",
 			args: args{map[string]any{"field": 1}, &inC},
-			exp: nil,
+			exp:  nil,
 		},
 	}
 
@@ -354,11 +353,11 @@ func TestStructFromMapStringInterface(t *testing.T) {
 			if i == 1 {
 				if err == nil {
 					t.Error("was expecting an error")
-				}  
+				}
 			} else {
 				if err != tt.exp {
 					t.Errorf("recived %s, expected %s", err, tt.exp)
-				}  
+				}
 			}
 		})
 	}
@@ -380,26 +379,26 @@ func TestStructUpdateStructWithStrMap(t *testing.T) {
 		m map[string]string
 	}
 
-	tests := []struct{
+	tests := []struct {
 		name string
 		args args
-		exp []string
+		exp  []string
 	}{
 		{
 			name: "bool case",
 			args: args{&arg, map[string]string{"Field1": "true", "Field2": "2", "Field3": "val2"}},
-			exp: []string{},
+			exp:  []string{},
 		},
 		{
 			name: "bool case",
 			args: args{&arg, map[string]string{"Field": "1.8"}},
-			exp: []string{"Field"},
+			exp:  []string{"Field"},
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			
+
 			rcv := UpdateStructWithStrMap(tt.args.s, tt.args.m)
 
 			if !reflect.DeepEqual(rcv, tt.exp) {

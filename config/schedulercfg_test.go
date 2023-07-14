@@ -85,25 +85,25 @@ func TestSchedulerCfgAsMapInterface(t *testing.T) {
 func TestSchedulerCfgloadFromJsonCfg2(t *testing.T) {
 	s := SchedulerCfg{}
 
-	tests := []struct{
+	tests := []struct {
 		name string
-		arg *SchedulerJsonCfg
-		err string
+		arg  *SchedulerJsonCfg
+		err  string
 	}{
 		{
 			name: "cdrs conns diff from *internal",
-			arg: &SchedulerJsonCfg{Cdrs_conns: &[]string{"test"}},
-			err: "",
+			arg:  &SchedulerJsonCfg{Cdrs_conns: &[]string{"test"}},
+			err:  "",
 		},
 		{
 			name: "cdrs conns equal to *internal",
-			arg: &SchedulerJsonCfg{Cdrs_conns: &[]string{"*internal"}},
-			err: "",
+			arg:  &SchedulerJsonCfg{Cdrs_conns: &[]string{"*internal"}},
+			err:  "",
 		},
 		{
 			name: "filers with value",
-			arg: &SchedulerJsonCfg{Filters: &[]string{"test"}},
-			err: "",
+			arg:  &SchedulerJsonCfg{Filters: &[]string{"test"}},
+			err:  "",
 		},
 	}
 

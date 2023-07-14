@@ -120,7 +120,7 @@ func TestCacheCFGAsMapInterface(t *testing.T) {
 		Limit:     1,
 		TTL:       1 * time.Second,
 		StaticTTL: true,
-		Precache: false,
+		Precache:  false,
 	}
 
 	rcv := c.AsMapInterface()
@@ -136,14 +136,12 @@ func TestCacheCFGAsMapInterface(t *testing.T) {
 	}
 }
 
-
-
 func TestCacheCFGAddTmpCaches(t *testing.T) {
 	c := CacheParamCfg{
 		Limit:     1,
 		TTL:       1 * time.Second,
 		StaticTTL: true,
-		Precache: false,
+		Precache:  false,
 	}
 
 	cc := CacheCfg{"test": &c}
@@ -166,7 +164,7 @@ func TestCacheCFGAsMappInterface(t *testing.T) {
 		Limit:     1,
 		TTL:       1 * time.Second,
 		StaticTTL: true,
-		Precache: false,
+		Precache:  false,
 	}
 
 	cc := CacheCfg{"test": &c}

@@ -104,9 +104,9 @@ func TestMapKeys(t *testing.T) {
 
 func TestMapNewStringMap(t *testing.T) {
 	tests := []struct {
-			name string
-			args []string
-			want StringMap
+		name string
+		args []string
+		want StringMap
 	}{
 		{
 			name: "testing both return cases",
@@ -180,29 +180,28 @@ func TestMapEqual(t *testing.T) {
 	}{
 		{
 			name: "sm is nil and argument is not nil",
-			sm: nil,
+			sm:   nil,
 			args: StringMap{"test": false},
 			want: false,
 		},
 		{
 			name: "different lengths",
-			sm: StringMap{"test1": true, "test2": true},
+			sm:   StringMap{"test1": true, "test2": true},
 			args: StringMap{"test1": true},
 			want: false,
 		},
 		{
 			name: "different values",
-			sm: StringMap{"test1": true},
+			sm:   StringMap{"test1": true},
 			args: StringMap{"test1": false},
 			want: false,
 		},
 		{
 			name: "same keys and values are true",
-			sm: StringMap{"test": true, "test1": true},
+			sm:   StringMap{"test": true, "test1": true},
 			args: StringMap{"test": true, "test1": true},
 			want: true,
 		},
-
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -222,19 +221,19 @@ func TestMapIncludes(t *testing.T) {
 	}{
 		{
 			name: "different lengths",
-			sm: StringMap{"test": false},
+			sm:   StringMap{"test": false},
 			args: StringMap{"test": false, "test1": true},
 			want: false,
 		},
 		{
 			name: "sm does not have all the keys of the argument",
-			sm: StringMap{"test": true, "test1": true},
+			sm:   StringMap{"test": true, "test1": true},
 			args: StringMap{"test2": true, "test3": false},
 			want: false,
 		},
 		{
 			name: "sm contains all the keys of the argument",
-			sm: StringMap{"test": true, "test1": true, "test2": true},
+			sm:   StringMap{"test": true, "test1": true, "test2": true},
 			args: StringMap{"test": true, "test1": true},
 			want: true,
 		},
@@ -256,7 +255,7 @@ func TestMapSlice(t *testing.T) {
 	}{
 		{
 			name: "testing Slice",
-			sm: StringMap{"test1": true, "test2": true, "test3": false},
+			sm:   StringMap{"test1": true, "test2": true, "test3": false},
 			want: []string{"test1", "test2", "test3"},
 		},
 	}
@@ -280,17 +279,17 @@ func TestMapStringMap_Copy(t *testing.T) {
 	}{
 		{
 			name: "testing Copy",
-			sm: StringMap{},
+			sm:   StringMap{},
 			args: StringMap{"test1": false, "test2": true},
 		},
 	}
 	for _, tt := range tests {
-			t.Run(tt.name, func(t *testing.T) {
-					tt.sm.Copy(tt.args)
-					if !reflect.DeepEqual(tt.sm, tt.args) {
-						t.Errorf("sm %v, want %v", tt.sm, tt.args)
-					}
-			})
+		t.Run(tt.name, func(t *testing.T) {
+			tt.sm.Copy(tt.args)
+			if !reflect.DeepEqual(tt.sm, tt.args) {
+				t.Errorf("sm %v, want %v", tt.sm, tt.args)
+			}
+		})
 	}
 }
 
@@ -302,7 +301,7 @@ func TestMapClone(t *testing.T) {
 	}{
 		{
 			name: "testinf Clone",
-			sm: StringMap{"test1": true, "test2": false},
+			sm:   StringMap{"test1": true, "test2": false},
 			want: StringMap{"test1": true, "test2": false},
 		},
 	}
@@ -310,7 +309,7 @@ func TestMapClone(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			if got := tt.sm.Clone(); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("StringMap.Clone() = %v, want %v", got, tt.want)
-			}			
+			}
 		})
 	}
 }
@@ -323,19 +322,19 @@ func TestMapGetOne(t *testing.T) {
 	}{
 		{
 			name: "empty StringMap",
-			sm: StringMap{},
+			sm:   StringMap{},
 			want: EmptyString,
 		},
 		{
 			name: "StringMap with values",
-			sm: StringMap{"test1": true},
+			sm:   StringMap{"test1": true},
 			want: "test1",
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			if got := tt.sm.GetOne(); got != tt.want {
-					t.Errorf("StringMap.GetOne() = %v, want %v", got, tt.want)
+				t.Errorf("StringMap.GetOne() = %v, want %v", got, tt.want)
 			}
 		})
 	}
@@ -350,7 +349,7 @@ func TestMapJoin(t *testing.T) {
 	}{
 		{
 			name: "testing Join",
-			sm: StringMap{"test1": true, "test2": true},
+			sm:   StringMap{"test1": true, "test2": true},
 			args: []StringMap{{"test3": false, "test4": true}, {"test5": true}},
 			want: StringMap{"test1": true, "test2": true, "test3": false, "test4": true, "test5": true},
 		},
@@ -358,23 +357,23 @@ func TestMapJoin(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			tt.sm.Join(tt.args...)
-			if !reflect.DeepEqual(tt.sm, tt.want)  {
+			if !reflect.DeepEqual(tt.sm, tt.want) {
 				t.Errorf("sm %v, want %v", tt.sm, tt.want)
-		}
+			}
 		})
 	}
 }
 
 func TestMapString(t *testing.T) {
 	tests := []struct {
-		name string
-		sm   StringMap
+		name  string
+		sm    StringMap
 		want1 string
 		want2 string
 	}{
 		{
-			name: "testing string",
-			sm: StringMap{"test1": true, "test2": false},
+			name:  "testing string",
+			sm:    StringMap{"test1": true, "test2": false},
 			want1: "test1;test2",
 			want2: "test2;test1",
 		},
@@ -382,7 +381,7 @@ func TestMapString(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			if got := tt.sm.String(); got != tt.want1 && got != tt.want2 {
-					t.Errorf("StringMap.String() = %v", got)
+				t.Errorf("StringMap.String() = %v", got)
 			}
 		})
 	}
@@ -395,38 +394,38 @@ func TestMapFieldMultiplyFactorClone(t *testing.T) {
 		wantCln FieldMultiplyFactor
 	}{
 		{
-			name: "testing FieldMultiplyFactor.Clone",
-			fmp: FieldMultiplyFactor{"test": 0.5, "test2": 1.2},
+			name:    "testing FieldMultiplyFactor.Clone",
+			fmp:     FieldMultiplyFactor{"test": 0.5, "test2": 1.2},
 			wantCln: FieldMultiplyFactor{"test": 0.5, "test2": 1.2},
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			if gotCln := tt.fmp.Clone(); !reflect.DeepEqual(gotCln, tt.wantCln) {
-					t.Errorf("FieldMultiplyFactor.Clone() = %v, want %v", gotCln, tt.wantCln)
+				t.Errorf("FieldMultiplyFactor.Clone() = %v, want %v", gotCln, tt.wantCln)
 			}
 		})
 	}
 }
 
 func TestMapStringToInt64(t *testing.T) {
-	tests := []struct{
+	tests := []struct {
 		name string
 		args map[string]string
 		want map[string]int64
-		err bool
+		err  bool
 	}{
 		{
 			name: "testing MapToStringInt64",
 			args: map[string]string{"test": "1", "test2": "4"},
 			want: map[string]int64{"test": 1, "test2": 4},
-			err: false,
+			err:  false,
 		},
 		{
 			name: "passing invalid string value",
 			args: map[string]string{"test": "abc"},
 			want: nil,
-			err: true,
+			err:  true,
 		},
 	}
 

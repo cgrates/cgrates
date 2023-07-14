@@ -153,12 +153,12 @@ func TestDispatcherCfgloadFromJsonCfg(t *testing.T) {
 	}
 
 	exp := DispatcherSCfg{
-		Enabled  :           bl,
-		IndexedSelects  :    bl,
-		StringIndexedFields : &slc,
-		PrefixIndexedFields : &slc,
-		AttributeSConns  :   slc,
-		NestedFields    :    bl,
+		Enabled:             bl,
+		IndexedSelects:      bl,
+		StringIndexedFields: &slc,
+		PrefixIndexedFields: &slc,
+		AttributeSConns:     slc,
+		NestedFields:        bl,
 	}
 
 	err := d.loadFromJsonCfg(&js)
@@ -176,12 +176,12 @@ func TestDispatcherSCfgAsMapInterface2(t *testing.T) {
 	slc := []string{"val1", "val2"}
 
 	dsp := DispatcherSCfg{
-		Enabled  :           bl,
-		IndexedSelects  :    bl,
-		StringIndexedFields : &slc,
-		PrefixIndexedFields : &slc,
-		AttributeSConns  :   slc,
-		NestedFields    :    bl,
+		Enabled:             bl,
+		IndexedSelects:      bl,
+		StringIndexedFields: &slc,
+		PrefixIndexedFields: &slc,
+		AttributeSConns:     slc,
+		NestedFields:        bl,
 	}
 
 	exp := map[string]any{

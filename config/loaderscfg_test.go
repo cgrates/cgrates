@@ -193,20 +193,20 @@ func TestLoadersCFGEnable(t *testing.T) {
 	lst := LoaderSCfgs{&lt}
 	lsf := LoaderSCfgs{&lf}
 
-	tests := []struct{
-		name string 
-		loader LoaderSCfgs 
-		exp bool 
+	tests := []struct {
+		name   string
+		loader LoaderSCfgs
+		exp    bool
 	}{
 		{
-			name: "return true",
+			name:   "return true",
 			loader: lst,
-			exp: true,
+			exp:    true,
 		},
 		{
-			name: "return false",
+			name:   "return false",
 			loader: lsf,
-			exp: false,
+			exp:    false,
 		},
 	}
 
@@ -232,30 +232,30 @@ func TestLoadersCFGLoadFromJsonCfg(t *testing.T) {
 	str := "`test"
 
 	ljd := LoaderJsonDataType{
-		Fields:    &[]*FcTemplateJsonCfg{
-			{Value: &str,},
+		Fields: &[]*FcTemplateJsonCfg{
+			{Value: &str},
 		},
 	}
 
 	type args struct {
-		jsnCfg *LoaderJsonDataType
+		jsnCfg    *LoaderJsonDataType
 		separator string
 	}
 
-	tests := []struct{
-		name string 
-		args args 
-		exp error 
+	tests := []struct {
+		name string
+		args args
+		exp  error
 	}{
 		{
 			name: "nil return",
 			args: args{jsnCfg: nil, separator: ""},
-			exp: nil,
+			exp:  nil,
 		},
 		{
 			name: "error check",
 			args: args{&ljd, ""},
-			exp: fmt.Errorf("Unclosed unspilit syntax"),
+			exp:  fmt.Errorf("Unclosed unspilit syntax"),
 		},
 	}
 

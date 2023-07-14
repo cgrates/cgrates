@@ -104,7 +104,7 @@ func TestSliceAvgNegative(t *testing.T) {
 		},
 		{
 			name: "testing AvgNegative",
-			args: []float64{-1,0,4},
+			args: []float64{-1, 0, 4},
 			want: 1,
 		},
 	}
@@ -119,26 +119,26 @@ func TestSliceAvgNegative(t *testing.T) {
 
 func TestSliceAPrefixSliceItems(t *testing.T) {
 	type args struct {
-			slc  []string
-			prfx string
+		slc  []string
+		prfx string
 	}
 	tests := []struct {
-			name    string
-			args    args
-			wantOut []string
+		name    string
+		args    args
+		wantOut []string
 	}{
-			{
-				name: "testing PrefixSliceItems",
-				args: args{[]string{"test1", "test2"}, "!"},
-				wantOut: []string{"!test1", "!test2"},
-			},
+		{
+			name:    "testing PrefixSliceItems",
+			args:    args{[]string{"test1", "test2"}, "!"},
+			wantOut: []string{"!test1", "!test2"},
+		},
 	}
 	for _, tt := range tests {
-			t.Run(tt.name, func(t *testing.T) {
-					if gotOut := PrefixSliceItems(tt.args.slc, tt.args.prfx); !reflect.DeepEqual(gotOut, tt.wantOut) {
-							t.Errorf("PrefixSliceItems() = %v, want %v", gotOut, tt.wantOut)
-					}
-			})
+		t.Run(tt.name, func(t *testing.T) {
+			if gotOut := PrefixSliceItems(tt.args.slc, tt.args.prfx); !reflect.DeepEqual(gotOut, tt.wantOut) {
+				t.Errorf("PrefixSliceItems() = %v, want %v", gotOut, tt.wantOut)
+			}
+		})
 	}
 }
 
