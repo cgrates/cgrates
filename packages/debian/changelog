@@ -1,17 +1,66 @@
 cgrates (0.10.3~dev) UNRELEASED; urgency=medium
 
-  * [RALs] Send balance update event from rals to threshold ( in case of negative) only once
-  * [SessionS] Use rals_conns when sending refund rounding
-  * [SupplierS] SupplierS require a connection to rals when give
-    AccountIDs and RatingPlanIDs to calculate
-  * [SessionS] Compile the SRun.EventCost before store it and send it further
-  * [ApierS] Correct handle error in case of APIerSv1.GetActionTriggers
-  * [SessionS] Added extra condition to determine if the increment is considered the roundIncrement
-  * [SessionS] Cloned the charging interval added on EventCost merge 
-  * [FilterS] Optimized the automated index fields matching
-  * [AgentS] Added *routes_maxcost flag
-  * [SessionS] Replaced max_call_duration config with default_usage for each ToR
-  * [SessionS] The sessions are no longer terminated on shutdown if the replication_conns are set
+  * [RALs] Now, balance update events from RALs to ThresholdS (when negative) are only sent once.
+  * [SessionS] Updated to use rals_conns when refund rounding is sent.
+  * [SupplierS] Now requires a connection to rals for calculating AccountIDs and RatingPlanIDs.
+  * [SessionS] Implemented the compilation of SRun.EventCost before storing and passing it further.
+  * [ApierS] Improved error handling for APIerSv1.GetActionTriggers.
+  * [SessionS] Added condition to assess if increment should be considered roundIncrement.
+  * [SessionS] When appending to the EventCost,the charging interval is now being cloned.
+  * [FilterS] Enhanced automated index fields matching for optimization.
+  * [AgentS] Introduced *routes_maxcost flag.
+  * [SessionS] max_call_duration config replaced with default_usage per ToR.
+  * [SessionS] If replication_conns are set, sessions will not terminate on shutdown.
+  * [EventCost] Improved FieldAsInterface function to prevent crashes when a RatingPlan doesn't exist (#2743).
+  * [EventCost] Added nil check when creating EventCost DataProvider, preventing crashes when cgr-engine is manually restarted during an ongoing call (#2764).
+  * [DispatcherS] Fixed panic when sending Ping request through DispatcherS.
+  * [CacheS] Tenant now passed to automatic cache calls (#2928).
+  * [DispatcherS] Added missing Responder methods to DispatcherS (#2954).
+  * [DispatcherS] The ArgDispatcher field for ThresholdS methods is now mandatory only if a connection to AttributeS has been defined (#2981).
+  * [DataManager] Revised caching logic for ActionPlans.
+  * [AttributeS] Introduced *sipcid field type.
+  * [FilterS] New APIs for index status checks have been implemented.
+  * [SessionS] Tenant is set to default if not specified for SessionS APIs.
+  * [RALs] Fixed issue with *any subject not considered when removing RatingProfiles (#3161).
+  * [ResourceS] ResourceS APIs updated for concurrent usage safety.
+  * [APIs] Addressed potential panic risk caused by API parameter validator function.
+  * [cgr-loader] Added tenant flag.
+  * [ApierS] Cache now reloaded when setting/removing RatingProfiles (#3186).
+  * [SessionS] Session synchronization no longer occurs with no active sessions.
+  * [RALs] Updated EventCost rounding increment handling (#3018).
+  * [SessionS] Protection added for missing events.
+  * [Config] Resolved issue with appending default port to multiple mongodb hosts in config file (#3673).
+  * [FSock] Fixed cgr-engine panic at startup when trying to connect to freeswitch_agent with logger set to *stdout (#3678).
+  * [AttributeS/DispatcherS] Context/Subsystems now set to *any if not specified.
+  * [FilterS] Added support for reverse filter indexes.
+  * [FSock] Addressed an issue where parsing responses from FreeSWITCH sometimes resulted in an unexpected number of values (#3749).
+  * [FSock] Resolved a connectivity issue where, if the connection between cgr-engine and the freeswitch agent was terminated during use, no reconnection attempts would be made (#3794).
+  * [Fsock] Corrected a parsing error where separators between parentheses were not ignored, leading to improper parsing of replies from the 'show channels' API call.
+  * [CDRe] Retained export_path as is for amqp, amqpv1, sqs, s3 and kafka exporters.
+  * [ServiceManager] Rectified a problem that prevented the RALs service from starting when the Responder was already running.
+  * [CDRs] Refund process now precedes debit during CDR rerating, fixing potential inaccuracies.
+  * [LoaderS] Introduced inline filter validation before DB write, preventing late-stage errors.
+  * [RPCClient] Updated to the latest version, addressing potential panic, deadlock, and data race issues.
+  * [CDRe] *exp.Cost path population no longer hardcoded to Cost found in *req map, user now can choose.
+  * [CDRe] Resolved an issue where the RoundingDecimals, if not explicitly set by the user, defaulted to 0 instead of the value defined under the "general" section in the configuration.
+  * [CDRe] Fixed a template problem where attempts to overwrite existing fields would lead to appending new values at the end of old ones, rather than replacing them.
+  * [CDRe] Overwriting preexisting fields in a template no longer appends new values at the end.
+  * [Storage] Introduced error handling for a previously overlooked case. Specifically, when GetCDRs is called for mongo with the remove flag set to true and the process returns an error, it previously led to a panic. This issue has now been addressed.
+  * [CDRe] Fixed support for *combimed field type.
+  * [Docs] Updated installation documentation: https://cgrates.readthedocs.io/en/v0.10/installation.html.
+  * Updated all associated libraries to their most recent versions.
+  * Enhanced the testing suite and increased coverage.
+  * Fixes, updates and general quality of life changes that can be only noticed on the developer side so we will not be going into much detail:
+      - updated ansible bash/ansible scripts;
+      - improved formatting, readability;
+      - reducing complexity of some functions.
+  * Implemented various fixes, updates, and enhancements primarily noticeable to developers (so we will not go into too much detail), including:
+
+      - Enhanced code formatting and readability for better maintainability.
+      - Simplified some complex functions to increase efficiency and ease of understanding.
+      - Updated outdated Ansible and Bash scripts.
+
+Full Changelog: https://github.com/cgrates/cgrates/compare/v0.10.2...v0.10
 
  -- DanB <danb@cgrates.org>  Thu, 08 Oct 2020 16:23:58 +0300
 
