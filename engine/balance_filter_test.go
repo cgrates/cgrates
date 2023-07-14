@@ -174,3 +174,249 @@ func TestBalanceFilterClone(t *testing.T) {
 		t.Errorf("Expecting: 0.7, received: %+v", *bf.Weight)
 	}
 }
+
+func TestBalanceFilterLoadFromBalance(t *testing.T) {
+	str := "test"
+	fl := 1.2
+	tm := time.Date(2009, 11, 17, 20, 34, 58, 651387237, time.UTC)
+	sm := utils.StringMap{"test": true}
+	rt := []*RITiming{{}}
+	bl := true
+	vf := ValueFactor{"test": 1.5}
+	acc := Account{
+		ID: "test",
+	}
+	nm := 2
+
+	bf := BalanceFilter{
+		Value: &utils.ValueFormula{},
+	}
+
+	b := Balance{
+		Uuid:           str,
+		ID:             str,
+		Value:          fl,
+		ExpirationDate: tm,
+		Weight:         fl,
+		DestinationIDs: sm,
+		RatingSubject:  str,
+		Categories:     sm,
+		SharedGroups:   sm,
+		Timings:        rt,
+		TimingIDs:      sm,
+		Disabled:       bl,
+		Factor:         vf,
+		Blocker:        bl,
+		precision:      nm,
+		account:        &acc,
+		dirty:          bl,
+	}
+
+	exp := &BalanceFilter{
+		Uuid: &str,
+		ID:   &str,
+		Value: &utils.ValueFormula{
+			Static: fl,
+		},
+		ExpirationDate: &tm,
+		Weight:         &fl,
+		DestinationIDs: &sm,
+		RatingSubject:  &str,
+		Categories:     &sm,
+		SharedGroups:   &sm,
+		TimingIDs:      &sm,
+		Timings:        rt,
+		Disabled:       &bl,
+		Factor:         &vf,
+		Blocker:        &bl,
+	}
+
+	rcv := bf.LoadFromBalance(&b)
+
+	if !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("expected %v, received %v", utils.ToJSON(exp), utils.ToJSON(rcv))
+	}
+}
+
+func TestBalanceFilterGetType(t *testing.T) {
+	bp := BalanceFilter{}
+
+	rcv := bp.GetType()
+
+	if rcv != "" {
+		t.Error(rcv)
+	}
+}
+
+func TestBalanceFilterGetValue(t *testing.T) {
+	bp := BalanceFilter{
+		Value: &utils.ValueFormula{
+			Method: "test",
+		},
+	}
+
+	rcv := bp.GetValue()
+
+	if rcv != 0.0 {
+		t.Error(rcv)
+	}
+}
+
+func TestBalanceFilterSetValue(t *testing.T) {
+	bp := BalanceFilter{}
+
+	bp.SetValue(1.5)
+
+	if bp.Value.Static != 1.5 {
+		t.Error(bp.Value.Static)
+	}
+}
+
+func TestBalanceFilterGetUuid(t *testing.T) {
+	str := "test"
+
+	bp := BalanceFilter{
+		Uuid: &str,
+	}
+
+	rcv := bp.GetUuid()
+
+	if rcv != str {
+		t.Error(rcv)
+	}
+}
+
+func TestBalanceFilterGetCategories(t *testing.T) {
+	bp := BalanceFilter{
+		Categories: &utils.StringMap{"test": true},
+	}
+
+	rcv := bp.GetCategories()
+
+	if !reflect.DeepEqual(rcv, utils.StringMap{"test": true}) {
+		t.Error(rcv)
+	}
+}
+
+func TestBalanceFilterGetTimings(t *testing.T) {
+	bp := BalanceFilter{
+		TimingIDs: &utils.StringMap{"test": true},
+	}
+
+	rcv := bp.GetTimingIDs()
+
+	if !reflect.DeepEqual(rcv, utils.StringMap{"test": true}) {
+		t.Error(rcv)
+	}
+}
+
+func TestBalanceFilterGetFactor(t *testing.T) {
+	bp := BalanceFilter{
+		Factor: &ValueFactor{"test": 1.5},
+	}
+
+	rcv := bp.GetFactor()
+
+	if !reflect.DeepEqual(rcv, ValueFactor{"test": 1.5}) {
+		t.Error(rcv)
+	}
+}
+
+func TestBalanceFilterEmptyExpirationDate(t *testing.T) {
+	tm := time.Date(2009, 11, 17, 20, 34, 58, 651387237, time.UTC)
+
+	bp := BalanceFilter{
+		ExpirationDate: &tm,
+	}
+
+	rcv := bp.EmptyExpirationDate()
+
+	if rcv != false {
+		t.Error(rcv)
+	}
+}
+
+func TestBalanceFilterModifyBalance(t *testing.T) {
+	str := "test"
+	fl := 1.2
+	tm := time.Date(2009, 11, 17, 20, 34, 58, 651387237, time.UTC)
+	sm := utils.StringMap{"test": true}
+	rt := []*RITiming{{}}
+	bl := true
+	acc := Account{
+		ID: "test",
+	}
+	nm := 2
+
+	str2 := "testt"
+	fl2 := 1.5
+	tm2 := time.Date(2010, 11, 17, 20, 34, 58, 651387237, time.UTC)
+	sm2 := utils.StringMap{"testt": false}
+	rt2 := []*RITiming{{}}
+	bl2 := true
+	acc2 := Account{
+		ID: "test",
+	}
+	nm2 := 2
+
+	bf := BalanceFilter{
+		ID: &str2,
+		Value: &utils.ValueFormula{
+			Static: fl2,
+		},
+		ExpirationDate: &tm2,
+		Weight:         &fl2,
+		DestinationIDs: &sm2,
+		RatingSubject:  &str2,
+		Categories:     &sm2,
+		SharedGroups:   &sm2,
+		TimingIDs:      &sm2,
+		Timings:        rt2,
+		Disabled:       &bl2,
+		Blocker:        &bl2,
+	}
+
+	b := Balance{
+		ID:             str,
+		Value:          fl,
+		ExpirationDate: tm,
+		Weight:         fl,
+		DestinationIDs: sm,
+		RatingSubject:  str,
+		Categories:     sm,
+		SharedGroups:   sm,
+		Timings:        rt,
+		TimingIDs:      sm,
+		Disabled:       bl,
+		Blocker:        bl,
+		precision:      nm,
+		account:        &acc,
+		dirty:          bl,
+	}
+
+	exp := Balance{
+		ID:             str2,
+		Value:          fl2,
+		ExpirationDate: tm2,
+		Weight:         fl2,
+		DestinationIDs: sm2,
+		RatingSubject:  str2,
+		Categories:     sm2,
+		SharedGroups:   sm2,
+		Timings:        rt2,
+		TimingIDs:      sm2,
+		Disabled:       bl2,
+		Blocker:        bl2,
+		precision:      nm2,
+		account:        &acc2,
+		dirty:          bl2,
+	}
+
+	bf.ModifyBalance(&b)
+
+	if !reflect.DeepEqual(b, exp) {
+		t.Error(exp, b)
+	}
+
+	bf.ModifyBalance(nil)
+}
