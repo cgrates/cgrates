@@ -111,11 +111,5 @@
 	"apiers_conns": ["*internal"]
 }
 
- //"sentrypeer":{
- //"url":"https://sentrypeer.com/api/",
- //"clientID":"",
- //"clientSecret":"",
- //},
-
 
 }

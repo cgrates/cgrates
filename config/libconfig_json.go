@@ -877,9 +877,13 @@ type APIBanJsonCfg struct {
 }
 
 type SentryPeerJsonCfg struct {
-	ClientID     *string
-	ClientSecret *string
-	Url          *string
+	ClientID     *string `json:"client_id"`
+	ClientSecret *string `json:"client_secret"`
+	TokenUrl     *string `json:"token_url"`
+	IpUrl        *string `json:"ip_url"`
+	NumberUrl    *string `json:"number_url"`
+	Audience     *string `json:"audience"`
+	GrantType    *string `json:"grant_type"`
 }
 
 type CoreSJsonCfg struct {
