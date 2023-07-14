@@ -2184,57 +2184,57 @@ func TestValidateCallData(t *testing.T) {
 
 func TestCallDescNewCallDescriptorFromCGREvent(t *testing.T) {
 	c := utils.CGREvent{
-		Event:  map[string]any{
+		Event: map[string]any{
 			"Account": "test",
 		},
 	}
 
 	c2 := utils.CGREvent{
-		Event:  map[string]any{
-			"Account": "test",
-			"Subject": "test",
+		Event: map[string]any{
+			"Account":     "test",
+			"Subject":     "test",
 			"Destination": "test",
 		},
 	}
 
 	c3 := utils.CGREvent{
-		Event:  map[string]any{
-			"Account": "test",
-			"Subject": "test",
+		Event: map[string]any{
+			"Account":     "test",
+			"Subject":     "test",
 			"Destination": "test",
-			"SetupTime": "*daily",
+			"SetupTime":   "*daily",
 		},
 	}
 
 	type args struct {
-		cgrEv *utils.CGREvent
+		cgrEv    *utils.CGREvent
 		timezone string
 	}
 
 	type exp struct {
-		cd *CallDescriptor 
+		cd  *CallDescriptor
 		err string
 	}
 
-	tests := []struct{
-		name string 
-		args args 
-		exp exp
+	tests := []struct {
+		name string
+		args args
+		exp  exp
 	}{
 		{
 			name: "subject and destiantion field as string error check",
 			args: args{&c, ""},
-			exp: exp{nil, utils.ErrNotFound.Error()},
+			exp:  exp{nil, utils.ErrNotFound.Error()},
 		},
 		{
 			name: "setup time field as time error check",
 			args: args{&c2, ""},
-			exp: exp{nil, utils.ErrNotFound.Error()},
+			exp:  exp{nil, utils.ErrNotFound.Error()},
 		},
 		{
 			name: "answer time field as time error check",
 			args: args{&c3, "UTC"},
-			exp: exp{nil, utils.ErrNotFound.Error()},
+			exp:  exp{nil, utils.ErrNotFound.Error()},
 		},
 	}
 
@@ -2257,7 +2257,7 @@ func TestCallDescNewCallDescriptorFromCGREvent(t *testing.T) {
 
 func TestCallDescAsCGREvet(t *testing.T) {
 	cd := CallDescriptor{
-		ExtraFields:     map[string]string{"test": "test"},
+		ExtraFields: map[string]string{"test": "test"},
 	}
 
 	rcv := cd.AsCGREvent()
@@ -2265,89 +2265,89 @@ func TestCallDescAsCGREvet(t *testing.T) {
 	if rcv.Event["test"] != "test" {
 		t.Error(rcv.Event["test"])
 	}
- }
+}
 
- func TestCallDescUpdateFromCGREvent(t *testing.T) {
+func TestCallDescUpdateFromCGREvent(t *testing.T) {
 	cd := CallDescriptor{
-		ExtraFields:     map[string]string{},
+		ExtraFields: map[string]string{},
 	}
 
 	c := utils.CGREvent{
-		Event:  map[string]any{
+		Event: map[string]any{
 			"Test2": "test",
 		},
 	}
 
 	c2 := utils.CGREvent{
-		Event:  map[string]any{
+		Event: map[string]any{
 			"Usage": 1 * time.Millisecond,
 		},
 	}
 
 	type args struct {
-		cgrEv *utils.CGREvent
+		cgrEv  *utils.CGREvent
 		fields []string
 	}
 
 	tests := []struct {
-		name string 
-		args args 
-		err string
+		name string
+		args args
+		err  string
 	}{
 		{
 			name: "ToR field as string error check",
 			args: args{&c, []string{"ToR"}},
-			err: utils.ErrNotFound.Error(),
+			err:  utils.ErrNotFound.Error(),
 		},
 		{
 			name: "Tenant field as string error check",
 			args: args{&c, []string{"Tenant"}},
-			err: utils.ErrNotFound.Error(),
+			err:  utils.ErrNotFound.Error(),
 		},
 		{
 			name: "Category field as string error check",
 			args: args{&c, []string{"Category"}},
-			err: utils.ErrNotFound.Error(),
+			err:  utils.ErrNotFound.Error(),
 		},
 		{
 			name: "Account field as string error check",
 			args: args{&c, []string{"Account"}},
-			err: utils.ErrNotFound.Error(),
+			err:  utils.ErrNotFound.Error(),
 		},
 		{
 			name: "Subject field as string error check",
 			args: args{&c, []string{"Subject"}},
-			err: utils.ErrNotFound.Error(),
+			err:  utils.ErrNotFound.Error(),
 		},
 		{
 			name: "Destination field as string error check",
 			args: args{&c, []string{"Destination"}},
-			err: utils.ErrNotFound.Error(),
+			err:  utils.ErrNotFound.Error(),
 		},
 		{
 			name: "AnswerTime field as string error check",
 			args: args{&c, []string{"AnswerTime"}},
-			err: utils.ErrNotFound.Error(),
+			err:  utils.ErrNotFound.Error(),
 		},
 		{
 			name: "Usage field as string error check",
 			args: args{&c, []string{"Usage"}},
-			err: utils.ErrNotFound.Error(),
+			err:  utils.ErrNotFound.Error(),
 		},
 		{
 			name: "Usage field as string error check",
 			args: args{&c2, []string{"Usage"}},
-			err: "",
+			err:  "",
 		},
 		{
 			name: "Default error check",
 			args: args{&c, []string{"Test"}},
-			err: utils.ErrNotFound.Error(),
+			err:  utils.ErrNotFound.Error(),
 		},
 		{
 			name: "Default error check",
 			args: args{&c, []string{"Test2"}},
-			err: "",
+			err:  "",
 		},
 	}
 
@@ -2362,9 +2362,9 @@ func TestCallDescAsCGREvet(t *testing.T) {
 			}
 		})
 	}
- }
+}
 
- func TestCallDescgetAccount(t *testing.T) {
+func TestCallDescgetAccount(t *testing.T) {
 	cd := CallDescriptor{
 		account: &Account{
 			Disabled: true,
@@ -2380,11 +2380,11 @@ func TestCallDescAsCGREvet(t *testing.T) {
 	if rcv != nil {
 		t.Error(rcv)
 	}
- }
+}
 
- func TestCallDescDebit(t *testing.T) {
+func TestCallDescDebit(t *testing.T) {
 	cd := CallDescriptor{
-		account:    &Account{
+		account: &Account{
 			Disabled: true,
 		},
 	}
@@ -2400,11 +2400,11 @@ func TestCallDescAsCGREvet(t *testing.T) {
 	if rcv != nil {
 		t.Errorf("received %v, expected %v", rcv, nil)
 	}
- }
+}
 
- func TestCallDescMaxDebit(t *testing.T) {
+func TestCallDescMaxDebit(t *testing.T) {
 	cd := CallDescriptor{
-		account:    &Account{
+		account: &Account{
 			Disabled: true,
 		},
 	}
@@ -2420,9 +2420,9 @@ func TestCallDescAsCGREvet(t *testing.T) {
 	if rcv != nil {
 		t.Errorf("received %v, expected %v", rcv, nil)
 	}
- }
+}
 
- func TestCallDescAccountSummary(t *testing.T) {
+func TestCallDescAccountSummary(t *testing.T) {
 	cd := CallDescriptor{
 		account: nil,
 	}
@@ -2434,9 +2434,9 @@ func TestCallDescAsCGREvet(t *testing.T) {
 	if rcv != nil {
 		t.Error(rcv)
 	}
- }
+}
 
- func TestCallDescFieldAsInterface(t *testing.T) {
+func TestCallDescFieldAsInterface(t *testing.T) {
 	cd := CallDescriptor{}
 
 	rcv, err := cd.FieldAsInterface([]string{})
@@ -2447,9 +2447,9 @@ func TestCallDescAsCGREvet(t *testing.T) {
 	if rcv != nil {
 		t.Error(rcv)
 	}
- }
+}
 
- func TestCallDescFieldAsString(t *testing.T) {
+func TestCallDescFieldAsString(t *testing.T) {
 	cd := CallDescriptor{}
 
 	rcv, err := cd.FieldAsString([]string{})
@@ -2460,9 +2460,9 @@ func TestCallDescAsCGREvet(t *testing.T) {
 	if rcv != "" {
 		t.Error(rcv)
 	}
- }
+}
 
- func TestCallDescString(t *testing.T) {
+func TestCallDescString(t *testing.T) {
 	cd := CallDescriptor{}
 
 	rcv := cd.String()
@@ -2470,9 +2470,9 @@ func TestCallDescAsCGREvet(t *testing.T) {
 	if rcv != `{"Category":"","Tenant":"","Subject":"","Account":"","Destination":"","TimeStart":"0001-01-01T00:00:00Z","TimeEnd":"0001-01-01T00:00:00Z","LoopIndex":0,"DurationIndex":0,"FallbackSubject":"","RatingInfos":null,"Increments":null,"ToR":"","ExtraFields":null,"MaxRate":0,"MaxRateUnit":0,"MaxCostSoFar":0,"CgrID":"","RunID":"","ForceDuration":false,"PerformRounding":false,"DryRun":false,"DenyNegativeAccount":false}` {
 		t.Error(rcv)
 	}
- }
+}
 
- func TestCallDescRemoteHost(t *testing.T) {
+func TestCallDescRemoteHost(t *testing.T) {
 	cd := CallDescriptor{}
 
 	rcv := cd.RemoteHost()
@@ -2480,4 +2480,4 @@ func TestCallDescAsCGREvet(t *testing.T) {
 	if rcv.String() != "local" {
 		t.Error(rcv)
 	}
- }
+}
