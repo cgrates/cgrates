@@ -880,8 +880,8 @@ type SentryPeerJsonCfg struct {
 	ClientID     *string `json:"client_id"`
 	ClientSecret *string `json:"client_secret"`
 	TokenUrl     *string `json:"token_url"`
-	IpUrl        *string `json:"ip_url"`
-	NumberUrl    *string `json:"number_url"`
+	IpsUrl       *string `json:"ips_url"`
+	NumbersUrl   *string `json:"numbers_url"`
 	Audience     *string `json:"audience"`
 	GrantType    *string `json:"grant_type"`
 }

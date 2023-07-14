@@ -22,8 +22,8 @@ type SentryPeerCfg struct {
 	ClientID     string
 	ClientSecret string
 	TokenUrl     string
-	IpUrl        string
-	NumberUrl    string
+	IpsUrl       string
+	NumbersUrl   string
 	Audience     string
 	GrantType    string
 }
@@ -35,11 +35,11 @@ func (sp *SentryPeerCfg) loadFromJSONCfg(jsnCfg *SentryPeerJsonCfg) (err error) 
 	if jsnCfg.TokenUrl != nil {
 		sp.TokenUrl = *jsnCfg.TokenUrl
 	}
-	if jsnCfg.IpUrl != nil {
-		sp.IpUrl = *jsnCfg.IpUrl
+	if jsnCfg.IpsUrl != nil {
+		sp.IpsUrl = *jsnCfg.IpsUrl
 	}
-	if jsnCfg.NumberUrl != nil {
-		sp.NumberUrl = *jsnCfg.NumberUrl
+	if jsnCfg.NumbersUrl != nil {
+		sp.NumbersUrl = *jsnCfg.NumbersUrl
 	}
 	if jsnCfg.ClientSecret != nil {
 		sp.ClientSecret = *jsnCfg.ClientSecret
@@ -61,8 +61,8 @@ func (sp *SentryPeerCfg) AsMapInterface() map[string]any {
 		"TokenURL":     sp.TokenUrl,
 		"ClientSecret": sp.ClientSecret,
 		"ClientID":     sp.ClientID,
-		"IpUrl":        sp.IpUrl,
-		"NumberUrl":    sp.NumberUrl,
+		"IpUrl":        sp.IpsUrl,
+		"NumberUrl":    sp.NumbersUrl,
 		"Audience":     sp.Audience,
 		"GrantType":    sp.GrantType,
 	}
@@ -73,8 +73,8 @@ func (sp *SentryPeerCfg) Clone() (cln *SentryPeerCfg) {
 		TokenUrl:     sp.TokenUrl,
 		ClientSecret: sp.ClientSecret,
 		ClientID:     sp.ClientID,
-		IpUrl:        sp.IpUrl,
-		NumberUrl:    sp.NumberUrl,
+		IpsUrl:       sp.IpsUrl,
+		NumbersUrl:   sp.NumbersUrl,
 		Audience:     sp.Audience,
 		GrantType:    sp.GrantType,
 	}
