@@ -67,6 +67,7 @@ var (
 	RalsErrorPrfx                     = "RALS_ERROR"
 	DispatcherErrorPrefix             = "DISPATCHER_ERROR"
 	RateSErrPrfx                      = "RATES_ERROR"
+	ErrNotAuthorized                  = errors.New("NOT_AUTHORIZED")
 	ErrUnsupportedFormat              = errors.New("UNSUPPORTED_FORMAT")
 	ErrNoDatabaseConn                 = errors.New("NO_DATABASE_CONNECTION")
 	ErrMaxIncrementsExceeded          = errors.New("MAX_INCREMENTS_EXCEEDED")

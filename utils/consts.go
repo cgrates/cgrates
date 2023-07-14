@@ -1159,6 +1159,9 @@ const (
 	MetaIPNet              = "*ipnet"
 	MetaAPIBan             = "*apiban"
 	MetaSentryPeer         = "*sentrypeer"
+	MetaToken              = "*token"
+	MetaIp                 = "*ip"
+	MetaNumber             = "*number"
 	MetaActivationInterval = "*ai"
 	MetaRegex              = "*regex"
 

@@ -1268,9 +1268,13 @@ const CGRATES_CFG_JSON = `
 	"keys": [],
 },
 "sentrypeer":{
-	"url":"",
-	"clientID":"",
-	"clientSecret":"",
-}
+	 	 "client_id":"",
+	 	 "client_secret":"",
+	 	 "token_url":"https://authz.sentrypeer.com/oauth/token",
+	 	 "ip_url":"https://sentrypeer.com/api/ip-addresses",
+	 	 "number_url":"https://sentrypeer.com/api/phone-numbers",
+	 	 "audience":"https://sentrypeer.com/api",
+	 	 "grant_type":"client_credentials",
+	   },
 
 }`

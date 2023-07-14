@@ -128,9 +128,13 @@
 },
 
 //  "sentrypeer":{
-//  "url":"https://sentrypeer.com/api/",
-//  "clientID":"",
-//  "clientSecret":"",
-//  },
+// 	 "client_id":"",
+// 	 "client_secret":"",
+// 	 "token_url":"",
+// 	 "ip_url":"",
+// 	 "number_url":"",
+// 	 "audience":"",
+// 	 "grant_type":"",
+//   },
 
 }
