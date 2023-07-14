@@ -159,8 +159,10 @@ func (rdr *FlatstoreER) processFile(fPath, fName string) (err error) {
 		} else {
 			pr, err := NewUnpairedRecord(record, rdr.Config().Timezone, fName)
 			if err != nil {
-				fmt.Sprintf("<%s> Converting row : <%s> to unpairedRecord , ignoring due to error: <%s>",
-					utils.ERs, record, err.Error())
+				utils.Logger.Err(
+					fmt.Sprintf("<%s> Converting row : <%s> to unpairedRecord , ignoring due to error: <%s>",
+						utils.ERs, record, err.Error()),
+				)
 				continue
 			}
 			if val, has := rdr.cache.Get(pr.OriginID); !has {
@@ -170,8 +172,10 @@ func (rdr *FlatstoreER) processFile(fPath, fName string) (err error) {
 				pair := val.(*UnpairedRecord)
 				record, err = pairToRecord(pair, pr)
 				if err != nil {
-					fmt.Sprintf("<%s> Merging unpairedRecords : <%s> and <%s> to record , ignoring due to error: <%s>",
-						utils.ERs, utils.ToJSON(pair), utils.ToJSON(pr), err.Error())
+					utils.Logger.Err(
+						fmt.Sprintf("<%s> Merging unpairedRecords : <%s> and <%s> to record , ignoring due to error: <%s>",
+							utils.ERs, utils.ToJSON(pair), utils.ToJSON(pr), err.Error()),
+					)
 					continue
 				}
 				rdr.cache.Remove(pr.OriginID)
