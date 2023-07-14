@@ -1,0 +1,48 @@
+{
+    // Real-time Online/Offline Charging System (OCS) for Telecom & ISP environments
+    // Copyright (C) ITsysCOM GmbH
+
+    "general": {
+        "log_level": 7
+    },
+
+    "stor_db": {
+        "db_password": "CGRateS.org"
+    },
+
+    "schedulers": {
+        "enabled": true
+    },
+
+    "rals": {
+        "enabled": true
+    },
+
+    "cdrs": {
+        "enabled": true,
+        "chargers_conns": ["*internal"],
+        "rals_conns": ["*internal"]
+    },
+
+    "chargers": {
+        "enabled": true,
+        "attributes_conns": ["*internal"]
+    },
+
+    "sessions": {
+        "enabled": true,
+        "rals_conns": ["*internal"],
+        "cdrs_conns": ["*internal"],
+        "chargers_conns": ["*internal"]
+    },
+
+    "attributes": {
+        "enabled": true
+    },
+
+    "apiers": {
+        "enabled": true,
+        "scheduler_conns": ["*internal"]
+    }
+}
+    

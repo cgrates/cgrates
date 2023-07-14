@@ -20,6 +20,8 @@ package main
 
 import (
 	"fmt"
+	"log"
+	"math"
 	"time"
 
 	"github.com/cenkalti/rpc2"
@@ -39,15 +41,24 @@ func handleDisconnectSession(clnt *rpc2.Client,
 	return nil
 }
 
-func callSession() (err error) {
+func callSessions(digitMin, digitMax int64) (err error) {
+
+	if *digits <= 0 {
+		return fmt.Errorf(`"digits" should be bigger than 0`)
+	} else if int(math.Pow10(*digits))-1 < *cps {
+		return fmt.Errorf(`"digits" should amount to be more than "cps"`)
+	}
+
+	acc := utils.RandomInteger(digitMin, digitMax)
+	dest := utils.RandomInteger(digitMin, digitMax)
 
 	event := &utils.CGREvent{
 		Tenant: *tenant,
 		ID:     "TheEventID100000",
 		Time:   utils.TimePointer(time.Now()),
 		Event: map[string]any{
-			utils.AccountField: *subject,
-			utils.Destination:  *destination,
+			utils.AccountField: acc,
+			utils.Destination:  dest,
 			utils.OriginHost:   utils.Local,
 			utils.RequestType:  *requestType,
 			utils.Source:       utils.CGRTester,
@@ -62,7 +73,8 @@ func callSession() (err error) {
 		return fmt.Errorf(`"min_usage" should be smaller than "max_usage"`)
 	}
 
-	clntHandlers := map[string]any{utils.SessionSv1DisconnectSession: handleDisconnectSession}
+	clntHandlers := map[string]any{
+		utils.SessionSv1DisconnectSession: handleDisconnectSession}
 	brpc, err = utils.NewBiJSONrpcClient(tstCfg.SessionSCfg().ListenBijson, clntHandlers)
 	if err != nil {
 		return
@@ -80,15 +92,17 @@ func callSession() (err error) {
 	if err = brpc.Call(utils.SessionSv1AuthorizeEvent, authArgs, &authRply); err != nil {
 		return
 	}
+	if *verbose {
+		log.Printf("Account: <%v>, Destination: <%v>, SessionSv1AuthorizeEvent reply: <%v>", acc, dest, utils.ToJSON(authRply))
+	}
 
 	// Delay between authorize and initiation for a more realistic case
-	time.Sleep(time.Duration(utils.RandomInteger(1, 5)) * time.Second)
+	time.Sleep(time.Duration(utils.RandomInteger(50, 100)) * time.Millisecond)
 
 	//
 	// SessionSv1InitiateSession
 	//
 	event.Event[utils.AnswerTime] = time.Now()
-
 	initArgs := &sessions.V1InitSessionArgs{
 		InitSession: true,
 		CGREvent:    event,
@@ -98,22 +112,27 @@ func callSession() (err error) {
 	if err = brpc.Call(utils.SessionSv1InitiateSession, initArgs, &initRply); err != nil {
 		return
 	}
+	if *verbose {
+		log.Printf("Account: <%v>, Destination: <%v>, SessionSv1InitiateSession reply: <%v>", acc, dest, utils.ToJSON(initRply))
+	}
 
 	//
 	// SessionSv1UpdateSession
 	//
 	totalUsage := time.Duration(utils.RandomInteger(int64(*minUsage), int64(*maxUsage)))
-	for currentUsage := time.Duration(0); currentUsage < totalUsage; currentUsage += *updateInterval {
+	for currentUsage := time.Duration(1 * time.Second); currentUsage < totalUsage; currentUsage += *updateInterval {
 
 		event.Event[utils.Usage] = currentUsage.String()
 		upArgs := &sessions.V1UpdateSessionArgs{
-			GetAttributes: true,
 			UpdateSession: true,
 			CGREvent:      event,
 		}
 		var upRply sessions.V1UpdateSessionReply
 		if err = brpc.Call(utils.SessionSv1UpdateSession, upArgs, &upRply); err != nil {
 			return
+		}
+		if *verbose {
+			log.Printf("Account: <%v>, Destination: <%v>, SessionSv1UpdateSession reply: <%v>", acc, dest, utils.ToJSON(upRply))
 		}
 	}
 
@@ -133,9 +152,12 @@ func callSession() (err error) {
 	if err = brpc.Call(utils.SessionSv1TerminateSession, tArgs, &tRply); err != nil {
 		return
 	}
+	if *verbose {
+		log.Printf("Account: <%v>, Destination: <%v>, SessionSv1TerminateSession reply: <%v>", acc, dest, utils.ToJSON(tRply))
+	}
 
 	// Delay between terminate and processCDR for a more realistic case
-	time.Sleep(time.Duration(utils.RandomInteger(1, 3)) * time.Millisecond)
+	time.Sleep(time.Duration(utils.RandomInteger(20, 40)) * time.Millisecond)
 
 	//
 	// SessionSv1ProcessCDR
@@ -145,6 +167,8 @@ func callSession() (err error) {
 	if err = brpc.Call(utils.SessionSv1ProcessCDR, procArgs, &pRply); err != nil {
 		return
 	}
-
+	if *verbose {
+		log.Printf("Account: <%v>, Destination: <%v>, SessionSv1ProcessCDR reply: <%v>", acc, dest, utils.ToJSON(pRply))
+	}
 	return
 }
