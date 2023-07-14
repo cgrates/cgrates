@@ -292,8 +292,8 @@ func cpuProfiling(cpuProfDir string, stopChan, doneChan chan struct{}, exitChan 
 }
 
 func singnalHandler(exitChan chan bool) {
-	shutdownSignal := make(chan os.Signal)
-	reloadSignal := make(chan os.Signal)
+	shutdownSignal := make(chan os.Signal, 1)
+	reloadSignal := make(chan os.Signal, 1)
 	signal.Notify(shutdownSignal, os.Interrupt,
 		syscall.SIGTERM, syscall.SIGINT, syscall.SIGQUIT)
 	signal.Notify(reloadSignal, syscall.SIGHUP)
