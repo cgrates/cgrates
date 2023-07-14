@@ -24,6 +24,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"net/url"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/guardian"
@@ -123,7 +124,7 @@ func WeightFromDynamics(dWs []*utils.DynamicWeight,
 	}
 	return 0.0, nil
 }
-func getToken(tokenUrl, clientID, clientSecret, audience, grantType string) (token string, err error) {
+func sentrypeerGetToken(tokenUrl, clientID, clientSecret, audience, grantType string) (token string, err error) {
 	var resp *http.Response
 	payload := map[string]string{
 		"client_id":     clientID,
@@ -147,11 +148,11 @@ func getToken(tokenUrl, clientID, clientSecret, audience, grantType string) (tok
 	token = m.AccessToken
 	return
 }
-func GetSentryPeer(val string, sentryPeerCfg *config.SentryPeerCfg, path string) (found bool, err error) {
-	itemId := utils.ConcatenatedKey(path, val)
+func GetSentryPeer(val string, sentryPeerCfg *config.SentryPeerCfg, dataType string) (found bool, err error) {
+	itemId := utils.ConcatenatedKey(dataType, val)
 	var (
 		isCached bool
-		url      string
+		apiUrl   string
 		token    string
 	)
 	if x, ok := Cache.Get(utils.MetaSentryPeer, itemId); ok && x != nil { // Attempt to find in cache first
@@ -162,14 +163,17 @@ func GetSentryPeer(val string, sentryPeerCfg *config.SentryPeerCfg, path string)
 		utils.MetaToken); isCached && cachedToken != nil {
 		token = cachedToken.(string)
 	}
-	switch path {
+	switch dataType {
 	case utils.MetaIp:
-		url = sentryPeerCfg.IpUrl + "/" + val
+		apiUrl, err = url.JoinPath(sentryPeerCfg.IpsUrl, val)
 	case utils.MetaNumber:
-		url = sentryPeerCfg.NumberUrl + "/" + val
+		apiUrl, err = url.JoinPath(sentryPeerCfg.NumbersUrl, val)
+	}
+	if err != nil {
+		return
 	}
 	if !isCached {
-		if token, err = getToken(sentryPeerCfg.TokenUrl, sentryPeerCfg.ClientID, sentryPeerCfg.ClientSecret,
+		if token, err = sentrypeerGetToken(sentryPeerCfg.TokenUrl, sentryPeerCfg.ClientID, sentryPeerCfg.ClientSecret,
 			sentryPeerCfg.Audience, sentryPeerCfg.GrantType); err != nil {
 			return
 		}
@@ -180,7 +184,7 @@ func GetSentryPeer(val string, sentryPeerCfg *config.SentryPeerCfg, path string)
 	}
 
 	for i := 0; i < 2; i++ {
-		if found, err = hasData(itemId, token, url); err == nil {
+		if found, err = sentrypeerHasData(itemId, token, apiUrl); err == nil {
 			if err = Cache.Set(utils.MetaSentryPeer, itemId, found,
 				nil, true, utils.NonTransactional); err != nil {
 				return
@@ -190,7 +194,7 @@ func GetSentryPeer(val string, sentryPeerCfg *config.SentryPeerCfg, path string)
 			break
 		}
 		Cache.Remove(utils.MetaSentryPeer, utils.MetaToken, true, utils.EmptyString)
-		if token, err = getToken(sentryPeerCfg.TokenUrl, sentryPeerCfg.ClientID, sentryPeerCfg.ClientSecret,
+		if token, err = sentrypeerGetToken(sentryPeerCfg.TokenUrl, sentryPeerCfg.ClientID, sentryPeerCfg.ClientSecret,
 			sentryPeerCfg.Audience, sentryPeerCfg.GrantType); err != nil {
 			return
 		}
@@ -202,7 +206,7 @@ func GetSentryPeer(val string, sentryPeerCfg *config.SentryPeerCfg, path string)
 	return
 }
 
-func hasData(itemId, token, url string) (found bool, err error) {
+func sentrypeerHasData(itemId, token, url string) (found bool, err error) {
 	var resp *http.Response
 	resp, err = getHTTP("GET", url, nil, map[string][]string{"Authorization": {fmt.Sprintf("Bearer %v", token)}})
 	if err != nil {
@@ -219,9 +223,9 @@ func hasData(itemId, token, url string) (found bool, err error) {
 	case resp.StatusCode >= http.StatusBadRequest && resp.StatusCode < http.StatusInternalServerError:
 		err = fmt.Errorf("sentrypeer api got client err <%v>", resp.Status)
 	case resp.StatusCode >= http.StatusInternalServerError:
-		err = fmt.Errorf("sentrypeer api got server error<%s>", resp.Status)
+		err = fmt.Errorf("sentrypeer api got server err <%s>", resp.Status)
 	default:
-		err = fmt.Errorf("sentrypeer api got unexpected status code<%s>", resp.Status)
+		err = fmt.Errorf("sentrypeer api got unexpected err <%s>", resp.Status)
 	}
 	utils.Logger.Warning(err.Error())
 	return false, err
