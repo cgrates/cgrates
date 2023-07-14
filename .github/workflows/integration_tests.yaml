@@ -8,7 +8,7 @@ on:
 
 jobs:
 
-  pre_job:
+  check-if-duplicate-action:
     # continue-on-error: true # Uncomment once integration is finished
     runs-on: ubuntu-latest
     outputs:
@@ -22,9 +22,9 @@ jobs:
           paths_ignore: '["v0.10/docs/**"]'
           paths: '["v0.10/**.go", "v0.10/*.sh", "v0.10/.github", "v0.10/data/ansible/conf/samples/**", "v0.10/data/tariffplans"]'
 
-  main_job:
-    needs: pre_job
-    if: needs.pre_job.outputs.should_skip != 'true'
+  integration-tests:
+    needs: check-if-duplicate-action
+    if: needs.check-if-duplicate-action.outputs.should_skip != 'true'
     runs-on: ubuntu-latest
     steps:
     - name: Checkout code
