@@ -1,4 +1,4 @@
-name: Integration Test
+name: Integration Tests
 
 on:
   push:
@@ -7,7 +7,24 @@ on:
     branches: [ v0.10 ]
 
 jobs:
-  test:
+
+  pre_job:
+    # continue-on-error: true # Uncomment once integration is finished
+    runs-on: ubuntu-latest
+    outputs:
+      should_skip: ${{ steps.skip_check.outputs.should_skip }}
+    steps:
+      - id: skip_check
+        uses: fkirc/skip-duplicate-actions@v5
+        with:
+          concurrent_skipping: 'never'
+          skip_after_successful_duplicate: 'true'
+          paths_ignore: '["v0.10/docs/**"]'
+          paths: '["v0.10/**.go", "v0.10/*.sh", "v0.10/.github", "v0.10/data/ansible/conf/samples/**", "v0.10/data/tariffplans"]'
+
+  main_job:
+    needs: pre_job
+    if: needs.pre_job.outputs.should_skip != 'true'
     runs-on: ubuntu-latest
     steps:
     - name: Checkout code
