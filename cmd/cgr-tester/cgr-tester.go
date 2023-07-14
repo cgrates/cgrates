@@ -93,7 +93,7 @@ var (
 	fPath       = cgrTesterFlags.String("file_path", "", "read requests from file with path")
 	reqSep      = cgrTesterFlags.String("req_separator", "\n\n", "separator for requests in file")
 	verbose     = cgrTesterFlags.Bool(utils.VerboseCgr, false, "Enable detailed verbose logging output")
-	replyCount  sync.RWMutex
+	replyCntMux sync.RWMutex
 	err         error
 )
 
@@ -292,9 +292,9 @@ func main() {
 				if err := callSessions(digitMin, digitMax); err != nil {
 					log.Fatal(err.Error())
 				}
-				replyCount.Lock()
+				replyCntMux.Lock()
 				rplyNr++
-				replyCount.Unlock()
+				replyCntMux.Unlock()
 
 			}()
 		}
