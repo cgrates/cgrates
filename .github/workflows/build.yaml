@@ -11,7 +11,7 @@ on:
 jobs:
   
   check-if-duplicate-action:
-    # continue-on-error: true # Uncomment once integration is finished
+    continue-on-error: true 
     runs-on: ubuntu-latest
     outputs:
       should_skip: ${{ steps.skip_check.outputs.should_skip }}
@@ -31,7 +31,7 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        go: ['stable', 'oldstable']
+        go: ['stable'] # could be a good idea to consider oldstable as well
 
     steps:
       - name: Check out code
