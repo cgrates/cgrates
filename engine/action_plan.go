@@ -429,7 +429,7 @@ func (at *ActionTiming) Execute(successActions, failedActions chan *Action) (err
 				break
 			}
 			if successActions != nil {
-				go func() { successActions <- a }()
+				go func(action *Action) { successActions <- action }(a)
 			}
 		}
 	}

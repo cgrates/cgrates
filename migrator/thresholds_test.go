@@ -27,7 +27,7 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-func Testv2ActionTriggerAsThreshold(t *testing.T) {
+func TestV2ActionTriggerAsThreshold(t *testing.T) {
 	var filters []*engine.FilterRule
 	v2ATR := &v2ActionTrigger{
 		ID:                "test2",              // original csv tag
