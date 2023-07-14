@@ -18,3 +18,10 @@
     name: "{{ postgresql_version }}"
     state: latest
     update_cache: yes
+
+- name: Manage the PostgreSQL service
+  become: yes
+  ansible.builtin.systemd:
+    name: postgresql
+    state: "{{ postgresql_service_state }}"
+    enabled: "{{ postgresql_service_enabled }}"
