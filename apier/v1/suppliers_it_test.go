@@ -866,7 +866,7 @@ func testV1SplSGetSupplierProfileIDs(t *testing.T) {
 		"SPL_ACNT_1001", "SPL_LEASTCOST_1", "SPL_WEIGHT_2", "SPL_WEIGHT_1", "SPL_QOS_3", "TEST_PROFILE1", "SPL_LCR"}
 	var result []string
 	if err := splSv1Rpc.Call(utils.APIerSv1GetSupplierProfileIDs,
-		&utils.TenantArgWithPaginator{TenantArg: utils.TenantArg{"cgrates.org"}}, &result); err != nil {
+		&utils.TenantArgWithPaginator{TenantArg: utils.TenantArg{Tenant: "cgrates.org"}}, &result); err != nil {
 		t.Error(err)
 	} else if len(expected) != len(result) {
 		t.Errorf("Expecting : %+v, received: %+v", expected, result)
