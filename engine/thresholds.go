@@ -95,11 +95,11 @@ func (t *Threshold) ProcessEvent(args *ArgsProcessEvent, dm *DataManager) (err e
 		}
 		if t.tPrfl.Async {
 
-			go func() {
+			go func(actID string) {
 				if errExec := at.Execute(nil, nil); errExec != nil {
-					utils.Logger.Warning(fmt.Sprintf("<ThresholdS> failed executing actions: %s, error: %s", actionSetID, errExec.Error()))
+					utils.Logger.Warning(fmt.Sprintf("<ThresholdS> failed executing actions: %s, error: %s", actID, errExec.Error()))
 				}
-			}()
+			}(actionSetID)
 
 		} else {
 			if errExec := at.Execute(nil, nil); errExec != nil {
