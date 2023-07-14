@@ -1637,13 +1637,13 @@ func TestStorageUtilsNewStorDBConn(t *testing.T) {
 
 	type args struct {
 		dbType, host, port, name, user, pass, marshaler, sslmode string
-        maxConn, maxIdleConn, connMaxLifetime int
-		stringIndexedFields, prefixIndexedFields []string
-		itemsCacheCfg map[string]*config.ItemOpt
+		maxConn, maxIdleConn, connMaxLifetime                    int
+		stringIndexedFields, prefixIndexedFields                 []string
+		itemsCacheCfg                                            map[string]*config.ItemOpt
 	}
 
 	type exp struct {
-		db StorDB
+		db  StorDB
 		err string
 	}
 
@@ -1651,43 +1651,43 @@ func TestStorageUtilsNewStorDBConn(t *testing.T) {
 	db2, err2 := NewPostgresStorage("1", "1", "1", str, str, str, 1, 1, 1)
 	db3, err3 := NewMySQLStorage("1", "1", "1", str, str, 1, 1, 1)
 
-	tests := []struct{
-		name string 
-		args args 
-		exp exp
+	tests := []struct {
+		name string
+		args args
+		exp  exp
 	}{
 		{
 			name: "case mongo",
 			args: args{"*mongo", "1", "1", "1", str, str, str, str, 1, 1, 1, []string{"test"}, []string{"test2"}, map[string]*config.ItemOpt{}},
-			exp: exp{db, err.Error()},
+			exp:  exp{db, err.Error()},
 		},
 		{
 			name: "case postgres",
 			args: args{"*postgres", "1", "1", "1", str, str, str, str, 1, 1, 1, []string{"test"}, []string{"test2"}, map[string]*config.ItemOpt{}},
-			exp: exp{db2, err2.Error()},
+			exp:  exp{db2, err2.Error()},
 		},
 		{
 			name: "case MySQL",
 			args: args{"*mysql", "1", "1", "1", str, str, str, str, 1, 1, 1, []string{"test"}, []string{"test2"}, map[string]*config.ItemOpt{}},
-			exp: exp{db3, err3.Error()},
+			exp:  exp{db3, err3.Error()},
 		},
 		{
 			name: "case default",
 			args: args{"test", "1", "1", "1", str, str, str, str, 1, 1, 1, []string{"test"}, []string{"test2"}, map[string]*config.ItemOpt{}},
-			exp: exp{nil, "unknown db 'test' valid options are [*mysql, *mongo, *postgres, *internal]"},
+			exp:  exp{nil, "unknown db 'test' valid options are [*mysql, *mongo, *postgres, *internal]"},
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			rcv, err := NewStorDBConn(tt.args.dbType, tt.args.host, tt.args.port, tt.args.name, tt.args.user,
-				                      tt.args.pass, tt.args.marshaler, tt.args.sslmode, tt.args.maxConn,
-				                      tt.args.maxIdleConn, tt.args.connMaxLifetime, tt.args.stringIndexedFields,
-									  tt.args.prefixIndexedFields, tt.args.itemsCacheCfg)
-			
+				tt.args.pass, tt.args.marshaler, tt.args.sslmode, tt.args.maxConn,
+				tt.args.maxIdleConn, tt.args.connMaxLifetime, tt.args.stringIndexedFields,
+				tt.args.prefixIndexedFields, tt.args.itemsCacheCfg)
+
 			if err.Error() != tt.exp.err {
 				t.Error(err)
-			} 
+			}
 
 			if !reflect.DeepEqual(rcv, tt.exp.db) {
 				t.Errorf("received %v, expected %v", rcv, tt.exp.db)

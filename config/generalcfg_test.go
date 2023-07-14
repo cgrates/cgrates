@@ -191,10 +191,10 @@ func TestGeneralCfgloadFromJsonCfgErrors(t *testing.T) {
 	strErr := "test"
 	g := GeneralCfg{}
 
-	tests := []struct{
-		name string 
-		arg *GeneralJsonCfg
-		err string
+	tests := []struct {
+		name string
+		arg  *GeneralJsonCfg
+		err  string
 	}{
 		{
 			name: "Connect timeout error check",

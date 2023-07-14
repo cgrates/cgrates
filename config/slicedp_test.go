@@ -55,7 +55,7 @@ func TestSliceDPFieldAsInterface(t *testing.T) {
 	slc2 := []string{"0"}
 	slc3 := []string{"test"}
 	slc4 := []string{"4"}
-	cp := SliceDP{req:slc2, cache: utils.MapStorage{"0": "val1"}}
+	cp := SliceDP{req: slc2, cache: utils.MapStorage{"0": "val1"}}
 
 	type exp struct {
 		data any
@@ -103,7 +103,7 @@ func TestSliceDPFieldAsInterface(t *testing.T) {
 					t.Fatal("was expecting an error")
 				}
 			} else {
-				if  !reflect.DeepEqual(err, tt.exp.err) {
+				if !reflect.DeepEqual(err, tt.exp.err) {
 					t.Fatalf("recived %s, expected %s", err, tt.exp.err)
 				}
 			}
@@ -118,7 +118,7 @@ func TestSliceDPFieldAsInterface(t *testing.T) {
 
 		slcRec := []string{"0", "1"}
 		slcArg := []string{"0"}
-		cp := SliceDP{req:slcRec, cache: utils.MapStorage{"test": "val1"}}
+		cp := SliceDP{req: slcRec, cache: utils.MapStorage{"test": "val1"}}
 
 		data, err := cp.FieldAsInterface(slcArg)
 
@@ -134,29 +134,29 @@ func TestSliceDPFieldAsInterface(t *testing.T) {
 }
 
 func TestSliceDPFieldAsString(t *testing.T) {
-	
+
 	slc := []string{"0", "1"}
 	cP := NewSliceDP(slc)
 
 	type exp struct {
-		data string 
-		err error 
+		data string
+		err  error
 	}
 
-	tests := []struct{
+	tests := []struct {
 		name string
-		arg []string
-		exp exp
+		arg  []string
+		exp  exp
 	}{
 		{
 			name: "err",
-			arg: []string{"2"},
-			exp: exp{"", utils.ErrNotFound},
+			arg:  []string{"2"},
+			exp:  exp{"", utils.ErrNotFound},
 		},
 		{
 			name: "no err",
-			arg: []string{"1"},
-			exp: exp{"1", nil},
+			arg:  []string{"1"},
+			exp:  exp{"1", nil},
 		},
 	}
 
@@ -167,7 +167,7 @@ func TestSliceDPFieldAsString(t *testing.T) {
 			if err != tt.exp.err {
 				t.Fatalf("recived %s, expected %s", err, tt.exp.err)
 			}
-	
+
 			if !reflect.DeepEqual(data, tt.exp.data) {
 				t.Errorf("recived %v, expected %v", data, tt.exp.data)
 			}
@@ -176,7 +176,7 @@ func TestSliceDPFieldAsString(t *testing.T) {
 }
 
 func TestSliceDPRemoteHost(t *testing.T) {
-	
+
 	slc := []string{"test", "test2"}
 	cP := NewSliceDP(slc)
 

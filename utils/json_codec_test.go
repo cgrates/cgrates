@@ -261,7 +261,6 @@ func TestJSONReadRequestBody3(t *testing.T) {
 	}
 }
 
-
 /*
 - NewCustomJSONServerCodec
 - defer Close
@@ -281,7 +280,6 @@ func TestJSONCodecOK(t *testing.T) {
 	}
 	s := NewCustomJSONServerCodec(conn)
 	c := s.(*jsonServerCodec)
-
 
 	defer s.Close()
 
@@ -355,9 +353,9 @@ func TestJSONCodecOK(t *testing.T) {
 		t.Error(err)
 	}
 
-	if mp["error"] != nil || 
-	mp["result"] != "test" || 
-	mp["id"] != 0. {
+	if mp["error"] != nil ||
+		mp["result"] != "test" ||
+		mp["id"] != 0. {
 		t.Error("unexpected reply", mp)
 	}
 }
@@ -406,8 +404,8 @@ func TestJSONCodecWriteResponse2(t *testing.T) {
 	}
 
 	res := rpc.Response{
-		Seq: 1,
-		Error: "error", 
+		Seq:   1,
+		Error: "error",
 	}
 	err = c.WriteResponse(&res, "test")
 	if err != nil {
@@ -420,9 +418,9 @@ func TestJSONCodecWriteResponse2(t *testing.T) {
 		t.Error(err)
 	}
 
-	if mp["error"] != "error" || 
-	mp["result"] != nil || 
-	mp["id"] != nil {
+	if mp["error"] != "error" ||
+		mp["result"] != nil ||
+		mp["id"] != nil {
 		t.Error("unexpected reply", mp)
 	}
 }

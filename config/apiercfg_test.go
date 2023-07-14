@@ -126,13 +126,13 @@ func TestApierCfgloadFromJsonCfg2(t *testing.T) {
 	}
 
 	exp := ApierCfg{
-		Enabled: bl,
-		CachesConns: slc,
-        SchedulerConns: slc,
+		Enabled:         bl,
+		CachesConns:     slc,
+		SchedulerConns:  slc,
 		AttributeSConns: slc,
 	}
 
-	err := a.loadFromJsonCfg(&js) 
+	err := a.loadFromJsonCfg(&js)
 
 	if err != nil {
 		t.Fatal("was not expecting an error", err)
@@ -149,9 +149,9 @@ func TestApierCfgAsMapInterface2(t *testing.T) {
 	slc := []string{"val1", "val2"}
 
 	a := ApierCfg{
-		Enabled: bl,
-		CachesConns: slc,
-        SchedulerConns: slc,
+		Enabled:         bl,
+		CachesConns:     slc,
+		SchedulerConns:  slc,
 		AttributeSConns: slc,
 	}
 
@@ -162,7 +162,7 @@ func TestApierCfgAsMapInterface2(t *testing.T) {
 		utils.AttributeSConnsCfg: slc,
 	}
 
-	rcv := a.AsMapInterface() 
+	rcv := a.AsMapInterface()
 
 	if !reflect.DeepEqual(rcv, exp) {
 		t.Errorf("recived %v, expected %v", rcv, exp)

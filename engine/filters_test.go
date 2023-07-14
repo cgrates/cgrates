@@ -2792,8 +2792,8 @@ func TestFilterspassStringPrefix(t *testing.T) {
 		t.Error("Recived:", rcv)
 	}
 
-	f2 := FilterRule {
-		Values:    []string{"~test.test"},
+	f2 := FilterRule{
+		Values: []string{"~test.test"},
 	}
 
 	rcv, err = f2.passStringPrefix(utils.MapStorage{"test": "test"}, []utils.DataProvider{utils.MapStorage{"test": "test"}})
@@ -2826,8 +2826,8 @@ func TestFilterspassStringSuffix(t *testing.T) {
 		t.Error("Recived:", rcv)
 	}
 
-	f2 := FilterRule {
-		Values:    []string{"~test.test"},
+	f2 := FilterRule{
+		Values: []string{"~test.test"},
 	}
 
 	rcv, err = f2.passStringSuffix(utils.MapStorage{"test": "test"}, []utils.DataProvider{utils.MapStorage{"test": "test"}})

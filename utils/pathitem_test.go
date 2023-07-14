@@ -221,5 +221,3 @@ func TestPathItemGetPathWithoutIndex(t *testing.T) {
 		})
 	}
 }
-
-

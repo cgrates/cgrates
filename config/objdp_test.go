@@ -46,7 +46,7 @@ func TestObjDPNewObjectDP(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			
+
 			rcv := NewObjectDP(tt.args.obj, tt.args.prfxSlc)
 
 			if rcv.String() != tt.exp.String() {
@@ -59,12 +59,12 @@ func TestObjDPNewObjectDP(t *testing.T) {
 func TestObjDPSetCache(t *testing.T) {
 
 	type args struct {
-		path string 
-		val any
+		path string
+		val  any
 	}
 
-	tests := []struct{
-		name string 
+	tests := []struct {
+		name string
 		args args
 	}{
 		{
@@ -79,7 +79,7 @@ func TestObjDPSetCache(t *testing.T) {
 			odp := ObjectDP{"test", map[string]any{}, []string{}}
 
 			odp.setCache(tt.args.path, tt.args.val)
-			
+
 			if odp.cache["test"] != "val1" {
 				t.Error("didn't set cache")
 			}
@@ -88,21 +88,21 @@ func TestObjDPSetCache(t *testing.T) {
 }
 
 func TestObjDPGetCache(t *testing.T) {
-	
+
 	type exp struct {
 		val any
-		has bool 
+		has bool
 	}
 
-	tests := []struct{
+	tests := []struct {
 		name string
-		arg string
-		exp exp
+		arg  string
+		exp  exp
 	}{
 		{
 			name: "get cache",
-			arg: "test",
-			exp: exp{val: "val1", has: true},
+			arg:  "test",
+			exp:  exp{val: "val1", has: true},
 		},
 	}
 
@@ -116,12 +116,12 @@ func TestObjDPGetCache(t *testing.T) {
 
 			if !has {
 				t.Error("didn't get cache")
-			} 
+			}
 
 			if rcv != tt.exp.val {
 				t.Errorf("recived %s, expected %s", rcv, tt.exp.val)
 			}
-			
+
 		})
 	}
 }
@@ -133,50 +133,50 @@ func TestObjDPFieldAsInterface(t *testing.T) {
 	odp.setCache("test", "val1")
 
 	type exp struct {
-		data any 	
-		err bool
+		data any
+		err  bool
 	}
 
-	tests := []struct{
-		name string
-		arg []string 
-		exp exp
+	tests := []struct {
+		name    string
+		arg     []string
+		exp     exp
 		slcPrfx []string
 	}{
 		{
-			name: "found in cache",
-			arg: []string{"test"},
-			exp: exp{data: "val1", err: false},
+			name:    "found in cache",
+			arg:     []string{"test"},
+			exp:     exp{data: "val1", err: false},
 			slcPrfx: []string{"!", "."},
 		},
 		{
-			name: "object has prefix slice and length of field pat his smaller than lenght of prefix slice",
-			arg: []string{"test1"},
-			exp: exp{data: nil, err: true},
+			name:    "object has prefix slice and length of field pat his smaller than lenght of prefix slice",
+			arg:     []string{"test1"},
+			exp:     exp{data: nil, err: true},
 			slcPrfx: []string{"!", "."},
 		},
 		{
-			name: "has slice prefix different from field path",
-			arg: []string{"test1", "test2"},
-			exp: exp{data: nil, err: true},
+			name:    "has slice prefix different from field path",
+			arg:     []string{"test1", "test2"},
+			exp:     exp{data: nil, err: true},
 			slcPrfx: []string{"!", "."},
 		},
 		{
-			name: "has slice prefix",
-			arg: []string{"!", "."},
-			exp: exp{data: nil, err: false},
+			name:    "has slice prefix",
+			arg:     []string{"!", "."},
+			exp:     exp{data: nil, err: false},
 			slcPrfx: []string{"!", "."},
 		},
 		{
-			name: "has selector with error",
-			arg: []string{"test[0", "."},
-			exp: exp{data: nil, err: true},
+			name:    "has selector with error",
+			arg:     []string{"test[0", "."},
+			exp:     exp{data: nil, err: true},
 			slcPrfx: []string{},
 		},
 		{
-			name: "has selector",
-			arg: []string{"test[0]", "."},
-			exp: exp{data: nil, err: true},
+			name:    "has selector",
+			arg:     []string{"test[0]", "."},
+			exp:     exp{data: nil, err: true},
 			slcPrfx: []string{},
 		},
 	}
@@ -207,24 +207,24 @@ func TestObjDPFieldAsInterface(t *testing.T) {
 func TestObjDPFieldAsString(t *testing.T) {
 
 	type exp struct {
-		data string 
-		err bool
+		data string
+		err  bool
 	}
 
-	tests := []struct{
+	tests := []struct {
 		name string
 		args []string
-		exp exp 
+		exp  exp
 	}{
 		{
 			name: "error",
 			args: []string{"123"},
-			exp: exp{data: "", err: true},
+			exp:  exp{data: "", err: true},
 		},
 		{
 			name: "error",
 			args: []string{},
-			exp: exp{data: "", err: false},
+			exp:  exp{data: "", err: false},
 		},
 	}
 

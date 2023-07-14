@@ -234,7 +234,7 @@ func TestCdrsCfgAsMapInterface2(t *testing.T) {
 		OnlineCDRExports: slc,
 	}
 
-	exp := map[string]any {
+	exp := map[string]any{
 		utils.EnabledCfg:          cdrscfg.Enabled,
 		utils.ExtraFieldsCfg:      []string{},
 		utils.StoreCdrsCfg:        cdrscfg.StoreCdrs,

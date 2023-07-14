@@ -145,8 +145,7 @@ func TestDPComposeNavMapVal(t *testing.T) {
 	}
 
 	onm = NewOrderedNavigableMap()
-	nm = NavigableMap2{
-	}
+	nm = NavigableMap2{}
 	if err := ComposeNavMapVal(onm, &FullPath{Path: "Field", PathItems: PathItems{}}, NewNMData(18)); err == nil {
 		t.Error("was expecting an error")
 	}
