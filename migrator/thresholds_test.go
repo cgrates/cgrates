@@ -30,15 +30,22 @@ import (
 func TestV2ActionTriggerAsThreshold(t *testing.T) {
 	var filters []*engine.FilterRule
 	v2ATR := &v2ActionTrigger{
-		ID:                "test2",              // original csv tag
-		UniqueID:          "testUUID",           // individual id
-		ThresholdType:     "*min_event_counter", //*min_event_counter, *max_event_counter, *min_balance_counter, *max_balance_counter, *min_balance, *max_balance, *balance_expired
-		ThresholdValue:    5.32,
-		Recurrent:         false,                          // reset excuted flag each run
-		MinSleep:          time.Duration(5) * time.Second, // Minimum duration between two executions in case of recurrent triggers
-		ExpirationDate:    time.Now(),
-		ActivationDate:    time.Now(),
-		Balance:           new(engine.BalanceFilter),
+		ID:             "test2",              // original csv tag
+		UniqueID:       "testUUID",           // individual id
+		ThresholdType:  "*min_event_counter", //*min_event_counter, *max_event_counter, *min_balance_counter, *max_balance_counter, *min_balance, *max_balance, *balance_expired
+		ThresholdValue: 5.32,
+		Recurrent:      false,                          // reset excuted flag each run
+		MinSleep:       time.Duration(5) * time.Second, // Minimum duration between two executions in case of recurrent triggers
+		ExpirationDate: time.Now(),
+		ActivationDate: time.Now(),
+		Balance: &engine.BalanceFilter{
+			ID:             utils.StringPointer("test_balance"),
+			DestinationIDs: &utils.StringMap{"1002": true},
+			RatingSubject:  utils.StringPointer("1001"),
+			Categories:     &utils.StringMap{utils.CALL: true},
+			SharedGroups:   &utils.StringMap{"shared": true},
+			TimingIDs:      &utils.StringMap{utils.ANY: true},
+		},
 		Weight:            0,
 		ActionsID:         "Action1",
 		MinQueuedItems:    10, // Trigger actions only if this number is hit (stats only)
@@ -62,10 +69,11 @@ func TestV2ActionTriggerAsThreshold(t *testing.T) {
 		Rules:  filters}
 
 	thp := &engine.ThresholdProfile{
-		ID:      v2ATR.ID,
-		Tenant:  config.CgrConfig().GeneralCfg().DefaultTenant,
-		Blocker: false,
-		Weight:  v2ATR.Weight,
+		ID:        v2ATR.ID,
+		FilterIDs: []string{},
+		Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
+		Blocker:   false,
+		Weight:    v2ATR.Weight,
 		ActivationInterval: &utils.ActivationInterval{
 			ExpiryTime:     v2ATR.ExpirationDate,
 			ActivationTime: v2ATR.ActivationDate,
@@ -82,12 +90,12 @@ func TestV2ActionTriggerAsThreshold(t *testing.T) {
 		t.Errorf("err")
 	}
 	if !reflect.DeepEqual(thp, newthp) {
-		t.Errorf("Expecting: %+v, received: %+v", thp, newthp)
+		t.Errorf("expected: %+v,\nreceived: %+v", utils.ToJSON(thp), utils.ToJSON(newthp))
 	}
 	if !reflect.DeepEqual(th, newth) {
-		t.Errorf("Expecting: %+v, received: %+v", th, newth)
+		t.Errorf("expected: %+v,\nreceived: %+v", th, newth)
 	}
 	if !reflect.DeepEqual(filter, fltr) {
-		t.Errorf("Expecting: %+v, received: %+v", filter, fltr)
+		t.Errorf("expected: %+v,\nreceived: %+v", filter, fltr)
 	}
 }
