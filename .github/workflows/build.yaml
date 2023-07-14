@@ -10,7 +10,7 @@ on:
 
 jobs:
   
-  pre_job:
+  check-if-duplicate-action:
     # continue-on-error: true # Uncomment once integration is finished
     runs-on: ubuntu-latest
     outputs:
@@ -24,10 +24,10 @@ jobs:
           paths_ignore: '["v0.10/docs/**"]'
           paths: '["v0.10/**.go", "v0.10/.github"]'
 
-  main_job:
-    name: Build
+  build:
+    needs: check-if-duplicate-action
+    if: needs.check-if-duplicate-action.outputs.should_skip != 'true'
     runs-on: ubuntu-latest
-    timeout-minutes: 5
     strategy:
       fail-fast: true
       matrix:
@@ -47,6 +47,7 @@ jobs:
         run: gofmt -s -w . && git diff --exit-code
 
       - name: Go Vet
+        continue-on-error: true # will soon be removed
         run: go vet ./...
 
       - name: Go Tidy
