@@ -62,12 +62,15 @@ func TestV2ActionTriggerAsThreshold(t *testing.T) {
 		Rules:  filters}
 
 	thp := &engine.ThresholdProfile{
-		ID:                 v2ATR.ID,
-		Tenant:             config.CgrConfig().GeneralCfg().DefaultTenant,
-		Blocker:            false,
-		Weight:             v2ATR.Weight,
-		ActivationInterval: &utils.ActivationInterval{v2ATR.ExpirationDate, v2ATR.ActivationDate},
-		MinSleep:           v2ATR.MinSleep,
+		ID:      v2ATR.ID,
+		Tenant:  config.CgrConfig().GeneralCfg().DefaultTenant,
+		Blocker: false,
+		Weight:  v2ATR.Weight,
+		ActivationInterval: &utils.ActivationInterval{
+			ExpiryTime:     v2ATR.ExpirationDate,
+			ActivationTime: v2ATR.ActivationDate,
+		},
+		MinSleep: v2ATR.MinSleep,
 	}
 	th := &engine.Threshold{
 		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
