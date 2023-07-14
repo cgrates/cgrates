@@ -304,6 +304,7 @@ const CGRATES_CFG_JSON = `
 		"*uch": {"limit": -1, "ttl": "3h", "static_ttl": false, "remote":false, "replicate": false},									// User cache
 		"*stir": {"limit": -1, "ttl": "3h", "static_ttl": false, "remote":false, "replicate": false},									// stirShaken cache keys
 		"*apiban":{"limit": -1, "ttl": "2m", "static_ttl": false, "remote":false, "replicate": false}, 
+		"*sentrypeer":{"limit": -1, "ttl": "86400s", "static_ttl": true, "remote":false, "replicate": false},
 		"*caps_events": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false},								// caps cached samples
 		"*replication_hosts": {"limit": 0, "ttl": "", "static_ttl": false, "remote":false, "replicate": false},							// the replication hosts cache(used when replication_filtered is enbled)
 	},
@@ -1268,7 +1269,8 @@ const CGRATES_CFG_JSON = `
 },
 "sentrypeer":{
 	"url":"",
-	"token":"",
+	"clientID":"",
+	"clientSecret":"",
 }
 
 }`

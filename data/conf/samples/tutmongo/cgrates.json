@@ -127,9 +127,10 @@
 	"apiers_conns": ["*internal"],
 },
 
- //"sentrypeer":{
- //"url":"https://sentrypeer.com/api/",
- //"token":""
- //},
+//  "sentrypeer":{
+//  "url":"https://sentrypeer.com/api/",
+//  "clientID":"",
+//  "clientSecret":"",
+//  },
 
 }

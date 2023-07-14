@@ -18,40 +18,41 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package config
 
-import "github.com/cgrates/cgrates/utils"
-
-// APIBanCfg the config for the APIBan Keys
-type APIBanCfg struct {
-	Keys []string
+type SentryPeerCfg struct {
+	ClientID     string
+	ClientSecret string
+	Url          string
 }
 
-func (ban *APIBanCfg) loadFromJSONCfg(jsnCfg *APIBanJsonCfg) (err error) {
+func (sp *SentryPeerCfg) loadFromJSONCfg(jsnCfg *SentryPeerJsonCfg) (err error) {
 	if jsnCfg == nil {
 		return
 	}
-	if jsnCfg.Keys != nil {
-		ban.Keys = make([]string, len(*jsnCfg.Keys))
-		for i, key := range *jsnCfg.Keys {
-			ban.Keys[i] = key
-		}
+	if jsnCfg.Url != nil {
+		sp.Url = *jsnCfg.Url
 	}
-	return nil
+	if jsnCfg.ClientSecret != nil {
+		sp.ClientSecret = *jsnCfg.ClientSecret
+	}
+	if jsnCfg.ClientID != nil {
+		sp.ClientID = *jsnCfg.ClientID
+	}
+	return
 }
 
-// AsMapInterface returns the config as a map[string]any
-func (ban *APIBanCfg) AsMapInterface() map[string]any {
+func (sp *SentryPeerCfg) AsMapInterface() map[string]any {
 	return map[string]any{
-		utils.KeysCfg: ban.Keys,
+		"URL":          sp.Url,
+		"ClientSecret": sp.ClientSecret,
+		"ClientID":     sp.ClientID,
 	}
 }
 
-// Clone returns a deep copy of APIBanCfg
-func (ban APIBanCfg) Clone() (cln *APIBanCfg) {
-	cln = &APIBanCfg{
-		Keys: make([]string, len(ban.Keys)),
-	}
-	for i, k := range ban.Keys {
-		cln.Keys[i] = k
+func (sp *SentryPeerCfg) Clone() (cln *SentryPeerCfg) {
+	cln = &SentryPeerCfg{
+		Url:          sp.Url,
+		ClientSecret: sp.ClientSecret,
+		ClientID:     sp.ClientID,
 	}
 	return
 }

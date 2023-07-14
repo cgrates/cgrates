@@ -19,13 +19,20 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"bytes"
+	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/guardian"
 	"github.com/cgrates/cgrates/utils"
 )
+
+type TokenResponse struct {
+	AccessToken string `json:"access_token"`
+}
 
 // MatchingItemIDsForEvent returns the list of item IDs matching fieldName/fieldValue for an event
 // fieldIDs limits the fields which are checked against indexes
@@ -120,12 +127,50 @@ func WeightFromDynamics(dWs []*utils.DynamicWeight,
 	}
 	return 0.0, nil
 }
-
-func GetSentryPeer(val, url, token, path string, cacheRead, cacheWrite bool) (found bool, err error) {
+func getToken(clientID, clientSecret string, cacheWrite bool, token *TokenResponse) (err error) {
+	var resp *http.Response
+	payload := map[string]string{
+		"client_id":     clientID,
+		"client_secret": clientSecret,
+		"audience":      "https://sentrypeer.com/api",
+		"grant_type":    "client_credentials",
+	}
+	jsonPayload, _ := json.Marshal(payload)
+	resp, err = getHTTP("POST", "https://authz.sentrypeer.com/oauth/token", bytes.NewBuffer(jsonPayload), map[string][]string{"Content-Type": {"application/json"}})
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+	err = json.NewDecoder(resp.Body).Decode(&token)
+	if err != nil {
+		return err
+	}
+	if cacheWrite {
+		if err = Cache.Set(utils.MetaSentryPeer, "*token", token.AccessToken, nil, true, utils.NonTransactional); err != nil {
+			return err
+		}
+	}
+	return
+}
+func GetSentryPeer(val, url, clientID, clientSecret, path string, cacheRead, cacheWrite bool) (found bool, err error) {
 	valpath := utils.ConcatenatedKey(path, val)
+	var (
+		token     TokenResponse
+		resp      *http.Response
+		cachedReq bool
+	)
 	if cacheRead {
 		if x, ok := Cache.Get(utils.MetaSentryPeer, valpath); ok && x != nil { // Attempt to find in cache first
 			return x.(bool), nil
+		}
+		var cachedToken any
+		if cachedToken, cachedReq = Cache.Get(utils.MetaSentryPeer, "*token"); cachedReq && cachedToken != nil {
+			token.AccessToken = cachedToken.(string)
+		}
+	}
+	if !cachedReq {
+		if err = getToken(clientID, clientSecret, cacheWrite, &token); err != nil {
+			return
 		}
 	}
 	switch path {
@@ -134,46 +179,57 @@ func GetSentryPeer(val, url, token, path string, cacheRead, cacheWrite bool) (fo
 	case "*number":
 		url += "phone-numbers/"
 	}
-	var req *http.Request
-	if req, err = http.NewRequest("GET", url+val, nil); err != nil {
+	resp, err = getHTTP("GET", url+val, nil, map[string][]string{"Authorization": {fmt.Sprintf("Bearer %v", token.AccessToken)}})
+	if err != nil {
 		return
 	}
-	if token != "" {
-		req.Header = http.Header{
-			"Authorization": {fmt.Sprintf("Bearer %s", token)},
+	defer resp.Body.Close()
+	if resp.StatusCode == http.StatusUnauthorized || resp.StatusCode == http.StatusForbidden {
+		Cache.Remove(utils.MetaSentryPeer, "*token", true, utils.NonTransactional)
+		utils.Logger.Warning("SentryPeer redirecting to  new bearer token ")
+		if err = getToken(clientID, clientSecret, cacheWrite, &token); err != nil {
+			return
+		}
+		resp, err = getHTTP("GET", url+val, nil, map[string][]string{"Authorization": {fmt.Sprintf("Bearer %v", token.AccessToken)}})
+		if err != nil {
+			return
+		}
+		defer resp.Body.Close()
+		if resp.StatusCode == http.StatusUnauthorized || resp.StatusCode == http.StatusForbidden {
+			return false, fmt.Errorf("still unauthorized after getting new token")
 		}
 	}
-	var resp *http.Response
-	resp, err = http.DefaultClient.Do(req)
-	if err != nil {
-		return false, err
-	}
-	defer resp.Body.Close()
-	if resp.StatusCode >= 200 && resp.StatusCode < 300 {
+	switch {
+	case resp.StatusCode >= http.StatusOK && resp.StatusCode < http.StatusMultipleChoices:
+		if cacheWrite {
+			if err = Cache.Set(utils.MetaSentryPeer, valpath, false, nil, true, utils.NonTransactional); err != nil {
+				return
+			}
+		}
+		return false, nil
+	case resp.StatusCode == http.StatusNotFound:
 		if cacheWrite {
 			if err = Cache.Set(utils.MetaSentryPeer, valpath, true, nil, true, utils.NonTransactional); err != nil {
 				return false, err
 			}
 		}
 		return true, nil
-	} else {
-		switch {
-		case resp.StatusCode == http.StatusNotFound:
-			if cacheWrite {
-				if err = Cache.Set(utils.MetaSentryPeer, valpath, false, nil, true, utils.NonTransactional); err != nil {
-					return false, err
-				}
-			}
-			return
-		case resp.StatusCode >= 400 && resp.StatusCode < 500:
-			err = fmt.Errorf("client error<%s>", resp.Status)
-			return
-		case resp.StatusCode >= 500:
-			err = fmt.Errorf("server error<%s>", resp.Status)
-			return
-		default:
-			err = fmt.Errorf("unexpected status code<%s>", resp.Status)
-		}
+	case resp.StatusCode >= http.StatusBadRequest && resp.StatusCode < http.StatusInternalServerError:
+		err = fmt.Errorf("client err <%v>", resp.Status)
+	case resp.StatusCode >= http.StatusInternalServerError:
+		err = fmt.Errorf("server error<%s>", resp.Status)
+	default:
+		err = fmt.Errorf("unexpected status code<%s>", resp.Status)
 	}
-	return
+	utils.Logger.Warning(fmt.Sprintf("Sentrypeer filter got %v ", err.Error()))
+	return false, err
+}
+
+func getHTTP(method, url string, payload io.Reader, headers map[string][]string) (resp *http.Response, err error) {
+	var req *http.Request
+	if req, err = http.NewRequest(method, url, payload); err != nil {
+		return
+	}
+	req.Header = headers
+	return http.DefaultClient.Do(req)
 }
