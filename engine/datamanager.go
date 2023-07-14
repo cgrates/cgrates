@@ -270,7 +270,7 @@ func (dm *DataManager) CacheDataFromDB(prfx string, ids []string, mustBeCached b
 		case utils.MetaAPIBan:
 			_, err = dm.GetAPIBan(utils.EmptyString, config.CgrConfig().APIBanCfg().Keys, false, false, true)
 		case utils.MetaSentryPeer:
-			_, err = GetSentryPeer(utils.EmptyString, config.CgrConfig().SentryPeerCfg().Url, config.CgrConfig().SentryPeerCfg().Token, utils.EmptyString, false, true)
+			_, err = GetSentryPeer(utils.EmptyString, config.CgrConfig().SentryPeerCfg().Url, config.CgrConfig().SentryPeerCfg().ClientID, config.CgrConfig().SentryPeerCfg().ClientSecret, utils.EmptyString, false, true)
 		}
 		if err != nil {
 			if err != utils.ErrNotFound && err != utils.ErrDSPProfileNotFound && err != utils.ErrDSPHostNotFound {
