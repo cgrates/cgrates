@@ -591,7 +591,7 @@ func TestBalanceHasBalance(t *testing.T) {
 	bc := Balances{}
 	b := Balance{}
 
-	rcv := bc.HasBalance(&b) 
+	rcv := bc.HasBalance(&b)
 
 	if rcv != false {
 		t.Error(rcv)
@@ -599,7 +599,7 @@ func TestBalanceHasBalance(t *testing.T) {
 
 	bc2 := Balances{&b}
 
-	rcv = bc2.HasBalance(&b) 
+	rcv = bc2.HasBalance(&b)
 
 	if rcv != true {
 		t.Error(rcv)
