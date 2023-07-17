@@ -1016,3 +1016,151 @@ func TestAccountingClone(t *testing.T) {
 		t.Errorf("Expecting 1001 , received: %+v", a2)
 	}
 }
+
+func TestLibeventcostChargingIncrementFieldAsInterface(t *testing.T) {
+	cIt := ChargingIncrement{
+		Usage:          1 * time.Millisecond,
+		Cost:           1.2,
+		AccountingID:   "test",
+		CompressFactor: 1,
+	}
+
+	tests := []struct {
+		name string
+		arg  []string
+		val  any
+		err  string
+	}{
+		{
+			name: "empty file path",
+			arg:  []string{},
+			val:  nil,
+			err:  "NOT_FOUND",
+		},
+		{
+			name: "default case",
+			arg:  []string{"test"},
+			val:  nil,
+			err:  "unsupported field prefix: <test>",
+		},
+		{
+			name: "Usage case",
+			arg:  []string{"Usage"},
+			val:  1 * time.Millisecond,
+			err:  "",
+		},
+		{
+			name: "Cost case",
+			arg:  []string{"Cost"},
+			val:  1.2,
+			err:  "",
+		},
+		{
+			name: "AccountingID case",
+			arg:  []string{"AccountingID"},
+			val:  "test",
+			err:  "",
+		},
+		{
+			name: "Compress factor case",
+			arg:  []string{"CompressFactor"},
+			val:  1,
+			err:  "",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			rcv, err := cIt.FieldAsInterface(tt.arg)
+
+			if err != nil {
+				if err.Error() != tt.err {
+					t.Error(err)
+				}
+			}
+
+			if rcv != tt.val {
+				t.Error(rcv)
+			}
+		})
+	}
+}
+
+func TestLibeventcostBalanceChargeFieldAsInterface(t *testing.T) {
+	str := "test"
+	fl := 1.2
+
+	cIt := BalanceCharge{
+		AccountID:     str,
+		BalanceUUID:   str,
+		RatingID:      str,
+		Units:         fl,
+		ExtraChargeID: str,
+	}
+
+	tests := []struct {
+		name string
+		arg  []string
+		val  any
+		err  string
+	}{
+		{
+			name: "empty file path",
+			arg:  []string{},
+			val:  nil,
+			err:  "NOT_FOUND",
+		},
+		{
+			name: "default case",
+			arg:  []string{"test"},
+			val:  nil,
+			err:  "unsupported field prefix: <test>",
+		},
+		{
+			name: "AccountID case",
+			arg:  []string{"AccountID"},
+			val:  str,
+			err:  "",
+		},
+		{
+			name: "BalanceUUID case",
+			arg:  []string{"BalanceUUID"},
+			val:  str,
+			err:  "",
+		},
+		{
+			name: "RatingID case",
+			arg:  []string{"RatingID"},
+			val:  str,
+			err:  "",
+		},
+		{
+			name: "Units factor case",
+			arg:  []string{"Units"},
+			val:  fl,
+			err:  "",
+		},
+		{
+			name: "ExtraChargeID factor case",
+			arg:  []string{"ExtraChargeID"},
+			val:  str,
+			err:  "",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			rcv, err := cIt.FieldAsInterface(tt.arg)
+
+			if err != nil {
+				if err.Error() != tt.err {
+					t.Error(err)
+				}
+			}
+
+			if rcv != tt.val {
+				t.Error(rcv)
+			}
+		})
+	}
+}

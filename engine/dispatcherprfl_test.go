@@ -253,3 +253,17 @@ func TestDispatcherHostCall(t *testing.T) {
 		t.Errorf("Expected: %s , received: %s", utils.ToJSON(etRPC), utils.ToJSON(tRPC))
 	}
 }
+
+func TestDispatcherprflClone(t *testing.T) {
+	dC := DispatcherHostProfile{
+		Params: map[string]any{
+			"test": 1,
+		},
+	}
+
+	rcv := dC.Clone()
+
+	if !reflect.DeepEqual(dC, *rcv) {
+		t.Errorf("expected %v, received %v", dC, rcv)
+	}
+}

@@ -140,3 +140,65 @@ func TestNewAttributeFromInline(t *testing.T) {
 		t.Errorf("Expecting %+v, received: %+v", utils.ToJSON(expAttrPrf1), utils.ToJSON(attr))
 	}
 }
+
+func TestLibattributescompileSubstitutes(t *testing.T) {
+	ap := AttributeProfile{
+		Attributes: []*Attribute{
+			{
+				Value: config.RSRParsers{{Rules: "test)"}},
+			},
+		},
+	}
+
+	err := ap.compileSubstitutes()
+
+	if err != nil {
+		if err.Error() != "invalid RSRFilter start rule in string: <test)>" {
+			t.Error(err)
+		}
+	}
+}
+
+func TestLibattributesSort(t *testing.T) {
+	aps := AttributeProfiles{{Weight: 1.2}, {Weight: 1.5}}
+
+	aps.Sort()
+
+	if aps[0].Weight != 1.5 {
+		t.Error("didn't sort")
+	}
+}
+
+func TestLibattributesNewAttributeFromInline(t *testing.T) {
+	tests := []struct{
+		name string 
+		t string
+		in string 
+		err string
+	}{
+		{
+			name: "split error check",
+			t: "",
+			in: "",
+			err: "inline parse error for string: <>",
+		},
+		{
+			name: "NewRSRParsers error check",
+			t: "",
+			in: "test):test):test)",
+			err: "invalid RSRFilter start rule in string: <test)>",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			_, err := NewAttributeFromInline(tt.t, tt.in)
+
+			if err != nil {
+				if tt.err != err.Error() {
+					t.Error(err)
+				}
+			}
+		})
+	}
+}
