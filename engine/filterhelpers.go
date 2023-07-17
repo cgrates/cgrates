@@ -124,30 +124,7 @@ func WeightFromDynamics(dWs []*utils.DynamicWeight,
 	}
 	return 0.0, nil
 }
-func sentrypeerGetToken(tokenUrl, clientID, clientSecret, audience, grantType string) (token string, err error) {
-	var resp *http.Response
-	payload := map[string]string{
-		"client_id":     clientID,
-		"client_secret": clientSecret,
-		"audience":      audience,
-		"grant_type":    grantType,
-	}
-	jsonPayload, _ := json.Marshal(payload)
-	resp, err = getHTTP("POST", tokenUrl, bytes.NewBuffer(jsonPayload), map[string][]string{"Content-Type": {"application/json"}})
-	if err != nil {
-		return
-	}
-	defer resp.Body.Close()
-	var m struct {
-		AccessToken string `json:"access_token"`
-	}
-	err = json.NewDecoder(resp.Body).Decode(&m)
-	if err != nil {
-		return
-	}
-	token = m.AccessToken
-	return
-}
+
 func GetSentryPeer(val string, sentryPeerCfg *config.SentryPeerCfg, dataType string) (found bool, err error) {
 	itemId := utils.ConcatenatedKey(dataType, val)
 	var (
@@ -175,6 +152,7 @@ func GetSentryPeer(val string, sentryPeerCfg *config.SentryPeerCfg, dataType str
 	if !isCached {
 		if token, err = sentrypeerGetToken(sentryPeerCfg.TokenUrl, sentryPeerCfg.ClientID, sentryPeerCfg.ClientSecret,
 			sentryPeerCfg.Audience, sentryPeerCfg.GrantType); err != nil {
+			utils.Logger.Err(fmt.Sprintf("sentrypeer token auth got err <%v> ", err.Error()))
 			return
 		}
 		if err = Cache.Set(utils.MetaSentryPeer, utils.MetaToken,
@@ -191,8 +169,10 @@ func GetSentryPeer(val string, sentryPeerCfg *config.SentryPeerCfg, dataType str
 			}
 			break
 		} else if err != utils.ErrNotAuthorized {
+			utils.Logger.Err(err.Error())
 			break
 		}
+		utils.Logger.Warning("Sentrypeer token expired !Getting new one.")
 		Cache.Remove(utils.MetaSentryPeer, utils.MetaToken, true, utils.EmptyString)
 		if token, err = sentrypeerGetToken(sentryPeerCfg.TokenUrl, sentryPeerCfg.ClientID, sentryPeerCfg.ClientSecret,
 			sentryPeerCfg.Audience, sentryPeerCfg.GrantType); err != nil {
@@ -206,9 +186,34 @@ func GetSentryPeer(val string, sentryPeerCfg *config.SentryPeerCfg, dataType str
 	return
 }
 
+func sentrypeerGetToken(tokenUrl, clientID, clientSecret, audience, grantType string) (token string, err error) {
+	var resp *http.Response
+	payload := map[string]string{
+		"client_id":     clientID,
+		"client_secret": clientSecret,
+		"audience":      audience,
+		"grant_type":    grantType,
+	}
+	jsonPayload, _ := json.Marshal(payload)
+	resp, err = getHTTP(http.MethodPost, tokenUrl, bytes.NewBuffer(jsonPayload), map[string][]string{"Content-Type": {"application/json"}})
+	if err != nil {
+		return
+	}
+	defer resp.Body.Close()
+	var m struct {
+		AccessToken string `json:"access_token"`
+	}
+	err = json.NewDecoder(resp.Body).Decode(&m)
+	if err != nil {
+		return
+	}
+	token = m.AccessToken
+	return
+}
+
 func sentrypeerHasData(itemId, token, url string) (found bool, err error) {
 	var resp *http.Response
-	resp, err = getHTTP("GET", url, nil, map[string][]string{"Authorization": {fmt.Sprintf("Bearer %v", token)}})
+	resp, err = getHTTP(http.MethodGet, url, nil, map[string][]string{"Authorization": {fmt.Sprintf("Bearer %v", token)}})
 	if err != nil {
 		return
 	}
@@ -227,7 +232,6 @@ func sentrypeerHasData(itemId, token, url string) (found bool, err error) {
 	default:
 		err = fmt.Errorf("sentrypeer api got unexpected err <%s>", resp.Status)
 	}
-	utils.Logger.Warning(err.Error())
 	return false, err
 }
 
