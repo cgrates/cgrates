@@ -921,7 +921,7 @@ func CastRPCErr(err error) error {
 	return err
 }
 
-// RandomInteger returns a random integer between min and max values
-func RandomInteger(min, max int) int {
-	return math_rand.Intn(max-min) + min
+// RandomInteger returns a random 64-bit integer between min and max values
+func RandomInteger(min, max int64) int64 {
+	return math_rand.Int63n(max-min) + min
 }
