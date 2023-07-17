@@ -26,6 +26,7 @@ import (
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
+	"github.com/cgrates/ltcache"
 )
 
 func TestV1LoadCache(t *testing.T) {
@@ -319,4 +320,134 @@ func TestCacheV1GetItemExpiryTime(t *testing.T) {
 		t.Error("Expected 1 Day ttl")
 	}
 
+}
+
+func TestCachesV1GetItemIDs(t *testing.T) {
+	c := CacheS{}
+
+	err := c.V1GetItemIDs(&utils.ArgsGetCacheItemIDsWithArgDispatcher{}, &[]string{})
+
+	if err != nil {
+		if err.Error() != "NOT_FOUND" {
+			t.Error(err)
+		}
+	}
+}
+
+func TestCachesV1GetItemExpiryTime(t *testing.T) {
+	c := CacheS{}
+	tm := time.Now()
+
+	err := c.V1GetItemExpiryTime(&utils.ArgsGetCacheItemWithArgDispatcher{}, &tm)
+
+	if err != nil {
+		if err.Error() != "NOT_FOUND" {
+			t.Error(err)
+		}
+	}
+}
+
+func TestV1RemoveItem(t *testing.T) {
+	ch := CacheS{}
+	str := "test"
+
+	err := ch.V1RemoveItem(&utils.ArgsGetCacheItemWithArgDispatcher{}, &str)
+
+	if err != nil {
+		t.Error(err)
+	}
+
+	if str != "OK" {
+		t.Error(str)
+	}
+}
+
+func TestV1Clear(t *testing.T) {
+	ch := CacheS{}
+	str := "test"
+
+	err := ch.V1Clear(&utils.AttrCacheIDsWithArgDispatcher{}, &str)
+
+	if err != nil {
+		t.Error(err)
+	}
+
+	if str != "OK" {
+		t.Error(str)
+	}
+}
+
+func TestV1GetCacheStats(t *testing.T) {
+	ch := CacheS{}
+	cs := map[string]*ltcache.CacheStats{}
+
+	err := ch.V1GetCacheStats(&utils.AttrCacheIDsWithArgDispatcher{}, &cs)
+
+	if err != nil {
+		t.Error(err)
+	}
+
+	if cs == nil {
+		t.Error("didnt get cache stats")
+	}
+}
+
+func TestV1PrecacheStatus(t *testing.T) {
+	c := CacheS{}
+
+	err := c.V1PrecacheStatus(&utils.AttrCacheIDsWithArgDispatcher{}, &map[string]string{})
+
+	if err == nil {
+		t.Error("didn't receive an error")
+	}
+}
+
+func TestCacheV1HasGroup(t *testing.T) {
+	c := CacheS{}
+	bl := true
+	err := c.V1HasGroup(&utils.ArgsGetGroupWithArgDispatcher{}, &bl)
+
+	if err != nil  {
+		if err.Error() != "unknown cacheID: *resources" {
+			t.Error(err)
+		}
+	}
+}
+
+func TestV1GetGroupItemIDs(t *testing.T) {
+	c := CacheS{}
+	slc := []string{"test"}
+
+	err := c.V1GetGroupItemIDs(&utils.ArgsGetGroupWithArgDispatcher{}, &slc)
+
+	if err.Error() != "NOT_FOUND" {
+		t.Error(err)
+	}
+} 
+
+func TestV1RemoveGroup(t *testing.T) {
+	c := CacheS{}
+	str := ""
+
+	err := c.V1RemoveGroup(&utils.ArgsGetGroupWithArgDispatcher{}, &str) 
+
+	if err != nil {
+		t.Error(err)
+	}
+}
+
+func TestCachetoStringSlice(t *testing.T) {
+	s := []string{}
+
+	slc := toStringSlice(&s)
+
+	if !reflect.DeepEqual(s, slc) {
+		t.Errorf("received %v, expected %v", slc, s)
+	}
+
+	slc = toStringSlice(nil)
+
+	if slc != nil {
+		t.Error(slc)
+	}
 }

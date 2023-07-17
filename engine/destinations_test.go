@@ -19,6 +19,7 @@ package engine
 
 import (
 	"encoding/json"
+	"reflect"
 	"testing"
 
 	"github.com/cgrates/cgrates/utils"
@@ -120,6 +121,30 @@ func TestDestinationNonCachedDestRightPrefix(t *testing.T) {
 func TestDestinationNonCachedDestWrongPrefix(t *testing.T) {
 	if CachedDestHasPrefix("FAKE", "771") {
 		t.Error("Both arguments should be fake")
+	}
+}
+
+func TestDestinationsString(t *testing.T) {
+	d := Destination{
+		Prefixes: []string{"val1"},
+	}
+
+	rcv := d.String()
+
+	if rcv != ": val1" {
+		t.Error(rcv)
+	}
+}
+
+func TestDestinationsAddPrefix(t *testing.T) {
+	d := Destination{
+		Prefixes: []string{"val1"},
+	}
+
+	d.AddPrefix("val2")
+
+	if !reflect.DeepEqual(d.Prefixes, []string{"val1", "val2"}) {
+		t.Error(d.Prefixes)
 	}
 }
 

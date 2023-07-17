@@ -1003,3 +1003,53 @@ func TestArgsSuppAsOptsGetSupplier(t *testing.T) {
 	}
 	//unifinished
 }
+
+func TestSupplierscompileCacheParamaters(t *testing.T) {
+	sp := SupplierProfile{
+		Sorting:           "*load",
+		SortingParameters: []string{"1:2", "2:1"},
+		Suppliers:         []*Supplier{{}},
+	}
+
+	err := sp.compileCacheParameters()
+
+	if err != nil {
+		t.Error(err)
+	}
+
+	sp2 := SupplierProfile{
+		Sorting:           "*load",
+		SortingParameters: []string{"test:test"},
+		Suppliers:         []*Supplier{{}},
+	}
+
+	err = sp2.compileCacheParameters()
+
+	if err.Error() != `strconv.Atoi: parsing "test": invalid syntax` {
+		t.Error(err)
+	}
+
+	sp3 := SupplierProfile{
+		Sorting:           "*load",
+		SortingParameters: []string{"*default:1",},
+		Suppliers:         []*Supplier{{}},
+	}
+
+	err = sp3.compileCacheParameters()
+
+	if err != nil {
+		t.Error(err)
+	}
+
+	sp4 := SupplierProfile{
+		Sorting:           "*load",
+		SortingParameters: []string{"test:1",},
+		Suppliers:         []*Supplier{{ID: "test"}},
+	}
+
+	err = sp4.compileCacheParameters()
+
+	if err != nil {
+		t.Error(err)
+	}
+}
