@@ -1031,7 +1031,7 @@ func TestSupplierscompileCacheParamaters(t *testing.T) {
 
 	sp3 := SupplierProfile{
 		Sorting:           "*load",
-		SortingParameters: []string{"*default:1",},
+		SortingParameters: []string{"*default:1"},
 		Suppliers:         []*Supplier{{}},
 	}
 
@@ -1043,7 +1043,7 @@ func TestSupplierscompileCacheParamaters(t *testing.T) {
 
 	sp4 := SupplierProfile{
 		Sorting:           "*load",
-		SortingParameters: []string{"test:1",},
+		SortingParameters: []string{"test:1"},
 		Suppliers:         []*Supplier{{ID: "test"}},
 	}
 

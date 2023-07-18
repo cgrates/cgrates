@@ -170,23 +170,23 @@ func TestLibattributesSort(t *testing.T) {
 }
 
 func TestLibattributesNewAttributeFromInline(t *testing.T) {
-	tests := []struct{
-		name string 
-		t string
-		in string 
-		err string
+	tests := []struct {
+		name string
+		t    string
+		in   string
+		err  string
 	}{
 		{
 			name: "split error check",
-			t: "",
-			in: "",
-			err: "inline parse error for string: <>",
+			t:    "",
+			in:   "",
+			err:  "inline parse error for string: <>",
 		},
 		{
 			name: "NewRSRParsers error check",
-			t: "",
-			in: "test):test):test)",
-			err: "invalid RSRFilter start rule in string: <test)>",
+			t:    "",
+			in:   "test):test):test)",
+			err:  "invalid RSRFilter start rule in string: <test)>",
 		},
 	}
 

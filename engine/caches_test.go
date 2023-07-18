@@ -407,7 +407,7 @@ func TestCacheV1HasGroup(t *testing.T) {
 	bl := true
 	err := c.V1HasGroup(&utils.ArgsGetGroupWithArgDispatcher{}, &bl)
 
-	if err != nil  {
+	if err != nil {
 		if err.Error() != "unknown cacheID: *resources" {
 			t.Error(err)
 		}
@@ -423,13 +423,13 @@ func TestV1GetGroupItemIDs(t *testing.T) {
 	if err.Error() != "NOT_FOUND" {
 		t.Error(err)
 	}
-} 
+}
 
 func TestV1RemoveGroup(t *testing.T) {
 	c := CacheS{}
 	str := ""
 
-	err := c.V1RemoveGroup(&utils.ArgsGetGroupWithArgDispatcher{}, &str) 
+	err := c.V1RemoveGroup(&utils.ArgsGetGroupWithArgDispatcher{}, &str)
 
 	if err != nil {
 		t.Error(err)
