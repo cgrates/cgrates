@@ -2419,6 +2419,18 @@ const (
 	KeysCfg = "keys"
 )
 
+// SentryPeerCfg
+const (
+	ClientIdCfg      = "client_id"
+	ClientSecretCfg  = "client_secret"
+	AudienceCfg      = "audience"
+	GrantTypeCfg     = "grant_type"
+	ContentType      = "Content-Type"
+	JsonBody         = "application/json"
+	AuthorizationHdr = "Authorization"
+	BearerAuth       = "Bearer"
+)
+
 // STIR/SHAKEN
 const (
 	STIRAlg = "ES256"

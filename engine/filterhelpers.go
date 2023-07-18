@@ -125,6 +125,7 @@ func WeightFromDynamics(dWs []*utils.DynamicWeight,
 	return 0.0, nil
 }
 
+// fail or pass the filter based on sentrypeer server response
 func GetSentryPeer(val string, sentryPeerCfg *config.SentryPeerCfg, dataType string) (found bool, err error) {
 	itemId := utils.ConcatenatedKey(dataType, val)
 	var (
@@ -186,16 +187,17 @@ func GetSentryPeer(val string, sentryPeerCfg *config.SentryPeerCfg, dataType str
 	return
 }
 
+// Returns a new token from sentrypeer api
 func sentrypeerGetToken(tokenUrl, clientID, clientSecret, audience, grantType string) (token string, err error) {
 	var resp *http.Response
 	payload := map[string]string{
-		"client_id":     clientID,
-		"client_secret": clientSecret,
-		"audience":      audience,
-		"grant_type":    grantType,
+		utils.ClientIdCfg:     clientID,
+		utils.ClientSecretCfg: clientSecret,
+		utils.AudienceCfg:     audience,
+		utils.GrantTypeCfg:    grantType,
 	}
 	jsonPayload, _ := json.Marshal(payload)
-	resp, err = getHTTP(http.MethodPost, tokenUrl, bytes.NewBuffer(jsonPayload), map[string][]string{"Content-Type": {"application/json"}})
+	resp, err = getHTTP(http.MethodPost, tokenUrl, bytes.NewBuffer(jsonPayload), map[string][]string{utils.ContentType: {utils.JsonBody}})
 	if err != nil {
 		return
 	}
@@ -211,9 +213,10 @@ func sentrypeerGetToken(tokenUrl, clientID, clientSecret, audience, grantType st
 	return
 }
 
+// sentrypeerHasData return a boolean based on query response on finding ip/number
 func sentrypeerHasData(itemId, token, url string) (found bool, err error) {
 	var resp *http.Response
-	resp, err = getHTTP(http.MethodGet, url, nil, map[string][]string{"Authorization": {fmt.Sprintf("Bearer %v", token)}})
+	resp, err = getHTTP(http.MethodGet, url, nil, map[string][]string{utils.AuthorizationHdr: {fmt.Sprintf("%s %s", utils.BearerAuth, token)}})
 	if err != nil {
 		return
 	}
