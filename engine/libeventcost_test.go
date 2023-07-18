@@ -1164,3 +1164,417 @@ func TestLibeventcostBalanceChargeFieldAsInterface(t *testing.T) {
 		})
 	}
 }
+
+func TestLibeventcostRatingMatchedFiltersFieldAsInterface(t *testing.T) {
+	rf := RatingMatchedFilters{
+		"test1": 1,
+	}
+
+	tests := []struct {
+		name string
+		arg  []string
+		val  any
+		err  string
+	}{
+		{
+			name: "empty filepath",
+			arg:  []string{},
+			val:  nil,
+			err:  "NOT_FOUND",
+		},
+		{
+			name: "keyword not found",
+			arg:  []string{"test"},
+			val:  nil,
+			err:  "NOT_FOUND",
+		},
+		{
+			name: "found",
+			arg:  []string{"test1"},
+			val:  1,
+			err:  "",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			rcv, err := rf.FieldAsInterface(tt.arg)
+
+			if err != nil {
+				if err.Error() != tt.err {
+					t.Error(err)
+				}
+			}
+
+			if !reflect.DeepEqual(rcv, tt.val) {
+				t.Errorf("expected %v, received %v", tt.val, rcv)
+			}
+		})
+	}
+}
+
+func TestLibeventcostChargedTimingFieldAsInterface(t *testing.T) {
+	ct := ChargedTiming{
+		Years:     utils.Years{1999},
+		Months:    utils.Months{time.August},
+		MonthDays: utils.MonthDays{28},
+		WeekDays:  utils.WeekDays{time.Friday},
+		StartTime: "00:00:00",
+	}
+
+	tests := []struct {
+		name string
+		arg []string 
+		exp any 
+		err string 
+	}{
+		{
+			name: "empty filepath", 
+			arg: []string{},
+			exp: nil,
+			err: "NOT_FOUND",
+		},
+		{
+			name: "empty filepath", 
+			arg: []string{"test"},
+			exp: nil,
+			err: "unsupported field prefix: <test>",
+		},
+		{
+			name: "Years case", 
+			arg: []string{"Years"},
+			exp: utils.Years{1999},
+			err: "",
+		},
+		{
+			name: "Months case", 
+			arg: []string{"Months"},
+			exp: utils.Months{time.August},
+			err: "",
+		},
+		{
+			name: "MonthDays case", 
+			arg: []string{"MonthDays"},
+			exp: utils.MonthDays{28},
+			err: "",
+		},
+		{
+			name: "WeekDays case", 
+			arg: []string{"WeekDays"},
+			exp: utils.WeekDays{time.Friday},
+			err: "",
+		},
+		{
+			name: "StartTime case", 
+			arg: []string{"StartTime"},
+			exp: "00:00:00",
+			err: "",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			rcv, err := ct.FieldAsInterface(tt.arg)
+
+			if err != nil {
+				if err.Error() != tt.err {
+					t.Error(err)
+				}
+			}
+
+			if !reflect.DeepEqual(rcv, tt.exp) {
+				t.Errorf("expected %v, received %v", tt.exp, rcv)
+			}
+		})
+	}
+}
+
+func TestLibeventcostRatingUnitFieldAsInterface(t *testing.T) {
+	fl := 1.5
+	nm := 1
+	str := "test"
+	ct := RatingUnit{
+		ConnectFee:       fl,
+		RoundingMethod:   str,
+		RoundingDecimals: nm,
+		MaxCost:          fl,
+		MaxCostStrategy:  str,
+		TimingID:         str,
+		RatesID:          str,
+		RatingFiltersID:  str,
+	}
+
+	tests := []struct {
+		name string
+		arg []string 
+		exp any 
+		err string
+	}{
+		{
+			name: "empty filepath", 
+			arg: []string{},
+			exp: nil,
+			err: "NOT_FOUND",
+		},
+		{
+			name: "empty filepath",
+			arg: []string{"test"},
+			exp: nil,
+			err: "unsupported field prefix: <test>",
+		},
+		{
+			name: "ConnectFee case", 
+			arg: []string{"ConnectFee"},
+			exp: fl,
+			err: "",
+		},
+		{
+			name: "RoundingMethod case", 
+			arg: []string{"RoundingMethod"},
+			exp: str,
+			err: "",
+		},
+		{
+			name: "RoundingDecimals case", 
+			arg: []string{"RoundingDecimals"},
+			exp: nm,
+			err: "",
+		},
+		{
+			name: "MaxCost case", 
+			arg: []string{"MaxCost"},
+			exp: fl,
+			err: "",
+		},
+		{
+			name: "MaxCostStrategy case", 
+			arg: []string{"MaxCostStrategy"},
+			exp: str,
+			err: "",
+		},
+		{
+			name: "TimingID case", 
+			arg: []string{"TimingID"},
+			exp: str,
+			err: "",
+		},
+		{
+			name: "RatesID case", 
+			arg: []string{"RatesID"},
+			exp: str,
+			err: "",
+		},
+		{
+			name: "RatingFiltersID case", 
+			arg: []string{"RatingFiltersID"},
+			exp: str,
+			err: "",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			rcv, err := ct.FieldAsInterface(tt.arg)
+
+			if err != nil {
+				if err.Error() != tt.err {
+					t.Error(err)
+				}
+			}
+
+			if rcv != tt.exp {
+				t.Errorf("expected %v, received %v", tt.exp, rcv)
+			}
+		})
+	}
+}
+
+func TestLibeventcostRatingFiltersFiltersFieldAsInterface(t *testing.T) {
+	rf := RatingFilters{
+		"test1": {"test": 1},
+	}
+
+	tests := []struct {
+		name string
+		arg  []string
+		val  any
+		err  string
+	}{
+		{
+			name: "empty filepath",
+			arg:  []string{},
+			val:  nil,
+			err:  "NOT_FOUND",
+		},
+		{
+			name: "keyword not found",
+			arg:  []string{"test"},
+			val:  nil,
+			err:  "NOT_FOUND",
+		},
+		{
+			name: "found",
+			arg:  []string{"test1"},
+			val:  RatingMatchedFilters{"test": 1},
+			err:  "",
+		},
+		{
+			name: "found",
+			arg:  []string{"test1", "test"},
+			val:  1,
+			err:  "",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			rcv, err := rf.FieldAsInterface(tt.arg)
+
+			if err != nil {
+				if err.Error() != tt.err {
+					t.Error(err)
+				}
+			}
+
+			if !reflect.DeepEqual(rcv, tt.val) {
+				t.Errorf("expected %v, received %v", tt.val, rcv)
+			}
+		})
+	}
+}
+
+func TestLibeventcostRatingFiltersFieldAsInterface(t *testing.T) {
+	rf := Rating{
+		"test1": {RatesID: "test"},
+	}
+
+	tests := []struct {
+		name string
+		arg  []string
+		val  any
+		err  string
+	}{
+		{
+			name: "empty filepath",
+			arg:  []string{},
+			val:  nil,
+			err:  "NOT_FOUND",
+		},
+		{
+			name: "keyword not found",
+			arg:  []string{"test"},
+			val:  nil,
+			err:  "NOT_FOUND",
+		},
+		{
+			name: "found",
+			arg:  []string{"test1"},
+			val:  &RatingUnit{RatesID: "test"},
+			err:  "",
+		},
+		{
+			name: "found",
+			arg:  []string{"test1", "RatesID"},
+			val:  "test",
+			err:  "",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			rcv, err := rf.FieldAsInterface(tt.arg)
+
+			if err != nil {
+				if err.Error() != tt.err {
+					t.Error(err)
+				}
+			}
+
+			if !reflect.DeepEqual(rcv, tt.val) {
+				t.Errorf("expected %v, received %v", tt.val, rcv)
+			}
+		})
+	}
+}
+
+func TestLibeventcostChargedRatesFieldAsInterface(t *testing.T) {
+	tm := 1 * time.Millisecond
+	ch := ChargedRates{
+		"test": {{
+			GroupIntervalStart: tm,
+			Value:              1.2,
+			RateIncrement:      tm,
+			RateUnit:           tm,
+		}},
+	}
+
+	tests := []struct{
+		name string 
+		arg []string
+		val  any
+		err  string
+	}{
+		{
+			name: "empty filepath",
+			arg:  []string{},
+			val:  nil,
+			err:  "NOT_FOUND",
+		},
+		{
+			name: "keyword not found",
+			arg:  []string{"test1"},
+			val:  nil,
+			err:  "NOT_FOUND",
+		},
+		{
+			name: "no index",
+			arg:  []string{"test", "test"},
+			val:  nil,
+			err:  "NOT_FOUND",
+		},
+		{
+			name: "found",
+			arg:  []string{"test"},
+			val:  RateGroups{{
+					GroupIntervalStart: tm,
+				 	Value:              1.2,
+				 	RateIncrement:      tm,
+				 	RateUnit:           tm,
+				  }},
+			err:  "",
+		},
+		{
+			name: "found",
+			arg:  []string{"test[0]"},
+			val:  &Rate{
+					GroupIntervalStart: tm,
+				 	Value:              1.2,
+				 	RateIncrement:      tm,
+				 	RateUnit:           tm,
+				  },
+			err:  "",
+		},
+		{
+			name: "found",
+			arg:  []string{"test[0]", "Value"},
+			val:  1.2,
+			err:  "",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			rcv, err := ch.FieldAsInterface(tt.arg)
+
+			if err != nil {
+				if err.Error() != tt.err {
+					t.Error(err)
+				}
+			}
+
+			if !reflect.DeepEqual(rcv, tt.val) {
+				t.Errorf("expected %v, received %v", tt.val, rcv)
+			}
+		})
+	}
+}
