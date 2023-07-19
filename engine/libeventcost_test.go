@@ -1224,51 +1224,51 @@ func TestLibeventcostChargedTimingFieldAsInterface(t *testing.T) {
 
 	tests := []struct {
 		name string
-		arg []string 
-		exp any 
-		err string 
+		arg  []string
+		exp  any
+		err  string
 	}{
 		{
-			name: "empty filepath", 
-			arg: []string{},
-			exp: nil,
-			err: "NOT_FOUND",
+			name: "empty filepath",
+			arg:  []string{},
+			exp:  nil,
+			err:  "NOT_FOUND",
 		},
 		{
-			name: "empty filepath", 
-			arg: []string{"test"},
-			exp: nil,
-			err: "unsupported field prefix: <test>",
+			name: "empty filepath",
+			arg:  []string{"test"},
+			exp:  nil,
+			err:  "unsupported field prefix: <test>",
 		},
 		{
-			name: "Years case", 
-			arg: []string{"Years"},
-			exp: utils.Years{1999},
-			err: "",
+			name: "Years case",
+			arg:  []string{"Years"},
+			exp:  utils.Years{1999},
+			err:  "",
 		},
 		{
-			name: "Months case", 
-			arg: []string{"Months"},
-			exp: utils.Months{time.August},
-			err: "",
+			name: "Months case",
+			arg:  []string{"Months"},
+			exp:  utils.Months{time.August},
+			err:  "",
 		},
 		{
-			name: "MonthDays case", 
-			arg: []string{"MonthDays"},
-			exp: utils.MonthDays{28},
-			err: "",
+			name: "MonthDays case",
+			arg:  []string{"MonthDays"},
+			exp:  utils.MonthDays{28},
+			err:  "",
 		},
 		{
-			name: "WeekDays case", 
-			arg: []string{"WeekDays"},
-			exp: utils.WeekDays{time.Friday},
-			err: "",
+			name: "WeekDays case",
+			arg:  []string{"WeekDays"},
+			exp:  utils.WeekDays{time.Friday},
+			err:  "",
 		},
 		{
-			name: "StartTime case", 
-			arg: []string{"StartTime"},
-			exp: "00:00:00",
-			err: "",
+			name: "StartTime case",
+			arg:  []string{"StartTime"},
+			exp:  "00:00:00",
+			err:  "",
 		},
 	}
 
@@ -1306,69 +1306,69 @@ func TestLibeventcostRatingUnitFieldAsInterface(t *testing.T) {
 
 	tests := []struct {
 		name string
-		arg []string 
-		exp any 
-		err string
+		arg  []string
+		exp  any
+		err  string
 	}{
 		{
-			name: "empty filepath", 
-			arg: []string{},
-			exp: nil,
-			err: "NOT_FOUND",
+			name: "empty filepath",
+			arg:  []string{},
+			exp:  nil,
+			err:  "NOT_FOUND",
 		},
 		{
 			name: "empty filepath",
-			arg: []string{"test"},
-			exp: nil,
-			err: "unsupported field prefix: <test>",
+			arg:  []string{"test"},
+			exp:  nil,
+			err:  "unsupported field prefix: <test>",
 		},
 		{
-			name: "ConnectFee case", 
-			arg: []string{"ConnectFee"},
-			exp: fl,
-			err: "",
+			name: "ConnectFee case",
+			arg:  []string{"ConnectFee"},
+			exp:  fl,
+			err:  "",
 		},
 		{
-			name: "RoundingMethod case", 
-			arg: []string{"RoundingMethod"},
-			exp: str,
-			err: "",
+			name: "RoundingMethod case",
+			arg:  []string{"RoundingMethod"},
+			exp:  str,
+			err:  "",
 		},
 		{
-			name: "RoundingDecimals case", 
-			arg: []string{"RoundingDecimals"},
-			exp: nm,
-			err: "",
+			name: "RoundingDecimals case",
+			arg:  []string{"RoundingDecimals"},
+			exp:  nm,
+			err:  "",
 		},
 		{
-			name: "MaxCost case", 
-			arg: []string{"MaxCost"},
-			exp: fl,
-			err: "",
+			name: "MaxCost case",
+			arg:  []string{"MaxCost"},
+			exp:  fl,
+			err:  "",
 		},
 		{
-			name: "MaxCostStrategy case", 
-			arg: []string{"MaxCostStrategy"},
-			exp: str,
-			err: "",
+			name: "MaxCostStrategy case",
+			arg:  []string{"MaxCostStrategy"},
+			exp:  str,
+			err:  "",
 		},
 		{
-			name: "TimingID case", 
-			arg: []string{"TimingID"},
-			exp: str,
-			err: "",
+			name: "TimingID case",
+			arg:  []string{"TimingID"},
+			exp:  str,
+			err:  "",
 		},
 		{
-			name: "RatesID case", 
-			arg: []string{"RatesID"},
-			exp: str,
-			err: "",
+			name: "RatesID case",
+			arg:  []string{"RatesID"},
+			exp:  str,
+			err:  "",
 		},
 		{
-			name: "RatingFiltersID case", 
-			arg: []string{"RatingFiltersID"},
-			exp: str,
-			err: "",
+			name: "RatingFiltersID case",
+			arg:  []string{"RatingFiltersID"},
+			exp:  str,
+			err:  "",
 		},
 	}
 
@@ -1508,9 +1508,9 @@ func TestLibeventcostChargedRatesFieldAsInterface(t *testing.T) {
 		}},
 	}
 
-	tests := []struct{
-		name string 
-		arg []string
+	tests := []struct {
+		name string
+		arg  []string
 		val  any
 		err  string
 	}{
@@ -1535,24 +1535,24 @@ func TestLibeventcostChargedRatesFieldAsInterface(t *testing.T) {
 		{
 			name: "found",
 			arg:  []string{"test"},
-			val:  RateGroups{{
-					GroupIntervalStart: tm,
-				 	Value:              1.2,
-				 	RateIncrement:      tm,
-				 	RateUnit:           tm,
-				  }},
-			err:  "",
+			val: RateGroups{{
+				GroupIntervalStart: tm,
+				Value:              1.2,
+				RateIncrement:      tm,
+				RateUnit:           tm,
+			}},
+			err: "",
 		},
 		{
 			name: "found",
 			arg:  []string{"test[0]"},
-			val:  &Rate{
-					GroupIntervalStart: tm,
-				 	Value:              1.2,
-				 	RateIncrement:      tm,
-				 	RateUnit:           tm,
-				  },
-			err:  "",
+			val: &Rate{
+				GroupIntervalStart: tm,
+				Value:              1.2,
+				RateIncrement:      tm,
+				RateUnit:           tm,
+			},
+			err: "",
 		},
 		{
 			name: "found",
@@ -1574,6 +1574,173 @@ func TestLibeventcostChargedRatesFieldAsInterface(t *testing.T) {
 
 			if !reflect.DeepEqual(rcv, tt.val) {
 				t.Errorf("expected %v, received %v", tt.val, rcv)
+			}
+		})
+	}
+}
+
+func TestLibeventcostChargedTimingsFieldAsInterface(t *testing.T) {
+	ct := ChargedTiming{
+		Years:     utils.Years{1999},
+		Months:    utils.Months{time.August},
+		MonthDays: utils.MonthDays{28},
+		WeekDays:  utils.WeekDays{time.Friday},
+		StartTime: "00:00:00",
+	}
+	c := ChargedTimings{
+		"test1": &ct,
+	}
+	tests := []struct {
+		name string
+		arg  []string
+		val  any
+		err  string
+	}{
+		{
+			name: "empty filepath",
+			arg:  []string{},
+			val:  nil,
+			err:  "NOT_FOUND",
+		},
+		{
+			name: "keyword not found",
+			arg:  []string{"test"},
+			val:  nil,
+			err:  "NOT_FOUND",
+		},
+		{
+			name: "found",
+			arg:  []string{"test1"},
+			val:  &ct,
+			err:  "",
+		},
+		{
+			name: "found",
+			arg:  []string{"test1", "StartTime"},
+			val:  "00:00:00",
+			err:  "",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			rcv, err := c.FieldAsInterface(tt.arg)
+
+			if err != nil {
+				if err.Error() != tt.err {
+					t.Error(err)
+				}
+			}
+
+			if !reflect.DeepEqual(rcv, tt.val) {
+				t.Errorf("expected %v, received %v", tt.val, rcv)
+			}
+		})
+	}
+}
+
+func TestLibeventcostAccountingFieldAsInterface(t *testing.T) {
+	bc := BalanceCharge{
+		AccountID: "test",
+	}
+	ac := Accounting{
+		"test1": &bc,
+	}
+	tests := []struct {
+		name string
+		arg  []string
+		val  any
+		err  string
+	}{
+		{
+			name: "empty filepath",
+			arg:  []string{},
+			val:  nil,
+			err:  "NOT_FOUND",
+		},
+		{
+			name: "keyword not found",
+			arg:  []string{"test"},
+			val:  nil,
+			err:  "NOT_FOUND",
+		},
+		{
+			name: "found",
+			arg:  []string{"test1"},
+			val:  &bc,
+			err:  "",
+		},
+		{
+			name: "found",
+			arg:  []string{"test1", "AccountID"},
+			val:  "test",
+			err:  "",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			rcv, err := ac.FieldAsInterface(tt.arg)
+
+			if err != nil {
+				if err.Error() != tt.err {
+					t.Error(err)
+				}
+			}
+
+			if !reflect.DeepEqual(rcv, tt.val) {
+				t.Errorf("expected %v, received %v", tt.val, rcv)
+			}
+		})
+	}
+}
+
+func TestLibeventcostIfaceAsEventCost(t *testing.T) {
+	e := EventCost{
+		CGRID: "test",
+	}
+	mp := map[string]any{
+		"CGRID": "test",
+	}
+
+	tests := []struct {
+		name string
+		arg  any
+		exp  *EventCost
+		err  string
+	}{
+		{
+			name: "EventCost case",
+			arg:  &e,
+			exp:  &e,
+			err:  "",
+		},
+		{
+			name: "map string interface case",
+			arg:  mp,
+			exp:  &e,
+			err:  "",
+		},
+		{
+			name: "default case",
+			arg:  1,
+			exp:  nil,
+			err:  "not convertible : from: int to:*EventCost",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			rcv, err := IfaceAsEventCost(tt.arg)
+
+			if err != nil {
+				if err.Error() != tt.err {
+					t.Error(err)
+				}
+			}
+
+			if !reflect.DeepEqual(rcv, tt.exp) {
+				t.Errorf("expected %v, received %v", tt.exp, rcv)
 			}
 		})
 	}
