@@ -18,6 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"reflect"
 	"testing"
 	"time"
 
@@ -196,5 +197,123 @@ func TestCallCostToDataCostError(t *testing.T) {
 	_, err := cc.ToDataCost()
 	if err == nil {
 		t.Error("Failed to throw error on call to datacost!")
+	}
+}
+
+func TestCallCostGetStartTime(t *testing.T) {
+	cc := CallCost{}
+
+	rcv := cc.GetStartTime()
+
+	if rcv.Minute() != time.Now().Minute() {
+		t.Error(rcv)
+	}
+
+	cc2 := CallCost{
+		Timespans: TimeSpans{{TimeStart: time.Now()}},
+	}
+
+	rcv = cc2.GetStartTime()
+
+	if rcv.Minute() != time.Now().Minute() {
+		t.Error(rcv)
+	}
+}
+
+func TestCallCostGetEndTime(t *testing.T) {
+	cc := CallCost{}
+
+	rcv := cc.GetEndTime()
+
+	if rcv.Minute() != time.Now().Minute() {
+		t.Error(rcv)
+	}
+}
+
+func TestCallCostIsPaid(t *testing.T) {
+	cc := CallCost{}
+
+	rcv := cc.IsPaid()
+
+	if rcv != true {
+		t.Error(rcv)
+	}
+
+	cc2 := CallCost{
+		Timespans: TimeSpans{{Increments: Increments{}}},
+	}
+
+	rcv = cc2.IsPaid()
+
+	if rcv != false {
+		t.Error(rcv)
+	}
+}
+
+func TestCallCostToDataCost(t *testing.T) {
+	str := "test"
+	bl := false
+	fl := 1.2
+	cc := CallCost{
+		Category:    str,
+		Tenant:      str,
+		Subject:     str,
+		Account:     str,
+		Destination: str,
+		ToR:         str,
+		Cost:        fl,
+		Timespans: TimeSpans{{
+			Increments: Increments{{}},
+		}},
+		RatedUsage:         fl,
+		AccountSummary:     &AccountSummary{},
+		deductConnectFee:   bl,
+		negativeConnectFee: bl,
+		maxCostDisconect:   bl,
+	}
+
+	exp := &DataCost{
+		Category:         cc.Category,
+		Tenant:           cc.Tenant,
+		Subject:          cc.Subject,
+		Account:          cc.Account,
+		Destination:      cc.Destination,
+		ToR:              cc.ToR,
+		Cost:             cc.Cost,
+		deductConnectFee: cc.deductConnectFee,
+		DataSpans: []*DataSpan{{
+			DataStart: 0,
+			DataEnd: 0,
+			Cost: 0,
+			ratingInfo:         nil,
+			RateInterval:       nil,
+			DataIndex:          0,
+			Increments:         []*DataIncrement{{}},
+			MatchedSubject: "", 
+			MatchedPrefix: "",
+			MatchedDestId: "",
+			RatingPlanId: "",
+		}},
+	}
+
+	rcv, err := cc.ToDataCost()
+	if err != nil {
+		t.Error(err)
+	}
+
+	if !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("expected %v\n received %v\n", exp, rcv)
+	}
+}
+
+func TestCallCostUpdateCost(t *testing.T) {
+	cc := CallCost{
+		deductConnectFee: false,
+	}
+
+	cc.UpdateCost()
+
+	if cc.deductConnectFee != true {
+		t.Error("didn't update")
 	}
 }
