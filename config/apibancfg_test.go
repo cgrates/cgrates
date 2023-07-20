@@ -61,14 +61,12 @@ func TestAPIBanCfgAsMapInterface(t *testing.T) {
 	var alS APIBanCfg
 	cfgJSONStr := `{
 		"apiban":{
-			"enabled":false,
 			"keys": ["key1","key2"]
 		},
 		
 }`
 	eMap := map[string]any{
-		"enabled": false,
-		"keys":    []string{"key1", "key2"},
+		"keys": []string{"key1", "key2"},
 	}
 	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)

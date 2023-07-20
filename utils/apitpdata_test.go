@@ -1005,7 +1005,7 @@ func TestNewAttrReloadCacheWithOpts(t *testing.T) {
 }
 
 func TestNewAttrReloadCacheWithOptsFromMap(t *testing.T) {
-	excluded := NewStringSet([]string{MetaAPIBan, MetaAccounts, MetaLoadIDs})
+	excluded := NewStringSet([]string{MetaAPIBan, MetaSentryPeer, MetaAccounts, MetaLoadIDs})
 	mp := make(map[string][]string)
 	for k := range CacheInstanceToPrefix {
 		if !excluded.Has(k) {
