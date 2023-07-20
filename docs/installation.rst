@@ -126,12 +126,13 @@ Installation:
    sudo ln -s $HOME/go/src/github.com/cgrates/cgrates/data /usr/share/cgrates
 
    # Make cgr-engine binary available system-wide
-   sudo ln -s $HOME/go/bin/cgr-engine /usr/local/bin/cgr-engine
+   sudo ln -s $HOME/go/bin/cgr-engine /usr/bin/cgr-engine
 
    # Optional: Additional useful symbolic links
-   sudo ln -s $HOME/go/bin/cgr-loader /usr/local/bin/cgr-loader
-   sudo ln -s $HOME/go/bin/cgr-migrator /usr/local/bin/cgr-migrator
-   sudo ln -s $HOME/go/bin/cgr-console /usr/local/bin/cgr-console
+   sudo ln -s $HOME/go/bin/cgr-loader /usr/bin/cgr-loader
+   sudo ln -s $HOME/go/bin/cgr-migrator /usr/bin/cgr-migrator
+   sudo ln -s $HOME/go/bin/cgr-console /usr/bin/cgr-console
+   sudo ln -s $HOME/go/bin/cgr-tester /usr/bin/cgr-tester
 
 Creating Your Own Packages
 --------------------------
