@@ -433,7 +433,9 @@ func testV1FIdxGetThresholdsIndexesHealth(t *testing.T) {
 		BrokenIndexes:  map[string][]string{},
 		MissingFilters: map[string][]string{},
 	}
-	var rply *engine.FilterIHReply
+	rply := &engine.FilterIHReply{
+		MissingObjects: []string{},
+	}
 	if err := tFIdxHRpc.Call(utils.APIerSv1GetThresholdsIndexesHealth,
 		args, &rply); err != nil {
 		t.Error(err)
@@ -543,7 +545,9 @@ func testV1FIdxGetResourcesIndexesHealth(t *testing.T) {
 		MissingFilters: map[string][]string{},
 	}
 	args := &engine.IndexHealthArgsWith3Ch{}
-	var rply *engine.FilterIHReply
+	rply := &engine.FilterIHReply{
+		MissingObjects: []string{},
+	}
 	if err := tFIdxHRpc.Call(utils.APIerSv1GetResourcesIndexesHealth,
 		args, &rply); err != nil {
 		t.Error(err)
@@ -637,7 +641,9 @@ func testV1FIdxGetStatsIndexesHealth(t *testing.T) {
 		MissingFilters: map[string][]string{},
 	}
 	args := &engine.IndexHealthArgsWith3Ch{}
-	var rplyFl *engine.FilterIHReply
+	rplyFl := &engine.FilterIHReply{
+		MissingObjects: []string{},
+	}
 	if err := tFIdxHRpc.Call(utils.APIerSv1GetStatsIndexesHealth,
 		args, &rplyFl); err != nil {
 		t.Error(err)
@@ -720,7 +726,9 @@ func testV1FIdxGetSupplierIndexesHealth(t *testing.T) {
 		MissingFilters: map[string][]string{},
 	}
 	args := &engine.IndexHealthArgsWith3Ch{}
-	var rplyFl *engine.FilterIHReply
+	rplyFl := &engine.FilterIHReply{
+		MissingObjects: []string{},
+	}
 	if err := tFIdxHRpc.Call(utils.APIerSv1GetSuppliersIndexesHealth,
 		args, &rplyFl); err != nil {
 		t.Error(err)
@@ -821,7 +829,9 @@ func testV1FIdxGetChargersIndexesHealth(t *testing.T) {
 		MissingFilters: map[string][]string{},
 	}
 	args := &engine.IndexHealthArgsWith3Ch{}
-	var rplyFl *engine.FilterIHReply
+	rplyFl := &engine.FilterIHReply{
+		MissingObjects: []string{},
+	}
 	if err := tFIdxHRpc.Call(utils.APIerSv1GetChargersIndexesHealth,
 		args, &rplyFl); err != nil {
 		t.Error(err)
@@ -953,7 +963,9 @@ func testV1FIdxGetAttributesIndexesHealth(t *testing.T) {
 		MissingFilters: map[string][]string{},
 	}
 	args := &engine.IndexHealthArgsWith3Ch{}
-	var rplyFl *engine.FilterIHReply
+	rplyFl := &engine.FilterIHReply{
+		MissingObjects: []string{},
+	}
 	if err := tFIdxHRpc.Call(utils.APIerSv1GetAttributesIndexesHealth,
 		args, &rplyFl); err != nil {
 		t.Error(err)
@@ -1007,7 +1019,9 @@ func testV1FIdxHGetDispatchersIndexesHealth(t *testing.T) {
 		MissingFilters: map[string][]string{},
 	}
 	args := &engine.IndexHealthArgsWith3Ch{}
-	var rplyFl *engine.FilterIHReply
+	rplyFl := &engine.FilterIHReply{
+		MissingObjects: []string{},
+	}
 	if err := tFIdxHRpc.Call(utils.APIerSv1GetDispatchersIndexesHealth,
 		args, &rplyFl); err != nil {
 		t.Error(err)
