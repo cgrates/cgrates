@@ -1,37 +1,36 @@
 name: Build & Unit Tests
 
-permissions: {} # no need any permissions
+permissions: {}
 
 on:
-  push:
-    branches: [v0.10]
+  # push:
+  #   branches: [v0.10]
   pull_request:
     branches: [v0.10]
 
 jobs:
-  
-  check-if-duplicate-action:
-    continue-on-error: true 
-    runs-on: ubuntu-latest
-    outputs:
-      should_skip: ${{ steps.skip_check.outputs.should_skip }}
-    steps:
-      - id: skip_check
-        uses: fkirc/skip-duplicate-actions@v5
-        with:
-          concurrent_skipping: 'never'
-          skip_after_successful_duplicate: 'true'
-          paths_ignore: '["v0.10/docs/**"]'
-          paths: '["v0.10/**.go", "v0.10/.github"]'
+  # check-if-duplicate-action:
+  #   continue-on-error: true
+  #   runs-on: ubuntu-latest
+  #   outputs:
+  #     should_skip: ${{ steps.skip_check.outputs.should_skip }}
+  #   steps:
+  #     - id: skip_check
+  #       uses: fkirc/skip-duplicate-actions@v5
+  #       with:
+  #         concurrent_skipping: 'never'
+  #         skip_after_successful_duplicate: 'true'
+  #         paths_ignore: '["v0.10/docs/**"]'
+  #         paths: '["v0.10/**.go", "v0.10/.github"]'
 
   build:
-    needs: check-if-duplicate-action
-    if: needs.check-if-duplicate-action.outputs.should_skip != 'true'
+    # needs: check-if-duplicate-action
+    # if: needs.check-if-duplicate-action.outputs.should_skip != 'true'
     runs-on: ubuntu-latest
     strategy:
       fail-fast: true
       matrix:
-        go: ['stable'] # could be a good idea to consider oldstable as well
+        go: ["stable"] # could be a good idea to consider oldstable as well
 
     steps:
       - name: Check out code
@@ -47,7 +46,7 @@ jobs:
         run: gofmt -s -w . && git diff --exit-code
 
       - name: Go Vet
-        continue-on-error: true # will soon be removed
+        continue-on-error: true # option will soon be removed
         run: go vet ./...
 
       - name: Go Tidy
