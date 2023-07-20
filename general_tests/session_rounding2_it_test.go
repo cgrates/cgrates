@@ -21,6 +21,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package general_tests
 
 import (
+	"encoding/json"
 	"net/rpc"
 	"os"
 	"path"
@@ -385,6 +386,7 @@ func testSesRnd2PostpaidProcessCDR(t *testing.T) {
 		t.Error(err)
 	}
 }
+
 func testSesRnd2CompareCosts(t *testing.T) {
 	var cdrs []*engine.ExternalCDR
 	req := utils.RPCCDRsFilter{OriginIDs: []string{"session1", "session2"}}
@@ -392,9 +394,22 @@ func testSesRnd2CompareCosts(t *testing.T) {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(cdrs) != 2 {
 		t.Errorf("expected 2 cdrs, received <%d>", len(cdrs))
-	} else if cdrs[0].Cost != cdrs[1].Cost {
-		t.Errorf("expected the costs to be equal, received: <%+v> and <%+v>",
-			cdrs[0].Cost, cdrs[1].Cost)
+	} else {
+		// Compare with the Cost within CostDetails, not the one from the main event for the
+		// *postpaid session.
+		var postpaidCD engine.EventCost
+		err := json.Unmarshal([]byte(cdrs[1].CostDetails), &postpaidCD)
+		if err != nil {
+			t.Error(err)
+		}
+		var postpaidCost float64
+		if postpaidCD.Cost != nil {
+			postpaidCost = *postpaidCD.Cost
+		}
+		if cdrs[0].Cost != postpaidCost {
+			t.Errorf("expected the costs to be equal, received: <%+v> and <%+v>",
+				cdrs[0].Cost, postpaidCost)
+		}
 	}
 }
 
