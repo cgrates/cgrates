@@ -134,7 +134,7 @@ func testTPRouteSetTPRoute(t *testing.T) {
 		},
 		Sorting: "*lc",
 		Routes: []*utils.TPRoute{
-			&utils.TPRoute{
+			{
 				ID:              "route1",
 				FilterIDs:       []string{"FLTR_1"},
 				AccountIDs:      []string{"Acc1", "Acc2"},
@@ -184,7 +184,7 @@ func testTPRouteGetTPRouteIDs(t *testing.T) {
 
 func testTPRouteUpdateTPRoute(t *testing.T) {
 	tpRoutePrf.Routes = []*utils.TPRoute{
-		&utils.TPRoute{
+		{
 			ID:              "route1",
 			FilterIDs:       []string{"FLTR_1"},
 			AccountIDs:      []string{"Acc1", "Acc2"},
@@ -195,7 +195,7 @@ func testTPRouteUpdateTPRoute(t *testing.T) {
 			Blocker:         true,
 			RouteParameters: "SortingParam1",
 		},
-		&utils.TPRoute{
+		{
 			ID:              "route2",
 			FilterIDs:       []string{"FLTR_1"},
 			AccountIDs:      []string{"Acc3"},

@@ -60,7 +60,7 @@ func TestV2toV3Cost(t *testing.T) {
 			Tenant: "cgrates.org",
 			ID:     "1001",
 			BalanceSummaries: []*engine.BalanceSummary{
-				&engine.BalanceSummary{
+				{
 					UUID:  "UUID",
 					ID:    "First",
 					Type:  utils.MetaMonetary,

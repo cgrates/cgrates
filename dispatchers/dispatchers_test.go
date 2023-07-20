@@ -1006,7 +1006,7 @@ func TestDispatcherServiceDispatcherProfileForEventNotNotFound(t *testing.T) {
 			if cnt == 0 {
 				cnt++
 				return map[string]utils.StringSet{
-					idxKey: utils.StringSet{"cgrates.org:dsp1": {}},
+					idxKey: {"cgrates.org:dsp1": {}},
 				}, nil
 			}
 			return nil, utils.ErrNotImplemented
