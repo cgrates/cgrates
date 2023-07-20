@@ -1264,9 +1264,9 @@ const CGRATES_CFG_JSON = `
 
 
 "apiban": {
-	"enabled": false,
 	"keys": [],
 },
+
 "sentrypeer":{
 	 	 "client_id":"",
 	 	 "client_secret":"",
