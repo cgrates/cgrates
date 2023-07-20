@@ -938,9 +938,11 @@ func TestEndOfMonth(t *testing.T) {
 	if !eom.Equal(expected) {
 		t.Errorf("Expected %v was %v", expected, eom)
 	}
+	// Date ref represents zero time instant, will return time.Now().
 	eom = GetEndOfMonth(time.Date(1, time.January, 1, 0, 0, 0, 0, time.UTC))
-	if time.Now().Add(-1).Before(eom) {
-		t.Errorf("Expected %v was %v", expected, eom)
+	if currentDateRef := time.Now(); currentDateRef.Before(eom) ||
+		time.Since(eom) > time.Millisecond {
+		t.Errorf("Expected GetEndOfMonth to return the current date info, received: %s", eom)
 	}
 }
 
