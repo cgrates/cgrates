@@ -134,12 +134,12 @@ func testTPRatingProfilesSetTPRatingProfile(t *testing.T) {
 		Category: "Category",
 		Subject:  "Subject",
 		RatingPlanActivations: []*utils.TPRatingActivation{
-			&utils.TPRatingActivation{
+			{
 				ActivationTime:   "2014-07-29T15:00:00Z",
 				RatingPlanId:     "PlanOne",
 				FallbackSubjects: "FallBack",
 			},
-			&utils.TPRatingActivation{
+			{
 				ActivationTime:   "2015-07-29T10:00:00Z",
 				RatingPlanId:     "PlanTwo",
 				FallbackSubjects: "FallOut",
@@ -209,17 +209,17 @@ func testTPRatingProfilesGetTPRatingProfilesByLoadID(t *testing.T) {
 func testTPRatingProfilesUpdateTPRatingProfile(t *testing.T) {
 	var result string
 	tpRatingProfile.RatingPlanActivations = []*utils.TPRatingActivation{
-		&utils.TPRatingActivation{
+		{
 			ActivationTime:   "2014-07-29T15:00:00Z",
 			RatingPlanId:     "PlanOne",
 			FallbackSubjects: "FallBack",
 		},
-		&utils.TPRatingActivation{
+		{
 			ActivationTime:   "2015-07-29T10:00:00Z",
 			RatingPlanId:     "PlanTwo",
 			FallbackSubjects: "FallOut",
 		},
-		&utils.TPRatingActivation{
+		{
 			ActivationTime:   "2017-07-29T10:00:00Z",
 			RatingPlanId:     "BackupPlan",
 			FallbackSubjects: "Retreat",

@@ -35,7 +35,7 @@ func TestV1ActionPlanAsActionPlan(t *testing.T) {
 		Id:         "test",
 		AccountIDs: utils.StringMap{"one": true},
 		ActionTimings: []*engine.ActionTiming{
-			&engine.ActionTiming{
+			{
 				Timing: &engine.RateInterval{
 					Timing: new(engine.RITiming),
 				},

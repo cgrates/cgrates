@@ -117,7 +117,7 @@ func testTpStatsITPopulate(t *testing.T) {
 			},
 			TTL: "1",
 			Metrics: []*utils.MetricWithFilters{
-				&utils.MetricWithFilters{
+				{
 					MetricID: "*sum#Param1",
 				},
 			},

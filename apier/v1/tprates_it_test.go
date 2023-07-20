@@ -128,14 +128,14 @@ func testTPRatesSetTPRate(t *testing.T) {
 		TPid: "TPidTpRate",
 		ID:   "RT_FS_USERS",
 		RateSlots: []*utils.RateSlot{
-			&utils.RateSlot{
+			{
 				ConnectFee:         12,
 				Rate:               3,
 				RateUnit:           "6s",
 				RateIncrement:      "6s",
 				GroupIntervalStart: "0s",
 			},
-			&utils.RateSlot{
+			{
 				ConnectFee:         12,
 				Rate:               3,
 				RateUnit:           "4s",
@@ -174,21 +174,21 @@ func testTPRatesGetTPRateIds(t *testing.T) {
 func testTPRatesUpdateTPRate(t *testing.T) {
 	var result string
 	tpRate.RateSlots = []*utils.RateSlot{
-		&utils.RateSlot{
+		{
 			ConnectFee:         12,
 			Rate:               3,
 			RateUnit:           "6s",
 			RateIncrement:      "6s",
 			GroupIntervalStart: "0s",
 		},
-		&utils.RateSlot{
+		{
 			ConnectFee:         12,
 			Rate:               10,
 			RateUnit:           "4s",
 			RateIncrement:      "6s",
 			GroupIntervalStart: "1s",
 		},
-		&utils.RateSlot{
+		{
 			ConnectFee:         5,
 			Rate:               10,
 			RateUnit:           "4s",

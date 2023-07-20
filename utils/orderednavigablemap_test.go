@@ -885,7 +885,7 @@ func TestOrderedNavigableMapString(t *testing.T) {
 	onm.nm = &DataNode{
 		Type: NMMapType,
 		Map: map[string]*DataNode{
-			"test1": &DataNode{
+			"test1": {
 				Value: &DataLeaf{
 					Data: "data!",
 				},
@@ -903,7 +903,7 @@ func TestOrderedNavigableMapInterface(t *testing.T) {
 	onm.nm = &DataNode{
 		Type: NMMapType,
 		Map: map[string]*DataNode{
-			"test1": &DataNode{
+			"test1": {
 				Value: &DataLeaf{
 					Data: "data!",
 				},
@@ -939,7 +939,7 @@ func TestOrderedNavigableMapCompose(t *testing.T) {
 	}, NewLeafNode("1003"))
 	onm.orderRef = make(map[string][]*PathItemElement)
 	onm.orderRef = map[string][]*PathItemElement{
-		"Field1.Field2[0]": []*PathItemElement{&PathItemElement{Value: []string{"test"}}},
+		"Field1.Field2[0]": {{Value: []string{"test"}}},
 	}
 	if err := onm.Compose(&FullPath{
 		PathSlice: []string{"Field1", "Field2", "0"},

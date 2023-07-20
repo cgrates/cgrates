@@ -132,7 +132,7 @@ func testTPStatsSetTPStat(t *testing.T) {
 		},
 		TTL: "1",
 		Metrics: []*utils.MetricWithFilters{
-			&utils.MetricWithFilters{
+			{
 				MetricID: "*sum",
 			},
 		},
@@ -167,10 +167,10 @@ func testTPStatsUpdateTPStat(t *testing.T) {
 	var result string
 	tpStat.Weight = 21
 	tpStat.Metrics = []*utils.MetricWithFilters{
-		&utils.MetricWithFilters{
+		{
 			MetricID: "*sum",
 		},
-		&utils.MetricWithFilters{
+		{
 			MetricID: "*averege",
 		},
 	}

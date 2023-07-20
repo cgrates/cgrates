@@ -4749,7 +4749,7 @@ func TestRouteProfileToAPICase1(t *testing.T) {
 		},
 		SortingParameters: []string{"Param1", "Param2"},
 		Routes: []*Route{
-			&Route{ID: "ResGroup2"},
+			{ID: "ResGroup2"},
 		},
 	}
 
@@ -5815,7 +5815,7 @@ func TestModelHelpersMapTPSharedGroup2(t *testing.T) {
 		},
 	}
 	expStruct := map[string][]*utils.TPSharedGroup{
-		"2": []*utils.TPSharedGroup{
+		"2": {
 			{
 				Account:       "",
 				Strategy:      "",
@@ -5855,7 +5855,7 @@ func TestSharedGroupMdlsAsMapTPSharedGroups2(t *testing.T) {
 		},
 	}
 	expStruct := map[string]*utils.TPSharedGroups{
-		"": &utils.TPSharedGroups{
+		"": {
 			TPid: "2",
 			ID:   "",
 			SharedGroups: []*utils.TPSharedGroup{
