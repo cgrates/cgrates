@@ -1,52 +1,51 @@
 name: Integration Tests
 
 on:
-  push:
-    branches: [ v0.10 ]
+  # push:
+  #   branches: [v0.10]
   pull_request:
-    branches: [ v0.10 ]
+    branches: [v0.10]
 
 jobs:
-
-  check-if-duplicate-action:
-    # continue-on-error: true # Uncomment once integration is finished
-    runs-on: ubuntu-latest
-    outputs:
-      should_skip: ${{ steps.skip_check.outputs.should_skip }}
-    steps:
-      - id: skip_check
-        uses: fkirc/skip-duplicate-actions@v5
-        with:
-          concurrent_skipping: 'never'
-          skip_after_successful_duplicate: 'true'
-          paths_ignore: '["v0.10/docs/**"]'
-          paths: '["v0.10/**.go", "v0.10/*.sh", "v0.10/.github", "v0.10/data/ansible/conf/samples/**", "v0.10/data/tariffplans"]'
+  # check-if-duplicate-action:
+  #   # continue-on-error: true # Uncomment once integration is finished
+  #   runs-on: ubuntu-latest
+  #   outputs:
+  #     should_skip: ${{ steps.skip_check.outputs.should_skip }}
+  #   steps:
+  #     - id: skip_check
+  #       uses: fkirc/skip-duplicate-actions@v5
+  #       with:
+  #         concurrent_skipping: 'never'
+  #         skip_after_successful_duplicate: 'true'
+  #         paths_ignore: '["v0.10/docs/**"]'
+  #         paths: '["v0.10/**.go", "v0.10/*.sh", "v0.10/.github", "v0.10/data/ansible/conf/samples/**", "v0.10/data/tariffplans"]'
 
   integration-tests:
-    needs: check-if-duplicate-action
-    if: needs.check-if-duplicate-action.outputs.should_skip != 'true'
+    # needs: check-if-duplicate-action
+    # if: needs.check-if-duplicate-action.outputs.should_skip != 'true'
     runs-on: ubuntu-latest
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v3
-      
-    - name: Setup Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: '3.x'
-    
-    - name: Install Ansible
-      run: |
-        python -m pip install --upgrade pip
-        pip install ansible
+      - name: Checkout code
+        uses: actions/checkout@v3
 
-    - name: Run Ansible Playbook
-      run: |
-        ansible-playbook data/ansible/integration_tests/main.yaml -i localhost, -c local -e "ansible_user=$(whoami)"
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.x"
 
-    - name: Run integration tests
-      run: |
-        sudo su <<EOF
-        source /etc/profile
-        ./integration_test.sh
-        EOF
+      - name: Install Ansible
+        run: |
+          python -m pip install --upgrade pip
+          pip install ansible
+
+      - name: Run Ansible Playbook
+        run: |
+          ansible-playbook data/ansible/integration_tests/main.yaml -i localhost, -c local -e "ansible_user=$(whoami)"
+
+      - name: Run integration tests
+        run: |
+          sudo su <<EOF
+          source /etc/profile
+          ./integration_test.sh
+          EOF
