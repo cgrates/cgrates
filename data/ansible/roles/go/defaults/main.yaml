@@ -3,7 +3,7 @@
 package_manager: apt
 
 # Go version to install
-golang_version: 1.20.5
+golang_version: 1.20.6
 
 # Expected go version output
 go_version_target: "go version go{{ golang_version }} linux/amd64"
