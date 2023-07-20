@@ -3066,3 +3066,244 @@ func TestECFieldAsInterfaceNilEventCost(t *testing.T) {
 		t.Fatalf("Expected error:%s, received: %v", utils.ErrNotFound.Error(), err)
 	}
 }
+
+func TestEventCostFieldAsInterface(t *testing.T) {
+	ec := EventCost{
+		cache: utils.MapStorage{"test": "val1"},
+	}
+
+	_, err := ec.FieldAsInterface([]string{"test", "val1"})
+
+	if err != nil {
+		if err.Error() != "WRONG_PATH" {
+			t.Error(err)
+		}
+	}
+
+	ec = EventCost{
+		cache: utils.MapStorage{"test[": nil},
+	}
+
+	_, err = ec.FieldAsInterface([]string{"test["})
+
+	if err != nil {
+		if err.Error() != "NOT_FOUND" {
+			t.Error(err)
+		}
+	}
+}
+
+func TestEventCostfieldAsInterface(t *testing.T) {
+	td := 1 * time.Second
+	fl := 1.2
+	as := AccountSummary{ID: "test"}
+
+	ec := EventCost{
+		CGRID:          "test",
+		RunID:          "test",
+		StartTime:      time.Date(1999, 8, 28, 1, 12, 34, 1334, time.Local),
+		Usage:          &td,
+		Cost:           &fl,
+		Charges:        []*ChargingInterval{{RatingID: "test"}},
+		AccountSummary: &as,
+		Rating:         Rating{},
+		Accounting:     Accounting{},
+		RatingFilters:  RatingFilters{},
+		Rates:          ChargedRates{},
+		Timings:        ChargedTimings{},
+	}
+
+	tests := []struct {
+		name string
+		arg  []string
+		val  any
+		err  string
+	}{
+		{
+			name: "get path index error check",
+			arg:  []string{"test"},
+			val:  nil,
+			err:  "unsupported field prefix: <test>",
+		},
+		{
+			name: "case charges",
+			arg:  []string{"Charges"},
+			val:  []*ChargingInterval{{RatingID: "test"}},
+			err:  "",
+		},
+		{
+			name: "case StartTime",
+			arg:  []string{"StartTime"},
+			val:  time.Date(1999, 8, 28, 1, 12, 34, 1334, time.Local),
+			err:  "",
+		},
+		{
+			name: "case Usage",
+			arg:  []string{"Usage"},
+			val:  &td,
+			err:  "",
+		},
+		{
+			name: "case Cost",
+			arg:  []string{"Cost"},
+			val:  &fl,
+			err:  "",
+		},
+		{
+			name: "case charges error",
+			arg:  []string{"Charges", "test"},
+			val:  nil,
+			err:  "NOT_FOUND",
+		},
+		{
+			name: "case CGRID error",
+			arg:  []string{"CGRID", "test"},
+			val:  nil,
+			err:  "NOT_FOUND",
+		},
+		{
+			name: "case RunID error",
+			arg:  []string{"RunID", "test"},
+			val:  nil,
+			err:  "NOT_FOUND",
+		},
+		{
+			name: "case StartTime error",
+			arg:  []string{"StartTime", "test"},
+			val:  nil,
+			err:  "NOT_FOUND",
+		},
+		{
+			name: "case Usage error",
+			arg:  []string{"Usage", "test"},
+			val:  nil,
+			err:  "NOT_FOUND",
+		},
+		{
+			name: "case Cost error",
+			arg:  []string{"Cost", "test"},
+			val:  nil,
+			err:  "NOT_FOUND",
+		},
+		{
+			name: "case AccountSummary error",
+			arg:  []string{"AccountSummary"},
+			val:  &as,
+			err:  "",
+		},
+		{
+			name: "case Timings error",
+			arg:  []string{"Timings"},
+			val:  ChargedTimings{},
+			err:  "",
+		},
+		{
+			name: "case Timings",
+			arg:  []string{"Timings", "test"},
+			val:  nil,
+			err:  "NOT_FOUND",
+		},
+		{
+			name: "case Rates error",
+			arg:  []string{"Rates"},
+			val:  ChargedRates{},
+			err:  "",
+		},
+		{
+			name: "case RatingFilters error",
+			arg:  []string{"RatingFilters"},
+			val:  RatingFilters{},
+			err:  "",
+		},
+		{
+			name: "case RatingFilters error",
+			arg:  []string{"RatingFilters", "test"},
+			val:  nil,
+			err:  "NOT_FOUND",
+		},
+		{
+			name: "case Accounting error",
+			arg:  []string{"Accounting"},
+			val:  Accounting{},
+			err:  "",
+		},
+		{
+			name: "case Accounting error",
+			arg:  []string{"Accounting", "test"},
+			val:  nil,
+			err:  "NOT_FOUND",
+		},
+		{
+			name: "case Rating error",
+			arg:  []string{"Rating"},
+			val:  Rating{},
+			err:  "",
+		},
+		{
+			name: "case Rating error",
+			arg:  []string{"Rating", "test"},
+			val:  nil,
+			err:  "NOT_FOUND",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			rcv, err := ec.fieldAsInterface(tt.arg)
+
+			if err != nil {
+				if err.Error() != tt.err {
+					t.Fatal(err)
+				}
+			}
+
+			if !reflect.DeepEqual(rcv, tt.val) {
+				t.Errorf("expected %v, received %v", tt.val, rcv)
+			}
+		})
+	}
+}
+
+func TestEventCostgetChargesForPath(t *testing.T) {
+	ec := EventCost{}
+	chr := ChargingInterval{}
+
+	tests := []struct {
+		name string
+		fl   []string
+		chr  *ChargingInterval
+		exp  any
+		err  string
+	}{
+		{
+			name: "nil charging interval",
+			fl:   []string{},
+			chr:  nil,
+			exp:  nil,
+			err:  "NOT_FOUND",
+		},
+		{
+			name: "nil charging interval",
+			fl:   []string{},
+			chr:  &chr,
+			exp:  &chr,
+			err:  "",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			rcv, err := ec.getChargesForPath(tt.fl, tt.chr)
+
+			if err != nil {
+				if err.Error() != tt.err {
+					t.Error(err)
+				}
+			}
+
+			if !reflect.DeepEqual(rcv, tt.exp) {
+				t.Errorf("expected %v, received %v", tt.exp, rcv)
+			}
+		})
+	}
+}
