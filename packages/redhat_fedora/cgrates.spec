@@ -1,13 +1,17 @@
+# Define global variables
 %global version 0.11.0~dev
 %global go_version 1.20.5
 %global git_commit %(echo $gitLastCommit)
 %global releaseTag %(echo $rpmTag)
 
-%define debug_package  %{nil}
+# Define system paths
 %global _logdir	       /var/log/%name
 %global _spooldir      /var/spool/%name
 %global _libdir	       /var/lib/%name
 
+%define debug_package  %{nil}
+
+# Define package metadata
 Name:           cgrates
 Version:        %{version}
 Release:        %{releaseTag}
@@ -15,19 +19,10 @@ Summary:        Carrier Grade Real-time Charging System
 License:        GPLv3
 URL:            https://github.com/cgrates/cgrates
 Source0:        %{git_commit}.tar.gz
-
-%if 0%{?fedora} > 16 || 0%{?rhel} > 6
-Requires(post): systemd
-Requires(preun): systemd
-Requires(postun): systemd
-%else
-Requires(post): chkconfig
-Requires(preun):chkconfig
-Requires(preun):initscripts
-%endif
-
+BuildRequires:  git curl tar
 Requires(pre):  shadow-utils
-BuildRequires:git curl tar
+
+# Systemd service management macros
 %{?systemd_requires}
 BuildRequires:  systemd-rpm-macros
 
@@ -35,6 +30,7 @@ BuildRequires:  systemd-rpm-macros
 CGRateS is a very fast and easy scalable real-time charging system for Telecom environments.
 
 %prep
+# In the prep phase, the source is unpacked and set up for the build
 %setup -q -n %{name}-%{version} -c
 mkdir -p src/github.com/cgrates
 ln -sf ../../../$(ls |grep %{name}) src/github.com/cgrates/cgrates
@@ -42,82 +38,77 @@ curl -LO https://golang.org/dl/go%{go_version}.linux-amd64.tar.gz
 tar -xzf go%{go_version}.linux-amd64.tar.gz -C %{_builddir}
 
 %pre
+# In the pre-install phase, user/group is created if not exists
 getent group %{name} >/dev/null || groupadd -r %{name}
-getent passwd %{name} >/dev/null || \
-useradd -r -g %{name} -d %{_localstatedir}/run/%{name} -s /sbin/nologin \
--c "CGRateS" %{name} 2>/dev/null || :
-
-%post
-%if 0%{?fedora} > 16 || 0%{?rhel} > 6
-if [ $1 -eq 1 ] ; then
-	# Initial installation
-	/bin/systemctl daemon-reload >/dev/null 2>&1 || :
+if ! getent passwd %{name} >/dev/null ; then
+    useradd -r -g %{name} -d %{_localstatedir}/run/%{name} -s /sbin/nologin \
+    -c "CGRateS" %{name} || exit $?
 fi
-%else
-/sbin/chkconfig --add %{name}
-%endif
-/bin/chown -R %{name}:%{name} %{_logdir}
-/bin/chown -R %{name}:%{name} %{_spooldir}
-/bin/chown -R %{name}:%{name} %{_libdir}
-sudo systemctl restart rsyslog
-
-%preun
-%if 0%{?fedora} > 16 || 0%{?rhel} > 6
-if [ $1 -eq 0 ] ; then
-	# Package removal, not upgrade
-	/bin/systemctl --no-reload disable %{name}.service > /dev/null 2>&1 || :
-	/bin/systemctl stop %{name}.service > /dev/null 2>&1 || :
-fi
-%else
-if [ $1 = 0 ]; then
-	/sbin/service %{name} stop > /dev/null 2>&1
-	/sbin/chkconfig --del %{name}
-fi
-%endif
 
 %build
-export GOPATH=$RPM_BUILD_DIR/%{name}-%{version}
-cd $RPM_BUILD_DIR/%{name}-%{version}/src/github.com/cgrates/cgrates
+# In the build phase, the CGRateS binaries are built
+export GOPATH=%{_builddir}/%{name}-%{version}
+cd %{_builddir}/%{name}-%{version}/src/github.com/cgrates/cgrates
 export PATH=$PATH:%{_builddir}/go/bin
 ./build.sh
 
 %install
-rm -rf $RPM_BUILD_ROOT
-mkdir -p $RPM_BUILD_ROOT%{_datarootdir}/%{name}
-cp -rpf src/github.com/cgrates/cgrates/data/conf/ $RPM_BUILD_ROOT%{_datarootdir}/%{name}
-cp -rpf src/github.com/cgrates/cgrates/data/diameter/ $RPM_BUILD_ROOT%{_datarootdir}/%{name}
-cp -rpf src/github.com/cgrates/cgrates/data/postman/ $RPM_BUILD_ROOT%{_datarootdir}/%{name}
-cp -rpf src/github.com/cgrates/cgrates/data/radius/ $RPM_BUILD_ROOT%{_datarootdir}/%{name}
-cp -rpf src/github.com/cgrates/cgrates/data/tariffplans/ $RPM_BUILD_ROOT%{_datarootdir}/%{name}
-cp -rpf src/github.com/cgrates/cgrates/data/tutorial_tests/ $RPM_BUILD_ROOT%{_datarootdir}/%{name}
-cp -rpf src/github.com/cgrates/cgrates/data/tutorials/ $RPM_BUILD_ROOT%{_datarootdir}/%{name}
-cp -rpf src/github.com/cgrates/cgrates/data/storage/mongo $RPM_BUILD_ROOT%{_datarootdir}/%{name}/storage
-cp -rpf src/github.com/cgrates/cgrates/data/storage/mysql $RPM_BUILD_ROOT%{_datarootdir}/%{name}/storage
-cp -rpf src/github.com/cgrates/cgrates/data/storage/postgres $RPM_BUILD_ROOT%{_datarootdir}/%{name}/storage
-install -D -m 0644 -p src/github.com/cgrates/cgrates/data/conf/%{name}/%{name}.json $RPM_BUILD_ROOT%{_sysconfdir}/%{name}/%{name}.json
-install -D -m 0755 -p bin/cgr-console $RPM_BUILD_ROOT%{_bindir}/cgr-console
-install -D -m 0755 -p bin/cgr-engine $RPM_BUILD_ROOT%{_bindir}/cgr-engine
-install -D -m 0755 -p bin/cgr-loader $RPM_BUILD_ROOT%{_bindir}/cgr-loader
-install -D -m 0755 -p bin/cgr-tester $RPM_BUILD_ROOT%{_bindir}/cgr-tester
-install -D -m 0755 -p bin/cgr-migrator $RPM_BUILD_ROOT%{_bindir}/cgr-migrator
-mkdir -p $RPM_BUILD_ROOT%{_logdir}/cdre/csv
-mkdir -p $RPM_BUILD_ROOT%{_logdir}/cdre/fwv
-mkdir -p $RPM_BUILD_ROOT%{_spooldir}/cdre/csv
-mkdir -p $RPM_BUILD_ROOT%{_spooldir}/cdre/fwv
-mkdir -p $RPM_BUILD_ROOT%{_spooldir}/tpe
-mkdir -p $RPM_BUILD_ROOT%{_spooldir}/failed_posts
-mkdir -p $RPM_BUILD_ROOT%{_spooldir}/analyzers
-mkdir -p $RPM_BUILD_ROOT%{_libdir}/cache_dump
-mkdir -p $RPM_BUILD_ROOT/etc/logrotate.d
-mkdir -p $RPM_BUILD_ROOT/etc/rsyslog.d
-install -m 755 src/github.com/cgrates/cgrates/data/conf/logging/logrotate.conf $RPM_BUILD_ROOT/etc/logrotate.d/%{name}
-install -m 755 src/github.com/cgrates/cgrates/data/conf/logging/rsyslog.conf $RPM_BUILD_ROOT/etc/rsyslog.d/%{name}.conf
-install -D -m 0644 -p src/github.com/cgrates/cgrates/packages/redhat_fedora/%{name}.options $RPM_BUILD_ROOT%{_sysconfdir}/sysconfig/%{name}
+# In the install phase, files are copied to buildroot
+rm -rf %{buildroot}
+mkdir -p %{buildroot}%{_datarootdir}/%{name}
+cp -rpf src/github.com/cgrates/cgrates/data/conf/ %{buildroot}%{_datarootdir}/%{name}
+cp -rpf src/github.com/cgrates/cgrates/data/diameter/ %{buildroot}%{_datarootdir}/%{name}
+cp -rpf src/github.com/cgrates/cgrates/data/postman/ %{buildroot}%{_datarootdir}/%{name}
+cp -rpf src/github.com/cgrates/cgrates/data/radius/ %{buildroot}%{_datarootdir}/%{name}
+cp -rpf src/github.com/cgrates/cgrates/data/tariffplans/ %{buildroot}%{_datarootdir}/%{name}
+cp -rpf src/github.com/cgrates/cgrates/data/tutorial_tests/ %{buildroot}%{_datarootdir}/%{name}
+cp -rpf src/github.com/cgrates/cgrates/data/tutorials/ %{buildroot}%{_datarootdir}/%{name}
+cp -rpf src/github.com/cgrates/cgrates/data/storage/mongo %{buildroot}%{_datarootdir}/%{name}/storage
+cp -rpf src/github.com/cgrates/cgrates/data/storage/mysql %{buildroot}%{_datarootdir}/%{name}/storage
+cp -rpf src/github.com/cgrates/cgrates/data/storage/postgres %{buildroot}%{_datarootdir}/%{name}/storage
+install -D -m 0644 -p src/github.com/cgrates/cgrates/data/conf/%{name}/%{name}.json %{buildroot}%{_sysconfdir}/%{name}/%{name}.json
+install -D -m 0755 -p bin/cgr-console %{buildroot}%{_bindir}/cgr-console
+install -D -m 0755 -p bin/cgr-engine %{buildroot}%{_bindir}/cgr-engine
+install -D -m 0755 -p bin/cgr-loader %{buildroot}%{_bindir}/cgr-loader
+install -D -m 0755 -p bin/cgr-tester %{buildroot}%{_bindir}/cgr-tester
+install -D -m 0755 -p bin/cgr-migrator %{buildroot}%{_bindir}/cgr-migrator
+mkdir -p %{buildroot}%{_logdir}/cdre/csv
+mkdir -p %{buildroot}%{_logdir}/cdre/fwv
+mkdir -p %{buildroot}%{_spooldir}/cdre/csv
+mkdir -p %{buildroot}%{_spooldir}/cdre/fwv
+mkdir -p %{buildroot}%{_spooldir}/tpe
+mkdir -p %{buildroot}%{_spooldir}/failed_posts
+mkdir -p %{buildroot}%{_libdir}/cache_dump
+mkdir -p %{buildroot}/etc/logrotate.d
+mkdir -p %{buildroot}/etc/rsyslog.d
+install -m 0644 src/github.com/cgrates/cgrates/data/conf/logging/logrotate.conf %{buildroot}/etc/logrotate.d/%{name}
+install -m 0644 src/github.com/cgrates/cgrates/data/conf/logging/rsyslog.conf %{buildroot}/etc/rsyslog.d/%{name}.conf
+install -D -m 0644 -p src/github.com/cgrates/cgrates/packages/redhat_fedora/%{name}.options %{buildroot}%{_sysconfdir}/sysconfig/%{name}
 %if 0%{?fedora} > 16 || 0%{?rhel} > 6
-	install -D -m 0644 -p src/github.com/cgrates/cgrates/packages/redhat_fedora/%{name}.service $RPM_BUILD_ROOT%{_unitdir}/%{name}.service
+    install -D -m 0644 -p src/github.com/cgrates/cgrates/packages/redhat_fedora/%{name}.service %{buildroot}%{_unitdir}/%{name}.service
 %else
-	install -D -m 0755 -p src/github.com/cgrates/cgrates/packages/redhat_fedora/%{name}.init $RPM_BUILD_ROOT%{_initrddir}/%{name}
+    install -D -m 0755 -p src/github.com/cgrates/cgrates/packages/redhat_fedora/%{name}.init %{buildroot}%{_initrddir}/%{name}
 %endif
+
+%post
+# After package installation, enable and start the service
+%systemd_post %{name}.service
+
+# Change the ownership of the directories to the created user
+/bin/chown -R %{name}:%{name} %{_logdir}
+/bin/chown -R %{name}:%{name} %{_spooldir}
+/bin/chown -R %{name}:%{name} %{_libdir}
+
+# Restart rsyslog to apply the /etc/rsyslog.d/cgrates.conf
+sudo systemctl restart rsyslog
+
+%preun
+# Before package removal, stop the service
+%systemd_preun %{name}.service
+
+%postun
+# After package removal, try to restart the service in case of an update
+%systemd_postun_with_restart %{name}.service
 
 %files
 %defattr(-,root,root,-)
@@ -130,12 +121,5 @@ install -D -m 0644 -p src/github.com/cgrates/cgrates/packages/redhat_fedora/%{na
 %{_sysconfdir}/sysconfig/%{name}
 /etc/logrotate.d/%{name}
 /etc/rsyslog.d/%{name}.conf
-%if 0%{?fedora} > 16 || 0%{?rhel} > 6
-	%{_unitdir}/%{name}.service
-%else
-	%{_initrddir}/%{name}
-%endif
-
-%clean
-sudo rm -rf $RPM_BUILD_DIR/%{name}-%{version}
-sudo rm -rf $RPM_BUILD_ROOT
+%{?_unitdir:%{_unitdir}/%{name}.service}
+%{!?_unitdir:%{_initrddir}/%{name}}
