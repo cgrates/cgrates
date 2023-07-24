@@ -3266,7 +3266,12 @@ func TestEventCostfieldAsInterface(t *testing.T) {
 
 func TestEventCostgetChargesForPath(t *testing.T) {
 	ec := EventCost{}
-	chr := ChargingInterval{}
+	chr := ChargingInterval{
+		CompressFactor: 1,
+		Increments: []*ChargingIncrement{
+			{CompressFactor: 1},
+		},
+	}
 
 	tests := []struct {
 		name string
@@ -3283,11 +3288,62 @@ func TestEventCostgetChargesForPath(t *testing.T) {
 			err:  "NOT_FOUND",
 		},
 		{
-			name: "nil charging interval",
+			name: "empty field path",
 			fl:   []string{},
 			chr:  &chr,
 			exp:  &chr,
 			err:  "",
+		},
+		{
+			name: "compress factor with second non existing field",
+			fl:   []string{"CompressFactor", "test"},
+			chr:  &chr,
+			exp:  nil,
+			err:  "NOT_FOUND",
+		},
+		{
+			name: "compress factor case",
+			fl:   []string{"CompressFactor"},
+			chr:  &chr,
+			exp:  1,
+			err:  "",
+		},
+		{
+			name: "index on non existing fiels",
+			fl:   []string{"test[0]"},
+			chr:  &chr,
+			exp:  nil,
+			err:  "unsupported field prefix: <test>",
+		},
+		{
+			name: "increments case with index",
+			fl:   []string{"Increments[0]"},
+			chr:  &chr,
+			exp:  &ChargingIncrement{CompressFactor: 1},
+			err:  "",
+		},
+		{
+			name: "increments case no index",
+			fl:   []string{"Increments"},
+			chr:  &chr,
+			exp: []*ChargingIncrement{
+				{CompressFactor: 1},
+			},
+			err: "",
+		},
+		{
+			name: "index is nill",
+			fl:   []string{"Increments", "test"},
+			chr:  &chr,
+			exp:  nil,
+			err:  "NOT_FOUND",
+		},
+		{
+			name: "extrafield in increments",
+			fl:   []string{"Increments[0]", "CompressFactor"},
+			chr:  &chr,
+			exp:  nil,
+			err:  "NOT_FOUND",
 		},
 	}
 
@@ -3305,5 +3361,320 @@ func TestEventCostgetChargesForPath(t *testing.T) {
 				t.Errorf("expected %v, received %v", tt.exp, rcv)
 			}
 		})
+	}
+}
+
+func TestEventCostgetRatingForPath(t *testing.T) {
+	tm := 1 * time.Second
+	r := RatingUnit{
+		RatesID: "1",
+	}
+	r2 := RatingUnit{
+		RatesID:         "2",
+		TimingID:        "timingID",
+		RatingFiltersID: "rf",
+	}
+	ec := EventCost{
+		Rates: ChargedRates{
+			"2": {{
+				GroupIntervalStart: tm,
+				Value:              1.2,
+				RateIncrement:      tm,
+				RateUnit:           tm,
+			}},
+		},
+		Timings: ChargedTimings{
+			"timingID": {StartTime: "00:00:00"},
+		},
+		RatingFilters: RatingFilters{
+			"rf": {"test": 1},
+		},
+	}
+
+	tests := []struct {
+		name    string
+		fldPath []string
+		rating  *RatingUnit
+		exp     any
+		err     string
+	}{
+		{
+			name:    "nil rating",
+			fldPath: []string{},
+			rating:  nil,
+			exp:     nil,
+			err:     "NOT_FOUND",
+		},
+		{
+			name:    "empty fldPath",
+			fldPath: []string{},
+			rating:  &r,
+			exp:     &r,
+			err:     "",
+		},
+		{
+			name:    "non exisitng field with index",
+			fldPath: []string{"test[0]"},
+			rating:  &r,
+			exp:     nil,
+			err:     "unsupported field prefix: <test>",
+		},
+		{
+			name:    "rating not found in event cost",
+			fldPath: []string{"Rates[0]"},
+			rating:  &r,
+			exp:     nil,
+			err:     "NOT_FOUND",
+		},
+		{
+			name:    "rating found",
+			fldPath: []string{"Rates[0]"},
+			rating:  &r2,
+			exp: &Rate{
+				GroupIntervalStart: tm,
+				Value:              1.2,
+				RateIncrement:      tm,
+				RateUnit:           tm,
+			},
+			err: "",
+		},
+		{
+			name:    "rates case not found in event cost",
+			fldPath: []string{"Rates"},
+			rating:  &r,
+			exp:     nil,
+			err:     "NOT_FOUND",
+		},
+		{
+			name:    "rates case field path length diff from 1",
+			fldPath: []string{"Rates", "test"},
+			rating:  &r2,
+			exp:     nil,
+			err:     "NOT_FOUND",
+		},
+		{
+			name:    "rates case found",
+			fldPath: []string{"Rates"},
+			rating:  &r2,
+			exp: RateGroups{{
+				GroupIntervalStart: tm,
+				Value:              1.2,
+				RateIncrement:      tm,
+				RateUnit:           tm,
+			}},
+			err: "",
+		},
+		{
+			name:    "Timing case not found in event cost",
+			fldPath: []string{"Timing"},
+			rating:  &r,
+			exp:     nil,
+			err:     "NOT_FOUND",
+		},
+		{
+			name:    "Timing case field path length is 1",
+			fldPath: []string{"Timing"},
+			rating:  &r2,
+			exp:     &ChargedTiming{StartTime: "00:00:00"},
+			err:     "",
+		},
+		{
+			name:    "Timing case extrafield found",
+			fldPath: []string{"Timing", "StartTime"},
+			rating:  &r2,
+			exp:     "00:00:00",
+			err:     "",
+		},
+		{
+			name:    "RatingFilter case not found in event cost",
+			fldPath: []string{"RatingFilter"},
+			rating:  &r,
+			exp:     nil,
+			err:     "NOT_FOUND",
+		},
+		{
+			name:    "RatingFilter case field path length is 1",
+			fldPath: []string{"RatingFilter"},
+			rating:  &r2,
+			exp:     RatingMatchedFilters{"test": 1},
+			err:     "",
+		},
+		{
+			name:    "RatingFilter case extrafield found",
+			fldPath: []string{"RatingFilter", "test"},
+			rating:  &r2,
+			exp:     1,
+			err:     "",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			rcv, err := ec.getRatingForPath(tt.fldPath, tt.rating)
+
+			if err != nil {
+				if err.Error() != tt.err {
+					t.Error(err)
+				}
+			}
+
+			if !reflect.DeepEqual(rcv, tt.exp) {
+				t.Errorf("expected %v, received %v", tt.exp, rcv)
+			}
+		})
+	}
+}
+
+func TestEventCostgetAcountingForPath(t *testing.T) {
+	ec := EventCost{
+		AccountSummary: &AccountSummary{
+			BalanceSummaries: BalanceSummaries{{
+				UUID: "bl2",
+			}},
+		},
+	}
+	bc := BalanceCharge{
+		BalanceUUID: "bl",
+	}
+	bc2 := BalanceCharge{
+		BalanceUUID: "bl2",
+	}
+
+	tests := []struct {
+		name    string
+		fldPath []string
+		bc      *BalanceCharge
+		exp     any
+		err     string
+	}{
+		{
+			name:    "nil balance charge",
+			fldPath: []string{},
+			bc:      nil,
+			exp:     nil,
+			err:     "NOT_FOUND",
+		},
+		{
+			name:    "empty fldPath",
+			fldPath: []string{},
+			bc:      &bc,
+			exp:     &bc,
+			err:     "NOT_FOUND",
+		},
+		{
+			name:    "balance not found in event cost",
+			fldPath: []string{"Balance"},
+			bc:      &bc,
+			exp:     nil,
+			err:     "NOT_FOUND",
+		},
+		{
+			name:    "balance not found in event cost",
+			fldPath: []string{"Balance"},
+			bc:      &bc2,
+			exp: &BalanceSummary{
+				UUID: "bl2",
+			},
+			err: "",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			rcv, err := ec.getAcountingForPath(tt.fldPath, tt.bc)
+
+			if err != nil {
+				if err.Error() != tt.err {
+					t.Error(err)
+				}
+			}
+
+			if !reflect.DeepEqual(rcv, tt.exp) {
+				t.Errorf("expected %v, received %v", tt.exp, rcv)
+			}
+		})
+	}
+}
+
+func TestEventCostString(t *testing.T) {
+	tm := 1 * time.Second
+	fl := 1.2
+	e := EventCost{
+		CGRID:          "test",
+		RunID:          "test",
+		StartTime:      time.Date(2021, 8, 15, 14, 30, 45, 100, time.Local),
+		Usage:          &tm,
+		Cost:           &fl,
+		Charges:        []*ChargingInterval{},
+		AccountSummary: &AccountSummary{},
+		Rating:         Rating{},
+		Accounting:     Accounting{},
+		RatingFilters:  RatingFilters{},
+		Rates:          ChargedRates{},
+		Timings:        ChargedTimings{},
+	}
+
+	rcv := e.String()
+
+	if rcv != `{"CGRID":"test","RunID":"test","StartTime":"2021-08-15T14:30:45.0000001+02:00","Usage":1000000000,"Cost":1.2,"Charges":[],"AccountSummary":{"Tenant":"","ID":"","BalanceSummaries":null,"AllowNegative":false,"Disabled":false},"Rating":{},"Accounting":{},"RatingFilters":{},"Rates":{},"Timings":{}}` {
+		t.Error(rcv)
+	}
+}
+
+func TestEventCostFieldAsString(t *testing.T) {
+	e := EventCost{
+		RunID: "test",
+		cache: utils.MapStorage{},
+	}
+
+	rcv, err := e.FieldAsString([]string{"RunID"})
+	if err != nil {
+		if err.Error() != "err" {
+			t.Error(err)
+		}
+	}
+
+	if rcv != "test" {
+		t.Error(rcv)
+	}
+
+	rcv, err = e.FieldAsString([]string{"test"})
+	if err != nil {
+		if err.Error() != "unsupported field prefix: <test>" {
+			t.Error(err)
+		}
+	}
+
+	if rcv != "" {
+		t.Error(rcv)
+	}
+}
+
+func TestEventCostRemoteHost(t *testing.T) {
+	ec := EventCost{}
+
+	rcv := ec.RemoteHost()
+
+	if rcv.String() != "local" {
+		t.Error(rcv.String())
+	}
+}
+
+func TestEventCostnewChargingIncrement(t *testing.T) {
+	e := EventCost{}
+
+	rcv := e.newChargingIncrement(&Increment{
+		Duration: 1 * time.Second,
+		Cost: 1, 
+		CompressFactor: 1,
+	}, RatingMatchedFilters{}, false)
+	exp := &ChargingIncrement{
+		Usage: 1 * time.Second,
+		Cost: 1, 
+		CompressFactor: 1,
+	}
+
+	if !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("expected %v, received %v", exp, rcv)
 	}
 }
