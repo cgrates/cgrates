@@ -534,3 +534,17 @@ func TestFsCdrFirstDefined(t *testing.T) {
 		t.Errorf("Expecting: 1001, received: %s", value)
 	}
 }
+
+func TestFSCdrNewFSCdr(t *testing.T) {
+	rcv, err := NewFSCdr([]byte{}, nil)
+
+	if err != nil {
+		if err.Error() != "unexpected end of JSON input" {
+			t.Error(err)
+		}
+	}
+
+	if rcv != nil {
+		t.Error(rcv)
+	}
+}

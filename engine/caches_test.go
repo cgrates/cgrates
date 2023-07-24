@@ -451,3 +451,59 @@ func TestCachetoStringSlice(t *testing.T) {
 		t.Error(slc)
 	}
 }
+
+func TestCacheSV1ReloadCacheErrors(t *testing.T) {
+	str := "test"
+	type args struct {
+		attrs utils.AttrReloadCacheWithArgDispatcher
+		reply *string
+	}
+
+	chS := CacheS{
+		cfg: &config.CGRConfig{},
+		dm: &DataManager{
+			cacheCfg: config.CacheCfg{},
+		},
+	}
+
+	tests := []struct {
+		name string
+		args args
+		err  string
+	}{
+		{
+			name: "FlushAll",
+			args: args{attrs: utils.AttrReloadCacheWithArgDispatcher{
+				&utils.ArgDispatcher{},
+				utils.TenantArg{},
+				utils.AttrReloadCache{
+					FlushAll: true,
+				},
+			}, reply: &str},
+			err: "",
+		},
+		{
+			name: "REload destination error",
+			args: args{attrs: utils.AttrReloadCacheWithArgDispatcher{
+				&utils.ArgDispatcher{},
+				utils.TenantArg{},
+				utils.AttrReloadCache{
+					FlushAll: true,
+				},
+			}, reply: &str},
+			err: "err",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			err := chS.V1ReloadCache(tt.args.attrs, tt.args.reply)
+
+			if err != nil {
+				if err.Error() != tt.err {
+					t.Error(err)
+				}
+			}
+		})
+	}
+}
