@@ -267,3 +267,16 @@ func TestDispatcherprflClone(t *testing.T) {
 		t.Errorf("expected %v, received %v", dC, rcv)
 	}
 }
+
+func TestDispatcherprflCall(t *testing.T) {
+	dH := DispatcherHost{}
+
+	err := dH.Call("test", 1, 1)
+	if err != nil {
+		t.Error(err)
+	}
+
+	if dH.rpcConn == nil {
+		t.Error(dH.Tenant)
+	}
+}

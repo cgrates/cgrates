@@ -3664,13 +3664,13 @@ func TestEventCostnewChargingIncrement(t *testing.T) {
 	e := EventCost{}
 
 	rcv := e.newChargingIncrement(&Increment{
-		Duration: 1 * time.Second,
-		Cost: 1, 
+		Duration:       1 * time.Second,
+		Cost:           1,
 		CompressFactor: 1,
 	}, RatingMatchedFilters{}, false)
 	exp := &ChargingIncrement{
-		Usage: 1 * time.Second,
-		Cost: 1, 
+		Usage:          1 * time.Second,
+		Cost:           1,
 		CompressFactor: 1,
 	}
 

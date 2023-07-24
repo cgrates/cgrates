@@ -867,3 +867,88 @@ func TestThSProcessEventMaxHits(t *testing.T) {
 		t.Error(err)
 	}
 }
+
+func TestThresholdsProcessEvent3(t *testing.T) {
+	to := Threshold{
+		Snooze: time.Date(
+			2024, 11, 17, 20, 34, 58, 651387237, time.UTC),
+	}
+
+	err := to.ProcessEvent(nil, nil)
+
+	if err != nil {
+		t.Error(err)
+	}
+
+	to2 := Threshold{
+		Hits: 1,
+		tPrfl: &ThresholdProfile{
+			MinHits: 2,
+		},
+	}
+
+	err = to2.ProcessEvent(nil, nil)
+
+	if err != nil {
+		t.Error(err)
+	}
+
+	to3 := Threshold{
+		Hits: 2,
+		tPrfl: &ThresholdProfile{
+			MinHits: 2,
+			MaxHits: 1,
+		},
+	}
+
+	err = to3.ProcessEvent(nil, nil)
+
+	if err != nil {
+		t.Error(err)
+	}
+}
+
+func TestThresholdsStoreThreshold(t *testing.T) {
+	ts := ThresholdService{}
+
+	err := ts.StoreThreshold(&Threshold{})
+
+	if err != nil {
+		t.Error(err)
+	}
+}
+
+func TestThresholdsV1GetThresholdsForEvent(t *testing.T) {
+	tS := ThresholdService{}
+
+	err := tS.V1GetThresholdsForEvent(&ArgsProcessEvent{}, &Thresholds{})
+
+	if err != nil {
+		if err.Error() != "MANDATORY_IE_MISSING: [CGREvent]" {
+			t.Error(err)
+		}
+	}
+
+	err = tS.V1GetThresholdsForEvent(&ArgsProcessEvent{
+		CGREvent: &utils.CGREvent{},
+	}, &Thresholds{})
+
+	if err != nil {
+		if err.Error() != "MANDATORY_IE_MISSING: [Tenant ID]" {
+			t.Error(err)
+		}
+	}
+
+	err = tS.V1GetThresholdsForEvent(&ArgsProcessEvent{
+		CGREvent: &utils.CGREvent{
+			Tenant: "test",
+			ID:     "test",
+		},
+	}, &Thresholds{})
+
+	if err != nil {
+		if err.Error() != "MANDATORY_IE_MISSING: [Event]" {
+			t.Error(err)
+		}
+	}
+}

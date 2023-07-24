@@ -2992,3 +2992,151 @@ func TestFilterspassEqualTo(t *testing.T) {
 		t.Error("Recived:", rcv)
 	}
 }
+
+func TestFiltersNewFilterRule(t *testing.T) {
+	_, err := NewFilterRule("*rsr", "test", []string{"test)"})
+
+	if err != nil {
+		if err.Error() != "invalid RSRFilter start rule in string: <test)>" {
+			t.Error(err)
+		}
+	}
+}
+
+func TestFiltersgetFieldNameDataProvider(t *testing.T) {
+	fS := FilterS{}
+
+	type args struct {
+		initialDP utils.DataProvider
+		fieldName string
+		tenant    string
+	}
+
+	tests := []struct {
+		name string
+		args args
+		exp  utils.DataProvider
+		err  string
+	}{
+		{
+			name: "",
+			args: args{
+				initialDP: utils.MapStorage{},
+				fieldName: "~*accounts",
+				tenant:    "test",
+			},
+			exp: nil,
+			err: "invalid fieldname <~*accounts>",
+		},
+		{
+			name: "",
+			args: args{
+				initialDP: utils.MapStorage{},
+				fieldName: "~*resources",
+				tenant:    "test",
+			},
+			exp: nil,
+			err: "invalid fieldname <~*resources>",
+		},
+		{
+			name: "",
+			args: args{
+				initialDP: utils.MapStorage{},
+				fieldName: "~*stats",
+				tenant:    "test",
+			},
+			exp: nil,
+			err: "invalid fieldname <~*stats>",
+		},
+		{
+			name: "",
+			args: args{
+				initialDP: utils.MapStorage{},
+				fieldName: "test",
+				tenant:    "test",
+			},
+			exp: nil,
+			err: "filter path: <test> doesn't have a valid prefix",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			rcv, err := fS.getFieldNameDataProvider(tt.args.initialDP, tt.args.fieldName, tt.args.tenant)
+
+			if err != nil {
+				if err.Error() != tt.err {
+					t.Error(err)
+				}
+			}
+
+			if !reflect.DeepEqual(rcv, tt.exp) {
+				t.Errorf("expected %v, received %v", tt.exp, rcv)
+			}
+		})
+	}
+}
+
+func TestFiltersgetFieldValueDataProvider(t *testing.T) {
+	fS := FilterS{}
+
+	type args struct {
+		initialDP utils.DataProvider
+		fieldName string
+		tenant    string
+	}
+
+	tests := []struct {
+		name string
+		args args
+		exp  utils.DataProvider
+		err  string
+	}{
+		{
+			name: "",
+			args: args{
+				initialDP: utils.MapStorage{},
+				fieldName: "~*accounts",
+				tenant:    "test",
+			},
+			exp: nil,
+			err: "invalid fieldname <~*accounts>",
+		},
+		{
+			name: "",
+			args: args{
+				initialDP: utils.MapStorage{},
+				fieldName: "~*resources",
+				tenant:    "test",
+			},
+			exp: nil,
+			err: "invalid fieldname <~*resources>",
+		},
+		{
+			name: "",
+			args: args{
+				initialDP: utils.MapStorage{},
+				fieldName: "~*stats",
+				tenant:    "test",
+			},
+			exp: nil,
+			err: "invalid fieldname <~*stats>",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			rcv, err := fS.getFieldValueDataProvider(tt.args.initialDP, tt.args.fieldName, tt.args.tenant)
+
+			if err != nil {
+				if err.Error() != tt.err {
+					t.Error(err)
+				}
+			}
+
+			if !reflect.DeepEqual(rcv, tt.exp) {
+				t.Errorf("expected %v, received %v", tt.exp, rcv)
+			}
+		})
+	}
+}
