@@ -454,16 +454,19 @@ func TestCachetoStringSlice(t *testing.T) {
 
 func TestCacheSV1ReloadCacheErrors(t *testing.T) {
 	str := "test"
+	slc := []string{str}
 	type args struct {
 		attrs utils.AttrReloadCacheWithArgDispatcher
 		reply *string
 	}
 
+	cfg, _ := config.NewDefaultCGRConfig()
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+
 	chS := CacheS{
 		cfg: &config.CGRConfig{},
-		dm: &DataManager{
-			cacheCfg: config.CacheCfg{},
-		},
+		dm:  dm,
 	}
 
 	tests := []struct {
@@ -483,12 +486,36 @@ func TestCacheSV1ReloadCacheErrors(t *testing.T) {
 			err: "",
 		},
 		{
-			name: "REload destination error",
+			name: "Reload destination error",
 			args: args{attrs: utils.AttrReloadCacheWithArgDispatcher{
 				&utils.ArgDispatcher{},
 				utils.TenantArg{},
 				utils.AttrReloadCache{
-					FlushAll: true,
+					utils.ArgsCache{
+						DestinationIDs:        slc,
+						ReverseDestinationIDs: slc,
+						RatingPlanIDs:         slc,
+						RatingProfileIDs:      slc,
+						ActionIDs:             slc,
+						ActionPlanIDs:         slc,
+						AccountActionPlanIDs:  slc,
+						ActionTriggerIDs:      slc,
+						SharedGroupIDs:        slc,
+						ResourceProfileIDs:    slc,
+						ResourceIDs:           slc,
+						StatsQueueIDs:         slc,
+						StatsQueueProfileIDs:  slc,
+						ThresholdIDs:          slc,
+						ThresholdProfileIDs:   slc,
+						FilterIDs:             slc,
+						SupplierProfileIDs:    slc,
+						AttributeProfileIDs:   slc,
+						ChargerProfileIDs:     slc,
+						DispatcherProfileIDs:  slc,
+						DispatcherHostIDs:     slc,
+						DispatcherRoutesIDs:   slc,
+					},
+					false,
 				},
 			}, reply: &str},
 			err: "err",
@@ -505,5 +532,53 @@ func TestCacheSV1ReloadCacheErrors(t *testing.T) {
 				}
 			}
 		})
+	}
+}
+
+func TestCacheSV1LoadCache(t *testing.T) {
+	str := "test"
+	cfg, _ := config.NewDefaultCGRConfig()
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+
+	chS := CacheS{
+		cfg: &config.CGRConfig{},
+		dm:  dm,
+	}
+
+	err := chS.V1LoadCache(utils.AttrReloadCacheWithArgDispatcher{
+		&utils.ArgDispatcher{},
+		utils.TenantArg{},
+		utils.AttrReloadCache{
+			FlushAll: true,
+		},
+	}, &str)
+
+	if err != nil {
+		t.Error(err)
+	}
+}
+
+func TestCacheSV1FlushCacheFlushAll(t *testing.T) {
+	str := "test"
+	cfg, _ := config.NewDefaultCGRConfig()
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+
+	chS := CacheS{
+		cfg: &config.CGRConfig{},
+		dm:  dm,
+	}
+
+	err := chS.V1FlushCache(utils.AttrReloadCacheWithArgDispatcher{
+		&utils.ArgDispatcher{},
+		utils.TenantArg{},
+		utils.AttrReloadCache{
+			FlushAll: true,
+		},
+	}, &str)
+
+	if err != nil {
+		t.Error(err)
 	}
 }
