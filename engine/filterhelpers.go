@@ -19,6 +19,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"bytes"
+	"encoding/json"
+	"fmt"
+	"io"
+	"net/http"
+	"net/url"
+
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/guardian"
@@ -136,4 +143,125 @@ func BlockerFromDynamics(ctx *context.Context, dBs []*utils.DynamicBlocker,
 		}
 	}
 	return false, nil
+}
+
+func GetSentryPeer(ctx *context.Context, val string, sentryPeerCfg *config.SentryPeerCfg, dataType string) (found bool, err error) {
+	itemId := utils.ConcatenatedKey(dataType, val)
+	var (
+		isCached bool
+		apiUrl   string
+		token    string
+	)
+	if x, ok := Cache.Get(utils.MetaSentryPeer, itemId); ok && x != nil { // Attempt to find in cache first
+		return x.(bool), nil
+	}
+	var cachedToken any
+	if cachedToken, isCached = Cache.Get(utils.MetaSentryPeer,
+		utils.MetaToken); isCached && cachedToken != nil {
+		token = cachedToken.(string)
+	}
+	switch dataType {
+	case utils.MetaIp:
+		apiUrl, err = url.JoinPath(sentryPeerCfg.IpsUrl, val)
+	case utils.MetaNumber:
+		apiUrl, err = url.JoinPath(sentryPeerCfg.NumbersUrl, val)
+	}
+	if err != nil {
+		return
+	}
+	if !isCached {
+		if token, err = sentrypeerGetToken(sentryPeerCfg.TokenUrl, sentryPeerCfg.ClientID, sentryPeerCfg.ClientSecret,
+			sentryPeerCfg.Audience, sentryPeerCfg.GrantType); err != nil {
+			utils.Logger.Err(fmt.Sprintf("sentrypeer token auth got err <%v> ", err.Error()))
+			return
+		}
+		if err = Cache.Set(ctx, utils.MetaSentryPeer, utils.MetaToken,
+			token, nil, true, utils.NonTransactional); err != nil {
+			return
+		}
+	}
+
+	for i := 0; i < 2; i++ {
+		if found, err = sentrypeerHasData(itemId, token, apiUrl); err == nil {
+			if err = Cache.Set(ctx, utils.MetaSentryPeer, itemId, found,
+				nil, true, ""); err != nil {
+				return
+			}
+			break
+		} else if err != utils.ErrNotAuthorized {
+			utils.Logger.Err(err.Error())
+			break
+		}
+		utils.Logger.Warning("Sentrypeer token expired !Getting new one.")
+		Cache.Remove(ctx, utils.MetaSentryPeer, utils.MetaToken, true, utils.EmptyString)
+		if token, err = sentrypeerGetToken(sentryPeerCfg.TokenUrl, sentryPeerCfg.ClientID, sentryPeerCfg.ClientSecret,
+			sentryPeerCfg.Audience, sentryPeerCfg.GrantType); err != nil {
+			return
+		}
+		if err = Cache.Set(ctx, utils.MetaSentryPeer, utils.MetaToken, token,
+			nil, true, utils.NonTransactional); err != nil {
+			return
+		}
+	}
+	return
+}
+
+// Returns a new token from sentrypeer api
+func sentrypeerGetToken(tokenUrl, clientID, clientSecret, audience, grantType string) (token string, err error) {
+	var resp *http.Response
+	payload := map[string]string{
+		utils.ClientIDCfg:     clientID,
+		utils.ClientSecretCfg: clientSecret,
+		utils.AudienceCfg:     audience,
+		utils.GrantTypeCfg:    grantType,
+	}
+	jsonPayload, _ := json.Marshal(payload)
+	resp, err = getHTTP(http.MethodPost, tokenUrl, bytes.NewBuffer(jsonPayload), map[string][]string{"Content-Type": {"application/json"}})
+	if err != nil {
+		return
+	}
+	defer resp.Body.Close()
+	var m struct {
+		AccessToken string `json:"access_token"`
+	}
+	err = json.NewDecoder(resp.Body).Decode(&m)
+	if err != nil {
+		return
+	}
+	token = m.AccessToken
+	return
+}
+
+// sentrypeerHasData return a boolean based on query response on finding ip/number
+func sentrypeerHasData(itemId, token, url string) (found bool, err error) {
+	var resp *http.Response
+	resp, err = getHTTP(http.MethodGet, url, nil, map[string][]string{"Authorization": {fmt.Sprintf("Bearer %s", token)}})
+	if err != nil {
+		return
+	}
+	defer resp.Body.Close()
+	switch {
+	case resp.StatusCode == http.StatusUnauthorized || resp.StatusCode == http.StatusForbidden:
+		return false, utils.ErrNotAuthorized
+	case resp.StatusCode >= http.StatusOK && resp.StatusCode < http.StatusMultipleChoices:
+		return false, nil
+	case resp.StatusCode == http.StatusNotFound:
+		return true, nil
+	case resp.StatusCode >= http.StatusBadRequest && resp.StatusCode < http.StatusInternalServerError:
+		err = fmt.Errorf("sentrypeer api got client err <%v>", resp.Status)
+	case resp.StatusCode >= http.StatusInternalServerError:
+		err = fmt.Errorf("sentrypeer api got server err <%s>", resp.Status)
+	default:
+		err = fmt.Errorf("sentrypeer api got unexpected err <%s>", resp.Status)
+	}
+	return false, err
+}
+
+func getHTTP(method, url string, payload io.Reader, headers map[string][]string) (resp *http.Response, err error) {
+	var req *http.Request
+	if req, err = http.NewRequest(method, url, payload); err != nil {
+		return
+	}
+	req.Header = headers
+	return http.DefaultClient.Do(req)
 }

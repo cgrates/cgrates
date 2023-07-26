@@ -65,6 +65,7 @@ var (
 	ErrNotConnected                  = errors.New("NOT_CONNECTED")
 	DispatcherErrorPrefix            = "DISPATCHER_ERROR"
 	RateSErrPrfx                     = "RATES_ERROR"
+	ErrNotAuthorized                 = errors.New("NOT_AUTHORIZED")
 	AccountSErrPrfx                  = "ACCOUNTS_ERROR"
 	ErrLoggerChanged                 = errors.New("LOGGER_CHANGED")
 	ErrUnsupportedFormat             = errors.New("UNSUPPORTED_FORMAT")

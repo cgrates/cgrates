@@ -69,6 +69,7 @@ const (
 	TemplatesJSON       = "templates"
 	ConfigSJSON         = "configs"
 	APIBanJSON          = "apiban"
+	SentryPeerJSON      = "sentrypeer"
 	CoreSJSON           = "cores"
 	AccountSJSON        = "accounts"
 	ConfigDBJSON        = "config_db"
@@ -197,6 +198,7 @@ func newSections(cfg *CGRConfig) Sections {
 		cfg.coreSCfg,
 		cfg.configSCfg,
 		cfg.apiBanCfg,
+		cfg.sentryPeerCfg,
 		cfg.configDBCfg,
 		cfg.sureTaxCfg,
 		cfg.tpeSCfg,

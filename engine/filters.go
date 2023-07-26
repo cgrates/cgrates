@@ -226,18 +226,18 @@ var supportedFiltersType utils.StringSet = utils.NewStringSet([]string{
 	utils.MetaCronExp, utils.MetaRSR, utils.MetaEmpty,
 	utils.MetaExists, utils.MetaLessThan, utils.MetaLessOrEqual,
 	utils.MetaGreaterThan, utils.MetaGreaterOrEqual, utils.MetaEqual,
-	utils.MetaIPNet, utils.MetaAPIBan, utils.MetaActivationInterval,
+	utils.MetaIPNet, utils.MetaAPIBan, utils.MetaSentryPeer, utils.MetaActivationInterval,
 	utils.MetaRegex, utils.MetaNever})
 var needsFieldName utils.StringSet = utils.NewStringSet([]string{
 	utils.MetaString, utils.MetaPrefix, utils.MetaSuffix,
 	utils.MetaCronExp, utils.MetaRSR, utils.MetaLessThan,
 	utils.MetaEmpty, utils.MetaExists, utils.MetaLessOrEqual, utils.MetaGreaterThan,
-	utils.MetaGreaterOrEqual, utils.MetaEqual, utils.MetaIPNet, utils.MetaAPIBan,
+	utils.MetaGreaterOrEqual, utils.MetaEqual, utils.MetaIPNet, utils.MetaAPIBan, utils.MetaSentryPeer,
 	utils.MetaActivationInterval, utils.MetaRegex})
 var needsValues utils.StringSet = utils.NewStringSet([]string{
 	utils.MetaString, utils.MetaPrefix, utils.MetaSuffix, utils.MetaCronExp, utils.MetaRSR,
 	utils.MetaLessThan, utils.MetaLessOrEqual, utils.MetaGreaterThan, utils.MetaGreaterOrEqual,
-	utils.MetaEqual, utils.MetaIPNet, utils.MetaAPIBan, utils.MetaActivationInterval,
+	utils.MetaEqual, utils.MetaIPNet, utils.MetaAPIBan, utils.MetaSentryPeer, utils.MetaActivationInterval,
 	utils.MetaRegex})
 
 // NewFilterRule returns a new filter
@@ -365,6 +365,8 @@ func (fltr *FilterRule) Pass(ctx *context.Context, dDP utils.DataProvider) (resu
 		result, err = fltr.passIPNet(dDP)
 	case utils.MetaAPIBan, utils.MetaNotAPIBan:
 		result, err = fltr.passAPIBan(ctx, dDP)
+	case utils.MetaSentryPeer, utils.MetaNotSentryPeer:
+		result, err = fltr.passSentryPeer(ctx, dDP)
 	case utils.MetaActivationInterval, utils.MetaNotActivationInterval:
 		result, err = fltr.passActivationInterval(dDP)
 	case utils.MetaRegex, utils.MetaNotRegex:
@@ -625,6 +627,20 @@ func (fltr *FilterRule) passAPIBan(ctx *context.Context, dDP utils.DataProvider)
 		return false, fmt.Errorf("invalid value for apiban filter: <%s>", fltr.Values[0])
 	}
 	return GetAPIBan(ctx, strVal, config.CgrConfig().APIBanCfg().Keys, fltr.Values[0] != utils.MetaAll, true, true)
+}
+
+func (fltr *FilterRule) passSentryPeer(ctx *context.Context, dDP utils.DataProvider) (bool, error) {
+	strVal, err := fltr.rsrElement.ParseDataProvider(dDP)
+	if err != nil {
+		if err == utils.ErrNotFound {
+			return false, nil
+		}
+		return false, err
+	}
+	if fltr.Values[0] != utils.MetaNumber && fltr.Values[0] != utils.MetaIp {
+		return false, fmt.Errorf("invalid value for sentrypeer filter: <%s>", fltr.Values[0])
+	}
+	return GetSentryPeer(ctx, strVal, config.CgrConfig().SentryPeerCfg(), fltr.Values[0])
 }
 
 func parseTime(rsr *config.RSRParser, dDp utils.DataProvider) (_ time.Time, err error) {
