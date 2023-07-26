@@ -2330,3 +2330,13 @@ func TestDMSetActionPlanRpl(t *testing.T) {
 		})
 	}
 }
+
+func TestDataManager(t *testing.T) {
+	var dm *DataManager
+
+	rcv := dm.DataDB()
+
+	if rcv != nil {
+		t.Error(rcv)
+	}
+}

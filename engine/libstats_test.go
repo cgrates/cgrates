@@ -18,7 +18,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"fmt"
 	"reflect"
+	"sync"
 	"testing"
 	"time"
 
@@ -690,5 +692,289 @@ func TestStatRemoveExpiredQueue(t *testing.T) {
 	if len(sq.SQItems) != 2 && sq.SQItems[0].EventID != "TestStatAddStatEvent_2" &&
 		sq.SQItems[1].EventID != "TestStatAddStatEvent_3" {
 		t.Errorf("Expecting: 2, received: %+v", len(sq.SQItems))
+	}
+}
+
+var str string = "test"
+var slc []string = []string{str}
+var nm int = 1
+var n int64 = 1
+var fl float64 = 1.2
+var tm time.Time = time.Date(2021, 8, 15, 14, 30, 45, 100, time.Local)
+
+type jsonErr struct{}
+
+func (je *jsonErr) Marshal(v any) ([]byte, error) {
+	return nil, fmt.Errorf("error test")
+}
+
+func (je *jsonErr) Unmarshal(data []byte, v any) error {
+	return fmt.Errorf("error test")
+}
+
+func TestLibStatsNewStoredStatQueue(t *testing.T) {
+	si := []SQItem{{
+		EventID:    str,
+		ExpiryTime: &tm,
+	}}
+	msw := map[string]*StatWithCompress{"test": {
+		Stat:           fl,
+		CompressFactor: nm,
+	}}
+	st := StatASR{
+		FilterIDs: slc,
+		Answered:  fl,
+		Count:     n,
+		Events:    msw,
+		MinItems:  nm,
+		val:       &fl,
+	}
+	msm := map[string]StatMetric{"test": &st}
+
+	sq := StatQueue{
+		Tenant:    str,
+		ID:        str,
+		SQItems:   si,
+		SQMetrics: msm,
+		MinItems:  nm,
+	}
+
+	ms := JSONMarshaler{}
+
+	rcv, err := NewStoredStatQueue(&sq, &ms)
+
+	mrsh, errM := st.Marshal(&ms)
+	if errM != nil {
+		t.Error(errM)
+	}
+	exp := &StoredStatQueue{
+		Tenant:     str,
+		ID:         str,
+		SQItems:    si,
+		SQMetrics:  map[string][]byte{"test": mrsh},
+		MinItems:   nm,
+		Compressed: false,
+	}
+
+	if err != nil {
+		t.Error(err)
+	}
+
+	if !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("expected %s, received %s", utils.ToJSON(exp), utils.ToJSON(rcv))
+	}
+
+	me := jsonErr{}
+
+	rcv, err = NewStoredStatQueue(&sq, &me)
+
+	if err != nil {
+		if err.Error() != "error test" {
+			t.Error(err)
+		}
+	}
+
+	if rcv != nil {
+		t.Error(rcv)
+	}
+}
+
+func TestLibStatsSqID(t *testing.T) {
+	si := []SQItem{{
+		EventID:    str,
+		ExpiryTime: &tm,
+	}}
+	msw := map[string]*StatWithCompress{"test": {
+		Stat:           fl,
+		CompressFactor: nm,
+	}}
+	st := StatASR{
+		FilterIDs: slc,
+		Answered:  fl,
+		Count:     n,
+		Events:    msw,
+		MinItems:  nm,
+		val:       &fl,
+	}
+	msm := map[string]StatMetric{"test": &st}
+
+	sq := StatQueue{
+		Tenant:    str,
+		ID:        str,
+		SQItems:   si,
+		SQMetrics: msm,
+		MinItems:  nm,
+	}
+
+	ms := JSONMarshaler{}
+
+	sqq, err := NewStoredStatQueue(&sq, &ms)
+	if err != nil {
+		t.Error(err)
+	}
+
+	rcv := sqq.SqID()
+
+	if rcv != "test:test" {
+		t.Error(rcv)
+	}
+}
+
+func TestLibStatsAsStatQueueNilReturn(t *testing.T) {
+	var sqq *StoredStatQueue
+
+	ms := JSONMarshaler{}
+	rcv, err := sqq.AsStatQueue(&ms)
+	if err != nil {
+		t.Error(err)
+	}
+
+	if rcv != nil {
+		t.Error(rcv)
+	}
+}
+
+func TestLibStatsAsStatQueue(t *testing.T) {
+	si := []SQItem{{
+		EventID:    str,
+		ExpiryTime: &tm,
+	}}
+	msw := map[string]*StatWithCompress{"test": {
+		Stat:           fl,
+		CompressFactor: nm,
+	}}
+	st := StatASR{
+		FilterIDs: slc,
+		Answered:  fl,
+		Count:     n,
+		Events:    msw,
+		MinItems:  nm,
+	}
+	msm := map[string]StatMetric{"*asr": &st}
+
+	sq := StatQueue{
+		Tenant:    str,
+		ID:        str,
+		SQItems:   si,
+		SQMetrics: msm,
+		MinItems:  nm,
+	}
+
+	ms := JSONMarshaler{}
+
+	sqq, errSqq := NewStoredStatQueue(&sq, &ms)
+	if errSqq != nil {
+		t.Error(errSqq)
+	}
+
+	sqq.Compressed = true
+	rcv, err := sqq.AsStatQueue(&ms)
+	if err != nil {
+		t.Fatal(err)
+	}
+	exp := &sq
+
+	if !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("expected %v, received %v", exp, rcv)
+	}
+
+	msm2 := map[string]StatMetric{"*test": &st}
+
+	sq2 := StatQueue{
+		Tenant:    str,
+		ID:        str,
+		SQItems:   si,
+		SQMetrics: msm2,
+		MinItems:  nm,
+	}
+
+	ms2 := JSONMarshaler{}
+
+	sqq2, errSqq2 := NewStoredStatQueue(&sq2, &ms2)
+	if errSqq2 != nil {
+		t.Error(errSqq2)
+	}
+
+	rcv, err = sqq2.AsStatQueue(&ms2)
+	if err != nil {
+		if err.Error() != "unsupported metric type <*test>" {
+			t.Error(err)
+		}
+	}
+
+	if rcv != nil {
+		t.Error(rcv)
+	}
+
+	msm3 := map[string]StatMetric{"*asr": &st}
+
+	sq3 := StatQueue{
+		Tenant:    str,
+		ID:        str,
+		SQItems:   si,
+		SQMetrics: msm3,
+		MinItems:  nm,
+	}
+
+	ms3 := JSONMarshaler{}
+
+	sqq3, errSqq3 := NewStoredStatQueue(&sq3, &ms3)
+	if errSqq3 != nil {
+		t.Error(errSqq3)
+	}
+
+	me := jsonErr{}
+	rcv, err = sqq3.AsStatQueue(&me)
+	if err != nil {
+		if err.Error() != "error test" {
+			t.Error(err)
+		}
+	}
+
+	if rcv != nil {
+		t.Error(rcv)
+	}
+}
+
+func TestLibStatsLock(t *testing.T) {
+	si := []SQItem{{
+		EventID:    str,
+		ExpiryTime: &tm,
+	}}
+	msw := map[string]*StatWithCompress{"test": {
+		Stat:           fl,
+		CompressFactor: nm,
+	}}
+	st := StatASR{
+		FilterIDs: slc,
+		Answered:  fl,
+		Count:     n,
+		Events:    msw,
+		MinItems:  nm,
+	}
+	msm := map[string]StatMetric{"*asr": &st}
+
+	var rwm sync.RWMutex
+	sq := StatQueue{
+		lk:        rwm,
+		Tenant:    str,
+		ID:        str,
+		SQItems:   si,
+		SQMetrics: msm,
+		MinItems:  nm,
+	}
+
+	nExp := sq
+
+	sq.Lock()
+
+	if reflect.DeepEqual(sq, nExp) {
+		t.Error("didn't lock")
+	}
+
+	sq.Unlock()
+
+	if !reflect.DeepEqual(sq, nExp) {
+		t.Error("didn't lock")
 	}
 }
