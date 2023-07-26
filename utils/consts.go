@@ -1060,6 +1060,10 @@ const (
 	MetaEqual              = "*eq"
 	MetaIPNet              = "*ipnet"
 	MetaAPIBan             = "*apiban"
+	MetaSentryPeer         = "*sentrypeer"
+	MetaToken              = "*token"
+	MetaIp                 = "*ip"
+	MetaNumber             = "*number"
 	MetaActivationInterval = "*ai"
 	MetaRegex              = "*regex"
 	MetaNever              = "*never"
@@ -1076,6 +1080,7 @@ const (
 	MetaNotEqual              = "*noteq"
 	MetaNotIPNet              = "*notipnet"
 	MetaNotAPIBan             = "*notapiban"
+	MetaNotSentryPeer         = "*notsentrypeer"
 	MetaNotActivationInterval = "*notai"
 	MetaNotRegex              = "*notregex"
 
@@ -2210,6 +2215,16 @@ const (
 // APIBanCfg
 const (
 	KeysCfg = "keys"
+)
+
+const (
+	ClientIDCfg     = "client_id"
+	ClientSecretCfg = "client_secret"
+	TokenUrlCfg     = "token_url"
+	IpsUrlCfg       = "ips_url"
+	NumbersUrlCfg   = "numbers_url"
+	AudienceCfg     = "audience"
+	GrantTypeCfg    = "grant_type"
 )
 
 // STIR/SHAKEN

@@ -245,10 +245,11 @@ func newCGRConfig(config []byte) (cfg *CGRConfig, err error) {
 			ProfileIgnoreFilters: []*utils.DynamicBoolOpt{},
 			PosterAttempts:       []*utils.DynamicIntOpt{},
 		}},
-		sipAgentCfg: new(SIPAgentCfg),
-		configSCfg:  new(ConfigSCfg),
-		apiBanCfg:   new(APIBanCfg),
-		coreSCfg:    new(CoreSCfg),
+		sipAgentCfg:   new(SIPAgentCfg),
+		configSCfg:    new(ConfigSCfg),
+		apiBanCfg:     new(APIBanCfg),
+		sentryPeerCfg: new(SentryPeerCfg),
+		coreSCfg:      new(CoreSCfg),
 		accountSCfg: &AccountSCfg{Opts: &AccountsOpts{
 			ProfileIDs:           []*utils.DynamicStringSliceOpt{},
 			Usage:                []*utils.DynamicDecimalBigOpt{},
@@ -367,6 +368,7 @@ type CGRConfig struct {
 	sipAgentCfg      *SIPAgentCfg      // SIPAgent config
 	configSCfg       *ConfigSCfg       // ConfigS config
 	apiBanCfg        *APIBanCfg        // APIBan config
+	sentryPeerCfg    *SentryPeerCfg    //SentryPeer config
 	coreSCfg         *CoreSCfg         // CoreS config
 	accountSCfg      *AccountSCfg      // AccountS config
 	tpeSCfg          *TpeSCfg          // TpeS config
@@ -761,6 +763,12 @@ func (cfg *CGRConfig) APIBanCfg() *APIBanCfg {
 	return cfg.apiBanCfg
 }
 
+func (cfg *CGRConfig) SentryPeerCfg() *SentryPeerCfg {
+	cfg.lks[SentryPeerJSON].Lock()
+	defer cfg.lks[SentryPeerJSON].Unlock()
+	return cfg.sentryPeerCfg
+}
+
 // CoreSCfg reads the CoreS configuration
 func (cfg *CGRConfig) CoreSCfg() *CoreSCfg {
 	cfg.lks[CoreSJSON].Lock()
@@ -1073,6 +1081,7 @@ func (cfg *CGRConfig) Clone() (cln *CGRConfig) {
 		sipAgentCfg:      cfg.sipAgentCfg.Clone(),
 		configSCfg:       cfg.configSCfg.Clone(),
 		apiBanCfg:        cfg.apiBanCfg.Clone(),
+		sentryPeerCfg:    cfg.sentryPeerCfg.Clone(),
 		coreSCfg:         cfg.coreSCfg.Clone(),
 		actionSCfg:       cfg.actionSCfg.Clone(),
 		accountSCfg:      cfg.accountSCfg.Clone(),

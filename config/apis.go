@@ -590,6 +590,12 @@ func storeDiffSection(ctx *context.Context, section string, db ConfigDB, v1, v2 
 			return
 		}
 		return db.SetSection(ctx, section, diffAPIBanJsonCfg(jsn, v1.APIBanCfg(), v2.APIBanCfg()))
+	case SentryPeerJSON:
+		jsn := new(SentryPeerJsonCfg)
+		if err = db.GetSection(ctx, section, jsn); err != nil {
+			return
+		}
+		return db.SetSection(ctx, section, diffSentryPeerJsonCfg(jsn, v1.SentryPeerCfg(), v2.SentryPeerCfg()))
 	case CoreSJSON:
 		jsn := new(CoreSJsonCfg)
 		if err = db.GetSection(ctx, section, jsn); err != nil {

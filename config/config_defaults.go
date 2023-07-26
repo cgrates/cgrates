@@ -288,7 +288,8 @@ const CGRATES_CFG_JSON = `
 		"*rpc_connections": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false},							// RPC connections caching
 		"*uch": {"limit": -1, "ttl": "3h", "static_ttl": false, "remote":false, "replicate": false},									// User cache
 		"*stir": {"limit": -1, "ttl": "3h", "static_ttl": false, "remote":false, "replicate": false},									// stirShaken cache keys
-		"*apiban":{"limit": -1, "ttl": "2m", "static_ttl": false, "remote":false, "replicate": false}, 
+		"*apiban":{"limit": -1, "ttl": "2m", "static_ttl": false, "remote":false, "replicate": false},
+		"*sentrypeer":{"limit": -1, "ttl": "24h", "static_ttl": true, "remote":false, "replicate": false}, 
 		"*caps_events": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false},								// caps cached samples
 		"*replication_hosts": {"limit": 0, "ttl": "", "static_ttl": false, "remote":false, "replicate": false},							// the replication hosts cache(used when replication_filtered is enbled)
 	},
@@ -1798,6 +1799,16 @@ const CGRATES_CFG_JSON = `
 "apiban": {
 	"enabled": false,
 	"keys": [],
+},
+
+"sentrypeer":{
+	"client_id":"",
+	"client_secret":"",
+	"token_url":"https://authz.sentrypeer.com/oauth/token",
+	"ips_url":"https://sentrypeer.com/api/ip-addresses",
+	"numbers_url":"https://sentrypeer.com/api/phone-numbers",
+	"audience":"https://sentrypeer.com/api",
+	"grant_type":"client_credentials",
 },
 
 

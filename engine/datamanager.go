@@ -120,7 +120,7 @@ func (dm *DataManager) CacheDataFromDB(ctx *context.Context, prfx string, ids []
 		return
 	}
 	// *apiban and *dispatchers are not stored in database
-	if prfx == utils.MetaAPIBan || prfx == utils.MetaDispatchers { // no need for ids in this case
+	if prfx == utils.MetaAPIBan || prfx == utils.MetaDispatchers || prfx == utils.MetaSentryPeer { // no need for ids in this case
 		ids = []string{utils.EmptyString}
 	} else if len(ids) != 0 && ids[0] == utils.MetaAny {
 		if mustBeCached {
