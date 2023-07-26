@@ -658,3 +658,13 @@ func TestBalancesFieldAsInterface(t *testing.T) {
 		t.Error(rcv)
 	}
 }
+
+func TestBalanceCloneNil(t *testing.T) {
+	var b *Balance
+
+	rcv := b.Clone()
+
+	if rcv != nil {
+		t.Error(rcv)
+	}
+}
