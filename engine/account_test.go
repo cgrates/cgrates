@@ -18,6 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"encoding/json"
 	"reflect"
 	"testing"
 	"time"
@@ -2856,5 +2857,553 @@ func BenchmarkGetSecondsForPrefix(b *testing.B) {
 	}
 	for i := 0; i < b.N; i++ {
 		ub1.getCreditForPrefix(cd)
+	}
+}
+
+var bl bool = true
+var str2 string = "test"
+var fl2 float64 = 1.2
+var nm2 int = 1
+var tm2 time.Time = time.Date(2009, 11, 17, 20, 34, 58, 651387237, time.UTC)
+
+func TestAccountsetBalanceAction(t *testing.T) {
+	var acc *Account
+
+	err := acc.setBalanceAction(nil)
+
+	if err != nil {
+		if err.Error() != "nil action" {
+			t.Error(err)
+		}
+	}
+
+	sm := utils.StringMap{str: bl}
+	rtm := RITiming{
+		Years:      utils.Years{2021},
+		Months:     utils.Months{8},
+		MonthDays:  utils.MonthDays{28},
+		WeekDays:   utils.WeekDays{5},
+		StartTime:  str2,
+		EndTime:    str2,
+		cronString: str2,
+		tag:        str2,
+	}
+	vf := ValueFactor{str2: fl2}
+	vfr := utils.ValueFormula{
+		Method: str2,
+		Params: map[string]any{str2: str2},
+		Static: fl2,
+	}
+	bf := BalanceFilter{
+		Uuid:           &str2,
+		ID:             &str2,
+		Type:           &str2,
+		Value:          &vfr,
+		ExpirationDate: &tm2,
+		Weight:         &fl2,
+		DestinationIDs: &sm,
+		RatingSubject:  &str2,
+		Categories:     &sm,
+		SharedGroups:   &sm,
+		TimingIDs:      &sm,
+		Timings:        []*RITiming{&rtm},
+		Disabled:       &bl,
+		Factor:         &vf,
+		Blocker:        &bl,
+	}
+	cf := CounterFilter{
+		Value:  fl,
+		Filter: &bf,
+	}
+	uc := UnitCounter{
+		CounterType: "*balance",
+		Counters:    CounterFilters{&cf},
+	}
+	at := ActionTrigger{
+		ID:                str2,
+		UniqueID:          str2,
+		ThresholdType:     str2,
+		Recurrent:         bl,
+		MinSleep:          1 * time.Millisecond,
+		ExpirationDate:    tm2,
+		ActivationDate:    tm2,
+		Balance:           &bf,
+		Weight:            fl2,
+		ActionsID:         str2,
+		MinQueuedItems:    nm2,
+		Executed:          bl,
+		LastExecutionTime: tm2,
+	}
+
+	ac := Account{
+		ID:                str2,
+		UnitCounters:      UnitCounters{str: {&uc}},
+		ActionTriggers:    ActionTriggers{&at},
+		AllowNegative:     bl,
+		Disabled:          bl,
+		UpdateTime:        tm2,
+		executingTriggers: bl,
+	}
+	a := Action{
+		Id:               str2,
+		ActionType:       str2,
+		ExtraParameters:  str2,
+		Filter:           str2,
+		ExpirationString: str2,
+		Weight:           fl2,
+		Balance:          &bf,
+		balanceValue:     fl2,
+	}
+
+	err = ac.setBalanceAction(&a)
+
+	if err != nil {
+		if err.Error() != "cannot find balance with uuid: <test>" {
+			t.Error(err)
+		}
+	}
+}
+
+func TestAccountGetSharedGroups(t *testing.T) {
+	sm := utils.StringMap{
+		"test1": bl,
+	}
+	rtm := RITiming{
+		Years:      utils.Years{2021},
+		Months:     utils.Months{8},
+		MonthDays:  utils.MonthDays{28},
+		WeekDays:   utils.WeekDays{5},
+		StartTime:  str,
+		EndTime:    str,
+		cronString: str,
+		tag:        str,
+	}
+	vf := ValueFactor{str: fl}
+	vfr := utils.ValueFormula{
+		Method: str,
+		Params: map[string]any{str: str},
+		Static: fl,
+	}
+	bf := BalanceFilter{
+		Uuid:           &str,
+		ID:             &str,
+		Type:           &str,
+		Value:          &vfr,
+		ExpirationDate: &tm,
+		Weight:         &fl,
+		DestinationIDs: &sm,
+		RatingSubject:  &str,
+		Categories:     &sm,
+		SharedGroups:   &sm,
+		TimingIDs:      &sm,
+		Timings:        []*RITiming{&rtm},
+		Disabled:       &bl,
+		Factor:         &vf,
+		Blocker:        &bl,
+	}
+	cf := CounterFilter{
+		Value:  fl,
+		Filter: &bf,
+	}
+	uc := UnitCounter{
+		CounterType: "*balance",
+		Counters:    CounterFilters{&cf},
+	}
+	at := ActionTrigger{
+		ID:                str,
+		UniqueID:          str,
+		ThresholdType:     str,
+		Recurrent:         bl,
+		MinSleep:          1 * time.Millisecond,
+		ExpirationDate:    tm,
+		ActivationDate:    tm,
+		Balance:           &bf,
+		Weight:            fl,
+		ActionsID:         str,
+		MinQueuedItems:    nm,
+		Executed:          bl,
+		LastExecutionTime: tm,
+	}
+
+	blc := Balance{
+		Uuid:           str2,
+		ID:             str2,
+		Value:          fl2,
+		ExpirationDate: tm2,
+		Weight:         fl2,
+		DestinationIDs: sm,
+		RatingSubject:  str2,
+		Categories:     sm,
+		SharedGroups:   sm,
+		Timings:        []*RITiming{&rtm},
+		TimingIDs:      sm,
+		Disabled:       bl,
+		Factor:         ValueFactor{str2: fl2},
+		Blocker:        bl,
+		precision:      nm2,
+		dirty:          bl,
+	}
+	ac := Account{
+		ID:                str,
+		BalanceMap:        map[string]Balances{str: {&blc}},
+		UnitCounters:      UnitCounters{str: {&uc}},
+		ActionTriggers:    ActionTriggers{&at},
+		AllowNegative:     bl,
+		Disabled:          bl,
+		UpdateTime:        tm,
+		executingTriggers: bl,
+	}
+
+	rcv := ac.GetSharedGroups()
+	exp := []string{"test1"}
+	if !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("expected %v, received %v", exp, rcv)
+	}
+}
+
+func TestAccountSummaryFieldAsInterface(t *testing.T) {
+	bs := BalanceSummary{
+		UUID:     str2,
+		ID:       str2,
+		Type:     str2,
+		Value:    fl2,
+		Disabled: bl,
+	}
+	as := AccountSummary{
+		Tenant:           str2,
+		ID:               str2,
+		BalanceSummaries: BalanceSummaries{&bs},
+		AllowNegative:    bl,
+		Disabled:         bl,
+	}
+
+	type exp struct {
+		val any
+		err string
+	}
+
+	tests := []struct {
+		name string
+		arg  []string
+		exp  exp
+	}{
+		{
+			name: "empty field path",
+			arg:  []string{},
+			exp:  exp{val: nil, err: "NOT_FOUND"},
+		},
+		{
+			name: "default case",
+			arg:  []string{"BalanceSummaries[0]"},
+			exp:  exp{val: &bs, err: ""},
+		},
+		{
+			name: "unsupported field prefix",
+			arg:  []string{"test"},
+			exp:  exp{val: nil, err: "unsupported field prefix: <test>"},
+		},
+		{
+			name: "case Tenant not found",
+			arg:  []string{"Tenant", "test"},
+			exp:  exp{val: nil, err: "NOT_FOUND"},
+		},
+		{
+			name: "case BalanceSummaries not found",
+			arg:  []string{"BalanceSummaries", "test"},
+			exp:  exp{val: nil, err: "NOT_FOUND"},
+		},
+		{
+			name: "case AllowNegative not found",
+			arg:  []string{"AllowNegative", "test"},
+			exp:  exp{val: nil, err: "NOT_FOUND"},
+		},
+		{
+			name: "case ID not found",
+			arg:  []string{"ID", "test"},
+			exp:  exp{val: nil, err: "NOT_FOUND"},
+		},
+		{
+			name: "case Disabled not found",
+			arg:  []string{"Disabled", "test"},
+			exp:  exp{val: nil, err: "NOT_FOUND"},
+		},
+		{
+			name: "case Tenant",
+			arg:  []string{"Tenant"},
+			exp:  exp{val: str2, err: ""},
+		},
+		{
+			name: "case ID",
+			arg:  []string{"ID"},
+			exp:  exp{val: str2, err: ""},
+		},
+		{
+			name: "case BalanceSummaries",
+			arg:  []string{"BalanceSummaries"},
+			exp:  exp{val: BalanceSummaries{&bs}, err: ""},
+		},
+		{
+			name: "case AllowNegative",
+			arg:  []string{"AllowNegative"},
+			exp:  exp{val: bl, err: ""},
+		},
+		{
+			name: "case Disabled",
+			arg:  []string{"Disabled"},
+			exp:  exp{val: bl, err: ""},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			rcv, err := as.FieldAsInterface(tt.arg)
+
+			if err != nil {
+				if err.Error() != tt.exp.err {
+					t.Error(err)
+				}
+			}
+
+			if !reflect.DeepEqual(rcv, tt.exp.val) {
+				t.Errorf("expected %v, received %v", tt.exp.val, rcv)
+			}
+		})
+	}
+}
+
+func TestAccountSummaryUpdateBalances(t *testing.T) {
+	bs := BalanceSummary{
+		UUID:     str2,
+		ID:       str2,
+		Type:     str2,
+		Value:    fl2,
+		Disabled: bl,
+	}
+	as := AccountSummary{
+		Tenant:           str2,
+		ID:               str2,
+		BalanceSummaries: BalanceSummaries{&bs},
+		AllowNegative:    bl,
+		Disabled:         bl,
+	}
+
+	exp := as
+
+	as.UpdateBalances(nil)
+
+	if !reflect.DeepEqual(as, exp) {
+		t.Error("Account summary was updated")
+	}
+}
+
+func TestNewAccountSummaryFromJSON(t *testing.T) {
+	bs := BalanceSummary{
+		UUID:     str2,
+		ID:       str2,
+		Type:     str2,
+		Value:    fl2,
+		Disabled: bl,
+	}
+	as := &AccountSummary{
+		Tenant:           str2,
+		ID:               str2,
+		BalanceSummaries: BalanceSummaries{&bs},
+		AllowNegative:    bl,
+		Disabled:         bl,
+	}
+	arg, errJ := json.Marshal(as)
+	if errJ != nil {
+		t.Error(errJ)
+	}
+
+	rcv, err := NewAccountSummaryFromJSON(string(arg))
+	if err != nil {
+		t.Error(err)
+	}
+
+	if !reflect.DeepEqual(rcv, as) {
+		t.Errorf("expected %v, received %v", as, rcv)
+	}
+}
+
+func TestAsOldStructure(t *testing.T) {
+	sm := utils.StringMap{str: bl}
+	rtm := RITiming{
+		Years:      utils.Years{2021},
+		Months:     utils.Months{8},
+		MonthDays:  utils.MonthDays{28},
+		WeekDays:   utils.WeekDays{5},
+		StartTime:  str2,
+		EndTime:    str2,
+		cronString: str2,
+		tag:        str2,
+	}
+	vf := ValueFactor{str2: fl2}
+	vfr := utils.ValueFormula{
+		Method: str2,
+		Params: map[string]any{str2: str2},
+		Static: fl2,
+	}
+	bf := BalanceFilter{
+		Uuid:           &str2,
+		ID:             &str2,
+		Type:           &str2,
+		Value:          &vfr,
+		ExpirationDate: &tm2,
+		Weight:         &fl2,
+		DestinationIDs: &sm,
+		RatingSubject:  &str2,
+		Categories:     &sm,
+		SharedGroups:   &sm,
+		TimingIDs:      &sm,
+		Timings:        []*RITiming{&rtm},
+		Disabled:       &bl,
+		Factor:         &vf,
+		Blocker:        &bl,
+	}
+	cf := CounterFilter{
+		Value:  fl,
+		Filter: &bf,
+	}
+	uc := UnitCounter{
+		CounterType: "*balance",
+		Counters:    CounterFilters{&cf},
+	}
+	at := ActionTrigger{
+		ID:                str2,
+		UniqueID:          str2,
+		ThresholdType:     str2,
+		Recurrent:         bl,
+		MinSleep:          1 * time.Millisecond,
+		ExpirationDate:    tm2,
+		ActivationDate:    tm2,
+		Balance:           &bf,
+		Weight:            fl2,
+		ActionsID:         str2,
+		MinQueuedItems:    nm2,
+		Executed:          bl,
+		LastExecutionTime: tm2,
+	}
+
+	blc := Balance{
+		Uuid:           str2,
+		ID:             str2,
+		Value:          fl2,
+		ExpirationDate: tm2,
+		Weight:         fl2,
+		DestinationIDs: sm,
+		RatingSubject:  str2,
+		Categories:     sm,
+		SharedGroups:   sm,
+		Timings:        []*RITiming{&rtm},
+		TimingIDs:      sm,
+		Disabled:       bl,
+		Factor:         ValueFactor{str2: fl2},
+		Blocker:        bl,
+		precision:      nm2,
+		dirty:          bl,
+	}
+	acc := Account{
+		ID:                str2,
+		BalanceMap:        map[string]Balances{str: {&blc}},
+		UnitCounters:      UnitCounters{str: {&uc, nil}},
+		ActionTriggers:    ActionTriggers{&at},
+		AllowNegative:     bl,
+		Disabled:          bl,
+		UpdateTime:        tm2,
+		executingTriggers: bl,
+	}
+
+	type Balance struct {
+		Uuid           string //system wide unique
+		Id             string // account wide unique
+		Value          float64
+		ExpirationDate time.Time
+		Weight         float64
+		DestinationIds string
+		RatingSubject  string
+		Category       string
+		SharedGroup    string
+		Timings        []*RITiming
+		TimingIDs      string
+		Disabled       bool
+		precision      int
+		account        *Account
+		dirty          bool
+	}
+	type Balances []*Balance
+	type UnitsCounter struct {
+		BalanceType string
+		//	Units     float64
+		Balances Balances // first balance is the general one (no destination)
+	}
+	type ActionTrigger struct {
+		Id                    string
+		ThresholdType         string
+		ThresholdValue        float64
+		Recurrent             bool
+		MinSleep              time.Duration
+		BalanceId             string
+		BalanceType           string
+		BalanceDestinationIds string
+		BalanceWeight         float64
+		BalanceExpirationDate time.Time
+		BalanceTimingTags     string
+		BalanceRatingSubject  string
+		BalanceCategory       string
+		BalanceSharedGroup    string
+		BalanceDisabled       bool
+		Weight                float64
+		ActionsId             string
+		MinQueuedItems        int
+		Executed              bool
+	}
+	type ActionTriggers []*ActionTrigger
+
+	type Account struct {
+		Id             string
+		BalanceMap     map[string]Balances
+		UnitCounters   []*UnitsCounter
+		ActionTriggers ActionTriggers
+		AllowNegative  bool
+		Disabled       bool
+	}
+
+	rcv := acc.AsOldStructure()
+
+	mrsh, err := json.Marshal(rcv)
+	if err != nil {
+		t.Error(err)
+	}
+
+	var ac *Account
+	err = json.Unmarshal(mrsh, &ac)
+	if err != nil {
+		t.Error(err)
+	}
+	exp := utils.META_OUT + ":" + acc.ID
+
+	if ac.Id != exp {
+		t.Errorf("expected %s, received %s", ac.Id, exp)
+	}
+
+	if ac.AllowNegative != acc.AllowNegative {
+		t.Error(ac.AllowNegative)
+	}
+
+	if ac.Disabled != acc.Disabled {
+		t.Error(ac.Disabled)
+	}
+}
+
+func TestAccountGetID(t *testing.T) {
+	acc := Account{
+		ID: str2,
+	}
+
+	rcv := acc.GetID()
+
+	if rcv != "" {
+		t.Error(rcv)
 	}
 }
