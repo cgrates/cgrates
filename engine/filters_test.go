@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
@@ -2416,4 +2417,122 @@ func TestFilterLazyPassErr(t *testing.T) {
 		[]string{fltrID}, fEv, prefixes); err == nil || err.Error() != utils.ErrPrefixNotFound(fltrID).Error() {
 		t.Errorf(err.Error())
 	}
+}
+
+func TestSentryPeer(t *testing.T) {
+	token := "token27072023"
+	testServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method == http.MethodPost {
+
+			if r.URL.EscapedPath() != "/oauth/token" {
+				w.WriteHeader(http.StatusNotFound)
+				return
+			}
+			contentType := r.Header.Get(utils.ContentType)
+			if contentType != utils.JsonBody {
+				w.WriteHeader(http.StatusBadRequest)
+				return
+			}
+			var data map[string]string
+			err := json.NewDecoder(r.Body).Decode(&data)
+			if err != nil {
+				w.WriteHeader(http.StatusBadRequest)
+				return
+			}
+
+			if data[utils.ClientIdCfg] != "ererwffwssf" ||
+				data[utils.ClientSecretCfg] != "3354rf43f34sf" ||
+				data[utils.AudienceCfg] != "https://sentrypeer.com/api" ||
+				data[utils.GrantTypeCfg] != "client_credentials" {
+				w.WriteHeader(http.StatusBadRequest)
+				return
+			}
+			response := struct {
+				AccessToken string `json:"access_token"`
+			}{
+				AccessToken: token,
+			}
+			w.WriteHeader(http.StatusOK)
+			err = json.NewEncoder(w).Encode(response)
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
+			return
+		}
+
+		if r.Method != http.MethodGet {
+			w.WriteHeader(http.StatusMethodNotAllowed)
+			return
+		}
+		responses := map[string]struct {
+			code int
+			body []byte
+		}{
+			"/api/ip-addresses/1.2.3.254":       {code: http.StatusNotFound, body: []byte(`{"IP Address not found"}`)},
+			"/api/ip-addresses/184.168.31.232":  {code: http.StatusOK, body: []byte(`{"IP Address  found"}`)},
+			"/api/phone-numbers/22663272712":    {code: http.StatusNotFound, body: []byte(`Phone Number not found`)},
+			"/api/phone-numbers/90046322651795": {code: http.StatusOK, body: []byte(`{"Phone Number  found`)},
+		}
+		if val, has := responses[r.URL.EscapedPath()]; has {
+			if r.Header.Get(utils.AuthorizationHdr) != utils.BearerAuth+" "+token {
+				w.WriteHeader(http.StatusUnauthorized)
+				return
+			}
+			w.WriteHeader(val.code)
+			if val.body != nil {
+				w.Write(val.body)
+			}
+			return
+		}
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte(`Wrong path in the request`))
+	}))
+
+	defer testServer.Close()
+	cfg := config.NewDefaultCGRConfig()
+	data := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
+	filterS := FilterS{
+		cfg: cfg,
+		dm:  dm,
+	}
+	dp := utils.MapStorage{
+		utils.MetaReq: utils.MapStorage{
+			"BADIP":     "184.168.31.232",
+			"IP":        "1.2.3.254",
+			"Number":    "22663272712",
+			"BadNumber": "90046322651795",
+		},
+	}
+	config.CgrConfig().SentryPeerCfg().ClientID = "ererwffwssf"
+	config.CgrConfig().SentryPeerCfg().ClientSecret = "3354rf43f34sf"
+	config.CgrConfig().SentryPeerCfg().TokenUrl = testServer.URL + "/oauth/token"
+	config.CgrConfig().SentryPeerCfg().IpsUrl = testServer.URL + "/api/ip-addresses"
+	config.CgrConfig().SentryPeerCfg().NumbersUrl = testServer.URL + "/api/phone-numbers"
+
+	if pass, err := filterS.Pass("cgrates.org", []string{"*sentrypeer:~*req.IP:*ip"}, dp); err != nil {
+		t.Error(err)
+	} else if !pass {
+		t.Error("Expected to pass")
+	}
+
+	if pass, err := filterS.Pass("cgrates.org", []string{"*sentrypeer:~*req.BADIP:*ip"}, dp); err != nil {
+		t.Error(err)
+	} else if pass {
+		t.Error("Expected to not pass")
+	}
+
+	if pass, err := filterS.Pass("cgrates.org", []string{"*sentrypeer:~*req.Number:*number"}, dp); err != nil {
+		t.Error(err)
+	} else if !pass {
+		t.Error("Expected to pass")
+	}
+
+	if pass, err := filterS.Pass("cgrates.org", []string{"*sentrypeer:~*req.BadNumber:*number"}, dp); err != nil {
+		t.Error(err)
+	} else if pass {
+		t.Error("Expected to not  pass")
+	}
+
 }
