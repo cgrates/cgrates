@@ -2421,7 +2421,9 @@ func TestFilterLazyPassErr(t *testing.T) {
 
 func TestSentryPeer(t *testing.T) {
 	token := "token27072023"
+	count := 0
 	testServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+
 		if r.Method == http.MethodPost {
 
 			if r.URL.EscapedPath() != "/oauth/token" {
@@ -2473,11 +2475,20 @@ func TestSentryPeer(t *testing.T) {
 			"/api/ip-addresses/184.168.31.232":  {code: http.StatusOK, body: []byte(`{"IP Address  found"}`)},
 			"/api/phone-numbers/22663272712":    {code: http.StatusNotFound, body: []byte(`Phone Number not found`)},
 			"/api/phone-numbers/90046322651795": {code: http.StatusOK, body: []byte(`{"Phone Number  found`)},
+			"/api/phone-numbers/1123452353245":  {code: http.StatusUnauthorized, body: []byte(`{"Not Authorized`)},
 		}
 		if val, has := responses[r.URL.EscapedPath()]; has {
 			if r.Header.Get(utils.AuthorizationHdr) != utils.BearerAuth+" "+token {
 				w.WriteHeader(http.StatusUnauthorized)
 				return
+			}
+			if count == 1 {
+				w.WriteHeader(http.StatusNotFound)
+				w.Write([]byte(`Phone number not found`))
+				return
+			}
+			if val.code == http.StatusUnauthorized {
+				count++
 			}
 			w.WriteHeader(val.code)
 			if val.body != nil {
@@ -2503,6 +2514,7 @@ func TestSentryPeer(t *testing.T) {
 			"IP":        "1.2.3.254",
 			"Number":    "22663272712",
 			"BadNumber": "90046322651795",
+			"No":        "1123452353245",
 		},
 	}
 	config.CgrConfig().SentryPeerCfg().ClientID = "ererwffwssf"
@@ -2516,11 +2528,27 @@ func TestSentryPeer(t *testing.T) {
 	} else if !pass {
 		t.Error("Expected to pass")
 	}
+	if val, has := Cache.Get(utils.MetaSentryPeer, utils.MetaToken); !has {
+		t.Error("Expected token to be set in the cahe")
+	} else if val.(string) != token {
+		t.Errorf("Expected +%v,Received +%v", token, val)
+	}
+
+	if val, has := Cache.Get(utils.MetaSentryPeer, utils.ConcatenatedKey(utils.MetaIp, "1.2.3.254")); !has {
+		t.Error("value should had been set in cache")
+	} else if !val.(bool) {
+		t.Error("Expected item to be true")
+	}
 
 	if pass, err := filterS.Pass("cgrates.org", []string{"*sentrypeer:~*req.BADIP:*ip"}, dp); err != nil {
 		t.Error(err)
 	} else if pass {
 		t.Error("Expected to not pass")
+	}
+	if val, has := Cache.Get(utils.MetaSentryPeer, utils.ConcatenatedKey(utils.MetaIp, "184.168.31.232")); !has {
+		t.Error("value should had been set in cache")
+	} else if val.(bool) {
+		t.Error("Expected item to be false")
 	}
 
 	if pass, err := filterS.Pass("cgrates.org", []string{"*sentrypeer:~*req.Number:*number"}, dp); err != nil {
@@ -2529,10 +2557,33 @@ func TestSentryPeer(t *testing.T) {
 		t.Error("Expected to pass")
 	}
 
+	if val, has := Cache.Get(utils.MetaSentryPeer, utils.ConcatenatedKey(utils.MetaNumber, "22663272712")); !has {
+		t.Error("value should had been set in cache")
+	} else if !val.(bool) {
+		t.Error("Expected item to be true")
+	}
+
 	if pass, err := filterS.Pass("cgrates.org", []string{"*sentrypeer:~*req.BadNumber:*number"}, dp); err != nil {
 		t.Error(err)
 	} else if pass {
 		t.Error("Expected to not  pass")
 	}
 
+	if val, has := Cache.Get(utils.MetaSentryPeer, utils.ConcatenatedKey(utils.MetaNumber, "90046322651795")); !has {
+		t.Error("value should had  been set in cache")
+	} else if val.(bool) {
+		t.Error("Expected item to be false")
+	}
+
+	if pass, err := filterS.Pass("cgrates.org", []string{"*sentrypeer:~*req.No:*number"}, dp); err != nil {
+		t.Error(err)
+	} else if !pass {
+		t.Error("Expected to pass")
+	}
+
+	if val, has := Cache.Get(utils.MetaSentryPeer, utils.ConcatenatedKey(utils.MetaNumber, "1123452353245")); !has {
+		t.Error("value should had been set in cache")
+	} else if !val.(bool) {
+		t.Error("Expected item to be true")
+	}
 }

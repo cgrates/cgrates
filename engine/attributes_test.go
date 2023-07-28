@@ -20,8 +20,11 @@ package engine
 
 import (
 	"bytes"
+	"encoding/json"
 	"fmt"
 	"log"
+	"net/http"
+	"net/http/httptest"
 	"os"
 	"reflect"
 	"sort"
@@ -1443,111 +1446,130 @@ func TestAttrSV1GetAttributeForEvent(t *testing.T) {
 
 }
 
-// func TestAttributesV1ProcessEventSentryPeer(t *testing.T) {
-// 	testServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-// 		if r.Method == http.MethodPost {
+func TestAttributesV1ProcessEventSentryPeer(t *testing.T) {
+	defer func() {
+		cfg2 := config.NewDefaultCGRConfig()
+		config.SetCgrConfig(cfg2)
+	}()
+	testServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method == http.MethodPost {
 
-// 			if r.URL.EscapedPath() != "/oauth/token" {
-// 				w.WriteHeader(http.StatusNotFound)
-// 				return
-// 			}
-// 			contentType := r.Header.Get(utils.ContentType)
-// 			if contentType != utils.JsonBody {
-// 				w.WriteHeader(http.StatusBadRequest)
-// 				return
-// 			}
-// 			var data map[string]string
-// 			err := json.NewDecoder(r.Body).Decode(&data)
-// 			if err != nil {
-// 				w.WriteHeader(http.StatusBadRequest)
-// 				return
-// 			}
-// 			response := struct {
-// 				AccessToken string `json:"access_token"`
-// 			}{
-// 				AccessToken: "302982309u2u30r23203",
-// 			}
-// 			w.WriteHeader(http.StatusOK)
-// 			err = json.NewEncoder(w).Encode(response)
-// 			if err != nil {
-// 				http.Error(w, err.Error(), http.StatusInternalServerError)
-// 				return
-// 			}
-// 			return
-// 		}
-// 		if r.Method != http.MethodGet {
-// 			w.WriteHeader(http.StatusMethodNotAllowed)
-// 			return
-// 		}
-// 		responses := map[string]struct {
-// 			code int
-// 			body []byte
-// 		}{
-// 			"/api/phone-numbers/100": {code: http.StatusOK, body: []byte(`{"IP Address  found"}`)},
-// 		}
-// 		if val, has := responses[r.URL.EscapedPath()]; has {
-// 			w.WriteHeader(val.code)
-// 			if val.body != nil {
-// 				w.Write(val.body)
-// 			}
-// 			return
-// 		}
-// 	}))
-// 	cfg := config.NewDefaultCGRConfig()
-// 	cfg.SentryPeerCfg().ClientID = "ererwffwssf"
-// 	cfg.SentryPeerCfg().ClientSecret = "3354rf43f34sf"
-// 	cfg.SentryPeerCfg().TokenUrl = testServer.URL + "/oauth/token"
-// 	cfg.SentryPeerCfg().IpsUrl = testServer.URL + "/api/ip-addresses"
-// 	cfg.SentryPeerCfg().NumbersUrl = testServer.URL + "/api/phone-numbers"
-// 	dm := NewDataManager(NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items), nil, nil)
-// 	filterS := NewFilterS(cfg, nil, dm)
+			if r.URL.EscapedPath() != "/oauth/token" {
+				w.WriteHeader(http.StatusNotFound)
+				return
+			}
+			contentType := r.Header.Get(utils.ContentType)
+			if contentType != utils.JsonBody {
+				w.WriteHeader(http.StatusBadRequest)
+				return
+			}
+			var data map[string]string
+			err := json.NewDecoder(r.Body).Decode(&data)
+			if err != nil {
+				w.WriteHeader(http.StatusBadRequest)
+				return
+			}
+			response := struct {
+				AccessToken string `json:"access_token"`
+			}{
+				AccessToken: "302982309u2u30r23203",
+			}
+			w.WriteHeader(http.StatusOK)
+			err = json.NewEncoder(w).Encode(response)
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
+			return
+		}
+		if r.Method != http.MethodGet {
+			w.WriteHeader(http.StatusMethodNotAllowed)
+			return
+		}
+		responses := map[string]struct {
+			code int
+			body []byte
+		}{
+			"/api/phone-numbers/453904509045": {code: http.StatusNotFound, body: []byte(`{"Number not  found"}`)},
+			"/api/phone-numbers/100":          {code: http.StatusOK, body: []byte(`{"Number  found"}`)},
+		}
+		if val, has := responses[r.URL.EscapedPath()]; has {
+			w.WriteHeader(val.code)
+			if val.body != nil {
+				w.Write(val.body)
+			}
+			return
+		}
+	}))
+	cfg := config.NewDefaultCGRConfig()
+	cfg.SentryPeerCfg().ClientID = "ererwffwssf"
+	cfg.SentryPeerCfg().ClientSecret = "3354rf43f34sf"
+	cfg.SentryPeerCfg().TokenUrl = testServer.URL + "/oauth/token"
+	cfg.SentryPeerCfg().IpsUrl = testServer.URL + "/api/ip-addresses"
+	cfg.SentryPeerCfg().NumbersUrl = testServer.URL + "/api/phone-numbers"
+	cfg.AttributeSCfg().IndexedSelects = false
+	dm := NewDataManager(NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items), nil, nil)
+	if err := dm.SetAttributeProfile(&AttributeProfile{
+		Tenant:    "cgrates.org",
+		ID:        "ATTR_CHECK_DESTINATION",
+		Contexts:  []string{},
+		FilterIDs: []string{"*sentrypeer:~*req.Destination:*number"},
+		Attributes: []*Attribute{
+			{
+				Path:  "*req.Destination",
+				Type:  utils.MetaConstant,
+				Value: config.NewRSRParsersMustCompile("NUM", utils.InfieldSep),
+			}},
+		Blocker: false,
+		Weight:  20}, true); err != nil {
+		t.Error(err)
+	}
+	filterS := NewFilterS(cfg, nil, dm)
+	alS := NewAttributeService(dm, filterS, cfg)
+	var rply AttrSProcessEventReply
+	expected := AttrSProcessEventReply{
+		MatchedProfiles: []string{"cgrates.org:ATTR_CHECK_DESTINATION"},
+		AlteredFields:   []string{"*req.Destination"},
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			Time:   nil,
+			Event: map[string]any{
+				utils.AccountField: "account_1001",
+				utils.Destination:  "NUM",
+			},
+			APIOpts: map[string]any{
+				utils.OptsAttributesProcessRuns: 2,
+			},
+		},
+		blocker: false,
+	}
+	config.SetCgrConfig(cfg)
+	if err = alS.V1ProcessEvent(&utils.CGREvent{
+		Tenant: "cgrates.org",
+		Event: map[string]any{
+			utils.AccountField: "account_1001",
+			utils.Destination:  "453904509045",
+		},
+		APIOpts: map[string]any{
+			utils.OptsAttributesProcessRuns: 2,
+		},
+	}, &rply); err != nil {
+		t.Errorf("Expected <%+v>, received <%+v>", nil, err)
+	} else if sort.Strings(rply.AlteredFields); !reflect.DeepEqual(expected, rply) {
+		t.Errorf("Expected <%+v>, received <%+v>", utils.ToJSON(expected), utils.ToJSON(rply))
+	}
 
-// 	if err := dm.SetAttributeProfile(&AttributeProfile{
-// 		Tenant:    "cgrates.org",
-// 		ID:        "ATTR_CHECK_DESTINATION",
-// 		Contexts:  []string{utils.MetaAny},
-// 		FilterIDs: []string{"*sentrypeer:~*req.Destination:*number"},
-// 		Attributes: []*Attribute{
-// 			{
-// 				Path:  "*req.Destination",
-// 				Type:  utils.MetaConstant,
-// 				Value: config.NewRSRParsersMustCompile("BANNED_NUM", utils.InfieldSep),
-// 			}},
-// 		Blocker: false,
-// 		Weight:  20}, false); err != nil {
-// 		t.Error(err)
-// 	}
+	if err = alS.V1ProcessEvent(&utils.CGREvent{
+		Tenant: "cgrates.org",
+		Event: map[string]any{
+			utils.AccountField: "account_1001",
+			utils.Destination:  "100",
+		},
+		APIOpts: map[string]any{
+			utils.OptsAttributesProcessRuns: 2,
+		},
+	}, &rply); err == nil {
+		t.Errorf("Expected <%+v>, received <%+v>", err, nil)
+	}
 
-// 	alS := NewAttributeService(dm, filterS, cfg)
-// 	var rply AttrSProcessEventReply
-// 	expected := AttrSProcessEventReply{
-// 		MatchedProfiles: []string{"cgrates.org:ATTR_CHECK_DESTINATION"},
-// 		AlteredFields:   []string{"*req.Destination"},
-// 		CGREvent: &utils.CGREvent{
-// 			Tenant: "cgrates.org",
-// 			Time:   nil,
-// 			Event: map[string]any{
-// 				utils.AccountField: "account_1001",
-// 				utils.Destination:  "BANNED_NUM",
-// 			},
-// 			APIOpts: map[string]any{
-// 				utils.OptsAttributesProcessRuns: 2,
-// 			},
-// 		},
-// 		blocker: false,
-// 	}
-// 	if err = alS.V1ProcessEvent(&utils.CGREvent{
-// 		Tenant: "cgrates.org",
-// 		Event: map[string]any{
-// 			utils.AccountField: "account_1001",
-// 			utils.Destination:  "100",
-// 		},
-// 		APIOpts: map[string]any{
-// 			utils.OptsAttributesProcessRuns: 2,
-// 		},
-// 	}, &rply); err != nil {
-// 		t.Errorf("Expected <%+v>, received <%+v>", nil, err)
-// 	} else if sort.Strings(rply.AlteredFields); !reflect.DeepEqual(expected, rply) {
-// 		t.Errorf("Expected <%+v>, received <%+v>", utils.ToJSON(expected), utils.ToJSON(rply))
-// 	}
-// }
+}
