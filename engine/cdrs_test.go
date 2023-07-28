@@ -2348,3 +2348,51 @@ func TestCDRSGetCDRs(t *testing.T) {
 		t.Error(err)
 	}
 }
+
+func TestV1RateCDRsSuccesful(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+	cdrS := &CDRServer{
+		cgrCfg:  cfg,
+		cdrDb:   db,
+		dm:      dm,
+		connMgr: nil,
+	}
+	cdr := &CDR{
+		CGRID:       utils.Sha1("dsafdsaf", time.Date(2023, 11, 7, 8, 42, 26, 0, time.UTC).String()),
+		OrderID:     123,
+		ToR:         utils.MetaVoice,
+		OriginID:    "dsafdsaf",
+		OriginHost:  "192.168.1.1",
+		Source:      utils.UnitTest,
+		RequestType: utils.MetaRated,
+		Tenant:      "cgrates.org",
+		Category:    "call",
+		Account:     "1001",
+		Subject:     "1002",
+		Destination: "+4986517174963",
+		SetupTime:   time.Date(2023, 11, 7, 8, 42, 20, 0, time.UTC),
+		AnswerTime:  time.Date(2023, 11, 7, 8, 42, 26, 0, time.UTC),
+		RunID:       utils.MetaDefault,
+		Usage:       10 * time.Second,
+		Cost:        1.01,
+	}
+	if err := db.SetCDR(cdr, true); err != nil {
+		t.Error(err)
+	}
+	var reply string
+	arg := &ArgRateCDRs{
+		Flags:  []string{utils.MetaRerate},
+		Tenant: "cgrates.org",
+		RPCCDRsFilter: utils.RPCCDRsFilter{
+			Accounts: []string{"1001"},
+		},
+		APIOpts: map[string]any{},
+	}
+	if err := cdrS.V1RateCDRs(arg, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error("Expected reply to be ok")
+	}
+}
