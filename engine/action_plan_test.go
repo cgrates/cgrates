@@ -376,3 +376,91 @@ func TestGetNextStartTimeOld(t *testing.T) {
 		})
 	}
 }
+
+func TestActionPlanCloneNilReturn(t *testing.T) {
+	var at *ActionTiming
+
+	rcv := at.Clone()
+
+	if rcv != nil {
+		t.Error(rcv)
+	}
+}
+
+func TestActionPlanGetNextStartTimeOld(t *testing.T) {
+	zr := time.Date(0, 0, 0, 0, 0, 0, 0, time.Local)
+	at := ActionTiming{
+		stCache: zr,
+	}
+	var zr2 time.Time
+	at2 := ActionTiming{
+		stCache: zr2,
+		Timing:  nil,
+	}
+	var zr3 time.Time
+	at3 := ActionTiming{
+		stCache: zr3,
+		Timing: &RateInterval{
+			Timing: &RITiming{
+				StartTime: "test",
+			},
+		},
+	}
+	var zr4 time.Time
+	at4 := ActionTiming{
+		stCache: zr4,
+		Timing: &RateInterval{
+			Timing: &RITiming{
+				StartTime:  "",
+				Years:      utils.Years{2021},
+				Months:     utils.Months{2},
+				MonthDays:  utils.MonthDays{2},
+				WeekDays:   utils.WeekDays{2},
+				EndTime:    "08:09:23",
+				cronString: "test",
+				tag:        "test",
+			},
+		},
+	}
+
+	tests := []struct {
+		name string
+		exp  time.Time
+	}{
+		{
+			name: "stCache is not zero",
+			exp:  zr,
+		},
+		{
+			name: "timing nil",
+			exp:  zr2,
+		},
+		{
+			name: "cannot parse start time",
+			exp:  zr3,
+		},
+		{
+			name: "empty timings",
+			exp:  at4.GetNextStartTimeOld(time.Now()),
+		},
+	}
+
+	for i, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			var rcv time.Time
+			if i == 0 {
+				rcv = at.GetNextStartTimeOld(time.Now())
+			} else if i == 1 {
+				rcv = at2.GetNextStartTimeOld(time.Now())
+			} else if i == 2 {
+				rcv = at3.GetNextStartTimeOld(time.Now())
+			} else if i == 3 {
+				rcv = at4.GetNextStartTimeOld(time.Now())
+			}
+
+			if rcv != tt.exp {
+				t.Error("received", rcv, "expected", tt.exp)
+			}
+		})
+	}
+}

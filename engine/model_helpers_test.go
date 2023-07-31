@@ -1899,3 +1899,78 @@ func TestTPSuppliersAsTPSupplierProfiles(t *testing.T) {
 		t.Errorf("Expecting: %+v,\nReceived: %+v", utils.ToJSON(expPrfRev), utils.ToJSON(rcvRev))
 	}
 }
+
+func TestModelHelpersAsMapDestinations(t *testing.T) {
+	tp := TpDestination{
+		Id:        1,
+		Tpid:      "test",
+		Tag:       "test",
+		Prefix:    "test",
+		CreatedAt: time.Now(),
+	}
+	tps := TpDestinations{tp}
+
+	d := &Destination{
+		Id:       "test",
+		Prefixes: []string{"test"},
+	}
+	exp := map[string]*Destination{"test": d}
+
+	rcv, err := tps.AsMapDestinations()
+	if err != nil {
+		t.Error(err)
+	}
+
+	if !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("expected %v, received %v", exp, rcv)
+	}
+}
+
+func TestModelHelpersAPItoModelDestination(t *testing.T) {
+	d := &utils.TPDestination{
+		TPid: "test",
+		ID:   "test",
+	}
+
+	tp := TpDestination{
+		Tpid: "test",
+		Tag:  "test",
+	}
+	exp := TpDestinations{tp}
+
+	rcv := APItoModelDestination(d)
+
+	if !reflect.DeepEqual(exp, rcv) {
+		t.Errorf("expected %v, received %v", exp, rcv)
+	}
+}
+
+func TestModelHelpersAPItoModelTimings(t *testing.T) {
+	ts := []*utils.ApierTPTiming{{
+		TPid:      str,
+		ID:        str,
+		Years:     str,
+		Months:    str,
+		MonthDays: str,
+		WeekDays:  str,
+		Time:      str,
+	}}
+
+	tp := TpTiming{
+		Id:        0,
+		Tpid:      str,
+		Tag:       str,
+		Years:     str,
+		Months:    str,
+		MonthDays: str,
+		WeekDays:  str,
+		Time:      str,
+	}
+	exp := TpTimings{tp}
+
+	rcv := APItoModelTimings(ts)
+
+	if !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("expected %v, received %v", exp, rcv)
+	}
+}

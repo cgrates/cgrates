@@ -196,7 +196,7 @@ var ac Account = Account{
 	UpdateTime:        tm2,
 	executingTriggers: bl,
 }
-var a Action = Action{
+var a *Action = &Action{
 	Id:               str2,
 	ActionType:       str2,
 	ExtraParameters:  str2,
@@ -241,7 +241,7 @@ func TestActionresetAction(t *testing.T) {
 
 	acs := Actions{}
 
-	err := debitResetAction(&ac, &a, acs, nil)
+	err := debitResetAction(&ac, a, acs, nil)
 	if err != nil {
 		if err.Error() != "" {
 			t.Error(err)
@@ -287,12 +287,6 @@ func TestActiongetOneData(t *testing.T) {
 }
 
 func TestAccountsendErrors(t *testing.T) {
-	type args struct {
-		ub        *Account
-		a         *Action
-		acs       Actions
-		extraData any
-	}
 	tests := []struct {
 		name string
 		rcv  error
@@ -331,6 +325,11 @@ func TestAccountsendErrors(t *testing.T) {
 		{
 			name: "callURLAsync error check",
 			rcv:  callURLAsync(nil, nil, nil, make(chan int)),
+			exp:  "json: unsupported type: chan int",
+		},
+		{
+			name: "postEvent error check",
+			rcv:  postEvent(nil, nil, nil, make(chan int)),
 			exp:  "json: unsupported type: chan int",
 		},
 	}
@@ -457,7 +456,7 @@ func TestActionCloneNil(t *testing.T) {
 
 var cdrP cdrLogProvider = cdrLogProvider{
 	acnt:   &ac,
-	action: &a,
+	action: a,
 	cache:  utils.MapStorage{},
 }
 
@@ -473,7 +472,7 @@ func TestActionString(t *testing.T) {
 func TestActionFieldAsInterface(t *testing.T) {
 	cdrP := cdrLogProvider{
 		acnt:   &ac,
-		action: &a,
+		action: a,
 		cache:  utils.MapStorage{},
 	}
 
@@ -597,5 +596,169 @@ func TestActionRemoteHost(t *testing.T) {
 
 	if rcv.String() != "local" {
 		t.Error(rcv)
+	}
+}
+
+func TestActionresetAccountErrors(t *testing.T) {
+	type args struct {
+		ub *Account
+		action *Action
+		acts Actions
+	}
+	tests :=  []struct{
+		name string 
+		args args 
+		err string 
+	}{
+		{
+			name: "nil account",
+			args: args{ub: nil, action: nil, acts: nil},
+			err: "nil account",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			err := resetAccount(tt.args.ub, tt.args.action, tt.args.acts, nil)
+
+			if err != nil {
+				if err.Error() != tt.err {
+					t.Error(err)
+				}
+			}
+		})
+	}
+}
+
+func TestActionremoveExpired(t *testing.T) {
+	sm := utils.StringMap{
+		"test1": bl,
+	}
+	rtm := RITiming{
+		Years:      utils.Years{2021},
+		Months:     utils.Months{8},
+		MonthDays:  utils.MonthDays{28},
+		WeekDays:   utils.WeekDays{5},
+		StartTime:  str,
+		EndTime:    str,
+		cronString: str,
+		tag:        str,
+	}
+	blc := Balance{
+		Uuid:           str2,
+		ID:             str2,
+		Value:          fl2,
+		ExpirationDate: tm2,
+		Weight:         fl2,
+		DestinationIDs: sm,
+		RatingSubject:  str2,
+		Categories:     sm,
+		SharedGroups:   sm,
+		Timings:        []*RITiming{&rtm},
+		TimingIDs:      sm,
+		Disabled:       bl,
+		Factor:         ValueFactor{str2: fl2},
+		Blocker:        bl,
+		precision:      nm2,
+		dirty:          bl,
+	}
+	acc := &Account{
+		BalanceMap: map[string]Balances{"test1": {&blc}},
+	}
+
+	type args struct {
+		ub *Account
+		action *Action
+		acts Actions
+		extra any
+	}
+	tests :=  []struct{
+		name string 
+		args args 
+		err string 
+	}{
+		{
+			name: "nil account",
+			args: args{nil, nil, nil, nil},
+			err: "nil account for null action",
+		},
+		{
+			name: "nil account",
+			args: args{acc, a, nil, nil},
+			err: "NOT_FOUND",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			err := removeExpired(tt.args.ub, tt.args.action, tt.args.acts, nil)
+
+			if err != nil {
+				if err.Error() != tt.err {
+					t.Error(err)
+				}
+			}
+		})
+	}
+}
+
+func TestActiontopupZeroNegativeAction(t *testing.T) {
+	ub := &Account{}
+
+	topupZeroNegativeAction(ub, nil, nil, nil)
+
+	if ub.BalanceMap == nil {
+		t.Error("didn't update")
+	}
+}
+
+func TestActionremoveAccountAction(t *testing.T) {
+	ub := &Account{
+		ID: "",
+	}
+	actn := &Action{
+		ExtraParameters:  str2,
+	}
+	actn2 := &Action{
+		ExtraParameters:  "",
+	}
+	type args struct {
+		ub *Account
+		action *Action
+		acts Actions
+		extra any
+	}
+	tests :=  []struct{
+		name string 
+		args args 
+		err  string 
+	}{
+		{
+			name: "error json unmarshal",
+			args: args{nil, actn, nil, nil},
+			err: "invalid character 'e' in literal true (expecting 'r')",
+		},
+		{
+			name: "concatenate key",
+			args: args{nil, actn2, nil, nil},
+			err: "",
+		},
+		{
+			name: "accID empty string",
+			args: args{ub, actn2, nil, nil},
+			err: "INVALID_KEY",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			err := removeAccountAction(tt.args.ub, tt.args.action, tt.args.acts, tt.args.extra)
+
+			if err != nil {
+				if err.Error() != tt.err {
+					t.Error(err)
+				}
+			}
+		})
 	}
 }
