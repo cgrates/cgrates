@@ -748,3 +748,26 @@ func TestMapEventGetDurationPtrOrDefault(t *testing.T) {
 		t.Errorf("Expected: %+v, received: %+v", newVal, ptr)
 	}
 }
+
+func TestMapEventCloneNil(t *testing.T) {
+	var me MapEvent
+
+	rcv := me.Clone()
+
+	if rcv != nil {
+		t.Error(rcv)
+	}
+}
+
+func TestMapEventData(t *testing.T) {
+	me := MapEvent{
+		"test": "val1",
+	}
+
+	rcv := me.Data()
+	exp := map[string]any{"test": "val1"}
+
+	if !reflect.DeepEqual(rcv, exp) {
+		t.Error(rcv)
+	}
+}
