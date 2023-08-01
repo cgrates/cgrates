@@ -86,7 +86,9 @@ func (dns *DNSAgent) Reload() (err error) {
 	dns.Lock()
 	defer dns.Unlock()
 
-	dns.Shutdown()
+	if dns.dns != nil {
+		close(dns.stopChan)
+	}
 
 	dns.dns, err = agents.NewDNSAgent(dns.cfg, filterS, dns.connMgr)
 	if err != nil {
