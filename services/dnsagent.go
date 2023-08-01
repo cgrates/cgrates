@@ -48,14 +48,14 @@ type DNSAgent struct {
 	cfg         *config.CGRConfig
 	filterSChan chan *engine.FilterS
 
+	stopChan chan struct{}
+
 	dns     *agents.DNSAgent
 	connMgr *engine.ConnManager
 	srvDep  map[string]*sync.WaitGroup
-
-	oldListen string
 }
 
-// Start should handle the sercive start
+// Start should handle the service start
 func (dns *DNSAgent) Start(ctx *context.Context, shtDwn context.CancelFunc) (err error) {
 	if dns.IsRunning() {
 		return utils.ErrServiceAlreadyRunning
@@ -67,37 +67,45 @@ func (dns *DNSAgent) Start(ctx *context.Context, shtDwn context.CancelFunc) (err
 
 	dns.Lock()
 	defer dns.Unlock()
-	dns.oldListen = dns.cfg.DNSAgentCfg().Listen
 	dns.dns, err = agents.NewDNSAgent(dns.cfg, filterS, dns.connMgr)
 	if err != nil {
 		utils.Logger.Err(fmt.Sprintf("<%s> error: <%s>", utils.DNSAgent, err.Error()))
 		dns.dns = nil
 		return
 	}
-	go dns.listenAndServe(shtDwn)
+	dns.stopChan = make(chan struct{})
+	go dns.listenAndServe(dns.stopChan, shtDwn)
 	return
 }
 
 // Reload handles the change of config
 func (dns *DNSAgent) Reload(ctx *context.Context, shtDwn context.CancelFunc) (err error) {
-	if dns.oldListen == dns.cfg.DNSAgentCfg().Listen {
-		return
-	}
+	filterS := <-dns.filterSChan
+	dns.filterSChan <- filterS
+
 	dns.Lock()
 	defer dns.Unlock()
-	if err = dns.dns.Shutdown(); err != nil {
+
+	dns.Shutdown()
+
+	dns.dns, err = agents.NewDNSAgent(dns.cfg, filterS, dns.connMgr)
+	if err != nil {
+		utils.Logger.Err(fmt.Sprintf("<%s> error: <%s>", utils.DNSAgent, err.Error()))
+		dns.dns = nil
 		return
 	}
-	dns.oldListen = dns.cfg.DNSAgentCfg().Listen
-	if err = dns.dns.Reload(); err != nil {
-		return
-	}
-	go dns.listenAndServe(shtDwn)
+
+	dns.dns.Lock()
+	defer dns.dns.Unlock()
+	dns.stopChan = make(chan struct{})
+	go dns.listenAndServe(dns.stopChan, shtDwn)
 	return
 }
 
-func (dns *DNSAgent) listenAndServe(shtDwn context.CancelFunc) (err error) {
-	if err = dns.dns.ListenAndServe(); err != nil {
+func (dns *DNSAgent) listenAndServe(stopChan chan struct{}, shtDwn context.CancelFunc) (err error) {
+	dns.dns.RLock()
+	defer dns.dns.RUnlock()
+	if err = dns.dns.ListenAndServe(stopChan); err != nil {
 		utils.Logger.Err(fmt.Sprintf("<%s> error: <%s>", utils.DNSAgent, err.Error()))
 		shtDwn() // stop the engine here
 	}

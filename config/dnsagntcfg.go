@@ -23,11 +23,15 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
+type Listener struct {
+	Address string
+	Network string // udp or tcp
+}
+
 // DNSAgentCfg the config section that describes the DNS Agent
 type DNSAgentCfg struct {
 	Enabled           bool
-	Listen            string
-	ListenNet         string // udp or tcp
+	Listeners         []Listener
 	SessionSConns     []string
 	Timezone          string
 	RequestProcessors []*RequestProcessor
@@ -49,11 +53,18 @@ func (da *DNSAgentCfg) loadFromJSONCfg(jsnCfg *DNSAgentJsonCfg, sep string) (err
 	if jsnCfg.Enabled != nil {
 		da.Enabled = *jsnCfg.Enabled
 	}
-	if jsnCfg.Listen_net != nil {
-		da.ListenNet = *jsnCfg.Listen_net
-	}
-	if jsnCfg.Listen != nil {
-		da.Listen = *jsnCfg.Listen
+	if jsnCfg.Listeners != nil {
+		da.Listeners = make([]Listener, 0, len(*jsnCfg.Listeners))
+		for _, listnr := range *jsnCfg.Listeners {
+			var ls Listener
+			if listnr.Address != nil {
+				ls.Address = *listnr.Address
+			}
+			if listnr.Network != nil {
+				ls.Network = *listnr.Network
+			}
+			da.Listeners = append(da.Listeners, ls)
+		}
 	}
 	if jsnCfg.Timezone != nil {
 		da.Timezone = *jsnCfg.Timezone
@@ -65,14 +76,25 @@ func (da *DNSAgentCfg) loadFromJSONCfg(jsnCfg *DNSAgentJsonCfg, sep string) (err
 	return
 }
 
+func (lstn *Listener) AsMapInterface(separator string) map[string]any {
+	return map[string]any{
+		utils.AddressCfg: lstn.Address,
+		utils.NetworkCfg: lstn.Network,
+	}
+}
+
 // AsMapInterface returns the config as a map[string]any
 func (da DNSAgentCfg) AsMapInterface(separator string) any {
 	mp := map[string]any{
-		utils.EnabledCfg:   da.Enabled,
-		utils.ListenCfg:    da.Listen,
-		utils.ListenNetCfg: da.ListenNet,
-		utils.TimezoneCfg:  da.Timezone,
+		utils.EnabledCfg:  da.Enabled,
+		utils.TimezoneCfg: da.Timezone,
 	}
+
+	listeners := make([]map[string]any, len(da.Listeners))
+	for i, item := range da.Listeners {
+		listeners[i] = item.AsMapInterface(separator)
+	}
+	mp[utils.ListenersCfg] = listeners
 
 	requestProcessors := make([]map[string]any, len(da.RequestProcessors))
 	for i, item := range da.RequestProcessors {
@@ -93,9 +115,13 @@ func (da DNSAgentCfg) CloneSection() Section { return da.Clone() }
 func (da DNSAgentCfg) Clone() (cln *DNSAgentCfg) {
 	cln = &DNSAgentCfg{
 		Enabled:   da.Enabled,
-		Listen:    da.Listen,
-		ListenNet: da.ListenNet,
+		Listeners: da.Listeners,
 		Timezone:  da.Timezone,
+	}
+
+	if da.Listeners != nil {
+		cln.Listeners = make([]Listener, len(da.Listeners))
+		copy(cln.Listeners, da.Listeners)
 	}
 	if da.SessionSConns != nil {
 		cln.SessionSConns = utils.CloneStringSlice(da.SessionSConns)
@@ -109,11 +135,15 @@ func (da DNSAgentCfg) Clone() (cln *DNSAgentCfg) {
 	return
 }
 
+type ListenerJsnCfg struct {
+	Address *string
+	Network *string
+}
+
 // DNSAgentJsonCfg
 type DNSAgentJsonCfg struct {
 	Enabled            *bool
-	Listen             *string
-	Listen_net         *string
+	Listeners          *[]*ListenerJsnCfg
 	Sessions_conns     *[]string
 	Timezone           *string
 	Request_processors *[]*ReqProcessorJsnCfg
@@ -126,12 +156,44 @@ func diffDNSAgentJsonCfg(d *DNSAgentJsonCfg, v1, v2 *DNSAgentCfg, separator stri
 	if v1.Enabled != v2.Enabled {
 		d.Enabled = utils.BoolPointer(v2.Enabled)
 	}
-	if v1.Listen != v2.Listen {
-		d.Listen = utils.StringPointer(v2.Listen)
+
+	minLen := len(v1.Listeners)
+	if len(v2.Listeners) < minLen {
+		minLen = len(v2.Listeners)
 	}
-	if v1.ListenNet != v2.ListenNet {
-		d.Listen_net = utils.StringPointer(v2.ListenNet)
+
+	diffListeners := &[]*ListenerJsnCfg{}
+
+	for i := 0; i < minLen; i++ {
+		if v1.Listeners[i].Address != v2.Listeners[i].Address ||
+			v1.Listeners[i].Network != v2.Listeners[i].Network {
+			*diffListeners = append(*diffListeners, &ListenerJsnCfg{
+				Address: utils.StringPointer(v2.Listeners[i].Address),
+				Network: utils.StringPointer(v2.Listeners[i].Network),
+			})
+		}
 	}
+
+	if len(v1.Listeners) > minLen {
+		for i := minLen; i < len(v1.Listeners); i++ {
+			*diffListeners = append(*diffListeners, &ListenerJsnCfg{
+				Address: utils.StringPointer(v1.Listeners[i].Address),
+				Network: utils.StringPointer(v1.Listeners[i].Network),
+			})
+		}
+	}
+
+	if len(v2.Listeners) > minLen {
+		for i := minLen; i < len(v2.Listeners); i++ {
+			*diffListeners = append(*diffListeners, &ListenerJsnCfg{
+				Address: utils.StringPointer(v2.Listeners[i].Address),
+				Network: utils.StringPointer(v2.Listeners[i].Network),
+			})
+		}
+	}
+
+	d.Listeners = diffListeners
+
 	if !utils.SliceStringEqual(v1.SessionSConns, v2.SessionSConns) {
 		d.Sessions_conns = utils.SliceStringPointer(getBiRPCInternalJSONConns(v2.SessionSConns))
 	}

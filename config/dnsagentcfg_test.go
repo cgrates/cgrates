@@ -26,9 +26,13 @@ import (
 
 func TestDNSAgentCfgloadFromJsonCfg(t *testing.T) {
 	jsnCfg := &DNSAgentJsonCfg{
-		Enabled:        utils.BoolPointer(true),
-		Listen:         utils.StringPointer("127.0.0.1:2053"),
-		Listen_net:     utils.StringPointer("udp"),
+		Enabled: utils.BoolPointer(true),
+		Listeners: &[]*ListenerJsnCfg{
+			{
+				Address: utils.StringPointer("127.0.0.1:2053"),
+				Network: utils.StringPointer("udp"),
+			},
+		},
 		Sessions_conns: &[]string{utils.MetaInternal, "*conn1"},
 		Timezone:       utils.StringPointer("UTC"),
 		Request_processors: &[]*ReqProcessorJsnCfg{
@@ -46,9 +50,13 @@ func TestDNSAgentCfgloadFromJsonCfg(t *testing.T) {
 		},
 	}
 	expected := &DNSAgentCfg{
-		Enabled:       true,
-		Listen:        "127.0.0.1:2053",
-		ListenNet:     "udp",
+		Enabled: true,
+		Listeners: []Listener{
+			{
+				Address: "127.0.0.1:2053",
+				Network: "udp",
+			},
+		},
 		SessionSConns: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS), "*conn1"},
 		Timezone:      "UTC",
 		RequestProcessors: []*RequestProcessor{
@@ -192,17 +200,23 @@ func TestDNSAgentCfgAsMapInterface(t *testing.T) {
 	cfgJSONStr := `{
 	"dns_agent": {
 		"enabled": false,
-		"listen": "127.0.0.1:2053",
-		"listen_net": "udp",
+		"listeners":[
+			{
+				"address": "127.0.0.1:2053",
+				"network": "udp"
+			}
+		],
 		"sessions_conns": ["*internal"],
 		"timezone": "",
 		"request_processors": [],
 	},
 }`
 	eMap := map[string]any{
-		utils.EnabledCfg:           false,
-		utils.ListenCfg:            "127.0.0.1:2053",
-		utils.ListenNetCfg:         "udp",
+		utils.EnabledCfg: false,
+		utils.ListenersCfg: []map[string]any{{
+			utils.AddressCfg: "127.0.0.1:2053",
+			utils.NetworkCfg: "udp",
+		}},
 		utils.SessionSConnsCfg:     []string{"*internal"},
 		utils.TimezoneCfg:          "",
 		utils.RequestProcessorsCfg: []map[string]any{},
@@ -218,8 +232,12 @@ func TestDNSAgentCfgAsMapInterface1(t *testing.T) {
 	cfgJSONStr := `{
 		"dns_agent": {
 			"enabled": false,
-			"listen": "127.0.0.1:2053",
-			"listen_net": "udp",
+			"listeners":[
+				{
+					"address": "127.0.0.1:2053",
+					"network": "udp"
+				}
+			],
 			"sessions_conns": ["*internal:*sessions", "*conn1"],
 			"timezone": "UTC",
 			"request_processors": [
@@ -247,9 +265,13 @@ func TestDNSAgentCfgAsMapInterface1(t *testing.T) {
 		},
 	}`
 	eMap := map[string]any{
-		utils.EnabledCfg:       false,
-		utils.ListenCfg:        "127.0.0.1:2053",
-		utils.ListenNetCfg:     "udp",
+		utils.EnabledCfg: false,
+		utils.ListenersCfg: []map[string]any{
+			{
+				utils.AddressCfg: "127.0.0.1:2053",
+				utils.NetworkCfg: "udp",
+			},
+		},
 		utils.SessionSConnsCfg: []string{utils.MetaInternal, "*conn1"},
 		utils.TimezoneCfg:      "UTC",
 		utils.RequestProcessorsCfg: []map[string]any{
@@ -303,9 +325,13 @@ func TestRequestProcessorClone(t *testing.T) {
 
 func TestDNSAgentCfgClone(t *testing.T) {
 	ban := &DNSAgentCfg{
-		Enabled:       true,
-		Listen:        "127.0.0.1:2053",
-		ListenNet:     "udp",
+		Enabled: true,
+		Listeners: []Listener{
+			{
+				Address: "127.0.0.1:2053",
+				Network: "udp",
+			},
+		},
 		SessionSConns: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS), "*conn1"},
 		Timezone:      "UTC",
 		RequestProcessors: []*RequestProcessor{
@@ -337,18 +363,26 @@ func TestDiffDNSAgentJsonCfg(t *testing.T) {
 	var d *DNSAgentJsonCfg
 
 	v1 := &DNSAgentCfg{
-		Enabled:           false,
-		Listen:            "localhost:8080",
-		ListenNet:         "tcp",
+		Enabled: false,
+		Listeners: []Listener{
+			{
+				Address: "localhost:8080",
+				Network: "tcp",
+			},
+		},
 		SessionSConns:     []string{"*localhost"},
 		Timezone:          "UTC",
 		RequestProcessors: []*RequestProcessor{},
 	}
 
 	v2 := &DNSAgentCfg{
-		Enabled:       true,
-		Listen:        "localhost:8037",
-		ListenNet:     "udp",
+		Enabled: true,
+		Listeners: []Listener{
+			{
+				Address: "localhost:8037",
+				Network: "udp",
+			},
+		},
 		SessionSConns: []string{"*birpc"},
 		Timezone:      "EEST",
 		RequestProcessors: []*RequestProcessor{
@@ -359,9 +393,13 @@ func TestDiffDNSAgentJsonCfg(t *testing.T) {
 	}
 
 	expected := &DNSAgentJsonCfg{
-		Enabled:        utils.BoolPointer(true),
-		Listen:         utils.StringPointer("localhost:8037"),
-		Listen_net:     utils.StringPointer("udp"),
+		Enabled: utils.BoolPointer(true),
+		Listeners: &[]*ListenerJsnCfg{
+			{
+				Address: utils.StringPointer("localhost:8037"),
+				Network: utils.StringPointer("udp"),
+			},
+		},
 		Sessions_conns: &[]string{"*birpc"},
 		Timezone:       utils.StringPointer("EEST"),
 		Request_processors: &[]*ReqProcessorJsnCfg{
@@ -378,29 +416,38 @@ func TestDiffDNSAgentJsonCfg(t *testing.T) {
 
 	v2_2 := v1
 	expected2 := &DNSAgentJsonCfg{
+		Listeners:          &[]*ListenerJsnCfg{},
 		Request_processors: &[]*ReqProcessorJsnCfg{},
 	}
 
 	rcv = diffDNSAgentJsonCfg(d, v1, v2_2, ";")
 	if !reflect.DeepEqual(rcv, expected2) {
-		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected2), utils.ToJSON(rcv))
+		t.Errorf("Expected %v \n but received \n %v", expected2, rcv)
 	}
 }
 
 func TestDnsAgentCloneSection(t *testing.T) {
 	dnsCfg := &DNSAgentCfg{
-		Enabled:           false,
-		Listen:            "localhost:8080",
-		ListenNet:         "tcp",
+		Enabled: false,
+		Listeners: []Listener{
+			{
+				Address: "localhost:8080",
+				Network: "tcp",
+			},
+		},
 		SessionSConns:     []string{"*localhost"},
 		Timezone:          "UTC",
 		RequestProcessors: []*RequestProcessor{},
 	}
 
 	exp := &DNSAgentCfg{
-		Enabled:           false,
-		Listen:            "localhost:8080",
-		ListenNet:         "tcp",
+		Enabled: false,
+		Listeners: []Listener{
+			{
+				Address: "localhost:8080",
+				Network: "tcp",
+			},
+		},
 		SessionSConns:     []string{"*localhost"},
 		Timezone:          "UTC",
 		RequestProcessors: []*RequestProcessor{},
