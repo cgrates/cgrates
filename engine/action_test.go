@@ -587,7 +587,7 @@ func TestActionFieldAsString(t *testing.T) {
 	if err != nil {
 		if err.Error() != "Unsupported format for TenantAccount: test" {
 			t.Error(err)
-		} 
+		}
 	}
 }
 
@@ -601,19 +601,19 @@ func TestActionRemoteHost(t *testing.T) {
 
 func TestActionresetAccountErrors(t *testing.T) {
 	type args struct {
-		ub *Account
+		ub     *Account
 		action *Action
-		acts Actions
+		acts   Actions
 	}
-	tests :=  []struct{
-		name string 
-		args args 
-		err string 
+	tests := []struct {
+		name string
+		args args
+		err  string
 	}{
 		{
 			name: "nil account",
 			args: args{ub: nil, action: nil, acts: nil},
-			err: "nil account",
+			err:  "nil account",
 		},
 	}
 
@@ -667,25 +667,25 @@ func TestActionremoveExpired(t *testing.T) {
 	}
 
 	type args struct {
-		ub *Account
+		ub     *Account
 		action *Action
-		acts Actions
-		extra any
+		acts   Actions
+		extra  any
 	}
-	tests :=  []struct{
-		name string 
-		args args 
-		err string 
+	tests := []struct {
+		name string
+		args args
+		err  string
 	}{
 		{
 			name: "nil account",
 			args: args{nil, nil, nil, nil},
-			err: "nil account for null action",
+			err:  "nil account for null action",
 		},
 		{
 			name: "nil account",
 			args: args{acc, a, nil, nil},
-			err: "NOT_FOUND",
+			err:  "NOT_FOUND",
 		},
 	}
 
@@ -717,36 +717,36 @@ func TestActionremoveAccountAction(t *testing.T) {
 		ID: "",
 	}
 	actn := &Action{
-		ExtraParameters:  str2,
+		ExtraParameters: str2,
 	}
 	actn2 := &Action{
-		ExtraParameters:  "",
+		ExtraParameters: "",
 	}
 	type args struct {
-		ub *Account
+		ub     *Account
 		action *Action
-		acts Actions
-		extra any
+		acts   Actions
+		extra  any
 	}
-	tests :=  []struct{
-		name string 
-		args args 
-		err  string 
+	tests := []struct {
+		name string
+		args args
+		err  string
 	}{
 		{
 			name: "error json unmarshal",
 			args: args{nil, actn, nil, nil},
-			err: "invalid character 'e' in literal true (expecting 'r')",
+			err:  "invalid character 'e' in literal true (expecting 'r')",
 		},
 		{
 			name: "concatenate key",
 			args: args{nil, actn2, nil, nil},
-			err: "",
+			err:  "",
 		},
 		{
 			name: "accID empty string",
 			args: args{ub, actn2, nil, nil},
-			err: "INVALID_KEY",
+			err:  "INVALID_KEY",
 		},
 	}
 
