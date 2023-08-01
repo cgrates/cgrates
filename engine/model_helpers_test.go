@@ -1974,3 +1974,337 @@ func TestModelHelpersAPItoModelTimings(t *testing.T) {
 		t.Errorf("expected %v, received %v", exp, rcv)
 	}
 }
+
+func TestModelHelpersAPItoModelRate(t *testing.T) {
+	r := &utils.TPRate{
+		TPid: str,
+		ID:   str,
+	}
+
+	rcv := APItoModelRate(r)
+	exp := TpRates{{
+		Tpid: r.TPid,
+		Tag:  r.ID,
+	}}
+
+	if !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("expected %v, received %v", exp, rcv)
+	}
+}
+
+func TestModelHelpersAPItoModelRates(t *testing.T) {
+	rs := []*utils.TPRate{{
+		TPid: str,
+		ID:   str,
+	}}
+
+	rcv := APItoModelRates(rs)
+	exp := APItoModelRate(rs[0])
+
+	if !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("expected %v, received %v", exp, rcv)
+	}
+}
+
+func TestModelHelpersMapTPDestinationRates(t *testing.T) {
+	s := []*utils.TPDestinationRate{{
+		TPid: str,
+		ID:   str,
+	}, {
+		TPid: str,
+		ID:   str,
+	}}
+
+	_, err := MapTPDestinationRates(s)
+
+	if err != nil {
+		if err.Error() != "Non unique ID test" {
+			t.Error(err)
+		}
+	}
+}
+
+func TestModelHelpersAPItoModelDestinationRate(t *testing.T) {
+	d := &utils.TPDestinationRate{
+		TPid: str,
+		ID:   str,
+	}
+
+	rcv := APItoModelDestinationRate(d)
+	exp := TpDestinationRates{{
+		Tpid: d.TPid,
+		Tag:  d.ID,
+	}}
+
+	if !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("expected %v, received %v", exp, rcv)
+	}
+}
+
+func TestModelHelpersAPItoModelDestinationRates(t *testing.T) {
+	drs := []*utils.TPDestinationRate{{
+		TPid: str,
+		ID:   str,
+	}}
+
+	rcv := APItoModelDestinationRates(drs)
+	exp := APItoModelDestinationRate(drs[0])
+
+	if !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("expected %v, received %v", exp, rcv)
+	}
+}
+
+func TestModelHelpersAPItoModelRatingPlan(t *testing.T) {
+	rp := &utils.TPRatingPlan{
+		TPid: str,
+		ID:   str,
+	}
+
+	rcv := APItoModelRatingPlan(rp)
+	exp := TpRatingPlans{{
+		Tpid: rp.TPid,
+		Tag:  rp.ID,
+	}}
+
+	if !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("expected %v, received %v", exp, rcv)
+	}
+}
+
+func TestModelHelpersAPItoModelRatingPlans(t *testing.T) {
+	rps := []*utils.TPRatingPlan{{
+		TPid: str,
+		ID:   str,
+	}}
+
+	rcv := APItoModelRatingPlans(rps)
+	exp := APItoModelRatingPlan(rps[0])
+
+	if !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("expected %v, received %v", exp, rcv)
+	}
+}
+
+func TestModelHelpersMapTPRatingProfiles(t *testing.T) {
+	s := []*utils.TPRatingProfile{{
+		TPid:   str,
+		LoadId: str,
+	}, {
+		TPid:   str,
+		LoadId: str,
+	}}
+
+	_, err := MapTPRatingProfiles(s)
+
+	if err != nil {
+		if err.Error() != "Non unique id test:*out:::" {
+			t.Error(err)
+		}
+	}
+}
+
+func TestModelHelpersMapTPRates(t *testing.T) {
+	s := []*utils.TPRate{{
+		TPid: str,
+		ID:   str,
+	}, {
+		TPid: str,
+		ID:   str,
+	}}
+
+	_, err := MapTPRates(s)
+
+	if err != nil {
+		if err.Error() != "Non unique ID test" {
+			t.Error(err)
+		}
+	}
+}
+
+func TestModelHelpersMapTPTimings(t *testing.T) {
+	tps := []*utils.ApierTPTiming{{
+		TPid: str,
+		ID:   str,
+	}, {
+		TPid: str,
+		ID:   str,
+	}}
+
+	_, err := MapTPTimings(tps)
+
+	if err != nil {
+		if err.Error() != "duplicate timing tag: test" {
+			t.Error(err)
+		}
+	}
+}
+
+func TestModelHelpersAPItoModelRatingProfile(t *testing.T) {
+	rp := &utils.TPRatingProfile{
+		TPid:     str,
+		LoadId:   str,
+		Tenant:   str,
+		Category: str,
+		Subject:  str,
+	}
+
+	rcv := APItoModelRatingProfile(rp)
+	exp := TpRatingProfiles{{
+		Tpid:     rp.TPid,
+		Loadid:   rp.LoadId,
+		Tenant:   rp.Tenant,
+		Category: rp.Category,
+		Subject:  rp.Subject,
+	}}
+
+	if !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("expected %v, received %v", exp, rcv)
+	}
+}
+
+func TestModelHelpersAPItoModelRatingProfiles(t *testing.T) {
+	rps := []*utils.TPRatingProfile{{
+		TPid:     str,
+		LoadId:   str,
+		Tenant:   str,
+		Category: str,
+		Subject:  str,
+	}}
+
+	rcv := APItoModelRatingProfiles(rps)
+	exp := APItoModelRatingProfile(rps[0])
+
+	if !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("expected %v, received %v", exp, rcv)
+	}
+}
+
+func TestModelHelpersMapTPSharedGroup(t *testing.T) {
+	s := []*utils.TPSharedGroups{{
+		TPid: str,
+		ID:   str,
+		SharedGroups: []*utils.TPSharedGroup{{
+			Account:       str,
+			Strategy:      str,
+			RatingSubject: str,
+		}},
+	},
+		{
+			TPid: str,
+			ID:   str,
+			SharedGroups: []*utils.TPSharedGroup{{
+				Account:       str,
+				Strategy:      str,
+				RatingSubject: str,
+			}},
+		}}
+
+	rcv := MapTPSharedGroup(s)
+	exp := map[string][]*utils.TPSharedGroup{str: {{
+		Account:       str,
+		Strategy:      str,
+		RatingSubject: str,
+	}, {
+		Account:       str,
+		Strategy:      str,
+		RatingSubject: str,
+	}}}
+
+	if !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("expected %v, received %v", exp, rcv)
+	}
+}
+
+func TestModelHelpersAPItoModelSharedGroup(t *testing.T) {
+	sgs := &utils.TPSharedGroups{
+		TPid: str,
+		ID:   str,
+	}
+
+	rcv := APItoModelSharedGroup(sgs)
+	exp := TpSharedGroups{{
+		Tpid: sgs.TPid,
+		Tag:  sgs.ID,
+	}}
+
+	if !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("expected %v, received %v", exp, rcv)
+	}
+}
+
+func TestModelHelpersAPItoModelSharedGroups(t *testing.T) {
+	sgs := []*utils.TPSharedGroups{{
+		TPid: str,
+		ID:   str,
+	}}
+
+	rcv := APItoModelSharedGroups(sgs)
+	exp := APItoModelSharedGroup(sgs[0])
+
+	if !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("expected %v, received %v", exp, rcv)
+	}
+}
+
+func TestModelHelpersAPItoModelAction(t *testing.T) {
+	as := &utils.TPActions{
+		TPid: str,
+		ID:   str,
+	}
+
+	rcv := APItoModelAction(as)
+	exp := TpActions{{
+		Tpid: as.TPid,
+		Tag:  as.ID,
+	}}
+
+	if !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("expected %v, received %v", exp, rcv)
+	}
+}
+
+func TestModelHelpersAPItoModelActions(t *testing.T) {
+	as := []*utils.TPActions{{
+		TPid: str,
+		ID:   str,
+	}}
+
+	rcv := APItoModelActions(as)
+	exp := APItoModelAction(as[0])
+
+	if !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("expected %v, received %v", exp, rcv)
+	}
+}
+
+func TestModelHelpersAPItoModelActionPlan(t *testing.T) {
+	a := &utils.TPActionPlan{
+		TPid: str,
+		ID:   str,
+	}
+
+	rcv := APItoModelActionPlan(a)
+	exp := TpActionPlans{{
+		Tpid: a.TPid,
+		Tag:  a.ID,
+	}}
+
+	if !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("expected %v, received %v", exp, rcv)
+	}
+}
+
+func TestModelHelpersAPItoModelActionPlans(t *testing.T) {
+	aps := []*utils.TPActionPlan{{
+		TPid: str,
+		ID:   str,
+	}}
+
+	rcv := APItoModelActionPlans(aps)
+	exp := APItoModelActionPlan(aps[0])
+
+	if !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("expected %v, received %v", exp, rcv)
+	}
+}
