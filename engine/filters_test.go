@@ -2587,3 +2587,57 @@ func TestSentryPeer(t *testing.T) {
 		t.Error("Expected item to be true")
 	}
 }
+
+func TestFilterPassTiming(t *testing.T) {
+	tmp1, tmp2 := connMgr, config.CgrConfig()
+	defer func() {
+		connMgr = tmp1
+		config.SetCgrConfig(tmp2)
+	}()
+
+	cfg := config.NewDefaultCGRConfig()
+	cfg.FilterSCfg().ApierSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaApier)}
+	config.SetCgrConfig(cfg)
+	Cache.Clear(nil)
+
+	client := make(chan rpcclient.ClientConnector, 1)
+	ccM := &ccMock{
+		calls: map[string]func(args any, reply any) error{
+			utils.APIerSv1GetTiming: func(args, reply any) error {
+				exp := &utils.TPTiming{
+					ID:        "MIDNIGHT",
+					Years:     utils.Years{2023},
+					Months:    utils.Months{1, 2, 3, 4},
+					MonthDays: utils.MonthDays{5, 6, 7, 8},
+					WeekDays:  utils.WeekDays{0, 1, 2, 3, 4, 5, 6},
+					StartTime: "17:00:00",
+					EndTime:   "17:00:18",
+				}
+				*reply.(*utils.TPTiming) = *exp
+				return nil
+			},
+		},
+	}
+	client <- ccM
+
+	NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaApier): client,
+	})
+
+	fltr, err := NewFilterRule(utils.MetaTimings, "~*req.AnswerTime", []string{"2023-01-07T17:00:10Z"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	dtP := utils.MapStorage{
+		utils.MetaReq: map[string]any{
+			"AnswerTime": "2023-01-07T17:00:10Z",
+		},
+	}
+
+	if pass, err := fltr.Pass(dtP); err != nil {
+		t.Error(err)
+	} else if !pass {
+		t.Errorf("expected: <%+v>, received: <%+v>", false, pass)
+	}
+
+}
