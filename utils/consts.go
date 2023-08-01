@@ -32,7 +32,7 @@ var (
 
 	extraDBPartition = NewStringSet([]string{CacheDispatchers,
 		CacheDispatcherRoutes, CacheDispatcherLoads, CacheDiameterMessages, CacheRPCResponses, CacheClosedSessions,
-		CacheCDRIDs, CacheRPCConnections, CacheUCH, CacheSTIR, CacheEventCharges, MetaAPIBan,
+		CacheCDRIDs, CacheRPCConnections, CacheUCH, CacheSTIR, CacheEventCharges, MetaAPIBan, MetaSentryPeer,
 		CacheCapsEvents, CacheReplicationHosts})
 
 	DataDBPartitions = NewStringSet([]string{

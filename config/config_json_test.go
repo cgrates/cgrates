@@ -215,6 +215,11 @@ func TestCacheJsonCfg(t *testing.T) {
 				Ttl: utils.StringPointer(""), Static_ttl: utils.BoolPointer(false),
 				Remote: utils.BoolPointer(false), Replicate: utils.BoolPointer(false),
 			},
+			utils.MetaSentryPeer: {
+				Limit: utils.IntPointer(-1),
+				Ttl:   utils.StringPointer("24h"), Static_ttl: utils.BoolPointer(true),
+				Remote: utils.BoolPointer(false), Replicate: utils.BoolPointer(false),
+			},
 			utils.MetaAPIBan: {Limit: utils.IntPointer(-1),
 				Ttl: utils.StringPointer("2m"), Static_ttl: utils.BoolPointer(false),
 				Remote: utils.BoolPointer(false), Replicate: utils.BoolPointer(false)},
