@@ -47,9 +47,13 @@ func TestInitClient(t *testing.T) {
 	ee := &ElasticEE{
 		cfg: &config.EventExporterCfg{
 			ExportPath: "/\x00",
+			Opts:       &config.EventExporterOpts{},
 		},
 	}
-	errExpect := `cannot create client: parse "/\x00": net/url: invalid control character in URL`
+	if err := ee.prepareOpts(); err != nil {
+		t.Error(err)
+	}
+	errExpect := `cannot create client: cannot parse url: parse "/\x00": net/url: invalid control character in URL`
 	if err := ee.Connect(); err == nil || err.Error() != errExpect {
 		t.Errorf("Expected %+v \n but got %+v", errExpect, err)
 	}
@@ -293,9 +297,10 @@ func TestElasticExportEvent3(t *testing.T) {
 		t.Error(err)
 	}
 	eEe.eClnt.Transport = new(mockClient)
-	// errExpect := `unsupported protocol scheme ""`
+	errExpect := `the client noticed that the server is not Elasticsearch and we do not support this unknown product`
+
 	cgrCfg.EEsCfg().Exporters[0].ComputeFields()
-	if err := eEe.ExportEvent(context.Background(), []byte{}, ""); err != nil {
+	if err := eEe.ExportEvent(context.Background(), []byte{}, ""); err == nil || err.Error() != errExpect {
 		t.Error(err)
 	}
 }
