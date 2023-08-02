@@ -33,7 +33,7 @@
     name: elasticsearch.service
     enabled: "{{ elasticsearch_service_enabled }}"
     state: "{{ elasticsearch_service_state }}"
-    # masked: "{{ elasticsearch_service_masked }}"
+    masked: "{{ elasticsearch_service_masked }}"
 
 - name: Configure Elasticsearch
   become: true
