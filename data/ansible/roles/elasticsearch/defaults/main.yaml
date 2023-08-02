@@ -8,6 +8,6 @@ elasticsearch_repository: "deb [signed-by={{ elasticsearch_gpg_keyring }}] https
 auto_create_index: ".monitoring*,.watches,.triggered_watches,.watcher-history*,.ml*"
 elasticsearch_service_enabled: true
 elasticsearch_service_state: started
-elasticsearch_service_masked: no
+elasticsearch_service_masked: false
 elasticsearch_dependencies:
   - apt-transport-https
