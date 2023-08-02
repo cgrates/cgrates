@@ -294,3 +294,92 @@ func TestDspResponderShutdownErrorNil(t *testing.T) {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}
 }
+
+func TestDspResponderGetCostOnRatingPlans(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	dm := engine.NewDataManager(engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items), cfg.CacheCfg(), nil)
+	dsp := NewDispatcherService(dm, cfg, nil, nil)
+	args := &utils.GetCostOnRatingPlansArgs{
+		Account: "1002",
+		RatingPlanIDs: []string{
+			"RP1",
+			"RP2",
+		},
+		Subject:     "1002",
+		Destination: "1001",
+		Usage:       2 * time.Minute,
+		Tenant:      "cgrates.org",
+	}
+	if err := dm.SetDispatcherHost(&engine.DispatcherHost{
+		Tenant: "cgrates.org",
+		RemoteHost: &config.RemoteHost{
+			ID: "ALL2",
+		},
+	}); err != nil {
+		t.Error(err)
+	}
+	if err := dm.SetDispatcherProfile(&engine.DispatcherProfile{
+		Tenant:     "cgrates.org",
+		ID:         "DSP_Test1",
+		FilterIDs:  []string{},
+		Strategy:   utils.MetaRoundRobin,
+		Subsystems: []string{utils.MetaAny},
+		Hosts: engine.DispatcherHostProfiles{
+			&engine.DispatcherHostProfile{
+				ID:        "ALL2",
+				FilterIDs: []string{},
+				Weight:    20,
+				Params:    make(map[string]any),
+			},
+		},
+		Weight: 20,
+	}, true); err != nil {
+		t.Error(err)
+	}
+	var reply map[string]any
+	if err := dsp.ResponderGetCostOnRatingPlans(args, &reply); err == nil {
+		t.Error(err)
+	}
+}
+
+// func TestDspResponderGetMaxSessionTimeOnAccounts(t *testing.T) {
+// 	cfg := config.NewDefaultCGRConfig()
+// 	dm := engine.NewDataManager(engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items), cfg.CacheCfg(), nil)
+// 	dsp := NewDispatcherService(dm, cfg, nil, nil)
+// 	args := &utils.GetMaxSessionTimeOnAccountsArgs{
+// 		Subject:     "1002",
+// 		Destination: "1001",
+// 		Usage:       2 * time.Minute,
+// 		Tenant:      "cgrates.org",
+// 	}
+// 	if err := dm.SetDispatcherHost(&engine.DispatcherHost{
+// 		Tenant: "cgrates.org",
+// 		RemoteHost: &config.RemoteHost{
+// 			ID: "ALL2",
+// 		},
+// 	}); err != nil {
+// 		t.Error(err)
+// 	}
+// 	if err := dm.SetDispatcherProfile(&engine.DispatcherProfile{
+// 		Tenant:     "cgrates.org",
+// 		ID:         "DSP_Test1",
+// 		FilterIDs:  []string{},
+// 		Strategy:   utils.MetaRoundRobin,
+// 		Subsystems: []string{utils.MetaAny},
+// 		Hosts: engine.DispatcherHostProfiles{
+// 			&engine.DispatcherHostProfile{
+// 				ID:        "ALL2",
+// 				FilterIDs: []string{},
+// 				Weight:    20,
+// 				Params:    make(map[string]any),
+// 			},
+// 		},
+// 		Weight: 20,
+// 	}, true); err != nil {
+// 		t.Error(err)
+// 	}
+// 	var reply map[string]any
+// 	if err := dsp.ResponderGetMaxSessionTimeOnAccounts(args, &reply); err == nil {
+// 		t.Error(err)
+// 	}
+// }
