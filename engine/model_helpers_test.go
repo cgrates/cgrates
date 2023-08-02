@@ -2308,3 +2308,403 @@ func TestModelHelpersAPItoModelActionPlans(t *testing.T) {
 		t.Errorf("expected %v, received %v", exp, rcv)
 	}
 }
+
+func TestModelHelpersAPItoModelActionTrigger(t *testing.T) {
+	ats := &utils.TPActionTriggers{
+		TPid: str,
+		ID:   str,
+	}
+
+	rcv := APItoModelActionTrigger(ats)
+	exp := TpActionTriggers{{
+		Tpid: ats.TPid,
+		Tag:  ats.ID,
+	}}
+
+	if !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("expected %v, received %v", exp, rcv)
+	}
+}
+
+func TestModelHelpersAPItoModelActionTriggers(t *testing.T) {
+	ts := []*utils.TPActionTriggers{{
+		TPid: str,
+		ID:   str,
+	}}
+
+	rcv := APItoModelActionTriggers(ts)
+	exp := APItoModelActionTrigger(ts[0])
+
+	if !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("expected %v, received %v", exp, rcv)
+	}
+}
+
+func TestModelHelpersMapTPAccountActions(t *testing.T) {
+	s := []*utils.TPAccountActions{{
+		TPid:   str,
+		LoadId: str,
+	}, {
+		TPid:   str,
+		LoadId: str,
+	}}
+
+	_, err := MapTPAccountActions(s)
+
+	if err != nil {
+		if err.Error() != "Non unique ID :" {
+			t.Error(err)
+		}
+	}
+}
+
+func TestModelHelpersAPItoModelAccountActions(t *testing.T) {
+	aas := []*utils.TPAccountActions{{
+		TPid:   str,
+		LoadId: str,
+	}}
+
+	rcv := APItoModelAccountActions(aas)
+	exp := TpAccountActions{*APItoModelAccountAction(aas[0])}
+
+	if !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("expected %v, received %v", exp, rcv)
+	}
+}
+
+func TestModelHelpersAPItoModelResourceNil(t *testing.T) {
+	var rl *utils.TPResourceProfile
+
+	rcv := APItoModelResource(rl)
+
+	if rcv != nil {
+		t.Error(rcv)
+	}
+}
+
+func TestModelHelpersAPItoModelTPFilter(t *testing.T) {
+	th := &utils.TPFilterProfile{
+		TPid:   str,
+		Tenant: str,
+		ID:     str,
+		Filters: []*utils.TPFilter{{
+			Type:    str,
+			Element: str,
+			Values:  []string{"val1", "val2"},
+		}},
+		ActivationInterval: &utils.TPActivationInterval{
+			ActivationTime: str,
+			ExpiryTime:     str,
+		},
+	}
+
+	rcv := APItoModelTPFilter(th)
+	exp := TpFilterS{{
+		Tpid:               str,
+		Tenant:             str,
+		ID:                 str,
+		Type:               str,
+		Element:            str,
+		Values:             "val1;val2",
+		ActivationInterval: "test;test",
+	}}
+
+	if !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("expected %v, received %v", utils.ToJSON(exp), utils.ToJSON(rcv))
+	}
+
+	th2 := &utils.TPFilterProfile{}
+	rcv = APItoModelTPFilter(th2)
+
+	if rcv != nil {
+		t.Error(rcv)
+	}
+}
+
+func TestModelHelpersAsMapTPSharedGroups(t *testing.T) {
+	tps := TpSharedGroups{{
+		Id:   1,
+		Tpid: str,
+	},
+		{
+			Id:   1,
+			Tpid: str,
+		}}
+
+	rcv, err := tps.AsMapTPSharedGroups()
+	if err != nil {
+		t.Error(err)
+	}
+	exp := map[string]*utils.TPSharedGroups{"": {
+		TPid:         str,
+		ID:           "",
+		SharedGroups: []*utils.TPSharedGroup{{}, {}},
+	}}
+
+	if !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("expected %v, received %v", utils.ToJSON(exp), utils.ToJSON(rcv))
+	}
+}
+
+func TestModelHelpersAPItoModelResource(t *testing.T) {
+	slc := []string{"val1", "val2"}
+	rl := &utils.TPResourceProfile{
+		TPid:      str,
+		Tenant:    str,
+		ID:        str,
+		FilterIDs: slc,
+		ActivationInterval: &utils.TPActivationInterval{
+			ActivationTime: str,
+			ExpiryTime:     str,
+		},
+		UsageTTL:          str,
+		Limit:             str,
+		AllocationMessage: str,
+		Blocker:           bl,
+		Stored:            bl,
+		Weight:            fl,
+		ThresholdIDs:      slc,
+	}
+
+	rcv := APItoModelResource(rl)
+	exp := TpResources{{
+		Tpid:               str,
+		Tenant:             str,
+		ID:                 str,
+		FilterIDs:          "val1",
+		ActivationInterval: "test;test",
+		UsageTTL:           str,
+		Limit:              str,
+		AllocationMessage:  str,
+		Blocker:            bl,
+		Stored:             bl,
+		Weight:             fl,
+		ThresholdIDs:       "val1;val2",
+	}, {
+		FilterIDs: "val2",
+		Blocker:   bl,
+		ID:        str,
+		Stored:    bl,
+		Tenant:    str,
+		Tpid:      str,
+	}}
+
+	if !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("expected %v, received %v", utils.ToJSON(exp), utils.ToJSON(rcv))
+	}
+}
+
+func TestModelHelpersAPItoModelStats(t *testing.T) {
+	slc := []string{"val1", "val2"}
+	st := &utils.TPStatProfile{
+		TPid:      str,
+		Tenant:    str,
+		ID:        str,
+		FilterIDs: slc,
+		ActivationInterval: &utils.TPActivationInterval{
+			ActivationTime: str,
+			ExpiryTime:     str,
+		},
+		QueueLength: nm,
+		TTL:         str,
+		Metrics: []*utils.MetricWithFilters{
+			{
+				FilterIDs: slc,
+				MetricID:  str,
+			}, {
+				FilterIDs: slc,
+				MetricID:  str,
+			},
+		},
+		Blocker:      bl,
+		Stored:       bl,
+		Weight:       fl,
+		MinItems:     nm,
+		ThresholdIDs: slc,
+	}
+
+	rcv := APItoModelStats(st)
+	exp := TpStats{{
+		Tpid:               str,
+		Tenant:             str,
+		ID:                 str,
+		FilterIDs:          "val1;val2",
+		ActivationInterval: "test;test",
+		QueueLength:        nm,
+		TTL:                str,
+		MinItems:           nm,
+		MetricIDs:          str,
+		MetricFilterIDs:    "val1;val2",
+		Stored:             bl,
+		Blocker:            bl,
+		Weight:             fl,
+		ThresholdIDs:       "val1;val2",
+	}, {
+		ID:              str,
+		MetricFilterIDs: "val1;val2",
+		MetricIDs:       str,
+		Tenant:          str,
+		Tpid:            str,
+	}}
+
+	if !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("expected %v, received %v", utils.ToJSON(exp), utils.ToJSON(rcv))
+	}
+}
+
+func TestModelHelpersAPItoModelTPSuppliers(t *testing.T) {
+	slc := []string{"val1", "val2"}
+	st := &utils.TPSupplierProfile{
+		TPid:      str,
+		Tenant:    str,
+		ID:        str,
+		FilterIDs: slc,
+		ActivationInterval: &utils.TPActivationInterval{
+			ActivationTime: str,
+			ExpiryTime:     str,
+		},
+		Sorting:           str,
+		SortingParameters: slc,
+		Suppliers: []*utils.TPSupplier{
+			{
+				ID:                 str,
+				FilterIDs:          slc,
+				AccountIDs:         slc,
+				RatingPlanIDs:      slc,
+				ResourceIDs:        slc,
+				StatIDs:            slc,
+				Weight:             fl,
+				Blocker:            bl,
+				SupplierParameters: str,
+			},
+		},
+		Weight: fl,
+	}
+
+	rcv := APItoModelTPSuppliers(st)
+	exp := TpSuppliers{{
+		Tpid:                  str,
+		Tenant:                str,
+		ID:                    str,
+		FilterIDs:             "val1;val2",
+		ActivationInterval:    "test;test",
+		Sorting:               str,
+		SortingParameters:     "val1;val2",
+		SupplierID:            str,
+		SupplierFilterIDs:     "val1;val2",
+		SupplierAccountIDs:    "val1;val2",
+		SupplierRatingplanIDs: "val1;val2",
+		SupplierResourceIDs:   "val1;val2",
+		SupplierStatIDs:       "val1;val2",
+		SupplierWeight:        fl,
+		SupplierBlocker:       bl,
+		SupplierParameters:    str,
+		Weight:                fl,
+	}}
+
+	if !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("expected %v, received %v", utils.ToJSON(exp), utils.ToJSON(rcv))
+	}
+
+	st2 := &utils.TPSupplierProfile{
+		Suppliers: []*utils.TPSupplier{},
+	}
+	rcv = APItoModelTPSuppliers(st2)
+
+	if rcv != nil {
+		t.Error(rcv)
+	}
+}
+
+func TestModelHepersAPItoModelTPDispatcherHost(t *testing.T) {
+	rcv := APItoModelTPDispatcherHost(nil)
+
+	if rcv != nil {
+		t.Error(err)
+	}
+
+	tpDPH := &utils.TPDispatcherHost{
+		TPid:   str,
+		Tenant: str,
+		ID:     str,
+		Conns: []*utils.TPDispatcherHostConn{{
+			Address:   str,
+			Transport: str,
+			TLS:       bl,
+		}},
+	}
+
+	rcv = APItoModelTPDispatcherHost(tpDPH)
+	exp := TPDispatcherHosts{{
+		Tpid:      tpDPH.TPid,
+		Tenant:    tpDPH.Tenant,
+		ID:        tpDPH.ID,
+		Address:   tpDPH.Conns[0].Address,
+		Transport: tpDPH.Conns[0].Transport,
+		TLS:       tpDPH.Conns[0].TLS,
+	}}
+
+	if !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("expected %v, received %v", utils.ToJSON(exp), utils.ToJSON(rcv))
+	}
+}
+
+func TestModelHelpersAPItoDispatcherHost(t *testing.T) {
+	rcv := APItoDispatcherHost(nil)
+
+	if rcv != nil {
+		t.Error(rcv)
+	}
+}
+
+func TestModelHelpersAPItoModelTPAttribute(t *testing.T) {
+	slc := []string{"val1", "val2"}
+	th := &utils.TPAttributeProfile{
+		Attributes: []*utils.TPAttribute{},
+	}
+	rcv := APItoModelTPAttribute(th)
+
+	if rcv != nil {
+		t.Error(rcv)
+	}
+
+	th2 := &utils.TPAttributeProfile{
+		TPid:      str,
+		Tenant:    str,
+		ID:        str,
+		FilterIDs: slc,
+		ActivationInterval: &utils.TPActivationInterval{
+			ActivationTime: str,
+			ExpiryTime:     str,
+		},
+		Contexts: slc,
+		Attributes: []*utils.TPAttribute{{
+			FilterIDs: slc,
+			Path:      str,
+			Type:      str,
+			Value:     str,
+		}},
+		Blocker: bl,
+		Weight:  fl,
+	}
+
+	rcv = APItoModelTPAttribute(th2)
+	exp := TPAttributes{{
+		Tpid:               str,
+		Tenant:             str,
+		ID:                 str,
+		Contexts:           "val1;val2",
+		FilterIDs:          "val1;val2",
+		ActivationInterval: "test;test",
+		AttributeFilterIDs: "val1;val2",
+		Path:               str,
+		Type:               str,
+		Value:              str,
+		Blocker:            bl,
+		Weight:             fl,
+	}}
+
+	if !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("expected %v, received %v", utils.ToJSON(exp), utils.ToJSON(rcv))
+	}
+}
