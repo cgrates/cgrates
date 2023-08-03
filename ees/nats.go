@@ -22,7 +22,7 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	"fmt"
-	"io/ioutil"
+	"os"
 	"sync"
 	"time"
 
@@ -164,7 +164,7 @@ func GetNatsOpts(opts *config.NATSOpts, nodeID string, connTimeout time.Duration
 				if err != nil {
 					return err
 				}
-				rootPEM, err := ioutil.ReadFile(*opts.CertificateAuthority)
+				rootPEM, err := os.ReadFile(*opts.CertificateAuthority)
 				if err != nil || rootPEM == nil {
 					return fmt.Errorf("nats: error loading or parsing rootCA file: %v", err)
 				}
