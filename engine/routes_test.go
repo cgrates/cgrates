@@ -2362,3 +2362,84 @@ func TestRouteServiceV1GetRoutesErr(t *testing.T) {
 		})
 	}
 }
+
+func TestRouteServiceSortRoutesQos(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	clientConn := make(chan rpcclient.ClientConnector, 1)
+	rsp := &Responder{}
+	tmpDm := dm
+	defer func() {
+		SetDataStorage(tmpDm)
+	}()
+	clientConn <- &ccMock{
+		calls: map[string]func(args any, reply any) error{
+			utils.ResponderGetMaxSessionTimeOnAccounts: func(args, reply any) error {
+				return rsp.GetMaxSessionTimeOnAccounts(args.(*utils.GetMaxSessionTimeOnAccountsArgs), reply.(*map[string]any))
+			},
+		},
+	}
+	cfg.RouteSCfg().RALsConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRALs)}
+	dm := NewDataManager(NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items), cfg.CacheCfg(), nil)
+	SetDataStorage(dm)
+	rs := NewRouteService(dm, NewFilterS(cfg, nil, dm), cfg, NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRALs): clientConn,
+	}))
+	if err := dm.SetAccount(&Account{
+		ID: "cgrates.org:1001",
+		BalanceMap: map[string]Balances{
+			utils.MetaMonetary: {
+				&Balance{Value: 11, Weight: 20},
+			}},
+	}); err != nil {
+		t.Error(err)
+	}
+	rpp := &RouteProfile{
+		Tenant:    "cgrates.org",
+		ID:        "ROUTE_ACNT_1001",
+		FilterIDs: []string{"*string:~*req.Account:1001"},
+		Sorting:   utils.MetaQOS,
+
+		SortingParameters: []string{},
+		Routes: []*Route{
+			{
+				ID:              "route1",
+				AccountIDs:      []string{"1001"},
+				RatingPlanIDs:   []string{"RP_1002_LOW"},
+				Weight:          10,
+				Blocker:         false,
+				RouteParameters: "",
+			},
+			{
+				ID:              "route2",
+				AccountIDs:      []string{"1001"},
+				RatingPlanIDs:   []string{"RP_1002"},
+				Weight:          20,
+				Blocker:         false,
+				RouteParameters: "",
+			},
+		},
+		Weight: 10,
+	}
+	if err := dm.SetRouteProfile(rpp, true); err != nil {
+		t.Error(err)
+	}
+	var reply SortedRoutesList
+	cgrEv := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "sortRoutesQosEvent1",
+		Event: map[string]any{
+			utils.EventName:    "SortEvent",
+			utils.ToR:          utils.MetaVoice,
+			utils.OriginID:     "123451",
+			utils.AccountField: "1001",
+			utils.Subject:      "1001",
+			utils.Destination:  "1002",
+			utils.Category:     "call",
+			utils.SetupTime:    time.Date(2023, 7, 14, 14, 25, 0, 0, time.UTC),
+			utils.Tenant:       "cgrates.org",
+			utils.RequestType:  utils.MetaPrepaid},
+	}
+	if err := rs.V1GetRoutes(cgrEv, &reply); err == nil {
+		t.Error(err)
+	}
+}

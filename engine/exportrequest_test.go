@@ -563,9 +563,7 @@ func TestExportRequestSetFields(t *testing.T) {
 	}
 	onm.Append(fullPath, val)
 	cfg := config.NewDefaultCGRConfig()
-
 	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
-
 	dm := NewDataManager(db, config.CgrConfig().CacheCfg(), nil)
 	eeR := &ExportRequest{
 		inData: map[string]utils.DataStorage{
@@ -591,7 +589,6 @@ func TestExportRequestSetFields(t *testing.T) {
 			Path:     "<*uch;*opts>",
 		},
 	}
-
 	if err = eeR.SetFields(fctTemp); err == nil || err.Error() != fmt.Sprint("unsupported field prefix: <*uch*opts> when set field") {
 		t.Error(err)
 	}
@@ -633,4 +630,40 @@ func TestExportRequestParseFieldErr(t *testing.T) {
 		t.Error(err)
 	}
 
+}
+
+func TestExportRequestSetFields2(t *testing.T) {
+
+	inData := map[string]utils.DataStorage{
+		utils.MetaReq: utils.MapStorage{
+			"Account": "1001",
+			"Usage":   "10m",
+		},
+	}
+	onm := utils.NewOrderedNavigableMap()
+
+	fullPath := &utils.FullPath{
+		PathSlice: []string{utils.MetaReq, utils.MetaTenant},
+		Path:      utils.MetaTenant,
+	}
+	val := &utils.DataLeaf{
+		Data: "value1",
+	}
+	onm.Append(fullPath, val)
+	expData := map[string]*utils.OrderedNavigableMap{
+		utils.MetaReq: onm,
+	}
+	eventReq := NewExportRequest(inData, "cgrates.org", nil, expData)
+	tpFields := []*config.FCTemplate{
+		{
+			Tag:   "Tenant",
+			Path:  utils.MetaReq + utils.NestingSep + utils.AccountField,
+			Type:  utils.MetaGroup,
+			Value: config.NewRSRParsersMustCompile("cgrates.org", utils.InfieldSep),
+		},
+	}
+	tpFields[0].ComputePath()
+	if err := eventReq.SetFields(tpFields); err != nil {
+		t.Error(err)
+	}
 }
