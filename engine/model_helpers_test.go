@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"errors"
 	"reflect"
 	"sort"
 	"strings"
@@ -2706,5 +2707,239 @@ func TestModelHelpersAPItoModelTPAttribute(t *testing.T) {
 
 	if !reflect.DeepEqual(rcv, exp) {
 		t.Errorf("expected %v, received %v", utils.ToJSON(exp), utils.ToJSON(rcv))
+	}
+}
+
+func TestModelHelpersmodelEqual(t *testing.T) {
+	type Test struct {
+		Fl  float64
+		Nm  int
+		Bl  bool
+		Str string
+	}
+	tst := Test{
+		Fl:  fl,
+		Nm:  nm,
+		Bl:  bl,
+		Str: str,
+	}
+	type args struct {
+		this  any
+		other any
+	}
+	tests := []struct {
+		name string
+		args args
+		exp  bool
+	}{
+		{
+			name: "true return",
+			args: args{tst, tst},
+			exp:  true,
+		},
+		{
+			name: "false return",
+			args: args{nm, str},
+			exp:  false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			rcv := modelEqual(tt.args.this, tt.args.other)
+
+			if rcv != tt.exp {
+				t.Errorf("received %v, expected %v", rcv, tt.exp)
+			}
+		})
+	}
+}
+
+func TestModelHelpersparamsToString(t *testing.T) {
+	rcv := paramsToString([]any{str, str})
+
+	if rcv != "test;test" {
+		t.Error(rcv)
+	}
+}
+
+func TestModelHelpersAPItoModelTPDispatcherProfile(t *testing.T) {
+	tpDPP := &utils.TPDispatcherProfile{
+		TPid:       str,
+		Tenant:     str,
+		ID:         str,
+		Subsystems: slc,
+		FilterIDs:  slc,
+		ActivationInterval: &utils.TPActivationInterval{
+			ActivationTime: str,
+			ExpiryTime:     str,
+		},
+		Strategy:       str,
+		StrategyParams: []any{str, str},
+		Weight:         fl,
+		Hosts:          []*utils.TPDispatcherHostProfile{},
+	}
+
+	rcv := APItoModelTPDispatcherProfile(tpDPP)
+	exp := TPDispatcherProfiles{{
+		Tpid:               str,
+		Tenant:             str,
+		ID:                 str,
+		Subsystems:         str,
+		FilterIDs:          str,
+		ActivationInterval: "test;test",
+		Strategy:           str,
+		StrategyParameters: "test;test",
+		ConnID:             "",
+		ConnFilterIDs:      "",
+		ConnWeight:         0,
+		ConnBlocker:        false,
+		ConnParameters:     "",
+		Weight:             fl,
+	}}
+
+	if !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("expected %v, received %v", utils.ToJSON(exp), utils.ToJSON(rcv))
+	}
+
+	rcv = APItoModelTPDispatcherProfile(nil)
+
+	if rcv != nil {
+		t.Error(rcv)
+	}
+}
+
+func TestModelHelpersAsTPDispatcherHosts(t *testing.T) {
+	tps := TPDispatcherHosts{{
+		Tpid:      str,
+		Tenant:    str,
+		ID:        str,
+		Address:   utils.EmptyString,
+		Transport: str,
+		TLS:       bl,
+	}, {
+		Tpid:      str,
+		Tenant:    str,
+		ID:        str,
+		Address:   str,
+		Transport: utils.EmptyString,
+		TLS:       bl,
+	}}
+
+	rcv := tps.AsTPDispatcherHosts()
+	exp := []*utils.TPDispatcherHost{{
+		TPid:   str,
+		Tenant: str,
+		ID:     str,
+		Conns: []*utils.TPDispatcherHostConn{{
+			Address:   str,
+			Transport: "*json",
+			TLS:       true,
+		}},
+	}}
+
+	if !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("expected %v, received %v", utils.ToJSON(exp), utils.ToJSON(rcv))
+	}
+}
+
+func TestModelHelpersAPItoResource(t *testing.T) {
+	errStr := "test`"
+	tpRL := &utils.TPResourceProfile{
+		TPid:      str,
+		Tenant:    str,
+		ID:        str,
+		FilterIDs: slc,
+		ActivationInterval: &utils.TPActivationInterval{
+			ActivationTime: str,
+			ExpiryTime:     str,
+		},
+		UsageTTL:          errStr,
+		Limit:             str,
+		AllocationMessage: str,
+		Blocker:           bl,
+		Stored:            bl,
+		Weight:            fl,
+		ThresholdIDs:      slc,
+	}
+
+	_, err := APItoResource(tpRL, "")
+
+	if err != nil {
+		if err.Error() != errors.New("time: invalid duration "+`"`+errStr+`"`).Error() {
+			t.Error(err)
+		}
+	}
+
+	tpRL.UsageTTL = utils.EmptyString
+
+	_, err = APItoResource(tpRL, "test")
+
+	if err != nil {
+		if err.Error() != "unknown time zone test" {
+			t.Error(err)
+		}
+	}
+
+	tpRL.ActivationInterval = nil
+	_, err = APItoResource(tpRL, "")
+
+	if err != nil {
+		if err.Error() != `strconv.ParseFloat: parsing "test": invalid syntax` {
+			t.Error(err)
+		}
+	}
+}
+
+func TestModelHelpersAPItoStats(t *testing.T) {
+	errStr := "test`"
+	tpST := &utils.TPStatProfile{
+		TTL: errStr,
+	}
+
+	_, err := APItoStats(tpST, "")
+
+	if err != nil {
+		if err.Error() != errors.New("time: invalid duration "+`"`+errStr+`"`).Error() {
+			t.Error(err)
+		}
+	}
+
+	tpST.TTL = utils.EmptyString
+
+	_, err = APItoStats(tpST, "test")
+
+	if err != nil {
+		if err.Error() != "unknown time zone test" {
+			t.Error(err)
+		}
+	}
+}
+
+func TestModelHelpersAPItoThresholdProfile(t *testing.T) {
+	errStr := "test`"
+	tpST := &utils.TPThresholdProfile{
+		MinSleep: errStr,
+		ActivationInterval: &utils.TPActivationInterval{
+			ActivationTime: str,
+			ExpiryTime:     str,
+		},
+	}
+
+	_, err := APItoThresholdProfile(tpST, "")
+
+	if err != nil {
+		if err.Error() != errors.New("time: invalid duration "+`"`+errStr+`"`).Error() {
+			t.Error(err)
+		}
+	}
+
+	tpST.MinSleep = ""
+	_, err = APItoThresholdProfile(tpST, "test")
+
+	if err != nil {
+		if err.Error() != "unknown time zone test" {
+			t.Error(err)
+		}
 	}
 }
