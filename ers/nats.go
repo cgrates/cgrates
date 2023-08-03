@@ -23,7 +23,7 @@ import (
 	"crypto/x509"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"os"
 	"time"
 
 	"github.com/cgrates/cgrates/agents"
@@ -263,7 +263,7 @@ func GetNatsOpts(opts *config.EventReaderOpts, nodeID string, connTimeout time.D
 				if err != nil {
 					return err
 				}
-				rootPEM, err := ioutil.ReadFile(*opts.NATSOpts.NATSCertificateAuthority)
+				rootPEM, err := os.ReadFile(*opts.NATSOpts.NATSCertificateAuthority)
 				if err != nil || rootPEM == nil {
 					return fmt.Errorf("nats: error loading or parsing rootCA file: %v", err)
 				}
