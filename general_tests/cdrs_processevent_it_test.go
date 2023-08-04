@@ -105,6 +105,14 @@ func testV1CDRsInitCdrDb(t *testing.T) {
 }
 
 func testV1CDRsStartEngine(t *testing.T) {
+	// before starting the engine, create the directories needed for failed posts or
+	// clear their contents if they exist already
+	if err := os.RemoveAll(pecdrsCfg.GeneralCfg().FailedPostsDir); err != nil {
+		t.Fatal("Error removing folder: ", pecdrsCfg.GeneralCfg().FailedPostsDir, err)
+	}
+	if err := os.MkdirAll(pecdrsCfg.GeneralCfg().FailedPostsDir, 0755); err != nil {
+		t.Fatal(err)
+	}
 	if _, err := engine.StopStartEngine(pecdrsCfgPath, *waitRater); err != nil {
 		t.Fatal(err)
 	}
@@ -681,6 +689,7 @@ func testV1CDRsV2ProcessEventRalS(t *testing.T) {
 	}
 	expRply[0].Event["Usage"] = 60000000000.
 	expRply[0].Event["Cost"] = 0.0102
+	expRply[0].Flags = append(expRply[0].Flags, utils.MetaRefund)
 	reply[0].Event["CostDetails"] = nil
 	if *encoding == utils.MetaGOB { // gob encoding encodes 0 values of pointers to nil
 		if utils.ToJSON(expRply) != utils.ToJSON(reply) {
