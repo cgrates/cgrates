@@ -2712,16 +2712,34 @@ func TestModelHelpersAPItoModelTPAttribute(t *testing.T) {
 
 func TestModelHelpersmodelEqual(t *testing.T) {
 	type Test struct {
-		Fl  float64
-		Nm  int
-		Bl  bool
-		Str string
+		Fl  float64 `index:"0"`
+		Nm  int     `index:"1"`
+		Bl  bool    `index:"2"`
+		Str string  `index:"3"`
 	}
 	tst := Test{
 		Fl:  fl,
 		Nm:  nm,
 		Bl:  bl,
 		Str: str,
+	}
+	tst2 := Test{
+		Fl: 2.5,
+	}
+	tst3 := Test{
+		Fl: fl,
+		Nm: 5,
+	}
+	tst4 := Test{
+		Fl: fl,
+		Nm: nm,
+		Bl: false,
+	}
+	tst5 := Test{
+		Fl:  fl,
+		Nm:  nm,
+		Bl:  bl,
+		Str: "test1",
 	}
 	type args struct {
 		this  any
@@ -2740,6 +2758,26 @@ func TestModelHelpersmodelEqual(t *testing.T) {
 		{
 			name: "false return",
 			args: args{nm, str},
+			exp:  false,
+		},
+		{
+			name: "false return",
+			args: args{tst, tst2},
+			exp:  false,
+		},
+		{
+			name: "false return",
+			args: args{tst, tst3},
+			exp:  false,
+		},
+		{
+			name: "false return",
+			args: args{tst, tst4},
+			exp:  false,
+		},
+		{
+			name: "false return",
+			args: args{tst, tst5},
 			exp:  false,
 		},
 	}
@@ -2927,7 +2965,6 @@ func TestModelHelpersAPItoThresholdProfile(t *testing.T) {
 	}
 
 	_, err := APItoThresholdProfile(tpST, "")
-
 	if err != nil {
 		if err.Error() != errors.New("time: invalid duration "+`"`+errStr+`"`).Error() {
 			t.Error(err)
@@ -2939,6 +2976,283 @@ func TestModelHelpersAPItoThresholdProfile(t *testing.T) {
 
 	if err != nil {
 		if err.Error() != "unknown time zone test" {
+			t.Error(err)
+		}
+	}
+}
+
+func TestModelHelpersAPItoDispatcherProfile(t *testing.T) {
+	tpDPP := &utils.TPDispatcherProfile{
+		StrategyParams: []any{str},
+		Hosts: []*utils.TPDispatcherHostProfile{
+			{
+				Params: []any{""},
+			},
+		},
+		ActivationInterval: &utils.TPActivationInterval{
+			ActivationTime: str,
+			ExpiryTime:     str,
+		},
+	}
+
+	_, err := APItoDispatcherProfile(tpDPP, "test")
+
+	if err != nil {
+		if err.Error() != "unknown time zone test" {
+			t.Error(err)
+		}
+	}
+}
+
+func TestModelHelpersAPItoChargerProfile(t *testing.T) {
+	tpCPP := &utils.TPChargerProfile{
+		ActivationInterval: &utils.TPActivationInterval{
+			ActivationTime: str,
+			ExpiryTime:     str,
+		},
+	}
+
+	_, err := APItoChargerProfile(tpCPP, "test")
+
+	if err != nil {
+		if err.Error() != "unknown time zone test" {
+			t.Error(err)
+		}
+	}
+}
+
+func TestModelHelpersAPItoModelTPCharger(t *testing.T) {
+	tpCPP := &utils.TPChargerProfile{
+		FilterIDs: []string{},
+		ActivationInterval: &utils.TPActivationInterval{
+			ActivationTime: str,
+			ExpiryTime:     str,
+		},
+	}
+
+	rcv := APItoModelTPCharger(tpCPP)
+	exp := TPChargers{{
+		ActivationInterval: "test;test",
+	}}
+
+	if !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("expected %v, received %v", utils.ToJSON(exp), utils.ToJSON(rcv))
+	}
+
+	tpCPP2 := &utils.TPChargerProfile{
+		FilterIDs: []string{"test"},
+		ActivationInterval: &utils.TPActivationInterval{
+			ActivationTime: str,
+			ExpiryTime:     str,
+		},
+	}
+
+	rcv = APItoModelTPCharger(tpCPP2)
+	exp = TPChargers{{
+		FilterIDs:          str,
+		ActivationInterval: "test;test",
+	}}
+
+	if !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("expected %v, received %v", utils.ToJSON(exp), utils.ToJSON(rcv))
+	}
+}
+
+func TestModelHelpersAPItoAttributeProfile(t *testing.T) {
+	errStr := "test`"
+	tpAttr := &utils.TPAttributeProfile{
+		Attributes: []*utils.TPAttribute{
+			{
+				Value: errStr,
+			},
+		},
+	}
+
+	_, err := APItoAttributeProfile(tpAttr, "")
+
+	if err != nil {
+		if err.Error() != "Unclosed unspilit syntax" {
+			t.Error(err)
+		}
+	}
+
+	tpAttr2 := &utils.TPAttributeProfile{
+		ActivationInterval: &utils.TPActivationInterval{
+			ActivationTime: str,
+			ExpiryTime:     str,
+		},
+	}
+
+	_, err = APItoAttributeProfile(tpAttr2, "test")
+
+	if err != nil {
+		if err.Error() != "unknown time zone test" {
+			t.Error(err)
+		}
+	}
+}
+
+func TestModelHelpersAPItoSupplierProfile(t *testing.T) {
+	tpSPP := &utils.TPSupplierProfile{
+		SortingParameters: slc,
+		ActivationInterval: &utils.TPActivationInterval{
+			ActivationTime: str,
+			ExpiryTime:     str,
+		},
+	}
+
+	_, err := APItoSupplierProfile(tpSPP, str)
+
+	if err != nil {
+		if err.Error() != "unknown time zone test" {
+			t.Error(err)
+		}
+	}
+}
+
+func TestModelHelpersAPItoFilter(t *testing.T) {
+	tpTH := &utils.TPFilterProfile{
+		Filters: []*utils.TPFilter{
+			{
+				Type:   utils.MetaRSR,
+				Values: []string{"test)"},
+			},
+		},
+	}
+
+	_, err := APItoFilter(tpTH, "")
+
+	if err != nil {
+		if err.Error() != "invalid RSRFilter start rule in string: <test)>" {
+			t.Error(err)
+		}
+	}
+
+	tpTH2 := &utils.TPFilterProfile{
+		ActivationInterval: &utils.TPActivationInterval{
+			ActivationTime: str,
+			ExpiryTime:     str,
+		},
+	}
+
+	_, err = APItoFilter(tpTH2, "test")
+
+	if err != nil {
+		if err.Error() != "unknown time zone test" {
+			t.Error(err)
+		}
+	}
+}
+
+func TestModelHelpersAPItoModelTPThreshold(t *testing.T) {
+	th := &utils.TPThresholdProfile{
+		ActionIDs: []string{str},
+		ActivationInterval: &utils.TPActivationInterval{
+			ActivationTime: str,
+			ExpiryTime:     str,
+		},
+	}
+
+	rcv := APItoModelTPThreshold(th)
+	exp := TpThresholds{{
+		ActivationInterval: "test;test",
+		ActionIDs:          str,
+	}}
+
+	if !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("expected %v, received %v", utils.ToJSON(exp), utils.ToJSON(rcv))
+	}
+}
+
+func TestModelHelpersAPItoStatsErr(t *testing.T) {
+	tpST := &utils.TPStatProfile{
+		ActivationInterval: &utils.TPActivationInterval{
+			ActivationTime: str,
+			ExpiryTime:     str,
+		},
+	}
+
+	_, err := APItoStats(tpST, "test")
+
+	if err != nil {
+		if err.Error() != "unknown time zone test" {
+			t.Error(err)
+		}
+	}
+}
+
+func TestModelHelpersAPItoModelResourceErrors(t *testing.T) {
+	rl := &utils.TPResourceProfile{
+		ActivationInterval: &utils.TPActivationInterval{
+			ActivationTime: str,
+			ExpiryTime:     str,
+		},
+		ThresholdIDs: []string{str, str},
+	}
+
+	rcv := APItoModelResource(rl)
+	exp := TpResources{{
+		ThresholdIDs:       "test;test",
+		ActivationInterval: "test;test",
+	}}
+
+	if !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("expected %v, received %v", utils.ToJSON(exp), utils.ToJSON(rcv))
+	}
+}
+
+func TestModelHelpersAsMapRates(t *testing.T) {
+	tps := TpRates{{
+		Id:                 1,
+		Tpid:               str,
+		Tag:                str,
+		ConnectFee:         fl,
+		Rate:               fl,
+		RateUnit:           str,
+		RateIncrement:      str,
+		GroupIntervalStart: str,
+	}}
+
+	_, err := tps.AsMapRates()
+
+	if err != nil {
+		if err.Error() != `time: invalid duration "test"` {
+			t.Error(err)
+		}
+	}
+}
+
+func TestModelHelpersAsTPRates(t *testing.T) {
+	tps := TpRates{{
+		Id:                 1,
+		Tpid:               str,
+		Tag:                str,
+		ConnectFee:         fl,
+		Rate:               fl,
+		RateUnit:           str,
+		RateIncrement:      str,
+		GroupIntervalStart: str,
+	}}
+
+	_, err := tps.AsTPRates()
+
+	if err != nil {
+		if err.Error() != `time: invalid duration "test"` {
+			t.Error(err)
+		}
+	}
+}
+
+func TestModelHelperscsvDump(t *testing.T) {
+	type Test struct {
+		Fl float64 `index:"a"`
+	}
+	tst := Test{1.2}
+
+	_, err := csvDump(&tst)
+
+	if err != nil {
+		if err.Error() != "invalid Test.Fl index a" {
 			t.Error(err)
 		}
 	}
