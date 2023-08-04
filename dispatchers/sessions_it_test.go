@@ -405,6 +405,7 @@ func testDspSessionUpdate(t *testing.T) {
 			APIOpts: map[string]any{
 				utils.OptsAPIKey:  "ses12345",
 				"*attrProfileIDs": nil,
+				utils.MetaNodeID:  "DispatcherS1",
 				utils.MetaSubsys:  utils.MetaSessionS,
 			},
 		},
@@ -480,6 +481,7 @@ func testDspSessionUpdate2(t *testing.T) {
 			APIOpts: map[string]any{
 				utils.OptsAPIKey:  "ses12345",
 				"*attrProfileIDs": nil,
+				utils.MetaNodeID:  "DispatcherS1",
 				utils.MetaSubsys:  utils.MetaSessionS,
 			},
 		},
@@ -637,6 +639,7 @@ func testDspSessionProcessEvent(t *testing.T) {
 				"*attrProfileIDs": nil,
 				"*rsUnits":        1.,
 				"*rsUsageID":      "TestSSv1It2",
+				utils.MetaNodeID:  "DispatcherS1",
 				utils.MetaSubsys:  utils.MetaSessionS,
 			},
 		},
@@ -718,7 +721,8 @@ func testDspSessionProcessEvent2(t *testing.T) {
 				"*attrProfileIDs": nil,
 				"*rsUnits":        1.,
 				"*rsUsageID":      "TestSSv1It2",
-				utils.MetaSubsys:  utils.MetaSessionS,
+				utils.MetaNodeID:  "DispatcherS1",
+				utils.MetaSubsys:  utils.MetaDispatchers,
 			},
 		},
 	}
