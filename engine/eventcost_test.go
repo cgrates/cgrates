@@ -3602,7 +3602,7 @@ func TestEventCostString(t *testing.T) {
 	e := EventCost{
 		CGRID:          "test",
 		RunID:          "test",
-		StartTime:      time.Date(2021, 8, 15, 14, 30, 45, 100, time.Local),
+		StartTime:      time.Date(2021, 8, 15, 14, 30, 45, 100, time.UTC),
 		Usage:          &tm,
 		Cost:           &fl,
 		Charges:        []*ChargingInterval{},
@@ -3615,9 +3615,10 @@ func TestEventCostString(t *testing.T) {
 	}
 
 	rcv := e.String()
+	exp := `{"CGRID":"test","RunID":"test","StartTime":"2021-08-15T14:30:45.0000001Z","Usage":1000000000,"Cost":1.2,"Charges":[],"AccountSummary":{"Tenant":"","ID":"","BalanceSummaries":null,"AllowNegative":false,"Disabled":false},"Rating":{},"Accounting":{},"RatingFilters":{},"Rates":{},"Timings":{}}`
 
-	if rcv != `{"CGRID":"test","RunID":"test","StartTime":"2021-08-15T14:30:45.0000001+02:00","Usage":1000000000,"Cost":1.2,"Charges":[],"AccountSummary":{"Tenant":"","ID":"","BalanceSummaries":null,"AllowNegative":false,"Disabled":false},"Rating":{},"Accounting":{},"RatingFilters":{},"Rates":{},"Timings":{}}` {
-		t.Error(rcv)
+	if rcv != exp {
+		t.Errorf("expected %s, received %s", exp, rcv)
 	}
 }
 
