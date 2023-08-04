@@ -289,6 +289,8 @@ func testDspAttrGetAttrFailover(t *testing.T) {
 		t.Errorf("Expecting: %s, received: %s", utils.ToJSON(eAttrPrf), utils.ToJSON(attrReply))
 	}
 
+	eRply.APIOpts[utils.MetaNodeID] = "DispatcherS1"
+	eRply.APIOpts[utils.MetaSubsys] = "*dispatchers"
 	if err := dispEngine.RPC.Call(utils.AttributeSv1ProcessEvent,
 		args, &rplyEv); err != nil {
 		t.Error(err)
@@ -452,6 +454,8 @@ func testDspAttrTestAuthKey2(t *testing.T) {
 			APIOpts: map[string]any{
 				utils.OptsAPIKey:  "attr12345",
 				utils.OptsContext: "simpleauth",
+				utils.MetaNodeID:  "DispatcherS1",
+				utils.MetaSubsys:  "*dispatchers",
 			},
 		},
 	}
@@ -535,7 +539,6 @@ func testDspAttrGetAttrRoundRobin(t *testing.T) {
 			},
 		},
 	}
-
 	var attrReply *engine.AttributeProfile
 	var rplyEv engine.AttrSProcessEventReply
 	// To ALL2
@@ -566,6 +569,8 @@ func testDspAttrGetAttrRoundRobin(t *testing.T) {
 	}
 
 	eRply.APIOpts[utils.OptsContext] = "simpleauth"
+	eRply.APIOpts[utils.MetaNodeID] = "DispatcherS1"
+	eRply.APIOpts[utils.MetaSubsys] = "*dispatchers"
 	// To ALL
 	if err := dispEngine.RPC.Call(utils.AttributeSv1ProcessEvent,
 		args, &rplyEv); err != nil {
@@ -604,6 +609,8 @@ func testDspAttrGetAttrInternal(t *testing.T) {
 			APIOpts: map[string]any{
 				utils.OptsAPIKey:  "attr12345",
 				utils.OptsContext: "simpleauth",
+				utils.MetaNodeID:  "DispatcherS1",
+				utils.MetaSubsys:  "*dispatchers",
 			},
 		},
 	}
