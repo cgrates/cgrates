@@ -193,6 +193,7 @@ func testPrecacheGetCacheStatsAfterRestart(t *testing.T) {
 		utils.CacheResources:           {Items: 3},
 		utils.CacheReverseDestinations: {Items: 7},
 		utils.CacheRPCResponses:        {},
+		utils.MetaSentryPeer:           {},
 		utils.CacheSharedGroups:        {Items: 1},
 		utils.CacheStatFilterIndexes: {
 			Items:  2,
