@@ -100,6 +100,14 @@ func testPosterITInitCdrDb(t *testing.T) {
 }
 
 func testPosterITStartEngine(t *testing.T) {
+	// before starting the engine, create the directories needed for failed posts or
+	// clear their contents if they exist already
+	if err := os.RemoveAll(pstrCfg.GeneralCfg().FailedPostsDir); err != nil {
+		t.Fatal("Error removing folder: ", pstrCfg.GeneralCfg().FailedPostsDir, err)
+	}
+	if err := os.MkdirAll(pstrCfg.GeneralCfg().FailedPostsDir, 0755); err != nil {
+		t.Fatal(err)
+	}
 	if _, err := engine.StopStartEngine(pstrCfgPath, *waitRater); err != nil {
 		t.Fatal(err)
 	}
