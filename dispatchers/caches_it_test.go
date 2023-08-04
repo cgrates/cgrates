@@ -140,7 +140,7 @@ func testDspChcLoadAfterFolder(t *testing.T) {
 	expStats[utils.CacheRouteProfiles].Items = 3
 	expStats[utils.CacheThresholdProfiles].Items = 2
 	expStats[utils.CacheThresholds].Items = 2
-	expStats[utils.CacheLoadIDs].Items = 30
+	expStats[utils.CacheLoadIDs].Items = 31
 	expStats[utils.CacheTimings].Items = 10
 	expStats[utils.CacheThresholdFilterIndexes].Items = 2
 	expStats[utils.CacheThresholdFilterIndexes].Groups = 1
@@ -211,8 +211,8 @@ func testDspChcPrecacheStatus(t *testing.T) {
 		utils.CacheEventCharges:            utils.MetaReady,
 		utils.CacheReverseFilterIndexes:    utils.MetaReady,
 		utils.CacheCapsEvents:              utils.MetaReady,
-
-		utils.MetaAPIBan: utils.MetaReady,
+		utils.MetaSentryPeer:               utils.MetaReady,
+		utils.MetaAPIBan:                   utils.MetaReady,
 
 		utils.CacheReplicationHosts: utils.MetaReady,
 	}

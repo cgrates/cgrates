@@ -132,6 +132,7 @@ func loadConfig() (ldrCfg *config.CGRConfig) {
 			log.Fatalf("Error loading config file %s", err)
 		}
 		config.SetCgrConfig(ldrCfg)
+		dfltCfg = config.CgrConfig()
 	}
 	// Data for DataDB
 	if *dataDBType != dfltCfg.DataDbCfg().Type {
