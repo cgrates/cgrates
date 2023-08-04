@@ -230,7 +230,7 @@ func testDspITMigrateAndMove(t *testing.T) {
 	}
 	_, err = dspMigrator.dmIN.DataManager().GetDispatcherProfile("cgrates.org",
 		"Dsp1", false, false, utils.NonTransactional)
-	if err == nil || err.Error() != utils.ErrNotFound.Error() {
+	if err == nil || err.Error() != utils.ErrDSPProfileNotFound.Error() {
 		t.Errorf("expected: %v,\nreceived: %v", utils.ErrDSPProfileNotFound, err)
 	}
 

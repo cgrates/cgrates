@@ -54,4 +54,4 @@
     src: "{{ nats_install_dir }}/nats-server-v{{ nats_version }}-linux-amd64/nats-server"
     dest: /usr/local/bin/nats-server
     state: link
-  when: add_nats_to_path
+  when: "add_nats_to_path|bool"
