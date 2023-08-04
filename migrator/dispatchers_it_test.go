@@ -228,10 +228,10 @@ func testDspITMigrateAndMove(t *testing.T) {
 	if !reflect.DeepEqual(result, dspPrf) {
 		t.Errorf("Expecting: %+v, received: %+v", dspPrf, result)
 	}
-	result, err = dspMigrator.dmIN.DataManager().GetDispatcherProfile("cgrates.org",
+	_, err = dspMigrator.dmIN.DataManager().GetDispatcherProfile("cgrates.org",
 		"Dsp1", false, false, utils.NonTransactional)
-	if err != utils.ErrNotFound {
-		t.Error(err)
+	if err == nil || err.Error() != utils.ErrNotFound.Error() {
+		t.Errorf("expected: %v,\nreceived: %v", utils.ErrDSPProfileNotFound, err)
 	}
 
 	resultHost, err := dspMigrator.dmOut.DataManager().GetDispatcherHost("cgrates.org",
@@ -242,7 +242,7 @@ func testDspITMigrateAndMove(t *testing.T) {
 	if !reflect.DeepEqual(resultHost, dspHost) {
 		t.Errorf("Expecting: %+v, received: %+v", dspHost, resultHost)
 	}
-	resultHost, err = dspMigrator.dmIN.DataManager().GetDispatcherHost("cgrates.org",
+	_, err = dspMigrator.dmIN.DataManager().GetDispatcherHost("cgrates.org",
 		"ALL", false, false, utils.NonTransactional)
 	if err != utils.ErrDSPHostNotFound {
 		t.Error(err)
