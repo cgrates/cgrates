@@ -26,6 +26,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -494,7 +495,9 @@ func (fltr *FilterRule) passTimings(dDP utils.DataProvider) (bool, error) {
 			return false, err
 		}
 		var tm utils.TPTiming
-		if err = connMgr.Call(config.CgrConfig().FilterSCfg().ApierSConns, nil, utils.APIerSv1GetTiming, &utils.ArgsGetTimingID{ID: valTmID}, &tm); err != nil {
+		if err = connMgr.Call(context.TODO(), config.CgrConfig().FilterSCfg().ApierSConns,
+			utils.APIerSv1GetTiming,
+			&utils.ArgsGetTimingID{ID: valTmID}, &tm); err != nil {
 			continue
 		}
 		ritm := &RITiming{
@@ -523,7 +526,9 @@ func (fltr *FilterRule) passDestinations(dDP utils.DataProvider) (bool, error) {
 	}
 	for _, p := range utils.SplitPrefix(dst, MIN_PREFIX_MATCH) {
 		var destIDs []string
-		if err = connMgr.Call(config.CgrConfig().FilterSCfg().ApierSConns, nil, utils.APIerSv1GetReverseDestination, &p, &destIDs); err != nil {
+		if err = connMgr.Call(context.TODO(), config.CgrConfig().FilterSCfg().ApierSConns,
+			utils.APIerSv1GetReverseDestination,
+			&p, &destIDs); err != nil {
 			continue
 		}
 		for _, dID := range destIDs {

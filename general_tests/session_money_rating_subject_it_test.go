@@ -21,11 +21,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package general_tests
 
 import (
-	"net/rpc"
 	"path"
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc"
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/sessions"
@@ -36,7 +37,7 @@ var (
 	sesMRSCfgPath string
 	sesMRSCfgDIR  string
 	sesMRSCfg     *config.CGRConfig
-	sesMRSRPC     *rpc.Client
+	sesMRSRPC     *birpc.Client
 	sesMRSAccount = "refundAcc"
 	sesMRSTenant  = "cgrates.org"
 
@@ -134,7 +135,7 @@ func testSesMRSItLoadFromFolder(t *testing.T) {
 		Weight:       20,
 	}
 	var result string
-	if err := sesMRSRPC.Call(utils.APIerSv1SetChargerProfile, chargerProfile, &result); err != nil {
+	if err := sesMRSRPC.Call(context.Background(), utils.APIerSv1SetChargerProfile, chargerProfile, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -153,7 +154,7 @@ func testSesMRSItAddVoiceBalance(t *testing.T) {
 		},
 	}
 	var reply string
-	if err := sesMRSRPC.Call(utils.APIerSv2SetBalance, attrSetBalance, &reply); err != nil {
+	if err := sesMRSRPC.Call(context.Background(), utils.APIerSv2SetBalance, attrSetBalance, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf("Received: %s", reply)
@@ -170,14 +171,14 @@ func testSesMRSItAddVoiceBalance(t *testing.T) {
 			utils.Weight:        10,
 		},
 	}
-	if err := sesMRSRPC.Call(utils.APIerSv2SetBalance, attrSetBalance, &reply); err != nil {
+	if err := sesMRSRPC.Call(context.Background(), utils.APIerSv2SetBalance, attrSetBalance, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf("Received: %s", reply)
 	}
 
 	var acnt engine.Account
-	if err := sesMRSRPC.Call(utils.APIerSv2GetAccount,
+	if err := sesMRSRPC.Call(context.Background(), utils.APIerSv2GetAccount,
 		&utils.AttrGetAccount{
 			Tenant:  sesMRSTenant,
 			Account: sesMRSAccount,
@@ -197,7 +198,7 @@ func testSesMRSItAddVoiceBalance(t *testing.T) {
 func testSesMRSItInitSession(t *testing.T) {
 	sesMRSCgrEv.Event[utils.Usage] = time.Second
 	var rply sessions.V1InitSessionReply
-	if err := sesMRSRPC.Call(utils.SessionSv1InitiateSession,
+	if err := sesMRSRPC.Call(context.Background(), utils.SessionSv1InitiateSession,
 		&sessions.V1InitSessionArgs{
 			InitSession: true,
 			CGREvent:    sesMRSCgrEv,
@@ -213,7 +214,7 @@ func testSesMRSItInitSession(t *testing.T) {
 func testSesMRSItTerminateSession(t *testing.T) {
 	sesMRSCgrEv.Event[utils.Usage] = 10 * time.Second
 	var rply string
-	if err := sesMRSRPC.Call(utils.SessionSv1TerminateSession,
+	if err := sesMRSRPC.Call(context.Background(), utils.SessionSv1TerminateSession,
 		&sessions.V1TerminateSessionArgs{
 			TerminateSession: true,
 			CGREvent:         sesMRSCgrEv,
@@ -224,13 +225,13 @@ func testSesMRSItTerminateSession(t *testing.T) {
 		t.Errorf("Unexpected reply: %s", rply)
 	}
 	aSessions := make([]*sessions.ExternalSession, 0)
-	if err := sesMRSRPC.Call(utils.SessionSv1GetActiveSessions, new(utils.SessionFilter), &aSessions); err == nil ||
+	if err := sesMRSRPC.Call(context.Background(), utils.SessionSv1GetActiveSessions, new(utils.SessionFilter), &aSessions); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
 
 	var acnt engine.Account
-	if err := sesMRSRPC.Call(utils.APIerSv2GetAccount,
+	if err := sesMRSRPC.Call(context.Background(), utils.APIerSv2GetAccount,
 		&utils.AttrGetAccount{
 			Tenant:  sesMRSTenant,
 			Account: sesMRSAccount,

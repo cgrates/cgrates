@@ -23,16 +23,18 @@ package ees
 
 import (
 	"flag"
-	"net/rpc"
 	"path"
 	"testing"
 	"time"
+
+	"github.com/cgrates/birpc/context"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/sqs"
+	"github.com/cgrates/birpc"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -45,7 +47,7 @@ var (
 	sqsConfDir string
 	sqsCfgPath string
 	sqsCfg     *config.CGRConfig
-	sqsRPC     *rpc.Client
+	sqsRPC     *birpc.Client
 
 	sTestsSQS = []func(t *testing.T){
 		testSQSLoadConfig,
@@ -137,7 +139,7 @@ func testSQSExportEvent(t *testing.T) {
 	}
 
 	var reply map[string]utils.MapStorage
-	if err := sqsRPC.Call(utils.EeSv1ProcessEvent, ev, &reply); err != nil {
+	if err := sqsRPC.Call(context.Background(), utils.EeSv1ProcessEvent, ev, &reply); err != nil {
 		t.Error(err)
 	}
 

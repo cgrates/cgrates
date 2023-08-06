@@ -21,10 +21,11 @@ package dispatchers
 import (
 	"time"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
 )
 
-func (dS *DispatcherService) RALsV1Ping(args *utils.CGREvent, rpl *string) (err error) {
+func (dS *DispatcherService) RALsV1Ping(ctx *context.Context, args *utils.CGREvent, rpl *string) (err error) {
 	if args == nil {
 		args = new(utils.CGREvent)
 	}
@@ -38,7 +39,7 @@ func (dS *DispatcherService) RALsV1Ping(args *utils.CGREvent, rpl *string) (err 
 	return dS.Dispatch(args, utils.MetaRALs, utils.RALsV1Ping, args, rpl)
 }
 
-func (dS *DispatcherService) RALsV1GetRatingPlansCost(args *utils.RatingPlanCostArg, rpl *RatingPlanCost) (err error) {
+func (dS *DispatcherService) RALsV1GetRatingPlansCost(ctx *context.Context, args *utils.RatingPlanCostArg, rpl *RatingPlanCost) (err error) {
 	tenant := dS.cfg.GeneralCfg().DefaultTenant
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(utils.RALsV1GetRatingPlansCost, tenant,

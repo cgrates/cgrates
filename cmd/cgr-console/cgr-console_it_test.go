@@ -27,8 +27,6 @@ import (
 	"errors"
 	"flag"
 	"fmt"
-	"net/rpc"
-	"net/rpc/jsonrpc"
 	"os"
 	"os/exec"
 	"path"
@@ -38,6 +36,10 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc/context"
+
+	"github.com/cgrates/birpc"
+	"github.com/cgrates/birpc/jsonrpc"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/dispatchers"
 	"github.com/cgrates/cgrates/engine"
@@ -50,7 +52,7 @@ var (
 	dbType    = flag.String("dbtype", utils.MetaInternal, "The type of DataBase (Internal/Mongo/mySql)")
 	waitRater = flag.Int("wait_rater", 100, "Number of milliseconds to wait for rater to start and cache")
 	encoding  = flag.String("rpc", utils.MetaJSON, "what encoding whould be uused for rpc comunication")
-	cnslRPC   *rpc.Client
+	cnslRPC   *birpc.Client
 )
 
 var (
@@ -312,12 +314,12 @@ func testConsoleItStartEngine(t *testing.T) {
 	}
 }
 
-func newRPCClient(cfg *config.ListenCfg) (c *rpc.Client, err error) {
+func newRPCClient(cfg *config.ListenCfg) (c *birpc.Client, err error) {
 	switch *encoding {
 	case utils.MetaJSON:
 		return jsonrpc.Dial(utils.TCP, cfg.RPCJSONListen)
 	case utils.MetaGOB:
-		return rpc.Dial(utils.TCP, cfg.RPCGOBListen)
+		return birpc.Dial(utils.TCP, cfg.RPCGOBListen)
 	default:
 		return nil, errors.New("UNSUPPORTED_RPC")
 	}
@@ -3584,7 +3586,7 @@ func testConsoleItActiveSessions(t *testing.T) {
 
 func testConsoleItPassiveSessions(t *testing.T) {
 	var reply string
-	err := cnslRPC.Call(utils.SessionSv1DeactivateSessions, &utils.SessionIDsWithArgsDispatcher{}, &reply)
+	err := cnslRPC.Call(context.Background(), utils.SessionSv1DeactivateSessions, &utils.SessionIDsWithArgsDispatcher{}, &reply)
 	if err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
@@ -3594,7 +3596,7 @@ func testConsoleItPassiveSessions(t *testing.T) {
 		APIOpts: make(map[string]any),
 	}
 	var reply2 []*sessions.ExternalSession
-	if err := cnslRPC.Call(utils.SessionSv1GetPassiveSessions, args, &reply2); err != nil {
+	if err := cnslRPC.Call(context.Background(), utils.SessionSv1GetPassiveSessions, args, &reply2); err != nil {
 		t.Error(err)
 	}
 	expected := []*sessions.ExternalSession{

@@ -27,6 +27,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc"
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -80,7 +82,7 @@ func TestCall(t *testing.T) {
 	filterS := engine.NewFilterS(cfg, nil, newDM)
 	eeS := NewEventExporterS(cfg, filterS, nil)
 	errExpect := "UNSUPPORTED_SERVICE_METHOD"
-	if err := eeS.Call("test", 24532, 43643); err == nil || err.Error() != errExpect {
+	if err := eeS.Call(context.Background(), "test", 24532, 43643); err == nil || err.Error() != errExpect {
 		t.Errorf("Expected %q but received %q", errExpect, err)
 	}
 }
@@ -89,7 +91,7 @@ type testMockEvent struct {
 	calls map[string]func(args any, reply any) error
 }
 
-func (sT *testMockEvent) Call(method string, arg any, rply any) error {
+func (sT *testMockEvent) Call(_ *context.Context, method string, arg any, rply any) error {
 	if call, has := sT.calls[method]; !has {
 		return rpcclient.ErrUnsupporteServiceMethod
 	} else {
@@ -119,9 +121,9 @@ func TestAttrSProcessEvent(t *testing.T) {
 	newIDb := engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
 	newDM := engine.NewDataManager(newIDb, cfg.CacheCfg(), nil)
 	filterS := engine.NewFilterS(cfg, nil, newDM)
-	clientConn := make(chan rpcclient.ClientConnector, 1)
+	clientConn := make(chan birpc.ClientConnector, 1)
 	clientConn <- testMock
-	connMgr := engine.NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	connMgr := engine.NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes): clientConn,
 	})
 	eeS := NewEventExporterS(cfg, filterS, connMgr)
@@ -148,9 +150,9 @@ func TestAttrSProcessEvent2(t *testing.T) {
 	newIDb := engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
 	newDM := engine.NewDataManager(newIDb, cfg.CacheCfg(), nil)
 	filterS := engine.NewFilterS(cfg, nil, newDM)
-	clientConn := make(chan rpcclient.ClientConnector, 1)
+	clientConn := make(chan birpc.ClientConnector, 1)
 	clientConn <- testMock
-	connMgr := engine.NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	connMgr := engine.NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes): clientConn,
 	})
 	eeS := NewEventExporterS(cfg, filterS, connMgr)
@@ -204,7 +206,7 @@ func TestV1ProcessEvent(t *testing.T) {
 	rplyExpect := map[string]map[string]any{
 		"SQLExporterFull": {},
 	}
-	if err := eeS.V1ProcessEvent(cgrEv, &rply); err != nil {
+	if err := eeS.V1ProcessEvent(context.Background(), cgrEv, &rply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rply, rplyExpect) {
 		t.Errorf("Expected %q but received %q", rplyExpect, rply)
@@ -241,13 +243,13 @@ func TestV1ProcessEvent2(t *testing.T) {
 	}
 	var rply map[string]map[string]any
 	errExpect := "NOT_FOUND"
-	if err := eeS.V1ProcessEvent(cgrEv, &rply); err == nil || err.Error() != errExpect {
+	if err := eeS.V1ProcessEvent(context.Background(), cgrEv, &rply); err == nil || err.Error() != errExpect {
 		t.Errorf("Expecting %q but received %q", errExpect, err)
 	}
 
 	errExpect = "NOT_FOUND:test"
 	eeS.cfg.EEsCfg().Exporters[0].Filters = []string{"test"}
-	if err := eeS.V1ProcessEvent(cgrEv, &rply); err == nil || err.Error() != errExpect {
+	if err := eeS.V1ProcessEvent(context.Background(), cgrEv, &rply); err == nil || err.Error() != errExpect {
 		t.Errorf("Expecting %q but received %q", errExpect, err)
 	}
 }
@@ -274,7 +276,7 @@ func TestV1ProcessEvent3(t *testing.T) {
 	}
 	var rply map[string]map[string]any
 	errExpect := "MANDATORY_IE_MISSING: [connIDs]"
-	if err := eeS.V1ProcessEvent(cgrEv, &rply); err == nil || err.Error() != errExpect {
+	if err := eeS.V1ProcessEvent(context.Background(), cgrEv, &rply); err == nil || err.Error() != errExpect {
 		t.Errorf("Expecting %q but received %q", errExpect, err)
 	}
 }
@@ -311,7 +313,7 @@ func TestV1ProcessEvent4(t *testing.T) {
 	}
 	var rply map[string]map[string]any
 	errExpect := "PARTIALLY_EXECUTED"
-	if err := eeS.V1ProcessEvent(cgrEv, &rply); err == nil || err.Error() != errExpect {
+	if err := eeS.V1ProcessEvent(context.Background(), cgrEv, &rply); err == nil || err.Error() != errExpect {
 		t.Errorf("Expecting %q but received %q", errExpect, err)
 	} else if len(rply) != 0 {
 		t.Error("Unexpected reply result")
@@ -373,7 +375,7 @@ func TestV1ProcessEventMockMetrics(t *testing.T) {
 	}
 	var rply map[string]map[string]any
 	errExpect := "cannot cast to map[string]any 5 for positive exports"
-	if err := eeS.V1ProcessEvent(cgrEv, &rply); err == nil || err.Error() != errExpect {
+	if err := eeS.V1ProcessEvent(context.Background(), cgrEv, &rply); err == nil || err.Error() != errExpect {
 		t.Errorf("Expecting %q but received %q", errExpect, err)
 	}
 }
@@ -406,7 +408,7 @@ func TestV1ProcessEvent5(t *testing.T) {
 	eeS := NewEventExporterS(cfg, filterS, nil)
 	var rply map[string]map[string]any
 	errExpect := "unsupported exporter type: <invalid_type>"
-	if err := eeS.V1ProcessEvent(cgrEv, &rply); err == nil || err.Error() != errExpect {
+	if err := eeS.V1ProcessEvent(context.Background(), cgrEv, &rply); err == nil || err.Error() != errExpect {
 		t.Errorf("Expected %v but received %v", errExpect, err)
 	}
 }
@@ -432,7 +434,7 @@ func TestV1ProcessEvent6(t *testing.T) {
 		},
 	}
 	var rply map[string]map[string]any
-	if err := eeS.V1ProcessEvent(cgrEv, &rply); err != nil {
+	if err := eeS.V1ProcessEvent(context.Background(), cgrEv, &rply); err != nil {
 		t.Error(err)
 	}
 }

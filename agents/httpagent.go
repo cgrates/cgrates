@@ -22,6 +22,7 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -72,9 +73,9 @@ func (ha *HTTPAgent) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 			utils.FirstNonEmpty(reqProcessor.Timezone,
 				config.CgrConfig().GeneralCfg().DefaultTimezone),
 			ha.filterS, nil)
-		lclProcessed, err := processRequest(reqProcessor, agReq,
+		lclProcessed, err := processRequest(context.TODO(), reqProcessor, agReq,
 			utils.HTTPAgent, ha.connMgr, ha.sessionConns,
-			nil, agReq.filterS)
+			agReq.filterS)
 		if err != nil {
 			utils.Logger.Warning(
 				fmt.Sprintf("<%s> error: %s processing request: %s",

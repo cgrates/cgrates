@@ -24,6 +24,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc"
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/rpcclient"
@@ -212,14 +214,14 @@ func TestChargersprocessEventNoConnIDs(t *testing.T) {
 }
 
 type ccMock struct {
-	calls map[string]func(args any, reply any) error
+	calls map[string]func(ctx *context.Context, args any, reply any) error
 }
 
-func (ccM *ccMock) Call(serviceMethod string, args any, reply any) (err error) {
+func (ccM *ccMock) Call(ctx *context.Context, serviceMethod string, args any, reply any) (err error) {
 	if call, has := ccM.calls[serviceMethod]; !has {
 		return rpcclient.ErrUnsupporteServiceMethod
 	} else {
-		return call(args, reply)
+		return call(ctx, args, reply)
 	}
 }
 
@@ -243,8 +245,8 @@ func TestChargersprocessEventCallNilErr(t *testing.T) {
 	}
 
 	ccM := &ccMock{
-		calls: map[string]func(args any, reply any) error{
-			utils.AttributeSv1ProcessEvent: func(args, reply any) error {
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.AttributeSv1ProcessEvent: func(ctx *context.Context, args, reply any) error {
 				rply := AttrSProcessEventReply{
 					AlteredFields: []string{utils.AccountField},
 					CGREvent: &utils.CGREvent{
@@ -260,7 +262,7 @@ func TestChargersprocessEventCallNilErr(t *testing.T) {
 			},
 		},
 	}
-	rpcInternal := make(chan rpcclient.ClientConnector, 1)
+	rpcInternal := make(chan birpc.ClientConnector, 1)
 	rpcInternal <- ccM
 
 	cS := &ChargerService{
@@ -270,7 +272,7 @@ func TestChargersprocessEventCallNilErr(t *testing.T) {
 			cfg: cfg,
 		},
 		cfg: cfg,
-		connMgr: NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+		connMgr: NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 			utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes): rpcInternal,
 		}),
 	}
@@ -332,13 +334,13 @@ func TestChargersprocessEventCallErr(t *testing.T) {
 	}
 
 	ccM := &ccMock{
-		calls: map[string]func(args any, reply any) error{
-			utils.AttributeSv1ProcessEvent: func(args, reply any) error {
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.AttributeSv1ProcessEvent: func(ctx *context.Context, args, reply any) error {
 				return utils.ErrNotFound
 			},
 		},
 	}
-	rpcInternal := make(chan rpcclient.ClientConnector, 1)
+	rpcInternal := make(chan birpc.ClientConnector, 1)
 	rpcInternal <- ccM
 
 	cS := &ChargerService{
@@ -348,7 +350,7 @@ func TestChargersprocessEventCallErr(t *testing.T) {
 			cfg: cfg,
 		},
 		cfg: cfg,
-		connMgr: NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+		connMgr: NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 			utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes): rpcInternal,
 		}),
 	}
@@ -415,8 +417,8 @@ func TestChargersV1ProcessEventErrNotFound(t *testing.T) {
 	}
 
 	ccM := &ccMock{
-		calls: map[string]func(args any, reply any) error{
-			utils.AttributeSv1ProcessEvent: func(args, reply any) error {
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.AttributeSv1ProcessEvent: func(ctx *context.Context, args, reply any) error {
 				rply := AttrSProcessEventReply{
 					AlteredFields: []string{utils.AccountField},
 					CGREvent: &utils.CGREvent{
@@ -432,7 +434,7 @@ func TestChargersV1ProcessEventErrNotFound(t *testing.T) {
 			},
 		},
 	}
-	rpcInternal := make(chan rpcclient.ClientConnector, 1)
+	rpcInternal := make(chan birpc.ClientConnector, 1)
 	rpcInternal <- ccM
 
 	cS := &ChargerService{
@@ -442,7 +444,7 @@ func TestChargersV1ProcessEventErrNotFound(t *testing.T) {
 			cfg: cfg,
 		},
 		cfg: cfg,
-		connMgr: NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+		connMgr: NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 			utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes): rpcInternal,
 		}),
 	}
@@ -455,7 +457,7 @@ func TestChargersV1ProcessEventErrNotFound(t *testing.T) {
 	reply := &[]*ChrgSProcessEventReply{}
 
 	experr := utils.ErrNotFound
-	err := cS.V1ProcessEvent(args, reply)
+	err := cS.V1ProcessEvent(context.Background(), args, reply)
 
 	if err == nil || err != experr {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", experr, err)
@@ -486,8 +488,8 @@ func TestChargersV1ProcessEventErrOther(t *testing.T) {
 	}
 
 	ccM := &ccMock{
-		calls: map[string]func(args any, reply any) error{
-			"invalidMethod": func(args, reply any) error {
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			"invalidMethod": func(ctx *context.Context, args, reply any) error {
 				rply := AttrSProcessEventReply{
 					AlteredFields: []string{utils.AccountField},
 					CGREvent: &utils.CGREvent{
@@ -503,7 +505,7 @@ func TestChargersV1ProcessEventErrOther(t *testing.T) {
 			},
 		},
 	}
-	rpcInternal := make(chan rpcclient.ClientConnector, 1)
+	rpcInternal := make(chan birpc.ClientConnector, 1)
 	rpcInternal <- ccM
 
 	cS := &ChargerService{
@@ -513,7 +515,7 @@ func TestChargersV1ProcessEventErrOther(t *testing.T) {
 			cfg: cfg,
 		},
 		cfg: cfg,
-		connMgr: NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+		connMgr: NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 			utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes): rpcInternal,
 		}),
 	}
@@ -527,7 +529,7 @@ func TestChargersV1ProcessEventErrOther(t *testing.T) {
 
 	exp := &[]*ChrgSProcessEventReply{}
 	experr := fmt.Sprintf("SERVER_ERROR: %s", rpcclient.ErrUnsupporteServiceMethod)
-	err := cS.V1ProcessEvent(args, reply)
+	err := cS.V1ProcessEvent(context.Background(), args, reply)
 
 	if err == nil || err.Error() != experr {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", experr, err)
@@ -563,8 +565,8 @@ func TestChargersV1ProcessEvent(t *testing.T) {
 	}
 
 	ccM := &ccMock{
-		calls: map[string]func(args any, reply any) error{
-			utils.AttributeSv1ProcessEvent: func(args, reply any) error {
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.AttributeSv1ProcessEvent: func(ctx *context.Context, args, reply any) error {
 				rply := AttrSProcessEventReply{
 					AlteredFields: []string{utils.AccountField},
 					CGREvent: &utils.CGREvent{
@@ -580,7 +582,7 @@ func TestChargersV1ProcessEvent(t *testing.T) {
 			},
 		},
 	}
-	rpcInternal := make(chan rpcclient.ClientConnector, 1)
+	rpcInternal := make(chan birpc.ClientConnector, 1)
 	rpcInternal <- ccM
 
 	cS := &ChargerService{
@@ -590,7 +592,7 @@ func TestChargersV1ProcessEvent(t *testing.T) {
 			cfg: cfg,
 		},
 		cfg: cfg,
-		connMgr: NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+		connMgr: NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 			utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes): rpcInternal,
 		}),
 	}
@@ -615,7 +617,7 @@ func TestChargersV1ProcessEvent(t *testing.T) {
 			},
 		},
 	}
-	err := cS.V1ProcessEvent(args, reply)
+	err := cS.V1ProcessEvent(context.Background(), args, reply)
 
 	if err != nil {
 		t.Fatalf("\nexpected: <%+v>, \nreceived: <%+v>", nil, err)
@@ -674,7 +676,7 @@ func TestChargersV1GetChargersForEventNilErr(t *testing.T) {
 			RunID:     "*default",
 		},
 	}
-	err := cS.V1GetChargersForEvent(args, reply)
+	err := cS.V1GetChargersForEvent(context.Background(), args, reply)
 
 	if err != nil {
 		t.Fatalf("\nexpected: <%+v>, \nreceived: <%+v>", nil, err)
@@ -720,7 +722,7 @@ func TestChargersV1GetChargersForEventErr(t *testing.T) {
 
 	exp := &ChargerProfiles{}
 	experr := fmt.Sprintf("SERVER_ERROR: %s", utils.ErrNotImplemented)
-	err := cS.V1GetChargersForEvent(args, reply)
+	err := cS.V1GetChargersForEvent(context.Background(), args, reply)
 
 	if err == nil || err.Error() != experr {
 		t.Fatalf("\nexpected: <%+v>, \nreceived: <%+v>", experr, err)

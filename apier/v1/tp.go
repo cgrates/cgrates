@@ -25,6 +25,7 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -33,7 +34,7 @@ type AttrGetTPIds struct {
 }
 
 // Queries tarrif plan identities gathered from all tables.
-func (apierSv1 *APIerSv1) GetTPIds(attrs *AttrGetTPIds, reply *[]string) error {
+func (apierSv1 *APIerSv1) GetTPIds(ctx *context.Context, attrs *AttrGetTPIds, reply *[]string) error {
 	if ids, err := apierSv1.StorDb.GetTpIds(utils.EmptyString); err != nil {
 		return utils.NewErrServerError(err)
 	} else if ids == nil {
@@ -49,7 +50,7 @@ type AttrImportTPZipFile struct {
 	File []byte
 }
 
-func (apierSv1 *APIerSv1) ImportTPZipFile(attrs *AttrImportTPZipFile, reply *string) error {
+func (apierSv1 *APIerSv1) ImportTPZipFile(ctx *context.Context, attrs *AttrImportTPZipFile, reply *string) error {
 	tmpDir, err := os.MkdirTemp("/tmp", "cgr_")
 	if err != nil {
 		*reply = "ERROR: creating temp directory!"
@@ -102,7 +103,7 @@ type AttrRemTp struct {
 	TPid string
 }
 
-func (apierSv1 *APIerSv1) RemTP(attrs *AttrRemTp, reply *string) error {
+func (apierSv1 *APIerSv1) RemTP(ctx *context.Context, attrs *AttrRemTp, reply *string) error {
 	if len(attrs.TPid) == 0 {
 		return utils.NewErrMandatoryIeMissing(utils.TPid)
 	}
@@ -114,7 +115,7 @@ func (apierSv1 *APIerSv1) RemTP(attrs *AttrRemTp, reply *string) error {
 	return nil
 }
 
-func (apierSv1 *APIerSv1) ExportTPToFolder(attrs *utils.AttrDirExportTP, exported *utils.ExportedTPStats) error {
+func (apierSv1 *APIerSv1) ExportTPToFolder(ctx *context.Context, attrs *utils.AttrDirExportTP, exported *utils.ExportedTPStats) error {
 	if attrs.TPid == nil || *attrs.TPid == "" {
 		return utils.NewErrMandatoryIeMissing(utils.TPid)
 	}
@@ -147,7 +148,7 @@ func (apierSv1 *APIerSv1) ExportTPToFolder(attrs *utils.AttrDirExportTP, exporte
 	return nil
 }
 
-func (apierSv1 *APIerSv1) ExportTPToZipString(attrs *utils.AttrDirExportTP, reply *string) error {
+func (apierSv1 *APIerSv1) ExportTPToZipString(ctx *context.Context, attrs *utils.AttrDirExportTP, reply *string) error {
 	if attrs.TPid == nil || *attrs.TPid == utils.EmptyString {
 		return utils.NewErrMandatoryIeMissing(utils.TPid)
 	}

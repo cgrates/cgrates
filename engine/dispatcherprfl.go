@@ -22,9 +22,10 @@ import (
 	"math/rand"
 	"sort"
 
+	"github.com/cgrates/birpc"
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/cgrates/rpcclient"
 )
 
 type DispatcherHostProfile struct {
@@ -133,7 +134,7 @@ func (dps DispatcherProfiles) Sort() {
 type DispatcherHost struct {
 	Tenant string
 	*config.RemoteHost
-	rpcConn rpcclient.ClientConnector
+	rpcConn birpc.ClientConnector
 }
 
 // DispatcherHostWithOpts is used in replicatorV1 for dispatcher
@@ -148,21 +149,26 @@ func (dH *DispatcherHost) TenantID() string {
 }
 
 // Call will build and cache the connection if it is not defined yet then will execute the method on conn
-func (dH *DispatcherHost) Call(serviceMethod string, args any, reply any) (err error) {
+func (dH *DispatcherHost) Call(ctx *context.Context, serviceMethod string, args any, reply any) (err error) {
 	if dH.rpcConn == nil {
 		// connect the rpcConn
 		cfg := config.CgrConfig()
-		if dH.rpcConn, err = NewRPCConnection(dH.RemoteHost,
+		if dH.rpcConn, err = NewRPCConnection(ctx,
+			dH.RemoteHost,
 			cfg.TLSCfg().ClientKey,
-			cfg.TLSCfg().ClientCerificate, cfg.TLSCfg().CaCertificate,
-			cfg.GeneralCfg().ConnectAttempts, cfg.GeneralCfg().Reconnects,
-			cfg.GeneralCfg().ConnectTimeout, cfg.GeneralCfg().ReplyTimeout,
-			IntRPC.GetInternalChanel(), false, nil,
+			cfg.TLSCfg().ClientCerificate,
+			cfg.TLSCfg().CaCertificate,
+			cfg.GeneralCfg().ConnectAttempts,
+			cfg.GeneralCfg().Reconnects,
+			cfg.GeneralCfg().MaxReconnectInterval,
+			cfg.GeneralCfg().ConnectTimeout,
+			cfg.GeneralCfg().ReplyTimeout,
+			IntRPC.GetInternalChanel(), false,
 			utils.EmptyString, utils.EmptyString, nil); err != nil {
 			return
 		}
 	}
-	return dH.rpcConn.Call(serviceMethod, args, reply)
+	return dH.rpcConn.Call(ctx, serviceMethod, args, reply)
 }
 
 type DispatcherHostIDs []string

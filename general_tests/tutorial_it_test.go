@@ -23,11 +23,12 @@ package general_tests
 
 import (
 	"flag"
-	"net/rpc"
 	"path"
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc"
+	"github.com/cgrates/birpc/context"
 	v1 "github.com/cgrates/cgrates/apier/v1"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
@@ -38,7 +39,7 @@ var (
 	itTestMongoAtalas = flag.Bool("mongo_atlas", false, "Run the test with mongo atalas connection")
 	tutorialCfgPath   string
 	tutorialCfg       *config.CGRConfig
-	tutorialRpc       *rpc.Client
+	tutorialRpc       *birpc.Client
 	tutorialConfDIR   string //run tests for specific configuration
 	tutorialDelay     int
 
@@ -122,7 +123,7 @@ func testTutorialRpcConn(t *testing.T) {
 func testTutorialFromFolder(t *testing.T) {
 	var reply string
 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "tutorial")}
-	if err := tutorialRpc.Call(utils.APIerSv1LoadTariffPlanFromFolder, attrs, &reply); err != nil {
+	if err := tutorialRpc.Call(context.Background(), utils.APIerSv1LoadTariffPlanFromFolder, attrs, &reply); err != nil {
 		t.Error(err)
 	}
 	time.Sleep(100 * time.Millisecond)
@@ -138,7 +139,7 @@ func testTutorialGetCost(t *testing.T) {
 		Usage:       "2m10s",
 	}
 	var rply *engine.EventCost
-	if err := tutorialRpc.Call(utils.APIerSv1GetCost, &attrs, &rply); err != nil {
+	if err := tutorialRpc.Call(context.Background(), utils.APIerSv1GetCost, &attrs, &rply); err != nil {
 		t.Error("Unexpected nil error received: ", err.Error())
 	} else if *rply.Cost != 0.716900 {
 		t.Errorf("Unexpected cost received: %f", *rply.Cost)

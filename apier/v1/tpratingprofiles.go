@@ -21,11 +21,12 @@ package v1
 // This file deals with tp_rate_profiles management over APIs
 
 import (
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
 )
 
 // SetTPRatingProfile creates a new RatingProfile within a tariff plan
-func (apierSv1 *APIerSv1) SetTPRatingProfile(attrs *utils.TPRatingProfile, reply *string) error {
+func (apierSv1 *APIerSv1) SetTPRatingProfile(ctx *context.Context, attrs *utils.TPRatingProfile, reply *string) error {
 	if missing := utils.MissingStructFields(attrs,
 		[]string{utils.TPid, utils.LoadId, utils.Category, utils.Subject, utils.RatingPlanActivations}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
@@ -41,7 +42,7 @@ func (apierSv1 *APIerSv1) SetTPRatingProfile(attrs *utils.TPRatingProfile, reply
 }
 
 // GetTPRatingProfilesByLoadID queries specific RatingProfile on tariff plan
-func (apierSv1 *APIerSv1) GetTPRatingProfilesByLoadID(attrs *utils.TPRatingProfile, reply *[]*utils.TPRatingProfile) error {
+func (apierSv1 *APIerSv1) GetTPRatingProfilesByLoadID(ctx *context.Context, attrs *utils.TPRatingProfile, reply *[]*utils.TPRatingProfile) error {
 	mndtryFlds := []string{utils.TPid, utils.LoadId}
 	if len(attrs.Subject) != 0 { // If Subject provided as filter, make all related fields mandatory
 		mndtryFlds = append(mndtryFlds, utils.Category, utils.Subject)
@@ -64,7 +65,7 @@ func (apierSv1 *APIerSv1) GetTPRatingProfilesByLoadID(attrs *utils.TPRatingProfi
 }
 
 // GetTPRatingProfileLoadIds queries RatingProfile identities on specific tariff plan.
-func (apierSv1 *APIerSv1) GetTPRatingProfileLoadIds(attrs *utils.AttrTPRatingProfileIds, reply *[]string) error {
+func (apierSv1 *APIerSv1) GetTPRatingProfileLoadIds(ctx *context.Context, attrs *utils.AttrTPRatingProfileIds, reply *[]string) error {
 	if missing := utils.MissingStructFields(attrs, []string{utils.TPid}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -94,7 +95,7 @@ type AttrGetTPRatingProfile struct {
 }
 
 // GetTPRatingProfile queries specific RatingProfile on tariff plan
-func (apierSv1 *APIerSv1) GetTPRatingProfile(attrs *AttrGetTPRatingProfile, reply *utils.TPRatingProfile) error {
+func (apierSv1 *APIerSv1) GetTPRatingProfile(ctx *context.Context, attrs *AttrGetTPRatingProfile, reply *utils.TPRatingProfile) error {
 	if missing := utils.MissingStructFields(attrs, []string{utils.TPid, utils.RatingProfileID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -120,7 +121,7 @@ type AttrGetTPRatingProfileIds struct {
 }
 
 // GetTPRatingProfileIds queries RatingProfiles identities on specific tariff plan.
-func (apierSv1 *APIerSv1) GetTPRatingProfileIds(attrs *AttrGetTPRatingProfileIds, reply *[]string) error {
+func (apierSv1 *APIerSv1) GetTPRatingProfileIds(ctx *context.Context, attrs *AttrGetTPRatingProfileIds, reply *[]string) error {
 	if missing := utils.MissingStructFields(attrs, []string{utils.TPid}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -138,7 +139,7 @@ func (apierSv1 *APIerSv1) GetTPRatingProfileIds(attrs *AttrGetTPRatingProfileIds
 }
 
 // RemoveTPRatingProfile removes specific RatingProfiles on Tariff plan
-func (apierSv1 *APIerSv1) RemoveTPRatingProfile(attrs *AttrGetTPRatingProfile, reply *string) (err error) {
+func (apierSv1 *APIerSv1) RemoveTPRatingProfile(ctx *context.Context, attrs *AttrGetTPRatingProfile, reply *string) (err error) {
 	if missing := utils.MissingStructFields(attrs, []string{utils.TPid, utils.RatingProfileID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}

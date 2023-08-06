@@ -29,8 +29,9 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc"
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/rpcclient"
 
 	"github.com/cgrates/cgrates/utils"
 )
@@ -859,8 +860,8 @@ func TestRouteServiceStatMetrics(t *testing.T) {
 
 	}()
 	testMock := &ccMock{
-		calls: map[string]func(args, reply any) error{
-			utils.StatSv1GetQueueFloatMetrics: func(args, reply any) error {
+		calls: map[string]func(ctx *context.Context, args, reply any) error{
+			utils.StatSv1GetQueueFloatMetrics: func(ctx *context.Context, args, reply any) error {
 				rpl := map[string]float64{
 					"metric1": 21.11,
 				}
@@ -875,9 +876,9 @@ func TestRouteServiceStatMetrics(t *testing.T) {
 	cfg.RouteSCfg().StringIndexedFields = nil
 	cfg.RouteSCfg().PrefixIndexedFields = nil
 	cfg.RouteSCfg().StatSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats)}
-	clientconn := make(chan rpcclient.ClientConnector, 1)
+	clientconn := make(chan birpc.ClientConnector, 1)
 	clientconn <- testMock
-	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	connMgr := NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats): clientconn,
 	})
 	rpS := NewRouteService(dmSPP, &FilterS{dm: dmSPP, cfg: cfg, connMgr: nil}, cfg, connMgr)
@@ -901,8 +902,8 @@ func TestRouteServiceStatMetricsLog(t *testing.T) {
 		log.SetOutput(os.Stderr)
 	}()
 	testMock := &ccMock{
-		calls: map[string]func(args, reply any) error{
-			utils.StatSv1GetQueueFloatMetrics: func(args, reply any) error {
+		calls: map[string]func(ctx *context.Context, args, reply any) error{
+			utils.StatSv1GetQueueFloatMetrics: func(ctx *context.Context, args, reply any) error {
 				return errors.New("Error")
 			},
 		},
@@ -911,9 +912,9 @@ func TestRouteServiceStatMetricsLog(t *testing.T) {
 	data := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
 	dmSPP := NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	cfg.RouteSCfg().StatSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats)}
-	clientconn := make(chan rpcclient.ClientConnector, 1)
+	clientconn := make(chan birpc.ClientConnector, 1)
 	clientconn <- testMock
-	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	connMgr := NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats): clientconn,
 	})
 	rpS := NewRouteService(dmSPP, &FilterS{dm: dmSPP, cfg: cfg, connMgr: nil}, cfg, connMgr)
@@ -1009,7 +1010,7 @@ func TestRouteServiceV1GetRouteProfilesForEvent(t *testing.T) {
 			Weight: 0,
 		},
 	}
-	if err := rpS.V1GetRouteProfilesForEvent(args, (*[]*RouteProfile)(testRoutesPrfs)); err == nil || err != utils.ErrNotFound {
+	if err := rpS.V1GetRouteProfilesForEvent(context.Background(), args, (*[]*RouteProfile)(testRoutesPrfs)); err == nil || err != utils.ErrNotFound {
 		t.Error(err)
 	}
 }
@@ -1020,8 +1021,8 @@ func TestRouteServiceV1GetRoutes(t *testing.T) {
 
 	}()
 	ccMock := &ccMock{
-		calls: map[string]func(args any, reply any) error{
-			utils.AttributeSv1ProcessEvent: func(args, reply any) error {
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.AttributeSv1ProcessEvent: func(ctx *context.Context, args, reply any) error {
 				rpl := &AttrSProcessEventReply{
 					AlteredFields: []string{"testcase"},
 					CGREvent:      testRoutesArgs[1],
@@ -1037,9 +1038,9 @@ func TestRouteServiceV1GetRoutes(t *testing.T) {
 	cfg.RouteSCfg().StringIndexedFields = nil
 	cfg.RouteSCfg().PrefixIndexedFields = nil
 	cfg.RouteSCfg().AttributeSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes)}
-	clientConn := make(chan rpcclient.ClientConnector, 1)
+	clientConn := make(chan birpc.ClientConnector, 1)
 	clientConn <- ccMock
-	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	connMgr := NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes): clientConn,
 	})
 	rpS := NewRouteService(dmSPP, &FilterS{dm: dmSPP, cfg: cfg, connMgr: nil}, cfg, connMgr)
@@ -1053,7 +1054,7 @@ func TestRouteServiceV1GetRoutes(t *testing.T) {
 	}
 	expErr := fmt.Sprintf("MANDATORY_IE_MISSING: [%v]", utils.CGREventString)
 	var reply SortedRoutesList
-	if err := rpS.V1GetRoutes(nil, &reply); err == nil || err.Error() != expErr {
+	if err := rpS.V1GetRoutes(context.Background(), nil, &reply); err == nil || err.Error() != expErr {
 		t.Errorf("Expected <%v>,Received <%v>", expErr, err.Error())
 	}
 	expS := SortedRoutesList{
@@ -1067,7 +1068,7 @@ func TestRouteServiceV1GetRoutes(t *testing.T) {
 				},
 			},
 		}}
-	if err = rpS.V1GetRoutes(args, &reply); err != nil {
+	if err = rpS.V1GetRoutes(context.Background(), args, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(reply[0].ProfileID, expS[0].ProfileID) {
 		t.Errorf("Expected %v,Received %v", utils.ToJSON(expS), utils.ToJSON(reply))
@@ -1359,17 +1360,17 @@ func TestReaSortRoutes(t *testing.T) {
 		utils.Logger.SetLogLevel(0)
 		log.SetOutput(os.Stderr)
 	}()
-	clientConn := make(chan rpcclient.ClientConnector, 1)
+	clientConn := make(chan birpc.ClientConnector, 1)
 	clientConn <- &ccMock{
-		calls: map[string]func(args any, reply any) error{
-			utils.ResponderGetMaxSessionTimeOnAccounts: func(args, reply any) error {
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.ResponderGetMaxSessionTimeOnAccounts: func(ctx *context.Context, args, reply any) error {
 				rpl := map[string]any{
 					utils.CapMaxUsage: 3 * time.Minute,
 				}
 				*reply.(*map[string]any) = rpl
 				return nil
 			},
-			utils.StatSv1GetQueueFloatMetrics: func(args, reply any) error {
+			utils.StatSv1GetQueueFloatMetrics: func(ctx *context.Context, args, reply any) error {
 				rpl := map[string]float64{
 					"metric":  22.0,
 					"metric3": 32.2,
@@ -1379,7 +1380,7 @@ func TestReaSortRoutes(t *testing.T) {
 			},
 		},
 	}
-	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	connMgr := NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRALs):  clientConn,
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats): clientConn,
 	})
@@ -1524,17 +1525,17 @@ func TestLoadDistributionSorterSortRoutes(t *testing.T) {
 	cfg.RouteSCfg().RALsConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRALs)}
 	cfg.RouteSCfg().StatSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats)}
 	cfg.GeneralCfg().DefaultTimezone = "UTC"
-	clientConn := make(chan rpcclient.ClientConnector, 1)
+	clientConn := make(chan birpc.ClientConnector, 1)
 	clientConn <- &ccMock{
-		calls: map[string]func(args any, reply any) error{
-			utils.ResponderGetMaxSessionTimeOnAccounts: func(args, reply any) error {
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.ResponderGetMaxSessionTimeOnAccounts: func(ctx *context.Context, args, reply any) error {
 				rpl := map[string]any{
 					utils.CapMaxUsage: 3 * time.Minute,
 				}
 				*reply.(*map[string]any) = rpl
 				return nil
 			},
-			utils.StatSv1GetQueueFloatMetrics: func(args, reply any) error {
+			utils.StatSv1GetQueueFloatMetrics: func(ctx *context.Context, args, reply any) error {
 				rpl := map[string]float64{
 					"metric":  22.0,
 					"metric3": 32.2,
@@ -1544,7 +1545,7 @@ func TestLoadDistributionSorterSortRoutes(t *testing.T) {
 			},
 		},
 	}
-	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	connMgr := NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRALs):  clientConn,
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats): clientConn,
 	})
@@ -1634,8 +1635,8 @@ func TestRouteServicePopulateSortingData(t *testing.T) {
 	Cache.Clear(nil)
 
 	ccMock := &ccMock{
-		calls: map[string]func(args, reply any) error{
-			utils.ResponderGetMaxSessionTimeOnAccounts: func(args, reply any) error {
+		calls: map[string]func(ctx *context.Context, args, reply any) error{
+			utils.ResponderGetMaxSessionTimeOnAccounts: func(ctx *context.Context, args, reply any) error {
 				rpl := map[string]any{
 					utils.CapMaxUsage: 1 * time.Second,
 					utils.Cost:        0,
@@ -1643,7 +1644,7 @@ func TestRouteServicePopulateSortingData(t *testing.T) {
 				*reply.(*map[string]any) = rpl
 				return nil
 			},
-			utils.ResponderGetCostOnRatingPlans: func(args, reply any) error {
+			utils.ResponderGetCostOnRatingPlans: func(ctx *context.Context, args, reply any) error {
 				rpl := map[string]any{
 					utils.CapMaxUsage: 5 * time.Second,
 					utils.Cost:        0,
@@ -1651,7 +1652,7 @@ func TestRouteServicePopulateSortingData(t *testing.T) {
 				*reply.(*map[string]any) = rpl
 				return nil
 			},
-			utils.StatSv1GetQueueFloatMetrics: func(args, reply any) error {
+			utils.StatSv1GetQueueFloatMetrics: func(ctx *context.Context, args, reply any) error {
 				rpl := &map[string]float64{
 					"metric1": 12,
 					"stat":    2.1,
@@ -1659,7 +1660,7 @@ func TestRouteServicePopulateSortingData(t *testing.T) {
 				*reply.(*map[string]float64) = *rpl
 				return nil
 			},
-			utils.ResourceSv1GetResource: func(args, reply any) error {
+			utils.ResourceSv1GetResource: func(ctx *context.Context, args, reply any) error {
 				rpl := &Resource{
 					Usages: map[string]*ResourceUsage{
 						"test_usage1": {
@@ -1684,9 +1685,9 @@ func TestRouteServicePopulateSortingData(t *testing.T) {
 	cfg.RouteSCfg().ResourceSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.ResourceSConnsCfg)}
 	cfg.RouteSCfg().StatSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.StatSConnsCfg)}
 	cfg.RouteSCfg().RALsConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.RALsConnsCfg)}
-	clientconn := make(chan rpcclient.ClientConnector, 1)
+	clientconn := make(chan birpc.ClientConnector, 1)
 	clientconn <- ccMock
-	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	connMgr := NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.RALsConnsCfg):      clientconn,
 		utils.ConcatenatedKey(utils.MetaInternal, utils.StatSConnsCfg):     clientconn,
 		utils.ConcatenatedKey(utils.MetaInternal, utils.ResourceSConnsCfg): clientconn})
@@ -1796,15 +1797,15 @@ func TestRSStatMetricsLogg(t *testing.T) {
 	cfg.RouteSCfg().StatSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats)}
 	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
 	dm := NewDataManager(db, cfg.CacheCfg(), nil)
-	clientConn := make(chan rpcclient.ClientConnector, 1)
+	clientConn := make(chan birpc.ClientConnector, 1)
 	clientConn <- &ccMock{
-		calls: map[string]func(args any, reply any) error{
-			utils.StatSv1GetQueueFloatMetrics: func(args, reply any) error {
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.StatSv1GetQueueFloatMetrics: func(ctx *context.Context, args, reply any) error {
 				return errors.New("Can't get StatMetrics")
 			},
 		},
 	}
-	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	connMgr := NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats): clientConn,
 	})
 	statIds := []string{"STATS_VENDOR_1:*sum#1"}
@@ -1831,15 +1832,15 @@ func TestRSStatMetricsForLoadDistributionLogg(t *testing.T) {
 	cfg.RouteSCfg().StatSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats)}
 	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
 	dm := NewDataManager(db, cfg.CacheCfg(), nil)
-	clientConn := make(chan rpcclient.ClientConnector, 1)
+	clientConn := make(chan birpc.ClientConnector, 1)
 	clientConn <- &ccMock{
-		calls: map[string]func(args any, reply any) error{
-			utils.StatSv1GetQueueFloatMetrics: func(args, reply any) error {
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.StatSv1GetQueueFloatMetrics: func(ctx *context.Context, args, reply any) error {
 				return errors.New("Can't get StatMetrics")
 			},
 		},
 	}
-	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	connMgr := NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats): clientConn,
 	})
 	statIds := []string{"STATS_VENDOR_1:*sum#1"}
@@ -1865,15 +1866,15 @@ func TestResourceUsage(t *testing.T) {
 	}()
 	cfg.RouteSCfg().ResourceSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources)}
 	resIds := []string{"RL1"}
-	clientConn := make(chan rpcclient.ClientConnector, 1)
+	clientConn := make(chan birpc.ClientConnector, 1)
 	clientConn <- &ccMock{
-		calls: map[string]func(args any, reply any) error{
-			utils.ResourceSv1GetResource: func(args, reply any) error {
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.ResourceSv1GetResource: func(ctx *context.Context, args, reply any) error {
 				return errors.New("Can't get Resources")
 			},
 		},
 	}
-	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	connMgr := NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources): clientConn,
 	})
 	rps := NewRouteService(dm, nil, cfg, connMgr)
@@ -1942,15 +1943,15 @@ func TestRSPopulateSortingDataResourceErr(t *testing.T) {
 		config.SetCgrConfig(config.NewDefaultCGRConfig())
 	}()
 	cfg.RouteSCfg().ResourceSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources)}
-	clientConn := make(chan rpcclient.ClientConnector, 1)
+	clientConn := make(chan birpc.ClientConnector, 1)
 	clientConn <- &ccMock{
-		calls: map[string]func(args any, reply any) error{
-			utils.ResourceSv1GetResource: func(args, reply any) error {
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.ResourceSv1GetResource: func(ctx *context.Context, args, reply any) error {
 				return errors.New("No Resources")
 			},
 		},
 	}
-	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	connMgr := NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources): clientConn,
 	})
 	rps := NewRouteService(dm, nil, cfg, connMgr)
@@ -2002,15 +2003,15 @@ func TestPopulateSortingDataStatsErr(t *testing.T) {
 		config.SetCgrConfig(config.NewDefaultCGRConfig())
 	}()
 	cfg.RouteSCfg().StatSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats)}
-	clientConn := make(chan rpcclient.ClientConnector, 1)
+	clientConn := make(chan birpc.ClientConnector, 1)
 	clientConn <- &ccMock{
-		calls: map[string]func(args any, reply any) error{
-			utils.StatSv1GetQueueFloatMetrics: func(args, reply any) error {
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.StatSv1GetQueueFloatMetrics: func(ctx *context.Context, args, reply any) error {
 				return errors.New("No Stats")
 			},
 		},
 	}
-	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	connMgr := NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats): clientConn,
 	})
 	ev := &utils.CGREvent{
@@ -2056,10 +2057,10 @@ func TestPopulateSortingDataAccsErr(t *testing.T) {
 		config.SetCgrConfig(config.NewDefaultCGRConfig())
 	}()
 	cfg.RouteSCfg().RALsConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRALs)}
-	clientConn := make(chan rpcclient.ClientConnector, 1)
+	clientConn := make(chan birpc.ClientConnector, 1)
 	clientConn <- &ccMock{
-		calls: map[string]func(args any, reply any) error{
-			utils.ResponderGetMaxSessionTimeOnAccounts: func(args, reply any) error {
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.ResponderGetMaxSessionTimeOnAccounts: func(ctx *context.Context, args, reply any) error {
 				rpl := map[string]any{
 					utils.CapMaxUsage: 50 * time.Second,
 					utils.Cost:        12.12,
@@ -2069,7 +2070,7 @@ func TestPopulateSortingDataAccsErr(t *testing.T) {
 			},
 		},
 	}
-	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	connMgr := NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRALs): clientConn,
 	})
 	ev := &utils.CGREvent{
@@ -2118,20 +2119,20 @@ func TestPopulateSortingDataAccs2(t *testing.T) {
 		config.SetCgrConfig(config.NewDefaultCGRConfig())
 	}()
 	cfg.RouteSCfg().RALsConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRALs)}
-	clientConn := make(chan rpcclient.ClientConnector, 1)
+	clientConn := make(chan birpc.ClientConnector, 1)
 	clientConn <- &ccMock{
-		calls: map[string]func(args any, reply any) error{
-			utils.ResponderGetMaxSessionTimeOnAccounts: func(args, reply any) error {
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.ResponderGetMaxSessionTimeOnAccounts: func(ctx *context.Context, args, reply any) error {
 				rpl := map[string]any{}
 				*reply.(*map[string]any) = rpl
 				return nil
 			},
-			utils.ResponderGetCostOnRatingPlans: func(args, reply any) error {
+			utils.ResponderGetCostOnRatingPlans: func(ctx *context.Context, args, reply any) error {
 				return nil
 			},
 		},
 	}
-	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	connMgr := NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRALs): clientConn,
 	})
 	ev := &utils.CGREvent{
@@ -2177,7 +2178,7 @@ func TestV1GetRoutesList(t *testing.T) {
 	dmSPP := NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	rpS := NewRouteService(dmSPP, &FilterS{dm: dmSPP, cfg: cfg, connMgr: nil}, cfg, connMgr)
 	var reply []string
-	if err := rpS.V1GetRoutesList(testRoutesArgs[0], &reply); err == nil || err != utils.ErrNotFound {
+	if err := rpS.V1GetRoutesList(context.Background(), testRoutesArgs[0], &reply); err == nil || err != utils.ErrNotFound {
 		t.Error(err)
 	}
 
@@ -2236,7 +2237,7 @@ func TestRoutesV1GetRoutes(t *testing.T) {
 		},
 	}
 
-	if err := rpS.V1GetRouteProfilesForEvent(args, &reply); err != nil {
+	if err := rpS.V1GetRouteProfilesForEvent(context.Background(), args, &reply); err != nil {
 		t.Error(err)
 	}
 
@@ -2287,7 +2288,7 @@ func TestRoutesV1GetRoutesList(t *testing.T) {
 		},
 		Weight: 10,
 	}, true)
-	if err := rpS.V1GetRoutesList(testRoutesArgs[0], &reply); err != nil {
+	if err := rpS.V1GetRoutesList(context.Background(), testRoutesArgs[0], &reply); err != nil {
 		t.Error(err)
 	}
 	sort.Slice(reply, func(i, j int) bool {
@@ -2305,7 +2306,7 @@ func TestRouteServiceV1GetRoutesErr(t *testing.T) {
 	cfg.RouteSCfg().AttributeSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes)}
 	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
 	dm := NewDataManager(db, cfg.CacheCfg(), nil)
-	clientConn := make(chan rpcclient.ClientConnector, 1)
+	clientConn := make(chan birpc.ClientConnector, 1)
 	clientConn <- clMock(func(serviceMethod string, _, _ any) error {
 		if serviceMethod == utils.AttributeSv1ProcessEvent {
 
@@ -2313,7 +2314,7 @@ func TestRouteServiceV1GetRoutesErr(t *testing.T) {
 		}
 		return utils.ErrNotImplemented
 	})
-	rpS := NewRouteService(dm, NewFilterS(cfg, nil, dm), cfg, NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	rpS := NewRouteService(dm, NewFilterS(cfg, nil, dm), cfg, NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes): clientConn,
 	}))
 
@@ -2356,7 +2357,7 @@ func TestRouteServiceV1GetRoutesErr(t *testing.T) {
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			if err := rpS.V1GetRoutes(tc.args, &tc.reply); err == nil {
+			if err := rpS.V1GetRoutes(context.Background(), tc.args, &tc.reply); err == nil {
 				t.Errorf("expected error, received nil")
 			}
 		})
@@ -2365,23 +2366,23 @@ func TestRouteServiceV1GetRoutesErr(t *testing.T) {
 
 func TestRouteServiceSortRoutesQos(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	clientConn := make(chan rpcclient.ClientConnector, 1)
+	clientConn := make(chan birpc.ClientConnector, 1)
 	rsp := &Responder{}
 	tmpDm := dm
 	defer func() {
 		SetDataStorage(tmpDm)
 	}()
 	clientConn <- &ccMock{
-		calls: map[string]func(args any, reply any) error{
-			utils.ResponderGetMaxSessionTimeOnAccounts: func(args, reply any) error {
-				return rsp.GetMaxSessionTimeOnAccounts(args.(*utils.GetMaxSessionTimeOnAccountsArgs), reply.(*map[string]any))
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.ResponderGetMaxSessionTimeOnAccounts: func(ctx *context.Context, args, reply any) error {
+				return rsp.GetMaxSessionTimeOnAccounts(ctx, args.(*utils.GetMaxSessionTimeOnAccountsArgs), reply.(*map[string]any))
 			},
 		},
 	}
 	cfg.RouteSCfg().RALsConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRALs)}
 	dm := NewDataManager(NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items), cfg.CacheCfg(), nil)
 	SetDataStorage(dm)
-	rs := NewRouteService(dm, NewFilterS(cfg, nil, dm), cfg, NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	rs := NewRouteService(dm, NewFilterS(cfg, nil, dm), cfg, NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRALs): clientConn,
 	}))
 	if err := dm.SetAccount(&Account{
@@ -2439,7 +2440,7 @@ func TestRouteServiceSortRoutesQos(t *testing.T) {
 			utils.Tenant:       "cgrates.org",
 			utils.RequestType:  utils.MetaPrepaid},
 	}
-	if err := rs.V1GetRoutes(cgrEv, &reply); err == nil {
+	if err := rs.V1GetRoutes(context.Background(), cgrEv, &reply); err == nil {
 		t.Error(err)
 	}
 }

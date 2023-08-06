@@ -17,14 +17,14 @@ require (
 	github.com/antchfx/xmlquery v1.3.3
 	github.com/aws/aws-sdk-go v1.36.24
 	github.com/blevesearch/bleve v1.0.14
-	github.com/cenkalti/rpc2 v0.0.0-20210604223624-c1acbc6ec984
 	github.com/cgrates/aringo v0.0.0-20220525160735-b5990313d99e
 	github.com/cgrates/baningo v0.0.0-20210413080722-004ffd5e429f
+	github.com/cgrates/birpc v1.3.1-0.20211117095917-5b0ff29f3084
 	github.com/cgrates/fsock v0.0.0-20230123160954-12cae14030cc
 	github.com/cgrates/kamevapi v0.0.0-20220525160402-5b8036487a6c
 	github.com/cgrates/ltcache v0.0.0-20210405185848-da943e80c1ab
 	github.com/cgrates/radigo v0.0.0-20210902121842-ea2f9a730627
-	github.com/cgrates/rpcclient v0.0.0-20210218104959-cc39fa26221e
+	github.com/cgrates/rpcclient v0.0.0-20230605090759-8bb5188b73e5
 	github.com/cgrates/sipingo v1.0.1-0.20200514112313-699ebc1cdb8e
 	github.com/cgrates/ugocodec v0.0.0-20201023092048-df93d0123f60
 	github.com/creack/pty v1.1.11

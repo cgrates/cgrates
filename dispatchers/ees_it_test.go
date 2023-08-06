@@ -24,6 +24,7 @@ package dispatchers
 import (
 	"testing"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -66,7 +67,7 @@ func TestDspEEsIT(t *testing.T) {
 
 func testDspEEsPingFailover(t *testing.T) {
 	var reply string
-	if err := allEngine.RPC.Call(utils.EeSv1Ping, new(utils.CGREvent), &reply); err != nil {
+	if err := allEngine.RPC.Call(context.Background(), utils.EeSv1Ping, new(utils.CGREvent), &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.Pong {
 		t.Errorf("Unexpected reply: %s", reply)
@@ -77,19 +78,19 @@ func testDspEEsPingFailover(t *testing.T) {
 			utils.OptsAPIKey: "ees12345",
 		},
 	}
-	if err := dispEngine.RPC.Call(utils.EeSv1Ping, ev, &reply); err != nil {
+	if err := dispEngine.RPC.Call(context.Background(), utils.EeSv1Ping, ev, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.Pong {
 		t.Errorf("Unexpected reply: %s", reply)
 	}
 	allEngine.stopEngine(t)
-	if err := dispEngine.RPC.Call(utils.EeSv1Ping, ev, &reply); err != nil {
+	if err := dispEngine.RPC.Call(context.Background(), utils.EeSv1Ping, ev, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.Pong {
 		t.Errorf("Unexpected reply: %s", reply)
 	}
 	allEngine2.stopEngine(t)
-	if err := dispEngine.RPC.Call(utils.EeSv1Ping, ev, &reply); err == nil {
+	if err := dispEngine.RPC.Call(context.Background(), utils.EeSv1Ping, ev, &reply); err == nil {
 		t.Errorf("Expected error but received %v and reply %v\n", err, reply)
 	}
 	allEngine.startEngine(t)
@@ -112,13 +113,13 @@ func testDspEEsProcessEventFailover(t *testing.T) {
 		},
 	}
 	var reply map[string]map[string]any
-	if err := dispEngine.RPC.Call(utils.EeSv1ProcessEvent, args, &reply); err == nil ||
+	if err := dispEngine.RPC.Call(context.Background(), utils.EeSv1ProcessEvent, args, &reply); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ErrNotFound, err)
 	}
 
 	allEngine2.stopEngine(t)
-	if err := dispEngine.RPC.Call(utils.EeSv1ProcessEvent,
+	if err := dispEngine.RPC.Call(context.Background(), utils.EeSv1ProcessEvent,
 		args, &reply); err != nil {
 		t.Fatal(err)
 	}
@@ -127,12 +128,12 @@ func testDspEEsProcessEventFailover(t *testing.T) {
 
 func testDspEEsPing(t *testing.T) {
 	var reply string
-	if err := allEngine.RPC.Call(utils.EeSv1Ping, new(utils.CGREvent), &reply); err != nil {
+	if err := allEngine.RPC.Call(context.Background(), utils.EeSv1Ping, new(utils.CGREvent), &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.Pong {
 		t.Errorf("Received: %s", reply)
 	}
-	if err := dispEngine.RPC.Call(utils.EeSv1Ping, &utils.CGREvent{
+	if err := dispEngine.RPC.Call(context.Background(), utils.EeSv1Ping, &utils.CGREvent{
 		Tenant: "cgrates.org",
 		APIOpts: map[string]any{
 			utils.OptsAPIKey: "ees12345",
@@ -158,7 +159,7 @@ func testDspEEsTestAuthKey(t *testing.T) {
 		},
 	}
 	var reply map[string]map[string]any
-	if err := dispEngine.RPC.Call(utils.EeSv1ProcessEvent,
+	if err := dispEngine.RPC.Call(context.Background(), utils.EeSv1ProcessEvent,
 		args, &reply); err == nil || err.Error() != utils.ErrUnauthorizedApi.Error() {
 		t.Errorf("expected: <%+v>,\nreceived: <%+v>", utils.ErrUnauthorizedApi.Error(), err)
 	}
@@ -178,7 +179,7 @@ func testDspEEsTestAuthKey2(t *testing.T) {
 		},
 	}
 	var reply map[string]map[string]any
-	if err := dispEngine.RPC.Call(utils.EeSv1ProcessEvent,
+	if err := dispEngine.RPC.Call(context.Background(), utils.EeSv1ProcessEvent,
 		args, &reply); err != nil {
 		t.Error(err)
 	} else if _, ok := reply[utils.MetaDefault]; !ok {
@@ -202,12 +203,12 @@ func testDspEEsProcessEventRoundRobin(t *testing.T) {
 	}
 	var reply map[string]map[string]any
 	// To ALL2
-	if err := dispEngine.RPC.Call(utils.EeSv1ProcessEvent,
+	if err := dispEngine.RPC.Call(context.Background(), utils.EeSv1ProcessEvent,
 		args, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ErrNotFound, err)
 	}
 	// To ALL
-	if err := dispEngine.RPC.Call(utils.EeSv1ProcessEvent,
+	if err := dispEngine.RPC.Call(context.Background(), utils.EeSv1ProcessEvent,
 		args, &reply); err != nil {
 		t.Error(err)
 	} else if _, ok := reply[utils.MetaDefault]; !ok {

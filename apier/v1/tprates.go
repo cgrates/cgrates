@@ -21,11 +21,12 @@ package v1
 // This file deals with tp_rates management over APIs
 
 import (
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
 )
 
 // SetTPRate creates a new rate within a tariff plan
-func (apierSv1 *APIerSv1) SetTPRate(attrs *utils.TPRateRALs, reply *string) error {
+func (apierSv1 *APIerSv1) SetTPRate(ctx *context.Context, attrs *utils.TPRateRALs, reply *string) error {
 	if missing := utils.MissingStructFields(attrs, []string{utils.TPid, utils.ID, utils.RateSlots}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -42,7 +43,7 @@ type AttrGetTPRate struct {
 }
 
 // GetTPRate queries specific Rate on tariff plan
-func (apierSv1 *APIerSv1) GetTPRate(attrs *AttrGetTPRate, reply *utils.TPRateRALs) error {
+func (apierSv1 *APIerSv1) GetTPRate(ctx *context.Context, attrs *AttrGetTPRate, reply *utils.TPRateRALs) error {
 	if missing := utils.MissingStructFields(attrs, []string{utils.TPid, utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -63,7 +64,7 @@ type AttrGetTPRateIds struct {
 }
 
 // GetTPRateIds queries rate identities on specific tariff plan.
-func (apierSv1 *APIerSv1) GetTPRateIds(attrs *AttrGetTPRateIds, reply *[]string) error {
+func (apierSv1 *APIerSv1) GetTPRateIds(ctx *context.Context, attrs *AttrGetTPRateIds, reply *[]string) error {
 	if missing := utils.MissingStructFields(attrs, []string{utils.TPid}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -80,7 +81,7 @@ func (apierSv1 *APIerSv1) GetTPRateIds(attrs *AttrGetTPRateIds, reply *[]string)
 }
 
 // RemoveTPRate removes specific Rate on Tariff plan
-func (apierSv1 *APIerSv1) RemoveTPRate(attrs *AttrGetTPRate, reply *string) error {
+func (apierSv1 *APIerSv1) RemoveTPRate(ctx *context.Context, attrs *AttrGetTPRate, reply *string) error {
 	if missing := utils.MissingStructFields(attrs, []string{utils.TPid, utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}

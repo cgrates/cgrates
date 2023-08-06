@@ -25,11 +25,12 @@ import (
 	"crypto/rand"
 	"fmt"
 	"math/big"
-	"net/rpc"
 	"os"
 	"path/filepath"
 	"testing"
 
+	"github.com/cgrates/birpc"
+	"github.com/cgrates/birpc/context"
 	v1 "github.com/cgrates/cgrates/apier/v1"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
@@ -39,7 +40,7 @@ import (
 var (
 	clntLockCfgPath string
 	clntLockCfg     *config.CGRConfig
-	clntLockRPC     *rpc.Client
+	clntLockRPC     *birpc.Client
 	clntLockDelay   int
 
 	sTestsClntLock = []func(t *testing.T){
@@ -148,7 +149,7 @@ func testSharedClientLockRpcConn(t *testing.T) {
 
 func testSharedClientLockSetProfiles(t *testing.T) {
 	var reply string
-	err := clntLockRPC.Call(utils.APIerSv1SetChargerProfile,
+	err := clntLockRPC.Call(context.Background(), utils.APIerSv1SetChargerProfile,
 		&v1.ChargerWithAPIOpts{
 			ChargerProfile: &engine.ChargerProfile{
 				Tenant:       "cgrates.org",
@@ -163,7 +164,7 @@ func testSharedClientLockSetProfiles(t *testing.T) {
 		t.Error("Unexpected reply returned", reply)
 	}
 
-	err = clntLockRPC.Call(utils.APIerSv1SetAttributeProfile,
+	err = clntLockRPC.Call(context.Background(), utils.APIerSv1SetAttributeProfile,
 		&engine.AttributeProfileWithAPIOpts{
 			AttributeProfile: &engine.AttributeProfile{
 				Tenant: "cgrates.org",
@@ -197,7 +198,7 @@ func testSharedClientLockCDRsProcessEvent(t *testing.T) {
 		},
 	}
 	var reply string
-	err = clntLockRPC.Call(utils.CDRsV1ProcessEvent, argsEv, &reply)
+	err = clntLockRPC.Call(context.Background(), utils.CDRsV1ProcessEvent, argsEv, &reply)
 	if err == nil || err.Error() != utils.ErrPartiallyExecuted.Error() {
 		t.Errorf("expected: <%v>,\nreceived: <%v>",
 			utils.ErrPartiallyExecuted, err)

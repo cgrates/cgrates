@@ -33,6 +33,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/rpcclient"
 
 	"github.com/cgrates/cgrates/utils"
@@ -1163,8 +1164,8 @@ func (cfg *CGRConfig) GetReloadChan(sectID string) chan struct{} {
 	return cfg.rldChans[sectID]
 }
 
-// Call implements rpcclient.ClientConnector interface for internal RPC
-func (cfg *CGRConfig) Call(serviceMethod string,
+// Call implements birpc.ClientConnector interface for internal RPC
+func (cfg *CGRConfig) Call(ctx *context.Context, serviceMethod string,
 	args any, reply any) error {
 	return utils.APIerRPCCall(cfg, serviceMethod, args, reply)
 }
@@ -1582,7 +1583,7 @@ type ReloadArgs struct {
 }
 
 // V1ReloadConfig reloads the configuration
-func (cfg *CGRConfig) V1ReloadConfig(args *ReloadArgs, reply *string) (err error) {
+func (cfg *CGRConfig) V1ReloadConfig(ctx *context.Context, args *ReloadArgs, reply *string) (err error) {
 	if missing := utils.MissingStructFields(args, []string{"Path"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -1623,7 +1624,7 @@ type SectionWithAPIOpts struct {
 }
 
 // V1GetConfig will retrieve from CGRConfig a section
-func (cfg *CGRConfig) V1GetConfig(args *SectionWithAPIOpts, reply *map[string]any) (err error) {
+func (cfg *CGRConfig) V1GetConfig(ctx *context.Context, args *SectionWithAPIOpts, reply *map[string]any) (err error) {
 	args.Section = utils.FirstNonEmpty(args.Section, utils.MetaAll)
 	cfg.cacheDPMux.RLock()
 	if mp, has := cfg.cacheDP[args.Section]; has && mp != nil {
@@ -1747,7 +1748,7 @@ type SetConfigArgs struct {
 }
 
 // V1SetConfig reloads the sections of config
-func (cfg *CGRConfig) V1SetConfig(args *SetConfigArgs, reply *string) (err error) {
+func (cfg *CGRConfig) V1SetConfig(ctx *context.Context, args *SetConfigArgs, reply *string) (err error) {
 	if len(args.Config) == 0 {
 		*reply = utils.OK
 		return
@@ -1787,7 +1788,7 @@ func (cfg *CGRConfig) V1SetConfig(args *SetConfigArgs, reply *string) (err error
 }
 
 // V1GetConfigAsJSON will retrieve from CGRConfig a section as a string
-func (cfg *CGRConfig) V1GetConfigAsJSON(args *SectionWithAPIOpts, reply *string) (err error) {
+func (cfg *CGRConfig) V1GetConfigAsJSON(ctx *context.Context, args *SectionWithAPIOpts, reply *string) (err error) {
 	args.Section = utils.FirstNonEmpty(args.Section, utils.MetaAll)
 	cfg.cacheDPMux.RLock()
 	if mp, has := cfg.cacheDP[args.Section]; has && mp != nil {
@@ -1914,7 +1915,7 @@ type SetConfigFromJSONArgs struct {
 }
 
 // V1SetConfigFromJSON reloads the sections of config
-func (cfg *CGRConfig) V1SetConfigFromJSON(args *SetConfigFromJSONArgs, reply *string) (err error) {
+func (cfg *CGRConfig) V1SetConfigFromJSON(ctx *context.Context, args *SetConfigFromJSONArgs, reply *string) (err error) {
 	if len(args.Config) == 0 {
 		*reply = utils.OK
 		return

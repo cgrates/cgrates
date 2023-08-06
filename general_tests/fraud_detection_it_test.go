@@ -22,12 +22,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package general_tests
 
 import (
-	"net/rpc"
 	"os"
 	"path"
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc"
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/sessions"
@@ -37,7 +38,7 @@ import (
 var (
 	fraudCfgPath string
 	fraudCfg     *config.CGRConfig
-	fraudRPC     *rpc.Client
+	fraudRPC     *birpc.Client
 	fraudDelay   int
 	fraudConfDIR string
 
@@ -250,7 +251,7 @@ cgrates.org,THD_FRD,*gte:~*req.*tcc:2,,-1,1,0,false,0,ACT_FRD_STOP;ACT_FRD_LOG,t
 
 	var reply string
 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: "/tmp/TestFraudIT"}
-	if err := fraudRPC.Call(utils.APIerSv1LoadTariffPlanFromFolder, attrs, &reply); err != nil {
+	if err := fraudRPC.Call(context.Background(), utils.APIerSv1LoadTariffPlanFromFolder, attrs, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply returned", reply)
@@ -281,7 +282,7 @@ func testFraudAuthorizeandProcess1(t *testing.T) {
 		false, false, false, cgrEv, utils.Paginator{}, false, "")
 
 	var rply sessions.V1AuthorizeReply
-	if err := fraudRPC.Call(utils.SessionSv1AuthorizeEvent, args, &rply); err != nil {
+	if err := fraudRPC.Call(context.Background(), utils.SessionSv1AuthorizeEvent, args, &rply); err != nil {
 		t.Error(err)
 	}
 	cgrEv = &utils.CGREvent{
@@ -302,7 +303,7 @@ func testFraudAuthorizeandProcess1(t *testing.T) {
 		APIOpts: map[string]any{},
 	}
 	var reply string
-	if err := fraudRPC.Call(utils.SessionSv1ProcessCDR,
+	if err := fraudRPC.Call(context.Background(), utils.SessionSv1ProcessCDR,
 		cgrEv, &reply); err == nil || err.Error() != utils.ErrPartiallyExecuted.Error() {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ErrPartiallyExecuted, err)
 	}
@@ -331,7 +332,7 @@ func testFraudAuthorizeandProcess2(t *testing.T) {
 		false, false, false, cgrEv, utils.Paginator{}, false, "")
 
 	var rply sessions.V1AuthorizeReply
-	if err := fraudRPC.Call(utils.SessionSv1AuthorizeEvent, args, &rply); err != nil {
+	if err := fraudRPC.Call(context.Background(), utils.SessionSv1AuthorizeEvent, args, &rply); err != nil {
 		t.Error(err)
 	}
 	cgrEv = &utils.CGREvent{
@@ -352,7 +353,7 @@ func testFraudAuthorizeandProcess2(t *testing.T) {
 		APIOpts: map[string]any{},
 	}
 	var reply string
-	if err := fraudRPC.Call(utils.SessionSv1ProcessCDR,
+	if err := fraudRPC.Call(context.Background(), utils.SessionSv1ProcessCDR,
 		cgrEv, &reply); err == nil || err.Error() != utils.ErrPartiallyExecuted.Error() {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ErrPartiallyExecuted, err)
 	}
@@ -381,7 +382,7 @@ func testFraudAuthorizeandProcess3(t *testing.T) {
 		false, false, false, cgrEv, utils.Paginator{}, false, "")
 
 	var rply sessions.V1AuthorizeReply
-	if err := fraudRPC.Call(utils.SessionSv1AuthorizeEvent, args, &rply); err != nil {
+	if err := fraudRPC.Call(context.Background(), utils.SessionSv1AuthorizeEvent, args, &rply); err != nil {
 		t.Error(err)
 	}
 	cgrEv = &utils.CGREvent{
@@ -402,7 +403,7 @@ func testFraudAuthorizeandProcess3(t *testing.T) {
 		APIOpts: map[string]any{},
 	}
 	var reply string
-	if err := fraudRPC.Call(utils.SessionSv1ProcessCDR,
+	if err := fraudRPC.Call(context.Background(), utils.SessionSv1ProcessCDR,
 		cgrEv, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
@@ -433,7 +434,7 @@ func testFraudFinalAuthorize(t *testing.T) {
 
 	expErr := `RALS_ERROR:ACCOUNT_DISABLED`
 	var rply sessions.V1AuthorizeReply
-	if err := fraudRPC.Call(utils.SessionSv1AuthorizeEvent, args,
+	if err := fraudRPC.Call(context.Background(), utils.SessionSv1AuthorizeEvent, args,
 		&rply); err == nil || err.Error() != expErr {
 		t.Error(err)
 	}

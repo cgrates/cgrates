@@ -22,13 +22,15 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package v2
 
 import (
-	"net/rpc"
 	"path"
 	"reflect"
 	"sort"
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc/context"
+
+	"github.com/cgrates/birpc"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -37,7 +39,7 @@ import (
 var (
 	alsPrfCfgPath   string
 	alsPrfCfg       *config.CGRConfig
-	attrSRPC        *rpc.Client
+	attrSRPC        *birpc.Client
 	alsPrfConfigDIR string //run tests for specific configuration
 
 	sTestsAlsPrf = []func(t *testing.T){
@@ -132,7 +134,7 @@ func testAttributeSSetAlsPrf(t *testing.T) {
 		},
 	}
 	var result string
-	if err := attrSRPC.Call(utils.APIerSv2SetAttributeProfile, extAlsPrf, &result); err != nil {
+	if err := attrSRPC.Call(context.Background(), utils.APIerSv2SetAttributeProfile, extAlsPrf, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -159,7 +161,7 @@ func testAttributeSSetAlsPrf(t *testing.T) {
 	}
 	alsPrf.Compile()
 	var reply *engine.AttributeProfile
-	if err := attrSRPC.Call(utils.APIerSv1GetAttributeProfile,
+	if err := attrSRPC.Call(context.Background(), utils.APIerSv1GetAttributeProfile,
 		utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ExternalAttribute"}}, &reply); err != nil {
 		t.Fatal(err)
 	}
@@ -194,7 +196,7 @@ func testAttributeSUpdateAlsPrf(t *testing.T) {
 		},
 	}
 	var result string
-	if err := attrSRPC.Call(utils.APIerSv2SetAttributeProfile, extAlsPrf, &result); err != nil {
+	if err := attrSRPC.Call(context.Background(), utils.APIerSv2SetAttributeProfile, extAlsPrf, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -226,7 +228,7 @@ func testAttributeSUpdateAlsPrf(t *testing.T) {
 	sort.Strings(alsPrf.AttributeProfile.Contexts)
 	alsPrf.Compile()
 	var reply *engine.AttributeProfile
-	if err := attrSRPC.Call(utils.APIerSv1GetAttributeProfile,
+	if err := attrSRPC.Call(context.Background(), utils.APIerSv1GetAttributeProfile,
 		utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ExternalAttribute"}}, &reply); err != nil {
 		t.Fatal(err)
 	}
@@ -263,7 +265,7 @@ func testAttributeSSetAlsPrfWithoutTenant(t *testing.T) {
 		},
 	}
 	var result string
-	if err := attrSRPC.Call(utils.APIerSv2SetAttributeProfile, extAlsPrf, &result); err != nil {
+	if err := attrSRPC.Call(context.Background(), utils.APIerSv2SetAttributeProfile, extAlsPrf, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -290,7 +292,7 @@ func testAttributeSSetAlsPrfWithoutTenant(t *testing.T) {
 	}
 	alsPrf.Compile()
 	var reply *engine.AttributeProfile
-	if err := attrSRPC.Call(utils.APIerSv1GetAttributeProfile,
+	if err := attrSRPC.Call(context.Background(), utils.APIerSv1GetAttributeProfile,
 		utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{ID: "ExternalAttribute"}}, &reply); err != nil {
 		t.Fatal(err)
 	}

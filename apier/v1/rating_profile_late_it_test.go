@@ -22,19 +22,21 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package v1
 
 import (
-	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/engine"
-	"github.com/cgrates/cgrates/utils"
-	"net/rpc"
 	"path"
 	"testing"
 	"time"
+
+	"github.com/cgrates/birpc"
+	"github.com/cgrates/birpc/context"
+	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/utils"
 )
 
 var (
 	rpLateCfGPath   string
 	rpLateCfg       *config.CGRConfig
-	rpLateRPC       *rpc.Client
+	rpLateRPC       *birpc.Client
 	rpLateConfigDIR string //run tests for specific configuration
 
 	rpLateAPIer = []func(t *testing.T){
@@ -110,7 +112,7 @@ func testRpLateRPCConn(t *testing.T) {
 func testRpLateLoadFromFolder(t *testing.T) {
 	var reply string
 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "tutorial")}
-	if err := rpLateRPC.Call(utils.APIerSv1LoadTariffPlanFromFolder, attrs, &reply); err != nil {
+	if err := rpLateRPC.Call(context.Background(), utils.APIerSv1LoadTariffPlanFromFolder, attrs, &reply); err != nil {
 		t.Error(err)
 	}
 	time.Sleep(100 * time.Millisecond)
@@ -134,7 +136,7 @@ func testRpLateCDRProcessEvent(t *testing.T) {
 		},
 	}
 	var reply string
-	if err := rpLateRPC.Call(utils.CDRsV1ProcessCDR, args, &reply); err != nil {
+	if err := rpLateRPC.Call(context.Background(), utils.CDRsV1ProcessCDR, args, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf("UNexpected reply returned")
@@ -151,7 +153,7 @@ func testRpLateCDRProcessEvent(t *testing.T) {
 
 		*/
 	}}
-	if err := rpLateRPC.Call(utils.CDRsV1GetCDRs, &req, &replyy); err != nil {
+	if err := rpLateRPC.Call(context.Background(), utils.CDRsV1GetCDRs, &req, &replyy); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(replyy) != 2 {
 		t.Error("Unexpected number of CDRs returned: ", len(replyy), "and CDRS: ", utils.ToJSON(replyy))

@@ -24,13 +24,15 @@ package ers
 import (
 	"encoding/json"
 	"fmt"
-	"net/rpc"
 	"os"
 	"path"
 	"reflect"
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc/context"
+
+	"github.com/cgrates/birpc"
 	v1 "github.com/cgrates/cgrates/apier/v1"
 	v2 "github.com/cgrates/cgrates/apier/v2"
 
@@ -44,7 +46,7 @@ var (
 	jsonCfgPath string
 	jsonCfgDIR  string
 	jsonCfg     *config.CGRConfig
-	jsonRPC     *rpc.Client
+	jsonRPC     *birpc.Client
 
 	fileContent = `
 {
@@ -148,7 +150,7 @@ func testJSONAddData(t *testing.T) {
 			utils.CacheOpt: utils.MetaReload,
 		},
 	}
-	if err := jsonRPC.Call(utils.APIerSv1SetChargerProfile, chargerProfile, &reply); err != nil {
+	if err := jsonRPC.Call(context.Background(), utils.APIerSv1SetChargerProfile, chargerProfile, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply returned", reply)
@@ -158,7 +160,7 @@ func testJSONAddData(t *testing.T) {
 		Tenant:  "cgrates.org",
 		Account: "voiceAccount",
 	}
-	if err := jsonRPC.Call(utils.APIerSv2SetAccount, &attrSetAcnt, &reply); err != nil {
+	if err := jsonRPC.Call(context.Background(), utils.APIerSv2SetAccount, &attrSetAcnt, &reply); err != nil {
 		t.Fatal(err)
 	}
 	attrs := &utils.AttrSetBalance{
@@ -172,12 +174,12 @@ func testJSONAddData(t *testing.T) {
 			utils.Weight:    10.0,
 		},
 	}
-	if err := jsonRPC.Call(utils.APIerSv2SetBalance, attrs, &reply); err != nil {
+	if err := jsonRPC.Call(context.Background(), utils.APIerSv2SetBalance, attrs, &reply); err != nil {
 		t.Fatal(err)
 	}
 
 	var acnt *engine.Account
-	if err := jsonRPC.Call(utils.APIerSv2GetAccount,
+	if err := jsonRPC.Call(context.Background(), utils.APIerSv2GetAccount,
 		&utils.AttrGetAccount{Tenant: "cgrates.org", Account: "voiceAccount"}, &acnt); err != nil {
 		t.Error(err)
 	} else if len(acnt.BalanceMap) != 1 || acnt.BalanceMap[utils.MetaVoice][0].Value != 600000000000 {
@@ -205,7 +207,7 @@ func testJSONVerify(t *testing.T) {
 			OriginIDs: []string{"testJsonCDR"},
 		},
 	}
-	if err := jsonRPC.Call(utils.CDRsV1GetCDRs, args, &cdrs); err != nil {
+	if err := jsonRPC.Call(context.Background(), utils.CDRsV1GetCDRs, args, &cdrs); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(cdrs) != 1 {
 		t.Error("Unexpected number of CDRs returned: ", len(cdrs))
@@ -216,7 +218,7 @@ func testJSONVerify(t *testing.T) {
 	}
 
 	var acnt *engine.Account
-	if err := jsonRPC.Call(utils.APIerSv2GetAccount,
+	if err := jsonRPC.Call(context.Background(), utils.APIerSv2GetAccount,
 		&utils.AttrGetAccount{Tenant: "cgrates.org", Account: "voiceAccount"}, &acnt); err != nil {
 		t.Error(err)
 	} else if len(acnt.BalanceMap) != 1 || acnt.BalanceMap[utils.MetaVoice][0].Value != 480000000000 {

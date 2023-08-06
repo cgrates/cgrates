@@ -25,7 +25,6 @@ import (
 	"bytes"
 	"flag"
 	"fmt"
-	"net/rpc"
 	"os"
 	"os/exec"
 	"path"
@@ -33,6 +32,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc"
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -65,7 +66,7 @@ import (
 
 var (
 	clsrConfig *config.CGRConfig
-	clsrRPC    *rpc.Client
+	clsrRPC    *birpc.Client
 
 	clsrNodeCfgPath   = path.Join(*dataDir, "redisCluster", "node%v.conf")
 	clsrEngineCfgPath = path.Join(*dataDir, "conf", "samples", "redisCluster")
@@ -203,13 +204,13 @@ func testClsrSetGetAttribute(t *testing.T) {
 	}
 	alsPrf.Compile()
 	var result string
-	if err := clsrRPC.Call(utils.APIerSv1SetAttributeProfile, alsPrf, &result); err != nil {
+	if err := clsrRPC.Call(context.Background(), utils.APIerSv1SetAttributeProfile, alsPrf, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
 	var reply *engine.AttributeProfile
-	if err := clsrRPC.Call(utils.APIerSv1GetAttributeProfile,
+	if err := clsrRPC.Call(context.Background(), utils.APIerSv1GetAttributeProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "ClsrTest"}, &reply); err != nil {
 		t.Fatal(err)
 	}
@@ -243,7 +244,7 @@ func testClsrSetGetAttribute2(t *testing.T) {
 	}
 	alsPrf.Compile()
 	var reply *engine.AttributeProfile
-	if err := clsrRPC.Call(utils.APIerSv1GetAttributeProfile,
+	if err := clsrRPC.Call(context.Background(), utils.APIerSv1GetAttributeProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "ClsrTest"}, &reply); err != nil {
 		t.Fatal(err)
 	}
@@ -254,7 +255,7 @@ func testClsrSetGetAttribute2(t *testing.T) {
 	// add another attribute
 	alsPrf.ID += "2"
 	var result string
-	if err := clsrRPC.Call(utils.APIerSv1SetAttributeProfile, alsPrf, &result); err != nil {
+	if err := clsrRPC.Call(context.Background(), utils.APIerSv1SetAttributeProfile, alsPrf, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -288,7 +289,7 @@ func testClsrGetAttribute(t *testing.T) {
 	}
 	alsPrf.Compile()
 	var reply *engine.AttributeProfile
-	if err := clsrRPC.Call(utils.APIerSv1GetAttributeProfile,
+	if err := clsrRPC.Call(context.Background(), utils.APIerSv1GetAttributeProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "ClsrTest2"}, &reply); err != nil {
 		t.Fatal(err)
 	}

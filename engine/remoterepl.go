@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -38,7 +39,7 @@ func replicate(connMgr *ConnManager, connIDs []string, filtered bool, objType, o
 	var reply string
 	if !filtered {
 		// is not partial so send to all defined connections
-		return utils.CastRPCErr(connMgr.Call(connIDs, nil, method, args, &reply))
+		return utils.CastRPCErr(connMgr.Call(context.TODO(), connIDs, method, args, &reply))
 	}
 	// is partial so get all the replicationHosts from cache based on object Type and ID
 	// alp_cgrates.org:ATTR1
@@ -60,7 +61,7 @@ func replicateMultipleIDs(connMgr *ConnManager, connIDs []string, filtered bool,
 	var reply string
 	if !filtered {
 		// is not partial so send to all defined connections
-		return utils.CastRPCErr(connMgr.Call(connIDs, nil, method, args, &reply))
+		return utils.CastRPCErr(connMgr.Call(context.TODO(), connIDs, method, args, &reply))
 	}
 	// is partial so get all the replicationHosts from cache based on object Type and ID
 	// combine all hosts in a single set so if we receive a get with one ID in list

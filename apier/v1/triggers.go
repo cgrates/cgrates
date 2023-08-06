@@ -23,6 +23,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/guardian"
@@ -30,7 +31,7 @@ import (
 )
 
 // Returns a list of ActionTriggers on an account
-func (apierSv1 *APIerSv1) GetAccountActionTriggers(attrs *utils.TenantAccount, reply *engine.ActionTriggers) error {
+func (apierSv1 *APIerSv1) GetAccountActionTriggers(ctx *context.Context, attrs *utils.TenantAccount, reply *engine.ActionTriggers) error {
 	if missing := utils.MissingStructFields(attrs, []string{utils.AccountField}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -59,7 +60,7 @@ type AttrAddAccountActionTriggers struct {
 	Executed               bool
 }
 
-func (apierSv1 *APIerSv1) AddAccountActionTriggers(attr *AttrAddAccountActionTriggers, reply *string) (err error) {
+func (apierSv1 *APIerSv1) AddAccountActionTriggers(ctx *context.Context, attr *AttrAddAccountActionTriggers, reply *string) (err error) {
 	if missing := utils.MissingStructFields(attr, []string{utils.AccountField}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -118,7 +119,7 @@ type AttrRemoveAccountActionTriggers struct {
 	UniqueID string
 }
 
-func (apierSv1 *APIerSv1) RemoveAccountActionTriggers(attr *AttrRemoveAccountActionTriggers, reply *string) error {
+func (apierSv1 *APIerSv1) RemoveAccountActionTriggers(ctx *context.Context, attr *AttrRemoveAccountActionTriggers, reply *string) error {
 	if missing := utils.MissingStructFields(attr, []string{utils.AccountField}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -163,7 +164,7 @@ type AttrResetAccountActionTriggers struct {
 	Executed bool
 }
 
-func (apierSv1 *APIerSv1) ResetAccountActionTriggers(attr *AttrResetAccountActionTriggers, reply *string) error {
+func (apierSv1 *APIerSv1) ResetAccountActionTriggers(ctx *context.Context, attr *AttrResetAccountActionTriggers, reply *string) error {
 	if missing := utils.MissingStructFields(attr, []string{utils.AccountField}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -351,7 +352,7 @@ func (attr *AttrSetActionTrigger) UpdateActionTrigger(at *engine.ActionTrigger, 
 }
 
 // SetAccountActionTriggers updates or creates if not present the ActionTrigger for an Account
-func (apierSv1 *APIerSv1) SetAccountActionTriggers(attr *AttrSetAccountActionTriggers, reply *string) error {
+func (apierSv1 *APIerSv1) SetAccountActionTriggers(ctx *context.Context, attr *AttrSetAccountActionTriggers, reply *string) error {
 	if missing := utils.MissingStructFields(attr, []string{utils.AccountField}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -401,7 +402,7 @@ type AttrRemoveActionTrigger struct {
 	UniqueID string
 }
 
-func (apierSv1 *APIerSv1) RemoveActionTrigger(attr *AttrRemoveActionTrigger, reply *string) (err error) {
+func (apierSv1 *APIerSv1) RemoveActionTrigger(ctx *context.Context, attr *AttrRemoveActionTrigger, reply *string) (err error) {
 	if missing := utils.MissingStructFields(attr, []string{"GroupID"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -428,7 +429,7 @@ func (apierSv1 *APIerSv1) RemoveActionTrigger(attr *AttrRemoveActionTrigger, rep
 		return
 	}
 	// CacheReload
-	if err = apierSv1.ConnMgr.Call(apierSv1.Config.ApierCfg().CachesConns, nil,
+	if err = apierSv1.ConnMgr.Call(context.TODO(), apierSv1.Config.ApierCfg().CachesConns,
 		utils.CacheSv1ReloadCache, &utils.AttrReloadCacheWithAPIOpts{
 			ActionTriggerIDs: []string{attr.GroupID},
 		}, reply); err != nil {
@@ -443,7 +444,7 @@ func (apierSv1 *APIerSv1) RemoveActionTrigger(attr *AttrRemoveActionTrigger, rep
 }
 
 // SetActionTrigger updates a ActionTrigger
-func (apierSv1 *APIerSv1) SetActionTrigger(attr *AttrSetActionTrigger, reply *string) (err error) {
+func (apierSv1 *APIerSv1) SetActionTrigger(ctx *context.Context, attr *AttrSetActionTrigger, reply *string) (err error) {
 	if missing := utils.MissingStructFields(attr, []string{"GroupID"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -478,7 +479,7 @@ func (apierSv1 *APIerSv1) SetActionTrigger(attr *AttrSetActionTrigger, reply *st
 		return
 	}
 	// CacheReload
-	if err = apierSv1.ConnMgr.Call(apierSv1.Config.ApierCfg().CachesConns, nil,
+	if err = apierSv1.ConnMgr.Call(context.TODO(), apierSv1.Config.ApierCfg().CachesConns,
 		utils.CacheSv1ReloadCache, &utils.AttrReloadCacheWithAPIOpts{
 			ActionTriggerIDs: []string{attr.GroupID},
 		}, reply); err != nil {
@@ -496,7 +497,7 @@ type AttrGetActionTriggers struct {
 	GroupIDs []string
 }
 
-func (apierSv1 *APIerSv1) GetActionTriggers(attr *AttrGetActionTriggers, atrs *engine.ActionTriggers) error {
+func (apierSv1 *APIerSv1) GetActionTriggers(ctx *context.Context, attr *AttrGetActionTriggers, atrs *engine.ActionTriggers) error {
 	var allAttrs engine.ActionTriggers
 	if len(attr.GroupIDs) > 0 {
 		for _, key := range attr.GroupIDs {
@@ -545,7 +546,7 @@ type AttrAddActionTrigger struct {
 }
 
 // Deprecated in rc8, replaced by AddAccountActionTriggers
-func (apierSv1 *APIerSv1) AddTriggeredAction(attr AttrAddActionTrigger, reply *string) error {
+func (apierSv1 *APIerSv1) AddTriggeredAction(ctx *context.Context, attr AttrAddActionTrigger, reply *string) error {
 	if missing := utils.MissingStructFields(&attr, []string{utils.AccountField}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}

@@ -21,6 +21,7 @@ package v2
 import (
 	"time"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -31,7 +32,7 @@ type AttributeWithAPIOpts struct {
 }
 
 // SetAttributeProfile add/update a new Attribute Profile
-func (APIerSv2 *APIerSv2) SetAttributeProfile(arg *AttributeWithAPIOpts, reply *string) error {
+func (APIerSv2 *APIerSv2) SetAttributeProfile(ctx *context.Context, arg *AttributeWithAPIOpts, reply *string) error {
 	if missing := utils.MissingStructFields(arg.APIAttributeProfile, []string{utils.ID}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}

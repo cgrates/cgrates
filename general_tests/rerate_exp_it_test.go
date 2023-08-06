@@ -22,12 +22,13 @@ package general_tests
 
 import (
 	"math"
-	"net/rpc"
 	"path"
 	"reflect"
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc"
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -36,7 +37,7 @@ import (
 var (
 	ng1CfgPath, ng2CfgPath string
 	ng1Cfg, ng2Cfg         *config.CGRConfig
-	ng1RPC, ng2RPC         *rpc.Client
+	ng1RPC, ng2RPC         *birpc.Client
 	ng1ConfDIR, ng2ConfDIR string //run tests for specific configuration
 	rrDelay                int
 	ng1UUID                = utils.GenUUID()
@@ -148,7 +149,7 @@ func testRerateExpRPCConn(t *testing.T) {
 func testRerateExpLoadTP(t *testing.T) {
 	var reply string
 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "reratecdrs")}
-	if err := ng1RPC.Call(utils.APIerSv1LoadTariffPlanFromFolder, attrs, &reply); err != nil {
+	if err := ng1RPC.Call(context.Background(), utils.APIerSv1LoadTariffPlanFromFolder, attrs, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply returned", reply)
@@ -173,7 +174,7 @@ func testRerateExpSetBalance(t *testing.T) {
 		},
 	}
 	var reply string
-	if err := ng1RPC.Call(utils.APIerSv2SetBalance, attrSetBalance, &reply); err != nil {
+	if err := ng1RPC.Call(context.Background(), utils.APIerSv2SetBalance, attrSetBalance, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf("Received: %s", reply)
@@ -194,7 +195,7 @@ func testRerateExpGetAccountAfterBalanceSet(t *testing.T) {
 	}
 	var acnt engine.Account
 	attrs := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1001"}
-	if err := ng1RPC.Call(utils.APIerSv2GetAccount, attrs, &acnt); err != nil {
+	if err := ng1RPC.Call(context.Background(), utils.APIerSv2GetAccount, attrs, &acnt); err != nil {
 		t.Error(err)
 	} else {
 		expAcnt.UpdateTime = acnt.UpdateTime
@@ -229,7 +230,7 @@ func testRerateExpProcessEventCDR1(t *testing.T) {
 		},
 	}
 	var reply string
-	if err := ng1RPC.Call(utils.CDRsV1ProcessEvent, argsEv, &reply); err != nil {
+	if err := ng1RPC.Call(context.Background(), utils.CDRsV1ProcessEvent, argsEv, &reply); err != nil {
 		t.Error(err)
 	}
 	time.Sleep(50 * time.Millisecond)
@@ -237,7 +238,7 @@ func testRerateExpProcessEventCDR1(t *testing.T) {
 
 func testRerateExpCheckCDRCostAfterProcessEvent1(t *testing.T) {
 	var cdrs []*engine.CDR
-	if err := ng2RPC.Call(utils.CDRsV1GetCDRs, &utils.RPCCDRsFilterWithAPIOpts{
+	if err := ng2RPC.Call(context.Background(), utils.CDRsV1GetCDRs, &utils.RPCCDRsFilterWithAPIOpts{
 		RPCCDRsFilter: &utils.RPCCDRsFilter{
 			RunIDs: []string{"run_1"},
 		}}, &cdrs); err != nil {
@@ -269,7 +270,7 @@ func testRerateExpGetAccountAfterProcessEvent1(t *testing.T) {
 	}
 	var acnt engine.Account
 	attrs := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1001"}
-	if err := ng1RPC.Call(utils.APIerSv2GetAccount, attrs, &acnt); err != nil {
+	if err := ng1RPC.Call(context.Background(), utils.APIerSv2GetAccount, attrs, &acnt); err != nil {
 		t.Error(err)
 	} else {
 		expAcnt.UpdateTime = acnt.UpdateTime
@@ -306,7 +307,7 @@ func testRerateExpProcessEventCDR2(t *testing.T) {
 		},
 	}
 	var reply string
-	if err := ng1RPC.Call(utils.CDRsV1ProcessEvent, argsEv, &reply); err != nil {
+	if err := ng1RPC.Call(context.Background(), utils.CDRsV1ProcessEvent, argsEv, &reply); err != nil {
 		t.Error(err)
 	}
 	time.Sleep(50 * time.Millisecond)
@@ -314,7 +315,7 @@ func testRerateExpProcessEventCDR2(t *testing.T) {
 
 func testRerateExpCheckCDRCostAfterProcessEvent2(t *testing.T) {
 	var cdrs []*engine.CDR
-	if err := ng2RPC.Call(utils.CDRsV1GetCDRs, &utils.RPCCDRsFilterWithAPIOpts{
+	if err := ng2RPC.Call(context.Background(), utils.CDRsV1GetCDRs, &utils.RPCCDRsFilterWithAPIOpts{
 		RPCCDRsFilter: &utils.RPCCDRsFilter{
 			RunIDs: []string{"run_2"},
 		}}, &cdrs); err != nil {
@@ -346,7 +347,7 @@ func testRerateExpGetAccountAfterProcessEvent2(t *testing.T) {
 	}
 	var acnt engine.Account
 	attrs := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1001"}
-	if err := ng1RPC.Call(utils.APIerSv2GetAccount, attrs, &acnt); err != nil {
+	if err := ng1RPC.Call(context.Background(), utils.APIerSv2GetAccount, attrs, &acnt); err != nil {
 		t.Error(err)
 	} else {
 		expAcnt.UpdateTime = acnt.UpdateTime
@@ -382,7 +383,7 @@ func testRerateExpProcessEventCDR3(t *testing.T) {
 		},
 	}
 	var reply string
-	if err := ng2RPC.Call(utils.CDRsV1ProcessEvent, argsEv, &reply); err != nil {
+	if err := ng2RPC.Call(context.Background(), utils.CDRsV1ProcessEvent, argsEv, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply received: ", reply)
@@ -391,7 +392,7 @@ func testRerateExpProcessEventCDR3(t *testing.T) {
 
 func testRerateExpCheckCDRCostAfterProcessEvent3(t *testing.T) {
 	var cdrs []*engine.CDR
-	if err := ng2RPC.Call(utils.CDRsV1GetCDRs, &utils.RPCCDRsFilterWithAPIOpts{
+	if err := ng2RPC.Call(context.Background(), utils.CDRsV1GetCDRs, &utils.RPCCDRsFilterWithAPIOpts{
 		RPCCDRsFilter: &utils.RPCCDRsFilter{
 			RunIDs: []string{"run_2"},
 		}}, &cdrs); err != nil {
@@ -423,7 +424,7 @@ func testRerateExpGetAccountAfterProcessEvent3(t *testing.T) {
 	}
 	var acnt engine.Account
 	attrs := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1001"}
-	if err := ng1RPC.Call(utils.APIerSv2GetAccount, attrs, &acnt); err != nil {
+	if err := ng1RPC.Call(context.Background(), utils.APIerSv2GetAccount, attrs, &acnt); err != nil {
 		t.Error(err)
 	} else {
 		expAcnt.UpdateTime = acnt.UpdateTime
@@ -438,7 +439,7 @@ func testRerateExpGetAccountAfterProcessEvent3(t *testing.T) {
 
 func testRerateExpRerateCDRs(t *testing.T) {
 	var reply string
-	if err := ng2RPC.Call(utils.CDRsV1RateCDRs, &engine.ArgRateCDRs{
+	if err := ng2RPC.Call(context.Background(), utils.CDRsV1RateCDRs, &engine.ArgRateCDRs{
 		Flags: []string{utils.MetaRerate},
 		RPCCDRsFilter: utils.RPCCDRsFilter{
 			OrderBy: utils.AnswerTime,
@@ -452,7 +453,7 @@ func testRerateExpRerateCDRs(t *testing.T) {
 
 func testRerateExpCheckCDRCostsAfterRerate(t *testing.T) {
 	var cdrs []*engine.CDR
-	if err := ng2RPC.Call(utils.CDRsV1GetCDRs, &utils.RPCCDRsFilterWithAPIOpts{
+	if err := ng2RPC.Call(context.Background(), utils.CDRsV1GetCDRs, &utils.RPCCDRsFilterWithAPIOpts{
 		RPCCDRsFilter: &utils.RPCCDRsFilter{
 			CGRIDs:  []string{ng1UUID, ng2UUID},
 			OrderBy: utils.AnswerTime,
@@ -487,7 +488,7 @@ func testRerateExpGetAccountAfterRerate(t *testing.T) {
 	}
 	var acnt engine.Account
 	attrs := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1001"}
-	if err := ng1RPC.Call(utils.APIerSv2GetAccount, attrs, &acnt); err != nil {
+	if err := ng1RPC.Call(context.Background(), utils.APIerSv2GetAccount, attrs, &acnt); err != nil {
 		t.Error(err)
 	} else {
 		expAcnt.UpdateTime = acnt.UpdateTime

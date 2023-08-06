@@ -24,6 +24,7 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -168,17 +169,20 @@ func (da *DNSAgent) handleQuestion(dnsDP utils.DataProvider, rply *dns.Msg, q *d
 	for _, reqProcessor := range da.cgrCfg.DNSAgentCfg().RequestProcessors {
 		var lclProcessed bool
 		if lclProcessed, err = processRequest(
+			context.TODO(),
 			reqProcessor,
 			NewAgentRequest(
 				dnsDP, reqVars, cgrRplyNM, rplyNM,
 				opts, reqProcessor.Tenant,
 				da.cgrCfg.GeneralCfg().DefaultTenant,
-				utils.FirstNonEmpty(da.cgrCfg.DNSAgentCfg().Timezone,
-					da.cgrCfg.GeneralCfg().DefaultTimezone),
+				utils.FirstNonEmpty(
+					da.cgrCfg.DNSAgentCfg().Timezone,
+					da.cgrCfg.GeneralCfg().DefaultTimezone,
+				),
 				da.fltrS, nil),
 			utils.DNSAgent, da.connMgr,
 			da.cgrCfg.DNSAgentCfg().SessionSConns,
-			nil, da.fltrS); err != nil {
+			da.fltrS); err != nil {
 			utils.Logger.Warning(
 				fmt.Sprintf("<%s> error: %s processing message: %s from %s",
 					utils.DNSAgent, err.Error(), dnsDP, rmtAddr))

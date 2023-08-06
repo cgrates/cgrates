@@ -23,14 +23,15 @@ package v1
 
 import (
 	"fmt"
-	"net/rpc"
-	"net/rpc/jsonrpc"
 	"os"
 	"os/exec"
 	"path"
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc"
+	"github.com/cgrates/birpc/context"
+	"github.com/cgrates/birpc/jsonrpc"
 	"github.com/cgrates/cgrates/engine"
 
 	"github.com/cgrates/cgrates/utils"
@@ -41,7 +42,7 @@ import (
 var (
 	coreV1CfgPath string
 	coreV1Cfg     *config.CGRConfig
-	coreV1Rpc     *rpc.Client
+	coreV1Rpc     *birpc.Client
 	coreV1ConfDIR string //run tests for specific configuration
 	argPath       string
 	sTestCoreSv1  = []func(t *testing.T){
@@ -157,7 +158,7 @@ func testCoreSv1StartCPUProfilingErrorAlreadyStarted(t *testing.T) {
 		DirPath: argPath,
 	}
 	expectedErr := "CPU profiling already started"
-	if err := coreV1Rpc.Call(utils.CoreSv1StartCPUProfiling,
+	if err := coreV1Rpc.Call(context.Background(), utils.CoreSv1StartCPUProfiling,
 		dirPath, &reply); err == nil || err.Error() != expectedErr {
 		t.Errorf("Expected %+v, received %+v", expectedErr, err)
 	}
@@ -172,7 +173,7 @@ func testCoreSv1StartEngine(t *testing.T) {
 func testCoreSv1StopMemProfilingBeforeStart(t *testing.T) {
 	var reply string
 	expectedErr := " Memory Profiling is not started"
-	if err := coreV1Rpc.Call(utils.CoreSv1StopMemoryProfiling,
+	if err := coreV1Rpc.Call(context.Background(), utils.CoreSv1StopMemoryProfiling,
 		new(utils.TenantWithAPIOpts), &reply); err == nil || err.Error() != expectedErr {
 		t.Errorf("Expected %+q, received %+q", expectedErr, err)
 	}
@@ -202,7 +203,7 @@ func testCoreSv1StartEngineByExecWIthMemProfiling(t *testing.T) {
 
 func testCoreSv1StopMemoryProfiling(t *testing.T) {
 	var reply string
-	if err := coreV1Rpc.Call(utils.CoreSv1StopMemoryProfiling,
+	if err := coreV1Rpc.Call(context.Background(), utils.CoreSv1StopMemoryProfiling,
 		new(utils.TenantWithAPIOpts), &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
@@ -260,7 +261,7 @@ func testCoreSv1StartMemProfilingErrorAlreadyStarted(t *testing.T) {
 		NrFiles:  2,
 	}
 	expErr := "Memory Profiling already started"
-	if err := coreV1Rpc.Call(utils.CoreSv1StartMemoryProfiling,
+	if err := coreV1Rpc.Call(context.Background(), utils.CoreSv1StartMemoryProfiling,
 		args, &reply); err == nil || err.Error() != expErr {
 		t.Errorf("Expected %+v, received %+v", expErr, err)
 	}
@@ -269,7 +270,7 @@ func testCoreSv1StartMemProfilingErrorAlreadyStarted(t *testing.T) {
 func testCoreSv1StopCPUProfilingBeforeStart(t *testing.T) {
 	var reply string
 	expectedErr := " cannot stop because CPUProfiling is not active"
-	if err := coreV1Rpc.Call(utils.CoreSv1StopCPUProfiling,
+	if err := coreV1Rpc.Call(context.Background(), utils.CoreSv1StopCPUProfiling,
 		new(utils.TenantWithAPIOpts), &reply); err == nil || err.Error() != expectedErr {
 		t.Errorf("Expected %+q, received %+q", expectedErr, err)
 	}
@@ -280,7 +281,7 @@ func testCoreSv1StartCPUProfiling(t *testing.T) {
 	dirPath := &utils.DirectoryArgs{
 		DirPath: argPath,
 	}
-	if err := coreV1Rpc.Call(utils.CoreSv1StartCPUProfiling,
+	if err := coreV1Rpc.Call(context.Background(), utils.CoreSv1StartCPUProfiling,
 		dirPath, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
@@ -293,7 +294,7 @@ func testCoreSv1Sleep(t *testing.T) {
 		Duration: 600 * time.Millisecond,
 	}
 	var reply string
-	if err := coreV1Rpc.Call(utils.CoreSv1Sleep,
+	if err := coreV1Rpc.Call(context.Background(), utils.CoreSv1Sleep,
 		args, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
@@ -303,7 +304,7 @@ func testCoreSv1Sleep(t *testing.T) {
 
 func testCoreSv1StopCPUProfiling(t *testing.T) {
 	var reply string
-	if err := coreV1Rpc.Call(utils.CoreSv1StopCPUProfiling,
+	if err := coreV1Rpc.Call(context.Background(), utils.CoreSv1StopCPUProfiling,
 		new(utils.TenantWithAPIOpts), &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
@@ -335,7 +336,7 @@ func testCoreSv1StartMemoryProfiling(t *testing.T) {
 		Interval: 100 * time.Millisecond,
 		NrFiles:  2,
 	}
-	if err := coreV1Rpc.Call(utils.CoreSv1StartMemoryProfiling,
+	if err := coreV1Rpc.Call(context.Background(), utils.CoreSv1StartMemoryProfiling,
 		args, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {

@@ -21,12 +21,13 @@ package dispatchers
 import (
 	"time"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
 // CDRsV1Ping interogates CDRsV1 server responsible to process the event
-func (dS *DispatcherService) CDRsV1Ping(args *utils.CGREvent,
+func (dS *DispatcherService) CDRsV1Ping(ctx *context.Context, args *utils.CGREvent,
 	reply *string) (err error) {
 	if args == nil {
 		args = new(utils.CGREvent)
@@ -46,7 +47,7 @@ func (dS *DispatcherService) CDRsV1Ping(args *utils.CGREvent,
 }
 
 // CDRsV1GetCDRs returns the CDRs that match the filter
-func (dS *DispatcherService) CDRsV1GetCDRs(args *utils.RPCCDRsFilterWithAPIOpts, reply *[]*engine.CDR) (err error) {
+func (dS *DispatcherService) CDRsV1GetCDRs(ctx *context.Context, args *utils.RPCCDRsFilterWithAPIOpts, reply *[]*engine.CDR) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
 	if args.Tenant != utils.EmptyString {
 		tnt = args.Tenant
@@ -64,7 +65,7 @@ func (dS *DispatcherService) CDRsV1GetCDRs(args *utils.RPCCDRsFilterWithAPIOpts,
 }
 
 // CDRsV1GetCDRsCount counts the cdrs that match the filter
-func (dS *DispatcherService) CDRsV1GetCDRsCount(args *utils.RPCCDRsFilterWithAPIOpts, reply *int64) (err error) {
+func (dS *DispatcherService) CDRsV1GetCDRsCount(ctx *context.Context, args *utils.RPCCDRsFilterWithAPIOpts, reply *int64) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
 	if args.Tenant != utils.EmptyString {
 		tnt = args.Tenant
@@ -81,7 +82,7 @@ func (dS *DispatcherService) CDRsV1GetCDRsCount(args *utils.RPCCDRsFilterWithAPI
 	}, utils.MetaCDRs, utils.CDRsV1GetCDRsCount, args, reply)
 }
 
-func (dS *DispatcherService) CDRsV1StoreSessionCost(args *engine.AttrCDRSStoreSMCost, reply *string) (err error) {
+func (dS *DispatcherService) CDRsV1StoreSessionCost(ctx *context.Context, args *engine.AttrCDRSStoreSMCost, reply *string) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
 	if args.Tenant != utils.EmptyString {
 		tnt = args.Tenant
@@ -98,7 +99,7 @@ func (dS *DispatcherService) CDRsV1StoreSessionCost(args *engine.AttrCDRSStoreSM
 	}, utils.MetaCDRs, utils.CDRsV1StoreSessionCost, args, reply)
 }
 
-func (dS *DispatcherService) CDRsV1RateCDRs(args *engine.ArgRateCDRs, reply *string) (err error) {
+func (dS *DispatcherService) CDRsV1RateCDRs(ctx *context.Context, args *engine.ArgRateCDRs, reply *string) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
 	if args.Tenant != utils.EmptyString {
 		tnt = args.Tenant
@@ -115,7 +116,7 @@ func (dS *DispatcherService) CDRsV1RateCDRs(args *engine.ArgRateCDRs, reply *str
 	}, utils.MetaCDRs, utils.CDRsV1RateCDRs, args, reply)
 }
 
-func (dS *DispatcherService) CDRsV1ProcessExternalCDR(args *engine.ExternalCDRWithAPIOpts, reply *string) (err error) {
+func (dS *DispatcherService) CDRsV1ProcessExternalCDR(ctx *context.Context, args *engine.ExternalCDRWithAPIOpts, reply *string) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
 	if args.Tenant != utils.EmptyString {
 		tnt = args.Tenant
@@ -132,7 +133,7 @@ func (dS *DispatcherService) CDRsV1ProcessExternalCDR(args *engine.ExternalCDRWi
 	}, utils.MetaCDRs, utils.CDRsV1ProcessExternalCDR, args, reply)
 }
 
-func (dS *DispatcherService) CDRsV1ProcessEvent(args *engine.ArgV1ProcessEvent, reply *string) (err error) {
+func (dS *DispatcherService) CDRsV1ProcessEvent(ctx *context.Context, args *engine.ArgV1ProcessEvent, reply *string) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
 	if args.CGREvent.Tenant != utils.EmptyString {
 		tnt = args.CGREvent.Tenant
@@ -147,7 +148,7 @@ func (dS *DispatcherService) CDRsV1ProcessEvent(args *engine.ArgV1ProcessEvent, 
 		utils.CDRsV1ProcessEvent, args, reply)
 }
 
-func (dS *DispatcherService) CDRsV1ProcessCDR(args *engine.CDRWithAPIOpts, reply *string) (err error) {
+func (dS *DispatcherService) CDRsV1ProcessCDR(ctx *context.Context, args *engine.CDRWithAPIOpts, reply *string) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
 	if args.Tenant != utils.EmptyString {
 		tnt = args.Tenant
@@ -164,7 +165,7 @@ func (dS *DispatcherService) CDRsV1ProcessCDR(args *engine.CDRWithAPIOpts, reply
 	}, utils.MetaCDRs, utils.CDRsV1ProcessCDR, args, reply)
 }
 
-func (dS *DispatcherService) CDRsV2ProcessEvent(args *engine.ArgV1ProcessEvent, reply *[]*utils.EventWithFlags) (err error) {
+func (dS *DispatcherService) CDRsV2ProcessEvent(ctx *context.Context, args *engine.ArgV1ProcessEvent, reply *[]*utils.EventWithFlags) (err error) {
 	tnt := args.Tenant
 	if tnt == utils.EmptyString {
 		tnt = dS.cfg.GeneralCfg().DefaultTenant
@@ -179,7 +180,7 @@ func (dS *DispatcherService) CDRsV2ProcessEvent(args *engine.ArgV1ProcessEvent, 
 		utils.CDRsV2ProcessEvent, args, reply)
 }
 
-func (dS *DispatcherService) CDRsV2StoreSessionCost(args *engine.ArgsV2CDRSStoreSMCost, reply *string) (err error) {
+func (dS *DispatcherService) CDRsV2StoreSessionCost(ctx *context.Context, args *engine.ArgsV2CDRSStoreSMCost, reply *string) (err error) {
 	tnt := args.Tenant
 	if tnt == utils.EmptyString {
 		tnt = dS.cfg.GeneralCfg().DefaultTenant

@@ -29,6 +29,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc"
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -280,7 +282,7 @@ func TestForceSTerminatorPostCDRs(t *testing.T) {
 	cfg.SessionSCfg().CDRsConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCDRs)}
 	data := engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
-	connMgr := engine.NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	connMgr := engine.NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCDRs): nil,
 	})
 	sessions := NewSessionS(cfg, dm, connMgr)
@@ -317,7 +319,7 @@ func TestForceSTerminatorReleaseSession(t *testing.T) {
 	cfg.SessionSCfg().ResSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources)}
 	data := engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
-	connMgr := engine.NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	connMgr := engine.NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources): nil,
 	})
 	sessions := NewSessionS(cfg, dm, connMgr)
@@ -354,7 +356,7 @@ type testMockClientConn struct {
 	*testRPCClientConnection
 }
 
-func (sT *testMockClientConn) Call(method string, arg any, rply any) error {
+func (sT *testMockClientConn) Call(ctx *context.Context, method string, arg any, rply any) error {
 	return utils.ErrNoActiveSession
 }
 
@@ -366,7 +368,7 @@ func TestForceSTerminatorClientCall(t *testing.T) {
 	cfg.GeneralCfg().NodeID = "ClientConnID"
 	data := engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
-	connMgr := engine.NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	connMgr := engine.NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources): nil,
 	})
 	sessions := NewSessionS(cfg, dm, connMgr)
@@ -455,7 +457,7 @@ type testMockClients struct {
 	calls map[string]func(args any, reply any) error
 }
 
-func (sT *testMockClients) Call(method string, arg any, rply any) error {
+func (sT *testMockClients) Call(ctx *context.Context, method string, arg any, rply any) error {
 	if call, has := sT.calls[method]; !has {
 		return rpcclient.ErrUnsupporteServiceMethod
 	} else {
@@ -482,13 +484,13 @@ func TestDebitSessionResponderMaxDebit(t *testing.T) {
 		},
 	}
 
-	sMock := make(chan rpcclient.ClientConnector, 1)
+	sMock := make(chan birpc.ClientConnector, 1)
 	sMock <- testMock1
 	cfg := config.NewDefaultCGRConfig()
 	cfg.SessionSCfg().RALsConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRALs)}
 	data := engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
-	connMgr := engine.NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	connMgr := engine.NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRALs): sMock,
 	})
 
@@ -550,13 +552,13 @@ func TestDebitSessionResponderMaxDebitError(t *testing.T) {
 		},
 	}
 
-	internalRpcChan := make(chan rpcclient.ClientConnector, 1)
+	internalRpcChan := make(chan birpc.ClientConnector, 1)
 	internalRpcChan <- sMock
 	cfg := config.NewDefaultCGRConfig()
 	cfg.SessionSCfg().RALsConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRALs)}
 	cfg.SessionSCfg().SchedulerConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaScheduler)}
 	data := engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
-	connMgr := engine.NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	connMgr := engine.NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRALs):      internalRpcChan,
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaScheduler): internalRpcChan})
 	dm := engine.NewDataManager(data, cfg.CacheCfg(), connMgr)
@@ -593,9 +595,9 @@ func TestDebitSessionResponderMaxDebitError(t *testing.T) {
 	sMock.calls[utils.SchedulerSv1ExecuteActionPlans] = func(args any, reply any) error {
 		return utils.ErrNotImplemented
 	}
-	newInternalRpcChan := make(chan rpcclient.ClientConnector, 1)
+	newInternalRpcChan := make(chan birpc.ClientConnector, 1)
 	newInternalRpcChan <- sMock
-	connMgr = engine.NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	connMgr = engine.NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRALs):      internalRpcChan,
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaScheduler): internalRpcChan})
 	dm = engine.NewDataManager(data, cfg.CacheCfg(), connMgr)
@@ -648,7 +650,7 @@ type testMockClientConnDiscSess struct {
 	*testRPCClientConnection
 }
 
-func (sT *testMockClientConnDiscSess) Call(method string, arg any, rply any) error {
+func (sT *testMockClientConnDiscSess) Call(ctx *context.Context, method string, arg any, rply any) error {
 	return nil
 }
 
@@ -703,9 +705,9 @@ func TestDebitLoopSessionErrorDebiting(t *testing.T) {
 			},
 		},
 	}
-	internalRpcChan := make(chan rpcclient.ClientConnector, 1)
+	internalRpcChan := make(chan birpc.ClientConnector, 1)
 	internalRpcChan <- sMock
-	connMgr := engine.NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	connMgr := engine.NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRALs):      internalRpcChan,
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaScheduler): internalRpcChan})
 	dm = engine.NewDataManager(data, cfg.CacheCfg(), connMgr)
@@ -738,13 +740,13 @@ func TestDebitLoopSession(t *testing.T) {
 		},
 	}
 
-	sMock := make(chan rpcclient.ClientConnector, 1)
+	sMock := make(chan birpc.ClientConnector, 1)
 	sMock <- testMock1
 	cfg := config.NewDefaultCGRConfig()
 	cfg.SessionSCfg().RALsConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRALs)}
 	data := engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
-	connMgr := engine.NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	connMgr := engine.NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRALs): sMock,
 	})
 
@@ -801,13 +803,13 @@ func TestDebitLoopSessionFrcDiscLowerDbtInterval(t *testing.T) {
 		},
 	}
 
-	sMock := make(chan rpcclient.ClientConnector, 1)
+	sMock := make(chan birpc.ClientConnector, 1)
 	sMock <- testMock1
 	cfg := config.NewDefaultCGRConfig()
 	cfg.SessionSCfg().RALsConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRALs)}
 	data := engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
-	connMgr := engine.NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	connMgr := engine.NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRALs): sMock,
 	})
 
@@ -854,14 +856,14 @@ func TestDebitLoopSessionLowBalance(t *testing.T) {
 		},
 	}
 
-	sMock := make(chan rpcclient.ClientConnector, 1)
+	sMock := make(chan birpc.ClientConnector, 1)
 	sMock <- testMock1
 	cfg := config.NewDefaultCGRConfig()
 	cfg.SessionSCfg().RALsConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRALs)}
 	cfg.SessionSCfg().MinDurLowBalance = 1 * time.Second
 	data := engine.NewInternalDB(nil, nil, true,cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
-	connMgr := engine.NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	connMgr := engine.NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRALs): sMock,
 	})
 
@@ -916,7 +918,7 @@ func TestDebitLoopSessionWarningSessions(t *testing.T) {
 		},
 	}
 
-	sMock := make(chan rpcclient.ClientConnector, 1)
+	sMock := make(chan birpc.ClientConnector, 1)
 	sMock <- testMock1
 	cfg := config.NewDefaultCGRConfig()
 	cfg.SessionSCfg().RALsConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRALs)}
@@ -924,7 +926,7 @@ func TestDebitLoopSessionWarningSessions(t *testing.T) {
 	cfg.SessionSCfg().MinDurLowBalance = 1 * time.Second
 	data := engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
-	connMgr := engine.NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	connMgr := engine.NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRALs):      sMock,
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources): sMock})
 
@@ -973,7 +975,7 @@ func TestDebitLoopSessionDisconnectSession(t *testing.T) {
 		},
 	}
 
-	sMock := make(chan rpcclient.ClientConnector, 1)
+	sMock := make(chan birpc.ClientConnector, 1)
 	sMock <- testMock1
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().NodeID = "ClientConnID"
@@ -982,7 +984,7 @@ func TestDebitLoopSessionDisconnectSession(t *testing.T) {
 	cfg.SessionSCfg().MinDurLowBalance = 1 * time.Second
 	data := engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
-	connMgr := engine.NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	connMgr := engine.NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRALs):      sMock,
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources): sMock})
 
@@ -1040,13 +1042,13 @@ func TestStoreSCost(t *testing.T) {
 		},
 	}
 
-	sMock := make(chan rpcclient.ClientConnector, 1)
+	sMock := make(chan birpc.ClientConnector, 1)
 	sMock <- testMock1
 	cfg := config.NewDefaultCGRConfig()
 	cfg.SessionSCfg().CDRsConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCDRs)}
 	data := engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
-	connMgr := engine.NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	connMgr := engine.NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCDRs): sMock})
 
 	sessions := NewSessionS(cfg, dm, connMgr)
@@ -1095,13 +1097,13 @@ func TestRefundSession(t *testing.T) {
 		},
 	}
 
-	sMock := make(chan rpcclient.ClientConnector, 1)
+	sMock := make(chan birpc.ClientConnector, 1)
 	sMock <- testMock1
 	cfg := config.NewDefaultCGRConfig()
 	cfg.SessionSCfg().RALsConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRALs)}
 	data := engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
-	connMgr := engine.NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	connMgr := engine.NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRALs): sMock})
 
 	sessions := NewSessionS(cfg, dm, connMgr)
@@ -1200,13 +1202,13 @@ func TestRoundCost(t *testing.T) {
 		},
 	}
 
-	sMock := make(chan rpcclient.ClientConnector, 1)
+	sMock := make(chan birpc.ClientConnector, 1)
 	sMock <- testMock1
 	cfg := config.NewDefaultCGRConfig()
 	cfg.SessionSCfg().RALsConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRALs)}
 	data := engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
-	connMgr := engine.NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	connMgr := engine.NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRALs): sMock})
 
 	sessions := NewSessionS(cfg, dm, connMgr)
@@ -1312,13 +1314,13 @@ func TestReplicateSessions(t *testing.T) {
 		},
 	}
 
-	sMock := make(chan rpcclient.ClientConnector, 1)
+	sMock := make(chan birpc.ClientConnector, 1)
 	sMock <- testMock1
 	cfg := config.NewDefaultCGRConfig()
 	cfg.SessionSCfg().ReplicationConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator)}
 	data := engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
-	connMgr := engine.NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	connMgr := engine.NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator): sMock})
 
 	sessions := NewSessionS(cfg, dm, connMgr)
@@ -1351,11 +1353,11 @@ func TestNewSession(t *testing.T) {
 			},
 		},
 	}
-	sMock := make(chan rpcclient.ClientConnector, 1)
+	sMock := make(chan birpc.ClientConnector, 1)
 	sMock <- testMock1
 	cfg := config.NewDefaultCGRConfig()
 	data := engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
-	connMgr := engine.NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	connMgr := engine.NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers): sMock})
 	dm := engine.NewDataManager(data, cfg.CacheCfg(), connMgr)
 
@@ -1433,8 +1435,8 @@ func TestProcessChargerS(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
 	cfg.CacheCfg().Partitions[utils.CacheEventCharges].Limit = -1
-	sMock := make(chan rpcclient.ClientConnector, 1)
-	connMgr := engine.NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	sMock := make(chan birpc.ClientConnector, 1)
+	connMgr := engine.NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers): sMock})
 	dm := engine.NewDataManager(engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items), cfg.CacheCfg(), connMgr)
 	engine.Cache = engine.NewCacheS(cfg, dm, nil)
@@ -1477,7 +1479,7 @@ func TestProcessChargerS(t *testing.T) {
 	}
 	cacheS := engine.NewCacheS(cfg, nil, nil)
 	engine.Cache = cacheS
-	connMgr = engine.NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	connMgr = engine.NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator): sMock})
 	engine.SetConnManager(connMgr)
 
@@ -1612,7 +1614,7 @@ func TestLibsessionsSetMockErrors(t *testing.T) {
 			},
 		},
 	}
-	chanInternal := make(chan rpcclient.ClientConnector, 1)
+	chanInternal := make(chan birpc.ClientConnector, 1)
 	chanInternal <- sTestMock
 	cfg := config.NewDefaultCGRConfig()
 	cfg.CacheCfg().ReplicationConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator)}
@@ -1621,7 +1623,7 @@ func TestLibsessionsSetMockErrors(t *testing.T) {
 	}
 	cacheS := engine.NewCacheS(cfg, nil, nil)
 	engine.Cache = cacheS
-	connMgr := engine.NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	connMgr := engine.NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator): chanInternal})
 	engine.SetConnManager(connMgr)
 
@@ -1655,7 +1657,7 @@ type testMockClientSyncSessions struct {
 	*testRPCClientConnection
 }
 
-func (sT *testMockClientSyncSessions) Call(method string, arg any, rply any) error {
+func (sT *testMockClientSyncSessions) Call(ctx *context.Context, method string, arg any, rply any) error {
 	queriedSessionIDs := []*SessionID{
 		{
 			OriginID:   "ORIGIN_ID",
@@ -1682,7 +1684,7 @@ func TestSyncSessions(t *testing.T) {
 			},
 		},
 	}
-	chanInternal := make(chan rpcclient.ClientConnector, 1)
+	chanInternal := make(chan birpc.ClientConnector, 1)
 	chanInternal <- sTestMock
 	cfg := config.NewDefaultCGRConfig()
 	//cfg.GeneralCfg().ReplyTimeout = 1
@@ -1692,7 +1694,7 @@ func TestSyncSessions(t *testing.T) {
 		Replicate: true,
 	}
 	data := engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
-	connMgr := engine.NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	connMgr := engine.NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources): chanInternal})
 	dm := engine.NewDataManager(data, cfg.CacheCfg(), connMgr)
 	sessions := NewSessionS(cfg, dm, connMgr)
@@ -1711,7 +1713,7 @@ func TestSyncSessions(t *testing.T) {
 	sessions.cgrCfg.GeneralCfg().ReplyTimeout = 1
 	cacheS := engine.NewCacheS(cfg, nil, nil)
 	engine.Cache = cacheS
-	connMgr = engine.NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	connMgr = engine.NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator): chanInternal})
 	engine.SetConnManager(connMgr)
 	sessions.aSessions = map[string]*Session{
@@ -1719,7 +1721,7 @@ func TestSyncSessions(t *testing.T) {
 	}
 
 	var reply string
-	if err := sessions.BiRPCv1SyncSessions(nil, nil, &reply); err != nil {
+	if err := sessions.BiRPCv1SyncSessions(context.Background(), nil, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf("Expected to be OK")
@@ -1757,12 +1759,12 @@ func TestAuthEvent(t *testing.T) {
 			},
 		},
 	}
-	chanInternal := make(chan rpcclient.ClientConnector, 1)
+	chanInternal := make(chan birpc.ClientConnector, 1)
 	chanInternal <- sTestMock
 	cfg := config.NewDefaultCGRConfig()
 	cfg.SessionSCfg().RALsConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRALs)}
 	data := engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
-	connMgr := engine.NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	connMgr := engine.NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRALs):     chanInternal,
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers): chanInternal})
 	dm := engine.NewDataManager(data, cfg.CacheCfg(), connMgr)
@@ -1830,11 +1832,11 @@ func TestAuthEventMockCall(t *testing.T) {
 			},
 		},
 	}
-	chanInternal := make(chan rpcclient.ClientConnector, 1)
+	chanInternal := make(chan birpc.ClientConnector, 1)
 	chanInternal <- sTestMock
 	cfg := config.NewDefaultCGRConfig()
 	cfg.SessionSCfg().RALsConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRALs)}
-	connMgr := engine.NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	connMgr := engine.NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRALs):     chanInternal,
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers): chanInternal})
 	data := engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
@@ -1904,14 +1906,14 @@ func TestChargeEvent(t *testing.T) {
 			},
 		},
 	}
-	chanInternal := make(chan rpcclient.ClientConnector, 1)
+	chanInternal := make(chan birpc.ClientConnector, 1)
 	chanInternal <- sTestMock
 	cfg := config.NewDefaultCGRConfig()
 	cfg.CacheCfg().ReplicationConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator)}
 	cfg.CacheCfg().Partitions[utils.CacheClosedSessions] = &config.CacheParamCfg{
 		Replicate: true,
 	}
-	connMgr := engine.NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	connMgr := engine.NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRALs):     chanInternal,
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers): chanInternal,
 	})
@@ -1936,7 +1938,7 @@ func TestChargeEvent(t *testing.T) {
 
 	cacheS := engine.NewCacheS(cfg, nil, nil)
 	engine.Cache = cacheS
-	connMgr = engine.NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	connMgr = engine.NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator): chanInternal})
 	engine.SetConnManager(connMgr)
 
@@ -2021,12 +2023,12 @@ func TestEndSession(t *testing.T) {
 			},
 		},
 	}
-	chanInternal := make(chan rpcclient.ClientConnector, 1)
+	chanInternal := make(chan birpc.ClientConnector, 1)
 	chanInternal <- sTestMock
 	cfg := config.NewDefaultCGRConfig()
 	cfg.SessionSCfg().RALsConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRALs)}
 	cfg.SessionSCfg().CDRsConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCDRs)}
-	connMgr := engine.NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	connMgr := engine.NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRALs): chanInternal,
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCDRs): chanInternal,
 	})
@@ -2110,35 +2112,6 @@ func TestEndSession(t *testing.T) {
 	}
 }
 
-func TestCallBiRPC(t *testing.T) {
-	log.SetOutput(io.Discard)
-	cfg := config.NewDefaultCGRConfig()
-	data := engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
-	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
-	sessions := NewSessionS(cfg, dm, nil)
-
-	sTestMock := &testMockClients{}
-	valid := "BiRPCv1TerminateSession"
-	args := new(V1TerminateSessionArgs)
-	var reply *string
-
-	if err := sessions.CallBiRPC(sTestMock, valid, args, reply); err == nil || err != rpcclient.ErrUnsupporteServiceMethod {
-		t.Errorf("Expected %+v, received %+v", rpcclient.ErrUnsupporteServiceMethod, err)
-	}
-
-	valid = "BiRPC.TerminateSession"
-	if err := sessions.CallBiRPC(sTestMock, valid, args, reply); err == nil || err != rpcclient.ErrUnsupporteServiceMethod {
-		t.Errorf("Expected %+v, received %+v", rpcclient.ErrUnsupporteServiceMethod, err)
-	}
-
-	valid = "BiRPCv1.TerminateSession"
-	expected := "MANDATORY_IE_MISSING: [CGREvent]"
-	if err := sessions.Call(valid, args, reply); err == nil || err.Error() != expected {
-		t.Errorf("Expected %+v, received %+v", expected, err)
-	}
-
-}
-
 func TestBiRPCv1GetActivePassiveSessions(t *testing.T) {
 	log.SetOutput(io.Discard)
 	clnt := &testMockClients{}
@@ -2151,8 +2124,9 @@ func TestBiRPCv1GetActivePassiveSessions(t *testing.T) {
 	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
 	sessions := NewSessionS(cfg, dm, nil)
 
+	ctx := context.WithClient(context.Background(), clnt)
 	var reply []*ExternalSession
-	if err := sessions.BiRPCv1GetActiveSessions(clnt, nil, &reply); err == nil || err != utils.ErrNotFound {
+	if err := sessions.BiRPCv1GetActiveSessions(ctx, nil, &reply); err == nil || err != utils.ErrNotFound {
 		t.Errorf("Expected %+v, received %+v", utils.ErrNotFound, err)
 	}
 
@@ -2243,7 +2217,7 @@ func TestBiRPCv1GetActivePassiveSessions(t *testing.T) {
 	}
 
 	args := &utils.SessionFilter{Filters: []string{fmt.Sprintf("*string:~*req.ToR:%s|%s", utils.MetaVoice, utils.MetaData)}}
-	if err := sessions.BiRPCv1GetActiveSessions(clnt, args, &reply); err != nil {
+	if err := sessions.BiRPCv1GetActiveSessions(ctx, args, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expSess, reply) {
 		t.Errorf("Expected %s , received: %s", utils.ToJSON(expSess), utils.ToJSON(reply))
@@ -2251,13 +2225,13 @@ func TestBiRPCv1GetActivePassiveSessions(t *testing.T) {
 
 	var newReply1 int
 	//nil args, but it will be an empty SessionFilter
-	if err := sessions.BiRPCv1GetActiveSessionsCount(clnt, nil, &newReply1); err != nil {
+	if err := sessions.BiRPCv1GetActiveSessionsCount(ctx, nil, &newReply1); err != nil {
 		t.Error(err)
 	} else if newReply1 != 2 {
 		t.Errorf("Expected %+v, received: %+v", 2, newReply1)
 	}
 
-	if err := sessions.BiRPCv1GetActiveSessionsCount(clnt, args, &newReply1); err != nil {
+	if err := sessions.BiRPCv1GetActiveSessionsCount(ctx, args, &newReply1); err != nil {
 		t.Error(err)
 	} else if newReply1 != 1 {
 		t.Errorf("Expected %+v, received: %+v", 1, newReply1)
@@ -2265,7 +2239,7 @@ func TestBiRPCv1GetActivePassiveSessions(t *testing.T) {
 
 	//Passive session
 	reply = []*ExternalSession{}
-	if err := sessions.BiRPCv1GetPassiveSessions(clnt, nil, &reply); err == nil || err != utils.ErrNotFound {
+	if err := sessions.BiRPCv1GetPassiveSessions(ctx, nil, &reply); err == nil || err != utils.ErrNotFound {
 		t.Errorf("Expected %+v, received %+v", utils.ErrNotFound, err)
 	}
 
@@ -2288,13 +2262,13 @@ func TestBiRPCv1GetActivePassiveSessions(t *testing.T) {
 			ExtraFields: map[string]string{},
 		},
 	}
-	if err := sessions.BiRPCv1GetPassiveSessions(clnt, args, &reply); err != nil {
+	if err := sessions.BiRPCv1GetPassiveSessions(ctx, args, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(reply, expSess) {
 		t.Errorf("Expected %+v\n, received: %+v", utils.ToJSON(expSess), utils.ToJSON(reply))
 	}
 
-	if err := sessions.BiRPCv1GetPassiveSessionsCount(clnt, nil, &newReply1); err != nil {
+	if err := sessions.BiRPCv1GetPassiveSessionsCount(ctx, nil, &newReply1); err != nil {
 		t.Error(err)
 	}
 }
@@ -2314,14 +2288,15 @@ func TestBiRPCv1SetPassiveSession(t *testing.T) {
 		SRuns:  []*SRun{},
 	}
 	expected := "MANDATORY_IE_MISSING: [CGRID]"
-	if err := sessions.BiRPCv1SetPassiveSession(clnt, ss, &reply); err == nil || err.Error() != expected {
+	ctx := context.WithClient(context.Background(), clnt)
+	if err := sessions.BiRPCv1SetPassiveSession(ctx, ss, &reply); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v\n, received: %+v", expected, err)
 	} else if reply != utils.EmptyString {
 		t.Errorf("Expected %+v\n, received: %+v", utils.EmptyString, err)
 	}
 
 	ss.CGRID = "CGR_ID"
-	if err := sessions.BiRPCv1SetPassiveSession(clnt, ss, &reply); err == nil || err != utils.ErrNotFound {
+	if err := sessions.BiRPCv1SetPassiveSession(ctx, ss, &reply); err == nil || err != utils.ErrNotFound {
 		t.Errorf("Expected %+v\n, received: %+v", utils.ErrNotFound, err)
 	} else if reply != utils.EmptyString {
 		t.Errorf("Expected %+v\n, received: %+v", utils.EmptyString, err)
@@ -2330,7 +2305,7 @@ func TestBiRPCv1SetPassiveSession(t *testing.T) {
 	sessions.pSessions = map[string]*Session{
 		"CGR_ID": ss,
 	}
-	if err := sessions.BiRPCv1SetPassiveSession(clnt, ss, &reply); err != nil {
+	if err := sessions.BiRPCv1SetPassiveSession(ctx, ss, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf("Expected %+v\n, received: %+v", utils.OK, err)
@@ -2340,7 +2315,7 @@ func TestBiRPCv1SetPassiveSession(t *testing.T) {
 		"CGR_ID": ss,
 	}
 	ss.EventStart = engine.MapEvent{}
-	if err := sessions.BiRPCv1SetPassiveSession(clnt, ss, &reply); err != nil {
+	if err := sessions.BiRPCv1SetPassiveSession(ctx, ss, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf("Expected %+v\n, received: %+v", utils.OK, err)
@@ -2357,11 +2332,11 @@ func TestBiRPCv1ReplicateSessions(t *testing.T) {
 			},
 		},
 	}
-	chanInternal := make(chan rpcclient.ClientConnector, 1)
+	chanInternal := make(chan birpc.ClientConnector, 1)
 	chanInternal <- clnt
 	cfg := config.NewDefaultCGRConfig()
 	data := engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
-	connMgr := engine.NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	connMgr := engine.NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		"conn1": chanInternal,
 	})
 	dm := engine.NewDataManager(data, cfg.CacheCfg(), connMgr)
@@ -2373,13 +2348,14 @@ func TestBiRPCv1ReplicateSessions(t *testing.T) {
 		ConnIDs: []string{},
 	}
 
+	ctx := context.WithClient(context.Background(), clnt)
 	var reply string
-	if err := sessions.BiRPCv1ReplicateSessions(clnt, args, &reply); err != nil {
+	if err := sessions.BiRPCv1ReplicateSessions(ctx, args, &reply); err != nil {
 		t.Error(err)
 	}
 
 	args.ConnIDs = []string{"conn1"}
-	if err := sessions.BiRPCv1ReplicateSessions(clnt, args, &reply); err != nil {
+	if err := sessions.BiRPCv1ReplicateSessions(ctx, args, &reply); err != nil {
 		t.Error(err)
 	}
 }
@@ -2404,11 +2380,11 @@ func TestBiRPCv1AuthorizeEvent(t *testing.T) {
 			},
 		},
 	}
-	chanInternal := make(chan rpcclient.ClientConnector, 1)
+	chanInternal := make(chan birpc.ClientConnector, 1)
 	chanInternal <- clnt
 	cfg := config.NewDefaultCGRConfig()
 	data := engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
-	connMgr := engine.NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	connMgr := engine.NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes): chanInternal,
 	})
 	dm := engine.NewDataManager(data, cfg.CacheCfg(), connMgr)
@@ -2432,7 +2408,7 @@ func TestBiRPCv1AuthorizeEvent(t *testing.T) {
 	}
 
 	expected := "MANDATORY_IE_MISSING: [CGREvent]"
-	if err := sessions.BiRPCv1AuthorizeEvent(nil, args, rply); err == nil || err.Error() != expected {
+	if err := sessions.BiRPCv1AuthorizeEvent(context.Background(), args, rply); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 
@@ -2450,12 +2426,12 @@ func TestBiRPCv1AuthorizeEvent(t *testing.T) {
 	engine.Cache = caches
 	caches.SetWithoutReplicate(utils.CacheRPCResponses, utils.ConcatenatedKey(utils.SessionSv1AuthorizeEvent, args.CGREvent.ID),
 		value, nil, true, utils.NonTransactional)
-	if err := sessions.BiRPCv1AuthorizeEvent(nil, args, rply); err != nil {
+	if err := sessions.BiRPCv1AuthorizeEvent(context.Background(), args, rply); err != nil {
 		t.Error(err)
 	}
 	engine.Cache = tmp
 
-	if err := sessions.BiRPCv1AuthorizeEvent(nil, args, rply); err == nil || err.Error() != expected {
+	if err := sessions.BiRPCv1AuthorizeEvent(context.Background(), args, rply); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 
@@ -2468,13 +2444,13 @@ func TestBiRPCv1AuthorizeEvent(t *testing.T) {
 	args.CGREvent.Tenant = "cgrates.org"
 	expected = "ATTRIBUTES_ERROR:NOT_CONNECTED: AttributeS"
 
-	if err := sessions.BiRPCv1AuthorizeEvent(nil, args, rply); err == nil || err.Error() != expected {
+	if err := sessions.BiRPCv1AuthorizeEvent(context.Background(), args, rply); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 
 	expected = "NOT_CONNECTED: RouteS"
 	sessions.cgrCfg.SessionSCfg().AttrSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes)}
-	if err := sessions.BiRPCv1AuthorizeEvent(nil, args, rply); err == nil || err.Error() != expected {
+	if err := sessions.BiRPCv1AuthorizeEvent(context.Background(), args, rply); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 }
@@ -2520,12 +2496,12 @@ func TestBiRPCv1AuthorizeEvent2(t *testing.T) {
 			},
 		},
 	}
-	chanInternal := make(chan rpcclient.ClientConnector, 1)
+	chanInternal := make(chan birpc.ClientConnector, 1)
 	chanInternal <- clnt
 	cfg := config.NewDefaultCGRConfig()
 	cfg.CacheCfg().Partitions[utils.CacheRPCResponses].Limit = 0
 	data := engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
-	connMgr := engine.NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	connMgr := engine.NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers):   chanInternal,
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources):  chanInternal,
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRoutes):     chanInternal,
@@ -2554,13 +2530,13 @@ func TestBiRPCv1AuthorizeEvent2(t *testing.T) {
 
 	//GetMaxUsage
 	expected := "ChargerS is disabled"
-	if err := sessions.BiRPCv1AuthorizeEvent(nil, args, rply); err == nil || err.Error() != expected {
+	if err := sessions.BiRPCv1AuthorizeEvent(context.Background(), args, rply); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 
 	args.CGREvent.ID = "TestID"
 	sessions.cgrCfg.SessionSCfg().ChargerSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers)}
-	if err := sessions.BiRPCv1AuthorizeEvent(nil, args, rply); err != nil {
+	if err := sessions.BiRPCv1AuthorizeEvent(context.Background(), args, rply); err != nil {
 		t.Error(err)
 	}
 
@@ -2569,18 +2545,18 @@ func TestBiRPCv1AuthorizeEvent2(t *testing.T) {
 		false, []string{}, false, []string{}, true, false,
 		false, false, false, cgrEvent, utils.Paginator{}, false, "")
 	expected = "NOT_CONNECTED: ResourceS"
-	if err := sessions.BiRPCv1AuthorizeEvent(nil, args, rply); err == nil || err.Error() != expected {
+	if err := sessions.BiRPCv1AuthorizeEvent(context.Background(), args, rply); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 
 	sessions.cgrCfg.SessionSCfg().ResSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources)}
-	if err := sessions.BiRPCv1AuthorizeEvent(nil, args, rply); err != nil {
+	if err := sessions.BiRPCv1AuthorizeEvent(context.Background(), args, rply); err != nil {
 		t.Error(err)
 	}
 
 	args.CGREvent.Tenant = "new_tenant"
 	expected = "RESOURCES_ERROR:NOT_IMPLEMENTED"
-	if err := sessions.BiRPCv1AuthorizeEvent(nil, args, rply); err == nil || err.Error() != expected {
+	if err := sessions.BiRPCv1AuthorizeEvent(context.Background(), args, rply); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 
@@ -2589,12 +2565,12 @@ func TestBiRPCv1AuthorizeEvent2(t *testing.T) {
 		false, []string{}, false, []string{}, false, false,
 		true, false, false, cgrEvent, utils.Paginator{}, false, "")
 	expected = "NOT_CONNECTED: RouteS"
-	if err := sessions.BiRPCv1AuthorizeEvent(nil, args, rply); err == nil || err.Error() != expected {
+	if err := sessions.BiRPCv1AuthorizeEvent(context.Background(), args, rply); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 
 	sessions.cgrCfg.SessionSCfg().RouteSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRoutes)}
-	if err := sessions.BiRPCv1AuthorizeEvent(nil, args, rply); err != nil {
+	if err := sessions.BiRPCv1AuthorizeEvent(context.Background(), args, rply); err != nil {
 		t.Error(err)
 	}
 
@@ -2602,7 +2578,7 @@ func TestBiRPCv1AuthorizeEvent2(t *testing.T) {
 	args = NewV1AuthorizeArgs(false, []string{},
 		true, []string{"TestID"}, false, []string{}, false, false,
 		true, false, false, cgrEvent, utils.Paginator{}, false, "")
-	if err := sessions.BiRPCv1AuthorizeEvent(nil, args, rply); err == nil || err != utils.ErrPartiallyExecuted {
+	if err := sessions.BiRPCv1AuthorizeEvent(context.Background(), args, rply); err == nil || err != utils.ErrPartiallyExecuted {
 		t.Errorf("Expected %+v, received %+v", utils.ErrPartiallyExecuted, err)
 	}
 
@@ -2610,7 +2586,7 @@ func TestBiRPCv1AuthorizeEvent2(t *testing.T) {
 	args = NewV1AuthorizeArgs(false, []string{},
 		false, []string{}, true, []string{"TestID"}, false, false,
 		true, false, false, cgrEvent, utils.Paginator{}, false, "")
-	if err := sessions.BiRPCv1AuthorizeEvent(nil, args, rply); err == nil || err != utils.ErrPartiallyExecuted {
+	if err := sessions.BiRPCv1AuthorizeEvent(context.Background(), args, rply); err == nil || err != utils.ErrPartiallyExecuted {
 		t.Errorf("Expected %+v, received %+v", utils.ErrPartiallyExecuted, err)
 	}
 }
@@ -2672,7 +2648,7 @@ func TestBiRPCv1AuthorizeEventWithDigest(t *testing.T) {
 			},
 		},
 	}
-	chanInternal := make(chan rpcclient.ClientConnector, 1)
+	chanInternal := make(chan birpc.ClientConnector, 1)
 	chanInternal <- clnt
 	cfg := config.NewDefaultCGRConfig()
 	cfg.SessionSCfg().AttrSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes)}
@@ -2683,7 +2659,7 @@ func TestBiRPCv1AuthorizeEventWithDigest(t *testing.T) {
 	cfg.SessionSCfg().StatSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats)}
 	cfg.CacheCfg().Partitions[utils.CacheRPCResponses].Limit = 0
 	data := engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
-	connMgr := engine.NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	connMgr := engine.NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers):   chanInternal,
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources):  chanInternal,
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRoutes):     chanInternal,
@@ -2714,7 +2690,7 @@ func TestBiRPCv1AuthorizeEventWithDigest(t *testing.T) {
 		Thresholds:         utils.StringPointer(utils.EmptyString),
 		StatQueues:         utils.StringPointer(utils.EmptyString),
 	}
-	if err := sessions.BiRPCv1AuthorizeEventWithDigest(nil, args, authReply); err != nil {
+	if err := sessions.BiRPCv1AuthorizeEventWithDigest(context.Background(), args, authReply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(authReply, expectedRply) {
 		t.Errorf("Expected %+v, received %+v", utils.ToJSON(expectedRply), utils.ToJSON(authReply))
@@ -2722,7 +2698,7 @@ func TestBiRPCv1AuthorizeEventWithDigest(t *testing.T) {
 
 	sessions.cgrCfg.SessionSCfg().ChargerSConns = nil
 	expected := "ChargerS is disabled"
-	if err := sessions.BiRPCv1AuthorizeEventWithDigest(nil, args, authReply); err == nil || err.Error() != expected {
+	if err := sessions.BiRPCv1AuthorizeEventWithDigest(context.Background(), args, authReply); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 }
@@ -2783,7 +2759,7 @@ func TestBiRPCv1InitiateSession1(t *testing.T) {
 			},
 		},
 	}
-	chanInternal := make(chan rpcclient.ClientConnector, 1)
+	chanInternal := make(chan birpc.ClientConnector, 1)
 	chanInternal <- clnt
 	cfg := config.NewDefaultCGRConfig()
 	cfg.CacheCfg().Partitions[utils.CacheRPCResponses].Limit = 1
@@ -2791,7 +2767,7 @@ func TestBiRPCv1InitiateSession1(t *testing.T) {
 	cfg.SessionSCfg().ResSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources)}
 	cfg.SessionSCfg().ChargerSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers)}
 	data := engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
-	connMgr := engine.NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	connMgr := engine.NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers):   chanInternal,
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources):  chanInternal,
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes): chanInternal,
@@ -2812,12 +2788,12 @@ func TestBiRPCv1InitiateSession1(t *testing.T) {
 
 	rply := &V1InitSessionReply{}
 	expected := "MANDATORY_IE_MISSING: [CGREvent]"
-	if err := sessions.BiRPCv1InitiateSession(nil, args, rply); err == nil || err.Error() != expected {
+	if err := sessions.BiRPCv1InitiateSession(context.Background(), args, rply); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 
 	args.CGREvent = cgrEvent
-	if err := sessions.BiRPCv1InitiateSession(nil, args, rply); err != nil {
+	if err := sessions.BiRPCv1InitiateSession(context.Background(), args, rply); err != nil {
 		t.Error(err)
 	}
 
@@ -2836,7 +2812,7 @@ func TestBiRPCv1InitiateSession1(t *testing.T) {
 	engine.Cache = caches
 	engine.Cache.SetWithoutReplicate(utils.CacheRPCResponses, utils.ConcatenatedKey(utils.SessionSv1InitiateSession, args.CGREvent.ID),
 		value, nil, true, utils.NonTransactional)
-	if err := sessions.BiRPCv1InitiateSession(nil, args, rply); err != nil {
+	if err := sessions.BiRPCv1InitiateSession(context.Background(), args, rply); err != nil {
 		t.Error(err)
 	}
 	engine.Cache = tmp
@@ -2844,7 +2820,7 @@ func TestBiRPCv1InitiateSession1(t *testing.T) {
 	args.CGREvent.Tenant = utils.EmptyString
 	args.AttributeIDs = []string{"attr1"}
 	expected = "ATTRIBUTES_ERROR:NOT_IMPLEMENTED"
-	if err := sessions.BiRPCv1InitiateSession(nil, args, rply); err == nil || err.Error() != expected {
+	if err := sessions.BiRPCv1InitiateSession(context.Background(), args, rply); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 
@@ -2852,7 +2828,7 @@ func TestBiRPCv1InitiateSession1(t *testing.T) {
 	args.AttributeIDs = []string{}
 	sessions.cgrCfg.SessionSCfg().ResSConns = []string{}
 	expected = "NOT_CONNECTED: ResourceS"
-	if err := sessions.BiRPCv1InitiateSession(nil, args, rply); err == nil || err.Error() != expected {
+	if err := sessions.BiRPCv1InitiateSession(context.Background(), args, rply); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 	sessions.cgrCfg.SessionSCfg().ResSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources)}
@@ -2862,7 +2838,7 @@ func TestBiRPCv1InitiateSession1(t *testing.T) {
 		cgrEvent, true)
 	delete(args.CGREvent.Event, utils.OriginID)
 	expected = "MANDATORY_IE_MISSING: [OriginID]"
-	if err := sessions.BiRPCv1InitiateSession(nil, args, rply); err == nil || err.Error() != expected {
+	if err := sessions.BiRPCv1InitiateSession(context.Background(), args, rply); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 
@@ -2878,7 +2854,7 @@ func TestBiRPCv1InitiateSession1(t *testing.T) {
 		false, []string{}, false, []string{}, true, false,
 		cgrEvent, true)
 	expected = "RESOURCES_ERROR:NOT_IMPLEMENTED"
-	if err := sessions.BiRPCv1InitiateSession(nil, args, rply); err == nil || err.Error() != expected {
+	if err := sessions.BiRPCv1InitiateSession(context.Background(), args, rply); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 
@@ -2887,7 +2863,7 @@ func TestBiRPCv1InitiateSession1(t *testing.T) {
 		false, []string{}, false, []string{}, false, false,
 		cgrEvent, true)
 	expected = "MANDATORY_IE_MISSING: [subsystems]"
-	if err := sessions.BiRPCv1InitiateSession(nil, args, rply); err == nil || err.Error() != expected {
+	if err := sessions.BiRPCv1InitiateSession(context.Background(), args, rply); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 }
@@ -2926,14 +2902,14 @@ func TestBiRPCv1InitiateSession2(t *testing.T) {
 			},
 		},
 	}
-	chanInternal := make(chan rpcclient.ClientConnector, 1)
+	chanInternal := make(chan birpc.ClientConnector, 1)
 	chanInternal <- clnt
 	cfg := config.NewDefaultCGRConfig()
 	cfg.CacheCfg().Partitions[utils.CacheRPCResponses].Limit = 1
 	cfg.SessionSCfg().ThreshSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds)}
 	cfg.SessionSCfg().ResSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources)}
 	data := engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
-	connMgr := engine.NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	connMgr := engine.NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers):   chanInternal,
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources):  chanInternal,
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds): chanInternal,
@@ -2958,25 +2934,25 @@ func TestBiRPCv1InitiateSession2(t *testing.T) {
 
 	rply := &V1InitSessionReply{}
 	expected := "RALS_ERROR:time: invalid duration \"invalid_DUR_FORMAT\""
-	if err := sessions.BiRPCv1InitiateSession(nil, args, rply); err == nil || err.Error() != expected {
+	if err := sessions.BiRPCv1InitiateSession(context.Background(), args, rply); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 	args.CGREvent.APIOpts[utils.OptsDebitInterval] = "10s"
 
 	expected = "ChargerS is disabled"
-	if err := sessions.BiRPCv1InitiateSession(nil, args, rply); err == nil || err.Error() != expected {
+	if err := sessions.BiRPCv1InitiateSession(context.Background(), args, rply); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 	sessions.cgrCfg.SessionSCfg().ChargerSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers)}
 
 	expected = "RALS_ERROR:time: invalid duration \"invalid_usage\""
-	if err := sessions.BiRPCv1InitiateSession(nil, args, rply); err == nil || err.Error() != expected {
+	if err := sessions.BiRPCv1InitiateSession(context.Background(), args, rply); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 
 	sessions = NewSessionS(cfg, dm, connMgr)
 	args.CGREvent.Event[utils.Usage] = "10s"
-	if err := sessions.BiRPCv1InitiateSession(nil, args, rply); err != nil {
+	if err := sessions.BiRPCv1InitiateSession(context.Background(), args, rply); err != nil {
 		t.Error(err)
 	}
 
@@ -2985,7 +2961,7 @@ func TestBiRPCv1InitiateSession2(t *testing.T) {
 		true, []string{}, true, []string{}, false, true,
 		cgrEvent, true)
 	sessions = NewSessionS(cfg, dm, connMgr)
-	if err := sessions.BiRPCv1InitiateSession(nil, args, rply); err == nil || err != utils.ErrPartiallyExecuted {
+	if err := sessions.BiRPCv1InitiateSession(context.Background(), args, rply); err == nil || err != utils.ErrPartiallyExecuted {
 		t.Errorf("Expected %+v, received %+v", utils.ErrPartiallyExecuted, err)
 	}
 
@@ -3004,7 +2980,7 @@ func TestBiRPCv1InitiateSession2(t *testing.T) {
 		true, []string{}, true, []string{}, false, true,
 		cgrEvent, true)
 	expected = "EXISTS"
-	if err := sessions.BiRPCv1InitiateSession(nil, args, rply); err == nil || err != utils.ErrPartiallyExecuted {
+	if err := sessions.BiRPCv1InitiateSession(context.Background(), args, rply); err == nil || err != utils.ErrPartiallyExecuted {
 		t.Errorf("Expected %+v, received %+v", utils.ErrPartiallyExecuted, err)
 	}
 
@@ -3063,7 +3039,7 @@ func TestBiRPCv1InitiateSessionWithDigest(t *testing.T) {
 			},
 		},
 	}
-	chanInternal := make(chan rpcclient.ClientConnector, 1)
+	chanInternal := make(chan birpc.ClientConnector, 1)
 	chanInternal <- clnt
 	cfg := config.NewDefaultCGRConfig()
 	cfg.SessionSCfg().AttrSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes)}
@@ -3074,7 +3050,7 @@ func TestBiRPCv1InitiateSessionWithDigest(t *testing.T) {
 	cfg.SessionSCfg().StatSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats)}
 	cfg.CacheCfg().Partitions[utils.CacheRPCResponses].Limit = 0
 	data := engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
-	connMgr := engine.NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	connMgr := engine.NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers):   chanInternal,
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources):  chanInternal,
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRoutes):     chanInternal,
@@ -3106,7 +3082,7 @@ func TestBiRPCv1InitiateSessionWithDigest(t *testing.T) {
 		Thresholds:         utils.StringPointer(utils.EmptyString),
 		StatQueues:         utils.StringPointer(utils.EmptyString),
 	}
-	if err := sessions.BiRPCv1InitiateSessionWithDigest(nil, args, authReply); err != nil {
+	if err := sessions.BiRPCv1InitiateSessionWithDigest(context.Background(), args, authReply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(authReply, expectedRply) {
 		t.Errorf("Expected %+v, received %+v", utils.ToJSON(expectedRply), utils.ToJSON(authReply))
@@ -3114,7 +3090,8 @@ func TestBiRPCv1InitiateSessionWithDigest(t *testing.T) {
 
 	sessions.cgrCfg.SessionSCfg().ChargerSConns = nil
 	expected := "MANDATORY_IE_MISSING: [OriginID]"
-	if err := sessions.BiRPCv1InitiateSessionWithDigest(nil, args, authReply); err == nil || err.Error() != expected {
+	if err := sessions.BiRPCv1InitiateSessionWithDigest(context.Background(), args,
+		authReply); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 }
@@ -3135,13 +3112,13 @@ func TestBiRPCv1UpdateSession1(t *testing.T) {
 			},
 		},
 	}
-	chanInternal := make(chan rpcclient.ClientConnector, 1)
+	chanInternal := make(chan birpc.ClientConnector, 1)
 	chanInternal <- clnt
 	cfg := config.NewDefaultCGRConfig()
 	cfg.CacheCfg().Partitions[utils.CacheRPCResponses].Limit = 1
 	cfg.SessionSCfg().AttrSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes)}
 	data := engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
-	connMgr := engine.NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	connMgr := engine.NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes): chanInternal,
 	})
 	dm := engine.NewDataManager(data, cfg.CacheCfg(), connMgr)
@@ -3158,7 +3135,7 @@ func TestBiRPCv1UpdateSession1(t *testing.T) {
 	rply := new(V1UpdateSessionReply)
 
 	expected := "MANDATORY_IE_MISSING: [CGREvent]"
-	if err := sessions.BiRPCv1UpdateSession(nil, args, rply); err == nil || err.Error() != expected {
+	if err := sessions.BiRPCv1UpdateSession(context.Background(), args, rply); err == nil || err.Error() != expected {
 		t.Errorf("Exepected %+v, received %+v", expected, err)
 	}
 
@@ -3175,7 +3152,7 @@ func TestBiRPCv1UpdateSession1(t *testing.T) {
 	engine.Cache = caches
 	engine.Cache.SetWithoutReplicate(utils.CacheRPCResponses, utils.ConcatenatedKey(utils.SessionSv1UpdateSession, args.CGREvent.ID),
 		value, nil, true, utils.NonTransactional)
-	if err := sessions.BiRPCv1UpdateSession(nil, args, rply); err != nil {
+	if err := sessions.BiRPCv1UpdateSession(context.Background(), args, rply); err != nil {
 		t.Error(err)
 	}
 	engine.Cache = tmp
@@ -3184,20 +3161,20 @@ func TestBiRPCv1UpdateSession1(t *testing.T) {
 	args = NewV1UpdateSessionArgs(true, []string{"attrr1"}, false,
 		cgrEvent, true)
 	expected = "ATTRIBUTES_ERROR:NOT_IMPLEMENTED"
-	if err := sessions.BiRPCv1UpdateSession(nil, args, rply); err == nil || err.Error() != expected {
+	if err := sessions.BiRPCv1UpdateSession(context.Background(), args, rply); err == nil || err.Error() != expected {
 		t.Errorf("Exepected %+v, received %+v", expected, err)
 	}
 
 	args = NewV1UpdateSessionArgs(true, []string{}, false,
 		cgrEvent, true)
-	if err := sessions.BiRPCv1UpdateSession(nil, args, rply); err != nil {
+	if err := sessions.BiRPCv1UpdateSession(context.Background(), args, rply); err != nil {
 		t.Error(err)
 	}
 
 	args = NewV1UpdateSessionArgs(false, []string{}, false,
 		cgrEvent, true)
 	expected = "MANDATORY_IE_MISSING: [subsystems]"
-	if err := sessions.BiRPCv1UpdateSession(nil, args, rply); err == nil || err.Error() != expected {
+	if err := sessions.BiRPCv1UpdateSession(context.Background(), args, rply); err == nil || err.Error() != expected {
 		t.Errorf("Exepected %+v, received %+v", expected, err)
 	}
 }
@@ -3224,11 +3201,11 @@ func TestBiRPCv1UpdateSession2(t *testing.T) {
 			},
 		},
 	}
-	chanInternal := make(chan rpcclient.ClientConnector, 1)
+	chanInternal := make(chan birpc.ClientConnector, 1)
 	chanInternal <- clnt
 	cfg := config.NewDefaultCGRConfig()
 	data := engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
-	connMgr := engine.NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	connMgr := engine.NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers): chanInternal,
 	})
 	dm := engine.NewDataManager(data, cfg.CacheCfg(), connMgr)
@@ -3248,7 +3225,7 @@ func TestBiRPCv1UpdateSession2(t *testing.T) {
 		cgrEvent, true)
 	rply := new(V1UpdateSessionReply)
 	expected := "RALS_ERROR:time: invalid duration \"invalid_dur_format\""
-	if err := sessions.BiRPCv1UpdateSession(nil, args, rply); err == nil || err.Error() != expected {
+	if err := sessions.BiRPCv1UpdateSession(context.Background(), args, rply); err == nil || err.Error() != expected {
 		t.Errorf("Exepected %+v, received %+v", expected, err)
 	}
 	cgrEvent.APIOpts[utils.OptsDebitInterval] = "10s"
@@ -3256,20 +3233,20 @@ func TestBiRPCv1UpdateSession2(t *testing.T) {
 	args = NewV1UpdateSessionArgs(false, []string{}, true,
 		cgrEvent, true)
 	expected = "ChargerS is disabled"
-	if err := sessions.BiRPCv1UpdateSession(nil, args, rply); err == nil || err.Error() != expected {
+	if err := sessions.BiRPCv1UpdateSession(context.Background(), args, rply); err == nil || err.Error() != expected {
 		t.Errorf("Exepected %+v, received %+v", expected, err)
 	}
 	sessions.cgrCfg.SessionSCfg().ChargerSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers)}
 
 	expected = "RALS_ERROR:time: invalid duration \"invalid_dur_format\""
-	if err := sessions.BiRPCv1UpdateSession(nil, args, rply); err == nil || err.Error() != expected {
+	if err := sessions.BiRPCv1UpdateSession(context.Background(), args, rply); err == nil || err.Error() != expected {
 		t.Errorf("Exepected %+v, received %+v", expected, err)
 	}
 
 	cgrEvent.Event[utils.Usage] = time.Minute
 	args = NewV1UpdateSessionArgs(false, []string{}, true,
 		cgrEvent, true)
-	if err := sessions.BiRPCv1UpdateSession(nil, args, rply); err != nil {
+	if err := sessions.BiRPCv1UpdateSession(context.Background(), args, rply); err != nil {
 		t.Error(err)
 	}
 }
@@ -3302,13 +3279,13 @@ func TestBiRPCv1TerminateSession1(t *testing.T) {
 			},
 		},
 	}
-	chanInternal := make(chan rpcclient.ClientConnector, 1)
+	chanInternal := make(chan birpc.ClientConnector, 1)
 	chanInternal <- clnt
 	cfg := config.NewDefaultCGRConfig()
 	cfg.CacheCfg().Partitions[utils.CacheRPCResponses].Limit = 1
 	cfg.SessionSCfg().ChargerSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers)}
 	data := engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
-	connMgr := engine.NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	connMgr := engine.NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers): chanInternal,
 	})
 	dm := engine.NewDataManager(data, cfg.CacheCfg(), connMgr)
@@ -3325,14 +3302,14 @@ func TestBiRPCv1TerminateSession1(t *testing.T) {
 	args := NewV1TerminateSessionArgs(true, false, false, nil, false, nil, nil, true)
 	var reply string
 	expected := "MANDATORY_IE_MISSING: [CGREvent]"
-	if err := sessions.BiRPCv1TerminateSession(nil, args, &reply); err == nil || err.Error() != expected {
+	if err := sessions.BiRPCv1TerminateSession(context.Background(), args, &reply); err == nil || err.Error() != expected {
 		t.Errorf("Exepected %+v, received %+v", expected, err)
 	}
 
 	cgrEvent.ID = utils.EmptyString
 	args = NewV1TerminateSessionArgs(false, false, false, nil, false, nil, cgrEvent, true)
 	expected = "MANDATORY_IE_MISSING: [subsystems]"
-	if err := sessions.BiRPCv1TerminateSession(nil, args, &reply); err == nil || err.Error() != expected {
+	if err := sessions.BiRPCv1TerminateSession(context.Background(), args, &reply); err == nil || err.Error() != expected {
 		t.Errorf("Exepected %+v, received %+v", expected, err)
 	}
 	cgrEvent.ID = "test_id"
@@ -3345,7 +3322,7 @@ func TestBiRPCv1TerminateSession1(t *testing.T) {
 	engine.Cache = caches
 	engine.Cache.SetWithoutReplicate(utils.CacheRPCResponses, utils.ConcatenatedKey(utils.SessionSv1TerminateSession, args.CGREvent.ID),
 		value, nil, true, utils.NonTransactional)
-	if err := sessions.BiRPCv1TerminateSession(nil, args, &reply); err != nil {
+	if err := sessions.BiRPCv1TerminateSession(context.Background(), args, &reply); err != nil {
 		t.Errorf("Exepected %+v, received %+v", expected, err)
 	}
 	engine.Cache = tmp
@@ -3353,7 +3330,7 @@ func TestBiRPCv1TerminateSession1(t *testing.T) {
 	cgrEvent.Event[utils.OriginID] = utils.EmptyString
 	args = NewV1TerminateSessionArgs(true, false, false, nil, false, nil, cgrEvent, true)
 	expected = "MANDATORY_IE_MISSING: [OriginID]"
-	if err := sessions.BiRPCv1TerminateSession(nil, args, &reply); err == nil || err.Error() != expected {
+	if err := sessions.BiRPCv1TerminateSession(context.Background(), args, &reply); err == nil || err.Error() != expected {
 		t.Errorf("Exepected %+v, received %+v", expected, err)
 	}
 	cgrEvent.Event[utils.OriginID] = "ORIGIN_ID"
@@ -3362,7 +3339,7 @@ func TestBiRPCv1TerminateSession1(t *testing.T) {
 	cgrEvent.APIOpts[utils.OptsDebitInterval] = "invalid_time_format"
 	args = NewV1TerminateSessionArgs(true, false, false, nil, false, nil, cgrEvent, true)
 	expected = "RALS_ERROR:time: invalid duration \"invalid_time_format\""
-	if err := sessions.BiRPCv1TerminateSession(nil, args, &reply); err == nil || err.Error() != expected {
+	if err := sessions.BiRPCv1TerminateSession(context.Background(), args, &reply); err == nil || err.Error() != expected {
 		t.Errorf("Exepected %+v, received %+v", expected, err)
 	}
 	cgrEvent.APIOpts[utils.OptsDebitInterval] = "1m"
@@ -3373,7 +3350,7 @@ func TestBiRPCv1TerminateSession1(t *testing.T) {
 		"CGR_ID": {},
 	}
 	args = NewV1TerminateSessionArgs(true, false, false, nil, false, nil, cgrEvent, true)
-	if err := sessions.BiRPCv1TerminateSession(nil, args, &reply); err != nil {
+	if err := sessions.BiRPCv1TerminateSession(context.Background(), args, &reply); err != nil {
 		t.Error(err)
 	}
 	cgrEvent.Event[utils.CGRID] = "CHANGED_CGRID"
@@ -3381,7 +3358,7 @@ func TestBiRPCv1TerminateSession1(t *testing.T) {
 	args = NewV1TerminateSessionArgs(true, false, false, nil, false, nil, cgrEvent, true)
 	sessions.cgrCfg.SessionSCfg().ChargerSConns = []string{}
 	expected = "RALS_ERROR:ChargerS is disabled"
-	if err := sessions.BiRPCv1TerminateSession(nil, args, &reply); err == nil || err.Error() != expected {
+	if err := sessions.BiRPCv1TerminateSession(context.Background(), args, &reply); err == nil || err.Error() != expected {
 		t.Errorf("Exepected %+v, received %+v", expected, err)
 	}
 	sessions.cgrCfg.SessionSCfg().ChargerSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers)}
@@ -3390,7 +3367,7 @@ func TestBiRPCv1TerminateSession1(t *testing.T) {
 	cgrEvent.Event[utils.Usage] = "invalid_dur_time"
 	args = NewV1TerminateSessionArgs(true, false, false, nil, false, nil, cgrEvent, true)
 	expected = "time: invalid duration \"invalid_dur_time\""
-	if err := sessions.BiRPCv1TerminateSession(nil, args, &reply); err == nil || err.Error() != expected {
+	if err := sessions.BiRPCv1TerminateSession(context.Background(), args, &reply); err == nil || err.Error() != expected {
 		t.Errorf("Exepected %+v, received %+v", expected, err)
 	}
 	cgrEvent.Event[utils.Usage] = "1m"
@@ -3409,7 +3386,7 @@ func TestBiRPCv1TerminateSession1(t *testing.T) {
 	}
 	cfg.SessionSCfg().ReplicationConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator)}
 	cfg.SessionSCfg().ChargerSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers)}
-	connMgr = engine.NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	connMgr = engine.NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers):   chanInternal,
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator): chanInternal,
 	})
@@ -3418,7 +3395,7 @@ func TestBiRPCv1TerminateSession1(t *testing.T) {
 	engine.Cache = caches
 	args = NewV1TerminateSessionArgs(true, false, false, nil, false, nil, cgrEvent, true)
 	expected = "RALS_ERROR:NOT_IMPLEMENTED"
-	if err := sessions.BiRPCv1TerminateSession(nil, args, &reply); err == nil || err.Error() != expected {
+	if err := sessions.BiRPCv1TerminateSession(context.Background(), args, &reply); err == nil || err.Error() != expected {
 		t.Errorf("Exepected %+v, received %+v", expected, err)
 	}
 	engine.Cache = tmp
@@ -3437,12 +3414,12 @@ func TestBiRPCv1TerminateSession2(t *testing.T) {
 			},
 		},
 	}
-	chanInternal := make(chan rpcclient.ClientConnector, 1)
+	chanInternal := make(chan birpc.ClientConnector, 1)
 	chanInternal <- clnt
 	cfg := config.NewDefaultCGRConfig()
 	cfg.SessionSCfg().ResSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources)}
 	data := engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
-	connMgr := engine.NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	connMgr := engine.NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources): chanInternal,
 	})
 	dm := engine.NewDataManager(data, cfg.CacheCfg(), connMgr)
@@ -3459,14 +3436,14 @@ func TestBiRPCv1TerminateSession2(t *testing.T) {
 	args := NewV1TerminateSessionArgs(false, true, false, nil, false, nil, cgrEvent, true)
 	var reply string
 	expected := "RESOURCES_ERROR:NOT_IMPLEMENTED"
-	if err := sessions.BiRPCv1TerminateSession(nil, args, &reply); err == nil || err.Error() != expected {
+	if err := sessions.BiRPCv1TerminateSession(context.Background(), args, &reply); err == nil || err.Error() != expected {
 		t.Errorf("Exepected %+v, received %+v", expected, err)
 	}
 
 	cgrEvent.Event[utils.OriginID] = utils.EmptyString
 	args = NewV1TerminateSessionArgs(false, true, false, nil, false, nil, cgrEvent, true)
 	expected = "MANDATORY_IE_MISSING: [OriginID]"
-	if err := sessions.BiRPCv1TerminateSession(nil, args, &reply); err == nil || err.Error() != expected {
+	if err := sessions.BiRPCv1TerminateSession(context.Background(), args, &reply); err == nil || err.Error() != expected {
 		t.Errorf("Exepected %+v, received %+v", expected, err)
 	}
 	cgrEvent.Event[utils.OriginID] = "ORIGIN_ID"
@@ -3474,14 +3451,14 @@ func TestBiRPCv1TerminateSession2(t *testing.T) {
 	args = NewV1TerminateSessionArgs(false, true, false, nil, false, nil, cgrEvent, true)
 	expected = "NOT_CONNECTED: ResourceS"
 	sessions.cgrCfg.SessionSCfg().ResSConns = []string{}
-	if err := sessions.BiRPCv1TerminateSession(nil, args, &reply); err == nil || err.Error() != expected {
+	if err := sessions.BiRPCv1TerminateSession(context.Background(), args, &reply); err == nil || err.Error() != expected {
 		t.Errorf("Exepected %+v, received %+v", expected, err)
 	}
 	sessions.cgrCfg.SessionSCfg().ResSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources)}
 
 	cgrEvent.Tenant = "CHANGED_ID"
 	args = NewV1TerminateSessionArgs(false, true, true, nil, true, nil, cgrEvent, true)
-	if err := sessions.BiRPCv1TerminateSession(nil, args, &reply); err == nil || err != utils.ErrPartiallyExecuted {
+	if err := sessions.BiRPCv1TerminateSession(context.Background(), args, &reply); err == nil || err != utils.ErrPartiallyExecuted {
 		t.Errorf("Exepected %+v, received %+v", utils.ErrPartiallyExecuted, err)
 	}
 }
@@ -3506,7 +3483,7 @@ func TestBiRPCv1ProcessCDR(t *testing.T) {
 
 	cgrEvent.ID = utils.EmptyString
 	expected := "MANDATORY_IE_MISSING: [connIDs]"
-	if err := sessions.BiRPCv1ProcessCDR(nil, cgrEvent, &reply); err == nil || err.Error() != expected {
+	if err := sessions.BiRPCv1ProcessCDR(context.Background(), cgrEvent, &reply); err == nil || err.Error() != expected {
 		t.Errorf("Exepected %+v, received %+v", expected, err)
 	}
 	cgrEvent.ID = "test_id"
@@ -3519,7 +3496,7 @@ func TestBiRPCv1ProcessCDR(t *testing.T) {
 	engine.Cache = caches
 	engine.Cache.SetWithoutReplicate(utils.CacheRPCResponses, utils.ConcatenatedKey(utils.SessionSv1ProcessCDR, cgrEvent.ID),
 		value, nil, true, utils.NonTransactional)
-	if err := sessions.BiRPCv1ProcessCDR(nil, cgrEvent, &reply); err != nil {
+	if err := sessions.BiRPCv1ProcessCDR(context.Background(), cgrEvent, &reply); err != nil {
 		t.Errorf("Exepected %+v, received %+v", expected, err)
 	}
 	engine.Cache = tmp
@@ -3540,13 +3517,13 @@ func TestBiRPCv1ProcessMessage1(t *testing.T) {
 			},
 		},
 	}
-	chanInternal := make(chan rpcclient.ClientConnector, 1)
+	chanInternal := make(chan birpc.ClientConnector, 1)
 	chanInternal <- clnt
 	cfg := config.NewDefaultCGRConfig()
 	cfg.CacheCfg().Partitions[utils.CacheRPCResponses].Limit = 1
 	cfg.SessionSCfg().AttrSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes)}
 	data := engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
-	connMgr := engine.NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	connMgr := engine.NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes): chanInternal,
 	})
 	dm := engine.NewDataManager(data, cfg.CacheCfg(), connMgr)
@@ -3565,7 +3542,7 @@ func TestBiRPCv1ProcessMessage1(t *testing.T) {
 		true, false, false, nil, utils.Paginator{}, false, "1")
 	reply := V1ProcessMessageReply{}
 	expected := "MANDATORY_IE_MISSING: [CGREvent]"
-	if err := sessions.BiRPCv1ProcessMessage(nil, args, &reply); err == nil || err.Error() != expected {
+	if err := sessions.BiRPCv1ProcessMessage(context.Background(), args, &reply); err == nil || err.Error() != expected {
 		t.Errorf("Exepected %+v, received %+v", expected, err)
 	}
 
@@ -3574,7 +3551,7 @@ func TestBiRPCv1ProcessMessage1(t *testing.T) {
 		false, []string{}, false, []string{}, true, false,
 		false, false, false, cgrEvent, utils.Paginator{}, false, "1")
 	expected = "ATTRIBUTES_ERROR:NOT_IMPLEMENTED"
-	if err := sessions.BiRPCv1ProcessMessage(nil, args, &reply); err == nil || err.Error() != expected {
+	if err := sessions.BiRPCv1ProcessMessage(context.Background(), args, &reply); err == nil || err.Error() != expected {
 		t.Errorf("Exepected %+v, received %+v", expected, err)
 	}
 
@@ -3583,7 +3560,7 @@ func TestBiRPCv1ProcessMessage1(t *testing.T) {
 		false, []string{}, false, []string{}, true, false,
 		false, false, false, cgrEvent, utils.Paginator{}, false, "1")
 	expected = "NOT_CONNECTED: ResourceS"
-	if err := sessions.BiRPCv1ProcessMessage(nil, args, &reply); err == nil || err.Error() != expected {
+	if err := sessions.BiRPCv1ProcessMessage(context.Background(), args, &reply); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 
@@ -3600,7 +3577,7 @@ func TestBiRPCv1ProcessMessage1(t *testing.T) {
 		false, false, false, cgrEvent, utils.Paginator{}, false, "1")
 	engine.Cache.SetWithoutReplicate(utils.CacheRPCResponses, utils.ConcatenatedKey(utils.SessionSv1ProcessMessage, args.CGREvent.ID),
 		value, nil, true, utils.NonTransactional)
-	if err := sessions.BiRPCv1ProcessMessage(nil, args, &reply); err != nil {
+	if err := sessions.BiRPCv1ProcessMessage(context.Background(), args, &reply); err != nil {
 		t.Error(err)
 	}
 	engine.Cache = tmp
@@ -3644,13 +3621,13 @@ func TestBiRPCv1ProcessMessage2(t *testing.T) {
 			},
 		},
 	}
-	chanInternal := make(chan rpcclient.ClientConnector, 1)
+	chanInternal := make(chan birpc.ClientConnector, 1)
 	chanInternal <- clnt
 	cfg := config.NewDefaultCGRConfig()
 	cfg.CacheCfg().Partitions[utils.CacheRPCResponses].Limit = 1
 	cfg.SessionSCfg().ResSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources)}
 	data := engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
-	connMgr := engine.NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	connMgr := engine.NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources): chanInternal,
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRoutes):    chanInternal,
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers):  chanInternal,
@@ -3671,7 +3648,7 @@ func TestBiRPCv1ProcessMessage2(t *testing.T) {
 		true, false, false, cgrEvent, utils.Paginator{}, false, "1")
 	reply := V1ProcessMessageReply{}
 	expected := "MANDATORY_IE_MISSING: [OriginID]"
-	if err := sessions.BiRPCv1ProcessMessage(nil, args, &reply); err == nil || err.Error() != expected {
+	if err := sessions.BiRPCv1ProcessMessage(context.Background(), args, &reply); err == nil || err.Error() != expected {
 		t.Errorf("Exepected %+v, received %+v", expected, err)
 	}
 	cgrEvent.Event[utils.OriginID] = "ID"
@@ -3681,7 +3658,7 @@ func TestBiRPCv1ProcessMessage2(t *testing.T) {
 		false, false, false, cgrEvent, utils.Paginator{}, false, "1")
 	reply = V1ProcessMessageReply{}
 	expected = "RESOURCES_ERROR:NOT_IMPLEMENTED"
-	if err := sessions.BiRPCv1ProcessMessage(nil, args, &reply); err == nil || err.Error() != expected {
+	if err := sessions.BiRPCv1ProcessMessage(context.Background(), args, &reply); err == nil || err.Error() != expected {
 		t.Errorf("Exepected %+v, received %+v", expected, err)
 	}
 
@@ -3690,13 +3667,13 @@ func TestBiRPCv1ProcessMessage2(t *testing.T) {
 		false, []string{}, false, []string{}, true, true,
 		true, false, false, cgrEvent, utils.Paginator{}, false, "1")
 	expected = "NOT_CONNECTED: RouteS"
-	if err := sessions.BiRPCv1ProcessMessage(nil, args, &reply); err == nil || err.Error() != expected {
+	if err := sessions.BiRPCv1ProcessMessage(context.Background(), args, &reply); err == nil || err.Error() != expected {
 		t.Errorf("Exepected %+v, received %+v", expected, err)
 	}
 
 	sessions.cgrCfg.SessionSCfg().RouteSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRoutes)}
 	expected = "ChargerS is disabled"
-	if err := sessions.BiRPCv1ProcessMessage(nil, args, &reply); err == nil || err.Error() != expected {
+	if err := sessions.BiRPCv1ProcessMessage(context.Background(), args, &reply); err == nil || err.Error() != expected {
 		t.Errorf("Exepected %+v, received %+v", expected, err)
 	}
 
@@ -3705,7 +3682,7 @@ func TestBiRPCv1ProcessMessage2(t *testing.T) {
 		true, false, false, cgrEvent, utils.Paginator{}, false, "1")
 	sessions.cgrCfg.SessionSCfg().ChargerSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers)}
 
-	if err := sessions.BiRPCv1ProcessMessage(nil, args, &reply); err == nil || err != utils.ErrPartiallyExecuted {
+	if err := sessions.BiRPCv1ProcessMessage(context.Background(), args, &reply); err == nil || err != utils.ErrPartiallyExecuted {
 		t.Errorf("Exepected %+v, received %+v", utils.ErrPartiallyExecuted, err)
 	}
 }
@@ -3766,12 +3743,12 @@ func TestBiRPCv1ProcessEvent(t *testing.T) {
 			},
 		},
 	}
-	chanInternal := make(chan rpcclient.ClientConnector, 1)
+	chanInternal := make(chan birpc.ClientConnector, 1)
 	chanInternal <- clnt
 	cfg := config.NewDefaultCGRConfig()
 	cfg.CacheCfg().Partitions[utils.CacheRPCResponses].Limit = 1
 	data := engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
-	connMgr := engine.NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	connMgr := engine.NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers):   chanInternal,
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes): chanInternal,
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRoutes):     chanInternal,
@@ -3793,7 +3770,7 @@ func TestBiRPCv1ProcessEvent(t *testing.T) {
 	}
 	reply := V1ProcessEventReply{}
 	expected := "MANDATORY_IE_MISSING: [CGREvent]"
-	if err := sessions.BiRPCv1ProcessEvent(nil, args, &reply); err == nil || err.Error() != expected {
+	if err := sessions.BiRPCv1ProcessEvent(context.Background(), args, &reply); err == nil || err.Error() != expected {
 		t.Errorf("Exepected %+v, received %+v", expected, err)
 	}
 	args.CGREvent = cgrEvent
@@ -3809,14 +3786,14 @@ func TestBiRPCv1ProcessEvent(t *testing.T) {
 	engine.Cache = caches
 	engine.Cache.SetWithoutReplicate(utils.CacheRPCResponses, utils.ConcatenatedKey(utils.SessionSv1ProcessEvent, args.CGREvent.ID),
 		value, nil, true, utils.NonTransactional)
-	if err := sessions.BiRPCv1ProcessEvent(nil, args, &reply); err != nil {
+	if err := sessions.BiRPCv1ProcessEvent(context.Background(), args, &reply); err != nil {
 		t.Error(err)
 	}
 	engine.Cache = tmp
 
 	cgrEvent.ID = utils.EmptyString
 	expected = "CHARGERS_ERROR:MANDATORY_IE_MISSING: [connIDs]"
-	if err := sessions.BiRPCv1ProcessEvent(nil, args, &reply); err == nil || err.Error() != expected {
+	if err := sessions.BiRPCv1ProcessEvent(context.Background(), args, &reply); err == nil || err.Error() != expected {
 		t.Errorf("Exepected %+v, received %+v", expected, err)
 	}
 
@@ -3825,7 +3802,7 @@ func TestBiRPCv1ProcessEvent(t *testing.T) {
 	sessions.cgrCfg.SessionSCfg().ChargerSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers)}
 	sessions.cgrCfg.SessionSCfg().AttrSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes)}
 	expected = "ATTRIBUTES_ERROR:NOT_IMPLEMENTED"
-	if err := sessions.BiRPCv1ProcessEvent(nil, args, &reply); err == nil || err.Error() != expected {
+	if err := sessions.BiRPCv1ProcessEvent(context.Background(), args, &reply); err == nil || err.Error() != expected {
 		t.Errorf("Exepected %+v, received %+v", expected, err)
 	}
 
@@ -3833,7 +3810,7 @@ func TestBiRPCv1ProcessEvent(t *testing.T) {
 	args.Flags = append(args.Flags, utils.MetaRoutes)
 	sessions.cgrCfg.SessionSCfg().RouteSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRoutes)}
 	expected = "ROUTES_ERROR:NOT_IMPLEMENTED"
-	if err := sessions.BiRPCv1ProcessEvent(nil, args, &reply); err == nil || err.Error() != expected {
+	if err := sessions.BiRPCv1ProcessEvent(context.Background(), args, &reply); err == nil || err.Error() != expected {
 		t.Errorf("Exepected %+v, received %+v", expected, err)
 	}
 
@@ -3841,14 +3818,14 @@ func TestBiRPCv1ProcessEvent(t *testing.T) {
 	args.CGREvent.ID = "SECOND_ID"
 	sessions.cgrCfg.SessionSCfg().ThreshSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds)}
 	expected = "PARTIALLY_EXECUTED"
-	if err := sessions.BiRPCv1ProcessEvent(nil, args, &reply); err == nil || err.Error() != expected {
+	if err := sessions.BiRPCv1ProcessEvent(context.Background(), args, &reply); err == nil || err.Error() != expected {
 		t.Errorf("Exepected %+v, received %+v", expected, err)
 	}
 
 	args.Flags = []string{utils.MetaThresholds, utils.MetaBlockerError}
 	sessions.cgrCfg.SessionSCfg().ThreshSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds)}
 	expected = "THRESHOLDS_ERROR:NOT_IMPLEMENTED"
-	if err := sessions.BiRPCv1ProcessEvent(nil, args, &reply); err == nil || err.Error() != expected {
+	if err := sessions.BiRPCv1ProcessEvent(context.Background(), args, &reply); err == nil || err.Error() != expected {
 		t.Errorf("Exepected %+v, received %+v", expected, err)
 	}
 
@@ -3878,13 +3855,13 @@ func TestBiRPCv1ProcessEventStats(t *testing.T) {
 			},
 		},
 	}
-	chanInternal := make(chan rpcclient.ClientConnector, 1)
+	chanInternal := make(chan birpc.ClientConnector, 1)
 	chanInternal <- clnt
 	cfg := config.NewDefaultCGRConfig()
 	cfg.SessionSCfg().StatSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats)}
 	cfg.SessionSCfg().ChargerSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers)}
 	data := engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
-	connMgr := engine.NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	connMgr := engine.NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats):    chanInternal,
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers): chanInternal,
 	})
@@ -3905,13 +3882,13 @@ func TestBiRPCv1ProcessEventStats(t *testing.T) {
 	}
 	reply := V1ProcessEventReply{}
 	expected := "PARTIALLY_EXECUTED"
-	if err := sessions.BiRPCv1ProcessEvent(nil, args, &reply); err == nil || err.Error() != expected {
+	if err := sessions.BiRPCv1ProcessEvent(context.Background(), args, &reply); err == nil || err.Error() != expected {
 		t.Errorf("Exepected %+v, received %+v", expected, err)
 	}
 
 	args.Flags = []string{utils.MetaStats, utils.MetaBlockerError}
 	expected = "STATS_ERROR:NOT_IMPLEMENTED"
-	if err := sessions.BiRPCv1ProcessEvent(nil, args, &reply); err == nil || err.Error() != expected {
+	if err := sessions.BiRPCv1ProcessEvent(context.Background(), args, &reply); err == nil || err.Error() != expected {
 		t.Errorf("Exepected %+v, received %+v", expected, err)
 	}
 
@@ -3919,7 +3896,7 @@ func TestBiRPCv1ProcessEventStats(t *testing.T) {
 	args.CGREvent.APIOpts = make(map[string]any)
 	args.CGREvent.APIOpts[utils.OptsStirATest] = "stir;test;opts"
 	expected = "*stir_authenticate: missing parts of the message header"
-	if err := sessions.BiRPCv1ProcessEvent(nil, args, &reply); err == nil || err.Error() != expected {
+	if err := sessions.BiRPCv1ProcessEvent(context.Background(), args, &reply); err == nil || err.Error() != expected {
 		t.Errorf("Exepected %+v, received %+v", expected, err)
 	}
 
@@ -3927,12 +3904,12 @@ func TestBiRPCv1ProcessEventStats(t *testing.T) {
 	args.CGREvent.APIOpts = make(map[string]any)
 	args.CGREvent.APIOpts[utils.OptsStirATest] = "stir;test;opts"
 	expected = "*stir_authenticate: open : no such file or directory"
-	if err := sessions.BiRPCv1ProcessEvent(nil, args, &reply); err == nil || err.Error() != expected {
+	if err := sessions.BiRPCv1ProcessEvent(context.Background(), args, &reply); err == nil || err.Error() != expected {
 		t.Errorf("Exepected %+v, received %+v", expected, err)
 	}
 
 	args.CGREvent.APIOpts[utils.OptsStirOriginatorURI] = "+407590336423;USER_ID"
-	if err := sessions.BiRPCv1ProcessEvent(nil, args, &reply); err == nil || err.Error() != expected {
+	if err := sessions.BiRPCv1ProcessEvent(context.Background(), args, &reply); err == nil || err.Error() != expected {
 		t.Errorf("Exepected %+v, received %+v", expected, err)
 	}
 }
@@ -3949,12 +3926,12 @@ func TestBiRPCv1ProcessEventResources(t *testing.T) {
 			},
 		},
 	}
-	chanInternal := make(chan rpcclient.ClientConnector, 1)
+	chanInternal := make(chan birpc.ClientConnector, 1)
 	chanInternal <- clnt
 	cfg := config.NewDefaultCGRConfig()
 	cfg.SessionSCfg().ChargerSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers)}
 	data := engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
-	connMgr := engine.NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	connMgr := engine.NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources): chanInternal,
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers):  chanInternal,
 	})
@@ -3982,27 +3959,27 @@ func TestBiRPCv1ProcessEventResources(t *testing.T) {
 
 	reply := V1ProcessEventReply{}
 	expected := "NOT_CONNECTED: ResourceS"
-	if err := sessions.BiRPCv1ProcessEvent(nil, args, &reply); err == nil || err.Error() != expected {
+	if err := sessions.BiRPCv1ProcessEvent(context.Background(), args, &reply); err == nil || err.Error() != expected {
 		t.Errorf("Exepected %+v, received %+v", expected, err)
 	}
 	sessions.cgrCfg.SessionSCfg().ResSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources)}
 	args.Flags = append(args.Flags, utils.MetaResources)
 
 	expected = "MANDATORY_IE_MISSING: [OriginID]"
-	if err := sessions.BiRPCv1ProcessEvent(nil, args, &reply); err == nil || err.Error() != expected {
+	if err := sessions.BiRPCv1ProcessEvent(context.Background(), args, &reply); err == nil || err.Error() != expected {
 		t.Errorf("Exepected %+v, received %+v", expected, err)
 	}
 
 	args.CGREvent.Event[utils.OriginID] = "ORIGIN_ID"
 	args.Flags = append(args.Flags, utils.MetaBlockerError)
 	expected = "RESOURCES_ERROR:UNSUPPORTED_SERVICE_METHOD"
-	if err := sessions.BiRPCv1ProcessEvent(nil, args, &reply); err == nil || err.Error() != expected {
+	if err := sessions.BiRPCv1ProcessEvent(context.Background(), args, &reply); err == nil || err.Error() != expected {
 		t.Errorf("Exepected %+v, received %+v", expected, err)
 	}
 
 	args.Flags = args.Flags[:len(args.Flags)-1]
 	expected = "PARTIALLY_EXECUTED"
-	if err := sessions.BiRPCv1ProcessEvent(nil, args, &reply); err == nil || err.Error() != expected {
+	if err := sessions.BiRPCv1ProcessEvent(context.Background(), args, &reply); err == nil || err.Error() != expected {
 		t.Errorf("Exepected %+v, received %+v", expected, err)
 	}
 
@@ -4011,13 +3988,13 @@ func TestBiRPCv1ProcessEventResources(t *testing.T) {
 		utils.MetaChargers}
 	args.Flags = append(args.Flags, utils.MetaBlockerError)
 	expected = "RESOURCES_ERROR:UNSUPPORTED_SERVICE_METHOD"
-	if err := sessions.BiRPCv1ProcessEvent(nil, args, &reply); err == nil || err.Error() != expected {
+	if err := sessions.BiRPCv1ProcessEvent(context.Background(), args, &reply); err == nil || err.Error() != expected {
 		t.Errorf("Exepected %+v, received %+v", expected, err)
 	}
 
 	args.Flags = args.Flags[:len(args.Flags)-1]
 	expected = "PARTIALLY_EXECUTED"
-	if err := sessions.BiRPCv1ProcessEvent(nil, args, &reply); err == nil || err.Error() != expected {
+	if err := sessions.BiRPCv1ProcessEvent(context.Background(), args, &reply); err == nil || err.Error() != expected {
 		t.Errorf("Exepected %+v, received %+v", expected, err)
 	}
 
@@ -4026,13 +4003,13 @@ func TestBiRPCv1ProcessEventResources(t *testing.T) {
 		utils.MetaChargers}
 	args.Flags = append(args.Flags, utils.MetaBlockerError)
 	expected = "RESOURCES_ERROR:UNSUPPORTED_SERVICE_METHOD"
-	if err := sessions.BiRPCv1ProcessEvent(nil, args, &reply); err == nil || err.Error() != expected {
+	if err := sessions.BiRPCv1ProcessEvent(context.Background(), args, &reply); err == nil || err.Error() != expected {
 		t.Errorf("Exepected %+v, received %+v", expected, err)
 	}
 
 	args.Flags = args.Flags[:len(args.Flags)-1]
 	expected = "PARTIALLY_EXECUTED"
-	if err := sessions.BiRPCv1ProcessEvent(nil, args, &reply); err == nil || err.Error() != expected {
+	if err := sessions.BiRPCv1ProcessEvent(context.Background(), args, &reply); err == nil || err.Error() != expected {
 		t.Errorf("Exepected %+v, received %+v", expected, err)
 	}
 }
@@ -4067,14 +4044,14 @@ func TestBiRPCv1ProcessEventRals1(t *testing.T) {
 			},
 		},
 	}
-	chanInternal := make(chan rpcclient.ClientConnector, 1)
+	chanInternal := make(chan birpc.ClientConnector, 1)
 	chanInternal <- clnt
 	cfg := config.NewDefaultCGRConfig()
 	cfg.CacheCfg().Partitions[utils.CacheEventCharges].Limit = -1
 	cfg.SessionSCfg().ChargerSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers)}
 	cfg.SessionSCfg().RALsConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRALs)}
 	data := engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
-	connMgr := engine.NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	connMgr := engine.NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRALs):     chanInternal,
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers): chanInternal,
 	})
@@ -4100,7 +4077,7 @@ func TestBiRPCv1ProcessEventRals1(t *testing.T) {
 	}
 
 	reply := V1ProcessEventReply{}
-	if err := sessions.BiRPCv1ProcessEvent(nil, args, &reply); err == nil || err != utils.ErrNotImplemented {
+	if err := sessions.BiRPCv1ProcessEvent(context.Background(), args, &reply); err == nil || err != utils.ErrNotImplemented {
 		t.Errorf("Exepected %+v, received %+v", utils.ErrNotImplemented, err)
 	}
 
@@ -4112,12 +4089,12 @@ func TestBiRPCv1ProcessEventRals1(t *testing.T) {
 		utils.MetaChargers}
 	args.CGREvent.Event[utils.Usage] = "invalid_usage_format"
 	expected := "time: invalid duration \"invalid_usage_format\""
-	if err := sessions.BiRPCv1ProcessEvent(nil, args, &reply); err == nil || err.Error() != expected {
+	if err := sessions.BiRPCv1ProcessEvent(context.Background(), args, &reply); err == nil || err.Error() != expected {
 		t.Errorf("Exepected %+v, received %+v", expected, err)
 	}
 
 	args.CGREvent.Event[utils.Usage] = "1m"
-	if err := sessions.BiRPCv1ProcessEvent(nil, args, &reply); err != nil {
+	if err := sessions.BiRPCv1ProcessEvent(context.Background(), args, &reply); err != nil {
 		t.Error(expected)
 	}
 
@@ -4127,14 +4104,14 @@ func TestBiRPCv1ProcessEventRals1(t *testing.T) {
 	args.APIOpts = make(map[string]any)
 	args.APIOpts[utils.OptsDebitInterval] = "invalid_dbtitrvl_format"
 	expected = "RALS_ERROR:time: invalid duration \"invalid_dbtitrvl_format\""
-	if err := sessions.BiRPCv1ProcessEvent(nil, args, &reply); err == nil || err.Error() != expected {
+	if err := sessions.BiRPCv1ProcessEvent(context.Background(), args, &reply); err == nil || err.Error() != expected {
 		t.Errorf("Exepected %+v, received %+v", expected, err)
 	}
 	args.APIOpts[utils.OptsDebitInterval] = "5s"
 
 	sessions.cgrCfg.SessionSCfg().ChargerSConns = []string{}
 	expected = "ChargerS is disabled"
-	if err := sessions.BiRPCv1ProcessEvent(nil, args, &reply); err == nil || err.Error() != expected {
+	if err := sessions.BiRPCv1ProcessEvent(context.Background(), args, &reply); err == nil || err.Error() != expected {
 		t.Errorf("Exepected %+v, received %+v", expected, err)
 	}
 	sessions.cgrCfg.SessionSCfg().ChargerSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers)}
@@ -4142,7 +4119,7 @@ func TestBiRPCv1ProcessEventRals1(t *testing.T) {
 	args.CGREvent.Event[utils.Usage] = "invalid_format"
 	args.CGREvent.Tenant = "cgrates.org"
 	expected = "RALS_ERROR:time: invalid duration \"invalid_format\""
-	if err := sessions.BiRPCv1ProcessEvent(nil, args, &reply); err == nil || err.Error() != expected {
+	if err := sessions.BiRPCv1ProcessEvent(context.Background(), args, &reply); err == nil || err.Error() != expected {
 		t.Errorf("Exepected %+v, received %+v", expected, err)
 	}
 	args.CGREvent.Event[utils.Usage] = "10s"
@@ -4178,7 +4155,7 @@ func TestBiRPCv1ProcessEventRals2(t *testing.T) {
 			},
 		},
 	}
-	chanInternal := make(chan rpcclient.ClientConnector, 1)
+	chanInternal := make(chan birpc.ClientConnector, 1)
 	chanInternal <- clnt
 	cfg := config.NewDefaultCGRConfig()
 	cfg.CacheCfg().Partitions[utils.CacheEventCharges].Limit = -1
@@ -4186,7 +4163,7 @@ func TestBiRPCv1ProcessEventRals2(t *testing.T) {
 	cfg.SessionSCfg().RALsConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRALs)}
 	cfg.SessionSCfg().ReplicationConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator)}
 	data := engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
-	connMgr := engine.NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	connMgr := engine.NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRALs):       chanInternal,
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers):   chanInternal,
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator): chanInternal,
@@ -4215,7 +4192,7 @@ func TestBiRPCv1ProcessEventRals2(t *testing.T) {
 
 	reply := V1ProcessEventReply{}
 
-	if err := sessions.BiRPCv1ProcessEvent(nil, args, &reply); err != nil {
+	if err := sessions.BiRPCv1ProcessEvent(context.Background(), args, &reply); err != nil {
 		t.Error(err)
 	}
 
@@ -4224,7 +4201,7 @@ func TestBiRPCv1ProcessEventRals2(t *testing.T) {
 		utils.MetaChargers}
 	args.APIOpts[utils.OptsDebitInterval] = "invalid_format"
 	expected := "RALS_ERROR:time: invalid duration \"invalid_format\""
-	if err := sessions.BiRPCv1ProcessEvent(nil, args, &reply); err == nil || err.Error() != expected {
+	if err := sessions.BiRPCv1ProcessEvent(context.Background(), args, &reply); err == nil || err.Error() != expected {
 		t.Errorf("Exepected %+v, received %+v", expected, err)
 	}
 	args.APIOpts[utils.OptsDebitInterval] = "10s"
@@ -4232,7 +4209,7 @@ func TestBiRPCv1ProcessEventRals2(t *testing.T) {
 	args.Event[utils.CGRID] = "test_id_new"
 	sessions.cgrCfg.SessionSCfg().ChargerSConns = []string{}
 	expected = "ChargerS is disabled"
-	if err := sessions.BiRPCv1ProcessEvent(nil, args, &reply); err == nil || err.Error() != expected {
+	if err := sessions.BiRPCv1ProcessEvent(context.Background(), args, &reply); err == nil || err.Error() != expected {
 		t.Errorf("Exepected %+v, received %+v", expected, err)
 	}
 	sessions.cgrCfg.SessionSCfg().ChargerSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers)}
@@ -4240,7 +4217,7 @@ func TestBiRPCv1ProcessEventRals2(t *testing.T) {
 
 	args.CGREvent.Event[utils.Usage] = "invalid_format"
 	expected = "RALS_ERROR:time: invalid duration \"invalid_format\""
-	if err := sessions.BiRPCv1ProcessEvent(nil, args, &reply); err == nil || err.Error() != expected {
+	if err := sessions.BiRPCv1ProcessEvent(context.Background(), args, &reply); err == nil || err.Error() != expected {
 		t.Errorf("Exepected %+v, received %+v", expected, err)
 	}
 	args.CGREvent.Event[utils.Usage] = "10"
@@ -4249,7 +4226,7 @@ func TestBiRPCv1ProcessEventRals2(t *testing.T) {
 		utils.ConcatenatedKey(utils.MetaRALs, utils.MetaUpdate),
 		utils.MetaChargers}
 	delete(args.APIOpts, utils.OptsDebitInterval)
-	if err := sessions.BiRPCv1ProcessEvent(nil, args, &reply); err != nil {
+	if err := sessions.BiRPCv1ProcessEvent(context.Background(), args, &reply); err != nil {
 		t.Error(err)
 	}
 
@@ -4258,7 +4235,7 @@ func TestBiRPCv1ProcessEventRals2(t *testing.T) {
 		utils.MetaChargers}
 	args.APIOpts[utils.OptsDebitInterval] = "invalid_format"
 	expected = "RALS_ERROR:time: invalid duration \"invalid_format\""
-	if err := sessions.BiRPCv1ProcessEvent(nil, args, &reply); err == nil || err.Error() != expected {
+	if err := sessions.BiRPCv1ProcessEvent(context.Background(), args, &reply); err == nil || err.Error() != expected {
 		t.Errorf("Exepected %+v, received %+v", expected, err)
 	}
 	args.APIOpts[utils.OptsDebitInterval] = "10s"
@@ -4266,7 +4243,7 @@ func TestBiRPCv1ProcessEventRals2(t *testing.T) {
 	args.Event[utils.CGRID] = "test_id_new"
 	sessions.cgrCfg.SessionSCfg().ChargerSConns = []string{}
 	expected = "ChargerS is disabled"
-	if err := sessions.BiRPCv1ProcessEvent(nil, args, &reply); err == nil || err.Error() != expected {
+	if err := sessions.BiRPCv1ProcessEvent(context.Background(), args, &reply); err == nil || err.Error() != expected {
 		t.Errorf("Exepected %+v, received %+v", expected, err)
 	}
 	sessions.cgrCfg.SessionSCfg().ChargerSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers)}
@@ -4281,7 +4258,7 @@ func TestBiRPCv1ProcessEventRals2(t *testing.T) {
 	engine.Cache = cacheS
 	engine.SetConnManager(connMgr)
 	expected = "RALS_ERROR:NOT_IMPLEMENTED"
-	if err := sessions.BiRPCv1ProcessEvent(nil, args, &reply); err == nil || err.Error() != expected {
+	if err := sessions.BiRPCv1ProcessEvent(context.Background(), args, &reply); err == nil || err.Error() != expected {
 		t.Errorf("Exepected %+v, received %+v", expected, err)
 	}
 
@@ -4314,13 +4291,13 @@ func TestBiRPCv1ProcessEventCDRs11(t *testing.T) {
 			},
 		},
 	}
-	chanInternal := make(chan rpcclient.ClientConnector, 1)
+	chanInternal := make(chan birpc.ClientConnector, 1)
 	chanInternal <- clnt
 	cfg := config.NewDefaultCGRConfig()
 	cfg.SessionSCfg().ChargerSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers)}
 	cfg.SessionSCfg().CDRsConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCDRs)}
 	data := engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
-	connMgr := engine.NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	connMgr := engine.NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers): chanInternal,
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCDRs):     chanInternal,
 	})
@@ -4367,7 +4344,7 @@ func TestBiRPCv1ProcessEventCDRs11(t *testing.T) {
 	reply := V1ProcessEventReply{}
 
 	expected := "PARTIALLY_EXECUTED"
-	if err := sessions.BiRPCv1ProcessEvent(nil, args, &reply); err == nil || err.Error() != expected {
+	if err := sessions.BiRPCv1ProcessEvent(context.Background(), args, &reply); err == nil || err.Error() != expected {
 		t.Errorf("Exepected %+v, received %+v", expected, err)
 	}
 
@@ -4386,7 +4363,7 @@ func TestBiRPCv1ProcessEventCDRs11(t *testing.T) {
 
 	expectedLogger := "[WARNING] <SessionS> ProcessCDR called for active session with CGRID: <TEST_CGRID>"
 	expected = "CDRS_ERROR:PARTIALLY_EXECUTED"
-	if err := sessions.BiRPCv1ProcessEvent(nil, args, &reply); err == nil || err.Error() != expected {
+	if err := sessions.BiRPCv1ProcessEvent(context.Background(), args, &reply); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	} else if rcv := buff.String(); !strings.Contains(rcv, expectedLogger) {
 		t.Errorf("Expected %+v, received %+v", expectedLogger, rcv)
@@ -4395,7 +4372,7 @@ func TestBiRPCv1ProcessEventCDRs11(t *testing.T) {
 
 	sessions.cgrCfg.SessionSCfg().CDRsConns = []string{}
 	expected = "NOT_CONNECTED: CDRs"
-	if err := sessions.BiRPCv1ProcessEvent(nil, args, &reply); err == nil || err.Error() != expected {
+	if err := sessions.BiRPCv1ProcessEvent(context.Background(), args, &reply); err == nil || err.Error() != expected {
 		t.Errorf("Exepected %+v, received %+v", expected, err)
 	}
 }
@@ -4425,12 +4402,12 @@ func TestBiRPCv1GetCost(t *testing.T) {
 			},
 		},
 	}
-	chanInternal := make(chan rpcclient.ClientConnector, 1)
+	chanInternal := make(chan birpc.ClientConnector, 1)
 	chanInternal <- clnt
 	cfg := config.NewDefaultCGRConfig()
 	cfg.CacheCfg().Partitions[utils.CacheRPCResponses].Limit = 1
 	data := engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
-	connMgr := engine.NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	connMgr := engine.NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRALs):       chanInternal,
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes): chanInternal,
 	})
@@ -4455,7 +4432,7 @@ func TestBiRPCv1GetCost(t *testing.T) {
 	}
 	reply := V1GetCostReply{}
 	expected := "MANDATORY_IE_MISSING: [CGREvent]"
-	if err := sessions.BiRPCv1GetCost(nil, args, &reply); err == nil || err.Error() != expected {
+	if err := sessions.BiRPCv1GetCost(context.Background(), args, &reply); err == nil || err.Error() != expected {
 		t.Errorf("Exepected %+v, received %+v", expected, err)
 	}
 	args.CGREvent = cgrEvent
@@ -4472,20 +4449,20 @@ func TestBiRPCv1GetCost(t *testing.T) {
 	engine.Cache = caches
 	engine.Cache.SetWithoutReplicate(utils.CacheRPCResponses, utils.ConcatenatedKey(utils.SessionSv1GetCost, args.CGREvent.ID),
 		value, nil, true, utils.NonTransactional)
-	if err := sessions.BiRPCv1GetCost(nil, args, &reply); err != nil {
+	if err := sessions.BiRPCv1GetCost(context.Background(), args, &reply); err != nil {
 		t.Error(err)
 	}
 	engine.Cache = tmp
 
 	args.CGREvent.ID = utils.EmptyString
 	expected = "ATTRIBUTES_ERROR:NOT_CONNECTED: AttributeS"
-	if err := sessions.BiRPCv1GetCost(nil, args, &reply); err == nil || err.Error() != expected {
+	if err := sessions.BiRPCv1GetCost(context.Background(), args, &reply); err == nil || err.Error() != expected {
 		t.Errorf("Exepected %+v, received %+v", expected, err)
 	}
 	sessions.cgrCfg.SessionSCfg().AttrSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes)}
 
 	expected = "MANDATORY_IE_MISSING: [connIDs]"
-	if err := sessions.BiRPCv1GetCost(nil, args, &reply); err == nil || err.Error() != expected {
+	if err := sessions.BiRPCv1GetCost(context.Background(), args, &reply); err == nil || err.Error() != expected {
 		t.Errorf("Exepected %+v, received %+v", expected, err)
 	}
 	sessions.cgrCfg.SessionSCfg().RALsConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRALs)}
@@ -4513,7 +4490,7 @@ func TestBiRPCv1GetCost(t *testing.T) {
 		},
 	}
 	expectedVal.EventCost.Compute()
-	if err := sessions.BiRPCv1GetCost(nil, args, &reply); err != nil {
+	if err := sessions.BiRPCv1GetCost(context.Background(), args, &reply); err != nil {
 		t.Errorf("Exepected %+v, received %+v", expected, err)
 	}
 	/*
@@ -4548,7 +4525,7 @@ func TestSyncSessionsSync(t *testing.T) {
 	sessions.aSessions = map[string]*Session{}
 
 	var reply string
-	if err := sessions.BiRPCv1SyncSessions(nil, nil, &reply); err != nil {
+	if err := sessions.BiRPCv1SyncSessions(context.Background(), nil, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf("Expected to be OK")

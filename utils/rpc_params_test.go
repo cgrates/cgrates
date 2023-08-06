@@ -21,6 +21,7 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/mitchellh/mapstructure"
 )
 
@@ -32,15 +33,11 @@ type Attr struct {
 	Age     float64
 }
 
-func (rpc *RpcStruct) Method1(normal Attr, out *float64) error {
+func (rpc *RpcStruct) Method1(ctx *context.Context, normal Attr, out *float64) error {
 	return nil
 }
 
-func (rpc *RpcStruct) Method2(pointer *Attr, out *float64) error {
-	return nil
-}
-
-func (rpc *RpcStruct) Call(string, any, any) error {
+func (rpc *RpcStruct) Method2(ctx *context.Context, pointer *Attr, out *float64) error {
 	return nil
 }
 
@@ -54,7 +51,7 @@ func TestRPCObjectPointer(t *testing.T) {
 		t.Errorf("error getting rpcobject: %v (%+v)", rpcParamsMap, x)
 	}
 	a := x.InParam
-	if err := mapstructure.Decode(map[string]any{"Name": "a", "Surname": "b", "Age": 10.2}, a); err != nil || a.(*Attr).Name != "a" || a.(*Attr).Surname != "b" || a.(*Attr).Age != 10.2 {
+	if err := mapstructure.Decode(map[string]any{"Name": "a", "Surname": "b", "Age": 10.2}, &a); err != nil || a.(Attr).Name != "a" || a.(Attr).Surname != "b" || a.(Attr).Age != 10.2 {
 		t.Errorf("error converting to struct: %+v (%v)", a, err)
 	}
 }
@@ -67,7 +64,7 @@ func TestGetRpcParamsError(t *testing.T) {
 }
 
 func TestGetRpcParams(t *testing.T) {
-	testStruct := &Attr{"", "", 0}
+	testStruct := Attr{"", "", 0}
 	RegisterRpcParams("", &RpcStruct{})
 	if result, err := GetRpcParams("RpcStruct.Method1"); err != nil {
 		t.Errorf("Expected <nil>, received <%+v>", err)

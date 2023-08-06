@@ -23,14 +23,15 @@ import (
 	"fmt"
 	"log"
 	"math"
-	"net/rpc"
-	"net/rpc/jsonrpc"
 	"os"
 	"runtime"
 	"runtime/pprof"
 	"sync"
 	"time"
 
+	"github.com/cgrates/birpc"
+	"github.com/cgrates/birpc/context"
+	"github.com/cgrates/birpc/jsonrpc"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -144,12 +145,12 @@ func durInternalRater(cd *engine.CallDescriptorWithAPIOpts) (time.Duration, erro
 
 func durRemoteRater(cd *engine.CallDescriptorWithAPIOpts) (time.Duration, error) {
 	result := engine.CallCost{}
-	var client *rpc.Client
+	var client *birpc.Client
 	var err error
 	if *json {
 		client, err = jsonrpc.Dial(utils.TCP, *raterAddress)
 	} else {
-		client, err = rpc.Dial(utils.TCP, *raterAddress)
+		client, err = birpc.Dial(utils.TCP, *raterAddress)
 	}
 
 	if err != nil {
@@ -164,7 +165,7 @@ func durRemoteRater(cd *engine.CallDescriptorWithAPIOpts) (time.Duration, error)
 		for i := 0; i < *runs; i++ {
 			go func() {
 				sem <- 1
-				client.Call(utils.ResponderGetCost, cd, &result)
+				client.Call(context.Background(), utils.ResponderGetCost, cd, &result)
 				<-sem
 				finish <- 1
 				// divCall = client.Go(utils.ResponderGetCost, cd, &result, nil)
@@ -176,7 +177,7 @@ func durRemoteRater(cd *engine.CallDescriptorWithAPIOpts) (time.Duration, error)
 		// <-divCall.Done
 	} else {
 		for j := 0; j < *runs; j++ {
-			client.Call(utils.ResponderGetCost, cd, &result)
+			client.Call(context.Background(), utils.ResponderGetCost, cd, &result)
 		}
 	}
 	log.Printf("Result:%s\n", utils.ToJSON(result))
@@ -370,7 +371,7 @@ func main() {
 						tmpTime = timeoutStamp
 						timeout = time.After(totalUsage + *timeoutDur + 140*time.Millisecond)
 					}
-					if err := callSessions(&authDur, &initDur, &updateDur, &terminateDur, &cdrDur,
+					if err := callSessions(context.TODO(), &authDur, &initDur, &updateDur, &terminateDur, &cdrDur,
 						&reqAuth, &reqInit, &reqUpdate, &reqTerminate, &reqCdr,
 						digitMin, digitMax, totalUsage); err != nil {
 						log.Fatal(err.Error())

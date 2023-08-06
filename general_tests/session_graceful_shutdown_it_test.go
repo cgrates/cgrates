@@ -21,7 +21,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package general_tests
 
 import (
-	"net/rpc"
 	"os/exec"
 	"path"
 	"reflect"
@@ -29,6 +28,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc"
+	"github.com/cgrates/birpc/context"
 	v1 "github.com/cgrates/cgrates/apier/v1"
 
 	"github.com/cgrates/cgrates/sessions"
@@ -43,7 +44,7 @@ var (
 	smgRplcCfgPath1, smgRplcCfgPath2 string
 	smgRplcCfgDIR1, smgRplcCfgDIR2   string
 	smgRplCfg1, smgRplCfg2           *config.CGRConfig
-	smgRplcRPC1, smgRplcRPC2         *rpc.Client
+	smgRplcRPC1, smgRplcRPC2         *birpc.Client
 	testEngine1, testEngine2         *exec.Cmd
 	sTestsSession1                   = []func(t *testing.T){
 		testSessionSRplcInitCfg,
@@ -129,11 +130,11 @@ func testSessionSRplcApierRpcConn(t *testing.T) {
 func testSessionSRplcApierGetActiveSessionsNotFound(t *testing.T) {
 	aSessions1 := make([]*sessions.ExternalSession, 0)
 	expected := "NOT_FOUND"
-	if err := smgRplcRPC1.Call(utils.SessionSv1GetActiveSessions, &utils.SessionFilter{}, &aSessions1); err == nil || err.Error() != expected {
+	if err := smgRplcRPC1.Call(context.Background(), utils.SessionSv1GetActiveSessions, &utils.SessionFilter{}, &aSessions1); err == nil || err.Error() != expected {
 		t.Error(err)
 	}
 	aSessions2 := make([]*sessions.ExternalSession, 0)
-	if err := smgRplcRPC2.Call(utils.SessionSv1GetActiveSessions, &utils.SessionFilter{}, &aSessions2); err == nil || err.Error() != expected {
+	if err := smgRplcRPC2.Call(context.Background(), utils.SessionSv1GetActiveSessions, &utils.SessionFilter{}, &aSessions2); err == nil || err.Error() != expected {
 		t.Error(err)
 	}
 }
@@ -149,7 +150,7 @@ func testSessionSRplcApierSetChargerS(t *testing.T) {
 		},
 	}
 	var result1 string
-	if err := smgRplcRPC1.Call(utils.APIerSv1SetChargerProfile, chargerProfile1, &result1); err != nil {
+	if err := smgRplcRPC1.Call(context.Background(), utils.APIerSv1SetChargerProfile, chargerProfile1, &result1); err != nil {
 		t.Error(err)
 	} else if result1 != utils.OK {
 		t.Error("Unexpected reply returned", result1)
@@ -165,7 +166,7 @@ func testSessionSRplcApierSetChargerS(t *testing.T) {
 		},
 	}
 	var result2 string
-	if err := smgRplcRPC2.Call(utils.APIerSv1SetChargerProfile, chargerProfile2, &result2); err != nil {
+	if err := smgRplcRPC2.Call(context.Background(), utils.APIerSv1SetChargerProfile, chargerProfile2, &result2); err != nil {
 		t.Error(err)
 	} else if result2 != utils.OK {
 		t.Error("Unexpected reply returned", result2)
@@ -187,7 +188,7 @@ func testSessionSRplcApierGetInitateSessions(t *testing.T) {
 		},
 	}
 	var rply sessions.V1InitSessionReply
-	if err := smgRplcRPC2.Call(utils.SessionSv1InitiateSession,
+	if err := smgRplcRPC2.Call(context.Background(), utils.SessionSv1InitiateSession,
 		args, &rply); err != nil {
 		t.Error(err)
 	}
@@ -223,7 +224,7 @@ func testSessionSRplcApierGetActiveSessions(t *testing.T) {
 		},
 	}
 	aSessions2 := make([]*sessions.ExternalSession, 0)
-	if err := smgRplcRPC2.Call(utils.SessionSv1GetActiveSessions, &utils.SessionFilter{}, &aSessions2); err != nil {
+	if err := smgRplcRPC2.Call(context.Background(), utils.SessionSv1GetActiveSessions, &utils.SessionFilter{}, &aSessions2); err != nil {
 		t.Error(err)
 	}
 	if !reflect.DeepEqual(&aSessions2, &expected) {
@@ -262,7 +263,7 @@ func testSessionSRplcApierGetPassiveSessions(t *testing.T) {
 		},
 	}
 	aSessions2 := make([]*sessions.ExternalSession, 0)
-	if err := smgRplcRPC1.Call(utils.SessionSv1GetPassiveSessions, &utils.SessionFilter{}, &aSessions2); err != nil {
+	if err := smgRplcRPC1.Call(context.Background(), utils.SessionSv1GetPassiveSessions, &utils.SessionFilter{}, &aSessions2); err != nil {
 		t.Error(err)
 	}
 	if !reflect.DeepEqual(&aSessions2, &expected) {
@@ -312,7 +313,7 @@ func testSessionSRplcApierGetPassiveSessionsAfterStop(t *testing.T) {
 		},
 	}
 	aSessions2 := make([]*sessions.ExternalSession, 0)
-	if err := smgRplcRPC1.Call(utils.SessionSv1GetPassiveSessions, &utils.SessionFilter{}, &aSessions2); err != nil {
+	if err := smgRplcRPC1.Call(context.Background(), utils.SessionSv1GetPassiveSessions, &utils.SessionFilter{}, &aSessions2); err != nil {
 		t.Error(err)
 	}
 	if !reflect.DeepEqual(&aSessions2, &expected) {

@@ -23,11 +23,12 @@ package general_tests
 
 import (
 	"flag"
-	"net/rpc"
 	"os/exec"
 	"path"
 	"testing"
 
+	"github.com/cgrates/birpc"
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -37,7 +38,7 @@ var (
 	loaderGoogleSheet = flag.Bool("google_sheet", false, "Run the test with google sheet")
 	cgrloaderCfgPath  string
 	cgrloaderCfg      *config.CGRConfig
-	cgrloaderRPC      *rpc.Client
+	cgrloaderRPC      *birpc.Client
 	cgrloaderConfDIR  string //run tests for specific configuration
 
 	sTestsCGRLoaders = []func(t *testing.T){
@@ -128,7 +129,7 @@ func testCGRLoaderGetData(t *testing.T) {
 		"ATTR_1001_SESSIONAUTH", "ATTR_1002_SESSIONAUTH", "ATTR_1003_SESSIONAUTH",
 		"ATTR_ACC_ALIAS"}
 	var result []string
-	if err := cgrloaderRPC.Call(utils.APIerSv1GetAttributeProfileIDs, &utils.PaginatorWithTenant{Tenant: "cgrates.org"}, &result); err != nil {
+	if err := cgrloaderRPC.Call(context.Background(), utils.APIerSv1GetAttributeProfileIDs, &utils.PaginatorWithTenant{Tenant: "cgrates.org"}, &result); err != nil {
 		t.Error(err)
 	} else if len(expected) != len(result) {
 		t.Errorf("Expecting : %+v, received: %+v", expected, result)

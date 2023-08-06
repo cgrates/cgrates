@@ -22,7 +22,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package ees
 
 import (
-	"net/rpc"
 	"os"
 	"path"
 	"path/filepath"
@@ -30,6 +29,9 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc/context"
+
+	"github.com/cgrates/birpc"
 	"github.com/cgrates/cgrates/utils"
 
 	"github.com/cgrates/cgrates/config"
@@ -40,7 +42,7 @@ var (
 	virtConfigDir string
 	virtCfgPath   string
 	virtCfg       *config.CGRConfig
-	virtRpc       *rpc.Client
+	virtRpc       *birpc.Client
 
 	sTestsVirt = []func(t *testing.T){
 		testCreateDirectory,
@@ -126,7 +128,7 @@ func testVirtExportSupplierEvent(t *testing.T) {
 	}
 
 	var reply map[string]utils.MapStorage
-	if err := virtRpc.Call(utils.EeSv1ProcessEvent, supplierEvent, &reply); err != nil {
+	if err := virtRpc.Call(context.Background(), utils.EeSv1ProcessEvent, supplierEvent, &reply); err != nil {
 		t.Error(err)
 	}
 	time.Sleep(10 * time.Millisecond)
@@ -159,7 +161,7 @@ func testVirtExportEvents(t *testing.T) {
 		},
 	}
 	var reply map[string]utils.MapStorage
-	if err := virtRpc.Call(utils.EeSv1ProcessEvent, eventVoice, &reply); err != nil {
+	if err := virtRpc.Call(context.Background(), utils.EeSv1ProcessEvent, eventVoice, &reply); err != nil {
 		t.Error(err)
 	}
 	time.Sleep(time.Second)

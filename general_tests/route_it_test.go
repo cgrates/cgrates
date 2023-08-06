@@ -22,12 +22,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package general_tests
 
 import (
-	"net/rpc"
 	"path"
 	"reflect"
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc"
+	"github.com/cgrates/birpc/context"
 	v1 "github.com/cgrates/cgrates/apier/v1"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
@@ -37,7 +38,7 @@ import (
 var (
 	splSv1CfgPath string
 	splSv1Cfg     *config.CGRConfig
-	splSv1Rpc     *rpc.Client
+	splSv1Rpc     *birpc.Client
 	splPrf        *v1.RouteWithAPIOpts
 	splSv1ConfDIR string //run tests for specific configuration
 
@@ -121,7 +122,7 @@ func testV1SplSRpcConn(t *testing.T) {
 func testV1SplSFromFolder(t *testing.T) {
 	var reply string
 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "testit")}
-	if err := splSv1Rpc.Call(utils.APIerSv1LoadTariffPlanFromFolder, attrs, &reply); err != nil {
+	if err := splSv1Rpc.Call(context.Background(), utils.APIerSv1LoadTariffPlanFromFolder, attrs, &reply); err != nil {
 		t.Error(err)
 	}
 	time.Sleep(100 * time.Millisecond)
@@ -129,7 +130,7 @@ func testV1SplSFromFolder(t *testing.T) {
 
 func testV1SplSSetRouteProfilesWithoutRatingPlanIDs(t *testing.T) {
 	var reply *engine.RouteProfile
-	if err := splSv1Rpc.Call(utils.APIerSv1GetRouteProfile,
+	if err := splSv1Rpc.Call(context.Background(), utils.APIerSv1GetRouteProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "TEST_PROFILE2"}, &reply); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
@@ -151,12 +152,12 @@ func testV1SplSSetRouteProfilesWithoutRatingPlanIDs(t *testing.T) {
 		},
 	}
 	var result string
-	if err := splSv1Rpc.Call(utils.APIerSv1SetRouteProfile, splPrf, &result); err != nil {
+	if err := splSv1Rpc.Call(context.Background(), utils.APIerSv1SetRouteProfile, splPrf, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	if err := splSv1Rpc.Call(utils.APIerSv1GetRouteProfile,
+	if err := splSv1Rpc.Call(context.Background(), utils.APIerSv1GetRouteProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "TEST_PROFILE2"}, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(splPrf.RouteProfile, reply) {
@@ -174,11 +175,11 @@ func testV1SplSSetRouteProfilesWithoutRatingPlanIDs(t *testing.T) {
 		},
 	}
 	var suplsReply engine.SortedRoutesList
-	if err := splSv1Rpc.Call(utils.RouteSv1GetRoutes,
+	if err := splSv1Rpc.Call(context.Background(), utils.RouteSv1GetRoutes,
 		ev, &suplsReply); err == nil || err.Error() != utils.NewErrServerError(utils.ErrAccountNotFound).Error() {
 		t.Error(err)
 	}
-	if err := splSv1Rpc.Call(utils.APIerSv1RemoveRouteProfile, utils.TenantID{
+	if err := splSv1Rpc.Call(context.Background(), utils.APIerSv1RemoveRouteProfile, utils.TenantID{
 		Tenant: splPrf.Tenant,
 		ID:     splPrf.ID,
 	}, &result); err != nil {
@@ -190,7 +191,7 @@ func testV1SplSSetRouteProfilesWithoutRatingPlanIDs(t *testing.T) {
 
 func testV1SplSAddNewRoutePrf(t *testing.T) {
 	var reply *engine.RouteProfile
-	if err := splSv1Rpc.Call(utils.APIerSv1GetRouteProfile,
+	if err := splSv1Rpc.Call(context.Background(), utils.APIerSv1GetRouteProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "ROUTE_ResourceTest"}, &reply); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
@@ -228,12 +229,12 @@ func testV1SplSAddNewRoutePrf(t *testing.T) {
 		},
 	}
 	var result string
-	if err := splSv1Rpc.Call(utils.APIerSv1SetRouteProfile, splPrf, &result); err != nil {
+	if err := splSv1Rpc.Call(context.Background(), utils.APIerSv1SetRouteProfile, splPrf, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	if err := splSv1Rpc.Call(utils.APIerSv1GetRouteProfile,
+	if err := splSv1Rpc.Call(context.Background(), utils.APIerSv1GetRouteProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "ROUTE_ResourceTest"}, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(splPrf.RouteProfile, reply) {
@@ -261,7 +262,7 @@ func testV1SplSAddNewResPrf(t *testing.T) {
 		},
 	}
 
-	if err := splSv1Rpc.Call(utils.APIerSv1SetResourceProfile, rPrf, &result); err != nil {
+	if err := splSv1Rpc.Call(context.Background(), utils.APIerSv1SetResourceProfile, rPrf, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -284,7 +285,7 @@ func testV1SplSAddNewResPrf(t *testing.T) {
 		},
 	}
 
-	if err := splSv1Rpc.Call(utils.APIerSv1SetResourceProfile, rPrf2, &result); err != nil {
+	if err := splSv1Rpc.Call(context.Background(), utils.APIerSv1SetResourceProfile, rPrf2, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -307,7 +308,7 @@ func testV1SplSAddNewResPrf(t *testing.T) {
 		},
 	}
 
-	if err := splSv1Rpc.Call(utils.APIerSv1SetResourceProfile, rPrf3, &result); err != nil {
+	if err := splSv1Rpc.Call(context.Background(), utils.APIerSv1SetResourceProfile, rPrf3, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -330,7 +331,7 @@ func testV1SplSAddNewResPrf(t *testing.T) {
 		},
 	}
 
-	if err := splSv1Rpc.Call(utils.APIerSv1SetResourceProfile, rPrf4, &result); err != nil {
+	if err := splSv1Rpc.Call(context.Background(), utils.APIerSv1SetResourceProfile, rPrf4, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -352,7 +353,7 @@ func testV1SplSPopulateResUsage(t *testing.T) {
 			utils.OptsResourcesUnits:   4,
 		},
 	}
-	if err := splSv1Rpc.Call(utils.ResourceSv1AllocateResources,
+	if err := splSv1Rpc.Call(context.Background(), utils.ResourceSv1AllocateResources,
 		cgrEv, &reply); err != nil {
 		t.Error(err)
 	}
@@ -374,7 +375,7 @@ func testV1SplSPopulateResUsage(t *testing.T) {
 			utils.OptsResourcesUnits:   7,
 		},
 	}
-	if err := splSv1Rpc.Call(utils.ResourceSv1AllocateResources,
+	if err := splSv1Rpc.Call(context.Background(), utils.ResourceSv1AllocateResources,
 		cgrEv, &reply); err != nil {
 		t.Error(err)
 	}
@@ -396,7 +397,7 @@ func testV1SplSPopulateResUsage(t *testing.T) {
 			utils.OptsResourcesUnits:   7,
 		},
 	}
-	if err := splSv1Rpc.Call(utils.ResourceSv1AllocateResources,
+	if err := splSv1Rpc.Call(context.Background(), utils.ResourceSv1AllocateResources,
 		cgrEv, &reply); err != nil {
 		t.Error(err)
 	}
@@ -418,7 +419,7 @@ func testV1SplSPopulateResUsage(t *testing.T) {
 			utils.OptsResourcesUnits:   7,
 		},
 	}
-	if err := splSv1Rpc.Call(utils.ResourceSv1AllocateResources,
+	if err := splSv1Rpc.Call(context.Background(), utils.ResourceSv1AllocateResources,
 		cgrEv, &reply); err != nil {
 		t.Error(err)
 	}
@@ -439,7 +440,7 @@ func testV1SplSGetSortedRoutes(t *testing.T) {
 	}
 	expSupplierIDs := []string{"route3", "route2", "route1"}
 	var suplsReply engine.SortedRoutesList
-	if err := splSv1Rpc.Call(utils.RouteSv1GetRoutes,
+	if err := splSv1Rpc.Call(context.Background(), utils.RouteSv1GetRoutes,
 		ev, &suplsReply); err != nil {
 		t.Error(err)
 	} else {
@@ -460,7 +461,7 @@ func testV1SplSGetSortedRoutes(t *testing.T) {
 
 func testV1SplSAddNewRoutePrf2(t *testing.T) {
 	var reply *engine.RouteProfile
-	if err := splSv1Rpc.Call(utils.APIerSv1GetRouteProfile,
+	if err := splSv1Rpc.Call(context.Background(), utils.APIerSv1GetRouteProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "ROUTE_ResourceDescendent"}, &reply); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
@@ -498,12 +499,12 @@ func testV1SplSAddNewRoutePrf2(t *testing.T) {
 		},
 	}
 	var result string
-	if err := splSv1Rpc.Call(utils.APIerSv1SetRouteProfile, splPrf, &result); err != nil {
+	if err := splSv1Rpc.Call(context.Background(), utils.APIerSv1SetRouteProfile, splPrf, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	if err := splSv1Rpc.Call(utils.APIerSv1GetRouteProfile,
+	if err := splSv1Rpc.Call(context.Background(), utils.APIerSv1GetRouteProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "ROUTE_ResourceDescendent"}, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(splPrf.RouteProfile, reply) {
@@ -521,7 +522,7 @@ func testV1SplSGetSortedRoutes2(t *testing.T) {
 	}
 	expSupplierIDs := []string{"route1", "route3", "route2"}
 	var suplsReply engine.SortedRoutesList
-	if err := splSv1Rpc.Call(utils.RouteSv1GetRoutes,
+	if err := splSv1Rpc.Call(context.Background(), utils.RouteSv1GetRoutes,
 		ev, &suplsReply); err != nil {
 		t.Error(err)
 	} else {
@@ -553,7 +554,7 @@ func testV1SplSPopulateStats(t *testing.T) {
 			"StatID":  "Stat_Supplier1",
 		},
 	}
-	if err := splSv1Rpc.Call(utils.StatSv1ProcessEvent, ev1, &reply); err != nil {
+	if err := splSv1Rpc.Call(context.Background(), utils.StatSv1ProcessEvent, ev1, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(reply, expected) {
 		t.Errorf("Expecting: %+v, received: %+v", expected, reply)
@@ -568,7 +569,7 @@ func testV1SplSPopulateStats(t *testing.T) {
 			"StatID":  "Stat_Supplier1",
 		},
 	}
-	if err := splSv1Rpc.Call(utils.StatSv1ProcessEvent, ev1, &reply); err != nil {
+	if err := splSv1Rpc.Call(context.Background(), utils.StatSv1ProcessEvent, ev1, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(reply, expected) {
 		t.Errorf("Expecting: %+v, received: %+v", expected, reply)
@@ -578,7 +579,7 @@ func testV1SplSPopulateStats(t *testing.T) {
 	expectedMetrics := map[string]string{
 		utils.MetaSum + utils.HashtagSep + utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + "LoadReq": "2",
 	}
-	if err := splSv1Rpc.Call(utils.StatSv1GetQueueStringMetrics,
+	if err := splSv1Rpc.Call(context.Background(), utils.StatSv1GetQueueStringMetrics,
 		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "Stat_Supplier1"}},
 		&metrics); err != nil {
 		t.Error(err)
@@ -595,7 +596,7 @@ func testV1SplSPopulateStats(t *testing.T) {
 			"StatID":  "Stat_Supplier2",
 		},
 	}
-	if err := splSv1Rpc.Call(utils.StatSv1ProcessEvent, ev1, &reply); err != nil {
+	if err := splSv1Rpc.Call(context.Background(), utils.StatSv1ProcessEvent, ev1, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(reply, expected) {
 		t.Errorf("Expecting: %+v, received: %+v", expected, reply)
@@ -610,13 +611,13 @@ func testV1SplSPopulateStats(t *testing.T) {
 			"StatID":  "Stat_Supplier2",
 		},
 	}
-	if err := splSv1Rpc.Call(utils.StatSv1ProcessEvent, ev1, &reply); err != nil {
+	if err := splSv1Rpc.Call(context.Background(), utils.StatSv1ProcessEvent, ev1, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(reply, expected) {
 		t.Errorf("Expecting: %+v, received: %+v", expected, reply)
 	}
 
-	if err := splSv1Rpc.Call(utils.StatSv1GetQueueStringMetrics,
+	if err := splSv1Rpc.Call(context.Background(), utils.StatSv1GetQueueStringMetrics,
 		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "Stat_Supplier2"}},
 		&metrics); err != nil {
 		t.Error(err)
@@ -633,7 +634,7 @@ func testV1SplSPopulateStats(t *testing.T) {
 			"StatID":  "Stat_Supplier3",
 		},
 	}
-	if err := splSv1Rpc.Call(utils.StatSv1ProcessEvent, ev1, &reply); err != nil {
+	if err := splSv1Rpc.Call(context.Background(), utils.StatSv1ProcessEvent, ev1, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(reply, expected) {
 		t.Errorf("Expecting: %+v, received: %+v", expected, reply)
@@ -648,7 +649,7 @@ func testV1SplSPopulateStats(t *testing.T) {
 			"StatID":  "Stat_Supplier3",
 		},
 	}
-	if err := splSv1Rpc.Call(utils.StatSv1ProcessEvent, ev1, &reply); err != nil {
+	if err := splSv1Rpc.Call(context.Background(), utils.StatSv1ProcessEvent, ev1, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(reply, expected) {
 		t.Errorf("Expecting: %+v, received: %+v", expected, reply)
@@ -663,7 +664,7 @@ func testV1SplSPopulateStats(t *testing.T) {
 			"StatID":  "Stat_Supplier3",
 		},
 	}
-	if err := splSv1Rpc.Call(utils.StatSv1ProcessEvent, ev1, &reply); err != nil {
+	if err := splSv1Rpc.Call(context.Background(), utils.StatSv1ProcessEvent, ev1, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(reply, expected) {
 		t.Errorf("Expecting: %+v, received: %+v", expected, reply)
@@ -673,7 +674,7 @@ func testV1SplSPopulateStats(t *testing.T) {
 		utils.MetaSum + utils.HashtagSep + utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + "LoadReq": "3",
 	}
 
-	if err := splSv1Rpc.Call(utils.StatSv1GetQueueStringMetrics,
+	if err := splSv1Rpc.Call(context.Background(), utils.StatSv1GetQueueStringMetrics,
 		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "Stat_Supplier3"}},
 		&metrics); err != nil {
 		t.Error(err)
@@ -719,7 +720,7 @@ func testV1SplSGetSoredRoutesWithLoad(t *testing.T) {
 	}
 
 	var suplsReply engine.SortedRoutesList
-	if err := splSv1Rpc.Call(utils.RouteSv1GetRoutes,
+	if err := splSv1Rpc.Call(context.Background(), utils.RouteSv1GetRoutes,
 		ev, &suplsReply); err != nil {
 		t.Error(err)
 	} else {

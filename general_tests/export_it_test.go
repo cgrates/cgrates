@@ -21,7 +21,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package general_tests
 
 import (
-	"net/rpc"
 	"os"
 	"path"
 	"reflect"
@@ -29,6 +28,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc"
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -38,7 +39,7 @@ var (
 	expCfgDir  string
 	expCfgPath string
 	expCfg     *config.CGRConfig
-	expRpc     *rpc.Client
+	expRpc     *birpc.Client
 
 	sTestsExp = []func(t *testing.T){
 		testExpLoadConfig,
@@ -120,7 +121,7 @@ func testExpRPCConn(t *testing.T) {
 func testExpLoadTPFromFolder(t *testing.T) {
 	var reply string
 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "testit")}
-	if err := expRpc.Call(utils.APIerSv1LoadTariffPlanFromFolder, attrs, &reply); err != nil {
+	if err := expRpc.Call(context.Background(), utils.APIerSv1LoadTariffPlanFromFolder, attrs, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Error(reply)
@@ -132,7 +133,7 @@ func testExpExportToFolder(t *testing.T) {
 	arg := &utils.ArgExportToFolder{
 		Path: "/tmp/tp/",
 	}
-	if err := expRpc.Call(utils.APIerSv1ExportToFolder, arg, &reply); err != nil {
+	if err := expRpc.Call(context.Background(), utils.APIerSv1ExportToFolder, arg, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Error(reply)
@@ -142,7 +143,7 @@ func testExpExportToFolder(t *testing.T) {
 func testExpLoadTPFromExported(t *testing.T) {
 	var reply string
 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: "/tmp/tp/"}
-	if err := expRpc.Call(utils.APIerSv1LoadTariffPlanFromFolder, attrs, &reply); err != nil {
+	if err := expRpc.Call(context.Background(), utils.APIerSv1LoadTariffPlanFromFolder, attrs, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Error(reply)
@@ -167,7 +168,7 @@ func testExpVerifyAttributes(t *testing.T) {
 		Weight:  10.0,
 	}
 	var reply *engine.AttributeProfile
-	if err := expRpc.Call(utils.APIerSv1GetAttributeProfile,
+	if err := expRpc.Call(context.Background(), utils.APIerSv1GetAttributeProfile,
 		utils.TenantIDWithAPIOpts{
 			TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ATTR_ACNT_1001"}}, &reply); err != nil {
 		t.Fatal(err)
@@ -199,7 +200,7 @@ func testExpVerifyFilters(t *testing.T) {
 		},
 	}
 	var reply *engine.Filter
-	if err := expRpc.Call(utils.APIerSv1GetFilter,
+	if err := expRpc.Call(context.Background(), utils.APIerSv1GetFilter,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "FLTR_ACCOUNT_1001"}, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(exp, reply) {
@@ -227,7 +228,7 @@ func testExpVerifyThresholds(t *testing.T) {
 		},
 	}
 	var reply *engine.ThresholdProfile
-	if err := expRpc.Call(utils.APIerSv1GetThresholdProfile,
+	if err := expRpc.Call(context.Background(), utils.APIerSv1GetThresholdProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "THD_ACNT_1001"}, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(tPrfl.ThresholdProfile, reply) {
@@ -251,7 +252,7 @@ func testExpVerifyResources(t *testing.T) {
 		rPrf.ThresholdIDs = nil
 	}
 	var reply *engine.ResourceProfile
-	if err := expRpc.Call(utils.APIerSv1GetResourceProfile,
+	if err := expRpc.Call(context.Background(), utils.APIerSv1GetResourceProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "RES_ACNT_1001"}, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(reply, rPrf) {
@@ -287,7 +288,7 @@ func testExpVerifyStats(t *testing.T) {
 		ThresholdIDs: []string{utils.MetaNone},
 	}
 	var reply *engine.StatQueueProfile
-	if err := expRpc.Call(utils.APIerSv1GetStatQueueProfile,
+	if err := expRpc.Call(context.Background(), utils.APIerSv1GetStatQueueProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "Stat_1"}, &reply); err != nil {
 		t.Error(err)
 	}
@@ -348,7 +349,7 @@ func testExpVerifyRoutes(t *testing.T) {
 		},
 		Weight: 10,
 	}
-	if err := expRpc.Call(utils.APIerSv1GetRouteProfile,
+	if err := expRpc.Call(context.Background(), utils.APIerSv1GetRouteProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "ROUTE_ACNT_1001"}, &reply); err != nil {
 		t.Fatal(err)
 	}

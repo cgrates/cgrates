@@ -22,12 +22,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package general_tests
 
 import (
-	"net/rpc"
 	"path"
 	"reflect"
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc"
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -40,9 +41,9 @@ var (
 	setterCfg       *config.CGRConfig
 	cfg2OptsCfg     *config.CGRConfig
 	cfg1Cfg         *config.CGRConfig
-	setterRPC       *rpc.Client
-	cgr2RPC         *rpc.Client
-	cgr1RPC         *rpc.Client
+	setterRPC       *birpc.Client
+	cgr2RPC         *birpc.Client
+	cgr1RPC         *birpc.Client
 	cfg1ConfigDIR   string
 	cfg2ConfigDIR   string
 	setterConfigDIR string
@@ -176,7 +177,7 @@ func testDispatcherCgr1CoreStatus(t *testing.T) {
 			utils.MetaDispatchers: false,
 		},
 	}
-	if err := cgr1RPC.Call(utils.CoreSv1Status, &ev, &reply); err != nil {
+	if err := cgr1RPC.Call(context.Background(), utils.CoreSv1Status, &ev, &reply); err != nil {
 		t.Error(err)
 	} else if reply[utils.NodeID] != "HOST1" {
 		t.Errorf("Expected HOST1, received %v", reply[utils.NodeID])
@@ -193,7 +194,7 @@ func testDispatcherCgr2CoreStatus(t *testing.T) {
 			utils.MetaDispatchers: false,
 		},
 	}
-	if err := cgr2RPC.Call(utils.CoreSv1Status, &ev, &reply); err != nil {
+	if err := cgr2RPC.Call(context.Background(), utils.CoreSv1Status, &ev, &reply); err != nil {
 		t.Error(err)
 	} else if reply[utils.NodeID] != "HOST2" {
 		t.Errorf("Expected HOST2, received %v", reply[utils.NodeID])
@@ -213,11 +214,11 @@ func testDispatcherGetItemBothEnginesFirstAttempt(t *testing.T) {
 		},
 	}
 	var reply any
-	if err := cgr2RPC.Call(utils.CacheSv1GetItem, argsCache,
+	if err := cgr2RPC.Call(context.Background(), utils.CacheSv1GetItem, argsCache,
 		&reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
-	if err := cgr1RPC.Call(utils.CacheSv1GetItem, argsCache,
+	if err := cgr1RPC.Call(context.Background(), utils.CacheSv1GetItem, argsCache,
 		&reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
@@ -233,11 +234,11 @@ func testDispatcherGetItemBothEnginesFirstAttempt(t *testing.T) {
 			ItemID:  "cgrates.org:DSP1",
 		},
 	}
-	if err := cgr2RPC.Call(utils.CacheSv1GetItem, argsCache,
+	if err := cgr2RPC.Call(context.Background(), utils.CacheSv1GetItem, argsCache,
 		&reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
-	if err := cgr1RPC.Call(utils.CacheSv1GetItem, argsCache,
+	if err := cgr1RPC.Call(context.Background(), utils.CacheSv1GetItem, argsCache,
 		&reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
@@ -253,11 +254,11 @@ func testDispatcherGetItemBothEnginesFirstAttempt(t *testing.T) {
 			ItemID:  "cgrates.org:DSP1",
 		},
 	}
-	if err := cgr2RPC.Call(utils.CacheSv1GetItem, argsCache,
+	if err := cgr2RPC.Call(context.Background(), utils.CacheSv1GetItem, argsCache,
 		&reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
-	if err := cgr1RPC.Call(utils.CacheSv1GetItem, argsCache,
+	if err := cgr1RPC.Call(context.Background(), utils.CacheSv1GetItem, argsCache,
 		&reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
@@ -307,7 +308,7 @@ func testDispatcherSetterSetDispatcherProfile(t *testing.T) {
 			utils.MetaDispatchers: false,
 		},
 	}
-	if err := setterRPC.Call(utils.APIerSv1SetDispatcherHost, setDispatcherHost, &replyStr); err != nil {
+	if err := setterRPC.Call(context.Background(), utils.APIerSv1SetDispatcherHost, setDispatcherHost, &replyStr); err != nil {
 		t.Error("Unexpected error when calling APIerSv1.SetDispatcherHost: ", err)
 	} else if replyStr != utils.OK {
 		t.Error("Unexpected reply returned", replyStr)
@@ -330,7 +331,7 @@ func testDispatcherSetterSetDispatcherProfile(t *testing.T) {
 			utils.MetaDispatchers: false,
 		},
 	}
-	if err := setterRPC.Call(utils.APIerSv1SetDispatcherHost, setDispatcherHost, &replyStr); err != nil {
+	if err := setterRPC.Call(context.Background(), utils.APIerSv1SetDispatcherHost, setDispatcherHost, &replyStr); err != nil {
 		t.Error("Unexpected error when calling APIerSv1.SetDispatcherHost: ", err)
 	} else if replyStr != utils.OK {
 		t.Error("Unexpected reply returned", replyStr)
@@ -359,7 +360,7 @@ func testDispatcherSetterSetDispatcherProfile(t *testing.T) {
 			utils.MetaDispatchers: false,
 		},
 	}
-	if err := setterRPC.Call(utils.APIerSv1SetDispatcherProfile, setDispatcherProfile, &replyStr); err != nil {
+	if err := setterRPC.Call(context.Background(), utils.APIerSv1SetDispatcherProfile, setDispatcherProfile, &replyStr); err != nil {
 		t.Error("Unexpected error when calling APIerSv1.SetDispatcherProfile: ", err)
 	} else if replyStr != utils.OK {
 		t.Error("Unexpected reply returned", replyStr)
@@ -375,7 +376,7 @@ func testDispatcherCgr2CoreStatusWithRouteID(t *testing.T) {
 		},
 	}
 	// even if HOST1 is prio, this engine was not staretd yet, so HOST2 matched
-	if err := cgr2RPC.Call(utils.CoreSv1Status, &ev, &reply); err != nil {
+	if err := cgr2RPC.Call(context.Background(), utils.CoreSv1Status, &ev, &reply); err != nil {
 		t.Error(err)
 	} else if reply[utils.NodeID] != "HOST2" {
 		t.Errorf("Expected HOST2, received %v", reply[utils.NodeID])
@@ -391,7 +392,7 @@ func testDispatcherCgr1CoreStatusWithRouteIDSecondAttempt(t *testing.T) {
 		},
 	}
 	// same HOST2 will be matched, due to routeID
-	if err := cgr1RPC.Call(utils.CoreSv1Status, &ev, &reply); err != nil {
+	if err := cgr1RPC.Call(context.Background(), utils.CoreSv1Status, &ev, &reply); err != nil {
 		t.Error(err)
 	} else if reply[utils.NodeID] != "HOST2" {
 		t.Errorf("Expected HOST2, received %v", reply[utils.NodeID])
@@ -411,7 +412,7 @@ func testDispatcherCgr2GetItemHOST2(t *testing.T) {
 		},
 	}
 	var reply any
-	if err := cgr2RPC.Call(utils.CacheSv1GetItem, argsCache,
+	if err := cgr2RPC.Call(context.Background(), utils.CacheSv1GetItem, argsCache,
 		&reply); err != nil {
 		t.Error(err)
 	} else {
@@ -436,7 +437,7 @@ func testDispatcherCgr2GetItemHOST2(t *testing.T) {
 			ItemID:  "cgrates.org:DSP1",
 		},
 	}
-	if err := cgr2RPC.Call(utils.CacheSv1GetItem, argsCache,
+	if err := cgr2RPC.Call(context.Background(), utils.CacheSv1GetItem, argsCache,
 		&reply); err != nil {
 		t.Error(err)
 	} else {
@@ -483,7 +484,7 @@ func testDispatcherCgr2GetItemHOST2(t *testing.T) {
 		},
 	}
 	// reply here is an interface type(singleResultDispatcher), it exists
-	if err := cgr2RPC.Call(utils.CacheSv1GetItem, argsCache,
+	if err := cgr2RPC.Call(context.Background(), utils.CacheSv1GetItem, argsCache,
 		&reply); err != nil {
 		t.Error(err)
 	}
@@ -491,7 +492,7 @@ func testDispatcherCgr2GetItemHOST2(t *testing.T) {
 
 func testDisaptcherCacheClear(t *testing.T) {
 	var reply string
-	if err := cgr1RPC.Call(utils.CacheSv1Clear, &utils.AttrCacheIDsWithAPIOpts{
+	if err := cgr1RPC.Call(context.Background(), utils.CacheSv1Clear, &utils.AttrCacheIDsWithAPIOpts{
 		APIOpts: map[string]any{
 			utils.MetaDispatchers: false,
 		},
@@ -501,7 +502,7 @@ func testDisaptcherCacheClear(t *testing.T) {
 		t.Errorf("Unexpected reply returned")
 	}
 
-	if err := cgr2RPC.Call(utils.CacheSv1Clear, &utils.AttrCacheIDsWithAPIOpts{
+	if err := cgr2RPC.Call(context.Background(), utils.CacheSv1Clear, &utils.AttrCacheIDsWithAPIOpts{
 		APIOpts: map[string]any{
 			utils.MetaDispatchers: false,
 		},
@@ -521,7 +522,7 @@ func testDispatcherCgr1CoreStatusWithRouteIDButHost1(t *testing.T) {
 		},
 	}
 	// as the cache was cleared, HOST1 will match due to his high prio, and it will be set as *dispatcher_routes as HOST1
-	if err := cgr1RPC.Call(utils.CoreSv1Status, &ev, &reply); err != nil {
+	if err := cgr1RPC.Call(context.Background(), utils.CoreSv1Status, &ev, &reply); err != nil {
 		t.Error(err)
 	} else if reply[utils.NodeID] != "HOST1" {
 		t.Errorf("Expected HOST1, received %v", reply[utils.NodeID])
@@ -541,7 +542,7 @@ func testDispatcherCgr1CheckCacheAfterRouting(t *testing.T) {
 		},
 	}
 	var reply any
-	if err := cgr1RPC.Call(utils.CacheSv1GetItem, argsCache,
+	if err := cgr1RPC.Call(context.Background(), utils.CacheSv1GetItem, argsCache,
 		&reply); err != nil {
 		t.Error(err)
 	} else {
@@ -566,7 +567,7 @@ func testDispatcherCgr1CheckCacheAfterRouting(t *testing.T) {
 			ItemID:  "cgrates.org:DSP1",
 		},
 	}
-	if err := cgr1RPC.Call(utils.CacheSv1GetItem, argsCache,
+	if err := cgr1RPC.Call(context.Background(), utils.CacheSv1GetItem, argsCache,
 		&reply); err != nil {
 		t.Error(err)
 	} else {
@@ -613,7 +614,7 @@ func testDispatcherCgr1CheckCacheAfterRouting(t *testing.T) {
 		},
 	}
 	// reply here is an interface type(singleResultDispatcher), it exists
-	if err := cgr1RPC.Call(utils.CacheSv1GetItem, argsCache,
+	if err := cgr1RPC.Call(context.Background(), utils.CacheSv1GetItem, argsCache,
 		&reply); err != nil {
 		t.Error(err)
 	}
@@ -642,7 +643,7 @@ func testDispatcherSetterSetDispatcherProfileOverwrite(t *testing.T) {
 			utils.MetaDispatchers: false,
 		},
 	}
-	if err := setterRPC.Call(utils.APIerSv1SetDispatcherProfile, setDispatcherProfile, &replyStr); err != nil {
+	if err := setterRPC.Call(context.Background(), utils.APIerSv1SetDispatcherProfile, setDispatcherProfile, &replyStr); err != nil {
 		t.Error("Unexpected error when calling APIerSv1.SetDispatcherProfile: ", err)
 	} else if replyStr != utils.OK {
 		t.Error("Unexpected reply returned", replyStr)
@@ -664,7 +665,7 @@ func testDispatcherCheckCacheAfterSetDispatcherDSP1(t *testing.T) {
 		},
 	}
 	var reply any // Should receive NOT_FOUND, as CallCache that was called in API will remove the DispatcherRoute
-	if err := cgr1RPC.Call(utils.CacheSv1GetItem, argsCache,
+	if err := cgr1RPC.Call(context.Background(), utils.CacheSv1GetItem, argsCache,
 		&reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("Unexpected error returned: %v", err)
 	}
@@ -682,7 +683,7 @@ func testDispatcherCheckCacheAfterSetDispatcherDSP1(t *testing.T) {
 		},
 	}
 	// as the DSP1 profile was overwritten, only HOST2 in profile will be contained
-	if err := cgr1RPC.Call(utils.CacheSv1GetItem, argsCache,
+	if err := cgr1RPC.Call(context.Background(), utils.CacheSv1GetItem, argsCache,
 		&reply); err != nil {
 		t.Error(err)
 	} else {
@@ -723,7 +724,7 @@ func testDispatcherCheckCacheAfterSetDispatcherDSP1(t *testing.T) {
 		},
 	}
 	// DispatcherInstance should also be removed, so it will be NOT_FOUND
-	if err := cgr1RPC.Call(utils.CacheSv1GetItem, argsCache,
+	if err := cgr1RPC.Call(context.Background(), utils.CacheSv1GetItem, argsCache,
 		&reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("Unexpected error returned: %v and reply: %v", err, reply)
 	}
@@ -754,7 +755,7 @@ func testDispatcherSetterSetAnotherProifle(t *testing.T) {
 			utils.MetaDispatchers: false,
 		},
 	}
-	if err := setterRPC.Call(utils.APIerSv1SetDispatcherProfile, setDispatcherProfile, &replyStr); err != nil {
+	if err := setterRPC.Call(context.Background(), utils.APIerSv1SetDispatcherProfile, setDispatcherProfile, &replyStr); err != nil {
 		t.Error("Unexpected error when calling APIerSv1.SetDispatcherProfile: ", err)
 	} else if replyStr != utils.OK {
 		t.Error("Unexpected reply returned", replyStr)
@@ -776,7 +777,7 @@ func testDispatcherCheckCacheAfterSetDispatcherDSP2(t *testing.T) {
 	}
 	var reply any
 	// NOT_FOUND
-	if err := cgr1RPC.Call(utils.CacheSv1GetItem, argsCache,
+	if err := cgr1RPC.Call(context.Background(), utils.CacheSv1GetItem, argsCache,
 		&reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("Unexpected error returned: %v", err)
 	}
@@ -793,7 +794,7 @@ func testDispatcherCheckCacheAfterSetDispatcherDSP2(t *testing.T) {
 		},
 	}
 	// NOT_FOUND
-	if err := cgr1RPC.Call(utils.CacheSv1GetItem, argsCache,
+	if err := cgr1RPC.Call(context.Background(), utils.CacheSv1GetItem, argsCache,
 		&reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("Unexpected error returned: %v", err)
 	}
@@ -810,7 +811,7 @@ func testDispatcherCheckCacheAfterSetDispatcherDSP2(t *testing.T) {
 		},
 	}
 	// NOT_FOUND
-	if err := cgr1RPC.Call(utils.CacheSv1GetItem, argsCache,
+	if err := cgr1RPC.Call(context.Background(), utils.CacheSv1GetItem, argsCache,
 		&reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("Unexpected error returned: %v", err)
 	}

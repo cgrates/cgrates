@@ -19,11 +19,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package v1
 
 import (
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
 )
 
 // SetTPSharedGroups creates a new SharedGroups profile within a tariff plan
-func (apierSv1 *APIerSv1) SetTPSharedGroups(attrs *utils.TPSharedGroups, reply *string) error {
+func (apierSv1 *APIerSv1) SetTPSharedGroups(ctx *context.Context, attrs *utils.TPSharedGroups, reply *string) error {
 	if missing := utils.MissingStructFields(attrs, []string{utils.TPid, utils.ID, utils.SharedGroups}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -40,7 +41,7 @@ type AttrGetTPSharedGroups struct {
 }
 
 // GetTPSharedGroups queries specific SharedGroup on tariff plan
-func (apierSv1 *APIerSv1) GetTPSharedGroups(attrs *AttrGetTPSharedGroups, reply *utils.TPSharedGroups) error {
+func (apierSv1 *APIerSv1) GetTPSharedGroups(ctx *context.Context, attrs *AttrGetTPSharedGroups, reply *utils.TPSharedGroups) error {
 	if missing := utils.MissingStructFields(attrs, []string{utils.TPid, utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -61,7 +62,7 @@ type AttrGetTPSharedGroupIds struct {
 }
 
 // GetTPSharedGroupIds queries SharedGroups identities on specific tariff plan.
-func (apierSv1 *APIerSv1) GetTPSharedGroupIds(attrs *AttrGetTPSharedGroupIds, reply *[]string) error {
+func (apierSv1 *APIerSv1) GetTPSharedGroupIds(ctx *context.Context, attrs *AttrGetTPSharedGroupIds, reply *[]string) error {
 	if missing := utils.MissingStructFields(attrs, []string{utils.TPid}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -78,7 +79,7 @@ func (apierSv1 *APIerSv1) GetTPSharedGroupIds(attrs *AttrGetTPSharedGroupIds, re
 }
 
 // RemoveTPSharedGroups removes specific SharedGroups on Tariff plan
-func (apierSv1 *APIerSv1) RemoveTPSharedGroups(attrs *AttrGetTPSharedGroups, reply *string) error {
+func (apierSv1 *APIerSv1) RemoveTPSharedGroups(ctx *context.Context, attrs *AttrGetTPSharedGroups, reply *string) error {
 	if missing := utils.MissingStructFields(attrs, []string{utils.TPid, utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}

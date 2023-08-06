@@ -21,6 +21,7 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -230,7 +231,7 @@ type testRPCHost struct {
 	reply         any
 }
 
-func (v *testRPCHost) Call(serviceMethod string, args any, reply any) error {
+func (v *testRPCHost) Call(ctx *context.Context, serviceMethod string, args any, reply any) error {
 	v.serviceMethod = serviceMethod
 	v.args = args
 	v.reply = reply
@@ -247,7 +248,7 @@ func TestDispatcherHostCall(t *testing.T) {
 	}
 	var reply string
 	dspHost.rpcConn = tRPC
-	if err := dspHost.Call(utils.AttributeSv1Ping, &utils.CGREvent{}, &reply); err != nil {
+	if err := dspHost.Call(context.Background(), utils.AttributeSv1Ping, &utils.CGREvent{}, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(*etRPC, *tRPC) {
 		t.Errorf("Expected: %s , received: %s", utils.ToJSON(etRPC), utils.ToJSON(tRPC))
@@ -334,7 +335,7 @@ func TestDispatcherHostCallErr(t *testing.T) {
 		},
 	}
 	var reply string
-	if err := dH.Call(utils.AttributeSv1Ping, &utils.CGREvent{}, &reply); err == nil || err.Error() != "dial tcp: missing address" {
+	if err := dH.Call(context.Background(), utils.AttributeSv1Ping, &utils.CGREvent{}, &reply); err == nil || err.Error() != "dial tcp: missing address" {
 		t.Error(err)
 	}
 }

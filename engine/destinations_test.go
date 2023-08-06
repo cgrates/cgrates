@@ -5,9 +5,10 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/cgrates/birpc"
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/cgrates/rpcclient"
 	"github.com/nyaruka/phonenumbers"
 )
 
@@ -191,16 +192,16 @@ func TestDMSetDestinationSucces(t *testing.T) {
 	cfg.DataDbCfg().RplCache = "cache"
 
 	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
-	clientConn := make(chan rpcclient.ClientConnector, 1)
+	clientConn := make(chan birpc.ClientConnector, 1)
 	clientConn <- &ccMock{
-		calls: map[string]func(args any, reply any) error{
-			utils.ReplicatorSv1SetDestination: func(args, reply any) error {
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.ReplicatorSv1SetDestination: func(ctx *context.Context, args, reply any) error {
 				*reply.(*string) = "reply"
 				return nil
 			},
 		},
 	}
-	connMngr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	connMngr := NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicationConnsCfg): clientConn,
 	})
 
@@ -227,16 +228,16 @@ func TestDMSetAccountSucces(t *testing.T) {
 			Replicate: true,
 		},
 	}*/
-	clientConn := make(chan rpcclient.ClientConnector, 1)
+	clientConn := make(chan birpc.ClientConnector, 1)
 	clientConn <- &ccMock{
-		calls: map[string]func(args any, reply any) error{
-			utils.ReplicatorSv1SetAccount: func(args, reply any) error {
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.ReplicatorSv1SetAccount: func(ctx *context.Context, args, reply any) error {
 				*reply.(*string) = "reply"
 				return nil
 			},
 		},
 	}
-	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	connMgr := NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicationConnsCfg): clientConn,
 	})
 	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
@@ -271,16 +272,16 @@ func TestDMSetReverseDestination(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 
 	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
-	clientConn := make(chan rpcclient.ClientConnector, 1)
+	clientConn := make(chan birpc.ClientConnector, 1)
 	clientConn <- &ccMock{
-		calls: map[string]func(args any, reply any) error{
-			utils.ReplicatorSv1SetReverseDestination: func(args, reply any) error {
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.ReplicatorSv1SetReverseDestination: func(ctx *context.Context, args, reply any) error {
 				*reply.(*string) = "reply"
 				return nil
 			},
 		},
 	}
-	connMngr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	connMngr := NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicationConnsCfg): clientConn,
 	})
 

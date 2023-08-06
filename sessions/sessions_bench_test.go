@@ -25,13 +25,14 @@ import (
 	"flag"
 	"fmt"
 	"log"
-	"net/rpc"
-	"net/rpc/jsonrpc"
 	"path"
 	"sync"
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc"
+	"github.com/cgrates/birpc/context"
+	"github.com/cgrates/birpc/jsonrpc"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -39,7 +40,7 @@ import (
 
 var (
 	sBenchCfg *config.CGRConfig
-	sBenchRPC *rpc.Client
+	sBenchRPC *birpc.Client
 	connOnce  sync.Once
 	initRuns  = flag.Int("runs", 25000, "number of loops to run in init")
 	cps       = flag.Int("cps", 2000, "number of loops to run in init")
@@ -68,14 +69,14 @@ func loadTP() {
 	attrs := &utils.AttrLoadTpFromFolder{
 		FolderPath: path.Join(*dataDir, "tariffplans", "tutorial")}
 	var tpLoadInst utils.LoadInstance
-	if err := sBenchRPC.Call(utils.APIerSv2LoadTariffPlanFromFolder,
+	if err := sBenchRPC.Call(context.Background(), utils.APIerSv2LoadTariffPlanFromFolder,
 		attrs, &tpLoadInst); err != nil {
 		log.Fatal(err)
 	}
 	time.Sleep(100 * time.Millisecond) // Give time for scheduler to execute topups
 }
 
-func addBalance(sBenchRPC *rpc.Client, sraccount string) {
+func addBalance(sBenchRPC *birpc.Client, sraccount string) {
 	attrSetBalance := utils.AttrSetBalance{
 		Tenant:      "cgrates.org",
 		Account:     sraccount,
@@ -86,7 +87,7 @@ func addBalance(sBenchRPC *rpc.Client, sraccount string) {
 		},
 	}
 	var reply string
-	if err := sBenchRPC.Call(utils.APIerSv2SetBalance,
+	if err := sBenchRPC.Call(context.Background(), utils.APIerSv2SetBalance,
 		attrSetBalance, &reply); err != nil {
 		log.Fatal(err)
 	}
@@ -131,7 +132,7 @@ func initSession(i int) {
 	initArgs.Event[utils.Destination] = fmt.Sprintf("1002%v", i)
 
 	var initRpl *V1InitSessionReply
-	if err := sBenchRPC.Call(utils.SessionSv1InitiateSession,
+	if err := sBenchRPC.Call(context.Background(), utils.SessionSv1InitiateSession,
 		initArgs, &initRpl); err != nil {
 		// log.Fatal(err)
 	}
@@ -165,7 +166,7 @@ func sendInit() {
 
 func getCount() int {
 	var count int
-	if err := sBenchRPC.Call(utils.SessionSv1GetActiveSessionsCount, utils.SessionFilter{
+	if err := sBenchRPC.Call(context.Background(), utils.SessionSv1GetActiveSessionsCount, utils.SessionFilter{
 		Filters: []string{"*string:~*req.ToR:*voice"},
 	}, &count); err != nil {
 		log.Fatal(err)
@@ -221,7 +222,7 @@ func BenchmarkEncodingGOB(b *testing.B) {
 		log.Fatal(err)
 	}
 
-	if sBenchRPC, err = rpc.Dial(utils.TCP, sBenchCfg.ListenCfg().RPCGOBListen); err != nil {
+	if sBenchRPC, err = birpc.Dial(utils.TCP, sBenchCfg.ListenCfg().RPCGOBListen); err != nil {
 		log.Fatalf("Error at dialing rcp client:%v\n", err)
 	}
 	b.ResetTimer()

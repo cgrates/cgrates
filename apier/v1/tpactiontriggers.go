@@ -19,11 +19,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package v1
 
 import (
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
 )
 
 // SetTPActionTriggers creates a new ActionTriggers profile within a tariff plan
-func (apierSv1 *APIerSv1) SetTPActionTriggers(attrs *utils.TPActionTriggers, reply *string) error {
+func (apierSv1 *APIerSv1) SetTPActionTriggers(ctx *context.Context, attrs *utils.TPActionTriggers, reply *string) error {
 	if missing := utils.MissingStructFields(attrs, []string{utils.TPid, utils.ID}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -41,7 +42,7 @@ type AttrGetTPActionTriggers struct {
 }
 
 // GetTPActionTriggers queries specific ActionTriggers profile on tariff plan
-func (apierSv1 *APIerSv1) GetTPActionTriggers(attrs *AttrGetTPActionTriggers, reply *utils.TPActionTriggers) error {
+func (apierSv1 *APIerSv1) GetTPActionTriggers(ctx *context.Context, attrs *AttrGetTPActionTriggers, reply *utils.TPActionTriggers) error {
 	if missing := utils.MissingStructFields(attrs, []string{utils.TPid, utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -63,7 +64,7 @@ type AttrGetTPActionTriggerIds struct {
 }
 
 // GetTPActionTriggerIds queries ActionTriggers identities on specific tariff plan.
-func (apierSv1 *APIerSv1) GetTPActionTriggerIds(attrs *AttrGetTPActionTriggerIds, reply *[]string) error {
+func (apierSv1 *APIerSv1) GetTPActionTriggerIds(ctx *context.Context, attrs *AttrGetTPActionTriggerIds, reply *[]string) error {
 	if missing := utils.MissingStructFields(attrs, []string{utils.TPid}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -80,7 +81,7 @@ func (apierSv1 *APIerSv1) GetTPActionTriggerIds(attrs *AttrGetTPActionTriggerIds
 }
 
 // RemoveTPActionTriggers removes specific ActionTriggers on Tariff plan
-func (apierSv1 *APIerSv1) RemoveTPActionTriggers(attrs *AttrGetTPActionTriggers, reply *string) error {
+func (apierSv1 *APIerSv1) RemoveTPActionTriggers(ctx *context.Context, attrs *AttrGetTPActionTriggers, reply *string) error {
 	if missing := utils.MissingStructFields(attrs, []string{utils.TPid, utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}

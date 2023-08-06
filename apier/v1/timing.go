@@ -21,11 +21,12 @@ package v1
 import (
 	"time"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
 )
 
 // GetTiming returns a TPTiming object
-func (apierSv1 *APIerSv1) GetTiming(arg *utils.ArgsGetTimingID, reply *utils.TPTiming) (err error) {
+func (apierSv1 *APIerSv1) GetTiming(ctx *context.Context, arg *utils.ArgsGetTimingID, reply *utils.TPTiming) (err error) {
 	if missing := utils.MissingStructFields(arg, []string{utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -39,7 +40,7 @@ func (apierSv1 *APIerSv1) GetTiming(arg *utils.ArgsGetTimingID, reply *utils.TPT
 }
 
 // SetTiming alters/creates a TPTimingWithAPIOpts
-func (apierSv1 *APIerSv1) SetTiming(args *utils.TPTimingWithAPIOpts, reply *string) error {
+func (apierSv1 *APIerSv1) SetTiming(ctx *context.Context, args *utils.TPTimingWithAPIOpts, reply *string) error {
 	if missing := utils.MissingStructFields(args.TPTiming, []string{utils.ID}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -63,7 +64,7 @@ func (apierSv1 *APIerSv1) SetTiming(args *utils.TPTimingWithAPIOpts, reply *stri
 }
 
 // RemoveTiming removes a specific TPTimingWithAPIOpts instance
-func (apierSv1 *APIerSv1) RemoveTiming(args *utils.TPTimingWithAPIOpts, reply *string) error {
+func (apierSv1 *APIerSv1) RemoveTiming(ctx *context.Context, args *utils.TPTimingWithAPIOpts, reply *string) error {
 	if missing := utils.MissingStructFields(args.TPTiming, []string{utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}

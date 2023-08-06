@@ -21,11 +21,12 @@ package v1
 import (
 	"fmt"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
 )
 
 // SetTPActionPlan creates a new ActionTimings profile within a tariff plan
-func (apierSv1 *APIerSv1) SetTPActionPlan(attrs *utils.TPActionPlan, reply *string) error {
+func (apierSv1 *APIerSv1) SetTPActionPlan(ctx *context.Context, attrs *utils.TPActionPlan, reply *string) error {
 	if missing := utils.MissingStructFields(attrs, []string{utils.TPid, utils.ID, utils.ActionPlan}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -48,7 +49,7 @@ type AttrGetTPActionPlan struct {
 }
 
 // GetTPActionPlan queries specific ActionPlan profile on tariff plan
-func (apierSv1 *APIerSv1) GetTPActionPlan(attrs *AttrGetTPActionPlan, reply *utils.TPActionPlan) error {
+func (apierSv1 *APIerSv1) GetTPActionPlan(ctx *context.Context, attrs *AttrGetTPActionPlan, reply *utils.TPActionPlan) error {
 	if missing := utils.MissingStructFields(attrs, []string{utils.TPid, utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -69,7 +70,7 @@ type AttrGetTPActionPlanIds struct {
 }
 
 // GetTPActionPlanIds queries ActionPlan identities on specific tariff plan.
-func (apierSv1 *APIerSv1) GetTPActionPlanIds(attrs *AttrGetTPActionPlanIds, reply *[]string) error {
+func (apierSv1 *APIerSv1) GetTPActionPlanIds(ctx *context.Context, attrs *AttrGetTPActionPlanIds, reply *[]string) error {
 	if missing := utils.MissingStructFields(attrs, []string{utils.TPid}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -86,7 +87,7 @@ func (apierSv1 *APIerSv1) GetTPActionPlanIds(attrs *AttrGetTPActionPlanIds, repl
 }
 
 // RemoveTPActionPlan removes specific ActionPlan on Tariff plan
-func (apierSv1 *APIerSv1) RemoveTPActionPlan(attrs *AttrGetTPActionPlan, reply *string) error {
+func (apierSv1 *APIerSv1) RemoveTPActionPlan(ctx *context.Context, attrs *AttrGetTPActionPlan, reply *string) error {
 	if missing := utils.MissingStructFields(attrs, []string{utils.TPid, utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}

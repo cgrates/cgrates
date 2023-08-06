@@ -25,9 +25,10 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/cgrates/birpc"
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/cgrates/rpcclient"
 	"github.com/nyaruka/phonenumbers"
 )
 
@@ -35,10 +36,10 @@ func TestDynamicDpFieldAsInterface(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	ms := utils.MapStorage{}
 	dDp := newDynamicDP([]string{}, []string{utils.ConcatenatedKey(utils.MetaInternal, utils.StatSConnsCfg)}, []string{}, "cgrates.org", ms)
-	clientconn := make(chan rpcclient.ClientConnector, 1)
+	clientconn := make(chan birpc.ClientConnector, 1)
 	clientconn <- &ccMock{
-		calls: map[string]func(args any, reply any) error{
-			utils.StatSv1GetQueueFloatMetrics: func(args, reply any) error {
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.StatSv1GetQueueFloatMetrics: func(ctx *context.Context, args, reply any) error {
 				rpl := &map[string]float64{
 					"stat1": 31,
 				}
@@ -47,7 +48,7 @@ func TestDynamicDpFieldAsInterface(t *testing.T) {
 			},
 		},
 	}
-	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	connMgr := NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.StatSConnsCfg): clientconn,
 	})
 	SetConnManager(connMgr)

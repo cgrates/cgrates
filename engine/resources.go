@@ -26,6 +26,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/guardian"
 	"github.com/cgrates/cgrates/utils"
@@ -542,7 +543,7 @@ func (rS *ResourceService) processThresholds(rs Resources, opts map[string]any) 
 			APIOpts: opts,
 		}
 		var tIDs []string
-		if err := rS.connMgr.Call(rS.cgrcfg.ResourceSCfg().ThresholdSConns, nil,
+		if err := rS.connMgr.Call(context.TODO(), rS.cgrcfg.ResourceSCfg().ThresholdSConns,
 			utils.ThresholdSv1ProcessEvent, thEv, &tIDs); err != nil &&
 			(len(thIDs) != 0 || err.Error() != utils.ErrNotFound.Error()) {
 			utils.Logger.Warning(
@@ -670,8 +671,8 @@ func (rS *ResourceService) matchingResourcesForEvent(tnt string, ev *utils.CGREv
 	return
 }
 
-// V1ResourcesForEvent returns active resource configs matching the event
-func (rS *ResourceService) V1ResourcesForEvent(args *utils.CGREvent, reply *Resources) (err error) {
+// V1GetResourcesForEvent returns active resource configs matching the event
+func (rS *ResourceService) V1GetResourcesForEvent(ctx *context.Context, args *utils.CGREvent, reply *Resources) (err error) {
 	if args == nil {
 		return utils.NewErrMandatoryIeMissing(utils.Event)
 	}
@@ -721,7 +722,7 @@ func (rS *ResourceService) V1ResourcesForEvent(args *utils.CGREvent, reply *Reso
 }
 
 // V1AuthorizeResources queries service to find if an Usage is allowed
-func (rS *ResourceService) V1AuthorizeResources(args *utils.CGREvent, reply *string) (err error) {
+func (rS *ResourceService) V1AuthorizeResources(ctx *context.Context, args *utils.CGREvent, reply *string) (err error) {
 	if args == nil {
 		return utils.NewErrMandatoryIeMissing(utils.Event)
 	}
@@ -788,7 +789,7 @@ func (rS *ResourceService) V1AuthorizeResources(args *utils.CGREvent, reply *str
 }
 
 // V1AllocateResources is called when a resource requires allocation
-func (rS *ResourceService) V1AllocateResources(args *utils.CGREvent, reply *string) (err error) {
+func (rS *ResourceService) V1AllocateResources(ctx *context.Context, args *utils.CGREvent, reply *string) (err error) {
 	if args == nil {
 		return utils.NewErrMandatoryIeMissing(utils.Event)
 	}
@@ -859,7 +860,7 @@ func (rS *ResourceService) V1AllocateResources(args *utils.CGREvent, reply *stri
 }
 
 // V1ReleaseResources is called when we need to clear an allocation
-func (rS *ResourceService) V1ReleaseResources(args *utils.CGREvent, reply *string) (err error) {
+func (rS *ResourceService) V1ReleaseResources(ctx *context.Context, args *utils.CGREvent, reply *string) (err error) {
 	if args == nil {
 		return utils.NewErrMandatoryIeMissing(utils.Event)
 	}
@@ -923,7 +924,7 @@ func (rS *ResourceService) V1ReleaseResources(args *utils.CGREvent, reply *strin
 }
 
 // V1GetResource returns a resource configuration
-func (rS *ResourceService) V1GetResource(arg *utils.TenantIDWithAPIOpts, reply *Resource) error {
+func (rS *ResourceService) V1GetResource(ctx *context.Context, arg *utils.TenantIDWithAPIOpts, reply *Resource) error {
 	if missing := utils.MissingStructFields(arg, []string{utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -951,7 +952,7 @@ type ResourceWithConfig struct {
 	Config *ResourceProfile
 }
 
-func (rS *ResourceService) V1GetResourceWithConfig(arg *utils.TenantIDWithAPIOpts, reply *ResourceWithConfig) (err error) {
+func (rS *ResourceService) V1GetResourceWithConfig(ctx *context.Context, arg *utils.TenantIDWithAPIOpts, reply *ResourceWithConfig) (err error) {
 	if missing := utils.MissingStructFields(arg, []string{utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}

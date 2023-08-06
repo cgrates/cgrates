@@ -19,12 +19,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package dispatchers
 
 import (
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
 // AttributeSv1Ping interrogates AttributeS server responsible to process the event
-func (dS *DispatcherService) AttributeSv1Ping(args *utils.CGREvent,
+func (dS *DispatcherService) AttributeSv1Ping(ctx *context.Context, args *utils.CGREvent,
 	reply *string) (err error) {
 	if args == nil {
 		args = new(utils.CGREvent)
@@ -43,7 +44,7 @@ func (dS *DispatcherService) AttributeSv1Ping(args *utils.CGREvent,
 }
 
 // AttributeSv1GetAttributeForEvent is the dispatcher method for AttributeSv1.GetAttributeForEvent
-func (dS *DispatcherService) AttributeSv1GetAttributeForEvent(args *utils.CGREvent,
+func (dS *DispatcherService) AttributeSv1GetAttributeForEvent(ctx *context.Context, args *utils.CGREvent,
 	reply *engine.AttributeProfile) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
 	if args != nil && args.Tenant != utils.EmptyString {
@@ -59,7 +60,7 @@ func (dS *DispatcherService) AttributeSv1GetAttributeForEvent(args *utils.CGREve
 }
 
 // AttributeSv1ProcessEvent .
-func (dS *DispatcherService) AttributeSv1ProcessEvent(args *utils.CGREvent,
+func (dS *DispatcherService) AttributeSv1ProcessEvent(ctx *context.Context, args *utils.CGREvent,
 	reply *engine.AttrSProcessEventReply) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
 	if args != nil && args.Tenant != utils.EmptyString {

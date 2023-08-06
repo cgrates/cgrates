@@ -22,13 +22,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package v1
 
 import (
-	"net/rpc"
 	"path"
 	"reflect"
 	"sort"
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc"
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -37,7 +38,7 @@ import (
 var (
 	chargerCfgPath   string
 	chargerCfg       *config.CGRConfig
-	chargerRPC       *rpc.Client
+	chargerRPC       *birpc.Client
 	chargerProfile   *ChargerWithAPIOpts
 	chargerConfigDIR string //run tests for specific configuration
 
@@ -179,7 +180,7 @@ func testChargerSLoadAddCharger(t *testing.T) {
 	}
 
 	var result string
-	if err := chargerRPC.Call(utils.APIerSv1SetChargerProfile, chargerProfile, &result); err != nil {
+	if err := chargerRPC.Call(context.Background(), utils.APIerSv1SetChargerProfile, chargerProfile, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -198,7 +199,7 @@ func testChargerSLoadAddCharger(t *testing.T) {
 		},
 	}
 
-	if err := chargerRPC.Call(utils.APIerSv1SetChargerProfile, chargerProfile, &result); err != nil {
+	if err := chargerRPC.Call(context.Background(), utils.APIerSv1SetChargerProfile, chargerProfile, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -218,7 +219,7 @@ func testChargerSLoadAddCharger(t *testing.T) {
 		},
 	}
 
-	if err := chargerRPC.Call(utils.APIerSv1SetChargerProfile, chargerProfile, &result); err != nil {
+	if err := chargerRPC.Call(context.Background(), utils.APIerSv1SetChargerProfile, chargerProfile, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -243,7 +244,7 @@ func testChargerSLoadAddCharger(t *testing.T) {
 			Weight:  10,
 		},
 	}
-	if err := chargerRPC.Call(utils.APIerSv1SetAttributeProfile, alsPrf, &result); err != nil {
+	if err := chargerRPC.Call(context.Background(), utils.APIerSv1SetAttributeProfile, alsPrf, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -265,12 +266,12 @@ func testChargerSGetChargersForEvent(t *testing.T) {
 		},
 	}
 	var result *engine.ChargerProfiles
-	if err := chargerRPC.Call(utils.ChargerSv1GetChargersForEvent,
+	if err := chargerRPC.Call(context.Background(), utils.ChargerSv1GetChargersForEvent,
 		chargerEvent[1], &result); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
-	if err := chargerRPC.Call(utils.ChargerSv1GetChargersForEvent,
+	if err := chargerRPC.Call(context.Background(), utils.ChargerSv1GetChargersForEvent,
 		chargerEvent[0], &result); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(result, chargerProfiles) {
@@ -291,7 +292,7 @@ func testChargerSGetChargersForEvent(t *testing.T) {
 		},
 	}
 	chargerEvent[0].Tenant = utils.EmptyString
-	if err := chargerRPC.Call(utils.ChargerSv1GetChargersForEvent,
+	if err := chargerRPC.Call(context.Background(), utils.ChargerSv1GetChargersForEvent,
 		chargerEvent[0], &result); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(result, chargerProfiles) {
@@ -301,7 +302,7 @@ func testChargerSGetChargersForEvent(t *testing.T) {
 
 func testChargerSGetChargersForEvent2(t *testing.T) {
 	var result *engine.ChargerProfiles
-	if err := chargerRPC.Call(utils.ChargerSv1GetChargersForEvent,
+	if err := chargerRPC.Call(context.Background(), utils.ChargerSv1GetChargersForEvent,
 		&utils.CGREvent{ // matching Charger1
 			Tenant: utils.EmptyString,
 			ID:     "event1",
@@ -339,11 +340,11 @@ func testChargerSProcessEvent(t *testing.T) {
 		},
 	}
 	var result []*engine.ChrgSProcessEventReply
-	if err := chargerRPC.Call(utils.ChargerSv1ProcessEvent, chargerEvent[1], &result); err == nil ||
+	if err := chargerRPC.Call(context.Background(), utils.ChargerSv1ProcessEvent, chargerEvent[1], &result); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
-	if err := chargerRPC.Call(utils.ChargerSv1ProcessEvent, chargerEvent[0], &result); err != nil {
+	if err := chargerRPC.Call(context.Background(), utils.ChargerSv1ProcessEvent, chargerEvent[0], &result); err != nil {
 		t.Error(err)
 	} else if utils.ToJSON(result) != utils.ToJSON(processedEv) {
 		t.Errorf("Expecting : %s, received: %s", utils.ToJSON(processedEv), utils.ToJSON(result))
@@ -371,7 +372,7 @@ func testChargerSProcessEvent(t *testing.T) {
 			},
 		},
 	}
-	if err := chargerRPC.Call(utils.ChargerSv1ProcessEvent, chargerEvent[2], &result); err != nil {
+	if err := chargerRPC.Call(context.Background(), utils.ChargerSv1ProcessEvent, chargerEvent[2], &result); err != nil {
 		t.Fatal(err)
 	}
 	sort.Strings(result[0].AlteredFields)
@@ -380,7 +381,7 @@ func testChargerSProcessEvent(t *testing.T) {
 	}
 
 	chargerEvent[2].Tenant = utils.EmptyString
-	if err := chargerRPC.Call(utils.ChargerSv1ProcessEvent, chargerEvent[2], &result); err != nil {
+	if err := chargerRPC.Call(context.Background(), utils.ChargerSv1ProcessEvent, chargerEvent[2], &result); err != nil {
 		t.Fatal(err)
 	}
 	sort.Strings(result[0].AlteredFields)
@@ -406,23 +407,23 @@ func testChargerSSetChargerProfile(t *testing.T) {
 	}
 	var result string
 	expErr := "SERVER_ERROR: broken reference to filter: <*wrong:inline> for item with ID: cgrates.org:ApierTest"
-	if err := chargerRPC.Call(utils.APIerSv1SetChargerProfile, chargerProfile, &result); err == nil || err.Error() != expErr {
+	if err := chargerRPC.Call(context.Background(), utils.APIerSv1SetChargerProfile, chargerProfile, &result); err == nil || err.Error() != expErr {
 		t.Fatalf("Expected error: %q, received: %v", expErr, err)
 	}
 	var reply *engine.ChargerProfile
-	if err := chargerRPC.Call(utils.APIerSv1GetChargerProfile,
+	if err := chargerRPC.Call(context.Background(), utils.APIerSv1GetChargerProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "ApierTest"}, &reply); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Fatal(err)
 	}
 
 	chargerProfile.FilterIDs = []string{"*string:~*req.Account:1001", "*string:~*opts.Account:1002"}
-	if err := chargerRPC.Call(utils.APIerSv1SetChargerProfile, chargerProfile, &result); err != nil {
+	if err := chargerRPC.Call(context.Background(), utils.APIerSv1SetChargerProfile, chargerProfile, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	if err := chargerRPC.Call(utils.APIerSv1GetChargerProfile,
+	if err := chargerRPC.Call(context.Background(), utils.APIerSv1GetChargerProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "ApierTest"}, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(chargerProfile.ChargerProfile, reply) {
@@ -433,17 +434,17 @@ func testChargerSSetChargerProfile(t *testing.T) {
 func testChargerSGetChargerProfileIDs(t *testing.T) {
 	expected := []string{"Charger1", "Charger2", "ApierTest", "ChargerNotMatching"}
 	var result []string
-	if err := chargerRPC.Call(utils.APIerSv1GetChargerProfileIDs, utils.PaginatorWithTenant{}, &result); err != nil {
+	if err := chargerRPC.Call(context.Background(), utils.APIerSv1GetChargerProfileIDs, utils.PaginatorWithTenant{}, &result); err != nil {
 		t.Error(err)
 	} else if len(expected) != len(result) {
 		t.Errorf("Expecting : %+v, received: %+v", expected, result)
 	}
-	if err := chargerRPC.Call(utils.APIerSv1GetChargerProfileIDs, utils.PaginatorWithTenant{Tenant: "cgrates.org"}, &result); err != nil {
+	if err := chargerRPC.Call(context.Background(), utils.APIerSv1GetChargerProfileIDs, utils.PaginatorWithTenant{Tenant: "cgrates.org"}, &result); err != nil {
 		t.Error(err)
 	} else if len(expected) != len(result) {
 		t.Errorf("Expecting : %+v, received: %+v", expected, result)
 	}
-	if err := chargerRPC.Call(utils.APIerSv1GetChargerProfileIDs, utils.PaginatorWithTenant{
+	if err := chargerRPC.Call(context.Background(), utils.APIerSv1GetChargerProfileIDs, utils.PaginatorWithTenant{
 		Tenant:    "cgrates.org",
 		Paginator: utils.Paginator{Limit: utils.IntPointer(1)},
 	}, &result); err != nil {
@@ -456,13 +457,13 @@ func testChargerSGetChargerProfileIDs(t *testing.T) {
 func testChargerSUpdateChargerProfile(t *testing.T) {
 	chargerProfile.RunID = "*rated"
 	var result string
-	if err := chargerRPC.Call(utils.APIerSv1SetChargerProfile, chargerProfile, &result); err != nil {
+	if err := chargerRPC.Call(context.Background(), utils.APIerSv1SetChargerProfile, chargerProfile, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
 	var reply *engine.ChargerProfile
-	if err := chargerRPC.Call(utils.APIerSv1GetChargerProfile,
+	if err := chargerRPC.Call(context.Background(), utils.APIerSv1GetChargerProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "ApierTest"}, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(chargerProfile.ChargerProfile, reply) {
@@ -472,19 +473,19 @@ func testChargerSUpdateChargerProfile(t *testing.T) {
 
 func testChargerSRemChargerProfile(t *testing.T) {
 	var resp string
-	if err := chargerRPC.Call(utils.APIerSv1RemoveChargerProfile,
+	if err := chargerRPC.Call(context.Background(), utils.APIerSv1RemoveChargerProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "ApierTest"}, &resp); err != nil {
 		t.Error(err)
 	} else if resp != utils.OK {
 		t.Error("Unexpected reply returned", resp)
 	}
 	var reply *engine.AttributeProfile
-	if err := chargerRPC.Call(utils.APIerSv1GetChargerProfile,
+	if err := chargerRPC.Call(context.Background(), utils.APIerSv1GetChargerProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "ApierTest"},
 		&reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
-	if err := chargerRPC.Call(utils.APIerSv1RemoveChargerProfile,
+	if err := chargerRPC.Call(context.Background(), utils.APIerSv1RemoveChargerProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "ApierTest"}, &resp); err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("Expected error: %v received: %v", utils.ErrNotFound, err)
 	}
@@ -492,7 +493,7 @@ func testChargerSRemChargerProfile(t *testing.T) {
 
 func testChargerSPing(t *testing.T) {
 	var resp string
-	if err := chargerRPC.Call(utils.ChargerSv1Ping, new(utils.CGREvent), &resp); err != nil {
+	if err := chargerRPC.Call(context.Background(), utils.ChargerSv1Ping, new(utils.CGREvent), &resp); err != nil {
 		t.Error(err)
 	} else if resp != utils.Pong {
 		t.Error("Unexpected reply returned", resp)
@@ -514,7 +515,7 @@ func testChargerSProcessWithNotFoundAttribute(t *testing.T) {
 		},
 	}
 
-	if err := chargerRPC.Call(utils.APIerSv1SetChargerProfile, chargerProfile, &result); err != nil {
+	if err := chargerRPC.Call(context.Background(), utils.APIerSv1SetChargerProfile, chargerProfile, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -552,7 +553,7 @@ func testChargerSProcessWithNotFoundAttribute(t *testing.T) {
 		processedEv[0].AttributeSProfiles = nil
 	}
 	var rply []*engine.ChrgSProcessEventReply
-	if err := chargerRPC.Call(utils.ChargerSv1ProcessEvent, ev, &rply); err != nil {
+	if err := chargerRPC.Call(context.Background(), utils.ChargerSv1ProcessEvent, ev, &rply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rply, processedEv) {
 		t.Errorf("Expecting : %+v, received: %+v", utils.ToJSON(processedEv), utils.ToJSON(rply))
@@ -581,13 +582,13 @@ func testChargerSProccessEventWithProcceSRunS(t *testing.T) {
 		},
 	}
 	var result string
-	if err := chargerRPC.Call(utils.APIerSv1SetChargerProfile, chargerProfile, &result); err != nil {
+	if err := chargerRPC.Call(context.Background(), utils.APIerSv1SetChargerProfile, chargerProfile, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
 	var reply *engine.ChargerProfile
-	if err := chargerRPC.Call(utils.APIerSv1GetChargerProfile,
+	if err := chargerRPC.Call(context.Background(), utils.APIerSv1GetChargerProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "ApierTest"}, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(chargerProfile.ChargerProfile, reply) {
@@ -623,7 +624,7 @@ func testChargerSProccessEventWithProcceSRunS(t *testing.T) {
 		APIOpts: map[string]any{utils.OptsAttributesProcessRuns: 1},
 	}
 	var result2 []*engine.ChrgSProcessEventReply
-	if err := chargerRPC.Call(utils.ChargerSv1ProcessEvent, cgrEv, &result2); err != nil {
+	if err := chargerRPC.Call(context.Background(), utils.ChargerSv1ProcessEvent, cgrEv, &result2); err != nil {
 		t.Error(err)
 	} else if utils.ToJSON(result2) != utils.ToJSON(processedEv) {
 		t.Errorf("Expecting : %s, received: %s", utils.ToJSON(processedEv), utils.ToJSON(result2))
@@ -645,14 +646,14 @@ func testChargerSSetChargerProfileWithoutTenant(t *testing.T) {
 		},
 	}
 	var reply string
-	if err := chargerRPC.Call(utils.APIerSv1SetChargerProfile, chargerProfile, &reply); err != nil {
+	if err := chargerRPC.Call(context.Background(), utils.APIerSv1SetChargerProfile, chargerProfile, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply returned", reply)
 	}
 	chargerProfile.ChargerProfile.Tenant = "cgrates.org"
 	var result *engine.ChargerProfile
-	if err := chargerRPC.Call(utils.APIerSv1GetChargerProfile,
+	if err := chargerRPC.Call(context.Background(), utils.APIerSv1GetChargerProfile,
 		&utils.TenantID{ID: "randomID"},
 		&result); err != nil {
 		t.Error(err)
@@ -663,7 +664,7 @@ func testChargerSSetChargerProfileWithoutTenant(t *testing.T) {
 
 func testChargerSRemChargerProfileWithoutTenant(t *testing.T) {
 	var reply string
-	if err := chargerRPC.Call(utils.APIerSv1RemoveChargerProfile,
+	if err := chargerRPC.Call(context.Background(), utils.APIerSv1RemoveChargerProfile,
 		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{ID: "randomID"}},
 		&reply); err != nil {
 		t.Error(err)
@@ -671,7 +672,7 @@ func testChargerSRemChargerProfileWithoutTenant(t *testing.T) {
 		t.Error("Unexpected reply returned", reply)
 	}
 	var result *engine.ChargerProfile
-	if err := chargerRPC.Call(utils.APIerSv1GetChargerProfile,
+	if err := chargerRPC.Call(context.Background(), utils.APIerSv1GetChargerProfile,
 		&utils.TenantID{ID: "randomID"},
 		&result); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
@@ -680,7 +681,7 @@ func testChargerSRemChargerProfileWithoutTenant(t *testing.T) {
 
 func testChargerSCacheTestGetNotFound(t *testing.T) {
 	var reply *engine.ChargerProfile
-	if err := chargerRPC.Call(utils.APIerSv1GetChargerProfile,
+	if err := chargerRPC.Call(context.Background(), utils.APIerSv1GetChargerProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "CHARGERS_CACHE"}, &reply); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Fatal(err)
@@ -689,7 +690,7 @@ func testChargerSCacheTestGetNotFound(t *testing.T) {
 
 func testChargerSCacheTestGetFound(t *testing.T) {
 	var reply *engine.ChargerProfile
-	if err := chargerRPC.Call(utils.APIerSv1GetChargerProfile,
+	if err := chargerRPC.Call(context.Background(), utils.APIerSv1GetChargerProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "CHARGERS_CACHE"}, &reply); err != nil {
 		t.Fatal(err)
 	}
@@ -706,7 +707,7 @@ func testChargerSCacheTestSet(t *testing.T) {
 		},
 	}
 	var reply string
-	if err := chargerRPC.Call(utils.APIerSv1SetChargerProfile, chargerProfile, &reply); err != nil {
+	if err := chargerRPC.Call(context.Background(), utils.APIerSv1SetChargerProfile, chargerProfile, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply returned", reply)
@@ -718,7 +719,7 @@ func testChargerSCacheReload(t *testing.T) {
 		ChargerProfileIDs: []string{"cgrates.org:CHARGERS_CACHE"},
 	}
 	var reply string
-	if err := chargerRPC.Call(utils.CacheSv1ReloadCache, cache, &reply); err != nil {
+	if err := chargerRPC.Call(context.Background(), utils.CacheSv1ReloadCache, cache, &reply); err != nil {
 		t.Error("Got error on CacheSv1.ReloadCache: ", err.Error())
 	} else if reply != utils.OK {
 		t.Error("Calling CacheSv1.ReloadCache got reply: ", reply)

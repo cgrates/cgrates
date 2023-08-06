@@ -22,12 +22,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package general_tests
 
 import (
-	"net/rpc"
 	"path"
 	"reflect"
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc"
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
 
 	"github.com/cgrates/cgrates/engine"
@@ -38,11 +39,11 @@ import (
 var (
 	engineOneCfgPath string
 	engineOneCfg     *config.CGRConfig
-	engineOneRpc     *rpc.Client
+	engineOneRpc     *birpc.Client
 
 	engineTwoCfgPath string
 	engineTwoCfg     *config.CGRConfig
-	engineTwoRpc     *rpc.Client
+	engineTwoRpc     *birpc.Client
 )
 
 var sTestsTwoEnginesIT = []func(t *testing.T){
@@ -112,7 +113,7 @@ func testTwoEnginesCheckCacheBeforeSet(t *testing.T) {
 		CacheID: utils.CacheThresholdProfiles,
 		ItemID:  "cgrates.org:THD_TwoEnginesTest",
 	}
-	if err := engineOneRpc.Call(utils.CacheSv1HasItem, argHasItem, &reply); err != nil {
+	if err := engineOneRpc.Call(context.Background(), utils.CacheSv1HasItem, argHasItem, &reply); err != nil {
 		t.Error(err)
 	} else if reply {
 		t.Errorf("Expected: false , received: %v ", reply)
@@ -121,17 +122,17 @@ func testTwoEnginesCheckCacheBeforeSet(t *testing.T) {
 	argGetItemIDs := utils.ArgsGetCacheItemIDs{
 		CacheID: utils.CacheThresholdProfiles,
 	}
-	if err := engineOneRpc.Call(utils.CacheSv1GetItemIDs, argGetItemIDs, &rcvKeys); err == nil ||
+	if err := engineOneRpc.Call(context.Background(), utils.CacheSv1GetItemIDs, argGetItemIDs, &rcvKeys); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Fatalf("Expected error: %s received error: %s and reply: %v ", utils.ErrNotFound, err.Error(), rcvKeys)
 	}
 
-	if err := engineTwoRpc.Call(utils.CacheSv1HasItem, argHasItem, &reply); err != nil {
+	if err := engineTwoRpc.Call(context.Background(), utils.CacheSv1HasItem, argHasItem, &reply); err != nil {
 		t.Error(err)
 	} else if reply {
 		t.Errorf("Expected: false , received: %v ", reply)
 	}
-	if err := engineTwoRpc.Call(utils.CacheSv1GetItemIDs, argGetItemIDs, &rcvKeys); err == nil ||
+	if err := engineTwoRpc.Call(context.Background(), utils.CacheSv1GetItemIDs, argGetItemIDs, &rcvKeys); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Fatalf("Expected error: %s received error: %s and reply: %v ", utils.ErrNotFound, err.Error(), rcvKeys)
 	}
@@ -140,7 +141,7 @@ func testTwoEnginesCheckCacheBeforeSet(t *testing.T) {
 func testTwoEnginesSetThreshold(t *testing.T) {
 	var reply *engine.ThresholdProfile
 	// enforce caching with nil on engine2 so CacheSv1.ReloadCache load correctly the threshold
-	if err := engineTwoRpc.Call(utils.APIerSv1GetThresholdProfile,
+	if err := engineTwoRpc.Call(context.Background(), utils.APIerSv1GetThresholdProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "THD_TwoEnginesTest"}, &reply); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
@@ -159,12 +160,12 @@ func testTwoEnginesSetThreshold(t *testing.T) {
 			Async:     true,
 		},
 	}
-	if err := engineOneRpc.Call(utils.APIerSv1SetThresholdProfile, tPrfl, &result); err != nil {
+	if err := engineOneRpc.Call(context.Background(), utils.APIerSv1SetThresholdProfile, tPrfl, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	if err := engineOneRpc.Call(utils.APIerSv1GetThresholdProfile,
+	if err := engineOneRpc.Call(context.Background(), utils.APIerSv1GetThresholdProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "THD_TwoEnginesTest"}, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(tPrfl.ThresholdProfile, reply) {
@@ -179,7 +180,7 @@ func testTwoEnginesCheckCacheAfterSet(t *testing.T) {
 		CacheID: utils.CacheThresholdProfiles,
 		ItemID:  "cgrates.org:THD_TwoEnginesTest",
 	}
-	if err := engineOneRpc.Call(utils.CacheSv1HasItem, argHasItem, &reply); err != nil {
+	if err := engineOneRpc.Call(context.Background(), utils.CacheSv1HasItem, argHasItem, &reply); err != nil {
 		t.Error(err)
 	} else if !reply {
 		t.Errorf("Expected: %v , received:%v", expected, reply)
@@ -189,18 +190,18 @@ func testTwoEnginesCheckCacheAfterSet(t *testing.T) {
 	argGetItemIDs := utils.ArgsGetCacheItemIDs{
 		CacheID: utils.CacheThresholdProfiles,
 	}
-	if err := engineOneRpc.Call(utils.CacheSv1GetItemIDs, argGetItemIDs, &rcvKeys); err != nil {
+	if err := engineOneRpc.Call(context.Background(), utils.CacheSv1GetItemIDs, argGetItemIDs, &rcvKeys); err != nil {
 		t.Fatalf("Got error on APIerSv1.GetCacheStats: %s ", err.Error())
 	} else if !reflect.DeepEqual(expKeys, rcvKeys) {
 		t.Errorf("Expected: %+v, received: %+v", expKeys, rcvKeys)
 	}
 
-	if err := engineTwoRpc.Call(utils.CacheSv1HasItem, argHasItem, &reply); err != nil {
+	if err := engineTwoRpc.Call(context.Background(), utils.CacheSv1HasItem, argHasItem, &reply); err != nil {
 		t.Error(err)
 	} else if !reply {
 		t.Errorf("Expected: %v , received:%v", expected, reply)
 	}
-	if err := engineTwoRpc.Call(utils.CacheSv1GetItemIDs, argGetItemIDs, &rcvKeys); err != nil {
+	if err := engineTwoRpc.Call(context.Background(), utils.CacheSv1GetItemIDs, argGetItemIDs, &rcvKeys); err != nil {
 		t.Fatalf("Got error on APIerSv1.GetCacheStats: %s ", err.Error())
 	} else if !reflect.DeepEqual(expKeys, rcvKeys) {
 		t.Errorf("Expected: %+v, received: %+v", expKeys, rcvKeys)
@@ -220,7 +221,7 @@ func testTwoEnginesCheckCacheAfterSet(t *testing.T) {
 		},
 	}
 	var rplTh *engine.ThresholdProfile
-	if err := engineTwoRpc.Call(utils.APIerSv1GetThresholdProfile,
+	if err := engineTwoRpc.Call(context.Background(), utils.APIerSv1GetThresholdProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "THD_TwoEnginesTest"}, &rplTh); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(tPrfl.ThresholdProfile, rplTh) {
@@ -247,18 +248,18 @@ func testTwoEnginesUpdateThreshold(t *testing.T) {
 			utils.CacheOpt: utils.MetaReload,
 		},
 	}
-	if err := engineOneRpc.Call(utils.APIerSv1SetThresholdProfile, tPrfl, &result); err != nil {
+	if err := engineOneRpc.Call(context.Background(), utils.APIerSv1SetThresholdProfile, tPrfl, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	if err := engineOneRpc.Call(utils.APIerSv1GetThresholdProfile,
+	if err := engineOneRpc.Call(context.Background(), utils.APIerSv1GetThresholdProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "THD_TwoEnginesTest"}, &rplTh); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(tPrfl.ThresholdProfile, rplTh) {
 		t.Errorf("Expecting: %+v, received: %+v", tPrfl.ThresholdProfile, rplTh)
 	}
-	if err := engineTwoRpc.Call(utils.APIerSv1GetThresholdProfile,
+	if err := engineTwoRpc.Call(context.Background(), utils.APIerSv1GetThresholdProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "THD_TwoEnginesTest"}, &rplTh); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(tPrfl.ThresholdProfile, rplTh) {

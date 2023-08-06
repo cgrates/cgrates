@@ -22,12 +22,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package general_tests
 
 import (
-	"net/rpc"
 	"os"
 	"path"
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc"
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/ees"
 	"github.com/cgrates/cgrates/engine"
@@ -37,7 +38,7 @@ import (
 var (
 	cdrsPostFailCfgPath string
 	cdrsPostFailCfg     *config.CGRConfig
-	cdrsPostFailRpc     *rpc.Client
+	cdrsPostFailRpc     *birpc.Client
 	cdrsPostFailConfDIR string // run the tests for specific configuration
 
 	// subtests to be executed for each confDIR
@@ -117,21 +118,21 @@ func testCDRsPostFailoverRpcConn(t *testing.T) {
 
 func testCDRsPostFailoverLoadTariffPlanFromFolder(t *testing.T) {
 	var loadInst utils.LoadInstance
-	if err := cdrsPostFailRpc.Call(utils.APIerSv2LoadTariffPlanFromFolder,
+	if err := cdrsPostFailRpc.Call(context.Background(), utils.APIerSv2LoadTariffPlanFromFolder,
 		&utils.AttrLoadTpFromFolder{FolderPath: path.Join(
 			*dataDir, "tariffplans", "testit")}, &loadInst); err != nil {
 		t.Error(err)
 	}
 	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // Give time for scheduler to execute topups
 	var resp string
-	if err := cdrsPostFailRpc.Call(utils.APIerSv1RemoveChargerProfile,
+	if err := cdrsPostFailRpc.Call(context.Background(), utils.APIerSv1RemoveChargerProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "SupplierCharges"}, &resp); err != nil {
 		t.Error(err)
 	} else if resp != utils.OK {
 		t.Error("Unexpected reply returned", resp)
 	}
 	var reply *engine.ChargerProfile
-	if err := cdrsPostFailRpc.Call(utils.APIerSv1GetChargerProfile,
+	if err := cdrsPostFailRpc.Call(context.Background(), utils.APIerSv1GetChargerProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "SupplierCharges"},
 		&reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
@@ -163,21 +164,21 @@ func testCDRsPostFailoverProcessCDR(t *testing.T) {
 	}
 
 	var reply string
-	if err := cdrsPostFailRpc.Call(utils.CDRsV1ProcessEvent, args, &reply); err != nil {
+	if err := cdrsPostFailRpc.Call(context.Background(), utils.CDRsV1ProcessEvent, args, &reply); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply received: ", reply)
 	}
 	args.ID = "2"
 	args.Event[utils.OriginID] = "2"
-	if err := cdrsPostFailRpc.Call(utils.CDRsV1ProcessEvent, args, &reply); err != nil {
+	if err := cdrsPostFailRpc.Call(context.Background(), utils.CDRsV1ProcessEvent, args, &reply); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply received: ", reply)
 	}
 	args.ID = "3"
 	args.Event[utils.OriginID] = "3"
-	if err := cdrsPostFailRpc.Call(utils.CDRsV1ProcessEvent, args, &reply); err != nil {
+	if err := cdrsPostFailRpc.Call(context.Background(), utils.CDRsV1ProcessEvent, args, &reply); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply received: ", reply)

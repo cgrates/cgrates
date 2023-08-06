@@ -22,12 +22,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package v1
 
 import (
-	"net/rpc"
-	"net/rpc/jsonrpc"
 	"path"
 	"reflect"
 	"testing"
 
+	"github.com/cgrates/birpc"
+	"github.com/cgrates/birpc/context"
+	"github.com/cgrates/birpc/jsonrpc"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -36,7 +37,7 @@ import (
 var (
 	tpRateCfgPath   string
 	tpRateCfg       *config.CGRConfig
-	tpRateRPC       *rpc.Client
+	tpRateRPC       *birpc.Client
 	tpRate          *utils.TPRateRALs
 	tpRateDelay     int
 	tpRateConfigDIR string //run tests for specific configuration
@@ -117,7 +118,7 @@ func testTPRatesRpcConn(t *testing.T) {
 
 func testTPRatesGetTPRateforeSet(t *testing.T) {
 	var reply *utils.TPRateRALs
-	if err := tpRateRPC.Call(utils.APIerSv1GetTPRate,
+	if err := tpRateRPC.Call(context.Background(), utils.APIerSv1GetTPRate,
 		&AttrGetTPRate{TPid: "TPidTpRate", ID: "RT_FS_USERS"}, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
@@ -145,7 +146,7 @@ func testTPRatesSetTPRate(t *testing.T) {
 		},
 	}
 	var result string
-	if err := tpRateRPC.Call(utils.APIerSv1SetTPRate, tpRate, &result); err != nil {
+	if err := tpRateRPC.Call(context.Background(), utils.APIerSv1SetTPRate, tpRate, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -154,7 +155,7 @@ func testTPRatesSetTPRate(t *testing.T) {
 
 func testTPRatesGetTPRateAfterSet(t *testing.T) {
 	var reply *utils.TPRateRALs
-	if err := tpRateRPC.Call(utils.APIerSv1GetTPRate, &AttrGetTPRate{TPid: "TPidTpRate", ID: tpRate.ID}, &reply); err != nil {
+	if err := tpRateRPC.Call(context.Background(), utils.APIerSv1GetTPRate, &AttrGetTPRate{TPid: "TPidTpRate", ID: tpRate.ID}, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(tpRate, reply) {
 		t.Errorf("Expecting : %+v, received: %+v", tpRate, reply)
@@ -164,7 +165,7 @@ func testTPRatesGetTPRateAfterSet(t *testing.T) {
 func testTPRatesGetTPRateIds(t *testing.T) {
 	var result []string
 	expectedTPID := []string{"RT_FS_USERS"}
-	if err := tpRateRPC.Call(utils.APIerSv1GetTPRateIds, &AttrGetTPRateIds{TPid: "TPidTpRate"}, &result); err != nil {
+	if err := tpRateRPC.Call(context.Background(), utils.APIerSv1GetTPRateIds, &AttrGetTPRateIds{TPid: "TPidTpRate"}, &result); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expectedTPID, result) {
 		t.Errorf("Expecting: %+v, received: %+v", expectedTPID, result)
@@ -196,7 +197,7 @@ func testTPRatesUpdateTPRate(t *testing.T) {
 			GroupIntervalStart: "3s",
 		},
 	}
-	if err := tpRateRPC.Call(utils.APIerSv1SetTPRate, tpRate, &result); err != nil {
+	if err := tpRateRPC.Call(context.Background(), utils.APIerSv1SetTPRate, tpRate, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -205,7 +206,7 @@ func testTPRatesUpdateTPRate(t *testing.T) {
 
 func testTPRatesGetTPRateAfterUpdate(t *testing.T) {
 	var reply *utils.TPRateRALs
-	if err := tpRateRPC.Call(utils.APIerSv1GetTPRate,
+	if err := tpRateRPC.Call(context.Background(), utils.APIerSv1GetTPRate,
 		&AttrGetTPRate{TPid: "TPidTpRate", ID: tpRate.ID}, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(tpRate, reply) {
@@ -216,7 +217,7 @@ func testTPRatesGetTPRateAfterUpdate(t *testing.T) {
 
 func testTPRatesRemoveTPRate(t *testing.T) {
 	var resp string
-	if err := tpRateRPC.Call(utils.APIerSv1RemoveTPRate,
+	if err := tpRateRPC.Call(context.Background(), utils.APIerSv1RemoveTPRate,
 		&AttrGetTPRate{TPid: "TPidTpRate", ID: "RT_FS_USERS"}, &resp); err != nil {
 		t.Error(err)
 	} else if resp != utils.OK {
@@ -226,7 +227,7 @@ func testTPRatesRemoveTPRate(t *testing.T) {
 
 func testTPRatesGetTPRateAfterRemove(t *testing.T) {
 	var reply *utils.TPRateRALs
-	if err := tpRateRPC.Call(utils.APIerSv1GetTPRate,
+	if err := tpRateRPC.Call(context.Background(), utils.APIerSv1GetTPRate,
 		&AttrGetTPRate{TPid: "TPidTpRate", ID: "RT_FS_USERS"}, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}

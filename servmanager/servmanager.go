@@ -25,6 +25,7 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -55,7 +56,7 @@ type ServiceManager struct {
 }
 
 // Call .
-func (srvMngr *ServiceManager) Call(serviceMethod string, args any, reply any) error {
+func (srvMngr *ServiceManager) Call(ctx *context.Context, serviceMethod string, args any, reply any) error {
 	parts := strings.Split(serviceMethod, ".")
 	if len(parts) != 2 {
 		return rpcclient.ErrUnsupporteServiceMethod
@@ -87,7 +88,7 @@ type ArgStartService struct {
 }
 
 // V1StartService starts a service with ID
-func (srvMngr *ServiceManager) V1StartService(args ArgStartService, reply *string) (err error) {
+func (srvMngr *ServiceManager) V1StartService(ctx *context.Context, args ArgStartService, reply *string) (err error) {
 	switch args.ServiceID {
 	case utils.MetaScheduler:
 		// stop the service using the config
@@ -106,7 +107,7 @@ func (srvMngr *ServiceManager) V1StartService(args ArgStartService, reply *strin
 }
 
 // V1StopService shuts-down a service with ID
-func (srvMngr *ServiceManager) V1StopService(args ArgStartService, reply *string) (err error) {
+func (srvMngr *ServiceManager) V1StopService(ctx *context.Context, args ArgStartService, reply *string) (err error) {
 	switch args.ServiceID {
 	case utils.MetaScheduler:
 		// stop the service using the config
@@ -125,7 +126,7 @@ func (srvMngr *ServiceManager) V1StopService(args ArgStartService, reply *string
 }
 
 // V1ServiceStatus  returns the service status
-func (srvMngr *ServiceManager) V1ServiceStatus(args ArgStartService, reply *string) error {
+func (srvMngr *ServiceManager) V1ServiceStatus(ctx *context.Context, args ArgStartService, reply *string) error {
 	srvMngr.RLock()
 	defer srvMngr.RUnlock()
 	var running bool

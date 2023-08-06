@@ -23,7 +23,6 @@ package general_tests
 
 import (
 	"flag"
-	"net/rpc"
 	"os"
 	"os/exec"
 	"path"
@@ -31,6 +30,8 @@ import (
 	"strconv"
 	"testing"
 
+	"github.com/cgrates/birpc"
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -43,7 +44,7 @@ var (
 	sentinel2ConfigPath = path.Join(*dataDir, "redisSentinel", "sentinel2.conf")
 	engineConfigPath    = path.Join(*dataDir, "conf", "samples", "redisSentinel")
 	sentinelConfig      *config.CGRConfig
-	sentinelRPC         *rpc.Client
+	sentinelRPC         *birpc.Client
 	node1Exec           *exec.Cmd
 	node2Exec           *exec.Cmd
 	stlExec1            *exec.Cmd
@@ -154,13 +155,13 @@ func testRedisSentinelSetGetAttribute(t *testing.T) {
 	}
 	alsPrf.Compile()
 	var result string
-	if err := sentinelRPC.Call(utils.APIerSv1SetAttributeProfile, alsPrf, &result); err != nil {
+	if err := sentinelRPC.Call(context.Background(), utils.APIerSv1SetAttributeProfile, alsPrf, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
 	var reply *engine.AttributeProfile
-	if err := sentinelRPC.Call(utils.APIerSv1GetAttributeProfile,
+	if err := sentinelRPC.Call(context.Background(), utils.APIerSv1GetAttributeProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "ApierTest"}, &reply); err != nil {
 		t.Fatal(err)
 	}
@@ -190,7 +191,7 @@ func testRedisSentinelInsertion(t *testing.T) {
 	var result string
 	addFunc := func(t *testing.T, nrFail *int) {
 		alsPrf.ID = orgiginID + strconv.Itoa(index)
-		if err := sentinelRPC.Call(utils.APIerSv1SetAttributeProfile, alsPrf, &result); err != nil {
+		if err := sentinelRPC.Call(context.Background(), utils.APIerSv1SetAttributeProfile, alsPrf, &result); err != nil {
 			if err.Error() == "SERVER_ERROR: EOF" {
 				*nrFail = *nrFail + 1
 			} else {
@@ -280,7 +281,7 @@ func testRedisSentinelGetAttrAfterFailover(t *testing.T) {
 	}
 	alsPrf.Compile()
 	var reply *engine.AttributeProfile
-	if err := sentinelRPC.Call(utils.APIerSv1GetAttributeProfile,
+	if err := sentinelRPC.Call(context.Background(), utils.APIerSv1GetAttributeProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "ApierTest"}, &reply); err != nil {
 		t.Fatal(err)
 	}

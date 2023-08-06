@@ -22,11 +22,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package general_tests
 
 import (
-	"net/rpc"
 	"path"
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc"
+	"github.com/cgrates/birpc/context"
 	v1 "github.com/cgrates/cgrates/apier/v1"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
@@ -38,7 +39,7 @@ var (
 	sesNoneReqTypeCfgDir  string
 	sesNoneReqTypeCfgPath string
 	sesNoneReqTypeCfg     *config.CGRConfig
-	sesNoneReqTypeRPC     *rpc.Client
+	sesNoneReqTypeRPC     *birpc.Client
 
 	sesNoneReqTypeTests = []func(t *testing.T){
 		testSesNoneReqTypeItLoadConfig,
@@ -117,7 +118,7 @@ func testSesNoneReqTypeItAddChargerS(t *testing.T) {
 		},
 	}
 	var result string
-	if err := sesNoneReqTypeRPC.Call(utils.APIerSv1SetChargerProfile, chargerProfile, &result); err != nil {
+	if err := sesNoneReqTypeRPC.Call(context.Background(), utils.APIerSv1SetChargerProfile, chargerProfile, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -148,7 +149,7 @@ func testSesNoneReqTypeItInit(t *testing.T) {
 		},
 	}
 	var rply1 sessions.V1InitSessionReply
-	if err := sesNoneReqTypeRPC.Call(utils.SessionSv1InitiateSession,
+	if err := sesNoneReqTypeRPC.Call(context.Background(), utils.SessionSv1InitiateSession,
 		args1, &rply1); err != nil {
 		t.Error(err)
 		return

@@ -21,14 +21,15 @@ package dispatchers
 import (
 	"errors"
 	"flag"
-	"net/rpc"
-	"net/rpc/jsonrpc"
 	"os/exec"
 	"path"
 	"strconv"
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc"
+	"github.com/cgrates/birpc/context"
+	"github.com/cgrates/birpc/jsonrpc"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -46,12 +47,12 @@ var (
 	dbType    = flag.String("dbtype", utils.MetaInternal, "The type of DataBase (Internal/Mongo/mySql)")
 )
 
-func newRPCClient(cfg *config.ListenCfg) (c *rpc.Client, err error) {
+func newRPCClient(cfg *config.ListenCfg) (c *birpc.Client, err error) {
 	switch *encoding {
 	case utils.MetaJSON:
 		return jsonrpc.Dial(utils.TCP, cfg.RPCJSONListen)
 	case utils.MetaGOB:
-		return rpc.Dial(utils.TCP, cfg.RPCGOBListen)
+		return birpc.Dial(utils.TCP, cfg.RPCGOBListen)
 	default:
 		return nil, errors.New("UNSUPPORTED_RPC")
 	}
@@ -60,7 +61,7 @@ func newRPCClient(cfg *config.ListenCfg) (c *rpc.Client, err error) {
 type testDispatcher struct {
 	CfgPath string
 	Cfg     *config.CGRConfig
-	RPC     *rpc.Client
+	RPC     *birpc.Client
 	cmd     *exec.Cmd
 }
 
@@ -121,7 +122,7 @@ func (d *testDispatcher) resetStorDb(t *testing.T) {
 func (d *testDispatcher) loadData(t *testing.T, path string) {
 	var reply string
 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path}
-	if err := d.RPC.Call(utils.APIerSv1LoadTariffPlanFromFolder, attrs, &reply); err != nil {
+	if err := d.RPC.Call(context.Background(), utils.APIerSv1LoadTariffPlanFromFolder, attrs, &reply); err != nil {
 		t.Errorf("<%s>Error at loading data from folder :%v", d.CfgPath, err)
 	}
 }

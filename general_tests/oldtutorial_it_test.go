@@ -39,7 +39,7 @@ package general_tests
 
 // var tutLocalCfgPath string
 // var tutFsLocalCfg *config.CGRConfig
-// var tutLocalRpc *rpc.Client
+// var tutLocalRpc *birpc.Client
 // var loadInst utils.LoadInstance // Share load information between tests
 
 // func TestTutITInitCfg(t *testing.T) {
@@ -87,7 +87,7 @@ package general_tests
 // // Load the tariff plan, creating accounts and their balances
 // func TestTutITLoadTariffPlanFromFolder(t *testing.T) {
 // 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(**dataDir, "tariffplans", "oldtutorial")}
-// 	if err := tutLocalRpc.Call(utils.APIerSv2LoadTariffPlanFromFolder, attrs, &loadInst); err != nil {
+// 	if err := tutLocalRpc.Call(context.Background(),utils.APIerSv2LoadTariffPlanFromFolder, attrs, &loadInst); err != nil {
 // 		t.Error(err)
 // 	}
 // 	time.Sleep(100*time.Millisecond + time.Duration(**waitRater)*time.Millisecond) // Give time for scheduler to execute topups
@@ -108,7 +108,7 @@ package general_tests
 // 		ThresholdProfiles: 7, Filters: 16, SupplierProfiles: 3, AttributeProfiles: 1,
 // 		CdrStats: 0, Users: 0} // CdrStats and Users are 0 because deprecated. To be removed
 // 	var args utils.AttrCacheStats
-// 	if err := tutLocalRpc.Call(utils.APIerSv1GetCacheStats, args, &rcvStats); err != nil {
+// 	if err := tutLocalRpc.Call(context.Background(),utils.APIerSv1GetCacheStats, args, &rcvStats); err != nil {
 // 		t.Error("Got error on APIerSv1.GetCacheStats: ", err.Error())
 // 	} else if !reflect.DeepEqual(expectedStats, rcvStats) {
 // 		t.Errorf("Calling APIerSv1.GetCacheStats expected: %+v, received: %+v", utils.ToJSON(expectedStats), utils.ToJSON(rcvStats))
@@ -120,7 +120,7 @@ package general_tests
 // 	var rcvKeys utils.ArgsCache
 // 	argsAPI := utils.ArgsCacheKeys{ArgsCache: utils.ArgsCache{
 // 		DestinationIDs: &[]string{}, RatingPlanIDs: &[]string{"RP_RETAIL1", "RP_GENERIC", "NONEXISTENT"}}}
-// 	if err := tutLocalRpc.Call(utils.APIerSv1GetCacheKeys, argsAPI, &rcvKeys); err != nil {
+// 	if err := tutLocalRpc.Call(context.Background(),utils.APIerSv1GetCacheKeys, argsAPI, &rcvKeys); err != nil {
 // 		t.Error("Got error on APIerSv1.GetCacheStats: ", err.Error())
 // 	} else {
 // 		if rcvKeys.DestinationIDs == nil {
@@ -145,7 +145,7 @@ package general_tests
 // 	if err != nil {
 // 		t.Fatal(err)
 // 	}
-// 	if err := tutLocalRpc.Call(utils.APIerSv1GetCacheStats, args, &rcvStats); err != nil {
+// 	if err := tutLocalRpc.Call(context.Background(),utils.APIerSv1GetCacheStats, args, &rcvStats); err != nil {
 // 		t.Error("Got error on APIerSv1.GetCacheStats: ", err.Error())
 // 	} else if !reflect.DeepEqual(expectedStats, rcvStats) {
 // 		t.Errorf("Calling APIerSv1.GetCacheStats expected: %+v, received: %+v", expectedStats, rcvStats)
@@ -197,7 +197,7 @@ package general_tests
 // 		TimeEnd:       tEnd,
 // 	}
 // 	var cc engine.CallCost
-// 	if err := tutLocalRpc.Call(utils.ResponderGetCost, cd, &cc); err != nil {
+// 	if err := tutLocalRpc.Call(context.Background(),utils.ResponderGetCost, cd, &cc); err != nil {
 // 		t.Error("Got error on Responder.GetCost: ", err.Error())
 // 	} else if cc.Cost != 0.6 {
 // 		t.Errorf("Calling Responder.GetCost got callcost: %v", cc.Cost)
@@ -214,7 +214,7 @@ package general_tests
 // 		TimeEnd:       tEnd,
 // 		ExtraFields:   map[string]string{"Uuid": "388539dfd4f5cefee8f488b78c6c244b9e19138e"},
 // 	}
-// 	if err := tutLocalRpc.Call(utils.ResponderGetCost, cd, &cc); err != nil {
+// 	if err := tutLocalRpc.Call(context.Background(),utils.ResponderGetCost, cd, &cc); err != nil {
 // 		t.Error("Got error on Responder.GetCost: ", err.Error())
 // 	} else if cc.Cost != 0.6 {
 // 		t.Errorf("Calling Responder.GetCost got callcost: %v", cc.Cost)
@@ -231,7 +231,7 @@ package general_tests
 // 		TimeStart:     tStart,
 // 		TimeEnd:       tEnd,
 // 	}
-// 	if err := tutLocalRpc.Call(utils.ResponderGetCost, cd, &cc); err != nil {
+// 	if err := tutLocalRpc.Call(context.Background(),utils.ResponderGetCost, cd, &cc); err != nil {
 // 		t.Error("Got error on Responder.GetCost: ", err.Error())
 // 	} else if cc.Cost != 0.6418 { // 0.01 first minute, 0.04 25 seconds with RT_20CNT
 // 		t.Errorf("Calling Responder.GetCost got callcost: %v", cc.Cost)
@@ -248,7 +248,7 @@ package general_tests
 // 		TimeStart:     tStart,
 // 		TimeEnd:       tEnd,
 // 	}
-// 	if err := tutLocalRpc.Call(utils.ResponderGetCost, cd, &cc); err != nil {
+// 	if err := tutLocalRpc.Call(context.Background(),utils.ResponderGetCost, cd, &cc); err != nil {
 // 		t.Error("Got error on Responder.GetCost: ", err.Error())
 // 	} else if cc.Cost != 1 {
 // 		t.Errorf("Calling Responder.GetCost got callcost: %v", cc.Cost)
@@ -265,7 +265,7 @@ package general_tests
 // 		TimeStart:     tStart,
 // 		TimeEnd:       tEnd,
 // 	}
-// 	if err := tutLocalRpc.Call(utils.ResponderGetCost, cd, &cc); err != nil {
+// 	if err := tutLocalRpc.Call(context.Background(),utils.ResponderGetCost, cd, &cc); err != nil {
 // 		t.Error("Got error on Responder.GetCost: ", err.Error())
 // 	} else if cc.Cost != 1.3 {
 // 		t.Errorf("Calling Responder.GetCost got callcost: %v", cc.Cost)
@@ -282,7 +282,7 @@ package general_tests
 // 		TimeStart:     tStart,
 // 		TimeEnd:       tEnd,
 // 	}
-// 	if err := tutLocalRpc.Call(utils.ResponderGetCost, cd, &cc); err != nil {
+// 	if err := tutLocalRpc.Call(context.Background(),utils.ResponderGetCost, cd, &cc); err != nil {
 // 		t.Error("Got error on Responder.GetCost: ", err.Error())
 // 	} else if cc.Cost != 1 {
 // 		t.Errorf("Calling Responder.GetCost got callcost: %v", cc.Cost)
@@ -299,7 +299,7 @@ package general_tests
 // 		TimeStart:     tStart,
 // 		TimeEnd:       tEnd,
 // 	}
-// 	if err := tutLocalRpc.Call(utils.ResponderGetCost, cd, &cc); err != nil {
+// 	if err := tutLocalRpc.Call(context.Background(),utils.ResponderGetCost, cd, &cc); err != nil {
 // 		t.Error("Got error on Responder.GetCost: ", err.Error())
 // 	} else if cc.Cost != 1.3 {
 // 		t.Errorf("Calling Responder.GetCost got callcost: %v", cc.Cost)
@@ -314,7 +314,7 @@ package general_tests
 // 		TimeStart:   tStart,
 // 		TimeEnd:     tStart.Add(50 * time.Second),
 // 	}
-// 	if err := tutLocalRpc.Call(utils.ResponderGetCost, cd, &cc); err != nil {
+// 	if err := tutLocalRpc.Call(context.Background(),utils.ResponderGetCost, cd, &cc); err != nil {
 // 		t.Error("Got error on Responder.GetCost: ", err.Error())
 // 	} else if cc.Cost != 0.5 {
 // 		t.Errorf("Calling Responder.GetCost got callcost: %s", cc.AsJSON())
@@ -328,7 +328,7 @@ package general_tests
 // 		TimeStart:   tStart,
 // 		TimeEnd:     tStart.Add(70 * time.Second),
 // 	}
-// 	if err := tutLocalRpc.Call(utils.ResponderGetCost, cd, &cc); err != nil {
+// 	if err := tutLocalRpc.Call(context.Background(),utils.ResponderGetCost, cd, &cc); err != nil {
 // 		t.Error("Got error on Responder.GetCost: ", err.Error())
 // 	} else if cc.Cost != 0.62 {
 // 		t.Errorf("Calling Responder.GetCost got callcost: %v", cc.Cost)
@@ -342,7 +342,7 @@ package general_tests
 // 		TimeStart:   tStart,
 // 		TimeEnd:     tStart.Add(50 * time.Second),
 // 	}
-// 	if err := tutLocalRpc.Call(utils.ResponderGetCost, cd, &cc); err != nil {
+// 	if err := tutLocalRpc.Call(context.Background(),utils.ResponderGetCost, cd, &cc); err != nil {
 // 		t.Error("Got error on Responder.GetCost: ", err.Error())
 // 	} else if cc.Cost != 0.5 {
 // 		t.Errorf("Calling Responder.GetCost got callcost: %s", cc.AsJSON())
@@ -356,7 +356,7 @@ package general_tests
 // 		TimeStart:   tStart,
 // 		TimeEnd:     tStart.Add(70 * time.Second),
 // 	}
-// 	if err := tutLocalRpc.Call(utils.ResponderGetCost, cd, &cc); err != nil {
+// 	if err := tutLocalRpc.Call(context.Background(),utils.ResponderGetCost, cd, &cc); err != nil {
 // 		t.Error("Got error on Responder.GetCost: ", err.Error())
 // 	} else if cc.Cost != 0.7 { // In case of *disconnect strategy, it will not be applied so we can go on negative costs
 // 		t.Errorf("Calling Responder.GetCost got callcost: %s", cc.AsJSON())
@@ -370,7 +370,7 @@ package general_tests
 // 		TimeStart:   time.Date(2016, 1, 6, 19, 0, 0, 0, time.UTC),
 // 		TimeEnd:     time.Date(2016, 1, 6, 19, 1, 30, 0, time.UTC),
 // 	}
-// 	if err := tutLocalRpc.Call(utils.ResponderGetCost, cd, &cc); err != nil {
+// 	if err := tutLocalRpc.Call(context.Background(),utils.ResponderGetCost, cd, &cc); err != nil {
 // 		t.Error("Got error on Responder.GetCost: ", err.Error())
 // 	} else if cc.Cost != 0.3249 { //
 // 		t.Errorf("Calling Responder.GetCost got callcost: %s", cc.AsJSON())
@@ -384,7 +384,7 @@ package general_tests
 // 		TimeStart:   time.Date(2016, 1, 6, 18, 31, 5, 0, time.UTC),
 // 		TimeEnd:     time.Date(2016, 1, 6, 18, 32, 35, 0, time.UTC),
 // 	}
-// 	if err := tutLocalRpc.Call(utils.ResponderGetCost, cd, &cc); err != nil {
+// 	if err := tutLocalRpc.Call(context.Background(),utils.ResponderGetCost, cd, &cc); err != nil {
 // 		t.Error("Got error on Responder.GetCost: ", err.Error())
 // 	} else if cc.Cost != 1.3 { //
 // 		t.Errorf("Calling Responder.GetCost got callcost: %s", cc.AsJSON())
@@ -398,7 +398,7 @@ package general_tests
 // 		TimeStart:   time.Date(2014, 12, 7, 8, 42, 26, 0, time.UTC),
 // 		TimeEnd:     time.Date(2014, 12, 7, 8, 44, 26, 0, time.UTC),
 // 	}
-// 	if err := tutLocalRpc.Call(utils.ResponderGetCost, cd, &cc); err != nil {
+// 	if err := tutLocalRpc.Call(context.Background(),utils.ResponderGetCost, cd, &cc); err != nil {
 // 		t.Error("Got error on Responder.GetCost: ", err.Error())
 // 	} else if cc.Cost != 0.3498 { //
 // 		t.Errorf("Calling Responder.GetCost got callcost: %s", cc.AsJSON())
@@ -419,7 +419,7 @@ package general_tests
 // 		TimeEnd:       tStart.Add(20 * time.Second),
 // 	}
 // 	var cc engine.CallCost
-// 	if err := tutLocalRpc.Call(utils.ResponderMaxDebit, cd, &cc); err != nil {
+// 	if err := tutLocalRpc.Call(context.Background(),utils.ResponderMaxDebit, cd, &cc); err != nil {
 // 		t.Error("Got error on Responder.GetCost: ", err.Error())
 // 	} else if cc.GetDuration() == 20 {
 // 		t.Errorf("Calling Responder.MaxDebit got callcost: %v", cc.GetDuration())
@@ -434,7 +434,7 @@ package general_tests
 // 		TimeStart:     tStart,
 // 		TimeEnd:       tStart.Add(200 * time.Second),
 // 	}
-// 	if err := tutLocalRpc.Call(utils.ResponderMaxDebit, cd, &cc); err != nil {
+// 	if err := tutLocalRpc.Call(context.Background(),utils.ResponderMaxDebit, cd, &cc); err != nil {
 // 		t.Error("Got error on Responder.MaxDebit: ", err.Error())
 // 	} else if cc.GetDuration() == 200 {
 // 		t.Errorf("Calling Responder.MaxDebit got duration: %v", cc.GetDuration())
@@ -450,7 +450,7 @@ package general_tests
 // 		TimeEnd:       tStart.Add(120 * time.Second),
 // 	}
 // 	cd.CgrID = "1"
-// 	if err := tutLocalRpc.Call(utils.ResponderMaxDebit, cd, &cc); err != nil {
+// 	if err := tutLocalRpc.Call(context.Background(),utils.ResponderMaxDebit, cd, &cc); err != nil {
 // 		t.Error("Got error on Responder.GetCost: ", err.Error())
 // 	} else if cc.GetDuration() == 120 {
 // 		t.Errorf("Calling Responder.MaxDebit got callcost: %v", cc.GetDuration())
@@ -466,7 +466,7 @@ package general_tests
 // 		TimeEnd:       tStart.Add(120 * time.Second),
 // 	}
 // 	cd.CgrID = "2"
-// 	if err := tutLocalRpc.Call(utils.ResponderMaxDebit, cd, &cc); err != nil {
+// 	if err := tutLocalRpc.Call(context.Background(),utils.ResponderMaxDebit, cd, &cc); err != nil {
 // 		t.Error("Got error on Responder.GetCost: ", err.Error())
 // 	} else if cc.GetDuration() != 62*time.Second { // We have as strategy *dsconnect
 // 		t.Errorf("Calling Responder.MaxDebit got callcost: %v", cc.GetDuration())
@@ -586,7 +586,7 @@ package general_tests
 // 	var cdrs []*engine.ExternalCDR
 // 	req := utils.RPCCDRsFilter{RunIDs: []string{utils.MetaDefault},
 // 		Accounts: []string{"1004"}, DestinationPrefixes: []string{"1001"}}
-// 	if err := tutLocalRpc.Call(utils.APIerSv2GetCDRs, req, &cdrs); err != nil {
+// 	if err := tutLocalRpc.Call(context.Background(),utils.APIerSv2GetCDRs, req, &cdrs); err != nil {
 // 		t.Error("Unexpected error: ", err.Error())
 // 	} else if len(cdrs) != 1 {
 // 		t.Error("Unexpected number of CDRs returned: ", len(cdrs))
@@ -646,7 +646,7 @@ package general_tests
 // 	time.Sleep(time.Duration(**waitRater) * time.Millisecond)
 // 	var cdrs []*engine.ExternalCDR
 // 	req := utils.RPCCDRsFilter{RunIDs: []string{utils.MetaDefault}, Accounts: []string{cdr.Account}, DestinationPrefixes: []string{cdr.Destination}}
-// 	if err := tutLocalRpc.Call(utils.APIerSv2GetCDRs, req, &cdrs); err != nil {
+// 	if err := tutLocalRpc.Call(context.Background(),utils.APIerSv2GetCDRs, req, &cdrs); err != nil {
 // 		t.Error("Unexpected error: ", err.Error())
 // 	} else if len(cdrs) != 1 {
 // 		t.Error("Unexpected number of CDRs returned: ", len(cdrs))
@@ -671,7 +671,7 @@ package general_tests
 // 	}
 // 	time.Sleep(time.Duration(**waitRater) * time.Millisecond) // Give time for CDR to be processed
 // 	req = utils.RPCCDRsFilter{RunIDs: []string{utils.MetaDefault}, Accounts: []string{cdr2.Account}, DestinationPrefixes: []string{cdr2.Destination}}
-// 	if err := tutLocalRpc.Call(utils.APIerSv2GetCDRs, req, &cdrs); err != nil {
+// 	if err := tutLocalRpc.Call(context.Background(),utils.APIerSv2GetCDRs, req, &cdrs); err != nil {
 // 		t.Error("Unexpected error: ", err.Error())
 // 	} else if len(cdrs) != 1 {
 // 		t.Error("Unexpected number of CDRs returned: ", len(cdrs))
@@ -696,7 +696,7 @@ package general_tests
 // 	}
 // 	time.Sleep(time.Duration(**waitRater) * time.Millisecond) // Give time for CDR to be processed
 // 	req = utils.RPCCDRsFilter{RunIDs: []string{utils.MetaDefault}, Accounts: []string{cdr3.Account}, DestinationPrefixes: []string{cdr3.Destination}}
-// 	if err := tutLocalRpc.Call(utils.APIerSv2GetCDRs, req, &cdrs); err != nil {
+// 	if err := tutLocalRpc.Call(context.Background(),utils.APIerSv2GetCDRs, req, &cdrs); err != nil {
 // 		t.Error("Unexpected error: ", err.Error())
 // 	} else if len(cdrs) != 1 {
 // 		t.Error("Unexpected number of CDRs returned: ", len(cdrs))
@@ -967,7 +967,7 @@ package general_tests
 // 		ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"}}
 // 	var reply string
 // 	for _, cdr := range []*engine.CDR{testCdr1, testCdr2} {
-// 		if err := tutLocalRpc.Call(utils.CDRsV1ProcessCDR, cdr, &reply); err != nil {
+// 		if err := tutLocalRpc.Call(context.Background(),utils.CDRsV1ProcessCDR, cdr, &reply); err != nil {
 // 			t.Error("Unexpected error: ", err.Error())
 // 		} else if reply != utils.OK {
 // 			t.Error("Unexpected reply received: ", reply)
@@ -1005,7 +1005,7 @@ package general_tests
 // 		Tenant: "cgrates.org", Category: "call", Account: "1003", Subject: "1003", Destination: "1004",
 // 		SetupTime: time.Date(2014, 12, 7, 8, 42, 24, 0, time.UTC), AnswerTime: time.Date(2014, 12, 7, 8, 42, 26, 0, time.UTC),
 // 		Usage: 180 * time.Second}
-// 	if err := tutLocalRpc.Call(utils.CDRsV1ProcessCDR, testCdr3, &reply); err != nil {
+// 	if err := tutLocalRpc.Call(context.Background(),utils.CDRsV1ProcessCDR, testCdr3, &reply); err != nil {
 // 		t.Error("Unexpected error: ", err.Error())
 // 	} else if reply != utils.OK {
 // 		t.Error("Unexpected reply received: ", reply)
@@ -1068,7 +1068,7 @@ package general_tests
 // 		SetupTime: time.Date(2014, 12, 7, 8, 42, 24, 0, time.UTC), AnswerTime: time.Date(2014, 12, 7, 8, 42, 26, 0, time.UTC),
 // 		Usage: 60 * time.Second}
 // 	var reply string
-// 	if err := tutLocalRpc.Call(utils.CDRsV1ProcessCDR, testCdr4, &reply); err != nil { // Should drop ACD under the 2m required by threshold,  removing suppl2 from lcr
+// 	if err := tutLocalRpc.Call(context.Background(),utils.CDRsV1ProcessCDR, testCdr4, &reply); err != nil { // Should drop ACD under the 2m required by threshold,  removing suppl2 from lcr
 // 		t.Error("Unexpected error: ", err.Error())
 // 	} else if reply != utils.OK {
 // 		t.Error("Unexpected reply received: ", reply)
@@ -1131,7 +1131,7 @@ package general_tests
 // 		Tenant: "cgrates.org", Category: "call", Account: "1003", Subject: "1003", Destination: "1004",
 // 		SetupTime: time.Date(2014, 12, 7, 8, 42, 24, 0, time.UTC), AnswerTime: time.Date(2014, 12, 7, 8, 42, 26, 0, time.UTC),
 // 		Usage:  time.Second}
-// 	if err := tutLocalRpc.Call(utils.CDRsV1ProcessCDR, testCdr5, &reply); err != nil { // Should drop ACD under the 1m required by threshold,  removing suppl2 from lcr
+// 	if err := tutLocalRpc.Call(context.Background(),utils.CDRsV1ProcessCDR, testCdr5, &reply); err != nil { // Should drop ACD under the 1m required by threshold,  removing suppl2 from lcr
 // 		t.Error("Unexpected error: ", err.Error())
 // 	} else if reply != utils.OK {
 // 		t.Error("Unexpected reply received: ", reply)
@@ -1158,7 +1158,7 @@ package general_tests
 // func TestTutITSetAccount(t *testing.T) {
 // 	var reply string
 // 	attrs := &v2.AttrSetAccount{Tenant: "cgrates.org", Account: "tutacnt1", ActionPlanIDs: &[]string{"PACKAGE_10"}, ActionTriggerIDs: &[]string{"STANDARD_TRIGGERS"}, ReloadScheduler: true}
-// 	if err := tutLocalRpc.Call(utils.APIerSv2SetAccount, attrs, &reply); err != nil {
+// 	if err := tutLocalRpc.Call(context.Background(),utils.APIerSv2SetAccount, attrs, &reply); err != nil {
 // 		t.Error("Got error on APIerSv2.SetAccount: ", err.Error())
 // 	} else if reply != utils.OK {
 // 		t.Errorf("Calling APIerSv2.SetAccount received: %s", reply)
@@ -1196,7 +1196,7 @@ package general_tests
 // 	}
 // 	attrs = &v2.AttrSetAccount{Tenant: "cgrates.org", Account: "tutacnt1", ActionPlanIDs: &[]string{"PACKAGE_10"}, ActionTriggerIDs: &[]string{"STANDARD_TRIGGERS"}, AllowNegative: utils.BoolPointer(true), Disabled: utils.BoolPointer(true), ReloadScheduler: true}
 
-// 	if err := tutLocalRpc.Call(utils.APIerSv2SetAccount, attrs, &reply); err != nil {
+// 	if err := tutLocalRpc.Call(context.Background(),utils.APIerSv2SetAccount, attrs, &reply); err != nil {
 // 		t.Error("Got error on APIerSv2.SetAccount: ", err.Error())
 // 	} else if reply != utils.OK {
 // 		t.Errorf("Calling APIerSv2.SetAccount received: %s", reply)
@@ -1226,7 +1226,7 @@ package general_tests
 // 	}
 // 	attrs = &v2.AttrSetAccount{Tenant: "cgrates.org", Account: "tutacnt1", ActionPlanIDs: &[]string{"PACKAGE_1001"}, ActionTriggerIDs: &[]string{"CDRST1_WARN"}, AllowNegative: utils.BoolPointer(true), Disabled: utils.BoolPointer(true), ReloadScheduler: true}
 
-// 	if err := tutLocalRpc.Call(utils.APIerSv2SetAccount, attrs, &reply); err != nil {
+// 	if err := tutLocalRpc.Call(context.Background(),utils.APIerSv2SetAccount, attrs, &reply); err != nil {
 // 		t.Error("Got error on APIerSv2.SetAccount: ", err.Error())
 // 	} else if reply != utils.OK {
 // 		t.Errorf("Calling APIerSv2.SetAccount received: %s", reply)
@@ -1349,7 +1349,7 @@ package general_tests
 // 	} else if reply != utils.OK {
 // 		t.Error("Unexpected reply received: ", reply)
 // 	}
-// 	if err := tutLocalRpc.Call(utils.CDRsV1ProcessCDR, cdr, &reply); err != nil {
+// 	if err := tutLocalRpc.Call(context.Background(),utils.CDRsV1ProcessCDR, cdr, &reply); err != nil {
 // 		t.Error("Unexpected error: ", err.Error())
 // 	} else if reply != utils.OK {
 // 		t.Error("Unexpected reply received: ", reply)
@@ -1357,7 +1357,7 @@ package general_tests
 // 	time.Sleep(time.Duration(**waitRater) * time.Millisecond) // Give time for CDR to be processed
 // 	var cdrs []*engine.ExternalCDR
 // 	req := utils.RPCCDRsFilter{RunIDs: []string{utils.MetaDefault}, CGRIDs: []string{cdr.CGRID}}
-// 	if err := tutLocalRpc.Call(utils.APIerSv2GetCDRs, req, &cdrs); err != nil {
+// 	if err := tutLocalRpc.Call(context.Background(),utils.APIerSv2GetCDRs, req, &cdrs); err != nil {
 // 		t.Error("Unexpected error: ", err.Error())
 // 	} else if len(cdrs) != 1 {
 // 		t.Error("Unexpected number of CDRs returned: ", len(cdrs))
@@ -1380,7 +1380,7 @@ package general_tests
 // 		Usage:       90 * time.Second,
 // 		ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"}}
 // 	var reply string
-// 	if err := tutLocalRpc.Call(utils.CDRsV1ProcessCDR, cdr, &reply); err != nil {
+// 	if err := tutLocalRpc.Call(context.Background(),utils.CDRsV1ProcessCDR, cdr, &reply); err != nil {
 // 		t.Error("Unexpected error: ", err.Error())
 // 	} else if reply != utils.OK {
 // 		t.Error("Unexpected reply received: ", reply)
@@ -1389,7 +1389,7 @@ package general_tests
 // 		time.Sleep(7000 * time.Millisecond) // Give time for CDR to be processed
 // 		var cdrs []*engine.ExternalCDR
 // 		req := utils.RPCCDRsFilter{RunIDs: []string{utils.MetaDefault}, CGRIDs: []string{cdr.CGRID}}
-// 		if err := tutLocalRpc.Call(utils.APIerSv2GetCDRs, req, &cdrs); err != nil {
+// 		if err := tutLocalRpc.Call(context.Background(),utils.APIerSv2GetCDRs, req, &cdrs); err != nil {
 // 			t.Error("Unexpected error: ", err.Error())
 // 		} else if len(cdrs) != 1 {
 // 			t.Error("Unexpected number of CDRs returned: ", len(cdrs))
@@ -1412,7 +1412,7 @@ package general_tests
 // 		ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"}}
 // 	cdr.ComputeCGRID()
 // 	var reply string
-// 	if err := tutLocalRpc.Call(utils.CDRsV1ProcessCDR, cdr, &reply); err != nil {
+// 	if err := tutLocalRpc.Call(context.Background(),utils.CDRsV1ProcessCDR, cdr, &reply); err != nil {
 // 		t.Error("Unexpected error: ", err.Error())
 // 	} else if reply != utils.OK {
 // 		t.Error("Unexpected reply received: ", reply)
@@ -1420,7 +1420,7 @@ package general_tests
 // 	time.Sleep(50 * time.Millisecond) // Give time for CDR to be processed
 // 	var cdrs []*engine.ExternalCDR
 // 	req := utils.RPCCDRsFilter{RunIDs: []string{utils.MetaDefault}, CGRIDs: []string{cdr.CGRID}}
-// 	if err := tutLocalRpc.Call(utils.APIerSv2GetCDRs, req, &cdrs); err != nil {
+// 	if err := tutLocalRpc.Call(context.Background(),utils.APIerSv2GetCDRs, req, &cdrs); err != nil {
 // 		t.Error("Unexpected error: ", err.Error())
 // 	} else if len(cdrs) != 1 {
 // 		t.Error("Unexpected number of CDRs returned: ", len(cdrs))
@@ -1438,7 +1438,7 @@ package general_tests
 // 		ExportFileName: utils.StringPointer("TestTutITExportCDR.csv"),
 // 		ExportTemplate: utils.StringPointer("TestTutITExportCDR"),
 // 		RPCCDRsFilter:  utils.RPCCDRsFilter{CGRIDs: []string{cdr.CGRID}, NotRunIDs: []string{utils.MetaRaw}}}
-// 	if err := tutLocalRpc.Call(utils.APIerSv1ExportCDRs, exportArgs, &replyExport); err != nil {
+// 	if err := tutLocalRpc.Call(context.Background(),utils.APIerSv1ExportCDRs, exportArgs, &replyExport); err != nil {
 // 		t.Error(err)
 // 	}
 // 	eExportContent := `f0a92222a7d21b4d9f72744aabe82daef52e20d8,*default,testexportcdr1,*rated,cgrates.org,call,1001,1003,2016-11-30T18:06:04+01:00,98,1.33340,RETA

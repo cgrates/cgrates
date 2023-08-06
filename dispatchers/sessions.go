@@ -21,11 +21,12 @@ package dispatchers
 import (
 	"time"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/sessions"
 	"github.com/cgrates/cgrates/utils"
 )
 
-func (dS *DispatcherService) SessionSv1Ping(args *utils.CGREvent, reply *string) (err error) {
+func (dS *DispatcherService) SessionSv1Ping(ctx *context.Context, args *utils.CGREvent, reply *string) (err error) {
 	args.Tenant = utils.FirstNonEmpty(args.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(utils.SessionSv1Ping, args.Tenant,
@@ -36,7 +37,7 @@ func (dS *DispatcherService) SessionSv1Ping(args *utils.CGREvent, reply *string)
 	return dS.Dispatch(args, utils.MetaSessionS, utils.SessionSv1Ping, args, reply)
 }
 
-func (dS *DispatcherService) SessionSv1AuthorizeEvent(args *sessions.V1AuthorizeArgs,
+func (dS *DispatcherService) SessionSv1AuthorizeEvent(ctx *context.Context, args *sessions.V1AuthorizeArgs,
 	reply *sessions.V1AuthorizeReply) (err error) {
 	args.CGREvent.Tenant = utils.FirstNonEmpty(args.CGREvent.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
@@ -48,7 +49,7 @@ func (dS *DispatcherService) SessionSv1AuthorizeEvent(args *sessions.V1Authorize
 	return dS.Dispatch(args.CGREvent, utils.MetaSessionS, utils.SessionSv1AuthorizeEvent, args, reply)
 }
 
-func (dS *DispatcherService) SessionSv1AuthorizeEventWithDigest(args *sessions.V1AuthorizeArgs,
+func (dS *DispatcherService) SessionSv1AuthorizeEventWithDigest(ctx *context.Context, args *sessions.V1AuthorizeArgs,
 	reply *sessions.V1AuthorizeReplyWithDigest) (err error) {
 	args.CGREvent.Tenant = utils.FirstNonEmpty(args.CGREvent.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
@@ -60,7 +61,7 @@ func (dS *DispatcherService) SessionSv1AuthorizeEventWithDigest(args *sessions.V
 	return dS.Dispatch(args.CGREvent, utils.MetaSessionS, utils.SessionSv1AuthorizeEventWithDigest, args, reply)
 }
 
-func (dS *DispatcherService) SessionSv1InitiateSession(args *sessions.V1InitSessionArgs,
+func (dS *DispatcherService) SessionSv1InitiateSession(ctx *context.Context, args *sessions.V1InitSessionArgs,
 	reply *sessions.V1InitSessionReply) (err error) {
 	args.CGREvent.Tenant = utils.FirstNonEmpty(args.CGREvent.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
@@ -72,7 +73,7 @@ func (dS *DispatcherService) SessionSv1InitiateSession(args *sessions.V1InitSess
 	return dS.Dispatch(args.CGREvent, utils.MetaSessionS, utils.SessionSv1InitiateSession, args, reply)
 }
 
-func (dS *DispatcherService) SessionSv1InitiateSessionWithDigest(args *sessions.V1InitSessionArgs,
+func (dS *DispatcherService) SessionSv1InitiateSessionWithDigest(ctx *context.Context, args *sessions.V1InitSessionArgs,
 	reply *sessions.V1InitReplyWithDigest) (err error) {
 	args.CGREvent.Tenant = utils.FirstNonEmpty(args.CGREvent.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
@@ -84,7 +85,7 @@ func (dS *DispatcherService) SessionSv1InitiateSessionWithDigest(args *sessions.
 	return dS.Dispatch(args.CGREvent, utils.MetaSessionS, utils.SessionSv1InitiateSessionWithDigest, args, reply)
 }
 
-func (dS *DispatcherService) SessionSv1UpdateSession(args *sessions.V1UpdateSessionArgs,
+func (dS *DispatcherService) SessionSv1UpdateSession(ctx *context.Context, args *sessions.V1UpdateSessionArgs,
 	reply *sessions.V1UpdateSessionReply) (err error) {
 	args.CGREvent.Tenant = utils.FirstNonEmpty(args.CGREvent.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
@@ -96,7 +97,7 @@ func (dS *DispatcherService) SessionSv1UpdateSession(args *sessions.V1UpdateSess
 	return dS.Dispatch(args.CGREvent, utils.MetaSessionS, utils.SessionSv1UpdateSession, args, reply)
 }
 
-func (dS *DispatcherService) SessionSv1SyncSessions(args *utils.TenantWithAPIOpts,
+func (dS *DispatcherService) SessionSv1SyncSessions(ctx *context.Context, args *utils.TenantWithAPIOpts,
 	reply *string) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
 	if args.Tenant != utils.EmptyString {
@@ -114,7 +115,7 @@ func (dS *DispatcherService) SessionSv1SyncSessions(args *utils.TenantWithAPIOpt
 	}, utils.MetaSessionS, utils.SessionSv1SyncSessions, args, reply)
 }
 
-func (dS *DispatcherService) SessionSv1TerminateSession(args *sessions.V1TerminateSessionArgs,
+func (dS *DispatcherService) SessionSv1TerminateSession(ctx *context.Context, args *sessions.V1TerminateSessionArgs,
 	reply *string) (err error) {
 	args.CGREvent.Tenant = utils.FirstNonEmpty(args.CGREvent.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
@@ -126,7 +127,7 @@ func (dS *DispatcherService) SessionSv1TerminateSession(args *sessions.V1Termina
 	return dS.Dispatch(args.CGREvent, utils.MetaSessionS, utils.SessionSv1TerminateSession, args, reply)
 }
 
-func (dS *DispatcherService) SessionSv1ProcessCDR(args *utils.CGREvent,
+func (dS *DispatcherService) SessionSv1ProcessCDR(ctx *context.Context, args *utils.CGREvent,
 	reply *string) (err error) {
 	args.Tenant = utils.FirstNonEmpty(args.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
@@ -138,7 +139,7 @@ func (dS *DispatcherService) SessionSv1ProcessCDR(args *utils.CGREvent,
 	return dS.Dispatch(args, utils.MetaSessionS, utils.SessionSv1ProcessCDR, args, reply)
 }
 
-func (dS *DispatcherService) SessionSv1ProcessMessage(args *sessions.V1ProcessMessageArgs,
+func (dS *DispatcherService) SessionSv1ProcessMessage(ctx *context.Context, args *sessions.V1ProcessMessageArgs,
 	reply *sessions.V1ProcessMessageReply) (err error) {
 	args.CGREvent.Tenant = utils.FirstNonEmpty(args.CGREvent.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
@@ -150,7 +151,7 @@ func (dS *DispatcherService) SessionSv1ProcessMessage(args *sessions.V1ProcessMe
 	return dS.Dispatch(args.CGREvent, utils.MetaSessionS, utils.SessionSv1ProcessMessage, args, reply)
 }
 
-func (dS *DispatcherService) SessionSv1ProcessEvent(args *sessions.V1ProcessEventArgs,
+func (dS *DispatcherService) SessionSv1ProcessEvent(ctx *context.Context, args *sessions.V1ProcessEventArgs,
 	reply *sessions.V1ProcessEventReply) (err error) {
 	args.CGREvent.Tenant = utils.FirstNonEmpty(args.CGREvent.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
@@ -162,7 +163,7 @@ func (dS *DispatcherService) SessionSv1ProcessEvent(args *sessions.V1ProcessEven
 	return dS.Dispatch(args.CGREvent, utils.MetaSessionS, utils.SessionSv1ProcessEvent, args, reply)
 }
 
-func (dS *DispatcherService) SessionSv1GetCost(args *sessions.V1ProcessEventArgs,
+func (dS *DispatcherService) SessionSv1GetCost(ctx *context.Context, args *sessions.V1ProcessEventArgs,
 	reply *sessions.V1GetCostReply) (err error) {
 	args.CGREvent.Tenant = utils.FirstNonEmpty(args.CGREvent.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
@@ -174,7 +175,7 @@ func (dS *DispatcherService) SessionSv1GetCost(args *sessions.V1ProcessEventArgs
 	return dS.Dispatch(args.CGREvent, utils.MetaSessionS, utils.SessionSv1GetCost, args, reply)
 }
 
-func (dS *DispatcherService) SessionSv1GetActiveSessions(args *utils.SessionFilter,
+func (dS *DispatcherService) SessionSv1GetActiveSessions(ctx *context.Context, args *utils.SessionFilter,
 	reply *[]*sessions.ExternalSession) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
 	if args.Tenant != utils.EmptyString {
@@ -192,7 +193,7 @@ func (dS *DispatcherService) SessionSv1GetActiveSessions(args *utils.SessionFilt
 	}, utils.MetaSessionS, utils.SessionSv1GetActiveSessions, args, reply)
 }
 
-func (dS *DispatcherService) SessionSv1GetActiveSessionsCount(args *utils.SessionFilter,
+func (dS *DispatcherService) SessionSv1GetActiveSessionsCount(ctx *context.Context, args *utils.SessionFilter,
 	reply *int) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
 	if args.Tenant != utils.EmptyString {
@@ -210,7 +211,7 @@ func (dS *DispatcherService) SessionSv1GetActiveSessionsCount(args *utils.Sessio
 	}, utils.MetaSessionS, utils.SessionSv1GetActiveSessionsCount, args, reply)
 }
 
-func (dS *DispatcherService) SessionSv1ForceDisconnect(args *utils.SessionFilter,
+func (dS *DispatcherService) SessionSv1ForceDisconnect(ctx *context.Context, args *utils.SessionFilter,
 	reply *string) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
 	if args.Tenant != utils.EmptyString {
@@ -228,7 +229,7 @@ func (dS *DispatcherService) SessionSv1ForceDisconnect(args *utils.SessionFilter
 	}, utils.MetaSessionS, utils.SessionSv1ForceDisconnect, args, reply)
 }
 
-func (dS *DispatcherService) SessionSv1GetPassiveSessions(args *utils.SessionFilter,
+func (dS *DispatcherService) SessionSv1GetPassiveSessions(ctx *context.Context, args *utils.SessionFilter,
 	reply *[]*sessions.ExternalSession) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
 	if args.Tenant != utils.EmptyString {
@@ -246,7 +247,7 @@ func (dS *DispatcherService) SessionSv1GetPassiveSessions(args *utils.SessionFil
 	}, utils.MetaSessionS, utils.SessionSv1GetPassiveSessions, args, reply)
 }
 
-func (dS *DispatcherService) SessionSv1GetPassiveSessionsCount(args *utils.SessionFilter,
+func (dS *DispatcherService) SessionSv1GetPassiveSessionsCount(ctx *context.Context, args *utils.SessionFilter,
 	reply *int) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
 	if args.Tenant != utils.EmptyString {
@@ -264,7 +265,7 @@ func (dS *DispatcherService) SessionSv1GetPassiveSessionsCount(args *utils.Sessi
 	}, utils.MetaSessionS, utils.SessionSv1GetPassiveSessionsCount, args, reply)
 }
 
-func (dS *DispatcherService) SessionSv1ReplicateSessions(args ArgsReplicateSessionsWithAPIOpts,
+func (dS *DispatcherService) SessionSv1ReplicateSessions(ctx *context.Context, args ArgsReplicateSessionsWithAPIOpts,
 	reply *string) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
 	if args.Tenant != utils.EmptyString {
@@ -282,7 +283,7 @@ func (dS *DispatcherService) SessionSv1ReplicateSessions(args ArgsReplicateSessi
 	}, utils.MetaSessionS, utils.SessionSv1ReplicateSessions, args, reply)
 }
 
-func (dS *DispatcherService) SessionSv1SetPassiveSession(args *sessions.Session,
+func (dS *DispatcherService) SessionSv1SetPassiveSession(ctx *context.Context, args *sessions.Session,
 	reply *string) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
 	if args.Tenant != utils.EmptyString {
@@ -300,7 +301,7 @@ func (dS *DispatcherService) SessionSv1SetPassiveSession(args *sessions.Session,
 	}, utils.MetaSessionS, utils.SessionSv1SetPassiveSession, args, reply)
 }
 
-func (dS *DispatcherService) SessionSv1ActivateSessions(args *utils.SessionIDsWithArgsDispatcher, reply *string) (err error) {
+func (dS *DispatcherService) SessionSv1ActivateSessions(ctx *context.Context, args *utils.SessionIDsWithArgsDispatcher, reply *string) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
 	if args.Tenant != utils.EmptyString {
 		tnt = args.Tenant
@@ -317,7 +318,7 @@ func (dS *DispatcherService) SessionSv1ActivateSessions(args *utils.SessionIDsWi
 	}, utils.MetaSessionS, utils.SessionSv1ActivateSessions, args, reply)
 }
 
-func (dS *DispatcherService) SessionSv1DeactivateSessions(args *utils.SessionIDsWithArgsDispatcher, reply *string) (err error) {
+func (dS *DispatcherService) SessionSv1DeactivateSessions(ctx *context.Context, args *utils.SessionIDsWithArgsDispatcher, reply *string) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
 	if args.Tenant != utils.EmptyString {
 		tnt = args.Tenant
@@ -334,7 +335,7 @@ func (dS *DispatcherService) SessionSv1DeactivateSessions(args *utils.SessionIDs
 	}, utils.MetaSessionS, utils.SessionSv1DeactivateSessions, args, reply)
 }
 
-func (dS *DispatcherService) SessionSv1STIRAuthenticate(args *sessions.V1STIRAuthenticateArgs, reply *string) (err error) {
+func (dS *DispatcherService) SessionSv1STIRAuthenticate(ctx *context.Context, args *sessions.V1STIRAuthenticateArgs, reply *string) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(utils.SessionSv1STIRAuthenticate,
@@ -348,7 +349,7 @@ func (dS *DispatcherService) SessionSv1STIRAuthenticate(args *sessions.V1STIRAut
 	}, utils.MetaSessionS, utils.SessionSv1STIRAuthenticate, args, reply)
 }
 
-func (dS *DispatcherService) SessionSv1STIRIdentity(args *sessions.V1STIRIdentityArgs, reply *string) (err error) {
+func (dS *DispatcherService) SessionSv1STIRIdentity(ctx *context.Context, args *sessions.V1STIRIdentityArgs, reply *string) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(utils.SessionSv1STIRIdentity,

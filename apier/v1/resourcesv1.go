@@ -21,6 +21,7 @@ package v1
 import (
 	"time"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -34,42 +35,42 @@ type ResourceSv1 struct {
 	rls *engine.ResourceService
 }
 
-// Call implements rpcclient.ClientConnector interface for internal RPC
-func (rsv1 *ResourceSv1) Call(serviceMethod string, args any, reply any) error {
+// Call implements birpc.ClientConnector interface for internal RPC
+func (rsv1 *ResourceSv1) Call(ctx *context.Context, serviceMethod string, args any, reply any) error {
 	return utils.APIerRPCCall(rsv1, serviceMethod, args, reply)
 }
 
 // GetResourcesForEvent returns Resources matching a specific event
-func (rsv1 *ResourceSv1) GetResourcesForEvent(args *utils.CGREvent, reply *engine.Resources) error {
-	return rsv1.rls.V1ResourcesForEvent(args, reply)
+func (rsv1 *ResourceSv1) GetResourcesForEvent(ctx *context.Context, args *utils.CGREvent, reply *engine.Resources) error {
+	return rsv1.rls.V1GetResourcesForEvent(ctx, args, reply)
 }
 
 // AuthorizeResources checks if there are limits imposed for event
-func (rsv1 *ResourceSv1) AuthorizeResources(args *utils.CGREvent, reply *string) error {
-	return rsv1.rls.V1AuthorizeResources(args, reply)
+func (rsv1 *ResourceSv1) AuthorizeResources(ctx *context.Context, args *utils.CGREvent, reply *string) error {
+	return rsv1.rls.V1AuthorizeResources(ctx, args, reply)
 }
 
 // V1InitiateResourceUsage records usage for an event
-func (rsv1 *ResourceSv1) AllocateResources(args *utils.CGREvent, reply *string) error {
-	return rsv1.rls.V1AllocateResources(args, reply)
+func (rsv1 *ResourceSv1) AllocateResources(ctx *context.Context, args *utils.CGREvent, reply *string) error {
+	return rsv1.rls.V1AllocateResources(ctx, args, reply)
 }
 
 // V1TerminateResourceUsage releases usage for an event
-func (rsv1 *ResourceSv1) ReleaseResources(args *utils.CGREvent, reply *string) error {
-	return rsv1.rls.V1ReleaseResources(args, reply)
+func (rsv1 *ResourceSv1) ReleaseResources(ctx *context.Context, args *utils.CGREvent, reply *string) error {
+	return rsv1.rls.V1ReleaseResources(ctx, args, reply)
 }
 
 // GetResource returns a resource configuration
-func (rsv1 *ResourceSv1) GetResource(args *utils.TenantIDWithAPIOpts, reply *engine.Resource) error {
-	return rsv1.rls.V1GetResource(args, reply)
+func (rsv1 *ResourceSv1) GetResource(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *engine.Resource) error {
+	return rsv1.rls.V1GetResource(ctx, args, reply)
 }
 
-func (rsv1 *ResourceSv1) GetResourceWithConfig(args *utils.TenantIDWithAPIOpts, reply *engine.ResourceWithConfig) error {
-	return rsv1.rls.V1GetResourceWithConfig(args, reply)
+func (rsv1 *ResourceSv1) GetResourceWithConfig(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *engine.ResourceWithConfig) error {
+	return rsv1.rls.V1GetResourceWithConfig(ctx, args, reply)
 }
 
 // GetResourceProfile returns a resource configuration
-func (apierSv1 *APIerSv1) GetResourceProfile(arg *utils.TenantID, reply *engine.ResourceProfile) error {
+func (apierSv1 *APIerSv1) GetResourceProfile(ctx *context.Context, arg *utils.TenantID, reply *engine.ResourceProfile) error {
 	if missing := utils.MissingStructFields(arg, []string{utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -86,7 +87,7 @@ func (apierSv1 *APIerSv1) GetResourceProfile(arg *utils.TenantID, reply *engine.
 }
 
 // GetResourceProfileIDs returns list of resourceProfile IDs registered for a tenant
-func (apierSv1 *APIerSv1) GetResourceProfileIDs(args *utils.PaginatorWithTenant, rsPrfIDs *[]string) error {
+func (apierSv1 *APIerSv1) GetResourceProfileIDs(ctx *context.Context, args *utils.PaginatorWithTenant, rsPrfIDs *[]string) error {
 	tnt := args.Tenant
 	if tnt == utils.EmptyString {
 		tnt = apierSv1.Config.GeneralCfg().DefaultTenant
@@ -108,7 +109,7 @@ func (apierSv1 *APIerSv1) GetResourceProfileIDs(args *utils.PaginatorWithTenant,
 }
 
 // SetResourceProfile adds a new resource configuration
-func (apierSv1 *APIerSv1) SetResourceProfile(arg *engine.ResourceProfileWithAPIOpts, reply *string) (err error) {
+func (apierSv1 *APIerSv1) SetResourceProfile(ctx *context.Context, arg *engine.ResourceProfileWithAPIOpts, reply *string) (err error) {
 	if missing := utils.MissingStructFields(arg.ResourceProfile, []string{utils.ID}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -136,7 +137,7 @@ func (apierSv1 *APIerSv1) SetResourceProfile(arg *engine.ResourceProfileWithAPIO
 }
 
 // RemoveResourceProfile remove a specific resource configuration
-func (apierSv1 *APIerSv1) RemoveResourceProfile(arg *utils.TenantIDWithAPIOpts, reply *string) error {
+func (apierSv1 *APIerSv1) RemoveResourceProfile(ctx *context.Context, arg *utils.TenantIDWithAPIOpts, reply *string) error {
 	if missing := utils.MissingStructFields(arg, []string{utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -162,7 +163,7 @@ func (apierSv1 *APIerSv1) RemoveResourceProfile(arg *utils.TenantIDWithAPIOpts, 
 	return nil
 }
 
-func (rsv1 *ResourceSv1) Ping(ign *utils.CGREvent, reply *string) error {
+func (rsv1 *ResourceSv1) Ping(ctx *context.Context, ign *utils.CGREvent, reply *string) error {
 	*reply = utils.Pong
 	return nil
 }

@@ -22,6 +22,7 @@ import (
 	"sort"
 	"time"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -40,14 +41,14 @@ type SchedulerSv1 struct {
 }
 
 // Reload reloads scheduler instructions
-func (schdSv1 *SchedulerSv1) Reload(arg *utils.CGREvent, reply *string) error {
+func (schdSv1 *SchedulerSv1) Reload(ctx *context.Context, arg *utils.CGREvent, reply *string) error {
 	schdSv1.cgrcfg.GetReloadChan(config.SCHEDULER_JSN) <- struct{}{}
 	*reply = utils.OK
 	return nil
 }
 
 // ExecuteActions execute an actionPlan or multiple actionsPlans between a time interval
-func (schdSv1 *SchedulerSv1) ExecuteActions(attr *utils.AttrsExecuteActions, reply *string) error {
+func (schdSv1 *SchedulerSv1) ExecuteActions(ctx *context.Context, attr *utils.AttrsExecuteActions, reply *string) error {
 	if attr.ActionPlanID != utils.EmptyString { // execute by ActionPlanID
 		apl, err := schdSv1.dm.GetActionPlan(attr.ActionPlanID, true, true, utils.NonTransactional)
 		if err != nil {
@@ -134,7 +135,7 @@ func (schdSv1 *SchedulerSv1) ExecuteActions(attr *utils.AttrsExecuteActions, rep
 }
 
 // ExecuteActionPlans execute multiple actionPlans one by one
-func (schdSv1 *SchedulerSv1) ExecuteActionPlans(attr *utils.AttrsExecuteActionPlans, reply *string) (err error) {
+func (schdSv1 *SchedulerSv1) ExecuteActionPlans(ctx *context.Context, attr *utils.AttrsExecuteActionPlans, reply *string) (err error) {
 	// try get account
 	// if not exist set in DM
 	accID := utils.ConcatenatedKey(attr.Tenant, attr.AccountID)
@@ -173,13 +174,13 @@ func (schdSv1 *SchedulerSv1) ExecuteActionPlans(attr *utils.AttrsExecuteActionPl
 }
 
 // Ping returns Pong
-func (schdSv1 *SchedulerSv1) Ping(ign *utils.CGREvent, reply *string) error {
+func (schdSv1 *SchedulerSv1) Ping(ctx *context.Context, ign *utils.CGREvent, reply *string) error {
 	*reply = utils.Pong
 	return nil
 }
 
-// Call implements rpcclient.ClientConnector interface for internal RPC
-func (schdSv1 *SchedulerSv1) Call(serviceMethod string,
+// Call implements birpc.ClientConnector interface for internal RPC
+func (schdSv1 *SchedulerSv1) Call(ctx *context.Context, serviceMethod string,
 	args any, reply any) error {
 	return utils.APIerRPCCall(schdSv1, serviceMethod, args, reply)
 }

@@ -23,7 +23,6 @@ package loaders
 import (
 	"encoding/csv"
 	"io"
-	"net/rpc"
 	"os"
 	"path"
 	"reflect"
@@ -32,6 +31,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc"
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -41,7 +42,7 @@ var (
 	loaderCfgPath    string
 	loaderCfgDIR     string //run tests for specific configuration
 	loaderCfg        *config.CGRConfig
-	loaderRPC        *rpc.Client
+	loaderRPC        *birpc.Client
 	customAttributes = "12012000001\t12018209998\n12012000002\t15512580598\n12012000007\t19085199998\n12012000008\t18622784999\n12012000010\t17329440866\n12012000011\t18623689800\n12012000012\t19082050951\n12012000014\t17329440866\n12012000015\t12018209999\n12012000031\t12018209999\n12012000032\t19082050951\n12012000033\t12018209998\n12012000034\t12018209998\n"
 
 	sTestsLoader = []func(t *testing.T){
@@ -169,7 +170,7 @@ func testLoaderPopulateData(t *testing.T) {
 
 func testLoaderLoadAttributes(t *testing.T) {
 	var reply string
-	if err := loaderRPC.Call(utils.LoaderSv1Load,
+	if err := loaderRPC.Call(context.Background(), utils.LoaderSv1Load,
 		&ArgsProcessFolder{LoaderID: "CustomLoader"}, &reply); err != nil {
 		t.Error(err)
 	}
@@ -212,7 +213,7 @@ func testLoaderCheckAttributes(t *testing.T) {
 		eAttrPrf.Attributes[1].FilterIDs = nil
 	}
 	var reply *engine.AttributeProfile
-	if err := loaderRPC.Call(utils.APIerSv1GetAttributeProfile,
+	if err := loaderRPC.Call(context.Background(), utils.APIerSv1GetAttributeProfile,
 		&utils.TenantIDWithAPIOpts{
 			TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ALS1"},
 		}, &reply); err != nil {
@@ -240,7 +241,7 @@ func testLoaderPopulateDataWithoutMoving(t *testing.T) {
 
 func testLoaderLoadAttributesWithoutMoving(t *testing.T) {
 	var reply string
-	if err := loaderRPC.Call(utils.LoaderSv1Load,
+	if err := loaderRPC.Call(context.Background(), utils.LoaderSv1Load,
 		&ArgsProcessFolder{LoaderID: "WithoutMoveToOut"}, &reply); err != nil {
 		t.Error(err)
 	}
@@ -272,7 +273,7 @@ func testLoaderPopulateDataWithSubpath(t *testing.T) {
 
 func testLoaderLoadAttributesWithSubpath(t *testing.T) {
 	var reply string
-	if err := loaderRPC.Call(utils.LoaderSv1Load,
+	if err := loaderRPC.Call(context.Background(), utils.LoaderSv1Load,
 		&ArgsProcessFolder{LoaderID: "SubpathLoaderWithoutMove"}, &reply); err != nil {
 		t.Error(err)
 	}
@@ -304,7 +305,7 @@ func testLoaderPopulateDataWithSubpathWithMove(t *testing.T) {
 
 func testLoaderLoadAttributesWithoutSubpathWithMove(t *testing.T) {
 	var reply string
-	if err := loaderRPC.Call(utils.LoaderSv1Load,
+	if err := loaderRPC.Call(context.Background(), utils.LoaderSv1Load,
 		&ArgsProcessFolder{LoaderID: "SubpathLoaderWithMove"}, &reply); err != nil {
 		t.Error(err)
 	}
@@ -335,7 +336,7 @@ func testLoaderPopulateDataForTemplateLoader(t *testing.T) {
 
 func testLoaderLoadAttributesForTemplateLoader(t *testing.T) {
 	var reply string
-	if err := loaderRPC.Call(utils.LoaderSv1Load,
+	if err := loaderRPC.Call(context.Background(), utils.LoaderSv1Load,
 		&ArgsProcessFolder{LoaderID: "LoaderWithTemplate"}, &reply); err != nil {
 		t.Error(err)
 	}
@@ -390,7 +391,7 @@ func testLoaderCheckForCustomSep(t *testing.T) {
 		eAttrPrf.Attributes[0].FilterIDs = nil
 	}
 	var reply *engine.AttributeProfile
-	if err := loaderRPC.Call(utils.APIerSv1GetAttributeProfile,
+	if err := loaderRPC.Call(context.Background(), utils.APIerSv1GetAttributeProfile,
 		&utils.TenantIDWithAPIOpts{
 			TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ATTR_12012000001"},
 		}, &reply); err != nil {

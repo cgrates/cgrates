@@ -22,13 +22,13 @@ import (
 	"sync"
 	"testing"
 
+	"github.com/cgrates/birpc"
 	"github.com/cgrates/cgrates/scheduler"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/cores"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/cgrates/rpcclient"
 )
 
 // TestSchedulerSCoverage for cover testing
@@ -42,8 +42,8 @@ func TestSchedulerSCoverage(t *testing.T) {
 	server := cores.NewServer(nil)
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
 	db := NewDataDBService(cfg, nil, srvDep)
-	anz := NewAnalyzerService(cfg, server, filterSChan, shdChan, make(chan rpcclient.ClientConnector, 1), srvDep)
-	schS := NewSchedulerService(cfg, db, chS, filterSChan, server, make(chan rpcclient.ClientConnector, 1), nil, anz, srvDep)
+	anz := NewAnalyzerService(cfg, server, filterSChan, shdChan, make(chan birpc.ClientConnector, 1), srvDep)
+	schS := NewSchedulerService(cfg, db, chS, filterSChan, server, make(chan birpc.ClientConnector, 1), nil, anz, srvDep)
 
 	if schS.IsRunning() {
 		t.Errorf("Expected service to be down")

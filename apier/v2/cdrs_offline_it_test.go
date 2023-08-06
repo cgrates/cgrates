@@ -21,12 +21,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package v2
 
 import (
-	"net/rpc"
 	"path"
 	"reflect"
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc/context"
+
+	"github.com/cgrates/birpc"
 	v1 "github.com/cgrates/cgrates/apier/v1"
 
 	"github.com/cgrates/cgrates/config"
@@ -37,7 +39,7 @@ import (
 var (
 	cdrsOfflineCfgPath string
 	cdrsOfflineCfg     *config.CGRConfig
-	cdrsOfflineRpc     *rpc.Client
+	cdrsOfflineRpc     *birpc.Client
 	cdrsOfflineConfDIR string // run the tests for specific configuration
 
 	// subtests to be executed for each confDIR
@@ -111,7 +113,7 @@ func testV2cdrsOfflineRpcConn(t *testing.T) {
 
 func testV2CDRsOfflineLoadData(t *testing.T) {
 	var loadInst utils.LoadInstance
-	if err := cdrsOfflineRpc.Call(utils.APIerSv2LoadTariffPlanFromFolder,
+	if err := cdrsOfflineRpc.Call(context.Background(), utils.APIerSv2LoadTariffPlanFromFolder,
 		&utils.AttrLoadTpFromFolder{FolderPath: path.Join(
 			*dataDir, "tariffplans", "testit")}, &loadInst); err != nil {
 		t.Error(err)
@@ -132,11 +134,11 @@ func testV2CDRsOfflineBalanceUpdate(t *testing.T) {
 		},
 	}
 	var reply string
-	if err := cdrsOfflineRpc.Call(utils.APIerSv2SetBalance, attrs, &reply); err != nil {
+	if err := cdrsOfflineRpc.Call(context.Background(), utils.APIerSv2SetBalance, attrs, &reply); err != nil {
 		t.Fatal(err)
 	}
 	var acnt *engine.Account
-	if err := cdrsOfflineRpc.Call(utils.APIerSv2GetAccount, &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "test"}, &acnt); err != nil {
+	if err := cdrsOfflineRpc.Call(context.Background(), utils.APIerSv2GetAccount, &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "test"}, &acnt); err != nil {
 		t.Error(err)
 	} else if len(acnt.BalanceMap) != 1 || acnt.BalanceMap[utils.MetaMonetary][0].Value != 10.0 {
 		t.Errorf("Unexpected balance received: %+v", acnt.BalanceMap[utils.MetaMonetary][0])
@@ -149,13 +151,13 @@ func testV2CDRsOfflineBalanceUpdate(t *testing.T) {
 	attrsAA := &utils.AttrSetActions{ActionsId: "ACT_LOG", Actions: []*utils.TPAction{
 		{Identifier: utils.MetaLog},
 	}}
-	if err := cdrsOfflineRpc.Call(utils.APIerSv2SetActions, attrsAA, &reply); err != nil && err.Error() != utils.ErrExists.Error() {
+	if err := cdrsOfflineRpc.Call(context.Background(), utils.APIerSv2SetActions, attrsAA, &reply); err != nil && err.Error() != utils.ErrExists.Error() {
 		t.Error("Got error on APIerSv2.SetActions: ", err.Error())
 	} else if reply != utils.OK {
 		t.Errorf("Calling APIerSv2.SetActions received: %s", reply)
 	}
 	//make sure that the threshold don't exit
-	if err := cdrsOfflineRpc.Call(utils.APIerSv1GetThresholdProfile,
+	if err := cdrsOfflineRpc.Call(context.Background(), utils.APIerSv1GetThresholdProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "THD_Test"}, &thReply); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
@@ -174,12 +176,12 @@ func testV2CDRsOfflineBalanceUpdate(t *testing.T) {
 			Async:     false,
 		},
 	}
-	if err := cdrsOfflineRpc.Call(utils.APIerSv1SetThresholdProfile, tPrfl, &result); err != nil {
+	if err := cdrsOfflineRpc.Call(context.Background(), utils.APIerSv1SetThresholdProfile, tPrfl, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	if err := cdrsOfflineRpc.Call(utils.APIerSv1GetThresholdProfile,
+	if err := cdrsOfflineRpc.Call(context.Background(), utils.APIerSv1GetThresholdProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "THD_Test"}, &thReply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(tPrfl.ThresholdProfile, thReply) {
@@ -207,7 +209,7 @@ func testV2CDRsOfflineBalanceUpdate(t *testing.T) {
 		t.Error("Unexpected error received: ", err)
 	}
 	//process cdr should trigger balance update event
-	if err := cdrsOfflineRpc.Call(utils.CDRsV1ProcessCDR, &engine.CDRWithAPIOpts{CDR: cdr}, &reply); err != nil {
+	if err := cdrsOfflineRpc.Call(context.Background(), utils.CDRsV1ProcessCDR, &engine.CDRWithAPIOpts{CDR: cdr}, &reply); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply received: ", reply)
@@ -224,7 +226,7 @@ func testV2CDRsOfflineExpiryBalance(t *testing.T) {
 		{Identifier: utils.MetaTopUp, BalanceType: utils.MetaMonetary, BalanceId: "NewBalance", Units: "10",
 			ExpiryTime: utils.MetaUnlimited, BalanceWeight: "10", Weight: 20.0},
 	}}
-	if err := cdrsOfflineRpc.Call(utils.APIerSv2SetActions, acc, &reply); err != nil && err.Error() != utils.ErrExists.Error() {
+	if err := cdrsOfflineRpc.Call(context.Background(), utils.APIerSv2SetActions, acc, &reply); err != nil && err.Error() != utils.ErrExists.Error() {
 		t.Error("Got error on APIerSv2.SetActions: ", err.Error())
 	} else if reply != utils.OK {
 		t.Errorf("Calling APIerSv2.SetActions received: %s", reply)
@@ -232,13 +234,13 @@ func testV2CDRsOfflineExpiryBalance(t *testing.T) {
 
 	atm1 := &v1.AttrActionPlan{ActionsId: "ACT_TOPUP_TEST2", Time: "*asap", Weight: 20.0}
 	atms1 := &v1.AttrSetActionPlan{Id: "AP_TEST2", ActionPlan: []*v1.AttrActionPlan{atm1}}
-	if err := cdrsOfflineRpc.Call(utils.APIerSv1SetActionPlan, &atms1, &reply); err != nil {
+	if err := cdrsOfflineRpc.Call(context.Background(), utils.APIerSv1SetActionPlan, &atms1, &reply); err != nil {
 		t.Error("Got error on APIerSv1.SetActionPlan: ", err.Error())
 	} else if reply != utils.OK {
 		t.Errorf("Calling APIerSv1.SetActionPlan received: %s", reply)
 	}
 
-	if err := cdrsOfflineRpc.Call(utils.APIerSv2SetAccount,
+	if err := cdrsOfflineRpc.Call(context.Background(), utils.APIerSv2SetAccount,
 		&AttrSetAccount{Tenant: "cgrates.org", Account: "test2",
 			ActionPlanIDs: []string{"AP_TEST2"}, ReloadScheduler: true},
 		&reply); err != nil {
@@ -249,7 +251,7 @@ func testV2CDRsOfflineExpiryBalance(t *testing.T) {
 
 	var acnt *engine.Account
 	//verify if the third balance was added
-	if err := cdrsOfflineRpc.Call(utils.APIerSv2GetAccount,
+	if err := cdrsOfflineRpc.Call(context.Background(), utils.APIerSv2GetAccount,
 		&utils.AttrGetAccount{Tenant: "cgrates.org", Account: "test2"}, &acnt); err != nil {
 		t.Error(err)
 	} else if acnt.BalanceMap[utils.MetaMonetary].Len() != 1 {
@@ -263,13 +265,13 @@ func testV2CDRsOfflineExpiryBalance(t *testing.T) {
 	attrsA := &utils.AttrSetActions{ActionsId: "ACT_LOG", Actions: []*utils.TPAction{
 		{Identifier: utils.MetaLog},
 	}}
-	if err := cdrsOfflineRpc.Call(utils.APIerSv2SetActions, attrsA, &reply); err != nil && err.Error() != utils.ErrExists.Error() {
+	if err := cdrsOfflineRpc.Call(context.Background(), utils.APIerSv2SetActions, attrsA, &reply); err != nil && err.Error() != utils.ErrExists.Error() {
 		t.Error("Got error on APIerSv2.SetActions: ", err.Error())
 	} else if reply != utils.OK {
 		t.Errorf("Calling APIerSv2.SetActions received: %s", reply)
 	}
 	//make sure that the threshold don't exit
-	if err := cdrsOfflineRpc.Call(utils.APIerSv1GetThresholdProfile,
+	if err := cdrsOfflineRpc.Call(context.Background(), utils.APIerSv1GetThresholdProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "THD_Test2"}, &thReply); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
@@ -292,12 +294,12 @@ func testV2CDRsOfflineExpiryBalance(t *testing.T) {
 			Async:     false,
 		},
 	}
-	if err := cdrsOfflineRpc.Call(utils.APIerSv1SetThresholdProfile, tPrfl, &result); err != nil {
+	if err := cdrsOfflineRpc.Call(context.Background(), utils.APIerSv1SetThresholdProfile, tPrfl, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	if err := cdrsOfflineRpc.Call(utils.APIerSv1GetThresholdProfile,
+	if err := cdrsOfflineRpc.Call(context.Background(), utils.APIerSv1GetThresholdProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "THD_Test2"}, &thReply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(tPrfl.ThresholdProfile, thReply) {
@@ -322,7 +324,7 @@ func testV2CDRsOfflineExpiryBalance(t *testing.T) {
 		},
 	}
 	//process cdr should trigger balance update event
-	if err := cdrsOfflineRpc.Call(utils.CDRsV1ProcessEvent, args, &reply); err != nil {
+	if err := cdrsOfflineRpc.Call(context.Background(), utils.CDRsV1ProcessEvent, args, &reply); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply received: ", reply)
@@ -342,15 +344,15 @@ func testV2CDRsBalancesWithSameWeight(t *testing.T) {
 		},
 	}
 	var reply string
-	if err := cdrsOfflineRpc.Call(utils.APIerSv2SetBalance, attrs, &reply); err != nil {
+	if err := cdrsOfflineRpc.Call(context.Background(), utils.APIerSv2SetBalance, attrs, &reply); err != nil {
 		t.Fatal(err)
 	}
 	attrs.Balance[utils.ID] = "SpecialBalance2"
-	if err := cdrsOfflineRpc.Call(utils.APIerSv2SetBalance, attrs, &reply); err != nil {
+	if err := cdrsOfflineRpc.Call(context.Background(), utils.APIerSv2SetBalance, attrs, &reply); err != nil {
 		t.Fatal(err)
 	}
 	var acnt *engine.Account
-	if err := cdrsOfflineRpc.Call(utils.APIerSv2GetAccount,
+	if err := cdrsOfflineRpc.Call(context.Background(), utils.APIerSv2GetAccount,
 		&utils.AttrGetAccount{Tenant: "cgrates.org", Account: "specialTest"}, &acnt); err != nil {
 		t.Error(err)
 	} else if len(acnt.BalanceMap) != 1 || len(acnt.BalanceMap[utils.MetaMonetary]) != 2 {
@@ -378,7 +380,7 @@ func testV2CDRsBalancesWithSameWeight(t *testing.T) {
 		t.Error("Unexpected error received: ", err)
 	}
 	//process cdr should trigger balance update event
-	if err := cdrsOfflineRpc.Call(utils.CDRsV1ProcessCDR, &engine.CDRWithAPIOpts{CDR: cdr}, &reply); err != nil {
+	if err := cdrsOfflineRpc.Call(context.Background(), utils.CDRsV1ProcessCDR, &engine.CDRWithAPIOpts{CDR: cdr}, &reply); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply received: ", reply)

@@ -22,11 +22,12 @@ package sessions
 
 import (
 	"fmt"
-	"net/rpc"
 	"path"
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc"
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -36,7 +37,7 @@ var (
 	sItCfgPath string
 	sItCfgDIR  string
 	sItCfg     *config.CGRConfig
-	sItRPC     *rpc.Client
+	sItRPC     *birpc.Client
 
 	sessionsITtests = []func(t *testing.T){
 		testSessionsItInitCfg,
@@ -115,7 +116,7 @@ func testSessionsItApierRpcConn(t *testing.T) {
 func testSessionsItTPFromFolder(t *testing.T) {
 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "tutorial")}
 	var loadInst utils.LoadInstance
-	if err := sItRPC.Call(utils.APIerSv2LoadTariffPlanFromFolder, attrs, &loadInst); err != nil {
+	if err := sItRPC.Call(context.Background(), utils.APIerSv2LoadTariffPlanFromFolder, attrs, &loadInst); err != nil {
 		t.Error(err)
 	}
 	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // Give time for scheduler to execute topups
@@ -125,7 +126,7 @@ func testSessionsItTerminatNonexist(t *testing.T) {
 	var acnt *engine.Account
 	attrs := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1001"}
 	eAcntVal := 10.0
-	if err := sItRPC.Call(utils.APIerSv2GetAccount, attrs, &acnt); err != nil {
+	if err := sItRPC.Call(context.Background(), utils.APIerSv2GetAccount, attrs, &acnt); err != nil {
 		t.Error(err)
 	} else if acnt.BalanceMap[utils.MetaMonetary].GetTotalValue() != eAcntVal {
 		t.Errorf("Expected: %f, received: %f", eAcntVal, acnt.BalanceMap[utils.MetaMonetary].GetTotalValue())
@@ -158,19 +159,19 @@ func testSessionsItTerminatNonexist(t *testing.T) {
 	}
 
 	var rpl string
-	if err := sItRPC.Call(utils.SessionSv1TerminateSession, termArgs, &rpl); err != nil || rpl != utils.OK {
+	if err := sItRPC.Call(context.Background(), utils.SessionSv1TerminateSession, termArgs, &rpl); err != nil || rpl != utils.OK {
 		t.Error(err)
 	}
 	time.Sleep(100 * time.Millisecond)
 
 	eAcntVal = 9.299800
-	if err := sItRPC.Call(utils.APIerSv2GetAccount, attrs, &acnt); err != nil {
+	if err := sItRPC.Call(context.Background(), utils.APIerSv2GetAccount, attrs, &acnt); err != nil {
 		t.Error(err)
 	} else if acnt.BalanceMap[utils.MetaMonetary].GetTotalValue() != eAcntVal {
 		t.Errorf("Expected: %f, received: %f", eAcntVal, acnt.BalanceMap[utils.MetaMonetary].GetTotalValue())
 	}
 	time.Sleep(100 * time.Millisecond)
-	if err := sItRPC.Call(utils.SessionSv1ProcessCDR, termArgs.CGREvent, &rpl); err != nil {
+	if err := sItRPC.Call(context.Background(), utils.SessionSv1ProcessCDR, termArgs.CGREvent, &rpl); err != nil {
 		t.Error(err)
 	} else if rpl != utils.OK {
 		t.Errorf("Received reply: %s", rpl)
@@ -181,7 +182,7 @@ func testSessionsItTerminatNonexist(t *testing.T) {
 		DestinationPrefixes: []string{"1002"},
 		RunIDs:              []string{utils.MetaDefault},
 	}
-	if err := sItRPC.Call(utils.APIerSv2GetCDRs, &req, &cdrs); err != nil {
+	if err := sItRPC.Call(context.Background(), utils.APIerSv2GetCDRs, &req, &cdrs); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(cdrs) != 1 {
 		t.Errorf("Unexpected number of CDRs returned: %v \n cdrs=%s", len(cdrs), utils.ToJSON(cdrs))
@@ -200,7 +201,7 @@ func testSessionsItUpdateNonexist(t *testing.T) {
 	var acnt *engine.Account
 	attrs := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1001"}
 	eAcntVal := 9.299800
-	if err := sItRPC.Call(utils.APIerSv2GetAccount, attrs, &acnt); err != nil {
+	if err := sItRPC.Call(context.Background(), utils.APIerSv2GetAccount, attrs, &acnt); err != nil {
 		t.Error(err)
 	} else if acnt.BalanceMap[utils.MetaMonetary].GetTotalValue() != eAcntVal {
 		t.Errorf("Expected: %f, received: %f", eAcntVal, acnt.BalanceMap[utils.MetaMonetary].GetTotalValue())
@@ -233,7 +234,7 @@ func testSessionsItUpdateNonexist(t *testing.T) {
 	}
 
 	var updtRpl V1UpdateSessionReply
-	if err := sItRPC.Call(utils.SessionSv1UpdateSession, updtArgs, &updtRpl); err != nil {
+	if err := sItRPC.Call(context.Background(), utils.SessionSv1UpdateSession, updtArgs, &updtRpl); err != nil {
 		t.Error(err)
 	}
 	if updtRpl.MaxUsage == nil || *updtRpl.MaxUsage != usage {
@@ -243,7 +244,7 @@ func testSessionsItUpdateNonexist(t *testing.T) {
 	time.Sleep(10 * time.Millisecond)
 
 	eAcntVal = 8.599600
-	if err := sItRPC.Call(utils.APIerSv2GetAccount, attrs, &acnt); err != nil {
+	if err := sItRPC.Call(context.Background(), utils.APIerSv2GetAccount, attrs, &acnt); err != nil {
 		t.Error(err)
 	} else if acnt.BalanceMap[utils.MetaMonetary].GetTotalValue() != eAcntVal {
 		t.Errorf("Expected: %f, received: %f", eAcntVal, acnt.BalanceMap[utils.MetaMonetary].GetTotalValue())
@@ -271,7 +272,7 @@ func testSessionsItUpdateNonexist(t *testing.T) {
 		},
 	}
 
-	if err := sItRPC.Call(utils.SessionSv1TerminateSession, termArgs, &rpl); err != nil || rpl != utils.OK {
+	if err := sItRPC.Call(context.Background(), utils.SessionSv1TerminateSession, termArgs, &rpl); err != nil || rpl != utils.OK {
 		t.Error(err)
 	}
 }
@@ -308,7 +309,7 @@ func testSessionsItTerminatePassive(t *testing.T) {
 
 	var rply string
 	//transfer the session from active to pasive
-	if err := sItRPC.Call(utils.SessionSv1SetPassiveSession,
+	if err := sItRPC.Call(context.Background(), utils.SessionSv1SetPassiveSession,
 		s, &rply); err != nil {
 		t.Error(err)
 	} else if rply != utils.OK {
@@ -316,7 +317,7 @@ func testSessionsItTerminatePassive(t *testing.T) {
 	}
 	var pSessions []*ExternalSession
 	//check if the passive session was created
-	if err := sItRPC.Call(utils.SessionSv1GetPassiveSessions,
+	if err := sItRPC.Call(context.Background(), utils.SessionSv1GetPassiveSessions,
 		&utils.SessionFilter{
 			Filters: []string{
 				fmt.Sprintf("*string:~*req.%s:%s", utils.OriginID, "123789"),
@@ -352,13 +353,13 @@ func testSessionsItTerminatePassive(t *testing.T) {
 	}
 
 	var rpl string
-	if err := sItRPC.Call(utils.SessionSv1TerminateSession, termArgs, &rpl); err != nil || rpl != utils.OK {
+	if err := sItRPC.Call(context.Background(), utils.SessionSv1TerminateSession, termArgs, &rpl); err != nil || rpl != utils.OK {
 		t.Error(err)
 	}
 	time.Sleep(10 * time.Millisecond)
 
 	//check if the passive session was terminate
-	if err := sItRPC.Call(utils.SessionSv1GetPassiveSessions,
+	if err := sItRPC.Call(context.Background(), utils.SessionSv1GetPassiveSessions,
 		utils.SessionFilter{
 			Filters: []string{
 				fmt.Sprintf("*string:~*req.%s:%s", utils.OriginID, "123789"),
@@ -382,7 +383,7 @@ func testSessionsItEventCostCompressing(t *testing.T) {
 		},
 	}
 	var reply string
-	if err := sItRPC.Call(utils.APIerSv2SetBalance, attrSetBalance, &reply); err != nil {
+	if err := sItRPC.Call(context.Background(), utils.APIerSv2SetBalance, attrSetBalance, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf("Received: %s", reply)
@@ -404,7 +405,7 @@ func testSessionsItEventCostCompressing(t *testing.T) {
 		},
 	}
 	var initRpl *V1InitSessionReply
-	if err := sItRPC.Call(utils.SessionSv1InitiateSession,
+	if err := sItRPC.Call(context.Background(), utils.SessionSv1InitiateSession,
 		initArgs, &initRpl); err != nil {
 		t.Error(err)
 	}
@@ -423,15 +424,15 @@ func testSessionsItEventCostCompressing(t *testing.T) {
 		},
 	}
 	var updateRpl *V1UpdateSessionReply
-	if err := sItRPC.Call(utils.SessionSv1UpdateSession,
+	if err := sItRPC.Call(context.Background(), utils.SessionSv1UpdateSession,
 		updateArgs, &updateRpl); err != nil {
 		t.Error(err)
 	}
-	if err := sItRPC.Call(utils.SessionSv1UpdateSession,
+	if err := sItRPC.Call(context.Background(), utils.SessionSv1UpdateSession,
 		updateArgs, &updateRpl); err != nil {
 		t.Error(err)
 	}
-	if err := sItRPC.Call(utils.SessionSv1UpdateSession,
+	if err := sItRPC.Call(context.Background(), utils.SessionSv1UpdateSession,
 		updateArgs, &updateRpl); err != nil {
 		t.Error(err)
 	}
@@ -451,19 +452,19 @@ func testSessionsItEventCostCompressing(t *testing.T) {
 		},
 	}
 	var rpl string
-	if err := sItRPC.Call(utils.SessionSv1TerminateSession,
+	if err := sItRPC.Call(context.Background(), utils.SessionSv1TerminateSession,
 		termArgs, &rpl); err != nil ||
 		rpl != utils.OK {
 		t.Error(err)
 	}
-	if err := sItRPC.Call(utils.SessionSv1ProcessCDR,
+	if err := sItRPC.Call(context.Background(), utils.SessionSv1ProcessCDR,
 		termArgs.CGREvent, &reply); err != nil {
 		t.Error(err)
 	}
 	time.Sleep(20 * time.Millisecond)
 	cgrID := utils.Sha1("TestSessionsItEventCostCompressing", "")
 	var ec *engine.EventCost
-	if err := sItRPC.Call(utils.APIerSv1GetEventCost,
+	if err := sItRPC.Call(context.Background(), utils.APIerSv1GetEventCost,
 		&utils.AttrGetCallCost{CgrId: cgrID, RunId: utils.MetaDefault},
 		&ec); err != nil {
 		t.Fatal(err)

@@ -26,6 +26,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -224,7 +225,7 @@ func (rpS *RouteService) costForEvent(ev *utils.CGREvent,
 	var acntCost map[string]any
 	var initialUsage time.Duration
 	if len(acntIDs) != 0 {
-		if err := rpS.connMgr.Call(rpS.cgrcfg.RouteSCfg().RALsConns, nil, utils.ResponderGetMaxSessionTimeOnAccounts,
+		if err := rpS.connMgr.Call(context.TODO(), rpS.cgrcfg.RouteSCfg().RALsConns, utils.ResponderGetMaxSessionTimeOnAccounts,
 			&utils.GetMaxSessionTimeOnAccountsArgs{
 				Tenant:      ev.Tenant,
 				Subject:     subj,
@@ -258,7 +259,7 @@ func (rpS *RouteService) costForEvent(ev *utils.CGREvent,
 
 	if accountMaxUsage == 0 || accountMaxUsage < initialUsage {
 		var rpCost map[string]any
-		if err := rpS.connMgr.Call(rpS.cgrcfg.RouteSCfg().RALsConns, nil, utils.ResponderGetCostOnRatingPlans,
+		if err := rpS.connMgr.Call(context.TODO(), rpS.cgrcfg.RouteSCfg().RALsConns, utils.ResponderGetCostOnRatingPlans,
 			&utils.GetCostOnRatingPlansArgs{
 				Tenant:        ev.Tenant,
 				Account:       acnt,
@@ -286,7 +287,7 @@ func (rpS *RouteService) statMetrics(statIDs []string, tenant string) (stsMetric
 	if len(rpS.cgrcfg.RouteSCfg().StatSConns) != 0 {
 		for _, statID := range statIDs {
 			var metrics map[string]float64
-			if err = rpS.connMgr.Call(rpS.cgrcfg.RouteSCfg().StatSConns, nil, utils.StatSv1GetQueueFloatMetrics,
+			if err = rpS.connMgr.Call(context.TODO(), rpS.cgrcfg.RouteSCfg().StatSConns, utils.StatSv1GetQueueFloatMetrics,
 				&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: tenant, ID: statID}}, &metrics); err != nil &&
 				err.Error() != utils.ErrNotFound.Error() {
 				utils.Logger.Warning(
@@ -317,8 +318,8 @@ func (rpS *RouteService) statMetricsForLoadDistribution(statIDs []string, tenant
 			// check if we get an ID in the following form (StatID:MetricID)
 			statWithMetric := strings.Split(statID, utils.InInFieldSep)
 			var metrics map[string]float64
-			if err = rpS.connMgr.Call(
-				rpS.cgrcfg.RouteSCfg().StatSConns, nil,
+			if err = rpS.connMgr.Call(context.TODO(),
+				rpS.cgrcfg.RouteSCfg().StatSConns,
 				utils.StatSv1GetQueueFloatMetrics,
 				&utils.TenantIDWithAPIOpts{
 					TenantID: &utils.TenantID{
@@ -360,7 +361,7 @@ func (rpS *RouteService) resourceUsage(resIDs []string, tenant string) (tUsage f
 	if len(rpS.cgrcfg.RouteSCfg().ResourceSConns) != 0 {
 		for _, resID := range resIDs {
 			var res Resource
-			if err = rpS.connMgr.Call(rpS.cgrcfg.RouteSCfg().ResourceSConns, nil, utils.ResourceSv1GetResource,
+			if err = rpS.connMgr.Call(context.TODO(), rpS.cgrcfg.RouteSCfg().ResourceSConns, utils.ResourceSv1GetResource,
 				&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: tenant, ID: resID}}, &res); err != nil && err.Error() != utils.ErrNotFound.Error() {
 				utils.Logger.Warning(
 					fmt.Sprintf("<%s> error: %s getting resource for ID : %s", utils.RouteS, err.Error(), resID))
@@ -557,7 +558,7 @@ type optsGetRoutes struct {
 }
 
 // V1GetRoutes returns the list of valid routes
-func (rpS *RouteService) V1GetRoutes(args *utils.CGREvent, reply *SortedRoutesList) (err error) {
+func (rpS *RouteService) V1GetRoutes(ctx *context.Context, args *utils.CGREvent, reply *SortedRoutesList) (err error) {
 	if args == nil {
 		return utils.NewErrMandatoryIeMissing(utils.CGREventString)
 	}
@@ -575,10 +576,12 @@ func (rpS *RouteService) V1GetRoutes(args *utils.CGREvent, reply *SortedRoutesLi
 			args.APIOpts = make(map[string]any)
 		}
 		args.APIOpts[utils.MetaSubsys] = utils.MetaRoutes
-		context := utils.GetStringOpts(args, rpS.cgrcfg.RouteSCfg().Opts.Context, utils.OptsContext)
-		args.APIOpts[utils.OptsContext] = utils.FirstNonEmpty(context, utils.MetaRoutes)
+		args.APIOpts[utils.OptsContext] = utils.FirstNonEmpty(
+			utils.GetStringOpts(args, rpS.cgrcfg.RouteSCfg().Opts.Context, utils.OptsContext),
+			utils.MetaRoutes,
+		)
 		var rplyEv AttrSProcessEventReply
-		if err := rpS.connMgr.Call(rpS.cgrcfg.RouteSCfg().AttributeSConns, nil,
+		if err := rpS.connMgr.Call(context.TODO(), rpS.cgrcfg.RouteSCfg().AttributeSConns,
 			utils.AttributeSv1ProcessEvent, args, &rplyEv); err == nil && len(rplyEv.AlteredFields) != 0 {
 			args = rplyEv.CGREvent
 		} else if err.Error() != utils.ErrNotFound.Error() {
@@ -597,7 +600,7 @@ func (rpS *RouteService) V1GetRoutes(args *utils.CGREvent, reply *SortedRoutesLi
 }
 
 // V1GetRouteProfilesForEvent returns the list of valid route profiles
-func (rpS *RouteService) V1GetRouteProfilesForEvent(args *utils.CGREvent, reply *[]*RouteProfile) (err error) {
+func (rpS *RouteService) V1GetRouteProfilesForEvent(ctx *context.Context, args *utils.CGREvent, reply *[]*RouteProfile) (err error) {
 	if missing := utils.MissingStructFields(args, []string{utils.ID}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	} else if args.Event == nil {
@@ -736,9 +739,9 @@ func (rpS *RouteService) sortedRoutesForEvent(tnt string, args *utils.CGREvent) 
 }
 
 // V1GetRoutesList returns the list of valid routes
-func (rpS *RouteService) V1GetRoutesList(args *utils.CGREvent, reply *[]string) (err error) {
+func (rpS *RouteService) V1GetRoutesList(ctx *context.Context, args *utils.CGREvent, reply *[]string) (err error) {
 	sR := new(SortedRoutesList)
-	if err = rpS.V1GetRoutes(args, sR); err != nil {
+	if err = rpS.V1GetRoutes(ctx, args, sR); err != nil {
 		return
 	}
 	*reply = sR.RoutesWithParams()

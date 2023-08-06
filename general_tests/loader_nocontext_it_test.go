@@ -22,7 +22,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package general_tests
 
 import (
-	"net/rpc"
 	"os"
 	"path"
 	"reflect"
@@ -30,6 +29,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc"
+	"github.com/cgrates/birpc/context"
 	v1 "github.com/cgrates/cgrates/apier/v1"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
@@ -39,7 +40,7 @@ import (
 var (
 	ldrCtxCfgPath string
 	ldrCtxCfg     *config.CGRConfig
-	ldrCtxRPC     *rpc.Client
+	ldrCtxRPC     *birpc.Client
 	ldrCtxConfDIR string //run tests for specific configuration
 	ldrCtxDelay   int
 
@@ -157,7 +158,7 @@ cgrates.org,DSP2,,,,,,ALL2,,10,,,
 func testLoaderNoContextLoadTariffPlans(t *testing.T) {
 	var reply string
 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: "/tmp/TestLoaderNoContextIT"}
-	if err := ldrCtxRPC.Call(utils.APIerSv1LoadTariffPlanFromFolder, attrs, &reply); err != nil {
+	if err := ldrCtxRPC.Call(context.Background(), utils.APIerSv1LoadTariffPlanFromFolder, attrs, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply returned", reply)
@@ -172,7 +173,7 @@ func testLoaderNoContextGetFilterIndexesAfterLoad(t *testing.T) {
 		"*string:*req.Field1:Value1:ATTR_1",
 	}
 	var result []string
-	if err := ldrCtxRPC.Call(utils.APIerSv1GetFilterIndexes, &v1.AttrGetFilterIndexes{
+	if err := ldrCtxRPC.Call(context.Background(), utils.APIerSv1GetFilterIndexes, &v1.AttrGetFilterIndexes{
 		ItemType: utils.MetaAttributes,
 		Tenant:   "cgrates.org",
 		Context:  utils.MetaAny,
@@ -190,7 +191,7 @@ func testLoaderNoContextGetFilterIndexesAfterLoad(t *testing.T) {
 		"*none:*any:*any:DSP1",
 		"*string:*req.Field1:Value1:DSP2",
 	}
-	if err := ldrCtxRPC.Call(utils.APIerSv1GetFilterIndexes, &v1.AttrGetFilterIndexes{
+	if err := ldrCtxRPC.Call(context.Background(), utils.APIerSv1GetFilterIndexes, &v1.AttrGetFilterIndexes{
 		ItemType: utils.MetaDispatchers,
 		Tenant:   "cgrates.org",
 		Context:  utils.MetaAny,
@@ -224,13 +225,13 @@ func testLoaderNoContextSetProfiles(t *testing.T) {
 	}
 	attrPrf.Compile()
 	var reply string
-	if err := ldrCtxRPC.Call(utils.APIerSv1SetAttributeProfile, attrPrf, &reply); err != nil {
+	if err := ldrCtxRPC.Call(context.Background(), utils.APIerSv1SetAttributeProfile, attrPrf, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply returned", reply)
 	}
 	var attrReply *engine.AttributeProfile
-	if err := ldrCtxRPC.Call(utils.APIerSv1GetAttributeProfile,
+	if err := ldrCtxRPC.Call(context.Background(), utils.APIerSv1GetAttributeProfile,
 		utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ATTR_3"}}, &attrReply); err != nil {
 		t.Error(err)
 	} else {
@@ -254,7 +255,7 @@ func testLoaderNoContextSetProfiles(t *testing.T) {
 		},
 	}
 
-	if err := ldrCtxRPC.Call(utils.APIerSv1SetDispatcherProfile,
+	if err := ldrCtxRPC.Call(context.Background(), utils.APIerSv1SetDispatcherProfile,
 		dspPrf,
 		&reply); err != nil {
 		t.Error(err)
@@ -263,7 +264,7 @@ func testLoaderNoContextSetProfiles(t *testing.T) {
 	}
 
 	var dspReply *engine.DispatcherProfile
-	if err := ldrCtxRPC.Call(utils.APIerSv1GetDispatcherProfile,
+	if err := ldrCtxRPC.Call(context.Background(), utils.APIerSv1GetDispatcherProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "DSP3"},
 		&dspReply); err != nil {
 		t.Error(err)
@@ -283,7 +284,7 @@ func testLoaderNoContextGetFilterIndexesAfterSet(t *testing.T) {
 		"*string:*req.Field3:Value3:ATTR_3",
 	}
 	var result []string
-	if err := ldrCtxRPC.Call(utils.APIerSv1GetFilterIndexes, &v1.AttrGetFilterIndexes{
+	if err := ldrCtxRPC.Call(context.Background(), utils.APIerSv1GetFilterIndexes, &v1.AttrGetFilterIndexes{
 		ItemType: utils.MetaAttributes,
 		Tenant:   "cgrates.org",
 		Context:  utils.MetaAny,
@@ -302,7 +303,7 @@ func testLoaderNoContextGetFilterIndexesAfterSet(t *testing.T) {
 		"*string:*req.Field1:Value1:DSP2",
 		"*string:*req.RandomField:RandomValue:DSP3",
 	}
-	if err := ldrCtxRPC.Call(utils.APIerSv1GetFilterIndexes, &v1.AttrGetFilterIndexes{
+	if err := ldrCtxRPC.Call(context.Background(), utils.APIerSv1GetFilterIndexes, &v1.AttrGetFilterIndexes{
 		ItemType: utils.MetaDispatchers,
 		Tenant:   "cgrates.org",
 		Context:  utils.MetaAny,

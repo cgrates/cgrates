@@ -21,11 +21,12 @@ package dispatchers
 import (
 	"time"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
 )
 
 // ServiceManagerV1Ping interogates ServiceManager server responsible to process the event
-func (dS *DispatcherService) ServiceManagerV1Ping(args *utils.CGREvent,
+func (dS *DispatcherService) ServiceManagerV1Ping(ctx *context.Context, args *utils.CGREvent,
 	reply *string) (err error) {
 	if args == nil {
 		args = new(utils.CGREvent)
@@ -40,7 +41,7 @@ func (dS *DispatcherService) ServiceManagerV1Ping(args *utils.CGREvent,
 	return dS.Dispatch(args, utils.MetaServiceManager, utils.ServiceManagerV1Ping, args, reply)
 }
 
-func (dS *DispatcherService) ServiceManagerV1StartService(args ArgStartServiceWithAPIOpts,
+func (dS *DispatcherService) ServiceManagerV1StartService(ctx *context.Context, args ArgStartServiceWithAPIOpts,
 	reply *string) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
 	if args.Tenant != utils.EmptyString {
@@ -58,7 +59,7 @@ func (dS *DispatcherService) ServiceManagerV1StartService(args ArgStartServiceWi
 	}, utils.MetaServiceManager, utils.ServiceManagerV1StartService, args, reply)
 }
 
-func (dS *DispatcherService) ServiceManagerV1StopService(args ArgStartServiceWithAPIOpts,
+func (dS *DispatcherService) ServiceManagerV1StopService(ctx *context.Context, args ArgStartServiceWithAPIOpts,
 	reply *string) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
 	if args.Tenant != utils.EmptyString {
@@ -76,7 +77,7 @@ func (dS *DispatcherService) ServiceManagerV1StopService(args ArgStartServiceWit
 	}, utils.MetaServiceManager, utils.ServiceManagerV1StopService, args, reply)
 }
 
-func (dS *DispatcherService) ServiceManagerV1ServiceStatus(args ArgStartServiceWithAPIOpts,
+func (dS *DispatcherService) ServiceManagerV1ServiceStatus(ctx *context.Context, args ArgStartServiceWithAPIOpts,
 	reply *string) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
 	if args.Tenant != utils.EmptyString {

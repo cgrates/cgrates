@@ -19,17 +19,19 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package v1
 
 import (
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
 // DebitUsage will debit the balance for the usage cost, allowing the
 // account to go negative if the cost calculated is greater than the balance
-func (apierSv1 *APIerSv1) DebitUsage(usageRecord *engine.UsageRecordWithAPIOpts, reply *string) error {
-	return apierSv1.DebitUsageWithOptions(&AttrDebitUsageWithOptions{
-		UsageRecord:          usageRecord,
-		AllowNegativeAccount: true,
-	}, reply)
+func (apierSv1 *APIerSv1) DebitUsage(ctx *context.Context, usageRecord *engine.UsageRecordWithAPIOpts, reply *string) error {
+	return apierSv1.DebitUsageWithOptions(ctx,
+		&AttrDebitUsageWithOptions{
+			UsageRecord:          usageRecord,
+			AllowNegativeAccount: true,
+		}, reply)
 }
 
 // AttrDebitUsageWithOptions represents the DebitUsage request
@@ -40,7 +42,7 @@ type AttrDebitUsageWithOptions struct {
 
 // DebitUsageWithOptions will debit the account based on the usage cost with
 // additional options to control if the balance can go negative
-func (apierSv1 *APIerSv1) DebitUsageWithOptions(args *AttrDebitUsageWithOptions, reply *string) error {
+func (apierSv1 *APIerSv1) DebitUsageWithOptions(ctx *context.Context, args *AttrDebitUsageWithOptions, reply *string) error {
 	if apierSv1.Responder == nil {
 		return utils.NewErrNotConnected(utils.RALService)
 	}
@@ -78,10 +80,12 @@ func (apierSv1 *APIerSv1) DebitUsageWithOptions(args *AttrDebitUsageWithOptions,
 
 	// Calculate the cost for usage and debit the account
 	var cc engine.CallCost
-	if err := apierSv1.Responder.Debit(&engine.CallDescriptorWithAPIOpts{
-		CallDescriptor: cd,
-		APIOpts:        args.UsageRecord.APIOpts,
-	}, &cc); err != nil {
+	if err := apierSv1.Responder.Debit(
+		context.Background(),
+		&engine.CallDescriptorWithAPIOpts{
+			CallDescriptor: cd,
+			APIOpts:        args.UsageRecord.APIOpts,
+		}, &cc); err != nil {
 		return utils.NewErrServerError(err)
 	}
 

@@ -19,11 +19,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package console
 
 import (
-	v1 "github.com/cgrates/cgrates/apier/v1"
-	"github.com/cgrates/cgrates/utils"
 	"reflect"
 	"strings"
 	"testing"
+
+	v1 "github.com/cgrates/cgrates/apier/v1"
+	"github.com/cgrates/cgrates/utils"
 )
 
 func TestCmdTriggerRemove(t *testing.T) {
@@ -34,15 +35,15 @@ func TestCmdTriggerRemove(t *testing.T) {
 	if !ok {
 		t.Fatal("method not found")
 	}
-	if m.Type.NumIn() != 3 { // ApierSv1 is consider and we expect 3 inputs
+	if m.Type.NumIn() != 4 { // expecting 4 inputs
 		t.Fatalf("invalid number of input parameters ")
 	}
 	// verify the type of input parameter
-	if ok := m.Type.In(1).AssignableTo(reflect.TypeOf(command.RpcParams(true))); !ok {
+	if ok := m.Type.In(2).AssignableTo(reflect.TypeOf(command.RpcParams(true))); !ok {
 		t.Fatalf("cannot assign input parameter")
 	}
 	// verify the type of output parameter
-	if ok := m.Type.In(2).AssignableTo(reflect.TypeOf(command.RpcResult())); !ok {
+	if ok := m.Type.In(3).AssignableTo(reflect.TypeOf(command.RpcResult())); !ok {
 		t.Fatalf("cannot assign output parameter")
 	}
 	// for coverage purpose

@@ -21,16 +21,17 @@ package services
 import (
 	"sync"
 
+	"github.com/cgrates/birpc"
 	v2 "github.com/cgrates/cgrates/apier/v2"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/cores"
+	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/cgrates/rpcclient"
 )
 
 // NewAPIerSv2Service returns the APIerSv2 Service
 func NewAPIerSv2Service(apiv1 *APIerSv1Service, cfg *config.CGRConfig,
-	server *cores.Server, internalAPIerSv2Chan chan rpcclient.ClientConnector,
+	server *cores.Server, internalAPIerSv2Chan chan birpc.ClientConnector,
 	anz *AnalyzerService, srvDep map[string]*sync.WaitGroup) *APIerSv2Service {
 	return &APIerSv2Service{
 		apiv1:    apiv1,
@@ -50,14 +51,14 @@ type APIerSv2Service struct {
 
 	apiv1    *APIerSv1Service
 	api      *v2.APIerSv2
-	connChan chan rpcclient.ClientConnector
+	connChan chan birpc.ClientConnector
 	anz      *AnalyzerService
 	srvDep   map[string]*sync.WaitGroup
 }
 
 // Start should handle the sercive start
 // For this service the start should be called from RAL Service
-func (api *APIerSv2Service) Start() (err error) {
+func (api *APIerSv2Service) Start() error {
 	if api.IsRunning() {
 		return utils.ErrServiceAlreadyRunning
 	}
@@ -72,14 +73,34 @@ func (api *APIerSv2Service) Start() (err error) {
 	api.api = &v2.APIerSv2{
 		APIerSv1: *apiV1,
 	}
-
+	srv, err := engine.NewService(api.api)
+	if err != nil {
+		return err
+	}
+	var apierV1Srv *birpc.Service
+	apierV1Srv, err = birpc.NewService(apiV1, "", false)
+	if err != nil {
+		return err
+	}
+	engine.RegisterPingMethod(apierV1Srv.Methods)
+	srv[utils.APIerSv1] = apierV1Srv
 	if !api.cfg.DispatcherSCfg().Enabled {
-		api.server.RpcRegister(api.api)
-		api.server.RpcRegisterName(utils.ApierV2, api.api)
+		for _, s := range srv {
+			api.server.RpcRegister(s)
+		}
+		var legacySrv engine.IntService
+		legacySrv, err = engine.NewServiceWithName(api.api, utils.ApierV2, true)
+		if err != nil {
+			return err
+		}
+		//backwards compatible
+		for _, s := range legacySrv {
+			api.server.RpcRegister(s)
+		}
 	}
 
-	api.connChan <- api.anz.GetInternalCodec(api.api, utils.APIerSv2)
-	return
+	api.connChan <- api.anz.GetInternalCodec(srv, utils.APIerSv2)
+	return nil
 }
 
 // Reload handles the change of config

@@ -22,11 +22,11 @@ import (
 	"sync"
 	"testing"
 
+	"github.com/cgrates/birpc"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/cores"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/cgrates/rpcclient"
 )
 
 // TestSupplierSCoverage for cover testing
@@ -40,8 +40,8 @@ func TestSupplierSCoverage(t *testing.T) {
 	server := cores.NewServer(nil)
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
 	db := NewDataDBService(cfg, nil, srvDep)
-	anz := NewAnalyzerService(cfg, server, filterSChan, shdChan, make(chan rpcclient.ClientConnector, 1), srvDep)
-	supS := NewRouteService(cfg, db, chS, filterSChan, server, make(chan rpcclient.ClientConnector, 1), nil, anz, srvDep)
+	anz := NewAnalyzerService(cfg, server, filterSChan, shdChan, make(chan birpc.ClientConnector, 1), srvDep)
+	supS := NewRouteService(cfg, db, chS, filterSChan, server, make(chan birpc.ClientConnector, 1), nil, anz, srvDep)
 
 	if supS.IsRunning() {
 		t.Errorf("Expected service to be down")
@@ -54,8 +54,7 @@ func TestSupplierSCoverage(t *testing.T) {
 		server:      server,
 		connMgr:     nil,
 		routeS:      &engine.RouteService{},
-		rpc:         nil,
-		connChan:    make(chan rpcclient.ClientConnector, 1),
+		connChan:    make(chan birpc.ClientConnector, 1),
 		anz:         anz,
 		srvDep:      srvDep,
 	}
@@ -70,7 +69,11 @@ func TestSupplierSCoverage(t *testing.T) {
 	if !reflect.DeepEqual(shouldRun, false) {
 		t.Errorf("\nExpecting <false>,\n Received <%+v>", shouldRun)
 	}
-	supS2.connChan <- chS
+	cacheSrv, err := engine.NewService(chS)
+	if err != nil {
+		t.Fatal(err)
+	}
+	supS2.connChan <- cacheSrv
 	supS2.Shutdown()
 	if supS.IsRunning() {
 		t.Errorf("Expected service to be down")

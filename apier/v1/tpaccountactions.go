@@ -19,12 +19,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package v1
 
 import (
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
 // SetTPAccountActions creates a new AccountActions profile within a tariff plan
-func (apierSv1 *APIerSv1) SetTPAccountActions(attrs *utils.TPAccountActions, reply *string) error {
+func (apierSv1 *APIerSv1) SetTPAccountActions(ctx *context.Context, attrs *utils.TPAccountActions, reply *string) error {
 	if missing := utils.MissingStructFields(attrs,
 		[]string{utils.TPid, utils.LoadId, utils.AccountField, utils.ActionPlanId}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
@@ -45,7 +46,7 @@ type AttrGetTPAccountActionsByLoadId struct {
 }
 
 // GetTPAccountActionsByLoadId queries specific AccountActions profile on tariff plan
-func (apierSv1 *APIerSv1) GetTPAccountActionsByLoadId(attrs *utils.TPAccountActions, reply *[]*utils.TPAccountActions) error {
+func (apierSv1 *APIerSv1) GetTPAccountActionsByLoadId(ctx *context.Context, attrs *utils.TPAccountActions, reply *[]*utils.TPAccountActions) error {
 	mndtryFlds := []string{utils.TPid, utils.LoadId}
 	if len(attrs.Account) != 0 { // If account provided as filter, make all related fields mandatory
 		mndtryFlds = append(mndtryFlds, utils.AccountField)
@@ -73,7 +74,7 @@ type AttrGetTPAccountActions struct {
 }
 
 // GetTPAccountActions queries specific DerivedCharge on tariff plan
-func (apierSv1 *APIerSv1) GetTPAccountActions(attrs *AttrGetTPAccountActions, reply *utils.TPAccountActions) error {
+func (apierSv1 *APIerSv1) GetTPAccountActions(ctx *context.Context, attrs *AttrGetTPAccountActions, reply *utils.TPAccountActions) error {
 	if missing := utils.MissingStructFields(attrs, []string{utils.TPid, utils.AccountActionsId}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -98,7 +99,7 @@ type AttrGetTPAccountActionIds struct {
 }
 
 // GetTPAccountActionLoadIds queries AccountActions identities on specific tariff plan.
-func (apierSv1 *APIerSv1) GetTPAccountActionLoadIds(attrs *AttrGetTPAccountActionIds, reply *[]string) error {
+func (apierSv1 *APIerSv1) GetTPAccountActionLoadIds(ctx *context.Context, attrs *AttrGetTPAccountActionIds, reply *[]string) error {
 	if missing := utils.MissingStructFields(attrs, []string{utils.TPid}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -115,7 +116,7 @@ func (apierSv1 *APIerSv1) GetTPAccountActionLoadIds(attrs *AttrGetTPAccountActio
 }
 
 // GetTPAccountActionIds queries DerivedCharges identities on specific tariff plan.
-func (apierSv1 *APIerSv1) GetTPAccountActionIds(attrs *AttrGetTPAccountActionIds, reply *[]string) error {
+func (apierSv1 *APIerSv1) GetTPAccountActionIds(ctx *context.Context, attrs *AttrGetTPAccountActionIds, reply *[]string) error {
 	if missing := utils.MissingStructFields(attrs, []string{utils.TPid}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -132,7 +133,7 @@ func (apierSv1 *APIerSv1) GetTPAccountActionIds(attrs *AttrGetTPAccountActionIds
 }
 
 // RemoveTPAccountActions removes specific AccountActions on Tariff plan
-func (apierSv1 *APIerSv1) RemoveTPAccountActions(attrs *AttrGetTPAccountActions, reply *string) error {
+func (apierSv1 *APIerSv1) RemoveTPAccountActions(ctx *context.Context, attrs *AttrGetTPAccountActions, reply *string) error {
 	if missing := utils.MissingStructFields(attrs, []string{utils.TPid, utils.AccountActionsId}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}

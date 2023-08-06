@@ -35,7 +35,7 @@ func TestCmdSharedGroup(t *testing.T) {
 	if !ok {
 		t.Fatal("method not found")
 	}
-	if m.Type.NumIn() != 3 { // ApierSv1 is consider and we expect 3 inputs
+	if m.Type.NumIn() != 4 { // expecting 4 inputs
 		t.Fatalf("invalid number of input parameters ")
 	}
 	// for coverage purpose
@@ -44,7 +44,7 @@ func TestCmdSharedGroup(t *testing.T) {
 		t.Errorf("Expected <%T>, Received <%T>", new(StringWrapper), result)
 	}
 	// verify the type of output parameter
-	if ok := m.Type.In(2).AssignableTo(reflect.TypeOf(command.RpcResult())); !ok {
+	if ok := m.Type.In(3).AssignableTo(reflect.TypeOf(command.RpcResult())); !ok {
 		t.Fatalf("cannot assign output parameter")
 	}
 	// for coverage purpose

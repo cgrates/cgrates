@@ -22,7 +22,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package general_tests
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -34,6 +33,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/ees"
 	"github.com/cgrates/cgrates/engine"
@@ -185,8 +185,8 @@ func testCDRsOnExpAMQPQueuesCreation(t *testing.T) {
 // Connect rpc client to rater
 func testCDRsOnExpInitMasterRPC(t *testing.T) {
 	var err error
-	cdrsMasterRpc, err = rpcclient.NewRPCClient(utils.TCP, cdrsMasterCfg.ListenCfg().RPCJSONListen, false, "", "", "", 1, 1,
-		time.Second, 5*time.Second, rpcclient.JSONrpc, nil, false, nil)
+	cdrsMasterRpc, err = rpcclient.NewRPCClient(context.Background(), utils.TCP, cdrsMasterCfg.ListenCfg().RPCJSONListen, false, "", "", "", 1, 1,
+		0, utils.FibDuration, time.Second, 5*time.Second, rpcclient.JSONrpc, nil, false, nil)
 	if err != nil {
 		t.Fatal("Could not connect to rater: ", err.Error())
 	}
@@ -202,7 +202,7 @@ func testCDRsOnExpLoadDefaultCharger(t *testing.T) {
 		Weight:       20,
 	}
 	var result string
-	if err := cdrsMasterRpc.Call(utils.APIerSv1SetChargerProfile, chargerProfile, &result); err != nil {
+	if err := cdrsMasterRpc.Call(context.Background(), utils.APIerSv1SetChargerProfile, chargerProfile, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -235,7 +235,8 @@ func testCDRsOnExpDisableOnlineExport(t *testing.T) {
 		},
 	}
 	var reply string
-	if err := cdrsMasterRpc.Call(utils.CDRsV1ProcessEvent,
+	if err := cdrsMasterRpc.Call(context.Background(),
+		utils.CDRsV1ProcessEvent,
 		&engine.ArgV1ProcessEvent{
 			Flags:    []string{"*export:false", "*chargers:false"},
 			CGREvent: *testCdr.AsCGREvent(),
@@ -280,21 +281,22 @@ func testCDRsOnExpHttpCdrReplication(t *testing.T) {
 	arg.APIOpts = map[string]any{"ExporterID": "http_localhost"}
 
 	// we expect that the cdr export to fail and go into the failed post directory
-	if err := cdrsMasterRpc.Call(utils.CDRsV1ProcessEvent,
+	if err := cdrsMasterRpc.Call(context.Background(),
+		utils.CDRsV1ProcessEvent,
 		&engine.ArgV1ProcessEvent{
 			CGREvent: *arg,
 		}, &reply); err == nil || err.Error() != utils.ErrPartiallyExecuted.Error() {
 		t.Error("Unexpected error: ", err)
 	}
 	time.Sleep(time.Duration(*waitRater) * time.Millisecond)
-	cdrsSlaveRpc, err := rpcclient.NewRPCClient(utils.TCP, "127.0.0.1:12012", false, "", "", "", 1, 1,
-		time.Second, 2*time.Second, rpcclient.JSONrpc, nil, false, nil)
+	cdrsSlaveRpc, err := rpcclient.NewRPCClient(context.Background(), utils.TCP, "127.0.0.1:12012", false, "", "", "", 1, 1,
+		0, utils.FibDuration, time.Second, 2*time.Second, rpcclient.JSONrpc, nil, false, nil)
 	if err != nil {
 		t.Fatal("Could not connect to rater: ", err.Error())
 	}
 	// ToDo: Fix cdr_http to be compatible with rest of processCdr methods
 	var rcvedCdrs []*engine.ExternalCDR
-	if err := cdrsSlaveRpc.Call(utils.APIerSv2GetCDRs,
+	if err := cdrsSlaveRpc.Call(context.Background(), utils.APIerSv2GetCDRs,
 		&utils.RPCCDRsFilter{CGRIDs: []string{testCdr1.CGRID}, RunIDs: []string{utils.MetaDefault}}, &rcvedCdrs); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(rcvedCdrs) != 1 {
@@ -396,7 +398,8 @@ func testCDRsOnExpAMQPReplication(t *testing.T) {
 		},
 	}
 	var reply string
-	if err := cdrsMasterRpc.Call(utils.CDRsV1ProcessEvent,
+	if err := cdrsMasterRpc.Call(context.Background(),
+		utils.CDRsV1ProcessEvent,
 		&engine.ArgV1ProcessEvent{
 			Flags: []string{"*export:true"},
 

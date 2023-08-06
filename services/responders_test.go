@@ -22,24 +22,24 @@ import (
 	"sync"
 	"testing"
 
+	"github.com/cgrates/birpc"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/cores"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/cgrates/rpcclient"
 )
 
 // TestResponderCoverage for cover testing
 func TestResponderCoverage(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	server := cores.NewServer(nil)
-	internalChan := make(chan rpcclient.ClientConnector, 1)
+	internalChan := make(chan birpc.ClientConnector, 1)
 	shdChan := utils.NewSyncedChan()
 	filterSChan := make(chan *engine.FilterS, 1)
 	filterSChan <- nil
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
 	anz := NewAnalyzerService(cfg, server, filterSChan,
-		shdChan, make(chan rpcclient.ClientConnector, 1), srvDep)
+		shdChan, make(chan birpc.ClientConnector, 1), srvDep)
 	srv := NewResponderService(cfg, server, internalChan,
 		shdChan, anz, srvDep, filterSChan)
 	if srv == nil {

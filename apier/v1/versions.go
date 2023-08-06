@@ -19,12 +19,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package v1
 
 import (
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
 // Queries all versions from dataDB
-func (apierSv1 *APIerSv1) GetDataDBVersions(ign *string, reply *engine.Versions) error {
+func (apierSv1 *APIerSv1) GetDataDBVersions(ctx *context.Context, ign *string, reply *engine.Versions) error {
 	if vrs, err := apierSv1.DataManager.DataDB().GetVersions(""); err != nil {
 		return utils.NewErrServerError(err)
 	} else if len(vrs) == 0 {
@@ -36,7 +37,7 @@ func (apierSv1 *APIerSv1) GetDataDBVersions(ign *string, reply *engine.Versions)
 }
 
 // Queries all versions from stordb
-func (apierSv1 *APIerSv1) GetStorDBVersions(ign *string, reply *engine.Versions) error {
+func (apierSv1 *APIerSv1) GetStorDBVersions(ctx *context.Context, ign *string, reply *engine.Versions) error {
 	if vrs, err := apierSv1.StorDb.GetVersions(""); err != nil {
 		return utils.NewErrServerError(err)
 	} else if len(vrs) == 0 {
@@ -53,7 +54,7 @@ type SetVersionsArg struct {
 }
 
 // Queries all versions from dataDB
-func (apierSv1 *APIerSv1) SetDataDBVersions(arg *SetVersionsArg, reply *string) error {
+func (apierSv1 *APIerSv1) SetDataDBVersions(ctx *context.Context, arg *SetVersionsArg, reply *string) error {
 	if arg.Versions == nil {
 		arg.Versions = engine.CurrentDataDBVersions()
 	}
@@ -65,7 +66,7 @@ func (apierSv1 *APIerSv1) SetDataDBVersions(arg *SetVersionsArg, reply *string) 
 }
 
 // Queries all versions from stordb
-func (apierSv1 *APIerSv1) SetStorDBVersions(arg *SetVersionsArg, reply *string) error {
+func (apierSv1 *APIerSv1) SetStorDBVersions(ctx *context.Context, arg *SetVersionsArg, reply *string) error {
 	if arg.Versions == nil {
 		arg.Versions = engine.CurrentDataDBVersions()
 	}

@@ -19,11 +19,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package v1
 
 import (
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
 )
 
 // SetTPCharger creates a new ChargerProfile within a tariff plan
-func (apierSv1 *APIerSv1) SetTPCharger(attr *utils.TPChargerProfile, reply *string) error {
+func (apierSv1 *APIerSv1) SetTPCharger(ctx *context.Context, attr *utils.TPChargerProfile, reply *string) error {
 	if missing := utils.MissingStructFields(attr, []string{utils.TPid, utils.ID}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -38,7 +39,7 @@ func (apierSv1 *APIerSv1) SetTPCharger(attr *utils.TPChargerProfile, reply *stri
 }
 
 // GetTPCharger queries specific ChargerProfile on Tariff plan
-func (apierSv1 *APIerSv1) GetTPCharger(attr *utils.TPTntID, reply *utils.TPChargerProfile) error {
+func (apierSv1 *APIerSv1) GetTPCharger(ctx *context.Context, attr *utils.TPTntID, reply *utils.TPChargerProfile) error {
 	if missing := utils.MissingStructFields(attr, []string{utils.TPid, utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -62,7 +63,7 @@ type AttrGetTPChargerIds struct {
 }
 
 // GetTPChargerIDs queries Charger identities on specific tariff plan.
-func (apierSv1 *APIerSv1) GetTPChargerIDs(attrs *AttrGetTPChargerIds, reply *[]string) error {
+func (apierSv1 *APIerSv1) GetTPChargerIDs(ctx *context.Context, attrs *AttrGetTPChargerIds, reply *[]string) error {
 	if missing := utils.MissingStructFields(attrs, []string{utils.TPid}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -79,7 +80,7 @@ func (apierSv1 *APIerSv1) GetTPChargerIDs(attrs *AttrGetTPChargerIds, reply *[]s
 }
 
 // RemoveTPCharger removes specific ChargerProfile on Tariff plan
-func (apierSv1 *APIerSv1) RemoveTPCharger(attrs *utils.TPTntID, reply *string) error {
+func (apierSv1 *APIerSv1) RemoveTPCharger(ctx *context.Context, attrs *utils.TPTntID, reply *string) error {
 	if missing := utils.MissingStructFields(attrs, []string{utils.TPid, utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}

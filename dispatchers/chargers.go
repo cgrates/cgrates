@@ -19,11 +19,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package dispatchers
 
 import (
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
-func (dS *DispatcherService) ChargerSv1Ping(args *utils.CGREvent, reply *string) (err error) {
+func (dS *DispatcherService) ChargerSv1Ping(ctx *context.Context, args *utils.CGREvent, reply *string) (err error) {
 	if args == nil {
 		args = new(utils.CGREvent)
 	}
@@ -40,7 +41,7 @@ func (dS *DispatcherService) ChargerSv1Ping(args *utils.CGREvent, reply *string)
 	return dS.Dispatch(args, utils.MetaChargers, utils.ChargerSv1Ping, args, reply)
 }
 
-func (dS *DispatcherService) ChargerSv1GetChargersForEvent(args *utils.CGREvent,
+func (dS *DispatcherService) ChargerSv1GetChargersForEvent(ctx *context.Context, args *utils.CGREvent,
 	reply *engine.ChargerProfiles) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
 	if args != nil && args.Tenant != utils.EmptyString {
@@ -55,7 +56,7 @@ func (dS *DispatcherService) ChargerSv1GetChargersForEvent(args *utils.CGREvent,
 	return dS.Dispatch(args, utils.MetaChargers, utils.ChargerSv1GetChargersForEvent, args, reply)
 }
 
-func (dS *DispatcherService) ChargerSv1ProcessEvent(args *utils.CGREvent,
+func (dS *DispatcherService) ChargerSv1ProcessEvent(ctx *context.Context, args *utils.CGREvent,
 	reply *[]*engine.ChrgSProcessEventReply) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
 	if args != nil && args.Tenant != utils.EmptyString {

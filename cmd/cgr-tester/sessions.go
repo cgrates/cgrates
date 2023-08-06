@@ -26,24 +26,27 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/cenkalti/rpc2"
+	"github.com/cgrates/birpc"
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/sessions"
 	"github.com/cgrates/cgrates/utils"
 )
 
 var (
-	brpc             *rpc2.Client
+	brpc             *birpc.BirpcClient
 	disconnectEvChan = make(chan *utils.AttrDisconnectSession, 1)
 )
 
-func handleDisconnectSession(clnt *rpc2.Client,
+type smock struct{}
+
+func (*smock) DisconnectSession(ctx *context.Context,
 	args *utils.AttrDisconnectSession, reply *string) error {
 	disconnectEvChan <- args
 	*reply = utils.OK
 	return nil
 }
 
-func callSessions(authDur, initDur, updateDur, terminateDur, cdrDur *[]time.Duration,
+func callSessions(ctx *context.Context, authDur, initDur, updateDur, terminateDur, cdrDur *[]time.Duration,
 	reqAuth, reqInit, reqUpdate, reqTerminate, reqCdr *uint64,
 	digitMin, digitMax int64, totalUsage time.Duration) (err error) {
 
@@ -71,11 +74,13 @@ func callSessions(authDur, initDur, updateDur, terminateDur, cdrDur *[]time.Dura
 		APIOpts: map[string]any{},
 	}
 
-	clntHandlers := map[string]any{
-		utils.SessionSv1DisconnectSession: handleDisconnectSession}
-	brpc, err = utils.NewBiJSONrpcClient(tstCfg.SessionSCfg().ListenBijson, clntHandlers)
+	srv, err := birpc.NewService(new(smock), utils.SessionSv1, true)
 	if err != nil {
-		return
+		return err
+	}
+	brpc, err = utils.NewBiJSONrpcClient(tstCfg.SessionSCfg().ListenBijson, srv)
+	if err != nil {
+		return err
 	}
 
 	//
@@ -90,7 +95,7 @@ func callSessions(authDur, initDur, updateDur, terminateDur, cdrDur *[]time.Dura
 	var authRply sessions.V1AuthorizeReply
 	atomic.AddUint64(reqAuth, 1)
 	authStartTime := time.Now()
-	if err = brpc.Call(utils.SessionSv1AuthorizeEvent, authArgs, &authRply); err != nil {
+	if err = brpc.Call(ctx, utils.SessionSv1AuthorizeEvent, authArgs, &authRply); err != nil {
 		return
 	}
 	appendMu.Lock()
@@ -115,7 +120,7 @@ func callSessions(authDur, initDur, updateDur, terminateDur, cdrDur *[]time.Dura
 	var initRply sessions.V1InitSessionReply
 	atomic.AddUint64(reqInit, 1)
 	initStartTime := time.Now()
-	if err = brpc.Call(utils.SessionSv1InitiateSession, initArgs, &initRply); err != nil {
+	if err = brpc.Call(ctx, utils.SessionSv1InitiateSession, initArgs, &initRply); err != nil {
 		return
 	}
 	appendMu.Lock()
@@ -141,7 +146,7 @@ func callSessions(authDur, initDur, updateDur, terminateDur, cdrDur *[]time.Dura
 		var upRply sessions.V1UpdateSessionReply
 		atomic.AddUint64(reqUpdate, 1)
 		updateStartTime := time.Now()
-		if err = brpc.Call(utils.SessionSv1UpdateSession, upArgs, &upRply); err != nil {
+		if err = brpc.Call(ctx, utils.SessionSv1UpdateSession, upArgs, &upRply); err != nil {
 			return
 		}
 		appendMu.Lock()
@@ -167,7 +172,7 @@ func callSessions(authDur, initDur, updateDur, terminateDur, cdrDur *[]time.Dura
 	var tRply string
 	atomic.AddUint64(reqTerminate, 1)
 	terminateStartTime := time.Now()
-	if err = brpc.Call(utils.SessionSv1TerminateSession, tArgs, &tRply); err != nil {
+	if err = brpc.Call(ctx, utils.SessionSv1TerminateSession, tArgs, &tRply); err != nil {
 		return
 	}
 	appendMu.Lock()
@@ -187,7 +192,7 @@ func callSessions(authDur, initDur, updateDur, terminateDur, cdrDur *[]time.Dura
 	var pRply string
 	atomic.AddUint64(reqCdr, 1)
 	cdrStartTime := time.Now()
-	if err = brpc.Call(utils.SessionSv1ProcessCDR, procArgs, &pRply); err != nil {
+	if err = brpc.Call(ctx, utils.SessionSv1ProcessCDR, procArgs, &pRply); err != nil {
 		return
 	}
 	appendMu.Lock()

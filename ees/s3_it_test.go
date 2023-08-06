@@ -24,16 +24,18 @@ package ees
 import (
 	"flag"
 	"fmt"
-	"net/rpc"
 	"path"
 	"testing"
 	"time"
+
+	"github.com/cgrates/birpc/context"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
+	"github.com/cgrates/birpc"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -45,7 +47,7 @@ var (
 	s3ConfDir string
 	s3CfgPath string
 	s3Cfg     *config.CGRConfig
-	s3RPC     *rpc.Client
+	s3RPC     *birpc.Client
 
 	sTestsS3 = []func(t *testing.T){
 		testS3LoadConfig,
@@ -138,7 +140,7 @@ func testS3ExportEvent(t *testing.T) {
 	}
 
 	var reply map[string]utils.MapStorage
-	if err := s3RPC.Call(utils.EeSv1ProcessEvent, ev, &reply); err != nil {
+	if err := s3RPC.Call(context.Background(), utils.EeSv1ProcessEvent, ev, &reply); err != nil {
 		t.Error(err)
 	}
 	time.Sleep(2 * time.Second)

@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package v1
 
 import (
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -34,32 +35,32 @@ type ConfigSv1 struct {
 }
 
 // GetConfig will retrieve from CGRConfig a section
-func (cSv1 *ConfigSv1) GetConfig(section *config.SectionWithAPIOpts, reply *map[string]any) (err error) {
-	return cSv1.cfg.V1GetConfig(section, reply)
+func (cSv1 *ConfigSv1) GetConfig(ctx *context.Context, section *config.SectionWithAPIOpts, reply *map[string]any) (err error) {
+	return cSv1.cfg.V1GetConfig(ctx, section, reply)
 }
 
 // ReloadConfig reloads the configuration
-func (cSv1 *ConfigSv1) ReloadConfig(args *config.ReloadArgs, reply *string) (err error) {
-	return cSv1.cfg.V1ReloadConfig(args, reply)
+func (cSv1 *ConfigSv1) ReloadConfig(ctx *context.Context, args *config.ReloadArgs, reply *string) (err error) {
+	return cSv1.cfg.V1ReloadConfig(ctx, args, reply)
 }
 
 // SetConfig reloads the sections of config
-func (cSv1 *ConfigSv1) SetConfig(args *config.SetConfigArgs, reply *string) (err error) {
-	return cSv1.cfg.V1SetConfig(args, reply)
+func (cSv1 *ConfigSv1) SetConfig(ctx *context.Context, args *config.SetConfigArgs, reply *string) (err error) {
+	return cSv1.cfg.V1SetConfig(ctx, args, reply)
 }
 
 // SetConfigFromJSON reloads the sections of config
-func (cSv1 *ConfigSv1) SetConfigFromJSON(args *config.SetConfigFromJSONArgs, reply *string) (err error) {
-	return cSv1.cfg.V1SetConfigFromJSON(args, reply)
+func (cSv1 *ConfigSv1) SetConfigFromJSON(ctx *context.Context, args *config.SetConfigFromJSONArgs, reply *string) (err error) {
+	return cSv1.cfg.V1SetConfigFromJSON(ctx, args, reply)
 }
 
 // GetConfigAsJSON will retrieve from CGRConfig a section
-func (cSv1 *ConfigSv1) GetConfigAsJSON(args *config.SectionWithAPIOpts, reply *string) (err error) {
-	return cSv1.cfg.V1GetConfigAsJSON(args, reply)
+func (cSv1 *ConfigSv1) GetConfigAsJSON(ctx *context.Context, args *config.SectionWithAPIOpts, reply *string) (err error) {
+	return cSv1.cfg.V1GetConfigAsJSON(ctx, args, reply)
 }
 
-// Call implements rpcclient.ClientConnector interface for internal RPC
-func (cSv1 *ConfigSv1) Call(serviceMethod string,
+// Call implements birpc.ClientConnector interface for internal RPC
+func (cSv1 *ConfigSv1) Call(ctx *context.Context, serviceMethod string,
 	args any, reply any) error {
 	return utils.APIerRPCCall(cSv1, serviceMethod, args, reply)
 }

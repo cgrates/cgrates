@@ -21,12 +21,13 @@ package dispatchers
 import (
 	"time"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
 // ResponderPing interogates Responder server responsible to process the event
-func (dS *DispatcherService) ResponderPing(args *utils.CGREvent,
+func (dS *DispatcherService) ResponderPing(ctx *context.Context, args *utils.CGREvent,
 	reply *string) (err error) {
 	if args == nil {
 		args = new(utils.CGREvent)
@@ -41,7 +42,7 @@ func (dS *DispatcherService) ResponderPing(args *utils.CGREvent,
 	return dS.Dispatch(args, utils.MetaResponder, utils.ResponderPing, args, reply)
 }
 
-func (dS *DispatcherService) ResponderGetCost(args *engine.CallDescriptorWithAPIOpts,
+func (dS *DispatcherService) ResponderGetCost(ctx *context.Context, args *engine.CallDescriptorWithAPIOpts,
 	reply *engine.CallCost) (err error) {
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(utils.ResponderGetCost, args.Tenant,
@@ -52,7 +53,7 @@ func (dS *DispatcherService) ResponderGetCost(args *engine.CallDescriptorWithAPI
 	return dS.Dispatch(args.AsCGREvent(args.APIOpts), utils.MetaResponder, utils.ResponderGetCost, args, reply)
 }
 
-func (dS *DispatcherService) ResponderDebit(args *engine.CallDescriptorWithAPIOpts,
+func (dS *DispatcherService) ResponderDebit(ctx *context.Context, args *engine.CallDescriptorWithAPIOpts,
 	reply *engine.CallCost) (err error) {
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(utils.ResponderDebit, args.Tenant,
@@ -63,7 +64,7 @@ func (dS *DispatcherService) ResponderDebit(args *engine.CallDescriptorWithAPIOp
 	return dS.Dispatch(args.AsCGREvent(args.APIOpts), utils.MetaResponder, utils.ResponderDebit, args, reply)
 }
 
-func (dS *DispatcherService) ResponderMaxDebit(args *engine.CallDescriptorWithAPIOpts,
+func (dS *DispatcherService) ResponderMaxDebit(ctx *context.Context, args *engine.CallDescriptorWithAPIOpts,
 	reply *engine.CallCost) (err error) {
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(utils.ResponderMaxDebit, args.Tenant,
@@ -74,7 +75,7 @@ func (dS *DispatcherService) ResponderMaxDebit(args *engine.CallDescriptorWithAP
 	return dS.Dispatch(args.AsCGREvent(args.APIOpts), utils.MetaResponder, utils.ResponderMaxDebit, args, reply)
 }
 
-func (dS *DispatcherService) ResponderRefundIncrements(args *engine.CallDescriptorWithAPIOpts,
+func (dS *DispatcherService) ResponderRefundIncrements(ctx *context.Context, args *engine.CallDescriptorWithAPIOpts,
 	reply *engine.Account) (err error) {
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(utils.ResponderRefundIncrements, args.Tenant,
@@ -85,7 +86,7 @@ func (dS *DispatcherService) ResponderRefundIncrements(args *engine.CallDescript
 	return dS.Dispatch(args.AsCGREvent(args.APIOpts), utils.MetaResponder, utils.ResponderRefundIncrements, args, reply)
 }
 
-func (dS *DispatcherService) ResponderRefundRounding(args *engine.CallDescriptorWithAPIOpts,
+func (dS *DispatcherService) ResponderRefundRounding(ctx *context.Context, args *engine.CallDescriptorWithAPIOpts,
 	reply *engine.Account) (err error) {
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(utils.ResponderRefundRounding, args.Tenant,
@@ -96,7 +97,7 @@ func (dS *DispatcherService) ResponderRefundRounding(args *engine.CallDescriptor
 	return dS.Dispatch(args.AsCGREvent(args.APIOpts), utils.MetaResponder, utils.ResponderRefundRounding, args, reply)
 }
 
-func (dS *DispatcherService) ResponderGetMaxSessionTime(args *engine.CallDescriptorWithAPIOpts,
+func (dS *DispatcherService) ResponderGetMaxSessionTime(ctx *context.Context, args *engine.CallDescriptorWithAPIOpts,
 	reply *time.Duration) (err error) {
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(utils.ResponderGetMaxSessionTime, args.Tenant,
@@ -107,7 +108,7 @@ func (dS *DispatcherService) ResponderGetMaxSessionTime(args *engine.CallDescrip
 	return dS.Dispatch(args.AsCGREvent(args.APIOpts), utils.MetaResponder, utils.ResponderGetMaxSessionTime, args, reply)
 }
 
-func (dS *DispatcherService) ResponderShutdown(args *utils.TenantWithAPIOpts,
+func (dS *DispatcherService) ResponderShutdown(ctx *context.Context, args *utils.TenantWithAPIOpts,
 	reply *string) (err error) {
 	tnt := utils.FirstNonEmpty(args.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
@@ -122,7 +123,7 @@ func (dS *DispatcherService) ResponderShutdown(args *utils.TenantWithAPIOpts,
 	}, utils.MetaResponder, utils.ResponderShutdown, args, reply)
 }
 
-func (dS *DispatcherService) ResponderGetCostOnRatingPlans(arg *utils.GetCostOnRatingPlansArgs, reply *map[string]any) (err error) {
+func (dS *DispatcherService) ResponderGetCostOnRatingPlans(ctx *context.Context, arg *utils.GetCostOnRatingPlansArgs, reply *map[string]any) (err error) {
 	tnt := utils.FirstNonEmpty(arg.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(utils.ResponderGetCostOnRatingPlans, tnt,
@@ -136,7 +137,7 @@ func (dS *DispatcherService) ResponderGetCostOnRatingPlans(arg *utils.GetCostOnR
 	}, utils.MetaResponder, utils.ResponderGetCostOnRatingPlans, arg, reply)
 }
 
-func (dS *DispatcherService) ResponderGetMaxSessionTimeOnAccounts(arg *utils.GetMaxSessionTimeOnAccountsArgs, reply *map[string]any) (err error) {
+func (dS *DispatcherService) ResponderGetMaxSessionTimeOnAccounts(ctx *context.Context, arg *utils.GetMaxSessionTimeOnAccountsArgs, reply *map[string]any) (err error) {
 	tnt := utils.FirstNonEmpty(arg.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(utils.ResponderGetMaxSessionTimeOnAccounts, tnt,

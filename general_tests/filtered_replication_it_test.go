@@ -27,12 +27,13 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc"
+	"github.com/cgrates/birpc/context"
 	v1 "github.com/cgrates/cgrates/apier/v1"
 	v2 "github.com/cgrates/cgrates/apier/v2"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/cgrates/rpcclient"
 )
 
 var (
@@ -40,15 +41,15 @@ var (
 
 	fltrRplInternalCfgPath string
 	fltrRplInternalCfg     *config.CGRConfig
-	fltrRplInternalRPC     rpcclient.ClientConnector
+	fltrRplInternalRPC     birpc.ClientConnector
 
 	fltrRplEngine1CfgPath string
 	fltrRplEngine1Cfg     *config.CGRConfig
-	fltrRplEngine1RPC     rpcclient.ClientConnector
+	fltrRplEngine1RPC     birpc.ClientConnector
 
 	fltrRplEngine2CfgPath string
 	fltrRplEngine2Cfg     *config.CGRConfig
-	fltrRplEngine2RPC     rpcclient.ClientConnector
+	fltrRplEngine2RPC     birpc.ClientConnector
 
 	sTestsFltrRpl = []func(t *testing.T){
 		testFltrRplInitCfg,
@@ -175,21 +176,21 @@ func testFltrRplAttributeProfile(t *testing.T) {
 	var replyPrfl *engine.AttributeProfile
 	var rplyIDs []string
 	// empty
-	if err := fltrRplEngine1RPC.Call(utils.APIerSv1GetAttributeProfileIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||
+	if err := fltrRplEngine1RPC.Call(context.Background(), utils.APIerSv1GetAttributeProfileIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Fatalf("Unexpected error: %v", err)
 	}
-	if err := fltrRplEngine2RPC.Call(utils.APIerSv1GetAttributeProfileIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||
+	if err := fltrRplEngine2RPC.Call(context.Background(), utils.APIerSv1GetAttributeProfileIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Fatalf("Unexpected error: %v", err)
 	}
 
-	if err := fltrRplInternalRPC.Call(utils.APIerSv1SetAttributeProfile, attrPrf, &result); err != nil {
+	if err := fltrRplInternalRPC.Call(context.Background(), utils.APIerSv1SetAttributeProfile, attrPrf, &result); err != nil {
 		t.Fatal(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	if err := fltrRplInternalRPC.Call(utils.APIerSv1GetAttributeProfile,
+	if err := fltrRplInternalRPC.Call(context.Background(), utils.APIerSv1GetAttributeProfile,
 		utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: attrID}}, &replyPrfl); err != nil {
 		t.Fatal(err)
 	}
@@ -199,16 +200,16 @@ func testFltrRplAttributeProfile(t *testing.T) {
 	}
 	replyPrfl = nil
 
-	if err := fltrRplEngine1RPC.Call(utils.APIerSv1GetAttributeProfileIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||
+	if err := fltrRplEngine1RPC.Call(context.Background(), utils.APIerSv1GetAttributeProfileIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Fatalf("Unexpected error: %v", err)
 	}
-	if err := fltrRplEngine2RPC.Call(utils.APIerSv1GetAttributeProfileIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||
+	if err := fltrRplEngine2RPC.Call(context.Background(), utils.APIerSv1GetAttributeProfileIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Fatalf("Unexpected error: %v", err)
 	}
 
-	if err := fltrRplEngine1RPC.Call(utils.APIerSv1GetAttributeProfile,
+	if err := fltrRplEngine1RPC.Call(context.Background(), utils.APIerSv1GetAttributeProfile,
 		utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: attrID}}, &replyPrfl); err != nil {
 		t.Fatal(err)
 	}
@@ -218,12 +219,12 @@ func testFltrRplAttributeProfile(t *testing.T) {
 	}
 	replyPrfl = nil
 	attrPrf.Weight = 15
-	if err := fltrRplInternalRPC.Call(utils.APIerSv1SetAttributeProfile, attrPrf, &result); err != nil {
+	if err := fltrRplInternalRPC.Call(context.Background(), utils.APIerSv1SetAttributeProfile, attrPrf, &result); err != nil {
 		t.Fatal(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	if err := fltrRplInternalRPC.Call(utils.APIerSv1GetAttributeProfile,
+	if err := fltrRplInternalRPC.Call(context.Background(), utils.APIerSv1GetAttributeProfile,
 		utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: attrID}}, &replyPrfl); err != nil {
 		t.Fatal(err)
 	}
@@ -234,7 +235,7 @@ func testFltrRplAttributeProfile(t *testing.T) {
 	replyPrfl = nil
 
 	// use replicator to see if the attribute was changed in the DB
-	if err := fltrRplEngine1RPC.Call(utils.ReplicatorSv1GetAttributeProfile,
+	if err := fltrRplEngine1RPC.Call(context.Background(), utils.ReplicatorSv1GetAttributeProfile,
 		utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: attrID}}, &replyPrfl); err != nil {
 		t.Fatal(err)
 	}
@@ -243,22 +244,22 @@ func testFltrRplAttributeProfile(t *testing.T) {
 		t.Errorf("Expecting : %s, received: %s", utils.ToJSON(attrPrf.AttributeProfile), utils.ToJSON(replyPrfl))
 	}
 
-	if err := fltrRplEngine2RPC.Call(utils.APIerSv1GetAttributeProfileIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||
+	if err := fltrRplEngine2RPC.Call(context.Background(), utils.APIerSv1GetAttributeProfileIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Fatalf("Unexpected error: %v", err)
 	}
 
-	if err := fltrRplInternalRPC.Call(utils.APIerSv1RemoveAttributeProfile,
+	if err := fltrRplInternalRPC.Call(context.Background(), utils.APIerSv1RemoveAttributeProfile,
 		utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: attrID}}, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	if err := fltrRplEngine1RPC.Call(utils.APIerSv1GetAttributeProfileIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||
+	if err := fltrRplEngine1RPC.Call(context.Background(), utils.APIerSv1GetAttributeProfileIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Fatalf("Unexpected error: %v", err)
 	}
-	if err := fltrRplEngine2RPC.Call(utils.APIerSv1GetAttributeProfileIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||
+	if err := fltrRplEngine2RPC.Call(context.Background(), utils.APIerSv1GetAttributeProfileIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Fatalf("Unexpected error: %v", err)
 	}
@@ -282,21 +283,21 @@ func testFltrRplFilters(t *testing.T) {
 	var replyPrfl *engine.Filter
 	var rplyIDs []string
 	// empty
-	if err := fltrRplEngine1RPC.Call(utils.APIerSv1GetFilterIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||
+	if err := fltrRplEngine1RPC.Call(context.Background(), utils.APIerSv1GetFilterIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Fatalf("Unexpected error: %v", err)
 	}
-	if err := fltrRplEngine2RPC.Call(utils.APIerSv1GetFilterIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||
+	if err := fltrRplEngine2RPC.Call(context.Background(), utils.APIerSv1GetFilterIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Fatalf("Unexpected error: %v", err)
 	}
 
-	if err := fltrRplInternalRPC.Call(utils.APIerSv1SetFilter, fltr, &result); err != nil {
+	if err := fltrRplInternalRPC.Call(context.Background(), utils.APIerSv1SetFilter, fltr, &result); err != nil {
 		t.Fatal(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	if err := fltrRplInternalRPC.Call(utils.APIerSv1GetFilter,
+	if err := fltrRplInternalRPC.Call(context.Background(), utils.APIerSv1GetFilter,
 		&utils.TenantID{Tenant: "cgrates.org", ID: fltrID}, &replyPrfl); err != nil {
 		t.Fatal(err)
 	}
@@ -306,16 +307,16 @@ func testFltrRplFilters(t *testing.T) {
 	}
 	replyPrfl = nil
 
-	if err := fltrRplEngine1RPC.Call(utils.APIerSv1GetFilterIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||
+	if err := fltrRplEngine1RPC.Call(context.Background(), utils.APIerSv1GetFilterIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Fatalf("Unexpected error: %v", err)
 	}
-	if err := fltrRplEngine2RPC.Call(utils.APIerSv1GetFilterIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||
+	if err := fltrRplEngine2RPC.Call(context.Background(), utils.APIerSv1GetFilterIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Fatalf("Unexpected error: %v", err)
 	}
 
-	if err := fltrRplEngine1RPC.Call(utils.APIerSv1GetFilter,
+	if err := fltrRplEngine1RPC.Call(context.Background(), utils.APIerSv1GetFilter,
 		&utils.TenantID{Tenant: "cgrates.org", ID: fltrID}, &replyPrfl); err != nil {
 		t.Fatal(err)
 	}
@@ -325,12 +326,12 @@ func testFltrRplFilters(t *testing.T) {
 	}
 	replyPrfl = nil
 	fltr.Rules[0].Type = utils.MetaPrefix
-	if err := fltrRplInternalRPC.Call(utils.APIerSv1SetFilter, fltr, &result); err != nil {
+	if err := fltrRplInternalRPC.Call(context.Background(), utils.APIerSv1SetFilter, fltr, &result); err != nil {
 		t.Fatal(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	if err := fltrRplInternalRPC.Call(utils.APIerSv1GetFilter,
+	if err := fltrRplInternalRPC.Call(context.Background(), utils.APIerSv1GetFilter,
 		&utils.TenantID{Tenant: "cgrates.org", ID: fltrID}, &replyPrfl); err != nil {
 		t.Fatal(err)
 	}
@@ -341,7 +342,7 @@ func testFltrRplFilters(t *testing.T) {
 	replyPrfl = nil
 
 	// use replicator to see if the attribute was changed in the DB
-	if err := fltrRplEngine1RPC.Call(utils.ReplicatorSv1GetFilter,
+	if err := fltrRplEngine1RPC.Call(context.Background(), utils.ReplicatorSv1GetFilter,
 		utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: fltrID}}, &replyPrfl); err != nil {
 		t.Fatal(err)
 	}
@@ -350,22 +351,22 @@ func testFltrRplFilters(t *testing.T) {
 		t.Errorf("Expecting : %s, received: %s", utils.ToJSON(fltr.Filter), utils.ToJSON(replyPrfl))
 	}
 
-	if err := fltrRplEngine2RPC.Call(utils.APIerSv1GetFilterIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||
+	if err := fltrRplEngine2RPC.Call(context.Background(), utils.APIerSv1GetFilterIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Fatalf("Unexpected error: %v", err)
 	}
 
-	if err := fltrRplInternalRPC.Call(utils.APIerSv1RemoveFilter,
+	if err := fltrRplInternalRPC.Call(context.Background(), utils.APIerSv1RemoveFilter,
 		utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: fltrID}}, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	if err := fltrRplEngine1RPC.Call(utils.APIerSv1GetFilterIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||
+	if err := fltrRplEngine1RPC.Call(context.Background(), utils.APIerSv1GetFilterIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Fatalf("Unexpected error: %v", err)
 	}
-	if err := fltrRplEngine2RPC.Call(utils.APIerSv1GetFilterIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||
+	if err := fltrRplEngine2RPC.Call(context.Background(), utils.APIerSv1GetFilterIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Fatalf("Unexpected error: %v", err)
 	}
@@ -398,30 +399,30 @@ func testFltrRplThresholdProfile(t *testing.T) {
 		},
 	}
 	// empty
-	if err := fltrRplEngine1RPC.Call(utils.APIerSv1GetThresholdProfileIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||
+	if err := fltrRplEngine1RPC.Call(context.Background(), utils.APIerSv1GetThresholdProfileIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Fatalf("Unexpected error: %v", err)
 	}
-	if err := fltrRplEngine2RPC.Call(utils.APIerSv1GetThresholdProfileIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||
-		err.Error() != utils.ErrNotFound.Error() {
-		t.Fatalf("Unexpected error: %v", err)
-	}
-
-	if err := fltrRplEngine1RPC.Call(utils.ReplicatorSv1GetThreshold, argsTh, &replyTh); err == nil ||
-		err.Error() != utils.ErrNotFound.Error() {
-		t.Fatalf("Unexpected error: %v", err)
-	}
-	if err := fltrRplEngine2RPC.Call(utils.ReplicatorSv1GetThreshold, argsTh, &replyTh); err == nil ||
+	if err := fltrRplEngine2RPC.Call(context.Background(), utils.APIerSv1GetThresholdProfileIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Fatalf("Unexpected error: %v", err)
 	}
 
-	if err := fltrRplInternalRPC.Call(utils.APIerSv1SetThresholdProfile, thPrfl, &result); err != nil {
+	if err := fltrRplEngine1RPC.Call(context.Background(), utils.ReplicatorSv1GetThreshold, argsTh, &replyTh); err == nil ||
+		err.Error() != utils.ErrNotFound.Error() {
+		t.Fatalf("Unexpected error: %v", err)
+	}
+	if err := fltrRplEngine2RPC.Call(context.Background(), utils.ReplicatorSv1GetThreshold, argsTh, &replyTh); err == nil ||
+		err.Error() != utils.ErrNotFound.Error() {
+		t.Fatalf("Unexpected error: %v", err)
+	}
+
+	if err := fltrRplInternalRPC.Call(context.Background(), utils.APIerSv1SetThresholdProfile, thPrfl, &result); err != nil {
 		t.Fatal(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	if err := fltrRplInternalRPC.Call(utils.APIerSv1GetThresholdProfile,
+	if err := fltrRplInternalRPC.Call(context.Background(), utils.APIerSv1GetThresholdProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: thID}, &replyPrfl); err != nil {
 		t.Fatal(err)
 	}
@@ -430,25 +431,25 @@ func testFltrRplThresholdProfile(t *testing.T) {
 	}
 	replyPrfl = nil
 
-	if err := fltrRplEngine1RPC.Call(utils.APIerSv1GetThresholdProfileIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||
+	if err := fltrRplEngine1RPC.Call(context.Background(), utils.APIerSv1GetThresholdProfileIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Fatalf("Unexpected error: %v", err)
 	}
-	if err := fltrRplEngine2RPC.Call(utils.APIerSv1GetThresholdProfileIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||
-		err.Error() != utils.ErrNotFound.Error() {
-		t.Fatalf("Unexpected error: %v", err)
-	}
-
-	if err := fltrRplEngine1RPC.Call(utils.ReplicatorSv1GetThreshold, argsTh, &replyTh); err == nil ||
-		err.Error() != utils.ErrNotFound.Error() {
-		t.Fatalf("Unexpected error: %v", err)
-	}
-	if err := fltrRplEngine2RPC.Call(utils.ReplicatorSv1GetThreshold, argsTh, &replyTh); err == nil ||
+	if err := fltrRplEngine2RPC.Call(context.Background(), utils.APIerSv1GetThresholdProfileIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Fatalf("Unexpected error: %v", err)
 	}
 
-	if err := fltrRplEngine1RPC.Call(utils.APIerSv1GetThresholdProfile,
+	if err := fltrRplEngine1RPC.Call(context.Background(), utils.ReplicatorSv1GetThreshold, argsTh, &replyTh); err == nil ||
+		err.Error() != utils.ErrNotFound.Error() {
+		t.Fatalf("Unexpected error: %v", err)
+	}
+	if err := fltrRplEngine2RPC.Call(context.Background(), utils.ReplicatorSv1GetThreshold, argsTh, &replyTh); err == nil ||
+		err.Error() != utils.ErrNotFound.Error() {
+		t.Fatalf("Unexpected error: %v", err)
+	}
+
+	if err := fltrRplEngine1RPC.Call(context.Background(), utils.APIerSv1GetThresholdProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: thID}, &replyPrfl); err != nil {
 		t.Fatal(err)
 	}
@@ -456,7 +457,7 @@ func testFltrRplThresholdProfile(t *testing.T) {
 		t.Errorf("Expecting : %s, received: %s", utils.ToJSON(thPrfl.ThresholdProfile), utils.ToJSON(replyPrfl))
 	}
 
-	if err := fltrRplEngine1RPC.Call(utils.ThresholdSv1GetThreshold, argsTh, &replyTh); err != nil {
+	if err := fltrRplEngine1RPC.Call(context.Background(), utils.ThresholdSv1GetThreshold, argsTh, &replyTh); err != nil {
 		t.Fatal(err)
 	} else if !reflect.DeepEqual(th, replyTh) {
 		t.Errorf("Expecting : %s, received: %s", utils.ToJSON(th), utils.ToJSON(replyTh))
@@ -464,12 +465,12 @@ func testFltrRplThresholdProfile(t *testing.T) {
 
 	replyPrfl = nil
 	thPrfl.Weight = 10
-	if err := fltrRplInternalRPC.Call(utils.APIerSv1SetThresholdProfile, thPrfl, &result); err != nil {
+	if err := fltrRplInternalRPC.Call(context.Background(), utils.APIerSv1SetThresholdProfile, thPrfl, &result); err != nil {
 		t.Fatal(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	if err := fltrRplInternalRPC.Call(utils.APIerSv1GetThresholdProfile,
+	if err := fltrRplInternalRPC.Call(context.Background(), utils.APIerSv1GetThresholdProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: thID}, &replyPrfl); err != nil {
 		t.Fatal(err)
 	}
@@ -479,7 +480,7 @@ func testFltrRplThresholdProfile(t *testing.T) {
 	replyPrfl = nil
 
 	// use replicator to see if the attribute was changed in the DB
-	if err := fltrRplEngine1RPC.Call(utils.ReplicatorSv1GetThresholdProfile,
+	if err := fltrRplEngine1RPC.Call(context.Background(), utils.ReplicatorSv1GetThresholdProfile,
 		utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: thID}}, &replyPrfl); err != nil {
 		t.Fatal(err)
 	}
@@ -487,7 +488,7 @@ func testFltrRplThresholdProfile(t *testing.T) {
 		t.Errorf("Expecting : %s, received: %s", utils.ToJSON(thPrfl.ThresholdProfile), utils.ToJSON(replyPrfl))
 	}
 
-	if err := fltrRplEngine2RPC.Call(utils.APIerSv1GetThresholdProfileIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||
+	if err := fltrRplEngine2RPC.Call(context.Background(), utils.APIerSv1GetThresholdProfileIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Fatalf("Unexpected error: %v", err)
 	}
@@ -501,13 +502,13 @@ func testFltrRplThresholdProfile(t *testing.T) {
 	}
 	var thIDs []string
 	//Testing ProcessEvent on set thresholdprofile using apier
-	if err := fltrRplInternalRPC.Call(utils.ThresholdSv1ProcessEvent, tEv, &thIDs); err != nil {
+	if err := fltrRplInternalRPC.Call(context.Background(), utils.ThresholdSv1ProcessEvent, tEv, &thIDs); err != nil {
 		t.Fatal(err)
 	} else if expected := []string{thID}; !reflect.DeepEqual(expected, thIDs) {
 		t.Errorf("Expecting : %s, received: %s", utils.ToJSON(expected), utils.ToJSON(thIDs))
 	}
 
-	if err := fltrRplEngine1RPC.Call(utils.ThresholdSv1GetThreshold, argsTh, &replyTh); err != nil {
+	if err := fltrRplEngine1RPC.Call(context.Background(), utils.ThresholdSv1GetThreshold, argsTh, &replyTh); err != nil {
 		t.Fatal(err)
 	}
 	th.Hits = 1
@@ -516,26 +517,26 @@ func testFltrRplThresholdProfile(t *testing.T) {
 		t.Errorf("Expecting : %s, received: %s", utils.ToJSON(th), utils.ToJSON(replyTh))
 	}
 
-	if err := fltrRplInternalRPC.Call(utils.APIerSv1RemoveThresholdProfile,
+	if err := fltrRplInternalRPC.Call(context.Background(), utils.APIerSv1RemoveThresholdProfile,
 		utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: thID}}, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	if err := fltrRplEngine1RPC.Call(utils.APIerSv1GetThresholdProfileIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||
+	if err := fltrRplEngine1RPC.Call(context.Background(), utils.APIerSv1GetThresholdProfileIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Fatalf("Unexpected error: %v", err)
 	}
-	if err := fltrRplEngine2RPC.Call(utils.APIerSv1GetThresholdProfileIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||
+	if err := fltrRplEngine2RPC.Call(context.Background(), utils.APIerSv1GetThresholdProfileIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Fatalf("Unexpected error: %v", err)
 	}
 
-	if err := fltrRplEngine1RPC.Call(utils.ReplicatorSv1GetThreshold, argsTh, &replyTh); err == nil ||
+	if err := fltrRplEngine1RPC.Call(context.Background(), utils.ReplicatorSv1GetThreshold, argsTh, &replyTh); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Fatalf("Unexpected error: %v", err)
 	}
-	if err := fltrRplEngine2RPC.Call(utils.ReplicatorSv1GetThreshold, argsTh, &replyTh); err == nil ||
+	if err := fltrRplEngine2RPC.Call(context.Background(), utils.ReplicatorSv1GetThreshold, argsTh, &replyTh); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Fatalf("Unexpected error: %v", err)
 	}
@@ -580,30 +581,30 @@ func testFltrRplStatQueueProfile(t *testing.T) {
 		},
 	}
 	// empty
-	if err := fltrRplEngine1RPC.Call(utils.APIerSv1GetStatQueueProfileIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||
+	if err := fltrRplEngine1RPC.Call(context.Background(), utils.APIerSv1GetStatQueueProfileIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Fatalf("Unexpected error: %v", err)
 	}
-	if err := fltrRplEngine2RPC.Call(utils.APIerSv1GetStatQueueProfileIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||
-		err.Error() != utils.ErrNotFound.Error() {
-		t.Fatalf("Unexpected error: %v", err)
-	}
-
-	if err := fltrRplEngine1RPC.Call(utils.ReplicatorSv1GetStatQueue, argsSq, &replySq); err == nil ||
-		err.Error() != utils.ErrNotFound.Error() {
-		t.Fatalf("Unexpected error: %v", err)
-	}
-	if err := fltrRplEngine2RPC.Call(utils.ReplicatorSv1GetStatQueue, argsSq, &replySq); err == nil ||
+	if err := fltrRplEngine2RPC.Call(context.Background(), utils.APIerSv1GetStatQueueProfileIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Fatalf("Unexpected error: %v", err)
 	}
 
-	if err := fltrRplInternalRPC.Call(utils.APIerSv1SetStatQueueProfile, stPrf, &result); err != nil {
+	if err := fltrRplEngine1RPC.Call(context.Background(), utils.ReplicatorSv1GetStatQueue, argsSq, &replySq); err == nil ||
+		err.Error() != utils.ErrNotFound.Error() {
+		t.Fatalf("Unexpected error: %v", err)
+	}
+	if err := fltrRplEngine2RPC.Call(context.Background(), utils.ReplicatorSv1GetStatQueue, argsSq, &replySq); err == nil ||
+		err.Error() != utils.ErrNotFound.Error() {
+		t.Fatalf("Unexpected error: %v", err)
+	}
+
+	if err := fltrRplInternalRPC.Call(context.Background(), utils.APIerSv1SetStatQueueProfile, stPrf, &result); err != nil {
 		t.Fatal(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	if err := fltrRplInternalRPC.Call(utils.APIerSv1GetStatQueueProfile,
+	if err := fltrRplInternalRPC.Call(context.Background(), utils.APIerSv1GetStatQueueProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: stID}, &replyPrfl); err != nil {
 		t.Fatal(err)
 	}
@@ -612,25 +613,25 @@ func testFltrRplStatQueueProfile(t *testing.T) {
 	}
 	replyPrfl = nil
 
-	if err := fltrRplEngine1RPC.Call(utils.APIerSv1GetStatQueueProfileIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||
+	if err := fltrRplEngine1RPC.Call(context.Background(), utils.APIerSv1GetStatQueueProfileIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Fatalf("Unexpected error: %v", err)
 	}
-	if err := fltrRplEngine2RPC.Call(utils.APIerSv1GetStatQueueProfileIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||
-		err.Error() != utils.ErrNotFound.Error() {
-		t.Fatalf("Unexpected error: %v", err)
-	}
-
-	if err := fltrRplEngine1RPC.Call(utils.ReplicatorSv1GetStatQueue, argsSq, &replySq); err == nil ||
-		err.Error() != utils.ErrNotFound.Error() {
-		t.Fatalf("Unexpected error: %v", err)
-	}
-	if err := fltrRplEngine2RPC.Call(utils.ReplicatorSv1GetStatQueue, argsSq, &replySq); err == nil ||
+	if err := fltrRplEngine2RPC.Call(context.Background(), utils.APIerSv1GetStatQueueProfileIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Fatalf("Unexpected error: %v", err)
 	}
 
-	if err := fltrRplEngine1RPC.Call(utils.APIerSv1GetStatQueueProfile,
+	if err := fltrRplEngine1RPC.Call(context.Background(), utils.ReplicatorSv1GetStatQueue, argsSq, &replySq); err == nil ||
+		err.Error() != utils.ErrNotFound.Error() {
+		t.Fatalf("Unexpected error: %v", err)
+	}
+	if err := fltrRplEngine2RPC.Call(context.Background(), utils.ReplicatorSv1GetStatQueue, argsSq, &replySq); err == nil ||
+		err.Error() != utils.ErrNotFound.Error() {
+		t.Fatalf("Unexpected error: %v", err)
+	}
+
+	if err := fltrRplEngine1RPC.Call(context.Background(), utils.APIerSv1GetStatQueueProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: stID}, &replyPrfl); err != nil {
 		t.Fatal(err)
 	}
@@ -643,7 +644,7 @@ func testFltrRplStatQueueProfile(t *testing.T) {
 	sq.SQMetrics = map[string]engine.StatMetric{
 		utils.MetaACD: s,
 	}
-	if err := fltrRplEngine1RPC.Call(utils.StatSv1GetStatQueue, argsSq, &replySq); err != nil {
+	if err := fltrRplEngine1RPC.Call(context.Background(), utils.StatSv1GetStatQueue, argsSq, &replySq); err != nil {
 		t.Fatal(err)
 	} else if !reflect.DeepEqual(sq, replySq) {
 		t.Errorf("Expecting : %s, received: %s", utils.ToJSON(sq), utils.ToJSON(replySq))
@@ -651,12 +652,12 @@ func testFltrRplStatQueueProfile(t *testing.T) {
 
 	replyPrfl = nil
 	stPrf.Weight = 15
-	if err := fltrRplInternalRPC.Call(utils.APIerSv1SetStatQueueProfile, stPrf, &result); err != nil {
+	if err := fltrRplInternalRPC.Call(context.Background(), utils.APIerSv1SetStatQueueProfile, stPrf, &result); err != nil {
 		t.Fatal(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	if err := fltrRplInternalRPC.Call(utils.APIerSv1GetStatQueueProfile,
+	if err := fltrRplInternalRPC.Call(context.Background(), utils.APIerSv1GetStatQueueProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: stID}, &replyPrfl); err != nil {
 		t.Fatal(err)
 	}
@@ -666,7 +667,7 @@ func testFltrRplStatQueueProfile(t *testing.T) {
 	replyPrfl = nil
 
 	// use replicator to see if the attribute was changed in the DB
-	if err := fltrRplEngine1RPC.Call(utils.ReplicatorSv1GetStatQueueProfile,
+	if err := fltrRplEngine1RPC.Call(context.Background(), utils.ReplicatorSv1GetStatQueueProfile,
 		utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: stID}}, &replyPrfl); err != nil {
 		t.Fatal(err)
 	}
@@ -674,7 +675,7 @@ func testFltrRplStatQueueProfile(t *testing.T) {
 		t.Errorf("Expecting : %s, received: %s", utils.ToJSON(stPrf.StatQueueProfile), utils.ToJSON(replyPrfl))
 	}
 
-	if err := fltrRplEngine2RPC.Call(utils.APIerSv1GetStatQueueProfileIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||
+	if err := fltrRplEngine2RPC.Call(context.Background(), utils.APIerSv1GetStatQueueProfileIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Fatalf("Unexpected error: %v", err)
 	}
@@ -689,13 +690,13 @@ func testFltrRplStatQueueProfile(t *testing.T) {
 	}
 	var sqIDs []string
 	//Testing ProcessEvent on set thresholdprofile using apier
-	if err := fltrRplInternalRPC.Call(utils.StatSv1ProcessEvent, sEv, &sqIDs); err != nil {
+	if err := fltrRplInternalRPC.Call(context.Background(), utils.StatSv1ProcessEvent, sEv, &sqIDs); err != nil {
 		t.Fatal(err)
 	} else if expected := []string{stID}; !reflect.DeepEqual(expected, sqIDs) {
 		t.Errorf("Expecting : %s, received: %s", utils.ToJSON(expected), utils.ToJSON(sqIDs))
 	}
 
-	if err := fltrRplEngine1RPC.Call(utils.StatSv1GetStatQueue, argsSq, &replySq); err != nil {
+	if err := fltrRplEngine1RPC.Call(context.Background(), utils.StatSv1GetStatQueue, argsSq, &replySq); err != nil {
 		t.Fatal(err)
 	}
 	sq.SQItems = []engine.SQItem{{
@@ -707,26 +708,26 @@ func testFltrRplStatQueueProfile(t *testing.T) {
 		t.Errorf("Expecting : %s, received: %s", utils.ToJSON(sq), utils.ToJSON(replySq))
 	}
 
-	if err := fltrRplInternalRPC.Call(utils.APIerSv1RemoveStatQueueProfile,
+	if err := fltrRplInternalRPC.Call(context.Background(), utils.APIerSv1RemoveStatQueueProfile,
 		utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: stID}}, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	if err := fltrRplEngine1RPC.Call(utils.APIerSv1GetStatQueueProfileIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||
+	if err := fltrRplEngine1RPC.Call(context.Background(), utils.APIerSv1GetStatQueueProfileIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Fatalf("Unexpected error: %v", err)
 	}
-	if err := fltrRplEngine2RPC.Call(utils.APIerSv1GetStatQueueProfileIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||
+	if err := fltrRplEngine2RPC.Call(context.Background(), utils.APIerSv1GetStatQueueProfileIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Fatalf("Unexpected error: %v", err)
 	}
 
-	if err := fltrRplEngine1RPC.Call(utils.ReplicatorSv1GetStatQueue, argsSq, &replySq); err == nil ||
+	if err := fltrRplEngine1RPC.Call(context.Background(), utils.ReplicatorSv1GetStatQueue, argsSq, &replySq); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Fatalf("Unexpected error: %v", err)
 	}
-	if err := fltrRplEngine2RPC.Call(utils.ReplicatorSv1GetStatQueue, argsSq, &replySq); err == nil ||
+	if err := fltrRplEngine2RPC.Call(context.Background(), utils.ReplicatorSv1GetStatQueue, argsSq, &replySq); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Fatalf("Unexpected error: %v", err)
 	}
@@ -764,29 +765,29 @@ func testFltrRplResourceProfile(t *testing.T) {
 		},
 	}
 	// empty
-	if err := fltrRplEngine1RPC.Call(utils.APIerSv1GetResourceProfileIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||
+	if err := fltrRplEngine1RPC.Call(context.Background(), utils.APIerSv1GetResourceProfileIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Fatalf("Unexpected error: %v", err)
 	}
-	if err := fltrRplEngine2RPC.Call(utils.APIerSv1GetResourceProfileIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||
+	if err := fltrRplEngine2RPC.Call(context.Background(), utils.APIerSv1GetResourceProfileIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Fatalf("Unexpected error: %v", err)
 	}
 
-	if err := fltrRplEngine1RPC.Call(utils.ReplicatorSv1GetResource, argsRs, &replyRs); err == nil ||
+	if err := fltrRplEngine1RPC.Call(context.Background(), utils.ReplicatorSv1GetResource, argsRs, &replyRs); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Fatalf("Unexpected error: %v", err)
 	}
-	if err := fltrRplEngine2RPC.Call(utils.ReplicatorSv1GetResource, argsRs, &replyRs); err == nil ||
+	if err := fltrRplEngine2RPC.Call(context.Background(), utils.ReplicatorSv1GetResource, argsRs, &replyRs); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Fatalf("Unexpected error: %v", err)
 	}
-	if err := fltrRplInternalRPC.Call(utils.APIerSv1SetResourceProfile, resPrf, &result); err != nil {
+	if err := fltrRplInternalRPC.Call(context.Background(), utils.APIerSv1SetResourceProfile, resPrf, &result); err != nil {
 		t.Fatal(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	if err := fltrRplInternalRPC.Call(utils.APIerSv1GetResourceProfile,
+	if err := fltrRplInternalRPC.Call(context.Background(), utils.APIerSv1GetResourceProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: resID}, &replyPrfl); err != nil {
 		t.Fatal(err)
 	}
@@ -795,25 +796,25 @@ func testFltrRplResourceProfile(t *testing.T) {
 	}
 	replyPrfl = nil
 
-	if err := fltrRplEngine1RPC.Call(utils.APIerSv1GetResourceProfileIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||
+	if err := fltrRplEngine1RPC.Call(context.Background(), utils.APIerSv1GetResourceProfileIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Fatalf("Unexpected error: %v", err)
 	}
-	if err := fltrRplEngine2RPC.Call(utils.APIerSv1GetResourceProfileIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||
-		err.Error() != utils.ErrNotFound.Error() {
-		t.Fatalf("Unexpected error: %v", err)
-	}
-
-	if err := fltrRplEngine1RPC.Call(utils.ReplicatorSv1GetResource, argsRs, &replyRs); err == nil ||
-		err.Error() != utils.ErrNotFound.Error() {
-		t.Fatalf("Unexpected error: %v", err)
-	}
-	if err := fltrRplEngine2RPC.Call(utils.ReplicatorSv1GetResource, argsRs, &replyRs); err == nil ||
+	if err := fltrRplEngine2RPC.Call(context.Background(), utils.APIerSv1GetResourceProfileIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Fatalf("Unexpected error: %v", err)
 	}
 
-	if err := fltrRplEngine1RPC.Call(utils.APIerSv1GetResourceProfile,
+	if err := fltrRplEngine1RPC.Call(context.Background(), utils.ReplicatorSv1GetResource, argsRs, &replyRs); err == nil ||
+		err.Error() != utils.ErrNotFound.Error() {
+		t.Fatalf("Unexpected error: %v", err)
+	}
+	if err := fltrRplEngine2RPC.Call(context.Background(), utils.ReplicatorSv1GetResource, argsRs, &replyRs); err == nil ||
+		err.Error() != utils.ErrNotFound.Error() {
+		t.Fatalf("Unexpected error: %v", err)
+	}
+
+	if err := fltrRplEngine1RPC.Call(context.Background(), utils.APIerSv1GetResourceProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: resID}, &replyPrfl); err != nil {
 		t.Fatal(err)
 	}
@@ -821,7 +822,7 @@ func testFltrRplResourceProfile(t *testing.T) {
 		t.Errorf("Expecting : %s, received: %s", utils.ToJSON(resPrf.ResourceProfile), utils.ToJSON(replyPrfl))
 	}
 
-	if err := fltrRplEngine1RPC.Call(utils.ResourceSv1GetResource, argsRs, &replyRs); err != nil {
+	if err := fltrRplEngine1RPC.Call(context.Background(), utils.ResourceSv1GetResource, argsRs, &replyRs); err != nil {
 		t.Fatal(err)
 	} else if !reflect.DeepEqual(rs, replyRs) {
 		t.Errorf("Expecting : %s, received: %s", utils.ToJSON(rs), utils.ToJSON(replyRs))
@@ -829,12 +830,12 @@ func testFltrRplResourceProfile(t *testing.T) {
 
 	replyPrfl = nil
 	resPrf.Weight = 15
-	if err := fltrRplInternalRPC.Call(utils.APIerSv1SetResourceProfile, resPrf, &result); err != nil {
+	if err := fltrRplInternalRPC.Call(context.Background(), utils.APIerSv1SetResourceProfile, resPrf, &result); err != nil {
 		t.Fatal(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	if err := fltrRplInternalRPC.Call(utils.APIerSv1GetResourceProfile,
+	if err := fltrRplInternalRPC.Call(context.Background(), utils.APIerSv1GetResourceProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: resID}, &replyPrfl); err != nil {
 		t.Fatal(err)
 	}
@@ -844,7 +845,7 @@ func testFltrRplResourceProfile(t *testing.T) {
 	replyPrfl = nil
 
 	// use replicator to see if the attribute was changed in the DB
-	if err := fltrRplEngine1RPC.Call(utils.ReplicatorSv1GetResourceProfile,
+	if err := fltrRplEngine1RPC.Call(context.Background(), utils.ReplicatorSv1GetResourceProfile,
 		utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: resID}}, &replyPrfl); err != nil {
 		t.Fatal(err)
 	}
@@ -852,7 +853,7 @@ func testFltrRplResourceProfile(t *testing.T) {
 		t.Errorf("Expecting : %s, received: %s", utils.ToJSON(resPrf.ResourceProfile), utils.ToJSON(replyPrfl))
 	}
 
-	if err := fltrRplEngine2RPC.Call(utils.APIerSv1GetResourceProfileIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||
+	if err := fltrRplEngine2RPC.Call(context.Background(), utils.APIerSv1GetResourceProfileIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Fatalf("Unexpected error: %v", err)
 	}
@@ -870,13 +871,13 @@ func testFltrRplResourceProfile(t *testing.T) {
 	}
 	var rsIDs string
 	//Testing ProcessEvent on set thresholdprofile using apier
-	if err := fltrRplInternalRPC.Call(utils.ResourceSv1AllocateResources, rEv, &rsIDs); err != nil {
+	if err := fltrRplInternalRPC.Call(context.Background(), utils.ResourceSv1AllocateResources, rEv, &rsIDs); err != nil {
 		t.Fatal(err)
 	} else if expected := resPrf.AllocationMessage; !reflect.DeepEqual(expected, rsIDs) {
 		t.Errorf("Expecting : %s, received: %s", utils.ToJSON(expected), utils.ToJSON(rsIDs))
 	}
 
-	if err := fltrRplEngine1RPC.Call(utils.ResourceSv1GetResource, argsRs, &replyRs); err != nil {
+	if err := fltrRplEngine1RPC.Call(context.Background(), utils.ResourceSv1GetResource, argsRs, &replyRs); err != nil {
 		t.Fatal(err)
 	}
 	usageID := utils.IfaceAsString(rEv.APIOpts[utils.OptsResourcesUsageID])
@@ -893,26 +894,26 @@ func testFltrRplResourceProfile(t *testing.T) {
 		t.Errorf("Expecting : %s, received: %s", utils.ToJSON(rs), utils.ToJSON(replyRs))
 	}
 
-	if err := fltrRplInternalRPC.Call(utils.APIerSv1RemoveResourceProfile,
+	if err := fltrRplInternalRPC.Call(context.Background(), utils.APIerSv1RemoveResourceProfile,
 		utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: resID}}, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	if err := fltrRplEngine1RPC.Call(utils.APIerSv1GetResourceProfileIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||
+	if err := fltrRplEngine1RPC.Call(context.Background(), utils.APIerSv1GetResourceProfileIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Fatalf("Unexpected error: %v", err)
 	}
-	if err := fltrRplEngine2RPC.Call(utils.APIerSv1GetResourceProfileIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||
+	if err := fltrRplEngine2RPC.Call(context.Background(), utils.APIerSv1GetResourceProfileIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Fatalf("Unexpected error: %v", err)
 	}
 
-	if err := fltrRplEngine1RPC.Call(utils.ReplicatorSv1GetResource, argsRs, &replyRs); err == nil ||
+	if err := fltrRplEngine1RPC.Call(context.Background(), utils.ReplicatorSv1GetResource, argsRs, &replyRs); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Fatalf("Unexpected error: %v", err)
 	}
-	if err := fltrRplEngine2RPC.Call(utils.ReplicatorSv1GetResource, argsRs, &replyRs); err == nil ||
+	if err := fltrRplEngine2RPC.Call(context.Background(), utils.ReplicatorSv1GetResource, argsRs, &replyRs); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Fatalf("Unexpected error: %v", err)
 	}
@@ -945,21 +946,21 @@ func testFltrRplRouteProfile(t *testing.T) {
 	var replyPrfl *engine.RouteProfile
 	var rplyIDs []string
 	// empty
-	if err := fltrRplEngine1RPC.Call(utils.APIerSv1GetRouteProfileIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||
+	if err := fltrRplEngine1RPC.Call(context.Background(), utils.APIerSv1GetRouteProfileIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Fatalf("Unexpected error: %v", err)
 	}
-	if err := fltrRplEngine2RPC.Call(utils.APIerSv1GetRouteProfileIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||
+	if err := fltrRplEngine2RPC.Call(context.Background(), utils.APIerSv1GetRouteProfileIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Fatalf("Unexpected error: %v", err)
 	}
 
-	if err := fltrRplInternalRPC.Call(utils.APIerSv1SetRouteProfile, rpPrf, &result); err != nil {
+	if err := fltrRplInternalRPC.Call(context.Background(), utils.APIerSv1SetRouteProfile, rpPrf, &result); err != nil {
 		t.Fatal(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	if err := fltrRplInternalRPC.Call(utils.APIerSv1GetRouteProfile,
+	if err := fltrRplInternalRPC.Call(context.Background(), utils.APIerSv1GetRouteProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: rpID}, &replyPrfl); err != nil {
 		t.Fatal(err)
 	}
@@ -969,16 +970,16 @@ func testFltrRplRouteProfile(t *testing.T) {
 	}
 	replyPrfl = nil
 
-	if err := fltrRplEngine1RPC.Call(utils.APIerSv1GetRouteProfileIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||
+	if err := fltrRplEngine1RPC.Call(context.Background(), utils.APIerSv1GetRouteProfileIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Fatalf("Unexpected error: %v", err)
 	}
-	if err := fltrRplEngine2RPC.Call(utils.APIerSv1GetRouteProfileIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||
+	if err := fltrRplEngine2RPC.Call(context.Background(), utils.APIerSv1GetRouteProfileIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Fatalf("Unexpected error: %v", err)
 	}
 
-	if err := fltrRplEngine1RPC.Call(utils.APIerSv1GetRouteProfile,
+	if err := fltrRplEngine1RPC.Call(context.Background(), utils.APIerSv1GetRouteProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: rpID}, &replyPrfl); err != nil {
 		t.Fatal(err)
 	}
@@ -988,12 +989,12 @@ func testFltrRplRouteProfile(t *testing.T) {
 	}
 	replyPrfl = nil
 	rpPrf.Weight = 15
-	if err := fltrRplInternalRPC.Call(utils.APIerSv1SetRouteProfile, rpPrf, &result); err != nil {
+	if err := fltrRplInternalRPC.Call(context.Background(), utils.APIerSv1SetRouteProfile, rpPrf, &result); err != nil {
 		t.Fatal(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	if err := fltrRplInternalRPC.Call(utils.APIerSv1GetRouteProfile,
+	if err := fltrRplInternalRPC.Call(context.Background(), utils.APIerSv1GetRouteProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: rpID}, &replyPrfl); err != nil {
 		t.Fatal(err)
 	}
@@ -1004,7 +1005,7 @@ func testFltrRplRouteProfile(t *testing.T) {
 	replyPrfl = nil
 
 	// use replicator to see if the attribute was changed in the DB
-	if err := fltrRplEngine1RPC.Call(utils.ReplicatorSv1GetRouteProfile,
+	if err := fltrRplEngine1RPC.Call(context.Background(), utils.ReplicatorSv1GetRouteProfile,
 		utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: rpID}}, &replyPrfl); err != nil {
 		t.Fatal(err)
 	}
@@ -1013,22 +1014,22 @@ func testFltrRplRouteProfile(t *testing.T) {
 		t.Errorf("Expecting : %s, received: %s", utils.ToJSON(rpPrf.RouteProfile), utils.ToJSON(replyPrfl))
 	}
 
-	if err := fltrRplEngine2RPC.Call(utils.APIerSv1GetRouteProfileIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||
+	if err := fltrRplEngine2RPC.Call(context.Background(), utils.APIerSv1GetRouteProfileIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Fatalf("Unexpected error: %v", err)
 	}
 
-	if err := fltrRplInternalRPC.Call(utils.APIerSv1RemoveRouteProfile,
+	if err := fltrRplInternalRPC.Call(context.Background(), utils.APIerSv1RemoveRouteProfile,
 		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: rpID}}, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	if err := fltrRplEngine1RPC.Call(utils.APIerSv1GetRouteProfileIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||
+	if err := fltrRplEngine1RPC.Call(context.Background(), utils.APIerSv1GetRouteProfileIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Fatalf("Unexpected error: %v", err)
 	}
-	if err := fltrRplEngine2RPC.Call(utils.APIerSv1GetRouteProfileIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||
+	if err := fltrRplEngine2RPC.Call(context.Background(), utils.APIerSv1GetRouteProfileIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Fatalf("Unexpected error: %v", err)
 	}
@@ -1050,21 +1051,21 @@ func testFltrRplChargerProfile(t *testing.T) {
 	var replyPrfl *engine.ChargerProfile
 	var rplyIDs []string
 	// empty
-	if err := fltrRplEngine1RPC.Call(utils.APIerSv1GetChargerProfileIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||
+	if err := fltrRplEngine1RPC.Call(context.Background(), utils.APIerSv1GetChargerProfileIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Fatalf("Unexpected error: %v", err)
 	}
-	if err := fltrRplEngine2RPC.Call(utils.APIerSv1GetChargerProfileIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||
+	if err := fltrRplEngine2RPC.Call(context.Background(), utils.APIerSv1GetChargerProfileIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Fatalf("Unexpected error: %v", err)
 	}
 
-	if err := fltrRplInternalRPC.Call(utils.APIerSv1SetChargerProfile, chPrf, &result); err != nil {
+	if err := fltrRplInternalRPC.Call(context.Background(), utils.APIerSv1SetChargerProfile, chPrf, &result); err != nil {
 		t.Fatal(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	if err := fltrRplInternalRPC.Call(utils.APIerSv1GetChargerProfile,
+	if err := fltrRplInternalRPC.Call(context.Background(), utils.APIerSv1GetChargerProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: chID}, &replyPrfl); err != nil {
 		t.Fatal(err)
 	}
@@ -1073,16 +1074,16 @@ func testFltrRplChargerProfile(t *testing.T) {
 	}
 	replyPrfl = nil
 
-	if err := fltrRplEngine1RPC.Call(utils.APIerSv1GetChargerProfileIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||
+	if err := fltrRplEngine1RPC.Call(context.Background(), utils.APIerSv1GetChargerProfileIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Fatalf("Unexpected error: %v", err)
 	}
-	if err := fltrRplEngine2RPC.Call(utils.APIerSv1GetChargerProfileIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||
+	if err := fltrRplEngine2RPC.Call(context.Background(), utils.APIerSv1GetChargerProfileIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Fatalf("Unexpected error: %v", err)
 	}
 
-	if err := fltrRplEngine1RPC.Call(utils.APIerSv1GetChargerProfile,
+	if err := fltrRplEngine1RPC.Call(context.Background(), utils.APIerSv1GetChargerProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: chID}, &replyPrfl); err != nil {
 		t.Fatal(err)
 	}
@@ -1091,12 +1092,12 @@ func testFltrRplChargerProfile(t *testing.T) {
 	}
 	replyPrfl = nil
 	chPrf.Weight = 15
-	if err := fltrRplInternalRPC.Call(utils.APIerSv1SetChargerProfile, chPrf, &result); err != nil {
+	if err := fltrRplInternalRPC.Call(context.Background(), utils.APIerSv1SetChargerProfile, chPrf, &result); err != nil {
 		t.Fatal(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	if err := fltrRplInternalRPC.Call(utils.APIerSv1GetChargerProfile,
+	if err := fltrRplInternalRPC.Call(context.Background(), utils.APIerSv1GetChargerProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: chID}, &replyPrfl); err != nil {
 		t.Fatal(err)
 	}
@@ -1106,7 +1107,7 @@ func testFltrRplChargerProfile(t *testing.T) {
 	replyPrfl = nil
 
 	// use replicator to see if the attribute was changed in the DB
-	if err := fltrRplEngine1RPC.Call(utils.ReplicatorSv1GetChargerProfile,
+	if err := fltrRplEngine1RPC.Call(context.Background(), utils.ReplicatorSv1GetChargerProfile,
 		utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: chID}}, &replyPrfl); err != nil {
 		t.Fatal(err)
 	}
@@ -1114,22 +1115,22 @@ func testFltrRplChargerProfile(t *testing.T) {
 		t.Errorf("Expecting : %s, received: %s", utils.ToJSON(chPrf.ChargerProfile), utils.ToJSON(replyPrfl))
 	}
 
-	if err := fltrRplEngine2RPC.Call(utils.APIerSv1GetChargerProfileIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||
+	if err := fltrRplEngine2RPC.Call(context.Background(), utils.APIerSv1GetChargerProfileIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Fatalf("Unexpected error: %v", err)
 	}
 
-	if err := fltrRplInternalRPC.Call(utils.APIerSv1RemoveChargerProfile,
+	if err := fltrRplInternalRPC.Call(context.Background(), utils.APIerSv1RemoveChargerProfile,
 		utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: chID}}, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	if err := fltrRplEngine1RPC.Call(utils.APIerSv1GetChargerProfileIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||
+	if err := fltrRplEngine1RPC.Call(context.Background(), utils.APIerSv1GetChargerProfileIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Fatalf("Unexpected error: %v", err)
 	}
-	if err := fltrRplEngine2RPC.Call(utils.APIerSv1GetChargerProfileIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||
+	if err := fltrRplEngine2RPC.Call(context.Background(), utils.APIerSv1GetChargerProfileIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Fatalf("Unexpected error: %v", err)
 	}
@@ -1150,21 +1151,21 @@ func testFltrRplDispatcherProfile(t *testing.T) {
 	var replyPrfl *engine.DispatcherProfile
 	var rplyIDs []string
 	// empty
-	if err := fltrRplEngine1RPC.Call(utils.APIerSv1GetDispatcherProfileIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||
+	if err := fltrRplEngine1RPC.Call(context.Background(), utils.APIerSv1GetDispatcherProfileIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Fatalf("Unexpected error: %v", err)
 	}
-	if err := fltrRplEngine2RPC.Call(utils.APIerSv1GetDispatcherProfileIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||
+	if err := fltrRplEngine2RPC.Call(context.Background(), utils.APIerSv1GetDispatcherProfileIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Fatalf("Unexpected error: %v", err)
 	}
 
-	if err := fltrRplInternalRPC.Call(utils.APIerSv1SetDispatcherProfile, dspPrf, &result); err != nil {
+	if err := fltrRplInternalRPC.Call(context.Background(), utils.APIerSv1SetDispatcherProfile, dspPrf, &result); err != nil {
 		t.Fatal(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	if err := fltrRplInternalRPC.Call(utils.APIerSv1GetDispatcherProfile,
+	if err := fltrRplInternalRPC.Call(context.Background(), utils.APIerSv1GetDispatcherProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: dspID}, &replyPrfl); err != nil {
 		t.Fatal(err)
 	}
@@ -1173,16 +1174,16 @@ func testFltrRplDispatcherProfile(t *testing.T) {
 	}
 	replyPrfl = nil
 
-	if err := fltrRplEngine1RPC.Call(utils.APIerSv1GetDispatcherProfileIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||
+	if err := fltrRplEngine1RPC.Call(context.Background(), utils.APIerSv1GetDispatcherProfileIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Fatalf("Unexpected error: %v", err)
 	}
-	if err := fltrRplEngine2RPC.Call(utils.APIerSv1GetDispatcherProfileIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||
+	if err := fltrRplEngine2RPC.Call(context.Background(), utils.APIerSv1GetDispatcherProfileIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Fatalf("Unexpected error: %v", err)
 	}
 
-	if err := fltrRplEngine1RPC.Call(utils.APIerSv1GetDispatcherProfile,
+	if err := fltrRplEngine1RPC.Call(context.Background(), utils.APIerSv1GetDispatcherProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: dspID}, &replyPrfl); err != nil {
 		t.Fatal(err)
 	}
@@ -1191,12 +1192,12 @@ func testFltrRplDispatcherProfile(t *testing.T) {
 	}
 	replyPrfl = nil
 	dspPrf.Weight = 15
-	if err := fltrRplInternalRPC.Call(utils.APIerSv1SetDispatcherProfile, dspPrf, &result); err != nil {
+	if err := fltrRplInternalRPC.Call(context.Background(), utils.APIerSv1SetDispatcherProfile, dspPrf, &result); err != nil {
 		t.Fatal(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	if err := fltrRplInternalRPC.Call(utils.APIerSv1GetDispatcherProfile,
+	if err := fltrRplInternalRPC.Call(context.Background(), utils.APIerSv1GetDispatcherProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: dspID}, &replyPrfl); err != nil {
 		t.Fatal(err)
 	}
@@ -1206,7 +1207,7 @@ func testFltrRplDispatcherProfile(t *testing.T) {
 	replyPrfl = nil
 
 	// use replicator to see if the attribute was changed in the DB
-	if err := fltrRplEngine1RPC.Call(utils.ReplicatorSv1GetDispatcherProfile,
+	if err := fltrRplEngine1RPC.Call(context.Background(), utils.ReplicatorSv1GetDispatcherProfile,
 		utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: dspID}}, &replyPrfl); err != nil {
 		t.Fatal(err)
 	}
@@ -1214,22 +1215,22 @@ func testFltrRplDispatcherProfile(t *testing.T) {
 		t.Errorf("Expecting : %s, received: %s", utils.ToJSON(dspPrf.DispatcherProfile), utils.ToJSON(replyPrfl))
 	}
 
-	if err := fltrRplEngine2RPC.Call(utils.APIerSv1GetDispatcherProfileIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||
+	if err := fltrRplEngine2RPC.Call(context.Background(), utils.APIerSv1GetDispatcherProfileIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Fatalf("Unexpected error: %v", err)
 	}
 
-	if err := fltrRplInternalRPC.Call(utils.APIerSv1RemoveDispatcherProfile,
+	if err := fltrRplInternalRPC.Call(context.Background(), utils.APIerSv1RemoveDispatcherProfile,
 		utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: dspID}}, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	if err := fltrRplEngine1RPC.Call(utils.APIerSv1GetDispatcherProfileIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||
+	if err := fltrRplEngine1RPC.Call(context.Background(), utils.APIerSv1GetDispatcherProfileIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Fatalf("Unexpected error: %v", err)
 	}
-	if err := fltrRplEngine2RPC.Call(utils.APIerSv1GetDispatcherProfileIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||
+	if err := fltrRplEngine2RPC.Call(context.Background(), utils.APIerSv1GetDispatcherProfileIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Fatalf("Unexpected error: %v", err)
 	}
@@ -1250,21 +1251,21 @@ func testFltrRplDispatcherHost(t *testing.T) {
 	var replyPrfl *engine.DispatcherHost
 	var rplyIDs []string
 	// empty
-	if err := fltrRplEngine1RPC.Call(utils.APIerSv1GetDispatcherHostIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||
+	if err := fltrRplEngine1RPC.Call(context.Background(), utils.APIerSv1GetDispatcherHostIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Fatalf("Unexpected error: %v", err)
 	}
-	if err := fltrRplEngine2RPC.Call(utils.APIerSv1GetDispatcherHostIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||
+	if err := fltrRplEngine2RPC.Call(context.Background(), utils.APIerSv1GetDispatcherHostIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Fatalf("Unexpected error: %v", err)
 	}
 
-	if err := fltrRplInternalRPC.Call(utils.APIerSv1SetDispatcherHost, dspPrf, &result); err != nil {
+	if err := fltrRplInternalRPC.Call(context.Background(), utils.APIerSv1SetDispatcherHost, dspPrf, &result); err != nil {
 		t.Fatal(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	if err := fltrRplInternalRPC.Call(utils.APIerSv1GetDispatcherHost,
+	if err := fltrRplInternalRPC.Call(context.Background(), utils.APIerSv1GetDispatcherHost,
 		&utils.TenantID{Tenant: "cgrates.org", ID: dspID}, &replyPrfl); err != nil {
 		t.Fatal(err)
 	}
@@ -1273,16 +1274,16 @@ func testFltrRplDispatcherHost(t *testing.T) {
 	}
 	replyPrfl = nil
 
-	if err := fltrRplEngine1RPC.Call(utils.APIerSv1GetDispatcherHostIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||
+	if err := fltrRplEngine1RPC.Call(context.Background(), utils.APIerSv1GetDispatcherHostIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Fatalf("Unexpected error: %v", err)
 	}
-	if err := fltrRplEngine2RPC.Call(utils.APIerSv1GetDispatcherHostIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||
+	if err := fltrRplEngine2RPC.Call(context.Background(), utils.APIerSv1GetDispatcherHostIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Fatalf("Unexpected error: %v", err)
 	}
 
-	if err := fltrRplEngine1RPC.Call(utils.APIerSv1GetDispatcherHost,
+	if err := fltrRplEngine1RPC.Call(context.Background(), utils.APIerSv1GetDispatcherHost,
 		&utils.TenantID{Tenant: "cgrates.org", ID: dspID}, &replyPrfl); err != nil {
 		t.Fatal(err)
 	}
@@ -1291,12 +1292,12 @@ func testFltrRplDispatcherHost(t *testing.T) {
 	}
 	replyPrfl = nil
 	dspPrf.Address = "127.0.0.1:2012"
-	if err := fltrRplInternalRPC.Call(utils.APIerSv1SetDispatcherHost, dspPrf, &result); err != nil {
+	if err := fltrRplInternalRPC.Call(context.Background(), utils.APIerSv1SetDispatcherHost, dspPrf, &result); err != nil {
 		t.Fatal(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	if err := fltrRplInternalRPC.Call(utils.APIerSv1GetDispatcherHost,
+	if err := fltrRplInternalRPC.Call(context.Background(), utils.APIerSv1GetDispatcherHost,
 		&utils.TenantID{Tenant: "cgrates.org", ID: dspID}, &replyPrfl); err != nil {
 		t.Fatal(err)
 	}
@@ -1306,7 +1307,7 @@ func testFltrRplDispatcherHost(t *testing.T) {
 	replyPrfl = nil
 
 	// use replicator to see if the attribute was changed in the DB
-	if err := fltrRplEngine1RPC.Call(utils.ReplicatorSv1GetDispatcherHost,
+	if err := fltrRplEngine1RPC.Call(context.Background(), utils.ReplicatorSv1GetDispatcherHost,
 		utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: dspID}}, &replyPrfl); err != nil {
 		t.Fatal(err)
 	}
@@ -1314,22 +1315,22 @@ func testFltrRplDispatcherHost(t *testing.T) {
 		t.Errorf("Expecting : %s, received: %s", utils.ToJSON(dspPrf.DispatcherHost), utils.ToJSON(replyPrfl))
 	}
 
-	if err := fltrRplEngine2RPC.Call(utils.APIerSv1GetDispatcherHostIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||
+	if err := fltrRplEngine2RPC.Call(context.Background(), utils.APIerSv1GetDispatcherHostIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Fatalf("Unexpected error: %v", err)
 	}
 
-	if err := fltrRplInternalRPC.Call(utils.APIerSv1RemoveDispatcherHost,
+	if err := fltrRplInternalRPC.Call(context.Background(), utils.APIerSv1RemoveDispatcherHost,
 		utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: dspID}}, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	if err := fltrRplEngine1RPC.Call(utils.APIerSv1GetDispatcherHostIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||
+	if err := fltrRplEngine1RPC.Call(context.Background(), utils.APIerSv1GetDispatcherHostIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Fatalf("Unexpected error: %v", err)
 	}
-	if err := fltrRplEngine2RPC.Call(utils.APIerSv1GetDispatcherHostIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||
+	if err := fltrRplEngine2RPC.Call(context.Background(), utils.APIerSv1GetDispatcherHostIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Fatalf("Unexpected error: %v", err)
 	}
@@ -1347,23 +1348,23 @@ func testFltrRplAccount(t *testing.T) {
 	var replyPrfl *engine.Account
 	var rplyCount int
 	// empty
-	if err := fltrRplEngine1RPC.Call(utils.APIerSv1GetAccountsCount, &utils.PaginatorWithTenant{}, &rplyCount); err != nil {
+	if err := fltrRplEngine1RPC.Call(context.Background(), utils.APIerSv1GetAccountsCount, &utils.PaginatorWithTenant{}, &rplyCount); err != nil {
 		t.Fatal(err)
 	} else if rplyCount != 0 {
 		t.Fatal("Expected no accounts")
 	}
-	if err := fltrRplEngine2RPC.Call(utils.APIerSv1GetAccountsCount, &utils.PaginatorWithTenant{}, &rplyCount); err != nil {
+	if err := fltrRplEngine2RPC.Call(context.Background(), utils.APIerSv1GetAccountsCount, &utils.PaginatorWithTenant{}, &rplyCount); err != nil {
 		t.Fatal(err)
 	} else if rplyCount != 0 {
 		t.Fatal("Expected no accounts")
 	}
 
-	if err := fltrRplInternalRPC.Call(utils.APIerSv2SetAccount, attrPrf, &result); err != nil {
+	if err := fltrRplInternalRPC.Call(context.Background(), utils.APIerSv2SetAccount, attrPrf, &result); err != nil {
 		t.Fatal(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	if err := fltrRplInternalRPC.Call(utils.APIerSv2GetAccount, attrAC, &replyPrfl); err != nil {
+	if err := fltrRplInternalRPC.Call(context.Background(), utils.APIerSv2GetAccount, attrAC, &replyPrfl); err != nil {
 		t.Fatal(err)
 	}
 	replyPrfl.BalanceMap = nil
@@ -1376,18 +1377,18 @@ func testFltrRplAccount(t *testing.T) {
 	}
 	replyPrfl = nil
 
-	if err := fltrRplEngine1RPC.Call(utils.APIerSv1GetAccountsCount, &utils.PaginatorWithTenant{}, &rplyCount); err != nil {
+	if err := fltrRplEngine1RPC.Call(context.Background(), utils.APIerSv1GetAccountsCount, &utils.PaginatorWithTenant{}, &rplyCount); err != nil {
 		t.Fatal(err)
 	} else if rplyCount != 0 {
 		t.Fatal("Expected no accounts")
 	}
-	if err := fltrRplEngine2RPC.Call(utils.APIerSv1GetAccountsCount, &utils.PaginatorWithTenant{}, &rplyCount); err != nil {
+	if err := fltrRplEngine2RPC.Call(context.Background(), utils.APIerSv1GetAccountsCount, &utils.PaginatorWithTenant{}, &rplyCount); err != nil {
 		t.Fatal(err)
 	} else if rplyCount != 0 {
 		t.Fatal("Expected no accounts")
 	}
 
-	if err := fltrRplEngine1RPC.Call(utils.APIerSv2GetAccount, attrAC, &replyPrfl); err != nil {
+	if err := fltrRplEngine1RPC.Call(context.Background(), utils.APIerSv2GetAccount, attrAC, &replyPrfl); err != nil {
 		t.Fatal(err)
 	}
 	replyPrfl.BalanceMap = nil
@@ -1401,12 +1402,12 @@ func testFltrRplAccount(t *testing.T) {
 	replyPrfl = nil
 	attrPrf.ExtraOptions[utils.Disabled] = false
 	expPrf.Disabled = false
-	if err := fltrRplInternalRPC.Call(utils.APIerSv2SetAccount, attrPrf, &result); err != nil {
+	if err := fltrRplInternalRPC.Call(context.Background(), utils.APIerSv2SetAccount, attrPrf, &result); err != nil {
 		t.Fatal(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	if err := fltrRplInternalRPC.Call(utils.APIerSv2GetAccount, attrAC, &replyPrfl); err != nil {
+	if err := fltrRplInternalRPC.Call(context.Background(), utils.APIerSv2GetAccount, attrAC, &replyPrfl); err != nil {
 		t.Fatal(err)
 	}
 	replyPrfl.BalanceMap = nil
@@ -1420,7 +1421,7 @@ func testFltrRplAccount(t *testing.T) {
 	replyPrfl = nil
 
 	// use replicator to see if the attribute was changed in the DB
-	if err := fltrRplEngine1RPC.Call(utils.ReplicatorSv1GetAccount, &utils.StringWithAPIOpts{
+	if err := fltrRplEngine1RPC.Call(context.Background(), utils.ReplicatorSv1GetAccount, &utils.StringWithAPIOpts{
 		Arg: expPrf.ID,
 	}, &replyPrfl); err != nil {
 		t.Fatal(err)
@@ -1434,7 +1435,7 @@ func testFltrRplAccount(t *testing.T) {
 		t.Errorf("Expecting : %s, received: %s", utils.ToJSON(expPrf), utils.ToJSON(replyPrfl))
 	}
 
-	if err := fltrRplEngine2RPC.Call(utils.APIerSv1GetAccountsCount, &utils.PaginatorWithTenant{}, &rplyCount); err != nil {
+	if err := fltrRplEngine2RPC.Call(context.Background(), utils.APIerSv1GetAccountsCount, &utils.PaginatorWithTenant{}, &rplyCount); err != nil {
 		t.Fatal(err)
 	} else if rplyCount != 0 {
 		t.Fatal("Expected no accounts")
@@ -1461,29 +1462,29 @@ func testFltrRplDestination(t *testing.T) {
 	var rplyIDs *engine.Destination
 	var rplyIDs2 []string
 	// empty
-	if err := fltrRplEngine1RPC.Call(utils.ReplicatorSv1GetDestination, args, &rplyIDs); err == nil ||
+	if err := fltrRplEngine1RPC.Call(context.Background(), utils.ReplicatorSv1GetDestination, args, &rplyIDs); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Fatalf("Unexpected error: %v", err)
 	}
-	if err := fltrRplEngine1RPC.Call(utils.ReplicatorSv1GetReverseDestination, args2, &rplyIDs2); err == nil ||
+	if err := fltrRplEngine1RPC.Call(context.Background(), utils.ReplicatorSv1GetReverseDestination, args2, &rplyIDs2); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Fatalf("Unexpected error: %v", err)
 	}
-	if err := fltrRplEngine2RPC.Call(utils.ReplicatorSv1GetDestination, args, &rplyIDs); err == nil ||
+	if err := fltrRplEngine2RPC.Call(context.Background(), utils.ReplicatorSv1GetDestination, args, &rplyIDs); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Fatalf("Unexpected error: %v", err)
 	}
-	if err := fltrRplEngine2RPC.Call(utils.ReplicatorSv1GetReverseDestination, args2, &rplyIDs2); err == nil ||
+	if err := fltrRplEngine2RPC.Call(context.Background(), utils.ReplicatorSv1GetReverseDestination, args2, &rplyIDs2); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Fatalf("Unexpected error: %v", err)
 	}
 
-	if err := fltrRplInternalRPC.Call(utils.APIerSv1SetDestination, dstPrf, &result); err != nil {
+	if err := fltrRplInternalRPC.Call(context.Background(), utils.APIerSv1SetDestination, dstPrf, &result); err != nil {
 		t.Fatal(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	if err := fltrRplInternalRPC.Call(utils.APIerSv1GetDestination, dstID, &replyPrfl); err != nil {
+	if err := fltrRplInternalRPC.Call(context.Background(), utils.APIerSv1GetDestination, dstID, &replyPrfl); err != nil {
 		t.Fatal(err)
 	}
 	if !reflect.DeepEqual(expPrf, replyPrfl) {
@@ -1491,30 +1492,30 @@ func testFltrRplDestination(t *testing.T) {
 	}
 	replyPrfl = nil
 
-	if err := fltrRplEngine1RPC.Call(utils.ReplicatorSv1GetDestination, args, &rplyIDs); err == nil ||
+	if err := fltrRplEngine1RPC.Call(context.Background(), utils.ReplicatorSv1GetDestination, args, &rplyIDs); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Fatalf("Unexpected error: %v", err)
 	}
-	if err := fltrRplEngine1RPC.Call(utils.ReplicatorSv1GetReverseDestination, args2, &rplyIDs2); err == nil ||
+	if err := fltrRplEngine1RPC.Call(context.Background(), utils.ReplicatorSv1GetReverseDestination, args2, &rplyIDs2); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Fatalf("Unexpected error: %v", err)
 	}
-	if err := fltrRplEngine2RPC.Call(utils.ReplicatorSv1GetDestination, args, &rplyIDs); err == nil ||
+	if err := fltrRplEngine2RPC.Call(context.Background(), utils.ReplicatorSv1GetDestination, args, &rplyIDs); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Fatalf("Unexpected error: %v", err)
 	}
-	if err := fltrRplEngine2RPC.Call(utils.ReplicatorSv1GetReverseDestination, args2, &rplyIDs2); err == nil ||
+	if err := fltrRplEngine2RPC.Call(context.Background(), utils.ReplicatorSv1GetReverseDestination, args2, &rplyIDs2); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Fatalf("Unexpected error: %v", err)
 	}
 
-	if err := fltrRplEngine1RPC.Call(utils.APIerSv1GetDestination, dstID, &replyPrfl); err != nil {
+	if err := fltrRplEngine1RPC.Call(context.Background(), utils.APIerSv1GetDestination, dstID, &replyPrfl); err != nil {
 		t.Fatal(err)
 	}
 	if !reflect.DeepEqual(expPrf, replyPrfl) {
 		t.Errorf("Expecting : %s, received: %s", utils.ToJSON(expPrf), utils.ToJSON(replyPrfl))
 	}
-	if err := fltrRplEngine1RPC.Call(utils.APIerSv1GetReverseDestination, "dan", &rplyIDs2); err != nil {
+	if err := fltrRplEngine1RPC.Call(context.Background(), utils.APIerSv1GetReverseDestination, "dan", &rplyIDs2); err != nil {
 		t.Fatal(err)
 	}
 	if !reflect.DeepEqual([]string{dstID}, rplyIDs2) {
@@ -1525,12 +1526,12 @@ func testFltrRplDestination(t *testing.T) {
 	dstPrf.Prefixes = []string{"dan2"}
 	expPrf.Prefixes = []string{"dan2"}
 	args2.Arg = "dan2"
-	if err := fltrRplInternalRPC.Call(utils.APIerSv1SetDestination, dstPrf, &result); err != nil {
+	if err := fltrRplInternalRPC.Call(context.Background(), utils.APIerSv1SetDestination, dstPrf, &result); err != nil {
 		t.Fatal(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	if err := fltrRplInternalRPC.Call(utils.APIerSv1GetDestination, dstID, &replyPrfl); err != nil {
+	if err := fltrRplInternalRPC.Call(context.Background(), utils.APIerSv1GetDestination, dstID, &replyPrfl); err != nil {
 		t.Fatal(err)
 	}
 	if !reflect.DeepEqual(expPrf, replyPrfl) {
@@ -1539,26 +1540,26 @@ func testFltrRplDestination(t *testing.T) {
 	replyPrfl = nil
 
 	// use replicator to see if the attribute was changed in the DB
-	if err := fltrRplEngine1RPC.Call(utils.ReplicatorSv1GetDestination, args, &replyPrfl); err != nil {
+	if err := fltrRplEngine1RPC.Call(context.Background(), utils.ReplicatorSv1GetDestination, args, &replyPrfl); err != nil {
 		t.Fatal(err)
 	}
 	if !reflect.DeepEqual(expPrf, replyPrfl) {
 		t.Errorf("Expecting : %s, received: %s", utils.ToJSON(expPrf), utils.ToJSON(replyPrfl))
 	}
 	// use replicator to see if the attribute was changed in the DB
-	if err := fltrRplEngine1RPC.Call(utils.ReplicatorSv1GetReverseDestination, args2, &rplyIDs2); err != nil {
+	if err := fltrRplEngine1RPC.Call(context.Background(), utils.ReplicatorSv1GetReverseDestination, args2, &rplyIDs2); err != nil {
 		t.Fatal(err)
 	}
 	if !reflect.DeepEqual([]string{dstID}, rplyIDs2) {
 		t.Errorf("Expecting : %s, received: %s", utils.ToJSON([]string{dstID}), utils.ToJSON(rplyIDs2))
 	}
 
-	if err := fltrRplEngine2RPC.Call(utils.ReplicatorSv1GetDestination, args, &rplyIDs); err == nil ||
+	if err := fltrRplEngine2RPC.Call(context.Background(), utils.ReplicatorSv1GetDestination, args, &rplyIDs); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Fatalf("Unexpected error: %v", err)
 	}
 	rplyIDs2 = nil
-	if err := fltrRplEngine2RPC.Call(utils.ReplicatorSv1GetReverseDestination, args2, &rplyIDs2); err == nil ||
+	if err := fltrRplEngine2RPC.Call(context.Background(), utils.ReplicatorSv1GetReverseDestination, args2, &rplyIDs2); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Log(rplyIDs2)
 		t.Fatalf("Unexpected error: %v", err)

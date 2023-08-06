@@ -22,13 +22,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package v1
 
 import (
-	"net/rpc"
-	"net/rpc/jsonrpc"
 	"path"
 	"reflect"
 	"sort"
 	"testing"
 
+	"github.com/cgrates/birpc"
+	"github.com/cgrates/birpc/context"
+	"github.com/cgrates/birpc/jsonrpc"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -37,7 +38,7 @@ import (
 var (
 	tpThresholdCfgPath   string
 	tpThresholdCfg       *config.CGRConfig
-	tpThresholdRPC       *rpc.Client
+	tpThresholdRPC       *birpc.Client
 	tpThreshold          *utils.TPThresholdProfile
 	tpThresholdDelay     int
 	tpThresholdConfigDIR string //run tests for specific configuration
@@ -114,7 +115,7 @@ func testTPThreholdRpcConn(t *testing.T) {
 
 func testTPThreholdGetTPThreholdBeforeSet(t *testing.T) {
 	var reply *utils.TPThresholdProfile
-	if err := tpThresholdRPC.Call(utils.APIerSv1GetTPThreshold,
+	if err := tpThresholdRPC.Call(context.Background(), utils.APIerSv1GetTPThreshold,
 		&utils.TPTntID{TPid: "TH1", Tenant: "cgrates.org", ID: "Threshold"}, &reply); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
@@ -140,7 +141,7 @@ func testTPThreholdSetTPThrehold(t *testing.T) {
 	sort.Strings(tpThreshold.FilterIDs)
 	sort.Strings(tpThreshold.ActionIDs)
 	var result string
-	if err := tpThresholdRPC.Call(utils.APIerSv1SetTPThreshold, tpThreshold, &result); err != nil {
+	if err := tpThresholdRPC.Call(context.Background(), utils.APIerSv1SetTPThreshold, tpThreshold, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -149,7 +150,7 @@ func testTPThreholdSetTPThrehold(t *testing.T) {
 
 func testTPThreholdGetTPThreholdAfterSet(t *testing.T) {
 	var respond *utils.TPThresholdProfile
-	if err := tpThresholdRPC.Call(utils.APIerSv1GetTPThreshold,
+	if err := tpThresholdRPC.Call(context.Background(), utils.APIerSv1GetTPThreshold,
 		&utils.TPTntID{TPid: "TH1", Tenant: "cgrates.org", ID: "Threshold"}, &respond); err != nil {
 		t.Fatal(err)
 	}
@@ -163,7 +164,7 @@ func testTPThreholdGetTPThreholdAfterSet(t *testing.T) {
 func testTPThreholdGetTPThreholdIds(t *testing.T) {
 	var result []string
 	expectedTPID := []string{"cgrates.org:Threshold"}
-	if err := tpThresholdRPC.Call(utils.APIerSv1GetTPThresholdIDs,
+	if err := tpThresholdRPC.Call(context.Background(), utils.APIerSv1GetTPThresholdIDs,
 		&AttrGetTPThresholdIds{TPid: tpThreshold.TPid}, &result); err != nil {
 		t.Fatal(err)
 	} else if !reflect.DeepEqual(result, expectedTPID) {
@@ -174,7 +175,7 @@ func testTPThreholdGetTPThreholdIds(t *testing.T) {
 func testTPThreholdUpdateTPThrehold(t *testing.T) {
 	var result string
 	tpThreshold.FilterIDs = []string{"FLTR_1", "FLTR_2", "FLTR_3"}
-	if err := tpThresholdRPC.Call(utils.APIerSv1SetTPThreshold, tpThreshold, &result); err != nil {
+	if err := tpThresholdRPC.Call(context.Background(), utils.APIerSv1SetTPThreshold, tpThreshold, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -183,7 +184,7 @@ func testTPThreholdUpdateTPThrehold(t *testing.T) {
 
 func testTPThreholdGetTPThreholdAfterUpdate(t *testing.T) {
 	var respond *utils.TPThresholdProfile
-	if err := tpThresholdRPC.Call(utils.APIerSv1GetTPThreshold,
+	if err := tpThresholdRPC.Call(context.Background(), utils.APIerSv1GetTPThreshold,
 		&utils.TPTntID{TPid: "TH1", Tenant: "cgrates.org", ID: "Threshold"}, &respond); err != nil {
 		t.Fatal(err)
 	}
@@ -196,7 +197,7 @@ func testTPThreholdGetTPThreholdAfterUpdate(t *testing.T) {
 
 func testTPThreholdRemTPThrehold(t *testing.T) {
 	var resp string
-	if err := tpThresholdRPC.Call(utils.APIerSv1RemoveTPThreshold,
+	if err := tpThresholdRPC.Call(context.Background(), utils.APIerSv1RemoveTPThreshold,
 		&utils.TPTntID{TPid: "TH1", Tenant: "cgrates.org", ID: "Threshold"}, &resp); err != nil {
 		t.Error(err)
 	} else if resp != utils.OK {
@@ -206,7 +207,7 @@ func testTPThreholdRemTPThrehold(t *testing.T) {
 
 func testTPThreholdGetTPThreholdAfterRemove(t *testing.T) {
 	var reply *utils.TPThresholdProfile
-	if err := tpThresholdRPC.Call(utils.APIerSv1GetTPThreshold,
+	if err := tpThresholdRPC.Call(context.Background(), utils.APIerSv1GetTPThreshold,
 		&utils.TPTntID{TPid: "TH1", Tenant: "cgrates.org", ID: "Threshold"}, &reply); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)

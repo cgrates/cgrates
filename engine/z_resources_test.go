@@ -28,6 +28,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc"
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/rpcclient"
 
@@ -944,10 +946,10 @@ func TestResourceV1AuthorizeResourceMissingStruct(t *testing.T) {
 			utils.OptsResourcesUnits: 20,
 		},
 	}
-	if err := resService.V1AuthorizeResources(argsMissingTenant, reply); err != nil && err.Error() != "MANDATORY_IE_MISSING: [Event]" {
+	if err := resService.V1AuthorizeResources(context.Background(), argsMissingTenant, reply); err != nil && err.Error() != "MANDATORY_IE_MISSING: [Event]" {
 		t.Error(err.Error())
 	}
-	if err := resService.V1AuthorizeResources(argsMissingUsageID, reply); err != nil && err.Error() != "MANDATORY_IE_MISSING: [Event]" {
+	if err := resService.V1AuthorizeResources(context.Background(), argsMissingUsageID, reply); err != nil && err.Error() != "MANDATORY_IE_MISSING: [Event]" {
 		t.Error(err.Error())
 	}
 }
@@ -2648,16 +2650,17 @@ func TestResourceAllocateResourceOtherDB(t *testing.T) {
 	}
 	var reply string
 	exp := rProf.ID
-	if err := rs.V1AllocateResources(&utils.CGREvent{
-		Tenant: "cgrates.org",
-		ID:     "ef0f554",
-		Event:  map[string]any{"": ""},
-		APIOpts: map[string]any{
-			"Resource":                 "RL_DB",
-			utils.OptsResourcesUsageID: "56156434-2e44-4f16-a766-086f10b413cd",
-			utils.OptsResourcesUnits:   1,
-		},
-	}, &reply); err != nil {
+	if err := rs.V1AllocateResources(context.Background(),
+		&utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "ef0f554",
+			Event:  map[string]any{"": ""},
+			APIOpts: map[string]any{
+				"Resource":                 "RL_DB",
+				utils.OptsResourcesUsageID: "56156434-2e44-4f16-a766-086f10b413cd",
+				utils.OptsResourcesUnits:   1,
+			},
+		}, &reply); err != nil {
 		t.Fatal(err)
 	} else if reply != exp {
 		t.Errorf("Expected: %q, received: %q", exp, reply)
@@ -2815,7 +2818,7 @@ func TestResourcesStoreResourceErrCache(t *testing.T) {
 	cfg.CacheCfg().Partitions[utils.CacheResources].Replicate = true
 	cfg.RPCConns()["test"] = &config.RPCConn{Conns: []*config.RemoteHost{{}}}
 	config.SetCgrConfig(cfg)
-	dm := NewDataManager(NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items), cfg.CacheCfg(), NewConnManager(cfg, make(map[string]chan rpcclient.ClientConnector)))
+	dm := NewDataManager(NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items), cfg.CacheCfg(), NewConnManager(cfg, make(map[string]chan birpc.ClientConnector)))
 	rS := NewResourceService(dm, cfg, nil, nil)
 	Cache = NewCacheS(cfg, dm, nil)
 	r := &Resource{
@@ -2893,8 +2896,8 @@ func TestResourcesProcessThresholdsOK(t *testing.T) {
 	Cache.Clear(nil)
 
 	ccM := &ccMock{
-		calls: map[string]func(args any, reply any) error{
-			utils.ThresholdSv1ProcessEvent: func(args, reply any) error {
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.ThresholdSv1ProcessEvent: func(ctx *context.Context, args, reply any) error {
 				exp := &utils.CGREvent{
 					Tenant: "cgrates.org",
 					ID:     args.(*utils.CGREvent).ID,
@@ -2916,11 +2919,11 @@ func TestResourcesProcessThresholdsOK(t *testing.T) {
 			},
 		},
 	}
-	rpcInternal := make(chan rpcclient.ClientConnector, 1)
+	rpcInternal := make(chan birpc.ClientConnector, 1)
 	rpcInternal <- ccM
 	rS := &ResourceService{
 		cgrcfg: cfg,
-		connMgr: NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+		connMgr: NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 			utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds): rpcInternal,
 		}),
 	}
@@ -2960,8 +2963,8 @@ func TestResourcesProcessThresholdsCallErr(t *testing.T) {
 	Cache.Clear(nil)
 
 	ccM := &ccMock{
-		calls: map[string]func(args any, reply any) error{
-			utils.ThresholdSv1ProcessEvent: func(args, reply any) error {
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.ThresholdSv1ProcessEvent: func(ctx *context.Context, args, reply any) error {
 				exp := &utils.CGREvent{
 					Tenant: "cgrates.org",
 					ID:     args.(*utils.CGREvent).ID,
@@ -2983,11 +2986,11 @@ func TestResourcesProcessThresholdsCallErr(t *testing.T) {
 			},
 		},
 	}
-	rpcInternal := make(chan rpcclient.ClientConnector, 1)
+	rpcInternal := make(chan birpc.ClientConnector, 1)
 	rpcInternal <- ccM
 	rS := &ResourceService{
 		cgrcfg: cfg,
-		connMgr: NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+		connMgr: NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 			utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds): rpcInternal,
 		}),
 	}
@@ -3232,7 +3235,7 @@ func TestResourcesV1ResourcesForEventOK(t *testing.T) {
 		},
 	}
 	var reply Resources
-	if err := rS.V1ResourcesForEvent(args, &reply); err != nil {
+	if err := rS.V1GetResourcesForEvent(context.Background(), args, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(reply, exp) {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>",
@@ -3290,7 +3293,7 @@ func TestResourcesV1ResourcesForEventNotFound(t *testing.T) {
 	}
 
 	var reply Resources
-	if err := rS.V1ResourcesForEvent(args, &reply); err == nil ||
+	if err := rS.V1GetResourcesForEvent(context.Background(), args, &reply); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ErrNotFound, err)
 	}
@@ -3336,7 +3339,7 @@ func TestResourcesV1ResourcesForEventMissingParameters(t *testing.T) {
 
 	experr := `MANDATORY_IE_MISSING: [Event]`
 	var reply Resources
-	if err := rS.V1ResourcesForEvent(nil, &reply); err == nil ||
+	if err := rS.V1GetResourcesForEvent(context.Background(), nil, &reply); err == nil ||
 		err.Error() != experr {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", experr, err)
 	}
@@ -3352,7 +3355,7 @@ func TestResourcesV1ResourcesForEventMissingParameters(t *testing.T) {
 	}
 
 	experr = `MANDATORY_IE_MISSING: [ID]`
-	if err := rS.V1ResourcesForEvent(args, &reply); err == nil ||
+	if err := rS.V1GetResourcesForEvent(context.Background(), args, &reply); err == nil ||
 		err.Error() != experr {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", experr, err)
 	}
@@ -3366,7 +3369,7 @@ func TestResourcesV1ResourcesForEventMissingParameters(t *testing.T) {
 	}
 
 	experr = `MANDATORY_IE_MISSING: [Event]`
-	if err := rS.V1ResourcesForEvent(args, &reply); err == nil ||
+	if err := rS.V1GetResourcesForEvent(context.Background(), args, &reply); err == nil ||
 		err.Error() != experr {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", experr, err)
 	}
@@ -3380,7 +3383,7 @@ func TestResourcesV1ResourcesForEventMissingParameters(t *testing.T) {
 	}
 
 	experr = `MANDATORY_IE_MISSING: [UsageID]`
-	if err := rS.V1ResourcesForEvent(args, &reply); err == nil ||
+	if err := rS.V1GetResourcesForEvent(context.Background(), args, &reply); err == nil ||
 		err.Error() != experr {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", experr, err)
 	}
@@ -3469,7 +3472,7 @@ func TestResourcesV1ResourcesForEventCacheReplyExists(t *testing.T) {
 		&utils.CachedRPCResponse{Result: &cacheReply, Error: nil},
 		nil, true, utils.NonTransactional)
 	var reply Resources
-	if err := rS.V1ResourcesForEvent(args, &reply); err != nil {
+	if err := rS.V1GetResourcesForEvent(context.Background(), args, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(reply, cacheReply) {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>",
@@ -3561,7 +3564,7 @@ func TestResourcesV1ResourcesForEventCacheReplySet(t *testing.T) {
 		},
 	}
 	var reply Resources
-	if err := rS.V1ResourcesForEvent(args, &reply); err != nil {
+	if err := rS.V1GetResourcesForEvent(context.Background(), args, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(reply, exp) {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>",
@@ -3642,7 +3645,7 @@ func TestResourcesV1GetResourceOK(t *testing.T) {
 		},
 	}
 	var reply Resource
-	if err := rS.V1GetResource(args, &reply); err != nil {
+	if err := rS.V1GetResource(context.Background(), args, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(reply, exp) {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>",
@@ -3698,7 +3701,7 @@ func TestResourcesV1GetResourceNotFound(t *testing.T) {
 		},
 	}
 	var reply Resource
-	if err := rS.V1GetResource(args, &reply); err == nil ||
+	if err := rS.V1GetResource(context.Background(), args, &reply); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ErrNotFound, err)
 	}
@@ -3751,7 +3754,7 @@ func TestResourcesV1GetResourceMissingParameters(t *testing.T) {
 
 	experr := `MANDATORY_IE_MISSING: [ID]`
 	var reply Resource
-	if err := rS.V1GetResource(args, &reply); err == nil ||
+	if err := rS.V1GetResource(context.Background(), args, &reply); err == nil ||
 		err.Error() != experr {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", experr, err)
 	}
@@ -3824,7 +3827,7 @@ func TestResourcesV1GetResourceWithConfigOK(t *testing.T) {
 		},
 	}
 	var reply ResourceWithConfig
-	if err := rS.V1GetResourceWithConfig(args, &reply); err != nil {
+	if err := rS.V1GetResourceWithConfig(context.Background(), args, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(reply, exp) {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>",
@@ -3902,7 +3905,7 @@ func TestResourcesV1GetResourceWithConfigNilrPrfOK(t *testing.T) {
 		},
 	}
 	var reply ResourceWithConfig
-	if err := rS.V1GetResourceWithConfig(args, &reply); err != nil {
+	if err := rS.V1GetResourceWithConfig(context.Background(), args, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(reply, exp) {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>",
@@ -3960,7 +3963,7 @@ func TestResourcesV1GetResourceWithConfigNilrPrfProfileNotFound(t *testing.T) {
 		},
 	}
 	var reply ResourceWithConfig
-	if err := rS.V1GetResourceWithConfig(args, &reply); err == nil ||
+	if err := rS.V1GetResourceWithConfig(context.Background(), args, &reply); err == nil ||
 		err != utils.ErrNotFound {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ErrNotFound, err)
 	}
@@ -4013,7 +4016,7 @@ func TestResourcesV1GetResourceWithConfigResourceNotFound(t *testing.T) {
 		},
 	}
 	var reply ResourceWithConfig
-	if err := rS.V1GetResourceWithConfig(args, &reply); err == nil || err != utils.ErrNotFound {
+	if err := rS.V1GetResourceWithConfig(context.Background(), args, &reply); err == nil || err != utils.ErrNotFound {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ErrNotFound, err)
 	}
 }
@@ -4064,7 +4067,7 @@ func TestResourcesV1GetResourceWithConfigMissingParameters(t *testing.T) {
 		TenantID: &utils.TenantID{},
 	}
 	var reply ResourceWithConfig
-	if err := rS.V1GetResourceWithConfig(args, &reply); err == nil || err.Error() != experr {
+	if err := rS.V1GetResourceWithConfig(context.Background(), args, &reply); err == nil || err.Error() != experr {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", experr, err)
 	}
 }
@@ -4108,7 +4111,7 @@ func TestResourcesV1AuthorizeResourcesOK(t *testing.T) {
 	}
 	var reply string
 
-	if err := rS.V1AuthorizeResources(args, &reply); err != nil {
+	if err := rS.V1AuthorizeResources(context.Background(), args, &reply); err != nil {
 		t.Error(err)
 	} else if reply != "Approved" {
 		t.Errorf("Unexpected reply returned: %q", reply)
@@ -4155,7 +4158,7 @@ func TestResourcesV1AuthorizeResourcesNotAuthorized(t *testing.T) {
 	}
 	var reply string
 
-	if err := rS.V1AuthorizeResources(args, &reply); err == nil ||
+	if err := rS.V1AuthorizeResources(context.Background(), args, &reply); err == nil ||
 		err != utils.ErrResourceUnauthorized {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ErrResourceUnauthorized, err)
 	}
@@ -4201,7 +4204,7 @@ func TestResourcesV1AuthorizeResourcesNoMatch(t *testing.T) {
 	}
 	var reply string
 
-	if err := rS.V1AuthorizeResources(args, &reply); err == nil ||
+	if err := rS.V1AuthorizeResources(context.Background(), args, &reply); err == nil ||
 		err != utils.ErrNotFound {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ErrNotFound, err)
 	}
@@ -4239,7 +4242,7 @@ func TestResourcesV1AuthorizeResourcesNilCGREvent(t *testing.T) {
 	experr := `MANDATORY_IE_MISSING: [Event]`
 	var reply string
 
-	if err := rS.V1AuthorizeResources(args, &reply); err == nil ||
+	if err := rS.V1AuthorizeResources(context.Background(), args, &reply); err == nil ||
 		err.Error() != experr {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", experr, err)
 	}
@@ -4284,7 +4287,7 @@ func TestResourcesV1AuthorizeResourcesMissingUsageID(t *testing.T) {
 	experr := `MANDATORY_IE_MISSING: [UsageID]`
 	var reply string
 
-	if err := rS.V1AuthorizeResources(args, &reply); err == nil ||
+	if err := rS.V1AuthorizeResources(context.Background(), args, &reply); err == nil ||
 		err.Error() != experr {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", experr, err)
 	}
@@ -4363,7 +4366,7 @@ func TestResourcesV1AuthorizeResourcesCacheReplyExists(t *testing.T) {
 		nil, true, utils.NonTransactional)
 
 	var reply string
-	if err := rS.V1AuthorizeResources(args, &reply); err != nil {
+	if err := rS.V1AuthorizeResources(context.Background(), args, &reply); err != nil {
 		t.Error(err)
 	} else if reply != cacheReply {
 		t.Errorf("Unexpected reply returned: %q", reply)
@@ -4439,7 +4442,7 @@ func TestResourcesV1AuthorizeResourcesCacheReplySet(t *testing.T) {
 	}
 
 	var reply string
-	if err := rS.V1AuthorizeResources(args, &reply); err != nil {
+	if err := rS.V1AuthorizeResources(context.Background(), args, &reply); err != nil {
 		t.Error(err)
 	} else if reply != "Approved" {
 		t.Errorf("Unexpected reply returned: %q", reply)
@@ -4495,7 +4498,7 @@ func TestResourcesV1AllocateResourcesOK(t *testing.T) {
 	}
 	var reply string
 
-	if err := rS.V1AllocateResources(args, &reply); err != nil {
+	if err := rS.V1AllocateResources(context.Background(), args, &reply); err != nil {
 		t.Error(err)
 	} else if reply != "Approved" {
 		t.Errorf("Unexpected reply returned: %q", reply)
@@ -4541,7 +4544,7 @@ func TestResourcesV1AllocateResourcesNoMatch(t *testing.T) {
 	}
 	var reply string
 
-	if err := rS.V1AllocateResources(args, &reply); err == nil ||
+	if err := rS.V1AllocateResources(context.Background(), args, &reply); err == nil ||
 		err != utils.ErrNotFound {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ErrNotFound, err)
 	}
@@ -4586,7 +4589,7 @@ func TestResourcesV1AllocateResourcesMissingParameters(t *testing.T) {
 	var reply string
 
 	experr := `MANDATORY_IE_MISSING: [UsageID]`
-	if err := rS.V1AllocateResources(args, &reply); err == nil ||
+	if err := rS.V1AllocateResources(context.Background(), args, &reply); err == nil ||
 		err.Error() != experr {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", experr, err)
 	}
@@ -4601,7 +4604,7 @@ func TestResourcesV1AllocateResourcesMissingParameters(t *testing.T) {
 	}
 
 	experr = `MANDATORY_IE_MISSING: [Event]`
-	if err := rS.V1AllocateResources(args, &reply); err == nil ||
+	if err := rS.V1AllocateResources(context.Background(), args, &reply); err == nil ||
 		err.Error() != experr {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", experr, err)
 	}
@@ -4618,7 +4621,7 @@ func TestResourcesV1AllocateResourcesMissingParameters(t *testing.T) {
 	}
 
 	experr = `MANDATORY_IE_MISSING: [ID]`
-	if err := rS.V1AllocateResources(args, &reply); err == nil ||
+	if err := rS.V1AllocateResources(context.Background(), args, &reply); err == nil ||
 		err.Error() != experr {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", experr, err)
 	}
@@ -4697,7 +4700,7 @@ func TestResourcesV1AllocateResourcesCacheReplyExists(t *testing.T) {
 		nil, true, utils.NonTransactional)
 
 	var reply string
-	if err := rS.V1AllocateResources(args, &reply); err != nil {
+	if err := rS.V1AllocateResources(context.Background(), args, &reply); err != nil {
 		t.Error(err)
 	} else if reply != cacheReply {
 		t.Errorf("Unexpected reply returned: %q", reply)
@@ -4773,7 +4776,7 @@ func TestResourcesV1AllocateResourcesCacheReplySet(t *testing.T) {
 	}
 
 	var reply string
-	if err := rS.V1AllocateResources(args, &reply); err != nil {
+	if err := rS.V1AllocateResources(context.Background(), args, &reply); err != nil {
 		t.Error(err)
 	} else if reply != "Approved" {
 		t.Errorf("Unexpected reply returned: %q", reply)
@@ -4828,7 +4831,7 @@ func TestResourcesV1AllocateResourcesResAllocErr(t *testing.T) {
 	}
 	var reply string
 
-	if err := rS.V1AllocateResources(args, &reply); err == nil ||
+	if err := rS.V1AllocateResources(context.Background(), args, &reply); err == nil ||
 		err != utils.ErrResourceUnavailable {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ErrResourceUnavailable, err)
 	}
@@ -4879,15 +4882,15 @@ func TestResourcesV1AllocateResourcesProcessThErr(t *testing.T) {
 	}
 
 	ccM := &ccMock{
-		calls: map[string]func(args any, reply any) error{
-			utils.ThresholdSv1ProcessEvent: func(args, reply any) error {
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.ThresholdSv1ProcessEvent: func(ctx *context.Context, args, reply any) error {
 				return utils.ErrExists
 			},
 		},
 	}
-	rpcInternal := make(chan rpcclient.ClientConnector, 1)
+	rpcInternal := make(chan birpc.ClientConnector, 1)
 	rpcInternal <- ccM
-	cM := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	cM := NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds): rpcInternal,
 	})
 	fltrs := NewFilterS(cfg, nil, dm)
@@ -4906,7 +4909,7 @@ func TestResourcesV1AllocateResourcesProcessThErr(t *testing.T) {
 	}
 	var reply string
 
-	if err := rS.V1AllocateResources(args, &reply); err == nil ||
+	if err := rS.V1AllocateResources(context.Background(), args, &reply); err == nil ||
 		err != utils.ErrPartiallyExecuted {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ErrPartiallyExecuted, err)
 	}
@@ -4951,13 +4954,13 @@ func TestResourcesV1ReleaseResourcesOK(t *testing.T) {
 		},
 	}
 	var reply string
-	if err := rS.V1AllocateResources(args, &reply); err != nil {
+	if err := rS.V1AllocateResources(context.Background(), args, &reply); err != nil {
 		t.Error(err)
 	} else if reply != "Approved" {
 		t.Errorf("Unexpected reply returned: %q", reply)
 	}
 
-	if err := rS.V1ReleaseResources(args, &reply); err != nil {
+	if err := rS.V1ReleaseResources(context.Background(), args, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf("Unexpected reply returned: %q", reply)
@@ -5002,7 +5005,7 @@ func TestResourcesV1ReleaseResourcesUsageNotFound(t *testing.T) {
 		},
 	}
 	var reply string
-	if err := rS.V1AllocateResources(args, &reply); err != nil {
+	if err := rS.V1AllocateResources(context.Background(), args, &reply); err != nil {
 		t.Error(err)
 	} else if reply != "Approved" {
 		t.Errorf("Unexpected reply returned: %q", reply)
@@ -5021,7 +5024,7 @@ func TestResourcesV1ReleaseResourcesUsageNotFound(t *testing.T) {
 	}
 
 	experr := `cannot find usage record with id: RU_Test2`
-	if err := rS.V1ReleaseResources(args, &reply); err == nil ||
+	if err := rS.V1ReleaseResources(context.Background(), args, &reply); err == nil ||
 		err.Error() != experr {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", experr, err)
 	}
@@ -5066,7 +5069,7 @@ func TestResourcesV1ReleaseResourcesNoMatch(t *testing.T) {
 	}
 	var reply string
 
-	if err := rS.V1ReleaseResources(args, &reply); err == nil ||
+	if err := rS.V1ReleaseResources(context.Background(), args, &reply); err == nil ||
 		err != utils.ErrNotFound {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ErrNotFound, err)
 	}
@@ -5111,7 +5114,7 @@ func TestResourcesV1ReleaseResourcesMissingParameters(t *testing.T) {
 	var reply string
 
 	experr := `MANDATORY_IE_MISSING: [UsageID]`
-	if err := rS.V1ReleaseResources(args, &reply); err == nil ||
+	if err := rS.V1ReleaseResources(context.Background(), args, &reply); err == nil ||
 		err.Error() != experr {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", experr, err)
 	}
@@ -5126,7 +5129,7 @@ func TestResourcesV1ReleaseResourcesMissingParameters(t *testing.T) {
 	}
 
 	experr = `MANDATORY_IE_MISSING: [Event]`
-	if err := rS.V1ReleaseResources(args, &reply); err == nil ||
+	if err := rS.V1ReleaseResources(context.Background(), args, &reply); err == nil ||
 		err.Error() != experr {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", experr, err)
 	}
@@ -5143,7 +5146,7 @@ func TestResourcesV1ReleaseResourcesMissingParameters(t *testing.T) {
 	}
 
 	experr = `MANDATORY_IE_MISSING: [ID]`
-	if err := rS.V1ReleaseResources(args, &reply); err == nil ||
+	if err := rS.V1ReleaseResources(context.Background(), args, &reply); err == nil ||
 		err.Error() != experr {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", experr, err)
 	}
@@ -5222,7 +5225,7 @@ func TestResourcesV1ReleaseResourcesCacheReplyExists(t *testing.T) {
 		nil, true, utils.NonTransactional)
 
 	var reply string
-	if err := rS.V1ReleaseResources(args, &reply); err != nil {
+	if err := rS.V1ReleaseResources(context.Background(), args, &reply); err != nil {
 		t.Error(err)
 	} else if reply != cacheReply {
 		t.Errorf("Unexpected reply returned: %q", reply)
@@ -5299,7 +5302,7 @@ func TestResourcesV1ReleaseResourcesCacheReplySet(t *testing.T) {
 
 	var reply string
 	experr := `cannot find usage record with id: RU_Test`
-	if err := rS.V1ReleaseResources(args, &reply); err == nil ||
+	if err := rS.V1ReleaseResources(context.Background(), args, &reply); err == nil ||
 		err.Error() != experr {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", experr, err)
 	}
@@ -5323,15 +5326,15 @@ func TestResourcesV1ReleaseResourcesProcessThErr(t *testing.T) {
 	data := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
 	ccM := &ccMock{
-		calls: map[string]func(args any, reply any) error{
-			utils.ThresholdSv1ProcessEvent: func(args, reply any) error {
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.ThresholdSv1ProcessEvent: func(ctx *context.Context, args, reply any) error {
 				return utils.ErrExists
 			},
 		},
 	}
-	rpcInternal := make(chan rpcclient.ClientConnector, 1)
+	rpcInternal := make(chan birpc.ClientConnector, 1)
 	rpcInternal <- ccM
-	cM := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	cM := NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds): rpcInternal,
 	})
 
@@ -5395,7 +5398,7 @@ func TestResourcesV1ReleaseResourcesProcessThErr(t *testing.T) {
 		t.Error(err)
 	}
 
-	if err := rS.V1ReleaseResources(args, &reply); err == nil ||
+	if err := rS.V1ReleaseResources(context.Background(), args, &reply); err == nil ||
 		err != utils.ErrPartiallyExecuted {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ErrPartiallyExecuted, err)
 	}
@@ -5416,7 +5419,7 @@ func TestResourcesStoreResourceError(t *testing.T) {
 	defer config.SetCgrConfig(dft)
 
 	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
-	dm := NewDataManager(db, cfg.CacheCfg(), NewConnManager(cfg, make(map[string]chan rpcclient.ClientConnector)))
+	dm := NewDataManager(db, cfg.CacheCfg(), NewConnManager(cfg, make(map[string]chan birpc.ClientConnector)))
 
 	rS := NewResourceService(dm, cfg, NewFilterS(cfg, nil, dm), nil)
 
@@ -5450,19 +5453,19 @@ func TestResourcesStoreResourceError(t *testing.T) {
 	}
 	cfg.DataDbCfg().Items[utils.MetaResources].Replicate = true
 	var reply string
-	if err := rS.V1AllocateResources(args, &reply); err != utils.ErrDisconnected {
+	if err := rS.V1AllocateResources(context.Background(), args, &reply); err != utils.ErrDisconnected {
 		t.Error(err)
 	}
 	cfg.DataDbCfg().Items[utils.MetaResources].Replicate = false
 
-	if err := rS.V1AllocateResources(args, &reply); err != nil {
+	if err := rS.V1AllocateResources(context.Background(), args, &reply); err != nil {
 		t.Error(err)
 	} else if reply != "Approved" {
 		t.Errorf("Unexpected reply returned: %q", reply)
 	}
 
 	cfg.DataDbCfg().Items[utils.MetaResources].Replicate = true
-	if err := rS.V1ReleaseResources(args, &reply); err != utils.ErrDisconnected {
+	if err := rS.V1ReleaseResources(context.Background(), args, &reply); err != utils.ErrDisconnected {
 		t.Error(err)
 	}
 }
@@ -5800,7 +5803,7 @@ func TestResourceMatchingResourcesForEventLocks3(t *testing.T) {
 // 	config.SetCgrConfig(cfg)
 // 	data := NewInternalDB(nil, nil, true,cfg.DataDbCfg().Items)
 // 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
-// 	connMgr = NewConnManager(cfg, make(map[string]chan rpcclient.ClientConnector))
+// 	connMgr = NewConnManager(cfg, make(map[string]chan birpc.ClientConnector))
 // 	Cache = NewCacheS(cfg, dm, nil)
 
 // 	fltrs := NewFilterS(cfg, nil, dm)
@@ -6041,7 +6044,7 @@ func TestResourcesMatchingResourcesForEventCacheSetErr(t *testing.T) {
 	config.SetCgrConfig(cfg)
 	data := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
-	connMgr = NewConnManager(cfg, make(map[string]chan rpcclient.ClientConnector))
+	connMgr = NewConnManager(cfg, make(map[string]chan birpc.ClientConnector))
 	Cache = NewCacheS(cfg, dm, nil)
 	fltrs := NewFilterS(cfg, nil, dm)
 
@@ -6081,7 +6084,7 @@ func TestResourcesMatchingResourcesForEventFinalCacheSetErr(t *testing.T) {
 	config.SetCgrConfig(cfg)
 	data := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
-	connMgr = NewConnManager(cfg, make(map[string]chan rpcclient.ClientConnector))
+	connMgr = NewConnManager(cfg, make(map[string]chan birpc.ClientConnector))
 	Cache = NewCacheS(cfg, dm, nil)
 	fltrs := NewFilterS(cfg, nil, dm)
 

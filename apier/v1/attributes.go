@@ -21,12 +21,13 @@ package v1
 import (
 	"time"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
 // GetAttributeProfile returns an Attribute Profile
-func (apierSv1 *APIerSv1) GetAttributeProfile(arg *utils.TenantIDWithAPIOpts, reply *engine.AttributeProfile) (err error) {
+func (apierSv1 *APIerSv1) GetAttributeProfile(ctx *context.Context, arg *utils.TenantIDWithAPIOpts, reply *engine.AttributeProfile) (err error) {
 	if missing := utils.MissingStructFields(arg, []string{utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -46,7 +47,7 @@ func (apierSv1 *APIerSv1) GetAttributeProfile(arg *utils.TenantIDWithAPIOpts, re
 }
 
 // GetAttributeProfileIDs returns list of attributeProfile IDs registered for a tenant
-func (apierSv1 *APIerSv1) GetAttributeProfileIDs(args *utils.PaginatorWithTenant, attrPrfIDs *[]string) error {
+func (apierSv1 *APIerSv1) GetAttributeProfileIDs(ctx *context.Context, args *utils.PaginatorWithTenant, attrPrfIDs *[]string) error {
 	tnt := args.Tenant
 	if tnt == utils.EmptyString {
 		tnt = apierSv1.Config.GeneralCfg().DefaultTenant
@@ -69,7 +70,7 @@ func (apierSv1 *APIerSv1) GetAttributeProfileIDs(args *utils.PaginatorWithTenant
 
 // GetAttributeProfileCount sets in reply var the total number of AttributeProfileIDs registered for a tenant
 // returns ErrNotFound in case of 0 AttributeProfileIDs
-func (apierSv1 *APIerSv1) GetAttributeProfileCount(args *utils.TenantWithAPIOpts, reply *int) (err error) {
+func (apierSv1 *APIerSv1) GetAttributeProfileCount(ctx *context.Context, args *utils.TenantWithAPIOpts, reply *int) (err error) {
 	tnt := args.Tenant
 	if tnt == utils.EmptyString {
 		tnt = apierSv1.Config.GeneralCfg().DefaultTenant
@@ -87,7 +88,7 @@ func (apierSv1 *APIerSv1) GetAttributeProfileCount(args *utils.TenantWithAPIOpts
 }
 
 // SetAttributeProfile add/update a new Attribute Profile
-func (apierSv1 *APIerSv1) SetAttributeProfile(alsWrp *engine.AttributeProfileWithAPIOpts, reply *string) error {
+func (apierSv1 *APIerSv1) SetAttributeProfile(ctx *context.Context, alsWrp *engine.AttributeProfileWithAPIOpts, reply *string) error {
 	if missing := utils.MissingStructFields(alsWrp.AttributeProfile, []string{utils.ID, utils.Attributes}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -124,7 +125,7 @@ func (apierSv1 *APIerSv1) SetAttributeProfile(alsWrp *engine.AttributeProfileWit
 }
 
 // RemoveAttributeProfile remove a specific Attribute Profile
-func (apierSv1 *APIerSv1) RemoveAttributeProfile(arg *utils.TenantIDWithAPIOpts, reply *string) error {
+func (apierSv1 *APIerSv1) RemoveAttributeProfile(ctx *context.Context, arg *utils.TenantIDWithAPIOpts, reply *string) error {
 	if missing := utils.MissingStructFields(arg, []string{utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -157,26 +158,26 @@ type AttributeSv1 struct {
 	attrS *engine.AttributeService
 }
 
-// Call implements rpcclient.ClientConnector interface for internal RPC
-func (alSv1 *AttributeSv1) Call(serviceMethod string,
+// Call implements birpc.ClientConnector interface for internal RPC
+func (alSv1 *AttributeSv1) Call(ctx *context.Context, serviceMethod string,
 	args any, reply any) error {
 	return utils.APIerRPCCall(alSv1, serviceMethod, args, reply)
 }
 
 // GetAttributeForEvent  returns matching AttributeProfile for Event
-func (alSv1 *AttributeSv1) GetAttributeForEvent(args *utils.CGREvent,
+func (alSv1 *AttributeSv1) GetAttributeForEvent(ctx *context.Context, args *utils.CGREvent,
 	reply *engine.AttributeProfile) (err error) {
-	return alSv1.attrS.V1GetAttributeForEvent(args, reply)
+	return alSv1.attrS.V1GetAttributeForEvent(ctx, args, reply)
 }
 
 // ProcessEvent will replace event fields with the ones in matching AttributeProfile
-func (alSv1 *AttributeSv1) ProcessEvent(args *utils.CGREvent,
+func (alSv1 *AttributeSv1) ProcessEvent(ctx *context.Context, args *utils.CGREvent,
 	reply *engine.AttrSProcessEventReply) error {
-	return alSv1.attrS.V1ProcessEvent(args, reply)
+	return alSv1.attrS.V1ProcessEvent(ctx, args, reply)
 }
 
 // Ping return pong if the service is active
-func (alSv1 *AttributeSv1) Ping(ign *utils.CGREvent, reply *string) error {
+func (alSv1 *AttributeSv1) Ping(ctx *context.Context, ign *utils.CGREvent, reply *string) error {
 	*reply = utils.Pong
 	return nil
 }

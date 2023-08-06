@@ -25,10 +25,10 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/cgrates/rpcclient"
 )
 
 // for the moment we dispable Apier through dispatcher
@@ -79,7 +79,7 @@ func testDspApierSetAttributes(t *testing.T) {
 	}
 
 	var result string
-	if err := dispEngine.RPC.Call(utils.APIerSv1SetAttributeProfile, attrPrf, &result); err != nil {
+	if err := dispEngine.RPC.Call(context.Background(),utils.APIerSv1SetAttributeProfile, attrPrf, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -110,7 +110,7 @@ func testDspApierGetAttributes(t *testing.T) {
 		Weight: 10,
 	}
 	alsPrf.Compile()
-	if err := dispEngine.RPC.Call(utils.APIerSv1GetAttributeProfile,
+	if err := dispEngine.RPC.Call(context.Background(),utils.APIerSv1GetAttributeProfile,
 		utils.TenantIDWithAPIOpts{
 			TenantID:      &utils.TenantID{Tenant: "cgrates.org", ID: "ATTR_Dispatcher"},
 			APIOpts: map[string]any{
@@ -128,7 +128,7 @@ func testDspApierGetAttributes(t *testing.T) {
 
 func testDspApierUnkownAPiKey(t *testing.T) {
 	var reply *engine.AttributeProfile
-	if err := dispEngine.RPC.Call(utils.APIerSv1GetAttributeProfile,
+	if err := dispEngine.RPC.Call(context.Background(),utils.APIerSv1GetAttributeProfile,
 		utils.TenantIDWithAPIOpts{
 			TenantID:      &utils.TenantID{Tenant: "cgrates.org", ID: "ATTR_Dispatcher"},
 			APIOpts: map[string]any{
@@ -144,7 +144,7 @@ func testDspApierUnkownAPiKey(t *testing.T) {
 func TestDispatcherServiceDispatcherProfileForEventGetDispatchertWithoutAuthentification(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.DispatcherSCfg().IndexedSelects = false
-	rpcCl := map[string]chan rpcclient.ClientConnector{}
+	rpcCl := map[string]chan birpc.ClientConnector{}
 	connMng := engine.NewConnManager(cfg, rpcCl)
 	dm := engine.NewDataManager(&engine.DataDBMock{
 		GetKeysForPrefixF: func(string) ([]string, error) {

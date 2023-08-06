@@ -19,11 +19,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package dispatchers
 
 import (
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
-func (dS *DispatcherService) RouteSv1Ping(args *utils.CGREvent, reply *string) (err error) {
+func (dS *DispatcherService) RouteSv1Ping(ctx *context.Context, args *utils.CGREvent, reply *string) (err error) {
 	if args == nil {
 		args = new(utils.CGREvent)
 	}
@@ -38,7 +39,7 @@ func (dS *DispatcherService) RouteSv1Ping(args *utils.CGREvent, reply *string) (
 	return dS.Dispatch(args, utils.MetaRoutes, utils.RouteSv1Ping, args, reply)
 }
 
-func (dS *DispatcherService) RouteSv1GetRoutes(args *utils.CGREvent, reply *engine.SortedRoutesList) (err error) {
+func (dS *DispatcherService) RouteSv1GetRoutes(ctx *context.Context, args *utils.CGREvent, reply *engine.SortedRoutesList) (err error) {
 	args.Tenant = utils.FirstNonEmpty(args.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(utils.RouteSv1GetRoutes,
@@ -50,7 +51,7 @@ func (dS *DispatcherService) RouteSv1GetRoutes(args *utils.CGREvent, reply *engi
 	return dS.Dispatch(args, utils.MetaRoutes, utils.RouteSv1GetRoutes, args, reply)
 }
 
-func (dS *DispatcherService) RouteSv1GetRoutesList(args *utils.CGREvent, reply *[]string) (err error) {
+func (dS *DispatcherService) RouteSv1GetRoutesList(ctx *context.Context, args *utils.CGREvent, reply *[]string) (err error) {
 	args.Tenant = utils.FirstNonEmpty(args.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(utils.RouteSv1GetRoutesList,
@@ -62,7 +63,7 @@ func (dS *DispatcherService) RouteSv1GetRoutesList(args *utils.CGREvent, reply *
 	return dS.Dispatch(args, utils.MetaRoutes, utils.RouteSv1GetRoutesList, args, reply)
 }
 
-func (dS *DispatcherService) RouteSv1GetRouteProfilesForEvent(args *utils.CGREvent, reply *[]*engine.RouteProfile) (err error) {
+func (dS *DispatcherService) RouteSv1GetRouteProfilesForEvent(ctx *context.Context, args *utils.CGREvent, reply *[]*engine.RouteProfile) (err error) {
 	args.Tenant = utils.FirstNonEmpty(args.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(utils.RouteSv1GetRouteProfilesForEvent,

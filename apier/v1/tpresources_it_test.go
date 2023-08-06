@@ -22,13 +22,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package v1
 
 import (
-	"net/rpc"
-	"net/rpc/jsonrpc"
 	"path"
 	"reflect"
 	"sort"
 	"testing"
 
+	"github.com/cgrates/birpc"
+	"github.com/cgrates/birpc/context"
+	"github.com/cgrates/birpc/jsonrpc"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -37,7 +38,7 @@ import (
 var (
 	tpResCfgPath   string
 	tpResCfg       *config.CGRConfig
-	tpResRPC       *rpc.Client
+	tpResRPC       *birpc.Client
 	tpRes          *utils.TPResourceProfile
 	tpResDelay     int
 	tpResConfigDIR string //run tests for specific configuration
@@ -112,7 +113,7 @@ func testTPResRpcConn(t *testing.T) {
 
 func testTPResGetTPResourceBeforeSet(t *testing.T) {
 	var reply *utils.TPResourceProfile
-	if err := tpResRPC.Call(utils.APIerSv1GetTPResource,
+	if err := tpResRPC.Call(context.Background(), utils.APIerSv1GetTPResource,
 		&utils.TPTntID{TPid: "TPR1", Tenant: "cgrates.org", ID: "ResGroup1"}, &reply); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
@@ -139,7 +140,7 @@ func testTPResSetTPResource(t *testing.T) {
 	}
 	sort.Strings(tpRes.ThresholdIDs)
 	var result string
-	if err := tpResRPC.Call(utils.APIerSv1SetTPResource, tpRes, &result); err != nil {
+	if err := tpResRPC.Call(context.Background(), utils.APIerSv1SetTPResource, tpRes, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -148,7 +149,7 @@ func testTPResSetTPResource(t *testing.T) {
 
 func testTPResGetTPResourceAfterSet(t *testing.T) {
 	var respond *utils.TPResourceProfile
-	if err := tpResRPC.Call(utils.APIerSv1GetTPResource, &utils.TPTntID{TPid: "TPR1", Tenant: "cgrates.org", ID: "ResGroup1"},
+	if err := tpResRPC.Call(context.Background(), utils.APIerSv1GetTPResource, &utils.TPTntID{TPid: "TPR1", Tenant: "cgrates.org", ID: "ResGroup1"},
 		&respond); err != nil {
 		t.Fatal(err)
 	}
@@ -162,7 +163,7 @@ func testTPResUpdateTPResource(t *testing.T) {
 	var result string
 	tpRes.FilterIDs = []string{"FLTR_1", "FLTR_STS1"}
 	sort.Strings(tpRes.FilterIDs)
-	if err := tpResRPC.Call(utils.APIerSv1SetTPResource, tpRes, &result); err != nil {
+	if err := tpResRPC.Call(context.Background(), utils.APIerSv1SetTPResource, tpRes, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -171,7 +172,7 @@ func testTPResUpdateTPResource(t *testing.T) {
 
 func testTPResGetTPResourceAfterUpdate(t *testing.T) {
 	var expectedTPR *utils.TPResourceProfile
-	if err := tpResRPC.Call(utils.APIerSv1GetTPResource, &utils.TPTntID{TPid: "TPR1", Tenant: "cgrates.org", ID: "ResGroup1"},
+	if err := tpResRPC.Call(context.Background(), utils.APIerSv1GetTPResource, &utils.TPTntID{TPid: "TPR1", Tenant: "cgrates.org", ID: "ResGroup1"},
 		&expectedTPR); err != nil {
 		t.Fatal(err)
 	}
@@ -184,7 +185,7 @@ func testTPResGetTPResourceAfterUpdate(t *testing.T) {
 
 func testTPResRemoveTPResource(t *testing.T) {
 	var resp string
-	if err := tpResRPC.Call(utils.APIerSv1RemoveTPResource, &utils.TPTntID{TPid: "TPR1", Tenant: "cgrates.org", ID: "ResGroup1"},
+	if err := tpResRPC.Call(context.Background(), utils.APIerSv1RemoveTPResource, &utils.TPTntID{TPid: "TPR1", Tenant: "cgrates.org", ID: "ResGroup1"},
 		&resp); err != nil {
 		t.Error(err)
 	} else if resp != utils.OK {
@@ -194,7 +195,7 @@ func testTPResRemoveTPResource(t *testing.T) {
 
 func testTPResGetTPResourceAfterRemove(t *testing.T) {
 	var respond *utils.TPResourceProfile
-	if err := tpResRPC.Call(utils.APIerSv1GetTPResource, &utils.TPTntID{TPid: "TPR1", Tenant: "cgrates.org", ID: "ResGroup1"},
+	if err := tpResRPC.Call(context.Background(), utils.APIerSv1GetTPResource, &utils.TPTntID{TPid: "TPR1", Tenant: "cgrates.org", ID: "ResGroup1"},
 		&respond); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}

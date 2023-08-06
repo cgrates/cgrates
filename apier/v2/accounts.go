@@ -22,13 +22,14 @@ import (
 	"errors"
 	"math"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/guardian"
 	"github.com/cgrates/cgrates/utils"
 )
 
-func (apiv2 *APIerSv2) GetAccounts(attr *utils.AttrGetAccounts, reply *[]*engine.Account) error {
+func (apiv2 *APIerSv2) GetAccounts(ctx *context.Context, attr *utils.AttrGetAccounts, reply *[]*engine.Account) error {
 	tnt := attr.Tenant
 	if tnt == utils.EmptyString {
 		tnt = apiv2.Config.GeneralCfg().DefaultTenant
@@ -83,7 +84,7 @@ func (apiv2 *APIerSv2) GetAccounts(attr *utils.AttrGetAccounts, reply *[]*engine
 
 // GetAccountsCount sets in reply var the total number of accounts registered for the received tenant
 // returns ErrNotFound in case of 0 accounts
-func (apiv2 *APIerSv2) GetAccountsCount(attr *utils.AttrGetAccountsCount, reply *int) (err error) {
+func (apiv2 *APIerSv2) GetAccountsCount(ctx *context.Context, attr *utils.AttrGetAccountsCount, reply *int) (err error) {
 	tnt := attr.Tenant
 	if tnt == utils.EmptyString {
 		tnt = apiv2.Config.GeneralCfg().DefaultTenant
@@ -101,7 +102,7 @@ func (apiv2 *APIerSv2) GetAccountsCount(attr *utils.AttrGetAccountsCount, reply 
 }
 
 // Get balance
-func (apiv2 *APIerSv2) GetAccount(attr *utils.AttrGetAccount, reply *engine.Account) error {
+func (apiv2 *APIerSv2) GetAccount(ctx *context.Context, attr *utils.AttrGetAccount, reply *engine.Account) error {
 	tnt := attr.Tenant
 	if tnt == utils.EmptyString {
 		tnt = apiv2.Config.GeneralCfg().DefaultTenant
@@ -126,7 +127,7 @@ type AttrSetAccount struct {
 	ReloadScheduler        bool
 }
 
-func (apiv2 *APIerSv2) SetAccount(attr *AttrSetAccount, reply *string) error {
+func (apiv2 *APIerSv2) SetAccount(ctx *context.Context, attr *AttrSetAccount, reply *string) error {
 	if missing := utils.MissingStructFields(attr, []string{utils.AccountField}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -215,7 +216,7 @@ func (apiv2 *APIerSv2) SetAccount(attr *AttrSetAccount, reply *string) error {
 			if err := apiv2.DataManager.SetAccountActionPlans(accID, acntAPids, true); err != nil {
 				return err
 			}
-			return apiv2.ConnMgr.Call(apiv2.Config.ApierCfg().CachesConns, nil,
+			return apiv2.ConnMgr.Call(context.TODO(), apiv2.Config.ApierCfg().CachesConns,
 				utils.CacheSv1ReloadCache, &utils.AttrReloadCacheWithAPIOpts{
 					AccountActionPlanIDs: []string{accID},
 					ActionPlanIDs:        apIDs,

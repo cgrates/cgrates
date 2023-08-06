@@ -21,6 +21,7 @@ package v1
 import (
 	"strings"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -90,7 +91,7 @@ func (apierSv1 *APIerSv1) CallCache(cacheopt string, tnt, cacheID, itemID, group
 		}
 
 	}
-	return apierSv1.ConnMgr.Call(apierSv1.Config.ApierCfg().CachesConns, nil,
+	return apierSv1.ConnMgr.Call(context.TODO(), apierSv1.Config.ApierCfg().CachesConns,
 		method, args, &reply)
 }
 
@@ -190,7 +191,7 @@ func (apierSv1 *APIerSv1) callCacheForRemoveIndexes(cacheopt string, tnt, cacheI
 			APIOpts:  opts,
 		}
 	}
-	return apierSv1.ConnMgr.Call(apierSv1.Config.ApierCfg().CachesConns, nil,
+	return apierSv1.ConnMgr.Call(context.TODO(), apierSv1.Config.ApierCfg().CachesConns,
 		method, args, &reply)
 }
 
@@ -219,7 +220,7 @@ func (apierSv1 *APIerSv1) callCacheForComputeIndexes(cacheopt, tnt string,
 			APIOpts:  opts,
 		}
 	}
-	return apierSv1.ConnMgr.Call(apierSv1.Config.ApierCfg().CachesConns, nil,
+	return apierSv1.ConnMgr.Call(context.TODO(), apierSv1.Config.ApierCfg().CachesConns,
 		method, args, &reply)
 }
 
@@ -250,7 +251,7 @@ func (apierSv1 *APIerSv1) callCacheMultiple(cacheopt, tnt, cacheID string, itemI
 			APIOpts:  opts,
 		}
 	}
-	return apierSv1.ConnMgr.Call(apierSv1.Config.ApierCfg().CachesConns, nil,
+	return apierSv1.ConnMgr.Call(context.TODO(), apierSv1.Config.ApierCfg().CachesConns,
 		method, args, &reply)
 }
 
@@ -349,5 +350,5 @@ func callCacheForFilter(connMgr *engine.ConnManager, cacheConns []string, cacheo
 			APIOpts:  opts,
 		}
 	}
-	return connMgr.Call(cacheConns, nil, method, args, &reply)
+	return connMgr.Call(context.TODO(), cacheConns, method, args, &reply)
 }

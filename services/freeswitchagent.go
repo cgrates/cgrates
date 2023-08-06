@@ -54,7 +54,7 @@ type FreeswitchAgent struct {
 }
 
 // Start should handle the sercive start
-func (fS *FreeswitchAgent) Start() (err error) {
+func (fS *FreeswitchAgent) Start() error {
 	if fS.IsRunning() {
 		return utils.ErrServiceAlreadyRunning
 	}
@@ -62,15 +62,20 @@ func (fS *FreeswitchAgent) Start() (err error) {
 	fS.Lock()
 	defer fS.Unlock()
 
-	fS.fS = agents.NewFSsessions(fS.cfg.FsAgentCfg(), fS.cfg.GeneralCfg().DefaultTimezone, fS.connMgr)
+	var err error
+	fS.fS, err = agents.NewFSsessions(fS.cfg.FsAgentCfg(), fS.cfg.GeneralCfg().DefaultTimezone, fS.connMgr)
+	if err != nil {
+		utils.Logger.Err(fmt.Sprintf("<%s> failed to initialize agent, error: %s", utils.FreeSWITCHAgent, err))
+		return err
+	}
 
 	go func(f *agents.FSsessions) {
-		if err := f.Connect(); err != nil {
-			utils.Logger.Err(fmt.Sprintf("<%s> error: %s!", utils.FreeSWITCHAgent, err))
+		if connErr := f.Connect(); connErr != nil {
+			utils.Logger.Err(fmt.Sprintf("<%s> error: %s!", utils.FreeSWITCHAgent, connErr))
 			fS.shdChan.CloseOnce() // stop the engine here
 		}
 	}(fS.fS)
-	return
+	return nil
 }
 
 // Reload handles the change of config

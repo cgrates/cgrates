@@ -21,11 +21,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package general_tests
 
 import (
-	"net/rpc"
 	"path"
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc"
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/sessions"
@@ -36,7 +37,7 @@ var (
 	sesRplPrePaidCfgPath string
 	sesRplPrePaidCfgDIR  string
 	sesRplPrePaidCfg     *config.CGRConfig
-	sesRplPrePaidRPC     *rpc.Client
+	sesRplPrePaidRPC     *birpc.Client
 
 	sesRplPrePaidTests = []func(t *testing.T){
 		testSeSRplPrepaidInitCfg,
@@ -99,7 +100,7 @@ func testSeSRplPrepaidApierRpcConn(t *testing.T) {
 // Load the tariff plan, creating accounts and their balances
 func testSeSRplPrepaidTPFromFolder(t *testing.T) {
 	var result string
-	if err := sesRplPrePaidRPC.Call(utils.APIerSv1SetChargerProfile, &engine.ChargerProfile{
+	if err := sesRplPrePaidRPC.Call(context.Background(), utils.APIerSv1SetChargerProfile, &engine.ChargerProfile{
 		Tenant:       "cgrates.org",
 		ID:           "Default",
 		RunID:        utils.MetaRaw,
@@ -121,14 +122,14 @@ func testSeSRplPrepaidTPFromFolder(t *testing.T) {
 		},
 	}
 	var reply string
-	if err := sesRplPrePaidRPC.Call(utils.APIerSv2SetBalance, attrSetBalance, &reply); err != nil {
+	if err := sesRplPrePaidRPC.Call(context.Background(), utils.APIerSv2SetBalance, attrSetBalance, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf("Received: %s", reply)
 	}
 	var acnt *engine.Account
 	//get balance
-	if err := sesRplPrePaidRPC.Call(utils.APIerSv2GetAccount, &utils.AttrGetAccount{
+	if err := sesRplPrePaidRPC.Call(context.Background(), utils.APIerSv2GetAccount, &utils.AttrGetAccount{
 		Tenant:  "cgrates.org",
 		Account: "1005",
 	}, &acnt); err != nil {
@@ -141,7 +142,7 @@ func testSeSRplPrepaidTPFromFolder(t *testing.T) {
 
 func testSeSRplPrepaidActivateSessions(t *testing.T) {
 	var reply string
-	if err = sesRplPrePaidRPC.Call(utils.SessionSv1SetPassiveSession, sessions.Session{
+	if err = sesRplPrePaidRPC.Call(context.Background(), utils.SessionSv1SetPassiveSession, sessions.Session{
 		CGRID:         "ede927f8e42318a8db02c0f74adc2d9e16770339",
 		Tenant:        "cgrates.org",
 		ResourceID:    "testSeSRplPrepaidActivateSessions",
@@ -244,19 +245,19 @@ func testSeSRplPrepaidActivateSessions(t *testing.T) {
 	}
 	var aSessions []*sessions.ExternalSession
 	// Activate first session (with ID: ede927f8e42318a8db02c0f74adc2d9e16770339)
-	if err := sesRplPrePaidRPC.Call(utils.SessionSv1ActivateSessions, &utils.SessionIDsWithArgsDispatcher{}, &reply); err != nil {
+	if err := sesRplPrePaidRPC.Call(context.Background(), utils.SessionSv1ActivateSessions, &utils.SessionIDsWithArgsDispatcher{}, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf("Unexpected reply %s", reply)
 	}
-	if err := sesRplPrePaidRPC.Call(utils.SessionSv1GetActiveSessions, new(utils.SessionFilter), &aSessions); err != nil {
+	if err := sesRplPrePaidRPC.Call(context.Background(), utils.SessionSv1GetActiveSessions, new(utils.SessionFilter), &aSessions); err != nil {
 		t.Error(err)
 	} else if len(aSessions) != 1 {
 		t.Errorf("Expecting: 1 session, received: %+v sessions", len(aSessions))
 	}
 	time.Sleep(10 * time.Millisecond)
 	var acnt *engine.Account
-	if err := sesRplPrePaidRPC.Call(utils.APIerSv2GetAccount, &utils.AttrGetAccount{
+	if err := sesRplPrePaidRPC.Call(context.Background(), utils.APIerSv2GetAccount, &utils.AttrGetAccount{
 		Tenant:  "cgrates.org",
 		Account: "1005",
 	}, &acnt); err != nil {

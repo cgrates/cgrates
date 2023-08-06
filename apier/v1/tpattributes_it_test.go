@@ -22,14 +22,15 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package v1
 
 import (
-	"net/rpc"
-	"net/rpc/jsonrpc"
 	"path"
 	"reflect"
 	"sort"
 	"strings"
 	"testing"
 
+	"github.com/cgrates/birpc"
+	"github.com/cgrates/birpc/context"
+	"github.com/cgrates/birpc/jsonrpc"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -38,7 +39,7 @@ import (
 var (
 	tpAlsPrfCfgPath   string
 	tpAlsPrfCfg       *config.CGRConfig
-	tpAlsPrfRPC       *rpc.Client
+	tpAlsPrfRPC       *birpc.Client
 	tpAlsPrf          *utils.TPAttributeProfile
 	tpAlsPrfDelay     int
 	tpAlsPrfConfigDIR string //run tests for specific configuration
@@ -114,7 +115,7 @@ func testTPAlsPrfRPCConn(t *testing.T) {
 
 func testTPAlsPrfGetTPAlsPrfBeforeSet(t *testing.T) {
 	var reply *utils.TPAttributeProfile
-	if err := tpAlsPrfRPC.Call(utils.APIerSv1GetTPAttributeProfile,
+	if err := tpAlsPrfRPC.Call(context.Background(), utils.APIerSv1GetTPAttributeProfile,
 		&utils.TPTntID{TPid: "TP1", Tenant: "cgrates.org", ID: "Attr1"}, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
@@ -142,7 +143,7 @@ func testTPAlsPrfSetTPAlsPrf(t *testing.T) {
 	}
 	sort.Strings(tpAlsPrf.FilterIDs)
 	var result string
-	if err := tpAlsPrfRPC.Call(utils.APIerSv1SetTPAttributeProfile, tpAlsPrf, &result); err != nil {
+	if err := tpAlsPrfRPC.Call(context.Background(), utils.APIerSv1SetTPAttributeProfile, tpAlsPrf, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -151,7 +152,7 @@ func testTPAlsPrfSetTPAlsPrf(t *testing.T) {
 
 func testTPAlsPrfGetTPAlsPrfAfterSet(t *testing.T) {
 	var reply *utils.TPAttributeProfile
-	if err := tpAlsPrfRPC.Call(utils.APIerSv1GetTPAttributeProfile,
+	if err := tpAlsPrfRPC.Call(context.Background(), utils.APIerSv1GetTPAttributeProfile,
 		&utils.TPTntID{TPid: "TP1", Tenant: "cgrates.org", ID: "Attr1"}, &reply); err != nil {
 		t.Fatal(err)
 	}
@@ -164,7 +165,7 @@ func testTPAlsPrfGetTPAlsPrfAfterSet(t *testing.T) {
 func testTPAlsPrfGetTPAlsPrfIDs(t *testing.T) {
 	var result []string
 	expectedTPID := []string{"cgrates.org:Attr1"}
-	if err := tpAlsPrfRPC.Call(utils.APIerSv1GetTPAttributeProfileIds,
+	if err := tpAlsPrfRPC.Call(context.Background(), utils.APIerSv1GetTPAttributeProfileIds,
 		&AttrGetTPAttributeProfileIds{TPid: "TP1"}, &result); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expectedTPID, result) {
@@ -186,7 +187,7 @@ func testTPAlsPrfUpdateTPAlsPrf(t *testing.T) {
 		},
 	}
 	var result string
-	if err := tpAlsPrfRPC.Call(utils.APIerSv1SetTPAttributeProfile, tpAlsPrf, &result); err != nil {
+	if err := tpAlsPrfRPC.Call(context.Background(), utils.APIerSv1SetTPAttributeProfile, tpAlsPrf, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -223,7 +224,7 @@ func testTPAlsPrfGetTPAlsPrfAfterUpdate(t *testing.T) {
 	sort.Slice(revTPAlsPrf.Attributes, func(i, j int) bool {
 		return strings.Compare(revTPAlsPrf.Attributes[i].Path, revTPAlsPrf.Attributes[j].Path) == -1
 	})
-	if err := tpAlsPrfRPC.Call(utils.APIerSv1GetTPAttributeProfile,
+	if err := tpAlsPrfRPC.Call(context.Background(), utils.APIerSv1GetTPAttributeProfile,
 		&utils.TPTntID{TPid: "TP1", Tenant: "cgrates.org", ID: "Attr1"}, &reply); err != nil {
 		t.Fatal(err)
 	}
@@ -238,7 +239,7 @@ func testTPAlsPrfGetTPAlsPrfAfterUpdate(t *testing.T) {
 
 func testTPAlsPrfRemTPAlsPrf(t *testing.T) {
 	var resp string
-	if err := tpAlsPrfRPC.Call(utils.APIerSv1RemoveTPAttributeProfile,
+	if err := tpAlsPrfRPC.Call(context.Background(), utils.APIerSv1RemoveTPAttributeProfile,
 		&utils.TPTntID{TPid: "TP1", Tenant: "cgrates.org", ID: "Attr1"},
 		&resp); err != nil {
 		t.Error(err)
@@ -249,7 +250,7 @@ func testTPAlsPrfRemTPAlsPrf(t *testing.T) {
 
 func testTPAlsPrfGetTPAlsPrfAfterRemove(t *testing.T) {
 	var reply *utils.TPAttributeProfile
-	if err := tpAlsPrfRPC.Call(utils.APIerSv1GetTPAttributeProfile,
+	if err := tpAlsPrfRPC.Call(context.Background(), utils.APIerSv1GetTPAttributeProfile,
 		&utils.TPTntID{TPid: "TP1", Tenant: "cgrates.org", ID: "Attr1"},
 		&reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)

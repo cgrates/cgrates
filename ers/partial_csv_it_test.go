@@ -22,13 +22,15 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package ers
 
 import (
-	"net/rpc"
 	"os"
 	"path"
 	"strings"
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc/context"
+
+	"github.com/cgrates/birpc"
 	v1 "github.com/cgrates/cgrates/apier/v1"
 
 	"github.com/cgrates/cgrates/config"
@@ -40,7 +42,7 @@ var (
 	partCfgPath string
 	partCfgDIR  string
 	partCfg     *config.CGRConfig
-	partRPC     *rpc.Client
+	partRPC     *birpc.Client
 
 	partTests = []func(t *testing.T){
 		testCreateDirs,
@@ -136,7 +138,7 @@ func testPartITLoadTPFromFolder(t *testing.T) {
 		},
 	}
 	var result string
-	if err := partRPC.Call(utils.APIerSv1SetChargerProfile, chargerProfile, &result); err != nil {
+	if err := partRPC.Call(context.Background(), utils.APIerSv1SetChargerProfile, chargerProfile, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -201,17 +203,17 @@ func testPartITVerifyFiles(t *testing.T) {
 
 func testPartITAnalyseCDRs(t *testing.T) {
 	var reply []*engine.ExternalCDR
-	if err := partRPC.Call(utils.APIerSv2GetCDRs, &utils.RPCCDRsFilter{}, &reply); err != nil {
+	if err := partRPC.Call(context.Background(), utils.APIerSv2GetCDRs, &utils.RPCCDRsFilter{}, &reply); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(reply) != 2 {
 		t.Error("Unexpected number of CDRs returned: ", len(reply))
 	}
-	if err := partRPC.Call(utils.APIerSv2GetCDRs, &utils.RPCCDRsFilter{DestinationPrefixes: []string{"+4986517174963"}}, &reply); err != nil {
+	if err := partRPC.Call(context.Background(), utils.APIerSv2GetCDRs, &utils.RPCCDRsFilter{DestinationPrefixes: []string{"+4986517174963"}}, &reply); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(reply) != 1 {
 		t.Error("Unexpected number of CDRs returned: ", len(reply))
 	}
-	if err := partRPC.Call(utils.APIerSv2GetCDRs, &utils.RPCCDRsFilter{DestinationPrefixes: []string{"+4986517174960"}}, &reply); err != nil {
+	if err := partRPC.Call(context.Background(), utils.APIerSv2GetCDRs, &utils.RPCCDRsFilter{DestinationPrefixes: []string{"+4986517174960"}}, &reply); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(reply) != 1 {
 		t.Error("Unexpected number of CDRs returned: ", len(reply))

@@ -30,7 +30,6 @@ import (
 	"net"
 	"net/http"
 	"net/http/httptest"
-	"net/rpc/jsonrpc"
 	"os"
 	"path"
 	"reflect"
@@ -39,7 +38,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/cenkalti/rpc2"
+	"github.com/cgrates/birpc"
+	"github.com/cgrates/birpc/context"
+	"github.com/cgrates/birpc/jsonrpc"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/sessions"
@@ -65,7 +66,6 @@ var (
 		testServeBiJSONEmptyBiRPCServer,
 		testServeBiJSONInvalidPort,
 		testServeBiGoB,
-		testServeBiGoBEmptyBiRPCServer,
 		testServeBiGoBInvalidPort,
 		testServeGOBTLS,
 		testServeJSONTls,
@@ -76,7 +76,6 @@ var (
 		testServeHTTPTLSError,
 		testServeHTTPTLSHttpNotEnabled,
 		testHandleRequest,
-		testBiRPCRegisterName,
 		testAcceptBiRPC,
 		testAcceptBiRPCError,
 		testRpcRegisterActions,
@@ -94,11 +93,7 @@ func TestServerIT(t *testing.T) {
 
 type mockRegister string
 
-func (x *mockRegister) ForTest(method *rpc2.Client, args *any, reply *any) error {
-	return nil
-}
-
-func (robj *mockRegister) Ping(in string, out *string) error {
+func (robj *mockRegister) Ping(ctx *context.Context, in string, out *string) error {
 	*out = utils.Pong
 	return nil
 }
@@ -324,7 +319,7 @@ func testServeBiJSON(t *testing.T) {
 	caps := engine.NewCaps(100, utils.MetaBusy)
 	server = NewServer(caps)
 	server.RpcRegister(new(mockRegister))
-	server.birpcSrv = rpc2.NewServer()
+	server.birpcSrv = birpc.NewBirpcServer()
 
 	data := engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
@@ -365,7 +360,7 @@ func testServeBiJSONInvalidPort(t *testing.T) {
 	caps := engine.NewCaps(100, utils.MetaBusy)
 	server = NewServer(caps)
 	server.RpcRegister(new(mockRegister))
-	server.birpcSrv = rpc2.NewServer()
+	server.birpcSrv = birpc.NewBirpcServer()
 
 	data := engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
@@ -386,7 +381,7 @@ func testServeBiGoB(t *testing.T) {
 	caps := engine.NewCaps(100, utils.MetaBusy)
 	server = NewServer(caps)
 	server.RpcRegister(new(mockRegister))
-	server.birpcSrv = rpc2.NewServer()
+	server.birpcSrv = birpc.NewBirpcServer()
 
 	data := engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
@@ -401,33 +396,12 @@ func testServeBiGoB(t *testing.T) {
 	runtime.Gosched()
 }
 
-func testServeBiGoBEmptyBiRPCServer(t *testing.T) {
-	cfg := config.NewDefaultCGRConfig()
-	caps := engine.NewCaps(100, utils.MetaBusy)
-	server = NewServer(caps)
-	server.RpcRegister(new(mockRegister))
-
-	data := engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
-	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
-
-	ss := sessions.NewSessionS(cfg, dm, nil)
-
-	expectedErr := "BiRPCServer should not be nil"
-	go func() {
-		if err := server.ServeBiRPC("", ":93430", ss.OnBiJSONConnect, ss.OnBiJSONDisconnect); err == nil || err.Error() != "BiRPCServer should not be nil" {
-			t.Errorf("Expected %+v, received %+v", expectedErr, err)
-		}
-	}()
-
-	runtime.Gosched()
-}
-
 func testServeBiGoBInvalidPort(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	caps := engine.NewCaps(100, utils.MetaBusy)
 	server = NewServer(caps)
 	server.RpcRegister(new(mockRegister))
-	server.birpcSrv = rpc2.NewServer()
+	server.birpcSrv = birpc.NewBirpcServer()
 
 	data := engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
@@ -731,34 +705,23 @@ func testServeHTTPTLSHttpNotEnabled(t *testing.T) {
 	shdChan.CloseOnce()
 }
 
-func testBiRPCRegisterName(t *testing.T) {
-	caps := engine.NewCaps(0, utils.MetaBusy)
-	server := NewServer(caps)
-
-	handler := func(method *rpc2.Client, args *any, reply *any) error {
-		return nil
-	}
-	go server.BiRPCRegisterName(utils.APIerSv1Ping, handler)
-	runtime.Gosched()
-
-	server.StopBiRPC()
-}
-
 func testAcceptBiRPC(t *testing.T) {
 	caps := engine.NewCaps(0, utils.MetaBusy)
 	server := NewServer(caps)
 	server.RpcRegister(new(mockRegister))
-	server.birpcSrv = rpc2.NewServer()
+	server.birpcSrv = birpc.NewBirpcServer()
 
 	p1, p2 := net.Pipe()
 	l := &mockListener{
 		p1: p1,
 	}
-	go server.acceptBiRPC(server.birpcSrv, l, utils.JSONCaps, newCapsBiRPCJSONCodec)
+	go acceptBiRPC(server.birpcSrv, l, utils.JSONCaps, func(conn conn) birpc.BirpcCodec {
+		return newCapsBiRPCJSONCodec(conn, server.caps, server.anz)
+	}, server.stopBiRPCServer)
 	rpc := jsonrpc.NewClient(p2)
 	var reply string
-	expected := "rpc2: can't find method AttributeSv1.Ping"
-	if err := rpc.Call(utils.AttributeSv1Ping, utils.CGREvent{}, &reply); err == nil || err.Error() != expected {
+	expected := "birpc: can't find method AttributeSv1.Ping"
+	if err := rpc.Call(context.Background(), utils.AttributeSv1Ping, utils.CGREvent{}, &reply); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 
@@ -778,11 +741,13 @@ func testAcceptBiRPCError(t *testing.T) {
 	caps := engine.NewCaps(10, utils.MetaBusy)
 	server := NewServer(caps)
 	server.RpcRegister(new(mockRegister))
-	server.birpcSrv = rpc2.NewServer()
+	server.birpcSrv = birpc.NewBirpcServer()
 
 	//it will contain "use of closed network connection"
 	l := new(mockListenError)
-	go server.acceptBiRPC(server.birpcSrv, l, utils.JSONCaps, newCapsBiRPCJSONCodec)
+	go acceptBiRPC(server.birpcSrv, l, utils.JSONCaps, func(conn conn) birpc.BirpcCodec {
+		return newCapsBiRPCJSONCodec(conn, server.caps, server.anz)
+	}, server.stopBiRPCServer)
 	runtime.Gosched()
 }
 
@@ -798,7 +763,7 @@ func testRpcRegisterActions(t *testing.T) {
 	rmtIP, _ := utils.GetRemoteIP(r)
 	rmtAddr, _ := net.ResolveIPAddr(utils.EmptyString, rmtIP)
 
-	rpcReq := newRPCRequest(r.Body, rmtAddr, server.caps, nil)
+	rpcReq := newRPCRequest(server.rpcSrv, r.Body, rmtAddr, server.caps, nil)
 	rpcReq.remoteAddr = utils.NewNetAddr("network", "127.0.0.1:2012")
 
 	if n, err := rpcReq.Write([]byte(`TEST`)); err != nil {
@@ -840,7 +805,7 @@ func testWebSocket(t *testing.T) {
 
 	rpc := jsonrpc.NewClient(conn1)
 	var reply string
-	err = rpc.Call("mockRegister.Ping", "", &reply)
+	err = rpc.Call(context.Background(), "mockRegister.Ping", "", &reply)
 	if err != nil {
 		t.Fatal(err)
 	}

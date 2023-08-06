@@ -27,6 +27,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc"
+	"github.com/cgrates/birpc/context"
 	v1 "github.com/cgrates/cgrates/apier/v1"
 
 	"github.com/cgrates/cgrates/config"
@@ -34,7 +36,6 @@ import (
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/servmanager"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/cgrates/rpcclient"
 )
 
 func TestApiersReload(t *testing.T) {
@@ -60,16 +61,16 @@ func TestApiersReload(t *testing.T) {
 	db := NewDataDBService(cfg, nil, srvDep)
 	cfg.StorDbCfg().Type = utils.MetaInternal
 	stordb := NewStorDBService(cfg, srvDep)
-	anz := NewAnalyzerService(cfg, server, filterSChan, shdChan, make(chan rpcclient.ClientConnector, 1), srvDep)
-	schS := NewSchedulerService(cfg, db, chS, filterSChan, server, make(chan rpcclient.ClientConnector, 1), nil, anz, srvDep)
-	tS := NewThresholdService(cfg, db, chS, filterSChan, server, make(chan rpcclient.ClientConnector, 1), anz, srvDep)
-	rspd := NewResponderService(cfg, server, make(chan rpcclient.ClientConnector, 1), shdChan, anz, srvDep, filterSChan)
+	anz := NewAnalyzerService(cfg, server, filterSChan, shdChan, make(chan birpc.ClientConnector, 1), srvDep)
+	schS := NewSchedulerService(cfg, db, chS, filterSChan, server, make(chan birpc.ClientConnector, 1), nil, anz, srvDep)
+	tS := NewThresholdService(cfg, db, chS, filterSChan, server, make(chan birpc.ClientConnector, 1), anz, srvDep)
+	rspd := NewResponderService(cfg, server, make(chan birpc.ClientConnector, 1), shdChan, anz, srvDep, filterSChan)
 	apiSv1 := NewAPIerSv1Service(cfg, db, stordb, filterSChan, server, schS, rspd,
-		make(chan rpcclient.ClientConnector, 1), nil, anz, srvDep)
+		make(chan birpc.ClientConnector, 1), nil, anz, srvDep)
 
-	apiSv2 := NewAPIerSv2Service(apiSv1, cfg, server, make(chan rpcclient.ClientConnector, 1), anz, srvDep)
+	apiSv2 := NewAPIerSv2Service(apiSv1, cfg, server, make(chan birpc.ClientConnector, 1), anz, srvDep)
 	srvMngr.AddServices(apiSv1, apiSv2, schS, tS,
-		NewLoaderService(cfg, db, filterSChan, server, make(chan rpcclient.ClientConnector, 1), nil, anz, srvDep), db, stordb)
+		NewLoaderService(cfg, db, filterSChan, server, make(chan birpc.ClientConnector, 1), nil, anz, srvDep), db, stordb)
 	if err := srvMngr.StartServices(); err != nil {
 		t.Error(err)
 	}
@@ -86,10 +87,11 @@ func TestApiersReload(t *testing.T) {
 		t.Errorf("Expected service to be down")
 	}
 	var reply string
-	if err := cfg.V1ReloadConfig(&config.ReloadArgs{
-		Path:    path.Join("/usr", "share", "cgrates", "conf", "samples", "tutmongo"),
-		Section: config.ApierS,
-	}, &reply); err != nil {
+	if err := cfg.V1ReloadConfig(context.Background(),
+		&config.ReloadArgs{
+			Path:    path.Join("/usr", "share", "cgrates", "conf", "samples", "tutmongo"),
+			Section: config.ApierS,
+		}, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf("Expecting OK ,received %s", reply)

@@ -23,11 +23,9 @@ package general_tests
 
 import (
 	"bytes"
-	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"net/rpc"
 	"net/url"
 	"os"
 	"os/exec"
@@ -37,6 +35,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc"
+	"github.com/cgrates/birpc/context"
 	v1 "github.com/cgrates/cgrates/apier/v1"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/ees"
@@ -50,7 +50,7 @@ var (
 	cdrsExpCfgPath string
 	cdrsExpCfgDir  string
 	cdrsExpCfg     *config.CGRConfig
-	cdrsExpRPC     *rpc.Client
+	cdrsExpRPC     *birpc.Client
 
 	cdrsExpHTTPEv     = make(chan map[string]any, 1)
 	cdrsExpHTTPServer *http.Server
@@ -233,7 +233,7 @@ func testCDRsExpLoadAddCharger(t *testing.T) {
 		},
 	}
 	var result string
-	if err := cdrsExpRPC.Call(utils.APIerSv1SetChargerProfile, chargerProfile, &result); err != nil {
+	if err := cdrsExpRPC.Call(context.Background(), utils.APIerSv1SetChargerProfile, chargerProfile, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -246,7 +246,7 @@ func testCDRsExpExportEvent(t *testing.T) {
 		t.Error(err)
 	}
 	var reply string
-	if err := cdrsExpRPC.Call(utils.CDRsV1ProcessEvent,
+	if err := cdrsExpRPC.Call(context.Background(), utils.CDRsV1ProcessEvent,
 		&engine.ArgV1ProcessEvent{
 			Flags:    []string{"*export:true", utils.MetaRALs},
 			CGREvent: *cdrsExpEv,

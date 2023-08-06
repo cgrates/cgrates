@@ -22,11 +22,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package v1
 
 import (
-	"net/rpc"
 	"path"
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc"
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -35,7 +36,7 @@ import (
 var (
 	costCfgPath   string
 	costCfg       *config.CGRConfig
-	costRPC       *rpc.Client
+	costRPC       *birpc.Client
 	costConfigDIR string //run tests for specific configuration
 
 	sTestsCost = []func(t *testing.T){
@@ -110,7 +111,7 @@ func testCostRPCConn(t *testing.T) {
 func testCostLoadFromFolder(t *testing.T) {
 	var reply string
 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "tutorial")}
-	if err := costRPC.Call(utils.APIerSv1LoadTariffPlanFromFolder, attrs, &reply); err != nil {
+	if err := costRPC.Call(context.Background(), utils.APIerSv1LoadTariffPlanFromFolder, attrs, &reply); err != nil {
 		t.Error(err)
 	}
 	time.Sleep(100 * time.Millisecond)
@@ -120,7 +121,7 @@ func testCostGetCost(t *testing.T) {
 	attrs := AttrGetCost{Category: "call", Tenant: "cgrates.org",
 		Subject: "1001", AnswerTime: "*now", Destination: "1002", Usage: "120000000000"} //120s ( 2m)
 	var rply *engine.EventCost
-	if err := costRPC.Call(utils.APIerSv1GetCost, &attrs, &rply); err != nil {
+	if err := costRPC.Call(context.Background(), utils.APIerSv1GetCost, &attrs, &rply); err != nil {
 		t.Error("Unexpected nil error received: ", err.Error())
 	} else if *rply.Cost != 0.700200 { // expect to get 0.7 (0.4 connect fee 0.2 first minute 0.1 each minute after)
 		t.Errorf("Unexpected cost received: %f", *rply.Cost)

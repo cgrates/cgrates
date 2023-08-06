@@ -26,6 +26,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -242,7 +243,7 @@ func (alS *AttributeService) processEvent(tnt string, args *utils.CGREvent, evNm
 }
 
 // V1GetAttributeForEvent returns the AttributeProfile that matches the event
-func (alS *AttributeService) V1GetAttributeForEvent(args *utils.CGREvent,
+func (alS *AttributeService) V1GetAttributeForEvent(ctx *context.Context, args *utils.CGREvent,
 	attrPrfl *AttributeProfile) (err error) {
 	if args == nil {
 		return utils.NewErrMandatoryIeMissing(utils.CGREventString)
@@ -282,7 +283,7 @@ func (alS *AttributeService) V1GetAttributeForEvent(args *utils.CGREvent,
 }
 
 // V1ProcessEvent proccess the event and returns the result
-func (alS *AttributeService) V1ProcessEvent(args *utils.CGREvent,
+func (alS *AttributeService) V1ProcessEvent(ctx *context.Context, args *utils.CGREvent,
 	reply *AttrSProcessEventReply) (err error) {
 	if args == nil {
 		return utils.NewErrMandatoryIeMissing(utils.CGREventString)

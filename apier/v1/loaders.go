@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package v1
 
 import (
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/loaders"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -32,23 +33,23 @@ type LoaderSv1 struct {
 	ldrS *loaders.LoaderService
 }
 
-// Call implements rpcclient.ClientConnector interface for internal RPC
-func (ldrSv1 *LoaderSv1) Call(serviceMethod string,
+// Call implements birpc.ClientConnector interface for internal RPC
+func (ldrSv1 *LoaderSv1) Call(ctx *context.Context, serviceMethod string,
 	args any, reply any) error {
 	return utils.APIerRPCCall(ldrSv1, serviceMethod, args, reply)
 }
 
-func (ldrSv1 *LoaderSv1) Load(args *loaders.ArgsProcessFolder,
+func (ldrSv1 *LoaderSv1) Load(ctx *context.Context, args *loaders.ArgsProcessFolder,
 	rply *string) error {
-	return ldrSv1.ldrS.V1Load(args, rply)
+	return ldrSv1.ldrS.V1Load(ctx, args, rply)
 }
 
-func (ldrSv1 *LoaderSv1) Remove(args *loaders.ArgsProcessFolder,
+func (ldrSv1 *LoaderSv1) Remove(ctx *context.Context, args *loaders.ArgsProcessFolder,
 	rply *string) error {
-	return ldrSv1.ldrS.V1Remove(args, rply)
+	return ldrSv1.ldrS.V1Remove(ctx, args, rply)
 }
 
-func (rsv1 *LoaderSv1) Ping(ign *utils.CGREvent, reply *string) error {
+func (rsv1 *LoaderSv1) Ping(ctx *context.Context, ign *utils.CGREvent, reply *string) error {
 	*reply = utils.Pong
 	return nil
 }

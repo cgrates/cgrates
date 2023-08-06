@@ -26,12 +26,13 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc"
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/cores"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/servmanager"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/cgrates/rpcclient"
 )
 
 func TestCdrsReload(t *testing.T) {
@@ -66,19 +67,19 @@ func TestCdrsReload(t *testing.T) {
 	db := NewDataDBService(cfg, nil, srvDep)
 	cfg.StorDbCfg().Type = utils.MetaInternal
 	stordb := NewStorDBService(cfg, srvDep)
-	anz := NewAnalyzerService(cfg, server, filterSChan, shdChan, make(chan rpcclient.ClientConnector, 1), srvDep)
-	chrS := NewChargerService(cfg, db, chS, filterSChan, server, make(chan rpcclient.ClientConnector, 1), nil, anz, srvDep)
-	schS := NewSchedulerService(cfg, db, chS, filterSChan, server, make(chan rpcclient.ClientConnector, 1), nil, anz, srvDep)
+	anz := NewAnalyzerService(cfg, server, filterSChan, shdChan, make(chan birpc.ClientConnector, 1), srvDep)
+	chrS := NewChargerService(cfg, db, chS, filterSChan, server, make(chan birpc.ClientConnector, 1), nil, anz, srvDep)
+	schS := NewSchedulerService(cfg, db, chS, filterSChan, server, make(chan birpc.ClientConnector, 1), nil, anz, srvDep)
 	ralS := NewRalService(cfg, chS, server,
-		make(chan rpcclient.ClientConnector, 1),
-		make(chan rpcclient.ClientConnector, 1),
+		make(chan birpc.ClientConnector, 1),
+		make(chan birpc.ClientConnector, 1),
 		shdChan, nil, anz, srvDep, filterSChan)
-	cdrsRPC := make(chan rpcclient.ClientConnector, 1)
+	cdrsRPC := make(chan birpc.ClientConnector, 1)
 	cdrS := NewCDRServer(cfg, db, stordb, filterSChan, server,
 		cdrsRPC, nil, anz, srvDep)
 	srvMngr.AddServices(cdrS, ralS, schS, chrS,
 		NewLoaderService(cfg, db, filterSChan, server,
-			make(chan rpcclient.ClientConnector, 1), nil, anz, srvDep), db, stordb)
+			make(chan birpc.ClientConnector, 1), nil, anz, srvDep), db, stordb)
 	if err := srvMngr.StartServices(); err != nil {
 		t.Error(err)
 	}
@@ -94,10 +95,11 @@ func TestCdrsReload(t *testing.T) {
 
 	cfg.RalsCfg().Enabled = true
 	var reply string
-	if err := cfg.V1ReloadConfig(&config.ReloadArgs{
-		Path:    path.Join("/usr", "share", "cgrates", "conf", "samples", "tutmongo"),
-		Section: config.CDRS_JSN,
-	}, &reply); err != nil {
+	if err := cfg.V1ReloadConfig(context.Background(),
+		&config.ReloadArgs{
+			Path:    path.Join("/usr", "share", "cgrates", "conf", "samples", "tutmongo"),
+			Section: config.CDRS_JSN,
+		}, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf("Expecting OK ,received %s", reply)

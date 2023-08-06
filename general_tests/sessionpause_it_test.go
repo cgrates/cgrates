@@ -23,12 +23,13 @@ package general_tests
 
 import (
 	"encoding/json"
-	"net/rpc"
 	"path"
 	"reflect"
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc"
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/sessions"
@@ -39,7 +40,7 @@ var (
 	sesPauseCfgDir  string
 	sesPauseCfgPath string
 	sesPauseCfg     *config.CGRConfig
-	sesPauseRPC     *rpc.Client
+	sesPauseRPC     *birpc.Client
 
 	sesPauseTests = []func(t *testing.T){
 		testSesPauseItLoadConfig,
@@ -112,7 +113,7 @@ func testSesPauseItRPCConn(t *testing.T) {
 func testSesPauseItLoadFromFolder(t *testing.T) {
 	var reply string
 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "tutorial")}
-	if err := sesPauseRPC.Call(utils.APIerSv1LoadTariffPlanFromFolder, attrs, &reply); err != nil {
+	if err := sesPauseRPC.Call(context.Background(), utils.APIerSv1LoadTariffPlanFromFolder, attrs, &reply); err != nil {
 		t.Error(err)
 	}
 	time.Sleep(100 * time.Millisecond)
@@ -143,7 +144,7 @@ func testSesPauseItInitSession(t *testing.T, cgrID string, chargeable bool, usag
 		},
 	}
 	var rply1 sessions.V1InitSessionReply
-	if err := sesPauseRPC.Call(utils.SessionSv1InitiateSession,
+	if err := sesPauseRPC.Call(context.Background(), utils.SessionSv1InitiateSession,
 		args1, &rply1); err != nil {
 		t.Error(err)
 		return
@@ -177,7 +178,7 @@ func testSesPauseItUpdateSession(t *testing.T, cgrID string, chargeable bool, us
 	}
 
 	var updtRpl sessions.V1UpdateSessionReply
-	if err := sesPauseRPC.Call(utils.SessionSv1UpdateSession, updtArgs, &updtRpl); err != nil {
+	if err := sesPauseRPC.Call(context.Background(), utils.SessionSv1UpdateSession, updtArgs, &updtRpl); err != nil {
 		t.Error(err)
 	}
 	if updtRpl.MaxUsage == nil || *updtRpl.MaxUsage != usage {
@@ -209,14 +210,14 @@ func testSesPauseItTerminateSession(t *testing.T, cgrID string, chargeable bool,
 		},
 	}
 	var rply string
-	if err := sesPauseRPC.Call(utils.SessionSv1TerminateSession,
+	if err := sesPauseRPC.Call(context.Background(), utils.SessionSv1TerminateSession,
 		args, &rply); err != nil {
 		t.Error(err)
 	}
 	if rply != utils.OK {
 		t.Errorf("Unexpected reply: %s", rply)
 	}
-	if err := sesPauseRPC.Call(utils.SessionSv1ProcessCDR, &utils.CGREvent{
+	if err := sesPauseRPC.Call(context.Background(), utils.SessionSv1ProcessCDR, &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "testSesPauseItProccesCDR",
 		Event: map[string]any{
@@ -247,7 +248,7 @@ func testSesPauseItAllPause(t *testing.T) {
 	time.Sleep(20 * time.Millisecond)
 	var cdrs []*engine.ExternalCDR
 	req := utils.RPCCDRsFilter{RequestTypes: []string{utils.MetaPrepaid}, CGRIDs: []string{cgrID}}
-	if err := sesPauseRPC.Call(utils.APIerSv2GetCDRs, &req, &cdrs); err != nil {
+	if err := sesPauseRPC.Call(context.Background(), utils.APIerSv2GetCDRs, &req, &cdrs); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	}
 
@@ -383,7 +384,7 @@ func testSesPauseItInitPause(t *testing.T) {
 	time.Sleep(20 * time.Millisecond)
 	var cdrs []*engine.ExternalCDR
 	req := utils.RPCCDRsFilter{RequestTypes: []string{utils.MetaPrepaid}, CGRIDs: []string{cgrID}}
-	if err := sesPauseRPC.Call(utils.APIerSv2GetCDRs, &req, &cdrs); err != nil {
+	if err := sesPauseRPC.Call(context.Background(), utils.APIerSv2GetCDRs, &req, &cdrs); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	}
 
@@ -569,7 +570,7 @@ func testSesPauseItInitUpdatePause(t *testing.T) {
 	time.Sleep(20 * time.Millisecond)
 	var cdrs []*engine.ExternalCDR
 	req := utils.RPCCDRsFilter{RequestTypes: []string{utils.MetaPrepaid}, CGRIDs: []string{cgrID}}
-	if err := sesPauseRPC.Call(utils.APIerSv2GetCDRs, &req, &cdrs); err != nil {
+	if err := sesPauseRPC.Call(context.Background(), utils.APIerSv2GetCDRs, &req, &cdrs); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	}
 
@@ -765,7 +766,7 @@ func testSesPauseItUpdatePause(t *testing.T) {
 	time.Sleep(20 * time.Millisecond)
 	var cdrs []*engine.ExternalCDR
 	req := utils.RPCCDRsFilter{RequestTypes: []string{utils.MetaPrepaid}, CGRIDs: []string{cgrID}}
-	if err := sesPauseRPC.Call(utils.APIerSv2GetCDRs, &req, &cdrs); err != nil {
+	if err := sesPauseRPC.Call(context.Background(), utils.APIerSv2GetCDRs, &req, &cdrs); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	}
 

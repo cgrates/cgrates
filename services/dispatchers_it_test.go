@@ -26,8 +26,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/cgrates/rpcclient"
-
+	"github.com/cgrates/birpc"
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/cores"
 	"github.com/cgrates/cgrates/engine"
@@ -55,14 +55,14 @@ func TestDispatcherSReload(t *testing.T) {
 	srvMngr := servmanager.NewServiceManager(cfg, shdChan, shdWg, nil)
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
 	db := NewDataDBService(cfg, nil, srvDep)
-	anz := NewAnalyzerService(cfg, server, filterSChan, shdChan, make(chan rpcclient.ClientConnector, 1), srvDep)
-	attrS := NewAttributeService(cfg, db, chS, filterSChan, server, make(chan rpcclient.ClientConnector, 1), anz, srvDep)
+	anz := NewAnalyzerService(cfg, server, filterSChan, shdChan, make(chan birpc.ClientConnector, 1), srvDep)
+	attrS := NewAttributeService(cfg, db, chS, filterSChan, server, make(chan birpc.ClientConnector, 1), anz, srvDep)
 	srv := NewDispatcherService(cfg, db, chS, filterSChan, server,
-		make(chan rpcclient.ClientConnector, 1), nil, anz, srvDep)
+		make(chan birpc.ClientConnector, 1), nil, anz, srvDep)
 	engine.NewConnManager(cfg, nil)
 	srvMngr.AddServices(attrS, srv,
 		NewLoaderService(cfg, db, filterSChan, server,
-			make(chan rpcclient.ClientConnector, 1), nil, anz, srvDep), db)
+			make(chan birpc.ClientConnector, 1), nil, anz, srvDep), db)
 	if err := srvMngr.StartServices(); err != nil {
 		t.Error(err)
 	}
@@ -73,11 +73,12 @@ func TestDispatcherSReload(t *testing.T) {
 		t.Errorf("Expected service to be down")
 	}
 	var reply string
-	if err := cfg.V1ReloadConfig(&config.ReloadArgs{
-		Path: path.Join("/usr", "share", "cgrates", "conf", "samples", "dispatchers", "dispatchers_mysql"),
+	if err := cfg.V1ReloadConfig(context.Background(),
+		&config.ReloadArgs{
+			Path: path.Join("/usr", "share", "cgrates", "conf", "samples", "dispatchers", "dispatchers_mysql"),
 
-		Section: config.DispatcherSJson,
-	}, &reply); err != nil {
+			Section: config.DispatcherSJson,
+		}, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf("Expecting OK ,received %s", reply)

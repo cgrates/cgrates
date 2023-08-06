@@ -23,12 +23,13 @@ package general_tests
 
 import (
 	"fmt"
-	"net/rpc"
 	"os/exec"
 	"path"
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc"
+	"github.com/cgrates/birpc/context"
 	v1 "github.com/cgrates/cgrates/apier/v1"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
@@ -40,7 +41,7 @@ var (
 	sesPCfgDir  string
 	sesPCfgPath string
 	sesPCfg     *config.CGRConfig
-	sesPRPC     *rpc.Client
+	sesPRPC     *birpc.Client
 
 	sesPTests = []func(t *testing.T){
 		testSesPItLoadConfig,
@@ -130,7 +131,7 @@ func getAccounts(ids []string) (accounts *[]any, err error) {
 		Tenant:     "cgrates.org",
 		AccountIDs: ids,
 	}
-	err = sesPRPC.Call("APIerSv1.GetAccounts", attr, &reply)
+	err = sesPRPC.Call(context.Background(), "APIerSv1.GetAccounts", attr, &reply)
 	if err != nil {
 		return
 	}
@@ -151,7 +152,7 @@ func setAccBalance(acc string) (err error) {
 	}
 	var reply string
 
-	err = sesPRPC.Call(utils.APIerSv1SetBalance, args, &reply)
+	err = sesPRPC.Call(context.Background(), utils.APIerSv1SetBalance, args, &reply)
 	return err
 }
 
@@ -193,7 +194,7 @@ func initSes(n int) (err error) {
 	for i := 0; i < n; i++ {
 		initArgs.CGREvent.Event[utils.AccountField] = accIDs[i]
 		initArgs.CGREvent.Event[utils.OriginID] = utils.UUIDSha1Prefix()
-		if err = sesPRPC.Call(utils.SessionSv1InitiateSession,
+		if err = sesPRPC.Call(context.Background(), utils.SessionSv1InitiateSession,
 			initArgs, &initRpl); err != nil {
 			return
 		}
@@ -214,7 +215,7 @@ func testSesPItBenchmark(t *testing.T) {
 		},
 		APIOpts: map[string]any{},
 	}
-	if err := sesPRPC.Call(utils.APIerSv1SetChargerProfile, args, &reply); err != nil {
+	if err := sesPRPC.Call(context.Background(), utils.APIerSv1SetChargerProfile, args, &reply); err != nil {
 		t.Error(err)
 	} else if reply != "OK" {
 		t.Error("Expected OK")
@@ -230,7 +231,7 @@ func testSesPItBenchmark(t *testing.T) {
 		APIOpts: map[string]any{},
 	}
 
-	if err := sesPRPC.Call(utils.APIerSv1SetChargerProfile, args2, &reply); err != nil {
+	if err := sesPRPC.Call(context.Background(), utils.APIerSv1SetChargerProfile, args2, &reply); err != nil {
 		t.Error(err)
 	} else if reply != "OK" {
 		t.Error("Expected OK")
@@ -247,7 +248,7 @@ func testSesPItBenchmark(t *testing.T) {
 	}
 	var statusRpl map[string]any
 
-	if err := sesPRPC.Call(utils.CoreSv1Status, nil, &statusRpl); err != nil {
+	if err := sesPRPC.Call(context.Background(), utils.CoreSv1Status, nil, &statusRpl); err != nil {
 		t.Error(err)
 	}
 	fmt.Println(statusRpl)

@@ -19,12 +19,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package v1
 
 import (
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
 // Retrieves the callCost out of CGR logDb
-func (apierSv1 *APIerSv1) GetEventCost(attrs *utils.AttrGetCallCost, reply *engine.EventCost) error {
+func (apierSv1 *APIerSv1) GetEventCost(ctx *context.Context, attrs *utils.AttrGetCallCost, reply *engine.EventCost) error {
 	if attrs.CgrId == utils.EmptyString {
 		return utils.NewErrMandatoryIeMissing("CgrId")
 	}
@@ -50,7 +51,7 @@ func (apierSv1 *APIerSv1) GetEventCost(attrs *utils.AttrGetCallCost, reply *engi
 }
 
 // Retrieves CDRs based on the filters
-func (apierSv1 *APIerSv1) GetCDRs(attrs *utils.AttrGetCdrs, reply *[]*engine.ExternalCDR) error {
+func (apierSv1 *APIerSv1) GetCDRs(ctx *context.Context, attrs *utils.AttrGetCdrs, reply *[]*engine.ExternalCDR) error {
 	cdrsFltr, err := attrs.AsCDRsFilter(apierSv1.Config.GeneralCfg().DefaultTimezone)
 	if err != nil {
 		return utils.NewErrServerError(err)
@@ -68,7 +69,7 @@ func (apierSv1 *APIerSv1) GetCDRs(attrs *utils.AttrGetCdrs, reply *[]*engine.Ext
 }
 
 // New way of removing CDRs
-func (apierSv1 *APIerSv1) RemoveCDRs(attrs *utils.RPCCDRsFilter, reply *string) error {
+func (apierSv1 *APIerSv1) RemoveCDRs(ctx *context.Context, attrs *utils.RPCCDRsFilter, reply *string) error {
 	cdrsFilter, err := attrs.AsCDRsFilter(apierSv1.Config.GeneralCfg().DefaultTimezone)
 	if err != nil {
 		return utils.NewErrServerError(err)
@@ -90,39 +91,39 @@ type CDRsV1 struct {
 }
 
 // ProcessCDR will process a CDR in CGRateS internal format
-func (cdrSv1 *CDRsV1) ProcessCDR(cdr *engine.CDRWithAPIOpts, reply *string) error {
-	return cdrSv1.CDRs.V1ProcessCDR(cdr, reply)
+func (cdrSv1 *CDRsV1) ProcessCDR(ctx *context.Context, cdr *engine.CDRWithAPIOpts, reply *string) error {
+	return cdrSv1.CDRs.V1ProcessCDR(ctx, cdr, reply)
 }
 
 // ProcessEvent will process an Event based on the flags attached
-func (cdrSv1 *CDRsV1) ProcessEvent(arg *engine.ArgV1ProcessEvent, reply *string) error {
-	return cdrSv1.CDRs.V1ProcessEvent(arg, reply)
+func (cdrSv1 *CDRsV1) ProcessEvent(ctx *context.Context, arg *engine.ArgV1ProcessEvent, reply *string) error {
+	return cdrSv1.CDRs.V1ProcessEvent(ctx, arg, reply)
 }
 
 // ProcessExternalCDR will process a CDR in external format
-func (cdrSv1 *CDRsV1) ProcessExternalCDR(cdr *engine.ExternalCDRWithAPIOpts, reply *string) error {
-	return cdrSv1.CDRs.V1ProcessExternalCDR(cdr, reply)
+func (cdrSv1 *CDRsV1) ProcessExternalCDR(ctx *context.Context, cdr *engine.ExternalCDRWithAPIOpts, reply *string) error {
+	return cdrSv1.CDRs.V1ProcessExternalCDR(ctx, cdr, reply)
 }
 
 // RateCDRs can re-/rate remotely CDRs
-func (cdrSv1 *CDRsV1) RateCDRs(arg *engine.ArgRateCDRs, reply *string) error {
-	return cdrSv1.CDRs.V1RateCDRs(arg, reply)
+func (cdrSv1 *CDRsV1) RateCDRs(ctx *context.Context, arg *engine.ArgRateCDRs, reply *string) error {
+	return cdrSv1.CDRs.V1RateCDRs(ctx, arg, reply)
 }
 
 // StoreSMCost will store
-func (cdrSv1 *CDRsV1) StoreSessionCost(attr *engine.AttrCDRSStoreSMCost, reply *string) error {
-	return cdrSv1.CDRs.V1StoreSessionCost(attr, reply)
+func (cdrSv1 *CDRsV1) StoreSessionCost(ctx *context.Context, attr *engine.AttrCDRSStoreSMCost, reply *string) error {
+	return cdrSv1.CDRs.V1StoreSessionCost(ctx, attr, reply)
 }
 
-func (cdrSv1 *CDRsV1) GetCDRsCount(args *utils.RPCCDRsFilterWithAPIOpts, reply *int64) error {
-	return cdrSv1.CDRs.V1CountCDRs(args, reply)
+func (cdrSv1 *CDRsV1) GetCDRsCount(ctx *context.Context, args *utils.RPCCDRsFilterWithAPIOpts, reply *int64) error {
+	return cdrSv1.CDRs.V1GetCDRsCount(ctx, args, reply)
 }
 
-func (cdrSv1 *CDRsV1) GetCDRs(args *utils.RPCCDRsFilterWithAPIOpts, reply *[]*engine.CDR) error {
-	return cdrSv1.CDRs.V1GetCDRs(*args, reply)
+func (cdrSv1 *CDRsV1) GetCDRs(ctx *context.Context, args *utils.RPCCDRsFilterWithAPIOpts, reply *[]*engine.CDR) error {
+	return cdrSv1.CDRs.V1GetCDRs(ctx, *args, reply)
 }
 
-func (cdrSv1 *CDRsV1) Ping(ign *utils.CGREvent, reply *string) error {
+func (cdrSv1 *CDRsV1) Ping(ctx *context.Context, ign *utils.CGREvent, reply *string) error {
 	*reply = utils.Pong
 	return nil
 }

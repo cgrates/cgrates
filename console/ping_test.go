@@ -43,7 +43,7 @@ func TestCmdPingRoutesLow(t *testing.T) {
 	if !ok {
 		t.Fatal("method not found")
 	}
-	if m.Type.NumIn() != 3 { // ApierSv1 is consider and we expect 3 inputs
+	if m.Type.NumIn() != 4 { // expecting 4 inputs
 		t.Fatalf("invalid number of input parameters ")
 	}
 	// for coverage purpose
@@ -52,7 +52,7 @@ func TestCmdPingRoutesLow(t *testing.T) {
 		t.Errorf("Expected <%T>, Received <%T>", new(StringWrapper), result)
 	}
 	// verify the type of output parameter
-	if ok := m.Type.In(2).AssignableTo(reflect.TypeOf(command.RpcResult())); !ok {
+	if ok := m.Type.In(3).AssignableTo(reflect.TypeOf(command.RpcResult())); !ok {
 		t.Fatalf("cannot assign output parameter")
 	}
 	// for coverage purpose
@@ -77,7 +77,7 @@ func TestCmdPingAttributesLow(t *testing.T) {
 	if !ok {
 		t.Fatal("method not found")
 	}
-	if m.Type.NumIn() != 3 { // ApierSv1 is consider and we expect 3 inputs
+	if m.Type.NumIn() != 4 { // expecting 4 inputs
 		t.Fatalf("invalid number of input parameters ")
 	}
 	// for coverage purpose
@@ -86,7 +86,7 @@ func TestCmdPingAttributesLow(t *testing.T) {
 		t.Errorf("Expected <%T>, Received <%T>", new(StringWrapper), result)
 	}
 	// verify the type of output parameter
-	if ok := m.Type.In(2).AssignableTo(reflect.TypeOf(command.RpcResult())); !ok {
+	if ok := m.Type.In(3).AssignableTo(reflect.TypeOf(command.RpcResult())); !ok {
 		t.Fatalf("cannot assign output parameter")
 	}
 	// for coverage purpose
@@ -112,7 +112,7 @@ func TestCmdPingChargerSLow(t *testing.T) {
 	if !ok {
 		t.Fatal("method not found")
 	}
-	if m.Type.NumIn() != 3 { // ApierSv1 is consider and we expect 3 inputs
+	if m.Type.NumIn() != 4 { // expecting 4 inputs
 		t.Fatalf("invalid number of input parameters ")
 	}
 	// for coverage purpose
@@ -121,7 +121,7 @@ func TestCmdPingChargerSLow(t *testing.T) {
 		t.Errorf("Expected <%T>, Received <%T>", new(StringWrapper), result)
 	}
 	// verify the type of output parameter
-	if ok := m.Type.In(2).AssignableTo(reflect.TypeOf(command.RpcResult())); !ok {
+	if ok := m.Type.In(3).AssignableTo(reflect.TypeOf(command.RpcResult())); !ok {
 		t.Fatalf("cannot assign output parameter")
 	}
 	// for coverage purpose
@@ -147,7 +147,7 @@ func TestCmdPingResourcesLow(t *testing.T) {
 	if !ok {
 		t.Fatal("method not found")
 	}
-	if m.Type.NumIn() != 3 { // ApierSv1 is consider and we expect 3 inputs
+	if m.Type.NumIn() != 4 { // expecting 4 inputs
 		t.Fatalf("invalid number of input parameters ")
 	}
 	// for coverage purpose
@@ -156,7 +156,7 @@ func TestCmdPingResourcesLow(t *testing.T) {
 		t.Errorf("Expected <%T>, Received <%T>", new(StringWrapper), result)
 	}
 	// verify the type of output parameter
-	if ok := m.Type.In(2).AssignableTo(reflect.TypeOf(command.RpcResult())); !ok {
+	if ok := m.Type.In(3).AssignableTo(reflect.TypeOf(command.RpcResult())); !ok {
 		t.Fatalf("cannot assign output parameter")
 	}
 	// for coverage purpose
@@ -182,7 +182,7 @@ func TestCmdPingStatServiceLow(t *testing.T) {
 	if !ok {
 		t.Fatal("method not found")
 	}
-	if m.Type.NumIn() != 3 { // ApierSv1 is consider and we expect 3 inputs
+	if m.Type.NumIn() != 4 { // expecting 4 inputs
 		t.Fatalf("invalid number of input parameters ")
 	}
 	// for coverage purpose
@@ -191,7 +191,7 @@ func TestCmdPingStatServiceLow(t *testing.T) {
 		t.Errorf("Expected <%T>, Received <%T>", new(StringWrapper), result)
 	}
 	// verify the type of output parameter
-	if ok := m.Type.In(2).AssignableTo(reflect.TypeOf(command.RpcResult())); !ok {
+	if ok := m.Type.In(3).AssignableTo(reflect.TypeOf(command.RpcResult())); !ok {
 		t.Fatalf("cannot assign output parameter")
 	}
 	// for coverage purpose
@@ -216,7 +216,7 @@ func TestCmdPingThresholdsLow(t *testing.T) {
 	if !ok {
 		t.Fatal("method not found")
 	}
-	if m.Type.NumIn() != 3 { // ApierSv1 is consider and we expect 3 inputs
+	if m.Type.NumIn() != 4 { // expecting 4 inputs
 		t.Fatalf("invalid number of input parameters ")
 	}
 	// for coverage purpose
@@ -225,7 +225,7 @@ func TestCmdPingThresholdsLow(t *testing.T) {
 		t.Errorf("Expected <%T>, Received <%T>", new(StringWrapper), result)
 	}
 	// verify the type of output parameter
-	if ok := m.Type.In(2).AssignableTo(reflect.TypeOf(command.RpcResult())); !ok {
+	if ok := m.Type.In(3).AssignableTo(reflect.TypeOf(command.RpcResult())); !ok {
 		t.Fatalf("cannot assign output parameter")
 	}
 	// for coverage purpose
@@ -250,7 +250,7 @@ func TestCmdPingSessionsLow(t *testing.T) {
 	if !ok {
 		t.Fatal("method not found")
 	}
-	if m.Type.NumIn() != 3 { // ApierSv1 is consider and we expect 3 inputs
+	if m.Type.NumIn() != 4 { // expecting 4 inputs
 		t.Fatalf("invalid number of input parameters ")
 	}
 	// for coverage purpose
@@ -259,7 +259,7 @@ func TestCmdPingSessionsLow(t *testing.T) {
 		t.Errorf("Expected <%T>, Received <%T>", new(StringWrapper), result)
 	}
 	// verify the type of output parameter
-	if ok := m.Type.In(2).AssignableTo(reflect.TypeOf(command.RpcResult())); !ok {
+	if ok := m.Type.In(3).AssignableTo(reflect.TypeOf(command.RpcResult())); !ok {
 		t.Fatalf("cannot assign output parameter")
 	}
 	// for coverage purpose
@@ -284,7 +284,7 @@ func TestCmdPingLoaderSLow(t *testing.T) {
 	if !ok {
 		t.Fatal("method not found")
 	}
-	if m.Type.NumIn() != 3 { // ApierSv1 is consider and we expect 3 inputs
+	if m.Type.NumIn() != 4 { // expecting 4 inputs
 		t.Fatalf("invalid number of input parameters ")
 	}
 	// for coverage purpose
@@ -293,7 +293,7 @@ func TestCmdPingLoaderSLow(t *testing.T) {
 		t.Errorf("Expected <%T>, Received <%T>", new(StringWrapper), result)
 	}
 	// verify the type of output parameter
-	if ok := m.Type.In(2).AssignableTo(reflect.TypeOf(command.RpcResult())); !ok {
+	if ok := m.Type.In(3).AssignableTo(reflect.TypeOf(command.RpcResult())); !ok {
 		t.Fatalf("cannot assign output parameter")
 	}
 	// for coverage purpose
@@ -318,7 +318,7 @@ func TestCmdPingDispatcherSLow(t *testing.T) {
 	if !ok {
 		t.Fatal("method not found")
 	}
-	if m.Type.NumIn() != 3 { // ApierSv1 is consider and we expect 3 inputs
+	if m.Type.NumIn() != 4 { // expecting 4 inputs
 		t.Fatalf("invalid number of input parameters ")
 	}
 	// for coverage purpose
@@ -327,7 +327,7 @@ func TestCmdPingDispatcherSLow(t *testing.T) {
 		t.Errorf("Expected <%T>, Received <%T>", new(StringWrapper), result)
 	}
 	// verify the type of output parameter
-	if ok := m.Type.In(2).AssignableTo(reflect.TypeOf(command.RpcResult())); !ok {
+	if ok := m.Type.In(3).AssignableTo(reflect.TypeOf(command.RpcResult())); !ok {
 		t.Fatalf("cannot assign output parameter")
 	}
 	// for coverage purpose
@@ -352,7 +352,7 @@ func TestCmdPingAnalyzerSLow(t *testing.T) {
 	if !ok {
 		t.Fatal("method not found")
 	}
-	if m.Type.NumIn() != 3 { // ApierSv1 is consider and we expect 3 inputs
+	if m.Type.NumIn() != 4 { // expecting 4 inputs
 		t.Fatalf("invalid number of input parameters ")
 	}
 	// for coverage purpose
@@ -361,7 +361,7 @@ func TestCmdPingAnalyzerSLow(t *testing.T) {
 		t.Errorf("Expected <%T>, Received <%T>", new(StringWrapper), result)
 	}
 	// verify the type of output parameter
-	if ok := m.Type.In(2).AssignableTo(reflect.TypeOf(command.RpcResult())); !ok {
+	if ok := m.Type.In(3).AssignableTo(reflect.TypeOf(command.RpcResult())); !ok {
 		t.Fatalf("cannot assign output parameter")
 	}
 	// for coverage purpose
@@ -386,7 +386,7 @@ func TestCmdPingSchedulerSLow(t *testing.T) {
 	if !ok {
 		t.Fatal("method not found")
 	}
-	if m.Type.NumIn() != 3 { // ApierSv1 is consider and we expect 3 inputs
+	if m.Type.NumIn() != 4 { // expecting 4 inputs
 		t.Fatalf("invalid number of input parameters ")
 	}
 	// for coverage purpose
@@ -395,7 +395,7 @@ func TestCmdPingSchedulerSLow(t *testing.T) {
 		t.Errorf("Expected <%T>, Received <%T>", new(StringWrapper), result)
 	}
 	// verify the type of output parameter
-	if ok := m.Type.In(2).AssignableTo(reflect.TypeOf(command.RpcResult())); !ok {
+	if ok := m.Type.In(3).AssignableTo(reflect.TypeOf(command.RpcResult())); !ok {
 		t.Fatalf("cannot assign output parameter")
 	}
 	// for coverage purpose
@@ -420,7 +420,7 @@ func TestCmdPingRALsLow(t *testing.T) {
 	if !ok {
 		t.Fatal("method not found")
 	}
-	if m.Type.NumIn() != 3 { // ApierSv1 is consider and we expect 3 inputs
+	if m.Type.NumIn() != 4 { // expecting 4 inputs
 		t.Fatalf("invalid number of input parameters ")
 	}
 	// for coverage purpose
@@ -429,7 +429,7 @@ func TestCmdPingRALsLow(t *testing.T) {
 		t.Errorf("Expected <%T>, Received <%T>", new(StringWrapper), result)
 	}
 	// verify the type of output parameter
-	if ok := m.Type.In(2).AssignableTo(reflect.TypeOf(command.RpcResult())); !ok {
+	if ok := m.Type.In(3).AssignableTo(reflect.TypeOf(command.RpcResult())); !ok {
 		t.Fatalf("cannot assign output parameter")
 	}
 	// for coverage purpose
@@ -454,7 +454,7 @@ func TestCmdPingReplicatorLow(t *testing.T) {
 	if !ok {
 		t.Fatal("method not found")
 	}
-	if m.Type.NumIn() != 3 { // ApierSv1 is consider and we expect 3 inputs
+	if m.Type.NumIn() != 4 { // expecting 4 inputs
 		t.Fatalf("invalid number of input parameters ")
 	}
 	// for coverage purpose
@@ -463,7 +463,7 @@ func TestCmdPingReplicatorLow(t *testing.T) {
 		t.Errorf("Expected <%T>, Received <%T>", new(StringWrapper), result)
 	}
 	// verify the type of output parameter
-	if ok := m.Type.In(2).AssignableTo(reflect.TypeOf(command.RpcResult())); !ok {
+	if ok := m.Type.In(3).AssignableTo(reflect.TypeOf(command.RpcResult())); !ok {
 		t.Fatalf("cannot assign output parameter")
 	}
 	// for coverage purpose
@@ -488,7 +488,7 @@ func TestCmdPingApierSLow(t *testing.T) {
 	if !ok {
 		t.Fatal("method not found")
 	}
-	if m.Type.NumIn() != 3 { // ApierSv1 is consider and we expect 3 inputs
+	if m.Type.NumIn() != 4 { // expecting 4 inputs
 		t.Fatalf("invalid number of input parameters ")
 	}
 	// for coverage purpose
@@ -497,7 +497,7 @@ func TestCmdPingApierSLow(t *testing.T) {
 		t.Errorf("Expected <%T>, Received <%T>", new(StringWrapper), result)
 	}
 	// verify the type of output parameter
-	if ok := m.Type.In(2).AssignableTo(reflect.TypeOf(command.RpcResult())); !ok {
+	if ok := m.Type.In(3).AssignableTo(reflect.TypeOf(command.RpcResult())); !ok {
 		t.Fatalf("cannot assign output parameter")
 	}
 	// for coverage purpose
@@ -522,7 +522,7 @@ func TestCmdPingEEsLow(t *testing.T) {
 	if !ok {
 		t.Fatal("method not found")
 	}
-	if m.Type.NumIn() != 3 { // ApierSv1 is consider and we expect 3 inputs
+	if m.Type.NumIn() != 4 { // expecting 4 inputs
 		t.Fatalf("invalid number of input parameters ")
 	}
 	// for coverage purpose
@@ -531,7 +531,7 @@ func TestCmdPingEEsLow(t *testing.T) {
 		t.Errorf("Expected <%T>, Received <%T>", new(StringWrapper), result)
 	}
 	// verify the type of output parameter
-	if ok := m.Type.In(2).AssignableTo(reflect.TypeOf(command.RpcResult())); !ok {
+	if ok := m.Type.In(3).AssignableTo(reflect.TypeOf(command.RpcResult())); !ok {
 		t.Fatalf("cannot assign output parameter")
 	}
 	// for coverage purpose

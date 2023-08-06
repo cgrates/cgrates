@@ -24,5 +24,5 @@ import (
 )
 
 func TestFAsSessionSClientIface(t *testing.T) {
-	_ = sessions.BiRPClient(new(FSsessions))
+	_ = sessions.BiRPCClient(new(FSsessions))
 }

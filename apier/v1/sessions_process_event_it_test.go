@@ -27,6 +27,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/sessions"
@@ -181,7 +182,7 @@ func testSSv1ItProcessEventAuth(t *testing.T) {
 		},
 	}
 	var rply sessions.V1ProcessEventReply
-	if err := sSv1BiRpc.Call(utils.SessionSv1ProcessEvent, args, &rply); err != nil {
+	if err := sSv1BiRpc.Call(context.Background(), utils.SessionSv1ProcessEvent, args, &rply); err != nil {
 		t.Fatal(err)
 	}
 	expMaxUsage := map[string]time.Duration{
@@ -286,7 +287,7 @@ func testSSv1ItProcessEventInitiateSession(t *testing.T) {
 		},
 	}
 	var rply sessions.V1ProcessEventReply
-	if err := sSv1BiRpc.Call(utils.SessionSv1ProcessEvent,
+	if err := sSv1BiRpc.Call(context.Background(), utils.SessionSv1ProcessEvent,
 		args, &rply); err != nil {
 		t.Error(err)
 	}
@@ -338,7 +339,7 @@ func testSSv1ItProcessEventInitiateSession(t *testing.T) {
 			utils.ToJSON(eAttrs), utils.ToJSON(rply.Attributes[utils.MetaRaw]))
 	}
 	aSessions := make([]*sessions.ExternalSession, 0)
-	if err := sSv1BiRpc.Call(utils.SessionSv1GetActiveSessions, &utils.SessionFilter{}, &aSessions); err != nil {
+	if err := sSv1BiRpc.Call(context.Background(), utils.SessionSv1GetActiveSessions, &utils.SessionFilter{}, &aSessions); err != nil {
 		t.Error(err)
 	} else if len(aSessions) != 3 {
 		t.Errorf("wrong active sessions: %s \n , and len(aSessions) %+v", utils.ToJSON(aSessions), len(aSessions))
@@ -369,7 +370,7 @@ func testSSv1ItProcessEventUpdateSession(t *testing.T) {
 		},
 	}
 	var rply sessions.V1ProcessEventReply
-	if err := sSv1BiRpc.Call(utils.SessionSv1ProcessEvent,
+	if err := sSv1BiRpc.Call(context.Background(), utils.SessionSv1ProcessEvent,
 		args, &rply); err != nil {
 		t.Error(err)
 	}
@@ -416,7 +417,7 @@ func testSSv1ItProcessEventUpdateSession(t *testing.T) {
 		t.Errorf("Expected %s received %s", expMaxUsage, rply.MaxUsage)
 	}
 	aSessions := make([]*sessions.ExternalSession, 0)
-	if err := sSv1BiRpc.Call(utils.SessionSv1GetActiveSessions, &utils.SessionFilter{}, &aSessions); err != nil {
+	if err := sSv1BiRpc.Call(context.Background(), utils.SessionSv1GetActiveSessions, &utils.SessionFilter{}, &aSessions); err != nil {
 		t.Error(err)
 	} else if len(aSessions) != 3 {
 		t.Errorf("wrong active sessions: %s", utils.ToJSON(aSessions))
@@ -445,12 +446,12 @@ func testSSv1ItProcessEventTerminateSession(t *testing.T) {
 		},
 	}
 	var rply sessions.V1ProcessEventReply
-	if err := sSv1BiRpc.Call(utils.SessionSv1ProcessEvent,
+	if err := sSv1BiRpc.Call(context.Background(), utils.SessionSv1ProcessEvent,
 		args, &rply); err != nil {
 		t.Error(err)
 	}
 	aSessions := make([]*sessions.ExternalSession, 0)
-	if err := sSv1BiRpc.Call(utils.SessionSv1GetActiveSessions, &utils.SessionFilter{}, &aSessions); err == nil ||
+	if err := sSv1BiRpc.Call(context.Background(), utils.SessionSv1GetActiveSessions, &utils.SessionFilter{}, &aSessions); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
@@ -474,7 +475,7 @@ func testSSv1ItProcessCDRForSessionFromProcessEvent(t *testing.T) {
 		},
 	}
 	var rply string
-	if err := sSv1BiRpc.Call(utils.SessionSv1ProcessCDR,
+	if err := sSv1BiRpc.Call(context.Background(), utils.SessionSv1ProcessCDR,
 		args, &rply); err != nil {
 		t.Error(err)
 	}
@@ -486,7 +487,7 @@ func testSSv1ItProcessCDRForSessionFromProcessEvent(t *testing.T) {
 func testSSv1ItGetCDRs(t *testing.T) {
 	var cdrCnt int64
 	req := &utils.RPCCDRsFilterWithAPIOpts{RPCCDRsFilter: &utils.RPCCDRsFilter{}}
-	if err := sSApierRpc.Call(utils.CDRsV1GetCDRsCount, req, &cdrCnt); err != nil {
+	if err := sSApierRpc.Call(context.Background(), utils.CDRsV1GetCDRsCount, req, &cdrCnt); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if cdrCnt != 3 { // 3 for each CDR
 		t.Error("Unexpected number of CDRs returned: ", cdrCnt)
@@ -494,7 +495,7 @@ func testSSv1ItGetCDRs(t *testing.T) {
 
 	var cdrs []*engine.CDR
 	args := &utils.RPCCDRsFilterWithAPIOpts{RPCCDRsFilter: &utils.RPCCDRsFilter{RunIDs: []string{"raw"}}}
-	if err := sSApierRpc.Call(utils.CDRsV1GetCDRs, args, &cdrs); err != nil {
+	if err := sSApierRpc.Call(context.Background(), utils.CDRsV1GetCDRs, args, &cdrs); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(cdrs) != 1 {
 		t.Error("Unexpected number of CDRs returned: ", len(cdrs))
@@ -505,7 +506,7 @@ func testSSv1ItGetCDRs(t *testing.T) {
 	}
 	args = &utils.RPCCDRsFilterWithAPIOpts{RPCCDRsFilter: &utils.RPCCDRsFilter{RunIDs: []string{"CustomerCharges"},
 		OriginIDs: []string{"testSSv1ItProcessEvent"}}}
-	if err := sSApierRpc.Call(utils.CDRsV1GetCDRs, args, &cdrs); err != nil {
+	if err := sSApierRpc.Call(context.Background(), utils.CDRsV1GetCDRs, args, &cdrs); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(cdrs) != 1 {
 		t.Error("Unexpected number of CDRs returned: ", len(cdrs))
@@ -516,7 +517,7 @@ func testSSv1ItGetCDRs(t *testing.T) {
 	}
 	args = &utils.RPCCDRsFilterWithAPIOpts{RPCCDRsFilter: &utils.RPCCDRsFilter{RunIDs: []string{"SupplierCharges"},
 		OriginIDs: []string{"testSSv1ItProcessEvent"}}}
-	if err := sSApierRpc.Call(utils.CDRsV1GetCDRs, args, &cdrs); err != nil {
+	if err := sSApierRpc.Call(context.Background(), utils.CDRsV1GetCDRs, args, &cdrs); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(cdrs) != 1 {
 		t.Error("Unexpected number of CDRs returned: ", len(cdrs))
@@ -548,7 +549,7 @@ func testSSv1ItProcessEventWithGetCost(t *testing.T) {
 		},
 	}
 	var rply sessions.V1ProcessEventReply
-	if err := sSv1BiRpc.Call(utils.SessionSv1ProcessEvent,
+	if err := sSv1BiRpc.Call(context.Background(), utils.SessionSv1ProcessEvent,
 		args, &rply); err != nil {
 		t.Error(err)
 	}
@@ -587,7 +588,7 @@ func testSSv1ItProcessEventWithGetCost2(t *testing.T) {
 		},
 	}
 	var rply sessions.V1ProcessEventReply
-	if err := sSv1BiRpc.Call(utils.SessionSv1ProcessEvent,
+	if err := sSv1BiRpc.Call(context.Background(), utils.SessionSv1ProcessEvent,
 		args, &rply); err != nil {
 		t.Error(err)
 	}
@@ -628,7 +629,7 @@ func testSSv1ItProcessEventWithGetCost3(t *testing.T) {
 		},
 	}
 	var rply sessions.V1ProcessEventReply
-	if err := sSv1BiRpc.Call(utils.SessionSv1ProcessEvent,
+	if err := sSv1BiRpc.Call(context.Background(), utils.SessionSv1ProcessEvent,
 		args, &rply); err != nil {
 		t.Error(err)
 	}
@@ -666,7 +667,7 @@ func testSSv1ItProcessEventWithGetCost4(t *testing.T) {
 		},
 	}
 	var rply sessions.V1ProcessEventReply
-	if err := sSv1BiRpc.Call(utils.SessionSv1ProcessEvent,
+	if err := sSv1BiRpc.Call(context.Background(), utils.SessionSv1ProcessEvent,
 		args, &rply); err == nil || err.Error() != utils.ErrRatingPlanNotFound.Error() {
 		t.Error(err)
 	}
@@ -694,7 +695,7 @@ func testSSv1ItGetCost(t *testing.T) {
 		},
 	}
 	var rply sessions.V1GetCostReply
-	if err := sSv1BiRpc.Call(utils.SessionSv1GetCost,
+	if err := sSv1BiRpc.Call(context.Background(), utils.SessionSv1GetCost,
 		args, &rply); err != nil {
 		t.Error(err)
 	}
@@ -735,7 +736,7 @@ func testSSv1ItProcessEventWithCDR(t *testing.T) {
 		},
 	}
 	var rply sessions.V1ProcessEventReply
-	if err := sSv1BiRpc.Call(utils.SessionSv1ProcessEvent,
+	if err := sSv1BiRpc.Call(context.Background(), utils.SessionSv1ProcessEvent,
 		args, &rply); err != nil {
 		t.Error(err)
 	}
@@ -745,7 +746,7 @@ func testSSv1ItGetCDRsFromProcessEvent(t *testing.T) {
 	var cdrCnt int64
 	req := &utils.RPCCDRsFilterWithAPIOpts{RPCCDRsFilter: &utils.RPCCDRsFilter{
 		OriginIDs: []string{"testSSv1ItProcessEventWithCDR"}}}
-	if err := sSApierRpc.Call(utils.CDRsV1GetCDRsCount, req, &cdrCnt); err != nil {
+	if err := sSApierRpc.Call(context.Background(), utils.CDRsV1GetCDRsCount, req, &cdrCnt); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if cdrCnt != 3 { // 3 for each CDR
 		t.Error("Unexpected number of CDRs returned: ", cdrCnt)
@@ -755,7 +756,7 @@ func testSSv1ItGetCDRsFromProcessEvent(t *testing.T) {
 	args := &utils.RPCCDRsFilterWithAPIOpts{RPCCDRsFilter: &utils.RPCCDRsFilter{
 		OriginIDs: []string{"testSSv1ItProcessEventWithCDR"},
 		RunIDs:    []string{"raw"}}}
-	if err := sSApierRpc.Call(utils.CDRsV1GetCDRs, args, &cdrs); err != nil {
+	if err := sSApierRpc.Call(context.Background(), utils.CDRsV1GetCDRs, args, &cdrs); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(cdrs) != 1 {
 		t.Error("Unexpected number of CDRs returned: ", len(cdrs))
@@ -767,7 +768,7 @@ func testSSv1ItGetCDRsFromProcessEvent(t *testing.T) {
 	args = &utils.RPCCDRsFilterWithAPIOpts{RPCCDRsFilter: &utils.RPCCDRsFilter{
 		RunIDs:    []string{"CustomerCharges"},
 		OriginIDs: []string{"testSSv1ItProcessEventWithCDR"}}}
-	if err := sSApierRpc.Call(utils.CDRsV1GetCDRs, args, &cdrs); err != nil {
+	if err := sSApierRpc.Call(context.Background(), utils.CDRsV1GetCDRs, args, &cdrs); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(cdrs) != 1 {
 		t.Error("Unexpected number of CDRs returned: ", len(cdrs))
@@ -779,7 +780,7 @@ func testSSv1ItGetCDRsFromProcessEvent(t *testing.T) {
 	args = &utils.RPCCDRsFilterWithAPIOpts{RPCCDRsFilter: &utils.RPCCDRsFilter{
 		RunIDs:    []string{"SupplierCharges"},
 		OriginIDs: []string{"testSSv1ItProcessEventWithCDR"}}}
-	if err := sSApierRpc.Call(utils.CDRsV1GetCDRs, args, &cdrs); err != nil {
+	if err := sSApierRpc.Call(context.Background(), utils.CDRsV1GetCDRs, args, &cdrs); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(cdrs) != 1 {
 		t.Error("Unexpected number of CDRs returned: ", len(cdrs))
@@ -812,7 +813,7 @@ func testSSv1ItProcessEventWithCDRResourceError(t *testing.T) {
 		},
 	}
 	var rply sessions.V1ProcessEventReply
-	if err := sSv1BiRpc.Call(utils.SessionSv1ProcessEvent,
+	if err := sSv1BiRpc.Call(context.Background(), utils.SessionSv1ProcessEvent,
 		args, &rply); err == nil || err.Error() != utils.ErrPartiallyExecuted.Error() {
 		t.Error(err)
 	}
@@ -822,7 +823,7 @@ func testSSv1ItGetCDRsFromProcessEventResourceError(t *testing.T) {
 	var cdrCnt int64
 	req := &utils.RPCCDRsFilterWithAPIOpts{RPCCDRsFilter: &utils.RPCCDRsFilter{
 		OriginIDs: []string{"testSSv1ItProcessEventWithCDRResourceError"}}}
-	if err := sSApierRpc.Call(utils.CDRsV1GetCDRsCount, req, &cdrCnt); err != nil {
+	if err := sSApierRpc.Call(context.Background(), utils.CDRsV1GetCDRsCount, req, &cdrCnt); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if cdrCnt != 3 { // 3 for each CDR
 		t.Error("Unexpected number of CDRs returned: ", cdrCnt)
@@ -832,7 +833,7 @@ func testSSv1ItGetCDRsFromProcessEventResourceError(t *testing.T) {
 	args := &utils.RPCCDRsFilterWithAPIOpts{RPCCDRsFilter: &utils.RPCCDRsFilter{
 		OriginIDs: []string{"testSSv1ItProcessEventWithCDRResourceError"},
 		RunIDs:    []string{"raw"}}}
-	if err := sSApierRpc.Call(utils.CDRsV1GetCDRs, args, &cdrs); err != nil {
+	if err := sSApierRpc.Call(context.Background(), utils.CDRsV1GetCDRs, args, &cdrs); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(cdrs) != 1 {
 		t.Error("Unexpected number of CDRs returned: ", len(cdrs))
@@ -844,7 +845,7 @@ func testSSv1ItGetCDRsFromProcessEventResourceError(t *testing.T) {
 	args = &utils.RPCCDRsFilterWithAPIOpts{RPCCDRsFilter: &utils.RPCCDRsFilter{
 		RunIDs:    []string{"CustomerCharges"},
 		OriginIDs: []string{"testSSv1ItProcessEventWithCDRResourceError"}}}
-	if err := sSApierRpc.Call(utils.CDRsV1GetCDRs, args, &cdrs); err != nil {
+	if err := sSApierRpc.Call(context.Background(), utils.CDRsV1GetCDRs, args, &cdrs); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(cdrs) != 1 {
 		t.Error("Unexpected number of CDRs returned: ", len(cdrs))
@@ -856,7 +857,7 @@ func testSSv1ItGetCDRsFromProcessEventResourceError(t *testing.T) {
 	args = &utils.RPCCDRsFilterWithAPIOpts{RPCCDRsFilter: &utils.RPCCDRsFilter{
 		RunIDs:    []string{"SupplierCharges"},
 		OriginIDs: []string{"testSSv1ItProcessEventWithCDRResourceError"}}}
-	if err := sSApierRpc.Call(utils.CDRsV1GetCDRs, args, &cdrs); err != nil {
+	if err := sSApierRpc.Call(context.Background(), utils.CDRsV1GetCDRs, args, &cdrs); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(cdrs) != 1 {
 		t.Error("Unexpected number of CDRs returned: ", len(cdrs))
@@ -890,7 +891,7 @@ func testSSv1ItProcessEventWithCDRResourceErrorBlockError(t *testing.T) {
 		},
 	}
 	var rply sessions.V1ProcessEventReply
-	if err := sSv1BiRpc.Call(utils.SessionSv1ProcessEvent,
+	if err := sSv1BiRpc.Call(context.Background(), utils.SessionSv1ProcessEvent,
 		args, &rply); err == nil || err.Error() != "RESOURCES_ERROR:cannot find usage record with id: testSSv1ItProcessEventWithCDRResourceErrorBlockError" {
 		t.Error(err)
 	}
@@ -900,7 +901,7 @@ func testSSv1ItGetCDRsFromProcessEventResourceErrorBlockError(t *testing.T) {
 	var cdrCnt int64
 	req := &utils.RPCCDRsFilterWithAPIOpts{RPCCDRsFilter: &utils.RPCCDRsFilter{
 		OriginIDs: []string{"testSSv1ItProcessEventWithCDRResourceErrorBlockError"}}}
-	if err := sSApierRpc.Call(utils.CDRsV1GetCDRsCount, req, &cdrCnt); err != nil {
+	if err := sSApierRpc.Call(context.Background(), utils.CDRsV1GetCDRsCount, req, &cdrCnt); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if cdrCnt != 0 {
 		t.Error("Unexpected number of CDRs returned: ", cdrCnt)

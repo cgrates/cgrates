@@ -22,12 +22,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package general_tests
 
 import (
-	"net/rpc"
 	"path"
 	"reflect"
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc"
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/sessions"
@@ -38,7 +39,7 @@ var (
 	sesRoutesCfgDir  string
 	sesRoutesCfgPath string
 	sesRoutesCfg     *config.CGRConfig
-	sesRoutesRPC     *rpc.Client
+	sesRoutesRPC     *birpc.Client
 
 	sesRoutesTests = []func(t *testing.T){
 		testSesRoutesItLoadConfig,
@@ -110,7 +111,7 @@ func testSesRoutesItRPCConn(t *testing.T) {
 func testSesRoutesItLoadFromFolder(t *testing.T) {
 	var reply string
 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "testit")}
-	if err := sesRoutesRPC.Call(utils.APIerSv1LoadTariffPlanFromFolder, attrs, &reply); err != nil {
+	if err := sesRoutesRPC.Call(context.Background(), utils.APIerSv1LoadTariffPlanFromFolder, attrs, &reply); err != nil {
 		t.Error(err)
 	}
 	time.Sleep(100 * time.Millisecond)
@@ -139,7 +140,7 @@ func testSesRoutesAuthorizeEvent(t *testing.T) {
 		true, false, false, cgrEv, utils.Paginator{}, false, "")
 
 	var rply sessions.V1AuthorizeReply
-	if err := sesRoutesRPC.Call(utils.SessionSv1AuthorizeEvent, args, &rply); err != nil {
+	if err := sesRoutesRPC.Call(context.Background(), utils.SessionSv1AuthorizeEvent, args, &rply); err != nil {
 		t.Fatal(err)
 	}
 	expected := sessions.V1AuthorizeReply{
@@ -183,7 +184,7 @@ func testSesRoutesAuthorizeEvent(t *testing.T) {
 		true, false, false, cgrEv, utils.Paginator{}, false, "2")
 
 	rply = sessions.V1AuthorizeReply{}
-	if err := sesRoutesRPC.Call(utils.SessionSv1ProcessMessage,
+	if err := sesRoutesRPC.Call(context.Background(), utils.SessionSv1ProcessMessage,
 		args, &rply); err != nil {
 		t.Fatal(err)
 	}
@@ -223,7 +224,7 @@ func testSesRoutesAuthorizeEvent(t *testing.T) {
 		true, false, false, cgrEv, utils.Paginator{}, false, "1")
 
 	rply = sessions.V1AuthorizeReply{}
-	if err := sesRoutesRPC.Call(utils.SessionSv1ProcessMessage,
+	if err := sesRoutesRPC.Call(context.Background(), utils.SessionSv1ProcessMessage,
 		args, &rply); err != nil {
 		t.Fatal(err)
 	}
@@ -237,7 +238,7 @@ func testSesRoutesAuthorizeEvent(t *testing.T) {
 		true, false, true, cgrEv, utils.Paginator{}, false, "")
 
 	rply = sessions.V1AuthorizeReply{}
-	if err := sesRoutesRPC.Call(utils.SessionSv1ProcessMessage,
+	if err := sesRoutesRPC.Call(context.Background(), utils.SessionSv1ProcessMessage,
 		args, &rply); err != nil {
 		t.Fatal(err)
 	}
@@ -272,7 +273,7 @@ func testSesRoutesProcessMessage(t *testing.T) {
 		true, false, false, cgrEv, utils.Paginator{}, false, "")
 
 	var rply sessions.V1ProcessMessageReply
-	if err := sesRoutesRPC.Call(utils.SessionSv1ProcessMessage,
+	if err := sesRoutesRPC.Call(context.Background(), utils.SessionSv1ProcessMessage,
 		args, &rply); err != nil {
 		t.Fatal(err)
 	}
@@ -318,7 +319,7 @@ func testSesRoutesProcessMessage(t *testing.T) {
 		true, false, false, cgrEv, utils.Paginator{}, false, "2")
 
 	rply = sessions.V1ProcessMessageReply{}
-	if err := sesRoutesRPC.Call(utils.SessionSv1ProcessMessage,
+	if err := sesRoutesRPC.Call(context.Background(), utils.SessionSv1ProcessMessage,
 		args, &rply); err != nil {
 		t.Fatal(err)
 	}
@@ -358,7 +359,7 @@ func testSesRoutesProcessMessage(t *testing.T) {
 		true, false, false, cgrEv, utils.Paginator{}, false, "1")
 
 	rply = sessions.V1ProcessMessageReply{}
-	if err := sesRoutesRPC.Call(utils.SessionSv1ProcessMessage,
+	if err := sesRoutesRPC.Call(context.Background(), utils.SessionSv1ProcessMessage,
 		args, &rply); err != nil {
 		t.Fatal(err)
 	}
@@ -372,7 +373,7 @@ func testSesRoutesProcessMessage(t *testing.T) {
 		true, false, true, cgrEv, utils.Paginator{}, false, "")
 
 	rply = sessions.V1ProcessMessageReply{}
-	if err := sesRoutesRPC.Call(utils.SessionSv1ProcessMessage,
+	if err := sesRoutesRPC.Call(context.Background(), utils.SessionSv1ProcessMessage,
 		args, &rply); err != nil {
 		t.Fatal(err)
 	}
@@ -409,7 +410,7 @@ func testSesRoutesProcessEvent(t *testing.T) {
 	}
 
 	var rply sessions.V1ProcessEventReply
-	if err := sesRoutesRPC.Call(utils.SessionSv1ProcessEvent, args, &rply); err != nil {
+	if err := sesRoutesRPC.Call(context.Background(), utils.SessionSv1ProcessEvent, args, &rply); err != nil {
 		t.Fatal(err)
 	}
 	expected := sessions.V1ProcessEventReply{
@@ -458,7 +459,7 @@ func testSesRoutesProcessEvent(t *testing.T) {
 	}
 
 	rply = sessions.V1ProcessEventReply{}
-	if err := sesRoutesRPC.Call(utils.SessionSv1ProcessEvent,
+	if err := sesRoutesRPC.Call(context.Background(), utils.SessionSv1ProcessEvent,
 		args, &rply); err != nil {
 		t.Fatal(err)
 	}
@@ -502,7 +503,7 @@ func testSesRoutesProcessEvent(t *testing.T) {
 	}
 	args.CGREvent.APIOpts[utils.OptsRoutesMaxCost] = "1"
 	rply = sessions.V1ProcessEventReply{}
-	if err := sesRoutesRPC.Call(utils.SessionSv1ProcessEvent,
+	if err := sesRoutesRPC.Call(context.Background(), utils.SessionSv1ProcessEvent,
 		args, &rply); err != nil {
 		t.Fatal(err)
 	}
@@ -518,7 +519,7 @@ func testSesRoutesProcessEvent(t *testing.T) {
 	}
 
 	rply = sessions.V1ProcessEventReply{}
-	if err := sesRoutesRPC.Call(utils.SessionSv1ProcessEvent,
+	if err := sesRoutesRPC.Call(context.Background(), utils.SessionSv1ProcessEvent,
 		args, &rply); err != nil {
 		t.Fatal(err)
 	}

@@ -23,12 +23,13 @@ package v1
 
 import (
 	"flag"
-	"net/rpc"
 	"path"
 	"reflect"
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc"
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -38,7 +39,7 @@ import (
 var (
 	precacheCfgPath   string
 	precacheCfg       *config.CGRConfig
-	precacheRPC       *rpc.Client
+	precacheRPC       *birpc.Client
 	precacheConfigDIR string //run tests for specific configuration
 
 	// use this flag to test the APIBan implementation for precache
@@ -115,7 +116,7 @@ func testPrecacheGetItemIDs(t *testing.T) {
 		CacheID: utils.MetaDefault,
 	}
 	var reply *[]string
-	if err := precacheRPC.Call(utils.CacheSv1GetItemIDs, args, &reply); err == nil ||
+	if err := precacheRPC.Call(context.Background(), utils.CacheSv1GetItemIDs, args, &reply); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
@@ -128,7 +129,7 @@ func testPrecacheGetCacheStatsBeforeLoad(t *testing.T) {
 	}
 	dfltStats := engine.GetDefaultEmptyCacheStats()
 	expectedStats := &dfltStats
-	if err := precacheRPC.Call(utils.CacheSv1GetCacheStats, args, &reply); err != nil {
+	if err := precacheRPC.Call(context.Background(), utils.CacheSv1GetCacheStats, args, &reply); err != nil {
 		t.Error(err.Error())
 	} else if !reflect.DeepEqual(reply, expectedStats) {
 		t.Errorf("Expecting : %+v,\n received: %+v", utils.ToJSON(expectedStats), utils.ToJSON(reply))
@@ -138,7 +139,7 @@ func testPrecacheGetCacheStatsBeforeLoad(t *testing.T) {
 func testPrecacheFromFolder(t *testing.T) {
 	var reply string
 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "precache")}
-	if err := precacheRPC.Call(utils.APIerSv1LoadTariffPlanFromFolder, attrs, &reply); err != nil {
+	if err := precacheRPC.Call(context.Background(), utils.APIerSv1LoadTariffPlanFromFolder, attrs, &reply); err != nil {
 		t.Error(err)
 	}
 	time.Sleep(100 * time.Millisecond)
@@ -230,7 +231,7 @@ func testPrecacheGetCacheStatsAfterRestart(t *testing.T) {
 	if *apiBan {
 		(*expectedStats)[utils.MetaAPIBan] = &ltcache.CacheStats{Items: 254}
 	}
-	if err := precacheRPC.Call(utils.CacheSv1GetCacheStats, args, &reply); err != nil {
+	if err := precacheRPC.Call(context.Background(), utils.CacheSv1GetCacheStats, args, &reply); err != nil {
 		t.Error(err.Error())
 	} else if !reflect.DeepEqual(reply, expectedStats) {
 		t.Errorf("Expecting : %+v, \n received: %+v", utils.ToJSON(expectedStats), utils.ToJSON(reply))

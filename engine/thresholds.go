@@ -25,6 +25,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/guardian"
 	"github.com/cgrates/cgrates/utils"
@@ -482,7 +483,7 @@ func (tS *ThresholdService) processEvent(tnt string, args *utils.CGREvent) (thre
 }
 
 // V1ProcessEvent implements ThresholdService method for processing an Event
-func (tS *ThresholdService) V1ProcessEvent(args *utils.CGREvent, reply *[]string) (err error) {
+func (tS *ThresholdService) V1ProcessEvent(ctx *context.Context, args *utils.CGREvent, reply *[]string) (err error) {
 	if args == nil {
 		return utils.NewErrMandatoryIeMissing(utils.CGREventString)
 	}
@@ -504,7 +505,7 @@ func (tS *ThresholdService) V1ProcessEvent(args *utils.CGREvent, reply *[]string
 }
 
 // V1GetThresholdsForEvent queries thresholds matching an Event
-func (tS *ThresholdService) V1GetThresholdsForEvent(args *utils.CGREvent, reply *Thresholds) (err error) {
+func (tS *ThresholdService) V1GetThresholdsForEvent(ctx *context.Context, args *utils.CGREvent, reply *Thresholds) (err error) {
 	if args == nil {
 		return utils.NewErrMandatoryIeMissing(utils.CGREventString)
 	}
@@ -526,7 +527,7 @@ func (tS *ThresholdService) V1GetThresholdsForEvent(args *utils.CGREvent, reply 
 }
 
 // V1GetThresholdIDs returns list of thresholdIDs configured for a tenant
-func (tS *ThresholdService) V1GetThresholdIDs(tenant string, tIDs *[]string) (err error) {
+func (tS *ThresholdService) V1GetThresholdIDs(ctx *context.Context, tenant string, tIDs *[]string) (err error) {
 	if tenant == utils.EmptyString {
 		tenant = tS.cgrcfg.GeneralCfg().DefaultTenant
 	}
@@ -544,7 +545,7 @@ func (tS *ThresholdService) V1GetThresholdIDs(tenant string, tIDs *[]string) (er
 }
 
 // V1GetThreshold retrieves a Threshold
-func (tS *ThresholdService) V1GetThreshold(tntID *utils.TenantID, t *Threshold) (err error) {
+func (tS *ThresholdService) V1GetThreshold(ctx *context.Context, tntID *utils.TenantID, t *Threshold) (err error) {
 	var thd *Threshold
 	tnt := tntID.Tenant
 	if tnt == utils.EmptyString {
@@ -563,7 +564,7 @@ func (tS *ThresholdService) V1GetThreshold(tntID *utils.TenantID, t *Threshold) 
 }
 
 // V1ResetThreshold resets the threshold hits
-func (tS *ThresholdService) V1ResetThreshold(tntID *utils.TenantID, rply *string) (err error) {
+func (tS *ThresholdService) V1ResetThreshold(ctx *context.Context, tntID *utils.TenantID, rply *string) (err error) {
 	var thd *Threshold
 	tnt := tntID.Tenant
 	if tnt == utils.EmptyString {

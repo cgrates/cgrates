@@ -44,9 +44,11 @@ func TestNewServer(t *testing.T) {
 		caps:     caps,
 	}
 	rcv := NewServer(caps)
-	rcv.stopbiRPCServer = nil
+	rcv.stopBiRPCServer = nil
+	rcv.rpcSrv = nil
+	rcv.birpcSrv = nil
 	if !reflect.DeepEqual(expected, rcv) {
-		t.Errorf("Expected %+v, received %+v", expected, rcv)
+		t.Errorf("\nExpected %+v,\nreceived %+v", expected, rcv)
 	}
 
 	cfgDflt.AnalyzerSCfg().DBPath = "/tmp/analyzers"

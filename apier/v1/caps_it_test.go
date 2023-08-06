@@ -26,15 +26,14 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"net/rpc"
 	"path"
 	"strings"
 	"sync"
 	"testing"
 	"time"
 
-	"github.com/cenkalti/rpc2"
-
+	"github.com/cgrates/birpc"
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -43,8 +42,8 @@ import (
 var (
 	capsCfgPath   string
 	capsCfg       *config.CGRConfig
-	capsRPC       *rpc.Client
-	capsBiRPC     *rpc2.Client
+	capsRPC       *birpc.Client
+	capsBiRPC     *birpc.BirpcClient
 	capsConfigDIR string //run tests for specific configuration
 
 	sTestsCaps = []func(t *testing.T){
@@ -121,7 +120,7 @@ func testCapsBusyAPIs(t *testing.T) {
 		go func() {
 			defer wg.Done()
 			var resp string
-			if err := capsRPC.Call(utils.CoreSv1Sleep,
+			if err := capsRPC.Call(context.Background(), utils.CoreSv1Sleep,
 				&utils.DurationArgs{Duration: 10 * time.Millisecond},
 				&resp); err != nil {
 				lock.Lock()
@@ -147,7 +146,7 @@ func testCapsQueueAPIs(t *testing.T) {
 		go func() {
 			defer wg.Done()
 			var resp string
-			if err := capsRPC.Call(utils.CoreSv1Sleep,
+			if err := capsRPC.Call(context.Background(), utils.CoreSv1Sleep,
 				&utils.DurationArgs{Duration: 10 * time.Millisecond},
 				&resp); err != nil {
 				t.Error(err)
@@ -227,8 +226,10 @@ func testCapsOnBiJSONBusy(t *testing.T) {
 			go func() {
 				defer wg.Done()
 				var resp string
-				if err := capsBiRPC.Call(utils.SessionSv1Sleep, &utils.DurationArgs{
-					Duration: 10 * time.Millisecond}, &resp); err != nil {
+				if err := capsBiRPC.Call(context.Background(), utils.SessionSv1Sleep,
+					&utils.DurationArgs{
+						Duration: 10 * time.Millisecond,
+					}, &resp); err != nil {
 					errChan <- err
 					lock.Lock()
 					failedAPIs++
@@ -268,7 +269,7 @@ func testCapsOnBiJSONQueue(t *testing.T) {
 		go func() {
 			defer wg.Done()
 			var resp string
-			if err := capsBiRPC.Call(utils.SessionSv1Sleep,
+			if err := capsBiRPC.Call(context.Background(), utils.SessionSv1Sleep,
 				&utils.DurationArgs{Duration: 10 * time.Millisecond},
 				&resp); err != nil {
 				t.Error(err)
@@ -312,7 +313,7 @@ func benchmarkInit(b *testing.B, cfgDir string) {
 func benchmarkCall(b *testing.B) {
 	var rply map[string]any
 	for i := 0; i < b.N; i++ {
-		if err := capsRPC.Call(utils.CoreSv1Status, &utils.TenantWithAPIOpts{}, &rply); err != nil {
+		if err := capsRPC.Call(context.Background(), utils.CoreSv1Status, &utils.TenantWithAPIOpts{}, &rply); err != nil {
 			b.Error(err)
 		}
 	}

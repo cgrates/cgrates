@@ -24,6 +24,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/guardian"
 	"github.com/cgrates/cgrates/utils"
@@ -240,9 +241,9 @@ func (sS *StatService) matchingStatQueuesForEvent(tnt string, statsIDs []string,
 	return
 }
 
-// Call implements rpcclient.ClientConnector interface for internal RPC
+// Call implements birpc.ClientConnector interface for internal RPC
 // here for cases when passing StatsService as rpccclient.RpcClientConnection
-func (sS *StatService) Call(serviceMethod string, args any, reply any) error {
+func (sS *StatService) Call(ctx *context.Context, serviceMethod string, args any, reply any) error {
 	return utils.RPCCall(sS, serviceMethod, args, reply)
 }
 
@@ -305,7 +306,7 @@ func (sS *StatService) processThresholds(sQs StatQueues, opts map[string]any) (e
 			thEv.Event[metricID] = metric.GetValue(sS.cgrcfg.GeneralCfg().RoundingDecimals)
 		}
 		var tIDs []string
-		if err := sS.connMgr.Call(sS.cgrcfg.StatSCfg().ThresholdSConns, nil,
+		if err := sS.connMgr.Call(context.TODO(), sS.cgrcfg.StatSCfg().ThresholdSConns,
 			utils.ThresholdSv1ProcessEvent, thEv, &tIDs); err != nil &&
 			(len(thIDs) != 0 || err.Error() != utils.ErrNotFound.Error()) {
 			utils.Logger.Warning(
@@ -362,7 +363,7 @@ func (sS *StatService) processEvent(tnt string, args *utils.CGREvent) (statQueue
 }
 
 // V1ProcessEvent implements StatV1 method for processing an Event
-func (sS *StatService) V1ProcessEvent(args *utils.CGREvent, reply *[]string) (err error) {
+func (sS *StatService) V1ProcessEvent(ctx *context.Context, args *utils.CGREvent, reply *[]string) (err error) {
 	if args == nil {
 		return utils.NewErrMandatoryIeMissing(utils.CGREventString)
 	}
@@ -384,7 +385,7 @@ func (sS *StatService) V1ProcessEvent(args *utils.CGREvent, reply *[]string) (er
 }
 
 // V1GetStatQueuesForEvent implements StatV1 method for processing an Event
-func (sS *StatService) V1GetStatQueuesForEvent(args *utils.CGREvent, reply *[]string) (err error) {
+func (sS *StatService) V1GetStatQueuesForEvent(ctx *context.Context, args *utils.CGREvent, reply *[]string) (err error) {
 	if args == nil {
 		return utils.NewErrMandatoryIeMissing(utils.CGREventString)
 	}
@@ -421,7 +422,7 @@ func (sS *StatService) V1GetStatQueuesForEvent(args *utils.CGREvent, reply *[]st
 }
 
 // V1GetStatQueue returns a StatQueue object
-func (sS *StatService) V1GetStatQueue(args *utils.TenantIDWithAPIOpts, reply *StatQueue) (err error) {
+func (sS *StatService) V1GetStatQueue(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *StatQueue) (err error) {
 	if missing := utils.MissingStructFields(args, []string{utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -443,7 +444,7 @@ func (sS *StatService) V1GetStatQueue(args *utils.TenantIDWithAPIOpts, reply *St
 }
 
 // V1GetQueueStringMetrics returns the metrics of a Queue as string values
-func (sS *StatService) V1GetQueueStringMetrics(args *utils.TenantID, reply *map[string]string) (err error) {
+func (sS *StatService) V1GetQueueStringMetrics(ctx *context.Context, args *utils.TenantID, reply *map[string]string) (err error) {
 	if missing := utils.MissingStructFields(args, []string{utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -472,7 +473,7 @@ func (sS *StatService) V1GetQueueStringMetrics(args *utils.TenantID, reply *map[
 }
 
 // V1GetQueueFloatMetrics returns the metrics as float64 values
-func (sS *StatService) V1GetQueueFloatMetrics(args *utils.TenantID, reply *map[string]float64) (err error) {
+func (sS *StatService) V1GetQueueFloatMetrics(ctx *context.Context, args *utils.TenantID, reply *map[string]float64) (err error) {
 	if missing := utils.MissingStructFields(args, []string{utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -501,7 +502,7 @@ func (sS *StatService) V1GetQueueFloatMetrics(args *utils.TenantID, reply *map[s
 }
 
 // V1GetQueueIDs returns list of queueIDs registered for a tenant
-func (sS *StatService) V1GetQueueIDs(tenant string, qIDs *[]string) (err error) {
+func (sS *StatService) V1GetQueueIDs(ctx *context.Context, tenant string, qIDs *[]string) (err error) {
 	if tenant == utils.EmptyString {
 		tenant = sS.cgrcfg.GeneralCfg().DefaultTenant
 	}
@@ -519,7 +520,7 @@ func (sS *StatService) V1GetQueueIDs(tenant string, qIDs *[]string) (err error) 
 }
 
 // V1ResetStatQueue resets the stat queue
-func (sS *StatService) V1ResetStatQueue(tntID *utils.TenantID, rply *string) (err error) {
+func (sS *StatService) V1ResetStatQueue(ctx *context.Context, tntID *utils.TenantID, rply *string) (err error) {
 	if missing := utils.MissingStructFields(tntID, []string{utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}

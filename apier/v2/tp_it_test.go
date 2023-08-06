@@ -22,11 +22,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package v2
 
 import (
-	"net/rpc"
 	"path"
 	"reflect"
 	"testing"
 
+	"github.com/cgrates/birpc/context"
+
+	"github.com/cgrates/birpc"
 	v1 "github.com/cgrates/cgrates/apier/v1"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
@@ -36,7 +38,7 @@ import (
 var (
 	tpCfgPath string
 	tpCfg     *config.CGRConfig
-	tpRPC     *rpc.Client
+	tpRPC     *birpc.Client
 	err       error
 	delay     int
 	configDIR string // relative path towards a config directory under samples prefix
@@ -174,7 +176,7 @@ func testTPitTimings(t *testing.T) {
 	// Test set
 	var reply string
 	for _, tm := range []*utils.ApierTPTiming{tmPeak, tmOffPeakMorning, tmOffPeakEvening, tmOffPeakWeekend, tmDummyRemove} {
-		if err := tpRPC.Call(utils.APIerSv2SetTPTiming, tm, &reply); err != nil {
+		if err := tpRPC.Call(context.Background(), utils.APIerSv2SetTPTiming, tm, &reply); err != nil {
 			t.Error("Got error on APIerSv2.SetTPTiming: ", err.Error())
 		} else if reply != utils.OK {
 			t.Error("Unexpected reply received when calling APIerSv2.SetTPTiming: ", reply)
@@ -182,20 +184,20 @@ func testTPitTimings(t *testing.T) {
 	}
 	// Test get
 	var rplyTmDummy *utils.ApierTPTiming
-	if err := tpRPC.Call(utils.APIerSv2GetTPTiming, v1.AttrGetTPTiming{tmDummyRemove.TPid, tmDummyRemove.ID}, &rplyTmDummy); err != nil {
+	if err := tpRPC.Call(context.Background(), utils.APIerSv2GetTPTiming, v1.AttrGetTPTiming{tmDummyRemove.TPid, tmDummyRemove.ID}, &rplyTmDummy); err != nil {
 		t.Error("Calling APIerSv2.GetTPTiming, got error: ", err.Error())
 	} else if !reflect.DeepEqual(tmDummyRemove, rplyTmDummy) {
 		t.Errorf("Calling APIerSv2.GetTPTiming expected: %v, received: %v", tmDummyRemove, rplyTmDummy)
 	}
 	var rplyTmIDs []string
 	expectedTmIDs := []string{"OFFPEAK_EVENING", "OFFPEAK_MORNING", "OFFPEAK_WEEKEND", "PEAK", tmDummyRemove.ID}
-	if err := tpRPC.Call(utils.APIerSv1GetTPTimingIds, &v1.AttrGetTPTimingIds{testTPid, utils.PaginatorWithSearch{}}, &rplyTmIDs); err != nil {
+	if err := tpRPC.Call(context.Background(), utils.APIerSv1GetTPTimingIds, &v1.AttrGetTPTimingIds{testTPid, utils.PaginatorWithSearch{}}, &rplyTmIDs); err != nil {
 		t.Error("Calling APIerSv1.GetTPTimingIds, got error: ", err.Error())
 	} else if len(expectedTmIDs) != len(rplyTmIDs) {
 		t.Errorf("Calling APIerSv1.GetTPTimingIds expected: %v, received: %v", expectedTmIDs, rplyTmIDs)
 	}
 	// Test remove
-	if err := tpRPC.Call(utils.APIerSv2RemoveTPTiming, v1.AttrGetTPTiming{tmDummyRemove.TPid, tmDummyRemove.ID}, &reply); err != nil {
+	if err := tpRPC.Call(context.Background(), utils.APIerSv2RemoveTPTiming, v1.AttrGetTPTiming{tmDummyRemove.TPid, tmDummyRemove.ID}, &reply); err != nil {
 		t.Error("Calling APIerSv2.RemoveTPTiming, got error: ", err.Error())
 	} else if reply != utils.OK {
 		t.Error("Calling APIerSv2.RemoveTPTiming received: ", reply)
@@ -203,7 +205,7 @@ func testTPitTimings(t *testing.T) {
 	// Test getIds
 	rplyTmIDs = []string{}
 	expectedTmIDs = []string{"OFFPEAK_EVENING", "OFFPEAK_MORNING", "OFFPEAK_WEEKEND", "PEAK"}
-	if err := tpRPC.Call(utils.APIerSv1GetTPTimingIds, &v1.AttrGetTPTimingIds{testTPid, utils.PaginatorWithSearch{}}, &rplyTmIDs); err != nil {
+	if err := tpRPC.Call(context.Background(), utils.APIerSv1GetTPTimingIds, &v1.AttrGetTPTimingIds{testTPid, utils.PaginatorWithSearch{}}, &rplyTmIDs); err != nil {
 		t.Error("Calling APIerSv1.GetTPTimingIds, got error: ", err.Error())
 	} else if len(expectedTmIDs) != len(rplyTmIDs) {
 		t.Errorf("Calling APIerSv1.GetTPTimingIds expected: %v, received: %v", expectedTmIDs, rplyTmIDs)
@@ -226,7 +228,7 @@ func testTPitDestinations(t *testing.T) {
 	dstDEMobile := &utils.TPDestination{TPid: testTPid, ID: "DST_DE_MOBILE", Prefixes: []string{"+49151", "+49161", "+49171"}}
 	dstDUMMY := &utils.TPDestination{TPid: testTPid, ID: "DUMMY_REMOVE", Prefixes: []string{"999"}}
 	for _, dst := range []*utils.TPDestination{dst1002, dst1003, dst1007, dstFS, dstDEMobile, dstDUMMY} {
-		if err := tpRPC.Call(utils.APIerSv2SetTPDestination, dst, &reply); err != nil {
+		if err := tpRPC.Call(context.Background(), utils.APIerSv2SetTPDestination, dst, &reply); err != nil {
 			t.Error("Got error on APIerSv2.SetTPDestination: ", err.Error())
 		} else if reply != utils.OK {
 			t.Error("Unexpected reply received when calling APIerSv2.SetTPDestination: ", reply)
@@ -234,13 +236,13 @@ func testTPitDestinations(t *testing.T) {
 	}
 	// Test get
 	var rplyDst *utils.TPDestination
-	if err := tpRPC.Call(utils.APIerSv2GetTPDestination, &AttrGetTPDestination{testTPid, dstDEMobile.ID}, &rplyDst); err != nil {
+	if err := tpRPC.Call(context.Background(), utils.APIerSv2GetTPDestination, &AttrGetTPDestination{testTPid, dstDEMobile.ID}, &rplyDst); err != nil {
 		t.Error("Calling APIerSv2.GetTPDestination, got error: ", err.Error())
 	} else if len(dstDEMobile.Prefixes) != len(rplyDst.Prefixes) {
 		t.Errorf("Calling APIerSv2.GetTPDestination expected: %v, received: %v", dstDEMobile, rplyDst)
 	}
 	// Test remove
-	if err := tpRPC.Call(utils.APIerSv2RemoveTPDestination, &AttrGetTPDestination{testTPid, dstDUMMY.ID}, &reply); err != nil {
+	if err := tpRPC.Call(context.Background(), utils.APIerSv2RemoveTPDestination, &AttrGetTPDestination{testTPid, dstDUMMY.ID}, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Error("Received: ", reply)
@@ -248,7 +250,7 @@ func testTPitDestinations(t *testing.T) {
 	// Test getIds
 	var rplyDstIds []string
 	expectedDstIds := []string{"DST_1002", "DST_1003", "DST_1007", "DST_DE_MOBILE", "DST_FS"}
-	if err := tpRPC.Call(utils.APIerSv2GetTPDestinationIDs, v1.AttrGetTPDestinationIds{TPid: testTPid}, &rplyDstIds); err != nil {
+	if err := tpRPC.Call(context.Background(), utils.APIerSv2GetTPDestinationIDs, v1.AttrGetTPDestinationIds{TPid: testTPid}, &rplyDstIds); err != nil {
 		t.Error("Calling APIerSv1.GetTPDestinationIDs, got error: ", err.Error())
 	} else if len(expectedDstIds) != len(rplyDstIds) {
 		t.Errorf("Calling APIerSv2.GetTPDestinationIDs expected: %v, received: %v", expectedDstIds, rplyDstIds)

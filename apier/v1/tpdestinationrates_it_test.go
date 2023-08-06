@@ -22,12 +22,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package v1
 
 import (
-	"net/rpc"
-	"net/rpc/jsonrpc"
 	"path"
 	"reflect"
 	"testing"
 
+	"github.com/cgrates/birpc"
+	"github.com/cgrates/birpc/context"
+	"github.com/cgrates/birpc/jsonrpc"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -36,7 +37,7 @@ import (
 var (
 	tpDstRateCfgPath   string
 	tpDstRateCfg       *config.CGRConfig
-	tpDstRateRPC       *rpc.Client
+	tpDstRateRPC       *birpc.Client
 	tpDstRate          *utils.TPDestinationRate
 	tpDstRateDelay     int
 	tpDstRateConfigDIR string //run tests for specific configuration
@@ -112,7 +113,7 @@ func testTPDstRateRpcConn(t *testing.T) {
 
 func testTPDstRateGetTPDstRateBeforeSet(t *testing.T) {
 	var reply *utils.TPDestinationRate
-	if err := tpDstRateRPC.Call(utils.APIerSv1GetTPDestinationRate,
+	if err := tpDstRateRPC.Call(context.Background(), utils.APIerSv1GetTPDestinationRate,
 		&AttrGetTPDestinationRate{TPid: "TP1", ID: "DR_FREESWITCH_USERS"}, &reply); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
@@ -133,7 +134,7 @@ func testTPDstRateSetTPDstRate(t *testing.T) {
 		},
 	}
 	var result string
-	if err := tpDstRateRPC.Call(utils.APIerSv1SetTPDestinationRate, tpDstRate, &result); err != nil {
+	if err := tpDstRateRPC.Call(context.Background(), utils.APIerSv1SetTPDestinationRate, tpDstRate, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -142,7 +143,7 @@ func testTPDstRateSetTPDstRate(t *testing.T) {
 
 func testTPDstRateGetTPDstRateAfterSet(t *testing.T) {
 	var reply *utils.TPDestinationRate
-	if err := tpDstRateRPC.Call(utils.APIerSv1GetTPDestinationRate,
+	if err := tpDstRateRPC.Call(context.Background(), utils.APIerSv1GetTPDestinationRate,
 		&AttrGetTPDestinationRate{TPid: "TP1", ID: "DR_FREESWITCH_USERS"}, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(tpDstRate, reply) {
@@ -153,7 +154,7 @@ func testTPDstRateGetTPDstRateAfterSet(t *testing.T) {
 func testTPDstRateGetTPDstRateIds(t *testing.T) {
 	var result []string
 	expectedTPID := []string{"DR_FREESWITCH_USERS"}
-	if err := tpDstRateRPC.Call(utils.APIerSv1GetTPDestinationRateIds,
+	if err := tpDstRateRPC.Call(context.Background(), utils.APIerSv1GetTPDestinationRateIds,
 		&AttrTPDestinationRateIds{TPid: "TP1"}, &result); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expectedTPID, result) {
@@ -168,7 +169,7 @@ func testTPDstRateUpdateTPDstRate(t *testing.T) {
 
 func testTPDstRateGetTPDstRateAfterUpdate(t *testing.T) {
 	var reply *utils.TPDestinationRate
-	if err := tpDstRateRPC.Call(utils.APIerSv1GetTPDestinationRate,
+	if err := tpDstRateRPC.Call(context.Background(), utils.APIerSv1GetTPDestinationRate,
 		&AttrGetTPDestinationRate{TPid: "TP1", ID: "DR_FREESWITCH_USERS"}, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(tpDstRate, reply) {
@@ -178,7 +179,7 @@ func testTPDstRateGetTPDstRateAfterUpdate(t *testing.T) {
 
 func testTPDstRateRemTPDstRate(t *testing.T) {
 	var resp string
-	if err := tpDstRateRPC.Call(utils.APIerSv1RemoveTPDestinationRate,
+	if err := tpDstRateRPC.Call(context.Background(), utils.APIerSv1RemoveTPDestinationRate,
 		&AttrGetTPDestinationRate{TPid: "TP1", ID: "DR_FREESWITCH_USERS"}, &resp); err != nil {
 		t.Error(err)
 	} else if resp != utils.OK {
@@ -189,7 +190,7 @@ func testTPDstRateRemTPDstRate(t *testing.T) {
 
 func testTPDstRateGetTPDstRateAfterRemove(t *testing.T) {
 	var reply *utils.TPDestinationRate
-	if err := tpDstRateRPC.Call(utils.APIerSv1GetTPDestinationRate,
+	if err := tpDstRateRPC.Call(context.Background(), utils.APIerSv1GetTPDestinationRate,
 		&AttrGetTPDestinationRate{TPid: "TP1", ID: "DR_FREESWITCH_USERS"}, &reply); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)

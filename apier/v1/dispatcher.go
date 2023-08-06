@@ -21,6 +21,7 @@ package v1
 import (
 	"time"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/dispatchers"
 	"github.com/cgrates/cgrates/engine"
@@ -30,7 +31,7 @@ import (
 )
 
 // GetDispatcherProfile returns a Dispatcher Profile
-func (apierSv1 *APIerSv1) GetDispatcherProfile(arg *utils.TenantID, reply *engine.DispatcherProfile) error {
+func (apierSv1 *APIerSv1) GetDispatcherProfile(ctx *context.Context, arg *utils.TenantID, reply *engine.DispatcherProfile) error {
 	if missing := utils.MissingStructFields(arg, []string{utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -47,7 +48,7 @@ func (apierSv1 *APIerSv1) GetDispatcherProfile(arg *utils.TenantID, reply *engin
 }
 
 // GetDispatcherProfileIDs returns list of dispatcherProfile IDs registered for a tenant
-func (apierSv1 *APIerSv1) GetDispatcherProfileIDs(tenantArg *utils.PaginatorWithTenant, dPrfIDs *[]string) error {
+func (apierSv1 *APIerSv1) GetDispatcherProfileIDs(ctx *context.Context, tenantArg *utils.PaginatorWithTenant, dPrfIDs *[]string) error {
 	tenant := tenantArg.Tenant
 	if tenant == utils.EmptyString {
 		tenant = apierSv1.Config.GeneralCfg().DefaultTenant
@@ -74,7 +75,7 @@ type DispatcherWithAPIOpts struct {
 }
 
 // SetDispatcherProfile add/update a new Dispatcher Profile
-func (apierSv1 *APIerSv1) SetDispatcherProfile(args *DispatcherWithAPIOpts, reply *string) error {
+func (apierSv1 *APIerSv1) SetDispatcherProfile(ctx *context.Context, args *DispatcherWithAPIOpts, reply *string) error {
 	if missing := utils.MissingStructFields(args.DispatcherProfile, []string{utils.ID}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -110,7 +111,7 @@ func (apierSv1 *APIerSv1) SetDispatcherProfile(args *DispatcherWithAPIOpts, repl
 }
 
 // RemoveDispatcherProfile remove a specific Dispatcher Profile
-func (apierSv1 *APIerSv1) RemoveDispatcherProfile(arg *utils.TenantIDWithAPIOpts, reply *string) error {
+func (apierSv1 *APIerSv1) RemoveDispatcherProfile(ctx *context.Context, arg *utils.TenantIDWithAPIOpts, reply *string) error {
 	if missing := utils.MissingStructFields(arg, []string{utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -136,7 +137,7 @@ func (apierSv1 *APIerSv1) RemoveDispatcherProfile(arg *utils.TenantIDWithAPIOpts
 }
 
 // GetDispatcherHost returns a Dispatcher Host
-func (apierSv1 *APIerSv1) GetDispatcherHost(arg *utils.TenantID, reply *engine.DispatcherHost) error {
+func (apierSv1 *APIerSv1) GetDispatcherHost(ctx *context.Context, arg *utils.TenantID, reply *engine.DispatcherHost) error {
 	if missing := utils.MissingStructFields(arg, []string{utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -153,7 +154,7 @@ func (apierSv1 *APIerSv1) GetDispatcherHost(arg *utils.TenantID, reply *engine.D
 }
 
 // GetDispatcherHostIDs returns list of dispatcherHost IDs registered for a tenant
-func (apierSv1 *APIerSv1) GetDispatcherHostIDs(tenantArg *utils.PaginatorWithTenant, dPrfIDs *[]string) error {
+func (apierSv1 *APIerSv1) GetDispatcherHostIDs(ctx *context.Context, tenantArg *utils.PaginatorWithTenant, dPrfIDs *[]string) error {
 	tenant := tenantArg.Tenant
 	if tenant == utils.EmptyString {
 		tenant = apierSv1.Config.GeneralCfg().DefaultTenant
@@ -175,7 +176,7 @@ func (apierSv1 *APIerSv1) GetDispatcherHostIDs(tenantArg *utils.PaginatorWithTen
 }
 
 // SetDispatcherHost add/update a new Dispatcher Host
-func (apierSv1 *APIerSv1) SetDispatcherHost(args *engine.DispatcherHostWithAPIOpts, reply *string) error {
+func (apierSv1 *APIerSv1) SetDispatcherHost(ctx *context.Context, args *engine.DispatcherHostWithAPIOpts, reply *string) error {
 	if missing := utils.MissingStructFields(args.DispatcherHost, []string{utils.ID}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -199,7 +200,7 @@ func (apierSv1 *APIerSv1) SetDispatcherHost(args *engine.DispatcherHostWithAPIOp
 }
 
 // RemoveDispatcherHost remove a specific Dispatcher Host
-func (apierSv1 *APIerSv1) RemoveDispatcherHost(arg *utils.TenantIDWithAPIOpts, reply *string) error {
+func (apierSv1 *APIerSv1) RemoveDispatcherHost(ctx *context.Context, arg *utils.TenantIDWithAPIOpts, reply *string) error {
 	if missing := utils.MissingStructFields(arg, []string{utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -234,30 +235,30 @@ type DispatcherThresholdSv1 struct {
 }
 
 // Ping implements ThresholdSv1Ping
-func (dT *DispatcherThresholdSv1) Ping(args *utils.CGREvent, reply *string) error {
-	return dT.dS.ThresholdSv1Ping(args, reply)
+func (dT *DispatcherThresholdSv1) Ping(ctx *context.Context, args *utils.CGREvent, reply *string) error {
+	return dT.dS.ThresholdSv1Ping(ctx, args, reply)
 }
 
 // GetThresholdsForEvent implements ThresholdSv1GetThresholdsForEvent
-func (dT *DispatcherThresholdSv1) GetThresholdsForEvent(tntID *utils.CGREvent,
+func (dT *DispatcherThresholdSv1) GetThresholdsForEvent(ctx *context.Context, tntID *utils.CGREvent,
 	t *engine.Thresholds) error {
-	return dT.dS.ThresholdSv1GetThresholdsForEvent(tntID, t)
+	return dT.dS.ThresholdSv1GetThresholdsForEvent(ctx, tntID, t)
 }
 
 // ProcessEvent implements ThresholdSv1ProcessEvent
-func (dT *DispatcherThresholdSv1) ProcessEvent(args *utils.CGREvent,
+func (dT *DispatcherThresholdSv1) ProcessEvent(ctx *context.Context, args *utils.CGREvent,
 	tIDs *[]string) error {
-	return dT.dS.ThresholdSv1ProcessEvent(args, tIDs)
+	return dT.dS.ThresholdSv1ProcessEvent(ctx, args, tIDs)
 }
 
-func (dT *DispatcherThresholdSv1) GetThresholdIDs(args *utils.TenantWithAPIOpts,
+func (dT *DispatcherThresholdSv1) GetThresholdIDs(ctx *context.Context, args *utils.TenantWithAPIOpts,
 	tIDs *[]string) error {
-	return dT.dS.ThresholdSv1GetThresholdIDs(args, tIDs)
+	return dT.dS.ThresholdSv1GetThresholdIDs(ctx, args, tIDs)
 }
 
-func (dT *DispatcherThresholdSv1) GetThreshold(args *utils.TenantIDWithAPIOpts,
+func (dT *DispatcherThresholdSv1) GetThreshold(ctx *context.Context, args *utils.TenantIDWithAPIOpts,
 	th *engine.Threshold) error {
-	return dT.dS.ThresholdSv1GetThreshold(args, th)
+	return dT.dS.ThresholdSv1GetThreshold(ctx, args, th)
 }
 
 func NewDispatcherStatSv1(dps *dispatchers.DispatcherService) *DispatcherStatSv1 {
@@ -270,34 +271,34 @@ type DispatcherStatSv1 struct {
 }
 
 // Ping implements StatSv1Ping
-func (dSts *DispatcherStatSv1) Ping(args *utils.CGREvent, reply *string) error {
-	return dSts.dS.StatSv1Ping(args, reply)
+func (dSts *DispatcherStatSv1) Ping(ctx *context.Context, args *utils.CGREvent, reply *string) error {
+	return dSts.dS.StatSv1Ping(ctx, args, reply)
 }
 
 // GetStatQueuesForEvent implements StatSv1GetStatQueuesForEvent
-func (dSts *DispatcherStatSv1) GetStatQueuesForEvent(args *utils.CGREvent, reply *[]string) error {
-	return dSts.dS.StatSv1GetStatQueuesForEvent(args, reply)
+func (dSts *DispatcherStatSv1) GetStatQueuesForEvent(ctx *context.Context, args *utils.CGREvent, reply *[]string) error {
+	return dSts.dS.StatSv1GetStatQueuesForEvent(ctx, args, reply)
 }
 
 // GetQueueStringMetrics implements StatSv1GetQueueStringMetrics
-func (dSts *DispatcherStatSv1) GetQueueStringMetrics(args *utils.TenantIDWithAPIOpts,
+func (dSts *DispatcherStatSv1) GetQueueStringMetrics(ctx *context.Context, args *utils.TenantIDWithAPIOpts,
 	reply *map[string]string) error {
-	return dSts.dS.StatSv1GetQueueStringMetrics(args, reply)
+	return dSts.dS.StatSv1GetQueueStringMetrics(ctx, args, reply)
 }
 
-func (dSts *DispatcherStatSv1) GetQueueFloatMetrics(args *utils.TenantIDWithAPIOpts,
+func (dSts *DispatcherStatSv1) GetQueueFloatMetrics(ctx *context.Context, args *utils.TenantIDWithAPIOpts,
 	reply *map[string]float64) error {
-	return dSts.dS.StatSv1GetQueueFloatMetrics(args, reply)
+	return dSts.dS.StatSv1GetQueueFloatMetrics(ctx, args, reply)
 }
 
-func (dSts *DispatcherStatSv1) GetQueueIDs(args *utils.TenantWithAPIOpts,
+func (dSts *DispatcherStatSv1) GetQueueIDs(ctx *context.Context, args *utils.TenantWithAPIOpts,
 	reply *[]string) error {
-	return dSts.dS.StatSv1GetQueueIDs(args, reply)
+	return dSts.dS.StatSv1GetQueueIDs(ctx, args, reply)
 }
 
 // GetQueueStringMetrics implements StatSv1ProcessEvent
-func (dSts *DispatcherStatSv1) ProcessEvent(args *utils.CGREvent, reply *[]string) error {
-	return dSts.dS.StatSv1ProcessEvent(args, reply)
+func (dSts *DispatcherStatSv1) ProcessEvent(ctx *context.Context, args *utils.CGREvent, reply *[]string) error {
+	return dSts.dS.StatSv1ProcessEvent(ctx, args, reply)
 }
 
 func NewDispatcherResourceSv1(dps *dispatchers.DispatcherService) *DispatcherResourceSv1 {
@@ -310,37 +311,37 @@ type DispatcherResourceSv1 struct {
 }
 
 // Ping implements ResourceSv1Ping
-func (dRs *DispatcherResourceSv1) Ping(args *utils.CGREvent, reply *string) error {
-	return dRs.dRs.ResourceSv1Ping(args, reply)
+func (dRs *DispatcherResourceSv1) Ping(ctx *context.Context, args *utils.CGREvent, reply *string) error {
+	return dRs.dRs.ResourceSv1Ping(ctx, args, reply)
 }
 
 // GetResourcesForEvent implements ResourceSv1GetResourcesForEvent
-func (dRs *DispatcherResourceSv1) GetResourcesForEvent(args *utils.CGREvent,
+func (dRs *DispatcherResourceSv1) GetResourcesForEvent(ctx *context.Context, args *utils.CGREvent,
 	reply *engine.Resources) error {
-	return dRs.dRs.ResourceSv1GetResourcesForEvent(args, reply)
+	return dRs.dRs.ResourceSv1GetResourcesForEvent(ctx, args, reply)
 }
 
-func (dRs *DispatcherResourceSv1) GetResource(args *utils.TenantIDWithAPIOpts, reply *engine.Resource) error {
-	return dRs.dRs.ResourceSv1GetResource(args, reply)
+func (dRs *DispatcherResourceSv1) GetResource(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *engine.Resource) error {
+	return dRs.dRs.ResourceSv1GetResource(ctx, args, reply)
 }
 
-func (dRs *DispatcherResourceSv1) GetResourceWithConfig(args *utils.TenantIDWithAPIOpts, reply *engine.ResourceWithConfig) error {
-	return dRs.dRs.ResourceSv1GetResourceWithConfig(args, reply)
+func (dRs *DispatcherResourceSv1) GetResourceWithConfig(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *engine.ResourceWithConfig) error {
+	return dRs.dRs.ResourceSv1GetResourceWithConfig(ctx, args, reply)
 }
 
-func (dRs *DispatcherResourceSv1) AuthorizeResources(args *utils.CGREvent,
+func (dRs *DispatcherResourceSv1) AuthorizeResources(ctx *context.Context, args *utils.CGREvent,
 	reply *string) error {
-	return dRs.dRs.ResourceSv1AuthorizeResources(args, reply)
+	return dRs.dRs.ResourceSv1AuthorizeResources(ctx, args, reply)
 }
 
-func (dRs *DispatcherResourceSv1) AllocateResources(args *utils.CGREvent,
+func (dRs *DispatcherResourceSv1) AllocateResources(ctx *context.Context, args *utils.CGREvent,
 	reply *string) error {
-	return dRs.dRs.ResourceSv1AllocateResources(args, reply)
+	return dRs.dRs.ResourceSv1AllocateResources(ctx, args, reply)
 }
 
-func (dRs *DispatcherResourceSv1) ReleaseResources(args *utils.CGREvent,
+func (dRs *DispatcherResourceSv1) ReleaseResources(ctx *context.Context, args *utils.CGREvent,
 	reply *string) error {
-	return dRs.dRs.ResourceSv1ReleaseResources(args, reply)
+	return dRs.dRs.ResourceSv1ReleaseResources(ctx, args, reply)
 }
 
 func NewDispatcherRouteSv1(dps *dispatchers.DispatcherService) *DispatcherRouteSv1 {
@@ -353,23 +354,23 @@ type DispatcherRouteSv1 struct {
 }
 
 // Ping implements RouteSv1Ping
-func (dRoute *DispatcherRouteSv1) Ping(args *utils.CGREvent, reply *string) error {
-	return dRoute.dRoute.RouteSv1Ping(args, reply)
+func (dRoute *DispatcherRouteSv1) Ping(ctx *context.Context, args *utils.CGREvent, reply *string) error {
+	return dRoute.dRoute.RouteSv1Ping(ctx, args, reply)
 }
 
 // GetRoutes implements RouteSv1GetRoutes
-func (dRoute *DispatcherRouteSv1) GetRoutes(args *utils.CGREvent, reply *engine.SortedRoutesList) error {
-	return dRoute.dRoute.RouteSv1GetRoutes(args, reply)
+func (dRoute *DispatcherRouteSv1) GetRoutes(ctx *context.Context, args *utils.CGREvent, reply *engine.SortedRoutesList) error {
+	return dRoute.dRoute.RouteSv1GetRoutes(ctx, args, reply)
 }
 
 // GetRouteProfilesForEvent returns a list of route profiles that match for Event
-func (dRoute *DispatcherRouteSv1) GetRouteProfilesForEvent(args *utils.CGREvent, reply *[]*engine.RouteProfile) error {
-	return dRoute.dRoute.RouteSv1GetRouteProfilesForEvent(args, reply)
+func (dRoute *DispatcherRouteSv1) GetRouteProfilesForEvent(ctx *context.Context, args *utils.CGREvent, reply *[]*engine.RouteProfile) error {
+	return dRoute.dRoute.RouteSv1GetRouteProfilesForEvent(ctx, args, reply)
 }
 
 // GetRoutesList returns sorted list of routes for Event as a string slice
-func (dRoute *DispatcherRouteSv1) GetRoutesList(args *utils.CGREvent, reply *[]string) error {
-	return dRoute.dRoute.RouteSv1GetRoutesList(args, reply)
+func (dRoute *DispatcherRouteSv1) GetRoutesList(ctx *context.Context, args *utils.CGREvent, reply *[]string) error {
+	return dRoute.dRoute.RouteSv1GetRoutesList(ctx, args, reply)
 }
 
 func NewDispatcherAttributeSv1(dps *dispatchers.DispatcherService) *DispatcherAttributeSv1 {
@@ -382,20 +383,20 @@ type DispatcherAttributeSv1 struct {
 }
 
 // Ping implements AttributeSv1Ping
-func (dA *DispatcherAttributeSv1) Ping(args *utils.CGREvent, reply *string) error {
-	return dA.dA.AttributeSv1Ping(args, reply)
+func (dA *DispatcherAttributeSv1) Ping(ctx *context.Context, args *utils.CGREvent, reply *string) error {
+	return dA.dA.AttributeSv1Ping(ctx, args, reply)
 }
 
 // GetAttributeForEvent implements AttributeSv1GetAttributeForEvent
-func (dA *DispatcherAttributeSv1) GetAttributeForEvent(args *utils.CGREvent,
+func (dA *DispatcherAttributeSv1) GetAttributeForEvent(ctx *context.Context, args *utils.CGREvent,
 	reply *engine.AttributeProfile) error {
-	return dA.dA.AttributeSv1GetAttributeForEvent(args, reply)
+	return dA.dA.AttributeSv1GetAttributeForEvent(ctx, args, reply)
 }
 
 // ProcessEvent implements AttributeSv1ProcessEvent
-func (dA *DispatcherAttributeSv1) ProcessEvent(args *utils.CGREvent,
+func (dA *DispatcherAttributeSv1) ProcessEvent(ctx *context.Context, args *utils.CGREvent,
 	reply *engine.AttrSProcessEventReply) error {
-	return dA.dA.AttributeSv1ProcessEvent(args, reply)
+	return dA.dA.AttributeSv1ProcessEvent(ctx, args, reply)
 }
 
 func NewDispatcherChargerSv1(dps *dispatchers.DispatcherService) *DispatcherChargerSv1 {
@@ -408,20 +409,20 @@ type DispatcherChargerSv1 struct {
 }
 
 // Ping implements ChargerSv1Ping
-func (dC *DispatcherChargerSv1) Ping(args *utils.CGREvent, reply *string) error {
-	return dC.dC.ChargerSv1Ping(args, reply)
+func (dC *DispatcherChargerSv1) Ping(ctx *context.Context, args *utils.CGREvent, reply *string) error {
+	return dC.dC.ChargerSv1Ping(ctx, args, reply)
 }
 
 // GetChargersForEvent implements ChargerSv1GetChargersForEvent
-func (dC *DispatcherChargerSv1) GetChargersForEvent(args *utils.CGREvent,
+func (dC *DispatcherChargerSv1) GetChargersForEvent(ctx *context.Context, args *utils.CGREvent,
 	reply *engine.ChargerProfiles) (err error) {
-	return dC.dC.ChargerSv1GetChargersForEvent(args, reply)
+	return dC.dC.ChargerSv1GetChargersForEvent(ctx, args, reply)
 }
 
 // ProcessEvent implements ChargerSv1ProcessEvent
-func (dC *DispatcherChargerSv1) ProcessEvent(args *utils.CGREvent,
+func (dC *DispatcherChargerSv1) ProcessEvent(ctx *context.Context, args *utils.CGREvent,
 	reply *[]*engine.ChrgSProcessEventReply) (err error) {
-	return dC.dC.ChargerSv1ProcessEvent(args, reply)
+	return dC.dC.ChargerSv1ProcessEvent(ctx, args, reply)
 }
 
 func NewDispatcherSessionSv1(dps *dispatchers.DispatcherService) *DispatcherSessionSv1 {
@@ -434,121 +435,121 @@ type DispatcherSessionSv1 struct {
 }
 
 // Ping implements SessionSv1Ping
-func (dS *DispatcherSessionSv1) Ping(args *utils.CGREvent, reply *string) error {
-	return dS.dS.SessionSv1Ping(args, reply)
+func (dS *DispatcherSessionSv1) Ping(ctx *context.Context, args *utils.CGREvent, reply *string) error {
+	return dS.dS.SessionSv1Ping(ctx, args, reply)
 }
 
 // AuthorizeEventWithDigest implements SessionSv1AuthorizeEventWithDigest
-func (dS *DispatcherSessionSv1) AuthorizeEventWithDigest(args *sessions.V1AuthorizeArgs,
+func (dS *DispatcherSessionSv1) AuthorizeEventWithDigest(ctx *context.Context, args *sessions.V1AuthorizeArgs,
 	reply *sessions.V1AuthorizeReplyWithDigest) error {
-	return dS.dS.SessionSv1AuthorizeEventWithDigest(args, reply)
+	return dS.dS.SessionSv1AuthorizeEventWithDigest(ctx, args, reply)
 }
 
-func (dS *DispatcherSessionSv1) AuthorizeEvent(args *sessions.V1AuthorizeArgs,
+func (dS *DispatcherSessionSv1) AuthorizeEvent(ctx *context.Context, args *sessions.V1AuthorizeArgs,
 	reply *sessions.V1AuthorizeReply) error {
-	return dS.dS.SessionSv1AuthorizeEvent(args, reply)
+	return dS.dS.SessionSv1AuthorizeEvent(ctx, args, reply)
 }
 
 // InitiateSessionWithDigest implements SessionSv1InitiateSessionWithDigest
-func (dS *DispatcherSessionSv1) InitiateSessionWithDigest(args *sessions.V1InitSessionArgs,
+func (dS *DispatcherSessionSv1) InitiateSessionWithDigest(ctx *context.Context, args *sessions.V1InitSessionArgs,
 	reply *sessions.V1InitReplyWithDigest) (err error) {
-	return dS.dS.SessionSv1InitiateSessionWithDigest(args, reply)
+	return dS.dS.SessionSv1InitiateSessionWithDigest(ctx, args, reply)
 }
 
 // InitiateSessionWithDigest implements SessionSv1InitiateSessionWithDigest
-func (dS *DispatcherSessionSv1) InitiateSession(args *sessions.V1InitSessionArgs,
+func (dS *DispatcherSessionSv1) InitiateSession(ctx *context.Context, args *sessions.V1InitSessionArgs,
 	reply *sessions.V1InitSessionReply) (err error) {
-	return dS.dS.SessionSv1InitiateSession(args, reply)
+	return dS.dS.SessionSv1InitiateSession(ctx, args, reply)
 }
 
 // ProcessCDR implements SessionSv1ProcessCDR
-func (dS *DispatcherSessionSv1) ProcessCDR(args *utils.CGREvent,
+func (dS *DispatcherSessionSv1) ProcessCDR(ctx *context.Context, args *utils.CGREvent,
 	reply *string) (err error) {
-	return dS.dS.SessionSv1ProcessCDR(args, reply)
+	return dS.dS.SessionSv1ProcessCDR(ctx, args, reply)
 }
 
 // ProcessMessage implements SessionSv1ProcessMessage
-func (dS *DispatcherSessionSv1) ProcessMessage(args *sessions.V1ProcessMessageArgs,
+func (dS *DispatcherSessionSv1) ProcessMessage(ctx *context.Context, args *sessions.V1ProcessMessageArgs,
 	reply *sessions.V1ProcessMessageReply) (err error) {
-	return dS.dS.SessionSv1ProcessMessage(args, reply)
+	return dS.dS.SessionSv1ProcessMessage(ctx, args, reply)
 }
 
 // ProcessMessage implements SessionSv1ProcessMessage
-func (dS *DispatcherSessionSv1) ProcessEvent(args *sessions.V1ProcessEventArgs,
+func (dS *DispatcherSessionSv1) ProcessEvent(ctx *context.Context, args *sessions.V1ProcessEventArgs,
 	reply *sessions.V1ProcessEventReply) (err error) {
-	return dS.dS.SessionSv1ProcessEvent(args, reply)
+	return dS.dS.SessionSv1ProcessEvent(ctx, args, reply)
 }
 
 // GetCost implements SessionSv1GetCost
-func (dS *DispatcherSessionSv1) GetCost(args *sessions.V1ProcessEventArgs,
+func (dS *DispatcherSessionSv1) GetCost(ctx *context.Context, args *sessions.V1ProcessEventArgs,
 	reply *sessions.V1GetCostReply) (err error) {
-	return dS.dS.SessionSv1GetCost(args, reply)
+	return dS.dS.SessionSv1GetCost(ctx, args, reply)
 }
 
 // TerminateSession implements SessionSv1TerminateSession
-func (dS *DispatcherSessionSv1) TerminateSession(args *sessions.V1TerminateSessionArgs,
+func (dS *DispatcherSessionSv1) TerminateSession(ctx *context.Context, args *sessions.V1TerminateSessionArgs,
 	reply *string) (err error) {
-	return dS.dS.SessionSv1TerminateSession(args, reply)
+	return dS.dS.SessionSv1TerminateSession(ctx, args, reply)
 }
 
 // UpdateSession implements SessionSv1UpdateSession
-func (dS *DispatcherSessionSv1) UpdateSession(args *sessions.V1UpdateSessionArgs,
+func (dS *DispatcherSessionSv1) UpdateSession(ctx *context.Context, args *sessions.V1UpdateSessionArgs,
 	reply *sessions.V1UpdateSessionReply) (err error) {
-	return dS.dS.SessionSv1UpdateSession(args, reply)
+	return dS.dS.SessionSv1UpdateSession(ctx, args, reply)
 }
 
-func (dS *DispatcherSessionSv1) GetActiveSessions(args *utils.SessionFilter,
+func (dS *DispatcherSessionSv1) GetActiveSessions(ctx *context.Context, args *utils.SessionFilter,
 	reply *[]*sessions.ExternalSession) (err error) {
-	return dS.dS.SessionSv1GetActiveSessions(args, reply)
+	return dS.dS.SessionSv1GetActiveSessions(ctx, args, reply)
 }
 
-func (dS *DispatcherSessionSv1) GetActiveSessionsCount(args *utils.SessionFilter,
+func (dS *DispatcherSessionSv1) GetActiveSessionsCount(ctx *context.Context, args *utils.SessionFilter,
 	reply *int) (err error) {
-	return dS.dS.SessionSv1GetActiveSessionsCount(args, reply)
+	return dS.dS.SessionSv1GetActiveSessionsCount(ctx, args, reply)
 }
 
-func (dS *DispatcherSessionSv1) ForceDisconnect(args *utils.SessionFilter,
+func (dS *DispatcherSessionSv1) ForceDisconnect(ctx *context.Context, args *utils.SessionFilter,
 	reply *string) (err error) {
-	return dS.dS.SessionSv1ForceDisconnect(args, reply)
+	return dS.dS.SessionSv1ForceDisconnect(ctx, args, reply)
 }
 
-func (dS *DispatcherSessionSv1) GetPassiveSessions(args *utils.SessionFilter,
+func (dS *DispatcherSessionSv1) GetPassiveSessions(ctx *context.Context, args *utils.SessionFilter,
 	reply *[]*sessions.ExternalSession) (err error) {
-	return dS.dS.SessionSv1GetPassiveSessions(args, reply)
+	return dS.dS.SessionSv1GetPassiveSessions(ctx, args, reply)
 }
 
-func (dS *DispatcherSessionSv1) GetPassiveSessionsCount(args *utils.SessionFilter,
+func (dS *DispatcherSessionSv1) GetPassiveSessionsCount(ctx *context.Context, args *utils.SessionFilter,
 	reply *int) (err error) {
-	return dS.dS.SessionSv1GetPassiveSessionsCount(args, reply)
+	return dS.dS.SessionSv1GetPassiveSessionsCount(ctx, args, reply)
 }
 
-func (dS *DispatcherSessionSv1) ReplicateSessions(args *dispatchers.ArgsReplicateSessionsWithAPIOpts,
+func (dS *DispatcherSessionSv1) ReplicateSessions(ctx *context.Context, args *dispatchers.ArgsReplicateSessionsWithAPIOpts,
 	reply *string) (err error) {
-	return dS.dS.SessionSv1ReplicateSessions(*args, reply)
+	return dS.dS.SessionSv1ReplicateSessions(ctx, *args, reply)
 }
 
-func (dS *DispatcherSessionSv1) SetPassiveSession(args *sessions.Session,
+func (dS *DispatcherSessionSv1) SetPassiveSession(ctx *context.Context, args *sessions.Session,
 	reply *string) (err error) {
-	return dS.dS.SessionSv1SetPassiveSession(args, reply)
+	return dS.dS.SessionSv1SetPassiveSession(ctx, args, reply)
 }
 
-func (dS *DispatcherSessionSv1) ActivateSessions(args *utils.SessionIDsWithArgsDispatcher, reply *string) error {
-	return dS.dS.SessionSv1ActivateSessions(args, reply)
+func (dS *DispatcherSessionSv1) ActivateSessions(ctx *context.Context, args *utils.SessionIDsWithArgsDispatcher, reply *string) error {
+	return dS.dS.SessionSv1ActivateSessions(ctx, args, reply)
 }
 
-func (dS *DispatcherSessionSv1) DeactivateSessions(args *utils.SessionIDsWithArgsDispatcher, reply *string) error {
-	return dS.dS.SessionSv1DeactivateSessions(args, reply)
+func (dS *DispatcherSessionSv1) DeactivateSessions(ctx *context.Context, args *utils.SessionIDsWithArgsDispatcher, reply *string) error {
+	return dS.dS.SessionSv1DeactivateSessions(ctx, args, reply)
 }
 
-func (dS *DispatcherSessionSv1) SyncSessions(args *utils.TenantWithAPIOpts, rply *string) error {
-	return dS.dS.SessionSv1SyncSessions(args, rply)
+func (dS *DispatcherSessionSv1) SyncSessions(ctx *context.Context, args *utils.TenantWithAPIOpts, rply *string) error {
+	return dS.dS.SessionSv1SyncSessions(ctx, args, rply)
 }
 
-func (dS *DispatcherSessionSv1) STIRAuthenticate(args *sessions.V1STIRAuthenticateArgs, reply *string) error {
-	return dS.dS.SessionSv1STIRAuthenticate(args, reply)
+func (dS *DispatcherSessionSv1) STIRAuthenticate(ctx *context.Context, args *sessions.V1STIRAuthenticateArgs, reply *string) error {
+	return dS.dS.SessionSv1STIRAuthenticate(ctx, args, reply)
 }
-func (dS *DispatcherSessionSv1) STIRIdentity(args *sessions.V1STIRIdentityArgs, reply *string) error {
-	return dS.dS.SessionSv1STIRIdentity(args, reply)
+func (dS *DispatcherSessionSv1) STIRIdentity(ctx *context.Context, args *sessions.V1STIRIdentityArgs, reply *string) error {
+	return dS.dS.SessionSv1STIRIdentity(ctx, args, reply)
 }
 
 func NewDispatcherResponder(dps *dispatchers.DispatcherService) *DispatcherResponder {
@@ -560,44 +561,44 @@ type DispatcherResponder struct {
 	dS *dispatchers.DispatcherService
 }
 
-func (dS *DispatcherResponder) GetCost(args *engine.CallDescriptorWithAPIOpts, reply *engine.CallCost) error {
-	return dS.dS.ResponderGetCost(args, reply)
+func (dS *DispatcherResponder) GetCost(ctx *context.Context, args *engine.CallDescriptorWithAPIOpts, reply *engine.CallCost) error {
+	return dS.dS.ResponderGetCost(ctx, args, reply)
 }
 
-func (dS *DispatcherResponder) Debit(args *engine.CallDescriptorWithAPIOpts, reply *engine.CallCost) error {
-	return dS.dS.ResponderDebit(args, reply)
+func (dS *DispatcherResponder) Debit(ctx *context.Context, args *engine.CallDescriptorWithAPIOpts, reply *engine.CallCost) error {
+	return dS.dS.ResponderDebit(ctx, args, reply)
 }
 
-func (dS *DispatcherResponder) MaxDebit(args *engine.CallDescriptorWithAPIOpts, reply *engine.CallCost) error {
-	return dS.dS.ResponderMaxDebit(args, reply)
+func (dS *DispatcherResponder) MaxDebit(ctx *context.Context, args *engine.CallDescriptorWithAPIOpts, reply *engine.CallCost) error {
+	return dS.dS.ResponderMaxDebit(ctx, args, reply)
 }
 
-func (dS *DispatcherResponder) RefundIncrements(args *engine.CallDescriptorWithAPIOpts, reply *engine.Account) error {
-	return dS.dS.ResponderRefundIncrements(args, reply)
+func (dS *DispatcherResponder) RefundIncrements(ctx *context.Context, args *engine.CallDescriptorWithAPIOpts, reply *engine.Account) error {
+	return dS.dS.ResponderRefundIncrements(ctx, args, reply)
 }
 
-func (dS *DispatcherResponder) RefundRounding(args *engine.CallDescriptorWithAPIOpts, reply *engine.Account) error {
-	return dS.dS.ResponderRefundRounding(args, reply)
+func (dS *DispatcherResponder) RefundRounding(ctx *context.Context, args *engine.CallDescriptorWithAPIOpts, reply *engine.Account) error {
+	return dS.dS.ResponderRefundRounding(ctx, args, reply)
 }
 
-func (dS *DispatcherResponder) GetMaxSessionTime(args *engine.CallDescriptorWithAPIOpts, reply *time.Duration) error {
-	return dS.dS.ResponderGetMaxSessionTime(args, reply)
+func (dS *DispatcherResponder) GetMaxSessionTime(ctx *context.Context, args *engine.CallDescriptorWithAPIOpts, reply *time.Duration) error {
+	return dS.dS.ResponderGetMaxSessionTime(ctx, args, reply)
 }
 
-func (dS *DispatcherResponder) Shutdown(args *utils.TenantWithAPIOpts, reply *string) error {
-	return dS.dS.ResponderShutdown(args, reply)
+func (dS *DispatcherResponder) Shutdown(ctx *context.Context, args *utils.TenantWithAPIOpts, reply *string) error {
+	return dS.dS.ResponderShutdown(ctx, args, reply)
 }
 
-func (dS *DispatcherResponder) GetCostOnRatingPlans(arg *utils.GetCostOnRatingPlansArgs, reply *map[string]any) (err error) {
-	return dS.dS.ResponderGetCostOnRatingPlans(arg, reply)
+func (dS *DispatcherResponder) GetCostOnRatingPlans(ctx *context.Context, arg *utils.GetCostOnRatingPlansArgs, reply *map[string]any) (err error) {
+	return dS.dS.ResponderGetCostOnRatingPlans(ctx, arg, reply)
 }
-func (dS *DispatcherResponder) GetMaxSessionTimeOnAccounts(arg *utils.GetMaxSessionTimeOnAccountsArgs, reply *map[string]any) (err error) {
-	return dS.dS.ResponderGetMaxSessionTimeOnAccounts(arg, reply)
+func (dS *DispatcherResponder) GetMaxSessionTimeOnAccounts(ctx *context.Context, arg *utils.GetMaxSessionTimeOnAccountsArgs, reply *map[string]any) (err error) {
+	return dS.dS.ResponderGetMaxSessionTimeOnAccounts(ctx, arg, reply)
 }
 
 // Ping used to detreminate if component is active
-func (dS *DispatcherResponder) Ping(args *utils.CGREvent, reply *string) error {
-	return dS.dS.ResponderPing(args, reply)
+func (dS *DispatcherResponder) Ping(ctx *context.Context, args *utils.CGREvent, reply *string) error {
+	return dS.dS.ResponderPing(ctx, args, reply)
 }
 
 func NewDispatcherCacheSv1(dps *dispatchers.DispatcherService) *DispatcherCacheSv1 {
@@ -610,105 +611,105 @@ type DispatcherCacheSv1 struct {
 }
 
 // GetItemIDs returns the IDs for cacheID with given prefix
-func (dS *DispatcherCacheSv1) GetItemIDs(args *utils.ArgsGetCacheItemIDsWithAPIOpts,
+func (dS *DispatcherCacheSv1) GetItemIDs(ctx *context.Context, args *utils.ArgsGetCacheItemIDsWithAPIOpts,
 	reply *[]string) error {
-	return dS.dS.CacheSv1GetItemIDs(args, reply)
+	return dS.dS.CacheSv1GetItemIDs(ctx, args, reply)
 }
 
 // HasItem verifies the existence of an Item in cache
-func (dS *DispatcherCacheSv1) HasItem(args *utils.ArgsGetCacheItemWithAPIOpts,
+func (dS *DispatcherCacheSv1) HasItem(ctx *context.Context, args *utils.ArgsGetCacheItemWithAPIOpts,
 	reply *bool) error {
-	return dS.dS.CacheSv1HasItem(args, reply)
+	return dS.dS.CacheSv1HasItem(ctx, args, reply)
 }
 
 // GetItem returns an Item from the cache
-func (dS *DispatcherCacheSv1) GetItem(args *utils.ArgsGetCacheItemWithAPIOpts,
+func (dS *DispatcherCacheSv1) GetItem(ctx *context.Context, args *utils.ArgsGetCacheItemWithAPIOpts,
 	reply *any) error {
-	return dS.dS.CacheSv1GetItem(args, reply)
+	return dS.dS.CacheSv1GetItem(ctx, args, reply)
 }
 
 // GetItemWithRemote returns an Item from local or remote cache
-func (dS *DispatcherCacheSv1) GetItemWithRemote(args *utils.ArgsGetCacheItemWithAPIOpts,
+func (dS *DispatcherCacheSv1) GetItemWithRemote(ctx *context.Context, args *utils.ArgsGetCacheItemWithAPIOpts,
 	reply *any) error {
-	return dS.dS.CacheSv1GetItemWithRemote(args, reply)
+	return dS.dS.CacheSv1GetItemWithRemote(ctx, args, reply)
 }
 
 // GetItemExpiryTime returns the expiryTime for an item
-func (dS *DispatcherCacheSv1) GetItemExpiryTime(args *utils.ArgsGetCacheItemWithAPIOpts,
+func (dS *DispatcherCacheSv1) GetItemExpiryTime(ctx *context.Context, args *utils.ArgsGetCacheItemWithAPIOpts,
 	reply *time.Time) error {
-	return dS.dS.CacheSv1GetItemExpiryTime(args, reply)
+	return dS.dS.CacheSv1GetItemExpiryTime(ctx, args, reply)
 }
 
 // RemoveItem removes the Item with ID from cache
-func (dS *DispatcherCacheSv1) RemoveItem(args *utils.ArgsGetCacheItemWithAPIOpts,
+func (dS *DispatcherCacheSv1) RemoveItem(ctx *context.Context, args *utils.ArgsGetCacheItemWithAPIOpts,
 	reply *string) error {
-	return dS.dS.CacheSv1RemoveItem(args, reply)
+	return dS.dS.CacheSv1RemoveItem(ctx, args, reply)
 }
 
 // RemoveItems removes the Item with ID from cache
-func (dS *DispatcherCacheSv1) RemoveItems(args *utils.AttrReloadCacheWithAPIOpts,
+func (dS *DispatcherCacheSv1) RemoveItems(ctx *context.Context, args *utils.AttrReloadCacheWithAPIOpts,
 	reply *string) error {
-	return dS.dS.CacheSv1RemoveItems(args, reply)
+	return dS.dS.CacheSv1RemoveItems(ctx, args, reply)
 }
 
 // Clear will clear partitions in the cache (nil fol all, empty slice for none)
-func (dS *DispatcherCacheSv1) Clear(args *utils.AttrCacheIDsWithAPIOpts,
+func (dS *DispatcherCacheSv1) Clear(ctx *context.Context, args *utils.AttrCacheIDsWithAPIOpts,
 	reply *string) error {
-	return dS.dS.CacheSv1Clear(args, reply)
+	return dS.dS.CacheSv1Clear(ctx, args, reply)
 }
 
 // GetCacheStats returns CacheStats filtered by cacheIDs
-func (dS *DispatcherCacheSv1) GetCacheStats(args *utils.AttrCacheIDsWithAPIOpts,
+func (dS *DispatcherCacheSv1) GetCacheStats(ctx *context.Context, args *utils.AttrCacheIDsWithAPIOpts,
 	reply *map[string]*ltcache.CacheStats) error {
-	return dS.dS.CacheSv1GetCacheStats(args, reply)
+	return dS.dS.CacheSv1GetCacheStats(ctx, args, reply)
 }
 
 // PrecacheStatus checks status of active precache processes
-func (dS *DispatcherCacheSv1) PrecacheStatus(args *utils.AttrCacheIDsWithAPIOpts, reply *map[string]string) error {
-	return dS.dS.CacheSv1PrecacheStatus(args, reply)
+func (dS *DispatcherCacheSv1) PrecacheStatus(ctx *context.Context, args *utils.AttrCacheIDsWithAPIOpts, reply *map[string]string) error {
+	return dS.dS.CacheSv1PrecacheStatus(ctx, args, reply)
 }
 
 // HasGroup checks existence of a group in cache
-func (dS *DispatcherCacheSv1) HasGroup(args *utils.ArgsGetGroupWithAPIOpts,
+func (dS *DispatcherCacheSv1) HasGroup(ctx *context.Context, args *utils.ArgsGetGroupWithAPIOpts,
 	reply *bool) (err error) {
-	return dS.dS.CacheSv1HasGroup(args, reply)
+	return dS.dS.CacheSv1HasGroup(ctx, args, reply)
 }
 
 // GetGroupItemIDs returns a list of itemIDs in a cache group
-func (dS *DispatcherCacheSv1) GetGroupItemIDs(args *utils.ArgsGetGroupWithAPIOpts,
+func (dS *DispatcherCacheSv1) GetGroupItemIDs(ctx *context.Context, args *utils.ArgsGetGroupWithAPIOpts,
 	reply *[]string) (err error) {
-	return dS.dS.CacheSv1GetGroupItemIDs(args, reply)
+	return dS.dS.CacheSv1GetGroupItemIDs(ctx, args, reply)
 }
 
 // RemoveGroup will remove a group and all items belonging to it from cache
-func (dS *DispatcherCacheSv1) RemoveGroup(args *utils.ArgsGetGroupWithAPIOpts,
+func (dS *DispatcherCacheSv1) RemoveGroup(ctx *context.Context, args *utils.ArgsGetGroupWithAPIOpts,
 	reply *string) (err error) {
-	return dS.dS.CacheSv1RemoveGroup(args, reply)
+	return dS.dS.CacheSv1RemoveGroup(ctx, args, reply)
 }
 
 // ReloadCache reloads cache from DB for a prefix or completely
-func (dS *DispatcherCacheSv1) ReloadCache(args *utils.AttrReloadCacheWithAPIOpts, reply *string) (err error) {
-	return dS.dS.CacheSv1ReloadCache(args, reply)
+func (dS *DispatcherCacheSv1) ReloadCache(ctx *context.Context, args *utils.AttrReloadCacheWithAPIOpts, reply *string) (err error) {
+	return dS.dS.CacheSv1ReloadCache(ctx, args, reply)
 }
 
 // LoadCache loads cache from DB for a prefix or completely
-func (dS *DispatcherCacheSv1) LoadCache(args *utils.AttrReloadCacheWithAPIOpts, reply *string) (err error) {
-	return dS.dS.CacheSv1LoadCache(args, reply)
+func (dS *DispatcherCacheSv1) LoadCache(ctx *context.Context, args *utils.AttrReloadCacheWithAPIOpts, reply *string) (err error) {
+	return dS.dS.CacheSv1LoadCache(ctx, args, reply)
 }
 
 // ReplicateSet replicate an item
-func (dS *DispatcherCacheSv1) ReplicateSet(args *utils.ArgCacheReplicateSet, reply *string) (err error) {
-	return dS.dS.CacheSv1ReplicateSet(args, reply)
+func (dS *DispatcherCacheSv1) ReplicateSet(ctx *context.Context, args *utils.ArgCacheReplicateSet, reply *string) (err error) {
+	return dS.dS.CacheSv1ReplicateSet(ctx, args, reply)
 }
 
 // ReplicateRemove remove an item
-func (dS *DispatcherCacheSv1) ReplicateRemove(args *utils.ArgCacheReplicateRemove, reply *string) (err error) {
-	return dS.dS.CacheSv1ReplicateRemove(args, reply)
+func (dS *DispatcherCacheSv1) ReplicateRemove(ctx *context.Context, args *utils.ArgCacheReplicateRemove, reply *string) (err error) {
+	return dS.dS.CacheSv1ReplicateRemove(ctx, args, reply)
 }
 
 // Ping used to determinate if component is active
-func (dS *DispatcherCacheSv1) Ping(args *utils.CGREvent, reply *string) error {
-	return dS.dS.CacheSv1Ping(args, reply)
+func (dS *DispatcherCacheSv1) Ping(ctx *context.Context, args *utils.CGREvent, reply *string) error {
+	return dS.dS.CacheSv1Ping(ctx, args, reply)
 }
 
 func NewDispatcherGuardianSv1(dps *dispatchers.DispatcherService) *DispatcherGuardianSv1 {
@@ -721,18 +722,18 @@ type DispatcherGuardianSv1 struct {
 }
 
 // RemoteLock will lock a key from remote
-func (dS *DispatcherGuardianSv1) RemoteLock(attr *dispatchers.AttrRemoteLockWithAPIOpts, reply *string) (err error) {
-	return dS.dS.GuardianSv1RemoteLock(*attr, reply)
+func (dS *DispatcherGuardianSv1) RemoteLock(ctx *context.Context, attr *dispatchers.AttrRemoteLockWithAPIOpts, reply *string) (err error) {
+	return dS.dS.GuardianSv1RemoteLock(ctx, *attr, reply)
 }
 
 // RemoteUnlock will unlock a key from remote based on reference ID
-func (dS *DispatcherGuardianSv1) RemoteUnlock(attr *dispatchers.AttrRemoteUnlockWithAPIOpts, reply *[]string) (err error) {
-	return dS.dS.GuardianSv1RemoteUnlock(*attr, reply)
+func (dS *DispatcherGuardianSv1) RemoteUnlock(ctx *context.Context, attr *dispatchers.AttrRemoteUnlockWithAPIOpts, reply *[]string) (err error) {
+	return dS.dS.GuardianSv1RemoteUnlock(ctx, *attr, reply)
 }
 
 // Ping used to detreminate if component is active
-func (dS *DispatcherGuardianSv1) Ping(args *utils.CGREvent, reply *string) error {
-	return dS.dS.GuardianSv1Ping(args, reply)
+func (dS *DispatcherGuardianSv1) Ping(ctx *context.Context, args *utils.CGREvent, reply *string) error {
+	return dS.dS.GuardianSv1Ping(ctx, args, reply)
 }
 
 func NewDispatcherSchedulerSv1(dps *dispatchers.DispatcherService) *DispatcherSchedulerSv1 {
@@ -745,23 +746,23 @@ type DispatcherSchedulerSv1 struct {
 }
 
 // Reload reloads scheduler instructions
-func (dS *DispatcherSchedulerSv1) Reload(attr *utils.CGREvent, reply *string) (err error) {
-	return dS.dS.SchedulerSv1Reload(attr, reply)
+func (dS *DispatcherSchedulerSv1) Reload(ctx *context.Context, attr *utils.CGREvent, reply *string) (err error) {
+	return dS.dS.SchedulerSv1Reload(ctx, attr, reply)
 }
 
 // Ping used to detreminate if component is active
-func (dS *DispatcherSchedulerSv1) Ping(args *utils.CGREvent, reply *string) error {
-	return dS.dS.SchedulerSv1Ping(args, reply)
+func (dS *DispatcherSchedulerSv1) Ping(ctx *context.Context, args *utils.CGREvent, reply *string) error {
+	return dS.dS.SchedulerSv1Ping(ctx, args, reply)
 }
 
 // ExecuteActions execute an actionPlan or multiple actionsPlans between a time interval
-func (dS *DispatcherSchedulerSv1) ExecuteActions(args *utils.AttrsExecuteActions, reply *string) error {
-	return dS.dS.SchedulerSv1ExecuteActions(args, reply)
+func (dS *DispatcherSchedulerSv1) ExecuteActions(ctx *context.Context, args *utils.AttrsExecuteActions, reply *string) error {
+	return dS.dS.SchedulerSv1ExecuteActions(ctx, args, reply)
 }
 
 // ExecuteActionPlans execute multiple actionPlans one by one
-func (dS *DispatcherSchedulerSv1) ExecuteActionPlans(args *utils.AttrsExecuteActionPlans, reply *string) (err error) {
-	return dS.dS.SchedulerSv1ExecuteActionPlans(args, reply)
+func (dS *DispatcherSchedulerSv1) ExecuteActionPlans(ctx *context.Context, args *utils.AttrsExecuteActionPlans, reply *string) (err error) {
+	return dS.dS.SchedulerSv1ExecuteActionPlans(ctx, args, reply)
 }
 
 func NewDispatcherSv1(dS *dispatchers.DispatcherService) *DispatcherSv1 {
@@ -773,30 +774,30 @@ type DispatcherSv1 struct {
 }
 
 // GetProfileForEvent returns the matching dispatcher profile for the provided event
-func (dSv1 DispatcherSv1) GetProfilesForEvent(ev *utils.CGREvent,
+func (dSv1 DispatcherSv1) GetProfilesForEvent(ctx *context.Context, ev *utils.CGREvent,
 	dPrfl *engine.DispatcherProfiles) error {
-	return dSv1.dS.V1GetProfilesForEvent(ev, dPrfl)
+	return dSv1.dS.DispatcherSv1GetProfilesForEvent(ctx, ev, dPrfl)
 }
 
-func (dS *DispatcherSv1) RemoteStatus(args *utils.TenantWithAPIOpts, reply *map[string]any) (err error) {
-	return dS.dS.DispatcherSv1RemoteStatus(args, reply)
+func (dS *DispatcherSv1) RemoteStatus(ctx *context.Context, args *utils.TenantWithAPIOpts, reply *map[string]any) (err error) {
+	return dS.dS.DispatcherSv1RemoteStatus(ctx, args, reply)
 }
 
-func (dS *DispatcherSv1) RemotePing(args *utils.CGREvent, reply *string) (err error) {
-	return dS.dS.DispatcherSv1RemotePing(args, reply)
+func (dS *DispatcherSv1) RemotePing(ctx *context.Context, args *utils.CGREvent, reply *string) (err error) {
+	return dS.dS.DispatcherSv1RemotePing(ctx, args, reply)
 }
 
-func (dS *DispatcherSv1) RemoteSleep(args *utils.DurationArgs, reply *string) (err error) {
-	return dS.dS.DispatcherSv1RemoteSleep(args, reply)
+func (dS *DispatcherSv1) RemoteSleep(ctx *context.Context, args *utils.DurationArgs, reply *string) (err error) {
+	return dS.dS.DispatcherSv1RemoteSleep(ctx, args, reply)
 }
 
 /*
-func (dSv1 DispatcherSv1) Apier(args *utils.MethodParameters, reply *any) (err error) {
-	return dSv1.dS.V1Apier(new(APIerSv1), args, reply)
+func (dSv1 DispatcherSv1) Apier(ctx *context.Context,args *utils.MethodParameters, reply *any) (err error) {
+	return dSv1.dS.V1Apier(ctx,new(APIerSv1), args, reply)
 }
 */
 
-func (rS *DispatcherSv1) Ping(ign *utils.CGREvent, reply *string) error {
+func (rS *DispatcherSv1) Ping(ctx *context.Context, ign *utils.CGREvent, reply *string) error {
 	*reply = utils.Pong
 	return nil
 }
@@ -811,36 +812,36 @@ type DispatcherSCDRsV1 struct {
 }
 
 // Ping used to detreminate if component is active
-func (dS *DispatcherSCDRsV1) Ping(args *utils.CGREvent, reply *string) error {
-	return dS.dS.CDRsV1Ping(args, reply)
+func (dS *DispatcherSCDRsV1) Ping(ctx *context.Context, args *utils.CGREvent, reply *string) error {
+	return dS.dS.CDRsV1Ping(ctx, args, reply)
 }
 
-func (dS *DispatcherSCDRsV1) GetCDRs(args *utils.RPCCDRsFilterWithAPIOpts, reply *[]*engine.CDR) error {
-	return dS.dS.CDRsV1GetCDRs(args, reply)
+func (dS *DispatcherSCDRsV1) GetCDRs(ctx *context.Context, args *utils.RPCCDRsFilterWithAPIOpts, reply *[]*engine.CDR) error {
+	return dS.dS.CDRsV1GetCDRs(ctx, args, reply)
 }
 
-func (dS *DispatcherSCDRsV1) GetCDRsCount(args *utils.RPCCDRsFilterWithAPIOpts, reply *int64) error {
-	return dS.dS.CDRsV1GetCDRsCount(args, reply)
+func (dS *DispatcherSCDRsV1) GetCDRsCount(ctx *context.Context, args *utils.RPCCDRsFilterWithAPIOpts, reply *int64) error {
+	return dS.dS.CDRsV1GetCDRsCount(ctx, args, reply)
 }
 
-func (dS *DispatcherSCDRsV1) StoreSessionCost(args *engine.AttrCDRSStoreSMCost, reply *string) error {
-	return dS.dS.CDRsV1StoreSessionCost(args, reply)
+func (dS *DispatcherSCDRsV1) StoreSessionCost(ctx *context.Context, args *engine.AttrCDRSStoreSMCost, reply *string) error {
+	return dS.dS.CDRsV1StoreSessionCost(ctx, args, reply)
 }
 
-func (dS *DispatcherSCDRsV1) RateCDRs(args *engine.ArgRateCDRs, reply *string) error {
-	return dS.dS.CDRsV1RateCDRs(args, reply)
+func (dS *DispatcherSCDRsV1) RateCDRs(ctx *context.Context, args *engine.ArgRateCDRs, reply *string) error {
+	return dS.dS.CDRsV1RateCDRs(ctx, args, reply)
 }
 
-func (dS *DispatcherSCDRsV1) ProcessExternalCDR(args *engine.ExternalCDRWithAPIOpts, reply *string) error {
-	return dS.dS.CDRsV1ProcessExternalCDR(args, reply)
+func (dS *DispatcherSCDRsV1) ProcessExternalCDR(ctx *context.Context, args *engine.ExternalCDRWithAPIOpts, reply *string) error {
+	return dS.dS.CDRsV1ProcessExternalCDR(ctx, args, reply)
 }
 
-func (dS *DispatcherSCDRsV1) ProcessEvent(args *engine.ArgV1ProcessEvent, reply *string) error {
-	return dS.dS.CDRsV1ProcessEvent(args, reply)
+func (dS *DispatcherSCDRsV1) ProcessEvent(ctx *context.Context, args *engine.ArgV1ProcessEvent, reply *string) error {
+	return dS.dS.CDRsV1ProcessEvent(ctx, args, reply)
 }
 
-func (dS *DispatcherSCDRsV1) ProcessCDR(args *engine.CDRWithAPIOpts, reply *string) error {
-	return dS.dS.CDRsV1ProcessCDR(args, reply)
+func (dS *DispatcherSCDRsV1) ProcessCDR(ctx *context.Context, args *engine.CDRWithAPIOpts, reply *string) error {
+	return dS.dS.CDRsV1ProcessCDR(ctx, args, reply)
 }
 
 func NewDispatcherSServiceManagerV1(dps *dispatchers.DispatcherService) *DispatcherSServiceManagerV1 {
@@ -853,17 +854,17 @@ type DispatcherSServiceManagerV1 struct {
 }
 
 // Ping used to detreminate if component is active
-func (dS *DispatcherSServiceManagerV1) Ping(args *utils.CGREvent, reply *string) error {
-	return dS.dS.ServiceManagerV1Ping(args, reply)
+func (dS *DispatcherSServiceManagerV1) Ping(ctx *context.Context, args *utils.CGREvent, reply *string) error {
+	return dS.dS.ServiceManagerV1Ping(ctx, args, reply)
 }
-func (dS *DispatcherSServiceManagerV1) StartService(args *dispatchers.ArgStartServiceWithAPIOpts, reply *string) error {
-	return dS.dS.ServiceManagerV1StartService(*args, reply)
+func (dS *DispatcherSServiceManagerV1) StartService(ctx *context.Context, args *dispatchers.ArgStartServiceWithAPIOpts, reply *string) error {
+	return dS.dS.ServiceManagerV1StartService(ctx, *args, reply)
 }
-func (dS *DispatcherSServiceManagerV1) StopService(args *dispatchers.ArgStartServiceWithAPIOpts, reply *string) error {
-	return dS.dS.ServiceManagerV1StopService(*args, reply)
+func (dS *DispatcherSServiceManagerV1) StopService(ctx *context.Context, args *dispatchers.ArgStartServiceWithAPIOpts, reply *string) error {
+	return dS.dS.ServiceManagerV1StopService(ctx, *args, reply)
 }
-func (dS *DispatcherSServiceManagerV1) ServiceStatus(args *dispatchers.ArgStartServiceWithAPIOpts, reply *string) error {
-	return dS.dS.ServiceManagerV1ServiceStatus(*args, reply)
+func (dS *DispatcherSServiceManagerV1) ServiceStatus(ctx *context.Context, args *dispatchers.ArgStartServiceWithAPIOpts, reply *string) error {
+	return dS.dS.ServiceManagerV1ServiceStatus(ctx, *args, reply)
 }
 
 func NewDispatcherConfigSv1(dps *dispatchers.DispatcherService) *DispatcherConfigSv1 {
@@ -875,23 +876,23 @@ type DispatcherConfigSv1 struct {
 	dS *dispatchers.DispatcherService
 }
 
-func (dS *DispatcherConfigSv1) GetConfig(args *config.SectionWithAPIOpts, reply *map[string]any) (err error) {
-	return dS.dS.ConfigSv1GetConfig(args, reply)
+func (dS *DispatcherConfigSv1) GetConfig(ctx *context.Context, args *config.SectionWithAPIOpts, reply *map[string]any) (err error) {
+	return dS.dS.ConfigSv1GetConfig(ctx, args, reply)
 }
 
-func (dS *DispatcherConfigSv1) ReloadConfig(args *config.ReloadArgs, reply *string) (err error) {
-	return dS.dS.ConfigSv1ReloadConfig(args, reply)
+func (dS *DispatcherConfigSv1) ReloadConfig(ctx *context.Context, args *config.ReloadArgs, reply *string) (err error) {
+	return dS.dS.ConfigSv1ReloadConfig(ctx, args, reply)
 }
 
-func (dS *DispatcherConfigSv1) SetConfig(args *config.SetConfigArgs, reply *string) (err error) {
-	return dS.dS.ConfigSv1SetConfig(args, reply)
+func (dS *DispatcherConfigSv1) SetConfig(ctx *context.Context, args *config.SetConfigArgs, reply *string) (err error) {
+	return dS.dS.ConfigSv1SetConfig(ctx, args, reply)
 }
 
-func (dS *DispatcherConfigSv1) SetConfigFromJSON(args *config.SetConfigFromJSONArgs, reply *string) (err error) {
-	return dS.dS.ConfigSv1SetConfigFromJSON(args, reply)
+func (dS *DispatcherConfigSv1) SetConfigFromJSON(ctx *context.Context, args *config.SetConfigFromJSONArgs, reply *string) (err error) {
+	return dS.dS.ConfigSv1SetConfigFromJSON(ctx, args, reply)
 }
-func (dS *DispatcherConfigSv1) GetConfigAsJSON(args *config.SectionWithAPIOpts, reply *string) (err error) {
-	return dS.dS.ConfigSv1GetConfigAsJSON(args, reply)
+func (dS *DispatcherConfigSv1) GetConfigAsJSON(ctx *context.Context, args *config.SectionWithAPIOpts, reply *string) (err error) {
+	return dS.dS.ConfigSv1GetConfigAsJSON(ctx, args, reply)
 }
 
 func NewDispatcherRALsV1(dps *dispatchers.DispatcherService) *DispatcherRALsV1 {
@@ -903,13 +904,13 @@ type DispatcherRALsV1 struct {
 	dS *dispatchers.DispatcherService
 }
 
-func (dS *DispatcherRALsV1) GetRatingPlansCost(args *utils.RatingPlanCostArg, reply *dispatchers.RatingPlanCost) error {
-	return dS.dS.RALsV1GetRatingPlansCost(args, reply)
+func (dS *DispatcherRALsV1) GetRatingPlansCost(ctx *context.Context, args *utils.RatingPlanCostArg, reply *dispatchers.RatingPlanCost) error {
+	return dS.dS.RALsV1GetRatingPlansCost(ctx, args, reply)
 }
 
 // Ping used to detreminate if component is active
-func (dS *DispatcherRALsV1) Ping(args *utils.CGREvent, reply *string) error {
-	return dS.dS.RALsV1Ping(args, reply)
+func (dS *DispatcherRALsV1) Ping(ctx *context.Context, args *utils.CGREvent, reply *string) error {
+	return dS.dS.RALsV1Ping(ctx, args, reply)
 }
 
 // DispatcherCoreSv1 exports RPC from CoreSv1
@@ -921,36 +922,36 @@ func NewDispatcherCoreSv1(dps *dispatchers.DispatcherService) *DispatcherCoreSv1
 	return &DispatcherCoreSv1{dS: dps}
 }
 
-func (dS *DispatcherCoreSv1) Status(args *utils.TenantWithAPIOpts, reply *map[string]any) error {
-	return dS.dS.CoreSv1Status(args, reply)
+func (dS *DispatcherCoreSv1) Status(ctx *context.Context, args *utils.TenantWithAPIOpts, reply *map[string]any) error {
+	return dS.dS.CoreSv1Status(ctx, args, reply)
 }
 
-func (dS *DispatcherCoreSv1) Ping(args *utils.CGREvent, reply *string) error {
-	return dS.dS.CoreSv1Ping(args, reply)
+func (dS *DispatcherCoreSv1) Ping(ctx *context.Context, args *utils.CGREvent, reply *string) error {
+	return dS.dS.CoreSv1Ping(ctx, args, reply)
 }
 
-func (dS *DispatcherCoreSv1) Sleep(args *utils.DurationArgs, reply *string) error {
-	return dS.dS.CoreSv1Sleep(args, reply)
+func (dS *DispatcherCoreSv1) Sleep(ctx *context.Context, args *utils.DurationArgs, reply *string) error {
+	return dS.dS.CoreSv1Sleep(ctx, args, reply)
 }
 
-func (dS *DispatcherCoreSv1) StartCPUProfiling(args *utils.DirectoryArgs, reply *string) error {
-	return dS.dS.CoreSv1StartCPUProfiling(args, reply)
+func (dS *DispatcherCoreSv1) StartCPUProfiling(ctx *context.Context, args *utils.DirectoryArgs, reply *string) error {
+	return dS.dS.CoreSv1StartCPUProfiling(ctx, args, reply)
 }
 
-func (dS *DispatcherCoreSv1) StopCPUProfiling(args *utils.TenantWithAPIOpts, reply *string) error {
-	return dS.dS.CoreSv1StopCPUProfiling(args, reply)
+func (dS *DispatcherCoreSv1) StopCPUProfiling(ctx *context.Context, args *utils.TenantWithAPIOpts, reply *string) error {
+	return dS.dS.CoreSv1StopCPUProfiling(ctx, args, reply)
 }
 
-func (dS *DispatcherCoreSv1) StartMemoryProfiling(args *utils.MemoryPrf, reply *string) error {
-	return dS.dS.CoreSv1StartMemoryProfiling(args, reply)
+func (dS *DispatcherCoreSv1) StartMemoryProfiling(ctx *context.Context, args *utils.MemoryPrf, reply *string) error {
+	return dS.dS.CoreSv1StartMemoryProfiling(ctx, args, reply)
 }
 
-func (dS *DispatcherCoreSv1) StopMemoryProfiling(args *utils.TenantWithAPIOpts, reply *string) error {
-	return dS.dS.CoreSv1StopMemoryProfiling(args, reply)
+func (dS *DispatcherCoreSv1) StopMemoryProfiling(ctx *context.Context, args *utils.TenantWithAPIOpts, reply *string) error {
+	return dS.dS.CoreSv1StopMemoryProfiling(ctx, args, reply)
 }
 
-func (dS *DispatcherCoreSv1) Panic(args *utils.PanicMessageArgs, reply *string) error {
-	return dS.dS.CoreSv1Panic(args, reply)
+func (dS *DispatcherCoreSv1) Panic(ctx *context.Context, args *utils.PanicMessageArgs, reply *string) error {
+	return dS.dS.CoreSv1Panic(ctx, args, reply)
 }
 
 // DispatcherCoreSv1 exports RPC from CoreSv1
@@ -962,12 +963,12 @@ func NewDispatcherEeSv1(dps *dispatchers.DispatcherService) *DispatcherEeSv1 {
 	return &DispatcherEeSv1{dS: dps}
 }
 
-func (dS *DispatcherEeSv1) Ping(args *utils.CGREvent, reply *string) error {
-	return dS.dS.EeSv1Ping(args, reply)
+func (dS *DispatcherEeSv1) Ping(ctx *context.Context, args *utils.CGREvent, reply *string) error {
+	return dS.dS.EeSv1Ping(ctx, args, reply)
 }
 
-func (dS *DispatcherEeSv1) ProcessEvent(args *engine.CGREventWithEeIDs, reply *map[string]map[string]any) error {
-	return dS.dS.EeSv1ProcessEvent(args, reply)
+func (dS *DispatcherEeSv1) ProcessEvent(ctx *context.Context, args *engine.CGREventWithEeIDs, reply *map[string]map[string]any) error {
+	return dS.dS.EeSv1ProcessEvent(ctx, args, reply)
 }
 
 type DispatcherReplicatorSv1 struct {
@@ -979,378 +980,378 @@ func NewDispatcherReplicatorSv1(dps *dispatchers.DispatcherService) *DispatcherR
 }
 
 // Ping used to detreminate if component is active
-func (dS *DispatcherReplicatorSv1) Ping(args *utils.CGREvent, reply *string) error {
-	return dS.dS.ReplicatorSv1Ping(args, reply)
+func (dS *DispatcherReplicatorSv1) Ping(ctx *context.Context, args *utils.CGREvent, reply *string) error {
+	return dS.dS.ReplicatorSv1Ping(ctx, args, reply)
 }
 
 // GetAccount
-func (dS *DispatcherReplicatorSv1) GetAccount(args *utils.StringWithAPIOpts, reply *engine.Account) error {
-	return dS.dS.ReplicatorSv1GetAccount(args, reply)
+func (dS *DispatcherReplicatorSv1) GetAccount(ctx *context.Context, args *utils.StringWithAPIOpts, reply *engine.Account) error {
+	return dS.dS.ReplicatorSv1GetAccount(ctx, args, reply)
 }
 
 // GetDestination
-func (dS *DispatcherReplicatorSv1) GetDestination(key *utils.StringWithAPIOpts, reply *engine.Destination) error {
-	return dS.dS.ReplicatorSv1GetDestination(key, reply)
+func (dS *DispatcherReplicatorSv1) GetDestination(ctx *context.Context, key *utils.StringWithAPIOpts, reply *engine.Destination) error {
+	return dS.dS.ReplicatorSv1GetDestination(ctx, key, reply)
 }
 
 // GetReverseDestination
-func (dS *DispatcherReplicatorSv1) GetReverseDestination(key *utils.StringWithAPIOpts, reply *[]string) error {
-	return dS.dS.ReplicatorSv1GetReverseDestination(key, reply)
+func (dS *DispatcherReplicatorSv1) GetReverseDestination(ctx *context.Context, key *utils.StringWithAPIOpts, reply *[]string) error {
+	return dS.dS.ReplicatorSv1GetReverseDestination(ctx, key, reply)
 }
 
 // GetStatQueue
-func (dS *DispatcherReplicatorSv1) GetStatQueue(tntID *utils.TenantIDWithAPIOpts, reply *engine.StatQueue) error {
-	return dS.dS.ReplicatorSv1GetStatQueue(tntID, reply)
+func (dS *DispatcherReplicatorSv1) GetStatQueue(ctx *context.Context, tntID *utils.TenantIDWithAPIOpts, reply *engine.StatQueue) error {
+	return dS.dS.ReplicatorSv1GetStatQueue(ctx, tntID, reply)
 }
 
 // GetFilter
-func (dS *DispatcherReplicatorSv1) GetFilter(tntID *utils.TenantIDWithAPIOpts, reply *engine.Filter) error {
-	return dS.dS.ReplicatorSv1GetFilter(tntID, reply)
+func (dS *DispatcherReplicatorSv1) GetFilter(ctx *context.Context, tntID *utils.TenantIDWithAPIOpts, reply *engine.Filter) error {
+	return dS.dS.ReplicatorSv1GetFilter(ctx, tntID, reply)
 }
 
 // GetThreshold
-func (dS *DispatcherReplicatorSv1) GetThreshold(tntID *utils.TenantIDWithAPIOpts, reply *engine.Threshold) error {
-	return dS.dS.ReplicatorSv1GetThreshold(tntID, reply)
+func (dS *DispatcherReplicatorSv1) GetThreshold(ctx *context.Context, tntID *utils.TenantIDWithAPIOpts, reply *engine.Threshold) error {
+	return dS.dS.ReplicatorSv1GetThreshold(ctx, tntID, reply)
 }
 
 // GetThresholdProfile
-func (dS *DispatcherReplicatorSv1) GetThresholdProfile(tntID *utils.TenantIDWithAPIOpts, reply *engine.ThresholdProfile) error {
-	return dS.dS.ReplicatorSv1GetThresholdProfile(tntID, reply)
+func (dS *DispatcherReplicatorSv1) GetThresholdProfile(ctx *context.Context, tntID *utils.TenantIDWithAPIOpts, reply *engine.ThresholdProfile) error {
+	return dS.dS.ReplicatorSv1GetThresholdProfile(ctx, tntID, reply)
 }
 
 // GetStatQueueProfile
-func (dS *DispatcherReplicatorSv1) GetStatQueueProfile(tntID *utils.TenantIDWithAPIOpts, reply *engine.StatQueueProfile) error {
-	return dS.dS.ReplicatorSv1GetStatQueueProfile(tntID, reply)
+func (dS *DispatcherReplicatorSv1) GetStatQueueProfile(ctx *context.Context, tntID *utils.TenantIDWithAPIOpts, reply *engine.StatQueueProfile) error {
+	return dS.dS.ReplicatorSv1GetStatQueueProfile(ctx, tntID, reply)
 }
 
 // GetTiming
-func (dS *DispatcherReplicatorSv1) GetTiming(id *utils.StringWithAPIOpts, reply *utils.TPTiming) error {
-	return dS.dS.ReplicatorSv1GetTiming(id, reply)
+func (dS *DispatcherReplicatorSv1) GetTiming(ctx *context.Context, id *utils.StringWithAPIOpts, reply *utils.TPTiming) error {
+	return dS.dS.ReplicatorSv1GetTiming(ctx, id, reply)
 }
 
 // GetResource
-func (dS *DispatcherReplicatorSv1) GetResource(tntID *utils.TenantIDWithAPIOpts, reply *engine.Resource) error {
-	return dS.dS.ReplicatorSv1GetResource(tntID, reply)
+func (dS *DispatcherReplicatorSv1) GetResource(ctx *context.Context, tntID *utils.TenantIDWithAPIOpts, reply *engine.Resource) error {
+	return dS.dS.ReplicatorSv1GetResource(ctx, tntID, reply)
 }
 
 // GetResourceProfile
-func (dS *DispatcherReplicatorSv1) GetResourceProfile(tntID *utils.TenantIDWithAPIOpts, reply *engine.ResourceProfile) error {
-	return dS.dS.ReplicatorSv1GetResourceProfile(tntID, reply)
+func (dS *DispatcherReplicatorSv1) GetResourceProfile(ctx *context.Context, tntID *utils.TenantIDWithAPIOpts, reply *engine.ResourceProfile) error {
+	return dS.dS.ReplicatorSv1GetResourceProfile(ctx, tntID, reply)
 }
 
 // GetActionTriggers
-func (dS *DispatcherReplicatorSv1) GetActionTriggers(id *utils.StringWithAPIOpts, reply *engine.ActionTriggers) error {
-	return dS.dS.ReplicatorSv1GetActionTriggers(id, reply)
+func (dS *DispatcherReplicatorSv1) GetActionTriggers(ctx *context.Context, id *utils.StringWithAPIOpts, reply *engine.ActionTriggers) error {
+	return dS.dS.ReplicatorSv1GetActionTriggers(ctx, id, reply)
 }
 
 // GetSharedGroup
-func (dS *DispatcherReplicatorSv1) GetSharedGroup(id *utils.StringWithAPIOpts, reply *engine.SharedGroup) error {
-	return dS.dS.ReplicatorSv1GetSharedGroup(id, reply)
+func (dS *DispatcherReplicatorSv1) GetSharedGroup(ctx *context.Context, id *utils.StringWithAPIOpts, reply *engine.SharedGroup) error {
+	return dS.dS.ReplicatorSv1GetSharedGroup(ctx, id, reply)
 }
 
 // GetActions
-func (dS *DispatcherReplicatorSv1) GetActions(id *utils.StringWithAPIOpts, reply *engine.Actions) error {
-	return dS.dS.ReplicatorSv1GetActions(id, reply)
+func (dS *DispatcherReplicatorSv1) GetActions(ctx *context.Context, id *utils.StringWithAPIOpts, reply *engine.Actions) error {
+	return dS.dS.ReplicatorSv1GetActions(ctx, id, reply)
 }
 
 // GetActionPlan
-func (dS *DispatcherReplicatorSv1) GetActionPlan(id *utils.StringWithAPIOpts, reply *engine.ActionPlan) error {
-	return dS.dS.ReplicatorSv1GetActionPlan(id, reply)
+func (dS *DispatcherReplicatorSv1) GetActionPlan(ctx *context.Context, id *utils.StringWithAPIOpts, reply *engine.ActionPlan) error {
+	return dS.dS.ReplicatorSv1GetActionPlan(ctx, id, reply)
 }
 
 // GetAllActionPlans
-func (dS *DispatcherReplicatorSv1) GetAllActionPlans(args *utils.StringWithAPIOpts, reply *map[string]*engine.ActionPlan) error {
-	return dS.dS.ReplicatorSv1GetAllActionPlans(args, reply)
+func (dS *DispatcherReplicatorSv1) GetAllActionPlans(ctx *context.Context, args *utils.StringWithAPIOpts, reply *map[string]*engine.ActionPlan) error {
+	return dS.dS.ReplicatorSv1GetAllActionPlans(ctx, args, reply)
 }
 
 // GetAccountActionPlans
-func (dS *DispatcherReplicatorSv1) GetAccountActionPlans(id *utils.StringWithAPIOpts, reply *[]string) error {
-	return dS.dS.ReplicatorSv1GetAccountActionPlans(id, reply)
+func (dS *DispatcherReplicatorSv1) GetAccountActionPlans(ctx *context.Context, id *utils.StringWithAPIOpts, reply *[]string) error {
+	return dS.dS.ReplicatorSv1GetAccountActionPlans(ctx, id, reply)
 }
 
 // GetRatingPlan
-func (dS *DispatcherReplicatorSv1) GetRatingPlan(id *utils.StringWithAPIOpts, reply *engine.RatingPlan) error {
-	return dS.dS.ReplicatorSv1GetRatingPlan(id, reply)
+func (dS *DispatcherReplicatorSv1) GetRatingPlan(ctx *context.Context, id *utils.StringWithAPIOpts, reply *engine.RatingPlan) error {
+	return dS.dS.ReplicatorSv1GetRatingPlan(ctx, id, reply)
 }
 
 // GetRatingProfile
-func (dS *DispatcherReplicatorSv1) GetRatingProfile(id *utils.StringWithAPIOpts, reply *engine.RatingProfile) error {
-	return dS.dS.ReplicatorSv1GetRatingProfile(id, reply)
+func (dS *DispatcherReplicatorSv1) GetRatingProfile(ctx *context.Context, id *utils.StringWithAPIOpts, reply *engine.RatingProfile) error {
+	return dS.dS.ReplicatorSv1GetRatingProfile(ctx, id, reply)
 }
 
 // GetRouteProfile
-func (dS *DispatcherReplicatorSv1) GetRouteProfile(tntID *utils.TenantIDWithAPIOpts, reply *engine.RouteProfile) error {
-	return dS.dS.ReplicatorSv1GetRouteProfile(tntID, reply)
+func (dS *DispatcherReplicatorSv1) GetRouteProfile(ctx *context.Context, tntID *utils.TenantIDWithAPIOpts, reply *engine.RouteProfile) error {
+	return dS.dS.ReplicatorSv1GetRouteProfile(ctx, tntID, reply)
 }
 
 // GetAttributeProfile
-func (dS *DispatcherReplicatorSv1) GetAttributeProfile(tntID *utils.TenantIDWithAPIOpts, reply *engine.AttributeProfile) error {
-	return dS.dS.ReplicatorSv1GetAttributeProfile(tntID, reply)
+func (dS *DispatcherReplicatorSv1) GetAttributeProfile(ctx *context.Context, tntID *utils.TenantIDWithAPIOpts, reply *engine.AttributeProfile) error {
+	return dS.dS.ReplicatorSv1GetAttributeProfile(ctx, tntID, reply)
 }
 
 // GetChargerProfile
-func (dS *DispatcherReplicatorSv1) GetChargerProfile(tntID *utils.TenantIDWithAPIOpts, reply *engine.ChargerProfile) error {
-	return dS.dS.ReplicatorSv1GetChargerProfile(tntID, reply)
+func (dS *DispatcherReplicatorSv1) GetChargerProfile(ctx *context.Context, tntID *utils.TenantIDWithAPIOpts, reply *engine.ChargerProfile) error {
+	return dS.dS.ReplicatorSv1GetChargerProfile(ctx, tntID, reply)
 }
 
 // GetDispatcherProfile
-func (dS *DispatcherReplicatorSv1) GetDispatcherProfile(tntID *utils.TenantIDWithAPIOpts, reply *engine.DispatcherProfile) error {
-	return dS.dS.ReplicatorSv1GetDispatcherProfile(tntID, reply)
+func (dS *DispatcherReplicatorSv1) GetDispatcherProfile(ctx *context.Context, tntID *utils.TenantIDWithAPIOpts, reply *engine.DispatcherProfile) error {
+	return dS.dS.ReplicatorSv1GetDispatcherProfile(ctx, tntID, reply)
 }
 
 // GetDispatcherHost
-func (dS *DispatcherReplicatorSv1) GetDispatcherHost(tntID *utils.TenantIDWithAPIOpts, reply *engine.DispatcherHost) error {
-	return dS.dS.ReplicatorSv1GetDispatcherHost(tntID, reply)
+func (dS *DispatcherReplicatorSv1) GetDispatcherHost(ctx *context.Context, tntID *utils.TenantIDWithAPIOpts, reply *engine.DispatcherHost) error {
+	return dS.dS.ReplicatorSv1GetDispatcherHost(ctx, tntID, reply)
 }
 
 // GetItemLoadIDs
-func (dS *DispatcherReplicatorSv1) GetItemLoadIDs(itemID *utils.StringWithAPIOpts, reply *map[string]int64) error {
-	return dS.dS.ReplicatorSv1GetItemLoadIDs(itemID, reply)
+func (dS *DispatcherReplicatorSv1) GetItemLoadIDs(ctx *context.Context, itemID *utils.StringWithAPIOpts, reply *map[string]int64) error {
+	return dS.dS.ReplicatorSv1GetItemLoadIDs(ctx, itemID, reply)
 }
 
 //finished all the above
 
 // SetThresholdProfile
-func (dS *DispatcherReplicatorSv1) SetThresholdProfile(args *engine.ThresholdProfileWithAPIOpts, reply *string) error {
-	return dS.dS.ReplicatorSv1SetThresholdProfile(args, reply)
+func (dS *DispatcherReplicatorSv1) SetThresholdProfile(ctx *context.Context, args *engine.ThresholdProfileWithAPIOpts, reply *string) error {
+	return dS.dS.ReplicatorSv1SetThresholdProfile(ctx, args, reply)
 }
 
 // SetThreshold
-func (dS *DispatcherReplicatorSv1) SetThreshold(args *engine.ThresholdWithAPIOpts, reply *string) error {
-	return dS.dS.ReplicatorSv1SetThreshold(args, reply)
+func (dS *DispatcherReplicatorSv1) SetThreshold(ctx *context.Context, args *engine.ThresholdWithAPIOpts, reply *string) error {
+	return dS.dS.ReplicatorSv1SetThreshold(ctx, args, reply)
 }
 
 // SetDestination
-func (dS *DispatcherReplicatorSv1) SetDestination(args *engine.DestinationWithAPIOpts, reply *string) error {
-	return dS.dS.ReplicatorSv1SetDestination(args, reply)
+func (dS *DispatcherReplicatorSv1) SetDestination(ctx *context.Context, args *engine.DestinationWithAPIOpts, reply *string) error {
+	return dS.dS.ReplicatorSv1SetDestination(ctx, args, reply)
 }
 
 // SetAccount
-func (dS *DispatcherReplicatorSv1) SetAccount(args *engine.AccountWithAPIOpts, reply *string) error {
-	return dS.dS.ReplicatorSv1SetAccount(args, reply)
+func (dS *DispatcherReplicatorSv1) SetAccount(ctx *context.Context, args *engine.AccountWithAPIOpts, reply *string) error {
+	return dS.dS.ReplicatorSv1SetAccount(ctx, args, reply)
 }
 
 // SetReverseDestination
-func (dS *DispatcherReplicatorSv1) SetReverseDestination(args *engine.DestinationWithAPIOpts, reply *string) error {
-	return dS.dS.ReplicatorSv1SetReverseDestination(args, reply)
+func (dS *DispatcherReplicatorSv1) SetReverseDestination(ctx *context.Context, args *engine.DestinationWithAPIOpts, reply *string) error {
+	return dS.dS.ReplicatorSv1SetReverseDestination(ctx, args, reply)
 }
 
 // SetStatQueue
-func (dS *DispatcherReplicatorSv1) SetStatQueue(args *engine.StatQueueWithAPIOpts, reply *string) error {
-	return dS.dS.ReplicatorSv1SetStatQueue(args, reply)
+func (dS *DispatcherReplicatorSv1) SetStatQueue(ctx *context.Context, args *engine.StatQueueWithAPIOpts, reply *string) error {
+	return dS.dS.ReplicatorSv1SetStatQueue(ctx, args, reply)
 }
 
 // SetFilter
-func (dS *DispatcherReplicatorSv1) SetFilter(args *engine.FilterWithAPIOpts, reply *string) error {
-	return dS.dS.ReplicatorSv1SetFilter(args, reply)
+func (dS *DispatcherReplicatorSv1) SetFilter(ctx *context.Context, args *engine.FilterWithAPIOpts, reply *string) error {
+	return dS.dS.ReplicatorSv1SetFilter(ctx, args, reply)
 }
 
 // SetStatQueueProfile
-func (dS *DispatcherReplicatorSv1) SetStatQueueProfile(args *engine.StatQueueProfileWithAPIOpts, reply *string) error {
-	return dS.dS.ReplicatorSv1SetStatQueueProfile(args, reply)
+func (dS *DispatcherReplicatorSv1) SetStatQueueProfile(ctx *context.Context, args *engine.StatQueueProfileWithAPIOpts, reply *string) error {
+	return dS.dS.ReplicatorSv1SetStatQueueProfile(ctx, args, reply)
 }
 
 // SetTiming
-func (dS *DispatcherReplicatorSv1) SetTiming(args *utils.TPTimingWithAPIOpts, reply *string) error {
-	return dS.dS.ReplicatorSv1SetTiming(args, reply)
+func (dS *DispatcherReplicatorSv1) SetTiming(ctx *context.Context, args *utils.TPTimingWithAPIOpts, reply *string) error {
+	return dS.dS.ReplicatorSv1SetTiming(ctx, args, reply)
 }
 
 // SetResource
-func (dS *DispatcherReplicatorSv1) SetResource(args *engine.ResourceWithAPIOpts, reply *string) error {
-	return dS.dS.ReplicatorSv1SetResource(args, reply)
+func (dS *DispatcherReplicatorSv1) SetResource(ctx *context.Context, args *engine.ResourceWithAPIOpts, reply *string) error {
+	return dS.dS.ReplicatorSv1SetResource(ctx, args, reply)
 }
 
 // SetResourceProfile
-func (dS *DispatcherReplicatorSv1) SetResourceProfile(args *engine.ResourceProfileWithAPIOpts, reply *string) error {
-	return dS.dS.ReplicatorSv1SetResourceProfile(args, reply)
+func (dS *DispatcherReplicatorSv1) SetResourceProfile(ctx *context.Context, args *engine.ResourceProfileWithAPIOpts, reply *string) error {
+	return dS.dS.ReplicatorSv1SetResourceProfile(ctx, args, reply)
 }
 
 // SetActionTriggers
-func (dS *DispatcherReplicatorSv1) SetActionTriggers(args *engine.SetActionTriggersArgWithAPIOpts, reply *string) error {
-	return dS.dS.ReplicatorSv1SetActionTriggers(args, reply)
+func (dS *DispatcherReplicatorSv1) SetActionTriggers(ctx *context.Context, args *engine.SetActionTriggersArgWithAPIOpts, reply *string) error {
+	return dS.dS.ReplicatorSv1SetActionTriggers(ctx, args, reply)
 }
 
 // SetSharedGroup
-func (dS *DispatcherReplicatorSv1) SetSharedGroup(args *engine.SharedGroupWithAPIOpts, reply *string) error {
-	return dS.dS.ReplicatorSv1SetSharedGroup(args, reply)
+func (dS *DispatcherReplicatorSv1) SetSharedGroup(ctx *context.Context, args *engine.SharedGroupWithAPIOpts, reply *string) error {
+	return dS.dS.ReplicatorSv1SetSharedGroup(ctx, args, reply)
 }
 
 // SetActions
-func (dS *DispatcherReplicatorSv1) SetActions(args *engine.SetActionsArgsWithAPIOpts, reply *string) error {
-	return dS.dS.ReplicatorSv1SetActions(args, reply)
+func (dS *DispatcherReplicatorSv1) SetActions(ctx *context.Context, args *engine.SetActionsArgsWithAPIOpts, reply *string) error {
+	return dS.dS.ReplicatorSv1SetActions(ctx, args, reply)
 }
 
 // SetRatingPlan
-func (dS *DispatcherReplicatorSv1) SetRatingPlan(args *engine.RatingPlanWithAPIOpts, reply *string) error {
-	return dS.dS.ReplicatorSv1SetRatingPlan(args, reply)
+func (dS *DispatcherReplicatorSv1) SetRatingPlan(ctx *context.Context, args *engine.RatingPlanWithAPIOpts, reply *string) error {
+	return dS.dS.ReplicatorSv1SetRatingPlan(ctx, args, reply)
 }
 
 // SetRatingProfile
-func (dS *DispatcherReplicatorSv1) SetRatingProfile(args *engine.RatingProfileWithAPIOpts, reply *string) error {
-	return dS.dS.ReplicatorSv1SetRatingProfile(args, reply)
+func (dS *DispatcherReplicatorSv1) SetRatingProfile(ctx *context.Context, args *engine.RatingProfileWithAPIOpts, reply *string) error {
+	return dS.dS.ReplicatorSv1SetRatingProfile(ctx, args, reply)
 }
 
 // SetRouteProfile
-func (dS *DispatcherReplicatorSv1) SetRouteProfile(args *engine.RouteProfileWithAPIOpts, reply *string) error {
-	return dS.dS.ReplicatorSv1SetRouteProfile(args, reply)
+func (dS *DispatcherReplicatorSv1) SetRouteProfile(ctx *context.Context, args *engine.RouteProfileWithAPIOpts, reply *string) error {
+	return dS.dS.ReplicatorSv1SetRouteProfile(ctx, args, reply)
 }
 
 // SetAttributeProfile
-func (dS *DispatcherReplicatorSv1) SetAttributeProfile(args *engine.AttributeProfileWithAPIOpts, reply *string) error {
-	return dS.dS.ReplicatorSv1SetAttributeProfile(args, reply)
+func (dS *DispatcherReplicatorSv1) SetAttributeProfile(ctx *context.Context, args *engine.AttributeProfileWithAPIOpts, reply *string) error {
+	return dS.dS.ReplicatorSv1SetAttributeProfile(ctx, args, reply)
 }
 
 // SetChargerProfile
-func (dS *DispatcherReplicatorSv1) SetChargerProfile(args *engine.ChargerProfileWithAPIOpts, reply *string) error {
-	return dS.dS.ReplicatorSv1SetChargerProfile(args, reply)
+func (dS *DispatcherReplicatorSv1) SetChargerProfile(ctx *context.Context, args *engine.ChargerProfileWithAPIOpts, reply *string) error {
+	return dS.dS.ReplicatorSv1SetChargerProfile(ctx, args, reply)
 }
 
 // SetDispatcherProfile
-func (dS *DispatcherReplicatorSv1) SetDispatcherProfile(args *engine.DispatcherProfileWithAPIOpts, reply *string) error {
-	return dS.dS.ReplicatorSv1SetDispatcherProfile(args, reply)
+func (dS *DispatcherReplicatorSv1) SetDispatcherProfile(ctx *context.Context, args *engine.DispatcherProfileWithAPIOpts, reply *string) error {
+	return dS.dS.ReplicatorSv1SetDispatcherProfile(ctx, args, reply)
 }
 
 // SetActionPlan
-func (dS *DispatcherReplicatorSv1) SetActionPlan(args *engine.SetActionPlanArgWithAPIOpts, reply *string) error {
-	return dS.dS.ReplicatorSv1SetActionPlan(args, reply)
+func (dS *DispatcherReplicatorSv1) SetActionPlan(ctx *context.Context, args *engine.SetActionPlanArgWithAPIOpts, reply *string) error {
+	return dS.dS.ReplicatorSv1SetActionPlan(ctx, args, reply)
 }
 
 // SetAccountActionPlans
-func (dS *DispatcherReplicatorSv1) SetAccountActionPlans(args *engine.SetAccountActionPlansArgWithAPIOpts, reply *string) error {
-	return dS.dS.ReplicatorSv1SetAccountActionPlans(args, reply)
+func (dS *DispatcherReplicatorSv1) SetAccountActionPlans(ctx *context.Context, args *engine.SetAccountActionPlansArgWithAPIOpts, reply *string) error {
+	return dS.dS.ReplicatorSv1SetAccountActionPlans(ctx, args, reply)
 }
 
 // SetDispatcherHost
-func (dS *DispatcherReplicatorSv1) SetDispatcherHost(args *engine.DispatcherHostWithAPIOpts, reply *string) error {
-	return dS.dS.ReplicatorSv1SetDispatcherHost(args, reply)
+func (dS *DispatcherReplicatorSv1) SetDispatcherHost(ctx *context.Context, args *engine.DispatcherHostWithAPIOpts, reply *string) error {
+	return dS.dS.ReplicatorSv1SetDispatcherHost(ctx, args, reply)
 }
 
 // RemoveThreshold
-func (dS *DispatcherReplicatorSv1) RemoveThreshold(args *utils.TenantIDWithAPIOpts, reply *string) error {
-	return dS.dS.ReplicatorSv1RemoveThreshold(args, reply)
+func (dS *DispatcherReplicatorSv1) RemoveThreshold(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *string) error {
+	return dS.dS.ReplicatorSv1RemoveThreshold(ctx, args, reply)
 }
 
 // SetLoadIDs
-func (dS *DispatcherReplicatorSv1) SetLoadIDs(args *utils.LoadIDsWithAPIOpts, reply *string) error {
-	return dS.dS.ReplicatorSv1SetLoadIDs(args, reply)
+func (dS *DispatcherReplicatorSv1) SetLoadIDs(ctx *context.Context, args *utils.LoadIDsWithAPIOpts, reply *string) error {
+	return dS.dS.ReplicatorSv1SetLoadIDs(ctx, args, reply)
 }
 
 // RemoveDestination
-func (dS *DispatcherReplicatorSv1) RemoveDestination(args *utils.StringWithAPIOpts, reply *string) error {
-	return dS.dS.ReplicatorSv1RemoveDestination(args, reply)
+func (dS *DispatcherReplicatorSv1) RemoveDestination(ctx *context.Context, args *utils.StringWithAPIOpts, reply *string) error {
+	return dS.dS.ReplicatorSv1RemoveDestination(ctx, args, reply)
 }
 
 // RemoveAccount
-func (dS *DispatcherReplicatorSv1) RemoveAccount(args *utils.StringWithAPIOpts, reply *string) error {
-	return dS.dS.ReplicatorSv1RemoveAccount(args, reply)
+func (dS *DispatcherReplicatorSv1) RemoveAccount(ctx *context.Context, args *utils.StringWithAPIOpts, reply *string) error {
+	return dS.dS.ReplicatorSv1RemoveAccount(ctx, args, reply)
 }
 
 // RemoveStatQueue
-func (dS *DispatcherReplicatorSv1) RemoveStatQueue(args *utils.TenantIDWithAPIOpts, reply *string) error {
-	return dS.dS.ReplicatorSv1RemoveStatQueue(args, reply)
+func (dS *DispatcherReplicatorSv1) RemoveStatQueue(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *string) error {
+	return dS.dS.ReplicatorSv1RemoveStatQueue(ctx, args, reply)
 }
 
 // RemoveFilter
-func (dS *DispatcherReplicatorSv1) RemoveFilter(args *utils.TenantIDWithAPIOpts, reply *string) error {
-	return dS.dS.ReplicatorSv1RemoveFilter(args, reply)
+func (dS *DispatcherReplicatorSv1) RemoveFilter(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *string) error {
+	return dS.dS.ReplicatorSv1RemoveFilter(ctx, args, reply)
 }
 
 // RemoveThresholdProfile
-func (dS *DispatcherReplicatorSv1) RemoveThresholdProfile(args *utils.TenantIDWithAPIOpts, reply *string) error {
-	return dS.dS.ReplicatorSv1RemoveThresholdProfile(args, reply)
+func (dS *DispatcherReplicatorSv1) RemoveThresholdProfile(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *string) error {
+	return dS.dS.ReplicatorSv1RemoveThresholdProfile(ctx, args, reply)
 }
 
 // RemoveStatQueueProfile
-func (dS *DispatcherReplicatorSv1) RemoveStatQueueProfile(args *utils.TenantIDWithAPIOpts, reply *string) error {
-	return dS.dS.ReplicatorSv1RemoveStatQueueProfile(args, reply)
+func (dS *DispatcherReplicatorSv1) RemoveStatQueueProfile(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *string) error {
+	return dS.dS.ReplicatorSv1RemoveStatQueueProfile(ctx, args, reply)
 }
 
 // RemoveTiming
-func (dS *DispatcherReplicatorSv1) RemoveTiming(args *utils.StringWithAPIOpts, reply *string) error {
-	return dS.dS.ReplicatorSv1RemoveTiming(args, reply)
+func (dS *DispatcherReplicatorSv1) RemoveTiming(ctx *context.Context, args *utils.StringWithAPIOpts, reply *string) error {
+	return dS.dS.ReplicatorSv1RemoveTiming(ctx, args, reply)
 }
 
 // RemoveResource
-func (dS *DispatcherReplicatorSv1) RemoveResource(args *utils.TenantIDWithAPIOpts, reply *string) error {
-	return dS.dS.ReplicatorSv1RemoveResource(args, reply)
+func (dS *DispatcherReplicatorSv1) RemoveResource(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *string) error {
+	return dS.dS.ReplicatorSv1RemoveResource(ctx, args, reply)
 }
 
 // RemoveResourceProfile
-func (dS *DispatcherReplicatorSv1) RemoveResourceProfile(args *utils.TenantIDWithAPIOpts, reply *string) error {
-	return dS.dS.ReplicatorSv1RemoveResourceProfile(args, reply)
+func (dS *DispatcherReplicatorSv1) RemoveResourceProfile(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *string) error {
+	return dS.dS.ReplicatorSv1RemoveResourceProfile(ctx, args, reply)
 }
 
 // RemoveActionTriggers
-func (dS *DispatcherReplicatorSv1) RemoveActionTriggers(args *utils.StringWithAPIOpts, reply *string) error {
-	return dS.dS.ReplicatorSv1RemoveActionTriggers(args, reply)
+func (dS *DispatcherReplicatorSv1) RemoveActionTriggers(ctx *context.Context, args *utils.StringWithAPIOpts, reply *string) error {
+	return dS.dS.ReplicatorSv1RemoveActionTriggers(ctx, args, reply)
 }
 
 // RemoveSharedGroup
-func (dS *DispatcherReplicatorSv1) RemoveSharedGroup(args *utils.StringWithAPIOpts, reply *string) error {
-	return dS.dS.ReplicatorSv1RemoveSharedGroup(args, reply)
+func (dS *DispatcherReplicatorSv1) RemoveSharedGroup(ctx *context.Context, args *utils.StringWithAPIOpts, reply *string) error {
+	return dS.dS.ReplicatorSv1RemoveSharedGroup(ctx, args, reply)
 }
 
 // RemoveActions
-func (dS *DispatcherReplicatorSv1) RemoveActions(args *utils.StringWithAPIOpts, reply *string) error {
-	return dS.dS.ReplicatorSv1RemoveActions(args, reply)
+func (dS *DispatcherReplicatorSv1) RemoveActions(ctx *context.Context, args *utils.StringWithAPIOpts, reply *string) error {
+	return dS.dS.ReplicatorSv1RemoveActions(ctx, args, reply)
 }
 
 // RemoveActionPlan
-func (dS *DispatcherReplicatorSv1) RemoveActionPlan(args *utils.StringWithAPIOpts, reply *string) error {
-	return dS.dS.ReplicatorSv1RemoveActionPlan(args, reply)
+func (dS *DispatcherReplicatorSv1) RemoveActionPlan(ctx *context.Context, args *utils.StringWithAPIOpts, reply *string) error {
+	return dS.dS.ReplicatorSv1RemoveActionPlan(ctx, args, reply)
 }
 
 // RemAccountActionPlans
-func (dS *DispatcherReplicatorSv1) RemAccountActionPlans(args *engine.RemAccountActionPlansArgsWithAPIOpts, reply *string) error {
-	return dS.dS.ReplicatorSv1RemAccountActionPlans(args, reply)
+func (dS *DispatcherReplicatorSv1) RemAccountActionPlans(ctx *context.Context, args *engine.RemAccountActionPlansArgsWithAPIOpts, reply *string) error {
+	return dS.dS.ReplicatorSv1RemAccountActionPlans(ctx, args, reply)
 }
 
 // RemoveRatingPlan
-func (dS *DispatcherReplicatorSv1) RemoveRatingPlan(args *utils.StringWithAPIOpts, reply *string) error {
-	return dS.dS.ReplicatorSv1RemoveRatingPlan(args, reply)
+func (dS *DispatcherReplicatorSv1) RemoveRatingPlan(ctx *context.Context, args *utils.StringWithAPIOpts, reply *string) error {
+	return dS.dS.ReplicatorSv1RemoveRatingPlan(ctx, args, reply)
 }
 
 // RemoveRatingProfile
-func (dS *DispatcherReplicatorSv1) RemoveRatingProfile(args *utils.StringWithAPIOpts, reply *string) error {
-	return dS.dS.ReplicatorSv1RemoveRatingProfile(args, reply)
+func (dS *DispatcherReplicatorSv1) RemoveRatingProfile(ctx *context.Context, args *utils.StringWithAPIOpts, reply *string) error {
+	return dS.dS.ReplicatorSv1RemoveRatingProfile(ctx, args, reply)
 }
 
 // RemoveRouteProfile
-func (dS *DispatcherReplicatorSv1) RemoveRouteProfile(args *utils.TenantIDWithAPIOpts, reply *string) error {
-	return dS.dS.ReplicatorSv1RemoveRouteProfile(args, reply)
+func (dS *DispatcherReplicatorSv1) RemoveRouteProfile(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *string) error {
+	return dS.dS.ReplicatorSv1RemoveRouteProfile(ctx, args, reply)
 }
 
 // RemoveAttributeProfile
-func (dS *DispatcherReplicatorSv1) RemoveAttributeProfile(args *utils.TenantIDWithAPIOpts, reply *string) error {
-	return dS.dS.ReplicatorSv1RemoveAttributeProfile(args, reply)
+func (dS *DispatcherReplicatorSv1) RemoveAttributeProfile(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *string) error {
+	return dS.dS.ReplicatorSv1RemoveAttributeProfile(ctx, args, reply)
 }
 
 // RemoveChargerProfile
-func (dS *DispatcherReplicatorSv1) RemoveChargerProfile(args *utils.TenantIDWithAPIOpts, reply *string) error {
-	return dS.dS.ReplicatorSv1RemoveChargerProfile(args, reply)
+func (dS *DispatcherReplicatorSv1) RemoveChargerProfile(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *string) error {
+	return dS.dS.ReplicatorSv1RemoveChargerProfile(ctx, args, reply)
 }
 
 // RemoveDispatcherProfile
-func (dS *DispatcherReplicatorSv1) RemoveDispatcherProfile(args *utils.TenantIDWithAPIOpts, reply *string) error {
-	return dS.dS.ReplicatorSv1RemoveDispatcherProfile(args, reply)
+func (dS *DispatcherReplicatorSv1) RemoveDispatcherProfile(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *string) error {
+	return dS.dS.ReplicatorSv1RemoveDispatcherProfile(ctx, args, reply)
 }
 
 // RemoveDispatcherHost
-func (dS *DispatcherReplicatorSv1) RemoveDispatcherHost(args *utils.TenantIDWithAPIOpts, reply *string) error {
-	return dS.dS.ReplicatorSv1RemoveDispatcherHost(args, reply)
+func (dS *DispatcherReplicatorSv1) RemoveDispatcherHost(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *string) error {
+	return dS.dS.ReplicatorSv1RemoveDispatcherHost(ctx, args, reply)
 }
 
 // GetIndexes .
-func (dS *DispatcherReplicatorSv1) GetIndexes(args *utils.GetIndexesArg, reply *map[string]utils.StringSet) error {
-	return dS.dS.ReplicatorSv1GetIndexes(args, reply)
+func (dS *DispatcherReplicatorSv1) GetIndexes(ctx *context.Context, args *utils.GetIndexesArg, reply *map[string]utils.StringSet) error {
+	return dS.dS.ReplicatorSv1GetIndexes(ctx, args, reply)
 }
 
 // SetIndexes .
-func (dS *DispatcherReplicatorSv1) SetIndexes(args *utils.SetIndexesArg, reply *string) error {
-	return dS.dS.ReplicatorSv1SetIndexes(args, reply)
+func (dS *DispatcherReplicatorSv1) SetIndexes(ctx *context.Context, args *utils.SetIndexesArg, reply *string) error {
+	return dS.dS.ReplicatorSv1SetIndexes(ctx, args, reply)
 }
 
 // RemoveIndexes .
-func (dS *DispatcherReplicatorSv1) RemoveIndexes(args *utils.GetIndexesArg, reply *string) error {
-	return dS.dS.ReplicatorSv1RemoveIndexes(args, reply)
+func (dS *DispatcherReplicatorSv1) RemoveIndexes(ctx *context.Context, args *utils.GetIndexesArg, reply *string) error {
+	return dS.dS.ReplicatorSv1RemoveIndexes(ctx, args, reply)
 }

@@ -22,11 +22,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package general_tests
 
 import (
-	"net/rpc"
 	"path"
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc"
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/sessions"
@@ -37,7 +38,7 @@ var (
 	sesMFDCfgDir  string
 	sesMFDCfgPath string
 	sesMFDCfg     *config.CGRConfig
-	sesMFDRPC     *rpc.Client
+	sesMFDRPC     *birpc.Client
 
 	sesMFDTests = []func(t *testing.T){
 		testSesMFDItLoadConfig,
@@ -107,7 +108,7 @@ func testSesMFDItRPCConn(t *testing.T) {
 func testSesMFDItSetChargers(t *testing.T) {
 	//add a default charger
 	var result string
-	if err := sesMFDRPC.Call(utils.APIerSv1SetChargerProfile, &engine.ChargerProfile{
+	if err := sesMFDRPC.Call(context.Background(), utils.APIerSv1SetChargerProfile, &engine.ChargerProfile{
 		Tenant:       "cgrates.org",
 		ID:           "default",
 		RunID:        utils.MetaDefault,
@@ -118,7 +119,7 @@ func testSesMFDItSetChargers(t *testing.T) {
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	if err := sesMFDRPC.Call(utils.APIerSv1SetChargerProfile, &engine.ChargerProfile{
+	if err := sesMFDRPC.Call(context.Background(), utils.APIerSv1SetChargerProfile, &engine.ChargerProfile{
 		Tenant:       "cgrates.org",
 		ID:           "default2",
 		RunID:        "default2",
@@ -133,7 +134,7 @@ func testSesMFDItSetChargers(t *testing.T) {
 
 func testSesMFDItAddVoiceBalance(t *testing.T) {
 	var reply string
-	if err := sesMFDRPC.Call(utils.APIerSv2SetBalance, utils.AttrSetBalance{
+	if err := sesMFDRPC.Call(context.Background(), utils.APIerSv2SetBalance, utils.AttrSetBalance{
 		Tenant:      "cgrates.org",
 		Account:     "1001",
 		BalanceType: utils.MetaSMS,
@@ -149,7 +150,7 @@ func testSesMFDItAddVoiceBalance(t *testing.T) {
 	}
 
 	var acnt engine.Account
-	if err := sesMFDRPC.Call(utils.APIerSv2GetAccount,
+	if err := sesMFDRPC.Call(context.Background(), utils.APIerSv2GetAccount,
 		&utils.AttrGetAccount{
 			Tenant:  "cgrates.org",
 			Account: "1001",
@@ -163,7 +164,7 @@ func testSesMFDItAddVoiceBalance(t *testing.T) {
 }
 func testSesMFDItProcessMessage(t *testing.T) {
 	var initRpl *sessions.V1ProcessMessageReply
-	if err := sesMFDRPC.Call(utils.SessionSv1ProcessMessage,
+	if err := sesMFDRPC.Call(context.Background(), utils.SessionSv1ProcessMessage,
 		&sessions.V1ProcessMessageArgs{
 			Debit:         true,
 			ForceDuration: true,
@@ -191,7 +192,7 @@ func testSesMFDItProcessMessage(t *testing.T) {
 
 func testSesMFDItGetAccountAfter(t *testing.T) {
 	var acnt engine.Account
-	if err := sesMFDRPC.Call(utils.APIerSv2GetAccount,
+	if err := sesMFDRPC.Call(context.Background(), utils.APIerSv2GetAccount,
 		&utils.AttrGetAccount{
 			Tenant:  "cgrates.org",
 			Account: "1001",

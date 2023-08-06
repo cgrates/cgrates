@@ -21,11 +21,12 @@ package v1
 // This file deals with tp_destrates_timing management over APIs
 
 import (
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
 )
 
 // SetTPRatingPlan creates a new DestinationRateTiming profile within a tariff plan
-func (apierSv1 *APIerSv1) SetTPRatingPlan(attrs *utils.TPRatingPlan, reply *string) error {
+func (apierSv1 *APIerSv1) SetTPRatingPlan(ctx *context.Context, attrs *utils.TPRatingPlan, reply *string) error {
 	if missing := utils.MissingStructFields(attrs, []string{utils.TPid, utils.ID, utils.RatingPlanBindings}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -43,7 +44,7 @@ type AttrGetTPRatingPlan struct {
 }
 
 // GetTPRatingPlan queries specific RatingPlan profile on tariff plan
-func (apierSv1 *APIerSv1) GetTPRatingPlan(attrs *AttrGetTPRatingPlan, reply *utils.TPRatingPlan) error {
+func (apierSv1 *APIerSv1) GetTPRatingPlan(ctx *context.Context, attrs *AttrGetTPRatingPlan, reply *utils.TPRatingPlan) error {
 	if missing := utils.MissingStructFields(attrs, []string{utils.TPid, utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -64,7 +65,7 @@ type AttrGetTPRatingPlanIds struct {
 }
 
 // GetTPRatingPlanIds queries RatingPlan identities on specific tariff plan.
-func (apierSv1 *APIerSv1) GetTPRatingPlanIds(attrs *AttrGetTPRatingPlanIds, reply *[]string) error {
+func (apierSv1 *APIerSv1) GetTPRatingPlanIds(ctx *context.Context, attrs *AttrGetTPRatingPlanIds, reply *[]string) error {
 	if missing := utils.MissingStructFields(attrs, []string{utils.TPid}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -81,7 +82,7 @@ func (apierSv1 *APIerSv1) GetTPRatingPlanIds(attrs *AttrGetTPRatingPlanIds, repl
 }
 
 // RemoveTPRatingPlan removes specific RatingPlan on Tariff plan
-func (apierSv1 *APIerSv1) RemoveTPRatingPlan(attrs *AttrGetTPRatingPlan, reply *string) error {
+func (apierSv1 *APIerSv1) RemoveTPRatingPlan(ctx *context.Context, attrs *AttrGetTPRatingPlan, reply *string) error {
 	if missing := utils.MissingStructFields(attrs, []string{utils.TPid, utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}

@@ -23,17 +23,16 @@ import (
 	"io"
 	"sync"
 
-	v1 "github.com/cgrates/cgrates/apier/v1"
+	"github.com/cgrates/birpc"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/cores"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/cgrates/rpcclient"
 )
 
 // NewCoreService returns the Core Service
 func NewCoreService(cfg *config.CGRConfig, caps *engine.Caps, server *cores.Server,
-	internalCoreSChan chan rpcclient.ClientConnector, anz *AnalyzerService,
+	internalCoreSChan chan birpc.ClientConnector, anz *AnalyzerService,
 	fileCpu io.Closer, fileMEM string, shdWg *sync.WaitGroup, stopMemPrf chan struct{},
 	shdChan *utils.SyncedChan, srvDep map[string]*sync.WaitGroup) *CoreService {
 	return &CoreService{
@@ -64,14 +63,13 @@ type CoreService struct {
 	fileCpu    io.Closer
 	fileMem    string
 	cS         *cores.CoreService
-	rpc        *v1.CoreSv1
-	connChan   chan rpcclient.ClientConnector
+	connChan   chan birpc.ClientConnector
 	anz        *AnalyzerService
 	srvDep     map[string]*sync.WaitGroup
 }
 
 // Start should handle the service start
-func (cS *CoreService) Start() (err error) {
+func (cS *CoreService) Start() error {
 	if cS.IsRunning() {
 		return utils.ErrServiceAlreadyRunning
 	}
@@ -81,12 +79,17 @@ func (cS *CoreService) Start() (err error) {
 	utils.Logger.Info(fmt.Sprintf("<%s> starting <%s> subsystem", utils.CoreS, utils.CoreS))
 	cS.stopChan = make(chan struct{})
 	cS.cS = cores.NewCoreService(cS.cfg, cS.caps, cS.fileCpu, cS.fileMem, cS.stopChan, cS.shdWg, cS.stopMemPrf, cS.shdChan)
-	cS.rpc = v1.NewCoreSv1(cS.cS)
-	if !cS.cfg.DispatcherSCfg().Enabled {
-		cS.server.RpcRegister(cS.rpc)
+	srv, err := engine.NewServiceWithName(cS.cS, utils.CoreS, true)
+	if err != nil {
+		return err
 	}
-	cS.connChan <- cS.anz.GetInternalCodec(cS.rpc, utils.CoreS)
-	return
+	if !cS.cfg.DispatcherSCfg().Enabled {
+		for _, s := range srv {
+			cS.server.RpcRegister(s)
+		}
+	}
+	cS.connChan <- cS.anz.GetInternalCodec(srv, utils.CoreS)
+	return nil
 }
 
 // Reload handles the change of config
@@ -101,7 +104,6 @@ func (cS *CoreService) Shutdown() (err error) {
 	cS.cS.Shutdown()
 	close(cS.stopChan)
 	cS.cS = nil
-	cS.rpc = nil
 	<-cS.connChan
 	return
 }

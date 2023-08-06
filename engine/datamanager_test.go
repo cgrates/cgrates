@@ -24,6 +24,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc"
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/rpcclient"
@@ -50,10 +52,10 @@ func TestDmGetDestinationRemote(t *testing.T) {
 			RouteID: "route",
 		},
 	}
-	clientConn := make(chan rpcclient.ClientConnector, 1)
+	clientConn := make(chan birpc.ClientConnector, 1)
 	clientConn <- &ccMock{
-		calls: map[string]func(args any, reply any) error{
-			utils.ReplicatorSv1GetDestination: func(args, reply any) error {
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.ReplicatorSv1GetDestination: func(ctx *context.Context, args, reply any) error {
 				rpl := &Destination{
 					Id: "nat", Prefixes: []string{"0257", "0256", "0723"},
 				}
@@ -63,7 +65,7 @@ func TestDmGetDestinationRemote(t *testing.T) {
 		},
 	}
 	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
-	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	connMgr := NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1): clientConn,
 	})
 	exp := &Destination{
@@ -101,10 +103,10 @@ func TestDmGetAccountRemote(t *testing.T) {
 			RouteID: "route",
 		},
 	}
-	clientConn := make(chan rpcclient.ClientConnector, 1)
+	clientConn := make(chan birpc.ClientConnector, 1)
 	clientConn <- &ccMock{
-		calls: map[string]func(args any, reply any) error{
-			utils.ReplicatorSv1GetAccount: func(args, reply any) error {
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.ReplicatorSv1GetAccount: func(ctx *context.Context, args, reply any) error {
 				rpl := &Account{
 					ID:         "cgrates.org:exp",
 					UpdateTime: time.Now(),
@@ -115,7 +117,7 @@ func TestDmGetAccountRemote(t *testing.T) {
 		},
 	}
 	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
-	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	connMgr := NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1): clientConn,
 	})
 	exp := &Account{
@@ -154,10 +156,10 @@ func TestDmGetFilterRemote(t *testing.T) {
 			RouteID: "route",
 		},
 	}
-	clientConn := make(chan rpcclient.ClientConnector, 1)
+	clientConn := make(chan birpc.ClientConnector, 1)
 	clientConn <- &ccMock{
-		calls: map[string]func(args any, reply any) error{
-			utils.ReplicatorSv1GetFilter: func(args, reply any) error {
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.ReplicatorSv1GetFilter: func(ctx *context.Context, args, reply any) error {
 				rpl := &Filter{
 					Tenant: "cgrates.org",
 					ID:     "Filter1",
@@ -179,7 +181,7 @@ func TestDmGetFilterRemote(t *testing.T) {
 		},
 	}
 	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
-	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	connMgr := NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1): clientConn,
 	})
 
@@ -230,10 +232,10 @@ func TestDMGetThresholdRemote(t *testing.T) {
 			Replicate: true,
 		},
 	}
-	clientConn := make(chan rpcclient.ClientConnector, 1)
+	clientConn := make(chan birpc.ClientConnector, 1)
 	clientConn <- &ccMock{
-		calls: map[string]func(args any, reply any) error{
-			utils.ReplicatorSv1GetThreshold: func(args, reply any) error {
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.ReplicatorSv1GetThreshold: func(ctx *context.Context, args, reply any) error {
 				rpl := &Threshold{
 					Tenant: "cgrates.org",
 					ID:     "THD_ACNT_1001",
@@ -242,14 +244,14 @@ func TestDMGetThresholdRemote(t *testing.T) {
 				*reply.(**Threshold) = rpl
 				return nil
 			},
-			utils.CacheSv1ReplicateSet: func(args, reply any) error {
+			utils.CacheSv1ReplicateSet: func(ctx *context.Context, args, reply any) error {
 
 				return errors.New("Can't Replicate")
 			},
 		},
 	}
 	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
-	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	connMgr := NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1): clientConn,
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches):    clientConn,
 	})
@@ -299,19 +301,19 @@ func TestDMGetThresholdRemoteErr(t *testing.T) {
 			Replicate: true,
 		},
 	}
-	clientConn := make(chan rpcclient.ClientConnector, 1)
+	clientConn := make(chan birpc.ClientConnector, 1)
 	clientConn <- &ccMock{
-		calls: map[string]func(args any, reply any) error{
-			utils.ReplicatorSv1GetThreshold: func(args, reply any) error {
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.ReplicatorSv1GetThreshold: func(ctx *context.Context, args, reply any) error {
 				return utils.ErrNotFound
 			},
-			utils.CacheSv1ReplicateSet: func(args, reply any) error {
+			utils.CacheSv1ReplicateSet: func(ctx *context.Context, args, reply any) error {
 				return errors.New("Can't Replicate")
 			},
 		},
 	}
 	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
-	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	connMgr := NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1): clientConn,
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches):    clientConn,
 	})
@@ -347,10 +349,10 @@ func TestDMGetThresholdProfileRemote(t *testing.T) {
 			Replicate: true,
 		},
 	}
-	clientConn := make(chan rpcclient.ClientConnector, 1)
+	clientConn := make(chan birpc.ClientConnector, 1)
 	clientConn <- &ccMock{
-		calls: map[string]func(args any, reply any) error{
-			utils.ReplicatorSv1GetThresholdProfile: func(args, reply any) error {
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.ReplicatorSv1GetThresholdProfile: func(ctx *context.Context, args, reply any) error {
 				rpl := &ThresholdProfile{
 					Tenant: "cgrates.org",
 					ID:     "ID",
@@ -358,14 +360,14 @@ func TestDMGetThresholdProfileRemote(t *testing.T) {
 				*reply.(**ThresholdProfile) = rpl
 				return nil
 			},
-			utils.CacheSv1ReplicateSet: func(args, reply any) error {
+			utils.CacheSv1ReplicateSet: func(ctx *context.Context, args, reply any) error {
 
 				return errors.New("Can't Replicate")
 			},
 		},
 	}
 	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
-	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	connMgr := NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1): clientConn,
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches):    clientConn,
 	})
@@ -409,19 +411,19 @@ func TestDMGetThresholdProfileRemoteErr(t *testing.T) {
 			Replicate: true,
 		},
 	}
-	clientConn := make(chan rpcclient.ClientConnector, 1)
+	clientConn := make(chan birpc.ClientConnector, 1)
 	clientConn <- &ccMock{
-		calls: map[string]func(args any, reply any) error{
-			utils.ReplicatorSv1GetThresholdProfile: func(args, reply any) error {
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.ReplicatorSv1GetThresholdProfile: func(ctx *context.Context, args, reply any) error {
 				return utils.ErrNotFound
 			},
-			utils.CacheSv1ReplicateSet: func(args, reply any) error {
+			utils.CacheSv1ReplicateSet: func(ctx *context.Context, args, reply any) error {
 				return errors.New("Can't Replicate")
 			},
 		},
 	}
 	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
-	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	connMgr := NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1): clientConn,
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches):    clientConn,
 	})
@@ -461,10 +463,10 @@ func TestDMGetStatQueue(t *testing.T) {
 			RouteID: "route",
 		},
 	}
-	clientConn := make(chan rpcclient.ClientConnector, 1)
+	clientConn := make(chan birpc.ClientConnector, 1)
 	clientConn <- &ccMock{
-		calls: map[string]func(args any, reply any) error{
-			utils.ReplicatorSv1GetStatQueue: func(args, reply any) error {
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.ReplicatorSv1GetStatQueue: func(ctx *context.Context, args, reply any) error {
 				rpl := &StatQueue{
 					Tenant: "cgrates.org",
 					ID:     "StatsID",
@@ -478,7 +480,7 @@ func TestDMGetStatQueue(t *testing.T) {
 		},
 	}
 	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
-	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	connMgr := NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1): clientConn,
 	})
 	dm := NewDataManager(db, cfg.CacheCfg(), connMgr)
@@ -560,10 +562,10 @@ func TestDMSetAccount(t *testing.T) {
 					DestinationIDs: utils.NewStringMap("RET"), Weight: 20},
 			}},
 	}
-	clientConn := make(chan rpcclient.ClientConnector, 1)
+	clientConn := make(chan birpc.ClientConnector, 1)
 	clientConn <- &ccMock{
-		calls: map[string]func(args any, reply any) error{
-			utils.ReplicatorSv1SetAccount: func(args, reply any) error {
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.ReplicatorSv1SetAccount: func(ctx *context.Context, args, reply any) error {
 				accApiOpts, cancast := args.(AccountWithAPIOpts)
 				if !cancast {
 					return utils.ErrNotConvertible
@@ -575,7 +577,7 @@ func TestDMSetAccount(t *testing.T) {
 		},
 	}
 	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
-	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	connMgr := NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1): clientConn,
 	})
 	dm := NewDataManager(db, cfg.CacheCfg(), connMgr)
@@ -630,10 +632,10 @@ func TestDMRemoveAccount(t *testing.T) {
 		t.Error(err)
 	}
 
-	clientConn := make(chan rpcclient.ClientConnector, 1)
+	clientConn := make(chan birpc.ClientConnector, 1)
 	clientConn <- &ccMock{
-		calls: map[string]func(args any, reply any) error{
-			utils.ReplicatorSv1RemoveAccount: func(args, reply any) error {
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.ReplicatorSv1RemoveAccount: func(ctx *context.Context, args, reply any) error {
 				strApiOpts, cancast := args.(utils.StringWithAPIOpts)
 				if !cancast {
 					return utils.ErrNotConvertible
@@ -644,7 +646,7 @@ func TestDMRemoveAccount(t *testing.T) {
 		},
 	}
 	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
-	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	connMgr := NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1): clientConn,
 	})
 	dm := NewDataManager(db, cfg.CacheCfg(), connMgr)
@@ -694,10 +696,10 @@ func TestDmSetFilter(t *testing.T) {
 			},
 		},
 	}
-	clientConn := make(chan rpcclient.ClientConnector, 1)
+	clientConn := make(chan birpc.ClientConnector, 1)
 	clientConn <- &ccMock{
-		calls: map[string]func(args any, reply any) error{
-			utils.ReplicatorSv1SetFilter: func(args, reply any) error {
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.ReplicatorSv1SetFilter: func(ctx *context.Context, args, reply any) error {
 				fltr, cancast := args.(FilterWithAPIOpts)
 				if !cancast {
 					return utils.ErrNotConvertible
@@ -708,7 +710,7 @@ func TestDmSetFilter(t *testing.T) {
 		},
 	}
 	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
-	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	connMgr := NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1): clientConn,
 	})
 	dm := NewDataManager(db, cfg.CacheCfg(), connMgr)
@@ -749,10 +751,10 @@ func TestDMSetThreshold(t *testing.T) {
 		ID:     "THD_ACNT_1001",
 		Hits:   0,
 	}
-	clientConn := make(chan rpcclient.ClientConnector, 1)
+	clientConn := make(chan birpc.ClientConnector, 1)
 	clientConn <- &ccMock{
-		calls: map[string]func(args any, reply any) error{
-			utils.ReplicatorSv1SetThreshold: func(args, reply any) error {
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.ReplicatorSv1SetThreshold: func(ctx *context.Context, args, reply any) error {
 				thS, cancast := args.(ThresholdWithAPIOpts)
 				if !cancast {
 					return utils.ErrNotConvertible
@@ -763,7 +765,7 @@ func TestDMSetThreshold(t *testing.T) {
 		},
 	}
 	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
-	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	connMgr := NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1): clientConn,
 	})
 	dm := NewDataManager(db, cfg.CacheCfg(), connMgr)
@@ -805,10 +807,10 @@ func TestDmRemoveThreshold(t *testing.T) {
 		ID:     "THD_ACNT_1001",
 		Hits:   0,
 	}
-	clientConn := make(chan rpcclient.ClientConnector, 1)
+	clientConn := make(chan birpc.ClientConnector, 1)
 	clientConn <- &ccMock{
-		calls: map[string]func(args any, reply any) error{
-			utils.ReplicatorSv1RemoveThreshold: func(args, reply any) error {
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.ReplicatorSv1RemoveThreshold: func(ctx *context.Context, args, reply any) error {
 				tntApiOpts, cancast := args.(utils.TenantIDWithAPIOpts)
 				if !cancast {
 					return utils.ErrNotConvertible
@@ -819,7 +821,7 @@ func TestDmRemoveThreshold(t *testing.T) {
 		},
 	}
 	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
-	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	connMgr := NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1): clientConn,
 	})
 	dm := NewDataManager(db, cfg.CacheCfg(), connMgr)
@@ -854,10 +856,10 @@ func TestDMReverseDestinationRemote(t *testing.T) {
 			RouteID:   "route",
 		},
 	}
-	clientConn := make(chan rpcclient.ClientConnector, 1)
+	clientConn := make(chan birpc.ClientConnector, 1)
 	clientConn <- &ccMock{
-		calls: map[string]func(args any, reply any) error{
-			utils.ReplicatorSv1SetReverseDestination: func(args, reply any) error {
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.ReplicatorSv1SetReverseDestination: func(ctx *context.Context, args, reply any) error {
 				dest, cancast := args.(Destination)
 				if !cancast {
 					return utils.ErrNotConvertible
@@ -868,7 +870,7 @@ func TestDMReverseDestinationRemote(t *testing.T) {
 		},
 	}
 	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
-	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	connMgr := NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1): clientConn,
 	})
 	dm := NewDataManager(db, cfg.CacheCfg(), connMgr)
@@ -910,10 +912,10 @@ func TestDMStatQueueRemote(t *testing.T) {
 			RouteID:   "route",
 		},
 	}
-	clientConn := make(chan rpcclient.ClientConnector, 1)
+	clientConn := make(chan birpc.ClientConnector, 1)
 	clientConn <- &ccMock{
-		calls: map[string]func(args any, reply any) error{
-			utils.ReplicatorSv1SetStatQueue: func(args, reply any) error {
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.ReplicatorSv1SetStatQueue: func(ctx *context.Context, args, reply any) error {
 				sqApiOpts, cancast := args.(StatQueueWithAPIOpts)
 				if !cancast {
 					return utils.ErrNotConvertible
@@ -921,7 +923,7 @@ func TestDMStatQueueRemote(t *testing.T) {
 				dm.dataDB.SetStatQueueDrv(nil, sqApiOpts.StatQueue)
 				return nil
 			},
-			utils.ReplicatorSv1RemoveStatQueue: func(args, reply any) error {
+			utils.ReplicatorSv1RemoveStatQueue: func(ctx *context.Context, args, reply any) error {
 				tntIDApiOpts, cancast := args.(utils.TenantIDWithAPIOpts)
 				if !cancast {
 					return utils.ErrNotConvertible
@@ -932,7 +934,7 @@ func TestDMStatQueueRemote(t *testing.T) {
 		},
 	}
 	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
-	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	connMgr := NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1): clientConn,
 	})
 	dm := NewDataManager(db, cfg.CacheCfg(), connMgr)
@@ -984,10 +986,10 @@ func TestDmTimingR(t *testing.T) {
 			RouteID:   "route",
 		},
 	}
-	clientConn := make(chan rpcclient.ClientConnector, 1)
+	clientConn := make(chan birpc.ClientConnector, 1)
 	clientConn <- &ccMock{
-		calls: map[string]func(args any, reply any) error{
-			utils.ReplicatorSv1SetTiming: func(args, reply any) error {
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.ReplicatorSv1SetTiming: func(ctx *context.Context, args, reply any) error {
 				tpTimingApiOpts, cancast := args.(utils.TPTimingWithAPIOpts)
 				if !cancast {
 					return utils.ErrNotConvertible
@@ -995,7 +997,7 @@ func TestDmTimingR(t *testing.T) {
 				dm.DataDB().SetTimingDrv(tpTimingApiOpts.TPTiming)
 				return nil
 			},
-			utils.ReplicatorSv1RemoveTiming: func(args, reply any) error {
+			utils.ReplicatorSv1RemoveTiming: func(ctx *context.Context, args, reply any) error {
 				id, cancast := args.(string)
 				if !cancast {
 					return utils.ErrNotConvertible
@@ -1006,7 +1008,7 @@ func TestDmTimingR(t *testing.T) {
 		},
 	}
 	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
-	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	connMgr := NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1): clientConn,
 	})
 	dm := NewDataManager(db, cfg.CacheCfg(), connMgr)
@@ -1054,10 +1056,10 @@ func TestDMSetActionTriggers(t *testing.T) {
 			RouteID:   "route",
 		},
 	}
-	clientConn := make(chan rpcclient.ClientConnector, 1)
+	clientConn := make(chan birpc.ClientConnector, 1)
 	clientConn <- &ccMock{
-		calls: map[string]func(args any, reply any) error{
-			utils.ReplicatorSv1SetActionTriggers: func(args, reply any) error {
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.ReplicatorSv1SetActionTriggers: func(ctx *context.Context, args, reply any) error {
 				setActTrgAOpts, cancast := args.(SetActionTriggersArgWithAPIOpts)
 				if !cancast {
 					return utils.ErrNotConvertible
@@ -1065,7 +1067,7 @@ func TestDMSetActionTriggers(t *testing.T) {
 				dm.DataDB().SetActionTriggersDrv(setActTrgAOpts.Key, setActTrgAOpts.Attrs)
 				return nil
 			},
-			utils.ReplicatorSv1RemoveActionTriggers: func(args, reply any) error {
+			utils.ReplicatorSv1RemoveActionTriggers: func(ctx *context.Context, args, reply any) error {
 				strApiOpts, cancast := args.(utils.StringWithAPIOpts)
 				if !cancast {
 					return utils.ErrNotConvertible
@@ -1076,7 +1078,7 @@ func TestDMSetActionTriggers(t *testing.T) {
 		},
 	}
 	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
-	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	connMgr := NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1): clientConn,
 	})
 	dm := NewDataManager(db, cfg.CacheCfg(), connMgr)
@@ -1131,10 +1133,10 @@ func TestDMResourceProfileRemote(t *testing.T) {
 			RouteID:   "route",
 		},
 	}
-	clientConn := make(chan rpcclient.ClientConnector, 1)
+	clientConn := make(chan birpc.ClientConnector, 1)
 	clientConn <- &ccMock{
-		calls: map[string]func(args any, reply any) error{
-			utils.ReplicatorSv1SetResourceProfile: func(args, reply any) error {
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.ReplicatorSv1SetResourceProfile: func(ctx *context.Context, args, reply any) error {
 				rscPrflApiOpts, cancast := args.(ResourceProfileWithAPIOpts)
 				if !cancast {
 					return utils.ErrNotConvertible
@@ -1142,7 +1144,7 @@ func TestDMResourceProfileRemote(t *testing.T) {
 				dm.DataDB().SetResourceProfileDrv(rscPrflApiOpts.ResourceProfile)
 				return nil
 			},
-			utils.ReplicatorSv1SetResource: func(args, reply any) error {
+			utils.ReplicatorSv1SetResource: func(ctx *context.Context, args, reply any) error {
 				rscApiOpts, cancast := args.(ResourceWithAPIOpts)
 				if !cancast {
 					return utils.ErrNotConvertible
@@ -1150,7 +1152,7 @@ func TestDMResourceProfileRemote(t *testing.T) {
 				dm.DataDB().SetResourceDrv(rscApiOpts.Resource)
 				return nil
 			},
-			utils.ReplicatorSv1RemoveResourceProfile: func(args, reply any) error {
+			utils.ReplicatorSv1RemoveResourceProfile: func(ctx *context.Context, args, reply any) error {
 				tntApiOpts, cancast := args.(utils.TenantIDWithAPIOpts)
 				if !cancast {
 					return utils.ErrNotConvertible
@@ -1161,7 +1163,7 @@ func TestDMResourceProfileRemote(t *testing.T) {
 		},
 	}
 	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
-	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	connMgr := NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1): clientConn,
 	})
 	dm := NewDataManager(db, cfg.CacheCfg(), connMgr)
@@ -1221,10 +1223,10 @@ func TestDmSharedGroup(t *testing.T) {
 			RouteID:   "route",
 		},
 	}
-	clientConn := make(chan rpcclient.ClientConnector, 1)
+	clientConn := make(chan birpc.ClientConnector, 1)
 	clientConn <- &ccMock{
-		calls: map[string]func(args any, reply any) error{
-			utils.ReplicatorSv1SetSharedGroup: func(args, reply any) error {
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.ReplicatorSv1SetSharedGroup: func(ctx *context.Context, args, reply any) error {
 				shGrpApiOpts, cancast := args.(SharedGroupWithAPIOpts)
 				if !cancast {
 					return utils.ErrNotConvertible
@@ -1232,7 +1234,7 @@ func TestDmSharedGroup(t *testing.T) {
 				dm.dataDB.SetSharedGroupDrv(shGrpApiOpts.SharedGroup)
 				return nil
 			},
-			utils.ReplicatorSv1RemoveSharedGroup: func(args, reply any) error {
+			utils.ReplicatorSv1RemoveSharedGroup: func(ctx *context.Context, args, reply any) error {
 				strApiOpts, cancast := args.(utils.StringWithAPIOpts)
 				if !cancast {
 					return utils.ErrNotConvertible
@@ -1243,7 +1245,7 @@ func TestDmSharedGroup(t *testing.T) {
 		},
 	}
 	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
-	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	connMgr := NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1): clientConn,
 	})
 	dm := NewDataManager(db, cfg.CacheCfg(), connMgr)
@@ -1300,10 +1302,10 @@ func TestDMThresholdProfile(t *testing.T) {
 			RouteID:   "route",
 		},
 	}
-	clientConn := make(chan rpcclient.ClientConnector, 1)
+	clientConn := make(chan birpc.ClientConnector, 1)
 	clientConn <- &ccMock{
-		calls: map[string]func(args any, reply any) error{
-			utils.ReplicatorSv1SetThresholdProfile: func(args, reply any) error {
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.ReplicatorSv1SetThresholdProfile: func(ctx *context.Context, args, reply any) error {
 				thPApiOpts, cancast := args.(ThresholdProfileWithAPIOpts)
 				if !cancast {
 					return utils.ErrNotConvertible
@@ -1311,7 +1313,7 @@ func TestDMThresholdProfile(t *testing.T) {
 				dm.DataDB().SetThresholdProfileDrv(thPApiOpts.ThresholdProfile)
 				return nil
 			},
-			utils.ReplicatorSv1SetThreshold: func(args, reply any) error {
+			utils.ReplicatorSv1SetThreshold: func(ctx *context.Context, args, reply any) error {
 				thApiOpts, cancast := args.(ThresholdWithAPIOpts)
 				if !cancast {
 					return utils.ErrNotConvertible
@@ -1319,7 +1321,7 @@ func TestDMThresholdProfile(t *testing.T) {
 				dm.DataDB().SetThresholdDrv(thApiOpts.Threshold)
 				return nil
 			},
-			utils.ReplicatorSv1RemoveThresholdProfile: func(args, reply any) error {
+			utils.ReplicatorSv1RemoveThresholdProfile: func(ctx *context.Context, args, reply any) error {
 				tntApiOpts, cancast := args.(utils.TenantIDWithAPIOpts)
 				if !cancast {
 					return utils.ErrNotConvertible
@@ -1330,7 +1332,7 @@ func TestDMThresholdProfile(t *testing.T) {
 		},
 	}
 	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
-	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	connMgr := NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1): clientConn,
 	})
 	dm := NewDataManager(db, cfg.CacheCfg(), connMgr)
@@ -1380,15 +1382,15 @@ func TestDMRemoveThresholdProfileErr(t *testing.T) {
 	}
 	cfg.DataDbCfg().RmtConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator)}
 	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
-	clientConn := make(chan rpcclient.ClientConnector, 1)
+	clientConn := make(chan birpc.ClientConnector, 1)
 	clientConn <- &ccMock{
-		calls: map[string]func(args any, reply any) error{
-			utils.ReplicatorSv1GetThresholdProfile: func(args, reply any) error {
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.ReplicatorSv1GetThresholdProfile: func(ctx *context.Context, args, reply any) error {
 				return fmt.Errorf("Can't Replicate")
 			},
 		},
 	}
-	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	connMgr := NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator): clientConn,
 	})
 	dm := NewDataManager(db, cfg.CacheCfg(), connMgr)
@@ -1439,10 +1441,10 @@ func TestDmDispatcherHost(t *testing.T) {
 			RouteID:   "route",
 		},
 	}
-	clientConn := make(chan rpcclient.ClientConnector, 1)
+	clientConn := make(chan birpc.ClientConnector, 1)
 	clientConn <- &ccMock{
-		calls: map[string]func(args any, reply any) error{
-			utils.ReplicatorSv1SetDispatcherHost: func(args, reply any) error {
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.ReplicatorSv1SetDispatcherHost: func(ctx *context.Context, args, reply any) error {
 				dspApiOpts, cancast := args.(DispatcherHostWithAPIOpts)
 				if !cancast {
 					return utils.ErrNotConvertible
@@ -1450,7 +1452,7 @@ func TestDmDispatcherHost(t *testing.T) {
 				dm.DataDB().SetDispatcherHostDrv(dspApiOpts.DispatcherHost)
 				return nil
 			},
-			utils.ReplicatorSv1RemoveDispatcherHost: func(args, reply any) error {
+			utils.ReplicatorSv1RemoveDispatcherHost: func(ctx *context.Context, args, reply any) error {
 				tntApiOpts, cancast := args.(utils.TenantIDWithAPIOpts)
 				if !cancast {
 					return utils.ErrNotConvertible
@@ -1461,7 +1463,7 @@ func TestDmDispatcherHost(t *testing.T) {
 		},
 	}
 	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
-	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	connMgr := NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1): clientConn,
 	})
 	dm := NewDataManager(db, cfg.CacheCfg(), connMgr)
@@ -1512,19 +1514,19 @@ func TestGetDispatcherHostErr(t *testing.T) {
 			Replicate: true,
 		},
 	}
-	clientConn := make(chan rpcclient.ClientConnector, 1)
+	clientConn := make(chan birpc.ClientConnector, 1)
 	clientConn <- &ccMock{
-		calls: map[string]func(args any, reply any) error{
-			utils.ReplicatorSv1GetDispatcherHost: func(args, reply any) error {
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.ReplicatorSv1GetDispatcherHost: func(ctx *context.Context, args, reply any) error {
 				return utils.ErrDSPHostNotFound
 			},
-			utils.CacheSv1ReplicateSet: func(args, reply any) error {
+			utils.CacheSv1ReplicateSet: func(ctx *context.Context, args, reply any) error {
 				return errors.New("Can't Replicate")
 			},
 		},
 	}
 	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
-	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	connMgr := NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1): clientConn,
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches):    clientConn,
 	})
@@ -1572,10 +1574,10 @@ func TestChargerProfileRemote(t *testing.T) {
 			RouteID:   "route",
 		},
 	}
-	clientConn := make(chan rpcclient.ClientConnector, 1)
+	clientConn := make(chan birpc.ClientConnector, 1)
 	clientConn <- &ccMock{
-		calls: map[string]func(args any, reply any) error{
-			utils.ReplicatorSv1SetDispatcherHost: func(args, reply any) error {
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.ReplicatorSv1SetDispatcherHost: func(ctx *context.Context, args, reply any) error {
 				chrgPrflApiOpts, cancast := args.(ChargerProfileWithAPIOpts)
 				if !cancast {
 					return utils.ErrNotConvertible
@@ -1583,7 +1585,7 @@ func TestChargerProfileRemote(t *testing.T) {
 				dm.DataDB().SetChargerProfileDrv(chrgPrflApiOpts.ChargerProfile)
 				return nil
 			},
-			utils.ReplicatorSv1RemoveChargerProfile: func(args, reply any) error {
+			utils.ReplicatorSv1RemoveChargerProfile: func(ctx *context.Context, args, reply any) error {
 				tntApiOpts, cancast := args.(utils.TenantIDWithAPIOpts)
 				if !cancast {
 					return utils.ErrNotConvertible
@@ -1594,7 +1596,7 @@ func TestChargerProfileRemote(t *testing.T) {
 		},
 	}
 	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
-	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	connMgr := NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1): clientConn,
 	})
 	dm := NewDataManager(db, cfg.CacheCfg(), connMgr)
@@ -1647,10 +1649,10 @@ func TestDispatcherProfileRemote(t *testing.T) {
 			RouteID:   "route",
 		},
 	}
-	clientConn := make(chan rpcclient.ClientConnector, 1)
+	clientConn := make(chan birpc.ClientConnector, 1)
 	clientConn <- &ccMock{
-		calls: map[string]func(args any, reply any) error{
-			utils.ReplicatorSv1SetDispatcherProfile: func(args, reply any) error {
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.ReplicatorSv1SetDispatcherProfile: func(ctx *context.Context, args, reply any) error {
 				dspApiOpts, cancast := args.(DispatcherProfileWithAPIOpts)
 				if !cancast {
 					return utils.ErrNotConvertible
@@ -1658,7 +1660,7 @@ func TestDispatcherProfileRemote(t *testing.T) {
 				dm.DataDB().SetDispatcherProfileDrv(dspApiOpts.DispatcherProfile)
 				return nil
 			},
-			utils.ReplicatorSv1RemoveDispatcherProfile: func(args, reply any) error {
+			utils.ReplicatorSv1RemoveDispatcherProfile: func(ctx *context.Context, args, reply any) error {
 				tntApiOpts, cancast := args.(utils.TenantIDWithAPIOpts)
 				if !cancast {
 					return utils.ErrNotConvertible
@@ -1669,7 +1671,7 @@ func TestDispatcherProfileRemote(t *testing.T) {
 		},
 	}
 	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
-	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	connMgr := NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1): clientConn,
 	})
 	dm := NewDataManager(db, cfg.CacheCfg(), connMgr)
@@ -1719,10 +1721,10 @@ func TestRouteProfileRemote(t *testing.T) {
 			RouteID:   "route",
 		},
 	}
-	clientConn := make(chan rpcclient.ClientConnector, 1)
+	clientConn := make(chan birpc.ClientConnector, 1)
 	clientConn <- &ccMock{
-		calls: map[string]func(args any, reply any) error{
-			utils.ReplicatorSv1SetRouteProfile: func(args, reply any) error {
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.ReplicatorSv1SetRouteProfile: func(ctx *context.Context, args, reply any) error {
 				routeApiOpts, cancast := args.(RouteProfileWithAPIOpts)
 				if !cancast {
 					return utils.ErrNotConvertible
@@ -1730,7 +1732,7 @@ func TestRouteProfileRemote(t *testing.T) {
 				dm.DataDB().SetRouteProfileDrv(routeApiOpts.RouteProfile)
 				return nil
 			},
-			utils.ReplicatorSv1RemoveRouteProfile: func(args, reply any) error {
+			utils.ReplicatorSv1RemoveRouteProfile: func(ctx *context.Context, args, reply any) error {
 				tntApiOpts, cancast := args.(utils.TenantIDWithAPIOpts)
 				if !cancast {
 					return utils.ErrNotConvertible
@@ -1741,7 +1743,7 @@ func TestRouteProfileRemote(t *testing.T) {
 		},
 	}
 	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
-	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	connMgr := NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1): clientConn,
 	})
 	dm := NewDataManager(db, cfg.CacheCfg(), connMgr)
@@ -1788,10 +1790,10 @@ func TestRatingPlanRemote(t *testing.T) {
 			RouteID:   "route",
 		},
 	}
-	clientConn := make(chan rpcclient.ClientConnector, 1)
+	clientConn := make(chan birpc.ClientConnector, 1)
 	clientConn <- &ccMock{
-		calls: map[string]func(args any, reply any) error{
-			utils.ReplicatorSv1SetRatingPlan: func(args, reply any) error {
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.ReplicatorSv1SetRatingPlan: func(ctx *context.Context, args, reply any) error {
 				rPnApiOpts, cancast := args.(RatingPlanWithAPIOpts)
 				if !cancast {
 					return utils.ErrNotConvertible
@@ -1799,7 +1801,7 @@ func TestRatingPlanRemote(t *testing.T) {
 				dm.DataDB().SetRatingPlanDrv(rPnApiOpts.RatingPlan)
 				return nil
 			},
-			utils.ReplicatorSv1RemoveRatingPlan: func(args, reply any) error {
+			utils.ReplicatorSv1RemoveRatingPlan: func(ctx *context.Context, args, reply any) error {
 				strApiOpts, cancast := args.(utils.StringWithAPIOpts)
 				if !cancast {
 					return utils.ErrNotConvertible
@@ -1810,7 +1812,7 @@ func TestRatingPlanRemote(t *testing.T) {
 		},
 	}
 	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
-	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	connMgr := NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1): clientConn,
 	})
 	dm := NewDataManager(db, cfg.CacheCfg(), connMgr)
@@ -1879,10 +1881,10 @@ func TestGetResourceRemote(t *testing.T) {
 			},
 		},
 	}
-	clientConn := make(chan rpcclient.ClientConnector, 1)
+	clientConn := make(chan birpc.ClientConnector, 1)
 	clientConn <- &ccMock{
-		calls: map[string]func(args any, reply any) error{
-			utils.ReplicatorSv1GetResource: func(args, reply any) error {
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.ReplicatorSv1GetResource: func(ctx *context.Context, args, reply any) error {
 				tntApiOpts, cancast := args.(*utils.TenantIDWithAPIOpts)
 				if !cancast {
 					return utils.ErrNotConvertible
@@ -1891,13 +1893,13 @@ func TestGetResourceRemote(t *testing.T) {
 				*reply.(**Resource) = rS
 				return nil
 			},
-			utils.CacheSv1ReplicateSet: func(args, reply any) error {
+			utils.CacheSv1ReplicateSet: func(ctx *context.Context, args, reply any) error {
 				return errors.New("Can't Replicate")
 			},
 		},
 	}
 	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
-	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	connMgr := NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator): clientConn,
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches):     clientConn,
 	})
@@ -1948,10 +1950,10 @@ func TestGetResourceProfileRemote(t *testing.T) {
 		Weight:            20,
 		ThresholdIDs:      []string{"Val1"},
 	}
-	clientConn := make(chan rpcclient.ClientConnector, 1)
+	clientConn := make(chan birpc.ClientConnector, 1)
 	clientConn <- &ccMock{
-		calls: map[string]func(args any, reply any) error{
-			utils.ReplicatorSv1GetResourceProfile: func(args, reply any) error {
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.ReplicatorSv1GetResourceProfile: func(ctx *context.Context, args, reply any) error {
 				tntApiOpts, cancast := args.(*utils.TenantIDWithAPIOpts)
 				if !cancast {
 					return utils.ErrNotConvertible
@@ -1963,7 +1965,7 @@ func TestGetResourceProfileRemote(t *testing.T) {
 		},
 	}
 	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
-	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	connMgr := NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator): clientConn,
 	})
 	dm := NewDataManager(db, cfg.CacheCfg(), connMgr)
@@ -2004,10 +2006,10 @@ func TestGetActionTriggers(t *testing.T) {
 			ID: "Test",
 		},
 	}
-	clientConn := make(chan rpcclient.ClientConnector, 1)
+	clientConn := make(chan birpc.ClientConnector, 1)
 	clientConn <- &ccMock{
-		calls: map[string]func(args any, reply any) error{
-			utils.ReplicatorSv1GetActionTriggers: func(args, reply any) error {
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.ReplicatorSv1GetActionTriggers: func(ctx *context.Context, args, reply any) error {
 				strApiOpts, cancast := args.(*utils.StringWithAPIOpts)
 				if !cancast {
 					return utils.ErrNotConvertible
@@ -2016,14 +2018,14 @@ func TestGetActionTriggers(t *testing.T) {
 				*reply.(*ActionTriggers) = aT
 				return nil
 			},
-			utils.CacheSv1ReplicateSet: func(args, reply any) error {
+			utils.CacheSv1ReplicateSet: func(ctx *context.Context, args, reply any) error {
 
 				return errors.New("Can't Replicate")
 			},
 		},
 	}
 	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
-	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	connMgr := NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1): clientConn,
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches):    clientConn,
 	})
@@ -2072,19 +2074,19 @@ func TestGetActionTriggersErr(t *testing.T) {
 			ID: "Test",
 		},
 	}
-	clientConn := make(chan rpcclient.ClientConnector, 1)
+	clientConn := make(chan birpc.ClientConnector, 1)
 	clientConn <- &ccMock{
-		calls: map[string]func(args any, reply any) error{
-			utils.ReplicatorSv1GetActionTriggers: func(args, reply any) error {
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.ReplicatorSv1GetActionTriggers: func(ctx *context.Context, args, reply any) error {
 				return utils.ErrNotFound
 			},
-			utils.CacheSv1ReplicateSet: func(args, reply any) error {
+			utils.CacheSv1ReplicateSet: func(ctx *context.Context, args, reply any) error {
 				return errors.New("Can't Replicate")
 			},
 		},
 	}
 	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
-	connMgr1 := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	connMgr1 := NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1): clientConn,
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches):    clientConn,
 	})
@@ -2146,10 +2148,10 @@ func TestGetSharedGroupRemote(t *testing.T) {
 			"string2": false,
 		},
 	}
-	clientConn := make(chan rpcclient.ClientConnector, 1)
+	clientConn := make(chan birpc.ClientConnector, 1)
 	clientConn <- &ccMock{
-		calls: map[string]func(args any, reply any) error{
-			utils.ReplicatorSv1GetSharedGroup: func(args, reply any) error {
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.ReplicatorSv1GetSharedGroup: func(ctx *context.Context, args, reply any) error {
 				strApiOpts, cancast := args.(*utils.StringWithAPIOpts)
 				if !cancast {
 					return utils.ErrNotConvertible
@@ -2161,7 +2163,7 @@ func TestGetSharedGroupRemote(t *testing.T) {
 		},
 	}
 	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
-	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	connMgr := NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator): clientConn,
 	})
 	dm := NewDataManager(db, cfg.CacheCfg(), connMgr)
@@ -2201,10 +2203,10 @@ func TestGetStatQueueProfileRemote(t *testing.T) {
 		FilterIDs: []string{"FLTR_ID"},
 		Weight:    10,
 	}
-	clientConn := make(chan rpcclient.ClientConnector, 1)
+	clientConn := make(chan birpc.ClientConnector, 1)
 	clientConn <- &ccMock{
-		calls: map[string]func(args any, reply any) error{
-			utils.ReplicatorSv1GetStatQueueProfile: func(args, reply any) error {
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.ReplicatorSv1GetStatQueueProfile: func(ctx *context.Context, args, reply any) error {
 				tntApiOpts, cancast := args.(*utils.TenantIDWithAPIOpts)
 				if !cancast {
 					return utils.ErrNotConvertible
@@ -2216,7 +2218,7 @@ func TestGetStatQueueProfileRemote(t *testing.T) {
 		},
 	}
 	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
-	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	connMgr := NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator): clientConn,
 	})
 	dm := NewDataManager(db, cfg.CacheCfg(), connMgr)
@@ -2264,10 +2266,10 @@ func TestStatQueueProfileRemote(t *testing.T) {
 		FilterIDs: []string{"FLTR_ID"},
 		Weight:    10,
 	}
-	clientConn := make(chan rpcclient.ClientConnector, 1)
+	clientConn := make(chan birpc.ClientConnector, 1)
 	clientConn <- &ccMock{
-		calls: map[string]func(args any, reply any) error{
-			utils.ReplicatorSv1SetStatQueueProfile: func(args, reply any) error {
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.ReplicatorSv1SetStatQueueProfile: func(ctx *context.Context, args, reply any) error {
 				sqPApiOpts, cancast := args.(StatQueueProfileWithAPIOpts)
 				if !cancast {
 					return utils.ErrNotConvertible
@@ -2275,7 +2277,7 @@ func TestStatQueueProfileRemote(t *testing.T) {
 				dm.DataDB().SetStatQueueProfileDrv(sqPApiOpts.StatQueueProfile)
 				return nil
 			},
-			utils.ReplicatorSv1SetStatQueue: func(args, reply any) error {
+			utils.ReplicatorSv1SetStatQueue: func(ctx *context.Context, args, reply any) error {
 				sqApiOpts, cancast := args.(StatQueueWithAPIOpts)
 				if !cancast {
 					return utils.ErrNotConvertible
@@ -2286,7 +2288,7 @@ func TestStatQueueProfileRemote(t *testing.T) {
 		},
 	}
 	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
-	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	connMgr := NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator): clientConn,
 	})
 	dm := NewDataManager(db, cfg.CacheCfg(), connMgr)
@@ -2322,10 +2324,10 @@ func TestDMActionsRemote(t *testing.T) {
 			Remote:    true,
 		},
 	}
-	clientConn := make(chan rpcclient.ClientConnector, 1)
+	clientConn := make(chan birpc.ClientConnector, 1)
 	clientConn <- &ccMock{
-		calls: map[string]func(args any, reply any) error{
-			utils.ReplicatorSv1SetActions: func(args, reply any) error {
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.ReplicatorSv1SetActions: func(ctx *context.Context, args, reply any) error {
 				sArgApiOpts, cancast := args.(SetActionsArgsWithAPIOpts)
 				if !cancast {
 					return utils.ErrNotConvertible
@@ -2333,7 +2335,7 @@ func TestDMActionsRemote(t *testing.T) {
 				dm.DataDB().SetActionsDrv(sArgApiOpts.Key, sArgApiOpts.Acs)
 				return nil
 			},
-			utils.ReplicatorSv1GetActions: func(args, reply any) error {
+			utils.ReplicatorSv1GetActions: func(ctx *context.Context, args, reply any) error {
 				strApiOpts, cancast := args.(utils.StringWithAPIOpts)
 				if !cancast {
 					return utils.ErrNotConvertible
@@ -2341,7 +2343,7 @@ func TestDMActionsRemote(t *testing.T) {
 				dm.DataDB().GetActionsDrv(strApiOpts.Arg)
 				return nil
 			},
-			utils.ReplicatorSv1RemoveActions: func(args, reply any) error {
+			utils.ReplicatorSv1RemoveActions: func(ctx *context.Context, args, reply any) error {
 				strApiOpts, cancast := args.(utils.StringWithAPIOpts)
 				if !cancast {
 					return utils.ErrNotConvertible
@@ -2355,7 +2357,7 @@ func TestDMActionsRemote(t *testing.T) {
 		ActionType:       utils.MetaTopUp,
 		ExpirationString: utils.MetaUnlimited}}
 	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
-	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	connMgr := NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator): clientConn,
 	})
 	dm := NewDataManager(db, cfg.CacheCfg(), connMgr)
@@ -2408,10 +2410,10 @@ func TestGetDispatcherHost(t *testing.T) {
 			Transport: utils.MetaJSON,
 		},
 	}
-	clientConn := make(chan rpcclient.ClientConnector, 1)
+	clientConn := make(chan birpc.ClientConnector, 1)
 	clientConn <- &ccMock{
-		calls: map[string]func(args any, reply any) error{
-			utils.ReplicatorSv1GetDispatcherHost: func(args, reply any) error {
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.ReplicatorSv1GetDispatcherHost: func(ctx *context.Context, args, reply any) error {
 				tntApiOpts, cancast := args.(*utils.TenantIDWithAPIOpts)
 				if !cancast {
 					return utils.ErrNotConvertible
@@ -2423,7 +2425,7 @@ func TestGetDispatcherHost(t *testing.T) {
 		},
 	}
 	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
-	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	connMgr := NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1): clientConn,
 	})
 	dm := NewDataManager(db, cfg.CacheCfg(), connMgr)
@@ -2463,10 +2465,10 @@ func TestGetReverseDestinationRemote(t *testing.T) {
 		},
 	}
 	ids := []string{"dest1", "dest2"}
-	clientConn := make(chan rpcclient.ClientConnector, 1)
+	clientConn := make(chan birpc.ClientConnector, 1)
 	clientConn <- &ccMock{
-		calls: map[string]func(args any, reply any) error{
-			utils.ReplicatorSv1GetReverseDestination: func(args, reply any) error {
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.ReplicatorSv1GetReverseDestination: func(ctx *context.Context, args, reply any) error {
 				strApiOpts, cancast := args.(*utils.StringWithAPIOpts)
 				if !cancast {
 					return utils.ErrNotConvertible
@@ -2478,7 +2480,7 @@ func TestGetReverseDestinationRemote(t *testing.T) {
 		},
 	}
 	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
-	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	connMgr := NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1): clientConn,
 	})
 	dm := NewDataManager(db, cfg.CacheCfg(), connMgr)
@@ -2490,15 +2492,15 @@ func TestGetReverseDestinationRemote(t *testing.T) {
 		t.Errorf("expected %v,received %v", utils.ToJSON(ids), utils.ToJSON(val))
 	}
 	Cache = NewCacheS(cfg, dm, nil)
-	clientConn2 := make(chan rpcclient.ClientConnector, 1)
+	clientConn2 := make(chan birpc.ClientConnector, 1)
 	clientConn2 <- &ccMock{
-		calls: map[string]func(args any, reply any) error{
-			utils.CacheSv1ReplicateSet: func(args, reply any) error {
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.CacheSv1ReplicateSet: func(ctx *context.Context, args, reply any) error {
 				return errors.New("Can't replicate")
 			},
 		},
 	}
-	connMgr2 := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	connMgr2 := NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches): clientConn2,
 	})
 	SetConnManager(connMgr2)
@@ -2541,10 +2543,10 @@ func TestDMRemoveDestination(t *testing.T) {
 	dest := &Destination{
 		Id: "nat", Prefixes: []string{"0257", "0256", "0723"},
 	}
-	clientConn := make(chan rpcclient.ClientConnector, 1)
+	clientConn := make(chan birpc.ClientConnector, 1)
 	clientConn <- &ccMock{
-		calls: map[string]func(args any, reply any) error{
-			utils.ReplicatorSv1RemoveDestination: func(args, reply any) error {
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.ReplicatorSv1RemoveDestination: func(ctx *context.Context, args, reply any) error {
 				strApiOpts, cancast := args.(utils.StringWithAPIOpts)
 				if !cancast {
 					return utils.ErrNotConvertible
@@ -2552,7 +2554,7 @@ func TestDMRemoveDestination(t *testing.T) {
 				dm.DataDB().RemoveDestinationDrv(strApiOpts.Arg, utils.NonTransactional)
 				return nil
 			},
-			utils.ReplicatorSv1GetReverseDestination: func(args, reply any) error {
+			utils.ReplicatorSv1GetReverseDestination: func(ctx *context.Context, args, reply any) error {
 				strApiOpts, cancast := args.(utils.StringWithAPIOpts)
 				if !cancast {
 					return utils.ErrNotConvertible
@@ -2563,7 +2565,7 @@ func TestDMRemoveDestination(t *testing.T) {
 		},
 	}
 	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
-	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	connMgr := NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1): clientConn,
 	})
 	dm := NewDataManager(db, cfg.CacheCfg(), connMgr)
@@ -2577,15 +2579,15 @@ func TestDMRemoveDestination(t *testing.T) {
 		t.Error(err)
 	}
 	Cache = NewCacheS(cfg, dm, nil)
-	clientConn2 := make(chan rpcclient.ClientConnector, 1)
+	clientConn2 := make(chan birpc.ClientConnector, 1)
 	clientConn2 <- &ccMock{
-		calls: map[string]func(args any, reply any) error{
-			utils.CacheSv1ReplicateRemove: func(args, reply any) error {
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.CacheSv1ReplicateRemove: func(ctx *context.Context, args, reply any) error {
 				return errors.New("Can't replicate")
 			},
 		},
 	}
-	connMgr2 := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	connMgr2 := NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches): clientConn2,
 	})
 	SetConnManager(connMgr2)
@@ -2622,10 +2624,10 @@ func TestDMRemoveFilter(t *testing.T) {
 			Remote: true,
 		},
 	}
-	clientConn := make(chan rpcclient.ClientConnector, 1)
+	clientConn := make(chan birpc.ClientConnector, 1)
 	clientConn <- &ccMock{
-		calls: map[string]func(args any, reply any) error{
-			utils.ReplicatorSv1RemoveFilter: func(args, reply any) error {
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.ReplicatorSv1RemoveFilter: func(ctx *context.Context, args, reply any) error {
 				tntApiOpts, cancast := args.(utils.TenantIDWithAPIOpts)
 				if !cancast {
 					return utils.ErrNotConvertible
@@ -2633,13 +2635,13 @@ func TestDMRemoveFilter(t *testing.T) {
 				dm.dataDB.RemoveFilterDrv(tntApiOpts.TenantID.Tenant, tntApiOpts.TenantID.ID)
 				return nil
 			},
-			utils.ReplicatorSv1GetIndexes: func(args, reply any) error {
+			utils.ReplicatorSv1GetIndexes: func(ctx *context.Context, args, reply any) error {
 				return nil
 			},
 		},
 	}
 	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
-	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	connMgr := NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1): clientConn,
 	})
 	dm := NewDataManager(db, cfg.CacheCfg(), connMgr)
@@ -2712,10 +2714,10 @@ func TestRemoveStatQueueProfile(t *testing.T) {
 		FilterIDs: []string{"FLTR_ST_Resource1", "*string:~*req.Account:1001"},
 		Weight:    50,
 	}
-	clientConn := make(chan rpcclient.ClientConnector, 1)
+	clientConn := make(chan birpc.ClientConnector, 1)
 	clientConn <- &ccMock{
-		calls: map[string]func(args any, reply any) error{
-			utils.ReplicatorSv1RemoveStatQueueProfile: func(args, reply any) error {
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.ReplicatorSv1RemoveStatQueueProfile: func(ctx *context.Context, args, reply any) error {
 				tntApiOpts, cancast := args.(utils.TenantIDWithAPIOpts)
 				if !cancast {
 					return utils.ErrNotConvertible
@@ -2723,14 +2725,14 @@ func TestRemoveStatQueueProfile(t *testing.T) {
 				dm.DataDB().RemStatQueueProfileDrv(tntApiOpts.Tenant, tntApiOpts.ID)
 				return nil
 			},
-			utils.ReplicatorSv1GetIndexes: func(args, reply any) error {
+			utils.ReplicatorSv1GetIndexes: func(ctx *context.Context, args, reply any) error {
 
 				return errors.New("Can't replicate")
 			},
 		},
 	}
 	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
-	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	connMgr := NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1): clientConn,
 	})
 	dm := NewDataManager(db, cfg.CacheCfg(), connMgr)
@@ -2788,10 +2790,10 @@ func TestDMGetTimingRemote(t *testing.T) {
 		EndTime:   "00:00:01",
 	}
 
-	clientConn := make(chan rpcclient.ClientConnector, 1)
+	clientConn := make(chan birpc.ClientConnector, 1)
 	clientConn <- &ccMock{
-		calls: map[string]func(args any, reply any) error{
-			utils.ReplicatorSv1GetTiming: func(args, reply any) error {
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.ReplicatorSv1GetTiming: func(ctx *context.Context, args, reply any) error {
 				strApiOpts, cancast := args.(*utils.StringWithAPIOpts)
 				if !cancast {
 					return utils.ErrNotConvertible
@@ -2803,7 +2805,7 @@ func TestDMGetTimingRemote(t *testing.T) {
 		},
 	}
 	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
-	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	connMgr := NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1): clientConn,
 	})
 	dm := NewDataManager(db, cfg.CacheCfg(), connMgr)
@@ -2813,15 +2815,15 @@ func TestDMGetTimingRemote(t *testing.T) {
 		t.Error(err)
 	}
 	Cache = NewCacheS(cfg, dm, nil)
-	clientConn2 := make(chan rpcclient.ClientConnector, 1)
+	clientConn2 := make(chan birpc.ClientConnector, 1)
 	clientConn2 <- &ccMock{
-		calls: map[string]func(args any, reply any) error{
-			utils.CacheSv1ReplicateSet: func(args, reply any) error {
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.CacheSv1ReplicateSet: func(ctx *context.Context, args, reply any) error {
 				return errors.New("Can't replicate")
 			},
 		},
 	}
-	connMgr2 := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches): clientConn2})
+	connMgr2 := NewConnManager(cfg, map[string]chan birpc.ClientConnector{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches): clientConn2})
 	SetConnManager(connMgr2)
 	if _, err := dm.GetTiming(tp.ID, true, utils.NonTransactional); err == nil || err.Error() != "Can't replicate" {
 		t.Error(err)
@@ -2861,10 +2863,10 @@ func TestDmGetActions(t *testing.T) {
 			ActionType:       utils.MetaTopUpReset,
 			ExpirationString: utils.MetaUnlimited},
 	}
-	clientConn := make(chan rpcclient.ClientConnector, 1)
+	clientConn := make(chan birpc.ClientConnector, 1)
 	clientConn <- &ccMock{
-		calls: map[string]func(args any, reply any) error{
-			utils.ReplicatorSv1GetActions: func(args, reply any) error {
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.ReplicatorSv1GetActions: func(ctx *context.Context, args, reply any) error {
 				strApiOpts, cancast := args.(*utils.StringWithAPIOpts)
 				if !cancast {
 					return utils.ErrNotConvertible
@@ -2876,7 +2878,7 @@ func TestDmGetActions(t *testing.T) {
 		},
 	}
 	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
-	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	connMgr := NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1): clientConn,
 	})
 	dm := NewDataManager(db, cfg.CacheCfg(), connMgr)
@@ -2909,10 +2911,10 @@ func TestDMSetLoadIDs(t *testing.T) {
 			RouteID:   "route",
 		},
 	}
-	clientConn := make(chan rpcclient.ClientConnector, 1)
+	clientConn := make(chan birpc.ClientConnector, 1)
 	clientConn <- &ccMock{
-		calls: map[string]func(args any, reply any) error{
-			utils.ReplicatorSv1SetLoadIDs: func(args, reply any) error {
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.ReplicatorSv1SetLoadIDs: func(ctx *context.Context, args, reply any) error {
 				ldApiOpts, cancast := args.(*utils.LoadIDsWithAPIOpts)
 				if !cancast {
 					return utils.ErrNotConvertible
@@ -2923,7 +2925,7 @@ func TestDMSetLoadIDs(t *testing.T) {
 		},
 	}
 	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
-	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	connMgr := NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1): clientConn,
 	})
 	dm := NewDataManager(db, cfg.CacheCfg(), connMgr)
@@ -2974,10 +2976,10 @@ func TestGetItemLoadIDsRemote(t *testing.T) {
 		"load1": 23,
 		"load2": 22,
 	}
-	clientConn := make(chan rpcclient.ClientConnector, 1)
+	clientConn := make(chan birpc.ClientConnector, 1)
 	clientConn <- &ccMock{
-		calls: map[string]func(args any, reply any) error{
-			utils.ReplicatorSv1GetItemLoadIDs: func(args, reply any) error {
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.ReplicatorSv1GetItemLoadIDs: func(ctx *context.Context, args, reply any) error {
 				strApiOpts, cancast := args.(*utils.StringWithAPIOpts)
 				if !cancast {
 					return utils.ErrNotConvertible
@@ -2989,7 +2991,7 @@ func TestGetItemLoadIDsRemote(t *testing.T) {
 		},
 	}
 	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
-	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	connMgr := NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1): clientConn,
 	})
 	dm := NewDataManager(db, cfg.CacheCfg(), connMgr)
@@ -3007,13 +3009,13 @@ func TestGetItemLoadIDsRemote(t *testing.T) {
 	}
 
 	Cache = NewCacheS(cfg, dm, nil)
-	clientconn := make(chan rpcclient.ClientConnector, 1)
+	clientconn := make(chan birpc.ClientConnector, 1)
 	clientconn <- &ccMock{
-		calls: map[string]func(args any, reply any) error{
-			utils.CacheSv1ReplicateSet: func(args, reply any) error { return errors.New("Can't replicate") },
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.CacheSv1ReplicateSet: func(ctx *context.Context, args, reply any) error { return errors.New("Can't replicate") },
 		},
 	}
-	connMgr2 := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	connMgr2 := NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches): clientconn,
 	})
 	SetConnManager(connMgr2)
@@ -3049,18 +3051,18 @@ func TestDMItemLoadIDsRemoteErr(t *testing.T) {
 		"load1": 23,
 		"load2": 22,
 	}
-	clientConn := make(chan rpcclient.ClientConnector, 1)
+	clientConn := make(chan birpc.ClientConnector, 1)
 	clientConn <- &ccMock{
-		calls: map[string]func(args any, reply any) error{
-			utils.ReplicatorSv1GetItemLoadIDs: func(args, reply any) error {
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.ReplicatorSv1GetItemLoadIDs: func(ctx *context.Context, args, reply any) error {
 				*reply.(*map[string]int64) = ld
 				return utils.ErrNotFound
 			},
-			utils.CacheSv1ReplicateSet: func(args, reply any) error { return errors.New("Can't replicate") },
+			utils.CacheSv1ReplicateSet: func(ctx *context.Context, args, reply any) error { return errors.New("Can't replicate") },
 		},
 	}
 	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
-	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	connMgr := NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches):    clientConn,
 		utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1): clientConn,
 	})
@@ -3118,10 +3120,10 @@ func TestActionPlanRemote(t *testing.T) {
 			},
 		},
 	}
-	clientConn := make(chan rpcclient.ClientConnector, 1)
+	clientConn := make(chan birpc.ClientConnector, 1)
 	clientConn <- &ccMock{
-		calls: map[string]func(args any, reply any) error{
-			utils.ReplicatorSv1SetActionPlan: func(args, reply any) error {
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.ReplicatorSv1SetActionPlan: func(ctx *context.Context, args, reply any) error {
 				setActPlnOpts, cancast := args.(*SetActionPlanArgWithAPIOpts)
 				if !cancast {
 					return utils.ErrNotConvertible
@@ -3129,7 +3131,7 @@ func TestActionPlanRemote(t *testing.T) {
 				dm.dataDB.SetActionPlanDrv(setActPlnOpts.Key, setActPlnOpts.Ats)
 				return nil
 			},
-			utils.ReplicatorSv1RemoveActionPlan: func(args, reply any) error {
+			utils.ReplicatorSv1RemoveActionPlan: func(ctx *context.Context, args, reply any) error {
 				strApiOpts, cancast := args.(*utils.StringWithAPIOpts)
 				if !cancast {
 					return utils.ErrNotConvertible
@@ -3137,7 +3139,7 @@ func TestActionPlanRemote(t *testing.T) {
 				dm.DataDB().RemoveActionPlanDrv(strApiOpts.Arg)
 				return nil
 			},
-			utils.ReplicatorSv1GetAllActionPlans: func(args, reply any) error {
+			utils.ReplicatorSv1GetAllActionPlans: func(ctx *context.Context, args, reply any) error {
 
 				*reply.(*map[string]*ActionPlan) = map[string]*ActionPlan{
 					"act_key": actPln,
@@ -3147,7 +3149,7 @@ func TestActionPlanRemote(t *testing.T) {
 		},
 	}
 	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
-	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	connMgr := NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1): clientConn,
 	})
 	dm := NewDataManager(db, cfg.CacheCfg(), connMgr)
@@ -3193,10 +3195,10 @@ func TestAccountActionPlansRemote(t *testing.T) {
 		},
 	}
 
-	clientConn := make(chan rpcclient.ClientConnector, 1)
+	clientConn := make(chan birpc.ClientConnector, 1)
 	clientConn <- &ccMock{
-		calls: map[string]func(args any, reply any) error{
-			utils.ReplicatorSv1SetAccountActionPlans: func(args, reply any) error {
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.ReplicatorSv1SetAccountActionPlans: func(ctx *context.Context, args, reply any) error {
 				setActPlnOpts, cancast := args.(*SetActionPlanArgWithAPIOpts)
 				if !cancast {
 					return utils.ErrNotConvertible
@@ -3204,14 +3206,14 @@ func TestAccountActionPlansRemote(t *testing.T) {
 				dm.dataDB.SetActionPlanDrv(setActPlnOpts.Key, setActPlnOpts.Ats)
 				return nil
 			},
-			utils.ReplicatorSv1RemAccountActionPlans: func(args, reply any) error {
+			utils.ReplicatorSv1RemAccountActionPlans: func(ctx *context.Context, args, reply any) error {
 
 				return nil
 			},
 		},
 	}
 	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
-	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	connMgr := NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1): clientConn,
 	})
 	dm := NewDataManager(db, cfg.CacheCfg(), connMgr)
@@ -3476,10 +3478,10 @@ func TestDMRatingProfile(t *testing.T) {
 		}},
 	}
 
-	clientConn := make(chan rpcclient.ClientConnector, 1)
+	clientConn := make(chan birpc.ClientConnector, 1)
 	clientConn <- &ccMock{
-		calls: map[string]func(args any, reply any) error{
-			utils.ReplicatorSv1SetRatingProfile: func(args, reply any) error {
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.ReplicatorSv1SetRatingProfile: func(ctx *context.Context, args, reply any) error {
 				rtPrfApiOpts, cancast := args.(*RatingProfileWithAPIOpts)
 				if !cancast {
 					return utils.ErrNotConvertible
@@ -3487,7 +3489,7 @@ func TestDMRatingProfile(t *testing.T) {
 				dm.dataDB.SetRatingProfileDrv(rtPrfApiOpts.RatingProfile)
 				return nil
 			},
-			utils.ReplicatorSv1RemoveRatingProfile: func(args, reply any) error {
+			utils.ReplicatorSv1RemoveRatingProfile: func(ctx *context.Context, args, reply any) error {
 				strApiOpts, cancast := args.(*utils.StringWithAPIOpts)
 				if !cancast {
 					return utils.ErrNotConvertible
@@ -3495,7 +3497,7 @@ func TestDMRatingProfile(t *testing.T) {
 				dm.DataDB().RemoveRatingProfileDrv(strApiOpts.Arg)
 				return nil
 			},
-			utils.ReplicatorSv1GetRatingProfile: func(args, reply any) error {
+			utils.ReplicatorSv1GetRatingProfile: func(ctx *context.Context, args, reply any) error {
 				strApiOpts, cancast := args.(*utils.StringWithAPIOpts)
 				if !cancast {
 					return utils.ErrNotConvertible
@@ -3507,7 +3509,7 @@ func TestDMRatingProfile(t *testing.T) {
 		},
 	}
 	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
-	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	connMgr := NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1): clientConn,
 	})
 	dm := NewDataManager(db, cfg.CacheCfg(), connMgr)
@@ -3628,21 +3630,21 @@ func TestDMGetRatingPlan(t *testing.T) {
 		Ratings: map[string]*RIRate{"Ratings": {ConnectFee: 0.7}},
 		Timings: map[string]*RITiming{"Timings": {Months: utils.Months{4}}},
 	}
-	clientConn := make(chan rpcclient.ClientConnector, 1)
+	clientConn := make(chan birpc.ClientConnector, 1)
 	clientConn <- &ccMock{
-		calls: map[string]func(args any, reply any) error{
-			utils.ReplicatorSv1GetRatingPlan: func(args, reply any) error {
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.ReplicatorSv1GetRatingPlan: func(ctx *context.Context, args, reply any) error {
 				*reply.(**RatingPlan) = rpL
 				return nil
 			},
-			utils.CacheSv1ReplicateSet: func(args, reply any) error {
+			utils.CacheSv1ReplicateSet: func(ctx *context.Context, args, reply any) error {
 
 				return errors.New("Can't replicate ")
 			},
 		},
 	}
 	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
-	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	connMgr := NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1): clientConn,
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches):    clientConn,
 	})
@@ -3691,21 +3693,21 @@ func TestDMChargerProfile(t *testing.T) {
 		AttributeIDs: []string{"ATTR_1"},
 		Weight:       20,
 	}
-	clientConn := make(chan rpcclient.ClientConnector, 1)
+	clientConn := make(chan birpc.ClientConnector, 1)
 	clientConn <- &ccMock{
-		calls: map[string]func(args any, reply any) error{
-			utils.ReplicatorSv1GetChargerProfile: func(args, reply any) error {
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.ReplicatorSv1GetChargerProfile: func(ctx *context.Context, args, reply any) error {
 				*reply.(**ChargerProfile) = chP
 				return nil
 			},
-			utils.CacheSv1ReplicateSet: func(args, reply any) error {
+			utils.CacheSv1ReplicateSet: func(ctx *context.Context, args, reply any) error {
 
 				return errors.New("Can't replicate ")
 			},
 		},
 	}
 	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
-	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	connMgr := NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1): clientConn,
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches):    clientConn,
 	})
@@ -3763,21 +3765,21 @@ func TestDMDispatcherProfile(t *testing.T) {
 			},
 		},
 	}
-	clientConn := make(chan rpcclient.ClientConnector, 1)
+	clientConn := make(chan birpc.ClientConnector, 1)
 	clientConn <- &ccMock{
-		calls: map[string]func(args any, reply any) error{
-			utils.ReplicatorSv1GetDispatcherProfile: func(args, reply any) error {
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.ReplicatorSv1GetDispatcherProfile: func(ctx *context.Context, args, reply any) error {
 				*reply.(**DispatcherProfile) = dPP
 				return nil
 			},
-			utils.CacheSv1ReplicateSet: func(args, reply any) error {
+			utils.CacheSv1ReplicateSet: func(ctx *context.Context, args, reply any) error {
 
 				return errors.New("Can't replicate ")
 			},
 		},
 	}
 	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
-	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	connMgr := NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1): clientConn,
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches):    clientConn,
 	})
@@ -4121,18 +4123,18 @@ func TestCacheDataFromDBErr(t *testing.T) {
 	cfg.CacheCfg().Partitions[utils.CacheThresholdProfiles].Replicate = true
 	cfg.CacheCfg().ReplicationConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)}
 	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
-	clientConn := make(chan rpcclient.ClientConnector, 1)
+	clientConn := make(chan birpc.ClientConnector, 1)
 	clientConn <- &ccMock{
-		calls: map[string]func(args any, reply any) error{
-			utils.ReplicatorSv1GetThresholdProfile: func(args, reply any) error {
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.ReplicatorSv1GetThresholdProfile: func(ctx *context.Context, args, reply any) error {
 				return errors.New("Another Error")
 			},
-			utils.CacheSv1ReplicateSet: func(args, reply any) error {
+			utils.CacheSv1ReplicateSet: func(ctx *context.Context, args, reply any) error {
 				return fmt.Errorf("New Error")
 			},
 		},
 	}
-	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	connMgr := NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator): clientConn,
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches):     clientConn,
 	})
@@ -4189,20 +4191,20 @@ func TestDMGetRouteProfile(t *testing.T) {
 		},
 		Weight: 10,
 	}
-	clientConn := make(chan rpcclient.ClientConnector, 1)
+	clientConn := make(chan birpc.ClientConnector, 1)
 	clientConn <- &ccMock{
-		calls: map[string]func(args any, reply any) error{
-			utils.ReplicatorSv1GetRouteProfile: func(args, reply any) error {
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.ReplicatorSv1GetRouteProfile: func(ctx *context.Context, args, reply any) error {
 				*reply.(**RouteProfile) = rpL
 				return nil
 			},
-			utils.CacheSv1ReplicateSet: func(args, reply any) error {
+			utils.CacheSv1ReplicateSet: func(ctx *context.Context, args, reply any) error {
 				return errors.New("Can't Replicate")
 			},
 		},
 	}
 	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
-	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	connMgr := NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1): clientConn,
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches):    clientConn,
 	})
@@ -4242,19 +4244,19 @@ func TestDMGetRouteProfileErr(t *testing.T) {
 			Replicate: true,
 		},
 	}
-	clientConn := make(chan rpcclient.ClientConnector, 1)
+	clientConn := make(chan birpc.ClientConnector, 1)
 	clientConn <- &ccMock{
-		calls: map[string]func(args any, reply any) error{
-			utils.ReplicatorSv1GetRouteProfile: func(args, reply any) error {
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.ReplicatorSv1GetRouteProfile: func(ctx *context.Context, args, reply any) error {
 				return utils.ErrNotFound
 			},
-			utils.CacheSv1ReplicateSet: func(args, reply any) error {
+			utils.CacheSv1ReplicateSet: func(ctx *context.Context, args, reply any) error {
 				return errors.New("Can't Replicate")
 			},
 		},
 	}
 	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
-	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	connMgr := NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1): clientConn,
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches):    clientConn,
 	})
@@ -4407,14 +4409,14 @@ func TestDMAttributeProfile(t *testing.T) {
 		},
 		Weight: 20.0,
 	}
-	clientConn := make(chan rpcclient.ClientConnector, 1)
+	clientConn := make(chan birpc.ClientConnector, 1)
 	clientConn <- &ccMock{
-		calls: map[string]func(args any, reply any) error{
-			utils.ReplicatorSv1GetAttributeProfile: func(args, reply any) error {
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.ReplicatorSv1GetAttributeProfile: func(ctx *context.Context, args, reply any) error {
 				*reply.(**AttributeProfile) = attrPrf
 				return nil
 			},
-			utils.ReplicatorSv1SetAttributeProfile: func(args, reply any) error {
+			utils.ReplicatorSv1SetAttributeProfile: func(ctx *context.Context, args, reply any) error {
 				attrPrfApiOpts, cancast := args.(*AttributeProfileWithAPIOpts)
 				if !cancast {
 					return utils.ErrNotConvertible
@@ -4422,7 +4424,7 @@ func TestDMAttributeProfile(t *testing.T) {
 				dm.DataDB().SetAttributeProfileDrv(attrPrfApiOpts.AttributeProfile)
 				return nil
 			},
-			utils.ReplicatorSv1RemoveAttributeProfile: func(args, reply any) error {
+			utils.ReplicatorSv1RemoveAttributeProfile: func(ctx *context.Context, args, reply any) error {
 				tntApiOpts, cancast := args.(*utils.TenantIDWithAPIOpts)
 				if !cancast {
 					return utils.ErrNotConvertible
@@ -4433,7 +4435,7 @@ func TestDMAttributeProfile(t *testing.T) {
 		},
 	}
 	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
-	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	connMgr := NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1): clientConn,
 	})
 	dm := NewDataManager(db, cfg.CacheCfg(), connMgr)
@@ -4584,10 +4586,10 @@ func TestDmIndexes(t *testing.T) {
 		},
 	}
 	cfg.DataDbCfg().RplConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator)}
-	clientConn := make(chan rpcclient.ClientConnector, 1)
+	clientConn := make(chan birpc.ClientConnector, 1)
 	clientConn <- &ccMock{
-		calls: map[string]func(args any, reply any) error{
-			utils.ReplicatorSv1SetIndexes: func(args, reply any) error {
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.ReplicatorSv1SetIndexes: func(ctx *context.Context, args, reply any) error {
 				setcastIndxArg, cancast := args.(*utils.SetIndexesArg)
 				if !cancast {
 					return utils.ErrNotConvertible
@@ -4595,7 +4597,7 @@ func TestDmIndexes(t *testing.T) {
 				dm.DataDB().SetIndexesDrv(setcastIndxArg.IdxItmType, setcastIndxArg.TntCtx, setcastIndxArg.Indexes, true, utils.NonTransactional)
 				return nil
 			},
-			utils.ReplicatorSv1RemoveIndexes: func(args, reply any) error {
+			utils.ReplicatorSv1RemoveIndexes: func(ctx *context.Context, args, reply any) error {
 				gIdxArg, cancast := args.(*utils.GetIndexesArg)
 				if !cancast {
 					return utils.ErrNotConvertible
@@ -4605,7 +4607,7 @@ func TestDmIndexes(t *testing.T) {
 			},
 		},
 	}
-	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	connMgr := NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator): clientConn,
 	})
 	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
@@ -4644,10 +4646,10 @@ func TestDmCheckFilters(t *testing.T) {
 		},
 	}
 	cfg.DataDbCfg().RmtConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator)}
-	clientConn := make(chan rpcclient.ClientConnector, 1)
+	clientConn := make(chan birpc.ClientConnector, 1)
 	clientConn <- &ccMock{
-		calls: map[string]func(args any, reply any) error{
-			utils.ReplicatorSv1GetFilter: func(args, reply any) error {
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.ReplicatorSv1GetFilter: func(ctx *context.Context, args, reply any) error {
 				fltr := &Filter{
 					ID:     "FLTR_1",
 					Tenant: "cgrates.org",
@@ -4664,7 +4666,7 @@ func TestDmCheckFilters(t *testing.T) {
 			},
 		},
 	}
-	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	connMgr := NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator): clientConn,
 	})
 	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
@@ -4686,15 +4688,15 @@ func TestRemoveFilterIndexes(t *testing.T) {
 		},
 	}
 	cfg.DataDbCfg().RmtConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator)}
-	clientConn := make(chan rpcclient.ClientConnector, 1)
+	clientConn := make(chan birpc.ClientConnector, 1)
 	clientConn <- &ccMock{
-		calls: map[string]func(args any, reply any) error{
-			utils.ReplicatorSv1GetIndexes: func(args, reply any) error {
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.ReplicatorSv1GetIndexes: func(ctx *context.Context, args, reply any) error {
 				return utils.ErrNotImplemented
 			},
 		},
 	}
-	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	connMgr := NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator): clientConn,
 	})
 	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
@@ -4741,15 +4743,15 @@ func TestGetDispatcherProfileErr(t *testing.T) {
 	}
 	cfg.DataDbCfg().RmtConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator)}
 	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
-	clientConn := make(chan rpcclient.ClientConnector, 1)
+	clientConn := make(chan birpc.ClientConnector, 1)
 	clientConn <- &ccMock{
-		calls: map[string]func(args any, reply any) error{
-			utils.ReplicatorSv1GetDispatcherProfile: func(args, reply any) error {
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.ReplicatorSv1GetDispatcherProfile: func(ctx *context.Context, args, reply any) error {
 				return utils.ErrDSPProfileNotFound
 			},
 		},
 	}
-	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	connMgr := NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator): clientConn,
 	})
 	dm := NewDataManager(db, cfg.CacheCfg(), connMgr)
@@ -4890,7 +4892,7 @@ func TestDmCheckFiltersRmt(t *testing.T) {
 	cfg.DataDbCfg().Items[utils.MetaFilters].Remote = true
 	cfg.DataDbCfg().RmtConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1)}
 	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
-	clientConn := make(chan rpcclient.ClientConnector, 1)
+	clientConn := make(chan birpc.ClientConnector, 1)
 	clientConn <- clMock(func(serviceMethod string, _, _ any) error {
 		if serviceMethod == utils.ReplicatorSv1GetFilter {
 
@@ -4898,7 +4900,7 @@ func TestDmCheckFiltersRmt(t *testing.T) {
 		}
 		return utils.ErrNotFound
 	})
-	dm := NewDataManager(db, cfg.CacheCfg(), NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	dm := NewDataManager(db, cfg.CacheCfg(), NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1): clientConn,
 	}))
 	dm.SetFilter(&Filter{

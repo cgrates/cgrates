@@ -23,13 +23,14 @@ package agents
 
 import (
 	"fmt"
-	"net/rpc"
 	"os/exec"
 	"path"
 	"reflect"
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc"
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/sessions"
@@ -42,7 +43,7 @@ var (
 	raCfgPath              string
 	raCfg                  *config.CGRConfig
 	raAuthClnt, raAcctClnt *radigo.Client
-	raRPC                  *rpc.Client
+	raRPC                  *birpc.Client
 
 	sTestsRadius = []func(t *testing.T){
 		testRAitInitCfg,
@@ -166,7 +167,7 @@ func testRAitApierRpcConn(t *testing.T) {
 func testRAitTPFromFolder(t *testing.T) {
 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "oldtutorial")}
 	var loadInst utils.LoadInstance
-	if err := raRPC.Call(utils.APIerSv2LoadTariffPlanFromFolder, attrs, &loadInst); err != nil {
+	if err := raRPC.Call(context.Background(), utils.APIerSv2LoadTariffPlanFromFolder, attrs, &loadInst); err != nil {
 		t.Error(err)
 	}
 	if isDispatcherActive {
@@ -643,7 +644,7 @@ func testRAitAcctStart(t *testing.T) {
 		expUsage = 3 * time.Hour
 	}
 	var aSessions []*sessions.ExternalSession
-	if err := raRPC.Call(utils.SessionSv1GetActiveSessions,
+	if err := raRPC.Call(context.Background(), utils.SessionSv1GetActiveSessions,
 		utils.SessionFilter{
 			Filters: []string{
 				fmt.Sprintf("*string:~*req.%s:%s", utils.RunID, utils.MetaDefault),
@@ -714,7 +715,7 @@ func testRAitAcctStop(t *testing.T) {
 	}
 	// Make sure the sessin was disconnected from SMG
 	var aSessions []*sessions.ExternalSession
-	if err := raRPC.Call(utils.SessionSv1GetActiveSessions,
+	if err := raRPC.Call(context.Background(), utils.SessionSv1GetActiveSessions,
 		utils.SessionFilter{
 			Filters: []string{
 				fmt.Sprintf("*string:~*req.%s:%s", utils.RunID, utils.MetaDefault),
@@ -726,7 +727,7 @@ func testRAitAcctStop(t *testing.T) {
 	time.Sleep(150 * time.Millisecond)
 	var cdrs []*engine.ExternalCDR
 	args := utils.RPCCDRsFilter{RunIDs: []string{utils.MetaDefault}, DestinationPrefixes: []string{"1002"}}
-	if err := raRPC.Call(utils.APIerSv2GetCDRs, &args, &cdrs); err != nil {
+	if err := raRPC.Call(context.Background(), utils.APIerSv2GetCDRs, &args, &cdrs); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(cdrs) != 1 {
 		t.Error("Unexpected number of CDRs returned: ", len(cdrs))

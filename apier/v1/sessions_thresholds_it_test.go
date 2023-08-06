@@ -22,13 +22,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package v1
 
 import (
-	"net/rpc"
 	"path"
 	"reflect"
 	"testing"
 	"time"
 
-	"github.com/cenkalti/rpc2"
+	"github.com/cgrates/birpc"
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/sessions"
@@ -38,8 +38,8 @@ import (
 var (
 	sSv1CfgPath2      string
 	sSv1Cfg2          *config.CGRConfig
-	sSv1BiRpc2        *rpc2.Client
-	sSApierRpc2       *rpc.Client
+	sSv1BiRpc2        *birpc.BirpcClient
+	sSApierRpc2       *birpc.Client
 	disconnectEvChan2 = make(chan *utils.AttrDisconnectSession)
 	sessionsConfDIR   string
 
@@ -83,7 +83,9 @@ func TestSessionSITtests(t *testing.T) {
 	}
 }
 
-func handleDisconnectSession2(clnt *rpc2.Client,
+type smock2 struct{}
+
+func (*smock2) DisconnectSession(ctx *context.Context,
 	args *utils.AttrDisconnectSession, reply *string) error {
 	disconnectEvChan2 <- args
 	*reply = utils.OK
@@ -124,11 +126,12 @@ func testSessionSv1ItRpcConn(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	clntHandlers := map[string]any{
-		utils.SessionSv1DisconnectSession: handleDisconnectSession2,
+	srv, err := birpc.NewService(new(smock2), utils.SessionSv1, true)
+	if err != nil {
+		t.Fatal(err)
 	}
 	if sSv1BiRpc2, err = utils.NewBiJSONrpcClient(sSv1Cfg2.SessionSCfg().ListenBijson,
-		clntHandlers); err != nil {
+		srv); err != nil {
 		t.Fatal(err)
 	}
 	if sSApierRpc2, err = newRPCClient(sSv1Cfg2.ListenCfg()); err != nil {
@@ -142,7 +145,7 @@ func testSessionSv1ItTPFromFolder(t *testing.T) {
 	attrs := &utils.AttrLoadTpFromFolder{
 		FolderPath: path.Join(*dataDir, "tariffplans", "testit")}
 	var loadInst utils.LoadInstance
-	if err := sSApierRpc2.Call(utils.APIerSv2LoadTariffPlanFromFolder, attrs, &loadInst); err != nil {
+	if err := sSApierRpc2.Call(context.Background(), utils.APIerSv2LoadTariffPlanFromFolder, attrs, &loadInst); err != nil {
 		t.Error(err)
 	}
 	time.Sleep(100 * time.Millisecond)
@@ -164,7 +167,7 @@ func testSessionSv1ItGetThreshold(t *testing.T) {
 		Async:     false,
 	}
 	var reply *engine.ThresholdProfile
-	if err := sSApierRpc2.Call(utils.APIerSv1GetThresholdProfile,
+	if err := sSApierRpc2.Call(context.Background(), utils.APIerSv1GetThresholdProfile,
 		&utils.TenantID{Tenant: "cgrates.org",
 			ID: "THD_ACNT_1001"}, &reply); err != nil {
 		t.Error(err)
@@ -187,7 +190,7 @@ func testSessionSv1ItGetThreshold(t *testing.T) {
 	// Uuid will be generated
 	// so we will compare ID from Account and Value from BalanceMap
 	var reply2 *engine.Account
-	if err := sSApierRpc2.Call(utils.APIerSv2GetAccount,
+	if err := sSApierRpc2.Call(context.Background(), utils.APIerSv2GetAccount,
 		&utils.AttrGetAccount{Tenant: "cgrates.org",
 			Account: "1001"}, &reply2); err != nil {
 		t.Error(err)
@@ -221,7 +224,7 @@ func testSessionSv1ItAuth(t *testing.T) {
 		},
 	}
 	var rply sessions.V1AuthorizeReply
-	if err := sSv1BiRpc2.Call(utils.SessionSv1AuthorizeEvent,
+	if err := sSv1BiRpc2.Call(context.Background(), utils.SessionSv1AuthorizeEvent,
 		args, &rply); err != nil {
 		t.Error(err)
 	}
@@ -246,7 +249,7 @@ func testSessionSv1ItAuth(t *testing.T) {
 	// Uuid will be generated
 	// so we will compare ID from Account and Value from BalanceMap
 	var reply *engine.Account
-	if err := sSApierRpc2.Call(utils.APIerSv2GetAccount,
+	if err := sSApierRpc2.Call(context.Background(), utils.APIerSv2GetAccount,
 		&utils.AttrGetAccount{Tenant: "cgrates.org",
 			Account: "1001"}, &reply); err != nil {
 		t.Error(err)
@@ -288,7 +291,7 @@ func testSessionSv1ItInitiateSession(t *testing.T) {
 		},
 	}
 	var rply sessions.V1InitSessionReply
-	if err := sSv1BiRpc2.Call(utils.SessionSv1InitiateSession,
+	if err := sSv1BiRpc2.Call(context.Background(), utils.SessionSv1InitiateSession,
 		args, &rply); err != nil {
 		t.Error(err)
 	}
@@ -309,7 +312,7 @@ func testSessionSv1ItInitiateSession(t *testing.T) {
 	// Uuid will be generated
 	// so we will compare ID from Account and Value from BalanceMap
 	var reply *engine.Account
-	if err := sSApierRpc2.Call(utils.APIerSv2GetAccount,
+	if err := sSApierRpc2.Call(context.Background(), utils.APIerSv2GetAccount,
 		&utils.AttrGetAccount{Tenant: "cgrates.org",
 			Account: "1001"}, &reply); err != nil {
 		t.Error(err)
@@ -345,7 +348,7 @@ func testSessionSv1ItTerminateSession(t *testing.T) {
 		},
 	}
 	var rply string
-	if err := sSv1BiRpc2.Call(utils.SessionSv1TerminateSession,
+	if err := sSv1BiRpc2.Call(context.Background(), utils.SessionSv1TerminateSession,
 		args, &rply); err != nil {
 		t.Error(err)
 	}
@@ -366,7 +369,7 @@ func testSessionSv1ItTerminateSession(t *testing.T) {
 	// Uuid will be generated
 	// so we will compare ID from Account and Value from BalanceMap
 	var reply2 *engine.Account
-	if err := sSApierRpc2.Call(utils.APIerSv2GetAccount,
+	if err := sSApierRpc2.Call(context.Background(), utils.APIerSv2GetAccount,
 		&utils.AttrGetAccount{Tenant: "cgrates.org",
 			Account: "1001"}, &reply2); err != nil {
 		t.Error(err)
@@ -401,7 +404,7 @@ func testSessionSv1ItAuthNotFoundThreshold(t *testing.T) {
 		},
 	}
 	var rply sessions.V1AuthorizeReply
-	if err := sSv1BiRpc2.Call(utils.SessionSv1AuthorizeEvent,
+	if err := sSv1BiRpc2.Call(context.Background(), utils.SessionSv1AuthorizeEvent,
 		args, &rply); err != nil {
 		t.Error(err)
 	}
@@ -441,7 +444,7 @@ func testSessionSv1ItInitNotFoundThreshold(t *testing.T) {
 		},
 	}
 	var rply sessions.V1InitSessionReply
-	if err := sSv1BiRpc2.Call(utils.SessionSv1InitiateSession,
+	if err := sSv1BiRpc2.Call(context.Background(), utils.SessionSv1InitiateSession,
 		args, &rply); err != nil {
 		t.Error(err)
 	}
@@ -458,7 +461,7 @@ func testSessionSv1ItInitNotFoundThreshold(t *testing.T) {
 	}
 
 	aSessions := make([]*sessions.ExternalSession, 0)
-	if err := sSv1BiRpc2.Call(utils.SessionSv1GetActiveSessions, &utils.SessionFilter{}, &aSessions); err != nil {
+	if err := sSv1BiRpc2.Call(context.Background(), utils.SessionSv1GetActiveSessions, &utils.SessionFilter{}, &aSessions); err != nil {
 		t.Error(err)
 	} else if len(aSessions) != 3 {
 		t.Errorf("wrong active sessions: %s \n , and len(aSessions) %+v", utils.ToJSON(aSessions), len(aSessions))
@@ -492,7 +495,7 @@ func testSessionSv1ItTerminateNotFoundThreshold(t *testing.T) {
 		},
 	}
 	var rply string
-	if err := sSv1BiRpc2.Call(utils.SessionSv1TerminateSession,
+	if err := sSv1BiRpc2.Call(context.Background(), utils.SessionSv1TerminateSession,
 		args, &rply); err != nil {
 		t.Fatal(err)
 	}
@@ -500,7 +503,7 @@ func testSessionSv1ItTerminateNotFoundThreshold(t *testing.T) {
 		t.Fatalf("Unexpected reply: %s", rply)
 	}
 	aSessions := make([]*sessions.ExternalSession, 0)
-	if err := sSv1BiRpc2.Call(utils.SessionSv1GetActiveSessions, nil, &aSessions); err == nil ||
+	if err := sSv1BiRpc2.Call(context.Background(), utils.SessionSv1GetActiveSessions, nil, &aSessions); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
@@ -508,7 +511,7 @@ func testSessionSv1ItTerminateNotFoundThreshold(t *testing.T) {
 
 func testSessionSv1ItAuthNotFoundThresholdAndStats(t *testing.T) {
 	var resp string
-	if err := sSApierRpc2.Call(utils.APIerSv1RemoveStatQueueProfile,
+	if err := sSApierRpc2.Call(context.Background(), utils.APIerSv1RemoveStatQueueProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "Stat_2"}, &resp); err != nil {
 		t.Error(err)
 	} else if resp != utils.OK {
@@ -533,7 +536,7 @@ func testSessionSv1ItAuthNotFoundThresholdAndStats(t *testing.T) {
 		},
 	}
 	var rply sessions.V1AuthorizeReply
-	if err := sSv1BiRpc2.Call(utils.SessionSv1AuthorizeEvent,
+	if err := sSv1BiRpc2.Call(context.Background(), utils.SessionSv1AuthorizeEvent,
 		args, &rply); err != nil {
 		t.Error(err)
 	}
@@ -574,7 +577,7 @@ func testSessionSv1ItInitNotFoundThresholdAndStats(t *testing.T) {
 		},
 	}
 	var rply sessions.V1InitSessionReply
-	if err := sSv1BiRpc2.Call(utils.SessionSv1InitiateSession,
+	if err := sSv1BiRpc2.Call(context.Background(), utils.SessionSv1InitiateSession,
 		args, &rply); err != nil {
 		t.Error(err)
 	}
@@ -592,7 +595,7 @@ func testSessionSv1ItInitNotFoundThresholdAndStats(t *testing.T) {
 	}
 
 	aSessions := make([]*sessions.ExternalSession, 0)
-	if err := sSv1BiRpc2.Call(utils.SessionSv1GetActiveSessions, &utils.SessionFilter{}, &aSessions); err != nil {
+	if err := sSv1BiRpc2.Call(context.Background(), utils.SessionSv1GetActiveSessions, &utils.SessionFilter{}, &aSessions); err != nil {
 		t.Error(err)
 	} else if len(aSessions) != 3 {
 		t.Errorf("wrong active sessions: %s \n , and len(aSessions) %+v", utils.ToJSON(aSessions), len(aSessions))
@@ -626,7 +629,7 @@ func testSessionSv1ItTerminateNotFoundThresholdAndStats(t *testing.T) {
 		},
 	}
 	var rply string
-	if err := sSv1BiRpc2.Call(utils.SessionSv1TerminateSession,
+	if err := sSv1BiRpc2.Call(context.Background(), utils.SessionSv1TerminateSession,
 		args, &rply); err != nil {
 		t.Error(err)
 	}
@@ -634,7 +637,7 @@ func testSessionSv1ItTerminateNotFoundThresholdAndStats(t *testing.T) {
 		t.Errorf("Unexpected reply: %s", rply)
 	}
 	aSessions := make([]*sessions.ExternalSession, 0)
-	if err := sSv1BiRpc2.Call(utils.SessionSv1GetActiveSessions, nil, &aSessions); err == nil ||
+	if err := sSv1BiRpc2.Call(context.Background(), utils.SessionSv1GetActiveSessions, nil, &aSessions); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}

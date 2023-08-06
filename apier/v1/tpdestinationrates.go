@@ -21,11 +21,12 @@ package v1
 // This file deals with tp_destination_rates management over APIs
 
 import (
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
 )
 
 // SetTPDestinationRate creates a new DestinationRate profile within a tariff plan
-func (apierSv1 *APIerSv1) SetTPDestinationRate(attrs *utils.TPDestinationRate, reply *string) error {
+func (apierSv1 *APIerSv1) SetTPDestinationRate(ctx *context.Context, attrs *utils.TPDestinationRate, reply *string) error {
 	if missing := utils.MissingStructFields(attrs, []string{utils.TPid, utils.ID, utils.DestinationRates}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -43,7 +44,7 @@ type AttrGetTPDestinationRate struct {
 }
 
 // GetTPDestinationRate queries specific DestinationRate profile on tariff plan
-func (apierSv1 *APIerSv1) GetTPDestinationRate(attrs *AttrGetTPDestinationRate, reply *utils.TPDestinationRate) error {
+func (apierSv1 *APIerSv1) GetTPDestinationRate(ctx *context.Context, attrs *AttrGetTPDestinationRate, reply *utils.TPDestinationRate) error {
 	if missing := utils.MissingStructFields(attrs, []string{utils.TPid, utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -64,7 +65,7 @@ type AttrTPDestinationRateIds struct {
 }
 
 // GetTPDestinationRateIds queries DestinationRate identities on specific tariff plan.
-func (apierSv1 *APIerSv1) GetTPDestinationRateIds(attrs *AttrGetTPRateIds, reply *[]string) error {
+func (apierSv1 *APIerSv1) GetTPDestinationRateIds(ctx *context.Context, attrs *AttrGetTPRateIds, reply *[]string) error {
 	if missing := utils.MissingStructFields(attrs, []string{utils.TPid}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -81,7 +82,7 @@ func (apierSv1 *APIerSv1) GetTPDestinationRateIds(attrs *AttrGetTPRateIds, reply
 }
 
 // RemoveTPDestinationRate removes specific DestinationRate on Tariff plan
-func (apierSv1 *APIerSv1) RemoveTPDestinationRate(attrs *AttrGetTPDestinationRate, reply *string) error {
+func (apierSv1 *APIerSv1) RemoveTPDestinationRate(ctx *context.Context, attrs *AttrGetTPDestinationRate, reply *string) error {
 	if missing := utils.MissingStructFields(attrs, []string{utils.TPid, utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}

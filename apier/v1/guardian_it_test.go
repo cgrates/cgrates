@@ -26,6 +26,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/dispatchers"
 	"github.com/cgrates/cgrates/engine"
@@ -80,11 +81,11 @@ func TestGuardianSIT(t *testing.T) {
 		Timeout:     500 * time.Millisecond,
 	}
 	var reply string
-	if err = guardianRPC.Call(utils.GuardianSv1RemoteLock, &args, &reply); err != nil {
+	if err = guardianRPC.Call(context.Background(), utils.GuardianSv1RemoteLock, &args, &reply); err != nil {
 		t.Error(err)
 	}
 	var unlockReply []string
-	if err = guardianRPC.Call(utils.GuardianSv1RemoteUnlock, &dispatchers.AttrRemoteUnlockWithAPIOpts{RefID: reply}, &unlockReply); err != nil {
+	if err = guardianRPC.Call(context.Background(), utils.GuardianSv1RemoteUnlock, &dispatchers.AttrRemoteUnlockWithAPIOpts{RefID: reply}, &unlockReply); err != nil {
 		t.Error(err)
 	}
 	if !reflect.DeepEqual(args.LockIDs, unlockReply) {
@@ -93,7 +94,7 @@ func TestGuardianSIT(t *testing.T) {
 
 	// ping
 	var resp string
-	if err = guardianRPC.Call(utils.GuardianSv1Ping, new(utils.CGREvent), &resp); err != nil {
+	if err = guardianRPC.Call(context.Background(), utils.GuardianSv1Ping, new(utils.CGREvent), &resp); err != nil {
 		t.Error(err)
 	} else if resp != utils.Pong {
 		t.Error("Unexpected reply returned", resp)

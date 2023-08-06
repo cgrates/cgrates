@@ -22,12 +22,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package v1
 
 import (
-	"net/rpc"
-	"net/rpc/jsonrpc"
 	"path"
 	"reflect"
 	"testing"
 
+	"github.com/cgrates/birpc"
+	"github.com/cgrates/birpc/context"
+	"github.com/cgrates/birpc/jsonrpc"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -36,7 +37,7 @@ import (
 var (
 	tpAccPlansCfgPath   string
 	tpAccPlansCfg       *config.CGRConfig
-	tpAccPlansRPC       *rpc.Client
+	tpAccPlansRPC       *birpc.Client
 	tpAccPlan           *utils.TPActionPlan
 	tpAccPlansDelay     int
 	tpAccPlansConfigDIR string //run tests for specific configuration
@@ -118,7 +119,7 @@ func testTPAccPlansRpcConn(t *testing.T) {
 
 func testTPAccPlansGetTPAccPlanBeforeSet(t *testing.T) {
 	var reply *utils.TPActionPlan
-	if err := tpAccPlansRPC.Call(utils.APIerSv1GetTPActionPlan,
+	if err := tpAccPlansRPC.Call(context.Background(), utils.APIerSv1GetTPActionPlan,
 		&AttrGetTPActionPlan{TPid: "TPAcc", ID: "ID"}, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
@@ -142,7 +143,7 @@ func testTPAccPlansSetTPAccPlan(t *testing.T) {
 		},
 	}
 	var result string
-	if err := tpAccPlansRPC.Call(utils.APIerSv1SetTPActionPlan, tpAccPlan, &result); err != nil {
+	if err := tpAccPlansRPC.Call(context.Background(), utils.APIerSv1SetTPActionPlan, tpAccPlan, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -151,7 +152,7 @@ func testTPAccPlansSetTPAccPlan(t *testing.T) {
 
 func testTPAccPlansGetTPAccPlanAfterSet(t *testing.T) {
 	var reply *utils.TPActionPlan
-	if err := tpAccPlansRPC.Call(utils.APIerSv1GetTPActionPlan,
+	if err := tpAccPlansRPC.Call(context.Background(), utils.APIerSv1GetTPActionPlan,
 		&AttrGetTPActionPlan{TPid: "TPAcc", ID: "ID"}, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(tpAccPlan.TPid, reply.TPid) {
@@ -166,7 +167,7 @@ func testTPAccPlansGetTPAccPlanAfterSet(t *testing.T) {
 func testTPAccPlansGetTPAccPlanIds(t *testing.T) {
 	var result []string
 	expectedTPID := []string{"ID"}
-	if err := tpAccPlansRPC.Call(utils.APIerSv1GetTPActionPlanIds,
+	if err := tpAccPlansRPC.Call(context.Background(), utils.APIerSv1GetTPActionPlanIds,
 		&AttrGetTPActionPlanIds{TPid: "TPAcc"}, &result); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expectedTPID, result) {
@@ -194,7 +195,7 @@ func testTPAccPlansUpdateTPAccPlan(t *testing.T) {
 		},
 	}
 	var result string
-	if err := tpAccPlansRPC.Call(utils.APIerSv1SetTPActionPlan, tpAccPlan, &result); err != nil {
+	if err := tpAccPlansRPC.Call(context.Background(), utils.APIerSv1SetTPActionPlan, tpAccPlan, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -204,7 +205,7 @@ func testTPAccPlansUpdateTPAccPlan(t *testing.T) {
 
 func testTPAccPlansGetTPAccPlanAfterUpdate(t *testing.T) {
 	var reply *utils.TPActionPlan
-	if err := tpAccPlansRPC.Call(utils.APIerSv1GetTPActionPlan,
+	if err := tpAccPlansRPC.Call(context.Background(), utils.APIerSv1GetTPActionPlan,
 		&AttrGetTPActionPlan{TPid: "TPAcc", ID: "ID"}, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(tpAccPlan.TPid, reply.TPid) {
@@ -219,7 +220,7 @@ func testTPAccPlansGetTPAccPlanAfterUpdate(t *testing.T) {
 
 func testTPAccPlansRemTPAccPlan(t *testing.T) {
 	var resp string
-	if err := tpAccPlansRPC.Call(utils.APIerSv1RemoveTPActionPlan,
+	if err := tpAccPlansRPC.Call(context.Background(), utils.APIerSv1RemoveTPActionPlan,
 		&AttrGetTPActionPlan{TPid: "TPAcc", ID: "ID"}, &resp); err != nil {
 		t.Error(err)
 	} else if resp != utils.OK {
@@ -230,7 +231,7 @@ func testTPAccPlansRemTPAccPlan(t *testing.T) {
 
 func testTPAccPlansGetTPAccPlanAfterRemove(t *testing.T) {
 	var reply *utils.TPActionPlan
-	if err := tpAccPlansRPC.Call(utils.APIerSv1GetTPActionPlan,
+	if err := tpAccPlansRPC.Call(context.Background(), utils.APIerSv1GetTPActionPlan,
 		&AttrGetTPActionPlan{TPid: "TPAcc", ID: "ID"}, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}

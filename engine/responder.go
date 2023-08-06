@@ -25,6 +25,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/guardian"
 	"github.com/cgrates/cgrates/utils"
@@ -66,7 +67,7 @@ func (rs *Responder) usageAllowed(tor string, reqUsage time.Duration) (allowed b
 /*
 RPC method that provides the external RPC interface for getting the rating information.
 */
-func (rs *Responder) GetCost(arg *CallDescriptorWithAPIOpts, reply *CallCost) (err error) {
+func (rs *Responder) GetCost(ctx *context.Context, arg *CallDescriptorWithAPIOpts, reply *CallCost) (err error) {
 	// RPC caching
 	if arg.CgrID != utils.EmptyString && config.CgrConfig().CacheCfg().Partitions[utils.CacheRPCResponses].Limit != 0 {
 		cacheKey := utils.ConcatenatedKey(utils.ResponderGetCost, arg.CgrID)
@@ -114,7 +115,7 @@ func (rs *Responder) GetCost(arg *CallDescriptorWithAPIOpts, reply *CallCost) (e
 
 // GetCostOnRatingPlans is used by RouteS to calculate the cost
 // Receive a list of RatingPlans and pick the first without error
-func (rs *Responder) GetCostOnRatingPlans(arg *utils.GetCostOnRatingPlansArgs, reply *map[string]any) (err error) {
+func (rs *Responder) GetCostOnRatingPlans(ctx *context.Context, arg *utils.GetCostOnRatingPlansArgs, reply *map[string]any) (err error) {
 	tnt := arg.Tenant
 	if tnt == utils.EmptyString {
 		tnt = config.CgrConfig().GeneralCfg().DefaultTenant
@@ -170,7 +171,7 @@ func (rs *Responder) GetCostOnRatingPlans(arg *utils.GetCostOnRatingPlansArgs, r
 	return
 }
 
-func (rs *Responder) Debit(arg *CallDescriptorWithAPIOpts, reply *CallCost) (err error) {
+func (rs *Responder) Debit(ctx *context.Context, arg *CallDescriptorWithAPIOpts, reply *CallCost) (err error) {
 	// RPC caching
 	if arg.Tenant == utils.EmptyString {
 		arg.Tenant = config.CgrConfig().GeneralCfg().DefaultTenant
@@ -211,7 +212,7 @@ func (rs *Responder) Debit(arg *CallDescriptorWithAPIOpts, reply *CallCost) (err
 	return
 }
 
-func (rs *Responder) MaxDebit(arg *CallDescriptorWithAPIOpts, reply *CallCost) (err error) {
+func (rs *Responder) MaxDebit(ctx *context.Context, arg *CallDescriptorWithAPIOpts, reply *CallCost) (err error) {
 	// RPC caching
 	if arg.Tenant == utils.EmptyString {
 		arg.Tenant = config.CgrConfig().GeneralCfg().DefaultTenant
@@ -251,7 +252,7 @@ func (rs *Responder) MaxDebit(arg *CallDescriptorWithAPIOpts, reply *CallCost) (
 	return
 }
 
-func (rs *Responder) RefundIncrements(arg *CallDescriptorWithAPIOpts, reply *Account) (err error) {
+func (rs *Responder) RefundIncrements(ctx *context.Context, arg *CallDescriptorWithAPIOpts, reply *Account) (err error) {
 	// RPC caching
 	if arg.Tenant == utils.EmptyString {
 		arg.Tenant = config.CgrConfig().GeneralCfg().DefaultTenant
@@ -292,7 +293,7 @@ func (rs *Responder) RefundIncrements(arg *CallDescriptorWithAPIOpts, reply *Acc
 	return
 }
 
-func (rs *Responder) RefundRounding(arg *CallDescriptorWithAPIOpts, reply *Account) (err error) {
+func (rs *Responder) RefundRounding(ctx *context.Context, arg *CallDescriptorWithAPIOpts, reply *Account) (err error) {
 	// RPC caching
 	if arg.Tenant == utils.EmptyString {
 		arg.Tenant = config.CgrConfig().GeneralCfg().DefaultTenant
@@ -330,7 +331,7 @@ func (rs *Responder) RefundRounding(arg *CallDescriptorWithAPIOpts, reply *Accou
 	return
 }
 
-func (rs *Responder) GetMaxSessionTime(arg *CallDescriptorWithAPIOpts, reply *time.Duration) (err error) {
+func (rs *Responder) GetMaxSessionTime(ctx *context.Context, arg *CallDescriptorWithAPIOpts, reply *time.Duration) (err error) {
 	if arg.Tenant == utils.EmptyString {
 		arg.Tenant = config.CgrConfig().GeneralCfg().DefaultTenant
 	}
@@ -344,7 +345,7 @@ func (rs *Responder) GetMaxSessionTime(arg *CallDescriptorWithAPIOpts, reply *ti
 	return
 }
 
-func (rs *Responder) GetMaxSessionTimeOnAccounts(arg *utils.GetMaxSessionTimeOnAccountsArgs,
+func (rs *Responder) GetMaxSessionTimeOnAccounts(ctx *context.Context, arg *utils.GetMaxSessionTimeOnAccountsArgs,
 	reply *map[string]any) (err error) {
 	var maxDur time.Duration
 	tnt := arg.Tenant
@@ -378,7 +379,7 @@ func (rs *Responder) GetMaxSessionTimeOnAccounts(arg *utils.GetMaxSessionTimeOnA
 	return
 }
 
-func (rs *Responder) Shutdown(arg *utils.TenantWithAPIOpts, reply *string) (err error) {
+func (rs *Responder) Shutdown(ctx *context.Context, arg *utils.TenantWithAPIOpts, reply *string) (err error) {
 	dm.DataDB().Close()
 	cdrStorage.Close()
 	defer rs.ShdChan.CloseOnce()
@@ -387,12 +388,12 @@ func (rs *Responder) Shutdown(arg *utils.TenantWithAPIOpts, reply *string) (err 
 }
 
 // Ping used to detreminate if component is active
-func (chSv1 *Responder) Ping(ign *utils.CGREvent, reply *string) error {
+func (chSv1 *Responder) Ping(ctx *context.Context, ign *utils.CGREvent, reply *string) error {
 	*reply = utils.Pong
 	return nil
 }
 
-func (rs *Responder) Call(serviceMethod string, args any, reply any) error {
+func (rs *Responder) Call(ctx *context.Context, serviceMethod string, args any, reply any) error {
 	parts := strings.Split(serviceMethod, ".")
 	if len(parts) != 2 {
 		return utils.ErrNotImplemented

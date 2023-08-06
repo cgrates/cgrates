@@ -26,6 +26,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc/context"
 	v1 "github.com/cgrates/cgrates/apier/v1"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
@@ -101,7 +102,7 @@ func testDestinationRpcConn(t *testing.T) {
 func testDestinationFromFolder(t *testing.T) {
 	var reply string
 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "tp_destination_with_any")}
-	if err := tutorialRpc.Call(utils.APIerSv1LoadTariffPlanFromFolder, attrs, &reply); err != nil {
+	if err := tutorialRpc.Call(context.Background(), utils.APIerSv1LoadTariffPlanFromFolder, attrs, &reply); err != nil {
 		t.Error(err)
 	}
 	time.Sleep(100 * time.Millisecond)
@@ -117,7 +118,7 @@ func testDestinationGetCostFor1002(t *testing.T) {
 		Usage:       "1m",
 	}
 	var rply *engine.EventCost
-	if err := tutorialRpc.Call(utils.APIerSv1GetCost, &attrs, &rply); err != nil {
+	if err := tutorialRpc.Call(context.Background(), utils.APIerSv1GetCost, &attrs, &rply); err != nil {
 		t.Error("Unexpected error received: ", err.Error())
 	} else if *rply.Cost != 0.01 {
 		t.Errorf("Unexpected cost received: %f", *rply.Cost)
@@ -134,7 +135,7 @@ func testDestinationGetCostFor1003(t *testing.T) {
 		Usage:       "1m",
 	}
 	var rply *engine.EventCost
-	if err := tutorialRpc.Call(utils.APIerSv1GetCost, &attrs, &rply); err != nil {
+	if err := tutorialRpc.Call(context.Background(), utils.APIerSv1GetCost, &attrs, &rply); err != nil {
 		t.Error("Unexpected error received: ", err.Error())
 	} else if *rply.Cost != 0.3 {
 		t.Errorf("Unexpected cost received: %f", *rply.Cost)

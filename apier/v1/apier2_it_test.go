@@ -22,7 +22,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package v1
 
 import (
-	"net/rpc"
 	"os/exec"
 	"path"
 	"reflect"
@@ -30,6 +29,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc"
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/scheduler"
 
 	"github.com/cgrates/cgrates/config"
@@ -41,7 +42,7 @@ import (
 var (
 	apierCfgPath      string
 	apierCfg          *config.CGRConfig
-	apierRPC          *rpc.Client
+	apierRPC          *birpc.Client
 	APIerSv2ConfigDIR string //run tests for specific configuration
 
 	sTestsAPIer = []func(t *testing.T){
@@ -147,7 +148,7 @@ func testAPIerRPCConn(t *testing.T) {
 func testAPIerLoadFromFolder(t *testing.T) {
 	var reply string
 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "tutorial")}
-	if err := apierRPC.Call(utils.APIerSv1LoadTariffPlanFromFolder, attrs, &reply); err != nil {
+	if err := apierRPC.Call(context.Background(), utils.APIerSv1LoadTariffPlanFromFolder, attrs, &reply); err != nil {
 		t.Error(err)
 	}
 	time.Sleep(100 * time.Millisecond)
@@ -187,7 +188,7 @@ func testAPIerVerifyAttributesAfterLoad(t *testing.T) {
 	}
 	eAttrPrf.Compile()
 	var attrReply *engine.AttributeProfile
-	if err := apierRPC.Call(utils.AttributeSv1GetAttributeForEvent,
+	if err := apierRPC.Call(context.Background(), utils.AttributeSv1GetAttributeForEvent,
 		ev, &attrReply); err != nil {
 		t.Error(err)
 	}
@@ -207,7 +208,7 @@ func testAPIerVerifyAttributesAfterLoad(t *testing.T) {
 func testAPIerRemoveTPFromFolder(t *testing.T) {
 	var reply string
 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "tutorial")}
-	if err := apierRPC.Call(utils.APIerSv1RemoveTPFromFolder, attrs, &reply); err != nil {
+	if err := apierRPC.Call(context.Background(), utils.APIerSv1RemoveTPFromFolder, attrs, &reply); err != nil {
 		t.Error(err)
 	}
 	time.Sleep(100 * time.Millisecond)
@@ -215,13 +216,13 @@ func testAPIerRemoveTPFromFolder(t *testing.T) {
 
 func testAPIerAfterDelete(t *testing.T) {
 	var reply *engine.AttributeProfile
-	if err := apierRPC.Call(utils.APIerSv1GetAttributeProfile,
+	if err := apierRPC.Call(context.Background(), utils.APIerSv1GetAttributeProfile,
 		utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ATTR_1001_SIMPLEAUTH"}}, &reply); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Fatal(err)
 	}
 	var replyTh *engine.ThresholdProfile
-	if err := apierRPC.Call(utils.APIerSv1GetThresholdProfile,
+	if err := apierRPC.Call(context.Background(), utils.APIerSv1GetThresholdProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "THD_ACNT_1001"}, &replyTh); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
@@ -241,7 +242,7 @@ func testAPIerVerifyAttributesAfterDelete(t *testing.T) {
 		},
 	}
 	var attrReply *engine.AttributeProfile
-	if err := apierRPC.Call(utils.AttributeSv1GetAttributeForEvent,
+	if err := apierRPC.Call(context.Background(), utils.AttributeSv1GetAttributeForEvent,
 		ev, &attrReply); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
@@ -256,7 +257,7 @@ func testAPIerGetRatingPlanCost(t *testing.T) {
 		Usage:         "1h",
 	}
 	var reply dispatchers.RatingPlanCost
-	if err := apierRPC.Call(utils.RALsV1GetRatingPlansCost, arg, &reply); err != nil {
+	if err := apierRPC.Call(context.Background(), utils.RALsV1GetRatingPlansCost, arg, &reply); err != nil {
 		t.Error(err)
 	} else if reply.RatingPlanID != "RP_1001" {
 		t.Error("Unexpected RatingPlanID: ", reply.RatingPlanID)
@@ -278,7 +279,7 @@ func testAPIerGetRatingPlanCost2(t *testing.T) {
 		Usage:         "1h",
 	}
 	var reply dispatchers.RatingPlanCost
-	if err := apierRPC.Call(utils.RALsV1GetRatingPlansCost, arg, &reply); err != nil {
+	if err := apierRPC.Call(context.Background(), utils.RALsV1GetRatingPlansCost, arg, &reply); err != nil {
 		t.Error(err)
 	} else if reply.RatingPlanID != "RP_1001" {
 		t.Error("Unexpected RatingPlanID: ", reply.RatingPlanID)
@@ -297,7 +298,7 @@ func testAPIerGetRatingPlanCost3(t *testing.T) {
 		Usage:         "1h",
 	}
 	var reply dispatchers.RatingPlanCost
-	if err := apierRPC.Call(utils.RALsV1GetRatingPlansCost, arg, &reply); err != nil {
+	if err := apierRPC.Call(context.Background(), utils.RALsV1GetRatingPlansCost, arg, &reply); err != nil {
 		t.Error(err)
 	} else if reply.RatingPlanID != "RP_1002" {
 		t.Error("Unexpected RatingPlanID: ", reply.RatingPlanID)
@@ -310,7 +311,7 @@ func testAPIerGetRatingPlanCost3(t *testing.T) {
 
 func testAPIerGetActionPlanIDs(t *testing.T) {
 	var reply []string
-	if err := apierRPC.Call(utils.APIerSv1GetActionPlanIDs,
+	if err := apierRPC.Call(context.Background(), utils.APIerSv1GetActionPlanIDs,
 		&utils.PaginatorWithTenant{Tenant: "cgrates.org"},
 		&reply); err != nil {
 		t.Error(err)
@@ -324,7 +325,7 @@ func testAPIerGetActionPlanIDs(t *testing.T) {
 func testAPIerGetRatingPlanIDs(t *testing.T) {
 	var reply []string
 	expected := []string{"RP_1002_LOW", "RP_1003", "RP_1001", "RP_MMS", "RP_SMS", "RP_1002"}
-	if err := apierRPC.Call(utils.APIerSv1GetRatingPlanIDs,
+	if err := apierRPC.Call(context.Background(), utils.APIerSv1GetRatingPlanIDs,
 		&utils.PaginatorWithTenant{Tenant: "cgrates.org"},
 		&reply); err != nil {
 		t.Error(err)
@@ -350,7 +351,7 @@ func testAPIerSetActionPlanDfltTime(t *testing.T) {
 		},
 		ReloadScheduler: true,
 	}
-	if err := apierRPC.Call(utils.APIerSv1SetActionPlan, &hourlyAP, &reply1); err != nil {
+	if err := apierRPC.Call(context.Background(), utils.APIerSv1SetActionPlan, &hourlyAP, &reply1); err != nil {
 		t.Error("Got error on APIerSv1.SetActionPlan: ", err.Error())
 	} else if reply1 != utils.OK {
 		t.Errorf("Calling APIerSv1.SetActionPlan received: %s", reply1)
@@ -366,7 +367,7 @@ func testAPIerSetActionPlanDfltTime(t *testing.T) {
 		},
 		ReloadScheduler: true,
 	}
-	if err := apierRPC.Call(utils.APIerSv1SetActionPlan, &dailyAP, &reply1); err != nil {
+	if err := apierRPC.Call(context.Background(), utils.APIerSv1SetActionPlan, &dailyAP, &reply1); err != nil {
 		t.Error("Got error on APIerSv1.SetActionPlan: ", err.Error())
 	} else if reply1 != utils.OK {
 		t.Errorf("Calling APIerSv1.SetActionPlan received: %s", reply1)
@@ -382,7 +383,7 @@ func testAPIerSetActionPlanDfltTime(t *testing.T) {
 		},
 		ReloadScheduler: true,
 	}
-	if err := apierRPC.Call(utils.APIerSv1SetActionPlan, &weeklyAP, &reply1); err != nil {
+	if err := apierRPC.Call(context.Background(), utils.APIerSv1SetActionPlan, &weeklyAP, &reply1); err != nil {
 		t.Error("Got error on APIerSv1.SetActionPlan: ", err.Error())
 	} else if reply1 != utils.OK {
 		t.Errorf("Calling APIerSv1.SetActionPlan received: %s", reply1)
@@ -398,13 +399,13 @@ func testAPIerSetActionPlanDfltTime(t *testing.T) {
 		},
 		ReloadScheduler: true,
 	}
-	if err := apierRPC.Call(utils.APIerSv1SetActionPlan, &monthlyAP, &reply1); err != nil {
+	if err := apierRPC.Call(context.Background(), utils.APIerSv1SetActionPlan, &monthlyAP, &reply1); err != nil {
 		t.Error("Got error on APIerSv1.SetActionPlan: ", err.Error())
 	} else if reply1 != utils.OK {
 		t.Errorf("Calling APIerSv1.SetActionPlan received: %s", reply1)
 	}
 	var rply []*scheduler.ScheduledAction
-	if err := apierRPC.Call(utils.APIerSv1GetScheduledActions,
+	if err := apierRPC.Call(context.Background(), utils.APIerSv1GetScheduledActions,
 		scheduler.ArgsGetScheduledActions{}, &rply); err != nil {
 		t.Error("Unexpected error: ", err)
 	} else {
@@ -445,7 +446,7 @@ func testAPIerSetActionPlanDfltTime(t *testing.T) {
 func testAPIerLoadRatingPlan(t *testing.T) {
 	attrs := utils.AttrSetDestination{Id: "DEST_CUSTOM", Prefixes: []string{"+4986517174963", "+4986517174960"}}
 	var reply string
-	if err := apierRPC.Call(utils.APIerSv1SetDestination, &attrs, &reply); err != nil {
+	if err := apierRPC.Call(context.Background(), utils.APIerSv1SetDestination, &attrs, &reply); err != nil {
 		t.Error("Unexpected error", err.Error())
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply returned", reply)
@@ -454,7 +455,7 @@ func testAPIerLoadRatingPlan(t *testing.T) {
 	rt := &utils.TPRateRALs{TPid: "TP_SAMPLE", ID: "SAMPLE_RATE_ID", RateSlots: []*utils.RateSlot{
 		{ConnectFee: 0, Rate: 0, RateUnit: "1s", RateIncrement: "1s", GroupIntervalStart: "0s"},
 	}}
-	if err := apierRPC.Call(utils.APIerSv1SetTPRate, rt, &reply); err != nil {
+	if err := apierRPC.Call(context.Background(), utils.APIerSv1SetTPRate, rt, &reply); err != nil {
 		t.Error("Got error on APIerSv1.SetTPRate: ", err.Error())
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply received when calling APIerSv1.SetTPRate: ", reply)
@@ -464,7 +465,7 @@ func testAPIerLoadRatingPlan(t *testing.T) {
 		{DestinationId: "DEST_CUSTOM", RateId: "SAMPLE_RATE_ID",
 			RoundingMethod: "*up", RoundingDecimals: 4},
 	}}
-	if err := apierRPC.Call(utils.APIerSv1SetTPDestinationRate, dr, &reply); err != nil {
+	if err := apierRPC.Call(context.Background(), utils.APIerSv1SetTPDestinationRate, dr, &reply); err != nil {
 		t.Error("Got error on APIerSv1.SetTPDestinationRate: ", err.Error())
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply received when calling APIerSv1.SetTPDestinationRate: ", reply)
@@ -476,13 +477,13 @@ func testAPIerLoadRatingPlan(t *testing.T) {
 				Weight: 10},
 		}}
 
-	if err := apierRPC.Call(utils.APIerSv1SetTPRatingPlan, rp, &reply); err != nil {
+	if err := apierRPC.Call(context.Background(), utils.APIerSv1SetTPRatingPlan, rp, &reply); err != nil {
 		t.Error("Got error on APIerSv1.SetTPRatingPlan: ", err.Error())
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply received when calling APIerSv1.SetTPRatingPlan: ", reply)
 	}
 
-	if err := apierRPC.Call(utils.APIerSv1LoadRatingPlan, &AttrLoadRatingPlan{TPid: "TP_SAMPLE", RatingPlanId: "RPl_SAMPLE_RATING_PLAN"}, &reply); err != nil {
+	if err := apierRPC.Call(context.Background(), utils.APIerSv1LoadRatingPlan, &AttrLoadRatingPlan{TPid: "TP_SAMPLE", RatingPlanId: "RPl_SAMPLE_RATING_PLAN"}, &reply); err != nil {
 		t.Error("Got error on APIerSv1.LoadRatingPlan: ", err.Error())
 	} else if reply != utils.OK {
 		t.Error("Calling APIerSv1.LoadRatingPlan got reply: ", reply)
@@ -490,7 +491,7 @@ func testAPIerLoadRatingPlan(t *testing.T) {
 
 	rpRply := new(engine.RatingPlan)
 	rplnId := "RPl_SAMPLE_RATING_PLAN"
-	if err := apierRPC.Call(utils.APIerSv1GetRatingPlan, &rplnId, rpRply); err != nil {
+	if err := apierRPC.Call(context.Background(), utils.APIerSv1GetRatingPlan, &rplnId, rpRply); err != nil {
 		t.Error("Got error on APIerSv1.GetRatingPlan: ", err.Error())
 	}
 
@@ -503,7 +504,7 @@ func testAPIerLoadRatingPlan2(t *testing.T) {
 		{DestinationId: "DST_NOT_FOUND", RateId: "SAMPLE_RATE_ID",
 			RoundingMethod: "*up", RoundingDecimals: 4},
 	}}
-	if err := apierRPC.Call(utils.APIerSv1SetTPDestinationRate, dr, &reply); err != nil {
+	if err := apierRPC.Call(context.Background(), utils.APIerSv1SetTPDestinationRate, dr, &reply); err != nil {
 		t.Error("Got error on APIerSv1.SetTPDestinationRate: ", err.Error())
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply received when calling APIerSv1.SetTPDestinationRate: ", reply)
@@ -515,13 +516,13 @@ func testAPIerLoadRatingPlan2(t *testing.T) {
 				Weight: 10},
 		}}
 
-	if err := apierRPC.Call(utils.APIerSv1SetTPRatingPlan, rp, &reply); err != nil {
+	if err := apierRPC.Call(context.Background(), utils.APIerSv1SetTPRatingPlan, rp, &reply); err != nil {
 		t.Error("Got error on APIerSv1.SetTPRatingPlan: ", err.Error())
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply received when calling APIerSv1.SetTPRatingPlan: ", reply)
 	}
 
-	if err := apierRPC.Call(utils.APIerSv1LoadRatingPlan,
+	if err := apierRPC.Call(context.Background(), utils.APIerSv1LoadRatingPlan,
 		&AttrLoadRatingPlan{TPid: "TP_SAMPLE", RatingPlanId: "RPL_WITH_ERROR"}, &reply); err == nil {
 		t.Error("Expected to get error: ", err)
 	}
@@ -543,14 +544,14 @@ func testAPIerLoadRatingProfile(t *testing.T) {
 		}},
 	}
 	// add a TPRatingProfile
-	if err := apierRPC.Call(utils.APIerSv1SetTPRatingProfile, rpf, &reply); err != nil {
+	if err := apierRPC.Call(context.Background(), utils.APIerSv1SetTPRatingProfile, rpf, &reply); err != nil {
 		t.Error(err)
 	}
 	// load the TPRatingProfile into dataDB
 	argsRPrf := &utils.TPRatingProfile{
 		TPid: "TP_SAMPLE", LoadId: "TP_SAMPLE",
 		Tenant: "cgrates.org", Category: "call", Subject: "*any"}
-	if err := apierRPC.Call(utils.APIerSv1LoadRatingProfile, argsRPrf, &reply); err != nil {
+	if err := apierRPC.Call(context.Background(), utils.APIerSv1LoadRatingProfile, argsRPrf, &reply); err != nil {
 		t.Error(err)
 	}
 
@@ -571,7 +572,7 @@ func testAPIerLoadRatingProfile(t *testing.T) {
 			},
 		},
 	}
-	if err := apierRPC.Call(utils.APIerSv1GetRatingProfile, attrGetRatingPlan, &rpl); err != nil {
+	if err := apierRPC.Call(context.Background(), utils.APIerSv1GetRatingProfile, attrGetRatingPlan, &rpl); err != nil {
 		t.Errorf("Got error on APIerSv1.GetRatingProfile: %+v", err)
 	} else if !reflect.DeepEqual(expected, rpl) {
 		t.Errorf("Calling APIerSv1.GetRatingProfile expected: %+v, received: %+v", utils.ToJSON(expected), utils.ToJSON(rpl))
@@ -584,13 +585,13 @@ func testAPIerLoadRatingProfile(t *testing.T) {
 				Weight: 10},
 		}}
 
-	if err := apierRPC.Call(utils.APIerSv1SetTPRatingPlan, rp, &reply); err != nil {
+	if err := apierRPC.Call(context.Background(), utils.APIerSv1SetTPRatingPlan, rp, &reply); err != nil {
 		t.Error("Got error on APIerSv1.SetTPRatingPlan: ", err.Error())
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply received when calling APIerSv1.SetTPRatingPlan: ", reply)
 	}
 
-	if err := apierRPC.Call(utils.APIerSv1LoadRatingPlan, &AttrLoadRatingPlan{TPid: "TP_SAMPLE", RatingPlanId: "RPl_SAMPLE_RATING_PLAN2"}, &reply); err != nil {
+	if err := apierRPC.Call(context.Background(), utils.APIerSv1LoadRatingPlan, &AttrLoadRatingPlan{TPid: "TP_SAMPLE", RatingPlanId: "RPl_SAMPLE_RATING_PLAN2"}, &reply); err != nil {
 		t.Error("Got error on APIerSv1.LoadRatingPlan: ", err.Error())
 	} else if reply != utils.OK {
 		t.Error("Calling APIerSv1.LoadRatingPlan got reply: ", reply)
@@ -617,13 +618,13 @@ func testAPIerLoadRatingProfile(t *testing.T) {
 		},
 	}
 
-	if err := apierRPC.Call(utils.APIerSv1SetTPRatingProfile, rpf, &reply); err != nil {
+	if err := apierRPC.Call(context.Background(), utils.APIerSv1SetTPRatingProfile, rpf, &reply); err != nil {
 		t.Error(err)
 	}
 
 	// load the TPRatingProfile into dataDB
 	// because the RatingProfile exists the RatingPlanActivations will be merged
-	if err := apierRPC.Call(utils.APIerSv1LoadRatingProfile, argsRPrf, &reply); err != nil {
+	if err := apierRPC.Call(context.Background(), utils.APIerSv1LoadRatingProfile, argsRPrf, &reply); err != nil {
 		t.Error(err)
 	}
 	actTime2, err := utils.ParseTimeDetectLayout("2012-02-02T00:00:00Z", utils.EmptyString)
@@ -643,7 +644,7 @@ func testAPIerLoadRatingProfile(t *testing.T) {
 			},
 		},
 	}
-	if err := apierRPC.Call(utils.APIerSv1GetRatingProfile, attrGetRatingPlan, &rpl); err != nil {
+	if err := apierRPC.Call(context.Background(), utils.APIerSv1GetRatingProfile, attrGetRatingPlan, &rpl); err != nil {
 		t.Errorf("Got error on APIerSv1.GetRatingProfile: %+v", err)
 	} else if !reflect.DeepEqual(expected, rpl) {
 		t.Errorf("Calling APIerSv1.GetRatingProfile expected: %+v, received: %+v", utils.ToJSON(expected), utils.ToJSON(rpl))
@@ -654,12 +655,12 @@ func testAPIerLoadRatingProfile(t *testing.T) {
 func testAPIerLoadFromFolderAccountAction(t *testing.T) {
 	var reply string
 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "tutorial")}
-	if err := apierRPC.Call(utils.APIerSv1LoadTariffPlanFromFolder, attrs, &reply); err != nil {
+	if err := apierRPC.Call(context.Background(), utils.APIerSv1LoadTariffPlanFromFolder, attrs, &reply); err != nil {
 		t.Error(err)
 	}
 	time.Sleep(100 * time.Millisecond)
 	attrs2 := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "account_action_from_tutorial")}
-	if err := apierRPC.Call(utils.APIerSv1LoadTariffPlanFromFolder, attrs2, &reply); err != nil {
+	if err := apierRPC.Call(context.Background(), utils.APIerSv1LoadTariffPlanFromFolder, attrs2, &reply); err != nil {
 		t.Error(err)
 	}
 	time.Sleep(100 * time.Millisecond)
@@ -668,7 +669,7 @@ func testAPIerLoadFromFolderAccountAction(t *testing.T) {
 		Tenant:  "cgrates.org",
 		Account: "AccountWithAPFromTutorial",
 	}
-	if err := apierRPC.Call(utils.APIerSv2GetAccount, attrAcnt, &acnt); err != nil {
+	if err := apierRPC.Call(context.Background(), utils.APIerSv2GetAccount, attrAcnt, &acnt); err != nil {
 		t.Error(err)
 	} else if rply := acnt.BalanceMap[utils.MetaMonetary].GetTotalValue(); rply != 10.0 {
 		t.Errorf("Expecting: %v, received: %v",
@@ -695,7 +696,7 @@ func testApierSetAndRemoveRatingProfileAnySubject(t *testing.T) {
 		Overwrite: true,
 	}
 	var reply string
-	if err := apierRPC.Call(utils.APIerSv1SetRatingProfile, rpf, &reply); err != nil {
+	if err := apierRPC.Call(context.Background(), utils.APIerSv1SetRatingProfile, rpf, &reply); err != nil {
 		t.Error("Got error on APIerSv1.SetRatingProfile: ", err.Error())
 	} else if reply != utils.OK {
 		t.Error("Calling APIerSv1.SetRatingProfile got reply: ", reply)
@@ -713,13 +714,13 @@ func testApierSetAndRemoveRatingProfileAnySubject(t *testing.T) {
 	attrGetRatingPlan := &utils.AttrGetRatingProfile{
 		Tenant: "cgrates.org", Category: "sms", Subject: utils.MetaAny}
 	var rpl engine.RatingProfile
-	if err := apierRPC.Call(utils.APIerSv1GetRatingProfile, attrGetRatingPlan, &rpl); err != nil {
+	if err := apierRPC.Call(context.Background(), utils.APIerSv1GetRatingProfile, attrGetRatingPlan, &rpl); err != nil {
 		t.Errorf("Got error on APIerSv1.GetRatingProfile: %+v", err)
 	} else if !reflect.DeepEqual(expected, rpl) {
 		t.Errorf("Calling APIerSv1.GetRatingProfile expected: %+v, received: %+v", utils.ToJSON(expected), utils.ToJSON(rpl))
 	}
 
-	if err := apierRPC.Call(utils.APIerSv1RemoveRatingProfile, &AttrRemoveRatingProfile{
+	if err := apierRPC.Call(context.Background(), utils.APIerSv1RemoveRatingProfile, &AttrRemoveRatingProfile{
 		Tenant:   "cgrates.org",
 		Category: "sms",
 		Subject:  utils.MetaAny,
@@ -729,7 +730,7 @@ func testApierSetAndRemoveRatingProfileAnySubject(t *testing.T) {
 		t.Errorf("Expected: %s, received: %s ", utils.OK, reply)
 	}
 
-	if err := apierRPC.Call(utils.APIerSv1GetRatingProfile,
+	if err := apierRPC.Call(context.Background(), utils.APIerSv1GetRatingProfile,
 		attrGetRatingPlan, &rpl); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("Expected %v, \n but received %v", utils.ErrNotFound, err)
 	}

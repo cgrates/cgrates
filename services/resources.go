@@ -22,19 +22,18 @@ import (
 	"fmt"
 	"sync"
 
-	v1 "github.com/cgrates/cgrates/apier/v1"
+	"github.com/cgrates/birpc"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/cores"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/servmanager"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/cgrates/rpcclient"
 )
 
 // NewResourceService returns the Resource Service
 func NewResourceService(cfg *config.CGRConfig, dm *DataDBService,
 	cacheS *engine.CacheS, filterSChan chan *engine.FilterS,
-	server *cores.Server, internalResourceSChan chan rpcclient.ClientConnector,
+	server *cores.Server, internalResourceSChan chan birpc.ClientConnector,
 	connMgr *engine.ConnManager, anz *AnalyzerService,
 	srvDep map[string]*sync.WaitGroup) servmanager.Service {
 	return &ResourceService{
@@ -60,15 +59,14 @@ type ResourceService struct {
 	server      *cores.Server
 
 	reS      *engine.ResourceService
-	rpc      *v1.ResourceSv1
-	connChan chan rpcclient.ClientConnector
+	connChan chan birpc.ClientConnector
 	connMgr  *engine.ConnManager
 	anz      *AnalyzerService
 	srvDep   map[string]*sync.WaitGroup
 }
 
 // Start should handle the service start
-func (reS *ResourceService) Start() (err error) {
+func (reS *ResourceService) Start() error {
 	if reS.IsRunning() {
 		return utils.ErrServiceAlreadyRunning
 	}
@@ -88,12 +86,17 @@ func (reS *ResourceService) Start() (err error) {
 	reS.reS = engine.NewResourceService(datadb, reS.cfg, filterS, reS.connMgr)
 	utils.Logger.Info(fmt.Sprintf("<%s> starting <%s> subsystem", utils.CoreS, utils.ResourceS))
 	reS.reS.StartLoop()
-	reS.rpc = v1.NewResourceSv1(reS.reS)
-	if !reS.cfg.DispatcherSCfg().Enabled {
-		reS.server.RpcRegister(reS.rpc)
+	srv, err := engine.NewServiceWithName(reS.reS, utils.ResourceS, true)
+	if err != nil {
+		return err
 	}
-	reS.connChan <- reS.anz.GetInternalCodec(reS.rpc, utils.ResourceS)
-	return
+	if !reS.cfg.DispatcherSCfg().Enabled {
+		for _, s := range srv {
+			reS.server.RpcRegister(s)
+		}
+	}
+	reS.connChan <- reS.anz.GetInternalCodec(srv, utils.ResourceS)
+	return nil
 }
 
 // Reload handles the change of config
@@ -111,7 +114,6 @@ func (reS *ResourceService) Shutdown() (err error) {
 	defer reS.Unlock()
 	reS.reS.Shutdown() //we don't verify the error because shutdown never returns an error
 	reS.reS = nil
-	reS.rpc = nil
 	<-reS.connChan
 	return
 }

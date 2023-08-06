@@ -21,6 +21,7 @@ package dispatchers
 import (
 	"testing"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -30,7 +31,7 @@ func TestDspThresholdSv1PingNilEvent(t *testing.T) {
 	cgrCfg := config.NewDefaultCGRConfig()
 	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
 	var reply *string
-	result := dspSrv.ThresholdSv1Ping(nil, reply)
+	result := dspSrv.ThresholdSv1Ping(context.Background(), nil, reply)
 	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
@@ -44,7 +45,7 @@ func TestDspThresholdSv1PingNil(t *testing.T) {
 		Tenant: "tenant",
 	}
 	var reply *string
-	result := dspSrv.ThresholdSv1Ping(CGREvent, reply)
+	result := dspSrv.ThresholdSv1Ping(context.Background(), CGREvent, reply)
 	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
@@ -57,7 +58,7 @@ func TestDspThresholdSv1PingErrorNil(t *testing.T) {
 	cgrCfg.DispatcherSCfg().AttributeSConns = []string{"test"}
 	CGREvent := &utils.CGREvent{}
 	var reply *string
-	result := dspSrv.ThresholdSv1Ping(CGREvent, reply)
+	result := dspSrv.ThresholdSv1Ping(context.Background(), CGREvent, reply)
 	expected := "MANDATORY_IE_MISSING: [ApiKey]"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
@@ -71,7 +72,7 @@ func TestDspThresholdSv1GetThresholdsForEventNil(t *testing.T) {
 		Tenant: "tenant",
 	}
 	var reply *engine.Thresholds
-	result := dspSrv.ThresholdSv1GetThresholdsForEvent(CGREvent, reply)
+	result := dspSrv.ThresholdSv1GetThresholdsForEvent(context.Background(), CGREvent, reply)
 	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
@@ -86,7 +87,7 @@ func TestDspThresholdSv1GetThresholdsEvnil(t *testing.T) {
 		Tenant: "tenant",
 	}
 	var reply *engine.Thresholds
-	result := dspSrv.ThresholdSv1GetThresholdsForEvent(CGREvent, reply)
+	result := dspSrv.ThresholdSv1GetThresholdsForEvent(context.Background(), CGREvent, reply)
 	expected := "MANDATORY_IE_MISSING: [ApiKey]"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
@@ -100,7 +101,7 @@ func TestDspThresholdSv1ProcessEventNil(t *testing.T) {
 		Tenant: "tenant",
 	}
 	var reply *[]string
-	result := dspSrv.ThresholdSv1ProcessEvent(CGREvent, reply)
+	result := dspSrv.ThresholdSv1ProcessEvent(context.Background(), CGREvent, reply)
 	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
@@ -115,7 +116,7 @@ func TestDspThresholdSv1ProcessEventnNil(t *testing.T) {
 		Tenant: "tenant",
 	}
 	var reply *[]string
-	result := dspSrv.ThresholdSv1ProcessEvent(CGREvent, reply)
+	result := dspSrv.ThresholdSv1ProcessEvent(context.Background(), CGREvent, reply)
 	expected := "MANDATORY_IE_MISSING: [ApiKey]"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
@@ -129,7 +130,7 @@ func TestDspThresholdSv1GetThresholdIDsNil(t *testing.T) {
 		Tenant: "tenant",
 	}
 	var reply *[]string
-	result := dspSrv.ThresholdSv1GetThresholdIDs(CGREvent, reply)
+	result := dspSrv.ThresholdSv1GetThresholdIDs(context.Background(), CGREvent, reply)
 	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
@@ -144,7 +145,7 @@ func TestDspThresholdSv1GetThresholdIDErrorNil(t *testing.T) {
 		Tenant: "tenant",
 	}
 	var reply *[]string
-	result := dspSrv.ThresholdSv1GetThresholdIDs(CGREvent, reply)
+	result := dspSrv.ThresholdSv1GetThresholdIDs(context.Background(), CGREvent, reply)
 	expected := "MANDATORY_IE_MISSING: [ApiKey]"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
@@ -160,7 +161,7 @@ func TestDspThresholdSv1GetThresholdNil(t *testing.T) {
 		},
 	}
 	var reply *engine.Threshold
-	result := dspSrv.ThresholdSv1GetThreshold(CGREvent, reply)
+	result := dspSrv.ThresholdSv1GetThreshold(context.Background(), CGREvent, reply)
 	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
@@ -177,7 +178,7 @@ func TestDspThresholdSv1GetThresholdErrorNil(t *testing.T) {
 		},
 	}
 	var reply *engine.Threshold
-	result := dspSrv.ThresholdSv1GetThreshold(CGREvent, reply)
+	result := dspSrv.ThresholdSv1GetThreshold(context.Background(), CGREvent, reply)
 	expected := "MANDATORY_IE_MISSING: [ApiKey]"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)

@@ -23,6 +23,7 @@ import (
 	"runtime"
 	"sync"
 
+	"github.com/cgrates/birpc"
 	v1 "github.com/cgrates/cgrates/apier/v1"
 	v2 "github.com/cgrates/cgrates/apier/v2"
 	"github.com/cgrates/cgrates/config"
@@ -30,13 +31,12 @@ import (
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/servmanager"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/cgrates/rpcclient"
 )
 
 // NewCDRServer returns the CDR Server
 func NewCDRServer(cfg *config.CGRConfig, dm *DataDBService,
 	storDB *StorDBService, filterSChan chan *engine.FilterS,
-	server *cores.Server, internalCDRServerChan chan rpcclient.ClientConnector,
+	server *cores.Server, internalCDRServerChan chan birpc.ClientConnector,
 	connMgr *engine.ConnManager, anz *AnalyzerService,
 	srvDep map[string]*sync.WaitGroup) servmanager.Service {
 	return &CDRServer{
@@ -62,9 +62,7 @@ type CDRServer struct {
 	server      *cores.Server
 
 	cdrS     *engine.CDRServer
-	rpcv1    *v1.CDRsV1
-	rpcv2    *v2.CDRsV2
-	connChan chan rpcclient.ClientConnector
+	connChan chan birpc.ClientConnector
 	connMgr  *engine.ConnManager
 
 	stopChan chan struct{}
@@ -73,7 +71,7 @@ type CDRServer struct {
 }
 
 // Start should handle the sercive start
-func (cdrService *CDRServer) Start() (err error) {
+func (cdrService *CDRServer) Start() error {
 	if cdrService.IsRunning() {
 		return utils.ErrServiceAlreadyRunning
 	}
@@ -99,16 +97,26 @@ func (cdrService *CDRServer) Start() (err error) {
 	utils.Logger.Info("Registering CDRS HTTP Handlers.")
 	cdrService.cdrS.RegisterHandlersToServer(cdrService.server)
 	utils.Logger.Info("Registering CDRS RPC service.")
-	cdrService.rpcv1 = v1.NewCDRsV1(cdrService.cdrS)
-	cdrService.rpcv2 = &v2.CDRsV2{CDRsV1: *cdrService.rpcv1}
-	if !cdrService.cfg.DispatcherSCfg().Enabled {
-		cdrService.server.RpcRegister(cdrService.rpcv1)
-		cdrService.server.RpcRegister(cdrService.rpcv2)
-		// Make the cdr server available for internal communication
-		cdrService.server.RpcRegister(cdrService.cdrS) // register CdrServer for internal usage (TODO: refactor this)
+
+	cdrsV1 := v1.NewCDRsV1(cdrService.cdrS)
+	cdrsV2 := &v2.CDRsV2{CDRsV1: *cdrsV1}
+	srv, err := engine.NewService(cdrsV1)
+	if err != nil {
+		return err
 	}
-	cdrService.connChan <- cdrService.anz.GetInternalCodec(cdrService.cdrS, utils.CDRServer) // Signal that cdrS is operational
-	return
+	cdrsV2Srv, err := birpc.NewService(cdrsV2, "", false)
+	if err != nil {
+		return err
+	}
+	engine.RegisterPingMethod(cdrsV2Srv.Methods)
+	srv[utils.CDRsV2] = cdrsV2Srv
+	if !cdrService.cfg.DispatcherSCfg().Enabled {
+		for _, s := range srv {
+			cdrService.server.RpcRegister(s)
+		}
+	}
+	cdrService.connChan <- cdrService.anz.GetInternalCodec(srv, utils.CDRServer) // Signal that cdrS is operational
+	return nil
 }
 
 // Reload handles the change of config
@@ -121,8 +129,6 @@ func (cdrService *CDRServer) Shutdown() (err error) {
 	cdrService.Lock()
 	close(cdrService.stopChan)
 	cdrService.cdrS = nil
-	cdrService.rpcv1 = nil
-	cdrService.rpcv2 = nil
 	<-cdrService.connChan
 	cdrService.Unlock()
 	return

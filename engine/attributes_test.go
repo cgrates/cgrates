@@ -32,9 +32,10 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc"
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/cgrates/rpcclient"
 )
 
 func TestAttributesShutdown(t *testing.T) {
@@ -71,7 +72,7 @@ func TestAttributesV1GetAttributeForEventNilCGREvent(t *testing.T) {
 	reply := &AttributeProfile{}
 
 	experr := fmt.Sprintf("MANDATORY_IE_MISSING: [%s]", "CGREvent")
-	err := alS.V1GetAttributeForEvent(nil, reply)
+	err := alS.V1GetAttributeForEvent(context.Background(), nil, reply)
 
 	if err == nil || err.Error() != experr {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", experr, err)
@@ -91,7 +92,7 @@ func TestAttributesV1GetAttributeForEventProfileNotFound(t *testing.T) {
 	reply := &AttributeProfile{}
 
 	experr := utils.ErrNotFound
-	err := alS.V1GetAttributeForEvent(args, reply)
+	err := alS.V1GetAttributeForEvent(context.Background(), args, reply)
 
 	if err == nil || err != experr {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", experr, err)
@@ -111,7 +112,7 @@ func TestAttributesV1GetAttributeForEvent2(t *testing.T) {
 	reply := &AttributeProfile{}
 
 	experr := utils.ErrNotFound
-	err := alS.V1GetAttributeForEvent(args, reply)
+	err := alS.V1GetAttributeForEvent(context.Background(), args, reply)
 
 	if err == nil || err != experr {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", experr, err)
@@ -121,7 +122,7 @@ func TestAttributesV1GetAttributeForEvent2(t *testing.T) {
 func TestAttributesV1ProcessEvent(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.FilterSCfg().ResourceSConns = []string{}
-	conMng := NewConnManager(cfg, make(map[string]chan rpcclient.ClientConnector))
+	conMng := NewConnManager(cfg, make(map[string]chan birpc.ClientConnector))
 	dm := NewDataManager(NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items), nil, conMng)
 	filterS := NewFilterS(cfg, conMng, dm)
 	if err := dm.SetAttributeProfile(&AttributeProfile{
@@ -187,15 +188,16 @@ func TestAttributesV1ProcessEvent(t *testing.T) {
 		},
 		blocker: false,
 	}
-	if err = alS.V1ProcessEvent(&utils.CGREvent{
-		Tenant: "cgrates.org",
-		Event: map[string]any{
-			utils.AccountField: "adrian@itsyscom.com",
-		},
-		APIOpts: map[string]any{
-			utils.OptsAttributesProcessRuns: 2,
-		},
-	}, &rply); err != nil {
+	if err = alS.V1ProcessEvent(context.Background(),
+		&utils.CGREvent{
+			Tenant: "cgrates.org",
+			Event: map[string]any{
+				utils.AccountField: "adrian@itsyscom.com",
+			},
+			APIOpts: map[string]any{
+				utils.OptsAttributesProcessRuns: 2,
+			},
+		}, &rply); err != nil {
 		t.Errorf("Expected <%+v>, received <%+v>", nil, err)
 	} else if sort.Strings(rply.AlteredFields); !reflect.DeepEqual(expected, rply) {
 		t.Errorf("Expected <%+v>, received <%+v>", utils.ToJSON(expected), utils.ToJSON(rply))
@@ -206,7 +208,7 @@ func TestAttributesV1ProcessEventErrorMetaSum(t *testing.T) {
 	Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	cfg.FilterSCfg().ResourceSConns = []string{}
-	conMng := NewConnManager(cfg, make(map[string]chan rpcclient.ClientConnector))
+	conMng := NewConnManager(cfg, make(map[string]chan birpc.ClientConnector))
 	dm := NewDataManager(NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items), nil, conMng)
 	filterS := NewFilterS(cfg, conMng, dm)
 
@@ -230,15 +232,16 @@ func TestAttributesV1ProcessEventErrorMetaSum(t *testing.T) {
 	alS := NewAttributeService(dm, filterS, cfg)
 	var rply AttrSProcessEventReply
 	expErr := "SERVER_ERROR: NotEnoughParameters"
-	if err = alS.V1ProcessEvent(&utils.CGREvent{
-		Tenant: "cgrates.org",
-		Event: map[string]any{
-			utils.AccountField: "adrian@itsyscom.com",
-		},
-		APIOpts: map[string]any{
-			utils.OptsAttributesProcessRuns: 2,
-		},
-	}, &rply); err == nil || err.Error() != expErr {
+	if err = alS.V1ProcessEvent(context.Background(),
+		&utils.CGREvent{
+			Tenant: "cgrates.org",
+			Event: map[string]any{
+				utils.AccountField: "adrian@itsyscom.com",
+			},
+			APIOpts: map[string]any{
+				utils.OptsAttributesProcessRuns: 2,
+			},
+		}, &rply); err == nil || err.Error() != expErr {
 		t.Errorf("Expected <%+v>, received <%+v>", expErr, err)
 	}
 
@@ -248,7 +251,7 @@ func TestAttributesV1ProcessEventErrorMetaDifference(t *testing.T) {
 	Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	cfg.FilterSCfg().ResourceSConns = []string{}
-	conMng := NewConnManager(cfg, make(map[string]chan rpcclient.ClientConnector))
+	conMng := NewConnManager(cfg, make(map[string]chan birpc.ClientConnector))
 	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
 	dm := NewDataManager(db, nil, conMng)
 	filterS := NewFilterS(cfg, conMng, dm)
@@ -273,15 +276,16 @@ func TestAttributesV1ProcessEventErrorMetaDifference(t *testing.T) {
 	alS := NewAttributeService(dm, filterS, cfg)
 	var rply AttrSProcessEventReply
 	expErr := "SERVER_ERROR: NotEnoughParameters"
-	if err := alS.V1ProcessEvent(&utils.CGREvent{
-		Tenant: "cgrates.org",
-		Event: map[string]any{
-			utils.AccountField: "adrian@itsyscom.com",
-		},
-		APIOpts: map[string]any{
-			utils.OptsAttributesProcessRuns: 2,
-		},
-	}, &rply); err == nil || err.Error() != expErr {
+	if err := alS.V1ProcessEvent(context.Background(),
+		&utils.CGREvent{
+			Tenant: "cgrates.org",
+			Event: map[string]any{
+				utils.AccountField: "adrian@itsyscom.com",
+			},
+			APIOpts: map[string]any{
+				utils.OptsAttributesProcessRuns: 2,
+			},
+		}, &rply); err == nil || err.Error() != expErr {
 		t.Errorf("Expected <%+v>, received <%+v>", expErr, err)
 	}
 
@@ -315,15 +319,16 @@ func TestAttributesV1ProcessEventErrorMetaValueExponent(t *testing.T) {
 	alS := NewAttributeService(dm, filterS, cfg)
 	var rply AttrSProcessEventReply
 	expErr := "SERVER_ERROR: invalid arguments <[{\"Rules\":\"CGRATES.ORG\"}]> to *value_exponent"
-	if err := alS.V1ProcessEvent(&utils.CGREvent{
-		Tenant: "cgrates.org",
-		Event: map[string]any{
-			utils.AccountField: "adrian@itsyscom.com",
-		},
-		APIOpts: map[string]any{
-			utils.OptsAttributesProcessRuns: 2,
-		},
-	}, &rply); err == nil || err.Error() != expErr {
+	if err := alS.V1ProcessEvent(context.Background(),
+		&utils.CGREvent{
+			Tenant: "cgrates.org",
+			Event: map[string]any{
+				utils.AccountField: "adrian@itsyscom.com",
+			},
+			APIOpts: map[string]any{
+				utils.OptsAttributesProcessRuns: 2,
+			},
+		}, &rply); err == nil || err.Error() != expErr {
 		t.Errorf("Expected <%+v>, received <%+v>", expErr, err)
 	}
 
@@ -1222,7 +1227,7 @@ func TestAttributesV1ProcessEventMultipleRuns1(t *testing.T) {
 		},
 	}
 
-	if err := alS.V1ProcessEvent(args, reply); err != nil {
+	if err := alS.V1ProcessEvent(context.Background(), args, reply); err != nil {
 		t.Error(err)
 	} else {
 		sort.Strings(reply.AlteredFields)
@@ -1231,7 +1236,7 @@ func TestAttributesV1ProcessEventMultipleRuns1(t *testing.T) {
 		}
 	}
 
-	if err := alS.V1ProcessEvent(nil, reply); err == nil {
+	if err := alS.V1ProcessEvent(context.Background(), nil, reply); err == nil {
 		t.Error("expected error")
 	}
 }
@@ -1333,7 +1338,7 @@ func TestAttributesV1ProcessEventMultipleRuns2(t *testing.T) {
 			},
 		},
 	}
-	if err := alS.V1ProcessEvent(args, reply); err != nil {
+	if err := alS.V1ProcessEvent(context.Background(), args, reply); err != nil {
 		t.Error(err)
 	} else {
 		sort.Strings(reply.AlteredFields)
@@ -1440,7 +1445,7 @@ func TestAttrSV1GetAttributeForEvent(t *testing.T) {
 		Weight: 10,
 	}, true)
 	var attrPrf AttributeProfile
-	if err := attS.V1GetAttributeForEvent(args, &attrPrf); err != nil {
+	if err := attS.V1GetAttributeForEvent(context.Background(), args, &attrPrf); err != nil {
 		t.Error(err)
 	}
 
@@ -1544,31 +1549,33 @@ func TestAttributesV1ProcessEventSentryPeer(t *testing.T) {
 		blocker: false,
 	}
 	config.SetCgrConfig(cfg)
-	if err = alS.V1ProcessEvent(&utils.CGREvent{
-		Tenant: "cgrates.org",
-		Event: map[string]any{
-			utils.AccountField: "account_1001",
-			utils.Destination:  "453904509045",
-		},
-		APIOpts: map[string]any{
-			utils.OptsAttributesProcessRuns: 2,
-		},
-	}, &rply); err != nil {
+	if err = alS.V1ProcessEvent(context.Background(),
+		&utils.CGREvent{
+			Tenant: "cgrates.org",
+			Event: map[string]any{
+				utils.AccountField: "account_1001",
+				utils.Destination:  "453904509045",
+			},
+			APIOpts: map[string]any{
+				utils.OptsAttributesProcessRuns: 2,
+			},
+		}, &rply); err != nil {
 		t.Errorf("Expected <%+v>, received <%+v>", nil, err)
 	} else if sort.Strings(rply.AlteredFields); !reflect.DeepEqual(expected, rply) {
 		t.Errorf("Expected <%+v>, received <%+v>", utils.ToJSON(expected), utils.ToJSON(rply))
 	}
 
-	if err = alS.V1ProcessEvent(&utils.CGREvent{
-		Tenant: "cgrates.org",
-		Event: map[string]any{
-			utils.AccountField: "account_1001",
-			utils.Destination:  "100",
-		},
-		APIOpts: map[string]any{
-			utils.OptsAttributesProcessRuns: 2,
-		},
-	}, &rply); err == nil {
+	if err = alS.V1ProcessEvent(context.Background(),
+		&utils.CGREvent{
+			Tenant: "cgrates.org",
+			Event: map[string]any{
+				utils.AccountField: "account_1001",
+				utils.Destination:  "100",
+			},
+			APIOpts: map[string]any{
+				utils.OptsAttributesProcessRuns: 2,
+			},
+		}, &rply); err == nil {
 		t.Errorf("Expected <%+v>, received <%+v>", err, nil)
 	}
 

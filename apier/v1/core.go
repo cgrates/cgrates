@@ -19,9 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package v1
 
 import (
-	"path"
-	"time"
-
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/cores"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -35,67 +33,50 @@ type CoreSv1 struct {
 	cS *cores.CoreService
 }
 
-// Call implements rpcclient.ClientConnector interface for internal RPC
-func (cS *CoreSv1) Call(serviceMethod string,
+// Call implements birpc.ClientConnector interface for internal RPC
+func (cS *CoreSv1) Call(ctx *context.Context, serviceMethod string,
 	args any, reply any) error {
 	return utils.APIerRPCCall(cS, serviceMethod, args, reply)
 }
 
-func (cS *CoreSv1) Status(arg *utils.TenantWithAPIOpts, reply *map[string]any) error {
-	return cS.cS.Status(arg, reply)
+func (cS *CoreSv1) Status(ctx *context.Context, arg *utils.TenantWithAPIOpts, reply *map[string]any) error {
+	return cS.cS.V1Status(ctx, arg, reply)
 }
 
 // Ping used to determinate if component is active
-func (cS *CoreSv1) Ping(ign *utils.CGREvent, reply *string) error {
+func (cS *CoreSv1) Ping(ctx *context.Context, ign *utils.CGREvent, reply *string) error {
 	*reply = utils.Pong
 	return nil
 }
 
 // Sleep is used to test the concurrent requests mechanism
-func (cS *CoreSv1) Sleep(arg *utils.DurationArgs, reply *string) error {
-	time.Sleep(arg.Duration)
-	*reply = utils.OK
-	return nil
+func (cS *CoreSv1) Sleep(ctx *context.Context, args *utils.DurationArgs, reply *string) error {
+	return cS.cS.V1Sleep(ctx, args, reply)
 }
 
 // StartCPUProfiling is used to start CPUProfiling in the given path
-func (cS *CoreSv1) StartCPUProfiling(args *utils.DirectoryArgs, reply *string) error {
-	if err := cS.cS.StartCPUProfiling(path.Join(args.DirPath, utils.CpuPathCgr)); err != nil {
-		return err
-	}
-	*reply = utils.OK
-	return nil
+func (cS *CoreSv1) StartCPUProfiling(ctx *context.Context, args *utils.DirectoryArgs, reply *string) error {
+	return cS.cS.V1StartCPUProfiling(ctx, args, reply)
 }
 
 // StopCPUProfiling is used to stop CPUProfiling. The file should be written on the path
 // where the CPUProfiling already started
-func (cS *CoreSv1) StopCPUProfiling(_ *utils.TenantWithAPIOpts, reply *string) error {
-	if err := cS.cS.StopCPUProfiling(); err != nil {
-		return err
-	}
-	*reply = utils.OK
-	return nil
+func (cS *CoreSv1) StopCPUProfiling(ctx *context.Context, args *utils.TenantWithAPIOpts, reply *string) error {
+	return cS.cS.V1StopCPUProfiling(ctx, args, reply)
 }
 
 // StartMemoryProfiling is used to start MemoryProfiling in the given path
-func (cS *CoreSv1) StartMemoryProfiling(args *utils.MemoryPrf, reply *string) error {
-	if err := cS.cS.StartMemoryProfiling(args); err != nil {
-		return err
-	}
-	*reply = utils.OK
-	return nil
+func (cS *CoreSv1) StartMemoryProfiling(ctx *context.Context, args *utils.MemoryPrf, reply *string) error {
+	return cS.cS.V1StartMemoryProfiling(ctx, args, reply)
 }
 
 // StopMemoryProfiling is used to stop MemoryProfiling. The file should be written on the path
 // where the MemoryProfiling already started
-func (cS *CoreSv1) StopMemoryProfiling(_ *utils.TenantWithAPIOpts, reply *string) error {
-	if err := cS.cS.StopMemoryProfiling(); err != nil {
-		return err
-	}
-	*reply = utils.OK
-	return nil
+func (cS *CoreSv1) StopMemoryProfiling(ctx *context.Context, args *utils.TenantWithAPIOpts, reply *string) error {
+	return cS.cS.V1StopMemoryProfiling(ctx, args, reply)
+
 }
 
-func (cS *CoreSv1) Panic(args *utils.PanicMessageArgs, reply *string) error {
-	return cS.cS.Panic(args, reply)
+func (cS *CoreSv1) Panic(ctx *context.Context, args *utils.PanicMessageArgs, reply *string) error {
+	return cS.cS.V1Panic(ctx, args, reply)
 }

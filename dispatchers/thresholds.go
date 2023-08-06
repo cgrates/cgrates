@@ -21,11 +21,12 @@ package dispatchers
 import (
 	"time"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
-func (dS *DispatcherService) ThresholdSv1Ping(args *utils.CGREvent, reply *string) (err error) {
+func (dS *DispatcherService) ThresholdSv1Ping(ctx *context.Context, args *utils.CGREvent, reply *string) (err error) {
 	if args == nil {
 		args = new(utils.CGREvent)
 	}
@@ -39,7 +40,7 @@ func (dS *DispatcherService) ThresholdSv1Ping(args *utils.CGREvent, reply *strin
 	return dS.Dispatch(args, utils.MetaThresholds, utils.ThresholdSv1Ping, args, reply)
 }
 
-func (dS *DispatcherService) ThresholdSv1GetThresholdsForEvent(args *utils.CGREvent,
+func (dS *DispatcherService) ThresholdSv1GetThresholdsForEvent(ctx *context.Context, args *utils.CGREvent,
 	t *engine.Thresholds) (err error) {
 	args.Tenant = utils.FirstNonEmpty(args.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
@@ -52,7 +53,7 @@ func (dS *DispatcherService) ThresholdSv1GetThresholdsForEvent(args *utils.CGREv
 	return dS.Dispatch(args, utils.MetaThresholds, utils.ThresholdSv1GetThresholdsForEvent, args, t)
 }
 
-func (dS *DispatcherService) ThresholdSv1ProcessEvent(args *utils.CGREvent,
+func (dS *DispatcherService) ThresholdSv1ProcessEvent(ctx *context.Context, args *utils.CGREvent,
 	tIDs *[]string) (err error) {
 	args.Tenant = utils.FirstNonEmpty(args.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
@@ -65,7 +66,7 @@ func (dS *DispatcherService) ThresholdSv1ProcessEvent(args *utils.CGREvent,
 	return dS.Dispatch(args, utils.MetaThresholds, utils.ThresholdSv1ProcessEvent, args, tIDs)
 }
 
-func (dS *DispatcherService) ThresholdSv1GetThresholdIDs(args *utils.TenantWithAPIOpts, tIDs *[]string) (err error) {
+func (dS *DispatcherService) ThresholdSv1GetThresholdIDs(ctx *context.Context, args *utils.TenantWithAPIOpts, tIDs *[]string) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
 	if args.Tenant != utils.EmptyString {
 		tnt = args.Tenant
@@ -82,7 +83,7 @@ func (dS *DispatcherService) ThresholdSv1GetThresholdIDs(args *utils.TenantWithA
 	}, utils.MetaThresholds, utils.ThresholdSv1GetThresholdIDs, args, tIDs)
 }
 
-func (dS *DispatcherService) ThresholdSv1GetThreshold(args *utils.TenantIDWithAPIOpts, th *engine.Threshold) (err error) {
+func (dS *DispatcherService) ThresholdSv1GetThreshold(ctx *context.Context, args *utils.TenantIDWithAPIOpts, th *engine.Threshold) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
 	if args.TenantID != nil && args.TenantID.Tenant != utils.EmptyString {
 		tnt = args.TenantID.Tenant

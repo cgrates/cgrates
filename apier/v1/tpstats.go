@@ -19,11 +19,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package v1
 
 import (
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
 )
 
 // SetTPStat creates a new stat within a tariff plan
-func (apierSv1 *APIerSv1) SetTPStat(attr *utils.TPStatProfile, reply *string) error {
+func (apierSv1 *APIerSv1) SetTPStat(ctx *context.Context, attr *utils.TPStatProfile, reply *string) error {
 	if missing := utils.MissingStructFields(attr, []string{utils.TPid, utils.ID}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -38,7 +39,7 @@ func (apierSv1 *APIerSv1) SetTPStat(attr *utils.TPStatProfile, reply *string) er
 }
 
 // GetTPStat queries specific Stat on Tariff plan
-func (apierSv1 *APIerSv1) GetTPStat(attr *utils.TPTntID, reply *utils.TPStatProfile) error {
+func (apierSv1 *APIerSv1) GetTPStat(ctx *context.Context, attr *utils.TPTntID, reply *utils.TPStatProfile) error {
 	if missing := utils.MissingStructFields(attr, []string{utils.TPid, utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -63,7 +64,7 @@ type AttrGetTPStatIds struct {
 }
 
 // GetTPStatIDs queries Stat identities on specific tariff plan.
-func (apierSv1 *APIerSv1) GetTPStatIDs(attrs *AttrGetTPStatIds, reply *[]string) error {
+func (apierSv1 *APIerSv1) GetTPStatIDs(ctx *context.Context, attrs *AttrGetTPStatIds, reply *[]string) error {
 	if missing := utils.MissingStructFields(&attrs, []string{utils.TPid}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -83,7 +84,7 @@ func (apierSv1 *APIerSv1) GetTPStatIDs(attrs *AttrGetTPStatIds, reply *[]string)
 }
 
 // RemoveTPStat removes specific Stat on Tariff plan
-func (apierSv1 *APIerSv1) RemoveTPStat(attrs *utils.TPTntID, reply *string) error {
+func (apierSv1 *APIerSv1) RemoveTPStat(ctx *context.Context, attrs *utils.TPTntID, reply *string) error {
 	if missing := utils.MissingStructFields(attrs, []string{utils.TPid, utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}

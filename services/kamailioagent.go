@@ -55,7 +55,7 @@ type KamailioAgent struct {
 }
 
 // Start should handle the sercive start
-func (kam *KamailioAgent) Start() (err error) {
+func (kam *KamailioAgent) Start() error {
 	if kam.IsRunning() {
 		return utils.ErrServiceAlreadyRunning
 	}
@@ -63,17 +63,22 @@ func (kam *KamailioAgent) Start() (err error) {
 	kam.Lock()
 	defer kam.Unlock()
 
-	kam.kam = agents.NewKamailioAgent(kam.cfg.KamAgentCfg(), kam.connMgr,
+	var err error
+	kam.kam, err = agents.NewKamailioAgent(kam.cfg.KamAgentCfg(), kam.connMgr,
 		utils.FirstNonEmpty(kam.cfg.KamAgentCfg().Timezone, kam.cfg.GeneralCfg().DefaultTimezone))
+	if err != nil {
+		utils.Logger.Err(fmt.Sprintf("<%s> failed to initialize agent, error: %s", utils.KamailioAgent, err))
+		return err
+	}
 
 	go func(k *agents.KamailioAgent) {
-		if err = k.Connect(); err != nil &&
-			!strings.Contains(err.Error(), "use of closed network connection") { // if closed by us do not log
-			utils.Logger.Err(fmt.Sprintf("<%s> error: %s", utils.KamailioAgent, err))
+		if connErr := k.Connect(); connErr != nil &&
+			!strings.Contains(connErr.Error(), "use of closed network connection") { // if closed by us do not log
+			utils.Logger.Err(fmt.Sprintf("<%s> error: %s", utils.KamailioAgent, connErr))
 			kam.shdChan.CloseOnce()
 		}
 	}(kam.kam)
-	return
+	return nil
 }
 
 // Reload handles the change of config

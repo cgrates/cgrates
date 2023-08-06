@@ -27,6 +27,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/cgrates/birpc/context"
 	v1 "github.com/cgrates/cgrates/apier/v1"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
@@ -38,8 +39,8 @@ type APIerSv2 struct {
 	v1.APIerSv1
 }
 
-// Call implements rpcclient.ClientConnector interface for internal RPC
-func (apiv2 *APIerSv2) Call(serviceMethod string,
+// Call implements birpc.ClientConnector interface for internal RPC
+func (apiv2 *APIerSv2) Call(ctx *context.Context, serviceMethod string,
 	args any, reply any) error {
 	return utils.APIerRPCCall(apiv2, serviceMethod, args, reply)
 }
@@ -50,7 +51,7 @@ type AttrLoadRatingProfile struct {
 }
 
 // Process dependencies and load a specific rating profile from storDb into dataDb.
-func (apiv2 *APIerSv2) LoadRatingProfile(attrs *AttrLoadRatingProfile, reply *string) error {
+func (apiv2 *APIerSv2) LoadRatingProfile(ctx *context.Context, attrs *AttrLoadRatingProfile, reply *string) error {
 	if len(attrs.TPid) == 0 {
 		return utils.NewErrMandatoryIeMissing("TPid")
 	}
@@ -80,7 +81,7 @@ type AttrLoadAccountActions struct {
 }
 
 // Process dependencies and load a specific AccountActions profile from storDb into dataDb.
-func (apiv2 *APIerSv2) LoadAccountActions(attrs *AttrLoadAccountActions, reply *string) error {
+func (apiv2 *APIerSv2) LoadAccountActions(ctx *context.Context, attrs *AttrLoadAccountActions, reply *string) error {
 	if len(attrs.TPid) == 0 {
 		return utils.NewErrMandatoryIeMissing("TPid")
 	}
@@ -106,7 +107,7 @@ func (apiv2 *APIerSv2) LoadAccountActions(attrs *AttrLoadAccountActions, reply *
 	return nil
 }
 
-func (apiv2 *APIerSv2) LoadTariffPlanFromFolder(attrs *utils.AttrLoadTpFromFolder, reply *utils.LoadInstance) error {
+func (apiv2 *APIerSv2) LoadTariffPlanFromFolder(ctx *context.Context, attrs *utils.AttrLoadTpFromFolder, reply *utils.LoadInstance) error {
 	if len(attrs.FolderPath) == 0 {
 		return fmt.Errorf("%s:%s", utils.ErrMandatoryIeMissing.Error(), "FolderPath")
 	}
@@ -184,7 +185,7 @@ type AttrGetActions struct {
 }
 
 // Retrieves actions attached to specific ActionsId within cache
-func (apiv2 *APIerSv2) GetActions(attr *AttrGetActions, reply *map[string]engine.Actions) error {
+func (apiv2 *APIerSv2) GetActions(ctx *context.Context, attr *AttrGetActions, reply *map[string]engine.Actions) error {
 	var actionKeys []string
 	var err error
 	if len(attr.ActionIDs) == 0 {
@@ -236,7 +237,7 @@ type AttrGetActionsCount struct{}
 
 // GetActionsCount sets in reply var the total number of actions registered for the received tenant
 // returns ErrNotFound in case of 0 actions
-func (apiv2 *APIerSv2) GetActionsCount(attr *AttrGetActionsCount, reply *int) (err error) {
+func (apiv2 *APIerSv2) GetActionsCount(ctx *context.Context, attr *AttrGetActionsCount, reply *int) (err error) {
 	var actionKeys []string
 	if actionKeys, err = apiv2.DataManager.DataDB().GetKeysForPrefix(utils.ActionPrefix); err != nil {
 		return err
@@ -253,7 +254,7 @@ type AttrGetDestinations struct {
 }
 
 // GetDestinations returns a list of destination based on the destinationIDs given
-func (apiv2 *APIerSv2) GetDestinations(attr *AttrGetDestinations, reply *[]*engine.Destination) (err error) {
+func (apiv2 *APIerSv2) GetDestinations(ctx *context.Context, attr *AttrGetDestinations, reply *[]*engine.Destination) (err error) {
 	if len(attr.DestinationIDs) == 0 {
 		// get all destination ids
 		if attr.DestinationIDs, err = apiv2.DataManager.DataDB().GetKeysForPrefix(utils.DestinationPrefix); err != nil {
@@ -273,7 +274,7 @@ func (apiv2 *APIerSv2) GetDestinations(attr *AttrGetDestinations, reply *[]*engi
 	return
 }
 
-func (apiv2 *APIerSv2) SetActions(attrs *utils.AttrSetActions, reply *string) error {
+func (apiv2 *APIerSv2) SetActions(ctx *context.Context, attrs *utils.AttrSetActions, reply *string) error {
 	if missing := utils.MissingStructFields(attrs, []string{"ActionsId", "Actions"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -363,7 +364,7 @@ func (apiv2 *APIerSv2) SetActions(attrs *utils.AttrSetActions, reply *string) er
 		return utils.NewErrServerError(err)
 	}
 	//CacheReload
-	if err := apiv2.ConnMgr.Call(apiv2.Config.ApierCfg().CachesConns, nil,
+	if err := apiv2.ConnMgr.Call(context.TODO(), apiv2.Config.ApierCfg().CachesConns,
 		utils.CacheSv1ReloadCache, &utils.AttrReloadCacheWithAPIOpts{
 			ActionIDs: []string{attrs.ActionsId},
 		}, reply); err != nil {
@@ -378,7 +379,7 @@ func (apiv2 *APIerSv2) SetActions(attrs *utils.AttrSetActions, reply *string) er
 }
 
 // Ping return pong if the service is active
-func (apiv2 *APIerSv2) Ping(ign *utils.CGREvent, reply *string) error {
+func (apiv2 *APIerSv2) Ping(ctx *context.Context, ign *utils.CGREvent, reply *string) error {
 	*reply = utils.Pong
 	return nil
 }

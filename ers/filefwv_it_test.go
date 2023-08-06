@@ -23,13 +23,15 @@ package ers
 
 import (
 	"fmt"
-	"net/rpc"
 	"os"
 	"path"
 	"reflect"
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc/context"
+
+	"github.com/cgrates/birpc"
 	v1 "github.com/cgrates/cgrates/apier/v1"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
@@ -40,7 +42,7 @@ var (
 	fwvCfgPath string
 	fwvCfgDIR  string
 	fwvCfg     *config.CGRConfig
-	fwvRPC     *rpc.Client
+	fwvRPC     *birpc.Client
 
 	fwvTests = []func(t *testing.T){
 		testCreateDirs,
@@ -125,7 +127,7 @@ func testFWVITLoadTPFromFolder(t *testing.T) {
 		},
 	}
 	var result string
-	if err := fwvRPC.Call(utils.APIerSv1SetChargerProfile, chargerProfile, &result); err != nil {
+	if err := fwvRPC.Call(context.Background(), utils.APIerSv1SetChargerProfile, chargerProfile, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -184,12 +186,12 @@ func testFWVITHandleCdr1File(t *testing.T) {
 func testFWVITAnalyseCDRs(t *testing.T) {
 	time.Sleep(time.Second)
 	var reply []*engine.ExternalCDR
-	if err := fwvRPC.Call(utils.APIerSv2GetCDRs, &utils.RPCCDRsFilter{}, &reply); err != nil {
+	if err := fwvRPC.Call(context.Background(), utils.APIerSv2GetCDRs, &utils.RPCCDRsFilter{}, &reply); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(reply) != 29 {
 		t.Error("Unexpected number of CDRs returned: ", len(reply))
 	}
-	if err := fwvRPC.Call(utils.APIerSv2GetCDRs, &utils.RPCCDRsFilter{OriginIDs: []string{"CDR0000010"}}, &reply); err != nil {
+	if err := fwvRPC.Call(context.Background(), utils.APIerSv2GetCDRs, &utils.RPCCDRsFilter{OriginIDs: []string{"CDR0000010"}}, &reply); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(reply) != 1 {
 		t.Error("Unexpected number of CDRs returned: ", len(reply))

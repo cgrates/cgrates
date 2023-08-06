@@ -21,6 +21,7 @@ package v1
 import (
 	"time"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -35,38 +36,38 @@ type ThresholdSv1 struct {
 	tS *engine.ThresholdService
 }
 
-// Call implements rpcclient.ClientConnector interface for internal RPC
-func (tSv1 *ThresholdSv1) Call(serviceMethod string, args any, reply any) error {
+// Call implements birpc.ClientConnector interface for internal RPC
+func (tSv1 *ThresholdSv1) Call(ctx *context.Context, serviceMethod string, args any, reply any) error {
 	return utils.APIerRPCCall(tSv1, serviceMethod, args, reply)
 }
 
 // GetThresholdIDs returns list of threshold IDs registered for a tenant
-func (tSv1 *ThresholdSv1) GetThresholdIDs(tenant *utils.TenantWithAPIOpts, tIDs *[]string) error {
-	return tSv1.tS.V1GetThresholdIDs(tenant.Tenant, tIDs)
+func (tSv1 *ThresholdSv1) GetThresholdIDs(ctx *context.Context, tenant *utils.TenantWithAPIOpts, tIDs *[]string) error {
+	return tSv1.tS.V1GetThresholdIDs(ctx, tenant.Tenant, tIDs)
 }
 
 // GetThresholdsForEvent returns a list of thresholds matching an event
-func (tSv1 *ThresholdSv1) GetThresholdsForEvent(args *utils.CGREvent, reply *engine.Thresholds) error {
-	return tSv1.tS.V1GetThresholdsForEvent(args, reply)
+func (tSv1 *ThresholdSv1) GetThresholdsForEvent(ctx *context.Context, args *utils.CGREvent, reply *engine.Thresholds) error {
+	return tSv1.tS.V1GetThresholdsForEvent(ctx, args, reply)
 }
 
 // GetThreshold queries a Threshold
-func (tSv1 *ThresholdSv1) GetThreshold(tntID *utils.TenantIDWithAPIOpts, t *engine.Threshold) error {
-	return tSv1.tS.V1GetThreshold(tntID.TenantID, t)
+func (tSv1 *ThresholdSv1) GetThreshold(ctx *context.Context, tntID *utils.TenantIDWithAPIOpts, t *engine.Threshold) error {
+	return tSv1.tS.V1GetThreshold(ctx, tntID.TenantID, t)
 }
 
 // ProcessEvent will process an Event
-func (tSv1 *ThresholdSv1) ProcessEvent(args *utils.CGREvent, tIDs *[]string) error {
-	return tSv1.tS.V1ProcessEvent(args, tIDs)
+func (tSv1 *ThresholdSv1) ProcessEvent(ctx *context.Context, args *utils.CGREvent, tIDs *[]string) error {
+	return tSv1.tS.V1ProcessEvent(ctx, args, tIDs)
 }
 
 // ResetThreshold resets the threshold hits
-func (tSv1 *ThresholdSv1) ResetThreshold(tntID *utils.TenantIDWithAPIOpts, reply *string) error {
-	return tSv1.tS.V1ResetThreshold(tntID.TenantID, reply)
+func (tSv1 *ThresholdSv1) ResetThreshold(ctx *context.Context, tntID *utils.TenantIDWithAPIOpts, reply *string) error {
+	return tSv1.tS.V1ResetThreshold(ctx, tntID.TenantID, reply)
 }
 
 // GetThresholdProfile returns a Threshold Profile
-func (apierSv1 *APIerSv1) GetThresholdProfile(arg *utils.TenantID, reply *engine.ThresholdProfile) (err error) {
+func (apierSv1 *APIerSv1) GetThresholdProfile(ctx *context.Context, arg *utils.TenantID, reply *engine.ThresholdProfile) (err error) {
 	if missing := utils.MissingStructFields(arg, []string{utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -83,7 +84,7 @@ func (apierSv1 *APIerSv1) GetThresholdProfile(arg *utils.TenantID, reply *engine
 }
 
 // GetThresholdProfileIDs returns list of thresholdProfile IDs registered for a tenant
-func (apierSv1 *APIerSv1) GetThresholdProfileIDs(args *utils.PaginatorWithTenant, thPrfIDs *[]string) error {
+func (apierSv1 *APIerSv1) GetThresholdProfileIDs(ctx *context.Context, args *utils.PaginatorWithTenant, thPrfIDs *[]string) error {
 	tnt := args.Tenant
 	if tnt == utils.EmptyString {
 		tnt = apierSv1.Config.GeneralCfg().DefaultTenant
@@ -106,7 +107,7 @@ func (apierSv1 *APIerSv1) GetThresholdProfileIDs(args *utils.PaginatorWithTenant
 
 // GetThresholdProfileCount sets in reply var the total number of ThresholdProfileIDs registered for the received tenant
 // returns ErrNotFound in case of 0 ThresholdProfileIDs
-func (apierSv1 *APIerSv1) GetThresholdProfileCount(args *utils.TenantWithAPIOpts, reply *int) (err error) {
+func (apierSv1 *APIerSv1) GetThresholdProfileCount(ctx *context.Context, args *utils.TenantWithAPIOpts, reply *int) (err error) {
 	tnt := args.Tenant
 	if tnt == utils.EmptyString {
 		tnt = apierSv1.Config.GeneralCfg().DefaultTenant
@@ -124,7 +125,7 @@ func (apierSv1 *APIerSv1) GetThresholdProfileCount(args *utils.TenantWithAPIOpts
 }
 
 // SetThresholdProfile alters/creates a ThresholdProfile
-func (apierSv1 *APIerSv1) SetThresholdProfile(args *engine.ThresholdProfileWithAPIOpts, reply *string) error {
+func (apierSv1 *APIerSv1) SetThresholdProfile(ctx *context.Context, args *engine.ThresholdProfileWithAPIOpts, reply *string) error {
 	if missing := utils.MissingStructFields(args.ThresholdProfile, []string{utils.ID}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -150,7 +151,7 @@ func (apierSv1 *APIerSv1) SetThresholdProfile(args *engine.ThresholdProfileWithA
 }
 
 // RemoveThresholdProfile removes a specific Threshold Profile
-func (apierSv1 *APIerSv1) RemoveThresholdProfile(args *utils.TenantIDWithAPIOpts, reply *string) error {
+func (apierSv1 *APIerSv1) RemoveThresholdProfile(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *string) error {
 	if missing := utils.MissingStructFields(args, []string{utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -177,7 +178,7 @@ func (apierSv1 *APIerSv1) RemoveThresholdProfile(args *utils.TenantIDWithAPIOpts
 }
 
 // Ping .
-func (tSv1 *ThresholdSv1) Ping(ign *utils.CGREvent, reply *string) error {
+func (tSv1 *ThresholdSv1) Ping(ctx *context.Context, ign *utils.CGREvent, reply *string) error {
 	*reply = utils.Pong
 	return nil
 }

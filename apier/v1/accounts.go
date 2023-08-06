@@ -24,6 +24,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/guardian"
@@ -37,7 +38,7 @@ type AccountActionTiming struct {
 	NextExecTime time.Time // Next execution time
 }
 
-func (apierSv1 *APIerSv1) GetAccountActionPlan(attrs *utils.TenantAccount, reply *[]*AccountActionTiming) error {
+func (apierSv1 *APIerSv1) GetAccountActionPlan(ctx *context.Context, attrs *utils.TenantAccount, reply *[]*AccountActionTiming) error {
 	if missing := utils.MissingStructFields(attrs, []string{utils.AccountField}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(strings.Join(missing, ","), "")
 	}
@@ -88,7 +89,7 @@ type AttrRemoveActionTiming struct {
 }
 
 // Removes an ActionTimings or parts of it depending on filters being set
-func (apierSv1 *APIerSv1) RemoveActionTiming(attrs *AttrRemoveActionTiming, reply *string) (err error) {
+func (apierSv1 *APIerSv1) RemoveActionTiming(ctx *context.Context, attrs *AttrRemoveActionTiming, reply *string) (err error) {
 	if missing := utils.MissingStructFields(attrs, []string{"ActionPlanId"}); len(missing) != 0 { // Only mandatory ActionPlanId
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -142,7 +143,7 @@ func (apierSv1 *APIerSv1) RemoveActionTiming(attrs *AttrRemoveActionTiming, repl
 		if err != nil {
 			return err
 		}
-		if err := apierSv1.ConnMgr.Call(apierSv1.Config.ApierCfg().CachesConns, nil,
+		if err := apierSv1.ConnMgr.Call(context.TODO(), apierSv1.Config.ApierCfg().CachesConns,
 			utils.CacheSv1ReloadCache, &utils.AttrReloadCacheWithAPIOpts{
 				ActionPlanIDs: []string{attrs.ActionPlanId},
 			}, reply); err != nil {
@@ -154,7 +155,7 @@ func (apierSv1 *APIerSv1) RemoveActionTiming(attrs *AttrRemoveActionTiming, repl
 			}
 		}
 		if len(remAcntAPids) != 0 {
-			if err := apierSv1.ConnMgr.Call(apierSv1.Config.ApierCfg().CachesConns, nil,
+			if err := apierSv1.ConnMgr.Call(context.TODO(), apierSv1.Config.ApierCfg().CachesConns,
 				utils.CacheSv1ReloadCache, &utils.AttrReloadCacheWithAPIOpts{
 					AccountActionPlanIDs: remAcntAPids,
 				}, reply); err != nil {
@@ -178,7 +179,7 @@ func (apierSv1 *APIerSv1) RemoveActionTiming(attrs *AttrRemoveActionTiming, repl
 }
 
 // SetAccount adds a new account into dataDb. If already defined, returns success.
-func (apierSv1 *APIerSv1) SetAccount(attr *utils.AttrSetAccount, reply *string) (err error) {
+func (apierSv1 *APIerSv1) SetAccount(ctx *context.Context, attr *utils.AttrSetAccount, reply *string) (err error) {
 	if missing := utils.MissingStructFields(attr, []string{utils.AccountField}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -255,7 +256,7 @@ func (apierSv1 *APIerSv1) SetAccount(attr *utils.AttrSetAccount, reply *string) 
 				if err := apierSv1.DataManager.SetAccountActionPlans(accID, acntAPids, true); err != nil {
 					return err
 				}
-				return apierSv1.ConnMgr.Call(apierSv1.Config.ApierCfg().CachesConns, nil,
+				return apierSv1.ConnMgr.Call(context.TODO(), apierSv1.Config.ApierCfg().CachesConns,
 					utils.CacheSv1ReloadCache, &utils.AttrReloadCacheWithAPIOpts{
 						AccountActionPlanIDs: []string{accID},
 						ActionPlanIDs:        apIDs,
@@ -296,7 +297,7 @@ func (apierSv1 *APIerSv1) SetAccount(attr *utils.AttrSetAccount, reply *string) 
 	return nil
 }
 
-func (apierSv1 *APIerSv1) RemoveAccount(attr *utils.AttrRemoveAccount, reply *string) (err error) {
+func (apierSv1 *APIerSv1) RemoveAccount(ctx *context.Context, attr *utils.AttrRemoveAccount, reply *string) (err error) {
 	if missing := utils.MissingStructFields(attr, []string{utils.AccountField}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -343,7 +344,7 @@ func (apierSv1 *APIerSv1) RemoveAccount(attr *utils.AttrRemoveAccount, reply *st
 		err.Error() != utils.ErrNotFound.Error() {
 		return err
 	}
-	if err = apierSv1.ConnMgr.Call(apierSv1.Config.ApierCfg().CachesConns, nil,
+	if err = apierSv1.ConnMgr.Call(context.TODO(), apierSv1.Config.ApierCfg().CachesConns,
 		utils.CacheSv1ReloadCache, &utils.AttrReloadCacheWithAPIOpts{
 			AccountActionPlanIDs: []string{accID},
 		}, reply); err != nil {
@@ -353,7 +354,7 @@ func (apierSv1 *APIerSv1) RemoveAccount(attr *utils.AttrRemoveAccount, reply *st
 	return nil
 }
 
-func (apierSv1 *APIerSv1) GetAccounts(attr *utils.AttrGetAccounts, reply *[]any) error {
+func (apierSv1 *APIerSv1) GetAccounts(ctx *context.Context, attr *utils.AttrGetAccounts, reply *[]any) error {
 	tnt := attr.Tenant
 	if tnt == utils.EmptyString {
 		tnt = apierSv1.Config.GeneralCfg().DefaultTenant
@@ -401,7 +402,7 @@ func (apierSv1 *APIerSv1) GetAccounts(attr *utils.AttrGetAccounts, reply *[]any)
 }
 
 // GetAccount returns the account
-func (apierSv1 *APIerSv1) GetAccount(attr *utils.AttrGetAccount, reply *any) error {
+func (apierSv1 *APIerSv1) GetAccount(ctx *context.Context, attr *utils.AttrGetAccount, reply *any) error {
 	tnt := attr.Tenant
 	if tnt == utils.EmptyString {
 		tnt = apierSv1.Config.GeneralCfg().DefaultTenant
@@ -427,10 +428,10 @@ type AttrAddBalance struct {
 	Cdrlog          bool
 }
 
-func (apierSv1 *APIerSv1) AddBalance(attr *AttrAddBalance, reply *string) error {
+func (apierSv1 *APIerSv1) AddBalance(ctx *context.Context, attr *AttrAddBalance, reply *string) error {
 	return apierSv1.modifyBalance(utils.MetaTopUp, attr, reply)
 }
-func (apierSv1 *APIerSv1) DebitBalance(attr *AttrAddBalance, reply *string) error {
+func (apierSv1 *APIerSv1) DebitBalance(ctx *context.Context, attr *AttrAddBalance, reply *string) error {
 	return apierSv1.modifyBalance(utils.MetaDebit, attr, reply)
 }
 
@@ -511,7 +512,7 @@ func (apierSv1 *APIerSv1) modifyBalance(aType string, attr *AttrAddBalance, repl
 
 // SetBalance sets the balance for the given account
 // if the account is not already created it will create the account also
-func (apierSv1 *APIerSv1) SetBalance(attr *utils.AttrSetBalance, reply *string) (err error) {
+func (apierSv1 *APIerSv1) SetBalance(ctx *context.Context, attr *utils.AttrSetBalance, reply *string) (err error) {
 	if missing := utils.MissingStructFields(attr, []string{utils.AccountField, utils.BalanceType}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -589,7 +590,7 @@ func (apierSv1 *APIerSv1) SetBalance(attr *utils.AttrSetBalance, reply *string) 
 
 // SetBalances sets multiple balances for the given account
 // if the account is not already created it will create the account also
-func (apierSv1 *APIerSv1) SetBalances(attr *utils.AttrSetBalances, reply *string) (err error) {
+func (apierSv1 *APIerSv1) SetBalances(ctx *context.Context, attr *utils.AttrSetBalances, reply *string) (err error) {
 	if missing := utils.MissingStructFields(attr, []string{utils.AccountField, utils.BalancesFld}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -672,7 +673,7 @@ func (apierSv1 *APIerSv1) SetBalances(attr *utils.AttrSetBalances, reply *string
 }
 
 // RemoveBalances remove the matching balances for the account
-func (apierSv1 *APIerSv1) RemoveBalances(attr *utils.AttrSetBalance, reply *string) (err error) {
+func (apierSv1 *APIerSv1) RemoveBalances(ctx *context.Context, attr *utils.AttrSetBalance, reply *string) (err error) {
 	if missing := utils.MissingStructFields(attr, []string{utils.AccountField, utils.BalanceType}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -710,7 +711,7 @@ func (apierSv1 *APIerSv1) RemoveBalances(attr *utils.AttrSetBalance, reply *stri
 	return nil
 }
 
-func (apierSv1 *APIerSv1) GetAccountsCount(attr *utils.TenantWithAPIOpts, reply *int) (err error) {
+func (apierSv1 *APIerSv1) GetAccountsCount(ctx *context.Context, attr *utils.TenantWithAPIOpts, reply *int) (err error) {
 	tnt := attr.Tenant
 	if tnt == utils.EmptyString {
 		tnt = apierSv1.Config.GeneralCfg().DefaultTenant

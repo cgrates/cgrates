@@ -26,6 +26,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -784,7 +785,7 @@ func (tpr *TpReader) LoadAccountActionsFiltered(qriedAA *utils.TPAccountActions)
 				return err
 			}
 			var reply string
-			if err := connMgr.Call(tpr.cacheConns, nil,
+			if err := connMgr.Call(context.TODO(), tpr.cacheConns,
 				utils.CacheSv1ReloadCache, &utils.AttrReloadCacheWithAPIOpts{
 					AccountActionPlanIDs: []string{id},
 					ActionPlanIDs:        []string{accountAction.ActionPlanId},
@@ -891,7 +892,7 @@ func (tpr *TpReader) LoadAccountActionsFiltered(qriedAA *utils.TPAccountActions)
 				return errors.New(err.Error() + " (SetActionTriggers): " + accountAction.ActionTriggersId)
 			}
 			var reply string
-			if err := connMgr.Call(tpr.cacheConns, nil,
+			if err := connMgr.Call(context.TODO(), tpr.cacheConns,
 				utils.CacheSv1ReloadCache, &utils.AttrReloadCacheWithAPIOpts{
 					ActionTriggerIDs: []string{accountAction.ActionTriggersId},
 				}, &reply); err != nil {
@@ -1009,7 +1010,7 @@ func (tpr *TpReader) LoadAccountActionsFiltered(qriedAA *utils.TPAccountActions)
 				return err
 			}
 			var reply string
-			if err := connMgr.Call(tpr.cacheConns, nil,
+			if err := connMgr.Call(context.TODO(), tpr.cacheConns,
 				utils.CacheSv1ReloadCache, &utils.AttrReloadCacheWithAPIOpts{
 					ActionIDs: []string{k},
 				}, &reply); err != nil {
@@ -2340,7 +2341,7 @@ func CallCache(connMgr *ConnManager, cacheConns []string, caching string, args m
 		log.Print("Reloading cache")
 	}
 
-	if err = connMgr.Call(cacheConns, nil, method, cacheArgs, &reply); err != nil {
+	if err = connMgr.Call(context.TODO(), cacheConns, method, cacheArgs, &reply); err != nil {
 		return
 	}
 
@@ -2348,7 +2349,7 @@ func CallCache(connMgr *ConnManager, cacheConns []string, caching string, args m
 		if verbose {
 			log.Print("Clearing indexes")
 		}
-		if err = connMgr.Call(cacheConns, nil, utils.CacheSv1Clear, &utils.AttrCacheIDsWithAPIOpts{
+		if err = connMgr.Call(context.TODO(), cacheConns, utils.CacheSv1Clear, &utils.AttrCacheIDsWithAPIOpts{
 			APIOpts:  opts,
 			CacheIDs: cacheIDs,
 			Tenant:   tenant,
@@ -2371,7 +2372,7 @@ func (tpr *TpReader) ReloadScheduler(verbose bool) (err error) {
 	if verbose {
 		log.Print("Reloading scheduler")
 	}
-	if err = connMgr.Call(tpr.schedulerConns, nil, utils.SchedulerSv1Reload,
+	if err = connMgr.Call(context.TODO(), tpr.schedulerConns, utils.SchedulerSv1Reload,
 		new(utils.CGREvent), &reply); err != nil {
 		log.Printf("WARNING: Got error on scheduler reload: %s\n", err.Error())
 	}

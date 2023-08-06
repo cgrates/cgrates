@@ -19,11 +19,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
-	"context"
 	"fmt"
 	"strings"
 
 	"github.com/cgrates/baningo"
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/guardian"
 	"github.com/cgrates/cgrates/utils"
@@ -354,7 +354,7 @@ func (dm *DataManager) GetDestination(key string, cacheRead, cacheWrite bool, tr
 	dest, err = dm.dataDB.GetDestinationDrv(key, transactionID)
 	if err != nil {
 		if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaDestinations]; err == utils.ErrNotFound && itm.Remote {
-			if err = dm.connMgr.Call(config.CgrConfig().DataDbCfg().RmtConns, nil,
+			if err = dm.connMgr.Call(context.TODO(), config.CgrConfig().DataDbCfg().RmtConns,
 				utils.ReplicatorSv1GetDestination, &utils.StringWithAPIOpts{
 					Arg:    key,
 					Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
@@ -482,7 +482,7 @@ func (dm *DataManager) GetReverseDestination(prefix string,
 	ids, err = dm.dataDB.GetReverseDestinationDrv(prefix, transactionID)
 	if err != nil {
 		if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaReverseDestinations]; err == utils.ErrNotFound && itm.Remote {
-			if err = dm.connMgr.Call(config.CgrConfig().DataDbCfg().RmtConns, nil,
+			if err = dm.connMgr.Call(context.TODO(), config.CgrConfig().DataDbCfg().RmtConns,
 				utils.ReplicatorSv1GetReverseDestination, &utils.StringWithAPIOpts{
 					Arg:    prefix,
 					Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
@@ -569,7 +569,7 @@ func (dm *DataManager) GetAccount(id string) (acc *Account, err error) {
 			itm.Remote {
 			splt := utils.SplitConcatenatedKey(id)
 			tenant := utils.FirstNonEmpty(splt[0], config.CgrConfig().GeneralCfg().DefaultTenant)
-			if err = dm.connMgr.Call(config.CgrConfig().DataDbCfg().RmtConns, nil,
+			if err = dm.connMgr.Call(context.TODO(), config.CgrConfig().DataDbCfg().RmtConns,
 				utils.ReplicatorSv1GetAccount, &utils.StringWithAPIOpts{
 					Arg:    id,
 					Tenant: tenant,
@@ -652,7 +652,7 @@ func (dm *DataManager) GetFilter(tenant, id string, cacheRead, cacheWrite bool,
 		fltr, err = dm.DataDB().GetFilterDrv(tenant, id)
 		if err != nil {
 			if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaFilters]; err == utils.ErrNotFound && itm.Remote {
-				if err = dm.connMgr.Call(config.CgrConfig().DataDbCfg().RmtConns, nil, utils.ReplicatorSv1GetFilter,
+				if err = dm.connMgr.Call(context.TODO(), config.CgrConfig().DataDbCfg().RmtConns, utils.ReplicatorSv1GetFilter,
 					&utils.TenantIDWithAPIOpts{
 						TenantID: &utils.TenantID{Tenant: tenant, ID: id},
 						APIOpts: utils.GenerateDBItemOpts(itm.APIKey, itm.RouteID, utils.EmptyString,
@@ -780,7 +780,7 @@ func (dm *DataManager) GetThreshold(tenant, id string,
 	th, err = dm.dataDB.GetThresholdDrv(tenant, id)
 	if err != nil {
 		if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaThresholds]; err == utils.ErrNotFound && itm.Remote {
-			if err = dm.connMgr.Call(config.CgrConfig().DataDbCfg().RmtConns, nil,
+			if err = dm.connMgr.Call(context.TODO(), config.CgrConfig().DataDbCfg().RmtConns,
 				utils.ReplicatorSv1GetThreshold, &utils.TenantIDWithAPIOpts{
 					TenantID: &utils.TenantID{Tenant: tenant, ID: id},
 					APIOpts: utils.GenerateDBItemOpts(itm.APIKey, itm.RouteID, utils.EmptyString,
@@ -868,7 +868,7 @@ func (dm *DataManager) GetThresholdProfile(tenant, id string, cacheRead, cacheWr
 	th, err = dm.dataDB.GetThresholdProfileDrv(tenant, id)
 	if err != nil {
 		if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaThresholdProfiles]; err == utils.ErrNotFound && itm.Remote {
-			if err = dm.connMgr.Call(config.CgrConfig().DataDbCfg().RmtConns, nil,
+			if err = dm.connMgr.Call(context.TODO(), config.CgrConfig().DataDbCfg().RmtConns,
 				utils.ReplicatorSv1GetThresholdProfile,
 				&utils.TenantIDWithAPIOpts{
 					TenantID: &utils.TenantID{Tenant: tenant, ID: id},
@@ -1016,7 +1016,7 @@ func (dm *DataManager) GetStatQueue(tenant, id string,
 	sq, err = dm.dataDB.GetStatQueueDrv(tenant, id)
 	if err != nil {
 		if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaStatQueues]; err == utils.ErrNotFound && itm.Remote {
-			if err = dm.connMgr.Call(config.CgrConfig().DataDbCfg().RmtConns, nil, utils.ReplicatorSv1GetStatQueue,
+			if err = dm.connMgr.Call(context.TODO(), config.CgrConfig().DataDbCfg().RmtConns, utils.ReplicatorSv1GetStatQueue,
 				&utils.TenantIDWithAPIOpts{
 					TenantID: &utils.TenantID{Tenant: tenant, ID: id},
 					APIOpts: utils.GenerateDBItemOpts(itm.APIKey, itm.RouteID, utils.EmptyString,
@@ -1120,7 +1120,7 @@ func (dm *DataManager) GetStatQueueProfile(tenant, id string, cacheRead, cacheWr
 	sqp, err = dm.dataDB.GetStatQueueProfileDrv(tenant, id)
 	if err != nil {
 		if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaStatQueueProfiles]; err == utils.ErrNotFound && itm.Remote {
-			if err = dm.connMgr.Call(config.CgrConfig().DataDbCfg().RmtConns, nil,
+			if err = dm.connMgr.Call(context.TODO(), config.CgrConfig().DataDbCfg().RmtConns,
 				utils.ReplicatorSv1GetStatQueueProfile,
 				&utils.TenantIDWithAPIOpts{
 					TenantID: &utils.TenantID{Tenant: tenant, ID: id},
@@ -1298,7 +1298,7 @@ func (dm *DataManager) GetTiming(id string, skipCache bool,
 	t, err = dm.dataDB.GetTimingDrv(id)
 	if err != nil {
 		if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaTimings]; err == utils.ErrNotFound && itm.Remote {
-			if err = dm.connMgr.Call(config.CgrConfig().DataDbCfg().RmtConns, nil, utils.ReplicatorSv1GetTiming,
+			if err = dm.connMgr.Call(context.TODO(), config.CgrConfig().DataDbCfg().RmtConns, utils.ReplicatorSv1GetTiming,
 				&utils.StringWithAPIOpts{
 					Arg:    id,
 					Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
@@ -1390,7 +1390,7 @@ func (dm *DataManager) GetResource(tenant, id string, cacheRead, cacheWrite bool
 	rs, err = dm.dataDB.GetResourceDrv(tenant, id)
 	if err != nil {
 		if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaResources]; err == utils.ErrNotFound && itm.Remote {
-			if err = dm.connMgr.Call(config.CgrConfig().DataDbCfg().RmtConns, nil,
+			if err = dm.connMgr.Call(context.TODO(), config.CgrConfig().DataDbCfg().RmtConns,
 				utils.ReplicatorSv1GetResource,
 				&utils.TenantIDWithAPIOpts{
 					TenantID: &utils.TenantID{Tenant: tenant, ID: id},
@@ -1480,7 +1480,7 @@ func (dm *DataManager) GetResourceProfile(tenant, id string, cacheRead, cacheWri
 	rp, err = dm.dataDB.GetResourceProfileDrv(tenant, id)
 	if err != nil {
 		if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaResourceProfile]; err == utils.ErrNotFound && itm.Remote {
-			if err = dm.connMgr.Call(config.CgrConfig().DataDbCfg().RmtConns, nil,
+			if err = dm.connMgr.Call(context.TODO(), config.CgrConfig().DataDbCfg().RmtConns,
 				utils.ReplicatorSv1GetResourceProfile, &utils.TenantIDWithAPIOpts{
 					TenantID: &utils.TenantID{Tenant: tenant, ID: id},
 					APIOpts: utils.GenerateDBItemOpts(itm.APIKey, itm.RouteID, utils.EmptyString,
@@ -1625,7 +1625,7 @@ func (dm *DataManager) GetActionTriggers(id string, skipCache bool,
 	attrs, err = dm.dataDB.GetActionTriggersDrv(id)
 	if err != nil {
 		if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaActionTriggers]; err == utils.ErrNotFound && itm.Remote {
-			if err = dm.connMgr.Call(config.CgrConfig().DataDbCfg().RmtConns, nil, utils.ReplicatorSv1GetActionTriggers,
+			if err = dm.connMgr.Call(context.TODO(), config.CgrConfig().DataDbCfg().RmtConns, utils.ReplicatorSv1GetActionTriggers,
 				&utils.StringWithAPIOpts{
 					Arg:    id,
 					Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
@@ -1729,7 +1729,7 @@ func (dm *DataManager) GetSharedGroup(key string, skipCache bool,
 	sg, err = dm.DataDB().GetSharedGroupDrv(key)
 	if err != nil {
 		if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaSharedGroups]; err == utils.ErrNotFound && itm.Remote {
-			if err = dm.connMgr.Call(config.CgrConfig().DataDbCfg().RmtConns, nil,
+			if err = dm.connMgr.Call(context.TODO(), config.CgrConfig().DataDbCfg().RmtConns,
 				utils.ReplicatorSv1GetSharedGroup, &utils.StringWithAPIOpts{
 					Arg:    key,
 					Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
@@ -1827,7 +1827,7 @@ func (dm *DataManager) GetActions(key string, skipCache bool, transactionID stri
 	as, err = dm.DataDB().GetActionsDrv(key)
 	if err != nil {
 		if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaActions]; err == utils.ErrNotFound && itm.Remote {
-			if err = dm.connMgr.Call(config.CgrConfig().DataDbCfg().RmtConns, nil,
+			if err = dm.connMgr.Call(context.TODO(), config.CgrConfig().DataDbCfg().RmtConns,
 				utils.ReplicatorSv1GetActions, &utils.StringWithAPIOpts{
 					Arg:    key,
 					Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
@@ -1927,7 +1927,7 @@ func (dm *DataManager) GetActionPlan(key string, cacheRead, cacheWrite bool, tra
 	ats, err = dm.dataDB.GetActionPlanDrv(key)
 	if err != nil {
 		if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaActionPlans]; err == utils.ErrNotFound && itm.Remote {
-			if err = dm.connMgr.Call(config.CgrConfig().DataDbCfg().RmtConns, nil,
+			if err = dm.connMgr.Call(context.TODO(), config.CgrConfig().DataDbCfg().RmtConns,
 				utils.ReplicatorSv1GetActionPlan, &utils.StringWithAPIOpts{
 					Arg:    key,
 					Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
@@ -2010,7 +2010,7 @@ func (dm *DataManager) GetAllActionPlans() (ats map[string]*ActionPlan, err erro
 	}
 	ats, err = dm.dataDB.GetAllActionPlansDrv()
 	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaActionPlans]; ((err == nil && len(ats) == 0) || err == utils.ErrNotFound) && itm.Remote {
-		err = dm.connMgr.Call(config.CgrConfig().DataDbCfg().RmtConns, nil,
+		err = dm.connMgr.Call(context.TODO(), config.CgrConfig().DataDbCfg().RmtConns,
 			utils.ReplicatorSv1GetAllActionPlans,
 			&utils.StringWithAPIOpts{
 				Arg:    utils.EmptyString,
@@ -2063,7 +2063,7 @@ func (dm *DataManager) GetAccountActionPlans(acntID string, cacheRead, cacheWrit
 	apIDs, err = dm.dataDB.GetAccountActionPlansDrv(acntID)
 	if err != nil {
 		if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaAccountActionPlans]; err == utils.ErrNotFound && itm.Remote {
-			if err = dm.connMgr.Call(config.CgrConfig().DataDbCfg().RmtConns, nil,
+			if err = dm.connMgr.Call(context.TODO(), config.CgrConfig().DataDbCfg().RmtConns,
 				utils.ReplicatorSv1GetAccountActionPlans,
 				&utils.StringWithAPIOpts{
 					Arg:    acntID,
@@ -2198,7 +2198,7 @@ func (dm *DataManager) GetRatingPlan(key string, skipCache bool,
 	rp, err = dm.DataDB().GetRatingPlanDrv(key)
 	if err != nil {
 		if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaRatingPlans]; err == utils.ErrNotFound && itm.Remote {
-			if err = dm.connMgr.Call(config.CgrConfig().DataDbCfg().RmtConns, nil,
+			if err = dm.connMgr.Call(context.TODO(), config.CgrConfig().DataDbCfg().RmtConns,
 				utils.ReplicatorSv1GetRatingPlan,
 				&utils.StringWithAPIOpts{
 					Arg:    key,
@@ -2290,7 +2290,7 @@ func (dm *DataManager) GetRatingProfile(key string, skipCache bool,
 	rpf, err = dm.DataDB().GetRatingProfileDrv(key)
 	if err != nil {
 		if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaRatingProfiles]; err == utils.ErrNotFound && itm.Remote {
-			if err = dm.connMgr.Call(config.CgrConfig().DataDbCfg().RmtConns, nil,
+			if err = dm.connMgr.Call(context.TODO(), config.CgrConfig().DataDbCfg().RmtConns,
 				utils.ReplicatorSv1GetRatingProfile,
 				&utils.StringWithAPIOpts{
 					Arg:    key,
@@ -2388,7 +2388,7 @@ func (dm *DataManager) GetRouteProfile(tenant, id string, cacheRead, cacheWrite 
 	rpp, err = dm.dataDB.GetRouteProfileDrv(tenant, id)
 	if err != nil {
 		if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaRouteProfiles]; err == utils.ErrNotFound && itm.Remote {
-			if err = dm.connMgr.Call(config.CgrConfig().DataDbCfg().RmtConns, nil, utils.ReplicatorSv1GetRouteProfile,
+			if err = dm.connMgr.Call(context.TODO(), config.CgrConfig().DataDbCfg().RmtConns, utils.ReplicatorSv1GetRouteProfile,
 				&utils.TenantIDWithAPIOpts{
 					TenantID: &utils.TenantID{Tenant: tenant, ID: id},
 					APIOpts: utils.GenerateDBItemOpts(itm.APIKey, itm.RouteID, utils.EmptyString,
@@ -2521,7 +2521,7 @@ func (dm *DataManager) GetAttributeProfile(tenant, id string, cacheRead, cacheWr
 	} else {
 		if attrPrfl, err = dm.dataDB.GetAttributeProfileDrv(tenant, id); err != nil {
 			if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaAttributeProfiles]; err == utils.ErrNotFound && itm.Remote {
-				if err = dm.connMgr.Call(config.CgrConfig().DataDbCfg().RmtConns, nil,
+				if err = dm.connMgr.Call(context.TODO(), config.CgrConfig().DataDbCfg().RmtConns,
 					utils.ReplicatorSv1GetAttributeProfile,
 					&utils.TenantIDWithAPIOpts{
 						TenantID: &utils.TenantID{Tenant: tenant, ID: id},
@@ -2659,7 +2659,7 @@ func (dm *DataManager) GetChargerProfile(tenant, id string, cacheRead, cacheWrit
 	cpp, err = dm.dataDB.GetChargerProfileDrv(tenant, id)
 	if err != nil {
 		if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaChargerProfiles]; err == utils.ErrNotFound && itm.Remote {
-			if err = dm.connMgr.Call(config.CgrConfig().DataDbCfg().RmtConns, nil,
+			if err = dm.connMgr.Call(context.TODO(), config.CgrConfig().DataDbCfg().RmtConns,
 				utils.ReplicatorSv1GetChargerProfile,
 				&utils.TenantIDWithAPIOpts{
 					TenantID: &utils.TenantID{Tenant: tenant, ID: id},
@@ -2786,7 +2786,7 @@ func (dm *DataManager) GetDispatcherProfile(tenant, id string, cacheRead, cacheW
 	dpp, err = dm.dataDB.GetDispatcherProfileDrv(tenant, id)
 	if err != nil {
 		if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaDispatcherProfiles]; err == utils.ErrDSPProfileNotFound && itm.Remote {
-			if err = dm.connMgr.Call(config.CgrConfig().DataDbCfg().RmtConns, nil,
+			if err = dm.connMgr.Call(context.TODO(), config.CgrConfig().DataDbCfg().RmtConns,
 				utils.ReplicatorSv1GetDispatcherProfile,
 				&utils.TenantIDWithAPIOpts{
 					TenantID: &utils.TenantID{Tenant: tenant, ID: id},
@@ -2919,7 +2919,7 @@ func (dm *DataManager) GetDispatcherHost(tenant, id string, cacheRead, cacheWrit
 	dH, err = dm.dataDB.GetDispatcherHostDrv(tenant, id)
 	if err != nil {
 		if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaDispatcherHosts]; err == utils.ErrDSPHostNotFound && itm.Remote {
-			if err = dm.connMgr.Call(config.CgrConfig().DataDbCfg().RmtConns, nil,
+			if err = dm.connMgr.Call(context.TODO(), config.CgrConfig().DataDbCfg().RmtConns,
 				utils.ReplicatorSv1GetDispatcherHost,
 				&utils.TenantIDWithAPIOpts{
 					TenantID: &utils.TenantID{Tenant: tenant, ID: id},
@@ -3006,7 +3006,7 @@ func (dm *DataManager) GetItemLoadIDs(itemIDPrefix string, cacheWrite bool) (loa
 	loadIDs, err = dm.DataDB().GetItemLoadIDsDrv(itemIDPrefix)
 	if err != nil {
 		if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaLoadIDs]; err == utils.ErrNotFound && itm.Remote {
-			if err = dm.connMgr.Call(config.CgrConfig().DataDbCfg().RmtConns, nil,
+			if err = dm.connMgr.Call(context.TODO(), config.CgrConfig().DataDbCfg().RmtConns,
 				utils.ReplicatorSv1GetItemLoadIDs,
 				&utils.StringWithAPIOpts{
 					Arg:    itemIDPrefix,
@@ -3101,7 +3101,7 @@ func (dm *DataManager) GetIndexes(idxItmType, tntCtx, idxKey string,
 	}
 	if indexes, err = dm.DataDB().GetIndexesDrv(idxItmType, tntCtx, idxKey); err != nil {
 		if itm := config.CgrConfig().DataDbCfg().Items[idxItmType]; err == utils.ErrNotFound && itm.Remote {
-			if err = dm.connMgr.Call(config.CgrConfig().DataDbCfg().RmtConns, nil,
+			if err = dm.connMgr.Call(context.TODO(), config.CgrConfig().DataDbCfg().RmtConns,
 				utils.ReplicatorSv1GetIndexes,
 				&utils.GetIndexesArg{
 					IdxItmType: idxItmType,
@@ -3245,7 +3245,7 @@ func (dm *DataManager) checkFilters(tenant string, ids []string) (err error) {
 			// in case we can not find it localy try to find it in the remote DB
 			if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaFilters]; err == utils.ErrNotFound && itm.Remote {
 				var fltr *Filter
-				err = dm.connMgr.Call(config.CgrConfig().DataDbCfg().RmtConns, nil, utils.ReplicatorSv1GetFilter,
+				err = dm.connMgr.Call(context.TODO(), config.CgrConfig().DataDbCfg().RmtConns, utils.ReplicatorSv1GetFilter,
 					&utils.TenantIDWithAPIOpts{
 						TenantID: &utils.TenantID{Tenant: tenant, ID: id},
 						APIOpts: utils.GenerateDBItemOpts(itm.APIKey, itm.RouteID, utils.EmptyString,

@@ -21,19 +21,18 @@ package services
 import (
 	"sync"
 
-	v1 "github.com/cgrates/cgrates/apier/v1"
+	"github.com/cgrates/birpc"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/cores"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/loaders"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/cgrates/rpcclient"
 )
 
 // NewLoaderService returns the Loader Service
 func NewLoaderService(cfg *config.CGRConfig, dm *DataDBService,
 	filterSChan chan *engine.FilterS, server *cores.Server,
-	internalLoaderSChan chan rpcclient.ClientConnector,
+	internalLoaderSChan chan birpc.ClientConnector,
 	connMgr *engine.ConnManager, anz *AnalyzerService,
 	srvDep map[string]*sync.WaitGroup) *LoaderService {
 	return &LoaderService{
@@ -59,15 +58,14 @@ type LoaderService struct {
 	stopChan    chan struct{}
 
 	ldrs     *loaders.LoaderService
-	rpc      *v1.LoaderSv1
-	connChan chan rpcclient.ClientConnector
+	connChan chan birpc.ClientConnector
 	connMgr  *engine.ConnManager
 	anz      *AnalyzerService
 	srvDep   map[string]*sync.WaitGroup
 }
 
 // Start should handle the sercive start
-func (ldrs *LoaderService) Start() (err error) {
+func (ldrs *LoaderService) Start() error {
 	if ldrs.IsRunning() {
 		return utils.ErrServiceAlreadyRunning
 	}
@@ -85,17 +83,22 @@ func (ldrs *LoaderService) Start() (err error) {
 		ldrs.cfg.GeneralCfg().DefaultTimezone, filterS, ldrs.connMgr)
 
 	if !ldrs.ldrs.Enabled() {
-		return
+		return nil
 	}
-	if err = ldrs.ldrs.ListenAndServe(ldrs.stopChan); err != nil {
-		return
+	if err := ldrs.ldrs.ListenAndServe(ldrs.stopChan); err != nil {
+		return err
 	}
-	ldrs.rpc = v1.NewLoaderSv1(ldrs.ldrs)
+	srv, err := engine.NewServiceWithName(ldrs.ldrs, utils.LoaderS, true)
+	if err != nil {
+		return err
+	}
 	if !ldrs.cfg.DispatcherSCfg().Enabled {
-		ldrs.server.RpcRegister(ldrs.rpc)
+		for _, s := range srv {
+			ldrs.server.RpcRegister(s)
+		}
 	}
-	ldrs.connChan <- ldrs.anz.GetInternalCodec(ldrs.rpc, utils.LoaderS)
-	return
+	ldrs.connChan <- ldrs.anz.GetInternalCodec(srv, utils.LoaderS)
+	return nil
 }
 
 // Reload handles the change of config
@@ -123,7 +126,6 @@ func (ldrs *LoaderService) Reload() (err error) {
 func (ldrs *LoaderService) Shutdown() (err error) {
 	ldrs.Lock()
 	ldrs.ldrs = nil
-	ldrs.rpc = nil
 	close(ldrs.stopChan)
 	<-ldrs.connChan
 	ldrs.Unlock()

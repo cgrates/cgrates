@@ -19,11 +19,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package v1
 
 import (
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
 )
 
 // SetTPDestination creates a new destination within a tariff plan
-func (apierSv1 *APIerSv1) SetTPDestination(attrs *utils.TPDestination, reply *string) error {
+func (apierSv1 *APIerSv1) SetTPDestination(ctx *context.Context, attrs *utils.TPDestination, reply *string) error {
 	if missing := utils.MissingStructFields(attrs, []string{utils.TPid, utils.ID, utils.Prefixes}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -40,7 +41,7 @@ type AttrGetTPDestination struct {
 }
 
 // GetTPDestination queries a specific destination
-func (apierSv1 *APIerSv1) GetTPDestination(attrs *AttrGetTPDestination, reply *utils.TPDestination) error {
+func (apierSv1 *APIerSv1) GetTPDestination(ctx *context.Context, attrs *AttrGetTPDestination, reply *utils.TPDestination) error {
 	if missing := utils.MissingStructFields(attrs, []string{utils.TPid, utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -63,7 +64,7 @@ type AttrGetTPDestinationIds struct {
 }
 
 // GetTPDestinationIDs queries destination identities on specific tariff plan.
-func (apierSv1 *APIerSv1) GetTPDestinationIDs(attrs *AttrGetTPDestinationIds, reply *[]string) error {
+func (apierSv1 *APIerSv1) GetTPDestinationIDs(ctx *context.Context, attrs *AttrGetTPDestinationIds, reply *[]string) error {
 	if missing := utils.MissingStructFields(attrs, []string{utils.TPid}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -80,7 +81,7 @@ func (apierSv1 *APIerSv1) GetTPDestinationIDs(attrs *AttrGetTPDestinationIds, re
 }
 
 // RemoveTPDestination removes specific Destination on Tariff plan
-func (apierSv1 *APIerSv1) RemoveTPDestination(attrs *AttrGetTPDestination, reply *string) error {
+func (apierSv1 *APIerSv1) RemoveTPDestination(ctx *context.Context, attrs *AttrGetTPDestination, reply *string) error {
 	if missing := utils.MissingStructFields(attrs, []string{utils.TPid, utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
