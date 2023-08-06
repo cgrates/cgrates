@@ -19,11 +19,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package v1
 
 import (
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
 )
 
 // SetTPAttributeProfile creates a new AttributeProfile within a tariff plan
-func (apierSv1 *APIerSv1) SetTPAttributeProfile(attrs *utils.TPAttributeProfile, reply *string) error {
+func (apierSv1 *APIerSv1) SetTPAttributeProfile(ctx *context.Context, attrs *utils.TPAttributeProfile, reply *string) error {
 	if missing := utils.MissingStructFields(attrs, []string{utils.TPid, utils.ID}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -39,7 +40,7 @@ func (apierSv1 *APIerSv1) SetTPAttributeProfile(attrs *utils.TPAttributeProfile,
 }
 
 // GetTPAttributeProfile queries specific AttributeProfile on Tariff plan
-func (apierSv1 *APIerSv1) GetTPAttributeProfile(attr *utils.TPTntID, reply *utils.TPAttributeProfile) error {
+func (apierSv1 *APIerSv1) GetTPAttributeProfile(ctx *context.Context, attr *utils.TPTntID, reply *utils.TPAttributeProfile) error {
 	if missing := utils.MissingStructFields(attr, []string{utils.TPid, utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -63,7 +64,7 @@ type AttrGetTPAttributeProfileIds struct {
 }
 
 // GetTPAttributeProfileIds queries attribute identities on specific tariff plan.
-func (apierSv1 *APIerSv1) GetTPAttributeProfileIds(attrs *AttrGetTPAttributeProfileIds, reply *[]string) error {
+func (apierSv1 *APIerSv1) GetTPAttributeProfileIds(ctx *context.Context, attrs *AttrGetTPAttributeProfileIds, reply *[]string) error {
 	if missing := utils.MissingStructFields(attrs, []string{utils.TPid}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -80,7 +81,7 @@ func (apierSv1 *APIerSv1) GetTPAttributeProfileIds(attrs *AttrGetTPAttributeProf
 }
 
 // RemoveTPAttributeProfile removes specific AttributeProfile on Tariff plan
-func (apierSv1 *APIerSv1) RemoveTPAttributeProfile(attrs *utils.TPTntID, reply *string) error {
+func (apierSv1 *APIerSv1) RemoveTPAttributeProfile(ctx *context.Context, attrs *utils.TPTntID, reply *string) error {
 	if missing := utils.MissingStructFields(attrs, []string{utils.TPid, utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}

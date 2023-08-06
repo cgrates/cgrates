@@ -21,6 +21,7 @@ package dispatchers
 import (
 	"testing"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/sessions"
 	"github.com/cgrates/cgrates/utils"
@@ -33,7 +34,7 @@ func TestDspSessionSv1PingNil(t *testing.T) {
 		Tenant: "tenant",
 	}
 	var reply *string
-	result := dspSrv.SessionSv1Ping(CGREvent, reply)
+	result := dspSrv.SessionSv1Ping(context.Background(), CGREvent, reply)
 	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
@@ -48,7 +49,7 @@ func TestDspSessionSv1PingErrorNil(t *testing.T) {
 		Tenant: "tenant",
 	}
 	var reply *string
-	result := dspSrv.SessionSv1Ping(CGREvent, reply)
+	result := dspSrv.SessionSv1Ping(context.Background(), CGREvent, reply)
 	expected := "MANDATORY_IE_MISSING: [ApiKey]"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
@@ -64,7 +65,7 @@ func TestDspSessionSv1AuthorizeEventNil(t *testing.T) {
 		},
 	}
 	var reply *sessions.V1AuthorizeReply
-	result := dspSrv.SessionSv1AuthorizeEvent(CGREvent, reply)
+	result := dspSrv.SessionSv1AuthorizeEvent(context.Background(), CGREvent, reply)
 	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
@@ -81,7 +82,7 @@ func TestDspSessionSv1AuthorizeEventErrorNil(t *testing.T) {
 		},
 	}
 	var reply *sessions.V1AuthorizeReply
-	result := dspSrv.SessionSv1AuthorizeEvent(CGREvent, reply)
+	result := dspSrv.SessionSv1AuthorizeEvent(context.Background(), CGREvent, reply)
 	expected := "MANDATORY_IE_MISSING: [ApiKey]"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
@@ -97,7 +98,7 @@ func TestDspSessionSv1AuthorizeEventWithDigestNil(t *testing.T) {
 		},
 	}
 	var reply *sessions.V1AuthorizeReplyWithDigest
-	result := dspSrv.SessionSv1AuthorizeEventWithDigest(CGREvent, reply)
+	result := dspSrv.SessionSv1AuthorizeEventWithDigest(context.Background(), CGREvent, reply)
 	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
@@ -114,7 +115,7 @@ func TestDspSessionSv1AuthorizeEventWithDigestErrorNil(t *testing.T) {
 		},
 	}
 	var reply *sessions.V1AuthorizeReplyWithDigest
-	result := dspSrv.SessionSv1AuthorizeEventWithDigest(CGREvent, reply)
+	result := dspSrv.SessionSv1AuthorizeEventWithDigest(context.Background(), CGREvent, reply)
 	expected := "MANDATORY_IE_MISSING: [ApiKey]"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
@@ -130,7 +131,7 @@ func TestDspSessionSv1InitiateSessionNil(t *testing.T) {
 		},
 	}
 	var reply *sessions.V1InitSessionReply
-	result := dspSrv.SessionSv1InitiateSession(CGREvent, reply)
+	result := dspSrv.SessionSv1InitiateSession(context.Background(), CGREvent, reply)
 	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
@@ -147,7 +148,7 @@ func TestDspSessionSv1InitiateSessionErrorNil(t *testing.T) {
 		},
 	}
 	var reply *sessions.V1InitSessionReply
-	result := dspSrv.SessionSv1InitiateSession(CGREvent, reply)
+	result := dspSrv.SessionSv1InitiateSession(context.Background(), CGREvent, reply)
 	expected := "MANDATORY_IE_MISSING: [ApiKey]"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
@@ -163,7 +164,7 @@ func TestDspSessionSv1InitiateSessionWithDigestNil(t *testing.T) {
 		},
 	}
 	var reply *sessions.V1InitReplyWithDigest
-	result := dspSrv.SessionSv1InitiateSessionWithDigest(CGREvent, reply)
+	result := dspSrv.SessionSv1InitiateSessionWithDigest(context.Background(), CGREvent, reply)
 	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
@@ -180,7 +181,7 @@ func TestDspSessionSv1InitiateSessionWithDigestErrorNil(t *testing.T) {
 		},
 	}
 	var reply *sessions.V1InitReplyWithDigest
-	result := dspSrv.SessionSv1InitiateSessionWithDigest(CGREvent, reply)
+	result := dspSrv.SessionSv1InitiateSessionWithDigest(context.Background(), CGREvent, reply)
 	expected := "MANDATORY_IE_MISSING: [ApiKey]"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
@@ -196,7 +197,7 @@ func TestDspSessionSv1UpdateSessionNil(t *testing.T) {
 		},
 	}
 	var reply *sessions.V1UpdateSessionReply
-	result := dspSrv.SessionSv1UpdateSession(CGREvent, reply)
+	result := dspSrv.SessionSv1UpdateSession(context.Background(), CGREvent, reply)
 	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
@@ -213,7 +214,7 @@ func TestDspSessionSv1UpdateSessionErrorNil(t *testing.T) {
 		},
 	}
 	var reply *sessions.V1UpdateSessionReply
-	result := dspSrv.SessionSv1UpdateSession(CGREvent, reply)
+	result := dspSrv.SessionSv1UpdateSession(context.Background(), CGREvent, reply)
 	expected := "MANDATORY_IE_MISSING: [ApiKey]"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
@@ -227,7 +228,7 @@ func TestDspSessionSv1SyncSessionsNil(t *testing.T) {
 		Tenant: "tenant",
 	}
 	var reply *string
-	result := dspSrv.SessionSv1SyncSessions(CGREvent, reply)
+	result := dspSrv.SessionSv1SyncSessions(context.Background(), CGREvent, reply)
 	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
@@ -242,7 +243,7 @@ func TestDspSessionSv1SyncSessionsErrorNil(t *testing.T) {
 		Tenant: "tenant",
 	}
 	var reply *string
-	result := dspSrv.SessionSv1SyncSessions(CGREvent, reply)
+	result := dspSrv.SessionSv1SyncSessions(context.Background(), CGREvent, reply)
 	expected := "MANDATORY_IE_MISSING: [ApiKey]"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
@@ -258,7 +259,7 @@ func TestDspSessionSv1TerminateSessionNil(t *testing.T) {
 		},
 	}
 	var reply *string
-	result := dspSrv.SessionSv1TerminateSession(CGREvent, reply)
+	result := dspSrv.SessionSv1TerminateSession(context.Background(), CGREvent, reply)
 	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
@@ -275,7 +276,7 @@ func TestDspSessionSv1TerminateSessionErrorNil(t *testing.T) {
 		},
 	}
 	var reply *string
-	result := dspSrv.SessionSv1TerminateSession(CGREvent, reply)
+	result := dspSrv.SessionSv1TerminateSession(context.Background(), CGREvent, reply)
 	expected := "MANDATORY_IE_MISSING: [ApiKey]"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
@@ -289,7 +290,7 @@ func TestDspSessionSv1ProcessCDRNil(t *testing.T) {
 		Tenant: "tenant",
 	}
 	var reply *string
-	result := dspSrv.SessionSv1ProcessCDR(CGREvent, reply)
+	result := dspSrv.SessionSv1ProcessCDR(context.Background(), CGREvent, reply)
 	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
@@ -304,7 +305,7 @@ func TestDspSessionSv1ProcessCDRErrorNil(t *testing.T) {
 		Tenant: "tenant",
 	}
 	var reply *string
-	result := dspSrv.SessionSv1ProcessCDR(CGREvent, reply)
+	result := dspSrv.SessionSv1ProcessCDR(context.Background(), CGREvent, reply)
 	expected := "MANDATORY_IE_MISSING: [ApiKey]"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
@@ -320,7 +321,7 @@ func TestDspSessionSv1ProcessMessageNil(t *testing.T) {
 		},
 	}
 	var reply *sessions.V1ProcessMessageReply
-	result := dspSrv.SessionSv1ProcessMessage(CGREvent, reply)
+	result := dspSrv.SessionSv1ProcessMessage(context.Background(), CGREvent, reply)
 	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
@@ -337,7 +338,7 @@ func TestDspSessionSv1ProcessMessageErrorNil(t *testing.T) {
 		},
 	}
 	var reply *sessions.V1ProcessMessageReply
-	result := dspSrv.SessionSv1ProcessMessage(CGREvent, reply)
+	result := dspSrv.SessionSv1ProcessMessage(context.Background(), CGREvent, reply)
 	expected := "MANDATORY_IE_MISSING: [ApiKey]"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
@@ -353,7 +354,7 @@ func TestDspSessionSv1ProcessEventNil(t *testing.T) {
 		},
 	}
 	var reply *sessions.V1ProcessEventReply
-	result := dspSrv.SessionSv1ProcessEvent(CGREvent, reply)
+	result := dspSrv.SessionSv1ProcessEvent(context.Background(), CGREvent, reply)
 	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
@@ -370,7 +371,7 @@ func TestDspSessionSv1ProcessEventErrorNil(t *testing.T) {
 		},
 	}
 	var reply *sessions.V1ProcessEventReply
-	result := dspSrv.SessionSv1ProcessEvent(CGREvent, reply)
+	result := dspSrv.SessionSv1ProcessEvent(context.Background(), CGREvent, reply)
 	expected := "MANDATORY_IE_MISSING: [ApiKey]"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
@@ -386,7 +387,7 @@ func TestDspSessionSv1GetCostNil(t *testing.T) {
 		},
 	}
 	var reply *sessions.V1GetCostReply
-	result := dspSrv.SessionSv1GetCost(CGREvent, reply)
+	result := dspSrv.SessionSv1GetCost(context.Background(), CGREvent, reply)
 	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
@@ -403,7 +404,7 @@ func TestDspSessionSv1GetCostErrorNil(t *testing.T) {
 		},
 	}
 	var reply *sessions.V1GetCostReply
-	result := dspSrv.SessionSv1GetCost(CGREvent, reply)
+	result := dspSrv.SessionSv1GetCost(context.Background(), CGREvent, reply)
 	expected := "MANDATORY_IE_MISSING: [ApiKey]"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
@@ -417,7 +418,7 @@ func TestDspSessionSv1GetActiveSessionsNil(t *testing.T) {
 		Tenant: "tenant",
 	}
 	var reply *[]*sessions.ExternalSession
-	result := dspSrv.SessionSv1GetActiveSessions(CGREvent, reply)
+	result := dspSrv.SessionSv1GetActiveSessions(context.Background(), CGREvent, reply)
 	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
@@ -432,7 +433,7 @@ func TestDspSessionSv1GetActiveSessionsErrorNil(t *testing.T) {
 		Tenant: "tenant",
 	}
 	var reply *[]*sessions.ExternalSession
-	result := dspSrv.SessionSv1GetActiveSessions(CGREvent, reply)
+	result := dspSrv.SessionSv1GetActiveSessions(context.Background(), CGREvent, reply)
 	expected := "MANDATORY_IE_MISSING: [ApiKey]"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
@@ -446,7 +447,7 @@ func TestDspSessionSv1GetActiveSessionsCountNil(t *testing.T) {
 		Tenant: "tenant",
 	}
 	var reply *int
-	result := dspSrv.SessionSv1GetActiveSessionsCount(CGREvent, reply)
+	result := dspSrv.SessionSv1GetActiveSessionsCount(context.Background(), CGREvent, reply)
 	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
@@ -461,7 +462,7 @@ func TestDspSessionSv1GetActiveSessionsCountErrorNil(t *testing.T) {
 		Tenant: "tenant",
 	}
 	var reply *int
-	result := dspSrv.SessionSv1GetActiveSessionsCount(CGREvent, reply)
+	result := dspSrv.SessionSv1GetActiveSessionsCount(context.Background(), CGREvent, reply)
 	expected := "MANDATORY_IE_MISSING: [ApiKey]"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
@@ -475,7 +476,7 @@ func TestDspSessionSv1ForceDisconnectNil(t *testing.T) {
 		Tenant: "tenant",
 	}
 	var reply *string
-	result := dspSrv.SessionSv1ForceDisconnect(CGREvent, reply)
+	result := dspSrv.SessionSv1ForceDisconnect(context.Background(), CGREvent, reply)
 	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
@@ -490,7 +491,7 @@ func TestDspSessionSv1ForceDisconnectErrorNil(t *testing.T) {
 		Tenant: "tenant",
 	}
 	var reply *string
-	result := dspSrv.SessionSv1ForceDisconnect(CGREvent, reply)
+	result := dspSrv.SessionSv1ForceDisconnect(context.Background(), CGREvent, reply)
 	expected := "MANDATORY_IE_MISSING: [ApiKey]"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
@@ -504,7 +505,7 @@ func TestDspSessionSv1GetPassiveSessionsNil(t *testing.T) {
 		Tenant: "tenant",
 	}
 	var reply *[]*sessions.ExternalSession
-	result := dspSrv.SessionSv1GetPassiveSessions(CGREvent, reply)
+	result := dspSrv.SessionSv1GetPassiveSessions(context.Background(), CGREvent, reply)
 	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
@@ -519,7 +520,7 @@ func TestDspSessionSv1GetPassiveSessionsErrorNil(t *testing.T) {
 		Tenant: "tenant",
 	}
 	var reply *[]*sessions.ExternalSession
-	result := dspSrv.SessionSv1GetPassiveSessions(CGREvent, reply)
+	result := dspSrv.SessionSv1GetPassiveSessions(context.Background(), CGREvent, reply)
 	expected := "MANDATORY_IE_MISSING: [ApiKey]"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
@@ -533,7 +534,7 @@ func TestDspSessionSv1ReplicateSessionsNil(t *testing.T) {
 		Tenant: "tenant",
 	}
 	var reply *string
-	result := dspSrv.SessionSv1ReplicateSessions(CGREvent, reply)
+	result := dspSrv.SessionSv1ReplicateSessions(context.Background(), CGREvent, reply)
 	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
@@ -548,7 +549,7 @@ func TestDspSessionSv1ReplicateSessionsErrorNil(t *testing.T) {
 		Tenant: "tenant",
 	}
 	var reply *string
-	result := dspSrv.SessionSv1ReplicateSessions(CGREvent, reply)
+	result := dspSrv.SessionSv1ReplicateSessions(context.Background(), CGREvent, reply)
 	expected := "MANDATORY_IE_MISSING: [ApiKey]"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
@@ -562,7 +563,7 @@ func TestDspSessionSv1GetPassiveSessionsCountNil(t *testing.T) {
 		Tenant: "tenant",
 	}
 	var reply *int
-	result := dspSrv.SessionSv1GetPassiveSessionsCount(CGREvent, reply)
+	result := dspSrv.SessionSv1GetPassiveSessionsCount(context.Background(), CGREvent, reply)
 	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
@@ -577,7 +578,7 @@ func TestDspSessionSv1GetPassiveSessionsCountErrorNil(t *testing.T) {
 		Tenant: "tenant",
 	}
 	var reply *int
-	result := dspSrv.SessionSv1GetPassiveSessionsCount(CGREvent, reply)
+	result := dspSrv.SessionSv1GetPassiveSessionsCount(context.Background(), CGREvent, reply)
 	expected := "MANDATORY_IE_MISSING: [ApiKey]"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
@@ -591,7 +592,7 @@ func TestDspSessionSv1SetPassiveSessionNil(t *testing.T) {
 		Tenant: "tenant",
 	}
 	var reply *string
-	result := dspSrv.SessionSv1SetPassiveSession(CGREvent, reply)
+	result := dspSrv.SessionSv1SetPassiveSession(context.Background(), CGREvent, reply)
 	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
@@ -606,7 +607,7 @@ func TestDspSessionSv1SetPassiveSessionErrorNil(t *testing.T) {
 		Tenant: "tenant",
 	}
 	var reply *string
-	result := dspSrv.SessionSv1SetPassiveSession(CGREvent, reply)
+	result := dspSrv.SessionSv1SetPassiveSession(context.Background(), CGREvent, reply)
 	expected := "MANDATORY_IE_MISSING: [ApiKey]"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
@@ -620,7 +621,7 @@ func TestDspSessionSv1ActivateSessionsNil(t *testing.T) {
 		Tenant: "tenant",
 	}
 	var reply *string
-	result := dspSrv.SessionSv1ActivateSessions(CGREvent, reply)
+	result := dspSrv.SessionSv1ActivateSessions(context.Background(), CGREvent, reply)
 	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
@@ -635,7 +636,7 @@ func TestDspSessionSv1ActivateSessionsErrorNil(t *testing.T) {
 		Tenant: "tenant",
 	}
 	var reply *string
-	result := dspSrv.SessionSv1ActivateSessions(CGREvent, reply)
+	result := dspSrv.SessionSv1ActivateSessions(context.Background(), CGREvent, reply)
 	expected := "MANDATORY_IE_MISSING: [ApiKey]"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
@@ -649,7 +650,7 @@ func TestDspSessionSv1DeactivateSessionsNil(t *testing.T) {
 		Tenant: "tenant",
 	}
 	var reply *string
-	result := dspSrv.SessionSv1DeactivateSessions(CGREvent, reply)
+	result := dspSrv.SessionSv1DeactivateSessions(context.Background(), CGREvent, reply)
 	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
@@ -664,7 +665,7 @@ func TestDspSessionSv1DeactivateSessionsErrorNil(t *testing.T) {
 		Tenant: "tenant",
 	}
 	var reply *string
-	result := dspSrv.SessionSv1DeactivateSessions(CGREvent, reply)
+	result := dspSrv.SessionSv1DeactivateSessions(context.Background(), CGREvent, reply)
 	expected := "MANDATORY_IE_MISSING: [ApiKey]"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
@@ -676,7 +677,7 @@ func TestDspSessionSv1STIRAuthenticateNil(t *testing.T) {
 	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
 	CGREvent := &sessions.V1STIRAuthenticateArgs{}
 	var reply *string
-	result := dspSrv.SessionSv1STIRAuthenticate(CGREvent, reply)
+	result := dspSrv.SessionSv1STIRAuthenticate(context.Background(), CGREvent, reply)
 	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
@@ -689,7 +690,7 @@ func TestDspSessionSv1STIRAuthenticateErrorNil(t *testing.T) {
 	cgrCfg.DispatcherSCfg().AttributeSConns = []string{"test"}
 	CGREvent := &sessions.V1STIRAuthenticateArgs{}
 	var reply *string
-	result := dspSrv.SessionSv1STIRAuthenticate(CGREvent, reply)
+	result := dspSrv.SessionSv1STIRAuthenticate(context.Background(), CGREvent, reply)
 	expected := "MANDATORY_IE_MISSING: [ApiKey]"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
@@ -701,7 +702,7 @@ func TestDspSessionSv1STIRIdentityNil(t *testing.T) {
 	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
 	CGREvent := &sessions.V1STIRIdentityArgs{}
 	var reply *string
-	result := dspSrv.SessionSv1STIRIdentity(CGREvent, reply)
+	result := dspSrv.SessionSv1STIRIdentity(context.Background(), CGREvent, reply)
 	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
@@ -714,7 +715,7 @@ func TestDspSessionSv1STIRIdentityErrorNil(t *testing.T) {
 	cgrCfg.DispatcherSCfg().AttributeSConns = []string{"test"}
 	CGREvent := &sessions.V1STIRIdentityArgs{}
 	var reply *string
-	result := dspSrv.SessionSv1STIRIdentity(CGREvent, reply)
+	result := dspSrv.SessionSv1STIRIdentity(context.Background(), CGREvent, reply)
 	expected := "MANDATORY_IE_MISSING: [ApiKey]"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)

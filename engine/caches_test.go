@@ -24,10 +24,11 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc"
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/ltcache"
-	"github.com/cgrates/rpcclient"
 )
 
 func TestCachesReplicateRemove(t *testing.T) {
@@ -40,16 +41,16 @@ func TestCachesReplicateRemove(t *testing.T) {
 	}
 	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
 	dm := NewDataManager(db, cfg.CacheCfg(), nil)
-	clientconn := make(chan rpcclient.ClientConnector, 1)
+	clientconn := make(chan birpc.ClientConnector, 1)
 	clientconn <- &ccMock{
-		calls: map[string]func(args any, reply any) error{
-			utils.CacheSv1ReplicateRemove: func(args, reply any) error {
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.CacheSv1ReplicateRemove: func(ctx *context.Context, args, reply any) error {
 				*reply.(*string) = utils.OK
 				return nil
 			},
 		},
 	}
-	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	connMgr := NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicationConnsCfg): clientconn,
 	})
 	chS := CacheS{
@@ -79,17 +80,17 @@ func TestCacheSSetWithReplicate(t *testing.T) {
 	}
 	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
 	dm := NewDataManager(db, cfg.CacheCfg(), nil)
-	clientconn := make(chan rpcclient.ClientConnector, 1)
+	clientconn := make(chan birpc.ClientConnector, 1)
 	clientconn <- &ccMock{
-		calls: map[string]func(args any, reply any) error{
-			utils.CacheSv1ReplicateSet: func(args, reply any) error {
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.CacheSv1ReplicateSet: func(ctx *context.Context, args, reply any) error {
 
 				*reply.(*string) = "reply"
 				return nil
 			},
 		},
 	}
-	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	connMgr := NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicationConnsCfg): clientconn,
 	})
 	ltcache := ltcache.NewTransCache(map[string]*ltcache.CacheConfig{
@@ -141,13 +142,13 @@ func TestCacheSV1GetItemIDs(t *testing.T) {
 	}
 	reply := &[]string{}
 	exp := &[]string{"itemID"}
-	if err := chS.V1GetItemIDs(args, reply); err != nil {
+	if err := chS.V1GetItemIDs(context.Background(), args, reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(reply, exp) {
 		t.Errorf("expected %+v,received %+v", utils.ToJSON(exp), utils.ToJSON(reply))
 	}
 	tscache.Remove("cacheID", "itemID", true, utils.NonTransactional)
-	if err := chS.V1GetItemIDs(args, reply); err == nil || err != utils.ErrNotFound {
+	if err := chS.V1GetItemIDs(context.Background(), args, reply); err == nil || err != utils.ErrNotFound {
 		t.Error(err)
 	}
 }
@@ -183,7 +184,7 @@ func TestCacheSV1HasItem(t *testing.T) {
 		tCache: tscache,
 	}
 	reply := utils.BoolPointer(false)
-	if err := chS.V1HasItem(args, reply); err != nil {
+	if err := chS.V1HasItem(context.Background(), args, reply); err != nil {
 		t.Error(err)
 	}
 }
@@ -203,16 +204,16 @@ func TestCacheSV1GetItemWithRemote(t *testing.T) {
 			Remote: true,
 		},
 	}
-	clientconn := make(chan rpcclient.ClientConnector, 1)
+	clientconn := make(chan birpc.ClientConnector, 1)
 	clientconn <- &ccMock{
-		calls: map[string]func(args any, reply any) error{
-			utils.CacheSv1GetItem: func(args, reply any) error {
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.CacheSv1GetItem: func(ctx *context.Context, args, reply any) error {
 
 				return nil
 			},
 		},
 	}
-	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	connMgr := NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.RemoteConnsCfg): clientconn,
 	},
 	)
@@ -234,7 +235,7 @@ func TestCacheSV1GetItemWithRemote(t *testing.T) {
 	}
 	SetConnManager(connMgr)
 	var reply any = "str"
-	if err := chS.V1GetItemWithRemote(args, &reply); err != nil {
+	if err := chS.V1GetItemWithRemote(context.Background(), args, &reply); err != nil {
 		t.Error(err)
 	}
 }
@@ -268,7 +269,7 @@ func TestCacheSV1GetItem(t *testing.T) {
 		tCache: tscache,
 	}
 	var reply any
-	if err := chS.V1GetItem(args, &reply); err != nil {
+	if err := chS.V1GetItem(context.Background(), args, &reply); err != nil {
 		t.Error(err)
 	} else if val, cancast := reply.(string); cancast {
 		if val != "value" {
@@ -276,7 +277,7 @@ func TestCacheSV1GetItem(t *testing.T) {
 		}
 	}
 	tscache.Remove("cacheID", "itemID", true, utils.NonTransactional)
-	if err := chS.V1GetItem(args, &reply); err == nil || err != utils.ErrNotFound {
+	if err := chS.V1GetItem(context.Background(), args, &reply); err == nil || err != utils.ErrNotFound {
 		t.Error(err)
 	}
 }
@@ -319,7 +320,7 @@ func TestCacheSV1GetItemExpiryTime(t *testing.T) {
 	reply := now
 	loc, _ := time.LoadLocation("EST")
 	exp := now.Add(30 * time.Minute).In(loc).Minute()
-	if err := chS.V1GetItemExpiryTime(args, &reply); err != nil {
+	if err := chS.V1GetItemExpiryTime(context.Background(), args, &reply); err != nil {
 		t.Error(err)
 	} else if reply.Minute() != exp {
 		t.Errorf("expected %+v,received %+v", exp, reply)
@@ -356,7 +357,7 @@ func TestCacheSV1RemoveItem(t *testing.T) {
 		tCache: tscache,
 	}
 	var reply string
-	if err := chS.V1RemoveItem(args, &reply); err != nil {
+	if err := chS.V1RemoveItem(context.Background(), args, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf("expected %v,received %v", utils.OK, reply)
@@ -418,7 +419,7 @@ func TestCacheSV1RemoveItems(t *testing.T) {
 
 	reply := "error"
 
-	if err := chS.V1RemoveItems(args, &reply); err != nil {
+	if err := chS.V1RemoveItems(context.Background(), args, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf("expected %v,received %v", utils.OK, reply)
@@ -467,7 +468,7 @@ func TestCacheSV1Clear(t *testing.T) {
 		tCache: tscache,
 	}
 	reply := "error"
-	if err := chS.V1Clear(args, &reply); err != nil {
+	if err := chS.V1Clear(context.Background(), args, &reply); err != nil {
 		t.Error(err)
 	}
 }
@@ -501,7 +502,7 @@ func TestCacheSV1ReplicateSet(t *testing.T) {
 		tCache: tscache,
 	}
 	reply := "reply"
-	if err := chS.V1ReplicateSet(args, &reply); err != nil {
+	if err := chS.V1ReplicateSet(context.Background(), args, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf("expected %+v,received %+v", utils.OK, reply)
@@ -567,7 +568,7 @@ func TestCacheSV1GetCacheStats(t *testing.T) {
 		"cacheID2": {Items: 1, Groups: 0},
 		"cacheID3": {Items: 1, Groups: 0},
 	}
-	if err := chS.V1GetCacheStats(args, &reply); err != nil {
+	if err := chS.V1GetCacheStats(context.Background(), args, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(reply, exp) {
 		t.Errorf("expected %v,received %v", utils.ToJSON(reply), utils.ToJSON(exp))
@@ -623,13 +624,13 @@ func TestV1PrecacheStatus(t *testing.T) {
 	exp := map[string]string{
 		utils.CacheFilters: utils.MetaPrecaching,
 	}
-	if err := chS.V1PrecacheStatus(args, &reply); err != nil {
+	if err := chS.V1PrecacheStatus(context.Background(), args, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(exp, reply) {
 		t.Errorf("expected %+v,received %+v", exp, reply)
 	}
 	args.CacheIDs = []string{}
-	if err := chS.V1PrecacheStatus(args, &reply); err == nil {
+	if err := chS.V1PrecacheStatus(context.Background(), args, &reply); err == nil {
 		t.Error(err)
 	}
 }
@@ -663,7 +664,7 @@ func TestCacheSV1HasGroup(t *testing.T) {
 	}
 
 	var reply bool
-	if err := chS.V1HasGroup(args, &reply); err != nil {
+	if err := chS.V1HasGroup(context.Background(), args, &reply); err != nil {
 		t.Error(err)
 	} else if !reply {
 		t.Error("expected true,received false")
@@ -700,7 +701,7 @@ func TestCacheSV1HasGroupItemIDs(t *testing.T) {
 	}
 	var reply []string
 	exp := []string{"itemId"}
-	if err := chS.V1GetGroupItemIDs(args, &reply); err != nil {
+	if err := chS.V1GetGroupItemIDs(context.Background(), args, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(exp, reply) {
 		t.Errorf("expected %+v,received %+v", exp, reply)
@@ -737,7 +738,7 @@ func TestV1RemoveGroup(t *testing.T) {
 	}
 	var reply string
 
-	if err := chS.V1RemoveGroup(args, &reply); err != nil {
+	if err := chS.V1RemoveGroup(context.Background(), args, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf("expected %v,received %v", utils.OK, reply)
@@ -777,7 +778,7 @@ func TestCacheSV1ReplicateRemove(t *testing.T) {
 	}
 	var reply string
 
-	if err := chS.V1ReplicateRemove(args, &reply); err != nil {
+	if err := chS.V1ReplicateRemove(context.Background(), args, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf("expected %v,received %v", utils.OK, reply)
@@ -801,17 +802,17 @@ func TestNewCacheS(t *testing.T) {
 	}
 	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
 	dm := NewDataManager(db, cfg.CacheCfg(), nil)
-	clientconn := make(chan rpcclient.ClientConnector, 1)
+	clientconn := make(chan birpc.ClientConnector, 1)
 	clientconn <- &ccMock{
-		calls: map[string]func(args any, reply any) error{
-			utils.CacheSv1ReplicateRemove: func(args, reply any) error {
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.CacheSv1ReplicateRemove: func(ctx *context.Context, args, reply any) error {
 
 				*reply.(*string) = "reply"
 				return nil
 			},
 		},
 	}
-	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	connMgr := NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicationConnsCfg): clientconn,
 	})
 	expCacheS := &CacheS{}
@@ -913,16 +914,16 @@ func TestReplicateMultipleIDs(t *testing.T) {
 	}
 
 	Cache = NewCacheS(cfg, nil, nil)
-	connClient := make(chan rpcclient.ClientConnector, 1)
+	connClient := make(chan birpc.ClientConnector, 1)
 	connClient <- &ccMock{
-		calls: map[string]func(args any, reply any) error{
-			utils.CacheSv1ReloadCache: func(args, reply any) error {
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.CacheSv1ReloadCache: func(ctx *context.Context, args, reply any) error {
 				*reply.(*string) = "reply"
 				return nil
 			},
 		},
 	}
-	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	connMgr := NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches): connClient,
 	})
 	objType := "obj"
@@ -956,17 +957,17 @@ func TestCachesGetWithRemote(t *testing.T) {
 	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
 	dm := NewDataManager(db, cfg.CacheCfg(), nil)
 	chS := NewCacheS(cfg, dm, nil)
-	clientconn := make(chan rpcclient.ClientConnector, 1)
+	clientconn := make(chan birpc.ClientConnector, 1)
 	clientconn <- &ccMock{
-		calls: map[string]func(args any, reply any) error{
-			utils.CacheSv1GetItem: func(args, reply any) error {
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.CacheSv1GetItem: func(ctx *context.Context, args, reply any) error {
 				*reply.(*string) = utils.OK
 				return utils.ErrNotFound
 			},
 		},
 	}
 
-	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	connMgr := NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.RemoteConnsCfg): clientconn,
 	})
 	SetConnManager(connMgr)
@@ -1015,7 +1016,7 @@ func TestV1LoadCache(t *testing.T) {
 	}
 	chS := NewCacheS(cfg, dm, nil)
 	var reply string
-	if err := chS.V1LoadCache(attr, &reply); err != nil {
+	if err := chS.V1LoadCache(context.Background(), attr, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf("reply should  be %v", utils.OK)

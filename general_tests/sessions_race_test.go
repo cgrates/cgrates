@@ -26,12 +26,13 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc"
+	"github.com/cgrates/birpc/context"
 	v1 "github.com/cgrates/cgrates/apier/v1"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/sessions"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/cgrates/rpcclient"
 )
 
 var (
@@ -44,11 +45,11 @@ var (
 	resp    *engine.Responder
 )
 
-// this structure will iplement rpcclient.ClientConnector
+// this structure will iplement birpc.ClientConnector
 // and will read forever the Event map
 type raceConn struct{}
 
-func (_ raceConn) Call(serviceMethod string, args any, reply any) (err error) {
+func (_ raceConn) Call(_ *context.Context, serviceMethod string, args any, reply any) (err error) {
 	cgrev := args.(*utils.CGREvent)
 	for {
 		for k := range cgrev.Event {
@@ -77,11 +78,11 @@ func TestSessionSRace(t *testing.T) {
 
 	utils.Logger.SetLogLevel(7)
 	// connManager
-	raceChan := make(chan rpcclient.ClientConnector, 1)
-	chargerSChan := make(chan rpcclient.ClientConnector, 1)
-	respChan := make(chan rpcclient.ClientConnector, 1)
+	raceChan := make(chan birpc.ClientConnector, 1)
+	chargerSChan := make(chan birpc.ClientConnector, 1)
+	respChan := make(chan birpc.ClientConnector, 1)
 	raceChan <- new(raceConn)
-	connMgr = engine.NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	connMgr = engine.NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds): raceChan,
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers):   chargerSChan,
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResponder):  respChan,
@@ -131,52 +132,54 @@ func TestSessionSRace(t *testing.T) {
 
 	// the race2
 	rply := new(sessions.V1InitSessionReply)
-	if err = sS.BiRPCv1InitiateSession(nil, &sessions.V1InitSessionArgs{
-		InitSession:       true,
-		ProcessThresholds: true,
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "testSSv1ItProcessEventInitiateSession",
-			Event: map[string]any{
-				utils.Tenant:       "cgrates.org",
-				utils.ToR:          utils.MetaVoice,
-				utils.OriginID:     "testSSv1ItProcessEvent",
-				utils.RequestType:  utils.MetaPrepaid,
-				utils.AccountField: "1001",
-				// utils.RatingSubject: "*zero1ms",
-				// utils.CGRDebitInterval: 10,
-				utils.Destination: "1002",
-				utils.SetupTime:   time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
-				utils.AnswerTime:  time.Date(2018, time.January, 7, 16, 60, 10, 0, time.UTC),
-				utils.Usage:       0,
+	if err = sS.BiRPCv1InitiateSession(context.Background(),
+		&sessions.V1InitSessionArgs{
+			InitSession:       true,
+			ProcessThresholds: true,
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "testSSv1ItProcessEventInitiateSession",
+				Event: map[string]any{
+					utils.Tenant:       "cgrates.org",
+					utils.ToR:          utils.MetaVoice,
+					utils.OriginID:     "testSSv1ItProcessEvent",
+					utils.RequestType:  utils.MetaPrepaid,
+					utils.AccountField: "1001",
+					// utils.RatingSubject: "*zero1ms",
+					// utils.CGRDebitInterval: 10,
+					utils.Destination: "1002",
+					utils.SetupTime:   time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
+					utils.AnswerTime:  time.Date(2018, time.January, 7, 16, 60, 10, 0, time.UTC),
+					utils.Usage:       0,
+				},
 			},
-		},
-	}, rply); err != utils.ErrPartiallyExecuted {
+		}, rply); err != utils.ErrPartiallyExecuted {
 		t.Fatal(err)
 	}
 	// the race1
 	rply2 := new(sessions.V1ProcessEventReply)
-	if err = sS.BiRPCv1ProcessEvent(nil, &sessions.V1ProcessEventArgs{
-		Flags: []string{utils.ConcatenatedKey(utils.MetaRALs, utils.MetaInitiate),
-			utils.MetaThresholds},
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "testSSv1ItProcessEventInitiateSession",
-			Event: map[string]any{
-				utils.Tenant:       "cgrates.org",
-				utils.ToR:          utils.MetaVoice,
-				utils.OriginID:     "testSSv1ItProcessEvent",
-				utils.RequestType:  utils.MetaPrepaid,
-				utils.AccountField: "1001",
-				// utils.RatingSubject: "*zero1ms",
-				// utils.CGRDebitInterval: 10,
-				utils.Destination: "1002",
-				utils.SetupTime:   time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
-				utils.AnswerTime:  time.Date(2018, time.January, 7, 16, 60, 10, 0, time.UTC),
-				utils.Usage:       0,
+	if err = sS.BiRPCv1ProcessEvent(context.Background(),
+		&sessions.V1ProcessEventArgs{
+			Flags: []string{utils.ConcatenatedKey(utils.MetaRALs, utils.MetaInitiate),
+				utils.MetaThresholds},
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "testSSv1ItProcessEventInitiateSession",
+				Event: map[string]any{
+					utils.Tenant:       "cgrates.org",
+					utils.ToR:          utils.MetaVoice,
+					utils.OriginID:     "testSSv1ItProcessEvent",
+					utils.RequestType:  utils.MetaPrepaid,
+					utils.AccountField: "1001",
+					// utils.RatingSubject: "*zero1ms",
+					// utils.CGRDebitInterval: 10,
+					utils.Destination: "1002",
+					utils.SetupTime:   time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
+					utils.AnswerTime:  time.Date(2018, time.January, 7, 16, 60, 10, 0, time.UTC),
+					utils.Usage:       0,
+				},
 			},
-		},
-	}, rply2); err != utils.ErrPartiallyExecuted {
+		}, rply2); err != utils.ErrPartiallyExecuted {
 		t.Fatal(err)
 	}
 }

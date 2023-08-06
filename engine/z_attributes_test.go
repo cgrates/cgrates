@@ -23,6 +23,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -600,7 +601,7 @@ func TestAttributeProcessWithMultipleRuns1(t *testing.T) {
 		},
 	}
 	var reply AttrSProcessEventReply
-	if err := attrS.V1ProcessEvent(attrArgs, &reply); err != nil {
+	if err := attrS.V1ProcessEvent(context.Background(), attrArgs, &reply); err != nil {
 		t.Errorf("Error: %+v", err)
 	}
 	if !reflect.DeepEqual(eRply.MatchedProfiles, reply.MatchedProfiles) {
@@ -709,7 +710,7 @@ func TestAttributeProcessWithMultipleRuns2(t *testing.T) {
 		},
 	}
 	var reply AttrSProcessEventReply
-	if err := attrS.V1ProcessEvent(attrArgs, &reply); err != nil {
+	if err := attrS.V1ProcessEvent(context.Background(), attrArgs, &reply); err != nil {
 		t.Errorf("Error: %+v", err)
 	}
 	if !reflect.DeepEqual(eRply.MatchedProfiles, reply.MatchedProfiles) {
@@ -818,7 +819,7 @@ func TestAttributeProcessWithMultipleRuns3(t *testing.T) {
 		},
 	}
 	var reply AttrSProcessEventReply
-	if err := attrS.V1ProcessEvent(attrArgs, &reply); err != nil {
+	if err := attrS.V1ProcessEvent(context.Background(), attrArgs, &reply); err != nil {
 		t.Errorf("Error: %+v", err)
 	}
 	if !reflect.DeepEqual(eRply.MatchedProfiles, reply.MatchedProfiles) {
@@ -908,7 +909,7 @@ func TestAttributeProcessWithMultipleRuns4(t *testing.T) {
 		},
 	}
 	var reply AttrSProcessEventReply
-	if err := attrS.V1ProcessEvent(attrArgs, &reply); err != nil {
+	if err := attrS.V1ProcessEvent(context.Background(), attrArgs, &reply); err != nil {
 		t.Errorf("Error: %+v", err)
 	}
 	if !reflect.DeepEqual(eRply.MatchedProfiles, reply.MatchedProfiles) {
@@ -1020,7 +1021,7 @@ func TestAttributeMultipleProcessWithBlocker(t *testing.T) {
 		},
 	}
 	var reply AttrSProcessEventReply
-	if err := attrS.V1ProcessEvent(attrArgs, &reply); err != nil {
+	if err := attrS.V1ProcessEvent(context.Background(), attrArgs, &reply); err != nil {
 		t.Errorf("Error: %+v", err)
 	}
 	if !reflect.DeepEqual(eRply.MatchedProfiles, reply.MatchedProfiles) {
@@ -1129,7 +1130,7 @@ func TestAttributeMultipleProcessWithBlocker2(t *testing.T) {
 		},
 	}
 	var reply AttrSProcessEventReply
-	if err := attrS.V1ProcessEvent(attrArgs, &reply); err != nil {
+	if err := attrS.V1ProcessEvent(context.Background(), attrArgs, &reply); err != nil {
 		t.Errorf("Error: %+v", err)
 	}
 	if !reflect.DeepEqual(eRply.MatchedProfiles, reply.MatchedProfiles) {
@@ -1199,7 +1200,7 @@ func TestAttributeProcessValue(t *testing.T) {
 		},
 	}
 	var reply AttrSProcessEventReply
-	if err := attrS.V1ProcessEvent(attrArgs, &reply); err != nil {
+	if err := attrS.V1ProcessEvent(context.Background(), attrArgs, &reply); err != nil {
 		t.Errorf("Error: %+v", err)
 	}
 	if !reflect.DeepEqual(eRply.MatchedProfiles, reply.MatchedProfiles) {
@@ -1279,7 +1280,7 @@ func TestAttributeAttributeFilterIDs(t *testing.T) {
 		},
 	}
 	var reply AttrSProcessEventReply
-	if err := attrS.V1ProcessEvent(attrArgs, &reply); err != nil {
+	if err := attrS.V1ProcessEvent(context.Background(), attrArgs, &reply); err != nil {
 		t.Errorf("Error: %+v", err)
 	}
 	if !reflect.DeepEqual(eRply.MatchedProfiles, reply.MatchedProfiles) {
@@ -1351,7 +1352,7 @@ func TestAttributeProcessEventConstant(t *testing.T) {
 		},
 	}
 	var reply AttrSProcessEventReply
-	if err := attrS.V1ProcessEvent(attrArgs, &reply); err != nil {
+	if err := attrS.V1ProcessEvent(context.Background(), attrArgs, &reply); err != nil {
 		t.Errorf("Error: %+v", err)
 	}
 	if !reflect.DeepEqual(eRply.MatchedProfiles, reply.MatchedProfiles) {
@@ -1429,7 +1430,7 @@ func TestAttributeProcessEventVariable(t *testing.T) {
 		},
 	}
 	var reply AttrSProcessEventReply
-	if err := attrS.V1ProcessEvent(attrArgs, &reply); err != nil {
+	if err := attrS.V1ProcessEvent(context.Background(), attrArgs, &reply); err != nil {
 		t.Errorf("Error: %+v", err)
 	}
 	if !reflect.DeepEqual(eRply.MatchedProfiles, reply.MatchedProfiles) {
@@ -1512,7 +1513,7 @@ func TestAttributeProcessEventComposed(t *testing.T) {
 		},
 	}
 	var reply AttrSProcessEventReply
-	if err := attrS.V1ProcessEvent(attrArgs, &reply); err != nil {
+	if err := attrS.V1ProcessEvent(context.Background(), attrArgs, &reply); err != nil {
 		t.Fatalf("Error: %+v", err)
 	}
 	if !reflect.DeepEqual(eRply.MatchedProfiles, reply.MatchedProfiles) {
@@ -1587,7 +1588,7 @@ func TestAttributeProcessEventSum(t *testing.T) {
 		},
 	}
 	var reply AttrSProcessEventReply
-	if err := attrS.V1ProcessEvent(attrArgs, &reply); err != nil {
+	if err := attrS.V1ProcessEvent(context.Background(), attrArgs, &reply); err != nil {
 		t.Errorf("Error: %+v", err)
 	}
 	if !reflect.DeepEqual(eRply.MatchedProfiles, reply.MatchedProfiles) {
@@ -1664,7 +1665,7 @@ func TestAttributeProcessEventUsageDifference(t *testing.T) {
 		},
 	}
 	var reply AttrSProcessEventReply
-	if err := attrS.V1ProcessEvent(attrArgs, &reply); err != nil {
+	if err := attrS.V1ProcessEvent(context.Background(), attrArgs, &reply); err != nil {
 		t.Errorf("Error: %+v", err)
 	}
 	if !reflect.DeepEqual(eRply.MatchedProfiles, reply.MatchedProfiles) {
@@ -1741,7 +1742,7 @@ func TestAttributeProcessEventValueExponent(t *testing.T) {
 		},
 	}
 	var reply AttrSProcessEventReply
-	if err := attrS.V1ProcessEvent(attrArgs, &reply); err != nil {
+	if err := attrS.V1ProcessEvent(context.Background(), attrArgs, &reply); err != nil {
 		t.Errorf("Error: %+v", err)
 	}
 	if !reflect.DeepEqual(eRply.MatchedProfiles, reply.MatchedProfiles) {
@@ -1807,7 +1808,7 @@ func BenchmarkAttributeProcessEventConstant(b *testing.B) {
 	var reply AttrSProcessEventReply
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		if err := attrS.V1ProcessEvent(attrArgs, &reply); err != nil {
+		if err := attrS.V1ProcessEvent(context.Background(), attrArgs, &reply); err != nil {
 			b.Errorf("Error: %+v", err)
 		}
 	}
@@ -1866,7 +1867,7 @@ func BenchmarkAttributeProcessEventVariable(b *testing.B) {
 	var reply AttrSProcessEventReply
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		if err := attrS.V1ProcessEvent(attrArgs, &reply); err != nil {
+		if err := attrS.V1ProcessEvent(context.Background(), attrArgs, &reply); err != nil {
 			b.Errorf("Error: %+v", err)
 		}
 	}
@@ -2686,7 +2687,7 @@ func TestAttributeIndexSelectsFalse(t *testing.T) {
 	}
 
 	var reply AttrSProcessEventReply
-	if err := attrS.V1ProcessEvent(attrArgs, &reply); err == nil || err != utils.ErrNotFound {
+	if err := attrS.V1ProcessEvent(context.Background(), attrArgs, &reply); err == nil || err != utils.ErrNotFound {
 		t.Errorf("Expected not found, reveiced: %+v", err)
 	}
 
@@ -2748,7 +2749,7 @@ func TestProcessAttributeWithSameWeight(t *testing.T) {
 		},
 	}
 	var rcv AttrSProcessEventReply
-	if err := attrS.V1ProcessEvent(ev, &rcv); err != nil {
+	if err := attrS.V1ProcessEvent(context.Background(), ev, &rcv); err != nil {
 		t.Errorf("Error: %+v", err)
 	}
 	clnEv := ev.Clone()
@@ -2848,7 +2849,7 @@ func TestAttributeMultipleProcessWithFiltersExists(t *testing.T) {
 		},
 	}
 	var reply AttrSProcessEventReply
-	if err := attrS.V1ProcessEvent(attrArgs, &reply); err != nil {
+	if err := attrS.V1ProcessEvent(context.Background(), attrArgs, &reply); err != nil {
 		t.Errorf("Error: %+v", err)
 	}
 	if !reflect.DeepEqual(eRply.MatchedProfiles, reply.MatchedProfiles) {
@@ -2945,7 +2946,7 @@ func TestAttributeMultipleProcessWithFiltersNotEmpty(t *testing.T) {
 		},
 	}
 	var reply AttrSProcessEventReply
-	if err := attrS.V1ProcessEvent(attrArgs, &reply); err != nil {
+	if err := attrS.V1ProcessEvent(context.Background(), attrArgs, &reply); err != nil {
 		t.Errorf("Error: %+v", err)
 	}
 	if !reflect.DeepEqual(eRply.MatchedProfiles, reply.MatchedProfiles) {
@@ -3005,7 +3006,7 @@ func TestAttributeMetaTenant(t *testing.T) {
 		},
 	}
 	var reply AttrSProcessEventReply
-	if err := attrS.V1ProcessEvent(args, &reply); err != nil {
+	if err := attrS.V1ProcessEvent(context.Background(), args, &reply); err != nil {
 		t.Fatal(err)
 	}
 	if !reflect.DeepEqual(eRply, reply) {
@@ -3112,7 +3113,7 @@ func TestAttributesPorcessEventMatchingProcessRuns(t *testing.T) {
 			},
 		},
 	}
-	if err := attr.V1ProcessEvent(args, reply); err != nil {
+	if err := attr.V1ProcessEvent(context.Background(), args, reply); err != nil {
 		t.Error(err)
 	} else if sort.Strings(reply.AlteredFields); !reflect.DeepEqual(expReply, reply) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expReply), utils.ToJSON(reply))
@@ -3193,7 +3194,7 @@ func TestAttributeMultipleProfileRunns(t *testing.T) {
 		},
 	}
 	var reply AttrSProcessEventReply
-	if err := attrS.V1ProcessEvent(args, &reply); err != nil {
+	if err := attrS.V1ProcessEvent(context.Background(), args, &reply); err != nil {
 		t.Errorf("Error: %+v", err)
 	}
 	sort.Strings(reply.AlteredFields)
@@ -3233,7 +3234,7 @@ func TestAttributeMultipleProfileRunns(t *testing.T) {
 		},
 	}
 	reply = AttrSProcessEventReply{}
-	if err := attrS.V1ProcessEvent(args, &reply); err != nil {
+	if err := attrS.V1ProcessEvent(context.Background(), args, &reply); err != nil {
 		t.Errorf("Error: %+v", err)
 	}
 	sort.Strings(reply.AlteredFields)

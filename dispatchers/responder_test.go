@@ -22,6 +22,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -32,7 +33,7 @@ func TestDspResponderPingEventNilEvent(t *testing.T) {
 	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
 	cgrCfg.DispatcherSCfg().AttributeSConns = []string{"test"}
 	var reply *string
-	result := dspSrv.ResponderPing(nil, reply)
+	result := dspSrv.ResponderPing(context.Background(), nil, reply)
 	expected := "MANDATORY_IE_MISSING: [ApiKey]"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
@@ -47,7 +48,7 @@ func TestDspResponderPingEventNil(t *testing.T) {
 		Tenant: "tenant",
 	}
 	var reply *string
-	result := dspSrv.ResponderPing(CGREvent, reply)
+	result := dspSrv.ResponderPing(context.Background(), CGREvent, reply)
 	expected := "MANDATORY_IE_MISSING: [ApiKey]"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
@@ -61,7 +62,7 @@ func TestDspResponderPingErrorNil(t *testing.T) {
 		Tenant: "tenant",
 	}
 	var reply *string
-	result := dspSrv.ResponderPing(CGREvent, reply)
+	result := dspSrv.ResponderPing(context.Background(), CGREvent, reply)
 	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
@@ -78,7 +79,7 @@ func TestDspResponderDebitNil(t *testing.T) {
 		},
 	}
 	var reply *engine.CallCost
-	result := dspSrv.ResponderDebit(CGREvent, reply)
+	result := dspSrv.ResponderDebit(context.Background(), CGREvent, reply)
 	expected := "MANDATORY_IE_MISSING: [ApiKey]"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
@@ -94,7 +95,7 @@ func TestDspResponderDebitErrorNil(t *testing.T) {
 		},
 	}
 	var reply *engine.CallCost
-	result := dspSrv.ResponderDebit(CGREvent, reply)
+	result := dspSrv.ResponderDebit(context.Background(), CGREvent, reply)
 	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
@@ -111,7 +112,7 @@ func TestDspResponderGetCostNil(t *testing.T) {
 		},
 	}
 	var reply *engine.CallCost
-	result := dspSrv.ResponderGetCost(CGREvent, reply)
+	result := dspSrv.ResponderGetCost(context.Background(), CGREvent, reply)
 	expected := "MANDATORY_IE_MISSING: [ApiKey]"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
@@ -127,7 +128,7 @@ func TestDspResponderGetCostErrorNil(t *testing.T) {
 		},
 	}
 	var reply *engine.CallCost
-	result := dspSrv.ResponderGetCost(CGREvent, reply)
+	result := dspSrv.ResponderGetCost(context.Background(), CGREvent, reply)
 	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
@@ -144,7 +145,7 @@ func TestDspResponderMaxDebitNil(t *testing.T) {
 		},
 	}
 	var reply *engine.CallCost
-	result := dspSrv.ResponderMaxDebit(CGREvent, reply)
+	result := dspSrv.ResponderMaxDebit(context.Background(), CGREvent, reply)
 	expected := "MANDATORY_IE_MISSING: [ApiKey]"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
@@ -160,7 +161,7 @@ func TestDspResponderMaxDebitErrorNil(t *testing.T) {
 		},
 	}
 	var reply *engine.CallCost
-	result := dspSrv.ResponderMaxDebit(CGREvent, reply)
+	result := dspSrv.ResponderMaxDebit(context.Background(), CGREvent, reply)
 	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
@@ -177,7 +178,7 @@ func TestDspResponderRefundIncrementsNil(t *testing.T) {
 		},
 	}
 	var reply *engine.Account
-	result := dspSrv.ResponderRefundIncrements(CGREvent, reply)
+	result := dspSrv.ResponderRefundIncrements(context.Background(), CGREvent, reply)
 	expected := "MANDATORY_IE_MISSING: [ApiKey]"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
@@ -193,7 +194,7 @@ func TestDspResponderRefundIncrementsErrorNil(t *testing.T) {
 		},
 	}
 	var reply *engine.Account
-	result := dspSrv.ResponderRefundIncrements(CGREvent, reply)
+	result := dspSrv.ResponderRefundIncrements(context.Background(), CGREvent, reply)
 	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
@@ -210,7 +211,7 @@ func TestDspResponderRefundRoundingNil(t *testing.T) {
 		},
 	}
 	var reply engine.Account
-	result := dspSrv.ResponderRefundRounding(CGREvent, &reply)
+	result := dspSrv.ResponderRefundRounding(context.Background(), CGREvent, &reply)
 	expected := "MANDATORY_IE_MISSING: [ApiKey]"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
@@ -226,7 +227,7 @@ func TestDspResponderRefundRoundingErrorNil(t *testing.T) {
 		},
 	}
 	var reply engine.Account
-	result := dspSrv.ResponderRefundRounding(CGREvent, &reply)
+	result := dspSrv.ResponderRefundRounding(context.Background(), CGREvent, &reply)
 	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
@@ -243,7 +244,7 @@ func TestDspResponderGetMaxSessionTimeNil(t *testing.T) {
 		},
 	}
 	var reply *time.Duration
-	result := dspSrv.ResponderGetMaxSessionTime(CGREvent, reply)
+	result := dspSrv.ResponderGetMaxSessionTime(context.Background(), CGREvent, reply)
 	expected := "MANDATORY_IE_MISSING: [ApiKey]"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
@@ -259,7 +260,7 @@ func TestDspResponderGetMaxSessionTimeErrorNil(t *testing.T) {
 		},
 	}
 	var reply *time.Duration
-	result := dspSrv.ResponderGetMaxSessionTime(CGREvent, reply)
+	result := dspSrv.ResponderGetMaxSessionTime(context.Background(), CGREvent, reply)
 	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
@@ -274,7 +275,7 @@ func TestDspResponderShutdownNil(t *testing.T) {
 		Tenant: "tenant",
 	}
 	var reply *string
-	result := dspSrv.ResponderShutdown(CGREvent, reply)
+	result := dspSrv.ResponderShutdown(context.Background(), CGREvent, reply)
 	expected := "MANDATORY_IE_MISSING: [ApiKey]"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
@@ -288,7 +289,7 @@ func TestDspResponderShutdownErrorNil(t *testing.T) {
 		Tenant: "tenant",
 	}
 	var reply *string
-	result := dspSrv.ResponderShutdown(CGREvent, reply)
+	result := dspSrv.ResponderShutdown(context.Background(), CGREvent, reply)
 	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
@@ -337,7 +338,7 @@ func TestDspResponderGetCostOnRatingPlans(t *testing.T) {
 		t.Error(err)
 	}
 	var reply map[string]any
-	if err := dsp.ResponderGetCostOnRatingPlans(args, &reply); err == nil {
+	if err := dsp.ResponderGetCostOnRatingPlans(context.Background(), args, &reply); err == nil {
 		t.Error(err)
 	}
 }
@@ -379,7 +380,7 @@ func TestDspResponderGetCostOnRatingPlans(t *testing.T) {
 // 		t.Error(err)
 // 	}
 // 	var reply map[string]any
-// 	if err := dsp.ResponderGetMaxSessionTimeOnAccounts(args, &reply); err == nil {
+// 	if err := dsp.ResponderGetMaxSessionTimeOnAccounts(context.Background(),args, &reply); err == nil {
 // 		t.Error(err)
 // 	}
 // }

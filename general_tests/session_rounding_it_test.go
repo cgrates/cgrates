@@ -21,11 +21,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package general_tests
 
 import (
-	"net/rpc"
 	"path"
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc"
+	"github.com/cgrates/birpc/context"
 	v1 "github.com/cgrates/cgrates/apier/v1"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
@@ -37,7 +38,7 @@ var (
 	sesRndCfgPath string
 	sesRndCfgDIR  string
 	sesRndCfg     *config.CGRConfig
-	sesRndRPC     *rpc.Client
+	sesRndRPC     *birpc.Client
 	sesRndAccount = "testAccount"
 	sesRndTenant  = "cgrates.org"
 
@@ -185,7 +186,7 @@ func testSesRndItRPCConn(t *testing.T) {
 
 func testSesRndItLoadRating(t *testing.T) {
 	var reply string
-	if err := sesRndRPC.Call(utils.APIerSv1SetTPRate, &utils.TPRateRALs{
+	if err := sesRndRPC.Call(context.Background(), utils.APIerSv1SetTPRate, &utils.TPRateRALs{
 		TPid: utils.TestSQL,
 		ID:   "RT1",
 		RateSlots: []*utils.RateSlot{
@@ -204,14 +205,14 @@ func testSesRndItLoadRating(t *testing.T) {
 			{DestinationId: utils.MetaAny, RateId: "RT1", RoundingMethod: utils.MetaRoundingUp, RoundingDecimals: 1},
 		},
 	}
-	if err := sesRndRPC.Call(utils.APIerSv1SetTPDestinationRate, dr, &reply); err != nil {
+	if err := sesRndRPC.Call(context.Background(), utils.APIerSv1SetTPDestinationRate, dr, &reply); err != nil {
 		t.Error("Got error on APIerSv1.SetTPDestinationRate: ", err.Error())
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply received when calling APIerSv1.SetTPDestinationRate: ", reply)
 	}
 	dr.ID = "DR_DOWN"
 	dr.DestinationRates[0].RoundingMethod = utils.MetaRoundingDown
-	if err := sesRndRPC.Call(utils.APIerSv1SetTPDestinationRate, dr, &reply); err != nil {
+	if err := sesRndRPC.Call(context.Background(), utils.APIerSv1SetTPDestinationRate, dr, &reply); err != nil {
 		t.Error("Got error on APIerSv1.SetTPDestinationRate: ", err.Error())
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply received when calling APIerSv1.SetTPDestinationRate: ", reply)
@@ -224,14 +225,14 @@ func testSesRndItLoadRating(t *testing.T) {
 			{DestinationRatesId: "DR_UP", TimingId: utils.MetaAny, Weight: 10},
 		},
 	}
-	if err := sesRndRPC.Call(utils.APIerSv1SetTPRatingPlan, rp, &reply); err != nil {
+	if err := sesRndRPC.Call(context.Background(), utils.APIerSv1SetTPRatingPlan, rp, &reply); err != nil {
 		t.Error("Got error on APIerSv1.SetTPRatingPlan: ", err.Error())
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply received when calling APIerSv1.SetTPRatingPlan: ", reply)
 	}
 	rp.ID = "RP_DOWN"
 	rp.RatingPlanBindings[0].DestinationRatesId = "DR_DOWN"
-	if err := sesRndRPC.Call(utils.APIerSv1SetTPRatingPlan, rp, &reply); err != nil {
+	if err := sesRndRPC.Call(context.Background(), utils.APIerSv1SetTPRatingPlan, rp, &reply); err != nil {
 		t.Error("Got error on APIerSv1.SetTPRatingPlan: ", err.Error())
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply received when calling APIerSv1.SetTPRatingPlan: ", reply)
@@ -248,26 +249,26 @@ func testSesRndItLoadRating(t *testing.T) {
 			FallbackSubjects: utils.EmptyString,
 		}},
 	}
-	if err := sesRndRPC.Call(utils.APIerSv1SetTPRatingProfile, rpf, &reply); err != nil {
+	if err := sesRndRPC.Call(context.Background(), utils.APIerSv1SetTPRatingProfile, rpf, &reply); err != nil {
 		t.Error("Got error on APIerSv1.SetTPRatingProfile: ", err.Error())
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply received when calling APIerSv1.SetTPRatingProfile: ", reply)
 	}
 	rpf.Subject = "down"
 	rpf.RatingPlanActivations[0].RatingPlanId = "RP_DOWN"
-	if err := sesRndRPC.Call(utils.APIerSv1SetTPRatingProfile, rpf, &reply); err != nil {
+	if err := sesRndRPC.Call(context.Background(), utils.APIerSv1SetTPRatingProfile, rpf, &reply); err != nil {
 		t.Error("Got error on APIerSv1.SetTPRatingProfile: ", err.Error())
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply received when calling APIerSv1.SetTPRatingProfile: ", reply)
 	}
 
-	if err := sesRndRPC.Call(utils.APIerSv1LoadRatingPlan, &v1.AttrLoadRatingPlan{TPid: utils.TestSQL}, &reply); err != nil {
+	if err := sesRndRPC.Call(context.Background(), utils.APIerSv1LoadRatingPlan, &v1.AttrLoadRatingPlan{TPid: utils.TestSQL}, &reply); err != nil {
 		t.Error("Got error on APIerSv1.LoadRatingPlan: ", err.Error())
 	} else if reply != utils.OK {
 		t.Error("Calling APIerSv1.LoadRatingPlan got reply: ", reply)
 	}
 
-	if err := sesRndRPC.Call(utils.APIerSv1LoadRatingProfile, &utils.TPRatingProfile{
+	if err := sesRndRPC.Call(context.Background(), utils.APIerSv1LoadRatingProfile, &utils.TPRatingProfile{
 		TPid: utils.TestSQL, LoadId: utils.TestSQL,
 		Tenant: sesRndTenant, Category: utils.Call}, &reply); err != nil {
 		t.Error("Got error on APIerSv1.LoadRatingProfile: ", err.Error())
@@ -280,7 +281,7 @@ func testSesRndItLoadRating(t *testing.T) {
 func testSesRndItAddCharger(t *testing.T) {
 	//add a default charger
 	var result string
-	if err := sesRndRPC.Call(utils.APIerSv1SetChargerProfile, &engine.ChargerProfile{
+	if err := sesRndRPC.Call(context.Background(), utils.APIerSv1SetChargerProfile, &engine.ChargerProfile{
 		Tenant:       sesRndTenant,
 		ID:           "default",
 		RunID:        utils.MetaDefault,
@@ -295,7 +296,7 @@ func testSesRndItAddCharger(t *testing.T) {
 
 func testSesRndItAddVoiceBalance(t *testing.T) {
 	var reply string
-	if err := sesRndRPC.Call(utils.APIerSv2SetBalance, utils.AttrSetBalance{
+	if err := sesRndRPC.Call(context.Background(), utils.APIerSv2SetBalance, utils.AttrSetBalance{
 		Tenant:      sesRndTenant,
 		Account:     sesRndAccount,
 		BalanceType: utils.MetaMonetary,
@@ -310,7 +311,7 @@ func testSesRndItAddVoiceBalance(t *testing.T) {
 	}
 
 	var acnt engine.Account
-	if err := sesRndRPC.Call(utils.APIerSv2GetAccount,
+	if err := sesRndRPC.Call(context.Background(), utils.APIerSv2GetAccount,
 		&utils.AttrGetAccount{
 			Tenant:  sesRndTenant,
 			Account: sesRndAccount,
@@ -325,7 +326,7 @@ func testSesRndItAddVoiceBalance(t *testing.T) {
 
 func testSesRndItPrepareCDRs(t *testing.T) {
 	var reply sessions.V1InitSessionReply
-	if err := sesRndRPC.Call(utils.SessionSv1InitiateSession,
+	if err := sesRndRPC.Call(context.Background(), utils.SessionSv1InitiateSession,
 		&sessions.V1InitSessionArgs{
 			InitSession: true,
 			CGREvent:    sesRndCgrEv,
@@ -338,7 +339,7 @@ func testSesRndItPrepareCDRs(t *testing.T) {
 	time.Sleep(50 * time.Millisecond)
 
 	var rply string
-	if err := sesRndRPC.Call(utils.SessionSv1TerminateSession,
+	if err := sesRndRPC.Call(context.Background(), utils.SessionSv1TerminateSession,
 		&sessions.V1TerminateSessionArgs{
 			TerminateSession: true,
 			CGREvent:         sesRndCgrEv,
@@ -348,7 +349,7 @@ func testSesRndItPrepareCDRs(t *testing.T) {
 		t.Errorf("Unexpected reply: %s", rply)
 	}
 
-	if err := sesRndRPC.Call(utils.SessionSv1ProcessCDR,
+	if err := sesRndRPC.Call(context.Background(), utils.SessionSv1ProcessCDR,
 		sesRndCgrEv, &rply); err != nil {
 		t.Error(err)
 	} else if rply != utils.OK {
@@ -360,7 +361,7 @@ func testSesRndItPrepareCDRs(t *testing.T) {
 func testSesRndItCheckCdrs(t *testing.T) {
 	var cdrs []*engine.ExternalCDR
 	req := utils.RPCCDRsFilter{Accounts: []string{sesRndAccount}, OriginIDs: []string{utils.IfaceAsString(sesRndCgrEv.Event[utils.OriginID])}}
-	if err := sesRndRPC.Call(utils.APIerSv2GetCDRs, req, &cdrs); err != nil {
+	if err := sesRndRPC.Call(context.Background(), utils.APIerSv2GetCDRs, req, &cdrs); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(cdrs) != 1 {
 		t.Fatal("Wrong number of CDRs")
@@ -378,7 +379,7 @@ func testSesRndItCheckCdrs(t *testing.T) {
 		t.Errorf("Unexpected AccountSummary: %v", utils.ToJSON(cd.AccountSummary))
 	}
 	var acnt engine.Account
-	if err := sesRndRPC.Call(utils.APIerSv2GetAccount,
+	if err := sesRndRPC.Call(context.Background(), utils.APIerSv2GetAccount,
 		&utils.AttrGetAccount{
 			Tenant:  sesRndTenant,
 			Account: sesRndAccount,

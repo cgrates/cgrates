@@ -22,19 +22,19 @@ import (
 	"fmt"
 	"sync"
 
+	"github.com/cgrates/birpc"
 	v1 "github.com/cgrates/cgrates/apier/v1"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/cores"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/servmanager"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/cgrates/rpcclient"
 )
 
 // NewChargerService returns the Charger Service
 func NewChargerService(cfg *config.CGRConfig, dm *DataDBService,
 	cacheS *engine.CacheS, filterSChan chan *engine.FilterS, server *cores.Server,
-	internalChargerSChan chan rpcclient.ClientConnector, connMgr *engine.ConnManager,
+	internalChargerSChan chan birpc.ClientConnector, connMgr *engine.ConnManager,
 	anz *AnalyzerService, srvDep map[string]*sync.WaitGroup) servmanager.Service {
 	return &ChargerService{
 		connChan:    internalChargerSChan,
@@ -61,13 +61,13 @@ type ChargerService struct {
 
 	chrS     *engine.ChargerService
 	rpc      *v1.ChargerSv1
-	connChan chan rpcclient.ClientConnector
+	connChan chan birpc.ClientConnector
 	anz      *AnalyzerService
 	srvDep   map[string]*sync.WaitGroup
 }
 
 // Start should handle the sercive start
-func (chrS *ChargerService) Start() (err error) {
+func (chrS *ChargerService) Start() error {
 	if chrS.IsRunning() {
 		return utils.ErrServiceAlreadyRunning
 	}
@@ -85,12 +85,17 @@ func (chrS *ChargerService) Start() (err error) {
 	defer chrS.Unlock()
 	chrS.chrS = engine.NewChargerService(datadb, filterS, chrS.cfg, chrS.connMgr)
 	utils.Logger.Info(fmt.Sprintf("<%s> starting <%s> subsystem", utils.CoreS, utils.ChargerS))
-	cSv1 := v1.NewChargerSv1(chrS.chrS)
-	if !chrS.cfg.DispatcherSCfg().Enabled {
-		chrS.server.RpcRegister(cSv1)
+	srv, err := engine.NewServiceWithName(chrS.chrS, utils.ChargerS, true)
+	if err != nil {
+		return err
 	}
-	chrS.connChan <- chrS.anz.GetInternalCodec(cSv1, utils.ChargerS)
-	return
+	if !chrS.cfg.DispatcherSCfg().Enabled {
+		for _, s := range srv {
+			chrS.server.RpcRegister(s)
+		}
+	}
+	chrS.connChan <- chrS.anz.GetInternalCodec(srv, utils.ChargerS)
+	return nil
 }
 
 // Reload handles the change of config

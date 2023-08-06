@@ -22,13 +22,15 @@ package ers
 
 import (
 	"fmt"
-	"net/rpc"
 	"os"
 	"path"
 	"reflect"
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc/context"
+
+	"github.com/cgrates/birpc"
 	"github.com/cgrates/cgrates/utils"
 
 	"github.com/cgrates/cgrates/config"
@@ -39,7 +41,7 @@ var (
 	xmlCfgPath string
 	xmlCfgDIR  string
 	xmlCfg     *config.CGRConfig
-	xmlRPC     *rpc.Client
+	xmlRPC     *birpc.Client
 
 	xmlTests = []func(t *testing.T){
 		testCreateDirs,
@@ -115,7 +117,7 @@ func testXMLITLoadTPFromFolder(t *testing.T) {
 	attrs := &utils.AttrLoadTpFromFolder{
 		FolderPath: path.Join(*dataDir, "tariffplans", "testit")}
 	var loadInst utils.LoadInstance
-	if err := xmlRPC.Call(utils.APIerSv2LoadTariffPlanFromFolder,
+	if err := xmlRPC.Call(context.Background(), utils.APIerSv2LoadTariffPlanFromFolder,
 		attrs, &loadInst); err != nil {
 		t.Error(err)
 	}
@@ -270,12 +272,12 @@ func testXMLITHandleCdr1File(t *testing.T) {
 
 func testXmlITAnalyseCDRs(t *testing.T) {
 	var reply []*engine.ExternalCDR
-	if err := xmlRPC.Call(utils.APIerSv2GetCDRs, &utils.RPCCDRsFilter{}, &reply); err != nil {
+	if err := xmlRPC.Call(context.Background(), utils.APIerSv2GetCDRs, &utils.RPCCDRsFilter{}, &reply); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(reply) != 6 {
 		t.Error("Unexpected number of CDRs returned: ", len(reply))
 	}
-	if err := xmlRPC.Call(utils.APIerSv2GetCDRs, &utils.RPCCDRsFilter{DestinationPrefixes: []string{"+4915117174963"}}, &reply); err != nil {
+	if err := xmlRPC.Call(context.Background(), utils.APIerSv2GetCDRs, &utils.RPCCDRsFilter{DestinationPrefixes: []string{"+4915117174963"}}, &reply); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(reply) != 3 {
 		t.Error("Unexpected number of CDRs returned: ", len(reply))

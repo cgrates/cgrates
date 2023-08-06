@@ -21,13 +21,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package general_tests
 
 import (
-	"net/rpc"
 	"path"
 	"reflect"
 	"sort"
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc"
+	"github.com/cgrates/birpc/context"
 	v1 "github.com/cgrates/cgrates/apier/v1"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
@@ -39,7 +40,7 @@ var (
 	loadersIDBIdxCfgPath                       string
 	loadersIDBIdxCfgPathInternal               = path.Join(*dataDir, "conf", "samples", "loaders_indexes_internal_db")
 	loadersIDBIdxCfg, loadersIDBIdxCfgInternal *config.CGRConfig
-	loadersIDBIdxRPC, loadersIDBIdxRPCInternal *rpc.Client
+	loadersIDBIdxRPC, loadersIDBIdxRPCInternal *birpc.Client
 
 	LoadersIDBIdxTests = []func(t *testing.T){
 		testLoadersIDBIdxItLoadConfig,
@@ -111,7 +112,7 @@ func testLoadersIDBIdxItRPCConn(t *testing.T) {
 
 func testLoadersIDBIdxItLoad(t *testing.T) {
 	var loadInst utils.LoadInstance
-	if err := loadersIDBIdxRPCInternal.Call(utils.APIerSv2LoadTariffPlanFromFolder,
+	if err := loadersIDBIdxRPCInternal.Call(context.Background(), utils.APIerSv2LoadTariffPlanFromFolder,
 		&utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "tutorial")},
 		&loadInst); err != nil {
 		t.Error(err)
@@ -136,7 +137,7 @@ func testLoadersIDBIdxCheckAttributes(t *testing.T) {
 	}
 
 	var reply *engine.AttributeProfile
-	if err := loadersIDBIdxRPC.Call(utils.APIerSv1GetAttributeProfile,
+	if err := loadersIDBIdxRPC.Call(context.Background(), utils.APIerSv1GetAttributeProfile,
 		utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ATTR_1001_SIMPLEAUTH"}},
 		&reply); err != nil {
 		t.Error(err)
@@ -152,7 +153,7 @@ func testLoadersIDBIdxCheckAttributesIndexes(t *testing.T) {
 		"*string:*req.Account:1003:ATTR_1003_SIMPLEAUTH",
 	}
 	var indexes []string
-	if err := loadersIDBIdxRPC.Call(utils.APIerSv1GetFilterIndexes, &v1.AttrGetFilterIndexes{
+	if err := loadersIDBIdxRPC.Call(context.Background(), utils.APIerSv1GetFilterIndexes, &v1.AttrGetFilterIndexes{
 		ItemType: utils.MetaAttributes, Tenant: "cgrates.org", FilterType: utils.MetaString,
 		Context: "simpleauth"},
 		&indexes); err != nil {

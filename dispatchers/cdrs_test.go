@@ -21,6 +21,7 @@ package dispatchers
 import (
 	"testing"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -32,7 +33,7 @@ func TestDspCDRsV1PingError(t *testing.T) {
 	cgrCfg.DispatcherSCfg().AttributeSConns = []string{"test"}
 	CGREvent := &utils.CGREvent{}
 	var reply *string
-	result := dspSrv.CDRsV1Ping(CGREvent, reply)
+	result := dspSrv.CDRsV1Ping(context.Background(), CGREvent, reply)
 	expected := "MANDATORY_IE_MISSING: [ApiKey]"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
@@ -46,7 +47,7 @@ func TestDspCDRsV1PingNil(t *testing.T) {
 		Tenant: "tenant",
 	}
 	var reply *string
-	result := dspSrv.CDRsV1Ping(CGREvent, reply)
+	result := dspSrv.CDRsV1Ping(context.Background(), CGREvent, reply)
 	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
@@ -58,7 +59,7 @@ func TestDspCDRsV1PingNilError(t *testing.T) {
 	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
 	cgrCfg.DispatcherSCfg().AttributeSConns = []string{"test"}
 	var reply *string
-	result := dspSrv.CDRsV1Ping(nil, reply)
+	result := dspSrv.CDRsV1Ping(context.Background(), nil, reply)
 	expected := "MANDATORY_IE_MISSING: [ApiKey]"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
@@ -71,7 +72,7 @@ func TestDspCDRsV1GetCDRsError(t *testing.T) {
 	cgrCfg.DispatcherSCfg().AttributeSConns = []string{"test"}
 	CGREvent := &utils.RPCCDRsFilterWithAPIOpts{}
 	var reply *[]*engine.CDR
-	result := dspSrv.CDRsV1GetCDRs(CGREvent, reply)
+	result := dspSrv.CDRsV1GetCDRs(context.Background(), CGREvent, reply)
 	expected := "MANDATORY_IE_MISSING: [ApiKey]"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
@@ -85,7 +86,7 @@ func TestDspCDRsV1GetCDRsNil(t *testing.T) {
 		Tenant: "tenant",
 	}
 	var reply *[]*engine.CDR
-	result := dspSrv.CDRsV1GetCDRs(CGREvent, reply)
+	result := dspSrv.CDRsV1GetCDRs(context.Background(), CGREvent, reply)
 	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
@@ -98,7 +99,7 @@ func TestDspCDRsV1GetCDRsCountError(t *testing.T) {
 	cgrCfg.DispatcherSCfg().AttributeSConns = []string{"test"}
 	CGREvent := &utils.RPCCDRsFilterWithAPIOpts{}
 	var reply *int64
-	result := dspSrv.CDRsV1GetCDRsCount(CGREvent, reply)
+	result := dspSrv.CDRsV1GetCDRsCount(context.Background(), CGREvent, reply)
 	expected := "MANDATORY_IE_MISSING: [ApiKey]"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
@@ -112,7 +113,7 @@ func TestDspCDRsV1GetCDRsCountNil(t *testing.T) {
 		Tenant: "tenant",
 	}
 	var reply *int64
-	result := dspSrv.CDRsV1GetCDRsCount(CGREvent, reply)
+	result := dspSrv.CDRsV1GetCDRsCount(context.Background(), CGREvent, reply)
 	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
@@ -125,7 +126,7 @@ func TestDspCDRsV1RateCDRsError(t *testing.T) {
 	cgrCfg.DispatcherSCfg().AttributeSConns = []string{"test"}
 	CGREvent := &engine.ArgRateCDRs{}
 	var reply *string
-	result := dspSrv.CDRsV1RateCDRs(CGREvent, reply)
+	result := dspSrv.CDRsV1RateCDRs(context.Background(), CGREvent, reply)
 	expected := "MANDATORY_IE_MISSING: [ApiKey]"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
@@ -139,7 +140,7 @@ func TestDspCDRsV1RateCDRsNil(t *testing.T) {
 		Tenant: "tenant",
 	}
 	var reply *string
-	result := dspSrv.CDRsV1RateCDRs(CGREvent, reply)
+	result := dspSrv.CDRsV1RateCDRs(context.Background(), CGREvent, reply)
 	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
@@ -156,7 +157,7 @@ func TestDspCDRsV1ProcessExternalCDRError(t *testing.T) {
 		},
 	}
 	var reply *string
-	result := dspSrv.CDRsV1ProcessExternalCDR(CGREvent, reply)
+	result := dspSrv.CDRsV1ProcessExternalCDR(context.Background(), CGREvent, reply)
 	expected := "MANDATORY_IE_MISSING: [ApiKey]"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
@@ -172,7 +173,7 @@ func TestDspCDRsV1ProcessExternalCDRNil(t *testing.T) {
 		},
 	}
 	var reply *string
-	result := dspSrv.CDRsV1ProcessExternalCDR(CGREvent, reply)
+	result := dspSrv.CDRsV1ProcessExternalCDR(context.Background(), CGREvent, reply)
 	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
@@ -189,7 +190,7 @@ func TestDspCDRsV1ProcessEventError(t *testing.T) {
 		},
 	}
 	var reply *string
-	result := dspSrv.CDRsV1ProcessEvent(CGREvent, reply)
+	result := dspSrv.CDRsV1ProcessEvent(context.Background(), CGREvent, reply)
 	expected := "MANDATORY_IE_MISSING: [ApiKey]"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
@@ -205,7 +206,7 @@ func TestDspCDRsV1ProcessEventNil(t *testing.T) {
 		},
 	}
 	var reply *string
-	result := dspSrv.CDRsV1ProcessEvent(CGREvent, reply)
+	result := dspSrv.CDRsV1ProcessEvent(context.Background(), CGREvent, reply)
 	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
@@ -222,7 +223,7 @@ func TestDspCDRsV1ProcessCDRError(t *testing.T) {
 		},
 	}
 	var reply *string
-	result := dspSrv.CDRsV1ProcessCDR(CGREvent, reply)
+	result := dspSrv.CDRsV1ProcessCDR(context.Background(), CGREvent, reply)
 	expected := "MANDATORY_IE_MISSING: [ApiKey]"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
@@ -238,7 +239,7 @@ func TestDspCDRsV1ProcessCDRNil(t *testing.T) {
 		},
 	}
 	var reply *string
-	result := dspSrv.CDRsV1ProcessCDR(CGREvent, reply)
+	result := dspSrv.CDRsV1ProcessCDR(context.Background(), CGREvent, reply)
 	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
@@ -256,7 +257,7 @@ func TestDspCDRsV2ProcessEventError(t *testing.T) {
 		},
 	}
 	var reply *[]*utils.EventWithFlags
-	result := dspSrv.CDRsV2ProcessEvent(CGREvent, reply)
+	result := dspSrv.CDRsV2ProcessEvent(context.Background(), CGREvent, reply)
 	expected := "MANDATORY_IE_MISSING: [ApiKey]"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
@@ -273,7 +274,7 @@ func TestDspCDRsV2ProcessEventNil(t *testing.T) {
 		},
 	}
 	var reply *[]*utils.EventWithFlags
-	result := dspSrv.CDRsV2ProcessEvent(CGREvent, reply)
+	result := dspSrv.CDRsV2ProcessEvent(context.Background(), CGREvent, reply)
 	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
@@ -289,7 +290,7 @@ func TestDspCDRsV2ProcessEventErrorNil(t *testing.T) {
 		CGREvent: utils.CGREvent{},
 	}
 	var reply *[]*utils.EventWithFlags
-	result := dspSrv.CDRsV2ProcessEvent(CGREvent, reply)
+	result := dspSrv.CDRsV2ProcessEvent(context.Background(), CGREvent, reply)
 	expected := "MANDATORY_IE_MISSING: [ApiKey]"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
@@ -303,7 +304,7 @@ func TestDspCDRsV1StoreSessionCostNil(t *testing.T) {
 		Tenant: "tenant",
 	}
 	var reply *string
-	result := dspSrv.CDRsV1StoreSessionCost(CGREvent, reply)
+	result := dspSrv.CDRsV1StoreSessionCost(context.Background(), CGREvent, reply)
 	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
@@ -316,7 +317,7 @@ func TestDspCDRsV1StoreSessionCostErrorNil(t *testing.T) {
 	cgrCfg.DispatcherSCfg().AttributeSConns = []string{"test"}
 	CGREvent := &engine.AttrCDRSStoreSMCost{}
 	var reply *string
-	result := dspSrv.CDRsV1StoreSessionCost(CGREvent, reply)
+	result := dspSrv.CDRsV1StoreSessionCost(context.Background(), CGREvent, reply)
 	expected := "MANDATORY_IE_MISSING: [ApiKey]"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
@@ -330,7 +331,7 @@ func TestDspCDRsV2StoreSessionCostNil(t *testing.T) {
 		Tenant: "tenant",
 	}
 	var reply *string
-	result := dspSrv.CDRsV2StoreSessionCost(CGREvent, reply)
+	result := dspSrv.CDRsV2StoreSessionCost(context.Background(), CGREvent, reply)
 	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
@@ -343,7 +344,7 @@ func TestDspCDRsV2StoreSessionCostErrorNil(t *testing.T) {
 	cgrCfg.DispatcherSCfg().AttributeSConns = []string{"test"}
 	CGREvent := &engine.ArgsV2CDRSStoreSMCost{}
 	var reply *string
-	result := dspSrv.CDRsV2StoreSessionCost(CGREvent, reply)
+	result := dspSrv.CDRsV2StoreSessionCost(context.Background(), CGREvent, reply)
 	expected := "MANDATORY_IE_MISSING: [ApiKey]"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)

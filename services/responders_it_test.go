@@ -24,8 +24,7 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/cgrates/rpcclient"
-
+	"github.com/cgrates/birpc"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/cores"
 	"github.com/cgrates/cgrates/engine"
@@ -44,8 +43,8 @@ func TestResponderSReload(t *testing.T) {
 	shdChan := utils.NewSyncedChan()
 	server := cores.NewServer(nil)
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
-	anz := NewAnalyzerService(cfg, server, filterSChan, shdChan, make(chan rpcclient.ClientConnector, 1), srvDep)
-	internalChan := make(chan rpcclient.ClientConnector, 1)
+	anz := NewAnalyzerService(cfg, server, filterSChan, shdChan, make(chan birpc.ClientConnector, 1), srvDep)
+	internalChan := make(chan birpc.ClientConnector, 1)
 	srv := NewResponderService(cfg, server, internalChan,
 		shdChan, anz, srvDep, filterSChan)
 
@@ -101,8 +100,8 @@ func TestResponderSReload2(t *testing.T) {
 	shdChan := utils.NewSyncedChan()
 	server := cores.NewServer(nil)
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
-	anz := NewAnalyzerService(cfg, server, filterSChan, shdChan, make(chan rpcclient.ClientConnector, 1), srvDep)
-	internalChan := make(chan rpcclient.ClientConnector, 1)
+	anz := NewAnalyzerService(cfg, server, filterSChan, shdChan, make(chan birpc.ClientConnector, 1), srvDep)
+	internalChan := make(chan birpc.ClientConnector, 1)
 	srv := NewResponderService(cfg, server, internalChan,
 		shdChan, anz, srvDep, filterSChan)
 

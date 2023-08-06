@@ -26,6 +26,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 
 	"github.com/cgrates/cgrates/utils"
@@ -664,7 +665,7 @@ func TestChargersV1ProcessEventMissingArgs(t *testing.T) {
 	var reply *[]*ChrgSProcessEventReply
 
 	experr := "MANDATORY_IE_MISSING: [Event]"
-	err := cS.V1ProcessEvent(args, reply)
+	err := cS.V1ProcessEvent(context.Background(), args, reply)
 
 	if err == nil || err.Error() != experr {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", experr, err)

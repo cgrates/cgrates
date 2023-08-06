@@ -28,9 +28,10 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc"
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/cgrates/rpcclient"
 )
 
 var (
@@ -972,7 +973,7 @@ func TestThresholdsProcessEventMaxHitsDMErr(t *testing.T) {
 	cfg.CacheCfg().Partitions[utils.CacheThresholds].Replicate = true
 	config.SetCgrConfig(cfg)
 	data := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
-	connMgr = NewConnManager(cfg, make(map[string]chan rpcclient.ClientConnector))
+	connMgr = NewConnManager(cfg, make(map[string]chan birpc.ClientConnector))
 	dm := NewDataManager(data, cfg.CacheCfg(), connMgr)
 	filterS := NewFilterS(cfg, nil, dm)
 	tS := NewThresholdService(nil, cfg, filterS)
@@ -1133,7 +1134,7 @@ func TestThresholdsV1ProcessEventOK(t *testing.T) {
 	}
 	var reply []string
 	exp := []string{"TH1", "TH2"}
-	if err := tS.V1ProcessEvent(args, &reply); err != nil {
+	if err := tS.V1ProcessEvent(context.Background(), args, &reply); err != nil {
 		t.Error(err)
 	} else {
 		sort.Strings(reply)
@@ -1195,7 +1196,7 @@ func TestThresholdsV1ProcessEventPartExecErr(t *testing.T) {
 	expLog1 := `[ERROR] Failed to get actions for ACT1: NOT_FOUND`
 	expLog2 := `[WARNING] <ThresholdS> failed executing actions: ACT1, error: NOT_FOUND`
 	var reply []string
-	if err := tS.V1ProcessEvent(args, &reply); err == nil ||
+	if err := tS.V1ProcessEvent(context.Background(), args, &reply); err == nil ||
 		err != utils.ErrPartiallyExecuted {
 		t.Errorf("expected: <%+v>,\nreceived: <%+v>", utils.ErrPartiallyExecuted, err)
 	} else {
@@ -1256,13 +1257,13 @@ func TestThresholdsV1ProcessEventMissingArgs(t *testing.T) {
 	}
 	var reply []string
 	experr := `MANDATORY_IE_MISSING: [ID]`
-	if err := tS.V1ProcessEvent(args, &reply); err == nil ||
+	if err := tS.V1ProcessEvent(context.Background(), args, &reply); err == nil ||
 		err.Error() != experr {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", experr, err)
 	}
 
 	experr = `MANDATORY_IE_MISSING: [CGREvent]`
-	if err := tS.V1ProcessEvent(nil, &reply); err == nil ||
+	if err := tS.V1ProcessEvent(context.Background(), nil, &reply); err == nil ||
 		err.Error() != experr {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", experr, err)
 	}
@@ -1272,7 +1273,7 @@ func TestThresholdsV1ProcessEventMissingArgs(t *testing.T) {
 		Event: nil,
 	}
 	experr = `MANDATORY_IE_MISSING: [Event]`
-	if err := tS.V1ProcessEvent(args, &reply); err == nil ||
+	if err := tS.V1ProcessEvent(context.Background(), args, &reply); err == nil ||
 		err.Error() != experr {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", experr, err)
 	}
@@ -1305,9 +1306,10 @@ func TestThresholdsV1GetThresholdOK(t *testing.T) {
 		ID:     "TH1",
 	}
 	var rplyTh Threshold
-	if err := tS.V1GetThreshold(&utils.TenantID{
-		ID: "TH1",
-	}, &rplyTh); err != nil {
+	if err := tS.V1GetThreshold(context.Background(),
+		&utils.TenantID{
+			ID: "TH1",
+		}, &rplyTh); err != nil {
 		t.Error(err)
 	} else {
 		var snooze time.Time
@@ -1343,9 +1345,10 @@ func TestThresholdsV1GetThresholdNotFoundErr(t *testing.T) {
 	}
 
 	var rplyTh Threshold
-	if err := tS.V1GetThreshold(&utils.TenantID{
-		ID: "TH2",
-	}, &rplyTh); err == nil || err != utils.ErrNotFound {
+	if err := tS.V1GetThreshold(context.Background(),
+		&utils.TenantID{
+			ID: "TH2",
+		}, &rplyTh); err == nil || err != utils.ErrNotFound {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ErrNotFound, err)
 	}
 }
@@ -1681,7 +1684,7 @@ func TestThresholdMatchingThresholdForEventLocks5(t *testing.T) {
 	}()
 	Cache.Clear(nil)
 	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
-	dm := NewDataManager(db, config.CgrConfig().CacheCfg(), NewConnManager(cfg, make(map[string]chan rpcclient.ClientConnector)))
+	dm := NewDataManager(db, config.CgrConfig().CacheCfg(), NewConnManager(cfg, make(map[string]chan birpc.ClientConnector)))
 	cfg.ThresholdSCfg().StoreInterval = 1
 	cfg.ThresholdSCfg().StringIndexedFields = nil
 	cfg.ThresholdSCfg().PrefixIndexedFields = nil
@@ -1885,7 +1888,7 @@ func TestThresholdsV1GetThresholdsForEventOK(t *testing.T) {
 		},
 	}
 	var reply Thresholds
-	if err := tS.V1GetThresholdsForEvent(args, &reply); err != nil {
+	if err := tS.V1GetThresholdsForEvent(context.Background(), args, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(reply, exp) {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", exp, reply)
@@ -1919,7 +1922,7 @@ func TestThresholdsV1GetThresholdsForEventMissingArgs(t *testing.T) {
 	}
 	experr := `MANDATORY_IE_MISSING: [CGREvent]`
 	var reply Thresholds
-	if err := tS.V1GetThresholdsForEvent(nil, &reply); err == nil ||
+	if err := tS.V1GetThresholdsForEvent(context.Background(), nil, &reply); err == nil ||
 		err.Error() != experr {
 		t.Error(err)
 	}
@@ -1935,7 +1938,7 @@ func TestThresholdsV1GetThresholdsForEventMissingArgs(t *testing.T) {
 	}
 
 	experr = `MANDATORY_IE_MISSING: [ID]`
-	if err := tS.V1GetThresholdsForEvent(args, &reply); err == nil ||
+	if err := tS.V1GetThresholdsForEvent(context.Background(), args, &reply); err == nil ||
 		err.Error() != experr {
 		t.Error(err)
 	}
@@ -1950,7 +1953,7 @@ func TestThresholdsV1GetThresholdsForEventMissingArgs(t *testing.T) {
 	}
 
 	experr = `MANDATORY_IE_MISSING: [Event]`
-	if err := tS.V1GetThresholdsForEvent(args, &reply); err == nil ||
+	if err := tS.V1GetThresholdsForEvent(context.Background(), args, &reply); err == nil ||
 		err.Error() != experr {
 		t.Error(err)
 	}
@@ -1996,7 +1999,7 @@ func TestThresholdsV1GetThresholdIDsOK(t *testing.T) {
 
 	expIDs := []string{"TH1", "TH2"}
 	var reply []string
-	if err := tS.V1GetThresholdIDs("", &reply); err != nil {
+	if err := tS.V1GetThresholdIDs(context.Background(), "", &reply); err != nil {
 		t.Error(err)
 	} else {
 		sort.Strings(reply)
@@ -2020,7 +2023,7 @@ func TestThresholdsV1GetThresholdIDsGetKeysForPrefixErr(t *testing.T) {
 	tS := NewThresholdService(dm, cfg, filterS)
 
 	var reply []string
-	if err := tS.V1GetThresholdIDs("", &reply); err == nil ||
+	if err := tS.V1GetThresholdIDs(context.Background(), "", &reply); err == nil ||
 		err != utils.ErrNotImplemented {
 		t.Error(err)
 	}
@@ -2064,9 +2067,10 @@ func TestThresholdsV1ResetThresholdOK(t *testing.T) {
 		"cgrates.org:TH1": {},
 	}
 	var reply string
-	if err := tS.V1ResetThreshold(&utils.TenantID{
-		ID: "TH1",
-	}, &reply); err != nil {
+	if err := tS.V1ResetThreshold(context.Background(),
+		&utils.TenantID{
+			ID: "TH1",
+		}, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf("Unexpected reply returned: <%q>", reply)
@@ -2112,9 +2116,10 @@ func TestThresholdsV1ResetThresholdErrNotFound(t *testing.T) {
 	}
 
 	var reply string
-	if err := tS.V1ResetThreshold(&utils.TenantID{
-		ID: "TH1",
-	}, &reply); err == nil || err != utils.ErrNotFound {
+	if err := tS.V1ResetThreshold(context.Background(),
+		&utils.TenantID{
+			ID: "TH1",
+		}, &reply); err == nil || err != utils.ErrNotFound {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ErrNotFound, err)
 	}
 }
@@ -2155,9 +2160,10 @@ func TestThresholdsV1ResetThresholdNegativeStoreIntervalOK(t *testing.T) {
 	}
 
 	var reply string
-	if err := tS.V1ResetThreshold(&utils.TenantID{
-		ID: "TH1",
-	}, &reply); err != nil {
+	if err := tS.V1ResetThreshold(context.Background(),
+		&utils.TenantID{
+			ID: "TH1",
+		}, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf("Unexpected reply returned: <%q>", reply)
@@ -2202,9 +2208,10 @@ func TestThresholdsV1ResetThresholdNegativeStoreIntervalErr(t *testing.T) {
 	}
 
 	var reply string
-	if err := tS.V1ResetThreshold(&utils.TenantID{
-		ID: "TH1",
-	}, &reply); err == nil || err != utils.ErrNoDatabaseConn {
+	if err := tS.V1ResetThreshold(context.Background(),
+		&utils.TenantID{
+			ID: "TH1",
+		}, &reply); err == nil || err != utils.ErrNoDatabaseConn {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ErrNoDatabaseConn, err)
 	}
 }
@@ -2344,7 +2351,7 @@ func TestThresholdsStoreThresholdCacheSetErr(t *testing.T) {
 	config.SetCgrConfig(cfg)
 	data := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
-	connMgr = NewConnManager(cfg, make(map[string]chan rpcclient.ClientConnector))
+	connMgr = NewConnManager(cfg, make(map[string]chan birpc.ClientConnector))
 	Cache = NewCacheS(cfg, dm, nil)
 	filterS := NewFilterS(cfg, nil, dm)
 	tS := NewThresholdService(dm, cfg, filterS)

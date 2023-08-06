@@ -22,10 +22,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package v1
 
 import (
-	"net/rpc"
 	"path"
 	"testing"
 
+	"github.com/cgrates/birpc"
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -34,7 +35,7 @@ import (
 var (
 	vrsCfgPath     string
 	vrsCfg         *config.CGRConfig
-	vrsRPC         *rpc.Client
+	vrsRPC         *birpc.Client
 	vrsDelay       int
 	vrsConfigDIR   string //run tests for specific configuration
 	vrsStorageType string
@@ -125,7 +126,7 @@ func testVrsDataDB(t *testing.T) {
 		"RatingProfile": 1, "Accounts": 3, "ActionPlans": 3, "Chargers": 2,
 		"Destinations": 1, "LoadIDs": 1, "SharedGroups": 2, "Stats": 4, "Resource": 1,
 		"Subscribers": 1, "Routes": 2, "Thresholds": 4, "Timing": 1, "Dispatchers": 2}
-	if err := vrsRPC.Call(utils.APIerSv1GetDataDBVersions, utils.StringPointer(utils.EmptyString), &result); err != nil {
+	if err := vrsRPC.Call(context.Background(), utils.APIerSv1GetDataDBVersions, utils.StringPointer(utils.EmptyString), &result); err != nil {
 		t.Error(err)
 	} else if expectedVrs.Compare(result, vrsStorageType, true) != "" {
 		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(expectedVrs), utils.ToJSON(result))
@@ -139,7 +140,7 @@ func testVrsStorDB(t *testing.T) {
 		"TpSharedGroups": 1, "TpRoutes": 1, "SessionSCosts": 3, "TpRatingProfiles": 1, "TpStats": 1, "TpTiming": 1,
 		"CostDetails": 2, "TpAccountActions": 1, "TpActionPlans": 1, "TpChargers": 1, "TpRatingProfile": 1,
 		"TpRatingPlan": 1, "TpResources": 1}
-	if err := vrsRPC.Call(utils.APIerSv1GetStorDBVersions, utils.StringPointer(utils.EmptyString), &result); err != nil {
+	if err := vrsRPC.Call(context.Background(), utils.APIerSv1GetStorDBVersions, utils.StringPointer(utils.EmptyString), &result); err != nil {
 		t.Error(err)
 	} else if expectedVrs.Compare(result, vrsStorageType, true) != "" {
 		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(result), utils.ToJSON(expectedVrs))
@@ -153,7 +154,7 @@ func testVrsSetDataDBVrs(t *testing.T) {
 			"Attributes": 3,
 		},
 	}
-	if err := vrsRPC.Call(utils.APIerSv1SetDataDBVersions, &args, &reply); err != nil {
+	if err := vrsRPC.Call(context.Background(), utils.APIerSv1SetDataDBVersions, &args, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf("Expecting: %+v, received: %+v", utils.OK, reply)
@@ -166,7 +167,7 @@ func testVrsSetDataDBVrs(t *testing.T) {
 		"Destinations": 1, "LoadIDs": 1, "SharedGroups": 2, "Stats": 4, "Resource": 1,
 		"Subscribers": 1, "Routes": 2, "Thresholds": 4, "Timing": 1,
 		"Dispatchers": 2}
-	if err := vrsRPC.Call(utils.APIerSv1GetDataDBVersions, utils.StringPointer(utils.EmptyString), &result); err != nil {
+	if err := vrsRPC.Call(context.Background(), utils.APIerSv1GetDataDBVersions, utils.StringPointer(utils.EmptyString), &result); err != nil {
 		t.Error(err)
 	} else if expectedVrs.Compare(result, vrsStorageType, true) != "" {
 		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(expectedVrs), utils.ToJSON(result))
@@ -175,7 +176,7 @@ func testVrsSetDataDBVrs(t *testing.T) {
 	args = SetVersionsArg{
 		Versions: nil,
 	}
-	if err := vrsRPC.Call(utils.APIerSv1SetDataDBVersions, &args, &reply); err != nil {
+	if err := vrsRPC.Call(context.Background(), utils.APIerSv1SetDataDBVersions, &args, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf("Expecting: %+v, received: %+v", utils.OK, reply)
@@ -189,7 +190,7 @@ func testVrsSetStorDBVrs(t *testing.T) {
 			"TpResources": 2,
 		},
 	}
-	if err := vrsRPC.Call(utils.APIerSv1SetStorDBVersions, &args, &reply); err != nil {
+	if err := vrsRPC.Call(context.Background(), utils.APIerSv1SetStorDBVersions, &args, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf("Expecting: %+v, received: %+v", utils.OK, reply)
@@ -201,7 +202,7 @@ func testVrsSetStorDBVrs(t *testing.T) {
 		"TpSharedGroups": 1, "TpRoutes": 1, "SessionSCosts": 3, "TpRatingProfiles": 1, "TpStats": 1, "TpTiming": 1,
 		"CostDetails": 2, "TpAccountActions": 1, "TpActionPlans": 1, "TpChargers": 1, "TpRatingProfile": 1,
 		"TpRatingPlan": 1, "TpResources": 2}
-	if err := vrsRPC.Call(utils.APIerSv1GetStorDBVersions, utils.StringPointer(utils.EmptyString), &result); err != nil {
+	if err := vrsRPC.Call(context.Background(), utils.APIerSv1GetStorDBVersions, utils.StringPointer(utils.EmptyString), &result); err != nil {
 		t.Error(err)
 	} else if expectedVrs.Compare(result, vrsStorageType, true) != "" {
 		t.Errorf("Expecting: %+v, received: %+v", result, expectedVrs)
@@ -210,7 +211,7 @@ func testVrsSetStorDBVrs(t *testing.T) {
 	args = SetVersionsArg{
 		Versions: nil,
 	}
-	if err := vrsRPC.Call(utils.APIerSv1SetStorDBVersions, &args, &reply); err != nil {
+	if err := vrsRPC.Call(context.Background(), utils.APIerSv1SetStorDBVersions, &args, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf("Expecting: %+v, received: %+v", utils.OK, reply)

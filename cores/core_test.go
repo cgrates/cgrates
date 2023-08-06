@@ -25,6 +25,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -83,7 +84,7 @@ func TestCoreServiceStatus(t *testing.T) {
 		utils.MemoryUsage:      "CHANGED_MEMORY_USAGE",
 		utils.NodeID:           cfgDflt.GeneralCfg().NodeID,
 	}
-	if err := cores.Status(args, &reply); err != nil {
+	if err := cores.V1Status(context.Background(), args, &reply); err != nil {
 		t.Error(err)
 	} else {
 		reply[utils.RunningSince] = "TIME_CHANGED"
@@ -106,7 +107,7 @@ func TestCoreServiceStatus(t *testing.T) {
 	}
 	utils.GitLastLog = `Date: wrong format
 `
-	if err := cores.Status(args, &reply); err != nil {
+	if err := cores.V1Status(context.Background(), args, &reply); err != nil {
 		t.Error(err)
 	}
 

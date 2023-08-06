@@ -29,10 +29,11 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc"
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/ltcache"
-	"github.com/cgrates/rpcclient"
 )
 
 func TestTPReaderCallCacheNoCaching(t *testing.T) {
@@ -69,10 +70,10 @@ func TestTPReaderCallCacheReloadCacheFirstCallErr(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	Cache.Clear(nil)
 	cacheConns := []string{"cacheConn1"}
-	client := make(chan rpcclient.ClientConnector, 1)
+	client := make(chan birpc.ClientConnector, 1)
 	ccM := &ccMock{
-		calls: map[string]func(args any, reply any) error{
-			utils.CacheSv1ReloadCache: func(args, reply any) error {
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.CacheSv1ReloadCache: func(ctx *context.Context, args, reply any) error {
 				expArgs := &utils.AttrReloadCacheWithAPIOpts{
 					APIOpts: map[string]any{
 						utils.MetaSubsys: utils.MetaChargers,
@@ -93,7 +94,7 @@ func TestTPReaderCallCacheReloadCacheFirstCallErr(t *testing.T) {
 	}
 	client <- ccM
 
-	cM := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	cM := NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		"cacheConn1": client,
 	})
 	caching := utils.MetaReload
@@ -134,13 +135,13 @@ func TestTPReaderCallCacheReloadCacheSecondCallErr(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	Cache.Clear(nil)
 	cacheConns := []string{"cacheConn1"}
-	client := make(chan rpcclient.ClientConnector, 1)
+	client := make(chan birpc.ClientConnector, 1)
 	ccM := &ccMock{
-		calls: map[string]func(args any, reply any) error{
-			utils.CacheSv1ReloadCache: func(args, reply any) error {
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.CacheSv1ReloadCache: func(ctx *context.Context, args, reply any) error {
 				return nil
 			},
-			utils.CacheSv1Clear: func(args, reply any) error {
+			utils.CacheSv1Clear: func(ctx *context.Context, args, reply any) error {
 				expArgs := &utils.AttrCacheIDsWithAPIOpts{
 					APIOpts: map[string]any{
 						utils.MetaSubsys: utils.MetaChargers,
@@ -161,7 +162,7 @@ func TestTPReaderCallCacheReloadCacheSecondCallErr(t *testing.T) {
 	}
 	client <- ccM
 
-	cM := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	cM := NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		"cacheConn1": client,
 	})
 	caching := utils.MetaReload
@@ -214,10 +215,10 @@ func TestTPReaderCallCacheLoadCache(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	Cache.Clear(nil)
 	cacheConns := []string{"cacheConn1"}
-	client := make(chan rpcclient.ClientConnector, 1)
+	client := make(chan birpc.ClientConnector, 1)
 	ccM := &ccMock{
-		calls: map[string]func(args any, reply any) error{
-			utils.CacheSv1LoadCache: func(args, reply any) error {
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.CacheSv1LoadCache: func(ctx *context.Context, args, reply any) error {
 				expArgs := &utils.AttrReloadCacheWithAPIOpts{
 					APIOpts: map[string]any{
 						utils.MetaSubsys: utils.MetaChargers,
@@ -234,7 +235,7 @@ func TestTPReaderCallCacheLoadCache(t *testing.T) {
 				}
 				return nil
 			},
-			utils.CacheSv1Clear: func(args, reply any) error {
+			utils.CacheSv1Clear: func(ctx *context.Context, args, reply any) error {
 				expArgs := &utils.AttrCacheIDsWithAPIOpts{
 					APIOpts: map[string]any{
 						utils.MetaSubsys: utils.MetaChargers,
@@ -255,7 +256,7 @@ func TestTPReaderCallCacheLoadCache(t *testing.T) {
 	}
 	client <- ccM
 
-	cM := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	cM := NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		"cacheConn1": client,
 	})
 	caching := utils.MetaLoad
@@ -283,10 +284,10 @@ func TestTPReaderCallCacheRemoveItems(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	Cache.Clear(nil)
 	cacheConns := []string{"cacheConn1"}
-	client := make(chan rpcclient.ClientConnector, 1)
+	client := make(chan birpc.ClientConnector, 1)
 	ccM := &ccMock{
-		calls: map[string]func(args any, reply any) error{
-			utils.CacheSv1RemoveItems: func(args, reply any) error {
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.CacheSv1RemoveItems: func(ctx *context.Context, args, reply any) error {
 				expArgs := &utils.AttrReloadCacheWithAPIOpts{
 					APIOpts: map[string]any{
 						utils.MetaSubsys: utils.MetaChargers,
@@ -303,7 +304,7 @@ func TestTPReaderCallCacheRemoveItems(t *testing.T) {
 				}
 				return nil
 			},
-			utils.CacheSv1Clear: func(args, reply any) error {
+			utils.CacheSv1Clear: func(ctx *context.Context, args, reply any) error {
 				expArgs := &utils.AttrCacheIDsWithAPIOpts{
 					APIOpts: map[string]any{
 						utils.MetaSubsys: utils.MetaChargers,
@@ -324,7 +325,7 @@ func TestTPReaderCallCacheRemoveItems(t *testing.T) {
 	}
 	client <- ccM
 
-	cM := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	cM := NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		"cacheConn1": client,
 	})
 	caching := utils.MetaRemove
@@ -352,10 +353,10 @@ func TestTPReaderCallCacheClear(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	Cache.Clear(nil)
 	cacheConns := []string{"cacheConn1"}
-	client := make(chan rpcclient.ClientConnector, 1)
+	client := make(chan birpc.ClientConnector, 1)
 	ccM := &ccMock{
-		calls: map[string]func(args any, reply any) error{
-			utils.CacheSv1Clear: func(args, reply any) error {
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.CacheSv1Clear: func(ctx *context.Context, args, reply any) error {
 				expArgs := &utils.AttrCacheIDsWithAPIOpts{
 					APIOpts: map[string]any{
 						utils.MetaSubsys: utils.MetaChargers,
@@ -375,7 +376,7 @@ func TestTPReaderCallCacheClear(t *testing.T) {
 	}
 	client <- ccM
 
-	cM := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	cM := NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		"cacheConn1": client,
 	})
 	caching := utils.MetaClear
@@ -950,23 +951,23 @@ func TestTPReaderReloadCache(t *testing.T) {
 		AccountActionPlanIDs:  []string{"AccountActionPlansID"},
 		ReverseDestinationIDs: []string{},
 	}
-	rpcInternal := make(chan rpcclient.ClientConnector, 1)
+	rpcInternal := make(chan birpc.ClientConnector, 1)
 	rpcInternal <- &ccMock{
-		calls: map[string]func(args any, reply any) error{
-			utils.CacheSv1ReloadCache: func(args any, reply any) error {
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.CacheSv1ReloadCache: func(ctx *context.Context, args any, reply any) error {
 				if !reflect.DeepEqual(args, argExpect) {
 					t.Errorf("Expected %v \nbut received %v", utils.ToJSON(argExpect), utils.ToJSON(args))
 				}
 				return nil
 			},
-			utils.CacheSv1Clear: func(args any, reply any) error {
+			utils.CacheSv1Clear: func(ctx *context.Context, args any, reply any) error {
 				return nil
 			},
 		},
 	}
 	tmp := connMgr
 	defer func() { connMgr = tmp }()
-	connMgr = NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	connMgr = NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches): rpcInternal,
 	})
 	tpr := &TpReader{
@@ -1087,8 +1088,8 @@ func TestTPReaderLoadAll(t *testing.T) {
 func TestTpReaderReloadScheduler(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	ccMocK := &ccMock{
-		calls: map[string]func(args any, reply any) error{
-			utils.SchedulerSv1Reload: func(args, reply any) error {
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.SchedulerSv1Reload: func(ctx *context.Context, args, reply any) error {
 				rpl := "reply"
 
 				*reply.(*string) = rpl
@@ -1096,12 +1097,12 @@ func TestTpReaderReloadScheduler(t *testing.T) {
 			},
 		},
 	}
-	clientconn := make(chan rpcclient.ClientConnector, 1)
+	clientconn := make(chan birpc.ClientConnector, 1)
 	clientconn <- ccMocK
 
 	tmp := connMgr
 	defer func() { connMgr = tmp }()
-	connMgr = NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	connMgr = NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.SchedulerConnsCfg): clientconn,
 	})
 
@@ -2214,7 +2215,7 @@ func TestTprLoadAccountActionFiltered(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	clientconn := make(chan rpcclient.ClientConnector, 1)
+	clientconn := make(chan birpc.ClientConnector, 1)
 	clientconn <- clMock(func(serviceMethod string, _, _ any) error {
 		if serviceMethod == utils.CacheSv1ReloadCache {
 
@@ -2222,7 +2223,7 @@ func TestTprLoadAccountActionFiltered(t *testing.T) {
 		}
 		return utils.ErrNotImplemented
 	})
-	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	connMgr := NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches): clientconn,
 	})
 	timings := &utils.ApierTPTiming{

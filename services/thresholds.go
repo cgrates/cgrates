@@ -22,19 +22,19 @@ import (
 	"fmt"
 	"sync"
 
+	"github.com/cgrates/birpc"
 	v1 "github.com/cgrates/cgrates/apier/v1"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/cores"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/servmanager"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/cgrates/rpcclient"
 )
 
 // NewThresholdService returns the Threshold Service
 func NewThresholdService(cfg *config.CGRConfig, dm *DataDBService,
 	cacheS *engine.CacheS, filterSChan chan *engine.FilterS,
-	server *cores.Server, internalThresholdSChan chan rpcclient.ClientConnector,
+	server *cores.Server, internalThresholdSChan chan birpc.ClientConnector,
 	anz *AnalyzerService, srvDep map[string]*sync.WaitGroup) servmanager.Service {
 	return &ThresholdService{
 		connChan:    internalThresholdSChan,
@@ -58,14 +58,13 @@ type ThresholdService struct {
 	server      *cores.Server
 
 	thrs     *engine.ThresholdService
-	rpc      *v1.ThresholdSv1
-	connChan chan rpcclient.ClientConnector
+	connChan chan birpc.ClientConnector
 	anz      *AnalyzerService
 	srvDep   map[string]*sync.WaitGroup
 }
 
 // Start should handle the sercive start
-func (thrs *ThresholdService) Start() (err error) {
+func (thrs *ThresholdService) Start() error {
 	if thrs.IsRunning() {
 		return utils.ErrServiceAlreadyRunning
 	}
@@ -87,12 +86,17 @@ func (thrs *ThresholdService) Start() (err error) {
 
 	utils.Logger.Info(fmt.Sprintf("<%s> starting <%s> subsystem", utils.CoreS, utils.ThresholdS))
 	thrs.thrs.StartLoop()
-	thrs.rpc = v1.NewThresholdSv1(thrs.thrs)
-	if !thrs.cfg.DispatcherSCfg().Enabled {
-		thrs.server.RpcRegister(thrs.rpc)
+	srv, err := engine.NewService(v1.NewThresholdSv1(thrs.thrs))
+	if err != nil {
+		return err
 	}
-	thrs.connChan <- thrs.anz.GetInternalCodec(thrs.rpc, utils.ThresholdS)
-	return
+	if !thrs.cfg.DispatcherSCfg().Enabled {
+		for _, s := range srv {
+			thrs.server.RpcRegister(s)
+		}
+	}
+	thrs.connChan <- thrs.anz.GetInternalCodec(srv, utils.ThresholdS)
+	return nil
 }
 
 // Reload handles the change of config
@@ -110,7 +114,6 @@ func (thrs *ThresholdService) Shutdown() (err error) {
 	defer thrs.Unlock()
 	thrs.thrs.Shutdown()
 	thrs.thrs = nil
-	thrs.rpc = nil
 	<-thrs.connChan
 	return
 }

@@ -22,6 +22,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc"
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/sessions"
@@ -30,30 +32,18 @@ import (
 )
 
 func TestDAsSessionSClientIface(t *testing.T) {
-	_ = sessions.BiRPClient(new(DiameterAgent))
+	_ = sessions.BiRPCClient(new(DiameterAgent))
 }
 
 type testMockSessionConn struct {
 	calls map[string]func(arg any, rply any) error
 }
 
-func (s *testMockSessionConn) Call(method string, arg any, rply any) error {
+func (s *testMockSessionConn) Call(_ *context.Context, method string, arg any, rply any) error {
 	if call, has := s.calls[method]; has {
 		return call(arg, rply)
 	}
 	return rpcclient.ErrUnsupporteServiceMethod
-}
-
-func (s *testMockSessionConn) CallBiRPC(_ rpcclient.ClientConnector, method string, arg any, rply any) error {
-	return s.Call(method, arg, rply)
-}
-
-func (s *testMockSessionConn) Handlers() (b map[string]any) {
-	b = make(map[string]any)
-	for n, f := range s.calls {
-		b[n] = f
-	}
-	return
 }
 
 func TestProcessRequest(t *testing.T) {
@@ -447,9 +437,9 @@ func TestProcessRequest(t *testing.T) {
 		reqProcessor.Tenant, config.CgrConfig().GeneralCfg().DefaultTenant,
 		config.CgrConfig().GeneralCfg().DefaultTimezone, filters, nil)
 
-	internalSessionSChan := make(chan rpcclient.ClientConnector, 1)
+	internalSessionSChan := make(chan birpc.ClientConnector, 1)
 	internalSessionSChan <- sS
-	connMgr := engine.NewConnManager(config.CgrConfig(), map[string]chan rpcclient.ClientConnector{
+	connMgr := engine.NewConnManager(config.CgrConfig(), map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS):      internalSessionSChan,
 		utils.ConcatenatedKey(rpcclient.BiRPCInternal, utils.MetaSessionS): internalSessionSChan,
 	})
@@ -458,7 +448,8 @@ func TestProcessRequest(t *testing.T) {
 		filterS: filters,
 		connMgr: connMgr,
 	}
-	pr, err := processRequest(reqProcessor, agReq, utils.DiameterAgent, connMgr, da.cgrCfg.DiameterAgentCfg().SessionSConns, da, da.filterS)
+	ctx := context.WithClient(context.Background(), da)
+	pr, err := processRequest(ctx, reqProcessor, agReq, utils.DiameterAgent, connMgr, da.cgrCfg.DiameterAgentCfg().SessionSConns, da.filterS)
 	if err != nil {
 		t.Error(err)
 	} else if !pr {
@@ -475,7 +466,7 @@ func TestProcessRequest(t *testing.T) {
 		reqProcessor.Tenant, config.CgrConfig().GeneralCfg().DefaultTenant,
 		config.CgrConfig().GeneralCfg().DefaultTimezone, filters, nil)
 
-	pr, err = processRequest(reqProcessor, agReq, utils.DiameterAgent, connMgr, da.cgrCfg.DiameterAgentCfg().SessionSConns, da, da.filterS)
+	pr, err = processRequest(ctx, reqProcessor, agReq, utils.DiameterAgent, connMgr, da.cgrCfg.DiameterAgentCfg().SessionSConns, da.filterS)
 	if err != nil {
 		t.Error(err)
 	} else if !pr {
@@ -492,7 +483,7 @@ func TestProcessRequest(t *testing.T) {
 		reqProcessor.Tenant, config.CgrConfig().GeneralCfg().DefaultTenant,
 		config.CgrConfig().GeneralCfg().DefaultTimezone, filters, nil)
 
-	pr, err = processRequest(reqProcessor, agReq, utils.DiameterAgent, connMgr, da.cgrCfg.DiameterAgentCfg().SessionSConns, da, da.filterS)
+	pr, err = processRequest(ctx, reqProcessor, agReq, utils.DiameterAgent, connMgr, da.cgrCfg.DiameterAgentCfg().SessionSConns, da.filterS)
 	if err != nil {
 		t.Error(err)
 	} else if !pr {
@@ -515,7 +506,7 @@ func TestProcessRequest(t *testing.T) {
 		reqProcessor.Tenant, config.CgrConfig().GeneralCfg().DefaultTenant,
 		config.CgrConfig().GeneralCfg().DefaultTimezone, filters, nil)
 
-	pr, err = processRequest(reqProcessor, agReq, utils.DiameterAgent, connMgr, da.cgrCfg.DiameterAgentCfg().SessionSConns, da, da.filterS)
+	pr, err = processRequest(ctx, reqProcessor, agReq, utils.DiameterAgent, connMgr, da.cgrCfg.DiameterAgentCfg().SessionSConns, da.filterS)
 	if err != nil {
 		t.Error(err)
 	} else if !pr {
@@ -532,7 +523,7 @@ func TestProcessRequest(t *testing.T) {
 		reqProcessor.Tenant, config.CgrConfig().GeneralCfg().DefaultTenant,
 		config.CgrConfig().GeneralCfg().DefaultTimezone, filters, nil)
 
-	pr, err = processRequest(reqProcessor, agReq, utils.DiameterAgent, connMgr, da.cgrCfg.DiameterAgentCfg().SessionSConns, da, da.filterS)
+	pr, err = processRequest(ctx, reqProcessor, agReq, utils.DiameterAgent, connMgr, da.cgrCfg.DiameterAgentCfg().SessionSConns, da.filterS)
 	if err != nil {
 		t.Error(err)
 	} else if !pr {

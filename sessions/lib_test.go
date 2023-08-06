@@ -21,26 +21,26 @@ package sessions
 import (
 	"errors"
 	"flag"
-	"net/rpc"
-	"net/rpc/jsonrpc"
 
+	"github.com/cgrates/birpc"
+	"github.com/cgrates/birpc/jsonrpc"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 )
 
 var (
 	dataDir   = flag.String("data_dir", "/usr/share/cgrates", "CGR data dir path here")
-	waitRater = flag.Int("wait_rater", 100, "Number of miliseconds to wait for rater to start and cache")
+	waitRater = flag.Int("wait_rater", 500, "Number of miliseconds to wait for rater to start and cache")
 	encoding  = flag.String("rpc", utils.MetaJSON, "what encoding whould be uused for rpc comunication")
 	dbType    = flag.String("dbtype", utils.MetaInternal, "The type of DataBase (Internal/Mongo/mySql)")
 )
 
-func newRPCClient(cfg *config.ListenCfg) (c *rpc.Client, err error) {
+func newRPCClient(cfg *config.ListenCfg) (c *birpc.Client, err error) {
 	switch *encoding {
 	case utils.MetaJSON:
 		return jsonrpc.Dial(utils.TCP, cfg.RPCJSONListen)
 	case utils.MetaGOB:
-		return rpc.Dial(utils.TCP, cfg.RPCGOBListen)
+		return birpc.Dial(utils.TCP, cfg.RPCGOBListen)
 	default:
 		return nil, errors.New("UNSUPPORTED_RPC")
 	}

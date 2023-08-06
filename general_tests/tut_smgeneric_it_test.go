@@ -22,12 +22,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package general_tests
 
 import (
-	"net/rpc"
 	"path"
 	"reflect"
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc"
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -38,7 +39,7 @@ var (
 	tutSMGCfgPath string
 	tutSMGCfgDIR  string
 	tutSMGCfg     *config.CGRConfig
-	tutSMGRpc     *rpc.Client
+	tutSMGRpc     *birpc.Client
 	smgLoadInst   utils.LoadInstance // Share load information between tests
 
 	sTestTutSMG = []func(t *testing.T){
@@ -115,7 +116,7 @@ func testTutSMGRpcConn(t *testing.T) {
 // Load the tariff plan, creating accounts and their balances
 func testTutSMGLoadTariffPlanFromFolder(t *testing.T) {
 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "oldtutorial")}
-	if err := tutSMGRpc.Call(utils.APIerSv2LoadTariffPlanFromFolder, attrs, &smgLoadInst); err != nil {
+	if err := tutSMGRpc.Call(context.Background(), utils.APIerSv2LoadTariffPlanFromFolder, attrs, &smgLoadInst); err != nil {
 		t.Error(err)
 	}
 	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // Give time for scheduler to execute topups
@@ -124,7 +125,7 @@ func testTutSMGLoadTariffPlanFromFolder(t *testing.T) {
 // Check loaded stats
 func testTutSMGCacheStats(t *testing.T) {
 	var reply string
-	if err := tutSMGRpc.Call(utils.CacheSv1LoadCache, utils.NewAttrReloadCacheWithOpts(), &reply); err != nil {
+	if err := tutSMGRpc.Call(context.Background(), utils.CacheSv1LoadCache, utils.NewAttrReloadCacheWithOpts(), &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Error(reply)
@@ -171,7 +172,7 @@ func testTutSMGCacheStats(t *testing.T) {
 	expectedStats[utils.CacheAttributeFilterIndexes].Groups = 2
 	expectedStats[utils.CacheReverseFilterIndexes].Items = 15
 	expectedStats[utils.CacheReverseFilterIndexes].Groups = 13
-	if err := tutSMGRpc.Call(utils.CacheSv1GetCacheStats, new(utils.AttrCacheIDsWithAPIOpts), &rcvStats); err != nil {
+	if err := tutSMGRpc.Call(context.Background(), utils.CacheSv1GetCacheStats, new(utils.AttrCacheIDsWithAPIOpts), &rcvStats); err != nil {
 		t.Error("Got error on CacheSv1.GetCacheStats: ", err.Error())
 	} else if !reflect.DeepEqual(expectedStats, rcvStats) {
 		t.Errorf("Calling APIerSv2.CacheSv1 expected: %+v,\n received: %+v", utils.ToJSON(expectedStats), utils.ToJSON(rcvStats))

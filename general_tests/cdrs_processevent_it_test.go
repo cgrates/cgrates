@@ -22,7 +22,6 @@ package general_tests
 
 import (
 	"fmt"
-	"net/rpc"
 	"os"
 	"path"
 	"reflect"
@@ -31,6 +30,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc"
+	"github.com/cgrates/birpc/context"
 	v2 "github.com/cgrates/cgrates/apier/v2"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/ees"
@@ -42,7 +43,7 @@ var (
 	pecdrsCfgPath string
 	pecdrsConfDIR string
 	pecdrsCfg     *config.CGRConfig
-	pecdrsRpc     *rpc.Client
+	pecdrsRpc     *birpc.Client
 
 	sTestsCDRsIT_ProcessEvent = []func(t *testing.T){
 		testV1CDRsInitConfig,
@@ -128,7 +129,7 @@ func testV1CDRsRpcConn(t *testing.T) {
 
 func testV1CDRsLoadTariffPlanFromFolder(t *testing.T) {
 	var loadInst string
-	if err := pecdrsRpc.Call(utils.APIerSv1LoadTariffPlanFromFolder,
+	if err := pecdrsRpc.Call(context.Background(), utils.APIerSv1LoadTariffPlanFromFolder,
 		&utils.AttrLoadTpFromFolder{FolderPath: path.Join(
 			*dataDir, "tariffplans", "testit")}, &loadInst); err != nil {
 		t.Error(err)
@@ -152,13 +153,13 @@ func testV1CDRsProcessEventAttrS(t *testing.T) {
 		},
 	}
 	var reply string
-	if err := pecdrsRpc.Call(utils.APIerSv1SetBalance, attrSetBalance, &reply); err != nil {
+	if err := pecdrsRpc.Call(context.Background(), utils.APIerSv1SetBalance, attrSetBalance, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf("received: %s", reply)
 	}
 	expectedVoice := 120000000000.0
-	if err := pecdrsRpc.Call(utils.APIerSv2GetAccount, acntAttrs, &acnt); err != nil {
+	if err := pecdrsRpc.Call(context.Background(), utils.APIerSv2GetAccount, acntAttrs, &acnt); err != nil {
 		t.Error(err)
 	} else if rply := acnt.BalanceMap[utils.MetaVoice].GetTotalValue(); rply != expectedVoice {
 		t.Errorf("Expecting: %v, received: %v", expectedVoice, rply)
@@ -198,13 +199,13 @@ func testV1CDRsProcessEventAttrS(t *testing.T) {
 	}
 	alsPrf.Compile()
 	var result string
-	if err := pecdrsRpc.Call(utils.APIerSv1SetAttributeProfile, alsPrf, &result); err != nil {
+	if err := pecdrsRpc.Call(context.Background(), utils.APIerSv1SetAttributeProfile, alsPrf, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
 	var replyAt *engine.AttributeProfile
-	if err := pecdrsRpc.Call(utils.APIerSv1GetAttributeProfile, &utils.TenantIDWithAPIOpts{
+	if err := pecdrsRpc.Call(context.Background(), utils.APIerSv1GetAttributeProfile, &utils.TenantIDWithAPIOpts{
 		TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ApierTest"}}, &replyAt); err != nil {
 		t.Fatal(err)
 	}
@@ -212,13 +213,13 @@ func testV1CDRsProcessEventAttrS(t *testing.T) {
 	if !reflect.DeepEqual(alsPrf.AttributeProfile, replyAt) {
 		t.Errorf("Expecting : %+v, received: %+v", utils.ToJSON(alsPrf.AttributeProfile), utils.ToJSON(replyAt))
 	}
-	if err := pecdrsRpc.Call(utils.CDRsV1ProcessEvent, argsEv, &reply); err != nil {
+	if err := pecdrsRpc.Call(context.Background(), utils.CDRsV1ProcessEvent, argsEv, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply received: ", reply)
 	}
 	// check if the CDR was correctly processed
-	if err := pecdrsRpc.Call(utils.CDRsV1GetCDRs, &utils.RPCCDRsFilterWithAPIOpts{
+	if err := pecdrsRpc.Call(context.Background(), utils.CDRsV1GetCDRs, &utils.RPCCDRsFilterWithAPIOpts{
 		RPCCDRsFilter: &utils.RPCCDRsFilter{OriginHosts: []string{"OriginHost1"}}}, &cdrs); err != nil {
 		t.Fatal("Unexpected error: ", err.Error())
 	} else if len(cdrs) != 1 {
@@ -265,13 +266,13 @@ func testV1CDRsProcessEventChrgS(t *testing.T) {
 		},
 	}
 	var reply string
-	if err := pecdrsRpc.Call(utils.CDRsV1ProcessEvent, argsEv, &reply); err != nil {
+	if err := pecdrsRpc.Call(context.Background(), utils.CDRsV1ProcessEvent, argsEv, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply received: ", reply)
 	}
 	var cdrs []*engine.CDR
-	if err := pecdrsRpc.Call(utils.CDRsV1GetCDRs, &utils.RPCCDRsFilterWithAPIOpts{
+	if err := pecdrsRpc.Call(context.Background(), utils.CDRsV1GetCDRs, &utils.RPCCDRsFilterWithAPIOpts{
 		RPCCDRsFilter: &utils.RPCCDRsFilter{OriginHosts: []string{"OriginHost2"}}}, &cdrs); err != nil {
 		t.Fatal("Unexpected error: ", err.Error())
 	} else if len(cdrs) != 3 {
@@ -308,13 +309,13 @@ func testV1CDRsProcessEventRalS(t *testing.T) {
 		},
 	}
 	var reply string
-	if err := pecdrsRpc.Call(utils.CDRsV1ProcessEvent, argsEv, &reply); err != nil {
+	if err := pecdrsRpc.Call(context.Background(), utils.CDRsV1ProcessEvent, argsEv, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply received: ", reply)
 	}
 	var cdrs []*engine.CDR
-	if err := pecdrsRpc.Call(utils.CDRsV1GetCDRs, &utils.RPCCDRsFilterWithAPIOpts{
+	if err := pecdrsRpc.Call(context.Background(), utils.CDRsV1GetCDRs, &utils.RPCCDRsFilterWithAPIOpts{
 		RPCCDRsFilter: &utils.RPCCDRsFilter{OriginHosts: []string{"OriginHost3"}}}, &cdrs); err != nil {
 		t.Fatal("Unexpected error: ", err.Error())
 	} else if len(cdrs) != 1 {
@@ -348,7 +349,7 @@ func testV1CDRsProcessEventSts(t *testing.T) {
 		},
 	}
 	var reply string
-	if err := pecdrsRpc.Call(utils.CDRsV1ProcessEvent, argsEv, &reply); err != nil {
+	if err := pecdrsRpc.Call(context.Background(), utils.CDRsV1ProcessEvent, argsEv, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply received: ", reply)
@@ -381,7 +382,7 @@ func testV1CDRsProcessEventSts(t *testing.T) {
 			CostDetails: nil,
 		},
 	}
-	if err := pecdrsRpc.Call(utils.CDRsV1GetCDRs, &utils.RPCCDRsFilterWithAPIOpts{
+	if err := pecdrsRpc.Call(context.Background(), utils.CDRsV1GetCDRs, &utils.RPCCDRsFilterWithAPIOpts{
 		RPCCDRsFilter: &utils.RPCCDRsFilter{OriginHosts: []string{"OriginHost4"}}}, &cdrs); err != nil {
 		t.Fatal("Unexpected error: ", err.Error())
 	} else if len(cdrs) != 1 {
@@ -400,7 +401,7 @@ func testV1CDRsProcessEventSts(t *testing.T) {
 		utils.MetaTCD: "15m0s",
 	}
 
-	if err := pecdrsRpc.Call(utils.StatSv1GetQueueStringMetrics,
+	if err := pecdrsRpc.Call(context.Background(), utils.StatSv1GetQueueStringMetrics,
 		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "Stat_1"}}, &metrics); err != nil {
 		t.Error(err)
 	}
@@ -428,13 +429,13 @@ func testV1CDRsProcessEventStore(t *testing.T) {
 		},
 	}
 	var reply string
-	if err := pecdrsRpc.Call(utils.CDRsV1ProcessEvent, argsEv, &reply); err != nil {
+	if err := pecdrsRpc.Call(context.Background(), utils.CDRsV1ProcessEvent, argsEv, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply received: ", reply)
 	}
 	var cdrs []*engine.CDR
-	if err := pecdrsRpc.Call(utils.CDRsV1GetCDRs, &utils.RPCCDRsFilterWithAPIOpts{
+	if err := pecdrsRpc.Call(context.Background(), utils.CDRsV1GetCDRs, &utils.RPCCDRsFilterWithAPIOpts{
 		RPCCDRsFilter: &utils.RPCCDRsFilter{OriginHosts: []string{"OriginHost5"}}}, &cdrs); err == nil ||
 		err.Error() != "SERVER_ERROR: NOT_FOUND" {
 		t.Fatal("Unexpected error: ", err.Error())
@@ -445,7 +446,7 @@ func testV1CDRsProcessEventStore(t *testing.T) {
 
 func testV1CDRsProcessEventThreshold(t *testing.T) {
 	var reply string
-	if err := pecdrsRpc.Call(utils.APIerSv2SetActions, &utils.AttrSetActions{
+	if err := pecdrsRpc.Call(context.Background(), utils.APIerSv2SetActions, &utils.AttrSetActions{
 		ActionsId: "ACT_LOG",
 		Actions: []*utils.TPAction{
 			{Identifier: utils.MetaLog},
@@ -473,7 +474,7 @@ func testV1CDRsProcessEventThreshold(t *testing.T) {
 			Async:     true,
 		},
 	}
-	if err := pecdrsRpc.Call(utils.APIerSv1SetThresholdProfile, tPrfl, &reply); err != nil {
+	if err := pecdrsRpc.Call(context.Background(), utils.APIerSv1SetThresholdProfile, tPrfl, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply returned", reply)
@@ -485,7 +486,7 @@ func testV1CDRsProcessEventThreshold(t *testing.T) {
 			utils.AllowNegative: true,
 		},
 	}
-	if err := pecdrsRpc.Call(utils.APIerSv2SetAccount, &attrSetAcnt, &reply); err != nil {
+	if err := pecdrsRpc.Call(context.Background(), utils.APIerSv2SetAccount, &attrSetAcnt, &reply); err != nil {
 		t.Fatal(err)
 	}
 	attrs := &utils.AttrSetBalance{
@@ -498,7 +499,7 @@ func testV1CDRsProcessEventThreshold(t *testing.T) {
 			utils.Weight: 10.0,
 		},
 	}
-	if err := pecdrsRpc.Call(utils.APIerSv2SetBalance, attrs, &reply); err != nil {
+	if err := pecdrsRpc.Call(context.Background(), utils.APIerSv2SetBalance, attrs, &reply); err != nil {
 		t.Fatal(err)
 	}
 	args := &engine.ArgV1ProcessEvent{
@@ -521,21 +522,21 @@ func testV1CDRsProcessEventThreshold(t *testing.T) {
 			},
 		},
 	}
-	if err := pecdrsRpc.Call(utils.CDRsV1ProcessEvent, args, &reply); err != nil {
+	if err := pecdrsRpc.Call(context.Background(), utils.CDRsV1ProcessEvent, args, &reply); err != nil {
 		t.Error("Unexpected error: ", err)
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply received: ", reply)
 	}
 
 	var cdrs []*engine.CDR
-	if err := pecdrsRpc.Call(utils.CDRsV1GetCDRs, &utils.RPCCDRsFilterWithAPIOpts{
+	if err := pecdrsRpc.Call(context.Background(), utils.CDRsV1GetCDRs, &utils.RPCCDRsFilterWithAPIOpts{
 		RPCCDRsFilter: &utils.RPCCDRsFilter{OriginHosts: []string{"OriginHost6"}}}, &cdrs); err != nil {
 		t.Error("Unexpected error: ", err)
 	} else if len(cdrs) != 1 {
 		t.Errorf("Expecting: 1, received: %+v", len(cdrs))
 	}
 	var td engine.Threshold
-	if err := pecdrsRpc.Call(utils.ThresholdSv1GetThreshold,
+	if err := pecdrsRpc.Call(context.Background(), utils.ThresholdSv1GetThreshold,
 		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "THD_Test"}}, &td); err != nil {
 		t.Error(err)
 	} else if td.Hits != 1 {
@@ -547,7 +548,7 @@ func testV1CDRsProcessEventThreshold(t *testing.T) {
 		Account: "1005"}
 	time.Sleep(50 * time.Millisecond)
 	expectedVoice := 10.0
-	if err := pecdrsRpc.Call(utils.APIerSv2GetAccount, acntAttrs, &acnt); err != nil {
+	if err := pecdrsRpc.Call(context.Background(), utils.APIerSv2GetAccount, acntAttrs, &acnt); err != nil {
 		t.Error(err)
 	} else if rply := acnt.BalanceMap[utils.MetaVoice].GetTotalValue(); rply != expectedVoice {
 		t.Errorf("Expecting: %v, received: %v", expectedVoice, rply)
@@ -572,7 +573,7 @@ func testV1CDRsProcessEventExport(t *testing.T) {
 			},
 		},
 	}
-	if err := pecdrsRpc.Call(utils.CDRsV1ProcessEvent, args, &reply); err == nil ||
+	if err := pecdrsRpc.Call(context.Background(), utils.CDRsV1ProcessEvent, args, &reply); err == nil ||
 		err.Error() != utils.ErrPartiallyExecuted.Error() { // the export should fail as we test if the cdr is corectly writen in file
 		t.Error("Unexpected error: ", err)
 	}
@@ -655,7 +656,7 @@ func testV1CDRsV2ProcessEventRalS(t *testing.T) {
 		},
 	}
 	var reply []*utils.EventWithFlags
-	if err := pecdrsRpc.Call(utils.CDRsV2ProcessEvent, argsEv, &reply); err != nil {
+	if err := pecdrsRpc.Call(context.Background(), utils.CDRsV2ProcessEvent, argsEv, &reply); err != nil {
 		t.Error(err)
 	}
 	reply[0].Event["CostDetails"] = nil
@@ -671,7 +672,7 @@ func testV1CDRsV2ProcessEventRalS(t *testing.T) {
 		}
 	}
 	var cdrs []*engine.CDR
-	if err := pecdrsRpc.Call(utils.CDRsV1GetCDRs, &utils.RPCCDRsFilterWithAPIOpts{
+	if err := pecdrsRpc.Call(context.Background(), utils.CDRsV1GetCDRs, &utils.RPCCDRsFilterWithAPIOpts{
 		RPCCDRsFilter: &utils.RPCCDRsFilter{OriginHosts: []string{"OriginHost101"}}}, &cdrs); err != nil {
 		t.Fatal("Unexpected error: ", err.Error())
 	} else if len(cdrs) != 1 {
@@ -684,7 +685,7 @@ func testV1CDRsV2ProcessEventRalS(t *testing.T) {
 	argsEv.CGREvent.ID = "test1002"
 	argsEv.CGREvent.Event[utils.Usage] = time.Minute
 
-	if err := pecdrsRpc.Call(utils.CDRsV2ProcessEvent, argsEv, &reply); err != nil {
+	if err := pecdrsRpc.Call(context.Background(), utils.CDRsV2ProcessEvent, argsEv, &reply); err != nil {
 		t.Error(err)
 	}
 	expRply[0].Event["Usage"] = 60000000000.
@@ -702,7 +703,7 @@ func testV1CDRsV2ProcessEventRalS(t *testing.T) {
 	}
 
 	argsEv.CGREvent.Event[utils.Usage] = 30 * time.Second
-	if err := pecdrsRpc.Call(utils.CDRsV2ProcessEvent, argsEv, &reply); err != nil {
+	if err := pecdrsRpc.Call(context.Background(), utils.CDRsV2ProcessEvent, argsEv, &reply); err != nil {
 		t.Error(err)
 	}
 	reply[0].Event["CostDetails"] = nil

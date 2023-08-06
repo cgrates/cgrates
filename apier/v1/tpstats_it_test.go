@@ -22,14 +22,15 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package v1
 
 import (
-	"net/rpc"
-	"net/rpc/jsonrpc"
 	"path"
 	"reflect"
 	"sort"
 	"strings"
 	"testing"
 
+	"github.com/cgrates/birpc"
+	"github.com/cgrates/birpc/context"
+	"github.com/cgrates/birpc/jsonrpc"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -38,7 +39,7 @@ import (
 var (
 	tpStatCfgPath   string
 	tpStatCfg       *config.CGRConfig
-	tpStatRPC       *rpc.Client
+	tpStatRPC       *birpc.Client
 	tpStat          *utils.TPStatProfile
 	tpStatDelay     int
 	tpStatConfigDIR string //run tests for specific configuration
@@ -113,7 +114,7 @@ func testTPStatsRpcConn(t *testing.T) {
 
 func testTPStatsGetTPStatBeforeSet(t *testing.T) {
 	var reply *utils.TPStatProfile
-	if err := tpStatRPC.Call(utils.APIerSv1GetTPStat,
+	if err := tpStatRPC.Call(context.Background(), utils.APIerSv1GetTPStat,
 		&utils.TPTntID{TPid: "TPS1", Tenant: "cgrates.org", ID: "Stat1"},
 		&reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
@@ -144,7 +145,7 @@ func testTPStatsSetTPStat(t *testing.T) {
 	}
 	sort.Strings(tpStat.ThresholdIDs)
 	var result string
-	if err := tpStatRPC.Call(utils.APIerSv1SetTPStat, tpStat, &result); err != nil {
+	if err := tpStatRPC.Call(context.Background(), utils.APIerSv1SetTPStat, tpStat, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -153,7 +154,7 @@ func testTPStatsSetTPStat(t *testing.T) {
 
 func testTPStatsGetTPStatAfterSet(t *testing.T) {
 	var respond *utils.TPStatProfile
-	if err := tpStatRPC.Call(utils.APIerSv1GetTPStat,
+	if err := tpStatRPC.Call(context.Background(), utils.APIerSv1GetTPStat,
 		&utils.TPTntID{TPid: "TPS1", Tenant: "cgrates.org", ID: "Stat1"}, &respond); err != nil {
 		t.Fatal(err)
 	}
@@ -177,7 +178,7 @@ func testTPStatsUpdateTPStat(t *testing.T) {
 	sort.Slice(tpStat.Metrics, func(i, j int) bool {
 		return strings.Compare(tpStat.Metrics[i].MetricID, tpStat.Metrics[j].MetricID) == -1
 	})
-	if err := tpStatRPC.Call(utils.APIerSv1SetTPStat, tpStat, &result); err != nil {
+	if err := tpStatRPC.Call(context.Background(), utils.APIerSv1SetTPStat, tpStat, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -186,7 +187,7 @@ func testTPStatsUpdateTPStat(t *testing.T) {
 
 func testTPStatsGetTPStatAfterUpdate(t *testing.T) {
 	var expectedTPS *utils.TPStatProfile
-	if err := tpStatRPC.Call(utils.APIerSv1GetTPStat,
+	if err := tpStatRPC.Call(context.Background(), utils.APIerSv1GetTPStat,
 		&utils.TPTntID{TPid: "TPS1", Tenant: "cgrates.org", ID: "Stat1"}, &expectedTPS); err != nil {
 		t.Fatal(err)
 	}
@@ -201,7 +202,7 @@ func testTPStatsGetTPStatAfterUpdate(t *testing.T) {
 
 func testTPStatsRemoveTPStat(t *testing.T) {
 	var resp string
-	if err := tpStatRPC.Call(utils.APIerSv1RemoveTPStat,
+	if err := tpStatRPC.Call(context.Background(), utils.APIerSv1RemoveTPStat,
 		&utils.TPTntID{TPid: "TPS1", Tenant: "cgrates.org", ID: "Stat1"}, &resp); err != nil {
 		t.Error(err)
 	} else if resp != utils.OK {
@@ -211,7 +212,7 @@ func testTPStatsRemoveTPStat(t *testing.T) {
 
 func testTPStatsGetTPStatAfterRemove(t *testing.T) {
 	var respond *utils.TPStatProfile
-	if err := tpStatRPC.Call(utils.APIerSv1GetTPStat,
+	if err := tpStatRPC.Call(context.Background(), utils.APIerSv1GetTPStat,
 		&utils.TPTntID{TPid: "TPS1", Tenant: "cgrates.org", ID: "Stat1"},
 		&respond); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)

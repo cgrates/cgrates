@@ -69,7 +69,7 @@ func (dns *DNSAgent) Start() (err error) {
 	defer dns.Unlock()
 	dns.dns, err = agents.NewDNSAgent(dns.cfg, filterS, dns.connMgr)
 	if err != nil {
-		utils.Logger.Err(fmt.Sprintf("<%s> error: <%s>", utils.DNSAgent, err.Error()))
+		utils.Logger.Err(fmt.Sprintf("<%s> failed to initialize agent, error: <%s>", utils.DNSAgent, err.Error()))
 		dns.dns = nil
 		return
 	}

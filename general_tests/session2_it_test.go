@@ -22,11 +22,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package general_tests
 
 import (
-	"net/rpc"
 	"path"
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc"
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/sessions"
@@ -37,7 +38,7 @@ var (
 	ses2CfgDir  string
 	ses2CfgPath string
 	ses2Cfg     *config.CGRConfig
-	ses2RPC     *rpc.Client
+	ses2RPC     *birpc.Client
 
 	ses2Tests = []func(t *testing.T){
 		testSes2ItLoadConfig,
@@ -110,7 +111,7 @@ func testSes2ItRPCConn(t *testing.T) {
 func testSes2ItLoadFromFolder(t *testing.T) {
 	var reply string
 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "tutorial")}
-	if err := ses2RPC.Call(utils.APIerSv1LoadTariffPlanFromFolder, attrs, &reply); err != nil {
+	if err := ses2RPC.Call(context.Background(), utils.APIerSv1LoadTariffPlanFromFolder, attrs, &reply); err != nil {
 		t.Error(err)
 	}
 	time.Sleep(100 * time.Millisecond)
@@ -128,7 +129,7 @@ func testSes2ItInitSession(t *testing.T) {
 		},
 	}
 	var reply string
-	if err := ses2RPC.Call(utils.APIerSv2SetBalance,
+	if err := ses2RPC.Call(context.Background(), utils.APIerSv2SetBalance,
 		attrSetBalance, &reply); err != nil {
 		t.Fatal(err)
 	}
@@ -154,7 +155,7 @@ func testSes2ItInitSession(t *testing.T) {
 		},
 	}
 	var initRpl *sessions.V1InitSessionReply
-	if err := ses2RPC.Call(utils.SessionSv1InitiateSession,
+	if err := ses2RPC.Call(context.Background(), utils.SessionSv1InitiateSession,
 		initArgs, &initRpl); err != nil {
 		t.Fatal(err)
 	}
@@ -163,14 +164,14 @@ func testSes2ItInitSession(t *testing.T) {
 
 func testSes2ItAsActiveSessions(t *testing.T) {
 	var count int
-	if err := ses2RPC.Call(utils.SessionSv1GetActiveSessionsCount, utils.SessionFilter{
+	if err := ses2RPC.Call(context.Background(), utils.SessionSv1GetActiveSessionsCount, utils.SessionFilter{
 		Filters: []string{"*string:~*req.Account:1001"},
 	}, &count); err != nil {
 		t.Fatal(err)
 	} else if count != 2 { // 2 chargers
 		t.Errorf("Expected 2 session received %v session(s)", count)
 	}
-	if err := ses2RPC.Call(utils.SessionSv1GetActiveSessionsCount, utils.SessionFilter{
+	if err := ses2RPC.Call(context.Background(), utils.SessionSv1GetActiveSessionsCount, utils.SessionFilter{
 		Filters: []string{"*string:~*req.Account:1002"},
 	}, &count); err != nil {
 		t.Fatal(err)
@@ -207,20 +208,20 @@ func testSes2StirAuthenticate(t *testing.T) {
 		},
 	}
 	var rply sessions.V1ProcessEventReply
-	if err := ses2RPC.Call(utils.SessionSv1ProcessEvent,
+	if err := ses2RPC.Call(context.Background(), utils.SessionSv1ProcessEvent,
 		args, &rply); err != nil { // no error verificated with success
 		t.Error(err)
 	}
 	// altered originator
 	args.APIOpts[utils.OptsStirOriginatorTn] = "1005"
-	if err := ses2RPC.Call(utils.SessionSv1ProcessEvent,
+	if err := ses2RPC.Call(context.Background(), utils.SessionSv1ProcessEvent,
 		args, &rply); err == nil || err.Error() != "*stir_authenticate: wrong originatorTn" {
 		t.Errorf("Expected error :%q ,receved: %v", "*stir_authenticate: wrong originatorTn", err)
 	}
 
 	// altered identity
 	args.APIOpts[utils.OptsStirIdentity] = "eyJhbGciOiJFUzI1NiIsInBwdCI6InNoYWtlbiIsInR5cCI6InBhc3Nwb3J0IiwieDV1IjoiL3Vzci9zaGFyZS9jZ3JhdGVzL3N0aXIvc3Rpcl9wdWJrZXkucGVtIn0.eyJhdHRlc3QiOiJBIiwiZGVzdCI6eyJ0biI6WyIxMDAyIl19LCJpYXQiOjE1ODcwMzg4MDIsIm9yaWciOnsidG4iOiIxMDA1In0sIm9yaWdpZCI6IjEyMzQ1NiJ9.cMEMlFnfyTu8uxfeU4RoZTamA7ifFT9Ibwrvi1_LKwL2xAU6fZ_CSIxKbtyOpNhM_sV03x7CfA_v0T4sHkifzg;info=</usr/share/cgrates/stir/stir_pubkey.pem>;ppt=shaken"
-	if err := ses2RPC.Call(utils.SessionSv1ProcessEvent,
+	if err := ses2RPC.Call(context.Background(), utils.SessionSv1ProcessEvent,
 		args, &rply); err == nil || err.Error() != "*stir_authenticate: crypto/ecdsa: verification error" {
 		t.Errorf("Expected error :%q ,receved: %v", "*stir_authenticate: crypto/ecdsa: verification error", err)
 	}
@@ -249,7 +250,7 @@ func testSes2StirInit(t *testing.T) {
 		},
 	}
 	var rply sessions.V1ProcessEventReply
-	if err := ses2RPC.Call(utils.SessionSv1ProcessEvent,
+	if err := ses2RPC.Call(context.Background(), utils.SessionSv1ProcessEvent,
 		args, &rply); err != nil { // no error verificated with success
 		t.Error(err)
 	}
@@ -260,7 +261,7 @@ func testSes2StirInit(t *testing.T) {
 
 func testSes2STIRAuthenticate(t *testing.T) {
 	var rply string
-	if err := ses2RPC.Call(utils.SessionSv1STIRAuthenticate,
+	if err := ses2RPC.Call(context.Background(), utils.SessionSv1STIRAuthenticate,
 		&sessions.V1STIRAuthenticateArgs{
 			Attest:             []string{"A"},
 			PayloadMaxDuration: "-1",
@@ -288,7 +289,7 @@ func testSes2STIRIdentity(t *testing.T) {
 		OverwriteIAT:   true,
 	}
 	var rply string
-	if err := ses2RPC.Call(utils.SessionSv1STIRIdentity,
+	if err := ses2RPC.Call(context.Background(), utils.SessionSv1STIRIdentity,
 		args, &rply); err != nil {
 		t.Error(err)
 	}

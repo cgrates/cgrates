@@ -21,6 +21,7 @@ package v1
 import (
 	"time"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -35,7 +36,7 @@ type AttrGetCost struct {
 	APIOpts     map[string]any
 }
 
-func (apierSv1 *APIerSv1) GetCost(attrs *AttrGetCost, ec *engine.EventCost) error {
+func (apierSv1 *APIerSv1) GetCost(ctx *context.Context, attrs *AttrGetCost, ec *engine.EventCost) error {
 	if apierSv1.Responder == nil {
 		return utils.NewErrNotConnected(utils.RALService)
 	}
@@ -59,7 +60,7 @@ func (apierSv1 *APIerSv1) GetCost(attrs *AttrGetCost, ec *engine.EventCost) erro
 		DurationIndex: usage,
 	}
 	var cc engine.CallCost
-	if err := apierSv1.Responder.GetCost(
+	if err := apierSv1.Responder.GetCost(context.Background(),
 		&engine.CallDescriptorWithAPIOpts{
 			CallDescriptor: cd,
 			APIOpts:        attrs.APIOpts,
@@ -80,7 +81,7 @@ type AttrGetDataCost struct {
 	Opts       map[string]any
 }
 
-func (apierSv1 *APIerSv1) GetDataCost(attrs *AttrGetDataCost, reply *engine.DataCost) error {
+func (apierSv1 *APIerSv1) GetDataCost(ctx *context.Context, attrs *AttrGetDataCost, reply *engine.DataCost) error {
 	if apierSv1.Responder == nil {
 		return utils.NewErrNotConnected(utils.RALService)
 	}
@@ -99,10 +100,12 @@ func (apierSv1 *APIerSv1) GetDataCost(attrs *AttrGetDataCost, reply *engine.Data
 		ToR:           utils.MetaData,
 	}
 	var cc engine.CallCost
-	if err := apierSv1.Responder.GetCost(&engine.CallDescriptorWithAPIOpts{
-		CallDescriptor: cd,
-		APIOpts:        attrs.Opts,
-	}, &cc); err != nil {
+	if err := apierSv1.Responder.GetCost(
+		context.Background(),
+		&engine.CallDescriptorWithAPIOpts{
+			CallDescriptor: cd,
+			APIOpts:        attrs.Opts,
+		}, &cc); err != nil {
 		return utils.NewErrServerError(err)
 	}
 	if dc, err := cc.ToDataCost(); err != nil {

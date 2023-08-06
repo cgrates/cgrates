@@ -26,12 +26,12 @@ import (
 	"sync"
 	"time"
 
-	"github.com/cenkalti/rpc2"
+	"github.com/cgrates/birpc"
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/sessions"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/cgrates/rpcclient"
 	"github.com/fiorix/go-diameter/v4/diam"
 	"github.com/fiorix/go-diameter/v4/diam/avp"
 	"github.com/fiorix/go-diameter/v4/diam/datatype"
@@ -57,6 +57,13 @@ func NewDiameterAgent(cgrCfg *config.CGRConfig, filterS *engine.FilterS,
 		dpa:     make(map[string]chan *diam.Message),
 		peers:   make(map[string]diam.Conn),
 	}
+	srv, err := birpc.NewServiceWithMethodsRename(da, utils.SessionSv1, true, func(oldFn string) (newFn string) {
+		return strings.TrimPrefix(oldFn, "V1")
+	})
+	if err != nil {
+		return nil, err
+	}
+	da.ctx = context.WithClient(context.TODO(), srv)
 	dictsPath := cgrCfg.DiameterAgentCfg().DictionariesPath
 	if len(dictsPath) != 0 {
 		if err := loadDictionaries(dictsPath, utils.DiameterAgent); err != nil {
@@ -94,6 +101,8 @@ type DiameterAgent struct {
 	peers    map[string]diam.Conn // peer index by OriginHost;OriginRealm
 	dpa      map[string]chan *diam.Message
 	dpaLck   sync.RWMutex
+
+	ctx *context.Context
 }
 
 // ListenAndServe is called when DiameterAgent is started, usually from within cmd/cgr-engine
@@ -268,16 +277,20 @@ func (da *DiameterAgent) handleMessage(c diam.Conn, m *diam.Message) {
 	for _, reqProcessor := range da.cgrCfg.DiameterAgentCfg().RequestProcessors {
 		var lclProcessed bool
 		lclProcessed, err = processRequest(
+			da.ctx,
 			reqProcessor,
 			NewAgentRequest(
-				diamDP, reqVars, cgrRplyNM, rply, opts,
-				reqProcessor.Tenant, da.cgrCfg.GeneralCfg().DefaultTenant,
-				utils.FirstNonEmpty(reqProcessor.Timezone,
-					da.cgrCfg.GeneralCfg().DefaultTimezone),
+				diamDP, reqVars, cgrRplyNM, rply,
+				opts, reqProcessor.Tenant,
+				da.cgrCfg.GeneralCfg().DefaultTenant,
+				utils.FirstNonEmpty(
+					reqProcessor.Timezone,
+					da.cgrCfg.GeneralCfg().DefaultTimezone,
+				),
 				da.filterS, nil),
 			utils.DiameterAgent, da.connMgr,
 			da.cgrCfg.DiameterAgentCfg().SessionSConns,
-			da, da.filterS)
+			da.filterS)
 		if lclProcessed {
 			processed = lclProcessed
 		}
@@ -312,13 +325,13 @@ func (da *DiameterAgent) handleMessage(c diam.Conn, m *diam.Message) {
 	writeOnConn(c, a)
 }
 
-// Call implements rpcclient.ClientConnector interface
-func (da *DiameterAgent) Call(serviceMethod string, args any, reply any) error {
+// Call implements birpc.ClientConnector interface
+func (da *DiameterAgent) Call(ctx *context.Context, serviceMethod string, args any, reply any) error {
 	return utils.RPCCall(da, serviceMethod, args, reply)
 }
 
 // V1DisconnectSession is part of the sessions.BiRPClient
-func (da *DiameterAgent) V1DisconnectSession(args utils.AttrDisconnectSession, reply *string) (err error) {
+func (da *DiameterAgent) V1DisconnectSession(ctx *context.Context, args utils.AttrDisconnectSession, reply *string) (err error) {
 	ssID, has := args.EventStart[utils.OriginID]
 	if !has {
 		utils.Logger.Info(
@@ -334,14 +347,14 @@ func (da *DiameterAgent) V1DisconnectSession(args utils.AttrDisconnectSession, r
 	case utils.MetaASR:
 		return da.sendASR(originID, reply)
 	case utils.MetaRAR:
-		return da.V1ReAuthorize(originID, reply)
+		return da.V1ReAuthorize(ctx, originID, reply)
 	default:
 		return fmt.Errorf("Unsupported request type <%s>", da.cgrCfg.DiameterAgentCfg().ForcedDisconnect)
 	}
 }
 
 // V1GetActiveSessionIDs is part of the sessions.BiRPClient
-func (da *DiameterAgent) V1GetActiveSessionIDs(ignParam string,
+func (da *DiameterAgent) V1GetActiveSessionIDs(ctx *context.Context, ignParam string,
 	sessionIDs *[]*sessions.SessionID) error {
 	return utils.ErrNotImplemented
 }
@@ -383,7 +396,7 @@ func (da *DiameterAgent) sendASR(originID string, reply *string) (err error) {
 }
 
 // V1ReAuthorize  sends a rar message to diameter client
-func (da *DiameterAgent) V1ReAuthorize(originID string, reply *string) (err error) {
+func (da *DiameterAgent) V1ReAuthorize(ctx *context.Context, originID string, reply *string) (err error) {
 	if originID == "" {
 		utils.Logger.Info(
 			fmt.Sprintf("<%s> cannot send RAR, missing session ID",
@@ -506,7 +519,7 @@ func (da *DiameterAgent) handleDPA(c diam.Conn, m *diam.Message) {
 }
 
 // V1DisconnectPeer  sends a DPR meseage to diameter client
-func (da *DiameterAgent) V1DisconnectPeer(args *utils.DPRArgs, reply *string) (err error) {
+func (da *DiameterAgent) V1DisconnectPeer(ctx *context.Context, args *utils.DPRArgs, reply *string) (err error) {
 	if args == nil {
 		utils.Logger.Info(
 			fmt.Sprintf("<%s> cannot send DPR, missing arrguments",
@@ -566,67 +579,6 @@ func (da *DiameterAgent) V1DisconnectPeer(args *utils.DPRArgs, reply *string) (e
 }
 
 // V1WarnDisconnect is used to implement the sessions.BiRPClient interface
-func (*DiameterAgent) V1WarnDisconnect(args map[string]any, reply *string) (err error) {
+func (*DiameterAgent) V1WarnDisconnect(ctx *context.Context, args map[string]any, reply *string) (err error) {
 	return utils.ErrNotImplemented
-}
-
-// CallBiRPC is part of utils.BiRPCServer interface to help internal connections do calls over rpcclient.ClientConnector interface
-func (da *DiameterAgent) CallBiRPC(clnt rpcclient.ClientConnector, serviceMethod string, args any, reply any) error {
-	return utils.BiRPCCall(da, clnt, serviceMethod, args, reply)
-}
-
-// BiRPCv1DisconnectSession is internal method to disconnect session in asterisk
-func (da *DiameterAgent) BiRPCv1DisconnectSession(clnt rpcclient.ClientConnector, args utils.AttrDisconnectSession, reply *string) error {
-	return da.V1DisconnectSession(args, reply)
-}
-
-// BiRPCv1GetActiveSessionIDs is internal method to  get all active sessions in asterisk
-func (da *DiameterAgent) BiRPCv1GetActiveSessionIDs(clnt rpcclient.ClientConnector, ignParam string,
-	sessionIDs *[]*sessions.SessionID) error {
-	return da.V1GetActiveSessionIDs(ignParam, sessionIDs)
-
-}
-
-// BiRPCv1ReAuthorize is used to implement the sessions.BiRPClient interface
-func (da *DiameterAgent) BiRPCv1ReAuthorize(clnt rpcclient.ClientConnector, originID string, reply *string) (err error) {
-	return da.V1ReAuthorize(originID, reply)
-}
-
-// BiRPCv1DisconnectPeer is used to implement the sessions.BiRPClient interface
-func (da *DiameterAgent) BiRPCv1DisconnectPeer(clnt rpcclient.ClientConnector, args *utils.DPRArgs, reply *string) (err error) {
-	return da.V1DisconnectPeer(args, reply)
-}
-
-// BiRPCv1WarnDisconnect is used to implement the sessions.BiRPClient interface
-func (da *DiameterAgent) BiRPCv1WarnDisconnect(clnt rpcclient.ClientConnector, args map[string]any, reply *string) (err error) {
-	return da.V1WarnDisconnect(args, reply)
-}
-
-// BiRPCv1CapsError is used to return error when the caps limit is hit
-func (da *DiameterAgent) BiRPCv1CapsError(clnt rpcclient.ClientConnector, args any, reply *string) (err error) {
-	return utils.ErrMaxConcurrentRPCExceeded
-}
-
-// Handlers is used to implement the rpcclient.BiRPCConector interface
-func (da *DiameterAgent) Handlers() map[string]any {
-	return map[string]any{
-		utils.SessionSv1DisconnectSession: func(clnt *rpc2.Client, args utils.AttrDisconnectSession, rply *string) error {
-			return da.BiRPCv1DisconnectSession(clnt, args, rply)
-		},
-		utils.SessionSv1GetActiveSessionIDs: func(clnt *rpc2.Client, args string, rply *[]*sessions.SessionID) error {
-			return da.BiRPCv1GetActiveSessionIDs(clnt, args, rply)
-		},
-		utils.SessionSv1ReAuthorize: func(clnt *rpc2.Client, args string, rply *string) (err error) {
-			return da.BiRPCv1ReAuthorize(clnt, args, rply)
-		},
-		utils.SessionSv1DisconnectPeer: func(clnt *rpc2.Client, args *utils.DPRArgs, rply *string) (err error) {
-			return da.BiRPCv1DisconnectPeer(clnt, args, rply)
-		},
-		utils.SessionSv1WarnDisconnect: func(clnt *rpc2.Client, args map[string]any, rply *string) (err error) {
-			return da.BiRPCv1WarnDisconnect(clnt, args, rply)
-		},
-		utils.SessionSv1CapsError: func(clnt *rpc2.Client, args any, rply *string) (err error) {
-			return da.BiRPCv1CapsError(clnt, args, rply)
-		},
-	}
 }

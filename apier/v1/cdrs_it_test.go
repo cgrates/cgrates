@@ -21,11 +21,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package v1
 
 import (
-	"net/rpc"
 	"path"
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc"
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -34,7 +35,7 @@ import (
 var (
 	cdrsCfgPath string
 	cdrsCfg     *config.CGRConfig
-	cdrsRpc     *rpc.Client
+	cdrsRpc     *birpc.Client
 	cdrsConfDIR string // run the tests for specific configuration
 
 	sTestsCDRsIT = []func(t *testing.T){
@@ -117,7 +118,7 @@ func testV1CDRsRpcConn(t *testing.T) {
 
 func testV1CDRsLoadTariffPlanFromFolder(t *testing.T) {
 	var loadInst string
-	if err := cdrsRpc.Call(utils.APIerSv1LoadTariffPlanFromFolder,
+	if err := cdrsRpc.Call(context.Background(), utils.APIerSv1LoadTariffPlanFromFolder,
 		&utils.AttrLoadTpFromFolder{FolderPath: path.Join(
 			*dataDir, "tariffplans", "testit")}, &loadInst); err != nil {
 		t.Error(err)
@@ -141,7 +142,7 @@ func testV1CDRsProcessEventWithRefund(t *testing.T) {
 		},
 	}
 	var reply string
-	if err := cdrsRpc.Call(utils.APIerSv1SetBalance, attrSetBalance, &reply); err != nil {
+	if err := cdrsRpc.Call(context.Background(), utils.APIerSv1SetBalance, attrSetBalance, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf("received: %s", reply)
@@ -156,13 +157,13 @@ func testV1CDRsProcessEventWithRefund(t *testing.T) {
 			utils.Weight: 10,
 		},
 	}
-	if err := cdrsRpc.Call(utils.APIerSv1SetBalance, attrSetBalance, &reply); err != nil {
+	if err := cdrsRpc.Call(context.Background(), utils.APIerSv1SetBalance, attrSetBalance, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf("received: <%s>", reply)
 	}
 	expectedVoice := 300000000000.0
-	if err := cdrsRpc.Call(utils.APIerSv2GetAccount, acntAttrs, &acnt); err != nil {
+	if err := cdrsRpc.Call(context.Background(), utils.APIerSv2GetAccount, acntAttrs, &acnt); err != nil {
 		t.Error(err)
 	} else if rply := acnt.BalanceMap[utils.MetaVoice].GetTotalValue(); rply != expectedVoice {
 		t.Errorf("Expecting: %v, received: %v", expectedVoice, rply)
@@ -182,13 +183,13 @@ func testV1CDRsProcessEventWithRefund(t *testing.T) {
 			},
 		},
 	}
-	if err := cdrsRpc.Call(utils.CDRsV1ProcessEvent, argsEv, &reply); err != nil {
+	if err := cdrsRpc.Call(context.Background(), utils.CDRsV1ProcessEvent, argsEv, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply received: ", reply)
 	}
 	var cdrs []*engine.ExternalCDR
-	if err := cdrsRpc.Call(utils.APIerSv1GetCDRs, &utils.AttrGetCdrs{}, &cdrs); err != nil {
+	if err := cdrsRpc.Call(context.Background(), utils.APIerSv1GetCDRs, &utils.AttrGetCdrs{}, &cdrs); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(cdrs) != 1 {
 		t.Error("Unexpected number of CDRs returned: ", len(cdrs))
@@ -197,7 +198,7 @@ func testV1CDRsProcessEventWithRefund(t *testing.T) {
 			t.Errorf("Unexpected cost for CDR: %f", cdrs[0].Cost)
 		}
 	}
-	if err := cdrsRpc.Call(utils.APIerSv2GetAccount, acntAttrs, &acnt); err != nil {
+	if err := cdrsRpc.Call(context.Background(), utils.APIerSv2GetAccount, acntAttrs, &acnt); err != nil {
 		t.Error(err)
 	} else if blc1 := acnt.GetBalanceWithID(utils.MetaVoice, "BALANCE1"); blc1.Value != 0 {
 		t.Errorf("Balance1 is: %s", utils.ToIJSON(blc1))
@@ -205,10 +206,10 @@ func testV1CDRsProcessEventWithRefund(t *testing.T) {
 		t.Errorf("Balance2 is: %s", utils.ToIJSON(blc2))
 	}
 	// without re-rate we should be denied
-	if err := cdrsRpc.Call(utils.CDRsV1ProcessEvent, argsEv, &reply); err == nil {
+	if err := cdrsRpc.Call(context.Background(), utils.CDRsV1ProcessEvent, argsEv, &reply); err == nil {
 		t.Error("should receive error here")
 	}
-	if err := cdrsRpc.Call(utils.APIerSv2GetAccount, acntAttrs, &acnt); err != nil {
+	if err := cdrsRpc.Call(context.Background(), utils.APIerSv2GetAccount, acntAttrs, &acnt); err != nil {
 		t.Error(err)
 	} else if blc1 := acnt.GetBalanceWithID(utils.MetaVoice, "BALANCE1"); blc1.Value != 0 {
 		t.Errorf("Balance1 is: %s", utils.ToIJSON(blc1))
@@ -230,12 +231,12 @@ func testV1CDRsProcessEventWithRefund(t *testing.T) {
 			},
 		},
 	}
-	if err := cdrsRpc.Call(utils.CDRsV1ProcessEvent, argsEv, &reply); err != nil {
+	if err := cdrsRpc.Call(context.Background(), utils.CDRsV1ProcessEvent, argsEv, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply received: ", reply)
 	}
-	if err := cdrsRpc.Call(utils.APIerSv2GetAccount, acntAttrs, &acnt); err != nil {
+	if err := cdrsRpc.Call(context.Background(), utils.APIerSv2GetAccount, acntAttrs, &acnt); err != nil {
 		t.Error(err)
 	} else if blc1 := acnt.GetBalanceWithID(utils.MetaVoice, "BALANCE1"); blc1.Value != 60000000000 {
 		t.Errorf("Balance1 is: %s", utils.ToIJSON(blc1))
@@ -261,14 +262,14 @@ func testV1CDRsRefundOutOfSessionCost(t *testing.T) {
 		},
 	}
 	var reply string
-	if err := cdrsRpc.Call(utils.APIerSv1SetBalance, attrSetBalance, &reply); err != nil {
+	if err := cdrsRpc.Call(context.Background(), utils.APIerSv1SetBalance, attrSetBalance, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf("received: %s", reply)
 	}
 
 	exp := 123.0
-	if err := cdrsRpc.Call(utils.APIerSv2GetAccount, acntAttrs, &acnt); err != nil {
+	if err := cdrsRpc.Call(context.Background(), utils.APIerSv2GetAccount, acntAttrs, &acnt); err != nil {
 		t.Error(err)
 	} else if rply := acnt.BalanceMap[utils.MetaMonetary].GetTotalValue(); rply != exp {
 		t.Errorf("Expecting: %v, received: %v", exp, rply)
@@ -354,7 +355,7 @@ func testV1CDRsRefundOutOfSessionCost(t *testing.T) {
 			},
 		},
 	}
-	if err := cdrsRpc.Call(utils.CDRsV1StoreSessionCost,
+	if err := cdrsRpc.Call(context.Background(), utils.CDRsV1StoreSessionCost,
 		attr, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
@@ -377,7 +378,7 @@ func testV1CDRsRefundOutOfSessionCost(t *testing.T) {
 			},
 		},
 	}
-	if err := cdrsRpc.Call(utils.CDRsV1ProcessEvent, argsEv, &reply); err != nil {
+	if err := cdrsRpc.Call(context.Background(), utils.CDRsV1ProcessEvent, argsEv, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply received: ", reply)
@@ -386,7 +387,7 @@ func testV1CDRsRefundOutOfSessionCost(t *testing.T) {
 	// Initial the balance was 123.0
 	// after refunc the balance become 123.0+2.3=125.3
 	exp = 124.0454
-	if err := cdrsRpc.Call(utils.APIerSv2GetAccount, acntAttrs, &acnt); err != nil {
+	if err := cdrsRpc.Call(context.Background(), utils.APIerSv2GetAccount, acntAttrs, &acnt); err != nil {
 		t.Error(err)
 	} else if rply := acnt.BalanceMap[utils.MetaMonetary].GetTotalValue(); rply != exp {
 		t.Errorf("Expecting: %v, received: %v", exp, rply)
@@ -410,14 +411,14 @@ func testV1CDRsRefundCDR(t *testing.T) {
 		},
 	}
 	var reply string
-	if err := cdrsRpc.Call(utils.APIerSv1SetBalance, attrSetBalance, &reply); err != nil {
+	if err := cdrsRpc.Call(context.Background(), utils.APIerSv1SetBalance, attrSetBalance, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf("received: %s", reply)
 	}
 
 	exp := 123.0
-	if err := cdrsRpc.Call(utils.APIerSv2GetAccount, acntAttrs, &acnt); err != nil {
+	if err := cdrsRpc.Call(context.Background(), utils.APIerSv2GetAccount, acntAttrs, &acnt); err != nil {
 		t.Error(err)
 	} else if rply := acnt.BalanceMap[utils.MetaMonetary].GetTotalValue(); rply != exp {
 		t.Errorf("Expecting: %v, received: %v", exp, rply)
@@ -510,7 +511,7 @@ func testV1CDRsRefundCDR(t *testing.T) {
 			},
 		},
 	}
-	if err := cdrsRpc.Call(utils.CDRsV1ProcessEvent, argsEv, &reply); err != nil {
+	if err := cdrsRpc.Call(context.Background(), utils.CDRsV1ProcessEvent, argsEv, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply received: ", reply)
@@ -519,7 +520,7 @@ func testV1CDRsRefundCDR(t *testing.T) {
 	// Initial the balance was 123.0
 	// after refund the balance become 123.0 + 2.3 = 125.3
 	exp = 125.3
-	if err := cdrsRpc.Call(utils.APIerSv2GetAccount, acntAttrs, &acnt); err != nil {
+	if err := cdrsRpc.Call(context.Background(), utils.APIerSv2GetAccount, acntAttrs, &acnt); err != nil {
 		t.Error(err)
 	} else if rply := acnt.BalanceMap[utils.MetaMonetary].GetTotalValue(); rply != exp {
 		t.Errorf("Expecting: %v, received: %v", exp, rply)
@@ -528,7 +529,7 @@ func testV1CDRsRefundCDR(t *testing.T) {
 
 func testV1CDRsLoadTariffPlanFromFolderSMS(t *testing.T) {
 	var loadInst string
-	if err := cdrsRpc.Call(utils.APIerSv1LoadTariffPlanFromFolder,
+	if err := cdrsRpc.Call(context.Background(), utils.APIerSv1LoadTariffPlanFromFolder,
 		&utils.AttrLoadTpFromFolder{FolderPath: path.Join(
 			*dataDir, "tariffplans", "tutorial")}, &loadInst); err != nil {
 		t.Error(err)
@@ -544,7 +545,7 @@ func testV1CDRsAddBalanceForSMS(t *testing.T) {
 		BalanceType: utils.MetaSMS,
 		Value:       1000,
 	}
-	if err := cdrsRpc.Call(utils.APIerSv1AddBalance, attrs, &reply); err != nil {
+	if err := cdrsRpc.Call(context.Background(), utils.APIerSv1AddBalance, attrs, &reply); err != nil {
 		t.Error("Got error on APIerSv1.AddBalance: ", err.Error())
 	} else if reply != utils.OK {
 		t.Errorf("Calling APIerSv1.AddBalance received: %s", reply)
@@ -556,7 +557,7 @@ func testV1CDRsAddBalanceForSMS(t *testing.T) {
 		BalanceType: utils.MetaMonetary,
 		Value:       10,
 	}
-	if err := cdrsRpc.Call(utils.APIerSv1AddBalance, attrs, &reply); err != nil {
+	if err := cdrsRpc.Call(context.Background(), utils.APIerSv1AddBalance, attrs, &reply); err != nil {
 		t.Error("Got error on APIerSv1.AddBalance: ", err.Error())
 	} else if reply != utils.OK {
 		t.Errorf("Calling APIerSv1.AddBalance received: %s", reply)
@@ -568,7 +569,7 @@ func testV1CDRsAddBalanceForSMS(t *testing.T) {
 		Account: "testV1CDRsAddBalanceForSMS",
 	}
 
-	if err := cdrsRpc.Call(utils.APIerSv2GetAccount, attrAcc, &acnt); err != nil {
+	if err := cdrsRpc.Call(context.Background(), utils.APIerSv2GetAccount, attrAcc, &acnt); err != nil {
 		t.Error(err)
 	} else if len(acnt.BalanceMap[utils.MetaSMS]) != 1 {
 		t.Errorf("Expecting: %v, received: %v", 1, len(acnt.BalanceMap[utils.MetaSMS]))
@@ -598,13 +599,13 @@ func testV1CDRsAddBalanceForSMS(t *testing.T) {
 			},
 		},
 	}
-	if err := cdrsRpc.Call(utils.CDRsV1ProcessEvent, argsEv, &reply); err != nil {
+	if err := cdrsRpc.Call(context.Background(), utils.CDRsV1ProcessEvent, argsEv, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply received: ", reply)
 	}
 
-	if err := cdrsRpc.Call(utils.APIerSv2GetAccount, attrAcc, &acnt); err != nil {
+	if err := cdrsRpc.Call(context.Background(), utils.APIerSv2GetAccount, attrAcc, &acnt); err != nil {
 		t.Error(err)
 	} else if len(acnt.BalanceMap[utils.MetaSMS]) != 1 {
 		t.Errorf("Expecting: %v, received: %v", 1, len(acnt.BalanceMap[utils.MetaSMS]))

@@ -22,11 +22,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package general_tests
 
 import (
-	"net/rpc"
 	"path"
 	"reflect"
 	"testing"
 
+	"github.com/cgrates/birpc"
+	"github.com/cgrates/birpc/context"
 	v1 "github.com/cgrates/cgrates/apier/v1"
 	"github.com/cgrates/cgrates/engine"
 
@@ -37,7 +38,7 @@ import (
 var (
 	attrFltrCfgPath     string
 	attrFltrCfg         *config.CGRConfig
-	attrFltrRPC         *rpc.Client
+	attrFltrRPC         *birpc.Client
 	alsPrfFltrConfigDIR string
 	sTestsAlsFltrPrf    = []func(t *testing.T){
 		testAttributeFltrSInitCfg,
@@ -123,14 +124,14 @@ func testAttributeSetFltr1(t *testing.T) {
 		},
 	}
 	var result string
-	if err := attrFltrRPC.Call(utils.APIerSv1SetFilter, filter, &result); err != nil {
+	if err := attrFltrRPC.Call(context.Background(), utils.APIerSv1SetFilter, filter, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
 
 	var indexes []string
-	if err := attrFltrRPC.Call(utils.APIerSv1GetFilterIndexes, &v1.AttrGetFilterIndexes{
+	if err := attrFltrRPC.Call(context.Background(), utils.APIerSv1GetFilterIndexes, &v1.AttrGetFilterIndexes{
 		ItemType: utils.MetaAttributes, Tenant: "cgrates.org", FilterType: utils.MetaPrefix,
 		Context: utils.MetaSessionS},
 		&indexes); err == nil || err.Error() != utils.ErrNotFound.Error() {
@@ -155,7 +156,7 @@ func testAttributeSetProfile(t *testing.T) {
 			Weight: 20,
 		},
 	}
-	if err := attrFltrRPC.Call(utils.APIerSv1SetAttributeProfile, alsPrf, &result); err != nil {
+	if err := attrFltrRPC.Call(context.Background(), utils.APIerSv1SetAttributeProfile, alsPrf, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -171,7 +172,7 @@ func testAttributeSetProfile(t *testing.T) {
 		},
 	}
 	var rplyEv engine.AttrSProcessEventReply
-	if err := attrFltrRPC.Call(utils.AttributeSv1ProcessEvent,
+	if err := attrFltrRPC.Call(context.Background(), utils.AttributeSv1ProcessEvent,
 		ev, &rplyEv); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("Expected %+v, received %+v", utils.ErrNotFound, err)
 	}
@@ -180,7 +181,7 @@ func testAttributeSetProfile(t *testing.T) {
 	expIdx := []string{
 		"*prefix:*req.Subject:48:ApierTest",
 	}
-	if err := attrFltrRPC.Call(utils.APIerSv1GetFilterIndexes, &v1.AttrGetFilterIndexes{
+	if err := attrFltrRPC.Call(context.Background(), utils.APIerSv1GetFilterIndexes, &v1.AttrGetFilterIndexes{
 		ItemType: utils.MetaAttributes, Tenant: "cgrates.org", FilterType: utils.MetaPrefix,
 		Context: utils.MetaSessionS},
 		&indexes); err != nil {
@@ -204,7 +205,7 @@ func testAttributeSetFltr2(t *testing.T) {
 			}},
 		},
 	}
-	if err := attrFltrRPC.Call(utils.APIerSv1SetFilter, filter, &result); err != nil {
+	if err := attrFltrRPC.Call(context.Background(), utils.APIerSv1SetFilter, filter, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -235,7 +236,7 @@ func testAttributeSetFltr2(t *testing.T) {
 		},
 	}
 	var rplyEv engine.AttrSProcessEventReply
-	if err := attrFltrRPC.Call(utils.AttributeSv1ProcessEvent,
+	if err := attrFltrRPC.Call(context.Background(), utils.AttributeSv1ProcessEvent,
 		ev, &rplyEv); err != nil {
 		t.Fatal(err)
 	} else if !reflect.DeepEqual(exp, rplyEv) {
@@ -246,7 +247,7 @@ func testAttributeSetFltr2(t *testing.T) {
 	expIdx := []string{
 		"*prefix:*req.Subject:44:ApierTest",
 	}
-	if err := attrFltrRPC.Call(utils.APIerSv1GetFilterIndexes, &v1.AttrGetFilterIndexes{
+	if err := attrFltrRPC.Call(context.Background(), utils.APIerSv1GetFilterIndexes, &v1.AttrGetFilterIndexes{
 		ItemType: utils.MetaAttributes, Tenant: "cgrates.org", FilterType: utils.MetaPrefix,
 		Context: utils.MetaSessionS},
 		&indexes); err != nil {
@@ -259,14 +260,14 @@ func testAttributeSetFltr2(t *testing.T) {
 
 func testAttributeRemoveFltr(t *testing.T) {
 	var result string
-	if err := attrFltrRPC.Call(utils.APIerSv1RemoveAttributeProfile, &utils.TenantIDWithAPIOpts{
+	if err := attrFltrRPC.Call(context.Background(), utils.APIerSv1RemoveAttributeProfile, &utils.TenantIDWithAPIOpts{
 		TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ApierTest"}}, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
 
-	if err := attrFltrRPC.Call(utils.APIerSv1RemoveFilter, &utils.TenantIDWithAPIOpts{
+	if err := attrFltrRPC.Call(context.Background(), utils.APIerSv1RemoveFilter, &utils.TenantIDWithAPIOpts{
 		TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "FLTR_1"}}, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
@@ -274,7 +275,7 @@ func testAttributeRemoveFltr(t *testing.T) {
 	}
 
 	var indexes []string
-	if err := attrFltrRPC.Call(utils.APIerSv1GetFilterIndexes, &v1.AttrGetFilterIndexes{
+	if err := attrFltrRPC.Call(context.Background(), utils.APIerSv1GetFilterIndexes, &v1.AttrGetFilterIndexes{
 		ItemType: utils.MetaAttributes, Tenant: "cgrates.org", FilterType: utils.MetaPrefix,
 		Context: utils.MetaSessionS},
 		&indexes); err == nil || err.Error() != utils.ErrNotFound.Error() {

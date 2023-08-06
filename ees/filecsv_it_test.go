@@ -22,7 +22,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package ees
 
 import (
-	"net/rpc"
 	"os"
 	"path"
 	"path/filepath"
@@ -30,6 +29,9 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc/context"
+
+	"github.com/cgrates/birpc"
 	"github.com/cgrates/cgrates/utils"
 
 	"github.com/cgrates/cgrates/engine"
@@ -41,7 +43,7 @@ var (
 	csvConfigDir string
 	csvCfgPath   string
 	csvCfg       *config.CGRConfig
-	csvRpc       *rpc.Client
+	csvRpc       *birpc.Client
 
 	sTestsCsv = []func(t *testing.T){
 		testCreateDirectory,
@@ -184,13 +186,13 @@ func testCsvExportEvent(t *testing.T) {
 		},
 	}
 	var reply map[string]utils.MapStorage
-	if err := csvRpc.Call(utils.EeSv1ProcessEvent, eventVoice, &reply); err != nil {
+	if err := csvRpc.Call(context.Background(), utils.EeSv1ProcessEvent, eventVoice, &reply); err != nil {
 		t.Error(err)
 	}
-	if err := csvRpc.Call(utils.EeSv1ProcessEvent, eventData, &reply); err != nil {
+	if err := csvRpc.Call(context.Background(), utils.EeSv1ProcessEvent, eventData, &reply); err != nil {
 		t.Error(err)
 	}
-	if err := csvRpc.Call(utils.EeSv1ProcessEvent, eventSMS, &reply); err != nil {
+	if err := csvRpc.Call(context.Background(), utils.EeSv1ProcessEvent, eventSMS, &reply); err != nil {
 		t.Error(err)
 	}
 	time.Sleep(time.Second)
@@ -410,10 +412,10 @@ func testCsvExportComposedEvent(t *testing.T) {
 		},
 	}
 	var reply map[string]utils.MapStorage
-	if err := csvRpc.Call(utils.EeSv1ProcessEvent, eventVoice, &reply); err != nil {
+	if err := csvRpc.Call(context.Background(), utils.EeSv1ProcessEvent, eventVoice, &reply); err != nil {
 		t.Error(err)
 	}
-	if err := csvRpc.Call(utils.EeSv1ProcessEvent, eventSMS, &reply); err != nil {
+	if err := csvRpc.Call(context.Background(), utils.EeSv1ProcessEvent, eventSMS, &reply); err != nil {
 		t.Error(err)
 	}
 	time.Sleep(time.Second)
@@ -448,7 +450,7 @@ func testCsvExportMaskedDestination(t *testing.T) {
 
 	attrs := utils.AttrSetDestination{Id: "MASKED_DESTINATIONS", Prefixes: []string{"+4986517174963"}}
 	var reply string
-	if err := csvRpc.Call(utils.APIerSv1SetDestination, &attrs, &reply); err != nil {
+	if err := csvRpc.Call(context.Background(), utils.APIerSv1SetDestination, &attrs, &reply); err != nil {
 		t.Error("Unexpected error", err.Error())
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply returned", reply)
@@ -480,7 +482,7 @@ func testCsvExportMaskedDestination(t *testing.T) {
 		},
 	}
 	var rply map[string]utils.MapStorage
-	if err := csvRpc.Call(utils.EeSv1ProcessEvent, eventVoice, &rply); err != nil {
+	if err := csvRpc.Call(context.Background(), utils.EeSv1ProcessEvent, eventVoice, &rply); err != nil {
 		t.Error(err)
 	}
 	time.Sleep(time.Second)
@@ -593,13 +595,13 @@ func testCsvExportEventWithInflateTemplate(t *testing.T) {
 		},
 	}
 	var reply map[string]utils.MapStorage
-	if err := csvRpc.Call(utils.EeSv1ProcessEvent, eventVoice, &reply); err != nil {
+	if err := csvRpc.Call(context.Background(), utils.EeSv1ProcessEvent, eventVoice, &reply); err != nil {
 		t.Error(err)
 	}
-	if err := csvRpc.Call(utils.EeSv1ProcessEvent, eventData, &reply); err != nil {
+	if err := csvRpc.Call(context.Background(), utils.EeSv1ProcessEvent, eventData, &reply); err != nil {
 		t.Error(err)
 	}
-	if err := csvRpc.Call(utils.EeSv1ProcessEvent, eventSMS, &reply); err != nil {
+	if err := csvRpc.Call(context.Background(), utils.EeSv1ProcessEvent, eventSMS, &reply); err != nil {
 		t.Error(err)
 	}
 	time.Sleep(time.Second)
@@ -662,7 +664,7 @@ func testCsvExportNotFoundExporter(t *testing.T) {
 	}
 
 	var reply map[string]utils.MapStorage
-	if err := csvRpc.Call(utils.EeSv1ProcessEvent, eventVoice, &reply); err == nil ||
+	if err := csvRpc.Call(context.Background(), utils.EeSv1ProcessEvent, eventVoice, &reply); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}

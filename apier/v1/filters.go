@@ -21,12 +21,13 @@ package v1
 import (
 	"time"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
 // SetFilter add a new Filter
-func (apierSv1 *APIerSv1) SetFilter(arg *engine.FilterWithAPIOpts, reply *string) (err error) {
+func (apierSv1 *APIerSv1) SetFilter(ctx *context.Context, arg *engine.FilterWithAPIOpts, reply *string) (err error) {
 	if missing := utils.MissingStructFields(arg.Filter, []string{utils.ID}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -65,7 +66,7 @@ func (apierSv1 *APIerSv1) SetFilter(arg *engine.FilterWithAPIOpts, reply *string
 }
 
 // GetFilter returns a Filter
-func (apierSv1 *APIerSv1) GetFilter(arg *utils.TenantID, reply *engine.Filter) error {
+func (apierSv1 *APIerSv1) GetFilter(ctx *context.Context, arg *utils.TenantID, reply *engine.Filter) error {
 	if missing := utils.MissingStructFields(arg, []string{utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -82,7 +83,7 @@ func (apierSv1 *APIerSv1) GetFilter(arg *utils.TenantID, reply *engine.Filter) e
 }
 
 // GetFilterIDs returns list of Filter IDs registered for a tenant
-func (apierSv1 *APIerSv1) GetFilterIDs(args *utils.PaginatorWithTenant, fltrIDs *[]string) error {
+func (apierSv1 *APIerSv1) GetFilterIDs(ctx *context.Context, args *utils.PaginatorWithTenant, fltrIDs *[]string) error {
 	tnt := args.Tenant
 	if tnt == utils.EmptyString {
 		tnt = apierSv1.Config.GeneralCfg().DefaultTenant
@@ -104,7 +105,7 @@ func (apierSv1 *APIerSv1) GetFilterIDs(args *utils.PaginatorWithTenant, fltrIDs 
 }
 
 // RemoveFilter  remove a specific filter
-func (apierSv1 *APIerSv1) RemoveFilter(arg *utils.TenantIDWithAPIOpts, reply *string) error {
+func (apierSv1 *APIerSv1) RemoveFilter(ctx *context.Context, arg *utils.TenantIDWithAPIOpts, reply *string) error {
 	if missing := utils.MissingStructFields(arg, []string{utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}

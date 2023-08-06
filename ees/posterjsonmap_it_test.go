@@ -24,11 +24,13 @@ package ees
 import (
 	"encoding/json"
 	"net/http"
-	"net/rpc"
 	"path"
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc/context"
+
+	"github.com/cgrates/birpc"
 	"github.com/cgrates/cgrates/utils"
 
 	"github.com/cgrates/cgrates/config"
@@ -39,7 +41,7 @@ var (
 	httpJSONMapConfigDir string
 	httpJSONMapCfgPath   string
 	httpJSONMapCfg       *config.CGRConfig
-	httpJSONMapRpc       *rpc.Client
+	httpJSONMapRpc       *birpc.Client
 	httpJsonMap          map[string]string
 	httpJsonHdr          http.Header
 
@@ -224,7 +226,7 @@ func testHTTPJsonMapExportEvent(t *testing.T) {
 		},
 	}
 	var reply map[string]utils.MapStorage
-	if err := httpJSONMapRpc.Call(utils.EeSv1ProcessEvent, eventVoice, &reply); err != nil {
+	if err := httpJSONMapRpc.Call(context.Background(), utils.EeSv1ProcessEvent, eventVoice, &reply); err != nil {
 		t.Error(err)
 	}
 	time.Sleep(10 * time.Millisecond)
@@ -247,7 +249,7 @@ func testHTTPJsonMapExportEvent(t *testing.T) {
 	if len(httpJsonHdr["Origin"]) == 0 || httpJsonHdr["Origin"][0] != expHeader {
 		t.Errorf("Expected %+v, received: %+v", expHeader, httpJsonHdr["Origin"])
 	}
-	if err := httpJSONMapRpc.Call(utils.EeSv1ProcessEvent, eventData, &reply); err != nil {
+	if err := httpJSONMapRpc.Call(context.Background(), utils.EeSv1ProcessEvent, eventData, &reply); err != nil {
 		t.Error(err)
 	}
 	time.Sleep(10 * time.Millisecond)
@@ -270,7 +272,7 @@ func testHTTPJsonMapExportEvent(t *testing.T) {
 	if len(httpJsonHdr["Origin"]) == 0 || httpJsonHdr["Origin"][0] != expHeader {
 		t.Errorf("Expected %+v, received: %+v", expHeader, httpJsonHdr["Origin"])
 	}
-	if err := httpJSONMapRpc.Call(utils.EeSv1ProcessEvent, eventSMS, &reply); err != nil {
+	if err := httpJSONMapRpc.Call(context.Background(), utils.EeSv1ProcessEvent, eventSMS, &reply); err != nil {
 		t.Error(err)
 	}
 	time.Sleep(10 * time.Millisecond)
@@ -294,7 +296,7 @@ func testHTTPJsonMapExportEvent(t *testing.T) {
 		t.Errorf("Expected %+v, received: %+v", expHeader, httpJsonHdr["Origin"])
 	}
 
-	if err := httpJSONMapRpc.Call(utils.EeSv1ProcessEvent, eventSMSNoFields, &reply); err != nil {
+	if err := httpJSONMapRpc.Call(context.Background(), utils.EeSv1ProcessEvent, eventSMSNoFields, &reply); err != nil {
 		t.Error(err)
 	}
 	time.Sleep(10 * time.Millisecond)

@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package v1
 
 import (
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -37,13 +38,13 @@ type ReplicatorSv1 struct {
 	v1 *APIerSv1 // needed for CallCache only
 }
 
-// Call implements rpcclient.ClientConnector interface for internal RPC
-func (rplSv1 *ReplicatorSv1) Call(serviceMethod string, args any, reply any) error {
+// Call implements birpc.ClientConnector interface for internal RPC
+func (rplSv1 *ReplicatorSv1) Call(ctx *context.Context, serviceMethod string, args any, reply any) error {
 	return utils.APIerRPCCall(rplSv1, serviceMethod, args, reply)
 }
 
 // GetAccount is the remote method coresponding to the dataDb driver method
-func (rplSv1 *ReplicatorSv1) GetAccount(args *utils.StringWithAPIOpts, reply *engine.Account) error {
+func (rplSv1 *ReplicatorSv1) GetAccount(ctx *context.Context, args *utils.StringWithAPIOpts, reply *engine.Account) error {
 	engine.UpdateReplicationFilters(utils.AccountPrefix, args.Arg, utils.IfaceAsString(args.APIOpts[utils.RemoteHostOpt]))
 	rcv, err := rplSv1.dm.GetAccount(args.Arg)
 	if err != nil {
@@ -54,7 +55,7 @@ func (rplSv1 *ReplicatorSv1) GetAccount(args *utils.StringWithAPIOpts, reply *en
 }
 
 // GetDestination is the remote method coresponding to the dataDb driver method
-func (rplSv1 *ReplicatorSv1) GetDestination(key *utils.StringWithAPIOpts, reply *engine.Destination) error {
+func (rplSv1 *ReplicatorSv1) GetDestination(ctx *context.Context, key *utils.StringWithAPIOpts, reply *engine.Destination) error {
 	engine.UpdateReplicationFilters(utils.DestinationPrefix, key.Arg, utils.IfaceAsString(key.APIOpts[utils.RemoteHostOpt]))
 	rcv, err := rplSv1.dm.DataDB().GetDestinationDrv(key.Arg, utils.NonTransactional)
 	if err != nil {
@@ -65,7 +66,7 @@ func (rplSv1 *ReplicatorSv1) GetDestination(key *utils.StringWithAPIOpts, reply 
 }
 
 // GetReverseDestination is the remote method coresponding to the dataDb driver method
-func (rplSv1 *ReplicatorSv1) GetReverseDestination(key *utils.StringWithAPIOpts, reply *[]string) error {
+func (rplSv1 *ReplicatorSv1) GetReverseDestination(ctx *context.Context, key *utils.StringWithAPIOpts, reply *[]string) error {
 	rcv, err := rplSv1.dm.DataDB().GetReverseDestinationDrv(key.Arg, utils.NonTransactional)
 	if err != nil {
 		return err
@@ -78,7 +79,7 @@ func (rplSv1 *ReplicatorSv1) GetReverseDestination(key *utils.StringWithAPIOpts,
 }
 
 // GetStatQueue is the remote method coresponding to the dataDb driver method
-func (rplSv1 *ReplicatorSv1) GetStatQueue(tntID *utils.TenantIDWithAPIOpts, reply *engine.StatQueue) error {
+func (rplSv1 *ReplicatorSv1) GetStatQueue(ctx *context.Context, tntID *utils.TenantIDWithAPIOpts, reply *engine.StatQueue) error {
 	engine.UpdateReplicationFilters(utils.StatQueuePrefix, tntID.TenantID.TenantID(), utils.IfaceAsString(tntID.APIOpts[utils.RemoteHostOpt]))
 	rcv, err := rplSv1.dm.DataDB().GetStatQueueDrv(tntID.Tenant, tntID.ID)
 	if err != nil {
@@ -89,7 +90,7 @@ func (rplSv1 *ReplicatorSv1) GetStatQueue(tntID *utils.TenantIDWithAPIOpts, repl
 }
 
 // GetFilter is the remote method coresponding to the dataDb driver method
-func (rplSv1 *ReplicatorSv1) GetFilter(tntID *utils.TenantIDWithAPIOpts, reply *engine.Filter) error {
+func (rplSv1 *ReplicatorSv1) GetFilter(ctx *context.Context, tntID *utils.TenantIDWithAPIOpts, reply *engine.Filter) error {
 	engine.UpdateReplicationFilters(utils.FilterPrefix, tntID.TenantID.TenantID(), utils.IfaceAsString(tntID.APIOpts[utils.RemoteHostOpt]))
 	rcv, err := rplSv1.dm.DataDB().GetFilterDrv(tntID.Tenant, tntID.ID)
 	if err != nil {
@@ -100,7 +101,7 @@ func (rplSv1 *ReplicatorSv1) GetFilter(tntID *utils.TenantIDWithAPIOpts, reply *
 }
 
 // GetThreshold is the remote method coresponding to the dataDb driver method
-func (rplSv1 *ReplicatorSv1) GetThreshold(tntID *utils.TenantIDWithAPIOpts, reply *engine.Threshold) error {
+func (rplSv1 *ReplicatorSv1) GetThreshold(ctx *context.Context, tntID *utils.TenantIDWithAPIOpts, reply *engine.Threshold) error {
 	engine.UpdateReplicationFilters(utils.ThresholdPrefix, tntID.TenantID.TenantID(), utils.IfaceAsString(tntID.APIOpts[utils.RemoteHostOpt]))
 	rcv, err := rplSv1.dm.DataDB().GetThresholdDrv(tntID.Tenant, tntID.ID)
 	if err != nil {
@@ -111,7 +112,7 @@ func (rplSv1 *ReplicatorSv1) GetThreshold(tntID *utils.TenantIDWithAPIOpts, repl
 }
 
 // GetThresholdProfile is the remote method coresponding to the dataDb driver method
-func (rplSv1 *ReplicatorSv1) GetThresholdProfile(tntID *utils.TenantIDWithAPIOpts, reply *engine.ThresholdProfile) error {
+func (rplSv1 *ReplicatorSv1) GetThresholdProfile(ctx *context.Context, tntID *utils.TenantIDWithAPIOpts, reply *engine.ThresholdProfile) error {
 	engine.UpdateReplicationFilters(utils.ThresholdProfilePrefix, tntID.TenantID.TenantID(), utils.IfaceAsString(tntID.APIOpts[utils.RemoteHostOpt]))
 	rcv, err := rplSv1.dm.DataDB().GetThresholdProfileDrv(tntID.Tenant, tntID.ID)
 	if err != nil {
@@ -122,7 +123,7 @@ func (rplSv1 *ReplicatorSv1) GetThresholdProfile(tntID *utils.TenantIDWithAPIOpt
 }
 
 // GetStatQueueProfile is the remote method coresponding to the dataDb driver method
-func (rplSv1 *ReplicatorSv1) GetStatQueueProfile(tntID *utils.TenantIDWithAPIOpts, reply *engine.StatQueueProfile) error {
+func (rplSv1 *ReplicatorSv1) GetStatQueueProfile(ctx *context.Context, tntID *utils.TenantIDWithAPIOpts, reply *engine.StatQueueProfile) error {
 	engine.UpdateReplicationFilters(utils.StatQueueProfilePrefix, tntID.TenantID.TenantID(), utils.IfaceAsString(tntID.APIOpts[utils.RemoteHostOpt]))
 	rcv, err := rplSv1.dm.DataDB().GetStatQueueProfileDrv(tntID.Tenant, tntID.ID)
 	if err != nil {
@@ -133,7 +134,7 @@ func (rplSv1 *ReplicatorSv1) GetStatQueueProfile(tntID *utils.TenantIDWithAPIOpt
 }
 
 // GetTiming is the remote method coresponding to the dataDb driver method
-func (rplSv1 *ReplicatorSv1) GetTiming(id *utils.StringWithAPIOpts, reply *utils.TPTiming) error {
+func (rplSv1 *ReplicatorSv1) GetTiming(ctx *context.Context, id *utils.StringWithAPIOpts, reply *utils.TPTiming) error {
 	engine.UpdateReplicationFilters(utils.TimingsPrefix, id.Arg, utils.IfaceAsString(id.APIOpts[utils.RemoteHostOpt]))
 	rcv, err := rplSv1.dm.DataDB().GetTimingDrv(id.Arg)
 	if err != nil {
@@ -144,7 +145,7 @@ func (rplSv1 *ReplicatorSv1) GetTiming(id *utils.StringWithAPIOpts, reply *utils
 }
 
 // GetResource is the remote method coresponding to the dataDb driver method
-func (rplSv1 *ReplicatorSv1) GetResource(tntID *utils.TenantIDWithAPIOpts, reply *engine.Resource) error {
+func (rplSv1 *ReplicatorSv1) GetResource(ctx *context.Context, tntID *utils.TenantIDWithAPIOpts, reply *engine.Resource) error {
 	engine.UpdateReplicationFilters(utils.ResourcesPrefix, tntID.TenantID.TenantID(), utils.IfaceAsString(tntID.APIOpts[utils.RemoteHostOpt]))
 	rcv, err := rplSv1.dm.DataDB().GetResourceDrv(tntID.Tenant, tntID.ID)
 	if err != nil {
@@ -155,7 +156,7 @@ func (rplSv1 *ReplicatorSv1) GetResource(tntID *utils.TenantIDWithAPIOpts, reply
 }
 
 // GetResourceProfile is the remote method coresponding to the dataDb driver method
-func (rplSv1 *ReplicatorSv1) GetResourceProfile(tntID *utils.TenantIDWithAPIOpts, reply *engine.ResourceProfile) error {
+func (rplSv1 *ReplicatorSv1) GetResourceProfile(ctx *context.Context, tntID *utils.TenantIDWithAPIOpts, reply *engine.ResourceProfile) error {
 	engine.UpdateReplicationFilters(utils.ResourceProfilesPrefix, tntID.TenantID.TenantID(), utils.IfaceAsString(tntID.APIOpts[utils.RemoteHostOpt]))
 	rcv, err := rplSv1.dm.DataDB().GetResourceProfileDrv(tntID.Tenant, tntID.ID)
 	if err != nil {
@@ -166,7 +167,7 @@ func (rplSv1 *ReplicatorSv1) GetResourceProfile(tntID *utils.TenantIDWithAPIOpts
 }
 
 // GetActionTriggers is the remote method coresponding to the dataDb driver method
-func (rplSv1 *ReplicatorSv1) GetActionTriggers(id *utils.StringWithAPIOpts, reply *engine.ActionTriggers) error {
+func (rplSv1 *ReplicatorSv1) GetActionTriggers(ctx *context.Context, id *utils.StringWithAPIOpts, reply *engine.ActionTriggers) error {
 	engine.UpdateReplicationFilters(utils.ActionTriggerPrefix, id.Arg, utils.IfaceAsString(id.APIOpts[utils.RemoteHostOpt]))
 	rcv, err := rplSv1.dm.DataDB().GetActionTriggersDrv(id.Arg)
 	if err != nil {
@@ -177,7 +178,7 @@ func (rplSv1 *ReplicatorSv1) GetActionTriggers(id *utils.StringWithAPIOpts, repl
 }
 
 // GetSharedGroup is the remote method coresponding to the dataDb driver method
-func (rplSv1 *ReplicatorSv1) GetSharedGroup(id *utils.StringWithAPIOpts, reply *engine.SharedGroup) error {
+func (rplSv1 *ReplicatorSv1) GetSharedGroup(ctx *context.Context, id *utils.StringWithAPIOpts, reply *engine.SharedGroup) error {
 	engine.UpdateReplicationFilters(utils.SharedGroupPrefix, id.Arg, utils.IfaceAsString(id.APIOpts[utils.RemoteHostOpt]))
 	rcv, err := rplSv1.dm.DataDB().GetSharedGroupDrv(id.Arg)
 	if err != nil {
@@ -188,7 +189,7 @@ func (rplSv1 *ReplicatorSv1) GetSharedGroup(id *utils.StringWithAPIOpts, reply *
 }
 
 // GetActions is the remote method coresponding to the dataDb driver method
-func (rplSv1 *ReplicatorSv1) GetActions(id *utils.StringWithAPIOpts, reply *engine.Actions) error {
+func (rplSv1 *ReplicatorSv1) GetActions(ctx *context.Context, id *utils.StringWithAPIOpts, reply *engine.Actions) error {
 	engine.UpdateReplicationFilters(utils.ActionPrefix, id.Arg, utils.IfaceAsString(id.APIOpts[utils.RemoteHostOpt]))
 	rcv, err := rplSv1.dm.DataDB().GetActionsDrv(id.Arg)
 	if err != nil {
@@ -199,7 +200,7 @@ func (rplSv1 *ReplicatorSv1) GetActions(id *utils.StringWithAPIOpts, reply *engi
 }
 
 // GetActionPlan is the remote method coresponding to the dataDb driver method
-func (rplSv1 *ReplicatorSv1) GetActionPlan(id *utils.StringWithAPIOpts, reply *engine.ActionPlan) error {
+func (rplSv1 *ReplicatorSv1) GetActionPlan(ctx *context.Context, id *utils.StringWithAPIOpts, reply *engine.ActionPlan) error {
 	engine.UpdateReplicationFilters(utils.ActionPlanPrefix, id.Arg, utils.IfaceAsString(id.APIOpts[utils.RemoteHostOpt]))
 	rcv, err := rplSv1.dm.DataDB().GetActionPlanDrv(id.Arg)
 	if err != nil {
@@ -210,7 +211,7 @@ func (rplSv1 *ReplicatorSv1) GetActionPlan(id *utils.StringWithAPIOpts, reply *e
 }
 
 // GetAllActionPlans is the remote method coresponding to the dataDb driver method
-func (rplSv1 *ReplicatorSv1) GetAllActionPlans(id *utils.StringWithAPIOpts, reply *map[string]*engine.ActionPlan) error {
+func (rplSv1 *ReplicatorSv1) GetAllActionPlans(ctx *context.Context, id *utils.StringWithAPIOpts, reply *map[string]*engine.ActionPlan) error {
 	rcv, err := rplSv1.dm.DataDB().GetAllActionPlansDrv()
 	if err != nil {
 		return err
@@ -223,7 +224,7 @@ func (rplSv1 *ReplicatorSv1) GetAllActionPlans(id *utils.StringWithAPIOpts, repl
 }
 
 // GetAccountActionPlans is the remote method coresponding to the dataDb driver method
-func (rplSv1 *ReplicatorSv1) GetAccountActionPlans(id *utils.StringWithAPIOpts, reply *[]string) error {
+func (rplSv1 *ReplicatorSv1) GetAccountActionPlans(ctx *context.Context, id *utils.StringWithAPIOpts, reply *[]string) error {
 	engine.UpdateReplicationFilters(utils.AccountActionPlansPrefix, id.Arg, utils.IfaceAsString(id.APIOpts[utils.RemoteHostOpt]))
 	rcv, err := rplSv1.dm.DataDB().GetAccountActionPlansDrv(id.Arg)
 	if err != nil {
@@ -234,7 +235,7 @@ func (rplSv1 *ReplicatorSv1) GetAccountActionPlans(id *utils.StringWithAPIOpts, 
 }
 
 // GetRatingPlan is the remote method coresponding to the dataDb driver method
-func (rplSv1 *ReplicatorSv1) GetRatingPlan(id *utils.StringWithAPIOpts, reply *engine.RatingPlan) error {
+func (rplSv1 *ReplicatorSv1) GetRatingPlan(ctx *context.Context, id *utils.StringWithAPIOpts, reply *engine.RatingPlan) error {
 	engine.UpdateReplicationFilters(utils.RatingPlanPrefix, id.Arg, utils.IfaceAsString(id.APIOpts[utils.RemoteHostOpt]))
 	rcv, err := rplSv1.dm.DataDB().GetRatingPlanDrv(id.Arg)
 	if err != nil {
@@ -245,7 +246,7 @@ func (rplSv1 *ReplicatorSv1) GetRatingPlan(id *utils.StringWithAPIOpts, reply *e
 }
 
 // GetRatingProfile is the remote method coresponding to the dataDb driver method
-func (rplSv1 *ReplicatorSv1) GetRatingProfile(id *utils.StringWithAPIOpts, reply *engine.RatingProfile) error {
+func (rplSv1 *ReplicatorSv1) GetRatingProfile(ctx *context.Context, id *utils.StringWithAPIOpts, reply *engine.RatingProfile) error {
 	engine.UpdateReplicationFilters(utils.RatingProfilePrefix, id.Arg, utils.IfaceAsString(id.APIOpts[utils.RemoteHostOpt]))
 	rcv, err := rplSv1.dm.DataDB().GetRatingProfileDrv(id.Arg)
 	if err != nil {
@@ -256,7 +257,7 @@ func (rplSv1 *ReplicatorSv1) GetRatingProfile(id *utils.StringWithAPIOpts, reply
 }
 
 // GetRouteProfile is the remote method coresponding to the dataDb driver method
-func (rplSv1 *ReplicatorSv1) GetRouteProfile(tntID *utils.TenantIDWithAPIOpts, reply *engine.RouteProfile) error {
+func (rplSv1 *ReplicatorSv1) GetRouteProfile(ctx *context.Context, tntID *utils.TenantIDWithAPIOpts, reply *engine.RouteProfile) error {
 	engine.UpdateReplicationFilters(utils.RouteProfilePrefix, tntID.TenantID.TenantID(), utils.IfaceAsString(tntID.APIOpts[utils.RemoteHostOpt]))
 	rcv, err := rplSv1.dm.DataDB().GetRouteProfileDrv(tntID.Tenant, tntID.ID)
 	if err != nil {
@@ -267,7 +268,7 @@ func (rplSv1 *ReplicatorSv1) GetRouteProfile(tntID *utils.TenantIDWithAPIOpts, r
 }
 
 // GetAttributeProfile is the remote method coresponding to the dataDb driver method
-func (rplSv1 *ReplicatorSv1) GetAttributeProfile(tntID *utils.TenantIDWithAPIOpts, reply *engine.AttributeProfile) error {
+func (rplSv1 *ReplicatorSv1) GetAttributeProfile(ctx *context.Context, tntID *utils.TenantIDWithAPIOpts, reply *engine.AttributeProfile) error {
 	engine.UpdateReplicationFilters(utils.AttributeProfilePrefix, tntID.TenantID.TenantID(), utils.IfaceAsString(tntID.APIOpts[utils.RemoteHostOpt]))
 	rcv, err := rplSv1.dm.DataDB().GetAttributeProfileDrv(tntID.Tenant, tntID.ID)
 	if err != nil {
@@ -278,7 +279,7 @@ func (rplSv1 *ReplicatorSv1) GetAttributeProfile(tntID *utils.TenantIDWithAPIOpt
 }
 
 // GetChargerProfile is the remote method coresponding to the dataDb driver method
-func (rplSv1 *ReplicatorSv1) GetChargerProfile(tntID *utils.TenantIDWithAPIOpts, reply *engine.ChargerProfile) error {
+func (rplSv1 *ReplicatorSv1) GetChargerProfile(ctx *context.Context, tntID *utils.TenantIDWithAPIOpts, reply *engine.ChargerProfile) error {
 	engine.UpdateReplicationFilters(utils.ChargerProfilePrefix, tntID.TenantID.TenantID(), utils.IfaceAsString(tntID.APIOpts[utils.RemoteHostOpt]))
 	rcv, err := rplSv1.dm.DataDB().GetChargerProfileDrv(tntID.Tenant, tntID.ID)
 	if err != nil {
@@ -289,7 +290,7 @@ func (rplSv1 *ReplicatorSv1) GetChargerProfile(tntID *utils.TenantIDWithAPIOpts,
 }
 
 // GetDispatcherProfile is the remote method coresponding to the dataDb driver method
-func (rplSv1 *ReplicatorSv1) GetDispatcherProfile(tntID *utils.TenantIDWithAPIOpts, reply *engine.DispatcherProfile) error {
+func (rplSv1 *ReplicatorSv1) GetDispatcherProfile(ctx *context.Context, tntID *utils.TenantIDWithAPIOpts, reply *engine.DispatcherProfile) error {
 	engine.UpdateReplicationFilters(utils.DispatcherProfilePrefix, tntID.TenantID.TenantID(), utils.IfaceAsString(tntID.APIOpts[utils.RemoteHostOpt]))
 	rcv, err := rplSv1.dm.DataDB().GetDispatcherProfileDrv(tntID.Tenant, tntID.ID)
 	if err != nil {
@@ -300,7 +301,7 @@ func (rplSv1 *ReplicatorSv1) GetDispatcherProfile(tntID *utils.TenantIDWithAPIOp
 }
 
 // GetDispatcherHost is the remote method coresponding to the dataDb driver method
-func (rplSv1 *ReplicatorSv1) GetDispatcherHost(tntID *utils.TenantIDWithAPIOpts, reply *engine.DispatcherHost) error {
+func (rplSv1 *ReplicatorSv1) GetDispatcherHost(ctx *context.Context, tntID *utils.TenantIDWithAPIOpts, reply *engine.DispatcherHost) error {
 	engine.UpdateReplicationFilters(utils.DispatcherHostPrefix, tntID.TenantID.TenantID(), utils.IfaceAsString(tntID.APIOpts[utils.RemoteHostOpt]))
 	rcv, err := rplSv1.dm.DataDB().GetDispatcherHostDrv(tntID.Tenant, tntID.ID)
 	if err != nil {
@@ -311,7 +312,7 @@ func (rplSv1 *ReplicatorSv1) GetDispatcherHost(tntID *utils.TenantIDWithAPIOpts,
 }
 
 // GetItemLoadIDs is the remote method coresponding to the dataDb driver method
-func (rplSv1 *ReplicatorSv1) GetItemLoadIDs(itemID *utils.StringWithAPIOpts, reply *map[string]int64) error {
+func (rplSv1 *ReplicatorSv1) GetItemLoadIDs(ctx *context.Context, itemID *utils.StringWithAPIOpts, reply *map[string]int64) error {
 	engine.UpdateReplicationFilters(utils.LoadIDPrefix, itemID.Arg, utils.IfaceAsString(itemID.APIOpts[utils.RemoteHostOpt]))
 	rcv, err := rplSv1.dm.DataDB().GetItemLoadIDsDrv(itemID.Arg)
 	if err != nil {
@@ -322,7 +323,7 @@ func (rplSv1 *ReplicatorSv1) GetItemLoadIDs(itemID *utils.StringWithAPIOpts, rep
 }
 
 // GetIndexes is the remote method coresponding to the dataDb driver method
-func (rplSv1 *ReplicatorSv1) GetIndexes(args *utils.GetIndexesArg, reply *map[string]utils.StringSet) error {
+func (rplSv1 *ReplicatorSv1) GetIndexes(ctx *context.Context, args *utils.GetIndexesArg, reply *map[string]utils.StringSet) error {
 	engine.UpdateReplicationFilters(utils.CacheInstanceToPrefix[args.IdxItmType], args.TntCtx, utils.IfaceAsString(args.APIOpts[utils.RemoteHostOpt]))
 	indx, err := rplSv1.dm.DataDB().GetIndexesDrv(args.IdxItmType, args.TntCtx, args.IdxKey)
 	if err != nil {
@@ -333,7 +334,7 @@ func (rplSv1 *ReplicatorSv1) GetIndexes(args *utils.GetIndexesArg, reply *map[st
 }
 
 // SetAccount is the replication method coresponding to the dataDb driver method
-func (rplSv1 *ReplicatorSv1) SetAccount(acc *engine.AccountWithAPIOpts, reply *string) (err error) {
+func (rplSv1 *ReplicatorSv1) SetAccount(ctx *context.Context, acc *engine.AccountWithAPIOpts, reply *string) (err error) {
 	if err = rplSv1.dm.DataDB().SetAccountDrv(acc.Account); err != nil {
 		return
 	}
@@ -343,7 +344,7 @@ func (rplSv1 *ReplicatorSv1) SetAccount(acc *engine.AccountWithAPIOpts, reply *s
 }
 
 // SetDestination is the replication method coresponding to the dataDb driver method
-func (rplSv1 *ReplicatorSv1) SetDestination(dst *engine.DestinationWithAPIOpts, reply *string) (err error) {
+func (rplSv1 *ReplicatorSv1) SetDestination(ctx *context.Context, dst *engine.DestinationWithAPIOpts, reply *string) (err error) {
 	if err = rplSv1.dm.DataDB().SetDestinationDrv(dst.Destination, utils.NonTransactional); err != nil {
 		return
 	}
@@ -356,7 +357,7 @@ func (rplSv1 *ReplicatorSv1) SetDestination(dst *engine.DestinationWithAPIOpts, 
 }
 
 // SetReverseDestination is the replication method coresponding to the dataDb driver method
-func (rplSv1 *ReplicatorSv1) SetReverseDestination(dst *engine.DestinationWithAPIOpts, reply *string) (err error) {
+func (rplSv1 *ReplicatorSv1) SetReverseDestination(ctx *context.Context, dst *engine.DestinationWithAPIOpts, reply *string) (err error) {
 	if err = rplSv1.dm.DataDB().SetReverseDestinationDrv(dst.Destination.Id, dst.Destination.Prefixes, utils.NonTransactional); err != nil {
 		return
 	}
@@ -369,7 +370,7 @@ func (rplSv1 *ReplicatorSv1) SetReverseDestination(dst *engine.DestinationWithAP
 }
 
 // SetThresholdProfile is the replication method coresponding to the dataDb driver method
-func (rplSv1 *ReplicatorSv1) SetThresholdProfile(th *engine.ThresholdProfileWithAPIOpts, reply *string) (err error) {
+func (rplSv1 *ReplicatorSv1) SetThresholdProfile(ctx *context.Context, th *engine.ThresholdProfileWithAPIOpts, reply *string) (err error) {
 	if err = rplSv1.dm.DataDB().SetThresholdProfileDrv(th.ThresholdProfile); err != nil {
 		return
 	}
@@ -382,7 +383,7 @@ func (rplSv1 *ReplicatorSv1) SetThresholdProfile(th *engine.ThresholdProfileWith
 }
 
 // SetThreshold is the replication method coresponding to the dataDb driver method
-func (rplSv1 *ReplicatorSv1) SetThreshold(th *engine.ThresholdWithAPIOpts, reply *string) (err error) {
+func (rplSv1 *ReplicatorSv1) SetThreshold(ctx *context.Context, th *engine.ThresholdWithAPIOpts, reply *string) (err error) {
 	if err = rplSv1.dm.DataDB().SetThresholdDrv(th.Threshold); err != nil {
 		return
 	}
@@ -395,7 +396,7 @@ func (rplSv1 *ReplicatorSv1) SetThreshold(th *engine.ThresholdWithAPIOpts, reply
 }
 
 // SetStatQueueProfile is the replication method coresponding to the dataDb driver method
-func (rplSv1 *ReplicatorSv1) SetStatQueueProfile(sq *engine.StatQueueProfileWithAPIOpts, reply *string) (err error) {
+func (rplSv1 *ReplicatorSv1) SetStatQueueProfile(ctx *context.Context, sq *engine.StatQueueProfileWithAPIOpts, reply *string) (err error) {
 	if err = rplSv1.dm.DataDB().SetStatQueueProfileDrv(sq.StatQueueProfile); err != nil {
 		return
 	}
@@ -408,7 +409,7 @@ func (rplSv1 *ReplicatorSv1) SetStatQueueProfile(sq *engine.StatQueueProfileWith
 }
 
 // SetStatQueue is the replication method coresponding to the dataDb driver method
-func (rplSv1 *ReplicatorSv1) SetStatQueue(sq *engine.StatQueueWithAPIOpts, reply *string) (err error) {
+func (rplSv1 *ReplicatorSv1) SetStatQueue(ctx *context.Context, sq *engine.StatQueueWithAPIOpts, reply *string) (err error) {
 	if err = rplSv1.dm.DataDB().SetStatQueueDrv(nil, sq.StatQueue); err != nil {
 		return
 	}
@@ -421,7 +422,7 @@ func (rplSv1 *ReplicatorSv1) SetStatQueue(sq *engine.StatQueueWithAPIOpts, reply
 }
 
 // SetFilter is the replication method coresponding to the dataDb driver method
-func (rplSv1 *ReplicatorSv1) SetFilter(fltr *engine.FilterWithAPIOpts, reply *string) (err error) {
+func (rplSv1 *ReplicatorSv1) SetFilter(ctx *context.Context, fltr *engine.FilterWithAPIOpts, reply *string) (err error) {
 	if err = rplSv1.dm.DataDB().SetFilterDrv(fltr.Filter); err != nil {
 		return
 	}
@@ -434,7 +435,7 @@ func (rplSv1 *ReplicatorSv1) SetFilter(fltr *engine.FilterWithAPIOpts, reply *st
 }
 
 // SetTiming is the replication method coresponding to the dataDb driver method
-func (rplSv1 *ReplicatorSv1) SetTiming(tm *utils.TPTimingWithAPIOpts, reply *string) (err error) {
+func (rplSv1 *ReplicatorSv1) SetTiming(ctx *context.Context, tm *utils.TPTimingWithAPIOpts, reply *string) (err error) {
 	if err = rplSv1.dm.DataDB().SetTimingDrv(tm.TPTiming); err != nil {
 		return
 	}
@@ -447,7 +448,7 @@ func (rplSv1 *ReplicatorSv1) SetTiming(tm *utils.TPTimingWithAPIOpts, reply *str
 }
 
 // SetResourceProfile is the replication method coresponding to the dataDb driver method
-func (rplSv1 *ReplicatorSv1) SetResourceProfile(rs *engine.ResourceProfileWithAPIOpts, reply *string) (err error) {
+func (rplSv1 *ReplicatorSv1) SetResourceProfile(ctx *context.Context, rs *engine.ResourceProfileWithAPIOpts, reply *string) (err error) {
 	if err = rplSv1.dm.DataDB().SetResourceProfileDrv(rs.ResourceProfile); err != nil {
 		return
 	}
@@ -460,7 +461,7 @@ func (rplSv1 *ReplicatorSv1) SetResourceProfile(rs *engine.ResourceProfileWithAP
 }
 
 // SetResource is the replication method coresponding to the dataDb driver method
-func (rplSv1 *ReplicatorSv1) SetResource(rs *engine.ResourceWithAPIOpts, reply *string) (err error) {
+func (rplSv1 *ReplicatorSv1) SetResource(ctx *context.Context, rs *engine.ResourceWithAPIOpts, reply *string) (err error) {
 	if err = rplSv1.dm.DataDB().SetResourceDrv(rs.Resource); err != nil {
 		return
 	}
@@ -473,7 +474,7 @@ func (rplSv1 *ReplicatorSv1) SetResource(rs *engine.ResourceWithAPIOpts, reply *
 }
 
 // SetActionTriggers is the replication method coresponding to the dataDb driver method
-func (rplSv1 *ReplicatorSv1) SetActionTriggers(args *engine.SetActionTriggersArgWithAPIOpts, reply *string) (err error) {
+func (rplSv1 *ReplicatorSv1) SetActionTriggers(ctx *context.Context, args *engine.SetActionTriggersArgWithAPIOpts, reply *string) (err error) {
 	if err = rplSv1.dm.DataDB().SetActionTriggersDrv(args.Key, args.Attrs); err != nil {
 		return
 	}
@@ -486,7 +487,7 @@ func (rplSv1 *ReplicatorSv1) SetActionTriggers(args *engine.SetActionTriggersArg
 }
 
 // SetSharedGroup is the replication method coresponding to the dataDb driver method
-func (rplSv1 *ReplicatorSv1) SetSharedGroup(shg *engine.SharedGroupWithAPIOpts, reply *string) (err error) {
+func (rplSv1 *ReplicatorSv1) SetSharedGroup(ctx *context.Context, shg *engine.SharedGroupWithAPIOpts, reply *string) (err error) {
 	if err = rplSv1.dm.DataDB().SetSharedGroupDrv(shg.SharedGroup); err != nil {
 		return
 	}
@@ -499,7 +500,7 @@ func (rplSv1 *ReplicatorSv1) SetSharedGroup(shg *engine.SharedGroupWithAPIOpts, 
 }
 
 // SetActions is the replication method coresponding to the dataDb driver method
-func (rplSv1 *ReplicatorSv1) SetActions(args *engine.SetActionsArgsWithAPIOpts, reply *string) (err error) {
+func (rplSv1 *ReplicatorSv1) SetActions(ctx *context.Context, args *engine.SetActionsArgsWithAPIOpts, reply *string) (err error) {
 	if err = rplSv1.dm.DataDB().SetActionsDrv(args.Key, args.Acs); err != nil {
 		return
 	}
@@ -512,7 +513,7 @@ func (rplSv1 *ReplicatorSv1) SetActions(args *engine.SetActionsArgsWithAPIOpts, 
 }
 
 // SetRatingPlan is the replication method coresponding to the dataDb driver method
-func (rplSv1 *ReplicatorSv1) SetRatingPlan(rp *engine.RatingPlanWithAPIOpts, reply *string) (err error) {
+func (rplSv1 *ReplicatorSv1) SetRatingPlan(ctx *context.Context, rp *engine.RatingPlanWithAPIOpts, reply *string) (err error) {
 	if err = rplSv1.dm.DataDB().SetRatingPlanDrv(rp.RatingPlan); err != nil {
 		return
 	}
@@ -525,7 +526,7 @@ func (rplSv1 *ReplicatorSv1) SetRatingPlan(rp *engine.RatingPlanWithAPIOpts, rep
 }
 
 // SetRatingProfile is the replication method coresponding to the dataDb driver method
-func (rplSv1 *ReplicatorSv1) SetRatingProfile(rp *engine.RatingProfileWithAPIOpts, reply *string) (err error) {
+func (rplSv1 *ReplicatorSv1) SetRatingProfile(ctx *context.Context, rp *engine.RatingProfileWithAPIOpts, reply *string) (err error) {
 	if err = rplSv1.dm.DataDB().SetRatingProfileDrv(rp.RatingProfile); err != nil {
 		return
 	}
@@ -538,7 +539,7 @@ func (rplSv1 *ReplicatorSv1) SetRatingProfile(rp *engine.RatingProfileWithAPIOpt
 }
 
 // SetRouteProfile is the replication method coresponding to the dataDb driver method
-func (rplSv1 *ReplicatorSv1) SetRouteProfile(sp *engine.RouteProfileWithAPIOpts, reply *string) (err error) {
+func (rplSv1 *ReplicatorSv1) SetRouteProfile(ctx *context.Context, sp *engine.RouteProfileWithAPIOpts, reply *string) (err error) {
 	if err = rplSv1.dm.DataDB().SetRouteProfileDrv(sp.RouteProfile); err != nil {
 		return
 	}
@@ -551,7 +552,7 @@ func (rplSv1 *ReplicatorSv1) SetRouteProfile(sp *engine.RouteProfileWithAPIOpts,
 }
 
 // SetAttributeProfile is the replication method coresponding to the dataDb driver method
-func (rplSv1 *ReplicatorSv1) SetAttributeProfile(ap *engine.AttributeProfileWithAPIOpts, reply *string) (err error) {
+func (rplSv1 *ReplicatorSv1) SetAttributeProfile(ctx *context.Context, ap *engine.AttributeProfileWithAPIOpts, reply *string) (err error) {
 	if err = rplSv1.dm.DataDB().SetAttributeProfileDrv(ap.AttributeProfile); err != nil {
 		return
 	}
@@ -564,7 +565,7 @@ func (rplSv1 *ReplicatorSv1) SetAttributeProfile(ap *engine.AttributeProfileWith
 }
 
 // SetChargerProfile is the replication method coresponding to the dataDb driver method
-func (rplSv1 *ReplicatorSv1) SetChargerProfile(cp *engine.ChargerProfileWithAPIOpts, reply *string) (err error) {
+func (rplSv1 *ReplicatorSv1) SetChargerProfile(ctx *context.Context, cp *engine.ChargerProfileWithAPIOpts, reply *string) (err error) {
 	if err = rplSv1.dm.DataDB().SetChargerProfileDrv(cp.ChargerProfile); err != nil {
 		return
 	}
@@ -577,7 +578,7 @@ func (rplSv1 *ReplicatorSv1) SetChargerProfile(cp *engine.ChargerProfileWithAPIO
 }
 
 // SetDispatcherProfile is the replication method coresponding to the dataDb driver method
-func (rplSv1 *ReplicatorSv1) SetDispatcherProfile(dpp *engine.DispatcherProfileWithAPIOpts, reply *string) (err error) {
+func (rplSv1 *ReplicatorSv1) SetDispatcherProfile(ctx *context.Context, dpp *engine.DispatcherProfileWithAPIOpts, reply *string) (err error) {
 	if err = rplSv1.dm.DataDB().SetDispatcherProfileDrv(dpp.DispatcherProfile); err != nil {
 		return
 	}
@@ -590,7 +591,7 @@ func (rplSv1 *ReplicatorSv1) SetDispatcherProfile(dpp *engine.DispatcherProfileW
 }
 
 // SetActionPlan is the replication method coresponding to the dataDb driver method
-func (rplSv1 *ReplicatorSv1) SetActionPlan(args *engine.SetActionPlanArgWithAPIOpts, reply *string) (err error) {
+func (rplSv1 *ReplicatorSv1) SetActionPlan(ctx *context.Context, args *engine.SetActionPlanArgWithAPIOpts, reply *string) (err error) {
 	if err = rplSv1.dm.DataDB().SetActionPlanDrv(args.Key, args.Ats); err != nil {
 		return
 	}
@@ -603,7 +604,7 @@ func (rplSv1 *ReplicatorSv1) SetActionPlan(args *engine.SetActionPlanArgWithAPIO
 }
 
 // SetAccountActionPlans is the replication method coresponding to the dataDb driver method
-func (rplSv1 *ReplicatorSv1) SetAccountActionPlans(args *engine.SetAccountActionPlansArgWithAPIOpts, reply *string) (err error) {
+func (rplSv1 *ReplicatorSv1) SetAccountActionPlans(ctx *context.Context, args *engine.SetAccountActionPlansArgWithAPIOpts, reply *string) (err error) {
 	if err = rplSv1.dm.DataDB().SetAccountActionPlansDrv(args.AcntID, args.AplIDs); err != nil {
 		return
 	}
@@ -616,7 +617,7 @@ func (rplSv1 *ReplicatorSv1) SetAccountActionPlans(args *engine.SetAccountAction
 }
 
 // SetDispatcherHost is the replication method coresponding to the dataDb driver method
-func (rplSv1 *ReplicatorSv1) SetDispatcherHost(dpp *engine.DispatcherHostWithAPIOpts, reply *string) (err error) {
+func (rplSv1 *ReplicatorSv1) SetDispatcherHost(ctx *context.Context, dpp *engine.DispatcherHostWithAPIOpts, reply *string) (err error) {
 	if err = rplSv1.dm.DataDB().SetDispatcherHostDrv(dpp.DispatcherHost); err != nil {
 		return
 	}
@@ -629,7 +630,7 @@ func (rplSv1 *ReplicatorSv1) SetDispatcherHost(dpp *engine.DispatcherHostWithAPI
 }
 
 // SetLoadIDs is the replication method coresponding to the dataDb driver method
-func (rplSv1 *ReplicatorSv1) SetLoadIDs(args *utils.LoadIDsWithAPIOpts, reply *string) (err error) {
+func (rplSv1 *ReplicatorSv1) SetLoadIDs(ctx *context.Context, args *utils.LoadIDsWithAPIOpts, reply *string) (err error) {
 	if err = rplSv1.dm.DataDB().SetLoadIDsDrv(args.LoadIDs); err != nil {
 		return
 	}
@@ -646,7 +647,7 @@ func (rplSv1 *ReplicatorSv1) SetLoadIDs(args *utils.LoadIDsWithAPIOpts, reply *s
 }
 
 // SetIndexes is the replication method coresponding to the dataDb driver method
-func (rplSv1 *ReplicatorSv1) SetIndexes(args *utils.SetIndexesArg, reply *string) (err error) {
+func (rplSv1 *ReplicatorSv1) SetIndexes(ctx *context.Context, args *utils.SetIndexesArg, reply *string) (err error) {
 	if err = rplSv1.dm.DataDB().SetIndexesDrv(args.IdxItmType, args.TntCtx, args.Indexes, true, utils.NonTransactional); err != nil {
 		return
 	}
@@ -663,7 +664,7 @@ func (rplSv1 *ReplicatorSv1) SetIndexes(args *utils.SetIndexesArg, reply *string
 }
 
 // RemoveThreshold is the replication method coresponding to the dataDb driver method
-func (rplSv1 *ReplicatorSv1) RemoveThreshold(args *utils.TenantIDWithAPIOpts, reply *string) (err error) {
+func (rplSv1 *ReplicatorSv1) RemoveThreshold(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *string) (err error) {
 	if err = rplSv1.dm.DataDB().RemoveThresholdDrv(args.Tenant, args.ID); err != nil {
 		return
 	}
@@ -676,7 +677,7 @@ func (rplSv1 *ReplicatorSv1) RemoveThreshold(args *utils.TenantIDWithAPIOpts, re
 }
 
 // RemoveDestination is the replication method coresponding to the dataDb driver method
-func (rplSv1 *ReplicatorSv1) RemoveDestination(id *utils.StringWithAPIOpts, reply *string) (err error) {
+func (rplSv1 *ReplicatorSv1) RemoveDestination(ctx *context.Context, id *utils.StringWithAPIOpts, reply *string) (err error) {
 	if err = rplSv1.dm.DataDB().RemoveDestinationDrv(id.Arg, utils.NonTransactional); err != nil {
 		return
 	}
@@ -689,7 +690,7 @@ func (rplSv1 *ReplicatorSv1) RemoveDestination(id *utils.StringWithAPIOpts, repl
 }
 
 // RemoveAccount is the replication method coresponding to the dataDb driver method
-func (rplSv1 *ReplicatorSv1) RemoveAccount(id *utils.StringWithAPIOpts, reply *string) (err error) {
+func (rplSv1 *ReplicatorSv1) RemoveAccount(ctx *context.Context, id *utils.StringWithAPIOpts, reply *string) (err error) {
 	if err = rplSv1.dm.DataDB().RemoveAccountDrv(id.Arg); err != nil {
 		return
 	}
@@ -699,7 +700,7 @@ func (rplSv1 *ReplicatorSv1) RemoveAccount(id *utils.StringWithAPIOpts, reply *s
 }
 
 // RemoveStatQueue is the replication method coresponding to the dataDb driver method
-func (rplSv1 *ReplicatorSv1) RemoveStatQueue(args *utils.TenantIDWithAPIOpts, reply *string) (err error) {
+func (rplSv1 *ReplicatorSv1) RemoveStatQueue(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *string) (err error) {
 	if err = rplSv1.dm.DataDB().RemStatQueueDrv(args.Tenant, args.ID); err != nil {
 		return
 	}
@@ -712,7 +713,7 @@ func (rplSv1 *ReplicatorSv1) RemoveStatQueue(args *utils.TenantIDWithAPIOpts, re
 }
 
 // RemoveFilter is the replication method coresponding to the dataDb driver method
-func (rplSv1 *ReplicatorSv1) RemoveFilter(args *utils.TenantIDWithAPIOpts, reply *string) (err error) {
+func (rplSv1 *ReplicatorSv1) RemoveFilter(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *string) (err error) {
 	if err = rplSv1.dm.DataDB().RemoveFilterDrv(args.Tenant, args.ID); err != nil {
 		return
 	}
@@ -725,7 +726,7 @@ func (rplSv1 *ReplicatorSv1) RemoveFilter(args *utils.TenantIDWithAPIOpts, reply
 }
 
 // RemoveThresholdProfile is the replication method coresponding to the dataDb driver method
-func (rplSv1 *ReplicatorSv1) RemoveThresholdProfile(args *utils.TenantIDWithAPIOpts, reply *string) (err error) {
+func (rplSv1 *ReplicatorSv1) RemoveThresholdProfile(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *string) (err error) {
 	if err = rplSv1.dm.DataDB().RemThresholdProfileDrv(args.Tenant, args.ID); err != nil {
 		return
 	}
@@ -738,7 +739,7 @@ func (rplSv1 *ReplicatorSv1) RemoveThresholdProfile(args *utils.TenantIDWithAPIO
 }
 
 // RemoveStatQueueProfile is the replication method coresponding to the dataDb driver method
-func (rplSv1 *ReplicatorSv1) RemoveStatQueueProfile(args *utils.TenantIDWithAPIOpts, reply *string) (err error) {
+func (rplSv1 *ReplicatorSv1) RemoveStatQueueProfile(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *string) (err error) {
 	if err = rplSv1.dm.DataDB().RemStatQueueProfileDrv(args.Tenant, args.ID); err != nil {
 		return
 	}
@@ -751,7 +752,7 @@ func (rplSv1 *ReplicatorSv1) RemoveStatQueueProfile(args *utils.TenantIDWithAPIO
 }
 
 // RemoveTiming is the replication method coresponding to the dataDb driver method
-func (rplSv1 *ReplicatorSv1) RemoveTiming(id *utils.StringWithAPIOpts, reply *string) (err error) {
+func (rplSv1 *ReplicatorSv1) RemoveTiming(ctx *context.Context, id *utils.StringWithAPIOpts, reply *string) (err error) {
 	if err = rplSv1.dm.DataDB().RemoveTimingDrv(id.Arg); err != nil {
 		return
 	}
@@ -764,7 +765,7 @@ func (rplSv1 *ReplicatorSv1) RemoveTiming(id *utils.StringWithAPIOpts, reply *st
 }
 
 // RemoveResource is the replication method coresponding to the dataDb driver method
-func (rplSv1 *ReplicatorSv1) RemoveResource(args *utils.TenantIDWithAPIOpts, reply *string) (err error) {
+func (rplSv1 *ReplicatorSv1) RemoveResource(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *string) (err error) {
 	if err = rplSv1.dm.DataDB().RemoveResourceDrv(args.Tenant, args.ID); err != nil {
 		return
 	}
@@ -777,7 +778,7 @@ func (rplSv1 *ReplicatorSv1) RemoveResource(args *utils.TenantIDWithAPIOpts, rep
 }
 
 // RemoveResourceProfile is the replication method coresponding to the dataDb driver method
-func (rplSv1 *ReplicatorSv1) RemoveResourceProfile(args *utils.TenantIDWithAPIOpts, reply *string) (err error) {
+func (rplSv1 *ReplicatorSv1) RemoveResourceProfile(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *string) (err error) {
 	if err = rplSv1.dm.DataDB().RemoveResourceProfileDrv(args.Tenant, args.ID); err != nil {
 		return
 	}
@@ -790,7 +791,7 @@ func (rplSv1 *ReplicatorSv1) RemoveResourceProfile(args *utils.TenantIDWithAPIOp
 }
 
 // RemoveActionTriggers is the replication method coresponding to the dataDb driver method
-func (rplSv1 *ReplicatorSv1) RemoveActionTriggers(id *utils.StringWithAPIOpts, reply *string) (err error) {
+func (rplSv1 *ReplicatorSv1) RemoveActionTriggers(ctx *context.Context, id *utils.StringWithAPIOpts, reply *string) (err error) {
 	if err = rplSv1.dm.DataDB().RemoveActionTriggersDrv(id.Arg); err != nil {
 		return
 	}
@@ -803,7 +804,7 @@ func (rplSv1 *ReplicatorSv1) RemoveActionTriggers(id *utils.StringWithAPIOpts, r
 }
 
 // RemoveSharedGroup is the replication method coresponding to the dataDb driver method
-func (rplSv1 *ReplicatorSv1) RemoveSharedGroup(id *utils.StringWithAPIOpts, reply *string) (err error) {
+func (rplSv1 *ReplicatorSv1) RemoveSharedGroup(ctx *context.Context, id *utils.StringWithAPIOpts, reply *string) (err error) {
 	if err = rplSv1.dm.DataDB().RemoveSharedGroupDrv(id.Arg); err != nil {
 		return
 	}
@@ -816,7 +817,7 @@ func (rplSv1 *ReplicatorSv1) RemoveSharedGroup(id *utils.StringWithAPIOpts, repl
 }
 
 // RemoveActions is the replication method coresponding to the dataDb driver method
-func (rplSv1 *ReplicatorSv1) RemoveActions(id *utils.StringWithAPIOpts, reply *string) (err error) {
+func (rplSv1 *ReplicatorSv1) RemoveActions(ctx *context.Context, id *utils.StringWithAPIOpts, reply *string) (err error) {
 	if err = rplSv1.dm.DataDB().RemoveActionsDrv(id.Arg); err != nil {
 		return
 	}
@@ -829,7 +830,7 @@ func (rplSv1 *ReplicatorSv1) RemoveActions(id *utils.StringWithAPIOpts, reply *s
 }
 
 // RemoveActionPlan is the replication method coresponding to the dataDb driver method
-func (rplSv1 *ReplicatorSv1) RemoveActionPlan(id *utils.StringWithAPIOpts, reply *string) (err error) {
+func (rplSv1 *ReplicatorSv1) RemoveActionPlan(ctx *context.Context, id *utils.StringWithAPIOpts, reply *string) (err error) {
 	if err = rplSv1.dm.DataDB().RemoveActionPlanDrv(id.Arg); err != nil {
 		return
 	}
@@ -842,7 +843,7 @@ func (rplSv1 *ReplicatorSv1) RemoveActionPlan(id *utils.StringWithAPIOpts, reply
 }
 
 // RemAccountActionPlans is the replication method coresponding to the dataDb driver method
-func (rplSv1 *ReplicatorSv1) RemAccountActionPlans(args *engine.RemAccountActionPlansArgsWithAPIOpts, reply *string) (err error) {
+func (rplSv1 *ReplicatorSv1) RemAccountActionPlans(ctx *context.Context, args *engine.RemAccountActionPlansArgsWithAPIOpts, reply *string) (err error) {
 	if err = rplSv1.dm.DataDB().RemAccountActionPlansDrv(args.AcntID); err != nil {
 		return
 	}
@@ -855,7 +856,7 @@ func (rplSv1 *ReplicatorSv1) RemAccountActionPlans(args *engine.RemAccountAction
 }
 
 // RemoveRatingPlan is the replication method coresponding to the dataDb driver method
-func (rplSv1 *ReplicatorSv1) RemoveRatingPlan(id *utils.StringWithAPIOpts, reply *string) (err error) {
+func (rplSv1 *ReplicatorSv1) RemoveRatingPlan(ctx *context.Context, id *utils.StringWithAPIOpts, reply *string) (err error) {
 	if err = rplSv1.dm.DataDB().RemoveRatingPlanDrv(id.Arg); err != nil {
 		return
 	}
@@ -868,7 +869,7 @@ func (rplSv1 *ReplicatorSv1) RemoveRatingPlan(id *utils.StringWithAPIOpts, reply
 }
 
 // RemoveRatingProfile is the replication method coresponding to the dataDb driver method
-func (rplSv1 *ReplicatorSv1) RemoveRatingProfile(id *utils.StringWithAPIOpts, reply *string) (err error) {
+func (rplSv1 *ReplicatorSv1) RemoveRatingProfile(ctx *context.Context, id *utils.StringWithAPIOpts, reply *string) (err error) {
 	if err = rplSv1.dm.DataDB().RemoveRatingProfileDrv(id.Arg); err != nil {
 		return
 	}
@@ -881,7 +882,7 @@ func (rplSv1 *ReplicatorSv1) RemoveRatingProfile(id *utils.StringWithAPIOpts, re
 }
 
 // RemoveRouteProfile is the replication method coresponding to the dataDb driver method
-func (rplSv1 *ReplicatorSv1) RemoveRouteProfile(args *utils.TenantIDWithAPIOpts, reply *string) (err error) {
+func (rplSv1 *ReplicatorSv1) RemoveRouteProfile(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *string) (err error) {
 	if err = rplSv1.dm.DataDB().RemoveRouteProfileDrv(args.Tenant, args.ID); err != nil {
 		return
 	}
@@ -894,7 +895,7 @@ func (rplSv1 *ReplicatorSv1) RemoveRouteProfile(args *utils.TenantIDWithAPIOpts,
 }
 
 // RemoveAttributeProfile is the replication method coresponding to the dataDb driver method
-func (rplSv1 *ReplicatorSv1) RemoveAttributeProfile(args *utils.TenantIDWithAPIOpts, reply *string) (err error) {
+func (rplSv1 *ReplicatorSv1) RemoveAttributeProfile(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *string) (err error) {
 	if err = rplSv1.dm.DataDB().RemoveAttributeProfileDrv(args.Tenant, args.ID); err != nil {
 		return
 	}
@@ -907,7 +908,7 @@ func (rplSv1 *ReplicatorSv1) RemoveAttributeProfile(args *utils.TenantIDWithAPIO
 }
 
 // RemoveChargerProfile is the replication method coresponding to the dataDb driver method
-func (rplSv1 *ReplicatorSv1) RemoveChargerProfile(args *utils.TenantIDWithAPIOpts, reply *string) (err error) {
+func (rplSv1 *ReplicatorSv1) RemoveChargerProfile(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *string) (err error) {
 	if err = rplSv1.dm.DataDB().RemoveChargerProfileDrv(args.Tenant, args.ID); err != nil {
 		return
 	}
@@ -920,7 +921,7 @@ func (rplSv1 *ReplicatorSv1) RemoveChargerProfile(args *utils.TenantIDWithAPIOpt
 }
 
 // RemoveDispatcherProfile is the replication method coresponding to the dataDb driver method
-func (rplSv1 *ReplicatorSv1) RemoveDispatcherProfile(args *utils.TenantIDWithAPIOpts, reply *string) (err error) {
+func (rplSv1 *ReplicatorSv1) RemoveDispatcherProfile(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *string) (err error) {
 	if err = rplSv1.dm.DataDB().RemoveDispatcherProfileDrv(args.Tenant, args.ID); err != nil {
 		return
 	}
@@ -933,7 +934,7 @@ func (rplSv1 *ReplicatorSv1) RemoveDispatcherProfile(args *utils.TenantIDWithAPI
 }
 
 // RemoveDispatcherHost is the replication method coresponding to the dataDb driver method
-func (rplSv1 *ReplicatorSv1) RemoveDispatcherHost(args *utils.TenantIDWithAPIOpts, reply *string) (err error) {
+func (rplSv1 *ReplicatorSv1) RemoveDispatcherHost(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *string) (err error) {
 	if err = rplSv1.dm.DataDB().RemoveDispatcherHostDrv(args.Tenant, args.ID); err != nil {
 		return
 	}
@@ -946,7 +947,7 @@ func (rplSv1 *ReplicatorSv1) RemoveDispatcherHost(args *utils.TenantIDWithAPIOpt
 }
 
 // RemoveIndexes  is the replication method coresponding to the dataDb driver method
-func (rplSv1 *ReplicatorSv1) RemoveIndexes(args *utils.GetIndexesArg, reply *string) (err error) {
+func (rplSv1 *ReplicatorSv1) RemoveIndexes(ctx *context.Context, args *utils.GetIndexesArg, reply *string) (err error) {
 	if err = rplSv1.dm.DataDB().RemoveIndexesDrv(args.IdxItmType, args.TntCtx, args.IdxKey); err != nil {
 		return
 	}
@@ -959,7 +960,7 @@ func (rplSv1 *ReplicatorSv1) RemoveIndexes(args *utils.GetIndexesArg, reply *str
 }
 
 // Ping used to determine if the RPC is active
-func (rplSv1 *ReplicatorSv1) Ping(ign *utils.CGREvent, reply *string) error {
+func (rplSv1 *ReplicatorSv1) Ping(ctx *context.Context, ign *utils.CGREvent, reply *string) error {
 	*reply = utils.Pong
 	return nil
 }

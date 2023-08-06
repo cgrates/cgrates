@@ -22,12 +22,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package general_tests
 
 import (
-	"net/rpc"
 	"path"
 	"reflect"
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc"
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/sessions"
@@ -38,7 +39,7 @@ var (
 	ses3CfgDir  string
 	ses3CfgPath string
 	ses3Cfg     *config.CGRConfig
-	ses3RPC     *rpc.Client
+	ses3RPC     *birpc.Client
 
 	ses3Tests = []func(t *testing.T){
 		testSes3ItLoadConfig,
@@ -117,7 +118,7 @@ func testSes3ItRPCConn(t *testing.T) {
 func testSes3ItLoadFromFolder(t *testing.T) {
 	var reply string
 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "testit")}
-	if err := ses3RPC.Call(utils.APIerSv1LoadTariffPlanFromFolder, attrs, &reply); err != nil {
+	if err := ses3RPC.Call(context.Background(), utils.APIerSv1LoadTariffPlanFromFolder, attrs, &reply); err != nil {
 		t.Error(err)
 	}
 	time.Sleep(100 * time.Millisecond)
@@ -153,7 +154,7 @@ func testSes3ItProcessEvent(t *testing.T) {
 		},
 	}
 	var rply sessions.V1ProcessMessageReply
-	if err := ses3RPC.Call(utils.SessionSv1ProcessMessage,
+	if err := ses3RPC.Call(context.Background(), utils.SessionSv1ProcessMessage,
 		args, &rply); err != nil {
 		t.Fatal(err)
 	}
@@ -208,7 +209,7 @@ func testSes3ItProcessEvent(t *testing.T) {
 func testSes3ItThreshold1002After(t *testing.T) {
 	var td engine.Threshold
 	eTd := engine.Threshold{Tenant: "cgrates.org", ID: "THD_ACNT_1001", Hits: 1}
-	if err := ses3RPC.Call(utils.ThresholdSv1GetThreshold,
+	if err := ses3RPC.Call(context.Background(), utils.ThresholdSv1GetThreshold,
 		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "THD_ACNT_1001"}}, &td); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eTd.Tenant, td.Tenant) {
@@ -228,7 +229,7 @@ func testSes3ItStatMetricsAfter(t *testing.T) {
 		utils.MetaTCD: "5m0s",
 	}
 
-	if err := ses3RPC.Call(utils.StatSv1GetQueueStringMetrics,
+	if err := ses3RPC.Call(context.Background(), utils.StatSv1GetQueueStringMetrics,
 		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "Stat_1"}}, &metrics); err != nil {
 		t.Error(err)
 	}
@@ -240,7 +241,7 @@ func testSes3ItStatMetricsAfter(t *testing.T) {
 func testSes3ItThreshold1002After2(t *testing.T) {
 	var td engine.Threshold
 	eTd := engine.Threshold{Tenant: "cgrates.org", ID: "THD_ACNT_1001", Hits: 2}
-	if err := ses3RPC.Call(utils.ThresholdSv1GetThreshold,
+	if err := ses3RPC.Call(context.Background(), utils.ThresholdSv1GetThreshold,
 		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "THD_ACNT_1001"}}, &td); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eTd.Tenant, td.Tenant) {
@@ -260,7 +261,7 @@ func testSes3ItStatMetricsAfter2(t *testing.T) {
 		utils.MetaTCD: "10m0s",
 	}
 
-	if err := ses3RPC.Call(utils.StatSv1GetQueueStringMetrics,
+	if err := ses3RPC.Call(context.Background(), utils.StatSv1GetQueueStringMetrics,
 		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "Stat_1"}}, &metrics); err != nil {
 		t.Error(err)
 	}
@@ -281,7 +282,7 @@ func testSes3ItAddVoiceBalance(t *testing.T) {
 		},
 	}
 	var reply string
-	if err := ses3RPC.Call(utils.APIerSv2SetBalance, attrSetBalance, &reply); err != nil {
+	if err := ses3RPC.Call(context.Background(), utils.APIerSv2SetBalance, attrSetBalance, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf("Received: %s", reply)
@@ -291,7 +292,7 @@ func testSes3ItAddVoiceBalance(t *testing.T) {
 		Tenant:  "cgrates.org",
 		Account: "1002",
 	}
-	if err := ses3RPC.Call(utils.APIerSv2GetAccount, attrs, &acnt); err != nil {
+	if err := ses3RPC.Call(context.Background(), utils.APIerSv2GetAccount, attrs, &acnt); err != nil {
 		t.Error(err)
 	} else if rply := acnt.BalanceMap[utils.MetaVoice].GetTotalValue(); rply != float64(5*time.Second) {
 		t.Errorf("Expecting: %v, received: %v",
@@ -323,7 +324,7 @@ func testSes3ItTerminatWithoutInit(t *testing.T) {
 			},
 		}
 		var rply string
-		if err := ses3RPC.Call(utils.SessionSv1TerminateSession,
+		if err := ses3RPC.Call(context.Background(), utils.SessionSv1TerminateSession,
 			args, &rply); err != nil {
 			t.Error(err)
 		}
@@ -354,7 +355,7 @@ func testSes3ItTerminatWithoutInit(t *testing.T) {
 		},
 	}
 	var rply1 sessions.V1InitSessionReply
-	if err := ses3RPC.Call(utils.SessionSv1InitiateSession,
+	if err := ses3RPC.Call(context.Background(), utils.SessionSv1InitiateSession,
 		args1, &rply1); err != nil {
 		t.Error(err)
 		return
@@ -363,7 +364,7 @@ func testSes3ItTerminatWithoutInit(t *testing.T) {
 	}
 	time.Sleep(5 * time.Millisecond)
 	aSessions := make([]*sessions.ExternalSession, 0)
-	if err := ses3RPC.Call(utils.SessionSv1GetActiveSessions, new(utils.SessionFilter), &aSessions); err == nil ||
+	if err := ses3RPC.Call(context.Background(), utils.SessionSv1GetActiveSessions, new(utils.SessionFilter), &aSessions); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
@@ -375,7 +376,7 @@ func testSes3ItBalance(t *testing.T) {
 		Tenant:  "cgrates.org",
 		Account: "1002",
 	}
-	if err := ses3RPC.Call(utils.APIerSv2GetAccount, attrs, &acnt); err != nil {
+	if err := ses3RPC.Call(context.Background(), utils.APIerSv2GetAccount, attrs, &acnt); err != nil {
 		t.Error(err)
 	} else if rply := acnt.BalanceMap[utils.MetaVoice].GetTotalValue(); rply != float64(3*time.Second) {
 		t.Errorf("Expecting: %v, received: %v",
@@ -385,7 +386,7 @@ func testSes3ItBalance(t *testing.T) {
 
 func testSes3ItCDRs(t *testing.T) {
 	var reply string
-	if err := ses3RPC.Call(utils.SessionSv1ProcessCDR, &utils.CGREvent{
+	if err := ses3RPC.Call(context.Background(), utils.SessionSv1ProcessCDR, &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "TestSesItProccesCDR",
 		Event: map[string]any{
@@ -410,7 +411,7 @@ func testSes3ItCDRs(t *testing.T) {
 	var cdrs []*engine.ExternalCDR
 	req := utils.RPCCDRsFilter{RunIDs: []string{"CustomerCharges"},
 		Accounts: []string{"1002"}}
-	if err := ses3RPC.Call(utils.APIerSv2GetCDRs, &req, &cdrs); err != nil {
+	if err := ses3RPC.Call(context.Background(), utils.APIerSv2GetCDRs, &req, &cdrs); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(cdrs) != 1 {
 		t.Error("Unexpected number of CDRs returned: ", len(cdrs))

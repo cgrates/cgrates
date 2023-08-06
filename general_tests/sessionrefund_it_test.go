@@ -21,11 +21,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package general_tests
 
 import (
-	"net/rpc"
 	"path"
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc"
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/sessions"
@@ -36,7 +37,7 @@ var (
 	srCfgPath string
 	srCfgDIR  string
 	srCfg     *config.CGRConfig
-	srrpc     *rpc.Client
+	srrpc     *birpc.Client
 	sraccount = "refundAcc"
 	srtenant  = "cgrates.org"
 
@@ -111,7 +112,7 @@ func testSrItRPCConn(t *testing.T) {
 func testSrItLoadFromFolder(t *testing.T) {
 	var reply string
 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "oldtutorial")}
-	if err := srrpc.Call(utils.APIerSv1LoadTariffPlanFromFolder, attrs, &reply); err != nil {
+	if err := srrpc.Call(context.Background(), utils.APIerSv1LoadTariffPlanFromFolder, attrs, &reply); err != nil {
 		t.Error(err)
 	}
 	time.Sleep(100 * time.Millisecond)
@@ -123,7 +124,7 @@ func testAccountBalance(t *testing.T, sracc, srten, balType string, expected flo
 		Tenant:  srten,
 		Account: sracc,
 	}
-	if err := srrpc.Call(utils.APIerSv2GetAccount, attrs, &acnt); err != nil {
+	if err := srrpc.Call(context.Background(), utils.APIerSv2GetAccount, attrs, &acnt); err != nil {
 		t.Error(err)
 	} else if rply := acnt.BalanceMap[balType].GetTotalValue(); rply != expected {
 		t.Errorf("Expecting: %v, received: %v",
@@ -143,7 +144,7 @@ func testSrItAddVoiceBalance(t *testing.T) {
 		},
 	}
 	var reply string
-	if err := srrpc.Call(utils.APIerSv2SetBalance, attrSetBalance, &reply); err != nil {
+	if err := srrpc.Call(context.Background(), utils.APIerSv2SetBalance, attrSetBalance, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf("Received: %s", reply)
@@ -176,7 +177,7 @@ func testSrItInitSession(t *testing.T) {
 		},
 	}
 	var rply1 sessions.V1InitSessionReply
-	if err := srrpc.Call(utils.SessionSv1InitiateSession,
+	if err := srrpc.Call(context.Background(), utils.SessionSv1InitiateSession,
 		args1, &rply1); err != nil {
 		t.Error(err)
 		return
@@ -210,7 +211,7 @@ func testSrItTerminateSession(t *testing.T) {
 		},
 	}
 	var rply string
-	if err := srrpc.Call(utils.SessionSv1TerminateSession,
+	if err := srrpc.Call(context.Background(), utils.SessionSv1TerminateSession,
 		args, &rply); err != nil {
 		t.Error(err)
 	}
@@ -218,7 +219,7 @@ func testSrItTerminateSession(t *testing.T) {
 		t.Errorf("Unexpected reply: %s", rply)
 	}
 	aSessions := make([]*sessions.ExternalSession, 0)
-	if err := srrpc.Call(utils.SessionSv1GetActiveSessions, new(utils.SessionFilter), &aSessions); err == nil ||
+	if err := srrpc.Call(context.Background(), utils.SessionSv1GetActiveSessions, new(utils.SessionFilter), &aSessions); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
@@ -239,7 +240,7 @@ func testSrItAddMonetaryBalance(t *testing.T) {
 		},
 	}
 	var reply string
-	if err := srrpc.Call(utils.APIerSv2SetBalance, attrs, &reply); err != nil {
+	if err := srrpc.Call(context.Background(), utils.APIerSv2SetBalance, attrs, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf("Received: %s", reply)
@@ -270,7 +271,7 @@ func testSrItInitSession2(t *testing.T) {
 		},
 	}
 	var rply1 sessions.V1InitSessionReply
-	if err := srrpc.Call(utils.SessionSv1InitiateSession,
+	if err := srrpc.Call(context.Background(), utils.SessionSv1InitiateSession,
 		args1, &rply1); err != nil {
 		t.Error(err)
 		return
@@ -303,7 +304,7 @@ func testSrItTerminateSession2(t *testing.T) {
 		},
 	}
 	var rply string
-	if err := srrpc.Call(utils.SessionSv1TerminateSession,
+	if err := srrpc.Call(context.Background(), utils.SessionSv1TerminateSession,
 		args, &rply); err != nil {
 		t.Error(err)
 	}
@@ -311,7 +312,7 @@ func testSrItTerminateSession2(t *testing.T) {
 		t.Errorf("Unexpected reply: %s", rply)
 	}
 	aSessions := make([]*sessions.ExternalSession, 0)
-	if err := srrpc.Call(utils.SessionSv1GetActiveSessions, new(utils.SessionFilter), &aSessions); err == nil ||
+	if err := srrpc.Call(context.Background(), utils.SessionSv1GetActiveSessions, new(utils.SessionFilter), &aSessions); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}

@@ -24,6 +24,8 @@ import (
 	"sort"
 	"testing"
 
+	"github.com/cgrates/birpc"
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -34,7 +36,7 @@ type ccMock struct {
 	calls map[string]func(args any, reply any) error
 }
 
-func (ccM *ccMock) Call(serviceMethod string, args any, reply any) (err error) {
+func (ccM *ccMock) Call(ctx *context.Context, serviceMethod string, args any, reply any) (err error) {
 	if call, has := ccM.calls[serviceMethod]; !has {
 		return rpcclient.ErrUnsupporteServiceMethod
 	} else {
@@ -65,9 +67,9 @@ func TestFiltersSetFilterReloadCache(t *testing.T) {
 			},
 		},
 	}
-	rpcInternal := make(chan rpcclient.ClientConnector, 1)
+	rpcInternal := make(chan birpc.ClientConnector, 1)
 	rpcInternal <- ccM
-	cM := engine.NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	cM := engine.NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches): rpcInternal,
 	})
 	apierSv1 := &APIerSv1{
@@ -92,7 +94,7 @@ func TestFiltersSetFilterReloadCache(t *testing.T) {
 	}
 	var reply string
 
-	if err := apierSv1.SetFilter(arg, &reply); err != nil {
+	if err := apierSv1.SetFilter(context.Background(), arg, &reply); err != nil {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", nil, err)
 	}
 
@@ -115,7 +117,7 @@ func TestFiltersSetFilterReloadCache(t *testing.T) {
 		},
 	}
 
-	if err := apierSv1.SetAttributeProfile(attrPrf, &reply); err != nil {
+	if err := apierSv1.SetAttributeProfile(context.Background(), attrPrf, &reply); err != nil {
 		t.Error(err)
 	}
 
@@ -131,7 +133,7 @@ func TestFiltersSetFilterReloadCache(t *testing.T) {
 		},
 	}
 
-	if err := apierSv1.SetThresholdProfile(thPrf, &reply); err != nil {
+	if err := apierSv1.SetThresholdProfile(context.Background(), thPrf, &reply); err != nil {
 		t.Error(err)
 	}
 
@@ -146,7 +148,7 @@ func TestFiltersSetFilterReloadCache(t *testing.T) {
 		},
 	}
 
-	if err := apierSv1.SetResourceProfile(rsPrf, &reply); err != nil {
+	if err := apierSv1.SetResourceProfile(context.Background(), rsPrf, &reply); err != nil {
 		t.Error(err)
 	}
 
@@ -161,7 +163,7 @@ func TestFiltersSetFilterReloadCache(t *testing.T) {
 		},
 	}
 
-	if err := apierSv1.SetStatQueueProfile(sqPrf, &reply); err != nil {
+	if err := apierSv1.SetStatQueueProfile(context.Background(), sqPrf, &reply); err != nil {
 		t.Error(err)
 	}
 
@@ -176,7 +178,7 @@ func TestFiltersSetFilterReloadCache(t *testing.T) {
 		},
 	}
 
-	if err := apierSv1.SetDispatcherProfile(dpPrf, &reply); err != nil {
+	if err := apierSv1.SetDispatcherProfile(context.Background(), dpPrf, &reply); err != nil {
 		t.Error(err)
 	}
 
@@ -191,7 +193,7 @@ func TestFiltersSetFilterReloadCache(t *testing.T) {
 		},
 	}
 
-	if err := apierSv1.SetChargerProfile(chgPrf, &reply); err != nil {
+	if err := apierSv1.SetChargerProfile(context.Background(), chgPrf, &reply); err != nil {
 		t.Error(err)
 	}
 
@@ -224,7 +226,7 @@ func TestFiltersSetFilterReloadCache(t *testing.T) {
 		ThresholdFilterIndexIDs:  []string{"cgrates.org:*string:*req.Account:1001", "cgrates.org:*string:*req.Account:1002"},
 	}
 
-	if err := apierSv1.SetFilter(arg, &reply); err != nil {
+	if err := apierSv1.SetFilter(context.Background(), arg, &reply); err != nil {
 		t.Error(err)
 	}
 
@@ -256,9 +258,9 @@ func TestFiltersSetFilterClearCache(t *testing.T) {
 			},
 		},
 	}
-	rpcInternal := make(chan rpcclient.ClientConnector, 1)
+	rpcInternal := make(chan birpc.ClientConnector, 1)
 	rpcInternal <- ccM
-	cM := engine.NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	cM := engine.NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches): rpcInternal,
 	})
 	apierSv1 := &APIerSv1{
@@ -283,7 +285,7 @@ func TestFiltersSetFilterClearCache(t *testing.T) {
 	}
 	var reply string
 
-	if err := apierSv1.SetFilter(arg, &reply); err != nil {
+	if err := apierSv1.SetFilter(context.Background(), arg, &reply); err != nil {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", nil, err)
 	}
 
@@ -306,7 +308,7 @@ func TestFiltersSetFilterClearCache(t *testing.T) {
 		},
 	}
 
-	if err := apierSv1.SetAttributeProfile(attrPrf, &reply); err != nil {
+	if err := apierSv1.SetAttributeProfile(context.Background(), attrPrf, &reply); err != nil {
 		t.Error(err)
 	}
 
@@ -322,7 +324,7 @@ func TestFiltersSetFilterClearCache(t *testing.T) {
 		},
 	}
 
-	if err := apierSv1.SetThresholdProfile(thPrf, &reply); err != nil {
+	if err := apierSv1.SetThresholdProfile(context.Background(), thPrf, &reply); err != nil {
 		t.Error(err)
 	}
 
@@ -337,7 +339,7 @@ func TestFiltersSetFilterClearCache(t *testing.T) {
 		},
 	}
 
-	if err := apierSv1.SetResourceProfile(rsPrf, &reply); err != nil {
+	if err := apierSv1.SetResourceProfile(context.Background(), rsPrf, &reply); err != nil {
 		t.Error(err)
 	}
 
@@ -352,7 +354,7 @@ func TestFiltersSetFilterClearCache(t *testing.T) {
 		},
 	}
 
-	if err := apierSv1.SetStatQueueProfile(sqPrf, &reply); err != nil {
+	if err := apierSv1.SetStatQueueProfile(context.Background(), sqPrf, &reply); err != nil {
 		t.Error(err)
 	}
 
@@ -367,7 +369,7 @@ func TestFiltersSetFilterClearCache(t *testing.T) {
 		},
 	}
 
-	if err := apierSv1.SetDispatcherProfile(dpPrf, &reply); err != nil {
+	if err := apierSv1.SetDispatcherProfile(context.Background(), dpPrf, &reply); err != nil {
 		t.Error(err)
 	}
 
@@ -382,7 +384,7 @@ func TestFiltersSetFilterClearCache(t *testing.T) {
 		},
 	}
 
-	if err := apierSv1.SetChargerProfile(chgPrf, &reply); err != nil {
+	if err := apierSv1.SetChargerProfile(context.Background(), chgPrf, &reply); err != nil {
 		t.Error(err)
 	}
 
@@ -412,7 +414,7 @@ func TestFiltersSetFilterClearCache(t *testing.T) {
 	}
 	sort.Strings(expArgs.CacheIDs)
 
-	if err := apierSv1.SetFilter(arg, &reply); err != nil {
+	if err := apierSv1.SetFilter(context.Background(), arg, &reply); err != nil {
 		t.Error(err)
 	}
 

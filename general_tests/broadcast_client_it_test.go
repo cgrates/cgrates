@@ -21,12 +21,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package general_tests
 
 import (
-	"net/rpc"
 	"path"
 	"reflect"
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc"
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -38,8 +39,8 @@ var (
 	brodcastInternalCfgDIR  string
 	brodcastCfg             *config.CGRConfig
 	brodcastInternalCfg     *config.CGRConfig
-	brodcastRPC             *rpc.Client
-	brodcastInternalRPC     *rpc.Client
+	brodcastRPC             *birpc.Client
+	brodcastInternalRPC     *birpc.Client
 
 	sTestBrodcastIt = []func(t *testing.T){
 		testbrodcastItLoadConfig,
@@ -124,10 +125,10 @@ func testbrodcastItRPCConn(t *testing.T) {
 func testbrodcastItLoadFromFolder(t *testing.T) {
 	var reply string
 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "tutorial")}
-	if err := brodcastRPC.Call(utils.APIerSv1LoadTariffPlanFromFolder, attrs, &reply); err != nil {
+	if err := brodcastRPC.Call(context.Background(), utils.APIerSv1LoadTariffPlanFromFolder, attrs, &reply); err != nil {
 		t.Error(err)
 	}
-	if err := brodcastInternalRPC.Call(utils.APIerSv1LoadTariffPlanFromFolder, attrs, &reply); err != nil {
+	if err := brodcastInternalRPC.Call(context.Background(), utils.APIerSv1LoadTariffPlanFromFolder, attrs, &reply); err != nil {
 		t.Error(err)
 	}
 	time.Sleep(200 * time.Millisecond)
@@ -152,7 +153,7 @@ func testbrodcastItProccessEvent(t *testing.T) {
 	}
 
 	var rply string
-	if err := brodcastRPC.Call(utils.SessionSv1ProcessCDR, args, &rply); err != nil {
+	if err := brodcastRPC.Call(context.Background(), utils.SessionSv1ProcessCDR, args, &rply); err != nil {
 		t.Fatal(err)
 	}
 	if rply != utils.OK {
@@ -187,7 +188,7 @@ func testbrodcastItGetCDRs(t *testing.T) {
 	}
 	var cdrs []*engine.CDR
 	args := utils.RPCCDRsFilterWithAPIOpts{RPCCDRsFilter: &utils.RPCCDRsFilter{RunIDs: []string{utils.MetaDefault}}}
-	if err := brodcastRPC.Call(utils.CDRsV1GetCDRs, &args, &cdrs); err != nil {
+	if err := brodcastRPC.Call(context.Background(), utils.CDRsV1GetCDRs, &args, &cdrs); err != nil {
 		t.Fatal("Unexpected error: ", err.Error())
 	} else if len(cdrs) != 1 {
 		t.Fatal("Unexpected number of CDRs returned: ", len(cdrs))
@@ -197,7 +198,7 @@ func testbrodcastItGetCDRs(t *testing.T) {
 		t.Errorf("Expected: %s ,received: %s", utils.ToJSON(eCDR), utils.ToJSON(cdrs[0]))
 	}
 
-	if err := brodcastInternalRPC.Call(utils.CDRsV1GetCDRs, &args, &cdrs); err != nil {
+	if err := brodcastInternalRPC.Call(context.Background(), utils.CDRsV1GetCDRs, &args, &cdrs); err != nil {
 		t.Fatal("Unexpected error: ", err.Error())
 	} else if len(cdrs) != 1 {
 		t.Error("Unexpected number of CDRs returned: ", len(cdrs))

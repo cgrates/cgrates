@@ -22,12 +22,12 @@ import (
 	"sync"
 	"testing"
 
+	"github.com/cgrates/birpc"
 	v1 "github.com/cgrates/cgrates/apier/v1"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/cores"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/cgrates/rpcclient"
 )
 
 // TestRalsCoverage for cover testing
@@ -41,10 +41,10 @@ func TestRalsCoverage(t *testing.T) {
 	server := cores.NewServer(nil)
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
 	cfg.StorDbCfg().Type = utils.MetaInternal
-	anz := NewAnalyzerService(cfg, server, filterSChan, shdChan, make(chan rpcclient.ClientConnector, 1), srvDep)
+	anz := NewAnalyzerService(cfg, server, filterSChan, shdChan, make(chan birpc.ClientConnector, 1), srvDep)
 	ralS := NewRalService(cfg, chS, server,
-		make(chan rpcclient.ClientConnector, 1),
-		make(chan rpcclient.ClientConnector, 1),
+		make(chan birpc.ClientConnector, 1),
+		make(chan birpc.ClientConnector, 1),
 		shdChan, nil, anz, srvDep, filterSChan)
 	if ralS.IsRunning() {
 		t.Errorf("Expected service to be down")
@@ -55,7 +55,7 @@ func TestRalsCoverage(t *testing.T) {
 			server:   server,
 			shdChan:  shdChan,
 			resp:     &engine.Responder{},
-			connChan: make(chan rpcclient.ClientConnector, 1),
+			connChan: make(chan birpc.ClientConnector, 1),
 			anz:      anz,
 			srvDep:   srvDep,
 		},
@@ -63,9 +63,13 @@ func TestRalsCoverage(t *testing.T) {
 		cacheS:   chS,
 		server:   server,
 		rals:     &v1.RALsV1{},
-		connChan: make(chan rpcclient.ClientConnector, 1),
+		connChan: make(chan birpc.ClientConnector, 1),
 	}
-	ralS2.responder.connChan <- chS
+	cacheSrv, err := engine.NewService(chS)
+	if err != nil {
+		t.Fatal(err)
+	}
+	ralS2.responder.connChan <- cacheSrv
 	if !ralS2.IsRunning() {
 		t.Errorf("Expected service to be running")
 	}
@@ -80,7 +84,7 @@ func TestRalsCoverage(t *testing.T) {
 	if !reflect.DeepEqual(ralS2.GetResponder(), ralS2.responder) {
 		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", ralS2.responder, ralS2.GetResponder())
 	}
-	ralS2.connChan <- chS
+	ralS2.connChan <- cacheSrv
 	ralS2.Shutdown()
 	if ralS.IsRunning() {
 		t.Errorf("Expected service to be down")

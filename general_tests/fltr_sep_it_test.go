@@ -22,13 +22,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package general_tests
 
 import (
-	"net/rpc"
 	"path"
 	"reflect"
 	"sort"
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc"
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -37,7 +38,7 @@ import (
 var (
 	fltrSepCfgPath string
 	fltrSepCfg     *config.CGRConfig
-	fltrSepRPC     *rpc.Client
+	fltrSepRPC     *birpc.Client
 	fltrSepDelay   int
 	fltrSepConfDIR string //run tests for specific configuration
 
@@ -111,7 +112,7 @@ func testFltrSepRpcConn(t *testing.T) {
 func testFltrSepLoadTarrifPlans(t *testing.T) {
 	var reply string
 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "fltr_sep")}
-	if err := fltrSepRPC.Call(utils.APIerSv1LoadTariffPlanFromFolder, attrs, &reply); err != nil {
+	if err := fltrSepRPC.Call(context.Background(), utils.APIerSv1LoadTariffPlanFromFolder, attrs, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply returned", reply)
@@ -151,7 +152,7 @@ func testFltrSepFilterSeparation(t *testing.T) {
 	var attrReply *engine.AttributeProfile
 
 	// first option of the first filter and the second filter match
-	if err := fltrSepRPC.Call(utils.AttributeSv1GetAttributeForEvent,
+	if err := fltrSepRPC.Call(context.Background(), utils.AttributeSv1GetAttributeForEvent,
 		ev, &attrReply); err != nil {
 		t.Error(err)
 	} else {
@@ -167,7 +168,7 @@ func testFltrSepFilterSeparation(t *testing.T) {
 
 	// third option of the first filter and the second filter match
 	ev.Event[utils.AccountField] = "1003"
-	if err := fltrSepRPC.Call(utils.AttributeSv1GetAttributeForEvent,
+	if err := fltrSepRPC.Call(context.Background(), utils.AttributeSv1GetAttributeForEvent,
 		ev, &attrReply); err != nil {
 		t.Error(err)
 	} else {
@@ -183,14 +184,14 @@ func testFltrSepFilterSeparation(t *testing.T) {
 
 	// the second filter matches while none of the options from the first filter match
 	ev.Event[utils.AccountField] = "1004"
-	if err := fltrSepRPC.Call(utils.AttributeSv1GetAttributeForEvent,
+	if err := fltrSepRPC.Call(context.Background(), utils.AttributeSv1GetAttributeForEvent,
 		ev, &attrReply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ErrNotFound, err)
 	}
 
 	// fourth option of the first filter matches while the second filter doesn't
 	ev.Event[utils.AccountField] = "1101"
-	if err := fltrSepRPC.Call(utils.AttributeSv1GetAttributeForEvent,
+	if err := fltrSepRPC.Call(context.Background(), utils.AttributeSv1GetAttributeForEvent,
 		ev, &attrReply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ErrNotFound, err)
 	}

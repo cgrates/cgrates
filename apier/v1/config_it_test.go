@@ -23,14 +23,15 @@ package v1
 
 import (
 	"fmt"
-	"net/rpc"
-	"net/rpc/jsonrpc"
 	"os/exec"
 	"path"
 	"reflect"
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc"
+	"github.com/cgrates/birpc/context"
+	"github.com/cgrates/birpc/jsonrpc"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -39,7 +40,7 @@ import (
 var (
 	configCfgPath   string
 	configCfg       *config.CGRConfig
-	configRPC       *rpc.Client
+	configRPC       *birpc.Client
 	configConfigDIR string //run tests for specific configuration
 
 	sTestsConfig = []func(t *testing.T){
@@ -122,7 +123,7 @@ func testConfigSRPCConn(t *testing.T) {
 
 func testConfigSSetConfigSessionS(t *testing.T) {
 	var reply string
-	if err := configRPC.Call(utils.ConfigSv1SetConfig, &config.SetConfigArgs{
+	if err := configRPC.Call(context.Background(), utils.ConfigSv1SetConfig, &config.SetConfigArgs{
 		Tenant: "cgrates.org",
 		Config: map[string]any{
 			"sessions": map[string]any{
@@ -221,7 +222,7 @@ func testConfigSSetConfigSessionS(t *testing.T) {
 		config.SessionSJson: exp,
 	}
 	var rpl map[string]any
-	if err := configRPC.Call(utils.ConfigSv1GetConfig, &config.SectionWithAPIOpts{
+	if err := configRPC.Call(context.Background(), utils.ConfigSv1GetConfig, &config.SectionWithAPIOpts{
 		Tenant:  "cgrates.org",
 		Section: config.SessionSJson,
 	}, &rpl); err != nil {
@@ -312,7 +313,7 @@ func testConfigSv1GetJSONSectionWithoutTenant(t *testing.T) {
 		config.SessionSJson: exp,
 	}
 	var rpl map[string]any
-	if err := configRPC.Call(utils.ConfigSv1GetConfig, &config.SectionWithAPIOpts{
+	if err := configRPC.Call(context.Background(), utils.ConfigSv1GetConfig, &config.SectionWithAPIOpts{
 		Section: config.SessionSJson,
 	}, &rpl); err != nil {
 		t.Error(err)
@@ -326,7 +327,7 @@ func testConfigSSetConfigEEsDryRun(t *testing.T) {
 		t.SkipNow()
 	}
 	var reply string
-	if err := configRPC.Call(utils.ConfigSv1SetConfig, &config.SetConfigArgs{
+	if err := configRPC.Call(context.Background(), utils.ConfigSv1SetConfig, &config.SetConfigArgs{
 		Config: map[string]any{
 			"ees": map[string]any{
 				"enabled": true,
@@ -340,7 +341,7 @@ func testConfigSSetConfigEEsDryRun(t *testing.T) {
 	}
 
 	var rpl map[string]any
-	if err := configRPC.Call(utils.ConfigSv1GetConfig, &config.SectionWithAPIOpts{
+	if err := configRPC.Call(context.Background(), utils.ConfigSv1GetConfig, &config.SectionWithAPIOpts{
 		Section: config.EEsJson,
 	}, &rpl); err != nil {
 		t.Error(err)
@@ -354,7 +355,7 @@ func testConfigSSetConfigEEs(t *testing.T) {
 		t.SkipNow()
 	}
 	var reply string
-	if err := configRPC.Call(utils.ConfigSv1SetConfig, &config.SetConfigArgs{
+	if err := configRPC.Call(context.Background(), utils.ConfigSv1SetConfig, &config.SetConfigArgs{
 		Config: map[string]any{
 			"ees": map[string]any{
 				"enabled":          true,
@@ -397,7 +398,7 @@ func testConfigSSetConfigEEs(t *testing.T) {
 		config.EEsJson: exp,
 	}
 	var rpl map[string]any
-	if err := configRPC.Call(utils.ConfigSv1GetConfig, &config.SectionWithAPIOpts{
+	if err := configRPC.Call(context.Background(), utils.ConfigSv1GetConfig, &config.SectionWithAPIOpts{
 		Section: config.EEsJson,
 	}, &rpl); err != nil {
 		t.Error(err)
@@ -427,7 +428,7 @@ func testConfigStartEngineWithConfigs(t *testing.T) {
 		t.Fatal(err)
 	}
 	var rply map[string]any
-	if err := configRPC.Call(utils.CoreSv1Status, &utils.TenantWithAPIOpts{}, &rply); err != nil {
+	if err := configRPC.Call(context.Background(), utils.CoreSv1Status, &utils.TenantWithAPIOpts{}, &rply); err != nil {
 		t.Error(err)
 	} else if rply[utils.NodeID] != "EngineWithConfigSActive" {
 		t.Errorf("Expected %+v , received: %+v ", "EngineWithConfigSActive", rply)
@@ -444,7 +445,7 @@ func testConfigStartEngineFromHTTP(t *testing.T) {
 		t.Error(err)
 	}
 	fib := utils.FibDuration(time.Millisecond, 0)
-	var jsonClnt *rpc.Client
+	var jsonClnt *birpc.Client
 	var connected bool
 	for i := 0; i < 200; i++ {
 		time.Sleep(fib())
@@ -461,7 +462,7 @@ func testConfigStartEngineFromHTTP(t *testing.T) {
 	}
 	time.Sleep(100 * time.Millisecond)
 	var rply map[string]any
-	if err := jsonClnt.Call(utils.CoreSv1Status, &utils.TenantWithAPIOpts{}, &rply); err != nil {
+	if err := jsonClnt.Call(context.Background(), utils.CoreSv1Status, &utils.TenantWithAPIOpts{}, &rply); err != nil {
 		t.Error(err)
 	}
 }
@@ -469,7 +470,7 @@ func testConfigStartEngineFromHTTP(t *testing.T) {
 func testConfigSSetConfigFromJSONCoreSDryRun(t *testing.T) {
 	cfgStr := `{"cores":{"caps":0,"caps_stats_interval":"0","caps_strategy":"*queue","shutdown_timeout":"1s"}}`
 	var reply string
-	if err := configRPC.Call(utils.ConfigSv1SetConfigFromJSON, &config.SetConfigFromJSONArgs{
+	if err := configRPC.Call(context.Background(), utils.ConfigSv1SetConfigFromJSON, &config.SetConfigFromJSONArgs{
 		Tenant: "cgrates.org",
 		Config: cfgStr,
 		DryRun: true,
@@ -481,7 +482,7 @@ func testConfigSSetConfigFromJSONCoreSDryRun(t *testing.T) {
 
 	expCfg := "{\"cores\":{\"caps\":0,\"caps_stats_interval\":\"0\",\"caps_strategy\":\"*busy\",\"shutdown_timeout\":\"1s\"}}"
 	var rpl string
-	if err := configRPC.Call(utils.ConfigSv1GetConfigAsJSON, &config.SectionWithAPIOpts{
+	if err := configRPC.Call(context.Background(), utils.ConfigSv1GetConfigAsJSON, &config.SectionWithAPIOpts{
 		Tenant:  "cgrates.org",
 		Section: config.CoreSCfgJson,
 	}, &rpl); err != nil {
@@ -494,7 +495,7 @@ func testConfigSSetConfigFromJSONCoreSDryRun(t *testing.T) {
 func testConfigSSetConfigFromJSONCoreS(t *testing.T) {
 	cfgStr := `{"cores":{"caps":0,"caps_stats_interval":"0","caps_strategy":"*queue","shutdown_timeout":"1s"}}`
 	var reply string
-	if err := configRPC.Call(utils.ConfigSv1SetConfigFromJSON, &config.SetConfigFromJSONArgs{
+	if err := configRPC.Call(context.Background(), utils.ConfigSv1SetConfigFromJSON, &config.SetConfigFromJSONArgs{
 		Tenant: "cgrates.org",
 		Config: cfgStr,
 	}, &reply); err != nil {
@@ -504,7 +505,7 @@ func testConfigSSetConfigFromJSONCoreS(t *testing.T) {
 	}
 
 	var rpl string
-	if err := configRPC.Call(utils.ConfigSv1GetConfigAsJSON, &config.SectionWithAPIOpts{
+	if err := configRPC.Call(context.Background(), utils.ConfigSv1GetConfigAsJSON, &config.SectionWithAPIOpts{
 		Tenant:  "cgrates.org",
 		Section: config.CoreSCfgJson,
 	}, &rpl); err != nil {
@@ -517,7 +518,7 @@ func testConfigSSetConfigFromJSONCoreS(t *testing.T) {
 func testConfigSReloadConfigCoreSDryRun(t *testing.T) {
 	cfgStr := `{"cores":{"caps":0,"caps_stats_interval":"0","caps_strategy":"*queue","shutdown_timeout":"1s"}}`
 	var reply string
-	if err := configRPC.Call(utils.ConfigSv1ReloadConfig, &config.ReloadArgs{
+	if err := configRPC.Call(context.Background(), utils.ConfigSv1ReloadConfig, &config.ReloadArgs{
 		Tenant:  "cgrates.org",
 		Path:    path.Join(*dataDir, "conf", "samples", "caps_busy"),
 		Section: config.CoreSCfgJson,
@@ -529,7 +530,7 @@ func testConfigSReloadConfigCoreSDryRun(t *testing.T) {
 	}
 
 	var rpl string
-	if err := configRPC.Call(utils.ConfigSv1GetConfigAsJSON, &config.SectionWithAPIOpts{
+	if err := configRPC.Call(context.Background(), utils.ConfigSv1GetConfigAsJSON, &config.SectionWithAPIOpts{
 		Tenant:  "cgrates.org",
 		Section: config.CoreSCfgJson,
 	}, &rpl); err != nil {
@@ -542,7 +543,7 @@ func testConfigSReloadConfigCoreSDryRun(t *testing.T) {
 func testConfigSReloadConfigCoreS(t *testing.T) {
 	cfgStr := `{"cores":{"caps":2,"caps_stats_interval":"0","caps_strategy":"*busy","shutdown_timeout":"1s"}}`
 	var reply string
-	if err := configRPC.Call(utils.ConfigSv1ReloadConfig, &config.ReloadArgs{
+	if err := configRPC.Call(context.Background(), utils.ConfigSv1ReloadConfig, &config.ReloadArgs{
 		Tenant:  "cgrates.org",
 		Path:    path.Join(*dataDir, "conf", "samples", "caps_busy"),
 		Section: config.CoreSCfgJson,
@@ -553,7 +554,7 @@ func testConfigSReloadConfigCoreS(t *testing.T) {
 	}
 
 	var rpl string
-	if err := configRPC.Call(utils.ConfigSv1GetConfigAsJSON, &config.SectionWithAPIOpts{
+	if err := configRPC.Call(context.Background(), utils.ConfigSv1GetConfigAsJSON, &config.SectionWithAPIOpts{
 		Tenant:  "cgrates.org",
 		Section: config.CoreSCfgJson,
 	}, &rpl); err != nil {

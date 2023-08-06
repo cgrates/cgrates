@@ -22,19 +22,19 @@ import (
 	"fmt"
 	"sync"
 
+	"github.com/cgrates/birpc"
 	v1 "github.com/cgrates/cgrates/apier/v1"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/cores"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/servmanager"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/cgrates/rpcclient"
 )
 
 // NewAttributeService returns the Attribute Service
 func NewAttributeService(cfg *config.CGRConfig, dm *DataDBService,
 	cacheS *engine.CacheS, filterSChan chan *engine.FilterS,
-	server *cores.Server, internalChan chan rpcclient.ClientConnector,
+	server *cores.Server, internalChan chan birpc.ClientConnector,
 	anz *AnalyzerService,
 	srvDep map[string]*sync.WaitGroup) servmanager.Service {
 	return &AttributeService{
@@ -59,14 +59,14 @@ type AttributeService struct {
 	server      *cores.Server
 
 	attrS    *engine.AttributeService
-	rpc      *v1.AttributeSv1               // useful on restart
-	connChan chan rpcclient.ClientConnector // publish the internal Subsystem when available
+	rpc      *v1.AttributeSv1           // useful on restart
+	connChan chan birpc.ClientConnector // publish the internal Subsystem when available
 	anz      *AnalyzerService
 	srvDep   map[string]*sync.WaitGroup
 }
 
 // Start should handle the service start
-func (attrS *AttributeService) Start() (err error) {
+func (attrS *AttributeService) Start() error {
 	if attrS.IsRunning() {
 		return utils.ErrServiceAlreadyRunning
 	}
@@ -85,11 +85,17 @@ func (attrS *AttributeService) Start() (err error) {
 	attrS.attrS = engine.NewAttributeService(datadb, filterS, attrS.cfg)
 	utils.Logger.Info(fmt.Sprintf("<%s> starting <%s> subsystem", utils.CoreS, utils.AttributeS))
 	attrS.rpc = v1.NewAttributeSv1(attrS.attrS)
-	if !attrS.cfg.DispatcherSCfg().Enabled {
-		attrS.server.RpcRegister(attrS.rpc)
+	srv, err := engine.NewService(attrS.rpc)
+	if err != nil {
+		return err
 	}
-	attrS.connChan <- attrS.anz.GetInternalCodec(attrS.rpc, utils.AttributeS)
-	return
+	if !attrS.cfg.DispatcherSCfg().Enabled {
+		for _, s := range srv {
+			attrS.server.RpcRegister(s)
+		}
+	}
+	attrS.connChan <- attrS.anz.GetInternalCodec(srv, utils.AttributeS)
+	return nil
 }
 
 // Reload handles the change of config

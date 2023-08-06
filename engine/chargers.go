@@ -21,6 +21,7 @@ package engine
 import (
 	"fmt"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -129,7 +130,7 @@ func (cS *ChargerService) processEvent(tnt string, cgrEv *utils.CGREvent) (rply 
 			utils.IfaceAsString(ctx),
 			utils.MetaChargers)
 		var evReply AttrSProcessEventReply
-		if err = cS.connMgr.Call(cS.cfg.ChargerSCfg().AttributeSConns, nil,
+		if err = cS.connMgr.Call(context.TODO(), cS.cfg.ChargerSCfg().AttributeSConns,
 			utils.AttributeSv1ProcessEvent, clonedEv, &evReply); err != nil {
 			if err.Error() != utils.ErrNotFound.Error() {
 				return nil, err
@@ -149,7 +150,7 @@ func (cS *ChargerService) processEvent(tnt string, cgrEv *utils.CGREvent) (rply 
 }
 
 // V1ProcessEvent will process the event received via API and return list of events forked
-func (cS *ChargerService) V1ProcessEvent(args *utils.CGREvent,
+func (cS *ChargerService) V1ProcessEvent(ctx *context.Context, args *utils.CGREvent,
 	reply *[]*ChrgSProcessEventReply) (err error) {
 	if args == nil ||
 		args.Event == nil {
@@ -171,7 +172,7 @@ func (cS *ChargerService) V1ProcessEvent(args *utils.CGREvent,
 }
 
 // V1GetChargersForEvent exposes the list of ordered matching ChargingProfiles for an event
-func (cS *ChargerService) V1GetChargersForEvent(args *utils.CGREvent,
+func (cS *ChargerService) V1GetChargersForEvent(ctx *context.Context, args *utils.CGREvent,
 	rply *ChargerProfiles) (err error) {
 	tnt := args.Tenant
 	if tnt == utils.EmptyString {

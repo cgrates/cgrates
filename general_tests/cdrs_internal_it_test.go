@@ -22,11 +22,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package general_tests
 
 import (
-	"net/rpc"
 	"path"
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc"
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
 
 	"github.com/cgrates/cgrates/engine"
@@ -38,7 +39,7 @@ var (
 	cdrsIntCfgPath string
 	cdrsIntCfgDIR  string
 	cdrsIntCfg     *config.CGRConfig
-	cdrsIntRPC     *rpc.Client
+	cdrsIntRPC     *birpc.Client
 
 	sTestsCdrsInt = []func(t *testing.T){
 		testCdrsIntInitCfg,
@@ -113,19 +114,19 @@ func testCdrsIntTestTTL(t *testing.T) {
 	}
 
 	var reply string
-	if err := cdrsIntRPC.Call(utils.CDRsV1ProcessEvent, args, &reply); err != nil {
+	if err := cdrsIntRPC.Call(context.Background(), utils.CDRsV1ProcessEvent, args, &reply); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply received: ", reply)
 	}
 	var cdrs []*engine.ExternalCDR
-	if err := cdrsIntRPC.Call(utils.APIerSv2GetCDRs, &utils.RPCCDRsFilter{}, &cdrs); err != nil {
+	if err := cdrsIntRPC.Call(context.Background(), utils.APIerSv2GetCDRs, &utils.RPCCDRsFilter{}, &cdrs); err != nil {
 		t.Fatal("Unexpected error: ", err.Error())
 	} else if len(cdrs) != 1 {
 		t.Errorf("Expected 1 result received %v ", len(cdrs))
 	}
 	time.Sleep(time.Second + 50*time.Millisecond)
-	if err := cdrsIntRPC.Call(utils.APIerSv2GetCDRs, &utils.RPCCDRsFilter{}, &cdrs); err == nil ||
+	if err := cdrsIntRPC.Call(context.Background(), utils.APIerSv2GetCDRs, &utils.RPCCDRsFilter{}, &cdrs); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Fatal("Unexpected error: ", err)
 	}

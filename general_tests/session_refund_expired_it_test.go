@@ -21,11 +21,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package general_tests
 
 import (
-	"net/rpc"
 	"path"
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc"
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/sessions"
@@ -36,7 +37,7 @@ var (
 	sesExpCfgPath string
 	sesExpCfgDIR  string
 	sesExpCfg     *config.CGRConfig
-	sesExpRPC     *rpc.Client
+	sesExpRPC     *birpc.Client
 	sesExpAccount = "refundAcc"
 	sesExpTenant  = "cgrates.org"
 
@@ -137,7 +138,7 @@ func testSesExpItLoadFromFolder(t *testing.T) {
 		Weight:       20,
 	}
 	var result string
-	if err := sesExpRPC.Call(utils.APIerSv1SetChargerProfile, chargerProfile, &result); err != nil {
+	if err := sesExpRPC.Call(context.Background(), utils.APIerSv1SetChargerProfile, chargerProfile, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -156,7 +157,7 @@ func testSesExpItAddVoiceBalance(t *testing.T) {
 		},
 	}
 	var reply string
-	if err := sesExpRPC.Call(utils.APIerSv2SetBalance, attrSetBalance, &reply); err != nil {
+	if err := sesExpRPC.Call(context.Background(), utils.APIerSv2SetBalance, attrSetBalance, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf("Received: %s", reply)
@@ -173,14 +174,14 @@ func testSesExpItAddVoiceBalance(t *testing.T) {
 			utils.Weight:        100,
 		},
 	}
-	if err := sesExpRPC.Call(utils.APIerSv2SetBalance, attrSetBalance, &reply); err != nil {
+	if err := sesExpRPC.Call(context.Background(), utils.APIerSv2SetBalance, attrSetBalance, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf("Received: %s", reply)
 	}
 
 	var acnt engine.Account
-	if err := sesExpRPC.Call(utils.APIerSv2GetAccount,
+	if err := sesExpRPC.Call(context.Background(), utils.APIerSv2GetAccount,
 		&utils.AttrGetAccount{
 			Tenant:  sesExpTenant,
 			Account: sesExpAccount,
@@ -196,7 +197,7 @@ func testSesExpItAddVoiceBalance(t *testing.T) {
 func testSesExpItInitSession(t *testing.T) {
 	sesExpCgrEv.Event[utils.Usage] = time.Second
 	var rply sessions.V1InitSessionReply
-	if err := sesExpRPC.Call(utils.SessionSv1InitiateSession,
+	if err := sesExpRPC.Call(context.Background(), utils.SessionSv1InitiateSession,
 		&sessions.V1InitSessionArgs{
 			InitSession: true,
 			CGREvent:    sesExpCgrEv,
@@ -212,7 +213,7 @@ func testSesExpItInitSession(t *testing.T) {
 func testSesExpItTerminateSession(t *testing.T) {
 	sesExpCgrEv.Event[utils.Usage] = 10 * time.Second
 	var rply string
-	if err := sesExpRPC.Call(utils.SessionSv1TerminateSession,
+	if err := sesExpRPC.Call(context.Background(), utils.SessionSv1TerminateSession,
 		&sessions.V1TerminateSessionArgs{
 			TerminateSession: true,
 			CGREvent:         sesExpCgrEv,
@@ -223,13 +224,13 @@ func testSesExpItTerminateSession(t *testing.T) {
 		t.Errorf("Unexpected reply: %s", rply)
 	}
 	aSessions := make([]*sessions.ExternalSession, 0)
-	if err := sesExpRPC.Call(utils.SessionSv1GetActiveSessions, new(utils.SessionFilter), &aSessions); err == nil ||
+	if err := sesExpRPC.Call(context.Background(), utils.SessionSv1GetActiveSessions, new(utils.SessionFilter), &aSessions); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
 
 	var acnt engine.Account
-	if err := sesExpRPC.Call(utils.APIerSv2GetAccount,
+	if err := sesExpRPC.Call(context.Background(), utils.APIerSv2GetAccount,
 		&utils.AttrGetAccount{
 			Tenant:  sesExpTenant,
 			Account: sesExpAccount,
@@ -244,7 +245,7 @@ func testSesExpItTerminateSession(t *testing.T) {
 
 func testSesExpItProcessCDR(t *testing.T) {
 	var reply string
-	if err := sesExpRPC.Call(utils.SessionSv1ProcessCDR,
+	if err := sesExpRPC.Call(context.Background(), utils.SessionSv1ProcessCDR,
 		sesExpCgrEv, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
@@ -253,7 +254,7 @@ func testSesExpItProcessCDR(t *testing.T) {
 	time.Sleep(20 * time.Millisecond)
 	var cdrs []*engine.ExternalCDR
 	req := utils.RPCCDRsFilter{Accounts: []string{sesExpAccount}}
-	if err := sesExpRPC.Call(utils.APIerSv2GetCDRs, req, &cdrs); err != nil {
+	if err := sesExpRPC.Call(context.Background(), utils.APIerSv2GetCDRs, req, &cdrs); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(cdrs) != 1 {
 		t.Fatal("Wrong number of CDRs")
@@ -267,7 +268,7 @@ func testSesExpItRerate(t *testing.T) {
 	var reply string
 	sesExpCgrEv.Event[utils.Usage] = time.Second
 	sesExpCgrEv.Event[utils.RequestType] = utils.MetaPostpaid // change the request type in order to not wait 12s to check the cost for a closed session
-	if err := sesExpRPC.Call(utils.CDRsV1ProcessEvent,
+	if err := sesExpRPC.Call(context.Background(), utils.CDRsV1ProcessEvent,
 		&engine.ArgV1ProcessEvent{
 			Flags:    []string{utils.MetaRerate},
 			CGREvent: *sesExpCgrEv,
@@ -277,7 +278,7 @@ func testSesExpItRerate(t *testing.T) {
 		t.Error("Unexpected reply received: ", reply)
 	}
 	var acnt engine.Account
-	if err := sesExpRPC.Call(utils.APIerSv2GetAccount,
+	if err := sesExpRPC.Call(context.Background(), utils.APIerSv2GetAccount,
 		&utils.AttrGetAccount{
 			Tenant:  sesExpTenant,
 			Account: sesExpAccount,

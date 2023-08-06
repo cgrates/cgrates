@@ -23,6 +23,8 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/cgrates/birpc"
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/ltcache"
@@ -42,14 +44,14 @@ func TestCMgetConnNotFound(t *testing.T) {
 	Cache.SetWithoutReplicate(utils.CacheRPCConnections, connID, nil, nil, true, utils.NonTransactional)
 
 	experr := utils.ErrNotFound
-	rcv, err := cM.getConn(connID, nil)
+	rcv, err := cM.getConn(context.Background(), connID)
 
 	if err == nil || err != experr {
-		t.Fatalf("\nexpected: <%+v>, \nreceived: <%+v>", experr, err)
+		t.Fatalf("expected: <%+v>, \nreceived: <%+v>", experr, err)
 	}
 
 	if rcv != nil {
-		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", nil, rcv)
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", nil, rcv)
 	}
 
 }
@@ -59,31 +61,36 @@ func TestCMgetConnUnsupportedBiRPC(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.RPCConns()[connID] = config.NewDfltRPCConn()
 
-	cc := make(chan rpcclient.ClientConnector, 1)
+	cc := make(chan birpc.ClientConnector, 1)
 
 	cM := &ConnManager{
 		cfg: cfg,
-		rpcInternal: map[string]chan rpcclient.ClientConnector{
+		rpcInternal: map[string]chan birpc.ClientConnector{
 			connID: cc,
 		},
 		connCache: ltcache.NewCache(-1, 0, true, nil),
 	}
 
 	experr := rpcclient.ErrUnsupportedBiRPC
-	exp, err := NewRPCPool("*first", "", "", "", cfg.GeneralCfg().ConnectAttempts,
-		cfg.GeneralCfg().Reconnects, cfg.GeneralCfg().ConnectTimeout,
-		cfg.GeneralCfg().ReplyTimeout, nil, cc, true, nil, "", cM.connCache)
+	exp, err := NewRPCPool(context.Background(),
+		"*first", "", "", "",
+		cfg.GeneralCfg().ConnectAttempts,
+		cfg.GeneralCfg().Reconnects,
+		cfg.GeneralCfg().MaxReconnectInterval,
+		cfg.GeneralCfg().ConnectTimeout,
+		cfg.GeneralCfg().ReplyTimeout,
+		nil, cc, true, "", cM.connCache)
 	if err != nil {
 		t.Fatal(err)
 	}
-	rcv, err := cM.getConn(connID, nil)
+	rcv, err := cM.getConn(context.Background(), connID)
 
 	if err == nil || err != experr {
-		t.Fatalf("\nexpected: <%+v>, \nreceived: <%+v>", experr, err)
+		t.Fatalf("expected: <%+v>, \nreceived: <%+v>", experr, err)
 	}
 
 	if !reflect.DeepEqual(rcv, exp) {
-		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", exp, rcv)
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", exp, rcv)
 	}
 }
 
@@ -99,11 +106,11 @@ func TestCMgetConnNotInternalRPC(t *testing.T) {
 		},
 	}
 
-	cc := make(chan rpcclient.ClientConnector, 1)
+	cc := make(chan birpc.ClientConnector, 1)
 
 	cM := &ConnManager{
 		cfg: cfg,
-		rpcInternal: map[string]chan rpcclient.ClientConnector{
+		rpcInternal: map[string]chan birpc.ClientConnector{
 			"testString": cc,
 		},
 		connCache: ltcache.NewCache(-1, 0, true, nil),
@@ -111,22 +118,28 @@ func TestCMgetConnNotInternalRPC(t *testing.T) {
 
 	cM.connCache.Set(connID, nil, nil)
 
-	exp, err := NewRPCPool("*first", cfg.TLSCfg().ClientKey, cfg.TLSCfg().ClientCerificate,
-		cfg.TLSCfg().CaCertificate, cfg.GeneralCfg().ConnectAttempts,
-		cfg.GeneralCfg().Reconnects, cfg.GeneralCfg().ConnectTimeout,
-		cfg.GeneralCfg().ReplyTimeout, cfg.RPCConns()[connID].Conns, cc,
-		true, nil, connID, cM.connCache)
+	exp, err := NewRPCPool(context.Background(), "*first",
+		cfg.TLSCfg().ClientKey,
+		cfg.TLSCfg().ClientCerificate,
+		cfg.TLSCfg().CaCertificate,
+		cfg.GeneralCfg().ConnectAttempts,
+		cfg.GeneralCfg().Reconnects,
+		cfg.GeneralCfg().MaxReconnectInterval,
+		cfg.GeneralCfg().ConnectTimeout,
+		cfg.GeneralCfg().ReplyTimeout,
+		cfg.RPCConns()[connID].Conns,
+		cc, true, connID, cM.connCache)
 	if err != nil {
 		t.Fatal(err)
 	}
-	rcv, err := cM.getConn(connID, nil)
+	rcv, err := cM.getConn(context.Background(), connID)
 
 	if err != nil {
-		t.Fatalf("\nexpected: <%+v>, \nreceived: <%+v>", nil, err)
+		t.Fatalf("expected: <%+v>, \nreceived: <%+v>", nil, err)
 	}
 
 	if !reflect.DeepEqual(rcv, exp) {
-		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", exp, rcv)
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", exp, rcv)
 	}
 }
 
@@ -142,25 +155,25 @@ func TestCMgetConnWithConfigUnsupportedTransport(t *testing.T) {
 		},
 	}
 
-	cc := make(chan rpcclient.ClientConnector, 1)
+	cc := make(chan birpc.ClientConnector, 1)
 
 	cM := &ConnManager{
 		cfg: cfg,
-		rpcInternal: map[string]chan rpcclient.ClientConnector{
+		rpcInternal: map[string]chan birpc.ClientConnector{
 			connID: cc,
 		},
 		connCache: ltcache.NewCache(-1, 0, true, nil),
 	}
 
 	experr := fmt.Sprintf("Unsupported transport: <%+s>", "invalid")
-	rcv, err := cM.getConnWithConfig(connID, cfg.RPCConns()[connID], nil, cc, true)
+	rcv, err := cM.getConnWithConfig(context.Background(), connID, cfg.RPCConns()[connID], cc, true)
 
 	if err == nil || err.Error() != experr {
-		t.Fatalf("\nexpected: <%+v>, \nreceived: <%+v>", experr, err)
+		t.Fatalf("expected: <%+v>, \nreceived: <%+v>", experr, err)
 	}
 
 	if rcv != nil {
-		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", nil, rcv)
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", nil, rcv)
 	}
 }
 
@@ -176,11 +189,11 @@ func TestCMgetConnWithConfigUnsupportedCodec(t *testing.T) {
 		},
 	}
 
-	cc := make(chan rpcclient.ClientConnector, 1)
+	cc := make(chan birpc.ClientConnector, 1)
 
 	cM := &ConnManager{
 		cfg: cfg,
-		rpcInternal: map[string]chan rpcclient.ClientConnector{
+		rpcInternal: map[string]chan birpc.ClientConnector{
 			connID: cc,
 		},
 		connCache: ltcache.NewCache(-1, 0, true, nil),
@@ -188,14 +201,14 @@ func TestCMgetConnWithConfigUnsupportedCodec(t *testing.T) {
 
 	experr := rpcclient.ErrUnsupportedCodec
 	var exp *rpcclient.RPCParallelClientPool
-	rcv, err := cM.getConnWithConfig(connID, cfg.RPCConns()[connID], nil, cc, true)
+	rcv, err := cM.getConnWithConfig(context.Background(), connID, cfg.RPCConns()[connID], cc, true)
 
 	if err == nil || err != experr {
-		t.Fatalf("\nexpected: <%+v>, \nreceived: <%+v>", experr, err)
+		t.Fatalf("expected: <%+v>, \nreceived: <%+v>", experr, err)
 	}
 
 	if !reflect.DeepEqual(rcv, exp) {
-		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", exp, rcv)
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", exp, rcv)
 	}
 }
 
@@ -211,11 +224,11 @@ func TestCMgetConnWithConfigEmptyTransport(t *testing.T) {
 		},
 	}
 
-	cc := make(chan rpcclient.ClientConnector, 1)
+	cc := make(chan birpc.ClientConnector, 1)
 
 	cM := &ConnManager{
 		cfg: cfg,
-		rpcInternal: map[string]chan rpcclient.ClientConnector{
+		rpcInternal: map[string]chan birpc.ClientConnector{
 			connID: cc,
 		},
 		connCache: ltcache.NewCache(-1, 0, true, nil),
@@ -223,10 +236,10 @@ func TestCMgetConnWithConfigEmptyTransport(t *testing.T) {
 
 	cM.connCache.Set(connID, nil, nil)
 
-	rcv, err := cM.getConnWithConfig(connID, cfg.RPCConns()[connID], nil, cc, true)
+	rcv, err := cM.getConnWithConfig(context.Background(), connID, cfg.RPCConns()[connID], cc, true)
 
 	if err != nil {
-		t.Fatalf("\nexpected: <%+v>, \nreceived: <%+v>", nil, err)
+		t.Fatalf("expected: <%+v>, \nreceived: <%+v>", nil, err)
 	}
 
 	if _, cancast := rcv.(*rpcclient.RPCParallelClientPool); !cancast {
@@ -235,122 +248,11 @@ func TestCMgetConnWithConfigEmptyTransport(t *testing.T) {
 }
 
 type BiRPCConnectorMock struct {
-	calls map[string]func(rpcclient.ClientConnector, string, any, any) error
+	calls map[string]func(birpc.ClientConnector, string, any, any) error
 }
 
-func (bRCM *BiRPCConnectorMock) Call(serviceMethod string, args any, reply any) (err error) {
+func (bRCM *BiRPCConnectorMock) Call(ctx *context.Context, serviceMethod string, args any, reply any) (err error) {
 	return nil
-}
-
-func (bRCM *BiRPCConnectorMock) CallBiRPC(cc rpcclient.ClientConnector, method string, args any, reply any) error {
-	if call, has := bRCM.calls[method]; !has {
-		return rpcclient.ErrUnsupporteServiceMethod
-	} else {
-		return call(cc, method, args, reply)
-	}
-}
-
-func (bRCM *BiRPCConnectorMock) Handlers() map[string]any {
-	return nil
-}
-
-func TestCMgetConnWithConfigCallBiRPCNilErr(t *testing.T) {
-	connID := "connID"
-	cfg := config.NewDefaultCGRConfig()
-	cfg.RPCConns()[connID] = config.NewDfltRPCConn()
-	cfg.RPCConns()[connID].Conns = []*config.RemoteHost{
-		{
-			ID:        connID,
-			Address:   rpcclient.BiRPCInternal,
-			Transport: rpcclient.BiRPCJSON,
-		},
-	}
-
-	cc := make(chan rpcclient.ClientConnector, 1)
-	birpc := &BiRPCConnectorMock{
-		calls: map[string]func(rpcclient.ClientConnector, string, any, any) error{
-			utils.SessionSv1RegisterInternalBiJSONConn: func(cc rpcclient.ClientConnector, s string, i1, i2 any) error {
-				return nil
-			},
-		},
-	}
-	cc <- birpc
-
-	cM := &ConnManager{
-		cfg: cfg,
-		rpcInternal: map[string]chan rpcclient.ClientConnector{
-			connID: cc,
-		},
-		connCache: ltcache.NewCache(-1, 0, true, nil),
-	}
-
-	exp, err := NewRPCPool("*first", cfg.TLSCfg().ClientKey, cfg.TLSCfg().ClientCerificate,
-		cfg.TLSCfg().CaCertificate, cfg.GeneralCfg().ConnectAttempts,
-		cfg.GeneralCfg().Reconnects, cfg.GeneralCfg().ConnectTimeout,
-		cfg.GeneralCfg().ReplyTimeout, cfg.RPCConns()[connID].Conns, cc,
-		false, birpc, connID, cM.connCache)
-	if err != nil {
-		t.Fatal(err)
-	}
-	rcv, err := cM.getConnWithConfig(connID, cfg.RPCConns()[connID], birpc, cc, true)
-
-	if err != nil {
-		t.Fatalf("\nexpected: <%+v>, \nreceived: <%+v>", nil, err)
-	}
-
-	if !reflect.DeepEqual(rcv, exp) {
-		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", exp, rcv)
-	}
-}
-
-func TestCMgetConnWithConfigCallBiRPCErr(t *testing.T) {
-	connID := "connID"
-	cfg := config.NewDefaultCGRConfig()
-	cfg.RPCConns()[connID] = config.NewDfltRPCConn()
-	cfg.RPCConns()[connID].Conns = []*config.RemoteHost{
-		{
-			ID:        connID,
-			Address:   rpcclient.BiRPCInternal,
-			Transport: rpcclient.BiRPCJSON,
-		},
-	}
-
-	cc := make(chan rpcclient.ClientConnector, 1)
-	birpc := &BiRPCConnectorMock{
-		calls: map[string]func(rpcclient.ClientConnector, string, any, any) error{
-			"wrong method": func(cc rpcclient.ClientConnector, s string, i1, i2 any) error {
-				return nil
-			},
-		},
-	}
-	cc <- birpc
-
-	cM := &ConnManager{
-		cfg: cfg,
-		rpcInternal: map[string]chan rpcclient.ClientConnector{
-			connID: cc,
-		},
-		connCache: ltcache.NewCache(-1, 0, true, nil),
-	}
-
-	exp, err := NewRPCPool("*first", cfg.TLSCfg().ClientKey, cfg.TLSCfg().ClientCerificate,
-		cfg.TLSCfg().CaCertificate, cfg.GeneralCfg().ConnectAttempts,
-		cfg.GeneralCfg().Reconnects, cfg.GeneralCfg().ConnectTimeout,
-		cfg.GeneralCfg().ReplyTimeout, cfg.RPCConns()[connID].Conns, cc,
-		false, birpc, connID, cM.connCache)
-	if err != nil {
-		t.Fatal(err)
-	}
-	experr := rpcclient.ErrUnsupporteServiceMethod
-	rcv, err := cM.getConnWithConfig(connID, cfg.RPCConns()[connID], birpc, cc, true)
-
-	if err == nil || err != experr {
-		t.Fatalf("\nexpected: <%+v>, \nreceived: <%+v>", nil, err)
-	}
-
-	if !reflect.DeepEqual(rcv, exp) {
-		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", exp, rcv)
-	}
 }
 
 func TestCMgetConnWithConfigInternalRPCCodec(t *testing.T) {
@@ -364,20 +266,20 @@ func TestCMgetConnWithConfigInternalRPCCodec(t *testing.T) {
 		},
 	}
 
-	cc := make(chan rpcclient.ClientConnector, 1)
+	cc := make(chan birpc.ClientConnector, 1)
 
 	cM := &ConnManager{
 		cfg: cfg,
-		rpcInternal: map[string]chan rpcclient.ClientConnector{
+		rpcInternal: map[string]chan birpc.ClientConnector{
 			connID: cc,
 		},
 		connCache: ltcache.NewCache(-1, 0, true, nil),
 	}
 
-	rcv, err := cM.getConnWithConfig(connID, cfg.RPCConns()[connID], nil, cc, true)
+	rcv, err := cM.getConnWithConfig(context.Background(), connID, cfg.RPCConns()[connID], cc, true)
 
 	if err != nil {
-		t.Fatalf("\nexpected: <%+v>, \nreceived: <%+v>", nil, err)
+		t.Fatalf("expected: <%+v>, \nreceived: <%+v>", nil, err)
 	}
 
 	if _, cancast := rcv.(*rpcclient.RPCParallelClientPool); !cancast {
@@ -396,21 +298,21 @@ func TestCMgetConnWithConfigInternalBiRPCCodecUnsupported(t *testing.T) {
 		},
 	}
 
-	cc := make(chan rpcclient.ClientConnector, 1)
+	cc := make(chan birpc.ClientConnector, 1)
 
 	cM := &ConnManager{
 		cfg: cfg,
-		rpcInternal: map[string]chan rpcclient.ClientConnector{
+		rpcInternal: map[string]chan birpc.ClientConnector{
 			connID: cc,
 		},
 		connCache: ltcache.NewCache(-1, 0, true, nil),
 	}
 
 	experr := rpcclient.ErrUnsupportedCodec
-	rcv, err := cM.getConnWithConfig(connID, cfg.RPCConns()[connID], nil, cc, true)
+	rcv, err := cM.getConnWithConfig(context.Background(), connID, cfg.RPCConns()[connID], cc, true)
 
 	if err == nil || err != experr {
-		t.Fatalf("\nexpected: <%+v>, \nreceived: <%+v>", experr, err)
+		t.Fatalf("expected: <%+v>, \nreceived: <%+v>", experr, err)
 	}
 
 	if _, cancast := rcv.(*rpcclient.RPCParallelClientPool); !cancast {
@@ -431,10 +333,10 @@ func TestCMCallErrgetConn(t *testing.T) {
 	Cache.SetWithoutReplicate(utils.CacheRPCConnections, connID, nil, nil, true, utils.NonTransactional)
 
 	experr := utils.ErrNotFound
-	err := cM.Call([]string{connID}, nil, "", "", "")
+	err := cM.Call(context.Background(), []string{connID}, "", "", "")
 
 	if err == nil || err != experr {
-		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", experr, err)
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", experr, err)
 	}
 }
 
@@ -451,7 +353,7 @@ func TestCMCallWithConnIDsNoSubsHostIDs(t *testing.T) {
 	err := cM.CallWithConnIDs([]string{connID}, subsHostIDs, "", "", "")
 
 	if err != nil {
-		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", nil, err)
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", nil, err)
 	}
 }
 
@@ -471,7 +373,7 @@ func TestCMCallWithConnIDsNoConnIDs(t *testing.T) {
 	err := cM.CallWithConnIDs([]string{}, subsHostIDs, "", "", "")
 
 	if err == nil || err.Error() != experr {
-		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", experr, err)
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", experr, err)
 	}
 }
 
@@ -496,7 +398,7 @@ func TestCMCallWithConnIDsNoConns(t *testing.T) {
 	err := cM.CallWithConnIDs([]string{connID}, subsHostIDs, "", "", "")
 
 	if err != nil {
-		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", nil, err)
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", nil, err)
 	}
 }
 
@@ -523,7 +425,7 @@ func TestCMCallWithConnIDsInternallyDCed(t *testing.T) {
 	err := cM.CallWithConnIDs([]string{connID}, subsHostIDs, "", "", "")
 
 	if err == nil || err != experr {
-		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", nil, err)
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", nil, err)
 	}
 }
 
@@ -540,8 +442,8 @@ func TestCMCallWithConnIDs2(t *testing.T) {
 	}
 
 	ccM := &ccMock{
-		calls: map[string]func(args any, reply any) error{
-			"testMethod": func(args, reply any) error {
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			"testMethod": func(ctx *context.Context, args, reply any) error {
 				return utils.ErrExists
 			},
 		},
@@ -562,7 +464,7 @@ func TestCMCallWithConnIDs2(t *testing.T) {
 	err := cM.CallWithConnIDs([]string{poolID}, subsHostIDs, "testMethod", "", "")
 
 	if err == nil || err != experr {
-		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", experr, err)
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", experr, err)
 	}
 }
 
@@ -585,11 +487,11 @@ func TestCMReload(t *testing.T) {
 	rcv2 := Cache.GetItemIDs(utils.CacheRPCConnections, utils.EmptyString)
 
 	if !reflect.DeepEqual(rcv1, exp) {
-		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", exp, rcv1)
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", exp, rcv1)
 	}
 
 	if !reflect.DeepEqual(rcv2, exp) {
-		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", exp, rcv2)
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", exp, rcv2)
 	}
 }
 

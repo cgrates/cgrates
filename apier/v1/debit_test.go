@@ -22,6 +22,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -146,9 +147,11 @@ func TestDebitUsageWithOptions(t *testing.T) {
 	}
 
 	var reply string
-	if err := apierDebit.DebitUsageWithOptions(&AttrDebitUsageWithOptions{
-		UsageRecord:          &engine.UsageRecordWithAPIOpts{UsageRecord: usageRecord},
-		AllowNegativeAccount: false}, &reply); err != nil {
+	if err := apierDebit.DebitUsageWithOptions(
+		context.Background(),
+		&AttrDebitUsageWithOptions{
+			UsageRecord:          &engine.UsageRecordWithAPIOpts{UsageRecord: usageRecord},
+			AllowNegativeAccount: false}, &reply); err != nil {
 		t.Error(err)
 	}
 

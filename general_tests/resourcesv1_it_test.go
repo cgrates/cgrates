@@ -21,11 +21,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package general_tests
 
 import (
-	"net/rpc"
 	"path"
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc"
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -34,7 +35,7 @@ import (
 var (
 	rlsV1CfgPath string
 	rlsV1Cfg     *config.CGRConfig
-	rlsV1Rpc     *rpc.Client
+	rlsV1Rpc     *birpc.Client
 	rlsV1ConfDIR string //run tests for specific configuration
 
 	sTestsRLSV1 = []func(t *testing.T){
@@ -122,7 +123,7 @@ func testV1RsSetProfile(t *testing.T) {
 		},
 	}
 	var result string
-	if err := rlsV1Rpc.Call(utils.APIerSv1SetResourceProfile, rls, &result); err != nil {
+	if err := rlsV1Rpc.Call(context.Background(), utils.APIerSv1SetResourceProfile, rls, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -143,7 +144,7 @@ func testV1RsAllocate(t *testing.T) {
 		},
 	}
 	var reply string
-	if err := rlsV1Rpc.Call(utils.ResourceSv1AllocateResources,
+	if err := rlsV1Rpc.Call(context.Background(), utils.ResourceSv1AllocateResources,
 		cgrEv, &reply); err != nil {
 		t.Error(err)
 	} else if reply != "Account1Channels" {
@@ -162,7 +163,7 @@ func testV1RsAllocate(t *testing.T) {
 			utils.OptsResourcesUnits:   1,
 		},
 	}
-	if err := rlsV1Rpc.Call(utils.ResourceSv1AllocateResources,
+	if err := rlsV1Rpc.Call(context.Background(), utils.ResourceSv1AllocateResources,
 		cgrEv2, &reply); err != nil {
 		t.Error(err)
 	} else if reply != "Account1Channels" {
@@ -183,7 +184,7 @@ func testV1RsAuthorize(t *testing.T) {
 			utils.OptsResourcesUsageID: "RandomUsageID",
 		},
 	}
-	if err := rlsV1Rpc.Call(utils.ResourceSv1GetResourcesForEvent,
+	if err := rlsV1Rpc.Call(context.Background(), utils.ResourceSv1GetResourcesForEvent,
 		args, &reply); err != nil {
 		t.Error(err)
 	}
@@ -217,7 +218,7 @@ func testV1RsAuthorize(t *testing.T) {
 			utils.OptsResourcesUnits:   1,
 		},
 	}
-	if err := rlsV1Rpc.Call(utils.ResourceSv1AuthorizeResources,
+	if err := rlsV1Rpc.Call(context.Background(), utils.ResourceSv1AuthorizeResources,
 		&cgrEv, &reply2); err.Error() != "RESOURCE_UNAUTHORIZED" {
 		t.Error(err)
 	}

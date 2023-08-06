@@ -64,18 +64,22 @@ func (ast *AsteriskAgent) Start() (err error) {
 	defer ast.Unlock()
 
 	listenAndServe := func(sma *agents.AsteriskAgent, stopChan chan struct{}, shdChan *utils.SyncedChan) {
-		if err := sma.ListenAndServe(stopChan); err != nil {
-			utils.Logger.Err(fmt.Sprintf("<%s> runtime error: %s!", utils.AsteriskAgent, err))
+		if lnsErr := sma.ListenAndServe(stopChan); lnsErr != nil {
+			utils.Logger.Err(fmt.Sprintf("<%s> runtime error: %s!", utils.AsteriskAgent, lnsErr))
 			shdChan.CloseOnce()
 		}
 	}
 	ast.stopChan = make(chan struct{})
 	ast.smas = make([]*agents.AsteriskAgent, len(ast.cfg.AsteriskAgentCfg().AsteriskConns))
 	for connIdx := range ast.cfg.AsteriskAgentCfg().AsteriskConns { // Instantiate connections towards asterisk servers
-		ast.smas[connIdx] = agents.NewAsteriskAgent(ast.cfg, connIdx, ast.connMgr)
+		ast.smas[connIdx], err = agents.NewAsteriskAgent(ast.cfg, connIdx, ast.connMgr)
+		if err != nil {
+			utils.Logger.Err(fmt.Sprintf("<%s> failed to initialize agent for connection %d, error: %s!", utils.AsteriskAgent, connIdx, err))
+			return err
+		}
 		go listenAndServe(ast.smas[connIdx], ast.stopChan, ast.shdChan)
 	}
-	return
+	return nil
 }
 
 // Reload handles the change of config

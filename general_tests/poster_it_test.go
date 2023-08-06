@@ -23,12 +23,13 @@ package general_tests
 import (
 	"encoding/json"
 	"fmt"
-	"net/rpc"
 	"os"
 	"path"
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc"
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/ees"
 	"github.com/cgrates/cgrates/engine"
@@ -37,7 +38,7 @@ import (
 
 var (
 	pstrCfg       *config.CGRConfig
-	pstrRpc       *rpc.Client
+	pstrRpc       *birpc.Client
 	pstrCfgPath   string
 	pstrConfigDIR string
 
@@ -145,7 +146,7 @@ func testPosterReadFolder(format string) (expEv *ees.ExportEvents, err error) {
 
 func testPosterITSetAccount(t *testing.T) {
 	var reply string
-	if err := pstrRpc.Call(utils.APIerSv1SetAccount, pstrAccount, &reply); err != nil {
+	if err := pstrRpc.Call(context.Background(), utils.APIerSv1SetAccount, pstrAccount, &reply); err != nil {
 		t.Error("Got error on APIerSv1.SetAccount: ", err.Error())
 	} else if reply != utils.OK {
 		t.Errorf("Calling APIerSv1.SetAccount received: %s", reply)
@@ -160,13 +161,13 @@ func testPosterITAMQP(t *testing.T) {
 			{Identifier: utils.MetaExport, ExtraParameters: "amqp_fail"},
 		},
 	}
-	if err := pstrRpc.Call(utils.APIerSv2SetActions, attrsAA, &reply); err != nil && err.Error() != utils.ErrExists.Error() {
+	if err := pstrRpc.Call(context.Background(), utils.APIerSv2SetActions, attrsAA, &reply); err != nil && err.Error() != utils.ErrExists.Error() {
 		t.Error("Got error on APIerSv2.SetActions: ", err.Error())
 	} else if reply != utils.OK {
 		t.Errorf("Calling APIerSv2.SetActions received: %s", reply)
 	}
 	attrsEA := &utils.AttrExecuteAction{Tenant: pstrAccount.Tenant, Account: pstrAccount.Account, ActionsId: attrsAA.ActionsId}
-	if err := pstrRpc.Call(utils.APIerSv1ExecuteAction, attrsEA, &reply); err != nil {
+	if err := pstrRpc.Call(context.Background(), utils.APIerSv1ExecuteAction, attrsEA, &reply); err != nil {
 		t.Error("Got error on APIerSv1.ExecuteAction: ", err.Error())
 	} else if reply != utils.OK {
 		t.Errorf("Calling APIerSv1.ExecuteAction received: %s", reply)
@@ -198,13 +199,13 @@ func testPosterITAMQPv1(t *testing.T) {
 			{Identifier: utils.MetaExport, ExtraParameters: "aws_fail"},
 		},
 	}
-	if err := pstrRpc.Call(utils.APIerSv2SetActions, attrsAA, &reply); err != nil && err.Error() != utils.ErrExists.Error() {
+	if err := pstrRpc.Call(context.Background(), utils.APIerSv2SetActions, attrsAA, &reply); err != nil && err.Error() != utils.ErrExists.Error() {
 		t.Error("Got error on APIerSv2.SetActions: ", err.Error())
 	} else if reply != utils.OK {
 		t.Errorf("Calling APIerSv2.SetActions received: %s", reply)
 	}
 	attrsEA := &utils.AttrExecuteAction{Tenant: pstrAccount.Tenant, Account: pstrAccount.Account, ActionsId: attrsAA.ActionsId}
-	if err := pstrRpc.Call(utils.APIerSv1ExecuteAction, attrsEA, &reply); err != nil {
+	if err := pstrRpc.Call(context.Background(), utils.APIerSv1ExecuteAction, attrsEA, &reply); err != nil {
 		t.Error("Got error on APIerSv1.ExecuteAction: ", err.Error())
 	} else if reply != utils.OK {
 		t.Errorf("Calling APIerSv1.ExecuteAction received: %s", reply)
@@ -236,13 +237,13 @@ func testPosterITSQS(t *testing.T) {
 			{Identifier: utils.MetaExport, ExtraParameters: "sqs_fail"},
 		},
 	}
-	if err := pstrRpc.Call(utils.APIerSv2SetActions, attrsAA, &reply); err != nil && err.Error() != utils.ErrExists.Error() {
+	if err := pstrRpc.Call(context.Background(), utils.APIerSv2SetActions, attrsAA, &reply); err != nil && err.Error() != utils.ErrExists.Error() {
 		t.Error("Got error on APIerSv2.SetActions: ", err.Error())
 	} else if reply != utils.OK {
 		t.Errorf("Calling APIerSv2.SetActions received: %s", reply)
 	}
 	attrsEA := &utils.AttrExecuteAction{Tenant: pstrAccount.Tenant, Account: pstrAccount.Account, ActionsId: attrsAA.ActionsId}
-	if err := pstrRpc.Call(utils.APIerSv1ExecuteAction, attrsEA, &reply); err != nil {
+	if err := pstrRpc.Call(context.Background(), utils.APIerSv1ExecuteAction, attrsEA, &reply); err != nil {
 		t.Error("Got error on APIerSv1.ExecuteAction: ", err.Error())
 	} else if reply != utils.OK {
 		t.Errorf("Calling APIerSv1.ExecuteAction received: %s", reply)
@@ -274,13 +275,13 @@ func testPosterITS3(t *testing.T) {
 			{Identifier: utils.MetaExport, ExtraParameters: "s3_fail"},
 		},
 	}
-	if err := pstrRpc.Call(utils.APIerSv2SetActions, attrsAA, &reply); err != nil && err.Error() != utils.ErrExists.Error() {
+	if err := pstrRpc.Call(context.Background(), utils.APIerSv2SetActions, attrsAA, &reply); err != nil && err.Error() != utils.ErrExists.Error() {
 		t.Error("Got error on APIerSv2.SetActions: ", err.Error())
 	} else if reply != utils.OK {
 		t.Errorf("Calling APIerSv2.SetActions received: %s", reply)
 	}
 	attrsEA := &utils.AttrExecuteAction{Tenant: pstrAccount.Tenant, Account: pstrAccount.Account, ActionsId: attrsAA.ActionsId}
-	if err := pstrRpc.Call(utils.APIerSv1ExecuteAction, attrsEA, &reply); err != nil {
+	if err := pstrRpc.Call(context.Background(), utils.APIerSv1ExecuteAction, attrsEA, &reply); err != nil {
 		t.Error("Got error on APIerSv1.ExecuteAction: ", err.Error())
 	} else if reply != utils.OK {
 		t.Errorf("Calling APIerSv1.ExecuteAction received: %s", reply)
@@ -312,13 +313,13 @@ func testPosterITKafka(t *testing.T) {
 			{Identifier: utils.MetaExport, ExtraParameters: "kafka_fail"},
 		},
 	}
-	if err := pstrRpc.Call(utils.APIerSv2SetActions, attrsAA, &reply); err != nil && err.Error() != utils.ErrExists.Error() {
+	if err := pstrRpc.Call(context.Background(), utils.APIerSv2SetActions, attrsAA, &reply); err != nil && err.Error() != utils.ErrExists.Error() {
 		t.Error("Got error on APIerSv2.SetActions: ", err.Error())
 	} else if reply != utils.OK {
 		t.Errorf("Calling APIerSv2.SetActions received: %s", reply)
 	}
 	attrsEA := &utils.AttrExecuteAction{Tenant: pstrAccount.Tenant, Account: pstrAccount.Account, ActionsId: attrsAA.ActionsId}
-	if err := pstrRpc.Call(utils.APIerSv1ExecuteAction, attrsEA, &reply); err != nil {
+	if err := pstrRpc.Call(context.Background(), utils.APIerSv1ExecuteAction, attrsEA, &reply); err != nil {
 		t.Error("Got error on APIerSv1.ExecuteAction: ", err.Error())
 	} else if reply != utils.OK {
 		t.Errorf("Calling APIerSv1.ExecuteAction received: %s", reply)

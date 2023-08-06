@@ -22,16 +22,16 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/sessions"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/cgrates/rpcclient"
 )
 
-func processRequest(reqProcessor *config.RequestProcessor, agReq *AgentRequest,
-	agentName string, connMgr *engine.ConnManager, sessionsConns []string,
-	aConn rpcclient.BiRPCConector, filterS *engine.FilterS) (_ bool, err error) {
+func processRequest(ctx *context.Context, reqProcessor *config.RequestProcessor,
+	agReq *AgentRequest, agentName string, connMgr *engine.ConnManager,
+	sessionsConns []string, filterS *engine.FilterS) (_ bool, err error) {
 	if pass, err := filterS.Pass(agReq.Tenant,
 		reqProcessor.Filters, agReq); err != nil || !pass {
 		return pass, err
@@ -91,7 +91,7 @@ func processRequest(reqProcessor *config.RequestProcessor, agReq *AgentRequest,
 			reqProcessor.Flags.ParamValue(utils.MetaRoutesMaxCost),
 		)
 		rply := new(sessions.V1AuthorizeReply)
-		err = connMgr.Call(sessionsConns, aConn, utils.SessionSv1AuthorizeEvent,
+		err = connMgr.Call(ctx, sessionsConns, utils.SessionSv1AuthorizeEvent,
 			authArgs, rply)
 		rply.SetMaxUsageNeeded(authArgs.GetMaxUsage)
 		agReq.setCGRReply(rply, err)
@@ -107,7 +107,7 @@ func processRequest(reqProcessor *config.RequestProcessor, agReq *AgentRequest,
 			reqProcessor.Flags.Has(utils.MetaAccounts),
 			cgrEv, reqProcessor.Flags.Has(utils.MetaFD))
 		rply := new(sessions.V1InitSessionReply)
-		err = connMgr.Call(sessionsConns, aConn, utils.SessionSv1InitiateSession,
+		err = connMgr.Call(ctx, sessionsConns, utils.SessionSv1InitiateSession,
 			initArgs, rply)
 		rply.SetMaxUsageNeeded(initArgs.InitSession)
 		agReq.setCGRReply(rply, err)
@@ -119,7 +119,7 @@ func processRequest(reqProcessor *config.RequestProcessor, agReq *AgentRequest,
 			cgrEv, reqProcessor.Flags.Has(utils.MetaFD))
 		rply := new(sessions.V1UpdateSessionReply)
 		rply.SetMaxUsageNeeded(updateArgs.UpdateSession)
-		err = connMgr.Call(sessionsConns, aConn, utils.SessionSv1UpdateSession,
+		err = connMgr.Call(ctx, sessionsConns, utils.SessionSv1UpdateSession,
 			updateArgs, rply)
 		agReq.setCGRReply(rply, err)
 	case utils.MetaTerminate:
@@ -132,7 +132,7 @@ func processRequest(reqProcessor *config.RequestProcessor, agReq *AgentRequest,
 			reqProcessor.Flags.ParamsSlice(utils.MetaStats, utils.MetaIDs),
 			cgrEv, reqProcessor.Flags.Has(utils.MetaFD))
 		var rply string
-		err = connMgr.Call(sessionsConns, aConn, utils.SessionSv1TerminateSession,
+		err = connMgr.Call(ctx, sessionsConns, utils.SessionSv1TerminateSession,
 			terminateArgs, &rply)
 		agReq.setCGRReply(nil, err)
 	case utils.MetaMessage:
@@ -153,7 +153,7 @@ func processRequest(reqProcessor *config.RequestProcessor, agReq *AgentRequest,
 			reqProcessor.Flags.ParamValue(utils.MetaRoutesMaxCost),
 		)
 		rply := new(sessions.V1ProcessMessageReply)
-		err = connMgr.Call(sessionsConns, aConn, utils.SessionSv1ProcessMessage,
+		err = connMgr.Call(ctx, sessionsConns, utils.SessionSv1ProcessMessage,
 			msgArgs, rply)
 		if utils.ErrHasPrefix(err, utils.RalsErrorPrfx) {
 			cgrEv.Event[utils.Usage] = 0 // avoid further debits
@@ -169,7 +169,7 @@ func processRequest(reqProcessor *config.RequestProcessor, agReq *AgentRequest,
 			CGREvent:  cgrEv,
 		}
 		rply := new(sessions.V1ProcessEventReply)
-		err = connMgr.Call(sessionsConns, aConn, utils.SessionSv1ProcessEvent,
+		err = connMgr.Call(ctx, sessionsConns, utils.SessionSv1ProcessEvent,
 			evArgs, rply)
 		if utils.ErrHasPrefix(err, utils.RalsErrorPrfx) {
 			cgrEv.Event[utils.Usage] = 0 // avoid further debits
@@ -183,7 +183,7 @@ func processRequest(reqProcessor *config.RequestProcessor, agReq *AgentRequest,
 	if reqProcessor.Flags.GetBool(utils.MetaCDRs) &&
 		!reqProcessor.Flags.Has(utils.MetaDryRun) {
 		var rplyCDRs string
-		if err = connMgr.Call(sessionsConns, aConn, utils.SessionSv1ProcessCDR,
+		if err = connMgr.Call(ctx, sessionsConns, utils.SessionSv1ProcessCDR,
 			cgrEv, &rplyCDRs); err != nil {
 			agReq.CGRReply.Map[utils.Error] = utils.NewLeafNode(err.Error())
 		}

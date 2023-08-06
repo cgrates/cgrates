@@ -21,19 +21,20 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package v1
 
 import (
-	"net/rpc"
 	"path"
 	"reflect"
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc"
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
 var (
-	tFIdxCaRpc               *rpc.Client
+	tFIdxCaRpc               *birpc.Client
 	sTestsFilterIndexesSV1Ca = []func(t *testing.T){
 		testV1FIdxCaLoadConfig,
 		testV1FIdxCaInitDataDb,
@@ -136,7 +137,7 @@ func testV1FIdxCaRpcConn(t *testing.T) {
 func testV1FIdxCaFromFolder(t *testing.T) {
 	var reply string
 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "oldtutorial")}
-	if err := tFIdxCaRpc.Call(utils.APIerSv1LoadTariffPlanFromFolder, attrs, &reply); err != nil {
+	if err := tFIdxCaRpc.Call(context.Background(), utils.APIerSv1LoadTariffPlanFromFolder, attrs, &reply); err != nil {
 		t.Error(err)
 	}
 	time.Sleep(100 * time.Millisecond)
@@ -156,7 +157,7 @@ func testV1FIdxCaProcessEventWithNotFound(t *testing.T) {
 		},
 	}
 	var thIDs []string
-	if err := tFIdxCaRpc.Call(utils.ThresholdSv1ProcessEvent, tEv, &thIDs); err.Error() != utils.ErrNotFound.Error() {
+	if err := tFIdxCaRpc.Call(context.Background(), utils.ThresholdSv1ProcessEvent, tEv, &thIDs); err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
 }
@@ -184,7 +185,7 @@ func testV1FIdxCaSetThresholdProfile(t *testing.T) {
 		},
 	}
 	var result string
-	if err := tFIdxCaRpc.Call(utils.APIerSv1SetFilter, filter, &result); err != nil {
+	if err := tFIdxCaRpc.Call(context.Background(), utils.APIerSv1SetFilter, filter, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -206,7 +207,7 @@ func testV1FIdxCaSetThresholdProfile(t *testing.T) {
 		},
 	}
 
-	if err := tFIdxCaRpc.Call(utils.APIerSv1SetThresholdProfile, tPrfl, &result); err != nil {
+	if err := tFIdxCaRpc.Call(context.Background(), utils.APIerSv1SetThresholdProfile, tPrfl, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -228,7 +229,7 @@ func testV1FIdxCaSetThresholdProfile(t *testing.T) {
 	eIDs := []string{"TEST_PROFILE1"}
 	//Testing ProcessEvent on set thresholdprofile using apier
 
-	if err := tFIdxCaRpc.Call(utils.ThresholdSv1ProcessEvent, tEv, &thIDs); err != nil {
+	if err := tFIdxCaRpc.Call(context.Background(), utils.ThresholdSv1ProcessEvent, tEv, &thIDs); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(thIDs, eIDs) {
 		t.Errorf("Expecting hits: %s, received: %s", eIDs, thIDs)
@@ -254,7 +255,7 @@ func testV1FIdxCaGetThresholdFromTP(t *testing.T) {
 	var thIDs []string
 	eIDs := []string{"THD_ACNT_BALANCE_1"}
 	//Testing ProcessEvent on set thresholdprofile using apier
-	if err := tFIdxCaRpc.Call(utils.ThresholdSv1ProcessEvent,
+	if err := tFIdxCaRpc.Call(context.Background(), utils.ThresholdSv1ProcessEvent,
 		tEv, &thIDs); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(thIDs, eIDs) {
@@ -285,7 +286,7 @@ func testV1FIdxCaUpdateThresholdProfile(t *testing.T) {
 			},
 		},
 	}
-	if err := tFIdxCaRpc.Call(utils.APIerSv1SetFilter, filter, &result); err != nil {
+	if err := tFIdxCaRpc.Call(context.Background(), utils.APIerSv1SetFilter, filter, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -305,7 +306,7 @@ func testV1FIdxCaUpdateThresholdProfile(t *testing.T) {
 			Async:    true,
 		},
 	}
-	if err := tFIdxCaRpc.Call(utils.APIerSv1SetThresholdProfile, tPrfl, &result); err != nil {
+	if err := tFIdxCaRpc.Call(context.Background(), utils.APIerSv1SetThresholdProfile, tPrfl, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -325,7 +326,7 @@ func testV1FIdxCaUpdateThresholdProfile(t *testing.T) {
 	var thIDs []string
 	eIDs := []string{}
 	//Testing ProcessEvent on set thresholdprofile  after update making sure there are no hits
-	if err := tFIdxCaRpc.Call(utils.ThresholdSv1ProcessEvent, tEv, &thIDs); err == nil ||
+	if err := tFIdxCaRpc.Call(context.Background(), utils.ThresholdSv1ProcessEvent, tEv, &thIDs); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
@@ -343,7 +344,7 @@ func testV1FIdxCaUpdateThresholdProfile(t *testing.T) {
 	}
 	eIDs = []string{"TEST_PROFILE1"}
 	//Testing ProcessEvent on set thresholdprofile after update
-	if err := tFIdxCaRpc.Call(utils.ThresholdSv1ProcessEvent, tEv2, &thIDs); err != nil {
+	if err := tFIdxCaRpc.Call(context.Background(), utils.ThresholdSv1ProcessEvent, tEv2, &thIDs); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(thIDs, eIDs) {
 		t.Errorf("Expecting : %s, received: %s", eIDs, thIDs)
@@ -373,14 +374,14 @@ func testV1FIdxCaUpdateThresholdProfileFromTP(t *testing.T) {
 			},
 		},
 	}
-	if err := tFIdxCaRpc.Call(utils.APIerSv1SetFilter, filter, &result); err != nil {
+	if err := tFIdxCaRpc.Call(context.Background(), utils.APIerSv1SetFilter, filter, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
 
 	var reply *engine.ThresholdProfile
-	if err := tFIdxCaRpc.Call(utils.APIerSv1GetThresholdProfile,
+	if err := tFIdxCaRpc.Call(context.Background(), utils.APIerSv1GetThresholdProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "THD_ACNT_BALANCE_1"}, &reply); err != nil {
 		t.Error(err)
 	}
@@ -393,7 +394,7 @@ func testV1FIdxCaUpdateThresholdProfileFromTP(t *testing.T) {
 	}
 	reply.FilterIDs = []string{"TestFilter3"}
 
-	if err := tFIdxCaRpc.Call(utils.APIerSv1SetThresholdProfile, &engine.ThresholdProfileWithAPIOpts{ThresholdProfile: reply}, &result); err != nil {
+	if err := tFIdxCaRpc.Call(context.Background(), utils.APIerSv1SetThresholdProfile, &engine.ThresholdProfileWithAPIOpts{ThresholdProfile: reply}, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -411,7 +412,7 @@ func testV1FIdxCaUpdateThresholdProfileFromTP(t *testing.T) {
 	}
 	var thIDs []string
 	//Testing ProcessEvent on set thresholdprofile using apier
-	if err := tFIdxCaRpc.Call(utils.ThresholdSv1ProcessEvent, tEv, &thIDs); err == nil ||
+	if err := tFIdxCaRpc.Call(context.Background(), utils.ThresholdSv1ProcessEvent, tEv, &thIDs); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
@@ -428,7 +429,7 @@ func testV1FIdxCaUpdateThresholdProfileFromTP(t *testing.T) {
 	}
 	eIDs := []string{"THD_ACNT_BALANCE_1"}
 	//Testing ProcessEvent on set thresholdprofile using apier
-	if err := tFIdxCaRpc.Call(utils.ThresholdSv1ProcessEvent, tEv2, &thIDs); err != nil {
+	if err := tFIdxCaRpc.Call(context.Background(), utils.ThresholdSv1ProcessEvent, tEv2, &thIDs); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(thIDs, eIDs) {
 		t.Errorf("Expecting : %s, received: %s", eIDs, thIDs)
@@ -450,7 +451,7 @@ func testV1FIdxCaRemoveThresholdProfile(t *testing.T) {
 	}
 	var thIDs []string
 	eIDs := []string{"TEST_PROFILE1"}
-	if err := tFIdxCaRpc.Call(utils.ThresholdSv1ProcessEvent, tEv, &thIDs); err != nil {
+	if err := tFIdxCaRpc.Call(context.Background(), utils.ThresholdSv1ProcessEvent, tEv, &thIDs); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(thIDs, eIDs) {
 		t.Errorf("Expecting : %s, received: %s", eIDs, thIDs)
@@ -468,13 +469,13 @@ func testV1FIdxCaRemoveThresholdProfile(t *testing.T) {
 		},
 	}
 	eIDs = []string{"THD_ACNT_BALANCE_1"}
-	if err := tFIdxCaRpc.Call(utils.ThresholdSv1ProcessEvent, tEv2, &thIDs); err != nil {
+	if err := tFIdxCaRpc.Call(context.Background(), utils.ThresholdSv1ProcessEvent, tEv2, &thIDs); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(thIDs, eIDs) {
 		t.Errorf("Expecting : %s, received: %s", eIDs, thIDs)
 	}
 	//Remove threshold profile that was set form api
-	if err := tFIdxCaRpc.Call(utils.APIerSv1RemoveThresholdProfile,
+	if err := tFIdxCaRpc.Call(context.Background(), utils.APIerSv1RemoveThresholdProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "TEST_PROFILE1"}, &resp); err != nil {
 		t.Error(err)
 	} else if resp != utils.OK {
@@ -482,29 +483,29 @@ func testV1FIdxCaRemoveThresholdProfile(t *testing.T) {
 	}
 	var sqp *engine.ThresholdProfile
 	//Test the remove
-	if err := tFIdxCaRpc.Call(utils.APIerSv1GetThresholdProfile,
+	if err := tFIdxCaRpc.Call(context.Background(), utils.APIerSv1GetThresholdProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "TEST_PROFILE1"}, &sqp); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
 	//Remove threshold profile that was set form tariffplan
-	if err := tFIdxCaRpc.Call(utils.APIerSv1RemoveThresholdProfile,
+	if err := tFIdxCaRpc.Call(context.Background(), utils.APIerSv1RemoveThresholdProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "THD_ACNT_BALANCE_1"}, &resp); err != nil {
 		t.Error(err)
 	} else if resp != utils.OK {
 		t.Error("Unexpected reply returned", resp)
 	}
 	//Test the remove
-	if err := tFIdxCaRpc.Call(utils.APIerSv1GetThresholdProfile,
+	if err := tFIdxCaRpc.Call(context.Background(), utils.APIerSv1GetThresholdProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "THD_ACNT_BALANCE_1"}, &sqp); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
-	if err := tFIdxCaRpc.Call(utils.ThresholdSv1ProcessEvent, tEv, &thIDs); err == nil ||
+	if err := tFIdxCaRpc.Call(context.Background(), utils.ThresholdSv1ProcessEvent, tEv, &thIDs); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
-	if err := tFIdxCaRpc.Call(utils.ThresholdSv1ProcessEvent, tEv2, &thIDs); err == nil ||
+	if err := tFIdxCaRpc.Call(context.Background(), utils.ThresholdSv1ProcessEvent, tEv2, &thIDs); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
@@ -524,13 +525,13 @@ func testV1FIdxCaGetStatQueuesWithNotFound(t *testing.T) {
 			utils.MetaEventType: utils.AccountUpdate,
 		},
 	}
-	if err := tFIdxCaRpc.Call(utils.StatSv1ProcessEvent, tEv, &reply); err == nil ||
+	if err := tFIdxCaRpc.Call(context.Background(), utils.StatSv1ProcessEvent, tEv, &reply); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
 
 	tEv.Tenant = utils.EmptyString
-	if err := tFIdxCaRpc.Call(utils.StatSv1ProcessEvent, tEv, &reply); err == nil ||
+	if err := tFIdxCaRpc.Call(context.Background(), utils.StatSv1ProcessEvent, tEv, &reply); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
@@ -561,7 +562,7 @@ func testV1FIdxCaSetStatQueueProfile(t *testing.T) {
 	}
 	var result string
 
-	if err := tFIdxCaRpc.Call(utils.APIerSv1SetFilter, filter, &result); err != nil {
+	if err := tFIdxCaRpc.Call(context.Background(), utils.APIerSv1SetFilter, filter, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -588,7 +589,7 @@ func testV1FIdxCaSetStatQueueProfile(t *testing.T) {
 			MinItems:     1,
 		},
 	}
-	if err := tFIdxCaRpc.Call(utils.APIerSv1SetStatQueueProfile, statConfig, &result); err != nil {
+	if err := tFIdxCaRpc.Call(context.Background(), utils.APIerSv1SetStatQueueProfile, statConfig, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -608,7 +609,7 @@ func testV1FIdxCaSetStatQueueProfile(t *testing.T) {
 	}
 	var reply []string
 	expected := []string{"TEST_PROFILE1"}
-	if err := tFIdxCaRpc.Call(utils.StatSv1ProcessEvent,
+	if err := tFIdxCaRpc.Call(context.Background(), utils.StatSv1ProcessEvent,
 		tEv, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(reply, expected) {
@@ -629,7 +630,7 @@ func testV1FIdxCaGetStatQueuesFromTP(t *testing.T) {
 			utils.Cost:         12.1,
 		},
 	}
-	if err := tFIdxCaRpc.Call(utils.StatSv1ProcessEvent, ev2, &reply); err != nil {
+	if err := tFIdxCaRpc.Call(context.Background(), utils.StatSv1ProcessEvent, ev2, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(reply, expected) {
 		t.Errorf("Expecting: %+v, received: %+v", expected, reply)
@@ -644,7 +645,7 @@ func testV1FIdxCaGetStatQueuesFromTP(t *testing.T) {
 			utils.Cost:         12.1,
 		},
 	}
-	if err := tFIdxCaRpc.Call(utils.StatSv1ProcessEvent, &ev3, &reply); err != nil {
+	if err := tFIdxCaRpc.Call(context.Background(), utils.StatSv1ProcessEvent, &ev3, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(reply, expected) {
 		t.Errorf("Expecting: %+v, received: %+v", expected, reply)
@@ -664,7 +665,7 @@ func testV1FIdxCaGetStatQueuesFromTP(t *testing.T) {
 			utils.MetaEventType: utils.AccountUpdate,
 		},
 	}
-	if err := tFIdxCaRpc.Call(utils.StatSv1ProcessEvent, &tEv, &reply); err != nil {
+	if err := tFIdxCaRpc.Call(context.Background(), utils.StatSv1ProcessEvent, &tEv, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(reply, expected) {
 		t.Errorf("Expecting: %+v, received: %+v", expected, reply)
@@ -683,7 +684,7 @@ func testV1FIdxCaGetStatQueuesFromTP(t *testing.T) {
 			utils.MetaEventType: utils.AccountUpdate,
 		},
 	}
-	if err := tFIdxCaRpc.Call(utils.StatSv1ProcessEvent, &tEv2, &reply); err != nil {
+	if err := tFIdxCaRpc.Call(context.Background(), utils.StatSv1ProcessEvent, &tEv2, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(reply, expected) {
 		t.Errorf("Expecting: %+v, received: %+v", expected, reply)
@@ -713,7 +714,7 @@ func testV1FIdxCaUpdateStatQueueProfile(t *testing.T) {
 		},
 	}
 	var result string
-	if err := tFIdxCaRpc.Call(utils.APIerSv1SetFilter, filter, &result); err != nil {
+	if err := tFIdxCaRpc.Call(context.Background(), utils.APIerSv1SetFilter, filter, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -740,7 +741,7 @@ func testV1FIdxCaUpdateStatQueueProfile(t *testing.T) {
 			MinItems:     1,
 		},
 	}
-	if err := tFIdxCaRpc.Call(utils.APIerSv1SetStatQueueProfile, statConfig, &result); err != nil {
+	if err := tFIdxCaRpc.Call(context.Background(), utils.APIerSv1SetStatQueueProfile, statConfig, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -759,7 +760,7 @@ func testV1FIdxCaUpdateStatQueueProfile(t *testing.T) {
 			utils.MetaEventType: utils.BalanceUpdate,
 		},
 	}
-	if err := tFIdxCaRpc.Call(utils.StatSv1ProcessEvent, tEv, &reply); err != nil {
+	if err := tFIdxCaRpc.Call(context.Background(), utils.StatSv1ProcessEvent, tEv, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(reply, expected) {
 		t.Errorf("Expecting: %+v, received: %+v", expected, reply)
@@ -789,19 +790,19 @@ func testV1FIdxCaUpdateStatQueueProfileFromTP(t *testing.T) {
 		},
 	}
 	var result string
-	if err := tFIdxCaRpc.Call(utils.APIerSv1SetFilter, filter, &result); err != nil {
+	if err := tFIdxCaRpc.Call(context.Background(), utils.APIerSv1SetFilter, filter, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
 	var reply engine.StatQueueProfile
-	if err := tFIdxCaRpc.Call(utils.APIerSv1GetStatQueueProfile,
+	if err := tFIdxCaRpc.Call(context.Background(), utils.APIerSv1GetStatQueueProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "Stats1"}, &reply); err != nil {
 		t.Error(err)
 	}
 	reply.FilterIDs = []string{"FLTR_3"}
 	reply.ActivationInterval = &utils.ActivationInterval{ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC)}
-	if err := tFIdxCaRpc.Call(utils.APIerSv1SetStatQueueProfile,
+	if err := tFIdxCaRpc.Call(context.Background(), utils.APIerSv1SetStatQueueProfile,
 		&engine.StatQueueProfileWithAPIOpts{StatQueueProfile: &reply}, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
@@ -823,7 +824,7 @@ func testV1FIdxCaUpdateStatQueueProfileFromTP(t *testing.T) {
 	}
 	var ids []string
 	expected := []string{"Stats1"}
-	if err := tFIdxCaRpc.Call(utils.StatSv1ProcessEvent,
+	if err := tFIdxCaRpc.Call(context.Background(), utils.StatSv1ProcessEvent,
 		tEv, &ids); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(ids, expected) {
@@ -846,7 +847,7 @@ func testV1FIdxCaRemoveStatQueueProfile(t *testing.T) {
 			utils.MetaEventType: utils.BalanceUpdate,
 		},
 	}
-	if err := tFIdxCaRpc.Call(utils.StatSv1ProcessEvent, tEv, &reply); err != nil {
+	if err := tFIdxCaRpc.Call(context.Background(), utils.StatSv1ProcessEvent, tEv, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(reply, expected) {
 		t.Errorf("Expecting: %+v, received: %+v", expected, reply)
@@ -866,14 +867,14 @@ func testV1FIdxCaRemoveStatQueueProfile(t *testing.T) {
 			utils.MetaEventType: utils.AccountUpdate,
 		},
 	}
-	if err := tFIdxCaRpc.Call(utils.StatSv1ProcessEvent, tEv2, &reply); err != nil {
+	if err := tFIdxCaRpc.Call(context.Background(), utils.StatSv1ProcessEvent, tEv2, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(reply, expected) {
 		t.Errorf("Expecting: %+v, received: %+v", expected, reply)
 	}
 	var result string
 	//Remove threshold profile that was set form api
-	if err := tFIdxCaRpc.Call(utils.APIerSv1RemoveStatQueueProfile,
+	if err := tFIdxCaRpc.Call(context.Background(), utils.APIerSv1RemoveStatQueueProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "TEST_PROFILE1"}, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
@@ -881,30 +882,30 @@ func testV1FIdxCaRemoveStatQueueProfile(t *testing.T) {
 	}
 	var sqp *engine.StatQueueProfile
 	//Test the remove
-	if err := tFIdxCaRpc.Call(utils.APIerSv1GetStatQueueProfile,
+	if err := tFIdxCaRpc.Call(context.Background(), utils.APIerSv1GetStatQueueProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "TEST_PROFILE1"}, &sqp); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
 	//Remove threshold profile that was set form tariffplan
-	if err := tFIdxCaRpc.Call(utils.APIerSv1RemoveStatQueueProfile,
+	if err := tFIdxCaRpc.Call(context.Background(), utils.APIerSv1RemoveStatQueueProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "Stats1"}, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
 	//Test the remove
-	if err := tFIdxCaRpc.Call(utils.APIerSv1GetStatQueueProfile,
+	if err := tFIdxCaRpc.Call(context.Background(), utils.APIerSv1GetStatQueueProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "Stats1"}, &sqp); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
 
-	if err := tFIdxCaRpc.Call(utils.StatSv1ProcessEvent, tEv, &reply); err == nil ||
+	if err := tFIdxCaRpc.Call(context.Background(), utils.StatSv1ProcessEvent, tEv, &reply); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
-	if err := tFIdxCaRpc.Call(utils.StatSv1ProcessEvent, tEv2, &reply); err == nil ||
+	if err := tFIdxCaRpc.Call(context.Background(), utils.StatSv1ProcessEvent, tEv2, &reply); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
@@ -924,7 +925,7 @@ func testV1FIdxCaProcessAttributeProfileEventWithNotFound(t *testing.T) {
 		},
 	}
 	var rplyEv engine.AttrSProcessEventReply
-	if err := tFIdxCaRpc.Call(utils.AttributeSv1ProcessEvent, ev, &rplyEv); err == nil ||
+	if err := tFIdxCaRpc.Call(context.Background(), utils.AttributeSv1ProcessEvent, ev, &rplyEv); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
@@ -953,7 +954,7 @@ func testV1FIdxCaSetAttributeProfile(t *testing.T) {
 		},
 	}
 	var result string
-	if err := tFIdxCaRpc.Call(utils.APIerSv1SetFilter, filter, &result); err != nil {
+	if err := tFIdxCaRpc.Call(context.Background(), utils.APIerSv1SetFilter, filter, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -980,7 +981,7 @@ func testV1FIdxCaSetAttributeProfile(t *testing.T) {
 			Weight: 20,
 		},
 	}
-	if err := tFIdxCaRpc.Call(utils.APIerSv1SetAttributeProfile, alsPrf, &result); err != nil {
+	if err := tFIdxCaRpc.Call(context.Background(), utils.APIerSv1SetAttributeProfile, alsPrf, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -998,7 +999,7 @@ func testV1FIdxCaSetAttributeProfile(t *testing.T) {
 		},
 	}
 	var rplyEv engine.AttrSProcessEventReply
-	if err := tFIdxCaRpc.Call(utils.AttributeSv1ProcessEvent,
+	if err := tFIdxCaRpc.Call(context.Background(), utils.AttributeSv1ProcessEvent,
 		ev, &rplyEv); err != nil {
 		t.Error(err)
 	}
@@ -1018,7 +1019,7 @@ func testV1FIdxCaGetAttributeProfileFromTP(t *testing.T) {
 		},
 	}
 	var rplyEv engine.AttrSProcessEventReply
-	if err := tFIdxCaRpc.Call(utils.AttributeSv1ProcessEvent, ev, &rplyEv); err != nil {
+	if err := tFIdxCaRpc.Call(context.Background(), utils.AttributeSv1ProcessEvent, ev, &rplyEv); err != nil {
 		t.Error(err)
 	}
 }
@@ -1046,7 +1047,7 @@ func testV1FIdxCaUpdateAttributeProfile(t *testing.T) {
 		},
 	}
 	var result string
-	if err := tFIdxCaRpc.Call(utils.APIerSv1SetFilter, filter, &result); err != nil {
+	if err := tFIdxCaRpc.Call(context.Background(), utils.APIerSv1SetFilter, filter, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -1073,7 +1074,7 @@ func testV1FIdxCaUpdateAttributeProfile(t *testing.T) {
 			Weight: 20,
 		},
 	}
-	if err := tFIdxCaRpc.Call(utils.APIerSv1SetAttributeProfile, alsPrf, &result); err != nil {
+	if err := tFIdxCaRpc.Call(context.Background(), utils.APIerSv1SetAttributeProfile, alsPrf, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -1091,7 +1092,7 @@ func testV1FIdxCaUpdateAttributeProfile(t *testing.T) {
 		},
 	}
 	var rplyEv engine.AttrSProcessEventReply
-	if err := tFIdxCaRpc.Call(utils.AttributeSv1ProcessEvent, ev, &rplyEv); err != nil {
+	if err := tFIdxCaRpc.Call(context.Background(), utils.AttributeSv1ProcessEvent, ev, &rplyEv); err != nil {
 		t.Error(err)
 	}
 }
@@ -1119,19 +1120,19 @@ func testV1FIdxCaUpdateAttributeProfileFromTP(t *testing.T) {
 		},
 	}
 	var result string
-	if err := tFIdxCaRpc.Call(utils.APIerSv1SetFilter, filter, &result); err != nil {
+	if err := tFIdxCaRpc.Call(context.Background(), utils.APIerSv1SetFilter, filter, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
 	var reply engine.AttributeProfile
-	if err := tFIdxCaRpc.Call(utils.APIerSv1GetAttributeProfile,
+	if err := tFIdxCaRpc.Call(context.Background(), utils.APIerSv1GetAttributeProfile,
 		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ATTR_1"}},
 		&reply); err != nil {
 		t.Error(err)
 	}
 	reply.FilterIDs = []string{"TestFilter3"}
-	if err := tFIdxCaRpc.Call(utils.APIerSv1SetAttributeProfile, &engine.AttributeProfileWithAPIOpts{AttributeProfile: &reply}, &result); err != nil {
+	if err := tFIdxCaRpc.Call(context.Background(), utils.APIerSv1SetAttributeProfile, &engine.AttributeProfileWithAPIOpts{AttributeProfile: &reply}, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -1149,7 +1150,7 @@ func testV1FIdxCaUpdateAttributeProfileFromTP(t *testing.T) {
 		},
 	}
 	var rplyEv engine.AttrSProcessEventReply
-	if err := tFIdxCaRpc.Call(utils.AttributeSv1ProcessEvent, ev, &rplyEv); err != nil {
+	if err := tFIdxCaRpc.Call(context.Background(), utils.AttributeSv1ProcessEvent, ev, &rplyEv); err != nil {
 		t.Error(err)
 	}
 }
@@ -1168,7 +1169,7 @@ func testV1FIdxCaRemoveAttributeProfile(t *testing.T) {
 		},
 	}
 	var rplyEv engine.AttrSProcessEventReply
-	if err := tFIdxCaRpc.Call(utils.AttributeSv1ProcessEvent, ev, &rplyEv); err != nil {
+	if err := tFIdxCaRpc.Call(context.Background(), utils.AttributeSv1ProcessEvent, ev, &rplyEv); err != nil {
 		t.Error(err)
 	}
 
@@ -1183,11 +1184,11 @@ func testV1FIdxCaRemoveAttributeProfile(t *testing.T) {
 			utils.OptsContext: utils.MetaSessionS,
 		},
 	}
-	if err := tFIdxCaRpc.Call(utils.AttributeSv1ProcessEvent, ev2, &rplyEv); err != nil {
+	if err := tFIdxCaRpc.Call(context.Background(), utils.AttributeSv1ProcessEvent, ev2, &rplyEv); err != nil {
 		t.Error(err)
 	}
 	//Remove threshold profile that was set form api
-	if err := tFIdxCaRpc.Call(utils.APIerSv1RemoveAttributeProfile, &utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org",
+	if err := tFIdxCaRpc.Call(context.Background(), utils.APIerSv1RemoveAttributeProfile, &utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org",
 		ID: "TEST_PROFILE1"}}, &resp); err != nil {
 		t.Error(err)
 	} else if resp != utils.OK {
@@ -1195,31 +1196,31 @@ func testV1FIdxCaRemoveAttributeProfile(t *testing.T) {
 	}
 	var sqp *engine.AttributeProfile
 	//Test the remove
-	if err := tFIdxCaRpc.Call(utils.APIerSv1GetAttributeProfile,
+	if err := tFIdxCaRpc.Call(context.Background(), utils.APIerSv1GetAttributeProfile,
 		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "TEST_PROFILE1"}},
 		&sqp); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
 	//Remove threshold profile that was set form tariffplan
-	if err := tFIdxCaRpc.Call(utils.APIerSv1RemoveAttributeProfile, &utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org",
+	if err := tFIdxCaRpc.Call(context.Background(), utils.APIerSv1RemoveAttributeProfile, &utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org",
 		ID: "ATTR_1"}}, &resp); err != nil {
 		t.Error(err)
 	} else if resp != utils.OK {
 		t.Error("Unexpected reply returned", resp)
 	}
 	//Test the remove
-	if err := tFIdxCaRpc.Call(utils.APIerSv1GetAttributeProfile,
+	if err := tFIdxCaRpc.Call(context.Background(), utils.APIerSv1GetAttributeProfile,
 		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ATTR_1"}},
 		&sqp); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
-	if err := tFIdxCaRpc.Call(utils.AttributeSv1ProcessEvent, ev, &rplyEv); err == nil ||
+	if err := tFIdxCaRpc.Call(context.Background(), utils.AttributeSv1ProcessEvent, ev, &rplyEv); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
-	if err := tFIdxCaRpc.Call(utils.AttributeSv1ProcessEvent, ev2, &rplyEv); err == nil ||
+	if err := tFIdxCaRpc.Call(context.Background(), utils.AttributeSv1ProcessEvent, ev2, &rplyEv); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
@@ -1241,21 +1242,21 @@ func testV1FIdxCaGetResourceProfileWithNotFound(t *testing.T) {
 			utils.OptsResourcesUnits:   6,
 		},
 	}
-	if err := tFIdxCaRpc.Call(utils.ResourceSv1AllocateResources,
+	if err := tFIdxCaRpc.Call(context.Background(), utils.ResourceSv1AllocateResources,
 		cgrEv, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
-	if err := tFIdxCaRpc.Call(utils.ResourceSv1AuthorizeResources,
+	if err := tFIdxCaRpc.Call(context.Background(), utils.ResourceSv1AuthorizeResources,
 		&cgrEv, &reply); err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
 
 	cgrEv.Tenant = utils.EmptyString
-	if err := tFIdxCaRpc.Call(utils.ResourceSv1AllocateResources,
+	if err := tFIdxCaRpc.Call(context.Background(), utils.ResourceSv1AllocateResources,
 		cgrEv, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
-	if err := tFIdxCaRpc.Call(utils.ResourceSv1AuthorizeResources,
+	if err := tFIdxCaRpc.Call(context.Background(), utils.ResourceSv1AuthorizeResources,
 		&cgrEv, &reply); err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
@@ -1289,7 +1290,7 @@ func testV1FIdxCaSetResourceProfile(t *testing.T) {
 		},
 	}
 	var result string
-	if err := tFIdxCaRpc.Call(utils.APIerSv1SetFilter, filter, &result); err != nil {
+	if err := tFIdxCaRpc.Call(context.Background(), utils.APIerSv1SetFilter, filter, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -1311,7 +1312,7 @@ func testV1FIdxCaSetResourceProfile(t *testing.T) {
 			ThresholdIDs:      []string{utils.MetaNone},
 		},
 	}
-	if err := tFIdxCaRpc.Call(utils.APIerSv1SetResourceProfile, rlsConfig, &result); err != nil {
+	if err := tFIdxCaRpc.Call(context.Background(), utils.APIerSv1SetResourceProfile, rlsConfig, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -1329,14 +1330,14 @@ func testV1FIdxCaSetResourceProfile(t *testing.T) {
 			utils.OptsResourcesUnits:   6,
 		},
 	}
-	if err := tFIdxCaRpc.Call(utils.ResourceSv1AllocateResources,
+	if err := tFIdxCaRpc.Call(context.Background(), utils.ResourceSv1AllocateResources,
 		cgrEv, &result); err != nil {
 		t.Error(err)
 	} else if result != "Approved" {
 		t.Error("Unexpected reply returned", result)
 	}
 
-	if err := tFIdxCaRpc.Call(utils.ResourceSv1AuthorizeResources,
+	if err := tFIdxCaRpc.Call(context.Background(), utils.ResourceSv1AuthorizeResources,
 		&cgrEv, &result); err != nil {
 		t.Error(err)
 	} else if result != "Approved" {
@@ -1359,13 +1360,13 @@ func testV1FIdxCaGetResourceProfileFromTP(t *testing.T) {
 			utils.OptsResourcesUnits:   6,
 		},
 	}
-	if err := tFIdxCaRpc.Call(utils.ResourceSv1AllocateResources,
+	if err := tFIdxCaRpc.Call(context.Background(), utils.ResourceSv1AllocateResources,
 		cgrEv, &reply); err != nil {
 		t.Error(err)
 	} else if reply != "Approved" {
 		t.Error("Unexpected reply returned", reply)
 	}
-	if err := tFIdxCaRpc.Call(utils.ResourceSv1AuthorizeResources,
+	if err := tFIdxCaRpc.Call(context.Background(), utils.ResourceSv1AuthorizeResources,
 		&cgrEv, &reply); err != nil {
 		t.Error(err)
 	} else if reply != "Approved" {
@@ -1385,7 +1386,7 @@ func testV1FIdxCaGetResourceProfileFromTP(t *testing.T) {
 			utils.OptsResourcesUnits:   6,
 		},
 	}
-	if err := tFIdxCaRpc.Call(utils.ResourceSv1AuthorizeResources,
+	if err := tFIdxCaRpc.Call(context.Background(), utils.ResourceSv1AuthorizeResources,
 		&ev, &reply); err != nil {
 		t.Error(err)
 	} else if reply != "ResGroup1" {
@@ -1421,7 +1422,7 @@ func testV1FIdxCaUpdateResourceProfile(t *testing.T) {
 		},
 	}
 	var result string
-	if err := tFIdxCaRpc.Call(utils.APIerSv1SetFilter, filter, &result); err != nil {
+	if err := tFIdxCaRpc.Call(context.Background(), utils.APIerSv1SetFilter, filter, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -1443,7 +1444,7 @@ func testV1FIdxCaUpdateResourceProfile(t *testing.T) {
 			ThresholdIDs:      []string{utils.MetaNone},
 		},
 	}
-	if err := tFIdxCaRpc.Call(utils.APIerSv1SetResourceProfile,
+	if err := tFIdxCaRpc.Call(context.Background(), utils.APIerSv1SetResourceProfile,
 		rlsConfig, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
@@ -1462,7 +1463,7 @@ func testV1FIdxCaUpdateResourceProfile(t *testing.T) {
 			utils.OptsResourcesUnits:   6,
 		},
 	}
-	if err := tFIdxCaRpc.Call(utils.ResourceSv1AuthorizeResources,
+	if err := tFIdxCaRpc.Call(context.Background(), utils.ResourceSv1AuthorizeResources,
 		&cgrEv, &result); err != nil {
 		t.Error(err)
 	} else if result != "MessageAllocation" {
@@ -1498,20 +1499,20 @@ func testV1FIdxCaUpdateResourceProfileFromTP(t *testing.T) {
 		},
 	}
 	var result string
-	if err := tFIdxCaRpc.Call(utils.APIerSv1SetFilter, filter, &result); err != nil {
+	if err := tFIdxCaRpc.Call(context.Background(), utils.APIerSv1SetFilter, filter, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
 	var reply engine.ResourceProfile
-	if err := tFIdxCaRpc.Call(utils.APIerSv1GetResourceProfile,
+	if err := tFIdxCaRpc.Call(context.Background(), utils.APIerSv1GetResourceProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "ResGroup1"}, &reply); err != nil {
 		t.Error(err)
 	}
 	reply.FilterIDs = []string{"FLTR_RES_RCFG3"}
 	reply.ActivationInterval = &utils.ActivationInterval{ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC)}
 
-	if err := tFIdxCaRpc.Call(utils.APIerSv1SetResourceProfile, &engine.ResourceProfileWithAPIOpts{ResourceProfile: &reply}, &result); err != nil {
+	if err := tFIdxCaRpc.Call(context.Background(), utils.APIerSv1SetResourceProfile, &engine.ResourceProfileWithAPIOpts{ResourceProfile: &reply}, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -1529,7 +1530,7 @@ func testV1FIdxCaUpdateResourceProfileFromTP(t *testing.T) {
 			utils.OptsResourcesUnits:   6,
 		},
 	}
-	if err := tFIdxCaRpc.Call(utils.ResourceSv1AuthorizeResources, &ev, &result); err != nil {
+	if err := tFIdxCaRpc.Call(context.Background(), utils.ResourceSv1AuthorizeResources, &ev, &result); err != nil {
 		t.Error(err)
 	} else if result != "ResGroup1" {
 		t.Error("Unexpected reply returned", result)
@@ -1551,12 +1552,12 @@ func testV1FIdxCaRemoveResourceProfile(t *testing.T) {
 			utils.OptsResourcesUnits:   6,
 		},
 	}
-	if err := tFIdxCaRpc.Call(utils.ResourceSv1AllocateResources, ev, &resp); err != nil {
+	if err := tFIdxCaRpc.Call(context.Background(), utils.ResourceSv1AllocateResources, ev, &resp); err != nil {
 		t.Error(err)
 	} else if resp != "MessageAllocation" {
 		t.Error("Unexpected reply returned", resp)
 	}
-	if err := tFIdxCaRpc.Call(utils.ResourceSv1AuthorizeResources, &ev, &resp); err != nil {
+	if err := tFIdxCaRpc.Call(context.Background(), utils.ResourceSv1AuthorizeResources, &ev, &resp); err != nil {
 		t.Error(err)
 	} else if resp != "MessageAllocation" {
 		t.Error("Unexpected reply returned", resp)
@@ -1574,31 +1575,31 @@ func testV1FIdxCaRemoveResourceProfile(t *testing.T) {
 			utils.OptsResourcesUnits:   6,
 		},
 	}
-	if err := tFIdxCaRpc.Call(utils.ResourceSv1AuthorizeResources, &ev2, &resp); err != nil {
+	if err := tFIdxCaRpc.Call(context.Background(), utils.ResourceSv1AuthorizeResources, &ev2, &resp); err != nil {
 		t.Error(err)
 	} else if resp != "ResGroup1" {
 		t.Error("Unexpected reply returned", resp)
 	}
 
-	if err := tFIdxCaRpc.Call(utils.APIerSv1RemoveResourceProfile,
+	if err := tFIdxCaRpc.Call(context.Background(), utils.APIerSv1RemoveResourceProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "RCFG1"}, &resp); err != nil {
 		t.Error(err)
 	} else if resp != utils.OK {
 		t.Error("Unexpected reply returned", resp)
 	}
-	if err := tFIdxCaRpc.Call(utils.APIerSv1RemoveResourceProfile,
+	if err := tFIdxCaRpc.Call(context.Background(), utils.APIerSv1RemoveResourceProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "ResGroup1"}, &resp); err != nil {
 		t.Error(err)
 	} else if resp != utils.OK {
 		t.Error("Unexpected reply returned", resp)
 	}
 	var sqp *engine.ThresholdProfile
-	if err := tFIdxCaRpc.Call(utils.APIerSv1GetResourceProfile,
+	if err := tFIdxCaRpc.Call(context.Background(), utils.APIerSv1GetResourceProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "RCFG1"}, &sqp); err == nil &&
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
-	if err := tFIdxCaRpc.Call(utils.APIerSv1GetResourceProfile,
+	if err := tFIdxCaRpc.Call(context.Background(), utils.APIerSv1GetResourceProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "ResGroup1"}, &sqp); err == nil &&
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)

@@ -24,6 +24,7 @@ package dispatchers
 import (
 	"testing"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -61,12 +62,12 @@ func TestDspSchedulerS(t *testing.T) {
 
 func testDspSchedPing(t *testing.T) {
 	var reply string
-	if err := allEngine.RPC.Call(utils.SchedulerSv1Ping, new(utils.CGREvent), &reply); err != nil {
+	if err := allEngine.RPC.Call(context.Background(), utils.SchedulerSv1Ping, new(utils.CGREvent), &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.Pong {
 		t.Errorf("Received: %s", reply)
 	}
-	if err := dispEngine.RPC.Call(utils.SchedulerSv1Ping, &utils.CGREvent{
+	if err := dispEngine.RPC.Call(context.Background(), utils.SchedulerSv1Ping, &utils.CGREvent{
 		Tenant: "cgrates.org",
 
 		APIOpts: map[string]any{

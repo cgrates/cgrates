@@ -27,12 +27,13 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc"
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/cores"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/servmanager"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/cgrates/rpcclient"
 )
 
 func TestSIPAgentReload(t *testing.T) {
@@ -47,21 +48,24 @@ func TestSIPAgentReload(t *testing.T) {
 	shdChan := utils.NewSyncedChan()
 	shdWg := new(sync.WaitGroup)
 	chS := engine.NewCacheS(cfg, nil, nil)
-
-	cacheSChan := make(chan rpcclient.ClientConnector, 1)
-	cacheSChan <- chS
+	cacheSrv, err := engine.NewService(chS)
+	if err != nil {
+		t.Fatal(err)
+	}
+	cacheSChan := make(chan birpc.ClientConnector, 1)
+	cacheSChan <- cacheSrv
 
 	server := cores.NewServer(nil)
 	srvMngr := servmanager.NewServiceManager(cfg, shdChan, shdWg, nil)
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
 	db := NewDataDBService(cfg, nil, srvDep)
-	anz := NewAnalyzerService(cfg, server, filterSChan, shdChan, make(chan rpcclient.ClientConnector, 1), srvDep)
-	sS := NewSessionService(cfg, db, server, make(chan rpcclient.ClientConnector, 1),
+	anz := NewAnalyzerService(cfg, server, filterSChan, shdChan, make(chan birpc.ClientConnector, 1), srvDep)
+	sS := NewSessionService(cfg, db, server, make(chan birpc.ClientConnector, 1),
 		shdChan, nil, anz, srvDep)
 	srv := NewSIPAgent(cfg, filterSChan, shdChan, nil, srvDep)
 	engine.NewConnManager(cfg, nil)
 	srvMngr.AddServices(srv, sS,
-		NewLoaderService(cfg, db, filterSChan, server, make(chan rpcclient.ClientConnector, 1), nil, anz, srvDep), db)
+		NewLoaderService(cfg, db, filterSChan, server, make(chan birpc.ClientConnector, 1), nil, anz, srvDep), db)
 	if err := srvMngr.StartServices(); err != nil {
 		t.Fatal(err)
 	}
@@ -69,10 +73,11 @@ func TestSIPAgentReload(t *testing.T) {
 		t.Fatalf("Expected service to be down")
 	}
 	var reply string
-	if err := cfg.V1ReloadConfig(&config.ReloadArgs{
-		Path:    path.Join("/usr", "share", "cgrates", "conf", "samples", "sipagent_mysql"),
-		Section: config.SIPAgentJson,
-	}, &reply); err != nil {
+	if err := cfg.V1ReloadConfig(context.Background(),
+		&config.ReloadArgs{
+			Path:    path.Join("/usr", "share", "cgrates", "conf", "samples", "sipagent_mysql"),
+			Section: config.SIPAgentJson,
+		}, &reply); err != nil {
 		t.Fatal(err)
 	} else if reply != utils.OK {
 		t.Fatalf("Expecting OK ,received %s", reply)
@@ -87,7 +92,7 @@ func TestSIPAgentReload(t *testing.T) {
 	if srvStart != utils.ErrServiceAlreadyRunning {
 		t.Fatalf("\nExpecting <%+v>,\n Received <%+v>", utils.ErrServiceAlreadyRunning, srvStart)
 	}
-	err := srv.Reload()
+	err = srv.Reload()
 	if err != nil {
 		t.Fatalf("\nExpecting <nil>,\n Received <%+v>", err)
 	}
@@ -112,8 +117,12 @@ func TestSIPAgentReload2(t *testing.T) {
 	filterSChan <- nil
 	shdChan := utils.NewSyncedChan()
 	chS := engine.NewCacheS(cfg, nil, nil)
-	cacheSChan := make(chan rpcclient.ClientConnector, 1)
-	cacheSChan <- chS
+	cacheSrv, err := engine.NewService(chS)
+	if err != nil {
+		t.Fatal(err)
+	}
+	cacheSChan := make(chan birpc.ClientConnector, 1)
+	cacheSChan <- cacheSrv
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
 	srv := NewSIPAgent(cfg, filterSChan, shdChan, nil, srvDep)
 	if srv.IsRunning() {
@@ -128,7 +137,7 @@ func TestSIPAgentReload2(t *testing.T) {
 			},
 		},
 	}
-	err := srv.Start()
+	err = srv.Start()
 	if err == nil || err.Error() != "no template with id: <>" {
 		t.Fatalf("\nExpecting <%+v>,\n Received <%+v>", "no template with id: <>", err)
 	}
@@ -145,14 +154,18 @@ func TestSIPAgentReload3(t *testing.T) {
 	filterSChan <- nil
 	shdChan := utils.NewSyncedChan()
 	chS := engine.NewCacheS(cfg, nil, nil)
-	cacheSChan := make(chan rpcclient.ClientConnector, 1)
-	cacheSChan <- chS
+	cacheSrv, err := engine.NewService(chS)
+	if err != nil {
+		t.Fatal(err)
+	}
+	cacheSChan := make(chan birpc.ClientConnector, 1)
+	cacheSChan <- cacheSrv
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
 	srv := NewSIPAgent(cfg, filterSChan, shdChan, nil, srvDep)
 	if srv.IsRunning() {
 		t.Fatalf("Expected service to be down")
 	}
-	err := srv.Start()
+	err = srv.Start()
 	if err != nil {
 		t.Fatalf("\nExpecting <%+v>,\n Received <%+v>", nil, err)
 	}

@@ -22,11 +22,11 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc"
 	v1 "github.com/cgrates/cgrates/apier/v1"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/cgrates/rpcclient"
 )
 
 func TestFilterPassDestinations(t *testing.T) {
@@ -35,13 +35,17 @@ func TestFilterPassDestinations(t *testing.T) {
 		t.Errorf("Expecting: nil, received: %s", err)
 	}
 	config.CgrConfig().FilterSCfg().ApierSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaApier)}
-	internalAPIerSv1Chan := make(chan rpcclient.ClientConnector, 1)
-	connMgr := engine.NewConnManager(config.CgrConfig(), map[string]chan rpcclient.ClientConnector{
+	internalAPIerSv1Chan := make(chan birpc.ClientConnector, 1)
+	connMgr := engine.NewConnManager(config.CgrConfig(), map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaApier): internalAPIerSv1Chan,
 	})
 	data := engine.NewInternalDB(nil, nil, true, config.CgrConfig().DataDbCfg().Items)
 	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), connMgr)
-	internalAPIerSv1Chan <- &v1.APIerSv1{DataManager: dm}
+	srv, err := engine.NewService(&v1.APIerSv1{DataManager: dm})
+	if err != nil {
+		t.Error(err)
+	}
+	internalAPIerSv1Chan <- srv
 	engine.SetConnManager(connMgr)
 	cd := &engine.CallDescriptor{
 		Category:      "call",
@@ -86,8 +90,8 @@ func TestFilterPassDestinations(t *testing.T) {
 func TestInlineFilterPassFiltersForEvent(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.FilterSCfg().ApierSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaApier)}
-	internalAPIerSv1Chan := make(chan rpcclient.ClientConnector, 1)
-	connMgr := engine.NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	internalAPIerSv1Chan := make(chan birpc.ClientConnector, 1)
+	connMgr := engine.NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaApier): internalAPIerSv1Chan,
 	})
 	data := engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
@@ -97,7 +101,12 @@ func TestInlineFilterPassFiltersForEvent(t *testing.T) {
 		[]string{"DE", "EU_LANDLINE"}, nil, true, ""); err != nil {
 		t.Errorf("Expecting: nil, received: %s", err)
 	}
-	internalAPIerSv1Chan <- &v1.APIerSv1{DataManager: dmFilterPass}
+
+	apiSrv, err := engine.NewService(&v1.APIerSv1{DataManager: dmFilterPass})
+	if err != nil {
+		t.Fatal(err)
+	}
+	internalAPIerSv1Chan <- apiSrv
 	engine.SetConnManager(connMgr)
 	failEvent := map[string]any{
 		utils.Destination: "+5086517174963",

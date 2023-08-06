@@ -25,6 +25,7 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -85,13 +86,13 @@ func TestDspReplicator(t *testing.T) {
 
 func testDspRplPingFailover(t *testing.T) {
 	var reply string
-	if err := allEngine.RPC.Call(utils.ReplicatorSv1Ping, new(utils.CGREvent), &reply); err != nil {
+	if err := allEngine.RPC.Call(context.Background(), utils.ReplicatorSv1Ping, new(utils.CGREvent), &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.Pong {
 		t.Errorf("Received: %s", reply)
 	}
 	reply = utils.EmptyString
-	if err := allEngine2.RPC.Call(utils.ReplicatorSv1Ping, new(utils.CGREvent), &reply); err != nil {
+	if err := allEngine2.RPC.Call(context.Background(), utils.ReplicatorSv1Ping, new(utils.CGREvent), &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.Pong {
 		t.Errorf("Received: %s", reply)
@@ -104,27 +105,27 @@ func testDspRplPingFailover(t *testing.T) {
 			utils.OptsAPIKey: "repl12345",
 		},
 	}
-	if err := dispEngine.RPC.Call(utils.ReplicatorSv1Ping, &ev, &reply); err != nil {
+	if err := dispEngine.RPC.Call(context.Background(), utils.ReplicatorSv1Ping, &ev, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.Pong {
 		t.Errorf("Received: %s", reply)
 	}
 	allEngine.stopEngine(t)
 	reply = utils.EmptyString
-	if err := dispEngine.RPC.Call(utils.ReplicatorSv1Ping, &ev, &reply); err != nil {
+	if err := dispEngine.RPC.Call(context.Background(), utils.ReplicatorSv1Ping, &ev, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.Pong {
 		t.Errorf("Received: %s", reply)
 	}
 	allEngine2.stopEngine(t)
 	reply = utils.EmptyString
-	if err := dispEngine.RPC.Call(utils.ReplicatorSv1Ping, &ev, &reply); err == nil {
+	if err := dispEngine.RPC.Call(context.Background(), utils.ReplicatorSv1Ping, &ev, &reply); err == nil {
 		t.Errorf("Expected error but received %v and reply %v\n", err, reply)
 	}
 	allEngine.startEngine(t)
 	allEngine2.startEngine(t)
 	reply = utils.EmptyString
-	if err := dispEngine.RPC.Call(utils.ReplicatorSv1Ping, &ev, &reply); err != nil {
+	if err := dispEngine.RPC.Call(context.Background(), utils.ReplicatorSv1Ping, &ev, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.Pong {
 		t.Errorf("Received: %s", reply)
@@ -144,7 +145,7 @@ func testDspRplAccount(t *testing.T) {
 			utils.OptsAPIKey: "repl12345",
 		},
 	}
-	if err := dispEngine.RPC.Call(utils.ReplicatorSv1SetAccount, attrSetAccount, &replyStr); err != nil {
+	if err := dispEngine.RPC.Call(context.Background(), utils.ReplicatorSv1SetAccount, attrSetAccount, &replyStr); err != nil {
 		t.Error("Unexpected error when calling ReplicatorSv1.SetAccount: ", err)
 	} else if replyStr != utils.OK {
 		t.Error("Unexpected reply returned", replyStr)
@@ -157,7 +158,7 @@ func testDspRplAccount(t *testing.T) {
 			utils.OptsAPIKey: "repl12345",
 		},
 	}
-	if err := dispEngine.RPC.Call(utils.ReplicatorSv1GetAccount, argsGetAccount, &reply); err != nil {
+	if err := dispEngine.RPC.Call(context.Background(), utils.ReplicatorSv1GetAccount, argsGetAccount, &reply); err != nil {
 		t.Errorf("Expecting: %+v, received: %+v", utils.ErrNotFound, err)
 	} else if reply.ID != attrSetAccount.Account.ID {
 		t.Errorf("Expecting: %+v, received: %+v", attrSetAccount.Account.ID, reply.ID)
@@ -169,13 +170,13 @@ func testDspRplAccount(t *testing.T) {
 	// Stop engine 1
 	allEngine.stopEngine(t)
 	// Get
-	if err := dispEngine.RPC.Call(utils.ReplicatorSv1GetAccount, argsGetAccount, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
+	if err := dispEngine.RPC.Call(context.Background(), utils.ReplicatorSv1GetAccount, argsGetAccount, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("Expecting: %+v, received: %+v, ", utils.ErrNotFound, err)
 	}
 	// Start engine 1
 	allEngine.startEngine(t)
 	// Remove Account
-	if err := dispEngine.RPC.Call(utils.ReplicatorSv1RemoveAccount, &utils.StringWithAPIOpts{
+	if err := dispEngine.RPC.Call(context.Background(), utils.ReplicatorSv1RemoveAccount, &utils.StringWithAPIOpts{
 		Arg: "cgrates.org:1008",
 		APIOpts: map[string]any{
 			utils.OptsAPIKey: "repl12345",
@@ -186,7 +187,7 @@ func testDspRplAccount(t *testing.T) {
 		t.Error("Unexpected reply returned", replyStr)
 	}
 	// Get Account
-	if err := dispEngine.RPC.Call(utils.ReplicatorSv1GetAccount, argsGetAccount, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
+	if err := dispEngine.RPC.Call(context.Background(), utils.ReplicatorSv1GetAccount, argsGetAccount, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("Expecting: %+v, received: %+v, ", utils.ErrNotFound, err)
 	}
 }
@@ -204,7 +205,7 @@ func testDspRplSupplierProfile(t *testing.T) {
 		},
 	}
 
-	if err := dispEngine.RPC.Call(utils.ReplicatorSv1SetRouteProfile, argSetSupplierProfile, &replyStr); err != nil {
+	if err := dispEngine.RPC.Call(context.Background(), utils.ReplicatorSv1SetRouteProfile, argSetSupplierProfile, &replyStr); err != nil {
 		t.Error("Unexpected error when calling ReplicatorSv1.SetSupplierProfile: ", err)
 	} else if replyStr != utils.OK {
 		t.Error("Unexpected reply returned", replyStr)
@@ -221,7 +222,7 @@ func testDspRplSupplierProfile(t *testing.T) {
 			utils.OptsAPIKey: "repl12345",
 		},
 	}
-	if err := dispEngine.RPC.Call(utils.ReplicatorSv1GetRouteProfile, argRouteProfile, &reply); err != nil {
+	if err := dispEngine.RPC.Call(context.Background(), utils.ReplicatorSv1GetRouteProfile, argRouteProfile, &reply); err != nil {
 		t.Error("Unexpected error when calling ReplicatorSv1.GetSupplierProfile: ", err)
 	} else if reply.ID != argSetSupplierProfile.ID {
 		t.Errorf("Expecting: %+v, received: %+v", argSetSupplierProfile.ID, reply.ID)
@@ -233,7 +234,7 @@ func testDspRplSupplierProfile(t *testing.T) {
 	allEngine.stopEngine(t)
 
 	// Get RouteProfile
-	if err := dispEngine.RPC.Call(utils.ReplicatorSv1GetRouteProfile, argRouteProfile, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
+	if err := dispEngine.RPC.Call(context.Background(), utils.ReplicatorSv1GetRouteProfile, argRouteProfile, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("Expecting: %+v, received: %+v, ", utils.ErrNotFound, err)
 	}
 
@@ -241,13 +242,13 @@ func testDspRplSupplierProfile(t *testing.T) {
 	allEngine.startEngine(t)
 
 	// Remove SupplierProfile
-	if err := dispEngine.RPC.Call(utils.ReplicatorSv1RemoveRouteProfile, argRouteProfile, &replyStr); err != nil {
+	if err := dispEngine.RPC.Call(context.Background(), utils.ReplicatorSv1RemoveRouteProfile, argRouteProfile, &replyStr); err != nil {
 		t.Error(err)
 	} else if replyStr != utils.OK {
 		t.Error("Unexpected reply returned", replyStr)
 	}
 	// Get RouteProfile
-	if err := dispEngine.RPC.Call(utils.ReplicatorSv1GetRouteProfile, argRouteProfile, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
+	if err := dispEngine.RPC.Call(context.Background(), utils.ReplicatorSv1GetRouteProfile, argRouteProfile, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("Expecting: %+v, received: %+v, ", utils.ErrNotFound, err)
 	}
 }
@@ -264,7 +265,7 @@ func testDspRplAttributeProfile(t *testing.T) {
 			utils.OptsAPIKey: "repl12345",
 		},
 	}
-	if err := dispEngine.RPC.Call(utils.ReplicatorSv1SetAttributeProfile, setAttributeProfile, &replyStr); err != nil {
+	if err := dispEngine.RPC.Call(context.Background(), utils.ReplicatorSv1SetAttributeProfile, setAttributeProfile, &replyStr); err != nil {
 		t.Error("Unexpected error when calling ReplicatorSv1.SetAttributeProfile: ", err)
 	} else if replyStr != utils.OK {
 		t.Error("Unexpected reply returned", replyStr)
@@ -281,7 +282,7 @@ func testDspRplAttributeProfile(t *testing.T) {
 			utils.OptsAPIKey: "repl12345",
 		},
 	}
-	if err := dispEngine.RPC.Call(utils.ReplicatorSv1GetAttributeProfile, argAttributeProfile, &reply); err != nil {
+	if err := dispEngine.RPC.Call(context.Background(), utils.ReplicatorSv1GetAttributeProfile, argAttributeProfile, &reply); err != nil {
 		t.Error("Unexpected error when calling ReplicatorSv1.GetAttributeProfile: ", err)
 	} else if reply.ID != setAttributeProfile.ID {
 		t.Errorf("Expecting: %+v, received: %+v", setAttributeProfile.ID, reply.ID)
@@ -292,7 +293,7 @@ func testDspRplAttributeProfile(t *testing.T) {
 	allEngine.stopEngine(t)
 
 	// Get AttributeProfile
-	if err := dispEngine.RPC.Call(utils.ReplicatorSv1GetAttributeProfile, argAttributeProfile, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
+	if err := dispEngine.RPC.Call(context.Background(), utils.ReplicatorSv1GetAttributeProfile, argAttributeProfile, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("Expecting: %+v, received: %+v, ", utils.ErrNotFound, err)
 	}
 
@@ -300,14 +301,14 @@ func testDspRplAttributeProfile(t *testing.T) {
 	allEngine.startEngine(t)
 
 	// Remove AttributeProfile
-	if err := dispEngine.RPC.Call(utils.ReplicatorSv1RemoveAttributeProfile, argAttributeProfile, &replyStr); err != nil {
+	if err := dispEngine.RPC.Call(context.Background(), utils.ReplicatorSv1RemoveAttributeProfile, argAttributeProfile, &replyStr); err != nil {
 		t.Error(err)
 	} else if replyStr != utils.OK {
 		t.Error("Unexpected reply returned", replyStr)
 	}
 
 	// Get AttributeProfile
-	if err := dispEngine.RPC.Call(utils.ReplicatorSv1GetAttributeProfile, argAttributeProfile, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
+	if err := dispEngine.RPC.Call(context.Background(), utils.ReplicatorSv1GetAttributeProfile, argAttributeProfile, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("Expecting: %+v, received: %+v, ", utils.ErrNotFound, err)
 	}
 }
@@ -324,7 +325,7 @@ func testDspRplChargerProfile(t *testing.T) {
 			utils.OptsAPIKey: "repl12345",
 		},
 	}
-	if err := dispEngine.RPC.Call(utils.ReplicatorSv1SetChargerProfile, setChargerProfile, &replyStr); err != nil {
+	if err := dispEngine.RPC.Call(context.Background(), utils.ReplicatorSv1SetChargerProfile, setChargerProfile, &replyStr); err != nil {
 		t.Error("Unexpected error when calling ReplicatorSv1.SetChargerProfile: ", err)
 	} else if replyStr != utils.OK {
 		t.Error("Unexpected reply returned", replyStr)
@@ -340,7 +341,7 @@ func testDspRplChargerProfile(t *testing.T) {
 			utils.OptsAPIKey: "repl12345",
 		},
 	}
-	if err := dispEngine.RPC.Call(utils.ReplicatorSv1GetChargerProfile, argsChargerProfile, &reply); err != nil {
+	if err := dispEngine.RPC.Call(context.Background(), utils.ReplicatorSv1GetChargerProfile, argsChargerProfile, &reply); err != nil {
 		t.Error("Unexpected error when calling ReplicatorSv1.GetChargerProfile: ", err)
 	} else if reply.ID != argsChargerProfile.ID {
 		t.Errorf("Expecting: %+v, received: %+v", argsChargerProfile.ID, reply.ID)
@@ -351,7 +352,7 @@ func testDspRplChargerProfile(t *testing.T) {
 	allEngine.stopEngine(t)
 
 	// Get ChargerProfile
-	if err := dispEngine.RPC.Call(utils.ReplicatorSv1GetChargerProfile, argsChargerProfile, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
+	if err := dispEngine.RPC.Call(context.Background(), utils.ReplicatorSv1GetChargerProfile, argsChargerProfile, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("Expecting: %+v, received: %+v, ", utils.ErrNotFound, err)
 	}
 
@@ -359,14 +360,14 @@ func testDspRplChargerProfile(t *testing.T) {
 	allEngine.startEngine(t)
 
 	// Remove ChargerProfile
-	if err := dispEngine.RPC.Call(utils.ReplicatorSv1RemoveChargerProfile, argsChargerProfile, &replyStr); err != nil {
+	if err := dispEngine.RPC.Call(context.Background(), utils.ReplicatorSv1RemoveChargerProfile, argsChargerProfile, &replyStr); err != nil {
 		t.Error(err)
 	} else if replyStr != utils.OK {
 		t.Error("Unexpected reply returned", replyStr)
 	}
 
 	// Get ChargerProfile
-	if err := dispEngine.RPC.Call(utils.ReplicatorSv1GetChargerProfile, argsChargerProfile, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
+	if err := dispEngine.RPC.Call(context.Background(), utils.ReplicatorSv1GetChargerProfile, argsChargerProfile, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("Expecting: %+v, received: %+v, ", utils.ErrNotFound, err)
 	}
 }
@@ -383,7 +384,7 @@ func testDspRplDispatcherProfile(t *testing.T) {
 			utils.OptsAPIKey: "repl12345",
 		},
 	}
-	if err := dispEngine.RPC.Call(utils.ReplicatorSv1SetDispatcherProfile, setDispatcherProfile, &replyStr); err != nil {
+	if err := dispEngine.RPC.Call(context.Background(), utils.ReplicatorSv1SetDispatcherProfile, setDispatcherProfile, &replyStr); err != nil {
 		t.Error("Unexpected error when calling ReplicatorSv1.SetDispatcherProfile: ", err)
 	} else if replyStr != utils.OK {
 		t.Error("Unexpected reply returned", replyStr)
@@ -399,7 +400,7 @@ func testDspRplDispatcherProfile(t *testing.T) {
 			utils.OptsAPIKey: "repl12345",
 		},
 	}
-	if err := dispEngine.RPC.Call(utils.ReplicatorSv1GetDispatcherProfile, argsDispatcherProfile, &reply); err != nil {
+	if err := dispEngine.RPC.Call(context.Background(), utils.ReplicatorSv1GetDispatcherProfile, argsDispatcherProfile, &reply); err != nil {
 		t.Error("Unexpected error when calling ReplicatorSv1.GetDispatcherProfile: ", err)
 	} else if reply.ID != argsDispatcherProfile.ID {
 		t.Errorf("Expecting: %+v, received: %+v", argsDispatcherProfile.ID, reply.ID)
@@ -410,7 +411,7 @@ func testDspRplDispatcherProfile(t *testing.T) {
 	allEngine.stopEngine(t)
 
 	// Get DispatcherProfile
-	if err := dispEngine.RPC.Call(utils.ReplicatorSv1GetDispatcherProfile, argsDispatcherProfile, &reply); err == nil || err.Error() != utils.ErrDSPProfileNotFound.Error() {
+	if err := dispEngine.RPC.Call(context.Background(), utils.ReplicatorSv1GetDispatcherProfile, argsDispatcherProfile, &reply); err == nil || err.Error() != utils.ErrDSPProfileNotFound.Error() {
 		t.Errorf("Expecting: %+v, received: %+v, ", utils.ErrNotFound, err)
 	}
 
@@ -418,14 +419,14 @@ func testDspRplDispatcherProfile(t *testing.T) {
 	allEngine.startEngine(t)
 
 	// Remove DispatcherProfile
-	if err := dispEngine.RPC.Call(utils.ReplicatorSv1RemoveDispatcherProfile, argsDispatcherProfile, &replyStr); err != nil {
+	if err := dispEngine.RPC.Call(context.Background(), utils.ReplicatorSv1RemoveDispatcherProfile, argsDispatcherProfile, &replyStr); err != nil {
 		t.Error(err)
 	} else if replyStr != utils.OK {
 		t.Error("Unexpected reply returned", replyStr)
 	}
 
 	// Get DispatcherProfile
-	if err := dispEngine.RPC.Call(utils.ReplicatorSv1GetDispatcherProfile, argsDispatcherProfile, &reply); err == nil || err.Error() != utils.ErrDSPProfileNotFound.Error() {
+	if err := dispEngine.RPC.Call(context.Background(), utils.ReplicatorSv1GetDispatcherProfile, argsDispatcherProfile, &reply); err == nil || err.Error() != utils.ErrDSPProfileNotFound.Error() {
 		t.Errorf("Expecting: %+v, received: %+v, ", utils.ErrNotFound, err)
 	}
 }
@@ -444,7 +445,7 @@ func testDspRplDispatcherHost(t *testing.T) {
 			utils.OptsAPIKey: "repl12345",
 		},
 	}
-	if err := dispEngine.RPC.Call(utils.ReplicatorSv1SetDispatcherHost, setDispatcherHost, &replyStr); err != nil {
+	if err := dispEngine.RPC.Call(context.Background(), utils.ReplicatorSv1SetDispatcherHost, setDispatcherHost, &replyStr); err != nil {
 		t.Error("Unexpected error when calling ReplicatorSv1.SetDispatcherHost: ", err)
 	} else if replyStr != utils.OK {
 		t.Error("Unexpected reply returned", replyStr)
@@ -460,7 +461,7 @@ func testDspRplDispatcherHost(t *testing.T) {
 			utils.OptsAPIKey: "repl12345",
 		},
 	}
-	if err := dispEngine.RPC.Call(utils.ReplicatorSv1GetDispatcherHost, argsDispatcherHost, &reply); err != nil {
+	if err := dispEngine.RPC.Call(context.Background(), utils.ReplicatorSv1GetDispatcherHost, argsDispatcherHost, &reply); err != nil {
 		t.Error("Unexpected error when calling ReplicatorSv1.GetDispatcherHost: ", err)
 	} else if reply.ID != argsDispatcherHost.ID {
 		t.Errorf("Expecting: %+v, received: %+v", argsDispatcherHost.ID, reply.ID)
@@ -471,7 +472,7 @@ func testDspRplDispatcherHost(t *testing.T) {
 	allEngine.stopEngine(t)
 
 	// Get DispatcherHost
-	if err := dispEngine.RPC.Call(utils.ReplicatorSv1GetDispatcherHost, argsDispatcherHost, &reply); err == nil || err.Error() != utils.ErrDSPHostNotFound.Error() {
+	if err := dispEngine.RPC.Call(context.Background(), utils.ReplicatorSv1GetDispatcherHost, argsDispatcherHost, &reply); err == nil || err.Error() != utils.ErrDSPHostNotFound.Error() {
 		t.Errorf("Expecting: %+v, received: %+v, ", utils.ErrNotFound, err)
 	}
 
@@ -479,14 +480,14 @@ func testDspRplDispatcherHost(t *testing.T) {
 	allEngine.startEngine(t)
 
 	// Remove DispatcherHost
-	if err := dispEngine.RPC.Call(utils.ReplicatorSv1RemoveDispatcherHost, argsDispatcherHost, &replyStr); err != nil {
+	if err := dispEngine.RPC.Call(context.Background(), utils.ReplicatorSv1RemoveDispatcherHost, argsDispatcherHost, &replyStr); err != nil {
 		t.Error(err)
 	} else if replyStr != utils.OK {
 		t.Error("Unexpected reply returned", replyStr)
 	}
 
 	// Get DispatcherHost
-	if err := dispEngine.RPC.Call(utils.ReplicatorSv1GetDispatcherHost, argsDispatcherHost, &reply); err == nil || err.Error() != utils.ErrDSPHostNotFound.Error() {
+	if err := dispEngine.RPC.Call(context.Background(), utils.ReplicatorSv1GetDispatcherHost, argsDispatcherHost, &reply); err == nil || err.Error() != utils.ErrDSPHostNotFound.Error() {
 		t.Errorf("Expecting: %+v, received: %+v, ", utils.ErrNotFound, err)
 	}
 }
@@ -503,7 +504,7 @@ func testDspRplFilter(t *testing.T) {
 			utils.OptsAPIKey: "repl12345",
 		},
 	}
-	if err := dispEngine.RPC.Call(utils.ReplicatorSv1SetFilter, setFilter, &replyStr); err != nil {
+	if err := dispEngine.RPC.Call(context.Background(), utils.ReplicatorSv1SetFilter, setFilter, &replyStr); err != nil {
 		t.Error("Unexpected error when calling ReplicatorSv1.SetFilter: ", err)
 	} else if replyStr != utils.OK {
 		t.Error("Unexpected reply returned", replyStr)
@@ -519,7 +520,7 @@ func testDspRplFilter(t *testing.T) {
 			utils.OptsAPIKey: "repl12345",
 		},
 	}
-	if err := dispEngine.RPC.Call(utils.ReplicatorSv1GetFilter, argsFilter, &reply); err != nil {
+	if err := dispEngine.RPC.Call(context.Background(), utils.ReplicatorSv1GetFilter, argsFilter, &reply); err != nil {
 		t.Error("Unexpected error when calling ReplicatorSv1.GetFilter: ", err)
 	} else if reply.ID != argsFilter.ID {
 		t.Errorf("Expecting: %+v, received: %+v", argsFilter.ID, reply.ID)
@@ -530,7 +531,7 @@ func testDspRplFilter(t *testing.T) {
 	allEngine.stopEngine(t)
 
 	// Get Filter
-	if err := dispEngine.RPC.Call(utils.ReplicatorSv1GetFilter, argsFilter, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
+	if err := dispEngine.RPC.Call(context.Background(), utils.ReplicatorSv1GetFilter, argsFilter, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("Expecting: %+v, received: %+v, ", utils.ErrNotFound, err)
 	}
 
@@ -538,14 +539,14 @@ func testDspRplFilter(t *testing.T) {
 	allEngine.startEngine(t)
 
 	// Remove Filter
-	if err := dispEngine.RPC.Call(utils.ReplicatorSv1RemoveFilter, argsFilter, &replyStr); err != nil {
+	if err := dispEngine.RPC.Call(context.Background(), utils.ReplicatorSv1RemoveFilter, argsFilter, &replyStr); err != nil {
 		t.Error(err)
 	} else if replyStr != utils.OK {
 		t.Error("Unexpected reply returned", replyStr)
 	}
 
 	// Get Filter
-	if err := dispEngine.RPC.Call(utils.ReplicatorSv1GetFilter, argsFilter, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
+	if err := dispEngine.RPC.Call(context.Background(), utils.ReplicatorSv1GetFilter, argsFilter, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("Expecting: %+v, received: %+v, ", utils.ErrNotFound, err)
 	}
 }
@@ -562,7 +563,7 @@ func testDspRplThreshold(t *testing.T) {
 			utils.OptsAPIKey: "repl12345",
 		},
 	}
-	if err := dispEngine.RPC.Call(utils.ReplicatorSv1SetThreshold, setThreshold, &replyStr); err != nil {
+	if err := dispEngine.RPC.Call(context.Background(), utils.ReplicatorSv1SetThreshold, setThreshold, &replyStr); err != nil {
 		t.Error("Unexpected error when calling ReplicatorSv1.SetThreshold: ", err)
 	} else if replyStr != utils.OK {
 		t.Error("Unexpected reply returned", replyStr)
@@ -578,7 +579,7 @@ func testDspRplThreshold(t *testing.T) {
 			utils.OptsAPIKey: "repl12345",
 		},
 	}
-	if err := dispEngine.RPC.Call(utils.ReplicatorSv1GetThreshold, argsThreshold, &reply); err != nil {
+	if err := dispEngine.RPC.Call(context.Background(), utils.ReplicatorSv1GetThreshold, argsThreshold, &reply); err != nil {
 		t.Error("Unexpected error when calling ReplicatorSv1.GetThreshold: ", err)
 	} else if reply.ID != argsThreshold.ID {
 		t.Errorf("Expecting: %+v, received: %+v", argsThreshold.ID, reply.ID)
@@ -589,7 +590,7 @@ func testDspRplThreshold(t *testing.T) {
 	allEngine.stopEngine(t)
 
 	// Get Threshold
-	if err := dispEngine.RPC.Call(utils.ReplicatorSv1GetThreshold, argsThreshold, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
+	if err := dispEngine.RPC.Call(context.Background(), utils.ReplicatorSv1GetThreshold, argsThreshold, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("Expecting: %+v, received: %+v, ", utils.ErrNotFound, err)
 	}
 
@@ -597,14 +598,14 @@ func testDspRplThreshold(t *testing.T) {
 	allEngine.startEngine(t)
 
 	// Remove Threshold
-	if err := dispEngine.RPC.Call(utils.ReplicatorSv1RemoveThreshold, argsThreshold, &replyStr); err != nil {
+	if err := dispEngine.RPC.Call(context.Background(), utils.ReplicatorSv1RemoveThreshold, argsThreshold, &replyStr); err != nil {
 		t.Error(err)
 	} else if replyStr != utils.OK {
 		t.Error("Unexpected reply returned", replyStr)
 	}
 
 	// Get Threshold
-	if err := dispEngine.RPC.Call(utils.ReplicatorSv1GetThreshold, argsThreshold, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
+	if err := dispEngine.RPC.Call(context.Background(), utils.ReplicatorSv1GetThreshold, argsThreshold, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("Expecting: %+v, received: %+v, ", utils.ErrNotFound, err)
 	}
 }
@@ -621,7 +622,7 @@ func testDspRplThresholdProfile(t *testing.T) {
 			utils.OptsAPIKey: "repl12345",
 		},
 	}
-	if err := dispEngine.RPC.Call(utils.ReplicatorSv1SetThresholdProfile, setThresholdProfile, &replyStr); err != nil {
+	if err := dispEngine.RPC.Call(context.Background(), utils.ReplicatorSv1SetThresholdProfile, setThresholdProfile, &replyStr); err != nil {
 		t.Error("Unexpected error when calling ReplicatorSv1.SetThresholdProfile: ", err)
 	} else if replyStr != utils.OK {
 		t.Error("Unexpected reply returned", replyStr)
@@ -637,7 +638,7 @@ func testDspRplThresholdProfile(t *testing.T) {
 			utils.OptsAPIKey: "repl12345",
 		},
 	}
-	if err := dispEngine.RPC.Call(utils.ReplicatorSv1GetThresholdProfile, argsThresholdProfile, &reply); err != nil {
+	if err := dispEngine.RPC.Call(context.Background(), utils.ReplicatorSv1GetThresholdProfile, argsThresholdProfile, &reply); err != nil {
 		t.Error("Unexpected error when calling ReplicatorSv1.GetThresholdProfile: ", err)
 	} else if reply.ID != argsThresholdProfile.ID {
 		t.Errorf("Expecting: %+v, received: %+v", argsThresholdProfile.ID, reply.ID)
@@ -648,7 +649,7 @@ func testDspRplThresholdProfile(t *testing.T) {
 	allEngine.stopEngine(t)
 
 	// Get ThresholdProfile
-	if err := dispEngine.RPC.Call(utils.ReplicatorSv1GetThresholdProfile, argsThresholdProfile, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
+	if err := dispEngine.RPC.Call(context.Background(), utils.ReplicatorSv1GetThresholdProfile, argsThresholdProfile, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("Expecting: %+v, received: %+v, ", utils.ErrNotFound, err)
 	}
 
@@ -656,14 +657,14 @@ func testDspRplThresholdProfile(t *testing.T) {
 	allEngine.startEngine(t)
 
 	// Remove ThresholdProfile
-	if err := dispEngine.RPC.Call(utils.ReplicatorSv1RemoveThresholdProfile, argsThresholdProfile, &replyStr); err != nil {
+	if err := dispEngine.RPC.Call(context.Background(), utils.ReplicatorSv1RemoveThresholdProfile, argsThresholdProfile, &replyStr); err != nil {
 		t.Error(err)
 	} else if replyStr != utils.OK {
 		t.Error("Unexpected reply returned", replyStr)
 	}
 
 	// Get ThresholdProfile
-	if err := dispEngine.RPC.Call(utils.ReplicatorSv1GetThresholdProfile, argsThresholdProfile, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
+	if err := dispEngine.RPC.Call(context.Background(), utils.ReplicatorSv1GetThresholdProfile, argsThresholdProfile, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("Expecting: %+v, received: %+v, ", utils.ErrNotFound, err)
 	}
 }
@@ -680,7 +681,7 @@ func testDspRplStatQueue(t *testing.T) {
 			utils.OptsAPIKey: "repl12345",
 		},
 	}
-	if err := dispEngine.RPC.Call(utils.ReplicatorSv1SetStatQueue, setStatQueue, &replyStr); err != nil {
+	if err := dispEngine.RPC.Call(context.Background(), utils.ReplicatorSv1SetStatQueue, setStatQueue, &replyStr); err != nil {
 		t.Error("Unexpected error when calling ReplicatorSv1.SetStatQueue: ", err)
 	} else if replyStr != utils.OK {
 		t.Error("Unexpected reply returned", replyStr)
@@ -696,7 +697,7 @@ func testDspRplStatQueue(t *testing.T) {
 			utils.OptsAPIKey: "repl12345",
 		},
 	}
-	if err := dispEngine.RPC.Call(utils.ReplicatorSv1GetStatQueue, argsStatQueue, &reply); err != nil {
+	if err := dispEngine.RPC.Call(context.Background(), utils.ReplicatorSv1GetStatQueue, argsStatQueue, &reply); err != nil {
 		t.Error("Unexpected error when calling ReplicatorSv1.GetStatQueue: ", err)
 	} else if reply.ID != argsStatQueue.ID {
 		t.Errorf("Expecting: %+v, received: %+v", argsStatQueue.ID, reply.ID)
@@ -707,7 +708,7 @@ func testDspRplStatQueue(t *testing.T) {
 	allEngine.stopEngine(t)
 
 	// Get StatQueue
-	if err := dispEngine.RPC.Call(utils.ReplicatorSv1GetStatQueue, argsStatQueue, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
+	if err := dispEngine.RPC.Call(context.Background(), utils.ReplicatorSv1GetStatQueue, argsStatQueue, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("Expecting: %+v, received: %+v, ", utils.ErrNotFound, err)
 	}
 
@@ -715,14 +716,14 @@ func testDspRplStatQueue(t *testing.T) {
 	allEngine.startEngine(t)
 
 	// Remove StatQueue
-	if err := dispEngine.RPC.Call(utils.ReplicatorSv1RemoveStatQueue, argsStatQueue, &replyStr); err != nil {
+	if err := dispEngine.RPC.Call(context.Background(), utils.ReplicatorSv1RemoveStatQueue, argsStatQueue, &replyStr); err != nil {
 		t.Error(err)
 	} else if replyStr != utils.OK {
 		t.Error("Unexpected reply returned", replyStr)
 	}
 
 	// Get StatQueue
-	if err := dispEngine.RPC.Call(utils.ReplicatorSv1GetStatQueue, argsStatQueue, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
+	if err := dispEngine.RPC.Call(context.Background(), utils.ReplicatorSv1GetStatQueue, argsStatQueue, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("Expecting: %+v, received: %+v, ", utils.ErrNotFound, err)
 	}
 }
@@ -739,7 +740,7 @@ func testDspRplStatQueueProfile(t *testing.T) {
 			utils.OptsAPIKey: "repl12345",
 		},
 	}
-	if err := dispEngine.RPC.Call(utils.ReplicatorSv1SetStatQueueProfile, setStatQueueProfile, &replyStr); err != nil {
+	if err := dispEngine.RPC.Call(context.Background(), utils.ReplicatorSv1SetStatQueueProfile, setStatQueueProfile, &replyStr); err != nil {
 		t.Error("Unexpected error when calling ReplicatorSv1.SetStatQueueProfile: ", err)
 	} else if replyStr != utils.OK {
 		t.Error("Unexpected reply returned", replyStr)
@@ -755,7 +756,7 @@ func testDspRplStatQueueProfile(t *testing.T) {
 			utils.OptsAPIKey: "repl12345",
 		},
 	}
-	if err := dispEngine.RPC.Call(utils.ReplicatorSv1GetStatQueueProfile, argsStatQueueProfile, &reply); err != nil {
+	if err := dispEngine.RPC.Call(context.Background(), utils.ReplicatorSv1GetStatQueueProfile, argsStatQueueProfile, &reply); err != nil {
 		t.Error("Unexpected error when calling ReplicatorSv1.GetStatQueueProfile: ", err)
 	} else if reply.ID != argsStatQueueProfile.ID {
 		t.Errorf("Expecting: %+v, received: %+v", argsStatQueueProfile.ID, reply.ID)
@@ -766,7 +767,7 @@ func testDspRplStatQueueProfile(t *testing.T) {
 	allEngine.stopEngine(t)
 
 	// Get StatQueueProfile
-	if err := dispEngine.RPC.Call(utils.ReplicatorSv1GetStatQueueProfile, argsStatQueueProfile, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
+	if err := dispEngine.RPC.Call(context.Background(), utils.ReplicatorSv1GetStatQueueProfile, argsStatQueueProfile, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("Expecting: %+v, received: %+v, ", utils.ErrNotFound, err)
 	}
 
@@ -774,14 +775,14 @@ func testDspRplStatQueueProfile(t *testing.T) {
 	allEngine.startEngine(t)
 
 	// Remove StatQueueProfile
-	if err := dispEngine.RPC.Call(utils.ReplicatorSv1RemoveStatQueueProfile, argsStatQueueProfile, &replyStr); err != nil {
+	if err := dispEngine.RPC.Call(context.Background(), utils.ReplicatorSv1RemoveStatQueueProfile, argsStatQueueProfile, &replyStr); err != nil {
 		t.Error(err)
 	} else if replyStr != utils.OK {
 		t.Error("Unexpected reply returned", replyStr)
 	}
 
 	// Get StatQueueProfile
-	if err := dispEngine.RPC.Call(utils.ReplicatorSv1GetStatQueueProfile, argsStatQueueProfile, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
+	if err := dispEngine.RPC.Call(context.Background(), utils.ReplicatorSv1GetStatQueueProfile, argsStatQueueProfile, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("Expecting: %+v, received: %+v, ", utils.ErrNotFound, err)
 	}
 }
@@ -798,7 +799,7 @@ func testDspRplResource(t *testing.T) {
 			utils.OptsAPIKey: "repl12345",
 		},
 	}
-	if err := dispEngine.RPC.Call(utils.ReplicatorSv1SetResource, setResource, &replyStr); err != nil {
+	if err := dispEngine.RPC.Call(context.Background(), utils.ReplicatorSv1SetResource, setResource, &replyStr); err != nil {
 		t.Error("Unexpected error when calling ReplicatorSv1.SetResource: ", err)
 	} else if replyStr != utils.OK {
 		t.Error("Unexpected reply returned", replyStr)
@@ -814,7 +815,7 @@ func testDspRplResource(t *testing.T) {
 			utils.OptsAPIKey: "repl12345",
 		},
 	}
-	if err := dispEngine.RPC.Call(utils.ReplicatorSv1GetResource, argsResource, &reply); err != nil {
+	if err := dispEngine.RPC.Call(context.Background(), utils.ReplicatorSv1GetResource, argsResource, &reply); err != nil {
 		t.Error("Unexpected error when calling ReplicatorSv1.GetResource: ", err)
 	} else if reply.ID != argsResource.ID {
 		t.Errorf("Expecting: %+v, received: %+v", argsResource.ID, reply.ID)
@@ -825,7 +826,7 @@ func testDspRplResource(t *testing.T) {
 	allEngine.stopEngine(t)
 
 	// Get Resource
-	if err := dispEngine.RPC.Call(utils.ReplicatorSv1GetResource, argsResource, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
+	if err := dispEngine.RPC.Call(context.Background(), utils.ReplicatorSv1GetResource, argsResource, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("Expecting: %+v, received: %+v, ", utils.ErrNotFound, err)
 	}
 
@@ -833,14 +834,14 @@ func testDspRplResource(t *testing.T) {
 	allEngine.startEngine(t)
 
 	// Remove Resource
-	if err := dispEngine.RPC.Call(utils.ReplicatorSv1RemoveResource, argsResource, &replyStr); err != nil {
+	if err := dispEngine.RPC.Call(context.Background(), utils.ReplicatorSv1RemoveResource, argsResource, &replyStr); err != nil {
 		t.Error(err)
 	} else if replyStr != utils.OK {
 		t.Error("Unexpected reply returned", replyStr)
 	}
 
 	// Get Resource
-	if err := dispEngine.RPC.Call(utils.ReplicatorSv1GetResource, argsResource, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
+	if err := dispEngine.RPC.Call(context.Background(), utils.ReplicatorSv1GetResource, argsResource, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("Expecting: %+v, received: %+v, ", utils.ErrNotFound, err)
 	}
 }
@@ -857,7 +858,7 @@ func testDspRplResourceProfile(t *testing.T) {
 			utils.OptsAPIKey: "repl12345",
 		},
 	}
-	if err := dispEngine.RPC.Call(utils.ReplicatorSv1SetResourceProfile, setResourceProfile, &replyStr); err != nil {
+	if err := dispEngine.RPC.Call(context.Background(), utils.ReplicatorSv1SetResourceProfile, setResourceProfile, &replyStr); err != nil {
 		t.Error("Unexpected error when calling ReplicatorSv1.SetResourceProfile: ", err)
 	} else if replyStr != utils.OK {
 		t.Error("Unexpected reply returned", replyStr)
@@ -873,7 +874,7 @@ func testDspRplResourceProfile(t *testing.T) {
 			utils.OptsAPIKey: "repl12345",
 		},
 	}
-	if err := dispEngine.RPC.Call(utils.ReplicatorSv1GetResourceProfile, argsResourceProfile, &reply); err != nil {
+	if err := dispEngine.RPC.Call(context.Background(), utils.ReplicatorSv1GetResourceProfile, argsResourceProfile, &reply); err != nil {
 		t.Error("Unexpected error when calling ReplicatorSv1.GetResourceProfile: ", err)
 	} else if reply.ID != argsResourceProfile.ID {
 		t.Errorf("Expecting: %+v, received: %+v", argsResourceProfile.ID, reply.ID)
@@ -884,7 +885,7 @@ func testDspRplResourceProfile(t *testing.T) {
 	allEngine.stopEngine(t)
 
 	// Get ResourceProfile
-	if err := dispEngine.RPC.Call(utils.ReplicatorSv1GetResourceProfile, argsResourceProfile, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
+	if err := dispEngine.RPC.Call(context.Background(), utils.ReplicatorSv1GetResourceProfile, argsResourceProfile, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("Expecting: %+v, received: %+v, ", utils.ErrNotFound, err)
 	}
 
@@ -892,14 +893,14 @@ func testDspRplResourceProfile(t *testing.T) {
 	allEngine.startEngine(t)
 
 	// Remove ResourceProfile
-	if err := dispEngine.RPC.Call(utils.ReplicatorSv1RemoveResourceProfile, argsResourceProfile, &replyStr); err != nil {
+	if err := dispEngine.RPC.Call(context.Background(), utils.ReplicatorSv1RemoveResourceProfile, argsResourceProfile, &replyStr); err != nil {
 		t.Error(err)
 	} else if replyStr != utils.OK {
 		t.Error("Unexpected reply returned", replyStr)
 	}
 
 	// Get ResourceProfile
-	if err := dispEngine.RPC.Call(utils.ReplicatorSv1GetResourceProfile, argsResourceProfile, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
+	if err := dispEngine.RPC.Call(context.Background(), utils.ReplicatorSv1GetResourceProfile, argsResourceProfile, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("Expecting: %+v, received: %+v, ", utils.ErrNotFound, err)
 	}
 }
@@ -917,7 +918,7 @@ func testDspRplTiming(t *testing.T) {
 			utils.OptsAPIKey: "repl12345",
 		},
 	}
-	if err := dispEngine.RPC.Call(utils.ReplicatorSv1SetTiming, setTiming, &replyStr); err != nil {
+	if err := dispEngine.RPC.Call(context.Background(), utils.ReplicatorSv1SetTiming, setTiming, &replyStr); err != nil {
 		t.Error("Unexpected error when calling ReplicatorSv1.SetTiming: ", err)
 	} else if replyStr != utils.OK {
 		t.Error("Unexpected reply returned", replyStr)
@@ -931,7 +932,7 @@ func testDspRplTiming(t *testing.T) {
 			utils.OptsAPIKey: "repl12345",
 		},
 	}
-	if err := dispEngine.RPC.Call(utils.ReplicatorSv1GetTiming, argsTiming, &reply); err != nil {
+	if err := dispEngine.RPC.Call(context.Background(), utils.ReplicatorSv1GetTiming, argsTiming, &reply); err != nil {
 		t.Error("Unexpected error when calling ReplicatorSv1.GetTiming: ", err)
 	} else if reply.ID != argsTiming.Arg {
 		t.Errorf("Expecting: %+v, received: %+v", argsTiming.Arg, reply.ID)
@@ -942,7 +943,7 @@ func testDspRplTiming(t *testing.T) {
 	allEngine.stopEngine(t)
 
 	// Get Timing
-	if err := dispEngine.RPC.Call(utils.ReplicatorSv1GetTiming, argsTiming, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
+	if err := dispEngine.RPC.Call(context.Background(), utils.ReplicatorSv1GetTiming, argsTiming, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("Expecting: %+v, received: %+v, ", utils.ErrNotFound, err)
 	}
 
@@ -950,14 +951,14 @@ func testDspRplTiming(t *testing.T) {
 	allEngine.startEngine(t)
 
 	// Remove Timing
-	if err := dispEngine.RPC.Call(utils.ReplicatorSv1RemoveTiming, argsTiming, &replyStr); err != nil {
+	if err := dispEngine.RPC.Call(context.Background(), utils.ReplicatorSv1RemoveTiming, argsTiming, &replyStr); err != nil {
 		t.Error(err)
 	} else if replyStr != utils.OK {
 		t.Error("Unexpected reply returned", replyStr)
 	}
 
 	// Get Timing
-	if err := dispEngine.RPC.Call(utils.ReplicatorSv1GetTiming, argsTiming, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
+	if err := dispEngine.RPC.Call(context.Background(), utils.ReplicatorSv1GetTiming, argsTiming, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("Expecting: %+v, received: %+v, ", utils.ErrNotFound, err)
 	}
 }
@@ -973,7 +974,7 @@ func testDspRplActionTriggers(t *testing.T) {
 			utils.OptsAPIKey: "repl12345",
 		},
 	}
-	if err := dispEngine.RPC.Call(utils.ReplicatorSv1SetActionTriggers, setActionTriggers, &replyStr); err != nil {
+	if err := dispEngine.RPC.Call(context.Background(), utils.ReplicatorSv1SetActionTriggers, setActionTriggers, &replyStr); err != nil {
 		t.Error("Unexpected error when calling ReplicatorSv1.SetActionTriggers: ", err)
 	} else if replyStr != utils.OK {
 		t.Error("Unexpected reply returned", replyStr)
@@ -987,7 +988,7 @@ func testDspRplActionTriggers(t *testing.T) {
 			utils.OptsAPIKey: "repl12345",
 		},
 	}
-	if err := dispEngine.RPC.Call(utils.ReplicatorSv1GetActionTriggers, argsActionTriggers, &reply); err != nil {
+	if err := dispEngine.RPC.Call(context.Background(), utils.ReplicatorSv1GetActionTriggers, argsActionTriggers, &reply); err != nil {
 		t.Error("Unexpected error when calling ReplicatorSv1.GetActionTriggers: ", err)
 	} else if reply[0].ID != argsActionTriggers.Arg {
 		t.Errorf("Expecting: %+v, received: %+v", argsActionTriggers.Arg, reply[0].ID)
@@ -996,7 +997,7 @@ func testDspRplActionTriggers(t *testing.T) {
 	allEngine.stopEngine(t)
 
 	// Get ActionTriggers
-	if err := dispEngine.RPC.Call(utils.ReplicatorSv1GetActionTriggers, argsActionTriggers, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
+	if err := dispEngine.RPC.Call(context.Background(), utils.ReplicatorSv1GetActionTriggers, argsActionTriggers, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("Expecting: %+v, received: %+v, ", utils.ErrNotFound, err)
 	}
 
@@ -1004,14 +1005,14 @@ func testDspRplActionTriggers(t *testing.T) {
 	allEngine.startEngine(t)
 
 	// Remove ActionTriggers
-	if err := dispEngine.RPC.Call(utils.ReplicatorSv1RemoveActionTriggers, argsActionTriggers, &replyStr); err != nil {
+	if err := dispEngine.RPC.Call(context.Background(), utils.ReplicatorSv1RemoveActionTriggers, argsActionTriggers, &replyStr); err != nil {
 		t.Error(err)
 	} else if replyStr != utils.OK {
 		t.Error("Unexpected reply returned", replyStr)
 	}
 
 	// Get ActionTriggers
-	if err := dispEngine.RPC.Call(utils.ReplicatorSv1GetActionTriggers, argsActionTriggers, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
+	if err := dispEngine.RPC.Call(context.Background(), utils.ReplicatorSv1GetActionTriggers, argsActionTriggers, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("Expecting: %+v, received: %+v, ", utils.ErrNotFound, err)
 	}
 }
@@ -1027,7 +1028,7 @@ func testDspRplSharedGroup(t *testing.T) {
 			utils.OptsAPIKey: "repl12345",
 		},
 	}
-	if err := dispEngine.RPC.Call(utils.ReplicatorSv1SetSharedGroup, setSharedGroup, &replyStr); err != nil {
+	if err := dispEngine.RPC.Call(context.Background(), utils.ReplicatorSv1SetSharedGroup, setSharedGroup, &replyStr); err != nil {
 		t.Error("Unexpected error when calling ReplicatorSv1.SetSharedGroup: ", err)
 	} else if replyStr != utils.OK {
 		t.Error("Unexpected reply returned", replyStr)
@@ -1041,7 +1042,7 @@ func testDspRplSharedGroup(t *testing.T) {
 			utils.OptsAPIKey: "repl12345",
 		},
 	}
-	if err := dispEngine.RPC.Call(utils.ReplicatorSv1GetSharedGroup, argsSharedGroup, &reply); err != nil {
+	if err := dispEngine.RPC.Call(context.Background(), utils.ReplicatorSv1GetSharedGroup, argsSharedGroup, &reply); err != nil {
 		t.Error("Unexpected error when calling ReplicatorSv1.GetSharedGroup: ", err)
 	} else if reply.Id != setSharedGroup.Id {
 		t.Errorf("Expecting: %+v, received: %+v", setSharedGroup.Id, reply.Id)
@@ -1050,7 +1051,7 @@ func testDspRplSharedGroup(t *testing.T) {
 	allEngine.stopEngine(t)
 
 	// Get SharedGroup
-	if err := dispEngine.RPC.Call(utils.ReplicatorSv1GetSharedGroup, argsSharedGroup, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
+	if err := dispEngine.RPC.Call(context.Background(), utils.ReplicatorSv1GetSharedGroup, argsSharedGroup, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("Expecting: %+v, received: %+v, ", utils.ErrNotFound, err)
 	}
 
@@ -1058,14 +1059,14 @@ func testDspRplSharedGroup(t *testing.T) {
 	allEngine.startEngine(t)
 
 	// Remove SharedGroup
-	if err := dispEngine.RPC.Call(utils.ReplicatorSv1RemoveSharedGroup, argsSharedGroup, &replyStr); err != nil {
+	if err := dispEngine.RPC.Call(context.Background(), utils.ReplicatorSv1RemoveSharedGroup, argsSharedGroup, &replyStr); err != nil {
 		t.Error(err)
 	} else if replyStr != utils.OK {
 		t.Error("Unexpected reply returned", replyStr)
 	}
 
 	// Get SharedGroup
-	if err := dispEngine.RPC.Call(utils.ReplicatorSv1GetSharedGroup, argsSharedGroup, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
+	if err := dispEngine.RPC.Call(context.Background(), utils.ReplicatorSv1GetSharedGroup, argsSharedGroup, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("Expecting: %+v, received: %+v, ", utils.ErrNotFound, err)
 	}
 }
@@ -1086,7 +1087,7 @@ func testDspRplActions(t *testing.T) {
 			utils.OptsAPIKey: "repl12345",
 		},
 	}
-	if err := dispEngine.RPC.Call(utils.ReplicatorSv1SetActions, setActions, &replyStr); err != nil {
+	if err := dispEngine.RPC.Call(context.Background(), utils.ReplicatorSv1SetActions, setActions, &replyStr); err != nil {
 		t.Error("Unexpected error when calling ReplicatorSv1.SetActions: ", err)
 	} else if replyStr != utils.OK {
 		t.Error("Unexpected reply returned", replyStr)
@@ -1100,7 +1101,7 @@ func testDspRplActions(t *testing.T) {
 			utils.OptsAPIKey: "repl12345",
 		},
 	}
-	if err := dispEngine.RPC.Call(utils.ReplicatorSv1GetActions, argsActions, &reply); err != nil {
+	if err := dispEngine.RPC.Call(context.Background(), utils.ReplicatorSv1GetActions, argsActions, &reply); err != nil {
 		t.Error("Unexpected error when calling ReplicatorSv1.GetActions: ", err)
 	} else if reply[0].Id != setActions.Acs[0].Id {
 		t.Errorf("Expecting: %+v, received: %+v", setActions.Acs[0].Id, reply[0].Id)
@@ -1111,7 +1112,7 @@ func testDspRplActions(t *testing.T) {
 	allEngine.stopEngine(t)
 
 	// Get Actions
-	if err := dispEngine.RPC.Call(utils.ReplicatorSv1GetActions, argsActions, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
+	if err := dispEngine.RPC.Call(context.Background(), utils.ReplicatorSv1GetActions, argsActions, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("Expecting: %+v, received: %+v, ", utils.ErrNotFound, err)
 	}
 
@@ -1119,14 +1120,14 @@ func testDspRplActions(t *testing.T) {
 	allEngine.startEngine(t)
 
 	// Remove Actions
-	if err := dispEngine.RPC.Call(utils.ReplicatorSv1RemoveActions, argsActions, &replyStr); err != nil {
+	if err := dispEngine.RPC.Call(context.Background(), utils.ReplicatorSv1RemoveActions, argsActions, &replyStr); err != nil {
 		t.Error(err)
 	} else if replyStr != utils.OK {
 		t.Error("Unexpected reply returned", replyStr)
 	}
 
 	// Get Actions
-	if err := dispEngine.RPC.Call(utils.ReplicatorSv1GetActions, argsActions, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
+	if err := dispEngine.RPC.Call(context.Background(), utils.ReplicatorSv1GetActions, argsActions, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("Expecting: %+v, received: %+v, ", utils.ErrNotFound, err)
 	}
 }
@@ -1152,7 +1153,7 @@ func testDspRplActionPlan(t *testing.T) {
 			utils.OptsAPIKey: "repl12345",
 		},
 	}
-	if err := dispEngine.RPC.Call(utils.ReplicatorSv1SetActionPlan, setActionPlan, &replyStr); err != nil {
+	if err := dispEngine.RPC.Call(context.Background(), utils.ReplicatorSv1SetActionPlan, setActionPlan, &replyStr); err != nil {
 		t.Error("Unexpected error when calling ReplicatorSv1.SetActionPlan: ", err)
 	} else if replyStr != utils.OK {
 		t.Error("Unexpected reply returned", replyStr)
@@ -1166,7 +1167,7 @@ func testDspRplActionPlan(t *testing.T) {
 			utils.OptsAPIKey: "repl12345",
 		},
 	}
-	if err := dispEngine.RPC.Call(utils.ReplicatorSv1GetActionPlan, argsActionPlan, &reply); err != nil {
+	if err := dispEngine.RPC.Call(context.Background(), utils.ReplicatorSv1GetActionPlan, argsActionPlan, &reply); err != nil {
 		t.Error("Unexpected error when calling ReplicatorSv1.GetActionPlan: ", err)
 	} else if reply.Id != setActionPlan.Ats.Id {
 		t.Errorf("Expecting: %+v, received: %+v", setActionPlan.Ats.Id, reply.Id)
@@ -1175,7 +1176,7 @@ func testDspRplActionPlan(t *testing.T) {
 	allEngine.stopEngine(t)
 
 	// Get ActionPlan
-	if err := dispEngine.RPC.Call(utils.ReplicatorSv1GetActionPlan, argsActionPlan, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
+	if err := dispEngine.RPC.Call(context.Background(), utils.ReplicatorSv1GetActionPlan, argsActionPlan, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("Expecting: %+v, received: %+v, ", utils.ErrNotFound, err)
 	}
 
@@ -1183,14 +1184,14 @@ func testDspRplActionPlan(t *testing.T) {
 	allEngine.startEngine(t)
 
 	// Remove ActionPlan
-	if err := dispEngine.RPC.Call(utils.ReplicatorSv1RemoveActionPlan, argsActionPlan, &replyStr); err != nil {
+	if err := dispEngine.RPC.Call(context.Background(), utils.ReplicatorSv1RemoveActionPlan, argsActionPlan, &replyStr); err != nil {
 		t.Error(err)
 	} else if replyStr != utils.OK {
 		t.Error("Unexpected reply returned", replyStr)
 	}
 
 	// Get ActionPlan
-	if err := dispEngine.RPC.Call(utils.ReplicatorSv1GetActionPlan, argsActionPlan, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
+	if err := dispEngine.RPC.Call(context.Background(), utils.ReplicatorSv1GetActionPlan, argsActionPlan, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("Expecting: %+v, received: %+v, ", utils.ErrNotFound, err)
 	}
 }
@@ -1206,7 +1207,7 @@ func testDspRplAccountActionPlans(t *testing.T) {
 			utils.OptsAPIKey: "repl12345",
 		},
 	}
-	if err := dispEngine.RPC.Call(utils.ReplicatorSv1SetAccountActionPlans, setAccountActionPlans, &replyStr); err != nil {
+	if err := dispEngine.RPC.Call(context.Background(), utils.ReplicatorSv1SetAccountActionPlans, setAccountActionPlans, &replyStr); err != nil {
 		t.Error("Unexpected error when calling ReplicatorSv1.SetAccountActionPlans: ", err)
 	} else if replyStr != utils.OK {
 		t.Error("Unexpected reply returned", replyStr)
@@ -1220,7 +1221,7 @@ func testDspRplAccountActionPlans(t *testing.T) {
 			utils.OptsAPIKey: "repl12345",
 		},
 	}
-	if err := dispEngine.RPC.Call(utils.ReplicatorSv1GetAccountActionPlans, argsAccountActionPlans, &reply); err != nil {
+	if err := dispEngine.RPC.Call(context.Background(), utils.ReplicatorSv1GetAccountActionPlans, argsAccountActionPlans, &reply); err != nil {
 		t.Error("Unexpected error when calling ReplicatorSv1.GetAccountActionPlans: ", err)
 	} else if reply[0] != setAccountActionPlans.AcntID {
 		t.Errorf("Expecting: %+v, received: %+v", setAccountActionPlans.AcntID, reply[0])
@@ -1229,7 +1230,7 @@ func testDspRplAccountActionPlans(t *testing.T) {
 	allEngine.stopEngine(t)
 
 	// Get AccountActionPlans
-	if err := dispEngine.RPC.Call(utils.ReplicatorSv1GetAccountActionPlans, argsAccountActionPlans, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
+	if err := dispEngine.RPC.Call(context.Background(), utils.ReplicatorSv1GetAccountActionPlans, argsAccountActionPlans, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("Expecting: %+v, received: %+v, ", utils.ErrNotFound, err)
 	}
 
@@ -1237,14 +1238,14 @@ func testDspRplAccountActionPlans(t *testing.T) {
 	allEngine.startEngine(t)
 
 	// Remove AccountActionPlans
-	if err := dispEngine.RPC.Call(utils.ReplicatorSv1RemAccountActionPlans, argsAccountActionPlans, &replyStr); err != nil {
+	if err := dispEngine.RPC.Call(context.Background(), utils.ReplicatorSv1RemAccountActionPlans, argsAccountActionPlans, &replyStr); err != nil {
 		t.Error(err)
 	} else if replyStr != utils.OK {
 		t.Error("Unexpected reply returned", replyStr)
 	}
 
 	// Get AccountActionPlans
-	if err := dispEngine.RPC.Call(utils.ReplicatorSv1GetAccountActionPlans, argsAccountActionPlans, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
+	if err := dispEngine.RPC.Call(context.Background(), utils.ReplicatorSv1GetAccountActionPlans, argsAccountActionPlans, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("Expecting: %+v, received: %+v, ", utils.ErrNotFound, err)
 	}
 }
@@ -1265,7 +1266,7 @@ func testDspRplRatingPlan(t *testing.T) {
 			utils.OptsAPIKey: "repl12345",
 		},
 	}
-	if err := dispEngine.RPC.Call(utils.ReplicatorSv1SetRatingPlan, setRatingPlan, &replyStr); err != nil {
+	if err := dispEngine.RPC.Call(context.Background(), utils.ReplicatorSv1SetRatingPlan, setRatingPlan, &replyStr); err != nil {
 		t.Error("Unexpected error when calling ReplicatorSv1.SetRatingPlan: ", err)
 	} else if replyStr != utils.OK {
 		t.Error("Unexpected reply returned", replyStr)
@@ -1279,7 +1280,7 @@ func testDspRplRatingPlan(t *testing.T) {
 			utils.OptsAPIKey: "repl12345",
 		},
 	}
-	if err := dispEngine.RPC.Call(utils.ReplicatorSv1GetRatingPlan, argsRatingPlan, &reply); err != nil {
+	if err := dispEngine.RPC.Call(context.Background(), utils.ReplicatorSv1GetRatingPlan, argsRatingPlan, &reply); err != nil {
 		t.Error("Unexpected error when calling ReplicatorSv1.GetRatingPlan: ", err)
 	} else if reply.Id != setRatingPlan.Id {
 		t.Errorf("Expecting: %+v, received: %+v", setRatingPlan.Id, reply.Id)
@@ -1288,7 +1289,7 @@ func testDspRplRatingPlan(t *testing.T) {
 	allEngine.stopEngine(t)
 
 	// Get RatingPlan
-	if err := dispEngine.RPC.Call(utils.ReplicatorSv1GetRatingPlan, argsRatingPlan, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
+	if err := dispEngine.RPC.Call(context.Background(), utils.ReplicatorSv1GetRatingPlan, argsRatingPlan, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("Expecting: %+v, received: %+v, ", utils.ErrNotFound, err)
 	}
 
@@ -1296,14 +1297,14 @@ func testDspRplRatingPlan(t *testing.T) {
 	allEngine.startEngine(t)
 
 	// Remove RatingPlan
-	if err := dispEngine.RPC.Call(utils.ReplicatorSv1RemoveRatingPlan, argsRatingPlan, &replyStr); err != nil {
+	if err := dispEngine.RPC.Call(context.Background(), utils.ReplicatorSv1RemoveRatingPlan, argsRatingPlan, &replyStr); err != nil {
 		t.Error(err)
 	} else if replyStr != utils.OK {
 		t.Error("Unexpected reply returned", replyStr)
 	}
 
 	// Get RatingPlan
-	if err := dispEngine.RPC.Call(utils.ReplicatorSv1GetRatingPlan, argsRatingPlan, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
+	if err := dispEngine.RPC.Call(context.Background(), utils.ReplicatorSv1GetRatingPlan, argsRatingPlan, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("Expecting: %+v, received: %+v, ", utils.ErrNotFound, err)
 	}
 }
@@ -1322,7 +1323,7 @@ func testDspRplRatingProfile(t *testing.T) {
 			utils.OptsAPIKey: "repl12345",
 		},
 	}
-	if err := dispEngine.RPC.Call(utils.ReplicatorSv1SetRatingProfile, setRatingProfile, &replyStr); err != nil {
+	if err := dispEngine.RPC.Call(context.Background(), utils.ReplicatorSv1SetRatingProfile, setRatingProfile, &replyStr); err != nil {
 		t.Error("Unexpected error when calling ReplicatorSv1.SetRatingProfile: ", err)
 	} else if replyStr != utils.OK {
 		t.Error("Unexpected reply returned", replyStr)
@@ -1336,7 +1337,7 @@ func testDspRplRatingProfile(t *testing.T) {
 			utils.OptsAPIKey: "repl12345",
 		},
 	}
-	if err := dispEngine.RPC.Call(utils.ReplicatorSv1GetRatingProfile, argsRatingProfile, &reply); err != nil {
+	if err := dispEngine.RPC.Call(context.Background(), utils.ReplicatorSv1GetRatingProfile, argsRatingProfile, &reply); err != nil {
 		t.Error("Unexpected error when calling ReplicatorSv1.GetRatingProfile: ", err)
 	} else if reply.Id != setRatingProfile.Id {
 		t.Errorf("Expecting: %+v, received: %+v", setRatingProfile.Id, reply.Id)
@@ -1345,7 +1346,7 @@ func testDspRplRatingProfile(t *testing.T) {
 	allEngine.stopEngine(t)
 
 	// Get RatingProfile
-	if err := dispEngine.RPC.Call(utils.ReplicatorSv1GetRatingProfile, argsRatingProfile, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
+	if err := dispEngine.RPC.Call(context.Background(), utils.ReplicatorSv1GetRatingProfile, argsRatingProfile, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("Expecting: %+v, received: %+v, ", utils.ErrNotFound, err)
 	}
 
@@ -1353,14 +1354,14 @@ func testDspRplRatingProfile(t *testing.T) {
 	allEngine.startEngine(t)
 
 	// Remove RatingProfile
-	if err := dispEngine.RPC.Call(utils.ReplicatorSv1RemoveRatingProfile, argsRatingProfile, &replyStr); err != nil {
+	if err := dispEngine.RPC.Call(context.Background(), utils.ReplicatorSv1RemoveRatingProfile, argsRatingProfile, &replyStr); err != nil {
 		t.Error(err)
 	} else if replyStr != utils.OK {
 		t.Error("Unexpected reply returned", replyStr)
 	}
 
 	// Get RatingProfile
-	if err := dispEngine.RPC.Call(utils.ReplicatorSv1GetRatingProfile, argsRatingProfile, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
+	if err := dispEngine.RPC.Call(context.Background(), utils.ReplicatorSv1GetRatingProfile, argsRatingProfile, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("Expecting: %+v, received: %+v, ", utils.ErrNotFound, err)
 	}
 }
@@ -1377,7 +1378,7 @@ func testDspRplDestination(t *testing.T) {
 			utils.OptsAPIKey: "repl12345",
 		},
 	}
-	if err := dispEngine.RPC.Call(utils.ReplicatorSv1SetDestination, setDestination, &replyStr); err != nil {
+	if err := dispEngine.RPC.Call(context.Background(), utils.ReplicatorSv1SetDestination, setDestination, &replyStr); err != nil {
 		t.Error("Unexpected error when calling ReplicatorSv1.SetDestination: ", err)
 	} else if replyStr != utils.OK {
 		t.Error("Unexpected reply returned", replyStr)
@@ -1391,7 +1392,7 @@ func testDspRplDestination(t *testing.T) {
 			utils.OptsAPIKey: "repl12345",
 		},
 	}
-	if err := dispEngine.RPC.Call(utils.ReplicatorSv1GetDestination, argsDestination, &reply); err != nil {
+	if err := dispEngine.RPC.Call(context.Background(), utils.ReplicatorSv1GetDestination, argsDestination, &reply); err != nil {
 		t.Error("Unexpected error when calling ReplicatorSv1.GetDestination: ", err)
 	} else if reply.Id != setDestination.Id {
 		t.Errorf("Expecting: %+v, received: %+v", setDestination.Id, reply.Id)
@@ -1400,7 +1401,7 @@ func testDspRplDestination(t *testing.T) {
 	allEngine.stopEngine(t)
 
 	// Get Destination
-	if err := dispEngine.RPC.Call(utils.ReplicatorSv1GetDestination, argsDestination, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
+	if err := dispEngine.RPC.Call(context.Background(), utils.ReplicatorSv1GetDestination, argsDestination, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("Expecting: %+v, received: %+v, ", utils.ErrNotFound, err)
 	}
 
@@ -1408,14 +1409,14 @@ func testDspRplDestination(t *testing.T) {
 	allEngine.startEngine(t)
 
 	// Remove Destination
-	if err := dispEngine.RPC.Call(utils.ReplicatorSv1RemoveDestination, argsDestination, &replyStr); err != nil {
+	if err := dispEngine.RPC.Call(context.Background(), utils.ReplicatorSv1RemoveDestination, argsDestination, &replyStr); err != nil {
 		t.Error(err)
 	} else if replyStr != utils.OK {
 		t.Error("Unexpected reply returned", replyStr)
 	}
 
 	// Get Destination
-	if err := dispEngine.RPC.Call(utils.ReplicatorSv1GetDestination, argsDestination, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
+	if err := dispEngine.RPC.Call(context.Background(), utils.ReplicatorSv1GetDestination, argsDestination, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("Expecting: %+v, received: %+v, ", utils.ErrNotFound, err)
 	}
 }
@@ -1432,7 +1433,7 @@ func testDspRplLoadIDs(t *testing.T) {
 			utils.OptsAPIKey: "repl12345",
 		},
 	}
-	if err := dispEngine.RPC.Call(utils.ReplicatorSv1SetLoadIDs, setLoadIDs, &replyStr); err != nil {
+	if err := dispEngine.RPC.Call(context.Background(), utils.ReplicatorSv1SetLoadIDs, setLoadIDs, &replyStr); err != nil {
 		t.Error("Unexpected error when calling ReplicatorSv1.SetLoadIDs: ", err)
 	} else if replyStr != utils.OK {
 		t.Error("Unexpected reply returned", replyStr)
@@ -1446,7 +1447,7 @@ func testDspRplLoadIDs(t *testing.T) {
 			utils.OptsAPIKey: "repl12345",
 		},
 	}
-	if err := dispEngine.RPC.Call(utils.ReplicatorSv1GetItemLoadIDs, argsLoadIDs, &reply); err != nil {
+	if err := dispEngine.RPC.Call(context.Background(), utils.ReplicatorSv1GetItemLoadIDs, argsLoadIDs, &reply); err != nil {
 		t.Error("Unexpected error when calling ReplicatorSv1.GetItemLoadIDs: ", err)
 	} else if reflect.DeepEqual(reply, setLoadIDs) {
 		t.Errorf("Expecting: %+v, received: %+v", setLoadIDs, reply)
@@ -1459,7 +1460,7 @@ func testDspRplLoadIDs(t *testing.T) {
 	allEngine.stopEngine(t)
 
 	// Get LoadIDs
-	if err := dispEngine.RPC.Call(utils.ReplicatorSv1GetItemLoadIDs, argsLoadIDs, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
+	if err := dispEngine.RPC.Call(context.Background(), utils.ReplicatorSv1GetItemLoadIDs, argsLoadIDs, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("Expecting: %+v, received: %+v, ", utils.ErrNotFound, err)
 	}
 

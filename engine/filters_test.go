@@ -28,9 +28,10 @@ import (
 	"time"
 
 	"github.com/cgrates/baningo"
+	"github.com/cgrates/birpc"
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/cgrates/rpcclient"
 )
 
 func TestFilterPassString(t *testing.T) {
@@ -1952,10 +1953,10 @@ func TestFiltersPassTimingsCallSuccessful(t *testing.T) {
 	config.SetCgrConfig(cfg)
 	Cache.Clear(nil)
 
-	client := make(chan rpcclient.ClientConnector, 1)
+	client := make(chan birpc.ClientConnector, 1)
 	ccM := &ccMock{
-		calls: map[string]func(args any, reply any) error{
-			utils.APIerSv1GetTiming: func(args, reply any) error {
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.APIerSv1GetTiming: func(ctx *context.Context, args, reply any) error {
 				exp := &utils.TPTiming{
 					ID:        "MIDNIGHT",
 					Years:     utils.Years{2020, 2018},
@@ -1972,7 +1973,7 @@ func TestFiltersPassTimingsCallSuccessful(t *testing.T) {
 	}
 	client <- ccM
 
-	NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaApier): client,
 	})
 
@@ -2091,10 +2092,10 @@ func TestFiltersPassDestinationsCallSuccessSameDest(t *testing.T) {
 	config.SetCgrConfig(cfg)
 	Cache.Clear(nil)
 
-	client := make(chan rpcclient.ClientConnector, 1)
+	client := make(chan birpc.ClientConnector, 1)
 	ccM := &ccMock{
-		calls: map[string]func(args any, reply any) error{
-			utils.APIerSv1GetReverseDestination: func(args, reply any) error {
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.APIerSv1GetReverseDestination: func(ctx *context.Context, args, reply any) error {
 				rply := []string{"1002"}
 				*reply.(*[]string) = rply
 				return nil
@@ -2103,7 +2104,7 @@ func TestFiltersPassDestinationsCallSuccessSameDest(t *testing.T) {
 	}
 	client <- ccM
 
-	NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaApier): client,
 	})
 
@@ -2140,10 +2141,10 @@ func TestFiltersPassDestinationsCallSuccessParseErr(t *testing.T) {
 	config.SetCgrConfig(cfg)
 	Cache.Clear(nil)
 
-	client := make(chan rpcclient.ClientConnector, 1)
+	client := make(chan birpc.ClientConnector, 1)
 	ccM := &ccMock{
-		calls: map[string]func(args any, reply any) error{
-			utils.APIerSv1GetReverseDestination: func(args, reply any) error {
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.APIerSv1GetReverseDestination: func(ctx *context.Context, args, reply any) error {
 				rply := []string{"1002"}
 				*reply.(*[]string) = rply
 				return nil
@@ -2152,7 +2153,7 @@ func TestFiltersPassDestinationsCallSuccessParseErr(t *testing.T) {
 	}
 	client <- ccM
 
-	NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaApier): client,
 	})
 
@@ -2291,8 +2292,8 @@ func TestFilterGreaterThanOnObjectDP(t *testing.T) {
 	cfg.FilterSCfg().ResourceSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources)}
 	dm := NewDataManager(NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items), cfg.CacheCfg(), nil)
 	mockConn := &ccMock{
-		calls: map[string]func(args any, reply any) error{
-			utils.ResourceSv1GetResourceWithConfig: func(args any, reply any) error {
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.ResourceSv1GetResourceWithConfig: func(ctx *context.Context, args any, reply any) error {
 				*(reply.(*ResourceWithConfig)) = ResourceWithConfig{
 					Resource: &Resource{},
 				}
@@ -2300,9 +2301,9 @@ func TestFilterGreaterThanOnObjectDP(t *testing.T) {
 			},
 		},
 	}
-	mockChan := make(chan rpcclient.ClientConnector, 1)
+	mockChan := make(chan birpc.ClientConnector, 1)
 	mockChan <- mockConn
-	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	connMgr := NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources): mockChan,
 	})
 	flts := NewFilterS(cfg, connMgr, dm)
@@ -2600,10 +2601,10 @@ func TestFilterPassTiming(t *testing.T) {
 	config.SetCgrConfig(cfg)
 	Cache.Clear(nil)
 
-	client := make(chan rpcclient.ClientConnector, 1)
+	client := make(chan birpc.ClientConnector, 1)
 	ccM := &ccMock{
-		calls: map[string]func(args any, reply any) error{
-			utils.APIerSv1GetTiming: func(args, reply any) error {
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.APIerSv1GetTiming: func(ctx *context.Context, args, reply any) error {
 				exp := &utils.TPTiming{
 					ID:        "MIDNIGHT",
 					Years:     utils.Years{2023},
@@ -2620,7 +2621,7 @@ func TestFilterPassTiming(t *testing.T) {
 	}
 	client <- ccM
 
-	NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaApier): client,
 	})
 

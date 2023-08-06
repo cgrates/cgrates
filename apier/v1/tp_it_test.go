@@ -22,13 +22,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package v1
 
 import (
-	"net/rpc"
 	"path"
 	"reflect"
 	"sort"
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc"
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -37,7 +38,7 @@ import (
 var (
 	tpCfgPath   string
 	tpCfg       *config.CGRConfig
-	tpRPC       *rpc.Client
+	tpRPC       *birpc.Client
 	tpConfigDIR string //run tests for specific configuration
 
 	sTestsTP = []func(t *testing.T){
@@ -106,7 +107,7 @@ func testTPRpcConn(t *testing.T) {
 
 func testTPImportTPFromFolderPath(t *testing.T) {
 	var reply string
-	if err := tpRPC.Call(utils.APIerSv1ImportTariffPlanFromFolder,
+	if err := tpRPC.Call(context.Background(), utils.APIerSv1ImportTariffPlanFromFolder,
 		utils.AttrImportTPFromFolder{TPid: "TEST_TPID2",
 			FolderPath: path.Join(*dataDir, "tariffplans", "tutorial")}, &reply); err != nil {
 		t.Error("Got error on APIerSv1.ImportTarrifPlanFromFolder: ", err.Error())
@@ -129,7 +130,7 @@ func testTPExportTPToFolder(t *testing.T) {
 	tpid := "TEST_TPID2"
 	compress := true
 	exportPath := "/tmp/"
-	if err := tpRPC.Call(utils.APIerSv1ExportTPToFolder, &utils.AttrDirExportTP{TPid: &tpid, ExportPath: &exportPath, Compress: &compress}, &reply); err != nil {
+	if err := tpRPC.Call(context.Background(), utils.APIerSv1ExportTPToFolder, &utils.AttrDirExportTP{TPid: &tpid, ExportPath: &exportPath, Compress: &compress}, &reply); err != nil {
 		t.Error("Got error on APIerSv1.ExportTPToFolder: ", err.Error())
 	} else if !reflect.DeepEqual(reply.ExportPath, expectedTPStas.ExportPath) {
 		t.Errorf("Expecting : %+v, received: %+v", expectedTPStas.ExportPath, reply.ExportPath)
@@ -145,7 +146,7 @@ func testTPExportTPToFolderWithError(t *testing.T) {
 	tpid := "UnexistedTP"
 	compress := true
 	exportPath := "/tmp/"
-	if err := tpRPC.Call(utils.APIerSv1ExportTPToFolder,
+	if err := tpRPC.Call(context.Background(), utils.APIerSv1ExportTPToFolder,
 		&utils.AttrDirExportTP{TPid: &tpid, ExportPath: &exportPath, Compress: &compress}, &reply); err == nil || err.Error() != utils.NewErrServerError(utils.ErrNotFound).Error() {
 		t.Error("Expecting error, received: ", err)
 	}

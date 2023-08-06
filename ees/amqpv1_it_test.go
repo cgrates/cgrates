@@ -19,14 +19,15 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package ees
 
 import (
-	"context"
 	"flag"
-	"net/rpc"
 	"path"
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc/context"
+
 	amqpv1 "github.com/Azure/go-amqp"
+	"github.com/cgrates/birpc"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -37,7 +38,7 @@ var (
 	amqpv1ConfDir  string
 	amqpv1CfgPath  string
 	amqpv1Cfg      *config.CGRConfig
-	amqpv1RPC      *rpc.Client
+	amqpv1RPC      *birpc.Client
 	amqpv1DialURL  string
 	amqpv1ConnOpts *amqpv1.ConnOptions
 
@@ -135,7 +136,7 @@ func testAMQPv1ExportEvent(t *testing.T) {
 	}
 
 	var reply map[string]utils.MapStorage
-	if err := amqpv1RPC.Call(utils.EeSv1ProcessEvent, ev, &reply); err != nil {
+	if err := amqpv1RPC.Call(context.Background(), utils.EeSv1ProcessEvent, ev, &reply); err != nil {
 		t.Error(err)
 	}
 	time.Sleep(2 * time.Second)

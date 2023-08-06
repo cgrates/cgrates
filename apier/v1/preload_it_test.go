@@ -22,8 +22,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package v1
 
 import (
-	"net/rpc"
-	"net/rpc/jsonrpc"
 	"os"
 	"os/exec"
 	"path"
@@ -32,6 +30,9 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc"
+	"github.com/cgrates/birpc/context"
+	"github.com/cgrates/birpc/jsonrpc"
 	"github.com/cgrates/cgrates/utils"
 
 	"github.com/cgrates/cgrates/config"
@@ -42,7 +43,7 @@ var (
 	preloadCfgPath string
 	preloadCfgDIR  string
 	preloadCfg     *config.CGRConfig
-	preloadRPC     *rpc.Client
+	preloadRPC     *birpc.Client
 
 	preloadTests = []func(t *testing.T){
 		testCreateDirs,
@@ -148,7 +149,7 @@ func testPreloadITVerifyAttributes(t *testing.T) {
 	}
 
 	var reply *engine.AttributeProfile
-	if err := preloadRPC.Call(utils.APIerSv1GetAttributeProfile,
+	if err := preloadRPC.Call(context.Background(), utils.APIerSv1GetAttributeProfile,
 		utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ALS1"}}, &reply); err != nil {
 		t.Fatal(err)
 	}

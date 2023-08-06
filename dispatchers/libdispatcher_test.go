@@ -23,6 +23,8 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/cgrates/birpc"
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -692,7 +694,7 @@ func TestLibDispatcherLoadDispatcherCacheError7(t *testing.T) {
 			},
 		},
 	}
-	//rpcCl := map[string]chan rpcclient.ClientConnector{}
+	//rpcCl := map[string]chan birpc.ClientConnector{}
 	connMng := engine.NewConnManager(cfg, nil)
 	dm := engine.NewDataManager(nil, nil, connMng)
 
@@ -745,7 +747,7 @@ func TestLibDispatcherLoadDispatcherCacheError7(t *testing.T) {
 
 type mockTypeConDispatch struct{}
 
-func (*mockTypeConDispatch) Call(serviceMethod string, args, reply any) error {
+func (*mockTypeConDispatch) Call(ctx *context.Context, serviceMethod string, args, reply any) error {
 	return rpc.ErrShutdown
 }
 
@@ -768,7 +770,7 @@ func TestLibDispatcherLoadDispatcherCacheError5(t *testing.T) {
 
 	tmp := engine.IntRPC
 	engine.IntRPC = map[string]*rpcclient.RPCClient{}
-	chanRPC := make(chan rpcclient.ClientConnector, 1)
+	chanRPC := make(chan birpc.ClientConnector, 1)
 	chanRPC <- new(mockTypeConDispatch)
 	engine.IntRPC.AddInternalRPCClient(utils.AttributeSv1, chanRPC)
 	engine.Cache.SetWithoutReplicate(utils.CacheDispatcherHosts, "testTenant:testID",
@@ -812,7 +814,7 @@ func TestLibDispatcherSingleResultDispatcherCase1(t *testing.T) {
 	}
 	tmp := engine.IntRPC
 	engine.IntRPC = map[string]*rpcclient.RPCClient{}
-	chanRPC := make(chan rpcclient.ClientConnector, 1)
+	chanRPC := make(chan birpc.ClientConnector, 1)
 	chanRPC <- new(mockTypeConDispatch)
 	engine.IntRPC.AddInternalRPCClient(utils.AttributeSv1, chanRPC)
 	engine.Cache.SetWithoutReplicate(utils.CacheDispatcherHosts, "testTenant:testID",
@@ -828,7 +830,7 @@ func TestLibDispatcherSingleResultDispatcherCase1(t *testing.T) {
 
 type mockTypeConDispatch2 struct{}
 
-func (*mockTypeConDispatch2) Call(serviceMethod string, args, reply any) error {
+func (*mockTypeConDispatch2) Call(ctx *context.Context, serviceMethod string, args, reply any) error {
 	return nil
 }
 
@@ -849,7 +851,7 @@ func TestLibDispatcherSingleResultDispatcherCase2(t *testing.T) {
 	}
 	tmp := engine.IntRPC
 	engine.IntRPC = map[string]*rpcclient.RPCClient{}
-	chanRPC := make(chan rpcclient.ClientConnector, 1)
+	chanRPC := make(chan birpc.ClientConnector, 1)
 	chanRPC <- new(mockTypeConDispatch2)
 	engine.IntRPC.AddInternalRPCClient(utils.AttributeSv1, chanRPC)
 	engine.Cache.SetWithoutReplicate(utils.CacheDispatcherHosts, "testTenant:testID",
@@ -880,7 +882,7 @@ func TestLibDispatcherSingleResultDispatcherCase3(t *testing.T) {
 			},
 		},
 	}
-	rpcCl := map[string]chan rpcclient.ClientConnector{}
+	rpcCl := map[string]chan birpc.ClientConnector{}
 	connMng := engine.NewConnManager(cfg, rpcCl)
 	dm := engine.NewDataManager(nil, nil, connMng)
 	newCache := engine.NewCacheS(cfg, dm, nil)
@@ -896,7 +898,7 @@ func TestLibDispatcherSingleResultDispatcherCase3(t *testing.T) {
 	}
 	tmp := engine.IntRPC
 	engine.IntRPC = map[string]*rpcclient.RPCClient{}
-	chanRPC := make(chan rpcclient.ClientConnector, 1)
+	chanRPC := make(chan birpc.ClientConnector, 1)
 	chanRPC <- new(mockTypeConDispatch2)
 	engine.IntRPC.AddInternalRPCClient(utils.AttributeSv1, chanRPC)
 	engine.Cache.SetWithoutReplicate(utils.CacheDispatcherHosts, "testTenant:testID",

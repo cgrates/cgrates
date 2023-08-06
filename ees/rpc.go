@@ -23,6 +23,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -70,7 +71,7 @@ func (e *RPCee) ExportEvent(args any, _ string) (err error) {
 	e.Lock()
 	defer e.Unlock()
 	var rply string
-	return e.connMgr.Call(e.connIDs, nil, e.serviceMethod, args, &rply)
+	return e.connMgr.Call(context.TODO(), e.connIDs, e.serviceMethod, args, &rply)
 }
 
 func (e *RPCee) Close() (err error) {

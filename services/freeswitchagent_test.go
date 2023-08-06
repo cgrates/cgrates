@@ -22,11 +22,11 @@ import (
 	"sync"
 	"testing"
 
+	"github.com/cgrates/birpc"
 	"github.com/cgrates/cgrates/agents"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/cgrates/rpcclient"
 )
 
 // TestFreeSwitchAgentCoverage for cover testing
@@ -38,8 +38,12 @@ func TestFreeSwitchAgentCoverage(t *testing.T) {
 	filterSChan <- nil
 	shdChan := utils.NewSyncedChan()
 	chS := engine.NewCacheS(cfg, nil, nil)
-	cacheSChan := make(chan rpcclient.ClientConnector, 1)
-	cacheSChan <- chS
+	cacheSrv, err := engine.NewService(chS)
+	if err != nil {
+		t.Fatal(err)
+	}
+	cacheSChan := make(chan birpc.ClientConnector, 1)
+	cacheSChan <- cacheSrv
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
 
 	srv := NewFreeswitchAgent(cfg, shdChan, nil, srvDep)

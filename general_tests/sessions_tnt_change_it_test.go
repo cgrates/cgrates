@@ -22,12 +22,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package general_tests
 
 import (
-	"net/rpc"
 	"path"
 	"reflect"
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc"
+	"github.com/cgrates/birpc/context"
 	v1 "github.com/cgrates/cgrates/apier/v1"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
@@ -39,7 +40,7 @@ var (
 	sesTntChngCfgDir  string
 	sesTntChngCfgPath string
 	sesTntChngCfg     *config.CGRConfig
-	sesTntChngRPC     *rpc.Client
+	sesTntChngRPC     *birpc.Client
 
 	sesTntChngTests = []func(t *testing.T){
 		testSesTntChngLoadConfig,
@@ -107,7 +108,7 @@ func testSesTntChngRPCConn(t *testing.T) {
 
 func testSesTntChngSetChargerProfile1(t *testing.T) {
 	var reply *engine.ChargerProfile
-	if err := sesTntChngRPC.Call(utils.APIerSv1GetChargerProfile,
+	if err := sesTntChngRPC.Call(context.Background(), utils.APIerSv1GetChargerProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "Charger1"}, &reply); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Fatal(err)
@@ -122,13 +123,13 @@ func testSesTntChngSetChargerProfile1(t *testing.T) {
 	}
 
 	var result string
-	if err := sesTntChngRPC.Call(utils.APIerSv1SetChargerProfile, chargerProfile, &result); err != nil {
+	if err := sesTntChngRPC.Call(context.Background(), utils.APIerSv1SetChargerProfile, chargerProfile, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
 
-	if err := sesTntChngRPC.Call(utils.APIerSv1GetChargerProfile,
+	if err := sesTntChngRPC.Call(context.Background(), utils.APIerSv1GetChargerProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "Charger1"}, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(chargerProfile.ChargerProfile, reply) {
@@ -138,7 +139,7 @@ func testSesTntChngSetChargerProfile1(t *testing.T) {
 
 func testSesTntChngSetChargerProfile2(t *testing.T) {
 	var reply *engine.ChargerProfile
-	if err := sesTntChngRPC.Call(utils.APIerSv1GetChargerProfile,
+	if err := sesTntChngRPC.Call(context.Background(), utils.APIerSv1GetChargerProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "Charger2"}, &reply); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Fatal(err)
@@ -153,13 +154,13 @@ func testSesTntChngSetChargerProfile2(t *testing.T) {
 	}
 
 	var result string
-	if err := sesTntChngRPC.Call(utils.APIerSv1SetChargerProfile, chargerProfile, &result); err != nil {
+	if err := sesTntChngRPC.Call(context.Background(), utils.APIerSv1SetChargerProfile, chargerProfile, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
 
-	if err := sesTntChngRPC.Call(utils.APIerSv1GetChargerProfile,
+	if err := sesTntChngRPC.Call(context.Background(), utils.APIerSv1GetChargerProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "Charger2"}, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(chargerProfile.ChargerProfile, reply) {
@@ -179,7 +180,7 @@ func testChargerSAuthProcessEventAuth(t *testing.T) {
 		},
 	}
 	var reply string
-	if err := sesTntChngRPC.Call(utils.APIerSv2SetBalance, attrSetBalance, &reply); err != nil {
+	if err := sesTntChngRPC.Call(context.Background(), utils.APIerSv2SetBalance, attrSetBalance, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf("Received: %s", reply)
@@ -196,7 +197,7 @@ func testChargerSAuthProcessEventAuth(t *testing.T) {
 		},
 	}
 	var reply2 string
-	if err := sesTntChngRPC.Call(utils.APIerSv2SetBalance, attrSetBalance2, &reply2); err != nil {
+	if err := sesTntChngRPC.Call(context.Background(), utils.APIerSv2SetBalance, attrSetBalance2, &reply2); err != nil {
 		t.Error(err)
 	} else if reply2 != utils.OK {
 		t.Errorf("Received: %s", reply2)
@@ -219,7 +220,7 @@ func testChargerSAuthProcessEventAuth(t *testing.T) {
 		},
 	}
 	var rply sessions.V1AuthorizeReply
-	if err := sesTntChngRPC.Call(utils.SessionSv1AuthorizeEvent, ev, &rply); err != nil {
+	if err := sesTntChngRPC.Call(context.Background(), utils.SessionSv1AuthorizeEvent, ev, &rply); err != nil {
 		t.Fatal(err)
 	}
 	expected := &sessions.V1AuthorizeReply{

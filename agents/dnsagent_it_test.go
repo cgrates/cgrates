@@ -23,11 +23,12 @@ package agents
 
 import (
 	"crypto/tls"
-	"net/rpc"
 	"path"
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc"
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -44,7 +45,7 @@ var (
 	dnsCfgPath string
 	dnsCfgDIR  string
 	dnsCfg     *config.CGRConfig
-	dnsRPC     *rpc.Client
+	dnsRPC     *birpc.Client
 	dnsClnt    *dnsConns // so we can cache the connection
 
 	sTestsDNS = []func(t *testing.T){
@@ -131,7 +132,7 @@ func testDNSitApierRpcConn(t *testing.T) {
 func testDNSitTPFromFolder(t *testing.T) {
 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "dnsagent")}
 	var loadInst utils.LoadInstance
-	if err := dnsRPC.Call(utils.APIerSv2LoadTariffPlanFromFolder,
+	if err := dnsRPC.Call(context.Background(), utils.APIerSv2LoadTariffPlanFromFolder,
 		attrs, &loadInst); err != nil {
 		t.Error(err)
 	}

@@ -21,12 +21,13 @@ package v1
 import (
 	"time"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
 // GetRouteProfile returns a Route configuration
-func (apierSv1 *APIerSv1) GetRouteProfile(arg *utils.TenantID, reply *engine.RouteProfile) error {
+func (apierSv1 *APIerSv1) GetRouteProfile(ctx *context.Context, arg *utils.TenantID, reply *engine.RouteProfile) error {
 	if missing := utils.MissingStructFields(arg, []string{utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -43,7 +44,7 @@ func (apierSv1 *APIerSv1) GetRouteProfile(arg *utils.TenantID, reply *engine.Rou
 }
 
 // GetRouteProfileIDs returns list of routeProfile IDs registered for a tenant
-func (apierSv1 *APIerSv1) GetRouteProfileIDs(args *utils.PaginatorWithTenant, sppPrfIDs *[]string) error {
+func (apierSv1 *APIerSv1) GetRouteProfileIDs(ctx *context.Context, args *utils.PaginatorWithTenant, sppPrfIDs *[]string) error {
 	tnt := args.Tenant
 	if tnt == utils.EmptyString {
 		tnt = apierSv1.Config.GeneralCfg().DefaultTenant
@@ -70,7 +71,7 @@ type RouteWithAPIOpts struct {
 }
 
 // SetRouteProfile add a new Route configuration
-func (apierSv1 *APIerSv1) SetRouteProfile(args *RouteWithAPIOpts, reply *string) error {
+func (apierSv1 *APIerSv1) SetRouteProfile(ctx *context.Context, args *RouteWithAPIOpts, reply *string) error {
 	if missing := utils.MissingStructFields(args.RouteProfile, []string{utils.ID}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -94,7 +95,7 @@ func (apierSv1 *APIerSv1) SetRouteProfile(args *RouteWithAPIOpts, reply *string)
 }
 
 // RemoveRouteProfile remove a specific Route configuration
-func (apierSv1 *APIerSv1) RemoveRouteProfile(args *utils.TenantIDWithAPIOpts, reply *string) error {
+func (apierSv1 *APIerSv1) RemoveRouteProfile(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *string) error {
 	if missing := utils.MissingStructFields(args, []string{utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -127,27 +128,27 @@ type RouteSv1 struct {
 	rS *engine.RouteService
 }
 
-// Call implements rpcclient.ClientConnector interface for internal RPC
-func (rS *RouteSv1) Call(serviceMethod string, args any, reply any) error {
+// Call implements birpc.ClientConnector interface for internal RPC
+func (rS *RouteSv1) Call(ctx *context.Context, serviceMethod string, args any, reply any) error {
 	return utils.APIerRPCCall(rS, serviceMethod, args, reply)
 }
 
 // GetRoutes returns sorted list of routes for Event
-func (rS *RouteSv1) GetRoutes(args *utils.CGREvent, reply *engine.SortedRoutesList) error {
-	return rS.rS.V1GetRoutes(args, reply)
+func (rS *RouteSv1) GetRoutes(ctx *context.Context, args *utils.CGREvent, reply *engine.SortedRoutesList) error {
+	return rS.rS.V1GetRoutes(ctx, args, reply)
 }
 
 // GetRouteProfilesForEvent returns a list of route profiles that match for Event
-func (rS *RouteSv1) GetRouteProfilesForEvent(args *utils.CGREvent, reply *[]*engine.RouteProfile) error {
-	return rS.rS.V1GetRouteProfilesForEvent(args, reply)
+func (rS *RouteSv1) GetRouteProfilesForEvent(ctx *context.Context, args *utils.CGREvent, reply *[]*engine.RouteProfile) error {
+	return rS.rS.V1GetRouteProfilesForEvent(ctx, args, reply)
 }
 
-func (rS *RouteSv1) Ping(ign *utils.CGREvent, reply *string) error {
+func (rS *RouteSv1) Ping(ctx *context.Context, ign *utils.CGREvent, reply *string) error {
 	*reply = utils.Pong
 	return nil
 }
 
 // GetRoutesList returns sorted list of routes for Event as a string slice
-func (rS *RouteSv1) GetRoutesList(args *utils.CGREvent, reply *[]string) error {
-	return rS.rS.V1GetRoutesList(args, reply)
+func (rS *RouteSv1) GetRoutesList(ctx *context.Context, args *utils.CGREvent, reply *[]string) error {
+	return rS.rS.V1GetRoutesList(ctx, args, reply)
 }

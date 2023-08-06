@@ -21,6 +21,7 @@ package v1
 import (
 	"errors"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/scheduler"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -96,7 +97,7 @@ import (
 ]
 */
 
-func (apierSv1 *APIerSv1) GetScheduledActions(args *scheduler.ArgsGetScheduledActions, reply *[]*scheduler.ScheduledAction) error {
+func (apierSv1 *APIerSv1) GetScheduledActions(ctx *context.Context, args *scheduler.ArgsGetScheduledActions, reply *[]*scheduler.ScheduledAction) error {
 	sched := apierSv1.SchedulerService.GetScheduler()
 	if sched == nil {
 		return errors.New(utils.SchedulerNotRunningCaps)

@@ -30,6 +30,7 @@ import (
 	"github.com/blevesearch/bleve"
 	"github.com/blevesearch/bleve/search"
 	"github.com/blevesearch/bleve/search/query"
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -144,7 +145,7 @@ type QueryArgs struct {
 }
 
 // V1StringQuery returns a list of API that match the query
-func (aS *AnalyzerService) V1StringQuery(args *QueryArgs, reply *[]map[string]any) error {
+func (aS *AnalyzerService) V1StringQuery(ctx *context.Context, args *QueryArgs, reply *[]map[string]any) error {
 	var q query.Query
 	if args.HeaderFilters == utils.EmptyString {
 		q = bleve.NewMatchAllQuery()

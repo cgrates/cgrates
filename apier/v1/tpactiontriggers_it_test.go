@@ -22,12 +22,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package v1
 
 import (
-	"net/rpc"
-	"net/rpc/jsonrpc"
 	"path"
 	"reflect"
 	"testing"
 
+	"github.com/cgrates/birpc"
+	"github.com/cgrates/birpc/context"
+	"github.com/cgrates/birpc/jsonrpc"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -36,7 +37,7 @@ import (
 var (
 	tpActionTriggerCfgPath   string
 	tpActionTriggerCfg       *config.CGRConfig
-	tpActionTriggerRPC       *rpc.Client
+	tpActionTriggerRPC       *birpc.Client
 	tpActionTriggers         *utils.TPActionTriggers
 	tpActionTriggerDelay     int
 	tpActionTriggerConfigDIR string //run tests for specific configuration
@@ -118,7 +119,7 @@ func testTPActionTriggersRpcConn(t *testing.T) {
 
 func testTPActionTriggersGetTPActionTriggersBeforeSet(t *testing.T) {
 	var reply *utils.TPActionTriggers
-	if err := tpActionTriggerRPC.Call(utils.APIerSv1GetTPActionTriggers,
+	if err := tpActionTriggerRPC.Call(context.Background(), utils.APIerSv1GetTPActionTriggers,
 		&AttrGetTPActionTriggers{TPid: "TPAct", ID: "ID"}, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
@@ -178,7 +179,7 @@ func testTPActionTriggersSetTPActionTriggers(t *testing.T) {
 		},
 	}
 	var result string
-	if err := tpActionTriggerRPC.Call(utils.APIerSv1SetTPActionTriggers, tpActionTriggers, &result); err != nil {
+	if err := tpActionTriggerRPC.Call(context.Background(), utils.APIerSv1SetTPActionTriggers, tpActionTriggers, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -187,7 +188,7 @@ func testTPActionTriggersSetTPActionTriggers(t *testing.T) {
 
 func testTPActionTriggersGetTPActionTriggersAfterSet(t *testing.T) {
 	var reply *utils.TPActionTriggers
-	if err := tpActionTriggerRPC.Call(utils.APIerSv1GetTPActionTriggers,
+	if err := tpActionTriggerRPC.Call(context.Background(), utils.APIerSv1GetTPActionTriggers,
 		&AttrGetTPActionTriggers{TPid: "TPAct", ID: "ID"}, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(tpActionTriggers.TPid, reply.TPid) {
@@ -202,7 +203,7 @@ func testTPActionTriggersGetTPActionTriggersAfterSet(t *testing.T) {
 func testTPActionTriggersGetTPActionTriggersIds(t *testing.T) {
 	var result []string
 	expectedTPID := []string{"ID"}
-	if err := tpActionTriggerRPC.Call(utils.APIerSv1GetTPActionTriggerIds,
+	if err := tpActionTriggerRPC.Call(context.Background(), utils.APIerSv1GetTPActionTriggerIds,
 		&AttrGetTPActionTriggerIds{TPid: "TPAct"}, &result); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expectedTPID, result) {
@@ -284,7 +285,7 @@ func testTPActionTriggersUpdateTPActionTriggers(t *testing.T) {
 	}
 
 	var result string
-	if err := tpActionTriggerRPC.Call(utils.APIerSv1SetTPActionTriggers, tpActionTriggers, &result); err != nil {
+	if err := tpActionTriggerRPC.Call(context.Background(), utils.APIerSv1SetTPActionTriggers, tpActionTriggers, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -294,7 +295,7 @@ func testTPActionTriggersUpdateTPActionTriggers(t *testing.T) {
 
 func testTPActionTriggersGetTPActionTriggersAfterUpdate(t *testing.T) {
 	var reply *utils.TPActionTriggers
-	if err := tpActionTriggerRPC.Call(utils.APIerSv1GetTPActionTriggers,
+	if err := tpActionTriggerRPC.Call(context.Background(), utils.APIerSv1GetTPActionTriggers,
 		&AttrGetTPActionTriggers{TPid: "TPAct", ID: "ID"}, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(tpActionTriggers.TPid, reply.TPid) {
@@ -309,7 +310,7 @@ func testTPActionTriggersGetTPActionTriggersAfterUpdate(t *testing.T) {
 
 func testTPActionTriggersRemoveTPActionTriggers(t *testing.T) {
 	var resp string
-	if err := tpActionTriggerRPC.Call(utils.APIerSv1RemoveTPActionTriggers,
+	if err := tpActionTriggerRPC.Call(context.Background(), utils.APIerSv1RemoveTPActionTriggers,
 		&AttrGetTPActionTriggers{TPid: "TPAct", ID: "ID"}, &resp); err != nil {
 		t.Error(err)
 	} else if resp != utils.OK {
@@ -320,7 +321,7 @@ func testTPActionTriggersRemoveTPActionTriggers(t *testing.T) {
 
 func testTPActionTriggersGetTPActionTriggersAfterRemove(t *testing.T) {
 	var reply *utils.TPActionTriggers
-	if err := tpActionTriggerRPC.Call(utils.APIerSv1GetTPActionTriggers,
+	if err := tpActionTriggerRPC.Call(context.Background(), utils.APIerSv1GetTPActionTriggers,
 		&AttrGetTPActionTriggers{TPid: "TPAct", ID: "ID"}, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}

@@ -23,16 +23,17 @@ package ees
 
 import (
 	"bytes"
-	"context"
 	"encoding/json"
 	"flag"
-	"net/rpc"
 	"os/exec"
 	"path"
 	"reflect"
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc/context"
+
+	"github.com/cgrates/birpc"
 	"github.com/cgrates/cgrates/utils"
 	elasticsearch "github.com/elastic/go-elasticsearch/v8"
 
@@ -44,7 +45,7 @@ var (
 	elasticConfigDir  string
 	elasticCfgPath    string
 	elasticCfg        *config.CGRConfig
-	elasticRpc        *rpc.Client
+	elasticRpc        *birpc.Client
 	elasticServerPath = flag.Bool("elastic", false, "Run only if the user specify it")
 
 	sTestsElastic = []func(t *testing.T){
@@ -225,16 +226,16 @@ func testElasticExportEvents(t *testing.T) {
 		},
 	}
 	var reply map[string]utils.MapStorage
-	if err := elasticRpc.Call(utils.EeSv1ProcessEvent, eventVoice, &reply); err != nil {
+	if err := elasticRpc.Call(context.Background(), utils.EeSv1ProcessEvent, eventVoice, &reply); err != nil {
 		t.Error(err)
 	}
-	if err := elasticRpc.Call(utils.EeSv1ProcessEvent, eventData, &reply); err != nil {
+	if err := elasticRpc.Call(context.Background(), utils.EeSv1ProcessEvent, eventData, &reply); err != nil {
 		t.Error(err)
 	}
-	if err := elasticRpc.Call(utils.EeSv1ProcessEvent, eventSMS, &reply); err != nil {
+	if err := elasticRpc.Call(context.Background(), utils.EeSv1ProcessEvent, eventSMS, &reply); err != nil {
 		t.Error(err)
 	}
-	if err := elasticRpc.Call(utils.EeSv1ProcessEvent, eventSMSNoFields, &reply); err != nil {
+	if err := elasticRpc.Call(context.Background(), utils.EeSv1ProcessEvent, eventSMSNoFields, &reply); err != nil {
 		t.Error(err)
 	}
 }

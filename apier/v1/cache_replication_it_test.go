@@ -22,13 +22,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package v1
 
 import (
-	"net/rpc"
 	"path"
 	"reflect"
 	"sort"
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc"
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 
@@ -37,10 +38,10 @@ import (
 
 var (
 	engine1Cfg     *config.CGRConfig
-	engine1RPC     *rpc.Client
+	engine1RPC     *birpc.Client
 	engine1CfgPath string
 	engine2Cfg     *config.CGRConfig
-	engine2RPC     *rpc.Client
+	engine2RPC     *birpc.Client
 	engine2CfgPath string
 
 	sTestsCacheSReplicate = []func(t *testing.T){
@@ -117,7 +118,7 @@ func testCacheSReplicateRpcConn(t *testing.T) {
 func testCacheSReplicateLoadTariffPlanFromFolder(t *testing.T) {
 	var reply string
 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "testit")}
-	if err := engine2RPC.Call(utils.APIerSv1LoadTariffPlanFromFolder, attrs, &reply); err != nil {
+	if err := engine2RPC.Call(context.Background(), utils.APIerSv1LoadTariffPlanFromFolder, attrs, &reply); err != nil {
 		t.Error(err)
 	}
 	time.Sleep(time.Duration(*waitRater) * time.Millisecond)
@@ -150,7 +151,7 @@ func testCacheSReplicateProcessAttributes(t *testing.T) {
 		},
 	}
 	var rplyEv engine.AttrSProcessEventReply
-	if err := engine1RPC.Call(utils.AttributeSv1ProcessEvent,
+	if err := engine1RPC.Call(context.Background(), utils.AttributeSv1ProcessEvent,
 		ev, &rplyEv); err != nil {
 		t.Error(err)
 	} else {
@@ -161,7 +162,7 @@ func testCacheSReplicateProcessAttributes(t *testing.T) {
 				utils.ToJSON(eRply), utils.ToJSON(rplyEv))
 		}
 	}
-	if err := engine2RPC.Call(utils.AttributeSv1ProcessEvent,
+	if err := engine2RPC.Call(context.Background(), utils.AttributeSv1ProcessEvent,
 		ev, &rplyEv); err != nil {
 		t.Error(err)
 	} else {

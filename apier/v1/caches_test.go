@@ -20,6 +20,7 @@ package v1
 import (
 	"testing"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -35,7 +36,7 @@ func TestCacheLoadCache(t *testing.T) {
 	cache := NewCacheSv1(ch)
 
 	var reply string
-	if err := cache.LoadCache(utils.NewAttrReloadCacheWithOpts(),
+	if err := cache.LoadCache(context.Background(), utils.NewAttrReloadCacheWithOpts(),
 		&reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
@@ -48,7 +49,7 @@ func TestCacheLoadCache(t *testing.T) {
 		},
 	}
 	var replyStr []string
-	if err := cache.GetItemIDs(argsGetItem,
+	if err := cache.GetItemIDs(context.Background(), argsGetItem,
 		&replyStr); err == nil || err != utils.ErrNotFound {
 		t.Errorf("Expected %+v, received %+v", utils.ErrNotFound, err)
 	}
@@ -64,7 +65,7 @@ func TestCacheReloadCache(t *testing.T) {
 	cache := NewCacheSv1(ch)
 
 	var reply string
-	if err := cache.ReloadCache(utils.NewAttrReloadCacheWithOpts(),
+	if err := cache.ReloadCache(context.Background(), utils.NewAttrReloadCacheWithOpts(),
 		&reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
@@ -77,7 +78,7 @@ func TestCacheReloadCache(t *testing.T) {
 		},
 	}
 	var replyStr []string
-	if err := cache.GetItemIDs(argsGetItem,
+	if err := cache.GetItemIDs(context.Background(), argsGetItem,
 		&replyStr); err == nil || err != utils.ErrNotFound {
 		t.Errorf("Expected %+v, received %+v", utils.ErrNotFound, err)
 	}
@@ -99,7 +100,7 @@ func TestCacheSetAndRemoveItems(t *testing.T) {
 			"cgrates.org:TestCacheSetAndRemoveItems2", "cgrates.org:TestCacheSetAndRemoveItems3"},
 	}
 	var reply string
-	if err := cache.RemoveItems(argsRemItm, &reply); err != nil {
+	if err := cache.RemoveItems(context.Background(), argsRemItm, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf("Unexpected replyBool returned")
@@ -112,19 +113,19 @@ func TestCacheSetAndRemoveItems(t *testing.T) {
 		},
 	}
 	var replyBool bool
-	if err := cache.HasItem(argsHasItem, &replyBool); err != nil {
+	if err := cache.HasItem(context.Background(), argsHasItem, &replyBool); err != nil {
 		t.Error(err)
 	} else if replyBool {
 		t.Errorf("Unexpected replyBool returned")
 	}
 	argsHasItem.ArgsGetCacheItem.ItemID = "cgrates.org:TestCacheSetAndRemoveItems2"
-	if err := cache.HasItem(argsHasItem, &replyBool); err != nil {
+	if err := cache.HasItem(context.Background(), argsHasItem, &replyBool); err != nil {
 		t.Error(err)
 	} else if replyBool {
 		t.Errorf("Unexpected replyBool returned")
 	}
 	argsHasItem.ArgsGetCacheItem.ItemID = "cgrates.org:TestCacheSetAndRemoveItems3"
-	if err := cache.HasItem(argsHasItem, &replyBool); err != nil {
+	if err := cache.HasItem(context.Background(), argsHasItem, &replyBool); err != nil {
 		t.Error(err)
 	} else if replyBool {
 		t.Errorf("Unexpected replyBool returned")
@@ -136,7 +137,7 @@ func TestCacheSetAndRemoveItems(t *testing.T) {
 		},
 	}
 	var replyStr []string
-	if err := cache.GetItemIDs(argsGetItem, &replyStr); err == nil || err != utils.ErrNotFound {
+	if err := cache.GetItemIDs(context.Background(), argsGetItem, &replyStr); err == nil || err != utils.ErrNotFound {
 		t.Errorf("Expected %+v, received %+v", utils.ErrNotFound, err)
 	}
 }

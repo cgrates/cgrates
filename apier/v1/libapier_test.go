@@ -22,10 +22,11 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/cgrates/birpc"
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/cgrates/rpcclient"
 )
 
 func TestComposeArgsReload(t *testing.T) {
@@ -97,7 +98,7 @@ type rpcRequest struct {
 }
 type rpcMock chan *rpcRequest
 
-func (r rpcMock) Call(method string, args, _ any) error {
+func (r rpcMock) Call(_ *context.Context, method string, args, _ any) error {
 	r <- &rpcRequest{
 		Method: method,
 		Params: args,
@@ -107,9 +108,9 @@ func (r rpcMock) Call(method string, args, _ any) error {
 
 func TestCallCache(t *testing.T) {
 	cache := make(rpcMock, 1)
-	ch := make(chan rpcclient.ClientConnector, 1)
+	ch := make(chan birpc.ClientConnector, 1)
 	ch <- cache
-	cn := engine.NewConnManager(config.CgrConfig(), map[string]chan rpcclient.ClientConnector{
+	cn := engine.NewConnManager(config.CgrConfig(), map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches): ch,
 	})
 	cn.Reload()

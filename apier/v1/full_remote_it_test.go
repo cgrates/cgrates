@@ -22,12 +22,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package v1
 
 import (
-	"net/rpc"
 	"path"
 	"reflect"
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc"
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -37,12 +38,12 @@ var (
 	fullRemInternalCfgPath    string
 	fullRemInternalCfgDirPath string
 	fullRemInternalCfg        *config.CGRConfig
-	fullRemInternalRPC        *rpc.Client
+	fullRemInternalRPC        *birpc.Client
 
 	fullRemEngineOneCfgPath    string
 	fullRemEngineOneCfgDirPath string
 	fullRemEngineOneCfg        *config.CGRConfig
-	fullRemEngineOneRPC        *rpc.Client
+	fullRemEngineOneRPC        *birpc.Client
 
 	sTestsFullRemoteIT = []func(t *testing.T){
 		testFullRemoteITInitCfg,
@@ -122,7 +123,7 @@ func testFullRemoteITRPCConn(t *testing.T) {
 func testFullRemoteITAttribute(t *testing.T) {
 	// verify for not found in internal
 	var reply *engine.AttributeProfile
-	if err := fullRemInternalRPC.Call(utils.APIerSv1GetAttributeProfile,
+	if err := fullRemInternalRPC.Call(context.Background(), utils.APIerSv1GetAttributeProfile,
 		utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ATTR_1001_SIMPLEAUTH"}},
 		&reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Fatal(err)
@@ -145,13 +146,13 @@ func testFullRemoteITAttribute(t *testing.T) {
 	}
 	alsPrf.Compile()
 	// add an attribute profile in engine1 and verify it internal
-	if err := fullRemEngineOneRPC.Call(utils.APIerSv1SetAttributeProfile, alsPrf, &replySet); err != nil {
+	if err := fullRemEngineOneRPC.Call(context.Background(), utils.APIerSv1SetAttributeProfile, alsPrf, &replySet); err != nil {
 		t.Error(err)
 	} else if replySet != utils.OK {
 		t.Error("Unexpected reply returned", replySet)
 	}
 
-	if err := fullRemInternalRPC.Call(utils.APIerSv1GetAttributeProfile,
+	if err := fullRemInternalRPC.Call(context.Background(), utils.APIerSv1GetAttributeProfile,
 		utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ATTR_1001_SIMPLEAUTH"}},
 		&reply); err != nil {
 		t.Fatal(err)
@@ -163,13 +164,13 @@ func testFullRemoteITAttribute(t *testing.T) {
 	// update the attribute profile and verify it to be updated
 	alsPrf.FilterIDs = []string{"*string:~*req.Account:1001", "*string:~*req.Destination:1002"}
 	alsPrf.Compile()
-	if err := fullRemEngineOneRPC.Call(utils.APIerSv1SetAttributeProfile, alsPrf, &replySet); err != nil {
+	if err := fullRemEngineOneRPC.Call(context.Background(), utils.APIerSv1SetAttributeProfile, alsPrf, &replySet); err != nil {
 		t.Error(err)
 	} else if replySet != utils.OK {
 		t.Error("Unexpected reply returned", replySet)
 	}
 
-	if err := fullRemInternalRPC.Call(utils.APIerSv1GetAttributeProfile,
+	if err := fullRemInternalRPC.Call(context.Background(), utils.APIerSv1GetAttributeProfile,
 		utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ATTR_1001_SIMPLEAUTH"}},
 		&reply); err != nil {
 		t.Fatal(err)
@@ -183,7 +184,7 @@ func testFullRemoteITAttribute(t *testing.T) {
 func testFullRemoteITStatQueue(t *testing.T) {
 	// verify for not found in internal
 	var reply *engine.StatQueueProfile
-	if err := fullRemInternalRPC.Call(utils.APIerSv1GetStatQueueProfile,
+	if err := fullRemInternalRPC.Call(context.Background(), utils.APIerSv1GetStatQueueProfile,
 		utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "TEST_PROFILE1"}},
 		&reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Fatal(err)
@@ -217,13 +218,13 @@ func testFullRemoteITStatQueue(t *testing.T) {
 		},
 	}
 	// add a statQueue profile in engine1 and verify it internal
-	if err := fullRemEngineOneRPC.Call(utils.APIerSv1SetStatQueueProfile, stat, &replySet); err != nil {
+	if err := fullRemEngineOneRPC.Call(context.Background(), utils.APIerSv1SetStatQueueProfile, stat, &replySet); err != nil {
 		t.Error(err)
 	} else if replySet != utils.OK {
 		t.Error("Unexpected reply returned", replySet)
 	}
 
-	if err := fullRemInternalRPC.Call(utils.APIerSv1GetStatQueueProfile,
+	if err := fullRemInternalRPC.Call(context.Background(), utils.APIerSv1GetStatQueueProfile,
 		utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "TEST_PROFILE1"}},
 		&reply); err != nil {
 		t.Fatal(err)
@@ -232,13 +233,13 @@ func testFullRemoteITStatQueue(t *testing.T) {
 	}
 	// update the statQueue profile and verify it to be updated
 	stat.FilterIDs = []string{"*string:~*req.Account:1001", "*string:~*req.Destination:1002"}
-	if err := fullRemEngineOneRPC.Call(utils.APIerSv1SetStatQueueProfile, stat, &replySet); err != nil {
+	if err := fullRemEngineOneRPC.Call(context.Background(), utils.APIerSv1SetStatQueueProfile, stat, &replySet); err != nil {
 		t.Error(err)
 	} else if replySet != utils.OK {
 		t.Error("Unexpected reply returned", replySet)
 	}
 
-	if err := fullRemInternalRPC.Call(utils.APIerSv1GetStatQueueProfile,
+	if err := fullRemInternalRPC.Call(context.Background(), utils.APIerSv1GetStatQueueProfile,
 		utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "TEST_PROFILE1"}},
 		&reply); err != nil {
 		t.Fatal(err)
@@ -250,7 +251,7 @@ func testFullRemoteITStatQueue(t *testing.T) {
 func testFullRemoteITThreshold(t *testing.T) {
 	// verify for not found in internal
 	var reply *engine.ThresholdProfile
-	if err := fullRemInternalRPC.Call(utils.APIerSv1GetThresholdProfile,
+	if err := fullRemInternalRPC.Call(context.Background(), utils.APIerSv1GetThresholdProfile,
 		utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "THD_Test"}},
 		&reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Fatal(err)
@@ -275,13 +276,13 @@ func testFullRemoteITThreshold(t *testing.T) {
 		},
 	}
 	// add a threshold profile in engine1 and verify it internal
-	if err := fullRemEngineOneRPC.Call(utils.APIerSv1SetThresholdProfile, tPrfl, &replySet); err != nil {
+	if err := fullRemEngineOneRPC.Call(context.Background(), utils.APIerSv1SetThresholdProfile, tPrfl, &replySet); err != nil {
 		t.Error(err)
 	} else if replySet != utils.OK {
 		t.Error("Unexpected reply returned", replySet)
 	}
 
-	if err := fullRemInternalRPC.Call(utils.APIerSv1GetThresholdProfile,
+	if err := fullRemInternalRPC.Call(context.Background(), utils.APIerSv1GetThresholdProfile,
 		utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "THD_Test"}},
 		&reply); err != nil {
 		t.Fatal(err)
@@ -290,13 +291,13 @@ func testFullRemoteITThreshold(t *testing.T) {
 	}
 	// update the threshold profile and verify it to be updated
 	tPrfl.FilterIDs = []string{"*string:~*req.Account:1001", "*string:~*req.Destination:1002"}
-	if err := fullRemEngineOneRPC.Call(utils.APIerSv1SetThresholdProfile, tPrfl, &replySet); err != nil {
+	if err := fullRemEngineOneRPC.Call(context.Background(), utils.APIerSv1SetThresholdProfile, tPrfl, &replySet); err != nil {
 		t.Error(err)
 	} else if replySet != utils.OK {
 		t.Error("Unexpected reply returned", replySet)
 	}
 
-	if err := fullRemInternalRPC.Call(utils.APIerSv1GetThresholdProfile,
+	if err := fullRemInternalRPC.Call(context.Background(), utils.APIerSv1GetThresholdProfile,
 		utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "THD_Test"}},
 		&reply); err != nil {
 		t.Fatal(err)
@@ -308,7 +309,7 @@ func testFullRemoteITThreshold(t *testing.T) {
 func testFullRemoteITResource(t *testing.T) {
 	// verify for not found in internal
 	var reply *engine.ResourceProfile
-	if err := fullRemInternalRPC.Call(utils.APIerSv1GetResourceProfile,
+	if err := fullRemInternalRPC.Call(context.Background(), utils.APIerSv1GetResourceProfile,
 		utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ResGroup1"}},
 		&reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Fatal(err)
@@ -332,13 +333,13 @@ func testFullRemoteITResource(t *testing.T) {
 		},
 	}
 	// add a threshold profile in engine1 and verify it internal
-	if err := fullRemEngineOneRPC.Call(utils.APIerSv1SetResourceProfile, rlsPrf, &replySet); err != nil {
+	if err := fullRemEngineOneRPC.Call(context.Background(), utils.APIerSv1SetResourceProfile, rlsPrf, &replySet); err != nil {
 		t.Error(err)
 	} else if replySet != utils.OK {
 		t.Error("Unexpected reply returned", replySet)
 	}
 
-	if err := fullRemInternalRPC.Call(utils.APIerSv1GetResourceProfile,
+	if err := fullRemInternalRPC.Call(context.Background(), utils.APIerSv1GetResourceProfile,
 		utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ResGroup1"}},
 		&reply); err != nil {
 		t.Fatal(err)
@@ -347,13 +348,13 @@ func testFullRemoteITResource(t *testing.T) {
 	}
 	// update the threshold profile and verify it to be updated
 	rlsPrf.FilterIDs = []string{"*string:~*req.Account:1001", "*string:~*req.Destination:1002"}
-	if err := fullRemEngineOneRPC.Call(utils.APIerSv1SetResourceProfile, rlsPrf, &replySet); err != nil {
+	if err := fullRemEngineOneRPC.Call(context.Background(), utils.APIerSv1SetResourceProfile, rlsPrf, &replySet); err != nil {
 		t.Error(err)
 	} else if replySet != utils.OK {
 		t.Error("Unexpected reply returned", replySet)
 	}
 
-	if err := fullRemInternalRPC.Call(utils.APIerSv1GetResourceProfile,
+	if err := fullRemInternalRPC.Call(context.Background(), utils.APIerSv1GetResourceProfile,
 		utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ResGroup1"}},
 		&reply); err != nil {
 		t.Fatal(err)
@@ -365,7 +366,7 @@ func testFullRemoteITResource(t *testing.T) {
 func testFullRemoteITRoute(t *testing.T) {
 	// verify for not found in internal
 	var reply *engine.RouteProfile
-	if err := fullRemInternalRPC.Call(utils.APIerSv1GetRouteProfile,
+	if err := fullRemInternalRPC.Call(context.Background(), utils.APIerSv1GetRouteProfile,
 		utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ROUTE_ACNT_1001"}},
 		&reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Fatal(err)
@@ -390,13 +391,13 @@ func testFullRemoteITRoute(t *testing.T) {
 		Weight: 20,
 	}
 	// add a threshold profile in engine1 and verify it internal
-	if err := fullRemEngineOneRPC.Call(utils.APIerSv1SetRouteProfile, routePrf, &replySet); err != nil {
+	if err := fullRemEngineOneRPC.Call(context.Background(), utils.APIerSv1SetRouteProfile, routePrf, &replySet); err != nil {
 		t.Error(err)
 	} else if replySet != utils.OK {
 		t.Error("Unexpected reply returned", replySet)
 	}
 
-	if err := fullRemInternalRPC.Call(utils.APIerSv1GetRouteProfile,
+	if err := fullRemInternalRPC.Call(context.Background(), utils.APIerSv1GetRouteProfile,
 		utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ROUTE_ACNT_1001"}},
 		&reply); err != nil {
 		t.Fatal(err)
@@ -405,13 +406,13 @@ func testFullRemoteITRoute(t *testing.T) {
 	}
 	// update the threshold profile and verify it to be updated
 	routePrf.FilterIDs = []string{"*string:~*req.Account:1001", "*string:~*req.Destination:1002"}
-	if err := fullRemEngineOneRPC.Call(utils.APIerSv1SetRouteProfile, routePrf, &replySet); err != nil {
+	if err := fullRemEngineOneRPC.Call(context.Background(), utils.APIerSv1SetRouteProfile, routePrf, &replySet); err != nil {
 		t.Error(err)
 	} else if replySet != utils.OK {
 		t.Error("Unexpected reply returned", replySet)
 	}
 
-	if err := fullRemInternalRPC.Call(utils.APIerSv1GetRouteProfile,
+	if err := fullRemInternalRPC.Call(context.Background(), utils.APIerSv1GetRouteProfile,
 		utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ROUTE_ACNT_1001"}},
 		&reply); err != nil {
 		t.Fatal(err)
@@ -423,7 +424,7 @@ func testFullRemoteITRoute(t *testing.T) {
 func testFullRemoteITFilter(t *testing.T) {
 	// verify for not found in internal
 	var reply *engine.Filter
-	if err := fullRemInternalRPC.Call(utils.APIerSv1GetFilter,
+	if err := fullRemInternalRPC.Call(context.Background(), utils.APIerSv1GetFilter,
 		utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "FLTR_ACNT_1001"}},
 		&reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Fatal(err)
@@ -445,13 +446,13 @@ func testFullRemoteITFilter(t *testing.T) {
 		},
 	}
 	// add a threshold profile in engine1 and verify it internal
-	if err := fullRemEngineOneRPC.Call(utils.APIerSv1SetFilter, fltr, &replySet); err != nil {
+	if err := fullRemEngineOneRPC.Call(context.Background(), utils.APIerSv1SetFilter, fltr, &replySet); err != nil {
 		t.Error(err)
 	} else if replySet != utils.OK {
 		t.Error("Unexpected reply returned", replySet)
 	}
 
-	if err := fullRemInternalRPC.Call(utils.APIerSv1GetFilter,
+	if err := fullRemInternalRPC.Call(context.Background(), utils.APIerSv1GetFilter,
 		utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "FLTR_ACNT_1001"}},
 		&reply); err != nil {
 		t.Fatal(err)
@@ -471,13 +472,13 @@ func testFullRemoteITFilter(t *testing.T) {
 			Values:  []string{"10", "20"},
 		},
 	}
-	if err := fullRemEngineOneRPC.Call(utils.APIerSv1SetFilter, fltr, &replySet); err != nil {
+	if err := fullRemEngineOneRPC.Call(context.Background(), utils.APIerSv1SetFilter, fltr, &replySet); err != nil {
 		t.Error(err)
 	} else if replySet != utils.OK {
 		t.Error("Unexpected reply returned", replySet)
 	}
 
-	if err := fullRemInternalRPC.Call(utils.APIerSv1GetFilter,
+	if err := fullRemInternalRPC.Call(context.Background(), utils.APIerSv1GetFilter,
 		utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "FLTR_ACNT_1001"}},
 		&reply); err != nil {
 		t.Fatal(err)
@@ -489,7 +490,7 @@ func testFullRemoteITFilter(t *testing.T) {
 func testFullRemoteITCharger(t *testing.T) {
 	// verify for not found in internal
 	var reply *engine.ChargerProfile
-	if err := fullRemInternalRPC.Call(utils.APIerSv1GetChargerProfile,
+	if err := fullRemInternalRPC.Call(context.Background(), utils.APIerSv1GetChargerProfile,
 		utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "DEFAULT"}},
 		&reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Fatal(err)
@@ -504,13 +505,13 @@ func testFullRemoteITCharger(t *testing.T) {
 		Weight:       0,
 	}
 	// add a threshold profile in engine1 and verify it internal
-	if err := fullRemEngineOneRPC.Call(utils.APIerSv1SetChargerProfile, chargerProfile, &replySet); err != nil {
+	if err := fullRemEngineOneRPC.Call(context.Background(), utils.APIerSv1SetChargerProfile, chargerProfile, &replySet); err != nil {
 		t.Error(err)
 	} else if replySet != utils.OK {
 		t.Error("Unexpected reply returned", replySet)
 	}
 
-	if err := fullRemInternalRPC.Call(utils.APIerSv1GetChargerProfile,
+	if err := fullRemInternalRPC.Call(context.Background(), utils.APIerSv1GetChargerProfile,
 		utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "DEFAULT"}},
 		&reply); err != nil {
 		t.Fatal(err)
@@ -519,13 +520,13 @@ func testFullRemoteITCharger(t *testing.T) {
 	}
 	// update the threshold profile and verify it to be updated
 	chargerProfile.FilterIDs = []string{"*string:~*req.Account:1001", "*string:~*req.Destination:1002"}
-	if err := fullRemEngineOneRPC.Call(utils.APIerSv1SetChargerProfile, chargerProfile, &replySet); err != nil {
+	if err := fullRemEngineOneRPC.Call(context.Background(), utils.APIerSv1SetChargerProfile, chargerProfile, &replySet); err != nil {
 		t.Error(err)
 	} else if replySet != utils.OK {
 		t.Error("Unexpected reply returned", replySet)
 	}
 
-	if err := fullRemInternalRPC.Call(utils.APIerSv1GetChargerProfile,
+	if err := fullRemInternalRPC.Call(context.Background(), utils.APIerSv1GetChargerProfile,
 		utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "DEFAULT"}},
 		&reply); err != nil {
 		t.Fatal(err)
@@ -537,7 +538,7 @@ func testFullRemoteITCharger(t *testing.T) {
 func testFullRemoteITDispatcher(t *testing.T) {
 	// verify for not found in internal
 	var reply *engine.DispatcherProfile
-	if err := fullRemInternalRPC.Call(utils.APIerSv1GetDispatcherProfile,
+	if err := fullRemInternalRPC.Call(context.Background(), utils.APIerSv1GetDispatcherProfile,
 		utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "Dsp1"}},
 		&reply); err == nil || err.Error() != utils.ErrDSPProfileNotFound.Error() {
 		t.Fatal(err)
@@ -555,13 +556,13 @@ func testFullRemoteITDispatcher(t *testing.T) {
 		},
 	}
 	// add a threshold profile in engine1 and verify it internal
-	if err := fullRemEngineOneRPC.Call(utils.APIerSv1SetDispatcherProfile, dispatcherProfile, &replySet); err != nil {
+	if err := fullRemEngineOneRPC.Call(context.Background(), utils.APIerSv1SetDispatcherProfile, dispatcherProfile, &replySet); err != nil {
 		t.Error(err)
 	} else if replySet != utils.OK {
 		t.Error("Unexpected reply returned", replySet)
 	}
 
-	if err := fullRemInternalRPC.Call(utils.APIerSv1GetDispatcherProfile,
+	if err := fullRemInternalRPC.Call(context.Background(), utils.APIerSv1GetDispatcherProfile,
 		utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "Dsp1"}},
 		&reply); err != nil {
 		t.Fatal(err)
@@ -570,13 +571,13 @@ func testFullRemoteITDispatcher(t *testing.T) {
 	}
 	// update the threshold profile and verify it to be updated
 	dispatcherProfile.FilterIDs = []string{"*string:~*req.Account:1001", "*string:~*req.Destination:1002"}
-	if err := fullRemEngineOneRPC.Call(utils.APIerSv1SetDispatcherProfile, dispatcherProfile, &replySet); err != nil {
+	if err := fullRemEngineOneRPC.Call(context.Background(), utils.APIerSv1SetDispatcherProfile, dispatcherProfile, &replySet); err != nil {
 		t.Error(err)
 	} else if replySet != utils.OK {
 		t.Error("Unexpected reply returned", replySet)
 	}
 
-	if err := fullRemInternalRPC.Call(utils.APIerSv1GetDispatcherProfile,
+	if err := fullRemInternalRPC.Call(context.Background(), utils.APIerSv1GetDispatcherProfile,
 		utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "Dsp1"}},
 		&reply); err != nil {
 		t.Fatal(err)

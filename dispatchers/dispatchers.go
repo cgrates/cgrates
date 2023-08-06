@@ -24,6 +24,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/guardian"
@@ -61,7 +62,7 @@ func (dS *DispatcherService) Shutdown() {
 func (dS *DispatcherService) authorizeEvent(ev *utils.CGREvent,
 	reply *engine.AttrSProcessEventReply) (err error) {
 	ev.APIOpts[utils.OptsContext] = utils.MetaAuth
-	if err = dS.connMgr.Call(dS.cfg.DispatcherSCfg().AttributeSConns, nil,
+	if err = dS.connMgr.Call(context.TODO(), dS.cfg.DispatcherSCfg().AttributeSConns,
 		utils.AttributeSv1ProcessEvent, ev, reply); err != nil {
 		if err.Error() == utils.ErrNotFound.Error() {
 			err = utils.ErrUnknownApiKey
@@ -311,7 +312,7 @@ func (dS *DispatcherService) Dispatch(ev *utils.CGREvent, subsys string,
 	return // return the last error
 }
 
-func (dS *DispatcherService) V1GetProfilesForEvent(ev *utils.CGREvent,
+func (dS *DispatcherService) DispatcherSv1GetProfilesForEvent(ctx *context.Context, ev *utils.CGREvent,
 	dPfl *engine.DispatcherProfiles) (err error) {
 	tnt := ev.Tenant
 	if tnt == utils.EmptyString {
@@ -333,7 +334,7 @@ func (dS *DispatcherService) V1GetProfilesForEvent(ev *utils.CGREvent,
 
 /*
 // V1Apier is a generic way to cover all APIer methods
-func (dS *DispatcherService) V1Apier(apier any, args *utils.MethodParameters, reply *any) (err error) {
+func (dS *DispatcherService) V1Apier(ctx *context.Context,apier any, args *utils.MethodParameters, reply *any) (err error) {
 
 	parameters, canCast := args.Parameters.(map[string]any)
 	if !canCast {
@@ -426,8 +427,8 @@ func (dS *DispatcherService) V1Apier(apier any, args *utils.MethodParameters, re
 }
 */
 
-// Call implements rpcclient.ClientConnector interface for internal RPC
-func (dS *DispatcherService) Call(serviceMethod string, // all API fuction must be of type: SubsystemMethod
+// Call implements birpc.ClientConnector interface for internal RPC
+func (dS *DispatcherService) Call(ctx *context.Context, serviceMethod string, // all API fuction must be of type: SubsystemMethod
 	args any, reply any) error {
 	methodSplit := strings.Split(serviceMethod, ".")
 	if len(methodSplit) != 2 {
@@ -452,7 +453,7 @@ func (dS *DispatcherService) Call(serviceMethod string, // all API fuction must 
 	return err
 }
 
-func (dS *DispatcherService) DispatcherSv1RemoteStatus(args *utils.TenantWithAPIOpts,
+func (dS *DispatcherService) DispatcherSv1RemoteStatus(ctx *context.Context, args *utils.TenantWithAPIOpts,
 	reply *map[string]any) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
 	if args.Tenant != utils.EmptyString {
@@ -470,7 +471,7 @@ func (dS *DispatcherService) DispatcherSv1RemoteStatus(args *utils.TenantWithAPI
 	}, utils.MetaCore, utils.CoreSv1Status, args, reply)
 }
 
-func (dS *DispatcherService) DispatcherSv1RemoteSleep(args *utils.DurationArgs, reply *string) (err error) {
+func (dS *DispatcherService) DispatcherSv1RemoteSleep(ctx *context.Context, args *utils.DurationArgs, reply *string) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
 	if args.Tenant != utils.EmptyString {
 		tnt = args.Tenant
@@ -487,7 +488,7 @@ func (dS *DispatcherService) DispatcherSv1RemoteSleep(args *utils.DurationArgs, 
 	}, utils.MetaCore, utils.CoreSv1Sleep, args, reply)
 }
 
-func (dS *DispatcherService) DispatcherSv1RemotePing(args *utils.CGREvent, reply *string) (err error) {
+func (dS *DispatcherService) DispatcherSv1RemotePing(ctx *context.Context, args *utils.CGREvent, reply *string) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
 	if args != nil && args.Tenant != utils.EmptyString {
 		tnt = args.Tenant

@@ -28,6 +28,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/console"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/rpcclient"
@@ -35,21 +36,24 @@ import (
 )
 
 var (
-	cgrConsoleFlags = flag.NewFlagSet(utils.CgrConsole, flag.ContinueOnError)
-	historyFN       = os.Getenv(utils.HomeCgr) + utils.HistoryCgr
-	version         = cgrConsoleFlags.Bool(utils.VersionCgr, false, "Prints the application version.")
-	verbose         = cgrConsoleFlags.Bool(utils.VerboseCgr, false, "Show extra info about command execution.")
-	server          = cgrConsoleFlags.String(utils.MailerServerCfg, "127.0.0.1:2012", "server address host:port")
-	rpcEncoding     = cgrConsoleFlags.String(utils.RpcEncodingCgr, utils.MetaJSON, "RPC encoding used <*gob|*json>")
-	certificatePath = cgrConsoleFlags.String(utils.CertPathCgr, utils.EmptyString, "path to certificate for tls connection")
-	keyPath         = cgrConsoleFlags.String(utils.KeyPathCgr, utils.EmptyString, "path to key for tls connection")
-	caPath          = cgrConsoleFlags.String(utils.CAPathCgr, utils.EmptyString, "path to CA for tls connection(only for self sign certificate)")
-	tls             = cgrConsoleFlags.Bool(utils.TLSNoCaps, false, "TLS connection")
-	replyTimeOut    = cgrConsoleFlags.Int(utils.ReplyTimeoutCfg, 300, "Reply timeout in seconds ")
-	client          *rpcclient.RPCClient
+	cgrConsoleFlags      = flag.NewFlagSet(utils.CgrConsole, flag.ContinueOnError)
+	historyFN            = os.Getenv(utils.HomeCgr) + utils.HistoryCgr
+	version              = cgrConsoleFlags.Bool(utils.VersionCgr, false, "Prints the application version.")
+	verbose              = cgrConsoleFlags.Bool(utils.VerboseCgr, false, "Show extra info about command execution.")
+	server               = cgrConsoleFlags.String(utils.MailerServerCfg, "127.0.0.1:2012", "server address host:port")
+	rpcEncoding          = cgrConsoleFlags.String(utils.RpcEncodingCgr, utils.MetaJSON, "RPC encoding used <*gob|*json>")
+	certificatePath      = cgrConsoleFlags.String(utils.CertPathCgr, utils.EmptyString, "path to certificate for tls connection")
+	keyPath              = cgrConsoleFlags.String(utils.KeyPathCgr, utils.EmptyString, "path to key for tls connection")
+	caPath               = cgrConsoleFlags.String(utils.CAPathCgr, utils.EmptyString, "path to CA for tls connection(only for self sign certificate)")
+	tls                  = cgrConsoleFlags.Bool(utils.TLSNoCaps, false, "TLS connection")
+	connectAttempts      = cgrConsoleFlags.Int(utils.ConnectAttemptsCfg, 3, "Connect attempts")
+	reconnects           = cgrConsoleFlags.Int(utils.ReconnectsCfg, 3, "Reconnect attempts")
+	maxReconnectInterval = cgrConsoleFlags.Int(utils.MaxReconnectIntervalCfg, 0, "Maximum reconnect interval")
+	connectTimeout       = cgrConsoleFlags.Int(utils.ConnectTimeoutCfg, 1, "Connect timeout in seconds ")
+	replyTimeout         = cgrConsoleFlags.Int(utils.ReplyTimeoutCfg, 300, "Reply timeout in seconds ")
 )
 
-func executeCommand(command string) {
+func executeCommand(command string, client *rpcclient.RPCClient) {
 	if strings.TrimSpace(command) == utils.EmptyString {
 		return
 	}
@@ -106,7 +110,7 @@ func executeCommand(command string) {
 			param = param.(*console.StringMapWrapper).Items
 		}
 
-		if rpcErr := client.Call(cmd.RpcMethod(), param, res); rpcErr != nil {
+		if rpcErr := client.Call(context.TODO(), cmd.RpcMethod(), param, res); rpcErr != nil {
 			fmt.Println("Error executing command: " + rpcErr.Error())
 		} else {
 			fmt.Println(cmd.GetFormatedResult(res))
@@ -128,17 +132,17 @@ func main() {
 		}
 		return
 	}
-	var err error
 
-	client, err = rpcclient.NewRPCClient(utils.TCP, *server, *tls, *keyPath, *certificatePath, *caPath, 3, 3,
-		time.Second, time.Duration(*replyTimeOut)*time.Second, *rpcEncoding, nil, false, nil)
+	client, err := rpcclient.NewRPCClient(context.TODO(), utils.TCP, *server, *tls, *keyPath, *certificatePath, *caPath, *connectAttempts, *reconnects,
+		time.Duration(*maxReconnectInterval)*time.Second, utils.FibDuration, time.Duration(*connectTimeout)*time.Second,
+		time.Duration(*replyTimeout)*time.Second, *rpcEncoding, nil, false, nil)
 	if err != nil {
 		cgrConsoleFlags.PrintDefaults()
 		log.Fatal("Could not connect to server " + *server)
 	}
 
 	if len(cgrConsoleFlags.Args()) != 0 {
-		executeCommand(strings.Join(cgrConsoleFlags.Args(), utils.SepCgr))
+		executeCommand(strings.Join(cgrConsoleFlags.Args(), utils.SepCgr), client)
 		return
 	}
 
@@ -190,7 +194,7 @@ func main() {
 				fmt.Println("\nbye!")
 				stop = true
 			default:
-				executeCommand(command)
+				executeCommand(command, client)
 			}
 		}
 	}

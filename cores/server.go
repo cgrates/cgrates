@@ -29,13 +29,12 @@ import (
 	"net"
 	"net/http"
 	"net/http/pprof"
-	"net/rpc"
 	"os"
 	"strings"
 	"sync"
 	"time"
 
-	"github.com/cenkalti/rpc2"
+	"github.com/cgrates/birpc"
 	"github.com/cgrates/cgrates/analyzers"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -46,8 +45,10 @@ func NewServer(caps *engine.Caps) (s *Server) {
 	return &Server{
 		httpMux:         http.NewServeMux(),
 		httpsMux:        http.NewServeMux(),
-		stopbiRPCServer: make(chan struct{}, 1),
+		stopBiRPCServer: make(chan struct{}, 1),
 		caps:            caps,
+		rpcSrv:          birpc.NewServer(),
+		birpcSrv:        birpc.NewBirpcServer(),
 	}
 }
 
@@ -55,8 +56,9 @@ type Server struct {
 	sync.RWMutex
 	rpcEnabled      bool
 	httpEnabled     bool
-	birpcSrv        *rpc2.Server
-	stopbiRPCServer chan struct{} // used in order to fully stop the biRPC
+	rpcSrv          *birpc.Server
+	birpcSrv        *birpc.BirpcServer
+	stopBiRPCServer chan struct{} // used in order to fully stop the biRPC
 	httpsMux        *http.ServeMux
 	httpMux         *http.ServeMux
 	caps            *engine.Caps
@@ -69,7 +71,7 @@ func (s *Server) SetAnalyzer(anz *analyzers.AnalyzerService) {
 
 func (s *Server) RpcRegister(rcvr any) {
 	utils.RegisterRpcParams(utils.EmptyString, rcvr)
-	rpc.Register(rcvr)
+	s.rpcSrv.Register(rcvr)
 	s.Lock()
 	s.rpcEnabled = true
 	s.Unlock()
@@ -77,10 +79,14 @@ func (s *Server) RpcRegister(rcvr any) {
 
 func (s *Server) RpcRegisterName(name string, rcvr any) {
 	utils.RegisterRpcParams(name, rcvr)
-	rpc.RegisterName(name, rcvr)
+	s.rpcSrv.RegisterName(name, rcvr)
 	s.Lock()
 	s.rpcEnabled = true
 	s.Unlock()
+}
+
+func (s *Server) RpcUnregisterName(name string) {
+	s.rpcSrv.UnregisterName(name)
 }
 
 func (s *Server) RegisterHttpFunc(pattern string, handler func(http.ResponseWriter, *http.Request)) {
@@ -108,19 +114,15 @@ func (s *Server) RegisterHttpHandler(pattern string, handler http.Handler) {
 }
 
 // Registers a new BiJsonRpc name
-func (s *Server) BiRPCRegisterName(method string, handlerFunc any) {
-	s.RLock()
-	isNil := s.birpcSrv == nil
-	s.RUnlock()
-	if isNil {
-		s.Lock()
-		s.birpcSrv = rpc2.NewServer()
-		s.Unlock()
-	}
-	s.birpcSrv.Handle(method, handlerFunc)
+func (s *Server) BiRPCRegisterName(name string, rcvr any) {
+	s.birpcSrv.RegisterName(name, rcvr)
 }
 
-func (s *Server) serveCodec(addr, codecName string, newCodec func(conn conn, caps *engine.Caps, anz *analyzers.AnalyzerService) rpc.ServerCodec,
+func (s *Server) BiRPCUnregisterName(name string) {
+	s.birpcSrv.UnregisterName(name)
+}
+
+func (s *Server) serveCodec(addr, codecName string, newCodec func(conn conn, caps *engine.Caps, anz *analyzers.AnalyzerService) birpc.ServerCodec,
 	shdChan *utils.SyncedChan) {
 	s.RLock()
 	enabled := s.rpcEnabled
@@ -139,9 +141,9 @@ func (s *Server) serveCodec(addr, codecName string, newCodec func(conn conn, cap
 	s.accept(l, codecName, newCodec, shdChan)
 }
 
-func (s *Server) accept(l net.Listener, codecName string, newCodec func(conn conn, caps *engine.Caps, anz *analyzers.AnalyzerService) rpc.ServerCodec,
+func (s *Server) accept(l net.Listener, codecName string, newCodec func(conn conn, caps *engine.Caps, anz *analyzers.AnalyzerService) birpc.ServerCodec,
 	shdChan *utils.SyncedChan) {
-	errCnt := 0
+	var errCnt int
 	var lastErrorTime time.Time
 	for {
 		conn, err := l.Accept()
@@ -159,7 +161,7 @@ func (s *Server) accept(l net.Listener, codecName string, newCodec func(conn con
 			}
 			continue
 		}
-		go rpc.ServeCodec(newCodec(conn, s.caps, s.anz))
+		go s.rpcSrv.ServeCodec(newCodec(conn, s.caps, s.anz))
 	}
 }
 
@@ -176,7 +178,7 @@ func (s *Server) handleRequest(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	rmtIP, _ := utils.GetRemoteIP(r)
 	rmtAddr, _ := net.ResolveIPAddr(utils.EmptyString, rmtIP)
-	res := newRPCRequest(r.Body, rmtAddr, s.caps, s.anz).Call()
+	res := newRPCRequest(s.rpcSrv, r.Body, rmtAddr, s.caps, s.anz).Call()
 	io.Copy(w, res)
 }
 
@@ -248,62 +250,59 @@ func (s *Server) ServeHTTP(addr string, jsonRPCURL string, wsRPCURL string,
 }
 
 // ServeBiRPC create a goroutine to listen and serve as BiRPC server
-func (s *Server) ServeBiRPC(addrJSON, addrGOB string, onConn func(*rpc2.Client), onDis func(*rpc2.Client)) (err error) {
-	s.RLock()
-	isNil := s.birpcSrv == nil
-	s.RUnlock()
-	if isNil {
-		return fmt.Errorf("BiRPCServer should not be nil")
-	}
-
+func (s *Server) ServeBiRPC(addrJSON, addrGOB string, onConn, onDis func(birpc.ClientConnector)) (err error) {
 	s.birpcSrv.OnConnect(onConn)
 	s.birpcSrv.OnDisconnect(onDis)
 	if addrJSON != utils.EmptyString {
 		var ljson net.Listener
-		if ljson, err = s.listenBiRPC(s.birpcSrv, addrJSON, utils.JSONCaps, newCapsBiRPCJSONCodec); err != nil {
+		if ljson, err = listenBiRPC(s.birpcSrv, addrJSON, utils.JSONCaps, func(conn conn) birpc.BirpcCodec {
+			return newCapsBiRPCJSONCodec(conn, s.caps, s.anz)
+		}, s.stopBiRPCServer); err != nil {
 			return
 		}
 		defer ljson.Close()
 	}
 	if addrGOB != utils.EmptyString {
 		var lgob net.Listener
-		if lgob, err = s.listenBiRPC(s.birpcSrv, addrGOB, utils.GOBCaps, newCapsBiRPCGOBCodec); err != nil {
+		if lgob, err = listenBiRPC(s.birpcSrv, addrGOB, utils.GOBCaps, func(conn conn) birpc.BirpcCodec {
+			return newCapsBiRPCGOBCodec(conn, s.caps, s.anz)
+		}, s.stopBiRPCServer); err != nil {
 			return
 		}
 		defer lgob.Close()
 	}
-	<-s.stopbiRPCServer // wait until server is stopped to close the listener
+	<-s.stopBiRPCServer // wait until server is stopped to close the listener
 	return
 }
 
-func (s *Server) listenBiRPC(srv *rpc2.Server, addr, codecName string, newCodec func(conn conn, caps *engine.Caps, anz *analyzers.AnalyzerService) rpc2.Codec) (lBiRPC net.Listener, err error) {
+func listenBiRPC(srv *birpc.BirpcServer, addr, codecName string, newCodec func(conn conn) birpc.BirpcCodec, stopBiRPCServer chan struct{}) (lBiRPC net.Listener, err error) {
 	if lBiRPC, err = net.Listen(utils.TCP, addr); err != nil {
 		log.Printf("ServeBi%s listen error: %s \n", codecName, err)
 		return
 	}
 	utils.Logger.Info(fmt.Sprintf("Starting CGRateS Bi%s server at <%s>", codecName, addr))
-	go s.acceptBiRPC(srv, lBiRPC, codecName, newCodec)
+	go acceptBiRPC(srv, lBiRPC, codecName, newCodec, stopBiRPCServer)
 	return
 }
 
-func (s *Server) acceptBiRPC(srv *rpc2.Server, l net.Listener, codecName string, newCodec func(conn conn, caps *engine.Caps, anz *analyzers.AnalyzerService) rpc2.Codec) {
+func acceptBiRPC(srv *birpc.BirpcServer, l net.Listener, codecName string, newCodec func(conn conn) birpc.BirpcCodec, stopBiRPCServer chan struct{}) {
 	for {
 		conn, err := l.Accept()
 		if err != nil {
 			if strings.Contains(err.Error(), "use of closed network connection") { // if closed by us do not log
 				return
 			}
-			s.stopbiRPCServer <- struct{}{}
+			stopBiRPCServer <- struct{}{}
 			utils.Logger.Crit(fmt.Sprintf("Stopped Bi%s server beacause %s", codecName, err))
 			return // stop if we get Accept error
 		}
-		go srv.ServeCodec(newCodec(conn, s.caps, s.anz))
+		go srv.ServeCodec(newCodec(conn))
 	}
 }
 
 // StopBiRPC stops the go routine create with ServeBiJSON
 func (s *Server) StopBiRPC() {
-	s.stopbiRPCServer <- struct{}{}
+	s.stopBiRPCServer <- struct{}{}
 	s.Lock()
 	s.birpcSrv = nil
 	s.Unlock()
@@ -317,16 +316,18 @@ type rpcRequest struct {
 	remoteAddr net.Addr
 	caps       *engine.Caps
 	anzWarpper *analyzers.AnalyzerService
+	srv        *birpc.Server
 }
 
 // newRPCRequest returns a new rpcRequest.
-func newRPCRequest(r io.ReadCloser, remoteAddr net.Addr, caps *engine.Caps, anz *analyzers.AnalyzerService) *rpcRequest {
+func newRPCRequest(srv *birpc.Server, r io.ReadCloser, remoteAddr net.Addr, caps *engine.Caps, anz *analyzers.AnalyzerService) *rpcRequest {
 	return &rpcRequest{
 		r:          r,
 		rw:         new(bytes.Buffer),
 		remoteAddr: remoteAddr,
 		caps:       caps,
 		anzWarpper: anz,
+		srv:        srv,
 	}
 }
 
@@ -351,7 +352,7 @@ func (r *rpcRequest) Close() error {
 
 // Call invokes the RPC request, waits for it to complete, and returns the results.
 func (r *rpcRequest) Call() io.Reader {
-	rpc.ServeCodec(newCapsJSONCodec(r, r.caps, r.anzWarpper))
+	r.srv.ServeCodec(newCapsJSONCodec(r, r.caps, r.anzWarpper))
 	return r.rw
 }
 
@@ -395,7 +396,7 @@ func loadTLSConfig(serverCrt, serverKey, caCert string, serverPolicy int,
 }
 
 func (s *Server) serveCodecTLS(addr, codecName, serverCrt, serverKey, caCert string,
-	serverPolicy int, serverName string, newCodec func(conn conn, caps *engine.Caps, anz *analyzers.AnalyzerService) rpc.ServerCodec,
+	serverPolicy int, serverName string, newCodec func(conn conn, caps *engine.Caps, anz *analyzers.AnalyzerService) birpc.ServerCodec,
 	shdChan *utils.SyncedChan) {
 	s.RLock()
 	enabled := s.rpcEnabled
@@ -429,7 +430,7 @@ func (s *Server) ServeJSONTLS(addr, serverCrt, serverKey, caCert string,
 }
 
 func (s *Server) handleWebSocket(ws *websocket.Conn) {
-	rpc.ServeCodec(newCapsJSONCodec(ws, s.caps, s.anz))
+	s.rpcSrv.ServeCodec(newCapsJSONCodec(ws, s.caps, s.anz))
 }
 
 func (s *Server) ServeHTTPTLS(addr, serverCrt, serverKey, caCert string, serverPolicy int,

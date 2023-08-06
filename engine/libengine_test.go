@@ -27,6 +27,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc"
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/ltcache"
@@ -40,7 +42,7 @@ func TestLibengineNewRPCPoolNoAddress(t *testing.T) {
 	}()
 
 	connID := "connID"
-	intChan := make(chan rpcclient.ClientConnector)
+	intChan := make(chan birpc.ClientConnector)
 	defaultCfg := config.NewDefaultCGRConfig()
 	defaultCfg.RPCConns()[connID] = config.NewDfltRPCConn()
 	defaultCfg.RPCConns()[connID].Conns = []*config.RemoteHost{
@@ -53,9 +55,12 @@ func TestLibengineNewRPCPoolNoAddress(t *testing.T) {
 
 	exp := &rpcclient.RPCPool{}
 	experr := rpcclient.ErrDisconnected
-	rcv, err := NewRPCPool("", "", "", "", defaultCfg.GeneralCfg().ConnectAttempts,
-		defaultCfg.GeneralCfg().Reconnects, defaultCfg.GeneralCfg().ConnectTimeout,
-		0, defaultCfg.RPCConns()[connID].Conns, intChan, false, nil, connID, connCache)
+	rcv, err := NewRPCPool(context.Background(), "", "", "", "",
+		defaultCfg.GeneralCfg().ConnectAttempts,
+		defaultCfg.GeneralCfg().Reconnects,
+		defaultCfg.GeneralCfg().MaxReconnectInterval,
+		defaultCfg.GeneralCfg().ConnectTimeout,
+		0, defaultCfg.RPCConns()[connID].Conns, intChan, false, connID, connCache)
 
 	if err == nil || err != experr {
 		t.Fatalf("\nexpected: <%+v>, \nreceived: <%+v>", experr, err)
@@ -75,30 +80,38 @@ func TestLibengineNewRPCConnection(t *testing.T) {
 	}()
 
 	cfg := &config.RemoteHost{
-		ID:              "a4f3f",
-		Address:         "localhost:6012",
-		Transport:       "*json",
-		ConnectAttempts: 2,
-		Reconnects:      5,
-		ConnectTimeout:  2 * time.Minute,
-		ReplyTimeout:    3 * time.Minute,
-		TLS:             true,
-		ClientKey:       "key1",
+		ID:                   "a4f3f",
+		Address:              "localhost:6012",
+		Transport:            "*json",
+		ConnectAttempts:      2,
+		Reconnects:           5,
+		MaxReconnectInterval: 5 * time.Minute,
+		ConnectTimeout:       2 * time.Minute,
+		ReplyTimeout:         3 * time.Minute,
+		TLS:                  true,
+		ClientKey:            "key1",
 	}
 	expectedErr1 := "dial tcp [::1]:6012: connect: connection refused"
 	expectedErr2 := "dial tcp 127.0.0.1:6012: connect: connection refused"
 	cM := NewConnManager(config.NewDefaultCGRConfig(), nil)
-	exp, err := rpcclient.NewRPCClient(utils.TCP, cfg.Address, cfg.TLS, cfg.ClientKey, cM.cfg.TLSCfg().ClientCerificate,
-		cM.cfg.TLSCfg().CaCertificate, cfg.ConnectAttempts, cfg.Reconnects, cfg.ConnectTimeout, cfg.ReplyTimeout,
-		cfg.Transport, nil, false, nil)
+	exp, err := rpcclient.NewRPCClient(context.Background(), utils.TCP, cfg.Address, cfg.TLS, cfg.ClientKey,
+		cM.cfg.TLSCfg().ClientCerificate, cM.cfg.TLSCfg().CaCertificate, cfg.ConnectAttempts, cfg.Reconnects,
+		cfg.MaxReconnectInterval, utils.FibDuration, cfg.ConnectTimeout, cfg.ReplyTimeout, cfg.Transport, nil, false, nil)
 
 	if err.Error() != expectedErr1 && err.Error() != expectedErr2 {
 		t.Errorf("Expected %v or %v \n but received \n %v", expectedErr1, expectedErr2, err)
 	}
 
-	conn, err := NewRPCConnection(cfg, cM.cfg.TLSCfg().ClientKey, cM.cfg.TLSCfg().ClientCerificate, cM.cfg.TLSCfg().CaCertificate,
-		cM.cfg.GeneralCfg().ConnectAttempts, cM.cfg.GeneralCfg().Reconnects, cM.cfg.GeneralCfg().ConnectTimeout, cM.cfg.GeneralCfg().ReplyTimeout,
-		nil, false, nil, "*localhost", "a4f3f", new(ltcache.Cache))
+	conn, err := NewRPCConnection(context.Background(), cfg,
+		cM.cfg.TLSCfg().ClientKey,
+		cM.cfg.TLSCfg().ClientCerificate,
+		cM.cfg.TLSCfg().CaCertificate,
+		cM.cfg.GeneralCfg().ConnectAttempts,
+		cM.cfg.GeneralCfg().Reconnects,
+		cM.cfg.GeneralCfg().MaxReconnectInterval,
+		cM.cfg.GeneralCfg().ConnectTimeout,
+		cM.cfg.GeneralCfg().ReplyTimeout,
+		nil, false, "*localhost", "a4f3f", new(ltcache.Cache))
 	if err.Error() != expectedErr1 && err.Error() != expectedErr2 {
 		t.Errorf("Expected %v or %v \n but received \n %v", expectedErr1, expectedErr2, err)
 	}
@@ -124,10 +137,10 @@ func TestLibengineNewRPCConnectionInternal(t *testing.T) {
 		TLS:             true,
 		ClientKey:       "key1",
 	}
-	cM := NewConnManager(config.NewDefaultCGRConfig(), make(map[string]chan rpcclient.ClientConnector))
-	exp, err := rpcclient.NewRPCClient("", "", cfg.TLS, cfg.ClientKey, cM.cfg.TLSCfg().ClientCerificate,
-		cM.cfg.TLSCfg().ClientCerificate, cfg.ConnectAttempts, cfg.Reconnects, cfg.ConnectTimeout, cfg.ReplyTimeout,
-		rpcclient.InternalRPC, cM.rpcInternal["a4f3f"], false, nil)
+	cM := NewConnManager(config.NewDefaultCGRConfig(), make(map[string]chan birpc.ClientConnector))
+	exp, err := rpcclient.NewRPCClient(context.Background(), "", "", cfg.TLS, cfg.ClientKey, cM.cfg.TLSCfg().ClientCerificate,
+		cM.cfg.TLSCfg().ClientCerificate, cfg.ConnectAttempts, cfg.Reconnects, cfg.MaxReconnectInterval, utils.FibDuration,
+		cfg.ConnectTimeout, cfg.ReplyTimeout, rpcclient.InternalRPC, cM.rpcInternal["a4f3f"], false, nil)
 
 	// We only want to check if the client loaded with the correct config,
 	// therefore connection is not mandatory
@@ -135,9 +148,16 @@ func TestLibengineNewRPCConnectionInternal(t *testing.T) {
 		t.Error(err)
 	}
 
-	conn, err := NewRPCConnection(cfg, cM.cfg.TLSCfg().ClientKey, cM.cfg.TLSCfg().ClientCerificate, cM.cfg.TLSCfg().CaCertificate,
-		cM.cfg.GeneralCfg().ConnectAttempts, cM.cfg.GeneralCfg().Reconnects, cM.cfg.GeneralCfg().ConnectTimeout, cM.cfg.GeneralCfg().ReplyTimeout,
-		cM.rpcInternal["a4f3f"], false, nil, "*internal", "a4f3f", new(ltcache.Cache))
+	conn, err := NewRPCConnection(context.Background(), cfg,
+		cM.cfg.TLSCfg().ClientKey,
+		cM.cfg.TLSCfg().ClientCerificate,
+		cM.cfg.TLSCfg().CaCertificate,
+		cM.cfg.GeneralCfg().ConnectAttempts,
+		cM.cfg.GeneralCfg().Reconnects,
+		cM.cfg.GeneralCfg().MaxReconnectInterval,
+		cM.cfg.GeneralCfg().ConnectTimeout,
+		cM.cfg.GeneralCfg().ReplyTimeout,
+		cM.rpcInternal["a4f3f"], false, "*internal", "a4f3f", new(ltcache.Cache))
 
 	if err != rpcclient.ErrInternallyDisconnected {
 		t.Error(err)
@@ -153,7 +173,7 @@ func TestLibengineNewRPCPoolUnsupportedTransport(t *testing.T) {
 	}()
 
 	connID := "connID"
-	intChan := make(chan rpcclient.ClientConnector)
+	intChan := make(chan birpc.ClientConnector)
 	defaultCfg := config.NewDefaultCGRConfig()
 	defaultCfg.RPCConns()[connID] = config.NewDfltRPCConn()
 	defaultCfg.RPCConns()[connID].Conns = []*config.RemoteHost{
@@ -168,9 +188,13 @@ func TestLibengineNewRPCPoolUnsupportedTransport(t *testing.T) {
 	var exp *rpcclient.RPCPool
 	experr := fmt.Sprintf("Unsupported transport: <%s>",
 		defaultCfg.RPCConns()[connID].Conns[0].Transport)
-	rcv, err := NewRPCPool("", "", "", "", defaultCfg.GeneralCfg().ConnectAttempts,
-		defaultCfg.GeneralCfg().Reconnects, defaultCfg.GeneralCfg().ConnectTimeout,
-		0, defaultCfg.RPCConns()[connID].Conns, intChan, false, nil, connID, connCache)
+	rcv, err := NewRPCPool(context.Background(), "", "", "", "",
+		defaultCfg.GeneralCfg().ConnectAttempts,
+		defaultCfg.GeneralCfg().Reconnects,
+		defaultCfg.GeneralCfg().MaxReconnectInterval,
+		defaultCfg.GeneralCfg().ConnectTimeout,
+		0, defaultCfg.RPCConns()[connID].Conns,
+		intChan, false, connID, connCache)
 
 	if err == nil || err.Error() != experr {
 		t.Fatalf("\nexpected: <%+v>, \nreceived: <%+v>", experr, err)
@@ -193,11 +217,12 @@ func TestLibengineNewRPCClientSet(t *testing.T) {
 func TestLibengineAddInternalRPCClientSuccess(t *testing.T) {
 	s := RPCClientSet{}
 	name := "testName"
-	connChan := make(chan rpcclient.ClientConnector)
+	connChan := make(chan birpc.ClientConnector)
 
-	expClient, err := rpcclient.NewRPCClient(utils.EmptyString, utils.EmptyString, false,
+	expClient, err := rpcclient.NewRPCClient(context.Background(), utils.EmptyString, utils.EmptyString, false,
 		utils.EmptyString, utils.EmptyString, utils.EmptyString,
 		config.CgrConfig().GeneralCfg().ConnectAttempts, config.CgrConfig().GeneralCfg().Reconnects,
+		config.CgrConfig().GeneralCfg().MaxReconnectInterval, utils.FibDuration,
 		config.CgrConfig().GeneralCfg().ConnectTimeout, config.CgrConfig().GeneralCfg().ReplyTimeout,
 		rpcclient.InternalRPC, connChan, true, nil)
 
@@ -247,7 +272,7 @@ func TestLibengineCallInvalidMethod(t *testing.T) {
 	reply := "testReply"
 
 	experr := rpcclient.ErrUnsupporteServiceMethod
-	err := s.Call(method, args, reply)
+	err := s.Call(context.Background(), method, args, reply)
 
 	if err == nil || err != experr {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", experr, err)
@@ -255,10 +280,11 @@ func TestLibengineCallInvalidMethod(t *testing.T) {
 }
 
 func TestLibengineCallMethodNotFound(t *testing.T) {
-	connChan := make(chan rpcclient.ClientConnector)
-	client, err := rpcclient.NewRPCClient(utils.EmptyString, utils.EmptyString, false,
+	connChan := make(chan birpc.ClientConnector)
+	client, err := rpcclient.NewRPCClient(context.Background(), utils.EmptyString, utils.EmptyString, false,
 		utils.EmptyString, utils.EmptyString, utils.EmptyString,
 		config.CgrConfig().GeneralCfg().ConnectAttempts, config.CgrConfig().GeneralCfg().Reconnects,
+		config.CgrConfig().GeneralCfg().MaxReconnectInterval, utils.FibDuration,
 		config.CgrConfig().GeneralCfg().ConnectTimeout, config.CgrConfig().GeneralCfg().ReplyTimeout,
 		rpcclient.InternalRPC, connChan, true, nil)
 
@@ -274,7 +300,7 @@ func TestLibengineCallMethodNotFound(t *testing.T) {
 	reply := "testReply"
 
 	experr := rpcclient.ErrUnsupporteServiceMethod
-	err = s.Call(method, args, reply)
+	err = s.Call(context.Background(), method, args, reply)
 
 	if err == nil || err != experr {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", experr, err)
@@ -282,10 +308,11 @@ func TestLibengineCallMethodNotFound(t *testing.T) {
 }
 
 func TestLibengineCallNilArgument(t *testing.T) {
-	connChan := make(chan rpcclient.ClientConnector)
-	client, err := rpcclient.NewRPCClient(utils.EmptyString, utils.EmptyString, false,
+	connChan := make(chan birpc.ClientConnector)
+	client, err := rpcclient.NewRPCClient(context.Background(), utils.EmptyString, utils.EmptyString, false,
 		utils.EmptyString, utils.EmptyString, utils.EmptyString,
 		config.CgrConfig().GeneralCfg().ConnectAttempts, config.CgrConfig().GeneralCfg().Reconnects,
+		config.CgrConfig().GeneralCfg().MaxReconnectInterval, utils.FibDuration,
 		config.CgrConfig().GeneralCfg().ConnectTimeout, config.CgrConfig().GeneralCfg().ReplyTimeout,
 		rpcclient.InternalRPC, connChan, true, nil)
 
@@ -302,7 +329,7 @@ func TestLibengineCallNilArgument(t *testing.T) {
 
 	experr := fmt.Sprintf("nil rpc in argument method: %s in: %v out: %v",
 		method, args, reply)
-	err = s.Call(method, args, reply)
+	err = s.Call(context.Background(), method, args, reply)
 
 	if err == nil || err.Error() != experr {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", experr, err)

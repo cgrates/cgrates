@@ -23,6 +23,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -79,8 +80,8 @@ func (eeS *EventExporterS) Shutdown() {
 	eeS.setupCache(nil) // cleanup exporters
 }
 
-// Call implements rpcclient.ClientConnector interface for internal RPC
-func (eeS *EventExporterS) Call(serviceMethod string, args any, reply any) error {
+// Call implements birpc.ClientConnector interface for internal RPC
+func (eeS *EventExporterS) Call(ctx *context.Context, serviceMethod string, args any, reply any) error {
 	return utils.RPCCall(eeS, serviceMethod, args, reply)
 }
 
@@ -110,7 +111,8 @@ func (eeS *EventExporterS) attrSProcessEvent(cgrEv *utils.CGREvent, attrIDs []st
 	cgrEv.APIOpts[utils.OptsAttributesProfileIDs] = attrIDs
 	cgrEv.APIOpts[utils.OptsContext] = utils.FirstNonEmpty(ctx,
 		utils.IfaceAsString(cgrEv.APIOpts[utils.OptsContext]), utils.MetaEEs)
-	if err = eeS.connMgr.Call(eeS.cfg.EEsNoLksCfg().AttributeSConns, nil, utils.AttributeSv1ProcessEvent,
+	if err = eeS.connMgr.Call(context.TODO(), eeS.cfg.EEsNoLksCfg().AttributeSConns,
+		utils.AttributeSv1ProcessEvent,
 		cgrEv, &rplyEv); err == nil && len(rplyEv.AlteredFields) != 0 {
 		*cgrEv = *rplyEv.CGREvent
 	} else if err != nil &&
@@ -122,7 +124,7 @@ func (eeS *EventExporterS) attrSProcessEvent(cgrEv *utils.CGREvent, attrIDs []st
 
 // V1ProcessEvent will be called each time a new event is received from readers
 // rply -> map[string]map[string]any
-func (eeS *EventExporterS) V1ProcessEvent(cgrEv *engine.CGREventWithEeIDs, rply *map[string]map[string]any) (err error) {
+func (eeS *EventExporterS) V1ProcessEvent(ctx *context.Context, cgrEv *engine.CGREventWithEeIDs, rply *map[string]map[string]any) (err error) {
 	eeS.cfg.RLocks(config.EEsJson)
 	defer eeS.cfg.RUnlocks(config.EEsJson)
 

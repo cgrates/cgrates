@@ -22,12 +22,13 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
 // Returns MaxUsage (for calls in seconds), -1 for no limit
-func (apierSv1 *APIerSv1) GetMaxUsage(usageRecord *engine.UsageRecordWithAPIOpts, maxUsage *int64) error {
+func (apierSv1 *APIerSv1) GetMaxUsage(ctx *context.Context, usageRecord *engine.UsageRecordWithAPIOpts, maxUsage *int64) error {
 	if apierSv1.Responder == nil {
 		return utils.NewErrNotConnected(utils.RALService)
 	}
@@ -58,10 +59,11 @@ func (apierSv1 *APIerSv1) GetMaxUsage(usageRecord *engine.UsageRecordWithAPIOpts
 		return utils.NewErrServerError(err)
 	}
 	var maxDur time.Duration
-	if err := apierSv1.Responder.GetMaxSessionTime(&engine.CallDescriptorWithAPIOpts{
-		CallDescriptor: cd,
-		APIOpts:        usageRecord.APIOpts,
-	}, &maxDur); err != nil {
+	if err := apierSv1.Responder.GetMaxSessionTime(ctx,
+		&engine.CallDescriptorWithAPIOpts{
+			CallDescriptor: cd,
+			APIOpts:        usageRecord.APIOpts,
+		}, &maxDur); err != nil {
 		return err
 	}
 	if maxDur == time.Duration(-1) {

@@ -22,12 +22,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package v1
 
 import (
-	"net/rpc"
-	"net/rpc/jsonrpc"
 	"path"
 	"reflect"
 	"testing"
 
+	"github.com/cgrates/birpc"
+	"github.com/cgrates/birpc/context"
+	"github.com/cgrates/birpc/jsonrpc"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -36,7 +37,7 @@ import (
 var (
 	tpDispatcherCfgPath   string
 	tpDispatcherCfg       *config.CGRConfig
-	tpDispatcherRPC       *rpc.Client
+	tpDispatcherRPC       *birpc.Client
 	tpDispatcher          *utils.TPDispatcherProfile
 	tpDispatcherDelay     int
 	tpDispatcherConfigDIR string //run tests for specific configuration
@@ -113,7 +114,7 @@ func testTPDispatcherRpcConn(t *testing.T) {
 
 func testTPDispatcherGetTPDispatcherBeforeSet(t *testing.T) {
 	var reply *utils.TPDispatcherProfile
-	if err := tpDispatcherRPC.Call(utils.APIerSv1GetTPDispatcherProfile,
+	if err := tpDispatcherRPC.Call(context.Background(), utils.APIerSv1GetTPDispatcherProfile,
 		&utils.TPTntID{TPid: "TP1", Tenant: "cgrates.org", ID: "Dsp1"},
 		&reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
@@ -136,7 +137,7 @@ func testTPDispatcherSetTPDispatcher(t *testing.T) {
 	}
 
 	var result string
-	if err := tpDispatcherRPC.Call(utils.APIerSv1SetTPDispatcherProfile, tpDispatcher, &result); err != nil {
+	if err := tpDispatcherRPC.Call(context.Background(), utils.APIerSv1SetTPDispatcherProfile, tpDispatcher, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -145,7 +146,7 @@ func testTPDispatcherSetTPDispatcher(t *testing.T) {
 
 func testTPDispatcherGetTPDispatcherAfterSet(t *testing.T) {
 	var reply *utils.TPDispatcherProfile
-	if err := tpDispatcherRPC.Call(utils.APIerSv1GetTPDispatcherProfile,
+	if err := tpDispatcherRPC.Call(context.Background(), utils.APIerSv1GetTPDispatcherProfile,
 		&utils.TPTntID{TPid: "TP1", Tenant: "cgrates.org", ID: "Dsp1"}, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(tpDispatcher, reply) {
@@ -156,7 +157,7 @@ func testTPDispatcherGetTPDispatcherAfterSet(t *testing.T) {
 func testTPDispatcherGetTPDispatcherIds(t *testing.T) {
 	var result []string
 	expectedTPID := []string{"cgrates.org:Dsp1"}
-	if err := tpDispatcherRPC.Call(utils.APIerSv1GetTPDispatcherProfileIDs,
+	if err := tpDispatcherRPC.Call(context.Background(), utils.APIerSv1GetTPDispatcherProfileIDs,
 		&AttrGetTPDispatcherIds{TPid: "TP1"}, &result); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expectedTPID, result) {
@@ -166,7 +167,7 @@ func testTPDispatcherGetTPDispatcherIds(t *testing.T) {
 
 func testTPDispatcherUpdateTPDispatcher(t *testing.T) {
 	var result string
-	if err := tpDispatcherRPC.Call(utils.APIerSv1SetTPDispatcherProfile, tpDispatcher, &result); err != nil {
+	if err := tpDispatcherRPC.Call(context.Background(), utils.APIerSv1SetTPDispatcherProfile, tpDispatcher, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -187,7 +188,7 @@ func testTPDispatcherGetTPDispatcherAfterUpdate(t *testing.T) {
 		Strategy: utils.MetaFirst,
 		Weight:   10,
 	}
-	if err := tpDispatcherRPC.Call(utils.APIerSv1GetTPDispatcherProfile,
+	if err := tpDispatcherRPC.Call(context.Background(), utils.APIerSv1GetTPDispatcherProfile,
 		&utils.TPTntID{TPid: "TP1", Tenant: "cgrates.org", ID: "Dsp1"}, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(tpDispatcher, reply) && !reflect.DeepEqual(revHosts, reply) {
@@ -197,7 +198,7 @@ func testTPDispatcherGetTPDispatcherAfterUpdate(t *testing.T) {
 
 func testTPDispatcherRemTPDispatcher(t *testing.T) {
 	var resp string
-	if err := tpDispatcherRPC.Call(utils.APIerSv1RemoveTPDispatcherProfile,
+	if err := tpDispatcherRPC.Call(context.Background(), utils.APIerSv1RemoveTPDispatcherProfile,
 		&utils.TPTntID{TPid: "TP1", Tenant: "cgrates.org", ID: "Dsp1"}, &resp); err != nil {
 		t.Error(err)
 	} else if resp != utils.OK {
@@ -207,7 +208,7 @@ func testTPDispatcherRemTPDispatcher(t *testing.T) {
 
 func testTPDispatcherGetTPDispatcherAfterRemove(t *testing.T) {
 	var reply *utils.TPDispatcherProfile
-	if err := tpDispatcherRPC.Call(utils.APIerSv1GetTPDispatcherProfile,
+	if err := tpDispatcherRPC.Call(context.Background(), utils.APIerSv1GetTPDispatcherProfile,
 		&utils.TPTntID{TPid: "TP1", Tenant: "cgrates.org", ID: "Dsp1"},
 		&reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)

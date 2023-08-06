@@ -22,13 +22,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package v1
 
 import (
-	"net/rpc"
 	"os/exec"
 	"path"
 	"reflect"
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc"
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -37,7 +38,7 @@ import (
 var (
 	dspCfgPath string
 	dspCfg     *config.CGRConfig
-	dspRPC     *rpc.Client
+	dspRPC     *birpc.Client
 
 	sTestsDspDspv1 = []func(t *testing.T){
 		testDspITLoadConfig,
@@ -173,7 +174,7 @@ func testDspDspv1GetProfileForEvent(t *testing.T) {
 		expected.Hosts[1].FilterIDs = nil
 	}
 	expected.Hosts.Sort()
-	if err := dspRPC.Call(utils.DispatcherSv1GetProfilesForEvent, &arg, &reply); err != nil {
+	if err := dspRPC.Call(context.Background(), utils.DispatcherSv1GetProfilesForEvent, &arg, &reply); err != nil {
 		t.Fatal(err)
 	} else if len(reply) != 1 {
 		t.Fatalf("Unexpected number of profiles:%v", len(reply))
@@ -194,7 +195,7 @@ func testDspDspv1GetProfileForEvent(t *testing.T) {
 		},
 	}
 	expected.Hosts.Sort()
-	if err := dspRPC.Call(utils.DispatcherSv1GetProfilesForEvent, &arg2, &reply); err != nil {
+	if err := dspRPC.Call(context.Background(), utils.DispatcherSv1GetProfilesForEvent, &arg2, &reply); err != nil {
 		t.Fatal(err)
 	} else if len(reply) != 1 {
 		t.Fatalf("Unexpected number of profiles:%v", len(reply))
@@ -238,7 +239,7 @@ func testDspDspv1GetProfileForEventWithMethod(t *testing.T) {
 		expected.Hosts[0].FilterIDs = nil
 	}
 	expected.Hosts.Sort()
-	if err := dspRPC.Call(utils.DispatcherSv1GetProfilesForEvent, &arg, &reply); err != nil {
+	if err := dspRPC.Call(context.Background(), utils.DispatcherSv1GetProfilesForEvent, &arg, &reply); err != nil {
 		t.Fatal(err)
 	} else if len(reply) != 1 {
 		t.Error(utils.ToJSON(reply))

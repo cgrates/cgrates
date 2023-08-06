@@ -22,11 +22,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package general_tests
 
 import (
-	"net/rpc"
 	"path"
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc"
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -36,7 +37,7 @@ var (
 	ses4CfgDir  string
 	ses4CfgPath string
 	ses4Cfg     *config.CGRConfig
-	ses4RPC     *rpc.Client
+	ses4RPC     *birpc.Client
 
 	ses4Tests = []func(t *testing.T){
 		testSes4ItLoadConfig,
@@ -107,7 +108,7 @@ func testSes4ItRPCConn(t *testing.T) {
 func testSes4ItLoadFromFolder(t *testing.T) {
 	var reply string
 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "testit")}
-	if err := ses4RPC.Call(utils.APIerSv1LoadTariffPlanFromFolder, attrs, &reply); err != nil {
+	if err := ses4RPC.Call(context.Background(), utils.APIerSv1LoadTariffPlanFromFolder, attrs, &reply); err != nil {
 		t.Error(err)
 	}
 	time.Sleep(100 * time.Millisecond)
@@ -116,7 +117,7 @@ func testSes4ItLoadFromFolder(t *testing.T) {
 func testSes4SetAccount(t *testing.T) {
 	var reply string
 	attrs := &utils.AttrSetAccount{Tenant: "cgrates.org", Account: "dan7"}
-	if err := ses4RPC.Call(utils.APIerSv1SetAccount, attrs, &reply); err != nil {
+	if err := ses4RPC.Call(context.Background(), utils.APIerSv1SetAccount, attrs, &reply); err != nil {
 		t.Error("Got error on APIerSv1.SetAccount: ", err.Error())
 	} else if reply != utils.OK {
 		t.Errorf("Calling APIerSv1.SetAccount received: %s", reply)
@@ -149,7 +150,7 @@ func testSes4CDRsProcessCDR(t *testing.T) {
 
 	// Process and store the given CDR.
 	var reply string
-	if err := ses4RPC.Call(utils.CDRsV1ProcessEvent, args, &reply); err != nil {
+	if err := ses4RPC.Call(context.Background(), utils.CDRsV1ProcessEvent, args, &reply); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply received: ", reply)
@@ -157,7 +158,7 @@ func testSes4CDRsProcessCDR(t *testing.T) {
 
 	// Process the CDR again, after adding the *rerate flag.
 	args.Flags = append(args.Flags, utils.MetaRerate)
-	if err := ses4RPC.Call(utils.CDRsV1ProcessEvent, args, &reply); err != nil {
+	if err := ses4RPC.Call(context.Background(), utils.CDRsV1ProcessEvent, args, &reply); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply received: ", reply)

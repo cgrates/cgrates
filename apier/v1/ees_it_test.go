@@ -22,7 +22,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package v1
 
 import (
-	"net/rpc"
 	"os"
 	"path"
 	"path/filepath"
@@ -30,6 +29,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc"
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -38,7 +39,7 @@ import (
 var (
 	eeSCfgPath   string
 	eeSCfg       *config.CGRConfig
-	eeSRPC       *rpc.Client
+	eeSRPC       *birpc.Client
 	eeSConfigDIR string //run tests for specific configuration
 
 	sTestsEEs = []func(t *testing.T){
@@ -138,7 +139,7 @@ func testEEsAddCDRs(t *testing.T) {
 		},
 	}
 	var result string
-	if err := eeSRPC.Call(utils.APIerSv1SetChargerProfile, chargerProfile, &result); err != nil {
+	if err := eeSRPC.Call(context.Background(), utils.APIerSv1SetChargerProfile, chargerProfile, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -175,7 +176,7 @@ func testEEsAddCDRs(t *testing.T) {
 	}
 	for _, cdr := range storedCdrs {
 		var reply string
-		if err := eeSRPC.Call(utils.CDRsV1ProcessCDR, &engine.CDRWithAPIOpts{CDR: cdr}, &reply); err != nil {
+		if err := eeSRPC.Call(context.Background(), utils.CDRsV1ProcessCDR, &engine.CDRWithAPIOpts{CDR: cdr}, &reply); err != nil {
 			t.Error("Unexpected error: ", err.Error())
 		} else if reply != utils.OK {
 			t.Error("Unexpected reply received: ", reply)
@@ -189,7 +190,7 @@ func testEEsExportCDRs(t *testing.T) {
 		Verbose:     true,
 	}
 	var rply map[string]any
-	if err := eeSRPC.Call(utils.APIerSv1ExportCDRs, &attr, &rply); err != nil {
+	if err := eeSRPC.Call(context.Background(), utils.APIerSv1ExportCDRs, &attr, &rply); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	}
 	if len(rply) != 1 {
@@ -252,7 +253,7 @@ func testEEsExportCDRsMultipleExporters(t *testing.T) {
 		Verbose:     true,
 	}
 	var rply map[string]any
-	if err := eeSRPC.Call(utils.APIerSv1ExportCDRs, &attr, &rply); err != nil {
+	if err := eeSRPC.Call(context.Background(), utils.APIerSv1ExportCDRs, &attr, &rply); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	}
 	if len(rply) != 2 {

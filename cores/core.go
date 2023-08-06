@@ -29,6 +29,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -127,8 +128,8 @@ func MemProfiling(memProfDir string, interval time.Duration, nrFiles int, shdWg 
 	}
 }
 
-// Status returns the status of the engine
-func (cS *CoreService) Status(arg *utils.TenantWithAPIOpts, reply *map[string]any) (err error) {
+// V1Status returns the status of the engine
+func (cS *CoreService) V1Status(_ *context.Context, _ *utils.TenantWithAPIOpts, reply *map[string]any) (err error) {
 	memstats := new(runtime.MemStats)
 	runtime.ReadMemStats(memstats)
 	response := make(map[string]any)
@@ -203,7 +204,52 @@ func (cS *CoreService) StopMemoryProfiling() (err error) {
 	return
 }
 
-// Panic is used print the Message sent as a panic
-func (cS *CoreService) Panic(args *utils.PanicMessageArgs, _ *string) error {
+// Sleep is used to test the concurrent requests mechanism
+func (cS *CoreService) V1Sleep(_ *context.Context, arg *utils.DurationArgs, reply *string) error {
+	time.Sleep(arg.Duration)
+	*reply = utils.OK
+	return nil
+}
+
+// StartCPUProfiling is used to start CPUProfiling in the given path
+func (cS *CoreService) V1StartCPUProfiling(_ *context.Context, args *utils.DirectoryArgs, reply *string) error {
+	if err := cS.StartCPUProfiling(path.Join(args.DirPath, utils.CpuPathCgr)); err != nil {
+		return err
+	}
+	*reply = utils.OK
+	return nil
+}
+
+// StopCPUProfiling is used to stop CPUProfiling. The file should be written on the path
+// where the CPUProfiling already started
+func (cS *CoreService) V1StopCPUProfiling(_ *context.Context, _ *utils.TenantWithAPIOpts, reply *string) error {
+	if err := cS.StopCPUProfiling(); err != nil {
+		return err
+	}
+	*reply = utils.OK
+	return nil
+}
+
+// StartMemoryProfiling is used to start MemoryProfiling in the given path
+func (cS *CoreService) V1StartMemoryProfiling(_ *context.Context, args *utils.MemoryPrf, reply *string) error {
+	if err := cS.StartMemoryProfiling(args); err != nil {
+		return err
+	}
+	*reply = utils.OK
+	return nil
+}
+
+// V1StopMemoryProfiling is used to stop MemoryProfiling. The file should be written on the path
+// where the MemoryProfiling already started
+func (cS *CoreService) V1StopMemoryProfiling(_ *context.Context, _ *utils.TenantWithAPIOpts, reply *string) error {
+	if err := cS.StopMemoryProfiling(); err != nil {
+		return err
+	}
+	*reply = utils.OK
+	return nil
+}
+
+// V1Panic is used print the Message sent as a panic
+func (cS *CoreService) V1Panic(_ *context.Context, args *utils.PanicMessageArgs, _ *string) error {
 	panic(args.Message)
 }

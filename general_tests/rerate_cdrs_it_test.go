@@ -22,12 +22,13 @@ package general_tests
 
 import (
 	"math"
-	"net/rpc"
 	"path"
 	"reflect"
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc"
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -36,7 +37,7 @@ import (
 var (
 	rrCdrsCfgPath string
 	rrCdrsCfg     *config.CGRConfig
-	rrCdrsRPC     *rpc.Client
+	rrCdrsRPC     *birpc.Client
 	rrCdrsConfDIR string //run tests for specific configuration
 	rrCdrsDelay   int
 	rrCdrsUUID    = utils.GenUUID()
@@ -121,7 +122,7 @@ func testRerateCDRsRPCConn(t *testing.T) {
 func testRerateCDRsLoadTP(t *testing.T) {
 	var reply string
 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "reratecdrs")}
-	if err := rrCdrsRPC.Call(utils.APIerSv1LoadTariffPlanFromFolder, attrs, &reply); err != nil {
+	if err := rrCdrsRPC.Call(context.Background(), utils.APIerSv1LoadTariffPlanFromFolder, attrs, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply returned", reply)
@@ -146,7 +147,7 @@ func testRerateCDRsSetBalance(t *testing.T) {
 		},
 	}
 	var reply string
-	if err := rrCdrsRPC.Call(utils.APIerSv2SetBalance, attrSetBalance, &reply); err != nil {
+	if err := rrCdrsRPC.Call(context.Background(), utils.APIerSv2SetBalance, attrSetBalance, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf("Received: %s", reply)
@@ -167,7 +168,7 @@ func testRerateCDRsGetAccountAfterBalanceSet(t *testing.T) {
 	}
 	var acnt engine.Account
 	attrs := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1001"}
-	if err := rrCdrsRPC.Call(utils.APIerSv2GetAccount, attrs, &acnt); err != nil {
+	if err := rrCdrsRPC.Call(context.Background(), utils.APIerSv2GetAccount, attrs, &acnt); err != nil {
 		t.Error(err)
 	} else {
 		expAcnt.UpdateTime = acnt.UpdateTime
@@ -202,7 +203,7 @@ func testRerateCDRsProcessEventCDR1(t *testing.T) {
 		},
 	}
 	var reply string
-	if err := rrCdrsRPC.Call(utils.CDRsV1ProcessEvent, argsEv, &reply); err != nil {
+	if err := rrCdrsRPC.Call(context.Background(), utils.CDRsV1ProcessEvent, argsEv, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply received: ", reply)
@@ -212,7 +213,7 @@ func testRerateCDRsProcessEventCDR1(t *testing.T) {
 
 func testRerateCDRsCheckCDRCostAfterProcessEvent1(t *testing.T) {
 	var cdrs []*engine.CDR
-	if err := rrCdrsRPC.Call(utils.CDRsV1GetCDRs, &utils.RPCCDRsFilterWithAPIOpts{
+	if err := rrCdrsRPC.Call(context.Background(), utils.CDRsV1GetCDRs, &utils.RPCCDRsFilterWithAPIOpts{
 		RPCCDRsFilter: &utils.RPCCDRsFilter{
 			RunIDs: []string{"run_1"},
 		}}, &cdrs); err != nil {
@@ -244,7 +245,7 @@ func testRerateCDRsGetAccountAfterProcessEvent1(t *testing.T) {
 	}
 	var acnt engine.Account
 	attrs := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1001"}
-	if err := rrCdrsRPC.Call(utils.APIerSv2GetAccount, attrs, &acnt); err != nil {
+	if err := rrCdrsRPC.Call(context.Background(), utils.APIerSv2GetAccount, attrs, &acnt); err != nil {
 		t.Error(err)
 	} else {
 		expAcnt.UpdateTime = acnt.UpdateTime
@@ -281,7 +282,7 @@ func testRerateCDRsProcessEventCDR2(t *testing.T) {
 		},
 	}
 	var reply string
-	if err := rrCdrsRPC.Call(utils.CDRsV1ProcessEvent, argsEv, &reply); err != nil {
+	if err := rrCdrsRPC.Call(context.Background(), utils.CDRsV1ProcessEvent, argsEv, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply received: ", reply)
@@ -291,7 +292,7 @@ func testRerateCDRsProcessEventCDR2(t *testing.T) {
 
 func testRerateCDRsCheckCDRCostAfterProcessEvent2(t *testing.T) {
 	var cdrs []*engine.CDR
-	if err := rrCdrsRPC.Call(utils.CDRsV1GetCDRs, &utils.RPCCDRsFilterWithAPIOpts{
+	if err := rrCdrsRPC.Call(context.Background(), utils.CDRsV1GetCDRs, &utils.RPCCDRsFilterWithAPIOpts{
 		RPCCDRsFilter: &utils.RPCCDRsFilter{
 			RunIDs: []string{"run_2"},
 		}}, &cdrs); err != nil {
@@ -323,7 +324,7 @@ func testRerateCDRsGetAccountAfterProcessEvent2(t *testing.T) {
 	}
 	var acnt engine.Account
 	attrs := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1001"}
-	if err := rrCdrsRPC.Call(utils.APIerSv2GetAccount, attrs, &acnt); err != nil {
+	if err := rrCdrsRPC.Call(context.Background(), utils.APIerSv2GetAccount, attrs, &acnt); err != nil {
 		t.Error(err)
 	} else {
 		expAcnt.UpdateTime = acnt.UpdateTime
@@ -338,7 +339,7 @@ func testRerateCDRsGetAccountAfterProcessEvent2(t *testing.T) {
 
 func testRerateCDRsRerateCDRs(t *testing.T) {
 	var reply string
-	if err := rrCdrsRPC.Call(utils.CDRsV1RateCDRs, &engine.ArgRateCDRs{
+	if err := rrCdrsRPC.Call(context.Background(), utils.CDRsV1RateCDRs, &engine.ArgRateCDRs{
 		Flags: []string{utils.MetaRerate},
 		RPCCDRsFilter: utils.RPCCDRsFilter{
 			OrderBy: utils.AnswerTime,
@@ -352,7 +353,7 @@ func testRerateCDRsRerateCDRs(t *testing.T) {
 
 func testRerateCDRsCheckCDRCostsAfterRerate(t *testing.T) {
 	var cdrs []*engine.CDR
-	if err := rrCdrsRPC.Call(utils.CDRsV1GetCDRs, &utils.RPCCDRsFilterWithAPIOpts{
+	if err := rrCdrsRPC.Call(context.Background(), utils.CDRsV1GetCDRs, &utils.RPCCDRsFilterWithAPIOpts{
 		RPCCDRsFilter: &utils.RPCCDRsFilter{
 			CGRIDs:  []string{rrCdrsUUID},
 			OrderBy: utils.AnswerTime,
@@ -385,7 +386,7 @@ func testRerateCDRsGetAccountAfterRerate(t *testing.T) {
 	}
 	var acnt engine.Account
 	attrs := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1001"}
-	if err := rrCdrsRPC.Call(utils.APIerSv2GetAccount, attrs, &acnt); err != nil {
+	if err := rrCdrsRPC.Call(context.Background(), utils.APIerSv2GetAccount, attrs, &acnt); err != nil {
 		t.Error(err)
 	} else {
 		expAcnt.UpdateTime = acnt.UpdateTime

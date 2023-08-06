@@ -23,11 +23,12 @@ import (
 	"errors"
 	"flag"
 	"io"
-	"net/rpc"
-	"net/rpc/jsonrpc"
 	"strings"
 	"testing"
 
+	"github.com/cgrates/birpc"
+	"github.com/cgrates/birpc/context"
+	"github.com/cgrates/birpc/jsonrpc"
 	"github.com/cgrates/rpcclient"
 
 	"github.com/cgrates/cgrates/config"
@@ -46,12 +47,12 @@ var loaderPaths = []string{"/tmp/In", "/tmp/Out", "/tmp/LoaderIn", "/tmp/Subpath
 	"/tmp/SubpathLoaderWithMove", "/tmp/SubpathOut", "/tmp/templateLoaderIn", "/tmp/templateLoaderOut",
 	"/tmp/customSepLoaderIn", "/tmp/customSepLoaderOut"}
 
-func newRPCClient(cfg *config.ListenCfg) (c *rpc.Client, err error) {
+func newRPCClient(cfg *config.ListenCfg) (c *birpc.Client, err error) {
 	switch *encoding {
 	case utils.MetaJSON:
 		return jsonrpc.Dial(utils.TCP, cfg.RPCJSONListen)
 	case utils.MetaGOB:
-		return rpc.Dial(utils.TCP, cfg.RPCGOBListen)
+		return birpc.Dial(utils.TCP, cfg.RPCGOBListen)
 	default:
 		return nil, errors.New("UNSUPPORTED_RPC")
 	}
@@ -61,7 +62,7 @@ type testMockCacheConn struct {
 	calls map[string]func(arg any, rply any) error
 }
 
-func (s *testMockCacheConn) Call(method string, arg any, rply any) error {
+func (s *testMockCacheConn) Call(ctx *context.Context, method string, arg any, rply any) error {
 	if call, has := s.calls[method]; !has {
 		return rpcclient.ErrUnsupporteServiceMethod
 	} else {
@@ -97,12 +98,12 @@ func TestProcessContentCallsRemoveItems(t *testing.T) {
 	}
 	data := engine.NewInternalDB(nil, nil, true, config.CgrConfig().DataDbCfg().Items)
 
-	internalCacheSChan := make(chan rpcclient.ClientConnector, 1)
+	internalCacheSChan := make(chan birpc.ClientConnector, 1)
 	internalCacheSChan <- sMock
 	ldr := &Loader{
 		ldrID:         "TestProcessContentCallsRemoveItems",
 		bufLoaderData: make(map[string][]LoaderData),
-		connMgr: engine.NewConnManager(config.CgrConfig(), map[string]chan rpcclient.ClientConnector{
+		connMgr: engine.NewConnManager(config.CgrConfig(), map[string]chan birpc.ClientConnector{
 			utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches): internalCacheSChan,
 		}),
 		dm:         engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil),
@@ -201,12 +202,12 @@ func TestProcessContentCallsClear(t *testing.T) {
 	}
 	data := engine.NewInternalDB(nil, nil, true, config.CgrConfig().DataDbCfg().Items)
 
-	internalCacheSChan := make(chan rpcclient.ClientConnector, 1)
+	internalCacheSChan := make(chan birpc.ClientConnector, 1)
 	internalCacheSChan <- sMock
 	ldr := &Loader{
 		ldrID:         "TestProcessContentCallsClear",
 		bufLoaderData: make(map[string][]LoaderData),
-		connMgr: engine.NewConnManager(config.CgrConfig(), map[string]chan rpcclient.ClientConnector{
+		connMgr: engine.NewConnManager(config.CgrConfig(), map[string]chan birpc.ClientConnector{
 			utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches): internalCacheSChan,
 		}),
 		dm:         engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil),
@@ -312,12 +313,12 @@ func TestRemoveContentCallsReload(t *testing.T) {
 	}
 	data := engine.NewInternalDB(nil, nil, true, config.CgrConfig().DataDbCfg().Items)
 
-	internalCacheSChan := make(chan rpcclient.ClientConnector, 1)
+	internalCacheSChan := make(chan birpc.ClientConnector, 1)
 	internalCacheSChan <- sMock
 	ldr := &Loader{
 		ldrID:         "TestRemoveContentCallsReload",
 		bufLoaderData: make(map[string][]LoaderData),
-		connMgr: engine.NewConnManager(config.CgrConfig(), map[string]chan rpcclient.ClientConnector{
+		connMgr: engine.NewConnManager(config.CgrConfig(), map[string]chan birpc.ClientConnector{
 			utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches): internalCacheSChan,
 		}),
 		cacheConns: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)},
@@ -418,12 +419,12 @@ func TestRemoveContentCallsLoad(t *testing.T) {
 	}
 	data := engine.NewInternalDB(nil, nil, true, config.CgrConfig().DataDbCfg().Items)
 
-	internalCacheSChan := make(chan rpcclient.ClientConnector, 1)
+	internalCacheSChan := make(chan birpc.ClientConnector, 1)
 	internalCacheSChan <- sMock
 	ldr := &Loader{
 		ldrID:         "TestRemoveContentCallsReload",
 		bufLoaderData: make(map[string][]LoaderData),
-		connMgr: engine.NewConnManager(config.CgrConfig(), map[string]chan rpcclient.ClientConnector{
+		connMgr: engine.NewConnManager(config.CgrConfig(), map[string]chan birpc.ClientConnector{
 			utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches): internalCacheSChan,
 		}),
 		cacheConns: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)},
@@ -524,12 +525,12 @@ func TestRemoveContentCallsRemove(t *testing.T) {
 	}
 	data := engine.NewInternalDB(nil, nil, true, config.CgrConfig().DataDbCfg().Items)
 
-	internalCacheSChan := make(chan rpcclient.ClientConnector, 1)
+	internalCacheSChan := make(chan birpc.ClientConnector, 1)
 	internalCacheSChan <- sMock
 	ldr := &Loader{
 		ldrID:         "TestRemoveContentCallsReload",
 		bufLoaderData: make(map[string][]LoaderData),
-		connMgr: engine.NewConnManager(config.CgrConfig(), map[string]chan rpcclient.ClientConnector{
+		connMgr: engine.NewConnManager(config.CgrConfig(), map[string]chan birpc.ClientConnector{
 			utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches): internalCacheSChan,
 		}),
 		cacheConns: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)},
@@ -641,12 +642,12 @@ func TestRemoveContentCallsClear(t *testing.T) {
 	}
 	data := engine.NewInternalDB(nil, nil, true, config.CgrConfig().DataDbCfg().Items)
 
-	internalCacheSChan := make(chan rpcclient.ClientConnector, 1)
+	internalCacheSChan := make(chan birpc.ClientConnector, 1)
 	internalCacheSChan <- sMock
 	ldr := &Loader{
 		ldrID:         "TestRemoveContentCallsReload",
 		bufLoaderData: make(map[string][]LoaderData),
-		connMgr: engine.NewConnManager(config.CgrConfig(), map[string]chan rpcclient.ClientConnector{
+		connMgr: engine.NewConnManager(config.CgrConfig(), map[string]chan birpc.ClientConnector{
 			utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches): internalCacheSChan,
 		}),
 		cacheConns: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)},

@@ -21,12 +21,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package general_tests
 
 import (
-	"net/rpc"
 	"path"
 	"reflect"
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc"
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -35,7 +36,7 @@ import (
 var (
 	accWThdCfgPath string
 	accWThdCfg     *config.CGRConfig
-	accWThdRpc     *rpc.Client
+	accWThdRpc     *birpc.Client
 	accWThdConfDIR string //run tests for specific configuration
 	accWThdDelay   int
 
@@ -123,7 +124,7 @@ func testAccWThdSetThresholdProfile(t *testing.T) {
 		},
 	}
 	var reply string
-	if err := accWThdRpc.Call(utils.APIerSv1SetThresholdProfile, ThdPrf, &reply); err != nil {
+	if err := accWThdRpc.Call(context.Background(), utils.APIerSv1SetThresholdProfile, ThdPrf, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply returned", reply)
@@ -134,7 +135,7 @@ func testAccWThdSetThresholdProfile(t *testing.T) {
 	}
 
 	var result1 *engine.ThresholdProfile
-	if err := accWThdRpc.Call(utils.APIerSv1GetThresholdProfile, args, &result1); err != nil {
+	if err := accWThdRpc.Call(context.Background(), utils.APIerSv1GetThresholdProfile, args, &result1); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(result1, ThdPrf.ThresholdProfile) {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", utils.ToJSON(ThdPrf.ThresholdProfile), utils.ToJSON(result1))
@@ -154,7 +155,7 @@ func testAccWThdGetThresholdBeforeDebit(t *testing.T) {
 	}
 
 	var result2 *engine.Threshold
-	if err := accWThdRpc.Call(utils.ThresholdSv1GetThreshold, &utils.TenantIDWithAPIOpts{TenantID: args}, &result2); err != nil {
+	if err := accWThdRpc.Call(context.Background(), utils.ThresholdSv1GetThreshold, &utils.TenantIDWithAPIOpts{TenantID: args}, &result2); err != nil {
 		t.Error(err)
 	} else if result2.Snooze = expThd.Snooze; !reflect.DeepEqual(result2, expThd) {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", utils.ToJSON(expThd), utils.ToJSON(result2))
@@ -172,7 +173,7 @@ func testAccWThdSetBalance(t *testing.T) {
 		},
 	}
 	var reply string
-	if err := accWThdRpc.Call(utils.APIerSv2SetBalance, args, &reply); err != nil {
+	if err := accWThdRpc.Call(context.Background(), utils.APIerSv2SetBalance, args, &reply); err != nil {
 		t.Error("Got error on SetBalance: ", err.Error())
 	} else if reply != utils.OK {
 		t.Errorf("Calling SetBalance received: %s", reply)
@@ -186,7 +187,7 @@ func testAccWThdGetAccountBeforeDebit(t *testing.T) {
 		Tenant:  "cgrates.org",
 		Account: "1002",
 	}
-	if err := accWThdRpc.Call(utils.APIerSv2GetAccount, attrs, &acnt); err != nil {
+	if err := accWThdRpc.Call(context.Background(), utils.APIerSv2GetAccount, attrs, &acnt); err != nil {
 		t.Error(err)
 	} else if rply := acnt.BalanceMap[utils.MetaVoice].GetTotalValue(); rply != exp {
 		t.Errorf("Expecting: %v, received: %v",
@@ -211,7 +212,7 @@ func testAccWThdDebit1(t *testing.T) {
 		RunID:         utils.MetaDefault,
 	}
 	cc := new(engine.CallCost)
-	err = accWThdRpc.Call(utils.ResponderMaxDebit, &engine.CallDescriptorWithAPIOpts{
+	err = accWThdRpc.Call(context.Background(), utils.ResponderMaxDebit, &engine.CallDescriptorWithAPIOpts{
 		CallDescriptor: cd,
 	}, cc)
 	if err != nil {
@@ -236,7 +237,7 @@ func testAccWThdDebit2(t *testing.T) {
 		RunID:         utils.MetaDefault,
 	}
 	cc := new(engine.CallCost)
-	err = accWThdRpc.Call(utils.ResponderMaxDebit, &engine.CallDescriptorWithAPIOpts{
+	err = accWThdRpc.Call(context.Background(), utils.ResponderMaxDebit, &engine.CallDescriptorWithAPIOpts{
 		CallDescriptor: cd,
 	}, cc)
 	if err != nil {
@@ -251,7 +252,7 @@ func testAccWThdGetAccountAfterDebit(t *testing.T) {
 		Tenant:  "cgrates.org",
 		Account: "1002",
 	}
-	if err := accWThdRpc.Call(utils.APIerSv2GetAccount, attrs, &acnt); err != nil {
+	if err := accWThdRpc.Call(context.Background(), utils.APIerSv2GetAccount, attrs, &acnt); err != nil {
 		t.Error(err)
 	} else if rply := acnt.BalanceMap[utils.MetaVoice].GetTotalValue(); rply != exp {
 		t.Errorf("Expecting: %v, received: %v",
@@ -261,7 +262,7 @@ func testAccWThdGetAccountAfterDebit(t *testing.T) {
 
 func testAccWThdGetThresholdAfterDebit(t *testing.T) {
 	var result2 *engine.Threshold
-	if err := accWThdRpc.Call(utils.ThresholdSv1GetThreshold, &utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "THD_ACNT_1002"}}, &result2); err == nil || err.Error() != utils.ErrNotFound.Error() {
+	if err := accWThdRpc.Call(context.Background(), utils.ThresholdSv1GetThreshold, &utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "THD_ACNT_1002"}}, &result2); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
 }

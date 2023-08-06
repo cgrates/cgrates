@@ -73,24 +73,26 @@ func (da *DiameterAgent) Start() (err error) {
 	return da.start(filterS)
 }
 
-func (da *DiameterAgent) start(filterS *engine.FilterS) (err error) {
+func (da *DiameterAgent) start(filterS *engine.FilterS) error {
+	var err error
 	da.da, err = agents.NewDiameterAgent(da.cfg, filterS, da.connMgr)
 	if err != nil {
-		utils.Logger.Err(fmt.Sprintf("<%s> error: %s!",
+		utils.Logger.Err(fmt.Sprintf("<%s> failed to initialize agent, error: %s",
 			utils.DiameterAgent, err))
-		return
+		return err
 	}
 	da.lnet = da.cfg.DiameterAgentCfg().ListenNet
 	da.laddr = da.cfg.DiameterAgentCfg().Listen
 	da.stopChan = make(chan struct{})
 	go func(d *agents.DiameterAgent) {
-		if err = d.ListenAndServe(da.stopChan); err != nil {
-			utils.Logger.Err(fmt.Sprintf("<%s> error: %s!",
-				utils.DiameterAgent, err))
+		lnsErr := d.ListenAndServe(da.stopChan)
+		if lnsErr != nil {
+			utils.Logger.Err(fmt.Sprintf("<%s> error: %s",
+				utils.DiameterAgent, lnsErr))
 			da.shdChan.CloseOnce()
 		}
 	}(da.da)
-	return
+	return nil
 }
 
 // Reload handles the change of config

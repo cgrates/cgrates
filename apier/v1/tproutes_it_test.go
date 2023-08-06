@@ -22,14 +22,15 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package v1
 
 import (
-	"net/rpc"
-	"net/rpc/jsonrpc"
 	"path"
 	"reflect"
 	"sort"
 	"strings"
 	"testing"
 
+	"github.com/cgrates/birpc"
+	"github.com/cgrates/birpc/context"
+	"github.com/cgrates/birpc/jsonrpc"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -38,7 +39,7 @@ import (
 var (
 	tpRouteCfgPath   string
 	tpRouteCfg       *config.CGRConfig
-	tpRouteRPC       *rpc.Client
+	tpRouteRPC       *birpc.Client
 	tpRoutePrf       *utils.TPRouteProfile
 	tpRouteDelay     int
 	tpRouteConfigDIR string //run tests for specific configuration
@@ -115,7 +116,7 @@ func testTPRouteRPCConn(t *testing.T) {
 
 func testTPRouteGetTPRouteBeforeSet(t *testing.T) {
 	var reply *utils.TPRoute
-	if err := tpRouteRPC.Call(utils.APIerSv1GetTPRouteProfile,
+	if err := tpRouteRPC.Call(context.Background(), utils.APIerSv1GetTPRouteProfile,
 		&utils.TPTntID{TPid: "TP1", Tenant: "cgrates.org", ID: "RoutePrf"},
 		&reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
@@ -150,7 +151,7 @@ func testTPRouteSetTPRoute(t *testing.T) {
 	}
 	sort.Strings(tpRoutePrf.FilterIDs)
 	var result string
-	if err := tpRouteRPC.Call(utils.APIerSv1SetTPRouteProfile,
+	if err := tpRouteRPC.Call(context.Background(), utils.APIerSv1SetTPRouteProfile,
 		tpRoutePrf, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
@@ -160,7 +161,7 @@ func testTPRouteSetTPRoute(t *testing.T) {
 
 func testTPRouteGetTPRouteAfterSet(t *testing.T) {
 	var reply *utils.TPRouteProfile
-	if err := tpRouteRPC.Call(utils.APIerSv1GetTPRouteProfile,
+	if err := tpRouteRPC.Call(context.Background(), utils.APIerSv1GetTPRouteProfile,
 		&utils.TPTntID{TPid: "TP1", Tenant: "cgrates.org", ID: "RoutePrf"}, &reply); err != nil {
 		t.Fatal(err)
 	}
@@ -173,7 +174,7 @@ func testTPRouteGetTPRouteAfterSet(t *testing.T) {
 func testTPRouteGetTPRouteIDs(t *testing.T) {
 	var result []string
 	expectedTPID := []string{"cgrates.org:RoutePrf"}
-	if err := tpRouteRPC.Call(utils.APIerSv1GetTPRouteProfileIDs,
+	if err := tpRouteRPC.Call(context.Background(), utils.APIerSv1GetTPRouteProfileIDs,
 		&AttrGetTPRouteProfileIDs{TPid: "TP1"}, &result); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expectedTPID, result) {
@@ -208,7 +209,7 @@ func testTPRouteUpdateTPRoute(t *testing.T) {
 		},
 	}
 	var result string
-	if err := tpRouteRPC.Call(utils.APIerSv1SetTPRouteProfile,
+	if err := tpRouteRPC.Call(context.Background(), utils.APIerSv1SetTPRouteProfile,
 		tpRoutePrf, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
@@ -221,7 +222,7 @@ func testTPRouteUpdateTPRoute(t *testing.T) {
 
 func testTPRouteGetTPRouteAfterUpdate(t *testing.T) {
 	var reply *utils.TPRouteProfile
-	if err := tpRouteRPC.Call(utils.APIerSv1GetTPRouteProfile,
+	if err := tpRouteRPC.Call(context.Background(), utils.APIerSv1GetTPRouteProfile,
 		&utils.TPTntID{TPid: "TP1", Tenant: "cgrates.org", ID: "RoutePrf"}, &reply); err != nil {
 		t.Fatal(err)
 	}
@@ -236,7 +237,7 @@ func testTPRouteGetTPRouteAfterUpdate(t *testing.T) {
 
 func testTPRouteRemTPRoute(t *testing.T) {
 	var resp string
-	if err := tpRouteRPC.Call(utils.APIerSv1RemoveTPRouteProfile,
+	if err := tpRouteRPC.Call(context.Background(), utils.APIerSv1RemoveTPRouteProfile,
 		&utils.TPTntID{TPid: "TP1", Tenant: "cgrates.org", ID: "RoutePrf"},
 		&resp); err != nil {
 		t.Error(err)
@@ -247,7 +248,7 @@ func testTPRouteRemTPRoute(t *testing.T) {
 
 func testTPRouteGetTPRouteAfterRemove(t *testing.T) {
 	var reply *utils.TPRouteProfile
-	if err := tpRouteRPC.Call(utils.APIerSv1GetTPRouteProfile,
+	if err := tpRouteRPC.Call(context.Background(), utils.APIerSv1GetTPRouteProfile,
 		&utils.TPTntID{TPid: "TP1", Tenant: "cgrates.org", ID: "RoutePrf"},
 		&reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)

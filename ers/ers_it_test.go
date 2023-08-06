@@ -33,6 +33,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc"
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/rpcclient"
 
 	"github.com/cgrates/cgrates/config"
@@ -714,7 +716,7 @@ type testMockClients struct {
 	calls map[string]func(args any, reply any) error
 }
 
-func (sT *testMockClients) Call(method string, arg any, rply any) error {
+func (sT *testMockClients) Call(ctx *context.Context, method string, arg any, rply any) error {
 	if call, has := sT.calls[method]; !has {
 		return rpcclient.ErrUnsupporteServiceMethod
 	} else {
@@ -739,9 +741,9 @@ func TestERsProcessEvent11(t *testing.T) {
 			},
 		},
 	}
-	clientChan := make(chan rpcclient.ClientConnector, 1)
+	clientChan := make(chan birpc.ClientConnector, 1)
 	clientChan <- testMockClient
-	connMng := engine.NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	connMng := engine.NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS): clientChan,
 	})
 	srv := NewERService(cfg, fltrS, connMng)

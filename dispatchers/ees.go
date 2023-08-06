@@ -21,11 +21,12 @@ package dispatchers
 import (
 	"time"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
-func (dS *DispatcherService) EeSv1Ping(args *utils.CGREvent, reply *string) (err error) {
+func (dS *DispatcherService) EeSv1Ping(ctx *context.Context, args *utils.CGREvent, reply *string) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
 	if args != nil && len(args.Tenant) != 0 {
 		tnt = args.Tenant
@@ -47,7 +48,7 @@ func (dS *DispatcherService) EeSv1Ping(args *utils.CGREvent, reply *string) (err
 	return dS.Dispatch(&utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaCore, utils.EeSv1Ping, args, reply)
 }
 
-func (dS *DispatcherService) EeSv1ProcessEvent(args *engine.CGREventWithEeIDs, reply *map[string]map[string]any) (err error) {
+func (dS *DispatcherService) EeSv1ProcessEvent(ctx *context.Context, args *engine.CGREventWithEeIDs, reply *map[string]map[string]any) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
 	if args != nil && len(args.Tenant) != 0 {
 		tnt = args.Tenant

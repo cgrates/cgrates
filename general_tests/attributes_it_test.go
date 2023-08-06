@@ -21,7 +21,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package general_tests
 
 import (
-	"net/rpc"
 	"path"
 	"reflect"
 	"sort"
@@ -29,6 +28,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc"
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -37,7 +38,7 @@ import (
 var (
 	attrCfgPath     string
 	attrCfg         *config.CGRConfig
-	attrRPC         *rpc.Client
+	attrRPC         *birpc.Client
 	alsPrfConfigDIR string
 	sTestsAlsPrf    = []func(t *testing.T){
 		testAttributeSInitCfg,
@@ -120,7 +121,7 @@ func testAttributeSRPCConn(t *testing.T) {
 func testAttributeSLoadFromFolder(t *testing.T) {
 	var reply string
 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "testit")}
-	if err := attrRPC.Call(utils.APIerSv1LoadTariffPlanFromFolder, attrs, &reply); err != nil {
+	if err := attrRPC.Call(context.Background(), utils.APIerSv1LoadTariffPlanFromFolder, attrs, &reply); err != nil {
 		t.Error(err)
 	}
 	time.Sleep(200 * time.Millisecond)
@@ -156,7 +157,7 @@ func testAttributeSProcessEvent(t *testing.T) {
 	}
 	sort.Strings(eRply.AlteredFields)
 	var rplyEv engine.AttrSProcessEventReply
-	if err := attrRPC.Call(utils.AttributeSv1ProcessEvent,
+	if err := attrRPC.Call(context.Background(), utils.AttributeSv1ProcessEvent,
 		ev, &rplyEv); err != nil {
 		t.Fatal(err)
 	}
@@ -196,13 +197,13 @@ func testAttributeSProcessEventWithAccount(t *testing.T) {
 		},
 	}
 	alsPrf.Compile()
-	if err := attrRPC.Call(utils.APIerSv1SetAttributeProfile, alsPrf, &result); err != nil {
+	if err := attrRPC.Call(context.Background(), utils.APIerSv1SetAttributeProfile, alsPrf, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
 	var replyAttr *engine.AttributeProfile
-	if err := attrRPC.Call(utils.APIerSv1GetAttributeProfile,
+	if err := attrRPC.Call(context.Background(), utils.APIerSv1GetAttributeProfile,
 		utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ATTR_ACCOUNT"}}, &replyAttr); err != nil {
 		t.Fatal(err)
 	}
@@ -239,7 +240,7 @@ func testAttributeSProcessEventWithAccount(t *testing.T) {
 	}
 	sort.Strings(eRply.AlteredFields)
 	var rplyEv engine.AttrSProcessEventReply
-	if err := attrRPC.Call(utils.AttributeSv1ProcessEvent,
+	if err := attrRPC.Call(context.Background(), utils.AttributeSv1ProcessEvent,
 		ev, &rplyEv); err != nil {
 		t.Fatal(err)
 	}
@@ -279,13 +280,13 @@ func testAttributeSProcessEventWithAccountFull(t *testing.T) {
 		},
 	}
 	alsPrf.Compile()
-	if err := attrRPC.Call(utils.APIerSv1SetAttributeProfile, alsPrf, &result); err != nil {
+	if err := attrRPC.Call(context.Background(), utils.APIerSv1SetAttributeProfile, alsPrf, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
 	var replyAttr *engine.AttributeProfile
-	if err := attrRPC.Call(utils.APIerSv1GetAttributeProfile,
+	if err := attrRPC.Call(context.Background(), utils.APIerSv1GetAttributeProfile,
 		utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ATTR_ACCOUNT2"}}, &replyAttr); err != nil {
 		t.Fatal(err)
 	}
@@ -320,7 +321,7 @@ func testAttributeSProcessEventWithAccountFull(t *testing.T) {
 	}
 	sort.Strings(eRply.AlteredFields)
 	var rplyEv engine.AttrSProcessEventReply
-	if err := attrRPC.Call(utils.AttributeSv1ProcessEvent,
+	if err := attrRPC.Call(context.Background(), utils.AttributeSv1ProcessEvent,
 		ev, &rplyEv); err != nil {
 		t.Fatal(err)
 	}
@@ -356,7 +357,7 @@ func testAttributeSProcessEventWithStat(t *testing.T) {
 			utils.Cost:         10.0,
 		},
 	}
-	if err := attrRPC.Call(utils.StatSv1ProcessEvent, &ev1, &reply); err != nil {
+	if err := attrRPC.Call(context.Background(), utils.StatSv1ProcessEvent, &ev1, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(reply, expected) {
 		t.Errorf("Expecting: %+v, received: %+v", expected, reply)
@@ -373,7 +374,7 @@ func testAttributeSProcessEventWithStat(t *testing.T) {
 			utils.Cost:         10.5,
 		},
 	}
-	if err := attrRPC.Call(utils.StatSv1ProcessEvent, &ev1, &reply); err != nil {
+	if err := attrRPC.Call(context.Background(), utils.StatSv1ProcessEvent, &ev1, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(reply, expected) {
 		t.Errorf("Expecting: %+v, received: %+v", expected, reply)
@@ -407,13 +408,13 @@ func testAttributeSProcessEventWithStat(t *testing.T) {
 	}
 	alsPrf.Compile()
 	var result string
-	if err := attrRPC.Call(utils.APIerSv1SetAttributeProfile, alsPrf, &result); err != nil {
+	if err := attrRPC.Call(context.Background(), utils.APIerSv1SetAttributeProfile, alsPrf, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
 	var replyAttr *engine.AttributeProfile
-	if err := attrRPC.Call(utils.APIerSv1GetAttributeProfile,
+	if err := attrRPC.Call(context.Background(), utils.APIerSv1GetAttributeProfile,
 		utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ATTR_STATS"}}, &replyAttr); err != nil {
 		t.Fatal(err)
 	}
@@ -450,7 +451,7 @@ func testAttributeSProcessEventWithStat(t *testing.T) {
 	}
 	sort.Strings(eRply.AlteredFields)
 	var rplyEv engine.AttrSProcessEventReply
-	if err := attrRPC.Call(utils.AttributeSv1ProcessEvent,
+	if err := attrRPC.Call(context.Background(), utils.AttributeSv1ProcessEvent,
 		ev, &rplyEv); err != nil {
 		t.Fatal(err)
 	}
@@ -490,13 +491,13 @@ func testAttributeSProcessEventWithStatFull(t *testing.T) {
 	}
 	alsPrf.Compile()
 	var result string
-	if err := attrRPC.Call(utils.APIerSv1SetAttributeProfile, alsPrf, &result); err != nil {
+	if err := attrRPC.Call(context.Background(), utils.APIerSv1SetAttributeProfile, alsPrf, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
 	var replyAttr *engine.AttributeProfile
-	if err := attrRPC.Call(utils.APIerSv1GetAttributeProfile,
+	if err := attrRPC.Call(context.Background(), utils.APIerSv1GetAttributeProfile,
 		utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ATTR_STATS2"}}, &replyAttr); err != nil {
 		t.Fatal(err)
 	}
@@ -533,7 +534,7 @@ func testAttributeSProcessEventWithStatFull(t *testing.T) {
 	}
 	sort.Strings(eRply.AlteredFields)
 	var rplyEv engine.AttrSProcessEventReply
-	if err := attrRPC.Call(utils.AttributeSv1ProcessEvent,
+	if err := attrRPC.Call(context.Background(), utils.AttributeSv1ProcessEvent,
 		ev, &rplyEv); err != nil {
 		t.Fatal(err)
 	}
@@ -558,14 +559,14 @@ func testAttributeSProcessEventWithResource(t *testing.T) {
 	}
 
 	var result string
-	if err := attrRPC.Call(utils.APIerSv1SetResourceProfile, &engine.ResourceProfileWithAPIOpts{ResourceProfile: rlsConfig}, &result); err != nil {
+	if err := attrRPC.Call(context.Background(), utils.APIerSv1SetResourceProfile, &engine.ResourceProfileWithAPIOpts{ResourceProfile: rlsConfig}, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
 
 	var reply *engine.ResourceProfile
-	if err := attrRPC.Call(utils.APIerSv1GetResourceProfile,
+	if err := attrRPC.Call(context.Background(), utils.APIerSv1GetResourceProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: rlsConfig.ID}, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(reply, rlsConfig) {
@@ -584,7 +585,7 @@ func testAttributeSProcessEventWithResource(t *testing.T) {
 			utils.OptsResourcesUnits:   3,
 		},
 	}
-	if err := attrRPC.Call(utils.ResourceSv1AllocateResources,
+	if err := attrRPC.Call(context.Background(), utils.ResourceSv1AllocateResources,
 		argsRU, &result); err != nil {
 		t.Error(err)
 	}
@@ -600,7 +601,7 @@ func testAttributeSProcessEventWithResource(t *testing.T) {
 			utils.OptsResourcesUnits:   2,
 		},
 	}
-	if err := attrRPC.Call(utils.ResourceSv1AllocateResources,
+	if err := attrRPC.Call(context.Background(), utils.ResourceSv1AllocateResources,
 		argsRU2, &result); err != nil {
 		t.Error(err)
 	}
@@ -632,13 +633,13 @@ func testAttributeSProcessEventWithResource(t *testing.T) {
 		},
 	}
 	alsPrf.Compile()
-	if err := attrRPC.Call(utils.APIerSv1SetAttributeProfile, alsPrf, &result); err != nil {
+	if err := attrRPC.Call(context.Background(), utils.APIerSv1SetAttributeProfile, alsPrf, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
 	var replyAttr *engine.AttributeProfile
-	if err := attrRPC.Call(utils.APIerSv1GetAttributeProfile,
+	if err := attrRPC.Call(context.Background(), utils.APIerSv1GetAttributeProfile,
 		utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ATTR_RESOURCE"}}, &replyAttr); err != nil {
 		t.Fatal(err)
 	}
@@ -675,7 +676,7 @@ func testAttributeSProcessEventWithResource(t *testing.T) {
 	}
 	sort.Strings(eRply.AlteredFields)
 	var rplyEv engine.AttrSProcessEventReply
-	if err := attrRPC.Call(utils.AttributeSv1ProcessEvent,
+	if err := attrRPC.Call(context.Background(), utils.AttributeSv1ProcessEvent,
 		ev, &rplyEv); err != nil {
 		t.Fatal(err)
 	}
@@ -715,13 +716,13 @@ func testAttributeSProcessEventWithResourceFull(t *testing.T) {
 		},
 	}
 	alsPrf.Compile()
-	if err := attrRPC.Call(utils.APIerSv1SetAttributeProfile, alsPrf, &result); err != nil {
+	if err := attrRPC.Call(context.Background(), utils.APIerSv1SetAttributeProfile, alsPrf, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
 	var replyAttr *engine.AttributeProfile
-	if err := attrRPC.Call(utils.APIerSv1GetAttributeProfile,
+	if err := attrRPC.Call(context.Background(), utils.APIerSv1GetAttributeProfile,
 		utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ATTR_RESOURCE2"}}, &replyAttr); err != nil {
 		t.Fatal(err)
 	}
@@ -755,7 +756,7 @@ func testAttributeSProcessEventWithResourceFull(t *testing.T) {
 	}
 	sort.Strings(eRply.AlteredFields)
 	var rplyEv engine.AttrSProcessEventReply
-	if err := attrRPC.Call(utils.AttributeSv1ProcessEvent,
+	if err := attrRPC.Call(context.Background(), utils.AttributeSv1ProcessEvent,
 		ev, &rplyEv); err != nil {
 		t.Fatal(err)
 	}
@@ -806,13 +807,13 @@ func testAttributeSProcessEventWithLibPhoneNumber(t *testing.T) {
 		},
 	}
 	alsPrf.Compile()
-	if err := attrRPC.Call(utils.APIerSv1SetAttributeProfile, alsPrf, &result); err != nil {
+	if err := attrRPC.Call(context.Background(), utils.APIerSv1SetAttributeProfile, alsPrf, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
 	var replyAttr *engine.AttributeProfile
-	if err := attrRPC.Call(utils.APIerSv1GetAttributeProfile,
+	if err := attrRPC.Call(context.Background(), utils.APIerSv1GetAttributeProfile,
 		utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ATTR_LIBPHONENUMBER2"}}, &replyAttr); err != nil {
 		t.Fatal(err)
 	}
@@ -851,7 +852,7 @@ func testAttributeSProcessEventWithLibPhoneNumber(t *testing.T) {
 	}
 	sort.Strings(eRply.AlteredFields)
 	var rplyEv engine.AttrSProcessEventReply
-	if err := attrRPC.Call(utils.AttributeSv1ProcessEvent,
+	if err := attrRPC.Call(context.Background(), utils.AttributeSv1ProcessEvent,
 		ev, &rplyEv); err != nil {
 		t.Fatal(err)
 	}
@@ -909,13 +910,13 @@ func testAttributeSProcessEventWithLibPhoneNumberComposed(t *testing.T) {
 		},
 	}
 	alsPrf.Compile()
-	if err := attrRPC.Call(utils.APIerSv1SetAttributeProfile, alsPrf, &result); err != nil {
+	if err := attrRPC.Call(context.Background(), utils.APIerSv1SetAttributeProfile, alsPrf, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
 	var replyAttr *engine.AttributeProfile
-	if err := attrRPC.Call(utils.APIerSv1GetAttributeProfile,
+	if err := attrRPC.Call(context.Background(), utils.APIerSv1GetAttributeProfile,
 		utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ATTR_LIBPHONENUMBER_COMPOSED"}}, &replyAttr); err != nil {
 		t.Fatal(err)
 	}
@@ -954,7 +955,7 @@ func testAttributeSProcessEventWithLibPhoneNumberComposed(t *testing.T) {
 	}
 	sort.Strings(eRply.AlteredFields)
 	var rplyEv engine.AttrSProcessEventReply
-	if err := attrRPC.Call(utils.AttributeSv1ProcessEvent,
+	if err := attrRPC.Call(context.Background(), utils.AttributeSv1ProcessEvent,
 		ev, &rplyEv); err != nil {
 		t.Fatal(err)
 	}
@@ -994,13 +995,13 @@ func testAttributeSProcessEventWithLibPhoneNumberFull(t *testing.T) {
 		},
 	}
 	alsPrf.Compile()
-	if err := attrRPC.Call(utils.APIerSv1SetAttributeProfile, alsPrf, &result); err != nil {
+	if err := attrRPC.Call(context.Background(), utils.APIerSv1SetAttributeProfile, alsPrf, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
 	var replyAttr *engine.AttributeProfile
-	if err := attrRPC.Call(utils.APIerSv1GetAttributeProfile,
+	if err := attrRPC.Call(context.Background(), utils.APIerSv1GetAttributeProfile,
 		utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ATTR_LIBPHONENUMBER"}}, &replyAttr); err != nil {
 		t.Fatal(err)
 	}
@@ -1039,7 +1040,7 @@ func testAttributeSProcessEventWithLibPhoneNumberFull(t *testing.T) {
 	}
 	sort.Strings(eRply.AlteredFields)
 	var rplyEv engine.AttrSProcessEventReply
-	if err := attrRPC.Call(utils.AttributeSv1ProcessEvent,
+	if err := attrRPC.Call(context.Background(), utils.AttributeSv1ProcessEvent,
 		ev, &rplyEv); err != nil {
 		t.Fatal(err)
 	}

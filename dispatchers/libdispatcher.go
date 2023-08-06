@@ -26,6 +26,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -287,7 +288,7 @@ func (b *broadcastDispatcher) Dispatch(dm *engine.DataManager, flts *engine.Filt
 	if !hasHosts { // in case we do not match any host
 		return utils.ErrDSPHostNotFound
 	}
-	return pool.Call(serviceMethod, args, reply)
+	return pool.Call(context.TODO(), serviceMethod, args, reply)
 }
 
 type loadDispatcher struct {
@@ -437,7 +438,7 @@ type lazyDH struct {
 	dR      *DispatcherRoute
 }
 
-func (l *lazyDH) Call(method string, args, reply any) (err error) {
+func (l *lazyDH) Call(ctx *context.Context, method string, args, reply any) (err error) {
 	return callDH(l.dh, l.routeID, l.dR, method, args, reply)
 }
 
@@ -464,7 +465,7 @@ func callDH(dh *engine.DispatcherHost, routeID string, dR *DispatcherRoute,
 				utils.DispatcherS, err.Error(), dR))
 		}
 	}
-	if err = dh.Call(method, args, reply); err != nil {
+	if err = dh.Call(context.TODO(), method, args, reply); err != nil {
 		return
 	}
 	return

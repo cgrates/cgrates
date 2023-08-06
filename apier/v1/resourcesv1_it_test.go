@@ -21,7 +21,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package v1
 
 import (
-	"net/rpc"
 	"os"
 	"path"
 	"reflect"
@@ -29,6 +28,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc"
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -37,7 +38,7 @@ import (
 var (
 	rlsV1CfgPath string
 	rlsV1Cfg     *config.CGRConfig
-	rlsV1Rpc     *rpc.Client
+	rlsV1Rpc     *birpc.Client
 	rlsV1ConfDIR string //run tests for specific configuration
 	rlsConfig    *engine.ResourceProfileWithAPIOpts
 
@@ -165,7 +166,7 @@ func testV1ResourceStartCPUProfiling(t *testing.T) {
 		DirPath: "/tmp",
 	}
 	var reply string
-	if err := rlsV1Rpc.Call(utils.CoreSv1StartCPUProfiling,
+	if err := rlsV1Rpc.Call(context.Background(), utils.CoreSv1StartCPUProfiling,
 		argPath, &reply); err != nil {
 		t.Error(err)
 	}
@@ -173,7 +174,7 @@ func testV1ResourceStartCPUProfiling(t *testing.T) {
 
 func testV1RsCacheResourceBeforeLoad(t *testing.T) { // cache it with not found
 	var rplyRes *engine.Resource
-	if err := rlsV1Rpc.Call(utils.ResourceSv1GetResource, &utils.TenantIDWithAPIOpts{
+	if err := rlsV1Rpc.Call(context.Background(), utils.ResourceSv1GetResource, &utils.TenantIDWithAPIOpts{
 		TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ResGroup1"},
 	}, &rplyRes); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
@@ -187,7 +188,7 @@ func testV1RsCacheResourceAfterLoad(t *testing.T) { // the APIerSv1LoadTariffPla
 		ID:     "ResGroup1",
 		Usages: map[string]*engine.ResourceUsage{},
 	}
-	if err := rlsV1Rpc.Call(utils.ResourceSv1GetResource, &utils.TenantIDWithAPIOpts{
+	if err := rlsV1Rpc.Call(context.Background(), utils.ResourceSv1GetResource, &utils.TenantIDWithAPIOpts{
 		TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ResGroup1"},
 	}, &rplyRes); err != nil {
 		t.Error(err)
@@ -223,7 +224,7 @@ func testV1RsCacheResourceWithConfig(t *testing.T) {
 			ThresholdIDs:      []string{"*none"},
 		},
 	}
-	if err := rlsV1Rpc.Call(utils.ResourceSv1GetResourceWithConfig, &utils.TenantIDWithAPIOpts{
+	if err := rlsV1Rpc.Call(context.Background(), utils.ResourceSv1GetResourceWithConfig, &utils.TenantIDWithAPIOpts{
 		TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ResGroup1"},
 	}, &rplyRes); err != nil {
 		t.Error(err)
@@ -235,7 +236,7 @@ func testV1RsCacheResourceWithConfig(t *testing.T) {
 func testV1RsFromFolder(t *testing.T) {
 	var reply string
 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "oldtutorial")}
-	if err := rlsV1Rpc.Call(utils.APIerSv1LoadTariffPlanFromFolder, attrs, &reply); err != nil {
+	if err := rlsV1Rpc.Call(context.Background(), utils.APIerSv1LoadTariffPlanFromFolder, attrs, &reply); err != nil {
 		t.Error(err)
 	}
 	time.Sleep(100 * time.Millisecond)
@@ -252,13 +253,13 @@ func testV1RsGetResourcesForEvent(t *testing.T) {
 			utils.OptsResourcesUsageID: "RandomUsageID",
 		},
 	}
-	if err := rlsV1Rpc.Call(utils.ResourceSv1GetResourcesForEvent, args, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
+	if err := rlsV1Rpc.Call(context.Background(), utils.ResourceSv1GetResourcesForEvent, args, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
 	args.Event = map[string]any{"Destination": "10", "Account": "1001"}
 	args.ID = utils.UUIDSha1Prefix()
 	args.APIOpts[utils.OptsResourcesUsageID] = "RandomUsageID2"
-	if err := rlsV1Rpc.Call(utils.ResourceSv1GetResourcesForEvent, args, &reply); err != nil {
+	if err := rlsV1Rpc.Call(context.Background(), utils.ResourceSv1GetResourcesForEvent, args, &reply); err != nil {
 		t.Error(err)
 	}
 	if reply == nil {
@@ -278,14 +279,14 @@ func testV1RsGetResourcesForEvent(t *testing.T) {
 	args.Event = map[string]any{"Destination": "20"}
 	args.ID = utils.UUIDSha1Prefix()
 	args.APIOpts[utils.OptsResourcesUsageID] = "RandomUsageID3"
-	if err := rlsV1Rpc.Call(utils.ResourceSv1GetResourcesForEvent, args, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
+	if err := rlsV1Rpc.Call(context.Background(), utils.ResourceSv1GetResourcesForEvent, args, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
 
 	args.Event = map[string]any{"Account": "1002", "Subject": "test", "Destination": "1002"}
 	args.ID = utils.UUIDSha1Prefix()
 	args.APIOpts[utils.OptsResourcesUsageID] = "RandomUsageID5"
-	if err := rlsV1Rpc.Call(utils.ResourceSv1GetResourcesForEvent, args, &reply); err != nil {
+	if err := rlsV1Rpc.Call(context.Background(), utils.ResourceSv1GetResourcesForEvent, args, &reply); err != nil {
 		t.Error(err)
 	}
 	if len(*reply) != 1 {
@@ -294,7 +295,7 @@ func testV1RsGetResourcesForEvent(t *testing.T) {
 
 	args.Event = map[string]any{"Account": "1002", "Subject": "test", "Destination": "1001"}
 	args.ID = utils.UUIDSha1Prefix()
-	if err := rlsV1Rpc.Call(utils.ResourceSv1GetResourcesForEvent, args, &reply); err != nil {
+	if err := rlsV1Rpc.Call(context.Background(), utils.ResourceSv1GetResourcesForEvent, args, &reply); err != nil {
 		t.Error(err)
 	}
 	if len(*reply) != 1 {
@@ -306,7 +307,7 @@ func testV1RsGetResourcesForEvent(t *testing.T) {
 
 	args.Tenant = utils.EmptyString
 	args.ID = utils.UUIDSha1Prefix()
-	if err := rlsV1Rpc.Call(utils.ResourceSv1GetResourcesForEvent, args, &reply); err != nil {
+	if err := rlsV1Rpc.Call(context.Background(), utils.ResourceSv1GetResourcesForEvent, args, &reply); err != nil {
 		t.Error(err)
 	}
 	if len(*reply) != 1 {
@@ -332,7 +333,7 @@ func testV1RsTTL0(t *testing.T) {
 		},
 	}
 	var reply string
-	if err := rlsV1Rpc.Call(utils.ResourceSv1AllocateResources,
+	if err := rlsV1Rpc.Call(context.Background(), utils.ResourceSv1AllocateResources,
 		ev, &reply); err != nil {
 		t.Error(err)
 	}
@@ -349,7 +350,7 @@ func testV1RsTTL0(t *testing.T) {
 			utils.OptsResourcesUnits:   2,
 		},
 	}
-	if err := rlsV1Rpc.Call(utils.ResourceSv1AllocateResources, ev, &reply); err != nil {
+	if err := rlsV1Rpc.Call(context.Background(), utils.ResourceSv1AllocateResources, ev, &reply); err != nil {
 		t.Error(err)
 	}
 	// too many units should be rejected
@@ -365,7 +366,7 @@ func testV1RsTTL0(t *testing.T) {
 			utils.OptsResourcesUnits:   4,
 		},
 	}
-	if err := rlsV1Rpc.Call(utils.ResourceSv1AllocateResources, ev, &reply); err == nil ||
+	if err := rlsV1Rpc.Call(context.Background(), utils.ResourceSv1AllocateResources, ev, &reply); err == nil ||
 		err.Error() != utils.ErrResourceUnavailable.Error() {
 		t.Error(err)
 	}
@@ -398,7 +399,7 @@ func testV1RsTTL0(t *testing.T) {
 			},
 		},
 	}
-	if err := rlsV1Rpc.Call(utils.ResourceSv1GetResourcesForEvent,
+	if err := rlsV1Rpc.Call(context.Background(), utils.ResourceSv1GetResourcesForEvent,
 		args, &rs); err != nil {
 		t.Error(err)
 	} else if len(*rs) != 1 {
@@ -426,13 +427,13 @@ func testV1RsTTL0(t *testing.T) {
 			utils.OptsResourcesUsageID: "651a8db2-4f67-4cf8-b622-169e8a482e25", // same ID should be accepted by first group since the previous resource should be expired
 		},
 	}
-	if err := rlsV1Rpc.Call(utils.ResourceSv1ReleaseResources,
+	if err := rlsV1Rpc.Call(context.Background(), utils.ResourceSv1ReleaseResources,
 		ev, &releaseReply); err != nil {
 		t.Error(err)
 	}
 
 	ev.Tenant = utils.EmptyString
-	if err := rlsV1Rpc.Call(utils.ResourceSv1ReleaseResources,
+	if err := rlsV1Rpc.Call(context.Background(), utils.ResourceSv1ReleaseResources,
 		ev, &releaseReply); err != nil {
 		t.Error(err)
 	}
@@ -454,7 +455,7 @@ func testV1RsAllocateResource(t *testing.T) {
 			utils.OptsResourcesUnits:   3,
 		},
 	}
-	if err := rlsV1Rpc.Call(utils.ResourceSv1AllocateResources,
+	if err := rlsV1Rpc.Call(context.Background(), utils.ResourceSv1AllocateResources,
 		ev, &reply); err != nil {
 		t.Error(err)
 	}
@@ -476,7 +477,7 @@ func testV1RsAllocateResource(t *testing.T) {
 			utils.OptsResourcesUnits:   4,
 		},
 	}
-	if err := rlsV1Rpc.Call(utils.ResourceSv1AllocateResources,
+	if err := rlsV1Rpc.Call(context.Background(), utils.ResourceSv1AllocateResources,
 		ev, &reply); err != nil {
 		t.Error(err)
 	}
@@ -498,7 +499,7 @@ func testV1RsAllocateResource(t *testing.T) {
 			utils.OptsResourcesUnits:   1,
 		},
 	}
-	if err := rlsV1Rpc.Call(utils.ResourceSv1AllocateResources,
+	if err := rlsV1Rpc.Call(context.Background(), utils.ResourceSv1AllocateResources,
 		ev, &reply); err != nil {
 		t.Error(err)
 	}
@@ -520,7 +521,7 @@ func testV1RsAllocateResource(t *testing.T) {
 			utils.OptsResourcesUnits:   1,
 		},
 	}
-	if err := rlsV1Rpc.Call(utils.ResourceSv1AllocateResources,
+	if err := rlsV1Rpc.Call(context.Background(), utils.ResourceSv1AllocateResources,
 		ev, &reply); err == nil || err.Error() != utils.ErrResourceUnavailable.Error() {
 		t.Error(err)
 	}
@@ -540,7 +541,7 @@ func testV1RsAllocateResource(t *testing.T) {
 			utils.OptsResourcesUnits:   1,
 		},
 	}
-	if err := rlsV1Rpc.Call(utils.ResourceSv1AllocateResources,
+	if err := rlsV1Rpc.Call(context.Background(), utils.ResourceSv1AllocateResources,
 		ev, &reply); err != nil {
 		t.Error(err)
 	}
@@ -565,7 +566,7 @@ func testV1RsAuthorizeResources(t *testing.T) {
 			utils.OptsResourcesUsageID: "651a8db2-4f67-4cf8-b622-169e8a482e61",
 		},
 	}
-	if err := rlsV1Rpc.Call(utils.ResourceSv1AuthorizeResources, &argsRU, &reply); err != nil {
+	if err := rlsV1Rpc.Call(context.Background(), utils.ResourceSv1AuthorizeResources, &argsRU, &reply); err != nil {
 		t.Error(err)
 	} else if reply != "ResGroup1" { // already 3 usages active before allow call, we should have now more than allowed
 		t.Error("Unexpected reply returned", reply)
@@ -583,7 +584,7 @@ func testV1RsAuthorizeResources(t *testing.T) {
 			utils.OptsResourcesUnits:   7,
 		},
 	}
-	if err := rlsV1Rpc.Call(utils.ResourceSv1AuthorizeResources,
+	if err := rlsV1Rpc.Call(context.Background(), utils.ResourceSv1AuthorizeResources,
 		&argsRU, &reply); err.Error() != utils.ErrResourceUnauthorized.Error() {
 		t.Error(err)
 	}
@@ -604,7 +605,7 @@ func testV1RsReleaseResource(t *testing.T) {
 			utils.OptsResourcesUsageID: "651a8db2-4f67-4cf8-b622-169e8a482e55", // same ID should be accepted by first group since the previous resource should be expired
 		},
 	}
-	if err := rlsV1Rpc.Call(utils.ResourceSv1ReleaseResources,
+	if err := rlsV1Rpc.Call(context.Background(), utils.ResourceSv1ReleaseResources,
 		argsRU, &reply); err != nil {
 		t.Error(err)
 	}
@@ -623,7 +624,7 @@ func testV1RsReleaseResource(t *testing.T) {
 			utils.OptsResourcesUnits:   7,
 		},
 	}
-	if err := rlsV1Rpc.Call(utils.ResourceSv1AuthorizeResources, &argsRU, &reply); err != nil {
+	if err := rlsV1Rpc.Call(context.Background(), utils.ResourceSv1AuthorizeResources, &argsRU, &reply); err != nil {
 		t.Error(err)
 	} else if reply != "ResGroup1" {
 		t.Error("Unexpected reply returned", reply)
@@ -641,7 +642,7 @@ func testV1RsReleaseResource(t *testing.T) {
 			utils.OptsResourcesUsageID: utils.UUIDSha1Prefix(),
 		},
 	}
-	if err := rlsV1Rpc.Call(utils.ResourceSv1GetResourcesForEvent, args, &rs); err != nil {
+	if err := rlsV1Rpc.Call(context.Background(), utils.ResourceSv1GetResourcesForEvent, args, &rs); err != nil {
 		t.Error(err)
 	} else if len(*rs) != 2 {
 		t.Errorf("Resources: %+v", rs)
@@ -669,7 +670,7 @@ func testV1RsReleaseResource(t *testing.T) {
 			utils.OptsResourcesUsageID: "651a8db2-4f67-4cf8-b622-169e8a482e55", // same ID should be accepted by first group since the previous resource should be expired
 		},
 	}
-	if err := rlsV1Rpc.Call(utils.ResourceSv1ReleaseResources,
+	if err := rlsV1Rpc.Call(context.Background(), utils.ResourceSv1ReleaseResources,
 		argsRU, &reply); err == nil || err.Error() != "cannot find usage record with id: 651a8db2-4f67-4cf8-b622-169e8a482e55" {
 		t.Error(err)
 	}
@@ -694,7 +695,7 @@ func testV1RsDBStore(t *testing.T) {
 	}
 	var reply string
 	eAllocationMsg := "ResGroup1"
-	if err := rlsV1Rpc.Call(utils.ResourceSv1AllocateResources, argsRU, &reply); err != nil {
+	if err := rlsV1Rpc.Call(context.Background(), utils.ResourceSv1AllocateResources, argsRU, &reply); err != nil {
 		t.Error(err)
 	} else if reply != eAllocationMsg {
 		t.Errorf("Expecting: %+v, received: %+v", eAllocationMsg, reply)
@@ -712,7 +713,7 @@ func testV1RsDBStore(t *testing.T) {
 			utils.OptsResourcesUsageID: "651a8db2-4f67-4cf8-b622-169e8a482e71",
 		},
 	}
-	if err := rlsV1Rpc.Call(utils.ResourceSv1GetResourcesForEvent, args, &rs); err != nil {
+	if err := rlsV1Rpc.Call(context.Background(), utils.ResourceSv1GetResourcesForEvent, args, &rs); err != nil {
 		t.Error(err)
 	} else if len(*rs) != 2 {
 		t.Errorf("Resources: %+v", rs)
@@ -754,7 +755,7 @@ func testV1RsDBStore(t *testing.T) {
 			utils.OptsResourcesUsageID: "651a8db2-4f67-4cf8-b622-169e8a482e71",
 		},
 	}
-	if err := rlsV1Rpc.Call(utils.ResourceSv1GetResourcesForEvent, args, &rs); err != nil {
+	if err := rlsV1Rpc.Call(context.Background(), utils.ResourceSv1GetResourcesForEvent, args, &rs); err != nil {
 		t.Error(err)
 	} else if len(*rs) != 2 {
 		t.Errorf("Resources: %+v", rs)
@@ -776,7 +777,7 @@ func testV1RsDBStore(t *testing.T) {
 
 func testV1RsGetResourceProfileBeforeSet(t *testing.T) {
 	var reply *string
-	if err := rlsV1Rpc.Call(utils.APIerSv1GetResourceProfile,
+	if err := rlsV1Rpc.Call(context.Background(), utils.APIerSv1GetResourceProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "RES_GR_TEST"},
 		&reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
@@ -805,12 +806,12 @@ func testV1RsSetResourceProfile(t *testing.T) {
 
 	var result string
 	expErr := "SERVER_ERROR: broken reference to filter: <*wrong:inline> for item with ID: cgrates.org:RES_GR_TEST"
-	if err := rlsV1Rpc.Call(utils.APIerSv1SetResourceProfile, rlsConfig, &result); err == nil || err.Error() != expErr {
+	if err := rlsV1Rpc.Call(context.Background(), utils.APIerSv1SetResourceProfile, rlsConfig, &result); err == nil || err.Error() != expErr {
 		t.Fatalf("Expected error: %q, received: %v", expErr, err)
 	}
 
 	rlsConfig.FilterIDs = []string{"*string:~*req.Account:1001"}
-	if err := rlsV1Rpc.Call(utils.APIerSv1SetResourceProfile, rlsConfig, &result); err != nil {
+	if err := rlsV1Rpc.Call(context.Background(), utils.APIerSv1SetResourceProfile, rlsConfig, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -821,10 +822,10 @@ func testV1RsGetResourceProfileIDs(t *testing.T) {
 	expected := []string{"ResGroup2", "ResGroup1", "ResGroup3", "RES_GR_TEST"}
 	sort.Strings(expected)
 	var result []string
-	if err := rlsV1Rpc.Call(utils.APIerSv1GetResourceProfileIDs, utils.PaginatorWithTenant{}, &result); err != nil {
+	if err := rlsV1Rpc.Call(context.Background(), utils.APIerSv1GetResourceProfileIDs, utils.PaginatorWithTenant{}, &result); err != nil {
 		t.Error(err)
 	}
-	if err := rlsV1Rpc.Call(utils.APIerSv1GetResourceProfileIDs, utils.PaginatorWithTenant{Tenant: "cgrates.org"}, &result); err != nil {
+	if err := rlsV1Rpc.Call(context.Background(), utils.APIerSv1GetResourceProfileIDs, utils.PaginatorWithTenant{Tenant: "cgrates.org"}, &result); err != nil {
 		t.Error(err)
 	}
 	sort.Strings(result)
@@ -835,7 +836,7 @@ func testV1RsGetResourceProfileIDs(t *testing.T) {
 
 func testV1RsGetResourceProfileAfterSet(t *testing.T) {
 	var reply *engine.ResourceProfile
-	if err := rlsV1Rpc.Call(utils.APIerSv1GetResourceProfile,
+	if err := rlsV1Rpc.Call(context.Background(), utils.APIerSv1GetResourceProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: rlsConfig.ID}, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(reply, rlsConfig.ResourceProfile) {
@@ -846,7 +847,7 @@ func testV1RsGetResourceProfileAfterSet(t *testing.T) {
 func testV1RsUpdateResourceProfile(t *testing.T) {
 	var result string
 	rlsConfig.FilterIDs = []string{"*string:~*req.Account:1001", "*prefix:~*req.DST:10"}
-	if err := rlsV1Rpc.Call(utils.APIerSv1SetResourceProfile, rlsConfig, &result); err != nil {
+	if err := rlsV1Rpc.Call(context.Background(), utils.APIerSv1SetResourceProfile, rlsConfig, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -855,7 +856,7 @@ func testV1RsUpdateResourceProfile(t *testing.T) {
 
 func testV1RsGetResourceProfileAfterUpdate(t *testing.T) {
 	var reply *engine.ResourceProfile
-	if err := rlsV1Rpc.Call(utils.APIerSv1GetResourceProfile,
+	if err := rlsV1Rpc.Call(context.Background(), utils.APIerSv1GetResourceProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: rlsConfig.ID}, &reply); err != nil {
 		t.Error(err)
 	} else {
@@ -869,13 +870,13 @@ func testV1RsGetResourceProfileAfterUpdate(t *testing.T) {
 
 func testV1RsRemResourceProfile(t *testing.T) {
 	var resp string
-	if err := rlsV1Rpc.Call(utils.APIerSv1RemoveResourceProfile,
+	if err := rlsV1Rpc.Call(context.Background(), utils.APIerSv1RemoveResourceProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: rlsConfig.ID}, &resp); err != nil {
 		t.Error(err)
 	} else if resp != utils.OK {
 		t.Error("Unexpected reply returned", resp)
 	}
-	if err := rlsV1Rpc.Call(utils.APIerSv1RemoveResourceProfile,
+	if err := rlsV1Rpc.Call(context.Background(), utils.APIerSv1RemoveResourceProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: rlsConfig.ID}, &resp); err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("Expected error: %v received: %v", utils.ErrNotFound, err)
 	}
@@ -883,7 +884,7 @@ func testV1RsRemResourceProfile(t *testing.T) {
 
 func testV1RsGetResourceProfileAfterDelete(t *testing.T) {
 	var reply *string
-	if err := rlsV1Rpc.Call(utils.APIerSv1GetResourceProfile,
+	if err := rlsV1Rpc.Call(context.Background(), utils.APIerSv1GetResourceProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "RES_GR_TEST"},
 		&reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
@@ -892,7 +893,7 @@ func testV1RsGetResourceProfileAfterDelete(t *testing.T) {
 
 func testV1RsResourcePing(t *testing.T) {
 	var resp string
-	if err := rlsV1Rpc.Call(utils.ResourceSv1Ping, new(utils.CGREvent), &resp); err != nil {
+	if err := rlsV1Rpc.Call(context.Background(), utils.ResourceSv1Ping, new(utils.CGREvent), &resp); err != nil {
 		t.Error(err)
 	} else if resp != utils.Pong {
 		t.Error("Unexpected reply returned", resp)
@@ -916,7 +917,7 @@ func testV1RsMatchNotFound(t *testing.T) {
 
 	var result string
 
-	if err := rlsV1Rpc.Call(utils.APIerSv1SetResourceProfile, rlsConfig, &result); err != nil {
+	if err := rlsV1Rpc.Call(context.Background(), utils.APIerSv1SetResourceProfile, rlsConfig, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -935,7 +936,7 @@ func testV1RsMatchNotFound(t *testing.T) {
 		},
 	}
 	var reply string
-	if err := rlsV1Rpc.Call(utils.ResourceSv1ReleaseResources,
+	if err := rlsV1Rpc.Call(context.Background(), utils.ResourceSv1ReleaseResources,
 		argsRU, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
@@ -960,7 +961,7 @@ func testV1RsAllocateUnlimited(t *testing.T) {
 	}
 
 	var result string
-	if err := rlsV1Rpc.Call(utils.APIerSv1SetResourceProfile, rlsConfig, &result); err != nil {
+	if err := rlsV1Rpc.Call(context.Background(), utils.APIerSv1SetResourceProfile, rlsConfig, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -977,7 +978,7 @@ func testV1RsAllocateUnlimited(t *testing.T) {
 			utils.OptsResourcesUnits:   1,
 		},
 	}
-	if err := rlsV1Rpc.Call(utils.ResourceSv1AllocateResources,
+	if err := rlsV1Rpc.Call(context.Background(), utils.ResourceSv1AllocateResources,
 		ev, &reply); err != nil {
 		t.Error(err)
 	} else if reply != "CustomUnlimitedMessage" {
@@ -995,7 +996,7 @@ func testV1RsAllocateUnlimited(t *testing.T) {
 			},
 		},
 	}
-	if err := rlsV1Rpc.Call(utils.ResourceSv1GetResource, &utils.TenantIDWithAPIOpts{
+	if err := rlsV1Rpc.Call(context.Background(), utils.ResourceSv1GetResource, &utils.TenantIDWithAPIOpts{
 		TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "RES_ULTIMITED"},
 	}, &rplyRes); err != nil {
 		t.Error(err)
@@ -1030,14 +1031,14 @@ func testV1RsGetResourceProfileWithoutTenant(t *testing.T) {
 		},
 	}
 	var reply string
-	if err := rlsV1Rpc.Call(utils.APIerSv1SetResourceProfile, rlsConfig, &reply); err != nil {
+	if err := rlsV1Rpc.Call(context.Background(), utils.APIerSv1SetResourceProfile, rlsConfig, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply returned", reply)
 	}
 	rlsConfig.Tenant = "cgrates.org"
 	var result *engine.ResourceProfile
-	if err := rlsV1Rpc.Call(utils.APIerSv1GetResourceProfile,
+	if err := rlsV1Rpc.Call(context.Background(), utils.APIerSv1GetResourceProfile,
 		&utils.TenantID{ID: rlsConfig.ID},
 		&result); err != nil {
 		t.Error(err)
@@ -1048,7 +1049,7 @@ func testV1RsGetResourceProfileWithoutTenant(t *testing.T) {
 
 func testV1RsRemResourceProfileWithoutTenant(t *testing.T) {
 	var reply string
-	if err := rlsV1Rpc.Call(utils.APIerSv1RemoveResourceProfile,
+	if err := rlsV1Rpc.Call(context.Background(), utils.APIerSv1RemoveResourceProfile,
 		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{ID: rlsConfig.ID}},
 		&reply); err != nil {
 		t.Error(err)
@@ -1056,7 +1057,7 @@ func testV1RsRemResourceProfileWithoutTenant(t *testing.T) {
 		t.Error("Unexpected reply returned", reply)
 	}
 	var result *engine.ResourceProfile
-	if err := rlsV1Rpc.Call(utils.APIerSv1GetResourceProfile,
+	if err := rlsV1Rpc.Call(context.Background(), utils.APIerSv1GetResourceProfile,
 		&utils.TenantID{ID: rlsConfig.ID},
 		&result); err == nil || utils.ErrNotFound.Error() != err.Error() {
 		t.Error(err)
@@ -1077,14 +1078,14 @@ func testV1RsSetResourceProfileWithOpts(t *testing.T) {
 		},
 	}
 	var reply string
-	if err := rlsV1Rpc.Call(utils.APIerSv1SetResourceProfile, rlsCfg, &reply); err != nil {
+	if err := rlsV1Rpc.Call(context.Background(), utils.APIerSv1SetResourceProfile, rlsCfg, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply returned", reply)
 	}
 
 	var result *engine.ResourceProfile
-	if err := rlsV1Rpc.Call(utils.APIerSv1GetResourceProfile,
+	if err := rlsV1Rpc.Call(context.Background(), utils.APIerSv1GetResourceProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "TEST_WITH_OPTS"},
 		&result); err != nil {
 		t.Error(err)
@@ -1108,14 +1109,14 @@ func testV1RsAuthorizeResourcesWithOpts(t *testing.T) {
 			utils.OptsResourcesUnits:   6,
 		},
 	}
-	if err := rlsV1Rpc.Call(utils.ResourceSv1AuthorizeResources,
+	if err := rlsV1Rpc.Call(context.Background(), utils.ResourceSv1AuthorizeResources,
 		&ev,
 		&reply); err != nil {
 		t.Error(err)
 	} else if reply != "TEST_WITH_OPTS" {
 		t.Error("Unexpected reply returned", reply)
 	}
-	if err := rlsV1Rpc.Call(utils.ResourceSv1AllocateResources,
+	if err := rlsV1Rpc.Call(context.Background(), utils.ResourceSv1AllocateResources,
 		&ev,
 		&reply); err != nil {
 		t.Error(err)
@@ -1137,7 +1138,7 @@ func testV1RsCheckAuthorizeResourcesAfterRestart(t *testing.T) {
 			},
 		},
 	}
-	if err := rlsV1Rpc.Call(utils.ResourceSv1GetResource, &utils.TenantIDWithAPIOpts{
+	if err := rlsV1Rpc.Call(context.Background(), utils.ResourceSv1GetResource, &utils.TenantIDWithAPIOpts{
 		TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "RES_ULTIMITED"},
 	}, &rplyRes); err != nil {
 		t.Error(err)
@@ -1151,7 +1152,7 @@ func testV1RsCheckAuthorizeResourcesAfterRestart(t *testing.T) {
 		ID:     "TEST_WITH_OPTS",
 		Usages: map[string]*engine.ResourceUsage{},
 	}
-	if err := rlsV1Rpc.Call(utils.ResourceSv1GetResource, &utils.TenantIDWithAPIOpts{
+	if err := rlsV1Rpc.Call(context.Background(), utils.ResourceSv1GetResource, &utils.TenantIDWithAPIOpts{
 		TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "TEST_WITH_OPTS"},
 	}, &rplyRes); err != nil {
 		t.Error(err)
@@ -1164,7 +1165,7 @@ func testV1RsCheckAuthorizeResourcesAfterRestart(t *testing.T) {
 func testV1ResourceStopCPUProfiling(t *testing.T) {
 	argPath := "/tmp/cpu.prof"
 	var reply string
-	if err := rlsV1Rpc.Call(utils.CoreSv1StopCPUProfiling,
+	if err := rlsV1Rpc.Call(context.Background(), utils.CoreSv1StopCPUProfiling,
 		new(utils.DirectoryArgs), &reply); err != nil {
 		t.Error(err)
 	}
@@ -1189,7 +1190,7 @@ func testV1ResourceStopCPUProfiling(t *testing.T) {
 
 func testResourceSCacheTestGetNotFound(t *testing.T) {
 	var reply *engine.ChargerProfile
-	if err := rlsV1Rpc.Call(utils.APIerSv1GetResourceProfile,
+	if err := rlsV1Rpc.Call(context.Background(), utils.APIerSv1GetResourceProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "RESOURCE_CACHE"}, &reply); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Fatal(err)
@@ -1198,7 +1199,7 @@ func testResourceSCacheTestGetNotFound(t *testing.T) {
 
 func testResourceSCacheTestGetFound(t *testing.T) {
 	var reply *engine.ChargerProfile
-	if err := rlsV1Rpc.Call(utils.APIerSv1GetResourceProfile,
+	if err := rlsV1Rpc.Call(context.Background(), utils.APIerSv1GetResourceProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "RESOURCE_CACHE"}, &reply); err != nil {
 		t.Fatal(err)
 	}
@@ -1215,7 +1216,7 @@ func testResourceSCacheTestSet(t *testing.T) {
 		},
 	}
 	var result string
-	if err := rlsV1Rpc.Call(utils.APIerSv1SetResourceProfile, rlsConfig, &result); err != nil {
+	if err := rlsV1Rpc.Call(context.Background(), utils.APIerSv1SetResourceProfile, rlsConfig, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -1227,7 +1228,7 @@ func testResourceSCacheReload(t *testing.T) {
 		ResourceProfileIDs: []string{"cgrates.org:RESOURCE_CACHE"},
 	}
 	var reply string
-	if err := rlsV1Rpc.Call(utils.CacheSv1ReloadCache, cache, &reply); err != nil {
+	if err := rlsV1Rpc.Call(context.Background(), utils.CacheSv1ReloadCache, cache, &reply); err != nil {
 		t.Error("Got error on CacheSv1.ReloadCache: ", err.Error())
 	} else if reply != utils.OK {
 		t.Error("Calling CacheSv1.ReloadCache got reply: ", reply)
@@ -1244,7 +1245,7 @@ func testResourceSSetThresholdProfile(t *testing.T) {
 		},
 	}
 	var reply string
-	if err := rlsV1Rpc.Call(utils.APIerSv1SetThresholdProfile, ThdPrf,
+	if err := rlsV1Rpc.Call(context.Background(), utils.APIerSv1SetThresholdProfile, ThdPrf,
 		&reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
@@ -1256,7 +1257,7 @@ func testResourceSSetThresholdProfile(t *testing.T) {
 		ID:     "THD_1",
 	}
 	var result *engine.ThresholdProfile
-	if err := rlsV1Rpc.Call(utils.APIerSv1GetThresholdProfile, args,
+	if err := rlsV1Rpc.Call(context.Background(), utils.APIerSv1GetThresholdProfile, args,
 		&result); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(result, ThdPrf.ThresholdProfile) {
@@ -1274,7 +1275,7 @@ func testResourceSSetResourceProfile(t *testing.T) {
 		ThresholdIDs:      []string{"THD_1"},
 	}
 	var reply string
-	if err := rlsV1Rpc.Call(utils.APIerSv1SetResourceProfile, ResPrf,
+	if err := rlsV1Rpc.Call(context.Background(), utils.APIerSv1SetResourceProfile, ResPrf,
 		&reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
@@ -1282,7 +1283,7 @@ func testResourceSSetResourceProfile(t *testing.T) {
 	}
 
 	var result *engine.ResourceProfile
-	if err := rlsV1Rpc.Call(utils.APIerSv1GetResourceProfile,
+	if err := rlsV1Rpc.Call(context.Background(), utils.APIerSv1GetResourceProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: ResPrf.ID}, &result); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(result, ResPrf) {
@@ -1304,7 +1305,7 @@ func testResourceSCheckThresholdAfterResourceAllocate(t *testing.T) {
 			utils.OptsResourcesUnits:   5,
 		},
 	}
-	if err := rlsV1Rpc.Call(utils.ResourceSv1AllocateResources, ev,
+	if err := rlsV1Rpc.Call(context.Background(), utils.ResourceSv1AllocateResources, ev,
 		&reply); err != nil {
 		t.Error(err)
 	} else if reply != "Approved" {
@@ -1316,7 +1317,7 @@ func testResourceSCheckThresholdAfterResourceAllocate(t *testing.T) {
 		ID:     "THD_1",
 	}
 	var result *engine.Threshold
-	if err := rlsV1Rpc.Call(utils.ThresholdSv1GetThreshold, args,
+	if err := rlsV1Rpc.Call(context.Background(), utils.ThresholdSv1GetThreshold, args,
 		&result); err != nil {
 		t.Error(err)
 	} else if result.Hits != 1 {
@@ -1336,7 +1337,7 @@ func testResourceSCheckThresholdAfterResourceRelease(t *testing.T) {
 		},
 	}
 	var reply string
-	if err := rlsV1Rpc.Call(utils.ResourceSv1ReleaseResources, ev,
+	if err := rlsV1Rpc.Call(context.Background(), utils.ResourceSv1ReleaseResources, ev,
 		&reply); err != nil {
 		t.Error(err)
 	}
@@ -1346,7 +1347,7 @@ func testResourceSCheckThresholdAfterResourceRelease(t *testing.T) {
 		ID:     "THD_1",
 	}
 	var result *engine.Threshold
-	if err := rlsV1Rpc.Call(utils.ThresholdSv1GetThreshold, args,
+	if err := rlsV1Rpc.Call(context.Background(), utils.ThresholdSv1GetThreshold, args,
 		&result); err != nil {
 		t.Error(err)
 	} else if result.Hits != 2 {

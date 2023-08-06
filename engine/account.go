@@ -26,6 +26,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/guardian"
 	"github.com/cgrates/cgrates/utils"
@@ -565,7 +566,7 @@ func (acc *Account) debitCreditBalance(cd *CallDescriptor, count bool, dryRun bo
 				},
 			}
 			var tIDs []string
-			if err := connMgr.Call(config.CgrConfig().RalsCfg().ThresholdSConns, nil,
+			if err := connMgr.Call(context.TODO(), config.CgrConfig().RalsCfg().ThresholdSConns,
 				utils.ThresholdSv1ProcessEvent, thEv, &tIDs); err != nil &&
 				err.Error() != utils.ErrNotFound.Error() {
 				utils.Logger.Warning(
@@ -1082,7 +1083,7 @@ func (acc *Account) Publish(initBal map[string]float64) {
 	}
 	if len(config.CgrConfig().RalsCfg().ThresholdSConns) != 0 {
 		var tIDs []string
-		if err := connMgr.Call(config.CgrConfig().RalsCfg().ThresholdSConns, nil,
+		if err := connMgr.Call(context.TODO(), config.CgrConfig().RalsCfg().ThresholdSConns,
 			utils.ThresholdSv1ProcessEvent, cgrEv, &tIDs); err != nil &&
 			err.Error() != utils.ErrNotFound.Error() {
 			utils.Logger.Warning(
@@ -1091,7 +1092,7 @@ func (acc *Account) Publish(initBal map[string]float64) {
 	}
 	if len(config.CgrConfig().RalsCfg().StatSConns) != 0 {
 		var stsIDs []string
-		if err := connMgr.Call(config.CgrConfig().RalsCfg().StatSConns, nil,
+		if err := connMgr.Call(context.TODO(), config.CgrConfig().RalsCfg().StatSConns,
 			utils.StatSv1ProcessEvent, cgrEv, &stsIDs); err != nil &&
 			err.Error() != utils.ErrNotFound.Error() {
 			utils.Logger.Warning(

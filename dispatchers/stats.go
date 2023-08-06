@@ -21,10 +21,11 @@ package dispatchers
 import (
 	"time"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
 )
 
-func (dS *DispatcherService) StatSv1Ping(args *utils.CGREvent, reply *string) (err error) {
+func (dS *DispatcherService) StatSv1Ping(ctx *context.Context, args *utils.CGREvent, reply *string) (err error) {
 	if args == nil {
 		args = new(utils.CGREvent)
 	}
@@ -39,7 +40,7 @@ func (dS *DispatcherService) StatSv1Ping(args *utils.CGREvent, reply *string) (e
 	return dS.Dispatch(args, utils.MetaStats, utils.StatSv1Ping, args, reply)
 }
 
-func (dS *DispatcherService) StatSv1GetStatQueuesForEvent(args *utils.CGREvent,
+func (dS *DispatcherService) StatSv1GetStatQueuesForEvent(ctx *context.Context, args *utils.CGREvent,
 	reply *[]string) (err error) {
 	args.Tenant = utils.FirstNonEmpty(args.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
@@ -52,7 +53,7 @@ func (dS *DispatcherService) StatSv1GetStatQueuesForEvent(args *utils.CGREvent,
 	return dS.Dispatch(args, utils.MetaStats, utils.StatSv1GetStatQueuesForEvent, args, reply)
 }
 
-func (dS *DispatcherService) StatSv1GetQueueStringMetrics(args *utils.TenantIDWithAPIOpts,
+func (dS *DispatcherService) StatSv1GetQueueStringMetrics(ctx *context.Context, args *utils.TenantIDWithAPIOpts,
 	reply *map[string]string) (err error) {
 
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
@@ -69,7 +70,7 @@ func (dS *DispatcherService) StatSv1GetQueueStringMetrics(args *utils.TenantIDWi
 	}, utils.MetaStats, utils.StatSv1GetQueueStringMetrics, args, reply)
 }
 
-func (dS *DispatcherService) StatSv1ProcessEvent(args *utils.CGREvent,
+func (dS *DispatcherService) StatSv1ProcessEvent(ctx *context.Context, args *utils.CGREvent,
 	reply *[]string) (err error) {
 	args.Tenant = utils.FirstNonEmpty(args.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
@@ -82,7 +83,7 @@ func (dS *DispatcherService) StatSv1ProcessEvent(args *utils.CGREvent,
 	return dS.Dispatch(args, utils.MetaStats, utils.StatSv1ProcessEvent, args, reply)
 }
 
-func (dS *DispatcherService) StatSv1GetQueueFloatMetrics(args *utils.TenantIDWithAPIOpts,
+func (dS *DispatcherService) StatSv1GetQueueFloatMetrics(ctx *context.Context, args *utils.TenantIDWithAPIOpts,
 	reply *map[string]float64) (err error) {
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(utils.StatSv1GetQueueFloatMetrics,
@@ -98,7 +99,7 @@ func (dS *DispatcherService) StatSv1GetQueueFloatMetrics(args *utils.TenantIDWit
 	}, utils.MetaStats, utils.StatSv1GetQueueFloatMetrics, args, reply)
 }
 
-func (dS *DispatcherService) StatSv1GetQueueIDs(args *utils.TenantWithAPIOpts,
+func (dS *DispatcherService) StatSv1GetQueueIDs(ctx *context.Context, args *utils.TenantWithAPIOpts,
 	reply *[]string) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
 	if args.Tenant != utils.EmptyString {

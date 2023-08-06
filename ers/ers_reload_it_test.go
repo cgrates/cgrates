@@ -21,11 +21,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package ers
 
 import (
-	"net/rpc"
 	"os"
 	"path"
 	"testing"
 
+	"github.com/cgrates/birpc/context"
+
+	"github.com/cgrates/birpc"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -34,7 +36,7 @@ import (
 var (
 	reloadCfgPath      string
 	reloadCfg          *config.CGRConfig
-	reloadRPC          *rpc.Client
+	reloadRPC          *birpc.Client
 	ersReloadConfigDIR string
 
 	reloadTests = []func(t *testing.T){
@@ -129,7 +131,7 @@ func testReloadVerifyDisabledReaders(t *testing.T) {
 
 func testReloadReloadConfigFromPath(t *testing.T) {
 	var reply string
-	if err := reloadRPC.Call(utils.ConfigSv1ReloadConfig, &config.ReloadArgs{
+	if err := reloadRPC.Call(context.Background(), utils.ConfigSv1ReloadConfig, &config.ReloadArgs{
 		Path:    path.Join(*dataDir, "conf", "samples", "ers_reload", "first_reload"),
 		Section: config.ERsJson,
 	}, &reply); err != nil {
@@ -141,7 +143,7 @@ func testReloadReloadConfigFromPath(t *testing.T) {
 
 func testReloadVerifyFirstReload(t *testing.T) {
 	var reply map[string]any
-	if err := reloadRPC.Call(utils.ConfigSv1GetConfig, &config.SectionWithAPIOpts{
+	if err := reloadRPC.Call(context.Background(), utils.ConfigSv1GetConfig, &config.SectionWithAPIOpts{
 		Section: config.ERsJson,
 	}, &reply); err != nil {
 		t.Error(err)

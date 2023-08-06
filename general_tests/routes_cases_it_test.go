@@ -22,13 +22,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package general_tests
 
 import (
-	"net/rpc"
 	"path"
 	"reflect"
 	"sort"
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc"
+	"github.com/cgrates/birpc/context"
 	v1 "github.com/cgrates/cgrates/apier/v1"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
@@ -38,7 +39,7 @@ import (
 var (
 	rtsCaseSv1CfgPath string
 	rtsCaseSv1Cfg     *config.CGRConfig
-	rtsCaseSv1Rpc     *rpc.Client
+	rtsCaseSv1Rpc     *birpc.Client
 	rtsCasePrf        *v1.RouteWithAPIOpts
 	rtsCaseSv1ConfDIR string //run tests for specific configuration
 
@@ -134,7 +135,7 @@ func testV1RtsCaseRpcConn(t *testing.T) {
 func testV1RtsCaseFromFolder(t *testing.T) {
 	var reply string
 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "tutroutes")}
-	if err := rtsCaseSv1Rpc.Call(utils.APIerSv1LoadTariffPlanFromFolder, attrs, &reply); err != nil {
+	if err := rtsCaseSv1Rpc.Call(context.Background(), utils.APIerSv1LoadTariffPlanFromFolder, attrs, &reply); err != nil {
 		t.Error(err)
 	}
 	time.Sleep(100 * time.Millisecond)
@@ -171,7 +172,7 @@ func testV1RtsCaseGetRoutesAfterLoading(t *testing.T) {
 		},
 	}
 	var reply *engine.RouteProfile
-	if err := rtsCaseSv1Rpc.Call(utils.APIerSv1GetRouteProfile,
+	if err := rtsCaseSv1Rpc.Call(context.Background(), utils.APIerSv1GetRouteProfile,
 		&utils.TenantID{ID: "ROUTE_ACNT_1001", Tenant: "cgrates.org"},
 		&reply); err != nil {
 		t.Error(err)
@@ -217,7 +218,7 @@ func testV1RtsCaseGetRoutesAfterLoading(t *testing.T) {
 			},
 		},
 	}
-	if err := rtsCaseSv1Rpc.Call(utils.APIerSv1GetRouteProfile,
+	if err := rtsCaseSv1Rpc.Call(context.Background(), utils.APIerSv1GetRouteProfile,
 		&utils.TenantID{ID: "ROUTE_ACNT_1002", Tenant: "cgrates.org"},
 		&reply); err != nil {
 		t.Error(err)
@@ -257,7 +258,7 @@ func testV1RtsCaseGetRoutesAfterLoading(t *testing.T) {
 			},
 		},
 	}
-	if err := rtsCaseSv1Rpc.Call(utils.APIerSv1GetRouteProfile,
+	if err := rtsCaseSv1Rpc.Call(context.Background(), utils.APIerSv1GetRouteProfile,
 		&utils.TenantID{ID: "ROUTE_ACNT_1003", Tenant: "cgrates.org"},
 		&reply); err != nil {
 		t.Error(err)
@@ -298,7 +299,7 @@ func testV1RtsCaseGetRoutesAfterLoading(t *testing.T) {
 			},
 		},
 	}
-	if err := rtsCaseSv1Rpc.Call(utils.APIerSv1GetRouteProfile,
+	if err := rtsCaseSv1Rpc.Call(context.Background(), utils.APIerSv1GetRouteProfile,
 		&utils.TenantID{ID: "ROUTE_ACNT_1004", Tenant: "cgrates.org"},
 		&reply); err != nil {
 		t.Error(err)
@@ -334,7 +335,7 @@ func testV1RtsCaseGetRoutesAfterLoading(t *testing.T) {
 			},
 		},
 	}
-	if err := rtsCaseSv1Rpc.Call(utils.APIerSv1GetRouteProfile,
+	if err := rtsCaseSv1Rpc.Call(context.Background(), utils.APIerSv1GetRouteProfile,
 		&utils.TenantID{ID: "ROUTE_ACNT_1005", Tenant: "cgrates.org"},
 		&reply); err != nil {
 		t.Error(err)
@@ -379,7 +380,7 @@ func testV1RtsCaseGetRoutesAfterLoading(t *testing.T) {
 			},
 		},
 	}
-	if err := rtsCaseSv1Rpc.Call(utils.APIerSv1GetRouteProfile,
+	if err := rtsCaseSv1Rpc.Call(context.Background(), utils.APIerSv1GetRouteProfile,
 		&utils.TenantID{ID: "ROUTE_HC1", Tenant: "cgrates.org"},
 		&reply); err != nil {
 		t.Error(err)
@@ -422,7 +423,7 @@ func testV1RtsCasesSortingRoutesWeightAccountValue(t *testing.T) {
 		},
 	}
 	var reply *engine.SortedRoutesList
-	if err := rtsCaseSv1Rpc.Call(utils.RouteSv1GetRoutes,
+	if err := rtsCaseSv1Rpc.Call(context.Background(), utils.RouteSv1GetRoutes,
 		ev, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expSrtdRoutes, reply) {
@@ -472,7 +473,7 @@ func testV1RtsCasesSortingRoutesWeightAllRoutes(t *testing.T) {
 		},
 	}
 	var reply *engine.SortedRoutesList
-	if err := rtsCaseSv1Rpc.Call(utils.RouteSv1GetRoutes,
+	if err := rtsCaseSv1Rpc.Call(context.Background(), utils.RouteSv1GetRoutes,
 		ev, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expSrtdRoutes, reply) {
@@ -492,7 +493,7 @@ func testV1RtsCasesSortingRoutesWeightNotMatchingValue(t *testing.T) {
 		},
 	}
 	var result string
-	if err := rtsCaseSv1Rpc.Call(utils.APIerSv1SetBalance, attrBal,
+	if err := rtsCaseSv1Rpc.Call(context.Background(), utils.APIerSv1SetBalance, attrBal,
 		&result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
@@ -534,7 +535,7 @@ func testV1RtsCasesSortingRoutesWeightNotMatchingValue(t *testing.T) {
 		},
 	}
 	var reply *engine.SortedRoutesList
-	if err := rtsCaseSv1Rpc.Call(utils.RouteSv1GetRoutes,
+	if err := rtsCaseSv1Rpc.Call(context.Background(), utils.RouteSv1GetRoutes,
 		ev, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expSrtdRoutes, reply) {
@@ -579,7 +580,7 @@ func testV1RtsCasesSortingRoutesLowestCost(t *testing.T) {
 	}
 	var reply *engine.SortedRoutesList
 	//gonna match one route because the totalUsage by ne-allocated resources is 0
-	if err := rtsCaseSv1Rpc.Call(utils.RouteSv1GetRoutes,
+	if err := rtsCaseSv1Rpc.Call(context.Background(), utils.RouteSv1GetRoutes,
 		ev, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expSrtdRoutes, reply) {
@@ -633,7 +634,7 @@ func testV1RtsCasesSortingRoutesLowestCostDefaultUsage(t *testing.T) {
 	}
 	var reply *engine.SortedRoutesList
 	//gonna match one route because the totalUsage by ne-allocated resources is 0
-	if err := rtsCaseSv1Rpc.Call(utils.RouteSv1GetRoutes,
+	if err := rtsCaseSv1Rpc.Call(context.Background(), utils.RouteSv1GetRoutes,
 		ev, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expSrtdRoutes, reply) {
@@ -655,7 +656,7 @@ func testV1RtsCasesSortingRoutesLCSetStatsAndResForMatching(t *testing.T) {
 		},
 	}
 	var reply string
-	if err := rtsCaseSv1Rpc.Call(utils.ResourceSv1AllocateResources,
+	if err := rtsCaseSv1Rpc.Call(context.Background(), utils.ResourceSv1AllocateResources,
 		ev, &reply); err != nil {
 		t.Error(err)
 	} else if reply != "RES_GRP1" {
@@ -676,7 +677,7 @@ func testV1RtsCasesSortingRoutesLCSetStatsAndResForMatching(t *testing.T) {
 			utils.Cost:         1.0,
 		},
 	}
-	if err := rtsCaseSv1Rpc.Call(utils.StatSv1ProcessEvent, ev1, &result); err != nil {
+	if err := rtsCaseSv1Rpc.Call(context.Background(), utils.StatSv1ProcessEvent, ev1, &result); err != nil {
 		t.Error(err)
 	} else {
 		sort.Strings(result)
@@ -734,7 +735,7 @@ func testV1RtsCasesSortingRoutesLowestCostStats(t *testing.T) {
 	}
 	var reply *engine.SortedRoutesList
 	//gonna match one route because the totalUsage by ne-allocated resources is 0
-	if err := rtsCaseSv1Rpc.Call(utils.RouteSv1GetRoutes,
+	if err := rtsCaseSv1Rpc.Call(context.Background(), utils.RouteSv1GetRoutes,
 		ev, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expSrtdRoutes, reply) {
@@ -756,7 +757,7 @@ func testV1RtsCasesSortingRoutesLowestCosMatchingAllRoutes(t *testing.T) {
 		},
 	}
 	var result string
-	if err := rtsCaseSv1Rpc.Call(utils.ResourceSv1AllocateResources,
+	if err := rtsCaseSv1Rpc.Call(context.Background(), utils.ResourceSv1AllocateResources,
 		evRes, &result); err != nil {
 		t.Error(err)
 	} else if result != "RES_GRP1" {
@@ -815,7 +816,7 @@ func testV1RtsCasesSortingRoutesLowestCosMatchingAllRoutes(t *testing.T) {
 		},
 	}
 	var reply *engine.SortedRoutesList
-	if err := rtsCaseSv1Rpc.Call(utils.RouteSv1GetRoutes,
+	if err := rtsCaseSv1Rpc.Call(context.Background(), utils.RouteSv1GetRoutes,
 		ev, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expSrtdRoutes, reply) {
@@ -871,7 +872,7 @@ func testV1RtsCasesSortingRoutesLowestCosMaxCost(t *testing.T) {
 		},
 	}
 	var reply *engine.SortedRoutesList
-	if err := rtsCaseSv1Rpc.Call(utils.RouteSv1GetRoutes,
+	if err := rtsCaseSv1Rpc.Call(context.Background(), utils.RouteSv1GetRoutes,
 		ev, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expSrtdRoutes, reply) {
@@ -895,7 +896,7 @@ func testV1RtsCasesSortingRoutesLowestCosMaxCostNotMatch(t *testing.T) {
 		},
 	}
 	var reply *engine.SortedRoutesList
-	if err := rtsCaseSv1Rpc.Call(utils.RouteSv1GetRoutes,
+	if err := rtsCaseSv1Rpc.Call(context.Background(), utils.RouteSv1GetRoutes,
 		ev, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("Expected %+v, received %+v", utils.ErrNotFound, err)
 	}
@@ -917,7 +918,7 @@ func testV1RtsCasesSortingRoutesProcessMetrics(t *testing.T) {
 		},
 	}
 	var result []string
-	if err := rtsCaseSv1Rpc.Call(utils.StatSv1ProcessEvent, ev1, &result); err != nil {
+	if err := rtsCaseSv1Rpc.Call(context.Background(), utils.StatSv1ProcessEvent, ev1, &result); err != nil {
 		t.Error(err)
 	} else {
 		sort.Strings(expected)
@@ -926,7 +927,7 @@ func testV1RtsCasesSortingRoutesProcessMetrics(t *testing.T) {
 			t.Errorf("Expecting: %+v, received: %+v", expected, result)
 		}
 	}
-	if err := rtsCaseSv1Rpc.Call(utils.StatSv1ProcessEvent, ev1, &result); err != nil {
+	if err := rtsCaseSv1Rpc.Call(context.Background(), utils.StatSv1ProcessEvent, ev1, &result); err != nil {
 		t.Error(err)
 	} else {
 		sort.Strings(expected)
@@ -949,7 +950,7 @@ func testV1RtsCasesSortingRoutesProcessMetrics(t *testing.T) {
 			utils.Cost:         1.0,
 		},
 	}
-	if err := rtsCaseSv1Rpc.Call(utils.StatSv1ProcessEvent, ev1, &result); err != nil {
+	if err := rtsCaseSv1Rpc.Call(context.Background(), utils.StatSv1ProcessEvent, ev1, &result); err != nil {
 		t.Error(err)
 	} else {
 		sort.Strings(expected)
@@ -958,7 +959,7 @@ func testV1RtsCasesSortingRoutesProcessMetrics(t *testing.T) {
 			t.Errorf("Expecting: %+v, received: %+v", expected, result)
 		}
 	}
-	if err := rtsCaseSv1Rpc.Call(utils.StatSv1ProcessEvent, ev1, &result); err != nil {
+	if err := rtsCaseSv1Rpc.Call(context.Background(), utils.StatSv1ProcessEvent, ev1, &result); err != nil {
 		t.Error(err)
 	} else {
 		sort.Strings(expected)
@@ -1014,7 +1015,7 @@ func testV1RtsCasesSortingRoutesQOS(t *testing.T) {
 		},
 	}
 	var reply *engine.SortedRoutesList
-	if err := rtsCaseSv1Rpc.Call(utils.RouteSv1GetRoutes,
+	if err := rtsCaseSv1Rpc.Call(context.Background(), utils.RouteSv1GetRoutes,
 		ev, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(reply, expSrtdRoutes) {
@@ -1036,7 +1037,7 @@ func testV1RtsCasesSortingRoutesQOSAllRoutes(t *testing.T) {
 		},
 	}
 	var result []string
-	if err := rtsCaseSv1Rpc.Call(utils.StatSv1ProcessEvent, ev1, &result); err != nil {
+	if err := rtsCaseSv1Rpc.Call(context.Background(), utils.StatSv1ProcessEvent, ev1, &result); err != nil {
 		t.Error(err)
 	}
 
@@ -1095,7 +1096,7 @@ func testV1RtsCasesSortingRoutesQOSAllRoutes(t *testing.T) {
 		},
 	}
 	var reply *engine.SortedRoutesList
-	if err := rtsCaseSv1Rpc.Call(utils.RouteSv1GetRoutes,
+	if err := rtsCaseSv1Rpc.Call(context.Background(), utils.RouteSv1GetRoutes,
 		ev, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(reply, expSrtdRoutes) {
@@ -1116,7 +1117,7 @@ func testV1RtsCasesSortingRoutesQOSNotFound(t *testing.T) {
 		},
 	}
 	var reply *engine.SortedRoutesList
-	if err := rtsCaseSv1Rpc.Call(utils.RouteSv1GetRoutes,
+	if err := rtsCaseSv1Rpc.Call(context.Background(), utils.RouteSv1GetRoutes,
 		ev, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("Expected %+v, received %+v", utils.ErrNotFound, err)
 	}
@@ -1135,7 +1136,7 @@ func testV1RtsCasesSortingRoutesAllocateResources(t *testing.T) {
 		},
 	}
 	var reply string
-	if err := rtsCaseSv1Rpc.Call(utils.ResourceSv1AllocateResources,
+	if err := rtsCaseSv1Rpc.Call(context.Background(), utils.ResourceSv1AllocateResources,
 		ev, &reply); err != nil {
 		t.Error(err)
 	} else if reply != "RES_GRP1" {
@@ -1153,7 +1154,7 @@ func testV1RtsCasesSortingRoutesAllocateResources(t *testing.T) {
 			utils.OptsResourcesUnits:   7,
 		},
 	}
-	if err := rtsCaseSv1Rpc.Call(utils.ResourceSv1AllocateResources,
+	if err := rtsCaseSv1Rpc.Call(context.Background(), utils.ResourceSv1AllocateResources,
 		ev, &reply); err != nil {
 		t.Error(err)
 	} else if reply != "RES_GRP2" {
@@ -1193,7 +1194,7 @@ func testV1RtsCasesSortingRoutesReasNotAllRoutes(t *testing.T) {
 		},
 	}
 	var reply *engine.SortedRoutesList
-	if err := rtsCaseSv1Rpc.Call(utils.RouteSv1GetRoutes,
+	if err := rtsCaseSv1Rpc.Call(context.Background(), utils.RouteSv1GetRoutes,
 		ev, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(reply, expSrtdRoutes) {
@@ -1214,7 +1215,7 @@ func testV1RtsCasesSortingRoutesReasAllRoutes(t *testing.T) {
 		},
 	}
 	var replyStr string
-	if err := rtsCaseSv1Rpc.Call(utils.ResourceSv1AllocateResources,
+	if err := rtsCaseSv1Rpc.Call(context.Background(), utils.ResourceSv1AllocateResources,
 		evRs, &replyStr); err != nil {
 		t.Error(err)
 	} else if replyStr != "RES_GRP1" {
@@ -1259,7 +1260,7 @@ func testV1RtsCasesSortingRoutesReasAllRoutes(t *testing.T) {
 		},
 	}
 	var reply *engine.SortedRoutesList
-	if err := rtsCaseSv1Rpc.Call(utils.RouteSv1GetRoutes,
+	if err := rtsCaseSv1Rpc.Call(context.Background(), utils.RouteSv1GetRoutes,
 		ev, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(reply, expSrtdRoutes) {
@@ -1282,9 +1283,9 @@ func testV1RtsCasesRoutesProcessStatsForLoadRtsSorting(t *testing.T) {
 			utils.Cost:       1.8,
 		},
 	}
-	if err := rtsCaseSv1Rpc.Call(utils.StatSv1ProcessEvent, ev1, &reply); err != nil {
+	if err := rtsCaseSv1Rpc.Call(context.Background(), utils.StatSv1ProcessEvent, ev1, &reply); err != nil {
 		t.Error(err)
-	} else if err := rtsCaseSv1Rpc.Call(utils.StatSv1ProcessEvent, ev1, &reply); err != nil {
+	} else if err := rtsCaseSv1Rpc.Call(context.Background(), utils.StatSv1ProcessEvent, ev1, &reply); err != nil {
 		t.Error(err)
 	} else {
 		sort.Strings(expected)
@@ -1305,9 +1306,9 @@ func testV1RtsCasesRoutesProcessStatsForLoadRtsSorting(t *testing.T) {
 			utils.Cost:       1.8,
 		},
 	}
-	if err := rtsCaseSv1Rpc.Call(utils.StatSv1ProcessEvent, ev1, &reply); err != nil {
+	if err := rtsCaseSv1Rpc.Call(context.Background(), utils.StatSv1ProcessEvent, ev1, &reply); err != nil {
 		t.Error(err)
-	} else if err := rtsCaseSv1Rpc.Call(utils.StatSv1ProcessEvent, ev1, &reply); err != nil {
+	} else if err := rtsCaseSv1Rpc.Call(context.Background(), utils.StatSv1ProcessEvent, ev1, &reply); err != nil {
 		t.Error(err)
 	} else {
 		sort.Strings(expected)
@@ -1330,7 +1331,7 @@ func testV1RtsCasesRoutesProcessStatsForLoadRtsSorting(t *testing.T) {
 			utils.Cost:       0.77,
 		},
 	}
-	if err := rtsCaseSv1Rpc.Call(utils.StatSv1ProcessEvent, ev1, &reply); err != nil {
+	if err := rtsCaseSv1Rpc.Call(context.Background(), utils.StatSv1ProcessEvent, ev1, &reply); err != nil {
 		t.Error(err)
 	} else {
 		sort.Strings(expected)
@@ -1383,7 +1384,7 @@ func testV1RtsCasesRoutesLoadRtsSorting(t *testing.T) {
 		},
 	}
 	var reply *engine.SortedRoutesList
-	if err := rtsCaseSv1Rpc.Call(utils.RouteSv1GetRoutes,
+	if err := rtsCaseSv1Rpc.Call(context.Background(), utils.RouteSv1GetRoutes,
 		ev, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(reply, expSrtdRoutes) {
@@ -1429,7 +1430,7 @@ func testV1RtsCasesSortRoutesHigherCostV2V3(t *testing.T) {
 		},
 	}
 	var reply *engine.SortedRoutesList
-	if err := rtsCaseSv1Rpc.Call(utils.RouteSv1GetRoutes,
+	if err := rtsCaseSv1Rpc.Call(context.Background(), utils.RouteSv1GetRoutes,
 		ev, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(reply, expSrtdRoutes) {
@@ -1452,7 +1453,7 @@ func testV1RtsCasesSortRoutesHigherCostAllocateRes(t *testing.T) {
 			utils.OptsResourcesUnits:   7,
 		},
 	}
-	if err := rtsCaseSv1Rpc.Call(utils.ResourceSv1ReleaseResources,
+	if err := rtsCaseSv1Rpc.Call(context.Background(), utils.ResourceSv1ReleaseResources,
 		evRs, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
@@ -1470,7 +1471,7 @@ func testV1RtsCasesSortRoutesHigherCostAllocateRes(t *testing.T) {
 			utils.OptsResourcesUnits:   7,
 		},
 	}
-	if err := rtsCaseSv1Rpc.Call(utils.ResourceSv1ReleaseResources,
+	if err := rtsCaseSv1Rpc.Call(context.Background(), utils.ResourceSv1ReleaseResources,
 		evRs, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
@@ -1488,7 +1489,7 @@ func testV1RtsCasesSortRoutesHigherCostAllocateRes(t *testing.T) {
 			utils.OptsResourcesUnits:   1,
 		},
 	}
-	if err := rtsCaseSv1Rpc.Call(utils.ResourceSv1AllocateResources,
+	if err := rtsCaseSv1Rpc.Call(context.Background(), utils.ResourceSv1AllocateResources,
 		evRs, &result); err != nil {
 		t.Error(err)
 	} else if result != "RES_GRP2" {
@@ -1507,7 +1508,7 @@ func testV1RtsCasesSortRoutesHigherCostAllocateRes(t *testing.T) {
 			utils.OptsResourcesUnits:   4,
 		},
 	}
-	if err := rtsCaseSv1Rpc.Call(utils.ResourceSv1AllocateResources,
+	if err := rtsCaseSv1Rpc.Call(context.Background(), utils.ResourceSv1AllocateResources,
 		evRs, &result); err != nil {
 		t.Error(err)
 	} else if result != "RES_GRP1" {
@@ -1553,7 +1554,7 @@ func testV1RtsCasesSortRoutesHigherCostV1V3(t *testing.T) {
 		},
 	}
 	var reply *engine.SortedRoutesList
-	if err := rtsCaseSv1Rpc.Call(utils.RouteSv1GetRoutes,
+	if err := rtsCaseSv1Rpc.Call(context.Background(), utils.RouteSv1GetRoutes,
 		ev, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(reply, expSrtdRoutes) {
@@ -1574,7 +1575,7 @@ func testV1RtsCasesSortRoutesHigherCostAllRoutes(t *testing.T) {
 		},
 	}
 	var result string
-	if err := rtsCaseSv1Rpc.Call(utils.ResourceSv1AllocateResources,
+	if err := rtsCaseSv1Rpc.Call(context.Background(), utils.ResourceSv1AllocateResources,
 		evRs, &result); err != nil {
 		t.Error(err)
 	} else if result != "RES_GRP1" {
@@ -1626,7 +1627,7 @@ func testV1RtsCasesSortRoutesHigherCostAllRoutes(t *testing.T) {
 		},
 	}
 	var reply *engine.SortedRoutesList
-	if err := rtsCaseSv1Rpc.Call(utils.RouteSv1GetRoutes,
+	if err := rtsCaseSv1Rpc.Call(context.Background(), utils.RouteSv1GetRoutes,
 		ev, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(reply, expSrtdRoutes) {

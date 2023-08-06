@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package v1
 
 import (
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/ees"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -32,13 +33,13 @@ type EeSv1 struct {
 	eeS *ees.EventExporterS
 }
 
-func (eeSv1 *EeSv1) Ping(ign *utils.CGREvent, reply *string) error {
+func (eeSv1 *EeSv1) Ping(ctx *context.Context, ign *utils.CGREvent, reply *string) error {
 	*reply = utils.Pong
 	return nil
 }
 
 // ProcessEvent triggers exports on EEs side
-func (eeSv1 *EeSv1) ProcessEvent(args *engine.CGREventWithEeIDs,
+func (eeSv1 *EeSv1) ProcessEvent(ctx *context.Context, args *engine.CGREventWithEeIDs,
 	reply *map[string]map[string]any) error {
-	return eeSv1.eeS.V1ProcessEvent(args, reply)
+	return eeSv1.eeS.V1ProcessEvent(ctx, args, reply)
 }

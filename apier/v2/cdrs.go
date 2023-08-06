@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package v2
 
 import (
+	"github.com/cgrates/birpc/context"
 	v1 "github.com/cgrates/cgrates/apier/v1"
 
 	"github.com/cgrates/cgrates/engine"
@@ -26,7 +27,7 @@ import (
 )
 
 // Retrieves CDRs based on the filters
-func (apier *APIerSv2) GetCDRs(attrs *utils.RPCCDRsFilter, reply *[]*engine.ExternalCDR) error {
+func (apier *APIerSv2) GetCDRs(ctx *context.Context, attrs *utils.RPCCDRsFilter, reply *[]*engine.ExternalCDR) error {
 	cdrsFltr, err := attrs.AsCDRsFilter(apier.Config.GeneralCfg().DefaultTimezone)
 	if err != nil {
 		return utils.NewErrServerError(err)
@@ -46,7 +47,7 @@ func (apier *APIerSv2) GetCDRs(attrs *utils.RPCCDRsFilter, reply *[]*engine.Exte
 	return nil
 }
 
-func (apier *APIerSv2) CountCDRs(attrs *utils.RPCCDRsFilter, reply *int64) error {
+func (apier *APIerSv2) CountCDRs(ctx *context.Context, attrs *utils.RPCCDRsFilter, reply *int64) error {
 	cdrsFltr, err := attrs.AsCDRsFilter(apier.Config.GeneralCfg().DefaultTimezone)
 	if err != nil {
 		if err.Error() != utils.NotFoundCaps {
@@ -68,11 +69,11 @@ type CDRsV2 struct {
 	v1.CDRsV1
 }
 
-func (cdrSv2 *CDRsV2) StoreSessionCost(args *engine.ArgsV2CDRSStoreSMCost, reply *string) error {
-	return cdrSv2.CDRs.V2StoreSessionCost(args, reply)
+func (cdrSv2 *CDRsV2) StoreSessionCost(ctx *context.Context, args *engine.ArgsV2CDRSStoreSMCost, reply *string) error {
+	return cdrSv2.CDRs.V2StoreSessionCost(ctx, args, reply)
 }
 
 // ProcessEvent will process an Event based on the flags attached
-func (cdrSv2 *CDRsV2) ProcessEvent(arg *engine.ArgV1ProcessEvent, evs *[]*utils.EventWithFlags) error {
-	return cdrSv2.CDRs.V2ProcessEvent(arg, evs)
+func (cdrSv2 *CDRsV2) ProcessEvent(ctx *context.Context, arg *engine.ArgV1ProcessEvent, evs *[]*utils.EventWithFlags) error {
+	return cdrSv2.CDRs.V2ProcessEvent(ctx, arg, evs)
 }

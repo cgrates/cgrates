@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package v1
 
 import (
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/dispatchers"
 	"github.com/cgrates/cgrates/engine"
@@ -33,13 +34,13 @@ func NewRALsV1() *RALsV1 {
 type RALsV1 struct {
 }
 
-// Call implements rpcclient.ClientConnector interface for internal RPC
-func (rsv1 *RALsV1) Call(serviceMethod string, args any, reply any) error {
+// Call implements birpc.ClientConnector interface for internal RPC
+func (rsv1 *RALsV1) Call(ctx *context.Context, serviceMethod string, args any, reply any) error {
 	return utils.APIerRPCCall(rsv1, serviceMethod, args, reply)
 }
 
 // GetRatingPlansCost returns EventCosts matching RatingPlanIDs
-func (rsv1 *RALsV1) GetRatingPlansCost(arg *utils.RatingPlanCostArg, reply *dispatchers.RatingPlanCost) error {
+func (rsv1 *RALsV1) GetRatingPlansCost(ctx *context.Context, arg *utils.RatingPlanCostArg, reply *dispatchers.RatingPlanCost) error {
 	if missing := utils.MissingStructFields(arg, []string{utils.RatingPlanIDs,
 		utils.Destination, utils.SetupTime, utils.Usage}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
@@ -107,7 +108,7 @@ func (rsv1 *RALsV1) GetRatingPlansCost(arg *utils.RatingPlanCostArg, reply *disp
 	return nil
 }
 
-func (rsv1 *RALsV1) Ping(ign *utils.CGREvent, reply *string) error {
+func (rsv1 *RALsV1) Ping(ctx *context.Context, ign *utils.CGREvent, reply *string) error {
 	*reply = utils.Pong
 	return nil
 }

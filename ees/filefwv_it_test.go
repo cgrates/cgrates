@@ -22,7 +22,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package ees
 
 import (
-	"net/rpc"
 	"os"
 	"path"
 	"path/filepath"
@@ -30,6 +29,9 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc/context"
+
+	"github.com/cgrates/birpc"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -39,7 +41,7 @@ var (
 	fwvConfigDir string
 	fwvCfgPath   string
 	fwvCfg       *config.CGRConfig
-	fwvRpc       *rpc.Client
+	fwvRpc       *birpc.Client
 
 	sTestsFwv = []func(t *testing.T){
 		testCreateDirectory,
@@ -125,7 +127,7 @@ func testFwvExportEvent(t *testing.T) {
 		},
 	}
 	var reply map[string]utils.MapStorage
-	if err := fwvRpc.Call(utils.EeSv1ProcessEvent, event, &reply); err != nil {
+	if err := fwvRpc.Call(context.Background(), utils.EeSv1ProcessEvent, event, &reply); err != nil {
 		t.Error(err)
 	}
 	time.Sleep(time.Second)

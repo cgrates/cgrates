@@ -22,13 +22,15 @@ package ers
 
 import (
 	"fmt"
-	"net/rpc"
 	"os"
 	"path"
 	"reflect"
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc/context"
+
+	"github.com/cgrates/birpc"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/sessions"
@@ -39,7 +41,7 @@ var (
 	csvCfgPath string
 	csvCfgDIR  string
 	csvCfg     *config.CGRConfig
-	csvRPC     *rpc.Client
+	csvRPC     *birpc.Client
 
 	fileContent1 = `dbafe9c8614c785a65aabd116dd3959c3c56f7f6,default,*voice,dsafdsaf,*rated,*out,cgrates.org,call,1001,1001,+4986517174963,2013-11-07 08:42:25 +0000 UTC,2013-11-07 08:42:26 +0000 UTC,10s,1.0100,val_extra3,"",val_extra1
 dbafe9c8614c785a65aabd116dd3959c3c56f7f7,default,*voice,dsafdsag,*rated,*out,cgrates.org,call,1001,1001,+4986517174964,2013-11-07 09:42:25 +0000 UTC,2013-11-07 09:42:26 +0000 UTC,20s,1.0100,val_extra3,"",val_extra1
@@ -143,7 +145,7 @@ func testCsvITLoadTPFromFolder(t *testing.T) {
 	attrs := &utils.AttrLoadTpFromFolder{
 		FolderPath: path.Join(*dataDir, "tariffplans", "testit")}
 	var loadInst utils.LoadInstance
-	if err := csvRPC.Call(utils.APIerSv2LoadTariffPlanFromFolder,
+	if err := csvRPC.Call(context.Background(), utils.APIerSv2LoadTariffPlanFromFolder,
 		attrs, &loadInst); err != nil {
 		t.Error(err)
 	}
@@ -179,14 +181,14 @@ func testCsvITHandleSessionFile(t *testing.T) {
 	var acnt *engine.Account
 	attrs := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1001"}
 	eAcntVal := 10.0
-	if err := csvRPC.Call(utils.APIerSv2GetAccount, attrs, &acnt); err != nil {
+	if err := csvRPC.Call(context.Background(), utils.APIerSv2GetAccount, attrs, &acnt); err != nil {
 		t.Error(err)
 	} else if acnt.BalanceMap[utils.MetaMonetary].GetTotalValue() != eAcntVal {
 		t.Errorf("Expected: %f, received: %f", eAcntVal, acnt.BalanceMap[utils.MetaMonetary].GetTotalValue())
 	}
 
 	aSessions := make([]*sessions.ExternalSession, 0)
-	if err := csvRPC.Call(utils.SessionSv1GetActiveSessions, &utils.SessionFilter{},
+	if err := csvRPC.Call(context.Background(), utils.SessionSv1GetActiveSessions, &utils.SessionFilter{},
 		&aSessions); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
@@ -203,7 +205,7 @@ func testCsvITHandleSessionFile(t *testing.T) {
 func testCsvITCheckSession(t *testing.T) {
 	time.Sleep(200 * time.Millisecond)
 	aSessions := make([]*sessions.ExternalSession, 0)
-	if err := csvRPC.Call(utils.SessionSv1GetActiveSessions, &utils.SessionFilter{}, &aSessions); err != nil {
+	if err := csvRPC.Call(context.Background(), utils.SessionSv1GetActiveSessions, &utils.SessionFilter{}, &aSessions); err != nil {
 		t.Error(err)
 	} else if len(aSessions) != 3 {
 		t.Errorf("wrong active sessions: %s \n , and len(aSessions) %+v", utils.ToJSON(aSessions), len(aSessions))
@@ -220,7 +222,7 @@ func testCsvITTerminateSession(t *testing.T) {
 	}
 	time.Sleep(100 * time.Millisecond)
 	aSessions := make([]*sessions.ExternalSession, 0)
-	if err := csvRPC.Call(utils.SessionSv1GetActiveSessions, new(utils.SessionFilter), &aSessions); err == nil ||
+	if err := csvRPC.Call(context.Background(), utils.SessionSv1GetActiveSessions, new(utils.SessionFilter), &aSessions); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
@@ -247,7 +249,7 @@ func testCsvITAnalyseCDRs(t *testing.T) {
 			OriginIDs: []string{"SessionFromCsv"},
 		},
 	}
-	if err := csvRPC.Call(utils.CDRsV1GetCDRs, args, &cdrs); err != nil {
+	if err := csvRPC.Call(context.Background(), utils.CDRsV1GetCDRs, args, &cdrs); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(cdrs) != 1 {
 		t.Error("Unexpected number of CDRs returned: ", len(cdrs))
@@ -258,7 +260,7 @@ func testCsvITAnalyseCDRs(t *testing.T) {
 	}
 	args.RPCCDRsFilter = &utils.RPCCDRsFilter{RunIDs: []string{"SupplierCharges"},
 		OriginIDs: []string{"SessionFromCsv"}}
-	if err := csvRPC.Call(utils.CDRsV1GetCDRs, args, &cdrs); err != nil {
+	if err := csvRPC.Call(context.Background(), utils.CDRsV1GetCDRs, args, &cdrs); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(cdrs) != 1 {
 		t.Error("Unexpected number of CDRs returned: ", len(cdrs))
@@ -271,7 +273,7 @@ func testCsvITAnalyseCDRs(t *testing.T) {
 	var acnt *engine.Account
 	attrs := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1001"}
 	eAcntVal := 9.85
-	if err := csvRPC.Call(utils.APIerSv2GetAccount, attrs, &acnt); err != nil {
+	if err := csvRPC.Call(context.Background(), utils.APIerSv2GetAccount, attrs, &acnt); err != nil {
 		t.Error(err)
 	} else if acnt.BalanceMap[utils.MetaMonetary].GetTotalValue() != eAcntVal {
 		t.Errorf("Expected: %f, received: %f", eAcntVal, acnt.BalanceMap[utils.MetaMonetary].GetTotalValue())
@@ -299,7 +301,7 @@ func testCsvITAnalyzeFilteredCDR(t *testing.T) {
 			Sources:   []string{"ers_csv"},
 		},
 	}
-	if err := csvRPC.Call(utils.CDRsV1GetCDRs, args, &cdrs); err != nil {
+	if err := csvRPC.Call(context.Background(), utils.CDRsV1GetCDRs, args, &cdrs); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(cdrs) != 2 {
 		t.Error("Unexpected number of CDRs returned: ", utils.ToJSON(cdrs))
@@ -355,7 +357,7 @@ func testCsvITAnalyzeReaderWithFilter(t *testing.T) {
 			Sources:   []string{"ers_template_combined"},
 		},
 	}
-	if err := csvRPC.Call(utils.CDRsV1GetCDRs, args, &cdrs); err != nil {
+	if err := csvRPC.Call(context.Background(), utils.CDRsV1GetCDRs, args, &cdrs); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(cdrs) != 2 {
 		t.Error("Unexpected number of CDRs returned: ", utils.ToJSON(cdrs))

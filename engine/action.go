@@ -32,6 +32,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/cgrates/birpc"
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/guardian"
 	"github.com/cgrates/cgrates/utils"
@@ -216,7 +218,7 @@ func cdrLogAction(acc *Account, a *Action, acs Actions, _ *FilterS, extraData an
 		cdrs = append(cdrs, cdr)
 		var rply string
 		// After compute the CDR send it to CDR Server to be processed
-		if err := connMgr.Call(config.CgrConfig().SchedulerCfg().CDRsConns, nil,
+		if err := connMgr.Call(context.TODO(), config.CgrConfig().SchedulerCfg().CDRsConns,
 			utils.CDRsV1ProcessEvent,
 			&ArgV1ProcessEvent{
 				Flags:    []string{utils.ConcatenatedKey(utils.MetaChargers, "false")}, // do not try to get the chargers for cdrlog
@@ -447,7 +449,8 @@ func setddestinations(ub *Account, a *Action, acs Actions, _ *FilterS, extraData
 				continue
 			}
 			var sts StatQueue
-			if err = connMgr.Call(config.CgrConfig().RalsCfg().StatSConns, nil, utils.StatSv1GetStatQueue,
+			if err = connMgr.Call(context.TODO(), config.CgrConfig().RalsCfg().StatSConns,
+				utils.StatSv1GetStatQueue,
 				&utils.TenantIDWithAPIOpts{
 					TenantID: &utils.TenantID{
 						Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
@@ -656,35 +659,43 @@ func cgrRPCAction(ub *Account, a *Action, acs Actions, _ *FilterS, extraData any
 	if params, err = utils.GetRpcParams(req.Method); err != nil {
 		return
 	}
-	var client rpcclient.ClientConnector
+	var client birpc.ClientConnector
 	if req.Address == utils.MetaInternal {
-		client = params.Object.(rpcclient.ClientConnector)
-	} else if client, err = rpcclient.NewRPCClient(utils.TCP, req.Address, false, "", "", "",
-		req.Attempts, 0, config.CgrConfig().GeneralCfg().ConnectTimeout,
-		config.CgrConfig().GeneralCfg().ReplyTimeout, req.Transport,
-		nil, false, nil); err != nil {
+		client = params.Object.(birpc.ClientConnector)
+	} else if client, err = rpcclient.NewRPCClient(context.TODO(), utils.TCP, req.Address, false, "", "", "",
+		req.Attempts, 0,
+		config.CgrConfig().GeneralCfg().MaxReconnectInterval,
+		utils.FibDuration,
+		config.CgrConfig().GeneralCfg().ConnectTimeout,
+		config.CgrConfig().GeneralCfg().ReplyTimeout,
+		req.Transport, nil, false, nil); err != nil {
 		return
 	}
-	in, out := params.InParam, params.OutParam
-	//utils.Logger.Info("Params: " + utils.ToJSON(req.Params))
-	//p, err := utils.FromMapStringInterfaceValue(req.Params, in)
-	if err = mapstructure.Decode(req.Params, in); err != nil {
+
+	// Decode's output parameter requires a pointer.
+	if reflect.TypeOf(params.InParam).Kind() == reflect.Pointer {
+		err = mapstructure.Decode(req.Params, params.InParam)
+	} else {
+		err = mapstructure.Decode(req.Params, &params.InParam)
+
+	}
+	if err != nil {
 		utils.Logger.Info("<*cgr_rpc> err: " + err.Error())
 		return
 	}
-	if in == nil {
+	if params.InParam == nil {
 		utils.Logger.Info(fmt.Sprintf("<*cgr_rpc> nil params err: req.Params: %+v params: %+v", req.Params, params))
 		return utils.ErrParserError
 	}
-	utils.Logger.Info(fmt.Sprintf("<*cgr_rpc> calling: %s with: %s and result %v", req.Method, utils.ToJSON(in), out))
+	utils.Logger.Info(fmt.Sprintf("<*cgr_rpc> calling: %s with: %s and result %v", req.Method, utils.ToJSON(params.InParam), params.OutParam))
 	if !req.Async {
-		err = client.Call(req.Method, in, out)
-		utils.Logger.Info(fmt.Sprintf("<*cgr_rpc> result: %s err: %v", utils.ToJSON(out), err))
+		err = client.Call(context.TODO(), req.Method, params.InParam, params.OutParam)
+		utils.Logger.Info(fmt.Sprintf("<*cgr_rpc> result: %s err: %v", utils.ToJSON(params.OutParam), err))
 		return
 	}
 	go func() {
-		err := client.Call(req.Method, in, out)
-		utils.Logger.Info(fmt.Sprintf("<*cgr_rpc> result: %s err: %v", utils.ToJSON(out), err))
+		err := client.Call(context.TODO(), req.Method, params.InParam, params.OutParam)
+		utils.Logger.Info(fmt.Sprintf("<*cgr_rpc> result: %s err: %v", utils.ToJSON(params.OutParam), err))
 	}()
 	return
 }
@@ -987,7 +998,7 @@ func export(ub *Account, a *Action, acs Actions, _ *FilterS, extraData any) (err
 		CGREvent: cgrEv,
 	}
 	var rply map[string]map[string]any
-	return connMgr.Call(config.CgrConfig().ApierCfg().EEsConns, nil,
+	return connMgr.Call(context.TODO(), config.CgrConfig().ApierCfg().EEsConns,
 		utils.EeSv1ProcessEvent, args, &rply)
 }
 
@@ -996,7 +1007,7 @@ func resetThreshold(ub *Account, a *Action, acs Actions, _ *FilterS, extraData a
 		TenantID: utils.NewTenantID(a.ExtraParameters),
 	}
 	var rply string
-	return connMgr.Call(config.CgrConfig().SchedulerCfg().ThreshSConns, nil,
+	return connMgr.Call(context.TODO(), config.CgrConfig().SchedulerCfg().ThreshSConns,
 		utils.ThresholdSv1ResetThreshold, args, &rply)
 }
 
@@ -1005,7 +1016,7 @@ func resetStatQueue(ub *Account, a *Action, acs Actions, _ *FilterS, extraData a
 		TenantID: utils.NewTenantID(a.ExtraParameters),
 	}
 	var rply string
-	return connMgr.Call(config.CgrConfig().SchedulerCfg().StatSConns, nil,
+	return connMgr.Call(context.TODO(), config.CgrConfig().SchedulerCfg().StatSConns,
 		utils.StatSv1ResetStatQueue, args, &rply)
 }
 

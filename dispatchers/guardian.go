@@ -21,11 +21,12 @@ package dispatchers
 import (
 	"time"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
 )
 
 // GuardianSv1Ping interogates GuardianSv1 server responsible to process the event
-func (dS *DispatcherService) GuardianSv1Ping(args *utils.CGREvent,
+func (dS *DispatcherService) GuardianSv1Ping(ctx *context.Context, args *utils.CGREvent,
 	reply *string) (err error) {
 	if args == nil {
 		args = new(utils.CGREvent)
@@ -41,7 +42,7 @@ func (dS *DispatcherService) GuardianSv1Ping(args *utils.CGREvent,
 }
 
 // GuardianSv1RemoteLock will lock a key from remote
-func (dS *DispatcherService) GuardianSv1RemoteLock(args AttrRemoteLockWithAPIOpts,
+func (dS *DispatcherService) GuardianSv1RemoteLock(ctx *context.Context, args AttrRemoteLockWithAPIOpts,
 	reply *string) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
 	if args.Tenant != utils.EmptyString {
@@ -60,7 +61,7 @@ func (dS *DispatcherService) GuardianSv1RemoteLock(args AttrRemoteLockWithAPIOpt
 }
 
 // GuardianSv1RemoteUnlock will unlock a key from remote based on reference ID
-func (dS *DispatcherService) GuardianSv1RemoteUnlock(args AttrRemoteUnlockWithAPIOpts,
+func (dS *DispatcherService) GuardianSv1RemoteUnlock(ctx *context.Context, args AttrRemoteUnlockWithAPIOpts,
 	reply *[]string) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
 	if args.Tenant != utils.EmptyString {

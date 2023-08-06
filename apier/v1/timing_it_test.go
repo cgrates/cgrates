@@ -22,11 +22,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package v1
 
 import (
-	"net/rpc"
 	"path"
 	"reflect"
 	"testing"
 
+	"github.com/cgrates/birpc"
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -35,7 +36,7 @@ import (
 var (
 	timCfgPath   string
 	timCfg       *config.CGRConfig
-	timSRPC      *rpc.Client
+	timSRPC      *birpc.Client
 	timConfigDIR string //run tests for specific configuration
 
 	sTestsTiming = []func(t *testing.T){
@@ -119,7 +120,7 @@ func testTimingKillEngine(t *testing.T) {
 
 func testTimingGetTimingNotFound(t *testing.T) {
 	var reply *utils.TPTiming
-	if err := timSRPC.Call(utils.APIerSv1GetTiming, &utils.ArgsGetTimingID{ID: "MIDNIGHT"},
+	if err := timSRPC.Call(context.Background(), utils.APIerSv1GetTiming, &utils.ArgsGetTimingID{ID: "MIDNIGHT"},
 		&reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
@@ -141,7 +142,7 @@ func testTimingSetTiming(t *testing.T) {
 
 	var reply string
 
-	if err := timSRPC.Call(utils.APIerSv1SetTiming, timing, &reply); err != nil {
+	if err := timSRPC.Call(context.Background(), utils.APIerSv1SetTiming, timing, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply returned", reply)
@@ -150,7 +151,7 @@ func testTimingSetTiming(t *testing.T) {
 
 func testTimingGetTimingAfterSet(t *testing.T) {
 	var reply *utils.TPTiming
-	if err := timSRPC.Call(utils.APIerSv1GetTiming, &utils.ArgsGetTimingID{ID: "MIDNIGHT"},
+	if err := timSRPC.Call(context.Background(), utils.APIerSv1GetTiming, &utils.ArgsGetTimingID{ID: "MIDNIGHT"},
 		&reply); err != nil {
 		t.Fatal(err)
 	}
@@ -170,7 +171,7 @@ func testTimingGetTimingAfterSet(t *testing.T) {
 
 func testTimingRemoveTiming(t *testing.T) {
 	var reply string
-	if err := timSRPC.Call(utils.APIerSv1RemoveTiming,
+	if err := timSRPC.Call(context.Background(), utils.APIerSv1RemoveTiming,
 		&utils.ArgsGetTimingID{ID: "MIDNIGHT"}, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {

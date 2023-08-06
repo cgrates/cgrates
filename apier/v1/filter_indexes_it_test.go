@@ -21,13 +21,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package v1
 
 import (
-	"net/rpc"
 	"path"
 	"reflect"
 	"sort"
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc"
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -38,7 +39,7 @@ const (
 )
 
 var (
-	tFIdxRpc *rpc.Client
+	tFIdxRpc *birpc.Client
 
 	sTestsFilterIndexesSV1 = []func(t *testing.T){
 		testV1FIdxLoadConfig,
@@ -158,7 +159,7 @@ func testV1FIdxdxInitDataDb(t *testing.T) {
 
 func testV1IndexClearCache(t *testing.T) {
 	var reply string
-	if err := tFIdxRpc.Call(utils.CacheSv1Clear, &utils.AttrCacheIDsWithAPIOpts{}, &reply); err != nil {
+	if err := tFIdxRpc.Call(context.Background(), utils.CacheSv1Clear, &utils.AttrCacheIDsWithAPIOpts{}, &reply); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -199,12 +200,12 @@ func testV1FIdxSetThresholdProfile(t *testing.T) {
 		},
 	}
 	var result string
-	if err := tFIdxRpc.Call(utils.APIerSv1SetFilter, filter, &result); err != nil {
+	if err := tFIdxRpc.Call(context.Background(), utils.APIerSv1SetFilter, filter, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	if err := tFIdxRpc.Call(utils.APIerSv1GetThresholdProfile,
+	if err := tFIdxRpc.Call(context.Background(), utils.APIerSv1GetThresholdProfile,
 		&utils.TenantID{Tenant: tenant, ID: "TEST_PROFILE1"}, &reply); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
@@ -222,12 +223,12 @@ func testV1FIdxSetThresholdProfile(t *testing.T) {
 			Async:     true,
 		},
 	}
-	if err := tFIdxRpc.Call(utils.APIerSv1SetThresholdProfile, tPrfl, &result); err != nil {
+	if err := tFIdxRpc.Call(context.Background(), utils.APIerSv1SetThresholdProfile, tPrfl, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	if err := tFIdxRpc.Call(utils.APIerSv1GetThresholdProfile,
+	if err := tFIdxRpc.Call(context.Background(), utils.APIerSv1GetThresholdProfile,
 		&utils.TenantID{Tenant: tenant, ID: "TEST_PROFILE1"}, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(tPrfl.ThresholdProfile, reply) {
@@ -236,7 +237,7 @@ func testV1FIdxSetThresholdProfile(t *testing.T) {
 
 	var indexes []string
 	expectedIdx := []string{"*string:*req.Account:1001:TEST_PROFILE1"}
-	if err := tFIdxRpc.Call(utils.APIerSv1GetFilterIndexes, &AttrGetFilterIndexes{
+	if err := tFIdxRpc.Call(context.Background(), utils.APIerSv1GetFilterIndexes, &AttrGetFilterIndexes{
 		ItemType: utils.MetaThresholds, Tenant: tenant, FilterType: utils.MetaString},
 		&indexes); err != nil {
 		t.Error(err)
@@ -255,7 +256,7 @@ func testV1FIdxSetThresholdProfile(t *testing.T) {
 			}},
 		},
 	}
-	if err := tFIdxRpc.Call(utils.APIerSv1SetFilter, filter, &result); err != nil {
+	if err := tFIdxRpc.Call(context.Background(), utils.APIerSv1SetFilter, filter, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -264,7 +265,7 @@ func testV1FIdxSetThresholdProfile(t *testing.T) {
 	expectedIdx = []string{"*string:*req.Account:1006:TEST_PROFILE1",
 		"*string:*req.Account:1009:TEST_PROFILE1"}
 	sort.Strings(expectedIdx)
-	if err := tFIdxRpc.Call(utils.APIerSv1GetFilterIndexes, &AttrGetFilterIndexes{
+	if err := tFIdxRpc.Call(context.Background(), utils.APIerSv1GetFilterIndexes, &AttrGetFilterIndexes{
 		ItemType: utils.MetaThresholds, Tenant: tenant, FilterType: utils.MetaString},
 		&indexes); err != nil {
 		t.Error(err)
@@ -286,20 +287,20 @@ func testV1FIdxSetThresholdProfile(t *testing.T) {
 			}},
 		},
 	}
-	if err := tFIdxRpc.Call(utils.APIerSv1SetFilter, filter, &result); err != nil {
+	if err := tFIdxRpc.Call(context.Background(), utils.APIerSv1SetFilter, filter, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
 
-	if err := tFIdxRpc.Call(utils.APIerSv1RemoveFilterIndexes, &AttrRemFilterIndexes{
+	if err := tFIdxRpc.Call(context.Background(), utils.APIerSv1RemoveFilterIndexes, &AttrRemFilterIndexes{
 		ItemType: utils.MetaThresholds, Tenant: tenant}, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
 
-	if err := tFIdxRpc.Call(utils.APIerSv1GetFilterIndexes, &AttrGetFilterIndexes{
+	if err := tFIdxRpc.Call(context.Background(), utils.APIerSv1GetFilterIndexes, &AttrGetFilterIndexes{
 		ItemType: utils.MetaThresholds, Tenant: tenant, FilterType: utils.MetaString},
 		&indexes); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
@@ -309,7 +310,7 @@ func testV1FIdxSetThresholdProfile(t *testing.T) {
 
 func testV1FIdxComputeThresholdsIndexes(t *testing.T) {
 	var reply2 string
-	if err := tFIdxRpc.Call(utils.APIerSv1ComputeFilterIndexes,
+	if err := tFIdxRpc.Call(context.Background(), utils.APIerSv1ComputeFilterIndexes,
 		&utils.ArgsComputeFilterIndexes{
 			Tenant:     tenant,
 			ThresholdS: true,
@@ -321,7 +322,7 @@ func testV1FIdxComputeThresholdsIndexes(t *testing.T) {
 	}
 	expectedIDX := []string{"*string:*req.Account:1001:TEST_PROFILE1"}
 	var indexes []string
-	if err := tFIdxRpc.Call(utils.APIerSv1GetFilterIndexes, &AttrGetFilterIndexes{
+	if err := tFIdxRpc.Call(context.Background(), utils.APIerSv1GetFilterIndexes, &AttrGetFilterIndexes{
 		ItemType: utils.MetaThresholds, Tenant: tenant, FilterType: utils.MetaString},
 		&indexes); err != nil {
 		t.Error(err)
@@ -350,12 +351,12 @@ func testV1FIdxSetSecondThresholdProfile(t *testing.T) {
 	}
 
 	var result string
-	if err := tFIdxRpc.Call(utils.APIerSv1SetFilter, filter, &result); err != nil {
+	if err := tFIdxRpc.Call(context.Background(), utils.APIerSv1SetFilter, filter, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	if err := tFIdxRpc.Call(utils.APIerSv1GetThresholdProfile,
+	if err := tFIdxRpc.Call(context.Background(), utils.APIerSv1GetThresholdProfile,
 		&utils.TenantID{Tenant: tenant, ID: "TEST_PROFILE2"}, &reply); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
@@ -377,25 +378,25 @@ func testV1FIdxSetSecondThresholdProfile(t *testing.T) {
 			Async:     true,
 		},
 	}
-	if err := tFIdxRpc.Call(utils.APIerSv1SetThresholdProfile, tPrfl, &result); err != nil {
+	if err := tFIdxRpc.Call(context.Background(), utils.APIerSv1SetThresholdProfile, tPrfl, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	if err := tFIdxRpc.Call(utils.APIerSv1GetThresholdProfile,
+	if err := tFIdxRpc.Call(context.Background(), utils.APIerSv1GetThresholdProfile,
 		&utils.TenantID{Tenant: tenant, ID: "TEST_PROFILE2"}, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(tPrfl.ThresholdProfile, reply) {
 		t.Errorf("Expecting: %+v, received: %+v", tPrfl.ThresholdProfile, reply)
 	}
-	if err := tFIdxRpc.Call(utils.APIerSv1RemoveFilterIndexes, &AttrRemFilterIndexes{
+	if err := tFIdxRpc.Call(context.Background(), utils.APIerSv1RemoveFilterIndexes, &AttrRemFilterIndexes{
 		ItemType: utils.MetaThresholds, Tenant: tenant}, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
 	var indexes []string
-	if err := tFIdxRpc.Call(utils.APIerSv1GetFilterIndexes, &AttrGetFilterIndexes{
+	if err := tFIdxRpc.Call(context.Background(), utils.APIerSv1GetFilterIndexes, &AttrGetFilterIndexes{
 		ItemType: utils.MetaThresholds, Tenant: tenant, FilterType: utils.MetaString},
 		&indexes); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
@@ -405,7 +406,7 @@ func testV1FIdxSetSecondThresholdProfile(t *testing.T) {
 func testV1FIdxSecondComputeThresholdsIndexes(t *testing.T) {
 	thid := []string{"TEST_PROFILE2"}
 	var result string
-	if err := tFIdxRpc.Call(utils.APIerSv1ComputeFilterIndexIDs,
+	if err := tFIdxRpc.Call(context.Background(), utils.APIerSv1ComputeFilterIndexIDs,
 		&utils.ArgsComputeFilterIndexIDs{
 			Tenant:       tenant,
 			ThresholdIDs: thid,
@@ -417,7 +418,7 @@ func testV1FIdxSecondComputeThresholdsIndexes(t *testing.T) {
 	}
 	expectedIDX := []string{"*string:*req.Account:1002:TEST_PROFILE2"}
 	var indexes []string
-	if err := tFIdxRpc.Call(utils.APIerSv1GetFilterIndexes, &AttrGetFilterIndexes{
+	if err := tFIdxRpc.Call(context.Background(), utils.APIerSv1GetFilterIndexes, &AttrGetFilterIndexes{
 		ItemType: utils.MetaThresholds, Tenant: tenant, FilterType: utils.MetaString},
 		&indexes); err != nil {
 		t.Error(err)
@@ -429,7 +430,7 @@ func testV1FIdxSecondComputeThresholdsIndexes(t *testing.T) {
 
 func testV1FIdxThirdComputeThresholdsIndexes(t *testing.T) {
 	var result string
-	if err := tFIdxRpc.Call(utils.APIerSv1ComputeFilterIndexes, &utils.ArgsComputeFilterIndexes{
+	if err := tFIdxRpc.Call(context.Background(), utils.APIerSv1ComputeFilterIndexes, &utils.ArgsComputeFilterIndexes{
 		Tenant:     tenant,
 		ThresholdS: true,
 	}, &result); err != nil {
@@ -442,7 +443,7 @@ func testV1FIdxThirdComputeThresholdsIndexes(t *testing.T) {
 		"*string:*req.Account:1002:TEST_PROFILE2"}
 	sort.Strings(expectedIDX)
 	var indexes []string
-	if err := tFIdxRpc.Call(utils.APIerSv1GetFilterIndexes, &AttrGetFilterIndexes{
+	if err := tFIdxRpc.Call(context.Background(), utils.APIerSv1GetFilterIndexes, &AttrGetFilterIndexes{
 		ItemType: utils.MetaThresholds, Tenant: tenant, FilterType: utils.MetaString},
 		&indexes); err != nil {
 		t.Error(err)
@@ -456,7 +457,7 @@ func testV1FIdxThirdComputeThresholdsIndexes(t *testing.T) {
 
 func testV1FIdxRemoveThresholdProfile(t *testing.T) {
 	var result string
-	if err := tFIdxRpc.Call(utils.APIerSv1ComputeFilterIndexes, &utils.ArgsComputeFilterIndexes{
+	if err := tFIdxRpc.Call(context.Background(), utils.APIerSv1ComputeFilterIndexes, &utils.ArgsComputeFilterIndexes{
 		Tenant:     tenant,
 		ThresholdS: true,
 	}, &result); err != nil {
@@ -465,31 +466,31 @@ func testV1FIdxRemoveThresholdProfile(t *testing.T) {
 	if result != utils.OK {
 		t.Errorf("Error: %+v", result)
 	}
-	if err := tFIdxRpc.Call(utils.APIerSv1RemoveThresholdProfile,
+	if err := tFIdxRpc.Call(context.Background(), utils.APIerSv1RemoveThresholdProfile,
 		&utils.TenantID{Tenant: tenant, ID: "TEST_PROFILE1"}, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	if err := tFIdxRpc.Call(utils.APIerSv1RemoveThresholdProfile,
+	if err := tFIdxRpc.Call(context.Background(), utils.APIerSv1RemoveThresholdProfile,
 		&utils.TenantID{Tenant: tenant, ID: "TEST_PROFILE2"}, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
 	var sqp *engine.ThresholdProfile
-	if err := tFIdxRpc.Call(utils.APIerSv1GetThresholdProfile,
+	if err := tFIdxRpc.Call(context.Background(), utils.APIerSv1GetThresholdProfile,
 		&utils.TenantID{Tenant: tenant, ID: "TEST_PROFILE1"}, &sqp); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
-	if err := tFIdxRpc.Call(utils.APIerSv1GetThresholdProfile,
+	if err := tFIdxRpc.Call(context.Background(), utils.APIerSv1GetThresholdProfile,
 		&utils.TenantID{Tenant: tenant, ID: "TEST_PROFILE2"}, &sqp); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
 	var indexes []string
-	if err := tFIdxRpc.Call(utils.APIerSv1GetFilterIndexes, &AttrGetFilterIndexes{
+	if err := tFIdxRpc.Call(context.Background(), utils.APIerSv1GetFilterIndexes, &AttrGetFilterIndexes{
 		ItemType: utils.MetaThresholds, Tenant: tenant, FilterType: utils.MetaString},
 		&indexes); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
@@ -511,12 +512,12 @@ func testV1FIdxSetStatQueueProfileIndexes(t *testing.T) {
 		},
 	}
 	var result string
-	if err := tFIdxRpc.Call(utils.APIerSv1SetFilter, filter, &result); err != nil {
+	if err := tFIdxRpc.Call(context.Background(), utils.APIerSv1SetFilter, filter, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	if err := tFIdxRpc.Call(utils.APIerSv1GetStatQueueProfile,
+	if err := tFIdxRpc.Call(context.Background(), utils.APIerSv1GetStatQueueProfile,
 		&utils.TenantID{Tenant: tenant, ID: "TEST_PROFILE1"}, &reply); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
@@ -543,12 +544,12 @@ func testV1FIdxSetStatQueueProfileIndexes(t *testing.T) {
 			MinItems:     1,
 		},
 	}
-	if err := tFIdxRpc.Call(utils.APIerSv1SetStatQueueProfile, statConfig, &result); err != nil {
+	if err := tFIdxRpc.Call(context.Background(), utils.APIerSv1SetStatQueueProfile, statConfig, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	if err := tFIdxRpc.Call(utils.APIerSv1GetStatQueueProfile,
+	if err := tFIdxRpc.Call(context.Background(), utils.APIerSv1GetStatQueueProfile,
 		&utils.TenantID{Tenant: tenant, ID: "TEST_PROFILE1"}, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(statConfig.StatQueueProfile, reply) {
@@ -567,7 +568,7 @@ func testV1FIdxSetStatQueueProfileIndexes(t *testing.T) {
 			}},
 		},
 	}
-	if err := tFIdxRpc.Call(utils.APIerSv1SetFilter, filter, &result); err != nil {
+	if err := tFIdxRpc.Call(context.Background(), utils.APIerSv1SetFilter, filter, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -575,7 +576,7 @@ func testV1FIdxSetStatQueueProfileIndexes(t *testing.T) {
 	var indexes []string
 	expectedIdx := []string{"*string:*req.Destinations:+122:TEST_PROFILE1",
 		"*string:*req.Destinations:+5543:TEST_PROFILE1"}
-	if err := tFIdxRpc.Call(utils.APIerSv1GetFilterIndexes, &AttrGetFilterIndexes{
+	if err := tFIdxRpc.Call(context.Background(), utils.APIerSv1GetFilterIndexes, &AttrGetFilterIndexes{
 		ItemType: utils.MetaStats, Tenant: tenant, FilterType: utils.MetaString},
 		&indexes); err != nil {
 		t.Error(err)
@@ -599,19 +600,19 @@ func testV1FIdxSetStatQueueProfileIndexes(t *testing.T) {
 			}},
 		},
 	}
-	if err := tFIdxRpc.Call(utils.APIerSv1SetFilter, filter, &result); err != nil {
+	if err := tFIdxRpc.Call(context.Background(), utils.APIerSv1SetFilter, filter, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
 
-	if err := tFIdxRpc.Call(utils.APIerSv1RemoveFilterIndexes, &AttrRemFilterIndexes{
+	if err := tFIdxRpc.Call(context.Background(), utils.APIerSv1RemoveFilterIndexes, &AttrRemFilterIndexes{
 		ItemType: utils.MetaStats, Tenant: tenant}, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	if err := tFIdxRpc.Call(utils.APIerSv1GetFilterIndexes, &AttrGetFilterIndexes{
+	if err := tFIdxRpc.Call(context.Background(), utils.APIerSv1GetFilterIndexes, &AttrGetFilterIndexes{
 		ItemType: utils.MetaStats, Tenant: tenant, FilterType: utils.MetaString},
 		&indexes); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
@@ -620,7 +621,7 @@ func testV1FIdxSetStatQueueProfileIndexes(t *testing.T) {
 
 func testV1FIdxComputeStatQueueProfileIndexes(t *testing.T) {
 	var result string
-	if err := tFIdxRpc.Call(utils.APIerSv1ComputeFilterIndexes, &utils.ArgsComputeFilterIndexes{
+	if err := tFIdxRpc.Call(context.Background(), utils.APIerSv1ComputeFilterIndexes, &utils.ArgsComputeFilterIndexes{
 		Tenant: tenant,
 		StatS:  true,
 	}, &result); err != nil {
@@ -631,7 +632,7 @@ func testV1FIdxComputeStatQueueProfileIndexes(t *testing.T) {
 	}
 	expectedIDX := []string{"*string:*req.Account:1001:TEST_PROFILE1"}
 	var indexes []string
-	if err := tFIdxRpc.Call(utils.APIerSv1GetFilterIndexes, &AttrGetFilterIndexes{
+	if err := tFIdxRpc.Call(context.Background(), utils.APIerSv1GetFilterIndexes, &AttrGetFilterIndexes{
 		ItemType: utils.MetaStats, Tenant: tenant, FilterType: utils.MetaString},
 		&indexes); err != nil {
 		t.Error(err)
@@ -660,12 +661,12 @@ func testV1FIdxSetSecondStatQueueProfileIndexes(t *testing.T) {
 		},
 	}
 	var result string
-	if err := tFIdxRpc.Call(utils.APIerSv1SetFilter, filter, &result); err != nil {
+	if err := tFIdxRpc.Call(context.Background(), utils.APIerSv1SetFilter, filter, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	if err := tFIdxRpc.Call(utils.APIerSv1GetStatQueueProfile,
+	if err := tFIdxRpc.Call(context.Background(), utils.APIerSv1GetStatQueueProfile,
 		&utils.TenantID{Tenant: tenant, ID: "TEST_PROFILE2"}, &reply); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
@@ -696,25 +697,25 @@ func testV1FIdxSetSecondStatQueueProfileIndexes(t *testing.T) {
 			MinItems:     1,
 		},
 	}
-	if err := tFIdxRpc.Call(utils.APIerSv1SetStatQueueProfile, statConfig, &result); err != nil {
+	if err := tFIdxRpc.Call(context.Background(), utils.APIerSv1SetStatQueueProfile, statConfig, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	if err := tFIdxRpc.Call(utils.APIerSv1GetStatQueueProfile,
+	if err := tFIdxRpc.Call(context.Background(), utils.APIerSv1GetStatQueueProfile,
 		&utils.TenantID{Tenant: tenant, ID: "TEST_PROFILE2"}, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(statConfig.StatQueueProfile, reply) {
 		t.Errorf("Expecting: %+v, received: %+v", statConfig.StatQueueProfile, reply)
 	}
-	if err := tFIdxRpc.Call(utils.APIerSv1RemoveFilterIndexes, &AttrRemFilterIndexes{
+	if err := tFIdxRpc.Call(context.Background(), utils.APIerSv1RemoveFilterIndexes, &AttrRemFilterIndexes{
 		ItemType: utils.MetaStats, Tenant: tenant}, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
 	var indexes []string
-	if err := tFIdxRpc.Call(utils.APIerSv1GetFilterIndexes, &AttrGetFilterIndexes{
+	if err := tFIdxRpc.Call(context.Background(), utils.APIerSv1GetFilterIndexes, &AttrGetFilterIndexes{
 		ItemType: utils.MetaStats, Tenant: tenant, FilterType: utils.MetaString},
 		&indexes); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
@@ -723,7 +724,7 @@ func testV1FIdxSetSecondStatQueueProfileIndexes(t *testing.T) {
 
 func testV1FIdxSecondComputeStatQueueProfileIndexes(t *testing.T) {
 	var result string
-	if err := tFIdxRpc.Call(
+	if err := tFIdxRpc.Call(context.Background(),
 		utils.APIerSv1ComputeFilterIndexIDs, &utils.ArgsComputeFilterIndexIDs{
 			Tenant:  tenant,
 			StatIDs: []string{"TEST_PROFILE2"},
@@ -735,7 +736,7 @@ func testV1FIdxSecondComputeStatQueueProfileIndexes(t *testing.T) {
 	}
 	expectedIDX := []string{"*string:*req.Account:1001:TEST_PROFILE2"}
 	var indexes []string
-	if err := tFIdxRpc.Call(utils.APIerSv1GetFilterIndexes, &AttrGetFilterIndexes{
+	if err := tFIdxRpc.Call(context.Background(), utils.APIerSv1GetFilterIndexes, &AttrGetFilterIndexes{
 		ItemType: utils.MetaStats, Tenant: tenant, FilterType: utils.MetaString},
 		&indexes); err != nil {
 		t.Error(err)
@@ -748,7 +749,7 @@ func testV1FIdxSecondComputeStatQueueProfileIndexes(t *testing.T) {
 
 func testV1FIdxRemoveStatQueueProfile(t *testing.T) {
 	var result string
-	if err := tFIdxRpc.Call(utils.APIerSv1ComputeFilterIndexes, &utils.ArgsComputeFilterIndexes{
+	if err := tFIdxRpc.Call(context.Background(), utils.APIerSv1ComputeFilterIndexes, &utils.ArgsComputeFilterIndexes{
 		Tenant: tenant,
 		StatS:  true,
 	}, &result); err != nil {
@@ -757,30 +758,30 @@ func testV1FIdxRemoveStatQueueProfile(t *testing.T) {
 	if result != utils.OK {
 		t.Errorf("Error: %+v", result)
 	}
-	if err := tFIdxRpc.Call(utils.APIerSv1RemoveStatQueueProfile,
+	if err := tFIdxRpc.Call(context.Background(), utils.APIerSv1RemoveStatQueueProfile,
 		&utils.TenantID{Tenant: tenant, ID: "TEST_PROFILE1"}, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	if err := tFIdxRpc.Call(utils.APIerSv1RemoveStatQueueProfile,
+	if err := tFIdxRpc.Call(context.Background(), utils.APIerSv1RemoveStatQueueProfile,
 		&utils.TenantID{Tenant: tenant, ID: "TEST_PROFILE2"}, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	if err := tFIdxRpc.Call(utils.APIerSv1GetStatQueueProfile,
+	if err := tFIdxRpc.Call(context.Background(), utils.APIerSv1GetStatQueueProfile,
 		&utils.TenantID{Tenant: tenant, ID: "TEST_PROFILE1"}, &result); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
-	if err := tFIdxRpc.Call(utils.APIerSv1GetStatQueueProfile,
+	if err := tFIdxRpc.Call(context.Background(), utils.APIerSv1GetStatQueueProfile,
 		&utils.TenantID{Tenant: tenant, ID: "TEST_PROFILE2"}, &result); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
 	var indexes []string
-	if err := tFIdxRpc.Call(utils.APIerSv1GetFilterIndexes, &AttrGetFilterIndexes{
+	if err := tFIdxRpc.Call(context.Background(), utils.APIerSv1GetFilterIndexes, &AttrGetFilterIndexes{
 		ItemType: utils.MetaStats, Tenant: tenant, FilterType: utils.MetaString},
 		&indexes); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
@@ -802,12 +803,12 @@ func testV1FIdxSetResourceProfileIndexes(t *testing.T) {
 		},
 	}
 	var result string
-	if err := tFIdxRpc.Call(utils.APIerSv1SetFilter, filter, &result); err != nil {
+	if err := tFIdxRpc.Call(context.Background(), utils.APIerSv1SetFilter, filter, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	if err := tFIdxRpc.Call(utils.APIerSv1GetResourceProfile, &utils.TenantID{Tenant: tenant, ID: "RCFG1"},
+	if err := tFIdxRpc.Call(context.Background(), utils.APIerSv1GetResourceProfile, &utils.TenantID{Tenant: tenant, ID: "RCFG1"},
 		&reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
@@ -825,7 +826,7 @@ func testV1FIdxSetResourceProfileIndexes(t *testing.T) {
 			ThresholdIDs:      []string{"Val1", "Val2"},
 		},
 	}
-	if err := tFIdxRpc.Call(utils.APIerSv1SetResourceProfile, rlsConfig, &result); err != nil {
+	if err := tFIdxRpc.Call(context.Background(), utils.APIerSv1SetResourceProfile, rlsConfig, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -843,7 +844,7 @@ func testV1FIdxSetResourceProfileIndexes(t *testing.T) {
 			}},
 		},
 	}
-	if err := tFIdxRpc.Call(utils.APIerSv1SetFilter, filter, &result); err != nil {
+	if err := tFIdxRpc.Call(context.Background(), utils.APIerSv1SetFilter, filter, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -852,7 +853,7 @@ func testV1FIdxSetResourceProfileIndexes(t *testing.T) {
 	expectedIdx := []string{"*string:*req.Usage:20m:RCFG1",
 		"*string:*req.Usage:45m:RCFG1",
 		"*string:*req.Usage:10s:RCFG1"}
-	if err := tFIdxRpc.Call(utils.APIerSv1GetFilterIndexes, &AttrGetFilterIndexes{
+	if err := tFIdxRpc.Call(context.Background(), utils.APIerSv1GetFilterIndexes, &AttrGetFilterIndexes{
 		ItemType: utils.MetaResources, Tenant: tenant, FilterType: utils.MetaString},
 		&indexes); err != nil {
 		t.Error(err)
@@ -876,18 +877,18 @@ func testV1FIdxSetResourceProfileIndexes(t *testing.T) {
 			}},
 		},
 	}
-	if err := tFIdxRpc.Call(utils.APIerSv1SetFilter, filter, &result); err != nil {
+	if err := tFIdxRpc.Call(context.Background(), utils.APIerSv1SetFilter, filter, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	if err := tFIdxRpc.Call(utils.APIerSv1RemoveFilterIndexes, &AttrRemFilterIndexes{
+	if err := tFIdxRpc.Call(context.Background(), utils.APIerSv1RemoveFilterIndexes, &AttrRemFilterIndexes{
 		ItemType: utils.MetaResources, Tenant: tenant}, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	if err := tFIdxRpc.Call(utils.APIerSv1GetFilterIndexes, &AttrGetFilterIndexes{
+	if err := tFIdxRpc.Call(context.Background(), utils.APIerSv1GetFilterIndexes, &AttrGetFilterIndexes{
 		ItemType: utils.MetaResources, Tenant: tenant, FilterType: utils.MetaString},
 		&indexes); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
@@ -896,7 +897,7 @@ func testV1FIdxSetResourceProfileIndexes(t *testing.T) {
 
 func testV1FIdxComputeResourceProfileIndexes(t *testing.T) {
 	var reply2 string
-	if err := tFIdxRpc.Call(utils.APIerSv1ComputeFilterIndexes, &utils.ArgsComputeFilterIndexes{
+	if err := tFIdxRpc.Call(context.Background(), utils.APIerSv1ComputeFilterIndexes, &utils.ArgsComputeFilterIndexes{
 		Tenant:    tenant,
 		ResourceS: true,
 	}, &reply2); err != nil {
@@ -907,7 +908,7 @@ func testV1FIdxComputeResourceProfileIndexes(t *testing.T) {
 	}
 	expectedIDX := []string{"*string:*req.Account:1001:RCFG1"}
 	var indexes []string
-	if err := tFIdxRpc.Call(utils.APIerSv1GetFilterIndexes, &AttrGetFilterIndexes{
+	if err := tFIdxRpc.Call(context.Background(), utils.APIerSv1GetFilterIndexes, &AttrGetFilterIndexes{
 		ItemType: utils.MetaResources, Tenant: tenant, FilterType: utils.MetaString},
 		&indexes); err != nil {
 		t.Error(err)
@@ -932,12 +933,12 @@ func testV1FIdxSetSecondResourceProfileIndexes(t *testing.T) {
 		},
 	}
 	var result string
-	if err := tFIdxRpc.Call(utils.APIerSv1SetFilter, filter, &result); err != nil {
+	if err := tFIdxRpc.Call(context.Background(), utils.APIerSv1SetFilter, filter, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	if err := tFIdxRpc.Call(utils.APIerSv1GetResourceProfile, &utils.TenantID{Tenant: tenant, ID: "RCFG2"},
+	if err := tFIdxRpc.Call(context.Background(), utils.APIerSv1GetResourceProfile, &utils.TenantID{Tenant: tenant, ID: "RCFG2"},
 		&reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
@@ -955,19 +956,19 @@ func testV1FIdxSetSecondResourceProfileIndexes(t *testing.T) {
 			ThresholdIDs:      []string{"Val1", "Val2"},
 		},
 	}
-	if err := tFIdxRpc.Call(utils.APIerSv1SetResourceProfile, rlsConfig, &result); err != nil {
+	if err := tFIdxRpc.Call(context.Background(), utils.APIerSv1SetResourceProfile, rlsConfig, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	if err := tFIdxRpc.Call(utils.APIerSv1RemoveFilterIndexes, &AttrRemFilterIndexes{
+	if err := tFIdxRpc.Call(context.Background(), utils.APIerSv1RemoveFilterIndexes, &AttrRemFilterIndexes{
 		ItemType: utils.MetaResources, Tenant: tenant}, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
 	var indexes []string
-	if err := tFIdxRpc.Call(utils.APIerSv1GetFilterIndexes, &AttrGetFilterIndexes{
+	if err := tFIdxRpc.Call(context.Background(), utils.APIerSv1GetFilterIndexes, &AttrGetFilterIndexes{
 		ItemType: utils.MetaResources, Tenant: tenant, FilterType: utils.MetaString},
 		&indexes); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
@@ -977,7 +978,7 @@ func testV1FIdxSetSecondResourceProfileIndexes(t *testing.T) {
 func testV1FIdxSecondComputeResourceProfileIndexes(t *testing.T) {
 	rsid := []string{"RCFG2"}
 	var reply2 string
-	if err := tFIdxRpc.Call(utils.APIerSv1ComputeFilterIndexIDs,
+	if err := tFIdxRpc.Call(context.Background(), utils.APIerSv1ComputeFilterIndexIDs,
 		&utils.ArgsComputeFilterIndexIDs{
 			Tenant:      tenant,
 			ResourceIDs: rsid,
@@ -989,7 +990,7 @@ func testV1FIdxSecondComputeResourceProfileIndexes(t *testing.T) {
 	}
 	expectedIDX := []string{"*string:*req.Account:1001:RCFG2"}
 	var indexes []string
-	if err := tFIdxRpc.Call(utils.APIerSv1GetFilterIndexes, &AttrGetFilterIndexes{
+	if err := tFIdxRpc.Call(context.Background(), utils.APIerSv1GetFilterIndexes, &AttrGetFilterIndexes{
 		ItemType: utils.MetaResources, Tenant: tenant, FilterType: utils.MetaString},
 		&indexes); err != nil {
 		t.Error(err)
@@ -1002,7 +1003,7 @@ func testV1FIdxSecondComputeResourceProfileIndexes(t *testing.T) {
 func testV1FIdxRemoveResourceProfile(t *testing.T) {
 	var resp string
 	var reply2 string
-	if err := tFIdxRpc.Call(utils.APIerSv1ComputeFilterIndexes, &utils.ArgsComputeFilterIndexes{
+	if err := tFIdxRpc.Call(context.Background(), utils.APIerSv1ComputeFilterIndexes, &utils.ArgsComputeFilterIndexes{
 		Tenant:    tenant,
 		ResourceS: true,
 	}, &reply2); err != nil {
@@ -1011,28 +1012,28 @@ func testV1FIdxRemoveResourceProfile(t *testing.T) {
 	if reply2 != utils.OK {
 		t.Errorf("Error: %+v", reply2)
 	}
-	if err := tFIdxRpc.Call(utils.APIerSv1RemoveResourceProfile,
+	if err := tFIdxRpc.Call(context.Background(), utils.APIerSv1RemoveResourceProfile,
 		&utils.TenantID{Tenant: tenant, ID: "RCFG1"}, &resp); err != nil {
 		t.Error(err)
 	} else if resp != utils.OK {
 		t.Error("Unexpected reply returned", resp)
 	}
-	if err := tFIdxRpc.Call(utils.APIerSv1RemoveResourceProfile,
+	if err := tFIdxRpc.Call(context.Background(), utils.APIerSv1RemoveResourceProfile,
 		&utils.TenantID{Tenant: tenant, ID: "RCFG2"}, &resp); err != nil {
 		t.Error(err)
 	} else if resp != utils.OK {
 		t.Error("Unexpected reply returned", resp)
 	}
-	if err := tFIdxRpc.Call(utils.APIerSv1GetResourceProfile, &utils.TenantID{Tenant: tenant, ID: "RCFG1"},
+	if err := tFIdxRpc.Call(context.Background(), utils.APIerSv1GetResourceProfile, &utils.TenantID{Tenant: tenant, ID: "RCFG1"},
 		&reply2); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
-	if err := tFIdxRpc.Call(utils.APIerSv1GetResourceProfile, &utils.TenantID{Tenant: tenant, ID: "RCFG2"},
+	if err := tFIdxRpc.Call(context.Background(), utils.APIerSv1GetResourceProfile, &utils.TenantID{Tenant: tenant, ID: "RCFG2"},
 		&reply2); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
 	var indexes []string
-	if err := tFIdxRpc.Call(utils.APIerSv1GetFilterIndexes, &AttrGetFilterIndexes{
+	if err := tFIdxRpc.Call(context.Background(), utils.APIerSv1GetFilterIndexes, &AttrGetFilterIndexes{
 		ItemType: utils.MetaResources, Tenant: tenant, FilterType: utils.MetaString},
 		&indexes); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
@@ -1056,12 +1057,12 @@ func testV1FIdxSetRouteProfileIndexes(t *testing.T) {
 		},
 	}
 	var result string
-	if err := tFIdxRpc.Call(utils.APIerSv1SetFilter, filter, &result); err != nil {
+	if err := tFIdxRpc.Call(context.Background(), utils.APIerSv1SetFilter, filter, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	if err := tFIdxRpc.Call(utils.APIerSv1GetRouteProfile,
+	if err := tFIdxRpc.Call(context.Background(), utils.APIerSv1GetRouteProfile,
 		&utils.TenantID{Tenant: tenant, ID: "TEST_PROFILE1"}, &reply); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
@@ -1087,12 +1088,12 @@ func testV1FIdxSetRouteProfileIndexes(t *testing.T) {
 		},
 	}
 
-	if err := tFIdxRpc.Call(utils.APIerSv1SetRouteProfile, rPrf, &result); err != nil {
+	if err := tFIdxRpc.Call(context.Background(), utils.APIerSv1SetRouteProfile, rPrf, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	if err := tFIdxRpc.Call(utils.APIerSv1GetRouteProfile,
+	if err := tFIdxRpc.Call(context.Background(), utils.APIerSv1GetRouteProfile,
 		&utils.TenantID{Tenant: tenant, ID: "TEST_PROFILE1"}, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rPrf.RouteProfile, reply) {
@@ -1111,7 +1112,7 @@ func testV1FIdxSetRouteProfileIndexes(t *testing.T) {
 			}},
 		},
 	}
-	if err := tFIdxRpc.Call(utils.APIerSv1SetFilter, filter, &result); err != nil {
+	if err := tFIdxRpc.Call(context.Background(), utils.APIerSv1SetFilter, filter, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -1119,7 +1120,7 @@ func testV1FIdxSetRouteProfileIndexes(t *testing.T) {
 	var indexes []string
 	expectedIdx := []string{"*string:*req.CGRID:qweasdzxc:TEST_PROFILE1",
 		"*string:*req.CGRID:iopjklbnm:TEST_PROFILE1"}
-	if err := tFIdxRpc.Call(utils.APIerSv1GetFilterIndexes, &AttrGetFilterIndexes{
+	if err := tFIdxRpc.Call(context.Background(), utils.APIerSv1GetFilterIndexes, &AttrGetFilterIndexes{
 		ItemType: utils.MetaRoutes, Tenant: tenant},
 		&indexes); err != nil {
 		t.Error(err)
@@ -1145,18 +1146,18 @@ func testV1FIdxSetRouteProfileIndexes(t *testing.T) {
 			},
 		},
 	}
-	if err := tFIdxRpc.Call(utils.APIerSv1SetFilter, filter, &result); err != nil {
+	if err := tFIdxRpc.Call(context.Background(), utils.APIerSv1SetFilter, filter, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	if err := tFIdxRpc.Call(utils.APIerSv1RemoveFilterIndexes, &AttrRemFilterIndexes{
+	if err := tFIdxRpc.Call(context.Background(), utils.APIerSv1RemoveFilterIndexes, &AttrRemFilterIndexes{
 		ItemType: utils.MetaRoutes, Tenant: tenant}, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	if err := tFIdxRpc.Call(utils.APIerSv1GetFilterIndexes, &AttrGetFilterIndexes{
+	if err := tFIdxRpc.Call(context.Background(), utils.APIerSv1GetFilterIndexes, &AttrGetFilterIndexes{
 		ItemType: utils.MetaRoutes, Tenant: tenant, FilterType: utils.MetaString},
 		&indexes); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
@@ -1165,7 +1166,7 @@ func testV1FIdxSetRouteProfileIndexes(t *testing.T) {
 
 func testV1FIdxComputeRouteProfileIndexes(t *testing.T) {
 	var reply2 string
-	if err := tFIdxRpc.Call(utils.APIerSv1ComputeFilterIndexes, &utils.ArgsComputeFilterIndexes{
+	if err := tFIdxRpc.Call(context.Background(), utils.APIerSv1ComputeFilterIndexes, &utils.ArgsComputeFilterIndexes{
 		Tenant: tenant,
 		RouteS: true,
 	}, &reply2); err != nil {
@@ -1176,7 +1177,7 @@ func testV1FIdxComputeRouteProfileIndexes(t *testing.T) {
 	}
 	expectedIDX := []string{"*string:*req.Account:1001:TEST_PROFILE1"}
 	var indexes []string
-	if err := tFIdxRpc.Call(utils.APIerSv1GetFilterIndexes, &AttrGetFilterIndexes{
+	if err := tFIdxRpc.Call(context.Background(), utils.APIerSv1GetFilterIndexes, &AttrGetFilterIndexes{
 		ItemType: utils.MetaRoutes, Tenant: tenant, FilterType: utils.MetaString},
 		&indexes); err != nil {
 		t.Error(err)
@@ -1205,12 +1206,12 @@ func testV1FIdxSetSecondRouteProfileIndexes(t *testing.T) {
 		},
 	}
 	var result string
-	if err := tFIdxRpc.Call(utils.APIerSv1SetFilter, filter, &result); err != nil {
+	if err := tFIdxRpc.Call(context.Background(), utils.APIerSv1SetFilter, filter, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	if err := tFIdxRpc.Call(utils.APIerSv1GetRouteProfile,
+	if err := tFIdxRpc.Call(context.Background(), utils.APIerSv1GetRouteProfile,
 		&utils.TenantID{Tenant: tenant, ID: "TEST_PROFILE2"}, &reply); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
@@ -1235,25 +1236,25 @@ func testV1FIdxSetSecondRouteProfileIndexes(t *testing.T) {
 			Weight: 10,
 		},
 	}
-	if err := tFIdxRpc.Call(utils.APIerSv1SetRouteProfile, rPrf, &result); err != nil {
+	if err := tFIdxRpc.Call(context.Background(), utils.APIerSv1SetRouteProfile, rPrf, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	if err := tFIdxRpc.Call(utils.APIerSv1GetRouteProfile,
+	if err := tFIdxRpc.Call(context.Background(), utils.APIerSv1GetRouteProfile,
 		&utils.TenantID{Tenant: tenant, ID: "TEST_PROFILE2"}, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rPrf.RouteProfile, reply) {
 		t.Errorf("Expecting: %+v, received: %+v", rPrf.RouteProfile, reply)
 	}
-	if err := tFIdxRpc.Call(utils.APIerSv1RemoveFilterIndexes, &AttrRemFilterIndexes{
+	if err := tFIdxRpc.Call(context.Background(), utils.APIerSv1RemoveFilterIndexes, &AttrRemFilterIndexes{
 		ItemType: utils.MetaRoutes, Tenant: tenant}, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
 	var indexes []string
-	if err := tFIdxRpc.Call(utils.APIerSv1GetFilterIndexes, &AttrGetFilterIndexes{
+	if err := tFIdxRpc.Call(context.Background(), utils.APIerSv1GetFilterIndexes, &AttrGetFilterIndexes{
 		ItemType: utils.MetaRoutes, Tenant: tenant, FilterType: utils.MetaString},
 		&indexes); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
@@ -1263,7 +1264,7 @@ func testV1FIdxSetSecondRouteProfileIndexes(t *testing.T) {
 func testV1FIdxSecondComputeRouteProfileIndexes(t *testing.T) {
 	spid := []string{"TEST_PROFILE2"}
 	var reply2 string
-	if err := tFIdxRpc.Call(utils.APIerSv1ComputeFilterIndexIDs,
+	if err := tFIdxRpc.Call(context.Background(), utils.APIerSv1ComputeFilterIndexIDs,
 		&utils.ArgsComputeFilterIndexIDs{
 			Tenant:   tenant,
 			RouteIDs: spid,
@@ -1275,7 +1276,7 @@ func testV1FIdxSecondComputeRouteProfileIndexes(t *testing.T) {
 	}
 	expectedIDX := []string{"*string:*req.Account:1001:TEST_PROFILE2"}
 	var indexes []string
-	if err := tFIdxRpc.Call(utils.APIerSv1GetFilterIndexes, &AttrGetFilterIndexes{
+	if err := tFIdxRpc.Call(context.Background(), utils.APIerSv1GetFilterIndexes, &AttrGetFilterIndexes{
 		ItemType: utils.MetaRoutes, Tenant: tenant, FilterType: utils.MetaString},
 		&indexes); err != nil {
 		t.Error(err)
@@ -1289,7 +1290,7 @@ func testV1FIdxSecondComputeRouteProfileIndexes(t *testing.T) {
 func testV1FIdxRemoveRouteProfile(t *testing.T) {
 	var resp string
 	var reply2 string
-	if err := tFIdxRpc.Call(utils.APIerSv1ComputeFilterIndexes, &utils.ArgsComputeFilterIndexes{
+	if err := tFIdxRpc.Call(context.Background(), utils.APIerSv1ComputeFilterIndexes, &utils.ArgsComputeFilterIndexes{
 		Tenant: tenant,
 		RouteS: true,
 	}, &reply2); err != nil {
@@ -1298,30 +1299,30 @@ func testV1FIdxRemoveRouteProfile(t *testing.T) {
 	if reply2 != utils.OK {
 		t.Errorf("Error: %+v", reply2)
 	}
-	if err := tFIdxRpc.Call(utils.APIerSv1RemoveRouteProfile,
+	if err := tFIdxRpc.Call(context.Background(), utils.APIerSv1RemoveRouteProfile,
 		&utils.TenantID{Tenant: tenant, ID: "TEST_PROFILE1"}, &resp); err != nil {
 		t.Error(err)
 	} else if resp != utils.OK {
 		t.Error("Unexpected reply returned", resp)
 	}
-	if err := tFIdxRpc.Call(utils.APIerSv1RemoveRouteProfile,
+	if err := tFIdxRpc.Call(context.Background(), utils.APIerSv1RemoveRouteProfile,
 		&utils.TenantID{Tenant: tenant, ID: "TEST_PROFILE2"}, &resp); err != nil {
 		t.Error(err)
 	} else if resp != utils.OK {
 		t.Error("Unexpected reply returned", resp)
 	}
-	if err := tFIdxRpc.Call(utils.APIerSv1GetRouteProfile,
+	if err := tFIdxRpc.Call(context.Background(), utils.APIerSv1GetRouteProfile,
 		&utils.TenantID{Tenant: tenant, ID: "TEST_PROFILE1"}, &reply2); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
-	if err := tFIdxRpc.Call(utils.APIerSv1GetRouteProfile,
+	if err := tFIdxRpc.Call(context.Background(), utils.APIerSv1GetRouteProfile,
 		&utils.TenantID{Tenant: tenant, ID: "TEST_PROFILE2"}, &reply2); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
 	var indexes []string
-	if err := tFIdxRpc.Call(utils.APIerSv1GetFilterIndexes, &AttrGetFilterIndexes{
+	if err := tFIdxRpc.Call(context.Background(), utils.APIerSv1GetFilterIndexes, &AttrGetFilterIndexes{
 		ItemType: utils.MetaRoutes, Tenant: tenant, FilterType: utils.MetaString},
 		&indexes); err != nil &&
 		err.Error() != utils.ErrNotFound.Error() {
@@ -1344,12 +1345,12 @@ func testV1FIdxSetAttributeProfileIndexes(t *testing.T) {
 		},
 	}
 	var result string
-	if err := tFIdxRpc.Call(utils.APIerSv1SetFilter, filter, &result); err != nil {
+	if err := tFIdxRpc.Call(context.Background(), utils.APIerSv1SetFilter, filter, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	if err := tFIdxRpc.Call(utils.APIerSv1GetAttributeProfile,
+	if err := tFIdxRpc.Call(context.Background(), utils.APIerSv1GetAttributeProfile,
 		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: tenant, ID: "ApierTest"}}, &reply); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
@@ -1370,12 +1371,12 @@ func testV1FIdxSetAttributeProfileIndexes(t *testing.T) {
 			Weight: 20,
 		},
 	}
-	if err := tFIdxRpc.Call(utils.APIerSv1SetAttributeProfile, alsPrf, &result); err != nil {
+	if err := tFIdxRpc.Call(context.Background(), utils.APIerSv1SetAttributeProfile, alsPrf, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	if err := tFIdxRpc.Call(utils.APIerSv1GetAttributeProfile,
+	if err := tFIdxRpc.Call(context.Background(), utils.APIerSv1GetAttributeProfile,
 		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: tenant, ID: "ApierTest"}}, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(alsPrf.FilterIDs, reply.FilterIDs) {
@@ -1400,7 +1401,7 @@ func testV1FIdxSetAttributeProfileIndexes(t *testing.T) {
 			}},
 		},
 	}
-	if err := tFIdxRpc.Call(utils.APIerSv1SetFilter, filter, &result); err != nil {
+	if err := tFIdxRpc.Call(context.Background(), utils.APIerSv1SetFilter, filter, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -1409,7 +1410,7 @@ func testV1FIdxSetAttributeProfileIndexes(t *testing.T) {
 	expectedIdx := []string{"*string:*opts.Subsystems:*chargers:ApierTest",
 		"*string:*opts.Subsystems:*thresholds:ApierTest",
 		"*string:*opts.Subsystems:*stats:ApierTest"}
-	if err := tFIdxRpc.Call(utils.APIerSv1GetFilterIndexes, &AttrGetFilterIndexes{
+	if err := tFIdxRpc.Call(context.Background(), utils.APIerSv1GetFilterIndexes, &AttrGetFilterIndexes{
 		ItemType: utils.MetaAttributes, Tenant: tenant, FilterType: utils.MetaString,
 		Context: utils.MetaSessionS},
 		&indexes); err != nil {
@@ -1434,12 +1435,12 @@ func testV1FIdxSetAttributeProfileIndexes(t *testing.T) {
 			}},
 		},
 	}
-	if err := tFIdxRpc.Call(utils.APIerSv1SetFilter, filter, &result); err != nil {
+	if err := tFIdxRpc.Call(context.Background(), utils.APIerSv1SetFilter, filter, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	if err := tFIdxRpc.Call(utils.APIerSv1RemoveFilterIndexes, &AttrRemFilterIndexes{
+	if err := tFIdxRpc.Call(context.Background(), utils.APIerSv1RemoveFilterIndexes, &AttrRemFilterIndexes{
 		ItemType: utils.MetaAttributes,
 		Tenant:   tenant,
 		Context:  utils.MetaSessionS}, &result); err != nil {
@@ -1447,7 +1448,7 @@ func testV1FIdxSetAttributeProfileIndexes(t *testing.T) {
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	if err := tFIdxRpc.Call(utils.APIerSv1GetFilterIndexes, &AttrGetFilterIndexes{
+	if err := tFIdxRpc.Call(context.Background(), utils.APIerSv1GetFilterIndexes, &AttrGetFilterIndexes{
 		ItemType: utils.MetaAttributes, Tenant: tenant, FilterType: utils.MetaString,
 		Context: utils.MetaSessionS}, &indexes); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
@@ -1456,7 +1457,7 @@ func testV1FIdxSetAttributeProfileIndexes(t *testing.T) {
 
 func testV1FIdxComputeAttributeProfileIndexes(t *testing.T) {
 	var result string
-	if err := tFIdxRpc.Call(utils.APIerSv1ComputeFilterIndexes,
+	if err := tFIdxRpc.Call(context.Background(), utils.APIerSv1ComputeFilterIndexes,
 		&utils.ArgsComputeFilterIndexes{
 			Tenant:     tenant,
 			Context:    utils.MetaSessionS,
@@ -1468,7 +1469,7 @@ func testV1FIdxComputeAttributeProfileIndexes(t *testing.T) {
 	}
 	expectedIDX := []string{"*string:*req.Account:1001:ApierTest"}
 	var indexes []string
-	if err := tFIdxRpc.Call(utils.APIerSv1GetFilterIndexes, &AttrGetFilterIndexes{
+	if err := tFIdxRpc.Call(context.Background(), utils.APIerSv1GetFilterIndexes, &AttrGetFilterIndexes{
 		ItemType:   utils.MetaAttributes,
 		Tenant:     tenant,
 		FilterType: utils.MetaString,
@@ -1498,12 +1499,12 @@ func testV1FIdxSetSecondAttributeProfileIndexes(t *testing.T) {
 		},
 	}
 	var result string
-	if err := tFIdxRpc.Call(utils.APIerSv1SetFilter, filter, &result); err != nil {
+	if err := tFIdxRpc.Call(context.Background(), utils.APIerSv1SetFilter, filter, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	if err := tFIdxRpc.Call(utils.APIerSv1GetAttributeProfile,
+	if err := tFIdxRpc.Call(context.Background(), utils.APIerSv1GetAttributeProfile,
 		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{
 			Tenant: tenant, ID: "ApierTest2"}}, &reply); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
@@ -1523,12 +1524,12 @@ func testV1FIdxSetSecondAttributeProfileIndexes(t *testing.T) {
 			Weight: 20,
 		},
 	}
-	if err := tFIdxRpc.Call(utils.APIerSv1SetAttributeProfile, alsPrf, &result); err != nil {
+	if err := tFIdxRpc.Call(context.Background(), utils.APIerSv1SetAttributeProfile, alsPrf, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	if err := tFIdxRpc.Call(utils.APIerSv1GetAttributeProfile,
+	if err := tFIdxRpc.Call(context.Background(), utils.APIerSv1GetAttributeProfile,
 		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{
 			Tenant: tenant, ID: "ApierTest2"}}, &reply); err != nil {
 		t.Error(err)
@@ -1542,7 +1543,7 @@ func testV1FIdxSetSecondAttributeProfileIndexes(t *testing.T) {
 	} else if !reflect.DeepEqual(alsPrf.ID, reply.ID) {
 		t.Errorf("Expecting : %+v, received: %+v", alsPrf.ID, reply.ID)
 	}
-	if err := tFIdxRpc.Call(utils.APIerSv1RemoveFilterIndexes,
+	if err := tFIdxRpc.Call(context.Background(), utils.APIerSv1RemoveFilterIndexes,
 		&AttrRemFilterIndexes{
 			ItemType: utils.MetaAttributes,
 			Tenant:   tenant,
@@ -1552,7 +1553,7 @@ func testV1FIdxSetSecondAttributeProfileIndexes(t *testing.T) {
 		t.Error("Unexpected reply returned", result)
 	}
 	var indexes []string
-	if err := tFIdxRpc.Call(utils.APIerSv1GetFilterIndexes,
+	if err := tFIdxRpc.Call(context.Background(), utils.APIerSv1GetFilterIndexes,
 		&AttrGetFilterIndexes{
 			ItemType:   utils.MetaAttributes,
 			Tenant:     tenant,
@@ -1565,7 +1566,7 @@ func testV1FIdxSetSecondAttributeProfileIndexes(t *testing.T) {
 
 func testV1FIdxSecondComputeAttributeProfileIndexes(t *testing.T) {
 	var result string
-	if err := tFIdxRpc.Call(utils.APIerSv1ComputeFilterIndexIDs,
+	if err := tFIdxRpc.Call(context.Background(), utils.APIerSv1ComputeFilterIndexIDs,
 		&utils.ArgsComputeFilterIndexIDs{
 			Tenant:       tenant,
 			Context:      utils.MetaSessionS,
@@ -1577,7 +1578,7 @@ func testV1FIdxSecondComputeAttributeProfileIndexes(t *testing.T) {
 	}
 	expectedIDX := []string{"*string:*req.Account:1001:ApierTest2"}
 	var indexes []string
-	if err := tFIdxRpc.Call(utils.APIerSv1GetFilterIndexes, &AttrGetFilterIndexes{
+	if err := tFIdxRpc.Call(context.Background(), utils.APIerSv1GetFilterIndexes, &AttrGetFilterIndexes{
 		ItemType:   utils.MetaAttributes,
 		Tenant:     tenant,
 		FilterType: utils.MetaString,
@@ -1592,7 +1593,7 @@ func testV1FIdxSecondComputeAttributeProfileIndexes(t *testing.T) {
 
 func testV1FIdxComputeWithAnotherContext(t *testing.T) {
 	var result string
-	if err := tFIdxRpc.Call(utils.APIerSv1ComputeFilterIndexes,
+	if err := tFIdxRpc.Call(context.Background(), utils.APIerSv1ComputeFilterIndexes,
 		&utils.ArgsComputeFilterIndexes{
 			Tenant:     tenant,
 			Context:    utils.MetaAny,
@@ -1603,7 +1604,7 @@ func testV1FIdxComputeWithAnotherContext(t *testing.T) {
 		t.Errorf("Error: %+v", result)
 	}
 	var indexes []string
-	if err := tFIdxRpc.Call(utils.APIerSv1GetFilterIndexes, &AttrGetFilterIndexes{
+	if err := tFIdxRpc.Call(context.Background(), utils.APIerSv1GetFilterIndexes, &AttrGetFilterIndexes{
 		ItemType:   utils.MetaAttributes,
 		Tenant:     tenant,
 		FilterType: utils.MetaString,
@@ -1616,7 +1617,7 @@ func testV1FIdxComputeWithAnotherContext(t *testing.T) {
 
 func testV1FIdxRemoveAttributeProfile(t *testing.T) {
 	var result string
-	if err := tFIdxRpc.Call(utils.APIerSv1ComputeFilterIndexes,
+	if err := tFIdxRpc.Call(context.Background(), utils.APIerSv1ComputeFilterIndexes,
 		&utils.ArgsComputeFilterIndexes{
 			Tenant:     tenant,
 			Context:    utils.MetaSessionS,
@@ -1626,14 +1627,14 @@ func testV1FIdxRemoveAttributeProfile(t *testing.T) {
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	if err := tFIdxRpc.Call(utils.APIerSv1RemoveAttributeProfile, &utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{
+	if err := tFIdxRpc.Call(context.Background(), utils.APIerSv1RemoveAttributeProfile, &utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{
 		Tenant: tenant,
 		ID:     "ApierTest"}}, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	if err := tFIdxRpc.Call(utils.APIerSv1RemoveAttributeProfile, &utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{
+	if err := tFIdxRpc.Call(context.Background(), utils.APIerSv1RemoveAttributeProfile, &utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{
 		Tenant: tenant,
 		ID:     "ApierTest2"}}, &result); err != nil {
 		t.Error(err)
@@ -1641,20 +1642,20 @@ func testV1FIdxRemoveAttributeProfile(t *testing.T) {
 		t.Error("Unexpected reply returned", result)
 	}
 	var reply *engine.AttributeProfile
-	if err := tFIdxRpc.Call(utils.APIerSv1GetAttributeProfile,
+	if err := tFIdxRpc.Call(context.Background(), utils.APIerSv1GetAttributeProfile,
 		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{
 			Tenant: tenant, ID: "ApierTest2"}}, &reply); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
-	if err := tFIdxRpc.Call(utils.APIerSv1GetAttributeProfile,
+	if err := tFIdxRpc.Call(context.Background(), utils.APIerSv1GetAttributeProfile,
 		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{
 			Tenant: tenant, ID: "ApierTest"}}, &reply); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
 	var indexes []string
-	if err := tFIdxRpc.Call(utils.APIerSv1GetFilterIndexes, &AttrGetFilterIndexes{
+	if err := tFIdxRpc.Call(context.Background(), utils.APIerSv1GetFilterIndexes, &AttrGetFilterIndexes{
 		ItemType:   utils.MetaAttributes,
 		Tenant:     tenant,
 		FilterType: utils.MetaString,
@@ -1716,19 +1717,19 @@ func testV1FIdxSetMultipleAttributesMultipleFilters(t *testing.T) {
 	}
 	// First we will set a filter for usage
 	var reply string
-	if err := tFIdxRpc.Call(utils.APIerSv1SetFilter,
+	if err := tFIdxRpc.Call(context.Background(), utils.APIerSv1SetFilter,
 		fltr, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply result", reply)
 	}
-	if err := tFIdxRpc.Call(utils.APIerSv1SetFilter,
+	if err := tFIdxRpc.Call(context.Background(), utils.APIerSv1SetFilter,
 		fltr1, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply result", reply)
 	}
-	if err := tFIdxRpc.Call(utils.APIerSv1SetFilter,
+	if err := tFIdxRpc.Call(context.Background(), utils.APIerSv1SetFilter,
 		fltr2, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
@@ -1786,26 +1787,26 @@ func testV1FIdxSetMultipleAttributesMultipleFilters(t *testing.T) {
 			},
 		},
 	}
-	if err := tFIdxRpc.Call(utils.APIerSv1SetAttributeProfile,
+	if err := tFIdxRpc.Call(context.Background(), utils.APIerSv1SetAttributeProfile,
 		attrPrf2, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Error(err)
 	}
-	if err := tFIdxRpc.Call(utils.APIerSv1SetAttributeProfile,
+	if err := tFIdxRpc.Call(context.Background(), utils.APIerSv1SetAttributeProfile,
 		attrPrf3, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Error(err)
 	}
-	if err := tFIdxRpc.Call(utils.APIerSv1SetAttributeProfile,
+	if err := tFIdxRpc.Call(context.Background(), utils.APIerSv1SetAttributeProfile,
 		attrPrf, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Error(err)
 	}
 
-	if err := tFIdxRpc.Call(utils.APIerSv1RemoveFilterIndexes,
+	if err := tFIdxRpc.Call(context.Background(), utils.APIerSv1RemoveFilterIndexes,
 		&AttrRemFilterIndexes{
 			Tenant:   "cgrates.org",
 			Context:  utils.MetaAny,
@@ -1819,7 +1820,7 @@ func testV1FIdxSetMultipleAttributesMultipleFilters(t *testing.T) {
 
 	//not found for both cases
 	var replyIdx []string
-	if err := tFIdxRpc.Call(utils.APIerSv1GetFilterIndexes,
+	if err := tFIdxRpc.Call(context.Background(), utils.APIerSv1GetFilterIndexes,
 		&AttrGetFilterIndexes{
 			Tenant:   "cgrates.org",
 			Context:  utils.MetaAny,
@@ -1830,7 +1831,7 @@ func testV1FIdxSetMultipleAttributesMultipleFilters(t *testing.T) {
 
 	// now we will ComputeFilterIndexes by IDs for *sessions context(but just only 1 profile, not both)
 	var expIdx []string
-	if err := tFIdxRpc.Call(utils.APIerSv1ComputeFilterIndexIDs,
+	if err := tFIdxRpc.Call(context.Background(), utils.APIerSv1ComputeFilterIndexIDs,
 		&utils.ArgsComputeFilterIndexIDs{
 			Tenant:       "cgrates.org",
 			Context:      utils.MetaAny,
@@ -1849,7 +1850,7 @@ func testV1FIdxSetMultipleAttributesMultipleFilters(t *testing.T) {
 		"*string:*opts.*context:*chargers:TEST_ATTRIBUTES_new_fltr",
 		"*string:*opts.*context:*sessions:TEST_ATTRIBUTE3",
 		"*string:*req.Usage:123s:TEST_ATTRIBUTES_new_fltr"}
-	if err := tFIdxRpc.Call(utils.APIerSv1GetFilterIndexes,
+	if err := tFIdxRpc.Call(context.Background(), utils.APIerSv1GetFilterIndexes,
 		&AttrGetFilterIndexes{
 			Tenant:   "cgrates.org",
 			Context:  utils.MetaAny,
@@ -1865,7 +1866,7 @@ func testV1FIdxSetMultipleAttributesMultipleFilters(t *testing.T) {
 	}
 
 	// compute for the last profile remain
-	if err := tFIdxRpc.Call(utils.APIerSv1ComputeFilterIndexIDs,
+	if err := tFIdxRpc.Call(context.Background(), utils.APIerSv1ComputeFilterIndexIDs,
 		&utils.ArgsComputeFilterIndexIDs{Tenant: "cgrates.org",
 			Context:      utils.MetaAny,
 			AttributeIDs: []string{"TEST_ATTRIBUTES_IT_TEST"},
@@ -1893,7 +1894,7 @@ func testV1FIdxSetMultipleAttributesMultipleFilters(t *testing.T) {
 		"*string:*req.Usage:123s:TEST_ATTRIBUTES_IT_TEST",
 		"*string:*req.Usage:123s:TEST_ATTRIBUTES_new_fltr",
 	}
-	if err := tFIdxRpc.Call(utils.APIerSv1GetFilterIndexes,
+	if err := tFIdxRpc.Call(context.Background(), utils.APIerSv1GetFilterIndexes,
 		&AttrGetFilterIndexes{
 			Tenant:   "cgrates.org",
 			Context:  utils.MetaAny,
@@ -1960,17 +1961,17 @@ func testV1FIdxSetAttributeProfileMultipleContextsAndComputes(t *testing.T) {
 		},
 	}
 	var reply string
-	if err := tFIdxRpc.Call(utils.APIerSv1SetFilter, fltr, &reply); err != nil {
+	if err := tFIdxRpc.Call(context.Background(), utils.APIerSv1SetFilter, fltr, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf("Unexpected reply returned")
 	}
-	if err := tFIdxRpc.Call(utils.APIerSv1SetFilter, fltr1, &reply); err != nil {
+	if err := tFIdxRpc.Call(context.Background(), utils.APIerSv1SetFilter, fltr1, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf("Unexpected reply returned")
 	}
-	if err := tFIdxRpc.Call(utils.APIerSv1SetFilter, fltr2, &reply); err != nil {
+	if err := tFIdxRpc.Call(context.Background(), utils.APIerSv1SetFilter, fltr2, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf("Unexpected reply returned")
@@ -1992,7 +1993,7 @@ func testV1FIdxSetAttributeProfileMultipleContextsAndComputes(t *testing.T) {
 			},
 		},
 	}
-	if err := tFIdxRpc.Call(utils.APIerSv1SetAttributeProfile,
+	if err := tFIdxRpc.Call(context.Background(), utils.APIerSv1SetAttributeProfile,
 		attrPrf, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
@@ -2014,7 +2015,7 @@ func testV1FIdxSetAttributeProfileMultipleContextsAndComputes(t *testing.T) {
 	sort.Strings(expIdx)
 	var result []string
 	// same expecteded indexes for *sessions, *chargers and *thresholds
-	if err := tFIdxRpc.Call(utils.APIerSv1GetFilterIndexes, &AttrGetFilterIndexes{
+	if err := tFIdxRpc.Call(context.Background(), utils.APIerSv1GetFilterIndexes, &AttrGetFilterIndexes{
 		Tenant:   "cgrates.org",
 		Context:  utils.MetaSessionS,
 		ItemType: utils.MetaAttributes,
@@ -2026,7 +2027,7 @@ func testV1FIdxSetAttributeProfileMultipleContextsAndComputes(t *testing.T) {
 			t.Errorf("Expected %+v received %+v", utils.ToJSON(expIdx), utils.ToJSON(result))
 		}
 	}
-	if err := tFIdxRpc.Call(utils.APIerSv1GetFilterIndexes, &AttrGetFilterIndexes{
+	if err := tFIdxRpc.Call(context.Background(), utils.APIerSv1GetFilterIndexes, &AttrGetFilterIndexes{
 		Tenant:   "cgrates.org",
 		Context:  utils.MetaChargers,
 		ItemType: utils.MetaAttributes,
@@ -2038,7 +2039,7 @@ func testV1FIdxSetAttributeProfileMultipleContextsAndComputes(t *testing.T) {
 			t.Errorf("Expected %+v received %+v", utils.ToJSON(expIdx), utils.ToJSON(result))
 		}
 	}
-	if err := tFIdxRpc.Call(utils.APIerSv1GetFilterIndexes, &AttrGetFilterIndexes{
+	if err := tFIdxRpc.Call(context.Background(), utils.APIerSv1GetFilterIndexes, &AttrGetFilterIndexes{
 		Tenant:   "cgrates.org",
 		Context:  utils.MetaThresholds,
 		ItemType: utils.MetaAttributes,
@@ -2052,21 +2053,21 @@ func testV1FIdxSetAttributeProfileMultipleContextsAndComputes(t *testing.T) {
 	}
 
 	// remove indexes for all contexts
-	if err := tFIdxRpc.Call(utils.APIerSv1RemoveFilterIndexes, &AttrRemFilterIndexes{
+	if err := tFIdxRpc.Call(context.Background(), utils.APIerSv1RemoveFilterIndexes, &AttrRemFilterIndexes{
 		Tenant:   "cgrates.org",
 		Context:  utils.MetaSessionS,
 		ItemType: utils.MetaAttributes,
 	}, &reply); err != nil {
 		t.Error(err)
 	}
-	if err := tFIdxRpc.Call(utils.APIerSv1RemoveFilterIndexes, &AttrRemFilterIndexes{
+	if err := tFIdxRpc.Call(context.Background(), utils.APIerSv1RemoveFilterIndexes, &AttrRemFilterIndexes{
 		Tenant:   "cgrates.org",
 		Context:  utils.MetaChargers,
 		ItemType: utils.MetaAttributes,
 	}, &reply); err != nil {
 		t.Error(err)
 	}
-	if err := tFIdxRpc.Call(utils.APIerSv1RemoveFilterIndexes, &AttrRemFilterIndexes{
+	if err := tFIdxRpc.Call(context.Background(), utils.APIerSv1RemoveFilterIndexes, &AttrRemFilterIndexes{
 		Tenant:   "cgrates.org",
 		Context:  utils.MetaThresholds,
 		ItemType: utils.MetaAttributes,
@@ -2076,7 +2077,7 @@ func testV1FIdxSetAttributeProfileMultipleContextsAndComputes(t *testing.T) {
 
 	// compute indexes by with different contexts and check them
 	// firstly for *sessions context
-	if err := tFIdxRpc.Call(utils.APIerSv1ComputeFilterIndexes,
+	if err := tFIdxRpc.Call(context.Background(), utils.APIerSv1ComputeFilterIndexes,
 		&utils.ArgsComputeFilterIndexes{
 			Tenant:     "cgrates.org",
 			Context:    utils.MetaSessionS,
@@ -2100,7 +2101,7 @@ func testV1FIdxSetAttributeProfileMultipleContextsAndComputes(t *testing.T) {
 	}
 	sort.Strings(expIdx)
 	// same expected indexes for *sessions, *chargers and *thresholds
-	if err := tFIdxRpc.Call(utils.APIerSv1GetFilterIndexes, &AttrGetFilterIndexes{
+	if err := tFIdxRpc.Call(context.Background(), utils.APIerSv1GetFilterIndexes, &AttrGetFilterIndexes{
 		Tenant:   "cgrates.org",
 		Context:  utils.MetaSessionS,
 		ItemType: utils.MetaAttributes,
@@ -2114,7 +2115,7 @@ func testV1FIdxSetAttributeProfileMultipleContextsAndComputes(t *testing.T) {
 	}
 
 	// as for *sessions was computed, for *chargers and *thresaholds should not be computed, so NOT FOUND will be returned
-	if err := tFIdxRpc.Call(utils.APIerSv1GetFilterIndexes, &AttrGetFilterIndexes{
+	if err := tFIdxRpc.Call(context.Background(), utils.APIerSv1GetFilterIndexes, &AttrGetFilterIndexes{
 		Tenant:   "cgrates.org",
 		Context:  utils.MetaChargers,
 		ItemType: utils.MetaAttributes,
@@ -2122,7 +2123,7 @@ func testV1FIdxSetAttributeProfileMultipleContextsAndComputes(t *testing.T) {
 		t.Errorf("Expected %+v, received %+v", utils.ErrNotFound, err)
 	}
 
-	if err := tFIdxRpc.Call(utils.APIerSv1GetFilterIndexes, &AttrGetFilterIndexes{
+	if err := tFIdxRpc.Call(context.Background(), utils.APIerSv1GetFilterIndexes, &AttrGetFilterIndexes{
 		Tenant:   "cgrates.org",
 		Context:  utils.MetaThresholds,
 		ItemType: utils.MetaAttributes,
@@ -2131,7 +2132,7 @@ func testV1FIdxSetAttributeProfileMultipleContextsAndComputes(t *testing.T) {
 	}
 
 	// noe we will compute for *chargers, and the remain context for compute indexes will remain *thresholds
-	if err := tFIdxRpc.Call(utils.APIerSv1ComputeFilterIndexes,
+	if err := tFIdxRpc.Call(context.Background(), utils.APIerSv1ComputeFilterIndexes,
 		&utils.ArgsComputeFilterIndexes{
 			Tenant:     "cgrates.org",
 			Context:    utils.MetaChargers,
@@ -2141,7 +2142,7 @@ func testV1FIdxSetAttributeProfileMultipleContextsAndComputes(t *testing.T) {
 	}
 
 	// check for *sesssions and for *chargers, and for *threshold will be NOT FOUND
-	if err := tFIdxRpc.Call(utils.APIerSv1GetFilterIndexes, &AttrGetFilterIndexes{
+	if err := tFIdxRpc.Call(context.Background(), utils.APIerSv1GetFilterIndexes, &AttrGetFilterIndexes{
 		Tenant:   "cgrates.org",
 		Context:  utils.MetaSessionS,
 		ItemType: utils.MetaAttributes,
@@ -2153,7 +2154,7 @@ func testV1FIdxSetAttributeProfileMultipleContextsAndComputes(t *testing.T) {
 			t.Errorf("Expected %+v received %+v", utils.ToJSON(expIdx), utils.ToJSON(result))
 		}
 	}
-	if err := tFIdxRpc.Call(utils.APIerSv1GetFilterIndexes, &AttrGetFilterIndexes{
+	if err := tFIdxRpc.Call(context.Background(), utils.APIerSv1GetFilterIndexes, &AttrGetFilterIndexes{
 		Tenant:   "cgrates.org",
 		Context:  utils.MetaChargers,
 		ItemType: utils.MetaAttributes,
@@ -2166,7 +2167,7 @@ func testV1FIdxSetAttributeProfileMultipleContextsAndComputes(t *testing.T) {
 		}
 	}
 
-	if err := tFIdxRpc.Call(utils.APIerSv1GetFilterIndexes, &AttrGetFilterIndexes{
+	if err := tFIdxRpc.Call(context.Background(), utils.APIerSv1GetFilterIndexes, &AttrGetFilterIndexes{
 		Tenant:   "cgrates.org",
 		Context:  utils.MetaThresholds,
 		ItemType: utils.MetaAttributes,
@@ -2175,7 +2176,7 @@ func testV1FIdxSetAttributeProfileMultipleContextsAndComputes(t *testing.T) {
 	}
 
 	// compute with the remain context *thresholds, so in the end, all indexes will be computed for all contexts
-	if err := tFIdxRpc.Call(utils.APIerSv1ComputeFilterIndexes,
+	if err := tFIdxRpc.Call(context.Background(), utils.APIerSv1ComputeFilterIndexes,
 		&utils.ArgsComputeFilterIndexes{
 			Tenant:     "cgrates.org",
 			Context:    utils.MetaThresholds,
@@ -2185,7 +2186,7 @@ func testV1FIdxSetAttributeProfileMultipleContextsAndComputes(t *testing.T) {
 	}
 
 	// check again all the indexes for all contexts
-	if err := tFIdxRpc.Call(utils.APIerSv1GetFilterIndexes, &AttrGetFilterIndexes{
+	if err := tFIdxRpc.Call(context.Background(), utils.APIerSv1GetFilterIndexes, &AttrGetFilterIndexes{
 		Tenant:   "cgrates.org",
 		Context:  utils.MetaSessionS, // *sesssions
 		ItemType: utils.MetaAttributes,
@@ -2197,7 +2198,7 @@ func testV1FIdxSetAttributeProfileMultipleContextsAndComputes(t *testing.T) {
 			t.Errorf("Expected %+v received %+v", utils.ToJSON(expIdx), utils.ToJSON(result))
 		}
 	}
-	if err := tFIdxRpc.Call(utils.APIerSv1GetFilterIndexes, &AttrGetFilterIndexes{
+	if err := tFIdxRpc.Call(context.Background(), utils.APIerSv1GetFilterIndexes, &AttrGetFilterIndexes{
 		Tenant:   "cgrates.org",
 		Context:  utils.MetaChargers, // *chargers
 		ItemType: utils.MetaAttributes,
@@ -2209,7 +2210,7 @@ func testV1FIdxSetAttributeProfileMultipleContextsAndComputes(t *testing.T) {
 			t.Errorf("Expected %+v received %+v", utils.ToJSON(expIdx), utils.ToJSON(result))
 		}
 	}
-	if err := tFIdxRpc.Call(utils.APIerSv1GetFilterIndexes, &AttrGetFilterIndexes{
+	if err := tFIdxRpc.Call(context.Background(), utils.APIerSv1GetFilterIndexes, &AttrGetFilterIndexes{
 		Tenant:   "cgrates.org",
 		Context:  utils.MetaThresholds, // *thresholds
 		ItemType: utils.MetaAttributes,
@@ -2239,7 +2240,7 @@ func testV1FIdxPopulateDatabase(t *testing.T) {
 				"*string:~*req.Account:1002"},
 		},
 	}
-	if err := tFIdxRpc.Call(utils.APIerSv1SetResourceProfile, resPrf, &result); err != nil {
+	if err := tFIdxRpc.Call(context.Background(), utils.APIerSv1SetResourceProfile, resPrf, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -2258,7 +2259,7 @@ func testV1FIdxPopulateDatabase(t *testing.T) {
 				"*string:~*req.Account:1002"},
 		},
 	}
-	if err := tFIdxRpc.Call(utils.APIerSv1SetResourceProfile, resPrf, &result); err != nil {
+	if err := tFIdxRpc.Call(context.Background(), utils.APIerSv1SetResourceProfile, resPrf, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -2277,7 +2278,7 @@ func testV1FIdxPopulateDatabase(t *testing.T) {
 				"*string:~*req.Account:1003"},
 		},
 	}
-	if err := tFIdxRpc.Call(utils.APIerSv1SetResourceProfile, resPrf, &result); err != nil {
+	if err := tFIdxRpc.Call(context.Background(), utils.APIerSv1SetResourceProfile, resPrf, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -2313,7 +2314,7 @@ func testV1FIdxGetFilterIndexes1(t *testing.T) {
 		"*prefix:*req.Account:10:ResProfile3"}
 	sort.Strings(expectedIndexes)
 	var reply []string
-	if err := tFIdxRpc.Call(utils.APIerSv1GetFilterIndexes, arg, &reply); err != nil {
+	if err := tFIdxRpc.Call(context.Background(), utils.APIerSv1GetFilterIndexes, arg, &reply); err != nil {
 		t.Error(err)
 	} else if sort.Strings(reply); !reflect.DeepEqual(expectedIndexes, reply) {
 		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(expectedIndexes), utils.ToJSON(reply))
@@ -2343,7 +2344,7 @@ func testV1FIdxGetFilterIndexes2(t *testing.T) {
 		"*string:*req.Account:2002:ResProfile2"}
 	sort.Strings(expectedIndexes)
 	var reply []string
-	if err := tFIdxRpc.Call(utils.APIerSv1GetFilterIndexes, arg, &reply); err != nil {
+	if err := tFIdxRpc.Call(context.Background(), utils.APIerSv1GetFilterIndexes, arg, &reply); err != nil {
 		t.Error(err)
 	} else if sort.Strings(reply); !reflect.DeepEqual(expectedIndexes, reply) {
 		t.Errorf("Expecting: %+v, received: %+v", expectedIndexes, reply)
@@ -2366,7 +2367,7 @@ func testV1FIdxGetFilterIndexes3(t *testing.T) {
 		"*prefix:*req.Destination:1001:ResProfile3"}
 	sort.Strings(expectedIndexes)
 	var reply []string
-	if err := tFIdxRpc.Call(utils.APIerSv1GetFilterIndexes, arg, &reply); err != nil {
+	if err := tFIdxRpc.Call(context.Background(), utils.APIerSv1GetFilterIndexes, arg, &reply); err != nil {
 		t.Error(err)
 	} else if sort.Strings(reply); !reflect.DeepEqual(expectedIndexes, reply) {
 		t.Errorf("Expecting: %+v, received: %+v", expectedIndexes, reply)
@@ -2391,7 +2392,7 @@ func testV1FIdxGetFilterIndexes4(t *testing.T) {
 		"*string:*req.Account:2002:ResProfile2"}
 	sort.Strings(expectedIndexes)
 	var reply []string
-	if err := tFIdxRpc.Call(utils.APIerSv1GetFilterIndexes, arg, &reply); err != nil {
+	if err := tFIdxRpc.Call(context.Background(), utils.APIerSv1GetFilterIndexes, arg, &reply); err != nil {
 		t.Error(err)
 	} else if sort.Strings(reply); !reflect.DeepEqual(expectedIndexes, reply) {
 		t.Errorf("Expecting: %+v, received: %+v", expectedIndexes, reply)
@@ -2423,7 +2424,7 @@ func testV1FIdxSetDispatcherProfile(t *testing.T) {
 			},
 		},
 	}
-	if err := tFIdxRpc.Call(utils.APIerSv1SetFilter, filter, &reply); err != nil {
+	if err := tFIdxRpc.Call(context.Background(), utils.APIerSv1SetFilter, filter, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply returned", reply)
@@ -2440,7 +2441,7 @@ func testV1FIdxSetDispatcherProfile(t *testing.T) {
 		},
 	}
 
-	if err := tFIdxRpc.Call(utils.APIerSv1SetDispatcherProfile,
+	if err := tFIdxRpc.Call(context.Background(), utils.APIerSv1SetDispatcherProfile,
 		dispatcherProfile,
 		&reply); err != nil {
 		t.Error(err)
@@ -2461,7 +2462,7 @@ func testV1FIdxSetDispatcherProfile(t *testing.T) {
 	}
 	sort.Strings(expectedIndexes)
 	var idx []string
-	if err := tFIdxRpc.Call(utils.APIerSv1GetFilterIndexes, arg, &idx); err != nil {
+	if err := tFIdxRpc.Call(context.Background(), utils.APIerSv1GetFilterIndexes, arg, &idx); err != nil {
 		t.Error(err)
 	} else if sort.Strings(idx); !reflect.DeepEqual(len(expectedIndexes), len(idx)) {
 		t.Errorf("Expecting: %+v, received: %+v", len(expectedIndexes), len(idx))
@@ -2479,7 +2480,7 @@ func testV1FIdxSetDispatcherProfile(t *testing.T) {
 		"*string:*req.Subject:2012:DSP_Test1",
 	}
 	sort.Strings(expectedIndexes)
-	if err := tFIdxRpc.Call(utils.APIerSv1GetFilterIndexes, arg, &idx); err != nil {
+	if err := tFIdxRpc.Call(context.Background(), utils.APIerSv1GetFilterIndexes, arg, &idx); err != nil {
 		t.Error(err)
 	} else if sort.Strings(idx); !reflect.DeepEqual(len(expectedIndexes), len(idx)) {
 		t.Errorf("Expecting: %+v, received: %+v", len(expectedIndexes), len(idx))
@@ -2497,7 +2498,7 @@ func testV1FIdxSetDispatcherProfile(t *testing.T) {
 		"*string:*req.Subject:2012:DSP_Test1",
 	}
 	sort.Strings(expectedIndexes)
-	if err := tFIdxRpc.Call(utils.APIerSv1GetFilterIndexes, arg, &idx); err != nil {
+	if err := tFIdxRpc.Call(context.Background(), utils.APIerSv1GetFilterIndexes, arg, &idx); err != nil {
 		t.Error(err)
 	} else if sort.Strings(idx); !reflect.DeepEqual(expectedIndexes, idx) {
 		t.Errorf("Expecting: %+v, received: %+v", expectedIndexes, idx)
@@ -2522,7 +2523,7 @@ func testV1FIdxSetDispatcherProfile(t *testing.T) {
 			},
 		},
 	}
-	if err := tFIdxRpc.Call(utils.APIerSv1SetFilter, filter, &reply); err != nil {
+	if err := tFIdxRpc.Call(context.Background(), utils.APIerSv1SetFilter, filter, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply returned", reply)
@@ -2539,7 +2540,7 @@ func testV1FIdxSetDispatcherProfile(t *testing.T) {
 		"*string:*req.Usage:1s:DSP_Test1",
 	}
 	sort.Strings(expectedIndexes)
-	if err := tFIdxRpc.Call(utils.APIerSv1GetFilterIndexes, &AttrGetFilterIndexes{
+	if err := tFIdxRpc.Call(context.Background(), utils.APIerSv1GetFilterIndexes, &AttrGetFilterIndexes{
 		Tenant: tenant, Context: utils.MetaAttributes, ItemType: utils.MetaDispatchers,
 	}, &idx); err != nil {
 		t.Error(err)
@@ -2558,7 +2559,7 @@ func testV1FIdxSetDispatcherProfile(t *testing.T) {
 		"*string:*req.Usage:1s:DSP_Test1",
 	}
 	sort.Strings(expectedIndexes)
-	if err := tFIdxRpc.Call(utils.APIerSv1GetFilterIndexes, &AttrGetFilterIndexes{
+	if err := tFIdxRpc.Call(context.Background(), utils.APIerSv1GetFilterIndexes, &AttrGetFilterIndexes{
 		Tenant: tenant, Context: utils.MetaSessionS, ItemType: utils.MetaDispatchers,
 	}, &idx); err != nil {
 		t.Error(err)
@@ -2590,14 +2591,14 @@ func testV1FIdxSetDispatcherProfile(t *testing.T) {
 			},
 		},
 	}
-	if err := tFIdxRpc.Call(utils.APIerSv1SetFilter, filter, &reply); err != nil {
+	if err := tFIdxRpc.Call(context.Background(), utils.APIerSv1SetFilter, filter, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply returned", reply)
 	}
 
 	//remove the indexes for *sessions subsystem
-	if err := tFIdxRpc.Call(utils.APIerSv1RemoveFilterIndexes, &AttrRemFilterIndexes{
+	if err := tFIdxRpc.Call(context.Background(), utils.APIerSv1RemoveFilterIndexes, &AttrRemFilterIndexes{
 		ItemType: utils.MetaDispatchers,
 		Tenant:   tenant,
 		Context:  utils.MetaSessionS}, &reply); err != nil {
@@ -2608,7 +2609,7 @@ func testV1FIdxSetDispatcherProfile(t *testing.T) {
 
 	//verify if was removed
 	var indexes []string
-	if err := tFIdxRpc.Call(utils.APIerSv1GetFilterIndexes, AttrGetFilterIndexes{
+	if err := tFIdxRpc.Call(context.Background(), utils.APIerSv1GetFilterIndexes, AttrGetFilterIndexes{
 		Tenant: tenant, Context: utils.MetaSessionS, ItemType: utils.MetaDispatchers,
 	}, &indexes); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
@@ -2626,7 +2627,7 @@ func testV1FIdxSetDispatcherProfile(t *testing.T) {
 		"*string:*req.Subject:2012:DSP_Test1",
 	}
 	sort.Strings(expectedIndexes)
-	if err := tFIdxRpc.Call(utils.APIerSv1GetFilterIndexes, arg, &idx); err != nil {
+	if err := tFIdxRpc.Call(context.Background(), utils.APIerSv1GetFilterIndexes, arg, &idx); err != nil {
 		t.Error(err)
 	} else if sort.Strings(idx); !reflect.DeepEqual(len(expectedIndexes), len(idx)) {
 		t.Errorf("Expecting: %+v, received: %+v", len(expectedIndexes), len(idx))
@@ -2637,7 +2638,7 @@ func testV1FIdxSetDispatcherProfile(t *testing.T) {
 func testV1FIdxComputeDispatcherProfileIndexes(t *testing.T) {
 	var result string
 	//recompute indexes for dispatcherProfile for *sessions subsystem
-	if err := tFIdxRpc.Call(utils.APIerSv1ComputeFilterIndexes,
+	if err := tFIdxRpc.Call(context.Background(), utils.APIerSv1ComputeFilterIndexes,
 		&utils.ArgsComputeFilterIndexes{
 			Tenant:      tenant,
 			Context:     utils.MetaSessionS,
@@ -2654,7 +2655,7 @@ func testV1FIdxComputeDispatcherProfileIndexes(t *testing.T) {
 	}
 	sort.Strings(expectedIndexes)
 	var indexes []string
-	if err := tFIdxRpc.Call(utils.APIerSv1GetFilterIndexes, &AttrGetFilterIndexes{
+	if err := tFIdxRpc.Call(context.Background(), utils.APIerSv1GetFilterIndexes, &AttrGetFilterIndexes{
 		ItemType: utils.MetaDispatchers,
 		Tenant:   tenant,
 		Context:  utils.MetaSessionS}, &indexes); err != nil {
@@ -2677,7 +2678,7 @@ func testV1FIdxSetDispatcherProfile2(t *testing.T) {
 		},
 	}
 
-	if err := tFIdxRpc.Call(utils.APIerSv1SetDispatcherProfile,
+	if err := tFIdxRpc.Call(context.Background(), utils.APIerSv1SetDispatcherProfile,
 		dispatcherProfile,
 		&reply); err != nil {
 		t.Error(err)
@@ -2696,7 +2697,7 @@ func testV1FIdxSetDispatcherProfile2(t *testing.T) {
 		},
 	}
 
-	if err := tFIdxRpc.Call(utils.APIerSv1SetDispatcherProfile,
+	if err := tFIdxRpc.Call(context.Background(), utils.APIerSv1SetDispatcherProfile,
 		dispatcherProfile2,
 		&reply); err != nil {
 		t.Error(err)
@@ -2718,7 +2719,7 @@ func testV1FIdxSetDispatcherProfile2(t *testing.T) {
 	}
 	sort.Strings(expectedIndexes)
 	var idx []string
-	if err := tFIdxRpc.Call(utils.APIerSv1GetFilterIndexes, arg, &idx); err != nil {
+	if err := tFIdxRpc.Call(context.Background(), utils.APIerSv1GetFilterIndexes, arg, &idx); err != nil {
 		t.Error(err)
 	} else if sort.Strings(idx); !reflect.DeepEqual(expectedIndexes, idx) {
 		t.Errorf("Expecting: %+v, received: %+v", expectedIndexes, idx)
@@ -2737,13 +2738,13 @@ func testV1FIdxSetDispatcherProfile2(t *testing.T) {
 		"*string:*req.Subject:2012:DSP_Test1",
 	}
 	sort.Strings(expectedIndexes)
-	if err := tFIdxRpc.Call(utils.APIerSv1GetFilterIndexes, arg, &idx); err != nil {
+	if err := tFIdxRpc.Call(context.Background(), utils.APIerSv1GetFilterIndexes, arg, &idx); err != nil {
 		t.Error(err)
 	} else if sort.Strings(idx); !reflect.DeepEqual(expectedIndexes, idx) {
 		t.Errorf("Expecting: %+v, received: %+v", expectedIndexes, idx)
 	}
 	//remove the indexes for *sessions subsystem
-	if err := tFIdxRpc.Call(utils.APIerSv1RemoveFilterIndexes, &AttrRemFilterIndexes{
+	if err := tFIdxRpc.Call(context.Background(), utils.APIerSv1RemoveFilterIndexes, &AttrRemFilterIndexes{
 		ItemType: utils.MetaDispatchers,
 		Tenant:   tenant,
 		Context:  utils.MetaSessionS}, &reply); err != nil {
@@ -2754,13 +2755,13 @@ func testV1FIdxSetDispatcherProfile2(t *testing.T) {
 
 	//verify if indexes was removed for *sessions
 	var indexes []string
-	if err := tFIdxRpc.Call(utils.APIerSv1GetFilterIndexes, arg,
+	if err := tFIdxRpc.Call(context.Background(), utils.APIerSv1GetFilterIndexes, arg,
 		&indexes); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
 
 	//remove the indexes for *attribute subsystem
-	if err := tFIdxRpc.Call(utils.APIerSv1RemoveFilterIndexes, &AttrRemFilterIndexes{
+	if err := tFIdxRpc.Call(context.Background(), utils.APIerSv1RemoveFilterIndexes, &AttrRemFilterIndexes{
 		ItemType: utils.MetaDispatchers,
 		Tenant:   tenant,
 		Context:  utils.MetaAttributes}, &reply); err != nil {
@@ -2775,7 +2776,7 @@ func testV1FIdxSetDispatcherProfile2(t *testing.T) {
 		Context:  utils.MetaAttributes,
 		ItemType: utils.MetaDispatchers,
 	}
-	if err := tFIdxRpc.Call(utils.APIerSv1GetFilterIndexes, arg,
+	if err := tFIdxRpc.Call(context.Background(), utils.APIerSv1GetFilterIndexes, arg,
 		&idx); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
@@ -2784,7 +2785,7 @@ func testV1FIdxSetDispatcherProfile2(t *testing.T) {
 func testV1FIdxComputeDispatcherProfileIndexes2(t *testing.T) {
 	var result string
 	//recompute indexes for dispatcherProfile for *sessions subsystem
-	if err := tFIdxRpc.Call(utils.APIerSv1ComputeFilterIndexes,
+	if err := tFIdxRpc.Call(context.Background(), utils.APIerSv1ComputeFilterIndexes,
 		&utils.ArgsComputeFilterIndexes{
 			Tenant:      tenant,
 			Context:     utils.MetaSessionS,
@@ -2802,7 +2803,7 @@ func testV1FIdxComputeDispatcherProfileIndexes2(t *testing.T) {
 	}
 	sort.Strings(expectedIndexes)
 	var indexes []string
-	if err := tFIdxRpc.Call(utils.APIerSv1GetFilterIndexes, &AttrGetFilterIndexes{
+	if err := tFIdxRpc.Call(context.Background(), utils.APIerSv1GetFilterIndexes, &AttrGetFilterIndexes{
 		ItemType: utils.MetaDispatchers,
 		Tenant:   tenant,
 		Context:  utils.MetaSessionS}, &indexes); err != nil {
@@ -2812,7 +2813,7 @@ func testV1FIdxComputeDispatcherProfileIndexes2(t *testing.T) {
 	}
 
 	//recompute indexes for dispatcherProfile for *attributes subsystem
-	if err := tFIdxRpc.Call(utils.APIerSv1ComputeFilterIndexes,
+	if err := tFIdxRpc.Call(context.Background(), utils.APIerSv1ComputeFilterIndexes,
 		&utils.ArgsComputeFilterIndexes{
 			Tenant:      tenant,
 			Context:     utils.MetaAttributes,
@@ -2829,7 +2830,7 @@ func testV1FIdxComputeDispatcherProfileIndexes2(t *testing.T) {
 		"*string:*req.Subject:2012:DSP_Test1",
 	}
 	sort.Strings(expectedIndexes)
-	if err := tFIdxRpc.Call(utils.APIerSv1GetFilterIndexes, &AttrGetFilterIndexes{
+	if err := tFIdxRpc.Call(context.Background(), utils.APIerSv1GetFilterIndexes, &AttrGetFilterIndexes{
 		ItemType: utils.MetaDispatchers,
 		Tenant:   tenant,
 		Context:  utils.MetaAttributes}, &indexes); err != nil {
@@ -2841,7 +2842,7 @@ func testV1FIdxComputeDispatcherProfileIndexes2(t *testing.T) {
 
 func testV1FIdxClearCache(t *testing.T) {
 	var reply string
-	if err := tFIdxRpc.Call(utils.CacheSv1Clear, &utils.AttrCacheIDsWithAPIOpts{
+	if err := tFIdxRpc.Call(context.Background(), utils.CacheSv1Clear, &utils.AttrCacheIDsWithAPIOpts{
 		CacheIDs: nil,
 	}, &reply); err != nil {
 		t.Error(err)
@@ -2875,7 +2876,7 @@ func testV1FIdxSetDispatcherComputeIDs(t *testing.T) {
 			},
 		},
 	}
-	if err := tFIdxRpc.Call(utils.APIerSv1SetFilter, filter, &reply); err != nil {
+	if err := tFIdxRpc.Call(context.Background(), utils.APIerSv1SetFilter, filter, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply returned", reply)
@@ -2892,7 +2893,7 @@ func testV1FIdxSetDispatcherComputeIDs(t *testing.T) {
 		},
 	}
 
-	if err := tFIdxRpc.Call(utils.APIerSv1SetDispatcherProfile,
+	if err := tFIdxRpc.Call(context.Background(), utils.APIerSv1SetDispatcherProfile,
 		dispatcherProfile,
 		&reply); err != nil {
 		t.Error(err)
@@ -2901,7 +2902,7 @@ func testV1FIdxSetDispatcherComputeIDs(t *testing.T) {
 	}
 
 	//remove the indexes for *sessions subsystem
-	if err := tFIdxRpc.Call(utils.APIerSv1RemoveFilterIndexes, &AttrRemFilterIndexes{
+	if err := tFIdxRpc.Call(context.Background(), utils.APIerSv1RemoveFilterIndexes, &AttrRemFilterIndexes{
 		ItemType: utils.MetaDispatchers,
 		Tenant:   tenant,
 		Context:  utils.MetaSessionS}, &reply); err != nil {
@@ -2911,7 +2912,7 @@ func testV1FIdxSetDispatcherComputeIDs(t *testing.T) {
 	}
 	//verify if was removed
 	var indexes []string
-	if err := tFIdxRpc.Call(utils.APIerSv1GetFilterIndexes, AttrGetFilterIndexes{
+	if err := tFIdxRpc.Call(context.Background(), utils.APIerSv1GetFilterIndexes, AttrGetFilterIndexes{
 		Tenant: tenant, Context: utils.MetaSessionS, ItemType: utils.MetaDispatchers,
 	}, &indexes); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
@@ -2930,13 +2931,13 @@ func testV1FIdxSetDispatcherComputeIDs(t *testing.T) {
 	}
 	var idx []string
 	sort.Strings(expectedIndexes)
-	if err := tFIdxRpc.Call(utils.APIerSv1GetFilterIndexes, arg, &idx); err != nil {
+	if err := tFIdxRpc.Call(context.Background(), utils.APIerSv1GetFilterIndexes, arg, &idx); err != nil {
 		t.Error(err)
 	} else if sort.Strings(idx); !reflect.DeepEqual(len(expectedIndexes), len(idx)) {
 		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(expectedIndexes), utils.ToJSON(idx))
 	}
 
-	if err := tFIdxRpc.Call(utils.APIerSv1ComputeFilterIndexes,
+	if err := tFIdxRpc.Call(context.Background(), utils.APIerSv1ComputeFilterIndexes,
 		&utils.ArgsComputeFilterIndexes{
 			Tenant:      tenant,
 			Context:     utils.MetaSessionS,
@@ -2952,7 +2953,7 @@ func testV1FIdxSetDispatcherComputeIDs(t *testing.T) {
 		"*string:*req.Subject:2012:DSP_Test1",
 	}
 	sort.Strings(expectedIndexes)
-	if err := tFIdxRpc.Call(utils.APIerSv1GetFilterIndexes, &AttrGetFilterIndexes{
+	if err := tFIdxRpc.Call(context.Background(), utils.APIerSv1GetFilterIndexes, &AttrGetFilterIndexes{
 		ItemType: utils.MetaDispatchers,
 		Tenant:   tenant,
 		Context:  utils.MetaSessionS}, &indexes); err != nil {
@@ -2973,7 +2974,7 @@ func testV1FIdxSetDispatcherComputeIDs(t *testing.T) {
 		"*string:*req.Subject:2012:DSP_Test1",
 	}
 	sort.Strings(expectedIndexes)
-	if err := tFIdxRpc.Call(utils.APIerSv1GetFilterIndexes, arg, &idx); err != nil {
+	if err := tFIdxRpc.Call(context.Background(), utils.APIerSv1GetFilterIndexes, arg, &idx); err != nil {
 		t.Error(err)
 	} else if sort.Strings(idx); !reflect.DeepEqual(len(expectedIndexes), len(idx)) {
 		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(expectedIndexes), utils.ToJSON(idx))
@@ -2990,7 +2991,7 @@ func testV1FIdxSetDispatcherComputeIDs(t *testing.T) {
 		},
 	}
 
-	if err := tFIdxRpc.Call(utils.APIerSv1SetDispatcherProfile,
+	if err := tFIdxRpc.Call(context.Background(), utils.APIerSv1SetDispatcherProfile,
 		dispatcherProfile,
 		&reply); err != nil {
 		t.Error(err)
@@ -3009,7 +3010,7 @@ func testV1FIdxSetDispatcherComputeIDs(t *testing.T) {
 		},
 	}
 
-	if err := tFIdxRpc.Call(utils.APIerSv1SetDispatcherProfile,
+	if err := tFIdxRpc.Call(context.Background(), utils.APIerSv1SetDispatcherProfile,
 		dispatcherProfile2,
 		&reply); err != nil {
 		t.Error(err)
@@ -3030,7 +3031,7 @@ func testV1FIdxSetDispatcherComputeIDs(t *testing.T) {
 		"*string:*req.Subject:2012:DSP_Test1",
 	}
 	sort.Strings(expectedIndexes)
-	if err := tFIdxRpc.Call(utils.APIerSv1GetFilterIndexes, arg, &idx); err != nil {
+	if err := tFIdxRpc.Call(context.Background(), utils.APIerSv1GetFilterIndexes, arg, &idx); err != nil {
 		t.Error(err)
 	} else if sort.Strings(idx); !reflect.DeepEqual(expectedIndexes, idx) {
 		t.Errorf("Expecting: %+v, received: %+v", expectedIndexes, idx)
@@ -3050,7 +3051,7 @@ func testV1FIdxSetResourceComputeIDs(t *testing.T) {
 		},
 	}
 	var result string
-	if err := tFIdxRpc.Call(utils.APIerSv1SetFilter, filter, &result); err != nil {
+	if err := tFIdxRpc.Call(context.Background(), utils.APIerSv1SetFilter, filter, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -3070,27 +3071,27 @@ func testV1FIdxSetResourceComputeIDs(t *testing.T) {
 			ThresholdIDs:      []string{"Val1", "Val2"},
 		},
 	}
-	if err := tFIdxRpc.Call(utils.APIerSv1SetResourceProfile, rlsConfig, &result); err != nil {
+	if err := tFIdxRpc.Call(context.Background(), utils.APIerSv1SetResourceProfile, rlsConfig, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
 
-	if err := tFIdxRpc.Call(utils.APIerSv1RemoveFilterIndexes, &AttrRemFilterIndexes{
+	if err := tFIdxRpc.Call(context.Background(), utils.APIerSv1RemoveFilterIndexes, &AttrRemFilterIndexes{
 		ItemType: utils.MetaResources, Tenant: tenant}, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
 	var indexes []string
-	if err := tFIdxRpc.Call(utils.APIerSv1GetFilterIndexes, &AttrGetFilterIndexes{
+	if err := tFIdxRpc.Call(context.Background(), utils.APIerSv1GetFilterIndexes, &AttrGetFilterIndexes{
 		ItemType: utils.MetaResources, Tenant: tenant, FilterType: utils.MetaString},
 		&indexes); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
 
 	var reply2 string
-	if err := tFIdxRpc.Call(utils.APIerSv1ComputeFilterIndexes, &utils.ArgsComputeFilterIndexes{
+	if err := tFIdxRpc.Call(context.Background(), utils.APIerSv1ComputeFilterIndexes, &utils.ArgsComputeFilterIndexes{
 		Tenant:    tenant,
 		ResourceS: true,
 	}, &reply2); err != nil {
@@ -3100,7 +3101,7 @@ func testV1FIdxSetResourceComputeIDs(t *testing.T) {
 		t.Errorf("Error: %+v", reply2)
 	}
 	expectedIDX := []string{"*string:*req.Account:1001:RCFG1"}
-	if err := tFIdxRpc.Call(utils.APIerSv1GetFilterIndexes, &AttrGetFilterIndexes{
+	if err := tFIdxRpc.Call(context.Background(), utils.APIerSv1GetFilterIndexes, &AttrGetFilterIndexes{
 		ItemType: utils.MetaResources, Tenant: tenant, FilterType: utils.MetaString},
 		&indexes); err != nil {
 		t.Error(err)
@@ -3122,7 +3123,7 @@ func testV1FIdxSetResourceComputeIDs(t *testing.T) {
 		},
 	}
 
-	if err := tFIdxRpc.Call(utils.APIerSv1SetFilter, filter, &result); err != nil {
+	if err := tFIdxRpc.Call(context.Background(), utils.APIerSv1SetFilter, filter, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -3142,12 +3143,12 @@ func testV1FIdxSetResourceComputeIDs(t *testing.T) {
 			ThresholdIDs:      []string{"Val1", "Val2"},
 		},
 	}
-	if err := tFIdxRpc.Call(utils.APIerSv1SetFilter, filter, &result); err != nil {
+	if err := tFIdxRpc.Call(context.Background(), utils.APIerSv1SetFilter, filter, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	if err := tFIdxRpc.Call(utils.APIerSv1SetResourceProfile, rlsConfig, &result); err != nil {
+	if err := tFIdxRpc.Call(context.Background(), utils.APIerSv1SetResourceProfile, rlsConfig, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -3157,7 +3158,7 @@ func testV1FIdxSetResourceComputeIDs(t *testing.T) {
 		"*string:*req.Account:1001:RCFG1",
 		"*string:*req.Account:1001:RCFG2",
 	}
-	if err := tFIdxRpc.Call(utils.APIerSv1GetFilterIndexes, &AttrGetFilterIndexes{
+	if err := tFIdxRpc.Call(context.Background(), utils.APIerSv1GetFilterIndexes, &AttrGetFilterIndexes{
 		ItemType: utils.MetaResources, Tenant: tenant, FilterType: utils.MetaString},
 		&indexes); err != nil {
 		t.Error(err)
@@ -3203,12 +3204,12 @@ func testSetProfilesWithFltrsAndOverwriteThemFIdx(t *testing.T) {
 		},
 	}
 	var result string
-	if err := tFIdxRpc.Call(utils.APIerSv1SetFilter, filter1, &result); err != nil {
+	if err := tFIdxRpc.Call(context.Background(), utils.APIerSv1SetFilter, filter1, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	if err := tFIdxRpc.Call(utils.APIerSv1SetFilter, filter2, &result); err != nil {
+	if err := tFIdxRpc.Call(context.Background(), utils.APIerSv1SetFilter, filter2, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -3260,12 +3261,12 @@ func testSetProfilesWithFltrsAndOverwriteThemFIdx(t *testing.T) {
 		},
 	}
 	var reply string
-	if err := tFIdxRpc.Call(utils.APIerSv1SetStatQueueProfile, stat1, &reply); err != nil {
+	if err := tFIdxRpc.Call(context.Background(), utils.APIerSv1SetStatQueueProfile, stat1, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply returned", reply)
 	}
-	if err := tFIdxRpc.Call(utils.APIerSv1SetStatQueueProfile, stat2, &reply); err != nil {
+	if err := tFIdxRpc.Call(context.Background(), utils.APIerSv1SetStatQueueProfile, stat2, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply returned", reply)
@@ -3283,7 +3284,7 @@ func testSetProfilesWithFltrsAndOverwriteThemFIdx(t *testing.T) {
 			Async:     true,
 		},
 	}
-	if err := tFIdxRpc.Call(utils.APIerSv1SetThresholdProfile, tPrfl1, &reply); err != nil {
+	if err := tFIdxRpc.Call(context.Background(), utils.APIerSv1SetThresholdProfile, tPrfl1, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply returned", reply)
@@ -3309,7 +3310,7 @@ func testSetProfilesWithFltrsAndOverwriteThemFIdx(t *testing.T) {
 	}
 	sort.Strings(expectedIndexes)
 	var replyIDx []string
-	if err := tFIdxRpc.Call(utils.APIerSv1GetFilterIndexes, arg, &replyIDx); err != nil {
+	if err := tFIdxRpc.Call(context.Background(), utils.APIerSv1GetFilterIndexes, arg, &replyIDx); err != nil {
 		t.Error(err)
 	} else if sort.Strings(replyIDx); !reflect.DeepEqual(expectedIndexes, replyIDx) {
 		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(expectedIndexes), utils.ToJSON(replyIDx))
@@ -3347,12 +3348,12 @@ func testSetProfilesWithFltrsAndOverwriteThemFIdx(t *testing.T) {
 			},
 		},
 	}
-	if err := tFIdxRpc.Call(utils.APIerSv1SetFilter, filter1, &reply); err != nil {
+	if err := tFIdxRpc.Call(context.Background(), utils.APIerSv1SetFilter, filter1, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply returned", reply)
 	}
-	if err := tFIdxRpc.Call(utils.APIerSv1SetFilter, filter2, &reply); err != nil {
+	if err := tFIdxRpc.Call(context.Background(), utils.APIerSv1SetFilter, filter2, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply returned", reply)
@@ -3375,7 +3376,7 @@ func testSetProfilesWithFltrsAndOverwriteThemFIdx(t *testing.T) {
 		"*prefix:*req.Subject:1002:Stats2",
 	}
 	sort.Strings(expectedIndexes)
-	if err := tFIdxRpc.Call(utils.APIerSv1GetFilterIndexes, arg, &replyIDx); err != nil {
+	if err := tFIdxRpc.Call(context.Background(), utils.APIerSv1GetFilterIndexes, arg, &replyIDx); err != nil {
 		t.Error(err)
 	} else if sort.Strings(replyIDx); !reflect.DeepEqual(expectedIndexes, replyIDx) {
 		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(expectedIndexes), utils.ToJSON(replyIDx))
@@ -3427,12 +3428,12 @@ func testSetAndChangeFiltersOnProfiles(t *testing.T) {
 		},
 	}
 	var reply string
-	if err := tFIdxRpc.Call(utils.APIerSv1SetStatQueueProfile, stat1, &reply); err != nil {
+	if err := tFIdxRpc.Call(context.Background(), utils.APIerSv1SetStatQueueProfile, stat1, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply returned", reply)
 	}
-	if err := tFIdxRpc.Call(utils.APIerSv1SetStatQueueProfile, stat2, &reply); err != nil {
+	if err := tFIdxRpc.Call(context.Background(), utils.APIerSv1SetStatQueueProfile, stat2, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply returned", reply)
@@ -3452,7 +3453,7 @@ func testSetAndChangeFiltersOnProfiles(t *testing.T) {
 		},
 	}
 
-	if err := tFIdxRpc.Call(utils.APIerSv1SetThresholdProfile, tPrfl1, &reply); err != nil {
+	if err := tFIdxRpc.Call(context.Background(), utils.APIerSv1SetThresholdProfile, tPrfl1, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply returned", reply)
@@ -3468,7 +3469,7 @@ func testSetAndChangeFiltersOnProfiles(t *testing.T) {
 	}
 	sort.Strings(expectedIndexes)
 	var replyIDx []string
-	if err := tFIdxRpc.Call(utils.APIerSv1GetFilterIndexes, arg, &replyIDx); err != nil {
+	if err := tFIdxRpc.Call(context.Background(), utils.APIerSv1GetFilterIndexes, arg, &replyIDx); err != nil {
 		t.Error(err)
 	} else if sort.Strings(replyIDx); !reflect.DeepEqual(expectedIndexes, replyIDx) {
 		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(expectedIndexes), utils.ToJSON(replyIDx))
@@ -3485,7 +3486,7 @@ func testSetAndChangeFiltersOnProfiles(t *testing.T) {
 		"*prefix:*req.Subject:1002:TEST_PROFILE1",
 	}
 	sort.Strings(expectedIndexes)
-	if err := tFIdxRpc.Call(utils.APIerSv1GetFilterIndexes, arg, &replyIDx); err != nil {
+	if err := tFIdxRpc.Call(context.Background(), utils.APIerSv1GetFilterIndexes, arg, &replyIDx); err != nil {
 		t.Error(err)
 	} else if sort.Strings(replyIDx); !reflect.DeepEqual(expectedIndexes, replyIDx) {
 		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(expectedIndexes), utils.ToJSON(replyIDx))

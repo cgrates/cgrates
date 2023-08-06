@@ -28,6 +28,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc"
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/guardian"
 	"github.com/cgrates/cgrates/utils"
@@ -36,7 +38,7 @@ import (
 
 type clMock func(_ string, _ any, _ any) error
 
-func (c clMock) Call(m string, a any, r any) error {
+func (c clMock) Call(ctx *context.Context, m string, a any, r any) error {
 	return c(m, a, r)
 }
 
@@ -73,9 +75,9 @@ func TestCDRSV1ProcessCDRNoTenant(t *testing.T) {
 		}
 		return nil
 	})
-	chanClnt := make(chan rpcclient.ClientConnector, 1)
+	chanClnt := make(chan birpc.ClientConnector, 1)
 	chanClnt <- clMock
-	connMngr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	connMngr := NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes): chanClnt,
 	})
 	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
@@ -106,7 +108,7 @@ func TestCDRSV1ProcessCDRNoTenant(t *testing.T) {
 		},
 	}
 	var reply string
-	if err := cdrs.V1ProcessCDR(cdr, &reply); err != nil {
+	if err := cdrs.V1ProcessCDR(context.Background(), cdr, &reply); err != nil {
 		t.Error(err)
 	}
 }
@@ -129,9 +131,9 @@ func TestCDRSV1ProcessEventNoTenant(t *testing.T) {
 		*rply = []*ChrgSProcessEventReply{}
 		return nil
 	})
-	chanClnt := make(chan rpcclient.ClientConnector, 1)
+	chanClnt := make(chan birpc.ClientConnector, 1)
 	chanClnt <- clMock
-	connMngr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	connMngr := NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers): chanClnt,
 	})
 	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
@@ -160,7 +162,7 @@ func TestCDRSV1ProcessEventNoTenant(t *testing.T) {
 	}
 	var reply string
 
-	if err := cdrs.V1ProcessEvent(args, &reply); err != nil {
+	if err := cdrs.V1ProcessEvent(context.Background(), args, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf("expected %v,received %v", utils.OK, reply)
@@ -185,9 +187,9 @@ func TestCDRSV1V1ProcessExternalCDRNoTenant(t *testing.T) {
 		*rply = []*ChrgSProcessEventReply{}
 		return nil
 	})
-	chanClnt := make(chan rpcclient.ClientConnector, 1)
+	chanClnt := make(chan birpc.ClientConnector, 1)
 	chanClnt <- clMock
-	connMngr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	connMngr := NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers): chanClnt,
 	})
 	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
@@ -219,7 +221,7 @@ func TestCDRSV1V1ProcessExternalCDRNoTenant(t *testing.T) {
 	}
 	var reply string
 
-	if err := cdrs.V1ProcessExternalCDR(args, &reply); err != nil {
+	if err := cdrs.V1ProcessExternalCDR(context.Background(), args, &reply); err != nil {
 		t.Error(err)
 	}
 }
@@ -267,7 +269,7 @@ func TestCDRV1CountCDRs(t *testing.T) {
 	}
 
 	i := int64(3)
-	if err := cdrS.V1CountCDRs(args, &i); err != nil {
+	if err := cdrS.V1GetCDRsCount(context.Background(), args, &i); err != nil {
 		t.Error(err)
 	}
 }
@@ -294,7 +296,7 @@ func TestV1CountCDRsErr(t *testing.T) {
 		},
 	}
 	i := utils.Int64Pointer(23)
-	if err := cdrS.V1CountCDRs(args, i); err == nil {
+	if err := cdrS.V1GetCDRsCount(context.Background(), args, i); err == nil {
 		t.Error(err)
 	}
 }
@@ -317,7 +319,7 @@ func TestV1RateCDRs(t *testing.T) {
 	}
 
 	var reply string
-	if err := cdrS.V1RateCDRs(arg, &reply); err == nil {
+	if err := cdrS.V1RateCDRs(context.Background(), arg, &reply); err == nil {
 		t.Error(err)
 	}
 
@@ -325,8 +327,8 @@ func TestV1RateCDRs(t *testing.T) {
 
 func TestCDRServerThdsProcessEvent(t *testing.T) {
 	clMock := &ccMock{
-		calls: map[string]func(args any, reply any) error{
-			utils.ThresholdSv1ProcessEvent: func(args, reply any) error {
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.ThresholdSv1ProcessEvent: func(ctx *context.Context, args, reply any) error {
 
 				rpl := &[]string{"event"}
 
@@ -335,10 +337,10 @@ func TestCDRServerThdsProcessEvent(t *testing.T) {
 			},
 		},
 	}
-	clientconn := make(chan rpcclient.ClientConnector, 1)
+	clientconn := make(chan birpc.ClientConnector, 1)
 	clientconn <- clMock
 	cfg := config.NewDefaultCGRConfig()
-	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	connMgr := NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.ThresholdSConnsCfg): clientconn,
 	})
 	cfg.CdrsCfg().ThresholdSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.ThreshSConnsCfg)}
@@ -363,8 +365,8 @@ func TestCDRServerThdsProcessEvent(t *testing.T) {
 }
 func TestCDRServerStatSProcessEvent(t *testing.T) {
 	ccMock := &ccMock{
-		calls: map[string]func(args any, reply any) error{
-			utils.StatSv1ProcessEvent: func(args, reply any) error {
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.StatSv1ProcessEvent: func(ctx *context.Context, args, reply any) error {
 
 				rpl := &[]string{"status"}
 
@@ -373,10 +375,10 @@ func TestCDRServerStatSProcessEvent(t *testing.T) {
 			},
 		},
 	}
-	clientconn := make(chan rpcclient.ClientConnector, 1)
+	clientconn := make(chan birpc.ClientConnector, 1)
 	clientconn <- ccMock
 	cfg := config.NewDefaultCGRConfig()
-	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	connMgr := NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.StatSConnsCfg): clientconn,
 	})
 	cfg.CdrsCfg().StatSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.StatSConnsCfg)}
@@ -403,8 +405,8 @@ func TestCDRServerStatSProcessEvent(t *testing.T) {
 
 func TestCDRServerEesProcessEvent(t *testing.T) {
 	ccMock := &ccMock{
-		calls: map[string]func(args any, reply any) error{
-			utils.EeSv1ProcessEvent: func(args, reply any) error {
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.EeSv1ProcessEvent: func(ctx *context.Context, args, reply any) error {
 				rpls := &map[string]map[string]any{
 					"eeS": {
 						"process": "event",
@@ -416,11 +418,11 @@ func TestCDRServerEesProcessEvent(t *testing.T) {
 			},
 		},
 	}
-	clientconn := make(chan rpcclient.ClientConnector, 1)
+	clientconn := make(chan birpc.ClientConnector, 1)
 	clientconn <- ccMock
 
 	cfg := config.NewDefaultCGRConfig()
-	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	connMgr := NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.EEsConnsCfg): clientconn,
 	})
 	cfg.CdrsCfg().EEsConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.EEsConnsCfg)}
@@ -450,8 +452,8 @@ func TestCDRServerEesProcessEvent(t *testing.T) {
 func TestCDRefundEventCost(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	ccMock := &ccMock{
-		calls: map[string]func(args any, reply any) error{
-			utils.ResponderRefundIncrements: func(args, reply any) error {
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.ResponderRefundIncrements: func(ctx *context.Context, args, reply any) error {
 				return nil
 			},
 		},
@@ -460,9 +462,9 @@ func TestCDRefundEventCost(t *testing.T) {
 		CGRID: "event",
 		RunID: "runid",
 	}
-	clientconn := make(chan rpcclient.ClientConnector, 1)
+	clientconn := make(chan birpc.ClientConnector, 1)
 	clientconn <- ccMock
-	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	connMgr := NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.ResponderRefundIncrements): clientconn,
 	})
 	cfg.CdrsCfg().RaterConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.ResponderRefundIncrements)}
@@ -486,9 +488,9 @@ func TestGetCostFromRater(t *testing.T) {
 	dm := NewDataManager(db, cfg.CacheCfg(), nil)
 
 	ccMock := &ccMock{
-		calls: map[string]func(args any, reply any) error{
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
 
-			utils.ResponderDebit: func(args, reply any) error {
+			utils.ResponderDebit: func(ctx *context.Context, args, reply any) error {
 				rpl := &CallCost{
 					Category: "category",
 					Tenant:   "cgrates",
@@ -498,9 +500,9 @@ func TestGetCostFromRater(t *testing.T) {
 			},
 		},
 	}
-	clientconn := make(chan rpcclient.ClientConnector, 1)
+	clientconn := make(chan birpc.ClientConnector, 1)
 	clientconn <- ccMock
-	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	connMgr := NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.RateSConnsCfg): clientconn,
 	})
 	cdrS := &CDRServer{
@@ -534,19 +536,19 @@ func TestRefundEventCost(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.CdrsCfg().RaterConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.RateSConnsCfg)}
 	ccMock := &ccMock{
-		calls: map[string]func(args any, reply any) error{
-			utils.ResponderRefundIncrements: func(args, reply any) error {
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.ResponderRefundIncrements: func(ctx *context.Context, args, reply any) error {
 				rpl := &Account{}
 				*reply.(*Account) = *rpl
 				return nil
 			},
 		},
 	}
-	clientconn := make(chan rpcclient.ClientConnector, 1)
+	clientconn := make(chan birpc.ClientConnector, 1)
 	clientconn <- ccMock
 	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
 	dm := NewDataManager(db, cfg.CacheCfg(), nil)
-	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	connMgr := NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.RateSConnsCfg): clientconn,
 	})
 	cdrS := &CDRServer{
@@ -591,9 +593,9 @@ func TestCDRSV2ProcessEvent(t *testing.T) {
 
 		return nil
 	})
-	chanClnt := make(chan rpcclient.ClientConnector, 1)
+	chanClnt := make(chan birpc.ClientConnector, 1)
 	chanClnt <- clMock
-	connMngr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	connMngr := NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers): chanClnt,
 	})
 	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
@@ -625,7 +627,7 @@ func TestCDRSV2ProcessEvent(t *testing.T) {
 	}
 	evs := &[]*utils.EventWithFlags{}
 
-	if err := cdrs.V2ProcessEvent(args, evs); err != nil {
+	if err := cdrs.V2ProcessEvent(context.Background(), args, evs); err != nil {
 		t.Error(err)
 	}
 	exp := &utils.CachedRPCResponse{
@@ -677,7 +679,7 @@ func TestCDRSV2ProcessEventCacheSet(t *testing.T) {
 		&utils.CachedRPCResponse{Result: evs, Error: nil},
 		nil, true, utils.NonTransactional)
 
-	if err := cdrs.V2ProcessEvent(args, evs); err != nil {
+	if err := cdrs.V2ProcessEvent(context.Background(), args, evs); err != nil {
 		t.Error(err)
 	}
 	exp := &utils.CachedRPCResponse{Result: evs, Error: nil}
@@ -700,9 +702,9 @@ func TestCDRSV1ProcessEvent(t *testing.T) {
 
 		return nil
 	})
-	chanClnt := make(chan rpcclient.ClientConnector, 1)
+	chanClnt := make(chan birpc.ClientConnector, 1)
 	chanClnt <- clMock
-	connMngr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	connMngr := NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers): chanClnt,
 	})
 	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
@@ -734,7 +736,7 @@ func TestCDRSV1ProcessEvent(t *testing.T) {
 	}
 	reply := utils.StringPointer("result")
 
-	if err := cdrs.V1ProcessEvent(args, reply); err != nil {
+	if err := cdrs.V1ProcessEvent(context.Background(), args, reply); err != nil {
 		t.Error(err)
 	}
 	exp := &utils.CachedRPCResponse{
@@ -786,7 +788,7 @@ func TestCDRSV1ProcessEventCacheSet(t *testing.T) {
 		&utils.CachedRPCResponse{Result: reply, Error: nil},
 		nil, true, utils.NonTransactional)
 
-	if err := cdrs.V1ProcessEvent(args, reply); err != nil {
+	if err := cdrs.V1ProcessEvent(context.Background(), args, reply); err != nil {
 		t.Error(err)
 	}
 	exp := &utils.CachedRPCResponse{Result: reply, Error: nil}
@@ -814,10 +816,10 @@ func TestV1ProcessEvent(t *testing.T) {
 	cfg.CdrsCfg().StoreCdrs = true
 	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
 	dm := NewDataManager(db, cfg.CacheCfg(), nil)
-	clientconn := make(chan rpcclient.ClientConnector, 1)
+	clientconn := make(chan birpc.ClientConnector, 1)
 	clientconn <- &ccMock{
-		calls: map[string]func(args any, reply any) error{
-			utils.AttributeSv1ProcessEvent: func(args, reply any) error {
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.AttributeSv1ProcessEvent: func(ctx *context.Context, args, reply any) error {
 				rpl := &AttrSProcessEventReply{
 					AlteredFields: []string{"*req.OfficeGroup"},
 					CGREvent: &utils.CGREvent{
@@ -830,7 +832,7 @@ func TestV1ProcessEvent(t *testing.T) {
 
 				return nil
 			},
-			utils.ChargerSv1ProcessEvent: func(args, reply any) error {
+			utils.ChargerSv1ProcessEvent: func(ctx *context.Context, args, reply any) error {
 				rpl := []*ChrgSProcessEventReply{
 					{
 						ChargerSProfile:    "chrgs1",
@@ -845,7 +847,7 @@ func TestV1ProcessEvent(t *testing.T) {
 				*reply.(*[]*ChrgSProcessEventReply) = rpl
 				return nil
 			},
-			utils.ResponderRefundIncrements: func(args, reply any) error {
+			utils.ResponderRefundIncrements: func(ctx *context.Context, args, reply any) error {
 				rpl := &Account{
 					ID: "cgrates.org:1001",
 					BalanceMap: map[string]Balances{
@@ -855,34 +857,34 @@ func TestV1ProcessEvent(t *testing.T) {
 				*reply.(*Account) = *rpl
 				return nil
 			},
-			utils.ResponderDebit: func(args, reply any) error {
+			utils.ResponderDebit: func(ctx *context.Context, args, reply any) error {
 				rpl := &CallCost{}
 				*reply.(*CallCost) = *rpl
 				return nil
 			},
-			utils.ResponderGetCost: func(args, reply any) error {
+			utils.ResponderGetCost: func(ctx *context.Context, args, reply any) error {
 				rpl := &CallCost{}
 				*reply.(*CallCost) = *rpl
 				return nil
 			},
-			utils.EeSv1ProcessEvent: func(args, reply any) error {
+			utils.EeSv1ProcessEvent: func(ctx *context.Context, args, reply any) error {
 				rpl := &map[string]map[string]any{}
 				*reply.(*map[string]map[string]any) = *rpl
 				return nil
 			},
-			utils.ThresholdSv1ProcessEvent: func(args, reply any) error {
+			utils.ThresholdSv1ProcessEvent: func(ctx *context.Context, args, reply any) error {
 				rpl := &[]string{}
 				*reply.(*[]string) = *rpl
 				return nil
 			},
-			utils.StatSv1ProcessEvent: func(args, reply any) error {
+			utils.StatSv1ProcessEvent: func(ctx *context.Context, args, reply any) error {
 				rpl := &[]string{}
 				*reply.(*[]string) = *rpl
 				return nil
 			},
 		},
 	}
-	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	connMgr := NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.AttributeSConnsCfg): clientconn,
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers):       clientconn,
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResponder):      clientconn,
@@ -914,7 +916,7 @@ func TestV1ProcessEvent(t *testing.T) {
 		},
 	}
 	var reply string
-	if err := cdrS.V1ProcessEvent(arg, &reply); err == nil {
+	if err := cdrS.V1ProcessEvent(context.Background(), arg, &reply); err == nil {
 		t.Error(err)
 	}
 }
@@ -946,16 +948,16 @@ func TestCdrprocessEventsErrLog(t *testing.T) {
 	cfg.CdrsCfg().EEsConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEEs)}
 	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
 	dm := NewDataManager(db, cfg.CacheCfg(), nil)
-	clientConn := make(chan rpcclient.ClientConnector, 1)
+	clientConn := make(chan birpc.ClientConnector, 1)
 	clientConn <- &ccMock{
-		calls: map[string]func(args any, reply any) error{
-			utils.EeSv1ProcessEvent: func(args, reply any) error {
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.EeSv1ProcessEvent: func(ctx *context.Context, args, reply any) error {
 
 				return utils.ErrPartiallyExecuted
 			},
 		},
 	}
-	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	connMgr := NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEEs): clientConn,
 	})
 	cdrs := &CDRServer{
@@ -1088,7 +1090,7 @@ func TestV1ProcessCDR(t *testing.T) {
 	}
 	reply := utils.StringPointer("reply")
 
-	if err = cdrS.V1ProcessCDR(cdr, reply); err != nil {
+	if err = cdrS.V1ProcessCDR(context.Background(), cdr, reply); err != nil {
 		t.Error(err)
 	}
 	exp := &utils.CachedRPCResponse{
@@ -1133,7 +1135,7 @@ func TestV1ProcessCDRSet(t *testing.T) {
 	Cache.Set(utils.CacheRPCResponses, utils.ConcatenatedKey(utils.CDRsV1ProcessCDR, cdr.CGRID, cdr.RunID),
 		&utils.CachedRPCResponse{Result: reply, Error: err},
 		nil, true, utils.NonTransactional)
-	if err = cdrS.V1ProcessCDR(cdr, reply); err != nil {
+	if err = cdrS.V1ProcessCDR(context.Background(), cdr, reply); err != nil {
 		t.Error(err)
 	}
 	exp := &utils.CachedRPCResponse{
@@ -1154,9 +1156,9 @@ func TestV1StoreSessionCost(t *testing.T) {
 	clMock := clMock(func(_ string, _, _ any) error {
 		return nil
 	})
-	clientconn := make(chan rpcclient.ClientConnector, 1)
+	clientconn := make(chan birpc.ClientConnector, 1)
 	clientconn <- clMock
-	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{})
+	connMgr := NewConnManager(cfg, map[string]chan birpc.ClientConnector{})
 	cfg.CacheCfg().Partitions[utils.CacheRPCResponses].Limit = 1
 	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
 	dm := NewDataManager(db, cfg.CacheCfg(), nil)
@@ -1181,7 +1183,7 @@ func TestV1StoreSessionCost(t *testing.T) {
 		connMgr: connMgr,
 	}
 	reply := utils.StringPointer("reply")
-	if err = cdrS.V1StoreSessionCost(attr, reply); err != nil {
+	if err = cdrS.V1StoreSessionCost(context.Background(), attr, reply); err != nil {
 		t.Error(err)
 	}
 	exp := &utils.CachedRPCResponse{
@@ -1195,7 +1197,7 @@ func TestV1StoreSessionCost(t *testing.T) {
 		t.Errorf("expected %v,received %v", utils.ToJSON(exp), utils.ToJSON(rcv))
 	}
 	attr.Cost.CGRID = utils.EmptyString
-	if err := cdrS.V1StoreSessionCost(attr, reply); err == nil || err.Error() != fmt.Sprintf("%s: CGRID", utils.MandatoryInfoMissing) {
+	if err := cdrS.V1StoreSessionCost(context.Background(), attr, reply); err == nil || err.Error() != fmt.Sprintf("%s: CGRID", utils.MandatoryInfoMissing) {
 		t.Error(err)
 	}
 }
@@ -1207,9 +1209,9 @@ func TestV1StoreSessionCostSet(t *testing.T) {
 
 		return nil
 	})
-	clientconn := make(chan rpcclient.ClientConnector, 1)
+	clientconn := make(chan birpc.ClientConnector, 1)
 	clientconn <- clMock
-	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{})
+	connMgr := NewConnManager(cfg, map[string]chan birpc.ClientConnector{})
 	cfg.CacheCfg().Partitions[utils.CacheRPCResponses].Limit = 1
 	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
 	dm := NewDataManager(db, cfg.CacheCfg(), nil)
@@ -1238,7 +1240,7 @@ func TestV1StoreSessionCostSet(t *testing.T) {
 		&utils.CachedRPCResponse{Result: reply, Error: nil},
 		nil, true, utils.NonTransactional)
 
-	if err = cdrS.V1StoreSessionCost(attr, reply); err != nil {
+	if err = cdrS.V1StoreSessionCost(context.Background(), attr, reply); err != nil {
 		t.Error(err)
 	}
 	exp := &utils.CachedRPCResponse{
@@ -1255,7 +1257,7 @@ func TestV1StoreSessionCostSet(t *testing.T) {
 	cdrS.guard = guardian.Guardian
 	cfg.CacheCfg().Partitions[utils.CacheRPCResponses].Limit = 0
 	attr.CheckDuplicate = true
-	if err = cdrS.V1StoreSessionCost(attr, reply); err != nil {
+	if err = cdrS.V1StoreSessionCost(context.Background(), attr, reply); err != nil {
 		t.Error(err)
 	}
 }
@@ -1264,17 +1266,17 @@ func TestV2StoreSessionCost(t *testing.T) {
 	Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	ccMock := &ccMock{
-		calls: map[string]func(args any, reply any) error{
-			utils.ResponderRefundRounding: func(args, reply any) error {
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.ResponderRefundRounding: func(ctx *context.Context, args, reply any) error {
 				rpl := &Account{}
 				*reply.(*Account) = *rpl
 				return nil
 			},
 		},
 	}
-	clientconn := make(chan rpcclient.ClientConnector, 1)
+	clientconn := make(chan birpc.ClientConnector, 1)
 	clientconn <- ccMock
-	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	connMgr := NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.RateSConnsCfg): clientconn,
 	})
 	cfg.CacheCfg().Partitions[utils.CacheRPCResponses].Limit = 1
@@ -1315,7 +1317,7 @@ func TestV2StoreSessionCost(t *testing.T) {
 	}
 	var reply string
 
-	if err := cdrS.V2StoreSessionCost(args, &reply); err != nil {
+	if err := cdrS.V2StoreSessionCost(context.Background(), args, &reply); err != nil {
 		t.Error(err)
 	}
 	exp := &utils.CachedRPCResponse{Result: utils.StringPointer("OK"), Error: nil}
@@ -1330,7 +1332,7 @@ func TestV2StoreSessionCost(t *testing.T) {
 	args = &ArgsV2CDRSStoreSMCost{
 		Cost: &V2SMCost{},
 	}
-	if err = cdrS.V2StoreSessionCost(args, &reply); err == nil {
+	if err = cdrS.V2StoreSessionCost(context.Background(), args, &reply); err == nil {
 		t.Error(err)
 	}
 }
@@ -1339,17 +1341,17 @@ func TestV2StoreSessionCostSet(t *testing.T) {
 	Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	ccMock := &ccMock{
-		calls: map[string]func(args any, reply any) error{
-			utils.ResponderRefundRounding: func(args, reply any) error {
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.ResponderRefundRounding: func(ctx *context.Context, args, reply any) error {
 				rpl := &Account{}
 				*reply.(*Account) = *rpl
 				return nil
 			},
 		},
 	}
-	clientconn := make(chan rpcclient.ClientConnector, 1)
+	clientconn := make(chan birpc.ClientConnector, 1)
 	clientconn <- ccMock
-	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	connMgr := NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.RateSConnsCfg): clientconn,
 	})
 	cfg.CacheCfg().Partitions[utils.CacheRPCResponses].Limit = 1
@@ -1445,7 +1447,7 @@ func TestV2StoreSessionCostSet(t *testing.T) {
 		&utils.CachedRPCResponse{Result: reply, Error: nil},
 		nil, true, utils.NonTransactional)
 
-	if err := cdrS.V2StoreSessionCost(args, reply); err != nil {
+	if err := cdrS.V2StoreSessionCost(context.Background(), args, reply); err != nil {
 		t.Error(err)
 	}
 	exp := &utils.CachedRPCResponse{Result: reply, Error: nil}
@@ -1480,7 +1482,7 @@ func TestV1RateCDRSErr(t *testing.T) {
 	}
 	var reply string
 
-	if err := cdrS.V1RateCDRs(arg, &reply); err == nil || err != utils.ErrNotFound {
+	if err := cdrS.V1RateCDRs(context.Background(), arg, &reply); err == nil || err != utils.ErrNotFound {
 		t.Error(err)
 	}
 }
@@ -1511,11 +1513,11 @@ func TestV1GetCDRsErr(t *testing.T) {
 		APIOpts: map[string]any{},
 	}
 	var cdrs *[]*CDR
-	if err := cdrS.V1GetCDRs(args, cdrs); err == nil {
+	if err := cdrS.V1GetCDRs(context.Background(), args, cdrs); err == nil {
 		t.Error(utils.NewErrServerError(utils.ErrNotFound))
 	}
 	args.RPCCDRsFilter.SetupTimeStart = ""
-	if err := cdrS.V1GetCDRs(args, cdrs); err == nil || err.Error() != fmt.Sprintf("SERVER_ERROR: %s", utils.ErrNotFound) {
+	if err := cdrS.V1GetCDRs(context.Background(), args, cdrs); err == nil || err.Error() != fmt.Sprintf("SERVER_ERROR: %s", utils.ErrNotFound) {
 		t.Error(utils.NewErrServerError(utils.ErrNotFound))
 	}
 }
@@ -1526,21 +1528,21 @@ func TestGetCostFromRater2(t *testing.T) {
 	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
 	dm := NewDataManager(db, cfg.CacheCfg(), nil)
 	ccMock := &ccMock{
-		calls: map[string]func(args any, reply any) error{
-			utils.ResponderDebit: func(args, reply any) error {
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.ResponderDebit: func(ctx *context.Context, args, reply any) error {
 
 				return utils.ErrAccountNotFound
 			},
-			utils.SchedulerSv1ExecuteActionPlans: func(args, reply any) error {
+			utils.SchedulerSv1ExecuteActionPlans: func(ctx *context.Context, args, reply any) error {
 				rpl := "reply"
 				*reply.(*string) = rpl
 				return nil
 			},
 		},
 	}
-	clientconn := make(chan rpcclient.ClientConnector, 1)
+	clientconn := make(chan birpc.ClientConnector, 1)
 	clientconn <- ccMock
-	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	connMgr := NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.RateSConnsCfg):     clientconn,
 		utils.ConcatenatedKey(utils.MetaInternal, utils.SchedulerConnsCfg): clientconn,
 	})
@@ -1576,16 +1578,16 @@ func TestGetCostFromRater3(t *testing.T) {
 	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
 	dm := NewDataManager(db, cfg.CacheCfg(), nil)
 	ccMock := &ccMock{
-		calls: map[string]func(args any, reply any) error{
-			utils.ResponderGetCost: func(args, reply any) error {
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.ResponderGetCost: func(ctx *context.Context, args, reply any) error {
 
 				return nil
 			},
 		},
 	}
-	clientconn := make(chan rpcclient.ClientConnector, 1)
+	clientconn := make(chan birpc.ClientConnector, 1)
 	clientconn <- ccMock
-	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	connMgr := NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.RateSConnsCfg): clientconn,
 	})
 	cdrS := &CDRServer{
@@ -1622,17 +1624,17 @@ func TestV2StoreSessionCost2(t *testing.T) {
 	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
 	dm := NewDataManager(db, cfg.CacheCfg(), nil)
 	ccMOck := &ccMock{
-		calls: map[string]func(args any, reply any) error{
-			utils.ResponderRefundRounding: func(args, reply any) error {
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.ResponderRefundRounding: func(ctx *context.Context, args, reply any) error {
 				rpl := &Account{}
 				*reply.(*Account) = *rpl
 				return nil
 			},
 		},
 	}
-	clientconn := make(chan rpcclient.ClientConnector, 1)
+	clientconn := make(chan birpc.ClientConnector, 1)
 	clientconn <- ccMOck
-	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	connMgr := NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.RateSConnsCfg): clientconn,
 	})
 	cdrS := &CDRServer{
@@ -1753,16 +1755,16 @@ func TestV2StoreSessionCost2(t *testing.T) {
 		APIOpts: map[string]any{},
 	}
 	var reply string
-	if err := cdrS.V2StoreSessionCost(args, &reply); err != nil {
+	if err := cdrS.V2StoreSessionCost(context.Background(), args, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf("expected %+v,received %+v", utils.OK, reply)
 	}
-	clientconn2 := make(chan rpcclient.ClientConnector, 1)
+	clientconn2 := make(chan birpc.ClientConnector, 1)
 	clientconn2 <- &ccMock{
 
-		calls: map[string]func(args any, reply any) error{
-			utils.ResponderRefundRounding: func(args, reply any) error {
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.ResponderRefundRounding: func(ctx *context.Context, args, reply any) error {
 				rpl := &Account{}
 				*reply.(*Account) = *rpl
 				return utils.ErrNotFound
@@ -1771,7 +1773,7 @@ func TestV2StoreSessionCost2(t *testing.T) {
 	}
 	cdrS.connMgr.rpcInternal[utils.ConcatenatedKey(utils.MetaInternal, utils.RateSConnsCfg)] = clientconn2
 
-	if err := cdrS.V2StoreSessionCost(args, &reply); err != nil {
+	if err := cdrS.V2StoreSessionCost(context.Background(), args, &reply); err != nil {
 		t.Error(err)
 	}
 
@@ -1818,7 +1820,7 @@ func TestV1RateCDRSSuccesful(t *testing.T) {
 	}
 	var reply *string
 
-	if err := cdrS.V1RateCDRs(arg, reply); err == nil {
+	if err := cdrS.V1RateCDRs(context.Background(), arg, reply); err == nil {
 		t.Error(err)
 	}
 }
@@ -1891,10 +1893,10 @@ func TestCdrSRateCDR(t *testing.T) {
 			Replicate: true,
 		},
 	})
-	clientConn := make(chan rpcclient.ClientConnector, 1)
+	clientConn := make(chan birpc.ClientConnector, 1)
 	clientConn <- &ccMock{
-		calls: map[string]func(args any, reply any) error{
-			utils.ResponderDebit: func(args, reply any) error {
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.ResponderDebit: func(ctx *context.Context, args, reply any) error {
 				cc := &CallCost{
 					Category:    "generic",
 					Tenant:      "cgrates.org",
@@ -1909,7 +1911,7 @@ func TestCdrSRateCDR(t *testing.T) {
 			},
 		},
 	}
-	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	connMgr := NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRALs): clientConn,
 	})
 	dm := NewDataManager(db, cfg.CacheCfg(), nil)
@@ -2005,10 +2007,10 @@ func TestChrgrSProcessEvent(t *testing.T) {
 	cfg.CdrsCfg().ChargerSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers)}
 	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
 	dm := NewDataManager(db, cfg.CacheCfg(), nil)
-	clienConn := make(chan rpcclient.ClientConnector, 1)
+	clienConn := make(chan birpc.ClientConnector, 1)
 	clienConn <- &ccMock{
-		calls: map[string]func(args any, reply any) error{
-			utils.ChargerSv1ProcessEvent: func(args, reply any) error {
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.ChargerSv1ProcessEvent: func(ctx *context.Context, args, reply any) error {
 				*reply.(*[]*ChrgSProcessEventReply) = []*ChrgSProcessEventReply{
 					{
 						ChargerSProfile:    "Charger1",
@@ -2034,7 +2036,7 @@ func TestChrgrSProcessEvent(t *testing.T) {
 			},
 		},
 	}
-	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	connMgr := NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers): clienConn,
 	})
 	cdrS := &CDRServer{
@@ -2076,44 +2078,6 @@ func TestChrgrSProcessEvent(t *testing.T) {
 		t.Error(err)
 	} else if !reflect.DeepEqual(val, expcgrEv) {
 		t.Errorf("expected %v,received %v", utils.ToJSON(expcgrEv), utils.ToJSON(val))
-	}
-}
-
-func TestCdrSCall123(t *testing.T) {
-	cfg := config.NewDefaultCGRConfig()
-	tmpConnMgr := connMgr
-	defer func() {
-		connMgr = tmpConnMgr
-		config.SetCgrConfig(config.NewDefaultCGRConfig())
-	}()
-	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
-	dm := NewDataManager(db, cfg.CacheCfg(), nil)
-	cdrS := &CDRServer{
-		cgrCfg:  cfg,
-		connMgr: connMgr,
-		dm:      dm,
-		cdrDb:   db,
-	}
-	clientConn := make(chan rpcclient.ClientConnector, 1)
-	clientConn <- cdrS
-	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{})
-	config.SetCgrConfig(cfg)
-	SetConnManager(connMgr)
-	var reply string
-	attr := &AttrCDRSStoreSMCost{
-		Cost: &SMCost{
-			CGRID:    "cgrid1",
-			RunID:    "run1",
-			OriginID: "originid",
-			CostDetails: &EventCost{
-				Usage: utils.DurationPointer(1 * time.Minute),
-				Cost:  utils.Float64Pointer(32.3),
-			},
-		},
-		CheckDuplicate: false,
-	}
-	if err := cdrS.Call(utils.CDRsV1StoreSessionCost, attr, &reply); err != nil {
-		t.Error(err)
 	}
 }
 
@@ -2281,7 +2245,7 @@ func TestCDRSGetCDRs(t *testing.T) {
 	cfg.CdrsCfg().StatSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats)}
 	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
 	dm := NewDataManager(db, cfg.CacheCfg(), nil)
-	clientConn := make(chan rpcclient.ClientConnector, 1)
+	clientConn := make(chan birpc.ClientConnector, 1)
 	clientConn <- clMock(func(serviceMethod string, _, _ any) error {
 		if serviceMethod == utils.EeSv1ProcessEvent {
 
@@ -2300,7 +2264,7 @@ func TestCDRSGetCDRs(t *testing.T) {
 		cgrCfg: cfg,
 		cdrDb:  db,
 		dm:     dm,
-		connMgr: NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+		connMgr: NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 			utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEEs):        clientConn,
 			utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds): clientConn,
 			utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats):      clientConn,
@@ -2334,7 +2298,7 @@ func TestCDRSGetCDRs(t *testing.T) {
 		},
 	}
 	var reply string
-	if err := cdrS.V1ProcessEvent(arg, &reply); err != nil {
+	if err := cdrS.V1ProcessEvent(context.Background(), arg, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Error("Expected OK")
@@ -2344,7 +2308,7 @@ func TestCDRSGetCDRs(t *testing.T) {
 	args := utils.RPCCDRsFilterWithAPIOpts{
 		RPCCDRsFilter: &utils.RPCCDRsFilter{RequestTypes: []string{utils.MetaPrepaid}},
 	}
-	if err := cdrS.V1GetCDRs(args, &cdrs); err != nil {
+	if err := cdrS.V1GetCDRs(context.Background(), args, &cdrs); err != nil {
 		t.Error(err)
 	}
 }
@@ -2390,7 +2354,7 @@ func TestV1RateCDRsSuccesful(t *testing.T) {
 		},
 		APIOpts: map[string]any{},
 	}
-	if err := cdrS.V1RateCDRs(arg, &reply); err != nil {
+	if err := cdrS.V1RateCDRs(context.Background(), arg, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Error("Expected reply to be ok")

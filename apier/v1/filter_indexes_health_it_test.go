@@ -21,20 +21,21 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package v1
 
 import (
-	"net/rpc"
 	"path"
 	"reflect"
 	"sort"
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc"
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
 var (
-	tFIdxHRpc           *rpc.Client
+	tFIdxHRpc           *birpc.Client
 	tSv1InternalRestart bool
 
 	sTestsFilterIndexesSHealth = []func(t *testing.T){
@@ -132,7 +133,7 @@ func testV1FIdxHRpcConn(t *testing.T) {
 
 func testV1FIdxHLoadFromFolderTutorial2(t *testing.T) {
 	var reply string
-	if err := tFIdxHRpc.Call(utils.CacheSv1Clear, &utils.AttrCacheIDsWithAPIOpts{
+	if err := tFIdxHRpc.Call(context.Background(), utils.CacheSv1Clear, &utils.AttrCacheIDsWithAPIOpts{
 		CacheIDs: nil,
 	}, &reply); err != nil {
 		t.Error(err)
@@ -140,7 +141,7 @@ func testV1FIdxHLoadFromFolderTutorial2(t *testing.T) {
 		t.Error("Reply: ", reply)
 	}
 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "tutorial2")}
-	if err := tFIdxHRpc.Call(utils.APIerSv1LoadTariffPlanFromFolder, attrs, &reply); err != nil {
+	if err := tFIdxHRpc.Call(context.Background(), utils.APIerSv1LoadTariffPlanFromFolder, attrs, &reply); err != nil {
 		t.Error(err)
 	}
 	time.Sleep(100 * time.Millisecond)
@@ -148,7 +149,7 @@ func testV1FIdxHLoadFromFolderTutorial2(t *testing.T) {
 
 func testV1FIdxHAccountActionPlansHealth(t *testing.T) {
 	var reply engine.AccountActionPlanIHReply
-	if err := tFIdxHRpc.Call(utils.APIerSv1GetAccountActionPlansIndexHealth, engine.IndexHealthArgsWith2Ch{
+	if err := tFIdxHRpc.Call(context.Background(), utils.APIerSv1GetAccountActionPlansIndexHealth, engine.IndexHealthArgsWith2Ch{
 		IndexCacheLimit:  -1,
 		ObjectCacheLimit: -1,
 	}, &reply); err != nil {
@@ -165,7 +166,7 @@ func testV1FIdxHAccountActionPlansHealth(t *testing.T) {
 
 func testV1FIdxHReverseDestinationHealth(t *testing.T) {
 	var reply engine.ReverseDestinationsIHReply
-	if err := tFIdxHRpc.Call(utils.APIerSv1GetReverseDestinationsIndexHealth, engine.IndexHealthArgsWith2Ch{
+	if err := tFIdxHRpc.Call(context.Background(), utils.APIerSv1GetReverseDestinationsIndexHealth, engine.IndexHealthArgsWith2Ch{
 		IndexCacheLimit:  -1,
 		ObjectCacheLimit: -1,
 	}, &reply); err != nil {
@@ -182,7 +183,7 @@ func testV1FIdxHReverseDestinationHealth(t *testing.T) {
 
 func testV1FIdxHLoadFromFolderTutorial(t *testing.T) {
 	var reply string
-	if err := tFIdxHRpc.Call(utils.CacheSv1Clear, &utils.AttrCacheIDsWithAPIOpts{
+	if err := tFIdxHRpc.Call(context.Background(), utils.CacheSv1Clear, &utils.AttrCacheIDsWithAPIOpts{
 		CacheIDs: nil,
 	}, &reply); err != nil {
 		t.Error(err)
@@ -190,7 +191,7 @@ func testV1FIdxHLoadFromFolderTutorial(t *testing.T) {
 		t.Error("Reply: ", reply)
 	}
 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "tutorial")}
-	if err := tFIdxHRpc.Call(utils.APIerSv1LoadTariffPlanFromFolder, attrs, &reply); err != nil {
+	if err := tFIdxHRpc.Call(context.Background(), utils.APIerSv1LoadTariffPlanFromFolder, attrs, &reply); err != nil {
 		t.Error(err)
 	}
 	time.Sleep(100 * time.Millisecond)
@@ -201,7 +202,7 @@ func testV1FIdxGetReverseFilterHealth(t *testing.T) {
 	args := &engine.IndexHealthArgsWith3Ch{}
 	expRPly := map[string]*engine.ReverseFilterIHReply{}
 	var rply map[string]*engine.ReverseFilterIHReply
-	if err := tFIdxHRpc.Call(utils.APIerSv1GetReverseFilterHealth,
+	if err := tFIdxHRpc.Call(context.Background(), utils.APIerSv1GetReverseFilterHealth,
 		args, &rply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rply, expRPly) {
@@ -227,7 +228,7 @@ func testV1FIdxGetThresholdsIndexesHealth(t *testing.T) {
 	}
 
 	var rplyok string
-	if err := tFIdxHRpc.Call(utils.APIerSv1SetThresholdProfile, tPrfl, &rplyok); err != nil {
+	if err := tFIdxHRpc.Call(context.Background(), utils.APIerSv1SetThresholdProfile, tPrfl, &rplyok); err != nil {
 		t.Error(err)
 	} else if rplyok != utils.OK {
 		t.Error("Unexpected reply returned", rplyok)
@@ -242,7 +243,7 @@ func testV1FIdxGetThresholdsIndexesHealth(t *testing.T) {
 		"*prefix:*opts.Destination:+554:TEST_PROFILE1",
 	}
 	var result []string
-	if err := tFIdxHRpc.Call(utils.APIerSv1GetFilterIndexes, &AttrGetFilterIndexes{
+	if err := tFIdxHRpc.Call(context.Background(), utils.APIerSv1GetFilterIndexes, &AttrGetFilterIndexes{
 		ItemType: utils.MetaThresholds,
 		//Tenant: "cgrates.org",
 	}, &result); err != nil {
@@ -264,7 +265,7 @@ func testV1FIdxGetThresholdsIndexesHealth(t *testing.T) {
 		MissingFilters: map[string][]string{},
 	}
 	var rply *engine.FilterIHReply
-	if err := tFIdxHRpc.Call(utils.APIerSv1GetThresholdsIndexesHealth,
+	if err := tFIdxHRpc.Call(context.Background(), utils.APIerSv1GetThresholdsIndexesHealth,
 		args, &rply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rply, expRPly) {
@@ -272,7 +273,7 @@ func testV1FIdxGetThresholdsIndexesHealth(t *testing.T) {
 	}
 
 	// removing a profile + their indexes
-	if err := tFIdxHRpc.Call(utils.APIerSv1RemoveThresholdProfile,
+	if err := tFIdxHRpc.Call(context.Background(), utils.APIerSv1RemoveThresholdProfile,
 		&utils.TenantIDWithAPIOpts{
 			TenantID: &utils.TenantID{
 				Tenant: "cgrates.org",
@@ -291,7 +292,7 @@ func testV1FIdxGetThresholdsIndexesHealth(t *testing.T) {
 		"*prefix:*opts.Destination:+442:TEST_PROFILE1",
 		"*prefix:*opts.Destination:+554:TEST_PROFILE1",
 	}
-	if err := tFIdxHRpc.Call(utils.APIerSv1GetFilterIndexes, &AttrGetFilterIndexes{
+	if err := tFIdxHRpc.Call(context.Background(), utils.APIerSv1GetFilterIndexes, &AttrGetFilterIndexes{
 		ItemType: utils.MetaThresholds,
 	}, &result); err != nil {
 		t.Error(err)
@@ -309,7 +310,7 @@ func testV1FIdxGetThresholdsIndexesHealth(t *testing.T) {
 		BrokenIndexes:  map[string][]string{},
 		MissingFilters: map[string][]string{},
 	}
-	if err := tFIdxHRpc.Call(utils.APIerSv1GetThresholdsIndexesHealth,
+	if err := tFIdxHRpc.Call(context.Background(), utils.APIerSv1GetThresholdsIndexesHealth,
 		args, &rply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rply, expRPly) {
@@ -337,7 +338,7 @@ func testV1FIdxGetResourcesIndexesHealth(t *testing.T) {
 			ThresholdIDs:      []string{utils.MetaNone},
 		},
 	}
-	if err := tFIdxHRpc.Call(utils.APIerSv1SetResourceProfile, rlsPrf, &reply); err != nil {
+	if err := tFIdxHRpc.Call(context.Background(), utils.APIerSv1SetResourceProfile, rlsPrf, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply returned", reply)
@@ -353,7 +354,7 @@ func testV1FIdxGetResourcesIndexesHealth(t *testing.T) {
 		"*string:*req.Account:1003:ResGroup1",
 	}
 	var result []string
-	if err := tFIdxHRpc.Call(utils.APIerSv1GetFilterIndexes, &AttrGetFilterIndexes{
+	if err := tFIdxHRpc.Call(context.Background(), utils.APIerSv1GetFilterIndexes, &AttrGetFilterIndexes{
 		ItemType: utils.MetaResources,
 	}, &result); err != nil {
 		t.Error(err)
@@ -374,7 +375,7 @@ func testV1FIdxGetResourcesIndexesHealth(t *testing.T) {
 	}
 	args := &engine.IndexHealthArgsWith3Ch{}
 	var rply *engine.FilterIHReply
-	if err := tFIdxHRpc.Call(utils.APIerSv1GetResourcesIndexesHealth,
+	if err := tFIdxHRpc.Call(context.Background(), utils.APIerSv1GetResourcesIndexesHealth,
 		args, &rply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rply, expRPly) {
@@ -382,7 +383,7 @@ func testV1FIdxGetResourcesIndexesHealth(t *testing.T) {
 	}
 
 	// removing a profile + their indexes
-	if err := tFIdxHRpc.Call(utils.APIerSv1RemoveResourceProfile,
+	if err := tFIdxHRpc.Call(context.Background(), utils.APIerSv1RemoveResourceProfile,
 		&utils.TenantIDWithAPIOpts{
 			TenantID: &utils.TenantID{
 				Tenant: "cgrates.org",
@@ -395,7 +396,7 @@ func testV1FIdxGetResourcesIndexesHealth(t *testing.T) {
 	}
 
 	//as we removed the object, the index specified is removed too, so the health of the indexes is fine
-	if err := tFIdxHRpc.Call(utils.APIerSv1GetResourcesIndexesHealth,
+	if err := tFIdxHRpc.Call(context.Background(), utils.APIerSv1GetResourcesIndexesHealth,
 		args, &rply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rply, expRPly) {
@@ -426,7 +427,7 @@ func testV1FIdxGetStatsIndexesHealth(t *testing.T) {
 		},
 	}
 	var rply string
-	if err := tFIdxHRpc.Call(utils.APIerSv1SetStatQueueProfile, statConfig, &rply); err != nil {
+	if err := tFIdxHRpc.Call(context.Background(), utils.APIerSv1SetStatQueueProfile, statConfig, &rply); err != nil {
 		t.Error(err)
 	} else if rply != utils.OK {
 		t.Error("Unexpected reply returned", rply)
@@ -448,7 +449,7 @@ func testV1FIdxGetStatsIndexesHealth(t *testing.T) {
 		"*string:*req.Destination:1001:Stats2_1",
 	}
 	var result []string
-	if err := tFIdxHRpc.Call(utils.APIerSv1GetFilterIndexes, &AttrGetFilterIndexes{
+	if err := tFIdxHRpc.Call(context.Background(), utils.APIerSv1GetFilterIndexes, &AttrGetFilterIndexes{
 		ItemType: utils.MetaStats,
 	}, &result); err != nil {
 		t.Error(err)
@@ -469,7 +470,7 @@ func testV1FIdxGetStatsIndexesHealth(t *testing.T) {
 	}
 	args := &engine.IndexHealthArgsWith3Ch{}
 	var rplyFl *engine.FilterIHReply
-	if err := tFIdxHRpc.Call(utils.APIerSv1GetStatsIndexesHealth,
+	if err := tFIdxHRpc.Call(context.Background(), utils.APIerSv1GetStatsIndexesHealth,
 		args, &rplyFl); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rplyFl, expRPly) {
@@ -477,7 +478,7 @@ func testV1FIdxGetStatsIndexesHealth(t *testing.T) {
 	}
 
 	// removing a profile + their indexes
-	if err := tFIdxHRpc.Call(utils.APIerSv1RemoveStatQueueProfile,
+	if err := tFIdxHRpc.Call(context.Background(), utils.APIerSv1RemoveStatQueueProfile,
 		&utils.TenantIDWithAPIOpts{
 			TenantID: &utils.TenantID{
 				Tenant: "cgrates.org",
@@ -490,7 +491,7 @@ func testV1FIdxGetStatsIndexesHealth(t *testing.T) {
 	}
 
 	//as we removed the object, the index specified is removed too, so the health of the indexes is fine
-	if err := tFIdxHRpc.Call(utils.APIerSv1GetStatsIndexesHealth,
+	if err := tFIdxHRpc.Call(context.Background(), utils.APIerSv1GetStatsIndexesHealth,
 		args, &rplyFl); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rplyFl, expRPly) {
@@ -518,7 +519,7 @@ func testV1FIdxGetRoutesIndexesHealth(t *testing.T) {
 		},
 	}
 	var reply string
-	if err := tFIdxHRpc.Call(utils.APIerSv1SetRouteProfile, rPrf, &reply); err != nil {
+	if err := tFIdxHRpc.Call(context.Background(), utils.APIerSv1SetRouteProfile, rPrf, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply returned", reply)
@@ -532,7 +533,7 @@ func testV1FIdxGetRoutesIndexesHealth(t *testing.T) {
 		"*string:*req.Account:1003:ROUTE_ACNT_1003",
 	}
 	var result []string
-	if err := tFIdxHRpc.Call(utils.APIerSv1GetFilterIndexes, &AttrGetFilterIndexes{
+	if err := tFIdxHRpc.Call(context.Background(), utils.APIerSv1GetFilterIndexes, &AttrGetFilterIndexes{
 		ItemType: utils.MetaRoutes,
 	}, &result); err != nil {
 		t.Error(err)
@@ -553,7 +554,7 @@ func testV1FIdxGetRoutesIndexesHealth(t *testing.T) {
 	}
 	args := &engine.IndexHealthArgsWith3Ch{}
 	var rplyFl *engine.FilterIHReply
-	if err := tFIdxHRpc.Call(utils.APIerSv1GetRoutesIndexesHealth,
+	if err := tFIdxHRpc.Call(context.Background(), utils.APIerSv1GetRoutesIndexesHealth,
 		args, &rplyFl); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rplyFl, expRPly) {
@@ -561,7 +562,7 @@ func testV1FIdxGetRoutesIndexesHealth(t *testing.T) {
 	}
 
 	// removing a profile + their indexes
-	if err := tFIdxHRpc.Call(utils.APIerSv1RemoveRouteProfile,
+	if err := tFIdxHRpc.Call(context.Background(), utils.APIerSv1RemoveRouteProfile,
 		&utils.TenantIDWithAPIOpts{
 			TenantID: &utils.TenantID{
 				Tenant: "cgrates.org",
@@ -574,7 +575,7 @@ func testV1FIdxGetRoutesIndexesHealth(t *testing.T) {
 	}
 
 	//as we removed the object, the index specified is removed too, so the health of the indexes is fine
-	if err := tFIdxHRpc.Call(utils.APIerSv1GetRoutesIndexesHealth,
+	if err := tFIdxHRpc.Call(context.Background(), utils.APIerSv1GetRoutesIndexesHealth,
 		args, &rplyFl); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rplyFl, expRPly) {
@@ -596,7 +597,7 @@ func testV1FIdxGetChargersIndexesHealth(t *testing.T) {
 		},
 	}
 	var reply string
-	if err := tFIdxHRpc.Call(utils.APIerSv1SetChargerProfile, chargerProfile, &reply); err != nil {
+	if err := tFIdxHRpc.Call(context.Background(), utils.APIerSv1SetChargerProfile, chargerProfile, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply returned", reply)
@@ -611,7 +612,7 @@ func testV1FIdxGetChargersIndexesHealth(t *testing.T) {
 		"*none:*any:*any:Raw",
 	}
 	var result []string
-	if err := tFIdxHRpc.Call(utils.APIerSv1GetFilterIndexes, &AttrGetFilterIndexes{
+	if err := tFIdxHRpc.Call(context.Background(), utils.APIerSv1GetFilterIndexes, &AttrGetFilterIndexes{
 		ItemType: utils.MetaChargers,
 	}, &result); err != nil {
 		t.Error(err)
@@ -632,7 +633,7 @@ func testV1FIdxGetChargersIndexesHealth(t *testing.T) {
 	}
 	args := &engine.IndexHealthArgsWith3Ch{}
 	var rplyFl *engine.FilterIHReply
-	if err := tFIdxHRpc.Call(utils.APIerSv1GetChargersIndexesHealth,
+	if err := tFIdxHRpc.Call(context.Background(), utils.APIerSv1GetChargersIndexesHealth,
 		args, &rplyFl); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rplyFl, expRPly) {
@@ -640,7 +641,7 @@ func testV1FIdxGetChargersIndexesHealth(t *testing.T) {
 	}
 
 	// removing a profile + their indexes
-	if err := tFIdxHRpc.Call(utils.APIerSv1RemoveChargerProfile,
+	if err := tFIdxHRpc.Call(context.Background(), utils.APIerSv1RemoveChargerProfile,
 		&utils.TenantIDWithAPIOpts{
 			TenantID: &utils.TenantID{
 				Tenant: "cgrates.org",
@@ -653,7 +654,7 @@ func testV1FIdxGetChargersIndexesHealth(t *testing.T) {
 	}
 
 	//as we removed the object, the index specified is removed too, so the health of the indexes is fine
-	if err := tFIdxHRpc.Call(utils.APIerSv1GetRoutesIndexesHealth,
+	if err := tFIdxHRpc.Call(context.Background(), utils.APIerSv1GetRoutesIndexesHealth,
 		args, &rplyFl); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rplyFl, expRPly) {
@@ -671,7 +672,7 @@ func testV1FIdxGetAttributesIndexesHealth(t *testing.T) {
 		"*string:*req.Account:1003:ATTR_1003_SIMPLEAUTH",
 	}
 	var result []string
-	if err := tFIdxHRpc.Call(utils.APIerSv1GetFilterIndexes, &AttrGetFilterIndexes{
+	if err := tFIdxHRpc.Call(context.Background(), utils.APIerSv1GetFilterIndexes, &AttrGetFilterIndexes{
 		ItemType: utils.MetaAttributes,
 		Context:  "simpleauth",
 	}, &result); err != nil {
@@ -690,7 +691,7 @@ func testV1FIdxGetAttributesIndexesHealth(t *testing.T) {
 		"*string:*req.Account:1002:ATTR_1002_SESSIONAUTH",
 		"*string:*req.Account:1003:ATTR_1003_SESSIONAUTH",
 	}
-	if err := tFIdxHRpc.Call(utils.APIerSv1GetFilterIndexes, &AttrGetFilterIndexes{
+	if err := tFIdxHRpc.Call(context.Background(), utils.APIerSv1GetFilterIndexes, &AttrGetFilterIndexes{
 		ItemType: utils.MetaAttributes,
 		Context:  utils.MetaSessionS,
 	}, &result); err != nil {
@@ -707,7 +708,7 @@ func testV1FIdxGetAttributesIndexesHealth(t *testing.T) {
 	expIdx = []string{
 		"*string:*req.SubscriberId:1006:ATTR_ACC_ALIAS",
 	}
-	if err := tFIdxHRpc.Call(utils.APIerSv1GetFilterIndexes, &AttrGetFilterIndexes{
+	if err := tFIdxHRpc.Call(context.Background(), utils.APIerSv1GetFilterIndexes, &AttrGetFilterIndexes{
 		ItemType: utils.MetaAttributes,
 		Context:  utils.MetaAny,
 	}, &result); err != nil {
@@ -727,7 +728,7 @@ func testV1FIdxGetAttributesIndexesHealth(t *testing.T) {
 		"*string:*req.Account:testDiamInitWithSessionDisconnect:ATTR_TNT_DISC",
 		"*string:*req.SubscriberId:testDiamItEmulateTerminate:ATTR_ACC_EMULATE_TERMINATE",
 	}
-	if err := tFIdxHRpc.Call(utils.APIerSv1GetFilterIndexes, &AttrGetFilterIndexes{
+	if err := tFIdxHRpc.Call(context.Background(), utils.APIerSv1GetFilterIndexes, &AttrGetFilterIndexes{
 		Tenant:   "cgrates.com",
 		ItemType: utils.MetaAttributes,
 		Context:  utils.MetaAny,
@@ -750,7 +751,7 @@ func testV1FIdxGetAttributesIndexesHealth(t *testing.T) {
 	}
 	args := &engine.IndexHealthArgsWith3Ch{}
 	var rplyFl *engine.FilterIHReply
-	if err := tFIdxHRpc.Call(utils.APIerSv1GetAttributesIndexesHealth,
+	if err := tFIdxHRpc.Call(context.Background(), utils.APIerSv1GetAttributesIndexesHealth,
 		args, &rplyFl); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rplyFl, expRPly) {
@@ -761,7 +762,7 @@ func testV1FIdxGetAttributesIndexesHealth(t *testing.T) {
 func testV1FIdxHLoadFromFolderDispatchers(t *testing.T) {
 	var reply string
 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "dispatchers")}
-	if err := tFIdxHRpc.Call(utils.APIerSv1LoadTariffPlanFromFolder, attrs, &reply); err != nil {
+	if err := tFIdxHRpc.Call(context.Background(), utils.APIerSv1LoadTariffPlanFromFolder, attrs, &reply); err != nil {
 		t.Error(err)
 	}
 	time.Sleep(100 * time.Millisecond)
@@ -781,7 +782,7 @@ func testV1FIdxHGetDispatchersIndexesHealth(t *testing.T) {
 		"*string:*opts.EventType:LoadDispatcher:EVENT7",
 	}
 	var result []string
-	if err := tFIdxHRpc.Call(utils.APIerSv1GetFilterIndexes, &AttrGetFilterIndexes{
+	if err := tFIdxHRpc.Call(context.Background(), utils.APIerSv1GetFilterIndexes, &AttrGetFilterIndexes{
 		ItemType: utils.MetaDispatchers,
 		Context:  utils.MetaAny,
 	}, &result); err != nil {
@@ -803,7 +804,7 @@ func testV1FIdxHGetDispatchersIndexesHealth(t *testing.T) {
 	}
 	args := &engine.IndexHealthArgsWith3Ch{}
 	var rplyFl *engine.FilterIHReply
-	if err := tFIdxHRpc.Call(utils.APIerSv1GetDispatchersIndexesHealth,
+	if err := tFIdxHRpc.Call(context.Background(), utils.APIerSv1GetDispatchersIndexesHealth,
 		args, &rplyFl); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rplyFl, expRPly) {
@@ -812,7 +813,7 @@ func testV1FIdxHGetDispatchersIndexesHealth(t *testing.T) {
 
 	var reply string
 	// removing a profile + their indexes
-	if err := tFIdxHRpc.Call(utils.APIerSv1RemoveDispatcherProfile,
+	if err := tFIdxHRpc.Call(context.Background(), utils.APIerSv1RemoveDispatcherProfile,
 		&utils.TenantIDWithAPIOpts{
 			TenantID: &utils.TenantID{
 				Tenant: "cgrates.org",
@@ -826,7 +827,7 @@ func testV1FIdxHGetDispatchersIndexesHealth(t *testing.T) {
 
 	//as we removed the object, the index specified is removed too, so the health of the indexes is fine
 	args = &engine.IndexHealthArgsWith3Ch{}
-	if err := tFIdxHRpc.Call(utils.APIerSv1GetDispatchersIndexesHealth,
+	if err := tFIdxHRpc.Call(context.Background(), utils.APIerSv1GetDispatchersIndexesHealth,
 		args, &rplyFl); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rplyFl, expRPly) {

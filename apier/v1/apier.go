@@ -28,6 +28,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/ees"
 	"github.com/cgrates/cgrates/engine"
@@ -55,13 +56,13 @@ type APIerSv1 struct {
 	ResponderChan chan *engine.Responder
 }
 
-// Call implements rpcclient.ClientConnector interface for internal RPC
-func (apierSv1 *APIerSv1) Call(serviceMethod string,
+// Call implements birpc.ClientConnector interface for internal RPC
+func (apierSv1 *APIerSv1) Call(ctx *context.Context, serviceMethod string,
 	args any, reply any) error {
 	return utils.APIerRPCCall(apierSv1, serviceMethod, args, reply)
 }
 
-func (apierSv1 *APIerSv1) GetDestination(dstId *string, reply *engine.Destination) error {
+func (apierSv1 *APIerSv1) GetDestination(ctx *context.Context, dstId *string, reply *engine.Destination) error {
 	if dst, err := apierSv1.DataManager.GetDestination(*dstId, true, true, utils.NonTransactional); err != nil {
 		return utils.ErrNotFound
 	} else {
@@ -75,7 +76,7 @@ type AttrRemoveDestination struct {
 	Prefixes       []string
 }
 
-func (apierSv1 *APIerSv1) RemoveDestination(attr *AttrRemoveDestination, reply *string) (err error) {
+func (apierSv1 *APIerSv1) RemoveDestination(ctx *context.Context, attr *AttrRemoveDestination, reply *string) (err error) {
 	for _, dstID := range attr.DestinationIDs {
 		var oldDst *engine.Destination
 		if oldDst, err = apierSv1.DataManager.GetDestination(dstID, true, true,
@@ -100,7 +101,7 @@ func (apierSv1 *APIerSv1) RemoveDestination(attr *AttrRemoveDestination, reply *
 				if err = apierSv1.DataManager.UpdateReverseDestination(oldDst, newDst, utils.NonTransactional); err != nil {
 					return
 				}
-				if err = apierSv1.ConnMgr.Call(apierSv1.Config.ApierCfg().CachesConns, nil,
+				if err = apierSv1.ConnMgr.Call(context.TODO(), apierSv1.Config.ApierCfg().CachesConns,
 					utils.CacheSv1ReloadCache, &utils.AttrReloadCacheWithAPIOpts{
 						ReverseDestinationIDs: oldDst.Prefixes,
 						DestinationIDs:        []string{dstID},
@@ -113,7 +114,7 @@ func (apierSv1 *APIerSv1) RemoveDestination(attr *AttrRemoveDestination, reply *
 		if err = apierSv1.DataManager.RemoveDestination(dstID, utils.NonTransactional); err != nil {
 			return
 		}
-		if err = apierSv1.ConnMgr.Call(apierSv1.Config.ApierCfg().CachesConns, nil,
+		if err = apierSv1.ConnMgr.Call(context.TODO(), apierSv1.Config.ApierCfg().CachesConns,
 			utils.CacheSv1ReloadCache, &utils.AttrReloadCacheWithAPIOpts{
 				ReverseDestinationIDs: oldDst.Prefixes,
 				DestinationIDs:        []string{dstID},
@@ -126,7 +127,7 @@ func (apierSv1 *APIerSv1) RemoveDestination(attr *AttrRemoveDestination, reply *
 }
 
 // GetReverseDestination retrieves revese destination list for a prefix
-func (apierSv1 *APIerSv1) GetReverseDestination(prefix *string, reply *[]string) (err error) {
+func (apierSv1 *APIerSv1) GetReverseDestination(ctx *context.Context, prefix *string, reply *[]string) (err error) {
 	if *prefix == utils.EmptyString {
 		return utils.NewErrMandatoryIeMissing("prefix")
 	}
@@ -139,7 +140,7 @@ func (apierSv1 *APIerSv1) GetReverseDestination(prefix *string, reply *[]string)
 }
 
 // ComputeReverseDestinations will rebuild complete reverse destinations data
-func (apierSv1 *APIerSv1) ComputeReverseDestinations(ignr *string, reply *string) (err error) {
+func (apierSv1 *APIerSv1) ComputeReverseDestinations(ctx *context.Context, ignr *string, reply *string) (err error) {
 	if err = apierSv1.DataManager.RebuildReverseForPrefix(utils.ReverseDestinationPrefix); err != nil {
 		return
 	}
@@ -148,11 +149,11 @@ func (apierSv1 *APIerSv1) ComputeReverseDestinations(ignr *string, reply *string
 }
 
 // ComputeAccountActionPlans will rebuild complete reverse accountActions data
-func (apierSv1 *APIerSv1) ComputeAccountActionPlans(tnt *utils.TenantWithAPIOpts, reply *string) (err error) {
+func (apierSv1 *APIerSv1) ComputeAccountActionPlans(ctx *context.Context, tnt *utils.TenantWithAPIOpts, reply *string) (err error) {
 	if err = apierSv1.DataManager.RebuildReverseForPrefix(utils.AccountActionPlansPrefix); err != nil {
 		return
 	}
-	return apierSv1.ConnMgr.Call(apierSv1.Config.ApierCfg().CachesConns, nil,
+	return apierSv1.ConnMgr.Call(context.TODO(), apierSv1.Config.ApierCfg().CachesConns,
 		utils.CacheSv1Clear, &utils.AttrCacheIDsWithAPIOpts{
 			Tenant:   tnt.Tenant,
 			CacheIDs: []string{utils.CacheAccountActionPlans},
@@ -160,7 +161,7 @@ func (apierSv1 *APIerSv1) ComputeAccountActionPlans(tnt *utils.TenantWithAPIOpts
 		}, reply)
 }
 
-func (apierSv1 *APIerSv1) GetSharedGroup(sgId *string, reply *engine.SharedGroup) error {
+func (apierSv1 *APIerSv1) GetSharedGroup(ctx *context.Context, sgId *string, reply *engine.SharedGroup) error {
 	if sg, err := apierSv1.DataManager.GetSharedGroup(*sgId, false, utils.NonTransactional); err != nil && err != utils.ErrNotFound { // Not found is not an error here
 		return err
 	} else {
@@ -171,7 +172,7 @@ func (apierSv1 *APIerSv1) GetSharedGroup(sgId *string, reply *engine.SharedGroup
 	return nil
 }
 
-func (apierSv1 *APIerSv1) SetDestination(attrs *utils.AttrSetDestination, reply *string) (err error) {
+func (apierSv1 *APIerSv1) SetDestination(ctx *context.Context, attrs *utils.AttrSetDestination, reply *string) (err error) {
 	if missing := utils.MissingStructFields(attrs, []string{"Id", "Prefixes"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -190,7 +191,7 @@ func (apierSv1 *APIerSv1) SetDestination(attrs *utils.AttrSetDestination, reply 
 	if err = apierSv1.DataManager.UpdateReverseDestination(oldDest, dest, utils.NonTransactional); err != nil {
 		return
 	}
-	if err := apierSv1.ConnMgr.Call(apierSv1.Config.ApierCfg().CachesConns, nil,
+	if err := apierSv1.ConnMgr.Call(context.TODO(), apierSv1.Config.ApierCfg().CachesConns,
 		utils.CacheSv1ReloadCache, &utils.AttrReloadCacheWithAPIOpts{
 			ReverseDestinationIDs: dest.Prefixes,
 			DestinationIDs:        []string{attrs.Id},
@@ -201,7 +202,7 @@ func (apierSv1 *APIerSv1) SetDestination(attrs *utils.AttrSetDestination, reply 
 	return nil
 }
 
-func (apierSv1 *APIerSv1) GetRatingPlan(rplnId *string, reply *engine.RatingPlan) error {
+func (apierSv1 *APIerSv1) GetRatingPlan(ctx *context.Context, rplnId *string, reply *engine.RatingPlan) error {
 	rpln, err := apierSv1.DataManager.GetRatingPlan(*rplnId, false, utils.NonTransactional)
 	if err != nil {
 		if err.Error() == utils.ErrNotFound.Error() {
@@ -213,7 +214,7 @@ func (apierSv1 *APIerSv1) GetRatingPlan(rplnId *string, reply *engine.RatingPlan
 	return nil
 }
 
-func (apierSv1 *APIerSv1) RemoveRatingPlan(ID *string, reply *string) error {
+func (apierSv1 *APIerSv1) RemoveRatingPlan(ctx *context.Context, ID *string, reply *string) error {
 	if len(*ID) == 0 {
 		return utils.NewErrMandatoryIeMissing("ID")
 	}
@@ -221,7 +222,7 @@ func (apierSv1 *APIerSv1) RemoveRatingPlan(ID *string, reply *string) error {
 	if err != nil {
 		return utils.NewErrServerError(err)
 	}
-	if err := apierSv1.ConnMgr.Call(apierSv1.Config.ApierCfg().CachesConns, nil,
+	if err := apierSv1.ConnMgr.Call(context.TODO(), apierSv1.Config.ApierCfg().CachesConns,
 		utils.CacheSv1ReloadCache, &utils.AttrReloadCacheWithAPIOpts{
 			RatingPlanIDs: []string{*ID},
 		}, reply); err != nil {
@@ -235,7 +236,7 @@ func (apierSv1 *APIerSv1) RemoveRatingPlan(ID *string, reply *string) error {
 	return nil
 }
 
-func (apierSv1 *APIerSv1) ExecuteAction(attr *utils.AttrExecuteAction, reply *string) error {
+func (apierSv1 *APIerSv1) ExecuteAction(ctx *context.Context, attr *utils.AttrExecuteAction, reply *string) error {
 	at := &engine.ActionTiming{
 		ActionsID: attr.ActionsId,
 	}
@@ -260,7 +261,7 @@ type AttrLoadDestination struct {
 }
 
 // Load destinations from storDb into dataDb.
-func (apierSv1 *APIerSv1) LoadDestination(attrs *AttrLoadDestination, reply *string) error {
+func (apierSv1 *APIerSv1) LoadDestination(ctx *context.Context, attrs *AttrLoadDestination, reply *string) error {
 	if len(attrs.TPid) == 0 {
 		return utils.NewErrMandatoryIeMissing("TPid")
 	}
@@ -276,7 +277,7 @@ func (apierSv1 *APIerSv1) LoadDestination(attrs *AttrLoadDestination, reply *str
 	} else if !loaded {
 		return utils.ErrNotFound
 	}
-	if err := apierSv1.ConnMgr.Call(apierSv1.Config.ApierCfg().CachesConns, nil,
+	if err := apierSv1.ConnMgr.Call(context.TODO(), apierSv1.Config.ApierCfg().CachesConns,
 		utils.CacheSv1ReloadCache, &utils.AttrReloadCacheWithAPIOpts{
 			DestinationIDs: []string{attrs.ID},
 		}, reply); err != nil {
@@ -292,7 +293,7 @@ type AttrLoadRatingPlan struct {
 }
 
 // Process dependencies and load a specific rating plan from storDb into dataDb.
-func (apierSv1 *APIerSv1) LoadRatingPlan(attrs *AttrLoadRatingPlan, reply *string) error {
+func (apierSv1 *APIerSv1) LoadRatingPlan(ctx *context.Context, attrs *AttrLoadRatingPlan, reply *string) error {
 	if len(attrs.TPid) == 0 {
 		return utils.NewErrMandatoryIeMissing("TPid")
 	}
@@ -313,7 +314,7 @@ func (apierSv1 *APIerSv1) LoadRatingPlan(attrs *AttrLoadRatingPlan, reply *strin
 }
 
 // Process dependencies and load a specific rating profile from storDb into dataDb.
-func (apierSv1 *APIerSv1) LoadRatingProfile(attrs *utils.TPRatingProfile, reply *string) error {
+func (apierSv1 *APIerSv1) LoadRatingProfile(ctx *context.Context, attrs *utils.TPRatingProfile, reply *string) error {
 	if len(attrs.TPid) == 0 {
 		return utils.NewErrMandatoryIeMissing("TPid")
 	}
@@ -346,7 +347,7 @@ type AttrLoadSharedGroup struct {
 }
 
 // Load destinations from storDb into dataDb.
-func (apierSv1 *APIerSv1) LoadSharedGroup(attrs *AttrLoadSharedGroup, reply *string) error {
+func (apierSv1 *APIerSv1) LoadSharedGroup(ctx *context.Context, attrs *AttrLoadSharedGroup, reply *string) error {
 	if len(attrs.TPid) == 0 {
 		return utils.NewErrMandatoryIeMissing("TPid")
 	}
@@ -373,7 +374,7 @@ type AttrLoadTpFromStorDb struct {
 }
 
 // Loads complete data in a TP from storDb
-func (apierSv1 *APIerSv1) LoadTariffPlanFromStorDb(attrs *AttrLoadTpFromStorDb, reply *string) error {
+func (apierSv1 *APIerSv1) LoadTariffPlanFromStorDb(ctx *context.Context, attrs *AttrLoadTpFromStorDb, reply *string) error {
 	if len(attrs.TPid) == 0 {
 		return utils.NewErrMandatoryIeMissing("TPid")
 	}
@@ -422,7 +423,7 @@ func (apierSv1 *APIerSv1) LoadTariffPlanFromStorDb(attrs *AttrLoadTpFromStorDb, 
 	return nil
 }
 
-func (apierSv1 *APIerSv1) ImportTariffPlanFromFolder(attrs *utils.AttrImportTPFromFolder, reply *string) error {
+func (apierSv1 *APIerSv1) ImportTariffPlanFromFolder(ctx *context.Context, attrs *utils.AttrImportTPFromFolder, reply *string) error {
 	if missing := utils.MissingStructFields(attrs, []string{"TPid", "FolderPath"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -453,7 +454,7 @@ func (apierSv1 *APIerSv1) ImportTariffPlanFromFolder(attrs *utils.AttrImportTPFr
 }
 
 // SetRatingProfile sets a specific rating profile working with data directly in the DataDB without involving storDb
-func (apierSv1 *APIerSv1) SetRatingProfile(attrs *utils.AttrSetRatingProfile, reply *string) (err error) {
+func (apierSv1 *APIerSv1) SetRatingProfile(ctx *context.Context, attrs *utils.AttrSetRatingProfile, reply *string) (err error) {
 	if missing := utils.MissingStructFields(attrs, []string{"Subject", "RatingPlanActivations"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -512,7 +513,7 @@ func (apierSv1 *APIerSv1) SetRatingProfile(attrs *utils.AttrSetRatingProfile, re
 }
 
 // GetRatingProfileIDs returns list of resourceProfile IDs registered for a tenant
-func (apierSv1 *APIerSv1) GetRatingProfileIDs(args *utils.PaginatorWithTenant, rsPrfIDs *[]string) error {
+func (apierSv1 *APIerSv1) GetRatingProfileIDs(ctx *context.Context, args *utils.PaginatorWithTenant, rsPrfIDs *[]string) error {
 	tnt := args.Tenant
 	if tnt == utils.EmptyString {
 		tnt = apierSv1.Config.GeneralCfg().DefaultTenant
@@ -533,7 +534,7 @@ func (apierSv1 *APIerSv1) GetRatingProfileIDs(args *utils.PaginatorWithTenant, r
 	return nil
 }
 
-func (apierSv1 *APIerSv1) GetRatingProfile(attrs *utils.AttrGetRatingProfile, reply *engine.RatingProfile) (err error) {
+func (apierSv1 *APIerSv1) GetRatingProfile(ctx *context.Context, attrs *utils.AttrGetRatingProfile, reply *engine.RatingProfile) (err error) {
 	if missing := utils.MissingStructFields(attrs, []string{utils.Category, utils.Subject}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -581,7 +582,7 @@ type V1TPAction struct {
 	Weight          float64 // Action's weight
 }
 
-func (apierSv1 *APIerSv1) SetActions(attrs *V1AttrSetActions, reply *string) (err error) {
+func (apierSv1 *APIerSv1) SetActions(ctx *context.Context, attrs *V1AttrSetActions, reply *string) (err error) {
 	if missing := utils.MissingStructFields(attrs, []string{"ActionsId", "Actions"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -648,7 +649,7 @@ func (apierSv1 *APIerSv1) SetActions(attrs *V1AttrSetActions, reply *string) (er
 		return utils.NewErrServerError(err)
 	}
 	//CacheReload
-	if err := apierSv1.ConnMgr.Call(apierSv1.Config.ApierCfg().CachesConns, nil,
+	if err := apierSv1.ConnMgr.Call(context.TODO(), apierSv1.Config.ApierCfg().CachesConns,
 		utils.CacheSv1ReloadCache, &utils.AttrReloadCacheWithAPIOpts{
 			ActionIDs: []string{attrs.ActionsId},
 		}, reply); err != nil {
@@ -663,7 +664,7 @@ func (apierSv1 *APIerSv1) SetActions(attrs *V1AttrSetActions, reply *string) (er
 }
 
 // Retrieves actions attached to specific ActionsId within cache
-func (apierSv1 *APIerSv1) GetActions(actsId *string, reply *[]*utils.TPAction) error {
+func (apierSv1 *APIerSv1) GetActions(ctx *context.Context, actsId *string, reply *[]*utils.TPAction) error {
 	if len(*actsId) == 0 {
 		return fmt.Errorf("%s ActionsId: %s", utils.ErrMandatoryIeMissing.Error(), *actsId)
 	}
@@ -753,7 +754,7 @@ func (attr *AttrActionPlan) getRITiming(dm *engine.DataManager) (timing *engine.
 	return
 }
 
-func (apierSv1 *APIerSv1) SetActionPlan(attrs *AttrSetActionPlan, reply *string) (err error) {
+func (apierSv1 *APIerSv1) SetActionPlan(ctx *context.Context, attrs *AttrSetActionPlan, reply *string) (err error) {
 	if missing := utils.MissingStructFields(attrs, []string{"Id", "ActionPlan"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -795,7 +796,7 @@ func (apierSv1 *APIerSv1) SetActionPlan(attrs *AttrSetActionPlan, reply *string)
 		if err := apierSv1.DataManager.SetActionPlan(ap.Id, ap, true, utils.NonTransactional); err != nil {
 			return utils.NewErrServerError(err)
 		}
-		if err := apierSv1.ConnMgr.Call(apierSv1.Config.ApierCfg().CachesConns, nil,
+		if err := apierSv1.ConnMgr.Call(context.TODO(), apierSv1.Config.ApierCfg().CachesConns,
 			utils.CacheSv1ReloadCache, &utils.AttrReloadCacheWithAPIOpts{
 				ActionPlanIDs: []string{ap.Id},
 			}, reply); err != nil {
@@ -807,7 +808,7 @@ func (apierSv1 *APIerSv1) SetActionPlan(attrs *AttrSetActionPlan, reply *string)
 			}
 		}
 		if len(prevAccountIDs) != 0 {
-			if err := apierSv1.ConnMgr.Call(apierSv1.Config.ApierCfg().CachesConns, nil,
+			if err := apierSv1.ConnMgr.Call(context.TODO(), apierSv1.Config.ApierCfg().CachesConns,
 				utils.CacheSv1ReloadCache, &utils.AttrReloadCacheWithAPIOpts{
 					AccountActionPlanIDs: prevAccountIDs.Slice(),
 				}, reply); err != nil {
@@ -950,7 +951,7 @@ type AttrGetActionPlan struct {
 	ID string
 }
 
-func (apierSv1 *APIerSv1) GetActionPlan(attr *AttrGetActionPlan, reply *[]*engine.ActionPlan) error {
+func (apierSv1 *APIerSv1) GetActionPlan(ctx *context.Context, attr *AttrGetActionPlan, reply *[]*engine.ActionPlan) error {
 	var result []*engine.ActionPlan
 	if attr.ID == "" || attr.ID == "*" {
 		result = make([]*engine.ActionPlan, 0)
@@ -972,7 +973,7 @@ func (apierSv1 *APIerSv1) GetActionPlan(attr *AttrGetActionPlan, reply *[]*engin
 	return nil
 }
 
-func (apierSv1 *APIerSv1) RemoveActionPlan(attr *AttrGetActionPlan, reply *string) (err error) {
+func (apierSv1 *APIerSv1) RemoveActionPlan(ctx *context.Context, attr *AttrGetActionPlan, reply *string) (err error) {
 	if missing := utils.MissingStructFields(attr, []string{"ID"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -992,7 +993,7 @@ func (apierSv1 *APIerSv1) RemoveActionPlan(attr *AttrGetActionPlan, reply *strin
 			}
 		}
 		if len(prevAccountIDs) != 0 {
-			if err := apierSv1.ConnMgr.Call(apierSv1.Config.ApierCfg().CachesConns, nil,
+			if err := apierSv1.ConnMgr.Call(context.TODO(), apierSv1.Config.ApierCfg().CachesConns,
 				utils.CacheSv1ReloadCache, &utils.AttrReloadCacheWithAPIOpts{
 					AccountActionPlanIDs: prevAccountIDs.Slice(),
 				}, reply); err != nil {
@@ -1008,7 +1009,7 @@ func (apierSv1 *APIerSv1) RemoveActionPlan(attr *AttrGetActionPlan, reply *strin
 }
 
 // Process dependencies and load a specific AccountActions profile from storDb into dataDb.
-func (apierSv1 *APIerSv1) LoadAccountActions(attrs *utils.TPAccountActions, reply *string) error {
+func (apierSv1 *APIerSv1) LoadAccountActions(ctx *context.Context, attrs *utils.TPAccountActions, reply *string) error {
 	if len(attrs.TPid) == 0 {
 		return utils.NewErrMandatoryIeMissing("TPid")
 	}
@@ -1034,7 +1035,7 @@ func (apierSv1 *APIerSv1) LoadAccountActions(attrs *utils.TPAccountActions, repl
 	return nil
 }
 
-func (apierSv1 *APIerSv1) LoadTariffPlanFromFolder(attrs *utils.AttrLoadTpFromFolder, reply *string) error {
+func (apierSv1 *APIerSv1) LoadTariffPlanFromFolder(ctx *context.Context, attrs *utils.AttrLoadTpFromFolder, reply *string) error {
 	// verify if FolderPath is present
 	if len(attrs.FolderPath) == 0 {
 		return fmt.Errorf("%s:%s", utils.ErrMandatoryIeMissing.Error(), "FolderPath")
@@ -1106,7 +1107,7 @@ func (apierSv1 *APIerSv1) LoadTariffPlanFromFolder(attrs *utils.AttrLoadTpFromFo
 
 // RemoveTPFromFolder will load the tarrifplan from folder into TpReader object
 // and will delete if from database
-func (apierSv1 *APIerSv1) RemoveTPFromFolder(attrs *utils.AttrLoadTpFromFolder, reply *string) error {
+func (apierSv1 *APIerSv1) RemoveTPFromFolder(ctx *context.Context, attrs *utils.AttrLoadTpFromFolder, reply *string) error {
 	// verify if FolderPath is present
 	if len(attrs.FolderPath) == 0 {
 		return fmt.Errorf("%s:%s", utils.ErrMandatoryIeMissing.Error(), "FolderPath")
@@ -1178,7 +1179,7 @@ func (apierSv1 *APIerSv1) RemoveTPFromFolder(attrs *utils.AttrLoadTpFromFolder, 
 
 // RemoveTPFromStorDB will load the tarrifplan from StorDB into TpReader object
 // and will delete if from database
-func (apierSv1 *APIerSv1) RemoveTPFromStorDB(attrs *AttrLoadTpFromStorDb, reply *string) error {
+func (apierSv1 *APIerSv1) RemoveTPFromStorDB(ctx *context.Context, attrs *AttrLoadTpFromStorDb, reply *string) error {
 	if len(attrs.TPid) == 0 {
 		return utils.NewErrMandatoryIeMissing("TPid")
 	}
@@ -1254,7 +1255,7 @@ func (arrp *AttrRemoveRatingProfile) GetId() (result string) {
 	return
 }
 
-func (apierSv1 *APIerSv1) RemoveRatingProfile(attr *AttrRemoveRatingProfile, reply *string) error {
+func (apierSv1 *APIerSv1) RemoveRatingProfile(ctx *context.Context, attr *AttrRemoveRatingProfile, reply *string) error {
 	if attr.Tenant == utils.EmptyString {
 		attr.Tenant = apierSv1.Config.GeneralCfg().DefaultTenant
 	}
@@ -1281,7 +1282,7 @@ func (apierSv1 *APIerSv1) RemoveRatingProfile(attr *AttrRemoveRatingProfile, rep
 	return nil
 }
 
-func (apierSv1 *APIerSv1) GetLoadHistory(attrs *utils.Paginator, reply *[]*utils.LoadInstance) error {
+func (apierSv1 *APIerSv1) GetLoadHistory(ctx *context.Context, attrs *utils.Paginator, reply *[]*utils.LoadInstance) error {
 	nrItems := -1
 	offset := 0
 	if attrs.Offset != nil { // For offset we need full data
@@ -1313,7 +1314,7 @@ type AttrRemoveActions struct {
 	ActionIDs []string
 }
 
-func (apierSv1 *APIerSv1) RemoveActions(attr *AttrRemoveActions, reply *string) error {
+func (apierSv1 *APIerSv1) RemoveActions(ctx *context.Context, attr *AttrRemoveActions, reply *string) error {
 	if attr.ActionIDs == nil {
 		err := utils.ErrNotFound
 		*reply = err.Error()
@@ -1364,7 +1365,7 @@ func (apierSv1 *APIerSv1) RemoveActions(attr *AttrRemoveActions, reply *string) 
 		}
 	}
 	//CacheReload
-	if err := apierSv1.ConnMgr.Call(apierSv1.Config.ApierCfg().CachesConns, nil,
+	if err := apierSv1.ConnMgr.Call(context.TODO(), apierSv1.Config.ApierCfg().CachesConns,
 		utils.CacheSv1ReloadCache, &utils.AttrReloadCacheWithAPIOpts{
 			ActionIDs: attr.ActionIDs,
 		}, reply); err != nil {
@@ -1385,7 +1386,7 @@ type ArgsReplyFailedPosts struct {
 }
 
 // ReplayFailedPosts will repost failed requests found in the FailedRequestsInDir
-func (apierSv1 *APIerSv1) ReplayFailedPosts(args *ArgsReplyFailedPosts, reply *string) (err error) {
+func (apierSv1 *APIerSv1) ReplayFailedPosts(ctx *context.Context, args *ArgsReplyFailedPosts, reply *string) (err error) {
 	failedReqsInDir := apierSv1.Config.GeneralCfg().FailedPostsDir
 	if args.FailedRequestsInDir != nil && *args.FailedRequestsInDir != "" {
 		failedReqsInDir = *args.FailedRequestsInDir
@@ -1434,7 +1435,7 @@ func (apierSv1 *APIerSv1) ReplayFailedPosts(args *ArgsReplyFailedPosts, reply *s
 	return nil
 }
 
-func (apierSv1 *APIerSv1) GetLoadIDs(args *string, reply *map[string]int64) (err error) {
+func (apierSv1 *APIerSv1) GetLoadIDs(ctx *context.Context, args *string, reply *map[string]int64) (err error) {
 	var loadIDs map[string]int64
 	if loadIDs, err = apierSv1.DataManager.GetItemLoadIDs(*args, false); err != nil {
 		return
@@ -1448,7 +1449,7 @@ type LoadTimeArgs struct {
 	Item     string
 }
 
-func (apierSv1 *APIerSv1) GetLoadTimes(args *LoadTimeArgs, reply *map[string]string) (err error) {
+func (apierSv1 *APIerSv1) GetLoadTimes(ctx *context.Context, args *LoadTimeArgs, reply *map[string]string) (err error) {
 	if loadIDs, err := apierSv1.DataManager.GetItemLoadIDs(args.Item, false); err != nil {
 		return err
 	} else {
@@ -1465,7 +1466,7 @@ func (apierSv1 *APIerSv1) GetLoadTimes(args *LoadTimeArgs, reply *map[string]str
 	return
 }
 
-func (apierSv1 *APIerSv1) ComputeActionPlanIndexes(_ string, reply *string) (err error) {
+func (apierSv1 *APIerSv1) ComputeActionPlanIndexes(ctx *context.Context, _ string, reply *string) (err error) {
 	if err = apierSv1.DataManager.RebuildReverseForPrefix(utils.AccountActionPlansPrefix); err != nil {
 		return err
 	}
@@ -1474,7 +1475,7 @@ func (apierSv1 *APIerSv1) ComputeActionPlanIndexes(_ string, reply *string) (err
 }
 
 // GetActionPlanIDs returns list of ActionPlan IDs registered for a tenant
-func (apierSv1 *APIerSv1) GetActionPlanIDs(args *utils.PaginatorWithTenant, attrPrfIDs *[]string) error {
+func (apierSv1 *APIerSv1) GetActionPlanIDs(ctx *context.Context, args *utils.PaginatorWithTenant, attrPrfIDs *[]string) error {
 	prfx := utils.ActionPlanPrefix
 	keys, err := apierSv1.DataManager.DataDB().GetKeysForPrefix(utils.ActionPlanPrefix)
 	if err != nil {
@@ -1492,7 +1493,7 @@ func (apierSv1 *APIerSv1) GetActionPlanIDs(args *utils.PaginatorWithTenant, attr
 }
 
 // GetRatingPlanIDs returns list of RatingPlan IDs registered for a tenant
-func (apierSv1 *APIerSv1) GetRatingPlanIDs(args *utils.PaginatorWithTenant, attrPrfIDs *[]string) error {
+func (apierSv1 *APIerSv1) GetRatingPlanIDs(ctx *context.Context, args *utils.PaginatorWithTenant, attrPrfIDs *[]string) error {
 	prfx := utils.RatingPlanPrefix
 	keys, err := apierSv1.DataManager.DataDB().GetKeysForPrefix(utils.RatingPlanPrefix)
 	if err != nil {
@@ -1529,13 +1530,13 @@ func (apierSv1 *APIerSv1) ListenAndServe(stopChan chan struct{}) {
 }
 
 // Ping return pong if the service is active
-func (apierSv1 *APIerSv1) Ping(ign *utils.CGREvent, reply *string) error {
+func (apierSv1 *APIerSv1) Ping(ctx *context.Context, ign *utils.CGREvent, reply *string) error {
 	*reply = utils.Pong
 	return nil
 }
 
 // ExportToFolder export specific items (or all items if items is empty) from DataDB back to CSV
-func (apierSv1 *APIerSv1) ExportToFolder(arg *utils.ArgExportToFolder, reply *string) error {
+func (apierSv1 *APIerSv1) ExportToFolder(ctx *context.Context, arg *utils.ArgExportToFolder, reply *string) error {
 	// if items is empty we need to export all items
 	if len(arg.Items) == 0 {
 		arg.Items = []string{utils.MetaAttributes, utils.MetaChargers, utils.MetaDispatchers,
@@ -1893,7 +1894,7 @@ func (apierSv1 *APIerSv1) ExportToFolder(arg *utils.ArgExportToFolder, reply *st
 	return nil
 }
 
-func (apierSv1 *APIerSv1) ExportCDRs(args *utils.ArgExportCDRs, reply *map[string]any) (err error) {
+func (apierSv1 *APIerSv1) ExportCDRs(ctx *context.Context, args *utils.ArgExportCDRs, reply *map[string]any) (err error) {
 	if len(apierSv1.Config.ApierCfg().EEsConns) == 0 {
 		return utils.NewErrNotConnected(utils.EEs)
 	}
@@ -1917,7 +1918,8 @@ func (apierSv1 *APIerSv1) ExportCDRs(args *utils.ArgExportCDRs, reply *map[strin
 		if args.Verbose {
 			argCdr.CGREvent.APIOpts[utils.OptsEEsVerbose] = struct{}{}
 		}
-		if err := apierSv1.ConnMgr.Call(apierSv1.Config.ApierCfg().EEsConns, nil, utils.EeSv1ProcessEvent,
+		if err := apierSv1.ConnMgr.Call(context.TODO(), apierSv1.Config.ApierCfg().EEsConns,
+			utils.EeSv1ProcessEvent,
 			argCdr, &rplyCdr); err != nil {
 			utils.Logger.Warning(fmt.Sprintf("<%s> error: <%s> processing event: <%s> with <%s>",
 				utils.ApierS, err.Error(), utils.ToJSON(cdr.AsCGREvent()), utils.EEs))

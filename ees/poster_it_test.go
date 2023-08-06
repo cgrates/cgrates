@@ -21,7 +21,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package ees
 
 import (
-	"context"
 	"encoding/json"
 	"flag"
 	"net/http"
@@ -30,6 +29,8 @@ import (
 	"reflect"
 	"testing"
 	"time"
+
+	"github.com/cgrates/birpc/context"
 
 	amqpv1 "github.com/Azure/go-amqp"
 	"github.com/aws/aws-sdk-go/aws"

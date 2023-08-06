@@ -24,7 +24,6 @@ import (
 	"io"
 	"net/http"
 	"net/http/httptest"
-	"net/rpc"
 	"path"
 	"reflect"
 	"strconv"
@@ -32,13 +31,15 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc"
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 )
 
 var (
 	actsLclCfg       *config.CGRConfig
-	actsLclRpc       *rpc.Client
+	actsLclRpc       *birpc.Client
 	actsLclCfgPath   string
 	actionsConfigDIR string
 
@@ -127,7 +128,7 @@ func testActionsitRpcConn(t *testing.T) {
 func testActionsitSetCdrlogDebit(t *testing.T) {
 	var reply string
 	attrsSetAccount := &utils.AttrSetAccount{Tenant: "cgrates.org", Account: "dan2904"}
-	if err := actsLclRpc.Call(utils.APIerSv1SetAccount, attrsSetAccount, &reply); err != nil {
+	if err := actsLclRpc.Call(context.Background(), utils.APIerSv1SetAccount, attrsSetAccount, &reply); err != nil {
 		t.Error("Got error on APIerSv1.SetAccount: ", err.Error())
 	} else if reply != utils.OK {
 		t.Errorf("Calling APIerSv1.SetAccount received: %s", reply)
@@ -136,19 +137,19 @@ func testActionsitSetCdrlogDebit(t *testing.T) {
 		{Identifier: utils.MetaDebit, BalanceType: utils.MetaMonetary, Units: "5", ExpiryTime: utils.MetaUnlimited, Weight: 20.0},
 		{Identifier: utils.CDRLog},
 	}}
-	if err := actsLclRpc.Call(utils.APIerSv2SetActions, attrsAA, &reply); err != nil && err.Error() != utils.ErrExists.Error() {
+	if err := actsLclRpc.Call(context.Background(), utils.APIerSv2SetActions, attrsAA, &reply); err != nil && err.Error() != utils.ErrExists.Error() {
 		t.Error("Got error on APIerSv2.SetActions: ", err.Error())
 	} else if reply != utils.OK {
 		t.Errorf("Calling APIerSv2.SetActions received: %s", reply)
 	}
 	attrsEA := &utils.AttrExecuteAction{Tenant: attrsSetAccount.Tenant, Account: attrsSetAccount.Account, ActionsId: attrsAA.ActionsId}
-	if err := actsLclRpc.Call(utils.APIerSv1ExecuteAction, attrsEA, &reply); err != nil {
+	if err := actsLclRpc.Call(context.Background(), utils.APIerSv1ExecuteAction, attrsEA, &reply); err != nil {
 		t.Error("Got error on APIerSv1.ExecuteAction: ", err.Error())
 	} else if reply != utils.OK {
 		t.Errorf("Calling APIerSv1.ExecuteAction received: %s", reply)
 	}
 	var rcvedCdrs []*ExternalCDR
-	if err := actsLclRpc.Call(utils.APIerSv2GetCDRs, &utils.RPCCDRsFilter{Sources: []string{utils.CDRLog},
+	if err := actsLclRpc.Call(context.Background(), utils.APIerSv2GetCDRs, &utils.RPCCDRsFilter{Sources: []string{utils.CDRLog},
 		Accounts: []string{attrsSetAccount.Account}}, &rcvedCdrs); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(rcvedCdrs) != 1 {
@@ -170,7 +171,7 @@ func testActionsitSetCdrlogDebit(t *testing.T) {
 func testActionsitSetCdrlogTopup(t *testing.T) {
 	var reply string
 	attrsSetAccount := &utils.AttrSetAccount{Tenant: "cgrates.org", Account: "dan2905"}
-	if err := actsLclRpc.Call(utils.APIerSv1SetAccount, attrsSetAccount, &reply); err != nil {
+	if err := actsLclRpc.Call(context.Background(), utils.APIerSv1SetAccount, attrsSetAccount, &reply); err != nil {
 		t.Error("Got error on APIerSv1.SetAccount: ", err.Error())
 	} else if reply != utils.OK {
 		t.Errorf("Calling APIerSv1.SetAccount received: %s", reply)
@@ -179,19 +180,19 @@ func testActionsitSetCdrlogTopup(t *testing.T) {
 		{Identifier: utils.MetaTopUp, BalanceType: utils.MetaMonetary, Units: "5", ExpiryTime: utils.MetaUnlimited, Weight: 20.0},
 		{Identifier: utils.CDRLog},
 	}}
-	if err := actsLclRpc.Call(utils.APIerSv2SetActions, attrsAA, &reply); err != nil && err.Error() != utils.ErrExists.Error() {
+	if err := actsLclRpc.Call(context.Background(), utils.APIerSv2SetActions, attrsAA, &reply); err != nil && err.Error() != utils.ErrExists.Error() {
 		t.Error("Got error on APIerSv2.SetActions: ", err.Error())
 	} else if reply != utils.OK {
 		t.Errorf("Calling APIerSv2.SetActions received: %s", reply)
 	}
 	attrsEA := &utils.AttrExecuteAction{Tenant: attrsSetAccount.Tenant, Account: attrsSetAccount.Account, ActionsId: attrsAA.ActionsId}
-	if err := actsLclRpc.Call(utils.APIerSv1ExecuteAction, attrsEA, &reply); err != nil {
+	if err := actsLclRpc.Call(context.Background(), utils.APIerSv1ExecuteAction, attrsEA, &reply); err != nil {
 		t.Error("Got error on APIerSv1.ExecuteAction: ", err.Error())
 	} else if reply != utils.OK {
 		t.Errorf("Calling APIerSv1.ExecuteAction received: %s", reply)
 	}
 	var rcvedCdrs []*ExternalCDR
-	if err := actsLclRpc.Call(utils.APIerSv2GetCDRs, &utils.RPCCDRsFilter{Sources: []string{utils.CDRLog},
+	if err := actsLclRpc.Call(context.Background(), utils.APIerSv2GetCDRs, &utils.RPCCDRsFilter{Sources: []string{utils.CDRLog},
 		Accounts: []string{attrsSetAccount.Account}}, &rcvedCdrs); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(rcvedCdrs) != 1 {
@@ -218,19 +219,19 @@ func testActionsitCdrlogEmpty(t *testing.T) {
 			Units: "5", ExpiryTime: utils.MetaUnlimited, Weight: 20.0},
 		{Identifier: utils.CDRLog},
 	}}
-	if err := actsLclRpc.Call(utils.APIerSv2SetActions, attrsAA, &reply); err != nil && err.Error() != utils.ErrExists.Error() {
+	if err := actsLclRpc.Call(context.Background(), utils.APIerSv2SetActions, attrsAA, &reply); err != nil && err.Error() != utils.ErrExists.Error() {
 		t.Error("Got error on APIerSv2.SetActions: ", err.Error())
 	} else if reply != utils.OK {
 		t.Errorf("Calling APIerSv2.SetActions received: %s", reply)
 	}
 	attrsEA := &utils.AttrExecuteAction{Tenant: attrsSetAccount.Tenant, Account: attrsSetAccount.Account, ActionsId: attrsAA.ActionsId}
-	if err := actsLclRpc.Call(utils.APIerSv1ExecuteAction, attrsEA, &reply); err != nil {
+	if err := actsLclRpc.Call(context.Background(), utils.APIerSv1ExecuteAction, attrsEA, &reply); err != nil {
 		t.Error("Got error on APIerSv1.ExecuteAction: ", err.Error())
 	} else if reply != utils.OK {
 		t.Errorf("Calling APIerSv1.ExecuteAction received: %s", reply)
 	}
 	var rcvedCdrs []*ExternalCDR
-	if err := actsLclRpc.Call(utils.APIerSv2GetCDRs, &utils.RPCCDRsFilter{Sources: []string{utils.CDRLog},
+	if err := actsLclRpc.Call(context.Background(), utils.APIerSv2GetCDRs, &utils.RPCCDRsFilter{Sources: []string{utils.CDRLog},
 		Accounts: []string{attrsSetAccount.Account}, RunIDs: []string{utils.MetaDebit}}, &rcvedCdrs); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(rcvedCdrs) != 2 {
@@ -257,25 +258,25 @@ func testActionsitCdrlogWithParams(t *testing.T) {
 				DestinationIds: "RET", Units: "25", ExpiryTime: utils.MetaUnlimited, Weight: 20.0},
 		},
 	}
-	if err := actsLclRpc.Call(utils.APIerSv2SetActions, attrsAA, &reply); err != nil && err.Error() != utils.ErrExists.Error() {
+	if err := actsLclRpc.Call(context.Background(), utils.APIerSv2SetActions, attrsAA, &reply); err != nil && err.Error() != utils.ErrExists.Error() {
 		t.Error("Got error on APIerSv2.SetActions: ", err.Error())
 	} else if reply != utils.OK {
 		t.Errorf("Calling APIerSv2.SetActions received: %s", reply)
 	}
 	attrsEA := &utils.AttrExecuteAction{Tenant: attrsSetAccount.Tenant, Account: attrsSetAccount.Account, ActionsId: attrsAA.ActionsId}
-	if err := actsLclRpc.Call(utils.APIerSv1ExecuteAction, attrsEA, &reply); err != nil {
+	if err := actsLclRpc.Call(context.Background(), utils.APIerSv1ExecuteAction, attrsEA, &reply); err != nil {
 		t.Error("Got error on APIerSv1.ExecuteAction: ", err.Error())
 	} else if reply != utils.OK {
 		t.Errorf("Calling APIerSv1.ExecuteAction received: %s", reply)
 	}
 	var rcvedCdrs []*ExternalCDR
-	if err := actsLclRpc.Call(utils.APIerSv2GetCDRs, &utils.RPCCDRsFilter{Sources: []string{utils.CDRLog},
+	if err := actsLclRpc.Call(context.Background(), utils.APIerSv2GetCDRs, &utils.RPCCDRsFilter{Sources: []string{utils.CDRLog},
 		Accounts: []string{attrsSetAccount.Account}, RunIDs: []string{utils.MetaDebit}, RequestTypes: []string{"*pseudoprepaid"}}, &rcvedCdrs); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(rcvedCdrs) != 1 {
 		t.Error("Unexpected number of CDRs returned: ", len(rcvedCdrs))
 	}
-	if err := actsLclRpc.Call(utils.APIerSv2GetCDRs, &utils.RPCCDRsFilter{Sources: []string{utils.CDRLog},
+	if err := actsLclRpc.Call(context.Background(), utils.APIerSv2GetCDRs, &utils.RPCCDRsFilter{Sources: []string{utils.CDRLog},
 		Accounts: []string{attrsSetAccount.Account}, RunIDs: []string{utils.MetaDebitReset}, RequestTypes: []string{"*pseudoprepaid"}}, &rcvedCdrs); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(rcvedCdrs) != 1 {
@@ -295,19 +296,19 @@ func testActionsitCdrlogWithParams2(t *testing.T) {
 				ExtraParameters: `{"RequestType":"*pseudoprepaid", "Usage":"10", "Subject":"testActionsitCdrlogWithParams2", "ToR":"~ActionType:s/^\\*(.*)$/did_$1/"}`},
 		},
 	}
-	if err := actsLclRpc.Call(utils.APIerSv2SetActions, attrsAA, &reply); err != nil && err.Error() != utils.ErrExists.Error() {
+	if err := actsLclRpc.Call(context.Background(), utils.APIerSv2SetActions, attrsAA, &reply); err != nil && err.Error() != utils.ErrExists.Error() {
 		t.Error("Got error on APIerSv2.SetActions: ", err.Error())
 	} else if reply != utils.OK {
 		t.Errorf("Calling APIerSv2.SetActions received: %s", reply)
 	}
 	attrsEA := &utils.AttrExecuteAction{Tenant: attrsSetAccount.Tenant, Account: attrsSetAccount.Account, ActionsId: attrsAA.ActionsId}
-	if err := actsLclRpc.Call(utils.APIerSv1ExecuteAction, attrsEA, &reply); err != nil {
+	if err := actsLclRpc.Call(context.Background(), utils.APIerSv1ExecuteAction, attrsEA, &reply); err != nil {
 		t.Error("Got error on APIerSv1.ExecuteAction: ", err.Error())
 	} else if reply != utils.OK {
 		t.Errorf("Calling APIerSv1.ExecuteAction received: %s", reply)
 	}
 	var rcvedCdrs []*ExternalCDR
-	if err := actsLclRpc.Call(utils.APIerSv2GetCDRs, &utils.RPCCDRsFilter{Sources: []string{utils.CDRLog},
+	if err := actsLclRpc.Call(context.Background(), utils.APIerSv2GetCDRs, &utils.RPCCDRsFilter{Sources: []string{utils.CDRLog},
 		Accounts: []string{attrsSetAccount.Account}, Subjects: []string{"testActionsitCdrlogWithParams2"}}, &rcvedCdrs); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(rcvedCdrs) != 1 {
@@ -324,7 +325,7 @@ func testActionsitThresholdCDrLog(t *testing.T) {
 	var reply string
 
 	attrsSetAccount := &utils.AttrSetAccount{Tenant: "cgrates.org", Account: "th_acc"}
-	if err := actsLclRpc.Call(utils.APIerSv1SetAccount, attrsSetAccount, &reply); err != nil {
+	if err := actsLclRpc.Call(context.Background(), utils.APIerSv1SetAccount, attrsSetAccount, &reply); err != nil {
 		t.Error("Got error on APIerSv1.SetAccount: ", err.Error())
 	} else if reply != utils.OK {
 		t.Errorf("Calling APIerSv1.SetAccount received: %s", reply)
@@ -333,13 +334,13 @@ func testActionsitThresholdCDrLog(t *testing.T) {
 		{Identifier: utils.MetaTopUp, BalanceType: utils.MetaMonetary, Units: "5", ExpiryTime: utils.MetaUnlimited, Weight: 20.0},
 		{Identifier: utils.CDRLog},
 	}}
-	if err := actsLclRpc.Call(utils.APIerSv2SetActions, attrsAA, &reply); err != nil && err.Error() != utils.ErrExists.Error() {
+	if err := actsLclRpc.Call(context.Background(), utils.APIerSv2SetActions, attrsAA, &reply); err != nil && err.Error() != utils.ErrExists.Error() {
 		t.Error("Got error on APIerSv2.SetActions: ", err.Error())
 	} else if reply != utils.OK {
 		t.Errorf("Calling APIerSv2.SetActions received: %s", reply)
 	}
 	//make sure that the threshold don't exit
-	if err := actsLclRpc.Call(utils.APIerSv1GetThresholdProfile,
+	if err := actsLclRpc.Call(context.Background(), utils.APIerSv1GetThresholdProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "THD_Test"}, &thReply); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
@@ -361,12 +362,12 @@ func testActionsitThresholdCDrLog(t *testing.T) {
 			Async:     false,
 		},
 	}
-	if err := actsLclRpc.Call(utils.APIerSv1SetThresholdProfile, tPrfl, &result); err != nil {
+	if err := actsLclRpc.Call(context.Background(), utils.APIerSv1SetThresholdProfile, tPrfl, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	if err := actsLclRpc.Call(utils.APIerSv1GetThresholdProfile,
+	if err := actsLclRpc.Call(context.Background(), utils.APIerSv1GetThresholdProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "THD_Test"}, &thReply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(tPrfl.ThresholdProfile, thReply) {
@@ -405,13 +406,13 @@ func testActionsitThresholdCDrLog(t *testing.T) {
 	}
 	var ids []string
 	eIDs := []string{"THD_Test"}
-	if err := actsLclRpc.Call(utils.ThresholdSv1ProcessEvent, ev, &ids); err != nil {
+	if err := actsLclRpc.Call(context.Background(), utils.ThresholdSv1ProcessEvent, ev, &ids); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(ids, eIDs) {
 		t.Errorf("Expecting ids: %s, received: %s", eIDs, ids)
 	}
 	var rcvedCdrs []*ExternalCDR
-	if err := actsLclRpc.Call(utils.APIerSv2GetCDRs, &utils.RPCCDRsFilter{Sources: []string{utils.CDRLog},
+	if err := actsLclRpc.Call(context.Background(), utils.APIerSv2GetCDRs, &utils.RPCCDRsFilter{Sources: []string{utils.CDRLog},
 		Accounts: []string{attrsSetAccount.Account}}, &rcvedCdrs); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(rcvedCdrs) != 1 {
@@ -454,7 +455,7 @@ func testActionsitCDRAccount(t *testing.T) {
 		},
 		Overwrite: true,
 	}
-	if err := actsLclRpc.Call(utils.APIerSv1AddBalance, attrs, &reply); err != nil {
+	if err := actsLclRpc.Call(context.Background(), utils.APIerSv1AddBalance, attrs, &reply); err != nil {
 		t.Error("Got error on APIerSv1.AddBalance: ", err.Error())
 	} else if reply != utils.OK {
 		t.Errorf("Calling APIerSv1.AddBalance received: %s", reply)
@@ -466,7 +467,7 @@ func testActionsitCDRAccount(t *testing.T) {
 			{Identifier: utils.MetaCDRAccount, ExpiryTime: utils.MetaUnlimited, Weight: 20.0},
 		},
 	}
-	if err := actsLclRpc.Call(utils.APIerSv2SetActions, attrsAA, &reply); err != nil && err.Error() != utils.ErrExists.Error() {
+	if err := actsLclRpc.Call(context.Background(), utils.APIerSv2SetActions, attrsAA, &reply); err != nil && err.Error() != utils.ErrExists.Error() {
 		t.Error("Got error on APIerSv2.SetActions: ", err.Error())
 	} else if reply != utils.OK {
 		t.Errorf("Calling APIerSv2.SetActions received: %s", reply)
@@ -475,7 +476,7 @@ func testActionsitCDRAccount(t *testing.T) {
 	var acc Account
 	attrs2 := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: acnt}
 	var uuid string
-	if err := actsLclRpc.Call(utils.APIerSv2GetAccount, attrs2, &acc); err != nil {
+	if err := actsLclRpc.Call(context.Background(), utils.APIerSv2GetAccount, attrs2, &acc); err != nil {
 		t.Error("Got error on APIerSv1.GetAccount: ", err.Error())
 	} else {
 		voice := acc.BalanceMap[utils.MetaVoice]
@@ -517,7 +518,7 @@ func testActionsitCDRAccount(t *testing.T) {
 			},
 		},
 	}
-	if err := actsLclRpc.Call(utils.CDRsV1ProcessCDR, args, &reply); err != nil {
+	if err := actsLclRpc.Call(context.Background(), utils.CDRsV1ProcessCDR, args, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf("Received: %s", reply)
@@ -525,13 +526,13 @@ func testActionsitCDRAccount(t *testing.T) {
 	time.Sleep(100 * time.Millisecond)
 
 	attrsEA := &utils.AttrExecuteAction{Tenant: "cgrates.org", Account: acnt, ActionsId: attrsAA.ActionsId}
-	if err := actsLclRpc.Call(utils.APIerSv1ExecuteAction, attrsEA, &reply); err != nil {
+	if err := actsLclRpc.Call(context.Background(), utils.APIerSv1ExecuteAction, attrsEA, &reply); err != nil {
 		t.Error("Got error on APIerSv1.ExecuteAction: ", err.Error())
 	} else if reply != utils.OK {
 		t.Errorf("Calling APIerSv1.ExecuteAction received: %s", reply)
 	}
 
-	if err := actsLclRpc.Call(utils.APIerSv2GetAccount, attrs2, &acc); err != nil {
+	if err := actsLclRpc.Call(context.Background(), utils.APIerSv2GetAccount, attrs2, &acc); err != nil {
 		t.Error("Got error on APIerSv1.GetAccount: ", err.Error())
 	} else if tv := acc.BalanceMap[utils.MetaVoice].GetTotalValue(); tv != float64(10*time.Second) {
 		t.Errorf("Calling APIerSv1.GetBalance expected: %f, received: %f", float64(10*time.Second), tv)
@@ -550,13 +551,13 @@ func testActionsitThresholdCgrRpcAction(t *testing.T) {
 "Attempts":1,
 "Async" :false,
 "Params": {}}`}}}
-	if err := actsLclRpc.Call(utils.APIerSv2SetActions, attrsAA, &reply); err != nil && err.Error() != utils.ErrExists.Error() {
+	if err := actsLclRpc.Call(context.Background(), utils.APIerSv2SetActions, attrsAA, &reply); err != nil && err.Error() != utils.ErrExists.Error() {
 		t.Error("Got error on APIerSv2.SetActions: ", err.Error())
 	} else if reply != utils.OK {
 		t.Errorf("Calling APIerSv2.SetActions received: %s", reply)
 	}
 	//make sure that the threshold don't exit
-	if err := actsLclRpc.Call(utils.APIerSv1GetThresholdProfile,
+	if err := actsLclRpc.Call(context.Background(), utils.APIerSv1GetThresholdProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "TH_CGRRPC"}, &thReply); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
@@ -577,12 +578,12 @@ func testActionsitThresholdCgrRpcAction(t *testing.T) {
 			Async:     false,
 		},
 	}
-	if err := actsLclRpc.Call(utils.APIerSv1SetThresholdProfile, tPrfl, &result); err != nil {
+	if err := actsLclRpc.Call(context.Background(), utils.APIerSv1SetThresholdProfile, tPrfl, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	if err := actsLclRpc.Call(utils.APIerSv1GetThresholdProfile,
+	if err := actsLclRpc.Call(context.Background(), utils.APIerSv1GetThresholdProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "TH_CGRRPC"}, &thReply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(tPrfl.ThresholdProfile, thReply) {
@@ -597,7 +598,7 @@ func testActionsitThresholdCgrRpcAction(t *testing.T) {
 	}
 	var ids []string
 	eIDs := []string{"TH_CGRRPC"}
-	if err := actsLclRpc.Call(utils.ThresholdSv1ProcessEvent, ev, &ids); err != nil {
+	if err := actsLclRpc.Call(context.Background(), utils.ThresholdSv1ProcessEvent, ev, &ids); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(ids, eIDs) {
 		t.Errorf("Expecting ids: %s, received: %s", eIDs, ids)
@@ -614,13 +615,13 @@ func testActionsitThresholdPostEvent(t *testing.T) {
 	attrsAA := &utils.AttrSetActions{ActionsId: "ACT_TH_POSTEVENT", Actions: []*utils.TPAction{
 		{Identifier: utils.MetaPostEvent, ExtraParameters: "http://127.0.0.1:12080/invalid_json"},
 	}}
-	if err := actsLclRpc.Call(utils.APIerSv2SetActions, attrsAA, &reply); err != nil && err.Error() != utils.ErrExists.Error() {
+	if err := actsLclRpc.Call(context.Background(), utils.APIerSv2SetActions, attrsAA, &reply); err != nil && err.Error() != utils.ErrExists.Error() {
 		t.Error("Got error on APIerSv2.SetActions: ", err.Error())
 	} else if reply != utils.OK {
 		t.Errorf("Calling APIerSv2.SetActions received: %s", reply)
 	}
 	//make sure that the threshold don't exit
-	if err := actsLclRpc.Call(utils.APIerSv1GetThresholdProfile,
+	if err := actsLclRpc.Call(context.Background(), utils.APIerSv1GetThresholdProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "THD_PostEvent"}, &thReply); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
@@ -641,12 +642,12 @@ func testActionsitThresholdPostEvent(t *testing.T) {
 			Async:     false,
 		},
 	}
-	if err := actsLclRpc.Call(utils.APIerSv1SetThresholdProfile, tPrfl, &result); err != nil {
+	if err := actsLclRpc.Call(context.Background(), utils.APIerSv1SetThresholdProfile, tPrfl, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	if err := actsLclRpc.Call(utils.APIerSv1GetThresholdProfile,
+	if err := actsLclRpc.Call(context.Background(), utils.APIerSv1GetThresholdProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "THD_PostEvent"}, &thReply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(tPrfl.ThresholdProfile, thReply) {
@@ -679,7 +680,7 @@ func testActionsitThresholdPostEvent(t *testing.T) {
 	}
 	var ids []string
 	eIDs := []string{"THD_PostEvent"}
-	if err := actsLclRpc.Call(utils.ThresholdSv1ProcessEvent, ev, &ids); err != nil {
+	if err := actsLclRpc.Call(context.Background(), utils.ThresholdSv1ProcessEvent, ev, &ids); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(ids, eIDs) {
 		t.Errorf("Expecting ids: %s, received: %s", eIDs, ids)
@@ -693,7 +694,7 @@ func testActionsitSetSDestinations(t *testing.T) {
 		Tenant:  "cgrates.org",
 		Account: "testAccSetDDestination",
 	}
-	if err := actsLclRpc.Call(utils.APIerSv1SetAccount, attrsSetAccount, &reply); err != nil {
+	if err := actsLclRpc.Call(context.Background(), utils.APIerSv1SetAccount, attrsSetAccount, &reply); err != nil {
 		t.Error("Got error on APIerSv1.SetAccount: ", err.Error())
 	} else if reply != utils.OK {
 		t.Errorf("Calling APIerSv1.SetAccount received: %s", reply)
@@ -702,14 +703,14 @@ func testActionsitSetSDestinations(t *testing.T) {
 		{Identifier: utils.MetaTopUp, BalanceType: utils.MetaMonetary, DestinationIds: "*ddc_test",
 			Units: "5", ExpiryTime: utils.MetaUnlimited, Weight: 20.0},
 	}}
-	if err := actsLclRpc.Call(utils.APIerSv2SetActions, attrsAA, &reply); err != nil && err.Error() != utils.ErrExists.Error() {
+	if err := actsLclRpc.Call(context.Background(), utils.APIerSv2SetActions, attrsAA, &reply); err != nil && err.Error() != utils.ErrExists.Error() {
 		t.Error("Got error on APIerSv2.SetActions: ", err.Error())
 	} else if reply != utils.OK {
 		t.Errorf("Calling APIerSv2.SetActions received: %s", reply)
 	}
 
 	attrsEA := &utils.AttrExecuteAction{Tenant: attrsSetAccount.Tenant, Account: attrsSetAccount.Account, ActionsId: attrsAA.ActionsId}
-	if err := actsLclRpc.Call(utils.APIerSv1ExecuteAction, attrsEA, &reply); err != nil {
+	if err := actsLclRpc.Call(context.Background(), utils.APIerSv1ExecuteAction, attrsEA, &reply); err != nil {
 		t.Error("Got error on APIerSv1.ExecuteAction: ", err.Error())
 	} else if reply != utils.OK {
 		t.Errorf("Calling APIerSv1.ExecuteAction received: %s", reply)
@@ -717,13 +718,13 @@ func testActionsitSetSDestinations(t *testing.T) {
 
 	var acc Account
 	attrs2 := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "testAccSetDDestination"}
-	if err := actsLclRpc.Call(utils.APIerSv2GetAccount, attrs2, &acc); err != nil {
+	if err := actsLclRpc.Call(context.Background(), utils.APIerSv2GetAccount, attrs2, &acc); err != nil {
 		t.Error(err.Error())
 	} else if _, has := acc.BalanceMap[utils.MetaMonetary][0].DestinationIDs["*ddc_test"]; !has {
 		t.Errorf("Unexpected destinationIDs: %+v", acc.BalanceMap[utils.MetaMonetary][0].DestinationIDs)
 	}
 
-	if err := actsLclRpc.Call(utils.APIerSv1SetDestination,
+	if err := actsLclRpc.Call(context.Background(), utils.APIerSv1SetDestination,
 		&utils.AttrSetDestination{Id: "*ddc_test", Prefixes: []string{"111", "222"}}, &reply); err != nil {
 		t.Error("Got error on APIerSv1.ExecuteAction: ", err.Error())
 	} else if reply != utils.OK {
@@ -731,7 +732,7 @@ func testActionsitSetSDestinations(t *testing.T) {
 	}
 	//verify destinations
 	var dest Destination
-	if err := actsLclRpc.Call(utils.APIerSv1GetDestination,
+	if err := actsLclRpc.Call(context.Background(), utils.APIerSv1GetDestination,
 		utils.StringPointer("*ddc_test"), &dest); err != nil {
 		t.Error(err.Error())
 	} else {
@@ -756,7 +757,7 @@ func testActionsitSetSDestinations(t *testing.T) {
 		},
 	}
 
-	if err := actsLclRpc.Call(utils.APIerSv1SetStatQueueProfile, statConfig, &reply); err != nil {
+	if err := actsLclRpc.Call(context.Background(), utils.APIerSv1SetStatQueueProfile, statConfig, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply returned", reply)
@@ -772,7 +773,7 @@ func testActionsitSetSDestinations(t *testing.T) {
 			utils.Usage:       6 * time.Second,
 		},
 	}
-	if err := actsLclRpc.Call(utils.StatSv1ProcessEvent, &args, &reply2); err != nil {
+	if err := actsLclRpc.Call(context.Background(), utils.StatSv1ProcessEvent, &args, &reply2); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(reply2, expected) {
 		t.Errorf("Expecting: %+v, received: %+v", expected, reply2)
@@ -786,7 +787,7 @@ func testActionsitSetSDestinations(t *testing.T) {
 			utils.Usage:       6 * time.Second,
 		},
 	}
-	if err := actsLclRpc.Call(utils.StatSv1ProcessEvent, &args, &reply2); err != nil {
+	if err := actsLclRpc.Call(context.Background(), utils.StatSv1ProcessEvent, &args, &reply2); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(reply2, expected) {
 		t.Errorf("Expecting: %+v, received: %+v", expected, reply2)
@@ -796,7 +797,7 @@ func testActionsitSetSDestinations(t *testing.T) {
 	attrSetDDest := &utils.AttrSetActions{ActionsId: "ACT_setDDestination", Actions: []*utils.TPAction{
 		{Identifier: utils.MetaSetDDestinations, ExtraParameters: "DistinctMetricProfile"},
 	}}
-	if err := actsLclRpc.Call(utils.APIerSv2SetActions, attrSetDDest, &reply); err != nil && err.Error() != utils.ErrExists.Error() {
+	if err := actsLclRpc.Call(context.Background(), utils.APIerSv2SetActions, attrSetDDest, &reply); err != nil && err.Error() != utils.ErrExists.Error() {
 		t.Error("Got error on APIerSv2.SetActions: ", err.Error())
 	} else if reply != utils.OK {
 		t.Errorf("Calling APIerSv2.SetActions received: %s", reply)
@@ -804,14 +805,14 @@ func testActionsitSetSDestinations(t *testing.T) {
 
 	attrsetDDest := &utils.AttrExecuteAction{Tenant: attrsSetAccount.Tenant,
 		Account: attrsSetAccount.Account, ActionsId: attrSetDDest.ActionsId}
-	if err := actsLclRpc.Call(utils.APIerSv1ExecuteAction, attrsetDDest, &reply); err != nil {
+	if err := actsLclRpc.Call(context.Background(), utils.APIerSv1ExecuteAction, attrsetDDest, &reply); err != nil {
 		t.Error("Got error on APIerSv1.ExecuteAction: ", err.Error())
 	} else if reply != utils.OK {
 		t.Errorf("Calling APIerSv1.ExecuteAction received: %s", reply)
 	}
 
 	//verify destinations
-	if err := actsLclRpc.Call(utils.APIerSv1GetDestination,
+	if err := actsLclRpc.Call(context.Background(), utils.APIerSv1GetDestination,
 		utils.StringPointer("*ddc_test"), &dest); err != nil {
 		t.Error(err.Error())
 	} else {
@@ -830,7 +831,7 @@ func testActionsitresetAccountCDR(t *testing.T) {
 		Tenant:  "cgrates.org",
 		Account: "123456789",
 	}
-	if err := actsLclRpc.Call(utils.APIerSv1SetAccount, attrsSetAccount, &reply); err != nil {
+	if err := actsLclRpc.Call(context.Background(), utils.APIerSv1SetAccount, attrsSetAccount, &reply); err != nil {
 		t.Error("Got error on APIerSv1.SetAccount: ", err.Error())
 	} else if reply != utils.OK {
 		t.Errorf("Calling APIerSv1.SetAccount received: %s", reply)
@@ -842,7 +843,7 @@ func testActionsitresetAccountCDR(t *testing.T) {
 			{Identifier: utils.MetaCDRAccount, ExpiryTime: utils.MetaUnlimited, Weight: 20.0},
 		},
 	}
-	if err := actsLclRpc.Call(utils.APIerSv2SetActions, attrsAA, &reply); err != nil && err.Error() != utils.ErrExists.Error() {
+	if err := actsLclRpc.Call(context.Background(), utils.APIerSv2SetActions, attrsAA, &reply); err != nil && err.Error() != utils.ErrExists.Error() {
 		t.Error("Got error on APIerSv2.SetActions: ", err.Error())
 	} else if reply != utils.OK {
 		t.Errorf("Calling APIerSv2.SetActions received: %s", reply)
@@ -851,7 +852,7 @@ func testActionsitresetAccountCDR(t *testing.T) {
 	var acc Account
 	attrs2 := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: account}
 	var uuid string
-	if err := actsLclRpc.Call(utils.APIerSv2GetAccount, attrs2, &acc); err != nil {
+	if err := actsLclRpc.Call(context.Background(), utils.APIerSv2GetAccount, attrs2, &acc); err != nil {
 		t.Error("Got error on APIerSv1.GetAccount: ", err.Error())
 	} else {
 		voice := acc.BalanceMap[utils.MetaVoice]
@@ -892,7 +893,7 @@ func testActionsitresetAccountCDR(t *testing.T) {
 			},
 		},
 	}
-	if err := actsLclRpc.Call(utils.CDRsV1ProcessCDR, args, &reply); err != nil {
+	if err := actsLclRpc.Call(context.Background(), utils.CDRsV1ProcessCDR, args, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf("Received: %s", reply)
@@ -900,13 +901,13 @@ func testActionsitresetAccountCDR(t *testing.T) {
 	time.Sleep(100 * time.Millisecond)
 
 	attrsEA := &utils.AttrExecuteAction{Tenant: "cgrates.org", Account: account, ActionsId: attrsAA.ActionsId}
-	if err := actsLclRpc.Call(utils.APIerSv1ExecuteAction, attrsEA, &reply); err != nil {
+	if err := actsLclRpc.Call(context.Background(), utils.APIerSv1ExecuteAction, attrsEA, &reply); err != nil {
 		t.Error("Got error on APIerSv1.ExecuteAction: ", err.Error())
 	} else if reply != utils.OK {
 		t.Errorf("Calling APIerSv1.ExecuteAction received: %s", reply)
 	}
 
-	if err := actsLclRpc.Call(utils.APIerSv2GetAccount, attrs2, &acc); err != nil {
+	if err := actsLclRpc.Call(context.Background(), utils.APIerSv2GetAccount, attrs2, &acc); err != nil {
 		t.Error("Got error on APIerSv1.GetAccount: ", err.Error())
 	} else if tv := acc.BalanceMap[utils.MetaVoice].GetTotalValue(); tv != float64(10*time.Second) {
 		t.Errorf("Calling APIerSv1.GetBalance expected: %f, received: %f", float64(10*time.Second), tv)
@@ -957,14 +958,14 @@ func testActionsitremoteSetAccount(t *testing.T) {
 			{Identifier: utils.MetaRemoteSetAccount, ExtraParameters: ts.URL, Weight: 20.0},
 		},
 	}
-	if err := actsLclRpc.Call(utils.APIerSv2SetActions, attrsAA, &reply); err != nil && err.Error() != utils.ErrExists.Error() {
+	if err := actsLclRpc.Call(context.Background(), utils.APIerSv2SetActions, attrsAA, &reply); err != nil && err.Error() != utils.ErrExists.Error() {
 		t.Error("Got error on APIerSv2.SetActions: ", err.Error())
 	} else if reply != utils.OK {
 		t.Errorf("Calling APIerSv2.SetActions received: %s", reply)
 	}
 
 	attrsEA := &utils.AttrExecuteAction{Tenant: "cgrates.org", Account: account, ActionsId: attrsAA.ActionsId}
-	if err := actsLclRpc.Call(utils.APIerSv1ExecuteAction, attrsEA, &reply); err != nil {
+	if err := actsLclRpc.Call(context.Background(), utils.APIerSv1ExecuteAction, attrsEA, &reply); err != nil {
 		t.Error("Got error on APIerSv1.ExecuteAction: ", err.Error())
 	} else if reply != utils.OK {
 		t.Errorf("Calling APIerSv1.ExecuteAction received: %s", reply)
@@ -972,7 +973,7 @@ func testActionsitremoteSetAccount(t *testing.T) {
 
 	var acc2 Account
 	attrs2 := &utils.AttrGetAccount{Account: account}
-	if err := actsLclRpc.Call(utils.APIerSv2GetAccount, attrs2, &acc2); err != nil {
+	if err := actsLclRpc.Call(context.Background(), utils.APIerSv2GetAccount, attrs2, &acc2); err != nil {
 		t.Fatal("Got error on APIerSv1.GetAccount: ", err.Error())
 	}
 	acc2.UpdateTime = exp.UpdateTime

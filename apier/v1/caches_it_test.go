@@ -21,12 +21,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package v1
 
 import (
-	"net/rpc"
 	"path"
 	"reflect"
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc"
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -35,7 +36,7 @@ import (
 
 var (
 	chcCfg         *config.CGRConfig
-	chcRPC         *rpc.Client
+	chcRPC         *birpc.Client
 	chcCfgPath     string
 	cacheConfigDIR string
 
@@ -121,7 +122,7 @@ func testCacheSRpcConn(t *testing.T) {
 func testCacheSLoadTariffPlanFromFolder(t *testing.T) {
 	var reply string
 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "testtp")}
-	if err := chcRPC.Call(utils.APIerSv1LoadTariffPlanFromFolder, attrs, &reply); err != nil {
+	if err := chcRPC.Call(context.Background(), utils.APIerSv1LoadTariffPlanFromFolder, attrs, &reply); err != nil {
 		t.Error(err)
 	}
 	time.Sleep(time.Duration(*waitRater) * time.Millisecond)
@@ -134,14 +135,14 @@ func testCacheSAfterLoadFromFolder(t *testing.T) {
 	expStats[utils.CacheDestinations].Items = 3
 	expStats[utils.CacheLoadIDs].Items = 18
 	expStats[utils.CacheRPCConnections].Items = 2
-	if err := chcRPC.Call(utils.CacheSv1GetCacheStats, &utils.AttrCacheIDsWithAPIOpts{}, &rcvStats); err != nil {
+	if err := chcRPC.Call(context.Background(), utils.CacheSv1GetCacheStats, &utils.AttrCacheIDsWithAPIOpts{}, &rcvStats); err != nil {
 		t.Error("Got error on CacheSv1.GetCacheStats: ", err.Error())
 	} else if !reflect.DeepEqual(expStats, rcvStats) {
 		t.Errorf("Expecting: %+v, \n received: %+v", utils.ToJSON(expStats), utils.ToJSON(rcvStats))
 	}
 	reply := ""
 	// Simple test that command is executed without errors
-	if err := chcRPC.Call(utils.CacheSv1LoadCache, utils.NewAttrReloadCacheWithOpts(), &reply); err != nil {
+	if err := chcRPC.Call(context.Background(), utils.CacheSv1LoadCache, utils.NewAttrReloadCacheWithOpts(), &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Error(reply)
@@ -177,7 +178,7 @@ func testCacheSAfterLoadFromFolder(t *testing.T) {
 	expStats[utils.CacheReverseFilterIndexes].Items = 10
 	expStats[utils.CacheReverseFilterIndexes].Groups = 7
 
-	if err := chcRPC.Call(utils.CacheSv1GetCacheStats, &utils.AttrCacheIDsWithAPIOpts{}, &rcvStats); err != nil {
+	if err := chcRPC.Call(context.Background(), utils.CacheSv1GetCacheStats, &utils.AttrCacheIDsWithAPIOpts{}, &rcvStats); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expStats, rcvStats) {
 		t.Errorf("Expecting: %+v,\n received: %+v", utils.ToJSON(expStats), utils.ToJSON(rcvStats))
@@ -186,7 +187,7 @@ func testCacheSAfterLoadFromFolder(t *testing.T) {
 
 func testCacheSFlush(t *testing.T) {
 	reply := ""
-	if err := chcRPC.Call(utils.CacheSv1Clear, &utils.AttrCacheIDsWithAPIOpts{
+	if err := chcRPC.Call(context.Background(), utils.CacheSv1Clear, &utils.AttrCacheIDsWithAPIOpts{
 		CacheIDs: nil,
 	}, &reply); err != nil {
 		t.Error("Got error on CacheSv1.ReloadCache: ", err.Error())
@@ -195,7 +196,7 @@ func testCacheSFlush(t *testing.T) {
 	}
 	var rcvStats map[string]*ltcache.CacheStats
 	expStats := engine.GetDefaultEmptyCacheStats()
-	if err := chcRPC.Call(utils.CacheSv1GetCacheStats, &utils.AttrCacheIDsWithAPIOpts{}, &rcvStats); err != nil {
+	if err := chcRPC.Call(context.Background(), utils.CacheSv1GetCacheStats, &utils.AttrCacheIDsWithAPIOpts{}, &rcvStats); err != nil {
 		t.Error("Got error on CacheSv1.GetCacheStats: ", err.Error())
 	} else if !reflect.DeepEqual(expStats, rcvStats) {
 		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(expStats), utils.ToJSON(rcvStats))
@@ -207,7 +208,7 @@ func testCacheSReload(t *testing.T) {
 	expStats := engine.GetDefaultEmptyCacheStats()
 	reply := ""
 	// Simple test that command is executed without errors
-	if err := chcRPC.Call(utils.CacheSv1LoadCache, utils.NewAttrReloadCacheWithOpts(), &reply); err != nil {
+	if err := chcRPC.Call(context.Background(), utils.CacheSv1LoadCache, utils.NewAttrReloadCacheWithOpts(), &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Error(reply)
@@ -245,7 +246,7 @@ func testCacheSReload(t *testing.T) {
 	expStats[utils.CacheReverseFilterIndexes].Items = 10
 	expStats[utils.CacheReverseFilterIndexes].Groups = 7
 
-	if err := chcRPC.Call(utils.CacheSv1GetCacheStats, &utils.AttrCacheIDsWithAPIOpts{}, &rcvStats); err != nil {
+	if err := chcRPC.Call(context.Background(), utils.CacheSv1GetCacheStats, &utils.AttrCacheIDsWithAPIOpts{}, &rcvStats); err != nil {
 		t.Error(err)
 	}
 	rcvStats[utils.MetaAPIBan].Items = 0
@@ -261,7 +262,7 @@ func testCacheSGetItemIDs(t *testing.T) {
 		CacheID:      utils.CacheThresholdProfiles,
 		ItemIDPrefix: "NotExistent",
 	}
-	if err := chcRPC.Call(utils.CacheSv1GetItemIDs, argsAPI, &rcvKeys); err == nil || err.Error() != utils.ErrNotFound.Error() {
+	if err := chcRPC.Call(context.Background(), utils.CacheSv1GetItemIDs, argsAPI, &rcvKeys); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Fatalf("Expected error: %s received error: %s and reply: %v ", utils.ErrNotFound, err.Error(), rcvKeys)
 	}
 
@@ -269,7 +270,7 @@ func testCacheSGetItemIDs(t *testing.T) {
 	argsAPI = utils.ArgsGetCacheItemIDs{
 		CacheID: utils.CacheThresholdProfiles,
 	}
-	if err := chcRPC.Call(utils.CacheSv1GetItemIDs, argsAPI, &rcvKeys); err != nil {
+	if err := chcRPC.Call(context.Background(), utils.CacheSv1GetItemIDs, argsAPI, &rcvKeys); err != nil {
 		t.Fatalf("Got error on APIerSv1.GetCacheStats: %s ", err.Error())
 	}
 	if !reflect.DeepEqual(expKeys, rcvKeys) {
@@ -284,7 +285,7 @@ func testCacheSHasItem(t *testing.T) {
 		CacheID: utils.CacheThresholdProfiles,
 		ItemID:  "NotExistent",
 	}
-	if err := chcRPC.Call(utils.CacheSv1HasItem, argsAPI, &reply); err != nil {
+	if err := chcRPC.Call(context.Background(), utils.CacheSv1HasItem, argsAPI, &reply); err != nil {
 		t.Error(err)
 	} else if reply {
 		t.Errorf("Expected: %v , received:%v", expected, reply)
@@ -295,7 +296,7 @@ func testCacheSHasItem(t *testing.T) {
 		CacheID: utils.CacheThresholdProfiles,
 		ItemID:  "cgrates.org:Threshold1",
 	}
-	if err := chcRPC.Call(utils.CacheSv1HasItem, argsAPI, &reply); err != nil {
+	if err := chcRPC.Call(context.Background(), utils.CacheSv1HasItem, argsAPI, &reply); err != nil {
 		t.Error(err)
 	} else if !reply {
 		t.Errorf("Expected: %v , received:%v", expected, reply)
@@ -309,7 +310,7 @@ func testCacheSGetItemExpiryTime(t *testing.T) {
 		CacheID: utils.CacheThresholdProfiles,
 		ItemID:  "NotExistent",
 	}
-	if err := chcRPC.Call(utils.CacheSv1GetItemExpiryTime, argsAPI, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
+	if err := chcRPC.Call(context.Background(), utils.CacheSv1GetItemExpiryTime, argsAPI, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Fatalf("Expected error: %s received error: %s and reply: %v ", utils.ErrNotFound, err.Error(), reply)
 	}
 
@@ -318,7 +319,7 @@ func testCacheSGetItemExpiryTime(t *testing.T) {
 		CacheID: utils.CacheThresholdProfiles,
 		ItemID:  "cgrates.org:Threshold1",
 	}
-	if err := chcRPC.Call(utils.CacheSv1GetItemExpiryTime, argsAPI, &reply); err != nil {
+	if err := chcRPC.Call(context.Background(), utils.CacheSv1GetItemExpiryTime, argsAPI, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, reply) {
 		t.Errorf("Expected: %v , received:%v", expected, reply)
@@ -327,7 +328,7 @@ func testCacheSGetItemExpiryTime(t *testing.T) {
 
 func testCacheSReloadCache(t *testing.T) {
 	var reply string
-	if err := chcRPC.Call(utils.CacheSv1ReloadCache, new(utils.AttrReloadCacheWithAPIOpts), &reply); err != nil {
+	if err := chcRPC.Call(context.Background(), utils.CacheSv1ReloadCache, new(utils.AttrReloadCacheWithAPIOpts), &reply); err != nil {
 		t.Error("Got error on CacheSv1.ReloadCache: ", err.Error())
 	} else if reply != utils.OK {
 		t.Error("Calling CacheSv1.ReloadCache got reply: ", reply)
@@ -340,18 +341,18 @@ func testCacheSRemoveItem(t *testing.T) {
 		CacheID: utils.CacheThresholdProfiles,
 		ItemID:  "cgrates.org:Threshold1",
 	}
-	if err := chcRPC.Call(utils.CacheSv1HasItem, argsAPI, &reply); err != nil {
+	if err := chcRPC.Call(context.Background(), utils.CacheSv1HasItem, argsAPI, &reply); err != nil {
 		t.Error(err)
 	} else if !reply {
 		t.Errorf("Expected: %v , received:%v", true, reply)
 	}
 	var remReply string
-	if err := chcRPC.Call(utils.CacheSv1RemoveItem, argsAPI, &remReply); err != nil {
+	if err := chcRPC.Call(context.Background(), utils.CacheSv1RemoveItem, argsAPI, &remReply); err != nil {
 		t.Error(err)
 	} else if remReply != utils.OK {
 		t.Errorf("Expected: %v , received:%v", utils.OK, remReply)
 	}
-	if err := chcRPC.Call(utils.CacheSv1HasItem, argsAPI, &reply); err != nil {
+	if err := chcRPC.Call(context.Background(), utils.CacheSv1HasItem, argsAPI, &reply); err != nil {
 		t.Error(err)
 	} else if reply {
 		t.Errorf("Expected: %v , received:%v", false, reply)
@@ -364,7 +365,7 @@ func testCacheSRemoveItems(t *testing.T) {
 	// argsAPI2 := utils.ArgsGetCacheItemIDs{
 	// 	CacheID: utils.CacheStatQueueProfiles,
 	// }
-	// if err := chcRPC.Call(utils.CacheSv1GetItemIDs, argsAPI2, &rcvKeys); err != nil {
+	// if err := chcRPC.Call(context.Background(),utils.CacheSv1GetItemIDs, argsAPI2, &rcvKeys); err != nil {
 	// 	t.Fatalf("Got error on APIerSv1.GetCacheStats: %s ", err.Error())
 	// }
 	// if !reflect.DeepEqual(expKeys, rcvKeys) {
@@ -376,7 +377,7 @@ func testCacheSRemoveItems(t *testing.T) {
 		ItemID:  "cgrates.org:Stats1",
 	}
 
-	if err := chcRPC.Call(utils.CacheSv1HasItem, argsAPI, &reply); err != nil {
+	if err := chcRPC.Call(context.Background(), utils.CacheSv1HasItem, argsAPI, &reply); err != nil {
 		t.Error(err)
 	} else if !reply {
 		t.Errorf("Expected: %v , received:%v", true, reply)
@@ -386,13 +387,13 @@ func testCacheSRemoveItems(t *testing.T) {
 		ItemID:  "cgrates.org:ROUTE_1",
 	}
 
-	if err := chcRPC.Call(utils.CacheSv1HasItem, argsAPI, &reply); err != nil {
+	if err := chcRPC.Call(context.Background(), utils.CacheSv1HasItem, argsAPI, &reply); err != nil {
 		t.Error(err)
 	} else if !reply {
 		t.Errorf("Expected: %v , received:%v", true, reply)
 	}
 	var remReply string
-	if err := chcRPC.Call(utils.CacheSv1RemoveItems, &utils.AttrReloadCacheWithAPIOpts{
+	if err := chcRPC.Call(context.Background(), utils.CacheSv1RemoveItems, &utils.AttrReloadCacheWithAPIOpts{
 		APIOpts:              make(map[string]any),
 		Tenant:               "cgrates.org",
 		StatsQueueProfileIDs: []string{"cgrates.org:Stats1"},
@@ -402,7 +403,7 @@ func testCacheSRemoveItems(t *testing.T) {
 	} else if remReply != utils.OK {
 		t.Errorf("Expected: %v , received:%v", utils.OK, remReply)
 	}
-	if err := chcRPC.Call(utils.CacheSv1HasItem, argsAPI, &reply); err != nil {
+	if err := chcRPC.Call(context.Background(), utils.CacheSv1HasItem, argsAPI, &reply); err != nil {
 		t.Error(err)
 	} else if reply {
 		t.Errorf("Expected: %v , received:%v", false, reply)
@@ -413,7 +414,7 @@ func testCacheSRemoveItems(t *testing.T) {
 		ItemID:  "cgrates.org:Stats1",
 	}
 
-	if err := chcRPC.Call(utils.CacheSv1HasItem, argsAPI, &reply); err != nil {
+	if err := chcRPC.Call(context.Background(), utils.CacheSv1HasItem, argsAPI, &reply); err != nil {
 		t.Error(err)
 	} else if reply {
 		t.Errorf("Expected: %v , received:%v", false, reply)
@@ -422,14 +423,14 @@ func testCacheSRemoveItems(t *testing.T) {
 
 func testCacheSClear(t *testing.T) {
 	reply := ""
-	if err := chcRPC.Call(utils.CacheSv1Clear, &utils.AttrCacheIDsWithAPIOpts{}, &reply); err != nil {
+	if err := chcRPC.Call(context.Background(), utils.CacheSv1Clear, &utils.AttrCacheIDsWithAPIOpts{}, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Error("Calling CacheSv1.ReloadCache got reply: ", reply)
 	}
 	var rcvStats map[string]*ltcache.CacheStats
 	expStats := engine.GetDefaultEmptyCacheStats()
-	if err := chcRPC.Call(utils.CacheSv1GetCacheStats, &utils.AttrCacheIDsWithAPIOpts{}, &rcvStats); err != nil {
+	if err := chcRPC.Call(context.Background(), utils.CacheSv1GetCacheStats, &utils.AttrCacheIDsWithAPIOpts{}, &rcvStats); err != nil {
 		t.Error("Got error on CacheSv1.GetCacheStats: ", err.Error())
 	} else if !reflect.DeepEqual(expStats, rcvStats) {
 		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(expStats), utils.ToJSON(rcvStats))
@@ -442,7 +443,7 @@ func testCacheSPrecacheStatus(t *testing.T) {
 	for k := range utils.CachePartitions {
 		expected[k] = utils.MetaReady
 	}
-	if err := chcRPC.Call(utils.CacheSv1PrecacheStatus, &utils.AttrCacheIDsWithAPIOpts{}, &reply); err != nil {
+	if err := chcRPC.Call(context.Background(), utils.CacheSv1PrecacheStatus, &utils.AttrCacheIDsWithAPIOpts{}, &reply); err != nil {
 		t.Fatal(err)
 	}
 	reply[utils.MetaAPIBan] = utils.MetaReady // do not check the status for this partition
@@ -454,7 +455,7 @@ func testCacheSPrecacheStatus(t *testing.T) {
 func testCacheSPing(t *testing.T) {
 	var reply string
 	expected := utils.Pong
-	if err := chcRPC.Call(utils.CacheSv1Ping, &utils.CGREvent{}, &reply); err != nil {
+	if err := chcRPC.Call(context.Background(), utils.CacheSv1Ping, &utils.CGREvent{}, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, reply) {
 		t.Errorf("Expected: %v , received:%v", utils.ToJSON(expected), utils.ToJSON(reply))

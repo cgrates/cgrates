@@ -23,10 +23,10 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/cgrates/rpcclient"
 )
 
 func TestNewRpcEE(t *testing.T) {
@@ -35,7 +35,7 @@ func TestNewRpcEE(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	connMgr := engine.NewConnManager(config.NewDefaultCGRConfig(), make(map[string]chan rpcclient.ClientConnector))
+	connMgr := engine.NewConnManager(config.NewDefaultCGRConfig(), make(map[string]chan birpc.ClientConnector))
 
 	rcv, err := NewRpcEE(eeSCfg, dc, connMgr)
 	if err != nil {
@@ -108,7 +108,7 @@ func TestRPCConnect(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	connMgr := engine.NewConnManager(config.NewDefaultCGRConfig(), make(map[string]chan rpcclient.ClientConnector))
+	connMgr := engine.NewConnManager(config.NewDefaultCGRConfig(), make(map[string]chan birpc.ClientConnector))
 	rpcEe, err := NewRpcEE(eeSCfg, dc, connMgr)
 	if err != nil {
 		t.Error(err)
@@ -124,7 +124,7 @@ func TestRPCClose(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	connMgr := engine.NewConnManager(config.NewDefaultCGRConfig(), make(map[string]chan rpcclient.ClientConnector))
+	connMgr := engine.NewConnManager(config.NewDefaultCGRConfig(), make(map[string]chan birpc.ClientConnector))
 	rpcEe, err := NewRpcEE(eeSCfg, dc, connMgr)
 	if err != nil {
 		t.Error(err)
@@ -145,7 +145,7 @@ func TestRPCGetMetrics(t *testing.T) {
 			"just_a_field": "just_a_value",
 		},
 	}
-	connMgr := engine.NewConnManager(config.NewDefaultCGRConfig(), make(map[string]chan rpcclient.ClientConnector))
+	connMgr := engine.NewConnManager(config.NewDefaultCGRConfig(), make(map[string]chan birpc.ClientConnector))
 	rpcEe, err := NewRpcEE(eeSCfg, dc, connMgr)
 	if err != nil {
 		t.Error(err)
@@ -162,7 +162,7 @@ func TestRPCPrepareMap(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	connMgr := engine.NewConnManager(config.NewDefaultCGRConfig(), make(map[string]chan rpcclient.ClientConnector))
+	connMgr := engine.NewConnManager(config.NewDefaultCGRConfig(), make(map[string]chan birpc.ClientConnector))
 	rpcEe, err := NewRpcEE(eeSCfg, dc, connMgr)
 	if err != nil {
 		t.Error(err)

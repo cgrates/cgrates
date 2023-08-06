@@ -23,8 +23,6 @@ package general_tests
 
 import (
 	"flag"
-	"net/rpc"
-	"net/rpc/jsonrpc"
 	"os"
 	"path"
 	"reflect"
@@ -33,6 +31,9 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc"
+	"github.com/cgrates/birpc/context"
+	"github.com/cgrates/birpc/jsonrpc"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/sessions"
@@ -40,7 +41,7 @@ import (
 )
 
 var tutorialCallsCfg *config.CGRConfig
-var tutorialCallsRpc *rpc.Client
+var tutorialCallsRpc *birpc.Client
 var tutorialCallsPjSuaListener *os.File
 var fsConfig = flag.String("fsConfig", "/usr/share/cgrates/tutorial_tests/fs_evsock", "FreeSwitch tutorial folder")
 var kamConfig = flag.String("kamConfig", "/usr/share/cgrates/tutorial_tests/kamevapi", "Kamailio tutorial folder")
@@ -253,7 +254,7 @@ func testCallRpcConn(t *testing.T) {
 func testCallLoadTariffPlanFromFolder(t *testing.T) {
 	var reply string
 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "tutorial")}
-	if err := tutorialCallsRpc.Call(utils.APIerSv1LoadTariffPlanFromFolder, attrs, &reply); err != nil {
+	if err := tutorialCallsRpc.Call(context.Background(), utils.APIerSv1LoadTariffPlanFromFolder, attrs, &reply); err != nil {
 		t.Error(err)
 	}
 	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // Give time for scheduler to execute topups
@@ -263,21 +264,21 @@ func testCallLoadTariffPlanFromFolder(t *testing.T) {
 func testCallAccountsBefore(t *testing.T) {
 	var reply *engine.Account
 	attrs := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1001"}
-	if err := tutorialCallsRpc.Call(utils.APIerSv2GetAccount, attrs, &reply); err != nil {
+	if err := tutorialCallsRpc.Call(context.Background(), utils.APIerSv2GetAccount, attrs, &reply); err != nil {
 		t.Error("Got error on APIerSv2.GetAccount: ", err.Error())
 	} else if reply.BalanceMap[utils.MetaMonetary].GetTotalValue() != 10.0 {
 		t.Errorf("Calling APIerSv1.GetBalance received: %f", reply.BalanceMap[utils.MetaMonetary].GetTotalValue())
 	}
 	var reply2 *engine.Account
 	attrs2 := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1002"}
-	if err := tutorialCallsRpc.Call(utils.APIerSv2GetAccount, attrs2, &reply2); err != nil {
+	if err := tutorialCallsRpc.Call(context.Background(), utils.APIerSv2GetAccount, attrs2, &reply2); err != nil {
 		t.Error("Got error on APIerSv2.GetAccount: ", err.Error())
 	} else if reply2.BalanceMap[utils.MetaMonetary].GetTotalValue() != 10.0 {
 		t.Errorf("Calling APIerSv1.GetBalance received: %f", reply2.BalanceMap[utils.MetaMonetary].GetTotalValue())
 	}
 	var reply3 *engine.Account
 	attrs3 := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1003"}
-	if err := tutorialCallsRpc.Call(utils.APIerSv2GetAccount, attrs3, &reply3); err != nil {
+	if err := tutorialCallsRpc.Call(context.Background(), utils.APIerSv2GetAccount, attrs3, &reply3); err != nil {
 		t.Error("Got error on APIerSv2.GetAccount: ", err.Error())
 	} else if reply3.BalanceMap[utils.MetaMonetary].GetTotalValue() != 10.0 {
 		t.Errorf("Calling APIerSv1.GetBalance received: %f", reply3.BalanceMap[utils.MetaMonetary].GetTotalValue())
@@ -290,13 +291,13 @@ func testCallStatMetricsBefore(t *testing.T) {
 		utils.MetaTCC: utils.NotAvailable,
 		utils.MetaTCD: utils.NotAvailable,
 	}
-	if err := tutorialCallsRpc.Call(utils.StatSv1GetQueueStringMetrics,
+	if err := tutorialCallsRpc.Call(context.Background(), utils.StatSv1GetQueueStringMetrics,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "Stats2"}, &metrics); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expectedMetrics, metrics) {
 		t.Errorf("expecting: %+v, received reply: %s", expectedMetrics, metrics)
 	}
-	if err := tutorialCallsRpc.Call(utils.StatSv1GetQueueStringMetrics,
+	if err := tutorialCallsRpc.Call(context.Background(), utils.StatSv1GetQueueStringMetrics,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "Stats2_1"}, &metrics); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expectedMetrics, metrics) {
@@ -318,7 +319,7 @@ func testCallCheckResourceBeforeAllocation(t *testing.T) {
 			utils.OptsResourcesUsageID: "OriginID",
 		},
 	}
-	if err := tutorialCallsRpc.Call(utils.ResourceSv1GetResourcesForEvent, args, &rs); err != nil {
+	if err := tutorialCallsRpc.Call(context.Background(), utils.ResourceSv1GetResourcesForEvent, args, &rs); err != nil {
 		t.Fatal(err)
 	} else if len(*rs) != 1 {
 		t.Fatalf("Resources: %+v", utils.ToJSON(rs))
@@ -334,7 +335,7 @@ func testCallCheckResourceBeforeAllocation(t *testing.T) {
 func testCallCheckThreshold1001Before(t *testing.T) {
 	var td engine.Threshold
 	eTd := engine.Threshold{Tenant: "cgrates.org", ID: "THD_ACNT_1001", Hits: 0}
-	if err := tutorialCallsRpc.Call(utils.ThresholdSv1GetThreshold,
+	if err := tutorialCallsRpc.Call(context.Background(), utils.ThresholdSv1GetThreshold,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "THD_ACNT_1001"}, &td); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eTd, td) {
@@ -345,7 +346,7 @@ func testCallCheckThreshold1001Before(t *testing.T) {
 func testCallCheckThreshold1002Before(t *testing.T) {
 	var td engine.Threshold
 	eTd := engine.Threshold{Tenant: "cgrates.org", ID: "THD_ACNT_1002", Hits: 0}
-	if err := tutorialCallsRpc.Call(utils.ThresholdSv1GetThreshold,
+	if err := tutorialCallsRpc.Call(context.Background(), utils.ThresholdSv1GetThreshold,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "THD_ACNT_1002"}, &td); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eTd, td) {
@@ -395,7 +396,7 @@ func testCallGetActiveSessions(t *testing.T) {
 			Destination: "1002",
 		},
 	}
-	if err := tutorialCallsRpc.Call(utils.SessionSv1GetActiveSessions,
+	if err := tutorialCallsRpc.Call(context.Background(), utils.SessionSv1GetActiveSessions,
 		nil, &reply); err != nil {
 		t.Error("Got error on SessionSv1.GetActiveSessions: ", err.Error())
 	} else {
@@ -469,7 +470,7 @@ func testCallCheckResourceAllocation(t *testing.T) {
 			utils.OptsResourcesUsageID: "OriginID1",
 		},
 	}
-	if err := tutorialCallsRpc.Call(utils.ResourceSv1GetResourcesForEvent, args, &rs); err != nil {
+	if err := tutorialCallsRpc.Call(context.Background(), utils.ResourceSv1GetResourcesForEvent, args, &rs); err != nil {
 		t.Fatal(err)
 	} else if len(*rs) != 1 {
 		t.Fatalf("Resources: %+v", utils.ToJSON(rs))
@@ -487,7 +488,7 @@ func testCallCheckResourceAllocation(t *testing.T) {
 func testCallAccount1001(t *testing.T) {
 	var reply *engine.Account
 	attrs := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1001"}
-	if err := tutorialCallsRpc.Call(utils.APIerSv2GetAccount, attrs, &reply); err != nil {
+	if err := tutorialCallsRpc.Call(context.Background(), utils.APIerSv2GetAccount, attrs, &reply); err != nil {
 		t.Error(err.Error())
 	} else if reply.BalanceMap[utils.MetaMonetary].GetTotalValue() == 10.0 { // Make sure we debitted
 		t.Errorf("Expected: 10, received: %+v", reply.BalanceMap[utils.MetaMonetary].GetTotalValue())
@@ -500,7 +501,7 @@ func testCallAccount1001(t *testing.T) {
 func testCall1001Cdrs(t *testing.T) {
 	var reply []*engine.ExternalCDR
 	req := utils.RPCCDRsFilter{RunIDs: []string{utils.MetaDefault}, Accounts: []string{"1001"}}
-	if err := tutorialCallsRpc.Call(utils.APIerSv2GetCDRs, &req, &reply); err != nil {
+	if err := tutorialCallsRpc.Call(context.Background(), utils.APIerSv2GetCDRs, &req, &reply); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(reply) != 2 {
 		t.Error("Unexpected number of CDRs returned: ", len(reply))
@@ -541,7 +542,7 @@ func testCall1002Cdrs(t *testing.T) {
 	var reply []*engine.ExternalCDR
 	req := utils.RPCCDRsFilter{RunIDs: []string{utils.MetaDefault},
 		Accounts: []string{"1002"}, DestinationPrefixes: []string{"1001"}}
-	if err := tutorialCallsRpc.Call(utils.APIerSv2GetCDRs, &req, &reply); err != nil {
+	if err := tutorialCallsRpc.Call(context.Background(), utils.APIerSv2GetCDRs, &req, &reply); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(reply) != 1 {
 		t.Error("Unexpected number of CDRs returned: ", len(reply))
@@ -567,7 +568,7 @@ func testCall1003Cdrs(t *testing.T) {
 	var reply []*engine.ExternalCDR
 	req := utils.RPCCDRsFilter{RunIDs: []string{utils.MetaDefault},
 		Accounts: []string{"1003"}, DestinationPrefixes: []string{"1001"}}
-	if err := tutorialCallsRpc.Call(utils.APIerSv2GetCDRs, &req, &reply); err != nil {
+	if err := tutorialCallsRpc.Call(context.Background(), utils.APIerSv2GetCDRs, &req, &reply); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(reply) != 2 {
 		t.Error("Unexpected number of CDRs returned: ", len(reply))
@@ -619,7 +620,7 @@ func testCallStatMetrics(t *testing.T) {
 		utils.MetaTCD: "37s",
 	}
 
-	if err := tutorialCallsRpc.Call(utils.StatSv1GetQueueStringMetrics,
+	if err := tutorialCallsRpc.Call(context.Background(), utils.StatSv1GetQueueStringMetrics,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "Stats2"}, &metrics); err != nil {
 		t.Fatal(err)
 	}
@@ -632,7 +633,7 @@ func testCallStatMetrics(t *testing.T) {
 		!reflect.DeepEqual(firstStatMetrics4, metrics) {
 		t.Errorf("expecting: %+v, received reply: %s", firstStatMetrics1, metrics)
 	}
-	if err := tutorialCallsRpc.Call(utils.StatSv1GetQueueStringMetrics,
+	if err := tutorialCallsRpc.Call(context.Background(), utils.StatSv1GetQueueStringMetrics,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "Stats2_1"}, &metrics); err != nil {
 		t.Error(err)
 	}
@@ -659,7 +660,7 @@ func testCallCheckResourceRelease(t *testing.T) {
 			utils.OptsResourcesUsageID: "OriginID2",
 		},
 	}
-	if err := tutorialCallsRpc.Call(utils.ResourceSv1GetResourcesForEvent, args, &rs); err != nil {
+	if err := tutorialCallsRpc.Call(context.Background(), utils.ResourceSv1GetResourcesForEvent, args, &rs); err != nil {
 		t.Fatal(err)
 	} else if len(*rs) != 1 {
 		t.Fatalf("Resources: %+v", rs)
@@ -673,7 +674,7 @@ func testCallCheckResourceRelease(t *testing.T) {
 
 func testCallCheckThreshold1001After(t *testing.T) {
 	var td engine.Threshold
-	if err := tutorialCallsRpc.Call(utils.ThresholdSv1GetThreshold,
+	if err := tutorialCallsRpc.Call(context.Background(), utils.ThresholdSv1GetThreshold,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "THD_ACNT_1001"}, &td); err != nil &&
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
@@ -683,7 +684,7 @@ func testCallCheckThreshold1001After(t *testing.T) {
 func testCallCheckThreshold1002After(t *testing.T) {
 	var td engine.Threshold
 	eTd := engine.Threshold{Tenant: "cgrates.org", ID: "THD_ACNT_1002", Hits: 4}
-	if err := tutorialCallsRpc.Call(utils.ThresholdSv1GetThreshold,
+	if err := tutorialCallsRpc.Call(context.Background(), utils.ThresholdSv1GetThreshold,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "THD_ACNT_1002"}, &td); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eTd.Tenant, td.Tenant) {
@@ -698,7 +699,7 @@ func testCallCheckThreshold1002After(t *testing.T) {
 func testCallSyncSessions(t *testing.T) {
 	var reply *[]*sessions.ExternalSession
 	// activeSessions shouldn't be active
-	if err := tutorialCallsRpc.Call(utils.SessionSv1GetActiveSessions,
+	if err := tutorialCallsRpc.Call(context.Background(), utils.SessionSv1GetActiveSessions,
 		nil, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error("Got error on SessionSv1.GetActiveSessions: ", err)
 	}
@@ -716,7 +717,7 @@ func testCallSyncSessions(t *testing.T) {
 	}
 	time.Sleep(time.Second)
 	// get active sessions
-	if err := tutorialCallsRpc.Call(utils.SessionSv1GetActiveSessions,
+	if err := tutorialCallsRpc.Call(context.Background(), utils.SessionSv1GetActiveSessions,
 		nil, &reply); err != nil {
 		t.Error("Got error on SessionSv1.GetActiveSessions: ", err.Error())
 	} else if len(*reply) != 4 { // expect to have 4 sessions ( two for 1001 to 1003 *raw and *default and two from 1001 to 1002 *raw and *default)
@@ -736,7 +737,7 @@ func testCallSyncSessions(t *testing.T) {
 			utils.OptsResourcesUsageID: "OriginID3",
 		},
 	}
-	if err := tutorialCallsRpc.Call(utils.ResourceSv1GetResourcesForEvent, args, &rs); err != nil {
+	if err := tutorialCallsRpc.Call(context.Background(), utils.ResourceSv1GetResourcesForEvent, args, &rs); err != nil {
 		t.Fatal(err)
 	} else if len(*rs) != 1 {
 		t.Fatalf("Resources: %+v", utils.ToJSON(rs))
@@ -769,7 +770,7 @@ func testCallSyncSessions(t *testing.T) {
 	time.Sleep(2 * time.Second)
 
 	// activeSessions shouldn't be active
-	if err := tutorialCallsRpc.Call(utils.SessionSv1GetActiveSessions,
+	if err := tutorialCallsRpc.Call(context.Background(), utils.SessionSv1GetActiveSessions,
 		nil, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("Got error on SessionSv1.GetActiveSessions: %v and reply: %s", err, utils.ToJSON(reply))
 	}
@@ -794,7 +795,7 @@ func testCallSyncSessions(t *testing.T) {
 		RunIDs:   []string{utils.MetaDefault},
 		Accounts: []string{"1001"},
 	}
-	if err := tutorialCallsRpc.Call(utils.APIerSv2GetCDRs, &req, &rplCdrs); err != nil {
+	if err := tutorialCallsRpc.Call(context.Background(), utils.APIerSv2GetCDRs, &req, &rplCdrs); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(rplCdrs) != numberOfCDR { // cdr from sync session + cdr from before
 		t.Fatal("Unexpected number of CDRs returned: ", len(rplCdrs), utils.ToJSON(rplCdrs))
@@ -816,7 +817,7 @@ func testCallSyncSessions(t *testing.T) {
 
 	//check if resource was released
 	var rsAfter *engine.Resources
-	if err := tutorialCallsRpc.Call(utils.ResourceSv1GetResourcesForEvent, args, &rsAfter); err != nil {
+	if err := tutorialCallsRpc.Call(context.Background(), utils.ResourceSv1GetResourcesForEvent, args, &rsAfter); err != nil {
 		t.Fatal(err)
 	} else if len(*rsAfter) != 1 {
 		t.Fatalf("Resources: %+v", rsAfter)

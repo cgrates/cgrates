@@ -21,17 +21,17 @@ package services
 import (
 	"sync"
 
+	"github.com/cgrates/birpc"
 	v1 "github.com/cgrates/cgrates/apier/v1"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/cores"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/cgrates/rpcclient"
 )
 
 // NewRalService returns the Ral Service
 func NewRalService(cfg *config.CGRConfig, cacheS *engine.CacheS, server *cores.Server,
-	internalRALsChan, internalResponderChan chan rpcclient.ClientConnector, shdChan *utils.SyncedChan,
+	internalRALsChan, internalResponderChan chan birpc.ClientConnector, shdChan *utils.SyncedChan,
 	connMgr *engine.ConnManager, anz *AnalyzerService,
 	srvDep map[string]*sync.WaitGroup,
 	filtersCh chan *engine.FilterS) *RalService {
@@ -57,7 +57,7 @@ type RalService struct {
 	server    *cores.Server
 	rals      *v1.RALsV1
 	responder *ResponderService
-	connChan  chan rpcclient.ClientConnector
+	connChan  chan birpc.ClientConnector
 	connMgr   *engine.ConnManager
 	anz       *AnalyzerService
 	srvDep    map[string]*sync.WaitGroup
@@ -65,7 +65,7 @@ type RalService struct {
 
 // Start should handle the sercive start
 // For this service the start should be called from RAL Service
-func (rals *RalService) Start() (err error) {
+func (rals *RalService) Start() error {
 	if rals.IsRunning() {
 		return utils.ErrServiceAlreadyRunning
 	}
@@ -87,12 +87,18 @@ func (rals *RalService) Start() (err error) {
 
 	rals.rals = v1.NewRALsV1()
 
+	srv, err := engine.NewService(rals.rals)
+	if err != nil {
+		return err
+	}
 	if !rals.cfg.DispatcherSCfg().Enabled {
-		rals.server.RpcRegister(rals.rals)
+		for _, s := range srv {
+			rals.server.RpcRegister(s)
+		}
 	}
 
-	rals.connChan <- rals.anz.GetInternalCodec(rals.rals, utils.RALService)
-	return
+	rals.connChan <- rals.anz.GetInternalCodec(srv, utils.RALService)
+	return nil
 }
 
 // Reload handles the change of config

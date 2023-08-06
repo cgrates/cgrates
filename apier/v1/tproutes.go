@@ -19,11 +19,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package v1
 
 import (
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
 )
 
 // SetTPRouteProfile creates a new RouteProfile within a tariff plan
-func (apierSv1 *APIerSv1) SetTPRouteProfile(attrs *utils.TPRouteProfile, reply *string) error {
+func (apierSv1 *APIerSv1) SetTPRouteProfile(ctx *context.Context, attrs *utils.TPRouteProfile, reply *string) error {
 	if missing := utils.MissingStructFields(attrs, []string{utils.TPid, utils.ID}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -38,7 +39,7 @@ func (apierSv1 *APIerSv1) SetTPRouteProfile(attrs *utils.TPRouteProfile, reply *
 }
 
 // GetTPRouteProfile queries specific RouteProfile on tariff plan
-func (apierSv1 *APIerSv1) GetTPRouteProfile(attr *utils.TPTntID, reply *utils.TPRouteProfile) error {
+func (apierSv1 *APIerSv1) GetTPRouteProfile(ctx *context.Context, attr *utils.TPTntID, reply *utils.TPRouteProfile) error {
 	if missing := utils.MissingStructFields(attr, []string{utils.TPid, utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -62,7 +63,7 @@ type AttrGetTPRouteProfileIDs struct {
 }
 
 // GetTPRouteProfileIDs queries RouteProfile identities on specific tariff plan.
-func (apierSv1 *APIerSv1) GetTPRouteProfileIDs(attrs *AttrGetTPRouteProfileIDs, reply *[]string) error {
+func (apierSv1 *APIerSv1) GetTPRouteProfileIDs(ctx *context.Context, attrs *AttrGetTPRouteProfileIDs, reply *[]string) error {
 	if missing := utils.MissingStructFields(attrs, []string{utils.TPid}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -79,7 +80,7 @@ func (apierSv1 *APIerSv1) GetTPRouteProfileIDs(attrs *AttrGetTPRouteProfileIDs, 
 }
 
 // RemoveTPRouteProfile removes specific RouteProfile on Tariff plan
-func (apierSv1 *APIerSv1) RemoveTPRouteProfile(attrs *utils.TPTntID, reply *string) error {
+func (apierSv1 *APIerSv1) RemoveTPRouteProfile(ctx *context.Context, attrs *utils.TPTntID, reply *string) error {
 	if missing := utils.MissingStructFields(attrs, []string{utils.TPid, utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}

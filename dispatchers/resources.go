@@ -21,11 +21,12 @@ package dispatchers
 import (
 	"time"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
-func (dS *DispatcherService) ResourceSv1Ping(args *utils.CGREvent, rpl *string) (err error) {
+func (dS *DispatcherService) ResourceSv1Ping(ctx *context.Context, args *utils.CGREvent, rpl *string) (err error) {
 	if args == nil {
 		args = new(utils.CGREvent)
 	}
@@ -39,7 +40,7 @@ func (dS *DispatcherService) ResourceSv1Ping(args *utils.CGREvent, rpl *string) 
 	return dS.Dispatch(args, utils.MetaResources, utils.ResourceSv1Ping, args, rpl)
 }
 
-func (dS *DispatcherService) ResourceSv1GetResourcesForEvent(args *utils.CGREvent,
+func (dS *DispatcherService) ResourceSv1GetResourcesForEvent(ctx *context.Context, args *utils.CGREvent,
 	reply *engine.Resources) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
 	if args != nil && args.Tenant != utils.EmptyString {
@@ -54,7 +55,7 @@ func (dS *DispatcherService) ResourceSv1GetResourcesForEvent(args *utils.CGREven
 	return dS.Dispatch(args, utils.MetaResources, utils.ResourceSv1GetResourcesForEvent, args, reply)
 }
 
-func (dS *DispatcherService) ResourceSv1AuthorizeResources(args *utils.CGREvent,
+func (dS *DispatcherService) ResourceSv1AuthorizeResources(ctx *context.Context, args *utils.CGREvent,
 	reply *string) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
 	if args != nil && args.Tenant != utils.EmptyString {
@@ -69,7 +70,7 @@ func (dS *DispatcherService) ResourceSv1AuthorizeResources(args *utils.CGREvent,
 	return dS.Dispatch(args, utils.MetaResources, utils.ResourceSv1AuthorizeResources, args, reply)
 }
 
-func (dS *DispatcherService) ResourceSv1AllocateResources(args *utils.CGREvent,
+func (dS *DispatcherService) ResourceSv1AllocateResources(ctx *context.Context, args *utils.CGREvent,
 	reply *string) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
 	if args != nil && args.Tenant != utils.EmptyString {
@@ -84,7 +85,7 @@ func (dS *DispatcherService) ResourceSv1AllocateResources(args *utils.CGREvent,
 	return dS.Dispatch(args, utils.MetaResources, utils.ResourceSv1AllocateResources, args, reply)
 }
 
-func (dS *DispatcherService) ResourceSv1ReleaseResources(args *utils.CGREvent,
+func (dS *DispatcherService) ResourceSv1ReleaseResources(ctx *context.Context, args *utils.CGREvent,
 	reply *string) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
 	if args != nil && args.Tenant != utils.EmptyString {
@@ -99,7 +100,7 @@ func (dS *DispatcherService) ResourceSv1ReleaseResources(args *utils.CGREvent,
 	return dS.Dispatch(args, utils.MetaResources, utils.ResourceSv1ReleaseResources, args, reply)
 }
 
-func (dS *DispatcherService) ResourceSv1GetResource(args *utils.TenantIDWithAPIOpts, reply *engine.Resource) (err error) {
+func (dS *DispatcherService) ResourceSv1GetResource(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *engine.Resource) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
 	if args.TenantID != nil && args.TenantID.Tenant != utils.EmptyString {
 		tnt = args.TenantID.Tenant
@@ -117,7 +118,7 @@ func (dS *DispatcherService) ResourceSv1GetResource(args *utils.TenantIDWithAPIO
 	}, utils.MetaResources, utils.ResourceSv1GetResource, args, reply)
 }
 
-func (dS *DispatcherService) ResourceSv1GetResourceWithConfig(args *utils.TenantIDWithAPIOpts, reply *engine.ResourceWithConfig) (err error) {
+func (dS *DispatcherService) ResourceSv1GetResourceWithConfig(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *engine.ResourceWithConfig) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
 	if args.TenantID != nil && args.TenantID.Tenant != utils.EmptyString {
 		tnt = args.TenantID.Tenant

@@ -21,6 +21,7 @@ package dispatchers
 import (
 	"testing"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -35,7 +36,7 @@ func TestGuardianGuardianSv1PingErr1(t *testing.T) {
 	var reply *string
 
 	expected := "MANDATORY_IE_MISSING: [ApiKey]"
-	result := dspSrv.GuardianSv1Ping(CGREvent, reply)
+	result := dspSrv.GuardianSv1Ping(context.Background(), CGREvent, reply)
 
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
@@ -51,7 +52,7 @@ func TestGuardianGuardianSv1PingErr2(t *testing.T) {
 	var reply *string
 
 	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
-	result := dspSrv.GuardianSv1Ping(CGREvent, reply)
+	result := dspSrv.GuardianSv1Ping(context.Background(), CGREvent, reply)
 
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
@@ -65,7 +66,7 @@ func TestGuardianGuardianSv1PingErrNil(t *testing.T) {
 	var reply *string
 
 	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
-	result := dspSrv.GuardianSv1Ping(CGREvent, reply)
+	result := dspSrv.GuardianSv1Ping(context.Background(), CGREvent, reply)
 
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
@@ -82,7 +83,7 @@ func TestGuardianGuardianSv1RemoteLockErr1(t *testing.T) {
 	var reply *string
 
 	expected := "MANDATORY_IE_MISSING: [ApiKey]"
-	result := dspSrv.GuardianSv1RemoteLock(CGREvent, reply)
+	result := dspSrv.GuardianSv1RemoteLock(context.Background(), CGREvent, reply)
 
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
@@ -98,7 +99,7 @@ func TestGuardianGuardianSv1RemoteLockErr2(t *testing.T) {
 	var reply *string
 
 	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
-	result := dspSrv.GuardianSv1RemoteLock(CGREvent, reply)
+	result := dspSrv.GuardianSv1RemoteLock(context.Background(), CGREvent, reply)
 
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
@@ -115,7 +116,7 @@ func TestGuardianGuardianSv1RemoteUnlockErr1(t *testing.T) {
 	var reply *[]string
 
 	expected := "MANDATORY_IE_MISSING: [ApiKey]"
-	result := dspSrv.GuardianSv1RemoteUnlock(CGREvent, reply)
+	result := dspSrv.GuardianSv1RemoteUnlock(context.Background(), CGREvent, reply)
 
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
@@ -131,7 +132,7 @@ func TestGuardianGuardianSv1RemoteUnlockErr2(t *testing.T) {
 	var reply *[]string
 
 	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
-	result := dspSrv.GuardianSv1RemoteUnlock(CGREvent, reply)
+	result := dspSrv.GuardianSv1RemoteUnlock(context.Background(), CGREvent, reply)
 
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)

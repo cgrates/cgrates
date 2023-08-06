@@ -19,11 +19,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package v1
 
 import (
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
 )
 
 // SetTPDispatcherProfile creates a new DispatcherProfile within a tariff plan
-func (apierSv1 *APIerSv1) SetTPDispatcherProfile(attr *utils.TPDispatcherProfile, reply *string) error {
+func (apierSv1 *APIerSv1) SetTPDispatcherProfile(ctx *context.Context, attr *utils.TPDispatcherProfile, reply *string) error {
 	if missing := utils.MissingStructFields(attr, []string{utils.TPid, utils.ID}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -38,7 +39,7 @@ func (apierSv1 *APIerSv1) SetTPDispatcherProfile(attr *utils.TPDispatcherProfile
 }
 
 // GetTPDispatcherProfile queries specific DispatcherProfile on Tariff plan
-func (apierSv1 *APIerSv1) GetTPDispatcherProfile(attr *utils.TPTntID, reply *utils.TPDispatcherProfile) error {
+func (apierSv1 *APIerSv1) GetTPDispatcherProfile(ctx *context.Context, attr *utils.TPTntID, reply *utils.TPDispatcherProfile) error {
 	if missing := utils.MissingStructFields(attr, []string{utils.TPid, utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -63,7 +64,7 @@ type AttrGetTPDispatcherIds struct {
 }
 
 // GetTPDispatcherProfileIDs queries dispatcher identities on specific tariff plan.
-func (apierSv1 *APIerSv1) GetTPDispatcherProfileIDs(attrs *AttrGetTPDispatcherIds, reply *[]string) error {
+func (apierSv1 *APIerSv1) GetTPDispatcherProfileIDs(ctx *context.Context, attrs *AttrGetTPDispatcherIds, reply *[]string) error {
 	if missing := utils.MissingStructFields(attrs, []string{utils.TPid}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -80,7 +81,7 @@ func (apierSv1 *APIerSv1) GetTPDispatcherProfileIDs(attrs *AttrGetTPDispatcherId
 }
 
 // RemoveTPDispatcherProfile removes specific DispatcherProfile on Tariff plan
-func (apierSv1 *APIerSv1) RemoveTPDispatcherProfile(attrs *utils.TPTntID, reply *string) error {
+func (apierSv1 *APIerSv1) RemoveTPDispatcherProfile(ctx *context.Context, attrs *utils.TPTntID, reply *string) error {
 	if missing := utils.MissingStructFields(attrs, []string{utils.TPid, utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -96,7 +97,7 @@ func (apierSv1 *APIerSv1) RemoveTPDispatcherProfile(attrs *utils.TPTntID, reply 
 }
 
 // SetTPDispatcherHost creates a new DispatcherHost within a tariff plan
-func (apierSv1 *APIerSv1) SetTPDispatcherHost(attr *utils.TPDispatcherHost, reply *string) error {
+func (apierSv1 *APIerSv1) SetTPDispatcherHost(ctx *context.Context, attr *utils.TPDispatcherHost, reply *string) error {
 	if missing := utils.MissingStructFields(attr, []string{utils.TPid, utils.ID}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -111,7 +112,7 @@ func (apierSv1 *APIerSv1) SetTPDispatcherHost(attr *utils.TPDispatcherHost, repl
 }
 
 // GetTPDispatcherHost queries specific DispatcherHosts on Tariff plan
-func (apierSv1 *APIerSv1) GetTPDispatcherHost(attr *utils.TPTntID, reply *utils.TPDispatcherHost) error {
+func (apierSv1 *APIerSv1) GetTPDispatcherHost(ctx *context.Context, attr *utils.TPTntID, reply *utils.TPDispatcherHost) error {
 	if missing := utils.MissingStructFields(attr, []string{utils.TPid, utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -131,7 +132,7 @@ func (apierSv1 *APIerSv1) GetTPDispatcherHost(attr *utils.TPTntID, reply *utils.
 }
 
 // GetTPDispatcherHostIDs queries dispatcher host identities on specific tariff plan.
-func (apierSv1 *APIerSv1) GetTPDispatcherHostIDs(attrs *AttrGetTPDispatcherIds, reply *[]string) error {
+func (apierSv1 *APIerSv1) GetTPDispatcherHostIDs(ctx *context.Context, attrs *AttrGetTPDispatcherIds, reply *[]string) error {
 	if missing := utils.MissingStructFields(attrs, []string{utils.TPid}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -148,7 +149,7 @@ func (apierSv1 *APIerSv1) GetTPDispatcherHostIDs(attrs *AttrGetTPDispatcherIds, 
 }
 
 // RemoveTPDispatcherHost removes specific DispatcherHost on Tariff plan
-func (apierSv1 *APIerSv1) RemoveTPDispatcherHost(attrs *utils.TPTntID, reply *string) error {
+func (apierSv1 *APIerSv1) RemoveTPDispatcherHost(ctx *context.Context, attrs *utils.TPTntID, reply *string) error {
 	if missing := utils.MissingStructFields(attrs, []string{utils.TPid, utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}

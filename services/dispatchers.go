@@ -21,6 +21,7 @@ package services
 import (
 	"sync"
 
+	"github.com/cgrates/birpc"
 	v1 "github.com/cgrates/cgrates/apier/v1"
 	v2 "github.com/cgrates/cgrates/apier/v2"
 	"github.com/cgrates/cgrates/config"
@@ -29,13 +30,12 @@ import (
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/servmanager"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/cgrates/rpcclient"
 )
 
 // NewDispatcherService returns the Dispatcher Service
 func NewDispatcherService(cfg *config.CGRConfig, dm *DataDBService,
 	cacheS *engine.CacheS, filterSChan chan *engine.FilterS,
-	server *cores.Server, internalChan chan rpcclient.ClientConnector,
+	server *cores.Server, internalChan chan birpc.ClientConnector,
 	connMgr *engine.ConnManager, anz *AnalyzerService,
 	srvDep map[string]*sync.WaitGroup) servmanager.Service {
 	return &DispatcherService{
@@ -63,13 +63,13 @@ type DispatcherService struct {
 
 	dspS     *dispatchers.DispatcherService
 	rpc      *v1.DispatcherSv1
-	connChan chan rpcclient.ClientConnector
+	connChan chan birpc.ClientConnector
 	anz      *AnalyzerService
 	srvDep   map[string]*sync.WaitGroup
 }
 
 // Start should handle the sercive start
-func (dspS *DispatcherService) Start() (err error) {
+func (dspS *DispatcherService) Start() error {
 	if dspS.IsRunning() {
 		return utils.ErrServiceAlreadyRunning
 	}
@@ -88,69 +88,18 @@ func (dspS *DispatcherService) Start() (err error) {
 
 	dspS.dspS = dispatchers.NewDispatcherService(datadb, dspS.cfg, fltrS, dspS.connMgr)
 
-	// for the moment we dispable Apier through dispatcher
-	// until we figured out a better sollution in case of gob server
-	// dspS.server.SetDispatched()
+	dspS.server.RpcUnregisterName(utils.AttributeSv1)
 
-	dspS.server.RpcRegister(v1.NewDispatcherSv1(dspS.dspS))
+	srv, err := newDispatcherServiceMap(dspS.dspS)
+	if err != nil {
+		return err
+	}
+	for _, s := range srv {
+		dspS.server.RpcRegister(s)
+	}
+	dspS.connChan <- dspS.anz.GetInternalCodec(srv, utils.DispatcherS)
 
-	dspS.server.RpcRegisterName(utils.ThresholdSv1,
-		v1.NewDispatcherThresholdSv1(dspS.dspS))
-
-	dspS.server.RpcRegisterName(utils.StatSv1,
-		v1.NewDispatcherStatSv1(dspS.dspS))
-
-	dspS.server.RpcRegisterName(utils.ResourceSv1,
-		v1.NewDispatcherResourceSv1(dspS.dspS))
-
-	dspS.server.RpcRegisterName(utils.RouteSv1,
-		v1.NewDispatcherRouteSv1(dspS.dspS))
-
-	dspS.server.RpcRegisterName(utils.AttributeSv1,
-		v1.NewDispatcherAttributeSv1(dspS.dspS))
-
-	dspS.server.RpcRegisterName(utils.SessionSv1,
-		v1.NewDispatcherSessionSv1(dspS.dspS))
-
-	dspS.server.RpcRegisterName(utils.ChargerSv1,
-		v1.NewDispatcherChargerSv1(dspS.dspS))
-
-	dspS.server.RpcRegisterName(utils.CoreSv1,
-		v1.NewDispatcherCoreSv1(dspS.dspS))
-
-	dspS.server.RpcRegisterName(utils.EeSv1,
-		v1.NewDispatcherEeSv1(dspS.dspS))
-
-	dspS.server.RpcRegisterName(utils.Responder,
-		v1.NewDispatcherResponder(dspS.dspS))
-
-	dspS.server.RpcRegisterName(utils.CacheSv1,
-		v1.NewDispatcherCacheSv1(dspS.dspS))
-
-	dspS.server.RpcRegisterName(utils.GuardianSv1,
-		v1.NewDispatcherGuardianSv1(dspS.dspS))
-
-	dspS.server.RpcRegisterName(utils.SchedulerSv1,
-		v1.NewDispatcherSchedulerSv1(dspS.dspS))
-
-	dspS.server.RpcRegisterName(utils.CDRsV1,
-		v1.NewDispatcherSCDRsV1(dspS.dspS))
-
-	dspS.server.RpcRegisterName(utils.ConfigSv1,
-		v1.NewDispatcherConfigSv1(dspS.dspS))
-
-	dspS.server.RpcRegisterName(utils.RALsV1,
-		v1.NewDispatcherRALsV1(dspS.dspS))
-
-	dspS.server.RpcRegisterName(utils.ReplicatorSv1,
-		v1.NewDispatcherReplicatorSv1(dspS.dspS))
-
-	dspS.server.RpcRegisterName(utils.CDRsV2,
-		v2.NewDispatcherSCDRsV2(dspS.dspS))
-
-	dspS.connChan <- dspS.anz.GetInternalCodec(dspS.dspS, utils.DispatcherS)
-
-	return
+	return nil
 }
 
 // Reload handles the change of config
@@ -184,4 +133,143 @@ func (dspS *DispatcherService) ServiceName() string {
 // ShouldRun returns if the service should be running
 func (dspS *DispatcherService) ShouldRun() bool {
 	return dspS.cfg.DispatcherSCfg().Enabled
+}
+
+func newDispatcherServiceMap(val *dispatchers.DispatcherService) (engine.IntService, error) {
+	srvMap := make(engine.IntService)
+
+	srv, err := birpc.NewService(v1.NewDispatcherAttributeSv1(val),
+		utils.AttributeSv1, true)
+	if err != nil {
+		return nil, err
+	}
+	srvMap[srv.Name] = srv
+
+	srv, err = birpc.NewService(v1.NewDispatcherCacheSv1(val),
+		utils.CacheSv1, true)
+	if err != nil {
+		return nil, err
+	}
+	srvMap[srv.Name] = srv
+
+	srv, err = birpc.NewService(v1.NewDispatcherSCDRsV1(val),
+		utils.CDRsV1, true)
+	if err != nil {
+		return nil, err
+	}
+	srvMap[srv.Name] = srv
+
+	srv, err = birpc.NewService(v2.NewDispatcherSCDRsV2(val),
+		utils.CDRsV2, true)
+	if err != nil {
+		return nil, err
+	}
+	srvMap[srv.Name] = srv
+
+	srv, err = birpc.NewService(v1.NewDispatcherChargerSv1(val),
+		utils.ChargerSv1, true)
+	if err != nil {
+		return nil, err
+	}
+	srvMap[srv.Name] = srv
+
+	srv, err = birpc.NewService(v1.NewDispatcherConfigSv1(val),
+		utils.ConfigSv1, true)
+	if err != nil {
+		return nil, err
+	}
+	srvMap[srv.Name] = srv
+
+	srv, err = birpc.NewService(v1.NewDispatcherCoreSv1(val),
+		utils.CoreSv1, true)
+	if err != nil {
+		return nil, err
+	}
+	srvMap[srv.Name] = srv
+
+	srv, err = birpc.NewService(v1.NewDispatcherSv1(val),
+		utils.DispatcherSv1, true)
+	if err != nil {
+		return nil, err
+	}
+	srvMap[srv.Name] = srv
+
+	srv, err = birpc.NewService(v1.NewDispatcherEeSv1(val),
+		utils.EeSv1, true)
+	if err != nil {
+		return nil, err
+	}
+	srvMap[srv.Name] = srv
+
+	srv, err = birpc.NewService(v1.NewDispatcherGuardianSv1(val),
+		utils.GuardianSv1, true)
+	if err != nil {
+		return nil, err
+	}
+	srvMap[srv.Name] = srv
+
+	srv, err = birpc.NewService(v1.NewDispatcherRALsV1(val),
+		utils.RALsV1, true)
+	if err != nil {
+		return nil, err
+	}
+	srvMap[srv.Name] = srv
+
+	srv, err = birpc.NewService(v1.NewDispatcherReplicatorSv1(val),
+		utils.ReplicatorSv1, true)
+	if err != nil {
+		return nil, err
+	}
+	srvMap[srv.Name] = srv
+
+	srv, err = birpc.NewService(v1.NewDispatcherResourceSv1(val),
+		utils.ResourceSv1, true)
+	if err != nil {
+		return nil, err
+	}
+	srvMap[srv.Name] = srv
+
+	srv, err = birpc.NewService(v1.NewDispatcherThresholdSv1(val),
+		utils.ThresholdSv1, true)
+	if err != nil {
+		return nil, err
+	}
+	srvMap[srv.Name] = srv
+
+	srv, err = birpc.NewService(v1.NewDispatcherResponder(val),
+		utils.Responder, true)
+	if err != nil {
+		return nil, err
+	}
+	srvMap[srv.Name] = srv
+
+	srv, err = birpc.NewService(v1.NewDispatcherRouteSv1(val),
+		utils.RouteSv1, true)
+	if err != nil {
+		return nil, err
+	}
+	srvMap[srv.Name] = srv
+
+	srv, err = birpc.NewService(v1.NewDispatcherSchedulerSv1(val),
+		utils.SchedulerSv1, true)
+	if err != nil {
+		return nil, err
+	}
+	srvMap[srv.Name] = srv
+
+	srv, err = birpc.NewService(v1.NewDispatcherSessionSv1(val),
+		utils.SessionSv1, true)
+	if err != nil {
+		return nil, err
+	}
+	srvMap[srv.Name] = srv
+
+	srv, err = birpc.NewService(v1.NewDispatcherStatSv1(val),
+		utils.StatSv1, true)
+	if err != nil {
+		return nil, err
+	}
+	srvMap[srv.Name] = srv
+
+	return srvMap, nil
 }

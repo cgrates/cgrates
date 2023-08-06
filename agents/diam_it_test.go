@@ -24,7 +24,6 @@ package agents
 import (
 	"flag"
 	"fmt"
-	"net/rpc"
 	"os/exec"
 	"path"
 	"strings"
@@ -32,6 +31,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc"
+	"github.com/cgrates/birpc/context"
 	v1 "github.com/cgrates/cgrates/apier/v1"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
@@ -48,7 +49,7 @@ var (
 
 	daCfgPath, diamConfigDIR string
 	daCfg                    *config.CGRConfig
-	apierRpc                 *rpc.Client
+	apierRpc                 *birpc.Client
 	diamClnt                 *DiameterClient
 
 	rplyTimeout time.Duration
@@ -282,7 +283,7 @@ func testDiamItApierRpcConn(t *testing.T) {
 func testDiamItTPFromFolder(t *testing.T) {
 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "tutorial")}
 	var loadInst utils.LoadInstance
-	if err := apierRpc.Call(utils.APIerSv2LoadTariffPlanFromFolder, attrs, &loadInst); err != nil {
+	if err := apierRpc.Call(context.Background(), utils.APIerSv2LoadTariffPlanFromFolder, attrs, &loadInst); err != nil {
 		t.Error(err)
 	}
 	if isDispatcherActive {
@@ -929,7 +930,7 @@ func testDiamItCCRTerminate(t *testing.T) {
 	time.Sleep(time.Duration(*waitRater) * time.Millisecond)
 	var cdrs []*engine.CDR
 	args := utils.RPCCDRsFilterWithAPIOpts{RPCCDRsFilter: &utils.RPCCDRsFilter{RunIDs: []string{utils.MetaRaw}}}
-	if err := apierRpc.Call(utils.CDRsV1GetCDRs, &args, &cdrs); err != nil {
+	if err := apierRpc.Call(context.Background(), utils.CDRsV1GetCDRs, &args, &cdrs); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(cdrs) != 1 {
 		t.Error("Unexpected number of CDRs returned: ", len(cdrs))
@@ -1014,7 +1015,7 @@ func testDiamItCCRSMS(t *testing.T) {
 
 	var cdrs []*engine.CDR
 	args := &utils.RPCCDRsFilterWithAPIOpts{RPCCDRsFilter: &utils.RPCCDRsFilter{RunIDs: []string{utils.MetaRaw}, ToRs: []string{utils.MetaSMS}}}
-	if err := apierRpc.Call(utils.CDRsV1GetCDRs, args, &cdrs); err != nil {
+	if err := apierRpc.Call(context.Background(), utils.CDRsV1GetCDRs, args, &cdrs); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(cdrs) != 1 {
 		t.Error("Unexpected number of CDRs returned: ", len(cdrs))
@@ -1093,7 +1094,7 @@ func testDiamItCCRMMS(t *testing.T) {
 
 	var cdrs []*engine.CDR
 	args := &utils.RPCCDRsFilterWithAPIOpts{RPCCDRsFilter: &utils.RPCCDRsFilter{RunIDs: []string{utils.MetaRaw}, ToRs: []string{utils.MetaMMS}}}
-	if err := apierRpc.Call(utils.CDRsV1GetCDRs, args, &cdrs); err != nil {
+	if err := apierRpc.Call(context.Background(), utils.CDRsV1GetCDRs, args, &cdrs); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(cdrs) != 1 {
 		t.Error("Unexpected number of CDRs returned: ", len(cdrs))
@@ -1113,7 +1114,7 @@ func testDiamInitWithSessionDisconnect(t *testing.T) {
 		},
 	}
 	var reply string
-	if err := apierRpc.Call(utils.APIerSv2SetBalance, attrSetBalance, &reply); err != nil {
+	if err := apierRpc.Call(context.Background(), utils.APIerSv2SetBalance, attrSetBalance, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf("Received: %s", reply)
@@ -1233,7 +1234,7 @@ func testDiamItRAR(t *testing.T) {
 	wait.Add(1)
 	go func() {
 		var reply string
-		if err := apierRpc.Call(utils.SessionSv1ReAuthorize, &utils.SessionFilter{}, &reply); err != nil {
+		if err := apierRpc.Call(context.Background(), utils.SessionSv1ReAuthorize, &utils.SessionFilter{}, &reply); err != nil {
 			t.Error(err)
 		}
 		wait.Done()
@@ -1344,7 +1345,7 @@ func testDiamItDRR(t *testing.T) {
 	wait.Add(1)
 	go func() {
 		var reply string
-		if err := apierRpc.Call(utils.SessionSv1DisconnectPeer, &utils.DPRArgs{
+		if err := apierRpc.Call(context.Background(), utils.SessionSv1DisconnectPeer, &utils.DPRArgs{
 			OriginHost:      "INTEGRATION_TESTS",
 			OriginRealm:     "cgrates.org",
 			DisconnectCause: 1, // BUSY
@@ -1480,7 +1481,7 @@ func testDiamItEmulateTerminate(t *testing.T) {
 		},
 	}
 
-	if err := apierRpc.Call(utils.APIerSv1SetChargerProfile, chargerProfile, &result); err != nil {
+	if err := apierRpc.Call(context.Background(), utils.APIerSv1SetChargerProfile, chargerProfile, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -1496,7 +1497,7 @@ func testDiamItEmulateTerminate(t *testing.T) {
 		},
 	}
 
-	if err := apierRpc.Call(utils.APIerSv1SetChargerProfile, chargerProfile2, &result); err != nil {
+	if err := apierRpc.Call(context.Background(), utils.APIerSv1SetChargerProfile, chargerProfile2, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -1513,14 +1514,14 @@ func testDiamItEmulateTerminate(t *testing.T) {
 		},
 	}
 	var reply string
-	if err := apierRpc.Call(utils.APIerSv2SetBalance, attrSetBalance, &reply); err != nil {
+	if err := apierRpc.Call(context.Background(), utils.APIerSv2SetBalance, attrSetBalance, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf("Received: %s", reply)
 	}
 	var acnt *engine.Account
 	attrs := &utils.AttrGetAccount{Tenant: "cgrates.com", Account: "testDiamItEmulateTerminate"}
-	if err := apierRpc.Call(utils.APIerSv2GetAccount, attrs, &acnt); err != nil {
+	if err := apierRpc.Call(context.Background(), utils.APIerSv2GetAccount, attrs, &acnt); err != nil {
 		t.Error(err)
 	} else if acnt.BalanceMap[utils.MetaVoice].GetTotalValue() != float64(time.Hour) {
 		t.Errorf("Expected: %f, received: %f", float64(time.Hour), acnt.BalanceMap[utils.MetaVoice].GetTotalValue())
@@ -1612,7 +1613,7 @@ func testDiamItEmulateTerminate(t *testing.T) {
 		t.Errorf("expecting: %s, received: <%s>", eVal, val)
 	}
 
-	if err := apierRpc.Call(utils.APIerSv2GetAccount, attrs, &acnt); err != nil {
+	if err := apierRpc.Call(context.Background(), utils.APIerSv2GetAccount, attrs, &acnt); err != nil {
 		t.Error(err)
 	} else if acnt.BalanceMap[utils.MetaVoice].GetTotalValue() != float64(time.Hour) {
 		t.Errorf("Expected: %f, received: %f", float64(time.Hour), acnt.BalanceMap[utils.MetaVoice].GetTotalValue())

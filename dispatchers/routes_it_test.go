@@ -27,6 +27,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -74,12 +75,12 @@ func TestDspSupplierS(t *testing.T) {
 
 func testDspSupPing(t *testing.T) {
 	var reply string
-	if err := allEngine.RPC.Call(utils.RouteSv1Ping, new(utils.CGREvent), &reply); err != nil {
+	if err := allEngine.RPC.Call(context.Background(), utils.RouteSv1Ping, new(utils.CGREvent), &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.Pong {
 		t.Errorf("Received: %s", reply)
 	}
-	if err := dispEngine.RPC.Call(utils.RouteSv1Ping, &utils.CGREvent{
+	if err := dispEngine.RPC.Call(context.Background(), utils.RouteSv1Ping, &utils.CGREvent{
 		Tenant: "cgrates.org",
 		APIOpts: map[string]any{
 			utils.OptsAPIKey: "sup12345",
@@ -93,7 +94,7 @@ func testDspSupPing(t *testing.T) {
 
 func testDspSupPingFailover(t *testing.T) {
 	var reply string
-	if err := allEngine.RPC.Call(utils.RouteSv1Ping, new(utils.CGREvent), &reply); err != nil {
+	if err := allEngine.RPC.Call(context.Background(), utils.RouteSv1Ping, new(utils.CGREvent), &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.Pong {
 		t.Errorf("Received: %s", reply)
@@ -105,19 +106,19 @@ func testDspSupPingFailover(t *testing.T) {
 			utils.OptsAPIKey: "sup12345",
 		},
 	}
-	if err := dispEngine.RPC.Call(utils.RouteSv1Ping, &ev, &reply); err != nil {
+	if err := dispEngine.RPC.Call(context.Background(), utils.RouteSv1Ping, &ev, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.Pong {
 		t.Errorf("Received: %s", reply)
 	}
 	allEngine.stopEngine(t)
-	if err := dispEngine.RPC.Call(utils.RouteSv1Ping, &ev, &reply); err != nil {
+	if err := dispEngine.RPC.Call(context.Background(), utils.RouteSv1Ping, &ev, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.Pong {
 		t.Errorf("Received: %s", reply)
 	}
 	allEngine2.stopEngine(t)
-	if err := dispEngine.RPC.Call(utils.RouteSv1Ping, &ev, &reply); err == nil {
+	if err := dispEngine.RPC.Call(context.Background(), utils.RouteSv1Ping, &ev, &reply); err == nil {
 		t.Errorf("Expected error but received %v and reply %v\n", err, reply)
 	}
 	allEngine.startEngine(t)
@@ -180,14 +181,14 @@ func testDspSupGetSupFailover(t *testing.T) {
 			utils.OptsAPIKey: "sup12345",
 		},
 	}
-	if err := dispEngine.RPC.Call(utils.RouteSv1GetRoutes,
+	if err := dispEngine.RPC.Call(context.Background(), utils.RouteSv1GetRoutes,
 		args, &rpl); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eRpl1, rpl) {
 		t.Errorf("Expecting : %+v, received: %+v", utils.ToJSON(eRpl1), utils.ToJSON(rpl))
 	}
 	allEngine2.stopEngine(t)
-	if err := dispEngine.RPC.Call(utils.RouteSv1GetRoutes,
+	if err := dispEngine.RPC.Call(context.Background(), utils.RouteSv1GetRoutes,
 		args, &rpl); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eRpl, rpl) {
@@ -213,7 +214,7 @@ func testDspSupTestAuthKey(t *testing.T) {
 			utils.OptsAPIKey: "12345",
 		},
 	}
-	if err := dispEngine.RPC.Call(utils.RouteSv1GetRoutes,
+	if err := dispEngine.RPC.Call(context.Background(), utils.RouteSv1GetRoutes,
 		args, &rpl); err == nil || err.Error() != utils.ErrUnauthorizedApi.Error() {
 		t.Error(err)
 	}
@@ -261,7 +262,7 @@ func testDspSupTestAuthKey2(t *testing.T) {
 			utils.OptsAPIKey: "sup12345",
 		},
 	}
-	if err := dispEngine.RPC.Call(utils.RouteSv1GetRoutes,
+	if err := dispEngine.RPC.Call(context.Background(), utils.RouteSv1GetRoutes,
 		args, &rpl); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eRpl, rpl) {
@@ -325,13 +326,13 @@ func testDspSupGetSupRoundRobin(t *testing.T) {
 			utils.OptsAPIKey: "sup12345",
 		},
 	}
-	if err := dispEngine.RPC.Call(utils.RouteSv1GetRoutes,
+	if err := dispEngine.RPC.Call(context.Background(), utils.RouteSv1GetRoutes,
 		args, &rpl); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eRpl1, rpl) {
 		t.Errorf("Expecting : %+v, received: %+v", utils.ToJSON(eRpl1), utils.ToJSON(rpl))
 	}
-	if err := dispEngine.RPC.Call(utils.RouteSv1GetRoutes,
+	if err := dispEngine.RPC.Call(context.Background(), utils.RouteSv1GetRoutes,
 		args, &rpl); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eRpl, rpl) {
@@ -394,7 +395,7 @@ func testDspSupGetSupplierForEvent(t *testing.T) {
 		expected.SortingParameters = nil // empty slices are nil in gob
 	}
 	var supProf []*engine.RouteProfile
-	if err := dispEngine.RPC.Call(utils.RouteSv1GetRouteProfilesForEvent,
+	if err := dispEngine.RPC.Call(context.Background(), utils.RouteSv1GetRouteProfilesForEvent,
 		ev, &supProf); err != nil {
 		t.Fatal(err)
 	}

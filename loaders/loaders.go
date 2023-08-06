@@ -23,6 +23,7 @@ import (
 	"fmt"
 	"sync"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -68,7 +69,7 @@ type ArgsProcessFolder struct {
 	StopOnError bool
 }
 
-func (ldrS *LoaderService) V1Load(args *ArgsProcessFolder,
+func (ldrS *LoaderService) V1Load(ctx *context.Context, args *ArgsProcessFolder,
 	rply *string) (err error) {
 	ldrS.RLock()
 	defer ldrS.RUnlock()
@@ -101,7 +102,7 @@ func (ldrS *LoaderService) V1Load(args *ArgsProcessFolder,
 	return
 }
 
-func (ldrS *LoaderService) V1Remove(args *ArgsProcessFolder,
+func (ldrS *LoaderService) V1Remove(ctx *context.Context, args *ArgsProcessFolder,
 	rply *string) (err error) {
 	ldrS.RLock()
 	defer ldrS.RUnlock()

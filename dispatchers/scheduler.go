@@ -21,10 +21,11 @@ package dispatchers
 import (
 	"time"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
 )
 
-func (dS *DispatcherService) SchedulerSv1Ping(args *utils.CGREvent, reply *string) (err error) {
+func (dS *DispatcherService) SchedulerSv1Ping(ctx *context.Context, args *utils.CGREvent, reply *string) (err error) {
 	if args == nil {
 		args = new(utils.CGREvent)
 	}
@@ -38,7 +39,7 @@ func (dS *DispatcherService) SchedulerSv1Ping(args *utils.CGREvent, reply *strin
 	return dS.Dispatch(args, utils.MetaScheduler, utils.SchedulerSv1Ping, args, reply)
 }
 
-func (dS *DispatcherService) SchedulerSv1Reload(args *utils.CGREvent, reply *string) (err error) {
+func (dS *DispatcherService) SchedulerSv1Reload(ctx *context.Context, args *utils.CGREvent, reply *string) (err error) {
 	args.Tenant = utils.FirstNonEmpty(args.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(utils.SchedulerSv1Ping, args.Tenant,
@@ -49,7 +50,7 @@ func (dS *DispatcherService) SchedulerSv1Reload(args *utils.CGREvent, reply *str
 	return dS.Dispatch(args, utils.MetaScheduler, utils.SchedulerSv1Reload, args, reply)
 }
 
-func (dS *DispatcherService) SchedulerSv1ExecuteActions(args *utils.AttrsExecuteActions, reply *string) (err error) {
+func (dS *DispatcherService) SchedulerSv1ExecuteActions(ctx *context.Context, args *utils.AttrsExecuteActions, reply *string) (err error) {
 	args.Tenant = utils.FirstNonEmpty(args.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(utils.SchedulerSv1ExecuteActions, args.Tenant,
@@ -63,7 +64,7 @@ func (dS *DispatcherService) SchedulerSv1ExecuteActions(args *utils.AttrsExecute
 	}, utils.MetaScheduler, utils.SchedulerSv1ExecuteActions, args, reply)
 }
 
-func (dS *DispatcherService) SchedulerSv1ExecuteActionPlans(args *utils.AttrsExecuteActionPlans, reply *string) (err error) {
+func (dS *DispatcherService) SchedulerSv1ExecuteActionPlans(ctx *context.Context, args *utils.AttrsExecuteActionPlans, reply *string) (err error) {
 	args.Tenant = utils.FirstNonEmpty(args.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(utils.SchedulerSv1ExecuteActionPlans, args.Tenant,

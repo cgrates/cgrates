@@ -27,9 +27,9 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/cgrates/rpcclient"
 )
 
 var rsponder = &Responder{MaxComputedUsage: config.CgrConfig().RalsCfg().MaxComputedUsage}
@@ -170,7 +170,7 @@ func TestResponderGetCostMaxUsageANY(t *testing.T) {
 		},
 	}
 	var cc CallCost
-	if err := rsponder.GetCost(cd, &cc); err == nil ||
+	if err := rsponder.GetCost(context.Background(), cd, &cc); err == nil ||
 		err.Error() != utils.ErrMaxUsageExceeded.Error() {
 		t.Errorf("Expected %+v, received : %+v", utils.ErrMaxUsageExceeded, err)
 	}
@@ -197,7 +197,7 @@ func TestResponderGetCostMaxUsageVOICE(t *testing.T) {
 		},
 	}
 	var cc CallCost
-	if err := rsponder.GetCost(cd, &cc); err == nil ||
+	if err := rsponder.GetCost(context.Background(), cd, &cc); err == nil ||
 		err.Error() != utils.ErrMaxUsageExceeded.Error() {
 		t.Errorf("Expected %+v, received : %+v", utils.ErrMaxUsageExceeded, err)
 	}
@@ -224,7 +224,7 @@ func TestResponderDebitMaxUsageANY(t *testing.T) {
 		},
 	}
 	var cc CallCost
-	if err := rsponder.Debit(cd, &cc); err == nil ||
+	if err := rsponder.Debit(context.Background(), cd, &cc); err == nil ||
 		err.Error() != utils.ErrMaxUsageExceeded.Error() {
 		t.Errorf("Expected %+v, received : %+v", utils.ErrMaxUsageExceeded, err)
 	}
@@ -251,7 +251,7 @@ func TestResponderDebitMaxUsageVOICE(t *testing.T) {
 		},
 	}
 	var cc CallCost
-	if err := rsponder.Debit(cd, &cc); err == nil ||
+	if err := rsponder.Debit(context.Background(), cd, &cc); err == nil ||
 		err.Error() != utils.ErrMaxUsageExceeded.Error() {
 		t.Errorf("Expected %+v, received : %+v", utils.ErrMaxUsageExceeded, err)
 	}
@@ -278,7 +278,7 @@ func TestResponderMaxDebitMaxUsageANY(t *testing.T) {
 		},
 	}
 	var cc CallCost
-	if err := rsponder.MaxDebit(cd, &cc); err == nil ||
+	if err := rsponder.MaxDebit(context.Background(), cd, &cc); err == nil ||
 		err.Error() != utils.ErrMaxUsageExceeded.Error() {
 		t.Errorf("Expected %+v, received : %+v", utils.ErrMaxUsageExceeded, err)
 	}
@@ -305,7 +305,7 @@ func TestResponderMaxDebitMaxUsageVOICE(t *testing.T) {
 		},
 	}
 	var cc CallCost
-	if err := rsponder.MaxDebit(cd, &cc); err == nil ||
+	if err := rsponder.MaxDebit(context.Background(), cd, &cc); err == nil ||
 		err.Error() != utils.ErrMaxUsageExceeded.Error() {
 		t.Errorf("Expected %+v, received : %+v", utils.ErrMaxUsageExceeded, err)
 	}
@@ -332,7 +332,7 @@ func TestResponderRefundIncrementsMaxUsageANY(t *testing.T) {
 		},
 	}
 	var acc Account
-	if err := rsponder.RefundIncrements(cd, &acc); err == nil ||
+	if err := rsponder.RefundIncrements(context.Background(), cd, &acc); err == nil ||
 		err.Error() != utils.ErrMaxUsageExceeded.Error() {
 		t.Errorf("Expected %+v, received : %+v", utils.ErrMaxUsageExceeded, err)
 	}
@@ -359,7 +359,7 @@ func TestResponderRefundIncrementsMaxUsageVOICE(t *testing.T) {
 		},
 	}
 	var acc Account
-	if err := rsponder.RefundIncrements(cd, &acc); err == nil ||
+	if err := rsponder.RefundIncrements(context.Background(), cd, &acc); err == nil ||
 		err.Error() != utils.ErrMaxUsageExceeded.Error() {
 		t.Errorf("Expected %+v, received : %+v", utils.ErrMaxUsageExceeded, err)
 	}
@@ -386,7 +386,7 @@ func TestResponderRefundRoundingMaxUsageANY(t *testing.T) {
 		},
 	}
 	var reply Account
-	if err := rsponder.RefundRounding(cd, &reply); err == nil ||
+	if err := rsponder.RefundRounding(context.Background(), cd, &reply); err == nil ||
 		err.Error() != utils.ErrMaxUsageExceeded.Error() {
 		t.Errorf("Expected %+v, received : %+v", utils.ErrMaxUsageExceeded, err)
 	}
@@ -413,7 +413,7 @@ func TestResponderRefundRoundingMaxUsageVOICE(t *testing.T) {
 		},
 	}
 	var reply Account
-	if err := rsponder.RefundRounding(cd, &reply); err == nil ||
+	if err := rsponder.RefundRounding(context.Background(), cd, &reply); err == nil ||
 		err.Error() != utils.ErrMaxUsageExceeded.Error() {
 		t.Errorf("Expected %+v, received : %+v", utils.ErrMaxUsageExceeded, err)
 	}
@@ -440,7 +440,7 @@ func TestResponderGetMaxSessionTimeMaxUsageANY(t *testing.T) {
 		},
 	}
 	var reply time.Duration
-	if err := rsponder.GetMaxSessionTime(cd, &reply); err == nil ||
+	if err := rsponder.GetMaxSessionTime(context.Background(), cd, &reply); err == nil ||
 		err.Error() != utils.ErrMaxUsageExceeded.Error() {
 		t.Errorf("Expected %+v, received : %+v", utils.ErrMaxUsageExceeded, err)
 	}
@@ -467,7 +467,7 @@ func TestResponderGetMaxSessionTimeMaxUsageVOICE(t *testing.T) {
 		},
 	}
 	var reply time.Duration
-	if err := rsponder.GetMaxSessionTime(cd, &reply); err == nil ||
+	if err := rsponder.GetMaxSessionTime(context.Background(), cd, &reply); err == nil ||
 		err.Error() != utils.ErrMaxUsageExceeded.Error() {
 		t.Errorf("Expected %+v, received : %+v", utils.ErrMaxUsageExceeded, err)
 	}
@@ -510,7 +510,7 @@ func TestResponderGetCost(t *testing.T) {
 		Destination: "uk",
 	}
 
-	if err = rs.GetCost(arg, reply); err != nil {
+	if err = rs.GetCost(context.Background(), arg, reply); err != nil {
 		t.Error(err)
 	}
 	exp := &utils.CachedRPCResponse{
@@ -569,7 +569,7 @@ func TestResponderGetCostSet(t *testing.T) {
 		&utils.CachedRPCResponse{Result: reply, Error: nil},
 		nil, true, utils.NonTransactional)
 
-	if err = rs.GetCost(arg, reply); err != nil {
+	if err = rs.GetCost(context.Background(), arg, reply); err != nil {
 		t.Error(err)
 	}
 	exp := &utils.CachedRPCResponse{
@@ -630,7 +630,7 @@ func TestResponderDebit(t *testing.T) {
 		Account:     "acount",
 		Destination: "uk",
 	}
-	if err := rs.Debit(arg, reply); err == nil || err != utils.ErrAccountNotFound {
+	if err := rs.Debit(context.Background(), arg, reply); err == nil || err != utils.ErrAccountNotFound {
 		t.Errorf("expected %+v ,received %+v", utils.ErrAccountNotFound, err)
 	}
 }
@@ -659,7 +659,7 @@ func TestGetCostOnRatingPlansErr(t *testing.T) {
 			dm:  dm,
 		},
 	}
-	if err := rs.GetCostOnRatingPlans(arg, reply); err == nil || err != utils.ErrUnauthorizedDestination {
+	if err := rs.GetCostOnRatingPlans(context.Background(), arg, reply); err == nil || err != utils.ErrUnauthorizedDestination {
 		t.Errorf("expected %+v ,received %+v", utils.ErrUnauthorizedDestination, err)
 	}
 }
@@ -728,7 +728,7 @@ func TestResponderDebitSet(t *testing.T) {
 		&utils.CachedRPCResponse{Result: reply, Error: nil},
 		nil, true, utils.NonTransactional)
 
-	if err := rs.Debit(arg, reply); err != nil {
+	if err := rs.Debit(context.Background(), arg, reply); err != nil {
 		t.Error(err)
 	}
 	exp := &utils.CachedRPCResponse{Result: reply, Error: nil}
@@ -785,7 +785,7 @@ func TestResponderMaxDebit(t *testing.T) {
 		Account:     "acount",
 		Destination: "uk",
 	}
-	if err := rs.MaxDebit(arg, reply); err == nil || err != utils.ErrAccountNotFound {
+	if err := rs.MaxDebit(context.Background(), arg, reply); err == nil || err != utils.ErrAccountNotFound {
 		t.Errorf("expected %+v ,received %+v", utils.ErrAccountNotFound, err)
 	}
 	exp := &utils.CachedRPCResponse{
@@ -847,7 +847,7 @@ func TestResponderMaxDebitSet(t *testing.T) {
 	Cache.Set(utils.CacheRPCResponses, utils.ConcatenatedKey(utils.ResponderMaxDebit, arg.CgrID),
 		&utils.CachedRPCResponse{Result: reply, Error: nil},
 		nil, true, utils.NonTransactional)
-	if err := rs.MaxDebit(arg, reply); err != nil {
+	if err := rs.MaxDebit(context.Background(), arg, reply); err != nil {
 		t.Error(err)
 	}
 	exp := &utils.CachedRPCResponse{
@@ -908,7 +908,7 @@ func TestResponderRefundIncrements(t *testing.T) {
 		UpdateTime:        time.Date(2021, 12, 1, 12, 0, 0, 0, time.UTC),
 		executingTriggers: false,
 	}
-	if err := rs.RefundIncrements(arg, reply); err != nil {
+	if err := rs.RefundIncrements(context.Background(), arg, reply); err != nil {
 		t.Error(err)
 	}
 	exp := &utils.CachedRPCResponse{
@@ -975,7 +975,7 @@ func TestResponderRefundIncrementsSet(t *testing.T) {
 		Result: reply,
 		Error:  nil,
 	}, nil, true, utils.NonTransactional)
-	if err := rs.RefundIncrements(arg, reply); err != nil {
+	if err := rs.RefundIncrements(context.Background(), arg, reply); err != nil {
 		t.Error(err)
 	}
 	exp := &utils.CachedRPCResponse{
@@ -1038,7 +1038,7 @@ func TestResponderRefundRounding(t *testing.T) {
 		UpdateTime:        time.Date(2021, 12, 1, 12, 0, 0, 0, time.UTC),
 		executingTriggers: false,
 	}
-	if err := rs.RefundRounding(arg, reply); err != nil {
+	if err := rs.RefundRounding(context.Background(), arg, reply); err != nil {
 		t.Error(err)
 	}
 	exp := &utils.CachedRPCResponse{
@@ -1104,7 +1104,7 @@ func TestResponderRefundRoundingSet(t *testing.T) {
 		&utils.CachedRPCResponse{Result: reply, Error: err},
 		nil, true, utils.NonTransactional)
 
-	if err := rs.RefundRounding(arg, reply); err != nil {
+	if err := rs.RefundRounding(context.Background(), arg, reply); err != nil {
 		t.Error(err)
 	}
 	exp := &utils.CachedRPCResponse{
@@ -1154,57 +1154,13 @@ func TestGetMaxSessionTimeOnAccountsErr(t *testing.T) {
 		},
 	}
 	expLog := ` ignoring cost for account: `
-	if err := rs.GetMaxSessionTimeOnAccounts(arg, reply); err == nil || err != utils.ErrAccountNotFound {
+	if err := rs.GetMaxSessionTimeOnAccounts(context.Background(), arg, reply); err == nil || err != utils.ErrAccountNotFound {
 		t.Error(err)
 	}
 	if rcvLog := buf.String(); !strings.Contains(rcvLog, expLog) {
 		t.Errorf("logger %v doesn't contain %v", utils.ToJSON(rcvLog), utils.ToJSON(expLog))
 	}
 
-}
-
-func TestResponderCall(t *testing.T) {
-	tmpConn := connMgr
-	tmp := Cache
-	defer func() {
-		Cache = tmp
-		connMgr = tmpConn
-	}()
-	Cache.Clear(nil)
-	cfg := config.NewDefaultCGRConfig()
-	cfg.CacheCfg().Partitions[utils.CacheRPCResponses].Limit = 1
-	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
-	dm := NewDataManager(db, cfg.CacheCfg(), nil)
-	Cache = NewCacheS(cfg, dm, nil)
-	config.SetCgrConfig(cfg)
-	rs := &Responder{
-		Timezone: "UTC",
-		FilterS: &FilterS{
-			cfg: cfg,
-			dm:  dm,
-		},
-		MaxComputedUsage: map[string]time.Duration{},
-	}
-	clientConn := make(chan rpcclient.ClientConnector, 1)
-	clientConn <- rs
-	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{})
-	config.SetCgrConfig(cfg)
-	SetConnManager(connMgr)
-	var reply CallCost
-	attr := &CallDescriptorWithAPIOpts{
-		CallDescriptor: &CallDescriptor{
-			Category:      "call",
-			Tenant:        "cgrates.org",
-			Subject:       "dan",
-			ToR:           utils.MetaAny,
-			Account:       "dan",
-			Destination:   "+4917621621391",
-			DurationIndex: 9,
-		},
-	}
-	if err := rs.Call(utils.ResponderGetCost, attr, &reply); err != nil {
-		t.Error(err)
-	}
 }
 
 func TestGetMaxSessionTime(t *testing.T) {
@@ -1250,7 +1206,7 @@ func TestGetMaxSessionTime(t *testing.T) {
 		},
 	}
 	var reply time.Duration
-	if err := rsponder.GetMaxSessionTime(cd, &reply); err == nil || err != utils.ErrAccountNotFound {
+	if err := rsponder.GetMaxSessionTime(context.Background(), cd, &reply); err == nil || err != utils.ErrAccountNotFound {
 		t.Errorf("Expected %+v, received :", err)
 	}
 }
@@ -1286,7 +1242,7 @@ func TestResponderShutDown(t *testing.T) {
 		},
 	}
 	var reply string
-	if err := rs.Shutdown(arg, &reply); err != nil {
+	if err := rs.Shutdown(context.Background(), arg, &reply); err != nil {
 		t.Error(err)
 	} else if reply != "Done!" {
 		t.Errorf("Expected Done!,Received %v", reply)
@@ -1378,7 +1334,7 @@ func TestResponderDebitDebit(t *testing.T) {
 	})
 	var reply CallCost
 	SetDataStorage(dm)
-	if err := rsponder.Debit(cd, &reply); err != nil {
+	if err := rsponder.Debit(context.Background(), cd, &reply); err != nil {
 		t.Error(err)
 	} else if reply.Cost != 1.5 {
 		t.Errorf("expected Cost to be 1.5, got %v", reply.Cost)
@@ -1468,7 +1424,7 @@ func TestResponderGetCostOnRatingPlans(t *testing.T) {
 		utils.RatingPlanID: "RP1",
 	}
 	SetDataStorage(dm)
-	if err := rsponder.GetCostOnRatingPlans(arg, &reply); err != nil {
+	if err := rsponder.GetCostOnRatingPlans(context.Background(), arg, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(reply, exp) {
 		t.Errorf("expected %v, got %v", exp, reply)

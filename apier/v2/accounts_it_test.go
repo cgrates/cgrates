@@ -22,11 +22,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package v2
 
 import (
-	"net/rpc"
 	"path"
 	"reflect"
 	"testing"
 
+	"github.com/cgrates/birpc/context"
+
+	"github.com/cgrates/birpc"
 	v1 "github.com/cgrates/cgrates/apier/v1"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
@@ -37,7 +39,7 @@ var (
 	accConfigDIR string //run tests for specific configuration
 	accCfgPath   string
 	accCfg       *config.CGRConfig
-	accRPC       *rpc.Client
+	accRPC       *birpc.Client
 
 	sTestsAcc = []func(t *testing.T){
 		testAccountsInitCfg,
@@ -120,7 +122,7 @@ func testAccountsRPCConn(t *testing.T) {
 
 func testApierSetActions(t *testing.T) {
 	var reply string
-	if err := accRPC.Call(utils.APIerSv1SetActions, &v1.V1AttrSetActions{
+	if err := accRPC.Call(context.Background(), utils.APIerSv1SetActions, &v1.V1AttrSetActions{
 		ActionsId: "TestAccountAction",
 		Actions: []*v1.V1TPAction{{
 			Identifier:  utils.MetaTopUpReset,
@@ -138,7 +140,7 @@ func testApierSetActions(t *testing.T) {
 
 func testAccountsSetActPlans(t *testing.T) {
 	var reply string
-	if err := accRPC.Call(utils.APIerSv1SetActionPlan, &v1.AttrSetActionPlan{
+	if err := accRPC.Call(context.Background(), utils.APIerSv1SetActionPlan, &v1.AttrSetActionPlan{
 		Id: "TestAccountAP1",
 		ActionPlan: []*v1.AttrActionPlan{{
 			ActionsId: "TestAccountAction",
@@ -151,7 +153,7 @@ func testAccountsSetActPlans(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Errorf("Calling APIerSv1.SetActionPlan received: %s", reply)
 	}
-	if err := accRPC.Call(utils.APIerSv1SetActionPlan, &v1.AttrSetActionPlan{
+	if err := accRPC.Call(context.Background(), utils.APIerSv1SetActionPlan, &v1.AttrSetActionPlan{
 		Id: "TestAccountAP2",
 		ActionPlan: []*v1.AttrActionPlan{{
 			ActionsId: "TestAccountAction",
@@ -164,7 +166,7 @@ func testAccountsSetActPlans(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Errorf("Calling APIerSv1.SetActionPlan received: %s", reply)
 	}
-	if err := accRPC.Call(utils.APIerSv1SetActionPlan, &v1.AttrSetActionPlan{
+	if err := accRPC.Call(context.Background(), utils.APIerSv1SetActionPlan, &v1.AttrSetActionPlan{
 		Id: "TestAccountAP3",
 		ActionPlan: []*v1.AttrActionPlan{{
 			ActionsId: "TestAccountAction",
@@ -181,7 +183,7 @@ func testAccountsSetActPlans(t *testing.T) {
 
 func testAccountsSet1(t *testing.T) {
 	var reply string
-	if err := accRPC.Call(utils.APIerSv2SetAccount, AttrSetAccount{
+	if err := accRPC.Call(context.Background(), utils.APIerSv2SetAccount, AttrSetAccount{
 		Tenant:               "cgrates.org",
 		Account:              "dan",
 		ReloadScheduler:      true,
@@ -192,7 +194,7 @@ func testAccountsSet1(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Errorf("Calling APIerSv2.SetAccount received: %s", reply)
 	}
-	if err := accRPC.Call(utils.APIerSv2SetAccount, AttrSetAccount{
+	if err := accRPC.Call(context.Background(), utils.APIerSv2SetAccount, AttrSetAccount{
 		Tenant:               "cgrates.org",
 		Account:              "dan2",
 		ReloadScheduler:      true,
@@ -211,7 +213,7 @@ func testAccountsGetActionPlan1(t *testing.T) {
 		"cgrates.org:dan":  true,
 		"cgrates.org:dan2": true,
 	}
-	if err := accRPC.Call(utils.APIerSv1GetActionPlan,
+	if err := accRPC.Call(context.Background(), utils.APIerSv1GetActionPlan,
 		v1.AttrGetActionPlan{ID: "TestAccountAP1"}, &aps); err != nil {
 		t.Error(err)
 	} else if len(aps) != 1 {
@@ -225,7 +227,7 @@ func testAccountsGetActionPlan1(t *testing.T) {
 
 func testAccountsSet2(t *testing.T) {
 	var reply string
-	if err := accRPC.Call(utils.APIerSv2SetAccount, AttrSetAccount{
+	if err := accRPC.Call(context.Background(), utils.APIerSv2SetAccount, AttrSetAccount{
 		Tenant:               "cgrates.org",
 		Account:              "dan",
 		ReloadScheduler:      true,
@@ -240,7 +242,7 @@ func testAccountsSet2(t *testing.T) {
 
 func testAccountsGetAccountActionPlan(t *testing.T) {
 	var reply []*v1.AccountActionTiming
-	if err := accRPC.Call(utils.APIerSv1GetAccountActionPlan, utils.TenantAccount{
+	if err := accRPC.Call(context.Background(), utils.APIerSv1GetAccountActionPlan, utils.TenantAccount{
 		Tenant:  "cgrates.org",
 		Account: "dan",
 	}, &reply); err != nil {
@@ -257,7 +259,7 @@ func testAccountsGetActionPlan2(t *testing.T) {
 	accIDsStrMp := utils.StringMap{
 		"cgrates.org:dan2": true,
 	}
-	if err := accRPC.Call(utils.APIerSv1GetActionPlan,
+	if err := accRPC.Call(context.Background(), utils.APIerSv1GetActionPlan,
 		v1.AttrGetActionPlan{ID: "TestAccountAP1"}, &aps); err != nil {
 		t.Error(err)
 	} else if len(aps) != 1 {

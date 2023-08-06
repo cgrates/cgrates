@@ -19,14 +19,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package analyzers
 
 import (
-	"net/rpc"
 	"sync"
 	"time"
 
-	"github.com/cenkalti/rpc2"
+	"github.com/cgrates/birpc"
 )
 
-func NewAnalyzerServerCodec(sc rpc.ServerCodec, aS *AnalyzerService, enc, from, to string) rpc.ServerCodec {
+func NewAnalyzerServerCodec(sc birpc.ServerCodec, aS *AnalyzerService, enc, from, to string) birpc.ServerCodec {
 	return &AnalyzerServerCodec{
 		sc:   sc,
 		reqs: make(map[uint64]*rpcAPI),
@@ -38,7 +37,7 @@ func NewAnalyzerServerCodec(sc rpc.ServerCodec, aS *AnalyzerService, enc, from, 
 }
 
 type AnalyzerServerCodec struct {
-	sc rpc.ServerCodec
+	sc birpc.ServerCodec
 
 	// keep the API in memory because the write is async
 	reqs   map[uint64]*rpcAPI
@@ -50,7 +49,7 @@ type AnalyzerServerCodec struct {
 	to     string
 }
 
-func (c *AnalyzerServerCodec) ReadRequestHeader(r *rpc.Request) (err error) {
+func (c *AnalyzerServerCodec) ReadRequestHeader(r *birpc.Request) (err error) {
 	err = c.sc.ReadRequestHeader(r)
 	c.reqsLk.Lock()
 	c.reqIdx = r.Seq
@@ -71,7 +70,7 @@ func (c *AnalyzerServerCodec) ReadRequestBody(x any) (err error) {
 	return
 }
 
-func (c *AnalyzerServerCodec) WriteResponse(r *rpc.Response, x any) error {
+func (c *AnalyzerServerCodec) WriteResponse(r *birpc.Response, x any) error {
 	c.reqsLk.Lock()
 	api := c.reqs[r.Seq]
 	delete(c.reqs, r.Seq)
@@ -82,7 +81,7 @@ func (c *AnalyzerServerCodec) WriteResponse(r *rpc.Response, x any) error {
 
 func (c *AnalyzerServerCodec) Close() error { return c.sc.Close() }
 
-func NewAnalyzerBiRPCCodec(sc rpc2.Codec, aS *AnalyzerService, enc, from, to string) rpc2.Codec {
+func NewAnalyzerBiRPCCodec(sc birpc.BirpcCodec, aS *AnalyzerService, enc, from, to string) birpc.BirpcCodec {
 	return &AnalyzerBiRPCCodec{
 		sc:   sc,
 		reqs: make(map[uint64]*rpcAPI),
@@ -95,7 +94,7 @@ func NewAnalyzerBiRPCCodec(sc rpc2.Codec, aS *AnalyzerService, enc, from, to str
 }
 
 type AnalyzerBiRPCCodec struct {
-	sc rpc2.Codec
+	sc birpc.BirpcCodec
 
 	// keep the API in memory because the write is async
 	reqs   map[uint64]*rpcAPI
@@ -113,14 +112,14 @@ type AnalyzerBiRPCCodec struct {
 
 // ReadHeader must read a message and populate either the request
 // or the response by inspecting the incoming message.
-func (c *AnalyzerBiRPCCodec) ReadHeader(req *rpc2.Request, resp *rpc2.Response) (err error) {
+func (c *AnalyzerBiRPCCodec) ReadHeader(req *birpc.Request, resp *birpc.Response) (err error) {
 	err = c.sc.ReadHeader(req, resp)
-	if req.Method != "" {
+	if req.ServiceMethod != "" {
 		c.reqsLk.Lock()
 		c.reqIdx = req.Seq
 		c.reqs[c.reqIdx] = &rpcAPI{
 			ID:        req.Seq,
-			Method:    req.Method,
+			Method:    req.ServiceMethod,
 			StartTime: time.Now(),
 		}
 		c.reqsLk.Unlock()
@@ -154,12 +153,12 @@ func (c *AnalyzerBiRPCCodec) ReadResponseBody(x any) (err error) {
 }
 
 // WriteRequest must be safe for concurrent use by multiple goroutines.
-func (c *AnalyzerBiRPCCodec) WriteRequest(req *rpc2.Request, x any) error {
+func (c *AnalyzerBiRPCCodec) WriteRequest(req *birpc.Request, x any) error {
 	c.repsLk.Lock()
 	c.repIdx = req.Seq
 	c.reps[c.repIdx] = &rpcAPI{
 		ID:        req.Seq,
-		Method:    req.Method,
+		Method:    req.ServiceMethod,
 		StartTime: time.Now(),
 	}
 	c.repsLk.Unlock()
@@ -167,7 +166,7 @@ func (c *AnalyzerBiRPCCodec) WriteRequest(req *rpc2.Request, x any) error {
 }
 
 // WriteResponse must be safe for concurrent use by multiple goroutines.
-func (c *AnalyzerBiRPCCodec) WriteResponse(r *rpc2.Response, x any) error {
+func (c *AnalyzerBiRPCCodec) WriteResponse(r *birpc.Response, x any) error {
 	c.reqsLk.Lock()
 	api := c.reqs[r.Seq]
 	delete(c.reqs, r.Seq)

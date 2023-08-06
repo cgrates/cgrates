@@ -22,19 +22,18 @@ import (
 	"fmt"
 	"sync"
 
-	v1 "github.com/cgrates/cgrates/apier/v1"
+	"github.com/cgrates/birpc"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/cores"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/servmanager"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/cgrates/rpcclient"
 )
 
 // NewRouteService returns the Route Service
 func NewRouteService(cfg *config.CGRConfig, dm *DataDBService,
 	cacheS *engine.CacheS, filterSChan chan *engine.FilterS,
-	server *cores.Server, internalRouteSChan chan rpcclient.ClientConnector,
+	server *cores.Server, internalRouteSChan chan birpc.ClientConnector,
 	connMgr *engine.ConnManager, anz *AnalyzerService,
 	srvDep map[string]*sync.WaitGroup) servmanager.Service {
 	return &RouteService{
@@ -61,14 +60,13 @@ type RouteService struct {
 	connMgr     *engine.ConnManager
 
 	routeS   *engine.RouteService
-	rpc      *v1.RouteSv1
-	connChan chan rpcclient.ClientConnector
+	connChan chan birpc.ClientConnector
 	anz      *AnalyzerService
 	srvDep   map[string]*sync.WaitGroup
 }
 
 // Start should handle the sercive start
-func (routeS *RouteService) Start() (err error) {
+func (routeS *RouteService) Start() error {
 	if routeS.IsRunning() {
 		return utils.ErrServiceAlreadyRunning
 	}
@@ -87,12 +85,17 @@ func (routeS *RouteService) Start() (err error) {
 	routeS.routeS = engine.NewRouteService(datadb, filterS, routeS.cfg, routeS.connMgr)
 
 	utils.Logger.Info(fmt.Sprintf("<%s> starting <%s> subsystem", utils.CoreS, utils.RouteS))
-	routeS.rpc = v1.NewRouteSv1(routeS.routeS)
-	if !routeS.cfg.DispatcherSCfg().Enabled {
-		routeS.server.RpcRegister(routeS.rpc)
+	srv, err := engine.NewServiceWithName(routeS.routeS, utils.RouteS, true)
+	if err != nil {
+		return err
 	}
-	routeS.connChan <- routeS.anz.GetInternalCodec(routeS.rpc, utils.RouteS)
-	return
+	if !routeS.cfg.DispatcherSCfg().Enabled {
+		for _, s := range srv {
+			routeS.server.RpcRegister(s)
+		}
+	}
+	routeS.connChan <- routeS.anz.GetInternalCodec(srv, utils.RouteS)
+	return nil
 }
 
 // Reload handles the change of config
@@ -106,7 +109,6 @@ func (routeS *RouteService) Shutdown() (err error) {
 	defer routeS.Unlock()
 	routeS.routeS.Shutdown() //we don't verify the error because shutdown never returns an error
 	routeS.routeS = nil
-	routeS.rpc = nil
 	<-routeS.connChan
 	return
 }

@@ -19,11 +19,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package v1
 
 import (
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
 )
 
 // SetTPActions creates a new Actions profile within a tariff plan
-func (apierSv1 *APIerSv1) SetTPActions(attrs *utils.TPActions, reply *string) error {
+func (apierSv1 *APIerSv1) SetTPActions(ctx *context.Context, attrs *utils.TPActions, reply *string) error {
 	if missing := utils.MissingStructFields(attrs, []string{utils.TPid, utils.ID, utils.Actions}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -40,7 +41,7 @@ type AttrGetTPActions struct {
 }
 
 // GetTPActions queries specific Actions profile on tariff plan
-func (apierSv1 *APIerSv1) GetTPActions(attrs *AttrGetTPActions, reply *utils.TPActions) error {
+func (apierSv1 *APIerSv1) GetTPActions(ctx *context.Context, attrs *AttrGetTPActions, reply *utils.TPActions) error {
 	if missing := utils.MissingStructFields(attrs, []string{utils.TPid, utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -61,7 +62,7 @@ type AttrGetTPActionIds struct {
 }
 
 // GetTPActionIds queries Actions identities on specific tariff plan.
-func (apierSv1 *APIerSv1) GetTPActionIds(attrs *AttrGetTPActionIds, reply *[]string) error {
+func (apierSv1 *APIerSv1) GetTPActionIds(ctx *context.Context, attrs *AttrGetTPActionIds, reply *[]string) error {
 	if missing := utils.MissingStructFields(attrs, []string{utils.TPid}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -78,7 +79,7 @@ func (apierSv1 *APIerSv1) GetTPActionIds(attrs *AttrGetTPActionIds, reply *[]str
 }
 
 // RemoveTPActions removes specific Actions on Tariff plan
-func (apierSv1 *APIerSv1) RemoveTPActions(attrs *AttrGetTPActions, reply *string) error {
+func (apierSv1 *APIerSv1) RemoveTPActions(ctx *context.Context, attrs *AttrGetTPActions, reply *string) error {
 	if missing := utils.MissingStructFields(attrs, []string{utils.TPid, utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}

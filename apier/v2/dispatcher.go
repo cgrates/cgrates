@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package v2
 
 import (
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/dispatchers"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -33,10 +34,10 @@ type DispatcherSCDRsV2 struct {
 	dS *dispatchers.DispatcherService
 }
 
-func (dS *DispatcherSCDRsV2) StoreSessionCost(args *engine.ArgsV2CDRSStoreSMCost, reply *string) error {
-	return dS.dS.CDRsV2StoreSessionCost(args, reply)
+func (dS *DispatcherSCDRsV2) StoreSessionCost(ctx *context.Context, args *engine.ArgsV2CDRSStoreSMCost, reply *string) error {
+	return dS.dS.CDRsV2StoreSessionCost(ctx, args, reply)
 }
 
-func (dS *DispatcherSCDRsV2) ProcessEvent(args *engine.ArgV1ProcessEvent, reply *[]*utils.EventWithFlags) error {
-	return dS.dS.CDRsV2ProcessEvent(args, reply)
+func (dS *DispatcherSCDRsV2) ProcessEvent(ctx *context.Context, args *engine.ArgV1ProcessEvent, reply *[]*utils.EventWithFlags) error {
+	return dS.dS.CDRsV2ProcessEvent(ctx, args, reply)
 }

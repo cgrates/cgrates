@@ -22,11 +22,11 @@ import (
 	"sync"
 	"testing"
 
+	"github.com/cgrates/birpc"
 	"github.com/cgrates/cgrates/agents"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/cgrates/rpcclient"
 )
 
 // TestAsteriskAgentCoverage for cover testing
@@ -38,12 +38,16 @@ func TestAsteriskAgentCoverage(t *testing.T) {
 	filterSChan <- nil
 	shdChan := utils.NewSyncedChan()
 	chS := engine.NewCacheS(cfg, nil, nil)
-	cacheSChan := make(chan rpcclient.ClientConnector, 1)
-	cacheSChan <- chS
+	cacheSrv, err := engine.NewService(chS)
+	if err != nil {
+		t.Error(err)
+	}
+	cacheSChan := make(chan birpc.ClientConnector, 1)
+	cacheSChan <- cacheSrv
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
-	srv := NewAsteriskAgent(cfg, shdChan, nil, srvDep)
-	if srv == nil {
-		t.Errorf("\nExpecting <nil>,\n Received <%+v>", utils.ToJSON(srv))
+	astSrv := NewAsteriskAgent(cfg, shdChan, nil, srvDep)
+	if astSrv == nil {
+		t.Errorf("\nExpecting <nil>,\n Received <%+v>", utils.ToJSON(astSrv))
 	}
 	srv2 := &AsteriskAgent{
 		RWMutex:  sync.RWMutex{},

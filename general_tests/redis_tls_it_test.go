@@ -23,11 +23,12 @@ package general_tests
 
 import (
 	"flag"
-	"net/rpc"
 	"os/exec"
 	"path"
 	"testing"
 
+	"github.com/cgrates/birpc"
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
 
 	"github.com/cgrates/cgrates/config"
@@ -39,7 +40,7 @@ var (
 	redisTLSServer    *exec.Cmd
 	redisTLSEngineCfg = path.Join(*dataDir, "conf", "samples", "redisTLS")
 	redisTLSCfg       *config.CGRConfig
-	redisTLSRPC       *rpc.Client
+	redisTLSRPC       *birpc.Client
 
 	sTestsRedisTLS = []func(t *testing.T){
 		testRedisTLSStartServer,
@@ -107,7 +108,7 @@ func testRedisTLSRPCCon(t *testing.T) {
 func testRedisTLSSetGetAttribute(t *testing.T) {
 	// status command to check if the engine starts
 	var rply map[string]any
-	if err := redisTLSRPC.Call(utils.CoreSv1Status, &utils.TenantWithAPIOpts{}, &rply); err != nil {
+	if err := redisTLSRPC.Call(context.Background(), utils.CoreSv1Status, &utils.TenantWithAPIOpts{}, &rply); err != nil {
 		t.Error(err)
 	}
 }

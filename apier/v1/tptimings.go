@@ -19,11 +19,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package v1
 
 import (
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
 )
 
 // SetTPTiming creates a new timing within a tariff plan
-func (apierSv1 *APIerSv1) SetTPTiming(attrs *utils.ApierTPTiming, reply *string) error {
+func (apierSv1 *APIerSv1) SetTPTiming(ctx *context.Context, attrs *utils.ApierTPTiming, reply *string) error {
 	if missing := utils.MissingStructFields(attrs, []string{utils.TPid, utils.ID, utils.YearsFieldName, utils.MonthsFieldName, utils.MonthDaysFieldName, utils.WeekDaysFieldName, utils.Time}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -40,7 +41,7 @@ type AttrGetTPTiming struct {
 }
 
 // GetTPTiming queries specific Timing on Tariff plan
-func (apierSv1 *APIerSv1) GetTPTiming(attrs *AttrGetTPTiming, reply *utils.ApierTPTiming) error {
+func (apierSv1 *APIerSv1) GetTPTiming(ctx *context.Context, attrs *AttrGetTPTiming, reply *utils.ApierTPTiming) error {
 	if missing := utils.MissingStructFields(attrs, []string{utils.TPid, utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -61,7 +62,7 @@ type AttrGetTPTimingIds struct {
 }
 
 // GetTPTimingIds queries timing identities on specific tariff plan.
-func (apierSv1 *APIerSv1) GetTPTimingIds(attrs *AttrGetTPTimingIds, reply *[]string) error {
+func (apierSv1 *APIerSv1) GetTPTimingIds(ctx *context.Context, attrs *AttrGetTPTimingIds, reply *[]string) error {
 	if missing := utils.MissingStructFields(attrs, []string{utils.TPid}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -78,7 +79,7 @@ func (apierSv1 *APIerSv1) GetTPTimingIds(attrs *AttrGetTPTimingIds, reply *[]str
 }
 
 // RemoveTPTiming removes specific Timing on Tariff plan
-func (apierSv1 *APIerSv1) RemoveTPTiming(attrs AttrGetTPTiming, reply *string) error {
+func (apierSv1 *APIerSv1) RemoveTPTiming(ctx *context.Context, attrs AttrGetTPTiming, reply *string) error {
 	if missing := utils.MissingStructFields(&attrs, []string{utils.TPid, utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}

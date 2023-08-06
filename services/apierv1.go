@@ -22,12 +22,12 @@ import (
 	"runtime"
 	"sync"
 
+	"github.com/cgrates/birpc"
 	v1 "github.com/cgrates/cgrates/apier/v1"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/cores"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/cgrates/rpcclient"
 )
 
 // NewAPIerSv1Service returns the APIerSv1 Service
@@ -36,7 +36,7 @@ func NewAPIerSv1Service(cfg *config.CGRConfig, dm *DataDBService,
 	server *cores.Server,
 	schedService *SchedulerService,
 	responderService *ResponderService,
-	internalAPIerSv1Chan chan rpcclient.ClientConnector,
+	internalAPIerSv1Chan chan birpc.ClientConnector,
 	connMgr *engine.ConnManager, anz *AnalyzerService,
 	srvDep map[string]*sync.WaitGroup) *APIerSv1Service {
 	return &APIerSv1Service{
@@ -68,7 +68,7 @@ type APIerSv1Service struct {
 	connMgr          *engine.ConnManager
 
 	api      *v1.APIerSv1
-	connChan chan rpcclient.ClientConnector
+	connChan chan birpc.ClientConnector
 
 	stopChan chan struct{}
 
@@ -79,7 +79,7 @@ type APIerSv1Service struct {
 
 // Start should handle the sercive start
 // For this service the start should be called from RAL Service
-func (apiService *APIerSv1Service) Start() (err error) {
+func (apiService *APIerSv1Service) Start() error {
 	if apiService.IsRunning() {
 		return utils.ErrServiceAlreadyRunning
 	}
@@ -117,17 +117,37 @@ func (apiService *APIerSv1Service) Start() (err error) {
 	go apiService.api.ListenAndServe(apiService.stopChan)
 	runtime.Gosched()
 
+	srv, err := engine.NewService(apiService.api)
+	if err != nil {
+		return err
+	}
 	if !apiService.cfg.DispatcherSCfg().Enabled {
-		apiService.server.RpcRegister(apiService.api)
-		apiService.server.RpcRegisterName(utils.ApierV1, apiService.api)
-		apiService.server.RpcRegister(v1.NewReplicatorSv1(datadb, apiService.api))
+		for _, s := range srv {
+			apiService.server.RpcRegister(s)
+		}
+		var legacySrv engine.IntService
+		legacySrv, err = engine.NewServiceWithName(apiService.api, utils.ApierV1, true)
+		if err != nil {
+			return err
+		}
+		//backwards compatible
+		for _, s := range legacySrv {
+			apiService.server.RpcRegister(s)
+		}
+		var rplSrv engine.IntService
+		rplSrv, err = engine.NewService(v1.NewReplicatorSv1(datadb, apiService.api))
+		if err != nil {
+			return err
+		}
+		for _, s := range rplSrv {
+			apiService.server.RpcRegister(s)
+		}
 	}
 
-	//backwards compatible
-	apiService.connChan <- apiService.anz.GetInternalCodec(apiService.api, utils.APIerSv1)
+	apiService.connChan <- apiService.anz.GetInternalCodec(srv, utils.APIerSv1)
 
 	apiService.APIerSv1Chan <- apiService.api
-	return
+	return nil
 }
 
 // Reload handles the change of config

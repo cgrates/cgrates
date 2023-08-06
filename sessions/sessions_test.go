@@ -26,12 +26,11 @@ import (
 	"testing"
 	"time"
 
-	"github.com/cenkalti/rpc2"
-
+	"github.com/cgrates/birpc"
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/cgrates/rpcclient"
 	jwt "github.com/dgrijalva/jwt-go"
 )
 
@@ -94,7 +93,7 @@ func TestOnBiJSONConnectDisconnect(t *testing.T) {
 	sessions := NewSessionS(cfg, dm, nil)
 
 	//connect BiJSON
-	client := rpc2.NewClient(nil)
+	client := &birpc.Service{}
 	sessions.OnBiJSONConnect(client)
 
 	//we'll change the connection identifier just for testing
@@ -123,10 +122,10 @@ func TestBiRPCv1RegisterInternalBiJSONConn(t *testing.T) {
 	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
 	sessions := NewSessionS(cfg, dm, nil)
 
-	client := rpc2.NewClient(nil)
-
+	client := &birpc.Service{}
+	ctx := context.WithClient(context.Background(), client)
 	var reply string
-	if err := sessions.BiRPCv1RegisterInternalBiJSONConn(client, utils.EmptyString, &reply); err != nil {
+	if err := sessions.BiRPCv1RegisterInternalBiJSONConn(ctx, utils.EmptyString, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf("Expected %+v, received %+v", reply, utils.OK)
@@ -1942,7 +1941,7 @@ func TestNewSessionS(t *testing.T) {
 	eOut := &SessionS{
 		cgrCfg:        cgrCGF,
 		dm:            nil,
-		biJClnts:      make(map[rpcclient.ClientConnector]string),
+		biJClnts:      make(map[birpc.ClientConnector]string),
 		biJIDs:        make(map[string]*biJClient),
 		aSessions:     make(map[string]*Session),
 		aSessionsIdx:  make(map[string]map[string]map[string]utils.StringSet),
@@ -2468,26 +2467,29 @@ aa+jqv4dwkr/FLEcN1zC76Y/IniI65fId55hVJvN3ORuzUqYEtzD3irmsw==
 		t.Errorf("Expecting: nil, received: %s", err)
 	}
 	var rply string
-	if err := sS.BiRPCv1STIRAuthenticate(nil, &V1STIRAuthenticateArgs{
-		PayloadMaxDuration: "A",
-	}, &rply); err == nil {
+	if err := sS.BiRPCv1STIRAuthenticate(context.Background(),
+		&V1STIRAuthenticateArgs{
+			PayloadMaxDuration: "A",
+		}, &rply); err == nil {
 		t.Error("Expected error")
 	}
-	if err := sS.BiRPCv1STIRAuthenticate(nil, &V1STIRAuthenticateArgs{
-		DestinationTn: "1003",
-		Identity:      "eyJhbGciOiJFUzI1NiIsInBwdCI6InNoYWtlbiIsInR5cCI6InBhc3Nwb3J0IiwieDV1IjoiaHR0cHM6Ly93d3cuZXhhbXBsZS5vcmcvY2VydC5jZXIifQ.eyJhdHRlc3QiOiJBIiwiZGVzdCI6eyJ0biI6WyIxMDAyIl19LCJpYXQiOjE1ODcwMTk4MjIsIm9yaWciOnsidG4iOiIxMDAxIn0sIm9yaWdpZCI6IjEyMzQ1NiJ9.4ybtWmgqdkNyJLS9Iv3PuJV8ZxR7yZ_NEBhCpKCEu2WBiTchqwoqoWpI17Q_ALm38tbnpay32t95ZY_LhSgwJg;info=<https://www.example.org/cert.cer>;ppt=shaken",
-		OriginatorTn:  "1001",
-	}, &rply); err == nil {
+	if err := sS.BiRPCv1STIRAuthenticate(context.Background(),
+		&V1STIRAuthenticateArgs{
+			DestinationTn: "1003",
+			Identity:      "eyJhbGciOiJFUzI1NiIsInBwdCI6InNoYWtlbiIsInR5cCI6InBhc3Nwb3J0IiwieDV1IjoiaHR0cHM6Ly93d3cuZXhhbXBsZS5vcmcvY2VydC5jZXIifQ.eyJhdHRlc3QiOiJBIiwiZGVzdCI6eyJ0biI6WyIxMDAyIl19LCJpYXQiOjE1ODcwMTk4MjIsIm9yaWciOnsidG4iOiIxMDAxIn0sIm9yaWdpZCI6IjEyMzQ1NiJ9.4ybtWmgqdkNyJLS9Iv3PuJV8ZxR7yZ_NEBhCpKCEu2WBiTchqwoqoWpI17Q_ALm38tbnpay32t95ZY_LhSgwJg;info=<https://www.example.org/cert.cer>;ppt=shaken",
+			OriginatorTn:  "1001",
+		}, &rply); err == nil {
 		t.Error("Expected invalid identity")
 	}
 
-	if err := sS.BiRPCv1STIRAuthenticate(nil, &V1STIRAuthenticateArgs{
-		Attest:             []string{"A"},
-		PayloadMaxDuration: "-1",
-		DestinationTn:      "1002",
-		Identity:           "eyJhbGciOiJFUzI1NiIsInBwdCI6InNoYWtlbiIsInR5cCI6InBhc3Nwb3J0IiwieDV1IjoiaHR0cHM6Ly93d3cuZXhhbXBsZS5vcmcvY2VydC5jZXIifQ.eyJhdHRlc3QiOiJBIiwiZGVzdCI6eyJ0biI6WyIxMDAyIl19LCJpYXQiOjE1ODcwMTk4MjIsIm9yaWciOnsidG4iOiIxMDAxIn0sIm9yaWdpZCI6IjEyMzQ1NiJ9.4ybtWmgqdkNyJLS9Iv3PuJV8ZxR7yZ_NEBhCpKCEu2WBiTchqwoqoWpI17Q_ALm38tbnpay32t95ZY_LhSgwJg;info=<https://www.example.org/cert.cer>;ppt=shaken",
-		OriginatorTn:       "1001",
-	}, &rply); err != nil {
+	if err := sS.BiRPCv1STIRAuthenticate(context.Background(),
+		&V1STIRAuthenticateArgs{
+			Attest:             []string{"A"},
+			PayloadMaxDuration: "-1",
+			DestinationTn:      "1002",
+			Identity:           "eyJhbGciOiJFUzI1NiIsInBwdCI6InNoYWtlbiIsInR5cCI6InBhc3Nwb3J0IiwieDV1IjoiaHR0cHM6Ly93d3cuZXhhbXBsZS5vcmcvY2VydC5jZXIifQ.eyJhdHRlc3QiOiJBIiwiZGVzdCI6eyJ0biI6WyIxMDAyIl19LCJpYXQiOjE1ODcwMTk4MjIsIm9yaWciOnsidG4iOiIxMDAxIn0sIm9yaWdpZCI6IjEyMzQ1NiJ9.4ybtWmgqdkNyJLS9Iv3PuJV8ZxR7yZ_NEBhCpKCEu2WBiTchqwoqoWpI17Q_ALm38tbnpay32t95ZY_LhSgwJg;info=<https://www.example.org/cert.cer>;ppt=shaken",
+			OriginatorTn:       "1001",
+		}, &rply); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -2531,24 +2533,26 @@ aa+jqv4dwkr/FLEcN1zC76Y/IniI65fId55hVJvN3ORuzUqYEtzD3irmsw==
 	}
 
 	var rcv string
-	if err := sS.BiRPCv1STIRIdentity(nil, &V1STIRIdentityArgs{
-		Payload:        payload,
-		PublicKeyPath:  "https://www.example.org/cert.cer",
-		PrivateKeyPath: "https://www.example.org/private.pem",
-		OverwriteIAT:   true,
-	}, &rcv); err == nil {
+	if err := sS.BiRPCv1STIRIdentity(context.Background(),
+		&V1STIRIdentityArgs{
+			Payload:        payload,
+			PublicKeyPath:  "https://www.example.org/cert.cer",
+			PrivateKeyPath: "https://www.example.org/private.pem",
+			OverwriteIAT:   true,
+		}, &rcv); err == nil {
 		t.Error("Expected error")
 	}
 	if err := engine.Cache.Set(utils.CacheSTIR, "https://www.example.org/private.pem", prvKey,
 		nil, true, utils.NonTransactional); err != nil {
 		t.Errorf("Expecting: nil, received: %s", err)
 	}
-	if err := sS.BiRPCv1STIRIdentity(nil, &V1STIRIdentityArgs{
-		Payload:        payload,
-		PublicKeyPath:  "https://www.example.org/cert.cer",
-		PrivateKeyPath: "https://www.example.org/private.pem",
-		OverwriteIAT:   true,
-	}, &rcv); err != nil {
+	if err := sS.BiRPCv1STIRIdentity(context.Background(),
+		&V1STIRIdentityArgs{
+			Payload:        payload,
+			PublicKeyPath:  "https://www.example.org/cert.cer",
+			PrivateKeyPath: "https://www.example.org/private.pem",
+			OverwriteIAT:   true,
+		}, &rcv); err != nil {
 		t.Error(err)
 	} else if err := AuthStirShaken(rcv, "1001", "", "1002", "", utils.NewStringSet([]string{utils.MetaAny}), -1); err != nil {
 		t.Fatal(err)
@@ -2559,7 +2563,7 @@ type mockConnWarnDisconnect1 struct {
 	*testRPCClientConnection
 }
 
-func (mk *mockConnWarnDisconnect1) Call(method string, args any, rply any) error {
+func (mk *mockConnWarnDisconnect1) Call(ctx *context.Context, method string, args any, rply any) error {
 	return utils.ErrNotImplemented
 }
 
@@ -2567,7 +2571,7 @@ type mockConnWarnDisconnect2 struct {
 	*testRPCClientConnection
 }
 
-func (mk *mockConnWarnDisconnect2) Call(method string, args any, rply any) error {
+func (mk *mockConnWarnDisconnect2) Call(ctx *context.Context, method string, args any, rply any) error {
 	return utils.ErrNoActiveSession
 }
 
@@ -2597,13 +2601,13 @@ func TestWarnSession(t *testing.T) {
 
 type clMock func(_ string, _ any, _ any) error
 
-func (c clMock) Call(m string, a any, r any) error {
+func (c clMock) Call(_ *context.Context, m string, a any, r any) error {
 	return c(m, a, r)
 }
 func TestInitSession(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.SessionSCfg().ChargerSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers)}
-	clientConect := make(chan rpcclient.ClientConnector, 1)
+	clientConect := make(chan birpc.ClientConnector, 1)
 	clientConect <- clMock(func(_ string, args any, reply any) error {
 		rply, cancast := reply.(*[]*engine.ChrgSProcessEventReply)
 		if !cancast {
@@ -2619,7 +2623,7 @@ func TestInitSession(t *testing.T) {
 		}
 		return nil
 	})
-	conMng := engine.NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	conMng := engine.NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers): clientConect,
 	})
 	sS := NewSessionS(cfg, nil, conMng)
@@ -2666,17 +2670,13 @@ func TestInitSession(t *testing.T) {
 	}
 }
 
-func TestSessionSAsBiRPC(t *testing.T) {
-	_ = rpcclient.BiRPCConector(new(SessionS))
-}
-
 func TestBiJClntID(t *testing.T) {
 	client := &mockConnWarnDisconnect1{}
 	cfg := config.NewDefaultCGRConfig()
 	data := engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
 	sessions := NewSessionS(cfg, dm, nil)
-	sessions.biJClnts = map[rpcclient.ClientConnector]string{
+	sessions.biJClnts = map[birpc.ClientConnector]string{
 		client: "First_connector",
 	}
 	expected := "First_connector"
@@ -2720,9 +2720,9 @@ func TestBiRPCv1AuthorizeEventNoTenant(t *testing.T) {
 
 		return nil
 	})
-	chanClnt := make(chan rpcclient.ClientConnector, 1)
+	chanClnt := make(chan birpc.ClientConnector, 1)
 	chanClnt <- clMock
-	connMngr := engine.NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	connMngr := engine.NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.Attributes): chanClnt,
 	})
 	db := engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
@@ -2749,7 +2749,7 @@ func TestBiRPCv1AuthorizeEventNoTenant(t *testing.T) {
 	rply := &V1AuthorizeReply{
 		Attributes: new(engine.AttrSProcessEventReply),
 	}
-	if err := ss.BiRPCv1AuthorizeEvent(nil, args,
+	if err := ss.BiRPCv1AuthorizeEvent(context.Background(), args,
 		rply); err != nil {
 		t.Error(err)
 	}
@@ -2790,9 +2790,9 @@ func TestBiRPCv1AuthorizeEventWithDigestNoTenant(t *testing.T) {
 
 		return nil
 	})
-	chanClnt := make(chan rpcclient.ClientConnector, 1)
+	chanClnt := make(chan birpc.ClientConnector, 1)
 	chanClnt <- clMock
-	connMngr := engine.NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	connMngr := engine.NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.Attributes): chanClnt,
 	})
 	db := engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
@@ -2817,7 +2817,7 @@ func TestBiRPCv1AuthorizeEventWithDigestNoTenant(t *testing.T) {
 	}
 
 	rply := &V1AuthorizeReplyWithDigest{}
-	if err := ss.BiRPCv1AuthorizeEventWithDigest(nil, args,
+	if err := ss.BiRPCv1AuthorizeEventWithDigest(context.Background(), args,
 		rply); err != nil {
 		t.Error(err)
 	}
@@ -2858,9 +2858,9 @@ func TestBiRPCv1InitiateSessionNoTenant(t *testing.T) {
 
 		return nil
 	})
-	chanClnt := make(chan rpcclient.ClientConnector, 1)
+	chanClnt := make(chan birpc.ClientConnector, 1)
 	chanClnt <- clMock
-	connMngr := engine.NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	connMngr := engine.NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.Attributes): chanClnt,
 	})
 	db := engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
@@ -2886,7 +2886,7 @@ func TestBiRPCv1InitiateSessionNoTenant(t *testing.T) {
 	reply := &V1InitSessionReply{
 		Attributes: new(engine.AttrSProcessEventReply),
 	}
-	if err := ss.BiRPCv1InitiateSession(nil, args, reply); err != nil {
+	if err := ss.BiRPCv1InitiateSession(context.Background(), args, reply); err != nil {
 		t.Error(err)
 	}
 }
@@ -2925,9 +2925,9 @@ func TestBiRPCv1InitiateSessionWithDigestNoTenant(t *testing.T) {
 		}
 		return nil
 	})
-	chanClnt := make(chan rpcclient.ClientConnector, 1)
+	chanClnt := make(chan birpc.ClientConnector, 1)
 	chanClnt <- clMock
-	connMngr := engine.NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	connMngr := engine.NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.Attributes): chanClnt,
 	})
 	db := engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
@@ -2951,7 +2951,7 @@ func TestBiRPCv1InitiateSessionWithDigestNoTenant(t *testing.T) {
 		},
 	}
 	reply := &V1InitReplyWithDigest{}
-	if err := ss.BiRPCv1InitiateSessionWithDigest(nil, args, reply); err != nil {
+	if err := ss.BiRPCv1InitiateSessionWithDigest(context.Background(), args, reply); err != nil {
 		t.Error(err)
 	}
 }
@@ -2990,9 +2990,9 @@ func TestBiRPCv1UpdateSessionNoTenant(t *testing.T) {
 		}
 		return nil
 	})
-	chanClnt := make(chan rpcclient.ClientConnector, 1)
+	chanClnt := make(chan birpc.ClientConnector, 1)
 	chanClnt <- clMock
-	connMngr := engine.NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	connMngr := engine.NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.Attributes): chanClnt,
 	})
 	db := engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
@@ -3016,7 +3016,7 @@ func TestBiRPCv1UpdateSessionNoTenant(t *testing.T) {
 		},
 	}
 	rply := &V1UpdateSessionReply{}
-	if err := ss.BiRPCv1UpdateSession(nil, args, rply); err != nil {
+	if err := ss.BiRPCv1UpdateSession(context.Background(), args, rply); err != nil {
 		t.Error(err)
 	}
 }
@@ -3040,9 +3040,9 @@ func TestBiRPCv1TerminateSessionNoTenant(t *testing.T) {
 		*rply = []*engine.ChrgSProcessEventReply{}
 		return nil
 	})
-	chanClnt := make(chan rpcclient.ClientConnector, 1)
+	chanClnt := make(chan birpc.ClientConnector, 1)
 	chanClnt <- clMock
-	connMngr := engine.NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	connMngr := engine.NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers): chanClnt,
 	})
 	db := engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
@@ -3066,7 +3066,7 @@ func TestBiRPCv1TerminateSessionNoTenant(t *testing.T) {
 		},
 	}
 	var reply string
-	if err := ss.BiRPCv1TerminateSession(nil, args,
+	if err := ss.BiRPCv1TerminateSession(context.Background(), args,
 		&reply); err != nil {
 		t.Error(err)
 	}
@@ -3106,9 +3106,9 @@ func TestBiRPCv1ProcessMessageNoTenant(t *testing.T) {
 		}
 		return nil
 	})
-	chanClnt := make(chan rpcclient.ClientConnector, 1)
+	chanClnt := make(chan birpc.ClientConnector, 1)
 	chanClnt <- clMock
-	connMngr := engine.NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	connMngr := engine.NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.Attributes): chanClnt,
 	})
 	db := engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
@@ -3174,9 +3174,9 @@ func TestBiRPCv1ProcessEventNoTenant(t *testing.T) {
 		}
 		return nil
 	})
-	chanClnt := make(chan rpcclient.ClientConnector, 1)
+	chanClnt := make(chan birpc.ClientConnector, 1)
 	chanClnt <- clMock
-	connMngr := engine.NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	connMngr := engine.NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.Attributes): chanClnt,
 	})
 	db := engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
@@ -3202,7 +3202,7 @@ func TestBiRPCv1ProcessEventNoTenant(t *testing.T) {
 	reply := &V1ProcessEventReply{
 		Attributes: make(map[string]*engine.AttrSProcessEventReply),
 	}
-	if err := ss.BiRPCv1ProcessEvent(nil, args, reply); err != nil {
+	if err := ss.BiRPCv1ProcessEvent(context.Background(), args, reply); err != nil {
 		t.Error(err)
 	}
 }

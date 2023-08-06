@@ -21,19 +21,19 @@ package services
 import (
 	"sync"
 
+	"github.com/cgrates/birpc"
 	v1 "github.com/cgrates/cgrates/apier/v1"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/cores"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/scheduler"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/cgrates/rpcclient"
 )
 
 // NewSchedulerService returns the Scheduler Service
 func NewSchedulerService(cfg *config.CGRConfig, dm *DataDBService,
 	cacheS *engine.CacheS, fltrSChan chan *engine.FilterS,
-	server *cores.Server, internalSchedulerrSChan chan rpcclient.ClientConnector,
+	server *cores.Server, internalSchedulerrSChan chan birpc.ClientConnector,
 	connMgr *engine.ConnManager, anz *AnalyzerService,
 	srvDep map[string]*sync.WaitGroup) *SchedulerService {
 	return &SchedulerService{
@@ -60,14 +60,14 @@ type SchedulerService struct {
 
 	schS     *scheduler.Scheduler
 	rpc      *v1.SchedulerSv1
-	connChan chan rpcclient.ClientConnector
+	connChan chan birpc.ClientConnector
 	connMgr  *engine.ConnManager
 	anz      *AnalyzerService
 	srvDep   map[string]*sync.WaitGroup
 }
 
 // Start should handle the sercive start
-func (schS *SchedulerService) Start() (err error) {
+func (schS *SchedulerService) Start() error {
 	if schS.IsRunning() {
 		return utils.ErrServiceAlreadyRunning
 	}
@@ -87,12 +87,17 @@ func (schS *SchedulerService) Start() (err error) {
 	go schS.schS.Loop()
 
 	schS.rpc = v1.NewSchedulerSv1(schS.cfg, datadb, fltrS)
-	if !schS.cfg.DispatcherSCfg().Enabled {
-		schS.server.RpcRegister(schS.rpc)
+	srv, err := engine.NewService(schS.rpc)
+	if err != nil {
+		return err
 	}
-	schS.connChan <- schS.anz.GetInternalCodec(schS.rpc, utils.SchedulerS)
-
-	return
+	if !schS.cfg.DispatcherSCfg().Enabled {
+		for _, s := range srv {
+			schS.server.RpcRegister(s)
+		}
+	}
+	schS.connChan <- schS.anz.GetInternalCodec(srv, utils.SchedulerS)
+	return nil
 }
 
 // Reload handles the change of config

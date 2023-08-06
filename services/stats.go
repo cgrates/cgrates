@@ -22,19 +22,19 @@ import (
 	"fmt"
 	"sync"
 
+	"github.com/cgrates/birpc"
 	v1 "github.com/cgrates/cgrates/apier/v1"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/cores"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/servmanager"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/cgrates/rpcclient"
 )
 
 // NewStatService returns the Stat Service
 func NewStatService(cfg *config.CGRConfig, dm *DataDBService,
 	cacheS *engine.CacheS, filterSChan chan *engine.FilterS,
-	server *cores.Server, internalStatSChan chan rpcclient.ClientConnector,
+	server *cores.Server, internalStatSChan chan birpc.ClientConnector,
 	connMgr *engine.ConnManager, anz *AnalyzerService,
 	srvDep map[string]*sync.WaitGroup) servmanager.Service {
 	return &StatService{
@@ -61,14 +61,13 @@ type StatService struct {
 	connMgr     *engine.ConnManager
 
 	sts      *engine.StatService
-	rpc      *v1.StatSv1
-	connChan chan rpcclient.ClientConnector
+	connChan chan birpc.ClientConnector
 	anz      *AnalyzerService
 	srvDep   map[string]*sync.WaitGroup
 }
 
 // Start should handle the sercive start
-func (sts *StatService) Start() (err error) {
+func (sts *StatService) Start() error {
 	if sts.IsRunning() {
 		return utils.ErrServiceAlreadyRunning
 	}
@@ -91,12 +90,17 @@ func (sts *StatService) Start() (err error) {
 	utils.Logger.Info(fmt.Sprintf("<%s> starting <%s> subsystem",
 		utils.CoreS, utils.StatS))
 	sts.sts.StartLoop()
-	sts.rpc = v1.NewStatSv1(sts.sts)
-	if !sts.cfg.DispatcherSCfg().Enabled {
-		sts.server.RpcRegister(sts.rpc)
+	srv, err := engine.NewService(v1.NewStatSv1(sts.sts))
+	if err != nil {
+		return err
 	}
-	sts.connChan <- sts.anz.GetInternalCodec(sts.rpc, utils.StatS)
-	return
+	if !sts.cfg.DispatcherSCfg().Enabled {
+		for _, s := range srv {
+			sts.server.RpcRegister(s)
+		}
+	}
+	sts.connChan <- sts.anz.GetInternalCodec(srv, utils.StatS)
+	return nil
 }
 
 // Reload handles the change of config
@@ -114,7 +118,6 @@ func (sts *StatService) Shutdown() (err error) {
 	defer sts.Unlock()
 	sts.sts.Shutdown()
 	sts.sts = nil
-	sts.rpc = nil
 	<-sts.connChan
 	return
 }

@@ -26,9 +26,9 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/cgrates/birpc"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/cgrates/rpcclient"
 )
 
 var (
@@ -96,11 +96,15 @@ func testLoaderITInitDataDB(t *testing.T) {
 	if err = dataDbCsv.Flush(utils.EmptyString); err != nil {
 		t.Fatal("Error when flushing datadb")
 	}
-	cacheChan := make(chan rpcclient.ClientConnector, 1)
-	connMgr = NewConnManager(lCfg, map[string]chan rpcclient.ClientConnector{
+	cacheChan := make(chan birpc.ClientConnector, 1)
+	connMgr = NewConnManager(lCfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches): cacheChan,
 	})
-	cacheChan <- NewCacheS(lCfg, NewDataManager(dataDbCsv, lCfg.CacheCfg(), connMgr), nil)
+	srv, err := NewService(NewCacheS(lCfg, NewDataManager(dataDbCsv, lCfg.CacheCfg(), connMgr), nil))
+	if err != nil {
+		t.Fatal(err)
+	}
+	cacheChan <- srv
 }
 
 // Create/reset storage tariff plan tables, used as database connectin establishment also

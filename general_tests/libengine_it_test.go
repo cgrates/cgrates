@@ -21,11 +21,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package general_tests
 
 import (
-	"net/rpc"
 	"path"
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc"
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -34,7 +35,7 @@ import (
 
 var (
 	libengCfg       *config.CGRConfig
-	libengRpc       *rpc.Client
+	libengRpc       *birpc.Client
 	libengCfgPath   string
 	libengConfigDIR string
 
@@ -109,15 +110,18 @@ func testLibengITRPCConnection(t *testing.T) {
 		Tenant:   "cgrates.org",
 	}
 	var reply string
-	conn, err := engine.NewRPCConnection(cgrCfg, "", "", "",
-		cgrCfg.ConnectAttempts, cgrCfg.Reconnects, cgrCfg.ConnectTimeout, cgrCfg.ReplyTimeout, nil, false, nil, "*localhost",
+	conn, err := engine.NewRPCConnection(context.Background(),
+		cgrCfg, "", "", "",
+		cgrCfg.ConnectAttempts, cgrCfg.Reconnects,
+		cgrCfg.MaxReconnectInterval, cgrCfg.ConnectTimeout,
+		cgrCfg.ReplyTimeout, nil, false, "*localhost",
 		"a4f3f", new(ltcache.Cache))
 	if err != nil {
 		t.Error(err)
 	}
 	//We check if we get a reply timeout error when calling a sleep bigger than the reply timeout from connection config.
 	errExpect := "REPLY_TIMEOUT"
-	if err := conn.Call(utils.CoreSv1Sleep, args, &reply); err.Error() != errExpect {
+	if err := conn.Call(context.Background(), utils.CoreSv1Sleep, args, &reply); err.Error() != errExpect {
 		t.Errorf("Expected %v \n but received \n %v", errExpect, err.Error())
 	}
 

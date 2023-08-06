@@ -22,12 +22,13 @@ package general_tests
 
 import (
 	"fmt"
-	"net/rpc"
 	"os/exec"
 	"path"
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc"
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/sessions"
@@ -38,7 +39,7 @@ var (
 	smgRplcMasterCfgPath, smgRplcSlaveCfgPath string
 	smgRplcMasterCfgDIR, smgRplcSlaveCfgDIR   string
 	smgRplcMasterCfg, smgRplcSlaveCfg         *config.CGRConfig
-	smgRplcMstrRPC, smgRplcSlvRPC             *rpc.Client
+	smgRplcMstrRPC, smgRplcSlvRPC             *birpc.Client
 	masterEngine                              *exec.Cmd
 	sTestsSession                             = []func(t *testing.T){
 		testSessionSRplInitCfg,
@@ -89,7 +90,7 @@ func testSessionSRplAddVoiceBalance(t *testing.T) {
 		},
 	}
 	var reply string
-	if err := smgRplcMstrRPC.Call(utils.APIerSv2SetBalance, attrSetBalance, &reply); err != nil {
+	if err := smgRplcMstrRPC.Call(context.Background(), utils.APIerSv2SetBalance, attrSetBalance, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf("Received: %s", reply)
@@ -100,7 +101,7 @@ func testSessionSRplAddVoiceBalance(t *testing.T) {
 		Account: "1005",
 	}
 	//get balance
-	if err := smgRplcMstrRPC.Call(utils.APIerSv2GetAccount, attrs, &acnt); err != nil {
+	if err := smgRplcMstrRPC.Call(context.Background(), utils.APIerSv2GetAccount, attrs, &acnt); err != nil {
 		t.Error(err)
 	} else if rply := acnt.BalanceMap[utils.MetaVoice].GetTotalValue(); rply != float64(5*time.Second) {
 		t.Errorf("Expecting: %v, received: %v",
@@ -155,7 +156,7 @@ func testSessionSRplApierRpcConn(t *testing.T) {
 func testSessionSRplTPFromFolder(t *testing.T) {
 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "oldtutorial")}
 	var loadInst utils.LoadInstance
-	if err := smgRplcMstrRPC.Call(utils.APIerSv2LoadTariffPlanFromFolder, attrs, &loadInst); err != nil {
+	if err := smgRplcMstrRPC.Call(context.Background(), utils.APIerSv2LoadTariffPlanFromFolder, attrs, &loadInst); err != nil {
 		t.Error(err)
 	}
 	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // Give time for scheduler to execute topups
@@ -164,11 +165,11 @@ func testSessionSRplTPFromFolder(t *testing.T) {
 func testSessionSRplInitiate(t *testing.T) {
 	var aSessions []*sessions.ExternalSession
 	//make sure we don't have active sessions on master and passive on slave
-	if err := smgRplcMstrRPC.Call(utils.SessionSv1GetActiveSessions,
+	if err := smgRplcMstrRPC.Call(context.Background(), utils.SessionSv1GetActiveSessions,
 		new(utils.SessionFilter), &aSessions); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
-	if err := smgRplcSlvRPC.Call(utils.SessionSv1GetPassiveSessions,
+	if err := smgRplcSlvRPC.Call(context.Background(), utils.SessionSv1GetPassiveSessions,
 		new(utils.SessionFilter), &aSessions); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
@@ -196,7 +197,7 @@ func testSessionSRplInitiate(t *testing.T) {
 	}
 
 	var initRpl sessions.V1InitSessionReply
-	if err := smgRplcMstrRPC.Call(utils.SessionSv1InitiateSession,
+	if err := smgRplcMstrRPC.Call(context.Background(), utils.SessionSv1InitiateSession,
 		argsInit, &initRpl); err != nil {
 		t.Error(err)
 	}
@@ -208,7 +209,7 @@ func testSessionSRplInitiate(t *testing.T) {
 
 	//check active session
 	time.Sleep(10 * time.Millisecond)
-	if err := smgRplcMstrRPC.Call(utils.SessionSv1GetActiveSessions,
+	if err := smgRplcMstrRPC.Call(context.Background(), utils.SessionSv1GetActiveSessions,
 		utils.SessionFilter{
 			Filters: []string{
 				fmt.Sprintf("*string:~*req.%s:%s", utils.OriginID, "123451"),
@@ -225,7 +226,7 @@ func testSessionSRplInitiate(t *testing.T) {
 	var autoDebit1, autoDebit2 time.Time
 
 	var pSessions []*sessions.ExternalSession
-	if err := smgRplcSlvRPC.Call(utils.SessionSv1GetPassiveSessions,
+	if err := smgRplcSlvRPC.Call(context.Background(), utils.SessionSv1GetPassiveSessions,
 		utils.SessionFilter{
 			Filters: []string{
 				fmt.Sprintf("*string:~*req.%s:%s", utils.OriginID, "123451"),
@@ -242,7 +243,7 @@ func testSessionSRplInitiate(t *testing.T) {
 
 	//check active session (II)
 	time.Sleep(12 * time.Millisecond)
-	if err := smgRplcMstrRPC.Call(utils.SessionSv1GetActiveSessions,
+	if err := smgRplcMstrRPC.Call(context.Background(), utils.SessionSv1GetActiveSessions,
 		utils.SessionFilter{
 			Filters: []string{
 				fmt.Sprintf("*string:~*req.%s:%s", utils.OriginID, "123451"),
@@ -257,7 +258,7 @@ func testSessionSRplInitiate(t *testing.T) {
 	}
 
 	//check passive session (II)
-	if err := smgRplcSlvRPC.Call(utils.SessionSv1GetPassiveSessions,
+	if err := smgRplcSlvRPC.Call(context.Background(), utils.SessionSv1GetPassiveSessions,
 		utils.SessionFilter{
 			Filters: []string{
 				fmt.Sprintf("*string:~*req.%s:%s", utils.OriginID, "123451"),
@@ -280,7 +281,7 @@ func testSessionSRplInitiate(t *testing.T) {
 		Tenant:  "cgrates.org",
 		Account: "1005",
 	}
-	if err := smgRplcMstrRPC.Call(utils.APIerSv2GetAccount, attrs, &acnt); err != nil {
+	if err := smgRplcMstrRPC.Call(context.Background(), utils.APIerSv2GetAccount, attrs, &acnt); err != nil {
 		t.Error(err)
 		// a tolerance of +/- 5ms is acceptable
 	} else if rply := acnt.BalanceMap[utils.MetaVoice].GetTotalValue(); rply < float64(5*time.Second-25*time.Millisecond) || rply > float64(5*time.Second-15*time.Millisecond) {
@@ -295,14 +296,14 @@ func testSessionSRplActivateSlave(t *testing.T) {
 	}
 	// activate sessions on slave
 	var rplActivate string
-	if err := smgRplcSlvRPC.Call(utils.SessionSv1ActivateSessions, &utils.SessionIDsWithArgsDispatcher{}, &rplActivate); err != nil {
+	if err := smgRplcSlvRPC.Call(context.Background(), utils.SessionSv1ActivateSessions, &utils.SessionIDsWithArgsDispatcher{}, &rplActivate); err != nil {
 		t.Error(err)
 	}
 	time.Sleep(7 * time.Millisecond)
 	//check if the active session is on slave now
 	var aSessions []*sessions.ExternalSession
 	var autoDebit1, autoDebit2 time.Time
-	if err := smgRplcSlvRPC.Call(utils.SessionSv1GetActiveSessions, new(utils.SessionFilter), &aSessions); err != nil {
+	if err := smgRplcSlvRPC.Call(context.Background(), utils.SessionSv1GetActiveSessions, new(utils.SessionFilter), &aSessions); err != nil {
 		t.Error(err)
 	} else if len(aSessions) != 1 {
 		t.Errorf("Unexpected number of sessions received: %+v", utils.ToIJSON(aSessions))
@@ -318,7 +319,7 @@ func testSessionSRplActivateSlave(t *testing.T) {
 		t.Fatal(err)
 	}
 	time.Sleep(20 * time.Millisecond)
-	if err := smgRplcSlvRPC.Call(utils.SessionSv1GetActiveSessions, new(utils.SessionFilter), &aSessions2); err != nil {
+	if err := smgRplcSlvRPC.Call(context.Background(), utils.SessionSv1GetActiveSessions, new(utils.SessionFilter), &aSessions2); err != nil {
 		t.Error(err)
 	} else if len(aSessions2) != 1 {
 		t.Errorf("Unexpected number of sessions received: %+v", utils.ToIJSON(aSessions2))
@@ -342,7 +343,7 @@ func testSessionSRplCheckAccount(t *testing.T) {
 	}
 
 	expectedBal := 5*time.Second - 40*time.Millisecond
-	if err := smgRplcSlvRPC.Call(utils.APIerSv2GetAccount, attrs, &acnt); err != nil {
+	if err := smgRplcSlvRPC.Call(context.Background(), utils.APIerSv2GetAccount, attrs, &acnt); err != nil {
 		t.Error(err)
 		// a tolerance of +/- 10ms is acceptable
 	} else if rply := acnt.BalanceMap[utils.MetaVoice].GetTotalValue(); rply < float64(expectedBal-10*time.Millisecond) ||
@@ -374,20 +375,20 @@ func testSessionSRplTerminate(t *testing.T) {
 		},
 	}
 	var reply string
-	if err := smgRplcSlvRPC.Call(utils.SessionSv1TerminateSession, args, &reply); err != nil {
+	if err := smgRplcSlvRPC.Call(context.Background(), utils.SessionSv1TerminateSession, args, &reply); err != nil {
 		t.Error(err)
 	}
 	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // Wait for the sessions to be populated
 	var aSessions []*sessions.ExternalSession
 
 	//check if the session was terminated on slave
-	if err := smgRplcSlvRPC.Call(utils.SessionSv1GetActiveSessions,
+	if err := smgRplcSlvRPC.Call(context.Background(), utils.SessionSv1GetActiveSessions,
 		new(utils.SessionFilter), &aSessions); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("Error: %v with len(aSessions)=%v , session : %+v", err, len(aSessions), utils.ToIJSON(aSessions))
 	}
 	// check to don't have passive session on slave
 	var pSessions []*sessions.ExternalSession
-	if err := smgRplcSlvRPC.Call(utils.SessionSv1GetPassiveSessions,
+	if err := smgRplcSlvRPC.Call(context.Background(), utils.SessionSv1GetPassiveSessions,
 		new(utils.SessionFilter), &pSessions); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("Error: %v with len(pSessions)=%v , session : %+v", err, len(pSessions), utils.ToIJSON(pSessions))
 	}
@@ -398,7 +399,7 @@ func testSessionSRplTerminate(t *testing.T) {
 		Account: "1005",
 	}
 
-	if err := smgRplcSlvRPC.Call(utils.APIerSv2GetAccount, attrs, &acnt); err != nil {
+	if err := smgRplcSlvRPC.Call(context.Background(), utils.APIerSv2GetAccount, attrs, &acnt); err != nil {
 		t.Error(err)
 		// a tolerance of +/- 5ms is acceptable
 	} else if rply := acnt.BalanceMap[utils.MetaVoice].GetTotalValue(); rply != float64(3*time.Second) {

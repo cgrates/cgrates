@@ -23,11 +23,12 @@ package agents
 
 import (
 	"net"
-	"net/rpc"
 	"path"
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc"
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -38,7 +39,7 @@ var (
 	saonfigDIR string
 	saCfgPath  string
 	saCfg      *config.CGRConfig
-	saRPC      *rpc.Client
+	saRPC      *birpc.Client
 	saConn     net.Conn
 
 	sTestsSIP = []func(t *testing.T){
@@ -126,7 +127,7 @@ func testSAitApierRpcConn(t *testing.T) {
 func testSAitTPFromFolder(t *testing.T) {
 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "tut_sip_redirect")}
 	var loadInst utils.LoadInstance
-	if err := saRPC.Call(utils.APIerSv2LoadTariffPlanFromFolder, attrs, &loadInst); err != nil {
+	if err := saRPC.Call(context.Background(), utils.APIerSv2LoadTariffPlanFromFolder, attrs, &loadInst); err != nil {
 		t.Error(err)
 	}
 	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // Give time for scheduler to execute topups

@@ -25,6 +25,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/sessions"
@@ -85,22 +86,22 @@ func testTLSStartEngine(t *testing.T) {
 
 func testTLSRpcConn(t *testing.T) {
 	var err error
-	tlsRpcClientJson, err = rpcclient.NewRPCClient(utils.TCP, "localhost:2022", true, tlsCfg.TLSCfg().ClientKey,
-		tlsCfg.TLSCfg().ClientCerificate, tlsCfg.TLSCfg().CaCertificate, 3, 3,
+	tlsRpcClientJson, err = rpcclient.NewRPCClient(context.Background(), utils.TCP, "localhost:2022", true, tlsCfg.TLSCfg().ClientKey,
+		tlsCfg.TLSCfg().ClientCerificate, tlsCfg.TLSCfg().CaCertificate, 3, 3, 0, utils.FibDuration,
 		time.Second, 5*time.Minute, rpcclient.JSONrpc, nil, false, nil)
 	if err != nil {
 		t.Errorf("Error: %s when dialing", err)
 	}
 
-	tlsRpcClientGob, err = rpcclient.NewRPCClient(utils.TCP, "localhost:2023", true, tlsCfg.TLSCfg().ClientKey,
-		tlsCfg.TLSCfg().ClientCerificate, tlsCfg.TLSCfg().CaCertificate, 3, 3,
+	tlsRpcClientGob, err = rpcclient.NewRPCClient(context.Background(), utils.TCP, "localhost:2023", true, tlsCfg.TLSCfg().ClientKey,
+		tlsCfg.TLSCfg().ClientCerificate, tlsCfg.TLSCfg().CaCertificate, 3, 3, 0, utils.FibDuration,
 		time.Second, 5*time.Minute, rpcclient.GOBrpc, nil, false, nil)
 	if err != nil {
 		t.Errorf("Error: %s when dialing", err)
 	}
 
-	tlsHTTPJson, err = rpcclient.NewRPCClient(utils.TCP, "https://localhost:2280/jsonrpc", true, tlsCfg.TLSCfg().ClientKey,
-		tlsCfg.TLSCfg().ClientCerificate, tlsCfg.TLSCfg().CaCertificate, 3, 3,
+	tlsHTTPJson, err = rpcclient.NewRPCClient(context.Background(), utils.TCP, "https://localhost:2280/jsonrpc", true, tlsCfg.TLSCfg().ClientKey,
+		tlsCfg.TLSCfg().ClientCerificate, tlsCfg.TLSCfg().CaCertificate, 3, 3, 0, utils.FibDuration,
 		time.Second, 5*time.Minute, rpcclient.HTTPjson, nil, false, nil)
 	if err != nil {
 		t.Errorf("Error: %s when dialing", err)
@@ -110,28 +111,28 @@ func testTLSRpcConn(t *testing.T) {
 func testTLSPing(t *testing.T) {
 	var reply string
 
-	if err := tlsRpcClientJson.Call(utils.ThresholdSv1Ping, new(utils.CGREvent), &reply); err != nil {
+	if err := tlsRpcClientJson.Call(context.Background(), utils.ThresholdSv1Ping, new(utils.CGREvent), &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.Pong {
 		t.Errorf("Received: %s", reply)
 	}
-	if err := tlsRpcClientGob.Call(utils.ThresholdSv1Ping, new(utils.CGREvent), &reply); err != nil {
+	if err := tlsRpcClientGob.Call(context.Background(), utils.ThresholdSv1Ping, new(utils.CGREvent), &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.Pong {
 		t.Errorf("Received: %s", reply)
 	}
-	if err := tlsHTTPJson.Call(utils.ThresholdSv1Ping, new(utils.CGREvent), &reply); err != nil {
+	if err := tlsHTTPJson.Call(context.Background(), utils.ThresholdSv1Ping, new(utils.CGREvent), &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.Pong {
 		t.Errorf("Received: %s", reply)
 	}
-	if err := tlsRpcClientJson.Call(utils.DispatcherSv1Ping, "", &reply); err == nil {
+	if err := tlsRpcClientJson.Call(context.Background(), utils.DispatcherSv1Ping, "", &reply); err == nil {
 		t.Error(err)
 	}
-	if err := tlsRpcClientGob.Call(utils.DispatcherSv1Ping, "", &reply); err == nil {
+	if err := tlsRpcClientGob.Call(context.Background(), utils.DispatcherSv1Ping, "", &reply); err == nil {
 		t.Error(err)
 	}
-	if err := tlsHTTPJson.Call(utils.DispatcherSv1Ping, "", &reply); err == nil {
+	if err := tlsHTTPJson.Call(context.Background(), utils.DispatcherSv1Ping, "", &reply); err == nil {
 		t.Error(err)
 	}
 
@@ -160,7 +161,7 @@ func testTLSPing(t *testing.T) {
 		},
 	}
 	var rply sessions.V1InitReplyWithDigest
-	if err := tlsHTTPJson.Call(utils.SessionSv1InitiateSessionWithDigest,
+	if err := tlsHTTPJson.Call(context.Background(), utils.SessionSv1InitiateSessionWithDigest,
 		args, &rply); err == nil {
 		t.Error(err)
 	}

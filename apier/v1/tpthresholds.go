@@ -19,11 +19,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package v1
 
 import (
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
 )
 
 // SetTPThreshold creates a new threshold within a tariff plan
-func (apierSv1 *APIerSv1) SetTPThreshold(attr *utils.TPThresholdProfile, reply *string) error {
+func (apierSv1 *APIerSv1) SetTPThreshold(ctx *context.Context, attr *utils.TPThresholdProfile, reply *string) error {
 	if missing := utils.MissingStructFields(attr, []string{utils.TPid, utils.ID}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -38,7 +39,7 @@ func (apierSv1 *APIerSv1) SetTPThreshold(attr *utils.TPThresholdProfile, reply *
 }
 
 // GetTPThreshold queries specific Threshold on Tariff plan
-func (apierSv1 *APIerSv1) GetTPThreshold(attr *utils.TPTntID, reply *utils.TPThresholdProfile) error {
+func (apierSv1 *APIerSv1) GetTPThreshold(ctx *context.Context, attr *utils.TPTntID, reply *utils.TPThresholdProfile) error {
 	if missing := utils.MissingStructFields(attr, []string{utils.TPid, utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -63,7 +64,7 @@ type AttrGetTPThresholdIds struct {
 }
 
 // GetTPThresholdIDs queries Threshold identities on specific tariff plan.
-func (apierSv1 *APIerSv1) GetTPThresholdIDs(attrs *AttrGetTPThresholdIds, reply *[]string) error {
+func (apierSv1 *APIerSv1) GetTPThresholdIDs(ctx *context.Context, attrs *AttrGetTPThresholdIds, reply *[]string) error {
 	if missing := utils.MissingStructFields(attrs, []string{utils.TPid}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -83,7 +84,7 @@ func (apierSv1 *APIerSv1) GetTPThresholdIDs(attrs *AttrGetTPThresholdIds, reply 
 }
 
 // RemoveTPThreshold removes specific Threshold on Tariff plan
-func (apierSv1 *APIerSv1) RemoveTPThreshold(attrs *utils.TPTntID, reply *string) error {
+func (apierSv1 *APIerSv1) RemoveTPThreshold(ctx *context.Context, attrs *utils.TPTntID, reply *string) error {
 	if missing := utils.MissingStructFields(attrs, []string{utils.TPid, utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}

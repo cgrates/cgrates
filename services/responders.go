@@ -21,16 +21,16 @@ package services
 import (
 	"sync"
 
+	"github.com/cgrates/birpc"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/cores"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/cgrates/rpcclient"
 )
 
 // NewResponderService returns the Resonder Service
 func NewResponderService(cfg *config.CGRConfig, server *cores.Server,
-	internalRALsChan chan rpcclient.ClientConnector,
+	internalRALsChan chan birpc.ClientConnector,
 	shdChan *utils.SyncedChan, anz *AnalyzerService,
 	srvDep map[string]*sync.WaitGroup,
 	filterSCh chan *engine.FilterS) *ResponderService {
@@ -55,7 +55,7 @@ type ResponderService struct {
 	shdChan *utils.SyncedChan
 
 	resp      *engine.Responder
-	connChan  chan rpcclient.ClientConnector
+	connChan  chan birpc.ClientConnector
 	anz       *AnalyzerService
 	srvDep    map[string]*sync.WaitGroup
 	syncChans map[string]chan *engine.Responder
@@ -65,7 +65,7 @@ type ResponderService struct {
 
 // Start should handle the sercive start
 // For this service the start should be called from RAL Service
-func (resp *ResponderService) Start() (err error) {
+func (resp *ResponderService) Start() error {
 	if resp.IsRunning() {
 		return utils.ErrServiceAlreadyRunning
 	}
@@ -80,13 +80,19 @@ func (resp *ResponderService) Start() (err error) {
 		MaxComputedUsage: resp.cfg.RalsCfg().MaxComputedUsage,
 	}
 
+	srv, err := engine.NewService(resp.resp)
+	if err != nil {
+		return err
+	}
 	if !resp.cfg.DispatcherSCfg().Enabled {
-		resp.server.RpcRegister(resp.resp)
+		for _, s := range srv {
+			resp.server.RpcRegister(s)
+		}
 	}
 
-	resp.connChan <- resp.anz.GetInternalCodec(resp.resp, utils.ResponderS) // Rater done
+	resp.connChan <- resp.anz.GetInternalCodec(srv, utils.ResponderS) // Rater done
 	resp.sync()
-	return
+	return nil
 }
 
 // Reload handles the change of config

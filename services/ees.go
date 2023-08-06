@@ -22,20 +22,19 @@ import (
 	"fmt"
 	"sync"
 
-	v1 "github.com/cgrates/cgrates/apier/v1"
+	"github.com/cgrates/birpc"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/cores"
 	"github.com/cgrates/cgrates/ees"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/servmanager"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/cgrates/rpcclient"
 )
 
 // NewEventExporterService constructs EventExporterService
 func NewEventExporterService(cfg *config.CGRConfig, filterSChan chan *engine.FilterS,
 	connMgr *engine.ConnManager, server *cores.Server,
-	intConnChan chan rpcclient.ClientConnector, anz *AnalyzerService,
+	intConnChan chan birpc.ClientConnector, anz *AnalyzerService,
 	srvDep map[string]*sync.WaitGroup) servmanager.Service {
 	return &EventExporterService{
 		cfg:         cfg,
@@ -57,12 +56,11 @@ type EventExporterService struct {
 	filterSChan chan *engine.FilterS
 	connMgr     *engine.ConnManager
 	server      *cores.Server
-	intConnChan chan rpcclient.ClientConnector
+	intConnChan chan birpc.ClientConnector
 	rldChan     chan struct{}
 	stopChan    chan struct{}
 
 	eeS    *ees.EventExporterS
-	rpc    *v1.EeSv1
 	anz    *AnalyzerService
 	srvDep map[string]*sync.WaitGroup
 }
@@ -102,7 +100,7 @@ func (es *EventExporterService) Shutdown() (err error) {
 }
 
 // Start should handle the service start
-func (es *EventExporterService) Start() (err error) {
+func (es *EventExporterService) Start() error {
 	if es.IsRunning() {
 		return utils.ErrServiceAlreadyRunning
 	}
@@ -119,10 +117,15 @@ func (es *EventExporterService) Start() (err error) {
 	es.stopChan = make(chan struct{})
 	go es.eeS.ListenAndServe(es.stopChan, es.rldChan)
 
-	es.rpc = v1.NewEeSv1(es.eeS)
-	if !es.cfg.DispatcherSCfg().Enabled {
-		es.server.RpcRegister(es.rpc)
+	srv, err := engine.NewServiceWithName(es.eeS, utils.EeS, true)
+	if err != nil {
+		return err
 	}
-	es.intConnChan <- es.anz.GetInternalCodec(es.eeS, utils.EEs)
-	return
+	if !es.cfg.DispatcherSCfg().Enabled {
+		for _, s := range srv {
+			es.server.RpcRegister(s)
+		}
+	}
+	es.intConnChan <- es.anz.GetInternalCodec(srv, utils.EEs)
+	return nil
 }

@@ -22,13 +22,15 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package ers
 
 import (
-	"net/rpc"
 	"os"
 	"path"
 	"path/filepath"
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc/context"
+
+	"github.com/cgrates/birpc"
 	v1 "github.com/cgrates/cgrates/apier/v1"
 
 	"github.com/cgrates/cgrates/config"
@@ -40,7 +42,7 @@ var (
 	flatstoreCfgPath string
 	flatstoreCfgDIR  string
 	flatstoreCfg     *config.CGRConfig
-	flatstoreRPC     *rpc.Client
+	flatstoreRPC     *birpc.Client
 
 	fullSuccessfull = `INVITE|2daec40c|548625ac|dd0c4c617a9919d29a6175cdff223a9e@0:0:0:0:0:0:0:0|200|OK|1436454408|*prepaid|1001|1002||3401:2069362475
 BYE|2daec40c|548625ac|dd0c4c617a9919d29a6175cdff223a9e@0:0:0:0:0:0:0:0|200|OK|1436454410|||||3401:2069362475
@@ -167,7 +169,7 @@ func testFlatstoreITLoadTPFromFolder(t *testing.T) {
 		},
 	}
 	var result string
-	if err := flatstoreRPC.Call(utils.APIerSv1SetChargerProfile, chargerProfile, &result); err != nil {
+	if err := flatstoreRPC.Call(context.Background(), utils.APIerSv1SetChargerProfile, chargerProfile, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -229,13 +231,13 @@ func testFlatstoreITHandleCdr1File(t *testing.T) {
 
 func testFlatstoreITAnalyseCDRs(t *testing.T) {
 	var reply []*engine.ExternalCDR
-	if err := flatstoreRPC.Call(utils.APIerSv2GetCDRs, &utils.RPCCDRsFilter{}, &reply); err != nil {
+	if err := flatstoreRPC.Call(context.Background(), utils.APIerSv2GetCDRs, &utils.RPCCDRsFilter{}, &reply); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(reply) != 8 {
 		t.Error("Unexpected number of CDRs returned: ", len(reply))
 		t.Error(utils.ToJSON(reply))
 	}
-	if err := flatstoreRPC.Call(utils.APIerSv2GetCDRs, &utils.RPCCDRsFilter{MinUsage: "1"}, &reply); err != nil {
+	if err := flatstoreRPC.Call(context.Background(), utils.APIerSv2GetCDRs, &utils.RPCCDRsFilter{MinUsage: "1"}, &reply); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(reply) != 5 {
 		t.Error("Unexpected number of CDRs returned: ", len(reply))
@@ -273,7 +275,7 @@ func testFlatstoreITHandleCdr2File(t *testing.T) {
 
 func testFlatstoreITAnalyseCDRs2(t *testing.T) {
 	var reply []*engine.ExternalCDR
-	if err := flatstoreRPC.Call(utils.APIerSv2GetCDRs, &utils.RPCCDRsFilter{OriginHosts: []string{"flatStoreACK"}, MinUsage: "1"}, &reply); err != nil {
+	if err := flatstoreRPC.Call(context.Background(), utils.APIerSv2GetCDRs, &utils.RPCCDRsFilter{OriginHosts: []string{"flatStoreACK"}, MinUsage: "1"}, &reply); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(reply) != 4 {
 		t.Error("Unexpected number of CDRs returned: ", len(reply))
@@ -310,12 +312,12 @@ func testFlatstoreITHandleCdr3File(t *testing.T) {
 
 func testFlatstoreITAnalyseCDRs3(t *testing.T) {
 	var reply []*engine.ExternalCDR
-	if err := flatstoreRPC.Call(utils.APIerSv2GetCDRs, &utils.RPCCDRsFilter{OriginHosts: []string{"flatstoreMMErs"}}, &reply); err != nil {
+	if err := flatstoreRPC.Call(context.Background(), utils.APIerSv2GetCDRs, &utils.RPCCDRsFilter{OriginHosts: []string{"flatstoreMMErs"}}, &reply); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(reply) != 3 {
 		t.Error("Unexpected number of CDRs returned: ", len(reply))
 	}
-	if err := flatstoreRPC.Call(utils.APIerSv2GetCDRs, &utils.RPCCDRsFilter{OriginHosts: []string{"flatstoreMMErs"}, MinUsage: "1"}, &reply); err != nil {
+	if err := flatstoreRPC.Call(context.Background(), utils.APIerSv2GetCDRs, &utils.RPCCDRsFilter{OriginHosts: []string{"flatstoreMMErs"}, MinUsage: "1"}, &reply); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(reply) != 2 {
 		t.Error("Unexpected number of CDRs returned: ", len(reply))

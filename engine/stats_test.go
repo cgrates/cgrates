@@ -28,9 +28,10 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc"
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/cgrates/rpcclient"
 )
 
 var (
@@ -307,37 +308,49 @@ func TestStatQueuesProcessEvent(t *testing.T) {
 	stq := map[string]string{}
 	reply := []string{}
 	expected := []string{"StatQueueProfile1"}
-	err := statService.V1ProcessEvent(testStatsArgs[0], &reply)
+	err := statService.V1ProcessEvent(context.Background(), testStatsArgs[0], &reply)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	} else if !reflect.DeepEqual(reply, expected) {
 		t.Errorf("Expecting: %+v, received: %+v", expected, reply)
 	}
-	err = statService.V1GetQueueStringMetrics(&utils.TenantID{Tenant: testStatsQ[0].Tenant, ID: testStatsQ[0].ID}, &stq)
+	err = statService.V1GetQueueStringMetrics(context.Background(),
+		&utils.TenantID{
+			Tenant: testStatsQ[0].Tenant,
+			ID:     testStatsQ[0].ID,
+		}, &stq)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
 
 	expected = []string{"StatQueueProfile2"}
-	err = statService.V1ProcessEvent(testStatsArgs[1], &reply)
+	err = statService.V1ProcessEvent(context.Background(), testStatsArgs[1], &reply)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	} else if !reflect.DeepEqual(reply, expected) {
 		t.Errorf("Expecting: %+v, received: %+v", expected, reply)
 	}
-	err = statService.V1GetQueueStringMetrics(&utils.TenantID{Tenant: testStatsQ[1].Tenant, ID: testStatsQ[1].ID}, &stq)
+	err = statService.V1GetQueueStringMetrics(context.Background(),
+		&utils.TenantID{
+			Tenant: testStatsQ[1].Tenant,
+			ID:     testStatsQ[1].ID,
+		}, &stq)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
 
 	expected = []string{"StatQueueProfilePrefix"}
-	err = statService.V1ProcessEvent(testStatsArgs[2], &reply)
+	err = statService.V1ProcessEvent(context.Background(), testStatsArgs[2], &reply)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	} else if !reflect.DeepEqual(reply, expected) {
 		t.Errorf("Expecting: %+v, received: %+v", expected, reply)
 	}
-	err = statService.V1GetQueueStringMetrics(&utils.TenantID{Tenant: testStatsQ[2].Tenant, ID: testStatsQ[2].ID}, &stq)
+	err = statService.V1GetQueueStringMetrics(context.Background(),
+		&utils.TenantID{
+			Tenant: testStatsQ[2].Tenant,
+			ID:     testStatsQ[2].ID,
+		}, &stq)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
@@ -458,7 +471,7 @@ func TestStatQueuesV1ProcessEvent(t *testing.T) {
 	reply := []string{}
 	expected := []string{"StatQueueProfile1", "StatQueueProfile3"}
 	expectedRev := []string{"StatQueueProfile3", "StatQueueProfile1"}
-	if err := statService.V1ProcessEvent(ev, &reply); err != nil {
+	if err := statService.V1ProcessEvent(context.Background(), ev, &reply); err != nil {
 		t.Errorf("Error: %+v", err)
 	} else if !reflect.DeepEqual(reply, expected) && !reflect.DeepEqual(reply, expectedRev) {
 		t.Errorf("Expecting: %+v, received: %+v", expected, reply)
@@ -1438,7 +1451,7 @@ func TestStatQueueV1ProcessEventProcessEventErr(t *testing.T) {
 	}
 
 	var reply []string
-	if err := sS.V1ProcessEvent(args, &reply); err == nil ||
+	if err := sS.V1ProcessEvent(context.Background(), args, &reply); err == nil ||
 		err.Error() != utils.ErrPartiallyExecuted.Error() {
 		t.Errorf("expected: <%+v>, received: <%+v>", utils.ErrPartiallyExecuted, err)
 	}
@@ -1498,7 +1511,7 @@ func TestStatQueueV1ProcessEventMissingArgs(t *testing.T) {
 
 	var reply []string
 	experr := `MANDATORY_IE_MISSING: [CGREvent]`
-	if err := sS.V1ProcessEvent(nil, &reply); err == nil ||
+	if err := sS.V1ProcessEvent(context.Background(), nil, &reply); err == nil ||
 		err.Error() != experr {
 		t.Errorf("expected: <%+v>, received: <%+v>", experr, err)
 	}
@@ -1514,7 +1527,7 @@ func TestStatQueueV1ProcessEventMissingArgs(t *testing.T) {
 	}
 
 	experr = `MANDATORY_IE_MISSING: [ID]`
-	if err := sS.V1ProcessEvent(args, &reply); err == nil ||
+	if err := sS.V1ProcessEvent(context.Background(), args, &reply); err == nil ||
 		err.Error() != experr {
 		t.Errorf("expected: <%+v>, received: <%+v>", experr, err)
 	}
@@ -1529,7 +1542,7 @@ func TestStatQueueV1ProcessEventMissingArgs(t *testing.T) {
 	}
 
 	experr = `MANDATORY_IE_MISSING: [Event]`
-	if err := sS.V1ProcessEvent(args, &reply); err == nil ||
+	if err := sS.V1ProcessEvent(context.Background(), args, &reply); err == nil ||
 		err.Error() != experr {
 		t.Errorf("expected: <%+v>, received: <%+v>", experr, err)
 	}
@@ -1606,7 +1619,7 @@ func TestStatQueueV1GetQueueIDsOK(t *testing.T) {
 
 	expIDs := []string{"SQ1", "SQ3"}
 	var qIDs []string
-	if err := sS.V1GetQueueIDs(utils.EmptyString, &qIDs); err != nil {
+	if err := sS.V1GetQueueIDs(context.Background(), utils.EmptyString, &qIDs); err != nil {
 		t.Error(err)
 	} else {
 		sort.Strings(qIDs)
@@ -1630,7 +1643,7 @@ func TestStatQueueV1GetQueueIDsGetKeysForPrefixErr(t *testing.T) {
 	sS := NewStatService(dm, cfg, filterS, nil)
 
 	var qIDs []string
-	if err := sS.V1GetQueueIDs(utils.EmptyString, &qIDs); err == nil ||
+	if err := sS.V1GetQueueIDs(context.Background(), utils.EmptyString, &qIDs); err == nil ||
 		err.Error() != utils.ErrNotImplemented.Error() {
 		t.Errorf("expected: <%+v>, received: <%+v>", utils.ErrNotImplemented, err)
 	}
@@ -1689,11 +1702,12 @@ func TestStatQueueV1GetStatQueueOK(t *testing.T) {
 	}
 
 	var reply StatQueue
-	if err := sS.V1GetStatQueue(&utils.TenantIDWithAPIOpts{
-		TenantID: &utils.TenantID{
-			ID: "SQ1",
-		},
-	}, &reply); err != nil {
+	if err := sS.V1GetStatQueue(context.Background(),
+		&utils.TenantIDWithAPIOpts{
+			TenantID: &utils.TenantID{
+				ID: "SQ1",
+			},
+		}, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(reply, *sq) {
 		t.Errorf("expected: <%+v>, received: <%+v>",
@@ -1715,11 +1729,12 @@ func TestStatQueueV1GetStatQueueNotFound(t *testing.T) {
 	sS := NewStatService(dm, cfg, filterS, nil)
 
 	var reply StatQueue
-	if err := sS.V1GetStatQueue(&utils.TenantIDWithAPIOpts{
-		TenantID: &utils.TenantID{
-			ID: "SQ1",
-		},
-	}, &reply); err == nil || err != utils.ErrNotFound {
+	if err := sS.V1GetStatQueue(context.Background(),
+		&utils.TenantIDWithAPIOpts{
+			TenantID: &utils.TenantID{
+				ID: "SQ1",
+			},
+		}, &reply); err == nil || err != utils.ErrNotFound {
 		t.Errorf("expected: <%+v>, received: <%+v>", utils.ErrNotFound, err)
 	}
 }
@@ -1778,9 +1793,10 @@ func TestStatQueueV1GetStatQueueMissingArgs(t *testing.T) {
 
 	experr := `MANDATORY_IE_MISSING: [ID]`
 	var reply StatQueue
-	if err := sS.V1GetStatQueue(&utils.TenantIDWithAPIOpts{
-		TenantID: &utils.TenantID{},
-	}, &reply); err == nil || err.Error() != experr {
+	if err := sS.V1GetStatQueue(context.Background(),
+		&utils.TenantIDWithAPIOpts{
+			TenantID: &utils.TenantID{},
+		}, &reply); err == nil || err.Error() != experr {
 		t.Errorf("expected: <%+v>, received: <%+v>", experr, err)
 	}
 }
@@ -1852,7 +1868,7 @@ func TestStatQueueV1GetStatQueuesForEventOK(t *testing.T) {
 
 	exp := []string{"SQ1", "SQ2"}
 	var reply []string
-	if err := sS.V1GetStatQueuesForEvent(args, &reply); err != nil {
+	if err := sS.V1GetStatQueuesForEvent(context.Background(), args, &reply); err != nil {
 		t.Error(err)
 	} else {
 		sort.Strings(reply)
@@ -1906,7 +1922,7 @@ func TestStatQueueV1GetStatQueuesForEventNotFoundErr(t *testing.T) {
 	}
 
 	var reply []string
-	if err := sS.V1GetStatQueuesForEvent(args, &reply); err == nil ||
+	if err := sS.V1GetStatQueuesForEvent(context.Background(), args, &reply); err == nil ||
 		err != utils.ErrNotFound {
 		t.Errorf("expected: <%+v>, received: <%+v>", utils.ErrNotFound, err)
 	}
@@ -1950,7 +1966,7 @@ func TestStatQueueV1GetStatQueuesForEventMissingArgs(t *testing.T) {
 
 	experr := `MANDATORY_IE_MISSING: [CGREvent]`
 	var reply []string
-	if err := sS.V1GetStatQueuesForEvent(nil, &reply); err == nil ||
+	if err := sS.V1GetStatQueuesForEvent(context.Background(), nil, &reply); err == nil ||
 		err.Error() != experr {
 		t.Errorf("expected: <%+v>, received: <%+v>", experr, err)
 	}
@@ -1964,7 +1980,7 @@ func TestStatQueueV1GetStatQueuesForEventMissingArgs(t *testing.T) {
 	}
 
 	experr = `MANDATORY_IE_MISSING: [ID]`
-	if err := sS.V1GetStatQueuesForEvent(args, &reply); err == nil ||
+	if err := sS.V1GetStatQueuesForEvent(context.Background(), args, &reply); err == nil ||
 		err.Error() != experr {
 		t.Errorf("expected: <%+v>, received: <%+v>", experr, err)
 	}
@@ -1976,7 +1992,7 @@ func TestStatQueueV1GetStatQueuesForEventMissingArgs(t *testing.T) {
 	}
 
 	experr = `MANDATORY_IE_MISSING: [Event]`
-	if err := sS.V1GetStatQueuesForEvent(args, &reply); err == nil ||
+	if err := sS.V1GetStatQueuesForEvent(context.Background(), args, &reply); err == nil ||
 		err.Error() != experr {
 		t.Errorf("expected: <%+v>, received: <%+v>", experr, err)
 	}
@@ -2053,9 +2069,10 @@ func TestStatQueueV1ResetStatQueueOK(t *testing.T) {
 	}
 	var reply string
 
-	if err := sS.V1ResetStatQueue(&utils.TenantID{
-		ID: "SQ1",
-	}, &reply); err != nil {
+	if err := sS.V1ResetStatQueue(context.Background(),
+		&utils.TenantID{
+			ID: "SQ1",
+		}, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf("Unexpected reply returned: <%q>", reply)
@@ -2121,9 +2138,10 @@ func TestStatQueueV1ResetStatQueueNotFoundErr(t *testing.T) {
 	}
 
 	var reply string
-	if err := sS.V1ResetStatQueue(&utils.TenantID{
-		ID: "SQ2",
-	}, &reply); err == nil || err != utils.ErrNotFound {
+	if err := sS.V1ResetStatQueue(context.Background(),
+		&utils.TenantID{
+			ID: "SQ2",
+		}, &reply); err == nil || err != utils.ErrNotFound {
 		t.Errorf("expected: <%+v>, received: <%+v>", utils.ErrNotFound, err)
 	}
 }
@@ -2184,7 +2202,7 @@ func TestStatQueueV1ResetStatQueueMissingArgs(t *testing.T) {
 
 	experr := `MANDATORY_IE_MISSING: [ID]`
 	var reply string
-	if err := sS.V1ResetStatQueue(&utils.TenantID{}, &reply); err == nil ||
+	if err := sS.V1ResetStatQueue(context.Background(), &utils.TenantID{}, &reply); err == nil ||
 		err.Error() != experr {
 		t.Errorf("expected: <%+v>, received: <%+v>", experr, err)
 	}
@@ -2247,9 +2265,10 @@ func TestStatQueueV1ResetStatQueueUnsupportedMetricType(t *testing.T) {
 	experr := `unsupported metric type <testMetricType>`
 	var reply string
 
-	if err := sS.V1ResetStatQueue(&utils.TenantID{
-		ID: "SQ1",
-	}, &reply); err == nil || err.Error() != experr {
+	if err := sS.V1ResetStatQueue(context.Background(),
+		&utils.TenantID{
+			ID: "SQ1",
+		}, &reply); err == nil || err.Error() != experr {
 		t.Errorf("expected: <%+v>, received: <%+v>", experr, err)
 	}
 }
@@ -2335,8 +2354,8 @@ func TestStatQueueProcessThresholdsOK(t *testing.T) {
 	Cache.Clear(nil)
 
 	ccM := &ccMock{
-		calls: map[string]func(args any, reply any) error{
-			utils.ThresholdSv1ProcessEvent: func(args, reply any) error {
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.ThresholdSv1ProcessEvent: func(ctx *context.Context, args, reply any) error {
 				exp := &utils.CGREvent{
 					Tenant: "cgrates.org",
 					ID:     args.(*utils.CGREvent).ID,
@@ -2358,9 +2377,9 @@ func TestStatQueueProcessThresholdsOK(t *testing.T) {
 			},
 		},
 	}
-	rpcInternal := make(chan rpcclient.ClientConnector, 1)
+	rpcInternal := make(chan birpc.ClientConnector, 1)
 	rpcInternal <- ccM
-	connMgr = NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	connMgr = NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds): rpcInternal,
 	})
 
@@ -2443,15 +2462,15 @@ func TestStatQueueProcessThresholdsErrPartExec(t *testing.T) {
 	Cache.Clear(nil)
 
 	ccM := &ccMock{
-		calls: map[string]func(args any, reply any) error{
-			utils.ThresholdSv1ProcessEvent: func(args, reply any) error {
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.ThresholdSv1ProcessEvent: func(ctx *context.Context, args, reply any) error {
 				return utils.ErrExists
 			},
 		},
 	}
-	rpcInternal := make(chan rpcclient.ClientConnector, 1)
+	rpcInternal := make(chan birpc.ClientConnector, 1)
 	rpcInternal <- ccM
-	connMgr = NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	connMgr = NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds): rpcInternal,
 	})
 
@@ -2569,9 +2588,10 @@ func TestStatQueueV1GetQueueFloatMetricsOK(t *testing.T) {
 		utils.MetaTCD: 3600000000000,
 	}
 	reply := map[string]float64{}
-	if err := sS.V1GetQueueFloatMetrics(&utils.TenantID{
-		ID: "SQ1",
-	}, &reply); err != nil {
+	if err := sS.V1GetQueueFloatMetrics(context.Background(),
+		&utils.TenantID{
+			ID: "SQ1",
+		}, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(reply, expected) {
 		t.Errorf("expected: <%+v>, received: <%+v>", expected, reply)
@@ -2633,9 +2653,10 @@ func TestStatQueueV1GetQueueFloatMetricsErrNotFound(t *testing.T) {
 	}
 
 	reply := map[string]float64{}
-	if err := sS.V1GetQueueFloatMetrics(&utils.TenantID{
-		ID: "SQ2",
-	}, &reply); err == nil || err != utils.ErrNotFound {
+	if err := sS.V1GetQueueFloatMetrics(context.Background(),
+		&utils.TenantID{
+			ID: "SQ2",
+		}, &reply); err == nil || err != utils.ErrNotFound {
 		t.Errorf("expected: <%+v>, received: <%+v>", utils.ErrNotFound, err)
 	}
 }
@@ -2696,7 +2717,7 @@ func TestStatQueueV1GetQueueFloatMetricsMissingArgs(t *testing.T) {
 
 	experr := `MANDATORY_IE_MISSING: [ID]`
 	reply := map[string]float64{}
-	if err := sS.V1GetQueueFloatMetrics(&utils.TenantID{}, &reply); err == nil ||
+	if err := sS.V1GetQueueFloatMetrics(context.Background(), &utils.TenantID{}, &reply); err == nil ||
 		err.Error() != experr {
 		t.Errorf("expected: <%+v>, received: <%+v>", experr, err)
 	}
@@ -2716,9 +2737,10 @@ func TestStatQueueV1GetQueueFloatMetricsErrGetStats(t *testing.T) {
 
 	experr := `SERVER_ERROR: NO_DATABASE_CONNECTION`
 	reply := map[string]float64{}
-	if err := sS.V1GetQueueFloatMetrics(&utils.TenantID{
-		ID: "SQ1",
-	}, &reply); err == nil || err.Error() != experr {
+	if err := sS.V1GetQueueFloatMetrics(context.Background(),
+		&utils.TenantID{
+			ID: "SQ1",
+		}, &reply); err == nil || err.Error() != experr {
 		t.Errorf("expected: <%+v>, received: <%+v>", experr, err)
 	}
 }
@@ -2781,9 +2803,10 @@ func TestStatQueueV1GetQueueStringMetricsOK(t *testing.T) {
 		utils.MetaTCD: "1h0m0s",
 	}
 	reply := map[string]string{}
-	if err := sS.V1GetQueueStringMetrics(&utils.TenantID{
-		ID: "SQ1",
-	}, &reply); err != nil {
+	if err := sS.V1GetQueueStringMetrics(context.Background(),
+		&utils.TenantID{
+			ID: "SQ1",
+		}, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(reply, expected) {
 		t.Errorf("expected: <%+v>, received: <%+v>", expected, reply)
@@ -2845,9 +2868,10 @@ func TestStatQueueV1GetQueueStringMetricsErrNotFound(t *testing.T) {
 	}
 
 	reply := map[string]string{}
-	if err := sS.V1GetQueueStringMetrics(&utils.TenantID{
-		ID: "SQ2",
-	}, &reply); err == nil || err != utils.ErrNotFound {
+	if err := sS.V1GetQueueStringMetrics(context.Background(),
+		&utils.TenantID{
+			ID: "SQ2",
+		}, &reply); err == nil || err != utils.ErrNotFound {
 		t.Errorf("expected: <%+v>, received: <%+v>", utils.ErrNotFound, err)
 	}
 }
@@ -2908,7 +2932,7 @@ func TestStatQueueV1GetQueueStringMetricsMissingArgs(t *testing.T) {
 
 	experr := `MANDATORY_IE_MISSING: [ID]`
 	reply := map[string]string{}
-	if err := sS.V1GetQueueStringMetrics(&utils.TenantID{}, &reply); err == nil ||
+	if err := sS.V1GetQueueStringMetrics(context.Background(), &utils.TenantID{}, &reply); err == nil ||
 		err.Error() != experr {
 		t.Errorf("expected: <%+v>, received: <%+v>", experr, err)
 	}
@@ -2928,9 +2952,10 @@ func TestStatQueueV1GetQueueStringMetricsErrGetStats(t *testing.T) {
 
 	experr := `SERVER_ERROR: NO_DATABASE_CONNECTION`
 	reply := map[string]string{}
-	if err := sS.V1GetQueueStringMetrics(&utils.TenantID{
-		ID: "SQ1",
-	}, &reply); err == nil || err.Error() != experr {
+	if err := sS.V1GetQueueStringMetrics(context.Background(),
+		&utils.TenantID{
+			ID: "SQ1",
+		}, &reply); err == nil || err.Error() != experr {
 		t.Errorf("expected: <%+v>, received: <%+v>", experr, err)
 	}
 }
@@ -2948,7 +2973,7 @@ func TestStatQueueStoreStatQueueStoreIntervalDisabled(t *testing.T) {
 	config.SetCgrConfig(cfg)
 	data := NewInternalDB(nil, nil, true, config.CgrConfig().DataDbCfg().Items)
 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
-	connMgr = NewConnManager(cfg, make(map[string]chan rpcclient.ClientConnector))
+	connMgr = NewConnManager(cfg, make(map[string]chan birpc.ClientConnector))
 	Cache.Clear(nil)
 	filterS := NewFilterS(cfg, nil, dm)
 	sS := NewStatService(dm, cfg, filterS, connMgr)
@@ -3034,75 +3059,6 @@ func TestStatQueueGetStatQueueOK(t *testing.T) {
 	}
 }
 
-func TestStatQueueCall(t *testing.T) {
-	tmpC := config.CgrConfig()
-	defer func() {
-		config.SetCgrConfig(tmpC)
-	}()
-
-	cfg := config.NewDefaultCGRConfig()
-	data := NewInternalDB(nil, nil, true, config.CgrConfig().DataDbCfg().Items)
-	dm := NewDataManager(data, cfg.CacheCfg(), nil)
-	Cache.Clear(nil)
-	filterS := NewFilterS(cfg, nil, dm)
-	sS := NewStatService(dm, cfg, filterS, nil)
-
-	sqPrf := &StatQueueProfile{
-		Tenant:    "cgrates.org",
-		ID:        "SQ1",
-		FilterIDs: []string{"*string:~*req.Account:1001"},
-		ActivationInterval: &utils.ActivationInterval{
-			ExpiryTime: time.Date(2021, 6, 1, 12, 0, 0, 0, time.UTC),
-		},
-		Weight:       10,
-		Blocker:      true,
-		QueueLength:  10,
-		ThresholdIDs: []string{"*none"},
-		MinItems:     5,
-		Metrics: []*MetricWithFilters{
-			{
-				MetricID: utils.MetaTCD,
-			},
-		},
-	}
-	sq := &StatQueue{
-		sqPrfl: sqPrf,
-		dirty:  utils.BoolPointer(false),
-		Tenant: "cgrates.org",
-		ID:     "SQ1",
-		SQItems: []SQItem{
-			{
-				EventID:    "SqProcessEvent",
-				ExpiryTime: utils.TimePointer(time.Now()),
-			},
-		},
-		SQMetrics: map[string]StatMetric{
-			utils.MetaTCD: &StatTCD{
-				Sum: time.Minute,
-				val: utils.DurationPointer(time.Hour),
-			},
-		},
-	}
-
-	if err := dm.SetStatQueue(sq); err != nil {
-		t.Error(err)
-	}
-
-	args := &utils.TenantIDWithAPIOpts{
-		TenantID: &utils.TenantID{
-			Tenant: "cgrates.org",
-			ID:     "SQ1",
-		},
-	}
-	var reply StatQueue
-	if err := sS.Call(utils.StatSv1GetStatQueue, args, &reply); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(reply, *sq) {
-		t.Errorf("expected: <%+v>, received: <%+v>",
-			utils.ToJSON(*sq), utils.ToJSON(reply))
-	}
-}
-
 func TestStatQueueStoreStatQueueCacheSetErr(t *testing.T) {
 	utils.Logger.SetLogLevel(4)
 	utils.Logger.SetSyslog(nil)
@@ -3127,7 +3083,7 @@ func TestStatQueueStoreStatQueueCacheSetErr(t *testing.T) {
 	config.SetCgrConfig(cfg)
 	data := NewInternalDB(nil, nil, true, config.CgrConfig().DataDbCfg().Items)
 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
-	connMgr = NewConnManager(cfg, make(map[string]chan rpcclient.ClientConnector))
+	connMgr = NewConnManager(cfg, make(map[string]chan birpc.ClientConnector))
 	Cache = NewCacheS(cfg, dm, nil)
 	filterS := NewFilterS(cfg, connMgr, dm)
 	sS := NewStatService(dm, cfg, filterS, connMgr)
@@ -3213,7 +3169,7 @@ func TestStatQueueV1GetStatQueuesForSliceOptsErr(t *testing.T) {
 		},
 	}
 	var reply []string
-	if err := sS.V1GetStatQueuesForEvent(args, &reply); err == nil {
+	if err := sS.V1GetStatQueuesForEvent(context.Background(), args, &reply); err == nil {
 		t.Error(err)
 	}
 }
@@ -3281,7 +3237,7 @@ func TestStatQueueV1GetStatQueuesForEventBoolOptsErr(t *testing.T) {
 		},
 	}
 	var reply []string
-	if err := sS.V1GetStatQueuesForEvent(args, &reply); err == nil {
+	if err := sS.V1GetStatQueuesForEvent(context.Background(), args, &reply); err == nil {
 		t.Error(err)
 	}
 }

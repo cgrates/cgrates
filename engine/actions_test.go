@@ -31,6 +31,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc"
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 
 	"github.com/cgrates/cgrates/utils"
@@ -2454,37 +2456,9 @@ type Attr struct {
 	Age     float64
 }
 
-func (trpcp *TestRPCParameters) Hopa(in Attr, out *float64) error {
+func (trpcp *TestRPCParameters) Hopa(ctx *context.Context, in *Attr, out *float64) error {
 	trpcp.status = utils.OK
 	return nil
-}
-
-func (trpcp *TestRPCParameters) Call(serviceMethod string, args any, reply any) error {
-	parts := strings.Split(serviceMethod, ".")
-	if len(parts) != 2 {
-		return utils.ErrNotImplemented
-	}
-	// get method
-	method := reflect.ValueOf(trpcp).MethodByName(parts[1])
-	if !method.IsValid() {
-		return utils.ErrNotImplemented
-	}
-
-	// construct the params
-	params := []reflect.Value{reflect.ValueOf(args).Elem(), reflect.ValueOf(reply)}
-
-	ret := method.Call(params)
-	if len(ret) != 1 {
-		return utils.ErrServerError
-	}
-	if ret[0].Interface() == nil {
-		return nil
-	}
-	err, ok := ret[0].Interface().(error)
-	if !ok {
-		return utils.ErrServerError
-	}
-	return err
 }
 
 func TestCgrRpcAction(t *testing.T) {
@@ -2644,7 +2618,7 @@ type RPCMock struct {
 	args *ArgV1ProcessEvent
 }
 
-func (r *RPCMock) Call(method string, args any, rply any) error {
+func (r *RPCMock) Call(ctx *context.Context, method string, args any, rply any) error {
 	if method != utils.CDRsV1ProcessEvent {
 		return rpcclient.ErrUnsupporteServiceMethod
 	}
@@ -2667,10 +2641,10 @@ func TestCdrLogAction(t *testing.T) {
 	dfltCfg.SchedulerCfg().CDRsConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCDRs)}
 	config.SetCgrConfig(dfltCfg)
 
-	internalChan := make(chan rpcclient.ClientConnector, 1)
+	internalChan := make(chan birpc.ClientConnector, 1)
 	internalChan <- &mock
 
-	NewConnManager(dfltCfg, map[string]chan rpcclient.ClientConnector{
+	NewConnManager(dfltCfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCDRs): internalChan,
 	})
 
@@ -2947,8 +2921,8 @@ func TestActionSetDDestinations(t *testing.T) {
 		},
 	}
 	ccMock := &ccMock{
-		calls: map[string]func(args any, reply any) error{
-			utils.StatSv1GetStatQueue: func(args, reply any) error {
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.StatSv1GetStatQueue: func(ctx *context.Context, args, reply any) error {
 				rpl := &StatQueue{
 					Tenant: "cgrates",
 					ID:     "id",
@@ -2971,9 +2945,9 @@ func TestActionSetDDestinations(t *testing.T) {
 			},
 		},
 	}
-	clientconn := make(chan rpcclient.ClientConnector, 1)
+	clientconn := make(chan birpc.ClientConnector, 1)
 	clientconn <- ccMock
-	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	connMgr := NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.StatSConnsCfg): clientconn,
 	})
 	SetConnManager(connMgr)
@@ -3071,20 +3045,20 @@ func TestActionPublishAccount(t *testing.T) {
 	}()
 	cfg.RalsCfg().ThresholdSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.ThreshSConnsCfg)}
 	cfg.RalsCfg().StatSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.StatSConnsCfg)}
-	clientConn := make(chan rpcclient.ClientConnector, 1)
+	clientConn := make(chan birpc.ClientConnector, 1)
 	clientConn <- &ccMock{
-		calls: map[string]func(args any, reply any) error{
-			utils.ThresholdSv1ProcessEvent: func(args, reply any) error {
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.ThresholdSv1ProcessEvent: func(ctx *context.Context, args, reply any) error {
 				*reply.(*[]string) = []string{"*thr"}
 				return errors.New("Can't publish!")
 			},
-			utils.StatSv1ProcessEvent: func(args, reply any) error {
+			utils.StatSv1ProcessEvent: func(ctx *context.Context, args, reply any) error {
 				*reply.(*[]string) = []string{"*stat"}
 				return errors.New("Can't publish!")
 			},
 		},
 	}
-	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	connMgr := NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.ThreshSConnsCfg): clientConn,
 		utils.ConcatenatedKey(utils.MetaInternal, utils.StatSConnsCfg):   clientConn,
 	})
@@ -3167,8 +3141,8 @@ func TestExportAction(t *testing.T) {
 	cfg.ApierCfg().EEsConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.EEsConnsCfg)}
 	config.SetCgrConfig(cfg)
 	ccMock := &ccMock{
-		calls: map[string]func(args, reply any) error{
-			utils.EeSv1ProcessEvent: func(args, reply any) error {
+		calls: map[string]func(ctx *context.Context, args, reply any) error{
+			utils.EeSv1ProcessEvent: func(ctx *context.Context, args, reply any) error {
 				rpl := &map[string]map[string]any{}
 				*reply.(*map[string]map[string]any) = *rpl
 
@@ -3176,9 +3150,9 @@ func TestExportAction(t *testing.T) {
 			},
 		},
 	}
-	clientconn := make(chan rpcclient.ClientConnector, 1)
+	clientconn := make(chan birpc.ClientConnector, 1)
 	clientconn <- ccMock
-	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	connMgr := NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.EEsConnsCfg): clientconn,
 	})
 	SetConnManager(connMgr)
@@ -3263,17 +3237,17 @@ func TestResetStatQueue(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.SchedulerCfg().StatSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.StatSConnsCfg)}
 	ccMock := &ccMock{
-		calls: map[string]func(args any, reply any) error{
-			utils.StatSv1ResetStatQueue: func(args, reply any) error {
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.StatSv1ResetStatQueue: func(ctx *context.Context, args, reply any) error {
 				rpl := "reset"
 				*reply.(*string) = rpl
 				return nil
 			},
 		},
 	}
-	clientconn := make(chan rpcclient.ClientConnector, 1)
+	clientconn := make(chan birpc.ClientConnector, 1)
 	clientconn <- ccMock
-	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	connMgr := NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.StatSConnsCfg): clientconn,
 	})
 	SetConnManager(connMgr)
@@ -3294,17 +3268,17 @@ func TestResetTreshold(t *testing.T) {
 
 	cfg.SchedulerCfg().ThreshSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.ThreshSConnsCfg)}
 	ccMock := &ccMock{
-		calls: map[string]func(args any, reply any) error{
-			utils.ThresholdSv1ResetThreshold: func(args, reply any) error {
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.ThresholdSv1ResetThreshold: func(ctx *context.Context, args, reply any) error {
 				rpl := "threshold_reset"
 				*reply.(*string) = rpl
 				return nil
 			},
 		},
 	}
-	clientconn := make(chan rpcclient.ClientConnector, 1)
+	clientconn := make(chan birpc.ClientConnector, 1)
 	clientconn <- ccMock
-	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	connMgr := NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.ThreshSConnsCfg): clientconn,
 	})
 	SetConnManager(connMgr)
@@ -3755,19 +3729,19 @@ func TestRemoveAccountActionErr(t *testing.T) {
 		},
 	}
 	cfg.DataDbCfg().RmtConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator)}
-	clientConn := make(chan rpcclient.ClientConnector, 1)
+	clientConn := make(chan birpc.ClientConnector, 1)
 	clientConn <- &ccMock{
-		calls: map[string]func(args any, reply any) error{
-			utils.ReplicatorSv1GetAccountActionPlans: func(args, reply any) error {
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.ReplicatorSv1GetAccountActionPlans: func(ctx *context.Context, args, reply any) error {
 
 				return errors.New("ActionPlans not found")
 			},
-			utils.ReplicatorSv1GetActionPlan: func(args, reply any) error {
+			utils.ReplicatorSv1GetActionPlan: func(ctx *context.Context, args, reply any) error {
 				return errors.New("ActionPlan not found")
 			},
 		},
 	}
-	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	connMgr := NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator): clientConn,
 	})
 	a := &Action{
@@ -4035,10 +4009,10 @@ func TestSetDestinationsErr(t *testing.T) {
 		},
 	}
 	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
-	clientConn := make(chan rpcclient.ClientConnector, 1)
+	clientConn := make(chan birpc.ClientConnector, 1)
 	clientConn <- &ccMock{
-		calls: map[string]func(args any, reply any) error{
-			utils.StatSv1GetStatQueue: func(args, reply any) error {
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.StatSv1GetStatQueue: func(ctx *context.Context, args, reply any) error {
 				rpl := StatQueue{
 					Tenant: "cgrates.org",
 					ID:     "StatsID",
@@ -4070,12 +4044,12 @@ func TestSetDestinationsErr(t *testing.T) {
 				*reply.(*StatQueue) = rpl
 				return nil
 			},
-			utils.ReplicatorSv1SetReverseDestination: func(args, reply any) error {
+			utils.ReplicatorSv1SetReverseDestination: func(ctx *context.Context, args, reply any) error {
 				return utils.ErrNotImplemented
 			},
 		},
 	}
-	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	connMgr := NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats):      clientConn,
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator): clientConn,
 	})
@@ -4160,15 +4134,15 @@ func TestRemoveAccountActionLogg(t *testing.T) {
 	cfg.DataDbCfg().RmtConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator)}
 	cfg.DataDbCfg().RplConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator)}
 	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
-	clientConn := make(chan rpcclient.ClientConnector, 1)
+	clientConn := make(chan birpc.ClientConnector, 1)
 	clientConn <- &ccMock{
-		calls: map[string]func(args any, reply any) error{
-			utils.ReplicatorSv1GetAccountActionPlans: func(args, reply any) error {
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.ReplicatorSv1GetAccountActionPlans: func(ctx *context.Context, args, reply any) error {
 				rpl := []string{"PACKAGE_10_SHARED_A_5"}
 				*reply.(*[]string) = rpl
 				return nil
 			},
-			utils.ReplicatorSv1GetActionPlan: func(args, reply any) error {
+			utils.ReplicatorSv1GetActionPlan: func(ctx *context.Context, args, reply any) error {
 				rpl := ActionPlan{
 					Id: "PACKAGE_10_SHARED_A_5",
 					AccountIDs: utils.StringMap{
@@ -4178,11 +4152,11 @@ func TestRemoveAccountActionLogg(t *testing.T) {
 				*reply.(**ActionPlan) = &rpl
 				return nil
 			},
-			utils.ReplicatorSv1SetActionPlan: func(args, reply any) error {
+			utils.ReplicatorSv1SetActionPlan: func(ctx *context.Context, args, reply any) error {
 				return utils.ErrNotFound
 			},
 		}}
-	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	connMgr := NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator): clientConn,
 	})
 	dm := NewDataManager(db, cfg.CacheCfg(), connMgr)

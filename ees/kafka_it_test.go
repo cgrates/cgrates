@@ -22,16 +22,17 @@ along with this program. If not, see <http://www.gnu.org/licenses/>
 package ees
 
 import (
-	"context"
 	"net"
-	"net/rpc"
 	"path"
 	"strconv"
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc/context"
+
 	kafka "github.com/segmentio/kafka-go"
 
+	"github.com/cgrates/birpc"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -41,7 +42,7 @@ var (
 	kafkaConfigDir string
 	kafkaCfgPath   string
 	kafkaCfg       *config.CGRConfig
-	kafkaRpc       *rpc.Client
+	kafkaRpc       *birpc.Client
 
 	sTestsKafka = []func(t *testing.T){
 		testCreateDirectory,
@@ -159,7 +160,7 @@ func testKafkaExportEvent(t *testing.T) {
 	}
 
 	var reply map[string]map[string]any
-	if err := kafkaRpc.Call(utils.EeSv1ProcessEvent, event, &reply); err != nil {
+	if err := kafkaRpc.Call(context.Background(), utils.EeSv1ProcessEvent, event, &reply); err != nil {
 		t.Error(err)
 	}
 	time.Sleep(time.Second)

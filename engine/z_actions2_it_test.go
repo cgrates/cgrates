@@ -21,12 +21,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
-	"net/rpc"
 	"path"
 	"runtime"
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc"
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -36,7 +37,7 @@ var (
 	actsCfgPath  string
 	actsCfgDir   string
 	actsCfg      *config.CGRConfig
-	actsRPC      *rpc.Client
+	actsRPC      *birpc.Client
 )
 
 var sTestsActions = []func(t *testing.T){
@@ -189,13 +190,13 @@ func testActionsExecuteRemoveSMCos1(t *testing.T) {
 			},
 		},
 	}
-	if err := actsRPC.Call(utils.APIerSv2SetActions, attrsAA, &reply); err != nil && err.Error() != utils.ErrExists.Error() {
+	if err := actsRPC.Call(context.Background(), utils.APIerSv2SetActions, attrsAA, &reply); err != nil && err.Error() != utils.ErrExists.Error() {
 		t.Error("Got error on APIerSv2.SetActions: ", err.Error())
 	} else if reply != utils.OK {
 		t.Errorf("Calling APIerSv2.SetActions received: %s", reply)
 	}
 	attrsEA := &utils.AttrExecuteAction{Tenant: "cgrates.org", ActionsId: attrsAA.ActionsId}
-	if err := actsRPC.Call(utils.APIerSv1ExecuteAction, attrsEA, &reply); err != nil {
+	if err := actsRPC.Call(context.Background(), utils.APIerSv1ExecuteAction, attrsEA, &reply); err != nil {
 		t.Error("Got error on APIerSv1.ExecuteAction: ", err.Error())
 	} else if reply != utils.OK {
 		t.Errorf("Calling APIerSv1.ExecuteAction received: %s", reply)
@@ -222,13 +223,13 @@ func testActionsExecuteRemoveSMCos2(t *testing.T) {
 			},
 		},
 	}
-	if err := actsRPC.Call(utils.APIerSv2SetActions, attrsAA, &reply); err != nil && err.Error() != utils.ErrExists.Error() {
+	if err := actsRPC.Call(context.Background(), utils.APIerSv2SetActions, attrsAA, &reply); err != nil && err.Error() != utils.ErrExists.Error() {
 		t.Error("Got error on APIerSv2.SetActions: ", err.Error())
 	} else if reply != utils.OK {
 		t.Errorf("Calling APIerSv2.SetActions received: %s", reply)
 	}
 	attrsEA := &utils.AttrExecuteAction{Tenant: "cgrates.org", ActionsId: attrsAA.ActionsId}
-	if err := actsRPC.Call(utils.APIerSv1ExecuteAction, attrsEA, &reply); err != nil {
+	if err := actsRPC.Call(context.Background(), utils.APIerSv1ExecuteAction, attrsEA, &reply); err != nil {
 		t.Error("Got error on APIerSv1.ExecuteAction: ", err.Error())
 	} else if reply != utils.OK {
 		t.Errorf("Calling APIerSv1.ExecuteAction received: %s", reply)
@@ -243,7 +244,7 @@ func testActionsExecuteRemoveSMCos2(t *testing.T) {
 func testActionsUpdateBalance(t *testing.T) {
 	var reply string
 	attrsSetAccount := &utils.AttrSetAccount{Tenant: "cgrates.org", Account: "testAcc"}
-	if err := actsRPC.Call(utils.APIerSv1SetAccount, attrsSetAccount, &reply); err != nil {
+	if err := actsRPC.Call(context.Background(), utils.APIerSv1SetAccount, attrsSetAccount, &reply); err != nil {
 		t.Error("Got error on APIerSv1.SetAccount: ", err.Error())
 	} else if reply != utils.OK {
 		t.Errorf("Calling APIerSv1.SetAccount received: %s", reply)
@@ -251,7 +252,7 @@ func testActionsUpdateBalance(t *testing.T) {
 	topupAction := &utils.AttrSetActions{ActionsId: "ACT_TOPUP_RST", Actions: []*utils.TPAction{
 		{Identifier: utils.MetaTopUp, BalanceId: "test", BalanceType: utils.MetaMonetary, Units: "5", ExpiryTime: utils.MetaUnlimited, Weight: 20.0},
 	}}
-	if err := actsRPC.Call(utils.APIerSv2SetActions, topupAction, &reply); err != nil && err.Error() != utils.ErrExists.Error() {
+	if err := actsRPC.Call(context.Background(), utils.APIerSv2SetActions, topupAction, &reply); err != nil && err.Error() != utils.ErrExists.Error() {
 		t.Error("Got error on APIerSv2.SetActions: ", err.Error())
 	} else if reply != utils.OK {
 		t.Errorf("Calling APIerSv2.SetActions received: %s", reply)
@@ -259,27 +260,27 @@ func testActionsUpdateBalance(t *testing.T) {
 	changeBlockerAction := &utils.AttrSetActions{ActionsId: "ACT_BAL_UPDT", Actions: []*utils.TPAction{
 		{Identifier: utils.MetaSetBalance, BalanceId: "test", BalanceBlocker: "true"},
 	}}
-	if err := actsRPC.Call(utils.APIerSv2SetActions, changeBlockerAction, &reply); err != nil && err.Error() != utils.ErrExists.Error() {
+	if err := actsRPC.Call(context.Background(), utils.APIerSv2SetActions, changeBlockerAction, &reply); err != nil && err.Error() != utils.ErrExists.Error() {
 		t.Error("Got error on APIerSv2.SetActions: ", err.Error())
 	} else if reply != utils.OK {
 		t.Errorf("Calling APIerSv2.SetActions received: %s", reply)
 	}
 	attrsEA := &utils.AttrExecuteAction{Tenant: attrsSetAccount.Tenant, Account: attrsSetAccount.Account, ActionsId: topupAction.ActionsId}
-	if err := actsRPC.Call(utils.APIerSv1ExecuteAction, attrsEA, &reply); err != nil {
+	if err := actsRPC.Call(context.Background(), utils.APIerSv1ExecuteAction, attrsEA, &reply); err != nil {
 		t.Error("Got error on APIerSv1.ExecuteAction: ", err.Error())
 	} else if reply != utils.OK {
 		t.Errorf("Calling APIerSv1.ExecuteAction received: %s", reply)
 	}
 	runtime.Gosched()
 	attrsEA2 := &utils.AttrExecuteAction{Tenant: attrsSetAccount.Tenant, Account: attrsSetAccount.Account, ActionsId: changeBlockerAction.ActionsId}
-	if err := actsRPC.Call(utils.APIerSv1ExecuteAction, attrsEA2, &reply); err != nil {
+	if err := actsRPC.Call(context.Background(), utils.APIerSv1ExecuteAction, attrsEA2, &reply); err != nil {
 		t.Error("Got error on APIerSv1.ExecuteAction: ", err.Error())
 	} else if reply != utils.OK {
 		t.Errorf("Calling APIerSv1.ExecuteAction received: %s", reply)
 	}
 	var acc Account
 	attrs2 := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "testAcc"}
-	if err := actsRPC.Call(utils.APIerSv2GetAccount, attrs2, &acc); err != nil {
+	if err := actsRPC.Call(context.Background(), utils.APIerSv2GetAccount, attrs2, &acc); err != nil {
 		t.Error("Got error on APIerSv1.GetAccount: ", err.Error())
 	} else if acc.BalanceMap[utils.MetaMonetary][0].ID != "test" {
 		t.Errorf("Expected test result received %v ", acc.BalanceMap[utils.MetaMonetary][0].ID)
