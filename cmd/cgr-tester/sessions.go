@@ -92,6 +92,9 @@ func callSessions(digitMin, digitMax int64) (err error) {
 	if err = brpc.Call(utils.SessionSv1AuthorizeEvent, authArgs, &authRply); err != nil {
 		return
 	}
+	iterationsMux.Lock()
+	iterationsPerSecond++
+	iterationsMux.Unlock()
 	if *verbose {
 		log.Printf("Account: <%v>, Destination: <%v>, SessionSv1AuthorizeEvent reply: <%v>", acc, dest, utils.ToJSON(authRply))
 	}
@@ -119,8 +122,16 @@ func callSessions(digitMin, digitMax int64) (err error) {
 	//
 	// SessionSv1UpdateSession
 	//
-	totalUsage := time.Duration(utils.RandomInteger(int64(*minUsage), int64(*maxUsage)))
-	for currentUsage := time.Duration(1 * time.Second); currentUsage < totalUsage; currentUsage += *updateInterval {
+	var totalUsage time.Duration
+	if *minUsage == *maxUsage {
+		totalUsage = *maxUsage
+	} else {
+		totalUsage = time.Duration(utils.RandomInteger(int64(*minUsage), int64(*maxUsage)))
+	}
+	var currentUsage time.Duration
+	for currentUsage = time.Duration(1 * time.Second); currentUsage < totalUsage; currentUsage += *updateInterval {
+
+		time.Sleep(*updateInterval)
 
 		event.Event[utils.Usage] = currentUsage.String()
 		upArgs := &sessions.V1UpdateSessionArgs{
@@ -137,7 +148,7 @@ func callSessions(digitMin, digitMax int64) (err error) {
 	}
 
 	// Delay between last update and termination for a more realistic case
-	time.Sleep(time.Duration(utils.RandomInteger(10, 20)) * time.Millisecond)
+	time.Sleep(totalUsage - currentUsage)
 
 	//
 	// SessionSv1TerminateSession
@@ -152,6 +163,9 @@ func callSessions(digitMin, digitMax int64) (err error) {
 	if err = brpc.Call(utils.SessionSv1TerminateSession, tArgs, &tRply); err != nil {
 		return
 	}
+	terminateMx.Lock()
+	countTerminate++
+	terminateMx.Unlock()
 	if *verbose {
 		log.Printf("Account: <%v>, Destination: <%v>, SessionSv1TerminateSession reply: <%v>", acc, dest, utils.ToJSON(tRply))
 	}

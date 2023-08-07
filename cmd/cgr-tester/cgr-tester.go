@@ -49,6 +49,7 @@ var (
 	exec = cgrTesterFlags.String(utils.ExecCgr, utils.EmptyString, "Pick what you want to test "+
 		"<*sessions|*cost>")
 	cps             = cgrTesterFlags.Int("cps", 100, "run n requests in parallel")
+	calls           = cgrTesterFlags.Int("calls", 100, "run n number of calls")
 	datadbType      = cgrTesterFlags.String("datadb_type", cgrConfig.DataDbCfg().Type, "The type of the DataDb database <redis>")
 	datadbHost      = cgrTesterFlags.String("datadb_host", cgrConfig.DataDbCfg().Host, "The DataDb host to connect to.")
 	datadbPort      = cgrTesterFlags.String("datadb_port", cgrConfig.DataDbCfg().Port, "The DataDb port to bind to.")
@@ -82,19 +83,21 @@ var (
 	requestType    = cgrTesterFlags.String("request_type", utils.MetaRated, "Request type of the call")
 	digits         = cgrTesterFlags.Int("digits", 10, "Number of digits Account and Destination will have")
 
-	tor         = cgrTesterFlags.String("tor", utils.MetaVoice, "The type of record to use in queries.")
-	category    = cgrTesterFlags.String("category", "call", "The Record category to test.")
-	tenant      = cgrTesterFlags.String("tenant", "cgrates.org", "The type of record to use in queries.")
-	subject     = cgrTesterFlags.String("subject", "1001", "The rating subject to use in queries.")
-	destination = cgrTesterFlags.String("destination", "1002", "The destination to use in queries.")
-	json        = cgrTesterFlags.Bool("json", false, "Use JSON RPC")
-	version     = cgrTesterFlags.Bool("version", false, "Prints the application version.")
-	usage       = cgrTesterFlags.String("usage", "1m", "The duration to use in call simulation.")
-	fPath       = cgrTesterFlags.String("file_path", "", "read requests from file with path")
-	reqSep      = cgrTesterFlags.String("req_separator", "\n\n", "separator for requests in file")
-	verbose     = cgrTesterFlags.Bool(utils.VerboseCgr, false, "Enable detailed verbose logging output")
-	replyCntMux sync.RWMutex
-	err         error
+	tor                        = cgrTesterFlags.String("tor", utils.MetaVoice, "The type of record to use in queries.")
+	category                   = cgrTesterFlags.String("category", "call", "The Record category to test.")
+	tenant                     = cgrTesterFlags.String("tenant", "cgrates.org", "The type of record to use in queries.")
+	subject                    = cgrTesterFlags.String("subject", "1001", "The rating subject to use in queries.")
+	destination                = cgrTesterFlags.String("destination", "1002", "The destination to use in queries.")
+	json                       = cgrTesterFlags.Bool("json", false, "Use JSON RPC")
+	version                    = cgrTesterFlags.Bool("version", false, "Prints the application version.")
+	usage                      = cgrTesterFlags.String("usage", "1m", "The duration to use in call simulation.")
+	fPath                      = cgrTesterFlags.String("file_path", "", "read requests from file with path")
+	reqSep                     = cgrTesterFlags.String("req_separator", "\n\n", "separator for requests in file")
+	verbose                    = cgrTesterFlags.Bool(utils.VerboseCgr, false, "Enable detailed verbose logging output")
+	err                        error
+	iterationsPerSecond        = 0
+	iterationsMux, terminateMx sync.Mutex
+	countTerminate             = 0
 )
 
 func durInternalRater(cd *engine.CallDescriptorWithAPIOpts) (time.Duration, error) {
@@ -278,27 +281,38 @@ func main() {
 		log.Fatalf("task <%s> is not a supported tester task", *exec)
 		return
 	case utils.MetaSessionS:
+		if *cps > *calls {
+			log.Fatalf("Number of *calls <%v> should be bigger or equal to *cps <%v>", *calls, *cps)
+			return
+		}
 		digitMin := int64(math.Pow10(*digits - 1))
 		digitMax := int64(math.Pow10(*digits)) - 1
 		if *verbose {
 			log.Printf("Digit range: <%v - %v>", digitMin, digitMax)
 		}
-		var wg sync.WaitGroup
+		currentCalls := 0
 		rplyNr := 0
-		for i := 0; i < *cps; i++ {
-			wg.Add(1)
-			go func() {
-				defer wg.Done()
-				if err := callSessions(digitMin, digitMax); err != nil {
-					log.Fatal(err.Error())
-				}
-				replyCntMux.Lock()
-				rplyNr++
-				replyCntMux.Unlock()
 
-			}()
+		for i := 0; i < *calls+int(maxUsage.Seconds()); i++ {
+			if currentCalls+*cps > *calls {
+				*cps = *calls - currentCalls
+			}
+			for j := 0; j < *cps; j++ {
+				go func() {
+					if err := callSessions(digitMin, digitMax); err != nil {
+						log.Fatal(err.Error())
+					}
+					rplyNr++
+				}()
+			}
+			time.Sleep(1 * time.Second)
+			currentCalls += *cps
+			log.Printf("Iteration index: <%v>, cps: <%v>, calls finished <%v>", i, iterationsPerSecond, countTerminate)
+			iterationsPerSecond = 0
+			if countTerminate == *calls {
+				break
+			}
 		}
-		wg.Wait()
 		log.Printf("Number of successful calls: %v", rplyNr)
 	case utils.MetaCost:
 		var timeparsed time.Duration
