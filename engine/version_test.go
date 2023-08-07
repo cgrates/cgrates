@@ -18,8 +18,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"reflect"
 	"testing"
 
+	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -70,4 +72,106 @@ func TestVersionCompare(t *testing.T) {
 		t.Errorf("Error failed to compare to current version expected: %s received: %s", "cgr-migrator -exec=*sessions_costs", message6)
 	}
 
+}
+
+func TestVarsionCheckVersions(t *testing.T) {
+	defaultCfg, _ := config.NewDefaultCGRConfig()
+	data := NewInternalDB(nil, nil, true, defaultCfg.DataDbCfg().Items)
+
+	err := CheckVersions(data)
+
+	if err != nil {
+		t.Error(err)
+	}
+}
+
+func TestVersionSetDBVersions(t *testing.T) {
+	defaultCfg, _ := config.NewDefaultCGRConfig()
+	data := NewInternalDB(nil, nil, true, defaultCfg.DataDbCfg().Items)
+
+	err := SetDBVersions(data)
+
+	if err != nil {
+		t.Error(err)
+	}
+}
+
+func TestVersionCurrentDBVersions(t *testing.T) {
+	type args struct {
+		storType string
+		isDataDB bool
+	}
+	tests := []struct {
+		name string
+		args args
+		exp  Versions
+	}{
+		{
+			name: "CurrentDataDBVersions",
+			args: args{
+				storType: utils.MetaMongo,
+				isDataDB: true,
+			},
+			exp: CurrentDataDBVersions(),
+		},
+		{
+			name: "CurrentStorDBVersions",
+			args: args{
+				storType: utils.MetaMongo,
+				isDataDB: false,
+			},
+			exp: CurrentStorDBVersions(),
+		},
+		{
+			name: "CurrentStorDBVersions",
+			args: args{
+				storType: utils.MetaPostgres,
+				isDataDB: false,
+			},
+			exp: CurrentStorDBVersions(),
+		},
+		{
+			name: "CurrentDataDBVersions",
+			args: args{
+				storType: utils.MetaRedis,
+				isDataDB: false,
+			},
+			exp: CurrentDataDBVersions(),
+		},
+		{
+			name: "default",
+			args: args{
+				storType: str,
+				isDataDB: false,
+			},
+			exp: nil,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			rcv := CurrentDBVersions(tt.args.storType, tt.args.isDataDB)
+
+			if !reflect.DeepEqual(rcv, tt.exp) {
+				t.Errorf("expected %s, received %s", utils.ToJSON(tt.exp), utils.ToJSON(rcv))
+			}
+		})
+	}
+}
+
+func TestVersionCompare2(t *testing.T) {
+	vers := Versions{}
+	current := Versions{}
+
+	rcv := vers.Compare(current, utils.MetaInternal, false)
+
+	if rcv != "" {
+		t.Error(rcv)
+	}
+
+	rcv = vers.Compare(current, utils.MetaRedis, false)
+
+	if rcv != "" {
+		t.Error(rcv)
+	}
 }

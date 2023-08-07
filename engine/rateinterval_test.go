@@ -18,6 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"fmt"
 	"reflect"
 	"testing"
 	"time"
@@ -535,6 +536,269 @@ func TestRIRateClone(t *testing.T) {
 	rit.Rates[0].GroupIntervalStart = time.Duration(7)
 	if cloned.Rates[0].GroupIntervalStart != time.Duration(10) {
 		t.Errorf("\nExpecting: 10,\n received: %+v", cloned.Rates[0].GroupIntervalStart)
+	}
+}
+
+func TestRateIntervalCronString(t *testing.T) {
+	rit := &RITiming{
+		StartTime: "test",
+	}
+
+	rcv := rit.CronString()
+
+	if rcv != "* * * * * * *" {
+		t.Error(rcv)
+	}
+}
+
+func TestRateIntervalIsActive(t *testing.T) {
+	rit := &RITiming{
+		Years:      utils.Years{2021},
+		Months:     utils.Months{9},
+		MonthDays:  utils.MonthDays{2},
+		WeekDays:   utils.WeekDays{2},
+		StartTime:  "00:00:00",
+		EndTime:    "02:02:02",
+		cronString: str,
+		tag:        str,
+	}
+
+	rcv := rit.IsActive()
+
+	if rcv != false {
+		t.Error(rcv)
+	}
+}
+
+func TestRateIntervalFieldAsInterface(t *testing.T) {
+	r := &Rate{
+		GroupIntervalStart: 1 * time.Millisecond,
+		Value:              fl,
+		RateIncrement:      1 * time.Millisecond,
+		RateUnit:           1 * time.Millisecond,
+	}
+
+	tests := []struct {
+		name string
+		arg  []string
+		exp  any
+		err  string
+	}{
+		{
+			name: "empty field path",
+			arg:  []string{},
+			exp:  nil,
+			err:  "NOT_FOUND",
+		},
+		{
+			name: "default case",
+			arg:  []string{str},
+			exp:  nil,
+			err:  "unsupported field prefix: <test>",
+		},
+		{
+			name: "GroupIntervalStart case",
+			arg:  []string{"GroupIntervalStart"},
+			exp:  1 * time.Millisecond,
+			err:  "",
+		},
+		{
+			name: "RateIncrement case",
+			arg:  []string{"RateIncrement"},
+			exp:  1 * time.Millisecond,
+			err:  "",
+		},
+		{
+			name: "RateUnit case",
+			arg:  []string{"RateUnit"},
+			exp:  1 * time.Millisecond,
+			err:  "",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			rcv, err := r.FieldAsInterface(tt.arg)
+
+			if err != nil {
+				if err.Error() != tt.err {
+					t.Fatal(err)
+				}
+			}
+
+			if rcv != tt.exp {
+				t.Error(rcv)
+			}
+		})
+	}
+}
+
+func TestRateIntervalRateGroupsEqual(t *testing.T) {
+	r := &Rate{
+		GroupIntervalStart: 1 * time.Millisecond,
+		Value:              fl,
+		RateIncrement:      1 * time.Millisecond,
+		RateUnit:           1 * time.Millisecond,
+	}
+	r2 := &Rate{
+		GroupIntervalStart: 1 * time.Millisecond,
+		Value:              3.5,
+		RateIncrement:      1 * time.Millisecond,
+		RateUnit:           1 * time.Millisecond,
+	}
+	pg := RateGroups{r}
+	of := RateGroups{}
+	of2 := RateGroups{r2}
+	of3 := RateGroups{r}
+
+	tests := []struct {
+		name string
+		arg  RateGroups
+		exp  bool
+	}{
+		{
+			name: "different lengths",
+			arg:  of,
+			exp:  false,
+		},
+		{
+			name: "not equal",
+			arg:  of2,
+			exp:  false,
+		},
+		{
+			name: "equal",
+			arg:  of3,
+			exp:  true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			rcv := pg.Equal(tt.arg)
+
+			if rcv != tt.exp {
+				t.Error(rcv)
+			}
+		})
+	}
+}
+
+func TestRateIntervalAddRate(t *testing.T) {
+	r := &Rate{
+		GroupIntervalStart: 1 * time.Millisecond,
+		Value:              fl,
+		RateIncrement:      1 * time.Millisecond,
+		RateUnit:           1 * time.Millisecond,
+	}
+	r2 := &Rate{
+		GroupIntervalStart: 1 * time.Millisecond,
+		Value:              3.5,
+		RateIncrement:      1 * time.Millisecond,
+		RateUnit:           1 * time.Millisecond,
+	}
+	pg := RateGroups{r}
+
+	pg.AddRate(r2)
+	exp := RateGroups{r, r2}
+
+	if !reflect.DeepEqual(pg, exp) {
+		t.Errorf("expected %s, received %s", utils.ToJSON(exp), utils.ToJSON(pg))
+	}
+
+	pg.AddRate(r2)
+
+	if !reflect.DeepEqual(pg, exp) {
+		t.Errorf("expected %s, received %s", utils.ToJSON(exp), utils.ToJSON(pg))
+	}
+}
+
+func TestRateIntervalString_DISABLED(t *testing.T) {
+	rit := &RITiming{
+		Years:      utils.Years{2021},
+		Months:     utils.Months{9},
+		MonthDays:  utils.MonthDays{2},
+		WeekDays:   utils.WeekDays{2},
+		StartTime:  "00:00:00",
+		EndTime:    "02:02:02",
+		cronString: str,
+		tag:        str,
+	}
+	i := &RateInterval{
+		Timing: rit,
+	}
+
+	rcv := i.String_DISABLED()
+	exp := fmt.Sprintf("%v %v %v %v %v %v", i.Timing.Years, i.Timing.Months, i.Timing.MonthDays, i.Timing.WeekDays, i.Timing.StartTime, i.Timing.EndTime)
+
+	if rcv != exp {
+		t.Errorf("expected %s, received %s", exp, rcv)
+	}
+}
+
+func TestRateIntervalEqual2(t *testing.T) {
+	rit := &RITiming{
+		Years:      utils.Years{2021},
+		Months:     utils.Months{9},
+		MonthDays:  utils.MonthDays{2},
+		WeekDays:   utils.WeekDays{2},
+		StartTime:  "00:00:00",
+		EndTime:    "02:02:02",
+		cronString: str,
+		tag:        str,
+	}
+	i := &RateInterval{
+		Timing: rit,
+	}
+
+	rcv := i.Equal(nil)
+
+	if rcv != false {
+		t.Error(rcv)
+	}
+}
+
+func TestRateIntervalGetMaxCost(t *testing.T) {
+	var ri RateInterval
+
+	fl, str := ri.GetMaxCost()
+
+	if fl != 0.0 {
+		t.Error(fl)
+	}
+
+	if str != "" {
+		t.Error(str)
+	}
+}
+
+func TestRateIntervalRateClone(t *testing.T) {
+	var r *Rate
+
+	rcv := r.Clone()
+
+	if rcv != nil {
+		t.Error(rcv)
+	}
+}
+
+func TestRateIntervalGetRateParameters(t *testing.T) {
+	r := &Rate{
+		GroupIntervalStart: 1 * time.Millisecond,
+		Value:              fl,
+		RateIncrement:      1 * time.Millisecond,
+		RateUnit:           1 * time.Millisecond,
+	}
+	i := &RateInterval{
+		Rating: &RIRate{
+			Rates: RateGroups{r},
+		},
+	}
+
+	fl, ri, ru := i.GetRateParameters(0 * time.Millisecond)
+
+	if fl != -1 || ri != -1 || ru != -1 {
+		t.Error(fl, ri, ru)
 	}
 }
 

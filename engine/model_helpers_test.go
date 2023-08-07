@@ -3257,3 +3257,158 @@ func TestModelHelperscsvDump(t *testing.T) {
 		}
 	}
 }
+
+func TestModelHelpersAsTPResources(t *testing.T) {
+	tps := TpResources{{
+		ActivationInterval: "test;test",
+	}}
+
+	rcv := tps.AsTPResources()
+	exp := []*utils.TPResourceProfile{{
+		ActivationInterval: &utils.TPActivationInterval{
+			ActivationTime: str,
+			ExpiryTime:     str,
+		},
+	}}
+
+	if !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("expected %v, received %v", utils.ToJSON(exp), utils.ToJSON(rcv))
+	}
+}
+
+func TestModelHelpersAsTPThreshold(t *testing.T) {
+	tps := TpThresholds{{
+		ActivationInterval: "test;test",
+	}}
+
+	rcv := tps.AsTPThreshold()
+	exp := []*utils.TPThresholdProfile{{
+		ActivationInterval: &utils.TPActivationInterval{
+			ActivationTime: str,
+			ExpiryTime:     str,
+		},
+	}}
+
+	if !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("expected %v, received %v", utils.ToJSON(exp), utils.ToJSON(rcv))
+	}
+}
+
+func TestModelHelpersAsTPFilter(t *testing.T) {
+	tps := TpFilterS{{
+		ActivationInterval: "test;test",
+	}}
+
+	rcv := tps.AsTPFilter()
+	exp := []*utils.TPFilterProfile{{
+		ActivationInterval: &utils.TPActivationInterval{
+			ActivationTime: str,
+			ExpiryTime:     str,
+		},
+	}}
+
+	if !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("expected %v, received %v", utils.ToJSON(exp), utils.ToJSON(rcv))
+	}
+}
+
+func TestModelHelpersAsTPSuppliers(t *testing.T) {
+	tps := TpSuppliers{{
+		ActivationInterval: "test;test",
+	}}
+
+	rcv := tps.AsTPSuppliers()
+	exp := []*utils.TPSupplierProfile{{
+		ActivationInterval: &utils.TPActivationInterval{
+			ActivationTime: str,
+			ExpiryTime:     str,
+		},
+		SortingParameters: []string{},
+	}}
+
+	if !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("expected %v, received %v", utils.ToJSON(exp), utils.ToJSON(rcv))
+	}
+}
+
+func TestModelHelpersAsTPAttributes(t *testing.T) {
+	tps := TPAttributes{{
+		ActivationInterval: "test;test",
+	}}
+
+	rcv := tps.AsTPAttributes()
+	exp := []*utils.TPAttributeProfile{{
+		ActivationInterval: &utils.TPActivationInterval{
+			ActivationTime: str,
+			ExpiryTime:     str,
+		},
+	}}
+
+	if !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("expected %v, received %v", utils.ToJSON(exp), utils.ToJSON(rcv))
+	}
+}
+
+func TestModelHelpersAsTPChargers(t *testing.T) {
+	tps := TPChargers{{
+		ActivationInterval: "test;test",
+	}}
+
+	rcv := tps.AsTPChargers()
+	exp := []*utils.TPChargerProfile{{
+		ActivationInterval: &utils.TPActivationInterval{
+			ActivationTime: str,
+			ExpiryTime:     str,
+		},
+	}}
+
+	if !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("expected %v, received %v", utils.ToJSON(exp), utils.ToJSON(rcv))
+	}
+}
+
+func TestModelHelpersAsTPDispatcherProfiles(t *testing.T) {
+	tps := TPDispatcherProfiles{{
+		ActivationInterval: "test;test",
+		StrategyParameters: str,
+	}}
+
+	rcv := tps.AsTPDispatcherProfiles()
+	exp := []*utils.TPDispatcherProfile{{
+		ActivationInterval: &utils.TPActivationInterval{
+			ActivationTime: str,
+			ExpiryTime:     str,
+		},
+		StrategyParams: []any{str},
+	}}
+
+	if !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("expected %v, received %v", utils.ToJSON(exp), utils.ToJSON(rcv))
+	}
+}
+
+func TestModelHelpersAsTPStats(t *testing.T) {
+	tps := TpStats{{
+		ActivationInterval: "test;test",
+		MetricIDs:          str,
+		MetricFilterIDs:    str,
+	}}
+
+	rcv := tps.AsTPStats()
+	exp := []*utils.TPStatProfile{{
+		ActivationInterval: &utils.TPActivationInterval{
+			ActivationTime: str,
+			ExpiryTime:     str,
+		},
+		Metrics: []*utils.MetricWithFilters{
+			{
+				FilterIDs: []string{str},
+				MetricID:  str,
+			},
+		},
+	}}
+
+	if !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("expected %v, received %v", utils.ToJSON(exp), utils.ToJSON(rcv))
+	}
+}
