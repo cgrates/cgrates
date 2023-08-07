@@ -254,10 +254,10 @@ func (ka *KamailioAgent) onDlgList(evData []byte, connIdx int) {
 	for _, dlgInfo := range kamDlgRpl.Jsonrpl_body.Result {
 		var originHost, originID string
 		for _, variable := range dlgInfo.Variables {
-			if variable.CgrOriginHost != "" {
+			if variable.CgrOriginHost != utils.EmptyString {
 				originHost = variable.CgrOriginHost
 			}
-			if variable.CgrOriginID != "" {
+			if variable.CgrOriginID != utils.EmptyString {
 				originID = variable.CgrOriginID
 			}
 		}
