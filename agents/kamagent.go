@@ -252,7 +252,8 @@ func (ka *KamailioAgent) onDlgList(evData []byte, connIdx int) {
 	}
 	var sIDs []*sessions.SessionID
 	for _, dlgInfo := range kamDlgRpl.Jsonrpl_body.Result {
-		var originHost, originID string
+		originHost := ka.conns[connIdx].RemoteAddr().String()
+		originID := dlgInfo.CallId + ";" + dlgInfo.Caller.Tag
 		for _, variable := range dlgInfo.Variables {
 			if variable.CgrOriginHost != utils.EmptyString {
 				originHost = variable.CgrOriginHost
@@ -260,12 +261,6 @@ func (ka *KamailioAgent) onDlgList(evData []byte, connIdx int) {
 			if variable.CgrOriginID != utils.EmptyString {
 				originID = variable.CgrOriginID
 			}
-		}
-		if originHost == utils.EmptyString {
-			originHost = ka.conns[connIdx].RemoteAddr().String()
-		}
-		if originID == utils.EmptyString {
-			originID = dlgInfo.CallId + ";" + dlgInfo.Caller.Tag
 		}
 		sIDs = append(sIDs, &sessions.SessionID{
 			OriginHost: originHost,
