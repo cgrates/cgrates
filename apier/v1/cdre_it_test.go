@@ -26,6 +26,7 @@ import (
 	"os"
 	"path"
 	"reflect"
+	"sort"
 	"testing"
 	"time"
 
@@ -200,6 +201,13 @@ func testCDReExportCDRs2(t *testing.T) {
 			AnswerTime: time.Now(), RunID: utils.MetaDefault, Usage: time.Duration(5) * time.Second,
 			ExtraFields: map[string]string{"DisconnectCause": "UNALLOCATED_NUMBER"}, Cost: 2.21,
 		},
+		{CGRID: "Cdr7",
+			OrderID: 124343, ToR: utils.VOICE, OriginID: "OriginCDR2", OriginHost: "192.168.1.1", Source: "test2",
+			RequestType: utils.META_RATED, Tenant: "cgrates.org", Category: "call",
+			Account: "1001", Subject: "1001", Destination: "+4986517174963", SetupTime: time.Now(),
+			AnswerTime: time.Now(), RunID: utils.MetaDefault, Usage: time.Duration(5) * time.Second,
+			ExtraFields: map[string]string{"DisconnectCause": "USER_BUSY"}, Cost: 2.21,
+		},
 	}
 	for _, cdr := range storedCdrs {
 		var reply string
@@ -212,17 +220,20 @@ func testCDReExportCDRs2(t *testing.T) {
 	attr := ArgExportCDRs{
 		ExportArgs: map[string]any{
 			utils.ExportTemplate: "TemplateWithFilter",
-			utils.FilterIDs:      []string{"*string:~*req.DisconnectCause:UNALLOCATED_NUMBER"},
+			utils.FilterIDs:      []string{"*string:~*req.DisconnectCause:ORIGINATOR_CANCEL;USER_BUSY"},
 			utils.ExportPath:     "/tmp",
 			utils.ExportFileName: "TestFilteredCsv.csv",
 		},
 		Verbose: true,
 	}
 	var rply *RplExportedCDRs
+	expExportedCdrs := []string{"Cdr7", "Cdr5"}
 	if err := cdreRPC.Call(utils.APIerSv1ExportCDRs, attr, &rply); err != nil {
 		t.Error("Unexpected error: ", err.Error())
-	} else if len(rply.ExportedCGRIDs) != 1 {
-		t.Errorf("Unexpected number of CDR exported: %s ", utils.ToJSON(rply))
+	} else if sort.Slice(rply.ExportedCGRIDs, func(i, j int) bool {
+		return i < j
+	}); !reflect.DeepEqual(rply.ExportedCGRIDs, expExportedCdrs) {
+		t.Errorf("Expected CDRs %+v,Received %+v ", expExportedCdrs, rply.ExportedCGRIDs)
 	}
 
 }
