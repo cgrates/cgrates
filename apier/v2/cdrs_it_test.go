@@ -24,6 +24,7 @@ import (
 	"net/rpc"
 	"path"
 	"reflect"
+	"sort"
 	"testing"
 	"time"
 
@@ -850,7 +851,7 @@ func testV2ExportCDRsToFile(t *testing.T) {
 			Tenant: "cgrates.org",
 			Event: map[string]any{
 				utils.ToR:         utils.VOICE,
-				utils.CGRID:       "9b3cd5e698af94f8916220866c831a982ed163322",
+				utils.CGRID:       "29y32329358",
 				utils.OriginID:    "testCDREProcessCdr2",
 				utils.OriginHost:  "192.168.1.1",
 				utils.Source:      "TestTutITExportCDR",
@@ -868,7 +869,7 @@ func testV2ExportCDRsToFile(t *testing.T) {
 		{
 			Tenant: "cgrates.org",
 			Event: map[string]any{
-				utils.CGRID:       "9b3cd5e698af94f8916220866c831a982ed1623432",
+				utils.CGRID:       "9b3cd5e698af94",
 				utils.ToR:         utils.VOICE,
 				utils.OriginID:    "testCDREProcessCdr3",
 				utils.OriginHost:  "192.168.1.1",
@@ -887,7 +888,7 @@ func testV2ExportCDRsToFile(t *testing.T) {
 		{
 			Tenant: "cgrates.org",
 			Event: map[string]any{
-				utils.CGRID:       "9b3cd5e698af94f353216220866c831a982ed163322",
+				utils.CGRID:       "879cd5e698af",
 				utils.ToR:         utils.VOICE,
 				utils.OriginID:    "testCDREProcessCdr1",
 				utils.OriginHost:  "192.168.1.1",
@@ -931,13 +932,13 @@ func testV2ExportCDRsToFile(t *testing.T) {
 		ExportFileName:  utils.StringPointer("TestTutITExportCDR.csv"),
 		ExportDirectory: utils.StringPointer("/tmp"),
 		ExportTemplate:  utils.StringPointer("*default"),
-		FilterIDs:       []string{"*string:~*req.DisconnectCause:ORIGINATOR_CANCEL"},
+		FilterIDs:       []string{"*string:~*req.DisconnectCause:ORIGINATOR_CANCEL;USER_BUSY"},
 	}
-
+	expCgrIds := []string{"879cd5e698af", "9b3cd5e698af94"}
 	if err := cdrsRpc.Call(utils.APIerSv2ExportCdrsToFile, attr, &replyExp); err != nil {
 		t.Error(err)
-	} else if len(replyExp.ExportedCgrIds) != 1 {
-		t.Errorf("Exported records: %+v", len(replyExp.ExportedCgrIds))
+	} else if sort.Slice(replyExp.ExportedCgrIds, func(i, j int) bool { return i < j }); !reflect.DeepEqual(expCgrIds, replyExp.ExportedCgrIds) {
+		t.Errorf("Expected CgrsIds %+v,Received  %+v", expCgrIds, replyExp.ExportedCgrIds)
 	}
 }
 
