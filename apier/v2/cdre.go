@@ -36,7 +36,7 @@ type AttrExportCdrsToFile struct {
 	ExportID            *string  // Optional exportid
 	ExportDirectory     *string  // If provided it overwrites the configured export directory
 	ExportFileName      *string  // If provided the output filename will be set to this
-	FiltersIDs          []string // Will overwrite exporter filters
+	FilterIDs           []string // Will overwrite exporter filters
 	ExportTemplate      *string  // Exported fields template  <""|fld1,fld2|>
 	Verbose             bool     // Disable CgrIds reporting in reply/ExportedCgrIds and reply/UnexportedCgrIds
 	utils.RPCCDRsFilter          // Inherit the CDR filter attributes
@@ -71,8 +71,8 @@ func (apiv2 *APIerSv2) ExportCdrsToFile(attr AttrExportCdrsToFile, reply *utils.
 	if attr.ExportDirectory != nil && len(*attr.ExportDirectory) != 0 {
 		eDir = *attr.ExportDirectory
 	}
-	if len(attr.FiltersIDs) != 0 {
-		exportTemplate.Filters = attr.FiltersIDs
+	if len(attr.FilterIDs) != 0 {
+		exportTemplate.Filters = attr.FilterIDs
 	}
 	exportID := strconv.FormatInt(time.Now().Unix(), 10)
 	if attr.ExportID != nil && len(*attr.ExportID) != 0 {

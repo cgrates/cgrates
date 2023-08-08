@@ -68,6 +68,7 @@ var (
 		testv2CDRsGetCDRsDest,
 
 		testV2ExportCDRsToFile,
+
 		testV2CDRsKillEngine,
 	}
 )
@@ -930,7 +931,7 @@ func testV2ExportCDRsToFile(t *testing.T) {
 		ExportFileName:  utils.StringPointer("TestTutITExportCDR.csv"),
 		ExportDirectory: utils.StringPointer("/tmp"),
 		ExportTemplate:  utils.StringPointer("*default"),
-		FiltersIDs:      []string{"*string:~*req.DisconnectCause:ORIGINATOR_CANCEL"},
+		FilterIDs:       []string{"*string:~*req.DisconnectCause:ORIGINATOR_CANCEL"},
 	}
 
 	if err := cdrsRpc.Call(utils.APIerSv2ExportCdrsToFile, attr, &replyExp); err != nil {
