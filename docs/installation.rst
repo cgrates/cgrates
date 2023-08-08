@@ -80,8 +80,14 @@ To install a specific version of the package, run:
 
    sudo dnf install -y cgrates-<version>.x86_64
 
+Alternatively, you can manually install a specific .rpm package as follows:
+
+.. code-block:: bash
+   
+  sudo dnf install http://pkg.cgrates.org/rpm/v0.10/epel-9-x86_64/cgrates-current.rpm
+
 .. note::
-   The entire archive of CGRateS rpm packages is available at https://copr.fedorainfracloud.org/coprs/cgrates/v0.10/packages/.
+   The entire archive of CGRateS rpm packages is available at https://copr.fedorainfracloud.org/coprs/cgrates/v0.10/packages/ or http://pkg.cgrates.org/rpm/v0.10/.
 
 Installing from Source
 ----------------------
