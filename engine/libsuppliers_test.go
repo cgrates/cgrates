@@ -848,3 +848,83 @@ func TestPopulateSortingDataStatMetrics(t *testing.T) {
 		t.Error(err)
 	}
 }
+
+func TestLibSuppliersSupplierIDs(t *testing.T) {
+	sSpls := &SortedSuppliers{
+		ProfileID:       str,
+		Sorting:         str,
+		Count:           nm,
+		SortedSuppliers: []*SortedSupplier{
+			{
+				SupplierID:         str,
+				SupplierParameters: str,
+				SortingData:        map[string]any{str: str},
+			},
+		},
+	}
+
+	rcv := sSpls.SupplierIDs()
+	exp := []string{str}
+
+	if !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("expected %s, received %s", utils.ToJSON(exp), utils.ToJSON(rcv))
+	}
+}
+
+func TestLibSupplierAsNavigableMap(t *testing.T) {
+	ss := &SortedSupplier{
+		SupplierID:         str,
+		SupplierParameters: str,
+		SortingData:        map[string]any{str: str},
+	}
+
+	rcv := ss.AsNavigableMap()
+	exp := utils.NavigableMap2{
+		"SupplierID":         utils.NewNMData(ss.SupplierID),
+		"SupplierParameters": utils.NewNMData(ss.SupplierParameters),
+		"SortingData": 		  utils.NavigableMap2{str: utils.NewNMData(str)},
+	}
+
+	if !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("expected %s, received %s", utils.ToJSON(exp), utils.ToJSON(rcv))
+	}
+}
+
+func TestLibSuppliersAsNavigableMap(t *testing.T) {
+	sSpls := &SortedSuppliers{
+		ProfileID:       str,
+		Sorting:         str,
+		Count:           nm,
+		SortedSuppliers: []*SortedSupplier{
+			{
+				SupplierID:         str,
+				SupplierParameters: str,
+				SortingData:        map[string]any{str: str},
+			},
+		},
+	}
+
+	rcv := sSpls.AsNavigableMap()
+	exp := utils.NavigableMap2{
+		"ProfileID": utils.NewNMData(sSpls.ProfileID),
+		"Sorting":   utils.NewNMData(sSpls.Sorting),
+		"Count":     utils.NewNMData(sSpls.Count),
+		"SortedSuppliers": &utils.NMSlice{sSpls.SortedSuppliers[0].AsNavigableMap()},
+	}
+
+	if !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("expected %s, received %s", utils.ToJSON(exp), utils.ToJSON(rcv))
+	}
+}
+
+func TestLibSuppliersSortSuppliers(t *testing.T) {
+	ssd := SupplierSortDispatcher{}
+
+	_, err := ssd.SortSuppliers(str, str, []*Supplier{}, &utils.CGREvent{}, &optsGetSuppliers{}, nil)
+
+	if err != nil {
+		if err.Error() != "unsupported sorting strategy: test" {
+			t.Error(err)
+		}
+	}
+}
