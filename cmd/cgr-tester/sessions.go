@@ -54,7 +54,7 @@ func callSessions(digitMin, digitMax int64) (err error) {
 
 	event := &utils.CGREvent{
 		Tenant: *tenant,
-		ID:     "TheEventID100000",
+		ID:     "EventID1",
 		Time:   utils.TimePointer(time.Now()),
 		Event: map[string]any{
 			utils.AccountField: acc,
@@ -69,8 +69,8 @@ func callSessions(digitMin, digitMax int64) (err error) {
 
 	if *updateInterval > *maxUsage {
 		return fmt.Errorf(`"update_interval" should be smaller than "max_usage"`)
-	} else if *maxUsage <= *minUsage {
-		return fmt.Errorf(`"min_usage" should be smaller than "max_usage"`)
+	} else if *maxUsage < *minUsage {
+		return fmt.Errorf(`"min_usage" should be equal or smaller than "max_usage"`)
 	}
 
 	clntHandlers := map[string]any{
@@ -168,6 +168,19 @@ func callSessions(digitMin, digitMax int64) (err error) {
 	terminateMx.Unlock()
 	if *verbose {
 		log.Printf("Account: <%v>, Destination: <%v>, SessionSv1TerminateSession reply: <%v>", acc, dest, utils.ToJSON(tRply))
+	}
+
+	if countTerminate == *calls {
+		go func() {
+			time.Sleep(10 * time.Second)
+			var sSRply string
+			if err = brpc.Call(utils.SessionSv1SyncSessions, tArgs, &sSRply); err != nil {
+				return
+			}
+			if *verbose {
+				log.Printf("Account: <%v>, Destination: <%v>, SessionSv1TerminateSession reply: <%v>", acc, dest, utils.ToJSON(sSRply))
+			}
+		}()
 	}
 
 	// Delay between terminate and processCDR for a more realistic case
