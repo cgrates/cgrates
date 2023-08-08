@@ -67,6 +67,7 @@ var (
 
 		testv2CDRsGetCDRsDest,
 
+		testV2ExportCDRsToFile,
 		testV2CDRsKillEngine,
 	}
 )
@@ -834,6 +835,108 @@ func testv2CDRsGetCDRsDest(t *testing.T) {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(cdrs) != 3 {
 		t.Error("Unexpected number of CDRs returned: ", len(reply))
+	}
+}
+
+func testV2ExportCDRsToFile(t *testing.T) {
+	var (
+		reply    string
+		replyCdr []*engine.ExternalCDR
+		replyExp utils.ExportedFileCdrs
+	)
+	cgrEvs := []*utils.CGREvent{
+		{
+			Tenant: "cgrates.org",
+			Event: map[string]any{
+				utils.ToR:         utils.VOICE,
+				utils.CGRID:       "9b3cd5e698af94f8916220866c831a982ed163322",
+				utils.OriginID:    "testCDREProcessCdr2",
+				utils.OriginHost:  "192.168.1.1",
+				utils.Source:      "TestTutITExportCDR",
+				utils.RequestType: utils.META_POSTPAID,
+				utils.Category:    "call",
+				utils.Account:     "1001",
+				utils.Subject:     "1001",
+				utils.Destination: "1003",
+				utils.SetupTime:   time.Date(2022, 11, 30, 17, 5, 24, 0, time.UTC),
+				utils.AnswerTime:  time.Date(2023, 11, 30, 17, 6, 4, 0, time.UTC),
+				utils.Usage:       time.Duration(21) * time.Second,
+				"DisconnectCause": "UNALLOCATED_NUMBER",
+			},
+		},
+		{
+			Tenant: "cgrates.org",
+			Event: map[string]any{
+				utils.CGRID:       "9b3cd5e698af94f8916220866c831a982ed1623432",
+				utils.ToR:         utils.VOICE,
+				utils.OriginID:    "testCDREProcessCdr3",
+				utils.OriginHost:  "192.168.1.1",
+				utils.Source:      "TestTutITExportCDR",
+				utils.RequestType: utils.META_PREPAID,
+				utils.Category:    "call",
+				utils.Account:     "1002",
+				utils.Subject:     "1002",
+				utils.Destination: "1004",
+				utils.SetupTime:   time.Date(2022, 12, 30, 17, 5, 24, 0, time.UTC),
+				utils.AnswerTime:  time.Date(2022, 12, 30, 17, 6, 4, 0, time.UTC),
+				utils.Usage:       time.Duration(98) * time.Second,
+				"DisconnectCause": "ORIGINATOR_CANCEL",
+			},
+		},
+		{
+			Tenant: "cgrates.org",
+			Event: map[string]any{
+				utils.CGRID:       "9b3cd5e698af94f353216220866c831a982ed163322",
+				utils.ToR:         utils.VOICE,
+				utils.OriginID:    "testCDREProcessCdr1",
+				utils.OriginHost:  "192.168.1.1",
+				utils.Source:      "TestTutITExportCDR",
+				utils.RequestType: utils.META_RATED,
+				utils.Tenant:      "cgrates.org",
+				utils.Category:    "call",
+				utils.Account:     "1003",
+				utils.Subject:     "1003",
+				utils.Destination: "1007",
+				utils.SetupTime:   time.Date(2023, 3, 30, 17, 5, 24, 0, time.UTC),
+				utils.AnswerTime:  time.Date(2023, 3, 30, 17, 6, 4, 0, time.UTC),
+				utils.Usage:       time.Duration(10) * time.Second,
+				"DisconnectCause": "USER_BUSY"},
+		},
+	}
+
+	for _, cgrEv := range cgrEvs {
+		if err := cdrsRpc.Call(utils.CDRsV1ProcessEvent,
+			&engine.ArgV1ProcessEvent{
+				Flags:    []string{utils.ConcatenatedKey(utils.MetaChargers, "false")},
+				CGREvent: *cgrEv,
+			}, &reply); err != nil {
+			t.Error("Unexpected error: ", err.Error())
+		} else if reply != utils.OK {
+			t.Error("Unexpected reply received: ", reply)
+		}
+	}
+
+	req := utils.RPCCDRsFilter{
+		ExtraFields: map[string]string{
+			"DisconnectCause": "USER_BUSY",
+		},
+	}
+	if err := cdrsRpc.Call(utils.APIerSv2GetCDRs, req, &replyCdr); err != nil {
+		t.Error("Unexpected error: ", err.Error())
+	} else if len(replyCdr) != 1 {
+		t.Errorf("Received %v", len(replyCdr))
+	}
+	attr := AttrExportCdrsToFile{
+		ExportFileName:  utils.StringPointer("TestTutITExportCDR.csv"),
+		ExportDirectory: utils.StringPointer("/tmp"),
+		ExportTemplate:  utils.StringPointer("*default"),
+		FiltersIDs:      []string{"*string:~*req.DisconnectCause:ORIGINATOR_CANCEL"},
+	}
+
+	if err := cdrsRpc.Call(utils.APIerSv2ExportCdrsToFile, attr, &replyExp); err != nil {
+		t.Error(err)
+	} else if len(replyExp.ExportedCgrIds) != 1 {
+		t.Errorf("Exported records: %+v", len(replyExp.ExportedCgrIds))
 	}
 }
 
