@@ -31,14 +31,15 @@ import (
 )
 
 type AttrExportCdrsToFile struct {
-	CdrFormat           *string // Cdr output file format <utils.CdreCdrFormats>
-	FieldSeparator      *string // Separator used between fields
-	ExportID            *string // Optional exportid
-	ExportDirectory     *string // If provided it overwrites the configured export directory
-	ExportFileName      *string // If provided the output filename will be set to this
-	ExportTemplate      *string // Exported fields template  <""|fld1,fld2|>
-	Verbose             bool    // Disable CgrIds reporting in reply/ExportedCgrIds and reply/UnexportedCgrIds
-	utils.RPCCDRsFilter         // Inherit the CDR filter attributes
+	CdrFormat           *string  // Cdr output file format <utils.CdreCdrFormats>
+	FieldSeparator      *string  // Separator used between fields
+	ExportID            *string  // Optional exportid
+	ExportDirectory     *string  // If provided it overwrites the configured export directory
+	ExportFileName      *string  // If provided the output filename will be set to this
+	FiltersIDs          []string // Will overwrite exporter filters
+	ExportTemplate      *string  // Exported fields template  <""|fld1,fld2|>
+	Verbose             bool     // Disable CgrIds reporting in reply/ExportedCgrIds and reply/UnexportedCgrIds
+	utils.RPCCDRsFilter          // Inherit the CDR filter attributes
 }
 
 // Deprecated, please use APIerSv1.ExportCDRs instead
@@ -69,6 +70,9 @@ func (apiv2 *APIerSv2) ExportCdrsToFile(attr AttrExportCdrsToFile, reply *utils.
 	eDir := exportTemplate.ExportPath
 	if attr.ExportDirectory != nil && len(*attr.ExportDirectory) != 0 {
 		eDir = *attr.ExportDirectory
+	}
+	if len(attr.FiltersIDs) != 0 {
+		exportTemplate.Filters = attr.FiltersIDs
 	}
 	exportID := strconv.FormatInt(time.Now().Unix(), 10)
 	if attr.ExportID != nil && len(*attr.ExportID) != 0 {

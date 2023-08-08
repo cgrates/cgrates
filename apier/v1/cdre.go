@@ -225,6 +225,12 @@ func (api *APIerSv1) ExportCDRs(arg ArgExportCDRs, reply *RplExportedCDRs) (err 
 	if !utils.CDRExportFormats.Has(exportFormat) {
 		return utils.NewErrMandatoryIeMissing("CdrFormat")
 	}
+
+	if fltrs, has := arg.ExportArgs[utils.FilterIDs]; has {
+		if exportTemplate.Filters, err = utils.IfaceAsSliceString(fltrs); err != nil {
+			return
+		}
+	}
 	synchronous := exportTemplate.Synchronous
 	if sync, has := arg.ExportArgs[utils.Synchronous]; has {
 		if synchronous, err = utils.IfaceAsBool(sync); err != nil {
