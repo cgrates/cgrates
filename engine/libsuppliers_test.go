@@ -851,9 +851,9 @@ func TestPopulateSortingDataStatMetrics(t *testing.T) {
 
 func TestLibSuppliersSupplierIDs(t *testing.T) {
 	sSpls := &SortedSuppliers{
-		ProfileID:       str,
-		Sorting:         str,
-		Count:           nm,
+		ProfileID: str,
+		Sorting:   str,
+		Count:     nm,
 		SortedSuppliers: []*SortedSupplier{
 			{
 				SupplierID:         str,
@@ -882,7 +882,7 @@ func TestLibSupplierAsNavigableMap(t *testing.T) {
 	exp := utils.NavigableMap2{
 		"SupplierID":         utils.NewNMData(ss.SupplierID),
 		"SupplierParameters": utils.NewNMData(ss.SupplierParameters),
-		"SortingData": 		  utils.NavigableMap2{str: utils.NewNMData(str)},
+		"SortingData":        utils.NavigableMap2{str: utils.NewNMData(str)},
 	}
 
 	if !reflect.DeepEqual(rcv, exp) {
@@ -892,9 +892,9 @@ func TestLibSupplierAsNavigableMap(t *testing.T) {
 
 func TestLibSuppliersAsNavigableMap(t *testing.T) {
 	sSpls := &SortedSuppliers{
-		ProfileID:       str,
-		Sorting:         str,
-		Count:           nm,
+		ProfileID: str,
+		Sorting:   str,
+		Count:     nm,
 		SortedSuppliers: []*SortedSupplier{
 			{
 				SupplierID:         str,
@@ -906,9 +906,9 @@ func TestLibSuppliersAsNavigableMap(t *testing.T) {
 
 	rcv := sSpls.AsNavigableMap()
 	exp := utils.NavigableMap2{
-		"ProfileID": utils.NewNMData(sSpls.ProfileID),
-		"Sorting":   utils.NewNMData(sSpls.Sorting),
-		"Count":     utils.NewNMData(sSpls.Count),
+		"ProfileID":       utils.NewNMData(sSpls.ProfileID),
+		"Sorting":         utils.NewNMData(sSpls.Sorting),
+		"Count":           utils.NewNMData(sSpls.Count),
 		"SortedSuppliers": &utils.NMSlice{sSpls.SortedSuppliers[0].AsNavigableMap()},
 	}
 
