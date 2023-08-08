@@ -18,6 +18,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"encoding/json"
+	"reflect"
 	"testing"
 	"time"
 
@@ -394,4 +396,129 @@ func TestRatingProfileSubjectPrefixMatching(t *testing.T) {
 		t.Errorf("Error getting rating profile by prefix: %+v (%v)", rp, err)
 	}
 	rpSubjectPrefixMatching = false
+}
+
+func TestRatingProfileEqual(t *testing.T) {
+	rpa := &RatingPlanActivation{
+		ActivationTime: time.Date(2021, 7, 2, 4, 23, 3, 1234, time.UTC),
+		RatingPlanId:   "test",
+		FallbackKeys:   []string{"test"},
+	}
+	orpa := &RatingPlanActivation{
+		ActivationTime: time.Date(2021, 7, 2, 4, 23, 3, 1234, time.UTC),
+		RatingPlanId:   "test",
+		FallbackKeys:   []string{"test"},
+	}
+
+	rcv := rpa.Equal(orpa)
+
+	if rcv != true {
+		t.Error(rcv)
+	}
+}
+
+func TestRatingProfileSwap(t *testing.T) {
+	rpa := &RatingPlanActivation{
+		ActivationTime: time.Date(2021, 7, 2, 4, 23, 3, 1234, time.UTC),
+		RatingPlanId:   "test",
+		FallbackKeys:   []string{"test"},
+	}
+	orpa := &RatingPlanActivation{
+		ActivationTime: time.Date(2021, 7, 2, 4, 23, 3, 1234, time.UTC),
+		RatingPlanId:   "val1",
+		FallbackKeys:   []string{"val1"},
+	}
+	rpas := RatingPlanActivations{rpa, orpa}
+
+	rpas.Swap(0, 1)
+
+	if !reflect.DeepEqual(rpas[0], orpa) {
+		t.Error("didn't swap")
+	}
+}
+
+func TestRatingProfileSwapInfos(t *testing.T) {
+	ri := &RatingInfo{
+		MatchedSubject: str,
+		RatingPlanId:   str,
+		MatchedPrefix:  str,
+		MatchedDestId:  str,
+		ActivationTime: time.Date(2021, 7, 2, 4, 23, 3, 1234, time.UTC),
+		RateIntervals:  RateIntervalList{},
+		FallbackKeys:   []string{str},
+	}
+	ri2 := &RatingInfo{
+		MatchedSubject: "val1",
+		RatingPlanId:   "val2",
+		MatchedPrefix:  str,
+		MatchedDestId:  str,
+		ActivationTime: time.Date(2021, 7, 2, 4, 23, 3, 1234, time.UTC),
+		RateIntervals:  RateIntervalList{},
+		FallbackKeys:   []string{"val1"},
+	}
+	ris := RatingInfos{ri, ri2}
+
+	ris.Swap(1, 0)
+
+	if !reflect.DeepEqual(ris[1], ri) {
+		t.Error("didn't swap")
+	}
+}
+
+func TestRatingProfileLess(t *testing.T) {
+	ri := &RatingInfo{
+		MatchedSubject: str,
+		RatingPlanId:   str,
+		MatchedPrefix:  str,
+		MatchedDestId:  str,
+		ActivationTime: time.Date(2021, 7, 2, 4, 23, 3, 1234, time.UTC),
+		RateIntervals:  RateIntervalList{},
+		FallbackKeys:   []string{str},
+	}
+	ri2 := &RatingInfo{
+		MatchedSubject: "val1",
+		RatingPlanId:   "val2",
+		MatchedPrefix:  str,
+		MatchedDestId:  str,
+		ActivationTime: time.Date(2021, 5, 2, 4, 23, 3, 1234, time.UTC),
+		RateIntervals:  RateIntervalList{},
+		FallbackKeys:   []string{"val1"},
+	}
+	ris := RatingInfos{ri, ri2}
+
+	rcv := ris.Less(0, 1)
+
+	if rcv != false {
+		t.Error(rcv)
+	}
+}
+
+func TestRatingProfileString(t *testing.T) {
+	ri := &RatingInfo{
+		MatchedSubject: str,
+		RatingPlanId:   str,
+		MatchedPrefix:  str,
+		MatchedDestId:  str,
+		ActivationTime: time.Date(2021, 7, 2, 4, 23, 3, 1234, time.UTC),
+		RateIntervals:  RateIntervalList{},
+		FallbackKeys:   []string{str},
+	}
+	ri2 := &RatingInfo{
+		MatchedSubject: "val1",
+		RatingPlanId:   "val2",
+		MatchedPrefix:  str,
+		MatchedDestId:  str,
+		ActivationTime: time.Date(2021, 5, 2, 4, 23, 3, 1234, time.UTC),
+		RateIntervals:  RateIntervalList{},
+		FallbackKeys:   []string{"val1"},
+	}
+	ris := RatingInfos{ri, ri2}
+
+	rcv := ris.String()
+	b, _ := json.MarshalIndent(ris, "", " ")
+	exp := string(b)
+
+	if rcv != exp {
+		t.Error(rcv)
+	}
 }

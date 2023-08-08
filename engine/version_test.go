@@ -83,6 +83,71 @@ func TestVarsionCheckVersions(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
+
+	vrs := Versions{"test": 1}
+	data.SetVersions(vrs, true)
+
+	err = CheckVersions(data)
+
+	if err != nil {
+		if err.Error()[0] != 'M' {
+			t.Error(err)
+		}
+	}
+
+	vrs2 := Versions{
+		utils.StatS:               3,
+		utils.Accounts:            3,
+		utils.Actions:             2,
+		utils.ActionTriggers:      2,
+		utils.ActionPlans:         3,
+		utils.SharedGroups:        2,
+		utils.Thresholds:          3,
+		utils.Suppliers:           1,
+		utils.Attributes:          5,
+		utils.Timing:              1,
+		utils.RQF:                 4,
+		utils.Resource:            1,
+		utils.Subscribers:         1,
+		utils.Destinations:        1,
+		utils.ReverseDestinations: 1,
+		utils.RatingPlan:          1,
+		utils.RatingProfile:       1,
+		utils.Chargers:            1,
+		utils.Dispatchers:         1,
+		utils.LoadIDsVrs:          1,
+		utils.CostDetails:         2,
+		utils.SessionSCosts:       3,
+		utils.CDRs:                2,
+		utils.TpRatingPlans:       1,
+		utils.TpFilters:           1,
+		utils.TpDestinationRates:  1,
+		utils.TpActionTriggers:    1,
+		utils.TpAccountActionsV:   1,
+		utils.TpActionPlans:       1,
+		utils.TpActions:           1,
+		utils.TpThresholds:        1,
+		utils.TpSuppliers:         1,
+		utils.TpStats:             1,
+		utils.TpSharedGroups:      1,
+		utils.TpRatingProfiles:    1,
+		utils.TpResources:         1,
+		utils.TpRates:             1,
+		utils.TpTiming:            1,
+		utils.TpResource:          1,
+		utils.TpDestinations:      1,
+		utils.TpRatingPlan:        1,
+		utils.TpRatingProfile:     1,
+		utils.TpChargers:          1,
+		utils.TpDispatchers:       1,
+	}
+	data.SetVersions(vrs2, true)
+
+	err = CheckVersions(data)
+
+	if err != nil {
+		t.Error(err)
+	}
 }
 
 func TestVersionSetDBVersions(t *testing.T) {

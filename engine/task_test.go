@@ -135,3 +135,39 @@ func TestTaskRemoteHost(t *testing.T) {
 		t.Errorf("Expecting: %q, received: %q", eOut, rcv)
 	}
 }
+
+func TestTaskExecute(t *testing.T) {
+	ts := &Task{
+		Uuid:      str,
+		AccountID: str,
+		ActionsID: str,
+	}
+
+	err := ts.Execute()
+
+	if err != nil {
+		if err.Error() != "NOT_FOUND" {
+			t.Error(err)
+		}
+	}
+}
+
+func TestTaskFieldAsString2(t *testing.T) {
+	ts := &Task{
+		Uuid:      str,
+		AccountID: str,
+		ActionsID: str,
+	}
+
+	rcv, err := ts.FieldAsString([]string{"test"})
+
+	if err != nil {
+		if err.Error() != "NOT_FOUND:test" {
+			t.Error(err)
+		}
+	}
+
+	if rcv != "" {
+		t.Error(rcv)
+	}
+}
