@@ -574,13 +574,13 @@ func testSectConfigSReloadDNSAgent(t *testing.T) {
 	var reply string
 	if err := testSectRPC.Call(context.Background(), utils.ConfigSv1SetConfigFromJSON, &config.SetConfigFromJSONArgs{
 		Tenant: "cgrates.org",
-		Config: "{\"dns_agent\":{\"enabled\":true,\"listen\":\"127.0.0.1:2053\",\"listen_net\":\"udp\",\"request_processors\":[],\"sessions_conns\":[\"*internal\"],\"timezone\":\"\"}}",
+		Config: "{\"dns_agent\":{\"enabled\":true,\"listeners\":[{\"address\":\"127.0.0.1:2053\",\"network\":\"udp\"}],\"request_processors\":[],\"sessions_conns\":[\"*internal\"],\"timezone\":\"\"}}",
 	}, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf("Expected OK received: %+v", reply)
 	}
-	cfgStr := "{\"dns_agent\":{\"enabled\":true,\"listen\":\"127.0.0.1:2053\",\"listen_net\":\"udp\",\"request_processors\":[],\"sessions_conns\":[\"*internal\"],\"timezone\":\"\"}}"
+	cfgStr := "{\"dns_agent\":{\"enabled\":true,\"listeners\":[{\"address\":\"127.0.0.1:2053\",\"network\":\"udp\"}],\"request_processors\":[],\"sessions_conns\":[\"*internal\"],\"timezone\":\"\"}}"
 	var rpl string
 	if err := testSectRPC.Call(context.Background(), utils.ConfigSv1GetConfigAsJSON, &config.SectionWithAPIOpts{
 		Tenant:   "cgrates.org",

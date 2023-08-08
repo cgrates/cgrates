@@ -542,6 +542,10 @@ func testCGRConfigReloadDNSAgent(t *testing.T) {
 				Address: ":2053",
 				Network: "udp",
 			},
+			{
+				Address: ":2054",
+				Network: "tcp",
+			},
 		},
 		SessionSConns: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS)},
 		// Timezone          string

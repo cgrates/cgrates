@@ -23,12 +23,49 @@
 	"rals_conns": ["*internal"],
 	"cdrs_conns": ["*internal"],
 	"chargers_conns": ["*internal"],
-	"routes_conns": ["*localhost"]
+	"routes_conns": ["*localhost"],
+	"opts": {
+		"*attributes": [					
+			{
+				"Tenant": "*any",
+				"FilterIDs": [],
+				"Value": true,
+			},
+		],
+		"*routes": [						
+			{
+				"Tenant": "*any",
+				"FilterIDs": ["*string:~*req.Account:1001"],
+				"Value": true,
+			},
+			{
+				"Tenant": "*any",
+				"FilterIDs": ["*string:~*req.Account:1002"],
+				"Value": true,
+			},
+			{
+				"Tenant": "*any",
+				"FilterIDs": ["*string:~*req.Account:1003"],
+				"Value": true,
+			},
+		],
+	}
 },
 
+
 "rates": {
-	"enabled": true
+	"enabled": true,
 },
+
+"loaders": [
+	{
+		"enabled":true,
+		"id": "*default",
+		"tp_in_dir": "/usr/share/cgrates/tariffplans/dnsagent",
+		"tp_out_dir": "",
+		"lockfile_path": "",
+	},
+],
 
 "cdrs": {
 	"enabled": true,
@@ -48,9 +85,30 @@
 	"enabled": true
 },
 
+"tls": {
+	"server_certificate" : "/usr/share/cgrates/tls/server.crt",			
+	"server_key":"/usr/share/cgrates/tls/server.key",			
+	"client_certificate" : "/usr/share/cgrates/tls/client.crt",			
+	"client_key":"/usr/share/cgrates/tls/client.key",					
+	"ca_certificate":"/usr/share/cgrates/tls/ca.crt"
+},
+
 "dns_agent": {
 	"enabled": true,
-	"listen": ":2053",
+	"listeners":[
+		{
+			"address":":2053",
+			"network":"udp"
+		},
+		{
+			"address":":2053",
+			"network":"tcp"
+		},
+		{
+			"address":":2054",
+			"network":"tcp-tls"
+		}
+	],
 	"sessions_conns": ["*localhost"]
 },
 

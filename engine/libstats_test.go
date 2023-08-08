@@ -1732,12 +1732,12 @@ func TestStatQueueProfile_Set(t *testing.T) {
 }
 
 func TestStatQueueGobEncode(t *testing.T) {
-	exp := []byte{68, 255, 129, 3, 1, 1, 8, 115, 113, 69, 110, 99, 111, 100, 101, 1, 255, 130, 0, 1, 4, 1, 6, 84, 101, 110, 97, 110, 116, 1, 12, 0, 1, 2, 73, 68, 1, 12, 0, 1, 7, 83, 81, 73, 116, 101, 109, 115, 1, 255, 136, 0, 1, 9, 83, 81, 77, 101, 116, 114, 105, 99, 115, 1, 255, 138, 0, 0, 0, 30, 255, 135, 2, 1, 1, 15, 91, 93, 101, 110, 103, 105, 110, 101, 46, 83, 81, 73, 116, 101, 109, 1, 255, 136, 0, 1, 255, 132, 0, 0, 48, 255, 131, 3, 1, 1, 6, 83, 81, 73, 116, 101, 109, 1, 255, 132, 0, 1, 2, 1, 7, 69, 118, 101, 110, 116, 73, 68, 1, 12, 0, 1, 10, 69, 120, 112, 105, 114, 121, 84, 105, 109, 101, 1, 255, 134, 0, 0, 0, 10, 255, 133, 5, 1, 2, 255, 140, 0, 0, 0, 44, 255, 137, 4, 1, 1, 28, 109, 97, 112, 91, 115, 116, 114, 105, 110, 103, 93, 101, 110, 103, 105, 110, 101, 46, 83, 116, 97, 116, 77, 101, 116, 114, 105, 99, 1, 255, 138, 0, 1, 12, 1, 16, 0, 0, 3, 255, 130, 0}
+	exp := []byte{67, 127, 3, 1, 1, 8, 115, 113, 69, 110, 99, 111, 100, 101, 1, 255, 128, 0, 1, 4, 1, 6, 84, 101, 110, 97, 110, 116, 1, 12, 0, 1, 2, 73, 68, 1, 12, 0, 1, 7, 83, 81, 73, 116, 101, 109, 115, 1, 255, 134, 0, 1, 9, 83, 81, 77, 101, 116, 114, 105, 99, 115, 1, 255, 136, 0, 0, 0, 30, 255, 133, 2, 1, 1, 15, 91, 93, 101, 110, 103, 105, 110, 101, 46, 83, 81, 73, 116, 101, 109, 1, 255, 134, 0, 1, 255, 130, 0, 0, 48, 255, 129, 3, 1, 1, 6, 83, 81, 73, 116, 101, 109, 1, 255, 130, 0, 1, 2, 1, 7, 69, 118, 101, 110, 116, 73, 68, 1, 12, 0, 1, 10, 69, 120, 112, 105, 114, 121, 84, 105, 109, 101, 1, 255, 132, 0, 0, 0, 10, 255, 131, 5, 1, 2, 255, 138, 0, 0, 0, 44, 255, 135, 4, 1, 1, 28, 109, 97, 112, 91, 115, 116, 114, 105, 110, 103, 93, 101, 110, 103, 105, 110, 101, 46, 83, 116, 97, 116, 77, 101, 116, 114, 105, 99, 1, 255, 136, 0, 1, 12, 1, 16, 0, 0, 3, 255, 128, 0}
 	sq := &StatQueue{}
 	if rcv, err := sq.GobEncode(); err != nil {
 		t.Error(err)
 	} else if string(rcv) != string(exp) {
-		t.Errorf("Expected <%v>, \nReceived <%v>", exp, rcv)
+		t.Errorf("Expected <%v>, \nReceived <%v>", string(exp), string(rcv))
 	}
 }
 func TestStatQueueGobDecode(t *testing.T) {
@@ -2070,6 +2070,103 @@ func TestStatQAddStatEventBlockerFromDynamicsErr(t *testing.T) {
 	expErr := `NOT_IMPLEMENTED:*stirng`
 	if err := sq.addStatEvent(context.Background(), ev1.Tenant, ev1.ID, fltrS, utils.MapStorage{utils.MetaOpts: ev1.Event}); err == nil || err.Error() != expErr {
 		t.Errorf("Expected error %s received: %v", expErr, err)
+	}
+
+}
+
+func TestStatQAddStatEventBlockNotLast(t *testing.T) {
+
+	cfg := config.NewDefaultCGRConfig()
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	cM := NewConnManager(cfg)
+	dm := NewDataManager(data, cfg.CacheCfg(), cM)
+
+	fltrS := NewFilterS(cfg, cM, dm)
+
+	sq = &StatQueue{
+		SQMetrics: map[string]StatMetric{
+			utils.MetaASR: &StatASR{
+				Metric: &Metric{
+					Value: utils.NewDecimal(1, 0),
+					Count: 1,
+					Events: map[string]*DecimalWithCompress{
+						"cgrates.org:TestStatRemExpired_1": {Stat: utils.NewDecimalFromFloat64(1), CompressFactor: 1},
+					},
+				},
+			},
+		},
+		sqPrfl: &StatQueueProfile{
+			Metrics: []*MetricWithFilters{
+				{
+					MetricID: utils.MetaASR,
+					Blockers: utils.DynamicBlockers{
+						{
+							Blocker: true,
+						},
+					},
+				},
+				{
+					MetricID: utils.MetaTCD,
+					Blockers: utils.DynamicBlockers{
+						{
+							Blocker: true,
+						},
+					},
+				},
+			},
+		},
+	}
+	asrMetric := sq.SQMetrics[utils.MetaASR].(*StatASR)
+	if asr := asrMetric.GetValue(); asr.Compare(utils.NewDecimalFromFloat64(100)) != 0 {
+		t.Errorf("received ASR: %v", asr)
+	}
+	ev1 := &utils.CGREvent{Tenant: "cgrates.org", ID: "TestStatAddStatEvent_1"}
+
+	exp := &StatQueue{
+		SQMetrics: map[string]StatMetric{
+			utils.MetaASR: &StatASR{
+				Metric: &Metric{
+					Value: utils.NewDecimal(1, 0),
+					Count: 1,
+					Events: map[string]*DecimalWithCompress{
+						"cgrates.org:TestStatRemExpired_1": {Stat: utils.NewDecimalFromFloat64(1), CompressFactor: 1},
+					},
+				},
+			},
+		},
+		SQItems: []SQItem{
+			{
+				EventID: "eventID",
+			},
+		},
+		sqPrfl: &StatQueueProfile{
+			Metrics: []*MetricWithFilters{
+				{
+					MetricID: utils.MetaASR,
+					Blockers: utils.DynamicBlockers{
+						{
+							Blocker: true,
+						},
+					},
+				},
+				{
+					MetricID: utils.MetaTCD,
+					Blockers: utils.DynamicBlockers{
+						{
+							Blocker: true,
+						},
+					},
+				},
+			},
+		},
+	}
+
+	if err := sq.addStatEvent(context.Background(), ev1.Tenant, ev1.ID, fltrS, utils.MapStorage{utils.MetaOpts: ev1.Event}); err != nil {
+		t.Error(err)
+	}
+
+	if !reflect.DeepEqual(exp.sqPrfl, sq.sqPrfl) {
+		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", exp.sqPrfl, sq.sqPrfl)
 	}
 
 }

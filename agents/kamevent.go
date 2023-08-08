@@ -307,8 +307,12 @@ type kamJsonDlgBody struct {
 }
 
 type kamDlgInfo struct {
-	CallId string `json:"call-id"`
-	Caller *kamCallerDlg
+	CallId    string `json:"call-id"`
+	Caller    *kamCallerDlg
+	Variables []struct {
+		CgrOriginID   string `json:"cgrOriginID,omitempty"`
+		CgrOriginHost string `json:"cgrOriginHost,omitempty"`
+	} `json:"variables"`
 }
 
 type kamCallerDlg struct {

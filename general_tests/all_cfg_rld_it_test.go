@@ -292,7 +292,7 @@ func testConfigSReload(t *testing.T) {
 		t.Errorf("\nExpected %+v ,\n received: %+v", utils.ToIJSON(cfgStr), utils.ToIJSON(rpl18))
 	}
 
-	cfgStr = "{\"dns_agent\":{\"enabled\":false,\"listen\":\"127.0.0.1:2053\",\"listen_net\":\"udp\",\"request_processors\":[],\"sessions_conns\":[\"*internal\"],\"timezone\":\"\"}}"
+	cfgStr = "{\"dns_agent\":{\"enabled\":false,\"listeners\":[{\"address\":\"127.0.0.1:53\",\"network\":\"udp\"}],\"request_processors\":[],\"sessions_conns\":[\"*internal\"],\"timezone\":\"\"}}"
 	var rpl19 string
 	if err := testRPC.Call(context.Background(), utils.ConfigSv1GetConfigAsJSON, &config.SectionWithAPIOpts{
 		Tenant:   "cgrates.org",
