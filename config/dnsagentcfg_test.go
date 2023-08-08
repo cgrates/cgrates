@@ -426,6 +426,102 @@ func TestDiffDNSAgentJsonCfg(t *testing.T) {
 	}
 }
 
+func TestDiffDNSAgentJsonCfgExtraV1(t *testing.T) {
+	var d *DNSAgentJsonCfg
+
+	v1 := &DNSAgentCfg{
+		Enabled: false,
+		Listeners: []Listener{
+			{
+				Address: "localhost:8080",
+				Network: "tcp",
+			},
+			{
+				Address: "localhost:2054",
+				Network: "udp",
+			},
+		},
+	}
+
+	v2 := &DNSAgentCfg{
+		Enabled: true,
+		Listeners: []Listener{
+			{
+				Address: "localhost:8037",
+				Network: "udp",
+			},
+		},
+	}
+
+	expected := &DNSAgentJsonCfg{
+		Enabled: utils.BoolPointer(true),
+		Listeners: &[]*ListenerJsnCfg{
+			{
+				Address: utils.StringPointer("localhost:8037"),
+				Network: utils.StringPointer("udp"),
+			},
+			{
+				Address: utils.StringPointer("localhost:2054"),
+				Network: utils.StringPointer("udp"),
+			},
+		},
+		Request_processors: &[]*ReqProcessorJsnCfg{},
+	}
+
+	rcv := diffDNSAgentJsonCfg(d, v1, v2, ";")
+	if !reflect.DeepEqual(rcv, expected) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected), utils.ToJSON(rcv))
+	}
+}
+
+func TestDiffDNSAgentJsonCfgExtraV2(t *testing.T) {
+	var d *DNSAgentJsonCfg
+
+	v1 := &DNSAgentCfg{
+		Enabled: false,
+		Listeners: []Listener{
+			{
+				Address: "localhost:8080",
+				Network: "tcp",
+			},
+		},
+	}
+
+	v2 := &DNSAgentCfg{
+		Enabled: true,
+		Listeners: []Listener{
+			{
+				Address: "localhost:8037",
+				Network: "udp",
+			},
+			{
+				Address: "localhost:2054",
+				Network: "udp",
+			},
+		},
+	}
+
+	expected := &DNSAgentJsonCfg{
+		Enabled: utils.BoolPointer(true),
+		Listeners: &[]*ListenerJsnCfg{
+			{
+				Address: utils.StringPointer("localhost:8037"),
+				Network: utils.StringPointer("udp"),
+			},
+			{
+				Address: utils.StringPointer("localhost:2054"),
+				Network: utils.StringPointer("udp"),
+			},
+		},
+		Request_processors: &[]*ReqProcessorJsnCfg{},
+	}
+
+	rcv := diffDNSAgentJsonCfg(d, v1, v2, ";")
+	if !reflect.DeepEqual(rcv, expected) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected), utils.ToJSON(rcv))
+	}
+}
+
 func TestDnsAgentCloneSection(t *testing.T) {
 	dnsCfg := &DNSAgentCfg{
 		Enabled: false,

@@ -1,4 +1,8 @@
 #Tenant,ID,FilterIDs,Weights,Blockers,AttributeFilterIDs,AttributeBlockers,Path,Type,Value
 cgrates.org,ATTR_NAPTR_ADDR,*string:~*req.E164Address:4986517174964,;20,;false,,,*req.NAPTRAddress,*constant,sip:\1@172.16.1.1.
 cgrates.org,ATTR_NAPTR_SIP_URI,*string:~*req.Origin:cgrates,;20,;false,,,*req.SipURI,*variable,sip:cgrates@;~*req.Domanin
-
+cgrates.org,ATTR_A_DOM,*string:~*req.Domain:dns.google.,;20,;false,,,*req.Aip0,*constant,8.8.8.8
+cgrates.org,ATTR_A_DOM,*string:~*req.Domain:dns.google.,;20,;false,,,*req.Aip1,*constant,8.8.4.4
+cgrates.org,ATTR_A_SIP_URI,*string:~*req.AOrigin:cgrates,;20,;false,,,*req.SipURI,*variable,sip:cgrates@;~*req.ASIPDomain
+cgrates.org,ATTR_SRV,*string:~*req.SRVAddress:_ldap._tcp.google.com.,;20,;false,,,*req.SRVName,*constant,ldap.google.com.
+cgrates.org,ATTR_SRV_SIP_URI,*string:~*req.SRVOrigin:cgrates,;20,;false,,,*req.SipURI,*variable,sip:cgrates@;~*req.SRVDomain

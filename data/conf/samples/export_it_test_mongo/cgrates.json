@@ -146,7 +146,7 @@
 		"field_separator": ",",								// separator used in case of csv files
 		"tp_in_dir": "/tmp/archivesTP",		// absolute path towards the directory where the TPs are stored
 		"tp_out_dir": "",		// absolute path towards the directory where processed TPs will be moved
-		"action": "*store", 								// what should the loader do<*store|*parse|*remove|*dryrun>
+		"action": "*store", 								// what should the loader do<*store|*parse|*remove|*dryRun>
 		"opts": {
 			// "*cache": "*reload",
 			"*withIndex": true,

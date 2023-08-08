@@ -245,11 +245,20 @@ func (ka *KamailioAgent) onDlgList(evData []byte, connIdx int) {
 		return
 	}
 	var sIDs []*sessions.SessionID
-	// FixMe: find way to add OriginHost from event also, to be compatible with above implementation
 	for _, dlgInfo := range kamDlgRpl.Jsonrpl_body.Result {
+		originHost := ka.conns[connIdx].RemoteAddr().String()
+		originID := dlgInfo.CallId + ";" + dlgInfo.Caller.Tag
+		for _, variable := range dlgInfo.Variables {
+			if variable.CgrOriginHost != utils.EmptyString {
+				originHost = variable.CgrOriginHost
+			}
+			if variable.CgrOriginID != utils.EmptyString {
+				originID = variable.CgrOriginID
+			}
+		}
 		sIDs = append(sIDs, &sessions.SessionID{
-			OriginHost: ka.conns[connIdx].RemoteAddr().String(),
-			OriginID:   dlgInfo.CallId + ";" + dlgInfo.Caller.Tag,
+			OriginHost: originHost,
+			OriginID:   originID,
 		})
 	}
 	ka.activeSessionIDs <- sIDs

@@ -86,7 +86,9 @@ func (dns *DNSAgent) Reload(ctx *context.Context, shtDwn context.CancelFunc) (er
 	dns.Lock()
 	defer dns.Unlock()
 
-	dns.Shutdown()
+	if dns.dns != nil {
+		close(dns.stopChan)
+	}
 
 	dns.dns, err = agents.NewDNSAgent(dns.cfg, filterS, dns.connMgr)
 	if err != nil {
@@ -114,11 +116,12 @@ func (dns *DNSAgent) listenAndServe(stopChan chan struct{}, shtDwn context.Cance
 
 // Shutdown stops the service
 func (dns *DNSAgent) Shutdown() (err error) {
-	dns.Lock()
-	defer dns.Unlock()
-	if err = dns.dns.Shutdown(); err != nil {
+	if dns.dns == nil {
 		return
 	}
+	close(dns.stopChan)
+	dns.Lock()
+	defer dns.Unlock()
 	dns.dns = nil
 	return
 }
@@ -127,7 +130,7 @@ func (dns *DNSAgent) Shutdown() (err error) {
 func (dns *DNSAgent) IsRunning() bool {
 	dns.RLock()
 	defer dns.RUnlock()
-	return dns != nil && dns.dns != nil
+	return dns.dns != nil
 }
 
 // ServiceName returns the service name
