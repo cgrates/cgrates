@@ -25,7 +25,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io/ioutil"
 	"net/url"
 	"os"
 	"path"
@@ -53,7 +52,7 @@ func (api *APIerSv1) ExportCdrsToZipString(attr utils.AttrExpFileCdrs, reply *st
 	// Create a new zip archive.
 	w := zip.NewWriter(buf)
 	// read generated file
-	content, err := ioutil.ReadFile(efc.ExportedFilePath)
+	content, err := os.ReadFile(efc.ExportedFilePath)
 	if err != nil {
 		return err
 	}
