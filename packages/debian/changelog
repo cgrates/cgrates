@@ -1,4 +1,4 @@
-cgrates (0.10.3~dev) UNRELEASED; urgency=medium
+cgrates (0.10.3) UNRELEASED; urgency=medium
 
 - [RALs] Now, balance update events from RALs to ThresholdS (when negative) are only sent once.
 - [SessionS] Updated to use rals_conns when refund rounding is sent.
