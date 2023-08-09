@@ -80,24 +80,22 @@ var (
 	minUsage       = cgrTesterFlags.Duration("min_usage", 1*time.Second, "Minimum usage a session can have")
 	maxUsage       = cgrTesterFlags.Duration("max_usage", 5*time.Second, "Maximum usage a session can have")
 	updateInterval = cgrTesterFlags.Duration("update_interval", 1*time.Second, "Time duration added for each session update")
+	timeoutDur     = cgrTesterFlags.Duration("timeout", 10*time.Second, "After last call, time out after this much duration")
 	requestType    = cgrTesterFlags.String("request_type", utils.MetaRated, "Request type of the call")
 	digits         = cgrTesterFlags.Int("digits", 10, "Number of digits Account and Destination will have")
 
-	tor                        = cgrTesterFlags.String("tor", utils.MetaVoice, "The type of record to use in queries.")
-	category                   = cgrTesterFlags.String("category", "call", "The Record category to test.")
-	tenant                     = cgrTesterFlags.String("tenant", "cgrates.org", "The type of record to use in queries.")
-	subject                    = cgrTesterFlags.String("subject", "1001", "The rating subject to use in queries.")
-	destination                = cgrTesterFlags.String("destination", "1002", "The destination to use in queries.")
-	json                       = cgrTesterFlags.Bool("json", false, "Use JSON RPC")
-	version                    = cgrTesterFlags.Bool("version", false, "Prints the application version.")
-	usage                      = cgrTesterFlags.String("usage", "1m", "The duration to use in call simulation.")
-	fPath                      = cgrTesterFlags.String("file_path", "", "read requests from file with path")
-	reqSep                     = cgrTesterFlags.String("req_separator", "\n\n", "separator for requests in file")
-	verbose                    = cgrTesterFlags.Bool(utils.VerboseCgr, false, "Enable detailed verbose logging output")
-	err                        error
-	iterationsPerSecond        = 0
-	iterationsMux, terminateMx sync.Mutex
-	countTerminate             = 0
+	tor         = cgrTesterFlags.String("tor", utils.MetaVoice, "The type of record to use in queries.")
+	category    = cgrTesterFlags.String("category", "call", "The Record category to test.")
+	tenant      = cgrTesterFlags.String("tenant", "cgrates.org", "The type of record to use in queries.")
+	subject     = cgrTesterFlags.String("subject", "1001", "The rating subject to use in queries.")
+	destination = cgrTesterFlags.String("destination", "1002", "The destination to use in queries.")
+	json        = cgrTesterFlags.Bool("json", false, "Use JSON RPC")
+	version     = cgrTesterFlags.Bool("version", false, "Prints the application version.")
+	usage       = cgrTesterFlags.String("usage", "1m", "The duration to use in call simulation.")
+	fPath       = cgrTesterFlags.String("file_path", "", "read requests from file with path")
+	reqSep      = cgrTesterFlags.String("req_separator", "\n\n", "separator for requests in file")
+	verbose     = cgrTesterFlags.Bool(utils.VerboseCgr, false, "Enable detailed verbose logging output")
+	err         error
 )
 
 func durInternalRater(cd *engine.CallDescriptorWithAPIOpts) (time.Duration, error) {
@@ -183,6 +181,51 @@ func durRemoteRater(cd *engine.CallDescriptorWithAPIOpts) (time.Duration, error)
 	}
 	log.Printf("Result:%s\n", utils.ToJSON(result))
 	return time.Since(start), nil
+}
+
+func printAllDurationsSummary(authDurations, initDurations, updateDurations, terminateDurations, cdrDurations []time.Duration, reqAuth, reqInit, reqUpdate, reqTerminate, reqCdr uint64) {
+	fmt.Printf("| %-15s | %-15s | %-15s | %-15s | %-15s | %-15s |\n", "Session", "Min", "Average", "Max", "Requests sent", "Replies received")
+	fmt.Println("|-----------------|-----------------|-----------------|-----------------|-----------------|------------------|")
+
+	processes := []string{"Authorize", "Initiate", "Update", "Terminate", "ProcessCDR"}
+	allDurations := [][]time.Duration{authDurations, initDurations, updateDurations, terminateDurations, cdrDurations}
+	reqCounts := []uint64{reqAuth, reqInit, reqUpdate, reqTerminate, reqCdr}
+
+	for i, process := range processes {
+		minDur, maxDur := findMinMaxDurations(allDurations[i])
+		avgDur := calculateAverageDuration(allDurations[i])
+		reqCount := reqCounts[i]
+		completedRuns := len(allDurations[i])
+
+		fmt.Printf("| %-15s | %-15s | %-15s | %-15s | %-15d | %-16d |\n", process, minDur, avgDur, maxDur, reqCount, completedRuns)
+	}
+}
+func findMinMaxDurations(durations []time.Duration) (time.Duration, time.Duration) {
+	if len(durations) == 0 {
+		return 0, 0
+	}
+	minDur := durations[0]
+	maxDur := durations[0]
+	for _, dur := range durations {
+		if dur < minDur {
+			minDur = dur
+		}
+		if dur > maxDur {
+			maxDur = dur
+		}
+	}
+	return minDur, maxDur
+}
+func calculateAverageDuration(durations []time.Duration) time.Duration {
+	if len(durations) == 0 {
+		return 0
+	}
+	total := int64(0)
+	for _, dur := range durations {
+		total += int64(dur)
+	}
+	avg := time.Duration(total / int64(len(durations)))
+	return avg
 }
 
 func main() {
@@ -291,29 +334,68 @@ func main() {
 			log.Printf("Digit range: <%v - %v>", digitMin, digitMax)
 		}
 		currentCalls := 0
-		rplyNr := 0
-
-		for i := 0; i < *calls+int(maxUsage.Seconds()); i++ {
-			if currentCalls+*cps > *calls {
-				*cps = *calls - currentCalls
-			}
+		if *updateInterval > *maxUsage {
+			log.Fatal(`"update_interval" should be smaller than "max_usage"`)
+		} else if *maxUsage < *minUsage {
+			log.Fatal(`"min_usage" should be equal or smaller than "max_usage"`)
+		}
+		var wg sync.WaitGroup
+		authDur := make([]time.Duration, 0, *calls)
+		initDur := make([]time.Duration, 0, *calls)
+		updateDur := make([]time.Duration, 0, *calls)
+		terminateDur := make([]time.Duration, 0, *calls)
+		cdrDur := make([]time.Duration, 0, *calls)
+		var reqAuth uint64
+		var reqInit uint64
+		var reqUpdate uint64
+		var reqTerminate uint64
+		var reqCdr uint64
+		var tmpTime time.Time
+		timeout := time.After(*timeoutDur)
+		for i := 0; i < int(math.Ceil(float64(*calls)/float64(*cps))); i++ {
 			for j := 0; j < *cps; j++ {
+				currentCalls++
+				if *calls < currentCalls {
+					break
+				}
+				totalUsage := *maxUsage
+				if *minUsage != *maxUsage {
+					totalUsage = time.Duration(utils.RandomInteger(int64(*minUsage), int64(*maxUsage)))
+				}
+				wg.Add(1)
 				go func() {
-					if err := callSessions(digitMin, digitMax); err != nil {
+					defer wg.Done()
+					timeoutStamp := time.Now().Add(totalUsage + *timeoutDur)
+					if timeoutStamp.Compare(tmpTime) == +1 {
+						tmpTime = timeoutStamp
+						timeout = time.After(totalUsage + *timeoutDur + 140*time.Millisecond)
+					}
+					if err := callSessions(&authDur, &initDur, &updateDur, &terminateDur, &cdrDur,
+						&reqAuth, &reqInit, &reqUpdate, &reqTerminate, &reqCdr,
+						digitMin, digitMax, totalUsage); err != nil {
 						log.Fatal(err.Error())
 					}
-					rplyNr++
 				}()
+
 			}
 			time.Sleep(1 * time.Second)
-			currentCalls += *cps
-			log.Printf("Iteration index: <%v>, cps: <%v>, calls finished <%v>", i, iterationsPerSecond, countTerminate)
-			iterationsPerSecond = 0
-			if countTerminate == *calls {
-				break
-			}
 		}
-		log.Printf("Number of successful calls: %v", rplyNr)
+		completed := make(chan struct{})
+		go func() {
+			defer close(completed)
+			wg.Wait()
+
+		}()
+
+		select {
+		case to := <-timeout:
+			log.Printf("Timed out: %v", to.Format("2006-01-02 15:04:05"))
+			printAllDurationsSummary(authDur, initDur, updateDur, terminateDur, cdrDur,
+				reqAuth, reqInit, reqUpdate, reqTerminate, reqCdr)
+		case <-completed:
+			printAllDurationsSummary(authDur, initDur, updateDur, terminateDur, cdrDur,
+				reqAuth, reqInit, reqUpdate, reqTerminate, reqCdr)
+		}
 	case utils.MetaCost:
 		var timeparsed time.Duration
 		var err error
