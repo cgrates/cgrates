@@ -41,7 +41,7 @@ jobs:
 
       - name: Run Ansible Playbook
         run: |
-          ansible-playbook data/ansible/integration_tests/main.yaml -i localhost, -c local -e "ansible_user=$(whoami)"
+          ansible-playbook data/ansible/integration_tests/main.yaml -i localhost, -c local -e "ansible_user=$(whoami) cgrates_dir=$GITHUB_WORKSPACE clone_repository=false"
 
       - name: Run integration tests
         run: |
