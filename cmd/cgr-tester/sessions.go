@@ -22,6 +22,8 @@ import (
 	"fmt"
 	"log"
 	"math"
+	"sync"
+	"sync/atomic"
 	"time"
 
 	"github.com/cenkalti/rpc2"
@@ -41,14 +43,16 @@ func handleDisconnectSession(clnt *rpc2.Client,
 	return nil
 }
 
-func callSessions(digitMin, digitMax int64) (err error) {
+func callSessions(authDur, initDur, updateDur, terminateDur, cdrDur *[]time.Duration,
+	reqAuth, reqInit, reqUpdate, reqTerminate, reqCdr *uint64,
+	digitMin, digitMax int64, totalUsage time.Duration) (err error) {
 
 	if *digits <= 0 {
 		return fmt.Errorf(`"digits" should be bigger than 0`)
 	} else if int(math.Pow10(*digits))-1 < *cps {
 		return fmt.Errorf(`"digits" should amount to be more than "cps"`)
 	}
-
+	var appendMu sync.Mutex
 	acc := utils.RandomInteger(digitMin, digitMax)
 	dest := utils.RandomInteger(digitMin, digitMax)
 
@@ -67,12 +71,6 @@ func callSessions(digitMin, digitMax int64) (err error) {
 		APIOpts: map[string]any{},
 	}
 
-	if *updateInterval > *maxUsage {
-		return fmt.Errorf(`"update_interval" should be smaller than "max_usage"`)
-	} else if *maxUsage < *minUsage {
-		return fmt.Errorf(`"min_usage" should be equal or smaller than "max_usage"`)
-	}
-
 	clntHandlers := map[string]any{
 		utils.SessionSv1DisconnectSession: handleDisconnectSession}
 	brpc, err = utils.NewBiJSONrpcClient(tstCfg.SessionSCfg().ListenBijson, clntHandlers)
@@ -83,18 +81,21 @@ func callSessions(digitMin, digitMax int64) (err error) {
 	//
 	// SessionSv1AuthorizeEvent
 	//
+
 	event.Event[utils.SetupTime] = time.Now()
 	authArgs := &sessions.V1AuthorizeArgs{
 		GetMaxUsage: true,
 		CGREvent:    event,
 	}
 	var authRply sessions.V1AuthorizeReply
+	atomic.AddUint64(reqAuth, 1)
+	authStartTime := time.Now()
 	if err = brpc.Call(utils.SessionSv1AuthorizeEvent, authArgs, &authRply); err != nil {
 		return
 	}
-	iterationsMux.Lock()
-	iterationsPerSecond++
-	iterationsMux.Unlock()
+	appendMu.Lock()
+	*authDur = append(*authDur, time.Since(authStartTime))
+	appendMu.Unlock()
 	if *verbose {
 		log.Printf("Account: <%v>, Destination: <%v>, SessionSv1AuthorizeEvent reply: <%v>", acc, dest, utils.ToJSON(authRply))
 	}
@@ -112,9 +113,14 @@ func callSessions(digitMin, digitMax int64) (err error) {
 	}
 
 	var initRply sessions.V1InitSessionReply
+	atomic.AddUint64(reqInit, 1)
+	initStartTime := time.Now()
 	if err = brpc.Call(utils.SessionSv1InitiateSession, initArgs, &initRply); err != nil {
 		return
 	}
+	appendMu.Lock()
+	*initDur = append(*initDur, time.Since(initStartTime))
+	appendMu.Unlock()
 	if *verbose {
 		log.Printf("Account: <%v>, Destination: <%v>, SessionSv1InitiateSession reply: <%v>", acc, dest, utils.ToJSON(initRply))
 	}
@@ -122,12 +128,6 @@ func callSessions(digitMin, digitMax int64) (err error) {
 	//
 	// SessionSv1UpdateSession
 	//
-	var totalUsage time.Duration
-	if *minUsage == *maxUsage {
-		totalUsage = *maxUsage
-	} else {
-		totalUsage = time.Duration(utils.RandomInteger(int64(*minUsage), int64(*maxUsage)))
-	}
 	var currentUsage time.Duration
 	for currentUsage = time.Duration(1 * time.Second); currentUsage < totalUsage; currentUsage += *updateInterval {
 
@@ -139,9 +139,14 @@ func callSessions(digitMin, digitMax int64) (err error) {
 			CGREvent:      event,
 		}
 		var upRply sessions.V1UpdateSessionReply
+		atomic.AddUint64(reqUpdate, 1)
+		updateStartTime := time.Now()
 		if err = brpc.Call(utils.SessionSv1UpdateSession, upArgs, &upRply); err != nil {
 			return
 		}
+		appendMu.Lock()
+		*updateDur = append(*updateDur, time.Since(updateStartTime))
+		appendMu.Unlock()
 		if *verbose {
 			log.Printf("Account: <%v>, Destination: <%v>, SessionSv1UpdateSession reply: <%v>", acc, dest, utils.ToJSON(upRply))
 		}
@@ -160,27 +165,16 @@ func callSessions(digitMin, digitMax int64) (err error) {
 		CGREvent:         event,
 	}
 	var tRply string
+	atomic.AddUint64(reqTerminate, 1)
+	terminateStartTime := time.Now()
 	if err = brpc.Call(utils.SessionSv1TerminateSession, tArgs, &tRply); err != nil {
 		return
 	}
-	terminateMx.Lock()
-	countTerminate++
-	terminateMx.Unlock()
+	appendMu.Lock()
+	*terminateDur = append(*terminateDur, time.Since(terminateStartTime))
+	appendMu.Unlock()
 	if *verbose {
 		log.Printf("Account: <%v>, Destination: <%v>, SessionSv1TerminateSession reply: <%v>", acc, dest, utils.ToJSON(tRply))
-	}
-
-	if countTerminate == *calls {
-		go func() {
-			time.Sleep(10 * time.Second)
-			var sSRply string
-			if err = brpc.Call(utils.SessionSv1SyncSessions, tArgs, &sSRply); err != nil {
-				return
-			}
-			if *verbose {
-				log.Printf("Account: <%v>, Destination: <%v>, SessionSv1TerminateSession reply: <%v>", acc, dest, utils.ToJSON(sSRply))
-			}
-		}()
 	}
 
 	// Delay between terminate and processCDR for a more realistic case
@@ -191,9 +185,14 @@ func callSessions(digitMin, digitMax int64) (err error) {
 	//
 	procArgs := event
 	var pRply string
+	atomic.AddUint64(reqCdr, 1)
+	cdrStartTime := time.Now()
 	if err = brpc.Call(utils.SessionSv1ProcessCDR, procArgs, &pRply); err != nil {
 		return
 	}
+	appendMu.Lock()
+	*cdrDur = append(*cdrDur, time.Since(cdrStartTime))
+	appendMu.Unlock()
 	if *verbose {
 		log.Printf("Account: <%v>, Destination: <%v>, SessionSv1ProcessCDR reply: <%v>", acc, dest, utils.ToJSON(pRply))
 	}
