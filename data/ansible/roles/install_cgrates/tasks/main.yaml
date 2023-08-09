@@ -2,7 +2,7 @@
 - name: Install CGRateS dependencies
   become: yes
   ansible.builtin.package:
-    name: '{{ cgrates_dependencies }}'
+    name: "{{ cgrates_dependencies }}"
     state: present
     update_cache: yes
     cache_valid_time: 86400
@@ -10,24 +10,26 @@
 - name: Create cgrates directory
   ansible.builtin.file:
     state: directory
-    mode: 'u=rwx,go=rx'
+    mode: "u=rwx,go=rx"
     owner: "{{ ansible_user }}"
-    dest: '{{ cgrates_dir }}'
+    dest: "{{ cgrates_dir }}"
+  when: "clone_repository|bool"
 
 - name: Git clone cgrates
   ansible.builtin.git:
     repo: https://github.com/cgrates/cgrates.git
-    dest: '{{ cgrates_dir }}'
+    dest: "{{ cgrates_dir }}"
     update: yes
     force: yes
-    version: '{{ git_version }}'
+    version: "{{ git_version }}"
+  when: "clone_repository|bool"
 
 - name: Build cgrates
   ansible.builtin.command:
     cmd: bash -lc "source /etc/profile.d/golang.sh && sh {{ cgrates_dir }}/build.sh"
   args:
-    chdir: '{{ cgrates_dir }}'
-  become_user: '{{ ansible_user }}'
+    chdir: "{{ cgrates_dir }}"
+  become_user: "{{ ansible_user }}"
 
 - name: Create symbolic links
   ansible.builtin.file:
@@ -42,7 +44,7 @@
 - name: Run post install scripts
   ansible.builtin.shell:
     cmd: "{{ item.cmd }}"
-    chdir: '{{ cgrates_dir }}/data/storage/{{ item.db }}'
+    chdir: "{{ cgrates_dir }}/data/storage/{{ item.db }}"
   become: yes
   loop:
     - { db: "mysql", cmd: "sh setup_ers_db.sh root CGRateS.org localhost" }
@@ -53,7 +55,6 @@
 
 - name: Set versions
   ansible.builtin.shell:
-    cmd: 'cgr-migrator -exec=*set_versions -config_path=/usr/share/cgrates/conf/samples/tutmysql'
+    cmd: "cgr-migrator -exec=*set_versions -config_path=/usr/share/cgrates/conf/samples/tutmysql"
   environment:
     PATH: "{{ lookup('env','PATH') }}:{{ golang_gopath }}/bin:/usr/local/go/bin:{{ ansible_env.PATH }}"
-
