@@ -199,12 +199,13 @@
 - hosts: pkg
   vars:
     ansible_python_interpreter: auto # to disable deprication warning related to the use of python2
+    nginx_user: "www-data"
   tasks:
     - name: Add user to www-data group
       become: yes
       user:
        name: "{{ user }}"
-       groups: www-data
+       groups: "{{ nginx_user }}"
        append: yes
 
     - name: set cgrates cgrates_distribution
@@ -217,8 +218,8 @@
         path: /var/packages/deb/{{ cgrates_distribution }}/
         state: directory
         mode: '0775'
-        owner: www-data
-        group:  www-data
+        owner: "{{ nginx_user }}"
+        group:  "{{ nginx_user }}"
         
     - name: Remove symlink from current deb package
       file:
@@ -230,7 +231,18 @@
       shell: "mv /tmp/{{ item}} /var/packages/deb/{{ cgrates_distribution }}/"
       with_items: "{{ hostvars['apt']['debFileName']['stdout_lines'] }}"
 
+    - name: Set ownership and permissions for moved files
+      become: yes
+      file:
+       path: "/var/packages/deb/{{ cgrates_distribution }}/{{ item }}"
+       owner: "{{  nginx_user  }}"
+       group: "{{  nginx_user  }}"
+       mode: '0775'
+      loop: "{{ hostvars['apt']['debFileName']['stdout_lines'] }}"
+
     - name: Create the new symlink cgrates_current_amd64.deb
+      become: yes
+      become_user: "{{  nginx_user }}"
       file:
         src: /var/packages/deb/{{ cgrates_distribution }}/{{ item }}
         dest: /var/packages/deb/{{ cgrates_distribution }}/cgrates_current_amd64.deb
