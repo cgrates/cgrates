@@ -2,7 +2,7 @@
 Real-time Online/Offline Charging System (OCS) for Telecom & ISP environments
 Copyright (C) ITsysCOM GmbH
 
-This program is free software: you can redistribute it and/or modify
+This program is free software:".*"y
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation, either version 3 of the License, or
 (at your option) any later version.
@@ -30,16 +30,16 @@ import (
 type ResourceMdl struct {
 	PK                uint `gorm:"primary_key"`
 	Tpid              string
-	Tenant            string `index:"0" re:""`
-	ID                string `index:"1" re:""`
-	FilterIDs         string `index:"2" re:""`
-	Weights           string `index:"3" re:""`
-	UsageTTL          string `index:"4" re:""`
-	Limit             string `index:"5" re:""`
-	AllocationMessage string `index:"6" re:""`
-	Blocker           bool   `index:"7" re:""`
-	Stored            bool   `index:"8" re:""`
-	ThresholdIDs      string `index:"9" re:""`
+	Tenant            string `index:"0" re:".*"`
+	ID                string `index:"1" re:".*"`
+	FilterIDs         string `index:"2" re:".*"`
+	Weights           string `index:"3" re:".*"`
+	UsageTTL          string `index:"4" re:".*"`
+	Limit             string `index:"5" re:".*"`
+	AllocationMessage string `index:"6" re:".*"`
+	Blocker           bool   `index:"7" re:".*"`
+	Stored            bool   `index:"8" re:".*"`
+	ThresholdIDs      string `index:"9" re:".*"`
 	CreatedAt         time.Time
 }
 
@@ -50,19 +50,19 @@ func (ResourceMdl) TableName() string {
 type StatMdl struct {
 	PK              uint `gorm:"primary_key"`
 	Tpid            string
-	Tenant          string `index:"0" re:""`
-	ID              string `index:"1" re:""`
-	FilterIDs       string `index:"2" re:""`
-	Weights         string `index:"3" re:""`
-	Blockers        string `index:"4" re:""`
-	QueueLength     int    `index:"5" re:""`
-	TTL             string `index:"6" re:""`
-	MinItems        int    `index:"7" re:""`
-	Stored          bool   `index:"8" re:""`
-	ThresholdIDs    string `index:"9" re:""`
-	MetricIDs       string `index:"10" re:""`
-	MetricFilterIDs string `index:"11" re:""`
-	MetricBlockers  string `index:"12" re:""`
+	Tenant          string `index:"0" re:".*"`
+	ID              string `index:"1" re:".*"`
+	FilterIDs       string `index:"2" re:".*"`
+	Weights         string `index:"3" re:".*"`
+	Blockers        string `index:"4" re:".*"`
+	QueueLength     int    `index:"5" re:".*"`
+	TTL             string `index:"6" re:".*"`
+	MinItems        int    `index:"7" re:".*"`
+	Stored          bool   `index:"8" re:".*"`
+	ThresholdIDs    string `index:"9" re:".*"`
+	MetricIDs       string `index:"10" re:".*"`
+	MetricFilterIDs string `index:"11" re:".*"`
+	MetricBlockers  string `index:"12" re:".*"`
 	CreatedAt       time.Time
 }
 
@@ -73,16 +73,16 @@ func (StatMdl) TableName() string {
 type ThresholdMdl struct {
 	PK               uint `gorm:"primary_key"`
 	Tpid             string
-	Tenant           string `index:"0" re:""`
-	ID               string `index:"1" re:""`
-	FilterIDs        string `index:"2" re:""`
-	Weights          string `index:"3" re:""`
-	MaxHits          int    `index:"4" re:""`
-	MinHits          int    `index:"5" re:""`
-	MinSleep         string `index:"6" re:""`
-	Blocker          bool   `index:"7" re:""`
-	ActionProfileIDs string `index:"8" re:""`
-	Async            bool   `index:"9" re:""`
+	Tenant           string `index:"0" re:".*"`
+	ID               string `index:"1" re:".*"`
+	FilterIDs        string `index:"2" re:".*"`
+	Weights          string `index:"3" re:".*"`
+	MaxHits          int    `index:"4" re:".*"`
+	MinHits          int    `index:"5" re:".*"`
+	MinSleep         string `index:"6" re:".*"`
+	Blocker          bool   `index:"7" re:".*"`
+	ActionProfileIDs string `index:"8" re:".*"`
+	Async            bool   `index:"9" re:".*"`
 	CreatedAt        time.Time
 }
 
@@ -93,11 +93,11 @@ func (ThresholdMdl) TableName() string {
 type FilterMdl struct {
 	PK        uint `gorm:"primary_key"`
 	Tpid      string
-	Tenant    string `index:"0" re:""`
-	ID        string `index:"1" re:""`
-	Type      string `index:"2" re:"^\*[A-Za-z].*"`
-	Element   string `index:"3" re:""`
-	Values    string `index:"4" re:""`
+	Tenant    string `index:"0" re:".*"`
+	ID        string `index:"1" re:".*"`
+	Type      string `index:"2" re:".*"`
+	Element   string `index:"3" re:".*"`
+	Values    string `index:"4" re:".*"`
 	CreatedAt time.Time
 }
 
@@ -194,22 +194,22 @@ func (t TBLVersion) TableName() string {
 type RouteMdl struct {
 	PK                  uint `gorm:"primary_key"`
 	Tpid                string
-	Tenant              string `index:"0" re:""`
-	ID                  string `index:"1" re:""`
-	FilterIDs           string `index:"2" re:""`
-	Weights             string `index:"3" re:""`
-	Blockers            string `index:"4" re:""`
-	Sorting             string `index:"5" re:""`
-	SortingParameters   string `index:"6" re:""`
-	RouteID             string `index:"7" re:""`
-	RouteFilterIDs      string `index:"8" re:""`
-	RouteAccountIDs     string `index:"9" re:""`
-	RouteRateProfileIDs string `index:"10" re:""`
-	RouteResourceIDs    string `index:"11" re:""`
-	RouteStatIDs        string `index:"12" re:""`
-	RouteWeights        string `index:"13" re:""`
-	RouteBlockers       string `index:"14" re:""`
-	RouteParameters     string `index:"15" re:""`
+	Tenant              string `index:"0" re:".*"`
+	ID                  string `index:"1" re:".*"`
+	FilterIDs           string `index:"2" re:".*"`
+	Weights             string `index:"3" re:".*"`
+	Blockers            string `index:"4" re:".*"`
+	Sorting             string `index:"5" re:".*"`
+	SortingParameters   string `index:"6" re:".*"`
+	RouteID             string `index:"7" re:".*"`
+	RouteFilterIDs      string `index:"8" re:".*"`
+	RouteAccountIDs     string `index:"9" re:".*"`
+	RouteRateProfileIDs string `index:"10" re:".*"`
+	RouteResourceIDs    string `index:"11" re:".*"`
+	RouteStatIDs        string `index:"12" re:".*"`
+	RouteWeights        string `index:"13" re:".*"`
+	RouteBlockers       string `index:"14" re:".*"`
+	RouteParameters     string `index:"15" re:".*"`
 	CreatedAt           time.Time
 }
 
@@ -220,16 +220,16 @@ func (RouteMdl) TableName() string {
 type AttributeMdl struct {
 	PK                 uint `gorm:"primary_key"`
 	Tpid               string
-	Tenant             string `index:"0" re:""`
-	ID                 string `index:"1" re:""`
-	FilterIDs          string `index:"2" re:""`
-	Weights            string `index:"3" re:""`
-	Blockers           string `index:"4" re:""`
-	AttributeFilterIDs string `index:"5" re:""`
-	AttributeBlockers  string `index:"6" re:""`
-	Path               string `index:"7" re:""`
-	Type               string `index:"8" re:""`
-	Value              string `index:"9" re:""`
+	Tenant             string `index:"0" re:".*"`
+	ID                 string `index:"1" re:".*"`
+	FilterIDs          string `index:"2" re:".*"`
+	Weights            string `index:"3" re:".*"`
+	Blockers           string `index:"4" re:".*"`
+	AttributeFilterIDs string `index:"5" re:".*"`
+	AttributeBlockers  string `index:"6" re:".*"`
+	Path               string `index:"7" re:".*"`
+	Type               string `index:"8" re:".*"`
+	Value              string `index:"9" re:".*"`
 	CreatedAt          time.Time
 }
 
@@ -240,13 +240,13 @@ func (AttributeMdl) TableName() string {
 type ChargerMdl struct {
 	PK           uint `gorm:"primary_key"`
 	Tpid         string
-	Tenant       string `index:"0" re:""`
-	ID           string `index:"1" re:""`
-	FilterIDs    string `index:"2" re:""`
-	Weights      string `index:"3" re:""`
-	Blockers     string `index:"4" re:""`
-	RunID        string `index:"5" re:""`
-	AttributeIDs string `index:"6" re:""`
+	Tenant       string `index:"0" re:".*"`
+	ID           string `index:"1" re:".*"`
+	FilterIDs    string `index:"2" re:".*"`
+	Weights      string `index:"3" re:".*"`
+	Blockers     string `index:"4" re:".*"`
+	RunID        string `index:"5" re:".*"`
+	AttributeIDs string `index:"6" re:".*"`
 	CreatedAt    time.Time
 }
 
@@ -257,17 +257,17 @@ func (ChargerMdl) TableName() string {
 type DispatcherProfileMdl struct {
 	PK                 uint    `gorm:"primary_key"`
 	Tpid               string  //
-	Tenant             string  `index:"0" re:""`
-	ID                 string  `index:"1" re:""`
-	FilterIDs          string  `index:"2" re:""`
-	Weight             float64 `index:"3" re:"\d+\.?\d*"`
-	Strategy           string  `index:"4" re:""`
-	StrategyParameters string  `index:"5" re:""`
-	ConnID             string  `index:"6" re:""`
-	ConnFilterIDs      string  `index:"7" re:""`
-	ConnWeight         float64 `index:"8" re:"\d+\.?\d*"`
-	ConnBlocker        bool    `index:"9" re:""`
-	ConnParameters     string  `index:"10" re:""`
+	Tenant             string  `index:"0" re:".*"`
+	ID                 string  `index:"1" re:".*"`
+	FilterIDs          string  `index:"2" re:".*"`
+	Weight             float64 `index:"3" re:".*"`
+	Strategy           string  `index:"4" re:".*"`
+	StrategyParameters string  `index:"5" re:".*"`
+	ConnID             string  `index:"6" re:".*"`
+	ConnFilterIDs      string  `index:"7" re:".*"`
+	ConnWeight         float64 `index:"8" re:".*"`
+	ConnBlocker        bool    `index:"9" re:".*"`
+	ConnParameters     string  `index:"10" re:".*"`
 	CreatedAt          time.Time
 }
 
@@ -278,19 +278,19 @@ func (DispatcherProfileMdl) TableName() string {
 type DispatcherHostMdl struct {
 	PK                   uint   `gorm:"primary_key"`
 	Tpid                 string //
-	Tenant               string `index:"0" re:""`
-	ID                   string `index:"1" re:""`
-	Address              string `index:"2" re:""`
-	Transport            string `index:"3" re:""`
-	ConnectAttempts      int    `index:"4" re:""`
-	Reconnects           int    `index:"5" re:""`
-	MaxReconnectInterval string `index:"6" re:""`
-	ConnectTimeout       string `index:"7" re:""`
-	ReplyTimeout         string `index:"8" re:""`
-	TLS                  bool   `index:"9" re:""`
-	ClientKey            string `index:"10" re:""`
-	ClientCertificate    string `index:"11" re:""`
-	CaCertificate        string `index:"12" re:""`
+	Tenant               string `index:"0" re:".*"`
+	ID                   string `index:"1" re:".*"`
+	Address              string `index:"2" re:".*"`
+	Transport            string `index:"3" re:".*"`
+	ConnectAttempts      int    `index:"4" re:".*"`
+	Reconnects           int    `index:"5" re:".*"`
+	MaxReconnectInterval string `index:"6" re:".*"`
+	ConnectTimeout       string `index:"7" re:".*"`
+	ReplyTimeout         string `index:"8" re:".*"`
+	TLS                  bool   `index:"9" re:".*"`
+	ClientKey            string `index:"10" re:".*"`
+	ClientCertificate    string `index:"11" re:".*"`
+	CaCertificate        string `index:"12" re:".*"`
 	CreatedAt            time.Time
 }
 
@@ -301,23 +301,23 @@ func (DispatcherHostMdl) TableName() string {
 type RateProfileMdl struct {
 	PK                  uint `gorm:"primary_key"`
 	Tpid                string
-	Tenant              string  `index:"0" re:""`
-	ID                  string  `index:"1" re:""`
-	FilterIDs           string  `index:"2" re:""`
-	Weights             string  `index:"3" re:""`
-	MinCost             float64 `index:"4"  re:"\d+\.?\d*""`
-	MaxCost             float64 `index:"5"  re:"\d+\.?\d*"`
-	MaxCostStrategy     string  `index:"6" re:""`
-	RateID              string  `index:"7" re:""`
-	RateFilterIDs       string  `index:"8" re:""`
-	RateActivationTimes string  `index:"9" re:""`
-	RateWeights         string  `index:"10" re:""`
-	RateBlocker         bool    `index:"11" re:""`
-	RateIntervalStart   string  `index:"12" re:""`
-	RateFixedFee        float64 `index:"13" re:"\d+\.?\d*"`
-	RateRecurrentFee    float64 `index:"14" re:"\d+\.?\d*"`
-	RateUnit            string  `index:"15" re:""`
-	RateIncrement       string  `index:"16" re:""`
+	Tenant              string  `index:"0" re:".*"`
+	ID                  string  `index:"1" re:".*"`
+	FilterIDs           string  `index:"2" re:".*"`
+	Weights             string  `index:"3" re:".*"`
+	MinCost             float64 `index:"4"  re:".*"`
+	MaxCost             float64 `index:"5"  re:".*"`
+	MaxCostStrategy     string  `index:"6" re:".*"`
+	RateID              string  `index:"7" re:".*"`
+	RateFilterIDs       string  `index:"8" re:".*"`
+	RateActivationTimes string  `index:"9" re:".*"`
+	RateWeights         string  `index:"10" re:".*"`
+	RateBlocker         bool    `index:"11" re:".*"`
+	RateIntervalStart   string  `index:"12" re:".*"`
+	RateFixedFee        float64 `index:"13" re:".*"`
+	RateRecurrentFee    float64 `index:"14" re:".*"`
+	RateUnit            string  `index:"15" re:".*"`
+	RateIncrement       string  `index:"16" re:".*"`
 
 	CreatedAt time.Time
 }
@@ -329,21 +329,21 @@ func (RateProfileMdl) TableName() string {
 type ActionProfileMdl struct {
 	PK              uint `gorm:"primary_key"`
 	Tpid            string
-	Tenant          string `index:"0" re:""`
-	ID              string `index:"1" re:""`
-	FilterIDs       string `index:"2" re:""`
-	Weights         string `index:"3" re:""`
-	Blockers        string `index:"4" re:""`
-	Schedule        string `index:"5" re:""`
-	TargetType      string `index:"6" re:""`
-	TargetIDs       string `index:"7" re:""`
-	ActionID        string `index:"8" re:""`
-	ActionFilterIDs string `index:"9" re:""`
-	ActionTTL       string `index:"10" re:""`
-	ActionType      string `index:"11" re:""`
-	ActionOpts      string `index:"12" re:""`
-	ActionPath      string `index:"13" re:""`
-	ActionValue     string `index:"14" re:""`
+	Tenant          string `index:"0" re:".*"`
+	ID              string `index:"1" re:".*"`
+	FilterIDs       string `index:"2" re:".*"`
+	Weights         string `index:"3" re:".*"`
+	Blockers        string `index:"4" re:".*"`
+	Schedule        string `index:"5" re:".*"`
+	TargetType      string `index:"6" re:".*"`
+	TargetIDs       string `index:"7" re:".*"`
+	ActionID        string `index:"8" re:".*"`
+	ActionFilterIDs string `index:"9" re:".*"`
+	ActionTTL       string `index:"10" re:".*"`
+	ActionType      string `index:"11" re:".*"`
+	ActionOpts      string `index:"12" re:".*"`
+	ActionPath      string `index:"13" re:".*"`
+	ActionValue     string `index:"14" re:".*"`
 
 	CreatedAt time.Time
 }
@@ -355,24 +355,24 @@ func (ActionProfileMdl) TableName() string {
 type AccountMdl struct {
 	PK                    uint `gorm:"primary_key"`
 	Tpid                  string
-	Tenant                string `index:"0" re:""`
-	ID                    string `index:"1" re:""`
-	FilterIDs             string `index:"2" re:""`
-	Weights               string `index:"3" re:""`
-	Blockers              string `index:"4" re:""`
-	Opts                  string `index:"5" re:""`
-	BalanceID             string `index:"6" re:""`
-	BalanceFilterIDs      string `index:"7" re:""`
-	BalanceWeights        string `index:"8" re:""`
-	BalanceBlockers       string `index:"9" re:""`
-	BalanceType           string `index:"10" re:""`
-	BalanceUnits          string `index:"11" re:""`
-	BalanceUnitFactors    string `index:"12" re:""`
-	BalanceOpts           string `index:"13" re:""`
-	BalanceCostIncrements string `index:"14" re:""`
-	BalanceAttributeIDs   string `index:"15" re:""`
-	BalanceRateProfileIDs string `index:"16" re:""`
-	ThresholdIDs          string `index:"17" re:""`
+	Tenant                string `index:"0" re:".*"`
+	ID                    string `index:"1" re:".*"`
+	FilterIDs             string `index:"2" re:".*"`
+	Weights               string `index:"3" re:".*"`
+	Blockers              string `index:"4" re:".*"`
+	Opts                  string `index:"5" re:".*"`
+	BalanceID             string `index:"6" re:".*"`
+	BalanceFilterIDs      string `index:"7" re:".*"`
+	BalanceWeights        string `index:"8" re:".*"`
+	BalanceBlockers       string `index:"9" re:".*"`
+	BalanceType           string `index:"10" re:".*"`
+	BalanceUnits          string `index:"11" re:".*"`
+	BalanceUnitFactors    string `index:"12" re:".*"`
+	BalanceOpts           string `index:"13" re:".*"`
+	BalanceCostIncrements string `index:"14" re:".*"`
+	BalanceAttributeIDs   string `index:"15" re:".*"`
+	BalanceRateProfileIDs string `index:"16" re:".*"`
+	ThresholdIDs          string `index:"17" re:".*"`
 	CreatedAt             time.Time
 }
 
