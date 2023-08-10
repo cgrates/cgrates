@@ -1,3 +1,11 @@
+cgrates (0.10.4~dev) UNRELEASED; urgency=medium
+
+  * Incremented version
+
+ -- DanB <danb@cgrates.org>  Thu, 10 Aug 2023 10:00:00 +0200
+
+
+
 cgrates (0.10.3) UNRELEASED; urgency=medium
 
 - [RALs] Now, balance update events from RALs to ThresholdS (when negative) are only sent once.
