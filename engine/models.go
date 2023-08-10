@@ -32,12 +32,12 @@ import (
 type TimingMdl struct {
 	Id        int64
 	Tpid      string
-	Tag       string `index:"0" re:"\w+\s*,\s*"`
-	Years     string `index:"1" re:"\*any\s*,\s*|(?:\d{1,4};?)+\s*,\s*|\s*,\s*"`
-	Months    string `index:"2" re:"\*any\s*,\s*|(?:\d{1,4};?)+\s*,\s*|\s*,\s*"`
-	MonthDays string `index:"3" re:"\*any\s*,\s*|(?:\d{1,4};?)+\s*,\s*|\s*,\s*"`
-	WeekDays  string `index:"4" re:"\*any\s*,\s*|(?:\d{1,4};?)+\s*,\s*|\s*,\s*"`
-	Time      string `index:"5" re:"\d{2}:\d{2}:\d{2}|\*asap"`
+	Tag       string `index:"0" re:".*"`
+	Years     string `index:"1" re:".*"`
+	Months    string `index:"2" re:".*"`
+	MonthDays string `index:"3" re:".*"`
+	WeekDays  string `index:"4" re:".*"`
+	Time      string `index:"5" re:".*"`
 	CreatedAt time.Time
 }
 
@@ -48,8 +48,8 @@ func (TimingMdl) TableName() string {
 type DestinationMdl struct {
 	Id        int64
 	Tpid      string
-	Tag       string `index:"0" re:"\w+\s*,\s*"`
-	Prefix    string `index:"1" re:"\+?\d+.?\d*"`
+	Tag       string `index:"0" re:".*"`
+	Prefix    string `index:"1" re:".*"`
 	CreatedAt time.Time
 }
 
@@ -60,12 +60,12 @@ func (DestinationMdl) TableName() string {
 type RateMdl struct {
 	Id                 int64
 	Tpid               string
-	Tag                string  `index:"0" re:"\w+\s*"`
-	ConnectFee         float64 `index:"1" re:"\d+\.*\d*s*"`
-	Rate               float64 `index:"2" re:"\d+\.*\d*s*"`
-	RateUnit           string  `index:"3" re:"\d+\.*\d*(ns|us|µs|ms|s|m|h)*\s*"`
-	RateIncrement      string  `index:"4" re:"\d+\.*\d*(ns|us|µs|ms|s|m|h)*\s*"`
-	GroupIntervalStart string  `index:"5" re:"\d+\.*\d*(ns|us|µs|ms|s|m|h)*\s*"`
+	Tag                string  `index:"0" re:".*"`
+	ConnectFee         float64 `index:"1" re:".*"`
+	Rate               float64 `index:"2" re:".*"`
+	RateUnit           string  `index:"3" re:".*"`
+	RateIncrement      string  `index:"4" re:".*"`
+	GroupIntervalStart string  `index:"5" re:".*"`
 	CreatedAt          time.Time
 }
 
@@ -76,13 +76,13 @@ func (RateMdl) TableName() string {
 type DestinationRateMdl struct {
 	Id               int64
 	Tpid             string
-	Tag              string  `index:"0" re:"\w+\s*"`
-	DestinationsTag  string  `index:"1" re:"\w+\s*|\*any"`
-	RatesTag         string  `index:"2" re:"\w+\s*"`
-	RoundingMethod   string  `index:"3" re:"\*up|\*down|\*middle"`
-	RoundingDecimals int     `index:"4" re:"\d+"`
-	MaxCost          float64 `index:"5" re:"\d+\.*\d*s*"`
-	MaxCostStrategy  string  `index:"6" re:"\*free|\*disconnect"`
+	Tag              string  `index:"0" re:".*"`
+	DestinationsTag  string  `index:"1" re:".*"`
+	RatesTag         string  `index:"2" re:".*"`
+	RoundingMethod   string  `index:"3" re:".*"`
+	RoundingDecimals int     `index:"4" re:".*"`
+	MaxCost          float64 `index:"5" re:".*"`
+	MaxCostStrategy  string  `index:"6" re:".*"`
 	CreatedAt        time.Time
 }
 
@@ -93,10 +93,10 @@ func (DestinationRateMdl) TableName() string {
 type RatingPlanMdl struct {
 	Id           int64
 	Tpid         string
-	Tag          string  `index:"0" re:"\w+\s*,\s*"`
-	DestratesTag string  `index:"1" re:"\w+\s*,\s*|\*any"`
-	TimingTag    string  `index:"2" re:"\w+\s*,\s*|\*any"`
-	Weight       float64 `index:"3" re:"\d+.?\d*"`
+	Tag          string  `index:"0" re:".*"`
+	DestratesTag string  `index:"1" re:".*"`
+	TimingTag    string  `index:"2" re:".*"`
+	Weight       float64 `index:"3" re:".*"`
 	CreatedAt    time.Time
 }
 
@@ -108,12 +108,12 @@ type RatingProfileMdl struct {
 	Id               int64
 	Tpid             string
 	Loadid           string
-	Tenant           string `index:"0" re:"[0-9A-Za-z_\.]+\s*"`
-	Category         string `index:"1" re:"\w+\s*"`
-	Subject          string `index:"2" re:"\*any\s*|(\w+;?)+\s*"`
-	ActivationTime   string `index:"3" re:"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z"`
-	RatingPlanTag    string `index:"4" re:"\w+\s*"`
-	FallbackSubjects string `index:"5" re:"\w+\s*"`
+	Tenant           string `index:"0" re:".*"`
+	Category         string `index:"1" re:".*"`
+	Subject          string `index:"2" re:".*"`
+	ActivationTime   string `index:"3" re:".*"`
+	RatingPlanTag    string `index:"4" re:".*"`
+	FallbackSubjects string `index:"5" re:".*"`
 	CreatedAt        time.Time
 }
 
@@ -124,23 +124,23 @@ func (RatingProfileMdl) TableName() string {
 type ActionMdl struct {
 	Id              int64
 	Tpid            string
-	Tag             string  `index:"0" re:"\w+\s*"`
-	Action          string  `index:"1" re:"\*\w+\s*"`
-	ExtraParameters string  `index:"2" re:"\S+\s*"`
-	Filters         string  `index:"3" re:"\S+\s*"`
-	BalanceTag      string  `index:"4" re:"\w+\s*"`
-	BalanceType     string  `index:"5" re:"\*\w+\s*"`
-	Categories      string  `index:"6" re:""`
-	DestinationTags string  `index:"7" re:"\*any|\w+\s*"`
-	RatingSubject   string  `index:"8" re:"\w+\s*"`
-	SharedGroups    string  `index:"9" re:"[0-9A-Za-z_;]*"`
-	ExpiryTime      string  `index:"10" re:"\*\w+\s*|\+\d+[smh]\s*|\d+\s*"`
-	TimingTags      string  `index:"11" re:"[0-9A-Za-z_;]*|\*any"`
-	Units           string  `index:"12" re:"\d+\s*"`
-	BalanceWeight   string  `index:"13" re:"\d+\.?\d*\s*"`
-	BalanceBlocker  string  `index:"14" re:""`
-	BalanceDisabled string  `index:"15" re:""`
-	Weight          float64 `index:"16" re:"\d+\.?\d*\s*"`
+	Tag             string  `index:"0" re:".*"`
+	Action          string  `index:"1" re:".*"`
+	ExtraParameters string  `index:"2" re:".*"`
+	Filters         string  `index:"3" re:".*"`
+	BalanceTag      string  `index:"4" re:".*"`
+	BalanceType     string  `index:"5" re:".*"`
+	Categories      string  `index:"6" re:".*"`
+	DestinationTags string  `index:"7" re:".*"`
+	RatingSubject   string  `index:"8" re:".*"`
+	SharedGroups    string  `index:"9" re:".*"`
+	ExpiryTime      string  `index:"10" re:".*"`
+	TimingTags      string  `index:"11" re:".*"`
+	Units           string  `index:"12" re:".*"`
+	BalanceWeight   string  `index:"13" re:".*"`
+	BalanceBlocker  string  `index:"14" re:".*"`
+	BalanceDisabled string  `index:"15" re:".*"`
+	Weight          float64 `index:"16" re:".*"`
 	CreatedAt       time.Time
 }
 
@@ -151,10 +151,10 @@ func (ActionMdl) TableName() string {
 type ActionPlanMdl struct {
 	Id         int64
 	Tpid       string
-	Tag        string  `index:"0" re:"\w+\s*,\s*"`
-	ActionsTag string  `index:"1" re:"\w+\s*,\s*"`
-	TimingTag  string  `index:"2" re:"\w+\s*,\s*"|\*any`
-	Weight     float64 `index:"3" re:"\d+\.?\d*"`
+	Tag        string  `index:"0" re:".*"`
+	ActionsTag string  `index:"1" re:".*"`
+	TimingTag  string  `index:"2" re:".*"`
+	Weight     float64 `index:"3" re:".*"`
 	CreatedAt  time.Time
 }
 
@@ -165,27 +165,27 @@ func (ActionPlanMdl) TableName() string {
 type ActionTriggerMdl struct {
 	Id                     int64
 	Tpid                   string
-	Tag                    string  `index:"0" re:"\w+"`
-	UniqueId               string  `index:"1" re:"\w+"`
-	ThresholdType          string  `index:"2" re:"\*\w+"`
-	ThresholdValue         float64 `index:"3" re:"\d+\.?\d*"`
-	Recurrent              bool    `index:"4" re:"true|false|"`
-	MinSleep               string  `index:"5" re:"\d+[smh]?"`
-	ExpiryTime             string  `index:"6" re:""`
-	ActivationTime         string  `index:"7" re:""`
-	BalanceTag             string  `index:"8" re:"\w+\s*"`
-	BalanceType            string  `index:"9" re:"\*\w+"`
-	BalanceCategories      string  `index:"10" re:""`
-	BalanceDestinationTags string  `index:"11" re:"\w+|\*any"`
-	BalanceRatingSubject   string  `index:"12" re:"\w+|\*any"`
-	BalanceSharedGroups    string  `index:"13" re:"\w+|\*any"`
-	BalanceExpiryTime      string  `index:"14" re:"\*\w+\s*|\+\d+[smh]\s*|\d+\s*"`
-	BalanceTimingTags      string  `index:"15" re:"[0-9A-Za-z_;]*|\*any"`
-	BalanceWeight          string  `index:"16" re:"\d+\.?\d*"`
-	BalanceBlocker         string  `index:"17" re:""`
-	BalanceDisabled        string  `index:"18" re:""`
-	ActionsTag             string  `index:"19" re:"\w+"`
-	Weight                 float64 `index:"20" re:"\d+\.?\d*"`
+	Tag                    string  `index:"0" re:".*"`
+	UniqueId               string  `index:"1" re:".*"`
+	ThresholdType          string  `index:"2" re:".*"`
+	ThresholdValue         float64 `index:"3" re:".*"`
+	Recurrent              bool    `index:"4" re:".*"`
+	MinSleep               string  `index:"5" re:".*"`
+	ExpiryTime             string  `index:"6" re:".*"`
+	ActivationTime         string  `index:"7" re:".*"`
+	BalanceTag             string  `index:"8" re:".*"`
+	BalanceType            string  `index:"9" re:".*"`
+	BalanceCategories      string  `index:"10" re:".*"`
+	BalanceDestinationTags string  `index:"11" re:".*"`
+	BalanceRatingSubject   string  `index:"12" re:".*"`
+	BalanceSharedGroups    string  `index:"13" re:".*"`
+	BalanceExpiryTime      string  `index:"14" re:".*"`
+	BalanceTimingTags      string  `index:"15" re:".*"`
+	BalanceWeight          string  `index:"16" re:".*"`
+	BalanceBlocker         string  `index:"17" re:".*"`
+	BalanceDisabled        string  `index:"18" re:".*"`
+	ActionsTag             string  `index:"19" re:".*"`
+	Weight                 float64 `index:"20" re:".*"`
 	CreatedAt              time.Time
 }
 
@@ -197,12 +197,12 @@ type AccountActionMdl struct {
 	Id                int64
 	Tpid              string
 	Loadid            string
-	Tenant            string `index:"0" re:"\w+\s*"`
-	Account           string `index:"1" re:"(\w+;?)+\s*"`
-	ActionPlanTag     string `index:"2" re:"\w+\s*"`
-	ActionTriggersTag string `index:"3" re:"\w+\s*"`
-	AllowNegative     bool   `index:"4" re:""`
-	Disabled          bool   `index:"5" re:""`
+	Tenant            string `index:"0" re:".*"`
+	Account           string `index:"1" re:".*"`
+	ActionPlanTag     string `index:"2" re:".*"`
+	ActionTriggersTag string `index:"3" re:".*"`
+	AllowNegative     bool   `index:"4" re:".*"`
+	Disabled          bool   `index:"5" re:".*"`
 	CreatedAt         time.Time
 }
 
@@ -228,10 +228,10 @@ func (aa *AccountActionMdl) GetAccountActionId() string {
 type SharedGroupMdl struct {
 	Id            int64
 	Tpid          string
-	Tag           string `index:"0" re:"\w+\s*"`
-	Account       string `index:"1" re:"\*?\w+\s*"`
-	Strategy      string `index:"2" re:"\*\w+\s*"`
-	RatingSubject string `index:"3" re:"\*?\w]+\s*"`
+	Tag           string `index:"0" re:".*"`
+	Account       string `index:"1" re:".*"`
+	Strategy      string `index:"2" re:".*"`
+	RatingSubject string `index:"3" re:".*"`
 	CreatedAt     time.Time
 }
 
@@ -242,17 +242,17 @@ func (SharedGroupMdl) TableName() string {
 type ResourceMdl struct {
 	PK                 uint `gorm:"primary_key"`
 	Tpid               string
-	Tenant             string  `index:"0" re:""`
-	ID                 string  `index:"1" re:""`
-	FilterIDs          string  `index:"2" re:""`
-	ActivationInterval string  `index:"3" re:""`
-	UsageTTL           string  `index:"4" re:""`
-	Limit              string  `index:"5" re:""`
-	AllocationMessage  string  `index:"6" re:""`
-	Blocker            bool    `index:"7" re:""`
-	Stored             bool    `index:"8" re:""`
-	Weight             float64 `index:"9" re:"\d+\.?\d*"`
-	ThresholdIDs       string  `index:"10" re:""`
+	Tenant             string  `index:"0" re:".*"`
+	ID                 string  `index:"1" re:".*"`
+	FilterIDs          string  `index:"2" re:".*"`
+	ActivationInterval string  `index:"3" re:".*"`
+	UsageTTL           string  `index:"4" re:".*"`
+	Limit              string  `index:"5" re:".*"`
+	AllocationMessage  string  `index:"6" re:".*"`
+	Blocker            bool    `index:"7" re:".*"`
+	Stored             bool    `index:"8" re:".*"`
+	Weight             float64 `index:"9" re:".*"`
+	ThresholdIDs       string  `index:"10" re:".*"`
 	CreatedAt          time.Time
 }
 
@@ -263,19 +263,19 @@ func (ResourceMdl) TableName() string {
 type StatMdl struct {
 	PK                 uint `gorm:"primary_key"`
 	Tpid               string
-	Tenant             string  `index:"0" re:""`
-	ID                 string  `index:"1" re:""`
-	FilterIDs          string  `index:"2" re:""`
-	ActivationInterval string  `index:"3" re:""`
-	QueueLength        int     `index:"4" re:""`
-	TTL                string  `index:"5" re:""`
-	MinItems           int     `index:"6" re:""`
-	MetricIDs          string  `index:"7" re:""`
-	MetricFilterIDs    string  `index:"8" re:""`
-	Stored             bool    `index:"9" re:""`
-	Blocker            bool    `index:"10" re:""`
-	Weight             float64 `index:"11" re:"\d+\.?\d*"`
-	ThresholdIDs       string  `index:"12" re:""`
+	Tenant             string  `index:"0" re:".*"`
+	ID                 string  `index:"1" re:".*"`
+	FilterIDs          string  `index:"2" re:".*"`
+	ActivationInterval string  `index:"3" re:".*"`
+	QueueLength        int     `index:"4" re:".*"`
+	TTL                string  `index:"5" re:".*"`
+	MinItems           int     `index:"6" re:".*"`
+	MetricIDs          string  `index:"7" re:".*"`
+	MetricFilterIDs    string  `index:"8" re:".*"`
+	Stored             bool    `index:"9" re:".*"`
+	Blocker            bool    `index:"10" re:".*"`
+	Weight             float64 `index:"11" re:".*"`
+	ThresholdIDs       string  `index:"12" re:".*"`
 	CreatedAt          time.Time
 }
 
@@ -286,17 +286,17 @@ func (StatMdl) TableName() string {
 type ThresholdMdl struct {
 	PK                 uint `gorm:"primary_key"`
 	Tpid               string
-	Tenant             string  `index:"0" re:""`
-	ID                 string  `index:"1" re:""`
-	FilterIDs          string  `index:"2" re:""`
-	ActivationInterval string  `index:"3" re:""`
-	MaxHits            int     `index:"4" re:""`
-	MinHits            int     `index:"5" re:""`
-	MinSleep           string  `index:"6" re:""`
-	Blocker            bool    `index:"7" re:""`
-	Weight             float64 `index:"8" re:"\d+\.?\d*"`
-	ActionIDs          string  `index:"9" re:""`
-	Async              bool    `index:"10" re:""`
+	Tenant             string  `index:"0" re:".*"`
+	ID                 string  `index:"1" re:".*"`
+	FilterIDs          string  `index:"2" re:".*"`
+	ActivationInterval string  `index:"3" re:".*"`
+	MaxHits            int     `index:"4" re:".*"`
+	MinHits            int     `index:"5" re:".*"`
+	MinSleep           string  `index:"6" re:".*"`
+	Blocker            bool    `index:"7" re:".*"`
+	Weight             float64 `index:"8" re:".*"`
+	ActionIDs          string  `index:"9" re:".*"`
+	Async              bool    `index:"10" re:".*"`
 	CreatedAt          time.Time
 }
 
@@ -307,12 +307,12 @@ func (ThresholdMdl) TableName() string {
 type FilterMdl struct {
 	PK                 uint `gorm:"primary_key"`
 	Tpid               string
-	Tenant             string `index:"0" re:""`
-	ID                 string `index:"1" re:""`
-	Type               string `index:"2" re:"^\*[A-Za-z].*"`
-	Element            string `index:"3" re:""`
-	Values             string `index:"4" re:""`
-	ActivationInterval string `index:"5" re:""`
+	Tenant             string `index:"0" re:".*"`
+	ID                 string `index:"1" re:".*"`
+	Type               string `index:"2" re:".*"`
+	Element            string `index:"3" re:".*"`
+	Values             string `index:"4" re:".*"`
+	ActivationInterval string `index:"5" re:".*"`
 	CreatedAt          time.Time
 }
 
@@ -411,22 +411,22 @@ func (t TBLVersion) TableName() string {
 type RouteMdl struct {
 	PK                 uint `gorm:"primary_key"`
 	Tpid               string
-	Tenant             string  `index:"0" re:""`
-	ID                 string  `index:"1" re:""`
-	FilterIDs          string  `index:"2" re:""`
-	ActivationInterval string  `index:"3" re:""`
-	Sorting            string  `index:"4" re:""`
-	SortingParameters  string  `index:"5" re:""`
-	RouteID            string  `index:"6" re:""`
-	RouteFilterIDs     string  `index:"7" re:""`
-	RouteAccountIDs    string  `index:"8" re:""`
-	RouteRatingplanIDs string  `index:"9" re:""`
-	RouteResourceIDs   string  `index:"10" re:""`
-	RouteStatIDs       string  `index:"11" re:""`
-	RouteWeight        float64 `index:"12" re:"\d+\.?\d*"`
-	RouteBlocker       bool    `index:"13" re:""`
-	RouteParameters    string  `index:"14" re:""`
-	Weight             float64 `index:"15" re:"\d+\.?\d*"`
+	Tenant             string  `index:"0" re:".*"`
+	ID                 string  `index:"1" re:".*"`
+	FilterIDs          string  `index:"2" re:".*"`
+	ActivationInterval string  `index:"3" re:".*"`
+	Sorting            string  `index:"4" re:".*"`
+	SortingParameters  string  `index:"5" re:".*"`
+	RouteID            string  `index:"6" re:".*"`
+	RouteFilterIDs     string  `index:"7" re:".*"`
+	RouteAccountIDs    string  `index:"8" re:".*"`
+	RouteRatingplanIDs string  `index:"9" re:".*"`
+	RouteResourceIDs   string  `index:"10" re:".*"`
+	RouteStatIDs       string  `index:"11" re:".*"`
+	RouteWeight        float64 `index:"12" re:".*"`
+	RouteBlocker       bool    `index:"13" re:".*"`
+	RouteParameters    string  `index:"14" re:".*"`
+	Weight             float64 `index:"15" re:".*"`
 	CreatedAt          time.Time
 }
 
@@ -437,17 +437,17 @@ func (RouteMdl) TableName() string {
 type AttributeMdl struct {
 	PK                 uint `gorm:"primary_key"`
 	Tpid               string
-	Tenant             string  `index:"0" re:""`
-	ID                 string  `index:"1" re:""`
-	Contexts           string  `index:"2" re:""`
-	FilterIDs          string  `index:"3" re:""`
-	ActivationInterval string  `index:"4" re:""`
-	AttributeFilterIDs string  `index:"5" re:""`
-	Path               string  `index:"6" re:""`
-	Type               string  `index:"7" re:""`
-	Value              string  `index:"8" re:""`
-	Blocker            bool    `index:"9" re:""`
-	Weight             float64 `index:"10" re:"\d+\.?\d*"`
+	Tenant             string  `index:"0" re:".*"`
+	ID                 string  `index:"1" re:".*"`
+	Contexts           string  `index:"2" re:".*"`
+	FilterIDs          string  `index:"3" re:".*"`
+	ActivationInterval string  `index:"4" re:".*"`
+	AttributeFilterIDs string  `index:"5" re:".*"`
+	Path               string  `index:"6" re:".*"`
+	Type               string  `index:"7" re:".*"`
+	Value              string  `index:"8" re:".*"`
+	Blocker            bool    `index:"9" re:".*"`
+	Weight             float64 `index:"10" re:".*"`
 	CreatedAt          time.Time
 }
 
@@ -458,13 +458,13 @@ func (AttributeMdl) TableName() string {
 type ChargerMdl struct {
 	PK                 uint `gorm:"primary_key"`
 	Tpid               string
-	Tenant             string  `index:"0" re:""`
-	ID                 string  `index:"1" re:""`
-	FilterIDs          string  `index:"2" re:""`
-	ActivationInterval string  `index:"3" re:""`
-	RunID              string  `index:"4" re:""`
-	AttributeIDs       string  `index:"5" re:""`
-	Weight             float64 `index:"6" re:"\d+\.?\d*"`
+	Tenant             string  `index:"0" re:".*"`
+	ID                 string  `index:"1" re:".*"`
+	FilterIDs          string  `index:"2" re:".*"`
+	ActivationInterval string  `index:"3" re:".*"`
+	RunID              string  `index:"4" re:".*"`
+	AttributeIDs       string  `index:"5" re:".*"`
+	Weight             float64 `index:"6" re:".*"`
 	CreatedAt          time.Time
 }
 
@@ -475,19 +475,19 @@ func (ChargerMdl) TableName() string {
 type DispatcherProfileMdl struct {
 	PK                 uint    `gorm:"primary_key"`
 	Tpid               string  //
-	Tenant             string  `index:"0" re:""`
-	ID                 string  `index:"1" re:""`
-	Subsystems         string  `index:"2" re:""`
-	FilterIDs          string  `index:"3" re:""`
-	ActivationInterval string  `index:"4" re:""`
-	Strategy           string  `index:"5" re:""`
-	StrategyParameters string  `index:"6" re:""`
-	ConnID             string  `index:"7" re:""`
-	ConnFilterIDs      string  `index:"8" re:""`
-	ConnWeight         float64 `index:"9" re:"\d+\.?\d*"`
-	ConnBlocker        bool    `index:"10" re:""`
-	ConnParameters     string  `index:"11" re:""`
-	Weight             float64 `index:"12" re:"\d+\.?\d*"`
+	Tenant             string  `index:"0" re:".*"`
+	ID                 string  `index:"1" re:".*"`
+	Subsystems         string  `index:"2" re:".*"`
+	FilterIDs          string  `index:"3" re:".*"`
+	ActivationInterval string  `index:"4" re:".*"`
+	Strategy           string  `index:"5" re:".*"`
+	StrategyParameters string  `index:"6" re:".*"`
+	ConnID             string  `index:"7" re:".*"`
+	ConnFilterIDs      string  `index:"8" re:".*"`
+	ConnWeight         float64 `index:"9" re:".*"`
+	ConnBlocker        bool    `index:"10" re:".*"`
+	ConnParameters     string  `index:"11" re:".*"`
+	Weight             float64 `index:"12" re:".*"`
 	CreatedAt          time.Time
 }
 
@@ -498,19 +498,19 @@ func (DispatcherProfileMdl) TableName() string {
 type DispatcherHostMdl struct {
 	PK                   uint   `gorm:"primary_key"`
 	Tpid                 string //
-	Tenant               string `index:"0" re:""`
-	ID                   string `index:"1" re:""`
-	Address              string `index:"2" re:""`
-	Transport            string `index:"3" re:""`
-	ConnectAttempts      int    `index:"4" re:""`
-	Reconnects           int    `index:"5" re:""`
-	MaxReconnectInterval string `index:"6" re:""`
-	ConnectTimeout       string `index:"7" re:""`
-	ReplyTimeout         string `index:"8" re:""`
-	TLS                  bool   `index:"9" re:""`
-	ClientKey            string `index:"10" re:""`
-	ClientCertificate    string `index:"11" re:""`
-	CaCertificate        string `index:"12" re:""`
+	Tenant               string `index:"0" re:".*"`
+	ID                   string `index:"1" re:".*"`
+	Address              string `index:"2" re:".*"`
+	Transport            string `index:"3" re:".*"`
+	ConnectAttempts      int    `index:"4" re:".*"`
+	Reconnects           int    `index:"5" re:".*"`
+	MaxReconnectInterval string `index:"6" re:".*"`
+	ConnectTimeout       string `index:"7" re:".*"`
+	ReplyTimeout         string `index:"8" re:".*"`
+	TLS                  bool   `index:"9" re:".*"`
+	ClientKey            string `index:"10" re:".*"`
+	ClientCertificate    string `index:"11" re:".*"`
+	CaCertificate        string `index:"12" re:".*"`
 	CreatedAt            time.Time
 }
 
