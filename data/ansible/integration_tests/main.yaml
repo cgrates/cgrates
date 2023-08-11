@@ -5,6 +5,5 @@
     - ../roles/kafka
     - ../roles/mongodb
     - ../roles/postgresql
-    - role: ../roles/go
-      when: install_go | default(true)
+    - ../roles/go
     - ../roles/cgrates
