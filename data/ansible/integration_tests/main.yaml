@@ -1,17 +1,9 @@
 ---
 - hosts: all
-  tasks:
-    - name: Install RabbitMQ
-      import_role:
-        name: ../roles/install_rabbitmq
-
-    - name: Install NATS
-      import_role:
-        name: ../roles/nats
-
-    - name: Install ElasticSearch
-      import_role:
-        name: ../roles/elasticsearch
+  roles:
+    - ../roles/install_rabbitmq
+    - ../roles/nats
+    - role: ../roles/elasticsearch
       vars:
         auto_create_index: ".monitoring*,.watches,.triggered_watches,.watcher-history*,.ml*,cdrs"
 
@@ -21,22 +13,9 @@
     #   command: 'curl -X PUT "localhost:9200/cdrs?pretty"'
     #   ignore_errors: yes
 
-    - name: Install Kafka
-      import_role:
-        name: ../roles/kafka
-
-    - name: Install MongoDB
-      import_role:
-        name: ../roles/install_mongodb
-
-    - name: Install PostgreSQL
-      import_role:
-        name: ../roles/postgresql
-
-    - name: Install Go
-      import_role:
-        name: ../roles/go
-
-    - name: Install and configure CGRateS
-      import_role:
-        name: ../roles/cgrates
+    - ../roles/kafka
+    - ../roles/install_mongodb
+    - ../roles/postgresql
+    - role: ../roles/go
+      when: install_go | bool | default(true)
+    - ../roles/cgrates
