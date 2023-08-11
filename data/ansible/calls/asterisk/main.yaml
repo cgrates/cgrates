@@ -8,7 +8,7 @@
 
     - name: Install and configure CGRateS
       import_role:
-        name: ../../roles/install_cgrates
+        name: ../../roles/cgrates
 
     - name: Install Asterisk
       import_role:
