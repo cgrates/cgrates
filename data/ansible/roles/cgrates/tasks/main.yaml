@@ -13,7 +13,7 @@
     mode: "u=rwx,go=rx"
     owner: "{{ ansible_user }}"
     dest: "{{ cgrates_dir }}"
-  when: clone_repository | bool | default(true)
+  when: clone_repository | bool
 
 - name: Git clone cgrates
   ansible.builtin.git:
@@ -22,7 +22,7 @@
     update: yes
     force: yes
     version: "{{ git_version }}"
-  when: clone_repository | bool | default(true)
+  when: clone_repository | bool
 
 - name: Build cgrates
   ansible.builtin.shell:
