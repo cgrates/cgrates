@@ -1,6 +1,6 @@
 ---
 # Before running this script you need the following:
-# - 2 RockyLinux 9 minimal install servers with static ips defined 
+# - 2 RockyLinux 9 minimal install servers with static ips defined
 #     in order to configure a static ip:
 #       1. type nmtui in console
 #       2. Edit a connection
@@ -13,7 +13,7 @@
 #   and disrupt the script)
 
 - hosts: pkg, yum
-  vars: 
+  vars:
     ansible_user: root
   tasks:
     - name: Make sure we have a 'admin' group
@@ -25,13 +25,12 @@
       lineinfile:
         dest: /etc/sudoers
         state: present
-        regexp: '^%admin'
-        line: '%admin ALL=(ALL) NOPASSWD: ALL'
-        validate: 'visudo -cf %s'
+        regexp: "^%admin"
+        line: "%admin ALL=(ALL) NOPASSWD: ALL"
+        validate: "visudo -cf %s"
 
     - name: Add sudoers users to admin group
-      user:
-        name={{ user }}
+      user: name={{ user }}
         groups=admin
         append=yes
         state=present
@@ -45,8 +44,7 @@
     - name: Set up authorized keys for the {{ user }} user
       authorized_key: user={{ user }} key="{{ item }}"
       with_file:
-        - '/home/{{ host_username.stdout }}/.ssh/id_rsa.pub'
-
+        - "/home/{{ host_username.stdout }}/.ssh/id_rsa.pub"
 
 - hosts: yum
   vars:
@@ -66,18 +64,18 @@
     gpg_subkeylength: 2048
     gpg_expire: 360
 
-    rootUser : root
+    rootUser: root
 
     customPath: "{{ lookup('env','PATH') }}:/home/{{ user }}/go/bin:/usr/local/go/bin:{{ ansible_env.PATH }}"
 
-    ansible_user: '{{ user }}'
-  tasks:    
+    ansible_user: "{{ user }}"
+  tasks:
     - name: set cgrates cgrates_distribution
       set_fact:
         cgrates_distribution: "{{ cgrates_distribution }}"
-###########################################################################################################################
-###########################################################################################################################
-# install dependencies
+    ###########################################################################################################################
+    ###########################################################################################################################
+    # install dependencies
     - name: Add epel-relase repo so we can install sshpass
       become: true
       shell: "yum install epel-release -y"
@@ -97,9 +95,9 @@
           - sshpass
           - tar
         state: present
-###########################################################################################################################
-###########################################################################################################################
-# Prepare for configuration
+    ###########################################################################################################################
+    ###########################################################################################################################
+    # Prepare for configuration
     - name: set cgrates distribution
       set_fact:
         cgrates_distribution: "{{ cgrates_branch }}"
@@ -124,7 +122,7 @@
     - name: Nginx on CentOS needs additional permissions2
       become: true
       shell: "sudo chcon -t httpd_sys_rw_content_t /var/packages/ -R"
-        
+
     - name: Generate GPG Key
       include: gpg.yaml
 
@@ -151,39 +149,39 @@
       template:
         src: rpmmacros.j2
         dest: "{{ gpg_home }}/.rpmmacros"
-        mode: '0600'
+        mode: "0600"
         owner: "{{ rootUser }}"
-        
+
     - name: Import the key in rpm
       become: true
       shell: rpm --import /var/packages/yum.cgrates.org.gpg.key
       args:
         warn: false
 
-###########################################################################################################################
-###########################################################################################################################
-# Install Go
+    ###########################################################################################################################
+    ###########################################################################################################################
+    # Install Go
     - name: Install Go
       import_role:
-        name: ../roles/install_go
+        name: ../roles/go
 
-###########################################################################################################################
-###########################################################################################################################
-# Install CGRateS
+    ###########################################################################################################################
+    ###########################################################################################################################
+    # Install CGRateS
     - name: create cgrates directory
       become: yes
       file:
         state: directory
-        mode: 'u=rwx,go=rx'
+        mode: "u=rwx,go=rx"
         owner: "{{ user }}"
         group: "{{ user }}"
-        dest: '{{ cgrates_dir }}'
+        dest: "{{ cgrates_dir }}"
       become_user: "{{ user }}"
 
     - name: git clone cgrates
       git:
         repo: https://github.com/cgrates/cgrates.git
-        dest: '{{ cgrates_dir }}'
+        dest: "{{ cgrates_dir }}"
         update: yes
         force: yes
         version: "{{ cgrates_branch }}"
@@ -208,37 +206,37 @@
       environment:
         PATH: "{{ lookup('env','PATH') }}:/home/{{ user }}/go/bin:/usr/local/go/bin:{{ ansible_env.PATH }}"
       args:
-        chdir: '{{ cgrates_dir }}'
+        chdir: "{{ cgrates_dir }}"
 
-    - name:  build cgrates
+    - name: build cgrates
       shell: "sh {{ cgrates_dir }}/build.sh"
       environment:
         PATH: "{{ lookup('env','PATH') }}:/home/{{ user }}/go/bin:/usr/local/go/bin:{{ ansible_env.PATH }}"
       args:
-        chdir: '{{ cgrates_dir }}'
-        
+        chdir: "{{ cgrates_dir }}"
+
     - name: get git version
       shell: git rev-parse HEAD
       register: gitVersion
       args:
-        chdir: '{{ cgrates_dir }}'
-    
+        chdir: "{{ cgrates_dir }}"
+
     - name: get git short version
       shell: git log -1 --format=%ci | date +%Y%m%d%H%M%S
       register: gitDate
       args:
-        chdir: '{{ cgrates_dir }}'
-    
+        chdir: "{{ cgrates_dir }}"
+
     - name: get git date
       shell: git rev-parse --short HEAD
       register: gitShortVersion
       args:
-        chdir: '{{ cgrates_dir }}'
+        chdir: "{{ cgrates_dir }}"
 
     - name: get git tag
       shell: "git tag -l --points-at HEAD"
       args:
-        chdir: '{{ cgrates_dir }}'
+        chdir: "{{ cgrates_dir }}"
       register: gitTagVar
 
     - name: Compose the ReleaseTag
@@ -253,10 +251,10 @@
     - name: Compose the ReleaseTag with values
       set_fact:
         releaseTag: "{{ gitDate.stdout_lines[0] }}+{{ gitShortVersion.stdout_lines[0] }}"
-      when : gitTagVar.stdout_lines|length == 0
-###########################################################################################################################
-###########################################################################################################################
-# Generate package
+      when: gitTagVar.stdout_lines|length == 0
+    ###########################################################################################################################
+    ###########################################################################################################################
+    # Generate package
     - name: Create the folders for build
       become: yes
       file:
@@ -268,53 +266,53 @@
         - { dirName: SPECS }
         - { dirName: SRPMS }
         - { dirName: RPMS }
-       
+
     - name: Download the tar.gz for the last commit
       become: yes
       get_url:
         url: https://github.com/cgrates/cgrates/archive/{{ cgrates_branch }}/{{ gitVersion.stdout_lines[0] }}.tar.gz
         dest: cgr_build/SOURCES/{{ gitVersion.stdout_lines[0] }}.tar.gz
-     
+
     - name: Add cgrates.spec in SPECS
       become: yes
       template:
         src: cgrates.spec.j2
         dest: cgr_build/SPECS/cgrates.spec
-        
+
     - name: Generate the .rpm file
       become: yes
       shell: 'rpmbuild -bb --define "_topdir /home/{{ user }}/cgr_build" cgr_build/SPECS/cgrates.spec'
       environment:
         PATH: "{{ lookup('env','PATH') }}:/home/{{ user }}/go/bin:/usr/local/go/bin:{{ ansible_env.PATH }}"
-        
+
     - name: Take the name of the .rpm package
       become: yes
-      shell : "ls cgr_build/RPMS/x86_64/ | grep '.rpm'"
+      shell: "ls cgr_build/RPMS/x86_64/ | grep '.rpm'"
       register: rmpFileName
-    
+
     # Move the file to PKG server
     - name: Copy the file to PKG server
-      shell: 'scp cgr_build/RPMS/x86_64/{{ item }} {{ pkgAddr }}:/tmp/'
-      with_items: '{{ rmpFileName.stdout_lines }}'
-    
+      shell: "scp cgr_build/RPMS/x86_64/{{ item }} {{ pkgAddr }}:/tmp/"
+      with_items: "{{ rmpFileName.stdout_lines }}"
+
     - name: Sign with rpm --addsign the .rpm file
       become: yes
-      shell: 'sudo rpm --addsign cgr_build/RPMS/x86_64/{{ item }}'
+      shell: "sudo rpm --addsign cgr_build/RPMS/x86_64/{{ item }}"
       with_items: "{{ rmpFileName.stdout_lines }}"
-      when : cgrates_branch == "master" or gitTagVar.stdout_lines|length > 0
-      
+      when: cgrates_branch == "master" or gitTagVar.stdout_lines|length > 0
+
     - name: Check if is something in /var/packages/yum/{{ cgrates_distribution }}
       become: yes
-      shell : "ls /var/packages/yum/{{ cgrates_distribution }}/"
+      shell: "ls /var/packages/yum/{{ cgrates_distribution }}/"
       register: yumFiles
-      when : cgrates_branch == "master" or gitTagVar.stdout_lines|length > 0
+      when: cgrates_branch == "master" or gitTagVar.stdout_lines|length > 0
 
       #Clean the folder
     - name: Clean the incoming folder
       become: yes
       shell: "sudo rm -rf /var/packages/yum/{{ cgrates_distribution }}/*"
       when: (cgrates_branch == "master" or gitTagVar.stdout_lines|length > 0) and yumFiles.stdout_lines|length > 1
-    
+
     - name: Move the files to /var/packages/yum/{{ cgrates_distribution }}
       become: yes
       command: mv cgr_build/RPMS/x86_64/{{ item }} /var/packages/yum/{{ cgrates_distribution }}/
@@ -324,7 +322,7 @@
     - name: Include the package with createrepo
       become: yes
       shell: createrepo /var/packages/yum/{{ cgrates_distribution }}
-      when : cgrates_branch == "master" or gitTagVar.stdout_lines|length > 0
+      when: cgrates_branch == "master" or gitTagVar.stdout_lines|length > 0
 
     - name: Remove rpm files
       become: yes
@@ -345,7 +343,7 @@
 - hosts: pkg
   vars:
     ansible_python_interpreter: auto # to disable deprication warning related to the use of python2
-    ansible_user: '{{ user }}'
+    ansible_user: "{{ user }}"
   tasks:
     - name: set cgrates cgrates_distribution
       set_fact:
@@ -356,13 +354,13 @@
       file:
         path: /var/packages/rpm/{{ cgrates_distribution }}/
         state: directory
-        
+
     - name: Remove symlink from current rpm package
       become: yes
       file:
         path: /var/packages/rpm/{{ cgrates_distribution }}/cgrates_current.rpm
         state: absent
-      when : cgrates_distribution == "nightly" or hostvars['yum']['gitTagVar'].stdout_lines|length > 0
+      when: cgrates_distribution == "nightly" or hostvars['yum']['gitTagVar'].stdout_lines|length > 0
 
     - name: Move the new package to /var/packages/rpm
       become: yes
@@ -376,4 +374,4 @@
         dest: /var/packages/rpm/{{ cgrates_distribution }}/cgrates_current.rpm
         state: link
       with_items: "{{ hostvars['yum']['rmpFileName']['stdout_lines'] }}"
-      when : cgrates_distribution == "nightly" or hostvars['yum']['gitTagVar'].stdout_lines|length > 0
+      when: cgrates_distribution == "nightly" or hostvars['yum']['gitTagVar'].stdout_lines|length > 0

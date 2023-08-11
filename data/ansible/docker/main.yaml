@@ -6,9 +6,9 @@
     cgrates_branch: "v0.10"
     cgrates_distribution: "nightly"
     docker_tag: "latest"
-    registry_site: "dkr.cgrates.org"      # the web site
-    registry_name: "registry"             # the name of the registry container
-    users_filename: ""                    # the file containing the htpasswd users
+    registry_site: "dkr.cgrates.org" # the web site
+    registry_name: "registry" # the name of the registry container
+    users_filename: "" # the file containing the htpasswd users
     registry_port: 5000
 
     dependencies:
@@ -33,23 +33,23 @@
       - cgr-migrator
       - cgr-tester
 
-    rootUser : root
-    
-  remote_user: '{{ user }}'
+    rootUser: root
+
+  remote_user: "{{ user }}"
   tasks:
     - name: set cgrates distribution
       set_fact:
         cgrates_distribution: "{{ cgrates_branch }}"
       when: cgrates_branch != "master" or cgrates_branch != "1.0"
-###########################################################################################################################
-###########################################################################################################################
-# install dependencies
+    ###########################################################################################################################
+    ###########################################################################################################################
+    # install dependencies
     - name: Install dependencies
       become: yes
       apt: name={{ dependencies }} state=present
-###########################################################################################################################
-###########################################################################################################################
-# Prepare for configuration
+    ###########################################################################################################################
+    ###########################################################################################################################
+    # Prepare for configuration
     - name: Check if NGINX needs to be configured
       become: true
       shell: "ls /etc/nginx/sites-enabled | grep '{{ registry_site }}.vhost'"
@@ -66,41 +66,41 @@
         state: started
         masked: no
         enabled: yes
-      
-    - name: Configure docker 
+
+    - name: Configure docker
       include: docker.yaml
 
-###########################################################################################################################
-###########################################################################################################################
-# Install Go
+    ###########################################################################################################################
+    ###########################################################################################################################
+    # Install Go
     - name: Install Go
       import_role:
-        name: ../roles/install_go
+        name: ../roles/go
 
-###########################################################################################################################
-###########################################################################################################################
-# Install CGRateS
+    ###########################################################################################################################
+    ###########################################################################################################################
+    # Install CGRateS
     - name: create cgrates directory
       become: yes
       file:
         state: absent
-        dest: '{{ cgrates_dir }}'
+        dest: "{{ cgrates_dir }}"
       become_user: "{{ user }}"
 
     - name: create cgrates directory
       become: yes
       file:
         state: directory
-        mode: 'u=rwx,go=rx'
+        mode: "u=rwx,go=rx"
         owner: "{{ user }}"
         group: "{{ user }}"
-        dest: '{{ cgrates_dir }}'
+        dest: "{{ cgrates_dir }}"
       become_user: "{{ user }}"
 
     - name: git clone cgrates
       git:
         repo: https://github.com/cgrates/cgrates.git
-        dest: '{{ cgrates_dir }}'
+        dest: "{{ cgrates_dir }}"
         update: yes
         force: yes
         version: "{{ cgrates_branch }}"
@@ -119,12 +119,12 @@
       environment:
         PATH: "{{ lookup('env','PATH') }}:/home/{{ user }}/go/bin:/usr/local/go/bin:{{ ansible_env.PATH }}"
 
-    - name:  build cgrates for docker
+    - name: build cgrates for docker
       shell: "sh {{ cgrates_dir }}/data/docker/scratch/build.sh"
       environment:
         PATH: "{{ lookup('env','PATH') }}:/home/{{ user }}/go/bin:/usr/local/go/bin:{{ ansible_env.PATH }}"
       args:
-        chdir: '{{ cgrates_dir }}/data/docker/scratch'
+        chdir: "{{ cgrates_dir }}/data/docker/scratch"
 
     - name: clean go cache after build
       become: yes
@@ -147,21 +147,21 @@
     - name: get git tag
       shell: "git tag -l --points-at HEAD"
       args:
-        chdir: '{{ cgrates_dir }}'
+        chdir: "{{ cgrates_dir }}"
       register: gitTagVar
 
     - name: get commit
       shell: git log -n1 --format=format:%h
       args:
-        chdir: '{{ cgrates_dir }}'
-      register: gitCommit 
+        chdir: "{{ cgrates_dir }}"
+      register: gitCommit
       when: cgrates_branch == "master" or cgrates_branch == "1.0" or gitTagVar.stdout_lines|length == 0
-   
+
     - name: get commit
       shell: date +%Y%m%d%H%M%S --date="@$(git log -n1 --format=format:%ct)"
       args:
-        chdir: '{{ cgrates_dir }}'
-      register: gitDate 
+        chdir: "{{ cgrates_dir }}"
+      register: gitDate
       when: cgrates_branch == "master" or cgrates_branch == "1.0" or gitTagVar.stdout_lines|length == 0
 
     - name: set cgrates docker_tag
@@ -171,30 +171,26 @@
 
     - name: build Docker image
       become: yes
-      shell: 
-        docker build -t 127.0.0.1:{{ registry_port }}/{{ cgrates_distribution }}/{{ item }}:{{ docker_tag }} -f="{{ item }}.doker" {{ cgrates_dir }}/data/docker/scratch/;
+      shell: docker build -t 127.0.0.1:{{ registry_port }}/{{ cgrates_distribution }}/{{ item }}:{{ docker_tag }} -f="{{ item }}.doker" {{ cgrates_dir }}/data/docker/scratch/;
       args:
-        chdir: '{{ cgrates_dir }}/data/docker/scratch'
+        chdir: "{{ cgrates_dir }}/data/docker/scratch"
       with_items: "{{ build_execs }}"
 
     - name: push docker image to repo
       become: yes
-      shell: 
-        docker image push 127.0.0.1:{{ registry_port }}/{{ cgrates_distribution }}/{{ item }}:{{ docker_tag }};
+      shell: docker image push 127.0.0.1:{{ registry_port }}/{{ cgrates_distribution }}/{{ item }}:{{ docker_tag }};
       with_items: "{{ build_execs }}"
 
     - name: tag docker master image
       become: yes
-      shell: 
-        docker tag 127.0.0.1:{{ registry_port }}/{{ cgrates_distribution }}/{{ item }}:{{ docker_tag }} 127.0.0.1:{{ registry_port }}/{{ cgrates_distribution }}/{{ item }}:latest;
-      when: cgrates_branch == "master" or cgrates_branch == "1.0" 
+      shell: docker tag 127.0.0.1:{{ registry_port }}/{{ cgrates_distribution }}/{{ item }}:{{ docker_tag }} 127.0.0.1:{{ registry_port }}/{{ cgrates_distribution }}/{{ item }}:latest;
+      when: cgrates_branch == "master" or cgrates_branch == "1.0"
       with_items: "{{ build_execs }}"
 
     - name: push docker master image to repo
       become: yes
-      shell: 
-        docker image push 127.0.0.1:{{ registry_port }}/{{ cgrates_distribution }}/{{ item }}:latest;
-      when: cgrates_branch == "master" or cgrates_branch == "1.0" 
+      shell: docker image push 127.0.0.1:{{ registry_port }}/{{ cgrates_distribution }}/{{ item }}:latest;
+      when: cgrates_branch == "master" or cgrates_branch == "1.0"
       with_items: "{{ build_execs }}"
 
     - name: clean binar files
@@ -205,10 +201,9 @@
 
     - name: remove local docker images
       become: yes
-      shell: 
-        docker image prune -af
+      shell: docker image prune -af
 
-    - name:  docker_tag is
+    - name: docker_tag is
       debug:
         msg: "{{ docker_tag }}"
       when: docker_tag != ""
