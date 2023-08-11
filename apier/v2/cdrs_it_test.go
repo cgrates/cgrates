@@ -937,8 +937,11 @@ func testV2ExportCDRsToFile(t *testing.T) {
 	expCgrIds := []string{"879cd5e698af", "9b3cd5e698af94"}
 	if err := cdrsRpc.Call(utils.APIerSv2ExportCdrsToFile, attr, &replyExp); err != nil {
 		t.Error(err)
-	} else if sort.Slice(replyExp.ExportedCgrIds, func(i, j int) bool { return i < j }); !reflect.DeepEqual(expCgrIds, replyExp.ExportedCgrIds) {
-		t.Errorf("Expected CgrsIds %+v,Received  %+v", expCgrIds, replyExp.ExportedCgrIds)
+	} else {
+		sort.Strings(replyExp.ExportedCgrIds)
+		if !reflect.DeepEqual(expCgrIds, replyExp.ExportedCgrIds) {
+			t.Errorf("Expected CgrsIds %+v,Received  %+v", expCgrIds, replyExp.ExportedCgrIds)
+		}
 	}
 }
 
