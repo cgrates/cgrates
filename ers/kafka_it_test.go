@@ -75,20 +75,28 @@ func TestKafkaER(t *testing.T) {
 		rdrErr, new(engine.FilterS), rdrExit); err != nil {
 		t.Fatal(err)
 	}
-	w := kafka.NewWriter(kafka.WriterConfig{
-		Brokers: []string{"localhost:9092"},
-		Topic:   defaultTopic,
-	})
-	randomCGRID := utils.UUIDSha1Prefix()
-	w.WriteMessages(context.Background(),
-		kafka.Message{
-			Key:   []byte(randomCGRID), // for the moment we do not process the key
-			Value: []byte(fmt.Sprintf(`{"CGRID": "%s"}`, randomCGRID)),
-		},
-	)
-
-	w.Close()
 	kfk.Serve()
+
+	randomCGRID := utils.UUIDSha1Prefix()
+	go func(key string) {
+		w := kafka.Writer{
+			Addr:  kafka.TCP("localhost:9092"),
+			Topic: defaultTopic,
+		}
+		err := w.WriteMessages(context.Background(),
+			kafka.Message{
+				Key:   []byte(randomCGRID), // for the moment we do not process the key
+				Value: []byte(fmt.Sprintf(`{"CGRID": "%s"}`, randomCGRID)),
+			},
+		)
+		if err != nil {
+			t.Error("failed to write messages:", err)
+		}
+		err = w.Close()
+		if err != nil {
+			t.Error("failed to close writer:", err)
+		}
+	}(randomCGRID)
 
 	select {
 	case err = <-rdrErr:
