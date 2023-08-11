@@ -12,8 +12,8 @@
 
     - name: Install Asterisk
       import_role:
-        name: ../../roles/install_asterisk
+        name: ../../roles/asterisk
 
     - name: Install PJSUA
       import_role:
-        name: ../../roles/install_pjsua
+        name: ../../roles/pjsua

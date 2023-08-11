@@ -4,7 +4,7 @@
   tasks:
     - name: Install freeswitch
       import_role:
-        name: ../../roles/install_freeswitch
+        name: ../../roles/freeswitch
     - name: Install Go
       import_role:
         name: ../../roles/go
@@ -41,4 +41,4 @@
 
     - name: Configure PJSUA
       import_role:
-        name: ../../roles/install_pjsua
+        name: ../../roles/pjsua
