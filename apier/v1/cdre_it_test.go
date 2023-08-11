@@ -227,13 +227,14 @@ func testCDReExportCDRs2(t *testing.T) {
 		Verbose: true,
 	}
 	var rply *RplExportedCDRs
-	expExportedCdrs := []string{"Cdr7", "Cdr5"}
+	expExportedCdrs := []string{"Cdr5", "Cdr7"}
 	if err := cdreRPC.Call(utils.APIerSv1ExportCDRs, attr, &rply); err != nil {
 		t.Error("Unexpected error: ", err.Error())
-	} else if sort.Slice(rply.ExportedCGRIDs, func(i, j int) bool {
-		return i < j
-	}); !reflect.DeepEqual(rply.ExportedCGRIDs, expExportedCdrs) {
-		t.Errorf("Expected CDRs %+v,Received %+v ", expExportedCdrs, rply.ExportedCGRIDs)
+	} else {
+		sort.Strings(rply.ExportedCGRIDs)
+		if !reflect.DeepEqual(rply.ExportedCGRIDs, expExportedCdrs) {
+			t.Errorf("Expected CDRs %+v,Received %+v ", expExportedCdrs, rply.ExportedCGRIDs)
+		}
 	}
 
 }
