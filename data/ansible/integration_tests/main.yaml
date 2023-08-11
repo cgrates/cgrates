@@ -1,9 +1,9 @@
 ---
 - hosts: all
   roles:
-    - ../roles/install_rabbitmq
+    - ../roles/rabbitmq
     - ../roles/kafka
-    - ../roles/install_mongodb
+    - ../roles/mongodb
     - ../roles/postgresql
     - role: ../roles/go
       when: install_go | default(true)

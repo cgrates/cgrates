@@ -3,7 +3,7 @@
   tasks:
     - name: Install Kamailio
       import_role:
-        name: ../../roles/install_kamailio
+        name: ../../roles/kamailio
 
     - name: Install Go
       import_role:
@@ -15,4 +15,4 @@
 
     - name: Install PJSUA
       import_role:
-        name: ../../roles/install_pjsua
+        name: ../../roles/pjsua
