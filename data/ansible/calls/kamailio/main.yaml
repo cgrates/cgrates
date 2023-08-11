@@ -1,18 +1,18 @@
 ---
 - hosts: all
   tasks:
-  - name: Install Kamailio
-    import_role:
-      name: ../../roles/install_kamailio
+    - name: Install Kamailio
+      import_role:
+        name: ../../roles/install_kamailio
 
-  - name: Install Go
-    import_role:
-      name: ../../roles/go
+    - name: Install Go
+      import_role:
+        name: ../../roles/go
 
-  - name: Install and configure CGRateS
-    import_role:
-      name: ../../roles/install_cgrates
+    - name: Install and configure CGRateS
+      import_role:
+        name: ../../roles/cgrates
 
-  - name: Install PJSUA
-    import_role:
-      name: ../../roles/install_pjsua
+    - name: Install PJSUA
+      import_role:
+        name: ../../roles/install_pjsua

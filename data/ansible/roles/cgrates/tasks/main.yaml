@@ -13,7 +13,7 @@
     mode: "u=rwx,go=rx"
     owner: "{{ ansible_user }}"
     dest: "{{ cgrates_dir }}"
-  when: "clone_repository|bool"
+  when: clone_repository | bool | default(true)
 
 - name: Git clone cgrates
   ansible.builtin.git:
@@ -22,11 +22,11 @@
     update: yes
     force: yes
     version: "{{ git_version }}"
-  when: "clone_repository|bool"
+  when: clone_repository | bool | default(true)
 
 - name: Build cgrates
-  ansible.builtin.command:
-    cmd: bash -lc "source /etc/profile.d/golang.sh && sh {{ cgrates_dir }}/build.sh"
+  ansible.builtin.shell:
+    cmd: bash -lc "sh {{ cgrates_dir }}/build.sh"
   args:
     chdir: "{{ cgrates_dir }}"
   become_user: "{{ ansible_user }}"
@@ -40,9 +40,13 @@
   loop:
     - { src: "{{ cgrates_dir }}/data", dest: "/usr/share/cgrates" }
     - { src: "{{ golang_gopath }}/bin/cgr-engine", dest: "/usr/bin/cgr-engine" }
+    - { src: "{{ golang_gopath }}/bin/cgr-loader", dest: "/usr/bin/cgr-loader" }
+    - { src: "{{ golang_gopath }}/bin/cgr-migrator", dest: "/usr/bin/cgr-migrator" }
+    - { src: "{{ golang_gopath }}/bin/cgr-console", dest: "/usr/bin/cgr-console" }
+    - { src: "{{ golang_gopath }}/bin/cgr-tester", dest: "/usr/bin/cgr-tester" }
 
 - name: Run post install scripts
-  ansible.builtin.shell:
+  ansible.builtin.command:
     cmd: "{{ item.cmd }}"
     chdir: "{{ cgrates_dir }}/data/storage/{{ item.db }}"
   become: yes
@@ -54,7 +58,5 @@
     - { db: "mongo", cmd: "sh setup_cgr_db.sh" }
 
 - name: Set versions
-  ansible.builtin.shell:
+  ansible.builtin.command:
     cmd: "cgr-migrator -exec=*set_versions -config_path=/usr/share/cgrates/conf/samples/tutmysql"
-  environment:
-    PATH: "{{ lookup('env','PATH') }}:{{ golang_gopath }}/bin:/usr/local/go/bin:{{ ansible_env.PATH }}"

@@ -11,19 +11,19 @@
 
     - name: Install and config CGRateS
       import_role:
-        name: ../../roles/install_cgrates
+        name: ../../roles/cgrates
 
-    - name:  Unzip FreeSWITCH config
+    - name: Unzip FreeSWITCH config
       become: yes
-      shell: 'sudo tar -xvf freeswitch_conf.tar.gz'
+      shell: "sudo tar -xvf freeswitch_conf.tar.gz"
       args:
-        chdir: '{{ cgrates_dir }}/data/tutorial_tests/fs_evsock/freeswitch/etc'
+        chdir: "{{ cgrates_dir }}/data/tutorial_tests/fs_evsock/freeswitch/etc"
 
-    - name:  Unzip FreeSWITCH config 2
+    - name: Unzip FreeSWITCH config 2
       become: yes
-      shell: 'sudo tar -xvf freeswitch_conf.tar.gz'
+      shell: "sudo tar -xvf freeswitch_conf.tar.gz"
       args:
-        chdir: '{{ cgrates_dir }}/data/tutorials/fs_evsock/freeswitch/etc'
+        chdir: "{{ cgrates_dir }}/data/tutorials/fs_evsock/freeswitch/etc"
 
     - name: Update internal.xml with the correct IP
       ansible.builtin.replace:
@@ -31,17 +31,17 @@
         regexp: '192\.168\.56\.203'
         replace: "{{ ansible_host }}"
 
-    - name:  Remove FreeSWITCH default config from /etc/freeswitch
+    - name: Remove FreeSWITCH default config from /etc/freeswitch
       become: yes
-      shell: 'sudo rm -rf *'
+      shell: "sudo rm -rf *"
       args:
-        chdir: '/etc/freeswitch'
+        chdir: "/etc/freeswitch"
 
-    - name:  Copy our custom config for FreeSWITCH in /etc/freeswitch
+    - name: Copy our custom config for FreeSWITCH in /etc/freeswitch
       become: yes
-      shell: 'sudo cp -r {{ cgrates_dir }}/data/tutorial_tests/fs_evsock/freeswitch/etc/freeswitch/* /etc/freeswitch'
+      shell: "sudo cp -r {{ cgrates_dir }}/data/tutorial_tests/fs_evsock/freeswitch/etc/freeswitch/* /etc/freeswitch"
       args:
-        chdir: '/etc/freeswitch'
+        chdir: "/etc/freeswitch"
 
     - name: Configure PJSUA
       import_role:
