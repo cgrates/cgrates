@@ -27,10 +27,12 @@ jobs:
     # needs: check-if-duplicate-action
     # if: needs.check-if-duplicate-action.outputs.should_skip != 'true'
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: true
-      matrix:
-        go: ["stable"] # could be a good idea to consider oldstable as well
+
+    ## Currently prefer to run tests for a single static go version
+    # strategy:
+    #   fail-fast: true
+    #   matrix:
+    #     go: ["stable"] # could be a good idea to consider oldstable as well
 
     steps:
       - name: Check out code
@@ -39,8 +41,7 @@ jobs:
       - name: Install Go
         uses: actions/setup-go@v4
         with:
-          go-version: ${{ matrix.go }}
-          check-latest: true
+          go-version: "1.21.0"
 
       - name: Go Format
         run: gofmt -s -w . && git diff --exit-code
