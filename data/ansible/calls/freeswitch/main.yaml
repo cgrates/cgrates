@@ -11,7 +11,7 @@
 
     - name: Install and config CGRateS
       import_role:
-        name: ../../roles/install_cgrates
+        name: ../../roles/cgrates
 
     - name: Unzip FreeSWITCH config
       become: yes
