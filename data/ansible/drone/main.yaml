@@ -11,7 +11,7 @@
     docker_runner_capacity: 20
 
     drone_user_create: cgrates
-    drone_user_filter: 
+    drone_user_filter:
       - cgrates
       - danbogos
       - TeoV
@@ -26,34 +26,34 @@
       - apt-transport-https
       - ca-certificates
       - openssl
-      - gnupg-agent 
+      - gnupg-agent
       - software-properties-common
       - python3
       - python3-pip
       - virtualenv
       - python3-setuptools
-    rootUser : root
-        
-  remote_user: '{{ user }}'
+    rootUser: root
+
+  remote_user: "{{ user }}"
   tasks:
-###########################################################################################################################
-###########################################################################################################################
-# install dependencies
+    ###########################################################################################################################
+    ###########################################################################################################################
+    # install dependencies
     - name: Install dependencies
       become: yes
       apt: name={{ dependencies }} state=present
-        
-    - name: Configure docker 
+
+    - name: Configure docker
       include: docker.yaml
-###########################################################################################################################
-###########################################################################################################################
-# Install Go
+    ###########################################################################################################################
+    ###########################################################################################################################
+    # Install Go
     - name: Install Go
       import_role:
-        name: ../roles/install_go
+        name: ../roles/go
 
-###########################################################################################################################
-###########################################################################################################################
+    ###########################################################################################################################
+    ###########################################################################################################################
     - name: clean go cache
       become: yes
       shell: "go clean --cache"
@@ -70,16 +70,16 @@
       become: yes
       file:
         state: directory
-        mode: 'u=rwx,go=rx'
+        mode: "u=rwx,go=rx"
         owner: "{{ user }}"
         group: "{{ user }}"
-        dest: '/home/{{ user }}/go/src/github.com/Trial97/drone-email'
+        dest: "/home/{{ user }}/go/src/github.com/Trial97/drone-email"
       become_user: "{{ user }}"
 
     - name: git clone mailer
       git:
         repo: https://github.com/Trial97/drone-email.git
-        dest: '/home/{{ user }}/go/src/github.com/Trial97/drone-email'
+        dest: "/home/{{ user }}/go/src/github.com/Trial97/drone-email"
         update: yes
         force: yes
         version: "master"
@@ -90,23 +90,22 @@
       become: yes
       shell: docker build -t trial97/drone-email /home/{{ user }}/go/src/github.com/Trial97/drone-email
       args:
-        chdir: '/home/{{ user }}/go/src/github.com/Trial97/drone-email'
-
+        chdir: "/home/{{ user }}/go/src/github.com/Trial97/drone-email"
 
     - name: create drone-cli directory
       become: yes
       file:
         state: directory
-        mode: 'u=rwx,go=rx'
+        mode: "u=rwx,go=rx"
         owner: "{{ user }}"
         group: "{{ user }}"
-        dest: '/home/{{ user }}/go/src/github.com/drone/drone-cli'
+        dest: "/home/{{ user }}/go/src/github.com/drone/drone-cli"
       become_user: "{{ user }}"
 
     - name: git clone mailer
       git:
         repo: https://github.com/drone/drone-cli.git
-        dest: '/home/{{ user }}/go/src/github.com/drone/drone-cli'
+        dest: "/home/{{ user }}/go/src/github.com/drone/drone-cli"
         update: yes
         force: yes
         version: "master"
@@ -116,7 +115,7 @@
     - name: build drone-cli
       shell: go build -o /home/{{ user }}/go/bin/drone-cli ./main.go
       args:
-        chdir: '/home/{{ user }}/go/src/github.com/drone/drone-cli/drone'
+        chdir: "/home/{{ user }}/go/src/github.com/drone/drone-cli/drone"
       environment:
         PATH: "{{ lookup('env','PATH') }}:/home/{{ user }}/go/bin:/usr/local/go/bin:{{ ansible_env.PATH }}"
 
@@ -124,16 +123,16 @@
       become: yes
       file:
         state: directory
-        mode: 'u=rwx,go=rx'
+        mode: "u=rwx,go=rx"
         owner: "{{ user }}"
         group: "{{ user }}"
-        dest: '{{ cgrates_dir }}'
+        dest: "{{ cgrates_dir }}"
       become_user: "{{ user }}"
 
     - name: git clone cgrates
       git:
         repo: https://github.com/cgrates/cgrates.git
-        dest: '{{ cgrates_dir }}'
+        dest: "{{ cgrates_dir }}"
         update: yes
         force: yes
         version: "master"
@@ -141,8 +140,7 @@
       become_user: "{{ user }}"
 
     - name: copy storage scripts
-      shell:
-        mkdir -p postgres;
+      shell: mkdir -p postgres;
         cp {{ cgrates_dir }}/data/storage/postgres/create_cdrs_tables.sql ./postgres/create_cdrs_tables.sql;
         cp {{ cgrates_dir }}/data/storage/postgres/create_tariffplan_tables.sql ./postgres/create_tariffplan_tables.sql;
         cp {{ cgrates_dir }}/data/storage/mysql/create_cdrs_tables.sql ./mysql/create_cdrs_tables.sql;
@@ -151,28 +149,28 @@
         cp {{ cgrates_dir }}/data/storage/mongo/create_user.js ./create_user.js;
       args:
         warn: false
-        chdir: '{{ cgrates_dir }}/data/docker/integration/scripts'
+        chdir: "{{ cgrates_dir }}/data/docker/integration/scripts"
 
     - name: build Docker image for integration
       become: yes
       shell: docker build -t cgrates-integration {{ cgrates_dir }}/data/docker/integration/
       args:
-        chdir: '{{ cgrates_dir }}/data/docker/integration'
+        chdir: "{{ cgrates_dir }}/data/docker/integration"
 
     - name: create drone directory
       become: yes
       file:
         state: directory
-        mode: 'u=rwx,go=rx'
+        mode: "u=rwx,go=rx"
         owner: "{{ user }}"
         group: "{{ user }}"
-        dest: '{{ drone_dir }}'
+        dest: "{{ drone_dir }}"
       become_user: "{{ user }}"
 
     - name: git clone drone
       git:
         repo: https://github.com/drone/drone.git
-        dest: '{{ drone_dir }}'
+        dest: "{{ drone_dir }}"
         update: yes
         force: yes
       become: yes
@@ -183,7 +181,7 @@
       environment:
         PATH: "{{ lookup('env','PATH') }}:/home/{{ user }}/go/bin:/usr/local/go/bin:{{ ansible_env.PATH }}"
       args:
-        chdir: '{{ drone_dir }}'
+        chdir: "{{ drone_dir }}"
 
     - name: install validate plugin
       shell: "go get github.com/Trial97/droneAuth"
@@ -195,12 +193,11 @@
         src: users.json.j2
         dest: /home/{{ user }}/users.json
 
-    - name:  generate RPCSecret
+    - name: generate RPCSecret
       shell: "openssl rand -hex 16"
       register: drone_secret
 
-
-    - name:  generate token
+    - name: generate token
       shell: "openssl rand -hex 16"
       register: drone_token
 
@@ -208,14 +205,14 @@
       template:
         src: .env.j2
         dest: /home/{{ user }}/.env
-    
+
     - name: start validate plugin
       shell: "droneAuth -secret={{ drone_secret.stdout }} -cfg=/home/{{ user }}/users.json -endpoint={{ drone_validate_plugin_endpoint }}>/dev/null 2>&1 &"
       async: 10
       poll: 0
       environment:
         PATH: "{{ lookup('env','PATH') }}:/home/{{ user }}/go/bin:/usr/local/go/bin:{{ ansible_env.PATH }}"
-    
+
     - name: start drone
       become: yes
       shell: "drone-server --env-file=/home/{{ user }}/.env >/home/{{ user }}/drone.log 2>&1 &"
@@ -223,13 +220,13 @@
       poll: 0
       environment:
         PATH: "{{ lookup('env','PATH') }}:/home/{{ user }}/go/bin:/usr/local/go/bin:{{ ansible_env.PATH }}"
-    
+
     - name: Check if drone-runner is running
       become: yes
       shell: docker container ls -q -f="name=drone-runner"
       register: continerList2
 
-    - name:  Start drone-runner
+    - name: Start drone-runner
       become: yes
       shell: docker run -d -v /var/run/docker.sock:/var/run/docker.sock -e DRONE_RPC_PROTO="https" -e DRONE_RPC_HOST="{{ drone_server_host }}" -e DRONE_RPC_SECRET="{{ drone_secret.stdout }}" -e DRONE_RUNNER_CAPACITY={{ docker_runner_capacity }} -e DRONE_RUNNER_NAME=cgrates -p 3000:3000 --restart always --name runner drone/drone-runner-docker:1
       when: continerList2.stdout_lines|length == 0
@@ -238,13 +235,13 @@
       copy:
         dest: "/home/{{ user }}/credentials.json"
         content: "{{ gapi_credentials }}"
-    
-    - name: Creating token file 
+
+    - name: Creating token file
       copy:
         dest: "/home/{{ user }}/token.json"
         content: "{{ gapi_token }}"
 
-    - name:  add secrets
+    - name: add secrets
       become: yes
       shell: |
         drone-cli orgsecret add {{ item }} credentials @/home/{{ user }}/credentials.json --allow-pull-request;
@@ -253,14 +250,14 @@
         PATH: "{{ lookup('env','PATH') }}:/home/{{ user }}/go/bin:/usr/local/go/bin:{{ ansible_env.PATH }}"
         DRONE_SERVER: "https://{{ drone_server_host }}"
         DRONE_TOKEN: "{{ drone_token.stdout }}"
-      with_items: '{{ drone_user_filter }}'
+      with_items: "{{ drone_user_filter }}"
 
     - name: Removeing credentials file
       file:
         path: "/home/{{ user }}/credentials.json"
         state: absent
-    
-    - name: Removeing token file 
+
+    - name: Removeing token file
       file:
         path: "/home/{{ user }}/token.json"
         state: absent

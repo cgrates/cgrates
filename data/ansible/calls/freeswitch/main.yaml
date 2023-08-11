@@ -7,13 +7,13 @@
         name: ../../roles/install_freeswitch
     - name: Install Go
       import_role:
-        name: ../../roles/install_go
+        name: ../../roles/go
 
     - name: Install and config CGRateS
       import_role:
         name: ../../roles/install_cgrates
 
-    - name:  Unzip FreeSWITCH config
+    - name: Unzip FreeSWITCH config
       become: yes
       unarchive:
         src: "{{cgrates_dir}}/data/tutorial_tests/fs_evsock/freeswitch/etc/freeswitch_conf.tar.gz"
@@ -26,13 +26,13 @@
         regexp: '192\.168\.56\.203'
         replace: "{{ ansible_host }}"
 
-    - name:  Remove FreeSWITCH default config from /etc/freeswitch
+    - name: Remove FreeSWITCH default config from /etc/freeswitch
       become: yes
       file:
         state: absent
         path: /etc/freeswitch
 
-    - name:  Copy our custom config for FreeSWITCH in /etc/freeswitch
+    - name: Copy our custom config for FreeSWITCH in /etc/freeswitch
       become: yes
       ansible.builtin.copy:
         src: "{{ cgrates_dir }}/data/tutorial_tests/fs_evsock/freeswitch/etc/freeswitch"
