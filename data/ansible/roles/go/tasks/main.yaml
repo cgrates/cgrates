@@ -1,56 +1,36 @@
 ---
-- name: Check if Go is already installed
+- name: Check if Go is already installed.
   command: /usr/local/go/bin/go version
   ignore_errors: true
-  register: go_version_output
+  register: go_version_result
+  changed_when: false
 
-- name: Install Go dependencies with apt
-  become: yes
-  apt:
-    name: '{{ go_dependencies }}'
-    state: present
-    update_cache: yes
-  when: package_manager == 'apt'
-
-- name: Install Go dependencies with dnf
-  become: yes
-  dnf:
-    name: '{{ go_dependencies }}'
-    state: present
-    update_cache: yes
-  when: package_manager == 'dnf'
-
-- name: Remove old installation of Go if needed
-  become: yes
+- name: Remove current installation.
   file:
-    path: /usr/local/go
     state: absent
-  when: go_version_output.rc == 0 and go_version_output.stdout != go_version_target
+    path: /usr/local/go
+  when:
+    - go_version_result is succeeded
+    - go_version not in go_version_result.stdout
 
-- name: Create Go language SDK installation directory
-  become: yes
-  file:
-    path: '{{ golang_install_dir }}'
-    state: directory
-    mode: '0755'
-
-- name: Download Go language SDK
+- name: Download Go.
   get_url:
-    url: '{{ golang_mirror }}/{{ golang_redis_filename }}'
-    dest: '{{ golang_download_dir }}/{{ golang_redis_filename }}'
-    mode: '0644'
+    url: "{{ go_download_url }}"
+    dest: /usr/local/src/{{ go_tarball }}
+    checksum: "sha256:{{ go_checksum }}"
+  when: go_version_result is failed
+    or go_version not in go_version_result.stdout
 
-- name: Install Go language SDK
-  become: yes
+- name: Extract Go.
   unarchive:
-    src: '{{ golang_download_dir }}/{{ golang_redis_filename }}'
-    remote_src: true
-    dest: '{{ golang_install_dir | dirname }}'
-    creates: '{{ golang_install_dir }}/bin'
+    src: /usr/local/src/{{ go_tarball }}
+    dest: /usr/local
+    copy: no
+  when: go_version_result is failed
+    or go_version not in go_version_result.stdout
 
-- name: Set Go language SDK environment variables
-  become: yes
-  template:
-    src: golang.sh.j2
-    dest: /etc/profile.d/golang.sh
-    mode: '0644'
+- name: Add Go to to system-wide $PATH.
+  copy:
+    dest: /etc/profile.d/go-path.sh
+    content: |-
+      export PATH=$PATH:/usr/local/go/bin
