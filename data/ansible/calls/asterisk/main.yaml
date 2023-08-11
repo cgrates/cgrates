@@ -2,18 +2,18 @@
 - name: Set up environment in order to run call tests for Asterisk
   hosts: all
   tasks:
-  - name: Install Go
-    import_role:
-      name: ../../roles/go
+    - name: Install Go
+      import_role:
+        name: ../../roles/go
 
-  - name: Install and configure CGRateS
-    import_role:
-      name: ../../roles/install_cgrates
+    - name: Install and configure CGRateS
+      import_role:
+        name: ../../roles/cgrates
 
-  - name: Install Asterisk
-    import_role:
-      name: ../../roles/install_asterisk
+    - name: Install Asterisk
+      import_role:
+        name: ../../roles/install_asterisk
 
-  - name: Install PJSUA
-    import_role:
-      name: ../../roles/install_pjsua
+    - name: Install PJSUA
+      import_role:
+        name: ../../roles/install_pjsua
