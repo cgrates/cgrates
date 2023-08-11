@@ -24,7 +24,9 @@ package ers
 import (
 	"context"
 	"fmt"
+	"net"
 	"reflect"
+	"strconv"
 	"testing"
 	"time"
 
@@ -42,6 +44,37 @@ var (
 )
 
 func TestKafkaER(t *testing.T) {
+	// Create kafka topic
+
+	conn, err := kafka.Dial("tcp", "localhost:9092")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer conn.Close()
+
+	controller, err := conn.Controller()
+	if err != nil {
+		t.Fatal(err)
+	}
+	controllerConn, err := kafka.Dial("tcp", net.JoinHostPort(controller.Host, strconv.Itoa(controller.Port)))
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer controllerConn.Close()
+
+	topicConfigs := []kafka.TopicConfig{
+		{
+			Topic:             "cgrates_cdrs",
+			NumPartitions:     1,
+			ReplicationFactor: 1,
+		},
+	}
+
+	err = controllerConn.CreateTopics(topicConfigs...)
+	if err != nil {
+		t.Fatal(err)
+	}
+
 	cfg, err := config.NewCGRConfigFromJsonStringWithDefaults(`{
 "ers": {									// EventReaderService
 	"enabled": true,						// starts the EventReader service: <true|false>
@@ -120,4 +153,25 @@ func TestKafkaER(t *testing.T) {
 		t.Fatal("Timeout")
 	}
 	rdrExit <- struct{}{}
+
+	// Delete kafka topic
+
+	partitions, err := conn.ReadPartitions("cgrates_cdrs")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if len(partitions) != 1 || partitions[0].Topic != "cgrates_cdrs" {
+		t.Fatal("expected topic named cgrates_cdrs to exist")
+	}
+
+	if err := conn.DeleteTopics("cgrates_cdrs"); err != nil {
+		t.Fatal(err)
+	}
+
+	experr := `[5] Leader Not Available: the cluster is in the middle of a leadership election and there is currently no leader for this partition and hence it is unavailable for writes`
+	_, err = conn.ReadPartitions("cgrates_cdrs")
+	if err == nil || err.Error() != experr {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", experr, err)
+	}
 }
