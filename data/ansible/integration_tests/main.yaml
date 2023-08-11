@@ -1,26 +1,10 @@
 ---
 - hosts: all
-  tasks:
-  - name: Install RabbitMQ
-    import_role:
-      name: ../roles/install_rabbitmq
-
-  - name: Install Kafka
-    import_role:
-      name: ../roles/kafka
-
-  - name: Install MongoDB
-    import_role:
-      name: ../roles/install_mongodb
-
-  - name: Install PostgreSQL
-    import_role:
-      name: ../roles/postgresql
-
-  - name: Install Go
-    import_role:
-      name: ../roles/install_go
-
-  - name: Install and configure CGRateS
-    import_role:
-      name: ../roles/install_cgrates
+  roles:
+    - ../roles/install_rabbitmq
+    - ../roles/kafka
+    - ../roles/install_mongodb
+    - ../roles/postgresql
+    - role: ../roles/go
+      when: install_go | default(true)
+    - ../roles/cgrates
