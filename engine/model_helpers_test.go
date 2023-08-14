@@ -3412,3 +3412,46 @@ func TestModelHelpersAsTPStats(t *testing.T) {
 		t.Errorf("expected %v, received %v", utils.ToJSON(exp), utils.ToJSON(rcv))
 	}
 }
+
+func TestModelHelperscsvLoadErrors(t *testing.T) {
+	type Test struct {
+		Fl float64 `index:"a"`
+	}
+	type Test2 struct {
+		Field string `index:"0" re:"//w+"`
+	}
+	tst := Test{Fl: 1.2}
+	tst2 := Test2{}
+	type args struct {
+		s      any
+		values []string
+	}
+	tests := []struct {
+		name string
+		args args
+		err  string
+	}{
+		{
+			name: "index tag error",
+			args: args{tst, []string{"test"}},
+			err: "invalid Test.Fl index a",
+		},
+		{
+			name: "regex tag error",
+			args: args{tst2, []string{"123"}},
+			err: "invalid Test2.Field value 123",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			_, err := csvLoad(tt.args.s, tt.args.values)
+
+			if err != nil {
+				if err.Error() != tt.err {
+					t.Error(err)
+				}
+			}
+		})
+	}
+}
