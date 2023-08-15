@@ -451,3 +451,89 @@ func BenchmarkRatingPlanRestore(b *testing.B) {
 		dm.GetRatingPlan(rp.Id, true, utils.NonTransactional)
 	}
 }
+
+func TestRatingPlanEqual(t *testing.T) {
+	rt := &RITiming{
+		Years:              utils.Years{},
+		Months:             utils.Months{},
+		MonthDays:          utils.MonthDays{},
+		WeekDays:           utils.WeekDays{},
+		StartTime:          "00:00:00",
+		EndTime:            "00:00:00",
+		cronString:         str,
+		tag:                str,
+	}
+
+	rr := &RIRate{
+		ConnectFee:       fl,
+		RoundingMethod:   str,
+		RoundingDecimals: nm,
+		MaxCost:          fl,
+		MaxCostStrategy:  str,
+		Rates:            RateGroups{{
+			GroupIntervalStart: 1 * time.Second,
+			Value:              fl,
+			RateIncrement:      1 * time.Second,
+			RateUnit:           1 * time.Second,
+		}},
+		tag:              str,
+	}
+
+	rl := RPRateList{{
+		Timing: str,
+		Rating: str,
+		Weight: fl,
+	}}
+
+	rp := &RatingPlan{
+		Id: "test",
+		Timings:          map[string]*RITiming{str: rt},
+		Ratings:          map[string]*RIRate{str: rr},
+		DestinationRates: map[string]RPRateList{str: rl},
+	}
+
+	rt2 := &RITiming{
+		Years:              utils.Years{},
+		Months:             utils.Months{},
+		MonthDays:          utils.MonthDays{},
+		WeekDays:           utils.WeekDays{},
+		StartTime:          "00:00:00",
+		EndTime:            "00:00:00",
+		cronString:         "val1",
+		tag:                str,
+	}
+
+	rr2 := &RIRate{
+		ConnectFee:       3.6,
+		RoundingMethod:   str,
+		RoundingDecimals: nm,
+		MaxCost:          fl,
+		MaxCostStrategy:  str,
+		Rates:            RateGroups{{
+			GroupIntervalStart: 1 * time.Second,
+			Value:              fl,
+			RateIncrement:      1 * time.Second,
+			RateUnit:           1 * time.Second,
+		}},
+		tag:              str,
+	}
+
+	rl2 := RPRateList{{
+		Timing: "test2",
+		Rating: str,
+		Weight: 1.0,
+	}}
+
+	o := &RatingPlan{
+		Id: "test2",
+		Timings:          map[string]*RITiming{str: rt2},
+		Ratings:          map[string]*RIRate{str: rr2},
+		DestinationRates: map[string]RPRateList{str: rl2},
+	}
+
+	rcv := rp.Equal(o)
+
+	if rcv != false {
+		t.Error(rcv)
+	}
+}

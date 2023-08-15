@@ -1627,3 +1627,13 @@ func TestMetaHandler(t *testing.T) {
 		})
 	}
 }
+
+func TestCDRCloneNil(t *testing.T) {
+	var cdr *CDR
+
+	rcv := cdr.Clone()
+
+	if rcv != nil {
+		t.Error(rcv)
+	}
+}

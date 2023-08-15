@@ -175,3 +175,13 @@ func BenchmarkDestinationStorageStoreRestore(b *testing.B) {
 		dm.GetDestination(nationale.Id, true, utils.NonTransactional)
 	}
 }
+
+func TestDestinationcontainsPrefixNil(t *testing.T) {
+	var d *Destination
+
+	rcv := d.containsPrefix("test")
+
+	if rcv != 0 {
+		t.Error(rcv)
+	}
+}
