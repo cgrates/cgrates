@@ -3051,3 +3051,330 @@ func TestStatDistrictMarshal(t *testing.T) {
 		t.Errorf("Expected: %s , received: %s", utils.ToJSON(statDistinct), utils.ToJSON(nStatDistinct))
 	}
 }
+
+func TestStatMetricsGetFilterIDs(t *testing.T) {
+	slc := []string{"test"}
+	tm := 1 * time.Second
+	acd := &StatACD{
+		FilterIDs: slc,
+		Sum:       1 * time.Second,
+		Count:     1,
+		Events:    map[string]*DurationWithCompress{
+			str: {
+				Duration: 1 * time.Second,
+				CompressFactor: 1,
+			},
+		},
+		MinItems:  1,
+		val:       &tm,
+	}
+
+	exp := slc
+	rcv := acd.GetFilterIDs()
+
+	if !reflect.DeepEqual(exp, rcv) {
+		t.Errorf("expected %v, received %v", exp, rcv)
+	}
+}
+
+func TestStatMetricsGetFilterIDsStatTCD(t *testing.T) {
+	slc := []string{"test"}
+	tm := 1 * time.Second
+	acd := &StatTCD{
+		FilterIDs: slc,
+		Sum:       1 * time.Second,
+		Count:     1,
+		Events:    map[string]*DurationWithCompress{
+			str: {
+				Duration: 1 * time.Second,
+				CompressFactor: 1,
+			},
+		},
+		MinItems:  1,
+		val:       &tm,
+	}
+
+	exp := slc
+	rcv := acd.GetFilterIDs()
+
+	if !reflect.DeepEqual(exp, rcv) {
+		t.Errorf("expected %v, received %v", exp, rcv)
+	}
+}
+
+func TestStatMetricsGetFloat64ValueStatACC(t *testing.T) {
+	fl := 1.2
+	slc := []string{"test"}
+	acd := &StatACC{
+		FilterIDs: slc,
+		Sum:       1.2,
+		Count:     1,
+		Events:    map[string]*StatWithCompress{
+			"test": {
+				Stat:           fl,
+				CompressFactor: 1,
+			},
+		},
+		MinItems:  1,
+		val:       &fl,
+	}
+
+	exp := fl
+	rcv := acd.GetFloat64Value()
+
+	if !reflect.DeepEqual(exp, rcv) {
+		t.Errorf("expected %v, received %v", exp, rcv)
+	}
+}
+
+func TestStatMetricsGetFilterIDsStatACC(t *testing.T) {
+	fl := 1.2
+	slc := []string{"test"}
+	acd := &StatACC{
+		FilterIDs: slc,
+		Sum:       1.2,
+		Count:     1,
+		Events:    map[string]*StatWithCompress{
+			"test": {
+				Stat:           fl,
+				CompressFactor: 1,
+			},
+		},
+		MinItems:  1,
+		val:       &fl,
+	}
+
+	exp := slc
+	rcv := acd.GetFilterIDs()
+
+	if !reflect.DeepEqual(exp, rcv) {
+		t.Errorf("expected %v, received %v", exp, rcv)
+	}
+}
+
+func TestStatMetricsGetFloat64ValueStatTCC(t *testing.T) {
+	fl := 1.2
+	slc := []string{"test"}
+	acd := &StatTCC{
+		FilterIDs: slc,
+		Sum:       1.2,
+		Count:     1,
+		Events:    map[string]*StatWithCompress{
+			"test": {
+				Stat:           fl,
+				CompressFactor: 1,
+			},
+		},
+		MinItems:  1,
+		val:       &fl,
+	}
+
+	exp := fl
+	rcv := acd.GetFloat64Value()
+
+	if !reflect.DeepEqual(exp, rcv) {
+		t.Errorf("expected %v, received %v", exp, rcv)
+	}
+}
+
+func TestStatMetricsGetFilterIDsStatTCC(t *testing.T) {
+	fl := 1.2
+	slc := []string{"test"}
+	acd := &StatTCC{
+		FilterIDs: slc,
+		Sum:       1.2,
+		Count:     1,
+		Events:    map[string]*StatWithCompress{
+			"test": {
+				Stat:           fl,
+				CompressFactor: 1,
+			},
+		},
+		MinItems:  1,
+		val:       &fl,
+	}
+
+	exp := slc
+	rcv := acd.GetFilterIDs()
+
+	if !reflect.DeepEqual(exp, rcv) {
+		t.Errorf("expected %v, received %v", exp, rcv)
+	}
+}
+
+func TestStatMetricsGetFilterIDsStatPDD(t *testing.T) {
+	tm := 1 * time.Second
+	slc := []string{"test"}
+	acd := &StatPDD{
+		FilterIDs: slc,
+		Sum:       1 * time.Second,
+		Count:     1,
+		Events:    map[string]*DurationWithCompress{
+			str: {
+				Duration: 1 * time.Second,
+				CompressFactor: 1,
+			},
+		},
+		MinItems:  1,
+		val:       &tm,
+	}
+
+	exp := slc
+	rcv := acd.GetFilterIDs()
+
+	if !reflect.DeepEqual(exp, rcv) {
+		t.Errorf("expected %v, received %v", exp, rcv)
+	}
+}
+
+func TestStatMetricsGetFilterIDsStatDDC(t *testing.T) {
+	slc := []string{"test"}
+	acd := &StatDDC{
+		FilterIDs:   slc,
+		MinItems:    1,
+		Count:       1,
+	}
+
+	rcv := acd.GetValue()
+
+	if rcv != 0. {
+		t.Errorf("expected %v, received %v", 0., rcv)
+	}
+}
+
+func TestStatMetricsGetFilterIDsDDC(t *testing.T) {
+	slc := []string{"test"}
+	acd := &StatDDC{
+		FilterIDs:   slc,
+		MinItems:    1,
+		Count:       1,
+	}
+
+	rcv := acd.GetFilterIDs()
+
+	if !reflect.DeepEqual(slc, rcv) {
+		t.Errorf("expected %v, received %v", slc, rcv)
+	}
+}
+
+func TestStatMetricsGetValueSum(t *testing.T) {
+	slc := []string{"test"}
+	acd := &StatSum{
+		FilterIDs: slc,
+		Sum:       1.2,
+		Count:     1,
+		Events:    map[string]*StatWithCompress{
+			"test": {
+				Stat:           fl,
+				CompressFactor: 1,
+			},
+		},
+		MinItems:  1,
+		val:       &fl,
+	}
+
+	rcv := acd.GetValue()
+
+	if rcv != fl {
+		t.Errorf("expected %v, received %v", fl, rcv)
+	}
+}
+
+func TestStatMetricsGetFilterIDsSum(t *testing.T) {
+	slc := []string{"test"}
+	acd := &StatSum{
+		FilterIDs: slc,
+		Sum:       1.2,
+		Count:     1,
+		Events:    map[string]*StatWithCompress{
+			"test": {
+				Stat:           fl,
+				CompressFactor: 1,
+			},
+		},
+		MinItems:  1,
+		val:       &fl,
+	}
+
+	rcv := acd.GetFilterIDs()
+
+	if !reflect.DeepEqual(slc, rcv) {
+		t.Errorf("expected %v, received %v", slc, rcv)
+	}
+}
+
+func TestStatMetricsGetValueAvarage(t *testing.T) {
+	slc := []string{"test"}
+	acd := &StatAverage{
+		FilterIDs: slc,
+		Sum:       1.2,
+		Count:     1,
+		Events:    map[string]*StatWithCompress{
+			"test": {
+				Stat:           fl,
+				CompressFactor: 1,
+			},
+		},
+		MinItems:  1,
+		val:       &fl,
+	}
+
+	rcv := acd.GetValue()
+
+	if rcv != fl {
+		t.Errorf("expected %v, received %v", fl, rcv)
+	}
+}
+
+func TestStatMetricsGetFilterIDsAvarage(t *testing.T) {
+	slc := []string{"test"}
+	acd := &StatAverage{
+		FilterIDs: slc,
+		Sum:       1.2,
+		Count:     1,
+		Events:    map[string]*StatWithCompress{
+			"test": {
+				Stat:           fl,
+				CompressFactor: 1,
+			},
+		},
+		MinItems:  1,
+		val:       &fl,
+	}
+
+	rcv := acd.GetFilterIDs()
+
+	if !reflect.DeepEqual(slc, rcv) {
+		t.Errorf("expected %v, received %v", slc, rcv)
+	}
+}
+
+func TestStatMetricsGetValueDistinct(t *testing.T) {
+	slc := []string{"test"}
+	acd := &StatDistinct{
+		FilterIDs:   slc,
+		MinItems:    1,
+		Count:       1,
+	}
+
+	rcv := acd.GetValue()
+
+	if rcv != 0. {
+		t.Errorf("expected %v, received %v", 0., rcv)
+	}
+}
+
+func TestStatMetricsGetFilterIDsDistinct(t *testing.T) {
+	slc := []string{"test"}
+	acd := &StatDistinct{
+		FilterIDs:   slc,
+		MinItems:    1,
+		Count:       1,
+	}
+
+	rcv := acd.GetFilterIDs()
+
+	if !reflect.DeepEqual(slc, rcv) {
+		t.Errorf("expected %v, received %v", slc, rcv)
+	}
+}

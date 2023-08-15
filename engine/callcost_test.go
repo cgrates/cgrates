@@ -317,3 +317,13 @@ func TestCallCostUpdateCost(t *testing.T) {
 		t.Error("didn't update")
 	}
 }
+
+func TestCallCostUpdateRatedUsage(t *testing.T) {
+	var cc *CallCost
+
+	rcv := cc.UpdateRatedUsage()
+
+	if rcv != 0 {
+		t.Error(rcv)
+	}
+}

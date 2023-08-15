@@ -1745,3 +1745,13 @@ func TestLibeventcostIfaceAsEventCost(t *testing.T) {
 		})
 	}
 }
+
+func TestLibEventCostClone(t *testing.T) {
+	var rf RatingMatchedFilters
+
+	rcv := rf.Clone()
+
+	if rcv != nil {
+		t.Error(rcv)
+	}
+}
