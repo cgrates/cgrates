@@ -3434,12 +3434,12 @@ func TestModelHelperscsvLoadErrors(t *testing.T) {
 		{
 			name: "index tag error",
 			args: args{tst, []string{"test"}},
-			err: "invalid Test.Fl index a",
+			err:  "invalid Test.Fl index a",
 		},
 		{
 			name: "regex tag error",
 			args: args{tst2, []string{"123"}},
-			err: "invalid Test2.Field value 123",
+			err:  "invalid Test2.Field value 123",
 		},
 	}
 

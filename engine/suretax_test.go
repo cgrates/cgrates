@@ -84,3 +84,18 @@ func TestNewSureTaxRequest(t *testing.T) {
 		t.Errorf("Expecting:\n%s\nReceived:\n%s", string(eSureTaxRequest.Request), string(stReq.Request))
 	}
 }
+
+func TestSureTaxNewSureTaxRequest(t *testing.T) {
+	cdr := &CDR{}
+	rcv, err := NewSureTaxRequest(cdr, nil)
+
+	if err != nil {
+		if err.Error() != "invalid SureTax config" {
+			t.Fatal(err)
+		}
+	}
+
+	if rcv != nil {
+		t.Error(rcv)
+	}
+}
