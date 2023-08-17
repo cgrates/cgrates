@@ -1993,3 +1993,13 @@ func TestIncrementClone(t *testing.T) {
 		t.Errorf("Expecting %+v, received: %+v", utils.ToJSON(eOut), utils.ToJSON(clone))
 	}
 }
+
+func TestTimeSpansClone(t *testing.T) {
+	var incs Increments
+
+	rcv := incs.Clone()
+
+	if rcv != nil {
+		t.Error(rcv)
+	}
+}

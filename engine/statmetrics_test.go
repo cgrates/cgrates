@@ -3059,14 +3059,14 @@ func TestStatMetricsGetFilterIDs(t *testing.T) {
 		FilterIDs: slc,
 		Sum:       1 * time.Second,
 		Count:     1,
-		Events:    map[string]*DurationWithCompress{
+		Events: map[string]*DurationWithCompress{
 			str: {
-				Duration: 1 * time.Second,
+				Duration:       1 * time.Second,
 				CompressFactor: 1,
 			},
 		},
-		MinItems:  1,
-		val:       &tm,
+		MinItems: 1,
+		val:      &tm,
 	}
 
 	exp := slc
@@ -3084,14 +3084,14 @@ func TestStatMetricsGetFilterIDsStatTCD(t *testing.T) {
 		FilterIDs: slc,
 		Sum:       1 * time.Second,
 		Count:     1,
-		Events:    map[string]*DurationWithCompress{
+		Events: map[string]*DurationWithCompress{
 			str: {
-				Duration: 1 * time.Second,
+				Duration:       1 * time.Second,
 				CompressFactor: 1,
 			},
 		},
-		MinItems:  1,
-		val:       &tm,
+		MinItems: 1,
+		val:      &tm,
 	}
 
 	exp := slc
@@ -3109,14 +3109,14 @@ func TestStatMetricsGetFloat64ValueStatACC(t *testing.T) {
 		FilterIDs: slc,
 		Sum:       1.2,
 		Count:     1,
-		Events:    map[string]*StatWithCompress{
+		Events: map[string]*StatWithCompress{
 			"test": {
 				Stat:           fl,
 				CompressFactor: 1,
 			},
 		},
-		MinItems:  1,
-		val:       &fl,
+		MinItems: 1,
+		val:      &fl,
 	}
 
 	exp := fl
@@ -3134,14 +3134,14 @@ func TestStatMetricsGetFilterIDsStatACC(t *testing.T) {
 		FilterIDs: slc,
 		Sum:       1.2,
 		Count:     1,
-		Events:    map[string]*StatWithCompress{
+		Events: map[string]*StatWithCompress{
 			"test": {
 				Stat:           fl,
 				CompressFactor: 1,
 			},
 		},
-		MinItems:  1,
-		val:       &fl,
+		MinItems: 1,
+		val:      &fl,
 	}
 
 	exp := slc
@@ -3159,14 +3159,14 @@ func TestStatMetricsGetFloat64ValueStatTCC(t *testing.T) {
 		FilterIDs: slc,
 		Sum:       1.2,
 		Count:     1,
-		Events:    map[string]*StatWithCompress{
+		Events: map[string]*StatWithCompress{
 			"test": {
 				Stat:           fl,
 				CompressFactor: 1,
 			},
 		},
-		MinItems:  1,
-		val:       &fl,
+		MinItems: 1,
+		val:      &fl,
 	}
 
 	exp := fl
@@ -3184,14 +3184,14 @@ func TestStatMetricsGetFilterIDsStatTCC(t *testing.T) {
 		FilterIDs: slc,
 		Sum:       1.2,
 		Count:     1,
-		Events:    map[string]*StatWithCompress{
+		Events: map[string]*StatWithCompress{
 			"test": {
 				Stat:           fl,
 				CompressFactor: 1,
 			},
 		},
-		MinItems:  1,
-		val:       &fl,
+		MinItems: 1,
+		val:      &fl,
 	}
 
 	exp := slc
@@ -3209,14 +3209,14 @@ func TestStatMetricsGetFilterIDsStatPDD(t *testing.T) {
 		FilterIDs: slc,
 		Sum:       1 * time.Second,
 		Count:     1,
-		Events:    map[string]*DurationWithCompress{
+		Events: map[string]*DurationWithCompress{
 			str: {
-				Duration: 1 * time.Second,
+				Duration:       1 * time.Second,
 				CompressFactor: 1,
 			},
 		},
-		MinItems:  1,
-		val:       &tm,
+		MinItems: 1,
+		val:      &tm,
 	}
 
 	exp := slc
@@ -3230,9 +3230,9 @@ func TestStatMetricsGetFilterIDsStatPDD(t *testing.T) {
 func TestStatMetricsGetFilterIDsStatDDC(t *testing.T) {
 	slc := []string{"test"}
 	acd := &StatDDC{
-		FilterIDs:   slc,
-		MinItems:    1,
-		Count:       1,
+		FilterIDs: slc,
+		MinItems:  1,
+		Count:     1,
 	}
 
 	rcv := acd.GetValue()
@@ -3245,9 +3245,9 @@ func TestStatMetricsGetFilterIDsStatDDC(t *testing.T) {
 func TestStatMetricsGetFilterIDsDDC(t *testing.T) {
 	slc := []string{"test"}
 	acd := &StatDDC{
-		FilterIDs:   slc,
-		MinItems:    1,
-		Count:       1,
+		FilterIDs: slc,
+		MinItems:  1,
+		Count:     1,
 	}
 
 	rcv := acd.GetFilterIDs()
@@ -3263,14 +3263,14 @@ func TestStatMetricsGetValueSum(t *testing.T) {
 		FilterIDs: slc,
 		Sum:       1.2,
 		Count:     1,
-		Events:    map[string]*StatWithCompress{
+		Events: map[string]*StatWithCompress{
 			"test": {
 				Stat:           fl,
 				CompressFactor: 1,
 			},
 		},
-		MinItems:  1,
-		val:       &fl,
+		MinItems: 1,
+		val:      &fl,
 	}
 
 	rcv := acd.GetValue()
@@ -3286,14 +3286,14 @@ func TestStatMetricsGetFilterIDsSum(t *testing.T) {
 		FilterIDs: slc,
 		Sum:       1.2,
 		Count:     1,
-		Events:    map[string]*StatWithCompress{
+		Events: map[string]*StatWithCompress{
 			"test": {
 				Stat:           fl,
 				CompressFactor: 1,
 			},
 		},
-		MinItems:  1,
-		val:       &fl,
+		MinItems: 1,
+		val:      &fl,
 	}
 
 	rcv := acd.GetFilterIDs()
@@ -3309,14 +3309,14 @@ func TestStatMetricsGetValueAvarage(t *testing.T) {
 		FilterIDs: slc,
 		Sum:       1.2,
 		Count:     1,
-		Events:    map[string]*StatWithCompress{
+		Events: map[string]*StatWithCompress{
 			"test": {
 				Stat:           fl,
 				CompressFactor: 1,
 			},
 		},
-		MinItems:  1,
-		val:       &fl,
+		MinItems: 1,
+		val:      &fl,
 	}
 
 	rcv := acd.GetValue()
@@ -3332,14 +3332,14 @@ func TestStatMetricsGetFilterIDsAvarage(t *testing.T) {
 		FilterIDs: slc,
 		Sum:       1.2,
 		Count:     1,
-		Events:    map[string]*StatWithCompress{
+		Events: map[string]*StatWithCompress{
 			"test": {
 				Stat:           fl,
 				CompressFactor: 1,
 			},
 		},
-		MinItems:  1,
-		val:       &fl,
+		MinItems: 1,
+		val:      &fl,
 	}
 
 	rcv := acd.GetFilterIDs()
@@ -3352,9 +3352,9 @@ func TestStatMetricsGetFilterIDsAvarage(t *testing.T) {
 func TestStatMetricsGetValueDistinct(t *testing.T) {
 	slc := []string{"test"}
 	acd := &StatDistinct{
-		FilterIDs:   slc,
-		MinItems:    1,
-		Count:       1,
+		FilterIDs: slc,
+		MinItems:  1,
+		Count:     1,
 	}
 
 	rcv := acd.GetValue()
@@ -3367,9 +3367,9 @@ func TestStatMetricsGetValueDistinct(t *testing.T) {
 func TestStatMetricsGetFilterIDsDistinct(t *testing.T) {
 	slc := []string{"test"}
 	acd := &StatDistinct{
-		FilterIDs:   slc,
-		MinItems:    1,
-		Count:       1,
+		FilterIDs: slc,
+		MinItems:  1,
+		Count:     1,
 	}
 
 	rcv := acd.GetFilterIDs()

@@ -454,14 +454,14 @@ func BenchmarkRatingPlanRestore(b *testing.B) {
 
 func TestRatingPlanEqual(t *testing.T) {
 	rt := &RITiming{
-		Years:              utils.Years{},
-		Months:             utils.Months{},
-		MonthDays:          utils.MonthDays{},
-		WeekDays:           utils.WeekDays{},
-		StartTime:          "00:00:00",
-		EndTime:            "00:00:00",
-		cronString:         str,
-		tag:                str,
+		Years:      utils.Years{},
+		Months:     utils.Months{},
+		MonthDays:  utils.MonthDays{},
+		WeekDays:   utils.WeekDays{},
+		StartTime:  "00:00:00",
+		EndTime:    "00:00:00",
+		cronString: str,
+		tag:        str,
 	}
 
 	rr := &RIRate{
@@ -470,13 +470,13 @@ func TestRatingPlanEqual(t *testing.T) {
 		RoundingDecimals: nm,
 		MaxCost:          fl,
 		MaxCostStrategy:  str,
-		Rates:            RateGroups{{
+		Rates: RateGroups{{
 			GroupIntervalStart: 1 * time.Second,
 			Value:              fl,
 			RateIncrement:      1 * time.Second,
 			RateUnit:           1 * time.Second,
 		}},
-		tag:              str,
+		tag: str,
 	}
 
 	rl := RPRateList{{
@@ -486,21 +486,21 @@ func TestRatingPlanEqual(t *testing.T) {
 	}}
 
 	rp := &RatingPlan{
-		Id: "test",
+		Id:               "test",
 		Timings:          map[string]*RITiming{str: rt},
 		Ratings:          map[string]*RIRate{str: rr},
 		DestinationRates: map[string]RPRateList{str: rl},
 	}
 
 	rt2 := &RITiming{
-		Years:              utils.Years{},
-		Months:             utils.Months{},
-		MonthDays:          utils.MonthDays{},
-		WeekDays:           utils.WeekDays{},
-		StartTime:          "00:00:00",
-		EndTime:            "00:00:00",
-		cronString:         "val1",
-		tag:                str,
+		Years:      utils.Years{},
+		Months:     utils.Months{},
+		MonthDays:  utils.MonthDays{},
+		WeekDays:   utils.WeekDays{},
+		StartTime:  "00:00:00",
+		EndTime:    "00:00:00",
+		cronString: "val1",
+		tag:        str,
 	}
 
 	rr2 := &RIRate{
@@ -509,13 +509,13 @@ func TestRatingPlanEqual(t *testing.T) {
 		RoundingDecimals: nm,
 		MaxCost:          fl,
 		MaxCostStrategy:  str,
-		Rates:            RateGroups{{
+		Rates: RateGroups{{
 			GroupIntervalStart: 1 * time.Second,
 			Value:              fl,
 			RateIncrement:      1 * time.Second,
 			RateUnit:           1 * time.Second,
 		}},
-		tag:              str,
+		tag: str,
 	}
 
 	rl2 := RPRateList{{
@@ -525,7 +525,7 @@ func TestRatingPlanEqual(t *testing.T) {
 	}}
 
 	o := &RatingPlan{
-		Id: "test2",
+		Id:               "test2",
 		Timings:          map[string]*RITiming{str: rt2},
 		Ratings:          map[string]*RIRate{str: rr2},
 		DestinationRates: map[string]RPRateList{str: rl2},
