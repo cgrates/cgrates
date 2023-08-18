@@ -2085,25 +2085,25 @@ func TestTimespansMerge(t *testing.T) {
 
 func TestTimespansSharingSignatureFalse(t *testing.T) {
 	inc := Increment{
-		Duration:       1 * time.Millisecond,
-		Cost:           1.2,
-		BalanceInfo:    &DebitInfo{
-			Unit:      &UnitInfo{
+		Duration: 1 * time.Millisecond,
+		Cost:     1.2,
+		BalanceInfo: &DebitInfo{
+			Unit: &UnitInfo{
 				UUID:          "test",
 				ID:            "test",
 				Value:         1.2,
 				DestinationID: "test",
 				Consumed:      1.2,
 				ToR:           "test",
-				RateInterval:  &RateInterval{
+				RateInterval: &RateInterval{
 					Timing: &RITiming{WeekDays: []time.Weekday{time.Monday, time.Tuesday, time.Wednesday, time.Thursday, time.Friday}},
 					Rating: &RIRate{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 100, RateIncrement: 10 * time.Second, RateUnit: time.Second}}},
 					Weight: 1.2,
 				},
 			},
-			Monetary:  &MonetaryInfo{
-				UUID :        "test",
-				ID :          "test",
+			Monetary: &MonetaryInfo{
+				UUID:         "test",
+				ID:           "test",
 				Value:        1.2,
 				RateInterval: &RateInterval{},
 			},
@@ -2114,25 +2114,25 @@ func TestTimespansSharingSignatureFalse(t *testing.T) {
 	}
 
 	inc2 := Increment{
-		Duration:       2 * time.Millisecond,
-		Cost:           2.2,
-		BalanceInfo:    &DebitInfo{
-			Unit:      &UnitInfo{
+		Duration: 2 * time.Millisecond,
+		Cost:     2.2,
+		BalanceInfo: &DebitInfo{
+			Unit: &UnitInfo{
 				UUID:          "test2",
 				ID:            "test2",
 				Value:         2.2,
 				DestinationID: "test2",
 				Consumed:      2.2,
 				ToR:           "test2",
-				RateInterval:  &RateInterval{
+				RateInterval: &RateInterval{
 					Timing: &RITiming{},
 					Rating: &RIRate{},
 					Weight: 2.2,
 				},
 			},
-			Monetary:  &MonetaryInfo{
-				UUID :        "test2",
-				ID :          "test2",
+			Monetary: &MonetaryInfo{
+				UUID:         "test2",
+				ID:           "test2",
 				Value:        2.2,
 				RateInterval: &RateInterval{},
 			},

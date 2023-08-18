@@ -147,7 +147,7 @@ func TestStorageInternalStorDBSetNilFields(t *testing.T) {
 func TestStorageInternalStorDBNil(t *testing.T) {
 	iDB := &InternalDB{}
 	smCost := SMCost{}
-	
+
 	err := iDB.SetSMCost(&smCost)
 	if err != nil {
 		t.Error(err)
