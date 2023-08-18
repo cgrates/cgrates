@@ -4,7 +4,7 @@
     # CGRateS vars
     cgrates_dir: "/home/{{ user }}/go/src/github.com/cgrates/cgrates"
     cgrates_branch: "master"
-    cgrates_distribution: "nightly"
+    # cgrates_distribution: "nightly"
     ###############################################################
     ######################## GPG Vars #############################
     ###############################################################
@@ -30,9 +30,9 @@
 
   remote_user: '{{ user }}'
   tasks:
-    - name: set cgrates cgrates_distribution
-      set_fact:
-        cgrates_distribution: "{{ cgrates_distribution }}"
+    # - name: set cgrates cgrates_distribution
+    #   set_fact:
+    #     cgrates_distribution: "{{ cgrates_distribution }}"
 ###########################################################################################################################
 ###########################################################################################################################
 # install dependencies
@@ -170,7 +170,6 @@
     - name: set cgrates distribution
       set_fact:
         cgrates_distribution: "{{ cgrates_branch }}"
-      when: cgrates_branch != "master"
 
   # Include the package with reprepro
     - name : Include the package with reprepro
@@ -228,6 +227,7 @@
       when : cgrates_distribution == "nightly" or hostvars['apt']['gitTagVar'].stdout_lines|length > 0
 
     - name: Move the new package to /var/packages/deb
+      become: true
       shell: "mv /tmp/{{ item}} /var/packages/deb/{{ cgrates_distribution }}/"
       with_items: "{{ hostvars['apt']['debFileName']['stdout_lines'] }}"
 
