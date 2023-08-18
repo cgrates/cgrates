@@ -1053,3 +1053,60 @@ func TestSupplierscompileCacheParamaters(t *testing.T) {
 		t.Error(err)
 	}
 }
+
+func TestSuppliersCostForEvent(t *testing.T) {
+	spS := SupplierService{}
+	type args struct {
+		ev *utils.CGREvent
+        acntIDs []string
+		rpIDs []string
+		argDsp *utils.ArgDispatcher
+	}
+	type exp struct {
+		costData map[string]any
+		err string
+	}
+	tests := []struct{
+		name string 
+		args args
+		exp exp
+	}{
+		{
+			name: "CGREvent CheckMandatoryFields",
+			args: args{&utils.CGREvent{}, nil, nil, nil},
+			exp: exp{map[string]any{}, "MANDATORY_IE_MISSING: [Account]"},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			rcv, err := spS.costForEvent(tt.args.ev, tt.args.acntIDs, tt.args.rpIDs, tt.args.argDsp)
+
+			if err != nil {
+				if err.Error() != tt.exp.err {
+					t.Fatal(err)
+				}
+			} else {
+				t.Error("was expecting an error")
+			}
+
+			if !reflect.DeepEqual(rcv, tt.exp.costData) {
+				t.Errorf("expected %s, received %s", utils.ToJSON(tt.exp.costData), utils.ToJSON(rcv))
+			}
+		})
+	}
+}
+
+func TestSuppliersV1GetSuppliersError(t *testing.T) {
+	spS := SupplierService{}
+	args := &ArgsGetSuppliers{}
+
+	err := spS.V1GetSuppliers(args, nil)
+	if err != nil {
+		if err.Error() != "MANDATORY_IE_MISSING: [CGREvent]" {
+			t.Error(err)
+		}
+	} else {
+		t.Error("was expecting an error")
+	}
+}
