@@ -2003,3 +2003,159 @@ func TestTimeSpansClone(t *testing.T) {
 		t.Error(rcv)
 	}
 }
+
+func TestTimespansMonetaryInfoEqual(t *testing.T) {
+	mi := &MonetaryInfo{}
+
+	rcv := mi.Equal(nil)
+
+	if rcv != false {
+		t.Error(rcv)
+	}
+}
+
+func TestTimespansUnitInfoEqual(t *testing.T) {
+	mi := &UnitInfo{}
+
+	rcv := mi.Equal(nil)
+
+	if rcv != false {
+		t.Error(rcv)
+	}
+}
+
+func TestTimespansMerge(t *testing.T) {
+	ts := TimeSpan{
+		TimeStart:      time.Date(2009, 11, 17, 20, 34, 58, 651387237, time.UTC),
+		TimeEnd:        time.Date(2009, 11, 17, 20, 34, 58, 651387237, time.UTC),
+		Cost:           1.2,
+		RateInterval:   &RateInterval{},
+		DurationIndex:  1 * time.Second,
+		Increments:     Increments{},
+		RoundIncrement: &Increment{},
+		MatchedSubject: "test",
+		MatchedPrefix:  "test",
+		MatchedDestId:  "test",
+		RatingPlanId:   "test",
+		CompressFactor: 1,
+		ratingInfo:     &RatingInfo{},
+	}
+
+	ts2 := TimeSpan{
+		TimeStart:      time.Date(2009, 11, 17, 20, 34, 58, 651387237, time.UTC),
+		TimeEnd:        time.Date(2009, 11, 17, 20, 34, 58, 651387237, time.UTC),
+		Cost:           2.2,
+		RateInterval:   &RateInterval{},
+		DurationIndex:  2 * time.Second,
+		Increments:     Increments{},
+		RoundIncrement: &Increment{},
+		MatchedSubject: "test1",
+		MatchedPrefix:  "test1",
+		MatchedDestId:  "test1",
+		RatingPlanId:   "test1",
+		CompressFactor: 2,
+		ratingInfo:     &RatingInfo{},
+	}
+
+	ts3 := TimeSpan{
+		TimeStart:      time.Date(2009, 11, 17, 20, 34, 58, 651387237, time.UTC),
+		TimeEnd:        time.Date(2009, 11, 17, 20, 34, 58, 651387237, time.UTC),
+		Cost:           3.2,
+		RateInterval:   &RateInterval{},
+		DurationIndex:  3 * time.Second,
+		Increments:     Increments{},
+		RoundIncrement: &Increment{},
+		MatchedSubject: "test3",
+		MatchedPrefix:  "test3",
+		MatchedDestId:  "test3",
+		RatingPlanId:   "test3",
+		CompressFactor: 3,
+		ratingInfo:     &RatingInfo{},
+	}
+	tss := &TimeSpans{&ts, &ts2, &ts3}
+
+	tss.Merge()
+
+	exp := &TimeSpans{&ts, &ts2, &ts3}
+
+	if !reflect.DeepEqual(tss, exp) {
+		t.Errorf("expected %s, received %s", utils.ToJSON(exp), utils.ToJSON(tss))
+	}
+}
+
+func TestTimespansSharingSignatureFalse(t *testing.T) {
+	inc := Increment{
+		Duration:       1 * time.Millisecond,
+		Cost:           1.2,
+		BalanceInfo:    &DebitInfo{
+			Unit:      &UnitInfo{
+				UUID:          "test",
+				ID:            "test",
+				Value:         1.2,
+				DestinationID: "test",
+				Consumed:      1.2,
+				ToR:           "test",
+				RateInterval:  &RateInterval{
+					Timing: &RITiming{WeekDays: []time.Weekday{time.Monday, time.Tuesday, time.Wednesday, time.Thursday, time.Friday}},
+					Rating: &RIRate{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 100, RateIncrement: 10 * time.Second, RateUnit: time.Second}}},
+					Weight: 1.2,
+				},
+			},
+			Monetary:  &MonetaryInfo{
+				UUID :        "test",
+				ID :          "test",
+				Value:        1.2,
+				RateInterval: &RateInterval{},
+			},
+			AccountID: "test",
+		},
+		CompressFactor: 1,
+		paid:           false,
+	}
+
+	inc2 := Increment{
+		Duration:       2 * time.Millisecond,
+		Cost:           2.2,
+		BalanceInfo:    &DebitInfo{
+			Unit:      &UnitInfo{
+				UUID:          "test2",
+				ID:            "test2",
+				Value:         2.2,
+				DestinationID: "test2",
+				Consumed:      2.2,
+				ToR:           "test2",
+				RateInterval:  &RateInterval{
+					Timing: &RITiming{},
+					Rating: &RIRate{},
+					Weight: 2.2,
+				},
+			},
+			Monetary:  &MonetaryInfo{
+				UUID :        "test2",
+				ID :          "test2",
+				Value:        2.2,
+				RateInterval: &RateInterval{},
+			},
+			AccountID: "test2",
+		},
+		CompressFactor: 2,
+		paid:           true,
+	}
+	incs := Increments{&inc}
+	other := Increments{&inc2}
+
+	rcv := incs.SharingSignature(other)
+
+	if rcv != false {
+		t.Error(rcv)
+	}
+
+	incs2 := Increments{&inc, &inc2}
+	other2 := Increments{&inc2}
+
+	rcv = incs2.SharingSignature(other2)
+
+	if rcv != false {
+		t.Error(rcv)
+	}
+}
