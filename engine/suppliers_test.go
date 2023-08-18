@@ -1057,24 +1057,24 @@ func TestSupplierscompileCacheParamaters(t *testing.T) {
 func TestSuppliersCostForEvent(t *testing.T) {
 	spS := SupplierService{}
 	type args struct {
-		ev *utils.CGREvent
-        acntIDs []string
-		rpIDs []string
-		argDsp *utils.ArgDispatcher
+		ev      *utils.CGREvent
+		acntIDs []string
+		rpIDs   []string
+		argDsp  *utils.ArgDispatcher
 	}
 	type exp struct {
 		costData map[string]any
-		err string
+		err      string
 	}
-	tests := []struct{
-		name string 
+	tests := []struct {
+		name string
 		args args
-		exp exp
+		exp  exp
 	}{
 		{
 			name: "CGREvent CheckMandatoryFields",
 			args: args{&utils.CGREvent{}, nil, nil, nil},
-			exp: exp{map[string]any{}, "MANDATORY_IE_MISSING: [Account]"},
+			exp:  exp{map[string]any{}, "MANDATORY_IE_MISSING: [Account]"},
 		},
 	}
 
