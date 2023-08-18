@@ -26,6 +26,13 @@
     state: present
   ignore_errors: true
 
+- name: Make sure /etc/default/rng-tools exist
+  become: true
+  file:
+    path: /etc/default/rng-tools
+    state: touch
+
+
 - name: Add HRNGDEVICE=/dev/urandom so we can execute rngd
   become: true
   lineinfile:
