@@ -20,6 +20,7 @@ package engine
 import (
 	"reflect"
 	"testing"
+	"time"
 
 	"github.com/cgrates/cgrates/utils"
 )
@@ -595,5 +596,57 @@ func TestUnitCountersResetCounterById(t *testing.T) {
 			}
 		}
 		t.Errorf("Error Initializing adding unit counters: %v", len(a.UnitCounters))
+	}
+}
+
+func TestUnitsCounter(t *testing.T) {
+	str := "test"
+	fl := 1.2
+	bl := true
+	tm := time.Date(2010, 11, 17, 20, 34, 58, 651387237, time.UTC)
+	vf := utils.ValueFormula{
+		Method: str,
+		Params: map[string]any{str: fl},
+		Static: 1.2,
+	}
+	va := ValueFactor{str: fl}
+	rt := []*RITiming{{
+		Years:      utils.Years{2022},
+		Months:     utils.Months{8},
+		MonthDays:  utils.MonthDays{9},
+		WeekDays:   utils.WeekDays{2},
+		StartTime:  "00:00:00",
+		EndTime:    "00:00:00",
+		cronString: "test",
+		tag:        "test",
+	}}
+
+	cf := CounterFilter{
+		Value: 1.2,
+		Filter: &BalanceFilter{
+			Uuid:           &str,
+			ID:             &str,
+			Type:           &str,
+			Value:          &vf,
+			ExpirationDate: &tm,
+			Weight:         &fl,
+			DestinationIDs: &sm,
+			RatingSubject:  &str,
+			Categories:     &sm,
+			SharedGroups:   &sm,
+			TimingIDs:      &sm,
+			Timings:        rt,
+			Disabled:       &bl,
+			Factor:         &va,
+			Blocker:        &bl,
+		},
+	}
+
+	cfg := CounterFilters{&cf}
+
+	rcv := cfg.HasCounter(&cf)
+
+	if rcv != true {
+		t.Error(rcv)
 	}
 }
