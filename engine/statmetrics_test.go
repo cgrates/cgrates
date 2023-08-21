@@ -3378,3 +3378,111 @@ func TestStatMetricsGetFilterIDsDistinct(t *testing.T) {
 		t.Errorf("expected %v, received %v", slc, rcv)
 	}
 }
+
+func TestStatMetricsGetCompressedFactorStatACD(t *testing.T) {
+	tm := 1 * time.Second
+	acd := &StatACD{
+		FilterIDs: []string{"test"},
+		Sum:       tm,
+		Count:     1,
+		Events: map[string]*DurationWithCompress{"test": {
+			Duration:       1 * time.Second,
+			CompressFactor: 2,
+		}},
+		MinItems: 1,
+		val:      &tm,
+	}
+
+	events := map[string]int{"test": 1}
+	exp := map[string]int{"test": 2}
+
+	rcv := acd.GetCompressFactor(events)
+
+	if !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("expected %s, received %s", utils.ToJSON(exp), utils.ToJSON(rcv))
+	}
+}
+
+func TestStatMetricsGetCompressedFactorStatTCD(t *testing.T) {
+	tm := 1 * time.Second
+	acd := &StatTCD{
+		FilterIDs: []string{"test"},
+		Sum:       tm,
+		Count:     1,
+		Events: map[string]*DurationWithCompress{"test": {
+			Duration:       1 * time.Second,
+			CompressFactor: 2,
+		}},
+		MinItems: 1,
+		val:      &tm,
+	}
+
+	events := map[string]int{"test": 1}
+	exp := map[string]int{"test": 2}
+
+	rcv := acd.GetCompressFactor(events)
+
+	if !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("expected %s, received %s", utils.ToJSON(exp), utils.ToJSON(rcv))
+	}
+}
+
+func TestStatMetricsGetCompressedFactorStatPDD(t *testing.T) {
+	tm := 1 * time.Second
+	acd := &StatPDD{
+		FilterIDs: []string{"test"},
+		Sum:       tm,
+		Count:     1,
+		Events: map[string]*DurationWithCompress{"test": {
+			Duration:       1 * time.Second,
+			CompressFactor: 2,
+		}},
+		MinItems: 1,
+		val:      &tm,
+	}
+
+	events := map[string]int{"test": 1}
+	exp := map[string]int{"test": 2}
+
+	rcv := acd.GetCompressFactor(events)
+
+	if !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("expected %s, received %s", utils.ToJSON(exp), utils.ToJSON(rcv))
+	}
+}
+
+func TestStatMetricsGetCompressedFactorStatDDC(t *testing.T) {
+	acd := &StatDDC{
+		FilterIDs: []string{"test"},
+		Count:     1,
+		Events:    map[string]map[string]int64{"test": {"test": 2}},
+		MinItems:  1,
+	}
+
+	events := map[string]int{"test": 1}
+	exp := map[string]int{"test": 2}
+
+	rcv := acd.GetCompressFactor(events)
+
+	if !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("expected %s, received %s", utils.ToJSON(exp), utils.ToJSON(rcv))
+	}
+}
+
+func TestStatMetricsGetCompressedFactorStatDistinct(t *testing.T) {
+	acd := &StatDistinct{
+		FilterIDs: []string{"test"},
+		Count:     1,
+		Events:    map[string]map[string]int64{"test": {"test": 2}},
+		MinItems:  1,
+	}
+
+	events := map[string]int{"test": 1}
+	exp := map[string]int{"test": 2}
+
+	rcv := acd.GetCompressFactor(events)
+
+	if !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("expected %s, received %s", utils.ToJSON(exp), utils.ToJSON(rcv))
+	}
+}

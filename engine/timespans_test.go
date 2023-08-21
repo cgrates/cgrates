@@ -2159,3 +2159,202 @@ func TestTimespansSharingSignatureFalse(t *testing.T) {
 		t.Error(rcv)
 	}
 }
+
+func TestTimeSpansIsPaid(t *testing.T) {
+	ts := TimeSpan{
+		TimeStart: time.Date(2009, 11, 17, 20, 34, 58, 651387237, time.UTC),
+		TimeEnd:   time.Date(2010, 11, 17, 20, 34, 58, 651387237, time.UTC),
+		Cost:      1.2,
+		RateInterval: &RateInterval{
+			Timing: &RITiming{
+				Years:      utils.Years{2022},
+				Months:     utils.Months{8},
+				MonthDays:  utils.MonthDays{9},
+				WeekDays:   utils.WeekDays{2},
+				StartTime:  "00:00:00",
+				EndTime:    "00:00:00",
+				cronString: "test",
+				tag:        "test",
+			},
+			Rating: &RIRate{
+				ConnectFee:       1.2,
+				RoundingMethod:   "test",
+				RoundingDecimals: 1,
+				MaxCost:          1.2,
+				MaxCostStrategy:  "test",
+				Rates: RateGroups{{
+					GroupIntervalStart: 1 * time.Second,
+					Value:              1.2,
+					RateIncrement:      1 * time.Second,
+					RateUnit:           1 * time.Second,
+				}},
+				tag: "test",
+			},
+			Weight: 1.2,
+		},
+		Increments: Increments{{
+			Duration:       1 * time.Second,
+			Cost:           1.2,
+			BalanceInfo:    &DebitInfo{},
+			CompressFactor: 1,
+			paid:           false,
+		}},
+		RoundIncrement: &Increment{
+			Duration:       1 * time.Second,
+			Cost:           1.2,
+			BalanceInfo:    &DebitInfo{},
+			CompressFactor: 1,
+			paid:           false,
+		},
+		MatchedSubject: "test",
+		MatchedPrefix:  "test",
+		MatchedDestId:  "test",
+		RatingPlanId:   "test",
+		CompressFactor: 1,
+	}
+
+	bl, nm := ts.IsPaid()
+
+	if bl != false {
+		t.Fatal(bl)
+	}
+
+	if nm != 0 {
+		t.Error(nm)
+	}
+
+	ts.Increments[0].paid = true
+	bl, nm = ts.IsPaid()
+
+	if bl != true {
+		t.Fatal(bl)
+	}
+
+	if nm != 1 {
+		t.Error(nm)
+	}
+}
+
+func TestTimeSpansSplitByDuration(t *testing.T) {
+	ts := TimeSpan{}
+
+	rcv := ts.SplitByDuration(0 * time.Second)
+
+	if rcv != nil {
+		t.Error(rcv)
+	}
+}
+
+func TestTimeSpansAddIncrement(t *testing.T) {
+	ts := TimeSpan{
+		TimeStart: time.Date(2009, 11, 17, 20, 34, 58, 651387237, time.UTC),
+		TimeEnd:   time.Date(2010, 11, 17, 20, 34, 58, 651387237, time.UTC),
+		Cost:      1.2,
+		RateInterval: &RateInterval{
+			Timing: &RITiming{
+				Years:      utils.Years{2022},
+				Months:     utils.Months{8},
+				MonthDays:  utils.MonthDays{9},
+				WeekDays:   utils.WeekDays{2},
+				StartTime:  "00:00:00",
+				EndTime:    "00:00:00",
+				cronString: "test",
+				tag:        "test",
+			},
+			Rating: &RIRate{
+				ConnectFee:       1.2,
+				RoundingMethod:   "test",
+				RoundingDecimals: 1,
+				MaxCost:          1.2,
+				MaxCostStrategy:  "test",
+				Rates: RateGroups{{
+					GroupIntervalStart: 1 * time.Second,
+					Value:              1.2,
+					RateIncrement:      1 * time.Second,
+					RateUnit:           1 * time.Second,
+				}},
+				tag: "test",
+			},
+			Weight: 1.2,
+		},
+		Increments: Increments{{
+			Duration:       1 * time.Second,
+			Cost:           1.2,
+			BalanceInfo:    &DebitInfo{},
+			CompressFactor: 1,
+			paid:           false,
+		}},
+		RoundIncrement: &Increment{
+			Duration:       1 * time.Second,
+			Cost:           1.2,
+			BalanceInfo:    &DebitInfo{},
+			CompressFactor: 1,
+			paid:           false,
+		},
+		MatchedSubject: "test",
+		MatchedPrefix:  "test",
+		MatchedDestId:  "test",
+		RatingPlanId:   "test",
+		CompressFactor: 1,
+	}
+	inc := &Increment{
+		Duration:       1 * time.Second,
+		Cost:           1.2,
+		BalanceInfo:    &DebitInfo{},
+		CompressFactor: 1,
+		paid:           false,
+	}
+
+	ts.AddIncrement(inc)
+
+	exp := Increments{{
+		Duration:       1 * time.Second,
+		Cost:           1.2,
+		BalanceInfo:    &DebitInfo{},
+		CompressFactor: 1,
+		paid:           false,
+	},
+		{
+			Duration:       1 * time.Second,
+			Cost:           1.2,
+			BalanceInfo:    &DebitInfo{},
+			CompressFactor: 1,
+			paid:           false,
+		}}
+
+	if !reflect.DeepEqual(ts.Increments, exp) {
+		t.Errorf("expeced %v, received %v", ts.Increments, exp)
+	}
+
+	if ts.TimeEnd != time.Date(2010, 11, 17, 20, 34, 58, 651387237, time.UTC) {
+		t.Error(ts.TimeEnd)
+	}
+}
+
+func TestTimeSpansMerge(t *testing.T) {
+	ts := TimeSpan{
+		TimeStart: time.Date(2009, 11, 17, 20, 34, 58, 651387237, time.UTC),
+		TimeEnd:   time.Date(2010, 11, 17, 20, 34, 58, 651387237, time.UTC),
+	}
+
+	other := TimeSpan{
+		TimeStart: time.Date(2009, 11, 17, 20, 34, 58, 651387237, time.UTC),
+		TimeEnd:   time.Date(2010, 11, 17, 20, 34, 58, 651387237, time.UTC),
+	}
+
+	rcv := ts.Merge(&other)
+
+	if rcv != false {
+		t.Error(rcv)
+	}
+}
+
+func TestTimeSpansSetRateInterval(t *testing.T) {
+	ts := TimeSpan{}
+
+	ts.SetRateInterval(nil)
+
+	if ts.RateInterval != nil {
+		t.Error("didn't return")
+	}
+}
