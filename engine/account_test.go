@@ -3407,3 +3407,27 @@ func TestAccountGetID(t *testing.T) {
 		t.Error(rcv)
 	}
 }
+
+func TestAccountmatchActionFilter(t *testing.T) {
+	acc := &Account{
+		ID:                str2,
+		UnitCounters:      UnitCounters{str: {&uc}},
+		ActionTriggers:    ActionTriggers{&at},
+		AllowNegative:     bl,
+		Disabled:          bl,
+		UpdateTime:        tm2,
+		executingTriggers: bl,
+	}
+
+	rcv, err := acc.matchActionFilter("test")
+
+	if err != nil {
+		if err.Error() != "invalid character 'e' in literal true (expecting 'r')" {
+			t.Error(err)
+		}
+	}
+
+	if rcv != false {
+		t.Error(rcv)
+	}
+}

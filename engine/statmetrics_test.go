@@ -3486,3 +3486,247 @@ func TestStatMetricsGetCompressedFactorStatDistinct(t *testing.T) {
 		t.Errorf("expected %s, received %s", utils.ToJSON(exp), utils.ToJSON(rcv))
 	}
 }
+
+func TestStatMetricsAddEvent(t *testing.T) {
+	fl := 1.2
+	str := "test"
+	tm := time.Date(2009, 11, 17, 20, 34, 58, 651387237, time.UTC)
+	asr := StatASR{
+		FilterIDs: []string{str},
+		Answered:  fl,
+		Count:     1,
+		Events: map[string]*StatWithCompress{str: {
+			Stat:           1.2,
+			CompressFactor: 1,
+		}},
+		MinItems: 1,
+		val:      &fl,
+	}
+	ev := &utils.CGREvent{
+		Tenant: str,
+		ID:     str,
+		Time:   &tm,
+		Event:  map[string]any{"AnswerTime": fl},
+	}
+
+	err := asr.AddEvent(ev)
+
+	if err != nil {
+		if err.Error() != "cannot convert field: 1.2 to time.Time" {
+			t.Error(err)
+		}
+	} else {
+		t.Error("was expecting an error")
+	}
+}
+
+func TestStatMetricsRemEvent(t *testing.T) {
+	ddc := StatDDC{
+		FilterIDs: []string{"test"},
+		Events:    map[string]map[string]int64{"test": {}},
+		MinItems:  1,
+		Count:     1,
+	}
+
+	err := ddc.RemEvent("test")
+
+	if err != nil {
+		if err.Error() != "NOT_FOUND" {
+			t.Error(err)
+		}
+	} else {
+		t.Error("was expecting an error")
+	}
+
+	if _, has := ddc.Events["test"]; has {
+		t.Error("didn't delete event")
+	}
+
+	ddc2 := StatDDC{
+		FilterIDs: []string{"test"},
+		Events:    map[string]map[string]int64{"test": {"test": 2}},
+		MinItems:  1,
+		Count:     1,
+	}
+
+	err = ddc2.RemEvent("test")
+
+	if err != nil {
+		t.Error(err)
+	}
+
+	if _, has := ddc2.Events["test"]; !has {
+		t.Error("event deleted")
+	}
+
+	ddc3 := StatDDC{
+		FilterIDs:   []string{"test"},
+		FieldValues: map[string]map[string]struct{}{"test1": {"test1": {}}},
+		Events:      map[string]map[string]int64{"test": {"test": 1}},
+		MinItems:    1,
+		Count:       1,
+	}
+
+	err = ddc3.RemEvent("test")
+
+	if err != nil {
+		t.Error(err)
+	}
+
+	if _, has := ddc3.Events["test"]; !has {
+		t.Error("event deleted")
+	}
+}
+
+func TestStatMetricsSumAddEvent(t *testing.T) {
+	str := "test"
+	fl := 1.2
+	sum := StatSum{
+		FilterIDs: []string{str},
+		Sum:       fl,
+		Count:     1,
+		Events: map[string]*StatWithCompress{str: {
+			Stat:           fl,
+			CompressFactor: 1,
+		}},
+		MinItems:  1,
+		FieldName: str,
+		val:       &fl,
+	}
+
+	ev := &utils.CGREvent{
+		Tenant: str,
+		ID:     str,
+		Time:   &tm,
+		Event:  map[string]any{"AnswerTime": fl},
+	}
+
+	err := sum.AddEvent(ev)
+
+	if err != nil {
+		if err.Error() != `strconv.ParseFloat: parsing "test": invalid syntax` {
+			t.Error(err)
+		}
+	} else {
+		t.Error("was expecting an error")
+	}
+}
+
+func TestStatMetricsAverageAddEvent(t *testing.T) {
+	str := "test"
+	fl := 1.2
+	sum := StatAverage{
+		FilterIDs: []string{str},
+		Sum:       fl,
+		Count:     1,
+		Events: map[string]*StatWithCompress{str: {
+			Stat:           fl,
+			CompressFactor: 1,
+		}},
+		MinItems:  1,
+		FieldName: str,
+		val:       &fl,
+	}
+
+	ev := &utils.CGREvent{
+		Tenant: str,
+		ID:     str,
+		Time:   &tm,
+		Event:  map[string]any{"AnswerTime": fl},
+	}
+
+	err := sum.AddEvent(ev)
+
+	if err != nil {
+		if err.Error() != `strconv.ParseFloat: parsing "test": invalid syntax` {
+			t.Error(err)
+		}
+	} else {
+		t.Error("was expecting an error")
+	}
+}
+
+func TestStatMetricsDistinctRemEvent(t *testing.T) {
+	ddc := StatDistinct{
+		FilterIDs: []string{"test"},
+		Events:    map[string]map[string]int64{"test": {}},
+		MinItems:  1,
+		Count:     1,
+	}
+
+	err := ddc.RemEvent("test")
+
+	if err != nil {
+		if err.Error() != "NOT_FOUND" {
+			t.Error(err)
+		}
+	} else {
+		t.Error("was expecting an error")
+	}
+
+	if _, has := ddc.Events["test"]; has {
+		t.Error("didn't delete event")
+	}
+
+	ddc2 := StatDistinct{
+		FilterIDs: []string{"test"},
+		Events:    map[string]map[string]int64{"test": {"test": 2}},
+		MinItems:  1,
+		Count:     1,
+	}
+
+	err = ddc2.RemEvent("test")
+
+	if err != nil {
+		t.Error(err)
+	}
+
+	if _, has := ddc2.Events["test"]; !has {
+		t.Error("event deleted")
+	}
+
+	ddc3 := StatDistinct{
+		FilterIDs:   []string{"test"},
+		FieldValues: map[string]map[string]struct{}{"test1": {"test1": {}}},
+		Events:      map[string]map[string]int64{"test": {"test": 1}},
+		MinItems:    1,
+		Count:       1,
+	}
+
+	err = ddc3.RemEvent("test")
+
+	if err != nil {
+		t.Error(err)
+	}
+
+	if _, has := ddc3.Events["test"]; !has {
+		t.Error("event deleted")
+	}
+}
+
+func TestStatMetricsDistinctAddEvent(t *testing.T) {
+	dst := &StatDistinct{
+		FilterIDs:   []string{"test"},
+		FieldValues: map[string]map[string]struct{}{"test1": {"test1": {}}},
+		Events:      map[string]map[string]int64{"test": {"test": 1}},
+		MinItems:    1,
+		Count:       1,
+	}
+
+	ev := &utils.CGREvent{
+		Tenant: str,
+		ID:     str,
+		Time:   &tm,
+		Event:  map[string]any{"AnswerTime": fl},
+	}
+
+	err := dst.AddEvent(ev)
+
+	if err != nil {
+		if err.Error() != "Invalid format for field <>" {
+			t.Error(err)
+		}
+	} else {
+		t.Error("was expecting an error")
+	}
+}

@@ -184,6 +184,49 @@ func TestSharedPopBalanceByStrategyMineHigh(t *testing.T) {
 	}
 }
 
+func TestSharedGroupSortBalanceByStrategy(t *testing.T) {
+	str := "test"
+	sg := &SharedGroup{
+		Id: str,
+		AccountParameters: map[string]*SharingParameters{
+			utils.ANY: {
+				Strategy:      str,
+				RatingSubject: str,
+			},
+		},
+		MemberIds: utils.StringMap{str: true},
+	}
+
+	myBalance := &Balance{
+		Uuid:           str,
+		ID:             str,
+		Value:          fl,
+		ExpirationDate: tm,
+		Weight:         fl,
+		DestinationIDs: sm,
+		RatingSubject:  str,
+		Categories:     sm,
+		SharedGroups:   sm,
+		Timings:        []*RITiming{&rtm},
+		TimingIDs:      sm,
+		Disabled:       bl,
+		Factor:         ValueFactor{str: fl},
+		Blocker:        bl,
+		precision:      nm,
+		dirty:          bl,
+		account:        &Account{ID: ""},
+	}
+
+	bc := Balances{myBalance}
+
+	rcv := sg.SortBalancesByStrategy(myBalance, bc)
+	exp := Balances{myBalance}
+
+	if !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("expected %s, receives %s", utils.ToJSON(exp), utils.ToJSON(rcv))
+	}
+}
+
 /*func TestSharedPopBalanceByStrategyRandomHigh(t *testing.T) {
 	bc := Balances{
 		&Balance{Uuid: "uuuu", Value: 2.0, account: &Account{Id: "test"}},
