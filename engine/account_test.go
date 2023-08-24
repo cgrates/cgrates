@@ -2821,45 +2821,6 @@ func TestAccActDebitResetAction(t *testing.T) {
 	// unfinished
 }
 
-/*********************************** Benchmarks *******************************/
-
-func BenchmarkGetSecondForPrefix(b *testing.B) {
-	b.StopTimer()
-	b1 := &Balance{Value: 10, Weight: 10, DestinationIDs: utils.StringMap{"NAT": true}}
-	b2 := &Balance{Value: 100, Weight: 20, DestinationIDs: utils.StringMap{"RET": true}}
-
-	ub1 := &Account{ID: "other", BalanceMap: map[string]Balances{utils.VOICE: {b1, b2}, utils.MONETARY: {&Balance{Value: 21}}}}
-	cd := &CallDescriptor{
-		Destination: "0723",
-	}
-	b.StartTimer()
-	for i := 0; i < b.N; i++ {
-		ub1.getCreditForPrefix(cd)
-	}
-}
-
-func BenchmarkAccountStorageStoreRestore(b *testing.B) {
-	b1 := &Balance{Value: 10, Weight: 10, DestinationIDs: utils.StringMap{"NAT": true}}
-	b2 := &Balance{Value: 100, Weight: 20, DestinationIDs: utils.StringMap{"RET": true}}
-	rifsBalance := &Account{ID: "other", BalanceMap: map[string]Balances{utils.VOICE: {b1, b2}, utils.MONETARY: {&Balance{Value: 21}}}}
-	for i := 0; i < b.N; i++ {
-		dm.SetAccount(rifsBalance)
-		dm.GetAccount(rifsBalance.ID)
-	}
-}
-
-func BenchmarkGetSecondsForPrefix(b *testing.B) {
-	b1 := &Balance{Value: 10, Weight: 10, DestinationIDs: utils.StringMap{"NAT": true}}
-	b2 := &Balance{Value: 100, Weight: 20, DestinationIDs: utils.StringMap{"RET": true}}
-	ub1 := &Account{ID: "OUT:CUSTOMER_1:rif", BalanceMap: map[string]Balances{utils.VOICE: {b1, b2}, utils.MONETARY: {&Balance{Value: 21}}}}
-	cd := &CallDescriptor{
-		Destination: "0723",
-	}
-	for i := 0; i < b.N; i++ {
-		ub1.getCreditForPrefix(cd)
-	}
-}
-
 var bl bool = true
 var str2 string = "test"
 var fl2 float64 = 1.2
@@ -3429,5 +3390,44 @@ func TestAccountmatchActionFilter(t *testing.T) {
 
 	if rcv != false {
 		t.Error(rcv)
+	}
+}
+
+/*********************************** Benchmarks *******************************/
+
+func BenchmarkGetSecondForPrefix(b *testing.B) {
+	b.StopTimer()
+	b1 := &Balance{Value: 10, Weight: 10, DestinationIDs: utils.StringMap{"NAT": true}}
+	b2 := &Balance{Value: 100, Weight: 20, DestinationIDs: utils.StringMap{"RET": true}}
+
+	ub1 := &Account{ID: "other", BalanceMap: map[string]Balances{utils.VOICE: {b1, b2}, utils.MONETARY: {&Balance{Value: 21}}}}
+	cd := &CallDescriptor{
+		Destination: "0723",
+	}
+	b.StartTimer()
+	for i := 0; i < b.N; i++ {
+		ub1.getCreditForPrefix(cd)
+	}
+}
+
+func BenchmarkAccountStorageStoreRestore(b *testing.B) {
+	b1 := &Balance{Value: 10, Weight: 10, DestinationIDs: utils.StringMap{"NAT": true}}
+	b2 := &Balance{Value: 100, Weight: 20, DestinationIDs: utils.StringMap{"RET": true}}
+	rifsBalance := &Account{ID: "other", BalanceMap: map[string]Balances{utils.VOICE: {b1, b2}, utils.MONETARY: {&Balance{Value: 21}}}}
+	for i := 0; i < b.N; i++ {
+		dm.SetAccount(rifsBalance)
+		dm.GetAccount(rifsBalance.ID)
+	}
+}
+
+func BenchmarkGetSecondsForPrefix(b *testing.B) {
+	b1 := &Balance{Value: 10, Weight: 10, DestinationIDs: utils.StringMap{"NAT": true}}
+	b2 := &Balance{Value: 100, Weight: 20, DestinationIDs: utils.StringMap{"RET": true}}
+	ub1 := &Account{ID: "OUT:CUSTOMER_1:rif", BalanceMap: map[string]Balances{utils.VOICE: {b1, b2}, utils.MONETARY: {&Balance{Value: 21}}}}
+	cd := &CallDescriptor{
+		Destination: "0723",
+	}
+	for i := 0; i < b.N; i++ {
+		ub1.getCreditForPrefix(cd)
 	}
 }
