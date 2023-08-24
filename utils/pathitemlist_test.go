@@ -452,3 +452,13 @@ func TestPathItemListMoveAfter(t *testing.T) {
 		t.Error("moved after")
 	}
 }
+
+func TestPathItemListmove(t *testing.T) {
+	l := PathItemList{}
+
+	rcv := l.move(nil, nil)
+
+	if rcv != nil {
+		t.Error(rcv)
+	}
+}

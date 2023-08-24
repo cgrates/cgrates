@@ -407,3 +407,77 @@ func TestStructUpdateStructWithStrMap(t *testing.T) {
 		})
 	}
 }
+
+func TestStructUpdateStructWithIfaceMap(t *testing.T) {
+	type Test struct {
+		Bl bool
+		Nm int
+		Fl float64
+		Df []byte
+	}
+	test := Test{Bl: true}
+	test2 := Test{Nm: 1}
+	test3 := Test{Fl: 1.2}
+	test4 := Test{Df: []byte{}}
+	type args struct {
+		s  any
+		mp map[string]any
+	}
+	tests := []struct {
+		name string
+		args args
+		err  string
+	}{
+		{
+			name: "auto populate bool",
+			args: args{&test, map[string]any{"Bl": ""}},
+			err:  "",
+		},
+		{
+			name: "interface as bool error",
+			args: args{&test, map[string]any{"Bl": []byte{}}},
+			err:  "cannot convert field: [] to bool",
+		},
+		{
+			name: "auto populate int",
+			args: args{&test2, map[string]any{"Nm": ""}},
+			err:  "",
+		},
+		{
+			name: "interface as int error",
+			args: args{&test2, map[string]any{"Nm": []byte{}}},
+			err:  "cannot convert field: [] to int",
+		},
+		{
+			name: "auto populate float64",
+			args: args{&test3, map[string]any{"Fl": ""}},
+			err:  "",
+		},
+		{
+			name: "interface as flaot64 error",
+			args: args{&test3, map[string]any{"Fl": []byte{}}},
+			err:  "cannot convert field: [] to float64",
+		},
+		{
+			name: "default",
+			args: args{&test4, map[string]any{"Df": ""}},
+			err:  "cannot update unsupported struct field: []",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			err := UpdateStructWithIfaceMap(tt.args.s, tt.args.mp)
+
+			if tt.err != "" {
+				if err != nil {
+					if err.Error() != tt.err {
+						t.Error(err)
+					}
+				} else {
+					t.Error("was expecting an error")
+				}
+			}
+		})
+	}
+}
