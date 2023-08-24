@@ -1334,3 +1334,72 @@ func TestRandomInteger(t *testing.T) {
 		t.Errorf("one of the numbers are below min limit")
 	}
 }
+
+func TestCoreutilFibDuraton(t *testing.T) {
+	type args struct {
+		durationUnit time.Duration
+		maxDuration  time.Duration
+	}
+	tests := []struct {
+		name string
+		args args
+		exp  time.Duration
+	}{
+		{
+			name: "max duration",
+			args: args{1 * time.Millisecond, 1 * time.Millisecond},
+			exp:  1 * time.Millisecond,
+		},
+		{
+			name: "max duration",
+			args: args{1 * time.Nanosecond, 1 * time.Millisecond},
+			exp:  1 * time.Nanosecond,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			rcv := FibDuration(tt.args.durationUnit, tt.args.maxDuration)
+			rcv2 := rcv()
+
+			if rcv2 != tt.exp {
+				t.Errorf("expected %v, received %v", tt.exp, rcv2)
+			}
+		})
+	}
+}
+
+func TestCoreUtilsClone(t *testing.T) {
+	tests := []struct {
+		name string
+		a, b any
+		err  string
+	}{
+		{
+			name: "Encode error",
+			a:    nil,
+			b:    nil,
+			err:  "gob: cannot encode nil value",
+		},
+		{
+			name: "Decode error",
+			a:    "test",
+			b:    &[]string{},
+			err:  "gob: decoding into local type *[]string, received remote type string",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			err := Clone(tt.a, tt.b)
+
+			if err != nil {
+				if err.Error() != tt.err {
+					t.Error(err)
+				}
+			} else {
+				t.Error("was expecting an error")
+			}
+		})
+	}
+}

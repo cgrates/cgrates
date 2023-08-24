@@ -778,3 +778,184 @@ func TestRSRFieldNewRSRFilterdMustCompile(t *testing.T) {
 		t.Error("didn't create RSRFilter", rcv)
 	}
 }
+
+func TestRSRFieldCompile(t *testing.T) {
+	str := "test)"
+	rsrf := &RSRField{
+		Id:          str,
+		Rules:       str,
+		staticValue: str,
+		RSRules:     []*ReSearchReplace{},
+		filters:     []*RSRFilter{},
+		converters:  DataConverters{},
+	}
+
+	err := rsrf.Compile()
+
+	if err != nil {
+		if err.Error() != "Invalid FilterStartValue in string: test)" {
+			t.Error(err)
+		}
+	} else {
+		t.Error("was expecting an error")
+	}
+}
+
+func TestRSRFieldRegexMatched(t *testing.T) {
+	str := "test)"
+	rsrf := &RSRField{
+		Id:          str,
+		Rules:       str,
+		staticValue: str,
+		RSRules: []*ReSearchReplace{
+			{
+				SearchRegexp:    nil,
+				ReplaceTemplate: str,
+				Matched:         false,
+			},
+		},
+		filters:    []*RSRFilter{},
+		converters: DataConverters{},
+	}
+
+	rcv := rsrf.RegexpMatched()
+
+	if rcv != false {
+		t.Error(rcv)
+	}
+
+	rsrf2 := &RSRField{
+		Id:          str,
+		Rules:       str,
+		staticValue: str,
+		RSRules: []*ReSearchReplace{
+			{
+				SearchRegexp:    nil,
+				ReplaceTemplate: str,
+				Matched:         true,
+			},
+		},
+		filters:    []*RSRFilter{},
+		converters: DataConverters{},
+	}
+
+	rcv = rsrf2.RegexpMatched()
+
+	if rcv != true {
+		t.Error(rcv)
+	}
+}
+
+func TestRSRFieldFilterRule(t *testing.T) {
+	str := "test"
+	rsrFltr := RSRFilter{
+		filterRule: str,
+		fltrRgxp:   nil,
+		negative:   true,
+	}
+
+	rcv := rsrFltr.FilterRule()
+
+	if rcv != str {
+		t.Error(rcv)
+	}
+}
+
+func TestRSRFieldParseRSRFilters(t *testing.T) {
+	rcv, err := ParseRSRFilters("", "")
+	if err != nil {
+		t.Error(err)
+	}
+
+	if rcv != nil {
+		t.Error(rcv)
+	}
+}
+
+func TestRSRFieldFilterRules(t *testing.T) {
+	str := "test"
+	rsrFltr := RSRFilters{
+		{
+			filterRule: str,
+			fltrRgxp:   nil,
+			negative:   true,
+		},
+	}
+
+	rcv := rsrFltr.FilterRules()
+
+	if rcv != str {
+		t.Error(rcv)
+	}
+}
+
+func TestRSRFieldPass(t *testing.T) {
+	rsrFltr := RSRFilters{}
+
+	rcv := rsrFltr.Pass("", true)
+
+	if rcv != true {
+		t.Error(rcv)
+	}
+}
+
+func TestRSRFieldParseRSRFieldsMustCompile(t *testing.T) {
+	rcv := ParseRSRFieldsMustCompile("test)", "test)")
+
+	if rcv != nil {
+		t.Error(rcv)
+	}
+
+	rcv = ParseRSRFieldsMustCompile("test", ":")
+	r := &RSRField{
+		Id:    "test",
+		Rules: "test",
+	}
+	exp := RSRFields{r}
+
+	if !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("expected %s, received %s", ToJSON(exp), ToJSON(rcv))
+	}
+}
+
+func TestRSRFieldsCompile(t *testing.T) {
+	r := &RSRField{
+		Id:    "test)",
+		Rules: "test)",
+	}
+	rsr := RSRFields{r}
+
+	err := rsr.Compile()
+
+	if err != nil {
+		if err.Error() != "Invalid FilterStartValue in string: test)" {
+			t.Error(err)
+		}
+	} else {
+		t.Error("was expecting an error")
+	}
+}
+
+func TestRSRFieldParseRSRFieldFromSlice(t *testing.T) {
+	rcv, err := ParseRSRFieldsFromSlice([]string{})
+	if err != nil {
+		t.Error(err)
+	}
+
+	if rcv != nil {
+		t.Error(rcv)
+	}
+
+	rcv, err = ParseRSRFieldsFromSlice([]string{"test)"})
+	if err != nil {
+		if err.Error() != "Invalid FilterStartValue in string: test)" {
+			t.Error(err)
+		}
+	} else {
+		t.Error("was expecting an error")
+	}
+
+	if rcv != nil {
+		t.Error(rcv)
+	}
+}
