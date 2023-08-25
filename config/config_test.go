@@ -21,6 +21,7 @@ import (
 	"encoding/json"
 	"path"
 	"reflect"
+	"sync"
 	"testing"
 	"time"
 
@@ -2176,5 +2177,510 @@ func TestConfigLoadErrors(t *testing.T) {
 		} else {
 			t.Error("was expecting an error")
 		}
+	}
+}
+
+func TestConfigSureTaxCfg(t *testing.T) {
+	cfg := &CGRConfig{
+		lks: map[string]*sync.RWMutex{SURETAX_JSON: {}},
+	}
+
+	rcv := cfg.SureTaxCfg()
+
+	if rcv != nil {
+		t.Error(rcv)
+	}
+}
+
+func TestConfigDiameterAgentCfg(t *testing.T) {
+	cfg := &CGRConfig{
+		lks: map[string]*sync.RWMutex{DA_JSN: {}},
+	}
+
+	rcv := cfg.DiameterAgentCfg()
+
+	if rcv != nil {
+		t.Error(rcv)
+	}
+}
+
+func TestConfigRadiusAgentCfg(t *testing.T) {
+	cfg := &CGRConfig{
+		lks: map[string]*sync.RWMutex{RA_JSN: {}},
+	}
+
+	rcv := cfg.RadiusAgentCfg()
+
+	if rcv != nil {
+		t.Error(rcv)
+	}
+}
+
+func TestConfigDNSAgentCfg(t *testing.T) {
+	cfg := &CGRConfig{
+		lks: map[string]*sync.RWMutex{DNSAgentJson: {}},
+	}
+
+	rcv := cfg.DNSAgentCfg()
+
+	if rcv != nil {
+		t.Error(rcv)
+	}
+}
+
+func TestConfigAttributeSCfg(t *testing.T) {
+	cfg := &CGRConfig{
+		lks: map[string]*sync.RWMutex{ATTRIBUTE_JSN: {}},
+	}
+
+	rcv := cfg.AttributeSCfg()
+
+	if rcv != nil {
+		t.Error(rcv)
+	}
+}
+
+func TestConfigChargerSCfg(t *testing.T) {
+	cfg := &CGRConfig{
+		lks: map[string]*sync.RWMutex{ChargerSCfgJson: {}},
+	}
+
+	rcv := cfg.ChargerSCfg()
+
+	if rcv != nil {
+		t.Error(rcv)
+	}
+}
+
+func TestConfigResourceSCfg(t *testing.T) {
+	cfg := &CGRConfig{
+		lks: map[string]*sync.RWMutex{RESOURCES_JSON: {}},
+	}
+
+	rcv := cfg.ResourceSCfg()
+
+	if rcv != nil {
+		t.Error(rcv)
+	}
+}
+
+func TestConfigStatSCfg(t *testing.T) {
+	cfg := &CGRConfig{
+		lks: map[string]*sync.RWMutex{STATS_JSON: {}},
+	}
+
+	rcv := cfg.StatSCfg()
+
+	if rcv != nil {
+		t.Error(rcv)
+	}
+}
+
+func TestConfigThresholdSCfg(t *testing.T) {
+	cfg := &CGRConfig{
+		lks: map[string]*sync.RWMutex{THRESHOLDS_JSON: {}},
+	}
+
+	rcv := cfg.ThresholdSCfg()
+
+	if rcv != nil {
+		t.Error(rcv)
+	}
+}
+
+func TestConfigSupplierSCfg(t *testing.T) {
+	cfg := &CGRConfig{
+		lks: map[string]*sync.RWMutex{SupplierSJson: {}},
+	}
+
+	rcv := cfg.SupplierSCfg()
+
+	if rcv != nil {
+		t.Error(rcv)
+	}
+}
+
+func TestConfigSessionSCfg(t *testing.T) {
+	cfg := &CGRConfig{
+		lks: map[string]*sync.RWMutex{SessionSJson: {}},
+	}
+
+	rcv := cfg.SessionSCfg()
+
+	if rcv != nil {
+		t.Error(rcv)
+	}
+}
+
+func TestConfigFsAgentCfg(t *testing.T) {
+	cfg := &CGRConfig{
+		lks: map[string]*sync.RWMutex{FreeSWITCHAgentJSN: {}},
+	}
+
+	rcv := cfg.FsAgentCfg()
+
+	if rcv != nil {
+		t.Error(rcv)
+	}
+}
+
+func TestConfigKamAgentCfg(t *testing.T) {
+	cfg := &CGRConfig{
+		lks: map[string]*sync.RWMutex{KamailioAgentJSN: {}},
+	}
+
+	rcv := cfg.KamAgentCfg()
+
+	if rcv != nil {
+		t.Error(rcv)
+	}
+}
+
+func TestConfigAsteriskAgentCfg(t *testing.T) {
+	cfg := &CGRConfig{
+		lks: map[string]*sync.RWMutex{AsteriskAgentJSN: {}},
+	}
+
+	rcv := cfg.AsteriskAgentCfg()
+
+	if rcv != nil {
+		t.Error(rcv)
+	}
+}
+
+func TestConfigFilterSCfg(t *testing.T) {
+	cfg := &CGRConfig{
+		lks: map[string]*sync.RWMutex{FilterSjsn: {}},
+	}
+
+	rcv := cfg.FilterSCfg()
+
+	if rcv != nil {
+		t.Error(rcv)
+	}
+}
+
+func TestConfigLoaderCfg(t *testing.T) {
+	cfg := &CGRConfig{
+		lks: map[string]*sync.RWMutex{LoaderJson: {}},
+	}
+
+	rcv := cfg.LoaderCfg()
+
+	if rcv != nil {
+		t.Error(rcv)
+	}
+}
+
+func TestConfigDispatcherSCfg(t *testing.T) {
+	cfg := &CGRConfig{
+		lks: map[string]*sync.RWMutex{DispatcherSJson: {}},
+	}
+
+	rcv := cfg.DispatcherSCfg()
+
+	if rcv != nil {
+		t.Error(rcv)
+	}
+}
+
+func TestConfigSchedulerCfg(t *testing.T) {
+	cfg := &CGRConfig{
+		lks: map[string]*sync.RWMutex{SCHEDULER_JSN: {}},
+	}
+
+	rcv := cfg.SchedulerCfg()
+
+	if rcv != nil {
+		t.Error(rcv)
+	}
+}
+
+func TestConfigAnalyzerSCfg(t *testing.T) {
+	cfg := &CGRConfig{
+		lks: map[string]*sync.RWMutex{AnalyzerCfgJson: {}},
+	}
+
+	rcv := cfg.AnalyzerSCfg()
+
+	if rcv != nil {
+		t.Error(rcv)
+	}
+}
+
+func TestConfigApierCfg(t *testing.T) {
+	cfg := &CGRConfig{
+		lks: map[string]*sync.RWMutex{ApierS: {}},
+	}
+
+	rcv := cfg.ApierCfg()
+
+	if rcv != nil {
+		t.Error(rcv)
+	}
+}
+
+func TestConfigERsCfg(t *testing.T) {
+	cfg := &CGRConfig{
+		lks: map[string]*sync.RWMutex{ERsJson: {}},
+	}
+
+	rcv := cfg.ERsCfg()
+
+	if rcv != nil {
+		t.Error(rcv)
+	}
+}
+
+func TestConfigRPCConns(t *testing.T) {
+	cfg := &CGRConfig{
+		lks: map[string]*sync.RWMutex{RPCConnsJsonName: {}},
+	}
+
+	rcv := cfg.RPCConns()
+
+	if rcv != nil {
+		t.Error(rcv)
+	}
+}
+
+func TestConfigV1GetConfigSection(t *testing.T) {
+	JSN_CFG := `
+	{
+	"freeswitch_agent": {
+		"enabled": true,				// starts SessionManager service: <true|false>
+		"event_socket_conns":[					// instantiate connections to multiple FreeSWITCH servers
+			{"address": "1.2.3.4:8021", "password": "ClueCon", "reconnects": 3, "alias":"123"},
+			{"address": "1.2.3.5:8021", "password": "ClueCon", "reconnects": 5, "alias":"124"}
+		],
+	},
+	
+	}`
+	cfg, _ := NewCGRConfigFromJsonStringWithDefaults(JSN_CFG)
+	tests := []struct {
+		name string
+		args *StringWithArgDispatcher
+		exp  string
+		err  string
+	}{
+		{
+			name: "case GENERAL_JSN",
+			args: &StringWithArgDispatcher{Section: GENERAL_JSN},
+			exp:  utils.ToJSON(cfg.GeneralCfg()),
+			err:  "",
+		},
+		{
+			name: "case DATADB_JSN",
+			args: &StringWithArgDispatcher{Section: DATADB_JSN},
+			exp:  utils.ToJSON(cfg.DataDbCfg()),
+			err:  "",
+		},
+		{
+			name: "case STORDB_JSN",
+			args: &StringWithArgDispatcher{Section: STORDB_JSN},
+			exp:  utils.ToJSON(cfg.StorDbCfg()),
+			err:  "",
+		},
+		{
+			name: "case TlsCfgJson",
+			args: &StringWithArgDispatcher{Section: TlsCfgJson},
+			exp:  utils.ToJSON(cfg.TlsCfg()),
+			err:  "",
+		},
+		{
+			name: "case CACHE_JSN",
+			args: &StringWithArgDispatcher{Section: CACHE_JSN},
+			exp:  utils.ToJSON(cfg.CacheCfg()),
+			err:  "",
+		},
+		{
+			name: "case HTTP_JSN",
+			args: &StringWithArgDispatcher{Section: HTTP_JSN},
+			exp:  utils.ToJSON(cfg.HTTPCfg()),
+			err:  "",
+		},
+		{
+			name: "case FilterSjsn",
+			args: &StringWithArgDispatcher{Section: FilterSjsn},
+			exp:  utils.ToJSON(cfg.FilterSCfg()),
+			err:  "",
+		},
+		{
+			name: "case RALS_JSN",
+			args: &StringWithArgDispatcher{Section: RALS_JSN},
+			exp:  utils.ToJSON(cfg.RalsCfg()),
+			err:  "",
+		},
+		{
+			name: "case SCHEDULER_JSN",
+			args: &StringWithArgDispatcher{Section: SCHEDULER_JSN},
+			exp:  utils.ToJSON(cfg.SchedulerCfg()),
+			err:  "",
+		},
+		{
+			name: "case CDRS_JSN",
+			args: &StringWithArgDispatcher{Section: CDRS_JSN},
+			exp:  utils.ToJSON(cfg.CdrsCfg()),
+			err:  "",
+		},
+		{
+			name: "case SessionSJson",
+			args: &StringWithArgDispatcher{Section: SessionSJson},
+			exp:  utils.ToJSON(cfg.SessionSCfg()),
+			err:  "",
+		},
+		{
+			name: "case FreeSWITCHAgentJSN",
+			args: &StringWithArgDispatcher{Section: FreeSWITCHAgentJSN},
+			exp:  utils.ToJSON(cfg.FsAgentCfg()),
+			err:  "",
+		},
+		{
+			name: "case KamailioAgentJSN",
+			args: &StringWithArgDispatcher{Section: KamailioAgentJSN},
+			exp:  utils.ToJSON(cfg.KamAgentCfg()),
+			err:  "",
+		},
+		{
+			name: "case AsteriskAgentJSN",
+			args: &StringWithArgDispatcher{Section: AsteriskAgentJSN},
+			exp:  utils.ToJSON(cfg.AsteriskAgentCfg()),
+			err:  "",
+		},
+		{
+			name: "case DA_JSN",
+			args: &StringWithArgDispatcher{Section: DA_JSN},
+			exp:  utils.ToJSON(cfg.DiameterAgentCfg()),
+			err:  "",
+		},
+		{
+			name: "case RA_JSN",
+			args: &StringWithArgDispatcher{Section: RA_JSN},
+			exp:  utils.ToJSON(cfg.RadiusAgentCfg()),
+			err:  "",
+		},
+		{
+			name: "case DNSAgentJson",
+			args: &StringWithArgDispatcher{Section: DNSAgentJson},
+			exp:  utils.ToJSON(cfg.DNSAgentCfg()),
+			err:  "",
+		},
+		{
+			name: "case ATTRIBUTE_JSN",
+			args: &StringWithArgDispatcher{Section: ATTRIBUTE_JSN},
+			exp:  utils.ToJSON(cfg.AttributeSCfg()),
+			err:  "",
+		},
+		{
+			name: "case ChargerSCfgJson",
+			args: &StringWithArgDispatcher{Section: ChargerSCfgJson},
+			exp:  utils.ToJSON(cfg.ChargerSCfg()),
+			err:  "",
+		},
+		{
+			name: "case RESOURCES_JSON",
+			args: &StringWithArgDispatcher{Section: RESOURCES_JSON},
+			exp:  utils.ToJSON(cfg.ResourceSCfg()),
+			err:  "",
+		},
+		{
+			name: "case STATS_JSON",
+			args: &StringWithArgDispatcher{Section: STATS_JSON},
+			exp:  utils.ToJSON(cfg.StatSCfg()),
+			err:  "",
+		},
+		{
+			name: "case THRESHOLDS_JSON",
+			args: &StringWithArgDispatcher{Section: THRESHOLDS_JSON},
+			exp:  utils.ToJSON(cfg.ThresholdSCfg()),
+			err:  "",
+		},
+		{
+			name: "case SupplierSJson",
+			args: &StringWithArgDispatcher{Section: SupplierSJson},
+			exp:  utils.ToJSON(cfg.SupplierSCfg()),
+			err:  "",
+		},
+		{
+			name: "case SURETAX_JSON",
+			args: &StringWithArgDispatcher{Section: SURETAX_JSON},
+			exp:  utils.ToJSON(cfg.SureTaxCfg()),
+			err:  "",
+		},
+		{
+			name: "case DispatcherSJson",
+			args: &StringWithArgDispatcher{Section: DispatcherSJson},
+			exp:  utils.ToJSON(cfg.DispatcherSCfg()),
+			err:  "",
+		},
+		{
+			name: "case LoaderJson",
+			args: &StringWithArgDispatcher{Section: LoaderJson},
+			exp:  utils.ToJSON(cfg.LoaderCfg()),
+			err:  "",
+		},
+		{
+			name: "case CgrLoaderCfgJson",
+			args: &StringWithArgDispatcher{Section: CgrLoaderCfgJson},
+			exp:  utils.ToJSON(cfg.LoaderCgrCfg()),
+			err:  "",
+		},
+		{
+			name: "case CgrMigratorCfgJson",
+			args: &StringWithArgDispatcher{Section: CgrMigratorCfgJson},
+			exp:  utils.ToJSON(cfg.MigratorCgrCfg()),
+			err:  "",
+		},
+		{
+			name: "case ApierS",
+			args: &StringWithArgDispatcher{Section: ApierS},
+			exp:  utils.ToJSON(cfg.ApierCfg()),
+			err:  "",
+		},
+		{
+			name: "case CDRE_JSN",
+			args: &StringWithArgDispatcher{Section: CDRE_JSN},
+			exp:  utils.ToJSON(cfg.CdreProfiles),
+			err:  "",
+		},
+		{
+			name: "case ERsJson",
+			args: &StringWithArgDispatcher{Section: ERsJson},
+			exp:  utils.ToJSON(cfg.ERsCfg()),
+			err:  "",
+		},
+		{
+			name: "case RPCConnsJsonName",
+			args: &StringWithArgDispatcher{Section: RPCConnsJsonName},
+			exp:  utils.ToJSON(cfg.RPCConns()),
+			err:  "",
+		},
+		{
+			name: "default",
+			args: &StringWithArgDispatcher{Section: "test"},
+			exp:  "",
+			err:  "Invalid section",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			rcv := &map[string]any{}
+			exp := &map[string]any{}
+			json.Unmarshal([]byte(tt.exp), exp)
+
+			err := cfg.V1GetConfigSection(tt.args, rcv)
+			if tt.err != "" {
+				if err != nil {
+					if err.Error() != tt.err {
+						t.Error(err)
+					}
+				}
+			}
+
+			if !reflect.DeepEqual(rcv, exp) {
+				t.Errorf("expected %s, received %s", utils.ToJSON(exp), utils.ToJSON(rcv))
+			}
+		})
 	}
 }
