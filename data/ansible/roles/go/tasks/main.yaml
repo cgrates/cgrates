@@ -6,6 +6,7 @@
   changed_when: false
 
 - name: Remove current installation.
+  become: yes
   file:
     state: absent
     path: /usr/local/go
