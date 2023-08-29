@@ -316,12 +316,11 @@ func runPreload(loader *services.LoaderService, internalLoaderSChan chan rpcclie
 
 func main() {
 	if err := cgrEngineFlags.Parse(os.Args[1:]); err != nil {
-		return
+		log.Fatalf("<%s> error received: <%s>, exiting!", utils.InitS, err.Error())
 	}
 	vers, err := utils.GetCGRVersion()
 	if err != nil {
-		fmt.Println(err)
-		return
+		log.Fatalf("<%s> error received: <%s>, exiting!", utils.InitS, err.Error())
 	}
 	goVers := runtime.Version()
 	if *version {
@@ -361,7 +360,7 @@ func main() {
 		cpuPath := path.Join(*cpuProfDir, utils.CpuPathCgr)
 		cpuProfileFile, err = cores.StartCPUProfiling(cpuPath)
 		if err != nil {
-			return
+			log.Fatalf("<%s> error received: <%s>, exiting!", utils.InitS, err.Error())
 		}
 		defer func() {
 			if cS != nil {
@@ -378,7 +377,7 @@ func main() {
 	if *scheduledShutdown != utils.EmptyString {
 		shutdownDur, err := utils.ParseDurationWithNanosecs(*scheduledShutdown)
 		if err != nil {
-			log.Fatal(err)
+			log.Fatalf("<%s> error received: <%s>, exiting!", utils.InitS, err.Error())
 		}
 		shdWg.Add(1)
 		go func() { // Schedule shutdown
@@ -401,7 +400,7 @@ func main() {
 	}
 	if *checkConfig {
 		if err := cfg.CheckConfigSanity(); err != nil {
-			fmt.Println(err)
+			log.Fatalf("<%s> error received: <%s>, exiting!", utils.InitS, err.Error())
 		}
 		return
 	}
@@ -524,13 +523,13 @@ func main() {
 	gvService := services.NewGlobalVarS(cfg, srvDep)
 	shdWg.Add(1)
 	if err = gvService.Start(); err != nil {
-		return
+		log.Fatalf("<%s> error received: <%s>, exiting!", utils.InitS, err.Error())
 	}
 	dmService := services.NewDataDBService(cfg, connManager, srvDep)
 	if dmService.ShouldRun() { // Some services can run without db, ie:  ERs
 		shdWg.Add(1)
 		if err = dmService.Start(); err != nil {
-			return
+			log.Fatalf("<%s> error received: <%s>, exiting!", utils.InitS, err.Error())
 		}
 	}
 
@@ -538,7 +537,7 @@ func main() {
 	if storDBService.ShouldRun() { // Some services can run without db, ie:  ERs
 		shdWg.Add(1)
 		if err = storDBService.Start(); err != nil {
-			return
+			log.Fatalf("<%s> error received: <%s>, exiting!", utils.InitS, err.Error())
 		}
 	}
 
@@ -562,8 +561,7 @@ func main() {
 	if anz.ShouldRun() {
 		shdWg.Add(1)
 		if err := anz.Start(); err != nil {
-			fmt.Println(err)
-			return
+			log.Fatalf("<%s> error received: <%s>, exiting!", utils.InitS, err.Error())
 		}
 	}
 
@@ -572,8 +570,7 @@ func main() {
 	coreS := services.NewCoreService(cfg, caps, server, internalCoreSv1Chan, anz, cpuProfileFile, memPrfDirForCores, shdWg, stopMemProf, shdChan, srvDep)
 	shdWg.Add(1)
 	if err := coreS.Start(); err != nil {
-		fmt.Println(err)
-		return
+		log.Fatalf("<%s> error received: <%s>, exiting!", utils.InitS, err.Error())
 	}
 	cS = coreS.GetCoreS()
 

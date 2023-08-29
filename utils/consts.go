@@ -723,6 +723,7 @@ const (
 	MetaEventNumber         = "*event_number"
 	LoadIDs                 = "load_ids"
 	DNSAgent                = "DNSAgent"
+	InitS                   = "InitS"
 	TLSNoCaps               = "tls"
 	UsageID                 = "UsageID"
 	Replacement             = "Replacement"
