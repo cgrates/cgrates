@@ -672,6 +672,7 @@ const (
 	MetaBusy                    = "*busy"
 	MetaQueue                   = "*queue"
 	MetaRounding                = "*rounding"
+	InitS                       = "InitS"
 )
 
 // Migrator Action

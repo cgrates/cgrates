@@ -320,11 +320,12 @@ func singnalHandler(exitChan chan bool) {
 
 func main() {
 	if err := cgrEngineFlags.Parse(os.Args[1:]); err != nil {
+		log.Fatalf("<%s> error received: <%s>, exiting!", utils.InitS, err.Error())
 		return
 	}
 	vers, err := utils.GetCGRVersion()
 	if err != nil {
-		fmt.Println(err)
+		log.Fatalf("<%s> error received: <%s>, exiting!", utils.InitS, err.Error())
 		return
 	}
 	goVers := runtime.Version()
@@ -354,7 +355,7 @@ func main() {
 	if *scheduledShutdown != utils.EmptyString {
 		shutdownDur, err := utils.ParseDurationWithNanosecs(*scheduledShutdown)
 		if err != nil {
-			log.Fatal(err)
+			log.Fatalf("<%s> error received: <%s>, exiting!", utils.InitS, err.Error())
 		}
 		go func() { // Schedule shutdown
 			time.Sleep(shutdownDur)
@@ -443,6 +444,7 @@ func main() {
 	storDBService := services.NewStorDBService(cfg)
 	if dmService.ShouldRun() { // Some services can run without db, ie:  ERs
 		if err = dmService.Start(); err != nil {
+			log.Fatalf("<%s> error received: <%s>, exiting!", utils.InitS, err.Error())
 			return
 		}
 	}
