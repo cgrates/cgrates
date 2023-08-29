@@ -1,0 +1,2 @@
+[all]
+dkr ansible_host=h4.itsyscom.com ansible_port=50026 ansible_ssh_user=dan user=dan
