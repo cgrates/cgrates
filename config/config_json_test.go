@@ -1735,3 +1735,71 @@ func TestDfEventReaderCfg(t *testing.T) {
 		t.Errorf("Expected: %+v, \nreceived: %+v", utils.ToJSON(eCfg), utils.ToJSON(cfg))
 	}
 }
+
+func TestConfigJSONRPCConnJsonCfg(t *testing.T) {
+	jsn := &json.RawMessage{}
+	self := CgrJsonCfg{RPCConnsJsonName: jsn}
+
+	rcv, err := self.RPCConnJsonCfg()
+
+	if err != nil {
+		if err.Error() != "unexpected end of JSON input" {
+			t.Error(err)
+		}
+	}
+
+	if rcv != nil {
+		t.Error(rcv)
+	}
+}
+
+func TestConfigJSONCdreJsonCfgs(t *testing.T) {
+	jsn := &json.RawMessage{}
+	self := CgrJsonCfg{CDRE_JSN: jsn}
+
+	rcv, err := self.CdreJsonCfgs()
+
+	if err != nil {
+		if err.Error() != "unexpected end of JSON input" {
+			t.Error(err)
+		}
+	}
+
+	if rcv != nil {
+		t.Error(rcv)
+	}
+}
+
+func TestConfigJSONLoaderJsonCfg(t *testing.T) {
+	jsn := &json.RawMessage{}
+	self := CgrJsonCfg{LoaderJson: jsn}
+
+	rcv, err := self.LoaderJsonCfg()
+
+	if err != nil {
+		if err.Error() != "unexpected end of JSON input" {
+			t.Error(err)
+		}
+	}
+
+	if rcv != nil {
+		t.Error(rcv)
+	}
+}
+
+func TestConfigJSONLoaderCfgJson(t *testing.T) {
+	jsn := &json.RawMessage{}
+	self := CgrJsonCfg{CgrLoaderCfgJson: jsn}
+
+	rcv, err := self.LoaderCfgJson()
+
+	if err != nil {
+		if err.Error() != "unexpected end of JSON input" {
+			t.Error(err)
+		}
+	}
+
+	if rcv != nil {
+		t.Error(rcv)
+	}
+}

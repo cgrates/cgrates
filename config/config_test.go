@@ -2684,3 +2684,157 @@ func TestConfigV1GetConfigSection(t *testing.T) {
 		})
 	}
 }
+
+func TestConfigAsMapInterface(t *testing.T) {
+	separator := ""
+	cfg := CGRConfig{
+		lks:             map[string]*sync.RWMutex{},
+		MaxCallDuration: 1 * time.Second,
+		DataFolderPath:  "test",
+		ConfigPath:      "test",
+		dfltCdreProfile: &CdreCfg{},
+		dfltEvRdr:       &EventReaderCfg{},
+		CdreProfiles: map[string]*CdreCfg{"test": {
+			ExportFormat:      "test",
+			ExportPath:        "test",
+			Filters:           []string{"test"},
+			Tenant:            "test",
+			AttributeSContext: "test",
+			Synchronous:       false,
+			Attempts:          1,
+			FieldSeparator:    'a',
+			Fields:            []*FCTemplate{},
+		}},
+		loaderCfg: LoaderSCfgs{{
+			Id:             "test",
+			Enabled:        true,
+			Tenant:         RSRParsers{},
+			DryRun:         false,
+			RunDelay:       1 * time.Second,
+			LockFileName:   "test",
+			CacheSConns:    []string{"test"},
+			FieldSeparator: "test",
+			TpInDir:        "test",
+			TpOutDir:       "test",
+			Data:           []*LoaderDataType{},
+		}},
+		httpAgentCfg: HttpAgentCfgs{{
+			ID:                "test",
+			Url:               "test",
+			SessionSConns:     []string{"test"},
+			RequestPayload:    "test",
+			ReplyPayload:      "test",
+			RequestProcessors: []*RequestProcessor{},
+		}},
+		ConfigReloads: map[string]chan struct{}{},
+		rldChans:      map[string]chan struct{}{},
+		rpcConns: map[string]*RPCConn{"test": {
+			Strategy: "test",
+			PoolSize: 1,
+			Conns:    []*RemoteHost{},
+		}},
+		generalCfg:       &GeneralCfg{},
+		dataDbCfg:        &DataDbCfg{},
+		storDbCfg:        &StorDbCfg{},
+		tlsCfg:           &TlsCfg{},
+		cacheCfg:         CacheCfg{},
+		listenCfg:        &ListenCfg{},
+		httpCfg:          &HTTPCfg{},
+		filterSCfg:       &FilterSCfg{},
+		ralsCfg:          &RalsCfg{},
+		schedulerCfg:     &SchedulerCfg{},
+		cdrsCfg:          &CdrsCfg{},
+		sessionSCfg:      &SessionSCfg{},
+		fsAgentCfg:       &FsAgentCfg{},
+		kamAgentCfg:      &KamAgentCfg{},
+		asteriskAgentCfg: &AsteriskAgentCfg{},
+		diameterAgentCfg: &DiameterAgentCfg{},
+		radiusAgentCfg:   &RadiusAgentCfg{},
+		dnsAgentCfg:      &DNSAgentCfg{},
+		attributeSCfg:    &AttributeSCfg{},
+		chargerSCfg:      &ChargerSCfg{},
+		resourceSCfg:     &ResourceSConfig{},
+		statsCfg:         &StatSCfg{},
+		thresholdSCfg:    &ThresholdSCfg{},
+		supplierSCfg:     &SupplierSCfg{},
+		sureTaxCfg:       &SureTaxCfg{},
+		dispatcherSCfg:   &DispatcherSCfg{},
+		loaderCgrCfg: &LoaderCgrCfg{
+			TpID:           "test",
+			DataPath:       "test",
+			DisableReverse: false,
+			FieldSeparator: 'a',
+			CachesConns:    []string{},
+			SchedulerConns: []string{},
+		},
+		migratorCgrCfg: &MigratorCgrCfg{},
+		mailerCfg:      &MailerCfg{},
+		analyzerSCfg:   &AnalyzerSCfg{},
+		apier:          &ApierCfg{},
+		ersCfg:         &ERsCfg{},
+	}
+
+	rcv := cfg.AsMapInterface(separator)
+	rpcConns := make(map[string]map[string]any, len(cfg.rpcConns))
+	for key, val := range cfg.rpcConns {
+		rpcConns[key] = val.AsMapInterface()
+	}
+
+	cdreProfiles := make(map[string]map[string]any)
+	for key, val := range cfg.CdreProfiles {
+		cdreProfiles[key] = val.AsMapInterface(separator)
+	}
+
+	loaderCfg := make([]map[string]any, len(cfg.loaderCfg))
+	for i, item := range cfg.loaderCfg {
+		loaderCfg[i] = item.AsMapInterface(separator)
+	}
+
+	httpAgentCfg := make([]map[string]any, len(cfg.httpAgentCfg))
+	for i, item := range cfg.httpAgentCfg {
+		httpAgentCfg[i] = item.AsMapInterface(separator)
+	}
+	exp := map[string]any{
+
+		utils.CdreProfiles:     cdreProfiles,
+		utils.LoaderCfg:        loaderCfg,
+		utils.HttpAgentCfg:     httpAgentCfg,
+		utils.RpcConns:         rpcConns,
+		utils.GeneralCfg:       cfg.generalCfg.AsMapInterface(),
+		utils.DataDbCfg:        cfg.dataDbCfg.AsMapInterface(),
+		utils.StorDbCfg:        cfg.storDbCfg.AsMapInterface(),
+		utils.TlsCfg:           cfg.tlsCfg.AsMapInterface(),
+		utils.CacheCfg:         cfg.cacheCfg.AsMapInterface(),
+		utils.ListenCfg:        cfg.listenCfg.AsMapInterface(),
+		utils.HttpCfg:          cfg.httpCfg.AsMapInterface(),
+		utils.FilterSCfg:       cfg.filterSCfg.AsMapInterface(),
+		utils.RalsCfg:          cfg.ralsCfg.AsMapInterface(),
+		utils.SchedulerCfg:     cfg.schedulerCfg.AsMapInterface(),
+		utils.CdrsCfg:          cfg.cdrsCfg.AsMapInterface(),
+		utils.SessionSCfg:      cfg.sessionSCfg.AsMapInterface(),
+		utils.FsAgentCfg:       cfg.fsAgentCfg.AsMapInterface(separator),
+		utils.KamAgentCfg:      cfg.kamAgentCfg.AsMapInterface(),
+		utils.AsteriskAgentCfg: cfg.asteriskAgentCfg.AsMapInterface(),
+		utils.DiameterAgentCfg: cfg.diameterAgentCfg.AsMapInterface(separator),
+		utils.RadiusAgentCfg:   cfg.radiusAgentCfg.AsMapInterface(separator),
+		utils.DnsAgentCfg:      cfg.dnsAgentCfg.AsMapInterface(separator),
+		utils.AttributeSCfg:    cfg.attributeSCfg.AsMapInterface(),
+		utils.ChargerSCfg:      cfg.chargerSCfg.AsMapInterface(),
+		utils.ResourceSCfg:     cfg.resourceSCfg.AsMapInterface(),
+		utils.StatsCfg:         cfg.statsCfg.AsMapInterface(),
+		utils.ThresholdSCfg:    cfg.thresholdSCfg.AsMapInterface(),
+		utils.SupplierSCfg:     cfg.supplierSCfg.AsMapInterface(),
+		utils.SureTaxCfg:       cfg.sureTaxCfg.AsMapInterface(separator),
+		utils.DispatcherSCfg:   cfg.dispatcherSCfg.AsMapInterface(),
+		utils.LoaderCgrCfg:     cfg.loaderCgrCfg.AsMapInterface(),
+		utils.MigratorCgrCfg:   cfg.migratorCgrCfg.AsMapInterface(),
+		utils.MailerCfg:        cfg.mailerCfg.AsMapInterface(),
+		utils.AnalyzerSCfg:     cfg.analyzerSCfg.AsMapInterface(),
+		utils.Apier:            cfg.apier.AsMapInterface(),
+		utils.ErsCfg:           cfg.ersCfg.AsMapInterface(separator),
+	}
+
+	if !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("expected %v, received %v", exp, rcv)
+	}
+}
