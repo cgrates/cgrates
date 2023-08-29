@@ -311,3 +311,196 @@ func TestRSRParserParseDataProviderAsFloat64(t *testing.T) {
 		})
 	}
 }
+
+func TestRSRParserParseDataProvider(t *testing.T) {
+	prsr := RSRParser{
+		path: "test",
+	}
+	dP := &FWVProvider{
+		req:   "test",
+		cache: utils.MapStorage{"test": 1},
+	}
+
+	rcv, err := prsr.ParseDataProvider(dP, "")
+	if err != nil {
+		if err.Error() != "Invalid format for index : [t e s t]" {
+			t.Error(err)
+		}
+	} else {
+		t.Error("was expecting an error")
+	}
+
+	if rcv != "" {
+		t.Error(err)
+	}
+}
+
+func TestRSRParserParseDataProviderWithInterfaces(t *testing.T) {
+	prsr := RSRParser{
+		path: "test",
+	}
+	dP := &FWVProvider{
+		req:   "test",
+		cache: utils.MapStorage{"test": 1},
+	}
+
+	rcv, err := prsr.ParseDataProviderWithInterfaces(dP, "")
+	if err != nil {
+		if err.Error() != "Invalid format for index : [t e s t]" {
+			t.Error(err)
+		}
+	} else {
+		t.Error("was expecting an error")
+	}
+
+	if rcv != "" {
+		t.Error(err)
+	}
+}
+
+func TestRSRParserParseDataProviderAsFloat642(t *testing.T) {
+	prsr := RSRParser{
+		path: "test",
+	}
+	dP := &FWVProvider{
+		req:   "test",
+		cache: utils.MapStorage{"test": 1},
+	}
+
+	rcv, err := prsr.ParseDataProviderAsFloat64(dP, "")
+	if err != nil {
+		if err.Error() != "Invalid format for index : [t e s t]" {
+			t.Error(err)
+		}
+	} else {
+		t.Error("was expecting an error")
+	}
+
+	if rcv != 0.0 {
+		t.Error(err)
+	}
+}
+
+func TestRSRParsersParseValue(t *testing.T) {
+	str := "test"
+	prsrs := RSRParsers{{
+		Rules:           str,
+		AllFiltersMatch: false,
+		path:            str,
+		rsrRules:        []*utils.ReSearchReplace{},
+		converters:      utils.DataConverters{&utils.MultiplyConverter{Value: 1.2}},
+		filters:         utils.RSRFilters{},
+	}}
+
+	rcv, err := prsrs.ParseValue("test)")
+	if err != nil {
+		if err.Error() != `strconv.ParseFloat: parsing "test)": invalid syntax` {
+			t.Error(err)
+		}
+	} else {
+		t.Error("was expecting an error")
+	}
+
+	if rcv != "" {
+		t.Error(rcv)
+	}
+}
+
+func TestRSRParsersParseDataProvider(t *testing.T) {
+	str := "test"
+	prsrs := RSRParsers{{
+		Rules:           str,
+		AllFiltersMatch: false,
+		path:            str,
+		rsrRules:        []*utils.ReSearchReplace{},
+		converters:      utils.DataConverters{&utils.MultiplyConverter{Value: 1.2}},
+		filters:         utils.RSRFilters{},
+	}}
+	dP := &FWVProvider{
+		req:   "test",
+		cache: utils.MapStorage{"test": 1},
+	}
+
+	rcv, err := prsrs.ParseDataProvider(dP, "")
+	if err != nil {
+		if err.Error() != `Invalid format for index : [t e s t]` {
+			t.Error(err)
+		}
+	} else {
+		t.Error("was expecting an error")
+	}
+
+	if rcv != "" {
+		t.Error(rcv)
+	}
+}
+
+func TestRSRParsersParseDataProviderWithInterfaces(t *testing.T) {
+	str := "test"
+	prsrs := RSRParsers{{
+		Rules:           str,
+		AllFiltersMatch: false,
+		path:            str,
+		rsrRules:        []*utils.ReSearchReplace{},
+		converters:      utils.DataConverters{&utils.MultiplyConverter{Value: 1.2}},
+		filters:         utils.RSRFilters{},
+	}}
+	dP := &FWVProvider{
+		req:   "test",
+		cache: utils.MapStorage{"test": 1},
+	}
+
+	rcv, err := prsrs.ParseDataProviderWithInterfaces(dP, "")
+	if err != nil {
+		if err.Error() != `Invalid format for index : [t e s t]` {
+			t.Error(err)
+		}
+	} else {
+		t.Error("was expecting an error")
+	}
+
+	if rcv != "" {
+		t.Error(rcv)
+	}
+}
+
+func TestRSRParsersCompile2(t *testing.T) {
+	str := "test)"
+	prsrs := RSRParsers{{
+		Rules:           str,
+		AllFiltersMatch: false,
+		path:            str,
+		rsrRules:        []*utils.ReSearchReplace{},
+		converters:      utils.DataConverters{&utils.MultiplyConverter{Value: 1.2}},
+		filters:         utils.RSRFilters{},
+	}}
+
+	err := prsrs.Compile()
+
+	if err != nil {
+		if err.Error() != "invalid RSRFilter start rule in string: <test)>" {
+			t.Error(err)
+		}
+	} else {
+		t.Error("was expecting an error")
+	}
+}
+
+func TestRSRParserparseValue(t *testing.T) {
+	str := "test)"
+	prsr := RSRParser{
+		Rules:           str,
+		AllFiltersMatch: false,
+		path:            str,
+		rsrRules: []*utils.ReSearchReplace{{
+			ReplaceTemplate: "test",
+			Matched:         true,
+		},
+		}}
+
+	rcv := prsr.RegexpMatched()
+
+	if rcv != true {
+		t.Error(rcv)
+	}
+}

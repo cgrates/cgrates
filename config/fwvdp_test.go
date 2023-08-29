@@ -167,3 +167,20 @@ func TestFVWDPRemoteHost(t *testing.T) {
 		t.Error("didn't recive")
 	}
 }
+
+func TestFWVProviderFieldAsInterface(t *testing.T) {
+	fP := &FWVProvider{
+		req:   "test",
+		cache: utils.MapStorage{"test": 1},
+	}
+	fldPath := []string{"test"}
+
+	rcv, err := fP.FieldAsInterface(fldPath)
+	if err != nil {
+		t.Error(err)
+	}
+
+	if rcv != 1 {
+		t.Error(rcv)
+	}
+}

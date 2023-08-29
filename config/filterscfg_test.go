@@ -80,3 +80,45 @@ func TestFilterSCfgAsMapInterface(t *testing.T) {
 		t.Errorf("Expected: %+v ,\n received: %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
 	}
 }
+
+func TestFilterSCfgloadFromJsonCfg2(t *testing.T) {
+	fSCfg := FilterSCfg{
+		StatSConns:     []string{},
+		ResourceSConns: []string{},
+	}
+	jsnCfg := &FilterSJsonCfg{
+		Stats_conns:     &[]string{utils.MetaInternal},
+		Resources_conns: &[]string{utils.MetaInternal},
+	}
+
+	err := fSCfg.loadFromJsonCfg(jsnCfg)
+	exp := FilterSCfg{
+		StatSConns:     []string{"*internal:*stats"},
+		ResourceSConns: []string{"*internal:*resources"},
+	}
+	if err != nil {
+		t.Error(err)
+	}
+
+	if !reflect.DeepEqual(exp, fSCfg) {
+		t.Errorf("expected %s, received %s", utils.ToJSON(exp), utils.ToJSON(fSCfg))
+	}
+
+	jsnCfg2 := &FilterSJsonCfg{
+		Stats_conns:     &[]string{utils.MetaInternal},
+		Resources_conns: &[]string{"test"},
+	}
+
+	err = fSCfg.loadFromJsonCfg(jsnCfg2)
+	exp = FilterSCfg{
+		StatSConns:     []string{"*internal:*stats"},
+		ResourceSConns: []string{"test"},
+	}
+	if err != nil {
+		t.Error(err)
+	}
+
+	if !reflect.DeepEqual(exp, fSCfg) {
+		t.Errorf("expected %s, received %s", utils.ToJSON(exp), utils.ToJSON(fSCfg))
+	}
+}

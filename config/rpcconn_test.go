@@ -56,3 +56,60 @@ func TestRPCConnsAsMapInterface(t *testing.T) {
 		t.Errorf("\nExpected: %+v\nReceived: %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
 	}
 }
+
+func TestRPCConnloadFromJsonCfg(t *testing.T) {
+	str := "test"
+	str2 := "test2"
+	nm := 1
+	nm2 := 2
+	bl := false
+	rh := &RemoteHost{
+		ID:          str,
+		Address:     str,
+		Transport:   str,
+		Synchronous: true,
+		TLS:         true,
+	}
+	rC := &RPCConn{
+		Strategy: str,
+		PoolSize: nm,
+		Conns:    []*RemoteHost{rh},
+	}
+	jsnCfg := &RPCConnsJson{
+		Strategy: &str2,
+		PoolSize: &nm2,
+		Conns: &[]*RemoteHostJson{{
+			Id:          &str2,
+			Address:     &str2,
+			Transport:   &str2,
+			Synchronous: &bl,
+			Tls:         &bl,
+		}},
+	}
+
+	err := rC.loadFromJsonCfg(jsnCfg)
+	rh2 := &RemoteHost{
+		ID:          str2,
+		Address:     str2,
+		Transport:   str2,
+		Synchronous: false,
+		TLS:         false,
+	}
+	exp := &RPCConn{
+		Strategy: str2,
+		PoolSize: nm2,
+		Conns:    []*RemoteHost{rh2},
+	}
+	if err != nil {
+		t.Error(err)
+	}
+
+	if !reflect.DeepEqual(rC, exp) {
+		t.Errorf("expected %s, received %s", utils.ToJSON(exp), utils.ToJSON(rC))
+	}
+
+	err = rC.loadFromJsonCfg(nil)
+	if err != nil {
+		t.Error(err)
+	}
+}
