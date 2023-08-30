@@ -504,3 +504,66 @@ func TestRSRParserparseValue(t *testing.T) {
 		t.Error(rcv)
 	}
 }
+
+func TestRSRParsersNewRSRParsersFromSlice(t *testing.T) {
+	rcv, err := NewRSRParsersFromSlice([]string{"test)"}, false)
+
+	if err != nil {
+		if err.Error() != "invalid RSRFilter start rule in string: <test)>" {
+			t.Error(err)
+		}
+	}
+
+	if rcv != nil {
+		t.Error(rcv)
+	}
+
+	rcv, err = NewRSRParsersFromSlice([]string{""}, false)
+
+	if err != nil {
+		if err.Error() != "empty RSRParser in rule: <>" {
+			t.Error(err)
+		}
+	}
+
+	if rcv != nil {
+		t.Error(rcv)
+	}
+}
+
+func TestRSRParsersparseValue(t *testing.T) {
+	str := "test)"
+	prsr := RSRParser{
+		Rules:           str,
+		AllFiltersMatch: false,
+		path:            str,
+		rsrRules: []*utils.ReSearchReplace{{
+			ReplaceTemplate: "test",
+			Matched:         true,
+		}},
+	}
+
+	rcv := prsr.parseValue("test")
+
+	if rcv != "" {
+		t.Error(rcv)
+	}
+}
+
+func TestRSRParsersNewRSRParsersMustCompile(t *testing.T) {
+	defer func() {
+		_ = recover()
+	}()
+
+	rcv := NewRSRParsersMustCompile("test`", false, "")
+	t.Error("should have panicked", rcv)
+}
+
+func TestRSRParsersNewRSRParserMustCompile(t *testing.T) {
+	defer func() {
+		_ = recover()
+	}()
+
+	rcv := NewRSRParserMustCompile("test)", false)
+	t.Error("should have panicked, received:", rcv)
+}
