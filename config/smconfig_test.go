@@ -647,28 +647,28 @@ func TestSMConfigloadFromJsonCfg(t *testing.T) {
 
 	jsnCfg := &SessionSJsonCfg{
 		Enabled:                &bl,
-		Listen_bijson :         &str,
-		Chargers_conns :        &slc,
-		Rals_conns   :          &slc,
-		Resources_conns  :      &slc,
-		Thresholds_conns :      &slc,
-		Stats_conns     :       &slc,
-		Suppliers_conns  :      &slc,
-		Cdrs_conns     :        &slc,
-		Replication_conns :     &slc,
-		Attributes_conns :      &slc,
-		Debit_interval   :      &tds,
-		Store_session_costs :   &bl,
-		Session_ttl  :          &tds,
+		Listen_bijson:          &str,
+		Chargers_conns:         &slc,
+		Rals_conns:             &slc,
+		Resources_conns:        &slc,
+		Thresholds_conns:       &slc,
+		Stats_conns:            &slc,
+		Suppliers_conns:        &slc,
+		Cdrs_conns:             &slc,
+		Replication_conns:      &slc,
+		Attributes_conns:       &slc,
+		Debit_interval:         &tds,
+		Store_session_costs:    &bl,
+		Session_ttl:            &tds,
 		Session_ttl_max_delay:  &tds,
-		Session_ttl_last_used : &tds,
-		Session_ttl_usage :     &tds,
+		Session_ttl_last_used:  &tds,
+		Session_ttl_usage:      &tds,
 		Session_ttl_last_usage: &tds,
-		Session_indexes  :      &[]string{"test"},
-		Client_protocol :       &fl,
+		Session_indexes:        &[]string{"test"},
+		Client_protocol:        &fl,
 		Channel_sync_interval:  &tds,
 		Terminate_attempts:     &nm,
-		Alterable_fields :      &[]string{},
+		Alterable_fields:       &[]string{},
 	}
 
 	err := scfg.loadFromJsonCfg(jsnCfg)
@@ -710,7 +710,7 @@ func TestSMConfigloadFromJsonCfgErrors(t *testing.T) {
 	slc := []string{utils.MetaInternal}
 	str := "test"
 	scfg := SessionSCfg{
-		DefaultUsage:        map[string]time.Duration{str: 1 * time.Second},
+		DefaultUsage: map[string]time.Duration{str: 1 * time.Second},
 	}
 	jsnCfg := &SessionSJsonCfg{
 		Replication_conns: &slc,
@@ -740,55 +740,55 @@ func TestSMConfigloadFromJsonCfgErrors(t *testing.T) {
 		Default_usage: &map[string]string{str: str},
 	}
 
-	tests := []struct{
-		name string 
+	tests := []struct {
+		name string
 		arg  *SessionSJsonCfg
-		err string
+		err  string
 	}{
 		{
 			name: "Replication_conns error",
-			arg: jsnCfg,
-			err: "Replication connection ID needs to be different than *internal",
+			arg:  jsnCfg,
+			err:  "Replication connection ID needs to be different than *internal",
 		},
 		{
 			name: "Debit_interval error",
-			arg: jsnCfg2,
-			err: `time: invalid duration "test"`,
+			arg:  jsnCfg2,
+			err:  `time: invalid duration "test"`,
 		},
 		{
 			name: "Session_ttl error",
-			arg: jsnCfg3,
-			err: `time: invalid duration "test"`,
+			arg:  jsnCfg3,
+			err:  `time: invalid duration "test"`,
 		},
 		{
 			name: "Session_ttl_max_delay error",
-			arg: jsnCfg4,
-			err: `time: invalid duration "test"`,
+			arg:  jsnCfg4,
+			err:  `time: invalid duration "test"`,
 		},
 		{
 			name: "Session_ttl_last_used error",
-			arg: jsnCfg5,
-			err: `time: invalid duration "test"`,
+			arg:  jsnCfg5,
+			err:  `time: invalid duration "test"`,
 		},
 		{
 			name: "Session_ttl_usage error",
-			arg: jsnCfg6,
-			err: `time: invalid duration "test"`,
+			arg:  jsnCfg6,
+			err:  `time: invalid duration "test"`,
 		},
 		{
 			name: "Session_ttl_last_usage error",
-			arg: jsnCfg7,
-			err: `time: invalid duration "test"`,
+			arg:  jsnCfg7,
+			err:  `time: invalid duration "test"`,
 		},
 		{
 			name: "Channel_sync_interval error",
-			arg: jsnCfg8,
-			err: `time: invalid duration "test"`,
+			arg:  jsnCfg8,
+			err:  `time: invalid duration "test"`,
 		},
 		{
 			name: "Default_usage error",
-			arg: jsnCfg9,
-			err: `time: invalid duration "test"`,
+			arg:  jsnCfg9,
+			err:  `time: invalid duration "test"`,
 		},
 	}
 
@@ -814,7 +814,7 @@ func TestSMConfigFsAgentCfgloadFromJsonCfgErrors(t *testing.T) {
 	self := &FsAgentCfg{}
 	jsnCfg := &FreeswitchAgentJsonCfg{
 		Sessions_conns: &slc,
-		Extra_fields: &slc2,
+		Extra_fields:   &slc2,
 	}
 
 	err := self.loadFromJsonCfg(jsnCfg)
@@ -846,12 +846,12 @@ func TestSMConfigFsAgentCfgloadFromJsonCfgErrors(t *testing.T) {
 func TestSMConfigFsAgentCfgAsMapInterface(t *testing.T) {
 	fscfg := &FsAgentCfg{
 		SessionSConns: []string{"test"},
-		ExtraFields:   RSRParsers{{
+		ExtraFields: RSRParsers{{
 			Rules: "test",
 		}},
-		Enabled:       false,
-		SubscribePark: false,
-		CreateCdr:     false,
+		Enabled:             false,
+		SubscribePark:       false,
+		CreateCdr:           false,
 		EmptyBalanceContext: "test",
 		EmptyBalanceAnnFile: "test",
 		MaxWaitConnection:   1 * time.Second,
@@ -859,7 +859,7 @@ func TestSMConfigFsAgentCfgAsMapInterface(t *testing.T) {
 	}
 
 	rcv := fscfg.AsMapInterface(":")
-	exp :=	map[string]any{
+	exp := map[string]any{
 		utils.EnabledCfg:             fscfg.Enabled,
 		utils.SessionSConnsCfg:       []string{"test"},
 		utils.SubscribeParkCfg:       fscfg.SubscribePark,
@@ -870,7 +870,7 @@ func TestSMConfigFsAgentCfgAsMapInterface(t *testing.T) {
 		utils.MaxWaitConnectionCfg:   "1s",
 		utils.EventSocketConnsCfg:    []map[string]any{},
 	}
-	
+
 	if !reflect.DeepEqual(rcv, exp) {
 		t.Errorf("expected %s, received %s", utils.ToJSON(exp), utils.ToJSON(rcv))
 	}
@@ -880,7 +880,7 @@ func TestSMConfigAsteriskConnCfgloadFromJsonCfg(t *testing.T) {
 	str := "test"
 	aConnCfg := &AsteriskConnCfg{}
 	jsnCfg := &AstConnJsonCfg{
-		Alias:  &str,
+		Alias: &str,
 	}
 
 	err := aConnCfg.loadFromJsonCfg(jsnCfg)
