@@ -20,6 +20,7 @@ package config
 import (
 	"fmt"
 	"reflect"
+	"strings"
 	"testing"
 
 	"github.com/cgrates/cgrates/utils"
@@ -269,5 +270,62 @@ func TestLoadersCFGLoadFromJsonCfg(t *testing.T) {
 				}
 			}
 		})
+	}
+}
+
+func TestLoaderSCfgloadFromJsonCfg2(t *testing.T) {
+	str := "test)"
+	self := &LoaderSCfg{}
+	jsnCfg := &LoaderJsonCfg{
+		Tenant: &str,
+	}
+
+	err := self.loadFromJsonCfg(jsnCfg, "")
+
+	if err != nil {
+		if err.Error() != "invalid RSRFilter start rule in string: <)>" {
+			t.Error(err)
+		}
+	}
+
+	jsnCfg2 := &LoaderJsonCfg{
+		Caches_conns: &[]string{str},
+	}
+
+	err = self.loadFromJsonCfg(jsnCfg2, "")
+	if err != nil {
+		t.Error(err)
+	}
+
+	if self.CacheSConns[0] != str {
+		t.Error(self.CacheSConns[0])
+	}
+}
+
+func TestLoaderSCfgAsMapInterface(t *testing.T) {
+	l := &LoaderSCfg{
+		Tenant: RSRParsers{{
+			Rules:           "test",
+			AllFiltersMatch: true,
+		}},
+	}
+
+	exp := map[string]any{
+		utils.TenantCfg:         strings.Join([]string{"test"}, utils.EmptyString),
+		utils.IdCfg:             l.Id,
+		utils.EnabledCfg:        l.Enabled,
+		utils.DryRunCfg:         l.DryRun,
+		utils.RunDelayCfg:       "0",
+		utils.LockFileNameCfg:   l.LockFileName,
+		utils.CacheSConnsCfg:    []string{},
+		utils.FieldSeparatorCfg: l.FieldSeparator,
+		utils.TpInDirCfg:        l.TpInDir,
+		utils.TpOutDirCfg:       l.TpOutDir,
+		utils.DataCfg:           []map[string]any{},
+	}
+	rcv := l.AsMapInterface("")
+
+	if !reflect.DeepEqual(exp, rcv) {
+		t.Errorf("\nexpeting: %s\n received: %s\n", utils.ToJSON(exp), utils.ToJSON(rcv))
 	}
 }

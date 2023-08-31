@@ -114,3 +114,146 @@ func TestRadiusAgentCfgAsMapInterface(t *testing.T) {
 		t.Errorf("\nExpected: %+v\nReceived: %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
 	}
 }
+
+func TestRadiusAgentCfgloadFromJsonCfg2(t *testing.T) {
+	str := "test"
+	str2 := "test)"
+	self := &RadiusAgentCfg{
+		RequestProcessors: []*RequestProcessor{{
+			ID: str,
+		}},
+	}
+	jsnCfg := &RadiusAgentJsonCfg{
+		Sessions_conns: &[]string{str},
+		Request_processors: &[]*ReqProcessorJsnCfg{{
+			ID:       &str,
+			Filters:  &[]string{str},
+			Tenant:   &str,
+			Timezone: &str,
+			Flags:    &[]string{str},
+			Request_fields: &[]*FcTemplateJsonCfg{{
+				Tag:          &str,
+				Type:         &str,
+				Path:         &str,
+				Attribute_id: &str,
+				Filters:      &[]string{str},
+			}},
+			Reply_fields: &[]*FcTemplateJsonCfg{{
+				Tag:          &str,
+				Type:         &str,
+				Path:         &str,
+				Attribute_id: &str,
+				Filters:      &[]string{str},
+			}},
+		}, {
+			ID: &str2,
+		}},
+	}
+
+	err := self.loadFromJsonCfg(jsnCfg, "")
+	if err != nil {
+		t.Error(err)
+	}
+
+	jsnCfg2 := &RadiusAgentJsonCfg{
+		Sessions_conns: &[]string{str},
+		Request_processors: &[]*ReqProcessorJsnCfg{{
+			ID:       &str2,
+			Filters:  &[]string{str2},
+			Tenant:   &str2,
+			Timezone: &str2,
+			Flags:    &[]string{str2},
+			Request_fields: &[]*FcTemplateJsonCfg{{
+				Tag:          &str2,
+				Type:         &str2,
+				Path:         &str2,
+				Attribute_id: &str2,
+				Filters:      &[]string{"test)"},
+			}},
+			Reply_fields: &[]*FcTemplateJsonCfg{{
+				Tag:          &str2,
+				Type:         &str2,
+				Path:         &str2,
+				Attribute_id: &str2,
+				Filters:      &[]string{"test)"},
+			}},
+		}},
+	}
+
+	err = self.loadFromJsonCfg(jsnCfg2, "")
+	if err != nil {
+		t.Error(err)
+	}
+}
+
+func TestRadiusAgentCfgAsMapInterface2(t *testing.T) {
+	str := "test"
+	ra := &RadiusAgentCfg{
+		Enabled:            true,
+		ListenNet:          str,
+		ListenAuth:         str,
+		ListenAcct:         str,
+		ClientSecrets:      map[string]string{str: str},
+		ClientDictionaries: map[string]string{str: str},
+		SessionSConns:      []string{str},
+		RequestProcessors: []*RequestProcessor{
+			{
+				ID: str,
+				Tenant: RSRParsers{{
+					Rules:           "t",
+					AllFiltersMatch: true,
+				},
+					{
+						Rules:           "e",
+						AllFiltersMatch: true,
+					},
+					{
+						Rules:           "s",
+						AllFiltersMatch: true,
+					},
+					{
+						Rules:           "t",
+						AllFiltersMatch: true,
+					}},
+				Filters:  []string{str},
+				Flags:    utils.FlagsWithParams{str: {}},
+				Timezone: str,
+				RequestFields: []*FCTemplate{
+					{
+						AttributeID: str,
+						Tag:         str,
+						Type:        str,
+						Path:        str,
+						Filters:     []string{str},
+					},
+				},
+				ReplyFields: []*FCTemplate{
+					{
+						AttributeID: str,
+						Tag:         str,
+						Type:        str,
+						Path:        str,
+						Filters:     []string{str},
+					},
+				},
+			},
+		},
+	}
+
+	exp := map[string]any{
+		utils.EnabledCfg:            ra.Enabled,
+		utils.ListenNetCfg:          ra.ListenNet,
+		utils.ListenAuthCfg:         ra.ListenAuth,
+		utils.ListenAcctCfg:         ra.ListenAcct,
+		utils.ClientSecretsCfg:      map[string]any{str: str},
+		utils.ClientDictionariesCfg: map[string]any{str: str},
+		utils.SessionSConnsCfg:      []string{str},
+		utils.RequestProcessorsCfg:  []map[string]any{ra.RequestProcessors[0].AsMapInterface("")},
+	}
+
+	rcv := ra.AsMapInterface("")
+
+	if !reflect.DeepEqual(exp, rcv) {
+		t.Errorf("\nexpected %s: \nreceived %s\n", utils.ToJSON(exp), utils.ToJSON(rcv))
+	}
+}
