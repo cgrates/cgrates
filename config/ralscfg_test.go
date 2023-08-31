@@ -132,3 +132,67 @@ func TestRalsCfgAsMapInterface(t *testing.T) {
 		t.Errorf("Expected: %+v ,\n received: %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
 	}
 }
+
+func TestRalsCfgloadFromJsonCfg(t *testing.T) {
+	str := "test"
+	bl := false
+	nm := 1
+	ralsCfg := &RalsCfg{
+		MaxComputedUsage: map[string]time.Duration{str: 1 * time.Second},
+	}
+	jsnRALsCfg := &RalsJsonCfg{
+		Enabled:                    &bl,
+		Thresholds_conns:           &[]string{str},
+		Stats_conns:                &[]string{str},
+		CacheS_conns:               &[]string{str},
+		Rp_subject_prefix_matching: &bl,
+		Remove_expired:             &bl,
+		Max_computed_usage:         &map[string]string{str: str},
+		Max_increments:             &nm,
+		Balance_rating_subject:     &map[string]string{str: str},
+	}
+
+	err := ralsCfg.loadFromJsonCfg(jsnRALsCfg)
+
+	if err != nil {
+		if err.Error() != `time: invalid duration "test"` {
+			t.Error(err)
+		}
+	}
+
+	if ralsCfg.ThresholdSConns[0] != str {
+		t.Error(ralsCfg.ThresholdSConns[0])
+	}
+
+	if ralsCfg.StatSConns[0] != str {
+		t.Error(ralsCfg.StatSConns[0])
+	}
+
+	jsnRALsCfg2 := &RalsJsonCfg{
+		Enabled:                    &bl,
+		Thresholds_conns:           &[]string{utils.MetaInternal},
+		Stats_conns:                &[]string{utils.MetaInternal},
+		CacheS_conns:               &[]string{str},
+		Rp_subject_prefix_matching: &bl,
+		Remove_expired:             &bl,
+		Max_computed_usage:         &map[string]string{str: str},
+		Max_increments:             &nm,
+		Balance_rating_subject:     &map[string]string{str: str},
+	}
+
+	err = ralsCfg.loadFromJsonCfg(jsnRALsCfg2)
+
+	if err != nil {
+		if err.Error() != `time: invalid duration "test"` {
+			t.Error(err)
+		}
+	}
+
+	if ralsCfg.ThresholdSConns[0] != utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds) {
+		t.Error(ralsCfg.ThresholdSConns[0])
+	}
+
+	if ralsCfg.StatSConns[0] != utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStatS) {
+		t.Error(ralsCfg.StatSConns[0])
+	}
+}

@@ -892,3 +892,50 @@ func TestSMConfigAsteriskConnCfgloadFromJsonCfg(t *testing.T) {
 		t.Error("didn't load")
 	}
 }
+
+func TestSMConfigAsteriskAgentCfgloadFromJsonCfg(t *testing.T) {
+	aCfg := &AsteriskAgentCfg{}
+	jsnCfg := &AsteriskAgentJsonCfg{
+		Sessions_conns: &[]string{"test"},
+	}
+
+	err := aCfg.loadFromJsonCfg(jsnCfg)
+	if err != nil {
+		t.Error(err)
+	}
+
+	if aCfg.SessionSConns[0] != "test" {
+		t.Error("didn't load")
+	}
+}
+
+func TestSMConfigAsteriskAgentCfgAsMapInterface(t *testing.T) {
+	str := "test"
+	aCfg := &AsteriskAgentCfg{
+		Enabled:       false,
+		SessionSConns: []string{str},
+		CreateCDR:     false,
+		AsteriskConns: []*AsteriskConnCfg{
+			{
+				Alias:           str,
+				Address:         str,
+				User:            str,
+				Password:        str,
+				ConnectAttempts: 1,
+				Reconnects:      1,
+			},
+		},
+	}
+	exp := map[string]any{
+		utils.EnabledCfg:       aCfg.Enabled,
+		utils.SessionSConnsCfg: []string{str},
+		utils.CreateCDRCfg:     aCfg.CreateCDR,
+		utils.AsteriskConnsCfg: []map[string]any{aCfg.AsteriskConns[0].AsMapInterface()},
+	}
+
+	rcv := aCfg.AsMapInterface()
+
+	if !reflect.DeepEqual(exp, rcv) {
+		t.Errorf("expected %s, received %s", utils.ToJSON(exp), utils.ToJSON(rcv))
+	}
+}

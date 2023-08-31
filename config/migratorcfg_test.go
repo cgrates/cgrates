@@ -174,3 +174,26 @@ func TestMigratorCgrCfgAsMapInterface(t *testing.T) {
 	}
 
 }
+
+func TestMigratorCgrCfgloadFromJsonCfg2(t *testing.T) {
+	str := "*test"
+	mg := &MigratorCgrCfg{}
+	jsnCfg := &MigratorCfgJson{
+		Out_dataDB_type: &str,
+		Out_storDB_type: &str,
+	}
+
+	err := mg.loadFromJsonCfg(jsnCfg)
+	if err != nil {
+		t.Error(err)
+	}
+
+	exp := &MigratorCgrCfg{
+		OutDataDBType: str,
+		OutStorDBType: str,
+	}
+
+	if !reflect.DeepEqual(exp, mg) {
+		t.Errorf("\nexpected: %s \nreceived: %s\n", utils.ToJSON(exp), utils.ToJSON(mg))
+	}
+}
