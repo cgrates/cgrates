@@ -2,22 +2,22 @@ kind: pipeline
 type: docker
 name: unit
 
-
 workspace:
-  path: /cgrates
+  path: /go/src/github.com/cgrates/cgrates/
 
 steps:
 - name: unit
   pull: never
-  image: cgrates-it-entrypoint
+  image: cgrates-integration
   commands:
-  - docker-entrypoint.sh
+  - go version
   - ./test.sh
 - name: notify
   pull: never
   image: drillster/drone-email
   settings:
-    from: cgrates.test01@gmail.com
+    from.address: cgrates.dronebot@gmail.com
+    from.name: DroneEmail
     host: smtp.gmail.com
     username: 
       from_secret: email_username
@@ -48,20 +48,22 @@ name: integration-internal
 
 
 workspace:
-  path: /cgrates
+  path: /go/src/github.com/cgrates/cgrates/
 
 steps:
 - name: integration-internal
   pull: never
-  image: cgrates-it-entrypoint
+  image: cgrates-integration
   commands:
-  - docker-entrypoint.sh
+  - data/docker/integration/docker-entrypoint.sh
   - ./integration_test.sh -dbtype=*internal
+  failure: ignore
 - name: notify
   pull: never
   image: drillster/drone-email
   settings:
-    from: cgrates.test01@gmail.com
+    from.address: cgrates.dronebot@gmail.com
+    from.name: DroneEmail
     host: smtp.gmail.com
     username: 
       from_secret: email_username
@@ -83,7 +85,7 @@ steps:
     recipients_file: recipients
     recipients_only: true
   when:
-    status: failure 
+    status: failure
 
 ---
 kind: pipeline
@@ -92,20 +94,22 @@ name: integration-mysql
 
 
 workspace:
-  path: /cgrates
+  path: /go/src/github.com/cgrates/cgrates/
 
 steps:
 - name: integration-mysql
   pull: never
-  image: cgrates-it-entrypoint
+  image: cgrates-integration
   commands:
-  - docker-entrypoint.sh
+  - data/docker/integration/docker-entrypoint.sh
   - ./integration_test.sh -dbtype=*mysql
+  failure: ignore
 - name: notify
   pull: never
   image: drillster/drone-email
   settings:
-    from: cgrates.test01@gmail.com
+    from.address: cgrates.dronebot@gmail.com
+    from.name: DroneEmail
     host: smtp.gmail.com
     username: 
       from_secret: email_username
@@ -136,20 +140,22 @@ name: integration-mongo
 
 
 workspace:
-  path: /cgrates
+  path: /go/src/github.com/cgrates/cgrates/
 
 steps:
 - name: integration-mongo
   pull: never
-  image: cgrates-it-entrypoint
+  image: cgrates-integration
   commands:
-  - docker-entrypoint.sh
+  - data/docker/integration/docker-entrypoint.sh
   - ./integration_test.sh -dbtype=*mongo
+  failure: ignore
 - name: notify
   pull: never
   image: drillster/drone-email
   settings:
-    from: cgrates.test01@gmail.com
+    from.address: cgrates.dronebot@gmail.com
+    from.name: DroneEmail
     host: smtp.gmail.com
     username: 
       from_secret: email_username
@@ -180,20 +186,22 @@ name: integration-postgres
 
 
 workspace:
-  path: /cgrates
+  path: /go/src/github.com/cgrates/cgrates/
 
 steps:
 - name: integration-postgres
   pull: never
-  image: cgrates-it-entrypoint
+  image: cgrates-integration
   commands:
-  - docker-entrypoint.sh
+  - data/docker/integration/docker-entrypoint.sh
   - ./integration_test.sh -dbtype=*postgres
+  failure: ignore
 - name: notify
   pull: never
   image: drillster/drone-email
   settings:
-    from: cgrates.test01@gmail.com
+    from.address: cgrates.dronebot@gmail.com
+    from.name: DroneEmail
     host: smtp.gmail.com
     username: 
       from_secret: email_username
