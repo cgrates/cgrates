@@ -3684,10 +3684,10 @@ func TestEventCostAsRefundIncrements(t *testing.T) {
 	str := "test"
 	td := 1 * time.Second
 	ec := &EventCost{
-		CGRID:          str,
-		RunID:          str,
-		StartTime:      time.Date(2021, 8, 15, 14, 30, 45, 100, time.Local),
-		Usage:          &td,
+		CGRID:     str,
+		RunID:     str,
+		StartTime: time.Date(2021, 8, 15, 14, 30, 45, 100, time.Local),
+		Usage:     &td,
 	}
 
 	rcv := ec.AsRefundIncrements(str)
@@ -3712,13 +3712,13 @@ func TestEventCostappendChargingIntervalFromEventCost(t *testing.T) {
 	str2 := "test2"
 	td2 := 2 * time.Millisecond
 	ec := &EventCost{
-		CGRID:          str,
-		RunID:          str,
-		StartTime:      time.Date(2021, 8, 15, 14, 30, 45, 100, time.Local),
-		Usage:          &td,
-		Charges:        []*ChargingInterval{{
-			RatingID:       str,             
-			Increments:     []*ChargingIncrement{{
+		CGRID:     str,
+		RunID:     str,
+		StartTime: time.Date(2021, 8, 15, 14, 30, 45, 100, time.Local),
+		Usage:     &td,
+		Charges: []*ChargingInterval{{
+			RatingID: str,
+			Increments: []*ChargingIncrement{{
 				Usage:          td,
 				Cost:           fl,
 				AccountingID:   str,
@@ -3728,16 +3728,16 @@ func TestEventCostappendChargingIntervalFromEventCost(t *testing.T) {
 			usage:          &td,
 			ecUsageIdx:     &td,
 			cost:           &fl,
-		}, 
-	}}
+		},
+		}}
 	oEC := &EventCost{
-		CGRID:          str2,
-		RunID:          str2,
-		StartTime:      time.Date(2022, 8, 15, 14, 30, 45, 100, time.Local),
-		Usage:          &td2,
-		Charges:        []*ChargingInterval{{
-			RatingID:       str,             
-			Increments:     []*ChargingIncrement{{
+		CGRID:     str2,
+		RunID:     str2,
+		StartTime: time.Date(2022, 8, 15, 14, 30, 45, 100, time.Local),
+		Usage:     &td2,
+		Charges: []*ChargingInterval{{
+			RatingID: str,
+			Increments: []*ChargingIncrement{{
 				Usage:          td,
 				Cost:           fl,
 				AccountingID:   str,
