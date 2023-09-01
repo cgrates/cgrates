@@ -1,0 +1,29 @@
+#!/bin/bash
+
+if  [ $# -ne 2 ]; then
+    exit 1
+fi
+
+if [ $1 != "rabbitmq-server" ]; then
+    exit 1
+fi
+
+case "$2" in
+    "restart")
+        rabbitmqctl stop >/logs/rabbitmq.log 2>&1
+        rabbitmq-server >/logs/rabbitmq.log 2>&1 & 
+        sleep 5s
+        echo "Done restart"
+        exit 0;;
+    "start")
+        rabbitmq-server >/logs/rabbitmq.log 2>&1 & 
+        sleep 5s 
+        echo "Done start"
+        exit 0;;
+    "stop")
+    	rabbitmqctl stop >/logs/rabbitmq.log 2>&1
+        echo "Done stop"
+        exit 0;;
+    *)
+        exit 1;;
+esac
