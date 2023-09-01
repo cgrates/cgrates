@@ -356,6 +356,21 @@ func TestChargerV1ProcessEvent(t *testing.T) {
 
 }
 
+func TestChargersV1ProcessEvent(t *testing.T) {
+	cS := &ChargerService{}
+	args := &utils.CGREventWithArgDispatcher{}
+
+	err := cS.V1ProcessEvent(args, nil)
+
+	if err != nil {
+		if err.Error() != utils.NewErrMandatoryIeMissing("Event").Error() {
+			t.Error(err)
+		}
+	} else {
+		t.Error("was expecting an error")
+	}
+}
+
 // func TestChSListenAndServe(t *testing.T) {
 // 	cfg, _ := config.NewDefaultCGRConfig()
 // 	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)

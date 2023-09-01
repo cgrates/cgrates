@@ -18,6 +18,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package config
 
 import (
+	"bufio"
+	"encoding/json"
+	"errors"
+	"fmt"
+	"io"
 	"os"
 	"reflect"
 	"testing"
@@ -349,4 +354,230 @@ func TestGetErrorLine2(t *testing.T) {
 		t.Errorf("Expected line %v received:%v", expChar, character)
 	}
 
+}
+
+type reader struct {
+}
+
+func (r *reader) Read(p []byte) (n int, err error) {
+	return 0, fmt.Errorf("test error: %v", n)
+}
+
+func TestRjReaderNewRjReader(t *testing.T) {
+	r := &reader{}
+
+	rcv, err := NewRjReader(r)
+
+	if err != nil {
+		if err.Error() != "test error: 0" {
+			t.Error(err)
+		}
+	} else {
+		t.Error("was expecting an error")
+	}
+
+	if rcv != nil {
+		t.Error(rcv)
+	}
+}
+
+func TestRjReaderUnreadByte(t *testing.T) {
+	val := "val1"
+	mrsh, err := json.Marshal(val)
+	if err != nil {
+		t.Error(err)
+	}
+	rjr := &rjReader{
+		buf:        mrsh,
+		isInString: true,
+		indx:       0,
+	}
+
+	err = rjr.UnreadByte()
+
+	if err != nil {
+		if err.Error() != bufio.ErrInvalidUnreadByte.Error() {
+			t.Error(err)
+		}
+	} else {
+		t.Error("was expecting an error")
+	}
+}
+
+func TestRjReaderconsumeComent(t *testing.T) {
+	val := "1"
+	mrsh, err := json.Marshal(val)
+	if err != nil {
+		t.Error(err)
+	}
+	rjr := &rjReader{
+		buf:        mrsh,
+		isInString: true,
+		indx:       20,
+	}
+
+	rcv, err := rjr.consumeComent('*')
+
+	if err != nil {
+		if err.Error() != utils.ErrJsonIncompleteComment.Error() {
+			t.Error(err)
+		}
+	} else {
+		t.Error("was expecting an error")
+	}
+
+	if rcv != true {
+		t.Error(rcv)
+	}
+}
+
+func TestRjReaderPeekByteWC(t *testing.T) {
+	val := "1"
+	mrsh, err := json.Marshal(val)
+	if err != nil {
+		t.Error(err)
+	}
+	rjr := &rjReader{
+		buf:        mrsh,
+		isInString: true,
+		indx:       20,
+	}
+
+	rcv, err := rjr.PeekByteWC()
+
+	if err != nil {
+		if err.Error() != io.EOF.Error() {
+			t.Error(err)
+		}
+	} else {
+		t.Error("was expecting an error")
+	}
+
+	if rcv != 0 {
+		t.Error(rcv)
+	}
+}
+
+func TestRjReaderreadEnvName(t *testing.T) {
+	val := "val1"
+	mrsh, err := json.Marshal(val)
+	if err != nil {
+		t.Error(err)
+	}
+	rjr := &rjReader{
+		buf:        mrsh,
+		isInString: true,
+		indx:       0,
+	}
+
+	rcv1, rcv2, err := rjr.readEnvName(20)
+
+	if err != nil {
+		if err.Error() != io.EOF.Error() {
+			t.Error(err)
+		}
+	} else {
+		t.Error("was expecting an error")
+	}
+
+	if rcv1 != nil {
+		t.Error(rcv1)
+	}
+
+	if rcv2 != 20 {
+		t.Error(rcv2)
+	}
+}
+
+func TestRjReaderReplaceEnv(t *testing.T) {
+	val := "val1"
+	mrsh, err := json.Marshal(val)
+	if err != nil {
+		t.Error(err)
+	}
+	rjr := &rjReader{
+		buf:        mrsh,
+		isInString: true,
+		indx:       0,
+	}
+
+	err = rjr.replaceEnv(20)
+
+	if err != nil {
+		if err.Error() != "NOT_FOUND:ENV_VAR:" {
+			t.Error(err)
+		}
+	} else {
+		t.Error("was expecting an error")
+	}
+}
+
+func TestRjReaderHandleJSONError(t *testing.T) {
+	err1 := &json.InvalidUTF8Error{
+		S: "test err1",
+	}
+	err2 := &json.InvalidUnmarshalError{
+		Type: reflect.TypeOf(fmt.Errorf("error %s", "test")),
+	}
+	err3 := &json.UnmarshalTypeError{
+		Type: reflect.TypeOf(fmt.Errorf("error %s", "test")),
+	}
+	val := "val1"
+	mrsh, err := json.Marshal(val)
+	if err != nil {
+		t.Error(err)
+	}
+	rjr := &rjReader{
+		buf:        mrsh,
+		isInString: true,
+		indx:       0,
+	}
+
+	tests := []struct {
+		name string
+		arg  error
+		exp  string
+	}{
+		{
+			name: "case nil",
+			arg:  nil,
+			exp:  "",
+		},
+		{
+			name: "case *json.InvalidUTF8Error, *json.UnmarshalFieldError",
+			arg:  err1,
+			exp:  `json: invalid UTF-8 in string: "test err1"`,
+		},
+		{
+			name: "case *json.InvalidUnmarshalError",
+			arg:  err2,
+			exp:  `json: Unmarshal(nil *errors.errorString)`,
+		},
+		{
+			name: "case *json.UnmarshalTypeError",
+			arg:  err3,
+			exp:  `json: cannot unmarshal  into Go value of type *errors.errorString at line 0 around position 0`,
+		},
+		{
+			name: "case default",
+			arg:  errors.New("test error"),
+			exp:  `test error`,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			err := rjr.HandleJSONError(tt.arg)
+
+			if tt.exp != "" {
+				if err != nil {
+					if err.Error() != tt.exp {
+						t.Error(err)
+					}
+				} else {
+					t.Error("was expecting an error")
+				}
+			}
+		})
+	}
 }

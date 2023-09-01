@@ -3679,3 +3679,80 @@ func TestEventCostnewChargingIncrement(t *testing.T) {
 		t.Errorf("expected %v, received %v", exp, rcv)
 	}
 }
+
+func TestEventCostAsRefundIncrements(t *testing.T) {
+	str := "test"
+	td := 1 * time.Second
+	ec := &EventCost{
+		CGRID:          str,
+		RunID:          str,
+		StartTime:      time.Date(2021, 8, 15, 14, 30, 45, 100, time.Local),
+		Usage:          &td,
+	}
+
+	rcv := ec.AsRefundIncrements(str)
+	exp := &CallDescriptor{
+		CgrID:         ec.CGRID,
+		RunID:         ec.RunID,
+		ToR:           str,
+		TimeStart:     ec.StartTime,
+		TimeEnd:       ec.StartTime.Add(ec.GetUsage()),
+		DurationIndex: ec.GetUsage(),
+	}
+
+	if !reflect.DeepEqual(exp, rcv) {
+		t.Errorf("\nexpected: %s\nreceived: %s\n", utils.ToJSON(exp), utils.ToJSON(rcv))
+	}
+}
+
+func TestEventCostappendChargingIntervalFromEventCost(t *testing.T) {
+	str := "test"
+	td := 1 * time.Second
+	fl := 1.2
+	str2 := "test2"
+	td2 := 2 * time.Millisecond
+	ec := &EventCost{
+		CGRID:          str,
+		RunID:          str,
+		StartTime:      time.Date(2021, 8, 15, 14, 30, 45, 100, time.Local),
+		Usage:          &td,
+		Charges:        []*ChargingInterval{{
+			RatingID:       str,             
+			Increments:     []*ChargingIncrement{{
+				Usage:          td,
+				Cost:           fl,
+				AccountingID:   str,
+				CompressFactor: 1,
+			}},
+			CompressFactor: 1,
+			usage:          &td,
+			ecUsageIdx:     &td,
+			cost:           &fl,
+		}, 
+	}}
+	oEC := &EventCost{
+		CGRID:          str2,
+		RunID:          str2,
+		StartTime:      time.Date(2022, 8, 15, 14, 30, 45, 100, time.Local),
+		Usage:          &td2,
+		Charges:        []*ChargingInterval{{
+			RatingID:       str,             
+			Increments:     []*ChargingIncrement{{
+				Usage:          td,
+				Cost:           fl,
+				AccountingID:   str,
+				CompressFactor: 1,
+			}},
+			CompressFactor: 1,
+			usage:          &td,
+			ecUsageIdx:     &td,
+			cost:           &fl,
+		}},
+	}
+
+	ec.appendChargingIntervalFromEventCost(oEC, 0)
+
+	if ec.Charges[0].CompressFactor != 2 {
+		t.Error("didn't append charging interval from event cost")
+	}
+}
