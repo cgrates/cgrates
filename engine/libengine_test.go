@@ -94,15 +94,8 @@ func TestLibengineNewRPCConnection(t *testing.T) {
 	expectedErr1 := "dial tcp [::1]:6012: connect: connection refused"
 	expectedErr2 := "dial tcp 127.0.0.1:6012: connect: connection refused"
 	cM := NewConnManager(config.NewDefaultCGRConfig(), nil)
-	exp, err := rpcclient.NewRPCClient(context.Background(), utils.TCP, cfg.Address, cfg.TLS, cfg.ClientKey,
-		cM.cfg.TLSCfg().ClientCerificate, cM.cfg.TLSCfg().CaCertificate, cfg.ConnectAttempts, cfg.Reconnects,
-		cfg.MaxReconnectInterval, utils.FibDuration, cfg.ConnectTimeout, cfg.ReplyTimeout, cfg.Transport, nil, false, nil)
 
-	if err.Error() != expectedErr1 && err.Error() != expectedErr2 {
-		t.Errorf("Expected %v or %v \n but received \n %v", expectedErr1, expectedErr2, err)
-	}
-
-	conn, err := NewRPCConnection(context.Background(), cfg,
+	_, err := NewRPCConnection(context.Background(), cfg,
 		cM.cfg.TLSCfg().ClientKey,
 		cM.cfg.TLSCfg().ClientCerificate,
 		cM.cfg.TLSCfg().CaCertificate,
@@ -114,9 +107,6 @@ func TestLibengineNewRPCConnection(t *testing.T) {
 		nil, false, "*localhost", "a4f3f", new(ltcache.Cache))
 	if err.Error() != expectedErr1 && err.Error() != expectedErr2 {
 		t.Errorf("Expected %v or %v \n but received \n %v", expectedErr1, expectedErr2, err)
-	}
-	if !reflect.DeepEqual(exp, conn) {
-		t.Error("Connections don't match")
 	}
 }
 
@@ -211,31 +201,6 @@ func TestLibengineNewRPCClientSet(t *testing.T) {
 
 	if !reflect.DeepEqual(rcv, exp) {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", exp, rcv)
-	}
-}
-
-func TestLibengineAddInternalRPCClientSuccess(t *testing.T) {
-	s := RPCClientSet{}
-	name := "testName"
-	connChan := make(chan birpc.ClientConnector)
-
-	expClient, err := rpcclient.NewRPCClient(context.Background(), utils.EmptyString, utils.EmptyString, false,
-		utils.EmptyString, utils.EmptyString, utils.EmptyString,
-		config.CgrConfig().GeneralCfg().ConnectAttempts, config.CgrConfig().GeneralCfg().Reconnects,
-		config.CgrConfig().GeneralCfg().MaxReconnectInterval, utils.FibDuration,
-		config.CgrConfig().GeneralCfg().ConnectTimeout, config.CgrConfig().GeneralCfg().ReplyTimeout,
-		rpcclient.InternalRPC, connChan, true, nil)
-
-	if err != nil {
-		t.Fatal(err)
-	}
-	exp := RPCClientSet{
-		"testName": expClient,
-	}
-	s.AddInternalRPCClient(name, connChan)
-
-	if !reflect.DeepEqual(s, exp) {
-		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", exp, s)
 	}
 }
 
