@@ -1,4 +1,4 @@
-FROM  debian:buster-slim
+FROM  ubuntu:jammy
 
 RUN groupadd -r mongodb && useradd -r -g mongodb mongodb
 RUN groupadd -r redis && useradd -r -g redis redis 
@@ -6,36 +6,34 @@ RUN groupadd -r kafka && useradd -r -g kafka kafka
 
 RUN mkdir -p /usr/share/cgrates/conf /usr/share/man/man1 /var/spool/cgrates/ers/in /var/spool/cgrates/ers/out /var/spool/cgrates/cdre/csv /var/spool/cgrates/cdre/fwv /var/spool/cgrates/tpe /var/spool/cgrates/failed_posts /var/spool/cgrates/analyzers /run /data/configdb /data/db /kafka /logs
 
-RUN echo 'debconf debconf/frontend select Noninteractive' | debconf-set-selections
 
-# Install necessary libs
-RUN apt-get update 
+ENV DEBIAN_FRONTEND=noninteractive
+
+
+RUN apt-get update && apt-get install -y ansible
+
+# Install Erlang packages
+RUN apt-get install -y erlang-base erlang-asn1 erlang-crypto erlang-eldap erlang-ftp erlang-inets erlang-mnesia erlang-os-mon erlang-parsetools erlang-public-key erlang-runtime-tools erlang-snmp erlang-ssl erlang-syntax-tools erlang-tftp erlang-tools erlang-xmerl
+
 RUN apt-get install -y apt-utils wget gnupg gnupg2 apt-transport-https curl redis-server git build-essential rsyslog procps gosu "mariadb-server" mariadb-backup socat default-jdk-headless neovim net-tools
 
-RUN wget -qO - https://www.mongodb.org/static/pgp/server-4.4.asc | apt-key add -
-RUN echo "deb http://repo.mongodb.org/apt/debian buster/mongodb-org/4.4 main" | tee /etc/apt/sources.list.d/mongodb-org-4.4.list
+RUN curl -fsSL https://pgp.mongodb.com/server-7.0.asc | gpg -o /usr/share/keyrings/mongodb-server-7.0.gpg  --dearmor
+RUN echo "deb [ arch=amd64,arm64 signed-by=/usr/share/keyrings/mongodb-server-7.0.gpg ] https://repo.mongodb.org/apt/ubuntu jammy/mongodb-org/7.0 multiverse" | tee /etc/apt/sources.list.d/mongodb-org-7.0.list
 
-RUN wget -qO - https://www.postgresql.org/media/keys/ACCC4CF8.asc | apt-key add -
-RUN echo "deb http://apt.postgresql.org/pub/repos/apt buster-pgdg main" | tee /etc/apt/sources.list.d/pgdg.list
-
-RUN wget https://packages.erlang-solutions.com/erlang-solutions_1.0_all.deb
-RUN dpkg -i erlang-solutions_1.0_all.deb
-RUN apt-get update
-RUN apt-get install -y erlang erlang-nox
-RUN curl -s https://packagecloud.io/install/repositories/rabbitmq/rabbitmq-server/script.deb.sh | bash
+RUN sh -c 'echo "deb http://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list'
+RUN wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc |  apt-key add -
 
 RUN apt-get update
-RUN apt-get install -y mongodb-org postgresql rabbitmq-server
-
+RUN apt-get install -y mongodb-org postgresql
+# ADD THIS AFTER postgresql rabbitmq-server
 
 WORKDIR /kafka
 
-RUN wget "https://archive.apache.org/dist/kafka/2.1.1/kafka_2.11-2.1.1.tgz" 
-RUN tar -xvzf ./kafka_2.11-2.1.1.tgz --strip 1
-RUN rm kafka_2.11-2.1.1.tgz
+RUN wget "https://archive.apache.org/dist/kafka/2.1.0/kafka_2.11-2.1.0.tgz" 
+RUN tar -xvzf ./kafka_2.11-2.1.0.tgz --strip 1
+RUN rm kafka_2.11-2.1.0.tgz
 COPY ./conf/server.properties /kafka/config/server.properties
 WORKDIR /
-
 
 RUN set -ex; \
 	rm -rf /var/lib/apt/lists/*; \
@@ -52,8 +50,18 @@ RUN set -ex; \
 # don't reverse lookup hostnames, they are usually another container
 	echo '[mysqld]\nskip-host-cache\nskip-name-resolve' > /etc/mysql/conf.d/docker.cnf
 
+# Clean up
+RUN apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
 
-RUN wget -O go.tgz "https://storage.googleapis.com/golang/go1.18.linux-amd64.tar.gz" --progress=dot:giga
+RUN touch /logs/mariadb.log /logs/mariadb_script.log /logs/rabbitmq.log 
+RUN chmod 777  /logs/mariadb.log /logs/mariadb_script.log /logs/rabbitmq.log 
+
+COPY main.yaml /integration_tests.yaml
+
+COPY roles /roles
+
+RUN wget -O go.tgz "https://storage.googleapis.com/golang/go1.21.0.linux-amd64.tar.gz" --progress=dot:giga
 RUN tar -C /usr/local -xzf go.tgz
 RUN rm go.tgz
 
@@ -61,11 +69,6 @@ ENV GOPATH /go
 ENV PATH $GOPATH/bin:/usr/local/go/bin:$PATH
 RUN mkdir -p "$GOPATH/src" "$GOPATH/bin" && chmod -R 777 "$GOPATH"
 RUN	go version
-
-
-RUN touch /logs/mariadb.log /logs/mariadb_script.log /logs/rabbitmq.log 
-RUN chmod 777  /logs/mariadb.log /logs/mariadb_script.log /logs/rabbitmq.log 
-
 
 COPY ./scripts /scripts
 COPY ./scripts/service /usr/local/bin/service
