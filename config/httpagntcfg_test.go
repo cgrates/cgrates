@@ -425,3 +425,268 @@ func TestHttpAgentCfgAsMapInterface(t *testing.T) {
 		t.Errorf("Expected: %+v,\nReceived: %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
 	}
 }
+
+func TestHttpAgentCfgappendHttpAgntProcCfgsError(t *testing.T) {
+	nm := 1
+	str := "test`"
+	bl := true
+	ca := HttpAgentCfg{
+		ID:             str,
+		Url:            str,
+		SessionSConns:  []string{str},
+		RequestPayload: str,
+		ReplyPayload:   str,
+		RequestProcessors: []*RequestProcessor{{
+			ID:            str,
+			Tenant:        RSRParsers{},
+			Filters:       []string{str},
+			Flags:         utils.FlagsWithParams{},
+			Timezone:      str,
+			RequestFields: []*FCTemplate{},
+			ReplyFields:   []*FCTemplate{},
+		}},
+	}
+
+	hps := &[]*ReqProcessorJsnCfg{{
+		ID:       &str,
+		Filters:  &[]string{str},
+		Tenant:   &str,
+		Timezone: &str,
+		Flags:    &[]string{str},
+		Request_fields: &[]*FcTemplateJsonCfg{{
+			Tag:                  &str,
+			Type:                 &str,
+			Path:                 &str,
+			Attribute_id:         &str,
+			Filters:              &[]string{str},
+			Value:                &str,
+			Width:                &nm,
+			Strip:                &str,
+			Padding:              &str,
+			Mandatory:            &bl,
+			New_branch:           &bl,
+			Timezone:             &str,
+			Blocker:              &bl,
+			Break_on_success:     &bl,
+			Layout:               &str,
+			Cost_shift_digits:    &nm,
+			Rounding_decimals:    &nm,
+			Mask_destinationd_id: &str,
+			Mask_length:          &nm,
+		}},
+		Reply_fields: &[]*FcTemplateJsonCfg{{
+			Tag:                  &str,
+			Type:                 &str,
+			Path:                 &str,
+			Attribute_id:         &str,
+			Filters:              &[]string{str},
+			Value:                &str,
+			Width:                &nm,
+			Strip:                &str,
+			Padding:              &str,
+			Mandatory:            &bl,
+			New_branch:           &bl,
+			Timezone:             &str,
+			Blocker:              &bl,
+			Break_on_success:     &bl,
+			Layout:               &str,
+			Cost_shift_digits:    &nm,
+			Rounding_decimals:    &nm,
+			Mask_destinationd_id: &str,
+			Mask_length:          &nm,
+		}},
+	}}
+
+	err := ca.appendHttpAgntProcCfgs(hps, "")
+
+	if err != nil {
+		if err.Error() != "Unclosed unspilit syntax" {
+			t.Error(err)
+		}
+	} else {
+		t.Error("was expecting an error")
+	}
+}
+
+func TestHttpAgentCfgloadFromJsonCfgError(t *testing.T) {
+	nm := 1
+	str := "test`"
+	bl := true
+	ca := HttpAgentCfg{
+		ID:             str,
+		Url:            str,
+		SessionSConns:  []string{str},
+		RequestPayload: str,
+		ReplyPayload:   str,
+		RequestProcessors: []*RequestProcessor{{
+			ID:            str,
+			Tenant:        RSRParsers{},
+			Filters:       []string{str},
+			Flags:         utils.FlagsWithParams{},
+			Timezone:      str,
+			RequestFields: []*FCTemplate{},
+			ReplyFields:   []*FCTemplate{},
+		}},
+	}
+
+	hps := &[]*ReqProcessorJsnCfg{{
+		ID:       &str,
+		Filters:  &[]string{str},
+		Tenant:   &str,
+		Timezone: &str,
+		Flags:    &[]string{str},
+		Request_fields: &[]*FcTemplateJsonCfg{{
+			Tag:                  &str,
+			Type:                 &str,
+			Path:                 &str,
+			Attribute_id:         &str,
+			Filters:              &[]string{str},
+			Value:                &str,
+			Width:                &nm,
+			Strip:                &str,
+			Padding:              &str,
+			Mandatory:            &bl,
+			New_branch:           &bl,
+			Timezone:             &str,
+			Blocker:              &bl,
+			Break_on_success:     &bl,
+			Layout:               &str,
+			Cost_shift_digits:    &nm,
+			Rounding_decimals:    &nm,
+			Mask_destinationd_id: &str,
+			Mask_length:          &nm,
+		}},
+		Reply_fields: &[]*FcTemplateJsonCfg{{
+			Tag:                  &str,
+			Type:                 &str,
+			Path:                 &str,
+			Attribute_id:         &str,
+			Filters:              &[]string{str},
+			Value:                &str,
+			Width:                &nm,
+			Strip:                &str,
+			Padding:              &str,
+			Mandatory:            &bl,
+			New_branch:           &bl,
+			Timezone:             &str,
+			Blocker:              &bl,
+			Break_on_success:     &bl,
+			Layout:               &str,
+			Cost_shift_digits:    &nm,
+			Rounding_decimals:    &nm,
+			Mask_destinationd_id: &str,
+			Mask_length:          &nm,
+		}},
+	}}
+
+	jsnCfg := &HttpAgentJsonCfg{
+		Id:                 &str,
+		Url:                &str,
+		Sessions_conns:     &[]string{str},
+		Request_payload:    &str,
+		Reply_payload:      &str,
+		Request_processors: hps,
+	}
+
+	err := ca.loadFromJsonCfg(jsnCfg, "")
+
+	if err != nil {
+		if err.Error() != "Unclosed unspilit syntax" {
+			t.Error(err)
+		}
+	} else {
+		t.Error("was expecting an error")
+	}
+}
+
+func TestHttpAgentCfgloadFromJsonCfgErrorSlice(t *testing.T) {
+	nm := 1
+	str := "test`"
+	bl := true
+	ca := HttpAgentCfgs{{
+		ID:             str,
+		Url:            str,
+		SessionSConns:  []string{str},
+		RequestPayload: str,
+		ReplyPayload:   str,
+		RequestProcessors: []*RequestProcessor{{
+			ID:            str,
+			Tenant:        RSRParsers{},
+			Filters:       []string{str},
+			Flags:         utils.FlagsWithParams{},
+			Timezone:      str,
+			RequestFields: []*FCTemplate{},
+			ReplyFields:   []*FCTemplate{},
+		}},
+	}}
+
+	hps := &[]*ReqProcessorJsnCfg{{
+		ID:       &str,
+		Filters:  &[]string{str},
+		Tenant:   &str,
+		Timezone: &str,
+		Flags:    &[]string{str},
+		Request_fields: &[]*FcTemplateJsonCfg{{
+			Tag:                  &str,
+			Type:                 &str,
+			Path:                 &str,
+			Attribute_id:         &str,
+			Filters:              &[]string{str},
+			Value:                &str,
+			Width:                &nm,
+			Strip:                &str,
+			Padding:              &str,
+			Mandatory:            &bl,
+			New_branch:           &bl,
+			Timezone:             &str,
+			Blocker:              &bl,
+			Break_on_success:     &bl,
+			Layout:               &str,
+			Cost_shift_digits:    &nm,
+			Rounding_decimals:    &nm,
+			Mask_destinationd_id: &str,
+			Mask_length:          &nm,
+		}},
+		Reply_fields: &[]*FcTemplateJsonCfg{{
+			Tag:                  &str,
+			Type:                 &str,
+			Path:                 &str,
+			Attribute_id:         &str,
+			Filters:              &[]string{str},
+			Value:                &str,
+			Width:                &nm,
+			Strip:                &str,
+			Padding:              &str,
+			Mandatory:            &bl,
+			New_branch:           &bl,
+			Timezone:             &str,
+			Blocker:              &bl,
+			Break_on_success:     &bl,
+			Layout:               &str,
+			Cost_shift_digits:    &nm,
+			Rounding_decimals:    &nm,
+			Mask_destinationd_id: &str,
+			Mask_length:          &nm,
+		}},
+	}}
+
+	jsnCfg := &HttpAgentJsonCfg{
+		Id:                 &str,
+		Url:                &str,
+		Sessions_conns:     &[]string{str},
+		Request_payload:    &str,
+		Reply_payload:      &str,
+		Request_processors: hps,
+	}
+	jsnHttpAgntCfg := &[]*HttpAgentJsonCfg{jsnCfg}
+
+	err := ca.loadFromJsonCfg(jsnHttpAgntCfg, "")
+
+	if err != nil {
+		if err.Error() != "Unclosed unspilit syntax" {
+			t.Error(err)
+		}
+	} else {
+		t.Error("was expecting an error")
+	}
+}
