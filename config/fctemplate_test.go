@@ -652,3 +652,55 @@ func TestFCTemplateAsMapInterface(t *testing.T) {
 		})
 	}
 }
+
+func TestFCTemplateInflateTemplatesError(t *testing.T) {
+	mc := utils.MultiplyConverter{
+		Value: 1.2,
+	}
+	nm := 1
+	bl := false
+	str := "test)"
+	slc := []string{str}
+	fcts := []*FCTemplate{{
+		Tag:     str,
+		Type:    utils.MetaTemplate,
+		Path:    str,
+		Filters: slc,
+		Value: RSRParsers{{
+			Rules:           str,
+			AllFiltersMatch: bl,
+			path:            str,
+			converters:      utils.DataConverters{&mc},
+		}},
+		Width:            nm,
+		Strip:            str,
+		Padding:          str,
+		Mandatory:        bl,
+		AttributeID:      str,
+		NewBranch:        bl,
+		Timezone:         str,
+		Blocker:          bl,
+		BreakOnSuccess:   bl,
+		Layout:           str,
+		CostShiftDigits:  nm,
+		RoundingDecimals: &nm,
+		MaskDestID:       str,
+		MaskLen:          nm,
+		pathItems:        utils.PathItems{},
+		pathSlice:        slc,
+	}}
+	msgTpls := map[string][]*FCTemplate{str: fcts}
+	rcv, err := InflateTemplates(fcts, msgTpls)
+
+	if err != nil {
+		if err.Error() != `strconv.ParseFloat: parsing "": invalid syntax` {
+			t.Error(err)
+		}
+	} else {
+		t.Error("was expecting an error")
+	}
+
+	if rcv != nil {
+		t.Error(rcv)
+	}
+}
