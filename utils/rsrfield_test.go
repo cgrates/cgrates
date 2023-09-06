@@ -959,3 +959,33 @@ func TestRSRFieldParseRSRFieldFromSlice(t *testing.T) {
 		t.Error(rcv)
 	}
 }
+
+func TestRSRFieldParse(t *testing.T) {
+	str := "test"
+	ch := [2]string{str, str}
+	rsrf := &RSRField{
+		Id:          str,             
+		Rules:       str,
+		staticValue: str,
+		RSRules:     []*ReSearchReplace{}, 
+		filters:     []*RSRFilter{},       
+		converters:  DataConverters{&RoundConverter{
+			Decimals: 1,
+			Method:   str,
+		}},
+	}
+
+	rcv, err := rsrf.Parse(ch)
+
+	if err != nil {
+		if err.Error() != `strconv.ParseFloat: parsing "test": invalid syntax` {
+			t.Error(err)
+		}
+	} else {
+		t.Error("was expecting an error")
+	}
+
+	if rcv != "" {
+		t.Error(rcv)
+	}
+}
