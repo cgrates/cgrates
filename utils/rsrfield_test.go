@@ -964,12 +964,12 @@ func TestRSRFieldParse(t *testing.T) {
 	str := "test"
 	ch := [2]string{str, str}
 	rsrf := &RSRField{
-		Id:          str,             
+		Id:          str,
 		Rules:       str,
 		staticValue: str,
-		RSRules:     []*ReSearchReplace{}, 
-		filters:     []*RSRFilter{},       
-		converters:  DataConverters{&RoundConverter{
+		RSRules:     []*ReSearchReplace{},
+		filters:     []*RSRFilter{},
+		converters: DataConverters{&RoundConverter{
 			Decimals: 1,
 			Method:   str,
 		}},
