@@ -262,3 +262,34 @@ func TestObjDPRemoteHost(t *testing.T) {
 		t.Errorf("recived %s", rcv.String())
 	}
 }
+
+func TestOBJDPFieldAsInterface(t *testing.T) {
+	str := "test"
+	type test struct {
+		Field map[string][]string
+	}
+	tst := test{
+		Field: map[string][]string{str: {str}},
+	}
+	objDP := &ObjectDP{
+		obj:     tst,
+		cache:   map[string]any{},
+		prfxSls: []string{},
+	}
+
+	rcv, err := objDP.FieldAsInterface([]string{"Field", "test[0]"})
+
+	if err != nil {
+		t.Error(err)
+	}
+
+	if rcv != str {
+		t.Error(rcv)
+	}
+
+	exp := map[string]any{"Field": map[string][]string{str: {str}}, "Field.test": []string{str}, "Field.test[0]": str}
+
+	if !reflect.DeepEqual(exp, objDP.cache) {
+		t.Errorf("\nexpected: %s\nreceived: %s\n", utils.ToJSON(exp), utils.ToJSON(objDP.cache))
+	}
+}
