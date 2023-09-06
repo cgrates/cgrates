@@ -1762,3 +1762,331 @@ func TestEEsAsMapInterface(t *testing.T) {
 		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp["opts"]), utils.ToJSON(rcv["opts"]))
 	}
 }
+
+func TestEescfgNewEventExporterCfg(t *testing.T) {
+	str := "test"
+	bl := true
+	tm := 1 * time.Second
+	nm := 1
+	eeo := &EventExporterOpts{
+		CSVFieldSeparator:           &str,
+		ElsIndex:                    &str,
+		ElsDiscoverNodesOnStart:     &bl,
+		ElsDiscoverNodeInterval:     &tm,
+		ElsCloud:                    &bl,
+		ElsAPIKey:                   &str,
+		ElsCertificateFingerprint:   &str,
+		ElsServiceToken:             &str,
+		ElsUsername:                 &str,
+		ElsPassword:                 &str,
+		ElsEnableDebugLogger:        &bl,
+		ElsLogger:                   &str,
+		ElsCompressRequestBody:      &bl,
+		ElsCompressRequestBodyLevel: &nm,
+		ElsRetryOnStatus:            &[]int{nm},
+		ElsMaxRetries:               &nm,
+		ElsDisableRetry:             &bl,
+		ElsIfPrimaryTerm:            &nm,
+		ElsIfSeqNo:                  &nm,
+		ElsOpType:                   &str,
+		ElsPipeline:                 &str,
+		ElsRouting:                  &str,
+		ElsTimeout:                  &tm,
+		ElsVersion:                  &nm,
+		ElsVersionType:              &str,
+		ElsWaitForActiveShards:      &str,
+		SQLMaxIdleConns:             &nm,
+		SQLMaxOpenConns:             &nm,
+		SQLConnMaxLifetime:          &tm,
+		MYSQLDSNParams:              map[string]string{str: str},
+		SQLTableName:                &str,
+		SQLDBName:                   &str,
+		PgSSLMode:                   &str,
+		KafkaTopic:                  &str,
+		KafkaTLS:                    &bl,
+		KafkaCAPath:                 &str,
+		KafkaSkipTLSVerify:          &bl,
+		AMQPRoutingKey:              &str,
+		AMQPQueueID:                 &str,
+		AMQPExchange:                &str,
+		AMQPExchangeType:            &str,
+		AMQPUsername:                &str,
+		AMQPPassword:                &str,
+		AWSRegion:                   &str,
+		AWSKey:                      &str,
+		AWSSecret:                   &str,
+		AWSToken:                    &str,
+		SQSQueueID:                  &str,
+		S3BucketID:                  &str,
+		S3FolderPath:                &str,
+		NATSJetStream:               &bl,
+		NATSSubject:                 &str,
+		NATSJWTFile:                 &str,
+		NATSSeedFile:                &str,
+		NATSCertificateAuthority:    &str,
+		NATSClientCertificate:       &str,
+		NATSClientKey:               &str,
+		NATSJetStreamMaxWait:        &tm,
+		RPCCodec:                    &str,
+		ServiceMethod:               &str,
+		KeyPath:                     &str,
+		CertPath:                    &str,
+		CAPath:                      &str,
+		TLS:                         &bl,
+		ConnIDs:                     &[]string{str},
+		RPCConnTimeout:              &tm,
+		RPCReplyTimeout:             &tm,
+		RPCAPIOpts:                  map[string]any{str: bl},
+	}
+	rcv := NewEventExporterCfg(str, str, str, str, 1, eeo)
+	exp := &EventExporterCfg{
+		ID:             str,
+		Type:           str,
+		ExportPath:     str,
+		FailedPostsDir: str,
+		Attempts:       1,
+		Opts:           eeo,
+	}
+
+	if !reflect.DeepEqual(exp, rcv) {
+		t.Errorf("\nexpected: %s\n received: %s\n", utils.ToJSON(exp), utils.ToJSON(rcv))
+	}
+
+	rcv = NewEventExporterCfg(str, str, str, str, 1, nil)
+	exp = &EventExporterCfg{
+		ID:             str,
+		Type:           str,
+		ExportPath:     str,
+		FailedPostsDir: str,
+		Attempts:       1,
+		Opts:           new(EventExporterOpts),
+	}
+
+	if !reflect.DeepEqual(exp, rcv) {
+		t.Errorf("\nexpected: %s\n received: %s\n", utils.ToJSON(exp), utils.ToJSON(rcv))
+	}
+}
+
+func TestEescfgloadFromJSONCfg(t *testing.T) {
+	str := "test"
+	bl := true
+	tm := 1 * time.Second
+	nm := 1
+	tms := "1s"
+	eeOpts := &EventExporterOpts{}
+	jsnCfg := &EventExporterOptsJson{
+		CSVFieldSeparator:           &str,
+		ElsCloud:                    &bl,
+		ElsAPIKey:                   &str,
+		ElsServiceToken:             &str,
+		ElsCertificateFingerprint:   &str,
+		ElsUsername:                 &str,
+		ElsPassword:                 &str,
+		ElsDiscoverNodesOnStart:     &bl,
+		ElsDiscoverNodesInterval:    &tms,
+		ElsEnableDebugLogger:        &bl,
+		ElsLogger:                   &str,
+		ElsCompressRequestBody:      &bl,
+		ElsCompressRequestBodyLevel: &nm,
+		ElsRetryOnStatus:            &[]int{nm},
+		ElsMaxRetries:               &nm,
+		ElsDisableRetry:             &bl,
+		ElsIndex:                    &str,
+		ElsIfPrimaryTerm:            &nm,
+		ElsIfSeqNo:                  &nm,
+		ElsOpType:                   &str,
+		ElsPipeline:                 &str,
+		ElsRouting:                  &str,
+		ElsTimeout:                  &tms,
+		ElsVersion:                  &nm,
+		ElsVersionType:              &str,
+		ElsWaitForActiveShards:      &str,
+		SQLMaxIdleConns:             &nm,
+		SQLMaxOpenConns:             &nm,
+		SQLConnMaxLifetime:          &tms,
+		MYSQLDSNParams:              map[string]string{str: str},
+		SQLTableName:                &str,
+		SQLDBName:                   &str,
+		PgSSLMode:                   &str,
+		KafkaTopic:                  &str,
+		KafkaTLS:                    &bl,
+		KafkaCAPath:                 &str,
+		KafkaSkipTLSVerify:          &bl,
+		AMQPQueueID:                 &str,
+		AMQPRoutingKey:              &str,
+		AMQPExchange:                &str,
+		AMQPExchangeType:            &str,
+		AMQPUsername:                &str,
+		AMQPPassword:                &str,
+		AWSRegion:                   &str,
+		AWSKey:                      &str,
+		AWSSecret:                   &str,
+		AWSToken:                    &str,
+		SQSQueueID:                  &str,
+		S3BucketID:                  &str,
+		S3FolderPath:                &str,
+		NATSJetStream:               &bl,
+		NATSSubject:                 &str,
+		NATSJWTFile:                 &str,
+		NATSSeedFile:                &str,
+		NATSCertificateAuthority:    &str,
+		NATSClientCertificate:       &str,
+		NATSClientKey:               &str,
+		NATSJetStreamMaxWait:        &tms,
+		RPCCodec:                    &str,
+		ServiceMethod:               &str,
+		KeyPath:                     &str,
+		CertPath:                    &str,
+		CAPath:                      &str,
+		ConnIDs:                     &[]string{str},
+		TLS:                         &bl,
+		RPCConnTimeout:              &tms,
+		RPCReplyTimeout:             &tms,
+		RPCAPIOpts:                  map[string]any{str: bl},
+	}
+
+	err := eeOpts.loadFromJSONCfg(jsnCfg)
+	if err != nil {
+		t.Error(err)
+	}
+
+	exp := &EventExporterOpts{
+		CSVFieldSeparator:           &str,
+		ElsIndex:                    &str,
+		ElsDiscoverNodesOnStart:     &bl,
+		ElsDiscoverNodeInterval:     &tm,
+		ElsCloud:                    &bl,
+		ElsAPIKey:                   &str,
+		ElsCertificateFingerprint:   &str,
+		ElsServiceToken:             &str,
+		ElsUsername:                 &str,
+		ElsPassword:                 &str,
+		ElsEnableDebugLogger:        &bl,
+		ElsLogger:                   &str,
+		ElsCompressRequestBody:      &bl,
+		ElsCompressRequestBodyLevel: &nm,
+		ElsRetryOnStatus:            &[]int{nm},
+		ElsMaxRetries:               &nm,
+		ElsDisableRetry:             &bl,
+		ElsIfPrimaryTerm:            &nm,
+		ElsIfSeqNo:                  &nm,
+		ElsOpType:                   &str,
+		ElsPipeline:                 &str,
+		ElsRouting:                  &str,
+		ElsTimeout:                  &tm,
+		ElsVersion:                  &nm,
+		ElsVersionType:              &str,
+		ElsWaitForActiveShards:      &str,
+		SQLMaxIdleConns:             &nm,
+		SQLMaxOpenConns:             &nm,
+		SQLConnMaxLifetime:          &tm,
+		MYSQLDSNParams:              map[string]string{str: str},
+		SQLTableName:                &str,
+		SQLDBName:                   &str,
+		PgSSLMode:                   &str,
+		KafkaTopic:                  &str,
+		KafkaTLS:                    &bl,
+		KafkaCAPath:                 &str,
+		KafkaSkipTLSVerify:          &bl,
+		AMQPRoutingKey:              &str,
+		AMQPQueueID:                 &str,
+		AMQPExchange:                &str,
+		AMQPExchangeType:            &str,
+		AMQPUsername:                &str,
+		AMQPPassword:                &str,
+		AWSRegion:                   &str,
+		AWSKey:                      &str,
+		AWSSecret:                   &str,
+		AWSToken:                    &str,
+		SQSQueueID:                  &str,
+		S3BucketID:                  &str,
+		S3FolderPath:                &str,
+		NATSJetStream:               &bl,
+		NATSSubject:                 &str,
+		NATSJWTFile:                 &str,
+		NATSSeedFile:                &str,
+		NATSCertificateAuthority:    &str,
+		NATSClientCertificate:       &str,
+		NATSClientKey:               &str,
+		NATSJetStreamMaxWait:        &tm,
+		RPCCodec:                    &str,
+		ServiceMethod:               &str,
+		KeyPath:                     &str,
+		CertPath:                    &str,
+		CAPath:                      &str,
+		TLS:                         &bl,
+		ConnIDs:                     &[]string{str},
+		RPCConnTimeout:              &tm,
+		RPCReplyTimeout:             &tm,
+		RPCAPIOpts:                  map[string]any{str: bl},
+	}
+
+	if !reflect.DeepEqual(exp, eeOpts) {
+		t.Errorf("\nexpected: %s\nreceived: %s\n", utils.ToJSON(exp), utils.ToJSON(eeOpts))
+	}
+
+	jsnCfg2 := &EventExporterOptsJson{
+		ElsDiscoverNodesInterval: &str,
+	}
+
+	err = eeOpts.loadFromJSONCfg(jsnCfg2)
+	if err != nil {
+		if err.Error() != `time: invalid duration "test"` {
+			t.Error(err)
+		}
+	} else {
+		t.Error("was expecting an error")
+	}
+}
+
+func TestEescfgClone(t *testing.T) {
+	str := "test"
+	eeOpts := &EventExporterOpts{
+		AMQPUsername: &str,
+		AMQPPassword: &str,
+	}
+
+	rcv := eeOpts.Clone()
+
+	if !reflect.DeepEqual(eeOpts, rcv) {
+		t.Errorf("\nexpected: %s\nreceived: %s\n", utils.ToJSON(eeOpts), utils.ToJSON(rcv))
+	}
+}
+
+func TestEescfgAsMapInterface(t *testing.T) {
+	str := "test"
+	eeOpts := &EventExporterOpts{
+		AMQPUsername: &str,
+		AMQPPassword: &str,
+	}
+
+	rcv := eeOpts.AsMapInterface()
+	exp := map[string]any{
+		utils.AMQPUsername: *eeOpts.AMQPUsername,
+		utils.AMQPPassword: *eeOpts.AMQPPassword,
+	}
+
+	if !reflect.DeepEqual(exp, rcv) {
+		t.Errorf("\nexpected: %s\nreceived: %s\n", utils.ToJSON(exp), utils.ToJSON(rcv))
+	}
+}
+
+func TestEescfgdiffEventExporterOptsJsonCfg(t *testing.T) {
+	str := "test"
+	v2 := &EventExporterOpts{
+		AMQPUsername: &str,
+		AMQPPassword: &str,
+	}
+	v1 := &EventExporterOpts{}
+	d := &EventExporterOptsJson{}
+	rcv := diffEventExporterOptsJsonCfg(d, v1, v2)
+
+	expD := &EventExporterOptsJson{
+		AMQPUsername: &str,
+		AMQPPassword: &str,
+	}
+
+	if !reflect.DeepEqual(expD, d) {
+		t.Errorf("\nexpected: %s\nreceived: %s\n", utils.ToJSON(expD), utils.ToJSON(rcv))
+	}
+}

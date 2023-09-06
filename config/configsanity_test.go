@@ -972,7 +972,7 @@ func TestConfigSanityAttributesCfg(t *testing.T) {
 		Enabled: true,
 		Opts: &AttributesOpts{
 			ProcessRuns: []*utils.DynamicIntOpt{
-				&utils.DynamicIntOpt{
+				{
 					FilterIDs: []string{},
 					Value:     0,
 				},

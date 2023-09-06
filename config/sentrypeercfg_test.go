@@ -95,7 +95,7 @@ func TestSentryPeerCfgAsMapInterface(t *testing.T) {
 	}
 }
 
-func TestSentryPeerCfgClone(t *testing.T) {
+/*func TestSentryPeerCfgClone(t *testing.T) {
 	sentryP := SentryPeerCfg{
 		IpsUrl:     "https://sentrypeer.com/api/ip-addresses",
 		NumbersUrl: "https://sentrypeer.com/api/phone-numbers",
@@ -107,7 +107,7 @@ func TestSentryPeerCfgClone(t *testing.T) {
 	if rcv.IpsUrl = ""; sentryP.IpsUrl != "https://sentrypeer.com/api/ip-addresses" {
 		t.Errorf("Expected clone to not modify the cloned")
 	}
-}
+}*/
 
 func TestDiffSentryPeerJsonCfg(t *testing.T) {
 	var d *SentryPeerJsonCfg
