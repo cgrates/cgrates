@@ -551,3 +551,27 @@ func TestCdrsCfgCloneSection(t *testing.T) {
 		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(rcv))
 	}
 }
+
+func TestCdrsCfgdiffCdrsJsonCfg(t *testing.T) {
+	coj := &CdrsOptsJson{}
+	co := &CdrsOpts{}
+	bl := true
+	d := &CdrsJsonCfg{}
+	v2 := &CdrsCfg{
+		StoreCdrs: true,
+		Opts:      co,
+	}
+	v1 := &CdrsCfg{
+		StoreCdrs: false,
+		Opts:      co,
+	}
+	exp := &CdrsJsonCfg{
+		Store_cdrs: &bl,
+		Opts:       coj,
+	}
+	rcv := diffCdrsJsonCfg(d, v1, v2)
+
+	if !reflect.DeepEqual(exp, rcv) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(rcv))
+	}
+}

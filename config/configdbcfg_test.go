@@ -34,3 +34,20 @@ func TestConfigDBOptsInvalid(t *testing.T) {
 	}
 
 }
+
+func TestConfigDBCfgloadFromJSONCfg(t *testing.T) {
+	str := "test"
+	dbcfg := &ConfigDBCfg{}
+	jsnDbCfg := &DbJsonCfg{
+		Db_type: &str,
+	}
+
+	err := dbcfg.loadFromJSONCfg(jsnDbCfg)
+	if err != nil {
+		t.Error(err)
+	}
+
+	if dbcfg.Type != "*test" {
+		t.Error(dbcfg.Type)
+	}
+}

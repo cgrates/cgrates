@@ -154,3 +154,42 @@ func TestSentryPeerCloneSection(t *testing.T) {
 		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(rcv))
 	}
 }
+
+func TestSentryPeerdiffSentryPeerJsonCfg(t *testing.T) {
+	str := "test"
+	str2 := "test2"
+	d := &SentryPeerJsonCfg{}
+	v2 := &SentryPeerCfg{
+		ClientID:     str,
+		ClientSecret: str,
+		TokenUrl:     str,
+		IpsUrl:       str,
+		NumbersUrl:   str,
+		Audience:     str,
+		GrantType:    str,
+	}
+	v1 := &SentryPeerCfg{
+		ClientID:     str2,
+		ClientSecret: str2,
+		TokenUrl:     str2,
+		IpsUrl:       str2,
+		NumbersUrl:   str2,
+		Audience:     str2,
+		GrantType:    str2,
+	}
+	exp := &SentryPeerJsonCfg{
+		Client_id:     &str,
+		Client_secret: &str,
+		Token_url:     &str,
+		Ips_url:       &str,
+		Numbers_url:   &str,
+		Audience:      &str,
+		Grant_type:    &str,
+	}
+
+	rcv := diffSentryPeerJsonCfg(d, v1, v2)
+
+	if !reflect.DeepEqual(exp, rcv) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(rcv))
+	}
+}
