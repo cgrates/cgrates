@@ -139,7 +139,7 @@
 // 		"sqlConnMaxLifetime": 0, 			// maximum amount of time in seconds a connection may be reused (0 for unlimited), not applying for mongo
 // 		"mongoQueryTimeout":"10s",			// timeout for query when mongo is used
 // 		"postgresSSLMode":"disable",		// postgresSSLMode in case of *postgres
-// 		"mysqlLocation": "Local",			// the location the time from mysql is retrived
+// 		"mysqlLocation": "Local",			// the location the time from mysql is retrieved
 // 	},
 // 	"items":{
 // 		"*session_costs": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false}, 

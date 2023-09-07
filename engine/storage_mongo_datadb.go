@@ -398,10 +398,10 @@ func (ms *MongoStorage) EnsureIndexes(cols ...string) (err error) {
 	return
 }
 
-// Close disconects the client
+// Close disconnects the client
 func (ms *MongoStorage) Close() {
 	if err := ms.client.Disconnect(ms.ctx); err != nil {
-		utils.Logger.Err(fmt.Sprintf("<MongoStorage> Error on disconect:%s", err))
+		utils.Logger.Err(fmt.Sprintf("<MongoStorage> Error on disconnect:%s", err))
 	}
 }
 

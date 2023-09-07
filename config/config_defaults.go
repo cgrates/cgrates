@@ -168,7 +168,7 @@ const CGRATES_CFG_JSON = `
 		"mysqlDSNParams": {},               // DSN extra paramss
 		"mongoQueryTimeout": "10s",			// timeout for query when mongo is used
 		"pgSSLMode": "disable",		 		// pgSSLMode in case of *postgres
-		"mysqlLocation": "Local",			// the location the time from mysql is retrived
+		"mysqlLocation": "Local",			// the location the time from mysql is retrieved
 	},
 	"items":{
 		"*session_costs": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false}, 
@@ -593,7 +593,7 @@ const CGRATES_CFG_JSON = `
 				// "caPath": "",  								// path to CA certificate
 				// "tls": false, 								//
 				// "connIDs": [],  								// connections for connManager to this exporter
-				// "rpcConnTimeout" : "1s", 					// connection unsuccesfull on timeout
+				// "rpcConnTimeout" : "1s", 					// connection unsuccessful on timeout
 				// "rpcReplyTimeout":"2s", 						// connection down at replies if taking longer that this value
 				// "rpcAPIOpts": {},
 			},													// extra options for exporter

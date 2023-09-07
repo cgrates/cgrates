@@ -145,7 +145,7 @@ func (da *DiameterAgent) handlers() diam.Handler {
 	if len(hosts) == 0 {
 		interfaces, err := net.Interfaces()
 		if err != nil {
-			utils.Logger.Err(fmt.Sprintf("<%s> error : %v, when quering interfaces for address", utils.DiameterAgent, err))
+			utils.Logger.Err(fmt.Sprintf("<%s> error : %v, when querying interfaces for address", utils.DiameterAgent, err))
 		}
 		for _, inter := range interfaces {
 			addrs, err := inter.Addrs()
