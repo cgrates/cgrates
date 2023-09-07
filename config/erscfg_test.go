@@ -2478,3 +2478,106 @@ func TestDiffEventReaderOptsJsonCfg(t *testing.T) {
 		t.Errorf("Expected %v \n but received \n %v", exp, rcv)
 	}
 }
+
+func TestErsCfgloadFromJSONCfg(t *testing.T) {
+	str := "test"
+	jsnCfg := &EventReaderOptsJson{
+		AMQPUsername:          &str,
+		AMQPPassword:          &str,
+		AMQPUsernameProcessed: &str,
+		AMQPPasswordProcessed: &str,
+	}
+	erOpts := &EventReaderOpts{}
+	exp := &EventReaderOpts{
+		AMQPUsername:          &str,
+		AMQPPassword:          &str,
+		AMQPUsernameProcessed: &str,
+		AMQPPasswordProcessed: &str,
+	}
+
+	err := erOpts.loadFromJSONCfg(jsnCfg)
+	if err != nil {
+		t.Error(err)
+	}
+
+	if !reflect.DeepEqual(exp, erOpts) {
+		t.Errorf("\nexpecting: %s\nreceived: %s\n", utils.ToJSON(exp), utils.ToJSON(erOpts))
+	}
+}
+
+func TestErsCfgloadClone(t *testing.T) {
+	str := "test"
+	erOpts := &EventReaderOpts{
+		AMQPUsername:          &str,
+		AMQPPassword:          &str,
+		AMQPUsernameProcessed: &str,
+		AMQPPasswordProcessed: &str,
+	}
+
+	rcv := erOpts.Clone()
+
+	if !reflect.DeepEqual(erOpts, rcv) {
+		t.Errorf("\nexpecting: %s\nreceived: %s\n", utils.ToJSON(erOpts), utils.ToJSON(rcv))
+	}
+}
+
+func TestErsCfgAsMapInterface(t *testing.T) {
+	str := "test"
+	erOpts := &EventReaderOpts{
+		AMQPUsername:          &str,
+		AMQPPassword:          &str,
+		AMQPUsernameProcessed: &str,
+		AMQPPasswordProcessed: &str,
+	}
+	er := &EventReaderCfg{
+		Opts: erOpts,
+	}
+	opts := map[string]any{
+		utils.AMQPUsername:             str,
+		utils.AMQPPassword:             str,
+		utils.AMQPUsernameProcessedCfg: str,
+		utils.AMQPPasswordProcessedCfg: str,
+	}
+	exp := map[string]any{
+		utils.IDCfg:                 er.ID,
+		utils.TypeCfg:               er.Type,
+		utils.ConcurrentRequestsCfg: er.ConcurrentReqs,
+		utils.SourcePathCfg:         er.SourcePath,
+		utils.ProcessedPathCfg:      er.ProcessedPath,
+		utils.TenantCfg:             er.Tenant.GetRule(""),
+		utils.TimezoneCfg:           er.Timezone,
+		utils.FiltersCfg:            er.Filters,
+		utils.FlagsCfg:              []string{},
+		utils.RunDelayCfg:           "0",
+		utils.OptsCfg:               opts,
+	}
+	rcv := er.AsMapInterface("")
+
+	if !reflect.DeepEqual(exp, rcv) {
+		t.Errorf("\nexpecting %s\nreceived  %s\n", utils.ToJSON(exp), utils.ToJSON(rcv))
+	}
+}
+
+func TestErsCfgdiffEventReaderOptsJsonCfg(t *testing.T) {
+	str := "test"
+	d := &EventReaderOptsJson{}
+	v2 := &EventReaderOpts{
+		AMQPUsername:          &str,
+		AMQPPassword:          &str,
+		AMQPUsernameProcessed: &str,
+		AMQPPasswordProcessed: &str,
+	}
+	v1 := &EventReaderOpts{}
+	exp := &EventReaderOptsJson{
+		AMQPUsername:          &str,
+		AMQPPassword:          &str,
+		AMQPUsernameProcessed: &str,
+		AMQPPasswordProcessed: &str,
+	}
+
+	rcv := diffEventReaderOptsJsonCfg(d, v1, v2)
+
+	if !reflect.DeepEqual(exp, rcv) {
+		t.Errorf("\nexpecting %s\nreceived  %s\n", utils.ToJSON(exp), utils.ToJSON(rcv))
+	}
+}
