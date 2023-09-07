@@ -293,7 +293,7 @@ func acceptBiRPC(srv *birpc.BirpcServer, l net.Listener, codecName string, newCo
 				return
 			}
 			stopBiRPCServer <- struct{}{}
-			utils.Logger.Crit(fmt.Sprintf("Stopped Bi%s server beacause %s", codecName, err))
+			utils.Logger.Crit(fmt.Sprintf("Stopped Bi%s server because %s", codecName, err))
 			return // stop if we get Accept error
 		}
 		go srv.ServeCodec(newCodec(conn))

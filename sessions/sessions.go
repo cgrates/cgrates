@@ -559,7 +559,7 @@ func (sS *SessionS) debitLoopSession(s *Session, sRunIdx int,
 			if err.Error() == utils.ErrUnauthorizedDestination.Error() {
 				dscReason = err.Error()
 			}
-			// try to disconect the session n times before we force terminate it on our side
+			// try to disconnect the session n times before we force terminate it on our side
 			fib := utils.FibDuration(time.Millisecond, 0)
 			for i := 0; i < sS.cgrCfg.SessionSCfg().TerminateAttempts; i++ {
 				if i != 0 { // not the first iteration
@@ -598,7 +598,7 @@ func (sS *SessionS) debitLoopSession(s *Session, sRunIdx int,
 			case <-time.After(maxDebit):
 				s.Lock()
 				defer s.Unlock()
-				// try to disconect the session n times before we force terminate it on our side
+				// try to disconnect the session n times before we force terminate it on our side
 				fib := utils.FibDuration(time.Millisecond, 0)
 				for i := 0; i < sS.cgrCfg.SessionSCfg().TerminateAttempts; i++ {
 					if i != 0 { // not the first iteration
@@ -1393,11 +1393,11 @@ func (sS *SessionS) syncSessions() {
 		case err = <-errChan:
 			if err != nil && err.Error() != utils.ErrNoActiveSession.Error() {
 				utils.Logger.Warning(
-					fmt.Sprintf("<%s> error <%s> quering session ids", utils.SessionS, err.Error()))
+					fmt.Sprintf("<%s> error <%s> querying session ids", utils.SessionS, err.Error()))
 			}
 		case <-time.After(sS.cgrCfg.GeneralCfg().ReplyTimeout):
 			utils.Logger.Warning(
-				fmt.Sprintf("<%s> timeout quering session ids ", utils.SessionS))
+				fmt.Sprintf("<%s> timeout querying session ids ", utils.SessionS))
 		}
 	}
 	var toBeRemoved []string

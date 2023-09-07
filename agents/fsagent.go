@@ -361,7 +361,7 @@ func (fsa *FSsessions) disconnectSession(connIdx int, uuid, redirectNr, notify s
 	if err := fsa.conns[connIdx].SendMsgCmd(uuid,
 		map[string]string{"call-command": "hangup", "hangup-cause": "MANAGER_REQUEST"}); err != nil {
 		utils.Logger.Err(
-			fmt.Sprintf("<%s> Could not send disconect msg to freeswitch, error: <%s>, connIdx: %v",
+			fmt.Sprintf("<%s> Could not send disconnect msg to freeswitch, error: <%s>, connIdx: %v",
 				utils.FreeSWITCHAgent, err.Error(), connIdx))
 		return err
 	}

@@ -283,7 +283,7 @@ func (tS *ThresholdService) storeThresholds() {
 		}
 		tIf, ok := Cache.Get(utils.CacheThresholds, tID)
 		if !ok || tIf == nil {
-			utils.Logger.Warning(fmt.Sprintf("<ThresholdS> failed retrieving from cache treshold with ID: %s", tID))
+			utils.Logger.Warning(fmt.Sprintf("<ThresholdS> failed retrieving from cache threshold with ID: %s", tID))
 			continue
 		}
 		t := tIf.(*Threshold)

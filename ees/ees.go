@@ -200,7 +200,7 @@ func (eeS *EventExporterS) V1ProcessEvent(ctx *context.Context, cgrEv *engine.CG
 		// log the message before starting the gorutine, but still execute the exporter
 		if hasVerbose && !eeCfg.Synchronous {
 			utils.Logger.Warning(
-				fmt.Sprintf("<%s> with id <%s>, running verbosed exporter with syncronous false",
+				fmt.Sprintf("<%s> with id <%s>, running verbosed exporter with synchronous false",
 					utils.EEs, ee.Cfg().ID))
 		}
 		go func(evict, sync bool, ee EventExporter) {

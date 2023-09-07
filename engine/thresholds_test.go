@@ -814,7 +814,7 @@ func TestThresholdsStoreThresholdsCacheGetErr(t *testing.T) {
 	Cache.SetWithoutReplicate(utils.CacheThresholds, "TH2", value, nil, true,
 		utils.NonTransactional)
 	tS.storedTdIDs.Add("TH1")
-	expLog := `[WARNING] <ThresholdS> failed retrieving from cache treshold with ID: TH1`
+	expLog := `[WARNING] <ThresholdS> failed retrieving from cache threshold with ID: TH1`
 	tS.storeThresholds()
 
 	if rcvLog := buf.String(); !strings.Contains(rcvLog, expLog) {
