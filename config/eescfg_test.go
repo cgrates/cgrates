@@ -1081,3 +1081,163 @@ func TestEEsCfgAsMapInterface(t *testing.T) {
 		}
 	}
 }
+
+func TestEEsCfgappendEEsExporters(t *testing.T) {
+	str := ""
+	eeS := &EEsCfg{
+		Exporters: []*EventExporterCfg{},
+	}
+
+	err := eeS.appendEEsExporters(nil, nil, "", nil)
+	if err != nil {
+		t.Error(err)
+	}
+
+	exporters := &[]*EventExporterJsonCfg{{
+		Id: &str,
+	}}
+	err = eeS.appendEEsExporters(exporters, map[string][]*FCTemplate{}, "", nil)
+	if err != nil {
+		t.Error(err)
+	}
+}
+
+func TestEEsCfgNewEventExporterCfg(t *testing.T) {
+	str := "test"
+	rcv := NewEventExporterCfg(str, str, str, str, 1, nil)
+	exp := &EventExporterCfg{
+		ID:             str,
+		Type:           str,
+		ExportPath:     str,
+		FailedPostsDir: str,
+		Attempts:       1,
+		Opts:           &EventExporterOpts{},
+	}
+
+	if !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(exp), utils.ToJSON(rcv))
+	}
+}
+
+func TestEEsCfgloadFromJSONCfg(t *testing.T) {
+	str := "test"
+	bl := true
+	nm := 1
+	tm := 1 * time.Second
+	tms := "1s"
+	elsOpts := &ElsOpts{}
+	jsnCfg := &EventExporterOptsJson{
+		CSVFieldSeparator:           &str,
+		ElsCloud:                    &bl,
+		ElsAPIKey:                   &str,
+		ElsServiceToken:             &str,
+		ElsCertificateFingerprint:   &str,
+		ElsUsername:                 &str,
+		ElsPassword:                 &str,
+		ElsDiscoverNodesOnStart:     &bl,
+		ElsDiscoverNodesInterval:    &tms,
+		ElsEnableDebugLogger:        &bl,
+		ElsLogger:                   &str,
+		ElsCompressRequestBody:      &bl,
+		ElsCompressRequestBodyLevel: &nm,
+		ElsRetryOnStatus:            &[]int{nm},
+		ElsMaxRetries:               &nm,
+		ElsDisableRetry:             &bl,
+		ElsIndex:                    &str,
+		ElsIfPrimaryTerm:            &nm,
+		ElsIfSeqNo:                  &nm,
+		ElsOpType:                   &str,
+		ElsPipeline:                 &str,
+		ElsRouting:                  &str,
+		ElsTimeout:                  &tms,
+		ElsVersion:                  &nm,
+		ElsVersionType:              &str,
+		ElsWaitForActiveShards:      &str,
+		SQLMaxIdleConns:             &nm,
+		SQLMaxOpenConns:             &nm,
+		SQLConnMaxLifetime:          &str,
+		MYSQLDSNParams:              map[string]string{str: str},
+		SQLTableName:                &str,
+		SQLDBName:                   &str,
+		PgSSLMode:                   &str,
+		KafkaTopic:                  &str,
+		AMQPQueueID:                 &str,
+		AMQPRoutingKey:              &str,
+		AMQPExchange:                &str,
+		AMQPExchangeType:            &str,
+		AMQPUsername:                &str,
+		AMQPPassword:                &str,
+		AWSRegion:                   &str,
+		AWSKey:                      &str,
+		AWSSecret:                   &str,
+		AWSToken:                    &str,
+		SQSQueueID:                  &str,
+		S3BucketID:                  &str,
+		S3FolderPath:                &str,
+		NATSJetStream:               &bl,
+		NATSSubject:                 &str,
+		NATSJWTFile:                 &str,
+		NATSSeedFile:                &str,
+		NATSCertificateAuthority:    &str,
+		NATSClientCertificate:       &str,
+		NATSClientKey:               &str,
+		NATSJetStreamMaxWait:        &str,
+		RPCCodec:                    &str,
+		ServiceMethod:               &str,
+		KeyPath:                     &str,
+		CertPath:                    &str,
+		CAPath:                      &str,
+		ConnIDs:                     &[]string{str},
+		TLS:                         &bl,
+		RPCConnTimeout:              &str,
+		RPCReplyTimeout:             &str,
+		RPCAPIOpts:                  map[string]any{str: nm},
+	}
+	exp := &ElsOpts{
+		Index:                    &str,
+		IfPrimaryTerm:            &nm,
+		DiscoverNodesOnStart:     &bl,
+		DiscoverNodeInterval:     &tm,
+		Cloud:                    &bl,
+		APIKey:                   &str,
+		CertificateFingerprint:   &str,
+		ServiceToken:             &str,
+		Username:                 &str,
+		Password:                 &str,
+		EnableDebugLogger:        &bl,
+		Logger:                   &str,
+		CompressRequestBody:      &bl,
+		CompressRequestBodyLevel: &nm,
+		RetryOnStatus:            &[]int{nm},
+		MaxRetries:               &nm,
+		DisableRetry:             &bl,
+		IfSeqNo:                  &nm,
+		OpType:                   &str,
+		Pipeline:                 &str,
+		Routing:                  &str,
+		Timeout:                  &tm,
+		Version:                  &nm,
+		VersionType:              &str,
+		WaitForActiveShards:      &str,
+	}
+	err := elsOpts.loadFromJSONCfg(jsnCfg)
+	if err != nil {
+		t.Error(err)
+	}
+
+	if !reflect.DeepEqual(elsOpts, exp) {
+		t.Errorf("\nexpected %s\nreceived  %s\n", utils.ToJSON(exp), utils.ToJSON(elsOpts))
+	}
+
+	jsnCfg2 := &EventExporterOptsJson{
+		ElsDiscoverNodesInterval: &str,
+	}
+	err = elsOpts.loadFromJSONCfg(jsnCfg2)
+	if err != nil {
+		if err.Error() != `time: invalid duration "test"` {
+			t.Error(err)
+		}
+	} else {
+		t.Error("was expecting an error")
+	}
+}
