@@ -1571,3 +1571,179 @@ func TestEventReaderCfgClone(t *testing.T) {
 	}
 
 }
+
+func TestEventReaderCfgloadFromJSONCfg(t *testing.T) {
+	str := "test"
+	amqpr := &AMQPROpts{}
+	exp := &AMQPROpts{
+		AMQPUsername:          &str,
+		AMQPPassword:          &str,
+		AMQPUsernameProcessed: &str,
+		AMQPPasswordProcessed: &str,
+	}
+	jsnCfg := &EventReaderOptsJson{
+		AMQPUsername:          &str,
+		AMQPPassword:          &str,
+		AMQPUsernameProcessed: &str,
+		AMQPPasswordProcessed: &str,
+	}
+	err := amqpr.loadFromJSONCfg(jsnCfg)
+	if err != nil {
+		t.Error(err)
+	}
+
+	if !reflect.DeepEqual(amqpr, exp) {
+		t.Errorf("expected %v received %v", utils.ToJSON(exp), utils.ToJSON(amqpr))
+	}
+}
+
+func TestEventReaderCfgClone2(t *testing.T) {
+	str := "test"
+	amqpr := &AMQPROpts{
+		AMQPUsername:          &str,
+		AMQPPassword:          &str,
+		AMQPUsernameProcessed: &str,
+		AMQPPasswordProcessed: &str,
+	}
+	rcv := amqpr.Clone()
+
+	if !reflect.DeepEqual(amqpr, rcv) {
+		t.Errorf("expected %v received %v", utils.ToJSON(amqpr), utils.ToJSON(rcv))
+	}
+}
+func TestEventReaderCfgAsMapInterface(t *testing.T) {
+	str := "test"
+	amqpr := &AMQPROpts{
+		AMQPUsername:          &str,
+		AMQPPassword:          &str,
+		AMQPUsernameProcessed: &str,
+		AMQPPasswordProcessed: &str,
+	}
+	er := &EventReaderCfg{
+		Opts: &EventReaderOpts{
+			AMQPOpts: amqpr,
+		},
+	}
+	opts := map[string]any{
+		utils.AMQPUsername:             str,
+		utils.AMQPPassword:             str,
+		utils.AMQPUsernameProcessedCfg: str,
+		utils.AMQPPasswordProcessedCfg: str,
+	}
+	exp := map[string]any{
+		utils.IDCfg:                 er.ID,
+		utils.TypeCfg:               er.Type,
+		utils.ConcurrentRequestsCfg: er.ConcurrentReqs,
+		utils.SourcePathCfg:         er.SourcePath,
+		utils.ProcessedPathCfg:      er.ProcessedPath,
+		utils.TenantCfg:             er.Tenant.GetRule(""),
+		utils.TimezoneCfg:           er.Timezone,
+		utils.FiltersCfg:            er.Filters,
+		utils.FlagsCfg:              []string{},
+		utils.RunDelayCfg:           "0",
+		utils.OptsCfg:               opts,
+	}
+	rcv := er.AsMapInterface("")
+
+	if !reflect.DeepEqual(exp, rcv) {
+		t.Errorf("expected %v received %v", utils.ToJSON(exp), utils.ToJSON(rcv))
+	}
+}
+
+func TestERsCfgappendERsReaders(t *testing.T) {
+	tm := 1 * time.Second
+	nm := 1
+	str := "test"
+	bl := true
+	tms := "1s"
+	fc := []*FCTemplate{{
+		Tag:              str,
+		Type:             str,
+		Path:             str,
+		Filters:          []string{str},
+		Value:            RSRParsers{},
+		Width:            nm,
+		Strip:            str,
+		Padding:          str,
+		Mandatory:        bl,
+		AttributeID:      str,
+		NewBranch:        bl,
+		Timezone:         str,
+		Blocker:          bl,
+		Layout:           str,
+		CostShiftDigits:  nm,
+		RoundingDecimals: &nm,
+		MaskDestID:       str,
+		MaskLen:          nm,
+		pathSlice:        []string{},
+	}}
+	erS := &ERsCfg{
+		Enabled:       bl,
+		SessionSConns: []string{str},
+		Readers: []*EventReaderCfg{
+			{
+				ID:                  str,
+				Type:                str,
+				RunDelay:            tm,
+				ConcurrentReqs:      nm,
+				SourcePath:          str,
+				ProcessedPath:       str,
+				Opts:                &EventReaderOpts{},
+				Tenant:              RSRParsers{},
+				Timezone:            str,
+				Filters:             []string{str},
+				Flags:               utils.FlagsWithParams{},
+				Fields:              fc,
+				PartialCommitFields: fc,
+				CacheDumpFields:     fc,
+			},
+		},
+		PartialCacheTTL: tm,
+	}
+	fcj := &[]*FcTemplateJsonCfg{}
+	jsnReader := &EventReaderJsonCfg{
+		Type:                  &str,
+		Run_delay:             &tms,
+		Concurrent_requests:   &nm,
+		Source_path:           &str,
+		Processed_path:        &str,
+		Opts:                  &EventReaderOptsJson{},
+		Tenant:                &str,
+		Timezone:              &str,
+		Filters:               &[]string{str},
+		Flags:                 &[]string{str},
+		Fields:                fcj,
+		Partial_commit_fields: fcj,
+		Cache_dump_fields:     fcj,
+	}
+	jsnReaders := []*EventReaderJsonCfg{jsnReader}
+
+	exp := &EventReaderCfg{
+		Type:                str,
+		RunDelay:            tm,
+		ConcurrentReqs:      nm,
+		SourcePath:          str,
+		ProcessedPath:       str,
+		Opts:                &EventReaderOpts{},
+		Tenant:              RSRParsers{},
+		Timezone:            str,
+		Filters:             []string{str},
+		Flags:               utils.FlagsWithParams{},
+		Fields:              fc,
+		PartialCommitFields: fc,
+		CacheDumpFields:     fc,
+	}
+	err := exp.loadFromJSONCfg(jsnReader, map[string][]*FCTemplate{}, "")
+	if err != nil {
+		t.Error(err)
+	}
+
+	err = erS.appendERsReaders(&jsnReaders, map[string][]*FCTemplate{}, "", nil)
+	if err != nil {
+		t.Error(err)
+	}
+
+	if !reflect.DeepEqual(erS.Readers[1], exp) {
+		t.Errorf("\nexpected %s\nreceived %s\n", utils.ToJSON(exp), utils.ToJSON(erS.Readers[1]))
+	}
+}
