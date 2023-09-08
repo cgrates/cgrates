@@ -202,3 +202,30 @@ func TestFieldAsInterfaceObjDPMultiplePaths(t *testing.T) {
 		t.Errorf("Expected %+v, received %+v", "1", rcv)
 	}
 }
+
+func TestObjectDPFieldAsInterfaceError(t *testing.T) {
+	type test struct {
+		Field string
+	}
+	tst := test{
+		Field: "test",
+	}
+	objDP := &ObjectDP{
+		obj:   tst,
+		cache: map[string]any{"Field": nil},
+	}
+
+	rcv, err := objDP.FieldAsInterface([]string{"Field"})
+
+	if err != nil {
+		if err.Error() != "NOT_FOUND" {
+			t.Error(err)
+		}
+	} else {
+		t.Error("was expecting an error")
+	}
+
+	if rcv != nil {
+		t.Error(rcv)
+	}
+}

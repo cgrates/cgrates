@@ -1241,3 +1241,94 @@ func TestEEsCfgloadFromJSONCfg(t *testing.T) {
 		t.Error("was expecting an error")
 	}
 }
+
+func TestEEsCfgAMQPOptsloadFromJSONCfg(t *testing.T) {
+	str := "test"
+	amqpOpts := &AMQPOpts{}
+	jsnCfg := &EventExporterOptsJson{
+		AMQPQueueID: &str,
+		AMQPRoutingKey: &str,
+		AMQPExchange: &str,
+		AMQPExchangeType: &str,
+		AMQPUsername: &str,
+		AMQPPassword: &str,
+	}
+	exp := &AMQPOpts{
+		RoutingKey:   &str,
+		QueueID:      &str,
+		Exchange:     &str,
+		ExchangeType: &str,
+		Username:     &str,
+		Password:     &str,
+	}
+	err := amqpOpts.loadFromJSONCfg(jsnCfg)
+	if err != nil {
+		t.Error(err)
+	}
+
+	if !reflect.DeepEqual(amqpOpts, exp) {
+		t.Errorf("\nexpected %s\nreceived  %s\n", utils.ToJSON(exp), utils.ToJSON(amqpOpts))
+	}
+}
+
+func TestEEsCfgAMQPOptsClone(t *testing.T) {
+	str := "test"
+	AMQPOpts := &AMQPOpts{
+		RoutingKey:   &str,
+		QueueID:      &str,
+		Exchange:     &str,
+		ExchangeType: &str,
+		Username:     &str,
+		Password:     &str,
+	}
+	rcv := AMQPOpts.Clone()
+
+	if !reflect.DeepEqual(rcv, AMQPOpts) {
+		t.Errorf("\nexpected %s\nreceived  %s\n", utils.ToJSON(AMQPOpts), utils.ToJSON(rcv))
+	}
+}
+
+func TestEventExporterCfgAsMapInterface(t *testing.T) {
+	str := "test"
+	am := &AMQPOpts{
+		RoutingKey:   &str,
+		QueueID:      &str,
+		Exchange:     &str,
+		ExchangeType: &str,
+		Username:     &str,
+		Password:     &str,
+	}
+	eeC := &EventExporterCfg{
+		Opts: &EventExporterOpts{
+			AMQP: am,
+		},
+	}
+	opts := map[string]any{
+		utils.AMQPQueueID: str,
+		utils.AMQPRoutingKey: str,
+		utils.AMQPExchange: str,
+		utils.AMQPExchangeType: str,
+		utils.AMQPUsername: str,
+		utils.AMQPPassword: str,
+	}
+	exp := map[string]any{
+		utils.IDCfg:                 eeC.ID,
+		utils.TypeCfg:               eeC.Type,
+		utils.ExportPathCfg:         eeC.ExportPath,
+		utils.TimezoneCfg:           eeC.Timezone,
+		utils.FiltersCfg:            eeC.Filters,
+		utils.FlagsCfg:              []string{},
+		utils.AttributeContextCfg:   eeC.AttributeSCtx,
+		utils.AttributeIDsCfg:       eeC.AttributeSIDs,
+		utils.SynchronousCfg:        eeC.Synchronous,
+		utils.AttemptsCfg:           eeC.Attempts,
+		utils.ConcurrentRequestsCfg: eeC.ConcurrentRequests,
+		utils.FailedPostsDirCfg:     eeC.FailedPostsDir,
+		utils.OptsCfg:               opts,
+	}
+	rcv := eeC.AsMapInterface("")
+
+	if !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("\nexpected %s\nreceived  %s\n", utils.ToJSON(exp), utils.ToJSON(rcv))
+	}
+}
