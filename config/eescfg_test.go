@@ -1246,12 +1246,12 @@ func TestEEsCfgAMQPOptsloadFromJSONCfg(t *testing.T) {
 	str := "test"
 	amqpOpts := &AMQPOpts{}
 	jsnCfg := &EventExporterOptsJson{
-		AMQPQueueID: &str,
-		AMQPRoutingKey: &str,
-		AMQPExchange: &str,
+		AMQPQueueID:      &str,
+		AMQPRoutingKey:   &str,
+		AMQPExchange:     &str,
 		AMQPExchangeType: &str,
-		AMQPUsername: &str,
-		AMQPPassword: &str,
+		AMQPUsername:     &str,
+		AMQPPassword:     &str,
 	}
 	exp := &AMQPOpts{
 		RoutingKey:   &str,
@@ -1304,12 +1304,12 @@ func TestEventExporterCfgAsMapInterface(t *testing.T) {
 		},
 	}
 	opts := map[string]any{
-		utils.AMQPQueueID: str,
-		utils.AMQPRoutingKey: str,
-		utils.AMQPExchange: str,
+		utils.AMQPQueueID:      str,
+		utils.AMQPRoutingKey:   str,
+		utils.AMQPExchange:     str,
 		utils.AMQPExchangeType: str,
-		utils.AMQPUsername: str,
-		utils.AMQPPassword: str,
+		utils.AMQPUsername:     str,
+		utils.AMQPPassword:     str,
 	}
 	exp := map[string]any{
 		utils.IDCfg:                 eeC.ID,
