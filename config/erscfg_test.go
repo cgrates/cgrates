@@ -1747,3 +1747,147 @@ func TestERsCfgappendERsReaders(t *testing.T) {
 		t.Errorf("\nexpected %s\nreceived %s\n", utils.ToJSON(exp), utils.ToJSON(erS.Readers[1]))
 	}
 }
+
+func TestErsCfgloadFromJSONCfg(t *testing.T) {
+	tm := 1 * time.Second
+	nm := 1
+	str := "test"
+	str2 := "~test)`"
+	bl := true
+	tms := "1s"
+	fc := []*FCTemplate{{
+		Tag:              str,
+		Type:             str,
+		Path:             str,
+		Filters:          []string{str},
+		Value:            RSRParsers{},
+		Width:            nm,
+		Strip:            str,
+		Padding:          str,
+		Mandatory:        bl,
+		AttributeID:      str,
+		NewBranch:        bl,
+		Timezone:         str,
+		Blocker:          bl,
+		Layout:           str,
+		CostShiftDigits:  nm,
+		RoundingDecimals: &nm,
+		MaskDestID:       str,
+		MaskLen:          nm,
+		pathSlice:        []string{str},
+	}}
+	fc2 := []*FCTemplate{{
+		Tag:     str2,
+		Type:    utils.MetaTemplate,
+		Path:    str2,
+		Filters: []string{str2},
+		Value: RSRParsers{{
+			Rules: str2,
+			path:  str2,
+		}},
+		Width:            nm,
+		Strip:            str2,
+		Padding:          str2,
+		Mandatory:        bl,
+		AttributeID:      str2,
+		NewBranch:        bl,
+		Timezone:         str2,
+		Blocker:          bl,
+		Layout:           str2,
+		CostShiftDigits:  nm,
+		RoundingDecimals: &nm,
+		MaskDestID:       str2,
+		MaskLen:          nm,
+		pathSlice:        []string{str2},
+	}}
+	er := &EventReaderCfg{
+		ID:                  str,
+		Type:                str,
+		RunDelay:            tm,
+		ConcurrentReqs:      nm,
+		SourcePath:          str,
+		ProcessedPath:       str,
+		Opts:                &EventReaderOpts{},
+		Tenant:              RSRParsers{},
+		Timezone:            str,
+		Filters:             []string{str},
+		Flags:               utils.FlagsWithParams{},
+		Fields:              fc,
+		PartialCommitFields: fc2,
+		CacheDumpFields:     fc,
+	}
+	fcj := &[]*FcTemplateJsonCfg{}
+	fcj2 := &[]*FcTemplateJsonCfg{
+		{
+			Tag:                  &str2,
+			Type:                 &str2,
+			Path:                 &str2,
+			Attribute_id:         &str2,
+			Filters:              &[]string{str2},
+			Value:                &str2,
+			Width:                &nm,
+			Strip:                &str2,
+			Padding:              &str2,
+			Mandatory:            &bl,
+			New_branch:           &bl,
+			Timezone:             &str2,
+			Blocker:              &bl,
+			Layout:               &str2,
+			Cost_shift_digits:    &nm,
+			Rounding_decimals:    &nm,
+			Mask_destinationd_id: &str2,
+			Mask_length:          &nm,
+		},
+	}
+	jsnCfg := &EventReaderJsonCfg{
+		Type:                  &str,
+		Run_delay:             &tms,
+		Concurrent_requests:   &nm,
+		Source_path:           &str,
+		Processed_path:        &str,
+		Opts:                  &EventReaderOptsJson{},
+		Tenant:                &str,
+		Timezone:              &str,
+		Filters:               &[]string{str},
+		Flags:                 &[]string{str},
+		Fields:                fcj,
+		Partial_commit_fields: fcj2,
+		Cache_dump_fields:     fcj,
+	}
+
+	err := er.loadFromJSONCfg(jsnCfg, nil, "")
+
+	if err != nil {
+		if err.Error() != "Unclosed unspilit syntax" {
+			t.Error(err)
+		}
+	} else {
+		t.Error("was expecting an error")
+	}
+
+	jsnCfg2 := &EventReaderJsonCfg{
+		Type:                  &str,
+		Run_delay:             &tms,
+		Concurrent_requests:   &nm,
+		Source_path:           &str,
+		Processed_path:        &str,
+		Opts:                  &EventReaderOptsJson{},
+		Tenant:                &str,
+		Timezone:              &str,
+		Filters:               &[]string{str},
+		Flags:                 &[]string{str},
+		Fields:                fcj,
+		Partial_commit_fields: fcj,
+		Cache_dump_fields:     fcj,
+	}
+	msgTemplates := map[string][]*FCTemplate{
+		str2: fc2,
+	}
+	err = er.loadFromJSONCfg(jsnCfg2, msgTemplates, "")
+
+	if err != nil {
+		if err.Error() != "Unclosed unspilit syntax" {
+			t.Error(err)
+		}
+	}
+}

@@ -230,3 +230,56 @@ func TestCacheCfgClone(t *testing.T) {
 		t.Errorf("Expected clone to not modify the cloned")
 	}
 }
+
+func TestCacheCfgloadFromJSONCfg(t *testing.T) {
+	str := "test"
+	bl := true
+	nm := 1
+	slc := []string{str}
+	tm := 1 * time.Second
+	tms := "1s"
+	mcp := map[string]*CacheParamCfg{
+		str: {
+			Limit:     nm,
+			TTL:       tm,
+			StaticTTL: bl,
+			Precache:  bl,
+			Remote:    bl,
+			Replicate: bl,
+		},
+	}
+	cCfg := &CacheCfg{
+		Partitions:       map[string]*CacheParamCfg{},
+		ReplicationConns: []string{},
+		RemoteConns:      []string{},
+	}
+	mc := map[string]*CacheParamJsonCfg{
+		str: {
+			Limit:      &nm,
+			Ttl:        &tms,
+			Static_ttl: &bl,
+			Precache:   &bl,
+			Remote:     &bl,
+			Replicate:  &bl,
+		},
+	}
+	jsn := &CacheJsonCfg{
+		Partitions:        &mc,
+		Replication_conns: &slc,
+		Remote_conns:      &slc,
+	}
+	exp := &CacheCfg{
+		Partitions:       mcp,
+		ReplicationConns: slc,
+		RemoteConns:      slc,
+	}
+
+	err := cCfg.loadFromJSONCfg(jsn)
+	if err != nil {
+		t.Error(err)
+	}
+
+	if !reflect.DeepEqual(cCfg, exp) {
+		t.Errorf("\nexpected %s\nreceived %s\n", utils.ToJSON(exp), utils.ToJSON(cCfg))
+	}
+}
