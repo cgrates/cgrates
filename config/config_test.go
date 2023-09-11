@@ -5891,3 +5891,19 @@ func TestCGRConfigGetDP(t *testing.T) {
 		t.Errorf("Expected %+v, received %+v", exp, err)
 	}
 }
+
+func TestConfignewCGRConfigFromPathWithoutEnv(t *testing.T) {
+	flPath := "/usr/share/cgrates/conf/samples/NotExists/cgrates.json"
+	rcv, err := newCGRConfigFromPathWithoutEnv(flPath)
+	if err != nil {
+		if err.Error() != `path:"/usr/share/cgrates/conf/samples/NotExists/cgrates.json" is not reachable` {
+			t.Error(err)
+		}
+	} else {
+		t.Error("was expecting an error")
+	}
+
+	if rcv == nil {
+		t.Error(rcv)
+	}
+}

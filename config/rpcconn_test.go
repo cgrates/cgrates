@@ -490,3 +490,44 @@ func TestRemoveRPCCons(t *testing.T) {
 		t.Errorf("Expected: %+v\nReceived: %+v", utils.ToJSON(expectedRPCCons), utils.ToJSON(rpc))
 	}
 }
+
+func TestRPCConnAsMApInterface(t *testing.T) {
+	str := "test"
+	nm := 1
+	tm := 1 * time.Second
+	bl := true
+	rh := &RemoteHost{
+		ID:                   str,
+		Address:              str,
+		Transport:            str,
+		ConnectAttempts:      nm,
+		Reconnects:           nm,
+		MaxReconnectInterval: tm,
+		ConnectTimeout:       tm,
+		ReplyTimeout:         tm,
+		TLS:                  bl,
+		ClientKey:            str,
+		ClientCertificate:    str,
+		CaCertificate:        str,
+	}
+
+	rcv := rh.AsMapInterface()
+	exp := map[string]any{
+		utils.AddressCfg:              rh.Address,
+		utils.TransportCfg:            rh.Transport,
+		utils.IDCfg:                   rh.ID,
+		utils.TLSNoCaps:               rh.TLS,
+		utils.KeyPathCgr:              rh.ClientKey,
+		utils.CertPathCgr:             rh.ClientCertificate,
+		utils.CAPathCgr:               rh.CaCertificate,
+		utils.ConnectAttemptsCfg:      rh.ConnectAttempts,
+		utils.ReconnectsCfg:           rh.Reconnects,
+		utils.MaxReconnectIntervalCfg: rh.MaxReconnectInterval,
+		utils.ConnectTimeoutCfg:       rh.ConnectTimeout,
+		utils.ReplyTimeoutCfg:         rh.ReplyTimeout,
+	}
+
+	if !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("\nexpected %s\nreceived %s\n", utils.ToJSON(exp), utils.ToJSON(rcv))
+	}
+}

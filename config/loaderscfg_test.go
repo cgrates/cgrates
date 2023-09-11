@@ -529,3 +529,27 @@ func TestLockGetLockFilePath(t *testing.T) {
 	}
 
 }
+
+func TestLoadersCfgGetLockFilePath(t *testing.T) {
+	str := "test"
+	bl := true
+	l := LoaderSCfg{
+		ID:             str,
+		Enabled:        bl,
+		Tenant:         str,
+		DryRun:         bl,
+		RunDelay:       1 * time.Second,
+		LockFilePath:   str,
+		CacheSConns:    []string{str},
+		FieldSeparator: str,
+		TpInDir:        str,
+		TpOutDir:       str,
+		Data:           []*LoaderDataType{},
+	}
+
+	rcv := l.GetLockFilePath()
+
+	if rcv != "test/test" {
+		t.Error(rcv)
+	}
+}
