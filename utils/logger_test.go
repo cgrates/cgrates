@@ -273,7 +273,7 @@ func TestNewLoggerInvalidLoggerType(t *testing.T) {
 }
 
 func TestLoggerClose(t *testing.T) {
-	nm := 1 
+	nm := 1
 	str := "test"
 	sl := &StdLogger{
 		logLevel: nm,
@@ -288,7 +288,7 @@ func TestLoggerClose(t *testing.T) {
 }
 
 func TestLoggerAlert(t *testing.T) {
-	nm := 100 
+	nm := 100
 	str := "test"
 	sl := &StdLogger{
 		logLevel: nm,
@@ -303,7 +303,7 @@ func TestLoggerAlert(t *testing.T) {
 }
 
 func TestLoggerCrit(t *testing.T) {
-	nm := 100 
+	nm := 100
 	str := "test"
 	sl := &StdLogger{
 		logLevel: nm,
@@ -318,7 +318,7 @@ func TestLoggerCrit(t *testing.T) {
 }
 
 func TestLoggerDebug(t *testing.T) {
-	nm := 100 
+	nm := 100
 	str := "test"
 	sl := &StdLogger{
 		logLevel: nm,
@@ -334,7 +334,7 @@ func TestLoggerDebug(t *testing.T) {
 
 //Loggs: Broadcast message from systemd-journald@debian (Tue 2023-09-12 10:09:31 CEST):
 /*func TestLoggerEmerg(t *testing.T) {
-	nm := 100 
+	nm := 100
 	str := "test"
 	sl := &StdLogger{
 		logLevel: nm,
@@ -349,7 +349,7 @@ func TestLoggerDebug(t *testing.T) {
 }*/
 
 func TestLoggerErr(t *testing.T) {
-	nm := 100 
+	nm := 100
 	str := "test"
 	sl := &StdLogger{
 		logLevel: nm,
@@ -364,7 +364,7 @@ func TestLoggerErr(t *testing.T) {
 }
 
 func TestLoggerInfo(t *testing.T) {
-	nm := 100 
+	nm := 100
 	str := "test"
 	sl := &StdLogger{
 		logLevel: nm,
@@ -379,7 +379,7 @@ func TestLoggerInfo(t *testing.T) {
 }
 
 func TestLoggerNotice(t *testing.T) {
-	nm := 100 
+	nm := 100
 	str := "test"
 	sl := &StdLogger{
 		logLevel: nm,
@@ -394,7 +394,7 @@ func TestLoggerNotice(t *testing.T) {
 }
 
 func TestLoggerWarning(t *testing.T) {
-	nm := 100 
+	nm := 100
 	str := "test"
 	sl := &StdLogger{
 		logLevel: nm,
