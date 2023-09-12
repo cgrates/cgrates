@@ -22,6 +22,7 @@ import (
 	"bytes"
 	"io"
 	"log"
+	"log/syslog"
 	"os"
 	"strings"
 	"testing"
@@ -268,5 +269,141 @@ func TestNewLoggerInvalidLoggerType(t *testing.T) {
 	expected := "unsupported logger: <Invalid_TYPE>"
 	if _, err := Newlogger(loggertype, EmptyString); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
+	}
+}
+
+func TestLoggerClose(t *testing.T) {
+	nm := 1 
+	str := "test"
+	sl := &StdLogger{
+		logLevel: nm,
+		nodeID:   str,
+		syslog:   &syslog.Writer{},
+	}
+
+	err := sl.Close()
+	if err != nil {
+		t.Error(err)
+	}
+}
+
+func TestLoggerAlert(t *testing.T) {
+	nm := 100 
+	str := "test"
+	sl := &StdLogger{
+		logLevel: nm,
+		nodeID:   str,
+		syslog:   &syslog.Writer{},
+	}
+
+	err := sl.Alert(str)
+	if err != nil {
+		t.Error(err)
+	}
+}
+
+func TestLoggerCrit(t *testing.T) {
+	nm := 100 
+	str := "test"
+	sl := &StdLogger{
+		logLevel: nm,
+		nodeID:   str,
+		syslog:   &syslog.Writer{},
+	}
+
+	err := sl.Crit(str)
+	if err != nil {
+		t.Error(err)
+	}
+}
+
+func TestLoggerDebug(t *testing.T) {
+	nm := 100 
+	str := "test"
+	sl := &StdLogger{
+		logLevel: nm,
+		nodeID:   str,
+		syslog:   &syslog.Writer{},
+	}
+
+	err := sl.Debug(str)
+	if err != nil {
+		t.Error(err)
+	}
+}
+
+//Loggs: Broadcast message from systemd-journald@debian (Tue 2023-09-12 10:09:31 CEST):
+/*func TestLoggerEmerg(t *testing.T) {
+	nm := 100 
+	str := "test"
+	sl := &StdLogger{
+		logLevel: nm,
+		nodeID:   str,
+		syslog:   &syslog.Writer{},
+	}
+
+	err := sl.Emerg(str)
+	if err != nil {
+		t.Error(err)
+	}
+}*/
+
+func TestLoggerErr(t *testing.T) {
+	nm := 100 
+	str := "test"
+	sl := &StdLogger{
+		logLevel: nm,
+		nodeID:   str,
+		syslog:   &syslog.Writer{},
+	}
+
+	err := sl.Err(str)
+	if err != nil {
+		t.Error(err)
+	}
+}
+
+func TestLoggerInfo(t *testing.T) {
+	nm := 100 
+	str := "test"
+	sl := &StdLogger{
+		logLevel: nm,
+		nodeID:   str,
+		syslog:   &syslog.Writer{},
+	}
+
+	err := sl.Info(str)
+	if err != nil {
+		t.Error(err)
+	}
+}
+
+func TestLoggerNotice(t *testing.T) {
+	nm := 100 
+	str := "test"
+	sl := &StdLogger{
+		logLevel: nm,
+		nodeID:   str,
+		syslog:   &syslog.Writer{},
+	}
+
+	err := sl.Notice(str)
+	if err != nil {
+		t.Error(err)
+	}
+}
+
+func TestLoggerWarning(t *testing.T) {
+	nm := 100 
+	str := "test"
+	sl := &StdLogger{
+		logLevel: nm,
+		nodeID:   str,
+		syslog:   &syslog.Writer{},
+	}
+
+	err := sl.Warning(str)
+	if err != nil {
+		t.Error(err)
 	}
 }
