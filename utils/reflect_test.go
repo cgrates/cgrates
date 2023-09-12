@@ -1992,3 +1992,20 @@ func TestIfaceStringInterface(t *testing.T) {
 	}
 
 }
+
+func TestReflectDifference(t *testing.T) {
+	td := time.Date(2009, 11, 17, 20, 34, 58, 651387237, time.UTC)
+	td2 := time.Date(2009, 11, 17, 20, 35, 58, 651387237, time.UTC)
+	rcv, err := Difference("UTC", td, td2)
+	if err != nil {
+		if err.Error() != "cannot convert field: 2009-11-17 20:35:58.651387237 +0000 UTC to time.Duration" {
+			t.Error(err)
+		}
+	} else {
+		t.Error("was expecting an error")
+	}
+
+	if rcv != nil {
+		t.Error(rcv)
+	}
+}
