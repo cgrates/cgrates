@@ -23,6 +23,7 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"log/syslog"
 	"os"
 	"reflect"
 	"testing"
@@ -312,4 +313,189 @@ func TestGetLogLevelStdLogger(t *testing.T) {
 		t.Errorf("Expected <%v>, received %v %T", exp, rcv, rcv)
 	}
 
+}
+
+func TestLoggerAlert(t *testing.T) {
+	sl := &SysLogger{
+		logLevel: 0,
+		syslog:   &syslog.Writer{},
+	}
+	err := sl.Alert("test")
+
+	if err != nil {
+		t.Error(err)
+	}
+
+	sl2 := &SysLogger{
+		logLevel: 100,
+		syslog:   &syslog.Writer{},
+	}
+
+	err = sl2.Alert("test")
+
+	if err != nil {
+		t.Error(err)
+	}
+}
+
+func TestLoggerCrit(t *testing.T) {
+	sl := &SysLogger{
+		logLevel: 0,
+		syslog:   &syslog.Writer{},
+	}
+	err := sl.Crit("test")
+
+	if err != nil {
+		t.Error(err)
+	}
+
+	sl2 := &SysLogger{
+		logLevel: 100,
+		syslog:   &syslog.Writer{},
+	}
+
+	err = sl2.Crit("test")
+
+	if err != nil {
+		t.Error(err)
+	}
+}
+
+func TestLoggerDebug(t *testing.T) {
+	sl := &SysLogger{
+		logLevel: 0,
+		syslog:   &syslog.Writer{},
+	}
+	err := sl.Debug("test")
+
+	if err != nil {
+		t.Error(err)
+	}
+
+	sl2 := &SysLogger{
+		logLevel: 100,
+		syslog:   &syslog.Writer{},
+	}
+
+	err = sl2.Debug("test")
+
+	if err != nil {
+		t.Error(err)
+	}
+}
+
+//Loggs: Broadcast message from systemd-journald@debian (Tue 2023-09-12 12:28:00 CEST):
+/*func TestLoggerEmerg(t *testing.T) {
+	sl := &SysLogger{
+		logLevel: 0,
+		syslog:   &syslog.Writer{},
+	}
+	err := sl.Emerg("test")
+
+	if err != nil {
+		t.Error(err)
+	}
+
+	sl2 := &SysLogger{
+		logLevel: 100,
+		syslog:   &syslog.Writer{},
+	}
+
+	err = sl2.Emerg("test")
+
+	if err != nil {
+		t.Error(err)
+	}
+}*/
+
+func TestLoggerErr(t *testing.T) {
+	sl := &SysLogger{
+		logLevel: 0,
+		syslog:   &syslog.Writer{},
+	}
+	err := sl.Err("test")
+
+	if err != nil {
+		t.Error(err)
+	}
+
+	sl2 := &SysLogger{
+		logLevel: 100,
+		syslog:   &syslog.Writer{},
+	}
+
+	err = sl2.Err("test")
+
+	if err != nil {
+		t.Error(err)
+	}
+}
+
+func TestLoggerInfo(t *testing.T) {
+	sl := &SysLogger{
+		logLevel: 0,
+		syslog:   &syslog.Writer{},
+	}
+	err := sl.Info("test")
+
+	if err != nil {
+		t.Error(err)
+	}
+
+	sl2 := &SysLogger{
+		logLevel: 100,
+		syslog:   &syslog.Writer{},
+	}
+
+	err = sl2.Info("test")
+
+	if err != nil {
+		t.Error(err)
+	}
+}
+
+func TestLoggerNotice(t *testing.T) {
+	sl := &SysLogger{
+		logLevel: 0,
+		syslog:   &syslog.Writer{},
+	}
+	err := sl.Notice("test")
+
+	if err != nil {
+		t.Error(err)
+	}
+
+	sl2 := &SysLogger{
+		logLevel: 100,
+		syslog:   &syslog.Writer{},
+	}
+
+	err = sl2.Notice("test")
+
+	if err != nil {
+		t.Error(err)
+	}
+}
+
+func TestLoggerWarning(t *testing.T) {
+	sl := &SysLogger{
+		logLevel: -1,
+		syslog:   &syslog.Writer{},
+	}
+	err := sl.Warning("test")
+
+	if err != nil {
+		t.Error(err)
+	}
+
+	sl2 := &SysLogger{
+		logLevel: 100,
+		syslog:   &syslog.Writer{},
+	}
+
+	err = sl2.Warning("test")
+
+	if err != nil {
+		t.Error(err)
+	}
 }

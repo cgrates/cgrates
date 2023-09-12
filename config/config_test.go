@@ -6333,3 +6333,41 @@ func TestGetDftRemoteHostCfg(t *testing.T) {
 	}
 
 }
+
+func TestConfignewCGRConfigFromPathWithoutEnv(t *testing.T) {
+	rcv, err := newCGRConfigFromPathWithoutEnv(nil, "")
+	if err != nil {
+		if err.Error() != `path:"" is not reachable` {
+			t.Error(err)
+		}
+	} else {
+		t.Error("was expecting an error")
+	}
+
+	if rcv == nil {
+		t.Error(rcv)
+	}
+}
+
+func TestCfgloadCfgWithLocks(t *testing.T) {
+	cfg := &CGRConfig{
+		sections: Sections{
+			&CoreSCfg{
+				Caps:              2,
+				CapsStrategy:      "*busy",
+				CapsStatsInterval: 2 * time.Second,
+				ShutdownTimeout:   3 * time.Second,
+			},
+		},
+	}
+
+	err := cfg.loadCfgWithLocks(nil, "test", "")
+
+	if err != nil {
+		if err.Error() != `path:"test" is not reachable` {
+			t.Error(err)
+		}
+	} else {
+		t.Error(err)
+	}
+}
