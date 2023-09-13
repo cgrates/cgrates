@@ -537,3 +537,56 @@ func TestRatingPlanEqual(t *testing.T) {
 		t.Error(rcv)
 	}
 }
+
+func TestRAtingPlangetFirstUnsaneRating(t *testing.T) {
+	str := "test"
+	rt := &RITiming{
+		Years:      utils.Years{},
+		Months:     utils.Months{},
+		MonthDays:  utils.MonthDays{},
+		WeekDays:   utils.WeekDays{},
+		StartTime:  "00:00:00",
+		EndTime:    "00:00:00",
+		cronString: str,
+		tag:        str,
+	}
+
+	rr := &RIRate{
+		ConnectFee:       fl,
+		RoundingMethod:   str,
+		RoundingDecimals: nm,
+		MaxCost:          fl,
+		MaxCostStrategy:  str,
+		Rates: RateGroups{{
+			GroupIntervalStart: 0 * time.Second,
+			Value:              fl,
+			RateIncrement:      0 * time.Second,
+			RateUnit:           0 * time.Second,
+		}, {
+			GroupIntervalStart: 1 * time.Second,
+			Value:              fl,
+			RateIncrement:      1 * time.Second,
+			RateUnit:           1 * time.Second,
+		}},
+		tag: "TestTag",
+	}
+
+	rl := RPRateList{{
+		Timing: str,
+		Rating: str,
+		Weight: fl,
+	}}
+
+	rp := &RatingPlan{
+		Id:               "test2",
+		Timings:          map[string]*RITiming{str: rt},
+		Ratings:          map[string]*RIRate{str: rr},
+		DestinationRates: map[string]RPRateList{str: rl},
+	}
+
+	rcv := rp.getFirstUnsaneRating()
+
+	if rcv != "TestTag" {
+		t.Error(rcv)
+	}
+}
