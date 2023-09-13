@@ -99,3 +99,118 @@ func TestSureTaxNewSureTaxRequest(t *testing.T) {
 		t.Error(rcv)
 	}
 }
+
+func TestSureTaxSureTaxProcessCdr(t *testing.T) {
+	str := "test"
+	var nm int64 = 1
+	fl := 1.2
+	bl := false
+	td := 1 * time.Second
+	tm := time.Date(2023, 8, 17, 20, 34, 58, 651387237, time.UTC)
+	tm2 := time.Date(2023, 8, 17, 20, 34, 59, 651387237, time.UTC)
+	nm2 := 1
+	ct := &ChargedTiming{
+		Years:     utils.Years{1, 2},
+		Months:    utils.Months{2, 3},
+		MonthDays: utils.MonthDays{4, 5},
+		WeekDays:  utils.WeekDays{2, 3},
+		StartTime: "Time",
+	}
+	r := &Rate{
+		GroupIntervalStart: td,
+		Value:              fl,
+		RateIncrement:      td,
+		RateUnit:           td,
+	}
+	rg := RateGroups{r}
+	rm := RatingMatchedFilters{str: nm2}
+	bc := &BalanceCharge{
+		AccountID:     str,
+		BalanceUUID:   str,
+		RatingID:      str,
+		Units:         fl,
+		ExtraChargeID: str,
+	}
+	ru := &RatingUnit{
+		ConnectFee:       fl,
+		RoundingMethod:   str,
+		RoundingDecimals: nm2,
+		MaxCost:          fl,
+		MaxCostStrategy:  str,
+		TimingID:         str,
+		RatesID:          str,
+		RatingFiltersID:  str,
+	}
+	cdr := &CDR{
+		CGRID:       str,
+		RunID:       str,
+		OrderID:     nm,
+		OriginHost:  str,
+		Source:      str,
+		OriginID:    str,
+		ToR:         str,
+		RequestType: str,
+		Tenant:      str,
+		Category:    str,
+		Account:     str,
+		Subject:     str,
+		Destination: str,
+		SetupTime:   tm,
+		AnswerTime:  tm2,
+		Usage:       td,
+		ExtraFields: map[string]string{str: str},
+		ExtraInfo:   str,
+		Partial:     bl,
+		PreRated:    bl,
+		CostSource:  str,
+		Cost:        fl,
+		CostDetails: &EventCost{
+			CGRID:     str,
+			RunID:     str,
+			StartTime: tm,
+			Usage:     &td,
+			Cost:      &fl,
+			Charges: []*ChargingInterval{{
+				RatingID: str,
+				Increments: []*ChargingIncrement{{
+					Usage:          td,
+					Cost:           fl,
+					AccountingID:   str,
+					CompressFactor: nm2,
+				}},
+				CompressFactor: nm2,
+				usage:          &td,
+				ecUsageIdx:     &td,
+				cost:           &fl,
+			}},
+			AccountSummary: &AccountSummary{
+				Tenant: str,
+				ID:     str,
+				BalanceSummaries: BalanceSummaries{{
+					UUID:     str,
+					ID:       str,
+					Type:     str,
+					Value:    fl,
+					Disabled: bl,
+				}},
+				AllowNegative: bl,
+				Disabled:      bl,
+			},
+			Rating:        Rating{str: ru},
+			Accounting:    Accounting{str: bc},
+			RatingFilters: RatingFilters{str: rm},
+			Rates:         ChargedRates{str: rg},
+			Timings:       ChargedTimings{str: ct},
+		},
+	}
+
+	err := SureTaxProcessCdr(cdr)
+
+	if err != nil {
+		if err.Error() != `Post "": unsupported protocol scheme ""` {
+			t.Error(err)
+		}
+	} else {
+		t.Error("was expecting an error")
+	}
+}
