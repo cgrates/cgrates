@@ -27,19 +27,12 @@ steps:
       [{{ build.status }}]
       {{ repo.owner }}/{{ repo.name }}
       ({{ commit.branch }})
-    body: >
-      Build number: # {{ build.number }}
-      Build link: {{ build.link }}
-      Build started: {{ build.started }}
-      Build ended: {{ build.finished }}
-      Commit author: {{ commit.author.name }}
-      Commit message: {{ commit.message }}
-      Commit branch: {{ commit.branch }}
-      Commit link: {{ commit.link }}
+    body: 
+      file:///go/src/github.com/cgrates/cgrates/drone_template.html
     recipients_file: recipients
-    recipients_only: true
   when:
-    status: failure
+    status:
+    - failure
 
 ---
 kind: pipeline
@@ -73,19 +66,12 @@ steps:
       [{{ build.status }}]
       {{ repo.owner }}/{{ repo.name }}
       ({{ commit.branch }})
-    body: >
-      Build number: # {{ build.number }}
-      Build link: {{ build.link }}
-      Build started: {{ build.started }}
-      Build ended: {{ build.finished }}
-      Commit author: {{ commit.author.name }}
-      Commit message: {{ commit.message }}
-      Commit branch: {{ commit.branch }}
-      Commit link: {{ commit.link }}
+    body: 
+      file:///go/src/github.com/cgrates/cgrates/drone_template.html
     recipients_file: recipients
-    recipients_only: true
   when:
-    status: failure
+    status:
+    - failure
 
 ---
 kind: pipeline
@@ -119,19 +105,12 @@ steps:
       [{{ build.status }}]
       {{ repo.owner }}/{{ repo.name }}
       ({{ commit.branch }})
-    body: >
-      Build number: # {{ build.number }}
-      Build link: {{ build.link }}
-      Build started: {{ build.started }}
-      Build ended: {{ build.finished }}
-      Commit author: {{ commit.author.name }}
-      Commit message: {{ commit.message }}
-      Commit branch: {{ commit.branch }}
-      Commit link: {{ commit.link }}
+    body: 
+      file:///go/src/github.com/cgrates/cgrates/drone_template.html
     recipients_file: recipients
-    recipients_only: true
   when:
-    status: failure
+    status:
+    - failure
 
 ---
 kind: pipeline
@@ -165,19 +144,12 @@ steps:
       [{{ build.status }}]
       {{ repo.owner }}/{{ repo.name }}
       ({{ commit.branch }})
-    body: >
-      Build number: # {{ build.number }}
-      Build link: {{ build.link }}
-      Build started: {{ build.started }}
-      Build ended: {{ build.finished }}
-      Commit author: {{ commit.author.name }}
-      Commit message: {{ commit.message }}
-      Commit branch: {{ commit.branch }}
-      Commit link: {{ commit.link }}
+    body: 
+      file:///go/src/github.com/cgrates/cgrates/drone_template.html
     recipients_file: recipients
-    recipients_only: true
   when:
-    status: failure
+    status:
+    - failure
 
 ---
 kind: pipeline
@@ -211,16 +183,9 @@ steps:
       [{{ build.status }}]
       {{ repo.owner }}/{{ repo.name }}
       ({{ commit.branch }})
-    body: >
-      Build number: # {{ build.number }}
-      Build link: {{ build.link }}
-      Build started: {{ build.started }}
-      Build ended: {{ build.finished }}
-      Commit author: {{ commit.author.name }}
-      Commit message: {{ commit.message }}
-      Commit branch: {{ commit.branch }}
-      Commit link: {{ commit.link }}
+    body: 
+      file:///go/src/github.com/cgrates/cgrates/drone_template.html
     recipients_file: recipients
-    recipients_only: true
   when:
-    status: failure
+    status:
+    - failure
