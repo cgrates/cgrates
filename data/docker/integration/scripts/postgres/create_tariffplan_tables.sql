@@ -143,7 +143,7 @@ CREATE TABLE tp_actions (
   tag VARCHAR(64) NOT NULL,
   action VARCHAR(24) NOT NULL,
   extra_parameters VARCHAR(256) NOT NULL,
-  filters VARCHAR(256) NOT NULL,
+  filter VARCHAR(256) NOT NULL,
   balance_tag VARCHAR(64) NOT NULL,
   balance_type VARCHAR(24) NOT NULL,
   categories VARCHAR(32) NOT NULL,
@@ -333,11 +333,11 @@ CREATE TABLE tp_filters (
   CREATE INDEX tp_filters_unique ON tp_filters  ("tpid","tenant", "id", "type", "element");
 
 --
--- Table structure for table `tp_routes`
+-- Table structure for table `tp_suppliers`
 --
 
-DROP TABLE IF EXISTS tp_routes;
-CREATE TABLE tp_routes (
+DROP TABLE IF EXISTS tp_suppliers;
+CREATE TABLE tp_suppliers (
   "pk" SERIAL PRIMARY KEY,
   "tpid" varchar(64) NOT NULL,
   "tenant"varchar(64) NOT NULL,
@@ -346,22 +346,22 @@ CREATE TABLE tp_routes (
   "activation_interval" varchar(64) NOT NULL,
   "sorting" varchar(32) NOT NULL,
   "sorting_parameters" varchar(64) NOT NULL,
-  "route_id" varchar(32) NOT NULL,
-  "route_filter_ids" varchar(64) NOT NULL,
-  "route_account_ids" varchar(64) NOT NULL,
-  "route_ratingplan_ids" varchar(64) NOT NULL,
-  "route_resource_ids" varchar(64) NOT NULL,
-  "route_stat_ids" varchar(64) NOT NULL,
-  "route_weight" decimal(8,2) NOT NULL,
-  "route_blocker" BOOLEAN NOT NULL,
-  "route_parameters" varchar(64) NOT NULL,
+  "supplier_id" varchar(32) NOT NULL,
+  "supplier_filter_ids" varchar(64) NOT NULL,
+  "supplier_account_ids" varchar(64) NOT NULL,
+  "supplier_ratingplan_ids" varchar(64) NOT NULL,
+  "supplier_resource_ids" varchar(64) NOT NULL,
+  "supplier_stat_ids" varchar(64) NOT NULL,
+  "supplier_weight" decimal(8,2) NOT NULL,
+  "supplier_blocker" BOOLEAN NOT NULL,
+  "supplier_parameters" varchar(64) NOT NULL,
   "weight" decimal(8,2) NOT NULL,
   "created_at" TIMESTAMP WITH TIME ZONE
 );
-CREATE INDEX tp_routes_idx ON tp_routes (tpid);
-CREATE INDEX tp_routes_unique ON tp_routes  ("tpid",  "tenant", "id",
-  "filter_ids","route_id","route_filter_ids","route_account_ids",
-  "route_ratingplan_ids","route_resource_ids","route_stat_ids");
+CREATE INDEX tp_suppliers_idx ON tp_suppliers (tpid);
+CREATE INDEX tp_suppliers_unique ON tp_suppliers  ("tpid",  "tenant", "id",
+  "filter_ids","supplier_id","supplier_filter_ids","supplier_account_ids",
+  "supplier_ratingplan_ids","supplier_resource_ids","supplier_stat_ids");
 
   --
   -- Table structure for table `tp_attributes`
@@ -448,22 +448,12 @@ CREATE INDEX tp_routes_unique ON tp_routes  ("tpid",  "tenant", "id",
   "id" varchar(64) NOT NULL,
   "address" varchar(64) NOT NULL,
   "transport" varchar(64) NOT NULL,
-  "connect_attempts" INTEGER NOT NULL,
-  "reconnects" INTEGER NOT NULL,
-  "max_reconnect_interval" varchar(64) NOT NULL,
-  "connect_timeout" varchar(64) NOT NULL,
-  "reply_timeout" varchar(64) NOT NULL,
   "tls" BOOLEAN NOT NULL,
-  "client_key" varchar(64) NOT NULL,
-  "client_certificate" varchar(64) NOT NULL,
-  "ca_certificate" varchar(64) NOT NULL,
   "created_at" TIMESTAMP WITH TIME ZONE
   );
   CREATE INDEX tp_dispatchers_hosts_ids ON tp_dispatcher_hosts (tpid);
   CREATE INDEX tp_dispatcher_hosts_unique ON tp_dispatcher_hosts  ("tpid",  "tenant", "id",
     "address");
-
-
 
 --
 -- Table structure for table `versions`
