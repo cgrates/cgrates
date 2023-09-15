@@ -5,7 +5,7 @@
 DROP TABLE IF EXISTS cdrs;
 CREATE TABLE cdrs (
  id SERIAL PRIMARY KEY,
- cgrid VARCHAR(40) NOT NULL,
+
  run_id VARCHAR(64) NOT NULL,
  origin_host VARCHAR(64) NOT NULL,
  source VARCHAR(64) NOT NULL,
@@ -28,7 +28,7 @@ CREATE TABLE cdrs (
  created_at TIMESTAMP WITH TIME ZONE,
  updated_at TIMESTAMP WITH TIME ZONE NULL,
  deleted_at TIMESTAMP WITH TIME ZONE NULL,
- UNIQUE (cgrid, run_id)
+ UNIQUE ( run_id)
 );
 ;
 DROP INDEX IF EXISTS deleted_at_cp_idx;
@@ -38,7 +38,6 @@ CREATE INDEX deleted_at_cp_idx ON cdrs (deleted_at);
 DROP TABLE IF EXISTS session_costs;
 CREATE TABLE session_costs (
   id SERIAL PRIMARY KEY,
-  cgrid VARCHAR(40) NOT NULL,
   run_id  VARCHAR(64) NOT NULL,
   origin_host VARCHAR(64) NOT NULL,
   origin_id VARCHAR(128) NOT NULL,
@@ -47,10 +46,8 @@ CREATE TABLE session_costs (
   cost_details jsonb,
   created_at TIMESTAMP WITH TIME ZONE,
   deleted_at TIMESTAMP WITH TIME ZONE NULL,
-  UNIQUE (cgrid, run_id)
+  UNIQUE ( run_id)
 );
-DROP INDEX IF EXISTS cgrid_sessionscost_idx;
-CREATE INDEX cgrid_sessionscost_idx ON session_costs (cgrid, run_id);
 DROP INDEX IF EXISTS origin_sessionscost_idx;
 CREATE INDEX origin_sessionscost_idx ON session_costs (origin_host, origin_id);
 DROP INDEX IF EXISTS run_origin_sessionscost_idx;
