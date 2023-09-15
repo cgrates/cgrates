@@ -4,4 +4,4 @@
 DROP DATABASE IF EXISTS cgrates2;
 CREATE DATABASE cgrates2;
 
-GRANT ALL on cgrates2.* TO 'cgrates'@'localhost' IDENTIFIED BY 'CGRateS.org';
+GRANT ALL on cgrates2.* TO 'cgrates'@'127.0.0.1' IDENTIFIED BY 'CGRateS.org';
