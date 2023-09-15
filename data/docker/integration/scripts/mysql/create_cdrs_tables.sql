@@ -18,7 +18,7 @@ CREATE TABLE cdrs (
   subject varchar(128) NOT NULL,
   destination varchar(128) NOT NULL,
   setup_time datetime NOT NULL,
-  answer_time datetime NULL,
+  answer_time datetime NOT NULL,
   `usage` BIGINT NOT NULL,
   extra_fields text NOT NULL,
   cost_source varchar(64) NOT NULL,
