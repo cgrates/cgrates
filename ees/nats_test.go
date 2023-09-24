@@ -101,7 +101,7 @@ func TestParseOpt(t *testing.T) {
 		t.Error(err)
 	}
 
-	err = pstr.parseOpt(opts, nodeID, connTimeout)
+	err = pstr.parseOpts(opts, nodeID, connTimeout)
 	if err != nil {
 		t.Error(err)
 	}
@@ -138,7 +138,7 @@ func TestParseOptJetStream(t *testing.T) {
 		t.Error(err)
 	}
 
-	err = pstr.parseOpt(opts, nodeID, connTimeout)
+	err = pstr.parseOpts(opts, nodeID, connTimeout)
 	if err != nil {
 		t.Error(err)
 	}
@@ -179,7 +179,7 @@ func TestParseOptJetStreamMaxWait(t *testing.T) {
 		t.Error(err)
 	}
 
-	err = pstr.parseOpt(opts, nodeID, connTimeout)
+	err = pstr.parseOpts(opts, nodeID, connTimeout)
 	if err != nil {
 		t.Error(err)
 	}
@@ -219,7 +219,7 @@ func TestParseOptSubject(t *testing.T) {
 		t.Error(err)
 	}
 
-	err = pstr.parseOpt(opts, nodeID, connTimeout)
+	err = pstr.parseOpts(opts, nodeID, connTimeout)
 	if err != nil {
 		t.Error(err)
 	}

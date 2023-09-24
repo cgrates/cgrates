@@ -621,7 +621,7 @@ func testCGRConfigReloadERs(t *testing.T) {
 					PartialCacheAction: utils.StringPointer(utils.MetaNone),
 					XMLRootPath:        utils.StringPointer(utils.EmptyString),
 					NATSOpts: &NATSROpts{
-						NATSSubject: utils.StringPointer("cgrates_cdrs"),
+						Subject: utils.StringPointer("cgrates_cdrs"),
 					},
 				},
 			},
@@ -651,7 +651,7 @@ func testCGRConfigReloadERs(t *testing.T) {
 					PartialCacheAction: utils.StringPointer(utils.MetaNone),
 					XMLRootPath:        utils.StringPointer(utils.EmptyString),
 					NATSOpts: &NATSROpts{
-						NATSSubject: utils.StringPointer("cgrates_cdrs"),
+						Subject: utils.StringPointer("cgrates_cdrs"),
 					},
 				},
 			},

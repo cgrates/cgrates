@@ -32,7 +32,7 @@ func TestGetProcessOptions(t *testing.T) {
 			AMQPQueueIDProcessed: utils.StringPointer("processed"),
 		},
 	}
-	result := getProcessOptions(opts)
+	result := getProcessedOptions(opts)
 	expected := &config.EventExporterOpts{
 		AMQP: &config.AMQPOpts{
 			QueueID: utils.StringPointer("processed"),

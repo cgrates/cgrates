@@ -22,6 +22,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package ers
 
 import (
+	"encoding/json"
 	"fmt"
 	"os"
 	"os/exec"
@@ -36,6 +37,178 @@ import (
 	"github.com/cgrates/cgrates/utils"
 	"github.com/nats-io/nats.go"
 )
+
+func TestERsNATSIT(t *testing.T) {
+	t.Skip()
+	cfgContent := `{
+
+"general": {
+	"log_level": 7
+},
+
+"data_db": {
+	"db_type": "*internal"
+},
+
+"stor_db": {
+	"db_type": "*internal"
+},
+
+"ers": {														
+	"enabled": true,											
+	"sessions_conns":[],								
+	"readers": [
+		{
+			"id": "nats_consumer1",									
+			"type": "*nats_json_map",									
+			"source_path": "nats://127.0.0.1:4222",			
+			"processed_path": "nats://127.0.0.1:4222",		
+			"opts": {
+				"natsJetStream": true,						
+				"natsConsumerName": "cgrates_consumer",				
+				"natsSubject": "cgrates_cdrs",					
+				"natsQueueID": "queue",							
+				"natsJetStreamMaxWait": "5s",				
+
+				"natsJetStreamProcessed": true,				
+				"natsSubjectProcessed": "cgrates_cdrs_processed",		
+				"natsJetStreamMaxWaitProcessed": "5s"		
+			},
+			"flags": ["*dryrun"],										
+			"fields":[											
+				{"tag": "cdr_template", "type": "*template", "value": "cdr_template"}
+			]
+		},
+		{
+			"id": "nats_consumer2",									
+			"type": "*nats_json_map",									
+			"source_path": "nats://127.0.0.1:4222",			
+			"processed_path": "nats://127.0.0.1:4222",		
+			"opts": {
+				"natsJetStream": true,						
+				"natsConsumerName": "cgrates_consumer",				
+				"natsSubject": "cgrates_cdrs",					
+				"natsQueueID": "queue",							
+				"natsJetStreamMaxWait": "5s",				
+
+				"natsJetStreamProcessed": true,				
+				"natsSubjectProcessed": "cgrates_cdrs_processed",		
+				"natsJetStreamMaxWaitProcessed": "5s"		
+			},
+			"flags": ["*dryrun"],										
+			"fields":[											
+				{"tag": "cdr_template", "type": "*template", "value": "cdr_template"}
+			]
+		},
+		{
+			"id": "nats_consumer3",									
+			"type": "*nats_json_map",									
+			"source_path": "nats://127.0.0.1:4222",			
+			"processed_path": "nats://127.0.0.1:4222",		
+			"opts": {
+				"natsJetStream": true,						
+				"natsConsumerName": "cgrates_consumer",				
+				"natsSubject": "cgrates_cdrs",					
+				"natsQueueID": "queue",							
+				"natsJetStreamMaxWait": "5s",				
+
+				"natsJetStreamProcessed": true,				
+				"natsSubjectProcessed": "cgrates_cdrs_processed",		
+				"natsJetStreamMaxWaitProcessed": "5s"		
+			},
+			"flags": ["*dryrun"],										
+			"fields":[											
+				{"tag": "cdr_template", "type": "*template", "value": "cdr_template"}
+			]
+		},
+		{
+			"id": "nats_consumer4",									
+			"type": "*nats_json_map",									
+			"source_path": "nats://127.0.0.1:4222",			
+			"processed_path": "",		
+			"opts": {
+				"natsJetStream": true,						
+				"natsConsumerName": "cgrates_consumer4",				
+				"natsSubject": "cgrates_cdrs_processed",					
+				"natsQueueID": "",							
+				"natsJetStreamMaxWait": "5s",				
+			},
+			"flags": ["*dryrun"],										
+			"fields":[											
+				{"tag": "cdr_template", "type": "*template", "value": "cdr_template"}
+			]
+		}
+	]
+},
+	
+	
+"templates": {
+	"cdr_template": [
+		// {"tag": "Source", "path": "*cgreq.Source", "type": "*constant", "value": "ers_template_combined", "mandatory": true},
+		// {"tag": "ToR", "path": "*cgreq.ToR", "type": "*variable", "value": "~*req.2", "mandatory": true},
+		// {"tag": "OriginID", "path": "*cgreq.OriginID", "type": "*variable", "value": "~*req.3", "mandatory": true},
+		// {"tag": "RequestType", "path": "*cgreq.RequestType", "type": "*variable", "value": "~*req.4", "mandatory": true},
+		// {"tag": "Tenant", "path": "*cgreq.Tenant", "type": "*variable", "value": "~*req.6", "mandatory": true},
+		// {"tag": "Category", "path": "*cgreq.Category", "type": "*variable", "value": "~*req.7", "mandatory": true},
+		{"tag": "Account", "path": "*cgreq.Account", "type": "*variable", "value": "~*req.Account", "mandatory": true},
+		// {"tag": "Subject", "path": "*cgreq.Subject", "type": "*variable", "value": "~*req.9", "mandatory": true},
+		{"tag": "Destination", "path": "*cgreq.Destination", "type": "*variable", "value": "~*req.Destination", "mandatory": true},
+		// {"tag": "SetupTime", "path": "*cgreq.SetupTime", "type": "*variable", "value": "~*req.11", "mandatory": true},
+		// {"tag": "AnswerTime", "path": "*cgreq.AnswerTime", "type": "*variable", "value": "~*req.12", "mandatory": true},
+		// {"tag": "Usage", "path": "*cgreq.Usage", "type": "*variable", "value": "~*req.13", "mandatory": true}
+	]
+}
+	
+}`
+	cfg, cfgPath, clean, err := initTestCfg(cfgContent)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer clean()
+
+	nc, err := nats.Connect(cfg.ERsCfg().Readers[1].SourcePath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer nc.Close()
+
+	js, err := nc.JetStream(nats.PublishAsyncMaxPending(256))
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	js.AddStream(&nats.StreamConfig{
+		Name:     "CDRs",
+		Subjects: []string{"cgrates_cdrs", "cgrates_cdrs_processed"},
+	})
+
+	time.Sleep(2 * time.Second)
+
+	if _, err := engine.StopStartEngine(cfgPath, 100); err != nil {
+		t.Fatal(err)
+	}
+
+	for i := 0; i < 10; i++ {
+		cdr := map[string]any{
+			"Account":     1000 + i,
+			"Destination": 2000 + i,
+		}
+		b, _ := json.Marshal(cdr)
+		js.PublishAsync("cgrates_cdrs", b)
+	}
+	select {
+	case <-js.PublishAsyncComplete():
+	case <-time.After(5 * time.Second):
+		t.Fatal("Did not resolve in time")
+	}
+
+	// Add verification
+
+	err = engine.KillEngine(100)
+	if err != nil {
+		t.Error(err)
+	}
+}
 
 func testCheckNatsData(t *testing.T, randomCGRID, expData string, ch chan *nats.Msg) {
 	select {
@@ -80,7 +253,7 @@ func testCheckNatsJetStream(t *testing.T, cfg *config.CGRConfig) {
 		t.Fatal(err)
 	}
 
-	nop, err := GetNatsOpts(rdr.Config().Opts, "testExp", time.Second)
+	nop, err := GetNatsOpts(rdr.Config().Opts.NATSOpts, "testExp", time.Second)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -167,7 +340,7 @@ func testCheckNatsNormal(t *testing.T, cfg *config.CGRConfig) {
 		t.Fatal(err)
 	}
 
-	nop, err := GetNatsOpts(rdr.Config().Opts, "testExp", time.Second)
+	nop, err := GetNatsOpts(rdr.Config().Opts.NATSOpts, "testExp", time.Second)
 	if err != nil {
 		t.Fatal(err)
 	}
