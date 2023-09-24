@@ -219,7 +219,7 @@ func (rdr *SQSER) readLoop(scv sqsClient) (err error) {
 }
 
 func (rdr *SQSER) createPoster() {
-	processedOpt := getProcessOptions(rdr.Config().Opts)
+	processedOpt := getProcessedOptions(rdr.Config().Opts)
 	if processedOpt == nil && len(rdr.Config().ProcessedPath) == 0 {
 		return
 	}

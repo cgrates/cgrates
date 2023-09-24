@@ -313,88 +313,88 @@ func (awsROpts *AWSROpts) loadFromJSONCfg(jsnCfg *EventReaderOptsJson) (err erro
 }
 
 type NATSROpts struct {
-	NATSJetStream                     *bool
-	NATSConsumerName                  *string
-	NATSSubject                       *string
-	NATSQueueID                       *string
-	NATSJWTFile                       *string
-	NATSSeedFile                      *string
-	NATSCertificateAuthority          *string
-	NATSClientCertificate             *string
-	NATSClientKey                     *string
-	NATSJetStreamMaxWait              *time.Duration
-	NATSJetStreamProcessed            *bool
-	NATSSubjectProcessed              *string
-	NATSJWTFileProcessed              *string
-	NATSSeedFileProcessed             *string
-	NATSCertificateAuthorityProcessed *string
-	NATSClientCertificateProcessed    *string
-	NATSClientKeyProcessed            *string
-	NATSJetStreamMaxWaitProcessed     *time.Duration
+	JetStream                     *bool
+	ConsumerName                  *string
+	Subject                       *string
+	QueueID                       *string
+	JWTFile                       *string
+	SeedFile                      *string
+	CertificateAuthority          *string
+	ClientCertificate             *string
+	ClientKey                     *string
+	JetStreamMaxWait              *time.Duration
+	JetStreamProcessed            *bool
+	SubjectProcessed              *string
+	JWTFileProcessed              *string
+	SeedFileProcessed             *string
+	CertificateAuthorityProcessed *string
+	ClientCertificateProcessed    *string
+	ClientKeyProcessed            *string
+	JetStreamMaxWaitProcessed     *time.Duration
 }
 
 func (natsOpts *NATSROpts) loadFromJSONCfg(jsnCfg *EventReaderOptsJson) (err error) {
 	if jsnCfg.NATSJetStream != nil {
-		natsOpts.NATSJetStream = jsnCfg.NATSJetStream
+		natsOpts.JetStream = jsnCfg.NATSJetStream
 	}
 	if jsnCfg.NATSConsumerName != nil {
-		natsOpts.NATSConsumerName = jsnCfg.NATSConsumerName
+		natsOpts.ConsumerName = jsnCfg.NATSConsumerName
 	}
 	if jsnCfg.NATSSubject != nil {
-		natsOpts.NATSSubject = jsnCfg.NATSSubject
+		natsOpts.Subject = jsnCfg.NATSSubject
 	}
 	if jsnCfg.NATSQueueID != nil {
-		natsOpts.NATSQueueID = jsnCfg.NATSQueueID
+		natsOpts.QueueID = jsnCfg.NATSQueueID
 	}
 	if jsnCfg.NATSJWTFile != nil {
-		natsOpts.NATSJWTFile = jsnCfg.NATSJWTFile
+		natsOpts.JWTFile = jsnCfg.NATSJWTFile
 	}
 	if jsnCfg.NATSSeedFile != nil {
-		natsOpts.NATSSeedFile = jsnCfg.NATSSeedFile
+		natsOpts.SeedFile = jsnCfg.NATSSeedFile
 	}
 	if jsnCfg.NATSCertificateAuthority != nil {
-		natsOpts.NATSCertificateAuthority = jsnCfg.NATSCertificateAuthority
+		natsOpts.CertificateAuthority = jsnCfg.NATSCertificateAuthority
 	}
 	if jsnCfg.NATSClientCertificate != nil {
-		natsOpts.NATSClientCertificate = jsnCfg.NATSClientCertificate
+		natsOpts.ClientCertificate = jsnCfg.NATSClientCertificate
 	}
 	if jsnCfg.NATSClientKey != nil {
-		natsOpts.NATSClientKey = jsnCfg.NATSClientKey
+		natsOpts.ClientKey = jsnCfg.NATSClientKey
 	}
 	if jsnCfg.NATSJetStreamMaxWait != nil {
 		var jetStreamMaxWait time.Duration
 		if jetStreamMaxWait, err = utils.ParseDurationWithNanosecs(*jsnCfg.NATSJetStreamMaxWait); err != nil {
 			return
 		}
-		natsOpts.NATSJetStreamMaxWait = utils.DurationPointer(jetStreamMaxWait)
+		natsOpts.JetStreamMaxWait = utils.DurationPointer(jetStreamMaxWait)
 	}
 	if jsnCfg.NATSJetStreamProcessed != nil {
-		natsOpts.NATSJetStreamProcessed = jsnCfg.NATSJetStreamProcessed
+		natsOpts.JetStreamProcessed = jsnCfg.NATSJetStreamProcessed
 	}
 	if jsnCfg.NATSSubjectProcessed != nil {
-		natsOpts.NATSSubjectProcessed = jsnCfg.NATSSubjectProcessed
+		natsOpts.SubjectProcessed = jsnCfg.NATSSubjectProcessed
 	}
 	if jsnCfg.NATSJWTFileProcessed != nil {
-		natsOpts.NATSJWTFileProcessed = jsnCfg.NATSJWTFileProcessed
+		natsOpts.JWTFileProcessed = jsnCfg.NATSJWTFileProcessed
 	}
 	if jsnCfg.NATSSeedFileProcessed != nil {
-		natsOpts.NATSSeedFileProcessed = jsnCfg.NATSSeedFileProcessed
+		natsOpts.SeedFileProcessed = jsnCfg.NATSSeedFileProcessed
 	}
 	if jsnCfg.NATSCertificateAuthorityProcessed != nil {
-		natsOpts.NATSCertificateAuthorityProcessed = jsnCfg.NATSCertificateAuthorityProcessed
+		natsOpts.CertificateAuthorityProcessed = jsnCfg.NATSCertificateAuthorityProcessed
 	}
 	if jsnCfg.NATSClientCertificateProcessed != nil {
-		natsOpts.NATSClientCertificateProcessed = jsnCfg.NATSClientCertificateProcessed
+		natsOpts.ClientCertificateProcessed = jsnCfg.NATSClientCertificateProcessed
 	}
 	if jsnCfg.NATSClientKeyProcessed != nil {
-		natsOpts.NATSClientKeyProcessed = jsnCfg.NATSClientKeyProcessed
+		natsOpts.ClientKeyProcessed = jsnCfg.NATSClientKeyProcessed
 	}
 	if jsnCfg.NATSJetStreamMaxWaitProcessed != nil {
 		var jetStreamMaxWait time.Duration
 		if jetStreamMaxWait, err = utils.ParseDurationWithNanosecs(*jsnCfg.NATSJetStreamMaxWaitProcessed); err != nil {
 			return
 		}
-		natsOpts.NATSJetStreamMaxWaitProcessed = utils.DurationPointer(jetStreamMaxWait)
+		natsOpts.JetStreamMaxWaitProcessed = utils.DurationPointer(jetStreamMaxWait)
 	}
 	return
 }
@@ -761,77 +761,77 @@ func (awsOpt *AWSROpts) Clone() *AWSROpts {
 }
 func (natOpts *NATSROpts) Clone() *NATSROpts {
 	cln := &NATSROpts{}
-	if natOpts.NATSJetStream != nil {
-		cln.NATSJetStream = new(bool)
-		*cln.NATSJetStream = *natOpts.NATSJetStream
+	if natOpts.JetStream != nil {
+		cln.JetStream = new(bool)
+		*cln.JetStream = *natOpts.JetStream
 	}
-	if natOpts.NATSConsumerName != nil {
-		cln.NATSConsumerName = new(string)
-		*cln.NATSConsumerName = *natOpts.NATSConsumerName
+	if natOpts.ConsumerName != nil {
+		cln.ConsumerName = new(string)
+		*cln.ConsumerName = *natOpts.ConsumerName
 	}
-	if natOpts.NATSSubject != nil {
-		cln.NATSSubject = new(string)
-		*cln.NATSSubject = *natOpts.NATSSubject
+	if natOpts.Subject != nil {
+		cln.Subject = new(string)
+		*cln.Subject = *natOpts.Subject
 	}
-	if natOpts.NATSQueueID != nil {
-		cln.NATSQueueID = new(string)
-		*cln.NATSQueueID = *natOpts.NATSQueueID
+	if natOpts.QueueID != nil {
+		cln.QueueID = new(string)
+		*cln.QueueID = *natOpts.QueueID
 	}
-	if natOpts.NATSJWTFile != nil {
-		cln.NATSJWTFile = new(string)
-		*cln.NATSJWTFile = *natOpts.NATSJWTFile
+	if natOpts.JWTFile != nil {
+		cln.JWTFile = new(string)
+		*cln.JWTFile = *natOpts.JWTFile
 	}
-	if natOpts.NATSSeedFile != nil {
-		cln.NATSSeedFile = new(string)
-		*cln.NATSSeedFile = *natOpts.NATSSeedFile
+	if natOpts.SeedFile != nil {
+		cln.SeedFile = new(string)
+		*cln.SeedFile = *natOpts.SeedFile
 	}
-	if natOpts.NATSCertificateAuthority != nil {
-		cln.NATSCertificateAuthority = new(string)
-		*cln.NATSCertificateAuthority = *natOpts.NATSCertificateAuthority
+	if natOpts.CertificateAuthority != nil {
+		cln.CertificateAuthority = new(string)
+		*cln.CertificateAuthority = *natOpts.CertificateAuthority
 	}
-	if natOpts.NATSClientCertificate != nil {
-		cln.NATSClientCertificate = new(string)
-		*cln.NATSClientCertificate = *natOpts.NATSClientCertificate
+	if natOpts.ClientCertificate != nil {
+		cln.ClientCertificate = new(string)
+		*cln.ClientCertificate = *natOpts.ClientCertificate
 	}
-	if natOpts.NATSClientKey != nil {
-		cln.NATSClientKey = new(string)
-		*cln.NATSClientKey = *natOpts.NATSClientKey
+	if natOpts.ClientKey != nil {
+		cln.ClientKey = new(string)
+		*cln.ClientKey = *natOpts.ClientKey
 	}
-	if natOpts.NATSJetStreamMaxWait != nil {
-		cln.NATSJetStreamMaxWait = new(time.Duration)
-		*cln.NATSJetStreamMaxWait = *natOpts.NATSJetStreamMaxWait
+	if natOpts.JetStreamMaxWait != nil {
+		cln.JetStreamMaxWait = new(time.Duration)
+		*cln.JetStreamMaxWait = *natOpts.JetStreamMaxWait
 	}
-	if natOpts.NATSJetStreamProcessed != nil {
-		cln.NATSJetStreamProcessed = new(bool)
-		*cln.NATSJetStreamProcessed = *natOpts.NATSJetStreamProcessed
+	if natOpts.JetStreamProcessed != nil {
+		cln.JetStreamProcessed = new(bool)
+		*cln.JetStreamProcessed = *natOpts.JetStreamProcessed
 	}
-	if natOpts.NATSSubjectProcessed != nil {
-		cln.NATSSubjectProcessed = new(string)
-		*cln.NATSSubjectProcessed = *natOpts.NATSSubjectProcessed
+	if natOpts.SubjectProcessed != nil {
+		cln.SubjectProcessed = new(string)
+		*cln.SubjectProcessed = *natOpts.SubjectProcessed
 	}
-	if natOpts.NATSJWTFileProcessed != nil {
-		cln.NATSJWTFileProcessed = new(string)
-		*cln.NATSJWTFileProcessed = *natOpts.NATSJWTFileProcessed
+	if natOpts.JWTFileProcessed != nil {
+		cln.JWTFileProcessed = new(string)
+		*cln.JWTFileProcessed = *natOpts.JWTFileProcessed
 	}
-	if natOpts.NATSSeedFileProcessed != nil {
-		cln.NATSSeedFileProcessed = new(string)
-		*cln.NATSSeedFileProcessed = *natOpts.NATSSeedFileProcessed
+	if natOpts.SeedFileProcessed != nil {
+		cln.SeedFileProcessed = new(string)
+		*cln.SeedFileProcessed = *natOpts.SeedFileProcessed
 	}
-	if natOpts.NATSCertificateAuthorityProcessed != nil {
-		cln.NATSCertificateAuthorityProcessed = new(string)
-		*cln.NATSCertificateAuthorityProcessed = *natOpts.NATSCertificateAuthorityProcessed
+	if natOpts.CertificateAuthorityProcessed != nil {
+		cln.CertificateAuthorityProcessed = new(string)
+		*cln.CertificateAuthorityProcessed = *natOpts.CertificateAuthorityProcessed
 	}
-	if natOpts.NATSClientCertificateProcessed != nil {
-		cln.NATSClientCertificateProcessed = new(string)
-		*cln.NATSClientCertificateProcessed = *natOpts.NATSClientCertificateProcessed
+	if natOpts.ClientCertificateProcessed != nil {
+		cln.ClientCertificateProcessed = new(string)
+		*cln.ClientCertificateProcessed = *natOpts.ClientCertificateProcessed
 	}
-	if natOpts.NATSClientKeyProcessed != nil {
-		cln.NATSClientKeyProcessed = new(string)
-		*cln.NATSClientKeyProcessed = *natOpts.NATSClientKeyProcessed
+	if natOpts.ClientKeyProcessed != nil {
+		cln.ClientKeyProcessed = new(string)
+		*cln.ClientKeyProcessed = *natOpts.ClientKeyProcessed
 	}
-	if natOpts.NATSJetStreamMaxWaitProcessed != nil {
-		cln.NATSJetStreamMaxWaitProcessed = new(time.Duration)
-		*cln.NATSJetStreamMaxWaitProcessed = *natOpts.NATSJetStreamMaxWaitProcessed
+	if natOpts.JetStreamMaxWaitProcessed != nil {
+		cln.JetStreamMaxWaitProcessed = new(time.Duration)
+		*cln.JetStreamMaxWaitProcessed = *natOpts.JetStreamMaxWaitProcessed
 	}
 	return cln
 }
@@ -1072,59 +1072,59 @@ func (er *EventReaderCfg) AsMapInterface(separator string) (initialMP map[string
 	}
 
 	if natsOpts := er.Opts.NATSOpts; natsOpts != nil {
-		if natsOpts.NATSJetStream != nil {
-			opts[utils.NatsJetStream] = *natsOpts.NATSJetStream
+		if natsOpts.JetStream != nil {
+			opts[utils.NatsJetStream] = *natsOpts.JetStream
 		}
-		if natsOpts.NATSConsumerName != nil {
-			opts[utils.NatsConsumerName] = *natsOpts.NATSConsumerName
+		if natsOpts.ConsumerName != nil {
+			opts[utils.NatsConsumerName] = *natsOpts.ConsumerName
 		}
-		if natsOpts.NATSSubject != nil {
-			opts[utils.NatsSubject] = *natsOpts.NATSSubject
+		if natsOpts.Subject != nil {
+			opts[utils.NatsSubject] = *natsOpts.Subject
 		}
-		if natsOpts.NATSQueueID != nil {
-			opts[utils.NatsQueueID] = *natsOpts.NATSQueueID
+		if natsOpts.QueueID != nil {
+			opts[utils.NatsQueueID] = *natsOpts.QueueID
 		}
-		if natsOpts.NATSJWTFile != nil {
-			opts[utils.NatsJWTFile] = *natsOpts.NATSJWTFile
+		if natsOpts.JWTFile != nil {
+			opts[utils.NatsJWTFile] = *natsOpts.JWTFile
 		}
-		if natsOpts.NATSSeedFile != nil {
-			opts[utils.NatsSeedFile] = *natsOpts.NATSSeedFile
+		if natsOpts.SeedFile != nil {
+			opts[utils.NatsSeedFile] = *natsOpts.SeedFile
 		}
-		if natsOpts.NATSCertificateAuthority != nil {
-			opts[utils.NatsCertificateAuthority] = *natsOpts.NATSCertificateAuthority
+		if natsOpts.CertificateAuthority != nil {
+			opts[utils.NatsCertificateAuthority] = *natsOpts.CertificateAuthority
 		}
-		if natsOpts.NATSClientCertificate != nil {
-			opts[utils.NatsClientCertificate] = *natsOpts.NATSClientCertificate
+		if natsOpts.ClientCertificate != nil {
+			opts[utils.NatsClientCertificate] = *natsOpts.ClientCertificate
 		}
-		if natsOpts.NATSClientKey != nil {
-			opts[utils.NatsClientKey] = *natsOpts.NATSClientKey
+		if natsOpts.ClientKey != nil {
+			opts[utils.NatsClientKey] = *natsOpts.ClientKey
 		}
-		if natsOpts.NATSJetStreamMaxWait != nil {
-			opts[utils.NatsJetStreamMaxWait] = natsOpts.NATSJetStreamMaxWait.String()
+		if natsOpts.JetStreamMaxWait != nil {
+			opts[utils.NatsJetStreamMaxWait] = natsOpts.JetStreamMaxWait.String()
 		}
-		if natsOpts.NATSJetStreamProcessed != nil {
-			opts[utils.NATSJetStreamProcessedCfg] = *natsOpts.NATSJetStreamProcessed
+		if natsOpts.JetStreamProcessed != nil {
+			opts[utils.NATSJetStreamProcessedCfg] = *natsOpts.JetStreamProcessed
 		}
-		if natsOpts.NATSSubjectProcessed != nil {
-			opts[utils.NATSSubjectProcessedCfg] = *natsOpts.NATSSubjectProcessed
+		if natsOpts.SubjectProcessed != nil {
+			opts[utils.NATSSubjectProcessedCfg] = *natsOpts.SubjectProcessed
 		}
-		if natsOpts.NATSJWTFileProcessed != nil {
-			opts[utils.NATSJWTFileProcessedCfg] = *natsOpts.NATSJWTFileProcessed
+		if natsOpts.JWTFileProcessed != nil {
+			opts[utils.NATSJWTFileProcessedCfg] = *natsOpts.JWTFileProcessed
 		}
-		if natsOpts.NATSSeedFileProcessed != nil {
-			opts[utils.NATSSeedFileProcessedCfg] = *natsOpts.NATSSeedFileProcessed
+		if natsOpts.SeedFileProcessed != nil {
+			opts[utils.NATSSeedFileProcessedCfg] = *natsOpts.SeedFileProcessed
 		}
-		if natsOpts.NATSCertificateAuthorityProcessed != nil {
-			opts[utils.NATSCertificateAuthorityProcessedCfg] = *natsOpts.NATSCertificateAuthorityProcessed
+		if natsOpts.CertificateAuthorityProcessed != nil {
+			opts[utils.NATSCertificateAuthorityProcessedCfg] = *natsOpts.CertificateAuthorityProcessed
 		}
-		if natsOpts.NATSClientCertificateProcessed != nil {
-			opts[utils.NATSClientCertificateProcessed] = *natsOpts.NATSClientCertificateProcessed
+		if natsOpts.ClientCertificateProcessed != nil {
+			opts[utils.NATSClientCertificateProcessed] = *natsOpts.ClientCertificateProcessed
 		}
-		if natsOpts.NATSClientKeyProcessed != nil {
-			opts[utils.NATSClientKeyProcessedCfg] = *natsOpts.NATSClientKeyProcessed
+		if natsOpts.ClientKeyProcessed != nil {
+			opts[utils.NATSClientKeyProcessedCfg] = *natsOpts.ClientKeyProcessed
 		}
-		if natsOpts.NATSJetStreamMaxWaitProcessed != nil {
-			opts[utils.NATSJetStreamMaxWaitProcessedCfg] = natsOpts.NATSJetStreamMaxWaitProcessed.String()
+		if natsOpts.JetStreamMaxWaitProcessed != nil {
+			opts[utils.NATSJetStreamMaxWaitProcessedCfg] = natsOpts.JetStreamMaxWaitProcessed.String()
 		}
 	}
 	initialMP = map[string]any{

@@ -2368,7 +2368,7 @@ func TestERSConfig(t *testing.T) {
 					PartialCacheAction: utils.StringPointer(utils.MetaNone),
 					XMLRootPath:        utils.StringPointer(utils.EmptyString),
 					NATSOpts: &NATSROpts{
-						NATSSubject: utils.StringPointer("cgrates_cdrs"),
+						Subject: utils.StringPointer("cgrates_cdrs"),
 					},
 				},
 			},
@@ -5411,7 +5411,7 @@ func TestCgrCdfEventReader(t *testing.T) {
 					KafkaOpts:         &KafkaROpts{},
 					PartialOrderField: utils.StringPointer("~*req.AnswerTime"),
 					NATSOpts: &NATSROpts{
-						NATSSubject: utils.StringPointer("cgrates_cdrs"),
+						Subject: utils.StringPointer("cgrates_cdrs"),
 					},
 					PartialCacheAction: utils.StringPointer(utils.MetaNone),
 					XMLRootPath:        utils.StringPointer(utils.EmptyString),
@@ -5524,7 +5524,7 @@ func TestCgrCfgEventReaderDefault(t *testing.T) {
 			SQLOpts:            &SQLROpts{},
 			KafkaOpts:          &KafkaROpts{},
 			NATSOpts: &NATSROpts{
-				NATSSubject: utils.StringPointer("cgrates_cdrs"),
+				Subject: utils.StringPointer("cgrates_cdrs"),
 			},
 		},
 	}

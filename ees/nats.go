@@ -39,7 +39,7 @@ func NewNatsEE(cfg *config.EventExporterCfg, nodeID string, connTimeout time.Dur
 		subject: utils.DefaultQueueID,
 		reqs:    newConcReq(cfg.ConcurrentRequests),
 	}
-	err = natsPstr.parseOpt(cfg.Opts, nodeID, connTimeout)
+	err = natsPstr.parseOpts(cfg.Opts, nodeID, connTimeout)
 	return
 }
 
@@ -60,76 +60,87 @@ type NatsEE struct {
 	bytePreparing
 }
 
-func (pstr *NatsEE) parseOpt(opts *config.EventExporterOpts, nodeID string, connTimeout time.Duration) (err error) {
-
-	if natsOpts := opts.NATS; natsOpts != nil {
-		if natsOpts.JetStream != nil {
-			pstr.jetStream = *natsOpts.JetStream
-		}
-		pstr.subject = utils.DefaultQueueID
-		if natsOpts.Subject != nil {
-			pstr.subject = *natsOpts.Subject
-		}
-
-		pstr.opts, err = GetNatsOpts(natsOpts, nodeID, connTimeout)
-		if pstr.jetStream {
-			if natsOpts.JetStreamMaxWait != nil {
-				pstr.jsOpts = []nats.JSOpt{nats.MaxWait(*natsOpts.JetStreamMaxWait)}
-			}
-		}
+func (pstr *NatsEE) parseOpts(opts *config.EventExporterOpts, nodeID string, connTimeout time.Duration) error {
+	if opts.NATS == nil {
+		return nil
 	}
-	return
+
+	if opts.NATS.JetStream != nil {
+		pstr.jetStream = *opts.NATS.JetStream
+	}
+	if opts.NATS.Subject != nil {
+		pstr.subject = *opts.NATS.Subject
+	}
+
+	var err error
+	pstr.opts, err = GetNatsOpts(opts.NATS, nodeID, connTimeout)
+	if err != nil {
+		return err
+	}
+
+	if pstr.jetStream && opts.NATS.JetStreamMaxWait != nil {
+		pstr.jsOpts = []nats.JSOpt{nats.MaxWait(*opts.NATS.JetStreamMaxWait)}
+	}
+	return nil
 }
 
 func (pstr *NatsEE) Cfg() *config.EventExporterCfg { return pstr.cfg }
 
-func (pstr *NatsEE) Connect() (err error) {
+func (pstr *NatsEE) Connect() error {
 	pstr.Lock()
 	defer pstr.Unlock()
-	if pstr.poster == nil {
-		if pstr.poster, err = nats.Connect(pstr.Cfg().ExportPath, pstr.opts...); err != nil {
-			return
-		}
-		if pstr.jetStream {
-			pstr.posterJS, err = pstr.poster.JetStream(pstr.jsOpts...)
-		}
+	if pstr.poster != nil {
+		return nil
 	}
-	return
+
+	var err error
+	pstr.poster, err = nats.Connect(pstr.Cfg().ExportPath, pstr.opts...)
+	if err != nil {
+		return err
+	}
+	if pstr.jetStream {
+		pstr.posterJS, err = pstr.poster.JetStream(pstr.jsOpts...)
+	}
+	return err
 }
 
-func (pstr *NatsEE) ExportEvent(content any, _ string) (err error) {
+func (pstr *NatsEE) ExportEvent(content any, _ string) error {
 	pstr.reqs.get()
+	defer pstr.reqs.done()
 	pstr.RLock()
+	defer pstr.RUnlock()
+
 	if pstr.poster == nil {
-		pstr.RUnlock()
-		pstr.reqs.done()
 		return utils.ErrDisconnected
 	}
+
+	var err error
 	if pstr.jetStream {
 		_, err = pstr.posterJS.Publish(pstr.subject, content.([]byte))
 	} else {
 		err = pstr.poster.Publish(pstr.subject, content.([]byte))
 	}
-	pstr.RUnlock()
-	pstr.reqs.done()
-	return
+	return err
 }
 
-func (pstr *NatsEE) Close() (err error) {
+func (pstr *NatsEE) Close() error {
 	pstr.Lock()
-	if pstr.poster != nil {
-		err = pstr.poster.Drain()
-		pstr.poster = nil
+	defer pstr.Unlock()
+
+	if pstr.poster == nil {
+		return nil
 	}
-	pstr.Unlock()
-	return
+
+	err := pstr.poster.Drain()
+	pstr.poster = nil
+	return err
 }
 
 func (pstr *NatsEE) GetMetrics() *utils.SafeMapStorage { return pstr.dc }
 
-func GetNatsOpts(opts *config.NATSOpts, nodeID string, connTimeout time.Duration) (nop []nats.Option, err error) {
-	nop = make([]nats.Option, 0, 7)
-	nop = append(nop, nats.Name(utils.CGRateSLwr+nodeID),
+func GetNatsOpts(opts *config.NATSOpts, nodeID string, connTimeout time.Duration) ([]nats.Option, error) {
+	natsOpts := make([]nats.Option, 0, 7)
+	natsOpts = append(natsOpts, nats.Name(utils.CGRateSLwr+nodeID),
 		nats.Timeout(connTimeout),
 		nats.DrainTimeout(time.Second))
 	if opts.JWTFile != nil {
@@ -137,28 +148,27 @@ func GetNatsOpts(opts *config.NATSOpts, nodeID string, connTimeout time.Duration
 		if opts.SeedFile != nil {
 			keys = append(keys, *opts.SeedFile)
 		}
-		nop = append(nop, nats.UserCredentials(*opts.JWTFile, keys...))
+		natsOpts = append(natsOpts, nats.UserCredentials(*opts.JWTFile, keys...))
 	}
 	if opts.SeedFile != nil {
 		opt, err := nats.NkeyOptionFromSeed(*opts.SeedFile)
 		if err != nil {
 			return nil, err
 		}
-		nop = append(nop, opt)
+		natsOpts = append(natsOpts, opt)
 	}
-	if opts.ClientCertificate != nil {
-		if opts.ClientKey == nil {
-			err = fmt.Errorf("has certificate but no key")
-			return
-		}
-		nop = append(nop, nats.ClientCert(*opts.ClientCertificate, *opts.ClientKey))
-	} else if opts.ClientKey != nil {
-		err = fmt.Errorf("has key but no certificate")
-		return
+
+	switch {
+	case opts.ClientCertificate != nil && opts.ClientKey != nil:
+		natsOpts = append(natsOpts, nats.ClientCert(*opts.ClientCertificate, *opts.ClientKey))
+	case opts.ClientCertificate != nil:
+		return nil, fmt.Errorf("has certificate but no key")
+	case opts.ClientKey != nil:
+		return nil, fmt.Errorf("has key but no certificate")
 	}
 
 	if opts.CertificateAuthority != nil {
-		nop = append(nop,
+		natsOpts = append(natsOpts,
 			func(o *nats.Options) error {
 				pool, err := x509.SystemCertPool()
 				if err != nil {
@@ -181,5 +191,5 @@ func GetNatsOpts(opts *config.NATSOpts, nodeID string, connTimeout time.Duration
 				return nil
 			})
 	}
-	return
+	return natsOpts, nil
 }
