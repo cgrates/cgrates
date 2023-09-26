@@ -39,13 +39,14 @@ require (
 	github.com/mediocregopher/radix/v3 v3.8.1
 	github.com/miekg/dns v1.1.54
 	github.com/mitchellh/mapstructure v1.4.0
+	github.com/nats-io/nats-server/v2 v2.10.1
 	github.com/nats-io/nats.go v1.30.0
 	github.com/nyaruka/phonenumbers v1.0.75
 	github.com/peterh/liner v1.2.1
 	github.com/rabbitmq/amqp091-go v1.5.0
 	github.com/segmentio/kafka-go v0.4.8
 	go.mongodb.org/mongo-driver v1.11.0
-	golang.org/x/crypto v0.6.0
+	golang.org/x/crypto v0.13.0
 	golang.org/x/net v0.10.0
 	golang.org/x/oauth2 v0.0.0-20201208152858-08078c50e5b5
 	google.golang.org/api v0.36.0
@@ -93,9 +94,10 @@ require (
 	github.com/kr/pretty v0.2.1 // indirect
 	github.com/lib/pq v1.8.0 // indirect
 	github.com/mattn/go-runewidth v0.0.10 // indirect
+	github.com/minio/highwayhash v1.0.2 // indirect
 	github.com/montanaflynn/stats v0.0.0-20171201202039-1bf9dbcd8cbe // indirect
 	github.com/mschoch/smat v0.2.0 // indirect
-	github.com/nats-io/nats-server/v2 v2.2.6 // indirect
+	github.com/nats-io/jwt/v2 v2.5.2 // indirect
 	github.com/nats-io/nkeys v0.4.5 // indirect
 	github.com/nats-io/nuid v1.0.1 // indirect
 	github.com/philhofer/fwd v1.1.1 // indirect
@@ -115,8 +117,9 @@ require (
 	go.opencensus.io v0.22.5 // indirect
 	golang.org/x/mod v0.10.0 // indirect
 	golang.org/x/sync v0.2.0 // indirect
-	golang.org/x/sys v0.8.0 // indirect
-	golang.org/x/text v0.9.0 // indirect
+	golang.org/x/sys v0.12.0 // indirect
+	golang.org/x/text v0.13.0 // indirect
+	golang.org/x/time v0.3.0 // indirect
 	golang.org/x/tools v0.9.3 // indirect
 	golang.org/x/xerrors v0.0.0-20200804184101-5ec99f83aff1 // indirect
 	google.golang.org/appengine v1.6.7 // indirect

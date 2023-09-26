@@ -23,26 +23,33 @@ package ees
 
 import (
 	"os"
-	"os/exec"
 	"path"
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
+	"github.com/nats-io/nats-server/v2/server"
 	"github.com/nats-io/nats.go"
+	"github.com/nats-io/nats.go/jetstream"
 )
 
 func TestNatsEEJetStream(t *testing.T) {
-	testCreateDirectory(t)
-	var err error
-	cmd := exec.Command("nats-server", "-js") // Start the nats-server.
-	if err := cmd.Start(); err != nil {
-		t.Fatal(err) // Only if nats-server is not installed.
+
+	natsServer, err := server.NewServer(&server.Options{
+		Host:      "127.0.0.1",
+		Port:      4222,
+		JetStream: true,
+	})
+	if err != nil {
+		t.Fatal(err)
 	}
-	time.Sleep(50 * time.Millisecond)
-	defer cmd.Process.Kill()
+	natsServer.Start()
+	defer natsServer.Shutdown()
+
+	testCreateDirectory(t)
 	cgrCfg, err := config.NewCGRConfigFromPath(path.Join(*dataDir, "conf", "samples", "ees"))
 	if err != nil {
 		t.Fatal(err)
@@ -63,38 +70,40 @@ func TestNatsEEJetStream(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	nc, err := nats.Connect("nats://localhost:4222", nop...)
+	nc, err := nats.Connect(nats.DefaultURL, nop...)
 	if err != nil {
 		t.Fatal(err)
 	}
-	js, err := nc.JetStream()
+	defer nc.Drain()
+
+	js, err := jetstream.New(nc)
 	if err != nil {
 		t.Fatal(err)
-	}
-	for name := range js.StreamNames() {
-		if name == "test2" {
-			if err = js.DeleteStream("test2"); err != nil {
-				t.Fatal(err)
-			}
-			break
-		}
 	}
 
-	if _, err = js.AddStream(&nats.StreamConfig{
+	_, err = js.CreateStream(context.Background(), jetstream.StreamConfig{
 		Name:     "test2",
 		Subjects: []string{"processed_cdrs"},
-	}); err != nil {
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer js.DeleteStream(context.Background(), "test2")
+
+	ch := make(chan string, 3)
+	var cons jetstream.Consumer
+	cons, err = js.CreateOrUpdateConsumer(context.Background(), "test2", jetstream.ConsumerConfig{
+		Durable:       "test4",
+		FilterSubject: "processed_cdrs",
+		AckPolicy:     jetstream.AckAllPolicy,
+	})
+	if err != nil {
 		t.Fatal(err)
 	}
 
-	if err = js.PurgeStream("test2"); err != nil {
-		t.Fatal(err)
-	}
-
-	ch := make(chan *nats.Msg, 3)
-	_, err = js.QueueSubscribe("processed_cdrs", "test3", func(msg *nats.Msg) {
-		ch <- msg
-	}, nats.Durable("test4"))
+	_, err = cons.Consume(func(msg jetstream.Msg) {
+		ch <- string(msg.Data())
+	})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -114,8 +123,8 @@ func TestNatsEEJetStream(t *testing.T) {
 	// fmt.Println((<-ch).Data)
 	select {
 	case data := <-ch:
-		if expected != string(data.Data) {
-			t.Fatalf("Expected %v \n but received \n %v", expected, string(data.Data))
+		if expected != data {
+			t.Fatalf("Expected %v \n but received \n %v", expected, data)
 		}
 	case <-time.After(50 * time.Millisecond):
 		t.Fatal("Time limit exceeded")
@@ -124,14 +133,16 @@ func TestNatsEEJetStream(t *testing.T) {
 
 func TestNatsEE(t *testing.T) {
 	testCreateDirectory(t)
-	exec.Command("pkill", "nats-server")
 
-	cmd := exec.Command("nats-server")
-	if err := cmd.Start(); err != nil {
+	natsServer, err := server.NewServer(&server.Options{
+		Host: "127.0.0.1",
+		Port: 4222,
+	})
+	if err != nil {
 		t.Fatal(err)
 	}
-	time.Sleep(50 * time.Millisecond)
-	defer cmd.Process.Kill()
+	natsServer.Start()
+	defer natsServer.Shutdown()
 
 	cgrCfg, err := config.NewCGRConfigFromPath(path.Join(*dataDir, "conf", "samples", "ees"))
 	if err != nil {
@@ -211,7 +222,7 @@ func TestGetNatsOptsSeedFile(t *testing.T) {
 	//test error
 	os.WriteFile("/tmp/nkey.txt", []byte(""), 0777)
 	_, err = GetNatsOpts(opts, nodeID, connTimeout)
-	if err.Error() != "no nkey seed found" {
-		t.Errorf("Expected %v \n but received \n %v", err.Error(), "no nkey seed found")
+	if err == nil || err.Error() != "nkeys: no nkey seed found" {
+		t.Errorf("expected \"%s\" but received \"%s\"", "nkeys: no nkey seed found", err.Error())
 	}
 }

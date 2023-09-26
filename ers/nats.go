@@ -26,12 +26,14 @@ import (
 	"os"
 	"time"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/agents"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/ees"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/nats-io/nats.go"
+	"github.com/nats-io/nats.go/jetstream"
 )
 
 // NewNatsER return a new amqp event reader
@@ -79,8 +81,8 @@ type NatsER struct {
 	queueID      string
 	jetStream    bool
 	consumerName string
+	streamName   string
 	opts         []nats.Option
-	jsOpts       []nats.JSOpt
 
 	poster *ees.NatsEE
 }
@@ -101,28 +103,28 @@ func (rdr *NatsER) Serve() error {
 	}
 
 	// Define the message handler. Its content will get executed for every received message.
-	msgHandler := func(msg *nats.Msg) {
+	handleMessage := func(msgData []byte) {
 
 		// If the rdr.cap channel buffer is empty, block until a resource is available. Otherwise
 		// allocate one resource and start processing the message.
 		if rdr.Config().ConcurrentReqs != -1 {
 			<-rdr.cap
 		}
-		go func(msg *nats.Msg) {
-			handlerErr := rdr.processMessage(msg.Data)
+		go func() {
+			handlerErr := rdr.processMessage(msgData)
 			if handlerErr != nil {
 				utils.Logger.Warning(
 					fmt.Sprintf("<%s> processing message %s error: %s",
-						utils.ERs, string(msg.Data), handlerErr.Error()))
+						utils.ERs, string(msgData), handlerErr.Error()))
 			}
 
 			// Export the received message if a poster has been defined.
 			if rdr.poster != nil {
-				handlerErr = ees.ExportWithAttempts(rdr.poster, msg.Data, utils.EmptyString)
+				handlerErr = ees.ExportWithAttempts(rdr.poster, msgData, utils.EmptyString)
 				if handlerErr != nil {
 					utils.Logger.Warning(
 						fmt.Sprintf("<%s> writing message %s error: %s",
-							utils.ERs, string(msg.Data), handlerErr.Error()))
+							utils.ERs, string(msgData), handlerErr.Error()))
 				}
 			}
 
@@ -130,27 +132,48 @@ func (rdr *NatsER) Serve() error {
 			if rdr.Config().ConcurrentReqs != -1 {
 				rdr.cap <- struct{}{}
 			}
-		}(msg)
+
+		}()
 	}
 
 	// Subscribe to the appropriate NATS subject.
 	if !rdr.jetStream {
-		_, err = nc.QueueSubscribe(rdr.subject, rdr.queueID, msgHandler)
+		_, err = nc.QueueSubscribe(rdr.subject, rdr.queueID, func(msg *nats.Msg) {
+			handleMessage(msg.Data)
+		})
 		if err != nil {
 			nc.Drain()
 			return err
 		}
 	} else {
-		var js nats.JetStreamContext
-		js, err = nc.JetStream(rdr.jsOpts...)
+		var js jetstream.JetStream
+		js, err = jetstream.New(nc)
 		if err != nil {
 			nc.Drain()
 			return err
 		}
-		_, err = js.QueueSubscribe(rdr.subject, rdr.queueID, msgHandler,
-			nats.Durable(rdr.consumerName))
+		ctx := context.TODO()
+		if jsMaxWait := rdr.Config().Opts.NATSOpts.JetStreamMaxWait; jsMaxWait != nil {
+			var cancel context.CancelFunc
+			ctx, cancel = context.WithTimeout(ctx, *jsMaxWait)
+			defer cancel()
+		}
+
+		var cons jetstream.Consumer
+		cons, err = js.CreateOrUpdateConsumer(ctx, rdr.streamName, jetstream.ConsumerConfig{
+			FilterSubject: rdr.subject,
+			Durable:       rdr.consumerName,
+			AckPolicy:     jetstream.AckAllPolicy,
+		})
 		if err != nil {
 			nc.Drain()
+			return err
+		}
+
+		_, err = cons.Consume(func(msg jetstream.Msg) {
+			handleMessage(msg.Data())
+		})
+		if err != nil {
 			return err
 		}
 	}
@@ -219,23 +242,23 @@ func (rdr *NatsER) processOpts() (err error) {
 	if rdr.Config().Opts.NATSOpts.Subject != nil {
 		rdr.subject = *rdr.Config().Opts.NATSOpts.Subject
 	}
-	var queueID string
+
+	rdr.queueID = rdr.cgrCfg.GeneralCfg().NodeID
 	if rdr.Config().Opts.NATSOpts.QueueID != nil {
-		queueID = *rdr.Config().Opts.NATSOpts.QueueID
+		rdr.queueID = *rdr.Config().Opts.NATSOpts.QueueID
 	}
-	rdr.queueID = utils.FirstNonEmpty(queueID, rdr.cgrCfg.GeneralCfg().NodeID)
-	var consumerName string
+
+	rdr.consumerName = utils.CGRateSLwr
 	if rdr.Config().Opts.NATSOpts.ConsumerName != nil {
-		consumerName = *rdr.Config().Opts.NATSOpts.ConsumerName
+		rdr.consumerName = *rdr.Config().Opts.NATSOpts.ConsumerName
 	}
-	rdr.consumerName = utils.FirstNonEmpty(consumerName, utils.CGRateSLwr)
+
+	if rdr.Config().Opts.NATSOpts.StreamName != nil {
+		rdr.streamName = *rdr.Config().Opts.NATSOpts.StreamName
+	}
+
 	if rdr.Config().Opts.NATSOpts.JetStream != nil {
 		rdr.jetStream = *rdr.Config().Opts.NATSOpts.JetStream
-	}
-	if rdr.jetStream {
-		if rdr.Config().Opts.NATSOpts.JetStreamMaxWait != nil {
-			rdr.jsOpts = []nats.JSOpt{nats.MaxWait(*rdr.Config().Opts.NATSOpts.JetStreamMaxWait)}
-		}
 	}
 	rdr.opts, err = GetNatsOpts(rdr.Config().Opts.NATSOpts,
 		rdr.cgrCfg.GeneralCfg().NodeID,

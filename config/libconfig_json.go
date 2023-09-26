@@ -253,6 +253,7 @@ type EventReaderOptsJson struct {
 	S3BucketIDProcessed               *string `json:"s3BucketIDProcessed"`
 	NATSJetStream                     *bool   `json:"natsJetStream"`
 	NATSConsumerName                  *string `json:"natsConsumerName"`
+	NATSStreamName                    *string `json:"natsStreamName"`
 	NATSSubject                       *string `json:"natsSubject"`
 	NATSQueueID                       *string `json:"natsQueueID"`
 	NATSJWTFile                       *string `json:"natsJWTFile"`

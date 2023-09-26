@@ -315,6 +315,7 @@ func (awsROpts *AWSROpts) loadFromJSONCfg(jsnCfg *EventReaderOptsJson) (err erro
 type NATSROpts struct {
 	JetStream                     *bool
 	ConsumerName                  *string
+	StreamName                    *string
 	Subject                       *string
 	QueueID                       *string
 	JWTFile                       *string
@@ -339,6 +340,9 @@ func (natsOpts *NATSROpts) loadFromJSONCfg(jsnCfg *EventReaderOptsJson) (err err
 	}
 	if jsnCfg.NATSConsumerName != nil {
 		natsOpts.ConsumerName = jsnCfg.NATSConsumerName
+	}
+	if jsnCfg.NATSStreamName != nil {
+		natsOpts.StreamName = jsnCfg.NATSStreamName
 	}
 	if jsnCfg.NATSSubject != nil {
 		natsOpts.Subject = jsnCfg.NATSSubject
@@ -769,6 +773,10 @@ func (natOpts *NATSROpts) Clone() *NATSROpts {
 		cln.ConsumerName = new(string)
 		*cln.ConsumerName = *natOpts.ConsumerName
 	}
+	if natOpts.StreamName != nil {
+		cln.StreamName = new(string)
+		*cln.StreamName = *natOpts.StreamName
+	}
 	if natOpts.Subject != nil {
 		cln.Subject = new(string)
 		*cln.Subject = *natOpts.Subject
@@ -1077,6 +1085,9 @@ func (er *EventReaderCfg) AsMapInterface(separator string) (initialMP map[string
 		}
 		if natsOpts.ConsumerName != nil {
 			opts[utils.NatsConsumerName] = *natsOpts.ConsumerName
+		}
+		if natsOpts.StreamName != nil {
+			opts[utils.NatsStreamName] = *natsOpts.StreamName
 		}
 		if natsOpts.Subject != nil {
 			opts[utils.NatsSubject] = *natsOpts.Subject

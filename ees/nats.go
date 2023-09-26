@@ -26,9 +26,11 @@ import (
 	"sync"
 	"time"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/nats-io/nats.go"
+	"github.com/nats-io/nats.go/jetstream"
 )
 
 // NewNatsEE creates a kafka poster
@@ -48,10 +50,9 @@ type NatsEE struct {
 	subject   string // identifier of the CDR queue where we publish
 	jetStream bool
 	opts      []nats.Option
-	jsOpts    []nats.JSOpt
 
 	poster   *nats.Conn
-	posterJS nats.JetStreamContext
+	posterJS jetstream.JetStream
 
 	cfg          *config.EventExporterCfg
 	dc           *utils.SafeMapStorage
@@ -78,9 +79,6 @@ func (pstr *NatsEE) parseOpts(opts *config.EventExporterOpts, nodeID string, con
 		return err
 	}
 
-	if pstr.jetStream && opts.NATS.JetStreamMaxWait != nil {
-		pstr.jsOpts = []nats.JSOpt{nats.MaxWait(*opts.NATS.JetStreamMaxWait)}
-	}
 	return nil
 }
 
@@ -99,7 +97,7 @@ func (pstr *NatsEE) Connect() error {
 		return err
 	}
 	if pstr.jetStream {
-		pstr.posterJS, err = pstr.poster.JetStream(pstr.jsOpts...)
+		pstr.posterJS, err = jetstream.New(pstr.poster)
 	}
 	return err
 }
@@ -116,7 +114,13 @@ func (pstr *NatsEE) ExportEvent(content any, _ string) error {
 
 	var err error
 	if pstr.jetStream {
-		_, err = pstr.posterJS.Publish(pstr.subject, content.([]byte))
+		ctx := context.TODO()
+		if pstr.cfg.Opts.NATS.JetStreamMaxWait != nil {
+			var cancel context.CancelFunc
+			ctx, cancel = context.WithTimeout(ctx, *pstr.cfg.Opts.NATS.JetStreamMaxWait)
+			defer cancel()
+		}
+		_, err = pstr.posterJS.Publish(ctx, pstr.subject, content.([]byte))
 	} else {
 		err = pstr.poster.Publish(pstr.subject, content.([]byte))
 	}
