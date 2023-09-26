@@ -447,6 +447,7 @@ const CGRATES_CFG_JSON = `
 				// nats
 				// "natsJetStream": false,						// controls if the nats reader uses the JetStream
 				// "natsConsumerName": "cgrates",				// in case of JetStream the name of the consumer
+				// "natsStreamName": "cdrs",					// the name of the NATS JetStream stream from which the consumer will read messages
 				"natsSubject": "cgrates_cdrs",					// the subject from were the events are read
 				// "natsQueueID": "",							// the queue id the consumer listen to
 				// "natsJWTFile": "",							// the path to the JWT file( can be the chained file or the user file)

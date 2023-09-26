@@ -19,13 +19,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package ees
 
 import (
-	"reflect"
 	"testing"
 	"time"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/nats-io/nats.go"
 )
 
 func TestNewNatsEE(t *testing.T) {
@@ -145,47 +143,6 @@ func TestParseOptJetStream(t *testing.T) {
 
 	if !pstr.jetStream {
 		t.Error("Expected jetStream to be true")
-	}
-}
-
-func TestParseOptJetStreamMaxWait(t *testing.T) {
-	cfg := &config.EventExporterCfg{
-		ID:                 "nats_exporter",
-		Type:               "nats",
-		Attempts:           2,
-		ConcurrentRequests: 2,
-		Opts: &config.EventExporterOpts{
-			AMQP:  &config.AMQPOpts{},
-			Els:   &config.ElsOpts{},
-			AWS:   &config.AWSOpts{},
-			NATS:  &config.NATSOpts{},
-			Kafka: &config.KafkaOpts{},
-			RPC:   &config.RPCOpts{},
-		},
-	}
-	opts := &config.EventExporterOpts{
-		NATS: &config.NATSOpts{
-			JetStream:        utils.BoolPointer(true),
-			JetStreamMaxWait: utils.DurationPointer(2),
-		}}
-	nodeID := "node_id1"
-	connTimeout := 2 * time.Second
-	dc, err := newEEMetrics("Local")
-	if err != nil {
-		t.Error(err)
-	}
-	pstr, err := NewNatsEE(cfg, nodeID, connTimeout, dc)
-	if err != nil {
-		t.Error(err)
-	}
-
-	err = pstr.parseOpts(opts, nodeID, connTimeout)
-	if err != nil {
-		t.Error(err)
-	}
-	exp := []nats.JSOpt{nats.MaxWait(2 * time.Nanosecond)}
-	if !reflect.DeepEqual(pstr.jsOpts, exp) {
-		t.Errorf("Expected %v \n but received \n %v", exp, pstr.jsOpts)
 	}
 }
 

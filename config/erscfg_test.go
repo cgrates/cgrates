@@ -1070,6 +1070,7 @@ func TestERSCfgAsMapInterfaceCase2(t *testing.T) {
 					"s3BucketIDProcessed":"s3bucketid",
 					"natsJetStream":true,
 					"natsConsumerName": "NATConsumer",
+					"natsStreamName": "NATStream",
 					"natsQueueID":"NATid",
 					"natsJWTFile":"jwt",
 					"natsCertificateAuthority":"auth",
@@ -1204,6 +1205,7 @@ func TestERSCfgAsMapInterfaceCase2(t *testing.T) {
 					utils.S3BucketIDProcessedCfg:               "s3bucketid",
 					utils.NatsJetStream:                        true,
 					utils.NatsConsumerName:                     "NATConsumer",
+					utils.NatsStreamName:                       "NATStream",
 					utils.NatsQueueID:                          "NATid",
 					utils.NatsJWTFile:                          "jwt",
 					utils.NatsSeedFile:                         "seed",
@@ -1541,6 +1543,7 @@ func TestEventReaderCfgClone(t *testing.T) {
 			NATSOpts: &NATSROpts{
 				JetStream:                     utils.BoolPointer(false),
 				ConsumerName:                  utils.StringPointer("user"),
+				StreamName:                    utils.StringPointer("stream"),
 				QueueID:                       utils.StringPointer("id"),
 				JWTFile:                       utils.StringPointer("jwt"),
 				SeedFile:                      utils.StringPointer("seed"),

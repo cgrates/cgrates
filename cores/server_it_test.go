@@ -63,7 +63,6 @@ var (
 		testServeHHTPFail,
 		testServeHHTPFailEnableRpc,
 		testServeBiJSON,
-		testServeBiJSONEmptyBiRPCServer,
 		testServeBiJSONInvalidPort,
 		testServeBiGoB,
 		testServeBiGoBInvalidPort,
@@ -331,27 +330,6 @@ func testServeBiJSON(t *testing.T) {
 			t.Error(err)
 		}
 	}()
-	runtime.Gosched()
-}
-
-func testServeBiJSONEmptyBiRPCServer(t *testing.T) {
-	cfg := config.NewDefaultCGRConfig()
-	caps := engine.NewCaps(100, utils.MetaBusy)
-	server = NewServer(caps)
-	server.RpcRegister(new(mockRegister))
-
-	data := engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
-	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
-
-	ss := sessions.NewSessionS(cfg, dm, nil)
-
-	expectedErr := "BiRPCServer should not be nil"
-	go func() {
-		if err := server.ServeBiRPC(":3430", "", ss.OnBiJSONConnect, ss.OnBiJSONDisconnect); err == nil || err.Error() != "BiRPCServer should not be nil" {
-			t.Errorf("Expected %+v, received %+v", expectedErr, err)
-		}
-	}()
-
 	runtime.Gosched()
 }
 

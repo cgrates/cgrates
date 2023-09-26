@@ -1,0 +1,75 @@
+{
+
+"general": {
+    "log_level": 7
+},
+
+"data_db": {
+    "db_type": "*internal"
+},
+
+"stor_db": {
+    "db_type": "*internal"
+},
+
+"ers": {														
+    "enabled": true,											
+    "sessions_conns":[],								
+    "readers": [
+        {
+            "id": "nats_reader1",									
+            "type": "*nats_json_map",									
+            "source_path": "nats://127.0.0.1:4222",			
+            "processed_path": "nats://127.0.0.1:4222",		
+            "opts": {
+                "natsJetStream": true,						
+                "natsConsumerName": "cgrates",				
+                "natsStreamName": "stream",				
+                "natsSubject": "cgrates_cdrs",					
+                "natsQueueID": "queue",							
+                "natsJetStreamMaxWait": "5s",				
+
+                "natsJetStreamProcessed": true,				
+                "natsSubjectProcessed": "cgrates_cdrs_processed",		
+                "natsJetStreamMaxWaitProcessed": "5s"		
+            },
+            "flags": ["*dryrun"],										
+            "fields":[											
+                {"tag": "cdr_template", "type": "*template", "value": "cdr_template"}
+            ]
+        },
+        {
+            "id": "nats_reader2",									
+            "type": "*nats_json_map",									
+            "source_path": "nats://127.0.0.1:4222",			
+            "processed_path": "nats://127.0.0.1:4222",		
+            "opts": {
+                "natsJetStream": true,						
+                "natsConsumerName": "cgrates",				
+                "natsStreamName": "stream",				
+                "natsSubject": "cgrates_cdrs",					
+                "natsQueueID": "queue",							
+                "natsJetStreamMaxWait": "5s",				
+
+                "natsJetStreamProcessed": true,				
+                "natsSubjectProcessed": "cgrates_cdrs_processed",		
+                "natsJetStreamMaxWaitProcessed": "5s"		
+            },
+            "flags": ["*dryrun"],										
+            "fields":[											
+                {"tag": "cdr_template", "type": "*template", "value": "cdr_template"}
+            ]
+        }
+    ]
+},
+    
+    
+"templates": {
+    "cdr_template": [
+        {"tag": "Account", "path": "*cgreq.Account", "type": "*variable", "value": "~*req.Account", "mandatory": true},
+        {"tag": "Subject", "path": "*cgreq.Subject", "type": "*variable", "value": "~*req.Subject", "mandatory": true},
+        {"tag": "Destination", "path": "*cgreq.Destination", "type": "*variable", "value": "~*req.Destination", "mandatory": true},
+    ]
+}
+    
+}
