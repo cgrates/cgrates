@@ -1,0 +1,38 @@
+---
+- name: Install PJSUA dependencies
+  become: yes
+  ansible.builtin.package:
+    name: '{{ pjsua_dependencies }}'
+    state: present
+    update_cache: yes
+    cache_valid_time: 86400
+
+- name: Download PJSUA
+  ansible.builtin.get_url:
+    url: "{{ pjsua_url }}"
+    dest: "{{ tmp_dir }}/{{ pjsua_version }}.tar.gz"
+
+- name: Unzip PJSUA
+  become: yes
+  ansible.builtin.unarchive:
+    src: "{{ tmp_dir }}/{{ pjsua_version }}.tar.gz"
+    dest: "{{ tmp_dir }}"
+    remote_src: yes
+
+- name: Install PJSUA
+  become: yes
+  ansible.builtin.shell:
+    cmd: './configure CFLAGS="$CFLAGS -fPIC" && make dep && make && make install'
+    chdir: '{{ tmp_dir }}/pjproject-{{ pjsua_version }}'
+
+- name: Copy PJSUA into /usr/bin
+  become: yes
+  ansible.builtin.command:
+    cmd: 'cp pjsua-x86_64-unknown-linux-gnu /usr/bin/pjsua'
+    chdir: '{{ tmp_dir }}/pjproject-{{ pjsua_version }}/pjsip-apps/bin'
+
+- name: Cleanup temporary PJSUA files
+  become: yes
+  ansible.builtin.file:
+    path: '{{ tmp_dir }}/pjproject-{{ pjsua_version }}'
+    state: absent

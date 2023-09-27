@@ -1,0 +1,44 @@
+---
+- name: Install Java
+  become: yes
+  apt:
+    name: default-jdk
+    state: present
+    update_cache: yes
+
+- name: Download Apache Kafka
+  get_url:
+    url: "https://downloads.apache.org/kafka/{{ kafka_version }}/kafka_{{ scala_version }}-{{ kafka_version }}.tgz"
+    dest: "/tmp/kafka_{{ scala_version }}-{{ kafka_version }}.tgz"
+    mode: '0755'
+
+- name: Extract Apache Kafka
+  become: yes
+  unarchive:
+    src: "/tmp/kafka_{{ scala_version }}-{{ kafka_version }}.tgz"
+    dest: "/usr/local"
+    remote_src: yes
+    creates: "/usr/local/kafka_{{ scala_version }}-{{ kafka_version }}"
+
+- name: Ensure Kafka and Zookeeper services are created
+  become: yes
+  template:
+    src: "{{ item.service_file }}"
+    dest: "/etc/systemd/system/{{ item.service_name }}"
+    owner: root
+    group: root
+    mode: '0644'
+  loop:
+    - { service_file: 'zookeeper.service.j2', service_name: 'zookeeper.service' }
+    - { service_file: 'kafka.service.j2', service_name: 'kafka.service' }
+
+- name: Enable Kafka and Zookeeper services
+  become: yes
+  systemd:
+    name: "{{ item }}"
+    state: "{{ kafka_service_state }}"
+    enabled: "{{ kafka_service_enabled }}"
+    daemon_reload: yes
+  loop:
+    - zookeeper
+    - kafka

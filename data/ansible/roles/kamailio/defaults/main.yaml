@@ -1,0 +1,11 @@
+---
+kamailio_repository_line: "deb http://deb.kamailio.org/kamailio{{ kamailio_version }} {{ ansible_distribution_release }} main"
+kamailio_repository_src_line: "deb-src http://deb.kamailio.org/kamailio{{ kamailio_version }} {{ ansible_distribution_release }} main"
+kamailio_repository_key_url: "http://deb.kamailio.org/kamailiodebkey.gpg"
+kamailio_version: "56"
+kamailio_packages:
+  - kamailio
+  - kamailio-extra-modules
+  - kamailio-json-modules
+kamailio_dependencies:
+  - gnupg

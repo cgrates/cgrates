@@ -1,0 +1,52 @@
+---
+- name: Install RabbitMQ dependencies
+  become: yes
+  apt:
+    name: "{{ rabbitmq_dependencies }}"
+    state: present
+    update_cache: yes
+    cache_valid_time: 86400
+
+- name: Import RabbitMQ's main signing key
+  become: yes
+  apt_key:
+    id: "{{ rabbitmq_main_key }}"
+    keyring: "{{ rabbitmq_main_keyring }}"
+    url: "https://keys.openpgp.org/vks/v1/by-fingerprint/{{ rabbitmq_main_key }}"
+
+- name: Import Erlang GPG key
+  become: yes
+  apt_key:
+    id: "{{ erlang_key }}"
+    keyring: "{{ erlang_keyring }}"
+    url: "https://keyserver.ubuntu.com/pks/lookup?op=get&search=0x{{ erlang_key }}"
+
+- name: Import PackageCloud RabbitMQ repository
+  become: yes
+  apt_key:
+    url: "{{ rabbitmq_repo_key_url }}"
+    keyring: "{{ rabbitmq_repo_keyring }}"
+
+- name: Add apt repositories maintained by Team RabbitMQ
+  become: yes
+  copy:
+    dest: "/etc/apt/sources.list.d/rabbitmq.list"
+    content: |
+      deb [signed-by=/usr/share/keyrings/net.launchpad.ppa.rabbitmq.erlang.gpg] http://ppa.launchpad.net/rabbitmq/rabbitmq-erlang/ubuntu bionic main
+      deb-src [signed-by=/usr/share/keyrings/net.launchpad.ppa.rabbitmq.erlang.gpg] http://ppa.launchpad.net/rabbitmq/rabbitmq-erlang/ubuntu bionic main
+      deb [signed-by=/usr/share/keyrings/io.packagecloud.rabbitmq.gpg] https://packagecloud.io/rabbitmq/rabbitmq-server/ubuntu/ bionic main
+      deb-src [signed-by=/usr/share/keyrings/io.packagecloud.rabbitmq.gpg] https://packagecloud.io/rabbitmq/rabbitmq-server/ubuntu/ bionic main
+
+- name: Install Erlang packages
+  become: yes
+  apt:
+    name: "{{ erlang_packages }}"
+    state: present
+    update_cache: yes
+
+- name: Install rabbitmq-server and its dependencies
+  become: yes
+  apt:
+    name: rabbitmq-server
+    state: present
+    update_cache: yes
