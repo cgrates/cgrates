@@ -49,7 +49,7 @@ func GetCommands() map[string]Commander {
 
 func getAvailabelCommandsErr() error {
 	var keys []string
-	for key, _ := range commands {
+	for key := range commands {
 		keys = append(keys, key)
 	}
 	return fmt.Errorf("\n\tAvailable commands <%s>\n", strings.Join(keys, "|"))

@@ -977,7 +977,7 @@ func testAccDebitAbstracts(t *testing.T) {
 			},
 		},
 		Accounting: map[string]*utils.AccountCharge{
-			"charge1": &utils.AccountCharge{
+			"charge1": {
 				AccountID:       "TEST_ACC_IT_TEST5",
 				BalanceID:       "AbstractBalance1",
 				Units:           utils.NewDecimal(int64(27*time.Second), 0),
@@ -1155,7 +1155,7 @@ func testAccMaxConcretes(t *testing.T) {
 			},
 		},
 		Accounting: map[string]*utils.AccountCharge{
-			accKEy: &utils.AccountCharge{
+			accKEy: {
 				AccountID:    "TEST_ACC_IT_TEST6",
 				BalanceID:    "ConcreteBalance2",
 				Units:        utils.NewDecimal(213, 0),
@@ -1315,7 +1315,7 @@ func testAccDebitConcretes(t *testing.T) {
 			},
 		},
 		Accounting: map[string]*utils.AccountCharge{
-			accKEy: &utils.AccountCharge{
+			accKEy: {
 				AccountID:    "TEST_ACC_IT_TEST7",
 				BalanceID:    "ConcreteBalance2",
 				Units:        utils.NewDecimal(213, 0),
