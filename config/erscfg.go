@@ -181,6 +181,7 @@ type EventReaderOpts struct {
 	S3BucketIDProcessed               *string
 	NATSJetStream                     *bool
 	NATSConsumerName                  *string
+	NATSStreamName                    *string
 	NATSSubject                       *string
 	NATSQueueID                       *string
 	NATSJWTFile                       *string
@@ -383,6 +384,9 @@ func (erOpts *EventReaderOpts) loadFromJSONCfg(jsnCfg *EventReaderOptsJson) (err
 	}
 	if jsnCfg.NATSConsumerName != nil {
 		erOpts.NATSConsumerName = jsnCfg.NATSConsumerName
+	}
+	if jsnCfg.NATSStreamName != nil {
+		erOpts.NATSStreamName = jsnCfg.NATSStreamName
 	}
 	if jsnCfg.NATSSubject != nil {
 		erOpts.NATSSubject = jsnCfg.NATSSubject
@@ -731,6 +735,10 @@ func (erOpts *EventReaderOpts) Clone() *EventReaderOpts {
 		cln.NATSConsumerName = new(string)
 		*cln.NATSConsumerName = *erOpts.NATSConsumerName
 	}
+	if erOpts.NATSStreamName != nil {
+		cln.NATSStreamName = new(string)
+		*cln.NATSStreamName = *erOpts.NATSStreamName
+	}
 	if erOpts.NATSSubject != nil {
 		cln.NATSSubject = new(string)
 		*cln.NATSSubject = *erOpts.NATSSubject
@@ -999,6 +1007,9 @@ func (er *EventReaderCfg) AsMapInterface(separator string) (initialMP map[string
 	if er.Opts.NATSConsumerName != nil {
 		opts[utils.NatsConsumerName] = *er.Opts.NATSConsumerName
 	}
+	if er.Opts.NATSStreamName != nil {
+		opts[utils.NatsStreamName] = *er.Opts.NATSStreamName
+	}
 	if er.Opts.NATSSubject != nil {
 		opts[utils.NatsSubject] = *er.Opts.NATSSubject
 	}
@@ -1150,6 +1161,7 @@ type EventReaderOptsJson struct {
 	S3BucketIDProcessed               *string `json:"s3BucketIDProcessed"`
 	NATSJetStream                     *bool   `json:"natsJetStream"`
 	NATSConsumerName                  *string `json:"natsConsumerName"`
+	NATSStreamName                    *string `json:"natsStreamName"`
 	NATSSubject                       *string `json:"natsSubject"`
 	NATSQueueID                       *string `json:"natsQueueID"`
 	NATSJWTFile                       *string `json:"natsJWTFile"`
@@ -1613,6 +1625,14 @@ func diffEventReaderOptsJsonCfg(d *EventReaderOptsJson, v1, v2 *EventReaderOpts)
 		}
 	} else {
 		d.NATSConsumerName = nil
+	}
+	if v2.NATSStreamName != nil {
+		if v1.NATSStreamName == nil ||
+			*v1.NATSStreamName != *v2.NATSStreamName {
+			d.NATSStreamName = v2.NATSStreamName
+		}
+	} else {
+		d.NATSStreamName = nil
 	}
 	if v2.NATSSubject != nil {
 		if v1.NATSSubject == nil ||

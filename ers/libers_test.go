@@ -31,7 +31,7 @@ func TestGetProcessOptions(t *testing.T) {
 	opts := &config.EventReaderOpts{
 		AWSKeyProcessed: utils.StringPointer("testKey"),
 	}
-	result := getProcessOptions(opts)
+	result := getProcessedOptions(opts)
 	expected := &config.EventExporterOpts{
 		AWSKey: utils.StringPointer("testKey"),
 	}

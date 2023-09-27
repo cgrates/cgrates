@@ -22,22 +22,109 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package ers
 
 import (
+	"encoding/json"
 	"fmt"
 	"os"
-	"os/exec"
 	"path"
 	"reflect"
 	"runtime"
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
+	"github.com/nats-io/nats-server/v2/server"
 	"github.com/nats-io/nats.go"
+	"github.com/nats-io/nats.go/jetstream"
 )
 
-func testCheckNatsData(t *testing.T, randomOriginID, expData string, ch chan *nats.Msg) {
+func TestNatsERIT(t *testing.T) {
+	cfgPath := path.Join(*dataDir, "conf", "samples", "ers_nats")
+	cfg, err := config.NewCGRConfigFromPath(context.Background(), cfgPath)
+	if err != nil {
+		t.Fatal("could not init cfg", err.Error())
+	}
+
+	natsServer, err := server.NewServer(&server.Options{
+		Host:      "127.0.0.1",
+		Port:      4222,
+		JetStream: true,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	natsServer.Start()
+	defer natsServer.Shutdown()
+
+	// Establish a connection to nats.
+	nc, err := nats.Connect(cfg.ERsCfg().Readers[1].SourcePath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer nc.Close()
+
+	// Initialize a stream manager and create a stream.
+	js, err := jetstream.New(nc)
+	if err != nil {
+		t.Fatal(err)
+	}
+	js.CreateStream(context.Background(), jetstream.StreamConfig{
+		Name:     "stream",
+		Subjects: []string{"cgrates_cdrs", "cgrates_cdrs_processed"},
+	})
+
+	// Start the engine.
+	if _, err := engine.StopStartEngine(cfgPath, 100); err != nil {
+		t.Fatal(err)
+	}
+	defer engine.KillEngine(100)
+
+	// Publish CDRs asynchronously to the nats subject.
+	cdr := make(map[string]any)
+	for i := 0; i < 10; i++ {
+		cdr[utils.AccountField] = 1001 + i
+		cdr[utils.Subject] = 1001 + i
+		cdr[utils.Destination] = 2001 + i
+		b, _ := json.Marshal(cdr)
+		js.PublishAsync("cgrates_cdrs", b)
+	}
+	select {
+	case <-js.PublishAsyncComplete():
+	case <-time.After(5 * time.Second):
+		t.Fatal("Did not resolve in time")
+	}
+
+	// Define a consumer for the subject where all the processed cdrs were published.
+	var cons jetstream.Consumer
+	cons, err = js.CreateOrUpdateConsumer(context.Background(), "stream", jetstream.ConsumerConfig{
+		FilterSubject: "cgrates_cdrs_processed",
+		Durable:       "cgrates_processed",
+		AckPolicy:     jetstream.AckAllPolicy,
+	})
+	if err != nil {
+		t.Error(err)
+	}
+
+	// Wait for the messages to be consumed and processed.
+	time.Sleep(100 * time.Millisecond)
+
+	// Retrieve info about the consumer.
+	info, err := cons.Info(context.Background())
+	if err != nil {
+		t.Error(err)
+	}
+
+	if info.NumPending != 10 {
+		t.Errorf("expected %d pending messages, received %d", 10, info.NumPending)
+	}
+
+	js.DeleteStream(context.Background(), "stream")
+
+}
+
+func testCheckNatsData(t *testing.T, randomOriginID, expData string, ch chan string) {
 	select {
 	case err := <-rdrErr:
 		t.Fatal(err)
@@ -58,8 +145,8 @@ func testCheckNatsData(t *testing.T, randomOriginID, expData string, ch chan *na
 		}
 		select {
 		case msg := <-ch:
-			if expData != string(msg.Data) {
-				t.Errorf("Expected %q ,received %q", expData, string(msg.Data))
+			if expData != msg {
+				t.Errorf("Expected %q ,received %q", expData, msg)
 			}
 		case <-time.After(10 * time.Second):
 			t.Fatal("Timeout2")
@@ -89,49 +176,44 @@ func testCheckNatsJetStream(t *testing.T, cfg *config.CGRConfig) {
 	}
 	defer nc.Drain()
 
-	js, err := nc.JetStream()
+	js, err := jetstream.New(nc)
 	if err != nil {
 		t.Fatal(err)
 	}
-	for name := range js.StreamNames() {
-		if name == "test" {
-			if err = js.DeleteStream("test"); err != nil {
-				t.Fatal(err)
-			}
-			break
-		}
-		if name == "test2" {
-			if err = js.DeleteStream("test2"); err != nil {
-				t.Fatal(err)
-			}
-			break
-		}
-	}
-	if _, err = js.AddStream(&nats.StreamConfig{
+
+	_, err = js.CreateStream(context.Background(), jetstream.StreamConfig{
 		Name:     "test",
 		Subjects: []string{utils.DefaultQueueID},
-	}); err != nil {
+	})
+	if err != nil {
 		t.Fatal(err)
 	}
+	defer js.DeleteStream(context.Background(), "test")
 
-	if err = js.PurgeStream("test"); err != nil {
-		t.Fatal(err)
-	}
-
-	if _, err = js.AddStream(&nats.StreamConfig{
+	_, err = js.CreateStream(context.Background(), jetstream.StreamConfig{
 		Name:     "test2",
 		Subjects: []string{"processed_cdrs"},
-	}); err != nil {
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer js.DeleteStream(context.Background(), "test2")
+
+	ch := make(chan string, 3)
+	var cons jetstream.Consumer
+	cons, err = js.CreateOrUpdateConsumer(context.Background(), "test2", jetstream.ConsumerConfig{
+		FilterSubject: "processed_cdrs",
+		Durable:       "test4",
+		AckPolicy:     jetstream.AckAllPolicy,
+	})
+	if err != nil {
+		nc.Drain()
 		t.Fatal(err)
 	}
 
-	if err = js.PurgeStream("test2"); err != nil {
-		t.Fatal(err)
-	}
-	ch := make(chan *nats.Msg, 3)
-	_, err = js.QueueSubscribe("processed_cdrs", "test3", func(msg *nats.Msg) {
-		ch <- msg
-	}, nats.Durable("test4"))
+	_, err = cons.Consume(func(msg jetstream.Msg) {
+		ch <- string(msg.Data())
+	})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -143,7 +225,7 @@ func testCheckNatsJetStream(t *testing.T, cfg *config.CGRConfig) {
 	for i := 0; i < 3; i++ {
 		randomOriginID := utils.UUIDSha1Prefix()
 		expData := fmt.Sprintf(`{"OriginID": "%s"}`, randomOriginID)
-		if _, err = js.Publish(utils.DefaultQueueID, []byte(expData)); err != nil {
+		if _, err = js.Publish(context.Background(), utils.DefaultQueueID, []byte(expData)); err != nil {
 			t.Fatal(err)
 		}
 
@@ -174,8 +256,10 @@ func testCheckNatsNormal(t *testing.T, cfg *config.CGRConfig) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	ch := make(chan *nats.Msg, 3)
-	_, err = nc.ChanQueueSubscribe("processed_cdrs", "test3", ch)
+	ch := make(chan string, 3)
+	_, err = nc.QueueSubscribe("processed_cdrs", "test3", func(msg *nats.Msg) {
+		ch <- string(msg.Data)
+	})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -200,16 +284,16 @@ func testCheckNatsNormal(t *testing.T, cfg *config.CGRConfig) {
 }
 
 func TestNatsERJetStream(t *testing.T) {
-	// start the nats-server
-	exec.Command("pkill", "nats-server")
-
-	cmd := exec.Command("nats-server", "-js")
-	if err := cmd.Start(); err != nil {
-		t.Fatal(err) // most probably not installed
+	natsServer, err := server.NewServer(&server.Options{
+		Host:      "127.0.0.1",
+		Port:      4222,
+		JetStream: true,
+	})
+	if err != nil {
+		t.Fatal(err)
 	}
-	time.Sleep(50 * time.Millisecond)
-	defer cmd.Process.Kill()
-	//
+	natsServer.Start()
+	defer natsServer.Shutdown()
 
 	cfg, err := config.NewCGRConfigFromJSONStringWithDefaults(`{
 "ers": {									// EventReaderService
@@ -231,6 +315,7 @@ func TestNatsERJetStream(t *testing.T) {
 			],
 			"opts": {
 				"natsJetStream": true,
+				"natsStreamName": "test",
 				"natsJetStreamProcessed": true,
 				"natsSubjectProcessed": "processed_cdrs",
 			}
@@ -248,16 +333,15 @@ func TestNatsERJetStream(t *testing.T) {
 }
 
 func TestNatsER(t *testing.T) {
-	// start the nats-server
-	exec.Command("pkill", "nats-server")
-
-	cmd := exec.Command("nats-server")
-	if err := cmd.Start(); err != nil {
-		t.Fatal(err) // most probably not installed
+	natsServer, err := server.NewServer(&server.Options{
+		Host: "127.0.0.1",
+		Port: 4222,
+	})
+	if err != nil {
+		t.Fatal(err)
 	}
-	time.Sleep(50 * time.Millisecond)
-	defer cmd.Process.Kill()
-	//
+	natsServer.Start()
+	defer natsServer.Shutdown()
 
 	cfg, err := config.NewCGRConfigFromJSONStringWithDefaults(`{
 "ers": {									// EventReaderService
@@ -294,16 +378,18 @@ func TestNatsER(t *testing.T) {
 }
 
 func TestNatsERJetStreamUser(t *testing.T) {
-	// start the nats-server
-	exec.Command("pkill", "nats-server")
-
-	cmd := exec.Command("nats-server", "-js", "--user", "user", "--pass", "password")
-	if err := cmd.Start(); err != nil {
-		t.Fatal(err) // most probably not installed
+	natsServer, err := server.NewServer(&server.Options{
+		Host:      "127.0.0.1",
+		Port:      4222,
+		JetStream: true,
+		Username:  "user",
+		Password:  "password",
+	})
+	if err != nil {
+		t.Fatal(err)
 	}
-	time.Sleep(50 * time.Millisecond)
-	defer cmd.Process.Kill()
-	//
+	natsServer.Start()
+	defer natsServer.Shutdown()
 
 	cfg, err := config.NewCGRConfigFromJSONStringWithDefaults(`{
 "ers": {									// EventReaderService
@@ -325,6 +411,7 @@ func TestNatsERJetStreamUser(t *testing.T) {
 			],
 			"opts": {
 				"natsJetStream": true,
+				"natsStreamName": "test",
 				"natsJetStreamProcessed": true,
 				"natsSubjectProcessed": "processed_cdrs",
 			}
@@ -342,16 +429,17 @@ func TestNatsERJetStreamUser(t *testing.T) {
 }
 
 func TestNatsERUser(t *testing.T) {
-	// start the nats-server
-	exec.Command("pkill", "nats-server")
-
-	cmd := exec.Command("nats-server", "--user", "user", "--pass", "password")
-	if err := cmd.Start(); err != nil {
-		t.Fatal(err) // most probably not installed
+	natsServer, err := server.NewServer(&server.Options{
+		Host:     "127.0.0.1",
+		Port:     4222,
+		Username: "user",
+		Password: "password",
+	})
+	if err != nil {
+		t.Fatal(err)
 	}
-	time.Sleep(50 * time.Millisecond)
-	defer cmd.Process.Kill()
-	//
+	natsServer.Start()
+	defer natsServer.Shutdown()
 
 	cfg, err := config.NewCGRConfigFromJSONStringWithDefaults(`{
 "ers": {									// EventReaderService
@@ -388,16 +476,17 @@ func TestNatsERUser(t *testing.T) {
 }
 
 func TestNatsERJetStreamToken(t *testing.T) {
-	// start the nats-server
-	exec.Command("pkill", "nats-server")
-
-	cmd := exec.Command("nats-server", "-js", "--auth", "token")
-	if err := cmd.Start(); err != nil {
-		t.Fatal(err) // most probably not installed
+	natsServer, err := server.NewServer(&server.Options{
+		Host:          "127.0.0.1",
+		Port:          4222,
+		JetStream:     true,
+		Authorization: "token",
+	})
+	if err != nil {
+		t.Fatal(err)
 	}
-	time.Sleep(50 * time.Millisecond)
-	defer cmd.Process.Kill()
-	//
+	natsServer.Start()
+	defer natsServer.Shutdown()
 
 	cfg, err := config.NewCGRConfigFromJSONStringWithDefaults(`{
 "ers": {									// EventReaderService
@@ -419,6 +508,7 @@ func TestNatsERJetStreamToken(t *testing.T) {
 			],
 			"opts": {
 				"natsJetStream": true,
+				"natsStreamName": "test",
 				"natsJetStreamProcessed": true,
 				"natsSubjectProcessed": "processed_cdrs",
 			}
@@ -436,16 +526,17 @@ func TestNatsERJetStreamToken(t *testing.T) {
 }
 
 func TestNatsERToken(t *testing.T) {
-	// start the nats-server
-	exec.Command("pkill", "nats-server")
-
-	cmd := exec.Command("nats-server", "--auth", "token")
-	if err := cmd.Start(); err != nil {
-		t.Fatal(err) // most probably not installed
+	natsServer, err := server.NewServer(&server.Options{
+		Host:          "127.0.0.1",
+		Port:          4222,
+		JetStream:     true,
+		Authorization: "token",
+	})
+	if err != nil {
+		t.Fatal(err)
 	}
-	time.Sleep(50 * time.Millisecond)
-	defer cmd.Process.Kill()
-	//
+	natsServer.Start()
+	defer natsServer.Shutdown()
 
 	cfg, err := config.NewCGRConfigFromJSONStringWithDefaults(`{
 "ers": {									// EventReaderService
@@ -493,25 +584,21 @@ func TestNatsERNkey(t *testing.T) {
 	if err := os.WriteFile(seedFilePath, []byte("SUAOUIE5CU47NCO22GHFEZXGCRCJDVTHDLMIP4L7UQNCR5SW4FZICI7O3Q"), 0664); err != nil {
 		t.Fatal(err)
 	}
-	natsCfgPath := path.Join(basePath, "nats.cfg")
-	if err := os.WriteFile(natsCfgPath, []byte(`authorization: {
-	users: [
-	  { nkey: UBSNABLSM4Y2KY4ZFWPDOB4NVNYCGVD5YB7ROC4EGSDR7Z7V57PXAIQY }
-	]
-  }
-`), 0664); err != nil {
+
+	natsServer, err := server.NewServer(&server.Options{
+		Host: "127.0.0.1",
+		Port: 4222,
+		Nkeys: []*server.NkeyUser{
+			{
+				Nkey: "UBSNABLSM4Y2KY4ZFWPDOB4NVNYCGVD5YB7ROC4EGSDR7Z7V57PXAIQY",
+			},
+		},
+	})
+	if err != nil {
 		t.Fatal(err)
 	}
-	// start the nats-server
-	exec.Command("pkill", "nats-server")
-
-	cmd := exec.Command("nats-server", "-c", natsCfgPath)
-	if err := cmd.Start(); err != nil {
-		t.Fatal(err) // most probably not installed
-	}
-	time.Sleep(50 * time.Millisecond)
-	defer cmd.Process.Kill()
-	//
+	natsServer.Start()
+	defer natsServer.Shutdown()
 
 	cfg, err := config.NewCGRConfigFromJSONStringWithDefaults(fmt.Sprintf(`{
 "ers": {									// EventReaderService
@@ -561,25 +648,22 @@ func TestNatsERJetStreamNKey(t *testing.T) {
 	if err := os.WriteFile(seedFilePath, []byte("SUAOUIE5CU47NCO22GHFEZXGCRCJDVTHDLMIP4L7UQNCR5SW4FZICI7O3Q"), 0664); err != nil {
 		t.Fatal(err)
 	}
-	natsCfgPath := path.Join(basePath, "nats.cfg")
-	if err := os.WriteFile(natsCfgPath, []byte(`authorization: {
-users: [
-  { nkey: UBSNABLSM4Y2KY4ZFWPDOB4NVNYCGVD5YB7ROC4EGSDR7Z7V57PXAIQY }
-]
-}
-`), 0664); err != nil {
+
+	natsServer, err := server.NewServer(&server.Options{
+		Host:      "127.0.0.1",
+		Port:      4222,
+		JetStream: true,
+		Nkeys: []*server.NkeyUser{
+			{
+				Nkey: "UBSNABLSM4Y2KY4ZFWPDOB4NVNYCGVD5YB7ROC4EGSDR7Z7V57PXAIQY",
+			},
+		},
+	})
+	if err != nil {
 		t.Fatal(err)
 	}
-	// start the nats-server
-	exec.Command("pkill", "nats-server")
-
-	cmd := exec.Command("nats-server", "-c", natsCfgPath, "-js")
-	if err := cmd.Start(); err != nil {
-		t.Fatal(err) // most probably not installed
-	}
-	time.Sleep(50 * time.Millisecond)
-	defer cmd.Process.Kill()
-	//
+	natsServer.Start()
+	defer natsServer.Shutdown()
 
 	cfg, err := config.NewCGRConfigFromJSONStringWithDefaults(fmt.Sprintf(`{
 "ers": {									// EventReaderService
@@ -601,6 +685,7 @@ users: [
 			],
 			"opts": {
 				"natsJetStream": true,
+				"natsStreamName": "test",
 				"natsSeedFile": %q,
 				"natsJetStreamProcessed": true,
 				"natsSubjectProcessed": "processed_cdrs",
@@ -657,16 +742,16 @@ resolver_preload: {
 `), 0664); err != nil {
 		t.Fatal(err)
 	}
-	// start the nats-server
-	exec.Command("pkill", "nats-server")
-
-	cmd := exec.Command("nats-server", "-c", natsCfgPath)
-	if err := cmd.Start(); err != nil {
-		t.Fatal(err) // most probably not installed
+	natsServer, err := server.NewServer(&server.Options{
+		Host:       "127.0.0.1",
+		Port:       4222,
+		ConfigFile: natsCfgPath,
+	})
+	if err != nil {
+		t.Fatal(err)
 	}
-	time.Sleep(50 * time.Millisecond)
-	defer cmd.Process.Kill()
-	//
+	natsServer.Start()
+	defer natsServer.Shutdown()
 
 	cfg, err := config.NewCGRConfigFromJSONStringWithDefaults(fmt.Sprintf(`{
 "ers": {									// EventReaderService
@@ -746,16 +831,18 @@ system_account:AAFIBB6C56ROU5XRVJLJYR3BTGGYK3HJGHEHQV7L7QZMTT3ZRBLHBS7F
 `), 0664); err != nil {
 		t.Fatal(err)
 	}
-	// start the nats-server
-	exec.Command("pkill", "nats-server")
-
-	cmd := exec.Command("nats-server", "-c", natsCfgPath, "-js")
-	if err := cmd.Start(); err != nil {
-		t.Fatal(err) // most probably not installed
+	natsServer, err := server.NewServer(&server.Options{
+		Host:       "127.0.0.1",
+		Port:       4222,
+		ConfigFile: natsCfgPath,
+		JetStream:  true,
+	})
+	if err != nil {
+		t.Fatal(err)
 	}
-	time.Sleep(100 * time.Millisecond)
-	defer cmd.Process.Kill()
-	//
+	natsServer.Start()
+	defer natsServer.Shutdown()
+
 	cfg, err := config.NewCGRConfigFromJSONStringWithDefaults(fmt.Sprintf(`{
 "ers": {									// EventReaderService
 	"enabled": true,						// starts the EventReader service: <true|false>
@@ -776,6 +863,7 @@ system_account:AAFIBB6C56ROU5XRVJLJYR3BTGGYK3HJGHEHQV7L7QZMTT3ZRBLHBS7F
 			],
 			"opts": {
 				"natsJetStream": true,
+				"natsStreamName": "test",
 				"natsJWTFile": %q,
 				"natsJetStreamProcessed": true,
 				"natsSubjectProcessed": "processed_cdrs",

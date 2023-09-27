@@ -2524,6 +2524,7 @@ const (
 	NatsSubject              = "natsSubject"
 	NatsQueueID              = "natsQueueID"
 	NatsConsumerName         = "natsConsumerName"
+	NatsStreamName           = "natsStreamName"
 	NatsJWTFile              = "natsJWTFile"
 	NatsSeedFile             = "natsSeedFile"
 	NatsClientCertificate    = "natsClientCertificate"
