@@ -28,8 +28,9 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-// getProcessOptions assigns all non-nil fields ending in "Processed" from EventReaderOpts to their counterparts in EventExporterOpts
-func getProcessOptions(erOpts *config.EventReaderOpts) (eeOpts *config.EventExporterOpts) {
+// getProcessedOptions assigns all non-nil fields ending in "Processed" from EventReaderOpts to their counterparts in EventExporterOpts
+func getProcessedOptions(erOpts *config.EventReaderOpts) *config.EventExporterOpts {
+	var eeOpts *config.EventExporterOpts
 	if erOpts.AMQPExchangeProcessed != nil {
 		if eeOpts == nil {
 			eeOpts = new(config.EventExporterOpts)
@@ -198,7 +199,7 @@ func getProcessOptions(erOpts *config.EventReaderOpts) (eeOpts *config.EventExpo
 		}
 		eeOpts.PgSSLMode = erOpts.PgSSLModeProcessed
 	}
-	return
+	return eeOpts
 }
 
 // mergePartialEvents will unite the events using the reader configuration

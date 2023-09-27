@@ -469,6 +469,7 @@ const CGRATES_CFG_JSON = `
 				// nats
 				// "natsJetStream": false,						// controls if the nats reader uses the JetStream
 				// "natsConsumerName": "cgrates",				// in case of JetStream the name of the consumer
+				// "natsStreamName": "cdrs",					// the name of the NATS JetStream stream from which the consumer will read messages
 				"natsSubject": "cgrates_cdrs",					// the subject from were the events are read
 				// "natsQueueID": "",							// the queue id the consumer listen to
 				// "natsJWTFile": "",							// the path to the JWT file( can be the chained file or the user file)
@@ -485,7 +486,7 @@ const CGRATES_CFG_JSON = `
 				// "natsCertificateAuthorityProcessed": "",		// the path to a custom certificate authority file( used by tls)
 				// "natsClientCertificateProcessed": "",		// the path to a client certificate( used by tls)
 				// "natsClientKeyProcessed": "",				// the path to a client key( used by tls)
-				// "natsJetStreamMaxWaitProcessed": "5s	",		// the maximum amount of time to wait for a response
+				// "natsJetStreamMaxWaitProcessed": "5s",		// the maximum amount of time to wait for a response
 			},
 			"tenant": "",										// tenant used by import
 			"timezone": "",										// timezone for timestamps where not specified <""|UTC|Local|$IANA_TZ_DB>

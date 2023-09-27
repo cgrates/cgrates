@@ -297,7 +297,7 @@ func (rdr *SQLEventReader) setURL(inURL, outURL string, opts *config.EventReader
 	}
 
 	// outURL
-	processedOpt := getProcessOptions(opts)
+	processedOpt := getProcessedOptions(opts)
 	if processedOpt == nil {
 		if len(outURL) == 0 {
 			return
