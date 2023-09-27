@@ -1,179 +1,20 @@
 ---
-- hosts: local
-  vars:
-    ansible_python_interpreter: auto # to disable deprication warning related to the use of python2
-    ###############################################################
-    ##################### Golang Vars #############################
-    ###############################################################
-    # Go language SDK version number
-    golang_version: '1.18'
-    go_version_target: "go version go{{ golang_version }} linux/amd64"
-    # Mirror to download the Go language SDK redistributable package from
-    golang_mirror: 'https://storage.googleapis.com/golang'
-    # Base installation directory the Go language SDK distribution
-    golang_install_dir: '/usr/local/go'
-    # Directory to store files downloaded for Go language SDK installation
-    golang_download_dir: "{{ x_ansible_download_dir | default(ansible_env.HOME + '/.ansible/tmp/downloads') }}"
-    # Location for GOPATH environment variable
-    golang_gopath: "/home/{{ user }}/go"
-    # Filename of Go language SDK redistributable package
-    golang_redis_filename: 'go{{ golang_version }}.linux-amd64.tar.gz'
-    ###############################################################
-    ###################### Kafka Vars #############################
-    ###############################################################
-    kafka_apache_mirror: https://archive.apache.org/dist/
-    kafka_user: kafka
-    kafka_version_kafka: 2.1.0
-    kafka_version_scala: 2.11
-    kafka_base_name: "kafka_{{ kafka_version_scala }}-{{ kafka_version_kafka }}"
-    kafka_url: "{{ kafka_apache_mirror }}/kafka/{{ kafka_version_kafka }}/{{ kafka_base_name }}.tgz"
-    kafka_download_folder: "/home/{{ kafka_user }}/Downloads"
-    kafka_install_folder: "/home/{{ kafka_user }}"
-    # kafka_user_password: "123456y"
+- hosts: all
+  roles:
+    - ../roles/rabbitmq
+    - ../roles/nats
+    - role: ../roles/elasticsearch
+      vars:
+        auto_create_index: ".monitoring*,.watches,.triggered_watches,.watcher-history*,.ml*,cdrs"
 
-    ###############################################################
-    # CGRateS location
-    cgrates_dir: "{{ golang_gopath }}/src/github.com/cgrates/cgrates"
-    ###############################################################
-  remote_user: root
-  tasks:
+    # # Trying for now to overwrite the auto_create_index defaults.
+    # # In case of failure, we will be using the commented task below:
+    # - name: Create 'cdrs' index in Elasticsearch for CGRateS integration tests
+    #   command: 'curl -X PUT "localhost:9200/cdrs?pretty"'
+    #   ignore_errors: yes
 
-###########################################################################################################################
-
-###########################################################################################################################
-# install dependencies
-  - name: Install build-essential
-    become: yes
-    apt:
-      name: build-essential
-      state: present
-
-  - name: Install the git
-    become: yes
-    apt:
-      name: git
-
-  - name: Install the redis
-    become: yes
-    apt:
-      name: redis-server
-      
-  - name: Install the mysql
-    become: yes
-    apt:
-      name: mariadb-server
-
-  - name: Install the postgresql
-    become: yes
-    apt:
-      name: postgresql
-
-  - name: Install the postgresql-contrib
-    become: yes
-    apt:
-      name: postgresql-contrib
-
-###########################################################################################################################
-  - name: Install nats
-    become: yes
-    apt:
-      deb: https://github.com/nats-io/nats-server/releases/download/v2.3.0/nats-server-v2.3.0-amd64.deb
-
-  - name: Install mongo
-    include: mongo.yaml
-
-  - name: Install kafka
-    include: kafka.yaml
-
-  - name: Install rabbitmq
-    include: rabbitmq.yaml
-    
-  - name: Install elastic
-    include: elasic.yaml
-###########################################################################################################################
-
-###########################################################################################################################
-  # install golang
-  - name: install unarchive dependencies (zypper)
-    become: yes
-    zypper:
-      name:
-        - gzip
-        - tar
-      state: present
-    when: ansible_pkg_mgr == 'zypper'
-
-  - name: Install golang
-    include: go.yaml
-
-###########################################################################################################################
-
-###########################################################################################################################
-# install cgrates
-  - name: create cgrates directory
-    file:
-      state: directory
-      mode: 'u=rwx,go=rx'
-      owner: "{{ user }}"
-      group: "{{ user }}"
-      dest: '{{ cgrates_dir }}'
-    become_user: "{{ user }}"
-
-  - name: git clone cgrates
-    git:
-      repo: https://github.com/cgrates/cgrates.git
-      dest: '{{ cgrates_dir }}'
-    become: yes
-    become_user: "{{ user }}"
-
-  - name:  build cgrates
-    command: 'sh {{ cgrates_dir }}/build.sh'
-    environment:
-      PATH: "{{ lookup('env','PATH') }}:{{ golang_gopath }}/bin:/usr/local/go/bin:{{ ansible_env.PATH }}"
-    args:
-      chdir: '{{ cgrates_dir }}'
-
-  - name: symbol link
-    become: yes
-    file:
-      src: "{{ cgrates_dir }}/data"
-      dest: "/usr/share/cgrates"
-      state: link
-###########################################################################################################################
-
-###########################################################################################################################
-# post install
-  - name:  post install mysql
-    become: yes
-    command: 'sh {{ cgrates_dir }}/data/storage/mysql/setup_cgr_db.sh root CGRateS.org localhost'
-    args:
-      chdir: '{{ cgrates_dir }}/data/storage/mysql/'
-
-  - name:  post install for ers mysql
-    become: yes
-    command: 'sh {{ cgrates_dir }}/data/storage/mysql/setup_ers_db.sh root CGRateS.org localhost'
-    args:
-      chdir: '{{ cgrates_dir }}/data/storage/mysql/'
-
-  - name:  post install postgres2
-    become: yes
-    command: 'sh {{ cgrates_dir }}/data/storage/postgres/create_db_with_users.sh'
-    args:
-      chdir: '{{ cgrates_dir }}/data/storage/postgres/'
-
-  - name:  post install for ers postgres
-    become: yes
-    command: 'sh {{ cgrates_dir }}/data/storage/postgres/create_ers_db.sh'
-    args:
-      chdir: '{{ cgrates_dir }}/data/storage/postgres/'
-
-  - name:  post install mongo
-    become: yes
-    command: 'sh {{ cgrates_dir }}/data/storage/mongo/setup_cgr_db.sh'
-    args:
-      chdir: '{{ cgrates_dir }}/data/storage/mongo/'
-
-  - name:  set versions
-    command: 'cgr-migrator -exec=*set_versions -config_path=/usr/share/cgrates/conf/samples/tutmysql'
-    environment:
-      PATH: "{{ lookup('env','PATH') }}:{{ golang_gopath }}/bin:/usr/local/go/bin:{{ ansible_env.PATH }}"
+    - ../roles/kafka
+    - ../roles/mongodb
+    - ../roles/postgresql
+    - ../roles/go
+    - ../roles/cgrates
