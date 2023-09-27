@@ -41,13 +41,13 @@ func TestSQLSetURL(t *testing.T) {
 	inURL := "*mysql://cgrates:CGRateS.org@127.0.0.1:3306"
 	outURL := "*mysql://cgrates:CGRateS.org@127.0.0.1:3306"
 	if err := sql.setURL(inURL, outURL, &config.EventReaderOpts{
-		SQLOpts: &config.SQLROpts{
-			SQLDBName:             utils.StringPointer("cgrates2"),
-			SQLTableName:          utils.StringPointer("cdrs2"),
-			PgSSLMode:             utils.StringPointer("enabled"),
-			SQLDBNameProcessed:    utils.StringPointer("cgrates3"),
-			SQLTableNameProcessed: utils.StringPointer("cdrs3"),
-			PgSSLModeProcessed:    utils.StringPointer("enabled")},
+		SQL: &config.SQLROpts{
+			DBName:             utils.StringPointer("cgrates2"),
+			TableName:          utils.StringPointer("cdrs2"),
+			PgSSLMode:          utils.StringPointer("enabled"),
+			DBNameProcessed:    utils.StringPointer("cgrates3"),
+			TableNameProcessed: utils.StringPointer("cdrs3"),
+			PgSSLModeProcessed: utils.StringPointer("enabled")},
 	}); err != nil {
 		t.Fatal(err)
 	} else if expsql.connString != sql.connString {
@@ -76,13 +76,13 @@ func TestSQLSetURL(t *testing.T) {
 	inURL = "*postgres://cgrates:CGRateS.org@127.0.0.1:3306"
 	outURL = "*postgres://cgrates:CGRateS.org@127.0.0.1:3306"
 	if err := sql.setURL(inURL, outURL, &config.EventReaderOpts{
-		SQLOpts: &config.SQLROpts{
-			SQLDBName:             utils.StringPointer("cgrates2"),
-			SQLTableName:          utils.StringPointer("cdrs2"),
-			PgSSLMode:             utils.StringPointer("enabled"),
-			SQLDBNameProcessed:    utils.StringPointer("cgrates3"),
-			SQLTableNameProcessed: utils.StringPointer("cdrs3"),
-			PgSSLModeProcessed:    utils.StringPointer("enabled")},
+		SQL: &config.SQLROpts{
+			DBName:             utils.StringPointer("cgrates2"),
+			TableName:          utils.StringPointer("cdrs2"),
+			PgSSLMode:          utils.StringPointer("enabled"),
+			DBNameProcessed:    utils.StringPointer("cgrates3"),
+			TableNameProcessed: utils.StringPointer("cdrs3"),
+			PgSSLModeProcessed: utils.StringPointer("enabled")},
 	}); err != nil {
 		t.Fatal(err)
 	} else if expsql.connString != sql.connString {
@@ -111,13 +111,13 @@ func TestSQLSetURL(t *testing.T) {
 	inURL = "*postgres://cgrates:CGRateS.org@127.0.0.1:3306"
 	outURL = ""
 	if err := sql.setURL(inURL, outURL, &config.EventReaderOpts{
-		SQLOpts: &config.SQLROpts{
-			SQLDBName:             utils.StringPointer("cgrates2"),
-			SQLTableName:          utils.StringPointer("cdrs2"),
-			PgSSLMode:             utils.StringPointer("enabled"),
-			SQLDBNameProcessed:    utils.StringPointer("cgrates2"),
-			SQLTableNameProcessed: utils.StringPointer("cdrs2"),
-			PgSSLModeProcessed:    utils.StringPointer("enabled")},
+		SQL: &config.SQLROpts{
+			DBName:             utils.StringPointer("cgrates2"),
+			TableName:          utils.StringPointer("cdrs2"),
+			PgSSLMode:          utils.StringPointer("enabled"),
+			DBNameProcessed:    utils.StringPointer("cgrates2"),
+			TableNameProcessed: utils.StringPointer("cdrs2"),
+			PgSSLModeProcessed: utils.StringPointer("enabled")},
 	}); err != nil {
 		t.Fatal(err)
 	} else if expsql.connString != sql.connString {

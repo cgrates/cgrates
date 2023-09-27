@@ -608,19 +608,19 @@ func testCGRConfigReloadERs(t *testing.T) {
 				CacheDumpFields:     []*FCTemplate{},
 				PartialCommitFields: []*FCTemplate{},
 				Opts: &EventReaderOpts{
-					CSVOpts: &CSVROpts{
-						CSVFieldSeparator:   utils.StringPointer(utils.FieldsSep),
-						CSVHeaderDefineChar: utils.StringPointer(utils.InInFieldSep),
-						CSVRowLength:        utils.IntPointer(0),
+					CSV: &CSVROpts{
+						FieldSeparator:   utils.StringPointer(utils.FieldsSep),
+						HeaderDefineChar: utils.StringPointer(utils.InInFieldSep),
+						RowLength:        utils.IntPointer(0),
 					},
-					AMQPOpts:           &AMQPROpts{},
-					AWSOpts:            &AWSROpts{},
-					SQLOpts:            &SQLROpts{},
-					KafkaOpts:          &KafkaROpts{},
+					AMQP:               &AMQPROpts{},
+					AWS:                &AWSROpts{},
+					SQL:                &SQLROpts{},
+					Kafka:              &KafkaROpts{},
 					PartialOrderField:  utils.StringPointer("~*req.AnswerTime"),
 					PartialCacheAction: utils.StringPointer(utils.MetaNone),
 					XMLRootPath:        utils.StringPointer(utils.EmptyString),
-					NATSOpts: &NATSROpts{
+					NATS: &NATSROpts{
 						Subject: utils.StringPointer("cgrates_cdrs"),
 					},
 				},
@@ -638,19 +638,19 @@ func testCGRConfigReloadERs(t *testing.T) {
 				CacheDumpFields:     []*FCTemplate{},
 				PartialCommitFields: []*FCTemplate{},
 				Opts: &EventReaderOpts{
-					CSVOpts: &CSVROpts{
-						CSVFieldSeparator:   utils.StringPointer(utils.FieldsSep),
-						CSVHeaderDefineChar: utils.StringPointer(utils.InInFieldSep),
-						CSVRowLength:        utils.IntPointer(0),
+					CSV: &CSVROpts{
+						FieldSeparator:   utils.StringPointer(utils.FieldsSep),
+						HeaderDefineChar: utils.StringPointer(utils.InInFieldSep),
+						RowLength:        utils.IntPointer(0),
 					},
-					AMQPOpts:           &AMQPROpts{},
-					AWSOpts:            &AWSROpts{},
-					KafkaOpts:          &KafkaROpts{},
-					SQLOpts:            &SQLROpts{},
+					AMQP:               &AMQPROpts{},
+					AWS:                &AWSROpts{},
+					Kafka:              &KafkaROpts{},
+					SQL:                &SQLROpts{},
 					PartialOrderField:  utils.StringPointer("~*req.AnswerTime"),
 					PartialCacheAction: utils.StringPointer(utils.MetaNone),
 					XMLRootPath:        utils.StringPointer(utils.EmptyString),
-					NATSOpts: &NATSROpts{
+					NATS: &NATSROpts{
 						Subject: utils.StringPointer("cgrates_cdrs"),
 					},
 				},

@@ -34,9 +34,9 @@ func TestAMQPSetOpts(t *testing.T) {
 		tag:     "new",
 	}
 	if k.setOpts(&config.EventReaderOpts{
-		AMQPOpts: &config.AMQPROpts{
-			AMQPQueueID:     utils.StringPointer("cdrs"),
-			AMQPConsumerTag: utils.StringPointer("new")},
+		AMQP: &config.AMQPROpts{
+			QueueID:     utils.StringPointer("cdrs"),
+			ConsumerTag: utils.StringPointer("new")},
 	}); expKafka.dialURL != k.dialURL {
 		t.Errorf("Expected: %s ,received: %s", expKafka.dialURL, k.dialURL)
 	} else if expKafka.queueID != k.queueID {
@@ -52,9 +52,9 @@ func TestAMQPSetOpts(t *testing.T) {
 		tag:     "cgrates",
 	}
 	if k.setOpts(&config.EventReaderOpts{
-		AMQPOpts: &config.AMQPROpts{
-			AMQPQueueID:     utils.StringPointer("cgrates_cdrs"),
-			AMQPConsumerTag: utils.StringPointer("cgrates"),
+		AMQP: &config.AMQPROpts{
+			QueueID:     utils.StringPointer("cgrates_cdrs"),
+			ConsumerTag: utils.StringPointer("cgrates"),
 		},
 	}); expKafka.dialURL != k.dialURL {
 		t.Errorf("Expected: %s ,received: %s", expKafka.dialURL, k.dialURL)

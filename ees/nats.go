@@ -41,7 +41,7 @@ func NewNatsEE(cfg *config.EventExporterCfg, nodeID string, connTimeout time.Dur
 		subject: utils.DefaultQueueID,
 		reqs:    newConcReq(cfg.ConcurrentRequests),
 	}
-	err = natsPstr.parseOpts(cfg.Opts, nodeID, connTimeout)
+	err = natsPstr.parseOpts(cfg.Opts.NATS, nodeID, connTimeout)
 	return
 }
 
@@ -61,20 +61,20 @@ type NatsEE struct {
 	bytePreparing
 }
 
-func (pstr *NatsEE) parseOpts(opts *config.EventExporterOpts, nodeID string, connTimeout time.Duration) error {
-	if opts.NATS == nil {
+func (pstr *NatsEE) parseOpts(opts *config.NATSOpts, nodeID string, connTimeout time.Duration) error {
+	if opts == nil {
 		return nil
 	}
 
-	if opts.NATS.JetStream != nil {
-		pstr.jetStream = *opts.NATS.JetStream
+	if opts.JetStream != nil {
+		pstr.jetStream = *opts.JetStream
 	}
-	if opts.NATS.Subject != nil {
-		pstr.subject = *opts.NATS.Subject
+	if opts.Subject != nil {
+		pstr.subject = *opts.Subject
 	}
 
 	var err error
-	pstr.opts, err = GetNatsOpts(opts.NATS, nodeID, connTimeout)
+	pstr.opts, err = GetNatsOpts(opts, nodeID, connTimeout)
 	if err != nil {
 		return err
 	}

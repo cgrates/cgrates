@@ -39,7 +39,7 @@ import (
 // NewNatsER return a new amqp event reader
 func NewNatsER(cfg *config.CGRConfig, cfgIdx int,
 	rdrEvents, partialEvents chan *erEvent, rdrErr chan error,
-	fltrS *engine.FilterS, rdrExit chan struct{}) (_ EventReader, err error) {
+	fltrS *engine.FilterS, rdrExit chan struct{}) (EventReader, error) {
 	rdr := &NatsER{
 		cgrCfg:        cfg,
 		cfgIdx:        cfgIdx,
@@ -55,11 +55,13 @@ func NewNatsER(cfg *config.CGRConfig, cfgIdx int,
 			rdr.cap <- struct{}{}
 		}
 	}
-	if err = rdr.processOpts(); err != nil {
-		return
+	err := rdr.processOpts()
+	if err != nil {
+		return nil, err
 	}
-	if err = rdr.createPoster(); err != nil {
-		return
+	err = rdr.createPoster()
+	if err != nil {
+		return nil, err
 	}
 	return rdr, nil
 }
@@ -153,7 +155,7 @@ func (rdr *NatsER) Serve() error {
 			return err
 		}
 		ctx := context.TODO()
-		if jsMaxWait := rdr.Config().Opts.NATSOpts.JetStreamMaxWait; jsMaxWait != nil {
+		if jsMaxWait := rdr.Config().Opts.NATS.JetStreamMaxWait; jsMaxWait != nil {
 			var cancel context.CancelFunc
 			ctx, cancel = context.WithTimeout(ctx, *jsMaxWait)
 			defer cancel()
@@ -174,6 +176,7 @@ func (rdr *NatsER) Serve() error {
 			handleMessage(msg.Data())
 		})
 		if err != nil {
+			nc.Drain()
 			return err
 		}
 	}
@@ -239,28 +242,28 @@ func (rdr *NatsER) createPoster() (err error) {
 }
 
 func (rdr *NatsER) processOpts() (err error) {
-	if rdr.Config().Opts.NATSOpts.Subject != nil {
-		rdr.subject = *rdr.Config().Opts.NATSOpts.Subject
+	if rdr.Config().Opts.NATS.Subject != nil {
+		rdr.subject = *rdr.Config().Opts.NATS.Subject
 	}
 
 	rdr.queueID = rdr.cgrCfg.GeneralCfg().NodeID
-	if rdr.Config().Opts.NATSOpts.QueueID != nil {
-		rdr.queueID = *rdr.Config().Opts.NATSOpts.QueueID
+	if rdr.Config().Opts.NATS.QueueID != nil {
+		rdr.queueID = *rdr.Config().Opts.NATS.QueueID
 	}
 
 	rdr.consumerName = utils.CGRateSLwr
-	if rdr.Config().Opts.NATSOpts.ConsumerName != nil {
-		rdr.consumerName = *rdr.Config().Opts.NATSOpts.ConsumerName
+	if rdr.Config().Opts.NATS.ConsumerName != nil {
+		rdr.consumerName = *rdr.Config().Opts.NATS.ConsumerName
 	}
 
-	if rdr.Config().Opts.NATSOpts.StreamName != nil {
-		rdr.streamName = *rdr.Config().Opts.NATSOpts.StreamName
+	if rdr.Config().Opts.NATS.StreamName != nil {
+		rdr.streamName = *rdr.Config().Opts.NATS.StreamName
 	}
 
-	if rdr.Config().Opts.NATSOpts.JetStream != nil {
-		rdr.jetStream = *rdr.Config().Opts.NATSOpts.JetStream
+	if rdr.Config().Opts.NATS.JetStream != nil {
+		rdr.jetStream = *rdr.Config().Opts.NATS.JetStream
 	}
-	rdr.opts, err = GetNatsOpts(rdr.Config().Opts.NATSOpts,
+	rdr.opts, err = GetNatsOpts(rdr.Config().Opts.NATS,
 		rdr.cgrCfg.GeneralCfg().NodeID,
 		rdr.cgrCfg.GeneralCfg().ConnectTimeout)
 	return

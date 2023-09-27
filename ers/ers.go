@@ -458,8 +458,8 @@ func (erS *ERService) onEvicted(id string, value any) {
 			return
 		}
 		csvWriter := csv.NewWriter(fileOut)
-		if eEvs.rdrCfg.Opts.CSVOpts.PartialCSVFieldSeparator != nil {
-			csvWriter.Comma = rune((*eEvs.rdrCfg.Opts.CSVOpts.PartialCSVFieldSeparator)[0])
+		if eEvs.rdrCfg.Opts.CSV.PartialCSVFieldSeparator != nil {
+			csvWriter.Comma = rune((*eEvs.rdrCfg.Opts.CSV.PartialCSVFieldSeparator)[0])
 		}
 
 		if err = csvWriter.Write(record); err != nil {

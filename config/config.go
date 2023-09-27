@@ -188,12 +188,12 @@ func newCGRConfig(config []byte) (cfg *CGRConfig, err error) {
 		Kafka: new(KafkaOpts),
 	}}
 	cfg.dfltEvRdr = &EventReaderCfg{Opts: &EventReaderOpts{
-		SQLOpts:   new(SQLROpts),
-		CSVOpts:   new(CSVROpts),
-		AWSOpts:   new(AWSROpts),
-		AMQPOpts:  new(AMQPROpts),
-		KafkaOpts: new(KafkaROpts),
-		NATSOpts:  new(NATSROpts),
+		SQL:   new(SQLROpts),
+		CSV:   new(CSVROpts),
+		AWS:   new(AWSROpts),
+		AMQP:  new(AMQPROpts),
+		Kafka: new(KafkaROpts),
+		NATS:  new(NATSROpts),
 	}}
 
 	cfg.cacheDP = make(map[string]utils.MapStorage)

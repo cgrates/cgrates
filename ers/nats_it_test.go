@@ -167,7 +167,7 @@ func testCheckNatsJetStream(t *testing.T, cfg *config.CGRConfig) {
 		t.Fatal(err)
 	}
 
-	nop, err := GetNatsOpts(rdr.Config().Opts.NATSOpts, "testExp", time.Second)
+	nop, err := GetNatsOpts(rdr.Config().Opts.NATS, "testExp", time.Second)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -249,7 +249,7 @@ func testCheckNatsNormal(t *testing.T, cfg *config.CGRConfig) {
 		t.Fatal(err)
 	}
 
-	nop, err := GetNatsOpts(rdr.Config().Opts.NATSOpts, "testExp", time.Second)
+	nop, err := GetNatsOpts(rdr.Config().Opts.NATS, "testExp", time.Second)
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -188,15 +188,15 @@ func (rdr *KafkaER) setOpts(opts *config.EventReaderOpts) (err error) {
 	rdr.topic = utils.KafkaDefaultTopic
 	rdr.groupID = utils.KafkaDefaultGroupID
 	rdr.maxWait = utils.KafkaDefaultMaxWait
-	if kfkOpts := opts.KafkaOpts; kfkOpts != nil {
-		if kfkOpts.KafkaTopic != nil {
-			rdr.topic = *kfkOpts.KafkaTopic
+	if kfkOpts := opts.Kafka; kfkOpts != nil {
+		if kfkOpts.Topic != nil {
+			rdr.topic = *kfkOpts.Topic
 		}
-		if kfkOpts.KafkaGroupID != nil {
-			rdr.groupID = *kfkOpts.KafkaGroupID
+		if kfkOpts.GroupID != nil {
+			rdr.groupID = *kfkOpts.GroupID
 		}
-		if kfkOpts.KafkaMaxWait != nil {
-			rdr.maxWait = *kfkOpts.KafkaMaxWait
+		if kfkOpts.MaxWait != nil {
+			rdr.maxWait = *kfkOpts.MaxWait
 		}
 	}
 	return
