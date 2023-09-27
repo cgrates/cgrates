@@ -4492,7 +4492,7 @@ func TestBiRPCv1DisconnectPeer(t *testing.T) {
 	sessions := NewSessionS(cfg, dm, nil, nil)
 
 	sessions.biJIDs = map[string]*biJClient{
-		"client1": &biJClient{
+		"client1": {
 			conn: client,
 		},
 	}

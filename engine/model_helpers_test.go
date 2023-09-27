@@ -3281,7 +3281,7 @@ func TestRouteProfileToAPICase1(t *testing.T) {
 		FilterIDs:         []string{"FilterID1", "FilterID2", "*ai:~*req.AnswerTime:2020-04-11T21:34:01Z|2020-04-12T21:34:01Z"},
 		SortingParameters: []string{"Param1", "Param2"},
 		Routes: []*Route{
-			&Route{ID: "ResGroup2"},
+			{ID: "ResGroup2"},
 		},
 	}
 
@@ -3782,7 +3782,7 @@ func TestActionProfileMdlsAsTPActionProfile(t *testing.T) {
 			Blockers:  ";false",
 			Schedule:  "test_schedule",
 			Targets: []*utils.TPActionTarget{
-				&utils.TPActionTarget{
+				{
 					TargetType: utils.MetaAccounts,
 					TargetIDs:  []string{"test_account_id1", "test_account_id2"},
 				},
@@ -3863,11 +3863,11 @@ func TestModelHelpersAPItoActionProfile(t *testing.T) {
 		Weights:   ";1",
 		Schedule:  "test_schedule",
 		Targets: []*utils.TPActionTarget{
-			&utils.TPActionTarget{
+			{
 				TargetType: utils.MetaAccounts,
 				TargetIDs:  []string{"test_account_id1", "test_account_id2"},
 			},
-			&utils.TPActionTarget{
+			{
 				TargetType: utils.MetaResources,
 				TargetIDs:  []string{"test_ID1", "test_ID2"},
 			},

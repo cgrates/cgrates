@@ -2465,7 +2465,7 @@ func TestDebitAbstractsMaxDebitAbstractFromConcreteNoConcrBal(t *testing.T) {
 		Tenant: "cgrates.org",
 		ID:     "TestV1DebitAbstractsWithRecurrentFeeNegative",
 		Balances: map[string]*utils.Balance{
-			"ab1": &utils.Balance{
+			"ab1": {
 				ID:    "ab1",
 				Type:  utils.MetaAbstract,
 				Units: utils.NewDecimal(int64(60*time.Second), 0),

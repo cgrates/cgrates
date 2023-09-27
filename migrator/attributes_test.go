@@ -58,7 +58,7 @@ func TestV1AttributeProfileAsAttributeProfile(t *testing.T) {
 			ExpiryTime:     cloneExpTime,
 		},
 		Attributes: []*v2Attribute{
-			&v2Attribute{
+			{
 				FieldName:  "FL1",
 				Initial:    "In1",
 				Substitute: config.NewRSRParsersMustCompile("Al1", utils.InfieldSep),
@@ -86,7 +86,7 @@ func TestV2AttributeProfileAsAttributeProfile(t *testing.T) {
 			ExpiryTime:     cloneExpTime,
 		},
 		Attributes: []*v2Attribute{
-			&v2Attribute{
+			{
 				FieldName:  "FL1",
 				Initial:    "In1",
 				Substitute: config.NewRSRParsersMustCompile("Al1", utils.InfieldSep),
@@ -105,7 +105,7 @@ func TestV2AttributeProfileAsAttributeProfile(t *testing.T) {
 			ExpiryTime:     cloneExpTime,
 		},
 		Attributes: []*v3Attribute{
-			&v3Attribute{
+			{
 				FilterIDs:  []string{"*string:FL1:In1"},
 				FieldName:  "FL1",
 				Substitute: config.NewRSRParsersMustCompile("Al1", utils.InfieldSep),
@@ -132,7 +132,7 @@ func TestV2AttributeProfileAsAttributeProfile2(t *testing.T) {
 			ExpiryTime:     cloneExpTime,
 		},
 		Attributes: []*v2Attribute{
-			&v2Attribute{
+			{
 				FieldName:  "FL1",
 				Initial:    nil,
 				Substitute: config.NewRSRParsersMustCompile("Al1", utils.InfieldSep),
@@ -151,7 +151,7 @@ func TestV2AttributeProfileAsAttributeProfile2(t *testing.T) {
 			ExpiryTime:     cloneExpTime,
 		},
 		Attributes: []*v3Attribute{
-			&v3Attribute{
+			{
 				FilterIDs:  []string{"*string:FL1:"},
 				FieldName:  "FL1",
 				Substitute: config.NewRSRParsersMustCompile("Al1", utils.InfieldSep),
@@ -178,7 +178,7 @@ func TestV3AttributeProfileAsAttributeProfile(t *testing.T) {
 			ExpiryTime:     cloneExpTime,
 		},
 		Attributes: []*v3Attribute{
-			&v3Attribute{
+			{
 				FilterIDs:  []string{"*string:FL1:In1"},
 				FieldName:  "FL1",
 				Substitute: config.NewRSRParsersMustCompile("Al1", utils.InfieldSep),
@@ -196,7 +196,7 @@ func TestV3AttributeProfileAsAttributeProfile(t *testing.T) {
 			ExpiryTime:     cloneExpTime,
 		},
 		Attributes: []*v4Attribute{
-			&v4Attribute{
+			{
 				FilterIDs: []string{"*string:FL1:In1"},
 				FieldName: "FL1",
 				Type:      utils.MetaVariable,
@@ -224,7 +224,7 @@ func TestV4AttributeProfileAsAttributeProfile(t *testing.T) {
 			ExpiryTime:     cloneExpTime,
 		},
 		Attributes: []*v4Attribute{
-			&v4Attribute{
+			{
 				FieldName: "FL1",
 				Type:      utils.MetaVariable,
 				Value:     config.NewRSRParsersMustCompile("~Category:s/(.*)/${1}_UK_Mobile_Vodafone_GBRVF/", utils.InfieldSep),
@@ -238,7 +238,7 @@ func TestV4AttributeProfileAsAttributeProfile(t *testing.T) {
 		Contexts:  []string{utils.MetaSessionS},
 		FilterIDs: []string{"filter1"},
 		Attributes: []*v6Attribute{
-			&v6Attribute{
+			{
 				Path:  utils.MetaReq + utils.NestingSep + "FL1",
 				Type:  utils.MetaVariable,
 				Value: config.NewRSRParsersMustCompile("~*req.Category:s/(.*)/${1}_UK_Mobile_Vodafone_GBRVF/", utils.InfieldSep),
@@ -289,7 +289,7 @@ func TestAsAttributeProfileV2(t *testing.T) {
 			ExpiryTime:     time.Date(2020, 4, 18, 14, 25, 0, 0, time.UTC),
 		},
 		Attributes: []*v2Attribute{
-			&v2Attribute{
+			{
 				FieldName:  "FL1",
 				Initial:    "In1",
 				Substitute: sbstPrsr,
@@ -318,7 +318,7 @@ func TestAsAttributeProfileV3(t *testing.T) {
 			ExpiryTime:     time.Date(2020, 4, 18, 14, 25, 0, 0, time.UTC),
 		},
 		Attributes: []*v2Attribute{
-			&v2Attribute{
+			{
 				FieldName:  "FL1",
 				Initial:    "In1",
 				Substitute: config.NewRSRParsersMustCompile("Al1", utils.InfieldSep),
@@ -337,7 +337,7 @@ func TestAsAttributeProfileV3(t *testing.T) {
 			ExpiryTime:     time.Date(2020, 4, 18, 14, 25, 0, 0, time.UTC),
 		},
 		Attributes: []*v3Attribute{
-			&v3Attribute{
+			{
 				FilterIDs:  []string{"*string:FL1:In1"}, //here
 				FieldName:  "FL1",
 				Substitute: config.NewRSRParsersMustCompile("Al1", utils.InfieldSep),
@@ -362,7 +362,7 @@ func TestAsAttributeProfileV4(t *testing.T) {
 			ExpiryTime:     time.Date(2020, 4, 18, 14, 25, 0, 0, time.UTC),
 		},
 		Attributes: []*v3Attribute{
-			&v3Attribute{
+			{
 				FilterIDs:  []string{"*string:FL1:In1"},
 				FieldName:  "FL1",
 				Substitute: config.NewRSRParsersMustCompile("Al1", utils.InfieldSep),
@@ -380,7 +380,7 @@ func TestAsAttributeProfileV4(t *testing.T) {
 			ExpiryTime:     time.Date(2020, 4, 18, 14, 25, 0, 0, time.UTC),
 		},
 		Attributes: []*v4Attribute{
-			&v4Attribute{
+			{
 				FilterIDs: []string{"*string:FL1:In1"},
 				FieldName: "FL1",
 				Type:      utils.MetaVariable,
@@ -409,7 +409,7 @@ func TestAsAttributeProfileV5(t *testing.T) {
 			ExpiryTime:     time.Date(2020, 4, 18, 14, 25, 0, 0, time.UTC),
 		},
 		Attributes: []*v4Attribute{
-			&v4Attribute{
+			{
 				FilterIDs: []string{"*string:FL1:In1"},
 				FieldName: "FL1",
 				Type:      utils.MetaVariable,
@@ -425,7 +425,7 @@ func TestAsAttributeProfileV5(t *testing.T) {
 		Contexts:  []string{utils.MetaSessionS},
 		FilterIDs: []string{"filter1"},
 		Attributes: []*v6Attribute{
-			&v6Attribute{
+			{
 				FilterIDs: []string{"*string:FL1:In1"},
 				Path:      utils.MetaReq + utils.NestingSep + "FL1",
 				Type:      utils.MetaVariable,
@@ -478,7 +478,7 @@ func TestAsAttributeProfileV1To4(t *testing.T) {
 			ExpiryTime:     time.Date(2020, 4, 18, 14, 25, 0, 0, time.UTC),
 		},
 		Attributes: []*v4Attribute{
-			&v4Attribute{
+			{
 				FieldName: "FL1",
 				Type:      utils.MetaVariable,
 				Value:     sbstPrsr,
