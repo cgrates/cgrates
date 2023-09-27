@@ -1,0 +1,37 @@
+---
+- name: Add apt.cgrates.vhost in nginx
+  template:
+    src: nginx.conf.j2
+    dest: "/etc/nginx/sites-available/{{ nginx_server_name }}.vhost"
+    mode: '0600'
+    owner: root
+  register: nginx_config
+
+- name: Create a symlink for apt.cgrates.org
+  file:
+    src: "/etc/nginx/sites-available/{{ nginx_server_name }}.vhost"
+    dest: "/etc/nginx/sites-enabled/{{ nginx_server_name }}.vhost"
+    state: link
+
+- name: Reload nginx configuration
+  ansible.builtin.systemd:
+    name: nginx
+    state: reloaded
+  become: true
+  when: nginx_config.changed
+
+- name: Ensure nginx is started and enabled to start at boot
+  ansible.builtin.systemd:
+    name: nginx
+    state: started
+    enabled: yes
+  become: true
+
+# - name: Test Nginx configuration
+#   command: nginx -t
+#   register: result
+#   ignore_errors: true
+
+# - name: Report test results
+#   debug:
+#     msg: "{{ result.stdout }}"

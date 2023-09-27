@@ -1,0 +1,5 @@
+---
+kafka_version: 3.5.0
+scala_version: 2.13
+kafka_service_state: started
+kafka_service_enabled: true
