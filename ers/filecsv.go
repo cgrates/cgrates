@@ -134,17 +134,17 @@ func (rdr *CSVFileER) processFile(fPath, fName string) (err error) {
 	defer file.Close()
 	csvReader := csv.NewReader(file)
 	var rowLength int
-	if rdr.Config().Opts.CSVOpts.CSVRowLength != nil {
-		rowLength = *rdr.Config().Opts.CSVOpts.CSVRowLength
+	if rdr.Config().Opts.CSV.RowLength != nil {
+		rowLength = *rdr.Config().Opts.CSV.RowLength
 	}
 	csvReader.FieldsPerRecord = rowLength
 	csvReader.Comment = utils.CommentChar
 	csvReader.Comma = utils.CSVSep
-	if rdr.Config().Opts.CSVOpts.CSVFieldSeparator != nil {
-		csvReader.Comma = rune((*rdr.Config().Opts.CSVOpts.CSVFieldSeparator)[0])
+	if rdr.Config().Opts.CSV.FieldSeparator != nil {
+		csvReader.Comma = rune((*rdr.Config().Opts.CSV.FieldSeparator)[0])
 	}
-	if rdr.Config().Opts.CSVOpts.CSVLazyQuotes != nil {
-		csvReader.LazyQuotes = *rdr.Config().Opts.CSVOpts.CSVLazyQuotes
+	if rdr.Config().Opts.CSV.LazyQuotes != nil {
+		csvReader.LazyQuotes = *rdr.Config().Opts.CSV.LazyQuotes
 	}
 	var indxAls map[string]int
 	rowNr := 0 // This counts the rows in the file, not really number of CDRs
@@ -152,8 +152,8 @@ func (rdr *CSVFileER) processFile(fPath, fName string) (err error) {
 	timeStart := time.Now()
 	reqVars := &utils.DataNode{Type: utils.NMMapType, Map: map[string]*utils.DataNode{utils.MetaFileName: utils.NewLeafNode(fName)}}
 	var hdrDefChar string
-	if rdr.cgrCfg.ERsCfg().Readers[rdr.cfgIdx].Opts.CSVOpts.CSVHeaderDefineChar != nil {
-		hdrDefChar = *rdr.cgrCfg.ERsCfg().Readers[rdr.cfgIdx].Opts.CSVOpts.CSVHeaderDefineChar
+	if rdr.cgrCfg.ERsCfg().Readers[rdr.cfgIdx].Opts.CSV.HeaderDefineChar != nil {
+		hdrDefChar = *rdr.cgrCfg.ERsCfg().Readers[rdr.cfgIdx].Opts.CSV.HeaderDefineChar
 	}
 	for {
 		var record []string

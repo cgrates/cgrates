@@ -141,21 +141,21 @@ func (rdr *SQSER) processMessage(body []byte) (err error) {
 func (rdr *SQSER) parseOpts(opts *config.EventReaderOpts) {
 	rdr.queueID = utils.DefaultQueueID
 
-	if sqOpts := opts.AWSOpts; sqOpts != nil {
-		if opts.AWSOpts.SQSQueueID != nil {
-			rdr.queueID = *opts.AWSOpts.SQSQueueID
+	if sqOpts := opts.AWS; sqOpts != nil {
+		if opts.AWS.SQSQueueID != nil {
+			rdr.queueID = *opts.AWS.SQSQueueID
 		}
-		if opts.AWSOpts.AWSRegion != nil {
-			rdr.awsRegion = *opts.AWSOpts.AWSRegion
+		if opts.AWS.Region != nil {
+			rdr.awsRegion = *opts.AWS.Region
 		}
-		if opts.AWSOpts.AWSKey != nil {
-			rdr.awsID = *opts.AWSOpts.AWSKey
+		if opts.AWS.Key != nil {
+			rdr.awsID = *opts.AWS.Key
 		}
-		if opts.AWSOpts.AWSSecret != nil {
-			rdr.awsKey = *opts.AWSOpts.AWSSecret
+		if opts.AWS.Secret != nil {
+			rdr.awsKey = *opts.AWS.Secret
 		}
-		if opts.AWSOpts.AWSToken != nil {
-			rdr.awsToken = *opts.AWSOpts.AWSToken
+		if opts.AWS.Token != nil {
+			rdr.awsToken = *opts.AWS.Token
 		}
 	}
 	rdr.getQueueURL()

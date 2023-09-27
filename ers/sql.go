@@ -276,9 +276,9 @@ func (rdr *SQLEventReader) setURL(inURL, outURL string, opts *config.EventReader
 
 	dbname := utils.SQLDefaultDBName
 	ssl := utils.SQLDefaultSSLMode
-	if sqlOpts := opts.SQLOpts; sqlOpts != nil {
-		if sqlOpts.SQLDBName != nil {
-			dbname = *sqlOpts.SQLDBName
+	if sqlOpts := opts.SQL; sqlOpts != nil {
+		if sqlOpts.DBName != nil {
+			dbname = *sqlOpts.DBName
 		}
 
 		if sqlOpts.PgSSLMode != nil {
@@ -286,8 +286,8 @@ func (rdr *SQLEventReader) setURL(inURL, outURL string, opts *config.EventReader
 		}
 
 		rdr.tableName = utils.CDRsTBL
-		if sqlOpts.SQLTableName != nil {
-			rdr.tableName = *sqlOpts.SQLTableName
+		if sqlOpts.TableName != nil {
+			rdr.tableName = *sqlOpts.TableName
 		}
 	}
 	switch rdr.connType {

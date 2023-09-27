@@ -28,8 +28,8 @@ import (
 
 func TestGetProcessOptions(t *testing.T) {
 	opts := &config.EventReaderOpts{
-		AMQPOpts: &config.AMQPROpts{
-			AMQPQueueIDProcessed: utils.StringPointer("processed"),
+		AMQP: &config.AMQPROpts{
+			QueueIDProcessed: utils.StringPointer("processed"),
 		},
 	}
 	result := getProcessedOptions(opts)

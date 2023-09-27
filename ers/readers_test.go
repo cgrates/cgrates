@@ -103,8 +103,8 @@ func TestNewSQLReader(t *testing.T) {
 	reader.ID = "file_reader"
 	reader.ConcurrentReqs = -1
 	reader.Opts = &config.EventReaderOpts{
-		SQLOpts: &config.SQLROpts{
-			SQLDBName: utils.StringPointer("cgrates2"),
+		SQL: &config.SQLROpts{
+			DBName: utils.StringPointer("cgrates2"),
 		},
 	}
 	reader.SourcePath = "*mysql://cgrates:CGRateS.org@127.0.0.1:3306"
@@ -132,7 +132,7 @@ func TestNewSQLReaderError(t *testing.T) {
 	reader.ID = "file_reader"
 	reader.ConcurrentReqs = -1
 	reader.Opts = &config.EventReaderOpts{
-		SQLOpts: &config.SQLROpts{SQLDBName: utils.StringPointer("cgrates2")},
+		SQL: &config.SQLROpts{DBName: utils.StringPointer("cgrates2")},
 	}
 	reader.SourcePath = "#"
 	reader.ProcessedPath = ""
@@ -219,12 +219,12 @@ func TestNewAMQPReader(t *testing.T) {
 	exp.dialURL = exp.Config().SourcePath
 	exp.Config().ProcessedPath = ""
 	exp.setOpts(&config.EventReaderOpts{
-		CSVOpts:   &config.CSVROpts{},
-		AMQPOpts:  &config.AMQPROpts{},
-		SQLOpts:   &config.SQLROpts{},
-		AWSOpts:   &config.AWSROpts{},
-		NATSOpts:  &config.NATSROpts{},
-		KafkaOpts: &config.KafkaROpts{},
+		CSV:   &config.CSVROpts{},
+		AMQP:  &config.AMQPROpts{},
+		SQL:   &config.SQLROpts{},
+		AWS:   &config.AWSROpts{},
+		NATS:  &config.NATSROpts{},
+		Kafka: &config.KafkaROpts{},
 	})
 	exp.createPoster()
 	var expected EventReader = exp

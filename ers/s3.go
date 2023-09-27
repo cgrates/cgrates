@@ -152,21 +152,21 @@ func (rdr *S3ER) processMessage(body []byte) (err error) {
 
 func (rdr *S3ER) parseOpts(opts *config.EventReaderOpts) {
 	rdr.bucket = utils.DefaultQueueID
-	if awsOpts := opts.AWSOpts; awsOpts != nil {
+	if awsOpts := opts.AWS; awsOpts != nil {
 		if awsOpts.S3BucketID != nil {
 			rdr.bucket = *awsOpts.S3BucketID
 		}
-		if awsOpts.AWSRegion != nil {
-			rdr.awsRegion = *awsOpts.AWSRegion
+		if awsOpts.Region != nil {
+			rdr.awsRegion = *awsOpts.Region
 		}
-		if awsOpts.AWSKey != nil {
-			rdr.awsID = *awsOpts.AWSKey
+		if awsOpts.Key != nil {
+			rdr.awsID = *awsOpts.Key
 		}
-		if awsOpts.AWSSecret != nil {
-			rdr.awsKey = *awsOpts.AWSSecret
+		if awsOpts.Secret != nil {
+			rdr.awsKey = *awsOpts.Secret
 		}
-		if awsOpts.AWSToken != nil {
-			rdr.awsToken = *awsOpts.AWSToken
+		if awsOpts.Token != nil {
+			rdr.awsToken = *awsOpts.Token
 		}
 	}
 }

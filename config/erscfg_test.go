@@ -100,19 +100,19 @@ func TestERSClone(t *testing.T) {
 				CacheDumpFields:     make([]*FCTemplate, 0),
 				PartialCommitFields: make([]*FCTemplate, 0),
 				Opts: &EventReaderOpts{
-					CSVOpts: &CSVROpts{
-						CSVHeaderDefineChar: utils.StringPointer(utils.InInFieldSep),
-						CSVRowLength:        utils.IntPointer(0),
-						CSVFieldSeparator:   utils.StringPointer(utils.FieldsSep),
+					CSV: &CSVROpts{
+						HeaderDefineChar: utils.StringPointer(utils.InInFieldSep),
+						RowLength:        utils.IntPointer(0),
+						FieldSeparator:   utils.StringPointer(utils.FieldsSep),
 					},
-					AMQPOpts:           &AMQPROpts{},
-					AWSOpts:            &AWSROpts{},
-					SQLOpts:            &SQLROpts{},
-					KafkaOpts:          &KafkaROpts{},
+					AMQP:               &AMQPROpts{},
+					AWS:                &AWSROpts{},
+					SQL:                &SQLROpts{},
+					Kafka:              &KafkaROpts{},
 					XMLRootPath:        utils.StringPointer(utils.EmptyString),
 					PartialOrderField:  utils.StringPointer("~*req.AnswerTime"),
 					PartialCacheAction: utils.StringPointer(utils.MetaNone),
-					NATSOpts: &NATSROpts{
+					NATS: &NATSROpts{
 						Subject: utils.StringPointer("cgrates_cdrs"),
 					},
 				},
@@ -140,19 +140,19 @@ func TestERSClone(t *testing.T) {
 				},
 				PartialCommitFields: make([]*FCTemplate, 0),
 				Opts: &EventReaderOpts{
-					CSVOpts: &CSVROpts{
-						CSVFieldSeparator:   utils.StringPointer(utils.FieldsSep),
-						CSVHeaderDefineChar: utils.StringPointer(utils.InInFieldSep),
-						CSVRowLength:        utils.IntPointer(0),
+					CSV: &CSVROpts{
+						FieldSeparator:   utils.StringPointer(utils.FieldsSep),
+						HeaderDefineChar: utils.StringPointer(utils.InInFieldSep),
+						RowLength:        utils.IntPointer(0),
 					},
-					AMQPOpts:           &AMQPROpts{},
-					AWSOpts:            &AWSROpts{},
-					SQLOpts:            &SQLROpts{},
-					KafkaOpts:          &KafkaROpts{},
+					AMQP:               &AMQPROpts{},
+					AWS:                &AWSROpts{},
+					SQL:                &SQLROpts{},
+					Kafka:              &KafkaROpts{},
 					XMLRootPath:        utils.StringPointer(utils.EmptyString),
 					PartialOrderField:  utils.StringPointer("~*req.AnswerTime"),
 					PartialCacheAction: utils.StringPointer(utils.MetaNone),
-					NATSOpts: &NATSROpts{
+					NATS: &NATSROpts{
 						Subject: utils.StringPointer("cgrates_cdrs"),
 					},
 				},
@@ -268,19 +268,19 @@ func TestERSLoadFromjsonCfg(t *testing.T) {
 				CacheDumpFields:     make([]*FCTemplate, 0),
 				PartialCommitFields: make([]*FCTemplate, 0),
 				Opts: &EventReaderOpts{
-					CSVOpts: &CSVROpts{
-						CSVFieldSeparator:   utils.StringPointer(utils.FieldsSep),
-						CSVHeaderDefineChar: utils.StringPointer(utils.InInFieldSep),
-						CSVRowLength:        utils.IntPointer(0),
+					CSV: &CSVROpts{
+						FieldSeparator:   utils.StringPointer(utils.FieldsSep),
+						HeaderDefineChar: utils.StringPointer(utils.InInFieldSep),
+						RowLength:        utils.IntPointer(0),
 					},
-					AMQPOpts:           &AMQPROpts{},
-					AWSOpts:            &AWSROpts{},
-					KafkaOpts:          &KafkaROpts{},
-					SQLOpts:            &SQLROpts{},
+					AMQP:               &AMQPROpts{},
+					AWS:                &AWSROpts{},
+					Kafka:              &KafkaROpts{},
+					SQL:                &SQLROpts{},
 					XMLRootPath:        utils.StringPointer(utils.EmptyString),
 					PartialOrderField:  utils.StringPointer("~*req.AnswerTime"),
 					PartialCacheAction: utils.StringPointer(utils.MetaNone),
-					NATSOpts: &NATSROpts{
+					NATS: &NATSROpts{
 						Subject: utils.StringPointer("cgrates_cdrs"),
 					},
 				},
@@ -323,19 +323,19 @@ func TestERSLoadFromjsonCfg(t *testing.T) {
 				CacheDumpFields:     make([]*FCTemplate, 0),
 				PartialCommitFields: make([]*FCTemplate, 0),
 				Opts: &EventReaderOpts{
-					CSVOpts: &CSVROpts{
-						CSVFieldSeparator:   utils.StringPointer(utils.FieldsSep),
-						CSVHeaderDefineChar: utils.StringPointer(utils.InInFieldSep),
-						CSVRowLength:        utils.IntPointer(0),
+					CSV: &CSVROpts{
+						FieldSeparator:   utils.StringPointer(utils.FieldsSep),
+						HeaderDefineChar: utils.StringPointer(utils.InInFieldSep),
+						RowLength:        utils.IntPointer(0),
 					},
-					AMQPOpts:           &AMQPROpts{},
-					AWSOpts:            &AWSROpts{},
-					SQLOpts:            &SQLROpts{},
-					KafkaOpts:          &KafkaROpts{},
+					AMQP:               &AMQPROpts{},
+					AWS:                &AWSROpts{},
+					SQL:                &SQLROpts{},
+					Kafka:              &KafkaROpts{},
 					XMLRootPath:        utils.StringPointer(utils.EmptyString),
 					PartialOrderField:  utils.StringPointer("~*req.AnswerTime"),
 					PartialCacheAction: utils.StringPointer(utils.MetaNone),
-					NATSOpts: &NATSROpts{
+					NATS: &NATSROpts{
 						Subject: utils.StringPointer("cgrates_cdrs"),
 					},
 				},
@@ -511,19 +511,19 @@ func TestERSloadFromJsonCase3(t *testing.T) {
 				CacheDumpFields:     make([]*FCTemplate, 0),
 				PartialCommitFields: make([]*FCTemplate, 0),
 				Opts: &EventReaderOpts{
-					CSVOpts: &CSVROpts{
-						CSVFieldSeparator:   utils.StringPointer(utils.FieldsSep),
-						CSVHeaderDefineChar: utils.StringPointer(utils.InInFieldSep),
-						CSVRowLength:        utils.IntPointer(0),
+					CSV: &CSVROpts{
+						FieldSeparator:   utils.StringPointer(utils.FieldsSep),
+						HeaderDefineChar: utils.StringPointer(utils.InInFieldSep),
+						RowLength:        utils.IntPointer(0),
 					},
-					AMQPOpts:           &AMQPROpts{},
-					AWSOpts:            &AWSROpts{},
-					KafkaOpts:          &KafkaROpts{},
-					SQLOpts:            &SQLROpts{},
+					AMQP:               &AMQPROpts{},
+					AWS:                &AWSROpts{},
+					Kafka:              &KafkaROpts{},
+					SQL:                &SQLROpts{},
 					XMLRootPath:        utils.StringPointer(utils.EmptyString),
 					PartialOrderField:  utils.StringPointer("~*req.AnswerTime"),
 					PartialCacheAction: utils.StringPointer(utils.MetaNone),
-					NATSOpts: &NATSROpts{
+					NATS: &NATSROpts{
 						Subject: utils.StringPointer("cgrates_cdrs"),
 					},
 				},
@@ -550,19 +550,19 @@ func TestERSloadFromJsonCase3(t *testing.T) {
 				CacheDumpFields:     make([]*FCTemplate, 0),
 				PartialCommitFields: make([]*FCTemplate, 0),
 				Opts: &EventReaderOpts{
-					CSVOpts: &CSVROpts{
-						CSVFieldSeparator:   utils.StringPointer(utils.FieldsSep),
-						CSVHeaderDefineChar: utils.StringPointer(utils.InInFieldSep),
-						CSVRowLength:        utils.IntPointer(0),
+					CSV: &CSVROpts{
+						FieldSeparator:   utils.StringPointer(utils.FieldsSep),
+						HeaderDefineChar: utils.StringPointer(utils.InInFieldSep),
+						RowLength:        utils.IntPointer(0),
 					},
-					AMQPOpts:           &AMQPROpts{},
-					AWSOpts:            &AWSROpts{},
-					SQLOpts:            &SQLROpts{},
-					KafkaOpts:          &KafkaROpts{},
+					AMQP:               &AMQPROpts{},
+					AWS:                &AWSROpts{},
+					SQL:                &SQLROpts{},
+					Kafka:              &KafkaROpts{},
 					XMLRootPath:        utils.StringPointer(utils.EmptyString),
 					PartialOrderField:  utils.StringPointer("~*req.AnswerTime"),
 					PartialCacheAction: utils.StringPointer(utils.MetaNone),
-					NATSOpts: &NATSROpts{
+					NATS: &NATSROpts{
 						Subject: utils.StringPointer("cgrates_cdrs"),
 					},
 				},
@@ -662,19 +662,19 @@ func TestERSloadFromJsonCase4(t *testing.T) {
 				CacheDumpFields:     make([]*FCTemplate, 0),
 				PartialCommitFields: make([]*FCTemplate, 0),
 				Opts: &EventReaderOpts{
-					CSVOpts: &CSVROpts{
-						CSVFieldSeparator:   utils.StringPointer(utils.FieldsSep),
-						CSVHeaderDefineChar: utils.StringPointer(utils.InInFieldSep),
-						CSVRowLength:        utils.IntPointer(0),
+					CSV: &CSVROpts{
+						FieldSeparator:   utils.StringPointer(utils.FieldsSep),
+						HeaderDefineChar: utils.StringPointer(utils.InInFieldSep),
+						RowLength:        utils.IntPointer(0),
 					},
-					AMQPOpts:           &AMQPROpts{},
-					AWSOpts:            &AWSROpts{},
-					KafkaOpts:          &KafkaROpts{},
-					SQLOpts:            &SQLROpts{},
+					AMQP:               &AMQPROpts{},
+					AWS:                &AWSROpts{},
+					Kafka:              &KafkaROpts{},
+					SQL:                &SQLROpts{},
 					XMLRootPath:        utils.StringPointer(utils.EmptyString),
 					PartialOrderField:  utils.StringPointer("~*req.AnswerTime"),
 					PartialCacheAction: utils.StringPointer(utils.MetaNone),
-					NATSOpts: &NATSROpts{
+					NATS: &NATSROpts{
 						Subject: utils.StringPointer("cgrates_cdrs"),
 					},
 				},
@@ -701,19 +701,19 @@ func TestERSloadFromJsonCase4(t *testing.T) {
 				},
 				PartialCommitFields: make([]*FCTemplate, 0),
 				Opts: &EventReaderOpts{
-					CSVOpts: &CSVROpts{
-						CSVFieldSeparator:   utils.StringPointer(utils.FieldsSep),
-						CSVHeaderDefineChar: utils.StringPointer(utils.InInFieldSep),
-						CSVRowLength:        utils.IntPointer(0),
+					CSV: &CSVROpts{
+						FieldSeparator:   utils.StringPointer(utils.FieldsSep),
+						HeaderDefineChar: utils.StringPointer(utils.InInFieldSep),
+						RowLength:        utils.IntPointer(0),
 					},
-					AWSOpts:            &AWSROpts{},
-					AMQPOpts:           &AMQPROpts{},
-					SQLOpts:            &SQLROpts{},
-					KafkaOpts:          &KafkaROpts{},
+					AWS:                &AWSROpts{},
+					AMQP:               &AMQPROpts{},
+					SQL:                &SQLROpts{},
+					Kafka:              &KafkaROpts{},
 					XMLRootPath:        utils.StringPointer(utils.EmptyString),
 					PartialOrderField:  utils.StringPointer("~*req.AnswerTime"),
 					PartialCacheAction: utils.StringPointer(utils.MetaNone),
-					NATSOpts: &NATSROpts{
+					NATS: &NATSROpts{
 						Subject: utils.StringPointer("cgrates_cdrs"),
 					},
 				},
@@ -808,19 +808,19 @@ func TestEventReaderSameID(t *testing.T) {
 				CacheDumpFields:     make([]*FCTemplate, 0),
 				PartialCommitFields: make([]*FCTemplate, 0),
 				Opts: &EventReaderOpts{
-					CSVOpts: &CSVROpts{
-						CSVFieldSeparator:   utils.StringPointer(utils.FieldsSep),
-						CSVHeaderDefineChar: utils.StringPointer(utils.InInFieldSep),
-						CSVRowLength:        utils.IntPointer(0),
+					CSV: &CSVROpts{
+						FieldSeparator:   utils.StringPointer(utils.FieldsSep),
+						HeaderDefineChar: utils.StringPointer(utils.InInFieldSep),
+						RowLength:        utils.IntPointer(0),
 					},
-					KafkaOpts:          &KafkaROpts{},
-					AMQPOpts:           &AMQPROpts{},
-					AWSOpts:            &AWSROpts{},
-					SQLOpts:            &SQLROpts{},
+					Kafka:              &KafkaROpts{},
+					AMQP:               &AMQPROpts{},
+					AWS:                &AWSROpts{},
+					SQL:                &SQLROpts{},
 					XMLRootPath:        utils.StringPointer(utils.EmptyString),
 					PartialOrderField:  utils.StringPointer("~*req.AnswerTime"),
 					PartialCacheAction: utils.StringPointer(utils.MetaNone),
-					NATSOpts: &NATSROpts{
+					NATS: &NATSROpts{
 						Subject: utils.StringPointer("cgrates_cdrs"),
 					},
 				},
@@ -843,19 +843,19 @@ func TestEventReaderSameID(t *testing.T) {
 				CacheDumpFields:     make([]*FCTemplate, 0),
 				PartialCommitFields: make([]*FCTemplate, 0),
 				Opts: &EventReaderOpts{
-					CSVOpts: &CSVROpts{
-						CSVFieldSeparator:   utils.StringPointer(utils.FieldsSep),
-						CSVHeaderDefineChar: utils.StringPointer(utils.InInFieldSep),
-						CSVRowLength:        utils.IntPointer(0),
+					CSV: &CSVROpts{
+						FieldSeparator:   utils.StringPointer(utils.FieldsSep),
+						HeaderDefineChar: utils.StringPointer(utils.InInFieldSep),
+						RowLength:        utils.IntPointer(0),
 					},
-					AMQPOpts:           &AMQPROpts{},
-					AWSOpts:            &AWSROpts{},
-					SQLOpts:            &SQLROpts{},
-					KafkaOpts:          &KafkaROpts{},
+					AMQP:               &AMQPROpts{},
+					AWS:                &AWSROpts{},
+					SQL:                &SQLROpts{},
+					Kafka:              &KafkaROpts{},
 					XMLRootPath:        utils.StringPointer(utils.EmptyString),
 					PartialOrderField:  utils.StringPointer("~*req.AnswerTime"),
 					PartialCacheAction: utils.StringPointer(utils.MetaNone),
-					NATSOpts: &NATSROpts{
+					NATS: &NATSROpts{
 						Subject: utils.StringPointer("cgrates_cdrs"),
 					},
 				},
@@ -1304,19 +1304,19 @@ func TestERsloadFromJsonCfg(t *testing.T) {
 				CacheDumpFields:     make([]*FCTemplate, 0),
 				PartialCommitFields: make([]*FCTemplate, 0),
 				Opts: &EventReaderOpts{
-					CSVOpts: &CSVROpts{
-						CSVFieldSeparator:   utils.StringPointer(utils.FieldsSep),
-						CSVHeaderDefineChar: utils.StringPointer(utils.InInFieldSep),
-						CSVRowLength:        utils.IntPointer(0),
+					CSV: &CSVROpts{
+						FieldSeparator:   utils.StringPointer(utils.FieldsSep),
+						HeaderDefineChar: utils.StringPointer(utils.InInFieldSep),
+						RowLength:        utils.IntPointer(0),
 					},
-					KafkaOpts:          &KafkaROpts{},
-					AMQPOpts:           &AMQPROpts{},
-					AWSOpts:            &AWSROpts{},
-					SQLOpts:            &SQLROpts{},
+					Kafka:              &KafkaROpts{},
+					AMQP:               &AMQPROpts{},
+					AWS:                &AWSROpts{},
+					SQL:                &SQLROpts{},
 					XMLRootPath:        utils.StringPointer(utils.EmptyString),
 					PartialOrderField:  utils.StringPointer("~*req.AnswerTime"),
 					PartialCacheAction: utils.StringPointer(utils.MetaNone),
-					NATSOpts: &NATSROpts{
+					NATS: &NATSROpts{
 						Subject: utils.StringPointer("cgrates_cdrs"),
 					},
 				},
@@ -1345,19 +1345,19 @@ func TestERsloadFromJsonCfg(t *testing.T) {
 				CacheDumpFields:     make([]*FCTemplate, 0),
 				PartialCommitFields: make([]*FCTemplate, 0),
 				Opts: &EventReaderOpts{
-					CSVOpts: &CSVROpts{
-						CSVFieldSeparator:   utils.StringPointer(utils.FieldsSep),
-						CSVHeaderDefineChar: utils.StringPointer(utils.InInFieldSep),
-						CSVRowLength:        utils.IntPointer(0),
+					CSV: &CSVROpts{
+						FieldSeparator:   utils.StringPointer(utils.FieldsSep),
+						HeaderDefineChar: utils.StringPointer(utils.InInFieldSep),
+						RowLength:        utils.IntPointer(0),
 					},
-					AMQPOpts:           &AMQPROpts{},
-					AWSOpts:            &AWSROpts{},
-					SQLOpts:            &SQLROpts{},
-					KafkaOpts:          &KafkaROpts{},
+					AMQP:               &AMQPROpts{},
+					AWS:                &AWSROpts{},
+					SQL:                &SQLROpts{},
+					Kafka:              &KafkaROpts{},
 					XMLRootPath:        utils.StringPointer(utils.EmptyString),
 					PartialOrderField:  utils.StringPointer("~*req.AnswerTime"),
 					PartialCacheAction: utils.StringPointer(utils.MetaNone),
-					NATSOpts: &NATSROpts{
+					NATS: &NATSROpts{
 						Subject: utils.StringPointer("cgrates_cdrs"),
 					},
 				},
@@ -1451,12 +1451,12 @@ func TestEventReaderOptsCfg(t *testing.T) {
 	}
 	eventReader := &EventReaderCfg{
 		Opts: &EventReaderOpts{
-			CSVOpts:   &CSVROpts{},
-			AMQPOpts:  &AMQPROpts{},
-			AWSOpts:   &AWSROpts{},
-			NATSOpts:  &NATSROpts{},
-			KafkaOpts: &KafkaROpts{},
-			SQLOpts:   &SQLROpts{},
+			CSV:   &CSVROpts{},
+			AMQP:  &AMQPROpts{},
+			AWS:   &AWSROpts{},
+			NATS:  &NATSROpts{},
+			Kafka: &KafkaROpts{},
+			SQL:   &SQLROpts{},
 		},
 	}
 	if err := eventReader.Opts.loadFromJSONCfg(eventReaderOptsJson); err != nil {
@@ -1501,46 +1501,46 @@ func TestEventReaderCfgClone(t *testing.T) {
 		Flags:         utils.FlagsWithParams{},
 		Opts: &EventReaderOpts{
 			PartialPath: utils.StringPointer("path"),
-			CSVOpts: &CSVROpts{
+			CSV: &CSVROpts{
 				PartialCSVFieldSeparator: utils.StringPointer("/"),
-				CSVLazyQuotes:            utils.BoolPointer(false),
+				LazyQuotes:               utils.BoolPointer(false),
 			},
-			AMQPOpts: &AMQPROpts{
-				AMQPQueueID:               utils.StringPointer("id"),
-				AMQPQueueIDProcessed:      utils.StringPointer("id"),
-				AMQPConsumerTag:           utils.StringPointer("tag"),
-				AMQPExchange:              utils.StringPointer("exchange"),
-				AMQPExchangeType:          utils.StringPointer("type"),
-				AMQPRoutingKey:            utils.StringPointer("key1"),
-				AMQPExchangeProcessed:     utils.StringPointer("amq"),
-				AMQPExchangeTypeProcessed: utils.StringPointer("amqtype"),
-				AMQPRoutingKeyProcessed:   utils.StringPointer("key"),
+			AMQP: &AMQPROpts{
+				QueueID:               utils.StringPointer("id"),
+				QueueIDProcessed:      utils.StringPointer("id"),
+				ConsumerTag:           utils.StringPointer("tag"),
+				Exchange:              utils.StringPointer("exchange"),
+				ExchangeType:          utils.StringPointer("type"),
+				RoutingKey:            utils.StringPointer("key1"),
+				ExchangeProcessed:     utils.StringPointer("amq"),
+				ExchangeTypeProcessed: utils.StringPointer("amqtype"),
+				RoutingKeyProcessed:   utils.StringPointer("key"),
 			},
-			SQLOpts: &SQLROpts{
-				SQLDBName:             utils.StringPointer("dbname"),
-				SQLTableName:          utils.StringPointer("tablename"),
-				PgSSLMode:             utils.StringPointer("sslmode"),
-				SQLDBNameProcessed:    utils.StringPointer("dbnameproc"),
-				SQLTableNameProcessed: utils.StringPointer("tablenameproc"),
-				PgSSLModeProcessed:    utils.StringPointer("sslproc"),
+			SQL: &SQLROpts{
+				DBName:             utils.StringPointer("dbname"),
+				TableName:          utils.StringPointer("tablename"),
+				PgSSLMode:          utils.StringPointer("sslmode"),
+				DBNameProcessed:    utils.StringPointer("dbnameproc"),
+				TableNameProcessed: utils.StringPointer("tablenameproc"),
+				PgSSLModeProcessed: utils.StringPointer("sslproc"),
 			},
-			AWSOpts: &AWSROpts{
+			AWS: &AWSROpts{
 
-				AWSRegion:             utils.StringPointer("eu"),
-				AWSKey:                utils.StringPointer("key"),
-				AWSSecret:             utils.StringPointer("secret"),
-				AWSToken:              utils.StringPointer("token"),
-				AWSKeyProcessed:       utils.StringPointer("secret"),
-				AWSRegionProcessed:    utils.StringPointer("eu"),
-				AWSSecretProcessed:    utils.StringPointer("secret"),
-				AWSTokenProcessed:     utils.StringPointer("token"),
+				Region:                utils.StringPointer("eu"),
+				Key:                   utils.StringPointer("key"),
+				Secret:                utils.StringPointer("secret"),
+				Token:                 utils.StringPointer("token"),
+				KeyProcessed:          utils.StringPointer("secret"),
+				RegionProcessed:       utils.StringPointer("eu"),
+				SecretProcessed:       utils.StringPointer("secret"),
+				TokenProcessed:        utils.StringPointer("token"),
 				SQSQueueID:            utils.StringPointer("SQSQueue"),
 				SQSQueueIDProcessed:   utils.StringPointer("SQSQueueId"),
 				S3BucketID:            utils.StringPointer("S3BucketID"),
 				S3FolderPathProcessed: utils.StringPointer("S3Path"),
 				S3BucketIDProcessed:   utils.StringPointer("S3BucketProc"),
 			},
-			NATSOpts: &NATSROpts{
+			NATS: &NATSROpts{
 				JetStream:                     utils.BoolPointer(false),
 				ConsumerName:                  utils.StringPointer("user"),
 				StreamName:                    utils.StringPointer("stream"),
@@ -1560,11 +1560,11 @@ func TestEventReaderCfgClone(t *testing.T) {
 				JetStreamMaxWaitProcessed:     utils.DurationPointer(1 * time.Minute),
 				SubjectProcessed:              utils.StringPointer("process"),
 			},
-			KafkaOpts: &KafkaROpts{
-				KafkaTopic:          utils.StringPointer("kafka"),
-				KafkaMaxWait:        utils.DurationPointer(1 * time.Minute),
-				KafkaTopicProcessed: utils.StringPointer("kafkaproc"),
-				KafkaGroupID:        utils.StringPointer("groupId"),
+			Kafka: &KafkaROpts{
+				Topic:          utils.StringPointer("kafka"),
+				MaxWait:        utils.DurationPointer(1 * time.Minute),
+				TopicProcessed: utils.StringPointer("kafkaproc"),
+				GroupID:        utils.StringPointer("groupId"),
 			},
 		},
 	}
@@ -1579,10 +1579,10 @@ func TestEventReaderCfgloadFromJSONCfg(t *testing.T) {
 	str := "test"
 	amqpr := &AMQPROpts{}
 	exp := &AMQPROpts{
-		AMQPUsername:          &str,
-		AMQPPassword:          &str,
-		AMQPUsernameProcessed: &str,
-		AMQPPasswordProcessed: &str,
+		Username:          &str,
+		Password:          &str,
+		UsernameProcessed: &str,
+		PasswordProcessed: &str,
 	}
 	jsnCfg := &EventReaderOptsJson{
 		AMQPUsername:          &str,
@@ -1603,10 +1603,10 @@ func TestEventReaderCfgloadFromJSONCfg(t *testing.T) {
 func TestEventReaderCfgClone2(t *testing.T) {
 	str := "test"
 	amqpr := &AMQPROpts{
-		AMQPUsername:          &str,
-		AMQPPassword:          &str,
-		AMQPUsernameProcessed: &str,
-		AMQPPasswordProcessed: &str,
+		Username:          &str,
+		Password:          &str,
+		UsernameProcessed: &str,
+		PasswordProcessed: &str,
 	}
 	rcv := amqpr.Clone()
 
@@ -1617,14 +1617,14 @@ func TestEventReaderCfgClone2(t *testing.T) {
 func TestEventReaderCfgAsMapInterface(t *testing.T) {
 	str := "test"
 	amqpr := &AMQPROpts{
-		AMQPUsername:          &str,
-		AMQPPassword:          &str,
-		AMQPUsernameProcessed: &str,
-		AMQPPasswordProcessed: &str,
+		Username:          &str,
+		Password:          &str,
+		UsernameProcessed: &str,
+		PasswordProcessed: &str,
 	}
 	er := &EventReaderCfg{
 		Opts: &EventReaderOpts{
-			AMQPOpts: amqpr,
+			AMQP: amqpr,
 		},
 	}
 	opts := map[string]any{

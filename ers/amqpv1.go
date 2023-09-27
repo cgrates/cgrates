@@ -52,13 +52,13 @@ func NewAMQPv1ER(cfg *config.CGRConfig, cfgIdx int,
 		}
 	}
 
-	if amqOpts := rdr.Config().Opts.AMQPOpts; amqOpts != nil {
-		if amqOpts.AMQPQueueID != nil {
-			rdr.queueID = "/" + *amqOpts.AMQPQueueID
+	if amqOpts := rdr.Config().Opts.AMQP; amqOpts != nil {
+		if amqOpts.QueueID != nil {
+			rdr.queueID = "/" + *amqOpts.QueueID
 		}
-		if amqOpts.AMQPUsername != nil && amqOpts.AMQPPassword != nil {
+		if amqOpts.Username != nil && amqOpts.Password != nil {
 			rdr.connOpts = &amqpv1.ConnOptions{
-				SASLType: amqpv1.SASLTypePlain(*amqOpts.AMQPUsername, *amqOpts.AMQPPassword),
+				SASLType: amqpv1.SASLTypePlain(*amqOpts.Username, *amqOpts.Password),
 			}
 		}
 	}

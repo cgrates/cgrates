@@ -1249,8 +1249,8 @@ func TestConfigSanityEventReader(t *testing.T) {
 		ProcessedPath: "/",
 		SourcePath:    "/",
 		Opts: &EventReaderOpts{
-			CSVOpts: &CSVROpts{
-				CSVFieldSeparator: utils.StringPointer(utils.EmptyString),
+			CSV: &CSVROpts{
+				FieldSeparator: utils.StringPointer(utils.EmptyString),
 			},
 			PartialCacheAction: utils.StringPointer(utils.MetaNone),
 		},
@@ -1264,8 +1264,8 @@ func TestConfigSanityEventReader(t *testing.T) {
 		Type:     utils.MetaKafkajsonMap,
 		RunDelay: 1,
 		Opts: &EventReaderOpts{
-			CSVOpts: &CSVROpts{
-				CSVFieldSeparator: utils.StringPointer(utils.FieldsSep),
+			CSV: &CSVROpts{
+				FieldSeparator: utils.StringPointer(utils.FieldsSep),
 			},
 			PartialCacheAction: utils.StringPointer(utils.MetaNone),
 		},
@@ -2018,7 +2018,7 @@ func TestConfigSanityErs(t *testing.T) {
 
 	cfg.ersCfg.Readers[0].Opts = &EventReaderOpts{
 		PartialCacheAction: utils.StringPointer(utils.MetaDumpToFile),
-		CSVOpts: &CSVROpts{
+		CSV: &CSVROpts{
 			PartialCSVFieldSeparator: utils.StringPointer(utils.EmptyString),
 		},
 	}

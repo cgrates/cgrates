@@ -136,115 +136,115 @@ func (erS *ERsCfg) AsMapInterface(separator string) (initialMP map[string]any) {
 }
 
 type AMQPROpts struct {
-	AMQPQueueID               *string
-	AMQPQueueIDProcessed      *string
-	AMQPUsername              *string
-	AMQPPassword              *string
-	AMQPUsernameProcessed     *string
-	AMQPPasswordProcessed     *string
-	AMQPConsumerTag           *string
-	AMQPExchange              *string
-	AMQPExchangeType          *string
-	AMQPRoutingKey            *string
-	AMQPExchangeProcessed     *string
-	AMQPExchangeTypeProcessed *string
-	AMQPRoutingKeyProcessed   *string
+	QueueID               *string
+	QueueIDProcessed      *string
+	Username              *string
+	Password              *string
+	UsernameProcessed     *string
+	PasswordProcessed     *string
+	ConsumerTag           *string
+	Exchange              *string
+	ExchangeType          *string
+	RoutingKey            *string
+	ExchangeProcessed     *string
+	ExchangeTypeProcessed *string
+	RoutingKeyProcessed   *string
 }
 
 func (amqpr *AMQPROpts) loadFromJSONCfg(jsnCfg *EventReaderOptsJson) (err error) {
 	if jsnCfg.AMQPQueueID != nil {
-		amqpr.AMQPQueueID = jsnCfg.AMQPQueueID
+		amqpr.QueueID = jsnCfg.AMQPQueueID
 	}
 	if jsnCfg.AMQPQueueIDProcessed != nil {
-		amqpr.AMQPQueueIDProcessed = jsnCfg.AMQPQueueIDProcessed
+		amqpr.QueueIDProcessed = jsnCfg.AMQPQueueIDProcessed
 	}
 	if jsnCfg.AMQPUsername != nil {
-		amqpr.AMQPUsername = jsnCfg.AMQPUsername
+		amqpr.Username = jsnCfg.AMQPUsername
 	}
 	if jsnCfg.AMQPPassword != nil {
-		amqpr.AMQPPassword = jsnCfg.AMQPPassword
+		amqpr.Password = jsnCfg.AMQPPassword
 	}
 	if jsnCfg.AMQPUsernameProcessed != nil {
-		amqpr.AMQPUsernameProcessed = jsnCfg.AMQPUsernameProcessed
+		amqpr.UsernameProcessed = jsnCfg.AMQPUsernameProcessed
 	}
 	if jsnCfg.AMQPPasswordProcessed != nil {
-		amqpr.AMQPPasswordProcessed = jsnCfg.AMQPPasswordProcessed
+		amqpr.PasswordProcessed = jsnCfg.AMQPPasswordProcessed
 	}
 	if jsnCfg.AMQPConsumerTag != nil {
-		amqpr.AMQPConsumerTag = jsnCfg.AMQPConsumerTag
+		amqpr.ConsumerTag = jsnCfg.AMQPConsumerTag
 	}
 	if jsnCfg.AMQPExchange != nil {
-		amqpr.AMQPExchange = jsnCfg.AMQPExchange
+		amqpr.Exchange = jsnCfg.AMQPExchange
 	}
 	if jsnCfg.AMQPExchangeType != nil {
-		amqpr.AMQPExchangeType = jsnCfg.AMQPExchangeType
+		amqpr.ExchangeType = jsnCfg.AMQPExchangeType
 	}
 	if jsnCfg.AMQPRoutingKey != nil {
-		amqpr.AMQPRoutingKey = jsnCfg.AMQPRoutingKey
+		amqpr.RoutingKey = jsnCfg.AMQPRoutingKey
 	}
 	if jsnCfg.AMQPExchangeProcessed != nil {
-		amqpr.AMQPExchangeProcessed = jsnCfg.AMQPExchangeProcessed
+		amqpr.ExchangeProcessed = jsnCfg.AMQPExchangeProcessed
 	}
 	if jsnCfg.AMQPExchangeTypeProcessed != nil {
-		amqpr.AMQPExchangeTypeProcessed = jsnCfg.AMQPExchangeTypeProcessed
+		amqpr.ExchangeTypeProcessed = jsnCfg.AMQPExchangeTypeProcessed
 	}
 	if jsnCfg.AMQPRoutingKeyProcessed != nil {
-		amqpr.AMQPRoutingKeyProcessed = jsnCfg.AMQPRoutingKeyProcessed
+		amqpr.RoutingKeyProcessed = jsnCfg.AMQPRoutingKeyProcessed
 	}
 	return
 }
 
 type KafkaROpts struct {
-	KafkaTopic          *string
-	KafkaGroupID        *string
-	KafkaMaxWait        *time.Duration
-	KafkaTopicProcessed *string
+	Topic          *string
+	GroupID        *string
+	MaxWait        *time.Duration
+	TopicProcessed *string
 }
 
 func (kafkaROpts *KafkaROpts) loadFromJSONCfg(jsnCfg *EventReaderOptsJson) (err error) {
 	if jsnCfg.KafkaTopic != nil {
-		kafkaROpts.KafkaTopic = jsnCfg.KafkaTopic
+		kafkaROpts.Topic = jsnCfg.KafkaTopic
 	}
 	if jsnCfg.KafkaGroupID != nil {
-		kafkaROpts.KafkaGroupID = jsnCfg.KafkaGroupID
+		kafkaROpts.GroupID = jsnCfg.KafkaGroupID
 	}
 	if jsnCfg.KafkaMaxWait != nil {
 		var kafkaMaxWait time.Duration
 		if kafkaMaxWait, err = utils.ParseDurationWithNanosecs(*jsnCfg.KafkaMaxWait); err != nil {
 			return
 		}
-		kafkaROpts.KafkaMaxWait = utils.DurationPointer(kafkaMaxWait)
+		kafkaROpts.MaxWait = utils.DurationPointer(kafkaMaxWait)
 	}
 	if jsnCfg.KafkaTopicProcessed != nil {
-		kafkaROpts.KafkaTopicProcessed = jsnCfg.KafkaTopicProcessed
+		kafkaROpts.TopicProcessed = jsnCfg.KafkaTopicProcessed
 	}
 	return
 }
 
 type SQLROpts struct {
-	SQLDBName             *string
-	SQLTableName          *string
-	PgSSLMode             *string
-	SQLDBNameProcessed    *string
-	SQLTableNameProcessed *string
-	PgSSLModeProcessed    *string
+	DBName             *string
+	TableName          *string
+	PgSSLMode          *string
+	DBNameProcessed    *string
+	TableNameProcessed *string
+	PgSSLModeProcessed *string
 }
 
 func (sqlOpts *SQLROpts) loadFromJSONCfg(jsnCfg *EventReaderOptsJson) (err error) {
 	if jsnCfg.SQLDBName != nil {
-		sqlOpts.SQLDBName = jsnCfg.SQLDBName
+		sqlOpts.DBName = jsnCfg.SQLDBName
 	}
 	if jsnCfg.SQLTableName != nil {
-		sqlOpts.SQLTableName = jsnCfg.SQLTableName
+		sqlOpts.TableName = jsnCfg.SQLTableName
 	}
 	if jsnCfg.PgSSLMode != nil {
 		sqlOpts.PgSSLMode = jsnCfg.PgSSLMode
 	}
 	if jsnCfg.SQLDBNameProcessed != nil {
-		sqlOpts.SQLDBNameProcessed = jsnCfg.SQLDBNameProcessed
+		sqlOpts.DBNameProcessed = jsnCfg.SQLDBNameProcessed
 	}
 	if jsnCfg.SQLTableNameProcessed != nil {
-		sqlOpts.SQLTableNameProcessed = jsnCfg.SQLTableNameProcessed
+		sqlOpts.TableNameProcessed = jsnCfg.SQLTableNameProcessed
 	}
 	if jsnCfg.PgSSLModeProcessed != nil {
 		sqlOpts.PgSSLModeProcessed = jsnCfg.PgSSLModeProcessed
@@ -253,14 +253,14 @@ func (sqlOpts *SQLROpts) loadFromJSONCfg(jsnCfg *EventReaderOptsJson) (err error
 }
 
 type AWSROpts struct {
-	AWSRegion             *string
-	AWSKey                *string
-	AWSSecret             *string
-	AWSToken              *string
-	AWSRegionProcessed    *string
-	AWSKeyProcessed       *string
-	AWSSecretProcessed    *string
-	AWSTokenProcessed     *string
+	Region                *string
+	Key                   *string
+	Secret                *string
+	Token                 *string
+	RegionProcessed       *string
+	KeyProcessed          *string
+	SecretProcessed       *string
+	TokenProcessed        *string
 	SQSQueueID            *string
 	SQSQueueIDProcessed   *string
 	S3BucketID            *string
@@ -271,28 +271,28 @@ type AWSROpts struct {
 func (awsROpts *AWSROpts) loadFromJSONCfg(jsnCfg *EventReaderOptsJson) (err error) {
 
 	if jsnCfg.AWSRegion != nil {
-		awsROpts.AWSRegion = jsnCfg.AWSRegion
+		awsROpts.Region = jsnCfg.AWSRegion
 	}
 	if jsnCfg.AWSKey != nil {
-		awsROpts.AWSKey = jsnCfg.AWSKey
+		awsROpts.Key = jsnCfg.AWSKey
 	}
 	if jsnCfg.AWSSecret != nil {
-		awsROpts.AWSSecret = jsnCfg.AWSSecret
+		awsROpts.Secret = jsnCfg.AWSSecret
 	}
 	if jsnCfg.AWSToken != nil {
-		awsROpts.AWSToken = jsnCfg.AWSToken
+		awsROpts.Token = jsnCfg.AWSToken
 	}
 	if jsnCfg.AWSRegionProcessed != nil {
-		awsROpts.AWSRegionProcessed = jsnCfg.AWSRegionProcessed
+		awsROpts.RegionProcessed = jsnCfg.AWSRegionProcessed
 	}
 	if jsnCfg.AWSKeyProcessed != nil {
-		awsROpts.AWSKeyProcessed = jsnCfg.AWSKeyProcessed
+		awsROpts.KeyProcessed = jsnCfg.AWSKeyProcessed
 	}
 	if jsnCfg.AWSSecretProcessed != nil {
-		awsROpts.AWSSecretProcessed = jsnCfg.AWSSecretProcessed
+		awsROpts.SecretProcessed = jsnCfg.AWSSecretProcessed
 	}
 	if jsnCfg.AWSTokenProcessed != nil {
-		awsROpts.AWSTokenProcessed = jsnCfg.AWSTokenProcessed
+		awsROpts.TokenProcessed = jsnCfg.AWSTokenProcessed
 	}
 	if jsnCfg.SQSQueueID != nil {
 		awsROpts.SQSQueueID = jsnCfg.SQSQueueID
@@ -405,10 +405,10 @@ func (natsOpts *NATSROpts) loadFromJSONCfg(jsnCfg *EventReaderOptsJson) (err err
 
 type CSVROpts struct {
 	PartialCSVFieldSeparator *string
-	CSVRowLength             *int
-	CSVFieldSeparator        *string
-	CSVHeaderDefineChar      *string
-	CSVLazyQuotes            *bool
+	RowLength                *int
+	FieldSeparator           *string
+	HeaderDefineChar         *string
+	LazyQuotes               *bool
 }
 
 func (csvROpts *CSVROpts) loadFromJSONCfg(jsnCfg *EventReaderOptsJson) (err error) {
@@ -416,16 +416,16 @@ func (csvROpts *CSVROpts) loadFromJSONCfg(jsnCfg *EventReaderOptsJson) (err erro
 		csvROpts.PartialCSVFieldSeparator = jsnCfg.PartialCSVFieldSeparator
 	}
 	if jsnCfg.CSVRowLength != nil {
-		csvROpts.CSVRowLength = jsnCfg.CSVRowLength
+		csvROpts.RowLength = jsnCfg.CSVRowLength
 	}
 	if jsnCfg.CSVFieldSeparator != nil {
-		csvROpts.CSVFieldSeparator = jsnCfg.CSVFieldSeparator
+		csvROpts.FieldSeparator = jsnCfg.CSVFieldSeparator
 	}
 	if jsnCfg.CSVHeaderDefineChar != nil {
-		csvROpts.CSVHeaderDefineChar = jsnCfg.CSVHeaderDefineChar
+		csvROpts.HeaderDefineChar = jsnCfg.CSVHeaderDefineChar
 	}
 	if jsnCfg.CSVLazyQuotes != nil {
-		csvROpts.CSVLazyQuotes = jsnCfg.CSVLazyQuotes
+		csvROpts.LazyQuotes = jsnCfg.CSVLazyQuotes
 	}
 	return
 }
@@ -435,12 +435,12 @@ type EventReaderOpts struct {
 	PartialCacheAction *string
 	PartialOrderField  *string
 	XMLRootPath        *string
-	CSVOpts            *CSVROpts
-	AMQPOpts           *AMQPROpts
-	AWSOpts            *AWSROpts
-	NATSOpts           *NATSROpts
-	KafkaOpts          *KafkaROpts
-	SQLOpts            *SQLROpts
+	CSV                *CSVROpts
+	AMQP               *AMQPROpts
+	AWS                *AWSROpts
+	NATS               *NATSROpts
+	Kafka              *KafkaROpts
+	SQL                *SQLROpts
 }
 
 // EventReaderCfg the event for the Event Reader
@@ -465,22 +465,22 @@ func (erOpts *EventReaderOpts) loadFromJSONCfg(jsnCfg *EventReaderOptsJson) (err
 	if jsnCfg == nil {
 		return
 	}
-	if err = erOpts.AMQPOpts.loadFromJSONCfg(jsnCfg); err != nil {
+	if err = erOpts.AMQP.loadFromJSONCfg(jsnCfg); err != nil {
 		return
 	}
-	if err = erOpts.AWSOpts.loadFromJSONCfg(jsnCfg); err != nil {
+	if err = erOpts.AWS.loadFromJSONCfg(jsnCfg); err != nil {
 		return
 	}
-	if err = erOpts.KafkaOpts.loadFromJSONCfg(jsnCfg); err != nil {
+	if err = erOpts.Kafka.loadFromJSONCfg(jsnCfg); err != nil {
 		return
 	}
-	if err = erOpts.NATSOpts.loadFromJSONCfg(jsnCfg); err != nil {
+	if err = erOpts.NATS.loadFromJSONCfg(jsnCfg); err != nil {
 		return
 	}
-	if err = erOpts.SQLOpts.loadFromJSONCfg(jsnCfg); err != nil {
+	if err = erOpts.SQL.loadFromJSONCfg(jsnCfg); err != nil {
 		return
 	}
-	if err = erOpts.CSVOpts.loadFromJSONCfg(jsnCfg); err != nil {
+	if err = erOpts.CSV.loadFromJSONCfg(jsnCfg); err != nil {
 		return
 	}
 	if jsnCfg.PartialPath != nil {
@@ -578,57 +578,57 @@ func (er *EventReaderCfg) loadFromJSONCfg(jsnCfg *EventReaderJsonCfg, msgTemplat
 }
 func (amqpOpts *AMQPROpts) Clone() *AMQPROpts {
 	cln := &AMQPROpts{}
-	if amqpOpts.AMQPQueueID != nil {
-		cln.AMQPQueueID = new(string)
-		*cln.AMQPQueueID = *amqpOpts.AMQPQueueID
+	if amqpOpts.QueueID != nil {
+		cln.QueueID = new(string)
+		*cln.QueueID = *amqpOpts.QueueID
 	}
-	if amqpOpts.AMQPQueueIDProcessed != nil {
-		cln.AMQPQueueIDProcessed = new(string)
-		*cln.AMQPQueueIDProcessed = *amqpOpts.AMQPQueueIDProcessed
+	if amqpOpts.QueueIDProcessed != nil {
+		cln.QueueIDProcessed = new(string)
+		*cln.QueueIDProcessed = *amqpOpts.QueueIDProcessed
 	}
-	if amqpOpts.AMQPUsername != nil {
-		cln.AMQPUsername = new(string)
-		*cln.AMQPUsername = *amqpOpts.AMQPUsername
+	if amqpOpts.Username != nil {
+		cln.Username = new(string)
+		*cln.Username = *amqpOpts.Username
 	}
-	if amqpOpts.AMQPPassword != nil {
-		cln.AMQPPassword = new(string)
-		*cln.AMQPPassword = *amqpOpts.AMQPPassword
+	if amqpOpts.Password != nil {
+		cln.Password = new(string)
+		*cln.Password = *amqpOpts.Password
 	}
-	if amqpOpts.AMQPUsernameProcessed != nil {
-		cln.AMQPUsernameProcessed = new(string)
-		*cln.AMQPUsernameProcessed = *amqpOpts.AMQPUsernameProcessed
+	if amqpOpts.UsernameProcessed != nil {
+		cln.UsernameProcessed = new(string)
+		*cln.UsernameProcessed = *amqpOpts.UsernameProcessed
 	}
-	if amqpOpts.AMQPPasswordProcessed != nil {
-		cln.AMQPPasswordProcessed = new(string)
-		*cln.AMQPPasswordProcessed = *amqpOpts.AMQPPasswordProcessed
+	if amqpOpts.PasswordProcessed != nil {
+		cln.PasswordProcessed = new(string)
+		*cln.PasswordProcessed = *amqpOpts.PasswordProcessed
 	}
-	if amqpOpts.AMQPConsumerTag != nil {
-		cln.AMQPConsumerTag = new(string)
-		*cln.AMQPConsumerTag = *amqpOpts.AMQPConsumerTag
+	if amqpOpts.ConsumerTag != nil {
+		cln.ConsumerTag = new(string)
+		*cln.ConsumerTag = *amqpOpts.ConsumerTag
 	}
-	if amqpOpts.AMQPExchange != nil {
-		cln.AMQPExchange = new(string)
-		*cln.AMQPExchange = *amqpOpts.AMQPExchange
+	if amqpOpts.Exchange != nil {
+		cln.Exchange = new(string)
+		*cln.Exchange = *amqpOpts.Exchange
 	}
-	if amqpOpts.AMQPExchangeType != nil {
-		cln.AMQPExchangeType = new(string)
-		*cln.AMQPExchangeType = *amqpOpts.AMQPExchangeType
+	if amqpOpts.ExchangeType != nil {
+		cln.ExchangeType = new(string)
+		*cln.ExchangeType = *amqpOpts.ExchangeType
 	}
-	if amqpOpts.AMQPRoutingKey != nil {
-		cln.AMQPRoutingKey = new(string)
-		*cln.AMQPRoutingKey = *amqpOpts.AMQPRoutingKey
+	if amqpOpts.RoutingKey != nil {
+		cln.RoutingKey = new(string)
+		*cln.RoutingKey = *amqpOpts.RoutingKey
 	}
-	if amqpOpts.AMQPExchangeProcessed != nil {
-		cln.AMQPExchangeProcessed = new(string)
-		*cln.AMQPExchangeProcessed = *amqpOpts.AMQPExchangeProcessed
+	if amqpOpts.ExchangeProcessed != nil {
+		cln.ExchangeProcessed = new(string)
+		*cln.ExchangeProcessed = *amqpOpts.ExchangeProcessed
 	}
-	if amqpOpts.AMQPExchangeTypeProcessed != nil {
-		cln.AMQPExchangeTypeProcessed = new(string)
-		*cln.AMQPExchangeTypeProcessed = *amqpOpts.AMQPExchangeTypeProcessed
+	if amqpOpts.ExchangeTypeProcessed != nil {
+		cln.ExchangeTypeProcessed = new(string)
+		*cln.ExchangeTypeProcessed = *amqpOpts.ExchangeTypeProcessed
 	}
-	if amqpOpts.AMQPRoutingKeyProcessed != nil {
-		cln.AMQPRoutingKeyProcessed = new(string)
-		*cln.AMQPRoutingKeyProcessed = *amqpOpts.AMQPRoutingKeyProcessed
+	if amqpOpts.RoutingKeyProcessed != nil {
+		cln.RoutingKeyProcessed = new(string)
+		*cln.RoutingKeyProcessed = *amqpOpts.RoutingKeyProcessed
 	}
 	return cln
 }
@@ -639,66 +639,66 @@ func (csvOpts *CSVROpts) Clone() *CSVROpts {
 		cln.PartialCSVFieldSeparator = new(string)
 		*cln.PartialCSVFieldSeparator = *csvOpts.PartialCSVFieldSeparator
 	}
-	if csvOpts.CSVRowLength != nil {
-		cln.CSVRowLength = new(int)
-		*cln.CSVRowLength = *csvOpts.CSVRowLength
+	if csvOpts.RowLength != nil {
+		cln.RowLength = new(int)
+		*cln.RowLength = *csvOpts.RowLength
 	}
-	if csvOpts.CSVFieldSeparator != nil {
-		cln.CSVFieldSeparator = new(string)
-		*cln.CSVFieldSeparator = *csvOpts.CSVFieldSeparator
+	if csvOpts.FieldSeparator != nil {
+		cln.FieldSeparator = new(string)
+		*cln.FieldSeparator = *csvOpts.FieldSeparator
 	}
-	if csvOpts.CSVHeaderDefineChar != nil {
-		cln.CSVHeaderDefineChar = new(string)
-		*cln.CSVHeaderDefineChar = *csvOpts.CSVHeaderDefineChar
+	if csvOpts.HeaderDefineChar != nil {
+		cln.HeaderDefineChar = new(string)
+		*cln.HeaderDefineChar = *csvOpts.HeaderDefineChar
 	}
-	if csvOpts.CSVLazyQuotes != nil {
-		cln.CSVLazyQuotes = new(bool)
-		*cln.CSVLazyQuotes = *csvOpts.CSVLazyQuotes
+	if csvOpts.LazyQuotes != nil {
+		cln.LazyQuotes = new(bool)
+		*cln.LazyQuotes = *csvOpts.LazyQuotes
 	}
 	return cln
 }
 func (kafkaOpts *KafkaROpts) Clone() *KafkaROpts {
 	cln := &KafkaROpts{}
-	if kafkaOpts.KafkaTopic != nil {
-		cln.KafkaTopic = new(string)
-		*cln.KafkaTopic = *kafkaOpts.KafkaTopic
+	if kafkaOpts.Topic != nil {
+		cln.Topic = new(string)
+		*cln.Topic = *kafkaOpts.Topic
 	}
-	if kafkaOpts.KafkaGroupID != nil {
-		cln.KafkaGroupID = new(string)
-		*cln.KafkaGroupID = *kafkaOpts.KafkaGroupID
+	if kafkaOpts.GroupID != nil {
+		cln.GroupID = new(string)
+		*cln.GroupID = *kafkaOpts.GroupID
 	}
-	if kafkaOpts.KafkaMaxWait != nil {
-		cln.KafkaMaxWait = new(time.Duration)
-		*cln.KafkaMaxWait = *kafkaOpts.KafkaMaxWait
+	if kafkaOpts.MaxWait != nil {
+		cln.MaxWait = new(time.Duration)
+		*cln.MaxWait = *kafkaOpts.MaxWait
 	}
-	if kafkaOpts.KafkaTopicProcessed != nil {
-		cln.KafkaTopicProcessed = new(string)
-		*cln.KafkaTopicProcessed = *kafkaOpts.KafkaTopicProcessed
+	if kafkaOpts.TopicProcessed != nil {
+		cln.TopicProcessed = new(string)
+		*cln.TopicProcessed = *kafkaOpts.TopicProcessed
 	}
 	return cln
 }
 
 func (sqlOpts *SQLROpts) Clone() *SQLROpts {
 	cln := &SQLROpts{}
-	if sqlOpts.SQLDBName != nil {
-		cln.SQLDBName = new(string)
-		*cln.SQLDBName = *sqlOpts.SQLDBName
+	if sqlOpts.DBName != nil {
+		cln.DBName = new(string)
+		*cln.DBName = *sqlOpts.DBName
 	}
-	if sqlOpts.SQLTableName != nil {
-		cln.SQLTableName = new(string)
-		*cln.SQLTableName = *sqlOpts.SQLTableName
+	if sqlOpts.TableName != nil {
+		cln.TableName = new(string)
+		*cln.TableName = *sqlOpts.TableName
 	}
 	if sqlOpts.PgSSLMode != nil {
 		cln.PgSSLMode = new(string)
 		*cln.PgSSLMode = *sqlOpts.PgSSLMode
 	}
-	if sqlOpts.SQLDBNameProcessed != nil {
-		cln.SQLDBNameProcessed = new(string)
-		*cln.SQLDBNameProcessed = *sqlOpts.SQLDBNameProcessed
+	if sqlOpts.DBNameProcessed != nil {
+		cln.DBNameProcessed = new(string)
+		*cln.DBNameProcessed = *sqlOpts.DBNameProcessed
 	}
-	if sqlOpts.SQLTableNameProcessed != nil {
-		cln.SQLTableNameProcessed = new(string)
-		*cln.SQLTableNameProcessed = *sqlOpts.SQLTableNameProcessed
+	if sqlOpts.TableNameProcessed != nil {
+		cln.TableNameProcessed = new(string)
+		*cln.TableNameProcessed = *sqlOpts.TableNameProcessed
 	}
 	if sqlOpts.PgSSLModeProcessed != nil {
 		cln.PgSSLModeProcessed = new(string)
@@ -709,37 +709,37 @@ func (sqlOpts *SQLROpts) Clone() *SQLROpts {
 
 func (awsOpt *AWSROpts) Clone() *AWSROpts {
 	cln := &AWSROpts{}
-	if awsOpt.AWSRegion != nil {
-		cln.AWSRegion = new(string)
-		*cln.AWSRegion = *awsOpt.AWSRegion
+	if awsOpt.Region != nil {
+		cln.Region = new(string)
+		*cln.Region = *awsOpt.Region
 	}
-	if awsOpt.AWSKey != nil {
-		cln.AWSKey = new(string)
-		*cln.AWSKey = *awsOpt.AWSKey
+	if awsOpt.Key != nil {
+		cln.Key = new(string)
+		*cln.Key = *awsOpt.Key
 	}
-	if awsOpt.AWSSecret != nil {
-		cln.AWSSecret = new(string)
-		*cln.AWSSecret = *awsOpt.AWSSecret
+	if awsOpt.Secret != nil {
+		cln.Secret = new(string)
+		*cln.Secret = *awsOpt.Secret
 	}
-	if awsOpt.AWSToken != nil {
-		cln.AWSToken = new(string)
-		*cln.AWSToken = *awsOpt.AWSToken
+	if awsOpt.Token != nil {
+		cln.Token = new(string)
+		*cln.Token = *awsOpt.Token
 	}
-	if awsOpt.AWSRegionProcessed != nil {
-		cln.AWSRegionProcessed = new(string)
-		*cln.AWSRegionProcessed = *awsOpt.AWSRegionProcessed
+	if awsOpt.RegionProcessed != nil {
+		cln.RegionProcessed = new(string)
+		*cln.RegionProcessed = *awsOpt.RegionProcessed
 	}
-	if awsOpt.AWSKeyProcessed != nil {
-		cln.AWSKeyProcessed = new(string)
-		*cln.AWSKeyProcessed = *awsOpt.AWSKeyProcessed
+	if awsOpt.KeyProcessed != nil {
+		cln.KeyProcessed = new(string)
+		*cln.KeyProcessed = *awsOpt.KeyProcessed
 	}
-	if awsOpt.AWSSecretProcessed != nil {
-		cln.AWSSecretProcessed = new(string)
-		*cln.AWSSecretProcessed = *awsOpt.AWSSecretProcessed
+	if awsOpt.SecretProcessed != nil {
+		cln.SecretProcessed = new(string)
+		*cln.SecretProcessed = *awsOpt.SecretProcessed
 	}
-	if awsOpt.AWSTokenProcessed != nil {
-		cln.AWSTokenProcessed = new(string)
-		*cln.AWSTokenProcessed = *awsOpt.AWSTokenProcessed
+	if awsOpt.TokenProcessed != nil {
+		cln.TokenProcessed = new(string)
+		*cln.TokenProcessed = *awsOpt.TokenProcessed
 	}
 	if awsOpt.SQSQueueID != nil {
 		cln.SQSQueueID = new(string)
@@ -858,27 +858,27 @@ func (erOpts *EventReaderOpts) Clone() *EventReaderOpts {
 		cln.PartialOrderField = new(string)
 		*cln.PartialOrderField = *erOpts.PartialOrderField
 	}
-	if erOpts.CSVOpts != nil {
-		cln.CSVOpts = erOpts.CSVOpts.Clone()
+	if erOpts.CSV != nil {
+		cln.CSV = erOpts.CSV.Clone()
 	}
 	if erOpts.XMLRootPath != nil {
 		cln.XMLRootPath = new(string)
 		*cln.XMLRootPath = *erOpts.XMLRootPath
 	}
-	if erOpts.AMQPOpts != nil {
-		cln.AMQPOpts = erOpts.AMQPOpts.Clone()
+	if erOpts.AMQP != nil {
+		cln.AMQP = erOpts.AMQP.Clone()
 	}
-	if erOpts.NATSOpts != nil {
-		cln.NATSOpts = erOpts.NATSOpts.Clone()
+	if erOpts.NATS != nil {
+		cln.NATS = erOpts.NATS.Clone()
 	}
-	if erOpts.KafkaOpts != nil {
-		cln.KafkaOpts = erOpts.KafkaOpts.Clone()
+	if erOpts.Kafka != nil {
+		cln.Kafka = erOpts.Kafka.Clone()
 	}
-	if erOpts.SQLOpts != nil {
-		cln.SQLOpts = erOpts.SQLOpts.Clone()
+	if erOpts.SQL != nil {
+		cln.SQL = erOpts.SQL.Clone()
 	}
-	if erOpts.AWSOpts != nil {
-		cln.AWSOpts = erOpts.AWSOpts.Clone()
+	if erOpts.AWS != nil {
+		cln.AWS = erOpts.AWS.Clone()
 	}
 
 	return cln
@@ -939,128 +939,128 @@ func (er *EventReaderCfg) AsMapInterface(separator string) (initialMP map[string
 		opts[utils.PartialOrderFieldOpt] = *er.Opts.PartialOrderField
 	}
 
-	if csvOpts := er.Opts.CSVOpts; csvOpts != nil {
+	if csvOpts := er.Opts.CSV; csvOpts != nil {
 		if csvOpts.PartialCSVFieldSeparator != nil {
 			opts[utils.PartialCSVFieldSepartorOpt] = *csvOpts.PartialCSVFieldSeparator
 		}
-		if csvOpts.CSVRowLength != nil {
-			opts[utils.CSVRowLengthOpt] = *csvOpts.CSVRowLength
+		if csvOpts.RowLength != nil {
+			opts[utils.CSVRowLengthOpt] = *csvOpts.RowLength
 		}
-		if csvOpts.CSVFieldSeparator != nil {
-			opts[utils.CSVFieldSepOpt] = *csvOpts.CSVFieldSeparator
+		if csvOpts.FieldSeparator != nil {
+			opts[utils.CSVFieldSepOpt] = *csvOpts.FieldSeparator
 		}
-		if csvOpts.CSVHeaderDefineChar != nil {
-			opts[utils.HeaderDefineCharOpt] = *csvOpts.CSVHeaderDefineChar
+		if csvOpts.HeaderDefineChar != nil {
+			opts[utils.HeaderDefineCharOpt] = *csvOpts.HeaderDefineChar
 		}
-		if csvOpts.CSVLazyQuotes != nil {
-			opts[utils.CSVLazyQuotes] = *csvOpts.CSVLazyQuotes
+		if csvOpts.LazyQuotes != nil {
+			opts[utils.CSVLazyQuotes] = *csvOpts.LazyQuotes
 		}
 	}
 	if er.Opts.XMLRootPath != nil {
 		opts[utils.XMLRootPathOpt] = *er.Opts.XMLRootPath
 	}
-	if amqpOpts := er.Opts.AMQPOpts; amqpOpts != nil {
-		if amqpOpts.AMQPQueueID != nil {
-			opts[utils.AMQPQueueID] = *amqpOpts.AMQPQueueID
+	if amqpOpts := er.Opts.AMQP; amqpOpts != nil {
+		if amqpOpts.QueueID != nil {
+			opts[utils.AMQPQueueID] = *amqpOpts.QueueID
 		}
-		if amqpOpts.AMQPQueueIDProcessed != nil {
-			opts[utils.AMQPQueueIDProcessedCfg] = *amqpOpts.AMQPQueueIDProcessed
+		if amqpOpts.QueueIDProcessed != nil {
+			opts[utils.AMQPQueueIDProcessedCfg] = *amqpOpts.QueueIDProcessed
 		}
-		if amqpOpts.AMQPUsername != nil {
-			opts[utils.AMQPUsername] = *amqpOpts.AMQPUsername
+		if amqpOpts.Username != nil {
+			opts[utils.AMQPUsername] = *amqpOpts.Username
 		}
-		if amqpOpts.AMQPPassword != nil {
-			opts[utils.AMQPPassword] = *amqpOpts.AMQPPassword
+		if amqpOpts.Password != nil {
+			opts[utils.AMQPPassword] = *amqpOpts.Password
 		}
-		if amqpOpts.AMQPUsernameProcessed != nil {
-			opts[utils.AMQPUsernameProcessedCfg] = *amqpOpts.AMQPUsernameProcessed
+		if amqpOpts.UsernameProcessed != nil {
+			opts[utils.AMQPUsernameProcessedCfg] = *amqpOpts.UsernameProcessed
 		}
-		if amqpOpts.AMQPPasswordProcessed != nil {
-			opts[utils.AMQPPasswordProcessedCfg] = *amqpOpts.AMQPPasswordProcessed
+		if amqpOpts.PasswordProcessed != nil {
+			opts[utils.AMQPPasswordProcessedCfg] = *amqpOpts.PasswordProcessed
 		}
-		if amqpOpts.AMQPConsumerTag != nil {
-			opts[utils.AMQPConsumerTag] = *amqpOpts.AMQPConsumerTag
+		if amqpOpts.ConsumerTag != nil {
+			opts[utils.AMQPConsumerTag] = *amqpOpts.ConsumerTag
 		}
-		if amqpOpts.AMQPExchange != nil {
-			opts[utils.AMQPExchange] = *amqpOpts.AMQPExchange
+		if amqpOpts.Exchange != nil {
+			opts[utils.AMQPExchange] = *amqpOpts.Exchange
 		}
-		if amqpOpts.AMQPExchangeType != nil {
-			opts[utils.AMQPExchangeType] = *amqpOpts.AMQPExchangeType
+		if amqpOpts.ExchangeType != nil {
+			opts[utils.AMQPExchangeType] = *amqpOpts.ExchangeType
 		}
-		if amqpOpts.AMQPRoutingKey != nil {
-			opts[utils.AMQPRoutingKey] = *amqpOpts.AMQPRoutingKey
+		if amqpOpts.RoutingKey != nil {
+			opts[utils.AMQPRoutingKey] = *amqpOpts.RoutingKey
 		}
-		if amqpOpts.AMQPExchangeProcessed != nil {
-			opts[utils.AMQPExchangeProcessedCfg] = *amqpOpts.AMQPExchangeProcessed
+		if amqpOpts.ExchangeProcessed != nil {
+			opts[utils.AMQPExchangeProcessedCfg] = *amqpOpts.ExchangeProcessed
 		}
-		if amqpOpts.AMQPExchangeTypeProcessed != nil {
-			opts[utils.AMQPExchangeTypeProcessedCfg] = *amqpOpts.AMQPExchangeTypeProcessed
+		if amqpOpts.ExchangeTypeProcessed != nil {
+			opts[utils.AMQPExchangeTypeProcessedCfg] = *amqpOpts.ExchangeTypeProcessed
 		}
-		if amqpOpts.AMQPRoutingKeyProcessed != nil {
-			opts[utils.AMQPRoutingKeyProcessedCfg] = *amqpOpts.AMQPRoutingKeyProcessed
-		}
-	}
-
-	if kafkaOpts := er.Opts.KafkaOpts; kafkaOpts != nil {
-		if kafkaOpts.KafkaTopic != nil {
-			opts[utils.KafkaTopic] = *kafkaOpts.KafkaTopic
-		}
-		if kafkaOpts.KafkaGroupID != nil {
-			opts[utils.KafkaGroupID] = *kafkaOpts.KafkaGroupID
-		}
-		if kafkaOpts.KafkaMaxWait != nil {
-			opts[utils.KafkaMaxWait] = kafkaOpts.KafkaMaxWait.String()
-		}
-		if kafkaOpts.KafkaTopicProcessed != nil {
-			opts[utils.KafkaTopicProcessedCfg] = *kafkaOpts.KafkaTopicProcessed
+		if amqpOpts.RoutingKeyProcessed != nil {
+			opts[utils.AMQPRoutingKeyProcessedCfg] = *amqpOpts.RoutingKeyProcessed
 		}
 	}
 
-	if sqlOpts := er.Opts.SQLOpts; sqlOpts != nil {
-		if sqlOpts.SQLDBName != nil {
-			opts[utils.SQLDBNameOpt] = *sqlOpts.SQLDBName
+	if kafkaOpts := er.Opts.Kafka; kafkaOpts != nil {
+		if kafkaOpts.Topic != nil {
+			opts[utils.KafkaTopic] = *kafkaOpts.Topic
 		}
-		if sqlOpts.SQLTableName != nil {
-			opts[utils.SQLTableNameOpt] = *sqlOpts.SQLTableName
+		if kafkaOpts.GroupID != nil {
+			opts[utils.KafkaGroupID] = *kafkaOpts.GroupID
+		}
+		if kafkaOpts.MaxWait != nil {
+			opts[utils.KafkaMaxWait] = kafkaOpts.MaxWait.String()
+		}
+		if kafkaOpts.TopicProcessed != nil {
+			opts[utils.KafkaTopicProcessedCfg] = *kafkaOpts.TopicProcessed
+		}
+	}
+
+	if sqlOpts := er.Opts.SQL; sqlOpts != nil {
+		if sqlOpts.DBName != nil {
+			opts[utils.SQLDBNameOpt] = *sqlOpts.DBName
+		}
+		if sqlOpts.TableName != nil {
+			opts[utils.SQLTableNameOpt] = *sqlOpts.TableName
 		}
 		if sqlOpts.PgSSLMode != nil {
 			opts[utils.PgSSLModeCfg] = *sqlOpts.PgSSLMode
 		}
-		if sqlOpts.SQLDBNameProcessed != nil {
-			opts[utils.SQLDBNameProcessedCfg] = *sqlOpts.SQLDBNameProcessed
+		if sqlOpts.DBNameProcessed != nil {
+			opts[utils.SQLDBNameProcessedCfg] = *sqlOpts.DBNameProcessed
 		}
-		if sqlOpts.SQLTableNameProcessed != nil {
-			opts[utils.SQLTableNameProcessedCfg] = *sqlOpts.SQLTableNameProcessed
+		if sqlOpts.TableNameProcessed != nil {
+			opts[utils.SQLTableNameProcessedCfg] = *sqlOpts.TableNameProcessed
 		}
 		if sqlOpts.PgSSLModeProcessed != nil {
 			opts[utils.PgSSLModeProcessedCfg] = *sqlOpts.PgSSLModeProcessed
 		}
 	}
 
-	if awsOpts := er.Opts.AWSOpts; awsOpts != nil {
-		if awsOpts.AWSRegion != nil {
-			opts[utils.AWSRegion] = *awsOpts.AWSRegion
+	if awsOpts := er.Opts.AWS; awsOpts != nil {
+		if awsOpts.Region != nil {
+			opts[utils.AWSRegion] = *awsOpts.Region
 		}
-		if awsOpts.AWSKey != nil {
-			opts[utils.AWSKey] = *awsOpts.AWSKey
+		if awsOpts.Key != nil {
+			opts[utils.AWSKey] = *awsOpts.Key
 		}
-		if awsOpts.AWSSecret != nil {
-			opts[utils.AWSSecret] = *awsOpts.AWSSecret
+		if awsOpts.Secret != nil {
+			opts[utils.AWSSecret] = *awsOpts.Secret
 		}
-		if awsOpts.AWSToken != nil {
-			opts[utils.AWSToken] = *awsOpts.AWSToken
+		if awsOpts.Token != nil {
+			opts[utils.AWSToken] = *awsOpts.Token
 		}
-		if awsOpts.AWSRegionProcessed != nil {
-			opts[utils.AWSRegionProcessedCfg] = *awsOpts.AWSRegionProcessed
+		if awsOpts.RegionProcessed != nil {
+			opts[utils.AWSRegionProcessedCfg] = *awsOpts.RegionProcessed
 		}
-		if awsOpts.AWSKeyProcessed != nil {
-			opts[utils.AWSKeyProcessedCfg] = *awsOpts.AWSKeyProcessed
+		if awsOpts.KeyProcessed != nil {
+			opts[utils.AWSKeyProcessedCfg] = *awsOpts.KeyProcessed
 		}
-		if awsOpts.AWSSecretProcessed != nil {
-			opts[utils.AWSSecretProcessedCfg] = *awsOpts.AWSSecretProcessed
+		if awsOpts.SecretProcessed != nil {
+			opts[utils.AWSSecretProcessedCfg] = *awsOpts.SecretProcessed
 		}
-		if awsOpts.AWSTokenProcessed != nil {
-			opts[utils.AWSTokenProcessedCfg] = *awsOpts.AWSTokenProcessed
+		if awsOpts.TokenProcessed != nil {
+			opts[utils.AWSTokenProcessedCfg] = *awsOpts.TokenProcessed
 		}
 		if awsOpts.SQSQueueID != nil {
 			opts[utils.SQSQueueID] = *awsOpts.SQSQueueID
@@ -1079,7 +1079,7 @@ func (er *EventReaderCfg) AsMapInterface(separator string) (initialMP map[string
 		}
 	}
 
-	if natsOpts := er.Opts.NATSOpts; natsOpts != nil {
+	if natsOpts := er.Opts.NATS; natsOpts != nil {
 		if natsOpts.JetStream != nil {
 			opts[utils.NatsJetStream] = *natsOpts.JetStream
 		}

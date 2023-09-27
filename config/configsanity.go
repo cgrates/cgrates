@@ -725,8 +725,8 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 					return fmt.Errorf("<%s> nonexistent partial folder: %s for reader with ID: %s", utils.ERs, path, rdr.ID)
 				}
 				if pAct == utils.MetaDumpToFile {
-					if rdr.Opts.CSVOpts.PartialCSVFieldSeparator != nil && // the separtor must not be empty
-						*rdr.Opts.CSVOpts.PartialCSVFieldSeparator == utils.EmptyString {
+					if rdr.Opts.CSV.PartialCSVFieldSeparator != nil && // the separtor must not be empty
+						*rdr.Opts.CSV.PartialCSVFieldSeparator == utils.EmptyString {
 						return fmt.Errorf("<%s> empty %s for reader with ID: %s", utils.ERs, utils.PartialCSVFieldSepartorOpt, rdr.ID)
 					}
 				}
@@ -742,8 +742,8 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 						return fmt.Errorf("<%s> nonexistent folder: %s for reader with ID: %s", utils.ERs, dir, rdr.ID)
 					}
 				}
-				if rdr.Opts.CSVOpts.CSVFieldSeparator != nil &&
-					*rdr.Opts.CSVOpts.CSVFieldSeparator == utils.EmptyString {
+				if rdr.Opts.CSV.FieldSeparator != nil &&
+					*rdr.Opts.CSV.FieldSeparator == utils.EmptyString {
 					return fmt.Errorf("<%s> empty %s for reader with ID: %s", utils.ERs, utils.CSVFieldSepOpt, rdr.ID)
 				}
 			case utils.MetaKafkajsonMap:
