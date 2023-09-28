@@ -1,0 +1,105 @@
+---
+
+- hosts: k8snodes
+  vars:
+  tasks:
+
+  - name: Install kubeadm,containerd,kubectl
+    import_role:
+         name: ../roles/k8s
+  
+  - name: Disable swap permanently
+    lineinfile:
+      path: /etc/fstab
+      regexp: '^\s*UUID=\S+\s+none\s+swap'
+      state: absent
+    become: true
+
+  - name: Disable swap on current session
+    become: true
+    command:
+      cmd: swapoff -a
+    when: ansible_swaptotal_mb > 0
+
+
+- hosts: k8s-master
+  vars:
+     kube_config: "{{ ansible_env.HOME }}/.kube/config"
+     iface: enp0s8
+  tasks:
+  - name: Install kubectl 
+    become: true
+    apt: 
+     name: kubectl
+     state: present
+
+  - name: Get flannel configuration 
+    get_url:
+     url: https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml
+     dest: "{{ ansible_env.HOME }}"
+
+  - name: Add iface for flannel
+    lineinfile:
+         path: "{{ ansible_env.HOME }}/kube-flannel.yml"
+         insertafter: "- --kube-subnet-mgr"
+         line : "        - --iface={{ iface }}"
+
+
+  - name: Reset the kubeadm
+    become: true
+    command:
+       cmd: kubeadm reset -f
+
+  - name: Start the cluster
+    become: true
+    command:
+      cmd: "kubeadm init --apiserver-advertise-address {{ hostvars['k8s-master']['ansible_host'] }} --pod-network-cidr=10.244.0.0/16"
+    register: kubeadm_output
+
+  - name: Extract token value
+    set_fact:
+     kubeadm_token: "{{ kubeadm_output | regex_search('--token\\s+(\\S+)', '\\1') | first }}"
+     kubeadm_hash: "{{ kubeadm_output | regex_search('--discovery-token-ca-cert-hash\\s+sha256:(\\S+)', '\\1') | first }}"
+
+  - name: Remove $HOME/.config
+    file: 
+      path: "{{ kube_config }}"
+      state: absent
+
+  - name: Create .config
+    file: 
+      path: "{{ ansible_env.HOME }}/.kube"
+      state: directory
+
+  - name: Copy the file 
+    become: true
+    copy:
+      src: /etc/kubernetes/admin.conf
+      dest: "{{ kube_config }}"
+      remote_src: true
+      owner: "{{ ansible_env.USER }}"
+      group: "{{ ansible_env.USER }}"
+
+  - name: Apply flannel network settings
+    command:
+       cmd: kubectl apply -f kube-flannel.yml
+       chdir: "{{ ansible_env.HOME }}"
+    register: flannel
+
+
+- hosts: k8s-node1,k8s-node2
+
+  tasks:
+
+  - name: Reset the kubeadm
+    become: true
+    command:
+       cmd: kubeadm reset -f
+
+  - name: Join in the cluster
+    become: true
+    command:
+       cmd:   "kubeadm join {{ hostvars['k8s-master']['ansible_host'] }}:6443 --token {{ hostvars['k8s-master']['kubeadm_token'] }} --discovery-token-ca-cert-hash sha256:{{ hostvars['k8s-master']['kubeadm_hash'] }}"
+
+
+  

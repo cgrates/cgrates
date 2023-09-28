@@ -1,0 +1,23 @@
+---
+keyring_path: /etc/apt/keyrings
+
+kubernetes_version: v1.28
+
+k8s_dependencies:
+- ca-certificates
+- curl
+- gnupg
+- apt-transport-https
+
+k8s_packages:
+- containerd.io
+- kubelet
+- kubeadm
+
+gpg_keys:
+  - url: https://download.docker.com/linux/debian/gpg
+    dest: /tmp/docker.gpg
+    keyring_files: "{{ keyring_path }}/docker.gpg" 
+  - url: https://pkgs.k8s.io/core:/stable:/{{ kubernetes_version }}/deb/Release.key
+    dest: /tmp/kubernetes.gpg
+    keyring_files: "{{ keyring_path }}/kubernetes-apt-keyring.gpg"
