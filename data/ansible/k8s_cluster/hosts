@@ -1,0 +1,4 @@
+[k8snodes]
+k8s-master  ansible_host=192.168.56.120 ansible_ssh_user=gezim
+k8s-node1   ansible_host=192.168.56.121 ansible_ssh_user=gezim
+k8s-node2   ansible_host=192.168.56.122 ansible_ssh_user=gezim
