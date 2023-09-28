@@ -270,12 +270,12 @@ func (ra *RadiusAgent) processRequest(req *radigo.Packet, reqProcessor *config.R
 	if reqProcessor.Flags.Has(utils.MetaLog) {
 		utils.Logger.Info(
 			fmt.Sprintf("<%s> LOG, Radius reply: %s",
-				utils.RadiusAgent, utils.ToIJSON(agReq.Reply)))
+				utils.RadiusAgent, agReq.Reply))
 	}
 	if reqType == utils.MetaDryRun {
 		utils.Logger.Info(
 			fmt.Sprintf("<%s> DRY_RUN, Radius reply: %s",
-				utils.RadiusAgent, utils.ToJSON(agReq.Reply)))
+				utils.RadiusAgent, agReq.Reply))
 	}
 	if reqProcessor.Flags.Has(utils.MetaDryRun) {
 		return true, nil
