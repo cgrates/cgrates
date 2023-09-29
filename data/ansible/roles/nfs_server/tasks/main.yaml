@@ -1,0 +1,8 @@
+---
+
+- include_tasks: server.yaml
+  when: "'k8smaster' in group_names"
+
+
+- include_tasks: client.yaml
+  when: "'k8snodes' in group_names"
