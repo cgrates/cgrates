@@ -1,0 +1,38 @@
+---
+- name: Install nfs-kernel-server
+  become: true
+  apt:
+    update_cache: yes
+    name: nfs-kernel-server 
+    state: present 
+
+
+- name: Create a directory for NFS share 
+  become: true
+  file:
+    path: /nfs
+    owner: nobody
+    group: nogroup
+    mode: '0777'
+    state: directory
+
+
+- name: Modyify the exports file
+  become: true
+  lineinfile:
+    path: /etc/exports
+    insertafter: 'EOF'
+    line: "/nfs *(rw,sync,no_subtree_check,no_root_squash)"
+
+- name: Export the NFS Share
+  become: true 
+  command:
+    cmd: "exportfs -a"
+
+
+- name: Enable and start nfs-kernel-server
+  become: true 
+  systemd: 
+    name: nfs-kernel-server
+    enabled: yes
+    state: started

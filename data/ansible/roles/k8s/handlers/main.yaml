@@ -1,6 +1,7 @@
 ---
-- name: Restart containerd
-  become: true
-  ansible.builtin.systemd:
-    name: containerd
-    state: restarted
+
+- name: Restart kubelet
+  become: true 
+  systemd: 
+      name: kubelet
+      state: restarted

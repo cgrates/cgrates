@@ -3,6 +3,10 @@ keyring_path: /etc/apt/keyrings
 
 kubernetes_version: v1.28
 
+kube_config: "{{ ansible_env.HOME }}/.kube/config"
+
+iface: enp0s8
+
 k8s_dependencies:
 - ca-certificates
 - curl

@@ -1,0 +1,10 @@
+---
+- name: Reset the kubeadm
+  become: true
+  command:
+      cmd: kubeadm reset -f
+
+- name: Join in the cluster
+  become: true
+  command:
+       cmd:   "kubeadm join {{ m_node_ip }}:6443 --token {{ hostvars['k8s-master']['kubeadm_token'] }} --discovery-token-ca-cert-hash sha256:{{ hostvars['k8s-master']['kubeadm_hash'] }}"

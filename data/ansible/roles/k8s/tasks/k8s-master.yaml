@@ -1,0 +1,58 @@
+---
+
+- name: Install kubectl 
+  become: true
+  apt: 
+     name: kubectl
+     state: present
+
+- name: Get flannel configuration 
+  get_url:
+   url: https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml
+   dest: "{{ ansible_env.HOME }}"
+
+- name: Add iface for flannel
+  lineinfile:
+       path: "{{ ansible_env.HOME }}/kube-flannel.yml"
+       insertafter: "- --kube-subnet-mgr"
+       line : "        - --iface={{ iface }}"
+
+- name: Reset the kubeadm
+  become: true
+  command:
+     cmd: kubeadm reset -f
+
+- name: Start the cluster
+  become: true
+  command:
+    cmd: "kubeadm init --apiserver-advertise-address {{ ansible_host }} --pod-network-cidr=10.244.0.0/16"
+  register: kubeadm_output
+
+- name: Extract token and hash valuew
+  set_fact:
+   kubeadm_token: "{{ kubeadm_output | regex_search('--token\\s+(\\S+)', '\\1') | first }}"
+   kubeadm_hash: "{{ kubeadm_output | regex_search('--discovery-token-ca-cert-hash\\s+sha256:(\\S+)', '\\1') | first }}"
+
+- name: Remove $HOME/.config
+  file: 
+     path: "{{ kube_config }}"
+     state: absent
+
+- name: Create .config
+  file: 
+    path: "{{ ansible_env.HOME }}/.kube"
+    state: directory
+
+- name: Copy the file 
+  become: true
+  copy:
+    src: /etc/kubernetes/admin.conf
+    dest: "{{ kube_config }}"
+    remote_src: true
+    owner: "{{ ansible_env.USER }}"
+    group: "{{ ansible_env.USER }}"
+
+- name: Apply flannel network settings
+  command:
+     cmd: kubectl apply -f kube-flannel.yml
+     chdir: "{{ ansible_env.HOME }}"

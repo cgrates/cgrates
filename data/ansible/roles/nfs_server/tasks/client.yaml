@@ -1,0 +1,29 @@
+---
+
+- name: Install NFS client packages
+  become: true 
+  apt:
+    name: nfs-common
+    state: present 
+    update_cache: yes
+
+- name: Create  NFS Shared folder 
+  become: true
+  file:
+   state: directory
+   path: /mnt/nfs
+
+- name: Mount the shared folder
+  become: true 
+  mount: 
+    path: /mnt/nfs
+    src: "{{ m_node_ip }}:/nfs"
+    fstype: nfs
+    state: mounted
+
+# - name: Configure auto-mount 
+#   become: true
+#   lineinfile:
+#     path: /etc/fstab
+#     insertafter: 'EOF' 
+#     line: "{{ m_node_ip }}:/nfs /mnt/nfs  nfs defaults 0 0"

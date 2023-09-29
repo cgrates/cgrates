@@ -1,5 +1,18 @@
 ---
 
+- name: Disable swap permanently
+  lineinfile:
+    path: /etc/fstab
+    regexp: '^\s*UUID=\S+\s+none\s+swap'
+    state: absent
+  become: true
+
+- name: Disable swap on current session
+  become: true
+  command:
+    cmd: swapoff -a
+  when: ansible_swaptotal_mb > 0
+
 - name: Install containerd dependencies
   become: true
   apt:
@@ -93,8 +106,29 @@
       regexp: '^(\s*)SystemdCgroup'
       line: '\1SystemdCgroup = true'
       backrefs: yes
-  notify: Restart containerd
 
+- name: Restart containerd
+  become: true
+  ansible.builtin.systemd:
+    name: containerd
+    state: restarted
 
- 
+- include_tasks: k8s-master.yaml
+  when: "'k8smaster' in group_names"
 
+- include_tasks: k8s-nodes.yaml
+  when: "'k8snodes' in group_names"
+
+- name: Add worker label on nodes
+  command:
+      cmd: "kubectl label node {{ item }} node-role.kubernetes.io/worker=worker"
+  loop: "{{ groups['k8snodes']  }}"
+  when: "'k8smaster' in group_names"
+
+- name: Add the correct IP for the nodes
+  become: true
+  template:
+    dest: /var/lib/kubelet/kubeadm-flags.env
+    src:  kubeadm-flags.env.j2
+    force: yes
+  notify: Restart kubelet

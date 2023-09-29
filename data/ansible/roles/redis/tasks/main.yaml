@@ -1,0 +1,7 @@
+---
+
+- name: Get Redis from apt repository
+  become: true
+  apt:
+    name: redis-server 
+    state: present 
