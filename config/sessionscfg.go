@@ -95,34 +95,35 @@ func (fs FsConnCfg) Clone() *FsConnCfg {
 
 // SessionSCfg is the config section for SessionS
 type SessionSCfg struct {
-	Enabled             bool
-	ListenBijson        string
-	ListenBigob         string
-	ChargerSConns       []string
-	RALsConns           []string
-	ResSConns           []string
-	ThreshSConns        []string
-	StatSConns          []string
-	RouteSConns         []string
-	AttrSConns          []string
-	CDRsConns           []string
-	ReplicationConns    []string
-	DebitInterval       time.Duration
-	StoreSCosts         bool
-	SessionTTL          time.Duration
-	SessionTTLMaxDelay  *time.Duration
-	SessionTTLLastUsed  *time.Duration
-	SessionTTLUsage     *time.Duration
-	SessionTTLLastUsage *time.Duration
-	SessionIndexes      utils.StringSet
-	ClientProtocol      float64
-	ChannelSyncInterval time.Duration
-	TerminateAttempts   int
-	AlterableFields     utils.StringSet
-	MinDurLowBalance    time.Duration
-	SchedulerConns      []string
-	STIRCfg             *STIRcfg
-	DefaultUsage        map[string]time.Duration
+	Enabled                bool
+	ListenBijson           string
+	ListenBigob            string
+	ChargerSConns          []string
+	RALsConns              []string
+	ResSConns              []string
+	ThreshSConns           []string
+	StatSConns             []string
+	RouteSConns            []string
+	AttrSConns             []string
+	CDRsConns              []string
+	ReplicationConns       []string
+	DebitInterval          time.Duration
+	StoreSCosts            bool
+	SessionTTL             time.Duration
+	SessionTTLMaxDelay     *time.Duration
+	SessionTTLLastUsed     *time.Duration
+	SessionTTLUsage        *time.Duration
+	SessionTTLLastUsage    *time.Duration
+	SessionIndexes         utils.StringSet
+	ClientProtocol         float64
+	ChannelSyncInterval    time.Duration
+	StaleChanMaxExtraUsage time.Duration
+	TerminateAttempts      int
+	AlterableFields        utils.StringSet
+	MinDurLowBalance       time.Duration
+	SchedulerConns         []string
+	STIRCfg                *STIRcfg
+	DefaultUsage           map[string]time.Duration
 }
 
 func (scfg *SessionSCfg) loadFromJSONCfg(jsnCfg *SessionSJsonCfg) (err error) {
@@ -279,6 +280,11 @@ func (scfg *SessionSCfg) loadFromJSONCfg(jsnCfg *SessionSJsonCfg) (err error) {
 			return err
 		}
 	}
+	if jsnCfg.Stale_chan_max_extra_usage != nil {
+		if scfg.StaleChanMaxExtraUsage, err = utils.ParseDurationWithNanosecs(*jsnCfg.Stale_chan_max_extra_usage); err != nil {
+			return err
+		}
+	}
 	if jsnCfg.Terminate_attempts != nil {
 		scfg.TerminateAttempts = *jsnCfg.Terminate_attempts
 	}
@@ -328,21 +334,22 @@ func (scfg *SessionSCfg) AsMapInterface() (initialMP map[string]any) {
 		}
 	}
 	initialMP = map[string]any{
-		utils.EnabledCfg:             scfg.Enabled,
-		utils.ListenBijsonCfg:        scfg.ListenBijson,
-		utils.ListenBigobCfg:         scfg.ListenBigob,
-		utils.ReplicationConnsCfg:    scfg.ReplicationConns,
-		utils.StoreSCostsCfg:         scfg.StoreSCosts,
-		utils.SessionIndexesCfg:      scfg.SessionIndexes.AsSlice(),
-		utils.ClientProtocolCfg:      scfg.ClientProtocol,
-		utils.TerminateAttemptsCfg:   scfg.TerminateAttempts,
-		utils.AlterableFieldsCfg:     scfg.AlterableFields.AsSlice(),
-		utils.STIRCfg:                scfg.STIRCfg.AsMapInterface(),
-		utils.MinDurLowBalanceCfg:    "0",
-		utils.ChannelSyncIntervalCfg: "0",
-		utils.DebitIntervalCfg:       "0",
-		utils.SessionTTLCfg:          "0",
-		utils.DefaultUsageCfg:        maxComputed,
+		utils.EnabledCfg:                scfg.Enabled,
+		utils.ListenBijsonCfg:           scfg.ListenBijson,
+		utils.ListenBigobCfg:            scfg.ListenBigob,
+		utils.ReplicationConnsCfg:       scfg.ReplicationConns,
+		utils.StoreSCostsCfg:            scfg.StoreSCosts,
+		utils.SessionIndexesCfg:         scfg.SessionIndexes.AsSlice(),
+		utils.ClientProtocolCfg:         scfg.ClientProtocol,
+		utils.TerminateAttemptsCfg:      scfg.TerminateAttempts,
+		utils.AlterableFieldsCfg:        scfg.AlterableFields.AsSlice(),
+		utils.STIRCfg:                   scfg.STIRCfg.AsMapInterface(),
+		utils.MinDurLowBalanceCfg:       "0",
+		utils.ChannelSyncIntervalCfg:    "0",
+		utils.StaleChanMaxExtraUsageCfg: "0",
+		utils.DebitIntervalCfg:          "0",
+		utils.SessionTTLCfg:             "0",
+		utils.DefaultUsageCfg:           maxComputed,
 	}
 	if scfg.DebitInterval != 0 {
 		initialMP[utils.DebitIntervalCfg] = scfg.DebitInterval.String()
@@ -364,6 +371,9 @@ func (scfg *SessionSCfg) AsMapInterface() (initialMP map[string]any) {
 	}
 	if scfg.ChannelSyncInterval != 0 {
 		initialMP[utils.ChannelSyncIntervalCfg] = scfg.ChannelSyncInterval.String()
+	}
+	if scfg.StaleChanMaxExtraUsage != 0 {
+		initialMP[utils.StaleChanMaxExtraUsageCfg] = scfg.StaleChanMaxExtraUsage.String()
 	}
 	if scfg.MinDurLowBalance != 0 {
 		initialMP[utils.MinDurLowBalanceCfg] = scfg.MinDurLowBalance.String()
@@ -464,15 +474,16 @@ func (scfg *SessionSCfg) AsMapInterface() (initialMP map[string]any) {
 // Clone returns a deep copy of SessionSCfg
 func (scfg SessionSCfg) Clone() (cln *SessionSCfg) {
 	cln = &SessionSCfg{
-		Enabled:             scfg.Enabled,
-		ListenBijson:        scfg.ListenBijson,
-		DebitInterval:       scfg.DebitInterval,
-		StoreSCosts:         scfg.StoreSCosts,
-		SessionTTL:          scfg.SessionTTL,
-		ClientProtocol:      scfg.ClientProtocol,
-		ChannelSyncInterval: scfg.ChannelSyncInterval,
-		TerminateAttempts:   scfg.TerminateAttempts,
-		MinDurLowBalance:    scfg.MinDurLowBalance,
+		Enabled:                scfg.Enabled,
+		ListenBijson:           scfg.ListenBijson,
+		DebitInterval:          scfg.DebitInterval,
+		StoreSCosts:            scfg.StoreSCosts,
+		SessionTTL:             scfg.SessionTTL,
+		ClientProtocol:         scfg.ClientProtocol,
+		ChannelSyncInterval:    scfg.ChannelSyncInterval,
+		StaleChanMaxExtraUsage: scfg.StaleChanMaxExtraUsage,
+		TerminateAttempts:      scfg.TerminateAttempts,
+		MinDurLowBalance:       scfg.MinDurLowBalance,
 
 		SessionIndexes:  scfg.SessionIndexes.Clone(),
 		AlterableFields: scfg.AlterableFields.Clone(),

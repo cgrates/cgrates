@@ -813,26 +813,27 @@ func TestDfCdrsJsonCfg(t *testing.T) {
 
 func TestSmgJsonCfg(t *testing.T) {
 	eCfg := &SessionSJsonCfg{
-		Enabled:               utils.BoolPointer(false),
-		Listen_bijson:         utils.StringPointer("127.0.0.1:2014"),
-		Listen_bigob:          utils.StringPointer(""),
-		Chargers_conns:        &[]string{},
-		Rals_conns:            &[]string{},
-		Cdrs_conns:            &[]string{},
-		Resources_conns:       &[]string{},
-		Thresholds_conns:      &[]string{},
-		Stats_conns:           &[]string{},
-		Routes_conns:          &[]string{},
-		Attributes_conns:      &[]string{},
-		Replication_conns:     &[]string{},
-		Debit_interval:        utils.StringPointer("0s"),
-		Store_session_costs:   utils.BoolPointer(false),
-		Session_ttl:           utils.StringPointer("0s"),
-		Session_indexes:       &[]string{},
-		Client_protocol:       utils.Float64Pointer(1.0),
-		Channel_sync_interval: utils.StringPointer("0"),
-		Terminate_attempts:    utils.IntPointer(5),
-		Alterable_fields:      &[]string{},
+		Enabled:                    utils.BoolPointer(false),
+		Listen_bijson:              utils.StringPointer("127.0.0.1:2014"),
+		Listen_bigob:               utils.StringPointer(""),
+		Chargers_conns:             &[]string{},
+		Rals_conns:                 &[]string{},
+		Cdrs_conns:                 &[]string{},
+		Resources_conns:            &[]string{},
+		Thresholds_conns:           &[]string{},
+		Stats_conns:                &[]string{},
+		Routes_conns:               &[]string{},
+		Attributes_conns:           &[]string{},
+		Replication_conns:          &[]string{},
+		Debit_interval:             utils.StringPointer("0s"),
+		Store_session_costs:        utils.BoolPointer(false),
+		Session_ttl:                utils.StringPointer("0s"),
+		Session_indexes:            &[]string{},
+		Client_protocol:            utils.Float64Pointer(1.0),
+		Channel_sync_interval:      utils.StringPointer("0"),
+		Stale_chan_max_extra_usage: utils.StringPointer("0"),
+		Terminate_attempts:         utils.IntPointer(5),
+		Alterable_fields:           &[]string{},
 		Default_usage: &map[string]string{
 			utils.MetaAny:   "3h",
 			utils.MetaVoice: "3h",
@@ -855,7 +856,7 @@ func TestSmgJsonCfg(t *testing.T) {
 	if cfg, err := dfCgrJSONCfg.SessionSJsonCfg(); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCfg, cfg) {
-		t.Error("Received: ", cfg)
+		t.Error(fmt.Sprintf("Expecting: %s, received: %s", utils.ToJSON(eCfg), utils.ToJSON(cfg)))
 	}
 }
 

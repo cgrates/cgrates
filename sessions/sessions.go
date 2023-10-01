@@ -1374,32 +1374,28 @@ func (sS *SessionS) syncSessions() {
 	if asCount == 0 { // no need to sync the sessions if none is active
 		return
 	}
-	queriedCGRIDs := engine.NewSafEvent(nil) // need this to be
-	var err error
+	queriedCGRIDs := engine.NewSafEvent(nil) // will populate from all goroutines at once
+	var wg sync.WaitGroup
+
 	for _, clnt := range sS.biJClients() {
-		errChan := make(chan error)
-		go func() {
+		wg.Add(1)
+		go func() { // query all connections at once
 			var queriedSessionIDs []*SessionID
 			if err := clnt.conn.Call(context.TODO(), utils.SessionSv1GetActiveSessionIDs,
-				utils.EmptyString, &queriedSessionIDs); err != nil {
-				errChan <- err
+				utils.EmptyString, &queriedSessionIDs); err != nil &&
+				err.Error() != utils.ErrNoActiveSession.Error() {
+				utils.Logger.Warning(
+					fmt.Sprintf("<%s> error <%s> querying session ids", utils.SessionS, err.Error()))
+
 			}
 			for _, sessionID := range queriedSessionIDs {
 				queriedCGRIDs.Set(sessionID.CGRID(), struct{}{})
 			}
-			errChan <- nil
+			wg.Done()
 		}()
-		select {
-		case err = <-errChan:
-			if err != nil && err.Error() != utils.ErrNoActiveSession.Error() {
-				utils.Logger.Warning(
-					fmt.Sprintf("<%s> error <%s> querying session ids", utils.SessionS, err.Error()))
-			}
-		case <-time.After(sS.cgrCfg.GeneralCfg().ReplyTimeout):
-			utils.Logger.Warning(
-				fmt.Sprintf("<%s> timeout querying session ids ", utils.SessionS))
-		}
 	}
+
+	wg.Wait() // wait for all clients to finish in one way or another
 	var toBeRemoved []string
 	sS.aSsMux.RLock()
 	for cgrid := range sS.aSessions {
@@ -1418,8 +1414,14 @@ func (sS *SessionS) terminateSyncSessions(toBeRemoved []string) {
 		if len(ss) == 0 {
 			continue
 		}
+		var eUsage time.Duration
+		if sS.cgrCfg.SessionSCfg().StaleChanMaxExtraUsage > 0 { // add extra usage
+			rand.Seed(time.Now().Unix())
+			eUsage += time.Duration(
+				rand.Int63n(sS.cgrCfg.SessionSCfg().StaleChanMaxExtraUsage.Milliseconds()) * time.Millisecond.Nanoseconds())
+		}
 		ss[0].Lock()
-		if err := sS.forceSTerminate(ss[0], 0, nil, nil); err != nil {
+		if err := sS.forceSTerminate(ss[0], eUsage, nil, nil); err != nil {
 			utils.Logger.Warning(
 				fmt.Sprintf("<%s> failed force-terminating session: <%s>, err: <%s>",
 					utils.SessionS, cgrID, err.Error()))
