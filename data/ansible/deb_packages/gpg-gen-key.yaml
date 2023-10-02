@@ -4,7 +4,7 @@
   template:
     src: gpg.conf.j2
     dest: "{{ gpg_home }}/.gnupg/gpg.conf"
-    mode: '0600'
+    mode: "0600"
     owner: "{{ rootUser }}"
 
 - name: copy default template for gpg key generation
@@ -12,7 +12,7 @@
   template:
     src: gen-key-script
     dest: "{{ gpg_home }}/.gnupg/gen-key-script-{{ rootUser }}"
-    mode: '0600'
+    mode: "0600"
     owner: "{{ rootUser }}"
 
 - name: create some required file
@@ -32,7 +32,6 @@
     path: /etc/default/rng-tools
     state: touch
 
-
 - name: Add HRNGDEVICE=/dev/urandom so we can execute rngd
   become: true
   lineinfile:
@@ -48,4 +47,3 @@
 - name: generate gpg key
   become: true
   shell: "sudo gpg --batch --gen-key {{ gpg_home }}/.gnupg/gen-key-script-{{ rootUser }}"
-
