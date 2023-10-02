@@ -22,7 +22,7 @@
   template:
     src: distributions.conf.j2
     dest: "/var/packages/debian/conf/distributions"
-    mode: '0600'
+    mode: "0600"
     owner: "{{ rootUser }}"
 
 - name: Add distributions file in reprepro
@@ -30,7 +30,7 @@
   template:
     src: options.conf.j2
     dest: "/var/packages/debian/conf/options"
-    mode: '0600'
+    mode: "0600"
     owner: "{{ rootUser }}"
 
 - name: Create override.testing file

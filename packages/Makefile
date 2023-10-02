@@ -1,7 +1,7 @@
 
 GIT_TAG_LOG=$(shell git tag -l --points-at HEAD)
 
-DISTRIBUTION ?= nightly
+DISTRIBUTION ?= master
 
 ifneq ($(GIT_TAG_LOG),)
 	DISTRIBUTION := stable

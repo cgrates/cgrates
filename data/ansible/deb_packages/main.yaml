@@ -4,7 +4,6 @@
     # CGRateS vars
     cgrates_dir: "/home/{{ user }}/go/src/github.com/cgrates/cgrates"
     cgrates_branch: "master"
-    # cgrates_distribution: "nightly"
     ###############################################################
     ######################## GPG Vars #############################
     ###############################################################
@@ -17,7 +16,7 @@
     gpg_subkeylength: 2048
     gpg_expire: 360
 
-    rootUser : root
+    rootUser: root
 
     customPath: "{{ lookup('env','PATH') }}:/home/{{ user }}/go/bin:/usr/local/go/bin:{{ ansible_env.PATH }}"
 
@@ -28,20 +27,17 @@
       - reprepro
       - nginx
 
-  remote_user: '{{ user }}'
+  remote_user: "{{ user }}"
   tasks:
-    # - name: set cgrates cgrates_distribution
-    #   set_fact:
-    #     cgrates_distribution: "{{ cgrates_distribution }}"
-###########################################################################################################################
-###########################################################################################################################
-# install dependencies
+    ###########################################################################################################################
+    ###########################################################################################################################
+    # install dependencies
     - name: Install dependencies
       become: yes
       apt: name={{ dependencies }} state=present
-###########################################################################################################################
-###########################################################################################################################
-# Prepare for configuration
+    ###########################################################################################################################
+    ###########################################################################################################################
+    # Prepare for configuration
     - name: Config reprepro
       include: reprepro.yaml
 
@@ -57,7 +53,7 @@
     - name: Configure NGINX server
       include: nginx.yaml
       when: nginxConfig.stdout_lines|length < 1
-    
+
     - name: Enable and start nginx
       systemd:
         name: nginx
@@ -65,30 +61,30 @@
         masked: no
         enabled: yes
 
-###########################################################################################################################
-###########################################################################################################################
-# Install Go
+    ###########################################################################################################################
+    ###########################################################################################################################
+    # Install Go
     - name: Install Go
       import_role:
         name: ../roles/go
 
-###########################################################################################################################
-###########################################################################################################################
-# Install CGRateS
+    ###########################################################################################################################
+    ###########################################################################################################################
+    # Install CGRateS
     - name: create cgrates directory
       become: yes
       file:
         state: directory
-        mode: 'u=rwx,go=rx'
+        mode: "u=rwx,go=rx"
         owner: "{{ user }}"
         group: "{{ user }}"
-        dest: '{{ cgrates_dir }}'
+        dest: "{{ cgrates_dir }}"
       become_user: "{{ user }}"
 
     - name: git clone cgrates
       git:
         repo: https://github.com/cgrates/cgrates.git
-        dest: '{{ cgrates_dir }}'
+        dest: "{{ cgrates_dir }}"
         update: yes
         force: yes
         version: "{{ cgrates_branch }}"
@@ -113,14 +109,14 @@
       environment:
         PATH: "{{ lookup('env','PATH') }}:/home/{{ user }}/go/bin:/usr/local/go/bin:{{ ansible_env.PATH }}"
       args:
-        chdir: '{{ cgrates_dir }}'
+        chdir: "{{ cgrates_dir }}"
 
-    - name:  build cgrates
+    - name: build cgrates
       shell: "sh {{ cgrates_dir }}/build.sh"
       environment:
         PATH: "{{ lookup('env','PATH') }}:/home/{{ user }}/go/bin:/usr/local/go/bin:{{ ansible_env.PATH }}"
       args:
-        chdir: '{{ cgrates_dir }}'
+        chdir: "{{ cgrates_dir }}"
 
     - name: symbol link
       become: yes
@@ -128,19 +124,19 @@
         src: "{{ cgrates_dir }}/data"
         dest: "/usr/share/cgrates"
         state: link
-            
+
     - name: get git tag
       shell: "git tag -l --points-at HEAD"
       args:
-        chdir: '{{ cgrates_dir }}'
+        chdir: "{{ cgrates_dir }}"
       register: gitTagVar
-###########################################################################################################################
-###########################################################################################################################
-# Generate package
-    - name:  Generate package
+    ###########################################################################################################################
+    ###########################################################################################################################
+    # Generate package
+    - name: Generate package
       command: 'sudo env "PATH={{ customPath }}" make deb'
       args:
-        chdir: '{{ cgrates_dir }}/packages'
+        chdir: "{{ cgrates_dir }}/packages"
 
     - name: Check if the package was generated
       become: yes
@@ -152,41 +148,40 @@
       become: yes
       command: sudo mv {{item}} /var/packages/debian/incoming/
       args:
-        chdir: '/home/{{ user }}/go/src/github.com/cgrates'
-      when : packageVar.stdout_lines|length > 0
-      with_items: '{{ packageVar.stdout_lines }}'
+        chdir: "/home/{{ user }}/go/src/github.com/cgrates"
+      when: packageVar.stdout_lines|length > 0
+      with_items: "{{ packageVar.stdout_lines }}"
 
-    - name : Get the name of the deb file
+    - name: Get the name of the deb file
       become: yes
-      shell : "sudo ls /var/packages/debian/incoming/ | grep '.deb'"
+      shell: "sudo ls /var/packages/debian/incoming/ | grep '.deb'"
       register: debFileName
 
-    - name : Get the name of the changes file
+    - name: Get the name of the changes file
       become: yes
-      shell : "sudo ls /var/packages/debian/incoming/ | grep '.changes'"
+      shell: "sudo ls /var/packages/debian/incoming/ | grep '.changes'"
       register: changesFileNames
 
-  # get reprepro version
+    # get reprepro version
     - name: set cgrates distribution
       set_fact:
         cgrates_distribution: "{{ cgrates_branch }}"
 
-  # Include the package with reprepro
-    - name : Include the package with reprepro
+    # Include the package with reprepro
+    - name: Include the package with reprepro
       become: yes
       command: sudo reprepro -A amd64 -Vb . include {{ cgrates_distribution }} /var/packages/debian/incoming/{{ item }}
-      ignore_errors: true
-      args :
+      args:
         chdir: /var/packages/debian
-      with_items: '{{ changesFileNames.stdout_lines }}'
-      when : cgrates_branch == "master" or gitTagVar.stdout_lines|length > 0
+      with_items: "{{ changesFileNames.stdout_lines }}"
+      when: cgrates_branch == "master" or gitTagVar.stdout_lines|length > 0
 
     # Move the file to PKG server
     - name: Copy the file to PKG server
-      shell: 'scp /var/packages/debian/incoming/{{ item }} {{ pkgAddr }}:/tmp/'
+      shell: "scp /var/packages/debian/incoming/{{ item }} {{ pkgAddr }}:/tmp/"
       args:
         chdir: /var/packages/debian/incoming/
-      with_items: '{{ debFileName.stdout_lines }}'
+      with_items: "{{ debFileName.stdout_lines }}"
 
     # Clean the incoming folder
     - name: Clean the incoming folder
@@ -203,9 +198,9 @@
     - name: Add user to www-data group
       become: yes
       user:
-       name: "{{ user }}"
-       groups: "{{ nginx_user }}"
-       append: yes
+        name: "{{ user }}"
+        groups: "{{ nginx_user }}"
+        append: yes
 
     - name: set cgrates cgrates_distribution
       set_fact:
@@ -216,15 +211,15 @@
       file:
         path: /var/packages/deb/{{ cgrates_distribution }}/
         state: directory
-        mode: '0775'
+        mode: "0775"
         owner: "{{ nginx_user }}"
-        group:  "{{ nginx_user }}"
-        
+        group: "{{ nginx_user }}"
+
     - name: Remove symlink from current deb package
       file:
         path: /var/packages/deb/{{ cgrates_distribution }}/cgrates_current_amd64.deb
         state: absent
-      when : cgrates_distribution == "nightly" or hostvars['apt']['gitTagVar'].stdout_lines|length > 0
+      when: cgrates_distribution == "master" or hostvars['apt']['gitTagVar'].stdout_lines|length > 0
 
     - name: Move the new package to /var/packages/deb
       become: true
@@ -234,18 +229,17 @@
     - name: Set ownership and permissions for moved files
       become: yes
       file:
-       path: "/var/packages/deb/{{ cgrates_distribution }}/{{ item }}"
-       owner: "{{  nginx_user  }}"
-       group: "{{  nginx_user  }}"
-       mode: '0775'
+        path: "/var/packages/deb/{{ cgrates_distribution }}/{{ item }}"
+        owner: "{{  nginx_user  }}"
+        group: "{{  nginx_user  }}"
+        mode: "0775"
       loop: "{{ hostvars['apt']['debFileName']['stdout_lines'] }}"
 
     - name: Create the new symlink cgrates_current_amd64.deb
       become: yes
-      become_user: "{{  nginx_user }}"
       file:
         src: /var/packages/deb/{{ cgrates_distribution }}/{{ item }}
         dest: /var/packages/deb/{{ cgrates_distribution }}/cgrates_current_amd64.deb
         state: link
       with_items: "{{ hostvars['apt']['debFileName']['stdout_lines'] }}"
-      when : cgrates_distribution == "nightly" or hostvars['apt']['gitTagVar'].stdout_lines|length > 0
+      when: cgrates_distribution == "master" or hostvars['apt']['gitTagVar'].stdout_lines|length > 0

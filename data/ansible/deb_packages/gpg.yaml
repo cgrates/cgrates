@@ -15,14 +15,14 @@
   become: yes
   become_user: "{{ rootUser }}"
   register: gpgkeys
-  
+
 - name: Check expired keys
   become: yes
   shell: "gpg --list-keys {{ gpg_realname }} | grep 'expired'"
   ignore_errors: yes
   failed_when: false
   register: gpgExpKeys
-  when:  gpgkeys.stdout_lines|length > 0
+  when: gpgkeys.stdout_lines|length > 0
 
 - name: Update expired
   become: yes
