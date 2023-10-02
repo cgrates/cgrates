@@ -22,10 +22,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package agents
 
 import (
+	"bytes"
 	"fmt"
 	"os/exec"
 	"path"
-	"reflect"
 	"testing"
 	"time"
 
@@ -54,6 +54,7 @@ var (
 		testRAitTPFromFolder,
 		testRAitAuthPAPSuccess,
 		testRAitAuthPAPFail,
+		testRAitMandatoryFail,
 		testRAitAuthCHAPSuccess,
 		testRAitAuthCHAPFail,
 		testRAitAuthMSCHAPV2Success,
@@ -90,13 +91,14 @@ func TestRAit(t *testing.T) {
 }
 
 func TestRAitDispatcher(t *testing.T) {
+	engine.KillEngine(100)
 	if *encoding == utils.MetaGOB {
 		t.SkipNow()
 		return
 	}
 	isDispatcherActive = true
-	engine.StartEngine(path.Join(*dataDir, "conf", "samples", "dispatchers", "all"), 200)
-	engine.StartEngine(path.Join(*dataDir, "conf", "samples", "dispatchers", "all2"), 200)
+	engine.StartEngine(path.Join(*dataDir, "conf", "samples", "dispatchers", "all"), 400)
+	engine.StartEngine(path.Join(*dataDir, "conf", "samples", "dispatchers", "all2"), 400)
 	raonfigDIR = "dispatchers/radagent"
 	testRadiusitResetAllDB(t)
 	for _, stest := range sTestsRadius {
@@ -238,7 +240,7 @@ func testRAitAuthPAPSuccess(t *testing.T) {
 	}
 	if len(reply.AVPs) != 1 { // make sure max duration is received
 		t.Errorf("Received AVPs: %+v", utils.ToJSON(reply.AVPs))
-	} else if !reflect.DeepEqual([]byte("session_max_time#10800"), reply.AVPs[0].RawValue) {
+	} else if !bytes.Equal([]byte("session_max_time#10800"), reply.AVPs[0].RawValue) {
 		t.Errorf("Received: %s", string(reply.AVPs[0].RawValue))
 	}
 }
@@ -283,8 +285,36 @@ func testRAitAuthPAPFail(t *testing.T) {
 	}
 	if len(reply.AVPs) != 1 { // make sure max duration is received
 		t.Errorf("Received AVPs: %+v", reply.AVPs)
-	} else if !reflect.DeepEqual(utils.RadauthFailed, string(reply.AVPs[0].RawValue)) {
+	} else if utils.RadauthFailed != string(reply.AVPs[0].RawValue) {
 		t.Errorf("Received: %s", string(reply.AVPs[0].RawValue))
+	}
+}
+
+func testRAitMandatoryFail(t *testing.T) {
+	if raAuthClnt, err = radigo.NewClient("udp", "127.0.0.1:1812", "CGRateS.org", dictRad, 1, nil); err != nil {
+		t.Fatal(err)
+	}
+	authReq := raAuthClnt.NewRequest(radigo.AccessRequest, 1) // emulates Kamailio packet out of radius_load_caller_avps()
+	if err := authReq.AddAVPWithName("User-Name", "10011", ""); err != nil {
+		t.Error(err)
+	}
+	if err := authReq.AddAVPWithName("User-Password", "CGRateSPassword3", ""); err != nil {
+		t.Error(err)
+	}
+	// encode the password as required so we can decode it properly
+	authReq.AVPs[1].RawValue = radigo.EncodeUserPassword([]byte("CGRateSPassword3"), []byte("CGRateS.org"), authReq.Authenticator[:])
+	reply, err := raAuthClnt.SendRequest(authReq)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if reply.Code != radigo.AccessReject {
+		t.Errorf("Received reply: %+v", reply)
+	}
+	exp := "ATTRIBUTES_ERROR:" + utils.MandatoryIEMissingCaps + ": [RadReplyMessage]"
+	if len(reply.AVPs) != 1 { // make sure max duration is received
+		t.Errorf("Received AVPs: %+v", reply.AVPs)
+	} else if exp != string(reply.AVPs[0].RawValue) {
+		t.Errorf("Expected <%+v>, Received: <%+v>", exp, string(reply.AVPs[0].RawValue))
 	}
 }
 
@@ -327,7 +357,7 @@ func testRAitAuthCHAPSuccess(t *testing.T) {
 	}
 	if len(reply.AVPs) != 1 { // make sure max duration is received
 		t.Errorf("Received AVPs: %+v", utils.ToJSON(reply.AVPs))
-	} else if !reflect.DeepEqual([]byte("session_max_time#10800"), reply.AVPs[0].RawValue) {
+	} else if !bytes.Equal([]byte("session_max_time#10800"), reply.AVPs[0].RawValue) {
 		t.Errorf("Received: %s", string(reply.AVPs[0].RawValue))
 	}
 }
@@ -371,7 +401,7 @@ func testRAitAuthCHAPFail(t *testing.T) {
 	}
 	if len(reply.AVPs) != 1 { // make sure max duration is received
 		t.Errorf("Received AVPs: %+v", reply.AVPs)
-	} else if !reflect.DeepEqual(utils.RadauthFailed, string(reply.AVPs[0].RawValue)) {
+	} else if utils.RadauthFailed != string(reply.AVPs[0].RawValue) {
 		t.Errorf("Received: %s", string(reply.AVPs[0].RawValue))
 	}
 }
@@ -432,7 +462,7 @@ func testRAitAuthMSCHAPV2Success(t *testing.T) {
 			if avp.Number == 26 && len(avp.RawValue) != 49 {
 				t.Errorf("Unexpected lenght of MS-CHAP2-Success AVP: %+v", len(avp.RawValue))
 			}
-			if avp.Number == 225 && !reflect.DeepEqual([]byte("session_max_time#10800"), reply.AVPs[1].RawValue) {
+			if avp.Number == 225 && !bytes.Equal([]byte("session_max_time#10800"), reply.AVPs[1].RawValue) {
 				t.Errorf("Received: %s", string(reply.AVPs[0].RawValue))
 			}
 		}
@@ -490,7 +520,7 @@ func testRAitAuthMSCHAPV2Fail(t *testing.T) {
 	}
 	if len(reply.AVPs) != 1 { // make sure max duration is received
 		t.Errorf("Received AVPs: %+v", reply.AVPs)
-	} else if !reflect.DeepEqual(utils.RadauthFailed, string(reply.AVPs[0].RawValue)) {
+	} else if utils.RadauthFailed != string(reply.AVPs[0].RawValue) {
 		t.Errorf("Received: %s", string(reply.AVPs[0].RawValue))
 	}
 }
@@ -530,7 +560,7 @@ func testRAitChallenge(t *testing.T) {
 	}
 	if len(reply.AVPs) != 1 { // make sure the client receive the message
 		t.Errorf("Received AVPs: %+v", utils.ToJSON(reply.AVPs))
-	} else if !reflect.DeepEqual([]byte("Missing User-Password"), reply.AVPs[0].RawValue) {
+	} else if !bytes.Equal([]byte("Missing User-Password"), reply.AVPs[0].RawValue) {
 		t.Errorf("Received: %s", string(reply.AVPs[0].RawValue))
 	}
 }
@@ -575,7 +605,7 @@ func testRAitChallengeResponse(t *testing.T) {
 	}
 	if len(reply.AVPs) != 1 { // make sure max duration is received
 		t.Errorf("Received AVPs: %+v", utils.ToJSON(reply.AVPs))
-	} else if !reflect.DeepEqual([]byte("session_max_time#10800"), reply.AVPs[0].RawValue) {
+	} else if !bytes.Equal([]byte("session_max_time#10800"), reply.AVPs[0].RawValue) {
 		t.Errorf("Received: %s", string(reply.AVPs[0].RawValue))
 	}
 }

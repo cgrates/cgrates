@@ -27,3 +27,4 @@ cgrates.org,ATTR_API_CORE_AUTH,*auth,*string:~*req.ApiKey:core12345,,,*req.APIMe
 cgrates.org,ATTR_API_ACTIONS_AUTH,*auth,*string:~*req.ApiKey:actPrf12345,,,*req.APIMethods,*constant,ActionSv1.Ping,false,20
 cgrates.org,ATTR_API_ACCOUNTS_AUTH,*auth,*string:~*req.ApiKey:accPrf12345,,,*req.APIMethods,*constant,AccountSv1.Ping,false,20
 cgrates.org,ATTR_API_EES_AUTH,*auth,*string:~*req.ApiKey:ees12345,,,*req.APIMethods,*constant,EeSv1.Ping&EeSv1.ProcessEvent,false,20
+cgrates.org,ATTR_RAD,*any,*string:~*req.RadUserName:10011;*string:~*req.RadPassword:CGRateSPassword3,,,,,,false,10
