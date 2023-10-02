@@ -1416,7 +1416,6 @@ func (sS *SessionS) terminateSyncSessions(toBeRemoved []string) {
 		}
 		var eUsage time.Duration
 		if sS.cgrCfg.SessionSCfg().StaleChanMaxExtraUsage > 0 { // add extra usage
-			rand.Seed(time.Now().Unix())
 			eUsage += time.Duration(
 				rand.Int63n(sS.cgrCfg.SessionSCfg().StaleChanMaxExtraUsage.Milliseconds()) * time.Millisecond.Nanoseconds())
 		}

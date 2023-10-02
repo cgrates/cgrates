@@ -856,7 +856,7 @@ func TestSmgJsonCfg(t *testing.T) {
 	if cfg, err := dfCgrJSONCfg.SessionSJsonCfg(); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCfg, cfg) {
-		t.Error(fmt.Sprintf("Expecting: %s, received: %s", utils.ToJSON(eCfg), utils.ToJSON(cfg)))
+		t.Errorf("Expecting: %s, received: %s", utils.ToJSON(eCfg), utils.ToJSON(cfg))
 	}
 }
 
