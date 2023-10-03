@@ -1695,6 +1695,13 @@ func testITTestIndexingThresholds(t *testing.T) {
 	} else if !reflect.DeepEqual(eMp, rcvMp) {
 		t.Errorf("Expecting: %+v, received: %+v", eMp, rcvMp)
 	}
+	if err := dataManager.RemoveIndexes(utils.CacheThresholdFilterIndexes, th.Tenant, utils.EmptyString); err != nil {
+		t.Error(err)
+	} else if _, err := dataManager.GetIndexes(
+		utils.CacheThresholdFilterIndexes, th.Tenant,
+		utils.EmptyString, false, false); err == nil || err != utils.ErrNotFound {
+		t.Error(err)
+	}
 }
 
 func testITTestIndexingMetaNot(t *testing.T) {

@@ -24,6 +24,7 @@ import (
 	"path"
 	"reflect"
 	"runtime"
+	"slices"
 	"sort"
 	"strings"
 	"testing"
@@ -1635,6 +1636,15 @@ func testStorDBitCRUDTpResources(t *testing.T) {
 			t.Errorf("Expecting: %+v, received: %+v || %+v", snd[0].ThresholdIDs, rcv[0].ThresholdIDs, rcv[1].ThresholdIDs)
 		}
 	}
+
+	//tpIDs
+	expIds := []string{"testTag1", "testTag2"}
+	if tpIds, err := storDB.GetTpTableIds("testTPid", utils.TBLTPResources, utils.TPDistinctIds{utils.TenantCfg, utils.IDCfg}, nil, &utils.PaginatorWithSearch{}); err != nil {
+		t.Error(err)
+	} else if slices.Equal(tpIds, expIds) {
+		t.Errorf("Expected %+v,Received %+v", expIds, tpIds)
+	}
+
 	// REMOVE
 	if err := storDB.RemTpData("", "testTPid", nil); err != nil {
 		t.Error(err)

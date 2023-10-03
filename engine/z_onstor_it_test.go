@@ -75,6 +75,7 @@ var (
 		testOnStorITAttributeProfile,
 		testOnStorITFlush,
 		testOnStorITIsDBEmpty,
+		testOnStorITDispatcherHost,
 		testOnStorITTestAttributeSubstituteIface,
 		testOnStorITChargerProfile,
 		testOnStorITDispatcherProfile,
@@ -2025,6 +2026,40 @@ func testOnStorITAttributeProfile(t *testing.T) {
 	//check database if removed
 	if _, rcvErr := onStor.GetAttributeProfile("cgrates.org", "AttrPrf1",
 		false, true, utils.NonTransactional); rcvErr != nil && rcvErr != utils.ErrNotFound {
+		t.Error(rcvErr)
+	}
+}
+
+func testOnStorITDispatcherHost(t *testing.T) {
+	dpp := &DispatcherHost{
+		Tenant: "cgrates.org",
+		RemoteHost: &config.RemoteHost{
+			ID:        "ALL",
+			Address:   "127.0.0.1",
+			Transport: utils.MetaJSON,
+		},
+	}
+	if _, rcvErr := onStor.GetDispatcherHost("cgrates.org", "ALL2",
+		true, false, utils.NonTransactional); rcvErr != nil && rcvErr != utils.ErrDSPHostNotFound {
+		t.Error(rcvErr)
+	}
+	if err := onStor.SetDispatcherHost(dpp); err != nil {
+		t.Error(err)
+	}
+	//get from database
+	if rcv, err := onStor.GetDispatcherHost("cgrates.org", "ALL",
+		false, false, utils.NonTransactional); err != nil {
+		t.Error(err)
+	} else if !(reflect.DeepEqual(dpp, rcv)) {
+		t.Errorf("Expecting: %v, received: %v", dpp, rcv)
+	}
+
+	if err := onStor.RemoveDispatcherHost(dpp.Tenant, dpp.ID); err != nil {
+		t.Error(err)
+	}
+	//check database if removed
+	if _, rcvErr := onStor.GetDispatcherHost("cgrates.org", "ALL",
+		false, false, utils.NonTransactional); rcvErr != nil && rcvErr != utils.ErrDSPHostNotFound {
 		t.Error(rcvErr)
 	}
 }
