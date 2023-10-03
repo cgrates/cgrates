@@ -27,6 +27,7 @@ import (
 	"os/exec"
 	"path"
 	"reflect"
+	"strings"
 	"testing"
 
 	"github.com/cgrates/cgrates/config"
@@ -231,7 +232,7 @@ func testVersion(t *testing.T) {
 func testVersionsWithEngine(t *testing.T) {
 	cmd := exec.Command("cgr-engine", fmt.Sprintf(`-config_path=/usr/share/cgrates/conf/samples/%s`, versionsConfigDIR), `-scheduled_shutdown=4ms`)
 	output := bytes.NewBuffer(nil)
-	cmd.Stdout = output
+	cmd.Stderr = output
 	if err := cmd.Run(); err != nil {
 		t.Log(cmd.Args)
 		t.Log(output.String())
@@ -267,15 +268,16 @@ func testUpdateVersionsAccounts(t *testing.T) {
 	}
 	cmd := exec.Command("cgr-engine", fmt.Sprintf(`-config_path=/usr/share/cgrates/conf/samples/%s`, versionsConfigDIR), `-scheduled_shutdown=4ms`)
 	output := bytes.NewBuffer(nil)
-	cmd.Stdout = output
-	if err := cmd.Run(); err != nil {
+	cmd.Stderr = output
+	if err := cmd.Run(); err == nil ||
+		err.Error() != "exit status 1" {
 		t.Log(cmd.Args)
 		t.Log(output.String())
-		t.Fatal(err)
+		t.Fatalf("expected: %s, \nreceived: %s", "exit status 1", err)
 	}
-	errExpect := "Migration needed: please backup cgr data and run : <cgr-migrator -exec=*accounts>\n"
-	if output.String() != errExpect {
-		t.Fatalf("Expected %q \n but received: \n %q", errExpect, output.String())
+	errExpect := "Migration needed: please backup cgr data and run : <cgr-migrator -exec=*accounts>"
+	if !strings.Contains(output.String(), errExpect) {
+		t.Errorf("expected %s \nto contain: %s", output.String(), errExpect)
 	}
 }
 
@@ -287,15 +289,16 @@ func testUpdateVersionsActionPlans(t *testing.T) {
 	}
 	cmd := exec.Command("cgr-engine", fmt.Sprintf(`-config_path=/usr/share/cgrates/conf/samples/%s`, versionsConfigDIR), `-scheduled_shutdown=4ms`)
 	output := bytes.NewBuffer(nil)
-	cmd.Stdout = output
-	if err := cmd.Run(); err != nil {
+	cmd.Stderr = output
+	if err := cmd.Run(); err == nil ||
+		err.Error() != "exit status 1" {
 		t.Log(cmd.Args)
 		t.Log(output.String())
-		t.Fatal(err)
+		t.Fatalf("expected: %s, \nreceived: %s", "exit status 1", err)
 	}
-	errExpect := "Migration needed: please backup cgr data and run : <cgr-migrator -exec=*action_plans>\n"
-	if output.String() != errExpect {
-		t.Fatalf("Expected %q \n but received: \n %q", errExpect, output.String())
+	errExpect := "Migration needed: please backup cgr data and run : <cgr-migrator -exec=*action_plans>"
+	if !strings.Contains(output.String(), errExpect) {
+		t.Errorf("expected %s \nto contain: %s", output.String(), errExpect)
 	}
 }
 
@@ -307,15 +310,16 @@ func testUpdateVersionsActionTriggers(t *testing.T) {
 	}
 	cmd := exec.Command("cgr-engine", fmt.Sprintf(`-config_path=/usr/share/cgrates/conf/samples/%s`, versionsConfigDIR), `-scheduled_shutdown=4ms`)
 	output := bytes.NewBuffer(nil)
-	cmd.Stdout = output
-	if err := cmd.Run(); err != nil {
+	cmd.Stderr = output
+	if err := cmd.Run(); err == nil ||
+		err.Error() != "exit status 1" {
 		t.Log(cmd.Args)
 		t.Log(output.String())
-		t.Fatal(err)
+		t.Fatalf("expected: %s, \nreceived: %s", "exit status 1", err)
 	}
-	errExpect := "Migration needed: please backup cgr data and run : <cgr-migrator -exec=*action_triggers>\n"
-	if output.String() != errExpect {
-		t.Fatalf("Expected %q \n but received: \n %q", errExpect, output.String())
+	errExpect := "Migration needed: please backup cgr data and run : <cgr-migrator -exec=*action_triggers>"
+	if !strings.Contains(output.String(), errExpect) {
+		t.Errorf("expected %s \nto contain: %s", output.String(), errExpect)
 	}
 }
 
@@ -327,15 +331,16 @@ func testUpdateVersionsActions(t *testing.T) {
 	}
 	cmd := exec.Command("cgr-engine", fmt.Sprintf(`-config_path=/usr/share/cgrates/conf/samples/%s`, versionsConfigDIR), `-scheduled_shutdown=4ms`)
 	output := bytes.NewBuffer(nil)
-	cmd.Stdout = output
-	if err := cmd.Run(); err != nil {
+	cmd.Stderr = output
+	if err := cmd.Run(); err == nil ||
+		err.Error() != "exit status 1" {
 		t.Log(cmd.Args)
 		t.Log(output.String())
-		t.Fatal(err)
+		t.Fatalf("expected: %s, \nreceived: %s", "exit status 1", err)
 	}
-	errExpect := "Migration needed: please backup cgr data and run : <cgr-migrator -exec=*actions>\n"
-	if output.String() != errExpect {
-		t.Fatalf("Expected %q \n but received: \n %q", errExpect, output.String())
+	errExpect := "Migration needed: please backup cgr data and run : <cgr-migrator -exec=*actions>"
+	if !strings.Contains(output.String(), errExpect) {
+		t.Errorf("expected %s \nto contain: %s", output.String(), errExpect)
 	}
 }
 
@@ -347,15 +352,16 @@ func testUpdateVersionsChargers(t *testing.T) {
 	}
 	cmd := exec.Command("cgr-engine", fmt.Sprintf(`-config_path=/usr/share/cgrates/conf/samples/%s`, versionsConfigDIR), `-scheduled_shutdown=4ms`)
 	output := bytes.NewBuffer(nil)
-	cmd.Stdout = output
-	if err := cmd.Run(); err != nil {
+	cmd.Stderr = output
+	if err := cmd.Run(); err == nil ||
+		err.Error() != "exit status 1" {
 		t.Log(cmd.Args)
 		t.Log(output.String())
-		t.Fatal(err)
+		t.Fatalf("expected: %s, \nreceived: %s", "exit status 1", err)
 	}
-	errExpect := "Migration needed: please backup cgr data and run : <cgr-migrator -exec=*chargers>\n"
-	if output.String() != errExpect {
-		t.Fatalf("Expected %q \n but received: \n %q", errExpect, output.String())
+	errExpect := "Migration needed: please backup cgr data and run : <cgr-migrator -exec=*chargers>"
+	if !strings.Contains(output.String(), errExpect) {
+		t.Errorf("expected %s \nto contain: %s", output.String(), errExpect)
 	}
 }
 
@@ -367,7 +373,7 @@ func testUpdateVersionsDestinations(t *testing.T) {
 	}
 	cmd := exec.Command("cgr-engine", fmt.Sprintf(`-config_path=/usr/share/cgrates/conf/samples/%s`, versionsConfigDIR), `-scheduled_shutdown=4ms`)
 	output := bytes.NewBuffer(nil)
-	cmd.Stdout = output
+	cmd.Stderr = output
 	if err := cmd.Run(); err != nil {
 		t.Log(cmd.Args)
 		t.Log(output.String())
@@ -386,15 +392,16 @@ func testUpdateVersionsAttributes(t *testing.T) {
 	}
 	cmd := exec.Command("cgr-engine", fmt.Sprintf(`-config_path=/usr/share/cgrates/conf/samples/%s`, versionsConfigDIR), `-scheduled_shutdown=4ms`)
 	output := bytes.NewBuffer(nil)
-	cmd.Stdout = output
-	if err := cmd.Run(); err != nil {
+	cmd.Stderr = output
+	if err := cmd.Run(); err == nil ||
+		err.Error() != "exit status 1" {
 		t.Log(cmd.Args)
 		t.Log(output.String())
-		t.Fatal(err)
+		t.Fatalf("expected: %s, \nreceived: %s", "exit status 1", err)
 	}
-	errExpect := "Migration needed: please backup cgr data and run : <cgr-migrator -exec=*attributes>\n"
-	if output.String() != errExpect {
-		t.Fatalf("Expected %q \n but received: \n %q", errExpect, output.String())
+	errExpect := "Migration needed: please backup cgr data and run : <cgr-migrator -exec=*attributes>"
+	if !strings.Contains(output.String(), errExpect) {
+		t.Errorf("expected %s \nto contain: %s", output.String(), errExpect)
 	}
 }
 
@@ -406,15 +413,16 @@ func testUpdateVersionsDispatchers(t *testing.T) {
 	}
 	cmd := exec.Command("cgr-engine", fmt.Sprintf(`-config_path=/usr/share/cgrates/conf/samples/%s`, versionsConfigDIR), `-scheduled_shutdown=4ms`)
 	output := bytes.NewBuffer(nil)
-	cmd.Stdout = output
-	if err := cmd.Run(); err != nil {
+	cmd.Stderr = output
+	if err := cmd.Run(); err == nil ||
+		err.Error() != "exit status 1" {
 		t.Log(cmd.Args)
 		t.Log(output.String())
-		t.Fatal(err)
+		t.Fatalf("expected: %s, \nreceived: %s", "exit status 1", err)
 	}
-	errExpect := "Migration needed: please backup cgr data and run : <cgr-migrator -exec=*dispatchers>\n"
-	if output.String() != errExpect {
-		t.Fatalf("Expected %q \n but received: \n %q", errExpect, output.String())
+	errExpect := "Migration needed: please backup cgr data and run : <cgr-migrator -exec=*dispatchers>"
+	if !strings.Contains(output.String(), errExpect) {
+		t.Errorf("expected %s \nto contain: %s", output.String(), errExpect)
 	}
 }
 
@@ -426,7 +434,7 @@ func testUpdateVersionsLoadIDs(t *testing.T) {
 	}
 	cmd := exec.Command("cgr-engine", fmt.Sprintf(`-config_path=/usr/share/cgrates/conf/samples/%s`, versionsConfigDIR), `-scheduled_shutdown=4ms`)
 	output := bytes.NewBuffer(nil)
-	cmd.Stdout = output
+	cmd.Stderr = output
 	if err := cmd.Run(); err != nil {
 		t.Log(cmd.Args)
 		t.Log(output.String())
@@ -446,15 +454,16 @@ func testUpdateVersionsRQF(t *testing.T) {
 	}
 	cmd := exec.Command("cgr-engine", fmt.Sprintf(`-config_path=/usr/share/cgrates/conf/samples/%s`, versionsConfigDIR), `-scheduled_shutdown=4ms`)
 	output := bytes.NewBuffer(nil)
-	cmd.Stdout = output
-	if err := cmd.Run(); err != nil {
+	cmd.Stderr = output
+	if err := cmd.Run(); err == nil ||
+		err.Error() != "exit status 1" {
 		t.Log(cmd.Args)
 		t.Log(output.String())
-		t.Fatal(err)
+		t.Fatalf("expected: %s, \nreceived: %s", "exit status 1", err)
 	}
-	errExpect := "Migration needed: please backup cgr data and run : <cgr-migrator -exec=*filters>\n"
-	if output.String() != errExpect {
-		t.Fatalf("Expected %q \n but received: \n %q", errExpect, output.String())
+	errExpect := "Migration needed: please backup cgr data and run : <cgr-migrator -exec=*filters>"
+	if !strings.Contains(output.String(), errExpect) {
+		t.Errorf("expected %s \nto contain: %s", output.String(), errExpect)
 	}
 }
 
@@ -466,7 +475,7 @@ func testUpdateVersionsRatingPlan(t *testing.T) {
 	}
 	cmd := exec.Command("cgr-engine", fmt.Sprintf(`-config_path=/usr/share/cgrates/conf/samples/%s`, versionsConfigDIR), `-scheduled_shutdown=4ms`)
 	output := bytes.NewBuffer(nil)
-	cmd.Stdout = output
+	cmd.Stderr = output
 	if err := cmd.Run(); err != nil {
 		t.Log(cmd.Args)
 		t.Log(output.String())
@@ -486,7 +495,7 @@ func testUpdateVersionsRatingProfile(t *testing.T) {
 	}
 	cmd := exec.Command("cgr-engine", fmt.Sprintf(`-config_path=/usr/share/cgrates/conf/samples/%s`, versionsConfigDIR), `-scheduled_shutdown=4ms`)
 	output := bytes.NewBuffer(nil)
-	cmd.Stdout = output
+	cmd.Stderr = output
 	if err := cmd.Run(); err != nil {
 		t.Log(cmd.Args)
 		t.Log(output.String())
@@ -506,7 +515,7 @@ func testUpdateVersionsResource(t *testing.T) {
 	}
 	cmd := exec.Command("cgr-engine", fmt.Sprintf(`-config_path=/usr/share/cgrates/conf/samples/%s`, versionsConfigDIR), `-scheduled_shutdown=4ms`)
 	output := bytes.NewBuffer(nil)
-	cmd.Stdout = output
+	cmd.Stderr = output
 	if err := cmd.Run(); err != nil {
 		t.Log(cmd.Args)
 		t.Log(output.String())
@@ -526,7 +535,7 @@ func testUpdateVersionsReverseDestinations(t *testing.T) {
 	}
 	cmd := exec.Command("cgr-engine", fmt.Sprintf(`-config_path=/usr/share/cgrates/conf/samples/%s`, versionsConfigDIR), `-scheduled_shutdown=4ms`)
 	output := bytes.NewBuffer(nil)
-	cmd.Stdout = output
+	cmd.Stderr = output
 	if err := cmd.Run(); err != nil {
 		t.Log(cmd.Args)
 		t.Log(output.String())
@@ -546,15 +555,16 @@ func testUpdateVersionsRoutes(t *testing.T) {
 	}
 	cmd := exec.Command("cgr-engine", fmt.Sprintf(`-config_path=/usr/share/cgrates/conf/samples/%s`, versionsConfigDIR), `-scheduled_shutdown=4ms`)
 	output := bytes.NewBuffer(nil)
-	cmd.Stdout = output
-	if err := cmd.Run(); err != nil {
+	cmd.Stderr = output
+	if err := cmd.Run(); err == nil ||
+		err.Error() != "exit status 1" {
 		t.Log(cmd.Args)
 		t.Log(output.String())
-		t.Fatal(err)
+		t.Fatalf("expected: %s, \nreceived: %s", "exit status 1", err)
 	}
-	errExpect := "Migration needed: please backup cgr data and run : <cgr-migrator -exec=*routes>\n"
-	if output.String() != errExpect {
-		t.Fatalf("Expected %q \n but received: \n %q", errExpect, output.String())
+	errExpect := "Migration needed: please backup cgr data and run : <cgr-migrator -exec=*routes>"
+	if !strings.Contains(output.String(), errExpect) {
+		t.Errorf("expected %s \nto contain: %s", output.String(), errExpect)
 	}
 }
 
@@ -566,15 +576,16 @@ func testUpdateVersionsSharedGroups(t *testing.T) {
 	}
 	cmd := exec.Command("cgr-engine", fmt.Sprintf(`-config_path=/usr/share/cgrates/conf/samples/%s`, versionsConfigDIR), `-scheduled_shutdown=4ms`)
 	output := bytes.NewBuffer(nil)
-	cmd.Stdout = output
-	if err := cmd.Run(); err != nil {
+	cmd.Stderr = output
+	if err := cmd.Run(); err == nil ||
+		err.Error() != "exit status 1" {
 		t.Log(cmd.Args)
 		t.Log(output.String())
-		t.Fatal(err)
+		t.Fatalf("expected: %s, \nreceived: %s", "exit status 1", err)
 	}
-	errExpect := "Migration needed: please backup cgr data and run : <cgr-migrator -exec=*shared_groups>\n"
-	if output.String() != errExpect {
-		t.Fatalf("Expected %q \n but received: \n %q", errExpect, output.String())
+	errExpect := "Migration needed: please backup cgr data and run : <cgr-migrator -exec=*shared_groups>"
+	if !strings.Contains(output.String(), errExpect) {
+		t.Errorf("expected %s \nto contain: %s", output.String(), errExpect)
 	}
 }
 
@@ -586,15 +597,16 @@ func testUpdateVersionsStats(t *testing.T) {
 	}
 	cmd := exec.Command("cgr-engine", fmt.Sprintf(`-config_path=/usr/share/cgrates/conf/samples/%s`, versionsConfigDIR), `-scheduled_shutdown=4ms`)
 	output := bytes.NewBuffer(nil)
-	cmd.Stdout = output
-	if err := cmd.Run(); err != nil {
+	cmd.Stderr = output
+	if err := cmd.Run(); err == nil ||
+		err.Error() != "exit status 1" {
 		t.Log(cmd.Args)
 		t.Log(output.String())
-		t.Fatal(err)
+		t.Fatalf("expected: %s, \nreceived: %s", "exit status 1", err)
 	}
-	errExpect := "Migration needed: please backup cgr data and run : <cgr-migrator -exec=*stats>\n"
-	if output.String() != errExpect {
-		t.Fatalf("Expected %q \n but received: \n %q", errExpect, output.String())
+	errExpect := "Migration needed: please backup cgr data and run : <cgr-migrator -exec=*stats>"
+	if !strings.Contains(output.String(), errExpect) {
+		t.Errorf("expected %s \nto contain: %s", output.String(), errExpect)
 	}
 }
 
@@ -606,7 +618,7 @@ func testUpdateVersionsSubscribers(t *testing.T) {
 	}
 	cmd := exec.Command("cgr-engine", fmt.Sprintf(`-config_path=/usr/share/cgrates/conf/samples/%s`, versionsConfigDIR), `-scheduled_shutdown=4ms`)
 	output := bytes.NewBuffer(nil)
-	cmd.Stdout = output
+	cmd.Stderr = output
 	if err := cmd.Run(); err != nil {
 		t.Log(cmd.Args)
 		t.Log(output.String())
@@ -626,15 +638,16 @@ func testUpdateVersionsThresholds(t *testing.T) {
 	}
 	cmd := exec.Command("cgr-engine", fmt.Sprintf(`-config_path=/usr/share/cgrates/conf/samples/%s`, versionsConfigDIR), `-scheduled_shutdown=4ms`)
 	output := bytes.NewBuffer(nil)
-	cmd.Stdout = output
-	if err := cmd.Run(); err != nil {
+	cmd.Stderr = output
+	if err := cmd.Run(); err == nil ||
+		err.Error() != "exit status 1" {
 		t.Log(cmd.Args)
 		t.Log(output.String())
-		t.Fatal(err)
+		t.Fatalf("expected: %s, \nreceived: %s", "exit status 1", err)
 	}
-	errExpect := "Migration needed: please backup cgr data and run : <cgr-migrator -exec=*thresholds>\n"
-	if output.String() != errExpect {
-		t.Fatalf("Expected %q \n but received: \n %q", errExpect, output.String())
+	errExpect := "Migration needed: please backup cgr data and run : <cgr-migrator -exec=*thresholds>"
+	if !strings.Contains(output.String(), errExpect) {
+		t.Errorf("expected %s \nto contain: %s", output.String(), errExpect)
 	}
 }
 
@@ -646,7 +659,7 @@ func testUpdateVersionsTiming(t *testing.T) {
 	}
 	cmd := exec.Command("cgr-engine", fmt.Sprintf(`-config_path=/usr/share/cgrates/conf/samples/%s`, versionsConfigDIR), `-scheduled_shutdown=4ms`)
 	output := bytes.NewBuffer(nil)
-	cmd.Stdout = output
+	cmd.Stderr = output
 	if err := cmd.Run(); err != nil {
 		t.Log(cmd.Args)
 		t.Log(output.String())
@@ -667,15 +680,16 @@ func testUpdateVersionsCostDetails(t *testing.T) {
 	}
 	cmd := exec.Command("cgr-engine", fmt.Sprintf(`-config_path=/usr/share/cgrates/conf/samples/%s`, versionsConfigDIR), `-scheduled_shutdown=4ms`)
 	output := bytes.NewBuffer(nil)
-	cmd.Stdout = output
-	if err := cmd.Run(); err != nil {
+	cmd.Stderr = output
+	if err := cmd.Run(); err == nil ||
+		err.Error() != "exit status 1" {
 		t.Log(cmd.Args)
 		t.Log(output.String())
-		t.Fatal(err)
+		t.Fatalf("expected: %s, \nreceived: %s", "exit status 1", err)
 	}
-	errExpect := "Migration needed: please backup cgr data and run : <cgr-migrator -exec=*cost_details>\n"
-	if output.String() != errExpect {
-		t.Fatalf("Expected %q \n but received: \n %q", errExpect, output.String())
+	errExpect := "Migration needed: please backup cgr data and run : <cgr-migrator -exec=*cost_details>"
+	if !strings.Contains(output.String(), errExpect) {
+		t.Errorf("expected %s \nto contain: %s", output.String(), errExpect)
 	}
 }
 
@@ -687,15 +701,16 @@ func testUpdateVersionsSessionSCosts(t *testing.T) {
 	}
 	cmd := exec.Command("cgr-engine", fmt.Sprintf(`-config_path=/usr/share/cgrates/conf/samples/%s`, versionsConfigDIR), `-scheduled_shutdown=4ms`)
 	output := bytes.NewBuffer(nil)
-	cmd.Stdout = output
-	if err := cmd.Run(); err != nil {
+	cmd.Stderr = output
+	if err := cmd.Run(); err == nil ||
+		err.Error() != "exit status 1" {
 		t.Log(cmd.Args)
 		t.Log(output.String())
-		t.Fatal(err)
+		t.Fatalf("expected: %s, \nreceived: %s", "exit status 1", err)
 	}
-	errExpect := "Migration needed: please backup cgr data and run : <cgr-migrator -exec=*sessions_costs>\n"
-	if output.String() != errExpect {
-		t.Fatalf("Expected %q \n but received: \n %q", errExpect, output.String())
+	errExpect := "Migration needed: please backup cgr data and run : <cgr-migrator -exec=*sessions_costs>"
+	if !strings.Contains(output.String(), errExpect) {
+		t.Errorf("expected %s \nto contain: %s", output.String(), errExpect)
 	}
 }
 
@@ -707,14 +722,15 @@ func testUpdateVersionsCDRs(t *testing.T) {
 	}
 	cmd := exec.Command("cgr-engine", fmt.Sprintf(`-config_path=/usr/share/cgrates/conf/samples/%s`, versionsConfigDIR), `-scheduled_shutdown=4ms`)
 	output := bytes.NewBuffer(nil)
-	cmd.Stdout = output
-	if err := cmd.Run(); err != nil {
+	cmd.Stderr = output
+	if err := cmd.Run(); err == nil ||
+		err.Error() != "exit status 1" {
 		t.Log(cmd.Args)
 		t.Log(output.String())
-		t.Fatal(err)
+		t.Fatalf("expected: %s, \nreceived: %s", "exit status 1", err)
 	}
-	errExpect := "Migration needed: please backup cgr data and run : <cgr-migrator -exec=*cdrs>\n"
-	if output.String() != errExpect {
-		t.Fatalf("Expected %q \n but received: \n %q", errExpect, output.String())
+	errExpect := "Migration needed: please backup cgr data and run : <cgr-migrator -exec=*cdrs>"
+	if !strings.Contains(output.String(), errExpect) {
+		t.Errorf("expected %s \nto contain: %s", output.String(), errExpect)
 	}
 }
