@@ -136,7 +136,7 @@ func TestRadFieldOutVal(t *testing.T) {
 func TestRadReplyAppendAttributes(t *testing.T) {
 	rply := radigo.NewPacket(radigo.AccessRequest, 2, dictRad, coder, "CGRateS.org").Reply()
 	rplyFlds := []*config.FCTemplate{
-		{Tag: "ReplyCode", Path: MetaRadReplyCode, Type: utils.META_COMPOSED,
+		{Tag: "ReplyCode", Path: utils.MetaRep + utils.NestingSep + MetaRadReplyCode, Type: utils.META_COMPOSED,
 			Value: config.NewRSRParsersMustCompile("~*cgrep.Attributes.RadReply", true, utils.INFIELD_SEP)},
 		{Tag: "Acct-Session-Time", Path: "*rep.Acct-Session-Time", Type: utils.META_COMPOSED,
 			Value: config.NewRSRParsersMustCompile("~*cgrep.MaxUsage{*duration_seconds}", true, utils.INFIELD_SEP)},

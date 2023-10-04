@@ -100,7 +100,7 @@ func radReplyAppendAttributes(reply *radigo.Packet, agReq *AgentRequest,
 		if err != nil {
 			return err
 		}
-		if cfgFld.Path == MetaRadReplyCode { // Special case used to control the reply code of RADIUS reply
+		if strings.Split(cfgFld.Path, utils.NestingSep)[1] == MetaRadReplyCode { // Special case used to control the reply code of RADIUS reply
 			if err = reply.SetCodeWithName(fmtOut); err != nil {
 				return err
 			}
