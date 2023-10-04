@@ -1285,3 +1285,105 @@ func TestDataConverterConvertJSONOK(t *testing.T) {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", exp, rcv)
 	}
 }
+
+func TestStripConverter(t *testing.T) {
+	tests := []struct {
+		name      string
+		params    string
+		input     string
+		expected  string
+		expectErr bool
+	}{
+		{
+			name:      "Cut any leading 3 characters",
+			params:    "*strip:*left:*any:3",
+			input:     "000000435400",
+			expected:  "000435400",
+			expectErr: false,
+		},
+		{
+			name:      "Cut leading '00' twice",
+			params:    "*strip:*left:00:2",
+			input:     "000000435400",
+			expected:  "00435400",
+			expectErr: false,
+		},
+		{
+			name:      "Cut leading '00' default",
+			params:    "*strip:*left:00",
+			input:     "000000435400",
+			expected:  "0000435400",
+			expectErr: false,
+		},
+		{
+			name:      "Cut 8 trailing nils",
+			params:    "*strip:*right:\u0000:8",
+			input:     "password\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000",
+			expected:  "password",
+			expectErr: false,
+		},
+		{
+			name:      "Cut 8 trailing escaped nils",
+			params:    "*strip:*right:\\u0000:8",
+			input:     "password\\u0000\\u0000\\u0000\\u0000\\u0000\\u0000\\u0000\\u0000",
+			expected:  "password",
+			expectErr: false,
+		},
+		{
+			name:      "Cut all trailing nils",
+			params:    "*strip:*right:\u0000:-1",
+			input:     "password\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000",
+			expected:  "password",
+			expectErr: false,
+		},
+		{
+			name:      "Cut all escaped trailing nils",
+			params:    "*strip:*right:\\u0000:-1",
+			input:     "password\\u0000\\u0000\\u0000\\u0000\\u0000\\u0000\\u0000\\u0000",
+			expected:  "password",
+			expectErr: false,
+		},
+		{
+			name:      "Invalid substr and amount value combination",
+			params:    "*strip:*right:*any:-1",
+			input:     "test",
+			expected:  "",
+			expectErr: true,
+		},
+		{
+			name:      "Invalid nr of parameters",
+			params:    "*strip:*right",
+			input:     "test",
+			expected:  "",
+			expectErr: true,
+		},
+		{
+			name:      "Invalid side parameter",
+			params:    "*strip:*up:abc:2",
+			input:     "test",
+			expected:  "",
+			expectErr: true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			sc, err := NewDataConverter(tt.params)
+			if (err != nil) != tt.expectErr {
+				t.Errorf("NewStripConverter error = %v, expectErr %v", err, tt.expectErr)
+				return
+			}
+			if tt.expectErr {
+				return
+			}
+			rcv, err := sc.Convert(tt.input)
+			if (err != nil) != tt.expectErr {
+				t.Errorf("Convert error = %v, expectErr %v", err, tt.expectErr)
+				return
+			}
+			if rcv != tt.expected {
+				t.Errorf("expected: %s, received: %s", tt.expected, rcv)
+			}
+		})
+	}
+}
