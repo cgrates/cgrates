@@ -695,6 +695,7 @@ const (
 	VersionName             = "Version"
 	MetaTenant              = "*tenant"
 	ResourceUsage           = "ResourceUsage"
+	MetaStrip               = "*strip"
 	MetaDuration            = "*duration"
 	MetaLibPhoneNumber      = "*libphonenumber"
 	MetaTimeString          = "*time_string"
