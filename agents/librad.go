@@ -38,7 +38,7 @@ func radReplyAppendAttributes(reply *radigo.Packet, rplNM *utils.OrderedNavigabl
 			continue
 		}
 		var attrName, vendorName string
-		if len(path) > 2 {
+		if len(path) > 1 {
 			vendorName, attrName = path[0], path[1]
 		} else {
 			attrName = path[0]
