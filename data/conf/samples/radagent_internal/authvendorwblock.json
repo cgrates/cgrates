@@ -1,0 +1,81 @@
+{
+
+	"radius_agent": {
+		"request_processors": [{
+				"id": "RadiusMandatoryFail",
+				"filters": ["*string:~*vars.*radReqType:*radAuth", "*string:~*req.User-Name:10011"],
+				"flags": ["*log", "*authorize", "*attributes"],
+				"request_fields": [
+                    {
+						"tag": "UserName","path": "*cgreq.RadUserName",
+						"type": "*variable","value": "~*req.User-Name"
+					},
+					{
+						"tag": "Password","path": "*cgreq.RadPassword",
+						"type": "*variable","value": "~*req.User-Password"
+					},
+					{
+						"tag": "ReplyMessage","path": "*cgreq.RadReplyMessage",
+						"type": "*constant","value": "*attributes"
+					}
+				],
+				"reply_fields": [
+                    {
+						"tag": "Code","path": "*rep.*radReplyCode",
+                        "filters": ["*notempty:~*cgrep.Error:"],"type": "*constant",
+                        "value": "AccessReject"
+					},
+					{
+						"tag": "ReplyMessage","path": "*rep.Reply-Message",
+                        "filters": ["*notempty:~*cgrep.Error:"],"type": "*variable",
+                        "value": "~*cgrep.Error","blocker": true
+					},
+					{
+						"tag": "ReplyMessage","path": "*rep.Reply-Message",
+						"type": "*variable","value": "~*cgrep.Attributes.RadReplyMessage",
+						"mandatory": true
+					}
+				]
+			},
+			{
+				"id": "RadiusWithVendor",
+				"filters": ["*string:~*vars.*radReqType:*radAuth", "*string:~*req.User-Name:10012"],
+				"flags": ["*log", "*authorize", "*attributes"],
+				"request_fields": [
+                    {
+						"tag": "UserName","path": "*cgreq.RadUserName",
+						"type": "*variable","value": "~*req.User-Name"
+					},
+					{
+						"tag": "Password","path": "*cgreq.RadPassword",
+						"type": "*variable","value": "~*req.User-Password"
+					}
+				],
+				"reply_fields": [
+                    {
+						"tag": "Code","path": "*rep.*radReplyCode",
+						"filters": ["*notempty:~*cgrep.Error:"],"type": "*constant",
+                        "value": "AccessReject"
+					},
+					{
+						"tag": "ReplyMessage","path": "*rep.Reply-Message",
+						"filters": ["*notempty:~*cgrep.Error:"],"type": "*variable",
+						"value": "~*cgrep.Error","blocker": true
+					},
+					{
+						"tag": "MicrosoftB1","path": "*rep.Microsoft.MS-Service-Class",
+						"type": "*constant","value": "Class1"
+					},
+					{
+						"tag": "MicrosoftB2","path": "*rep.Microsoft.MS-Service-Class",
+						"type": "*group","value": "Class2","new_branch": true
+					},
+					{
+						"tag": "MicrosoftB3","path": "*rep.Microsoft.MS-Service-Class",
+						"type": "*group","value": "Class3","new_branch": true
+					}
+				]
+			}
+		]
+	}
+}

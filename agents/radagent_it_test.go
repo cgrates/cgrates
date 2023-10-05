@@ -22,6 +22,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package agents
 
 // import (
+// 	"bytes"
 // 	"fmt"
 // 	"net/rpc"
 // 	"os/exec"
@@ -29,7 +30,7 @@ package agents
 // 	"reflect"
 // 	"testing"
 // 	"time"
-
+//
 // 	"github.com/cgrates/birpc/context"
 // 	"github.com/cgrates/cgrates/config"
 // 	"github.com/cgrates/cgrates/engine"
@@ -37,14 +38,14 @@ package agents
 // 	"github.com/cgrates/cgrates/utils"
 // 	"github.com/cgrates/radigo"
 // )
-
+//
 // var (
 // 	raonfigDIR             string
 // 	raCfgPath              string
 // 	raCfg                  *config.CGRConfig
 // 	raAuthClnt, raAcctClnt *radigo.Client
 // 	raRPC                  *rpc.Client
-
+//
 // 	sTestsRadius = []func(t *testing.T){
 // 		testRAitInitCfg,
 // 		testRAitResetDataDb,
@@ -53,6 +54,8 @@ package agents
 // 		testRAitTPFromFolder,
 // 		testRAitAuthPAPSuccess,
 // 		testRAitAuthPAPFail,
+// 		testRAitMandatoryFail,
+// 		testRAitWithVendor,
 // 		testRAitAuthCHAPSuccess,
 // 		testRAitAuthCHAPFail,
 // 		testRAitAuthMSCHAPV2Success,
@@ -64,7 +67,7 @@ package agents
 // 		testRAitStopCgrEngine,
 // 	}
 // )
-
+//
 // // Test start here
 // func TestRAit(t *testing.T) {
 // 	// engine.KillEngine(0)
@@ -87,7 +90,7 @@ package agents
 // 		t.Run(raonfigDIR, stest)
 // 	}
 // }
-
+//
 // func TestRAitDispatcher(t *testing.T) {
 // 	if *utils.Encoding == utils.MetaGOB {
 // 		t.SkipNow()
@@ -104,7 +107,7 @@ package agents
 // 	engine.KillEngine(100)
 // 	isDispatcherActive = false
 // }
-
+//
 // func testRAitInitCfg(t *testing.T) {
 // 	raCfgPath = path.Join(*utils.DataDir, "conf", "samples", raonfigDIR)
 // 	// Init config first
@@ -117,7 +120,7 @@ package agents
 // 		raCfg.ListenCfg().RPCJSONListen = ":6012"
 // 	}
 // }
-
+//
 // func testRadiusitResetAllDB(t *testing.T) {
 // 	cfgPath1 := path.Join(*utils.DataDir, "conf", "samples", "dispatchers", "all")
 // 	allCfg, err := config.NewCGRConfigFromPath(context.Background(), cfgPath1)
@@ -127,23 +130,23 @@ package agents
 // 	if err := engine.InitDataDB(allCfg); err != nil {
 // 		t.Fatal(err)
 // 	}
-
+//
 // }
-
+//
 // // Remove data in both rating and accounting db
 // func testRAitResetDataDb(t *testing.T) {
 // 	if err := engine.InitDataDB(raCfg); err != nil {
 // 		t.Fatal(err)
 // 	}
 // }
-
+//
 // // Start CGR Engine
 // func testRAitStartEngine(t *testing.T) {
 // 	if _, err := engine.StartEngine(raCfgPath, *utils.WaitRater); err != nil {
 // 		t.Fatal(err)
 // 	}
 // }
-
+//
 // // Connect rpc client to rater
 // func testRAitApierRpcConn(t *testing.T) {
 // 	var err error
@@ -152,7 +155,7 @@ package agents
 // 		t.Fatal(err)
 // 	}
 // }
-
+//
 // // Load the tariff plan, creating accounts and their balances
 // func testRAitTPFromFolder(t *testing.T) {
 // 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*utils.DataDir, "tariffplans", "oldtutorial")}
@@ -165,7 +168,7 @@ package agents
 // 	}
 // 	time.Sleep(time.Duration(*utils.WaitRater) * time.Millisecond) // Give time for scheduler to execute topups
 // }
-
+//
 // func testRadiusitTPLoadData(t *testing.T) {
 // 	wchan := make(chan struct{}, 1)
 // 	go func() {
@@ -174,7 +177,7 @@ package agents
 // 			t.Error(err)
 // 		}
 // 		loader := exec.Command(loaderPath, "-config_path", raCfgPath, "-path", path.Join(*utils.DataDir, "tariffplans", "dispatchers"))
-
+//
 // 		if err := loader.Start(); err != nil {
 // 			t.Error(err)
 // 		}
@@ -187,7 +190,7 @@ package agents
 // 		t.Errorf("cgr-loader failed: ")
 // 	}
 // }
-
+//
 // func testRAitAuthPAPSuccess(t *testing.T) {
 // 	if raAuthClnt, err = radigo.NewClient("udp", "127.0.0.1:1812", "CGRateS.org", dictRad, 1, nil); err != nil {
 // 		t.Fatal(err)
@@ -232,7 +235,7 @@ package agents
 // 		t.Errorf("Received: %s", string(reply.AVPs[0].RawValue))
 // 	}
 // }
-
+//
 // func testRAitAuthPAPFail(t *testing.T) {
 // 	if raAuthClnt, err = radigo.NewClient("udp", "127.0.0.1:1812", "CGRateS.org", dictRad, 1, nil); err != nil {
 // 		t.Fatal(err)
@@ -277,7 +280,65 @@ package agents
 // 		t.Errorf("Received: %s", string(reply.AVPs[0].RawValue))
 // 	}
 // }
-
+//
+// func testRAitMandatoryFail(t *testing.T) {
+// 	if raAuthClnt, err = radigo.NewClient("udp", "127.0.0.1:1812", "CGRateS.org", dictRad, 1, nil); err != nil {
+// 		t.Fatal(err)
+// 	}
+// 	authReq := raAuthClnt.NewRequest(radigo.AccessRequest, 1)
+// 	if err := authReq.AddAVPWithName("User-Name", "10011", ""); err != nil {
+// 		t.Error(err)
+// 	}
+// 	if err := authReq.AddAVPWithName("User-Password", "CGRateSPassword3", ""); err != nil {
+// 		t.Error(err)
+// 	}
+// 	authReq.AVPs[1].RawValue = radigo.EncodeUserPassword([]byte("CGRateSPassword3"), []byte("CGRateS.org"), authReq.Authenticator[:])
+// 	reply, err := raAuthClnt.SendRequest(authReq)
+// 	if err != nil {
+// 		t.Fatal(err)
+// 	}
+// 	if reply.Code != radigo.AccessReject {
+// 		t.Errorf("Received reply: %+v", reply)
+// 	}
+// 	exp := "ATTRIBUTES_ERROR:" + utils.MandatoryIEMissingCaps + ": [RadReplyMessage]"
+// 	if len(reply.AVPs) != 1 {
+// 		t.Errorf("Received AVPs: %+v", reply.AVPs)
+// 	} else if exp != string(reply.AVPs[0].RawValue) {
+// 		t.Errorf("Expected <%+v>, Received: <%+v>", exp, string(reply.AVPs[0].RawValue))
+// 	}
+// }
+//
+// func testRAitWithVendor(t *testing.T) {
+// 	if raAuthClnt, err = radigo.NewClient("udp", "127.0.0.1:1812", "CGRateS.org", dictRad, 1, nil); err != nil {
+// 		t.Fatal(err)
+// 	}
+// 	authReq := raAuthClnt.NewRequest(radigo.AccessRequest, 1)
+// 	if err := authReq.AddAVPWithName("User-Name", "10012", ""); err != nil {
+// 		t.Error(err)
+// 	}
+// 	if err := authReq.AddAVPWithName("User-Password", "CGRateSPassword3", ""); err != nil {
+// 		t.Error(err)
+// 	}
+// 	authReq.AVPs[1].RawValue = radigo.EncodeUserPassword([]byte("CGRateSPassword3"), []byte("CGRateS.org"), authReq.Authenticator[:])
+// 	reply, err := raAuthClnt.SendRequest(authReq)
+// 	if err != nil {
+// 		t.Fatal(err)
+// 	}
+//
+// 	if reply.Code != radigo.AccessAccept {
+// 		t.Errorf("Received reply: %+v", reply)
+// 	}
+// 	if len(reply.AVPs) != 3 {
+// 		t.Errorf("Received AVPs: %+v", reply.AVPs)
+// 	} else if string(reply.AVPs[0].RawValue) != "\x00\x00\x00\x00*\bClass1" {
+// 		t.Errorf("Expected <%+q>, Received: <%+q>", "\x00\x00\x00\x00*\bClass1", string(reply.AVPs[0].RawValue))
+// 	} else if string(reply.AVPs[1].RawValue) != "\x00\x00\x00\x00*\bClass2" {
+// 		t.Errorf("Expected <%q>, Received: <%q>", "\x00\x00\x00\x00*\bClass2", string(reply.AVPs[1].RawValue))
+// 	} else if string(reply.AVPs[2].RawValue) != "\x00\x00\x00\x00*\bClass3" {
+// 		t.Errorf("Expected <%q>, Received: <%q>", "\x00\x00\x00\x00*\bClass3", string(reply.AVPs[2].RawValue))
+// 	}
+// }
+//
 // func testRAitAuthCHAPSuccess(t *testing.T) {
 // 	if raAuthClnt, err = radigo.NewClient("udp", "127.0.0.1:1812", "CGRateS.org", dictRad, 1, nil); err != nil {
 // 		t.Fatal(err)
@@ -317,11 +378,11 @@ package agents
 // 	}
 // 	if len(reply.AVPs) != 1 { // make sure max duration is received
 // 		t.Errorf("Received AVPs: %+v", utils.ToJSON(reply.AVPs))
-// 	} else if !reflect.DeepEqual([]byte("session_max_time#10800"), reply.AVPs[0].RawValue) {
+// 	} else if !bytes.Equal([]byte("session_max_time#10800"), reply.AVPs[0].RawValue) {
 // 		t.Errorf("Received: %s", string(reply.AVPs[0].RawValue))
 // 	}
 // }
-
+//
 // func testRAitAuthCHAPFail(t *testing.T) {
 // 	if raAuthClnt, err = radigo.NewClient("udp", "127.0.0.1:1812", "CGRateS.org", dictRad, 1, nil); err != nil {
 // 		t.Fatal(err)
@@ -365,7 +426,7 @@ package agents
 // 		t.Errorf("Received: %s", string(reply.AVPs[0].RawValue))
 // 	}
 // }
-
+//
 // func testRAitAuthMSCHAPV2Success(t *testing.T) {
 // 	for _, dictPath := range raCfg.RadiusAgentCfg().ClientDictionaries {
 // 		if dictRad, err = radigo.NewDictionaryFromFolderWithRFC2865(dictPath); err != nil {
@@ -382,7 +443,7 @@ package agents
 // 	if err := authReq.AddAVPWithName("MS-CHAP-Challenge", string(authReq.Authenticator[:]), "Microsoft"); err != nil {
 // 		t.Error(err)
 // 	}
-
+//
 // 	respVal, err := radigo.GenerateClientMSCHAPResponse(authReq.Authenticator, "1001", "CGRateSPassword1")
 // 	if err != nil {
 // 		t.Error(err)
@@ -427,9 +488,9 @@ package agents
 // 			}
 // 		}
 // 	}
-
+//
 // }
-
+//
 // func testRAitAuthMSCHAPV2Fail(t *testing.T) {
 // 	for _, dictPath := range raCfg.RadiusAgentCfg().ClientDictionaries {
 // 		if dictRad, err = radigo.NewDictionaryFromFolderWithRFC2865(dictPath); err != nil {
@@ -484,7 +545,7 @@ package agents
 // 		t.Errorf("Received: %s", string(reply.AVPs[0].RawValue))
 // 	}
 // }
-
+//
 // func testRAitChallenge(t *testing.T) {
 // 	if raAuthClnt, err = radigo.NewClient("udp", "127.0.0.1:1812", "CGRateS.org", dictRad, 1, nil); err != nil {
 // 		t.Fatal(err)
@@ -524,7 +585,7 @@ package agents
 // 		t.Errorf("Received: %s", string(reply.AVPs[0].RawValue))
 // 	}
 // }
-
+//
 // func testRAitChallengeResponse(t *testing.T) {
 // 	if raAuthClnt, err = radigo.NewClient("udp", "127.0.0.1:1812", "CGRateS.org", dictRad, 1, nil); err != nil {
 // 		t.Fatal(err)
@@ -569,7 +630,7 @@ package agents
 // 		t.Errorf("Received: %s", string(reply.AVPs[0].RawValue))
 // 	}
 // }
-
+//
 // func testRAitAcctStart(t *testing.T) {
 // 	if raAcctClnt, err = radigo.NewClient("udp", "127.0.0.1:1813", "CGRateS.org", dictRad, 1, nil); err != nil {
 // 		t.Fatal(err)
@@ -648,7 +709,7 @@ package agents
 // 		t.Errorf("Expecting %v, received usage: %v\nAnd Session: %s ", expUsage, aSessions[0].Usage, utils.ToJSON(aSessions))
 // 	}
 // }
-
+//
 // func testRAitAcctStop(t *testing.T) {
 // 	req := raAcctClnt.NewRequest(radigo.AccountingRequest, 3) // emulates Kamailio packet for accounting start
 // 	if err := req.AddAVPWithName("Acct-Status-Type", "Stop", ""); err != nil {
@@ -736,7 +797,7 @@ package agents
 // 		}
 // 	}
 // }
-
+//
 // func testRAitStopCgrEngine(t *testing.T) {
 // 	if err := engine.KillEngine(100); err != nil {
 // 		t.Error(err)
