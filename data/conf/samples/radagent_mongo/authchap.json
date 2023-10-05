@@ -46,27 +46,6 @@
             "type": "*variable", "value": "~*cgrep.Error"}
         ]
       },
-      {
-        "id": "RadiusMandatoryFail",
-        "filters": ["*string:~*vars.*radReqType:*radAuth","*string:~*req.User-Name:10011"],
-        "flags": ["*log", "*authorize", "*attributes"],
-        "request_fields":[
-          {"tag": "UserName", "path": "*cgreq.RadUserName", "type": "*variable", 
-            "value": "~*req.User-Name"},
-          {"tag": "Password", "path": "*cgreq.RadPassword", "type": "*variable", 
-            "value": "~*req.User-Password"},
-          {"tag": "ReplyMessage", "path": "*cgreq.RadReplyMessage", "type": "*constant",
-            "value": "*attributes"},
-        ],
-        "reply_fields":[
-          {"tag": "Code", "path": "*rep.*radReplyCode", "filters": ["*notempty:~*cgrep.Error:"],
-            "type": "*constant", "value": "AccessReject"},
-          {"tag": "ReplyMessage", "path": "*rep.Reply-Message","filters": ["*notempty:~*cgrep.Error:"],
-            "type": "*variable", "value": "~*cgrep.Error", "blocker":true},
-          {"tag": "ReplyMessage", "path": "*rep.Reply-Message",
-            "type": "*variable", "value": "~*cgrep.Attributes.RadReplyMessage","mandatory":true},
-        ],
-      },
     ],
   }
 }
