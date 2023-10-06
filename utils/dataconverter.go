@@ -611,8 +611,8 @@ func NewStripConverter(params string) (DataConverter, error) {
 	switch sc.substr {
 	case EmptyString:
 		return nil, errors.New("strip converter: substr parameter cannot be empty")
-	case "*nil", "*space":
-		if sc.substr == "*nil" {
+	case MetaNil, MetaSpace:
+		if sc.substr == MetaNil {
 			sc.substr = "\u0000"
 		} else {
 			sc.substr = " "
@@ -624,7 +624,7 @@ func NewStripConverter(params string) (DataConverter, error) {
 			}
 			sc.substr = strings.Repeat(sc.substr, sc.amount)
 		}
-	case "*char":
+	case MetaChar:
 		if len(paramSlice) < 4 {
 			return nil, errors.New("strip converter: usage of *char implies the need of 4 or 5 params")
 		}
