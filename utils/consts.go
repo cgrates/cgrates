@@ -1151,6 +1151,7 @@ const (
 	MetaString             = "*string"
 	MetaPrefix             = "*prefix"
 	MetaSuffix             = "*suffix"
+	MetaBoth               = "*both"
 	MetaEmpty              = "*empty"
 	MetaExists             = "*exists"
 	MetaTimings            = "*timings"
