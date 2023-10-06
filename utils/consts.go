@@ -181,6 +181,9 @@ const (
 	MetaSingle               = "*single"
 	MetaZero                 = "*zero"
 	MetaASAP                 = "*asap"
+	MetaNil                  = "*nil"
+	MetaSpace                = "*space"
+	MetaChar                 = "*char"
 	CommentChar              = '#'
 	CSVSep                   = ','
 	FallbackSep              = ';'
