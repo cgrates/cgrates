@@ -589,7 +589,7 @@ func (jsnC JSONConverter) Convert(in any) (any, error) {
 	return string(b), nil
 }
 
-// StripConverter strips characters from the left or the right side of a string.
+// StripConverter strips the prefix, the suffix or both from a string.
 type StripConverter struct {
 	side   string
 	substr string
@@ -597,42 +597,53 @@ type StripConverter struct {
 }
 
 // NewStripConverter creates a new StripConverter with the specified parameters.
-// The input params string should have the format "<type>:<side>:<substr>:<amount>", where:
-//   - 'type' must be "*strip".
-//   - 'side' specifies the side of the string to strip, and it must be either "*left" or "*right".
-//   - 'substr' is the substring to be removed from the string.
-//   - 'amount' is the optional number of times 'substr' should be removed from the specified side.
-//
-// If 'amount' is omitted, it defaults to 1. If it is -1, all instances of 'substr' will be removed from the
-// chosen side. If 'substr' is "*any", 'amount' characters will be removed from the specified side
-// regardless of their value.
 func NewStripConverter(params string) (DataConverter, error) {
-	sc := new(StripConverter)
 	paramSlice := strings.Split(params, InInFieldSep)
-	switch len(paramSlice) {
-	case 3:
-		sc.amount = 1
-	case 4:
-		var err error
-		sc.amount, err = strconv.Atoi(paramSlice[3])
-		if err != nil {
-			return nil, err
+	if len(paramSlice) < 3 || len(paramSlice) > 5 {
+		return nil, errors.New("strip converter: invalid number of parameters (should have 3, 4 or 5)")
+	}
+	sc := StripConverter{
+		side:   paramSlice[1],
+		substr: paramSlice[2],
+		amount: -1,
+	}
+	var err error
+	switch sc.substr {
+	case EmptyString:
+		return nil, errors.New("strip converter: substr parameter cannot be empty")
+	case "*nil", "*space":
+		if sc.substr == "*nil" {
+			sc.substr = "\u0000"
+		} else {
+			sc.substr = " "
+		}
+		if len(paramSlice) == 4 {
+			sc.amount, err = strconv.Atoi(paramSlice[3])
+			if err != nil {
+				return nil, fmt.Errorf("strip converter: invalid amount parameter (%w)", err)
+			}
+			sc.substr = strings.Repeat(sc.substr, sc.amount)
+		}
+	case "*char":
+		if len(paramSlice) < 4 {
+			return nil, errors.New("strip converter: usage of *char implies the need of 4 or 5 params")
+		}
+		sc.substr = paramSlice[3] // should probably return error if empty
+		if len(paramSlice) == 5 {
+			sc.amount, err = strconv.Atoi(paramSlice[4])
+			if err != nil {
+				return nil, fmt.Errorf("strip converter: invalid amount parameter (%w)", err)
+			}
+			sc.substr = strings.Repeat(sc.substr, sc.amount)
 		}
 	default:
-		return nil, errors.New("strip converter: invalid number of parameters (should have 3 or 4)")
+		sc.amount, err = strconv.Atoi(paramSlice[2])
+		if err != nil {
+			return nil, fmt.Errorf("strip converter: invalid amount parameter (%w)", err)
+		}
+		sc.substr = ""
 	}
 
-	if sc.side = paramSlice[1]; !IsSliceMember([]string{MetaLeft, MetaRight}, sc.side) {
-		return nil, errors.New("strip converter: invalid side parameter")
-	}
-
-	sc.substr = paramSlice[2]
-	if sc.substr == MetaAny && sc.amount == -1 {
-		return nil, errors.New("strip converter: invalid combination of substr and amount values")
-	}
-	if sc.substr != MetaAny && sc.amount != -1 {
-		sc.substr = strings.Repeat(paramSlice[2], sc.amount)
-	}
 	return sc, nil
 }
 
@@ -641,31 +652,47 @@ func NewStripConverter(params string) (DataConverter, error) {
 func (sc StripConverter) Convert(in any) (any, error) {
 	str, ok := in.(string)
 	if !ok {
-		return nil, ErrCastFailed
+		return nil, fmt.Errorf("strip converter: %w", ErrCastFailed)
+	}
+	if sc.amount <= 0 && sc.amount != -1 {
+		return str, nil
 	}
 	switch sc.side {
-	case MetaLeft:
-		if sc.substr == MetaAny {
+	case MetaPrefix:
+		if sc.substr == EmptyString {
 			if sc.amount < len(str) {
 				return str[sc.amount:], nil
 			}
-			return str, nil
+			return EmptyString, nil
 		}
 		if sc.amount != -1 {
 			return strings.TrimPrefix(str, sc.substr), nil
 		}
 		return strings.TrimLeft(str, sc.substr), nil
-	case MetaRight:
-		if sc.substr == MetaAny {
+	case MetaSuffix:
+		if sc.substr == EmptyString {
 			if sc.amount < len(str) {
 				return str[:len(str)-sc.amount], nil
 			}
-			return str, nil
+			return EmptyString, nil
 		}
 		if sc.amount != -1 {
 			return strings.TrimSuffix(str, sc.substr), nil
 		}
 		return strings.TrimRight(str, sc.substr), nil
+	case MetaBoth:
+		if sc.substr == EmptyString {
+			if sc.amount*2 < len(str) {
+				return str[sc.amount : len(str)-sc.amount], nil
+			}
+			return EmptyString, nil
+		}
+		if sc.amount != -1 {
+			str = strings.TrimPrefix(str, sc.substr)
+			return strings.TrimSuffix(str, sc.substr), nil
+		}
+		return strings.Trim(str, sc.substr), nil
+	default:
+		return EmptyString, errors.New("strip converter: invalid side parameter")
 	}
-	return str, nil
 }
