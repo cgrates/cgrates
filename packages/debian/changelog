@@ -1,10 +1,8 @@
 cgrates (0.10.4~dev) UNRELEASED; urgency=medium
 
-  * Incremented version
+- Incremented version
 
- -- DanB <danb@cgrates.org>  Thu, 10 Aug 2023 10:00:00 +0200
-
-
+-- DanB <danb@cgrates.org> Thu, 10 Aug 2023 10:00:00 +0200
 
 cgrates (0.10.3) UNRELEASED; urgency=medium
 
@@ -69,7 +67,7 @@ cgrates (0.10.3) UNRELEASED; urgency=medium
   - Simplified some complex functions to increase efficiency and ease of understanding.
   - Updated outdated Ansible and Bash scripts.
 
-Full Changelog: https://github.com/cgrates/cgrates/compare/v0.10.2...v0.10
+Full Changelog: https://github.com/cgrates/cgrates/compare/v0.10.2...v0.10.3
 
 -- DanB <danb@cgrates.org> Thu, 08 Oct 2020 16:23:58 +0300
 
