@@ -1468,7 +1468,7 @@ func TestStripConverter(t *testing.T) {
 			name:           "Empty third parameter",
 			params:         "*strip:*prefix:",
 			input:          "TEST",
-			expected:       "",
+			expected:       "strip converter: substr parameter cannot be empty",
 			constructorErr: true,
 			convertErr:     false,
 		},
@@ -1476,15 +1476,15 @@ func TestStripConverter(t *testing.T) {
 			name:           "Invalid side parameter",
 			params:         "*strip:*invalid:*nil",
 			input:          "TEST",
-			expected:       "",
+			expected:       "strip converter: invalid side parameter",
 			constructorErr: false,
 			convertErr:     true,
 		},
 		{
-			name:           "Invalid nr. of parameters",
+			name:           "Invalid nr. of params *char",
 			params:         "*strip:*prefix:*char:*nil:abc:3",
 			input:          "TEST",
-			expected:       "",
+			expected:       "strip converter: invalid number of parameters (should have 3, 4 or 5)",
 			constructorErr: true,
 			convertErr:     false,
 		},
@@ -1492,7 +1492,7 @@ func TestStripConverter(t *testing.T) {
 			name:           "Invalid amount parameter",
 			params:         "*strip:*prefix:*char:0:three",
 			input:          "000TEST",
-			expected:       "",
+			expected:       "strip converter: invalid amount parameter (strconv.Atoi: parsing \"three\": invalid syntax)",
 			constructorErr: true,
 			convertErr:     false,
 		},
@@ -1520,25 +1520,82 @@ func TestStripConverter(t *testing.T) {
 			constructorErr: false,
 			convertErr:     false,
 		},
+		{
+			name:           "*char missing substring case 1",
+			params:         "*strip:*prefix:*char",
+			input:          "12345TEST",
+			expected:       "strip converter: usage of *char implies the need of 4 or 5 non-empty params",
+			constructorErr: true,
+			convertErr:     false,
+		},
+		{
+			name:           "*char missing substring case 2",
+			params:         "*strip:*prefix:*char::2",
+			input:          "12345TEST",
+			expected:       "strip converter: usage of *char implies the need of 4 or 5 non-empty params",
+			constructorErr: true,
+			convertErr:     false,
+		},
+		{
+			name:           "*char missing substring case 3",
+			params:         "*strip:*prefix:*char:",
+			input:          "12345TEST",
+			expected:       "strip converter: usage of *char implies the need of 4 or 5 non-empty params",
+			constructorErr: true,
+			convertErr:     false,
+		},
+		{
+			name:           "*nil/*space too many parameters",
+			params:         "*strip:*prefix:*nil:5:12345",
+			input:          "12345TEST",
+			expected:       "strip converter: cannot have 5 params in *nil/*space case",
+			constructorErr: true,
+			convertErr:     false,
+		},
+		{
+			name:           "third param numeric with too many params case 1",
+			params:         "*strip:*prefix:1:1",
+			input:          "12345TEST",
+			expected:       "strip converter: just the amount specified, cannot have more than 3 params",
+			constructorErr: true,
+			convertErr:     false,
+		},
+		{
+			name:           "third param numeric with too many params case 2",
+			params:         "*strip:*prefix:1:12345:1",
+			input:          "12345TEST",
+			expected:       "strip converter: just the amount specified, cannot have more than 3 params",
+			constructorErr: true,
+			convertErr:     false,
+		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			sc, err := NewDataConverter(tt.params)
 			if (err != nil) != tt.constructorErr {
-				t.Errorf("NewStripConverter error = %v, constructorErr %v", err, tt.constructorErr)
+				t.Errorf("NewStripConverter() error = %v, constructorErr %v", err, tt.constructorErr)
 				return
 			}
 			if tt.constructorErr {
+				if err.Error() != tt.expected {
+					t.Errorf("expected error message: %v, received: %v", tt.expected, err.Error())
+				}
 				return
 			}
 			rcv, err := sc.Convert(tt.input)
 			if (err != nil) != tt.convertErr {
-				t.Errorf("Convert error = %v, convertErr %v", err, tt.convertErr)
+				t.Errorf("Convert() error = %v, convertErr %v", err, tt.convertErr)
+				return
+			}
+			if tt.convertErr {
+				if err.Error() != tt.expected {
+					t.Errorf("expected error message: %s, received: %s", tt.expected, err.Error())
+				}
 				return
 			}
 			if rcv != tt.expected {
-				t.Errorf("expected: %s, received: %s", tt.expected, rcv)
+				t.Errorf("expected: %q, received: %q", tt.expected, rcv)
 			}
 		})
 	}
