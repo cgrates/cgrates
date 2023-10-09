@@ -1,12 +1,9 @@
 ---
 - hosts: apt
   vars:
-    # CGRateS vars
     cgrates_dir: "/home/{{ user }}/go/src/github.com/cgrates/cgrates"
     cgrates_branch: "master"
-    ###############################################################
-    ######################## GPG Vars #############################
-    ###############################################################
+
     gpg_home: "/root"
     gpg_realname: "CGRateS"
     gpg_useremail: "cgrates@itsyscom.com"
@@ -29,16 +26,11 @@
 
   remote_user: "{{ user }}"
   tasks:
-    ###########################################################################################################################
-    ###########################################################################################################################
-    # install dependencies
     - name: Install dependencies
       become: yes
       apt: name={{ dependencies }} state=present
-    ###########################################################################################################################
-    ###########################################################################################################################
-    # Prepare for configuration
-    - name: Config reprepro
+
+    - name: Configure reprepro
       include: reprepro.yaml
 
     - name: Generate GPG Key
@@ -61,9 +53,6 @@
         masked: no
         enabled: yes
 
-    ###########################################################################################################################
-    ###########################################################################################################################
-    # Install Go
     - name: Install Go
       import_role:
         name: ../roles/go
@@ -162,28 +151,20 @@
       shell: "sudo ls /var/packages/debian/incoming/ | grep '.changes'"
       register: changesFileNames
 
-    # get reprepro version
-    - name: set cgrates distribution
-      set_fact:
-        cgrates_distribution: "{{ cgrates_branch }}"
-
-    # Include the package with reprepro
     - name: Include the package with reprepro
       become: yes
-      command: sudo reprepro -A amd64 -Vb . include {{ cgrates_distribution }} /var/packages/debian/incoming/{{ item }}
+      command: sudo reprepro -A amd64 -Vb . include {{ cgrates_branch }} /var/packages/debian/incoming/{{ item }}
       args:
         chdir: /var/packages/debian
       with_items: "{{ changesFileNames.stdout_lines }}"
       when: cgrates_branch == "master" or gitTagVar.stdout_lines|length > 0
 
-    # Move the file to PKG server
     - name: Copy the file to PKG server
       shell: "scp /var/packages/debian/incoming/{{ item }} {{ pkgAddr }}:/tmp/"
       args:
         chdir: /var/packages/debian/incoming/
       with_items: "{{ debFileName.stdout_lines }}"
 
-    # Clean the incoming folder
     - name: Clean the incoming folder
       become: yes
       shell: "sudo rm /var/packages/debian/incoming/*"
@@ -192,8 +173,8 @@
 
 - hosts: pkg
   vars:
-    ansible_python_interpreter: auto # to disable deprication warning related to the use of python2
     nginx_user: "www-data"
+    cgrates_branch: "master"
   tasks:
     - name: Add user to www-data group
       become: yes
@@ -202,14 +183,10 @@
         groups: "{{ nginx_user }}"
         append: yes
 
-    - name: set cgrates cgrates_distribution
-      set_fact:
-        cgrates_distribution: "{{ hostvars['apt']['cgrates_distribution'] }}"
-
     - name: Creates directory
       become: yes
       file:
-        path: /var/packages/deb/{{ cgrates_distribution }}/
+        path: /var/packages/deb/{{ cgrates_branch }}/
         state: directory
         mode: "0775"
         owner: "{{ nginx_user }}"
@@ -217,19 +194,19 @@
 
     - name: Remove symlink from current deb package
       file:
-        path: /var/packages/deb/{{ cgrates_distribution }}/cgrates_current_amd64.deb
+        path: /var/packages/deb/{{ cgrates_branch }}/cgrates_current_amd64.deb
         state: absent
-      when: cgrates_distribution == "master" or hostvars['apt']['gitTagVar'].stdout_lines|length > 0
+      when: cgrates_branch == "master" or hostvars['apt']['gitTagVar'].stdout_lines|length > 0
 
     - name: Move the new package to /var/packages/deb
-      become: true
-      shell: "mv /tmp/{{ item}} /var/packages/deb/{{ cgrates_distribution }}/"
+      become: yes
+      shell: "mv /tmp/{{ item}} /var/packages/deb/{{ cgrates_branch }}/"
       with_items: "{{ hostvars['apt']['debFileName']['stdout_lines'] }}"
 
     - name: Set ownership and permissions for moved files
       become: yes
       file:
-        path: "/var/packages/deb/{{ cgrates_distribution }}/{{ item }}"
+        path: "/var/packages/deb/{{ cgrates_branch }}/{{ item }}"
         owner: "{{  nginx_user  }}"
         group: "{{  nginx_user  }}"
         mode: "0775"
@@ -238,8 +215,8 @@
     - name: Create the new symlink cgrates_current_amd64.deb
       become: yes
       file:
-        src: /var/packages/deb/{{ cgrates_distribution }}/{{ item }}
-        dest: /var/packages/deb/{{ cgrates_distribution }}/cgrates_current_amd64.deb
+        src: /var/packages/deb/{{ cgrates_branch }}/{{ item }}
+        dest: /var/packages/deb/{{ cgrates_branch }}/cgrates_current_amd64.deb
         state: link
       with_items: "{{ hostvars['apt']['debFileName']['stdout_lines'] }}"
-      when: cgrates_distribution == "master" or hostvars['apt']['gitTagVar'].stdout_lines|length > 0
+      when: cgrates_branch == "master" or hostvars['apt']['gitTagVar'].stdout_lines|length > 0
