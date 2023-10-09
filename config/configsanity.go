@@ -371,10 +371,6 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 	}
 	//Radius Agent
 	if cfg.radiusAgentCfg.Enabled {
-		if len(cfg.radiusAgentCfg.SessionSConns) == 0 {
-			return fmt.Errorf("<%s> no %s connections defined",
-				utils.RadiusAgent, utils.SessionS)
-		}
 		for _, connID := range cfg.radiusAgentCfg.SessionSConns {
 			if strings.HasPrefix(connID, utils.MetaInternal) && !cfg.sessionSCfg.Enabled {
 				return fmt.Errorf("<%s> not enabled but requested by <%s> component", utils.SessionS, utils.RadiusAgent)
