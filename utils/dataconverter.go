@@ -139,6 +139,8 @@ func NewDataConverter(params string) (conv DataConverter, err error) {
 			return splitConverter(InfieldSep), nil
 		}
 		return splitConverter(params[len(MetaSplit)+1:]), nil
+	case strings.HasPrefix(params, MetaStrip):
+		return NewStripConverter(params)
 	default:
 		return nil, fmt.Errorf("unsupported converter definition: <%s>", params)
 	}
@@ -685,4 +687,139 @@ func (jsnC JSONConverter) Convert(in any) (any, error) {
 		return EmptyString, err
 	}
 	return string(b), nil
+}
+
+// StripConverter strips the prefix, the suffix or both from a string.
+type StripConverter struct {
+	side   string // side represents which part of the string to strip: prefix, suffix, or both.
+	substr string // substr represents the substring to be removed from the string.
+	amount int    // amount represents the number of characters to be removed from the string.
+}
+
+// NewStripConverter initializes and returns a new StripConverter with configurations
+// based on the provided parameters in the input string. Each parameter in the input
+// string should be separated by ':'.
+//
+// The input string must follow one of the following formats:
+//  1. "*strip:<side>:<amount>"
+//  2. "*strip:<side>:<substring>[:<amount>]"
+//  3. "*strip:<side>:*char:<substring>[:<amount>]"
+//
+// Explanation of placeholders:
+//   - <side>: Specifies which part of the string to strip. Must be one of "*prefix", "*suffix", or "*both".
+//   - <substring>: Identifies the substring to remove. It can be a specific string, "*nil" for null characters,
+//     "*space" for spaces, or any other character.
+//   - <amount> (optional): Determines the number of characters to remove. If omitted, all instances of <substring>
+//     are removed.
+//
+// Examples:
+//   - "*strip:*prefix:5": Removes the first 5 characters from the string's prefix.
+//   - "*strip:*suffix:*nil": Eliminates all trailing null characters in the string.
+//   - "*strip:*both:*space:2": Clears 2 spaces from both the prefix and suffix of the string.
+//   - "*strip:*suffix:*char:abc": Removes the substring "abc" from the suffix of the string.
+//   - "*strip:*prefix:*char:abc:2": Strips the substring "abc" from the prefix of the string, repeated 2 times.
+func NewStripConverter(params string) (DataConverter, error) {
+	paramSlice := strings.Split(params, InInFieldSep)
+	paramCount := len(paramSlice)
+	if paramCount < 3 || paramCount > 5 {
+		return nil, errors.New("strip converter: invalid number of parameters (should have 3, 4 or 5)")
+	}
+	sc := StripConverter{
+		side:   paramSlice[1],
+		substr: paramSlice[2],
+		amount: -1,
+	}
+	var err error
+	switch sc.substr {
+	case EmptyString:
+		return nil, errors.New("strip converter: substr parameter cannot be empty")
+	case MetaNil, MetaSpace:
+		if paramCount == 5 {
+			return nil, errors.New("strip converter: cannot have 5 params in *nil/*space case")
+		}
+		if sc.substr == MetaNil {
+			sc.substr = "\u0000"
+		} else {
+			sc.substr = " "
+		}
+		if paramCount == 4 {
+			sc.amount, err = strconv.Atoi(paramSlice[3])
+			if err != nil {
+				return nil, fmt.Errorf("strip converter: invalid amount parameter (%w)", err)
+			}
+			sc.substr = strings.Repeat(sc.substr, sc.amount)
+		}
+	case MetaChar:
+		if paramCount < 4 || paramSlice[3] == EmptyString {
+			return nil, errors.New("strip converter: usage of *char implies the need of 4 or 5 non-empty params")
+		}
+		sc.substr = paramSlice[3]
+		if paramCount == 5 {
+			sc.amount, err = strconv.Atoi(paramSlice[4])
+			if err != nil {
+				return nil, fmt.Errorf("strip converter: invalid amount parameter (%w)", err)
+			}
+			sc.substr = strings.Repeat(sc.substr, sc.amount)
+		}
+	default:
+		if paramCount > 3 {
+			return nil, errors.New("strip converter: just the amount specified, cannot have more than 3 params")
+		}
+		sc.amount, err = strconv.Atoi(paramSlice[2])
+		if err != nil {
+			return nil, fmt.Errorf("strip converter: invalid amount parameter (%w)", err)
+		}
+		sc.substr = ""
+	}
+	return sc, nil
+}
+
+// Convert trims the input string based on the StripConverter's configuration.
+// It returns a CAST_FAILED error if the input is not a string.
+func (sc StripConverter) Convert(in any) (any, error) {
+	str, ok := in.(string)
+	if !ok {
+		return nil, fmt.Errorf("strip converter: %w", ErrCastFailed)
+	}
+	if sc.amount <= 0 && sc.amount != -1 {
+		return str, nil
+	}
+	switch sc.side {
+	case MetaPrefix:
+		if sc.substr == EmptyString {
+			if sc.amount < len(str) {
+				return str[sc.amount:], nil
+			}
+			return EmptyString, nil
+		}
+		if sc.amount != -1 {
+			return strings.TrimPrefix(str, sc.substr), nil
+		}
+		return strings.TrimLeft(str, sc.substr), nil
+	case MetaSuffix:
+		if sc.substr == EmptyString {
+			if sc.amount < len(str) {
+				return str[:len(str)-sc.amount], nil
+			}
+			return EmptyString, nil
+		}
+		if sc.amount != -1 {
+			return strings.TrimSuffix(str, sc.substr), nil
+		}
+		return strings.TrimRight(str, sc.substr), nil
+	case MetaBoth:
+		if sc.substr == EmptyString {
+			if sc.amount*2 < len(str) {
+				return str[sc.amount : len(str)-sc.amount], nil
+			}
+			return EmptyString, nil
+		}
+		if sc.amount != -1 {
+			str = strings.TrimPrefix(str, sc.substr)
+			return strings.TrimSuffix(str, sc.substr), nil
+		}
+		return strings.Trim(str, sc.substr), nil
+	default:
+		return EmptyString, errors.New("strip converter: invalid side parameter")
+	}
 }
