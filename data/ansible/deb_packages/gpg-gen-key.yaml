@@ -15,33 +15,35 @@
     mode: "0600"
     owner: "{{ rootUser }}"
 
-- name: create some required file
+# Not sure what this task does, or if it's needed.
+- name: List available GPG secret keys
   become: true
   shell: "gpg --list-secret-keys --keyid-format LONG"
 
-- name: When starting fresh we need to make sure we have rng-tools
+# rng-tools might not be needed on newer kernel versions
+- name: Install rng-tools-debian
   become: true
   apt:
-    name: rng-tools
+    name: rng-tools-debian
     state: present
   ignore_errors: true
 
-- name: Make sure /etc/default/rng-tools exist
+- name: Make sure /etc/default/rng-tools-debian exist
   become: true
   file:
-    path: /etc/default/rng-tools
+    path: /etc/default/rng-tools-debian
     state: touch
 
 - name: Add HRNGDEVICE=/dev/urandom so we can execute rngd
   become: true
   lineinfile:
-    path: /etc/default/rng-tools
+    path: /etc/default/rng-tools-debian
     line: HRNGDEVICE=/dev/urandom
     insertafter: last
 
 - name: generate randomness
   become: true
-  shell: "sudo /etc/init.d/rng-tools restart"
+  shell: "sudo /etc/init.d/rng-tools-debian restart"
   ignore_errors: true
 
 - name: generate gpg key
