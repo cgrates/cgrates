@@ -1379,9 +1379,9 @@ func (sS *SessionS) syncSessions() {
 
 	for _, clnt := range sS.biJClients() {
 		wg.Add(1)
-		go func() { // query all connections at once
+		go func(c *biJClient) { // query all connections at once
 			var queriedSessionIDs []*SessionID
-			if err := clnt.conn.Call(context.TODO(), utils.SessionSv1GetActiveSessionIDs,
+			if err := c.conn.Call(context.TODO(), utils.SessionSv1GetActiveSessionIDs,
 				utils.EmptyString, &queriedSessionIDs); err != nil &&
 				err.Error() != utils.ErrNoActiveSession.Error() {
 				utils.Logger.Warning(
@@ -1392,7 +1392,7 @@ func (sS *SessionS) syncSessions() {
 				queriedCGRIDs.Set(sessionID.CGRID(), struct{}{})
 			}
 			wg.Done()
-		}()
+		}(clnt)
 	}
 
 	wg.Wait() // wait for all clients to finish in one way or another
