@@ -147,6 +147,9 @@ const (
 	MetaSingle               = "*single"
 	MetaZero                 = "*zero"
 	MetaASAP                 = "*asap"
+	MetaNil                  = "*nil"
+	MetaSpace                = "*space"
+	MetaChar                 = "*char"
 	CommentChar              = '#'
 	CSVSep                   = ','
 	FallbackSep              = ';'
@@ -658,6 +661,7 @@ const (
 	E164Converter           = "*e164"
 	MetaJoin                = "*join"
 	MetaSplit               = "*split"
+	MetaStrip               = "*strip"
 	MetaReload              = "*reload"
 	MetaLoad                = "*load"
 	MetaFloat64             = "*float64"
@@ -1051,6 +1055,7 @@ const (
 	MetaString             = "*string"
 	MetaPrefix             = "*prefix"
 	MetaSuffix             = "*suffix"
+	MetaBoth               = "*both"
 	MetaEmpty              = "*empty"
 	MetaExists             = "*exists"
 	MetaCronExp            = "*cronexp"

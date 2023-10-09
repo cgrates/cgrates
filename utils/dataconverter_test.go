@@ -1480,3 +1480,318 @@ func TestDataConverterConvertJSONOK(t *testing.T) {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", exp, rcv)
 	}
 }
+
+func TestStripConverter(t *testing.T) {
+	tests := []struct {
+		name           string
+		params         string
+		input          string
+		expected       string
+		constructorErr bool
+		convertErr     bool
+	}{
+
+		{
+			name:           "Strip 5 leading characters",
+			params:         "*strip:*prefix:5",
+			input:          "12345TEST12345",
+			expected:       "TEST12345",
+			constructorErr: false,
+			convertErr:     false,
+		},
+		{
+			name:           "Strip 5 trailing characters",
+			params:         "*strip:*suffix:5",
+			input:          "12345TEST12345",
+			expected:       "12345TEST",
+			constructorErr: false,
+			convertErr:     false,
+		},
+		{
+			name:           "Strip 5 characters from both sides",
+			params:         "*strip:*both:5",
+			input:          "12345TEST12345",
+			expected:       "TEST",
+			constructorErr: false,
+			convertErr:     false,
+		},
+		{
+			name:           "Strip all trailing nils",
+			params:         "*strip:*suffix:*nil",
+			input:          "TEST\u0000\u0000\u0000\u0000",
+			expected:       "TEST",
+			constructorErr: false,
+			convertErr:     false,
+		},
+		{
+			name:           "Strip all leading nils",
+			params:         "*strip:*prefix:*nil",
+			input:          "\u0000\u0000\u0000\u0000TEST",
+			expected:       "TEST",
+			constructorErr: false,
+			convertErr:     false,
+		},
+		{
+			name:           "Strip all nils from both sides",
+			params:         "*strip:*both:*nil",
+			input:          "\u0000\u0000TEST\u0000\u0000",
+			expected:       "TEST",
+			constructorErr: false,
+			convertErr:     false,
+		},
+		{
+			name:           "Strip 2 trailing nils",
+			params:         "*strip:*suffix:*nil:2",
+			input:          "TEST\u0000\u0000\u0000\u0000",
+			expected:       "TEST\u0000\u0000",
+			constructorErr: false,
+			convertErr:     false,
+		},
+		{
+			name:           "Strip 2 leading nils",
+			params:         "*strip:*prefix:*nil:2",
+			input:          "\u0000\u0000\u0000\u0000TEST",
+			expected:       "\u0000\u0000TEST",
+			constructorErr: false,
+			convertErr:     false,
+		},
+		{
+			name:           "Strip 1 nil from both sides",
+			params:         "*strip:*both:*nil:1",
+			input:          "\u0000\u0000TEST\u0000\u0000",
+			expected:       "\u0000TEST\u0000",
+			constructorErr: false,
+			convertErr:     false,
+		},
+		{
+			name:           "Strip all trailing spaces",
+			params:         "*strip:*suffix:*space",
+			input:          "TEST    ",
+			expected:       "TEST",
+			constructorErr: false,
+			convertErr:     false,
+		},
+		{
+			name:           "Strip all leading spaces",
+			params:         "*strip:*prefix:*space",
+			input:          "    TEST",
+			expected:       "TEST",
+			constructorErr: false,
+			convertErr:     false,
+		},
+		{
+			name:           "Strip all spaces from both sides",
+			params:         "*strip:*both:*space",
+			input:          "  TEST  ",
+			expected:       "TEST",
+			constructorErr: false,
+			convertErr:     false,
+		},
+		{
+			name:           "Strip 2 trailing spaces",
+			params:         "*strip:*suffix:*space:2",
+			input:          "TEST    ",
+			expected:       "TEST  ",
+			constructorErr: false,
+			convertErr:     false,
+		},
+		{
+			name:           "Strip 2 leading spaces",
+			params:         "*strip:*prefix:*space:2",
+			input:          "    TEST",
+			expected:       "  TEST",
+			constructorErr: false,
+			convertErr:     false,
+		},
+		{
+			name:           "Strip 1 space from both sides",
+			params:         "*strip:*both:*space:1",
+			input:          "  TEST  ",
+			expected:       " TEST ",
+			constructorErr: false,
+			convertErr:     false,
+		},
+		{
+			name:           "Strip all trailing 'abcd' char groups",
+			params:         "*strip:*suffix:*char:abcd",
+			input:          "TESTabcdabcdabcdabcd",
+			expected:       "TEST",
+			constructorErr: false,
+			convertErr:     false,
+		},
+		{
+			name:           "Strip all leading 'abcd' char groups",
+			params:         "*strip:*prefix:*char:abcd",
+			input:          "abcdabcdabcdabcdTEST",
+			expected:       "TEST",
+			constructorErr: false,
+			convertErr:     false,
+		},
+		{
+			name:           "Strip all 'abcd' char groups from both sides",
+			params:         "*strip:*both:*char:abcd",
+			input:          "abcdabcdTESTabcdabcd",
+			expected:       "TEST",
+			constructorErr: false,
+			convertErr:     false,
+		},
+		{
+			name:           "Strip 2 trailing 'abcd' char groups",
+			params:         "*strip:*suffix:*char:abcd:2",
+			input:          "TESTabcdabcdabcdabcd",
+			expected:       "TESTabcdabcd",
+			constructorErr: false,
+			convertErr:     false,
+		},
+		{
+			name:           "Strip 2 leading 'abcd' char groups",
+			params:         "*strip:*prefix:*char:abcd:2",
+			input:          "abcdabcdabcdabcdTEST",
+			expected:       "abcdabcdTEST",
+			constructorErr: false,
+			convertErr:     false,
+		},
+		{
+			name:           "Strip 1 'abcd' char group from both sides",
+			params:         "*strip:*both:*char:abcd:1",
+			input:          "abcdabcdTESTabcdabcd",
+			expected:       "abcdTESTabcd",
+			constructorErr: false,
+			convertErr:     false,
+		},
+		{
+			name:           "Empty third parameter",
+			params:         "*strip:*prefix:",
+			input:          "TEST",
+			expected:       "strip converter: substr parameter cannot be empty",
+			constructorErr: true,
+			convertErr:     false,
+		},
+		{
+			name:           "Invalid side parameter",
+			params:         "*strip:*invalid:*nil",
+			input:          "TEST",
+			expected:       "strip converter: invalid side parameter",
+			constructorErr: false,
+			convertErr:     true,
+		},
+		{
+			name:           "Invalid nr. of params *char",
+			params:         "*strip:*prefix:*char:*nil:abc:3",
+			input:          "TEST",
+			expected:       "strip converter: invalid number of parameters (should have 3, 4 or 5)",
+			constructorErr: true,
+			convertErr:     false,
+		},
+		{
+			name:           "Invalid amount parameter",
+			params:         "*strip:*prefix:*char:0:three",
+			input:          "000TEST",
+			expected:       "strip converter: invalid amount parameter (strconv.Atoi: parsing \"three\": invalid syntax)",
+			constructorErr: true,
+			convertErr:     false,
+		},
+		{
+			name:           "Strip a prefix longer than the value",
+			params:         "*strip:*prefix:5",
+			input:          "TEST",
+			expected:       "",
+			constructorErr: false,
+			convertErr:     false,
+		},
+		{
+			name:           "Strip a suffix longer than the value",
+			params:         "*strip:*suffix:5",
+			input:          "TEST",
+			expected:       "",
+			constructorErr: false,
+			convertErr:     false,
+		},
+		{
+			name:           "Strip from both ends an amount of characters longer than the value",
+			params:         "*strip:*both:3",
+			input:          "TEST",
+			expected:       "",
+			constructorErr: false,
+			convertErr:     false,
+		},
+		{
+			name:           "*char missing substring case 1",
+			params:         "*strip:*prefix:*char",
+			input:          "12345TEST",
+			expected:       "strip converter: usage of *char implies the need of 4 or 5 non-empty params",
+			constructorErr: true,
+			convertErr:     false,
+		},
+		{
+			name:           "*char missing substring case 2",
+			params:         "*strip:*prefix:*char::2",
+			input:          "12345TEST",
+			expected:       "strip converter: usage of *char implies the need of 4 or 5 non-empty params",
+			constructorErr: true,
+			convertErr:     false,
+		},
+		{
+			name:           "*char missing substring case 3",
+			params:         "*strip:*prefix:*char:",
+			input:          "12345TEST",
+			expected:       "strip converter: usage of *char implies the need of 4 or 5 non-empty params",
+			constructorErr: true,
+			convertErr:     false,
+		},
+		{
+			name:           "*nil/*space too many parameters",
+			params:         "*strip:*prefix:*nil:5:12345",
+			input:          "12345TEST",
+			expected:       "strip converter: cannot have 5 params in *nil/*space case",
+			constructorErr: true,
+			convertErr:     false,
+		},
+		{
+			name:           "third param numeric with too many params case 1",
+			params:         "*strip:*prefix:1:1",
+			input:          "12345TEST",
+			expected:       "strip converter: just the amount specified, cannot have more than 3 params",
+			constructorErr: true,
+			convertErr:     false,
+		},
+		{
+			name:           "third param numeric with too many params case 2",
+			params:         "*strip:*prefix:1:12345:1",
+			input:          "12345TEST",
+			expected:       "strip converter: just the amount specified, cannot have more than 3 params",
+			constructorErr: true,
+			convertErr:     false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			sc, err := NewDataConverter(tt.params)
+			if (err != nil) != tt.constructorErr {
+				t.Errorf("NewStripConverter() error = %v, constructorErr %v", err, tt.constructorErr)
+				return
+			}
+			if tt.constructorErr {
+				if err.Error() != tt.expected {
+					t.Errorf("expected error message: %v, received: %v", tt.expected, err.Error())
+				}
+				return
+			}
+			rcv, err := sc.Convert(tt.input)
+			if (err != nil) != tt.convertErr {
+				t.Errorf("Convert() error = %v, convertErr %v", err, tt.convertErr)
+				return
+			}
+			if tt.convertErr {
+				if err.Error() != tt.expected {
+					t.Errorf("expected error message: %s, received: %s", tt.expected, err.Error())
+				}
+				return
+			}
+			if rcv != tt.expected {
+				t.Errorf("expected: %q, received: %q", tt.expected, rcv)
+			}
+		})
+	}
+}
