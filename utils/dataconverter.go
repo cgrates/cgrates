@@ -591,15 +591,37 @@ func (jsnC JSONConverter) Convert(in any) (any, error) {
 
 // StripConverter strips the prefix, the suffix or both from a string.
 type StripConverter struct {
-	side   string
-	substr string
-	amount int
+	side   string // side represents which part of the string to strip: prefix, suffix, or both.
+	substr string // substr represents the substring to be removed from the string.
+	amount int    // amount represents the number of characters to be removed from the string.
 }
 
-// NewStripConverter creates a new StripConverter with the specified parameters.
+// NewStripConverter initializes and returns a new StripConverter with configurations
+// based on the provided parameters in the input string. Each parameter in the input
+// string should be separated by ':'.
+//
+// The input string must follow one of the following formats:
+//  1. "*strip:<side>:<amount>"
+//  2. "*strip:<side>:<substring>[:<amount>]"
+//  3. "*strip:<side>:*char:<substring>[:<amount>]"
+//
+// Explanation of placeholders:
+//   - <side>: Specifies which part of the string to strip. Must be one of "*prefix", "*suffix", or "*both".
+//   - <substring>: Identifies the substring to remove. It can be a specific string, "*nil" for null characters,
+//     "*space" for spaces, or any other character.
+//   - <amount> (optional): Determines the number of characters to remove. If omitted, all instances of <substring>
+//     are removed.
+//
+// Examples:
+//   - "*strip:*prefix:5": Removes the first 5 characters from the string's prefix.
+//   - "*strip:*suffix:*nil": Eliminates all trailing null characters in the string.
+//   - "*strip:*both:*space:2": Clears 2 spaces from both the prefix and suffix of the string.
+//   - "*strip:*suffix:*char:abc": Removes the substring "abc" from the suffix of the string.
+//   - "*strip:*prefix:*char:abc:2": Strips the substring "abc" from the prefix of the string, repeated 2 times.
 func NewStripConverter(params string) (DataConverter, error) {
 	paramSlice := strings.Split(params, InInFieldSep)
-	if len(paramSlice) < 3 || len(paramSlice) > 5 {
+	paramCount := len(paramSlice)
+	if paramCount < 3 || paramCount > 5 {
 		return nil, errors.New("strip converter: invalid number of parameters (should have 3, 4 or 5)")
 	}
 	sc := StripConverter{
@@ -612,12 +634,15 @@ func NewStripConverter(params string) (DataConverter, error) {
 	case EmptyString:
 		return nil, errors.New("strip converter: substr parameter cannot be empty")
 	case MetaNil, MetaSpace:
+		if paramCount == 5 {
+			return nil, errors.New("strip converter: cannot have 5 params in *nil/*space case")
+		}
 		if sc.substr == MetaNil {
 			sc.substr = "\u0000"
 		} else {
 			sc.substr = " "
 		}
-		if len(paramSlice) == 4 {
+		if paramCount == 4 {
 			sc.amount, err = strconv.Atoi(paramSlice[3])
 			if err != nil {
 				return nil, fmt.Errorf("strip converter: invalid amount parameter (%w)", err)
@@ -625,11 +650,11 @@ func NewStripConverter(params string) (DataConverter, error) {
 			sc.substr = strings.Repeat(sc.substr, sc.amount)
 		}
 	case MetaChar:
-		if len(paramSlice) < 4 {
-			return nil, errors.New("strip converter: usage of *char implies the need of 4 or 5 params")
+		if paramCount < 4 || paramSlice[3] == EmptyString {
+			return nil, errors.New("strip converter: usage of *char implies the need of 4 or 5 non-empty params")
 		}
-		sc.substr = paramSlice[3] // should probably return error if empty
-		if len(paramSlice) == 5 {
+		sc.substr = paramSlice[3]
+		if paramCount == 5 {
 			sc.amount, err = strconv.Atoi(paramSlice[4])
 			if err != nil {
 				return nil, fmt.Errorf("strip converter: invalid amount parameter (%w)", err)
@@ -637,13 +662,15 @@ func NewStripConverter(params string) (DataConverter, error) {
 			sc.substr = strings.Repeat(sc.substr, sc.amount)
 		}
 	default:
+		if paramCount > 3 {
+			return nil, errors.New("strip converter: just the amount specified, cannot have more than 3 params")
+		}
 		sc.amount, err = strconv.Atoi(paramSlice[2])
 		if err != nil {
 			return nil, fmt.Errorf("strip converter: invalid amount parameter (%w)", err)
 		}
 		sc.substr = ""
 	}
-
 	return sc, nil
 }
 
