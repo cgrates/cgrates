@@ -76,6 +76,27 @@
 	"sessions_conns": ["conn1"],
 	"request_processors": [
 		{
+			"id": "RadiusWithVendor",
+			"filters": ["*string:~*vars.*radReqType:*radAuth", "*string:~*req.User-Name:10012"],
+			"flags": ["*log", "*auth", "*attributes"],
+			"request_fields": [
+				{
+					"tag": "UserName","path": "*cgreq.RadUserName",
+					"type": "*composed","value": "~*req.User-Name"
+				},
+				{
+					"tag": "Password","path": "*cgreq.RadPassword",
+					"type": "*composed","value": "~*req.User-Password"
+				}
+			],
+			"reply_fields": [ 
+				{
+					"tag": "MicrosoftB1","path": "*rep.Microsoft.MS-Service-Class",
+					"type": "*constant","value": "Class1"
+				},
+			],
+		},
+		{
 			"id": "KamailioAuth",
 			"filters": ["*string:~*vars.*radReqType:*radAuth"],
 			"flags": ["*auth", "*accounts"],

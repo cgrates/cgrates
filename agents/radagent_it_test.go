@@ -51,6 +51,7 @@ var (
 		testRAitStartEngine,
 		testRAitApierRpcConn,
 		testRAitTPFromFolder,
+		testRAitWithVendor,
 		testRAitAuth,
 		testRAitAcctStart,
 		testRAitAcctStop,
@@ -189,6 +190,33 @@ func testRadiusitTPLoadData(t *testing.T) {
 	case <-wchan:
 	case <-time.After(5 * time.Second):
 		t.Errorf("cgr-loader failed: ")
+	}
+}
+
+func testRAitWithVendor(t *testing.T) {
+	if raAuthClnt, err = radigo.NewClient("udp", "127.0.0.1:1812", "CGRateS.org", dictRad, 1, nil); err != nil {
+		t.Fatal(err)
+	}
+	authReq := raAuthClnt.NewRequest(radigo.AccessRequest, 1)
+	if err := authReq.AddAVPWithName("User-Name", "10012", ""); err != nil {
+		t.Error(err)
+	}
+	if err := authReq.AddAVPWithName("User-Password", "CGRateSPassword3", ""); err != nil {
+		t.Error(err)
+	}
+	authReq.AVPs[1].RawValue = radigo.EncodeUserPassword([]byte("CGRateSPassword3"), []byte("CGRateS.org"), authReq.Authenticator[:])
+	reply, err := raAuthClnt.SendRequest(authReq)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if reply.Code != radigo.AccessAccept {
+		t.Errorf("Received reply: %+v", reply)
+	}
+	if len(reply.AVPs) != 1 {
+		t.Errorf("Received AVPs: %+v", reply.AVPs)
+	} else if string(reply.AVPs[0].RawValue) != "\x00\x00\x00\x00*\bClass1" {
+		t.Errorf("Expected <%+q>, Received: <%+q>", "\x00\x00\x00\x00*\bClass1", string(reply.AVPs[0].RawValue))
 	}
 }
 
