@@ -1,0 +1,2 @@
+#Tenant[0],ID[1],Type[2],Path[3],Values[4],ActivationInterval[5]
+cgrates.org,FLTR_STAT_1,*string,~*req.Account,1001,2014-07-29T15:00:00Z
