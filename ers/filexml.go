@@ -115,7 +115,7 @@ func (rdr *XMLFileER) Serve() (err error) {
 }
 
 // processFile is called for each file in a directory and dispatches erEvents from it
-func (rdr *XMLFileER) processFile(fPath, fName string) (err error) {
+func (rdr *XMLFileER) processFile(fPath, fName string) error {
 	if cap(rdr.conReqs) != 0 { // 0 goes for no limit
 		processFile := <-rdr.conReqs // Queue here for maxOpenFiles
 		defer func() { rdr.conReqs <- processFile }()
@@ -123,16 +123,21 @@ func (rdr *XMLFileER) processFile(fPath, fName string) (err error) {
 	absPath := path.Join(fPath, fName)
 	utils.Logger.Info(
 		fmt.Sprintf("<%s> parsing <%s>", utils.ERs, absPath))
-	var file *os.File
-	if file, err = os.Open(absPath); err != nil {
-		return
-	}
-	defer file.Close()
-	doc, err := xmlquery.Parse(file)
+	file, err := os.Open(absPath)
 	if err != nil {
 		return err
 	}
-	xmlElmts := xmlquery.Find(doc, rdr.Config().XmlRootPath.AsString("/", true))
+	defer file.Close()
+	var doc *xmlquery.Node
+	doc, err = xmlquery.Parse(file)
+	if err != nil {
+		return err
+	}
+	var xmlElmts []*xmlquery.Node
+	xmlElmts, err = xmlquery.QueryAll(doc, rdr.Config().XmlRootPath.AsString("/", true))
+	if err != nil {
+		return err
+	}
 	rowNr := 0 // This counts the rows in the file, not really number of CDRs
 	evsPosted := 0
 	timeStart := time.Now()
@@ -167,12 +172,12 @@ func (rdr *XMLFileER) processFile(fPath, fName string) (err error) {
 		// Finished with file, move it to processed folder
 		outPath := path.Join(rdr.Config().ProcessedPath, fName)
 		if err = os.Rename(absPath, outPath); err != nil {
-			return
+			return err
 		}
 	}
 
 	utils.Logger.Info(
 		fmt.Sprintf("%s finished processing file <%s>. Total records processed: %d, events posted: %d, run duration: %s",
 			utils.ERs, absPath, rowNr, evsPosted, time.Now().Sub(timeStart)))
-	return
+	return nil
 }

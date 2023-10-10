@@ -625,9 +625,12 @@ func TimeIs0h(t time.Time) bool {
 }
 
 func ParseHierarchyPath(path string, sep string) HierarchyPath {
+	if path == EmptyString {
+		return nil
+	}
 	if sep == EmptyString {
 		for _, sep = range []string{"/", NestingSep} {
-			if idx := strings.Index(path, sep); idx != -1 {
+			if strings.Contains(path, sep) {
 				break
 			}
 		}
@@ -639,22 +642,24 @@ func ParseHierarchyPath(path string, sep string) HierarchyPath {
 // HierarchyPath is used in various places to represent various path hierarchies (eg: in Diameter groups, XML trees)
 type HierarchyPath []string
 
-func (h HierarchyPath) AsString(sep string, prefix bool) string {
-	if len(h) == 0 {
-		return EmptyString
+// AsString converts HierarchyPath to a string.
+func (hP HierarchyPath) AsString(sep string, prefix bool) string {
+	var strHP strings.Builder
+
+	// If prefix is true and the HierarchyPath slice is empty, sep will be returned.
+	if prefix {
+		strHP.WriteString(sep)
 	}
-	retStr := EmptyString
-	for idx, itm := range h {
-		if idx == 0 {
-			if prefix {
-				retStr += sep
-			}
-		} else {
-			retStr += sep
+	if len(hP) == 0 {
+		return strHP.String()
+	}
+	for i, elem := range hP {
+		if i != 0 {
+			strHP.WriteString(sep)
 		}
-		retStr += itm
+		strHP.WriteString(elem)
 	}
-	return retStr
+	return strHP.String()
 }
 
 // Mask a number of characters in the suffix of the destination

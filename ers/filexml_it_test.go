@@ -49,6 +49,8 @@ var (
 		testXMLITLoadTPFromFolder,
 		testXMLITHandleCdr1File,
 		testXmlITAnalyseCDRs,
+		testXMLITEmptyRootPathCase,
+		testXMLITEmptyRootPathCaseCheckCDRs,
 		testXMLITCleanupFiles,
 		testXMLITKillEngine,
 	}
@@ -79,7 +81,7 @@ func testXMLITCreateCdrDirs(t *testing.T) {
 		"/tmp/cdrs/out", "/tmp/ers_with_filters/in", "/tmp/ers_with_filters/out",
 		"/tmp/xmlErs/in", "/tmp/xmlErs/out", "/tmp/fwvErs/in", "/tmp/fwvErs/out",
 		"/tmp/partErs1/in", "/tmp/partErs1/out", "/tmp/partErs2/in", "/tmp/partErs2/out",
-		"/tmp/flatstoreErs/in", "/tmp/flatstoreErs/out"} {
+		"/tmp/flatstoreErs/in", "/tmp/flatstoreErs/out", "/tmp/xmlErs2/in", "/tmp/xmlErs2/out"} {
 		if err := os.RemoveAll(dir); err != nil {
 			t.Fatal("Error removing folder: ", dir, err)
 		}
@@ -297,11 +299,55 @@ func testXmlITAnalyseCDRs(t *testing.T) {
 	}
 }
 
+var xmlPartialCDR = `<?xml version="1.0" encoding="ISO-8859-1"?>
+<root>
+  <partial_cdr>
+    <ID>1</ID>
+    <Account>1001</Account>
+    <Destination>1002</Destination>
+    <Tenant>cgrates.org</Tenant>
+    <ReleaseTime>20231011125833.158</ReleaseTime>
+  </partial_cdr>
+  <partial_cdr>
+    <ID>2</ID>
+    <RequestType>*postpaid</RequestType>
+    <ToR>*voice</ToR>
+  </partial_cdr>
+  <partial_cdr>
+    <TestCase>EmptyRootCDR</TestCase>
+    <ID>3</ID>
+    <Tenant>ignored</Tenant>
+    <SetupTime>20231011125800</SetupTime>
+    <AnswerTime>20231011125801</AnswerTime>
+  </partial_cdr>
+</root>`
+
+func testXMLITEmptyRootPathCase(t *testing.T) {
+	fileName := "partial-cdr.xml"
+	tmpFilePath := path.Join("/tmp", fileName)
+	if err := os.WriteFile(tmpFilePath, []byte(xmlPartialCDR), 0644); err != nil {
+		t.Fatal(err.Error())
+	}
+	if err := os.Rename(tmpFilePath, path.Join("/tmp/xmlErs2/in", fileName)); err != nil {
+		t.Fatal("Error moving file to processing directory: ", err)
+	}
+	time.Sleep(100 * time.Millisecond)
+}
+
+func testXMLITEmptyRootPathCaseCheckCDRs(t *testing.T) {
+	var reply []*engine.ExternalCDR
+	if err := xmlRPC.Call(utils.APIerSv2GetCDRs, utils.RPCCDRsFilter{OriginIDs: []string{"EmptyRootCDR_2"}}, &reply); err != nil {
+		t.Error("Unexpected error: ", err.Error())
+	} else if len(reply) != 3 {
+		t.Error("Unexpected number of CDRs returned:", len(reply))
+	}
+}
+
 func testXMLITCleanupFiles(t *testing.T) {
 	for _, dir := range []string{"/tmp/ers",
 		"/tmp/ers2", "/tmp/init_session", "/tmp/terminate_session",
 		"/tmp/cdrs", "/tmp/ers_with_filters", "/tmp/xmlErs", "/tmp/fwvErs",
-		"/tmp/partErs1", "/tmp/partErs2", "tmp/flatstoreErs"} {
+		"/tmp/partErs1", "/tmp/partErs2", "/tmp/flatstoreErs", "/tmp/xmlErs2"} {
 		if err := os.RemoveAll(dir); err != nil {
 			t.Fatal("Error removing folder: ", dir, err)
 		}
