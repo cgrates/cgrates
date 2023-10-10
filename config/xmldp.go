@@ -44,6 +44,9 @@ type XmlProvider struct {
 // String is part of engine.utils.DataProvider interface
 // when called, it will display the already parsed values out of cache
 func (xP *XmlProvider) String() string {
+
+	// TODO: Find a proper way to display xP as string. Right now it only has
+	// unexported fields, this will return an empty string.
 	return utils.ToJSON(xP)
 }
 
@@ -62,11 +65,11 @@ func (xP *XmlProvider) FieldAsInterface(fldPath []string) (data any, err error) 
 	for i := range relPath {
 		if sIdx := strings.Index(relPath[i], "["); sIdx != -1 {
 			slctrStr = relPath[i][sIdx:]
-			if slctrStr[len(slctrStr)-1:] != "]" {
+			if slctrStr[len(slctrStr)-1] != ']' {
 				return nil, fmt.Errorf("filter rule <%s> needs to end in ]", slctrStr)
 			}
 			relPath[i] = relPath[i][:sIdx]
-			if slctrStr[1:2] != "@" {
+			if slctrStr[1] != '@' {
 				i, err := strconv.Atoi(slctrStr[1 : len(slctrStr)-1])
 				if err != nil {
 					return nil, err
@@ -100,7 +103,10 @@ func (xP *XmlProvider) RemoteHost() net.Addr {
 // returns utils.ErrNotFound if the element is not found in the node
 // Make the method exportable until we remove the ers
 func ElementText(xmlElement *xmlquery.Node, elmntPath string) (string, error) {
-	elmnt := xmlquery.FindOne(xmlElement, elmntPath)
+	elmnt, err := xmlquery.Query(xmlElement, elmntPath)
+	if err != nil {
+		return "", err
+	}
 	if elmnt == nil {
 		return "", utils.ErrNotFound
 	}

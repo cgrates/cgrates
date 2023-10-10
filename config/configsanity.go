@@ -20,6 +20,7 @@ package config
 
 import (
 	"fmt"
+	"math"
 	"os"
 	"strings"
 
@@ -511,6 +512,26 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 			for _, field := range rdr.Fields {
 				if field.Type != utils.META_NONE && field.Path == utils.EmptyString {
 					return fmt.Errorf("<%s> %s for %s at %s", utils.ERs, utils.NewErrMandatoryIeMissing(utils.Path), rdr.ID, field.Tag)
+				}
+
+				// The following sanity check prevents a "slice bounds out of range" panic.
+				if rdr.Type == utils.MetaFileXML && !utils.IsSliceMember([]string{utils.META_NONE, utils.META_CONSTANT,
+					utils.META_FILLER, utils.MetaRemoteHost}, field.Type) && len(field.Value) != 0 {
+
+					// Retrieve the number of elements of the parser rule with the fewest elements.
+					minRuleLength := math.MaxInt
+					for _, rule := range field.Value {
+						if ruleLen := len(strings.Split(rule.AttrName(), utils.NestingSep)); minRuleLength > ruleLen {
+							minRuleLength = ruleLen
+						}
+					}
+
+					if len(rdr.XmlRootPath) >= minRuleLength {
+						return fmt.Errorf("<%s> %s for reader %s at %s",
+							utils.ERs,
+							"len of xml_root_path elements cannot be equal to or exceed the number of value rule elements",
+							rdr.ID, field.Tag)
+					}
 				}
 			}
 		}

@@ -466,7 +466,6 @@ func testCGRConfigReloadERs(t *testing.T) {
 				Flags:           flagsDefault,
 				Fields:          content,
 				CacheDumpFields: []*FCTemplate{},
-				XmlRootPath:     utils.HierarchyPath{utils.EmptyString},
 			},
 			{
 				ID:              "file_reader1",
@@ -479,7 +478,6 @@ func testCGRConfigReloadERs(t *testing.T) {
 				Flags:           flags,
 				Fields:          content,
 				CacheDumpFields: []*FCTemplate{},
-				XmlRootPath:     utils.HierarchyPath{utils.EmptyString},
 			},
 		},
 	}
@@ -858,7 +856,7 @@ func testCgrCfgV1ReloadConfigSection(t *testing.T) {
 				"Tenant":                   nil,
 				"Timezone":                 "",
 				"Type":                     "*none",
-				"XmlRootPath":              []any{utils.EmptyString},
+				"XmlRootPath":              nil,
 			},
 			map[string]any{
 				"CacheDumpFields": []any{},
@@ -879,7 +877,7 @@ func testCgrCfgV1ReloadConfigSection(t *testing.T) {
 				"Tenant":                   nil,
 				"Timezone":                 "",
 				"Type":                     "*file_csv",
-				"XmlRootPath":              []any{utils.EmptyString},
+				"XmlRootPath":              nil,
 				"Fields":                   content,
 			},
 		},
