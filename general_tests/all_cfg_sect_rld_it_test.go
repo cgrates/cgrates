@@ -775,7 +775,9 @@ func testSectConfigSReloadRadiusAgent(t *testing.T) {
 				"*default": "CGRateS.org"
 			},
 			"client_dictionaries": {
-				"*default": "/usr/share/cgrates/radius/dict/",
+				"*default": [
+				"/usr/share/cgrates/radius/dict/",
+				],
 			},
 			"sessions_conns": ["*internal"],
 			"request_processors": [
@@ -799,7 +801,7 @@ func testSectConfigSReloadRadiusAgent(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Errorf("Expected OK received: %+v", reply)
 	}
-	cfgStr := "{\"radius_agent\":{\"client_dictionaries\":{\"*default\":\"/usr/share/cgrates/radius/dict/\"},\"client_secrets\":{\"*default\":\"CGRateS.org\"},\"enabled\":true,\"listen_acct\":\"127.0.0.1:1813\",\"listen_auth\":\"127.0.0.1:1812\",\"listen_net\":\"udp\",\"request_processors\":[{\"filters\":[],\"flags\":[\"1\"],\"id\":\"cgrates\",\"reply_fields\":[{\"path\":\"randomPath\",\"tag\":\"randomPath\"}],\"request_fields\":[{\"path\":\"randomPath\",\"tag\":\"randomPath\"}],\"tenant\":\"1\",\"timezone\":\"\"}],\"sessions_conns\":[\"*internal\"]}}"
+	cfgStr := `{"radius_agent":{"client_dictionaries":{"*default":["/usr/share/cgrates/radius/dict/"]},"client_secrets":{"*default":"CGRateS.org"},"enabled":true,"listen_acct":"127.0.0.1:1813","listen_auth":"127.0.0.1:1812","listen_net":"udp","request_processors":[{"filters":[],"flags":["1"],"id":"cgrates","reply_fields":[{"path":"randomPath","tag":"randomPath"}],"request_fields":[{"path":"randomPath","tag":"randomPath"}],"tenant":"1","timezone":""}],"sessions_conns":["*internal"]}}`
 	var rpl string
 	if err := testSectRPC.Call(context.Background(), utils.ConfigSv1GetConfigAsJSON, &config.SectionWithAPIOpts{
 		Tenant:  "cgrates.org",

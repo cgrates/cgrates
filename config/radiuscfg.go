@@ -29,7 +29,7 @@ type RadiusAgentCfg struct {
 	ListenAuth         string
 	ListenAcct         string
 	ClientSecrets      map[string]string
-	ClientDictionaries map[string]string
+	ClientDictionaries map[string][]string
 	SessionSConns      []string
 	RequestProcessors  []*RequestProcessor
 }
@@ -60,7 +60,7 @@ func (ra *RadiusAgentCfg) loadFromJSONCfg(jsnCfg *RadiusAgentJsonCfg, separator 
 	}
 	if jsnCfg.Client_dictionaries != nil {
 		if ra.ClientDictionaries == nil {
-			ra.ClientDictionaries = make(map[string]string)
+			ra.ClientDictionaries = make(map[string][]string)
 		}
 		for k, v := range *jsnCfg.Client_dictionaries {
 			ra.ClientDictionaries[k] = v
@@ -128,7 +128,7 @@ func (ra *RadiusAgentCfg) AsMapInterface(separator string) (initialMP map[string
 		clientSecrets[k] = v
 	}
 	initialMP[utils.ClientSecretsCfg] = clientSecrets
-	clientDictionaries := make(map[string]string)
+	clientDictionaries := make(map[string][]string)
 	for k, v := range ra.ClientDictionaries {
 		clientDictionaries[k] = v
 	}
@@ -144,7 +144,7 @@ func (ra RadiusAgentCfg) Clone() (cln *RadiusAgentCfg) {
 		ListenAuth:         ra.ListenAuth,
 		ListenAcct:         ra.ListenAcct,
 		ClientSecrets:      make(map[string]string),
-		ClientDictionaries: make(map[string]string),
+		ClientDictionaries: make(map[string][]string),
 	}
 	if ra.SessionSConns != nil {
 		cln.SessionSConns = make([]string, len(ra.SessionSConns))

@@ -982,8 +982,8 @@ func TestRadiusAgentJsonCfg(t *testing.T) {
 		Client_secrets: utils.MapStringStringPointer(map[string]string{
 			utils.MetaDefault: "CGRateS.org",
 		}),
-		Client_dictionaries: utils.MapStringStringPointer(map[string]string{
-			utils.MetaDefault: "/usr/share/cgrates/radius/dict/",
+		Client_dictionaries: utils.MapStringSlicePointer(map[string][]string{
+			utils.MetaDefault: {"/usr/share/cgrates/radius/dict/"},
 		}),
 		Sessions_conns:     &[]string{utils.MetaInternal},
 		Request_processors: &[]*ReqProcessorJsnCfg{},

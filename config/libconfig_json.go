@@ -544,7 +544,7 @@ type RadiusAgentJsonCfg struct {
 	Listen_auth         *string
 	Listen_acct         *string
 	Client_secrets      *map[string]string
-	Client_dictionaries *map[string]string
+	Client_dictionaries *map[string][]string
 	Sessions_conns      *[]string
 	Timezone            *string
 	Request_processors  *[]*ReqProcessorJsnCfg
