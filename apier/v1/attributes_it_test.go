@@ -1417,14 +1417,14 @@ func testAttributeSGetAttributeProfileIDsCount(t *testing.T) {
 	if err := attrSRPC.Call(context.Background(), utils.APIerSv1GetAttributeProfileCount,
 		&utils.TenantWithAPIOpts{}, &reply); err != nil {
 		t.Error(err)
-	} else if reply != 7 {
-		t.Errorf("Expecting: 7, received: %+v", reply)
+	} else if reply != 8 {
+		t.Errorf("Expecting: 8, received: %+v", reply)
 	}
 	if err := attrSRPC.Call(context.Background(), utils.APIerSv1GetAttributeProfileCount,
 		&utils.TenantWithAPIOpts{Tenant: "cgrates.org"}, &reply); err != nil {
 		t.Error(err)
-	} else if reply != 7 {
-		t.Errorf("Expecting: 7, received: %+v", reply)
+	} else if reply != 8 {
+		t.Errorf("Expecting: 8, received: %+v", reply)
 	}
 	var resp string
 	if err := attrSRPC.Call(context.Background(), utils.APIerSv1RemoveAttributeProfile,
@@ -1442,13 +1442,31 @@ func testAttributeSGetAttributeProfileIDsCount(t *testing.T) {
 	if err := attrSRPC.Call(context.Background(), utils.APIerSv1GetAttributeProfileCount,
 		&utils.TenantWithAPIOpts{Tenant: "cgrates.org"}, &reply); err != nil {
 		t.Error(err)
+	} else if reply != 7 {
+		t.Errorf("Expecting: 7, received: %+v", reply)
+	}
+	if err := attrSRPC.Call(context.Background(), utils.APIerSv1RemoveAttributeProfile,
+		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{
+			Tenant: "cgrates.org",
+			ID:     "ATTR_2",
+		},
+			APIOpts: map[string]any{
+				utils.CacheOpt: utils.MetaRemove,
+			}}, &resp); err != nil {
+		t.Error(err)
+	} else if resp != utils.OK {
+		t.Error("Unexpected reply returned", resp)
+	}
+	if err := attrSRPC.Call(context.Background(), utils.APIerSv1GetAttributeProfileCount,
+		&utils.TenantWithAPIOpts{Tenant: "cgrates.org"}, &reply); err != nil {
+		t.Error(err)
 	} else if reply != 6 {
 		t.Errorf("Expecting: 6, received: %+v", reply)
 	}
 	if err := attrSRPC.Call(context.Background(), utils.APIerSv1RemoveAttributeProfile,
 		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{
 			Tenant: "cgrates.org",
-			ID:     "ATTR_2",
+			ID:     "ATTR_3",
 		},
 			APIOpts: map[string]any{
 				utils.CacheOpt: utils.MetaRemove,
@@ -1466,7 +1484,7 @@ func testAttributeSGetAttributeProfileIDsCount(t *testing.T) {
 	if err := attrSRPC.Call(context.Background(), utils.APIerSv1RemoveAttributeProfile,
 		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{
 			Tenant: "cgrates.org",
-			ID:     "ATTR_3",
+			ID:     "ATTR_Header",
 		},
 			APIOpts: map[string]any{
 				utils.CacheOpt: utils.MetaRemove,
@@ -1484,7 +1502,7 @@ func testAttributeSGetAttributeProfileIDsCount(t *testing.T) {
 	if err := attrSRPC.Call(context.Background(), utils.APIerSv1RemoveAttributeProfile,
 		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{
 			Tenant: "cgrates.org",
-			ID:     "ATTR_Header",
+			ID:     "ATTR_PASS",
 		},
 			APIOpts: map[string]any{
 				utils.CacheOpt: utils.MetaRemove,
@@ -1502,11 +1520,12 @@ func testAttributeSGetAttributeProfileIDsCount(t *testing.T) {
 	if err := attrSRPC.Call(context.Background(), utils.APIerSv1RemoveAttributeProfile,
 		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{
 			Tenant: "cgrates.org",
-			ID:     "ATTR_PASS",
+			ID:     "ATTR_Search_and_replace",
 		},
 			APIOpts: map[string]any{
 				utils.CacheOpt: utils.MetaRemove,
-			}}, &resp); err != nil {
+			}},
+		&resp); err != nil {
 		t.Error(err)
 	} else if resp != utils.OK {
 		t.Error("Unexpected reply returned", resp)
@@ -1520,7 +1539,7 @@ func testAttributeSGetAttributeProfileIDsCount(t *testing.T) {
 	if err := attrSRPC.Call(context.Background(), utils.APIerSv1RemoveAttributeProfile,
 		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{
 			Tenant: "cgrates.org",
-			ID:     "ATTR_Search_and_replace",
+			ID:     "ATTR_RAD",
 		},
 			APIOpts: map[string]any{
 				utils.CacheOpt: utils.MetaRemove,

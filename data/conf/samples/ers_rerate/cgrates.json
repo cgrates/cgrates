@@ -1,0 +1,111 @@
+{    
+    "general": {
+        "log_level": 7
+    },
+    
+    "listen": {
+        "rpc_json": ":2012",
+        "rpc_gob": ":2013",
+        "http": ":2080"
+    },
+    
+    "stor_db": {
+        "db_password": "CGRateS.org"
+    },
+    
+    "rals": {
+        "enabled": true,
+        "max_increments":3000000
+    },
+    
+    "resources": {
+        "enabled": true
+    },
+    
+    "attributes": {
+        "enabled": true
+    },
+    
+    "cdrs": {
+        "enabled": true,
+        "rals_conns": ["*localhost"]
+    },
+    
+    "sessions": {
+        "enabled": true,
+        "rals_conns": ["*localhost"],
+        "cdrs_conns": ["*localhost"],
+        "resources_conns": ["*localhost"],
+        "attributes_conns": ["*localhost"]
+    },
+    
+    "ers": {
+        "enabled": true,
+        "sessions_conns": ["*localhost"],
+        "readers": [
+            {
+                "id": "file_reader1",
+                "run_delay": "-1",
+                "type": "*file_csv",
+                "flags": ["*cdrs", "*rals", "*rerate","*attributes", "*export"],
+                "source_path": "/tmp/ers/in",
+                "processed_path": "/tmp/ers/out",
+                "fields":[								
+                    {"tag": "ToR", "path": "*cgreq.ToR", "type": "*variable", "value": "~*req.2", "mandatory": true},
+                    {"tag": "OriginID", "path": "*cgreq.OriginID", "type": "*variable", "value": "~*req.3", "mandatory": true},
+                    {"tag": "RequestType", "path": "*cgreq.RequestType", "type": "*variable", "value": "~*req.4", "mandatory": true},
+                    {"tag": "Tenant", "path": "*cgreq.Tenant", "type": "*variable", "value": "~*req.5", "mandatory": true},
+                    {"tag": "Category", "path": "*cgreq.Category", "type": "*variable", "value": "~*req.6", "mandatory": true},
+                    {"tag": "Account", "path": "*cgreq.Account", "type": "*variable", "value": "~*req.7", "mandatory": true},
+                    {"tag": "Subject", "path": "*cgreq.Subject", "type": "*variable", "value": "~*req.8", "mandatory": true},
+                    {"tag": "Destination", "path": "*cgreq.Destination", "type": "*variable", "value": "~*req.9", "mandatory": true},
+                    {"tag": "SetupTime", "path": "*cgreq.SetupTime", "type": "*variable", "value": "~*req.10", "mandatory": true},
+                    {"tag": "AnswerTime", "path": "*cgreq.AnswerTime", "type": "*variable", "value": "~*req.11", "mandatory": true},
+                    {"tag": "Usage", "path": "*cgreq.Usage", "type": "*variable", "value": "~*req.12", "mandatory": true},
+                    {"tag": "RunID", "path": "*cgreq.RunID", "type": "*variable", "value": "~*req.13", "mandatory": true},
+                    {"tag": "Cost", "path": "*cgreq.Cost", "type": "*variable", "value": "~*req.14", "mandatory": true}
+                ]
+            }
+        ]
+    },
+
+    "ees": {
+        "enabled": true,
+        "attributes_conns":["*localhost"],
+        "cache": {
+            "*file_csv": {"limit": -1, "ttl": "1s", "static_ttl": false}
+        },
+        "exporters": [
+            {
+                "id": "CSVExporter",
+                "type": "*file_csv",
+                "export_path": "/tmp/ers/in",
+                "timezone": "UTC",
+                "synchronous": true,
+                "attempts": 1,
+                "field_separator": ",",
+                "fields":[
+                    {"tag": "CGRID", "path": "*exp.CGRID", "type": "*variable", "value": "~*req.CGRID"},
+                    {"tag": "ToR", "path": "*exp.ToR", "type": "*variable", "value": "~*req.ToR"},
+                    {"tag": "OriginID", "path": "*exp.OriginID", "type": "*variable", "value": "~*req.OriginID"},
+                    {"tag": "RequestType", "path": "*exp.RequestType", "type": "*variable", "value": "~*req.RequestType"},
+                    {"tag": "Tenant", "path": "*exp.Tenant", "type": "*variable", "value": "~*req.Tenant"},
+                    {"tag": "Category", "path": "*exp.Category", "type": "*variable", "value": "~*req.Category"},
+                    {"tag": "Account", "path": "*exp.Account", "type": "*variable", "value": "~*req.Account"},
+                    {"tag": "Subject", "path": "*exp.Subject", "type": "*variable", "value": "~*req.Subject"},
+                    {"tag": "Destination", "path": "*exp.Destination", "type": "*variable", "value": "~*req.Destination"},
+                    {"tag": "SetupTime", "path": "*exp.SetupTime", "type": "*variable", "value": "~*req.SetupTime{*time_string}" },
+                    {"tag": "AnswerTime", "path": "*exp.AnswerTime", "type": "*variable", "value": "~*req.AnswerTime{*time_string}"},
+                    {"tag": "Usage", "path": "*exp.Usage", "type": "*variable", "value": "~*req.Usage{*duration_seconds}"},
+                    {"tag": "RunID", "path": "*exp.RunID", "type": "*variable", "value": "~*req.RunID"},
+                    {"tag": "Cost", "path": "*exp.Cost", "type": "*variable", "value": "~*req.Cost{*round:4}"}
+                ]
+            }
+        ]
+    },
+    
+    "apiers": {
+        "enabled": true
+    }
+}
+    
