@@ -1204,3 +1204,403 @@ func TestIDBTpSharedGroups(t *testing.T) {
 		t.Error(err)
 	}
 }
+
+func TestIDBGetTpIdsEmptyCol(t *testing.T) {
+	storDB := NewInternalDB(nil, nil, false, config.CgrConfig().StorDbCfg().Items)
+	tpRoutes := []*utils.TPRouteProfile{
+		{
+			TPid:      "TP1",
+			Tenant:    "cgrates.org",
+			ID:        "SUPL_1",
+			FilterIDs: []string{"*string:~*req.Accout:1007"},
+			Sorting:   "*lowest_cost",
+			Routes: []*utils.TPRoute{
+				{
+					ID:              "supplier1",
+					StatIDs:         []string{"Stat1"},
+					Weight:          10,
+					Blocker:         false,
+					RouteParameters: "SortingParam1",
+				},
+			},
+			Weight: 20,
+		}}
+
+	if err := storDB.SetTPRoutes(tpRoutes); err != nil {
+		t.Errorf("Unable to set TPRoutes")
+	}
+
+	tpFilters := []*utils.TPFilterProfile{
+		{
+			TPid:   "TP2",
+			Tenant: "cgrates.org",
+			ID:     "Filter1",
+			Filters: []*utils.TPFilter{
+				{
+					Type:    utils.MetaString,
+					Element: "Account",
+					Values:  []string{"1001", "1002"},
+				},
+			},
+		},
+	}
+	if err := storDB.SetTPFilters(tpFilters); err != nil {
+		t.Errorf("Unable to set TPFilters")
+	}
+	etpIds := []string{"TP1", "TP2"}
+	if tpIds, err := storDB.GetTpIds(utils.EmptyString); err != nil {
+		t.Error(err)
+	} else if sort.Slice(tpIds, func(i, j int) bool {
+		return tpIds[i] < tpIds[j]
+	}); !slices.Equal(tpIds, etpIds) {
+		t.Errorf("Expected  %v,Received %v", tpIds, etpIds)
+	}
+}
+
+func TestIDBGetTpTableIds(t *testing.T) {
+	storDB := NewInternalDB(nil, nil, false, config.CgrConfig().StorDbCfg().Items)
+	tpAccActions := []*utils.TPAccountActions{
+		{
+			TPid:          "TP1",
+			LoadId:        "ID",
+			Tenant:        "cgrates.org",
+			Account:       "1001",
+			ActionPlanId:  "PREPAID_10",
+			AllowNegative: true,
+			Disabled:      false,
+		},
+		{
+			TPid:             "TP1",
+			LoadId:           "TEST_LOADID",
+			Tenant:           "cgrates.org",
+			Account:          "1002",
+			ActionPlanId:     "PACKAGE_10_SHARED_A_5",
+			ActionTriggersId: "STANDARD_TRIGGERS",
+			AllowNegative:    true,
+			Disabled:         true,
+		},
+	}
+	if err := storDB.SetTPAccountActions(tpAccActions); err != nil {
+		t.Error(err)
+	}
+	expIds := []string{"ID", "TEST_LOADID"}
+	if tpIds, err := storDB.GetTpTableIds("TP1", utils.TBLTPAccountActions, utils.TPDistinctIds{utils.IDCfg}, nil, &utils.PaginatorWithSearch{}); err != nil {
+		t.Error(err)
+	} else if sort.Slice(tpIds, func(i, j int) bool {
+		return tpIds[i] < tpIds[j]
+	}); !slices.Equal(tpIds, expIds) {
+		t.Errorf("Expected  %v,Received %v", tpIds, expIds)
+	}
+}
+
+func TestIDBGetTPDestinationRatesPaginator(t *testing.T) {
+	storDB := NewInternalDB(nil, nil, true, config.CgrConfig().StorDbCfg().Items)
+	destRates := []*utils.TPDestinationRate{
+		{
+			TPid: "TEST_TPID",
+			ID:   "TEST_DSTRATE",
+			DestinationRates: []*utils.DestinationRate{
+				{
+					DestinationId:    "TEST_DEST1",
+					RateId:           "TEST_RATE1",
+					RoundingMethod:   "*up",
+					RoundingDecimals: 4},
+				{
+					DestinationId:    "TEST_DEST2",
+					RateId:           "TEST_RATE2",
+					RoundingMethod:   "*up",
+					RoundingDecimals: 4},
+			},
+		},
+		{
+			TPid: "TEST_TPID",
+			ID:   "RT_STD_WEEKEND",
+			DestinationRates: []*utils.DestinationRate{
+				{
+					DestinationId:    "GERMANY",
+					RateId:           "R2",
+					Rate:             csvr.rates["R2"],
+					RoundingMethod:   utils.MetaRoundingMiddle,
+					RoundingDecimals: 4,
+				},
+				{
+					DestinationId:    "GERMANY_O2",
+					RateId:           "R3",
+					Rate:             csvr.rates["R3"],
+					RoundingMethod:   utils.MetaRoundingMiddle,
+					RoundingDecimals: 4,
+				},
+			},
+		},
+	}
+	if err := storDB.SetTPDestinationRates(destRates); err != nil {
+		t.Error(err)
+	}
+	if dstRates, err := storDB.GetTPDestinationRates(destRates[0].TPid, "TEST", &utils.Paginator{Limit: utils.IntPointer(1)}); err != nil {
+		t.Error(err)
+	} else if !slices.Equal(destRates[:1], dstRates) {
+		t.Errorf("Expected %v,Received %v", utils.ToJSON(destRates[:1]), utils.ToJSON(dstRates))
+	}
+}
+
+func TestIDBGetTPRatingPlans(t *testing.T) {
+	storDB := NewInternalDB(nil, nil, true, config.CgrConfig().StorDbCfg().Items)
+	ratingPlans := []*utils.TPRatingPlan{
+		{
+			TPid: "TP1",
+			ID:   "Plan1",
+			RatingPlanBindings: []*utils.TPRatingPlanBinding{
+				{
+					DestinationRatesId: "DR_FREESWITCH_USERS",
+					TimingId:           "ALWAYS",
+					Weight:             10,
+				},
+			},
+		},
+		{
+			TPid: "TP1",
+			ID:   "Plan2",
+			RatingPlanBindings: []*utils.TPRatingPlanBinding{
+				{
+					DestinationRatesId: "1",
+					TimingId:           "ALWAYS",
+					Weight:             0.0,
+				},
+			},
+		},
+		{
+			TPid: "TP1",
+			ID:   "Plan3",
+			RatingPlanBindings: []*utils.TPRatingPlanBinding{
+				{
+					DestinationRatesId: "2",
+					TimingId:           "ALWAYS",
+					Weight:             2,
+				},
+			},
+		},
+	}
+	if err := storDB.SetTPRatingPlans(ratingPlans); err != nil {
+		t.Error(err)
+	}
+
+	if rPlans, err := storDB.GetTPRatingPlans("TP1", "Plan", &utils.Paginator{Limit: utils.IntPointer(1), Offset: utils.IntPointer(1)}); err != nil {
+		t.Error(err)
+	} else if len(rPlans) != 1 {
+		t.Errorf("Expected slice length: 1 ,Received : %v", len(rPlans))
+	}
+}
+
+func TestIDBRemoveSMCost(t *testing.T) {
+	storDB := NewInternalDB(nil, nil, true, config.CgrConfig().StorDbCfg().Items)
+	// READ
+	if _, err := storDB.GetSMCosts("", "", "", ""); err != utils.ErrNotFound {
+		t.Error(err)
+	}
+	// WRITE
+	var snd = []*SMCost{
+		{
+			CGRID:       "88ed9c38005f07576a1e1af293063833b60edcc6",
+			RunID:       "1",
+			OriginHost:  "host2",
+			OriginID:    "2",
+			CostDetails: NewBareEventCost(),
+		},
+		{
+			CGRID:       "88ed9c38005f07576a1e1af293063833b60edcc2",
+			RunID:       "2",
+			OriginHost:  "host2",
+			OriginID:    "2",
+			CostDetails: NewBareEventCost(),
+		},
+	}
+	for _, smc := range snd {
+		if err := storDB.SetSMCost(smc); err != nil {
+			t.Error(err)
+		}
+	}
+	// READ
+	if rcv, err := storDB.GetSMCosts("", "", "host2", ""); err != nil {
+		t.Error(err)
+	} else if sort.Slice(rcv, func(i, j int) bool {
+		return rcv[i].CGRID < rcv[j].CGRID
+	}); slices.Equal(snd, rcv) {
+		t.Errorf("Expected %+v,Received %+v", utils.ToJSON(snd), utils.ToJSON(rcv))
+	}
+	// REMOVE
+	for _, smc := range snd {
+		if err := storDB.RemoveSMCost(smc); err != nil {
+			t.Error(err)
+		}
+	}
+	// READ
+	if _, err := storDB.GetSMCosts("", "", "", ""); err != utils.ErrNotFound {
+		t.Error(err)
+	}
+}
+
+func TestIDBRemoveSMC(t *testing.T) {
+	storDB := NewInternalDB(nil, nil, false, config.CgrConfig().StorDbCfg().Items)
+	// READ
+	if _, err := storDB.GetSMCosts("", "", "", ""); err != utils.ErrNotFound {
+		t.Error(err)
+	}
+	// WRITE
+	var snd = []*SMCost{
+		{
+			CGRID:       "CGRID1",
+			RunID:       "11",
+			OriginHost:  "host22",
+			OriginID:    "O1",
+			CostDetails: NewBareEventCost(),
+		},
+		{
+			CGRID:       "CGRID2",
+			RunID:       "12",
+			OriginHost:  "host22",
+			OriginID:    "O2",
+			CostDetails: NewBareEventCost(),
+		},
+		{
+			CGRID:       "CGRID3",
+			RunID:       "13",
+			OriginHost:  "host23",
+			OriginID:    "O3",
+			CostDetails: NewBareEventCost(),
+		},
+	}
+	for _, smc := range snd {
+		if err := storDB.SetSMCost(smc); err != nil {
+			t.Error(err)
+		}
+	}
+	// READ
+	if rcv, err := storDB.GetSMCosts("", "", "host22", ""); err != nil {
+		t.Fatal(err)
+	} else if len(rcv) != 2 {
+		t.Errorf("Expected 2 results received %v ", len(rcv))
+	}
+	// REMOVE
+	if err := storDB.RemoveSMCosts(&utils.SMCostFilter{
+		RunIDs:         []string{"12", "13"},
+		NotRunIDs:      []string{"11"},
+		OriginHosts:    []string{"host22", "host23"},
+		NotOriginHosts: []string{"host21"},
+	}); err != nil {
+		t.Error(err)
+	}
+	// READ
+	if rcv, err := storDB.GetSMCosts("", "", "", ""); err != nil {
+		t.Error(err)
+	} else if len(rcv) != 1 {
+		t.Errorf("Expected 1 result received %v ", len(rcv))
+	}
+	// REMOVE
+	if err := storDB.RemoveSMCosts(&utils.SMCostFilter{}); err != nil {
+		t.Error(err)
+	}
+	// READ
+	if _, err := storDB.GetSMCosts("", "", "", ""); err != utils.ErrNotFound {
+		t.Error(err)
+	}
+}
+
+func TestIDBVersions(t *testing.T) {
+	dataDB := NewInternalDB(nil, nil, true, config.CgrConfig().DataDbCfg().Items)
+	if _, err := dataDB.GetVersions(utils.Accounts); err != utils.ErrNotFound {
+		t.Error(err)
+	}
+	vrs := Versions{
+		utils.Accounts:       3,
+		utils.Actions:        2,
+		utils.ActionTriggers: 2,
+		utils.ActionPlans:    2,
+		utils.SharedGroups:   2,
+		utils.CostDetails:    1,
+	}
+	if err := dataDB.SetVersions(vrs, false); err != nil {
+		t.Error(err)
+	}
+	if rcv, err := dataDB.GetVersions(""); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(vrs, rcv) {
+		t.Errorf("Expecting: %v, received: %v", vrs, rcv)
+	}
+	delete(vrs, utils.SharedGroups)
+	if err := dataDB.SetVersions(vrs, true); err != nil { // overwrite
+		t.Error(err)
+	}
+	if rcv, err := dataDB.GetVersions(""); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(vrs, rcv) {
+		t.Errorf("Expecting: %v, received: %v", vrs, rcv)
+	}
+	eAcnts := Versions{utils.Accounts: vrs[utils.Accounts]}
+	if rcv, err := dataDB.GetVersions(utils.Accounts); err != nil { //query one element
+		t.Error(err)
+	} else if !reflect.DeepEqual(eAcnts, rcv) {
+		t.Errorf("Expecting: %v, received: %v", eAcnts, rcv)
+	}
+	if _, err := dataDB.GetVersions(utils.NotAvailable); err != utils.ErrNotFound { //query non-existent
+		t.Error(err)
+	}
+	eAcnts[utils.Accounts] = 2
+	vrs[utils.Accounts] = eAcnts[utils.Accounts]
+	if err := dataDB.SetVersions(eAcnts, false); err != nil { // change one element
+		t.Error(err)
+	}
+	if rcv, err := dataDB.GetVersions(""); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(vrs, rcv) {
+		t.Errorf("Expecting: %v, received: %v", vrs, rcv)
+	}
+	if err = dataDB.RemoveVersions(eAcnts); err != nil { // remove one element
+		t.Error(err)
+	}
+	delete(vrs, utils.Accounts)
+	if rcv, err := dataDB.GetVersions(""); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(vrs, rcv) {
+		t.Errorf("Expecting: %v, received: %v", vrs, rcv)
+	}
+	if err = dataDB.RemoveVersions(nil); err != nil { // remove one element
+		t.Error(err)
+	}
+	if _, err := dataDB.GetVersions(""); err != utils.ErrNotFound { //query non-existent
+		t.Error(err)
+	}
+}
+
+func TestIDBGetCDR(t *testing.T) {
+	storDB := NewInternalDB([]string{"Account", utils.RunID, utils.Source, utils.ToR, "Subject", "OriginHost", "ExtraHeader1", "ExtraHeader2"}, []string{"Destination", "Header2"}, false, config.CgrConfig().StorDbCfg().Items)
+
+	cdr := &CDR{
+		CGRID:       utils.Sha1("testevent1", time.Date(2015, 12, 12, 14, 52, 0, 0, time.UTC).String()),
+		RunID:       utils.MetaRaw,
+		OrderID:     time.Now().UnixNano(),
+		OriginHost:  "127.0.0.1",
+		Source:      "testSetCDRs",
+		OriginID:    "testevent1",
+		ToR:         utils.MetaVoice,
+		RequestType: utils.MetaPrepaid,
+		Tenant:      "cgrates.org",
+		Category:    "call",
+		Account:     "1004",
+		Subject:     "1004",
+		Destination: "1007",
+		SetupTime:   time.Date(2015, 12, 12, 14, 52, 0, 0, time.UTC),
+		AnswerTime:  time.Date(2015, 12, 12, 14, 52, 20, 0, time.UTC),
+		Usage:       35 * time.Second,
+		ExtraFields: map[string]string{"ExtraHeader1": "ExtraVal1", "Header2": "Val2", "ExtraHeader2": "Val"},
+		Cost:        -1,
+	}
+	if err := storDB.SetCDR(cdr, false); err != nil {
+		t.Error(err)
+	}
+	if cdrs, _, err := storDB.GetCDRs(&utils.CDRsFilter{CGRIDs: []string{cdr.CGRID}, Subjects: []string{"1004"}, Sources: []string{"testSetCDRs"}, ToRs: []string{utils.MetaVoice}, RunIDs: []string{utils.MetaRaw}, OriginHosts: []string{"127.0.0.1"}, DestinationPrefixes: []string{"100"}, ExtraFields: map[string]string{"ExtraHeader1": "ExtraVal1", "Header2": "Val2"}, NotExtraFields: map[string]string{"ExtraHeader2": "ExtraVal2"}}, false); err != nil {
+		t.Error(err)
+	} else if len(cdrs) != 1 {
+		t.Errorf("cdr %+v, Unexpected number of CDRs returned: %d", cdr, len(cdrs))
+	}
+
+}
