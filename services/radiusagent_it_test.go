@@ -200,8 +200,8 @@ func TestRadiusAgentReload2(t *testing.T) {
 
 func TestRadiusAgentReload3(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	cfg.RadiusAgentCfg().ClientDictionaries = map[string]string{
-		"test": "test",
+	cfg.RadiusAgentCfg().ClientDictionaries = map[string][]string{
+		"test": {"test"},
 	}
 	cfg.SessionSCfg().Enabled = true
 	cfg.RadiusAgentCfg().Enabled = true

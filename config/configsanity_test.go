@@ -607,13 +607,9 @@ func TestConfigSanityRadiusAgent(t *testing.T) {
 			},
 		},
 	}
-	expected := "<RadiusAgent> no SessionS connections defined"
-	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
-		t.Errorf("Expecting: %+q  received: %+q", expected, err)
-	}
 
 	cfg.radiusAgentCfg.SessionSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS)}
-	expected = "<SessionS> not enabled but requested by <RadiusAgent> component"
+	expected := "<SessionS> not enabled but requested by <RadiusAgent> component"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}

@@ -856,7 +856,7 @@ func testAttributeSProcessEventWithHeader(t *testing.T) {
 // }
 
 func testAttributeSGetAttPrfIDs(t *testing.T) {
-	expected := []string{"ATTR_2", "ATTR_PASS", "ATTR_1", "ATTR_3", "ATTR_Header", "AttributeWithNonSubstitute"}
+	expected := []string{"ATTR_2", "ATTR_RAD", "ATTR_PASS", "ATTR_1", "ATTR_3", "ATTR_Header", "AttributeWithNonSubstitute"}
 	var result []string
 	if err := attrSRPC.Call(context.Background(), utils.APIerSv1GetAttributeProfileIDs, &utils.PaginatorWithTenant{}, &result); err != nil {
 		t.Error(err)

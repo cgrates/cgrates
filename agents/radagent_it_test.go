@@ -439,7 +439,7 @@ func testRAitAuthCHAPFail(t *testing.T) {
 
 func testRAitAuthMSCHAPV2Success(t *testing.T) {
 	for _, dictPath := range raCfg.RadiusAgentCfg().ClientDictionaries {
-		if dictRad, err = radigo.NewDictionaryFromFolderWithRFC2865(dictPath); err != nil {
+		if dictRad, err = radigo.NewDictionaryFromFoldersWithRFC2865(dictPath); err != nil {
 			return
 		}
 	}
@@ -503,7 +503,7 @@ func testRAitAuthMSCHAPV2Success(t *testing.T) {
 
 func testRAitAuthMSCHAPV2Fail(t *testing.T) {
 	for _, dictPath := range raCfg.RadiusAgentCfg().ClientDictionaries {
-		if dictRad, err = radigo.NewDictionaryFromFolderWithRFC2865(dictPath); err != nil {
+		if dictRad, err = radigo.NewDictionaryFromFoldersWithRFC2865(dictPath); err != nil {
 			return
 		}
 	}

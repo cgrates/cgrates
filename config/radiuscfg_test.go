@@ -33,7 +33,7 @@ func TestRadiusAgentCfgloadFromJsonCfgCase1(t *testing.T) {
 		Listen_auth:         utils.StringPointer("127.0.0.1:1812"),
 		Listen_acct:         utils.StringPointer("127.0.0.1:1813"),
 		Client_secrets:      &map[string]string{utils.MetaDefault: "CGRateS.org"},
-		Client_dictionaries: &map[string]string{utils.MetaDefault: "/usr/share/cgrates/radius/dict/"},
+		Client_dictionaries: &map[string][]string{utils.MetaDefault: {"/usr/share/cgrates/radius/dict/"}},
 		Sessions_conns:      &[]string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS)},
 		Request_processors: &[]*ReqProcessorJsnCfg{
 			{
@@ -62,7 +62,7 @@ func TestRadiusAgentCfgloadFromJsonCfgCase1(t *testing.T) {
 		ListenAuth:         "127.0.0.1:1812",
 		ListenAcct:         "127.0.0.1:1813",
 		ClientSecrets:      map[string]string{utils.MetaDefault: "CGRateS.org"},
-		ClientDictionaries: map[string]string{utils.MetaDefault: "/usr/share/cgrates/radius/dict/"},
+		ClientDictionaries: map[string][]string{utils.MetaDefault: {"/usr/share/cgrates/radius/dict/"}},
 		SessionSConns:      []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS)},
 		RequestProcessors: []*RequestProcessor{
 			{
@@ -153,7 +153,9 @@ func TestRadiusAgentCfgAsMapInterface(t *testing.T) {
          "listen_acct": "127.0.0.1:1892",							
 
 	     "client_dictionaries": {									
-	    	"*default": "/usr/share/cgrates/",			
+	    	"*default": [
+				"/usr/share/cgrates/",
+			],			
 	     },
 	     "sessions_conns": ["*birpc_internal", "*conn1","*conn2"],
          "request_processors": [
@@ -178,8 +180,8 @@ func TestRadiusAgentCfgAsMapInterface(t *testing.T) {
 		utils.ClientSecretsCfg: map[string]string{
 			utils.MetaDefault: "CGRateS.org",
 		},
-		utils.ClientDictionariesCfg: map[string]string{
-			utils.MetaDefault: "/usr/share/cgrates/",
+		utils.ClientDictionariesCfg: map[string][]string{
+			utils.MetaDefault: {"/usr/share/cgrates/"},
 		},
 		utils.SessionSConnsCfg: []string{rpcclient.BiRPCInternal, "*conn1", "*conn2"},
 		utils.RequestProcessorsCfg: []map[string]any{
@@ -215,8 +217,8 @@ func TestRadiusAgentCfgAsMapInterface1(t *testing.T) {
 		utils.ClientSecretsCfg: map[string]string{
 			utils.MetaDefault: "CGRateS.org",
 		},
-		utils.ClientDictionariesCfg: map[string]string{
-			utils.MetaDefault: "/usr/share/cgrates/radius/dict/",
+		utils.ClientDictionariesCfg: map[string][]string{
+			utils.MetaDefault: {"/usr/share/cgrates/radius/dict/"},
 		},
 		utils.SessionSConnsCfg:     []string{"*internal"},
 		utils.RequestProcessorsCfg: []map[string]any{},
@@ -235,7 +237,7 @@ func TestRadiusAgentCfgClone(t *testing.T) {
 		ListenAuth:         "127.0.0.1:1812",
 		ListenAcct:         "127.0.0.1:1813",
 		ClientSecrets:      map[string]string{utils.MetaDefault: "CGRateS.org"},
-		ClientDictionaries: map[string]string{utils.MetaDefault: "/usr/share/cgrates/radius/dict/"},
+		ClientDictionaries: map[string][]string{utils.MetaDefault: {"/usr/share/cgrates/radius/dict/"}},
 		SessionSConns:      []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS), "*conn1"},
 		RequestProcessors: []*RequestProcessor{
 			{
@@ -271,7 +273,9 @@ func TestRadiusAgentCfgClone(t *testing.T) {
 	if rcv.ClientSecrets[utils.MetaDefault] = ""; ban.ClientSecrets[utils.MetaDefault] != "CGRateS.org" {
 		t.Errorf("Expected clone to not modify the cloned")
 	}
-	if rcv.ClientDictionaries[utils.MetaDefault] = ""; ban.ClientDictionaries[utils.MetaDefault] != "/usr/share/cgrates/radius/dict/" {
+	rcv.ClientDictionaries[utils.MetaDefault] = []string{""}
+	if !reflect.DeepEqual(ban.ClientDictionaries[utils.MetaDefault],
+		[]string{"/usr/share/cgrates/radius/dict/"}) {
 		t.Errorf("Expected clone to not modify the cloned")
 	}
 }

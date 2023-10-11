@@ -541,6 +541,9 @@ func StringMapPointer(sm StringMap) *StringMap {
 func MapStringStringPointer(mp map[string]string) *map[string]string {
 	return &mp
 }
+func MapStringSlicePointer(mp map[string][]string) *map[string][]string {
+	return &mp
+}
 
 func TimePointer(t time.Time) *time.Time {
 	return &t
