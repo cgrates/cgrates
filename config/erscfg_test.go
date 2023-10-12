@@ -270,7 +270,6 @@ func TestERsCfgAsMapInterface(t *testing.T) {
 				"source_path":                 "/var/spool/cgrates/ers/in",
 				"tenant":                      "",
 				"timezone":                    "",
-				"xml_root_path":               []string{},
 				"cache_dump_fields":           []map[string]any{},
 				"concurrent_requests":         1024,
 				"type":                        "*none",
@@ -320,7 +319,6 @@ func TestERsCfgAsMapInterface(t *testing.T) {
 				"source_path":                 "/tmp/ers/in",
 				"tenant":                      "",
 				"timezone":                    "",
-				"xml_root_path":               []string{},
 			},
 		},
 	}
@@ -534,7 +532,7 @@ func TestEventReeadersCFGAsMapInterface(t *testing.T) {
 		ConcurrentReqs:           1,
 		SourcePath:               "test",
 		ProcessedPath:            "test",
-		XmlRootPath:              []string{},
+		XmlRootPath:              utils.HierarchyPath{"item1", "item2"},
 		Timezone:                 "test",
 		Filters:                  []string{},
 		FailedCallsPrefix:        "!",
@@ -550,7 +548,6 @@ func TestEventReeadersCFGAsMapInterface(t *testing.T) {
 		utils.ConcurrentReqsCfg:           er.ConcurrentReqs,
 		utils.SourcePathCfg:               er.SourcePath,
 		utils.ProcessedPathCfg:            er.ProcessedPath,
-		utils.XmlRootPathCfg:              []string{},
 		utils.TenantCfg:                   "test",
 		utils.TimezoneCfg:                 er.Timezone,
 		utils.FiltersCfg:                  er.Filters,
@@ -560,6 +557,7 @@ func TestEventReeadersCFGAsMapInterface(t *testing.T) {
 		utils.PartialCacheExpiryActionCfg: er.PartialCacheExpiryAction,
 		utils.FieldsCfg:                   []map[string]any{},
 		utils.CacheDumpFieldsCfg:          []map[string]any{fct.AsMapInterface("")},
+		utils.XmlRootPathCfg:              []string{"item1", "item2"},
 	}
 
 	tests := []struct {
@@ -579,7 +577,7 @@ func TestEventReeadersCFGAsMapInterface(t *testing.T) {
 			rcv := er.AsMapInterface(tt.arg)
 
 			if !reflect.DeepEqual(rcv, tt.exp) {
-				t.Errorf("recived %v, expected %v", rcv, tt.exp)
+				t.Errorf("expected %v,\nreceived %v", tt.exp, rcv)
 			}
 		})
 	}

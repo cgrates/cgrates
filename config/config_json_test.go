@@ -1719,7 +1719,6 @@ func TestDfEventReaderCfg(t *testing.T) {
 				Concurrent_requests: utils.IntPointer(1024),
 				Source_path:         utils.StringPointer("/var/spool/cgrates/ers/in"),
 				Processed_path:      utils.StringPointer("/var/spool/cgrates/ers/out"),
-				Xml_root_path:       utils.StringPointer(utils.EmptyString),
 				Tenant:              utils.StringPointer(utils.EmptyString),
 				Timezone:            utils.StringPointer(utils.EmptyString),
 				Filters:             &[]string{},
