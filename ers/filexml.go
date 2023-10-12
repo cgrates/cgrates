@@ -114,6 +114,28 @@ func (rdr *XMLFileER) Serve() (err error) {
 	return
 }
 
+/*
+   `xml_root_path` is a slice that determines the which XML nodes to process.
+   When used by `xmlquery.QueryAll()`, it behaves as follows:
+
+   ```xml
+   <?xml version="1.0" encoding="ISO-8859-1"?>
+   <A>
+       <B>
+           <C>item1</C>
+           <D>item2</D>
+       </B>
+       <B>
+           <C>item3</C>
+       </B>
+   </A>
+   ```
+
+   - If the root_path_string is empty or ["A"], it retrieves everything within <A></A>.
+   - For ["A", "B"], it retrieves each <B></B> element.
+   - For ["A", "B", "C"], it retrieves the text within each <C></C> ("item1" and "item3").
+*/
+
 // processFile is called for each file in a directory and dispatches erEvents from it
 func (rdr *XMLFileER) processFile(fPath, fName string) error {
 	if cap(rdr.conReqs) != 0 { // 0 goes for no limit
