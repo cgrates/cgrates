@@ -249,9 +249,23 @@ func (er *EventReaderCfg) Clone() (cln *EventReaderCfg) {
 }
 
 func (er *EventReaderCfg) AsMapInterface(separator string) map[string]any {
-	xmlRootPath := make([]string, len(er.XmlRootPath))
-	for i, item := range er.XmlRootPath {
-		xmlRootPath[i] = item
+	rdrMap := map[string]any{
+		utils.IDCfg:                       er.ID,
+		utils.TypeCfg:                     er.Type,
+		utils.RowLengthCfg:                er.RowLength,
+		utils.FieldSepCfg:                 er.FieldSep,
+		utils.ConcurrentReqsCfg:           er.ConcurrentReqs,
+		utils.SourcePathCfg:               er.SourcePath,
+		utils.ProcessedPathCfg:            er.ProcessedPath,
+		utils.TimezoneCfg:                 er.Timezone,
+		utils.FiltersCfg:                  er.Filters,
+		utils.FailedCallsPrefixCfg:        er.FailedCallsPrefix,
+		utils.PartialCacheExpiryActionCfg: er.PartialCacheExpiryAction,
+	}
+	if len(er.XmlRootPath) != 0 {
+		xmlRootPath := make([]string, len(er.XmlRootPath))
+		copy(xmlRootPath, er.XmlRootPath)
+		rdrMap[utils.XmlRootPathCfg] = xmlRootPath
 	}
 	var tenant string
 	if er.Tenant != nil {
@@ -261,7 +275,7 @@ func (er *EventReaderCfg) AsMapInterface(separator string) map[string]any {
 		}
 		tenant = strings.Join(values, separator)
 	}
-
+	rdrMap[utils.TenantCfg] = tenant
 	flags := make(map[string][]any, len(er.Flags))
 	for key, val := range er.Flags {
 		buf := make([]any, len(val))
@@ -270,14 +284,17 @@ func (er *EventReaderCfg) AsMapInterface(separator string) map[string]any {
 		}
 		flags[key] = buf
 	}
+	rdrMap[utils.FlagsCfg] = flags
 	fields := make([]map[string]any, len(er.Fields))
 	for i, item := range er.Fields {
 		fields[i] = item.AsMapInterface(separator)
 	}
+	rdrMap[utils.FieldsCfg] = fields
 	cacheDumpFields := make([]map[string]any, len(er.CacheDumpFields))
 	for i, item := range er.CacheDumpFields {
 		cacheDumpFields[i] = item.AsMapInterface(separator)
 	}
+	rdrMap[utils.CacheDumpFieldsCfg] = cacheDumpFields
 	var runDelay string
 	if er.RunDelay > 0 {
 		runDelay = er.RunDelay.String()
@@ -286,30 +303,11 @@ func (er *EventReaderCfg) AsMapInterface(separator string) map[string]any {
 	} else {
 		runDelay = "-1"
 	}
-
+	rdrMap[utils.RunDelayCfg] = runDelay
 	var partialRecordCache string = "0"
 	if er.PartialRecordCache != 0 {
 		partialRecordCache = er.PartialRecordCache.String()
 	}
-
-	return map[string]any{
-		utils.IDCfg:                       er.ID,
-		utils.TypeCfg:                     er.Type,
-		utils.RowLengthCfg:                er.RowLength,
-		utils.FieldSepCfg:                 er.FieldSep,
-		utils.RunDelayCfg:                 runDelay,
-		utils.ConcurrentReqsCfg:           er.ConcurrentReqs,
-		utils.SourcePathCfg:               er.SourcePath,
-		utils.ProcessedPathCfg:            er.ProcessedPath,
-		utils.XmlRootPathCfg:              xmlRootPath,
-		utils.TenantCfg:                   tenant,
-		utils.TimezoneCfg:                 er.Timezone,
-		utils.FiltersCfg:                  er.Filters,
-		utils.FlagsCfg:                    flags,
-		utils.FailedCallsPrefixCfg:        er.FailedCallsPrefix,
-		utils.PartialRecordCacheCfg:       partialRecordCache,
-		utils.PartialCacheExpiryActionCfg: er.PartialCacheExpiryAction,
-		utils.FieldsCfg:                   fields,
-		utils.CacheDumpFieldsCfg:          cacheDumpFields,
-	}
+	rdrMap[utils.PartialRecordCacheCfg] = partialRecordCache
+	return rdrMap
 }
