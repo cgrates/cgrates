@@ -1572,10 +1572,10 @@ func TestIDBVersions(t *testing.T) {
 }
 
 func TestIDBGetCDR(t *testing.T) {
-	storDB := NewInternalDB([]string{"Account", utils.RunID, utils.Source, utils.ToR, "Subject", "OriginHost", "ExtraHeader1", "ExtraHeader2"}, []string{"Destination", "Header2"}, false, config.CgrConfig().StorDbCfg().Items)
+	storDB := NewInternalDB([]string{utils.AccountField, utils.CGRID, utils.OriginID, utils.RequestType, utils.Tenant, utils.Category, utils.RunID, utils.Source, utils.ToR, utils.Subject, utils.OriginHost, "ExtraHeader1", "ExtraHeader2"}, []string{"Destination", "Header2"}, false, config.CgrConfig().StorDbCfg().Items)
 
 	cdr := &CDR{
-		CGRID:       utils.Sha1("testevent1", time.Date(2015, 12, 12, 14, 52, 0, 0, time.UTC).String()),
+		CGRID:       "CGR1",
 		RunID:       utils.MetaRaw,
 		OrderID:     time.Now().UnixNano(),
 		OriginHost:  "127.0.0.1",
@@ -1597,10 +1597,235 @@ func TestIDBGetCDR(t *testing.T) {
 	if err := storDB.SetCDR(cdr, false); err != nil {
 		t.Error(err)
 	}
-	if cdrs, _, err := storDB.GetCDRs(&utils.CDRsFilter{CGRIDs: []string{cdr.CGRID}, Subjects: []string{"1004"}, Sources: []string{"testSetCDRs"}, ToRs: []string{utils.MetaVoice}, RunIDs: []string{utils.MetaRaw}, OriginHosts: []string{"127.0.0.1"}, DestinationPrefixes: []string{"100"}, ExtraFields: map[string]string{"ExtraHeader1": "ExtraVal1", "Header2": "Val2"}, NotExtraFields: map[string]string{"ExtraHeader2": "ExtraVal2"}}, false); err != nil {
+	if cdrs, _, err := storDB.GetCDRs(&utils.CDRsFilter{CGRIDs: []string{cdr.CGRID}, OriginIDs: []string{"testevent1"}, RequestTypes: []string{utils.MetaPrepaid}, Tenants: []string{"cgrates.org"}, Categories: []string{"call"}, Subjects: []string{"1004"}, Sources: []string{"testSetCDRs"}, ToRs: []string{utils.MetaVoice}, RunIDs: []string{utils.MetaRaw}, OriginHosts: []string{"127.0.0.1"}, DestinationPrefixes: []string{"100"}, ExtraFields: map[string]string{"ExtraHeader1": "ExtraVal1", "Header2": "Val2"}, NotExtraFields: map[string]string{"ExtraHeader2": "ExtraVal2", "Header2": "Hdr"}}, false); err != nil {
 		t.Error(err)
 	} else if len(cdrs) != 1 {
 		t.Errorf("cdr %+v, Unexpected number of CDRs returned: %d", cdr, len(cdrs))
 	}
+}
 
+func TestIDBGeTps(t *testing.T) {
+	storDB := NewInternalDB(nil, nil, false, config.CgrConfig().StorDbCfg().Items)
+	resources := []*utils.TPResourceProfile{
+		{
+			TPid:              "TP1",
+			Tenant:            "cgrates.org",
+			ID:                "ResGroup21",
+			FilterIDs:         []string{"*string:~*req.Account:1001"},
+			UsageTTL:          "1s",
+			AllocationMessage: "call",
+			Weight:            10,
+			Limit:             "2",
+			Blocker:           true,
+			Stored:            true,
+		},
+	}
+	if err := storDB.SetTPResources(resources); err != nil {
+		t.Error(err)
+	}
+	if _, err := storDB.GetTPResources("TP1", "cgrates.org", resources[0].ID); err != nil {
+		t.Error(err)
+	}
+	stats := []*utils.TPStatProfile{
+		{
+			TPid:        "TP1",
+			Tenant:      "cgrates.org",
+			ID:          "Stats1",
+			FilterIDs:   []string{"FLTR_1"},
+			QueueLength: 100,
+			TTL:         "1s",
+			Metrics: []*utils.MetricWithFilters{
+				{
+					MetricID: utils.MetaASR,
+				},
+			},
+			ThresholdIDs: []string{"*none"},
+			Weight:       20.0,
+			Stored:       true,
+			MinItems:     1,
+		},
+	}
+	if err := storDB.SetTPStats(stats); err != nil {
+		t.Error(err)
+	}
+	if _, err := storDB.GetTPStats("TP1", "cgrates.org", stats[0].ID); err != nil {
+		t.Error(err)
+	}
+	thresholds := []*utils.TPThresholdProfile{
+		{TPid: "TP1",
+			Tenant:    "cgrates.org",
+			ID:        "TH_1",
+			FilterIDs: []string{"FLTR_1", "FLTR_2"},
+			MaxHits:   12,
+			MinHits:   10,
+			MinSleep:  "1s",
+			Blocker:   false,
+			Weight:    20.0,
+			ActionIDs: []string{"WARN3"},
+		}}
+	if err := storDB.SetTPThresholds(thresholds); err != nil {
+		t.Error(err)
+	}
+	if _, err := storDB.GetTPThresholds("TP1", "cgrates.org", thresholds[0].ID); err != nil {
+		t.Error(err)
+	}
+	filters := []*utils.TPFilterProfile{
+		{
+			TPid:   "TP1",
+			Tenant: "cgrates.org",
+			ID:     "Filter2",
+			Filters: []*utils.TPFilter{
+				{
+					Type:    utils.MetaPrefix,
+					Element: "Destination",
+					Values:  []string{"10"},
+				},
+			},
+		},
+	}
+	if err := storDB.SetTPFilters(filters); err != nil {
+		t.Error(err)
+	}
+	if _, err := storDB.GetTPFilters("TP1", "cgrates.org", filters[0].ID); err != nil {
+		t.Error(err)
+	}
+	routes := []*utils.TPRouteProfile{
+		{
+			TPid:      "TP1",
+			Tenant:    "cgrates.org",
+			ID:        "SUPL_1",
+			FilterIDs: []string{"*string:~*req.Accout:1007"},
+			Sorting:   "*lowest_cost",
+			Routes: []*utils.TPRoute{
+				{
+					ID:              "supplier1",
+					StatIDs:         []string{"Stat1"},
+					Weight:          10,
+					Blocker:         false,
+					RouteParameters: "SortingParam1",
+				},
+			},
+			Weight: 20,
+		},
+	}
+	if err := storDB.SetTPRoutes(routes); err != nil {
+		t.Error(err)
+	}
+	if _, err := storDB.GetTPRoutes("TP1", "cgrates.org", routes[0].ID); err != nil {
+		t.Error(err)
+	}
+	attributes := []*utils.TPAttributeProfile{
+		{TPid: "TP1",
+			Tenant:    "cgrates.org",
+			ID:        "ALS1",
+			Contexts:  []string{"con1"},
+			FilterIDs: []string{"FLTR_ACNT_dan", "FLTR_DST_DE"},
+			Attributes: []*utils.TPAttribute{
+				{
+					Path:  utils.MetaReq + utils.NestingSep + "FL1",
+					Value: "Al1",
+				},
+			},
+			Weight: 20,
+		}}
+	if err := storDB.SetTPAttributes(attributes); err != nil {
+		t.Error(err)
+	}
+	if _, err := storDB.GetTPAttributes("TP1", "cgrates.org", attributes[0].ID); err != nil {
+		t.Error(err)
+	}
+	chargers := []*utils.TPChargerProfile{
+		{TPid: "TP1",
+			Tenant:       "cgrates.org",
+			ID:           "Chrgs",
+			FilterIDs:    []string{"FLTR_ACNT_dan", "FLTR_DST_DE"},
+			RunID:        utils.MetaDefault,
+			AttributeIDs: []string{"Attr1", "Attr2"},
+			Weight:       20},
+	}
+	if err := storDB.SetTPChargers(chargers); err != nil {
+		t.Error(err)
+	}
+	if _, err := storDB.GetTPChargers("TP1", "cgrates.org", chargers[0].ID); err != nil {
+		t.Error(err)
+	}
+
+	dispatcherProfiles := []*utils.TPDispatcherProfile{
+		{
+			TPid:      "TP1",
+			Tenant:    "cgrates.org",
+			ID:        "Dsp1",
+			FilterIDs: []string{"*string:~*req.Account:1002"},
+			ActivationInterval: &utils.TPActivationInterval{
+				ActivationTime: "2014-07-29T15:00:00Z",
+				ExpiryTime:     "",
+			},
+			Strategy: utils.MetaFirst,
+			Weight:   10,
+		},
+	}
+	if err := storDB.SetTPDispatcherProfiles(dispatcherProfiles); err != nil {
+		t.Error(err)
+	}
+	if _, err := storDB.GetTPDispatcherProfiles("TP1", "cgrates.org", dispatcherProfiles[0].ID); err != nil {
+		t.Error(err)
+	}
+	dispatcherHosts := []*utils.TPDispatcherHost{
+
+		{
+			TPid:   "TP1",
+			Tenant: "cgrates.org",
+			ID:     "ALL",
+			Conn: &utils.TPDispatcherHostConn{
+				Address:   "127.0.0.1:2012",
+				Transport: utils.MetaJSON,
+				TLS:       true,
+			},
+		},
+	}
+	if err := storDB.SetTPDispatcherHosts(dispatcherHosts); err != nil {
+		t.Error(err)
+	}
+	if _, err := storDB.GetTPDispatcherHosts("TP1", "cgrates.org", dispatcherHosts[0].ID); err != nil {
+		t.Error(err)
+	}
+
+}
+
+func TestIDBGetAllActionPlanDrv(t *testing.T) {
+	dataDB := NewInternalDB(nil, nil, true, config.CgrConfig().DataDbCfg().Items)
+	acPln := []struct {
+		key string
+		apl *ActionPlan
+	}{
+		{
+			key: " MORE_MINUTES",
+			apl: &ActionPlan{
+				Id:         "MORE_MINUTES",
+				AccountIDs: utils.StringMap{"1001": true},
+			},
+		},
+		{
+			key: "PACKAGE_10_SHARED_A_5",
+			apl: &ActionPlan{
+				Id: "PACKAGE_10_SHARED_A_5",
+				AccountIDs: utils.StringMap{
+					"cgrates.org:1001": true,
+				},
+			},
+		},
+	}
+	for _, tt := range acPln {
+		t.Run(tt.key, func(t *testing.T) {
+			if err := dataDB.SetActionPlanDrv(tt.key, tt.apl); err != nil {
+				t.Error(err)
+			}
+		})
+	}
+
+	if apl, err := dataDB.GetAllActionPlansDrv(); err != nil {
+		t.Error(err)
+	} else if len(apl) != 2 {
+		t.Errorf("Expected : 2,Received %v", len(apl))
+	}
 }
