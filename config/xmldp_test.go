@@ -464,8 +464,8 @@ func TestStringXML(t *testing.T) {
 		cache:   utils.MapStorage{},
 	}
 	expected := utils.EmptyString
-	if received := dP.String(); !reflect.DeepEqual(received, expected) {
-		t.Errorf("Expected %+v, received %+v", expected, received)
+	if received := dP.String(); received != expected {
+		t.Errorf("Expected %q, received %q", expected, received)
 	}
 }
 

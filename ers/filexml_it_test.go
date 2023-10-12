@@ -53,6 +53,8 @@ var (
 		testXMLITLoadTPFromFolder,
 		testXMLITHandleCdr1File,
 		testXmlITAnalyseCDRs,
+		testXMLITEmptyRootPathCase,
+		testXMLITEmptyRootPathCaseCheckCDRs,
 		testCleanupFiles,
 		testXMLITKillEngine,
 	}
@@ -281,6 +283,54 @@ func testXmlITAnalyseCDRs(t *testing.T) {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(reply) != 3 {
 		t.Error("Unexpected number of CDRs returned: ", len(reply))
+	}
+}
+
+var xmlPartialCDR = `<?xml version="1.0" encoding="ISO-8859-1"?>
+<root>
+  <partial_cdr>
+    <ID>1</ID>
+    <Account>1001</Account>
+    <Destination>1002</Destination>
+    <Tenant>cgrates.org</Tenant>
+    <ReleaseTime>20231011125833.158</ReleaseTime>
+  </partial_cdr>
+  <partial_cdr>
+    <ID>2</ID>
+    <RequestType>*postpaid</RequestType>
+    <ToR>*voice</ToR>
+  </partial_cdr>
+  <partial_cdr>
+    <TestCase>EmptyRootCDR</TestCase>
+    <ID>3</ID>
+    <Tenant>ignored</Tenant>
+    <SetupTime>20231011125800</SetupTime>
+    <AnswerTime>20231011125801</AnswerTime>
+  </partial_cdr>
+</root>`
+
+func testXMLITEmptyRootPathCase(t *testing.T) {
+	fileName := "partial-cdr.xml"
+	tmpFilePath := path.Join("/tmp", fileName)
+	if err := os.WriteFile(tmpFilePath, []byte(xmlPartialCDR), 0644); err != nil {
+		t.Fatal(err.Error())
+	}
+	if err := os.Rename(tmpFilePath, path.Join("/tmp/xmlErs2/in", fileName)); err != nil {
+		t.Fatal("Error moving file to processing directory: ", err)
+	}
+	time.Sleep(100 * time.Millisecond)
+}
+
+func testXMLITEmptyRootPathCaseCheckCDRs(t *testing.T) {
+	var reply []*engine.ExternalCDR
+	if err := xmlRPC.Call(
+		context.Background(),
+		utils.APIerSv2GetCDRs,
+		utils.RPCCDRsFilter{OriginIDs: []string{"EmptyRootCDR_2"}},
+		&reply); err != nil {
+		t.Error("Unexpected error: ", err.Error())
+	} else if len(reply) != 3 {
+		t.Error("Unexpected number of CDRs returned:", len(reply))
 	}
 }
 

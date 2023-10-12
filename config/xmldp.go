@@ -37,16 +37,29 @@ func NewXMLProvider(req *xmlquery.Node, cdrPath utils.HierarchyPath) (dP utils.D
 	return
 }
 
-// XMLProvider implements engine.utils.DataProvider so we can pass it to filters
+// XmlProvider implements engine.utils.DataProvider, allowing it to be passed to filters.
+// An instance of XmlProvider is created for each element retrieved from xmlquery.QueryAll.
 type XMLProvider struct {
-	req     *xmlquery.Node
-	cdrPath utils.HierarchyPath //used to compute relative path
-	cache   utils.MapStorage
+
+	// req is the root node of each individual XML element retrieved.
+	// It acts as the starting point for extracting data from the XML element.
+	req *xmlquery.Node
+
+	// cdrPath is the root path used to calculate the relative path.
+	// The relative path is computed by trimming cdrPath from the full path of the XML element.
+	cdrPath utils.HierarchyPath
+
+	// cache stores the inner text of XML elements.
+	// The key is the relative path of the XML element.
+	cache utils.MapStorage
 }
 
 // String is part of engine.utils.DataProvider interface
 // when called, it will display the already parsed values out of cache
 func (xP *XMLProvider) String() string {
+
+	// TODO: Find a proper way to display xP as string. Right now it's returning an
+	// empty string due to xmlquery.Node referencing itself.
 	return utils.ToJSON(xP.req)
 }
 
@@ -65,11 +78,11 @@ func (xP *XMLProvider) FieldAsInterface(fldPath []string) (data any, err error) 
 	for i := range relPath {
 		if sIdx := strings.Index(relPath[i], "["); sIdx != -1 {
 			slctrStr = relPath[i][sIdx:]
-			if slctrStr[len(slctrStr)-1:] != "]" {
+			if slctrStr[len(slctrStr)-1] != ']' {
 				return nil, fmt.Errorf("filter rule <%s> needs to end in ]", slctrStr)
 			}
 			relPath[i] = relPath[i][:sIdx]
-			if slctrStr[1:2] != "@" {
+			if slctrStr[1] != '@' {
 				i, err := strconv.Atoi(slctrStr[1 : len(slctrStr)-1])
 				if err != nil {
 					return nil, err
@@ -98,7 +111,10 @@ func (xP *XMLProvider) FieldAsString(fldPath []string) (data string, err error) 
 // returns utils.ErrNotFound if the element is not found in the node
 // Make the method exportable until we remove the ers
 func ElementText(xmlElement *xmlquery.Node, elmntPath string) (string, error) {
-	elmnt := xmlquery.FindOne(xmlElement, elmntPath)
+	elmnt, err := xmlquery.Query(xmlElement, elmntPath)
+	if err != nil {
+		return "", err
+	}
 	if elmnt == nil {
 		return "", utils.ErrNotFound
 	}
