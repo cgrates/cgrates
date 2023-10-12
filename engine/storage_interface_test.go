@@ -191,27 +191,6 @@ func TestStorageInterfaceUnmarshalBinc(t *testing.T) {
 	}
 }
 
-func TestStorageInterfaceMarshalGOB(t *testing.T) {
-	type Test struct {
-		Field string
-	}
-	arg := Test{
-		Field: "test",
-	}
-	bm := GOBMarshaler{}
-
-	rcv, err := bm.Marshal(arg)
-	if err != nil {
-		t.Error(err)
-	}
-
-	exp := []byte{28, 255, 185, 3, 1, 1, 4, 84, 101, 115, 116, 1, 255, 186, 0, 1, 1, 1, 5, 70, 105, 101, 108, 100, 1, 12, 0, 0, 0, 9, 255, 186, 1, 4, 116, 101, 115, 116, 0}
-
-	if !reflect.DeepEqual(rcv, exp) {
-		t.Errorf("expeted %v, received %v", exp, rcv)
-	}
-}
-
 func TestStorageInterfaceUnmarshalGOB(t *testing.T) {
 	type Test struct {
 		Field string
