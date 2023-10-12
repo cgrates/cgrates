@@ -1,0 +1,24 @@
+Source: cgrates
+Maintainer: DanB <danb@cgrates.org>
+Section: misc
+Priority: optional
+Build-Depends: debhelper-compat (= 13),
+               dh-exec,
+               dh-golang
+Standards-Version: 4.6.2
+Vcs-Browser: https://github.com/cgrates/cgrates
+Vcs-Git: https://github.com/cgrates/cgrates.git
+Homepage: http://cgrates.org
+Rules-Requires-Root: no
+XS-Go-Import-Path: github.com/cgrates/cgrates
+
+Package: cgrates
+Architecture: any
+Depends: ${shlibs:Depends},
+         ${misc:Depends}
+Suggests: default-mysql-server,
+          redis-server
+Pre-Depends: ${misc:Pre-Depends}
+Description: Carrier Grade Real-time Charging System
+ CGRateS is a very fast and easily scalable real-time enterprise billing
+ suite targeted at ISPs and telecom operators (but not only).

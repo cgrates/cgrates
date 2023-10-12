@@ -1,0 +1,7 @@
+# Dependencies are included as-is
+source-is-missing [dependencies/*]
+source-contains-prebuilt-windows-binary [dependencies/*]
+
+# Not worth the effort for unofficial package
+add-component-copyright dependencies [debian/copyright]
+
