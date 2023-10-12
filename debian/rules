@@ -1,0 +1,45 @@
+#!/usr/bin/make -f
+
+export DH_VERBOSE=1
+
+# Enable hardening build flags
+export DEB_BUILD_MAINT_OPTIONS=hardening=+all
+
+export DH_GOLANG_BUILDPKG=github.com/cgrates/cgrates/cmd/cgr-console \
+                          github.com/cgrates/cgrates/cmd/cgr-engine \
+                          github.com/cgrates/cgrates/cmd/cgr-loader \
+                          github.com/cgrates/cgrates/cmd/cgr-migrator \
+                          github.com/cgrates/cgrates/cmd/cgr-tester
+
+export GO111MODULE=on
+
+%:
+	dh $@ --builddirectory=_build --buildsystem=golang
+
+override_dh_auto_clean:
+	PATH="/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/go/bin" dh_auto_clean
+
+override_dh_auto_configure:
+	PATH="/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/go/bin" dh_auto_configure
+
+execute_after_dh_auto_configure:
+	(mkdir -p _build/pkg && cd _build/pkg && ln -s ../../dependencies/pkg/* .)
+
+override_dh_auto_build:
+	PATH="/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/go/bin" dh_auto_build -- \
+	-ldflags "-X 'github.com/cgrates/cgrates/utils.GitCommitDate=$$GIT_COMMIT_DATE' \
+	          -X 'github.com/cgrates/cgrates/utils.GitCommitHash=$$GIT_COMMIT_HASH'"
+
+override_dh_auto_test:
+	PATH="/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/go/bin" dh_auto_test
+
+override_dh_auto_install:
+	PATH="/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/go/bin" dh_auto_install -- --no-source
+
+execute_after_dh_install:
+	tar -xavf debian/cgrates/usr/share/cgrates/tutorials/fs_evsock/freeswitch/etc/freeswitch_conf.tar.gz \
+	    -C debian/cgrates/usr/share/cgrates/tutorials/fs_evsock/freeswitch/etc/
+	rm -f debian/cgrates/usr/share/cgrates/tutorials/fs_evsock/freeswitch/etc/freeswitch_conf.tar.gz
+
+override_dh_dwz:
+	dh_dwz -Xcgr-console -Xcgr-engine -Xcgr-loader -Xcgr-migrator -Xcgr-tester
