@@ -34,11 +34,21 @@ func NewXmlProvider(req *xmlquery.Node, cdrPath utils.HierarchyPath) (dP utils.D
 	return
 }
 
-// XmlProvider implements engine.utils.DataProvider so we can pass it to filters
+// XmlProvider implements engine.utils.DataProvider, allowing it to be passed to filters.
+// An instance of XmlProvider is created for each element retrieved from xmlquery.QueryAll.
 type XmlProvider struct {
-	req     *xmlquery.Node
-	cdrPath utils.HierarchyPath //used to compute relative path
-	cache   utils.MapStorage
+
+	// req is the root node of each individual XML element retrieved.
+	// It acts as the starting point for extracting data from the XML element.
+	req *xmlquery.Node
+
+	// cdrPath is the root path used to calculate the relative path.
+	// The relative path is computed by trimming cdrPath from the full path of the XML element.
+	cdrPath utils.HierarchyPath
+
+	// cache stores the inner text of XML elements.
+	// The key is the relative path of the XML element.
+	cache utils.MapStorage
 }
 
 // String is part of engine.utils.DataProvider interface
