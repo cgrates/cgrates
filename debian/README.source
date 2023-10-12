@@ -1,0 +1,115 @@
+CGRateS for Debian
+------------------
+
+CGRateS dependencies are not packaged separately, an additional
+component is used alongside the upstream tarball.
+
+For package builds both tarballs need to be updated.
+
+The build.sh script in the debian directory automates the process.
+It creates the .orig.tar.gz using git archive, and uses go get to
+download the sources for the dependencies component. The script then
+proceed to build the package in a cowbuilder chroot.
+
+The script has a few dependencies:
+
+ git          To get the commit details for the package version
+ distro-info  To get the release version for the distribution
+ dpkg-dev     To parse the debian/changelog file and dpkg-buildpackage
+ devscripts   To set the package version and distribution
+ pbuilder     To build the package with pdebuild
+ cowbuilder   To have a more performant chroot
+
+Because the clean target is also executed outside the chroot these build
+dependencies need to be installed outside the chroot too:
+
+ debhelper    For dh sequencer support in debian/rules
+ dh-golang    For the golang buildsystem used by debhelper
+
+The cowbuilder chroots should have the upstream Go installed after
+creation:
+
+ sudo -i
+ export CODENAME=bookworm
+ export VERSION=1.21.4
+ cowbuilder --create \
+            --distribution ${CODENAME} \
+            --architecture amd64 \
+            --basepath /var/cache/pbuilder/base-${CODENAME}+go.cow \
+            --mirror http://ftp.nl.debian.org/debian/ \
+            --components 'main contrib non-free non-free-firmware'
+ wget https://go.dev/dl/go${VERSION}.linux-amd64.tar.gz -P /tmp
+ tar xavf /tmp/go${VERSION}.linux-amd64.tar.gz \
+     -C /var/cache/pbuilder/base-${CODENAME}+go.cow/usr/local
+ echo "export PATH=\$PATH:/usr/local/go/bin" >> /var/cache/pbuilder/base-${CODENAME}+go.cow/root/.bashrc
+
+To upgrade the Go version in an existing chroot replace /usr/local/go
+in the chroot:
+
+ sudo -i
+ export CODENAME=bookworm
+ export VERSION=1.21.6
+ wget https://go.dev/dl/go${VERSION}.linux-amd64.tar.gz -P /tmp
+ rm -rf /var/cache/pbuilder/base-${CODENAME}+go.cow/usr/local/go/
+ tar xavf /tmp/go${VERSION}.linux-amd64.tar.gz \
+     -C /var/cache/pbuilder/base-${CODENAME}+go.cow/usr/local
+
+To not have the upstream Go installed outside the chroot, the packaged
+Go can be used:
+
+ GO=/usr/lib/go-1.21/bin/go make -C packages/ deb
+
+To have the build artifacts alongside the source package in the parent
+directory instead of /var/cache/pbuilder/result configure the path in
+~/.pbuilderrc:
+
+ BUILDRESULT=".."
+
+To have lintian run after the package build in the chroot configure the
+hook:
+
+ sudo -i
+ mkdir -p /var/cache/pbuilder/hooks.d
+ cat <<EOF > /var/cache/pbuilder/hooks.d/B90lintian
+ #!/bin/bash
+
+ if [ -n "\${LINTIAN}" ] && [ "\${LINTIAN}" = "0" ]; then
+     echo
+     echo "Not running lintian"
+     echo
+     exit 0
+ fi
+
+ install_packages() {
+     apt-get -y "\${APTGETOPT[@]}" install "\$@"
+     rc=\$?
+
+     if [ "\${rc}" -ne 0 ]; then
+         echo
+         echo "Not running lintian"
+         echo
+         exit 0
+     fi
+ }
+
+ install_packages lintian
+
+ set -e
+
+ echo "+++ lintian output +++"
+
+ #su -c "lintian -I --show-overrides /tmp/buildd/*.changes" - pbuilder
+ # use this version if you don't want lintian to fail the build
+ su -c "lintian -I --show-overrides --pedantic -E /tmp/buildd/*.changes; :" - pbuilder
+
+ echo "+++ end of lintian output +++"
+
+ EOF
+
+And configure the path to the hooks directory in ~/.pbuilderrc:
+
+ HOOKDIR="/var/cache/pbuilder/hooks.d/"
+
+To skip running the lintian set LINTIAN=0 in the environment. When the
+lintian package fails to install, like during perl transitions, the build
+won't fail.
