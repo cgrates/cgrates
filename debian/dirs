@@ -1,0 +1,9 @@
+var/lib/cgrates/cache_dump
+var/log/cgrates
+var/spool/cgrates/analyzers
+var/spool/cgrates/cdre/csv
+var/spool/cgrates/cdre/fwv
+var/spool/cgrates/ers/in
+var/spool/cgrates/ers/out
+var/spool/cgrates/failed_posts
+var/spool/cgrates/tpe
