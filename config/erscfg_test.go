@@ -39,7 +39,6 @@ func TestERSClone(t *testing.T) {
 			"source_path": "/tmp/ers/in",
 			"processed_path": "/tmp/ers/out",
 			"opts": {},
-			"xml_root_path": "",								
 			"tenant": "~*req.Destination1",											
 			"timezone": "",										
 			"filters": ["randomFiletrs"],										
@@ -109,7 +108,6 @@ func TestERSClone(t *testing.T) {
 					AWS:                &AWSROpts{},
 					SQL:                &SQLROpts{},
 					Kafka:              &KafkaROpts{},
-					XMLRootPath:        utils.StringPointer(utils.EmptyString),
 					PartialOrderField:  utils.StringPointer("~*req.AnswerTime"),
 					PartialCacheAction: utils.StringPointer(utils.MetaNone),
 					NATS: &NATSROpts{
@@ -149,7 +147,6 @@ func TestERSClone(t *testing.T) {
 					AWS:                &AWSROpts{},
 					SQL:                &SQLROpts{},
 					Kafka:              &KafkaROpts{},
-					XMLRootPath:        utils.StringPointer(utils.EmptyString),
 					PartialOrderField:  utils.StringPointer("~*req.AnswerTime"),
 					PartialCacheAction: utils.StringPointer(utils.MetaNone),
 					NATS: &NATSROpts{
@@ -277,7 +274,6 @@ func TestERSLoadFromjsonCfg(t *testing.T) {
 					AWS:                &AWSROpts{},
 					Kafka:              &KafkaROpts{},
 					SQL:                &SQLROpts{},
-					XMLRootPath:        utils.StringPointer(utils.EmptyString),
 					PartialOrderField:  utils.StringPointer("~*req.AnswerTime"),
 					PartialCacheAction: utils.StringPointer(utils.MetaNone),
 					NATS: &NATSROpts{
@@ -332,7 +328,6 @@ func TestERSLoadFromjsonCfg(t *testing.T) {
 					AWS:                &AWSROpts{},
 					SQL:                &SQLROpts{},
 					Kafka:              &KafkaROpts{},
-					XMLRootPath:        utils.StringPointer(utils.EmptyString),
 					PartialOrderField:  utils.StringPointer("~*req.AnswerTime"),
 					PartialCacheAction: utils.StringPointer(utils.MetaNone),
 					NATS: &NATSROpts{
@@ -520,7 +515,6 @@ func TestERSloadFromJsonCase3(t *testing.T) {
 					AWS:                &AWSROpts{},
 					Kafka:              &KafkaROpts{},
 					SQL:                &SQLROpts{},
-					XMLRootPath:        utils.StringPointer(utils.EmptyString),
 					PartialOrderField:  utils.StringPointer("~*req.AnswerTime"),
 					PartialCacheAction: utils.StringPointer(utils.MetaNone),
 					NATS: &NATSROpts{
@@ -559,7 +553,6 @@ func TestERSloadFromJsonCase3(t *testing.T) {
 					AWS:                &AWSROpts{},
 					SQL:                &SQLROpts{},
 					Kafka:              &KafkaROpts{},
-					XMLRootPath:        utils.StringPointer(utils.EmptyString),
 					PartialOrderField:  utils.StringPointer("~*req.AnswerTime"),
 					PartialCacheAction: utils.StringPointer(utils.MetaNone),
 					NATS: &NATSROpts{
@@ -671,7 +664,6 @@ func TestERSloadFromJsonCase4(t *testing.T) {
 					AWS:                &AWSROpts{},
 					Kafka:              &KafkaROpts{},
 					SQL:                &SQLROpts{},
-					XMLRootPath:        utils.StringPointer(utils.EmptyString),
 					PartialOrderField:  utils.StringPointer("~*req.AnswerTime"),
 					PartialCacheAction: utils.StringPointer(utils.MetaNone),
 					NATS: &NATSROpts{
@@ -710,7 +702,6 @@ func TestERSloadFromJsonCase4(t *testing.T) {
 					AMQP:               &AMQPROpts{},
 					SQL:                &SQLROpts{},
 					Kafka:              &KafkaROpts{},
-					XMLRootPath:        utils.StringPointer(utils.EmptyString),
 					PartialOrderField:  utils.StringPointer("~*req.AnswerTime"),
 					PartialCacheAction: utils.StringPointer(utils.MetaNone),
 					NATS: &NATSROpts{
@@ -817,7 +808,6 @@ func TestEventReaderSameID(t *testing.T) {
 					AMQP:               &AMQPROpts{},
 					AWS:                &AWSROpts{},
 					SQL:                &SQLROpts{},
-					XMLRootPath:        utils.StringPointer(utils.EmptyString),
 					PartialOrderField:  utils.StringPointer("~*req.AnswerTime"),
 					PartialCacheAction: utils.StringPointer(utils.MetaNone),
 					NATS: &NATSROpts{
@@ -852,7 +842,6 @@ func TestEventReaderSameID(t *testing.T) {
 					AWS:                &AWSROpts{},
 					SQL:                &SQLROpts{},
 					Kafka:              &KafkaROpts{},
-					XMLRootPath:        utils.StringPointer(utils.EmptyString),
 					PartialOrderField:  utils.StringPointer("~*req.AnswerTime"),
 					PartialCacheAction: utils.StringPointer(utils.MetaNone),
 					NATS: &NATSROpts{
@@ -961,7 +950,6 @@ func TestERsCfgAsMapInterfaceCase1(t *testing.T) {
 					"csvFieldSeparator":   ",",
 					"csvHeaderDefineChar": ":",
 					"csvRowLength":        0,
-					"xmlRootPath":         "",
 					"partialOrderField":   "~*req.AnswerTime",
 					"partialCacheAction":  utils.MetaNone,
 					"natsSubject":         "cgrates_cdrs",
@@ -997,7 +985,6 @@ func TestERsCfgAsMapInterfaceCase1(t *testing.T) {
 					"csvFieldSeparator":   ",",
 					"csvHeaderDefineChar": ":",
 					"csvRowLength":        0,
-					"xmlRootPath":         "",
 					"partialOrderField":   "~*req.AnswerTime",
 					"partialCacheAction":  utils.MetaNone,
 					"natsSubject":         "cgrates_cdrs",
@@ -1035,6 +1022,7 @@ func TestERSCfgAsMapInterfaceCase2(t *testing.T) {
 				"opts":{
 					"kafkaGroupID": "test",
 					"csvLazyQuotes": false,
+					"xmlRootPath": "root.A",
 					"amqpQueueID": "id",
 					"amqpQueueIDProcessed":"queue",
 					"amqpConsumerTag": "tag",
@@ -1126,7 +1114,6 @@ func TestERSCfgAsMapInterfaceCase2(t *testing.T) {
 					"csvFieldSeparator":   ",",
 					"csvHeaderDefineChar": ":",
 					"csvRowLength":        0,
-					"xmlRootPath":         "",
 					"partialOrderField":   "~*req.AnswerTime",
 					"partialCacheAction":  utils.MetaNone,
 					"natsSubject":         "cgrates_cdrs",
@@ -1164,7 +1151,7 @@ func TestERSCfgAsMapInterfaceCase2(t *testing.T) {
 					utils.CSVLazyQuotes:                        false,
 					utils.KafkaGroupID:                         "test",
 					utils.CSVFieldSepOpt:                       ",",
-					utils.XMLRootPathOpt:                       "",
+					utils.XMLRootPathOpt:                       "root.A",
 					"csvHeaderDefineChar":                      ":",
 					"csvRowLength":                             0,
 					"partialOrderField":                        "~*req.AnswerTime",
@@ -1313,7 +1300,6 @@ func TestERsloadFromJsonCfg(t *testing.T) {
 					AMQP:               &AMQPROpts{},
 					AWS:                &AWSROpts{},
 					SQL:                &SQLROpts{},
-					XMLRootPath:        utils.StringPointer(utils.EmptyString),
 					PartialOrderField:  utils.StringPointer("~*req.AnswerTime"),
 					PartialCacheAction: utils.StringPointer(utils.MetaNone),
 					NATS: &NATSROpts{
@@ -1354,7 +1340,6 @@ func TestERsloadFromJsonCfg(t *testing.T) {
 					AWS:                &AWSROpts{},
 					SQL:                &SQLROpts{},
 					Kafka:              &KafkaROpts{},
-					XMLRootPath:        utils.StringPointer(utils.EmptyString),
 					PartialOrderField:  utils.StringPointer("~*req.AnswerTime"),
 					PartialCacheAction: utils.StringPointer(utils.MetaNone),
 					NATS: &NATSROpts{

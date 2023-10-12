@@ -665,9 +665,12 @@ func TimeIs0h(t time.Time) bool {
 }
 
 func ParseHierarchyPath(path string, sep string) HierarchyPath {
+	if path == EmptyString {
+		return nil
+	}
 	if sep == EmptyString {
 		for _, sep = range []string{"/", NestingSep} {
-			if idx := strings.Index(path, sep); idx != -1 {
+			if strings.Contains(path, sep) {
 				break
 			}
 		}
@@ -679,22 +682,30 @@ func ParseHierarchyPath(path string, sep string) HierarchyPath {
 // HierarchyPath is used in various places to represent various path hierarchies (eg: in Diameter groups, XML trees)
 type HierarchyPath []string
 
-func (h HierarchyPath) AsString(sep string, prefix bool) string {
-	if len(h) == 0 {
-		return EmptyString
+// AsString converts HierarchyPath to a string.
+func (hP HierarchyPath) AsString(sep string, prefix bool) string {
+	var strHP strings.Builder
+
+	// If prefix is true and the HierarchyPath slice is empty, sep will be returned.
+	if prefix {
+		strHP.WriteString(sep)
 	}
-	retStr := EmptyString
-	for idx, itm := range h {
-		if idx == 0 {
-			if prefix {
-				retStr += sep
-			}
-		} else {
-			retStr += sep
+
+	// TODO: Since this function can convert both the full and the relative HierarchyPath to a string, with
+	// prefix telling us which is which (true -> full path, false -> relative path), we should consider
+	// returning the '.' character when prefix == false. Currently, because we are returning an empty string
+	// if the path we are currently parsing is equal to the root path, when we attempt to retrieve the element
+	// we receive the error "expr expression is nil".
+	if len(hP) == 0 {
+		return strHP.String()
+	}
+	for i, elem := range hP {
+		if i != 0 {
+			strHP.WriteString(sep)
 		}
-		retStr += itm
+		strHP.WriteString(elem)
 	}
-	return retStr
+	return strHP.String()
 }
 
 // Clone returns a deep copy of HierarchyPath

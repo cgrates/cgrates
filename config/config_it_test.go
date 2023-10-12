@@ -619,7 +619,6 @@ func testCGRConfigReloadERs(t *testing.T) {
 					Kafka:              &KafkaROpts{},
 					PartialOrderField:  utils.StringPointer("~*req.AnswerTime"),
 					PartialCacheAction: utils.StringPointer(utils.MetaNone),
-					XMLRootPath:        utils.StringPointer(utils.EmptyString),
 					NATS: &NATSROpts{
 						Subject: utils.StringPointer("cgrates_cdrs"),
 					},
@@ -649,7 +648,6 @@ func testCGRConfigReloadERs(t *testing.T) {
 					SQL:                &SQLROpts{},
 					PartialOrderField:  utils.StringPointer("~*req.AnswerTime"),
 					PartialCacheAction: utils.StringPointer(utils.MetaNone),
-					XMLRootPath:        utils.StringPointer(utils.EmptyString),
 					NATS: &NATSROpts{
 						Subject: utils.StringPointer("cgrates_cdrs"),
 					},
@@ -847,7 +845,6 @@ func testCgrCfgV1ReloadConfigSection(t *testing.T) {
 					"csvRowLength":        0.,
 					"partialOrderField":   "~*req.AnswerTime",
 					"partialCacheAction":  utils.MetaNone,
-					"xmlRootPath":         "",
 					"natsSubject":         "cgrates_cdrs",
 				},
 				"partial_commit_fields": []any{},
@@ -871,7 +868,6 @@ func testCgrCfgV1ReloadConfigSection(t *testing.T) {
 					"csvRowLength":        0.,
 					"partialOrderField":   "~*req.AnswerTime",
 					"partialCacheAction":  utils.MetaNone,
-					"xmlRootPath":         "",
 					"natsSubject":         "cgrates_cdrs",
 				},
 				"partial_commit_fields": []any{},

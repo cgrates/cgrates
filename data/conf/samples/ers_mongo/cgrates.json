@@ -225,7 +225,32 @@
 				{"tag": "SetupTime", "path": "*cgreq.SetupTime", "type": "*variable", "value": "~*req.broadWorksCDR.cdrData.basicModule.startTime", "mandatory": true},
 				{"tag": "AnswerTime", "path": "*cgreq.AnswerTime", "type": "*variable", "value": "~*req.broadWorksCDR.cdrData.basicModule.answerTime", "mandatory": true},
 				{"tag": "Usage", "path": "*cgreq.Usage", "type": "*usage_difference", "value": "~*req.broadWorksCDR.cdrData.basicModule.releaseTime;~*req.broadWorksCDR.cdrData.basicModule.answerTime", "mandatory": true}
-			],
+			]
+		},
+		{
+			"id": "XML_EmptyRoot",
+			"run_delay":  "-1",
+			"type": "*file_xml",
+			"source_path": "/tmp/xmlErs2/in",
+			"flags": ["*cdrs","*log"],
+			"processed_path": "/tmp/xmlErs2/out",
+			"opts": {
+				"xmlRootPath": ""
+			},
+			"fields":[
+				{"tag": "ToR", "path": "*cgreq.ToR", "type": "*variable", "value": "~*req.root.partial_cdr.ToR", "mandatory": true},
+				{"tag": "OriginID", "path": "*cgreq.OriginID", "type": "*composed", "value": "~*req.root.partial_cdr.TestCase", "mandatory": true},
+				{"tag": "OriginID", "path": "*cgreq.OriginID", "type": "*composed", "value": "_", "mandatory": true},
+				{"tag": "OriginID", "path": "*cgreq.OriginID", "type": "*composed", "value": "~*req.root.partial_cdr[1].ID", "mandatory": true},
+				{"tag": "RequestType", "path": "*cgreq.RequestType", "type": "*variable", "value": "~*req.root.partial_cdr.RequestType", "mandatory": true},
+				{"tag": "Tenant", "path": "*cgreq.Tenant", "type": "*variable", "value": "~*req.root.partial_cdr.Tenant", "mandatory": true},
+				{"tag": "Category", "path": "*cgreq.Category", "type": "*constant", "value": "call", "mandatory": true},
+				{"tag": "Account", "path": "*cgreq.Account", "type": "*variable", "value": "~*req.root.partial_cdr.Account", "mandatory": true},
+				{"tag": "Destination", "path": "*cgreq.Destination", "type": "*variable", "value": "~*req.root.partial_cdr.Destination", "mandatory": true},
+				{"tag": "SetupTime", "path": "*cgreq.SetupTime", "type": "*variable", "value": "~*req.root.partial_cdr.SetupTime", "mandatory": true},
+				{"tag": "AnswerTime", "path": "*cgreq.AnswerTime", "type": "*variable", "value": "~*req.root.partial_cdr.AnswerTime", "mandatory": true},
+				{"tag": "Usage", "path": "*cgreq.Usage", "type": "*usage_difference", "value": "~*req.root.partial_cdr.ReleaseTime;~*req.root.partial_cdr.AnswerTime", "mandatory": true}
+			]
 		},
 		{
 			"id": "FWV1",
