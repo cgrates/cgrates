@@ -1,0 +1,5 @@
+#!/usr/bin/dh-exec
+data/conf/cgrates/                  etc/
+data/conf/logging/logrotate.conf => etc/logrotate.d/cgrates
+data/conf/logging/rsyslog.conf   => etc/rsyslog.d/25-cgrates.conf
+data/*                              usr/share/cgrates/

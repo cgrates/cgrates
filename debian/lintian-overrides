@@ -1,0 +1,21 @@
+# Not picked up by go
+hardening-no-pie [usr/bin/*]
+
+# Not a problem
+no-manual-page [usr/bin/*]
+
+# Not a problem
+package-contains-documentation-outside-usr-share-doc [usr/share/cgrates/*]
+
+# Only systemd is supported
+package-supports-alternative-init-but-no-init.d-script [lib/systemd/system/cgrates.service]
+
+# No good alternative
+recursive-privilege-change "chown -R" [postinst:*]
+
+# Sources for dependencies are included as-is
+spelling-error-in-binary *
+
+# Unported python2 scripts
+unusual-interpreter /usr/bin/python [usr/share/cgrates/*/migrator/*.py]
+
