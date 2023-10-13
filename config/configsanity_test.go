@@ -873,3 +873,58 @@ func TestConfigSanityFilterS(t *testing.T) {
 	cfg.filterSCfg.ResourceSConns = []string{}
 
 }
+
+func TestConfigSanityERsXmlRootPath(t *testing.T) {
+	cfg, err := NewCGRConfigFromJsonStringWithDefaults(`{
+"ers": {
+	"enabled": true,
+	"sessions_conns": [],
+	"readers": [
+		{
+			"id": "*default",
+			"type": "*file_xml",
+			"source_path": "/tmp",
+			"processed_path": "/tmp",
+			"flags": ["*dryrun"],
+			"xml_root_path": "A.B",
+			"fields":[
+				{"tag": "VariableFld", "path": "*cgreq.VariableFld", "type": "*variable", "value": "~*req.A.B.Value1", "mandatory": true},
+				{"tag": "ComposedFld", "path": "*cgreq.ComposedFld", "type": "*composed", "value": "~*req.A.B.Value2", "mandatory": true},
+				{"tag": "ComposedFld", "path": "*cgreq.ComposedFld", "type": "*composed", "value": "_", "mandatory": true},
+				{"tag": "ComposedFld", "path": "*cgreq.ComposedFld", "type": "*composed", "value": "~*req.A.B.Value3", "mandatory": true},
+				{"tag": "ConstantFld", "path": "*cgreq.ConstantFld", "type": "*constant", "value": "Value4", "mandatory": true},
+				{"tag": "UsageDiffFld", "path": "*cgreq.UsageDiffFld", "type": "*usage_difference", "value": "~*req.A.B.Value5;~*req.A.B.Value6", "mandatory": true},
+				{"tag": "NoneFld", "path": "*cgreq.NoneFld", "type": "*none", "mandatory": true},
+				{"tag": "FillerFld", "path": "*cgreq.FillerFld", "type": "*filler", "width": 5, "mandatory": true}
+			]
+		}
+	]
+}}`)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	err = cfg.checkConfigSanity()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	cfg.ERsCfg().Readers[0].XmlRootPath = utils.ParseHierarchyPath("", utils.EmptyString)
+	err = cfg.checkConfigSanity()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	cfg.ERsCfg().Readers[0].XmlRootPath = utils.ParseHierarchyPath("A.B.Value1", utils.EmptyString)
+	err = cfg.checkConfigSanity()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	experr := `<ERs> xml_root_path length exceeds value rule elements for reader *default at VariableFld`
+	cfg.ERsCfg().Readers[0].XmlRootPath = utils.ParseHierarchyPath("A.B.C.D", utils.EmptyString)
+	err = cfg.checkConfigSanity()
+	if err == nil || err.Error() != experr {
+		t.Errorf("expected: %s, received: %s", experr, err)
+	}
+}
