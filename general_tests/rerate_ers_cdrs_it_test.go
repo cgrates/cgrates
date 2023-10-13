@@ -21,9 +21,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package general_tests
 
 import (
-	"log"
 	"os"
 	"path"
+	"path/filepath"
 	"reflect"
 	"testing"
 	"time"
@@ -40,7 +40,7 @@ var (
 	rrErsCdrsCfg     *config.CGRConfig
 	rrErsCdrsRPC     *birpc.Client
 	rrErsCdrsDelay   int
-	rrErsCdrsUUID    = utils.GenUUID()
+	rrErsCdrsUUID    = "38e4d9f4-577f-4260-a7a5-bae8cd5417de"
 	cdrEvent         *utils.CGREvent
 
 	rrErsCdrsTests = []func(t *testing.T){
@@ -54,8 +54,10 @@ var (
 		testRerateCDRsERsSetBalance,
 		testRerateCDRsERsGetAccountAfterBalanceSet,
 		testRerateCDRsERsProcessEventCDR1,
-		testRerateCDRsERsGetCDRs,
+		testRerateCDRsERsGetCDRs1,
 		testRerateCDRsERsExport,
+		testRerateCDRsERsMoveFiles,
+		testRerateCDRsERsGetCDRs2,
 		testRerateCDRsERsStopEngine,
 		testRerateCDRsERsDeleteFolders,
 	}
@@ -69,42 +71,26 @@ func TestReRateCDRsERs(t *testing.T) {
 }
 
 func testRerateCDRsERsCreateFolders(t *testing.T) {
-	inPath := "/tmp/ers/in"
-	outPath := "/tmp/ers/out"
+	folders := []string{"/tmp/ers/in", "/tmp/ees/mv", "/tmp/ers/out"}
 
-	// Create the /tmp/ers/in folder
-	err := os.MkdirAll(inPath, os.ModePerm)
-	if err != nil {
-		t.Fatalf("Failed to create %s: %s", inPath, err)
+	for _, folder := range folders {
+		err := os.MkdirAll(folder, 0755)
+		if err != nil {
+			t.Fatalf("Failed to create folder %s: %v", folder, err)
+		}
 	}
-
-	// Create the /tmp/ers/out folder
-	err = os.MkdirAll(outPath, os.ModePerm)
-	if err != nil {
-		t.Fatalf("Failed to create %s: %s", outPath, err)
-	}
-
-	t.Log("Created folders successfully")
 }
 
 func testRerateCDRsERsDeleteFolders(t *testing.T) {
 	time.Sleep(5 * time.Second)
-	inPath := "/tmp/ers/in"
-	outPath := "/tmp/ers/out"
+	folders := []string{"/tmp/ers/in", "/tmp/ees/mv", "/tmp/ers/out"}
 
-	// Remove the /tmp/ers/in folder
-	err := os.RemoveAll(inPath)
-	if err != nil {
-		t.Fatalf("Failed to delete %s: %s", inPath, err)
+	for _, folder := range folders {
+		err := os.RemoveAll(folder)
+		if err != nil {
+			t.Fatalf("Failed to delete folder %s: %v", folder, err)
+		}
 	}
-
-	// Remove the /tmp/ers/out folder
-	err = os.RemoveAll(outPath)
-	if err != nil {
-		t.Fatalf("Failed to delete %s: %s", outPath, err)
-	}
-
-	t.Log("Deleted folders successfully")
 }
 
 func testRerateCDRsERsLoadConfig(t *testing.T) {
@@ -197,14 +183,14 @@ func testRerateCDRsERsGetAccountAfterBalanceSet(t *testing.T) {
 		expAcnt.UpdateTime = acnt.UpdateTime
 		expAcnt.BalanceMap[utils.MetaVoice][0].Uuid = acnt.BalanceMap[utils.MetaVoice][0].Uuid
 		if !reflect.DeepEqual(acnt, expAcnt) {
-			t.Errorf("expected: <%+v>,\nreceived: <%+v>", utils.ToJSON(expAcnt), utils.ToJSON(acnt))
+			t.Errorf("expected: <%+v>,\nreceived: \n<%+v>", utils.ToJSON(expAcnt), utils.ToJSON(acnt))
 		}
 	}
 }
 
 func testRerateCDRsERsProcessEventCDR1(t *testing.T) {
 	argsEv := &engine.ArgV1ProcessEvent{
-		Flags: []string{utils.MetaRALs},
+		Flags: []string{utils.MetaRALs, "*export:false"},
 		CGREvent: utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "event1",
@@ -235,25 +221,24 @@ func testRerateCDRsERsProcessEventCDR1(t *testing.T) {
 
 }
 
-func testRerateCDRsERsGetCDRs(t *testing.T) {
-	attrs := &utils.RPCCDRsFilter{}
+func testRerateCDRsERsGetCDRs1(t *testing.T) {
+	rpsCdrFltr := &utils.RPCCDRsFilter{}
 
 	var replies []*engine.ExternalCDR
-	if err := rrErsCdrsRPC.Call(context.Background(), utils.APIerSv2GetCDRs, attrs, &replies); err != nil {
+	if err := rrErsCdrsRPC.Call(context.Background(), utils.APIerSv2GetCDRs, rpsCdrFltr, &replies); err != nil {
 		t.Error(err)
 	}
+	if len(replies) != 1 {
+		t.Fatalf("Expected 1 reply, received \n<%+v>", utils.ToJSON(replies))
+	}
 
-	log.Printf("APIerSv2GetCDRsreply []*engine.ExternalCDR <%+v>", utils.ToJSON(replies))
-
-	if len(replies) == 1 {
-		if reply, err := engine.NewCDRFromExternalCDR(replies[0], utils.EmptyString); err != nil {
-			t.Error(err)
-		} else if reply != nil {
-			cdrEvent = reply.AsCGREvent()
-			log.Printf("\nreply <%+v>\n", utils.ToJSON(cdrEvent))
-		}
+	if reply, err := engine.NewCDRFromExternalCDR(replies[0], utils.EmptyString); err != nil {
+		t.Error(err)
+	} else if reply.Usage == 2*time.Minute {
+		cdrEvent = reply.AsCGREvent()
+		cdrEvent.Event[utils.Usage] = 1 * time.Minute
 	} else {
-		t.Error("More than 1 reply")
+		t.Errorf("Expected Usage <%+v>, Received CDR\n<%+v>", 2*time.Minute, utils.ToJSON(reply))
 	}
 
 }
@@ -262,12 +247,52 @@ func testRerateCDRsERsExport(t *testing.T) {
 	cgrEv := &engine.CGREventWithEeIDs{
 		CGREvent: cdrEvent,
 	}
-	log.Printf("cgrEv <%+v>", utils.ToJSON(cgrEv))
+	exp := map[string]map[string]any{
+		"CSVExporter": {},
+	}
 	var reply map[string]map[string]any
 	if err := rrErsCdrsRPC.Call(context.Background(), utils.EeSv1ProcessEvent, cgrEv, &reply); err != nil {
 		t.Error(err)
+	} else if !reflect.DeepEqual(reply, exp) {
+		t.Errorf("Expected <%+v>, received \n<%+v>", exp, reply)
+	}
+}
+
+func testRerateCDRsERsMoveFiles(t *testing.T) {
+	time.Sleep(1 * time.Second)
+	// Move all files from /tmp/ees/mv to /tmp/ers/in
+	srcDir := "/tmp/ees/mv"
+	destDir := "/tmp/ers/in"
+	fileInfos, err := os.ReadDir(srcDir)
+	if err != nil {
+		t.Fatalf("Error reading source directory: %v", err)
 	}
 
-	log.Printf("EeSv1ProcessEvent reply <%+v>", reply)
+	for _, fileInfo := range fileInfos {
+		srcPath := filepath.Join(srcDir, fileInfo.Name())
+		destPath := filepath.Join(destDir, fileInfo.Name())
+		if err := os.Rename(srcPath, destPath); err != nil {
+			t.Fatalf("Error moving file: %v", err)
+		}
+	}
+	time.Sleep(1 * time.Second)
 
+}
+
+func testRerateCDRsERsGetCDRs2(t *testing.T) {
+	rpsCdrFltr := &utils.RPCCDRsFilter{}
+
+	var replies []*engine.ExternalCDR
+	if err := rrErsCdrsRPC.Call(context.Background(), utils.APIerSv2GetCDRs, rpsCdrFltr, &replies); err != nil {
+		t.Error(err)
+	}
+	if len(replies) != 1 {
+		t.Fatalf("Expected 1 reply, received \n<%+v>", utils.ToJSON(replies))
+	}
+
+	if reply, err := engine.NewCDRFromExternalCDR(replies[0], utils.EmptyString); err != nil {
+		t.Error(err)
+	} else if reply.Usage != 1*time.Minute {
+		t.Errorf("Expected Usage <%+v>, Received CDR\n<%+v>", 1*time.Minute, utils.ToJSON(reply))
+	}
 }

@@ -28,7 +28,9 @@
     
     "cdrs": {
         "enabled": true,
-        "rals_conns": ["*localhost"]
+        "rals_conns": ["*localhost"],
+        "ees_conns": ["*localhost"],
+        "attributes_conns": ["*localhost"]
     },
     
     "sessions": {
@@ -47,23 +49,24 @@
                 "id": "file_reader1",
                 "run_delay": "-1",
                 "type": "*file_csv",
-                "flags": ["*cdrs", "*rals", "*rerate","*attributes", "*export"],
+                "flags": ["*log","*cdrs", "*rals", "*rerate","*attributes", "*export"],
                 "source_path": "/tmp/ers/in",
                 "processed_path": "/tmp/ers/out",
-                "fields":[								
-                    {"tag": "ToR", "path": "*cgreq.ToR", "type": "*variable", "value": "~*req.2", "mandatory": true},
-                    {"tag": "OriginID", "path": "*cgreq.OriginID", "type": "*variable", "value": "~*req.3", "mandatory": true},
-                    {"tag": "RequestType", "path": "*cgreq.RequestType", "type": "*variable", "value": "~*req.4", "mandatory": true},
-                    {"tag": "Tenant", "path": "*cgreq.Tenant", "type": "*variable", "value": "~*req.5", "mandatory": true},
-                    {"tag": "Category", "path": "*cgreq.Category", "type": "*variable", "value": "~*req.6", "mandatory": true},
-                    {"tag": "Account", "path": "*cgreq.Account", "type": "*variable", "value": "~*req.7", "mandatory": true},
-                    {"tag": "Subject", "path": "*cgreq.Subject", "type": "*variable", "value": "~*req.8", "mandatory": true},
-                    {"tag": "Destination", "path": "*cgreq.Destination", "type": "*variable", "value": "~*req.9", "mandatory": true},
-                    {"tag": "SetupTime", "path": "*cgreq.SetupTime", "type": "*variable", "value": "~*req.10", "mandatory": true},
-                    {"tag": "AnswerTime", "path": "*cgreq.AnswerTime", "type": "*variable", "value": "~*req.11", "mandatory": true},
-                    {"tag": "Usage", "path": "*cgreq.Usage", "type": "*variable", "value": "~*req.12", "mandatory": true},
-                    {"tag": "RunID", "path": "*cgreq.RunID", "type": "*variable", "value": "~*req.13", "mandatory": true},
-                    {"tag": "Cost", "path": "*cgreq.Cost", "type": "*variable", "value": "~*req.14", "mandatory": true}
+                "fields":[
+                    {"tag": "CGRID", "path": "*cgreq.CGRID", "type": "*variable", "value": "~*req.0", "mandatory": true},		
+                    {"tag": "ToR", "path": "*cgreq.ToR", "type": "*variable", "value": "~*req.1", "mandatory": true},
+                    {"tag": "OriginID", "path": "*cgreq.OriginID", "type": "*variable", "value": "~*req.2", "mandatory": true},
+                    {"tag": "RequestType", "path": "*cgreq.RequestType", "type": "*variable", "value": "~*req.3", "mandatory": true},
+                    {"tag": "Tenant", "path": "*cgreq.Tenant", "type": "*variable", "value": "~*req.4", "mandatory": true},
+                    {"tag": "Category", "path": "*cgreq.Category", "type": "*variable", "value": "~*req.5", "mandatory": true},
+                    {"tag": "Account", "path": "*cgreq.Account", "type": "*variable", "value": "~*req.6", "mandatory": true},
+                    {"tag": "Subject", "path": "*cgreq.Subject", "type": "*variable", "value": "~*req.7", "mandatory": true},
+                    {"tag": "Destination", "path": "*cgreq.Destination", "type": "*variable", "value": "~*req.8", "mandatory": true},
+                    {"tag": "SetupTime", "path": "*cgreq.SetupTime", "type": "*variable", "value": "~*req.9", "mandatory": true},
+                    {"tag": "AnswerTime", "path": "*cgreq.AnswerTime", "type": "*variable", "value": "~*req.10", "mandatory": true},
+                    {"tag": "Usage", "path": "*cgreq.Usage", "type": "*variable", "value": "~*req.11", "mandatory": true},
+                    {"tag": "RunID", "path": "*cgreq.RunID", "type": "*variable", "value": "~*req.12", "mandatory": true},
+                    {"tag": "Cost", "path": "*cgreq.Cost", "type": "*variable", "value": "~*req.13", "mandatory": true}
                 ]
             }
         ]
@@ -79,7 +82,7 @@
             {
                 "id": "CSVExporter",
                 "type": "*file_csv",
-                "export_path": "/tmp/ers/in",
+                "export_path": "/tmp/ees/mv",
                 "timezone": "UTC",
                 "synchronous": true,
                 "attempts": 1,
@@ -96,7 +99,7 @@
                     {"tag": "Destination", "path": "*exp.Destination", "type": "*variable", "value": "~*req.Destination"},
                     {"tag": "SetupTime", "path": "*exp.SetupTime", "type": "*variable", "value": "~*req.SetupTime{*time_string}" },
                     {"tag": "AnswerTime", "path": "*exp.AnswerTime", "type": "*variable", "value": "~*req.AnswerTime{*time_string}"},
-                    {"tag": "Usage", "path": "*exp.Usage", "type": "*variable", "value": "~*req.Usage{*duration_seconds}"},
+                    {"tag": "Usage", "path": "*exp.Usage", "type": "*variable", "value": "~*req.Usage"},
                     {"tag": "RunID", "path": "*exp.RunID", "type": "*variable", "value": "~*req.RunID"},
                     {"tag": "Cost", "path": "*exp.Cost", "type": "*variable", "value": "~*req.Cost{*round:4}"}
                 ]
