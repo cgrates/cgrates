@@ -50,6 +50,4 @@ jobs:
 
       - name: Run integration tests
         run: |
-          sudo su <<EOF
-          ./integration_test.sh
-          EOF
+          sudo env "PATH=$PATH" ./integration_test.sh
