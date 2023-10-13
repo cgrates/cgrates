@@ -515,21 +515,24 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 				}
 
 				// The following sanity check prevents a "slice bounds out of range" panic.
-				if rdr.Type == utils.MetaFileXML && !utils.IsSliceMember([]string{utils.META_NONE, utils.META_CONSTANT,
-					utils.META_FILLER, utils.MetaRemoteHost}, field.Type) && len(field.Value) != 0 {
+				if rdr.Type == utils.MetaFileXML && len(field.Value) != 0 &&
+					!utils.IsSliceMember([]string{utils.META_NONE, utils.META_CONSTANT}, field.Type) {
 
-					// Retrieve the number of elements of the parser rule with the fewest elements.
+					// Find the minimum rule length for dynamic RSRParser within the field value.
 					minRuleLength := math.MaxInt
-					for _, rule := range field.Value {
-						if ruleLen := len(strings.Split(rule.AttrName(), utils.NestingSep)); minRuleLength > ruleLen {
-							minRuleLength = ruleLen
+					for _, parser := range field.Value {
+						if !strings.HasPrefix(parser.Rules, utils.DynamicDataPrefix) {
+							continue
 						}
+						ruleLen := len(strings.Split(parser.Rules, utils.NestingSep))
+						minRuleLength = min(minRuleLength, ruleLen)
 					}
 
-					if len(rdr.XmlRootPath) >= minRuleLength {
+					// If a dynamic RSRParser is found, verify xml_root_path length against minRuleLength.
+					if minRuleLength != math.MaxInt && len(rdr.XmlRootPath) >= minRuleLength {
 						return fmt.Errorf("<%s> %s for reader %s at %s",
 							utils.ERs,
-							"len of xml_root_path elements cannot be equal to or exceed the number of value rule elements",
+							"xml_root_path length exceeds value rule elements",
 							rdr.ID, field.Tag)
 					}
 				}

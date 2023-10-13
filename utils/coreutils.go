@@ -650,6 +650,12 @@ func (hP HierarchyPath) AsString(sep string, prefix bool) string {
 	if prefix {
 		strHP.WriteString(sep)
 	}
+
+	// TODO: Since this function can convert both the full and the relative HierarchyPath to a string, with
+	// prefix telling us which is which (true -> full path, false -> relative path), we should consider
+	// returning the '.' character when prefix == false. Currently, because we are returning an empty string
+	// if the path we are currently parsing is equal to the root path, when we attempt to retrieve the element
+	// we receive the error "expr expression is nil".
 	if len(hP) == 0 {
 		return strHP.String()
 	}
