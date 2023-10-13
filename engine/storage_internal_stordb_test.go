@@ -22,6 +22,7 @@ import (
 	"slices"
 	"sort"
 	"testing"
+	"time"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
@@ -367,5 +368,81 @@ func TestIDBGetPaginator(t *testing.T) {
 		t.Error(err)
 	} else if len(ids) != 1 {
 		t.Errorf("Expected 1,Received :%v", len(ids))
+	}
+}
+
+func TestTPGetTRatingPlanPgt(t *testing.T) {
+	storDB := NewInternalDB(nil, nil, false, config.CgrConfig().StorDbCfg().Items)
+	if _, err := storDB.GetTPRatingPlans("TP1", "", &utils.Paginator{Limit: utils.IntPointer(1), Offset: utils.IntPointer(1)}); err == nil || err != utils.ErrNotFound {
+		t.Error(err)
+	}
+	ratingPlans := []*utils.TPRatingPlan{
+		{
+			TPid: "TP1",
+			ID:   "RP_1",
+			RatingPlanBindings: []*utils.TPRatingPlanBinding{
+				{
+					DestinationRatesId: "DR_FREESWITCH_USERS",
+					TimingId:           "ALWAYS",
+					Weight:             10,
+				},
+			},
+		},
+		{
+			TPid: "TP1",
+			ID:   "Plan1",
+			RatingPlanBindings: []*utils.TPRatingPlanBinding{
+				{
+					DestinationRatesId: "RateId",
+					TimingId:           "TimingID",
+					Weight:             12,
+				},
+			},
+		},
+		{
+			TPid: "TP1",
+			ID:   "RP_UP",
+			RatingPlanBindings: []*utils.TPRatingPlanBinding{
+				{DestinationRatesId: "DR_UP", TimingId: utils.ANY, Weight: 10},
+			},
+		},
+	}
+	if err := storDB.SetTPRatingPlans(ratingPlans); err != nil {
+		t.Error(err)
+	}
+
+	if rPlans, err := storDB.GetTPRatingPlans("TP1", "", &utils.Paginator{Limit: utils.IntPointer(1), Offset: utils.IntPointer(1)}); err != nil {
+		t.Error(err)
+	} else if len(rPlans) != 1 {
+		t.Errorf("Expected 1,Recived %v", len(rPlans))
+	}
+}
+
+func TestIDBSetCDR(t *testing.T) {
+	storDB := NewInternalDB([]string{utils.Account, utils.Subject, utils.RunID, utils.CGRID}, []string{utils.Destination}, false, config.CgrConfig().StorDbCfg().Items)
+	cdr := &CDR{
+		CGRID:       "Cdr1",
+		OrderID:     123,
+		ToR:         utils.VOICE,
+		OriginID:    "OriginCDR1",
+		OriginHost:  "192.168.1.1",
+		Source:      "test",
+		RequestType: utils.META_RATED,
+		Category:    "call",
+		Account:     "1001",
+		Subject:     "1001",
+		Destination: "+4986517174963",
+		RunID:       utils.MetaDefault,
+		Usage:       time.Duration(12000000000),
+		ExtraFields: map[string]string{},
+		Cost:        1.01,
+	}
+	if err := storDB.SetCDR(cdr, true); err != nil {
+		t.Error(err)
+	}
+
+	if _, _, err := storDB.GetCDRs(&utils.CDRsFilter{
+		CGRIDs: []string{"Cdr1"}, Accounts: []string{"1001"}, ToRs: []string{utils.VOICE}, Subjects: []string{"1001"}, RunIDs: []string{utils.MetaDefault}, DestinationPrefixes: []string{"+49"}}, true); err != nil {
+		t.Error(err)
 	}
 }
