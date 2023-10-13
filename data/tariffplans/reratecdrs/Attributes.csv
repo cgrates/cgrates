@@ -1,0 +1,3 @@
+#Tenant,ID,Contexts,FilterIDs,ActivationInterval,AttributeFilterIDs,Path,Type,Value,Blocker,Weight
+
+cgrates.org,ATTR_1,,,,,*req.Field,*constant,Value,,
