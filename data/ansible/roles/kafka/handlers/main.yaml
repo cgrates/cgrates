@@ -1,0 +1,7 @@
+---
+- name: Restart Kafka
+  systemd:
+    name: kafka
+    state: restarted
+    daemon_reload: yes
+  when: kafka_restart | bool
