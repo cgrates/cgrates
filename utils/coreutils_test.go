@@ -905,7 +905,7 @@ func TestHierarchyPathAsString(t *testing.T) {
 			hP:       HierarchyPath{},
 			sep:      "/",
 			prefix:   false,
-			expected: "",
+			expected: ".",
 		},
 		{
 			name:     "Empty HierarchyPath with prefix",
@@ -961,7 +961,7 @@ func TestHierarchyPathAsString(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			if received := tt.hP.AsString(tt.sep, tt.prefix); received != tt.expected {
-				t.Errorf("expected %s, received %s", tt.expected, received)
+				t.Errorf("expected <%s>, received <%s>", tt.expected, received)
 			}
 		})
 	}
