@@ -5,7 +5,6 @@
     name: "{{ cgrates_dependencies }}"
     state: present
     update_cache: yes
-    cache_valid_time: 86400
 
 - name: Create cgrates directory
   ansible.builtin.file:
