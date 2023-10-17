@@ -440,13 +440,24 @@ func TestXMLIndexes(t *testing.T) {
 }
 
 func TestXmlProviderString(t *testing.T) {
-	x := XmlProvider{}
+	xP := XmlProvider{
+		cdrPath: utils.HierarchyPath{"a", "b"},
+		cache:   make(utils.MapStorage),
+	}
+	err := xP.cache.Set([]string{"a", "b", "item1"}, "data1")
+	if err != nil {
+		t.Fatal(err)
+	}
+	err = xP.cache.Set([]string{"a", "b", "item2"}, "data2")
+	if err != nil {
+		t.Fatal(err)
+	}
 
-	rcv := x.String()
-	exp := utils.ToJSON(x)
+	exp := `{"a":{"b":{"item1":"data1","item2":"data2"}}}`
+	rcv := xP.String()
 
-	if !reflect.DeepEqual(rcv, exp) {
-		t.Errorf("recived %v, expected %v", rcv, exp)
+	if rcv != exp {
+		t.Errorf("expected %s, received %s", exp, rcv)
 	}
 }
 
