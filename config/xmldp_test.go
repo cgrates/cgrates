@@ -454,16 +454,21 @@ func TestFieldAsStringXMLEmptyPath(t *testing.T) {
 }
 
 func TestStringXML(t *testing.T) {
+	hP := utils.HierarchyPath{"complete-success-notification", "agentid"}
 	doc, err := xmlquery.Parse(strings.NewReader(xmlMultipleIndex))
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
-	dP := &XMLProvider{
-		req:     doc,
-		cdrPath: []string{},
-		cache:   utils.MapStorage{},
+	xmlElmts, err := xmlquery.QueryAll(doc, hP.AsString("/", true))
+	if err != nil {
+		t.Fatal(err)
 	}
-	expected := utils.EmptyString
+	dP := NewXMLProvider(xmlElmts[0], hP)
+	_, err = dP.FieldAsInterface([]string{"complete-success-notification", "agentid"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	expected := "{\"complete-success-notification\":{\"agentid\":\"44\"}}"
 	if received := dP.String(); received != expected {
 		t.Errorf("Expected %q, received %q", expected, received)
 	}
