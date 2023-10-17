@@ -643,19 +643,19 @@ func ParseHierarchyPath(path string, sep string) HierarchyPath {
 type HierarchyPath []string
 
 // AsString converts HierarchyPath to a string.
-func (hP HierarchyPath) AsString(sep string, prefix bool) string {
+func (hP HierarchyPath) AsString(sep string, isAbsolute bool) string {
 	var strHP strings.Builder
 
-	// If prefix is true and the HierarchyPath slice is empty, sep will be returned.
+	// If isAbsolute is true and the HierarchyPath slice is empty, sep will be returned.
 	// This will indicate the start of the absolute path.
-	if prefix {
+	if isAbsolute {
 		strHP.WriteString(sep)
 	}
 
 	if len(hP) == 0 {
-		// If prefix is false and HierarchyPath is empty, return '.' to represent the current directory in a relative path.
+		// If isAbsolute is false and HierarchyPath is empty, return '.' to represent the current directory in a relative path.
 		// This convention avoids errors (e.g., "expr expression is nil") when retrieving elements from an empty path.
-		if !prefix {
+		if !isAbsolute {
 			return "."
 		}
 		return strHP.String()
