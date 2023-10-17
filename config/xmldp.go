@@ -57,10 +57,7 @@ type XMLProvider struct {
 // String is part of engine.utils.DataProvider interface
 // when called, it will display the already parsed values out of cache
 func (xP *XMLProvider) String() string {
-
-	// TODO: Find a proper way to display xP as string. Right now it's returning an
-	// empty string due to xmlquery.Node referencing itself.
-	return utils.ToJSON(xP.req)
+	return xP.cache.String()
 }
 
 // FieldAsInterface is part of engine.utils.DataProvider interface
