@@ -191,15 +191,17 @@ func testFWVITHandleCdr1File(t *testing.T) {
 }
 
 func testFWVITAnalyseCDRs(t *testing.T) {
-	time.Sleep(500 * time.Millisecond)
+	time.Sleep(100 * time.Millisecond)
 	var cdrs []*engine.ExternalCDR
 	if err := fwvRPC.Call(utils.APIerSv2GetCDRs, utils.RPCCDRsFilter{}, &cdrs); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(cdrs) != 33 {
 		t.Error("Unexpected number of CDRs returned: ", len(cdrs))
 	}
-	if err := fwvRPC.Call(utils.APIerSv2GetCDRs, utils.RPCCDRsFilter{OriginIDs: []string{"CDR0000010", "CDR0000250", "CDR0000330"}},
-		&cdrs); err != nil {
+	if err := fwvRPC.Call(utils.APIerSv2GetCDRs, utils.RPCCDRsFilter{
+		OriginIDs: []string{"CDR0000010", "CDR0000250", "CDR0000330"},
+		OrderBy:   utils.OrderID,
+	}, &cdrs); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(cdrs) != 3 {
 		t.Error("Unexpected number of CDRs returned: ", len(cdrs))
