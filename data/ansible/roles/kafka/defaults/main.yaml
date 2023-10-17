@@ -1,5 +1,23 @@
 ---
-kafka_version: 3.5.0
-scala_version: 2.13
-kafka_service_state: started
-kafka_service_enabled: true
+kafka_download_base_url: https://downloads.apache.org/kafka
+kafka_download_validate_certs: yes
+kafka_version: 3.6.0
+kafka_scala_version: 2.13
+
+# The kafka user and group to create files/dirs with and for running the kafka service
+kafka_create_user_group: true
+kafka_user: kafka
+kafka_group: kafka
+
+kafka_root_dir: /opt
+kafka_dir: "{{ kafka_root_dir }}/kafka"
+kafka_unit_path: /lib/systemd/system/kafka.service
+
+# Start kafka after installation
+kafka_start: yes
+
+# Restart kafka on configuration change
+kafka_restart: yes
+
+# A comma separated list of directories under which to store data log files
+kafka_data_log_dirs: /var/lib/kafka/kraft-combined-logs
