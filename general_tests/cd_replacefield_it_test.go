@@ -153,7 +153,9 @@ func testCDReplaceFieldRpcConn(t *testing.T) {
 
 func testCDReplaceFieldStoreCDR(t *testing.T) {
 	sampleCD := &engine.EventCost{}
-	err := json.Unmarshal([]byte(`{"CGRID":"31ee543fdc15e011332e0a0952c0b37b161e3a59","RunID":"*default","StartTime":"2023-06-19T11:15:46-04:00","Usage":10000000000,"Cost":0.1,"Charges":[{"RatingID":"efd715b","Increments":[{"Usage":1000000000,"Cost":0.01,"AccountingID":"c946243","CompressFactor":5}],"CompressFactor":2}],"AccountSummary":{"Tenant":"cgrates.org","ID":"1001","BalanceSummaries":[{"UUID":"e4bf588f-583b-44d9-9b5d-cd12d9b7331c","ID":"test","Type":"*monetary","Value":8.5682,"Disabled":false}],"AllowNegative":false,"Disabled":false},"Rating":{"efd715b":{"ConnectFee":0,"RoundingMethod":"*up","RoundingDecimals":4,"MaxCost":0.12,"MaxCostStrategy":"*disconnect","TimingID":"240ecf8","RatesID":"8042384","RatingFiltersID":"ef07765"}},"Accounting":{"c946243":{"AccountID":"cgrates.org:1001","BalanceUUID":"e4bf588f-583b-44d9-9b5d-cd12d9b7331c","RatingID":"","Units":0.01,"ExtraChargeID":""}},"RatingFilters":{"ef07765":{"DestinationID":"CST_316_NL002","DestinationPrefix":"1003","RatingPlanID":"RP_1001","Subject":"*out:cgrates.org:call:1001"}},"Rates":{"8042384":[{"GroupIntervalStart":0,"Value":0.01,"RateIncrement":1000000000,"RateUnit":1000000000}]},"Timings":{"240ecf8":{"Years":[],"Months":[],"MonthDays":[],"WeekDays":[],"StartTime":"00:00:00"}}}`), sampleCD)
+	err := json.Unmarshal(
+		[]byte(`{"CGRID":"31ee543fdc15e011332e0a0952c0b37b161e3a59","RunID":"*default","StartTime":"2023-06-19T11:15:46-04:00","Usage":10000000000,"Cost":0.1,"Charges":[{"RatingID":"efd715b","Increments":[{"Usage":1000000000,"Cost":0.01,"AccountingID":"c946243","CompressFactor":5}],"CompressFactor":2}],"AccountSummary":{"Tenant":"cgrates.org","ID":"1001","BalanceSummaries":[{"UUID":"e4bf588f-583b-44d9-9b5d-cd12d9b7331c","ID":"test","Type":"*monetary","Value":8.5682,"Disabled":false}],"AllowNegative":false,"Disabled":false},"Rating":{"efd715b":{"ConnectFee":0,"RoundingMethod":"*up","RoundingDecimals":4,"MaxCost":0.12,"MaxCostStrategy":"*disconnect","TimingID":"240ecf8","RatesID":"8042384","RatingFiltersID":"ef07765"}},"Accounting":{"c946243":{"AccountID":"cgrates.org:1001","BalanceUUID":"e4bf588f-583b-44d9-9b5d-cd12d9b7331c","RatingID":"","Units":0.01,"ExtraChargeID":""}},"RatingFilters":{"ef07765":{"DestinationID":"CST_316_NL002","DestinationPrefix":"1003","RatingPlanID":"RP_1001","Subject":"*out:cgrates.org:call:1001"}},"Rates":{"8042384":[{"GroupIntervalStart":0,"Value":0.01,"RateIncrement":1000000000,"RateUnit":1000000000}]},"Timings":{"240ecf8":{"Years":[],"Months":[],"MonthDays":[],"WeekDays":[],"StartTime":"00:00:00"}}}`),
+		sampleCD)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -200,12 +202,15 @@ func testCDReplaceFieldExportCDR(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	var exportedCDR []byte
-	exportedCDR, err = os.ReadFile(reply.ExportedPath)
+	exportedCDR, err := os.ReadFile(reply.ExportedPath)
 	if err != nil {
 		t.Fatal(err)
 	}
-	fmt.Println(string(exportedCDR))
+	exp := "CDR_1,NL002\n"
+	if rcv := string(exportedCDR); rcv != exp {
+		t.Errorf("expected <%s>, received <%s>", exp, rcv)
+	}
+
 }
 
 func testCDReplaceFieldStopEngine(t *testing.T) {
