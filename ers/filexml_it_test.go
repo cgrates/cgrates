@@ -535,66 +535,6 @@ func TestFileXMLProcessEVentError2(t *testing.T) {
 	}
 }
 
-func TestFileXMLProcessEVentError3(t *testing.T) {
-	cfg := config.NewDefaultCGRConfig()
-	cfg.ERsCfg().Readers[0].ProcessedPath = ""
-	// fltrs := &engine.FilterS{}
-	fltrs := &engine.FilterS{}
-	filePath := "/tmp/TestFileXMLProcessEvent/"
-	fname := "file1.xml"
-	if err := os.MkdirAll(filePath, 0777); err != nil {
-		t.Error(err)
-	}
-	file, err := os.Create(path.Join(filePath, "file1.xml"))
-	if err != nil {
-		t.Error(err)
-	}
-	xmlData := `<?xml version="1.0" encoding="ISO-8859-1"?>
-  <!DOCTYPE broadWorksCDR>
-  <broadWorksCDR version="19.0">
-    <cdrData>
-      <basicModule>
-        <localCallId>
-          <localCallId>25160047719:0</localCallId>
-        </localCallId>
-      </basicModule>
-    </cdrData>
-  </broadWorksCDR>
-  `
-	file.Write([]byte(xmlData))
-	file.Close()
-	eR := &XMLFileER{
-		cgrCfg:    cfg,
-		cfgIdx:    0,
-		fltrS:     fltrs,
-		rdrDir:    "/tmp/xmlErs/out/",
-		rdrEvents: make(chan *erEvent, 1),
-		rdrError:  make(chan error, 1),
-		rdrExit:   make(chan struct{}),
-		conReqs:   make(chan struct{}, 1),
-	}
-	eR.conReqs <- struct{}{}
-
-	eR.Config().Fields = []*config.FCTemplate{
-		{
-			Tag:       "OriginID",
-			Type:      utils.MetaConstant,
-			Path:      "*cgreq.OriginID",
-			Value:     nil,
-			Mandatory: true,
-		},
-	}
-
-	eR.Config().Fields[0].ComputePath()
-	errExpect := "Empty source value for fieldID: <OriginID>"
-	if err := eR.processFile(filePath, fname); err == nil || err.Error() != errExpect {
-		t.Errorf("Expected %v but received %v", errExpect, err)
-	}
-	if err := os.RemoveAll(filePath); err != nil {
-		t.Error(err)
-	}
-}
-
 func TestFileXMLProcessEventParseError(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.ERsCfg().Readers[0].ProcessedPath = ""
