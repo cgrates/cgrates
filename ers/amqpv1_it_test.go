@@ -87,25 +87,27 @@ func TestAMQPERv1(t *testing.T) {
 		t.Fatal(err)
 	}
 	amqpv1Rdr := rdr.(*AMQPv1ER)
-	connection, err := amqpv1.Dial("amqps://RootManageSharedAccessKey:Je8l%2Bt9tyOgZbdA%2B5SmGIJEsEzhZ9VdIO7yRke5EYtM%3D@test0123456y.servicebus.windows.net", nil)
+	ctx := context.Background()
+	connection, err := amqpv1.Dial(ctx, "amqps://RootManageSharedAccessKey:Je8l%2Bt9tyOgZbdA%2B5SmGIJEsEzhZ9VdIO7yRke5EYtM%3D@test0123456y.servicebus.windows.net", nil)
 	if err != nil {
 		t.Fatal(err)
 	}
 	defer connection.Close()
 
-	channel, err := connection.NewSession(context.Background(), nil)
+	channel, err := connection.NewSession(ctx, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer channel.Close(context.Background())
+	defer channel.Close(ctx)
 
 	randomCGRID := utils.UUIDSha1Prefix()
-	sndr, err := channel.NewSender(context.Background(), amqpv1Rdr.queueID, nil)
+	sndr, err := channel.NewSender(ctx, amqpv1Rdr.queueID, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
-	if err = sndr.Send(context.Background(),
-		amqpv1.NewMessage([]byte(fmt.Sprintf(`{"CGRID": "%s"}`, randomCGRID)))); err != nil {
+	if err = sndr.Send(ctx,
+		amqpv1.NewMessage([]byte(fmt.Sprintf(`{"CGRID": "%s"}`, randomCGRID))),
+		nil); err != nil {
 		t.Fatal(err)
 	}
 	if err = rdr.Serve(); err != nil {

@@ -68,7 +68,7 @@ func (pstr *AMQPv1EE) Connect() (err error) {
 	pstr.Lock()
 	defer pstr.Unlock()
 	if pstr.conn == nil {
-		if pstr.conn, err = amqpv1.Dial(pstr.Cfg().ExportPath, pstr.connOpts); err != nil {
+		if pstr.conn, err = amqpv1.Dial(context.TODO(), pstr.Cfg().ExportPath, pstr.connOpts); err != nil {
 			return
 		}
 	}
@@ -102,7 +102,7 @@ func (pstr *AMQPv1EE) ExportEvent(content any, _ string) (err error) {
 	}
 	// Send message
 	ctx := context.Background()
-	err = sender.Send(ctx, amqpv1.NewMessage(content.([]byte)))
+	err = sender.Send(ctx, amqpv1.NewMessage(content.([]byte)), nil)
 	sender.Close(ctx)
 	return
 }

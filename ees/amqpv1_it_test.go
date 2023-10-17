@@ -143,14 +143,14 @@ func testAMQPv1ExportEvent(t *testing.T) {
 }
 
 func testAMQPv1VerifyExport(t *testing.T) {
+	ctx := context.Background()
+
 	// Create client
-	client, err := amqpv1.Dial(amqpv1DialURL, amqpv1ConnOpts)
+	client, err := amqpv1.Dial(ctx, amqpv1DialURL, amqpv1ConnOpts)
 	if err != nil {
 		t.Fatal("Dialing AMQP server:", err)
 	}
 	defer client.Close()
-
-	ctx := context.Background()
 
 	// Open a session
 	session, err := client.NewSession(ctx, nil)
@@ -170,7 +170,7 @@ func testAMQPv1VerifyExport(t *testing.T) {
 	}()
 
 	// Receive message
-	msg, err := receiver.Receive(ctx)
+	msg, err := receiver.Receive(ctx, nil)
 	if err != nil {
 		t.Fatal("Reading message from AMQP:", err)
 	}
