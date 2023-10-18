@@ -36,7 +36,7 @@ You can add the CGRateS repository to your system's sources list as follows:
    sudo mv apt.cgrates.org.asc /etc/apt/trusted.gpg.d/
 
    # Add the repository to the apt sources list
-   echo "deb http://apt.cgrates.org/debian/ nightly main" | sudo tee /etc/apt/sources.list.d/cgrates.list
+   echo "deb http://apt.cgrates.org/debian/ master main" | sudo tee /etc/apt/sources.list.d/cgrates.list
 
    # Update the system repository and install CGRateS
    sudo apt-get update -y
@@ -46,7 +46,7 @@ Alternatively, you can manually install a specific .deb package as follows:
 
 .. code-block:: bash
 
-   wget http://pkg.cgrates.org/deb/nightly/cgrates_current_amd64.deb
+   wget http://pkg.cgrates.org/deb/master/cgrates_current_amd64.deb
    sudo dpkg -i ./cgrates_current_amd64.deb
 
 .. note::
