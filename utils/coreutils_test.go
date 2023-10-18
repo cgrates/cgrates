@@ -886,14 +886,77 @@ func TestParseHierarchyPath(t *testing.T) {
 }
 
 func TestHierarchyPathAsString(t *testing.T) {
-	eStr := "/Root/CGRateS"
-	hp := HierarchyPath([]string{"Root", "CGRateS"})
-	if hpStr := hp.AsString("/", true); hpStr != eStr {
-		t.Errorf("Expecting: %q, received: %q", eStr, hpStr)
+	tests := []struct {
+		name     string
+		hP       HierarchyPath
+		sep      string
+		prefix   bool
+		expected string
+	}{
+		{
+			name:     "Empty HierarchyPath without prefix",
+			hP:       HierarchyPath{},
+			sep:      "/",
+			prefix:   false,
+			expected: ".",
+		},
+		{
+			name:     "Empty HierarchyPath with prefix",
+			hP:       HierarchyPath{},
+			sep:      "/",
+			prefix:   true,
+			expected: "/",
+		},
+		{
+			name:     "Single element without prefix",
+			hP:       HierarchyPath{"element"},
+			sep:      "/",
+			prefix:   false,
+			expected: "element",
+		},
+		{
+			name:     "Single element with prefix",
+			hP:       HierarchyPath{"element"},
+			sep:      "/",
+			prefix:   true,
+			expected: "/element",
+		},
+		{
+			name:     "Multiple elements without prefix",
+			hP:       HierarchyPath{"a", "b", "c"},
+			sep:      "/",
+			prefix:   false,
+			expected: "a/b/c",
+		},
+		{
+			name:     "Multiple elements with prefix",
+			hP:       HierarchyPath{"a", "b", "c"},
+			sep:      "/",
+			prefix:   true,
+			expected: "/a/b/c",
+		},
+		{
+			name:     "Custom separator without prefix",
+			hP:       HierarchyPath{"a", "b", "c"},
+			sep:      "->",
+			prefix:   false,
+			expected: "a->b->c",
+		},
+		{
+			name:     "Custom separator with prefix",
+			hP:       HierarchyPath{"a", "b", "c"},
+			sep:      "->",
+			prefix:   true,
+			expected: "->a->b->c",
+		},
 	}
-	hp = HierarchyPath([]string{})
-	if hpStr := hp.AsString(EmptyString, true); hpStr != EmptyString {
-		t.Errorf("Expecting: %q, received: %q", EmptyString, hpStr)
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if received := tt.hP.AsString(tt.sep, tt.prefix); received != tt.expected {
+				t.Errorf("expected <%s>, received <%s>", tt.expected, received)
+			}
+		})
 	}
 }
 

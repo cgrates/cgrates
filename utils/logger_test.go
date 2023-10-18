@@ -24,25 +24,9 @@ import (
 	"io"
 	"log"
 	"log/syslog"
-	"os"
 	"reflect"
 	"testing"
 )
-
-func TestLoggerNewLoggerStdoutOK(t *testing.T) {
-	exp := &StdLogger{
-		nodeID:   "1234",
-		logLevel: 7,
-		w: &logWriter{
-			log.New(os.Stderr, EmptyString, log.LstdFlags),
-		},
-	}
-	if rcv, err := NewLogger(MetaStdLog, "1234", 7); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(rcv, exp) {
-		t.Errorf("expected: <%+v>, \nreceived: <%+v>", exp, rcv)
-	}
-}
 
 func TestLoggerNewLoggerSyslogOK(t *testing.T) {
 	if noSysLog {

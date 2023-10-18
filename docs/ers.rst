@@ -158,7 +158,7 @@ source_path
 processed_path
 	Optional path for moving the events source to after processing.
 
-xml_root_path
+xmlRootPath
 	Used in case of XML content and will specify the prefix path applied to each xml element read.
 
 tenant

@@ -594,9 +594,12 @@ func SizeFmt(num float64, suffix string) string {
 }
 
 func ParseHierarchyPath(path string, sep string) HierarchyPath {
+	if path == EmptyString {
+		return nil
+	}
 	if sep == EmptyString {
 		for _, sep = range []string{"/", NestingSep} {
-			if idx := strings.Index(path, sep); idx != -1 {
+			if strings.Contains(path, sep) {
 				break
 			}
 		}
@@ -608,22 +611,32 @@ func ParseHierarchyPath(path string, sep string) HierarchyPath {
 // HierarchyPath is used in various places to represent various path hierarchies (eg: in Diameter groups, XML trees)
 type HierarchyPath []string
 
-func (h HierarchyPath) AsString(sep string, prefix bool) string {
-	if len(h) == 0 {
-		return EmptyString
+// AsString converts HierarchyPath to a string.
+func (hP HierarchyPath) AsString(sep string, isAbsolute bool) string {
+	var strHP strings.Builder
+
+	// If isAbsolute is true and the HierarchyPath slice is empty, sep will be returned.
+	// This will indicate the start of the absolute path.
+	if isAbsolute {
+		strHP.WriteString(sep)
 	}
-	retStr := EmptyString
-	for idx, itm := range h {
-		if idx == 0 {
-			if prefix {
-				retStr += sep
-			}
-		} else {
-			retStr += sep
+
+	if len(hP) == 0 {
+		// If isAbsolute is false and HierarchyPath is empty, return '.' to represent the current directory in a relative path.
+		// This convention avoids errors (e.g., "expr expression is nil") when retrieving elements from an empty path.
+		if !isAbsolute {
+			return "."
 		}
-		retStr += itm
+		return strHP.String()
 	}
-	return retStr
+
+	for i, elem := range hP {
+		if i != 0 {
+			strHP.WriteString(sep)
+		}
+		strHP.WriteString(elem)
+	}
+	return strHP.String()
 }
 
 // Clone returns a deep copy of HierarchyPath
