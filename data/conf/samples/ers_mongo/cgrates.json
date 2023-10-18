@@ -1,27 +1,21 @@
 {
-// CGRateS Configuration file
-//
-// Used for SessionSv1 integration tests
-
 
 "general": {
 	"log_level": 7,
-	"reply_timeout": "10s",									// consider connection down for replies taking longer than this value
-	"default_timezone": "UTC",
+	"reply_timeout": "10s",									
+	"default_timezone": "UTC"
 },
-
 
 "listen": {
 	"rpc_json": ":2012",
 	"rpc_gob": ":2013",
-	"http": ":2080",
+	"http": ":2080"
 },
-
 
 "data_db": {
 	"db_type": "mongo",
 	"db_name": "10",
-	"db_port": 27017,
+	"db_port": 27017
 },
 
 "stor_db": {
@@ -31,23 +25,21 @@
 },
 
 "rates": {
-	"enabled": true,
+	"enabled": true
 },
-
 
 "chargers": {
 	"enabled": true,
-	"attributes_conns": ["*internal"],
+	"attributes_conns": ["*internal"]
 },
 
-
 "resources": {
-	"enabled": true,
+	"enabled": true
 },
 
 
 "attributes": {
-	"enabled": true,
+	"enabled": true
 },
 
 
@@ -55,7 +47,7 @@
 	"enabled": true,
 	"chargers_conns": ["*localhost"],
 	"rates_conns": ["*internal"],
-	"session_cost_retries": 0,
+	"session_cost_retries": 0
 },
 
 
@@ -65,7 +57,7 @@
 	"rates_conns": ["*internal"],
 	"cdrs_conns": ["*internal"],
 	"resources_conns": ["*internal"],
-	"attributes_conns": ["*internal"],
+	"attributes_conns": ["*internal"]
 },
 
 
@@ -81,7 +73,7 @@
 			"type": "*fileCSV",
 			"flags": ["*dryRun"],
 			"source_path": "/tmp/ers/in",
-			"processed_path": "/tmp/ers/out",
+			"processed_path": "/tmp/ers/out"
 		},
 		{
 			"id": "file_reader2",
@@ -107,8 +99,8 @@
 				{"tag": "Usage", "path": "*cgreq.Usage", "type": "*variable", "value": "~*req.6", "mandatory": true},
 				{"tag": "HDRExtra3", "path": "*cgreq.HDRExtra3", "type": "*variable", "value": "~*req.6", "mandatory": true},
 				{"tag": "HDRExtra2", "path": "*cgreq.HDRExtra2", "type": "*variable", "value": "~*req.6", "mandatory": true},
-				{"tag": "HDRExtra1", "path": "*cgreq.HDRExtra1", "type": "*variable", "value": "~*req.6", "mandatory": true},
-			],
+				{"tag": "HDRExtra1", "path": "*cgreq.HDRExtra1", "type": "*variable", "value": "~*req.6", "mandatory": true}
+			]
 		},
 		{
 			"id": "init_session",
@@ -117,7 +109,7 @@
 			"source_path": "/tmp/init_session/in",
 			"flags": ["*initiate","*accounts","*resources","*attributes","*log"],
 			"processed_path": "/tmp/init_session/out",
-			"fields":[									// import content_fields template, tag will match internally CDR field, in case of .csv value will be represented by index of the field value
+			"fields":[									
 				{"tag": "Tenant", "path": "*cgreq.Tenant", "type": "*variable", "value": "~*req.Tenant", "mandatory": true},
 				{"tag": "ToR", "path": "*cgreq.ToR", "type": "*constant", "value": "*voice", "mandatory": true},
 				{"tag": "OriginID", "path": "*cgreq.OriginID", "type": "*variable", "value": "~*req.OriginID", "mandatory": true},
@@ -128,8 +120,8 @@
 				{"tag": "Destination", "path": "*cgreq.Destination", "type": "*variable", "value": "~*req.Destination", "mandatory": true},
 				{"tag": "SetupTime", "path": "*cgreq.SetupTime", "type": "*variable", "value": "~*req.SetupTime", "mandatory": true},
 				{"tag": "AnswerTime", "path": "*cgreq.AnswerTime", "type": "*variable", "value": "~*req.AnswerTime", "mandatory": true},
-				{"tag": "Usage", "path": "*cgreq.Usage", "type": "*variable", "value": "~*req.Usage", "mandatory": true},
-			],
+				{"tag": "Usage", "path": "*cgreq.Usage", "type": "*variable", "value": "~*req.Usage", "mandatory": true}
+			]
 		},
 		{
 			"id": "terminate_session",
@@ -138,12 +130,12 @@
 			"source_path": "/tmp/terminate_session/in",
 			"flags": ["*terminate","*accounts","*resources","*log"],
 			"processed_path": "/tmp/terminate_session/out",
-			"fields":[									// import content_fields template, tag will match internally CDR field, in case of .csv value will be represented by index of the field value
+			"fields":[									
 				{"tag": "Tenant", "path": "*cgreq.Tenant", "type": "*variable", "value": "~*req.0", "mandatory": true},
 				{"tag": "OriginID", "path": "*cgreq.OriginID", "type": "*variable", "value": "~*req.2", "mandatory": true},
 				{"tag": "RequestType", "path": "*cgreq.RequestType", "type": "*variable", "value": "~*req.3", "mandatory": true},
-				{"tag": "Usage", "path": "*cgreq.Usage", "type": "*variable", "value": "~*req.9", "mandatory": true},
-			],
+				{"tag": "Usage", "path": "*cgreq.Usage", "type": "*variable", "value": "~*req.9", "mandatory": true}
+			]
 		},
 		{
 			"id": "create_cdr",
@@ -152,7 +144,7 @@
 			"source_path": "/tmp/cdrs/in",
 			"flags": ["*cdrs","*log"],
 			"processed_path": "/tmp/cdrs/out",
-			"fields":[									// import content_fields template, tag will match internally CDR field, in case of .csv value will be represented by index of the field value
+			"fields":[									
 				{"tag": "Tenant", "path": "*cgreq.Tenant", "type": "*variable", "value": "~*req.0", "mandatory": true},
 				{"tag": "ToR", "path": "*cgreq.ToR", "type": "*constant", "value": "*voice", "mandatory": true},
 				{"tag": "OriginID", "path": "*cgreq.OriginID", "type": "*variable", "value": "~*req.2", "mandatory": true},
@@ -165,8 +157,8 @@
 				{"tag": "AnswerTime", "path": "*cgreq.AnswerTime", "type": "*variable", "value": "~*req.8", "mandatory": true},
 				{"tag": "Usage", "path": "*cgreq.Usage", "type": "*variable", "value": "~*req.9", "mandatory": true},
 				{"tag": "ExtraInfo1", "path": "*cgreq.ExtraInfo1", "type": "*constant", "value": "ExtraInfo1", "mandatory": true},
-				{"tag": "ExtraInfo2", "path": "*cgreq.ExtraInfo2", "type": "*constant", "value": "ExtraInfo2", "mandatory": true},
-			],
+				{"tag": "ExtraInfo2", "path": "*cgreq.ExtraInfo2", "type": "*constant", "value": "ExtraInfo2", "mandatory": true}
+			]
 		},
 		{
 			"id": "file_reader_with_filters",
@@ -194,8 +186,8 @@
 				{"tag": "Usage", "path": "*cgreq.Usage", "type": "*variable", "value": "~*req.6", "mandatory": true},
 				{"tag": "HDRExtra3", "path": "*cgreq.HDRExtra3", "type": "*variable", "value": "~*req.6", "mandatory": true},
 				{"tag": "HDRExtra2", "path": "*cgreq.HDRExtra2", "type": "*variable", "value": "~*req.6", "mandatory": true},
-				{"tag": "HDRExtra1", "path": "*cgreq.HDRExtra1", "type": "*variable", "value": "~*req.6", "mandatory": true},
-			],
+				{"tag": "HDRExtra1", "path": "*cgreq.HDRExtra1", "type": "*variable", "value": "~*req.6", "mandatory": true}
+			]
 		},
 		{
 			"id": "XmlDryRun",
@@ -205,7 +197,7 @@
 			"flags": ["*cdrs","*log"],
 			"processed_path": "/tmp/xmlErs/out",
 			"opts": {
-				"xmlRootPath": "broadWorksCDR.cdrData",
+				"xmlRootPath": "broadWorksCDR.cdrData"
 			},
 			"fields":[
 				{"tag": "ToR", "path": "*cgreq.ToR", "type": "*constant", "value": "*voice", "mandatory": true},
@@ -218,7 +210,32 @@
 				{"tag": "SetupTime", "path": "*cgreq.SetupTime", "type": "*variable", "value": "~*req.broadWorksCDR.cdrData.basicModule.startTime", "mandatory": true},
 				{"tag": "AnswerTime", "path": "*cgreq.AnswerTime", "type": "*variable", "value": "~*req.broadWorksCDR.cdrData.basicModule.answerTime", "mandatory": true},
 				{"tag": "Usage", "path": "*cgreq.Usage", "type": "*usageDifference", "value": "~*req.broadWorksCDR.cdrData.basicModule.releaseTime;~*req.broadWorksCDR.cdrData.basicModule.answerTime", "mandatory": true}
-			],
+			]
+		},
+		{
+			"id": "XML_EmptyRoot",
+			"run_delay":  "-1",
+			"type": "*fileXML",
+			"source_path": "/tmp/xmlErs2/in",
+			"flags": ["*dryRun"],
+			"processed_path": "/tmp/xmlErs2/out",
+			"opts": {
+				"xmlRootPath": ""
+			},
+			"fields":[
+				{"tag": "ToR", "path": "*cgreq.ToR", "type": "*variable", "value": "~*req.root.partial_cdr.ToR", "mandatory": true},
+				{"tag": "OriginID", "path": "*cgreq.OriginID", "type": "*composed", "value": "~*req.root.partial_cdr.TestCase", "mandatory": true},
+				{"tag": "OriginID", "path": "*cgreq.OriginID", "type": "*composed", "value": "_", "mandatory": true},
+				{"tag": "OriginID", "path": "*cgreq.OriginID", "type": "*composed", "value": "~*req.root.partial_cdr[1].ID", "mandatory": true},
+				{"tag": "RequestType", "path": "*cgreq.RequestType", "type": "*variable", "value": "~*req.root.partial_cdr.RequestType", "mandatory": true},
+				{"tag": "Tenant", "path": "*cgreq.Tenant", "type": "*variable", "value": "~*req.root.partial_cdr.Tenant", "mandatory": true},
+				{"tag": "Category", "path": "*cgreq.Category", "type": "*constant", "value": "call", "mandatory": true},
+				{"tag": "Account", "path": "*cgreq.Account", "type": "*variable", "value": "~*req.root.partial_cdr.Account", "mandatory": true},
+				{"tag": "Destination", "path": "*cgreq.Destination", "type": "*variable", "value": "~*req.root.partial_cdr.Destination", "mandatory": true},
+				{"tag": "SetupTime", "path": "*cgreq.SetupTime", "type": "*variable", "value": "~*req.root.partial_cdr.SetupTime", "mandatory": true},
+				{"tag": "AnswerTime", "path": "*cgreq.AnswerTime", "type": "*variable", "value": "~*req.root.partial_cdr.AnswerTime", "mandatory": true},
+				{"tag": "Usage", "path": "*cgreq.Usage", "type": "*usageDifference", "value": "~*req.root.partial_cdr.ReleaseTime;~*req.root.partial_cdr.AnswerTime", "mandatory": true}
+			]
 		},
 		{
 			"id": "FWV1",
@@ -250,7 +267,7 @@
 				{"tag": "AccId2", "path": "*cgreq.AccId2", "type": "*variable", "value": "~*req.14-30",  "padding":"*right", "mandatory": true},
 				{"tag": "NrOfCdrs", "type": "*variable", "path":"*cgreq.NrOfCdrs", "value": "~*trl.142-150"},
 				{"tag": "TotalDuration", "type": "*variable", "path":"*cgreq.TotalDuration", "value": "~*trl.150-162"}
-			],
+			]
 		},
 		{
 			"id": "PartialCSV1",
@@ -263,7 +280,7 @@
 			"opts": {
 				"partialCacheAction": "*dump_to_file",
 				"partialOrderField": "~*req.AnswerTime",
-				"partialPath": "/tmp/partErs1/out",
+				"partialPath": "/tmp/partErs1/out"
 			},
 			"fields":[
 				{"tag": "ToR", "path": "*cgreq.ToR", "type": "*constant", "value": "*voice", "mandatory": true},
@@ -282,9 +299,9 @@
 				{"tag": "SetupTime", "path": "*cgreq.SetupTime", "type": "*variable", "value": "~*req.4", "mandatory": true},
 				{"tag": "AnswerTime", "path": "*cgreq.AnswerTime", "type": "*variable", "value": "~*req.4", "mandatory": true},
 				{"tag": "Usage", "path": "*cgreq.Usage", "type": "*variable", "value": "~*req.6:s/^(\\d+)$/${1}s/", "mandatory": true},
-				{"tag": "Partial", "path": "*cgreq.Partial", "type": "*constant", "value": "true", "filters":["*string:~*req.10:partial"]},// keep this here for partial cdr field 
+				{"tag": "Partial", "path": "*cgreq.Partial", "type": "*constant", "value": "true", "filters":["*string:~*req.10:partial"]},
 				{"tag": "Partial", "path": "*opts.*partial", "type": "*constant", "value": "true", "filters":["*string:~*req.10:partial"]},
-				{"tag": "Partial", "path": "*opts.*partial", "type": "*constant", "value": "false", "filters":["*notstring:~*req.10:partial"]},
+				{"tag": "Partial", "path": "*opts.*partial", "type": "*constant", "value": "false", "filters":["*notstring:~*req.10:partial"]}
 			],
 			"cache_dump_fields": [
 				{"tag": "OriginID", "path":"*exp.OriginID", "type": "*variable", "value": "~*req.OriginID"},
@@ -294,8 +311,8 @@
 				{"tag": "Destination", "path":"*exp.Destination", "type": "*variable", "value": "~*req.Destination"},
 				{"tag": "SetupTime", "path":"*exp.SetupTime", "type": "*variable", "value": "~*req.SetupTime", "layout": "2006-01-02T15:04:05Z07:00"},
 				{"tag": "AnswerTime", "path":"*exp.AnswerTime", "type": "*variable", "value": "~*req.AnswerTime", "layout": "2006-01-02T15:04:05Z07:00"},
-				{"tag": "Usage", "path":"*exp.Usage", "type": "*variable", "value": "~*req.Usage"},
-			],
+				{"tag": "Usage", "path":"*exp.Usage", "type": "*variable", "value": "~*req.Usage"}
+			]
 		},
 		{
 			"id": "PartialCSV_PostExpiry",
@@ -308,7 +325,7 @@
 			"opts": {
 				"partialCacheAction": "*post_cdr",
 				"partialOrderField": "~*req.AnswerTime",
-				"partialPath": "/tmp/partErs2/out",
+				"partialPath": "/tmp/partErs2/out"
 			},
 			"fields":[
 				{"tag": "ToR", "path": "*cgreq.ToR", "type": "*constant", "value": "*voice", "mandatory": true},
@@ -327,10 +344,10 @@
 				{"tag": "SetupTime", "path": "*cgreq.SetupTime", "type": "*variable", "value": "~*req.4", "mandatory": true},
 				{"tag": "AnswerTime", "path": "*cgreq.AnswerTime", "type": "*variable", "value": "~*req.4", "mandatory": true},
 				{"tag": "Usage", "path": "*cgreq.Usage", "type": "*variable", "value": "~*req.6:s/^(\\d+)$/${1}s/", "mandatory": true},
-				{"tag": "Partial", "path": "*cgreq.Partial", "type": "*constant", "value": "true", "filters":["*string:~*req.10:partial"]},// keep this here for partial cdr field 
+				{"tag": "Partial", "path": "*cgreq.Partial", "type": "*constant", "value": "true", "filters":["*string:~*req.10:partial"]},
 				{"tag": "Partial", "path": "*opts.*partial", "type": "*constant", "value": "true", "filters":["*string:~*req.10:partial"]},
 				{"tag": "Partial", "path": "*opts.*partial", "type": "*constant", "value": "false", "filters":["*notstring:~*req.10:partial"]}
-			],
+			]
 		},
 		{
 			"id": "FlatstoreOsips",
@@ -342,7 +359,7 @@
 				"partialcsvFieldSeparator": "|",
 				"partialCacheAction": "*dump_to_file",
 				"partialOrderField": "~*opts.order",
-				"partialPath": "/tmp/flatstoreErs/out",
+				"partialPath": "/tmp/flatstoreErs/out"
 			},
 			"source_path": "/tmp/flatstoreErs/in",
 			"processed_path": "/tmp/flatstoreErs/out",
@@ -364,12 +381,12 @@
 				{"tag": "Invite", "path": "*opts.invite", "type": "*constant", "value": "true", "filters":["*string:~*req.0:INVITE"]},
 				{"tag": "Bye", "path": "*opts.bye", "type": "*constant", "value": "true", "filters":["*string:~*req.0:BYE"]},
 				{"tag": "Order", "path": "*opts.order", "type": "*constant", "value": "0", "filters":["*string:~*req.0:INVITE"]},
-				{"tag": "Order", "path": "*opts.order", "type": "*constant", "value": "1", "filters":["*string:~*req.0:BYE"]},
+				{"tag": "Order", "path": "*opts.order", "type": "*constant", "value": "1", "filters":["*string:~*req.0:BYE"]}
 			],
 			"partial_commit_fields": [
 				{"tag": "Usage", "path": "*cgreq.Usage", "type": "*constant","value": "0", "mandatory": true, "filters": ["*prefix:~*vars.*fileName:missed_calls"]},
 				{"tag": "Usage", "path": "*cgreq.Usage", "type": "*usageDifference","value": "~*req.EndTime;~*req.AnswerTime", "mandatory": true, "filters": ["*notprefix:~*vars.*fileName:missed_calls","*exists:~*opts.invite:","*exists:~*opts.bye:"]}, 
-				{"tag": "Partial", "path": "*opts.*partial", "type": "*constant", "value": "false","filters": ["*exists:~*opts.invite:","*exists:~*opts.bye:"]},
+				{"tag": "Partial", "path": "*opts.*partial", "type": "*constant", "value": "false","filters": ["*exists:~*opts.invite:","*exists:~*opts.bye:"]}
 			],
 			"cache_dump_fields": [
 				{"tag": "OriginHost",		"path": "*exp.OriginHost", 		"type": "*variable", "value":"~*req.OriginHost"},
@@ -382,8 +399,8 @@
 				{"tag": "AnswerTime",		"path": "*exp.AnswerTime", 		"type": "*variable", "value":"~*req.AnswerTime"},
 				{"tag": "EndTime",			"path": "*exp.EndTime", 		"type": "*variable", "value":"~*req.EndTime"},
 				{"tag": "DisconnectCause",	"path": "*exp.DisconnectCause", "type": "*variable", "value":"~*req.DisconnectCause"},
-				{"tag": "DialogId",			"path": "*exp.DialogId", 		"type": "*variable", "value":"~*req.DialogId"},
-			],
+				{"tag": "DialogId",			"path": "*exp.DialogId", 		"type": "*variable", "value":"~*req.DialogId"}
+			]
 
 		},
 		{
@@ -397,7 +414,7 @@
 				"partialCacheAction": "*dump_to_file",
 				"partialOrderField": "~*opts.order",
 				"partialPath": "/tmp/flatstoreACKErs/out",
-				"csvLazyQuotes": true,
+				"csvLazyQuotes": true
 			},
 			"source_path": "/tmp/flatstoreACKErs/in",
 			"processed_path": "/tmp/flatstoreACKErs/out",
@@ -421,12 +438,12 @@
 				{"tag": "Ack", "path": "*opts.ack", "type": "*constant", "value": "true", "filters":["*string:~*req.0:ACK"]},
 				{"tag": "Order", "path": "*opts.order", "type": "*constant", "value": "0", "filters":["*string:~*req.0:INVITE"]},
 				{"tag": "Order", "path": "*opts.order", "type": "*constant", "value": "1", "filters":["*string:~*req.0:ACK"]},
-				{"tag": "Order", "path": "*opts.order", "type": "*constant", "value": "2", "filters":["*string:~*req.0:BYE"]},
+				{"tag": "Order", "path": "*opts.order", "type": "*constant", "value": "2", "filters":["*string:~*req.0:BYE"]}
 			],
 			"partial_commit_fields": [
 				{"tag": "Usage", "path": "*cgreq.Usage", "type": "*constant","value": "0", "mandatory": true, "filters": ["*prefix:~*vars.*fileName:missed_calls"]},
 				{"tag": "Usage", "path": "*cgreq.Usage", "type": "*usageDifference","value": "~*req.EndTime;~*req.AnswerTime", "mandatory": true, "filters": ["*notprefix:~*vars.*fileName:missed_calls","*exists:~*opts.invite:","*exists:~*opts.bye:","*exists:~*opts.ack:"]}, 
-				{"tag": "Partial", "path": "*opts.*partial", "type": "*constant", "value": "false","filters": ["*exists:~*opts.invite:","*exists:~*opts.bye:","*exists:~*opts.ack:"]},
+				{"tag": "Partial", "path": "*opts.*partial", "type": "*constant", "value": "false","filters": ["*exists:~*opts.invite:","*exists:~*opts.bye:","*exists:~*opts.ack:"]}
 			],
 			"cache_dump_fields": [
 				{"tag": "OriginHost",		"path": "*exp.OriginHost", 		"type": "*variable", "value":"~*req.OriginHost"},
@@ -439,8 +456,8 @@
 				{"tag": "AnswerTime",		"path": "*exp.AnswerTime", 		"type": "*variable", "value":"~*req.AnswerTime"},
 				{"tag": "EndTime",			"path": "*exp.EndTime", 		"type": "*variable", "value":"~*req.EndTime"},
 				{"tag": "DisconnectCause",	"path": "*exp.DisconnectCause", "type": "*variable", "value":"~*req.DisconnectCause"},
-				{"tag": "DialogId",			"path": "*exp.DialogId", 		"type": "*variable", "value":"~*req.DialogId"},
-			],
+				{"tag": "DialogId",			"path": "*exp.DialogId", 		"type": "*variable", "value":"~*req.DialogId"}
+			]
 
 		},
 		{
@@ -461,8 +478,8 @@
 				{"tag": "Destination", "path": "*cgreq.Destination", "type": "*variable", "value": "~*req.Destination:s/0([1-9]\\d+)/+49${1}/", "mandatory": true},
 				{"tag": "SetupTime", "path": "*cgreq.SetupTime", "type": "*variable", "value": "~*req.SetupTime", "mandatory": true},
 				{"tag": "AnswerTime", "path": "*cgreq.AnswerTime", "type": "*variable", "value": "~*req.AnswerTime", "mandatory": true},
-				{"tag": "Usage", "path": "*cgreq.Usage", "type": "*variable", "value": "~*req.Usage", "mandatory": true},
-			],
+				{"tag": "Usage", "path": "*cgreq.Usage", "type": "*variable", "value": "~*req.Usage", "mandatory": true}
+			]
 		},
 		{
 			"id": "readerWithTemplate",
@@ -474,8 +491,8 @@
 			"fields":[
 				{"tag": "reqFields","type": "*template", "value": "reqFields"},
 				{"tag": "ExtraInfo1", "path": "*cgreq.ExtraInfo1", "type": "*constant", "value": "ExtraInfo1"},
-				{"tag": "ExtraInfo2", "path": "*cgreq.ExtraInfo2", "type": "*constant", "value": "ExtraInfo2"},
-			],
+				{"tag": "ExtraInfo2", "path": "*cgreq.ExtraInfo2", "type": "*constant", "value": "ExtraInfo2"}
+			]
 		},
 		{
 			"id": "PartialWithMultipleMethods",
@@ -488,7 +505,7 @@
 				"partialCacheAction": "*dump_to_file",
 				"partialOrderField": "~*opts.orderID",
 				"partialPath": "/tmp/flatstoreMMErs/out",
-				"csvLazyQuotes": true,
+				"csvLazyQuotes": true
 			},
 			"source_path": "/tmp/flatstoreMMErs/in",
 			"processed_path": "/tmp/flatstoreMMErs/out",
@@ -512,12 +529,12 @@
 				{"tag": "Order", "path": "*opts.orderID", "type": "*variable", "value": "~*req.0"},
 
 				{"tag": "Partial", "path": "*opts.*partial", "type": "*constant", "value": "false", "filters": ["*string:~*req.1:CANCEL"]},
-				{"tag": "Usage", "path": "*cgreq.Usage", "type": "*constant","value": "0", "mandatory": true, "filters": ["*string:~*req.1:CANCEL"]}, 
+				{"tag": "Usage", "path": "*cgreq.Usage", "type": "*constant","value": "0", "mandatory": true, "filters": ["*string:~*req.1:CANCEL"]}
 
 			],
 			"partial_commit_fields": [
 				{"tag": "Usage", "path": "*cgreq.Usage", "type": "*usageDifference","value": "~*req.EndTime;~*req.AnswerTime", "mandatory": true, "filters": ["*exists:~*opts.invite:","*exists:~*opts.bye:","*exists:~*opts.ack:"]}, 
-				{"tag": "Partial", "path": "*opts.*partial", "type": "*constant", "value": "false","filters": ["*exists:~*opts.invite:","*exists:~*opts.bye:","*exists:~*opts.ack:"]},
+				{"tag": "Partial", "path": "*opts.*partial", "type": "*constant", "value": "false","filters": ["*exists:~*opts.invite:","*exists:~*opts.bye:","*exists:~*opts.ack:"]}
 			],
 			"cache_dump_fields": [
 				{"tag": "OriginHost",		"path": "*exp.OriginHost", 		"type": "*variable", "value":"~*req.OriginHost"},
@@ -530,13 +547,12 @@
 				{"tag": "AnswerTime",		"path": "*exp.AnswerTime", 		"type": "*variable", "value":"~*req.AnswerTime"},
 				{"tag": "EndTime",			"path": "*exp.EndTime", 		"type": "*variable", "value":"~*req.EndTime"},
 				{"tag": "DisconnectCause",	"path": "*exp.DisconnectCause", "type": "*variable", "value":"~*req.DisconnectCause"},
-				{"tag": "DialogId",			"path": "*exp.DialogId", 		"type": "*variable", "value":"~*req.DialogId"},
-			],
+				{"tag": "DialogId",			"path": "*exp.DialogId", 		"type": "*variable", "value":"~*req.DialogId"}
+			]
 
-		},
-	],
+		}
+	]
 },
-
 
 "templates": {
 	"reqFields": [
@@ -552,13 +568,11 @@
 		{"tag": "SetupTime", "path": "*cgreq.SetupTime", "type": "*variable", "value": "~*req.11", "mandatory": true},
 		{"tag": "AnswerTime", "path": "*cgreq.AnswerTime", "type": "*variable", "value": "~*req.12", "mandatory": true},
 		{"tag": "Usage", "path": "*cgreq.Usage", "type": "*variable", "value": "~*req.13", "mandatory": true}
-	],
+	]
 },
-
 
 "admins": {
-	"enabled": true,
-},
-
+	"enabled": true
+}
 
 }

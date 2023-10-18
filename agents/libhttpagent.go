@@ -153,7 +153,10 @@ func (hU *httpXmlDP) FieldAsInterface(fldPath []string) (data any, err error) {
 	}
 	//convert workPath to HierarchyPath
 	hrPath := utils.HierarchyPath(workPath)
-	elmnt := xmlquery.FindOne(hU.xmlDoc, hrPath.AsString("/", false))
+	elmnt, err := xmlquery.Query(hU.xmlDoc, hrPath.AsString("/", false))
+	if err != nil {
+		return nil, err
+	}
 	if elmnt == nil {
 		return
 	}

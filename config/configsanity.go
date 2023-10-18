@@ -20,6 +20,7 @@ package config
 
 import (
 	"fmt"
+	"math"
 	"os"
 	"path"
 	"strings"
@@ -742,6 +743,34 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 				}
 				if err := utils.CheckInLineFilter(field.Filters); err != nil {
 					return fmt.Errorf("<%s> %s for %s at %s", utils.ERs, err, field.Filters, utils.FieldsCfg)
+				}
+				// The following sanity check prevents a "slice bounds out of range" panic.
+				if rdr.Type == utils.MetaFileXML && len(field.Value) != 0 &&
+					!utils.IsSliceMember([]string{utils.MetaNone, utils.MetaConstant}, field.Type) {
+
+					// Find the minimum rule length for dynamic RSRParser within the field value.
+					minRuleLength := math.MaxInt
+					for _, parser := range field.Value {
+						if !strings.HasPrefix(parser.Rules, utils.DynamicDataPrefix) {
+							continue
+						}
+						ruleLen := len(strings.Split(parser.Rules, utils.NestingSep))
+						minRuleLength = min(minRuleLength, ruleLen)
+					}
+
+					// If a dynamic RSRParser is found, verify xmlRootPath length against minRuleLength.
+					if minRuleLength != math.MaxInt {
+						var rootHP utils.HierarchyPath
+						if rdr.Opts.XMLRootPath != nil {
+							rootHP = utils.ParseHierarchyPath(*rdr.Opts.XMLRootPath, utils.EmptyString)
+						}
+						if len(rootHP) >= minRuleLength {
+							return fmt.Errorf("<%s> %s for reader %s at %s",
+								utils.ERs,
+								"xmlRootPath length exceeds value rule elements",
+								rdr.ID, field.Tag)
+						}
+					}
 				}
 			}
 			if err := utils.CheckInLineFilter(rdr.Filters); err != nil {

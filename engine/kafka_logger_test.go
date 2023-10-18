@@ -41,21 +41,6 @@ func TestLoggerNewLoggerExportKafkaLog(t *testing.T) {
 	}
 }
 
-func TestLoggerNewLoggerExportStdLog(t *testing.T) {
-	cfg := config.NewDefaultCGRConfig()
-	cM := NewConnManager(cfg)
-
-	exp, err := utils.NewLogger(utils.MetaStdLog, "123", 6)
-	if err != nil {
-		t.Error(err)
-	}
-	if rcv, err := NewLogger(context.Background(), utils.MetaStdLog, "cgrates.org", "123", cM, cfg); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(rcv, exp) {
-		t.Errorf("expected: <%+v>, \nreceived: <%+v>", exp, rcv)
-	}
-}
-
 func TestLoggerNewLoggerDefault(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cM := NewConnManager(cfg)

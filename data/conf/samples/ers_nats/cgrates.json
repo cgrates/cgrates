@@ -33,7 +33,7 @@
                 "natsSubjectProcessed": "cgrates_cdrs_processed",		
                 "natsJetStreamMaxWaitProcessed": "5s"		
             },
-            "flags": ["*dryrun"],										
+            "flags": ["*dryRun"],										
             "fields":[											
                 {"tag": "cdr_template", "type": "*template", "value": "cdr_template"}
             ]
@@ -55,7 +55,7 @@
                 "natsSubjectProcessed": "cgrates_cdrs_processed",		
                 "natsJetStreamMaxWaitProcessed": "5s"		
             },
-            "flags": ["*dryrun"],										
+            "flags": ["*dryRun"],										
             "fields":[											
                 {"tag": "cdr_template", "type": "*template", "value": "cdr_template"}
             ]

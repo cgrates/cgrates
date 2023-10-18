@@ -400,7 +400,7 @@ const CGRATES_CFG_JSON = `
 				// "csvLazyQuotes": false,						// if a quote may appear in an unquoted field and a non-doubled quote may appear in a quoted field
 
 				// FileXML
-				"xmlRootPath": "",								// path towards one event in case of XML CDRs
+				// "xmlRootPath": "",							// path towards one event in case of XML CDRs
 
 				// AMQP and AMQPv1
 				// "amqpQueueID": "cgrates_cdrs",				// the queue id for AMQP and AMQPv1 readers from were the events are read
