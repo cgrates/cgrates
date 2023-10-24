@@ -130,7 +130,7 @@
 // 	"db_port": 3306,						// the port to reach the stor_db
 // 	"db_name": "cgrates",					// stor database name
 // 	"db_user": "cgrates",					// username to use when connecting to stor_db
-// 	"db_password": "",						// password to use when connecting to stor_db
+// 	"db_password": "CGRateS.org",			// password to use when connecting to stor_db
 // 	"string_indexed_fields": [],			// indexes on cdrs table to speed up queries, used in case of *mongo and *internal
 // 	"prefix_indexed_fields":[],				// prefix indexes on cdrs table to speed up queries, used in case of *internal
 // 	"opts": {
