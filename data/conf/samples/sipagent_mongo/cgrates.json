@@ -22,6 +22,7 @@
 	"db_type": "*mongo",					// stor database type to use: <mysql|postgres>
 	"db_port": 27017, 						// the port to reach the stordb
 	"db_name": "cgrates",
+	"db_password": "",
 },
 
 "schedulers": {

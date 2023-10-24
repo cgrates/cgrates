@@ -547,7 +547,7 @@ func TestDfStorDBJsonCfg(t *testing.T) {
 		Db_port:               utils.IntPointer(3306),
 		Db_name:               utils.StringPointer("cgrates"),
 		Db_user:               utils.StringPointer("cgrates"),
-		Db_password:           utils.StringPointer(""),
+		Db_password:           utils.StringPointer("CGRateS.org"),
 		String_indexed_fields: &[]string{},
 		Prefix_indexed_fields: &[]string{},
 		Opts: &DBOptsJson{
