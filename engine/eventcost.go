@@ -1190,3 +1190,21 @@ func (ec *EventCost) FieldAsString(fldPath []string) (string, error) {
 	}
 	return utils.IfaceAsString(ival), nil
 }
+
+// Set is implemented to meet the DataStorage interface requirements for EventCost
+// type variables. It has no functionality.
+func (ec *EventCost) Set(fldPath []string, val any) error {
+	return utils.ErrNotImplemented
+}
+
+// Remove is implemented to meet the DataStorage interface requirements for EventCost
+// type variables. It has no functionality.
+func (ec *EventCost) Remove(fldPath []string) error {
+	return utils.ErrNotImplemented
+}
+
+// GetKeys is implemented to meet the DataStorage interface requirements for EventCost
+// type variables. It has no functionality.
+func (ec *EventCost) GetKeys(nested bool, nesteedLimit int, prefix string) []string {
+	return nil
+}
