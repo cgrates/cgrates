@@ -15,38 +15,37 @@
     mongodb_installation_required: "{{ mongodb_current_version != mongodb_version }}"
 
 - block:
+    - name: Install dependencies
+      become: yes
+      apt:
+        name: "{{ mongodb_dependencies }}"
+        state: present
+        update_cache: yes
 
-  - name: Install dependencies
-    become: yes
-    apt:
-      name: "{{ mongodb_dependencies }}"
-      state: present
-      update_cache: yes
+    - name: Import the MongoDB public GPG Key
+      become: yes
+      apt_key:
+        url: "https://pgp.mongodb.com/server-{{ mongodb_version }}.asc"
+        keyring: "/usr/share/keyrings/mongodb-server-{{ mongodb_version }}.gpg"
 
-  - name: Import the MongoDB public GPG Key
-    become: yes
-    apt_key:
-      url: "https://pgp.mongodb.com/server-{{ mongodb_version }}.asc"
-      keyring: "/usr/share/keyrings/mongodb-server-{{ mongodb_version }}.gpg"
+    - name: Add MongoDB repository
+      become: yes
+      apt_repository:
+        repo: "deb [ signed-by=/usr/share/keyrings/mongodb-server-{{ mongodb_version }}.gpg] http://repo.mongodb.org/apt/debian bullseye/mongodb-org/{{ mongodb_version }} main"
+        filename: "{{ mongodb_package_name }}-{{ mongodb_version }}"
 
-  - name: Add MongoDB repository
-    become: yes
-    apt_repository:
-      repo: "deb [ signed-by=/usr/share/keyrings/mongodb-server-{{ mongodb_version }}.gpg] http://repo.mongodb.org/apt/debian bullseye/mongodb-org/{{ mongodb_version }} main"
-      filename: "{{ mongodb_package_name }}-{{ mongodb_version }}"
+    - name: Install MongoDB packages
+      become: yes
+      apt:
+        name: "{{ mongodb_package_name }}"
+        state: present
+        update_cache: yes
 
-  - name: Install MongoDB packages
-    become: yes
-    apt:
-      name: "{{ mongodb_package_name }}"
-      state: present
-      update_cache: yes
-
-  - name: Start and enable MongoDB service
-    become: yes
-    ansible.builtin.systemd:
-      name: "{{ mongodb_service_name }}"
-      state: "{{ mongodb_service_state }}"
-      enabled: "{{ mongodb_service_enabled }}"
+    - name: Start and enable MongoDB service
+      become: yes
+      ansible.builtin.systemd:
+        name: "{{ mongodb_service_name }}"
+        state: "{{ mongodb_service_state }}"
+        enabled: "{{ mongodb_service_enabled }}"
 
   when: mongodb_installation_required
