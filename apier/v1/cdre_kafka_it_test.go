@@ -296,7 +296,7 @@ func testKafkaDeleteTopic(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	experr := `[5] Leader Not Available: the cluster is in the middle of a leadership election and there is currently no leader for this partition and hence it is unavailable for writes`
+	experr := `[3] Unknown Topic Or Partition: the request is for a topic or partition that does not exist on this broker`
 	_, err = conn.ReadPartitions("cgrates_cdrs")
 	if err == nil || err.Error() != experr {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", experr, err)
