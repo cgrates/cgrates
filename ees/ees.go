@@ -267,16 +267,24 @@ func exportEventWithExporter(exp EventExporter, ev *utils.CGREvent, oneTime bool
 		}
 	} else {
 		expNM := utils.NewOrderedNavigableMap()
-		err = engine.NewExportRequest(map[string]utils.DataStorage{
+		dsMap := map[string]utils.DataStorage{
 			utils.MetaReq:  utils.MapStorage(ev.Event),
 			utils.MetaDC:   exp.GetMetrics(),
 			utils.MetaOpts: utils.MapStorage(ev.APIOpts),
 			utils.MetaCfg:  cfg.GetDataProvider(),
-			utils.MetaEC:   utils.MapStorage{utils.CostDetails: ev.Event[utils.CostDetails]},
 			utils.MetaVars: utils.MapStorage{utils.MetaTenant: ev.Tenant},
-		}, utils.FirstNonEmpty(ev.Tenant, cfg.GeneralCfg().DefaultTenant),
-			filterS,
-			map[string]*utils.OrderedNavigableMap{utils.MetaExp: expNM}).SetFields(exp.Cfg().ContentFields())
+		}
+
+		// Blank statement is needed to avoid panic if the cast would fail. If CostDetails is not present in the
+		// map or it is not castable, the "*ec" key will still be created, but with a nil value inside. This is to
+		// prevent encountering the "unsupported field prefix: <*ec>" error. Might need a revision in the future.
+		dsMap[utils.MetaEC], _ = ev.Event[utils.CostDetails].(*engine.EventCost)
+
+		err = engine.NewExportRequest(dsMap,
+			utils.FirstNonEmpty(ev.Tenant, cfg.GeneralCfg().DefaultTenant),
+			filterS, map[string]*utils.OrderedNavigableMap{
+				utils.MetaExp: expNM,
+			}).SetFields(exp.Cfg().ContentFields())
 		if eEv, err = exp.PrepareOrderMap(expNM); err != nil {
 			return
 		}
