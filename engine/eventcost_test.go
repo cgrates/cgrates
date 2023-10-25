@@ -3780,6 +3780,107 @@ func TestECAsDataProvider2(t *testing.T) {
 	}
 }
 
+func TestECAsDataProvider3(t *testing.T) {
+	ecDP := testEC
+	testDPs := []struct {
+		name   string
+		fields []string
+		exp    any
+	}{
+		{
+			name:   "StartTime",
+			fields: []string{"Charges[0]", "Rating", "Timing", "StartTime"},
+			exp:    "00:00:00",
+		},
+		{
+			name:   "RateIncrement",
+			fields: []string{"Charges[0]", "Rating", "Rates[0]", "RateIncrement"},
+			exp:    "1m0s",
+		},
+		{
+			name:   "DestinationID",
+			fields: []string{"Charges[0]", "Rating", "RatingFilter", "DestinationID"},
+			exp:    "GERMANY",
+		},
+		{
+			name:   "Units",
+			fields: []string{"Charges[0]", "Increments[0]", "Accounting", "Units"},
+			exp:    "0.1",
+		},
+		{
+			name:   "Subject",
+			fields: []string{"Charges[0]", "Rating", "RatingFilter", "Subject"},
+			exp:    "*out:cgrates.org:call:*any",
+		},
+		{
+			name:   "Value",
+			fields: []string{"Charges[2]", "Increments[2]", "Accounting", "Balance", "Value"},
+			exp:    "200",
+		},
+		{
+			name:   "Type",
+			fields: []string{"Charges[1]", "Increments[0]", "Accounting", "Balance", "Type"},
+			exp:    "*monetary",
+		},
+		{
+			name:   "DestinationPrefix",
+			fields: []string{"Charges[2]", "Rating", "RatingFilter", "DestinationPrefix"},
+			exp:    "+49",
+		},
+		{
+			name:   "RatingPlanID",
+			fields: []string{"Charges[2]", "Rating", "RatingFilter", "RatingPlanID"},
+			exp:    "RPL_RETAIL1",
+		},
+		{
+			name:   "AccountID",
+			fields: []string{"Charges[0]", "Increments[3]", "Accounting", "AccountID"},
+			exp:    "cgrates.org:dan",
+		},
+		{
+			name:   "RateValue",
+			fields: []string{"Charges[1]", "Rating", "Rates[0]", "Value"},
+			exp:    "0.01",
+		},
+		{
+			name:   "RateUnit",
+			fields: []string{"Charges[2]", "Rating", "Rates[0]", "RateUnit"},
+			exp:    "1s",
+		},
+		{
+			name:   "ExtraCharge",
+			fields: []string{"Charges[0]", "Increments[1]", "Accounting", "ExtraChargeID"},
+			exp:    "*none",
+		},
+		{
+			name:   "AccountSummary",
+			fields: []string{"AccountSummary", "BalanceSummaries[1]", "Value"},
+			exp:    "25",
+		},
+		{
+			name:   "RoundingMethod",
+			fields: []string{"AccountSummary", "AllowNegative"},
+			exp:    "false",
+		},
+		{
+			name:   "CompressFactor",
+			fields: []string{"Charges[0]", "CompressFactor"},
+			exp:    "1",
+		},
+	}
+
+	for _, testDp := range testDPs {
+
+		t.Run(testDp.name, func(t *testing.T) {
+			if val, err := ecDP.FieldAsString(testDp.fields); err != nil {
+				t.Error(err)
+			} else if testDp.exp != val {
+				t.Errorf("Expecting: <%s> \nreceived: <%s>", testDp.exp, val)
+			}
+		})
+	}
+}
+
 func TestECFieldAsInterfaceNilEventCost(t *testing.T) {
 	dft := config.NewDefaultCGRConfig()
 	cdr, err := NewMapEvent(map[string]any{}).AsCDR(dft, "cgrates.org", "UTC")
