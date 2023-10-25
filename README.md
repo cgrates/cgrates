@@ -26,9 +26,9 @@
 
 ### Documentation
 
-[Step by steps tutorials](https://cgrates.readthedocs.org/en/v0.10/tut_freeswitch.html)
+[Step by steps tutorials](https://cgrates.readthedocs.io/en/v0.10/tutorial.html)
 
-[Debian apt-get repository](https://cgrates.readthedocs.io/en/v0.10/installation.html#debian-jessie-wheezy)
+[Debian apt-get repository](https://cgrates.readthedocs.io/en/v0.10/installation.html)
 
 [Installing CGRateS from sources on minimal debian](https://asciinema.org/a/0lwlputceg52xssqgra7wjza0) (for devel or testing)
 
