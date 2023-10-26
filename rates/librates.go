@@ -239,7 +239,7 @@ func computeRateSIntervals(rts []*orderedRate, intervalStart, usage *decimal.Big
 			}
 			if rt.IntervalRates[j].FixedFee != nil && rt.IntervalRates[j].FixedFee.Cmp(decimal.New(0, 0)) != 0 { // Add FixedFee
 				rIcmts = append(rIcmts, &utils.RateSIncrement{
-					IncrementStart:    &utils.Decimal{iRtUsageSIdx},
+					IncrementStart:    &utils.Decimal{Big: iRtUsageSIdx},
 					RateIntervalIndex: j,
 					RateID:            getRateIntervalIDFromIncrement(cstRts, rt.IntervalRates[j]),
 					CompressFactor:    1,
@@ -269,11 +269,11 @@ func computeRateSIntervals(rts []*orderedRate, intervalStart, usage *decimal.Big
 				return nil, fmt.Errorf("<%s> cannot convert <%+v> increment to Int64", utils.RateS, cmpFactor)
 			}
 			rIcmts = append(rIcmts, &utils.RateSIncrement{
-				IncrementStart:    &utils.Decimal{iRtUsageSIdx},
+				IncrementStart:    &utils.Decimal{Big: iRtUsageSIdx},
 				RateID:            getRateIntervalIDFromIncrement(cstRts, rt.IntervalRates[j]),
 				CompressFactor:    cmpFactorInt,
 				RateIntervalIndex: j,
-				Usage:             &utils.Decimal{iRtUsage},
+				Usage:             &utils.Decimal{Big: iRtUsage},
 			})
 			iRtUsageSIdx = utils.SumBig(iRtUsageSIdx, iRtUsage)
 
@@ -284,7 +284,7 @@ func computeRateSIntervals(rts []*orderedRate, intervalStart, usage *decimal.Big
 			continue
 		}
 		rtIvls = append(rtIvls, &utils.RateSInterval{
-			IntervalStart:  &utils.Decimal{usageStart},
+			IntervalStart:  &utils.Decimal{Big: usageStart},
 			Increments:     rIcmts,
 			CompressFactor: 1,
 		})

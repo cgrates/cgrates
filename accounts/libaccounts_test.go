@@ -528,7 +528,7 @@ func TestRestoreAccount(t *testing.T) { //coverage purpose
 	}
 
 	restoreAccounts(context.Background(), dm, []*utils.AccountWithWeight{
-		{acntPrf, 0, utils.EmptyString},
+		{Account: acntPrf, Weight: 0, LockID: utils.EmptyString},
 	}, []utils.AccountBalancesBackup{
 		map[string]*decimal.Big{"CB2": decimal.New(100, 0)},
 	})
@@ -576,7 +576,7 @@ func TestRestoreAccount2(t *testing.T) { //coverage purpose
 	utils.Logger = utils.NewStdLoggerWithWriter(&buf, "", 7)
 
 	restoreAccounts(context.Background(), dm, []*utils.AccountWithWeight{
-		{acntPrf, 0, utils.EmptyString},
+		{Account: acntPrf, Weight: 0, LockID: utils.EmptyString},
 	}, []utils.AccountBalancesBackup{
 		map[string]*decimal.Big{"CB1": decimal.New(100, 0)},
 	})
@@ -614,7 +614,7 @@ func TestRestoreAccount3(t *testing.T) { //coverage purpose
 	}
 
 	restoreAccounts(context.Background(), dm, []*utils.AccountWithWeight{
-		{acntPrf, 0, utils.EmptyString},
+		{Account: acntPrf, Weight: 0, LockID: utils.EmptyString},
 	}, []utils.AccountBalancesBackup{
 		nil,
 	})

@@ -1083,7 +1083,7 @@ func TestACCGetStringValue3(t *testing.T) {
 		Metric: &Metric{
 			Events: map[string]*DecimalWithCompress{
 				"EVENT_1": {Stat: utils.NewDecimalFromStringIgnoreError("12.2"), CompressFactor: 2},
-				"EVENT_3": {Stat: &utils.Decimal{decimal.WithContext(decimal.Context{Precision: 3}).SetFloat64(18.3)}, CompressFactor: 1},
+				"EVENT_3": {Stat: &utils.Decimal{Big: decimal.WithContext(decimal.Context{Precision: 3}).SetFloat64(18.3)}, CompressFactor: 1},
 			},
 			MinItems: 2,
 			Count:    3,

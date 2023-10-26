@@ -138,7 +138,7 @@ func (aB *abstractBalance) debitAbstracts(ctx *context.Context, usage *decimal.B
 
 	// EvenCharges building
 	ec = utils.NewEventCharges()
-	ec.Abstracts = &utils.Decimal{usage}
+	ec.Abstracts = &utils.Decimal{Big: usage}
 	if ecCost != nil {
 		ec.Concretes = ecCost.Concretes
 	}
@@ -174,7 +174,7 @@ func (aB *abstractBalance) debitAbstracts(ctx *context.Context, usage *decimal.B
 	ec.Accounting[acntID] = &utils.AccountCharge{
 		AccountID:    aB.acntID,
 		BalanceID:    aB.blnCfg.ID,
-		Units:        &utils.Decimal{usage},
+		Units:        &utils.Decimal{Big: usage},
 		BalanceLimit: blncLmt,
 		UnitFactorID: ufID,
 		RatingID:     ratingID,

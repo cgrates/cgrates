@@ -82,13 +82,13 @@ func TestMatchingAccountsForEventMockingErrors(t *testing.T) {
 					},
 				},
 				Type:  utils.MetaConcrete,
-				Units: &utils.Decimal{decimal.New(0, 0)},
+				Units: &utils.Decimal{Big: decimal.New(0, 0)},
 				CostIncrements: []*utils.CostIncrement{
 					{
 						FilterIDs:    []string{"*string:~*req.ToR:*data"},
-						Increment:    &utils.Decimal{decimal.New(1, 0)},
-						FixedFee:     &utils.Decimal{decimal.New(0, 0)},
-						RecurrentFee: &utils.Decimal{decimal.New(1, 0)},
+						Increment:    &utils.Decimal{Big: decimal.New(1, 0)},
+						FixedFee:     &utils.Decimal{Big: decimal.New(0, 0)},
+						RecurrentFee: &utils.Decimal{Big: decimal.New(1, 0)},
 					},
 				},
 			},
@@ -155,7 +155,7 @@ func TestMatchingAccountsForEvent(t *testing.T) {
 				ID: "AbstractBalance1",
 
 				Type:  utils.MetaAbstract,
-				Units: &utils.Decimal{decimal.New(0, 0)},
+				Units: &utils.Decimal{Big: decimal.New(0, 0)},
 			},
 		},
 	}
@@ -242,7 +242,7 @@ func TestAccountDebit(t *testing.T) {
 					},
 				},
 				Type:  utils.MetaConcrete,
-				Units: &utils.Decimal{decimal.New(150, 0)},
+				Units: &utils.Decimal{Big: decimal.New(150, 0)},
 			},
 			"AbstractBalance1": {
 				ID: "AbstractBalance1",
@@ -252,12 +252,12 @@ func TestAccountDebit(t *testing.T) {
 					},
 				},
 				Type:  utils.MetaAbstract,
-				Units: &utils.Decimal{decimal.New(200, 0)},
+				Units: &utils.Decimal{Big: decimal.New(200, 0)},
 				CostIncrements: []*utils.CostIncrement{
 					{
-						Increment:    &utils.Decimal{decimal.New(1, 0)},
-						FixedFee:     &utils.Decimal{decimal.New(0, 0)},
-						RecurrentFee: &utils.Decimal{decimal.New(1, 0)},
+						Increment:    &utils.Decimal{Big: decimal.New(1, 0)},
+						FixedFee:     &utils.Decimal{Big: decimal.New(0, 0)},
+						RecurrentFee: &utils.Decimal{Big: decimal.New(1, 0)},
 					},
 				},
 			},
@@ -273,7 +273,7 @@ func TestAccountDebit(t *testing.T) {
 		},
 	}
 
-	usage := &utils.Decimal{decimal.New(190, 0)}
+	usage := &utils.Decimal{Big: decimal.New(190, 0)}
 	expected := "NOT_FOUND:invalid_filter_format"
 	if _, err := accnts.accountDebit(context.Background(), accPrf, usage.Big,
 		cgrEvent, true, decimal.New(0, 0)); err == nil || err.Error() != expected {
@@ -289,17 +289,17 @@ func TestAccountDebit(t *testing.T) {
 	}
 	accPrf.Balances["ConcreteBalance1"].Type = utils.MetaConcrete
 
-	usage = &utils.Decimal{decimal.New(0, 0)}
+	usage = &utils.Decimal{Big: decimal.New(0, 0)}
 	if _, err := accnts.accountDebit(context.Background(), accPrf, usage.Big,
 		cgrEvent, true, decimal.New(0, 0)); err != nil {
 		t.Error(err)
 	}
-	usage = &utils.Decimal{decimal.New(190, 0)}
+	usage = &utils.Decimal{Big: decimal.New(190, 0)}
 
 	accPrf.Balances["ConcreteBalance1"].UnitFactors = []*utils.UnitFactor{
 		{
 			FilterIDs: []string{"invalid_format_type"},
-			Factor:    &utils.Decimal{decimal.New(1, 0)},
+			Factor:    &utils.Decimal{Big: decimal.New(1, 0)},
 		},
 	}
 	expected = "NOT_FOUND:invalid_format_type"
@@ -309,7 +309,7 @@ func TestAccountDebit(t *testing.T) {
 	}
 	accPrf.Balances["ConcreteBalance1"].UnitFactors[0].FilterIDs = []string{}
 
-	expectedUsage := &utils.Decimal{decimal.New(150, 0)}
+	expectedUsage := &utils.Decimal{Big: decimal.New(150, 0)}
 	if evCh, err := accnts.accountDebit(context.Background(), accPrf, usage.Big,
 		cgrEvent, true, decimal.New(0, 0)); err != nil {
 		t.Error(err)
@@ -341,12 +341,12 @@ func TestAccountsDebitGetUsage(t *testing.T) {
 							},
 						},
 						Type:  utils.MetaConcrete,
-						Units: &utils.Decimal{decimal.New(90, 0)},
+						Units: &utils.Decimal{Big: decimal.New(90, 0)},
 						CostIncrements: []*utils.CostIncrement{
 							{
-								Increment:    &utils.Decimal{decimal.New(1, 0)},
-								FixedFee:     &utils.Decimal{decimal.New(2, 1)}, // 0.2
-								RecurrentFee: &utils.Decimal{decimal.New(1, 0)},
+								Increment:    &utils.Decimal{Big: decimal.New(1, 0)},
+								FixedFee:     &utils.Decimal{Big: decimal.New(2, 1)}, // 0.2
+								RecurrentFee: &utils.Decimal{Big: decimal.New(1, 0)},
 							},
 						},
 					},
@@ -466,12 +466,12 @@ func TestAccountsDebit(t *testing.T) {
 							},
 						},
 						Type:  utils.MetaAbstract,
-						Units: &utils.Decimal{decimal.New(40, 0)},
+						Units: &utils.Decimal{Big: decimal.New(40, 0)},
 						CostIncrements: []*utils.CostIncrement{
 							{
-								Increment:    &utils.Decimal{decimal.New(1, 0)},
-								FixedFee:     &utils.Decimal{decimal.New(0, 0)},
-								RecurrentFee: &utils.Decimal{decimal.New(1, 0)},
+								Increment:    &utils.Decimal{Big: decimal.New(1, 0)},
+								FixedFee:     &utils.Decimal{Big: decimal.New(0, 0)},
+								RecurrentFee: &utils.Decimal{Big: decimal.New(1, 0)},
 							},
 						},
 					},
@@ -483,7 +483,7 @@ func TestAccountsDebit(t *testing.T) {
 							},
 						},
 						Type:  utils.MetaConcrete,
-						Units: &utils.Decimal{decimal.New(213, 0)},
+						Units: &utils.Decimal{Big: decimal.New(213, 0)},
 					},
 				},
 			},
@@ -551,7 +551,7 @@ func TestAccountsDebit(t *testing.T) {
 	var buf bytes.Buffer
 	utils.Logger = utils.NewStdLoggerWithWriter(&buf, "", 7)
 
-	accntsPrf[0].Balances["ConcreteBalance2"].Units = &utils.Decimal{decimal.New(213, 0)}
+	accntsPrf[0].Balances["ConcreteBalance2"].Units = &utils.Decimal{Big: decimal.New(213, 0)}
 	accnts.dm = nil
 	expected = utils.ErrNoDatabaseConn.Error()
 	if _, err := accnts.accountsDebit(context.Background(), accntsPrf, cgrEvent, true, true); err == nil || err.Error() != expected {
@@ -587,7 +587,7 @@ func TestV1AccountsForEvent(t *testing.T) {
 				ID: "AbstractBalance1",
 
 				Type:  utils.MetaAbstract,
-				Units: &utils.Decimal{decimal.New(0, 0)},
+				Units: &utils.Decimal{Big: decimal.New(0, 0)},
 			},
 		},
 	}
@@ -1186,8 +1186,8 @@ func TestV1DebitConcretes(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	accPrf.Balances["ConcreteBalance1"].Units = &utils.Decimal{decimal.New(0, 0)}
-	accPrf.Balances["ConcreteBalance2"].Units = &utils.Decimal{decimal.New(0, 0)}
+	accPrf.Balances["ConcreteBalance1"].Units = &utils.Decimal{Big: decimal.New(0, 0)}
+	accPrf.Balances["ConcreteBalance2"].Units = &utils.Decimal{Big: decimal.New(0, 0)}
 	if !reflect.DeepEqual(rcv, accPrf) {
 		t.Errorf("Expected %+v, received %+v", utils.ToJSON(accPrf), utils.ToJSON(rcv))
 	}
@@ -1220,12 +1220,12 @@ func TestMultipleAccountsErr(t *testing.T) {
 						},
 					},
 					Type:  utils.MetaConcrete,
-					Units: &utils.Decimal{decimal.New(213, 0)},
+					Units: &utils.Decimal{Big: decimal.New(213, 0)},
 					CostIncrements: []*utils.CostIncrement{
 						{
-							Increment:    &utils.Decimal{decimal.New(1, 0)},
-							FixedFee:     &utils.Decimal{decimal.New(0, 0)},
-							RecurrentFee: &utils.Decimal{decimal.New(1, 0)},
+							Increment:    &utils.Decimal{Big: decimal.New(1, 0)},
+							FixedFee:     &utils.Decimal{Big: decimal.New(0, 0)},
+							RecurrentFee: &utils.Decimal{Big: decimal.New(1, 0)},
 						},
 					},
 				},
@@ -1249,12 +1249,12 @@ func TestMultipleAccountsErr(t *testing.T) {
 						},
 					},
 					Type:  utils.MetaConcrete,
-					Units: &utils.Decimal{decimal.New(213, 0)},
+					Units: &utils.Decimal{Big: decimal.New(213, 0)},
 					CostIncrements: []*utils.CostIncrement{
 						{
-							Increment:    &utils.Decimal{decimal.New(1, 0)},
-							FixedFee:     &utils.Decimal{decimal.New(0, 0)},
-							RecurrentFee: &utils.Decimal{decimal.New(1, 0)},
+							Increment:    &utils.Decimal{Big: decimal.New(1, 0)},
+							FixedFee:     &utils.Decimal{Big: decimal.New(0, 0)},
+							RecurrentFee: &utils.Decimal{Big: decimal.New(1, 0)},
 						},
 					},
 				},
@@ -1279,12 +1279,12 @@ func TestMultipleAccountsErr(t *testing.T) {
 						},
 					},
 					Type:  utils.MetaConcrete,
-					Units: &utils.Decimal{decimal.New(213, 0)},
+					Units: &utils.Decimal{Big: decimal.New(213, 0)},
 					CostIncrements: []*utils.CostIncrement{
 						{
-							Increment:    &utils.Decimal{decimal.New(1, 0)},
-							FixedFee:     &utils.Decimal{decimal.New(0, 0)},
-							RecurrentFee: &utils.Decimal{decimal.New(1, 0)},
+							Increment:    &utils.Decimal{Big: decimal.New(1, 0)},
+							FixedFee:     &utils.Decimal{Big: decimal.New(0, 0)},
+							RecurrentFee: &utils.Decimal{Big: decimal.New(1, 0)},
 						},
 					},
 				},
@@ -1380,7 +1380,7 @@ func TestV1ActionSetBalance(t *testing.T) {
 			"AbstractBalance1": {
 				ID:    "AbstractBalance1",
 				Type:  utils.MetaConcrete,
-				Units: &utils.Decimal{decimal.New(10, 0)},
+				Units: &utils.Decimal{Big: decimal.New(10, 0)},
 				CostIncrements: []*utils.CostIncrement{
 					{
 						FilterIDs:    []string{"*string:~*req.ToR:*voice"},
@@ -1951,7 +1951,7 @@ func TestV1DebitAbstractsEventCharges(t *testing.T) {
 
 	acnt1.Balances[ab1ID].Units = utils.NewDecimal(int64(10*time.Second), 0)
 	acnt1.Balances[cb1ID].Units = utils.NewDecimal(-200, 0)
-	acnt1.Balances[ab2ID].Units = utils.SumDecimal(&utils.Decimal{utils.NewDecimal(0, 0).Neg(utils.NewDecimal(1, 0).Big)}, utils.NewDecimal(1, 0)) // negative 0
+	acnt1.Balances[ab2ID].Units = utils.SumDecimal(&utils.Decimal{Big: utils.NewDecimal(0, 0).Neg(utils.NewDecimal(1, 0).Big)}, utils.NewDecimal(1, 0)) // negative 0
 	acnt1.Balances[cb2ID].Units = utils.NewDecimal(0, 0)
 	if rcv, err := dm.GetAccount(context.Background(), acnt1.Tenant, acnt1.ID); err != nil {
 		t.Error(err)
@@ -1972,7 +1972,7 @@ func TestV1DebitAbstractsEventCharges(t *testing.T) {
 	// compare these 2 eventCHarges
 	eEvChgs.Accounts["TestV1DebitAbstractsEventCharges1"].Balances[ab1ID].Units = utils.NewDecimal(int64(10*time.Second), 0)
 	eEvChgs.Accounts["TestV1DebitAbstractsEventCharges1"].Balances[cb1ID].Units = utils.NewDecimal(-200, 0)
-	eEvChgs.Accounts["TestV1DebitAbstractsEventCharges1"].Balances[ab2ID].Units = utils.SumDecimal(&utils.Decimal{utils.NewDecimal(0, 0).Neg(utils.NewDecimal(1, 0).Big)}, utils.NewDecimal(1, 0)) // negative 0
+	eEvChgs.Accounts["TestV1DebitAbstractsEventCharges1"].Balances[ab2ID].Units = utils.SumDecimal(&utils.Decimal{Big: utils.NewDecimal(0, 0).Neg(utils.NewDecimal(1, 0).Big)}, utils.NewDecimal(1, 0)) // negative 0
 	eEvChgs.Accounts["TestV1DebitAbstractsEventCharges1"].Balances[cb2ID].Units = utils.NewDecimal(0, 0)
 	eEvChgs.Accounts["TestV1DebitAbstractsEventCharges2"].Balances[ab1ID].Units = utils.NewDecimal(10000000000, 9)
 	eEvChgs.Accounts["TestV1DebitAbstractsEventCharges2"].Balances[cb1ID].Units = utils.NewDecimal(0, 0)
@@ -2669,7 +2669,7 @@ func TestDebitAbstractUsingRatesWithRoundByIncrement(t *testing.T) {
 			"CHARGER1": {
 				AccountID:    "ACNT1",
 				BalanceID:    "ABS1",
-				Units:        &utils.Decimal{utils.NewDecimal(int64(30*time.Second), 0).Reduce()}, // 30 seconds from *abstract ABS1
+				Units:        &utils.Decimal{Big: utils.NewDecimal(int64(30*time.Second), 0).Reduce()}, // 30 seconds from *abstract ABS1
 				BalanceLimit: utils.NewDecimal(0, 0),
 				RatingID:     "Rating1",
 			},
@@ -2720,7 +2720,7 @@ func TestDebitAbstractUsingRatesWithRoundByIncrement(t *testing.T) {
 							},
 						},
 						Type:  utils.MetaAbstract,
-						Units: utils.SumDecimal(&utils.Decimal{utils.NewDecimal(0, 0).Neg(utils.NewDecimal(1, 0).Big)}, utils.NewDecimal(1, 0)), // negative 0
+						Units: utils.SumDecimal(&utils.Decimal{Big: utils.NewDecimal(0, 0).Neg(utils.NewDecimal(1, 0).Big)}, utils.NewDecimal(1, 0)), // negative 0
 						CostIncrements: []*utils.CostIncrement{
 							{
 								Increment: utils.NewDecimal(int64(time.Second), 0),
@@ -2782,7 +2782,7 @@ func TestDebitAbstractUsingRatesWithRoundByIncrement(t *testing.T) {
 					},
 				},
 				Type:  utils.MetaAbstract,
-				Units: utils.SumDecimal(&utils.Decimal{utils.NewDecimal(0, 0).Neg(utils.NewDecimal(1, 0).Big)}, utils.NewDecimal(1, 0)), // this should be -0
+				Units: utils.SumDecimal(&utils.Decimal{Big: utils.NewDecimal(0, 0).Neg(utils.NewDecimal(1, 0).Big)}, utils.NewDecimal(1, 0)), // this should be -0
 				CostIncrements: []*utils.CostIncrement{
 					{
 						Increment: utils.NewDecimal(int64(time.Second), 0),
@@ -3665,8 +3665,8 @@ func TestV1DebitConcretesProfileIgnoreFilters(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	accPrf.Balances["ConcreteBalance1"].Units = &utils.Decimal{decimal.New(0, 0)}
-	accPrf.Balances["ConcreteBalance2"].Units = &utils.Decimal{decimal.New(0, 0)}
+	accPrf.Balances["ConcreteBalance1"].Units = &utils.Decimal{Big: decimal.New(0, 0)}
+	accPrf.Balances["ConcreteBalance2"].Units = &utils.Decimal{Big: decimal.New(0, 0)}
 	if !reflect.DeepEqual(rcv, accPrf) {
 		t.Errorf("Expected %+v, received %+v", utils.ToJSON(accPrf), utils.ToJSON(rcv))
 	}

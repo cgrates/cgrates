@@ -126,7 +126,11 @@ func (aS *AccountS) matchingAccountsForEvent(ctx *context.Context, tnt string, c
 			unlockAccounts(acnts)
 			return
 		}
-		acnts = append(acnts, &utils.AccountWithWeight{qAcnt, weight, refID})
+		acnts = append(acnts, &utils.AccountWithWeight{
+			Account: qAcnt,
+			Weight:  weight,
+			LockID:  refID,
+		})
 	}
 	if len(acnts) == 0 {
 		return nil, utils.ErrNotFound
@@ -205,7 +209,7 @@ func (aS *AccountS) accountDebit(ctx *context.Context, acnt *utils.Account, usag
 			aS.fltrS, cgrEv.Tenant, cgrEv.AsDataProvider()); err != nil {
 			return
 		}
-		blcsWithWeight = append(blcsWithWeight, &utils.BalanceWithWeight{blnCfg, weight})
+		blcsWithWeight = append(blcsWithWeight, &utils.BalanceWithWeight{Balance: blnCfg, Weight: weight})
 	}
 	blcsWithWeight.Sort()
 	var blncOpers []balanceOperator
@@ -278,7 +282,7 @@ func (aS *AccountS) refundCharges(ctx *context.Context, tnt string, ecs *utils.E
 			unlockAccounts(acnts) // in case of errors will not have unlocks in upper layers
 			return
 		}
-		acnts = append(acnts, &utils.AccountWithWeight{qAcnt, 0, refID})
+		acnts = append(acnts, &utils.AccountWithWeight{Account: qAcnt, Weight: 0, LockID: refID})
 		acntsIdxed[acntID] = qAcnt
 	}
 	acntBkps := make([]utils.AccountBalancesBackup, len(acnts)) // so we can restore in case of issues
