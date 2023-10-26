@@ -25,6 +25,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
 	amqp "github.com/rabbitmq/amqp091-go"
 )
@@ -105,7 +106,8 @@ func (pstr *AMQPPoster) Post(content []byte, _ string) (err error) {
 		return
 	}
 	for i := 0; i < pstr.attempts; i++ {
-		if err = chn.Publish(
+		if err = chn.PublishWithContext(
+			context.TODO(),
 			pstr.exchange,   // exchange
 			pstr.routingKey, // routing key
 			false,           // mandatory
