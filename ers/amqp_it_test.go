@@ -27,6 +27,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -91,7 +92,8 @@ func TestAMQPER(t *testing.T) {
 
 	rdr.Serve()
 	randomOriginID := utils.UUIDSha1Prefix()
-	if err = channel.Publish(
+	if err = channel.PublishWithContext(
+		context.Background(),
 		"test-exchange", // publish to an exchange
 		"test-key",      // routing to 0 or more queues
 		false,           // mandatory
