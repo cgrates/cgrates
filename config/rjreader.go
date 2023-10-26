@@ -270,10 +270,6 @@ func (rjr *RjReader) HandleJSONError(err error) error {
 	switch realErr := err.(type) {
 	case nil:
 		return nil
-	case *json.InvalidUTF8Error, *json.UnmarshalFieldError: // deprecated
-		return err
-	case *json.InvalidUnmarshalError: // e.g. nil parameter
-		return err
 	case *json.SyntaxError:
 		offset = realErr.Offset
 	case *json.UnmarshalTypeError:
