@@ -318,7 +318,7 @@ func maxDebitAbstractsFromConcretes(ctx *context.Context, aUnits *decimal.Big,
 		aPaid = decimal.New(0, 0)
 		ec = utils.NewEventCharges()
 	}
-	ec.Abstracts = &utils.Decimal{aPaid}
+	ec.Abstracts = &utils.Decimal{Big: aPaid}
 	restoreUnitsFromClones(cncrtBlncs, paidConcrtUnts)
 	return
 }
@@ -350,7 +350,7 @@ func unlockAccounts(acnts utils.AccountsWithWeight) {
 func uncompressUnits(units *utils.Decimal, cmprsFctr int, acntChrg *utils.AccountCharge, uf *utils.UnitFactor) (tU *utils.Decimal) {
 	tU = units
 	if cmprsFctr > 1 {
-		tU = &utils.Decimal{utils.MultiplyBig(tU.Big,
+		tU = &utils.Decimal{Big: utils.MultiplyBig(tU.Big,
 			decimal.New(int64(cmprsFctr), 0))}
 	}
 	// check it this has unit factor
@@ -365,11 +365,11 @@ func uncompressUnits(units *utils.Decimal, cmprsFctr int, acntChrg *utils.Accoun
 func refundUnitsOnAccount(acnt *utils.Account, units *utils.Decimal, origBlnc *utils.Balance) {
 	if _, has := acnt.Balances[origBlnc.ID]; has {
 		acnt.Balances[origBlnc.ID].Units = &utils.Decimal{
-			utils.SumBig(
+			Big: utils.SumBig(
 				acnt.Balances[origBlnc.ID].Units.Big,
 				units.Big)}
 	} else {
 		acnt.Balances[origBlnc.ID] = origBlnc.Clone()
-		acnt.Balances[origBlnc.ID].Units = &utils.Decimal{utils.CloneDecimalBig(units.Big)}
+		acnt.Balances[origBlnc.ID].Units = &utils.Decimal{Big: utils.CloneDecimalBig(units.Big)}
 	}
 }

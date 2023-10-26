@@ -200,7 +200,7 @@ func (cB *concreteBalance) debitConcretes(ctx *context.Context, cUnits *decimal.
 	}
 	// EventCharges
 	ec = utils.NewEventCharges()
-	ec.Concretes = &utils.Decimal{dbted}
+	ec.Concretes = &utils.Decimal{Big: dbted}
 	// UnitFactors
 	var ufID string
 	if hasUF {
@@ -211,7 +211,7 @@ func (cB *concreteBalance) debitConcretes(ctx *context.Context, cUnits *decimal.
 	ec.Accounting[acntID] = &utils.AccountCharge{
 		AccountID:    cB.acntID,
 		BalanceID:    cB.blnCfg.ID,
-		Units:        &utils.Decimal{dbted},
+		Units:        &utils.Decimal{Big: dbted},
 		BalanceLimit: blncLmt,
 		UnitFactorID: ufID,
 	}

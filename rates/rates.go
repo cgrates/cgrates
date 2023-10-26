@@ -213,7 +213,7 @@ func (rS *RateS) rateProfileCostForEvent(ctx *context.Context, rtPfl *utils.Rate
 		finalCost = utils.SumBig(finalCost, costInt.Cost(rpCost.Rates)) // sums the costs for all intervals
 		rpCost.CostIntervals[idx] = costInt.AsRatesIntervalsCost()      //this does not contains IncrementStart and IntervalStart so we convert in RatesIntervalCosts
 	}
-	rpCost.Cost = &utils.Decimal{finalCost}
+	rpCost.Cost = &utils.Decimal{Big: finalCost}
 	return
 }
 

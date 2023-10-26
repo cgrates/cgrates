@@ -99,7 +99,7 @@ func (ws *LoadDistributionSorter) SortRoutes(ctx *context.Context, prflID string
 						utils.RouteS, route.cacheRoute[utils.MetaRatio], route.ID))
 			}
 			srtRoute.SortingData[utils.Ratio] = floatRatio
-			srtRoute.sortingDataDecimal[utils.Ratio] = &utils.Decimal{floatRatio}
+			srtRoute.sortingDataDecimal[utils.Ratio] = &utils.Decimal{Big: floatRatio}
 			sortedRoutes.Routes = append(sortedRoutes.Routes, srtRoute)
 		}
 	}

@@ -535,7 +535,7 @@ func (sum *Metric) addEvent(evID string, ival any) (err error) {
 	if val, err = utils.IfaceAsBig(ival); err != nil {
 		return
 	}
-	dVal := &utils.Decimal{val}
+	dVal := &utils.Decimal{Big: val}
 	sum.Value = utils.SumDecimal(sum.Value, dVal)
 	if v, has := sum.Events[evID]; !has {
 		sum.Events[evID] = &DecimalWithCompress{Stat: dVal, CompressFactor: 1}

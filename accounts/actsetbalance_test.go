@@ -71,7 +71,7 @@ func TestActSetAccountBalance(t *testing.T) {
 			"Concrete1": {
 				ID:    "Concrete1",
 				Type:  utils.MetaConcrete,
-				Units: &utils.Decimal{decimal.New(0, 0)},
+				Units: &utils.Decimal{Big: decimal.New(0, 0)},
 				Weights: []*utils.DynamicWeight{
 					{
 						Weight: 10,
@@ -208,11 +208,11 @@ func TestActSetBalanceFields(t *testing.T) {
 			},
 		},
 		Type:  utils.MetaAbstract,
-		Units: &utils.Decimal{decimal.New(20, 0)},
+		Units: &utils.Decimal{Big: decimal.New(20, 0)},
 		UnitFactors: []*utils.UnitFactor{
 			{
 				FilterIDs: []string{"fltr1"},
-				Factor:    &utils.Decimal{decimal.New(100, 0)},
+				Factor:    &utils.Decimal{Big: decimal.New(100, 0)},
 			},
 		},
 		Opts: map[string]any{
@@ -221,9 +221,9 @@ func TestActSetBalanceFields(t *testing.T) {
 		CostIncrements: []*utils.CostIncrement{
 			{
 				FilterIDs:    []string{"fltr1"},
-				Increment:    &utils.Decimal{decimal.New(1, 0)},
-				FixedFee:     &utils.Decimal{decimal.New(0, 0)},
-				RecurrentFee: &utils.Decimal{decimal.New(1, 0)},
+				Increment:    &utils.Decimal{Big: decimal.New(1, 0)},
+				FixedFee:     &utils.Decimal{Big: decimal.New(0, 0)},
+				RecurrentFee: &utils.Decimal{Big: decimal.New(1, 0)},
 			},
 		},
 		AttributeIDs:   []string{"ATTR_ID"},
@@ -311,7 +311,7 @@ func TestActNewCostIncrementsFromString(t *testing.T) {
 func TestActSetUnitFactor(t *testing.T) {
 	unitFctr := []*utils.UnitFactor{
 		{
-			Factor: &utils.Decimal{decimal.New(100, 0)},
+			Factor: &utils.Decimal{Big: decimal.New(100, 0)},
 		},
 	}
 	path := []string{"UnitFactors[0]", utils.Factor}
@@ -319,7 +319,7 @@ func TestActSetUnitFactor(t *testing.T) {
 
 	expected := []*utils.UnitFactor{
 		{
-			Factor: &utils.Decimal{decimal.New(200, 0)},
+			Factor: &utils.Decimal{Big: decimal.New(200, 0)},
 		},
 	}
 	if rcv, err := actSetUnitFactor(unitFctr, path, value); err != nil {
@@ -381,18 +381,18 @@ func TestActSetCostIncrement(t *testing.T) {
 	costIncr := []*utils.CostIncrement{
 		{
 			FilterIDs:    []string{"fltr1"},
-			Increment:    &utils.Decimal{decimal.New(1, 0)},
-			FixedFee:     &utils.Decimal{decimal.New(0, 0)},
-			RecurrentFee: &utils.Decimal{decimal.New(1, 0)},
+			Increment:    &utils.Decimal{Big: decimal.New(1, 0)},
+			FixedFee:     &utils.Decimal{Big: decimal.New(0, 0)},
+			RecurrentFee: &utils.Decimal{Big: decimal.New(1, 0)},
 		},
 	}
 
 	expected := []*utils.CostIncrement{
 		{
 			FilterIDs:    []string{"fltr1"},
-			Increment:    &utils.Decimal{decimal.New(1, 0)},
-			FixedFee:     &utils.Decimal{decimal.New(0, 0)},
-			RecurrentFee: &utils.Decimal{decimal.New(2, 0)},
+			Increment:    &utils.Decimal{Big: decimal.New(1, 0)},
+			FixedFee:     &utils.Decimal{Big: decimal.New(0, 0)},
+			RecurrentFee: &utils.Decimal{Big: decimal.New(2, 0)},
 		},
 	}
 	if rcv, err := actSetCostIncrement(costIncr, []string{"CostIncrements[0]", utils.RecurrentFee}, "2"); err != nil {
@@ -408,14 +408,14 @@ func TestActSetCostIncrement(t *testing.T) {
 		t.Errorf("Expected %+v, received %+v", utils.ToJSON(expected), utils.ToJSON(rcv))
 	}
 
-	expected[0].FixedFee = &utils.Decimal{decimal.New(1, 0)}
+	expected[0].FixedFee = &utils.Decimal{Big: decimal.New(1, 0)}
 	if rcv, err := actSetCostIncrement(costIncr, []string{"CostIncrements[0]", utils.FixedFee}, "1"); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, rcv) {
 		t.Errorf("Expected %+v, received %+v", utils.ToJSON(expected), utils.ToJSON(rcv))
 	}
 
-	expected[0].Increment = &utils.Decimal{decimal.New(2, 0)}
+	expected[0].Increment = &utils.Decimal{Big: decimal.New(2, 0)}
 	if rcv, err := actSetCostIncrement(costIncr, []string{"CostIncrements[0]", utils.Increment}, "2"); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, rcv) {
@@ -425,12 +425,12 @@ func TestActSetCostIncrement(t *testing.T) {
 	expected = []*utils.CostIncrement{
 		{
 			FilterIDs:    []string{"fltr2"},
-			Increment:    &utils.Decimal{decimal.New(2, 0)},
-			FixedFee:     &utils.Decimal{decimal.New(1, 0)},
-			RecurrentFee: &utils.Decimal{decimal.New(2, 0)},
+			Increment:    &utils.Decimal{Big: decimal.New(2, 0)},
+			FixedFee:     &utils.Decimal{Big: decimal.New(1, 0)},
+			RecurrentFee: &utils.Decimal{Big: decimal.New(2, 0)},
 		},
 		{
-			Increment: &utils.Decimal{decimal.New(2, 0)},
+			Increment: &utils.Decimal{Big: decimal.New(2, 0)},
 		},
 	}
 	if rcv, err := actSetCostIncrement(costIncr, []string{"CostIncrements[1]", utils.Increment}, "2"); err != nil {

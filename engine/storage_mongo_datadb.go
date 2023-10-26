@@ -1557,21 +1557,21 @@ func (ms *MongoStorage) RemoveConfigSectionsDrv(ctx *context.Context, nodeID str
 
 func newAggregateStages(profileID, tenant, prefix string) (match, query bson.D) {
 	match = bson.D{{
-		"$match", bson.M{
+		Key: "$match", Value: bson.M{
 			"id":     profileID,
 			"tenant": tenant,
 		}},
 	}
 	query = bson.D{{
-		"$replaceRoot", bson.D{{
-			"newRoot", bson.D{{
-				"$arrayToObject", bson.D{{
-					"$filter", bson.D{
-						{"input", bson.M{
+		Key: "$replaceRoot", Value: bson.D{{
+			Key: "newRoot", Value: bson.D{{
+				Key: "$arrayToObject", Value: bson.D{{
+					Key: "$filter", Value: bson.D{
+						{Key: "input", Value: bson.M{
 							"$objectToArray": "$$ROOT",
 						}},
-						{"cond", bson.D{{
-							"$regexFind", bson.M{
+						{Key: "cond", Value: bson.D{{
+							Key: "$regexFind", Value: bson.M{
 								"input": "$$this.k",
 								"regex": prefix,
 							},
