@@ -62,7 +62,7 @@ func (da *DNSAgent) initDNSServer() (_ error) {
 		if strings.HasSuffix(da.cgrCfg.DNSAgentCfg().Listeners[i].Network, utils.TLSNoCaps) {
 			cert, err := tls.LoadX509KeyPair(da.cgrCfg.TLSCfg().ServerCerificate, da.cgrCfg.TLSCfg().ServerKey)
 			if err != nil {
-				return err
+				return fmt.Errorf("load certificate error <%v>", err)
 			}
 			da.servers[i].Net = "tcp-tls"
 			da.servers[i].TLSConfig = &tls.Config{
