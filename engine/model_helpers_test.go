@@ -4465,8 +4465,8 @@ func TestModelHelperCsvLoadError(t *testing.T) {
 	type testStruct struct {
 		Id        int64
 		Tpid      string
-		Tag       string `index:"cat" re:"\w+\s*,\s*"`
-		Prefix    string `index:"1" re:"\+?\d+.?\d*"`
+		Tag       string `index:"cat" re:".*"`
+		Prefix    string `index:"1" re:".*"`
 		CreatedAt time.Time
 	}
 	var testStruct1 testStruct
@@ -4481,7 +4481,7 @@ func TestModelHelperCsvLoadError2(t *testing.T) {
 		Id        int64
 		Tpid      string
 		Tag       string `index:"0" re:"cat"`
-		Prefix    string `index:"1" re:"\+?\d+.?\d*"`
+		Prefix    string `index:"1" re:".*"`
 		CreatedAt time.Time
 	}
 	var testStruct1 testStruct
@@ -4496,8 +4496,8 @@ func TestModelHelpersCsvDumpError(t *testing.T) {
 	type testStruct struct {
 		Id        int64
 		Tpid      string
-		Tag       string `index:"cat" re:"\w+\s*,\s*"`
-		Prefix    string `index:"1" re:"\+?\d+.?\d*"`
+		Tag       string `index:"cat"  re:".*"`
+		Prefix    string `index:"1"  re:".*"`
 		CreatedAt time.Time
 	}
 	var testStruct1 testStruct
@@ -5907,7 +5907,7 @@ func TestModelHelpersCSVLoadErrorInt(t *testing.T) {
 	type testStruct struct {
 		Id        int64
 		Tpid      string
-		Tag       int `index:"0" re:"\w+\s*,\s*"`
+		Tag       int `index:"0" re:".*"`
 		CreatedAt time.Time
 	}
 
@@ -5921,7 +5921,7 @@ func TestModelHelpersCSVLoadErrorFloat64(t *testing.T) {
 	type testStruct struct {
 		Id        int64
 		Tpid      string
-		Tag       float64 `index:"0" re:"\w+\s*,\s*"`
+		Tag       float64 `index:"0" re:".*"`
 		CreatedAt time.Time
 	}
 
@@ -5935,7 +5935,7 @@ func TestModelHelpersCSVLoadErrorBool(t *testing.T) {
 	type testStruct struct {
 		Id        int64
 		Tpid      string
-		Tag       bool `index:"0" re:"\w+\s*,\s*"`
+		Tag       bool `index:"0" re:".*"`
 		CreatedAt time.Time
 	}
 
