@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package ees
 
 import (
+	"context"
 	"fmt"
 	"sync"
 
@@ -146,7 +147,8 @@ func (pstr *AMQPee) ExportEvent(content any, _ string) (err error) {
 		pstr.reqs.done()
 		return utils.ErrDisconnected
 	}
-	err = pstr.postChan.Publish(
+	err = pstr.postChan.PublishWithContext(
+		context.TODO(),
 		pstr.exchange,   // exchange
 		pstr.routingKey, // routing key
 		false,           // mandatory

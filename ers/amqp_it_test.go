@@ -22,6 +22,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package ers
 
 import (
+	"context"
 	"fmt"
 	"reflect"
 	"testing"
@@ -93,7 +94,8 @@ func TestAMQPER(t *testing.T) {
 
 	rdr.Serve()
 	randomCGRID := utils.UUIDSha1Prefix()
-	if err = channel.Publish(
+	if err = channel.PublishWithContext(
+		context.TODO(),
 		"test-exchange", // publish to an exchange
 		"test-key",      // routing to 0 or more queues
 		false,           // mandatory
