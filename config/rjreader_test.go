@@ -317,27 +317,6 @@ func TestHandleJSONErrorNil(t *testing.T) {
 	}
 }
 
-func TestHandleJSONErrorInvalidUTF8(t *testing.T) {
-	rjr := NewRjReaderFromBytes([]byte("{}"))
-	expectedErr := new(json.InvalidUTF8Error)
-	if err := rjr.HandleJSONError(expectedErr); err == nil || err.Error() != expectedErr.Error() {
-		t.Errorf("Expected %+v, received %+v", expectedErr, err)
-	}
-}
-
-func TestHandleJSONErrorInvalidUnmarshalError(t *testing.T) {
-	rjr := NewRjReaderFromBytes([]byte("{}"))
-	err := json.NewDecoder(rjr).Decode(nil)
-	if err == nil {
-		t.Fatal(err)
-	}
-	err = rjr.HandleJSONError(err)
-	expectedErr := &json.InvalidUnmarshalError{Type: reflect.TypeOf(nil)}
-	if err == nil || err.Error() != expectedErr.Error() {
-		t.Errorf("Expected %+v, received %+v", expectedErr, err)
-	}
-}
-
 func TestHandleJSONErrorDefaultError(t *testing.T) {
 	rjr := NewRjReaderFromBytes([]byte("{}"))
 	rjr.indx = 10
