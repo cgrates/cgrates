@@ -40,7 +40,6 @@ jobs:
         run: gofmt -s -w . && git diff --exit-code
 
       - name: Go Vet
-        continue-on-error: true # option will soon be removed
         run: go vet ./...
 
       - name: Go Tidy
