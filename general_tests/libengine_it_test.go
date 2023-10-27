@@ -21,11 +21,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package general_tests
 
 import (
+	"errors"
 	"path"
 	"testing"
 	"time"
 
-	"github.com/cgrates/birpc"
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
@@ -35,7 +35,6 @@ import (
 
 var (
 	libengCfg       *config.CGRConfig
-	libengRpc       *birpc.Client
 	libengCfgPath   string
 	libengConfigDIR string
 
@@ -57,6 +56,8 @@ func TestLibEngineIT(t *testing.T) {
 		libengConfigDIR = "tutmysql"
 	case utils.MetaMongo:
 		libengConfigDIR = "tutmongo"
+	case utils.MetaPostgres:
+		libengConfigDIR = "tutpostgres"
 	default:
 		t.Fatal("Unknown database type")
 	}
@@ -120,9 +121,9 @@ func testLibengITRPCConnection(t *testing.T) {
 		t.Error(err)
 	}
 	//We check if we get a reply timeout error when calling a sleep bigger than the reply timeout from connection config.
-	errExpect := "REPLY_TIMEOUT"
-	if err := conn.Call(context.Background(), utils.CoreSv1Sleep, args, &reply); err.Error() != errExpect {
-		t.Errorf("Expected %v \n but received \n %v", errExpect, err.Error())
+	if err := conn.Call(context.Background(), utils.CoreSv1Sleep, args,
+		&reply); !errors.Is(err, context.DeadlineExceeded) {
+		t.Errorf("expected: %v, received %v", context.DeadlineExceeded, err)
 	}
 
 }
