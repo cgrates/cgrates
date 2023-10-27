@@ -20,6 +20,7 @@ package engine
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"regexp"
 	"strings"
@@ -28,9 +29,9 @@ import (
 	"github.com/cgrates/cgrates/utils"
 
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
-	"go.mongodb.org/mongo-driver/x/bsonx"
 )
 
 func (ms *MongoStorage) GetTpIds(colName string) (tpids []string, err error) {
@@ -79,7 +80,7 @@ func (ms *MongoStorage) GetTpIds(colName string) (tpids []string, err error) {
 	return tpids, nil
 }
 
-func (ms *MongoStorage) GetTpTableIds(tpid, table string, distinct utils.TPDistinctIds,
+func (ms *MongoStorage) GetTpTableIds(tpid, table string, distinctIDs utils.TPDistinctIds,
 	filter map[string]string, pag *utils.PaginatorWithSearch) ([]string, error) {
 	findMap := bson.M{}
 	if tpid != "" {
@@ -95,11 +96,16 @@ func (ms *MongoStorage) GetTpTableIds(tpid, table string, distinct utils.TPDisti
 	if pag != nil {
 		if pag.Search != "" {
 			var searchItems []bson.M
-			for _, d := range distinct {
-				searchItems = append(searchItems, bson.M{d: bsonx.Regex(".*"+regexp.QuoteMeta(pag.Search)+".*", "")})
+			for _, distinctID := range distinctIDs {
+				searchItems = append(searchItems,
+					bson.M{
+						distinctID: primitive.Regex{
+							Pattern: ".*" + regexp.QuoteMeta(pag.Search) + ".*",
+						},
+					},
+				)
 			}
-			// findMap["$and"] = []bson.M{{"$or": searchItems}} //before
-			findMap["$or"] = searchItems // after
+			findMap["$or"] = searchItems
 		}
 		if pag.Paginator != nil {
 			if pag.Limit != nil {
@@ -112,32 +118,31 @@ func (ms *MongoStorage) GetTpTableIds(tpid, table string, distinct utils.TPDisti
 	}
 
 	selectors := bson.M{"_id": 0}
-	for i, d := range distinct {
-		if d == "tag" { // convert the tag used in SQL into id used here
-			distinct[i] = "id"
+	for i, distinctID := range distinctIDs {
+		if distinctID == "tag" { // convert the tag used in SQL into id used here
+			distinctIDs[i] = "id"
 		}
-		selectors[distinct[i]] = 1
+		selectors[distinctIDs[i]] = 1
 	}
 	fop.SetProjection(selectors)
 
 	distinctIds := make(utils.StringMap)
-	if err := ms.query(func(sctx mongo.SessionContext) (err error) {
-		cur, err := ms.getCol(table).Find(sctx, findMap, fop)
-		if err != nil {
-			return err
+	err := ms.query(func(sctx mongo.SessionContext) (qryErr error) {
+		cur, qryErr := ms.getCol(table).Find(sctx, findMap, fop)
+		if qryErr != nil {
+			return qryErr
 		}
 		for cur.Next(sctx) {
-			var elem bson.D
-			err := cur.Decode(&elem)
+			var item bson.M
+			err := cur.Decode(&item)
 			if err != nil {
 				return err
 			}
-			item := elem.Map()
 
 			var id string
-			last := len(distinct) - 1
-			for i, d := range distinct {
-				if distinctValue, ok := item[d]; ok {
+			last := len(distinctIDs) - 1
+			for i, distinctID := range distinctIDs {
+				if distinctValue, ok := item[distinctID]; ok {
 					id += distinctValue.(string)
 				}
 				if i < last {
@@ -147,7 +152,8 @@ func (ms *MongoStorage) GetTpTableIds(tpid, table string, distinct utils.TPDisti
 			distinctIds[id] = true
 		}
 		return cur.Close(sctx)
-	}); err != nil {
+	})
+	if err != nil {
 		return nil, err
 	}
 	return distinctIds.Slice(), nil
@@ -158,26 +164,26 @@ func (ms *MongoStorage) GetTPTimings(tpid, id string) ([]*utils.ApierTPTiming, e
 	if id != "" {
 		filter["id"] = id
 	}
-	var results []*utils.ApierTPTiming
-	err := ms.query(func(sctx mongo.SessionContext) (err error) {
-		cur, err := ms.getCol(utils.TBLTPTimings).Find(sctx, filter)
-		if err != nil {
-			return err
+	var tpTimings []*utils.ApierTPTiming
+	err := ms.query(func(sctx mongo.SessionContext) (qryErr error) {
+		cur, qryErr := ms.getCol(utils.TBLTPTimings).Find(sctx, filter)
+		if qryErr != nil {
+			return qryErr
 		}
 		for cur.Next(sctx) {
 			var el utils.ApierTPTiming
-			err := cur.Decode(&el)
-			if err != nil {
-				return err
+			qryErr = cur.Decode(&el)
+			if qryErr != nil {
+				return qryErr
 			}
-			results = append(results, &el)
+			tpTimings = append(tpTimings, &el)
 		}
-		if len(results) == 0 {
+		if len(tpTimings) == 0 {
 			return utils.ErrNotFound
 		}
 		return cur.Close(sctx)
 	})
-	return results, err
+	return tpTimings, err
 }
 
 func (ms *MongoStorage) GetTPDestinations(tpid, id string) ([]*utils.TPDestination, error) {
@@ -185,26 +191,26 @@ func (ms *MongoStorage) GetTPDestinations(tpid, id string) ([]*utils.TPDestinati
 	if id != "" {
 		filter["id"] = id
 	}
-	var results []*utils.TPDestination
-	err := ms.query(func(sctx mongo.SessionContext) (err error) {
-		cur, err := ms.getCol(utils.TBLTPDestinations).Find(sctx, filter)
-		if err != nil {
-			return err
+	var tpDestinations []*utils.TPDestination
+	err := ms.query(func(sctx mongo.SessionContext) (qryErr error) {
+		cur, qryErr := ms.getCol(utils.TBLTPDestinations).Find(sctx, filter)
+		if qryErr != nil {
+			return qryErr
 		}
 		for cur.Next(sctx) {
 			var el utils.TPDestination
-			err := cur.Decode(&el)
-			if err != nil {
-				return err
+			qryErr = cur.Decode(&el)
+			if qryErr != nil {
+				return qryErr
 			}
-			results = append(results, &el)
+			tpDestinations = append(tpDestinations, &el)
 		}
-		if len(results) == 0 {
+		if len(tpDestinations) == 0 {
 			return utils.ErrNotFound
 		}
 		return cur.Close(sctx)
 	})
-	return results, err
+	return tpDestinations, err
 }
 
 func (ms *MongoStorage) GetTPRates(tpid, id string) ([]*utils.TPRateRALs, error) {
@@ -212,11 +218,11 @@ func (ms *MongoStorage) GetTPRates(tpid, id string) ([]*utils.TPRateRALs, error)
 	if id != "" {
 		filter["id"] = id
 	}
-	var results []*utils.TPRateRALs
-	err := ms.query(func(sctx mongo.SessionContext) (err error) {
-		cur, err := ms.getCol(utils.TBLTPRates).Find(sctx, filter)
-		if err != nil {
-			return err
+	var tpRates []*utils.TPRateRALs
+	err := ms.query(func(sctx mongo.SessionContext) (qryErr error) {
+		cur, qryErr := ms.getCol(utils.TBLTPRates).Find(sctx, filter)
+		if qryErr != nil {
+			return qryErr
 		}
 		for cur.Next(sctx) {
 			var el utils.TPRateRALs
@@ -227,14 +233,14 @@ func (ms *MongoStorage) GetTPRates(tpid, id string) ([]*utils.TPRateRALs, error)
 			for _, rs := range el.RateSlots {
 				rs.SetDurations()
 			}
-			results = append(results, &el)
+			tpRates = append(tpRates, &el)
 		}
-		if len(results) == 0 {
+		if len(tpRates) == 0 {
 			return utils.ErrNotFound
 		}
 		return cur.Close(sctx)
 	})
-	return results, err
+	return tpRates, err
 }
 
 func (ms *MongoStorage) GetTPDestinationRates(tpid, id string, pag *utils.Paginator) ([]*utils.TPDestinationRate, error) {
@@ -242,7 +248,7 @@ func (ms *MongoStorage) GetTPDestinationRates(tpid, id string, pag *utils.Pagina
 	if id != "" {
 		filter["id"] = id
 	}
-	var results []*utils.TPDestinationRate
+	var tpDstRates []*utils.TPDestinationRate
 	fop := options.Find()
 	if pag != nil {
 		if pag.Limit != nil {
@@ -252,25 +258,25 @@ func (ms *MongoStorage) GetTPDestinationRates(tpid, id string, pag *utils.Pagina
 			fop = fop.SetSkip(int64(*pag.Offset))
 		}
 	}
-	err := ms.query(func(sctx mongo.SessionContext) (err error) {
-		cur, err := ms.getCol(utils.TBLTPDestinationRates).Find(sctx, filter, fop)
-		if err != nil {
-			return err
+	err := ms.query(func(sctx mongo.SessionContext) (qryErr error) {
+		cur, qryErr := ms.getCol(utils.TBLTPDestinationRates).Find(sctx, filter, fop)
+		if qryErr != nil {
+			return qryErr
 		}
 		for cur.Next(sctx) {
 			var el utils.TPDestinationRate
-			err := cur.Decode(&el)
-			if err != nil {
-				return err
+			qryErr = cur.Decode(&el)
+			if qryErr != nil {
+				return qryErr
 			}
-			results = append(results, &el)
+			tpDstRates = append(tpDstRates, &el)
 		}
-		if len(results) == 0 {
+		if len(tpDstRates) == 0 {
 			return utils.ErrNotFound
 		}
 		return cur.Close(sctx)
 	})
-	return results, err
+	return tpDstRates, err
 }
 
 func (ms *MongoStorage) GetTPRatingPlans(tpid, id string, pag *utils.Paginator) ([]*utils.TPRatingPlan, error) {
@@ -278,7 +284,7 @@ func (ms *MongoStorage) GetTPRatingPlans(tpid, id string, pag *utils.Paginator) 
 	if id != "" {
 		filter["id"] = id
 	}
-	var results []*utils.TPRatingPlan
+	var tpRatingPlans []*utils.TPRatingPlan
 	fop := options.Find()
 	if pag != nil {
 		if pag.Limit != nil {
@@ -288,25 +294,25 @@ func (ms *MongoStorage) GetTPRatingPlans(tpid, id string, pag *utils.Paginator) 
 			fop = fop.SetSkip(int64(*pag.Offset))
 		}
 	}
-	err := ms.query(func(sctx mongo.SessionContext) (err error) {
-		cur, err := ms.getCol(utils.TBLTPRatingPlans).Find(sctx, filter, fop)
-		if err != nil {
-			return err
+	err := ms.query(func(sctx mongo.SessionContext) (qryErr error) {
+		cur, qryErr := ms.getCol(utils.TBLTPRatingPlans).Find(sctx, filter, fop)
+		if qryErr != nil {
+			return qryErr
 		}
 		for cur.Next(sctx) {
 			var el utils.TPRatingPlan
-			err := cur.Decode(&el)
-			if err != nil {
-				return err
+			qryErr = cur.Decode(&el)
+			if qryErr != nil {
+				return qryErr
 			}
-			results = append(results, &el)
+			tpRatingPlans = append(tpRatingPlans, &el)
 		}
-		if len(results) == 0 {
+		if len(tpRatingPlans) == 0 {
 			return utils.ErrNotFound
 		}
 		return cur.Close(sctx)
 	})
-	return results, err
+	return tpRatingPlans, err
 }
 
 func (ms *MongoStorage) GetTPRatingProfiles(tp *utils.TPRatingProfile) ([]*utils.TPRatingProfile, error) {
@@ -323,26 +329,26 @@ func (ms *MongoStorage) GetTPRatingProfiles(tp *utils.TPRatingProfile) ([]*utils
 	if tp.LoadId != "" {
 		filter["loadid"] = tp.LoadId
 	}
-	var results []*utils.TPRatingProfile
-	err := ms.query(func(sctx mongo.SessionContext) (err error) {
-		cur, err := ms.getCol(utils.TBLTPRatingProfiles).Find(sctx, filter)
-		if err != nil {
-			return err
+	var tpRatingProfiles []*utils.TPRatingProfile
+	err := ms.query(func(sctx mongo.SessionContext) (qryErr error) {
+		cur, qryErr := ms.getCol(utils.TBLTPRatingProfiles).Find(sctx, filter)
+		if qryErr != nil {
+			return qryErr
 		}
 		for cur.Next(sctx) {
 			var el utils.TPRatingProfile
-			err := cur.Decode(&el)
-			if err != nil {
-				return err
+			qryErr = cur.Decode(&el)
+			if qryErr != nil {
+				return qryErr
 			}
-			results = append(results, &el)
+			tpRatingProfiles = append(tpRatingProfiles, &el)
 		}
-		if len(results) == 0 {
+		if len(tpRatingProfiles) == 0 {
 			return utils.ErrNotFound
 		}
 		return cur.Close(sctx)
 	})
-	return results, err
+	return tpRatingProfiles, err
 }
 
 func (ms *MongoStorage) GetTPSharedGroups(tpid, id string) ([]*utils.TPSharedGroups, error) {
@@ -551,7 +557,7 @@ func (ms *MongoStorage) GetTPAccountActions(tp *utils.TPAccountActions) ([]*util
 }
 
 func (ms *MongoStorage) RemTpData(table, tpid string, args map[string]string) error {
-	if len(table) == 0 { // Remove tpid out of all tables
+	if table == utils.EmptyString { // Remove tpid out of all tables
 		return ms.query(func(sctx mongo.SessionContext) error {
 			col, err := ms.DB().ListCollections(sctx, bson.D{}, options.ListCollections().SetNameOnly(true))
 			if err != nil {
@@ -890,7 +896,9 @@ func (ms *MongoStorage) GetSMCosts(cgrid, runid, originHost, originIDPrefix stri
 		filter[OriginHostLow] = originHost
 	}
 	if originIDPrefix != "" {
-		filter[OriginIDLow] = bsonx.Regex(fmt.Sprintf("^%s", originIDPrefix), "")
+		filter[OriginIDLow] = primitive.Regex{
+			Pattern: "^" + originIDPrefix,
+		}
 	}
 	err = ms.query(func(sctx mongo.SessionContext) (err error) {
 		cur, err := ms.getCol(utils.SessionCostsTBL).Find(sctx, filter)
@@ -934,7 +942,7 @@ func (ms *MongoStorage) RemoveSMCosts(qryFltr *utils.SMCostFilter) error {
 
 func (ms *MongoStorage) SetCDR(cdr *CDR, allowUpdate bool) error {
 	if cdr.OrderID == 0 {
-		cdr.OrderID = ms.cnter.Next()
+		cdr.OrderID = ms.counter.Next()
 	}
 	return ms.query(func(sctx mongo.SessionContext) (err error) {
 		if allowUpdate {
@@ -984,20 +992,22 @@ func (ms *MongoStorage) cleanEmptyFilters(filters bson.M) {
 }
 
 // _, err := col(ColCDRs).UpdateAll(bson.M{CGRIDLow: bson.M{"$in": cgrIds}}, bson.M{"$set": bson.M{"deleted_at": time.Now()}})
-func (ms *MongoStorage) GetCDRs(qryFltr *utils.CDRsFilter, remove bool) ([]*CDR, int64, error) {
+func (ms *MongoStorage) GetCDRs(qryFltr *utils.CDRsFilter, remove bool) (cdrs []*CDR, n int64, err error) {
 	var minUsage, maxUsage *time.Duration
-	if len(qryFltr.MinUsage) != 0 {
-		if parsed, err := utils.ParseDurationWithNanosecs(qryFltr.MinUsage); err != nil {
+	if qryFltr.MinUsage != utils.EmptyString {
+		parsedDur, err := utils.ParseDurationWithNanosecs(qryFltr.MinUsage)
+		if err != nil {
 			return nil, 0, err
 		} else {
-			minUsage = &parsed
+			minUsage = &parsedDur
 		}
 	}
-	if len(qryFltr.MaxUsage) != 0 {
-		if parsed, err := utils.ParseDurationWithNanosecs(qryFltr.MaxUsage); err != nil {
+	if qryFltr.MaxUsage != utils.EmptyString {
+		parsedDur, err := utils.ParseDurationWithNanosecs(qryFltr.MaxUsage)
+		if err != nil {
 			return nil, 0, err
 		} else {
-			maxUsage = &parsed
+			maxUsage = &parsedDur
 		}
 	}
 	filters := bson.M{
@@ -1018,20 +1028,20 @@ func (ms *MongoStorage) GetCDRs(qryFltr *utils.CDRsFilter, remove bool) ([]*CDR,
 		CreatedAtLow:   bson.M{"$gte": qryFltr.CreatedAtStart, "$lt": qryFltr.CreatedAtEnd},
 		UpdatedAtLow:   bson.M{"$gte": qryFltr.UpdatedAtStart, "$lt": qryFltr.UpdatedAtEnd},
 		UsageLow:       bson.M{"$gte": minUsage, "$lt": maxUsage},
-		//CostDetailsLow + "." + AccountLow: bson.M{"$in": qryFltr.RatedAccounts, "$nin": qryFltr.NotRatedAccounts},
-		//CostDetailsLow + "." + SubjectLow: bson.M{"$in": qryFltr.RatedSubjects, "$nin": qryFltr.NotRatedSubjects},
+		// CostDetailsLow + "." + AccountLow: bson.M{"$in": qryFltr.RatedAccounts, "$nin": qryFltr.NotRatedAccounts},
+		// CostDetailsLow + "." + SubjectLow: bson.M{"$in": qryFltr.RatedSubjects, "$nin": qryFltr.NotRatedSubjects},
 	}
-	//file, _ := os.TempFile(os.TempDir(), "debug")
-	//file.WriteString(fmt.Sprintf("FILTER: %v\n", utils.ToIJSON(qryFltr)))
-	//file.WriteString(fmt.Sprintf("BEFORE: %v\n", utils.ToIJSON(filters)))
+	// file, _ := os.TempFile(os.TempDir(), "debug")
+	// file.WriteString(fmt.Sprintf("FILTER: %v\n", utils.ToIJSON(qryFltr)))
+	// file.WriteString(fmt.Sprintf("BEFORE: %v\n", utils.ToIJSON(filters)))
 	ms.cleanEmptyFilters(filters)
 	if len(qryFltr.DestinationPrefixes) != 0 {
 		var regexpRule string
 		for _, prefix := range qryFltr.DestinationPrefixes {
-			if len(prefix) == 0 {
+			if prefix == utils.EmptyString {
 				continue
 			}
-			if len(regexpRule) != 0 {
+			if regexpRule != utils.EmptyString {
 				regexpRule += "|"
 			}
 			regexpRule += "^(" + regexp.QuoteMeta(prefix) + ")"
@@ -1039,17 +1049,29 @@ func (ms *MongoStorage) GetCDRs(qryFltr *utils.CDRsFilter, remove bool) ([]*CDR,
 		if _, hasIt := filters["$and"]; !hasIt {
 			filters["$and"] = make([]bson.M, 0)
 		}
-		filters["$and"] = append(filters["$and"].([]bson.M), bson.M{DestinationLow: bsonx.Regex(regexpRule, "")}) // $and gathers all rules not fitting top level query
+		// The "$and" operator is used to include additional query conditions that cannot be
+		// represented at the top level of the query.
+		filters["$and"] = append(filters["$and"].([]bson.M), bson.M{
+			DestinationLow: primitive.Regex{
+				Pattern: regexpRule,
+			},
+		})
 	}
 	if len(qryFltr.NotDestinationPrefixes) != 0 {
 		if _, hasIt := filters["$and"]; !hasIt {
 			filters["$and"] = make([]bson.M, 0)
 		}
 		for _, prefix := range qryFltr.NotDestinationPrefixes {
-			if len(prefix) == 0 {
+			if prefix == utils.EmptyString {
 				continue
 			}
-			filters["$and"] = append(filters["$and"].([]bson.M), bson.M{DestinationLow: bsonx.Regex("^(?!"+prefix+")", "")})
+			filters["$and"] = append(filters["$and"].([]bson.M),
+				bson.M{
+					DestinationLow: primitive.Regex{
+						Pattern: "^(?!" + prefix + ")",
+					},
+				},
+			)
 		}
 	}
 
@@ -1094,19 +1116,18 @@ func (ms *MongoStorage) GetCDRs(qryFltr *utils.CDRsFilter, remove bool) ([]*CDR,
 			filters[CostLow] = bson.M{"$lt": *qryFltr.MaxCost}
 		}
 	}
-	//file.WriteString(fmt.Sprintf("AFTER: %v\n", utils.ToIJSON(filters)))
-	//file.Close()
+	// file.WriteString(fmt.Sprintf("AFTER: %v\n", utils.ToIJSON(filters)))
+	// file.Close()
 	if remove {
-		var chgd int64
-		err := ms.query(func(sctx mongo.SessionContext) (err error) {
-			dr, err := ms.getCol(ColCDRs).DeleteMany(sctx, filters)
-			if err != nil {
-				return err
+		err := ms.query(func(sctx mongo.SessionContext) (qryErr error) {
+			dr, qryErr := ms.getCol(ColCDRs).DeleteMany(sctx, filters)
+			if qryErr != nil {
+				return qryErr
 			}
-			chgd = dr.DeletedCount
-			return err
+			n = dr.DeletedCount
+			return qryErr
 		})
-		return nil, chgd, err
+		return nil, n, err
 	}
 	fop := options.Find()
 	cop := options.Count()
@@ -1139,26 +1160,26 @@ func (ms *MongoStorage) GetCDRs(qryFltr *utils.CDRsFilter, remove bool) ([]*CDR,
 		case utils.Cost:
 			orderVal += "cost"
 		default:
-			return nil, 0, fmt.Errorf("Invalid value : %s", separateVals[0])
+			return nil, 0, fmt.Errorf("invalid value : %s", separateVals[0])
 		}
 		fop = fop.SetSort(bson.M{orderVal: ordVal})
 	}
 	if qryFltr.Count {
 		var cnt int64
-		if err := ms.query(func(sctx mongo.SessionContext) (err error) {
-			cnt, err = ms.getCol(ColCDRs).CountDocuments(sctx, filters, cop)
-			return err
-		}); err != nil {
+		err := ms.query(func(sctx mongo.SessionContext) (qryErr error) {
+			cnt, qryErr = ms.getCol(ColCDRs).CountDocuments(sctx, filters, cop)
+			return qryErr
+		})
+		if err != nil {
 			return nil, 0, err
 		}
 		return nil, cnt, nil
 	}
 	// Execute query
-	var cdrs []*CDR
-	err := ms.query(func(sctx mongo.SessionContext) (err error) {
-		cur, err := ms.getCol(ColCDRs).Find(sctx, filters, fop)
-		if err != nil {
-			return err
+	err = ms.query(func(sctx mongo.SessionContext) (qryErr error) {
+		cur, qryErr := ms.getCol(ColCDRs).Find(sctx, filters, fop)
+		if qryErr != nil {
+			return qryErr
 		}
 		for cur.Next(sctx) {
 			cdr := CDR{}
@@ -1532,37 +1553,40 @@ func (ms *MongoStorage) SetTPDispatcherHosts(tpDPPs []*utils.TPDispatcherHost) (
 	})
 }
 
-func (ms *MongoStorage) GetVersions(itm string) (vrs Versions, err error) {
+func (ms *MongoStorage) GetVersions(itm string) (Versions, error) {
 	fop := options.FindOne()
 	if itm != "" {
 		fop.SetProjection(bson.M{itm: 1, "_id": 0})
 	} else {
 		fop.SetProjection(bson.M{"_id": 0})
 	}
-	if err = ms.query(func(sctx mongo.SessionContext) (err error) {
-		cur := ms.getCol(ColVer).FindOne(sctx, bson.D{}, fop)
-		if err := cur.Decode(&vrs); err != nil {
-			if err == mongo.ErrNoDocuments {
-				return utils.ErrNotFound
-			}
-			return err
+	var vrs Versions
+	err := ms.query(func(sctx mongo.SessionContext) (err error) {
+		sr := ms.getCol(ColVer).FindOne(sctx, bson.D{}, fop)
+		decodeErr := sr.Decode(&vrs)
+		if errors.Is(decodeErr, mongo.ErrNoDocuments) {
+			return utils.ErrNotFound
 		}
-		return nil
-	}); err != nil {
+		return decodeErr
+	})
+	if err != nil {
 		return nil, err
 	}
 	if len(vrs) == 0 {
 		return nil, utils.ErrNotFound
 	}
-	return
+	return vrs, nil
 }
 
-func (ms *MongoStorage) SetVersions(vrs Versions, overwrite bool) (err error) {
+func (ms *MongoStorage) SetVersions(vrs Versions, overwrite bool) error {
 	if overwrite {
-		ms.RemoveVersions(nil)
+		err := ms.RemoveVersions(nil)
+		if err != nil && !errors.Is(err, utils.ErrNotFound) {
+			return err
+		}
 	}
-	return ms.query(func(sctx mongo.SessionContext) (err error) {
-		_, err = ms.getCol(ColVer).UpdateOne(sctx, bson.D{}, bson.M{"$set": vrs},
+	return ms.query(func(sctx mongo.SessionContext) error {
+		_, err := ms.getCol(ColVer).UpdateOne(sctx, bson.D{}, bson.M{"$set": vrs},
 			options.Update().SetUpsert(true),
 		)
 		return err
@@ -1575,23 +1599,22 @@ func (ms *MongoStorage) SetVersions(vrs Versions, overwrite bool) (err error) {
 	// _, err = col.Upsert(bson.M{}, bson.M{"$set": &vrs})
 }
 
-func (ms *MongoStorage) RemoveVersions(vrs Versions) (err error) {
+func (ms *MongoStorage) RemoveVersions(vrs Versions) error {
 	if len(vrs) == 0 {
-		return ms.query(func(sctx mongo.SessionContext) (err error) {
-			var dr *mongo.DeleteResult
-			dr, err = ms.getCol(ColVer).DeleteOne(sctx, bson.D{})
+		return ms.query(func(sctx mongo.SessionContext) error {
+			dr, err := ms.getCol(ColVer).DeleteOne(sctx, bson.D{})
 			if err != nil {
-				return
+				return err
 			}
 			if dr.DeletedCount == 0 {
 				return utils.ErrNotFound
 			}
-			return
+			return nil
 		})
 	}
-	return ms.query(func(sctx mongo.SessionContext) (err error) {
+	return ms.query(func(sctx mongo.SessionContext) error {
 		for k := range vrs {
-			if _, err = ms.getCol(ColVer).UpdateOne(sctx, bson.D{}, bson.M{"$unset": bson.M{k: 1}},
+			if _, err := ms.getCol(ColVer).UpdateOne(sctx, bson.D{}, bson.M{"$unset": bson.M{k: 1}},
 				options.Update().SetUpsert(true)); err != nil {
 				return err
 			}

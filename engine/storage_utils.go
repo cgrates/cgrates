@@ -20,6 +20,9 @@ package engine
 
 import (
 	"fmt"
+	"net"
+	"net/url"
+	"path"
 	"strconv"
 	"strings"
 	"time"
@@ -79,6 +82,24 @@ func NewStorDBConn(dbType, host, port, name, user, pass, marshaler string,
 			dbType, utils.MetaMySQL, utils.MetaMongo, utils.MetaPostgres, utils.MetaInternal)
 	}
 	return
+}
+
+func buildURL(scheme, host, port, db, user, pass string) (*url.URL, error) {
+	u, err := url.Parse("//" + host)
+	if err != nil {
+		return nil, err
+	}
+	if port != "0" {
+		u.Host = net.JoinHostPort(u.Host, port)
+	}
+	if user != "" && pass != "" {
+		u.User = url.UserPassword(user, pass)
+	}
+	if db != "" {
+		u.Path = path.Join(u.Path, db)
+	}
+	u.Scheme = scheme
+	return u, nil
 }
 
 // SMCost stores one Cost coming from SM
