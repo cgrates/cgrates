@@ -151,7 +151,7 @@ func testTutSMGCacheStats(t *testing.T) {
 	expectedStats[utils.CacheThresholdProfiles].Items = 7
 	expectedStats[utils.CacheFilters].Items = 15
 	expectedStats[utils.CacheRouteProfiles].Items = 3
-	expectedStats[utils.CacheAttributeProfiles].Items = 2
+	expectedStats[utils.CacheAttributeProfiles].Items = 3
 	expectedStats[utils.MetaDefault].Items = 1
 	expectedStats[utils.CacheActionTriggers].Items = 1
 	expectedStats[utils.CacheLoadIDs].Items = 31
@@ -168,8 +168,8 @@ func testTutSMGCacheStats(t *testing.T) {
 	expectedStats[utils.CacheResourceFilterIndexes].Groups = 1
 	expectedStats[utils.CacheChargerFilterIndexes].Items = 1
 	expectedStats[utils.CacheChargerFilterIndexes].Groups = 1
-	expectedStats[utils.CacheAttributeFilterIndexes].Items = 3
-	expectedStats[utils.CacheAttributeFilterIndexes].Groups = 2
+	expectedStats[utils.CacheAttributeFilterIndexes].Items = 5
+	expectedStats[utils.CacheAttributeFilterIndexes].Groups = 3
 	expectedStats[utils.CacheReverseFilterIndexes].Items = 15
 	expectedStats[utils.CacheReverseFilterIndexes].Groups = 13
 	if err := tutSMGRpc.Call(context.Background(), utils.CacheSv1GetCacheStats, new(utils.AttrCacheIDsWithAPIOpts), &rcvStats); err != nil {
