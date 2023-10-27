@@ -20,6 +20,7 @@ package engine
 
 import (
 	"fmt"
+	"slices"
 	"sort"
 	"strings"
 	"time"
@@ -1190,32 +1191,32 @@ func (iDB *InternalDB) GetCDRs(filter *utils.CDRsFilter, remove bool) (cdrs []*C
 		cdr := x.(*CDR)
 
 		// default indexed filters
-		if (len(filter.CGRIDs) > 0 && !utils.SliceHasMember(filter.CGRIDs, cdr.CGRID)) ||
-			(len(filter.RunIDs) > 0 && !utils.SliceHasMember(filter.RunIDs, cdr.RunID)) ||
-			(len(filter.OriginIDs) > 0 && !utils.SliceHasMember(filter.OriginIDs, cdr.OriginID)) ||
-			(len(filter.OriginHosts) > 0 && !utils.SliceHasMember(filter.OriginHosts, cdr.OriginHost)) ||
-			(len(filter.Sources) > 0 && !utils.SliceHasMember(filter.Sources, cdr.Source)) ||
-			(len(filter.ToRs) > 0 && !utils.SliceHasMember(filter.ToRs, cdr.ToR)) ||
-			(len(filter.RequestTypes) > 0 && !utils.SliceHasMember(filter.RequestTypes, cdr.RequestType)) ||
-			(len(filter.Tenants) > 0 && !utils.SliceHasMember(filter.Tenants, cdr.Tenant)) ||
-			(len(filter.Categories) > 0 && !utils.SliceHasMember(filter.Categories, cdr.Category)) ||
-			(len(filter.Accounts) > 0 && !utils.SliceHasMember(filter.Accounts, cdr.Account)) ||
-			(len(filter.Subjects) > 0 && !utils.SliceHasMember(filter.Subjects, cdr.Subject)) ||
+		if (len(filter.CGRIDs) > 0 && !slices.Contains(filter.CGRIDs, cdr.CGRID)) ||
+			(len(filter.RunIDs) > 0 && !slices.Contains(filter.RunIDs, cdr.RunID)) ||
+			(len(filter.OriginIDs) > 0 && !slices.Contains(filter.OriginIDs, cdr.OriginID)) ||
+			(len(filter.OriginHosts) > 0 && !slices.Contains(filter.OriginHosts, cdr.OriginHost)) ||
+			(len(filter.Sources) > 0 && !slices.Contains(filter.Sources, cdr.Source)) ||
+			(len(filter.ToRs) > 0 && !slices.Contains(filter.ToRs, cdr.ToR)) ||
+			(len(filter.RequestTypes) > 0 && !slices.Contains(filter.RequestTypes, cdr.RequestType)) ||
+			(len(filter.Tenants) > 0 && !slices.Contains(filter.Tenants, cdr.Tenant)) ||
+			(len(filter.Categories) > 0 && !slices.Contains(filter.Categories, cdr.Category)) ||
+			(len(filter.Accounts) > 0 && !slices.Contains(filter.Accounts, cdr.Account)) ||
+			(len(filter.Subjects) > 0 && !slices.Contains(filter.Subjects, cdr.Subject)) ||
 
-			(len(filter.NotCGRIDs) > 0 && utils.SliceHasMember(filter.NotCGRIDs, cdr.CGRID)) ||
-			(len(filter.NotRunIDs) > 0 && utils.SliceHasMember(filter.NotRunIDs, cdr.RunID)) ||
-			(len(filter.NotOriginIDs) > 0 && utils.SliceHasMember(filter.NotOriginIDs, cdr.OriginID)) ||
-			(len(filter.NotOriginHosts) > 0 && utils.SliceHasMember(filter.NotOriginHosts, cdr.OriginHost)) ||
-			(len(filter.NotSources) > 0 && utils.SliceHasMember(filter.NotSources, cdr.Source)) ||
-			(len(filter.NotToRs) > 0 && utils.SliceHasMember(filter.NotToRs, cdr.ToR)) ||
-			(len(filter.NotRequestTypes) > 0 && utils.SliceHasMember(filter.NotRequestTypes, cdr.RequestType)) ||
-			(len(filter.NotTenants) > 0 && utils.SliceHasMember(filter.NotTenants, cdr.Tenant)) ||
-			(len(filter.NotCategories) > 0 && utils.SliceHasMember(filter.NotCategories, cdr.Category)) ||
-			(len(filter.NotAccounts) > 0 && utils.SliceHasMember(filter.NotAccounts, cdr.Account)) ||
-			(len(filter.NotSubjects) > 0 && utils.SliceHasMember(filter.NotSubjects, cdr.Subject)) ||
+			(len(filter.NotCGRIDs) > 0 && slices.Contains(filter.NotCGRIDs, cdr.CGRID)) ||
+			(len(filter.NotRunIDs) > 0 && slices.Contains(filter.NotRunIDs, cdr.RunID)) ||
+			(len(filter.NotOriginIDs) > 0 && slices.Contains(filter.NotOriginIDs, cdr.OriginID)) ||
+			(len(filter.NotOriginHosts) > 0 && slices.Contains(filter.NotOriginHosts, cdr.OriginHost)) ||
+			(len(filter.NotSources) > 0 && slices.Contains(filter.NotSources, cdr.Source)) ||
+			(len(filter.NotToRs) > 0 && slices.Contains(filter.NotToRs, cdr.ToR)) ||
+			(len(filter.NotRequestTypes) > 0 && slices.Contains(filter.NotRequestTypes, cdr.RequestType)) ||
+			(len(filter.NotTenants) > 0 && slices.Contains(filter.NotTenants, cdr.Tenant)) ||
+			(len(filter.NotCategories) > 0 && slices.Contains(filter.NotCategories, cdr.Category)) ||
+			(len(filter.NotAccounts) > 0 && slices.Contains(filter.NotAccounts, cdr.Account)) ||
+			(len(filter.NotSubjects) > 0 && slices.Contains(filter.NotSubjects, cdr.Subject)) ||
 
-			(len(filter.Costs) > 0 && !utils.Float64SliceHasMember(filter.Costs, cdr.Cost)) ||
-			(len(filter.NotCosts) > 0 && utils.Float64SliceHasMember(filter.NotCosts, cdr.Cost)) ||
+			(len(filter.Costs) > 0 && !slices.Contains(filter.Costs, cdr.Cost)) ||
+			(len(filter.NotCosts) > 0 && slices.Contains(filter.NotCosts, cdr.Cost)) ||
 
 			(len(filter.DestinationPrefixes) > 0 && !utils.HasPrefixSlice(filter.DestinationPrefixes, cdr.Destination)) ||
 			(len(filter.NotDestinationPrefixes) > 0 && utils.HasPrefixSlice(filter.NotDestinationPrefixes, cdr.Destination)) ||

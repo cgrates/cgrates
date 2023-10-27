@@ -20,6 +20,7 @@ package config
 
 import (
 	"fmt"
+	"slices"
 	"strings"
 
 	"github.com/cgrates/cgrates/utils"
@@ -154,7 +155,7 @@ func (mg *MigratorCgrCfg) AsMapInterface() (initialMP map[string]any) {
 		utils.OutStorDBPasswordCfg: mg.OutStorDBPassword,
 		utils.OutDataDBOptsCfg:     outDataDBOpts,
 		utils.OutStorDBOptsCfg:     outStorDBOpts,
-		utils.UsersFiltersCfg:      utils.CloneStringSlice(mg.UsersFilters),
+		utils.UsersFiltersCfg:      slices.Clone(mg.UsersFilters),
 	}
 }
 
@@ -178,7 +179,7 @@ func (mg MigratorCgrCfg) Clone() (cln *MigratorCgrCfg) {
 		OutStorDBOpts:     mg.OutStorDBOpts.Clone(),
 	}
 	if mg.UsersFilters != nil {
-		cln.UsersFilters = utils.CloneStringSlice(mg.UsersFilters)
+		cln.UsersFilters = slices.Clone(mg.UsersFilters)
 	}
 	return
 }

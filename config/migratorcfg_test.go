@@ -238,7 +238,7 @@ func TestMigratorCgrCfgAsMapInterface2(t *testing.T) {
 		utils.OutStorDBNameCfg:     "cgrates",
 		utils.OutStorDBUserCfg:     "cgrates",
 		utils.OutStorDBPasswordCfg: "",
-		utils.UsersFiltersCfg:      []string{},
+		utils.UsersFiltersCfg:      []string(nil),
 		utils.OutStorDBOptsCfg: map[string]any{
 			utils.MongoQueryTimeoutCfg:  "0s",
 			utils.MYSQLDSNParams:        map[string]string(nil),

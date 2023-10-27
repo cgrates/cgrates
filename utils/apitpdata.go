@@ -20,6 +20,7 @@ package utils
 
 import (
 	"fmt"
+	"slices"
 	"sort"
 	"strings"
 	"time"
@@ -66,7 +67,7 @@ func (pgnt *Paginator) PaginateStringSlice(in []string) (out []string) {
 	if limit == 0 || limit > len(in) {
 		limit = len(in)
 	}
-	return CloneStringSlice(in[offset:limit])
+	return slices.Clone(in[offset:limit])
 }
 
 // Clone creates a clone of the object

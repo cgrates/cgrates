@@ -21,6 +21,7 @@ package v2
 import (
 	"errors"
 	"math"
+	"slices"
 
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
@@ -156,7 +157,7 @@ func (apiv2 *APIerSv2) SetAccount(ctx *context.Context, attr *AttrSetAccount, re
 				// clean previous action plans
 				nAcntAPids := make([]string, 0, len(acntAPids))
 				for _, apID := range acntAPids {
-					if utils.IsSliceMember(attr.ActionPlanIDs, apID) {
+					if slices.Contains(attr.ActionPlanIDs, apID) {
 						nAcntAPids = append(nAcntAPids, apID)
 						continue // not removing the ones where
 					}
@@ -193,7 +194,7 @@ func (apiv2 *APIerSv2) SetAccount(ctx *context.Context, attr *AttrSetAccount, re
 					schedNeedsReload = true
 				}
 				if schedTasks == len(ap.ActionTimings) || // scheduled all actions, no need to add account to AP
-					utils.IsSliceMember(acntAPids, apID) {
+					slices.Contains(acntAPids, apID) {
 					continue // No need to reschedule since already there
 				}
 				if ap.AccountIDs == nil {

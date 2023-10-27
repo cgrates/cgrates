@@ -20,6 +20,7 @@ package engine
 
 import (
 	"fmt"
+	"slices"
 	"strings"
 
 	"github.com/cgrates/cgrates/config"
@@ -125,7 +126,7 @@ func (eeR *ExportRequest) SetFields(tplFlds []*config.FCTemplate) (err error) {
 			return
 		} else if fullPath == nil { // no dynamic path
 			fullPath = &utils.FullPath{
-				PathSlice: utils.CloneStringSlice(tplFld.GetPathSlice()), // need to clone so me do not modify the template
+				PathSlice: slices.Clone(tplFld.GetPathSlice()), // need to clone so me do not modify the template
 				Path:      tplFld.Path,
 			}
 		}

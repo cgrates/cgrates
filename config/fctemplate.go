@@ -20,6 +20,7 @@ package config
 
 import (
 	"fmt"
+	"slices"
 	"time"
 
 	"github.com/cgrates/cgrates/utils"
@@ -186,10 +187,10 @@ func (fc FCTemplate) Clone() (cln *FCTemplate) {
 		*cln.RoundingDecimals = *fc.RoundingDecimals
 	}
 	if fc.pathSlice != nil {
-		cln.pathSlice = utils.CloneStringSlice(fc.pathSlice)
+		cln.pathSlice = slices.Clone(fc.pathSlice)
 	}
 	if fc.Filters != nil {
-		cln.Filters = utils.CloneStringSlice(fc.Filters)
+		cln.Filters = slices.Clone(fc.Filters)
 	}
 	return
 }

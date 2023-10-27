@@ -18,7 +18,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package config
 
-import "github.com/cgrates/cgrates/utils"
+import (
+	"slices"
+
+	"github.com/cgrates/cgrates/utils"
+)
 
 type AttributesOpts struct {
 	ProfileIDs           []string
@@ -212,7 +216,7 @@ func (alS *AttributeSCfg) AsMapInterface() (initialMP map[string]any) {
 
 func (attrOpts *AttributesOpts) Clone() *AttributesOpts {
 	cln := &AttributesOpts{
-		ProfileIDs:           utils.CloneStringSlice(attrOpts.ProfileIDs),
+		ProfileIDs:           slices.Clone(attrOpts.ProfileIDs),
 		ProfileRuns:          attrOpts.ProfileRuns,
 		ProfileIgnoreFilters: attrOpts.ProfileIgnoreFilters,
 		ProcessRuns:          attrOpts.ProcessRuns,

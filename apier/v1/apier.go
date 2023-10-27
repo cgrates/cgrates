@@ -24,6 +24,7 @@ import (
 	"fmt"
 	"os"
 	"path"
+	"slices"
 	"strconv"
 	"strings"
 	"time"
@@ -1259,7 +1260,7 @@ func (apierSv1 *APIerSv1) RemoveRatingProfile(ctx *context.Context, attr *AttrRe
 	if attr.Tenant == utils.EmptyString {
 		attr.Tenant = apierSv1.Config.GeneralCfg().DefaultTenant
 	}
-	if (attr.Subject != utils.EmptyString && utils.IsSliceMember([]string{attr.Tenant, attr.Category}, utils.EmptyString)) ||
+	if (attr.Subject != utils.EmptyString && slices.Contains([]string{attr.Tenant, attr.Category}, utils.EmptyString)) ||
 		(attr.Category != utils.EmptyString && attr.Tenant == utils.EmptyString) {
 		return utils.ErrMandatoryIeMissing
 	}

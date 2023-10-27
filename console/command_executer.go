@@ -24,6 +24,7 @@ import (
 	"fmt"
 	"reflect"
 	"regexp"
+	"slices"
 	"sort"
 	"strings"
 	"time"
@@ -128,7 +129,7 @@ func FromJSON(jsn []byte, interestingFields []string) (line string) {
 	}
 	for _, group := range jsonR.FindAllSubmatch(jsn, -1) {
 		if len(group) == 3 {
-			if utils.IsSliceMember(interestingFields, string(group[1])) {
+			if slices.Contains(interestingFields, string(group[1])) {
 				line += fmt.Sprintf("%s=%s ", group[1], group[2])
 			}
 		}

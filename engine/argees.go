@@ -20,6 +20,7 @@ package engine
 
 import (
 	"encoding/json"
+	"slices"
 
 	"github.com/cgrates/cgrates/utils"
 )
@@ -35,7 +36,7 @@ type CGREventWithEeIDs struct {
 
 func (attr *CGREventWithEeIDs) Clone() *CGREventWithEeIDs {
 	return &CGREventWithEeIDs{
-		EeIDs:    utils.CloneStringSlice(attr.EeIDs),
+		EeIDs:    slices.Clone(attr.EeIDs),
 		CGREvent: attr.CGREvent.Clone(),
 	}
 }

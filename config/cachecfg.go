@@ -20,6 +20,7 @@ package config
 
 import (
 	"fmt"
+	"slices"
 	"time"
 
 	"github.com/cgrates/cgrates/utils"
@@ -173,10 +174,10 @@ func (cCfg CacheCfg) Clone() (cln *CacheCfg) {
 		cln.Partitions[key] = par.Clone()
 	}
 	if cCfg.ReplicationConns != nil {
-		cln.ReplicationConns = utils.CloneStringSlice(cCfg.ReplicationConns)
+		cln.ReplicationConns = slices.Clone(cCfg.ReplicationConns)
 	}
 	if cCfg.RemoteConns != nil {
-		cln.RemoteConns = utils.CloneStringSlice(cCfg.RemoteConns)
+		cln.RemoteConns = slices.Clone(cCfg.RemoteConns)
 	}
 	return
 }

@@ -27,6 +27,7 @@ import (
 	"net/http"
 	"net/smtp"
 	"reflect"
+	"slices"
 	"sort"
 	"strconv"
 	"strings"
@@ -60,7 +61,7 @@ func (a *Action) Clone() (cln *Action) {
 	}
 	var fltrs []string
 	if a.Filters != nil {
-		fltrs = utils.CloneStringSlice(a.Filters)
+		fltrs = slices.Clone(a.Filters)
 	}
 	return &Action{
 		Id:               a.Id,
@@ -171,7 +172,7 @@ func cdrLogAction(acc *Account, a *Action, acs Actions, _ *FilterS, extraData an
 	// set stored cdr values
 	var cdrs []*CDR
 	for _, action := range acs {
-		if !utils.SliceHasMember([]string{utils.MetaDebit, utils.MetaDebitReset, utils.MetaSetBalance, utils.MetaTopUp, utils.MetaTopUpReset}, action.ActionType) ||
+		if !slices.Contains([]string{utils.MetaDebit, utils.MetaDebitReset, utils.MetaSetBalance, utils.MetaTopUp, utils.MetaTopUpReset}, action.ActionType) ||
 			action.Balance == nil {
 			continue // Only log specific actions
 		}

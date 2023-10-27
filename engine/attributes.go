@@ -21,6 +21,7 @@ package engine
 import (
 	"fmt"
 	"math"
+	"slices"
 	"sort"
 	"strconv"
 	"strings"
@@ -109,7 +110,7 @@ func (alS *AttributeService) attributeProfileForEvent(tnt string, ctx *string, a
 			return nil, err
 		}
 		if !(len(aPrfl.Contexts) == 1 && aPrfl.Contexts[0] == utils.MetaAny) &&
-			!utils.IsSliceMember(aPrfl.Contexts, contextVal) {
+			!slices.Contains(aPrfl.Contexts, contextVal) {
 			continue
 		}
 		if aPrfl.ActivationInterval != nil && actTime != nil &&
@@ -210,7 +211,7 @@ func (alS *AttributeService) processEvent(tnt string, args *utils.CGREvent, evNm
 		}
 		substitute := utils.IfaceAsString(out)
 		//add only once the Path in AlteredFields
-		if !utils.IsSliceMember(rply.AlteredFields, attribute.Path) {
+		if !slices.Contains(rply.AlteredFields, attribute.Path) {
 			rply.AlteredFields = append(rply.AlteredFields, attribute.Path)
 		}
 		if attribute.Path == utils.MetaTenant {

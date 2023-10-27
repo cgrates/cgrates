@@ -20,6 +20,7 @@ package engine
 
 import (
 	"fmt"
+	"slices"
 	"strings"
 
 	"github.com/cgrates/baningo"
@@ -1224,7 +1225,7 @@ func (dm *DataManager) SetStatQueueProfile(sqp *StatQueueProfile, withIndex bool
 			for _, metric := range sqp.Metrics { // add missing metrics and recreate the old metrics that changed
 				cMetricIDs.Add(metric.MetricID)
 				if oSqMetric, has := oSq.SQMetrics[metric.MetricID]; !has ||
-					!utils.SliceStringEqual(oSqMetric.GetFilterIDs(), metric.FilterIDs) { // recreate it if the filter changed
+					!slices.Equal(oSqMetric.GetFilterIDs(), metric.FilterIDs) { // recreate it if the filter changed
 					if oSq.SQMetrics[metric.MetricID], err = NewStatMetric(metric.MetricID,
 						sqp.MinItems, metric.FilterIDs); err != nil {
 						return
@@ -2112,7 +2113,7 @@ func (dm *DataManager) SetAccountActionPlans(acntID string, aPlIDs []string, ove
 			return
 		}
 		for _, oldAPid := range oldaPlIDs {
-			if !utils.IsSliceMember(aPlIDs, oldAPid) {
+			if !slices.Contains(aPlIDs, oldAPid) {
 				aPlIDs = append(aPlIDs, oldAPid)
 			}
 		}
@@ -2155,7 +2156,7 @@ func (dm *DataManager) RemAccountActionPlans(acntID string, apIDs []string) (err
 		}
 		remainAAP := make([]string, 0, len(oldAAP))
 		for _, ap := range oldAAP {
-			if !utils.IsSliceMember(apIDs, ap) {
+			if !slices.Contains(apIDs, ap) {
 				remainAAP = append(remainAAP, ap)
 			}
 		}

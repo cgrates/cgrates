@@ -20,6 +20,7 @@ package migrator
 
 import (
 	"fmt"
+	"slices"
 	"strings"
 
 	"github.com/cgrates/cgrates/config"
@@ -72,7 +73,7 @@ func userProfile2attributeProfile(user *v1UserProfile) (attr *engine.AttributePr
 		if fieldName == "ReqType" { // old style
 			fieldName = utils.RequestType
 		}
-		if utils.IsSliceMember(usrFltr, fieldName) {
+		if slices.Contains(usrFltr, fieldName) {
 			attr.FilterIDs = append(attr.FilterIDs, fmt.Sprintf("*string:~*req.%s:%s", fieldName, substitute))
 			continue
 		}
