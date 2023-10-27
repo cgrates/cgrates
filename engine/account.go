@@ -22,6 +22,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"slices"
 	"strconv"
 	"strings"
 	"time"
@@ -1111,7 +1112,7 @@ func balancesValues(bals Balances) (init map[string]float64) {
 
 // NewAccountSummaryFromJSON creates a new AcccountSummary from a json string
 func NewAccountSummaryFromJSON(jsn string) (acntSummary *AccountSummary, err error) {
-	if !utils.SliceHasMember([]string{"", "null"}, jsn) { // Unmarshal only when content
+	if !slices.Contains([]string{"", "null"}, jsn) { // Unmarshal only when content
 		err = json.Unmarshal([]byte(jsn), &acntSummary)
 	}
 	return

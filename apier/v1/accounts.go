@@ -21,6 +21,7 @@ package v1
 import (
 	"errors"
 	"math"
+	"slices"
 	"strings"
 	"time"
 
@@ -219,7 +220,7 @@ func (apierSv1 *APIerSv1) SetAccount(ctx *context.Context, attr *utils.AttrSetAc
 					dirtyActionPlans[apID] = ap
 					acntAPids = append(acntAPids[:i], acntAPids[i+1:]...) // remove the item from the list so we can overwrite the real list
 				}
-				if !utils.IsSliceMember(acntAPids, attr.ActionPlanID) { // Account not yet attached to action plan, do it here
+				if !slices.Contains(acntAPids, attr.ActionPlanID) { // Account not yet attached to action plan, do it here
 					ap, err := apierSv1.DataManager.GetActionPlan(attr.ActionPlanID, true, true, utils.NonTransactional)
 					if err != nil {
 						return err

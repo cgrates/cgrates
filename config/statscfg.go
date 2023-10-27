@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package config
 
 import (
+	"slices"
 	"time"
 
 	"github.com/cgrates/cgrates/utils"
@@ -169,7 +170,7 @@ func (st *StatSCfg) AsMapInterface() (initialMP map[string]any) {
 
 func (stOpts *StatsOpts) Clone() *StatsOpts {
 	return &StatsOpts{
-		ProfileIDs:           utils.CloneStringSlice(stOpts.ProfileIDs),
+		ProfileIDs:           slices.Clone(stOpts.ProfileIDs),
 		ProfileIgnoreFilters: stOpts.ProfileIgnoreFilters,
 	}
 }

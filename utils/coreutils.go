@@ -37,6 +37,7 @@ import (
 	"path/filepath"
 	"reflect"
 	"regexp"
+	"slices"
 	"strconv"
 	"strings"
 	"sync"
@@ -715,7 +716,7 @@ func (h HierarchyPath) Clone() (cln HierarchyPath) {
 	if h == nil {
 		return
 	}
-	return CloneStringSlice(h)
+	return slices.Clone(h)
 }
 
 // Mask a number of characters in the suffix of the destination

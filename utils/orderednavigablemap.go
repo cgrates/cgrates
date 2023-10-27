@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package utils
 
 import (
+	"slices"
 	"strconv"
 	"strings"
 )
@@ -85,7 +86,7 @@ func (onm *OrderedNavigableMap) Remove(fullPath *FullPath) (err error) {
 	if fullPath.Path == EmptyString {
 		return ErrWrongPath
 	}
-	// fullPath.PathSlice = CloneStringSlice(fullPath.PathSlice) // clone the items to not modify the templates
+	// fullPath.PathSlice = slices.Clone(fullPath.PathSlice) // clone the items to not modify the templates
 	if err = onm.nm.Remove(fullPath.PathSlice); err != nil { // remove them from DataNode
 		return
 	}
@@ -130,7 +131,7 @@ func (onm *OrderedNavigableMap) SetAsSlice(fullPath *FullPath, vals []*DataNode)
 
 	pathItmsSet := make([][]string, len(vals)) // prepare the path for order update
 	for i := range vals {
-		pathItmsSet[i] = append(CloneStringSlice(fullPath.PathSlice), strconv.Itoa(i)) // clone the slice as we will append an index
+		pathItmsSet[i] = append(slices.Clone(fullPath.PathSlice), strconv.Itoa(i)) // clone the slice as we will append an index
 	}
 	path := stripIdxFromLastPathElm(fullPath.Path)
 	if !addedNew { // cleanup old references since the value is being overwritten
@@ -204,7 +205,7 @@ func (onm *OrderedNavigableMap) Append(fullPath *FullPath, val *DataLeaf) (err e
 	// add the path to order
 	onm.orderRef[fullPath.Path] = append(onm.orderRef[fullPath.Path],
 		onm.orderIdx.PushBack(
-			append(CloneStringSlice(fullPath.PathSlice), // clone the slice as we will append an index
+			append(slices.Clone(fullPath.PathSlice), // clone the slice as we will append an index
 				strconv.Itoa(idx))))
 	return
 }
@@ -222,7 +223,7 @@ func (onm *OrderedNavigableMap) Compose(fullPath *FullPath, val *DataLeaf) (err 
 	if _, hasRef := onm.orderRef[fullPath.Path]; !hasRef { // the element is new so append to order
 		onm.orderRef[fullPath.Path] = append(onm.orderRef[fullPath.Path],
 			onm.orderIdx.PushBack(
-				append(CloneStringSlice(fullPath.PathSlice), // clone the slice as we will append an index
+				append(slices.Clone(fullPath.PathSlice), // clone the slice as we will append an index
 					"0")))
 	} else { // move element in the back of order list
 		onm.orderIdx.MoveToBack(onm.orderRef[fullPath.Path][len(onm.orderRef[fullPath.Path])-1])

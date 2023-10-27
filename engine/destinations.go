@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"slices"
 	"strings"
 
 	"github.com/cgrates/cgrates/utils"
@@ -72,7 +73,7 @@ func (d *Destination) AddPrefix(pfx string) {
 // Reverse search in cache to see if prefix belongs to destination id
 func CachedDestHasPrefix(destId, prefix string) bool {
 	if cached, err := dm.GetReverseDestination(prefix, true, true, utils.NonTransactional); err == nil {
-		return utils.IsSliceMember(cached, destId)
+		return slices.Contains(cached, destId)
 	}
 	return false
 }

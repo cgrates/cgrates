@@ -21,6 +21,7 @@ package dispatchers
 import (
 	"fmt"
 	"reflect"
+	"slices"
 	"strings"
 	"time"
 
@@ -168,7 +169,7 @@ func (dS *DispatcherService) dispatcherProfilesForEvent(tnt string, ev *utils.CG
 		}
 
 		if ((len(prfl.Subsystems) != 1 || prfl.Subsystems[0] != utils.MetaAny) &&
-			!utils.IsSliceMember(prfl.Subsystems, subsys)) ||
+			!slices.Contains(prfl.Subsystems, subsys)) ||
 			(prfl.ActivationInterval != nil && ev.Time != nil &&
 				!prfl.ActivationInterval.IsActiveAtTime(*ev.Time)) { // not active
 			continue

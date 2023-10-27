@@ -26,6 +26,7 @@ import (
 	"net/http/httptest"
 	"path"
 	"reflect"
+	"slices"
 	"strconv"
 	"strings"
 	"testing"
@@ -736,7 +737,7 @@ func testActionsitSetSDestinations(t *testing.T) {
 		utils.StringPointer("*ddc_test"), &dest); err != nil {
 		t.Error(err.Error())
 	} else {
-		if len(dest.Prefixes) != 2 || !utils.IsSliceMember(dest.Prefixes, "111") || !utils.IsSliceMember(dest.Prefixes, "222") {
+		if len(dest.Prefixes) != 2 || !slices.Contains(dest.Prefixes, "111") || !slices.Contains(dest.Prefixes, "222") {
 			t.Errorf("Unexpected destination : %+v", dest)
 		}
 	}
@@ -816,7 +817,7 @@ func testActionsitSetSDestinations(t *testing.T) {
 		utils.StringPointer("*ddc_test"), &dest); err != nil {
 		t.Error(err.Error())
 	} else {
-		if len(dest.Prefixes) != 2 || !utils.IsSliceMember(dest.Prefixes, "333") || !utils.IsSliceMember(dest.Prefixes, "777") {
+		if len(dest.Prefixes) != 2 || !slices.Contains(dest.Prefixes, "333") || !slices.Contains(dest.Prefixes, "777") {
 			t.Errorf("Unexpected destination : %+v", dest)
 		}
 	}

@@ -1122,7 +1122,10 @@ func testOnStorITCRUDAccountActionPlans(t *testing.T) {
 	}
 	if rcv, err := onStor.GetAccountActionPlans(acntID, false, true, utils.NonTransactional); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(expect, rcv) {
+	} else if sort.Slice(rcv, func(i, j int) bool {
+
+		return rcv[i] < rcv[j]
+	}); !reflect.DeepEqual(expect, rcv) {
 		t.Errorf("Expecting: %v, received: %v", expect, rcv)
 	}
 	// FixMe
@@ -1135,7 +1138,9 @@ func testOnStorITCRUDAccountActionPlans(t *testing.T) {
 	//
 	if rcv, err := onStor.GetAccountActionPlans(acntID, true, true, utils.NonTransactional); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(expect, rcv) {
+	} else if sort.Slice(rcv, func(i, j int) bool {
+		return rcv[i] < rcv[j]
+	}); !reflect.DeepEqual(expect, rcv) {
 		t.Errorf("Expecting: %v, received: %v", expect, rcv)
 	}
 	// if err = onStor.DataDB().SelectDatabase(onStorCfg); err != nil {

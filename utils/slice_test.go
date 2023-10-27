@@ -23,33 +23,6 @@ import (
 	"testing"
 )
 
-func TestIsSliceMember(t *testing.T) {
-	if !IsSliceMember([]string{"1", "2", "3", "4", "5"}, "5") {
-		t.Error("Expecting: true, received: false")
-	}
-	if IsSliceMember([]string{"1", "2", "3", "4", "5"}, "6") {
-		t.Error("Expecting: true, received: false")
-	}
-}
-
-func TestSliceHasMember(t *testing.T) {
-	if !SliceHasMember([]string{"1", "2", "3", "4", "5"}, "5") {
-		t.Error("Expecting: true, received: false")
-	}
-	if SliceHasMember([]string{"1", "2", "3", "4", "5"}, "6") {
-		t.Error("Expecting: true, received: false")
-	}
-}
-
-func TestFlaot64SliceHasMember(t *testing.T) {
-	if !Float64SliceHasMember([]float64{1, 2, 3, 4, 5}, 5) {
-		t.Error("Expecting: true, received: false")
-	}
-	if Float64SliceHasMember([]float64{1, 2, 3, 4, 5}, 6) {
-		t.Error("Expecting: true, received: false")
-	}
-}
-
 func TestHasPrefixSlice(t *testing.T) {
 	if !HasPrefixSlice([]string{"1", "2", "3", "4", "5"}, "123") {
 		t.Error("Expecting: true, received: false")
@@ -73,31 +46,4 @@ func TestSliceStringToIface(t *testing.T) {
 	if rply := SliceStringToIface([]string{"*default", "ToR", "*voice"}); !reflect.DeepEqual(exp, rply) {
 		t.Errorf("Expected: %s ,received: %s", ToJSON(exp), ToJSON(rply))
 	}
-}
-
-func TestSliceStringEqualDiffLength(t *testing.T) {
-	v1 := []string{"foo", "bar"}
-	v2 := []string{"baz"}
-	if rcv := SliceStringEqual(v1, v2); rcv != false {
-		t.Errorf("expected false ,received : %v", rcv)
-	}
-
-}
-func TestSliceStringEqualElementEqualFalse(t *testing.T) {
-
-	v1 := []string{"foo", "bar"}
-	v2 := []string{"foo", "baz"}
-	if rcv := SliceStringEqual(v1, v2); rcv != false {
-		t.Errorf("expected false ,received : %v", rcv)
-	}
-
-}
-func TestSliceStringEqualTrue(t *testing.T) {
-
-	v1 := []string{"foo", "bar"}
-	v2 := []string{"foo", "bar"}
-	if rcv := SliceStringEqual(v1, v2); rcv != true {
-		t.Errorf("expected false ,received : %v", rcv)
-	}
-
 }

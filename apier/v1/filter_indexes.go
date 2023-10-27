@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package v1
 
 import (
+	"slices"
 	"strings"
 	"time"
 
@@ -312,7 +313,7 @@ func (apierSv1 *APIerSv1) ComputeFilterIndexes(ctx *context.Context, args *utils
 				if e != nil {
 					return nil, e
 				}
-				if !utils.IsSliceMember(ap.Contexts, ctx) {
+				if !slices.Contains(ap.Contexts, ctx) {
 					return nil, nil
 				}
 				fltrIDs := make([]string, len(ap.FilterIDs))
@@ -354,7 +355,7 @@ func (apierSv1 *APIerSv1) ComputeFilterIndexes(ctx *context.Context, args *utils
 				if e != nil {
 					return nil, e
 				}
-				if !utils.IsSliceMember(dsp.Subsystems, ctx) {
+				if !slices.Contains(dsp.Subsystems, ctx) {
 					return nil, nil
 				}
 				fltrIDs := make([]string, len(dsp.FilterIDs))
@@ -524,7 +525,7 @@ func (apierSv1 *APIerSv1) ComputeFilterIndexIDs(ctx *context.Context, args *util
 			if e != nil {
 				return nil, e
 			}
-			if !utils.IsSliceMember(ap.Contexts, ctx) {
+			if !slices.Contains(ap.Contexts, ctx) {
 				return nil, nil
 			}
 			fltrIDs := make([]string, len(ap.FilterIDs))
@@ -563,7 +564,7 @@ func (apierSv1 *APIerSv1) ComputeFilterIndexIDs(ctx *context.Context, args *util
 			if e != nil {
 				return nil, e
 			}
-			if !utils.IsSliceMember(dsp.Subsystems, ctx) {
+			if !slices.Contains(dsp.Subsystems, ctx) {
 				return nil, nil
 			}
 			fltrIDs := make([]string, len(dsp.FilterIDs))

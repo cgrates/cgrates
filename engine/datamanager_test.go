@@ -21,6 +21,7 @@ import (
 	"errors"
 	"fmt"
 	"reflect"
+	"slices"
 	"testing"
 	"time"
 
@@ -3249,7 +3250,7 @@ func TestComputeIndexes(t *testing.T) {
 			if e != nil {
 				return nil, e
 			}
-			return utils.SliceStringPointer(utils.CloneStringSlice(th.FilterIDs)), nil
+			return utils.SliceStringPointer(slices.Clone(th.FilterIDs)), nil
 		}, nil); err != nil {
 		t.Error(err)
 	}

@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package config
 
 import (
+	"slices"
 	"time"
 
 	"github.com/cgrates/cgrates/utils"
@@ -141,7 +142,7 @@ func (t *ThresholdSCfg) AsMapInterface() (initialMP map[string]any) {
 
 func (thdOpts *ThresholdsOpts) Clone() *ThresholdsOpts {
 	return &ThresholdsOpts{
-		ProfileIDs:           utils.CloneStringSlice(thdOpts.ProfileIDs),
+		ProfileIDs:           slices.Clone(thdOpts.ProfileIDs),
 		ProfileIgnoreFilters: thdOpts.ProfileIgnoreFilters,
 	}
 }

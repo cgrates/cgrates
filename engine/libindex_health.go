@@ -20,6 +20,7 @@ package engine
 
 import (
 	"fmt"
+	"slices"
 	"strings"
 	"time"
 
@@ -155,7 +156,7 @@ func GetAccountActionPlansIndexHealth(dm *DataManager, objLimit, indexLimit int,
 				missingIndex[acntID] = append(missingIndex[acntID], apID)
 				continue
 			}
-			if !utils.IsSliceMember(ids, apID) { // the index doesn't exits for this actionPlan
+			if !slices.Contains(ids, apID) { // the index doesn't exits for this actionPlan
 				missingIndex[acntID] = append(missingIndex[acntID], apID)
 			}
 		}
@@ -241,7 +242,7 @@ func GetReverseDestinationsIndexHealth(dm *DataManager, objLimit, indexLimit int
 				brokenRef[dstID] = nil
 				continue
 			}
-			if !utils.IsSliceMember(dst.Prefixes, prefix) { // the action plan exists but doesn't point towards the account we have index
+			if !slices.Contains(dst.Prefixes, prefix) { // the action plan exists but doesn't point towards the account we have index
 				brokenRef[dstID] = append(brokenRef[dstID], prefix)
 			}
 		}
@@ -271,7 +272,7 @@ func GetReverseDestinationsIndexHealth(dm *DataManager, objLimit, indexLimit int
 				missingIndex[prefix] = append(missingIndex[prefix], dstID)
 				continue
 			}
-			if !utils.IsSliceMember(ids, dstID) { // the index doesn't exits for this actionPlan
+			if !slices.Contains(ids, dstID) { // the index doesn't exits for this actionPlan
 				missingIndex[prefix] = append(missingIndex[prefix], dstID)
 			}
 		}
@@ -589,7 +590,7 @@ func GetFltrIdxHealth(dm *DataManager, fltrCache, fltrIdxCache, objCache *ltcach
 				continue
 			}
 			if ctx != nil &&
-				(obj.contexts == nil || !utils.IsSliceMember(*obj.contexts, *ctx)) { // check the contexts if present
+				(obj.contexts == nil || !slices.Contains(*obj.contexts, *ctx)) { // check the contexts if present
 				key := utils.ConcatenatedKey(tntCtx, idxKey)
 				rply.MissingIndexes[key] = append(rply.MissingIndexes[key], itmID)
 				continue
@@ -760,10 +761,10 @@ func getRevFltrIdxHealthFromReverse(dm *DataManager, fltrCache, revFltrIdxCache 
 				}
 				return
 			}
-			if !utils.IsSliceMember(obj.filterIDs, fltrID) { // check the filters
+			if !slices.Contains(obj.filterIDs, fltrID) { // check the filters
 				key := utils.ConcatenatedKey(tnt, itemIDCtx)
 				rply[indxType].BrokenReverseIndexes[key] = append(rply[indxType].BrokenReverseIndexes[key], fltrID)
-			} else if obj.contexts != nil && !utils.IsSliceMember(*obj.contexts, ctx) { // and the contexts
+			} else if obj.contexts != nil && !slices.Contains(*obj.contexts, ctx) { // and the contexts
 				key := utils.ConcatenatedKey(tnt, itemIDCtx)
 				rply[indxType].BrokenReverseIndexes[key] = append(rply[indxType].BrokenReverseIndexes[key], fltrID)
 			}
