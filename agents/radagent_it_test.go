@@ -213,7 +213,7 @@ func testRadiusitTPLoadData(t *testing.T) {
 }
 
 func testRAitAuthPAPSuccess(t *testing.T) {
-	if raAuthClnt, err = radigo.NewClient("udp", "127.0.0.1:1812", "CGRateS.org", dictRad, 1, nil); err != nil {
+	if raAuthClnt, err = radigo.NewClient(utils.UDP, "127.0.0.1:1812", "CGRateS.org", dictRad, 1, nil); err != nil {
 		t.Fatal(err)
 	}
 	authReq := raAuthClnt.NewRequest(radigo.AccessRequest, 1) // emulates Kamailio packet out of radius_load_caller_avps()
@@ -257,7 +257,7 @@ func testRAitAuthPAPSuccess(t *testing.T) {
 	}
 }
 func testRAitAuthPAPSuccessTCP(t *testing.T) {
-	if raAuthClnt, err = radigo.NewClient("tcp", "127.0.0.1:1812", "CGRateS.org", dictRad, 1, nil); err != nil {
+	if raAuthClnt, err = radigo.NewClient(utils.TCP, "127.0.0.1:1812", "CGRateS.org", dictRad, 1, nil); err != nil {
 		t.Fatal(err)
 	}
 	authReq := raAuthClnt.NewRequest(radigo.AccessRequest, 1) // emulates Kamailio packet out of radius_load_caller_avps()
@@ -302,7 +302,7 @@ func testRAitAuthPAPSuccessTCP(t *testing.T) {
 }
 
 func testRAitAuthPAPFail(t *testing.T) {
-	if raAuthClnt, err = radigo.NewClient("udp", "127.0.0.1:1812", "CGRateS.org", dictRad, 1, nil); err != nil {
+	if raAuthClnt, err = radigo.NewClient(utils.UDP, "127.0.0.1:1812", "CGRateS.org", dictRad, 1, nil); err != nil {
 		t.Fatal(err)
 	}
 	authReq := raAuthClnt.NewRequest(radigo.AccessRequest, 1) // emulates Kamailio packet out of radius_load_caller_avps()
@@ -347,7 +347,7 @@ func testRAitAuthPAPFail(t *testing.T) {
 }
 
 func testRAitAuthPAPFailTCP(t *testing.T) {
-	if raAuthClnt, err = radigo.NewClient("tcp", "127.0.0.1:1812", "CGRateS.org", dictRad, 1, nil); err != nil {
+	if raAuthClnt, err = radigo.NewClient(utils.TCP, "127.0.0.1:1812", "CGRateS.org", dictRad, 1, nil); err != nil {
 		t.Fatal(err)
 	}
 	authReq := raAuthClnt.NewRequest(radigo.AccessRequest, 1) // emulates Kamailio packet out of radius_load_caller_avps()
@@ -392,7 +392,7 @@ func testRAitAuthPAPFailTCP(t *testing.T) {
 }
 
 func testRAitMandatoryFail(t *testing.T) {
-	if raAuthClnt, err = radigo.NewClient("udp", "127.0.0.1:1812", "CGRateS.org", dictRad, 1, nil); err != nil {
+	if raAuthClnt, err = radigo.NewClient(utils.UDP, "127.0.0.1:1812", "CGRateS.org", dictRad, 1, nil); err != nil {
 		t.Fatal(err)
 	}
 	authReq := raAuthClnt.NewRequest(radigo.AccessRequest, 1)
@@ -419,7 +419,7 @@ func testRAitMandatoryFail(t *testing.T) {
 }
 
 func testRAitMandatoryFailTCP(t *testing.T) {
-	if raAuthClnt, err = radigo.NewClient("tcp", "127.0.0.1:1812", "CGRateS.org", dictRad, 1, nil); err != nil {
+	if raAuthClnt, err = radigo.NewClient(utils.TCP, "127.0.0.1:1812", "CGRateS.org", dictRad, 1, nil); err != nil {
 		t.Fatal(err)
 	}
 	authReq := raAuthClnt.NewRequest(radigo.AccessRequest, 1)
@@ -446,7 +446,7 @@ func testRAitMandatoryFailTCP(t *testing.T) {
 }
 
 func testRAitWithVendor(t *testing.T) {
-	if raAuthClnt, err = radigo.NewClient("udp", "127.0.0.1:1812", "CGRateS.org", dictRad, 1, nil); err != nil {
+	if raAuthClnt, err = radigo.NewClient(utils.UDP, "127.0.0.1:1812", "CGRateS.org", dictRad, 1, nil); err != nil {
 		t.Fatal(err)
 	}
 	authReq := raAuthClnt.NewRequest(radigo.AccessRequest, 1)
@@ -477,7 +477,7 @@ func testRAitWithVendor(t *testing.T) {
 }
 
 func testRAitWithVendorTCP(t *testing.T) {
-	if raAuthClnt, err = radigo.NewClient("tcp", "127.0.0.1:1812", "CGRateS.org", dictRad, 1, nil); err != nil {
+	if raAuthClnt, err = radigo.NewClient(utils.TCP, "127.0.0.1:1812", "CGRateS.org", dictRad, 1, nil); err != nil {
 		t.Fatal(err)
 	}
 	authReq := raAuthClnt.NewRequest(radigo.AccessRequest, 1)
@@ -508,7 +508,7 @@ func testRAitWithVendorTCP(t *testing.T) {
 }
 
 func testRAitAuthCHAPSuccess(t *testing.T) {
-	if raAuthClnt, err = radigo.NewClient("udp", "127.0.0.1:1812", "CGRateS.org", dictRad, 1, nil); err != nil {
+	if raAuthClnt, err = radigo.NewClient(utils.UDP, "127.0.0.1:1812", "CGRateS.org", dictRad, 1, nil); err != nil {
 		t.Fatal(err)
 	}
 	authReq := raAuthClnt.NewRequest(radigo.AccessRequest, 1) // emulates Kamailio packet out of radius_load_caller_avps()
@@ -552,7 +552,7 @@ func testRAitAuthCHAPSuccess(t *testing.T) {
 }
 
 func testRAitAuthCHAPSuccessTCP(t *testing.T) {
-	if raAuthClnt, err = radigo.NewClient("tcp", "127.0.0.1:1812", "CGRateS.org", dictRad, 1, nil); err != nil {
+	if raAuthClnt, err = radigo.NewClient(utils.TCP, "127.0.0.1:1812", "CGRateS.org", dictRad, 1, nil); err != nil {
 		t.Fatal(err)
 	}
 	authReq := raAuthClnt.NewRequest(radigo.AccessRequest, 1) // emulates Kamailio packet out of radius_load_caller_avps()
@@ -596,7 +596,7 @@ func testRAitAuthCHAPSuccessTCP(t *testing.T) {
 }
 
 func testRAitAuthCHAPFail(t *testing.T) {
-	if raAuthClnt, err = radigo.NewClient("udp", "127.0.0.1:1812", "CGRateS.org", dictRad, 1, nil); err != nil {
+	if raAuthClnt, err = radigo.NewClient(utils.UDP, "127.0.0.1:1812", "CGRateS.org", dictRad, 1, nil); err != nil {
 		t.Fatal(err)
 	}
 	authReq := raAuthClnt.NewRequest(radigo.AccessRequest, 1) // emulates Kamailio packet out of radius_load_caller_avps()
@@ -640,7 +640,7 @@ func testRAitAuthCHAPFail(t *testing.T) {
 }
 
 func testRAitAuthCHAPFailTCP(t *testing.T) {
-	if raAuthClnt, err = radigo.NewClient("tcp", "127.0.0.1:1812", "CGRateS.org", dictRad, 1, nil); err != nil {
+	if raAuthClnt, err = radigo.NewClient(utils.TCP, "127.0.0.1:1812", "CGRateS.org", dictRad, 1, nil); err != nil {
 		t.Fatal(err)
 	}
 	authReq := raAuthClnt.NewRequest(radigo.AccessRequest, 1) // emulates Kamailio packet out of radius_load_caller_avps()
@@ -689,7 +689,7 @@ func testRAitAuthMSCHAPV2Success(t *testing.T) {
 			return
 		}
 	}
-	if raAuthClnt, err = radigo.NewClient("udp", "127.0.0.1:1812", "CGRateS.org", dictRad, 1, nil); err != nil {
+	if raAuthClnt, err = radigo.NewClient(utils.UDP, "127.0.0.1:1812", "CGRateS.org", dictRad, 1, nil); err != nil {
 		t.Fatal(err)
 	}
 	authReq := raAuthClnt.NewRequest(radigo.AccessRequest, 1) // emulates Kamailio packet out of radius_load_caller_avps()
@@ -753,7 +753,7 @@ func testRAitAuthMSCHAPV2SuccessTCP(t *testing.T) {
 			return
 		}
 	}
-	if raAuthClnt, err = radigo.NewClient("tcp", "127.0.0.1:1812", "CGRateS.org", dictRad, 1, nil); err != nil {
+	if raAuthClnt, err = radigo.NewClient(utils.TCP, "127.0.0.1:1812", "CGRateS.org", dictRad, 1, nil); err != nil {
 		t.Fatal(err)
 	}
 	authReq := raAuthClnt.NewRequest(radigo.AccessRequest, 1) // emulates Kamailio packet out of radius_load_caller_avps()
@@ -817,7 +817,7 @@ func testRAitAuthMSCHAPV2Fail(t *testing.T) {
 			return
 		}
 	}
-	if raAuthClnt, err = radigo.NewClient("udp", "127.0.0.1:1812", "CGRateS.org", dictRad, 1, nil); err != nil {
+	if raAuthClnt, err = radigo.NewClient(utils.UDP, "127.0.0.1:1812", "CGRateS.org", dictRad, 1, nil); err != nil {
 		t.Fatal(err)
 	}
 	authReq := raAuthClnt.NewRequest(radigo.AccessRequest, 1) // emulates Kamailio packet out of radius_load_caller_avps()
@@ -872,7 +872,7 @@ func testRAitAuthMSCHAPV2FailTCP(t *testing.T) {
 			return
 		}
 	}
-	if raAuthClnt, err = radigo.NewClient("tcp", "127.0.0.1:1812", "CGRateS.org", dictRad, 1, nil); err != nil {
+	if raAuthClnt, err = radigo.NewClient(utils.TCP, "127.0.0.1:1812", "CGRateS.org", dictRad, 1, nil); err != nil {
 		t.Fatal(err)
 	}
 	authReq := raAuthClnt.NewRequest(radigo.AccessRequest, 1) // emulates Kamailio packet out of radius_load_caller_avps()
@@ -922,7 +922,7 @@ func testRAitAuthMSCHAPV2FailTCP(t *testing.T) {
 }
 
 func testRAitChallenge(t *testing.T) {
-	if raAuthClnt, err = radigo.NewClient("udp", "127.0.0.1:1812", "CGRateS.org", dictRad, 1, nil); err != nil {
+	if raAuthClnt, err = radigo.NewClient(utils.UDP, "127.0.0.1:1812", "CGRateS.org", dictRad, 1, nil); err != nil {
 		t.Fatal(err)
 	}
 	authReq := raAuthClnt.NewRequest(radigo.AccessRequest, 1) // emulates Kamailio packet out of radius_load_caller_avps()
@@ -962,7 +962,7 @@ func testRAitChallenge(t *testing.T) {
 }
 
 func testRAitChallengeTCP(t *testing.T) {
-	if raAuthClnt, err = radigo.NewClient("tcp", "127.0.0.1:1812", "CGRateS.org", dictRad, 1, nil); err != nil {
+	if raAuthClnt, err = radigo.NewClient(utils.TCP, "127.0.0.1:1812", "CGRateS.org", dictRad, 1, nil); err != nil {
 		t.Fatal(err)
 	}
 	authReq := raAuthClnt.NewRequest(radigo.AccessRequest, 1) // emulates Kamailio packet out of radius_load_caller_avps()
@@ -1002,7 +1002,7 @@ func testRAitChallengeTCP(t *testing.T) {
 }
 
 func testRAitChallengeResponse(t *testing.T) {
-	if raAuthClnt, err = radigo.NewClient("udp", "127.0.0.1:1812", "CGRateS.org", dictRad, 1, nil); err != nil {
+	if raAuthClnt, err = radigo.NewClient(utils.UDP, "127.0.0.1:1812", "CGRateS.org", dictRad, 1, nil); err != nil {
 		t.Fatal(err)
 	}
 	authReq := raAuthClnt.NewRequest(radigo.AccessRequest, 1) // emulates Kamailio packet out of radius_load_caller_avps()
@@ -1047,7 +1047,7 @@ func testRAitChallengeResponse(t *testing.T) {
 }
 
 func testRAitChallengeResponseTCP(t *testing.T) {
-	if raAuthClnt, err = radigo.NewClient("tcp", "127.0.0.1:1812", "CGRateS.org", dictRad, 1, nil); err != nil {
+	if raAuthClnt, err = radigo.NewClient(utils.TCP, "127.0.0.1:1812", "CGRateS.org", dictRad, 1, nil); err != nil {
 		t.Fatal(err)
 	}
 	authReq := raAuthClnt.NewRequest(radigo.AccessRequest, 1) // emulates Kamailio packet out of radius_load_caller_avps()
@@ -1092,7 +1092,7 @@ func testRAitChallengeResponseTCP(t *testing.T) {
 }
 
 func testRAitAcctStart(t *testing.T) {
-	if raAcctClnt, err = radigo.NewClient("udp", "127.0.0.1:1813", "CGRateS.org", dictRad, 1, nil); err != nil {
+	if raAcctClnt, err = radigo.NewClient(utils.UDP, "127.0.0.1:1813", "CGRateS.org", dictRad, 1, nil); err != nil {
 		t.Fatal(err)
 	}
 	req := raAcctClnt.NewRequest(radigo.AccountingRequest, 2) // emulates Kamailio packet for accounting start
@@ -1171,7 +1171,7 @@ func testRAitAcctStart(t *testing.T) {
 }
 
 func testRAitAcctStartTCP(t *testing.T) {
-	if raAcctClnt, err = radigo.NewClient("tcp", "127.0.0.1:1813", "CGRateS.org", dictRad, 1, nil); err != nil {
+	if raAcctClnt, err = radigo.NewClient(utils.TCP, "127.0.0.1:1813", "CGRateS.org", dictRad, 1, nil); err != nil {
 		t.Fatal(err)
 	}
 	req := raAcctClnt.NewRequest(radigo.AccountingRequest, 2) // emulates Kamailio packet for accounting start
