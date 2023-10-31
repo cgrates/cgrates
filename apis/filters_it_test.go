@@ -24,6 +24,7 @@ package apis
 import (
 	"path"
 	"reflect"
+	"slices"
 	"sort"
 	"testing"
 
@@ -316,7 +317,7 @@ func testFiltersGetFilterIDsAfterSet(t *testing.T) {
 		t.Error(err)
 	} else {
 		sort.Strings(replyFilterIDs)
-		if !utils.SliceStringEqual(replyFilterIDs, expectedIDs) {
+		if !slices.Equal(replyFilterIDs, expectedIDs) {
 			t.Errorf("expected: <%+v>, \nreceived: <%+v>", expectedIDs, replyFilterIDs)
 		}
 	}
@@ -330,7 +331,7 @@ func testFiltersGetFilterIDsAfterSet(t *testing.T) {
 		t.Error(err)
 	} else {
 		sort.Strings(replyFilterIDs)
-		if !utils.SliceStringEqual(replyFilterIDs, expectedIDs) {
+		if !slices.Equal(replyFilterIDs, expectedIDs) {
 			t.Errorf("expected: <%+v>, \nreceived: <%+v>", expectedIDs, replyFilterIDs)
 		}
 	}
@@ -344,7 +345,7 @@ func testFiltersGetFilterIDsAfterSet(t *testing.T) {
 		t.Error(err)
 	} else {
 		sort.Strings(replyFilterIDs)
-		if !utils.SliceStringEqual(replyFilterIDs, expectedIDs) {
+		if !slices.Equal(replyFilterIDs, expectedIDs) {
 			t.Errorf("expected: <%+v>, \nreceived: <%+v>", expectedIDs, replyFilterIDs)
 		}
 	}
@@ -518,7 +519,7 @@ func testFiltersGetFilterIDsAfterRemove(t *testing.T) {
 		t.Error(err)
 	} else {
 		sort.Strings(replyFilterIDs)
-		if !utils.SliceStringEqual(replyFilterIDs, expectedIDs) {
+		if !slices.Equal(replyFilterIDs, expectedIDs) {
 			t.Errorf("expected: <%+v>, \nreceived: <%+v>", expectedIDs, replyFilterIDs)
 		}
 	}
@@ -532,7 +533,7 @@ func testFiltersGetFilterIDsAfterRemove(t *testing.T) {
 		t.Error(err)
 	} else {
 		sort.Strings(replyFilterIDs)
-		if !utils.SliceStringEqual(replyFilterIDs, expectedIDs) {
+		if !slices.Equal(replyFilterIDs, expectedIDs) {
 			t.Errorf("expected: <%+v>, \nreceived: <%+v>", expectedIDs, replyFilterIDs)
 		}
 	}
@@ -546,7 +547,7 @@ func testFiltersGetFilterIDsAfterRemove(t *testing.T) {
 		t.Error(err)
 	} else {
 		sort.Strings(replyFilterIDs)
-		if !utils.SliceStringEqual(replyFilterIDs, expectedIDs) {
+		if !slices.Equal(replyFilterIDs, expectedIDs) {
 			t.Errorf("expected: <%+v>, \nreceived: <%+v>", expectedIDs, replyFilterIDs)
 		}
 	}

@@ -21,6 +21,7 @@ package config
 import (
 	"fmt"
 	"reflect"
+	"slices"
 	"strconv"
 	"strings"
 	"time"
@@ -199,16 +200,16 @@ func (dbcfg StorDbCfg) Clone() (cln *StorDbCfg) {
 		cln.Items[key] = item.Clone()
 	}
 	if dbcfg.StringIndexedFields != nil {
-		cln.StringIndexedFields = utils.CloneStringSlice(dbcfg.StringIndexedFields)
+		cln.StringIndexedFields = slices.Clone(dbcfg.StringIndexedFields)
 	}
 	if dbcfg.PrefixIndexedFields != nil {
-		cln.PrefixIndexedFields = utils.CloneStringSlice(dbcfg.PrefixIndexedFields)
+		cln.PrefixIndexedFields = slices.Clone(dbcfg.PrefixIndexedFields)
 	}
 	if dbcfg.RmtConns != nil {
-		cln.RmtConns = utils.CloneStringSlice(dbcfg.RmtConns)
+		cln.RmtConns = slices.Clone(dbcfg.RmtConns)
 	}
 	if dbcfg.RplConns != nil {
-		cln.RplConns = utils.CloneStringSlice(dbcfg.RplConns)
+		cln.RplConns = slices.Clone(dbcfg.RplConns)
 	}
 	return
 }
@@ -301,18 +302,18 @@ func diffStorDBJsonCfg(d *DbJsonCfg, v1, v2 *StorDbCfg) *DbJsonCfg {
 	if v1.Password != v2.Password {
 		d.Db_password = utils.StringPointer(v2.Password)
 	}
-	if !utils.SliceStringEqual(v1.RmtConns, v2.RmtConns) {
+	if !slices.Equal(v1.RmtConns, v2.RmtConns) {
 		d.Remote_conns = &v2.RmtConns
 	}
 
-	if !utils.SliceStringEqual(v1.RplConns, v2.RplConns) {
+	if !slices.Equal(v1.RplConns, v2.RplConns) {
 		d.Replication_conns = &v2.RplConns
 	}
 
-	if !utils.SliceStringEqual(v1.StringIndexedFields, v2.StringIndexedFields) {
+	if !slices.Equal(v1.StringIndexedFields, v2.StringIndexedFields) {
 		d.String_indexed_fields = &v2.StringIndexedFields
 	}
-	if !utils.SliceStringEqual(v1.PrefixIndexedFields, v2.PrefixIndexedFields) {
+	if !slices.Equal(v1.PrefixIndexedFields, v2.PrefixIndexedFields) {
 		d.Prefix_indexed_fields = &v2.PrefixIndexedFields
 	}
 

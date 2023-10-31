@@ -20,6 +20,7 @@ package engine
 
 import (
 	"math/rand"
+	"slices"
 	"sort"
 	"strconv"
 	"strings"
@@ -45,7 +46,7 @@ func (dC *DispatcherHostProfile) Clone() (cln *DispatcherHostProfile) {
 		Blocker: dC.Blocker,
 	}
 	if dC.FilterIDs != nil {
-		cln.FilterIDs = utils.CloneStringSlice(dC.FilterIDs)
+		cln.FilterIDs = slices.Clone(dC.FilterIDs)
 	}
 	if dC.Params != nil {
 		cln.Params = make(map[string]any)

@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package config
 
 import (
+	"slices"
 	"time"
 
 	"github.com/cgrates/birpc/context"
@@ -108,7 +109,7 @@ func (sa SIPAgentCfg) Clone() (cln *SIPAgentCfg) {
 		RetransmissionTimer: sa.RetransmissionTimer,
 	}
 	if sa.SessionSConns != nil {
-		cln.SessionSConns = utils.CloneStringSlice(sa.SessionSConns)
+		cln.SessionSConns = slices.Clone(sa.SessionSConns)
 	}
 	if sa.RequestProcessors != nil {
 		cln.RequestProcessors = make([]*RequestProcessor, len(sa.RequestProcessors))
@@ -143,7 +144,7 @@ func diffSIPAgentJsonCfg(d *SIPAgentJsonCfg, v1, v2 *SIPAgentCfg, separator stri
 	if v1.ListenNet != v2.ListenNet {
 		d.Listen_net = utils.StringPointer(v2.ListenNet)
 	}
-	if !utils.SliceStringEqual(v1.SessionSConns, v2.SessionSConns) {
+	if !slices.Equal(v1.SessionSConns, v2.SessionSConns) {
 		d.Sessions_conns = utils.SliceStringPointer(getBiRPCInternalJSONConns(v2.SessionSConns))
 	}
 	if v1.Timezone != v2.Timezone {

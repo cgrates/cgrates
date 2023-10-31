@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package apis
 
 import (
+	"slices"
 	"strings"
 	"time"
 
@@ -245,7 +246,7 @@ func (adms *AdminSv1) ComputeFilterIndexes(ctx *context.Context, args *utils.Arg
 				if e != nil {
 					return nil, e
 				}
-				return utils.SliceStringPointer(utils.CloneStringSlice(th.FilterIDs)), nil
+				return utils.SliceStringPointer(slices.Clone(th.FilterIDs)), nil
 			}, nil); err != nil && err != utils.ErrNotFound {
 			return utils.APIErrorHandler(err)
 		}
@@ -260,7 +261,7 @@ func (adms *AdminSv1) ComputeFilterIndexes(ctx *context.Context, args *utils.Arg
 				if e != nil {
 					return nil, e
 				}
-				return utils.SliceStringPointer(utils.CloneStringSlice(sq.FilterIDs)), nil
+				return utils.SliceStringPointer(slices.Clone(sq.FilterIDs)), nil
 			}, nil); err != nil && err != utils.ErrNotFound {
 			return utils.APIErrorHandler(err)
 		}
@@ -275,7 +276,7 @@ func (adms *AdminSv1) ComputeFilterIndexes(ctx *context.Context, args *utils.Arg
 				if e != nil {
 					return nil, e
 				}
-				return utils.SliceStringPointer(utils.CloneStringSlice(rp.FilterIDs)), nil
+				return utils.SliceStringPointer(slices.Clone(rp.FilterIDs)), nil
 			}, nil); err != nil && err != utils.ErrNotFound {
 			return utils.APIErrorHandler(err)
 		}
@@ -290,7 +291,7 @@ func (adms *AdminSv1) ComputeFilterIndexes(ctx *context.Context, args *utils.Arg
 				if e != nil {
 					return nil, e
 				}
-				return utils.SliceStringPointer(utils.CloneStringSlice(rp.FilterIDs)), nil
+				return utils.SliceStringPointer(slices.Clone(rp.FilterIDs)), nil
 			}, nil); err != nil && err != utils.ErrNotFound {
 			return utils.APIErrorHandler(err)
 		}
@@ -305,7 +306,7 @@ func (adms *AdminSv1) ComputeFilterIndexes(ctx *context.Context, args *utils.Arg
 				if e != nil {
 					return nil, e
 				}
-				return utils.SliceStringPointer(utils.CloneStringSlice(attr.FilterIDs)), nil
+				return utils.SliceStringPointer(slices.Clone(attr.FilterIDs)), nil
 			}, nil); err != nil && err != utils.ErrNotFound {
 			return utils.APIErrorHandler(err)
 		}
@@ -320,7 +321,7 @@ func (adms *AdminSv1) ComputeFilterIndexes(ctx *context.Context, args *utils.Arg
 				if e != nil {
 					return nil, e
 				}
-				return utils.SliceStringPointer(utils.CloneStringSlice(ch.FilterIDs)), nil
+				return utils.SliceStringPointer(slices.Clone(ch.FilterIDs)), nil
 			}, nil); err != nil && err != utils.ErrNotFound {
 			return utils.APIErrorHandler(err)
 		}
@@ -335,7 +336,7 @@ func (adms *AdminSv1) ComputeFilterIndexes(ctx *context.Context, args *utils.Arg
 				if e != nil {
 					return nil, e
 				}
-				return utils.SliceStringPointer(utils.CloneStringSlice(acnts.FilterIDs)), nil
+				return utils.SliceStringPointer(slices.Clone(acnts.FilterIDs)), nil
 			}, nil); err != nil && err != utils.ErrNotFound {
 			return utils.APIErrorHandler(err)
 		}
@@ -350,7 +351,7 @@ func (adms *AdminSv1) ComputeFilterIndexes(ctx *context.Context, args *utils.Arg
 				if e != nil {
 					return nil, e
 				}
-				return utils.SliceStringPointer(utils.CloneStringSlice(act.FilterIDs)), nil
+				return utils.SliceStringPointer(slices.Clone(act.FilterIDs)), nil
 			}, nil); err != nil && err != utils.ErrNotFound {
 			return utils.APIErrorHandler(err)
 		}
@@ -374,12 +375,12 @@ func (adms *AdminSv1) ComputeFilterIndexes(ctx *context.Context, args *utils.Arg
 				cacheIDs[utils.CacheRateFilterIndexes] = rtIds
 				_, e = engine.ComputeIndexes(ctx, adms.dm, tnt, id, utils.CacheRateFilterIndexes,
 					&rtIds, transactionID, func(_, id, _ string) (*[]string, error) {
-						return utils.SliceStringPointer(utils.CloneStringSlice(rtPrf.Rates[id].FilterIDs)), nil
+						return utils.SliceStringPointer(slices.Clone(rtPrf.Rates[id].FilterIDs)), nil
 					}, nil)
 				if e != nil {
 					return nil, e
 				}
-				return utils.SliceStringPointer(utils.CloneStringSlice(rtPrf.FilterIDs)), nil
+				return utils.SliceStringPointer(slices.Clone(rtPrf.FilterIDs)), nil
 			}, nil); err != nil {
 			return utils.APIErrorHandler(err)
 		}
@@ -394,7 +395,7 @@ func (adms *AdminSv1) ComputeFilterIndexes(ctx *context.Context, args *utils.Arg
 				if e != nil {
 					return nil, e
 				}
-				return utils.SliceStringPointer(utils.CloneStringSlice(dsp.FilterIDs)), nil
+				return utils.SliceStringPointer(slices.Clone(dsp.FilterIDs)), nil
 			}, nil); err != nil && err != utils.ErrDSPProfileNotFound {
 			return utils.APIErrorHandler(err)
 		}
@@ -502,7 +503,7 @@ func (adms *AdminSv1) ComputeFilterIndexIDs(ctx *context.Context, args *utils.Ar
 			if e != nil {
 				return nil, e
 			}
-			return utils.SliceStringPointer(utils.CloneStringSlice(th.FilterIDs)), nil
+			return utils.SliceStringPointer(slices.Clone(th.FilterIDs)), nil
 		}, nil); err != nil && err != utils.ErrNotFound {
 		return utils.APIErrorHandler(err)
 	}
@@ -517,7 +518,7 @@ func (adms *AdminSv1) ComputeFilterIndexIDs(ctx *context.Context, args *utils.Ar
 				return nil, e
 			}
 			cacheIDs[utils.CacheStatFilterIndexes] = []string{sq.ID}
-			return utils.SliceStringPointer(utils.CloneStringSlice(sq.FilterIDs)), nil
+			return utils.SliceStringPointer(slices.Clone(sq.FilterIDs)), nil
 		}, nil); err != nil && err != utils.ErrNotFound {
 		return utils.APIErrorHandler(err)
 	}
@@ -532,7 +533,7 @@ func (adms *AdminSv1) ComputeFilterIndexIDs(ctx *context.Context, args *utils.Ar
 				return nil, e
 			}
 			cacheIDs[utils.CacheResourceFilterIndexes] = []string{rp.ID}
-			return utils.SliceStringPointer(utils.CloneStringSlice(rp.FilterIDs)), nil
+			return utils.SliceStringPointer(slices.Clone(rp.FilterIDs)), nil
 		}, nil); err != nil && err != utils.ErrNotFound {
 		return utils.APIErrorHandler(err)
 	}
@@ -547,7 +548,7 @@ func (adms *AdminSv1) ComputeFilterIndexIDs(ctx *context.Context, args *utils.Ar
 				return nil, e
 			}
 			cacheIDs[utils.CacheRouteFilterIndexes] = []string{rp.ID}
-			return utils.SliceStringPointer(utils.CloneStringSlice(rp.FilterIDs)), nil
+			return utils.SliceStringPointer(slices.Clone(rp.FilterIDs)), nil
 		}, nil); err != nil && err != utils.ErrNotFound {
 		return utils.APIErrorHandler(err)
 	}
@@ -561,7 +562,7 @@ func (adms *AdminSv1) ComputeFilterIndexIDs(ctx *context.Context, args *utils.Ar
 			if e != nil {
 				return nil, e
 			}
-			return utils.SliceStringPointer(utils.CloneStringSlice(attr.FilterIDs)), nil
+			return utils.SliceStringPointer(slices.Clone(attr.FilterIDs)), nil
 		}, nil); err != nil && err != utils.ErrNotFound {
 		return utils.APIErrorHandler(err)
 	}
@@ -575,7 +576,7 @@ func (adms *AdminSv1) ComputeFilterIndexIDs(ctx *context.Context, args *utils.Ar
 			if e != nil {
 				return nil, e
 			}
-			return utils.SliceStringPointer(utils.CloneStringSlice(ch.FilterIDs)), nil
+			return utils.SliceStringPointer(slices.Clone(ch.FilterIDs)), nil
 		}, nil); err != nil && err != utils.ErrNotFound {
 		return utils.APIErrorHandler(err)
 	}
@@ -589,7 +590,7 @@ func (adms *AdminSv1) ComputeFilterIndexIDs(ctx *context.Context, args *utils.Ar
 			if e != nil {
 				return nil, e
 			}
-			return utils.SliceStringPointer(utils.CloneStringSlice(acc.FilterIDs)), nil
+			return utils.SliceStringPointer(slices.Clone(acc.FilterIDs)), nil
 		}, nil); err != nil && err != utils.ErrNotFound {
 		return utils.APIErrorHandler(err)
 	}
@@ -603,7 +604,7 @@ func (adms *AdminSv1) ComputeFilterIndexIDs(ctx *context.Context, args *utils.Ar
 			if e != nil {
 				return nil, e
 			}
-			return utils.SliceStringPointer(utils.CloneStringSlice(act.FilterIDs)), nil
+			return utils.SliceStringPointer(slices.Clone(act.FilterIDs)), nil
 		}, nil); err != nil && err != utils.ErrNotFound {
 		return utils.APIErrorHandler(err)
 	}
@@ -625,7 +626,7 @@ func (adms *AdminSv1) ComputeFilterIndexIDs(ctx *context.Context, args *utils.Ar
 			}
 			indexesRate, e := engine.ComputeIndexes(ctx, adms.dm, tnt, id, utils.CacheRateFilterIndexes,
 				&rtIds, transactionID, func(_, id, _ string) (*[]string, error) {
-					return utils.SliceStringPointer(utils.CloneStringSlice(rpr.Rates[id].FilterIDs)), nil
+					return utils.SliceStringPointer(slices.Clone(rpr.Rates[id].FilterIDs)), nil
 				}, nil)
 			if e != nil {
 				return nil, e
@@ -633,7 +634,7 @@ func (adms *AdminSv1) ComputeFilterIndexIDs(ctx *context.Context, args *utils.Ar
 			if indexesRate.Size() != 0 {
 				cacheIDs[utils.CacheRateFilterIndexes] = indexesRate.AsSlice()
 			}
-			return utils.SliceStringPointer(utils.CloneStringSlice(rpr.FilterIDs)), nil
+			return utils.SliceStringPointer(slices.Clone(rpr.FilterIDs)), nil
 		}, nil); err != nil && err != utils.ErrNotFound {
 		return utils.APIErrorHandler(err)
 	}
@@ -647,7 +648,7 @@ func (adms *AdminSv1) ComputeFilterIndexIDs(ctx *context.Context, args *utils.Ar
 			if e != nil {
 				return nil, e
 			}
-			return utils.SliceStringPointer(utils.CloneStringSlice(dsp.FilterIDs)), nil
+			return utils.SliceStringPointer(slices.Clone(dsp.FilterIDs)), nil
 		}, nil); err != nil && err != utils.ErrDSPProfileNotFound {
 		return utils.APIErrorHandler(err)
 	}

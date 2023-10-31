@@ -20,6 +20,7 @@ package engine
 
 import (
 	"reflect"
+	"slices"
 	"testing"
 	"time"
 
@@ -78,7 +79,7 @@ func TestComputeIndexes(t *testing.T) {
 			if e != nil {
 				return nil, e
 			}
-			return utils.SliceStringPointer(utils.CloneStringSlice(th.FilterIDs)), nil
+			return utils.SliceStringPointer(slices.Clone(th.FilterIDs)), nil
 		}, nil)
 	if err != nil {
 		t.Error(err)
@@ -116,7 +117,7 @@ func TestComputeIndexesIDsNotNil(t *testing.T) {
 			if e != nil {
 				return nil, e
 			}
-			return utils.SliceStringPointer(utils.CloneStringSlice(th.FilterIDs)), nil
+			return utils.SliceStringPointer(slices.Clone(th.FilterIDs)), nil
 		}, nil)
 	if err != utils.ErrNotFound {
 		t.Errorf("Expected %v\n but received %v", utils.ErrNotFound, err)
@@ -3035,7 +3036,7 @@ func TestComputeIndexesNilFilterIDs(t *testing.T) {
 			if e != nil {
 				return nil, e
 			}
-			return utils.SliceStringPointer(utils.CloneStringSlice(th.FilterIDs)), nil
+			return utils.SliceStringPointer(slices.Clone(th.FilterIDs)), nil
 		}, nil)
 	if err != nil {
 		t.Error(err)
@@ -3089,7 +3090,7 @@ func TestComputeIndexesNewFilterIndexErr(t *testing.T) {
 
 	_, err := ComputeIndexes(context.Background(), dm, "cgrates.org", utils.EmptyString, utils.CacheThresholdFilterIndexes,
 		&[]string{"THD_2"}, utils.NonTransactional, func(tnt, id, grp string) (*[]string, error) {
-			return utils.SliceStringPointer(utils.CloneStringSlice(thd.FilterIDs)), nil
+			return utils.SliceStringPointer(slices.Clone(thd.FilterIDs)), nil
 		}, nil)
 	if err != utils.ErrNotImplemented {
 		t.Errorf("\nExpected error <%+v>, \nReceived error <%+v>", utils.ErrNotImplemented, err)

@@ -20,6 +20,7 @@ package engine
 
 import (
 	"fmt"
+	"slices"
 	"strings"
 	"time"
 
@@ -482,7 +483,7 @@ func getRevFltrIdxHealthFromReverse(ctx *context.Context, dm *DataManager, fltrC
 				}
 				return
 			}
-			if !utils.IsSliceMember(filterIDs, fltrID) { // check the filters
+			if !slices.Contains(filterIDs, fltrID) { // check the filters
 				key := utils.ConcatenatedKey(tnt, id)
 				rply[indxType].BrokenReverseIndexes[key] = append(rply[indxType].BrokenReverseIndexes[key], fltrID)
 			}

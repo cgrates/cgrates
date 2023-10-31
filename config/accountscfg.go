@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package config
 
 import (
+	"slices"
 	"time"
 
 	"github.com/cgrates/birpc/context"
@@ -106,19 +107,19 @@ func (acS *AccountSCfg) loadFromJSONCfg(jsnCfg *AccountSJsonCfg) (err error) {
 		acS.ThresholdSConns = updateInternalConns(*jsnCfg.Thresholds_conns, utils.MetaThresholds)
 	}
 	if jsnCfg.String_indexed_fields != nil {
-		acS.StringIndexedFields = utils.SliceStringPointer(utils.CloneStringSlice(*jsnCfg.String_indexed_fields))
+		acS.StringIndexedFields = utils.SliceStringPointer(slices.Clone(*jsnCfg.String_indexed_fields))
 	}
 	if jsnCfg.Prefix_indexed_fields != nil {
-		acS.PrefixIndexedFields = utils.SliceStringPointer(utils.CloneStringSlice(*jsnCfg.Prefix_indexed_fields))
+		acS.PrefixIndexedFields = utils.SliceStringPointer(slices.Clone(*jsnCfg.Prefix_indexed_fields))
 	}
 	if jsnCfg.Suffix_indexed_fields != nil {
-		acS.SuffixIndexedFields = utils.SliceStringPointer(utils.CloneStringSlice(*jsnCfg.Suffix_indexed_fields))
+		acS.SuffixIndexedFields = utils.SliceStringPointer(slices.Clone(*jsnCfg.Suffix_indexed_fields))
 	}
 	if jsnCfg.Exists_indexed_fields != nil {
-		acS.ExistsIndexedFields = utils.SliceStringPointer(utils.CloneStringSlice(*jsnCfg.Exists_indexed_fields))
+		acS.ExistsIndexedFields = utils.SliceStringPointer(slices.Clone(*jsnCfg.Exists_indexed_fields))
 	}
 	if jsnCfg.Notexists_indexed_fields != nil {
-		acS.NotExistsIndexedFields = utils.SliceStringPointer(utils.CloneStringSlice(*jsnCfg.Notexists_indexed_fields))
+		acS.NotExistsIndexedFields = utils.SliceStringPointer(slices.Clone(*jsnCfg.Notexists_indexed_fields))
 	}
 	if jsnCfg.Nested_fields != nil {
 		acS.NestedFields = *jsnCfg.Nested_fields
@@ -161,19 +162,19 @@ func (acS AccountSCfg) AsMapInterface(string) any {
 		mp[utils.ThresholdSConnsCfg] = getInternalJSONConns(acS.ThresholdSConns)
 	}
 	if acS.StringIndexedFields != nil {
-		mp[utils.StringIndexedFieldsCfg] = utils.CloneStringSlice(*acS.StringIndexedFields)
+		mp[utils.StringIndexedFieldsCfg] = slices.Clone(*acS.StringIndexedFields)
 	}
 	if acS.PrefixIndexedFields != nil {
-		mp[utils.PrefixIndexedFieldsCfg] = utils.CloneStringSlice(*acS.PrefixIndexedFields)
+		mp[utils.PrefixIndexedFieldsCfg] = slices.Clone(*acS.PrefixIndexedFields)
 	}
 	if acS.SuffixIndexedFields != nil {
-		mp[utils.SuffixIndexedFieldsCfg] = utils.CloneStringSlice(*acS.SuffixIndexedFields)
+		mp[utils.SuffixIndexedFieldsCfg] = slices.Clone(*acS.SuffixIndexedFields)
 	}
 	if acS.ExistsIndexedFields != nil {
-		mp[utils.ExistsIndexedFieldsCfg] = utils.CloneStringSlice(*acS.ExistsIndexedFields)
+		mp[utils.ExistsIndexedFieldsCfg] = slices.Clone(*acS.ExistsIndexedFields)
 	}
 	if acS.NotExistsIndexedFields != nil {
-		mp[utils.NotExistsIndexedFieldsCfg] = utils.CloneStringSlice(*acS.NotExistsIndexedFields)
+		mp[utils.NotExistsIndexedFieldsCfg] = slices.Clone(*acS.NotExistsIndexedFields)
 	}
 	if acS.MaxUsage != nil {
 		mp[utils.MaxUsage] = acS.MaxUsage.String()
@@ -214,28 +215,28 @@ func (acS AccountSCfg) Clone() (cln *AccountSCfg) {
 		Opts:           acS.Opts.Clone(),
 	}
 	if acS.AttributeSConns != nil {
-		cln.AttributeSConns = utils.CloneStringSlice(acS.AttributeSConns)
+		cln.AttributeSConns = slices.Clone(acS.AttributeSConns)
 	}
 	if acS.RateSConns != nil {
-		cln.RateSConns = utils.CloneStringSlice(acS.RateSConns)
+		cln.RateSConns = slices.Clone(acS.RateSConns)
 	}
 	if acS.ThresholdSConns != nil {
-		cln.ThresholdSConns = utils.CloneStringSlice(acS.ThresholdSConns)
+		cln.ThresholdSConns = slices.Clone(acS.ThresholdSConns)
 	}
 	if acS.StringIndexedFields != nil {
-		cln.StringIndexedFields = utils.SliceStringPointer(utils.CloneStringSlice(*acS.StringIndexedFields))
+		cln.StringIndexedFields = utils.SliceStringPointer(slices.Clone(*acS.StringIndexedFields))
 	}
 	if acS.PrefixIndexedFields != nil {
-		cln.PrefixIndexedFields = utils.SliceStringPointer(utils.CloneStringSlice(*acS.PrefixIndexedFields))
+		cln.PrefixIndexedFields = utils.SliceStringPointer(slices.Clone(*acS.PrefixIndexedFields))
 	}
 	if acS.SuffixIndexedFields != nil {
-		cln.SuffixIndexedFields = utils.SliceStringPointer(utils.CloneStringSlice(*acS.SuffixIndexedFields))
+		cln.SuffixIndexedFields = utils.SliceStringPointer(slices.Clone(*acS.SuffixIndexedFields))
 	}
 	if acS.ExistsIndexedFields != nil {
-		cln.ExistsIndexedFields = utils.SliceStringPointer(utils.CloneStringSlice(*acS.ExistsIndexedFields))
+		cln.ExistsIndexedFields = utils.SliceStringPointer(slices.Clone(*acS.ExistsIndexedFields))
 	}
 	if acS.NotExistsIndexedFields != nil {
-		cln.NotExistsIndexedFields = utils.SliceStringPointer(utils.CloneStringSlice(*acS.NotExistsIndexedFields))
+		cln.NotExistsIndexedFields = utils.SliceStringPointer(slices.Clone(*acS.NotExistsIndexedFields))
 	}
 	return
 }
@@ -287,13 +288,13 @@ func diffAccountSJsonCfg(d *AccountSJsonCfg, v1, v2 *AccountSCfg) *AccountSJsonC
 	if v1.Enabled != v2.Enabled {
 		d.Enabled = utils.BoolPointer(v2.Enabled)
 	}
-	if !utils.SliceStringEqual(v1.AttributeSConns, v2.AttributeSConns) {
+	if !slices.Equal(v1.AttributeSConns, v2.AttributeSConns) {
 		d.Attributes_conns = utils.SliceStringPointer(getInternalJSONConns(v2.AttributeSConns))
 	}
-	if !utils.SliceStringEqual(v1.RateSConns, v2.RateSConns) {
+	if !slices.Equal(v1.RateSConns, v2.RateSConns) {
 		d.Rates_conns = utils.SliceStringPointer(getInternalJSONConns(v2.RateSConns))
 	}
-	if !utils.SliceStringEqual(v1.ThresholdSConns, v2.ThresholdSConns) {
+	if !slices.Equal(v1.ThresholdSConns, v2.ThresholdSConns) {
 		d.Thresholds_conns = utils.SliceStringPointer(getInternalJSONConns(v2.ThresholdSConns))
 	}
 	if v1.IndexedSelects != v2.IndexedSelects {

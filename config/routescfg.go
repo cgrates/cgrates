@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package config
 
 import (
+	"slices"
 	"time"
 
 	"github.com/cgrates/birpc/context"
@@ -122,19 +123,19 @@ func (rts *RouteSCfg) loadFromJSONCfg(jsnCfg *RouteSJsonCfg) (err error) {
 		rts.IndexedSelects = *jsnCfg.Indexed_selects
 	}
 	if jsnCfg.String_indexed_fields != nil {
-		rts.StringIndexedFields = utils.SliceStringPointer(utils.CloneStringSlice(*jsnCfg.String_indexed_fields))
+		rts.StringIndexedFields = utils.SliceStringPointer(slices.Clone(*jsnCfg.String_indexed_fields))
 	}
 	if jsnCfg.Prefix_indexed_fields != nil {
-		rts.PrefixIndexedFields = utils.SliceStringPointer(utils.CloneStringSlice(*jsnCfg.Prefix_indexed_fields))
+		rts.PrefixIndexedFields = utils.SliceStringPointer(slices.Clone(*jsnCfg.Prefix_indexed_fields))
 	}
 	if jsnCfg.Suffix_indexed_fields != nil {
-		rts.SuffixIndexedFields = utils.SliceStringPointer(utils.CloneStringSlice(*jsnCfg.Suffix_indexed_fields))
+		rts.SuffixIndexedFields = utils.SliceStringPointer(slices.Clone(*jsnCfg.Suffix_indexed_fields))
 	}
 	if jsnCfg.Exists_indexed_fields != nil {
-		rts.ExistsIndexedFields = utils.SliceStringPointer(utils.CloneStringSlice(*jsnCfg.Exists_indexed_fields))
+		rts.ExistsIndexedFields = utils.SliceStringPointer(slices.Clone(*jsnCfg.Exists_indexed_fields))
 	}
 	if jsnCfg.Notexists_indexed_fields != nil {
-		rts.NotExistsIndexedFields = utils.SliceStringPointer(utils.CloneStringSlice(*jsnCfg.Notexists_indexed_fields))
+		rts.NotExistsIndexedFields = utils.SliceStringPointer(slices.Clone(*jsnCfg.Notexists_indexed_fields))
 	}
 	if jsnCfg.Attributes_conns != nil {
 		rts.AttributeSConns = updateInternalConns(*jsnCfg.Attributes_conns, utils.MetaAttributes)
@@ -229,19 +230,19 @@ func (rts RouteSCfg) AsMapInterface(string) any {
 		utils.OptsCfg:           opts,
 	}
 	if rts.StringIndexedFields != nil {
-		mp[utils.StringIndexedFieldsCfg] = utils.CloneStringSlice(*rts.StringIndexedFields)
+		mp[utils.StringIndexedFieldsCfg] = slices.Clone(*rts.StringIndexedFields)
 	}
 	if rts.PrefixIndexedFields != nil {
-		mp[utils.PrefixIndexedFieldsCfg] = utils.CloneStringSlice(*rts.PrefixIndexedFields)
+		mp[utils.PrefixIndexedFieldsCfg] = slices.Clone(*rts.PrefixIndexedFields)
 	}
 	if rts.SuffixIndexedFields != nil {
-		mp[utils.SuffixIndexedFieldsCfg] = utils.CloneStringSlice(*rts.SuffixIndexedFields)
+		mp[utils.SuffixIndexedFieldsCfg] = slices.Clone(*rts.SuffixIndexedFields)
 	}
 	if rts.ExistsIndexedFields != nil {
-		mp[utils.ExistsIndexedFieldsCfg] = utils.CloneStringSlice(*rts.ExistsIndexedFields)
+		mp[utils.ExistsIndexedFieldsCfg] = slices.Clone(*rts.ExistsIndexedFields)
 	}
 	if rts.NotExistsIndexedFields != nil {
-		mp[utils.NotExistsIndexedFieldsCfg] = utils.CloneStringSlice(*rts.NotExistsIndexedFields)
+		mp[utils.NotExistsIndexedFieldsCfg] = slices.Clone(*rts.NotExistsIndexedFields)
 	}
 	if rts.AttributeSConns != nil {
 		mp[utils.AttributeSConnsCfg] = getInternalJSONConns(rts.AttributeSConns)
@@ -274,34 +275,34 @@ func (rts RouteSCfg) Clone() (cln *RouteSCfg) {
 		Opts:           rts.Opts.Clone(),
 	}
 	if rts.AttributeSConns != nil {
-		cln.AttributeSConns = utils.CloneStringSlice(rts.AttributeSConns)
+		cln.AttributeSConns = slices.Clone(rts.AttributeSConns)
 	}
 	if rts.ResourceSConns != nil {
-		cln.ResourceSConns = utils.CloneStringSlice(rts.ResourceSConns)
+		cln.ResourceSConns = slices.Clone(rts.ResourceSConns)
 	}
 	if rts.StatSConns != nil {
-		cln.StatSConns = utils.CloneStringSlice(rts.StatSConns)
+		cln.StatSConns = slices.Clone(rts.StatSConns)
 	}
 	if rts.RateSConns != nil {
-		cln.RateSConns = utils.CloneStringSlice(rts.RateSConns)
+		cln.RateSConns = slices.Clone(rts.RateSConns)
 	}
 	if rts.AccountSConns != nil {
-		cln.AccountSConns = utils.CloneStringSlice(rts.AccountSConns)
+		cln.AccountSConns = slices.Clone(rts.AccountSConns)
 	}
 	if rts.StringIndexedFields != nil {
-		cln.StringIndexedFields = utils.SliceStringPointer(utils.CloneStringSlice(*rts.StringIndexedFields))
+		cln.StringIndexedFields = utils.SliceStringPointer(slices.Clone(*rts.StringIndexedFields))
 	}
 	if rts.PrefixIndexedFields != nil {
-		cln.PrefixIndexedFields = utils.SliceStringPointer(utils.CloneStringSlice(*rts.PrefixIndexedFields))
+		cln.PrefixIndexedFields = utils.SliceStringPointer(slices.Clone(*rts.PrefixIndexedFields))
 	}
 	if rts.SuffixIndexedFields != nil {
-		cln.SuffixIndexedFields = utils.SliceStringPointer(utils.CloneStringSlice(*rts.SuffixIndexedFields))
+		cln.SuffixIndexedFields = utils.SliceStringPointer(slices.Clone(*rts.SuffixIndexedFields))
 	}
 	if rts.ExistsIndexedFields != nil {
-		cln.ExistsIndexedFields = utils.SliceStringPointer(utils.CloneStringSlice(*rts.ExistsIndexedFields))
+		cln.ExistsIndexedFields = utils.SliceStringPointer(slices.Clone(*rts.ExistsIndexedFields))
 	}
 	if rts.NotExistsIndexedFields != nil {
-		cln.NotExistsIndexedFields = utils.SliceStringPointer(utils.CloneStringSlice(*rts.NotExistsIndexedFields))
+		cln.NotExistsIndexedFields = utils.SliceStringPointer(slices.Clone(*rts.NotExistsIndexedFields))
 	}
 	return
 }
@@ -385,19 +386,19 @@ func diffRouteSJsonCfg(d *RouteSJsonCfg, v1, v2 *RouteSCfg) *RouteSJsonCfg {
 	if v1.NestedFields != v2.NestedFields {
 		d.Nested_fields = utils.BoolPointer(v2.NestedFields)
 	}
-	if !utils.SliceStringEqual(v1.AttributeSConns, v2.AttributeSConns) {
+	if !slices.Equal(v1.AttributeSConns, v2.AttributeSConns) {
 		d.Attributes_conns = utils.SliceStringPointer(getInternalJSONConns(v2.AttributeSConns))
 	}
-	if !utils.SliceStringEqual(v1.ResourceSConns, v2.ResourceSConns) {
+	if !slices.Equal(v1.ResourceSConns, v2.ResourceSConns) {
 		d.Resources_conns = utils.SliceStringPointer(getInternalJSONConns(v2.ResourceSConns))
 	}
-	if !utils.SliceStringEqual(v1.StatSConns, v2.StatSConns) {
+	if !slices.Equal(v1.StatSConns, v2.StatSConns) {
 		d.Stats_conns = utils.SliceStringPointer(getInternalJSONConns(v2.StatSConns))
 	}
-	if !utils.SliceStringEqual(v1.RateSConns, v2.RateSConns) {
+	if !slices.Equal(v1.RateSConns, v2.RateSConns) {
 		d.Rates_conns = utils.SliceStringPointer(getInternalJSONConns(v2.RateSConns))
 	}
-	if !utils.SliceStringEqual(v1.AccountSConns, v2.AccountSConns) {
+	if !slices.Equal(v1.AccountSConns, v2.AccountSConns) {
 		d.Accounts_conns = utils.SliceStringPointer(getInternalJSONConns(v2.AccountSConns))
 	}
 	if v1.DefaultRatio != v2.DefaultRatio {

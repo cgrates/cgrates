@@ -20,6 +20,7 @@ package agents
 
 import (
 	"encoding/json"
+	"slices"
 	"strings"
 
 	"github.com/cgrates/cgrates/config"
@@ -85,12 +86,12 @@ type KamEvent map[string]string
 func (kev KamEvent) MissingParameter() bool {
 	switch kev[EVENT] {
 	case CGR_AUTH_REQUEST:
-		return utils.IsSliceMember([]string{
+		return slices.Contains([]string{
 			kev[KamTRIndex],
 			kev[KamTRLabel],
 		}, "")
 	case CGR_CALL_START:
-		return utils.IsSliceMember([]string{
+		return slices.Contains([]string{
 			kev[KamHashEntry],
 			kev[KamHashID],
 			kev[utils.OriginID],
@@ -99,7 +100,7 @@ func (kev KamEvent) MissingParameter() bool {
 			kev[utils.Destination],
 		}, "")
 	case CGR_CALL_END:
-		return utils.IsSliceMember([]string{
+		return slices.Contains([]string{
 			kev[utils.OriginID],
 			kev[utils.AnswerTime],
 			kev[utils.AccountField],
@@ -117,10 +118,10 @@ func (kev KamEvent) MissingParameter() bool {
 				kev[utils.AccountField],
 				kev[utils.Destination])
 		}
-		return utils.IsSliceMember(mndPrm, "")
+		return slices.Contains(mndPrm, "")
 	case CGR_PROCESS_CDR:
 		// TRIndex and TRLabel must exist in order to know where to send back the response
-		return utils.IsSliceMember([]string{
+		return slices.Contains([]string{
 			kev[KamTRIndex],
 			kev[KamTRLabel],
 			kev[utils.OriginID],

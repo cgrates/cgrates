@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package utils
 
 import (
+	"slices"
 	"strconv"
 	"strings"
 )
@@ -105,7 +106,7 @@ func (fWp FlagParams) Clone() (cln FlagParams) {
 	for flg, params := range fWp {
 		var cprm []string
 		if params != nil {
-			cprm = CloneStringSlice(params)
+			cprm = slices.Clone(params)
 		}
 		cln[flg] = cprm
 	}

@@ -23,6 +23,7 @@ import (
 	"math"
 	"os"
 	"path"
+	"slices"
 	"strings"
 
 	"github.com/cgrates/cgrates/utils"
@@ -450,10 +451,10 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 				return fmt.Errorf("<%s> template with ID <%s> has connection with id: <%s> not defined", utils.HTTPAgent, httpAgentCfg.ID, connID)
 			}
 		}
-		if !utils.SliceHasMember([]string{utils.MetaUrl, utils.MetaXml}, httpAgentCfg.RequestPayload) {
+		if !slices.Contains([]string{utils.MetaUrl, utils.MetaXml}, httpAgentCfg.RequestPayload) {
 			return fmt.Errorf("<%s> unsupported request payload %s", utils.HTTPAgent, httpAgentCfg.RequestPayload)
 		}
-		if !utils.SliceHasMember([]string{utils.MetaTextPlain, utils.MetaXml}, httpAgentCfg.ReplyPayload) {
+		if !slices.Contains([]string{utils.MetaTextPlain, utils.MetaXml}, httpAgentCfg.ReplyPayload) {
 			return fmt.Errorf("<%s> unsupported reply payload %s", utils.HTTPAgent, httpAgentCfg.ReplyPayload)
 		}
 		for _, req := range httpAgentCfg.RequestProcessors {
@@ -746,7 +747,7 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 				}
 				// The following sanity check prevents a "slice bounds out of range" panic.
 				if rdr.Type == utils.MetaFileXML && len(field.Value) != 0 &&
-					!utils.IsSliceMember([]string{utils.MetaNone, utils.MetaConstant}, field.Type) {
+					!slices.Contains([]string{utils.MetaNone, utils.MetaConstant}, field.Type) {
 
 					// Find the minimum rule length for dynamic RSRParser within the field value.
 					minRuleLength := math.MaxInt
@@ -857,7 +858,7 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 
 	// StorDB sanity checks
 	if cfg.storDbCfg.Type == utils.Postgres {
-		if !utils.IsSliceMember([]string{utils.PostgresSSLModeDisable, utils.PostgresSSLModeAllow,
+		if !slices.Contains([]string{utils.PostgresSSLModeDisable, utils.PostgresSSLModeAllow,
 			utils.PostgresSSLModePrefer, utils.PostgresSSLModeRequire, utils.PostgresSSLModeVerifyCa,
 			utils.PostgresSSLModeVerifyFull}, cfg.storDbCfg.Opts.PgSSLMode) {
 			return fmt.Errorf("<%s> unsupported ssl mode for storDB", utils.StorDB)
@@ -1006,7 +1007,7 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 		}
 		for tnt, hosts := range cfg.registrarCCfg.Dispatchers.Hosts {
 			for _, host := range hosts {
-				if !utils.SliceHasMember([]string{utils.MetaGOB, rpcclient.HTTPjson, utils.MetaJSON, rpcclient.BiRPCJSON, rpcclient.BiRPCGOB}, host.Transport) {
+				if !slices.Contains([]string{utils.MetaGOB, rpcclient.HTTPjson, utils.MetaJSON, rpcclient.BiRPCJSON, rpcclient.BiRPCGOB}, host.Transport) {
 					return fmt.Errorf("<%s> unsupported transport <%s> for host <%s>", utils.RegistrarC, host.Transport, utils.ConcatenatedKey(tnt, host.ID))
 				}
 			}
@@ -1037,7 +1038,7 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 		}
 		for tnt, hosts := range cfg.registrarCCfg.RPC.Hosts {
 			for _, host := range hosts {
-				if !utils.SliceHasMember([]string{utils.MetaGOB, rpcclient.HTTPjson, utils.MetaJSON, rpcclient.BiRPCJSON, rpcclient.BiRPCGOB}, host.Transport) {
+				if !slices.Contains([]string{utils.MetaGOB, rpcclient.HTTPjson, utils.MetaJSON, rpcclient.BiRPCJSON, rpcclient.BiRPCGOB}, host.Transport) {
 					return fmt.Errorf("<%s> unsupported transport <%s> for host <%s>", utils.RegistrarC, host.Transport, utils.ConcatenatedKey(tnt, host.ID))
 				}
 			}

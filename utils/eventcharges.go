@@ -18,6 +18,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package utils
 
+import "slices"
+
 // NewEventChargers instantiates the EventChargers in a central place
 func NewEventCharges() (ec *EventCharges) {
 	ec = &EventCharges{
@@ -330,10 +332,10 @@ func (ac *AccountCharge) Clone() *AccountCharge {
 		cln.BalanceLimit = ac.BalanceLimit.Clone()
 	}
 	if ac.AttributeIDs != nil {
-		cln.AttributeIDs = CloneStringSlice(ac.AttributeIDs)
+		cln.AttributeIDs = slices.Clone(ac.AttributeIDs)
 	}
 	if ac.JoinedChargeIDs != nil {
-		cln.JoinedChargeIDs = CloneStringSlice(ac.JoinedChargeIDs)
+		cln.JoinedChargeIDs = slices.Clone(ac.JoinedChargeIDs)
 	}
 	return cln
 }

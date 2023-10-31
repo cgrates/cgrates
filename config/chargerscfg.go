@@ -19,6 +19,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package config
 
 import (
+	"slices"
+
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -59,19 +61,19 @@ func (cS *ChargerSCfg) loadFromJSONCfg(jsnCfg *ChargerSJsonCfg) (err error) {
 		cS.AttributeSConns = updateInternalConns(*jsnCfg.Attributes_conns, utils.MetaAttributes)
 	}
 	if jsnCfg.String_indexed_fields != nil {
-		cS.StringIndexedFields = utils.SliceStringPointer(utils.CloneStringSlice(*jsnCfg.String_indexed_fields))
+		cS.StringIndexedFields = utils.SliceStringPointer(slices.Clone(*jsnCfg.String_indexed_fields))
 	}
 	if jsnCfg.Prefix_indexed_fields != nil {
-		cS.PrefixIndexedFields = utils.SliceStringPointer(utils.CloneStringSlice(*jsnCfg.Prefix_indexed_fields))
+		cS.PrefixIndexedFields = utils.SliceStringPointer(slices.Clone(*jsnCfg.Prefix_indexed_fields))
 	}
 	if jsnCfg.Suffix_indexed_fields != nil {
-		cS.SuffixIndexedFields = utils.SliceStringPointer(utils.CloneStringSlice(*jsnCfg.Suffix_indexed_fields))
+		cS.SuffixIndexedFields = utils.SliceStringPointer(slices.Clone(*jsnCfg.Suffix_indexed_fields))
 	}
 	if jsnCfg.Exists_indexed_fields != nil {
-		cS.ExistsIndexedFields = utils.SliceStringPointer(utils.CloneStringSlice(*jsnCfg.Exists_indexed_fields))
+		cS.ExistsIndexedFields = utils.SliceStringPointer(slices.Clone(*jsnCfg.Exists_indexed_fields))
 	}
 	if jsnCfg.Notexists_indexed_fields != nil {
-		cS.NotExistsIndexedFields = utils.SliceStringPointer(utils.CloneStringSlice(*jsnCfg.Notexists_indexed_fields))
+		cS.NotExistsIndexedFields = utils.SliceStringPointer(slices.Clone(*jsnCfg.Notexists_indexed_fields))
 	}
 	if jsnCfg.Nested_fields != nil {
 		cS.NestedFields = *jsnCfg.Nested_fields
@@ -90,19 +92,19 @@ func (cS ChargerSCfg) AsMapInterface(string) any {
 		mp[utils.AttributeSConnsCfg] = getInternalJSONConns(cS.AttributeSConns)
 	}
 	if cS.StringIndexedFields != nil {
-		mp[utils.StringIndexedFieldsCfg] = utils.CloneStringSlice(*cS.StringIndexedFields)
+		mp[utils.StringIndexedFieldsCfg] = slices.Clone(*cS.StringIndexedFields)
 	}
 	if cS.PrefixIndexedFields != nil {
-		mp[utils.PrefixIndexedFieldsCfg] = utils.CloneStringSlice(*cS.PrefixIndexedFields)
+		mp[utils.PrefixIndexedFieldsCfg] = slices.Clone(*cS.PrefixIndexedFields)
 	}
 	if cS.SuffixIndexedFields != nil {
-		mp[utils.SuffixIndexedFieldsCfg] = utils.CloneStringSlice(*cS.SuffixIndexedFields)
+		mp[utils.SuffixIndexedFieldsCfg] = slices.Clone(*cS.SuffixIndexedFields)
 	}
 	if cS.ExistsIndexedFields != nil {
-		mp[utils.ExistsIndexedFieldsCfg] = utils.CloneStringSlice(*cS.ExistsIndexedFields)
+		mp[utils.ExistsIndexedFieldsCfg] = slices.Clone(*cS.ExistsIndexedFields)
 	}
 	if cS.NotExistsIndexedFields != nil {
-		mp[utils.NotExistsIndexedFieldsCfg] = utils.CloneStringSlice(*cS.NotExistsIndexedFields)
+		mp[utils.NotExistsIndexedFieldsCfg] = slices.Clone(*cS.NotExistsIndexedFields)
 	}
 	return mp
 }
@@ -118,23 +120,23 @@ func (cS ChargerSCfg) Clone() (cln *ChargerSCfg) {
 		NestedFields:   cS.NestedFields,
 	}
 	if cS.AttributeSConns != nil {
-		cln.AttributeSConns = utils.CloneStringSlice(cS.AttributeSConns)
+		cln.AttributeSConns = slices.Clone(cS.AttributeSConns)
 	}
 
 	if cS.StringIndexedFields != nil {
-		cln.StringIndexedFields = utils.SliceStringPointer(utils.CloneStringSlice(*cS.StringIndexedFields))
+		cln.StringIndexedFields = utils.SliceStringPointer(slices.Clone(*cS.StringIndexedFields))
 	}
 	if cS.PrefixIndexedFields != nil {
-		cln.PrefixIndexedFields = utils.SliceStringPointer(utils.CloneStringSlice(*cS.PrefixIndexedFields))
+		cln.PrefixIndexedFields = utils.SliceStringPointer(slices.Clone(*cS.PrefixIndexedFields))
 	}
 	if cS.SuffixIndexedFields != nil {
-		cln.SuffixIndexedFields = utils.SliceStringPointer(utils.CloneStringSlice(*cS.SuffixIndexedFields))
+		cln.SuffixIndexedFields = utils.SliceStringPointer(slices.Clone(*cS.SuffixIndexedFields))
 	}
 	if cS.ExistsIndexedFields != nil {
-		cln.ExistsIndexedFields = utils.SliceStringPointer(utils.CloneStringSlice(*cS.ExistsIndexedFields))
+		cln.ExistsIndexedFields = utils.SliceStringPointer(slices.Clone(*cS.ExistsIndexedFields))
 	}
 	if cS.NotExistsIndexedFields != nil {
-		cln.NotExistsIndexedFields = utils.SliceStringPointer(utils.CloneStringSlice(*cS.NotExistsIndexedFields))
+		cln.NotExistsIndexedFields = utils.SliceStringPointer(slices.Clone(*cS.NotExistsIndexedFields))
 	}
 	return
 }
@@ -162,7 +164,7 @@ func diffChargerSJsonCfg(d *ChargerSJsonCfg, v1, v2 *ChargerSCfg) *ChargerSJsonC
 	if v1.IndexedSelects != v2.IndexedSelects {
 		d.Indexed_selects = utils.BoolPointer(v2.IndexedSelects)
 	}
-	if !utils.SliceStringEqual(v1.AttributeSConns, v2.AttributeSConns) {
+	if !slices.Equal(v1.AttributeSConns, v2.AttributeSConns) {
 		d.Attributes_conns = utils.SliceStringPointer(getInternalJSONConns(v2.AttributeSConns))
 	}
 	d.String_indexed_fields = diffIndexSlice(d.String_indexed_fields, v1.StringIndexedFields, v2.StringIndexedFields)

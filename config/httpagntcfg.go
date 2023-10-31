@@ -19,6 +19,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package config
 
 import (
+	"slices"
+
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/rpcclient"
@@ -198,7 +200,7 @@ func diffHttpAgentJsonCfg(d *HttpAgentJsonCfg, v1, v2 *HTTPAgentCfg, separator s
 	if v1.ReplyPayload != v2.ReplyPayload {
 		d.Reply_payload = utils.StringPointer(v2.ReplyPayload)
 	}
-	if !utils.SliceStringEqual(v1.SessionSConns, v2.SessionSConns) {
+	if !slices.Equal(v1.SessionSConns, v2.SessionSConns) {
 		d.Sessions_conns = utils.SliceStringPointer(getBiRPCInternalJSONConns(v2.SessionSConns))
 	}
 
@@ -213,7 +215,7 @@ func equalsHTTPAgentCfgs(v1, v2 HTTPAgentCfgs) bool {
 	for i := range v2 {
 		if v1[i].ID != v2[i].ID ||
 			v1[i].URL != v2[i].URL ||
-			!utils.SliceStringEqual(v1[i].SessionSConns, v2[i].SessionSConns) ||
+			!slices.Equal(v1[i].SessionSConns, v2[i].SessionSConns) ||
 			v1[i].RequestPayload != v2[i].RequestPayload ||
 			v1[i].ReplyPayload != v2[i].ReplyPayload ||
 			!equalsRequestProcessors(v1[i].RequestProcessors, v2[i].RequestProcessors) {

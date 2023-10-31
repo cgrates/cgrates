@@ -20,6 +20,7 @@ package config
 
 import (
 	"fmt"
+	"slices"
 	"strings"
 
 	"github.com/cgrates/birpc/context"
@@ -79,7 +80,7 @@ func (mg *MigratorCgrCfg) loadFromJSONCfg(jsnCfg *MigratorCfgJson) (err error) {
 		mg.OutDataDBEncoding = strings.TrimPrefix(*jsnCfg.Out_dataDB_encoding, "*")
 	}
 	if jsnCfg.Users_filters != nil && len(*jsnCfg.Users_filters) != 0 {
-		mg.UsersFilters = utils.CloneStringSlice(*jsnCfg.Users_filters)
+		mg.UsersFilters = slices.Clone(*jsnCfg.Users_filters)
 	}
 	if jsnCfg.Out_dataDB_opts != nil {
 		err = mg.OutDataDBOpts.loadFromJSONCfg(jsnCfg.Out_dataDB_opts)
@@ -114,7 +115,7 @@ func (mg MigratorCgrCfg) AsMapInterface(string) any {
 		utils.OutDataDBPasswordCfg: mg.OutDataDBPassword,
 		utils.OutDataDBEncodingCfg: mg.OutDataDBEncoding,
 		utils.OutDataDBOptsCfg:     outDataDBOpts,
-		utils.UsersFiltersCfg:      utils.CloneStringSlice(mg.UsersFilters),
+		utils.UsersFiltersCfg:      slices.Clone(mg.UsersFilters),
 	}
 }
 
@@ -135,7 +136,7 @@ func (mg MigratorCgrCfg) Clone() (cln *MigratorCgrCfg) {
 		OutDataDBOpts: mg.OutDataDBOpts.Clone(),
 	}
 	if mg.UsersFilters != nil {
-		cln.UsersFilters = utils.CloneStringSlice(mg.UsersFilters)
+		cln.UsersFilters = slices.Clone(mg.UsersFilters)
 	}
 	return
 }
@@ -178,8 +179,8 @@ func diffMigratorCfgJson(d *MigratorCfgJson, v1, v2 *MigratorCgrCfg) *MigratorCf
 		d.Out_dataDB_encoding = utils.StringPointer(v2.OutDataDBEncoding)
 	}
 
-	if !utils.SliceStringEqual(v1.UsersFilters, v2.UsersFilters) {
-		d.Users_filters = utils.SliceStringPointer(utils.CloneStringSlice(v2.UsersFilters))
+	if !slices.Equal(v1.UsersFilters, v2.UsersFilters) {
+		d.Users_filters = utils.SliceStringPointer(slices.Clone(v2.UsersFilters))
 	}
 	d.Out_dataDB_opts = diffDataDBOptsJsonCfg(d.Out_dataDB_opts, v1.OutDataDBOpts, v2.OutDataDBOpts)
 	return d

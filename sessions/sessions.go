@@ -23,6 +23,7 @@ import (
 	"fmt"
 	"math/rand"
 	"runtime"
+	"slices"
 	"strings"
 	"sync"
 	"time"
@@ -1402,7 +1403,7 @@ func (sS *SessionS) chargeEvent(ctx *context.Context, cgrEv *utils.CGREvent, for
 	}
 	ev := engine.MapEvent(cgrEv.Event)
 	usage := maxUsage
-	if utils.SliceHasMember(utils.PostPaidRatedSlice, ev.GetStringIgnoreErrors(utils.RequestType)) {
+	if slices.Contains(utils.PostPaidRatedSlice, ev.GetStringIgnoreErrors(utils.RequestType)) {
 		usage = ev.GetDurationIgnoreErrors(utils.Usage)
 	}
 	//in case of postpaid and rated maxUsage = usage from event

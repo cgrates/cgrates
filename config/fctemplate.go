@@ -20,6 +20,7 @@ package config
 
 import (
 	"fmt"
+	"slices"
 	"time"
 
 	"github.com/cgrates/birpc/context"
@@ -42,7 +43,7 @@ func NewFCTemplateFromFCTemplateJSONCfg(jsnCfg *FcTemplateJsonCfg, separator str
 		fcTmp.Tag = *jsnCfg.Tag
 	}
 	if jsnCfg.Filters != nil {
-		fcTmp.Filters = utils.CloneStringSlice(*jsnCfg.Filters)
+		fcTmp.Filters = slices.Clone(*jsnCfg.Filters)
 	}
 	if jsnCfg.Value != nil {
 		if fcTmp.Value, err = NewRSRParsers(*jsnCfg.Value, separator); err != nil {
@@ -183,10 +184,10 @@ func (fc FCTemplate) Clone() (cln *FCTemplate) {
 		cln.RoundingDecimals = utils.IntPointer(*fc.RoundingDecimals)
 	}
 	if fc.pathSlice != nil {
-		cln.pathSlice = utils.CloneStringSlice(fc.pathSlice)
+		cln.pathSlice = slices.Clone(fc.pathSlice)
 	}
 	if fc.Filters != nil {
-		cln.Filters = utils.CloneStringSlice(fc.Filters)
+		cln.Filters = slices.Clone(fc.Filters)
 	}
 	return
 }
@@ -312,8 +313,8 @@ func (fc *FCTemplate) Equals(fc2 *FCTemplate) bool {
 			fc.Tag == fc2.Tag &&
 			fc.Type == fc2.Type &&
 			fc.Path == fc2.Path &&
-			utils.SliceStringEqual(fc.Filters, fc2.Filters) &&
-			utils.SliceStringEqual(fc.Value.AsStringSlice(), fc2.Value.AsStringSlice()) &&
+			slices.Equal(fc.Filters, fc2.Filters) &&
+			slices.Equal(fc.Value.AsStringSlice(), fc2.Value.AsStringSlice()) &&
 			fc.Width == fc2.Width &&
 			fc.Strip == fc2.Strip &&
 			fc.Padding == fc2.Padding &&

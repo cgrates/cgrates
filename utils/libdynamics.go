@@ -18,6 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package utils
 
 import (
+	"slices"
 	"time"
 
 	"github.com/ericlagergren/decimal"
@@ -88,7 +89,7 @@ func CloneDynamicStringSliceOpt(in []*DynamicStringSliceOpt) (cl []*DynamicStrin
 	for i, val := range in {
 		cl[i] = &DynamicStringSliceOpt{
 			Tenant:    val.Tenant,
-			FilterIDs: CloneStringSlice(val.FilterIDs),
+			FilterIDs: slices.Clone(val.FilterIDs),
 			Value:     val.Value,
 		}
 	}
@@ -100,7 +101,7 @@ func CloneDynamicStringOpt(in []*DynamicStringOpt) (cl []*DynamicStringOpt) {
 	for i, val := range in {
 		cl[i] = &DynamicStringOpt{
 			Tenant:    val.Tenant,
-			FilterIDs: CloneStringSlice(val.FilterIDs),
+			FilterIDs: slices.Clone(val.FilterIDs),
 			Value:     val.Value,
 		}
 	}
@@ -112,7 +113,7 @@ func CloneDynamicInterfaceOpt(in []*DynamicInterfaceOpt) (cl []*DynamicInterface
 	for i, val := range in {
 		cl[i] = &DynamicInterfaceOpt{
 			Tenant:    val.Tenant,
-			FilterIDs: CloneStringSlice(val.FilterIDs),
+			FilterIDs: slices.Clone(val.FilterIDs),
 			Value:     val.Value,
 		}
 	}
@@ -124,7 +125,7 @@ func CloneDynamicBoolOpt(in []*DynamicBoolOpt) (cl []*DynamicBoolOpt) {
 	for i, val := range in {
 		cl[i] = &DynamicBoolOpt{
 			Tenant:    val.Tenant,
-			FilterIDs: CloneStringSlice(val.FilterIDs),
+			FilterIDs: slices.Clone(val.FilterIDs),
 			Value:     val.Value,
 		}
 	}
@@ -136,7 +137,7 @@ func CloneDynamicIntOpt(in []*DynamicIntOpt) (cl []*DynamicIntOpt) {
 	for i, val := range in {
 		cl[i] = &DynamicIntOpt{
 			Tenant:    val.Tenant,
-			FilterIDs: CloneStringSlice(val.FilterIDs),
+			FilterIDs: slices.Clone(val.FilterIDs),
 			Value:     val.Value,
 		}
 	}
@@ -148,7 +149,7 @@ func CloneDynamicFloat64Opt(in []*DynamicFloat64Opt) (cl []*DynamicFloat64Opt) {
 	for i, val := range in {
 		cl[i] = &DynamicFloat64Opt{
 			Tenant:    val.Tenant,
-			FilterIDs: CloneStringSlice(val.FilterIDs),
+			FilterIDs: slices.Clone(val.FilterIDs),
 			Value:     val.Value,
 		}
 	}
@@ -160,7 +161,7 @@ func CloneDynamicDurationOpt(in []*DynamicDurationOpt) (cl []*DynamicDurationOpt
 	for i, val := range in {
 		cl[i] = &DynamicDurationOpt{
 			Tenant:    val.Tenant,
-			FilterIDs: CloneStringSlice(val.FilterIDs),
+			FilterIDs: slices.Clone(val.FilterIDs),
 			Value:     val.Value,
 		}
 	}
@@ -172,7 +173,7 @@ func CloneDynamicDecimalBigOpt(in []*DynamicDecimalBigOpt) (cl []*DynamicDecimal
 	for i, val := range in {
 		cl[i] = &DynamicDecimalBigOpt{
 			Tenant:    val.Tenant,
-			FilterIDs: CloneStringSlice(val.FilterIDs),
+			FilterIDs: slices.Clone(val.FilterIDs),
 			Value:     CloneDecimalBig(val.Value),
 		}
 	}
@@ -184,7 +185,7 @@ func CloneDynamicIntPointerOpt(in []*DynamicIntPointerOpt) (cl []*DynamicIntPoin
 	for i, val := range in {
 		cl[i] = &DynamicIntPointerOpt{
 			Tenant:    val.Tenant,
-			FilterIDs: CloneStringSlice(val.FilterIDs),
+			FilterIDs: slices.Clone(val.FilterIDs),
 			Value:     IntPointer(*val.Value),
 		}
 	}
@@ -196,7 +197,7 @@ func CloneDynamicDurationPointerOpt(in []*DynamicDurationPointerOpt) (cl []*Dyna
 	for i, val := range in {
 		cl[i] = &DynamicDurationPointerOpt{
 			Tenant:    val.Tenant,
-			FilterIDs: CloneStringSlice(val.FilterIDs),
+			FilterIDs: slices.Clone(val.FilterIDs),
 			Value:     DurationPointer(*val.Value),
 		}
 	}
@@ -211,10 +212,10 @@ func DynamicStringSliceOptEqual(v1, v2 []*DynamicStringSliceOpt) bool {
 		if v1[i].Tenant != v2[i].Tenant {
 			return false
 		}
-		if !SliceStringEqual(v1[i].FilterIDs, v2[i].FilterIDs) {
+		if !slices.Equal(v1[i].FilterIDs, v2[i].FilterIDs) {
 			return false
 		}
-		if !SliceStringEqual(v1[i].Value, v2[i].Value) {
+		if !slices.Equal(v1[i].Value, v2[i].Value) {
 			return false
 		}
 	}
@@ -229,7 +230,7 @@ func DynamicStringOptEqual(v1, v2 []*DynamicStringOpt) bool {
 		if v1[i].Tenant != v2[i].Tenant {
 			return false
 		}
-		if !SliceStringEqual(v1[i].FilterIDs, v2[i].FilterIDs) {
+		if !slices.Equal(v1[i].FilterIDs, v2[i].FilterIDs) {
 			return false
 		}
 		if v1[i].Value != v2[i].Value {
@@ -247,7 +248,7 @@ func DynamicBoolOptEqual(v1, v2 []*DynamicBoolOpt) bool {
 		if v1[i].Tenant != v2[i].Tenant {
 			return false
 		}
-		if !SliceStringEqual(v1[i].FilterIDs, v2[i].FilterIDs) {
+		if !slices.Equal(v1[i].FilterIDs, v2[i].FilterIDs) {
 			return false
 		}
 		if v1[i].Value != v2[i].Value {
@@ -265,7 +266,7 @@ func DynamicIntOptEqual(v1, v2 []*DynamicIntOpt) bool {
 		if v1[i].Tenant != v2[i].Tenant {
 			return false
 		}
-		if !SliceStringEqual(v1[i].FilterIDs, v2[i].FilterIDs) {
+		if !slices.Equal(v1[i].FilterIDs, v2[i].FilterIDs) {
 			return false
 		}
 		if v1[i].Value != v2[i].Value {
@@ -283,7 +284,7 @@ func DynamicFloat64OptEqual(v1, v2 []*DynamicFloat64Opt) bool {
 		if v1[i].Tenant != v2[i].Tenant {
 			return false
 		}
-		if !SliceStringEqual(v1[i].FilterIDs, v2[i].FilterIDs) {
+		if !slices.Equal(v1[i].FilterIDs, v2[i].FilterIDs) {
 			return false
 		}
 		if v1[i].Value != v2[i].Value {
@@ -301,7 +302,7 @@ func DynamicDurationOptEqual(v1, v2 []*DynamicDurationOpt) bool {
 		if v1[i].Tenant != v2[i].Tenant {
 			return false
 		}
-		if !SliceStringEqual(v1[i].FilterIDs, v2[i].FilterIDs) {
+		if !slices.Equal(v1[i].FilterIDs, v2[i].FilterIDs) {
 			return false
 		}
 		if v1[i].Value != v2[i].Value {
@@ -319,7 +320,7 @@ func DynamicDecimalBigOptEqual(v1, v2 []*DynamicDecimalBigOpt) bool {
 		if v1[i].Tenant != v2[i].Tenant {
 			return false
 		}
-		if !SliceStringEqual(v1[i].FilterIDs, v2[i].FilterIDs) ||
+		if !slices.Equal(v1[i].FilterIDs, v2[i].FilterIDs) ||
 			v1[i].Value.Cmp(v2[i].Value) != 0 {
 			return false
 		}
@@ -335,7 +336,7 @@ func DynamicInterfaceOptEqual(v1, v2 []*DynamicInterfaceOpt) bool {
 		if v1[i].Tenant != v2[i].Tenant {
 			return false
 		}
-		if !SliceStringEqual(v1[i].FilterIDs, v2[i].FilterIDs) {
+		if !slices.Equal(v1[i].FilterIDs, v2[i].FilterIDs) {
 			return false
 		}
 		if v1[i].Value != v2[i].Value {
@@ -353,7 +354,7 @@ func DynamicIntPointerOptEqual(v1, v2 []*DynamicIntPointerOpt) bool {
 		if v1[i].Tenant != v2[i].Tenant {
 			return false
 		}
-		if !SliceStringEqual(v1[i].FilterIDs, v2[i].FilterIDs) {
+		if !slices.Equal(v1[i].FilterIDs, v2[i].FilterIDs) {
 			return false
 		}
 		if *v1[i].Value != *v2[i].Value {
@@ -371,7 +372,7 @@ func DynamicDurationPointerOptEqual(v1, v2 []*DynamicDurationPointerOpt) bool {
 		if v1[i].Tenant != v2[i].Tenant {
 			return false
 		}
-		if !SliceStringEqual(v1[i].FilterIDs, v2[i].FilterIDs) {
+		if !slices.Equal(v1[i].FilterIDs, v2[i].FilterIDs) {
 			return false
 		}
 		if *v1[i].Value != *v2[i].Value {

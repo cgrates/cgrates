@@ -19,6 +19,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package config
 
 import (
+	"slices"
+
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -46,7 +48,7 @@ func (ban *APIBanCfg) loadFromJSONCfg(jsnCfg *APIBanJsonCfg) (err error) {
 		ban.Enabled = *jsnCfg.Enabled
 	}
 	if jsnCfg.Keys != nil {
-		ban.Keys = utils.CloneStringSlice(*jsnCfg.Keys)
+		ban.Keys = slices.Clone(*jsnCfg.Keys)
 	}
 	return nil
 }
@@ -66,7 +68,7 @@ func (ban APIBanCfg) CloneSection() Section { return ban.Clone() }
 func (ban APIBanCfg) Clone() (cln *APIBanCfg) {
 	return &APIBanCfg{
 		Enabled: ban.Enabled,
-		Keys:    utils.CloneStringSlice(ban.Keys),
+		Keys:    slices.Clone(ban.Keys),
 	}
 }
 
@@ -82,7 +84,7 @@ func diffAPIBanJsonCfg(d *APIBanJsonCfg, v1, v2 *APIBanCfg) *APIBanJsonCfg {
 	if v1.Enabled != v2.Enabled {
 		d.Enabled = utils.BoolPointer(v2.Enabled)
 	}
-	if !utils.SliceStringEqual(v1.Keys, v2.Keys) {
+	if !slices.Equal(v1.Keys, v2.Keys) {
 		d.Keys = &v2.Keys
 	}
 	return d

@@ -20,6 +20,7 @@ package config
 
 import (
 	"fmt"
+	"slices"
 	"strconv"
 	"time"
 
@@ -639,37 +640,37 @@ func (scfg SessionSCfg) Clone() (cln *SessionSCfg) {
 		cln.DefaultUsage[k] = v
 	}
 	if scfg.ChargerSConns != nil {
-		cln.ChargerSConns = utils.CloneStringSlice(scfg.ChargerSConns)
+		cln.ChargerSConns = slices.Clone(scfg.ChargerSConns)
 	}
 	if scfg.ResourceSConns != nil {
-		cln.ResourceSConns = utils.CloneStringSlice(scfg.ResourceSConns)
+		cln.ResourceSConns = slices.Clone(scfg.ResourceSConns)
 	}
 	if scfg.ThresholdSConns != nil {
-		cln.ThresholdSConns = utils.CloneStringSlice(scfg.ThresholdSConns)
+		cln.ThresholdSConns = slices.Clone(scfg.ThresholdSConns)
 	}
 	if scfg.StatSConns != nil {
-		cln.StatSConns = utils.CloneStringSlice(scfg.StatSConns)
+		cln.StatSConns = slices.Clone(scfg.StatSConns)
 	}
 	if scfg.RouteSConns != nil {
-		cln.RouteSConns = utils.CloneStringSlice(scfg.RouteSConns)
+		cln.RouteSConns = slices.Clone(scfg.RouteSConns)
 	}
 	if scfg.AttributeSConns != nil {
-		cln.AttributeSConns = utils.CloneStringSlice(scfg.AttributeSConns)
+		cln.AttributeSConns = slices.Clone(scfg.AttributeSConns)
 	}
 	if scfg.CDRsConns != nil {
-		cln.CDRsConns = utils.CloneStringSlice(scfg.CDRsConns)
+		cln.CDRsConns = slices.Clone(scfg.CDRsConns)
 	}
 	if scfg.ReplicationConns != nil {
-		cln.ReplicationConns = utils.CloneStringSlice(scfg.ReplicationConns)
+		cln.ReplicationConns = slices.Clone(scfg.ReplicationConns)
 	}
 	if scfg.ActionSConns != nil {
-		cln.ActionSConns = utils.CloneStringSlice(scfg.ActionSConns)
+		cln.ActionSConns = slices.Clone(scfg.ActionSConns)
 	}
 	if scfg.RateSConns != nil {
-		cln.RateSConns = utils.CloneStringSlice(scfg.RateSConns)
+		cln.RateSConns = slices.Clone(scfg.RateSConns)
 	}
 	if scfg.AccountSConns != nil {
-		cln.AccountSConns = utils.CloneStringSlice(scfg.AccountSConns)
+		cln.AccountSConns = slices.Clone(scfg.AccountSConns)
 	}
 
 	return
@@ -944,34 +945,34 @@ func diffSessionSJsonCfg(d *SessionSJsonCfg, v1, v2 *SessionSCfg) *SessionSJsonC
 	if v1.ListenBigob != v2.ListenBigob {
 		d.Listen_bigob = utils.StringPointer(v2.ListenBigob)
 	}
-	if !utils.SliceStringEqual(v1.ChargerSConns, v2.ChargerSConns) {
+	if !slices.Equal(v1.ChargerSConns, v2.ChargerSConns) {
 		d.Chargers_conns = utils.SliceStringPointer(getInternalJSONConns(v2.ChargerSConns))
 	}
-	if !utils.SliceStringEqual(v1.ResourceSConns, v2.ResourceSConns) {
+	if !slices.Equal(v1.ResourceSConns, v2.ResourceSConns) {
 		d.Resources_conns = utils.SliceStringPointer(getInternalJSONConns(v2.ResourceSConns))
 	}
-	if !utils.SliceStringEqual(v1.ThresholdSConns, v2.ThresholdSConns) {
+	if !slices.Equal(v1.ThresholdSConns, v2.ThresholdSConns) {
 		d.Thresholds_conns = utils.SliceStringPointer(getInternalJSONConns(v2.ThresholdSConns))
 	}
-	if !utils.SliceStringEqual(v1.StatSConns, v2.StatSConns) {
+	if !slices.Equal(v1.StatSConns, v2.StatSConns) {
 		d.Stats_conns = utils.SliceStringPointer(getInternalJSONConns(v2.StatSConns))
 	}
-	if !utils.SliceStringEqual(v1.RouteSConns, v2.RouteSConns) {
+	if !slices.Equal(v1.RouteSConns, v2.RouteSConns) {
 		d.Routes_conns = utils.SliceStringPointer(getInternalJSONConns(v2.RouteSConns))
 	}
-	if !utils.SliceStringEqual(v1.AttributeSConns, v2.AttributeSConns) {
+	if !slices.Equal(v1.AttributeSConns, v2.AttributeSConns) {
 		d.Cdrs_conns = utils.SliceStringPointer(getInternalJSONConns(v2.AttributeSConns))
 	}
-	if !utils.SliceStringEqual(v1.CDRsConns, v2.CDRsConns) {
+	if !slices.Equal(v1.CDRsConns, v2.CDRsConns) {
 		d.Replication_conns = utils.SliceStringPointer(getInternalJSONConns(v2.CDRsConns))
 	}
-	if !utils.SliceStringEqual(v1.ReplicationConns, v2.ReplicationConns) {
+	if !slices.Equal(v1.ReplicationConns, v2.ReplicationConns) {
 		d.Attributes_conns = utils.SliceStringPointer(v2.ReplicationConns)
 	}
-	if !utils.SliceStringEqual(v1.RateSConns, v2.RateSConns) {
+	if !slices.Equal(v1.RateSConns, v2.RateSConns) {
 		d.Rates_conns = utils.SliceStringPointer(getInternalJSONConns(v2.RateSConns))
 	}
-	if !utils.SliceStringEqual(v1.AccountSConns, v2.AccountSConns) {
+	if !slices.Equal(v1.AccountSConns, v2.AccountSConns) {
 		d.Accounts_conns = utils.SliceStringPointer(getInternalJSONConns(v2.AccountSConns))
 	}
 	if v1.StoreSCosts != v2.StoreSCosts {
@@ -995,7 +996,7 @@ func diffSessionSJsonCfg(d *SessionSJsonCfg, v1, v2 *SessionSCfg) *SessionSJsonC
 	if v1.MinDurLowBalance != v2.MinDurLowBalance {
 		d.Min_dur_low_balance = utils.StringPointer(v2.MinDurLowBalance.String())
 	}
-	if !utils.SliceStringEqual(v1.ActionSConns, v2.ActionSConns) {
+	if !slices.Equal(v1.ActionSConns, v2.ActionSConns) {
 		d.Actions_conns = utils.SliceStringPointer(getInternalJSONConns(v2.ActionSConns))
 	}
 	d.Stir = diffSTIRJsonCfg(d.Stir, v1.STIRCfg, v2.STIRCfg)

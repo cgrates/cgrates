@@ -20,6 +20,7 @@ package engine
 
 import (
 	"fmt"
+	"slices"
 	"strconv"
 	"strings"
 
@@ -457,7 +458,7 @@ func (ddc *StatDDC) Clone() StatMetric {
 		Count:       ddc.Count,
 		Events:      make(map[string]map[string]uint64),
 		MinItems:    ddc.MinItems,
-		FilterIDs:   utils.CloneStringSlice(ddc.FilterIDs),
+		FilterIDs:   slices.Clone(ddc.FilterIDs),
 	}
 	for k, v := range ddc.Events {
 		cln.Events[k] = make(map[string]uint64)
@@ -606,7 +607,7 @@ func (sum *Metric) Clone() (cln *Metric) {
 		Count:     sum.Count,
 		Events:    make(map[string]*DecimalWithCompress),
 		MinItems:  sum.MinItems,
-		FilterIDs: utils.CloneStringSlice(sum.FilterIDs),
+		FilterIDs: slices.Clone(sum.FilterIDs),
 	}
 	for k, v := range sum.Events {
 		cln.Events[k] = &(*v)
@@ -836,7 +837,7 @@ func (dst *StatDistinct) Clone() StatMetric {
 		MinItems:    dst.MinItems,
 		FieldName:   dst.FieldName,
 		FieldValues: make(map[string]utils.StringSet),
-		FilterIDs:   utils.CloneStringSlice(dst.FilterIDs),
+		FilterIDs:   slices.Clone(dst.FilterIDs),
 	}
 	for k, v := range dst.Events {
 		cln.Events[k] = make(map[string]uint64)

@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package config
 
 import (
+	"slices"
 	"time"
 
 	"github.com/cgrates/birpc/context"
@@ -101,7 +102,7 @@ func (cS CoreSCfg) Clone() (cln *CoreSCfg) {
 		ShutdownTimeout:   cS.ShutdownTimeout,
 	}
 	if cS.EEsConns != nil {
-		cln.EEsConns = utils.CloneStringSlice(cS.EEsConns)
+		cln.EEsConns = slices.Clone(cS.EEsConns)
 	}
 
 	return
@@ -128,7 +129,7 @@ func diffCoreSJsonCfg(d *CoreSJsonCfg, v1, v2 *CoreSCfg) *CoreSJsonCfg {
 	if v1.CapsStatsInterval != v2.CapsStatsInterval {
 		d.Caps_stats_interval = utils.StringPointer(v2.CapsStatsInterval.String())
 	}
-	if !utils.SliceStringEqual(v1.EEsConns, v2.EEsConns) {
+	if !slices.Equal(v1.EEsConns, v2.EEsConns) {
 		d.Ees_conns = utils.SliceStringPointer(getInternalJSONConns(v2.EEsConns))
 	}
 	if v1.ShutdownTimeout != v2.ShutdownTimeout {

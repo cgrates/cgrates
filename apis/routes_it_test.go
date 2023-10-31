@@ -24,6 +24,7 @@ package apis
 import (
 	"path"
 	"reflect"
+	"slices"
 	"sort"
 	"testing"
 
@@ -342,7 +343,7 @@ func testRoutesGetRouteProfileIDsAfterSet(t *testing.T) {
 		t.Error(err)
 	} else {
 		sort.Strings(replyRouteProfileIDs)
-		if !utils.SliceStringEqual(replyRouteProfileIDs, expectedIDs) {
+		if !slices.Equal(replyRouteProfileIDs, expectedIDs) {
 			t.Errorf("expected: <%+v>, \nreceived: <%+v>", expectedIDs, replyRouteProfileIDs)
 		}
 	}
@@ -356,7 +357,7 @@ func testRoutesGetRouteProfileIDsAfterSet(t *testing.T) {
 		t.Error(err)
 	} else {
 		sort.Strings(replyRouteProfileIDs)
-		if !utils.SliceStringEqual(replyRouteProfileIDs, expectedIDs) {
+		if !slices.Equal(replyRouteProfileIDs, expectedIDs) {
 			t.Errorf("expected: <%+v>, \nreceived: <%+v>", expectedIDs, replyRouteProfileIDs)
 		}
 	}
@@ -370,7 +371,7 @@ func testRoutesGetRouteProfileIDsAfterSet(t *testing.T) {
 		t.Error(err)
 	} else {
 		sort.Strings(replyRouteProfileIDs)
-		if !utils.SliceStringEqual(replyRouteProfileIDs, expectedIDs) {
+		if !slices.Equal(replyRouteProfileIDs, expectedIDs) {
 			t.Errorf("expected: <%+v>, \nreceived: <%+v>", expectedIDs, replyRouteProfileIDs)
 		}
 	}
@@ -559,7 +560,7 @@ func testRoutesGetRouteProfileIDsAfterRemove(t *testing.T) {
 		t.Error(err)
 	} else {
 		sort.Strings(replyRouteProfileIDs)
-		if !utils.SliceStringEqual(replyRouteProfileIDs, expectedIDs) {
+		if !slices.Equal(replyRouteProfileIDs, expectedIDs) {
 			t.Errorf("expected: <%+v>, \nreceived: <%+v>", expectedIDs, replyRouteProfileIDs)
 		}
 	}
@@ -573,7 +574,7 @@ func testRoutesGetRouteProfileIDsAfterRemove(t *testing.T) {
 		t.Error(err)
 	} else {
 		sort.Strings(replyRouteProfileIDs)
-		if !utils.SliceStringEqual(replyRouteProfileIDs, expectedIDs) {
+		if !slices.Equal(replyRouteProfileIDs, expectedIDs) {
 			t.Errorf("expected: <%+v>, \nreceived: <%+v>", expectedIDs, replyRouteProfileIDs)
 		}
 	}
@@ -587,7 +588,7 @@ func testRoutesGetRouteProfileIDsAfterRemove(t *testing.T) {
 		t.Error(err)
 	} else {
 		sort.Strings(replyRouteProfileIDs)
-		if !utils.SliceStringEqual(replyRouteProfileIDs, expectedIDs) {
+		if !slices.Equal(replyRouteProfileIDs, expectedIDs) {
 			t.Errorf("expected: <%+v>, \nreceived: <%+v>", expectedIDs, replyRouteProfileIDs)
 		}
 	}
@@ -728,7 +729,7 @@ func testRoutesBlockerRemoveRouteProfiles(t *testing.T) {
 		t.Fatal(err)
 	} else {
 		sort.Strings(routeProfileIDs)
-		if !utils.SliceStringEqual(routeProfileIDs, expected) {
+		if !slices.Equal(routeProfileIDs, expected) {
 			t.Errorf("expected: <%+v>, \nreceived: <%+v>", expected, routeProfileIDs)
 		}
 	}

@@ -26,6 +26,7 @@ import (
 	"os"
 	"os/exec"
 	"path"
+	"slices"
 	"strings"
 	"time"
 
@@ -199,7 +200,7 @@ func InitStorDB(cfg *config.CGRConfig) error {
 		dbPath)); err != nil {
 		return err
 	}
-	if utils.IsSliceMember([]string{utils.MetaMongo, utils.MetaMySQL, utils.MetaPostgres},
+	if slices.Contains([]string{utils.MetaMongo, utils.MetaMySQL, utils.MetaPostgres},
 		cfg.StorDbCfg().Type) {
 		if err := SetDBVersions(storDB); err != nil {
 			return err

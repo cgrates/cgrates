@@ -20,6 +20,7 @@ package config
 
 import (
 	"reflect"
+	"slices"
 	"time"
 
 	"github.com/cgrates/birpc/context"
@@ -109,7 +110,7 @@ func (eeS EEsCfg) Clone() (cln *EEsCfg) {
 		Exporters: make([]*EventExporterCfg, len(eeS.Exporters)),
 	}
 	if eeS.AttributeSConns != nil {
-		cln.AttributeSConns = utils.CloneStringSlice(eeS.AttributeSConns)
+		cln.AttributeSConns = slices.Clone(eeS.AttributeSConns)
 	}
 	for key, value := range eeS.Cache {
 		cln.Cache[key] = value.Clone()
@@ -509,7 +510,7 @@ func (eeC *EventExporterCfg) loadFromJSONCfg(jsnEec *EventExporterJsonCfg, msgTe
 		eeC.Timezone = *jsnEec.Timezone
 	}
 	if jsnEec.Filters != nil {
-		eeC.Filters = utils.CloneStringSlice(*jsnEec.Filters)
+		eeC.Filters = slices.Clone(*jsnEec.Filters)
 	}
 	if jsnEec.Flags != nil {
 		eeC.Flags = utils.FlagsWithParamsFromSlice(*jsnEec.Flags)
@@ -518,7 +519,7 @@ func (eeC *EventExporterCfg) loadFromJSONCfg(jsnEec *EventExporterJsonCfg, msgTe
 		eeC.AttributeSCtx = *jsnEec.Attribute_context
 	}
 	if jsnEec.Attribute_ids != nil {
-		eeC.AttributeSIDs = utils.CloneStringSlice(*jsnEec.Attribute_ids)
+		eeC.AttributeSIDs = slices.Clone(*jsnEec.Attribute_ids)
 	}
 	if jsnEec.Synchronous != nil {
 		eeC.Synchronous = *jsnEec.Synchronous
@@ -827,13 +828,13 @@ func (eeC EventExporterCfg) Clone() (cln *EventExporterCfg) {
 	}
 
 	if eeC.Filters != nil {
-		cln.Filters = utils.CloneStringSlice(eeC.Filters)
+		cln.Filters = slices.Clone(eeC.Filters)
 	}
 	if eeC.AttributeSIDs != nil {
-		cln.AttributeSIDs = utils.CloneStringSlice(eeC.AttributeSIDs)
+		cln.AttributeSIDs = slices.Clone(eeC.AttributeSIDs)
 	}
 	if eeC.EFsConns != nil {
-		cln.EFsConns = utils.CloneStringSlice(eeC.EFsConns)
+		cln.EFsConns = slices.Clone(eeC.EFsConns)
 	}
 	for idx, fld := range eeC.Fields {
 		cln.Fields[idx] = fld.Clone()
@@ -1586,15 +1587,15 @@ func diffEventExporterJsonCfg(d *EventExporterJsonCfg, v1, v2 *EventExporterCfg,
 	if v1.Timezone != v2.Timezone {
 		d.Timezone = utils.StringPointer(v2.Timezone)
 	}
-	if !utils.SliceStringEqual(v1.Filters, v2.Filters) {
+	if !slices.Equal(v1.Filters, v2.Filters) {
 		d.Filters = &v2.Filters
 	}
 	flgs1 := v1.Flags.SliceFlags()
 	flgs2 := v2.Flags.SliceFlags()
-	if !utils.SliceStringEqual(flgs1, flgs2) {
+	if !slices.Equal(flgs1, flgs2) {
 		d.Flags = &flgs2
 	}
-	if !utils.SliceStringEqual(v1.AttributeSIDs, v2.AttributeSIDs) {
+	if !slices.Equal(v1.AttributeSIDs, v2.AttributeSIDs) {
 		d.Attribute_ids = &v2.AttributeSIDs
 	}
 	if v1.AttributeSCtx != v2.AttributeSCtx {
@@ -1623,7 +1624,7 @@ func diffEventExporterJsonCfg(d *EventExporterJsonCfg, v1, v2 *EventExporterCfg,
 	if v1.FailedPostsDir != v2.FailedPostsDir {
 		d.Failed_posts_dir = utils.StringPointer(v2.FailedPostsDir)
 	}
-	if !utils.SliceStringEqual(v1.EFsConns, v2.EFsConns) {
+	if !slices.Equal(v1.EFsConns, v2.EFsConns) {
 		d.Efs_conns = &v2.EFsConns
 	}
 	return d
@@ -1681,7 +1682,7 @@ func diffEEsJsonCfg(d *EEsJsonCfg, v1, v2 *EEsCfg, separator string) *EEsJsonCfg
 	if v1.Enabled != v2.Enabled {
 		d.Enabled = utils.BoolPointer(v2.Enabled)
 	}
-	if !utils.SliceStringEqual(v1.AttributeSConns, v2.AttributeSConns) {
+	if !slices.Equal(v1.AttributeSConns, v2.AttributeSConns) {
 		d.Attributes_conns = utils.SliceStringPointer(getInternalJSONConns(v2.AttributeSConns))
 	}
 	d.Cache = diffCacheParamsJsonCfg(d.Cache, v2.Cache)

@@ -20,6 +20,7 @@ package engine
 
 import (
 	"fmt"
+	"slices"
 	"strings"
 
 	"github.com/cgrates/baningo"
@@ -894,7 +895,7 @@ func (dm *DataManager) SetStatQueueProfile(ctx *context.Context, sqp *StatQueueP
 			for _, metric := range sqp.Metrics { // add missing metrics and recreate the old metrics that changed
 				cMetricIDs.Add(metric.MetricID)
 				if oSqMetric, has := oSq.SQMetrics[metric.MetricID]; !has ||
-					!utils.SliceStringEqual(oSqMetric.GetFilterIDs(), metric.FilterIDs) { // recreate it if the filter changed
+					!slices.Equal(oSqMetric.GetFilterIDs(), metric.FilterIDs) { // recreate it if the filter changed
 					if oSq.SQMetrics[metric.MetricID], err = NewStatMetric(metric.MetricID,
 						uint64(sqp.MinItems), metric.FilterIDs); err != nil {
 						return

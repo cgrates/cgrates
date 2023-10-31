@@ -22,6 +22,7 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"slices"
 	"time"
 
 	"github.com/cgrates/birpc/context"
@@ -283,7 +284,7 @@ func (l LoaderSCfg) Clone() (cln *LoaderSCfg) {
 		Tenant:         l.Tenant,
 		RunDelay:       l.RunDelay,
 		LockFilePath:   l.LockFilePath,
-		CacheSConns:    utils.CloneStringSlice(l.CacheSConns),
+		CacheSConns:    slices.Clone(l.CacheSConns),
 		FieldSeparator: l.FieldSeparator,
 		TpInDir:        l.TpInDir,
 		TpOutDir:       l.TpOutDir,
@@ -399,7 +400,7 @@ func equalsLoaderDatasType(v1, v2 []*LoaderDataType) bool {
 		if v1[i].ID != v2[i].ID ||
 			v1[i].Type != v2[i].Type ||
 			v1[i].Filename != v2[i].Filename ||
-			!utils.SliceStringEqual(v1[i].Flags.SliceFlags(), v2[i].Flags.SliceFlags()) ||
+			!slices.Equal(v1[i].Flags.SliceFlags(), v2[i].Flags.SliceFlags()) ||
 			!fcTemplatesEqual(v1[i].Fields, v2[i].Fields) {
 			return false
 		}
@@ -440,7 +441,7 @@ func diffLoaderJsonCfg(v1, v2 *LoaderSCfg, separator string) (d *LoaderJsonCfg) 
 	if v1.LockFilePath != v2.LockFilePath {
 		d.Lockfile_path = utils.StringPointer(v2.LockFilePath)
 	}
-	if !utils.SliceStringEqual(v1.CacheSConns, v2.CacheSConns) {
+	if !slices.Equal(v1.CacheSConns, v2.CacheSConns) {
 		d.Caches_conns = utils.SliceStringPointer(getInternalJSONConns(v2.CacheSConns))
 	}
 	if v1.FieldSeparator != v2.FieldSeparator {
@@ -485,7 +486,7 @@ func equalsLoadersJsonCfg(v1, v2 LoaderSCfgs) bool {
 			v1[i].Tenant != v2[i].Tenant ||
 			v1[i].RunDelay != v2[i].RunDelay ||
 			v1[i].LockFilePath != v2[i].LockFilePath ||
-			!utils.SliceStringEqual(v1[i].CacheSConns, v2[i].CacheSConns) ||
+			!slices.Equal(v1[i].CacheSConns, v2[i].CacheSConns) ||
 			v1[i].FieldSeparator != v2[i].FieldSeparator ||
 			v1[i].TpInDir != v2[i].TpInDir ||
 			v1[i].TpOutDir != v2[i].TpOutDir ||

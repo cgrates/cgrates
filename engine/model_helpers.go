@@ -22,6 +22,7 @@ import (
 	"fmt"
 	"reflect"
 	"regexp"
+	"slices"
 	"strconv"
 	"strings"
 	"time"
@@ -1605,7 +1606,7 @@ func DispatcherProfileToAPI(dpp *DispatcherProfile) (tpDPP *utils.TPDispatcherPr
 	for i, host := range dpp.Hosts {
 		tpDPP.Hosts[i] = &utils.TPDispatcherHostProfile{
 			ID:        host.ID,
-			FilterIDs: utils.CloneStringSlice(host.FilterIDs),
+			FilterIDs: slices.Clone(host.FilterIDs),
 			Weight:    host.Weight,
 			Params:    make([]any, len(host.Params)),
 			Blocker:   host.Blocker,

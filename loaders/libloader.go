@@ -20,6 +20,7 @@ package loaders
 
 import (
 	"fmt"
+	"slices"
 	"strings"
 
 	"github.com/cgrates/birpc/context"
@@ -161,7 +162,7 @@ func (ar *record) SetFields(ctx *context.Context, tmpls []*config.FCTemplate, fi
 				return
 			} else if fullPath == nil { // no dynamic path
 				fullPath = &utils.FullPath{
-					PathSlice: utils.CloneStringSlice(fld.GetPathSlice()), // need to clone so me do not modify the template
+					PathSlice: slices.Clone(fld.GetPathSlice()), // need to clone so me do not modify the template
 					Path:      fld.Path,
 				}
 			}
@@ -205,7 +206,7 @@ func (ar *record) Remove(fullPath *utils.FullPath) error {
 			Path:      fullPath.Path,
 		})*/
 	case utils.MetaTmp:
-		return ar.tmp.Remove(utils.CloneStringSlice(fullPath.PathSlice[1:]))
+		return ar.tmp.Remove(slices.Clone(fullPath.PathSlice[1:]))
 	case utils.MetaUCH:
 		ar.cache.Remove(fullPath.Path[5:])
 	}

@@ -20,6 +20,7 @@ package sessions
 
 import (
 	"errors"
+	"slices"
 	"strings"
 	"time"
 
@@ -184,10 +185,10 @@ func (pi *ProcessedStirIdentity) VerifyPayload(originatorTn, originatorURI, dest
 		return errors.New("wrong originatorTn")
 	}
 	if destinationURI != utils.EmptyString {
-		if !utils.SliceHasMember(pi.Payload.Dest.URI, destinationURI) {
+		if !slices.Contains(pi.Payload.Dest.URI, destinationURI) {
 			return errors.New("wrong destinationURI")
 		}
-	} else if !utils.SliceHasMember(pi.Payload.Dest.Tn, destinationTn) {
+	} else if !slices.Contains(pi.Payload.Dest.Tn, destinationTn) {
 		return errors.New("wrong destinationTn")
 	}
 	return

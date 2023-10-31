@@ -24,6 +24,7 @@ import (
 	"fmt"
 	"os"
 	"path"
+	"slices"
 	"sort"
 	"strings"
 	"sync"
@@ -291,7 +292,7 @@ func (erS *ERService) processPartialEvent(ev *utils.CGREvent, rdrCfg *config.Eve
 		erS.cfg.GeneralCfg().RSRSep); err != nil {
 		return
 	}
-	if partial := cgrEv.APIOpts[utils.PartialOpt]; !utils.IsSliceMember([]string{utils.FalseStr, utils.EmptyString},
+	if partial := cgrEv.APIOpts[utils.PartialOpt]; !slices.Contains([]string{utils.FalseStr, utils.EmptyString},
 		utils.IfaceAsString(partial)) { // if is still partial set it back in cache
 		erS.partialCache.Set(originID, cgrEvs, nil)
 		return

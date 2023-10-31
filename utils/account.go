@@ -20,6 +20,7 @@ package utils
 
 import (
 	"fmt"
+	"slices"
 	"sort"
 	"strconv"
 	"strings"
@@ -244,7 +245,7 @@ func (cI *CostIncrement) Clone() (cIcln *CostIncrement) {
 func (uF *UnitFactor) Clone() *UnitFactor {
 	cln := new(UnitFactor)
 	if uF.FilterIDs != nil {
-		cln.FilterIDs = CloneStringSlice(uF.FilterIDs)
+		cln.FilterIDs = slices.Clone(uF.FilterIDs)
 	}
 	if uF.Factor != nil {
 		cln.Factor = uF.Factor.Clone()

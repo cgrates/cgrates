@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package config
 
 import (
+	"slices"
 	"time"
 
 	"github.com/cgrates/birpc/context"
@@ -116,19 +117,19 @@ func (rCfg *RateSCfg) loadFromJSONCfg(jsnCfg *RateSJsonCfg) (err error) {
 		rCfg.IndexedSelects = *jsnCfg.Indexed_selects
 	}
 	if jsnCfg.String_indexed_fields != nil {
-		rCfg.StringIndexedFields = utils.SliceStringPointer(utils.CloneStringSlice(*jsnCfg.String_indexed_fields))
+		rCfg.StringIndexedFields = utils.SliceStringPointer(slices.Clone(*jsnCfg.String_indexed_fields))
 	}
 	if jsnCfg.Prefix_indexed_fields != nil {
-		rCfg.PrefixIndexedFields = utils.SliceStringPointer(utils.CloneStringSlice(*jsnCfg.Prefix_indexed_fields))
+		rCfg.PrefixIndexedFields = utils.SliceStringPointer(slices.Clone(*jsnCfg.Prefix_indexed_fields))
 	}
 	if jsnCfg.Suffix_indexed_fields != nil {
-		rCfg.SuffixIndexedFields = utils.SliceStringPointer(utils.CloneStringSlice(*jsnCfg.Suffix_indexed_fields))
+		rCfg.SuffixIndexedFields = utils.SliceStringPointer(slices.Clone(*jsnCfg.Suffix_indexed_fields))
 	}
 	if jsnCfg.Exists_indexed_fields != nil {
-		rCfg.ExistsIndexedFields = utils.SliceStringPointer(utils.CloneStringSlice(*jsnCfg.Exists_indexed_fields))
+		rCfg.ExistsIndexedFields = utils.SliceStringPointer(slices.Clone(*jsnCfg.Exists_indexed_fields))
 	}
 	if jsnCfg.Notexists_indexed_fields != nil {
-		rCfg.NotExistsIndexedFields = utils.SliceStringPointer(utils.CloneStringSlice(*jsnCfg.Notexists_indexed_fields))
+		rCfg.NotExistsIndexedFields = utils.SliceStringPointer(slices.Clone(*jsnCfg.Notexists_indexed_fields))
 	}
 	if jsnCfg.Nested_fields != nil {
 		rCfg.NestedFields = *jsnCfg.Nested_fields
@@ -138,19 +139,19 @@ func (rCfg *RateSCfg) loadFromJSONCfg(jsnCfg *RateSJsonCfg) (err error) {
 		rCfg.RateIndexedSelects = *jsnCfg.Rate_indexed_selects
 	}
 	if jsnCfg.Rate_string_indexed_fields != nil {
-		rCfg.RateStringIndexedFields = utils.SliceStringPointer(utils.CloneStringSlice(*jsnCfg.Rate_string_indexed_fields))
+		rCfg.RateStringIndexedFields = utils.SliceStringPointer(slices.Clone(*jsnCfg.Rate_string_indexed_fields))
 	}
 	if jsnCfg.Rate_prefix_indexed_fields != nil {
-		rCfg.RatePrefixIndexedFields = utils.SliceStringPointer(utils.CloneStringSlice(*jsnCfg.Rate_prefix_indexed_fields))
+		rCfg.RatePrefixIndexedFields = utils.SliceStringPointer(slices.Clone(*jsnCfg.Rate_prefix_indexed_fields))
 	}
 	if jsnCfg.Rate_suffix_indexed_fields != nil {
-		rCfg.RateSuffixIndexedFields = utils.SliceStringPointer(utils.CloneStringSlice(*jsnCfg.Rate_suffix_indexed_fields))
+		rCfg.RateSuffixIndexedFields = utils.SliceStringPointer(slices.Clone(*jsnCfg.Rate_suffix_indexed_fields))
 	}
 	if jsnCfg.Rate_exists_indexed_fields != nil {
-		rCfg.RateExistsIndexedFields = utils.SliceStringPointer(utils.CloneStringSlice(*jsnCfg.Rate_exists_indexed_fields))
+		rCfg.RateExistsIndexedFields = utils.SliceStringPointer(slices.Clone(*jsnCfg.Rate_exists_indexed_fields))
 	}
 	if jsnCfg.Rate_notexists_indexed_fields != nil {
-		rCfg.RateNotExistsIndexedFields = utils.SliceStringPointer(utils.CloneStringSlice(*jsnCfg.Rate_notexists_indexed_fields))
+		rCfg.RateNotExistsIndexedFields = utils.SliceStringPointer(slices.Clone(*jsnCfg.Rate_notexists_indexed_fields))
 	}
 	if jsnCfg.Rate_nested_fields != nil {
 		rCfg.RateNestedFields = *jsnCfg.Rate_nested_fields
@@ -183,34 +184,34 @@ func (rCfg RateSCfg) AsMapInterface(string) any {
 		utils.OptsCfg:               opts,
 	}
 	if rCfg.StringIndexedFields != nil {
-		mp[utils.StringIndexedFieldsCfg] = utils.CloneStringSlice(*rCfg.StringIndexedFields)
+		mp[utils.StringIndexedFieldsCfg] = slices.Clone(*rCfg.StringIndexedFields)
 	}
 	if rCfg.PrefixIndexedFields != nil {
-		mp[utils.PrefixIndexedFieldsCfg] = utils.CloneStringSlice(*rCfg.PrefixIndexedFields)
+		mp[utils.PrefixIndexedFieldsCfg] = slices.Clone(*rCfg.PrefixIndexedFields)
 	}
 	if rCfg.SuffixIndexedFields != nil {
-		mp[utils.SuffixIndexedFieldsCfg] = utils.CloneStringSlice(*rCfg.SuffixIndexedFields)
+		mp[utils.SuffixIndexedFieldsCfg] = slices.Clone(*rCfg.SuffixIndexedFields)
 	}
 	if rCfg.ExistsIndexedFields != nil {
-		mp[utils.ExistsIndexedFieldsCfg] = utils.CloneStringSlice(*rCfg.ExistsIndexedFields)
+		mp[utils.ExistsIndexedFieldsCfg] = slices.Clone(*rCfg.ExistsIndexedFields)
 	}
 	if rCfg.NotExistsIndexedFields != nil {
-		mp[utils.NotExistsIndexedFieldsCfg] = utils.CloneStringSlice(*rCfg.NotExistsIndexedFields)
+		mp[utils.NotExistsIndexedFieldsCfg] = slices.Clone(*rCfg.NotExistsIndexedFields)
 	}
 	if rCfg.RateStringIndexedFields != nil {
-		mp[utils.RateStringIndexedFieldsCfg] = utils.CloneStringSlice(*rCfg.RateStringIndexedFields)
+		mp[utils.RateStringIndexedFieldsCfg] = slices.Clone(*rCfg.RateStringIndexedFields)
 	}
 	if rCfg.RatePrefixIndexedFields != nil {
-		mp[utils.RatePrefixIndexedFieldsCfg] = utils.CloneStringSlice(*rCfg.RatePrefixIndexedFields)
+		mp[utils.RatePrefixIndexedFieldsCfg] = slices.Clone(*rCfg.RatePrefixIndexedFields)
 	}
 	if rCfg.RateSuffixIndexedFields != nil {
-		mp[utils.RateSuffixIndexedFieldsCfg] = utils.CloneStringSlice(*rCfg.RateSuffixIndexedFields)
+		mp[utils.RateSuffixIndexedFieldsCfg] = slices.Clone(*rCfg.RateSuffixIndexedFields)
 	}
 	if rCfg.RateExistsIndexedFields != nil {
-		mp[utils.RateExistsIndexedFieldsCfg] = utils.CloneStringSlice(*rCfg.RateExistsIndexedFields)
+		mp[utils.RateExistsIndexedFieldsCfg] = slices.Clone(*rCfg.RateExistsIndexedFields)
 	}
 	if rCfg.RateNotExistsIndexedFields != nil {
-		mp[utils.RateNotExistsIndexedFieldsCfg] = utils.CloneStringSlice(*rCfg.RateNotExistsIndexedFields)
+		mp[utils.RateNotExistsIndexedFieldsCfg] = slices.Clone(*rCfg.RateNotExistsIndexedFields)
 	}
 	return mp
 }
@@ -260,34 +261,34 @@ func (rCfg RateSCfg) Clone() (cln *RateSCfg) {
 		Opts:               rCfg.Opts.Clone(),
 	}
 	if rCfg.StringIndexedFields != nil {
-		cln.StringIndexedFields = utils.SliceStringPointer(utils.CloneStringSlice(*rCfg.StringIndexedFields))
+		cln.StringIndexedFields = utils.SliceStringPointer(slices.Clone(*rCfg.StringIndexedFields))
 	}
 	if rCfg.PrefixIndexedFields != nil {
-		cln.PrefixIndexedFields = utils.SliceStringPointer(utils.CloneStringSlice(*rCfg.PrefixIndexedFields))
+		cln.PrefixIndexedFields = utils.SliceStringPointer(slices.Clone(*rCfg.PrefixIndexedFields))
 	}
 	if rCfg.SuffixIndexedFields != nil {
-		cln.SuffixIndexedFields = utils.SliceStringPointer(utils.CloneStringSlice(*rCfg.SuffixIndexedFields))
+		cln.SuffixIndexedFields = utils.SliceStringPointer(slices.Clone(*rCfg.SuffixIndexedFields))
 	}
 	if rCfg.ExistsIndexedFields != nil {
-		cln.ExistsIndexedFields = utils.SliceStringPointer(utils.CloneStringSlice(*rCfg.ExistsIndexedFields))
+		cln.ExistsIndexedFields = utils.SliceStringPointer(slices.Clone(*rCfg.ExistsIndexedFields))
 	}
 	if rCfg.NotExistsIndexedFields != nil {
-		cln.NotExistsIndexedFields = utils.SliceStringPointer(utils.CloneStringSlice(*rCfg.NotExistsIndexedFields))
+		cln.NotExistsIndexedFields = utils.SliceStringPointer(slices.Clone(*rCfg.NotExistsIndexedFields))
 	}
 	if rCfg.RateStringIndexedFields != nil {
-		cln.RateStringIndexedFields = utils.SliceStringPointer(utils.CloneStringSlice(*rCfg.RateStringIndexedFields))
+		cln.RateStringIndexedFields = utils.SliceStringPointer(slices.Clone(*rCfg.RateStringIndexedFields))
 	}
 	if rCfg.RatePrefixIndexedFields != nil {
-		cln.RatePrefixIndexedFields = utils.SliceStringPointer(utils.CloneStringSlice(*rCfg.RatePrefixIndexedFields))
+		cln.RatePrefixIndexedFields = utils.SliceStringPointer(slices.Clone(*rCfg.RatePrefixIndexedFields))
 	}
 	if rCfg.RateSuffixIndexedFields != nil {
-		cln.RateSuffixIndexedFields = utils.SliceStringPointer(utils.CloneStringSlice(*rCfg.RateSuffixIndexedFields))
+		cln.RateSuffixIndexedFields = utils.SliceStringPointer(slices.Clone(*rCfg.RateSuffixIndexedFields))
 	}
 	if rCfg.RateExistsIndexedFields != nil {
-		cln.RateExistsIndexedFields = utils.SliceStringPointer(utils.CloneStringSlice(*rCfg.RateExistsIndexedFields))
+		cln.RateExistsIndexedFields = utils.SliceStringPointer(slices.Clone(*rCfg.RateExistsIndexedFields))
 	}
 	if rCfg.RateNotExistsIndexedFields != nil {
-		cln.RateNotExistsIndexedFields = utils.SliceStringPointer(utils.CloneStringSlice(*rCfg.RateNotExistsIndexedFields))
+		cln.RateNotExistsIndexedFields = utils.SliceStringPointer(slices.Clone(*rCfg.RateNotExistsIndexedFields))
 	}
 	return
 }

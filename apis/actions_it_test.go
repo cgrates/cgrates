@@ -27,6 +27,7 @@ import (
 	"net/http/httptest"
 	"path"
 	"reflect"
+	"slices"
 	"sort"
 	"testing"
 	"time"
@@ -678,7 +679,7 @@ func testActionsRemoveActionProfiles(t *testing.T) {
 		t.Fatal(err)
 	} else {
 		sort.Strings(actionProfileIDs)
-		if !utils.SliceStringEqual(actionProfileIDs, expected) {
+		if !slices.Equal(actionProfileIDs, expected) {
 			t.Errorf("expected: <%+v>, \nreceived: <%+v>", expected, actionProfileIDs)
 		}
 	}
