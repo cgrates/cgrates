@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package config
 
 import (
+	"slices"
 	"time"
 
 	"github.com/cgrates/birpc/context"
@@ -123,7 +124,7 @@ func (alS AnalyzerSCfg) Clone() (cln *AnalyzerSCfg) {
 		Opts:            alS.Opts.Clone(),
 	}
 	if alS.EEsConns != nil {
-		cln.EEsConns = utils.CloneStringSlice(alS.EEsConns)
+		cln.EEsConns = slices.Clone(alS.EEsConns)
 	}
 	return
 }
@@ -178,7 +179,7 @@ func diffAnalyzerSJsonCfg(d *AnalyzerSJsonCfg, v1, v2 *AnalyzerSCfg) *AnalyzerSJ
 	if v1.TTL != v2.TTL {
 		d.Ttl = utils.StringPointer(v2.TTL.String())
 	}
-	if !utils.SliceStringEqual(v1.EEsConns, v2.EEsConns) {
+	if !slices.Equal(v1.EEsConns, v2.EEsConns) {
 		d.Ees_conns = utils.SliceStringPointer(getBiRPCInternalJSONConns(v2.EEsConns))
 	}
 	if v1.CleanupInterval != v2.CleanupInterval {

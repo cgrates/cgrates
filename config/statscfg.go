@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package config
 
 import (
+	"slices"
 	"time"
 
 	"github.com/cgrates/birpc/context"
@@ -101,19 +102,19 @@ func (st *StatSCfg) loadFromJSONCfg(jsnCfg *StatServJsonCfg) (err error) {
 		st.ThresholdSConns = updateInternalConns(*jsnCfg.Thresholds_conns, utils.MetaThresholds)
 	}
 	if jsnCfg.String_indexed_fields != nil {
-		st.StringIndexedFields = utils.SliceStringPointer(utils.CloneStringSlice((*jsnCfg.String_indexed_fields)))
+		st.StringIndexedFields = utils.SliceStringPointer(slices.Clone((*jsnCfg.String_indexed_fields)))
 	}
 	if jsnCfg.Prefix_indexed_fields != nil {
-		st.PrefixIndexedFields = utils.SliceStringPointer(utils.CloneStringSlice((*jsnCfg.Prefix_indexed_fields)))
+		st.PrefixIndexedFields = utils.SliceStringPointer(slices.Clone((*jsnCfg.Prefix_indexed_fields)))
 	}
 	if jsnCfg.Suffix_indexed_fields != nil {
-		st.SuffixIndexedFields = utils.SliceStringPointer(utils.CloneStringSlice((*jsnCfg.Suffix_indexed_fields)))
+		st.SuffixIndexedFields = utils.SliceStringPointer(slices.Clone((*jsnCfg.Suffix_indexed_fields)))
 	}
 	if jsnCfg.Exists_indexed_fields != nil {
-		st.ExistsIndexedFields = utils.SliceStringPointer(utils.CloneStringSlice(*jsnCfg.Exists_indexed_fields))
+		st.ExistsIndexedFields = utils.SliceStringPointer(slices.Clone(*jsnCfg.Exists_indexed_fields))
 	}
 	if jsnCfg.Notexists_indexed_fields != nil {
-		st.NotExistsIndexedFields = utils.SliceStringPointer(utils.CloneStringSlice(*jsnCfg.Notexists_indexed_fields))
+		st.NotExistsIndexedFields = utils.SliceStringPointer(slices.Clone(*jsnCfg.Notexists_indexed_fields))
 	}
 	if jsnCfg.Nested_fields != nil {
 		st.NestedFields = *jsnCfg.Nested_fields
@@ -144,19 +145,19 @@ func (st StatSCfg) AsMapInterface(string) any {
 		mp[utils.StoreIntervalCfg] = st.StoreInterval.String()
 	}
 	if st.StringIndexedFields != nil {
-		mp[utils.StringIndexedFieldsCfg] = utils.CloneStringSlice(*st.StringIndexedFields)
+		mp[utils.StringIndexedFieldsCfg] = slices.Clone(*st.StringIndexedFields)
 	}
 	if st.PrefixIndexedFields != nil {
-		mp[utils.PrefixIndexedFieldsCfg] = utils.CloneStringSlice(*st.PrefixIndexedFields)
+		mp[utils.PrefixIndexedFieldsCfg] = slices.Clone(*st.PrefixIndexedFields)
 	}
 	if st.SuffixIndexedFields != nil {
-		mp[utils.SuffixIndexedFieldsCfg] = utils.CloneStringSlice(*st.SuffixIndexedFields)
+		mp[utils.SuffixIndexedFieldsCfg] = slices.Clone(*st.SuffixIndexedFields)
 	}
 	if st.ExistsIndexedFields != nil {
-		mp[utils.ExistsIndexedFieldsCfg] = utils.CloneStringSlice(*st.ExistsIndexedFields)
+		mp[utils.ExistsIndexedFieldsCfg] = slices.Clone(*st.ExistsIndexedFields)
 	}
 	if st.NotExistsIndexedFields != nil {
-		mp[utils.NotExistsIndexedFieldsCfg] = utils.CloneStringSlice(*st.NotExistsIndexedFields)
+		mp[utils.NotExistsIndexedFieldsCfg] = slices.Clone(*st.NotExistsIndexedFields)
 	}
 	if st.ThresholdSConns != nil {
 		mp[utils.ThresholdSConnsCfg] = getInternalJSONConns(st.ThresholdSConns)
@@ -203,22 +204,22 @@ func (st StatSCfg) Clone() (cln *StatSCfg) {
 		Opts:                   st.Opts.Clone(),
 	}
 	if st.ThresholdSConns != nil {
-		cln.ThresholdSConns = utils.CloneStringSlice(st.ThresholdSConns)
+		cln.ThresholdSConns = slices.Clone(st.ThresholdSConns)
 	}
 	if st.StringIndexedFields != nil {
-		cln.StringIndexedFields = utils.SliceStringPointer(utils.CloneStringSlice(*st.StringIndexedFields))
+		cln.StringIndexedFields = utils.SliceStringPointer(slices.Clone(*st.StringIndexedFields))
 	}
 	if st.PrefixIndexedFields != nil {
-		cln.PrefixIndexedFields = utils.SliceStringPointer(utils.CloneStringSlice(*st.PrefixIndexedFields))
+		cln.PrefixIndexedFields = utils.SliceStringPointer(slices.Clone(*st.PrefixIndexedFields))
 	}
 	if st.SuffixIndexedFields != nil {
-		cln.SuffixIndexedFields = utils.SliceStringPointer(utils.CloneStringSlice(*st.SuffixIndexedFields))
+		cln.SuffixIndexedFields = utils.SliceStringPointer(slices.Clone(*st.SuffixIndexedFields))
 	}
 	if st.ExistsIndexedFields != nil {
-		cln.ExistsIndexedFields = utils.SliceStringPointer(utils.CloneStringSlice(*st.ExistsIndexedFields))
+		cln.ExistsIndexedFields = utils.SliceStringPointer(slices.Clone(*st.ExistsIndexedFields))
 	}
 	if st.NotExistsIndexedFields != nil {
-		cln.NotExistsIndexedFields = utils.SliceStringPointer(utils.CloneStringSlice(*st.NotExistsIndexedFields))
+		cln.NotExistsIndexedFields = utils.SliceStringPointer(slices.Clone(*st.NotExistsIndexedFields))
 	}
 	return
 }
@@ -281,7 +282,7 @@ func diffStatServJsonCfg(d *StatServJsonCfg, v1, v2 *StatSCfg) *StatServJsonCfg 
 	if v1.StoreUncompressedLimit != v2.StoreUncompressedLimit {
 		d.Store_uncompressed_limit = utils.IntPointer(v2.StoreUncompressedLimit)
 	}
-	if !utils.SliceStringEqual(v1.ThresholdSConns, v2.ThresholdSConns) {
+	if !slices.Equal(v1.ThresholdSConns, v2.ThresholdSConns) {
 		d.Thresholds_conns = utils.SliceStringPointer(getInternalJSONConns(v2.ThresholdSConns))
 	}
 	d.String_indexed_fields = diffIndexSlice(d.String_indexed_fields, v1.StringIndexedFields, v2.StringIndexedFields)

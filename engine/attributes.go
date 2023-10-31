@@ -21,6 +21,7 @@ package engine
 import (
 	"fmt"
 	"math"
+	"slices"
 	"sort"
 	"strconv"
 	"strings"
@@ -202,7 +203,7 @@ func (alS *AttributeS) processEvent(ctx *context.Context, tnt string, args *util
 		}
 		substitute := utils.IfaceAsString(out)
 		//add only once the Path in AlteredFields
-		if !utils.IsSliceMember(rply.AlteredFields[0].Fields, attribute.Path) {
+		if !slices.Contains(rply.AlteredFields[0].Fields, attribute.Path) {
 			rply.AlteredFields[0].Fields = append(rply.AlteredFields[0].Fields, attribute.Path)
 		}
 		if attribute.Path == utils.MetaTenant {

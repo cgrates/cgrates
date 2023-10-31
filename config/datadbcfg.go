@@ -20,6 +20,7 @@ package config
 
 import (
 	"fmt"
+	"slices"
 	"strconv"
 	"strings"
 	"time"
@@ -280,10 +281,10 @@ func (dbcfg DataDbCfg) Clone() (cln *DataDbCfg) {
 		cln.Items[k] = itm.Clone()
 	}
 	if dbcfg.RmtConns != nil {
-		cln.RmtConns = utils.CloneStringSlice(dbcfg.RmtConns)
+		cln.RmtConns = slices.Clone(dbcfg.RmtConns)
 	}
 	if dbcfg.RplConns != nil {
-		cln.RplConns = utils.CloneStringSlice(dbcfg.RplConns)
+		cln.RplConns = slices.Clone(dbcfg.RplConns)
 	}
 	return
 }
@@ -584,13 +585,13 @@ func diffDataDBJsonCfg(d *DbJsonCfg, v1, v2 *DataDbCfg) *DbJsonCfg {
 	if v1.Password != v2.Password {
 		d.Db_password = utils.StringPointer(v2.Password)
 	}
-	if !utils.SliceStringEqual(v1.RmtConns, v2.RmtConns) {
+	if !slices.Equal(v1.RmtConns, v2.RmtConns) {
 		d.Remote_conns = &v2.RmtConns
 	}
 	if v1.RmtConnID != v2.RmtConnID {
 		d.Remote_conn_id = utils.StringPointer(v2.RmtConnID)
 	}
-	if !utils.SliceStringEqual(v1.RplConns, v2.RplConns) {
+	if !slices.Equal(v1.RplConns, v2.RplConns) {
 		d.Replication_conns = &v2.RplConns
 	}
 	if v1.RplFiltered != v2.RplFiltered {

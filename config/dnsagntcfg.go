@@ -19,6 +19,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package config
 
 import (
+	"slices"
+
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -124,7 +126,7 @@ func (da DNSAgentCfg) Clone() (cln *DNSAgentCfg) {
 		copy(cln.Listeners, da.Listeners)
 	}
 	if da.SessionSConns != nil {
-		cln.SessionSConns = utils.CloneStringSlice(da.SessionSConns)
+		cln.SessionSConns = slices.Clone(da.SessionSConns)
 	}
 	if da.RequestProcessors != nil {
 		cln.RequestProcessors = make([]*RequestProcessor, len(da.RequestProcessors))
@@ -194,7 +196,7 @@ func diffDNSAgentJsonCfg(d *DNSAgentJsonCfg, v1, v2 *DNSAgentCfg, separator stri
 
 	d.Listeners = diffListeners
 
-	if !utils.SliceStringEqual(v1.SessionSConns, v2.SessionSConns) {
+	if !slices.Equal(v1.SessionSConns, v2.SessionSConns) {
 		d.Sessions_conns = utils.SliceStringPointer(getBiRPCInternalJSONConns(v2.SessionSConns))
 	}
 	if v1.Timezone != v2.Timezone {

@@ -3773,7 +3773,9 @@ func TestAttributesV1ProcessEvent(t *testing.T) {
 	if err != nil {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
 	}
-	if !reflect.DeepEqual(expected, rply) {
+	if sort.Slice(rply.AlteredFields[0].Fields, func(i, j int) bool {
+		return rply.AlteredFields[0].Fields[i] < rply.AlteredFields[0].Fields[j]
+	}); !reflect.DeepEqual(expected, rply) {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", utils.ToJSON(expected), utils.ToJSON(rply))
 	}
 }

@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package config
 
 import (
+	"slices"
 	"time"
 
 	"github.com/cgrates/birpc/context"
@@ -162,7 +163,7 @@ func (aCfg AsteriskAgentCfg) Clone() (cln *AsteriskAgentCfg) {
 		CreateCDR: aCfg.CreateCDR,
 	}
 	if aCfg.SessionSConns != nil {
-		cln.SessionSConns = utils.CloneStringSlice(aCfg.SessionSConns)
+		cln.SessionSConns = slices.Clone(aCfg.SessionSConns)
 	}
 	if aCfg.AsteriskConns != nil {
 		cln.AsteriskConns = make([]*AsteriskConnCfg, len(aCfg.AsteriskConns))
@@ -241,7 +242,7 @@ func diffAsteriskAgentJsonCfg(d *AsteriskAgentJsonCfg, v1, v2 *AsteriskAgentCfg)
 	if v1.Enabled != v2.Enabled {
 		d.Enabled = utils.BoolPointer(v2.Enabled)
 	}
-	if !utils.SliceStringEqual(v1.SessionSConns, v2.SessionSConns) {
+	if !slices.Equal(v1.SessionSConns, v2.SessionSConns) {
 		d.Sessions_conns = utils.SliceStringPointer(getBiRPCInternalJSONConns(v2.SessionSConns))
 	}
 	if v1.CreateCDR != v2.CreateCDR {

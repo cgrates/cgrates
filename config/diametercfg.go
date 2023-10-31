@@ -19,6 +19,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package config
 
 import (
+	"slices"
+
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -152,7 +154,7 @@ func (da DiameterAgentCfg) Clone() (cln *DiameterAgentCfg) {
 		ForcedDisconnect: da.ForcedDisconnect,
 	}
 	if da.SessionSConns != nil {
-		cln.SessionSConns = utils.CloneStringSlice(da.SessionSConns)
+		cln.SessionSConns = slices.Clone(da.SessionSConns)
 	}
 	if da.RequestProcessors != nil {
 		cln.RequestProcessors = make([]*RequestProcessor, len(da.RequestProcessors))
@@ -198,7 +200,7 @@ func diffDiameterAgentJsonCfg(d *DiameterAgentJsonCfg, v1, v2 *DiameterAgentCfg,
 	if v1.DictionariesPath != v2.DictionariesPath {
 		d.Dictionaries_path = utils.StringPointer(v2.DictionariesPath)
 	}
-	if !utils.SliceStringEqual(v1.SessionSConns, v2.SessionSConns) {
+	if !slices.Equal(v1.SessionSConns, v2.SessionSConns) {
 		d.Sessions_conns = utils.SliceStringPointer(getBiRPCInternalJSONConns(v2.SessionSConns))
 	}
 	if v1.OriginHost != v2.OriginHost {

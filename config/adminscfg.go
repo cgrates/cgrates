@@ -19,6 +19,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package config
 
 import (
+	"slices"
+
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -92,16 +94,16 @@ func (aCfg AdminSCfg) Clone() (cln *AdminSCfg) {
 		Enabled: aCfg.Enabled,
 	}
 	if aCfg.CachesConns != nil {
-		cln.CachesConns = utils.CloneStringSlice(aCfg.CachesConns)
+		cln.CachesConns = slices.Clone(aCfg.CachesConns)
 	}
 	if aCfg.ActionSConns != nil {
-		cln.ActionSConns = utils.CloneStringSlice(aCfg.ActionSConns)
+		cln.ActionSConns = slices.Clone(aCfg.ActionSConns)
 	}
 	if aCfg.AttributeSConns != nil {
-		cln.AttributeSConns = utils.CloneStringSlice(aCfg.AttributeSConns)
+		cln.AttributeSConns = slices.Clone(aCfg.AttributeSConns)
 	}
 	if aCfg.EEsConns != nil {
-		cln.EEsConns = utils.CloneStringSlice(aCfg.EEsConns)
+		cln.EEsConns = slices.Clone(aCfg.EEsConns)
 	}
 	return
 }
@@ -121,16 +123,16 @@ func diffAdminSJsonCfg(d *AdminSJsonCfg, v1, v2 *AdminSCfg) *AdminSJsonCfg {
 	if v1.Enabled != v2.Enabled {
 		d.Enabled = utils.BoolPointer(v2.Enabled)
 	}
-	if !utils.SliceStringEqual(v1.CachesConns, v2.CachesConns) {
+	if !slices.Equal(v1.CachesConns, v2.CachesConns) {
 		d.Caches_conns = utils.SliceStringPointer(getInternalJSONConns(v2.CachesConns))
 	}
-	if !utils.SliceStringEqual(v1.ActionSConns, v2.ActionSConns) {
+	if !slices.Equal(v1.ActionSConns, v2.ActionSConns) {
 		d.Actions_conns = utils.SliceStringPointer(getInternalJSONConns(v2.ActionSConns))
 	}
-	if !utils.SliceStringEqual(v1.AttributeSConns, v2.AttributeSConns) {
+	if !slices.Equal(v1.AttributeSConns, v2.AttributeSConns) {
 		d.Attributes_conns = utils.SliceStringPointer(getInternalJSONConns(v2.AttributeSConns))
 	}
-	if !utils.SliceStringEqual(v1.EEsConns, v2.EEsConns) {
+	if !slices.Equal(v1.EEsConns, v2.EEsConns) {
 		d.Ees_conns = utils.SliceStringPointer(getInternalJSONConns(v2.EEsConns))
 	}
 	return d

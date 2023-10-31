@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package config
 
 import (
+	"slices"
 	"time"
 
 	"github.com/cgrates/birpc/context"
@@ -100,19 +101,19 @@ func (rlcfg *ResourceSConfig) loadFromJSONCfg(jsnCfg *ResourceSJsonCfg) (err err
 		}
 	}
 	if jsnCfg.String_indexed_fields != nil {
-		rlcfg.StringIndexedFields = utils.SliceStringPointer(utils.CloneStringSlice(*jsnCfg.String_indexed_fields))
+		rlcfg.StringIndexedFields = utils.SliceStringPointer(slices.Clone(*jsnCfg.String_indexed_fields))
 	}
 	if jsnCfg.Prefix_indexed_fields != nil {
-		rlcfg.PrefixIndexedFields = utils.SliceStringPointer(utils.CloneStringSlice(*jsnCfg.Prefix_indexed_fields))
+		rlcfg.PrefixIndexedFields = utils.SliceStringPointer(slices.Clone(*jsnCfg.Prefix_indexed_fields))
 	}
 	if jsnCfg.Suffix_indexed_fields != nil {
-		rlcfg.SuffixIndexedFields = utils.SliceStringPointer(utils.CloneStringSlice(*jsnCfg.Suffix_indexed_fields))
+		rlcfg.SuffixIndexedFields = utils.SliceStringPointer(slices.Clone(*jsnCfg.Suffix_indexed_fields))
 	}
 	if jsnCfg.Exists_indexed_fields != nil {
-		rlcfg.ExistsIndexedFields = utils.SliceStringPointer(utils.CloneStringSlice(*jsnCfg.Exists_indexed_fields))
+		rlcfg.ExistsIndexedFields = utils.SliceStringPointer(slices.Clone(*jsnCfg.Exists_indexed_fields))
 	}
 	if jsnCfg.Notexists_indexed_fields != nil {
-		rlcfg.NotExistsIndexedFields = utils.SliceStringPointer(utils.CloneStringSlice(*jsnCfg.Notexists_indexed_fields))
+		rlcfg.NotExistsIndexedFields = utils.SliceStringPointer(slices.Clone(*jsnCfg.Notexists_indexed_fields))
 	}
 	if jsnCfg.Nested_fields != nil {
 		rlcfg.NestedFields = *jsnCfg.Nested_fields
@@ -141,19 +142,19 @@ func (rlcfg ResourceSConfig) AsMapInterface(string) any {
 		mp[utils.ThresholdSConnsCfg] = getInternalJSONConns(rlcfg.ThresholdSConns)
 	}
 	if rlcfg.StringIndexedFields != nil {
-		mp[utils.StringIndexedFieldsCfg] = utils.CloneStringSlice(*rlcfg.StringIndexedFields)
+		mp[utils.StringIndexedFieldsCfg] = slices.Clone(*rlcfg.StringIndexedFields)
 	}
 	if rlcfg.PrefixIndexedFields != nil {
-		mp[utils.PrefixIndexedFieldsCfg] = utils.CloneStringSlice(*rlcfg.PrefixIndexedFields)
+		mp[utils.PrefixIndexedFieldsCfg] = slices.Clone(*rlcfg.PrefixIndexedFields)
 	}
 	if rlcfg.SuffixIndexedFields != nil {
-		mp[utils.SuffixIndexedFieldsCfg] = utils.CloneStringSlice(*rlcfg.SuffixIndexedFields)
+		mp[utils.SuffixIndexedFieldsCfg] = slices.Clone(*rlcfg.SuffixIndexedFields)
 	}
 	if rlcfg.ExistsIndexedFields != nil {
-		mp[utils.ExistsIndexedFieldsCfg] = utils.CloneStringSlice(*rlcfg.ExistsIndexedFields)
+		mp[utils.ExistsIndexedFieldsCfg] = slices.Clone(*rlcfg.ExistsIndexedFields)
 	}
 	if rlcfg.NotExistsIndexedFields != nil {
-		mp[utils.NotExistsIndexedFieldsCfg] = utils.CloneStringSlice(*rlcfg.NotExistsIndexedFields)
+		mp[utils.NotExistsIndexedFieldsCfg] = slices.Clone(*rlcfg.NotExistsIndexedFields)
 	}
 	if rlcfg.StoreInterval != 0 {
 		mp[utils.StoreIntervalCfg] = rlcfg.StoreInterval.String()
@@ -195,23 +196,23 @@ func (rlcfg ResourceSConfig) Clone() (cln *ResourceSConfig) {
 		Opts:           rlcfg.Opts.Clone(),
 	}
 	if rlcfg.ThresholdSConns != nil {
-		cln.ThresholdSConns = utils.CloneStringSlice(rlcfg.ThresholdSConns)
+		cln.ThresholdSConns = slices.Clone(rlcfg.ThresholdSConns)
 	}
 
 	if rlcfg.StringIndexedFields != nil {
-		cln.StringIndexedFields = utils.SliceStringPointer(utils.CloneStringSlice(*rlcfg.StringIndexedFields))
+		cln.StringIndexedFields = utils.SliceStringPointer(slices.Clone(*rlcfg.StringIndexedFields))
 	}
 	if rlcfg.PrefixIndexedFields != nil {
-		cln.PrefixIndexedFields = utils.SliceStringPointer(utils.CloneStringSlice(*rlcfg.PrefixIndexedFields))
+		cln.PrefixIndexedFields = utils.SliceStringPointer(slices.Clone(*rlcfg.PrefixIndexedFields))
 	}
 	if rlcfg.SuffixIndexedFields != nil {
-		cln.SuffixIndexedFields = utils.SliceStringPointer(utils.CloneStringSlice(*rlcfg.SuffixIndexedFields))
+		cln.SuffixIndexedFields = utils.SliceStringPointer(slices.Clone(*rlcfg.SuffixIndexedFields))
 	}
 	if rlcfg.ExistsIndexedFields != nil {
-		cln.ExistsIndexedFields = utils.SliceStringPointer(utils.CloneStringSlice(*rlcfg.ExistsIndexedFields))
+		cln.ExistsIndexedFields = utils.SliceStringPointer(slices.Clone(*rlcfg.ExistsIndexedFields))
 	}
 	if rlcfg.NotExistsIndexedFields != nil {
-		cln.NotExistsIndexedFields = utils.SliceStringPointer(utils.CloneStringSlice(*rlcfg.NotExistsIndexedFields))
+		cln.NotExistsIndexedFields = utils.SliceStringPointer(slices.Clone(*rlcfg.NotExistsIndexedFields))
 	}
 	return
 }
@@ -263,7 +264,7 @@ func diffResourceSJsonCfg(d *ResourceSJsonCfg, v1, v2 *ResourceSConfig) *Resourc
 	if v1.IndexedSelects != v2.IndexedSelects {
 		d.Indexed_selects = utils.BoolPointer(v2.IndexedSelects)
 	}
-	if !utils.SliceStringEqual(v1.ThresholdSConns, v2.ThresholdSConns) {
+	if !slices.Equal(v1.ThresholdSConns, v2.ThresholdSConns) {
 		d.Thresholds_conns = utils.SliceStringPointer(getInternalJSONConns(v2.ThresholdSConns))
 	}
 	if v1.StoreInterval != v2.StoreInterval {

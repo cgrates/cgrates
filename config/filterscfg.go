@@ -19,6 +19,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package config
 
 import (
+	"slices"
+
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -77,13 +79,13 @@ func (fSCfg FilterSCfg) CloneSection() Section { return fSCfg.Clone() }
 func (fSCfg FilterSCfg) Clone() (cln *FilterSCfg) {
 	cln = new(FilterSCfg)
 	if fSCfg.StatSConns != nil {
-		cln.StatSConns = utils.CloneStringSlice(fSCfg.StatSConns)
+		cln.StatSConns = slices.Clone(fSCfg.StatSConns)
 	}
 	if fSCfg.ResourceSConns != nil {
-		cln.ResourceSConns = utils.CloneStringSlice(fSCfg.ResourceSConns)
+		cln.ResourceSConns = slices.Clone(fSCfg.ResourceSConns)
 	}
 	if fSCfg.AccountSConns != nil {
-		cln.AccountSConns = utils.CloneStringSlice(fSCfg.AccountSConns)
+		cln.AccountSConns = slices.Clone(fSCfg.AccountSConns)
 	}
 	return
 }
@@ -99,13 +101,13 @@ func diffFilterSJsonCfg(d *FilterSJsonCfg, v1, v2 *FilterSCfg) *FilterSJsonCfg {
 	if d == nil {
 		d = new(FilterSJsonCfg)
 	}
-	if !utils.SliceStringEqual(v1.StatSConns, v2.StatSConns) {
+	if !slices.Equal(v1.StatSConns, v2.StatSConns) {
 		d.Stats_conns = utils.SliceStringPointer(getInternalJSONConns(v2.StatSConns))
 	}
-	if !utils.SliceStringEqual(v1.ResourceSConns, v2.ResourceSConns) {
+	if !slices.Equal(v1.ResourceSConns, v2.ResourceSConns) {
 		d.Resources_conns = utils.SliceStringPointer(getInternalJSONConns(v2.ResourceSConns))
 	}
-	if !utils.SliceStringEqual(v1.AccountSConns, v2.AccountSConns) {
+	if !slices.Equal(v1.AccountSConns, v2.AccountSConns) {
 		d.Accounts_conns = utils.SliceStringPointer(getInternalJSONConns(v2.AccountSConns))
 	}
 	return d

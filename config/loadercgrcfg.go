@@ -20,6 +20,7 @@ package config
 
 import (
 	"encoding/json"
+	"slices"
 
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
@@ -116,10 +117,10 @@ func (ld LoaderCgrCfg) Clone() (cln *LoaderCgrCfg) {
 	}
 
 	if ld.CachesConns != nil {
-		cln.CachesConns = utils.CloneStringSlice(ld.CachesConns)
+		cln.CachesConns = slices.Clone(ld.CachesConns)
 	}
 	if ld.ActionSConns != nil {
-		cln.ActionSConns = utils.CloneStringSlice(ld.ActionSConns)
+		cln.ActionSConns = slices.Clone(ld.ActionSConns)
 	}
 	return
 }
@@ -151,10 +152,10 @@ func diffLoaderCfgJson(d *LoaderCfgJson, v1, v2 *LoaderCgrCfg) *LoaderCfgJson {
 	if v1.FieldSeparator != v2.FieldSeparator {
 		d.Field_separator = utils.StringPointer(string(v2.FieldSeparator))
 	}
-	if !utils.SliceStringEqual(v1.CachesConns, v2.CachesConns) {
+	if !slices.Equal(v1.CachesConns, v2.CachesConns) {
 		d.Caches_conns = utils.SliceStringPointer(getInternalJSONConns(v2.CachesConns))
 	}
-	if !utils.SliceStringEqual(v1.ActionSConns, v2.ActionSConns) {
+	if !slices.Equal(v1.ActionSConns, v2.ActionSConns) {
 		d.Actions_conns = utils.SliceStringPointer(getInternalJSONConns(v2.ActionSConns))
 	}
 	gc1 := string(v1.GapiCredentials)

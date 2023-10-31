@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package config
 
 import (
+	"slices"
 	"time"
 
 	"github.com/cgrates/birpc/context"
@@ -97,7 +98,7 @@ func (erS ERsCfg) Clone() (cln *ERsCfg) {
 		PartialCacheTTL: erS.PartialCacheTTL,
 	}
 	if erS.SessionSConns != nil {
-		cln.SessionSConns = utils.CloneStringSlice(erS.SessionSConns)
+		cln.SessionSConns = slices.Clone(erS.SessionSConns)
 	}
 	for idx, rdr := range erS.Readers {
 		cln.Readers[idx] = rdr.Clone()
@@ -480,7 +481,7 @@ func (er *EventReaderCfg) loadFromJSONCfg(jsnCfg *EventReaderJsonCfg, msgTemplat
 		er.Timezone = *jsnCfg.Timezone
 	}
 	if jsnCfg.Filters != nil {
-		er.Filters = utils.CloneStringSlice(*jsnCfg.Filters)
+		er.Filters = slices.Clone(*jsnCfg.Filters)
 	}
 	if jsnCfg.Flags != nil {
 		er.Flags = utils.FlagsWithParamsFromSlice(*jsnCfg.Flags)
@@ -821,7 +822,7 @@ func (er EventReaderCfg) Clone() (cln *EventReaderCfg) {
 		Opts:           er.Opts.Clone(),
 	}
 	if er.Filters != nil {
-		cln.Filters = utils.CloneStringSlice(er.Filters)
+		cln.Filters = slices.Clone(er.Filters)
 	}
 	if er.Fields != nil {
 		cln.Fields = make([]*FCTemplate, len(er.Fields))
@@ -1796,12 +1797,12 @@ func diffEventReaderJsonCfg(d *EventReaderJsonCfg, v1, v2 *EventReaderCfg, separ
 	if v1.Timezone != v2.Timezone {
 		d.Timezone = utils.StringPointer(v2.Timezone)
 	}
-	if !utils.SliceStringEqual(v1.Filters, v2.Filters) {
+	if !slices.Equal(v1.Filters, v2.Filters) {
 		d.Filters = &v2.Filters
 	}
 	flgs1 := v1.Flags.SliceFlags()
 	flgs2 := v2.Flags.SliceFlags()
-	if !utils.SliceStringEqual(flgs1, flgs2) {
+	if !slices.Equal(flgs1, flgs2) {
 		d.Flags = &flgs2
 	}
 	var flds []*FcTemplateJsonCfg
@@ -1886,7 +1887,7 @@ func diffERsJsonCfg(d *ERsJsonCfg, v1, v2 *ERsCfg, separator string) *ERsJsonCfg
 	if v1.Enabled != v2.Enabled {
 		d.Enabled = utils.BoolPointer(v2.Enabled)
 	}
-	if !utils.SliceStringEqual(v1.SessionSConns, v2.SessionSConns) {
+	if !slices.Equal(v1.SessionSConns, v2.SessionSConns) {
 		d.Sessions_conns = utils.SliceStringPointer(getInternalJSONConns(v2.SessionSConns))
 	}
 	if v1.PartialCacheTTL != v2.PartialCacheTTL {

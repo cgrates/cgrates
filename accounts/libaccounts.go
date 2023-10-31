@@ -21,6 +21,7 @@ package accounts
 import (
 	"errors"
 	"fmt"
+	"slices"
 
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
@@ -115,7 +116,7 @@ func rateSCostForEvent(ctx *context.Context, connMgr *engine.ConnManager, cgrEv 
 		return nil, utils.NewErrNotConnected(utils.RateS)
 	}
 	tmp := cgrEv.APIOpts[utils.OptsRatesProfileIDs]
-	cgrEv.APIOpts[utils.OptsRatesProfileIDs] = utils.CloneStringSlice(rpIDs)
+	cgrEv.APIOpts[utils.OptsRatesProfileIDs] = slices.Clone(rpIDs)
 	var tmpReply utils.RateProfileCost
 	err = connMgr.Call(ctx, rateSConns, utils.RateSv1CostForEvent,
 		cgrEv, &tmpReply)

@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package config
 
 import (
+	"slices"
 	"time"
 
 	"github.com/cgrates/birpc/context"
@@ -86,7 +87,7 @@ func (dps *RegistrarCCfg) loadFromJSONCfg(jsnCfg *RegistrarCJsonCfg) (err error)
 		return nil
 	}
 	if jsnCfg.Registrars_conns != nil {
-		dps.RegistrarSConns = utils.CloneStringSlice(*jsnCfg.Registrars_conns)
+		dps.RegistrarSConns = slices.Clone(*jsnCfg.Registrars_conns)
 	}
 	if jsnCfg.Hosts != nil {
 		for _, hostJSON := range jsnCfg.Hosts {
@@ -110,7 +111,7 @@ func (dps *RegistrarCCfg) loadFromJSONCfg(jsnCfg *RegistrarCJsonCfg) (err error)
 // AsMapInterface returns the config as a map[string]any
 func (dps *RegistrarCCfg) AsMapInterface() (initialMP map[string]any) {
 	initialMP = map[string]any{
-		utils.RegistrarsConnsCfg: utils.CloneStringSlice(dps.RegistrarSConns),
+		utils.RegistrarsConnsCfg: slices.Clone(dps.RegistrarSConns),
 		utils.RefreshIntervalCfg: dps.RefreshInterval.String(),
 	}
 	if dps.RefreshInterval == 0 {
@@ -138,7 +139,7 @@ func (dps RegistrarCCfg) Clone() (cln *RegistrarCCfg) {
 		Hosts:           make(map[string][]*RemoteHost),
 	}
 	if dps.RegistrarSConns != nil {
-		cln.RegistrarSConns = utils.CloneStringSlice(dps.RegistrarSConns)
+		cln.RegistrarSConns = slices.Clone(dps.RegistrarSConns)
 	}
 	for tnt, hosts := range dps.Hosts {
 		clnH := make([]*RemoteHost, len(hosts))
@@ -160,8 +161,8 @@ func diffRegistrarCJsonCfg(d *RegistrarCJsonCfg, v1, v2 *RegistrarCCfg) *Registr
 	if d == nil {
 		d = new(RegistrarCJsonCfg)
 	}
-	if !utils.SliceStringEqual(v1.RegistrarSConns, v2.RegistrarSConns) {
-		d.Registrars_conns = utils.SliceStringPointer(utils.CloneStringSlice(v2.RegistrarSConns))
+	if !slices.Equal(v1.RegistrarSConns, v2.RegistrarSConns) {
+		d.Registrars_conns = utils.SliceStringPointer(slices.Clone(v2.RegistrarSConns))
 	}
 	if d.Hosts == nil {
 		d.Hosts = []*RemoteHostJsonWithTenant{}

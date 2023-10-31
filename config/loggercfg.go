@@ -19,6 +19,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package config
 
 import (
+	"slices"
+
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -161,7 +163,7 @@ func diffLoggerJsonCfg(d *LoggerJsonCfg, v1, v2 *LoggerCfg) *LoggerJsonCfg {
 	if v1.Level != v2.Level {
 		d.Level = utils.IntPointer(v2.Level)
 	}
-	if !utils.SliceStringEqual(v1.EFsConns, v2.EFsConns) {
+	if !slices.Equal(v1.EFsConns, v2.EFsConns) {
 		d.Efs_conns = utils.SliceStringPointer(getInternalJSONConns(v2.EFsConns))
 	}
 	d.Opts = diffLoggerOptsJsonCfg(d.Opts, v1.Opts, v2.Opts)

@@ -23,6 +23,7 @@ import (
 	"net"
 	"reflect"
 	"regexp"
+	"slices"
 	"strconv"
 	"strings"
 	"time"
@@ -292,7 +293,7 @@ func (fltr *FilterRule) IsValid() bool {
 	if fltr.Element == utils.EmptyString {
 		return fltr.Type == utils.MetaNever
 	}
-	if len(fltr.Values) == 0 && !utils.IsSliceMember([]string{utils.MetaExists, utils.MetaNotExists,
+	if len(fltr.Values) == 0 && !slices.Contains([]string{utils.MetaExists, utils.MetaNotExists,
 		utils.MetaEmpty, utils.MetaNotEmpty}, fltr.Type) {
 		return false
 	}

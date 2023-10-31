@@ -24,6 +24,7 @@ package apis
 import (
 	"path"
 	"reflect"
+	"slices"
 	"sort"
 	"testing"
 
@@ -313,7 +314,7 @@ func testChargersGetChargerProfileIDsAfterSet(t *testing.T) {
 		t.Error(err)
 	} else {
 		sort.Strings(replyChargerProfileIDs)
-		if !utils.SliceStringEqual(replyChargerProfileIDs, expectedIDs) {
+		if !slices.Equal(replyChargerProfileIDs, expectedIDs) {
 			t.Errorf("expected: <%+v>, \nreceived: <%+v>", expectedIDs, replyChargerProfileIDs)
 		}
 	}
@@ -327,7 +328,7 @@ func testChargersGetChargerProfileIDsAfterSet(t *testing.T) {
 		t.Error(err)
 	} else {
 		sort.Strings(replyChargerProfileIDs)
-		if !utils.SliceStringEqual(replyChargerProfileIDs, expectedIDs) {
+		if !slices.Equal(replyChargerProfileIDs, expectedIDs) {
 			t.Errorf("expected: <%+v>, \nreceived: <%+v>", expectedIDs, replyChargerProfileIDs)
 		}
 	}
@@ -341,7 +342,7 @@ func testChargersGetChargerProfileIDsAfterSet(t *testing.T) {
 		t.Error(err)
 	} else {
 		sort.Strings(replyChargerProfileIDs)
-		if !utils.SliceStringEqual(replyChargerProfileIDs, expectedIDs) {
+		if !slices.Equal(replyChargerProfileIDs, expectedIDs) {
 			t.Errorf("expected: <%+v>, \nreceived: <%+v>", expectedIDs, replyChargerProfileIDs)
 		}
 	}
@@ -505,7 +506,7 @@ func testChargersGetChargerProfileIDsAfterRemove(t *testing.T) {
 		t.Error(err)
 	} else {
 		sort.Strings(replyChargerProfileIDs)
-		if !utils.SliceStringEqual(replyChargerProfileIDs, expectedIDs) {
+		if !slices.Equal(replyChargerProfileIDs, expectedIDs) {
 			t.Errorf("expected: <%+v>, \nreceived: <%+v>", expectedIDs, replyChargerProfileIDs)
 		}
 	}
@@ -519,7 +520,7 @@ func testChargersGetChargerProfileIDsAfterRemove(t *testing.T) {
 		t.Error(err)
 	} else {
 		sort.Strings(replyChargerProfileIDs)
-		if !utils.SliceStringEqual(replyChargerProfileIDs, expectedIDs) {
+		if !slices.Equal(replyChargerProfileIDs, expectedIDs) {
 			t.Errorf("expected: <%+v>, \nreceived: <%+v>", expectedIDs, replyChargerProfileIDs)
 		}
 	}
@@ -533,7 +534,7 @@ func testChargersGetChargerProfileIDsAfterRemove(t *testing.T) {
 		t.Error(err)
 	} else {
 		sort.Strings(replyChargerProfileIDs)
-		if !utils.SliceStringEqual(replyChargerProfileIDs, expectedIDs) {
+		if !slices.Equal(replyChargerProfileIDs, expectedIDs) {
 			t.Errorf("expected: <%+v>, \nreceived: <%+v>", expectedIDs, replyChargerProfileIDs)
 		}
 	}
@@ -851,7 +852,7 @@ func testChargersBlockerRemoveChargerProfiles(t *testing.T) {
 		t.Fatal(err)
 	} else {
 		sort.Strings(chargerProfileIDs)
-		if !utils.SliceStringEqual(chargerProfileIDs, expected) {
+		if !slices.Equal(chargerProfileIDs, expected) {
 			t.Errorf("expected: <%+v>, \nreceived: <%+v>", expected, chargerProfileIDs)
 		}
 	}

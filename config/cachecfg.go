@@ -20,6 +20,7 @@ package config
 
 import (
 	"fmt"
+	"slices"
 	"time"
 
 	"github.com/cgrates/birpc/context"
@@ -175,10 +176,10 @@ func (cCfg CacheCfg) Clone() (cln *CacheCfg) {
 		cln.Partitions[key] = par.Clone()
 	}
 	if cCfg.ReplicationConns != nil {
-		cln.ReplicationConns = utils.CloneStringSlice(cCfg.ReplicationConns)
+		cln.ReplicationConns = slices.Clone(cCfg.ReplicationConns)
 	}
 	if cCfg.RemoteConns != nil {
-		cln.RemoteConns = utils.CloneStringSlice(cCfg.RemoteConns)
+		cln.RemoteConns = slices.Clone(cCfg.RemoteConns)
 	}
 	return
 }
@@ -220,10 +221,10 @@ func diffCacheJsonCfg(d *CacheJsonCfg, v1, v2 *CacheCfg) *CacheJsonCfg {
 		d = new(CacheJsonCfg)
 	}
 	d.Partitions = diffCacheParamsJsonCfg(d.Partitions, v2.Partitions)
-	if !utils.SliceStringEqual(v1.ReplicationConns, v2.ReplicationConns) {
+	if !slices.Equal(v1.ReplicationConns, v2.ReplicationConns) {
 		d.Replication_conns = &v2.ReplicationConns
 	}
-	if !utils.SliceStringEqual(v1.RemoteConns, v2.RemoteConns) {
+	if !slices.Equal(v1.RemoteConns, v2.RemoteConns) {
 		d.Remote_conns = &v2.RemoteConns
 	}
 	return d

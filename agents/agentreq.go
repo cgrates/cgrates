@@ -20,6 +20,7 @@ package agents
 
 import (
 	"fmt"
+	"slices"
 	"strings"
 
 	"github.com/cgrates/birpc/context"
@@ -230,7 +231,7 @@ func (ar *AgentRequest) SetFields(tplFlds []*config.FCTemplate) (err error) {
 				return
 			} else if fullPath == nil { // no dynamic path
 				fullPath = &utils.FullPath{
-					PathSlice: utils.CloneStringSlice(tplFld.GetPathSlice()), // need to clone so me do not modify the template
+					PathSlice: slices.Clone(tplFld.GetPathSlice()), // need to clone so me do not modify the template
 					Path:      tplFld.Path,
 				}
 			}
@@ -321,14 +322,14 @@ func (ar *AgentRequest) Remove(fullPath *utils.FullPath) error {
 	default:
 		return fmt.Errorf("unsupported field prefix: <%s> when set fields", fullPath.PathSlice[0])
 	case utils.MetaVars:
-		return ar.Vars.Remove(utils.CloneStringSlice(fullPath.PathSlice[1:]))
+		return ar.Vars.Remove(slices.Clone(fullPath.PathSlice[1:]))
 	case utils.MetaCgreq:
 		return ar.CGRRequest.Remove(&utils.FullPath{
 			PathSlice: fullPath.PathSlice[1:],
 			Path:      fullPath.Path[7:],
 		})
 	case utils.MetaCgrep:
-		return ar.CGRReply.Remove(utils.CloneStringSlice(fullPath.PathSlice[1:]))
+		return ar.CGRReply.Remove(slices.Clone(fullPath.PathSlice[1:]))
 	case utils.MetaRep:
 		return ar.Reply.Remove(&utils.FullPath{
 			PathSlice: fullPath.PathSlice[1:],
@@ -340,7 +341,7 @@ func (ar *AgentRequest) Remove(fullPath *utils.FullPath) error {
 			Path:      fullPath.Path[9:],
 		})
 	case utils.MetaTmp:
-		return ar.tmp.Remove(utils.CloneStringSlice(fullPath.PathSlice[1:]))
+		return ar.tmp.Remove(slices.Clone(fullPath.PathSlice[1:]))
 	case utils.MetaOpts:
 		return ar.Opts.Remove(fullPath.PathSlice[1:])
 	case utils.MetaUCH:

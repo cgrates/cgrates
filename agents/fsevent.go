@@ -20,6 +20,7 @@ package agents
 
 import (
 	"fmt"
+	"slices"
 	"strconv"
 	"strings"
 	"time"
@@ -230,7 +231,7 @@ func (fsev FSEvent) GetDuration(fieldName string) (time.Duration, error) {
 
 func (fsev FSEvent) GetPdd(fieldName string) (time.Duration, error) {
 	var PDDStr string
-	if utils.SliceHasMember([]string{utils.MetaDefault, utils.PDD}, fieldName) {
+	if slices.Contains([]string{utils.MetaDefault, utils.PDD}, fieldName) {
 		PDDStr = utils.FirstNonEmpty(fsev[PDD_MEDIA_MS], fsev[PDD_NOMEDIA_MS])
 		if len(PDDStr) != 0 {
 			PDDStr = PDDStr + "ms" // PDD is in milliseconds and CGR expects it in seconds
@@ -245,7 +246,7 @@ func (fsev FSEvent) GetPdd(fieldName string) (time.Duration, error) {
 
 func (fsev FSEvent) GetADC(fieldName string) (time.Duration, error) {
 	var ACDStr string
-	if utils.SliceHasMember([]string{utils.MetaDefault, utils.ACD}, fieldName) {
+	if slices.Contains([]string{utils.MetaDefault, utils.ACD}, fieldName) {
 		ACDStr = utils.FirstNonEmpty(fsev[VarCGRACD])
 		if len(ACDStr) != 0 {
 			ACDStr = ACDStr + "s" //  ACD is in seconds and CGR expects it in seconds

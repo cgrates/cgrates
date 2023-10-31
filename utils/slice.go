@@ -19,22 +19,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package utils
 
 import (
-	"sort"
 	"strings"
 )
-
-// Binary string search in slice
-func IsSliceMember(ss []string, s string) bool {
-	sort.Strings(ss)
-	return SliceHasMember(ss, s)
-}
-
-// SliceHasMember searches within a *sorted* slice
-// useful to search in shared vars (no slice sort)
-func SliceHasMember(ss []string, s string) bool {
-	i := sort.SearchStrings(ss, s)
-	return i < len(ss) && ss[i] == s
-}
 
 // PrefixSliceItems iterates through slice and add a prefix before every element
 func PrefixSliceItems(prfx string, slc []string) (out []string) {
@@ -56,13 +42,6 @@ func SliceStringToIface(slc []string) (ifc []any) {
 	return
 }
 
-// Float64SliceHasMember searches within a *sorted* slice
-// useful to search in shared vars (no slice sort)
-func Float64SliceHasMember(ss []float64, s float64) bool {
-	i := sort.SearchFloat64s(ss, s)
-	return i < len(ss) && ss[i] == s
-}
-
 // HasPrefixSlice iterates over slice members and returns true if one the element has that prefix
 func HasPrefixSlice(prfxs []string, el string) bool {
 	for _, prfx := range prfxs {
@@ -71,24 +50,4 @@ func HasPrefixSlice(prfxs []string, el string) bool {
 		}
 	}
 	return false
-}
-
-func CloneStringSlice(in []string) (cl []string) {
-	if in != nil {
-		cl = make([]string, len(in))
-		copy(cl, in)
-	}
-	return
-}
-
-func SliceStringEqual(v1, v2 []string) bool {
-	if len(v1) != len(v2) {
-		return false
-	}
-	for i := range v1 {
-		if v1[i] != v2[i] {
-			return false
-		}
-	}
-	return true
 }

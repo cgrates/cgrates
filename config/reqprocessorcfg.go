@@ -18,7 +18,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package config
 
-import "github.com/cgrates/cgrates/utils"
+import (
+	"slices"
+
+	"github.com/cgrates/cgrates/utils"
+)
 
 // RequestProcessor is the request processor configuration
 type RequestProcessor struct {
@@ -39,7 +43,7 @@ func (rp *RequestProcessor) loadFromJSONCfg(jsnCfg *ReqProcessorJsnCfg, sep stri
 		rp.ID = *jsnCfg.ID
 	}
 	if jsnCfg.Filters != nil {
-		rp.Filters = utils.CloneStringSlice(*jsnCfg.Filters)
+		rp.Filters = slices.Clone(*jsnCfg.Filters)
 	}
 	if jsnCfg.Flags != nil {
 		rp.Flags = utils.FlagsWithParamsFromSlice(*jsnCfg.Flags)
@@ -69,7 +73,7 @@ func (rp *RequestProcessor) loadFromJSONCfg(jsnCfg *ReqProcessorJsnCfg, sep stri
 func (rp *RequestProcessor) AsMapInterface(separator string) (initialMP map[string]any) {
 	initialMP = map[string]any{
 		utils.IDCfg:       rp.ID,
-		utils.FiltersCfg:  utils.CloneStringSlice(rp.Filters),
+		utils.FiltersCfg:  slices.Clone(rp.Filters),
 		utils.FlagsCfg:    rp.Flags.SliceFlags(),
 		utils.TimezoneCfg: rp.Timezone,
 	}
@@ -102,7 +106,7 @@ func (rp RequestProcessor) Clone() (cln *RequestProcessor) {
 		Timezone: rp.Timezone,
 	}
 	if rp.Filters != nil {
-		cln.Filters = utils.CloneStringSlice(rp.Filters)
+		cln.Filters = slices.Clone(rp.Filters)
 	}
 	if rp.RequestFields != nil {
 		cln.RequestFields = make([]*FCTemplate, len(rp.RequestFields))
@@ -141,12 +145,12 @@ func diffReqProcessorJsnCfg(d *ReqProcessorJsnCfg, v1, v2 *RequestProcessor, sep
 	if tnt1 != tnt2 {
 		d.Tenant = utils.StringPointer(tnt2)
 	}
-	if !utils.SliceStringEqual(v1.Filters, v2.Filters) {
-		d.Filters = utils.SliceStringPointer(utils.CloneStringSlice(v2.Filters))
+	if !slices.Equal(v1.Filters, v2.Filters) {
+		d.Filters = utils.SliceStringPointer(slices.Clone(v2.Filters))
 	}
 	flag1 := v1.Flags.SliceFlags()
 	flag2 := v2.Flags.SliceFlags()
-	if !utils.SliceStringEqual(flag1, flag2) {
+	if !slices.Equal(flag1, flag2) {
 		d.Flags = utils.SliceStringPointer(flag2)
 	}
 	if v1.Timezone != v2.Timezone {
@@ -236,9 +240,9 @@ func equalsRequestProcessors(v1, v2 []*RequestProcessor) bool {
 	}
 	for i := range v2 {
 		if v1[i].ID != v2[i].ID ||
-			!utils.SliceStringEqual(v1[i].Tenant.AsStringSlice(), v2[i].Tenant.AsStringSlice()) ||
-			!utils.SliceStringEqual(v1[i].Filters, v2[i].Filters) ||
-			!utils.SliceStringEqual(v1[i].Flags.SliceFlags(), v2[i].Flags.SliceFlags()) ||
+			!slices.Equal(v1[i].Tenant.AsStringSlice(), v2[i].Tenant.AsStringSlice()) ||
+			!slices.Equal(v1[i].Filters, v2[i].Filters) ||
+			!slices.Equal(v1[i].Flags.SliceFlags(), v2[i].Flags.SliceFlags()) ||
 			v1[i].Timezone != v2[i].Timezone ||
 			!fcTemplatesEqual(v1[i].RequestFields, v2[i].RequestFields) ||
 			!fcTemplatesEqual(v1[i].ReplyFields, v2[i].ReplyFields) {

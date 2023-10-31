@@ -24,6 +24,7 @@ package apis
 import (
 	"path"
 	"reflect"
+	"slices"
 	"sort"
 	"testing"
 	"time"
@@ -373,7 +374,7 @@ func testAttributesGetAttributeProfileIDsAfterSet(t *testing.T) {
 		t.Error(err)
 	} else {
 		sort.Strings(replyAttributeProfileIDs)
-		if !utils.SliceStringEqual(replyAttributeProfileIDs, expectedIDs) {
+		if !slices.Equal(replyAttributeProfileIDs, expectedIDs) {
 			t.Errorf("expected: <%+v>, \nreceived: <%+v>", expectedIDs, replyAttributeProfileIDs)
 		}
 	}
@@ -387,7 +388,7 @@ func testAttributesGetAttributeProfileIDsAfterSet(t *testing.T) {
 		t.Error(err)
 	} else {
 		sort.Strings(replyAttributeProfileIDs)
-		if !utils.SliceStringEqual(replyAttributeProfileIDs, expectedIDs) {
+		if !slices.Equal(replyAttributeProfileIDs, expectedIDs) {
 			t.Errorf("expected: <%+v>, \nreceived: <%+v>", expectedIDs, replyAttributeProfileIDs)
 		}
 	}
@@ -401,7 +402,7 @@ func testAttributesGetAttributeProfileIDsAfterSet(t *testing.T) {
 		t.Error(err)
 	} else {
 		sort.Strings(replyAttributeProfileIDs)
-		if !utils.SliceStringEqual(replyAttributeProfileIDs, expectedIDs) {
+		if !slices.Equal(replyAttributeProfileIDs, expectedIDs) {
 			t.Errorf("expected: <%+v>, \nreceived: <%+v>", expectedIDs, replyAttributeProfileIDs)
 		}
 	}
@@ -595,7 +596,7 @@ func testAttributesGetAttributeProfileIDsAfterRemove(t *testing.T) {
 		t.Error(err)
 	} else {
 		sort.Strings(replyAttributeProfileIDs)
-		if !utils.SliceStringEqual(replyAttributeProfileIDs, expectedIDs) {
+		if !slices.Equal(replyAttributeProfileIDs, expectedIDs) {
 			t.Errorf("expected: <%+v>, \nreceived: <%+v>", expectedIDs, replyAttributeProfileIDs)
 		}
 	}
@@ -609,7 +610,7 @@ func testAttributesGetAttributeProfileIDsAfterRemove(t *testing.T) {
 		t.Error(err)
 	} else {
 		sort.Strings(replyAttributeProfileIDs)
-		if !utils.SliceStringEqual(replyAttributeProfileIDs, expectedIDs) {
+		if !slices.Equal(replyAttributeProfileIDs, expectedIDs) {
 			t.Errorf("expected: <%+v>, \nreceived: <%+v>", expectedIDs, replyAttributeProfileIDs)
 		}
 	}
@@ -623,7 +624,7 @@ func testAttributesGetAttributeProfileIDsAfterRemove(t *testing.T) {
 		t.Error(err)
 	} else {
 		sort.Strings(replyAttributeProfileIDs)
-		if !utils.SliceStringEqual(replyAttributeProfileIDs, expectedIDs) {
+		if !slices.Equal(replyAttributeProfileIDs, expectedIDs) {
 			t.Errorf("expected: <%+v>, \nreceived: <%+v>", expectedIDs, replyAttributeProfileIDs)
 		}
 	}

@@ -19,6 +19,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package config
 
 import (
+	"slices"
+
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -122,7 +124,7 @@ func (ra RadiusAgentCfg) Clone() (cln *RadiusAgentCfg) {
 		ClientDictionaries: make(map[string]string),
 	}
 	if ra.SessionSConns != nil {
-		cln.SessionSConns = utils.CloneStringSlice(ra.SessionSConns)
+		cln.SessionSConns = slices.Clone(ra.SessionSConns)
 	}
 	for k, v := range ra.ClientSecrets {
 		cln.ClientSecrets[k] = v
@@ -169,7 +171,7 @@ func diffRadiusAgentJsonCfg(d *RadiusAgentJsonCfg, v1, v2 *RadiusAgentCfg, separ
 	}
 	d.Client_secrets = diffMapString(d.Client_secrets, v1.ClientSecrets, v2.ClientSecrets)
 	d.Client_dictionaries = diffMapString(d.Client_dictionaries, v1.ClientDictionaries, v2.ClientDictionaries)
-	if !utils.SliceStringEqual(v1.SessionSConns, v2.SessionSConns) {
+	if !slices.Equal(v1.SessionSConns, v2.SessionSConns) {
 		d.Sessions_conns = utils.SliceStringPointer(getBiRPCInternalJSONConns(v2.SessionSConns))
 	}
 	d.Request_processors = diffReqProcessorsJsnCfg(d.Request_processors, v1.RequestProcessors, v2.RequestProcessors, separator)

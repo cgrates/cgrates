@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package config
 
 import (
+	"slices"
 	"time"
 
 	"github.com/cgrates/birpc/context"
@@ -149,7 +150,7 @@ func (ka KamAgentCfg) Clone() (cln *KamAgentCfg) {
 		Timezone:  ka.Timezone,
 	}
 	if ka.SessionSConns != nil {
-		cln.SessionSConns = utils.CloneStringSlice(ka.SessionSConns)
+		cln.SessionSConns = slices.Clone(ka.SessionSConns)
 	}
 	if ka.EvapiConns != nil {
 		cln.EvapiConns = make([]*KamConnCfg, len(ka.EvapiConns))
@@ -216,7 +217,7 @@ func diffKamAgentJsonCfg(d *KamAgentJsonCfg, v1, v2 *KamAgentCfg) *KamAgentJsonC
 	if v1.Enabled != v2.Enabled {
 		d.Enabled = utils.BoolPointer(v2.Enabled)
 	}
-	if !utils.SliceStringEqual(v1.SessionSConns, v2.SessionSConns) {
+	if !slices.Equal(v1.SessionSConns, v2.SessionSConns) {
 		d.Sessions_conns = utils.SliceStringPointer(getBiRPCInternalJSONConns(v2.SessionSConns))
 	}
 	if v1.CreateCdr != v2.CreateCdr {

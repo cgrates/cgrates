@@ -19,6 +19,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package config
 
 import (
+	"slices"
+
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -165,7 +167,7 @@ func (cdrscfg CdrsCfg) AsMapInterface(string) any {
 		utils.SMCostRetriesCfg:    cdrscfg.SMCostRetries,
 		utils.StoreCdrsCfg:        cdrscfg.StoreCdrs,
 		utils.ExtraFieldsCfg:      cdrscfg.ExtraFields.AsStringSlice(),
-		utils.OnlineCDRExportsCfg: utils.CloneStringSlice(cdrscfg.OnlineCDRExports),
+		utils.OnlineCDRExportsCfg: slices.Clone(cdrscfg.OnlineCDRExports),
 		utils.OptsCfg:             opts,
 	}
 
@@ -249,31 +251,31 @@ func (cdrscfg CdrsCfg) Clone() (cln *CdrsCfg) {
 		Opts:          cdrscfg.Opts.Clone(),
 	}
 	if cdrscfg.ChargerSConns != nil {
-		cln.ChargerSConns = utils.CloneStringSlice(cdrscfg.ChargerSConns)
+		cln.ChargerSConns = slices.Clone(cdrscfg.ChargerSConns)
 	}
 	if cdrscfg.AttributeSConns != nil {
-		cln.AttributeSConns = utils.CloneStringSlice(cdrscfg.AttributeSConns)
+		cln.AttributeSConns = slices.Clone(cdrscfg.AttributeSConns)
 	}
 	if cdrscfg.ThresholdSConns != nil {
-		cln.ThresholdSConns = utils.CloneStringSlice(cdrscfg.ThresholdSConns)
+		cln.ThresholdSConns = slices.Clone(cdrscfg.ThresholdSConns)
 	}
 	if cdrscfg.StatSConns != nil {
-		cln.StatSConns = utils.CloneStringSlice(cdrscfg.StatSConns)
+		cln.StatSConns = slices.Clone(cdrscfg.StatSConns)
 	}
 	if cdrscfg.OnlineCDRExports != nil {
-		cln.OnlineCDRExports = utils.CloneStringSlice(cdrscfg.OnlineCDRExports)
+		cln.OnlineCDRExports = slices.Clone(cdrscfg.OnlineCDRExports)
 	}
 	if cdrscfg.ActionSConns != nil {
-		cln.ActionSConns = utils.CloneStringSlice(cdrscfg.ActionSConns)
+		cln.ActionSConns = slices.Clone(cdrscfg.ActionSConns)
 	}
 	if cdrscfg.EEsConns != nil {
-		cln.EEsConns = utils.CloneStringSlice(cdrscfg.EEsConns)
+		cln.EEsConns = slices.Clone(cdrscfg.EEsConns)
 	}
 	if cdrscfg.RateSConns != nil {
-		cln.RateSConns = utils.CloneStringSlice(cdrscfg.RateSConns)
+		cln.RateSConns = slices.Clone(cdrscfg.RateSConns)
 	}
 	if cdrscfg.AccountSConns != nil {
-		cln.AccountSConns = utils.CloneStringSlice(cdrscfg.AccountSConns)
+		cln.AccountSConns = slices.Clone(cdrscfg.AccountSConns)
 	}
 
 	return
@@ -344,7 +346,7 @@ func diffCdrsJsonCfg(d *CdrsJsonCfg, v1, v2 *CdrsCfg) *CdrsJsonCfg {
 	}
 	extra1 := v1.ExtraFields.AsStringSlice()
 	extra2 := v2.ExtraFields.AsStringSlice()
-	if !utils.SliceStringEqual(extra1, extra2) {
+	if !slices.Equal(extra1, extra2) {
 		d.Extra_fields = &extra2
 	}
 	if v1.StoreCdrs != v2.StoreCdrs {
@@ -353,31 +355,31 @@ func diffCdrsJsonCfg(d *CdrsJsonCfg, v1, v2 *CdrsCfg) *CdrsJsonCfg {
 	if v1.SMCostRetries != v2.SMCostRetries {
 		d.Session_cost_retries = utils.IntPointer(v2.SMCostRetries)
 	}
-	if !utils.SliceStringEqual(v1.ChargerSConns, v2.ChargerSConns) {
+	if !slices.Equal(v1.ChargerSConns, v2.ChargerSConns) {
 		d.Chargers_conns = utils.SliceStringPointer(getInternalJSONConns(v2.ChargerSConns))
 	}
-	if !utils.SliceStringEqual(v1.AttributeSConns, v2.AttributeSConns) {
+	if !slices.Equal(v1.AttributeSConns, v2.AttributeSConns) {
 		d.Attributes_conns = utils.SliceStringPointer(getInternalJSONConns(v2.AttributeSConns))
 	}
-	if !utils.SliceStringEqual(v1.ThresholdSConns, v2.ThresholdSConns) {
+	if !slices.Equal(v1.ThresholdSConns, v2.ThresholdSConns) {
 		d.Thresholds_conns = utils.SliceStringPointer(getInternalJSONConns(v2.ThresholdSConns))
 	}
-	if !utils.SliceStringEqual(v1.StatSConns, v2.StatSConns) {
+	if !slices.Equal(v1.StatSConns, v2.StatSConns) {
 		d.Stats_conns = utils.SliceStringPointer(getInternalJSONConns(v2.StatSConns))
 	}
-	if !utils.SliceStringEqual(v1.OnlineCDRExports, v2.OnlineCDRExports) {
+	if !slices.Equal(v1.OnlineCDRExports, v2.OnlineCDRExports) {
 		d.Online_cdr_exports = &v2.OnlineCDRExports
 	}
-	if !utils.SliceStringEqual(v1.ActionSConns, v2.ActionSConns) {
+	if !slices.Equal(v1.ActionSConns, v2.ActionSConns) {
 		d.Actions_conns = utils.SliceStringPointer(getInternalJSONConns(v2.ActionSConns))
 	}
-	if !utils.SliceStringEqual(v1.EEsConns, v2.EEsConns) {
+	if !slices.Equal(v1.EEsConns, v2.EEsConns) {
 		d.Ees_conns = utils.SliceStringPointer(getInternalJSONConns(v2.EEsConns))
 	}
-	if !utils.SliceStringEqual(v1.RateSConns, v2.RateSConns) {
+	if !slices.Equal(v1.RateSConns, v2.RateSConns) {
 		d.Rates_conns = utils.SliceStringPointer(getInternalJSONConns(v2.RateSConns))
 	}
-	if !utils.SliceStringEqual(v1.AccountSConns, v2.AccountSConns) {
+	if !slices.Equal(v1.AccountSConns, v2.AccountSConns) {
 		d.Accounts_conns = utils.SliceStringPointer(getInternalJSONConns(v2.AccountSConns))
 	}
 	d.Opts = diffCdrsOptsJsonCfg(d.Opts, v1.Opts, v2.Opts)
