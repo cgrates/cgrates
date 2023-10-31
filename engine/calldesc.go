@@ -134,7 +134,6 @@ type CallDescriptor struct {
 	RunID               string
 	ForceDuration       bool // for Max debit if less than duration return err
 	PerformRounding     bool // flag for rating info rounding
-	DryRun              bool
 	DenyNegativeAccount bool // prevent account going on negative during debit
 	account             *Account
 	testCallcost        *CallCost // testing purpose only!
@@ -770,7 +769,7 @@ func (cd *CallDescriptor) Debit(fltrS *FilterS) (cc *CallCost, err error) {
 			}
 		}
 		return guardian.Guardian.Guard(func() (err error) {
-			cc, err = cd.debit(account, cd.DryRun, !cd.DenyNegativeAccount, fltrS)
+			cc, err = cd.debit(account, false, !cd.DenyNegativeAccount, fltrS)
 			if err == nil {
 				cc.AccountSummary = cd.AccountSummary(initialAcnt)
 			}
@@ -834,7 +833,7 @@ func (cd *CallDescriptor) MaxDebit(fltrS *FilterS) (cc *CallCost, err error) {
 				cd.TimeEnd = cd.TimeStart.Add(remainingDuration)
 				cd.DurationIndex -= initialDuration - remainingDuration
 			}
-			cc, err = cd.debit(account, cd.DryRun, !cd.DenyNegativeAccount, fltrS)
+			cc, err = cd.debit(account, false, !cd.DenyNegativeAccount, fltrS)
 			if err == nil {
 				cc.AccountSummary = cd.AccountSummary(initialAcnt)
 			}
@@ -998,7 +997,6 @@ func (cd *CallDescriptor) Clone() *CallDescriptor {
 		ToR:             cd.ToR,
 		ForceDuration:   cd.ForceDuration,
 		PerformRounding: cd.PerformRounding,
-		DryRun:          cd.DryRun,
 		CgrID:           cd.CgrID,
 		RunID:           cd.RunID,
 	}
