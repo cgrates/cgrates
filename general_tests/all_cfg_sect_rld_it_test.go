@@ -772,9 +772,13 @@ func testSectConfigSReloadRadiusAgent(t *testing.T) {
 		Tenant: "cgrates.org",
 		Config: `{"radius_agent": {
 			"enabled": true,
-			"listen_net": "udp",
-			"listen_auth": "127.0.0.1:1812",
-			"listen_acct": "127.0.0.1:1813",
+			"listeners":[
+				{
+					"network": "udp",
+					"auth_address": "127.0.0.1:1812",
+					"acct_address": "127.0.0.1:1813"
+				}
+			],	
 			"client_secrets": {
 				"*default": "CGRateS.org"
 			},
@@ -805,7 +809,7 @@ func testSectConfigSReloadRadiusAgent(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Errorf("Expected OK received: %+v", reply)
 	}
-	cfgStr := `{"radius_agent":{"client_dictionaries":{"*default":["/usr/share/cgrates/radius/dict/"]},"client_secrets":{"*default":"CGRateS.org"},"enabled":true,"listen_acct":"127.0.0.1:1813","listen_auth":"127.0.0.1:1812","listen_net":"udp","request_processors":[{"filters":[],"flags":["1"],"id":"cgrates","reply_fields":[{"path":"randomPath","tag":"randomPath"}],"request_fields":[{"path":"randomPath","tag":"randomPath"}],"tenant":"1","timezone":""}],"sessions_conns":["*internal"]}}`
+	cfgStr := `{"radius_agent":{"client_dictionaries":{"*default":["/usr/share/cgrates/radius/dict/"]},"client_secrets":{"*default":"CGRateS.org"},"enabled":true,"listeners":[{"acct_address":"127.0.0.1:1813","auth_address":"127.0.0.1:1812","network":"udp"}],"request_processors":[{"filters":[],"flags":["1"],"id":"cgrates","reply_fields":[{"path":"randomPath","tag":"randomPath"}],"request_fields":[{"path":"randomPath","tag":"randomPath"}],"tenant":"1","timezone":""}],"sessions_conns":["*internal"]}}`
 	var rpl string
 	if err := testSectRPC.Call(context.Background(), utils.ConfigSv1GetConfigAsJSON, &config.SectionWithAPIOpts{
 		Tenant:  "cgrates.org",
@@ -857,8 +861,12 @@ func testSectConfigSReloadDNSAgent(t *testing.T) {
 		Tenant: "cgrates.org",
 		Config: `{"dns_agent": {
 			"enabled": true,
-			"listen": "127.0.0.1:2053",
-			"listen_net": "udp",
+			"listeners":[
+				{
+					"address": "127.0.0.1:2053",							
+					"network": "udp"									
+				}
+			],
 			"sessions_conns": ["*internal"],
 			"timezone": "local",
 			"request_processors": [
