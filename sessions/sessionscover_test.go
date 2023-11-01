@@ -1007,6 +1007,28 @@ func TestDebitLoopSessionDisconnectSession(t *testing.T) {
 				CD:    &engine.CallDescriptor{},
 				EventCost: &engine.EventCost{
 					Usage: utils.DurationPointer(5 * time.Hour),
+					Timings: engine.ChargedTimings{
+						utils.MetaPause: &engine.ChargedTiming{},
+					},
+					RatingFilters: engine.RatingFilters{
+						utils.MetaPause: engine.RatingMatchedFilters{},
+					},
+					Rating: engine.Rating{
+						utils.MetaPause: &engine.RatingUnit{},
+					},
+					Rates: engine.ChargedRates{
+						utils.MetaPause: engine.RateGroups{},
+					},
+					Charges: []*engine.ChargingInterval{
+						{
+							Increments: []*engine.ChargingIncrement{
+								{},
+							},
+						},
+					},
+					Accounting: engine.Accounting{
+						utils.MetaPause: &engine.BalanceCharge{},
+					},
 				},
 				ExtraDuration: 1,
 				LastUsage:     2,
@@ -1021,6 +1043,7 @@ func TestDebitLoopSessionDisconnectSession(t *testing.T) {
 	if _, err := sessions.debitLoopSession(ss, 0, 2*time.Second); err != nil {
 		t.Error(err)
 	}
+	ss.Chargeable = false
 
 	//force disconnect
 	go func() {
