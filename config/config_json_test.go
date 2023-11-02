@@ -975,10 +975,14 @@ func TestDiameterAgentJsonCfg(t *testing.T) {
 
 func TestRadiusAgentJsonCfg(t *testing.T) {
 	eCfg := &RadiusAgentJsonCfg{
-		Enabled:     utils.BoolPointer(false),
-		Listen_net:  utils.StringPointer("udp"),
-		Listen_auth: utils.StringPointer("127.0.0.1:1812"),
-		Listen_acct: utils.StringPointer("127.0.0.1:1813"),
+		Enabled: utils.BoolPointer(false),
+		Listeners: &[]*RadiListenerJsnCfg{
+			{
+				Network:      utils.StringPointer(utils.UDP),
+				Auth_Address: utils.StringPointer("127.0.0.1:1812"),
+				Acct_Address: utils.StringPointer("127.0.0.1:1813"),
+			},
+		},
 		Client_secrets: utils.MapStringStringPointer(map[string]string{
 			utils.MetaDefault: "CGRateS.org",
 		}),
@@ -996,7 +1000,7 @@ func TestRadiusAgentJsonCfg(t *testing.T) {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCfg, cfg) {
 		rcv := *cfg.Request_processors
-		t.Errorf("Received: %+v", rcv)
+		t.Errorf("Expected <%+v>, \nReceived: \n<%+v>", eCfg.Request_processors, rcv)
 	}
 }
 
@@ -1016,7 +1020,7 @@ func TestHttpAgentJsonCfg(t *testing.T) {
 func TestDNSAgentJsonCfg(t *testing.T) {
 	eCfg := &DNSAgentJsonCfg{
 		Enabled: utils.BoolPointer(false),
-		Listeners: &[]*ListenerJsnCfg{
+		Listeners: &[]*DnsListenerJsnCfg{
 			{
 				Network: utils.StringPointer("udp"),
 				Address: utils.StringPointer("127.0.0.1:53"),

@@ -53,10 +53,6 @@ type RadiusAgent struct {
 	rad     *agents.RadiusAgent
 	connMgr *engine.ConnManager
 	srvDep  map[string]*sync.WaitGroup
-
-	lnet  string
-	lauth string
-	lacct string
 }
 
 // Start should handle the sercive start
@@ -70,10 +66,6 @@ func (rad *RadiusAgent) Start() (err error) {
 
 	rad.Lock()
 	defer rad.Unlock()
-
-	rad.lnet = rad.cfg.RadiusAgentCfg().ListenNet
-	rad.lauth = rad.cfg.RadiusAgentCfg().ListenAuth
-	rad.lacct = rad.cfg.RadiusAgentCfg().ListenAcct
 
 	if rad.rad, err = agents.NewRadiusAgent(rad.cfg, filterS, rad.connMgr); err != nil {
 		utils.Logger.Err(fmt.Sprintf("<%s> error: <%s>", utils.RadiusAgent, err.Error()))
@@ -96,27 +88,21 @@ func (rad *RadiusAgent) listenAndServe(r *agents.RadiusAgent) (err error) {
 
 // Reload handles the change of config
 func (rad *RadiusAgent) Reload() (err error) {
-	if rad.lnet == rad.cfg.RadiusAgentCfg().ListenNet &&
-		rad.lauth == rad.cfg.RadiusAgentCfg().ListenAuth &&
-		rad.lacct == rad.cfg.RadiusAgentCfg().ListenAcct {
-		return
-	}
-
-	rad.shutdown()
+	rad.Shutdown()
 	return rad.Start()
 }
 
 // Shutdown stops the service
 func (rad *RadiusAgent) Shutdown() (err error) {
-	rad.shutdown()
-	return // no shutdown for the momment
-}
-
-func (rad *RadiusAgent) shutdown() {
-	rad.Lock()
+	if rad.rad == nil {
+		return
+	}
 	close(rad.stopChan)
+	rad.rad.Wait()
+	rad.rad.Lock()
+	defer rad.rad.Unlock()
 	rad.rad = nil
-	rad.Unlock()
+	return // no shutdown for the momment
 }
 
 // IsRunning returns if the service is running

@@ -22,12 +22,16 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
+type RadiusListener struct {
+	AuthAddr string
+	AcctAddr string
+	Network  string // udp or tcp
+}
+
 // RadiusAgentCfg the config section that describes the Radius Agent
 type RadiusAgentCfg struct {
 	Enabled            bool
-	ListenNet          string // udp or tcp
-	ListenAuth         string
-	ListenAcct         string
+	Listeners          []RadiusListener
 	ClientSecrets      map[string]string
 	ClientDictionaries map[string][]string
 	SessionSConns      []string
@@ -41,14 +45,21 @@ func (ra *RadiusAgentCfg) loadFromJSONCfg(jsnCfg *RadiusAgentJsonCfg, separator 
 	if jsnCfg.Enabled != nil {
 		ra.Enabled = *jsnCfg.Enabled
 	}
-	if jsnCfg.Listen_net != nil {
-		ra.ListenNet = *jsnCfg.Listen_net
-	}
-	if jsnCfg.Listen_auth != nil {
-		ra.ListenAuth = *jsnCfg.Listen_auth
-	}
-	if jsnCfg.Listen_acct != nil {
-		ra.ListenAcct = *jsnCfg.Listen_acct
+	if jsnCfg.Listeners != nil {
+		ra.Listeners = make([]RadiusListener, 0, len(*jsnCfg.Listeners))
+		for _, listnr := range *jsnCfg.Listeners {
+			var ls RadiusListener
+			if listnr.Auth_Address != nil {
+				ls.AuthAddr = *listnr.Auth_Address
+			}
+			if listnr.Acct_Address != nil {
+				ls.AcctAddr = *listnr.Acct_Address
+			}
+			if listnr.Network != nil {
+				ls.Network = *listnr.Network
+			}
+			ra.Listeners = append(ra.Listeners, ls)
+		}
 	}
 	if jsnCfg.Client_secrets != nil {
 		if ra.ClientSecrets == nil {
@@ -99,13 +110,26 @@ func (ra *RadiusAgentCfg) loadFromJSONCfg(jsnCfg *RadiusAgentJsonCfg, separator 
 }
 
 // AsMapInterface returns the config as a map[string]any
+func (lstn *RadiusListener) AsMapInterface(separator string) map[string]any {
+	return map[string]any{
+		utils.AuthAddrCfg: lstn.AuthAddr,
+		utils.AcctAddrCfg: lstn.AcctAddr,
+		utils.NetworkCfg:  lstn.Network,
+	}
+
+}
+
+// AsMapInterface returns the config as a map[string]any
 func (ra *RadiusAgentCfg) AsMapInterface(separator string) (initialMP map[string]any) {
 	initialMP = map[string]any{
-		utils.EnabledCfg:    ra.Enabled,
-		utils.ListenNetCfg:  ra.ListenNet,
-		utils.ListenAuthCfg: ra.ListenAuth,
-		utils.ListenAcctCfg: ra.ListenAcct,
+		utils.EnabledCfg: ra.Enabled,
 	}
+
+	listeners := make([]map[string]any, len(ra.Listeners))
+	for i, item := range ra.Listeners {
+		listeners[i] = item.AsMapInterface(separator)
+	}
+	initialMP[utils.ListenersCfg] = listeners
 
 	requestProcessors := make([]map[string]any, len(ra.RequestProcessors))
 	for i, item := range ra.RequestProcessors {
@@ -140,12 +164,16 @@ func (ra *RadiusAgentCfg) AsMapInterface(separator string) (initialMP map[string
 func (ra RadiusAgentCfg) Clone() (cln *RadiusAgentCfg) {
 	cln = &RadiusAgentCfg{
 		Enabled:            ra.Enabled,
-		ListenNet:          ra.ListenNet,
-		ListenAuth:         ra.ListenAuth,
-		ListenAcct:         ra.ListenAcct,
+		Listeners:          ra.Listeners,
 		ClientSecrets:      make(map[string]string),
 		ClientDictionaries: make(map[string][]string),
 	}
+
+	if ra.Listeners != nil {
+		cln.Listeners = make([]RadiusListener, len(ra.Listeners))
+		copy(cln.Listeners, ra.Listeners)
+	}
+
 	if ra.SessionSConns != nil {
 		cln.SessionSConns = make([]string, len(ra.SessionSConns))
 		copy(cln.SessionSConns, ra.SessionSConns)

@@ -683,7 +683,7 @@ func testCGRConfigReloadDNSAgent(t *testing.T) {
 	}
 	expAttr := &DNSAgentCfg{
 		Enabled: true,
-		Listeners: []Listener{
+		Listeners: []DnsListener{
 			{
 				Address: ":2053",
 				Network: "udp",

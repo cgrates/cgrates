@@ -22,7 +22,7 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-type Listener struct {
+type DnsListener struct {
 	Address string
 	Network string // udp or tcp
 }
@@ -30,7 +30,7 @@ type Listener struct {
 // DNSAgentCfg the config section that describes the DNS Agent
 type DNSAgentCfg struct {
 	Enabled           bool
-	Listeners         []Listener
+	Listeners         []DnsListener
 	SessionSConns     []string
 	Timezone          string
 	RequestProcessors []*RequestProcessor
@@ -45,9 +45,9 @@ func (da *DNSAgentCfg) loadFromJSONCfg(jsnCfg *DNSAgentJsonCfg, sep string) (err
 	}
 
 	if jsnCfg.Listeners != nil {
-		da.Listeners = make([]Listener, 0, len(*jsnCfg.Listeners))
+		da.Listeners = make([]DnsListener, 0, len(*jsnCfg.Listeners))
 		for _, listnr := range *jsnCfg.Listeners {
-			var ls Listener
+			var ls DnsListener
 			if listnr.Address != nil {
 				ls.Address = *listnr.Address
 			}
@@ -93,7 +93,7 @@ func (da *DNSAgentCfg) loadFromJSONCfg(jsnCfg *DNSAgentJsonCfg, sep string) (err
 }
 
 // AsMapInterface returns the config as a map[string]any
-func (lstn *Listener) AsMapInterface(separator string) map[string]any {
+func (lstn *DnsListener) AsMapInterface(separator string) map[string]any {
 	return map[string]any{
 		utils.AddressCfg: lstn.Address,
 		utils.NetworkCfg: lstn.Network,
@@ -142,7 +142,7 @@ func (da DNSAgentCfg) Clone() (cln *DNSAgentCfg) {
 	}
 
 	if da.Listeners != nil {
-		cln.Listeners = make([]Listener, len(da.Listeners))
+		cln.Listeners = make([]DnsListener, len(da.Listeners))
 		copy(cln.Listeners, da.Listeners)
 	}
 
