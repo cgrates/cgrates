@@ -42,7 +42,7 @@ func TestDNSAgentStartReloadShut(t *testing.T) {
 	cfg.SessionSCfg().Enabled = true
 	cfg.SessionSCfg().ListenBijson = ""
 	cfg.DNSAgentCfg().Enabled = true
-	cfg.DNSAgentCfg().Listeners = []config.Listener{
+	cfg.DNSAgentCfg().Listeners = []config.DnsListener{
 		{
 			Network: "udp",
 			Address: ":2055",

@@ -65,6 +65,18 @@
 "radius_agent": {
 	"enabled": true,
 	"sessions_conns": ["*localhost"],
+	"listeners":[
+		{
+			"network": "udp",
+			"auth_address": "127.0.0.1:1812",
+			"acct_address": "127.0.0.1:1813"
+		},
+		{
+			"network": "tcp",
+			"auth_address": "127.0.0.1:1812",
+			"acct_address": "127.0.0.1:1813"
+		},
+	],	
 },
 
 

@@ -20,6 +20,8 @@ package agents
 
 import (
 	"fmt"
+	"strings"
+	"sync"
 
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
@@ -55,23 +57,35 @@ func NewRadiusAgent(cgrCfg *config.CGRConfig, filterS *engine.FilterS,
 	dicts := radigo.NewDictionaries(dts)
 	ra = &RadiusAgent{cgrCfg: cgrCfg, filterS: filterS, connMgr: connMgr}
 	secrets := radigo.NewSecrets(cgrCfg.RadiusAgentCfg().ClientSecrets)
-	ra.rsAuth = radigo.NewServer(cgrCfg.RadiusAgentCfg().ListenNet,
-		cgrCfg.RadiusAgentCfg().ListenAuth, secrets, dicts,
-		map[radigo.PacketCode]func(*radigo.Packet) (*radigo.Packet, error){
-			radigo.AccessRequest: ra.handleAuth}, nil)
-	ra.rsAcct = radigo.NewServer(cgrCfg.RadiusAgentCfg().ListenNet,
-		cgrCfg.RadiusAgentCfg().ListenAcct, secrets, dicts,
-		map[radigo.PacketCode]func(*radigo.Packet) (*radigo.Packet, error){
-			radigo.AccountingRequest: ra.handleAcct}, nil)
+	ra.rsAuth = make(map[string]*radigo.Server, len(ra.cgrCfg.RadiusAgentCfg().Listeners))
+	for i := range ra.cgrCfg.RadiusAgentCfg().Listeners {
+		net := cgrCfg.RadiusAgentCfg().Listeners[i].Network
+		addr := cgrCfg.RadiusAgentCfg().Listeners[i].AuthAddr
+		ra.rsAuth[net+"://"+addr] = radigo.NewServer(net,
+			addr, secrets, dicts,
+			map[radigo.PacketCode]func(*radigo.Packet) (*radigo.Packet, error){
+				radigo.AccessRequest: ra.handleAuth}, nil)
+	}
+	ra.rsAcct = make(map[string]*radigo.Server, len(ra.cgrCfg.RadiusAgentCfg().Listeners))
+	for i := range ra.cgrCfg.RadiusAgentCfg().Listeners {
+		net := cgrCfg.RadiusAgentCfg().Listeners[i].Network
+		addr := cgrCfg.RadiusAgentCfg().Listeners[i].AcctAddr
+		ra.rsAcct[net+"://"+addr] = radigo.NewServer(net,
+			addr, secrets, dicts,
+			map[radigo.PacketCode]func(*radigo.Packet) (*radigo.Packet, error){
+				radigo.AccountingRequest: ra.handleAcct}, nil)
+	}
 	return
 }
 
 type RadiusAgent struct {
+	sync.RWMutex
 	cgrCfg  *config.CGRConfig // reference for future config reloads
 	connMgr *engine.ConnManager
 	filterS *engine.FilterS
-	rsAuth  *radigo.Server
-	rsAcct  *radigo.Server
+	rsAuth  map[string]*radigo.Server
+	rsAcct  map[string]*radigo.Server
+	sync.WaitGroup
 }
 
 // handleAuth handles RADIUS Authorization request
@@ -343,18 +357,37 @@ func (ra *RadiusAgent) processRequest(req *radigo.Packet, reqProcessor *config.R
 
 func (ra *RadiusAgent) ListenAndServe(stopChan <-chan struct{}) (err error) {
 	errListen := make(chan error, 2)
-	go func() {
-		utils.Logger.Info(fmt.Sprintf("<%s> Start listening for auth requests on <%s>", utils.RadiusAgent, ra.cgrCfg.RadiusAgentCfg().ListenAuth))
-		if err := ra.rsAuth.ListenAndServe(stopChan); err != nil {
-			errListen <- err
-		}
-	}()
-	go func() {
-		utils.Logger.Info(fmt.Sprintf("<%s> Start listening for acct req on <%s>", utils.RadiusAgent, ra.cgrCfg.RadiusAgentCfg().ListenAcct))
-		if err := ra.rsAcct.ListenAndServe(stopChan); err != nil {
-			errListen <- err
-		}
-	}()
+	for uri, server := range ra.rsAuth {
+		ra.Add(1)
+		go func(srv *radigo.Server, uri string) {
+			defer ra.Done()
+			utils.Logger.Info(fmt.Sprintf("<%s> Start listening for auth requests on <%s>", utils.RadiusAgent, uri))
+			if err := srv.ListenAndServe(stopChan); err != nil {
+				utils.Logger.Warning(fmt.Sprintf("<%s> error <%v>, on ListenAndServe <%s>",
+					utils.RadiusAgent, err, uri))
+				if strings.Contains(err.Error(), "address already in use") {
+					return
+				}
+				errListen <- err
+			}
+		}(server, uri)
+	}
+	for uri, server := range ra.rsAcct {
+		ra.Add(1)
+		go func(srv *radigo.Server, uri string) {
+			defer ra.Done()
+			utils.Logger.Info(fmt.Sprintf("<%s> Start listening for acct requests on <%s>", utils.RadiusAgent, uri))
+			if err := srv.ListenAndServe(stopChan); err != nil {
+				utils.Logger.Warning(fmt.Sprintf("<%s> error <%v>, on ListenAndServe <%s>",
+					utils.RadiusAgent, err, uri))
+				if strings.Contains(err.Error(), "address already in use") {
+					return
+				}
+				errListen <- err
+			}
+		}(server, uri)
+	}
+
 	err = <-errListen
 	return
 }

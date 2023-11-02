@@ -27,7 +27,7 @@ import (
 func TestDNSAgentCfgloadFromJsonCfg(t *testing.T) {
 	jsnCfg := &DNSAgentJsonCfg{
 		Enabled: utils.BoolPointer(true),
-		Listeners: &[]*ListenerJsnCfg{
+		Listeners: &[]*DnsListenerJsnCfg{
 			{
 				Address: utils.StringPointer("127.0.0.1:2053"),
 				Network: utils.StringPointer("udp"),
@@ -51,7 +51,7 @@ func TestDNSAgentCfgloadFromJsonCfg(t *testing.T) {
 	}
 	expected := &DNSAgentCfg{
 		Enabled: true,
-		Listeners: []Listener{
+		Listeners: []DnsListener{
 			{
 				Address: "127.0.0.1:2053",
 				Network: "udp",
@@ -324,7 +324,7 @@ func TestRequestProcessorClone(t *testing.T) {
 func TestDNSAgentCfgClone(t *testing.T) {
 	ban := &DNSAgentCfg{
 		Enabled: true,
-		Listeners: []Listener{
+		Listeners: []DnsListener{
 			{
 				Address: "127.0.0.1:2053",
 				Network: "udp",

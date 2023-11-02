@@ -37,7 +37,64 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-func TestRadiusAgentReload(t *testing.T) {
+func TestRadiusAgentReloadStartShut(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfg.SessionSCfg().Enabled = true
+	cfg.SessionSCfg().ListenBijson = ""
+	cfg.RadiusAgentCfg().Enabled = true
+	cfg.RadiusAgentCfg().Listeners = []config.RadiusListener{
+		{
+			Network:  "udp",
+			AuthAddr: ":1812",
+			AcctAddr: ":1813",
+		},
+		{
+			Network:  "tcp",
+			AuthAddr: ":1822",
+			AcctAddr: ":1823",
+		},
+	}
+	utils.Logger, _ = utils.Newlogger(utils.MetaSysLog, cfg.GeneralCfg().NodeID)
+	utils.Logger.SetLogLevel(7)
+	filterSChan := make(chan *engine.FilterS, 1)
+	filterSChan <- nil
+	shdChan := utils.NewSyncedChan()
+	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
+	srv := NewRadiusAgent(cfg, filterSChan, shdChan, nil, srvDep)
+	shdWg := new(sync.WaitGroup)
+	srvMngr := servmanager.NewServiceManager(cfg, shdChan, shdWg, nil)
+	engine.NewConnManager(cfg, nil)
+	db := NewDataDBService(cfg, nil, srvDep)
+	server := cores.NewServer(nil)
+	anz := NewAnalyzerService(cfg, server, filterSChan, shdChan, make(chan birpc.ClientConnector, 1), srvDep)
+	sS := NewSessionService(cfg, db, server, make(chan birpc.ClientConnector, 1),
+		shdChan, nil, anz, srvDep)
+	srvMngr.AddServices(srv, sS,
+		NewLoaderService(cfg, db, filterSChan, server, make(chan birpc.ClientConnector, 1), nil, anz, srvDep), db)
+	runtime.Gosched()
+	time.Sleep(10 * time.Millisecond) //need to switch to gorutine
+	if err := srv.Shutdown(); err != nil {
+		t.Error(err)
+	}
+	time.Sleep(10 * time.Millisecond)
+	if err := srv.Start(); err != nil {
+		t.Error(err)
+	}
+	time.Sleep(10 * time.Millisecond)
+	if err := srv.Reload(); err != nil {
+		t.Error(err)
+	}
+	time.Sleep(10 * time.Millisecond)
+	if err := srv.Shutdown(); err != nil {
+		t.Error(err)
+	}
+	time.Sleep(10 * time.Millisecond)
+	if srv.IsRunning() {
+		t.Errorf("service is still running")
+	}
+}
+
+func TestRadiusAgentReload1(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 
 	cfg.SessionSCfg().Enabled = true
@@ -87,12 +144,11 @@ func TestRadiusAgentReload(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Fatalf("Expecting OK ,received %s", reply)
 	}
-	time.Sleep(10 * time.Millisecond) //need to switch to gorutine
 	runtime.Gosched()
+	time.Sleep(10 * time.Millisecond) //need to switch to gorutine
 	if !srv.IsRunning() {
 		t.Fatalf("Expected service to be running")
 	}
-	runtime.Gosched()
 	err = srv.Start()
 	if err == nil || err != utils.ErrServiceAlreadyRunning {
 		t.Fatalf("\nExpecting <%+v>,\n Received <%+v>", utils.ErrServiceAlreadyRunning, err)
@@ -175,23 +231,17 @@ func TestRadiusAgentReload2(t *testing.T) {
 	if err != nil {
 		t.Fatalf("\nExpecting <nil>,\n Received <%+v>", err)
 	}
-	castSrv, canCastSrv := srv.(*RadiusAgent)
-	if !canCastSrv {
-		t.Fatalf("cannot cast")
-	}
-
 	err = srv.Reload()
 	if err != nil {
 		t.Fatalf("\nExpecting <nil>,\n Received <%+v>", err)
 	}
-	castSrv.lnet = "test_string"
 	err = srv.Reload()
 	if err != nil {
 		t.Fatalf("\nExpecting <nil>,\n Received <%+v>", err)
 	}
 	cfg.RadiusAgentCfg().Enabled = false
 	cfg.GetReloadChan(config.RA_JSN) <- struct{}{}
-	time.Sleep(10 * time.Millisecond)
+	time.Sleep(100 * time.Millisecond)
 	if srv.IsRunning() {
 		t.Fatalf("Expected service to be down")
 	}
@@ -226,7 +276,7 @@ func TestRadiusAgentReload4(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.SessionSCfg().Enabled = true
 	cfg.RadiusAgentCfg().Enabled = true
-	cfg.RadiusAgentCfg().ListenNet = "test"
+	cfg.RadiusAgentCfg().Listeners[0].Network = "test"
 	utils.Logger, _ = utils.Newlogger(utils.MetaSysLog, cfg.GeneralCfg().NodeID)
 	utils.Logger.SetLogLevel(7)
 	filterSChan := make(chan *engine.FilterS, 1)

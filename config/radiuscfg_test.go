@@ -28,10 +28,14 @@ import (
 
 func TestRadiusAgentCfgloadFromJsonCfgCase1(t *testing.T) {
 	cfgJSON := &RadiusAgentJsonCfg{
-		Enabled:             utils.BoolPointer(true),
-		Listen_net:          utils.StringPointer(utils.UDP),
-		Listen_auth:         utils.StringPointer("127.0.0.1:1812"),
-		Listen_acct:         utils.StringPointer("127.0.0.1:1813"),
+		Enabled: utils.BoolPointer(true),
+		Listeners: &[]*RadiListenerJsnCfg{
+			{
+				Network:      utils.StringPointer(utils.UDP),
+				Auth_Address: utils.StringPointer("127.0.0.1:1812"),
+				Acct_Address: utils.StringPointer("127.0.0.1:1813"),
+			},
+		},
 		Client_secrets:      &map[string]string{utils.MetaDefault: "CGRateS.org"},
 		Client_dictionaries: &map[string][]string{utils.MetaDefault: {"/usr/share/cgrates/radius/dict/"}},
 		Sessions_conns:      &[]string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS)},
@@ -57,10 +61,14 @@ func TestRadiusAgentCfgloadFromJsonCfgCase1(t *testing.T) {
 		},
 	}
 	expected := &RadiusAgentCfg{
-		Enabled:            true,
-		ListenNet:          "udp",
-		ListenAuth:         "127.0.0.1:1812",
-		ListenAcct:         "127.0.0.1:1813",
+		Enabled: true,
+		Listeners: []RadiusListener{
+			{
+				Network:  utils.UDP,
+				AuthAddr: "127.0.0.1:1812",
+				AcctAddr: "127.0.0.1:1813",
+			},
+		},
 		ClientSecrets:      map[string]string{utils.MetaDefault: "CGRateS.org"},
 		ClientDictionaries: map[string][]string{utils.MetaDefault: {"/usr/share/cgrates/radius/dict/"}},
 		SessionSConns:      []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS)},
@@ -148,10 +156,13 @@ func TestRadiusAgentCfgloadFromJsonCfgCase3(t *testing.T) {
 func TestRadiusAgentCfgAsMapInterface(t *testing.T) {
 	cfgJSONStr := `{
 	"radius_agent": {
-         "enabled": true,												
-         "listen_auth": "127.0.0.1:1816",							
-         "listen_acct": "127.0.0.1:1892",							
-
+         "enabled": true,		
+		 "listeners":[
+			{
+				"auth_address": "127.0.0.1:1816",					
+				"acct_address": "127.0.0.1:1892"
+			}
+		],														
 	     "client_dictionaries": {									
 	    	"*default": [
 				"/usr/share/cgrates/",
@@ -173,10 +184,14 @@ func TestRadiusAgentCfgAsMapInterface(t *testing.T) {
      },
 }`
 	eMap := map[string]any{
-		utils.EnabledCfg:    true,
-		utils.ListenNetCfg:  "udp",
-		utils.ListenAuthCfg: "127.0.0.1:1816",
-		utils.ListenAcctCfg: "127.0.0.1:1892",
+		utils.EnabledCfg: true,
+		utils.ListenersCfg: []map[string]any{
+			{
+				utils.NetworkCfg:  utils.EmptyString,
+				utils.AuthAddrCfg: "127.0.0.1:1816",
+				utils.AcctAddrCfg: "127.0.0.1:1892",
+			},
+		},
 		utils.ClientSecretsCfg: map[string]string{
 			utils.MetaDefault: "CGRateS.org",
 		},
@@ -210,10 +225,14 @@ func TestRadiusAgentCfgAsMapInterface1(t *testing.T) {
 	"radius_agent": {},
 }`
 	eMap := map[string]any{
-		utils.EnabledCfg:    false,
-		utils.ListenNetCfg:  "udp",
-		utils.ListenAuthCfg: "127.0.0.1:1812",
-		utils.ListenAcctCfg: "127.0.0.1:1813",
+		utils.EnabledCfg: false,
+		utils.ListenersCfg: []map[string]any{
+			{
+				utils.NetworkCfg:  utils.UDP,
+				utils.AuthAddrCfg: "127.0.0.1:1812",
+				utils.AcctAddrCfg: "127.0.0.1:1813",
+			},
+		},
 		utils.ClientSecretsCfg: map[string]string{
 			utils.MetaDefault: "CGRateS.org",
 		},
@@ -232,10 +251,14 @@ func TestRadiusAgentCfgAsMapInterface1(t *testing.T) {
 
 func TestRadiusAgentCfgClone(t *testing.T) {
 	ban := &RadiusAgentCfg{
-		Enabled:            true,
-		ListenNet:          "udp",
-		ListenAuth:         "127.0.0.1:1812",
-		ListenAcct:         "127.0.0.1:1813",
+		Enabled: true,
+		Listeners: []RadiusListener{
+			{
+				Network:  utils.UDP,
+				AuthAddr: "127.0.0.1:1812",
+				AcctAddr: "127.0.0.1:1813",
+			},
+		},
 		ClientSecrets:      map[string]string{utils.MetaDefault: "CGRateS.org"},
 		ClientDictionaries: map[string][]string{utils.MetaDefault: {"/usr/share/cgrates/radius/dict/"}},
 		SessionSConns:      []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS), "*conn1"},

@@ -539,12 +539,16 @@ type DiameterAgentJsonCfg struct {
 	Request_processors   *[]*ReqProcessorJsnCfg
 }
 
+type RadiListenerJsnCfg struct {
+	Network      *string
+	Auth_Address *string
+	Acct_Address *string
+}
+
 // Radius Agent configuration section
 type RadiusAgentJsonCfg struct {
 	Enabled             *bool
-	Listen_net          *string
-	Listen_auth         *string
-	Listen_acct         *string
+	Listeners           *[]*RadiListenerJsnCfg
 	Client_secrets      *map[string]string
 	Client_dictionaries *map[string][]string
 	Sessions_conns      *[]string
@@ -562,7 +566,7 @@ type HttpAgentJsonCfg struct {
 	Request_processors *[]*ReqProcessorJsnCfg
 }
 
-type ListenerJsnCfg struct {
+type DnsListenerJsnCfg struct {
 	Address *string
 	Network *string
 }
@@ -570,7 +574,7 @@ type ListenerJsnCfg struct {
 // DNSAgentJsonCfg
 type DNSAgentJsonCfg struct {
 	Enabled            *bool
-	Listeners          *[]*ListenerJsnCfg
+	Listeners          *[]*DnsListenerJsnCfg
 	Sessions_conns     *[]string
 	Timezone           *string
 	Request_processors *[]*ReqProcessorJsnCfg
