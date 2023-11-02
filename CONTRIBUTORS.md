@@ -88,6 +88,7 @@ information, please see the [`CONTRIBUTING.md`](CONTRIBUTING.md) file.
 | @ruhnet | Ruel Tmeizeh |
 | @arberkatellari | Arber Katellari |
 | @Juneezee | Eng Zer Jun |
+| @varundhand | Varun Dhand |
 <!-- to sign, include a single line above this comment containing the following text:
 | @username | First Last |
 -->
