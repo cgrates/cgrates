@@ -1,15 +1,4 @@
-  {
-
-"general": {
-    "log_level": 7,
-    "reply_timeout": "50s"
-},
-
-"listen": {
-    "rpc_json": ":2012",
-    "rpc_gob": ":2013",
-    "http": ":2080"
-},
+{
 
 "data_db": {								
     "db_type": "*internal"
@@ -20,19 +9,12 @@
 },
 
 "rals": {
-    "enabled": true,
-    "max_increments":3000000
+    "enabled": true
 },
 
 "cdrs": {
     "enabled": true,
-    "rals_conns": ["*localhost"]
-},
-
-"sessions": {
-    "enabled": true,
-    "rals_conns": ["*localhost"],
-    "cdrs_conns": ["*localhost"]
+    "rals_conns": ["*internal"]
 },
 
 "apiers": {

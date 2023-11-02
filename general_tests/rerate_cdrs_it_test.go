@@ -27,227 +27,144 @@ import (
 	"testing"
 	"time"
 
-	"github.com/cgrates/birpc"
 	"github.com/cgrates/birpc/context"
-	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
-var (
-	rrCdrsCfgPath string
-	rrCdrsCfg     *config.CGRConfig
-	rrCdrsRPC     *birpc.Client
-	rrCdrsConfDIR string //run tests for specific configuration
-	rrCdrsDelay   int
-	rrCdrsUUID    = utils.GenUUID()
-
-	rrCdrsTests = []func(t *testing.T){
-		testRerateCDRsLoadConfig,
-		testRerateCDRsInitDataDb,
-		testRerateCDRsResetStorDb,
-		testRerateCDRsStartEngine,
-		testRerateCDRsRPCConn,
-		testRerateCDRsLoadTP,
-		testRerateCDRsSetBalance,
-		testRerateCDRsGetAccountAfterBalanceSet,
-		testRerateCDRsProcessEventCDR1,
-		testRerateCDRsCheckCDRCostAfterProcessEvent1,
-		testRerateCDRsGetAccountAfterProcessEvent1,
-		testRerateCDRsProcessEventCDR2,
-		testRerateCDRsCheckCDRCostAfterProcessEvent2,
-		testRerateCDRsGetAccountAfterProcessEvent2,
-		testRerateCDRsRerateCDRs,
-		testRerateCDRsCheckCDRCostsAfterRerate,
-		testRerateCDRsGetAccountAfterRerate,
-		testRerateCDRsStopEngine,
-	}
-)
-
-// Test start here
 func TestRerateCDRs(t *testing.T) {
+	var cfgDir string
 	switch *dbType {
 	case utils.MetaInternal:
-		rrCdrsConfDIR = "rerate_cdrs_internal"
+		cfgDir = "rerate_cdrs_internal"
 	case utils.MetaMySQL:
-		rrCdrsConfDIR = "rerate_cdrs_mysql"
+		cfgDir = "rerate_cdrs_mysql"
 	case utils.MetaMongo:
-		rrCdrsConfDIR = "rerate_cdrs_mongo"
+		cfgDir = "rerate_cdrs_mongo"
 	case utils.MetaPostgres:
 		t.SkipNow()
 	default:
 		t.Fatal("Unknown Database type")
 	}
-
-	for _, stest := range rrCdrsTests {
-		t.Run(rrCdrsConfDIR, stest)
-	}
-}
-
-func testRerateCDRsLoadConfig(t *testing.T) {
-	var err error
-	rrCdrsCfgPath = path.Join(*dataDir, "conf", "samples", rrCdrsConfDIR)
-	if rrCdrsCfg, err = config.NewCGRConfigFromPath(rrCdrsCfgPath); err != nil {
-		t.Error(err)
-	}
-	rrCdrsDelay = 1000
-}
-
-func testRerateCDRsInitDataDb(t *testing.T) {
-	if err := engine.InitDataDb(rrCdrsCfg); err != nil {
-		t.Fatal(err)
-	}
-}
-
-func testRerateCDRsResetStorDb(t *testing.T) {
-	if err := engine.InitStorDb(rrCdrsCfg); err != nil {
-		t.Fatal(err)
-	}
-}
-
-func testRerateCDRsStartEngine(t *testing.T) {
-	if _, err := engine.StopStartEngine(rrCdrsCfgPath, rrCdrsDelay); err != nil {
-		t.Fatal(err)
-	}
-}
-
-func testRerateCDRsRPCConn(t *testing.T) {
-	var err error
-	rrCdrsRPC, err = newRPCClient(rrCdrsCfg.ListenCfg()) // We connect over JSON so we can also troubleshoot if needed
+	cfgPath := path.Join(*dataDir, "conf", "samples", cfgDir)
+	tpPath := path.Join(*dataDir, "tariffplans", "reratecdrs")
+	client, _, shutdown, err := setupTest(t, "TestRerateCDRs", cfgPath, tpPath, utils.EmptyString, nil)
 	if err != nil {
-		t.Fatal("Could not connect to rater: ", err.Error())
+		t.Fatal(err)
 	}
-}
+	defer shutdown()
 
-func testRerateCDRsLoadTP(t *testing.T) {
-	var reply string
-	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "reratecdrs")}
-	if err := rrCdrsRPC.Call(context.Background(), utils.APIerSv1LoadTariffPlanFromFolder, attrs, &reply); err != nil {
-		t.Error(err)
-	} else if reply != utils.OK {
-		t.Error("Unexpected reply returned", reply)
-	}
-	time.Sleep(200 * time.Millisecond)
-}
+	CGRID := utils.GenUUID()
 
-func testRerateCDRsStopEngine(t *testing.T) {
-	if err := engine.KillEngine(rrCdrsDelay); err != nil {
-		t.Error(err)
-	}
-}
-
-func testRerateCDRsSetBalance(t *testing.T) {
-	attrSetBalance := utils.AttrSetBalance{
-		Tenant:      "cgrates.org",
-		Account:     "1001",
-		Value:       float64(time.Minute),
-		BalanceType: utils.MetaVoice,
-		Balance: map[string]any{
-			utils.ID: "1001",
-		},
-	}
-	var reply string
-	if err := rrCdrsRPC.Call(context.Background(), utils.APIerSv2SetBalance, attrSetBalance, &reply); err != nil {
-		t.Error(err)
-	} else if reply != utils.OK {
-		t.Errorf("Received: %s", reply)
-	}
-}
-
-func testRerateCDRsGetAccountAfterBalanceSet(t *testing.T) {
-	expAcnt := engine.Account{
-		ID: "cgrates.org:1001",
-		BalanceMap: map[string]engine.Balances{
-			utils.MetaVoice: {
-				{
-					ID:    "1001",
-					Value: float64(time.Minute),
+	t.Run("SetBalance", func(t *testing.T) {
+		var reply string
+		if err := client.Call(context.Background(), utils.APIerSv2SetBalance,
+			utils.AttrSetBalance{
+				Tenant:      "cgrates.org",
+				Account:     "1001",
+				Value:       float64(time.Minute),
+				BalanceType: utils.MetaVoice,
+				Balance: map[string]any{
+					utils.ID: "voiceBalance1",
 				},
-			},
-		},
-	}
-	var acnt engine.Account
-	attrs := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1001"}
-	if err := rrCdrsRPC.Call(context.Background(), utils.APIerSv2GetAccount, attrs, &acnt); err != nil {
-		t.Error(err)
-	} else {
-		expAcnt.UpdateTime = acnt.UpdateTime
-		expAcnt.BalanceMap[utils.MetaVoice][0].Uuid = acnt.BalanceMap[utils.MetaVoice][0].Uuid
-		if !reflect.DeepEqual(acnt, expAcnt) {
-			t.Errorf("expected: <%+v>,\nreceived: <%+v>", utils.ToJSON(expAcnt), utils.ToJSON(acnt))
+			}, &reply); err != nil {
+			t.Fatal(err)
 		}
-	}
-}
+	})
 
-func testRerateCDRsProcessEventCDR1(t *testing.T) {
-	argsEv := &engine.ArgV1ProcessEvent{
-		Flags: []string{utils.MetaRALs},
-		CGREvent: utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "event1",
-			Event: map[string]any{
-				utils.RunID:        "run_1",
-				utils.CGRID:        rrCdrsUUID,
-				utils.Tenant:       "cgrates.org",
-				utils.Category:     "call",
-				utils.ToR:          utils.MetaVoice,
-				utils.OriginID:     "processCDR1",
-				utils.OriginHost:   "OriginHost1",
-				utils.RequestType:  utils.MetaPseudoPrepaid,
-				utils.AccountField: "1001",
-				utils.Destination:  "1002",
-				utils.SetupTime:    time.Date(2021, time.February, 2, 16, 14, 50, 0, time.UTC),
-				utils.AnswerTime:   time.Date(2021, time.February, 2, 16, 15, 0, 0, time.UTC),
-				utils.Usage:        2 * time.Minute,
-			},
-		},
-	}
-	var reply string
-	if err := rrCdrsRPC.Call(context.Background(), utils.CDRsV1ProcessEvent, argsEv, &reply); err != nil {
-		t.Error(err)
-	} else if reply != utils.OK {
-		t.Error("Unexpected reply received: ", reply)
-	}
-
-}
-
-func testRerateCDRsCheckCDRCostAfterProcessEvent1(t *testing.T) {
-	var cdrs []*engine.CDR
-	if err := rrCdrsRPC.Call(context.Background(), utils.CDRsV1GetCDRs, &utils.RPCCDRsFilterWithAPIOpts{
-		RPCCDRsFilter: &utils.RPCCDRsFilter{
-			RunIDs: []string{"run_1"},
-		}}, &cdrs); err != nil {
-		t.Error(err)
-	} else if cdrs[0].Usage != 2*time.Minute {
-		t.Errorf("expected usage to be <%+v>, received <%+v>", 2*time.Minute, cdrs[0].Usage)
-	} else if cdrs[0].Cost != 0.6 {
-		t.Errorf("expected cost to be <%+v>, received <%+v>", 0.6, cdrs[0].Cost)
-	}
-}
-
-func testRerateCDRsGetAccountAfterProcessEvent1(t *testing.T) {
-	expAcnt := engine.Account{
-		ID: "cgrates.org:1001",
-		BalanceMap: map[string]engine.Balances{
-			utils.MetaVoice: {
-				{
-					ID:    "1001",
-					Value: 0,
+	t.Run("CheckInitialBalance", func(t *testing.T) {
+		expAcnt := engine.Account{
+			ID: "cgrates.org:1001",
+			BalanceMap: map[string]engine.Balances{
+				utils.MetaVoice: {
+					{
+						ID:    "voiceBalance1",
+						Value: float64(time.Minute),
+					},
 				},
 			},
-			utils.MetaMonetary: {
-				{
-					ID:    utils.MetaDefault,
-					Value: -0.6,
+		}
+		var acnt engine.Account
+		attrs := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1001"}
+		if err := client.Call(context.Background(), utils.APIerSv2GetAccount, attrs, &acnt); err != nil {
+			t.Fatal(err)
+		} else {
+			expAcnt.UpdateTime = acnt.UpdateTime
+			expAcnt.BalanceMap[utils.MetaVoice][0].Uuid = acnt.BalanceMap[utils.MetaVoice][0].Uuid
+			if !reflect.DeepEqual(acnt, expAcnt) {
+				t.Fatalf("expected: <%+v>,\nreceived: <%+v>", utils.ToJSON(expAcnt), utils.ToJSON(acnt))
+			}
+		}
+	})
+
+	t.Run("ProcessFirstCDR", func(t *testing.T) {
+		var reply string
+		err := client.Call(context.Background(), utils.CDRsV1ProcessEvent,
+			&engine.ArgV1ProcessEvent{
+				Flags: []string{utils.MetaRALs},
+				CGREvent: utils.CGREvent{
+					Tenant: "cgrates.org",
+					ID:     "event1",
+					Event: map[string]any{
+						utils.RunID:        "run_1",
+						utils.CGRID:        CGRID,
+						utils.Tenant:       "cgrates.org",
+						utils.Category:     "call",
+						utils.ToR:          utils.MetaVoice,
+						utils.OriginID:     "processCDR1",
+						utils.OriginHost:   "OriginHost1",
+						utils.RequestType:  utils.MetaPseudoPrepaid,
+						utils.AccountField: "1001",
+						utils.Destination:  "1002",
+						utils.SetupTime:    time.Date(2021, time.February, 2, 16, 14, 50, 0, time.UTC),
+						utils.AnswerTime:   time.Date(2021, time.February, 2, 16, 15, 0, 0, time.UTC),
+						utils.Usage:        2 * time.Minute,
+					},
+				},
+			}, &reply)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		var cdrs []*engine.CDR
+		err = client.Call(context.Background(), utils.CDRsV1GetCDRs, &utils.RPCCDRsFilterWithAPIOpts{
+			RPCCDRsFilter: &utils.RPCCDRsFilter{
+				RunIDs: []string{"run_1"},
+			}}, &cdrs)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if cdrs[0].Usage != 2*time.Minute {
+			t.Errorf("expected usage to be <%+v>, received <%+v>", 2*time.Minute, cdrs[0].Usage)
+		} else if cdrs[0].Cost != 0.6 {
+			t.Errorf("expected cost to be <%+v>, received <%+v>", 0.6, cdrs[0].Cost)
+		}
+	})
+
+	t.Run("CheckAccountBalancesAfterFirstProcessCDR", func(t *testing.T) {
+		expAcnt := engine.Account{
+			ID: "cgrates.org:1001",
+			BalanceMap: map[string]engine.Balances{
+				utils.MetaVoice: {
+					{
+						ID:    "voiceBalance1",
+						Value: 0,
+					},
+				},
+				utils.MetaMonetary: {
+					{
+						ID:    utils.MetaDefault,
+						Value: -0.6,
+					},
 				},
 			},
-		},
-	}
-	var acnt engine.Account
-	attrs := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1001"}
-	if err := rrCdrsRPC.Call(context.Background(), utils.APIerSv2GetAccount, attrs, &acnt); err != nil {
-		t.Error(err)
-	} else {
+		}
+		var acnt engine.Account
+		attrs := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1001"}
+		if err := client.Call(context.Background(), utils.APIerSv2GetAccount, attrs, &acnt); err != nil {
+			t.Fatal(err)
+		}
+
 		expAcnt.UpdateTime = acnt.UpdateTime
 		expAcnt.BalanceMap[utils.MetaVoice][0].Uuid = acnt.BalanceMap[utils.MetaVoice][0].Uuid
 		expAcnt.BalanceMap[utils.MetaMonetary][0].Uuid = acnt.BalanceMap[utils.MetaMonetary][0].Uuid
@@ -255,78 +172,77 @@ func testRerateCDRsGetAccountAfterProcessEvent1(t *testing.T) {
 		if !reflect.DeepEqual(acnt, expAcnt) {
 			t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ToJSON(expAcnt), utils.ToJSON(acnt))
 		}
-	}
-}
+	})
 
-func testRerateCDRsProcessEventCDR2(t *testing.T) {
-	argsEv := &engine.ArgV1ProcessEvent{
-		Flags: []string{utils.MetaRALs},
-		CGREvent: utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "event2",
-			Event: map[string]any{
-				utils.RunID:        "run_2",
-				utils.CGRID:        rrCdrsUUID,
-				utils.Tenant:       "cgrates.org",
-				utils.Category:     "call",
-				utils.ToR:          utils.MetaVoice,
-				utils.OriginID:     "processCDR2",
-				utils.OriginHost:   "OriginHost2",
-				utils.RequestType:  utils.MetaPseudoPrepaid,
-				utils.AccountField: "1001",
-				utils.Destination:  "1002",
-				utils.SetupTime:    time.Date(2021, time.February, 2, 15, 14, 50, 0, time.UTC),
-				utils.AnswerTime:   time.Date(2021, time.February, 2, 15, 15, 0, 0, time.UTC),
-				utils.Usage:        2 * time.Minute,
-			},
-		},
-	}
-	var reply string
-	if err := rrCdrsRPC.Call(context.Background(), utils.CDRsV1ProcessEvent, argsEv, &reply); err != nil {
-		t.Error(err)
-	} else if reply != utils.OK {
-		t.Error("Unexpected reply received: ", reply)
-	}
+	t.Run("ProcessSecondCDR", func(t *testing.T) {
+		var reply string
+		err := client.Call(context.Background(), utils.CDRsV1ProcessEvent,
+			&engine.ArgV1ProcessEvent{
+				Flags: []string{utils.MetaRALs},
+				CGREvent: utils.CGREvent{
+					Tenant: "cgrates.org",
+					ID:     "event2",
+					Event: map[string]any{
+						utils.RunID:        "run_2",
+						utils.CGRID:        CGRID,
+						utils.Tenant:       "cgrates.org",
+						utils.Category:     "call",
+						utils.ToR:          utils.MetaVoice,
+						utils.OriginID:     "processCDR2",
+						utils.OriginHost:   "OriginHost2",
+						utils.RequestType:  utils.MetaPseudoPrepaid,
+						utils.AccountField: "1001",
+						utils.Destination:  "1002",
+						utils.SetupTime:    time.Date(2021, time.February, 2, 15, 14, 50, 0, time.UTC),
+						utils.AnswerTime:   time.Date(2021, time.February, 2, 15, 15, 0, 0, time.UTC),
+						utils.Usage:        2 * time.Minute,
+					},
+				},
+			}, &reply)
+		if err != nil {
+			t.Fatal(err)
+		}
+		var cdrs []*engine.CDR
+		err = client.Call(context.Background(), utils.CDRsV1GetCDRs, &utils.RPCCDRsFilterWithAPIOpts{
+			RPCCDRsFilter: &utils.RPCCDRsFilter{
+				RunIDs: []string{"run_2"},
+			}}, &cdrs)
+		if err != nil {
+			t.Fatal(err)
+		}
 
-}
+		if cdrs[0].Usage != 2*time.Minute {
+			t.Errorf("expected usage to be <%+v>, received <%+v>", 2*time.Minute, cdrs[0].Usage)
+		} else if cdrs[0].Cost != 1.2 {
+			t.Errorf("expected cost to be <%+v>, received <%+v>", 1.2, cdrs[0].Cost)
+		}
+	})
 
-func testRerateCDRsCheckCDRCostAfterProcessEvent2(t *testing.T) {
-	var cdrs []*engine.CDR
-	if err := rrCdrsRPC.Call(context.Background(), utils.CDRsV1GetCDRs, &utils.RPCCDRsFilterWithAPIOpts{
-		RPCCDRsFilter: &utils.RPCCDRsFilter{
-			RunIDs: []string{"run_2"},
-		}}, &cdrs); err != nil {
-		t.Error(err)
-	} else if cdrs[0].Usage != 2*time.Minute {
-		t.Errorf("expected usage to be <%+v>, received <%+v>", 2*time.Minute, cdrs[0].Usage)
-	} else if cdrs[0].Cost != 1.2 {
-		t.Errorf("expected cost to be <%+v>, received <%+v>", 1.2, cdrs[0].Cost)
-	}
-}
-
-func testRerateCDRsGetAccountAfterProcessEvent2(t *testing.T) {
-	expAcnt := engine.Account{
-		ID: "cgrates.org:1001",
-		BalanceMap: map[string]engine.Balances{
-			utils.MetaVoice: {
-				{
-					ID:    "1001",
-					Value: 0,
+	t.Run("CheckAccountBalancesAfterSecondProcessCDR", func(t *testing.T) {
+		expAcnt := engine.Account{
+			ID: "cgrates.org:1001",
+			BalanceMap: map[string]engine.Balances{
+				utils.MetaVoice: {
+					{
+						ID:    "voiceBalance1",
+						Value: 0,
+					},
+				},
+				utils.MetaMonetary: {
+					{
+						ID:    utils.MetaDefault,
+						Value: -1.8,
+					},
 				},
 			},
-			utils.MetaMonetary: {
-				{
-					ID:    utils.MetaDefault,
-					Value: -1.8,
-				},
-			},
-		},
-	}
-	var acnt engine.Account
-	attrs := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1001"}
-	if err := rrCdrsRPC.Call(context.Background(), utils.APIerSv2GetAccount, attrs, &acnt); err != nil {
-		t.Error(err)
-	} else {
+		}
+		var acnt engine.Account
+		attrs := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1001"}
+		err := client.Call(context.Background(), utils.APIerSv2GetAccount, attrs, &acnt)
+		if err != nil {
+			t.Fatal(err)
+		}
+
 		expAcnt.UpdateTime = acnt.UpdateTime
 		expAcnt.BalanceMap[utils.MetaVoice][0].Uuid = acnt.BalanceMap[utils.MetaVoice][0].Uuid
 		expAcnt.BalanceMap[utils.MetaMonetary][0].Uuid = acnt.BalanceMap[utils.MetaMonetary][0].Uuid
@@ -334,61 +250,61 @@ func testRerateCDRsGetAccountAfterProcessEvent2(t *testing.T) {
 		if !reflect.DeepEqual(acnt, expAcnt) {
 			t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ToJSON(expAcnt), utils.ToJSON(acnt))
 		}
-	}
-}
+	})
 
-func testRerateCDRsRerateCDRs(t *testing.T) {
-	var reply string
-	if err := rrCdrsRPC.Call(context.Background(), utils.CDRsV1RateCDRs, &engine.ArgRateCDRs{
-		Flags: []string{utils.MetaRerate},
-		RPCCDRsFilter: utils.RPCCDRsFilter{
-			OrderBy: utils.AnswerTime,
-			CGRIDs:  []string{rrCdrsUUID},
-		}}, &reply); err != nil {
-		t.Error("Unexpected error: ", err.Error())
-	} else if reply != utils.OK {
-		t.Error("Unexpected reply received: ", reply)
-	}
-}
+	t.Run("RerateCDRs", func(t *testing.T) {
+		var reply string
+		if err := client.Call(context.Background(), utils.CDRsV1RateCDRs, &engine.ArgRateCDRs{
+			Flags: []string{utils.MetaRerate},
+			RPCCDRsFilter: utils.RPCCDRsFilter{
+				OrderBy: utils.AnswerTime,
+				CGRIDs:  []string{CGRID},
+			}}, &reply); err != nil {
+			t.Fatal(err)
+		}
 
-func testRerateCDRsCheckCDRCostsAfterRerate(t *testing.T) {
-	var cdrs []*engine.CDR
-	if err := rrCdrsRPC.Call(context.Background(), utils.CDRsV1GetCDRs, &utils.RPCCDRsFilterWithAPIOpts{
-		RPCCDRsFilter: &utils.RPCCDRsFilter{
-			CGRIDs:  []string{rrCdrsUUID},
-			OrderBy: utils.AnswerTime,
-		}}, &cdrs); err != nil {
-		t.Error(err)
-	} else if cdrs[0].Cost != 0.6 {
-		t.Errorf("expected cost to be <%+v>, received <%+v>", 0.6, cdrs[0].Cost)
-	} else if cdrs[1].Cost != 1.2 {
-		t.Errorf("expected cost to be <%+v>, received <%+v>", 1.2, cdrs[1].Cost)
-	}
-}
+		var cdrs []*engine.CDR
+		err := client.Call(context.Background(), utils.CDRsV1GetCDRs, &utils.RPCCDRsFilterWithAPIOpts{
+			RPCCDRsFilter: &utils.RPCCDRsFilter{
+				CGRIDs:  []string{CGRID},
+				OrderBy: utils.AnswerTime,
+			}}, &cdrs)
+		if err != nil {
+			t.Fatal(err)
+		}
 
-func testRerateCDRsGetAccountAfterRerate(t *testing.T) {
-	expAcnt := engine.Account{
-		ID: "cgrates.org:1001",
-		BalanceMap: map[string]engine.Balances{
-			utils.MetaVoice: {
-				{
-					ID:    "1001",
-					Value: 0,
+		if cdrs[0].Cost != 0.6 {
+			t.Errorf("expected cost to be <%+v>, received <%+v>", 0.6, cdrs[0].Cost)
+		} else if cdrs[1].Cost != 1.2 {
+			t.Errorf("expected cost to be <%+v>, received <%+v>", 1.2, cdrs[1].Cost)
+		}
+	})
+
+	t.Run("CheckAccountBalancesAfterRerate", func(t *testing.T) {
+		expAcnt := engine.Account{
+			ID: "cgrates.org:1001",
+			BalanceMap: map[string]engine.Balances{
+				utils.MetaVoice: {
+					{
+						ID:    "voiceBalance1",
+						Value: 0,
+					},
+				},
+				utils.MetaMonetary: {
+					{
+						ID:    utils.MetaDefault,
+						Value: -1.8,
+					},
 				},
 			},
-			utils.MetaMonetary: {
-				{
-					ID:    utils.MetaDefault,
-					Value: -1.8,
-				},
-			},
-		},
-	}
-	var acnt engine.Account
-	attrs := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1001"}
-	if err := rrCdrsRPC.Call(context.Background(), utils.APIerSv2GetAccount, attrs, &acnt); err != nil {
-		t.Error(err)
-	} else {
+		}
+		var acnt engine.Account
+		attrs := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1001"}
+		err := client.Call(context.Background(), utils.APIerSv2GetAccount, attrs, &acnt)
+		if err != nil {
+			t.Fatal(err)
+		}
+
 		expAcnt.UpdateTime = acnt.UpdateTime
 		expAcnt.BalanceMap[utils.MetaVoice][0].Uuid = acnt.BalanceMap[utils.MetaVoice][0].Uuid
 		expAcnt.BalanceMap[utils.MetaMonetary][0].Uuid = acnt.BalanceMap[utils.MetaMonetary][0].Uuid
@@ -396,5 +312,5 @@ func testRerateCDRsGetAccountAfterRerate(t *testing.T) {
 		if !reflect.DeepEqual(acnt, expAcnt) {
 			t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ToJSON(expAcnt), utils.ToJSON(acnt))
 		}
-	}
+	})
 }
