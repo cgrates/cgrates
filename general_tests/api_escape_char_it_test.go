@@ -21,11 +21,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package general_tests
 
 import (
-	"crypto/rand"
 	"fmt"
-	"math/big"
-	"os"
-	"path/filepath"
 	"testing"
 
 	"github.com/cgrates/birpc"
@@ -146,33 +142,4 @@ func TestEscapeCharacters(t *testing.T) {
 		t.Error("unexpected reply:", utils.ToJSON(rplyEv))
 	}
 
-}
-
-func initTestCfg(cfgContent string) (*config.CGRConfig, string, func(), error) {
-	folderNameSuffix, err := rand.Int(rand.Reader, big.NewInt(10000))
-	if err != nil {
-		return nil, "", nil, fmt.Errorf("could not generate random number for folder name suffix, err: %s", err.Error())
-	}
-	cfgPath := fmt.Sprintf("/tmp/config%d", folderNameSuffix)
-	err = os.MkdirAll(cfgPath, 0755)
-	if err != nil {
-		return nil, "", nil, err
-	}
-	filePath := filepath.Join(cfgPath, "cgrates.json")
-	err = os.WriteFile(filePath, []byte(cfgContent), 0644)
-	if err != nil {
-		os.RemoveAll(cfgPath)
-		return nil, "", nil, err
-	}
-	var cfg *config.CGRConfig
-	cfg, err = config.NewCGRConfigFromPath(cfgPath)
-	if err != nil {
-		os.RemoveAll(cfgPath)
-		return nil, "", nil, err
-	}
-	removeFunc := func() {
-		os.RemoveAll(cfgPath)
-	}
-
-	return cfg, cfgPath, removeFunc, nil
 }
