@@ -40,7 +40,7 @@ func (m *Migrator) migrateCurrentTPratingplans() (err error) {
 					return err
 				}
 				if ratingPlan != nil {
-					if m.dryRun != true {
+					if !m.dryRun {
 						if err := m.storDBOut.StorDB().SetTPRatingPlans(ratingPlan); err != nil {
 							return err
 						}

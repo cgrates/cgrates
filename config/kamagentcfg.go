@@ -164,9 +164,7 @@ func (ka KamAgentCfg) Clone() (cln *KamAgentCfg) {
 	}
 	if ka.SessionSConns != nil {
 		cln.SessionSConns = make([]string, len(ka.SessionSConns))
-		for i, con := range ka.SessionSConns {
-			cln.SessionSConns[i] = con
-		}
+		copy(cln.SessionSConns, ka.SessionSConns)
 	}
 	if ka.EvapiConns != nil {
 		cln.EvapiConns = make([]*KamConnCfg, len(ka.EvapiConns))

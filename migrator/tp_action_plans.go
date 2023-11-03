@@ -40,7 +40,7 @@ func (m *Migrator) migrateCurrentTPactionplans() (err error) {
 				return err
 			}
 			if actPln != nil {
-				if m.dryRun != true {
+				if !m.dryRun {
 					if err := m.storDBOut.StorDB().SetTPActionPlans(actPln); err != nil {
 						return err
 					}

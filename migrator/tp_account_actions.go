@@ -34,7 +34,7 @@ func (m *Migrator) migrateCurrentTPaccountAcction() (err error) {
 			return err
 		}
 		if accAct != nil {
-			if m.dryRun != true {
+			if !m.dryRun {
 				if err := m.storDBOut.StorDB().SetTPAccountActions(accAct); err != nil {
 					return err
 				}

@@ -132,15 +132,11 @@ func (ld LoaderCgrCfg) Clone() (cln *LoaderCgrCfg) {
 
 	if ld.CachesConns != nil {
 		cln.CachesConns = make([]string, len(ld.CachesConns))
-		for i, k := range ld.CachesConns {
-			cln.CachesConns[i] = k
-		}
+		copy(cln.CachesConns, ld.CachesConns)
 	}
 	if ld.SchedulerConns != nil {
 		cln.SchedulerConns = make([]string, len(ld.SchedulerConns))
-		for i, k := range ld.SchedulerConns {
-			cln.SchedulerConns[i] = k
-		}
+		copy(cln.SchedulerConns, ld.SchedulerConns)
 	}
 	return
 }

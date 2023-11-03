@@ -562,12 +562,6 @@ func TestLibDispatcherSingleResultDispatcherCastError(t *testing.T) {
 	engine.Cache = cacheInit
 }
 
-type mockTypeCon struct{}
-
-func (*mockTypeCon) Call(serviceMethod string, args, reply any) error {
-	return utils.ErrNotFound
-}
-
 func TestLibDispatcherBroadcastDispatcherDispatchError1(t *testing.T) {
 	cacheInit := engine.Cache
 	cfg := config.NewDefaultCGRConfig()

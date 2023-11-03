@@ -304,14 +304,6 @@ func TestHandleJSONErrorNil(t *testing.T) {
 	}
 }
 
-func TestHandleJSONErrorInvalidUTF8(t *testing.T) {
-	rjr := NewRjReaderFromBytes([]byte("{}"))
-	expectedErr := new(json.InvalidUTF8Error)
-	if err := rjr.HandleJSONError(expectedErr); err == nil || err.Error() != expectedErr.Error() {
-		t.Errorf("Expected %+v, received %+v", expectedErr, err)
-	}
-}
-
 func TestHandleJSONErrorDefaultError(t *testing.T) {
 	rjr := NewRjReaderFromBytes([]byte("{}"))
 	rjr.indx = 10

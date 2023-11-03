@@ -19,7 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package main
 
 import (
-	"bufio"
 	"bytes"
 	"io"
 	"log"
@@ -52,9 +51,8 @@ type FileReaderTester struct {
 	runs     int
 	reqSep   []byte
 
-	rdr      io.Reader
-	conn     net.Conn
-	connScnr *bufio.Scanner
+	rdr  io.Reader
+	conn net.Conn
 }
 
 func (frt *FileReaderTester) connSendReq(req []byte) (err error) {

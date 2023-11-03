@@ -244,7 +244,7 @@ func (s *Server) ServeHTTP(addr string, jsonRPCURL string, wsRPCURL string,
 	}
 	utils.Logger.Info(fmt.Sprintf("<HTTP> start listening at <%s>", addr))
 	if err := http.ListenAndServe(addr, s.httpMux); err != nil {
-		log.Println(fmt.Sprintf("<HTTP>Error: %s when listening ", err))
+		log.Printf("<HTTP>Error: %s when listening ", err)
 		shdChan.CloseOnce()
 	}
 }
@@ -379,7 +379,7 @@ func loadTLSConfig(serverCrt, serverKey, caCert string, serverPolicy int,
 		}
 
 		if ok := rootCAs.AppendCertsFromPEM(ca); !ok {
-			utils.Logger.Crit(fmt.Sprintf("Cannot append certificate authority"))
+			utils.Logger.Crit("Cannot append certificate authority")
 			return config, errors.New("Cannot append certificate authority")
 		}
 	}
@@ -411,7 +411,7 @@ func (s *Server) serveCodecTLS(addr, codecName, serverCrt, serverKey, caCert str
 	}
 	listener, err := tls.Listen(utils.TCP, addr, config)
 	if err != nil {
-		log.Println(fmt.Sprintf("Error: %s when listening", err))
+		log.Printf("Error: %s when listening", err)
 		shdChan.CloseOnce()
 		return
 	}
@@ -483,7 +483,7 @@ func (s *Server) ServeHTTPTLS(addr, serverCrt, serverKey, caCert string, serverP
 	}
 	utils.Logger.Info(fmt.Sprintf("<HTTPS> start listening at <%s>", addr))
 	if err := httpSrv.ListenAndServeTLS(serverCrt, serverKey); err != nil {
-		log.Println(fmt.Sprintf("<HTTPS>Error: %s when listening ", err))
+		log.Printf("<HTTPS>Error: %s when listening ", err)
 		shdChan.CloseOnce()
 	}
 }

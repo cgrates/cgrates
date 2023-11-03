@@ -117,7 +117,7 @@ func (db *DataDBService) Shutdown() (err error) {
 func (db *DataDBService) IsRunning() bool {
 	db.RLock()
 	defer db.RUnlock()
-	return db != nil && db.dm != nil && db.dm.DataDB() != nil
+	return db.dm != nil && db.dm.DataDB() != nil
 }
 
 // ServiceName returns the service name

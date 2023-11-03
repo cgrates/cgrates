@@ -34,9 +34,7 @@ func newDnsReply(req *dns.Msg) (rply *dns.Msg) {
 	rply.SetReply(req)
 	if len(req.Question) > 0 {
 		rply.Question = make([]dns.Question, len(req.Question))
-		for i, q := range req.Question {
-			rply.Question[i] = q
-		}
+		copy(rply.Question, req.Question)
 	}
 	if opts := rply.IsEdns0(); opts != nil {
 		rply.SetEdns0(4096, false).IsEdns0().Option = opts.Option

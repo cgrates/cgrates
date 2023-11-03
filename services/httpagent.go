@@ -96,7 +96,7 @@ func (ha *HTTPAgent) Shutdown() (err error) {
 func (ha *HTTPAgent) IsRunning() bool {
 	ha.RLock()
 	defer ha.RUnlock()
-	return ha != nil && ha.started
+	return ha.started
 }
 
 // ServiceName returns the service name

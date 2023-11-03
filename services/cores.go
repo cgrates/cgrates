@@ -112,7 +112,7 @@ func (cS *CoreService) Shutdown() (err error) {
 func (cS *CoreService) IsRunning() bool {
 	cS.RLock()
 	defer cS.RUnlock()
-	return cS != nil && cS.cS != nil
+	return cS.cS != nil
 }
 
 // ServiceName returns the service name

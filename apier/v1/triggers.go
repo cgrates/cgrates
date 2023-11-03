@@ -188,7 +188,7 @@ func (apierSv1 *APIerSv1) ResetAccountActionTriggers(ctx *context.Context, attr 
 			}
 
 		}
-		if attr.Executed == false {
+		if !attr.Executed {
 			account.ExecuteActionTriggers(nil, apierSv1.FilterS)
 		}
 		return apierSv1.DataManager.SetAccount(account)

@@ -83,23 +83,17 @@ func (rts *RouteSCfg) loadFromJSONCfg(jsnCfg *RouteSJsonCfg) (err error) {
 	}
 	if jsnCfg.String_indexed_fields != nil {
 		sif := make([]string, len(*jsnCfg.String_indexed_fields))
-		for i, fID := range *jsnCfg.String_indexed_fields {
-			sif[i] = fID
-		}
+		copy(sif, *jsnCfg.String_indexed_fields)
 		rts.StringIndexedFields = &sif
 	}
 	if jsnCfg.Prefix_indexed_fields != nil {
 		pif := make([]string, len(*jsnCfg.Prefix_indexed_fields))
-		for i, fID := range *jsnCfg.Prefix_indexed_fields {
-			pif[i] = fID
-		}
+		copy(pif, *jsnCfg.Prefix_indexed_fields)
 		rts.PrefixIndexedFields = &pif
 	}
 	if jsnCfg.Suffix_indexed_fields != nil {
 		sif := make([]string, len(*jsnCfg.Suffix_indexed_fields))
-		for i, fID := range *jsnCfg.Suffix_indexed_fields {
-			sif[i] = fID
-		}
+		copy(sif, *jsnCfg.Suffix_indexed_fields)
 		rts.SuffixIndexedFields = &sif
 	}
 	if jsnCfg.Attributes_conns != nil {
@@ -181,23 +175,17 @@ func (rts *RouteSCfg) AsMapInterface() (initialMP map[string]any) {
 	}
 	if rts.StringIndexedFields != nil {
 		stringIndexedFields := make([]string, len(*rts.StringIndexedFields))
-		for i, item := range *rts.StringIndexedFields {
-			stringIndexedFields[i] = item
-		}
+		copy(stringIndexedFields, *rts.StringIndexedFields)
 		initialMP[utils.StringIndexedFieldsCfg] = stringIndexedFields
 	}
 	if rts.PrefixIndexedFields != nil {
 		prefixIndexedFields := make([]string, len(*rts.PrefixIndexedFields))
-		for i, item := range *rts.PrefixIndexedFields {
-			prefixIndexedFields[i] = item
-		}
+		copy(prefixIndexedFields, *rts.PrefixIndexedFields)
 		initialMP[utils.PrefixIndexedFieldsCfg] = prefixIndexedFields
 	}
 	if rts.SuffixIndexedFields != nil {
 		suffixIndexedFieldsCfg := make([]string, len(*rts.SuffixIndexedFields))
-		for i, item := range *rts.SuffixIndexedFields {
-			suffixIndexedFieldsCfg[i] = item
-		}
+		copy(suffixIndexedFieldsCfg, *rts.SuffixIndexedFields)
 		initialMP[utils.SuffixIndexedFieldsCfg] = suffixIndexedFieldsCfg
 	}
 	if rts.AttributeSConns != nil {
@@ -275,47 +263,33 @@ func (rts RouteSCfg) Clone() (cln *RouteSCfg) {
 	}
 	if rts.AttributeSConns != nil {
 		cln.AttributeSConns = make([]string, len(rts.AttributeSConns))
-		for i, con := range rts.AttributeSConns {
-			cln.AttributeSConns[i] = con
-		}
+		copy(cln.AttributeSConns, rts.AttributeSConns)
 	}
 	if rts.ResourceSConns != nil {
 		cln.ResourceSConns = make([]string, len(rts.ResourceSConns))
-		for i, con := range rts.ResourceSConns {
-			cln.ResourceSConns[i] = con
-		}
+		copy(cln.ResourceSConns, rts.ResourceSConns)
 	}
 	if rts.StatSConns != nil {
 		cln.StatSConns = make([]string, len(rts.StatSConns))
-		for i, con := range rts.StatSConns {
-			cln.StatSConns[i] = con
-		}
+		copy(cln.StatSConns, rts.StatSConns)
 	}
 	if rts.RALsConns != nil {
 		cln.RALsConns = make([]string, len(rts.RALsConns))
-		for i, con := range rts.RALsConns {
-			cln.RALsConns[i] = con
-		}
+		copy(cln.RALsConns, rts.RALsConns)
 	}
 	if rts.StringIndexedFields != nil {
 		idx := make([]string, len(*rts.StringIndexedFields))
-		for i, dx := range *rts.StringIndexedFields {
-			idx[i] = dx
-		}
+		copy(idx, *rts.StringIndexedFields)
 		cln.StringIndexedFields = &idx
 	}
 	if rts.PrefixIndexedFields != nil {
 		idx := make([]string, len(*rts.PrefixIndexedFields))
-		for i, dx := range *rts.PrefixIndexedFields {
-			idx[i] = dx
-		}
+		copy(idx, *rts.PrefixIndexedFields)
 		cln.PrefixIndexedFields = &idx
 	}
 	if rts.SuffixIndexedFields != nil {
 		idx := make([]string, len(*rts.SuffixIndexedFields))
-		for i, dx := range *rts.SuffixIndexedFields {
-			idx[i] = dx
-		}
+		copy(idx, *rts.SuffixIndexedFields)
 		cln.SuffixIndexedFields = &idx
 	}
 	return

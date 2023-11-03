@@ -211,6 +211,9 @@ func TestHTTPJsonMapPrepareMap(t *testing.T) {
 		t.Error(err)
 	}
 	body, err := json.Marshal(valMp)
+	if err != nil {
+		t.Error(err)
+	}
 	exp := &HTTPPosterRequest{
 		Header: httpEE.hdr,
 		Body:   body,

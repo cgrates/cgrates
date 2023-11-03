@@ -589,7 +589,7 @@ func TestExportRequestSetFields(t *testing.T) {
 			Path:     "<*uch;*opts>",
 		},
 	}
-	if err = eeR.SetFields(fctTemp); err == nil || err.Error() != fmt.Sprint("unsupported field prefix: <*uch*opts> when set field") {
+	if err = eeR.SetFields(fctTemp); err == nil || err.Error() != "unsupported field prefix: <*uch*opts> when set field" {
 		t.Error(err)
 	}
 }

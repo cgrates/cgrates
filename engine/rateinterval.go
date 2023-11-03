@@ -469,27 +469,20 @@ func (rit *RITiming) Clone() (cln *RITiming) {
 	}
 	if len(rit.Years) != 0 {
 		cln.Years = make(utils.Years, len(rit.Years))
-		for i, year := range rit.Years {
-			cln.Years[i] = year
-		}
+		copy(cln.Years, rit.Years)
 	}
 	if len(rit.Months) != 0 {
 		cln.Months = make(utils.Months, len(rit.Months))
-		for i, month := range rit.Months {
-			cln.Months[i] = month
-		}
+		copy(cln.Months, rit.Months)
 	}
 	if len(rit.MonthDays) != 0 {
 		cln.MonthDays = make(utils.MonthDays, len(rit.MonthDays))
-		for i, monthDay := range rit.MonthDays {
-			cln.MonthDays[i] = monthDay
-		}
+		copy(cln.MonthDays, rit.MonthDays)
+
 	}
 	if len(rit.WeekDays) != 0 {
 		cln.WeekDays = make(utils.WeekDays, len(rit.WeekDays))
-		for i, weekDay := range rit.WeekDays {
-			cln.WeekDays[i] = weekDay
-		}
+		copy(cln.WeekDays, rit.WeekDays)
 	}
 	return
 }

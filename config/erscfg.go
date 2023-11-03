@@ -97,9 +97,9 @@ func (erS *ERsCfg) Clone() (cln *ERsCfg) {
 		Readers:         make([]*EventReaderCfg, len(erS.Readers)),
 		PartialCacheTTL: erS.PartialCacheTTL,
 	}
-	for idx, sConn := range erS.SessionSConns {
-		cln.SessionSConns[idx] = sConn
-	}
+
+	copy(cln.SessionSConns, erS.SessionSConns)
+
 	for idx, rdr := range erS.Readers {
 		cln.Readers[idx] = rdr.Clone()
 	}
@@ -534,9 +534,7 @@ func (er *EventReaderCfg) loadFromJSONCfg(jsnCfg *EventReaderJsonCfg, msgTemplat
 	}
 	if jsnCfg.Filters != nil {
 		er.Filters = make([]string, len(*jsnCfg.Filters))
-		for i, fltr := range *jsnCfg.Filters {
-			er.Filters[i] = fltr
-		}
+		copy(er.Filters, *jsnCfg.Filters)
 	}
 	if jsnCfg.Flags != nil {
 		er.Flags = utils.FlagsWithParamsFromSlice(*jsnCfg.Flags)
@@ -900,9 +898,7 @@ func (er EventReaderCfg) Clone() (cln *EventReaderCfg) {
 	}
 	if er.Filters != nil {
 		cln.Filters = make([]string, len(er.Filters))
-		for idx, val := range er.Filters {
-			cln.Filters[idx] = val
-		}
+		copy(cln.Filters, er.Filters)
 	}
 	if er.Fields != nil {
 		cln.Fields = make([]*FCTemplate, len(er.Fields))

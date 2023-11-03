@@ -99,9 +99,7 @@ func (mg *MigratorCgrCfg) loadFromJSONCfg(jsnCfg *MigratorCfgJson) (err error) {
 	}
 	if jsnCfg.Users_filters != nil && len(*jsnCfg.Users_filters) != 0 {
 		mg.UsersFilters = make([]string, len(*jsnCfg.Users_filters))
-		for i, v := range *jsnCfg.Users_filters {
-			mg.UsersFilters[i] = v
-		}
+		copy(mg.UsersFilters, *jsnCfg.Users_filters)
 	}
 	if jsnCfg.Out_dataDB_opts != nil {
 		err = mg.OutDataDBOpts.loadFromJSONCfg(jsnCfg.Out_dataDB_opts)

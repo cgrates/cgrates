@@ -1218,7 +1218,7 @@ func TestDispatcherServiceDispatchDspErrHostNotFound3(t *testing.T) {
 	engine.Cache = cacheInit
 }
 
-func (dS *DispatcherService) DispatcherServiceTest(ev *utils.CGREvent, reply *string) (error, any) {
+func (dS *DispatcherService) DispatcherServiceTest(ev *utils.CGREvent, reply *string) (any, error) {
 	*reply = utils.Pong
 	return nil, nil
 }

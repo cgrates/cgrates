@@ -128,9 +128,7 @@ func (sa SIPAgentCfg) Clone() (cln *SIPAgentCfg) {
 	}
 	if sa.SessionSConns != nil {
 		cln.SessionSConns = make([]string, len(sa.SessionSConns))
-		for i, c := range sa.SessionSConns {
-			cln.SessionSConns[i] = c
-		}
+		copy(cln.SessionSConns, sa.SessionSConns)
 	}
 	if sa.RequestProcessors != nil {
 		cln.RequestProcessors = make([]*RequestProcessor, len(sa.RequestProcessors))

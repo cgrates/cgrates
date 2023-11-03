@@ -176,9 +176,7 @@ func (da DiameterAgentCfg) Clone() (cln *DiameterAgentCfg) {
 	}
 	if da.SessionSConns != nil {
 		cln.SessionSConns = make([]string, len(da.SessionSConns))
-		for i, con := range da.SessionSConns {
-			cln.SessionSConns[i] = con
-		}
+		copy(cln.SessionSConns, da.SessionSConns)
 	}
 	if da.RequestProcessors != nil {
 		cln.RequestProcessors = make([]*RequestProcessor, len(da.RequestProcessors))

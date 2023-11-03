@@ -79,7 +79,7 @@ func (es *EventExporterService) ShouldRun() (should bool) {
 func (es *EventExporterService) IsRunning() bool {
 	es.RLock()
 	defer es.RUnlock()
-	return es != nil && es.eeS != nil
+	return es.eeS != nil
 }
 
 // Reload handles the change of config

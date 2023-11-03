@@ -148,9 +148,7 @@ func (da DNSAgentCfg) Clone() (cln *DNSAgentCfg) {
 
 	if da.SessionSConns != nil {
 		cln.SessionSConns = make([]string, len(da.SessionSConns))
-		for i, con := range da.SessionSConns {
-			cln.SessionSConns[i] = con
-		}
+		copy(cln.SessionSConns, da.SessionSConns)
 	}
 	if da.RequestProcessors != nil {
 		cln.RequestProcessors = make([]*RequestProcessor, len(da.RequestProcessors))
@@ -181,9 +179,7 @@ func (rp *RequestProcessor) loadFromJSONCfg(jsnCfg *ReqProcessorJsnCfg, sep stri
 	}
 	if jsnCfg.Filters != nil {
 		rp.Filters = make([]string, len(*jsnCfg.Filters))
-		for i, fltr := range *jsnCfg.Filters {
-			rp.Filters[i] = fltr
-		}
+		copy(rp.Filters, *jsnCfg.Filters)
 	}
 	if jsnCfg.Flags != nil {
 		rp.Flags = utils.FlagsWithParamsFromSlice(*jsnCfg.Flags)
@@ -247,9 +243,8 @@ func (rp RequestProcessor) Clone() (cln *RequestProcessor) {
 	}
 	if rp.Filters != nil {
 		cln.Filters = make([]string, len(rp.Filters))
-		for i, fltr := range rp.Filters {
-			cln.Filters[i] = fltr
-		}
+		copy(cln.Filters, rp.Filters)
+
 	}
 	if rp.RequestFields != nil {
 		cln.RequestFields = make([]*FCTemplate, len(rp.RequestFields))

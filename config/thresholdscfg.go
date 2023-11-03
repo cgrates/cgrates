@@ -71,23 +71,17 @@ func (t *ThresholdSCfg) loadFromJSONCfg(jsnCfg *ThresholdSJsonCfg) (err error) {
 	}
 	if jsnCfg.String_indexed_fields != nil {
 		sif := make([]string, len(*jsnCfg.String_indexed_fields))
-		for i, fID := range *jsnCfg.String_indexed_fields {
-			sif[i] = fID
-		}
+		copy(sif, *jsnCfg.String_indexed_fields)
 		t.StringIndexedFields = &sif
 	}
 	if jsnCfg.Prefix_indexed_fields != nil {
 		pif := make([]string, len(*jsnCfg.Prefix_indexed_fields))
-		for i, fID := range *jsnCfg.Prefix_indexed_fields {
-			pif[i] = fID
-		}
+		copy(pif, *jsnCfg.Prefix_indexed_fields)
 		t.PrefixIndexedFields = &pif
 	}
 	if jsnCfg.Suffix_indexed_fields != nil {
 		sif := make([]string, len(*jsnCfg.Suffix_indexed_fields))
-		for i, fID := range *jsnCfg.Suffix_indexed_fields {
-			sif[i] = fID
-		}
+		copy(sif, *jsnCfg.Suffix_indexed_fields)
 		t.SuffixIndexedFields = &sif
 	}
 	if jsnCfg.Nested_fields != nil {
@@ -118,23 +112,17 @@ func (t *ThresholdSCfg) AsMapInterface() (initialMP map[string]any) {
 
 	if t.StringIndexedFields != nil {
 		stringIndexedFields := make([]string, len(*t.StringIndexedFields))
-		for i, item := range *t.StringIndexedFields {
-			stringIndexedFields[i] = item
-		}
+		copy(stringIndexedFields, *t.StringIndexedFields)
 		initialMP[utils.StringIndexedFieldsCfg] = stringIndexedFields
 	}
 	if t.PrefixIndexedFields != nil {
 		prefixIndexedFields := make([]string, len(*t.PrefixIndexedFields))
-		for i, item := range *t.PrefixIndexedFields {
-			prefixIndexedFields[i] = item
-		}
+		copy(prefixIndexedFields, *t.PrefixIndexedFields)
 		initialMP[utils.PrefixIndexedFieldsCfg] = prefixIndexedFields
 	}
 	if t.SuffixIndexedFields != nil {
 		suffixIndexedFields := make([]string, len(*t.SuffixIndexedFields))
-		for i, item := range *t.SuffixIndexedFields {
-			suffixIndexedFields[i] = item
-		}
+		copy(suffixIndexedFields, *t.SuffixIndexedFields)
 		initialMP[utils.SuffixIndexedFieldsCfg] = suffixIndexedFields
 	}
 	return
@@ -159,23 +147,17 @@ func (t ThresholdSCfg) Clone() (cln *ThresholdSCfg) {
 
 	if t.StringIndexedFields != nil {
 		idx := make([]string, len(*t.StringIndexedFields))
-		for i, dx := range *t.StringIndexedFields {
-			idx[i] = dx
-		}
+		copy(idx, *t.StringIndexedFields)
 		cln.StringIndexedFields = &idx
 	}
 	if t.PrefixIndexedFields != nil {
 		idx := make([]string, len(*t.PrefixIndexedFields))
-		for i, dx := range *t.PrefixIndexedFields {
-			idx[i] = dx
-		}
+		copy(idx, *t.PrefixIndexedFields)
 		cln.PrefixIndexedFields = &idx
 	}
 	if t.SuffixIndexedFields != nil {
 		idx := make([]string, len(*t.SuffixIndexedFields))
-		for i, dx := range *t.SuffixIndexedFields {
-			idx[i] = dx
-		}
+		copy(idx, *t.SuffixIndexedFields)
 		cln.SuffixIndexedFields = &idx
 	}
 	return

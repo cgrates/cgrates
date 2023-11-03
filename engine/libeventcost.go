@@ -383,7 +383,7 @@ type RatingFilters map[string]RatingMatchedFilters // so we can define search me
 
 // GetIDWithSet attempts to retrieve the UUID of a matching data or create a new one
 func (rfs RatingFilters) GetIDWithSet(rmf RatingMatchedFilters) string {
-	if rmf == nil || len(rmf) == 0 {
+	if len(rmf) == 0 {
 		return ""
 	}
 	for k, v := range rfs {
@@ -495,7 +495,7 @@ func (crs ChargedRates) FieldAsInterface(fldPath []string) (val any, err error) 
 
 // GetIDWithSet attempts to retrieve the UUID of a matching data or create a new one
 func (crs ChargedRates) GetIDWithSet(rg RateGroups) string {
-	if rg == nil || len(rg) == 0 {
+	if len(rg) == 0 {
 		return ""
 	}
 	for k, v := range crs {

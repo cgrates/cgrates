@@ -55,28 +55,28 @@ func basicAuth(userList map[string]string) basicAuthMiddleware {
 			authHeader := strings.SplitN(r.Header.Get("Authorization"), " ", 2)
 			if len(authHeader) != 2 {
 				utils.Logger.Warning("<BasicAuth> Missing authorization header value")
-				http.Error(w, "Not authorized", 401)
+				http.Error(w, "Not authorized", http.StatusUnauthorized)
 				return
 			}
 
 			authHeaderDecoded, err := base64.StdEncoding.DecodeString(authHeader[1])
 			if err != nil {
 				utils.Logger.Warning("<BasicAuth> Unable to decode authorization header")
-				http.Error(w, err.Error(), 401)
+				http.Error(w, err.Error(), http.StatusUnauthorized)
 				return
 			}
 
 			userPass := strings.SplitN(string(authHeaderDecoded), ":", 2)
 			if len(userPass) != 2 {
 				utils.Logger.Warning("<BasicAuth> Unauthorized API access. Missing or extra credential components")
-				http.Error(w, "Not authorized", 401)
+				http.Error(w, "Not authorized", http.StatusUnauthorized)
 				return
 			}
 
 			valid := verifyCredential(userPass[0], userPass[1], userList)
 			if !valid {
 				utils.Logger.Warning(fmt.Sprintf("<BasicAuth> Unauthorized API access by user '%s'", userPass[0]))
-				http.Error(w, "Not authorized", 401)
+				http.Error(w, "Not authorized", http.StatusUnauthorized)
 				return
 			}
 

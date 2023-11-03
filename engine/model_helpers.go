@@ -1180,12 +1180,10 @@ func APItoResource(tpRL *utils.TPResourceProfile, timezone string) (rp *Resource
 			return nil, err
 		}
 	}
-	for i, fltr := range tpRL.FilterIDs {
-		rp.FilterIDs[i] = fltr
-	}
-	for i, th := range tpRL.ThresholdIDs {
-		rp.ThresholdIDs[i] = th
-	}
+
+	copy(rp.FilterIDs, tpRL.FilterIDs)
+	copy(rp.ThresholdIDs, tpRL.ThresholdIDs)
+
 	if tpRL.ActivationInterval != nil {
 		if rp.ActivationInterval, err = tpRL.ActivationInterval.AsActivationInterval(timezone); err != nil {
 			return nil, err
@@ -1215,12 +1213,9 @@ func ResourceProfileToAPI(rp *ResourceProfile) (tpRL *utils.TPResourceProfile) {
 	if rp.UsageTTL != time.Duration(0) {
 		tpRL.UsageTTL = rp.UsageTTL.String()
 	}
-	for i, fli := range rp.FilterIDs {
-		tpRL.FilterIDs[i] = fli
-	}
-	for i, fli := range rp.ThresholdIDs {
-		tpRL.ThresholdIDs[i] = fli
-	}
+
+	copy(tpRL.FilterIDs, rp.FilterIDs)
+	copy(tpRL.ThresholdIDs, rp.ThresholdIDs)
 
 	if rp.ActivationInterval != nil {
 		if !rp.ActivationInterval.ActivationTime.IsZero() {
@@ -1411,12 +1406,10 @@ func APItoStats(tpST *utils.TPStatProfile, timezone string) (st *StatQueueProfil
 			FilterIDs: metric.FilterIDs,
 		}
 	}
-	for i, trh := range tpST.ThresholdIDs {
-		st.ThresholdIDs[i] = trh
-	}
-	for i, fltr := range tpST.FilterIDs {
-		st.FilterIDs[i] = fltr
-	}
+
+	copy(st.ThresholdIDs, tpST.ThresholdIDs)
+	copy(st.FilterIDs, tpST.FilterIDs)
+
 	if tpST.ActivationInterval != nil {
 		if st.ActivationInterval, err = tpST.ActivationInterval.AsActivationInterval(timezone); err != nil {
 			return nil, err
@@ -1445,21 +1438,16 @@ func StatQueueProfileToAPI(st *StatQueueProfile) (tpST *utils.TPStatProfile) {
 		}
 		if len(metric.FilterIDs) != 0 {
 			tpST.Metrics[i].FilterIDs = make([]string, len(metric.FilterIDs))
-			for j, fltr := range metric.FilterIDs {
-				tpST.Metrics[i].FilterIDs[j] = fltr
-			}
+			copy(tpST.Metrics[i].FilterIDs, metric.FilterIDs)
+
 		}
 
 	}
 	if st.TTL != time.Duration(0) {
 		tpST.TTL = st.TTL.String()
 	}
-	for i, fli := range st.FilterIDs {
-		tpST.FilterIDs[i] = fli
-	}
-	for i, fli := range st.ThresholdIDs {
-		tpST.ThresholdIDs[i] = fli
-	}
+	copy(tpST.FilterIDs, st.FilterIDs)
+	copy(tpST.ThresholdIDs, st.ThresholdIDs)
 
 	if st.ActivationInterval != nil {
 		if !st.ActivationInterval.ActivationTime.IsZero() {
@@ -1634,13 +1622,10 @@ func APItoThresholdProfile(tpTH *utils.TPThresholdProfile, timezone string) (th 
 			return nil, err
 		}
 	}
-	for i, ati := range tpTH.ActionIDs {
-		th.ActionIDs[i] = ati
 
-	}
-	for i, fli := range tpTH.FilterIDs {
-		th.FilterIDs[i] = fli
-	}
+	copy(th.ActionIDs, tpTH.ActionIDs)
+	copy(th.FilterIDs, tpTH.FilterIDs)
+
 	if tpTH.ActivationInterval != nil {
 		if th.ActivationInterval, err = tpTH.ActivationInterval.AsActivationInterval(timezone); err != nil {
 			return nil, err
@@ -1665,12 +1650,9 @@ func ThresholdProfileToAPI(th *ThresholdProfile) (tpTH *utils.TPThresholdProfile
 	if th.MinSleep != time.Duration(0) {
 		tpTH.MinSleep = th.MinSleep.String()
 	}
-	for i, fli := range th.FilterIDs {
-		tpTH.FilterIDs[i] = fli
-	}
-	for i, fli := range th.ActionIDs {
-		tpTH.ActionIDs[i] = fli
-	}
+
+	copy(tpTH.FilterIDs, th.FilterIDs)
+	copy(tpTH.ActionIDs, th.ActionIDs)
 
 	if th.ActivationInterval != nil {
 		if !th.ActivationInterval.ActivationTime.IsZero() {
@@ -1808,9 +1790,9 @@ func FilterToTPFilter(f *Filter) (tpFltr *utils.TPFilterProfile) {
 			Element: reqFltr.Element,
 			Values:  make([]string, len(reqFltr.Values)),
 		}
-		for j, val := range reqFltr.Values {
-			tpFltr.Filters[i].Values[j] = val
-		}
+
+		copy(tpFltr.Filters[i].Values, reqFltr.Values)
+
 	}
 	if f.ActivationInterval != nil {
 		tpFltr.ActivationInterval = &utils.TPActivationInterval{
@@ -2016,12 +1998,10 @@ func APItoRouteProfile(tpRp *utils.TPRouteProfile, timezone string) (rp *RoutePr
 		SortingParameters: make([]string, len(tpRp.SortingParameters)),
 		FilterIDs:         make([]string, len(tpRp.FilterIDs)),
 	}
-	for i, stp := range tpRp.SortingParameters {
-		rp.SortingParameters[i] = stp
-	}
-	for i, fli := range tpRp.FilterIDs {
-		rp.FilterIDs[i] = fli
-	}
+
+	copy(rp.SortingParameters, tpRp.SortingParameters)
+	copy(rp.FilterIDs, tpRp.FilterIDs)
+
 	if tpRp.ActivationInterval != nil {
 		if rp.ActivationInterval, err = tpRp.ActivationInterval.AsActivationInterval(timezone); err != nil {
 			return nil, err
@@ -2068,12 +2048,10 @@ func RouteProfileToAPI(rp *RouteProfile) (tpRp *utils.TPRouteProfile) {
 			RouteParameters: route.RouteParameters,
 		}
 	}
-	for i, fli := range rp.FilterIDs {
-		tpRp.FilterIDs[i] = fli
-	}
-	for i, fli := range rp.SortingParameters {
-		tpRp.SortingParameters[i] = fli
-	}
+
+	copy(tpRp.FilterIDs, rp.FilterIDs)
+	copy(tpRp.SortingParameters, rp.SortingParameters)
+
 	if rp.ActivationInterval != nil {
 		if !rp.ActivationInterval.ActivationTime.IsZero() {
 			tpRp.ActivationInterval.ActivationTime = rp.ActivationInterval.ActivationTime.Format(time.RFC3339)
@@ -2214,12 +2192,10 @@ func APItoAttributeProfile(tpAttr *utils.TPAttributeProfile, timezone string) (a
 		Contexts:   make([]string, len(tpAttr.Contexts)),
 		Attributes: make([]*Attribute, len(tpAttr.Attributes)),
 	}
-	for i, fli := range tpAttr.FilterIDs {
-		attrPrf.FilterIDs[i] = fli
-	}
-	for i, context := range tpAttr.Contexts {
-		attrPrf.Contexts[i] = context
-	}
+
+	copy(attrPrf.FilterIDs, tpAttr.FilterIDs)
+	copy(attrPrf.Contexts, tpAttr.Contexts)
+
 	for i, reqAttr := range tpAttr.Attributes {
 		if reqAttr.Path == utils.EmptyString { // we do not suppot empty Path in Attributes
 			err = fmt.Errorf("empty path in AttributeProfile <%s>", attrPrf.TenantID())
@@ -2255,12 +2231,10 @@ func AttributeProfileToAPI(attrPrf *AttributeProfile) (tpAttr *utils.TPAttribute
 		Blocker:            attrPrf.Blocker,
 		Weight:             attrPrf.Weight,
 	}
-	for i, fli := range attrPrf.FilterIDs {
-		tpAttr.FilterIDs[i] = fli
-	}
-	for i, fli := range attrPrf.Contexts {
-		tpAttr.Contexts[i] = fli
-	}
+
+	copy(tpAttr.FilterIDs, attrPrf.FilterIDs)
+	copy(tpAttr.Contexts, attrPrf.Contexts)
+
 	for i, attr := range attrPrf.Attributes {
 		tpAttr.Attributes[i] = &utils.TPAttribute{
 			FilterIDs: attr.FilterIDs,
@@ -2454,12 +2428,10 @@ func APItoChargerProfile(tpCPP *utils.TPChargerProfile, timezone string) (cpp *C
 		FilterIDs:    make([]string, len(tpCPP.FilterIDs)),
 		AttributeIDs: make([]string, len(tpCPP.AttributeIDs)),
 	}
-	for i, fli := range tpCPP.FilterIDs {
-		cpp.FilterIDs[i] = fli
-	}
-	for i, attribute := range tpCPP.AttributeIDs {
-		cpp.AttributeIDs[i] = attribute
-	}
+
+	copy(cpp.FilterIDs, tpCPP.FilterIDs)
+	copy(cpp.AttributeIDs, tpCPP.AttributeIDs)
+
 	if tpCPP.ActivationInterval != nil {
 		if cpp.ActivationInterval, err = tpCPP.ActivationInterval.AsActivationInterval(timezone); err != nil {
 			return nil, err
@@ -2478,12 +2450,10 @@ func ChargerProfileToAPI(chargerPrf *ChargerProfile) (tpCharger *utils.TPCharger
 		AttributeIDs:       make([]string, len(chargerPrf.AttributeIDs)),
 		Weight:             chargerPrf.Weight,
 	}
-	for i, fli := range chargerPrf.FilterIDs {
-		tpCharger.FilterIDs[i] = fli
-	}
-	for i, fli := range chargerPrf.AttributeIDs {
-		tpCharger.AttributeIDs[i] = fli
-	}
+
+	copy(tpCharger.FilterIDs, chargerPrf.FilterIDs)
+	copy(tpCharger.AttributeIDs, chargerPrf.AttributeIDs)
+
 	if chargerPrf.ActivationInterval != nil {
 		if !chargerPrf.ActivationInterval.ActivationTime.IsZero() {
 			tpCharger.ActivationInterval.ActivationTime = chargerPrf.ActivationInterval.ActivationTime.Format(time.RFC3339)
@@ -2698,12 +2668,10 @@ func APItoDispatcherProfile(tpDPP *utils.TPDispatcherProfile, timezone string) (
 		StrategyParams: make(map[string]any),
 		Hosts:          make(DispatcherHostProfiles, len(tpDPP.Hosts)),
 	}
-	for i, fli := range tpDPP.FilterIDs {
-		dpp.FilterIDs[i] = fli
-	}
-	for i, sub := range tpDPP.Subsystems {
-		dpp.Subsystems[i] = sub
-	}
+	copy(dpp.FilterIDs, tpDPP.FilterIDs)
+
+	copy(dpp.Subsystems, tpDPP.Subsystems)
+
 	for i, param := range tpDPP.StrategyParams {
 		if param != utils.EmptyString {
 			dpp.StrategyParams[strconv.Itoa(i)] = param
@@ -2717,9 +2685,9 @@ func APItoDispatcherProfile(tpDPP *utils.TPDispatcherProfile, timezone string) (
 			FilterIDs: make([]string, len(conn.FilterIDs)),
 			Params:    make(map[string]any),
 		}
-		for j, fltr := range conn.FilterIDs {
-			dpp.Hosts[i].FilterIDs[j] = fltr
-		}
+
+		copy(dpp.Hosts[i].FilterIDs, conn.FilterIDs)
+
 		for j, param := range conn.Params {
 			if param == utils.EmptyString {
 				continue
@@ -2753,12 +2721,9 @@ func DispatcherProfileToAPI(dpp *DispatcherProfile) (tpDPP *utils.TPDispatcherPr
 		Hosts:              make([]*utils.TPDispatcherHostProfile, len(dpp.Hosts)),
 	}
 
-	for i, fli := range dpp.FilterIDs {
-		tpDPP.FilterIDs[i] = fli
-	}
-	for i, sub := range dpp.Subsystems {
-		tpDPP.Subsystems[i] = sub
-	}
+	copy(tpDPP.FilterIDs, dpp.FilterIDs)
+	copy(tpDPP.Subsystems, dpp.Subsystems)
+
 	for key, val := range dpp.StrategyParams {
 		// here we expect that the key to be an integer because
 		// according to APItoDispatcherProfile when we convert from TP to obj we use index as key
@@ -2774,9 +2739,8 @@ func DispatcherProfileToAPI(dpp *DispatcherProfile) (tpDPP *utils.TPDispatcherPr
 			Params:    make([]any, len(host.Params)),
 			Blocker:   host.Blocker,
 		}
-		for j, fltr := range host.FilterIDs {
-			tpDPP.Hosts[i].FilterIDs[j] = fltr
-		}
+		copy(tpDPP.Hosts[i].FilterIDs, host.FilterIDs)
+
 		idx := 0
 		for key, val := range host.Params {
 			paramVal := val

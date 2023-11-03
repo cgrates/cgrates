@@ -109,9 +109,8 @@ func (eeS *EEsCfg) Clone() (cln *EEsCfg) {
 		Cache:           make(map[string]*CacheParamCfg),
 		Exporters:       make([]*EventExporterCfg, len(eeS.Exporters)),
 	}
-	for idx, sConn := range eeS.AttributeSConns {
-		cln.AttributeSConns[idx] = sConn
-	}
+
+	copy(cln.AttributeSConns, eeS.AttributeSConns)
 	for key, value := range eeS.Cache {
 		cln.Cache[key] = value.Clone()
 	}
@@ -577,9 +576,7 @@ func (eeC *EventExporterCfg) loadFromJSONCfg(jsnEec *EventExporterJsonCfg, msgTe
 	}
 	if jsnEec.Filters != nil {
 		eeC.Filters = make([]string, len(*jsnEec.Filters))
-		for i, fltr := range *jsnEec.Filters {
-			eeC.Filters[i] = fltr
-		}
+		copy(eeC.Filters, *jsnEec.Filters)
 	}
 	if jsnEec.Flags != nil {
 		eeC.Flags = utils.FlagsWithParamsFromSlice(*jsnEec.Flags)
@@ -589,9 +586,8 @@ func (eeC *EventExporterCfg) loadFromJSONCfg(jsnEec *EventExporterJsonCfg, msgTe
 	}
 	if jsnEec.Attribute_ids != nil {
 		eeC.AttributeSIDs = make([]string, len(*jsnEec.Attribute_ids))
-		for i, fltr := range *jsnEec.Attribute_ids {
-			eeC.AttributeSIDs[i] = fltr
-		}
+		copy(eeC.AttributeSIDs, *jsnEec.Attribute_ids)
+
 	}
 	if jsnEec.Synchronous != nil {
 		eeC.Synchronous = *jsnEec.Synchronous
@@ -940,15 +936,11 @@ func (eeC EventExporterCfg) Clone() (cln *EventExporterCfg) {
 
 	if eeC.Filters != nil {
 		cln.Filters = make([]string, len(eeC.Filters))
-		for idx, val := range eeC.Filters {
-			cln.Filters[idx] = val
-		}
+		copy(cln.Filters, eeC.Filters)
 	}
 	if eeC.AttributeSIDs != nil {
 		cln.AttributeSIDs = make([]string, len(eeC.AttributeSIDs))
-		for idx, val := range eeC.AttributeSIDs {
-			cln.AttributeSIDs[idx] = val
-		}
+		copy(cln.AttributeSIDs, eeC.AttributeSIDs)
 	}
 
 	for idx, fld := range eeC.Fields {

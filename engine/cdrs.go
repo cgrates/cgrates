@@ -759,9 +759,8 @@ func (attr *ArgV1ProcessEvent) Clone() *ArgV1ProcessEvent {
 	var flags []string
 	if attr.Flags != nil {
 		flags = make([]string, len(attr.Flags))
-		for i, id := range attr.Flags {
-			flags[i] = id
-		}
+		copy(flags, attr.Flags)
+
 	}
 	return &ArgV1ProcessEvent{
 		Flags:    flags,

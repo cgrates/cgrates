@@ -183,9 +183,7 @@ func (ha HTTPAgentCfg) Clone() (cln *HTTPAgentCfg) {
 	}
 	if ha.SessionSConns != nil {
 		cln.SessionSConns = make([]string, len(ha.SessionSConns))
-		for i, con := range ha.SessionSConns {
-			cln.SessionSConns[i] = con
-		}
+		copy(cln.SessionSConns, ha.SessionSConns)
 	}
 	for i, req := range ha.RequestProcessors {
 		cln.RequestProcessors[i] = req.Clone()

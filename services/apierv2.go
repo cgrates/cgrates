@@ -121,7 +121,7 @@ func (api *APIerSv2Service) Shutdown() (err error) {
 func (api *APIerSv2Service) IsRunning() bool {
 	api.RLock()
 	defer api.RUnlock()
-	return api != nil && api.api != nil
+	return api.api != nil
 }
 
 // ServiceName returns the service name

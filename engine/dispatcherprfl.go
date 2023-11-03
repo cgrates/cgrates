@@ -44,9 +44,7 @@ func (dC *DispatcherHostProfile) Clone() (cln *DispatcherHostProfile) {
 	}
 	if dC.FilterIDs != nil {
 		cln.FilterIDs = make([]string, len(dC.FilterIDs))
-		for i, fltr := range dC.FilterIDs {
-			cln.FilterIDs[i] = fltr
-		}
+		copy(cln.FilterIDs, dC.FilterIDs)
 	}
 	if dC.Params != nil {
 		cln.Params = make(map[string]any)
@@ -194,8 +192,6 @@ func (dHPrflIDs DispatcherHostIDs) Shuffle() {
 
 func (dHPrflIDs DispatcherHostIDs) Clone() (cln DispatcherHostIDs) {
 	cln = make(DispatcherHostIDs, len(dHPrflIDs))
-	for i, dhID := range dHPrflIDs {
-		cln[i] = dhID
-	}
+	copy(cln, dHPrflIDs)
 	return
 }

@@ -136,7 +136,7 @@ func (ldrs *LoaderService) Shutdown() (err error) {
 func (ldrs *LoaderService) IsRunning() bool {
 	ldrs.RLock()
 	defer ldrs.RUnlock()
-	return ldrs != nil && ldrs.ldrs != nil && ldrs.ldrs.Enabled()
+	return ldrs.ldrs != nil && ldrs.ldrs.Enabled()
 }
 
 // ServiceName returns the service name

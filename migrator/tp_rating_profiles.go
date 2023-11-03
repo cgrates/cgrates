@@ -36,7 +36,7 @@ func (m *Migrator) migrateCurrentTPratingprofiles() (err error) {
 			return err
 		}
 		if ratingProfile != nil {
-			if m.dryRun != true {
+			if !m.dryRun {
 				if err := m.storDBOut.StorDB().SetTPRatingProfiles(ratingProfile); err != nil {
 					return err
 				}

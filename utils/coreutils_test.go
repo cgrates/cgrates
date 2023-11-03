@@ -28,7 +28,6 @@ import (
 
 	"golang.org/x/crypto/bcrypt"
 
-	"github.com/cgrates/birpc"
 	"github.com/cgrates/rpcclient"
 )
 
@@ -1777,32 +1776,6 @@ func TestMonthlyEstimated(t *testing.T) {
 	} else if !reflect.DeepEqual(rcv, expectedTime) {
 		t.Errorf("Expected %+v, received %+v", expectedTime, rcv)
 	}
-}
-
-type server struct{}
-
-type client struct{}
-
-func (c client) Call(serviceMethod string, args any, reply any) (err error) {
-	err = ErrExists
-	return
-}
-
-func (srv *server) BiRPCv1ValidMethod(cl birpc.ClientConnector, args any, req any) error {
-	return nil
-}
-
-func (srv *server) BiRPCv1MultipleParams(cl birpc.ClientConnector, args any, req any) (int, error) {
-	return 1, nil
-}
-
-func (srv *server) BiRPCv1NoErrorReturn(cl birpc.ClientConnector, args any, req any) int {
-	return 1
-}
-
-func (srv *server) BiRPCv1FinalError(cl birpc.ClientConnector, args any, req any) (err error) {
-	err = ErrExists
-	return
 }
 
 func TestCoreUtilsGenerateDBItemOpts(t *testing.T) {

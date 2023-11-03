@@ -109,7 +109,7 @@ func (erS *EventReaderService) Shutdown() (err error) {
 func (erS *EventReaderService) IsRunning() bool {
 	erS.RLock()
 	defer erS.RUnlock()
-	return erS != nil && erS.ers != nil
+	return erS.ers != nil
 }
 
 // ServiceName returns the service name

@@ -2591,10 +2591,10 @@ func (args *V1TerminateSessionArgs) ParseFlags(flags, sep string) {
 			args.TerminateSession = true
 		case subsystem == utils.MetaResources:
 			args.ReleaseResources = true
-		case strings.Index(subsystem, utils.MetaThresholds) != -1:
+		case strings.Contains(subsystem, utils.MetaThresholds):
 			args.ProcessThresholds = true
 			args.ThresholdIDs = getFlagIDs(subsystem)
-		case strings.Index(subsystem, utils.MetaStats) != -1:
+		case strings.Contains(subsystem, utils.MetaStats):
 			args.ProcessStats = true
 			args.StatIDs = getFlagIDs(subsystem)
 		case subsystem == utils.MetaFD:
@@ -2849,13 +2849,13 @@ func (args *V1ProcessMessageArgs) ParseFlags(flags, sep string) {
 			args.RoutesMaxCost = utils.MetaEventCost
 		case strings.HasPrefix(subsystem, utils.MetaRoutesMaxCost):
 			args.RoutesMaxCost = strings.TrimPrefix(subsystem, utils.MetaRoutesMaxCost+utils.InInFieldSep)
-		case strings.Index(subsystem, utils.MetaAttributes) != -1:
+		case strings.Contains(subsystem, utils.MetaAttributes):
 			args.GetAttributes = true
 			args.AttributeIDs = getFlagIDs(subsystem)
-		case strings.Index(subsystem, utils.MetaThresholds) != -1:
+		case strings.Contains(subsystem, utils.MetaThresholds):
 			args.ProcessThresholds = true
 			args.ThresholdIDs = getFlagIDs(subsystem)
-		case strings.Index(subsystem, utils.MetaStats) != -1:
+		case strings.Contains(subsystem, utils.MetaStats):
 			args.ProcessStats = true
 			args.StatIDs = getFlagIDs(subsystem)
 		case subsystem == utils.MetaFD:

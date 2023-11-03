@@ -118,7 +118,7 @@ func (attrS *AttributeService) Shutdown() (err error) {
 func (attrS *AttributeService) IsRunning() bool {
 	attrS.RLock()
 	defer attrS.RUnlock()
-	return attrS != nil && attrS.attrS != nil
+	return attrS.attrS != nil
 }
 
 // ServiceName returns the service name

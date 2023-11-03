@@ -149,9 +149,8 @@ func (cdrscfg *CdrsCfg) AsMapInterface() (initialMP map[string]any) {
 	initialMP[utils.ExtraFieldsCfg] = extraFields
 
 	onlineCDRExports := make([]string, len(cdrscfg.OnlineCDRExports))
-	for i, item := range cdrscfg.OnlineCDRExports {
-		onlineCDRExports[i] = item
-	}
+	copy(onlineCDRExports, cdrscfg.OnlineCDRExports)
+
 	initialMP[utils.OnlineCDRExportsCfg] = onlineCDRExports
 
 	if cdrscfg.ChargerSConns != nil {
@@ -237,51 +236,35 @@ func (cdrscfg CdrsCfg) Clone() (cln *CdrsCfg) {
 	}
 	if cdrscfg.ChargerSConns != nil {
 		cln.ChargerSConns = make([]string, len(cdrscfg.ChargerSConns))
-		for i, con := range cdrscfg.ChargerSConns {
-			cln.ChargerSConns[i] = con
-		}
+		copy(cln.ChargerSConns, cdrscfg.ChargerSConns)
 	}
 	if cdrscfg.RaterConns != nil {
 		cln.RaterConns = make([]string, len(cdrscfg.RaterConns))
-		for i, con := range cdrscfg.RaterConns {
-			cln.RaterConns[i] = con
-		}
+		copy(cln.RaterConns, cdrscfg.RaterConns)
 	}
 	if cdrscfg.AttributeSConns != nil {
 		cln.AttributeSConns = make([]string, len(cdrscfg.AttributeSConns))
-		for i, con := range cdrscfg.AttributeSConns {
-			cln.AttributeSConns[i] = con
-		}
+		copy(cln.AttributeSConns, cdrscfg.AttributeSConns)
 	}
 	if cdrscfg.ThresholdSConns != nil {
 		cln.ThresholdSConns = make([]string, len(cdrscfg.ThresholdSConns))
-		for i, con := range cdrscfg.ThresholdSConns {
-			cln.ThresholdSConns[i] = con
-		}
+		copy(cln.ThresholdSConns, cdrscfg.ThresholdSConns)
 	}
 	if cdrscfg.StatSConns != nil {
 		cln.StatSConns = make([]string, len(cdrscfg.StatSConns))
-		for i, con := range cdrscfg.StatSConns {
-			cln.StatSConns[i] = con
-		}
+		copy(cln.StatSConns, cdrscfg.StatSConns)
 	}
 	if cdrscfg.OnlineCDRExports != nil {
 		cln.OnlineCDRExports = make([]string, len(cdrscfg.OnlineCDRExports))
-		for i, con := range cdrscfg.OnlineCDRExports {
-			cln.OnlineCDRExports[i] = con
-		}
+		copy(cln.OnlineCDRExports, cdrscfg.OnlineCDRExports)
 	}
 	if cdrscfg.SchedulerConns != nil {
 		cln.SchedulerConns = make([]string, len(cdrscfg.SchedulerConns))
-		for i, con := range cdrscfg.SchedulerConns {
-			cln.SchedulerConns[i] = con
-		}
+		copy(cln.SchedulerConns, cdrscfg.SchedulerConns)
 	}
 	if cdrscfg.EEsConns != nil {
 		cln.EEsConns = make([]string, len(cdrscfg.EEsConns))
-		for i, con := range cdrscfg.EEsConns {
-			cln.EEsConns[i] = con
-		}
+		copy(cln.EEsConns, cdrscfg.EEsConns)
 	}
 
 	return
