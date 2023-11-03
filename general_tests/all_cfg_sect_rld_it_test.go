@@ -881,7 +881,7 @@ func testSectConfigSReloadDNSAgent(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Errorf("Expected OK received: %+v", reply)
 	}
-	cfgStr := "{\"dns_agent\":{\"enabled\":true,\"listeners\":[{\"address\":\"127.0.0.1:53\",\"network\":\"udp\"}],\"request_processors\":[{\"filters\":null,\"flags\":null,\"id\":\"random\",\"timezone\":\"\"}],\"sessions_conns\":[\"*internal\"],\"timezone\":\"local\"}}"
+	cfgStr := "{\"dns_agent\":{\"enabled\":true,\"listeners\":[{\"address\":\"127.0.0.1:2053\",\"network\":\"udp\"}],\"request_processors\":[{\"filters\":null,\"flags\":null,\"id\":\"random\",\"timezone\":\"\"}],\"sessions_conns\":[\"*internal\"],\"timezone\":\"local\"}}"
 	var rpl string
 	if err := testSectRPC.Call(context.Background(), utils.ConfigSv1GetConfigAsJSON, &config.SectionWithAPIOpts{
 		Tenant:  "cgrates.org",
