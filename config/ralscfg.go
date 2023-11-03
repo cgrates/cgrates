@@ -148,15 +148,11 @@ func (ralsCfg RalsCfg) Clone() (cln *RalsCfg) {
 	}
 	if ralsCfg.ThresholdSConns != nil {
 		cln.ThresholdSConns = make([]string, len(ralsCfg.ThresholdSConns))
-		for i, con := range ralsCfg.ThresholdSConns {
-			cln.ThresholdSConns[i] = con
-		}
+		copy(cln.ThresholdSConns, ralsCfg.ThresholdSConns)
 	}
 	if ralsCfg.StatSConns != nil {
 		cln.StatSConns = make([]string, len(ralsCfg.StatSConns))
-		for i, con := range ralsCfg.StatSConns {
-			cln.StatSConns[i] = con
-		}
+		copy(cln.StatSConns, ralsCfg.StatSConns)
 	}
 
 	for k, u := range ralsCfg.MaxComputedUsage {

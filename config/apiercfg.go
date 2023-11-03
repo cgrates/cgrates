@@ -136,27 +136,19 @@ func (aCfg ApierCfg) Clone() (cln *ApierCfg) {
 	}
 	if aCfg.CachesConns != nil {
 		cln.CachesConns = make([]string, len(aCfg.CachesConns))
-		for i, k := range aCfg.CachesConns {
-			cln.CachesConns[i] = k
-		}
+		copy(cln.CachesConns, aCfg.CachesConns)
 	}
 	if aCfg.SchedulerConns != nil {
 		cln.SchedulerConns = make([]string, len(aCfg.SchedulerConns))
-		for i, k := range aCfg.SchedulerConns {
-			cln.SchedulerConns[i] = k
-		}
+		copy(cln.SchedulerConns, aCfg.SchedulerConns)
 	}
 	if aCfg.AttributeSConns != nil {
 		cln.AttributeSConns = make([]string, len(aCfg.AttributeSConns))
-		for i, k := range aCfg.AttributeSConns {
-			cln.AttributeSConns[i] = k
-		}
+		copy(cln.AttributeSConns, aCfg.AttributeSConns)
 	}
 	if aCfg.EEsConns != nil {
 		cln.EEsConns = make([]string, len(aCfg.EEsConns))
-		for i, k := range aCfg.EEsConns {
-			cln.EEsConns[i] = k
-		}
+		copy(cln.EEsConns, aCfg.EEsConns)
 	}
 	return
 }

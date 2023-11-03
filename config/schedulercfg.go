@@ -51,9 +51,7 @@ func (schdcfg *SchedulerCfg) loadFromJSONCfg(jsnCfg *SchedulerJsonCfg) error {
 	}
 	if jsnCfg.Filters != nil {
 		schdcfg.Filters = make([]string, len(*jsnCfg.Filters))
-		for i, fltr := range *jsnCfg.Filters {
-			schdcfg.Filters[i] = fltr
-		}
+		copy(schdcfg.Filters, *jsnCfg.Filters)
 	}
 	if jsnCfg.Thresholds_conns != nil {
 		schdcfg.ThreshSConns = make([]string, len(*jsnCfg.Thresholds_conns))
@@ -77,9 +75,7 @@ func (schdcfg *SchedulerCfg) loadFromJSONCfg(jsnCfg *SchedulerJsonCfg) error {
 	}
 	if jsnCfg.Dynaprepaid_actionplans != nil {
 		schdcfg.DynaprepaidActionPlans = make([]string, len(*jsnCfg.Dynaprepaid_actionplans))
-		for i, val := range *jsnCfg.Dynaprepaid_actionplans {
-			schdcfg.DynaprepaidActionPlans[i] = val
-		}
+		copy(schdcfg.DynaprepaidActionPlans, *jsnCfg.Dynaprepaid_actionplans)
 	}
 	return nil
 }
@@ -131,34 +127,25 @@ func (schdcfg SchedulerCfg) Clone() (cln *SchedulerCfg) {
 	}
 	if schdcfg.CDRsConns != nil {
 		cln.CDRsConns = make([]string, len(schdcfg.CDRsConns))
-		for i, con := range schdcfg.CDRsConns {
-			cln.CDRsConns[i] = con
-		}
+		copy(cln.CDRsConns, schdcfg.CDRsConns)
 	}
 	if schdcfg.ThreshSConns != nil {
 		cln.ThreshSConns = make([]string, len(schdcfg.ThreshSConns))
-		for i, con := range schdcfg.ThreshSConns {
-			cln.ThreshSConns[i] = con
-		}
+		copy(cln.ThreshSConns, schdcfg.ThreshSConns)
 	}
 	if schdcfg.StatSConns != nil {
 		cln.StatSConns = make([]string, len(schdcfg.StatSConns))
-		for i, con := range schdcfg.StatSConns {
-			cln.StatSConns[i] = con
-		}
+		copy(cln.StatSConns, schdcfg.StatSConns)
 	}
+
 	if schdcfg.Filters != nil {
 		cln.Filters = make([]string, len(schdcfg.Filters))
-		for i, con := range schdcfg.Filters {
-			cln.Filters[i] = con
-		}
+		copy(cln.Filters, schdcfg.Filters)
 	}
 
 	if schdcfg.DynaprepaidActionPlans != nil {
 		cln.DynaprepaidActionPlans = make([]string, len(schdcfg.DynaprepaidActionPlans))
-		for i, con := range schdcfg.DynaprepaidActionPlans {
-			cln.DynaprepaidActionPlans[i] = con
-		}
+		copy(cln.DynaprepaidActionPlans, schdcfg.DynaprepaidActionPlans)
 	}
 	return
 }

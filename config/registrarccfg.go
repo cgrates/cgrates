@@ -127,9 +127,7 @@ func (dps RegistrarCCfg) Clone() (cln *RegistrarCCfg) {
 	}
 	if dps.RegistrarSConns != nil {
 		cln.RegistrarSConns = make([]string, len(dps.RegistrarSConns))
-		for i, k := range dps.RegistrarSConns {
-			cln.RegistrarSConns[i] = k
-		}
+		copy(cln.RegistrarSConns, dps.RegistrarSConns)
 	}
 	for tnt, hosts := range dps.Hosts {
 		clnH := make([]*RemoteHost, len(hosts))

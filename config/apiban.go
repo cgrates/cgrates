@@ -31,9 +31,7 @@ func (ban *APIBanCfg) loadFromJSONCfg(jsnCfg *APIBanJsonCfg) (err error) {
 	}
 	if jsnCfg.Keys != nil {
 		ban.Keys = make([]string, len(*jsnCfg.Keys))
-		for i, key := range *jsnCfg.Keys {
-			ban.Keys[i] = key
-		}
+		copy(ban.Keys, *jsnCfg.Keys)
 	}
 	return nil
 }
@@ -50,8 +48,6 @@ func (ban APIBanCfg) Clone() (cln *APIBanCfg) {
 	cln = &APIBanCfg{
 		Keys: make([]string, len(ban.Keys)),
 	}
-	for i, k := range ban.Keys {
-		cln.Keys[i] = k
-	}
+	copy(cln.Keys, ban.Keys)
 	return
 }

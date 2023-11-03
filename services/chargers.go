@@ -118,7 +118,7 @@ func (chrS *ChargerService) Shutdown() (err error) {
 func (chrS *ChargerService) IsRunning() bool {
 	chrS.RLock()
 	defer chrS.RUnlock()
-	return chrS != nil && chrS.chrS != nil
+	return chrS.chrS != nil
 }
 
 // ServiceName returns the service name

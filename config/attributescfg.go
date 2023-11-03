@@ -110,23 +110,17 @@ func (alS *AttributeSCfg) loadFromJSONCfg(jsnCfg *AttributeSJsonCfg) (err error)
 	}
 	if jsnCfg.String_indexed_fields != nil {
 		sif := make([]string, len(*jsnCfg.String_indexed_fields))
-		for i, fID := range *jsnCfg.String_indexed_fields {
-			sif[i] = fID
-		}
+		copy(sif, *jsnCfg.String_indexed_fields)
 		alS.StringIndexedFields = &sif
 	}
 	if jsnCfg.Prefix_indexed_fields != nil {
 		pif := make([]string, len(*jsnCfg.Prefix_indexed_fields))
-		for i, fID := range *jsnCfg.Prefix_indexed_fields {
-			pif[i] = fID
-		}
+		copy(pif, *jsnCfg.Prefix_indexed_fields)
 		alS.PrefixIndexedFields = &pif
 	}
 	if jsnCfg.Suffix_indexed_fields != nil {
 		sif := make([]string, len(*jsnCfg.Suffix_indexed_fields))
-		for i, fID := range *jsnCfg.Suffix_indexed_fields {
-			sif[i] = fID
-		}
+		copy(sif, *jsnCfg.Suffix_indexed_fields)
 		alS.SuffixIndexedFields = &sif
 	}
 	if jsnCfg.Nested_fields != nil {
@@ -161,23 +155,17 @@ func (alS *AttributeSCfg) AsMapInterface() (initialMP map[string]any) {
 	}
 	if alS.StringIndexedFields != nil {
 		stringIndexedFields := make([]string, len(*alS.StringIndexedFields))
-		for i, item := range *alS.StringIndexedFields {
-			stringIndexedFields[i] = item
-		}
+		copy(stringIndexedFields, *alS.StringIndexedFields)
 		initialMP[utils.StringIndexedFieldsCfg] = stringIndexedFields
 	}
 	if alS.PrefixIndexedFields != nil {
 		prefixIndexedFields := make([]string, len(*alS.PrefixIndexedFields))
-		for i, item := range *alS.PrefixIndexedFields {
-			prefixIndexedFields[i] = item
-		}
+		copy(prefixIndexedFields, *alS.PrefixIndexedFields)
 		initialMP[utils.PrefixIndexedFieldsCfg] = prefixIndexedFields
 	}
 	if alS.SuffixIndexedFields != nil {
 		suffixIndexedFields := make([]string, len(*alS.SuffixIndexedFields))
-		for i, item := range *alS.SuffixIndexedFields {
-			suffixIndexedFields[i] = item
-		}
+		copy(suffixIndexedFields, *alS.SuffixIndexedFields)
 		initialMP[utils.SuffixIndexedFieldsCfg] = suffixIndexedFields
 	}
 	if alS.StatSConns != nil {
@@ -239,42 +227,30 @@ func (alS AttributeSCfg) Clone() (cln *AttributeSCfg) {
 	}
 	if alS.ResourceSConns != nil {
 		cln.ResourceSConns = make([]string, len(alS.ResourceSConns))
-		for i, con := range alS.ResourceSConns {
-			cln.ResourceSConns[i] = con
-		}
+		copy(cln.ResourceSConns, alS.ResourceSConns)
 	}
 	if alS.StatSConns != nil {
 		cln.StatSConns = make([]string, len(alS.StatSConns))
-		for i, con := range alS.StatSConns {
-			cln.StatSConns[i] = con
-		}
+		copy(cln.StatSConns, alS.StatSConns)
 	}
 	if alS.ApierSConns != nil {
 		cln.ApierSConns = make([]string, len(alS.ApierSConns))
-		for i, con := range alS.ApierSConns {
-			cln.ApierSConns[i] = con
-		}
+		copy(cln.ApierSConns, alS.ApierSConns)
 	}
 
 	if alS.StringIndexedFields != nil {
 		idx := make([]string, len(*alS.StringIndexedFields))
-		for i, dx := range *alS.StringIndexedFields {
-			idx[i] = dx
-		}
+		copy(idx, *alS.StringIndexedFields)
 		cln.StringIndexedFields = &idx
 	}
 	if alS.PrefixIndexedFields != nil {
 		idx := make([]string, len(*alS.PrefixIndexedFields))
-		for i, dx := range *alS.PrefixIndexedFields {
-			idx[i] = dx
-		}
+		copy(idx, *alS.PrefixIndexedFields)
 		cln.PrefixIndexedFields = &idx
 	}
 	if alS.SuffixIndexedFields != nil {
 		idx := make([]string, len(*alS.SuffixIndexedFields))
-		for i, dx := range *alS.SuffixIndexedFields {
-			idx[i] = dx
-		}
+		copy(idx, *alS.SuffixIndexedFields)
 		cln.SuffixIndexedFields = &idx
 	}
 	return

@@ -123,7 +123,7 @@ func (schS *SchedulerService) Shutdown() (err error) {
 func (schS *SchedulerService) IsRunning() bool {
 	schS.RLock()
 	defer schS.RUnlock()
-	return schS != nil && schS.schS != nil
+	return schS.schS != nil
 }
 
 // ServiceName returns the service name

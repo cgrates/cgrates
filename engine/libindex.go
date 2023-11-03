@@ -632,9 +632,8 @@ func UpdateFilterIndex(dm *DataManager, oldFlt, newFlt *Filter) (err error) {
 						return nil, e
 					}
 					fltrIDs := make([]string, len(th.FilterIDs))
-					for i, fltrID := range th.FilterIDs {
-						fltrIDs[i] = fltrID
-					}
+					copy(fltrIDs, th.FilterIDs)
+
 					return &fltrIDs, nil
 				}, newFlt); err != nil && err != utils.ErrNotFound {
 				return utils.APIErrorHandler(err)
@@ -652,9 +651,7 @@ func UpdateFilterIndex(dm *DataManager, oldFlt, newFlt *Filter) (err error) {
 						return nil, e
 					}
 					fltrIDs := make([]string, len(sq.FilterIDs))
-					for i, fltrID := range sq.FilterIDs {
-						fltrIDs[i] = fltrID
-					}
+					copy(fltrIDs, sq.FilterIDs)
 					return &fltrIDs, nil
 				}, newFlt); err != nil && err != utils.ErrNotFound {
 				return utils.APIErrorHandler(err)
@@ -672,9 +669,7 @@ func UpdateFilterIndex(dm *DataManager, oldFlt, newFlt *Filter) (err error) {
 						return nil, e
 					}
 					fltrIDs := make([]string, len(rs.FilterIDs))
-					for i, fltrID := range rs.FilterIDs {
-						fltrIDs[i] = fltrID
-					}
+					copy(fltrIDs, rs.FilterIDs)
 					return &fltrIDs, nil
 				}, newFlt); err != nil && err != utils.ErrNotFound {
 				return utils.APIErrorHandler(err)
@@ -692,9 +687,7 @@ func UpdateFilterIndex(dm *DataManager, oldFlt, newFlt *Filter) (err error) {
 						return nil, e
 					}
 					fltrIDs := make([]string, len(rt.FilterIDs))
-					for i, fltrID := range rt.FilterIDs {
-						fltrIDs[i] = fltrID
-					}
+					copy(fltrIDs, rt.FilterIDs)
 					return &fltrIDs, nil
 				}, newFlt); err != nil && err != utils.ErrNotFound {
 				return utils.APIErrorHandler(err)
@@ -712,9 +705,9 @@ func UpdateFilterIndex(dm *DataManager, oldFlt, newFlt *Filter) (err error) {
 						return nil, e
 					}
 					fltrIDs := make([]string, len(ch.FilterIDs))
-					for i, fltrID := range ch.FilterIDs {
-						fltrIDs[i] = fltrID
-					}
+
+					copy(fltrIDs, ch.FilterIDs)
+
 					return &fltrIDs, nil
 				}, newFlt); err != nil && err != utils.ErrNotFound {
 				return utils.APIErrorHandler(err)

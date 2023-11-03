@@ -122,7 +122,7 @@ func (rals *RalService) Shutdown() (err error) {
 func (rals *RalService) IsRunning() bool {
 	rals.RLock()
 	defer rals.RUnlock()
-	return rals != nil && rals.rals != nil
+	return rals.rals != nil
 }
 
 // ServiceName returns the service name

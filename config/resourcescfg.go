@@ -90,23 +90,17 @@ func (rlcfg *ResourceSConfig) loadFromJSONCfg(jsnCfg *ResourceSJsonCfg) (err err
 	}
 	if jsnCfg.String_indexed_fields != nil {
 		sif := make([]string, len(*jsnCfg.String_indexed_fields))
-		for i, fID := range *jsnCfg.String_indexed_fields {
-			sif[i] = fID
-		}
+		copy(sif, *jsnCfg.String_indexed_fields)
 		rlcfg.StringIndexedFields = &sif
 	}
 	if jsnCfg.Prefix_indexed_fields != nil {
 		pif := make([]string, len(*jsnCfg.Prefix_indexed_fields))
-		for i, fID := range *jsnCfg.Prefix_indexed_fields {
-			pif[i] = fID
-		}
+		copy(pif, *jsnCfg.Prefix_indexed_fields)
 		rlcfg.PrefixIndexedFields = &pif
 	}
 	if jsnCfg.Suffix_indexed_fields != nil {
 		sif := make([]string, len(*jsnCfg.Suffix_indexed_fields))
-		for i, fID := range *jsnCfg.Suffix_indexed_fields {
-			sif[i] = fID
-		}
+		copy(sif, *jsnCfg.Suffix_indexed_fields)
 		rlcfg.SuffixIndexedFields = &sif
 	}
 	if jsnCfg.Nested_fields != nil {
@@ -146,23 +140,17 @@ func (rlcfg *ResourceSConfig) AsMapInterface() (initialMP map[string]any) {
 	}
 	if rlcfg.StringIndexedFields != nil {
 		stringIndexedFields := make([]string, len(*rlcfg.StringIndexedFields))
-		for i, item := range *rlcfg.StringIndexedFields {
-			stringIndexedFields[i] = item
-		}
+		copy(stringIndexedFields, *rlcfg.StringIndexedFields)
 		initialMP[utils.StringIndexedFieldsCfg] = stringIndexedFields
 	}
 	if rlcfg.PrefixIndexedFields != nil {
 		prefixIndexedFields := make([]string, len(*rlcfg.PrefixIndexedFields))
-		for i, item := range *rlcfg.PrefixIndexedFields {
-			prefixIndexedFields[i] = item
-		}
+		copy(prefixIndexedFields, *rlcfg.PrefixIndexedFields)
 		initialMP[utils.PrefixIndexedFieldsCfg] = prefixIndexedFields
 	}
 	if rlcfg.SuffixIndexedFields != nil {
 		suffixIndexedFields := make([]string, len(*rlcfg.SuffixIndexedFields))
-		for i, item := range *rlcfg.SuffixIndexedFields {
-			suffixIndexedFields[i] = item
-		}
+		copy(suffixIndexedFields, *rlcfg.SuffixIndexedFields)
 		initialMP[utils.SuffixIndexedFieldsCfg] = suffixIndexedFields
 	}
 	if rlcfg.StoreInterval != 0 {
@@ -194,30 +182,22 @@ func (rlcfg ResourceSConfig) Clone() (cln *ResourceSConfig) {
 	}
 	if rlcfg.ThresholdSConns != nil {
 		cln.ThresholdSConns = make([]string, len(rlcfg.ThresholdSConns))
-		for i, con := range rlcfg.ThresholdSConns {
-			cln.ThresholdSConns[i] = con
-		}
+		copy(cln.ThresholdSConns, rlcfg.ThresholdSConns)
 	}
 
 	if rlcfg.StringIndexedFields != nil {
 		idx := make([]string, len(*rlcfg.StringIndexedFields))
-		for i, dx := range *rlcfg.StringIndexedFields {
-			idx[i] = dx
-		}
+		copy(idx, *rlcfg.StringIndexedFields)
 		cln.StringIndexedFields = &idx
 	}
 	if rlcfg.PrefixIndexedFields != nil {
 		idx := make([]string, len(*rlcfg.PrefixIndexedFields))
-		for i, dx := range *rlcfg.PrefixIndexedFields {
-			idx[i] = dx
-		}
+		copy(idx, *rlcfg.PrefixIndexedFields)
 		cln.PrefixIndexedFields = &idx
 	}
 	if rlcfg.SuffixIndexedFields != nil {
 		idx := make([]string, len(*rlcfg.SuffixIndexedFields))
-		for i, dx := range *rlcfg.SuffixIndexedFields {
-			idx[i] = dx
-		}
+		copy(idx, *rlcfg.SuffixIndexedFields)
 		cln.SuffixIndexedFields = &idx
 	}
 	return

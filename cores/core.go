@@ -68,7 +68,6 @@ func (cS *CoreService) Shutdown() {
 	utils.Logger.Info(fmt.Sprintf("<%s> shutdown initialized", utils.CoreS))
 	cS.StopChanMemProf()
 	utils.Logger.Info(fmt.Sprintf("<%s> shutdown complete", utils.CoreS))
-	return
 }
 
 // StopChanMemProf will stop the MemoryProfiling Channel in order to create

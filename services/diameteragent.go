@@ -122,7 +122,7 @@ func (da *DiameterAgent) Shutdown() (err error) {
 func (da *DiameterAgent) IsRunning() bool {
 	da.RLock()
 	defer da.RUnlock()
-	return da != nil && da.da != nil
+	return da.da != nil
 }
 
 // ServiceName returns the service name

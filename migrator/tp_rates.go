@@ -40,7 +40,7 @@ func (m *Migrator) migrateCurrentTPrates() (err error) {
 				return err
 			}
 			if rates != nil {
-				if m.dryRun != true {
+				if !m.dryRun {
 					if err := m.storDBOut.StorDB().SetTPRates(rates); err != nil {
 						return err
 					}

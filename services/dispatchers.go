@@ -122,7 +122,7 @@ func (dspS *DispatcherService) Shutdown() (err error) {
 func (dspS *DispatcherService) IsRunning() bool {
 	dspS.RLock()
 	defer dspS.RUnlock()
-	return dspS != nil && dspS.dspS != nil
+	return dspS.dspS != nil
 }
 
 // ServiceName returns the service name

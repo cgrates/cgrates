@@ -39,7 +39,7 @@ func (m *Migrator) migrateCurrentTPactiontriggers() (err error) {
 				return err
 			}
 			if actTrg != nil {
-				if m.dryRun != true {
+				if !m.dryRun {
 					if err := m.storDBOut.StorDB().SetTPActionTriggers(actTrg); err != nil {
 						return err
 					}

@@ -117,7 +117,7 @@ func (routeS *RouteService) Shutdown() (err error) {
 func (routeS *RouteService) IsRunning() bool {
 	routeS.RLock()
 	defer routeS.RUnlock()
-	return routeS != nil && routeS.routeS != nil
+	return routeS.routeS != nil
 }
 
 // ServiceName returns the service name

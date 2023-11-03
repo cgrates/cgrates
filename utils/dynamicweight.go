@@ -78,9 +78,7 @@ func (dW *DynamicWeight) Clone() (dinWeight *DynamicWeight) {
 	}
 	if dW.FilterIDs != nil {
 		dinWeight.FilterIDs = make([]string, len(dW.FilterIDs))
-		for i, value := range dW.FilterIDs {
-			dinWeight.FilterIDs[i] = value
-		}
+		copy(dinWeight.FilterIDs, dW.FilterIDs)
 	}
 	return dinWeight
 }

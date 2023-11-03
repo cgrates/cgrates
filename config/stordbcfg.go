@@ -186,27 +186,19 @@ func (dbcfg *StorDbCfg) Clone() (cln *StorDbCfg) {
 	}
 	if dbcfg.StringIndexedFields != nil {
 		cln.StringIndexedFields = make([]string, len(dbcfg.StringIndexedFields))
-		for i, idx := range dbcfg.StringIndexedFields {
-			cln.StringIndexedFields[i] = idx
-		}
+		copy(cln.StringIndexedFields, dbcfg.StringIndexedFields)
 	}
 	if dbcfg.PrefixIndexedFields != nil {
 		cln.PrefixIndexedFields = make([]string, len(dbcfg.PrefixIndexedFields))
-		for i, idx := range dbcfg.PrefixIndexedFields {
-			cln.PrefixIndexedFields[i] = idx
-		}
+		copy(cln.PrefixIndexedFields, dbcfg.PrefixIndexedFields)
 	}
 	if dbcfg.RmtConns != nil {
 		cln.RmtConns = make([]string, len(dbcfg.RmtConns))
-		for i, conn := range dbcfg.RmtConns {
-			cln.RmtConns[i] = conn
-		}
+		copy(cln.RmtConns, dbcfg.RmtConns)
 	}
 	if dbcfg.RplConns != nil {
 		cln.RplConns = make([]string, len(dbcfg.RplConns))
-		for i, conn := range dbcfg.RplConns {
-			cln.RplConns[i] = conn
-		}
+		copy(cln.RplConns, dbcfg.RplConns)
 	}
 	return
 }

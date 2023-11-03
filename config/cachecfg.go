@@ -120,9 +120,7 @@ func (cCfg *CacheCfg) loadFromJSONCfg(jsnCfg *CacheJsonCfg) (err error) {
 	}
 	if jsnCfg.Remote_conns != nil {
 		cCfg.RemoteConns = make([]string, len(*jsnCfg.Remote_conns))
-		for idx, connID := range *jsnCfg.Remote_conns {
-			cCfg.RemoteConns[idx] = connID
-		}
+		copy(cCfg.RemoteConns, *jsnCfg.Remote_conns)
 	}
 	return nil
 }

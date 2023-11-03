@@ -151,7 +151,7 @@ func (apierSv1 *APIerSv1) GetFilterIndexes(ctx *context.Context, arg *AttrGetFil
 		if len(indexedSlice) == 0 {
 			indexesFilter = make(map[string]utils.StringSet)
 			for val, strmap := range indexes {
-				if strings.Index(val, arg.FilterField) != -1 {
+				if strings.Contains(val, arg.FilterField) {
 					indexesFilter[val] = strmap
 					for _, value := range strmap.AsSlice() {
 						indexedSlice = append(indexedSlice, utils.ConcatenatedKey(val, value))
@@ -164,7 +164,7 @@ func (apierSv1 *APIerSv1) GetFilterIndexes(ctx *context.Context, arg *AttrGetFil
 		} else {
 			var cloneIndexSlice []string
 			for val, strmap := range indexesFilter {
-				if strings.Index(val, arg.FilterField) != -1 {
+				if strings.Contains(val, arg.FilterField) {
 					for _, value := range strmap.AsSlice() {
 						cloneIndexSlice = append(cloneIndexSlice, utils.ConcatenatedKey(val, value))
 					}
@@ -179,7 +179,7 @@ func (apierSv1 *APIerSv1) GetFilterIndexes(ctx *context.Context, arg *AttrGetFil
 	if arg.FilterValue != utils.EmptyString {
 		if len(indexedSlice) == 0 {
 			for val, strmap := range indexes {
-				if strings.Index(val, arg.FilterValue) != -1 {
+				if strings.Contains(val, arg.FilterValue) {
 					for _, value := range strmap.AsSlice() {
 						indexedSlice = append(indexedSlice, utils.ConcatenatedKey(val, value))
 					}
@@ -191,7 +191,7 @@ func (apierSv1 *APIerSv1) GetFilterIndexes(ctx *context.Context, arg *AttrGetFil
 		} else {
 			var cloneIndexSlice []string
 			for val, strmap := range indexesFilter {
-				if strings.Index(val, arg.FilterValue) != -1 {
+				if strings.Contains(val, arg.FilterValue) {
 					for _, value := range strmap.AsSlice() {
 						cloneIndexSlice = append(cloneIndexSlice, utils.ConcatenatedKey(val, value))
 					}
@@ -238,9 +238,7 @@ func (apierSv1 *APIerSv1) ComputeFilterIndexes(ctx *context.Context, args *utils
 					return nil, e
 				}
 				fltrIDs := make([]string, len(th.FilterIDs))
-				for i, fltrID := range th.FilterIDs {
-					fltrIDs[i] = fltrID
-				}
+				copy(fltrIDs, th.FilterIDs)
 				return &fltrIDs, nil
 			}, nil); err != nil && err != utils.ErrNotFound {
 			return utils.APIErrorHandler(err)
@@ -257,9 +255,7 @@ func (apierSv1 *APIerSv1) ComputeFilterIndexes(ctx *context.Context, args *utils
 					return nil, e
 				}
 				fltrIDs := make([]string, len(sq.FilterIDs))
-				for i, fltrID := range sq.FilterIDs {
-					fltrIDs[i] = fltrID
-				}
+				copy(fltrIDs, sq.FilterIDs)
 				return &fltrIDs, nil
 			}, nil); err != nil && err != utils.ErrNotFound {
 			return utils.APIErrorHandler(err)
@@ -276,9 +272,7 @@ func (apierSv1 *APIerSv1) ComputeFilterIndexes(ctx *context.Context, args *utils
 					return nil, e
 				}
 				fltrIDs := make([]string, len(rp.FilterIDs))
-				for i, fltrID := range rp.FilterIDs {
-					fltrIDs[i] = fltrID
-				}
+				copy(fltrIDs, rp.FilterIDs)
 				return &fltrIDs, nil
 			}, nil); err != nil && err != utils.ErrNotFound {
 			return utils.APIErrorHandler(err)
@@ -295,9 +289,7 @@ func (apierSv1 *APIerSv1) ComputeFilterIndexes(ctx *context.Context, args *utils
 					return nil, e
 				}
 				fltrIDs := make([]string, len(rp.FilterIDs))
-				for i, fltrID := range rp.FilterIDs {
-					fltrIDs[i] = fltrID
-				}
+				copy(fltrIDs, rp.FilterIDs)
 				return &fltrIDs, nil
 			}, nil); err != nil && err != utils.ErrNotFound {
 			return utils.APIErrorHandler(err)
@@ -317,9 +309,7 @@ func (apierSv1 *APIerSv1) ComputeFilterIndexes(ctx *context.Context, args *utils
 					return nil, nil
 				}
 				fltrIDs := make([]string, len(ap.FilterIDs))
-				for i, fltrID := range ap.FilterIDs {
-					fltrIDs[i] = fltrID
-				}
+				copy(fltrIDs, ap.FilterIDs)
 
 				return &fltrIDs, nil
 			}, nil); err != nil && err != utils.ErrNotFound {
@@ -337,9 +327,7 @@ func (apierSv1 *APIerSv1) ComputeFilterIndexes(ctx *context.Context, args *utils
 					return nil, e
 				}
 				fltrIDs := make([]string, len(ap.FilterIDs))
-				for i, fltrID := range ap.FilterIDs {
-					fltrIDs[i] = fltrID
-				}
+				copy(fltrIDs, ap.FilterIDs)
 				return &fltrIDs, nil
 			}, nil); err != nil && err != utils.ErrNotFound {
 			return utils.APIErrorHandler(err)
@@ -359,9 +347,7 @@ func (apierSv1 *APIerSv1) ComputeFilterIndexes(ctx *context.Context, args *utils
 					return nil, nil
 				}
 				fltrIDs := make([]string, len(dsp.FilterIDs))
-				for i, fltrID := range dsp.FilterIDs {
-					fltrIDs[i] = fltrID
-				}
+				copy(fltrIDs, dsp.FilterIDs)
 				return &fltrIDs, nil
 			}, nil); err != nil && err != utils.ErrDSPProfileNotFound {
 			return utils.APIErrorHandler(err)
@@ -451,9 +437,7 @@ func (apierSv1 *APIerSv1) ComputeFilterIndexIDs(ctx *context.Context, args *util
 				return nil, e
 			}
 			fltrIDs := make([]string, len(th.FilterIDs))
-			for i, fltrID := range th.FilterIDs {
-				fltrIDs[i] = fltrID
-			}
+			copy(fltrIDs, th.FilterIDs)
 			return &fltrIDs, nil
 		}, nil); err != nil && err != utils.ErrNotFound {
 		return utils.APIErrorHandler(err)
@@ -470,9 +454,7 @@ func (apierSv1 *APIerSv1) ComputeFilterIndexIDs(ctx *context.Context, args *util
 			}
 			cacheIDs[utils.CacheStatFilterIndexes] = []string{sq.ID}
 			fltrIDs := make([]string, len(sq.FilterIDs))
-			for i, fltrID := range sq.FilterIDs {
-				fltrIDs[i] = fltrID
-			}
+			copy(fltrIDs, sq.FilterIDs)
 			return &fltrIDs, nil
 		}, nil); err != nil && err != utils.ErrNotFound {
 		return utils.APIErrorHandler(err)
@@ -489,9 +471,7 @@ func (apierSv1 *APIerSv1) ComputeFilterIndexIDs(ctx *context.Context, args *util
 			}
 			cacheIDs[utils.CacheResourceFilterIndexes] = []string{rp.ID}
 			fltrIDs := make([]string, len(rp.FilterIDs))
-			for i, fltrID := range rp.FilterIDs {
-				fltrIDs[i] = fltrID
-			}
+			copy(fltrIDs, rp.FilterIDs)
 			return &fltrIDs, nil
 		}, nil); err != nil && err != utils.ErrNotFound {
 		return utils.APIErrorHandler(err)
@@ -508,9 +488,7 @@ func (apierSv1 *APIerSv1) ComputeFilterIndexIDs(ctx *context.Context, args *util
 			}
 			cacheIDs[utils.CacheRouteFilterIndexes] = []string{rp.ID}
 			fltrIDs := make([]string, len(rp.FilterIDs))
-			for i, fltrID := range rp.FilterIDs {
-				fltrIDs[i] = fltrID
-			}
+			copy(fltrIDs, rp.FilterIDs)
 			return &fltrIDs, nil
 		}, nil); err != nil && err != utils.ErrNotFound {
 		return utils.APIErrorHandler(err)
@@ -529,9 +507,7 @@ func (apierSv1 *APIerSv1) ComputeFilterIndexIDs(ctx *context.Context, args *util
 				return nil, nil
 			}
 			fltrIDs := make([]string, len(ap.FilterIDs))
-			for i, fltrID := range ap.FilterIDs {
-				fltrIDs[i] = fltrID
-			}
+			copy(fltrIDs, ap.FilterIDs)
 			return &fltrIDs, nil
 		}, nil); err != nil && err != utils.ErrNotFound {
 		return utils.APIErrorHandler(err)
@@ -547,9 +523,7 @@ func (apierSv1 *APIerSv1) ComputeFilterIndexIDs(ctx *context.Context, args *util
 				return nil, e
 			}
 			fltrIDs := make([]string, len(ap.FilterIDs))
-			for i, fltrID := range ap.FilterIDs {
-				fltrIDs[i] = fltrID
-			}
+			copy(fltrIDs, ap.FilterIDs)
 			return &fltrIDs, nil
 		}, nil); err != nil && err != utils.ErrNotFound {
 		return utils.APIErrorHandler(err)
@@ -568,9 +542,7 @@ func (apierSv1 *APIerSv1) ComputeFilterIndexIDs(ctx *context.Context, args *util
 				return nil, nil
 			}
 			fltrIDs := make([]string, len(dsp.FilterIDs))
-			for i, fltrID := range dsp.FilterIDs {
-				fltrIDs[i] = fltrID
-			}
+			copy(fltrIDs, dsp.FilterIDs)
 			return &fltrIDs, nil
 		}, nil); err != nil && err != utils.ErrDSPProfileNotFound {
 		return utils.APIErrorHandler(err)

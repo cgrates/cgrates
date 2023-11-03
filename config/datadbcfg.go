@@ -239,15 +239,11 @@ func (dbcfg *DataDbCfg) Clone() (cln *DataDbCfg) {
 	}
 	if dbcfg.RmtConns != nil {
 		cln.RmtConns = make([]string, len(dbcfg.RmtConns))
-		for i, conn := range dbcfg.RmtConns {
-			cln.RmtConns[i] = conn
-		}
+		copy(cln.RmtConns, dbcfg.RmtConns)
 	}
 	if dbcfg.RplConns != nil {
 		cln.RplConns = make([]string, len(dbcfg.RplConns))
-		for i, conn := range dbcfg.RplConns {
-			cln.RplConns[i] = conn
-		}
+		copy(cln.RplConns, dbcfg.RplConns)
 	}
 	return
 }

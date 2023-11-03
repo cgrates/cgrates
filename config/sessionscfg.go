@@ -512,63 +512,45 @@ func (scfg SessionSCfg) Clone() (cln *SessionSCfg) {
 
 	if scfg.ChargerSConns != nil {
 		cln.ChargerSConns = make([]string, len(scfg.ChargerSConns))
-		for i, con := range scfg.ChargerSConns {
-			cln.ChargerSConns[i] = con
-		}
+		copy(cln.ChargerSConns, scfg.ChargerSConns)
+
 	}
 	if scfg.RALsConns != nil {
 		cln.RALsConns = make([]string, len(scfg.RALsConns))
-		for i, con := range scfg.RALsConns {
-			cln.RALsConns[i] = con
-		}
+		copy(cln.RALsConns, scfg.RALsConns)
 	}
 	if scfg.ResSConns != nil {
 		cln.ResSConns = make([]string, len(scfg.ResSConns))
-		for i, con := range scfg.ResSConns {
-			cln.ResSConns[i] = con
-		}
+		copy(cln.ResSConns, scfg.ResSConns)
 	}
 	if scfg.ThreshSConns != nil {
 		cln.ThreshSConns = make([]string, len(scfg.ThreshSConns))
-		for i, con := range scfg.ThreshSConns {
-			cln.ThreshSConns[i] = con
-		}
+		copy(cln.ThreshSConns, scfg.ThreshSConns)
 	}
 	if scfg.StatSConns != nil {
 		cln.StatSConns = make([]string, len(scfg.StatSConns))
-		for i, con := range scfg.StatSConns {
-			cln.StatSConns[i] = con
-		}
+		copy(cln.StatSConns, scfg.StatSConns)
 	}
 	if scfg.RouteSConns != nil {
 		cln.RouteSConns = make([]string, len(scfg.RouteSConns))
-		for i, con := range scfg.RouteSConns {
-			cln.RouteSConns[i] = con
-		}
+		copy(cln.RouteSConns, scfg.RouteSConns)
 	}
 	if scfg.AttrSConns != nil {
 		cln.AttrSConns = make([]string, len(scfg.AttrSConns))
-		for i, con := range scfg.AttrSConns {
-			cln.AttrSConns[i] = con
-		}
+		copy(cln.AttrSConns, scfg.AttrSConns)
 	}
 	if scfg.CDRsConns != nil {
 		cln.CDRsConns = make([]string, len(scfg.CDRsConns))
-		for i, con := range scfg.CDRsConns {
-			cln.CDRsConns[i] = con
-		}
+		copy(cln.CDRsConns, scfg.CDRsConns)
+
 	}
 	if scfg.ReplicationConns != nil {
 		cln.ReplicationConns = make([]string, len(scfg.ReplicationConns))
-		for i, con := range scfg.ReplicationConns {
-			cln.ReplicationConns[i] = con
-		}
+		copy(cln.ReplicationConns, scfg.ReplicationConns)
 	}
 	if scfg.SchedulerConns != nil {
 		cln.SchedulerConns = make([]string, len(scfg.SchedulerConns))
-		for i, con := range scfg.SchedulerConns {
-			cln.SchedulerConns[i] = con
-		}
+		copy(cln.SchedulerConns, scfg.SchedulerConns)
 	}
 
 	return
@@ -698,9 +680,7 @@ func (fscfg FsAgentCfg) Clone() (cln *FsAgentCfg) {
 	}
 	if fscfg.SessionSConns != nil {
 		cln.SessionSConns = make([]string, len(fscfg.SessionSConns))
-		for i, con := range fscfg.SessionSConns {
-			cln.SessionSConns[i] = con
-		}
+		copy(cln.SessionSConns, fscfg.SessionSConns)
 	}
 	if fscfg.EventSocketConns != nil {
 		cln.EventSocketConns = make([]*FsConnCfg, len(fscfg.EventSocketConns))
@@ -863,9 +843,7 @@ func (aCfg AsteriskAgentCfg) Clone() (cln *AsteriskAgentCfg) {
 	}
 	if aCfg.SessionSConns != nil {
 		cln.SessionSConns = make([]string, len(aCfg.SessionSConns))
-		for i, con := range aCfg.SessionSConns {
-			cln.SessionSConns[i] = con
-		}
+		copy(cln.SessionSConns, aCfg.SessionSConns)
 	}
 	if aCfg.AsteriskConns != nil {
 		cln.AsteriskConns = make([]*AsteriskConnCfg, len(aCfg.AsteriskConns))

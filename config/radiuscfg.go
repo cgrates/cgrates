@@ -148,9 +148,7 @@ func (ra RadiusAgentCfg) Clone() (cln *RadiusAgentCfg) {
 	}
 	if ra.SessionSConns != nil {
 		cln.SessionSConns = make([]string, len(ra.SessionSConns))
-		for i, con := range ra.SessionSConns {
-			cln.SessionSConns[i] = con
-		}
+		copy(cln.SessionSConns, ra.SessionSConns)
 	}
 	for k, v := range ra.ClientSecrets {
 		cln.ClientSecrets[k] = v

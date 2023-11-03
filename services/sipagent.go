@@ -115,7 +115,7 @@ func (sip *SIPAgent) Shutdown() (err error) {
 func (sip *SIPAgent) IsRunning() bool {
 	sip.RLock()
 	defer sip.RUnlock()
-	return sip != nil && sip.sip != nil
+	return sip.sip != nil
 }
 
 // ServiceName returns the service name

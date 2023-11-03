@@ -39,7 +39,7 @@ func (m *Migrator) migrateCurrentTPdestinationrates() (err error) {
 				return err
 			}
 			if destRate != nil {
-				if m.dryRun != true {
+				if !m.dryRun {
 					if err := m.storDBOut.StorDB().SetTPDestinationRates(destRate); err != nil {
 						return err
 					}

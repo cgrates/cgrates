@@ -215,9 +215,9 @@ func (l LoaderSCfg) Clone() (cln *LoaderSCfg) {
 		TpOutDir:       l.TpOutDir,
 		Data:           make([]*LoaderDataType, len(l.Data)),
 	}
-	for idx, connID := range l.CacheSConns {
-		cln.CacheSConns[idx] = connID
-	}
+
+	copy(cln.CacheSConns, l.CacheSConns)
+
 	for idx, fld := range l.Data {
 		cln.Data[idx] = fld.Clone()
 	}

@@ -39,7 +39,7 @@ func (m *Migrator) migrateCurrentTPactions() (err error) {
 				return err
 			}
 			if action != nil {
-				if m.dryRun != true {
+				if !m.dryRun {
 					if err := m.storDBOut.StorDB().SetTPActions(action); err != nil {
 						return err
 					}

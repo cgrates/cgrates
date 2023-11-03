@@ -138,7 +138,7 @@ func (cdrService *CDRServer) Shutdown() (err error) {
 func (cdrService *CDRServer) IsRunning() bool {
 	cdrService.RLock()
 	defer cdrService.RUnlock()
-	return cdrService != nil && cdrService.cdrS != nil
+	return cdrService.cdrS != nil
 }
 
 // ServiceName returns the service name

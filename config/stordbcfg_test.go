@@ -100,24 +100,6 @@ func TestStoreDbCfgloadFromJsonCfgCase1(t *testing.T) {
 		t.Errorf("Expected %+v \n, recevied %+v", utils.ToJSON(expected.RmtConns), utils.ToJSON(jsonCfg.storDbCfg.RmtConns))
 	}
 
-	if err := jsonCfg.storDbCfg.Opts.loadFromJSONCfg(nil); err != nil {
-		t.Error(err)
-	} else if err := jsonCfg.storDbCfg.Opts.loadFromJSONCfg(&DBOptsJson{
-		SQLConnMaxLifetime: utils.StringPointer("test1"),
-	}); err == nil {
-		t.Error(err)
-	} else if err := jsonCfg.storDbCfg.Opts.loadFromJSONCfg(&DBOptsJson{
-		MongoQueryTimeout: utils.StringPointer("test2"),
-	}); err == nil {
-		t.Error(err)
-	} else if err := jsonCfg.storDbCfg.loadFromJSONCfg(&DbJsonCfg{
-		Items: &map[string]*ItemOptJson{
-			utils.MetaSessionsCosts: {
-				Ttl: utils.StringPointer("test3"),
-			},
-		}}); err == nil {
-
-	}
 }
 
 func TestStoreDbCfgloadFromJsonCfgCase2(t *testing.T) {

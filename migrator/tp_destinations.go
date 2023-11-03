@@ -39,7 +39,7 @@ func (m *Migrator) migrateCurrentTPDestinations() (err error) {
 				return err
 			}
 			if destinations != nil {
-				if m.dryRun != true {
+				if !m.dryRun {
 					if err := m.storDBOut.StorDB().SetTPDestinations(destinations); err != nil {
 						return err
 					}

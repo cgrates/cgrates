@@ -107,21 +107,15 @@ func (fSCfg FilterSCfg) Clone() (cln *FilterSCfg) {
 	cln = new(FilterSCfg)
 	if fSCfg.StatSConns != nil {
 		cln.StatSConns = make([]string, len(fSCfg.StatSConns))
-		for i, con := range fSCfg.StatSConns {
-			cln.StatSConns[i] = con
-		}
+		copy(cln.StatSConns, fSCfg.StatSConns)
 	}
 	if fSCfg.ResourceSConns != nil {
 		cln.ResourceSConns = make([]string, len(fSCfg.ResourceSConns))
-		for i, con := range fSCfg.ResourceSConns {
-			cln.ResourceSConns[i] = con
-		}
+		copy(cln.ResourceSConns, fSCfg.ResourceSConns)
 	}
 	if fSCfg.ApierSConns != nil {
 		cln.ApierSConns = make([]string, len(fSCfg.ApierSConns))
-		for i, con := range fSCfg.ApierSConns {
-			cln.ApierSConns[i] = con
-		}
+		copy(cln.ApierSConns, fSCfg.ApierSConns)
 	}
 	return
 }

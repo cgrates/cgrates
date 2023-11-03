@@ -93,7 +93,7 @@ func (dspS *RegistrarCService) Shutdown() (err error) {
 func (dspS *RegistrarCService) IsRunning() bool {
 	dspS.RLock()
 	defer dspS.RUnlock()
-	return dspS != nil && dspS.dspS != nil
+	return dspS.dspS != nil
 }
 
 // ServiceName returns the service name

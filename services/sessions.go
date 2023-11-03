@@ -163,7 +163,7 @@ func (smg *SessionService) Shutdown() (err error) {
 func (smg *SessionService) IsRunning() bool {
 	smg.RLock()
 	defer smg.RUnlock()
-	return smg != nil && smg.sm != nil
+	return smg.sm != nil
 }
 
 // ServiceName returns the service name

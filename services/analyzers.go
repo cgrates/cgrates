@@ -132,7 +132,7 @@ func (anz *AnalyzerService) Shutdown() (err error) {
 func (anz *AnalyzerService) IsRunning() bool {
 	anz.RLock()
 	defer anz.RUnlock()
-	return anz != nil && anz.anz != nil
+	return anz.anz != nil
 }
 
 // ServiceName returns the service name

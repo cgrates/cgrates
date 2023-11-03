@@ -122,7 +122,7 @@ func (thrs *ThresholdService) Shutdown() (err error) {
 func (thrs *ThresholdService) IsRunning() bool {
 	thrs.RLock()
 	defer thrs.RUnlock()
-	return thrs != nil && thrs.thrs != nil
+	return thrs.thrs != nil
 }
 
 // ServiceName returns the service name

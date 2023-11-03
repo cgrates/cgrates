@@ -47,23 +47,17 @@ func (dps *DispatcherSCfg) loadFromJSONCfg(jsnCfg *DispatcherSJsonCfg) (err erro
 	}
 	if jsnCfg.String_indexed_fields != nil {
 		sif := make([]string, len(*jsnCfg.String_indexed_fields))
-		for i, fID := range *jsnCfg.String_indexed_fields {
-			sif[i] = fID
-		}
+		copy(sif, *jsnCfg.String_indexed_fields)
 		dps.StringIndexedFields = &sif
 	}
 	if jsnCfg.Prefix_indexed_fields != nil {
 		pif := make([]string, len(*jsnCfg.Prefix_indexed_fields))
-		for i, fID := range *jsnCfg.Prefix_indexed_fields {
-			pif[i] = fID
-		}
+		copy(pif, *jsnCfg.Prefix_indexed_fields)
 		dps.PrefixIndexedFields = &pif
 	}
 	if jsnCfg.Suffix_indexed_fields != nil {
 		sif := make([]string, len(*jsnCfg.Suffix_indexed_fields))
-		for i, fID := range *jsnCfg.Suffix_indexed_fields {
-			sif[i] = fID
-		}
+		copy(sif, *jsnCfg.Suffix_indexed_fields)
 		dps.SuffixIndexedFields = &sif
 	}
 	if jsnCfg.Attributes_conns != nil {
@@ -99,23 +93,17 @@ func (dps *DispatcherSCfg) AsMapInterface() (mp map[string]any) {
 	}
 	if dps.StringIndexedFields != nil {
 		stringIndexedFields := make([]string, len(*dps.StringIndexedFields))
-		for i, item := range *dps.StringIndexedFields {
-			stringIndexedFields[i] = item
-		}
+		copy(stringIndexedFields, *dps.StringIndexedFields)
 		mp[utils.StringIndexedFieldsCfg] = stringIndexedFields
 	}
 	if dps.PrefixIndexedFields != nil {
 		prefixIndexedFields := make([]string, len(*dps.PrefixIndexedFields))
-		for i, item := range *dps.PrefixIndexedFields {
-			prefixIndexedFields[i] = item
-		}
+		copy(prefixIndexedFields, *dps.PrefixIndexedFields)
 		mp[utils.PrefixIndexedFieldsCfg] = prefixIndexedFields
 	}
 	if dps.SuffixIndexedFields != nil {
 		suffixIndexedFields := make([]string, len(*dps.SuffixIndexedFields))
-		for i, item := range *dps.SuffixIndexedFields {
-			suffixIndexedFields[i] = item
-		}
+		copy(suffixIndexedFields, *dps.SuffixIndexedFields)
 		mp[utils.SuffixIndexedFieldsCfg] = suffixIndexedFields
 	}
 	if dps.AttributeSConns != nil {
@@ -143,29 +131,21 @@ func (dps DispatcherSCfg) Clone() (cln *DispatcherSCfg) {
 
 	if dps.AttributeSConns != nil {
 		cln.AttributeSConns = make([]string, len(dps.AttributeSConns))
-		for i, conn := range dps.AttributeSConns {
-			cln.AttributeSConns[i] = conn
-		}
+		copy(cln.AttributeSConns, dps.AttributeSConns)
 	}
 	if dps.StringIndexedFields != nil {
 		idx := make([]string, len(*dps.StringIndexedFields))
-		for i, dx := range *dps.StringIndexedFields {
-			idx[i] = dx
-		}
+		copy(idx, *dps.StringIndexedFields)
 		cln.StringIndexedFields = &idx
 	}
 	if dps.PrefixIndexedFields != nil {
 		idx := make([]string, len(*dps.PrefixIndexedFields))
-		for i, dx := range *dps.PrefixIndexedFields {
-			idx[i] = dx
-		}
+		copy(idx, *dps.PrefixIndexedFields)
 		cln.PrefixIndexedFields = &idx
 	}
 	if dps.SuffixIndexedFields != nil {
 		idx := make([]string, len(*dps.SuffixIndexedFields))
-		for i, dx := range *dps.SuffixIndexedFields {
-			idx[i] = dx
-		}
+		copy(idx, *dps.SuffixIndexedFields)
 		cln.SuffixIndexedFields = &idx
 	}
 	return

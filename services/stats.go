@@ -126,7 +126,7 @@ func (sts *StatService) Shutdown() (err error) {
 func (sts *StatService) IsRunning() bool {
 	sts.RLock()
 	defer sts.RUnlock()
-	return sts != nil && sts.sts != nil
+	return sts.sts != nil
 }
 
 // ServiceName returns the service name

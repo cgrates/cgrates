@@ -122,7 +122,7 @@ func (reS *ResourceService) Shutdown() (err error) {
 func (reS *ResourceService) IsRunning() bool {
 	reS.RLock()
 	defer reS.RUnlock()
-	return reS != nil && reS.reS != nil
+	return reS.reS != nil
 }
 
 // ServiceName returns the service name
