@@ -445,7 +445,6 @@ func main() {
 	}
 	caps := engine.NewCaps(cncReqsLimit, cncReqsStrategy)
 	utils.Logger.Info(fmt.Sprintf("<CoreS> starting version <%s><%s>", vers, goVers))
-	cfg.LazySanityCheck()
 
 	// init the channel here because we need to pass them to connManager
 	internalServeManagerChan := make(chan birpc.ClientConnector, 1)

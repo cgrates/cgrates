@@ -993,30 +993,6 @@ func TestIsHidden(t *testing.T) {
 	}
 }
 
-func TestLazySanityCheck(t *testing.T) {
-	cfgJSONStr := `{
-      "cdrs": {
-	     "online_cdr_exports":["http_localhost", "amqp_localhost", "aws_test_file", "sqs_test_file", "kafka_localhost", "s3_test_file"],
-	  },
-      "ees": {
-            "exporters": [
-            {
-                  "id": "http_localhost",
-			      "type": "*s3_json_map",
-			      "fields":[
-                      {"tag": "CGRID", "path": "*exp.CGRID", "type": "*variable", "value": "~*req.CGRID"}
-                  ]
-            }]
-	  }
-},
-`
-	cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr)
-	if err != nil {
-		t.Error(err)
-	}
-	cgrCfg.LazySanityCheck()
-}
-
 func TestLoadRPCConnsError(t *testing.T) {
 	cfgJSONStr := `{
      "rpc_conns": {

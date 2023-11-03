@@ -64,7 +64,7 @@ func NewRadiusAgent(cgrCfg *config.CGRConfig, filterS *engine.FilterS,
 		ra.rsAuth[net+"://"+addr] = radigo.NewServer(net,
 			addr, secrets, dicts,
 			map[radigo.PacketCode]func(*radigo.Packet) (*radigo.Packet, error){
-				radigo.AccessRequest: ra.handleAuth}, nil)
+				radigo.AccessRequest: ra.handleAuth}, nil, utils.Logger)
 	}
 	ra.rsAcct = make(map[string]*radigo.Server, len(ra.cgrCfg.RadiusAgentCfg().Listeners))
 	for i := range ra.cgrCfg.RadiusAgentCfg().Listeners {
@@ -73,7 +73,7 @@ func NewRadiusAgent(cgrCfg *config.CGRConfig, filterS *engine.FilterS,
 		ra.rsAcct[net+"://"+addr] = radigo.NewServer(net,
 			addr, secrets, dicts,
 			map[radigo.PacketCode]func(*radigo.Packet) (*radigo.Packet, error){
-				radigo.AccountingRequest: ra.handleAcct}, nil)
+				radigo.AccountingRequest: ra.handleAcct}, nil, utils.Logger)
 	}
 	return
 }
