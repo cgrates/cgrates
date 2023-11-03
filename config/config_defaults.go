@@ -600,7 +600,7 @@ const CGRATES_CFG_JSON = `
 			},													// extra options for exporter
 			"timezone": "",										// timezone for timestamps where not specified <""|UTC|Local|$IANA_TZ_DB>
 			"filters": [],										// limit parsing based on the filters
-			"flags": [],										// flags to influence the event processing
+			"flags": [],										// flags to influence the event processing <*attributes|*log>
 			"attribute_ids": [],								// select Attribute profiles instead of discovering them
 			"attribute_context": "",							// context used to discover matching Attribute profiles
 			"synchronous": false,								// block processing until export has a result

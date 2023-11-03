@@ -320,6 +320,29 @@ func ExportWithAttempts(exp EventExporter, eEv any, key string) (err error) {
 				utils.EEs, exp.Cfg().ID, err.Error()))
 		return
 	}
+
+	if exp.Cfg().Flags.GetBool(utils.MetaLog) {
+		var evLog string
+		switch c := eEv.(type) {
+		case []byte:
+			evLog = string(c)
+		case string:
+			evLog = c
+		case *HTTPPosterRequest:
+			evByt, cancast := c.Body.([]byte)
+			if cancast {
+				evLog = string(evByt)
+				break
+			}
+			evLog = utils.ToJSON(c.Body)
+		default:
+			evLog = utils.ToJSON(c)
+		}
+		utils.Logger.Info(
+			fmt.Sprintf("<%s> LOG, exporter <%s>, message: %s",
+				utils.EEs, exp.Cfg().ID, evLog))
+	}
+
 	for i := 0; i < exp.Cfg().Attempts; i++ {
 		if err = exp.ExportEvent(eEv, key); err == nil ||
 			err == utils.ErrDisconnected { // special error in case the exporter was closed
