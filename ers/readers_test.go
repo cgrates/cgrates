@@ -209,30 +209,18 @@ func TestNewAMQPReader(t *testing.T) {
 	cfg.ERsCfg().Readers[0].Type = utils.MetaAMQPjsonMap
 	cfg.ERsCfg().Readers[0].ConcurrentReqs = -1
 	exp := &AMQPER{
-		cgrCfg:    cfg,
-		cfgIdx:    0,
-		fltrS:     fltr,
-		rdrEvents: nil,
-		rdrExit:   nil,
-		rdrErr:    nil,
+		cgrCfg: cfg,
+		fltrS:  fltr,
 	}
-	exp.dialURL = exp.Config().SourcePath
 	exp.Config().ProcessedPath = ""
-	exp.setOpts(&config.EventReaderOpts{
-		CSV:   &config.CSVROpts{},
-		AMQP:  &config.AMQPROpts{},
-		SQL:   &config.SQLROpts{},
-		AWS:   &config.AWSROpts{},
-		NATS:  &config.NATSROpts{},
-		Kafka: &config.KafkaROpts{},
-	})
+	exp.createClient(&config.AMQPROpts{}, nil)
 	exp.createPoster()
-	var expected EventReader = exp
+	// var expected EventReader = exp
 	rcv, err := NewEventReader(cfg, 0, nil, nil, nil, fltr, nil)
 	if err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(expected, rcv) {
-		t.Errorf("Expected %v but received %v", utils.ToJSON(expected), utils.ToJSON(rcv))
+	} else if !reflect.DeepEqual(exp, rcv) {
+		t.Errorf("Expected %v but received %v", utils.ToJSON(exp), utils.ToJSON(rcv))
 	}
 }
 
