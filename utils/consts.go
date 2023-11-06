@@ -2840,15 +2840,6 @@ const (
 	HSuffix  = "h"
 )
 
-// Go type limits
-const (
-	AbsoluteMaxUint     = ^uint(0)
-	AbsoluteMinUint     = 0
-	AbsoluteMaxInt      = int(AbsoluteMaxUint >> 1)
-	AbsoluteMinInt      = -AbsoluteMaxInt - 1
-	AbsoluteMaxDuration = time.Duration(AbsoluteMaxInt)
-)
-
 func buildCacheInstRevPrefixes() {
 	CachePrefixToInstance = make(map[string]string)
 	for k, v := range CacheInstanceToPrefix {
