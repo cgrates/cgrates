@@ -445,20 +445,28 @@ type EventReaderOpts struct {
 
 // EventReaderCfg the event for the Event Reader
 type EventReaderCfg struct {
-	ID                  string
-	Type                string
-	RunDelay            time.Duration
-	ConcurrentReqs      int
-	SourcePath          string
-	ProcessedPath       string
-	Opts                *EventReaderOpts
-	Tenant              RSRParsers
-	Timezone            string
-	Filters             []string
-	Flags               utils.FlagsWithParams
-	Fields              []*FCTemplate
-	PartialCommitFields []*FCTemplate
-	CacheDumpFields     []*FCTemplate
+	ID   string
+	Type string
+
+	// RunDelay determines how the Serve method initiates the reading process.
+	// 	- A value of 0 disables automatic reading, allowing manual control, possibly through an API.
+	// 	- A value of -1 enables watching directory changes indefinitely, applicable for file-based readers.
+	// 	- Any positive duration sets a fixed time interval for automatic reading cycles.
+	RunDelay time.Duration
+
+	ConcurrentReqs       int
+	SourcePath           string
+	ProcessedPath        string
+	Tenant               RSRParsers
+	Timezone             string
+	Filters              []string
+	Flags                utils.FlagsWithParams
+	Reconnects           int
+	MaxReconnectInterval time.Duration
+	Opts                 *EventReaderOpts
+	Fields               []*FCTemplate
+	PartialCommitFields  []*FCTemplate
+	CacheDumpFields      []*FCTemplate
 }
 
 func (erOpts *EventReaderOpts) loadFromJSONCfg(jsnCfg *EventReaderOptsJson) (err error) {
@@ -492,7 +500,6 @@ func (erOpts *EventReaderOpts) loadFromJSONCfg(jsnCfg *EventReaderOptsJson) (err
 	if jsnCfg.PartialOrderField != nil {
 		erOpts.PartialOrderField = jsnCfg.PartialOrderField
 	}
-
 	if jsnCfg.XMLRootPath != nil {
 		erOpts.XMLRootPath = jsnCfg.XMLRootPath
 	}
@@ -538,6 +545,14 @@ func (er *EventReaderCfg) loadFromJSONCfg(jsnCfg *EventReaderJsonCfg, msgTemplat
 	}
 	if jsnCfg.Flags != nil {
 		er.Flags = utils.FlagsWithParamsFromSlice(*jsnCfg.Flags)
+	}
+	if jsnCfg.Reconnects != nil {
+		er.Reconnects = *jsnCfg.Reconnects
+	}
+	if jsnCfg.Max_reconnect_interval != nil {
+		if er.MaxReconnectInterval, err = utils.ParseDurationWithNanosecs(*jsnCfg.Max_reconnect_interval); err != nil {
+			return err
+		}
 	}
 	if jsnCfg.Fields != nil {
 		if er.Fields, err = FCTemplatesFromFCTemplatesJSONCfg(*jsnCfg.Fields, sep); err != nil {
@@ -885,16 +900,18 @@ func (erOpts *EventReaderOpts) Clone() *EventReaderOpts {
 // Clone returns a deep copy of EventReaderCfg
 func (er EventReaderCfg) Clone() (cln *EventReaderCfg) {
 	cln = &EventReaderCfg{
-		ID:             er.ID,
-		Type:           er.Type,
-		RunDelay:       er.RunDelay,
-		ConcurrentReqs: er.ConcurrentReqs,
-		SourcePath:     er.SourcePath,
-		ProcessedPath:  er.ProcessedPath,
-		Tenant:         er.Tenant.Clone(),
-		Timezone:       er.Timezone,
-		Flags:          er.Flags.Clone(),
-		Opts:           er.Opts.Clone(),
+		ID:                   er.ID,
+		Type:                 er.Type,
+		RunDelay:             er.RunDelay,
+		ConcurrentReqs:       er.ConcurrentReqs,
+		SourcePath:           er.SourcePath,
+		ProcessedPath:        er.ProcessedPath,
+		Tenant:               er.Tenant.Clone(),
+		Timezone:             er.Timezone,
+		Flags:                er.Flags.Clone(),
+		Reconnects:           er.Reconnects,
+		MaxReconnectInterval: er.MaxReconnectInterval,
+		Opts:                 er.Opts.Clone(),
 	}
 	if er.Filters != nil {
 		cln.Filters = make([]string, len(er.Filters))
@@ -1135,19 +1152,24 @@ func (er *EventReaderCfg) AsMapInterface(separator string) (initialMP map[string
 		}
 	}
 	initialMP = map[string]any{
-		utils.IDCfg:                 er.ID,
-		utils.TypeCfg:               er.Type,
-		utils.ConcurrentRequestsCfg: er.ConcurrentReqs,
-		utils.SourcePathCfg:         er.SourcePath,
-		utils.ProcessedPathCfg:      er.ProcessedPath,
-		utils.TenantCfg:             er.Tenant.GetRule(separator),
-		utils.TimezoneCfg:           er.Timezone,
-		utils.FiltersCfg:            er.Filters,
-		utils.FlagsCfg:              []string{},
-		utils.RunDelayCfg:           "0",
-		utils.OptsCfg:               opts,
+		utils.IDCfg:                   er.ID,
+		utils.TypeCfg:                 er.Type,
+		utils.ConcurrentRequestsCfg:   er.ConcurrentReqs,
+		utils.SourcePathCfg:           er.SourcePath,
+		utils.ProcessedPathCfg:        er.ProcessedPath,
+		utils.TenantCfg:               er.Tenant.GetRule(separator),
+		utils.TimezoneCfg:             er.Timezone,
+		utils.FiltersCfg:              er.Filters,
+		utils.FlagsCfg:                []string{},
+		utils.RunDelayCfg:             "0",
+		utils.ReconnectsCfg:           er.Reconnects,
+		utils.MaxReconnectIntervalCfg: "0",
+		utils.OptsCfg:                 opts,
 	}
 
+	if er.MaxReconnectInterval != 0 {
+		initialMP[utils.MaxReconnectIntervalCfg] = er.MaxReconnectInterval.String()
+	}
 	initialMP[utils.OptsCfg] = opts
 
 	if flags := er.Flags.SliceFlags(); flags != nil {

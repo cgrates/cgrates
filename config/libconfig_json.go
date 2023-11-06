@@ -274,20 +274,22 @@ type EventReaderOptsJson struct {
 
 // EventReaderSJsonCfg is the configuration of a single EventReader
 type EventReaderJsonCfg struct {
-	Id                    *string
-	Type                  *string
-	Run_delay             *string
-	Concurrent_requests   *int
-	Source_path           *string
-	Processed_path        *string
-	Opts                  *EventReaderOptsJson
-	Tenant                *string
-	Timezone              *string
-	Filters               *[]string
-	Flags                 *[]string
-	Fields                *[]*FcTemplateJsonCfg
-	Partial_commit_fields *[]*FcTemplateJsonCfg
-	Cache_dump_fields     *[]*FcTemplateJsonCfg
+	Id                     *string
+	Type                   *string
+	Run_delay              *string
+	Concurrent_requests    *int
+	Source_path            *string
+	Processed_path         *string
+	Tenant                 *string
+	Timezone               *string
+	Filters                *[]string
+	Flags                  *[]string
+	Reconnects             *int
+	Max_reconnect_interval *string
+	Opts                   *EventReaderOptsJson
+	Fields                 *[]*FcTemplateJsonCfg
+	Partial_commit_fields  *[]*FcTemplateJsonCfg
+	Cache_dump_fields      *[]*FcTemplateJsonCfg
 }
 
 // EEsJsonCfg contains the configuration of EventExporterService
