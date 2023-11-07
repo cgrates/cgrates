@@ -1038,11 +1038,10 @@ func (cdrS *CDRServer) V2StoreSessionCost(ctx *context.Context, args *ArgsV2CDRS
 				fmt.Sprintf("<CDRS> RefundRounding for cc: %+v, got error: %s",
 					cc, err.Error()))
 		}
-		if response != nil {
-			accSum := response.AsAccountSummary()
-			accSum.UpdateInitialValue(cc.AccountSummary)
-			cc.AccountSummary = accSum
-		}
+		accSum := response.AsAccountSummary()
+		accSum.UpdateInitialValue(cc.AccountSummary)
+		cc.AccountSummary = accSum
+
 	}
 	if err = cdrS.storeSMCost(
 		&SMCost{

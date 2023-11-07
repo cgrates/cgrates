@@ -129,7 +129,7 @@ func testTpDstRtITPopulate(t *testing.T) {
 }
 
 func testTpDstRtITMove(t *testing.T) {
-	err, _ := tpDstRtMigrator.Migrate([]string{utils.MetaTpDestinationRates})
+	_, err := tpDstRtMigrator.Migrate([]string{utils.MetaTpDestinationRates})
 	if err != nil {
 		t.Error("Error when migrating TpDestinationRate ", err.Error())
 	}

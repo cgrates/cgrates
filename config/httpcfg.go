@@ -43,7 +43,6 @@ func newDialer(dialer *net.Dialer, jsnCfg *HTTPClientOptsJson) (err error) {
 	if jsnCfg == nil {
 		return
 	}
-	dialer.DualStack = true
 	if jsnCfg.DialTimeout != nil {
 		if dialer.Timeout, err = utils.ParseDurationWithNanosecs(*jsnCfg.DialTimeout); err != nil {
 			return
@@ -184,7 +183,6 @@ func (httpcfg *HTTPCfg) AsMapInterface() map[string]any {
 func (httpcfg HTTPCfg) Clone() (cln *HTTPCfg) {
 	dialer := &net.Dialer{
 		Timeout:       httpcfg.dialer.Timeout,
-		DualStack:     httpcfg.dialer.DualStack,
 		KeepAlive:     httpcfg.dialer.KeepAlive,
 		FallbackDelay: httpcfg.dialer.FallbackDelay,
 	}

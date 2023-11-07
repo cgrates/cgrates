@@ -138,7 +138,7 @@ func testTpRatesITPopulate(t *testing.T) {
 }
 
 func testTpRatesITMove(t *testing.T) {
-	err, _ := tpRatesMigrator.Migrate([]string{utils.MetaTpRates})
+	_, err := tpRatesMigrator.Migrate([]string{utils.MetaTpRates})
 	if err != nil {
 		t.Error("Error when migrating TpRate ", err.Error())
 	}

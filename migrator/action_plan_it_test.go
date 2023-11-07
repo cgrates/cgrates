@@ -248,7 +248,7 @@ func testActPlnITMigrateAndMove(t *testing.T) {
 		if err != nil {
 			t.Error("Error when setting version for ActionPlan ", err.Error())
 		}
-		err, _ = actPlnMigrator.Migrate([]string{utils.MetaActionPlans})
+		_, err = actPlnMigrator.Migrate([]string{utils.MetaActionPlans})
 		if err != nil {
 			t.Error("Error when migrating ActionPlan ", err.Error())
 		}
@@ -275,7 +275,7 @@ func testActPlnITMigrateAndMove(t *testing.T) {
 		if err != nil {
 			t.Error("Error when setting version for ActionPlan ", err.Error())
 		}
-		err, _ = actPlnMigrator.Migrate([]string{utils.MetaActionPlans})
+		_, err = actPlnMigrator.Migrate([]string{utils.MetaActionPlans})
 		if err != nil {
 			t.Error("Error when migrating ActionPlan ", err.Error())
 		}

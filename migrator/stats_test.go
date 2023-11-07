@@ -177,5 +177,5 @@ func TestRemakeQueue(t *testing.T) {
 	if rply := remakeQueue(sq); !reflect.DeepEqual(expected, rply) {
 		t.Errorf("Expecting: %+v, received: %+v", expected, rply)
 	}
-	return
+
 }

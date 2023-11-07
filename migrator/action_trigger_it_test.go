@@ -222,7 +222,7 @@ func testActTrgITMigrateAndMove(t *testing.T) {
 		if err != nil {
 			t.Error("Error when setting version for ActionTriggers ", err.Error())
 		}
-		err, _ = actTrgMigrator.Migrate([]string{utils.MetaActionTriggers})
+		_, err = actTrgMigrator.Migrate([]string{utils.MetaActionTriggers})
 		if err != nil {
 			t.Error("Error when migrating ActionTriggers ", err.Error())
 		}
@@ -244,7 +244,7 @@ func testActTrgITMigrateAndMove(t *testing.T) {
 		if err != nil {
 			t.Error("Error when setting version for ActionTriggers ", err.Error())
 		}
-		err, _ = actTrgMigrator.Migrate([]string{utils.MetaActionTriggers})
+		_, err = actTrgMigrator.Migrate([]string{utils.MetaActionTriggers})
 		if err != nil {
 			t.Error("Error when migrating ActionTriggers ", err.Error())
 		}

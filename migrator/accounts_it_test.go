@@ -307,7 +307,7 @@ func testAccITMigrateAndMove(t *testing.T) {
 			t.Errorf("Unexpected version returned: %d", vrs[utils.Accounts])
 		}
 		//migrate account
-		err, _ = accMigrator.Migrate([]string{utils.MetaAccounts})
+		_, err = accMigrator.Migrate([]string{utils.MetaAccounts})
 		if err != nil {
 			t.Error("Error when migrating Accounts ", err.Error())
 		}
@@ -345,7 +345,7 @@ func testAccITMigrateAndMove(t *testing.T) {
 			t.Error("Error when setting version for Accounts ", err.Error())
 		}
 		//migrate accounts
-		err, _ = accMigrator.Migrate([]string{utils.MetaAccounts})
+		_, err = accMigrator.Migrate([]string{utils.MetaAccounts})
 		if err != nil {
 			t.Error("Error when accMigratorrating Accounts ", err.Error())
 		}

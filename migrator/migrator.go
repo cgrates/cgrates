@@ -59,7 +59,7 @@ type Migrator struct {
 }
 
 // Migrate implements the tasks to migrate, used as a dispatcher to the individual methods
-func (m *Migrator) Migrate(taskIDs []string) (err error, stats map[string]int) {
+func (m *Migrator) Migrate(taskIDs []string) (stats map[string]int, err error) {
 	stats = make(map[string]int)
 	for _, taskID := range taskIDs {
 		switch taskID {
@@ -75,8 +75,8 @@ func (m *Migrator) Migrate(taskIDs []string) (err error, stats map[string]int) {
 			}
 			err = engine.OverwriteDBVersions(m.dmOut.DataManager().DataDB())
 			if err != nil {
-				return utils.NewCGRError(utils.Migrator, utils.ServerErrorCaps, err.Error(),
-					fmt.Sprintf("error: <%s> when seting versions for DataDB", err.Error())), nil
+				return nil, utils.NewCGRError(utils.Migrator, utils.ServerErrorCaps, err.Error(),
+					fmt.Sprintf("error: <%s> when seting versions for DataDB", err.Error()))
 			}
 			if m.sameOutDB {
 				err = engine.SetDBVersions(m.storDBOut.StorDB())
@@ -84,8 +84,8 @@ func (m *Migrator) Migrate(taskIDs []string) (err error, stats map[string]int) {
 				err = engine.OverwriteDBVersions(m.storDBOut.StorDB())
 			}
 			if err != nil {
-				return utils.NewCGRError(utils.Migrator, utils.ServerErrorCaps, err.Error(),
-					fmt.Sprintf("error: <%s> when seting versions for StorDB", err.Error())), nil
+				return nil, utils.NewCGRError(utils.Migrator, utils.ServerErrorCaps, err.Error(),
+					fmt.Sprintf("error: <%s> when seting versions for StorDB", err.Error()))
 			}
 		case utils.MetaEnsureIndexes:
 			if m.storDBOut.StorDB().GetStorageType() == utils.MetaMongo {

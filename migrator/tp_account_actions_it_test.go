@@ -127,7 +127,7 @@ func testTpAccActITPopulate(t *testing.T) {
 }
 
 func testTpAccActITMove(t *testing.T) {
-	err, _ := tpAccActMigrator.Migrate([]string{utils.MetaTpAccountActions})
+	_, err := tpAccActMigrator.Migrate([]string{utils.MetaTpAccountActions})
 	if err != nil {
 		t.Error("Error when migrating TpAccountActions ", err.Error())
 	}

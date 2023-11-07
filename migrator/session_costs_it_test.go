@@ -131,7 +131,7 @@ func testSessionCostITRename(t *testing.T) {
 	} else if vrs[utils.SessionSCosts] != 1 {
 		t.Errorf("Unexpected version returned: %d", vrs[utils.SessionSCosts])
 	}
-	err, _ = sCostMigrator.Migrate([]string{utils.MetaSessionsCosts})
+	_, err = sCostMigrator.Migrate([]string{utils.MetaSessionsCosts})
 	if err != nil {
 		t.Error("Error when migrating SessionsCosts ", err.Error())
 	}
@@ -202,7 +202,7 @@ func testSessionCostITMigrate(t *testing.T) {
 	} else if vrs[utils.SessionSCosts] != 2 {
 		t.Errorf("Unexpected version returned: %d", vrs[utils.SessionSCosts])
 	}
-	err, _ = sCostMigrator.Migrate([]string{utils.MetaSessionsCosts})
+	_, err = sCostMigrator.Migrate([]string{utils.MetaSessionsCosts})
 	if err != nil {
 		t.Error("Error when migrating SessionsCosts ", err.Error())
 	}

@@ -2862,7 +2862,6 @@ func TestLoaderListenAndServe(t *testing.T) {
 	ldr := &Loader{}
 	stopChan := make(chan struct{}, 1)
 	go func() {
-		time.Sleep(10)
 		stopChan <- struct{}{}
 	}()
 

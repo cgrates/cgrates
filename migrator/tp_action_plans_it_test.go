@@ -134,7 +134,7 @@ func testTpActPlnITPopulate(t *testing.T) {
 }
 
 func testTpActPlnITMove(t *testing.T) {
-	err, _ := tpActPlnMigrator.Migrate([]string{utils.MetaTpActionPlans})
+	_, err := tpActPlnMigrator.Migrate([]string{utils.MetaTpActionPlans})
 	if err != nil {
 		t.Error("Error when migrating TpActionPlan ", err.Error())
 	}

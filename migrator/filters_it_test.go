@@ -235,7 +235,7 @@ func testFltrITMigrateAndMove(t *testing.T) {
 		}
 
 		//migrate Filters
-		err, _ = fltrMigrator.Migrate([]string{utils.MetaFilters})
+		_, err = fltrMigrator.Migrate([]string{utils.MetaFilters})
 		if err != nil {
 			t.Error("Error when migrating Filters ", err.Error())
 		}
@@ -288,7 +288,7 @@ func testFltrITMigrateAndMove(t *testing.T) {
 			t.Error("Error when setting version for Filters ", err.Error())
 		}
 		//migrate accounts
-		err, _ = fltrMigrator.Migrate([]string{utils.MetaFilters})
+		_, err = fltrMigrator.Migrate([]string{utils.MetaFilters})
 		if err != nil {
 			t.Error("Error when fltrMigratorrating Filters ", err.Error())
 		}
@@ -431,7 +431,7 @@ func testFltrITMigratev2(t *testing.T) {
 	}
 
 	//migrate Filters
-	err, _ = fltrMigrator.Migrate([]string{utils.MetaFilters})
+	_, err = fltrMigrator.Migrate([]string{utils.MetaFilters})
 	if err != nil {
 		t.Error("Error when migrating Filters ", err.Error())
 	}
@@ -541,7 +541,7 @@ func testFltrITMigratev3(t *testing.T) {
 		t.Errorf("Unexpected version returned: %d", vrs[utils.RQF])
 	}
 	//migrate Filters
-	err, _ = fltrMigrator.Migrate([]string{utils.MetaFilters})
+	_, err = fltrMigrator.Migrate([]string{utils.MetaFilters})
 	if err != nil {
 		t.Error("Error when migrating Filters ", err.Error())
 	}

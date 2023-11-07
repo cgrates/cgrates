@@ -134,7 +134,7 @@ func testTpShrGrITPopulate(t *testing.T) {
 }
 
 func testTpShrGrITMove(t *testing.T) {
-	err, _ := tpShrGrMigrator.Migrate([]string{utils.MetaTpSharedGroups})
+	_, err := tpShrGrMigrator.Migrate([]string{utils.MetaTpSharedGroups})
 	if err != nil {
 		t.Error("Error when migrating TpSharedGroups ", err.Error())
 	}

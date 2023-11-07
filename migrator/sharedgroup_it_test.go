@@ -213,7 +213,7 @@ func testShrGrpITMigrateAndMove(t *testing.T) {
 		if err != nil {
 			t.Error("Error when setting version for SharedGroup ", err.Error())
 		}
-		err, _ = shrGrpMigrator.Migrate([]string{utils.MetaSharedGroups})
+		_, err = shrGrpMigrator.Migrate([]string{utils.MetaSharedGroups})
 		if err != nil {
 			t.Error("Error when migrating SharedGroup ", err.Error())
 		}
@@ -235,7 +235,7 @@ func testShrGrpITMigrateAndMove(t *testing.T) {
 		if err != nil {
 			t.Error("Error when setting version for SharedGroup ", err.Error())
 		}
-		err, _ = shrGrpMigrator.Migrate([]string{utils.MetaSharedGroups})
+		_, err = shrGrpMigrator.Migrate([]string{utils.MetaSharedGroups})
 		if err != nil {
 			t.Error("Error when migrating SharedGroup ", err.Error())
 		}

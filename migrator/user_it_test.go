@@ -167,7 +167,7 @@ func testUsrITMigrateAndMove(t *testing.T) {
 		t.Errorf("Unexpected version returned: %d", vrs[utils.User])
 	}
 	//migrate user
-	err, _ = usrMigrator.Migrate([]string{utils.MetaUsers})
+	_, err = usrMigrator.Migrate([]string{utils.MetaUsers})
 	if err != nil {
 		t.Error("Error when migrating User ", err.Error())
 	}

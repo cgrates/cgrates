@@ -2704,7 +2704,7 @@ func TestCallDescGetRatingPlansForPrefix(t *testing.T) {
 	})
 	dm.SetReverseDestination("DEST", []string{"1004"}, "")
 	SetDataStorage(dm)
-	if err, _ = cd.getRatingPlansForPrefix(cd.GetKey(cd.Subject), 1); err != nil {
+	if _, err = cd.getRatingPlansForPrefix(cd.GetKey(cd.Subject), 1); err != nil {
 		t.Error(err)
 	}
 }

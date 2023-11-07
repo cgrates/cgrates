@@ -232,7 +232,7 @@ func testAcc2ITMigrate(t *testing.T) {
 		t.Errorf("Unexpected version returned: %d", vrs[utils.Accounts])
 	}
 	//migrate account
-	err, _ = acc2Migrator.Migrate([]string{utils.MetaAccounts})
+	_, err = acc2Migrator.Migrate([]string{utils.MetaAccounts})
 	if err != nil {
 		t.Error("Error when migrating Accounts ", err.Error())
 	}

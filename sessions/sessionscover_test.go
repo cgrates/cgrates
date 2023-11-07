@@ -1688,7 +1688,7 @@ func (sT *testMockClientSyncSessions) Call(ctx *context.Context, method string, 
 		},
 	}
 	*rply.(*[]*SessionID) = queriedSessionIDs
-	time.Sleep(20)
+	time.Sleep(20 * time.Nanosecond)
 	return utils.ErrNoActiveSession
 }
 

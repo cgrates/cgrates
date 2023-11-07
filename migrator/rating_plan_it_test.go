@@ -208,7 +208,7 @@ func testRtPlITMigrateAndMove(t *testing.T) {
 			t.Error(err)
 		}
 
-		err, _ = rtplMigrator.Migrate([]string{utils.MetaRatingPlans})
+		_, err = rtplMigrator.Migrate([]string{utils.MetaRatingPlans})
 		if err != nil {
 			t.Error("Error when migrating RatingPlan ", err.Error())
 		}

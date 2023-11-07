@@ -132,7 +132,7 @@ func testLoadIdsITMigrateAndMove(t *testing.T) {
 		t.Errorf("Unexpected version returned: %d", vrs[utils.LoadIDsVrs])
 	}
 	//migrate user
-	err, _ = loadMigrator.Migrate([]string{utils.MetaLoadIDs})
+	_, err = loadMigrator.Migrate([]string{utils.MetaLoadIDs})
 	if err != nil {
 		t.Error("Error when migrating LoadIDs ", err.Error())
 	}

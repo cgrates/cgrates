@@ -145,7 +145,7 @@ func testTpSplITPopulate(t *testing.T) {
 }
 
 func testTpSplITMove(t *testing.T) {
-	err, _ := tpSplMigrator.Migrate([]string{utils.MetaTpRoutes})
+	_, err := tpSplMigrator.Migrate([]string{utils.MetaTpRoutes})
 	if err != nil {
 		t.Error("Error when migrating TpSuppliers ", err.Error())
 	}

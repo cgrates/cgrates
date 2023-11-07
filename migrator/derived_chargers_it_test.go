@@ -201,7 +201,7 @@ func testDCITMigrateAndMove(t *testing.T) {
 		t.Errorf("Unexpected version returned: %d", vrs[utils.DerivedChargersV])
 	}
 	//migrate derivch
-	err, _ = dcMigrator.Migrate([]string{utils.MetaDerivedChargersV})
+	_, err = dcMigrator.Migrate([]string{utils.MetaDerivedChargersV})
 	if err != nil {
 		t.Error("Error when migrating DerivedChargersV ", err.Error())
 	}

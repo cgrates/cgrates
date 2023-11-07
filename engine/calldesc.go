@@ -248,11 +248,11 @@ Restores the activation periods for the specified prefix from storage.
 */
 func (cd *CallDescriptor) LoadRatingPlans() (err error) {
 	var rec int
-	err, rec = cd.getRatingPlansForPrefix(cd.GetKey(cd.Subject), 1)
+	rec, err = cd.getRatingPlansForPrefix(cd.GetKey(cd.Subject), 1)
 	if err == utils.ErrNotFound && rec == 1 {
 		//if err != nil || !cd.continousRatingInfos() {
 		// use the default subject only if the initial one was not found
-		err, _ = cd.getRatingPlansForPrefix(cd.GetKey(FALLBACK_SUBJECT), 1)
+		_, err = cd.getRatingPlansForPrefix(cd.GetKey(FALLBACK_SUBJECT), 1)
 	}
 	//load the rating plans
 	if err != nil {
@@ -269,13 +269,13 @@ func (cd *CallDescriptor) LoadRatingPlans() (err error) {
 
 // FIXME: this method is not exhaustive but will cover 99% of cases just good
 // it will not cover very long calls with very short activation periods for rates
-func (cd *CallDescriptor) getRatingPlansForPrefix(key string, recursionDepth int) (error, int) {
+func (cd *CallDescriptor) getRatingPlansForPrefix(key string, recursionDepth int) (int, error) {
 	if recursionDepth > RECURSION_MAX_DEPTH {
-		return utils.ErrMaxRecursionDepth, recursionDepth
+		return recursionDepth, utils.ErrMaxRecursionDepth
 	}
 	rpf, err := RatingProfileSubjectPrefixMatching(key)
 	if err != nil || rpf == nil {
-		return utils.ErrNotFound, recursionDepth
+		return recursionDepth, utils.ErrNotFound
 	}
 	if err = rpf.GetRatingPlansForPrefix(cd); err != nil || !cd.continousRatingInfos() {
 		// try rating profile fallback
@@ -303,7 +303,7 @@ func (cd *CallDescriptor) getRatingPlansForPrefix(key string, recursionDepth int
 					tempCD.TimeEnd = cd.RatingInfos[index+1].ActivationTime
 				}
 				for _, fbk := range ri.FallbackKeys {
-					if err, _ := tempCD.getRatingPlansForPrefix(fbk, recursionDepth); err != nil {
+					if _, err := tempCD.getRatingPlansForPrefix(fbk, recursionDepth); err != nil {
 						continue
 					}
 					// extract the rate infos and break
@@ -331,7 +331,7 @@ func (cd *CallDescriptor) getRatingPlansForPrefix(key string, recursionDepth int
 			}
 		}
 	}
-	return nil, recursionDepth
+	return recursionDepth, nil
 }
 
 // checks if there is rating info for the entire call duration

@@ -134,7 +134,7 @@ func testTpRatPlnITPopulate(t *testing.T) {
 }
 
 func testTpRatPlnITMove(t *testing.T) {
-	err, _ := tpRatPlnMigrator.Migrate([]string{utils.MetaTpRatingPlans})
+	_, err := tpRatPlnMigrator.Migrate([]string{utils.MetaTpRatingPlans})
 	if err != nil {
 		t.Error("Error when migrating TpRatingPlans ", err.Error())
 	}

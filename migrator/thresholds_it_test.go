@@ -295,7 +295,7 @@ func testTrsITMigrateAndMove(t *testing.T) {
 		if err != nil {
 			t.Error("Error when setting version for Thresholds ", err.Error())
 		}
-		err, _ = trsMigrator.Migrate([]string{utils.MetaThresholds})
+		_, err = trsMigrator.Migrate([]string{utils.MetaThresholds})
 		if err != nil {
 			t.Error("Error when migrating Thresholds ", err.Error())
 		}
@@ -337,7 +337,7 @@ func testTrsITMigrateAndMove(t *testing.T) {
 		if err != nil {
 			t.Error("Error when setting version for Thresholds ", err.Error())
 		}
-		err, _ = trsMigrator.Migrate([]string{utils.MetaThresholds})
+		_, err = trsMigrator.Migrate([]string{utils.MetaThresholds})
 		if err != nil {
 			t.Error("Error when migrating Thresholds ", err.Error())
 		}
@@ -368,7 +368,7 @@ func testTrsITMigrateAndMove(t *testing.T) {
 		if err != nil {
 			t.Error("Error when setting version for Thresholds ", err.Error())
 		}
-		err, _ = trsMigrator.Migrate([]string{utils.MetaThresholds})
+		_, err = trsMigrator.Migrate([]string{utils.MetaThresholds})
 		if err != nil {
 			t.Error("Error when migrating Thresholds ", err.Error())
 		}

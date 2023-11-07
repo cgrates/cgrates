@@ -69,7 +69,6 @@ var (
 
 func init() {
 	startCGRateSTime = time.Now()
-	math_rand.Seed(startCGRateSTime.UnixNano())
 	boolGenerator = newBoolGen()
 }
 

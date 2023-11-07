@@ -137,7 +137,7 @@ func testTpResITPopulate(t *testing.T) {
 }
 
 func testTpResITMove(t *testing.T) {
-	err, _ := tpResMigrator.Migrate([]string{utils.MetaTpResources})
+	_, err := tpResMigrator.Migrate([]string{utils.MetaTpResources})
 	if err != nil {
 		t.Error("Error when migrating TpResources ", err.Error())
 	}

@@ -153,7 +153,7 @@ func (dbcfg *StorDbCfg) loadFromJSONCfg(jsnDbCfg *DbJsonCfg) (err error) {
 	if jsnDbCfg.Opts != nil {
 		err = dbcfg.Opts.loadFromJSONCfg(jsnDbCfg.Opts)
 	}
-	return nil
+	return
 }
 
 func (dbOpts *StorDBOpts) Clone() *StorDBOpts {
