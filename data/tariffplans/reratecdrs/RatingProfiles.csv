@@ -1,2 +1,4 @@
 #Tenant,Category,Subject,ActivationTime,RatingPlanId,RatesFallbackSubject
 cgrates.org,call,1001,2014-01-14T00:00:00Z,RP_ANY,
+cgrates.org,call,rs1,2014-01-14T00:00:00Z,RP_ANY,
+cgrates.org,call,rs2,2014-01-14T00:00:00Z,RP_ANY,

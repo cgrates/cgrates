@@ -666,6 +666,7 @@ const (
 	MetaEvent                = "*event"
 	MetaMessage              = "*message"
 	MetaDryRun               = "*dryrun"
+	MetaRALsDryRun           = "*ralsDryRun"
 	Event                    = "Event"
 	EmptyString              = ""
 	DynamicDataPrefix        = "~"
