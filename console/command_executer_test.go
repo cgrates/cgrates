@@ -360,7 +360,6 @@ func TestCommandExecuterClientArgs(t *testing.T) {
 }
 
 type mockTest struct {
-	a int
 	B *bool
 	C struct {
 	}

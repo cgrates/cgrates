@@ -214,7 +214,7 @@ func testSupITMigrateAndMove(t *testing.T) {
 			t.Error(err)
 		}
 
-		err, _ = supMigrator.Migrate([]string{utils.MetaRoutes})
+		_, err = supMigrator.Migrate([]string{utils.MetaRoutes})
 		if err != nil {
 			t.Error("Error when migrating Suppliers ", err.Error())
 		}

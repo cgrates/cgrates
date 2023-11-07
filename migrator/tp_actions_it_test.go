@@ -162,7 +162,7 @@ func testTpActITPopulate(t *testing.T) {
 }
 
 func testTpActITMove(t *testing.T) {
-	err, _ := tpActMigrator.Migrate([]string{utils.MetaTpActions})
+	_, err := tpActMigrator.Migrate([]string{utils.MetaTpActions})
 	if err != nil {
 		t.Error("Error when migrating TpActions ", err.Error())
 	}

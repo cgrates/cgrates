@@ -206,7 +206,7 @@ func testRtPrfITMigrateAndMove(t *testing.T) {
 			t.Error(err)
 		}
 
-		err, _ = rtprflMigrator.Migrate([]string{utils.MetaRatingProfiles})
+		_, err = rtprflMigrator.Migrate([]string{utils.MetaRatingProfiles})
 		if err != nil {
 			t.Error("Error when migrating RatingProfile ", err.Error())
 		}

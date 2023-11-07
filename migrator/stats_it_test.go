@@ -260,7 +260,7 @@ func testStsITMigrateAndMove(t *testing.T) {
 		if err != nil {
 			t.Error("Error when setting version for stats ", err.Error())
 		}
-		err, _ = stsMigrator.Migrate([]string{utils.MetaStats})
+		_, err = stsMigrator.Migrate([]string{utils.MetaStats})
 		if err != nil {
 			t.Error("Error when migrating Stats ", err.Error())
 		}
@@ -306,7 +306,7 @@ func testStsITMigrateAndMove(t *testing.T) {
 		if err != nil {
 			t.Error("Error when setting version for stats ", err.Error())
 		}
-		err, _ = stsMigrator.Migrate([]string{utils.MetaStats})
+		_, err = stsMigrator.Migrate([]string{utils.MetaStats})
 		if err != nil {
 			t.Error("Error when migrating Stats ", err.Error())
 		}

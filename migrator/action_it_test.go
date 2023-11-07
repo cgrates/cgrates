@@ -258,7 +258,7 @@ func testActITMigrateAndMove(t *testing.T) {
 		if err != nil {
 			t.Error("Error when setting version for Actions ", err.Error())
 		}
-		err, _ = actMigrator.Migrate([]string{utils.MetaActions})
+		_, err = actMigrator.Migrate([]string{utils.MetaActions})
 		if err != nil {
 			t.Error("Error when migrating Actions ", err.Error())
 		}
@@ -280,7 +280,7 @@ func testActITMigrateAndMove(t *testing.T) {
 		if err != nil {
 			t.Error("Error when setting version for Actions ", err.Error())
 		}
-		err, _ = actMigrator.Migrate([]string{utils.MetaActions})
+		_, err = actMigrator.Migrate([]string{utils.MetaActions})
 		if err != nil {
 			t.Error("Error when migrating Actions ", err.Error())
 		}

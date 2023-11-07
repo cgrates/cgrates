@@ -135,7 +135,7 @@ func testTpTresITPopulate(t *testing.T) {
 }
 
 func testTpTresITMove(t *testing.T) {
-	err, _ := tpTresMigrator.Migrate([]string{utils.MetaTpThresholds})
+	_, err := tpTresMigrator.Migrate([]string{utils.MetaTpThresholds})
 	if err != nil {
 		t.Error("Error when migrating TpThresholds ", err.Error())
 	}

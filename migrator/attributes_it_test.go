@@ -267,7 +267,7 @@ func testAttrITMigrateOnlyVersion(t *testing.T) {
 		t.Errorf("Unexpected version returned: %d", vrs[utils.Attributes])
 	}
 
-	err, _ = attrMigrator.Migrate([]string{utils.MetaAttributes})
+	_, err = attrMigrator.Migrate([]string{utils.MetaAttributes})
 	if err != nil {
 		t.Error("Error when migrating Attributes ", err.Error())
 	}
@@ -359,7 +359,7 @@ func testAttrITMigrateAndMove(t *testing.T) {
 			t.Errorf("Unexpected version returned: %d", vrs[utils.Attributes])
 		}
 
-		err, _ = attrMigrator.Migrate([]string{utils.MetaAttributes})
+		_, err = attrMigrator.Migrate([]string{utils.MetaAttributes})
 		if err != nil {
 			t.Error("Error when migrating Attributes ", err.Error())
 		}
@@ -403,7 +403,7 @@ func testAttrITMigrateAndMove(t *testing.T) {
 			t.Error(err)
 		}
 		// move
-		err, _ = attrMigrator.Migrate([]string{utils.MetaAttributes})
+		_, err = attrMigrator.Migrate([]string{utils.MetaAttributes})
 		if err != nil {
 			t.Error("Error when migrating Attributes ", err.Error())
 		}
@@ -504,7 +504,7 @@ func testAttrITMigrateV2(t *testing.T) {
 		t.Errorf("Unexpected version returned: %d", vrs[utils.Attributes])
 	}
 
-	err, _ = attrMigrator.Migrate([]string{utils.MetaAttributes})
+	_, err = attrMigrator.Migrate([]string{utils.MetaAttributes})
 	if err != nil {
 		t.Error("Error when migrating Attributes ", err.Error())
 	}
@@ -586,7 +586,7 @@ func testAttrITMigrateV3(t *testing.T) {
 		t.Errorf("Unexpected version returned: %d", vrs[utils.Attributes])
 	}
 
-	err, _ = attrMigrator.Migrate([]string{utils.MetaAttributes})
+	_, err = attrMigrator.Migrate([]string{utils.MetaAttributes})
 	if err != nil {
 		t.Error("Error when migrating Attributes ", err.Error())
 	}
@@ -672,7 +672,7 @@ func testAttrITMigrateV4(t *testing.T) {
 		t.Errorf("Unexpected version returned: %d", vrs[utils.Attributes])
 	}
 
-	err, _ = attrMigrator.Migrate([]string{utils.MetaAttributes})
+	_, err = attrMigrator.Migrate([]string{utils.MetaAttributes})
 	if err != nil {
 		t.Error("Error when migrating Attributes ", err.Error())
 	}

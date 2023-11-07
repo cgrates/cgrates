@@ -223,7 +223,7 @@ func (m *Migrator) migrateThresholds() (err error) {
 }
 
 func (v2ATR v2ActionTrigger) AsThreshold() (thp *engine.ThresholdProfile, th *engine.Threshold, filter *engine.Filter, err error) {
-	var filterIDS []string
+
 	var filters []*engine.FilterRule
 	if v2ATR.Balance.ID != nil && *v2ATR.Balance.ID != "" {
 		//TO DO:
@@ -281,7 +281,6 @@ func (v2ATR v2ActionTrigger) AsThreshold() (thp *engine.ThresholdProfile, th *en
 			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:     *v2ATR.Balance.ID,
 			Rules:  filters}
-		filterIDS = append(filterIDS, filter.ID)
 
 	}
 	thp = &engine.ThresholdProfile{

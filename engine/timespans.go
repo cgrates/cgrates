@@ -725,11 +725,6 @@ func (ts *TimeSpan) RoundToDuration(duration time.Duration) {
 	}
 }
 
-func (ts *TimeSpan) AddIncrement(inc *Increment) {
-	ts.Increments = append(ts.Increments, inc)
-	ts.TimeEnd.Add(inc.Duration)
-}
-
 func (ts *TimeSpan) hasBetterRateIntervalThan(interval *RateInterval) bool {
 	if interval.Timing == nil {
 		return false

@@ -247,7 +247,6 @@ func (sS *SessionS) setSTerminator(s *Session, opts engine.MapEvent) {
 		return
 	}
 	if maxDelay != 0 {
-		rand.Seed(time.Now().Unix())
 		ttl += time.Duration(
 			rand.Int63n(maxDelay.Milliseconds()) * time.Millisecond.Nanoseconds())
 	}
@@ -755,11 +754,9 @@ func (sS *SessionS) roundCost(s *Session, sRunIdx int) (err error) {
 			response); err != nil {
 			return
 		}
-		if response != nil {
-			accSum := response.AsAccountSummary()
-			accSum.UpdateInitialValue(cc.AccountSummary)
-			cc.AccountSummary = accSum
-		}
+		accSum := response.AsAccountSummary()
+		accSum.UpdateInitialValue(cc.AccountSummary)
+		cc.AccountSummary = accSum
 	}
 	sr.EventCost = engine.NewEventCostFromCallCost(cc, s.CGRID, runID)
 	return

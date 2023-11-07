@@ -678,7 +678,6 @@ func (c *csvFile) Open(fn string, sep rune, nrFields int) (err error) {
 	c.csvReader.Comma = sep
 	c.csvReader.Comment = utils.CommentChar
 	c.csvReader.FieldsPerRecord = nrFields
-	c.csvReader.TrailingComma = true
 	return
 }
 
@@ -705,7 +704,6 @@ func (c *csvString) Open(data string, sep rune, nrFields int) (err error) {
 	c.csvReader.Comma = sep
 	c.csvReader.Comment = utils.CommentChar
 	c.csvReader.FieldsPerRecord = nrFields
-	c.csvReader.TrailingComma = true
 	return
 }
 
@@ -906,7 +904,6 @@ func (c *csvURL) Open(fn string, sep rune, nrFields int) (err error) {
 	c.csvReader.Comma = sep
 	c.csvReader.Comment = utils.CommentChar
 	c.csvReader.FieldsPerRecord = nrFields
-	c.csvReader.TrailingComma = true
 	return
 }
 

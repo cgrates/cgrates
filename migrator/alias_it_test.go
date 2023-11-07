@@ -186,7 +186,7 @@ func testAlsITMigrateAndMove(t *testing.T) {
 		t.Errorf("Unexpected version returned: %d", vrs[Alias])
 	}
 	//migrate alias
-	err, _ = alsMigrator.Migrate([]string{MetaAliases})
+	_, err = alsMigrator.Migrate([]string{MetaAliases})
 	if err != nil {
 		t.Error("Error when migrating Alias ", err.Error())
 	}

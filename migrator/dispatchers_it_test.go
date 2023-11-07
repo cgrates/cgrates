@@ -216,7 +216,7 @@ func testDspITMigrateAndMove(t *testing.T) {
 		t.Error(err)
 	}
 
-	err, _ = dspMigrator.Migrate([]string{utils.MetaDispatchers})
+	_, err = dspMigrator.Migrate([]string{utils.MetaDispatchers})
 	if err != nil {
 		t.Error("Error when migrating Dispatchers ", err.Error())
 	}

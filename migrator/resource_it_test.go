@@ -205,7 +205,7 @@ func testResITMigrateAndMove(t *testing.T) {
 			t.Error(err)
 		}
 
-		err, _ = resMigrator.Migrate([]string{utils.MetaResources})
+		_, err = resMigrator.Migrate([]string{utils.MetaResources})
 		if err != nil {
 			t.Error("Error when migrating Resource ", err.Error())
 		}

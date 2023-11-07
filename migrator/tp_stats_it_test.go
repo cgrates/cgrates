@@ -139,7 +139,7 @@ func testTpStatsITPopulate(t *testing.T) {
 }
 
 func testTpStatsITMove(t *testing.T) {
-	err, _ := tpStatsMigrator.Migrate([]string{utils.MetaTpStats})
+	_, err := tpStatsMigrator.Migrate([]string{utils.MetaTpStats})
 	if err != nil {
 		t.Error("Error when migrating TpStat ", err.Error())
 	}

@@ -170,7 +170,7 @@ func testTpActTrgITPopulate(t *testing.T) {
 }
 
 func testTpActTrgITMove(t *testing.T) {
-	err, _ := tpActTrgMigrator.Migrate([]string{utils.MetaTpActionTriggers})
+	_, err := tpActTrgMigrator.Migrate([]string{utils.MetaTpActionTriggers})
 	if err != nil {
 		t.Error("Error when migrating TpActionTriggers ", err.Error())
 	}

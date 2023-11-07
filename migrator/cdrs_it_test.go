@@ -171,7 +171,7 @@ func testCdrITMigrateAndMove(t *testing.T) {
 	} else if vrs[utils.CDRs] != 1 {
 		t.Errorf("Unexpected version returned: %d", vrs[utils.CDRs])
 	}
-	err, _ = cdrMigrator.Migrate([]string{utils.MetaCDRs})
+	_, err = cdrMigrator.Migrate([]string{utils.MetaCDRs})
 	if err != nil {
 		t.Error("Error when migrating CDRs ", err.Error())
 	}

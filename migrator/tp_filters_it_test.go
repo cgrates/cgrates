@@ -134,7 +134,7 @@ func testTpFltrITPopulate(t *testing.T) {
 }
 
 func testTpFltrITMove(t *testing.T) {
-	err, _ := tpFltrMigrator.Migrate([]string{utils.MetaTpFilters})
+	_, err := tpFltrMigrator.Migrate([]string{utils.MetaTpFilters})
 	if err != nil {
 		t.Error("Error when migrating TpFilter ", err.Error())
 	}

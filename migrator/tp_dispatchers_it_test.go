@@ -133,7 +133,7 @@ func testTpDispITPopulate(t *testing.T) {
 }
 
 func testTpDispITMove(t *testing.T) {
-	err, _ := tpDispMigrator.Migrate([]string{utils.MetaTpDispatchers})
+	_, err := tpDispMigrator.Migrate([]string{utils.MetaTpDispatchers})
 	if err != nil {
 		t.Error("Error when migrating TpDispatchers ", err.Error())
 	}

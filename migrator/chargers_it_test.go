@@ -222,7 +222,7 @@ func testChrgITMigrateAndMove(t *testing.T) {
 			t.Error(err)
 		}
 
-		err, _ = chrgMigrator.Migrate([]string{utils.MetaChargers})
+		_, err = chrgMigrator.Migrate([]string{utils.MetaChargers})
 		if err != nil {
 			t.Error("Error when migrating Chargers ", err.Error())
 		}
