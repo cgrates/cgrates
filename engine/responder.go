@@ -202,6 +202,11 @@ func (rs *Responder) Debit(ctx *context.Context, arg *CallDescriptorWithAPIOpts,
 		err = utils.ErrMaxUsageExceeded
 		return
 	}
+	if ralsDryRun, exists := arg.APIOpts[utils.MetaRALsDryRun]; exists {
+		if arg.DryRun, err = utils.IfaceAsBool(ralsDryRun); err != nil {
+			return err
+		}
+	}
 	var r *CallCost
 	if r, err = arg.Debit(rs.FilterS); err != nil {
 		return

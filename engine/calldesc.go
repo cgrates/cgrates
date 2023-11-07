@@ -137,6 +137,7 @@ type CallDescriptor struct {
 	DenyNegativeAccount bool // prevent account going on negative during debit
 	account             *Account
 	testCallcost        *CallCost // testing purpose only!
+	DryRun              bool
 }
 
 // AsCGREvent converts the CallDescriptor into CGREvent
@@ -769,7 +770,7 @@ func (cd *CallDescriptor) Debit(fltrS *FilterS) (cc *CallCost, err error) {
 			}
 		}
 		return guardian.Guardian.Guard(func() (err error) {
-			cc, err = cd.debit(account, false, !cd.DenyNegativeAccount, fltrS)
+			cc, err = cd.debit(account, cd.DryRun, !cd.DenyNegativeAccount, fltrS)
 			if err == nil {
 				cc.AccountSummary = cd.AccountSummary(initialAcnt)
 			}
