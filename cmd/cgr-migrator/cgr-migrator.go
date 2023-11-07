@@ -409,7 +409,7 @@ func main() {
 	defer m.Close()
 	config.SetCgrConfig(mgrCfg)
 	if exec != nil && *exec != utils.EmptyString { // Run migrator
-		if err, migrstats := m.Migrate(strings.Split(*exec, utils.FieldsSep)); err != nil {
+		if migrstats, err := m.Migrate(strings.Split(*exec, utils.FieldsSep)); err != nil {
 			log.Fatal(err)
 		} else if *verbose {
 			log.Printf("Data migrated: %+v", migrstats)
