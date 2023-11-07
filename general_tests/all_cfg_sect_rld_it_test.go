@@ -21,6 +21,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package general_tests
 
 import (
+	"os"
 	"path"
 	"reflect"
 	"testing"
@@ -139,6 +140,9 @@ func testSectResetStorDb(t *testing.T) {
 }
 
 func testSectStartEngine(t *testing.T) {
+	if err := os.MkdirAll("/var/spool/cgrates/analyzers", 0755); err != nil {
+		t.Error(err)
+	}
 	if _, err := engine.StopStartEngine(testSectCfgPath, *waitRater); err != nil {
 		t.Fatal(err)
 	}
@@ -1483,6 +1487,9 @@ func testSectConfigSReloadAPIBan(t *testing.T) {
 }
 
 func testSectStopCgrEngine(t *testing.T) {
+	if err := os.RemoveAll("/var/spool/cgrates/analyzers"); err != nil {
+		t.Error(err)
+	}
 	if err := engine.KillEngine(*waitRater); err != nil {
 		t.Error(err)
 	}
