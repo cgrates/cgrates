@@ -115,3 +115,23 @@ func (apierSv1 *APIerSv1) GetDataCost(ctx *context.Context, attrs *AttrGetDataCo
 	}
 	return nil
 }
+
+// GetAccountCost returns a simulated cost of an account without debiting from it (dryrun)
+func (apierSv1 *APIerSv1) GetAccountCost(ctx *context.Context, args *utils.CGREvent, ec *engine.EventCost) (err error) {
+	cd, err := engine.NewCallDescriptorFromCGREvent(args, apierSv1.Config.GeneralCfg().DefaultTimezone)
+	if err != nil {
+		return
+	}
+	args.APIOpts[utils.MetaRALsDryRun] = true
+	var cc engine.CallCost
+	if err := apierSv1.Responder.Debit(context.Background(),
+		&engine.CallDescriptorWithAPIOpts{
+			CallDescriptor: cd,
+			APIOpts:        args.APIOpts,
+		}, &cc); err != nil {
+		return utils.NewErrServerError(err)
+	}
+	*ec = *engine.NewEventCostFromCallCost(&cc, cd.CgrID, cd.RunID)
+	ec.Compute()
+	return nil
+}

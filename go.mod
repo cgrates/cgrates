@@ -23,7 +23,7 @@ require (
 	github.com/cgrates/fsock v0.0.0-20230123160954-12cae14030cc
 	github.com/cgrates/kamevapi v0.0.0-20220525160402-5b8036487a6c
 	github.com/cgrates/ltcache v0.0.0-20210405185848-da943e80c1ab
-	github.com/cgrates/radigo v0.0.0-20231010181109-b0e5b086459e
+	github.com/cgrates/radigo v0.0.0-20231107162145-dac6e5c377ea
 	github.com/cgrates/rpcclient v0.0.0-20230605090759-8bb5188b73e5
 	github.com/cgrates/sipingo v1.0.1-0.20200514112313-699ebc1cdb8e
 	github.com/cgrates/ugocodec v0.0.0-20201023092048-df93d0123f60

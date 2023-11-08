@@ -1455,6 +1455,7 @@ const (
 	APIerSv1GetTiming                         = "APIerSv1.GetTiming"
 	APIerSv1SetTiming                         = "APIerSv1.SetTiming"
 	APIerSv1RemoveTiming                      = "APIerSv1.RemoveTiming"
+	APIerSV1GetAccountCost                    = "APIerSv1.GetAccountCost"
 )
 
 // APIerSv1 TP APIs

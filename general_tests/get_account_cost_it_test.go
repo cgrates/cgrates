@@ -26,12 +26,15 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc"
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
-func TestCDRsProcessEventDryrun(t *testing.T) {
+var aSummaryBefore *engine.AccountSummary
+
+func TestGetAccountCost(t *testing.T) {
 	cfgPath := path.Join(*dataDir, "conf", "samples", "rerate_cdrs_mysql")
 	tpPath := path.Join(*dataDir, "tariffplans", "reratecdrs")
 	client, _, shutdown, err := setupTest(t, "TestRerateCDRs", cfgPath, tpPath, utils.EmptyString, nil)
@@ -41,8 +44,6 @@ func TestCDRsProcessEventDryrun(t *testing.T) {
 	defer shutdown()
 
 	CGRID := utils.GenUUID()
-
-	var aSummaryBefore *engine.AccountSummary
 
 	t.Run("SetBalance", func(t *testing.T) {
 		var reply string
@@ -129,6 +130,48 @@ func TestCDRsProcessEventDryrun(t *testing.T) {
 
 	})
 
+	t.Run("GetAccountCost", func(t *testing.T) {
+		var reply engine.EventCost
+		err := client.Call(context.Background(), utils.APIerSV1GetAccountCost,
+			&engine.ArgV1ProcessEvent{
+				Flags: []string{utils.MetaRALs},
+				CGREvent: utils.CGREvent{
+					Tenant: "cgrates.org",
+					ID:     "event1",
+					Event: map[string]any{
+						utils.RunID:        "run_1",
+						utils.CGRID:        CGRID,
+						utils.Tenant:       "cgrates.org",
+						utils.Category:     "call",
+						utils.ToR:          utils.MetaVoice,
+						utils.OriginID:     "processCDR1",
+						utils.OriginHost:   "OriginHost1",
+						utils.RequestType:  utils.MetaPostpaid,
+						utils.AccountField: "1001",
+						utils.Destination:  "1002",
+						utils.SetupTime:    time.Date(2021, time.February, 2, 16, 14, 50, 0, time.UTC),
+						utils.AnswerTime:   time.Date(2021, time.February, 2, 16, 15, 0, 0, time.UTC),
+						utils.Usage:        4 * time.Minute,
+					},
+					APIOpts: map[string]any{
+						utils.MetaRALsDryRun: true,
+					},
+				},
+			}, &reply)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if *reply.Cost != 2.4 {
+			t.Errorf("expected cost to be <%+v>, received <%+v>", 2.4, *reply.Cost)
+		}
+		if *reply.Usage != 4*time.Minute {
+			t.Errorf("expected cost to be <%+v>, received <%+v>", 4*time.Minute, *reply.Usage)
+		}
+
+	})
+
+	t.Run("CheckAccountBalancesAfterGetAccountCost", checkAccountBalances(client))
+
 	t.Run("ProcessFirstCDR", func(t *testing.T) {
 		var reply []*utils.EventWithFlags
 		err := client.Call(context.Background(), utils.CDRsV2ProcessEvent,
@@ -176,7 +219,13 @@ func TestCDRsProcessEventDryrun(t *testing.T) {
 		}
 	})
 
-	t.Run("CheckAccountBalancesAfterFirstProcessCDR", func(t *testing.T) {
+	t.Run("CheckAccountBalancesAfterProcessCDR", checkAccountBalances(client))
+
+}
+
+func checkAccountBalances(client *birpc.Client) func(t *testing.T) {
+	return func(t *testing.T) {
+
 		expAcnt := engine.Account{
 			ID: "cgrates.org:1001",
 			BalanceMap: map[string]engine.Balances{
@@ -210,7 +259,5 @@ func TestCDRsProcessEventDryrun(t *testing.T) {
 		if !reflect.DeepEqual(aSummaryBefore, aSummaryAfter) {
 			t.Errorf("expected <%+v>, \nreceived <%+v>", utils.ToJSON(aSummaryBefore), utils.ToJSON(aSummaryAfter))
 		}
-
-	})
-
+	}
 }
