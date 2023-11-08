@@ -167,6 +167,7 @@ const (
 	GOBCaps                  = "GOB"
 	MsgPack                  = "msgpack"
 	CSVLoad                  = "CSVLOAD"
+	MetaCDRID                = "*cdrID"
 	MetaOriginID             = "*originID"
 	ToR                      = "ToR"
 	OrderID                  = "OrderID"
