@@ -57,8 +57,8 @@ github.com/cgrates/kamevapi v0.0.0-20220525160402-5b8036487a6c h1:ILTMiCcBw80hSe
 github.com/cgrates/kamevapi v0.0.0-20220525160402-5b8036487a6c/go.mod h1:R1iZadqJTrjkwWxhK8gVPcYhcWoE4d0A6HZ+y6ZHzys=
 github.com/cgrates/ltcache v0.0.0-20210405185848-da943e80c1ab h1:dKdAUwrij6vYwewe1WV1+pDSagqGI5JLqjTZZyN2ANo=
 github.com/cgrates/ltcache v0.0.0-20210405185848-da943e80c1ab/go.mod h1:9oSG/6gUoab/vKm/eQ3QcX6KeTR0wRw88N33iCnC/k4=
-github.com/cgrates/radigo v0.0.0-20231010181109-b0e5b086459e h1:ZlZUnZwtho03GuD0pnr1yodrfCo7JfwTNEjtWcjv7tw=
-github.com/cgrates/radigo v0.0.0-20231010181109-b0e5b086459e/go.mod h1:PizDxlLTjVQpyPU0ksWYfmM9UbYGu7q6at0nzuiZprI=
+github.com/cgrates/radigo v0.0.0-20231107162145-dac6e5c377ea h1:P5yYTIwL3MXE70+bJECW720DMEOEK1RwK6eSxZNo0BY=
+github.com/cgrates/radigo v0.0.0-20231107162145-dac6e5c377ea/go.mod h1:PizDxlLTjVQpyPU0ksWYfmM9UbYGu7q6at0nzuiZprI=
 github.com/cgrates/rpcclient v0.0.0-20230605090759-8bb5188b73e5 h1:GhA5qBUK7o0j+7fi1GACKnT454pv/LfCjoI52vFIz3E=
 github.com/cgrates/rpcclient v0.0.0-20230605090759-8bb5188b73e5/go.mod h1:tDqS6BieViKYpz696//gxseUN1b92hPHqk+w0CzY8AE=
 github.com/cgrates/sipingo v1.0.1-0.20200514112313-699ebc1cdb8e h1:izFjZB83/XRXInc+gMIssUxdbleGsGIuGCPj2u7RQo0=
