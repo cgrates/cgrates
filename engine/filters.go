@@ -222,24 +222,68 @@ func (fltr *Filter) Compile() (err error) {
 	return
 }
 
-var supportedFiltersType utils.StringSet = utils.NewStringSet([]string{
-	utils.MetaString, utils.MetaPrefix, utils.MetaSuffix,
-	utils.MetaCronExp, utils.MetaRSR, utils.MetaEmpty,
-	utils.MetaExists, utils.MetaLessThan, utils.MetaLessOrEqual,
-	utils.MetaGreaterThan, utils.MetaGreaterOrEqual, utils.MetaEqual,
-	utils.MetaIPNet, utils.MetaAPIBan, utils.MetaSentryPeer, utils.MetaActivationInterval,
-	utils.MetaRegex, utils.MetaNever})
-var needsFieldName utils.StringSet = utils.NewStringSet([]string{
-	utils.MetaString, utils.MetaPrefix, utils.MetaSuffix,
-	utils.MetaCronExp, utils.MetaRSR, utils.MetaLessThan,
-	utils.MetaEmpty, utils.MetaExists, utils.MetaLessOrEqual, utils.MetaGreaterThan,
-	utils.MetaGreaterOrEqual, utils.MetaEqual, utils.MetaIPNet, utils.MetaAPIBan, utils.MetaSentryPeer,
-	utils.MetaActivationInterval, utils.MetaRegex})
-var needsValues utils.StringSet = utils.NewStringSet([]string{
-	utils.MetaString, utils.MetaPrefix, utils.MetaSuffix, utils.MetaCronExp, utils.MetaRSR,
-	utils.MetaLessThan, utils.MetaLessOrEqual, utils.MetaGreaterThan, utils.MetaGreaterOrEqual,
-	utils.MetaEqual, utils.MetaIPNet, utils.MetaAPIBan, utils.MetaSentryPeer, utils.MetaActivationInterval,
-	utils.MetaRegex})
+var (
+	cdrQueryFilterTypes = utils.NewStringSet([]string{
+		utils.MetaString, utils.MetaNotString,
+		utils.MetaGreaterThan, utils.MetaGreaterOrEqual,
+		utils.MetaLessThan, utils.MetaLessOrEqual,
+		utils.MetaExists, utils.MetaNotExists,
+		utils.MetaPrefix, utils.MetaNotPrefix,
+		utils.MetaSuffix, utils.MetaNotSuffix,
+		utils.MetaEmpty, utils.MetaNotEmpty,
+		utils.MetaRegex, utils.MetaNotRegex,
+		utils.MetaEqual, utils.MetaNotEqual,
+		utils.MetaNever})
+
+	supportedFiltersType utils.StringSet = utils.NewStringSet([]string{
+		utils.MetaString, utils.MetaNotString,
+		utils.MetaPrefix, utils.MetaNotPrefix,
+		utils.MetaSuffix, utils.MetaNotSuffix,
+		utils.MetaCronExp, utils.MetaNotCronExp,
+		utils.MetaRSR, utils.MetaNotRSR,
+		utils.MetaEmpty, utils.MetaNotEmpty,
+		utils.MetaExists, utils.MetaNotExists,
+		utils.MetaLessThan, utils.MetaLessOrEqual,
+		utils.MetaGreaterThan, utils.MetaGreaterOrEqual,
+		utils.MetaEqual, utils.MetaNotEqual,
+		utils.MetaIPNet, utils.MetaNotIPNet,
+		utils.MetaAPIBan, utils.MetaNotAPIBan,
+		utils.MetaSentryPeer, utils.MetaNotSentryPeer,
+		utils.MetaActivationInterval, utils.MetaNotActivationInterval,
+		utils.MetaRegex, utils.MetaNotRegex,
+		utils.MetaNever})
+
+	needsFieldName utils.StringSet = utils.NewStringSet([]string{
+		utils.MetaString, utils.MetaNotString,
+		utils.MetaPrefix, utils.MetaNotPrefix,
+		utils.MetaSuffix, utils.MetaNotSuffix,
+		utils.MetaCronExp, utils.MetaNotCronExp,
+		utils.MetaRSR, utils.MetaNotRSR,
+		utils.MetaLessThan, utils.MetaLessThan,
+		utils.MetaEmpty, utils.MetaNotEmpty,
+		utils.MetaExists, utils.MetaNotExists,
+		utils.MetaLessThan, utils.MetaLessOrEqual,
+		utils.MetaGreaterThan, utils.MetaGreaterOrEqual,
+		utils.MetaEqual, utils.MetaNotEqual,
+		utils.MetaIPNet, utils.MetaNotIPNet,
+		utils.MetaAPIBan, utils.MetaNotAPIBan,
+		utils.MetaSentryPeer, utils.MetaNotSentryPeer,
+		utils.MetaActivationInterval, utils.MetaNotActivationInterval,
+		utils.MetaRegex, utils.MetaNotRegex})
+
+	needsValues utils.StringSet = utils.NewStringSet([]string{
+		utils.MetaString, utils.MetaNotString,
+		utils.MetaPrefix, utils.MetaNotPrefix,
+		utils.MetaSuffix, utils.MetaNotSuffix,
+		utils.MetaCronExp, utils.MetaNotCronExp,
+		utils.MetaRSR, utils.MetaNotRSR,
+		utils.MetaEqual, utils.MetaNotEqual,
+		utils.MetaIPNet, utils.MetaNotIPNet,
+		utils.MetaAPIBan, utils.MetaNotAPIBan,
+		utils.MetaSentryPeer, utils.MetaNotSentryPeer,
+		utils.MetaActivationInterval, utils.MetaNotActivationInterval,
+		utils.MetaRegex, utils.MetaNotRegex})
+)
 
 // NewFilterRule returns a new filter
 func NewFilterRule(rfType, fieldName string, vals []string) (*FilterRule, error) {
