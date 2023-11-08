@@ -106,6 +106,93 @@ func (msqlS *MySQLStorage) notExtraFieldsValueQry(field, value string) string {
 	return fmt.Sprintf(" extra_fields NOT LIKE '%%\"%s\":\"%s\"%%'", field, value)
 }
 
+// cdrIDQuery will query the CDR by its unique cdrID
+func (msqlS *MySQLStorage) cdrIDQuery(cdrID string) string {
+	return fmt.Sprintf(" JSON_VALUE(opts, '$.\"*cdrID\"') = '%s'", cdrID)
+}
+
+// existField will query for every element on json type if the field exists
+func (msqlS *MySQLStorage) existField(elem, field string) string {
+	return fmt.Sprintf("!JSON_EXISTS(%s, '$.\"%s\"')", elem, field)
+}
+
 func (msqlS *MySQLStorage) GetStorageType() string {
 	return utils.MetaMySQL
+}
+
+func (msqlS *MySQLStorage) valueQry(ruleType, elem, field string, values []string, not bool) (conditions []string) {
+	// here are for the filters that their values are empty: *exists, *notexists, *empty, *notempty..
+	if len(values) == 0 {
+		switch ruleType {
+		case utils.MetaExists, utils.MetaNotExists:
+			if not {
+				conditions = append(conditions, fmt.Sprintf(" JSON_VALUE(%s, '$.\"%s\"') IS NULL", elem, field))
+				return
+			}
+			conditions = append(conditions, fmt.Sprintf(" JSON_VALUE(%s, '$.\"%s\"') IS NOT NULL", elem, field))
+		case utils.MetaEmpty, utils.MetaNotEmpty:
+			if not {
+				conditions = append(conditions, fmt.Sprintf(" JSON_VALUE(%s, '$.\"%s\"') != ''", elem, field))
+				return
+			}
+			conditions = append(conditions, fmt.Sprintf(" JSON_VALUE(%s, '$.\"%s\"') != ''", elem, field))
+		}
+		return
+	}
+	// here are for the filters that can have more than one value: *string, *prefix, *suffix ..
+	for _, value := range values {
+		value := verifyBool(value) // in case we have boolean values, it should be queried over 1 or 0
+		var singleCond string
+		switch ruleType {
+		case utils.MetaString, utils.MetaNotString, utils.MetaEqual, utils.MetaNotEqual:
+			if not {
+				conditions = append(conditions, fmt.Sprintf(" JSON_VALUE(%s, '$.\"%s\"') != '%s'",
+					elem, field, value))
+				continue
+			}
+			singleCond = fmt.Sprintf(" JSON_VALUE(%s, '$.\"%s\"') = '%s'", elem, field, value)
+		case utils.MetaLessThan, utils.MetaLessOrEqual, utils.MetaGreaterThan, utils.MetaGreaterOrEqual:
+			if ruleType == utils.MetaGreaterOrEqual {
+				singleCond = fmt.Sprintf(" JSON_VALUE(%s, '$.\"%s\"') >= %s", elem, field, value)
+			} else if ruleType == utils.MetaGreaterThan {
+				singleCond = fmt.Sprintf(" JSON_VALUE(%s, '$.\"%s\"') > %s", elem, field, value)
+			} else if ruleType == utils.MetaLessOrEqual {
+				singleCond = fmt.Sprintf(" JSON_VALUE(%s, '$.\"%s\"') <= %s", elem, field, value)
+			} else if ruleType == utils.MetaLessThan {
+				singleCond = fmt.Sprintf(" JSON_VALUE(%s, '$.\"%s\"') < %s", elem, field, value)
+			}
+		case utils.MetaPrefix, utils.MetaNotPrefix:
+			if not {
+				conditions = append(conditions, fmt.Sprintf(" JSON_VALUE(%s, '$.\"%s\"') NOT LIKE '%s%%'", elem, field, value))
+				continue
+			}
+			singleCond = fmt.Sprintf(" JSON_VALUE(%s, '$.\"%s\"') LIKE '%s%%'", elem, field, value)
+		case utils.MetaSuffix, utils.MetaNotSuffix:
+			if not {
+				conditions = append(conditions, fmt.Sprintf(" JSON_VALUE(%s, '$.\"%s\"') NOT LIKE '%%%s'", elem, field, value))
+				continue
+			}
+			singleCond = fmt.Sprintf(" JSON_VALUE(%s, '$.\"%s\"') LIKE '%%%s'", elem, field, value)
+		case utils.MetaRegex, utils.MetaNotRegex:
+			if not {
+				conditions = append(conditions, fmt.Sprintf(" JSON_VALUE(%s, '$.\"%s\"') NOT REGEXP '%s'", elem, field, value))
+				continue
+			}
+			singleCond = fmt.Sprintf(" JSON_VALUE(%s, '$.\"%s\"') REGEXP '%s'", elem, field, value)
+		}
+		conditions = append(conditions, singleCond)
+	}
+	return
+}
+
+// verifyBool will check the value for booleans in roder to query properly
+func verifyBool(value string) string {
+	switch value {
+	case "true":
+		return "1"
+	case "false":
+		return "0"
+	default:
+		return value
+	}
 }

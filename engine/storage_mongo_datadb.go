@@ -1247,6 +1247,35 @@ func (ms *MongoStorage) GetRateProfileRatesDrv(ctx *context.Context, tenant, pro
 	return
 }
 
+func newAggregateStages(profileID, tenant, prefix string) (match, query bson.D) {
+	match = bson.D{{
+		Key: "$match", Value: bson.M{
+			"id":     profileID,
+			"tenant": tenant,
+		}},
+	}
+	query = bson.D{{
+		Key: "$replaceRoot", Value: bson.D{{
+			Key: "newRoot", Value: bson.D{{
+				Key: "$arrayToObject", Value: bson.D{{
+					Key: "$filter", Value: bson.D{
+						{Key: "input", Value: bson.M{
+							"$objectToArray": "$$ROOT",
+						}},
+						{Key: "cond", Value: bson.D{{
+							Key: "$regexFind", Value: bson.M{
+								"input": "$$this.k",
+								"regex": prefix,
+							},
+						}}},
+					},
+				}},
+			}},
+		}},
+	}}
+	return
+}
+
 func (ms *MongoStorage) SetRateProfileDrv(ctx *context.Context, rpp *utils.RateProfile, optOverwrite bool) (err error) {
 	rpMap, err := rpp.AsDataDBMap(ms.ms)
 	if err != nil {
@@ -1552,34 +1581,5 @@ func (ms *MongoStorage) RemoveConfigSectionsDrv(ctx *context.Context, nodeID str
 			return
 		}
 	}
-	return
-}
-
-func newAggregateStages(profileID, tenant, prefix string) (match, query bson.D) {
-	match = bson.D{{
-		Key: "$match", Value: bson.M{
-			"id":     profileID,
-			"tenant": tenant,
-		}},
-	}
-	query = bson.D{{
-		Key: "$replaceRoot", Value: bson.D{{
-			Key: "newRoot", Value: bson.D{{
-				Key: "$arrayToObject", Value: bson.D{{
-					Key: "$filter", Value: bson.D{
-						{Key: "input", Value: bson.M{
-							"$objectToArray": "$$ROOT",
-						}},
-						{Key: "cond", Value: bson.D{{
-							Key: "$regexFind", Value: bson.M{
-								"input": "$$this.k",
-								"regex": prefix,
-							},
-						}}},
-					},
-				}},
-			}},
-		}},
-	}}
 	return
 }

@@ -24,6 +24,7 @@ import (
 	"os"
 	"path"
 	"strings"
+	"time"
 
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
@@ -35,6 +36,9 @@ type SQLImpl interface {
 	extraFieldsValueQry(string, string) string
 	notExtraFieldsExistsQry(string) string
 	notExtraFieldsValueQry(string, string) string
+	valueQry(string, string, string, []string, bool) []string // will query for every type of filtering in case of needed
+	cdrIDQuery(string) string                                 // will get the unique *cdrID for every CDR
+	existField(string, string) string                         // will query for every element on json type if the field exists
 }
 
 type SQLStorage struct {
@@ -92,655 +96,12 @@ func (sqls *SQLStorage) CreateTablesFromScript(scriptPath string) error {
 }
 
 func (sqls *SQLStorage) IsDBEmpty() (resp bool, err error) {
-	tbls := []string{
-		utils.TBLTPResources, utils.TBLTPStats, utils.TBLTPThresholds,
-		utils.TBLTPFilters, utils.SessionCostsTBL, utils.CDRsTBL,
-		utils.TBLVersions, utils.TBLTPRoutes, utils.TBLTPAttributes, utils.TBLTPChargers,
-		utils.TBLTPDispatchers, utils.TBLTPDispatcherHosts,
-	}
-	for _, tbl := range tbls {
+	for _, tbl := range []string{utils.CDRsTBL, utils.TBLVersions} {
 		if sqls.db.Migrator().HasTable(tbl) {
 			return false, nil
 		}
-
 	}
 	return true, nil
-}
-
-// update
-// Return a list with all TPids defined in the system, even if incomplete, isolated in some table.
-func (sqls *SQLStorage) GetTpIds(colName string) ([]string, error) {
-	var rows *sql.Rows
-	var err error
-	var qryStr string
-	if colName == "" {
-		for _, clNm := range []string{
-			utils.TBLTPResources,
-			utils.TBLTPStats,
-			utils.TBLTPThresholds,
-			utils.TBLTPFilters,
-			utils.TBLTPRoutes,
-			utils.TBLTPAttributes,
-			utils.TBLTPChargers,
-			utils.TBLTPDispatchers,
-			utils.TBLTPDispatcherHosts,
-		} {
-			qryStr += fmt.Sprintf("UNION (SELECT tpid FROM %s)", clNm)
-		}
-		qryStr = strings.TrimPrefix(qryStr, "UNION ")
-	} else {
-		qryStr = fmt.Sprintf("(SELECT tpid FROM %s)", colName)
-	}
-	rows, err = sqls.DB.Query(qryStr)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	ids := make([]string, 0)
-	i := 0
-	for rows.Next() {
-		i++ //Keep here a reference so we know we got at least one
-		var id string
-		err = rows.Scan(&id)
-		if err != nil {
-			return nil, err
-		}
-		ids = append(ids, id)
-	}
-	if i == 0 {
-		return nil, nil
-	}
-	return ids, nil
-}
-
-// ToDo: TEST
-func (sqls *SQLStorage) GetTpTableIds(tpid, table string, distinct []string,
-	filters map[string]string, pagination *utils.PaginatorWithSearch) ([]string, error) {
-	qry := fmt.Sprintf("SELECT DISTINCT %s FROM %s where tpid='%s'", strings.Join(distinct, utils.FieldsSep), table, tpid)
-	for key, value := range filters {
-		if key != "" && value != "" {
-			qry += fmt.Sprintf(" AND %s='%s'", key, value)
-		}
-	}
-	if pagination != nil {
-		if len(pagination.Search) != 0 {
-			qry += fmt.Sprintf(" AND (%s LIKE '%%%s%%'", distinct[0], pagination.Search)
-			for _, d := range distinct[1:] {
-				qry += fmt.Sprintf(" OR %s LIKE '%%%s%%'", d, pagination.Search)
-			}
-			qry += ")"
-		}
-		if pagination.Paginator != nil {
-			if pagination.Limit != nil { // Keep Postgres compatibility by adding offset only when limit defined
-				qry += fmt.Sprintf(" LIMIT %d", *pagination.Limit)
-				if pagination.Offset != nil {
-					qry += fmt.Sprintf(" OFFSET %d", *pagination.Offset)
-				}
-			}
-		}
-	}
-	rows, err := sqls.DB.Query(qry)
-	if err != nil {
-		return nil, err
-	}
-
-	defer rows.Close()
-	ids := []string{}
-	i := 0
-	for rows.Next() {
-		i++ //Keep here a reference so we know we got at least one
-
-		cols, err := rows.Columns() // Get the column names; remember to check err
-		if err != nil {
-			return nil, err
-		}
-		vals := make([]string, len(cols)) // Allocate enough values
-		ints := make([]any, len(cols))    // Make a slice of []any
-		for i := range ints {
-			ints[i] = &vals[i] // Copy references into the slice
-		}
-
-		err = rows.Scan(ints...)
-		if err != nil {
-			return nil, err
-		}
-		finalID := vals[0]
-		if len(vals) > 1 {
-			finalID = strings.Join(vals, utils.ConcatenatedKeySep)
-		}
-		ids = append(ids, finalID)
-	}
-	if i == 0 {
-		return nil, nil
-	}
-	return ids, nil
-}
-
-func (sqls *SQLStorage) RemTpData(table, tpid string, args map[string]string) error {
-	tx := sqls.db.Begin()
-
-	if len(table) == 0 { // Remove tpid out of all tables
-		for _, tblName := range []string{
-			utils.TBLTPResources, utils.TBLTPStats, utils.TBLTPThresholds,
-			utils.TBLTPFilters, utils.TBLTPRoutes, utils.TBLTPAttributes,
-			utils.TBLTPChargers, utils.TBLTPDispatchers, utils.TBLTPDispatcherHosts, utils.TBLTPAccounts,
-			utils.TBLTPActionProfiles, utils.TBLTPRateProfiles} {
-			if err := tx.Table(tblName).Where("tpid = ?", tpid).Delete(nil).Error; err != nil {
-				tx.Rollback()
-				return err
-			}
-		}
-		tx.Commit()
-		return nil
-	}
-	// Remove from a single table
-	tx = tx.Table(table).Where("tpid = ?", tpid)
-	// Compose filters
-	for key, value := range args {
-		tx = tx.Where(key+" = ?", value)
-	}
-	if err := tx.Delete(nil).Error; err != nil {
-		tx.Rollback()
-		return err
-	}
-	tx.Commit()
-	return nil
-}
-
-func (sqls *SQLStorage) SetTPResources(rls []*utils.TPResourceProfile) error {
-	if len(rls) == 0 {
-		return nil
-	}
-	tx := sqls.db.Begin()
-	for _, rl := range rls {
-		// Remove previous
-		if err := tx.Where(&ResourceMdl{Tpid: rl.TPid, ID: rl.ID}).Delete(ResourceMdl{}).Error; err != nil {
-			tx.Rollback()
-			return err
-		}
-		for _, mrl := range APItoModelResource(rl) {
-			if err := tx.Create(&mrl).Error; err != nil {
-				tx.Rollback()
-				return err
-			}
-		}
-	}
-	tx.Commit()
-	return nil
-}
-
-func (sqls *SQLStorage) SetTPStats(sts []*utils.TPStatProfile) error {
-	if len(sts) == 0 {
-		return nil
-	}
-	tx := sqls.db.Begin()
-	for _, stq := range sts {
-		// Remove previous
-		if err := tx.Where(&StatMdl{Tpid: stq.TPid, ID: stq.ID}).Delete(StatMdl{}).Error; err != nil {
-			tx.Rollback()
-			return err
-		}
-		for _, mst := range APItoModelStats(stq) {
-			if err := tx.Create(&mst).Error; err != nil {
-				tx.Rollback()
-				return err
-			}
-		}
-	}
-	tx.Commit()
-	return nil
-}
-
-func (sqls *SQLStorage) SetTPThresholds(ths []*utils.TPThresholdProfile) error {
-	if len(ths) == 0 {
-		return nil
-	}
-	tx := sqls.db.Begin()
-	for _, th := range ths {
-		// Remove previous
-		if err := tx.Where(&ThresholdMdl{Tpid: th.TPid, ID: th.ID}).Delete(ThresholdMdl{}).Error; err != nil {
-			tx.Rollback()
-			return err
-		}
-		for _, mst := range APItoModelTPThreshold(th) {
-			if err := tx.Create(&mst).Error; err != nil {
-				tx.Rollback()
-				return err
-			}
-		}
-	}
-	tx.Commit()
-	return nil
-}
-
-func (sqls *SQLStorage) SetTPFilters(ths []*utils.TPFilterProfile) error {
-	if len(ths) == 0 {
-		return nil
-	}
-	tx := sqls.db.Begin()
-	for _, th := range ths {
-		// Remove previous
-		if err := tx.Where(&FilterMdl{Tpid: th.TPid, ID: th.ID}).Delete(FilterMdl{}).Error; err != nil {
-			tx.Rollback()
-			return err
-		}
-		for _, mst := range APItoModelTPFilter(th) {
-			if err := tx.Create(&mst).Error; err != nil {
-				tx.Rollback()
-				return err
-			}
-		}
-	}
-	tx.Commit()
-	return nil
-}
-
-func (sqls *SQLStorage) SetTPRoutes(tpRoutes []*utils.TPRouteProfile) error {
-	if len(tpRoutes) == 0 {
-		return nil
-	}
-	tx := sqls.db.Begin()
-	for _, tpRoute := range tpRoutes {
-		// Remove previous
-		if err := tx.Where(&RouteMdl{Tpid: tpRoute.TPid, ID: tpRoute.ID}).Delete(RouteMdl{}).Error; err != nil {
-			tx.Rollback()
-			return err
-		}
-		for _, mst := range APItoModelTPRoutes(tpRoute) {
-			if err := tx.Create(&mst).Error; err != nil {
-				tx.Rollback()
-				return err
-			}
-		}
-	}
-	tx.Commit()
-	return nil
-}
-
-func (sqls *SQLStorage) SetTPAttributes(tpAttrs []*utils.TPAttributeProfile) error {
-	if len(tpAttrs) == 0 {
-		return nil
-	}
-	tx := sqls.db.Begin()
-	for _, stq := range tpAttrs {
-		// Remove previous
-		if err := tx.Where(&AttributeMdl{Tpid: stq.TPid, ID: stq.ID}).Delete(AttributeMdl{}).Error; err != nil {
-			tx.Rollback()
-			return err
-		}
-		for _, mst := range APItoModelTPAttribute(stq) {
-			if err := tx.Create(&mst).Error; err != nil {
-				tx.Rollback()
-				return err
-			}
-		}
-	}
-	tx.Commit()
-	return nil
-}
-
-func (sqls *SQLStorage) SetTPChargers(tpCPPs []*utils.TPChargerProfile) error {
-	if len(tpCPPs) == 0 {
-		return nil
-	}
-	tx := sqls.db.Begin()
-	for _, cpp := range tpCPPs {
-		// Remove previous
-		if err := tx.Where(&ChargerMdl{Tpid: cpp.TPid, ID: cpp.ID}).Delete(ChargerMdl{}).Error; err != nil {
-			tx.Rollback()
-			return err
-		}
-		for _, mst := range APItoModelTPCharger(cpp) {
-			if err := tx.Create(&mst).Error; err != nil {
-				tx.Rollback()
-				return err
-			}
-		}
-	}
-	tx.Commit()
-	return nil
-}
-
-func (sqls *SQLStorage) SetTPDispatcherProfiles(tpDPPs []*utils.TPDispatcherProfile) error {
-	if len(tpDPPs) == 0 {
-		return nil
-	}
-	tx := sqls.db.Begin()
-	for _, dpp := range tpDPPs {
-		// Remove previous
-		if err := tx.Where(&DispatcherProfileMdl{Tpid: dpp.TPid, ID: dpp.ID}).Delete(DispatcherProfileMdl{}).Error; err != nil {
-			tx.Rollback()
-			return err
-		}
-		for _, mst := range APItoModelTPDispatcherProfile(dpp) {
-			if err := tx.Create(&mst).Error; err != nil {
-				tx.Rollback()
-				return err
-			}
-		}
-	}
-	tx.Commit()
-	return nil
-}
-
-func (sqls *SQLStorage) SetTPDispatcherHosts(tpDPPs []*utils.TPDispatcherHost) error {
-	if len(tpDPPs) == 0 {
-		return nil
-	}
-	tx := sqls.db.Begin()
-	for _, dpp := range tpDPPs {
-		// Remove previous
-		if err := tx.Where(&DispatcherHostMdl{Tpid: dpp.TPid, ID: dpp.ID}).Delete(DispatcherHostMdl{}).Error; err != nil {
-			tx.Rollback()
-			return err
-		}
-		if err := tx.Create(APItoModelTPDispatcherHost(dpp)).Error; err != nil {
-			tx.Rollback()
-			return err
-		}
-	}
-	tx.Commit()
-	return nil
-}
-
-func (sqls *SQLStorage) SetTPRateProfiles(tpDPPs []*utils.TPRateProfile) error {
-	if len(tpDPPs) == 0 {
-		return nil
-	}
-	tx := sqls.db.Begin()
-	for _, dpp := range tpDPPs {
-		// Remove previous
-		if err := tx.Where(&RateProfileMdl{Tpid: dpp.TPid, ID: dpp.ID}).Delete(RateProfileMdl{}).Error; err != nil {
-			tx.Rollback()
-			return err
-		}
-		for _, mst := range APItoModelTPRateProfile(dpp) {
-			if err := tx.Create(&mst).Error; err != nil {
-				tx.Rollback()
-				return err
-			}
-		}
-	}
-	tx.Commit()
-	return nil
-}
-
-func (sqls *SQLStorage) SetTPActionProfiles(tpAps []*utils.TPActionProfile) error {
-	if len(tpAps) == 0 {
-		return nil
-	}
-	tx := sqls.db.Begin()
-	for _, tpAp := range tpAps {
-		// Remove previous
-		if err := tx.Where(&ActionProfileMdl{Tpid: tpAp.TPid, Tenant: tpAp.Tenant, ID: tpAp.ID}).Delete(ActionProfileMdl{}).Error; err != nil {
-			tx.Rollback()
-			return err
-		}
-		for _, mst := range APItoModelTPActionProfile(tpAp) {
-			if err := tx.Create(&mst).Error; err != nil {
-				tx.Rollback()
-				return err
-			}
-		}
-	}
-	tx.Commit()
-	return nil
-}
-
-func (sqls *SQLStorage) SetTPAccounts(tpAps []*utils.TPAccount) error {
-	if len(tpAps) == 0 {
-		return nil
-	}
-	tx := sqls.db.Begin()
-	for _, tpAp := range tpAps {
-		// Remove previous
-		if err := tx.Where(&AccountMdl{Tpid: tpAp.TPid, Tenant: tpAp.Tenant, ID: tpAp.ID}).Delete(AccountMdl{}).Error; err != nil {
-			tx.Rollback()
-			return err
-		}
-		for _, mst := range APItoModelTPAccount(tpAp) {
-			if err := tx.Create(&mst).Error; err != nil {
-				tx.Rollback()
-				return err
-			}
-		}
-	}
-	tx.Commit()
-	return nil
-}
-
-func (sqls *SQLStorage) GetTPResources(tpid, tenant, id string) ([]*utils.TPResourceProfile, error) {
-	var rls ResourceMdls
-	q := sqls.db.Where("tpid = ?", tpid)
-	if len(id) != 0 {
-		q = q.Where("id = ?", id)
-	}
-	if len(tenant) != 0 {
-		q = q.Where("tenant = ?", tenant)
-	}
-	if err := q.Find(&rls).Error; err != nil {
-		return nil, err
-	}
-	arls := rls.AsTPResources()
-	if len(arls) == 0 {
-		return arls, utils.ErrNotFound
-	}
-	return arls, nil
-}
-
-func (sqls *SQLStorage) GetTPStats(tpid, tenant, id string) ([]*utils.TPStatProfile, error) {
-	var sts StatMdls
-	q := sqls.db.Where("tpid = ?", tpid)
-	if len(id) != 0 {
-		q = q.Where("id = ?", id)
-	}
-	if len(tenant) != 0 {
-		q = q.Where("tenant = ?", tenant)
-	}
-	if err := q.Find(&sts).Error; err != nil {
-		return nil, err
-	}
-	asts := sts.AsTPStats()
-	if len(asts) == 0 {
-		return asts, utils.ErrNotFound
-	}
-	return asts, nil
-}
-
-func (sqls *SQLStorage) GetTPThresholds(tpid, tenant, id string) ([]*utils.TPThresholdProfile, error) {
-	var ths ThresholdMdls
-	q := sqls.db.Where("tpid = ?", tpid)
-	if len(id) != 0 {
-		q = q.Where("id = ?", id)
-	}
-	if len(tenant) != 0 {
-		q = q.Where("tenant = ?", tenant)
-	}
-	if err := q.Find(&ths).Error; err != nil {
-		return nil, err
-	}
-	aths := ths.AsTPThreshold()
-	if len(aths) == 0 {
-		return aths, utils.ErrNotFound
-	}
-	return aths, nil
-}
-
-func (sqls *SQLStorage) GetTPFilters(tpid, tenant, id string) ([]*utils.TPFilterProfile, error) {
-	var ths FilterMdls
-	q := sqls.db.Where("tpid = ?", tpid)
-	if len(id) != 0 {
-		q = q.Where("id = ?", id)
-	}
-	if len(tenant) != 0 {
-		q = q.Where("tenant = ?", tenant)
-	}
-	if err := q.Find(&ths).Error; err != nil {
-		return nil, err
-	}
-	aths := ths.AsTPFilter()
-	if len(aths) == 0 {
-		return aths, utils.ErrNotFound
-	}
-	return aths, nil
-}
-
-func (sqls *SQLStorage) GetTPRoutes(tpid, tenant, id string) ([]*utils.TPRouteProfile, error) {
-	var tpRoutes RouteMdls
-	q := sqls.db.Where("tpid = ?", tpid)
-	if len(id) != 0 {
-		q = q.Where("id = ?", id)
-	}
-	if len(tenant) != 0 {
-		q = q.Where("tenant = ?", tenant)
-	}
-	if err := q.Find(&tpRoutes).Error; err != nil {
-		return nil, err
-	}
-	aTpRoutes := tpRoutes.AsTPRouteProfile()
-	if len(aTpRoutes) == 0 {
-		return aTpRoutes, utils.ErrNotFound
-	}
-	return aTpRoutes, nil
-}
-
-func (sqls *SQLStorage) GetTPAttributes(tpid, tenant, id string) ([]*utils.TPAttributeProfile, error) {
-	var sps AttributeMdls
-	q := sqls.db.Where("tpid = ?", tpid)
-	if len(id) != 0 {
-		q = q.Where("id = ?", id)
-	}
-	if len(tenant) != 0 {
-		q = q.Where("tenant = ?", tenant)
-	}
-	if err := q.Find(&sps).Error; err != nil {
-		return nil, err
-	}
-	arls := sps.AsTPAttributes()
-	if len(arls) == 0 {
-		return arls, utils.ErrNotFound
-	}
-	return arls, nil
-}
-
-func (sqls *SQLStorage) GetTPChargers(tpid, tenant, id string) ([]*utils.TPChargerProfile, error) {
-	var cpps ChargerMdls
-	q := sqls.db.Where("tpid = ?", tpid)
-	if len(id) != 0 {
-		q = q.Where("id = ?", id)
-	}
-	if len(tenant) != 0 {
-		q = q.Where("tenant = ?", tenant)
-	}
-	if err := q.Find(&cpps).Error; err != nil {
-		return nil, err
-	}
-	arls := cpps.AsTPChargers()
-	if len(arls) == 0 {
-		return arls, utils.ErrNotFound
-	}
-	return arls, nil
-}
-
-func (sqls *SQLStorage) GetTPDispatcherProfiles(tpid, tenant, id string) ([]*utils.TPDispatcherProfile, error) {
-	var dpps DispatcherProfileMdls
-	q := sqls.db.Where("tpid = ?", tpid)
-	if len(id) != 0 {
-		q = q.Where("id = ?", id)
-	}
-	if len(tenant) != 0 {
-		q = q.Where("tenant = ?", tenant)
-	}
-	if err := q.Find(&dpps).Error; err != nil {
-		return nil, err
-	}
-	arls := dpps.AsTPDispatcherProfiles()
-	if len(arls) == 0 {
-		return arls, utils.ErrNotFound
-	}
-	return arls, nil
-}
-
-func (sqls *SQLStorage) GetTPDispatcherHosts(tpid, tenant, id string) ([]*utils.TPDispatcherHost, error) {
-	var dpps DispatcherHostMdls
-	q := sqls.db.Where("tpid = ?", tpid)
-	if len(id) != 0 {
-		q = q.Where("id = ?", id)
-	}
-	if len(tenant) != 0 {
-		q = q.Where("tenant = ?", tenant)
-	}
-	if err := q.Find(&dpps).Error; err != nil {
-		return nil, err
-	}
-	arls, err := dpps.AsTPDispatcherHosts()
-	if err != nil {
-		return nil, err
-	}
-	if len(arls) == 0 {
-		return arls, utils.ErrNotFound
-	}
-	return arls, nil
-}
-
-func (sqls *SQLStorage) GetTPRateProfiles(tpid, tenant, id string) ([]*utils.TPRateProfile, error) {
-	var dpps RateProfileMdls
-	q := sqls.db.Where("tpid = ?", tpid)
-	if len(id) != 0 {
-		q = q.Where("id = ?", id)
-	}
-	if len(tenant) != 0 {
-		q = q.Where("tenant = ?", tenant)
-	}
-	if err := q.Find(&dpps).Error; err != nil {
-		return nil, err
-	}
-	arls := dpps.AsTPRateProfile()
-	if len(arls) == 0 {
-		return arls, utils.ErrNotFound
-	}
-	return arls, nil
-}
-
-func (sqls *SQLStorage) GetTPActionProfiles(tpid, tenant, id string) ([]*utils.TPActionProfile, error) {
-	var dpps ActionProfileMdls
-	q := sqls.db.Where("tpid = ?", tpid)
-
-	if len(id) != 0 {
-		q = q.Where("id = ?", id)
-	}
-	if len(tenant) != 0 {
-		q = q.Where("tenant = ?", tenant)
-	}
-	if err := q.Find(&dpps).Error; err != nil {
-		return nil, err
-	}
-	arls := dpps.AsTPActionProfile()
-	if len(arls) == 0 {
-		return arls, utils.ErrNotFound
-	}
-	return arls, nil
-}
-
-func (sqls *SQLStorage) GetTPAccounts(tpid, tenant, id string) ([]*utils.TPAccount, error) {
-	var dpps AccountMdls
-	q := sqls.db.Where("tpid = ?", tpid)
-	if len(id) != 0 {
-		q = q.Where("id = ?", id)
-	}
-	if len(tenant) != 0 {
-		q = q.Where("tenant = ?", tenant)
-	}
-	if err := q.Find(&dpps).Error; err != nil {
-		return nil, err
-	}
-	arls, err := dpps.AsTPAccount()
-	if err != nil {
-		return nil, err
-	} else if len(arls) == 0 {
-		return arls, utils.ErrNotFound
-	}
-	return arls, nil
 }
 
 // GetVersions returns slice of all versions or a specific version if tag is specified
@@ -777,5 +138,219 @@ func (sqls *SQLStorage) RemoveVersions(vrs Versions) (err error) {
 		}
 	}
 	tx.Commit()
+	return
+}
+
+func (sqls *SQLStorage) SetCDR(cdr *utils.CGREvent, allowUpdate bool) error {
+	tx := sqls.db.Begin()
+	if tx.Error != nil {
+		return tx.Error
+	}
+	cdrTable := &CDRSQLTable{
+		Tenant:    cdr.Tenant,
+		Opts:      cdr.APIOpts,
+		Event:     cdr.Event,
+		CreatedAt: time.Now(),
+	}
+	saved := tx.Save(cdrTable)
+	if saved.Error != nil {
+		tx.Rollback()
+		if !allowUpdate {
+			if strings.Contains(saved.Error.Error(), "1062") || strings.Contains(saved.Error.Error(), "duplicate key") { // returns 1062/pq when key is duplicated
+				return utils.ErrExists
+			}
+			return saved.Error
+		}
+		tx = sqls.db.Begin()
+		if tx.Error != nil {
+			return tx.Error
+		}
+
+		updated := tx.Model(&CDRSQLTable{}).Where(
+			sqls.cdrIDQuery(utils.IfaceAsString(cdr.APIOpts[utils.MetaCDRID]))).Updates(
+			CDRSQLTable{Opts: cdr.APIOpts, Event: cdr.Event, UpdatedAt: time.Now()})
+		if updated.Error != nil {
+			tx.Rollback()
+			return updated.Error
+		}
+	}
+	tx.Commit()
+	return nil
+}
+
+// GetCDRs has ability to get the filtered CDRs, count them or simply return them
+// qryFltr.Unscoped will ignore soft deletes or delete records permanently
+func (sqls *SQLStorage) GetCDRs(ctx *context.Context, qryFltr []*Filter, opts map[string]interface{}) (cdrs []*CDR, err error) {
+	q := sqls.db.Table(utils.CDRsTBL)
+	var excludedCdrQueryFilterTypes []*FilterRule
+	for _, fltr := range qryFltr {
+		for _, rule := range fltr.Rules {
+			if !cdrQueryFilterTypes.Has(rule.Type) || checkNestedFields(rule.Element, rule.Values) {
+				excludedCdrQueryFilterTypes = append(excludedCdrQueryFilterTypes, rule)
+				continue
+			}
+			var elem, field string
+			switch {
+			case strings.HasPrefix(rule.Element, utils.DynamicDataPrefix+utils.MetaReq+utils.NestingSep):
+				elem = "event"
+				field = strings.TrimPrefix(rule.Element, utils.DynamicDataPrefix+utils.MetaReq+utils.NestingSep)
+			case strings.HasPrefix(rule.Element, utils.DynamicDataPrefix+utils.MetaOpts+utils.NestingSep):
+				elem = "opts"
+				field = strings.TrimPrefix(rule.Element, utils.DynamicDataPrefix+utils.MetaOpts+utils.NestingSep)
+			}
+			var count int64
+			if _ = sqls.db.Table(utils.CDRsTBL).Where(
+				sqls.existField(elem, field)).Count(&count); count > 0 &&
+				(rule.Type == utils.MetaNotExists ||
+					rule.Type == utils.MetaNotString) {
+				continue
+			}
+			conditions := sqls.valueQry(rule.Type, elem, field, rule.Values, strings.HasPrefix(rule.Type, utils.MetaNot))
+			q.Where(strings.Join(conditions, " OR "))
+		}
+	}
+
+	limit, offset, maxItems, err := utils.GetPaginateOpts(opts)
+	if err != nil {
+		return nil, fmt.Errorf("could not retrieve paginator opts: %w", err)
+	}
+	if maxItems < limit+offset {
+		return nil, fmt.Errorf("sum of limit and offset exceeds maxItems")
+	}
+	q = q.Limit(limit)
+	q = q.Offset(offset)
+
+	// Execute query
+	results := make([]*CDRSQLTable, 0)
+	if err = q.Find(&results).Error; err != nil {
+		return
+	}
+	if len(results) == 0 {
+		return nil, utils.ErrNotFound
+	}
+	//convert into CDR
+	resultCdr := make([]*CDR, 0, len(results))
+	for _, val := range results {
+		// here we wil do our filtration, meaning that we will filter those cdrs who cannot be filtered in the databes eg: *ai, *rsr..
+		if len(excludedCdrQueryFilterTypes) != 0 {
+			newCdr := &CDR{
+				Tenant: val.Tenant,
+				Opts:   val.Opts,
+				Event:  val.Event,
+			}
+			var pass bool
+			dP := NewCGREventFromCDR(newCdr).AsDataProvider()
+			for _, fltr := range excludedCdrQueryFilterTypes {
+				if pass, err = fltr.Pass(ctx, dP); err != nil {
+					return nil, err
+				} else if !pass {
+					break
+				}
+			}
+			// if the cdr passed the filtration, get it as result, else continue
+			if !pass {
+				continue
+			}
+		}
+		resultCdr = append(resultCdr, &CDR{
+			Tenant:    val.Tenant,
+			Opts:      val.Opts,
+			Event:     val.Event,
+			CreatedAt: val.CreatedAt,
+			UpdatedAt: val.UpdatedAt,
+			DeletedAt: val.DeletedAt,
+		})
+	}
+	if len(resultCdr) == 0 {
+		return nil, utils.ErrNotFound
+	}
+	if maxItems != 0 && len(resultCdr) > maxItems {
+		return nil, fmt.Errorf("maximum number of items exceeded")
+	}
+	cdrs, err = utils.Paginate(resultCdr, 0, 0, maxItems)
+	return
+}
+
+func (sqls *SQLStorage) RemoveCDRs(ctx *context.Context, qryFltr []*Filter) (err error) {
+	q := sqls.db.Table(utils.CDRsTBL)
+	var excludedCdrQueryFilterTypes []*FilterRule
+	for _, fltr := range qryFltr {
+		for _, rule := range fltr.Rules {
+			if !cdrQueryFilterTypes.Has(rule.Type) || checkNestedFields(rule.Element, rule.Values) {
+				excludedCdrQueryFilterTypes = append(excludedCdrQueryFilterTypes, rule)
+				continue
+			}
+			var elem, field string
+			switch {
+			case strings.HasPrefix(rule.Element, utils.DynamicDataPrefix+utils.MetaReq+utils.NestingSep):
+				elem = "event"
+				field = strings.TrimPrefix(rule.Element, utils.DynamicDataPrefix+utils.MetaReq+utils.NestingSep)
+			case strings.HasPrefix(rule.Element, utils.DynamicDataPrefix+utils.MetaOpts+utils.NestingSep):
+				elem = "opts"
+				field = strings.TrimPrefix(rule.Element, utils.DynamicDataPrefix+utils.MetaOpts+utils.NestingSep)
+			}
+			var count int64
+			if _ = sqls.db.Table(utils.CDRsTBL).Where(
+				sqls.existField(elem, field)).Count(&count); count > 0 &&
+				(rule.Type == utils.MetaNotExists ||
+					rule.Type == utils.MetaNotString) {
+				continue
+			}
+			conditions := sqls.valueQry(rule.Type, elem, field, rule.Values, strings.HasPrefix(rule.Type, utils.MetaNot))
+			q.Where(strings.Join(conditions, " OR "))
+		}
+	}
+	// if we do not have any filters that cannot be queried in database, just delete all the results (e.g. *rsr, *ai, *cronexp ..))
+	if len(excludedCdrQueryFilterTypes) == 0 {
+		if err = q.Delete(nil).Error; err != nil {
+			q.Rollback()
+			return err
+		}
+		return
+	}
+	// in the other case, if we have such filters, check the results based on those filters
+	results := make([]*CDRSQLTable, 0)
+	if err = q.Find(&results).Error; err != nil {
+		return
+	}
+	// this means nothing in database matched, so we will not check the filtration process
+	if len(results) == 0 {
+		return
+	}
+	// keep the result for quering with other filter type that are not allowed in database
+	q = sqls.db.Table(utils.CDRsTBL)          // reset the query
+	remCdr := make([]string, 0, len(results)) // we will keep the *cdrID of every CDR taht matched the those filters
+	for _, cdr := range results {
+		if len(excludedCdrQueryFilterTypes) != 0 {
+			newCdr := &CDR{
+				Tenant: cdr.Tenant,
+				Opts:   cdr.Opts,
+				Event:  cdr.Event,
+			}
+			var pass bool
+			dP := NewCGREventFromCDR(newCdr).AsDataProvider()
+			// check if the filter pass
+			for _, fltr := range excludedCdrQueryFilterTypes {
+				if pass, err = fltr.Pass(ctx, dP); err != nil {
+					return err
+				} else if !pass {
+					break
+				}
+			}
+			if pass {
+				// if the filters passed, remove the CDR by it's *cdrID
+				remCdr = append(remCdr, sqls.cdrIDQuery(utils.IfaceAsString(newCdr.Opts[utils.MetaCDRID])))
+			}
+		}
+	}
+	// this means nothing PASSED trough filtration process, so nothing will be deleted
+	if len(remCdr) == 0 {
+		return
+	}
+	q.Where(strings.Join(remCdr, " OR "))
+	if err = q.Delete(nil).Error; err != nil {
+		q.Rollback()
+		return err
+	}
 	return
 }

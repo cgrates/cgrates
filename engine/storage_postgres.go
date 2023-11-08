@@ -97,6 +97,79 @@ func (poS *PostgresStorage) notExtraFieldsValueQry(field, value string) string {
 	return fmt.Sprintf(" NOT (extra_fields ?'%s' AND (extra_fields ->> '%s') = '%s')", field, field, value)
 }
 
+// cdrIDQuery will query the CDR by its unique cdrID
+func (poS *PostgresStorage) cdrIDQuery(cdrID string) string {
+	return fmt.Sprintf(" opts ->> '*cdrID' = '%s'", cdrID)
+}
+
+// existField will query for every element on json type if the field exists
+func (poS *PostgresStorage) existField(elem, field string) string {
+	return fmt.Sprintf("NOT(%s ? '%s')", elem, field)
+}
+
 func (poS *PostgresStorage) GetStorageType() string {
 	return utils.MetaPostgres
+}
+
+func (poS *PostgresStorage) valueQry(ruleType, elem, field string, values []string, not bool) (conditions []string) {
+	// here are for the filters that their values are empty: *exists, *notexists, *empty, *notempty..
+	if len(values) == 0 {
+		switch ruleType {
+		case utils.MetaExists, utils.MetaNotExists:
+			if not {
+				conditions = append(conditions, fmt.Sprintf("NOT(%s ? '%s')", elem, field))
+				return
+			}
+			conditions = append(conditions, fmt.Sprintf("%s ? '%s'", elem, field))
+		case utils.MetaEmpty, utils.MetaNotEmpty:
+			if not {
+				conditions = append(conditions, fmt.Sprintf(" NOT (%s ->> '%s') = ''", elem, field))
+				return
+			}
+			conditions = append(conditions, fmt.Sprintf(" (%s ->> '%s') = ''", elem, field))
+		}
+		return
+	}
+	// here are for the filters that can have more than one value: *string, *prefix, *suffix ..
+	for _, value := range values {
+		var singleCond string
+		switch ruleType {
+		case utils.MetaString, utils.MetaNotString, utils.MetaEqual, utils.MetaNotEqual:
+			if not {
+				conditions = append(conditions, fmt.Sprintf(" NOT (%s ?'%s' AND (%s ->> '%s') = '%s')", elem, field, elem, field, value))
+				continue
+			}
+			singleCond = fmt.Sprintf(" (%s ->> '%s') = '%s'", elem, field, value)
+		case utils.MetaLessThan, utils.MetaLessOrEqual, utils.MetaGreaterThan, utils.MetaGreaterOrEqual:
+			if ruleType == utils.MetaGreaterOrEqual {
+				singleCond = fmt.Sprintf(" (%s ->> '%s')::numeric >= '%s'", elem, field, value)
+			} else if ruleType == utils.MetaGreaterThan {
+				singleCond = fmt.Sprintf(" (%s ->> '%s')::numeric > '%s'", elem, field, value)
+			} else if ruleType == utils.MetaLessOrEqual {
+				singleCond = fmt.Sprintf(" (%s ->> '%s')::numeric <= '%s'", elem, field, value)
+			} else if ruleType == utils.MetaLessThan {
+				singleCond = fmt.Sprintf(" (%s ->> '%s')::numeric < '%s'", elem, field, value)
+			}
+		case utils.MetaPrefix, utils.MetaNotPrefix:
+			if not {
+				conditions = append(conditions, fmt.Sprintf(" NOT ((%s ->> '%s') ILIKE '%s%%')", elem, field, value))
+				continue
+			}
+			singleCond = fmt.Sprintf(" (%s ->> '%s') ILIKE '%s%%'", elem, field, value)
+		case utils.MetaSuffix, utils.MetaNotSuffix:
+			if not {
+				conditions = append(conditions, fmt.Sprintf(" NOT ((%s ->> '%s') ILIKE '%%%s')", elem, field, value))
+				continue
+			}
+			singleCond = fmt.Sprintf(" (%s ->> '%s') ILIKE '%%%s'", elem, field, value)
+		case utils.MetaRegex, utils.MetaNotRegex:
+			if not {
+				conditions = append(conditions, fmt.Sprintf(" (%s ->> '%s') !~ '%s'", elem, field, value))
+				continue
+			}
+			singleCond = fmt.Sprintf(" (%s ->> '%s') ~ '%s'", elem, field, value)
+		}
+		conditions = append(conditions, singleCond)
+	}
+	return
 }
