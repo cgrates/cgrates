@@ -46,6 +46,7 @@ type DNSAgent struct {
 	fltrS   *engine.FilterS   // connection towards FilterS
 	servers []*dns.Server
 	connMgr *engine.ConnManager
+	sync.WaitGroup
 }
 
 // initDNSServer instantiates the DNS server
@@ -79,7 +80,9 @@ func (da *DNSAgent) ListenAndServe(stopChan chan struct{}) error {
 	for _, server := range da.servers {
 		utils.Logger.Info(fmt.Sprintf("<%s> start listening on <%s:%s>",
 			utils.DNSAgent, server.Net, server.Addr))
+		da.Add(1)
 		go func(srv *dns.Server) {
+			defer da.Done()
 			err := srv.ListenAndServe()
 			if err != nil {
 				utils.Logger.Warning(fmt.Sprintf("<%s> error <%v>, on ListenAndServe <%s:%s>",

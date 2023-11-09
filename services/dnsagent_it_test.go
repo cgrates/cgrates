@@ -161,6 +161,7 @@ func TestDNSAgentReloadFirst(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Fatalf("Expecting OK ,received %s", reply)
 	}
+	time.Sleep(10 * time.Millisecond)
 	if err := cfg.V1ReloadConfig(context.Background(),
 		&config.ReloadArgs{
 			Path:    path.Join("/usr", "share", "cgrates", "conf", "samples", "dnsagent_reload"),
@@ -172,9 +173,8 @@ func TestDNSAgentReloadFirst(t *testing.T) {
 	}
 	time.Sleep(10 * time.Millisecond)
 	cfg.DNSAgentCfg().Enabled = false
-	time.Sleep(10 * time.Millisecond)
 	cfg.GetReloadChan(config.DNSAgentJson) <- struct{}{}
-	time.Sleep(100 * time.Millisecond)
+	time.Sleep(10 * time.Millisecond)
 	if srv.IsRunning() {
 		t.Fatalf("Expected service to be down")
 	}
@@ -208,7 +208,7 @@ func TestDNSAgentReload2(t *testing.T) {
 	}
 }
 
-func TestDNSAgentReload4(t *testing.T) {
+func TestDNSAgentReload3(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.SessionSCfg().Enabled = true
 	cfg.DNSAgentCfg().Enabled = true
@@ -235,11 +235,12 @@ func TestDNSAgentReload4(t *testing.T) {
 
 }
 
-func TestDNSAgentReload5(t *testing.T) {
+func TestDNSAgentReload4(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.SessionSCfg().Enabled = true
 	cfg.DNSAgentCfg().Enabled = true
-
+	cfg.DNSAgentCfg().Listeners[0].Network = "udp"
+	cfg.DNSAgentCfg().Listeners[0].Address = ":2053"
 	utils.Logger, _ = utils.Newlogger(utils.MetaSysLog, cfg.GeneralCfg().NodeID)
 	utils.Logger.SetLogLevel(7)
 	filterSChan := make(chan *engine.FilterS, 1)
@@ -262,7 +263,7 @@ func TestDNSAgentReload5(t *testing.T) {
 
 }
 
-func TestDNSAgentReload6(t *testing.T) {
+func TestDNSAgentReload5(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.SessionSCfg().Enabled = true
 	cfg.DNSAgentCfg().Enabled = true

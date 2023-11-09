@@ -88,6 +88,7 @@ func (dns *DNSAgent) Reload() (err error) {
 
 	if dns.dns != nil {
 		close(dns.stopChan)
+		dns.dns.Wait()
 	}
 
 	dns.dns, err = agents.NewDNSAgent(dns.cfg, filterS, dns.connMgr)
@@ -120,6 +121,7 @@ func (dns *DNSAgent) Shutdown() (err error) {
 		return
 	}
 	close(dns.stopChan)
+	dns.dns.Wait()
 	dns.dns.Lock()
 	defer dns.dns.Unlock()
 	dns.dns = nil
