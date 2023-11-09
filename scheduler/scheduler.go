@@ -38,7 +38,7 @@ type Scheduler struct {
 	dm                              *engine.DataManager
 	cfg                             *config.CGRConfig
 	fltrS                           *engine.FilterS
-	schedulerStarted                bool
+	started                         bool
 	actStatsInterval                time.Duration                 // How long time to keep the stats in memory
 	aSMux, aFMux                    sync.RWMutex                  // protect schedStats
 	actSuccessStats, actFailedStats map[string]map[time.Time]bool // keep here stats regarding executed actions, map[actionType]map[execTime]bool
@@ -86,12 +86,14 @@ func (s *Scheduler) updateActStats(act *engine.Action, isFailed bool) {
 }
 
 func (s *Scheduler) Loop() {
-	s.schedulerStarted = true
+	s.Lock()
+	s.started = true
+	s.Unlock()
 	for {
-		if !s.schedulerStarted { // shutdown requested
+		if !s.isRunning() { // shutdown requested
 			break
 		}
-		for len(s.queue) == 0 { //hang here if empty
+		for s.isQueueEmpty() { //hang here if empty
 			<-s.restartLoop
 		}
 		utils.Logger.Info(fmt.Sprintf("<Scheduler> Scheduler queue length: %v", len(s.queue)))
@@ -232,12 +234,24 @@ func (s *Scheduler) loadActionPlans() {
 }
 
 func (s *Scheduler) restart() {
-	if s.schedulerStarted {
+	if s.isRunning() {
 		s.restartLoop <- struct{}{}
 	}
 	if s.timer != nil {
 		s.timer.Stop()
 	}
+}
+
+func (s *Scheduler) isRunning() bool {
+	s.RLock()
+	defer s.RUnlock()
+	return s.started
+}
+
+func (s *Scheduler) isQueueEmpty() bool {
+	s.RLock()
+	defer s.RUnlock()
+	return len(s.queue) == 0
 }
 
 type ArgsGetScheduledActions struct {
@@ -301,7 +315,9 @@ func (s *Scheduler) GetScheduledActions(fltr ArgsGetScheduledActions) (schedActi
 }
 
 func (s *Scheduler) Shutdown() {
-	s.schedulerStarted = false  // disable loop on next run
+	s.Lock()
+	s.started = false // disable loop on next run
+	s.Unlock()
 	s.restartLoop <- struct{}{} // cancel waiting tasks
 	if s.timer != nil {
 		s.timer.Stop()
