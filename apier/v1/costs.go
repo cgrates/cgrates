@@ -122,7 +122,7 @@ func (apierSv1 *APIerSv1) GetAccountCost(ctx *context.Context, args *utils.CGREv
 	if err != nil {
 		return
 	}
-	args.APIOpts[utils.MetaRALsDryRun] = true
+	cd.DryRun = true
 	var cc engine.CallCost
 	if err := apierSv1.Responder.Debit(context.Background(),
 		&engine.CallDescriptorWithAPIOpts{
