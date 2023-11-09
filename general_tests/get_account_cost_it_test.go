@@ -153,9 +153,6 @@ func TestGetAccountCost(t *testing.T) {
 						utils.AnswerTime:   time.Date(2021, time.February, 2, 16, 15, 0, 0, time.UTC),
 						utils.Usage:        4 * time.Minute,
 					},
-					APIOpts: map[string]any{
-						utils.MetaRALsDryRun: true,
-					},
 				},
 			}, &reply)
 		if err != nil {
