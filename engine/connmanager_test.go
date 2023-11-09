@@ -605,7 +605,7 @@ func TestCMEnableDispatcher(t *testing.T) {
 	var storDB StorDB
 	storDBChan := make(chan StorDB, 1)
 	storDBChan <- storDB
-	newCDRSrv := NewCDRServer(cfg, storDBChan, dm, fltrs, nil)
+	newCDRSrv := NewCDRServer(cfg, dm, fltrs, nil, storDBChan)
 
 	srvcNames := []string{utils.AccountS, utils.ActionS, utils.AttributeS,
 		utils.CacheS, utils.ChargerS, utils.ConfigS, utils.DispatcherS,
@@ -676,7 +676,7 @@ func TestCMDisableDispatcher(t *testing.T) {
 	var storDB StorDB
 	storDBChan := make(chan StorDB, 1)
 	storDBChan <- storDB
-	newCDRSrv := NewCDRServer(cfg, storDBChan, dm, fltrs, nil)
+	newCDRSrv := NewCDRServer(cfg, dm, fltrs, nil, storDBChan)
 	newSrvcWName, err := NewServiceWithName(newCDRSrv, utils.AccountS, true)
 	if err != nil {
 		t.Error(err)
@@ -722,7 +722,7 @@ func TestCMgetInternalConnChanFromDisp(t *testing.T) {
 	var storDB StorDB
 	storDBChan := make(chan StorDB, 1)
 	storDBChan <- storDB
-	newCDRSrv := NewCDRServer(cfg, storDBChan, dm, fltrs, nil)
+	newCDRSrv := NewCDRServer(cfg, dm, fltrs, nil, storDBChan)
 	newSrvcWName, err := NewServiceWithName(newCDRSrv, utils.AccountS, true)
 	if err != nil {
 		t.Error(err)
