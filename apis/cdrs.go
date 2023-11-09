@@ -19,11 +19,75 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package apis
 
 import (
+	"fmt"
+
 	"github.com/cgrates/birpc/context"
 
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
+
+type CDRFilters struct {
+	Tenant    string
+	FilterIDs []string
+	APIOpts   map[string]interface{}
+}
+
+// GetCDRs retrieves a list of CDRs matching the specified filters.
+func (admS AdminSv1) GetCDRs(ctx *context.Context, args *CDRFilters, reply *[]*engine.CDR) error {
+	if args.Tenant == utils.EmptyString {
+		args.Tenant = admS.cfg.GeneralCfg().DefaultTenant
+	}
+	fltrs, err := admS.prepareFilters(ctx, args.FilterIDs, args.Tenant)
+	if err != nil {
+		return fmt.Errorf("preparing filters failed: %w", err)
+	}
+	cdrs, err := admS.storDB.GetCDRs(ctx, fltrs, args.APIOpts)
+	if err != nil {
+		return fmt.Errorf("retrieving CDRs failed: %w", err)
+	}
+	*reply = cdrs
+	return nil
+}
+
+// RemoveCDRs removes CDRs matching the specified filters.
+func (admS AdminSv1) RemoveCDRs(ctx *context.Context, args *CDRFilters, reply *string) (err error) {
+	if args.Tenant == utils.EmptyString {
+		args.Tenant = admS.cfg.GeneralCfg().DefaultTenant
+	}
+	fltrs, err := admS.prepareFilters(ctx, args.FilterIDs, args.Tenant)
+	if err != nil {
+		return fmt.Errorf("preparing filters failed: %w", err)
+	}
+	if err := admS.storDB.RemoveCDRs(ctx, fltrs); err != nil {
+		return fmt.Errorf("removing CDRs failed: %w", err)
+	}
+	*reply = utils.OK
+	return
+}
+
+// prepareFilters retrieves and compiles the filters identified by filterIDs for the specified tenant.
+func (admS AdminSv1) prepareFilters(ctx *context.Context, filterIDs []string, tenant string,
+) ([]*engine.Filter, error) {
+
+	fltrs := make([]*engine.Filter, 0, len(filterIDs))
+	for _, fltrID := range filterIDs {
+		var singleFltr engine.Filter
+		err := admS.GetFilter(ctx, &utils.TenantIDWithAPIOpts{
+			TenantID: &utils.TenantID{
+				Tenant: tenant,
+				ID:     fltrID,
+			}}, &singleFltr)
+		if err != nil {
+			return nil, fmt.Errorf("retrieving filter %s failed: %w", fltrID, err)
+		}
+		if err = singleFltr.Compile(); err != nil {
+			return nil, fmt.Errorf("compiling filter %s failed: %w", fltrID, err)
+		}
+		fltrs = append(fltrs, &singleFltr)
+	}
+	return fltrs, nil
+}
 
 // NewCDRsV1 constructs the RPC Object for CDRsV1
 func NewCDRsV1(cdrS *engine.CDRServer) *CDRsV1 {

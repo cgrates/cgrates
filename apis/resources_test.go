@@ -666,7 +666,10 @@ func TestResourcesGetResourceProfilesOK(t *testing.T) {
 	connMgr := engine.NewConnManager(cfg)
 	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
-	admS := NewAdminSv1(cfg, dm, connMgr, nil)
+	var storDB engine.StorDB
+	storDBChan := make(chan engine.StorDB, 1)
+	storDBChan <- storDB
+	admS := NewAdminSv1(cfg, dm, connMgr, nil, storDBChan)
 	args1 := &engine.ResourceProfileWithAPIOpts{
 		ResourceProfile: &engine.ResourceProfile{
 			Tenant:            "cgrates.org",
@@ -786,7 +789,10 @@ func TestResourcesGetResourceProfilesGetIDsErr(t *testing.T) {
 	connMgr := engine.NewConnManager(cfg)
 	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
-	admS := NewAdminSv1(cfg, dm, connMgr, nil)
+	var storDB engine.StorDB
+	storDBChan := make(chan engine.StorDB, 1)
+	storDBChan <- storDB
+	admS := NewAdminSv1(cfg, dm, connMgr, nil, storDBChan)
 	args := &engine.ResourceProfileWithAPIOpts{
 		ResourceProfile: &engine.ResourceProfile{
 			Tenant:            "cgrates.org",

@@ -43,26 +43,29 @@ func newMapEventFromReqForm(r *http.Request) (mp MapEvent, err error) {
 }
 
 // NewCDRServer is a constructor for CDRServer
-func NewCDRServer(cfg *config.CGRConfig, storDBChan chan StorDB, dm *DataManager, filterS *FilterS,
-	connMgr *ConnManager) *CDRServer {
+func NewCDRServer(cfg *config.CGRConfig, dm *DataManager, filterS *FilterS, connMgr *ConnManager,
+	storDBChan chan StorDB) *CDRServer {
+	cdrDB := <-storDBChan
 	return &CDRServer{
-		cfg:        cfg,
-		dm:         dm,
-		guard:      guardian.Guardian,
-		fltrS:      filterS,
-		connMgr:    connMgr,
-		storDBChan: storDBChan,
+		cfg:     cfg,
+		dm:      dm,
+		db:      cdrDB,
+		guard:   guardian.Guardian,
+		fltrS:   filterS,
+		connMgr: connMgr,
+		dbChan:  storDBChan,
 	}
 }
 
 // CDRServer stores and rates CDRs
 type CDRServer struct {
-	cfg        *config.CGRConfig
-	dm         *DataManager
-	guard      *guardian.GuardianLocker
-	fltrS      *FilterS
-	connMgr    *ConnManager
-	storDBChan chan StorDB
+	cfg     *config.CGRConfig
+	dm      *DataManager
+	db      StorDB
+	guard   *guardian.GuardianLocker
+	fltrS   *FilterS
+	connMgr *ConnManager
+	dbChan  chan StorDB
 }
 
 // ListenAndServe listen for storbd reload
@@ -71,7 +74,7 @@ func (cdrS *CDRServer) ListenAndServe(stopChan chan struct{}) {
 		select {
 		case <-stopChan:
 			return
-		case _, ok := <-cdrS.storDBChan:
+		case _, ok := <-cdrS.dbChan:
 			if !ok { // the channel was closed by the shutdown of the StorDB Service
 				return
 			}

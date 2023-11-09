@@ -1085,7 +1085,7 @@ func TestCDRProcessRatesCostForEvent(t *testing.T) {
 	var storDB engine.StorDB
 	storDBChan := make(chan engine.StorDB, 1)
 	storDBChan <- storDB
-	cdrs := engine.NewCDRServer(cfg, storDBChan, dm, filters, connMgr)
+	cdrs := engine.NewCDRServer(cfg, dm, filters, connMgr, storDBChan)
 	ratesConns := make(chan birpc.ClientConnector, 1)
 	rateSrv, err := birpc.NewServiceWithMethodsRename(NewRateS(cfg, filters, dm), utils.RateSv1, true, func(key string) (newKey string) {
 		return strings.TrimPrefix(key, utils.V1Prfx)

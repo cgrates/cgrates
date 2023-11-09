@@ -41,14 +41,15 @@ func TestCDRsNewCDRServer(t *testing.T) {
 	var storDB StorDB
 	storDBChan := make(chan StorDB, 1)
 	storDBChan <- storDB
-	newCDRSrv := NewCDRServer(cfg, storDBChan, dm, fltrs, connMng)
+	newCDRSrv := NewCDRServer(cfg, dm, fltrs, connMng, storDBChan)
 	expected := &CDRServer{
-		cfg:        cfg,
-		dm:         dm,
-		guard:      guardian.Guardian,
-		fltrS:      fltrs,
-		connMgr:    connMng,
-		storDBChan: storDBChan,
+		cfg:     cfg,
+		dm:      dm,
+		guard:   guardian.Guardian,
+		fltrS:   fltrs,
+		connMgr: connMng,
+		db:      storDB,
+		dbChan:  storDBChan,
 	}
 	if !reflect.DeepEqual(newCDRSrv, expected) {
 		t.Errorf("\nExpected <%+v> \n, received <%+v>", expected, newCDRSrv)
@@ -65,7 +66,7 @@ func TestCDRsChrgrSProcessEventErrMsnConnIDs(t *testing.T) {
 	var storDB StorDB
 	storDBChan := make(chan StorDB, 1)
 	storDBChan <- storDB
-	newCDRSrv := NewCDRServer(cfg, storDBChan, dm, fltrs, connMng)
+	newCDRSrv := NewCDRServer(cfg, dm, fltrs, connMng, storDBChan)
 
 	cgrEv := &utils.CGREvent{
 		Tenant: "cgrates.org",
@@ -98,7 +99,7 @@ func TestCDRsAttrSProcessEventNoOpts(t *testing.T) {
 	var storDB StorDB
 	storDBChan := make(chan StorDB, 1)
 	storDBChan <- storDB
-	newCDRSrv := NewCDRServer(cfg, storDBChan, dm, fltrs, connMng)
+	newCDRSrv := NewCDRServer(cfg, dm, fltrs, connMng, storDBChan)
 
 	cgrEv := &utils.CGREvent{
 		Tenant: "cgrates.org",
@@ -129,7 +130,7 @@ func TestCDRsAttrSProcessEvent(t *testing.T) {
 	var storDB StorDB
 	storDBChan := make(chan StorDB, 1)
 	storDBChan <- storDB
-	newCDRSrv := NewCDRServer(cfg, storDBChan, dm, fltrs, connMng)
+	newCDRSrv := NewCDRServer(cfg, dm, fltrs, connMng, storDBChan)
 
 	cgrEv := &utils.CGREvent{
 		Tenant: "cgrates.org",
@@ -163,7 +164,7 @@ func TestCDRsRateSCostForEventErr(t *testing.T) {
 	var storDB StorDB
 	storDBChan := make(chan StorDB, 1)
 	storDBChan <- storDB
-	newCDRSrv := NewCDRServer(cfg, storDBChan, dm, fltrs, connMng)
+	newCDRSrv := NewCDRServer(cfg, dm, fltrs, connMng, storDBChan)
 
 	cgrEv := &utils.CGREvent{
 		Tenant: "cgrates.org",
@@ -197,7 +198,7 @@ func TestCDRsAccountSDebitEventErr(t *testing.T) {
 	var storDB StorDB
 	storDBChan := make(chan StorDB, 1)
 	storDBChan <- storDB
-	newCDRSrv := NewCDRServer(cfg, storDBChan, dm, fltrs, connMng)
+	newCDRSrv := NewCDRServer(cfg, dm, fltrs, connMng, storDBChan)
 
 	cgrEv := &utils.CGREvent{
 		Tenant: "cgrates.org",
@@ -231,7 +232,7 @@ func TestCDRsThdSProcessEventErr(t *testing.T) {
 	var storDB StorDB
 	storDBChan := make(chan StorDB, 1)
 	storDBChan <- storDB
-	newCDRSrv := NewCDRServer(cfg, storDBChan, dm, fltrs, connMng)
+	newCDRSrv := NewCDRServer(cfg, dm, fltrs, connMng, storDBChan)
 
 	cgrEv := &utils.CGREvent{
 		Tenant: "cgrates.org",
@@ -263,7 +264,7 @@ func TestCDRsStatSProcessEventErrMsnConnIDs(t *testing.T) {
 	var storDB StorDB
 	storDBChan := make(chan StorDB, 1)
 	storDBChan <- storDB
-	newCDRSrv := NewCDRServer(cfg, storDBChan, dm, fltrs, connMng)
+	newCDRSrv := NewCDRServer(cfg, dm, fltrs, connMng, storDBChan)
 
 	cgrEv := &utils.CGREvent{
 		Tenant: "cgrates.org",
@@ -298,7 +299,7 @@ func TestCDRsEESProcessEventErrMsnConnIDs(t *testing.T) {
 	var storDB StorDB
 	storDBChan := make(chan StorDB, 1)
 	storDBChan <- storDB
-	newCDRSrv := NewCDRServer(cfg, storDBChan, dm, fltrs, connMng)
+	newCDRSrv := NewCDRServer(cfg, dm, fltrs, connMng, storDBChan)
 
 	cgrEv := &utils.CGREventWithEeIDs{
 		CGREvent: &utils.CGREvent{
@@ -366,7 +367,7 @@ func TestCDRsAttrSProcessEventMock(t *testing.T) {
 	var storDB StorDB
 	storDBChan := make(chan StorDB, 1)
 	storDBChan <- storDB
-	newCDRSrv := NewCDRServer(cfg, storDBChan, dm, fltrs, connMng)
+	newCDRSrv := NewCDRServer(cfg, dm, fltrs, connMng, storDBChan)
 	ccM := &ccMock{
 		calls: map[string]func(ctx *context.Context, args any, reply any) error{
 			utils.AttributeSv1ProcessEvent: func(ctx *context.Context, args, reply any) error {
@@ -446,7 +447,7 @@ func TestCDRsAttrSProcessEventMockNotFoundErr(t *testing.T) {
 	var storDB StorDB
 	storDBChan := make(chan StorDB, 1)
 	storDBChan <- storDB
-	newCDRSrv := NewCDRServer(cfg, storDBChan, dm, fltrs, connMng)
+	newCDRSrv := NewCDRServer(cfg, dm, fltrs, connMng, storDBChan)
 	ccM := &ccMock{
 		calls: map[string]func(ctx *context.Context, args any, reply any) error{
 			utils.AttributeSv1ProcessEvent: func(ctx *context.Context, args, reply any) error {
@@ -528,7 +529,7 @@ func TestCDRsAttrSProcessEventMockNotEmptyAF(t *testing.T) {
 	var storDB StorDB
 	storDBChan := make(chan StorDB, 1)
 	storDBChan <- storDB
-	newCDRSrv := NewCDRServer(cfg, storDBChan, dm, fltrs, connMng)
+	newCDRSrv := NewCDRServer(cfg, dm, fltrs, connMng, storDBChan)
 	ccM := &ccMock{
 		calls: map[string]func(ctx *context.Context, args any, reply any) error{
 			utils.AttributeSv1ProcessEvent: func(ctx *context.Context, args, reply any) error {
@@ -629,7 +630,7 @@ func TestCDRsChrgrSProcessEvent(t *testing.T) {
 	var storDB StorDB
 	storDBChan := make(chan StorDB, 1)
 	storDBChan <- storDB
-	newCDRSrv := NewCDRServer(cfg, storDBChan, dm, fltrs, connMng)
+	newCDRSrv := NewCDRServer(cfg, dm, fltrs, connMng, storDBChan)
 	ccM := &ccMock{
 		calls: map[string]func(ctx *context.Context, args any, reply any) error{
 			utils.ChargerSv1ProcessEvent: func(ctx *context.Context, args, reply any) error {
@@ -699,7 +700,7 @@ func TestCDRsRateProcessEventMock(t *testing.T) {
 	var storDB StorDB
 	storDBChan := make(chan StorDB, 1)
 	storDBChan <- storDB
-	newCDRSrv := NewCDRServer(cfg, storDBChan, dm, fltrs, connMng)
+	newCDRSrv := NewCDRServer(cfg, dm, fltrs, connMng, storDBChan)
 	ccM := &ccMock{
 		calls: map[string]func(ctx *context.Context, args any, reply any) error{
 			utils.RateSv1CostForEvent: func(ctx *context.Context, args, reply any) error {
@@ -778,7 +779,7 @@ func TestCDRsAccountProcessEventMock(t *testing.T) {
 	var storDB StorDB
 	storDBChan := make(chan StorDB, 1)
 	storDBChan <- storDB
-	newCDRSrv := NewCDRServer(cfg, storDBChan, dm, fltrs, connMng)
+	newCDRSrv := NewCDRServer(cfg, dm, fltrs, connMng, storDBChan)
 	ccM := &ccMock{
 		calls: map[string]func(ctx *context.Context, args any, reply any) error{
 			utils.AccountSv1DebitAbstracts: func(ctx *context.Context, args, reply any) error {
@@ -859,7 +860,7 @@ func TestCDRsThdSProcessEventMock(t *testing.T) {
 	var storDB StorDB
 	storDBChan := make(chan StorDB, 1)
 	storDBChan <- storDB
-	newCDRSrv := NewCDRServer(cfg, storDBChan, dm, fltrs, connMng)
+	newCDRSrv := NewCDRServer(cfg, dm, fltrs, connMng, storDBChan)
 	ccM := &ccMock{
 		calls: map[string]func(ctx *context.Context, args any, reply any) error{
 			utils.ThresholdSv1ProcessEvent: func(ctx *context.Context, args, reply any) error {
@@ -932,7 +933,7 @@ func TestCDRsThdSProcessEventMockNotfound(t *testing.T) {
 	var storDB StorDB
 	storDBChan := make(chan StorDB, 1)
 	storDBChan <- storDB
-	newCDRSrv := NewCDRServer(cfg, storDBChan, dm, fltrs, connMng)
+	newCDRSrv := NewCDRServer(cfg, dm, fltrs, connMng, storDBChan)
 	ccM := &ccMock{
 		calls: map[string]func(ctx *context.Context, args any, reply any) error{
 			utils.ThresholdSv1ProcessEvent: func(ctx *context.Context, args, reply any) error {
@@ -1004,7 +1005,7 @@ func TestCDRsStatSProcessEventMock(t *testing.T) {
 	var storDB StorDB
 	storDBChan := make(chan StorDB, 1)
 	storDBChan <- storDB
-	newCDRSrv := NewCDRServer(cfg, storDBChan, dm, fltrs, connMng)
+	newCDRSrv := NewCDRServer(cfg, dm, fltrs, connMng, storDBChan)
 	ccM := &ccMock{
 		calls: map[string]func(ctx *context.Context, args any, reply any) error{
 			utils.StatSv1ProcessEvent: func(ctx *context.Context, args, reply any) error {
@@ -1077,7 +1078,7 @@ func TestCDRsEESProcessEventMock(t *testing.T) {
 	var storDB StorDB
 	storDBChan := make(chan StorDB, 1)
 	storDBChan <- storDB
-	newCDRSrv := NewCDRServer(cfg, storDBChan, dm, fltrs, connMng)
+	newCDRSrv := NewCDRServer(cfg, dm, fltrs, connMng, storDBChan)
 	ccM := &ccMock{
 		calls: map[string]func(ctx *context.Context, args any, reply any) error{
 			utils.EeSv1ProcessEvent: func(ctx *context.Context, args, reply any) error {
@@ -1154,7 +1155,7 @@ func TestCDRsProcessEventMock(t *testing.T) {
 	var storDB StorDB
 	storDBChan := make(chan StorDB, 1)
 	storDBChan <- storDB
-	newCDRSrv := NewCDRServer(cfg, storDBChan, dm, fltrs, connMng)
+	newCDRSrv := NewCDRServer(cfg, dm, fltrs, connMng, storDBChan)
 	ccM := &ccMock{
 		calls: map[string]func(ctx *context.Context, args any, reply any) error{
 			utils.EeSv1ProcessEvent: func(ctx *context.Context, args, reply any) error {
@@ -1227,7 +1228,7 @@ func TestCDRsProcessEventMockSkipOpts(t *testing.T) {
 	var storDB StorDB
 	storDBChan := make(chan StorDB, 1)
 	storDBChan <- storDB
-	newCDRSrv := NewCDRServer(cfg, storDBChan, dm, fltrs, connMng)
+	newCDRSrv := NewCDRServer(cfg, dm, fltrs, connMng, storDBChan)
 	ccM := &ccMock{
 		calls: map[string]func(ctx *context.Context, args any, reply any) error{
 			utils.EeSv1ProcessEvent: func(ctx *context.Context, args, reply any) error {
@@ -1319,7 +1320,7 @@ func TestCDRsProcessEventMockAttrsErr(t *testing.T) {
 	var storDB StorDB
 	storDBChan := make(chan StorDB, 1)
 	storDBChan <- storDB
-	newCDRSrv := NewCDRServer(cfg, storDBChan, dm, fltrs, connMng)
+	newCDRSrv := NewCDRServer(cfg, dm, fltrs, connMng, storDBChan)
 	ccM := &ccMock{
 		calls: map[string]func(ctx *context.Context, args any, reply any) error{
 			utils.EeSv1ProcessEvent: func(ctx *context.Context, args, reply any) error {
@@ -1383,7 +1384,7 @@ func TestCDRsProcessEventMockAttrsErrBoolOpts(t *testing.T) {
 	var storDB StorDB
 	storDBChan := make(chan StorDB, 1)
 	storDBChan <- storDB
-	newCDRSrv := NewCDRServer(cfg, storDBChan, dm, fltrs, connMng)
+	newCDRSrv := NewCDRServer(cfg, dm, fltrs, connMng, storDBChan)
 	ccM := &ccMock{
 		calls: map[string]func(ctx *context.Context, args any, reply any) error{
 			utils.EeSv1ProcessEvent: func(ctx *context.Context, args, reply any) error {
@@ -1447,7 +1448,7 @@ func TestCDRsProcessEventMockChrgsErr(t *testing.T) {
 	var storDB StorDB
 	storDBChan := make(chan StorDB, 1)
 	storDBChan <- storDB
-	newCDRSrv := NewCDRServer(cfg, storDBChan, dm, fltrs, connMng)
+	newCDRSrv := NewCDRServer(cfg, dm, fltrs, connMng, storDBChan)
 	ccM := &ccMock{
 		calls: map[string]func(ctx *context.Context, args any, reply any) error{
 			utils.EeSv1ProcessEvent: func(ctx *context.Context, args, reply any) error {
@@ -1512,7 +1513,7 @@ func TestCDRsProcessEventMockChrgsErrBoolOpts(t *testing.T) {
 	var storDB StorDB
 	storDBChan := make(chan StorDB, 1)
 	storDBChan <- storDB
-	newCDRSrv := NewCDRServer(cfg, storDBChan, dm, fltrs, connMng)
+	newCDRSrv := NewCDRServer(cfg, dm, fltrs, connMng, storDBChan)
 	ccM := &ccMock{
 		calls: map[string]func(ctx *context.Context, args any, reply any) error{
 			utils.EeSv1ProcessEvent: func(ctx *context.Context, args, reply any) error {
@@ -1577,7 +1578,7 @@ func TestCDRsProcessEventMockRateSErr(t *testing.T) {
 	var storDB StorDB
 	storDBChan := make(chan StorDB, 1)
 	storDBChan <- storDB
-	newCDRSrv := NewCDRServer(cfg, storDBChan, dm, fltrs, connMng)
+	newCDRSrv := NewCDRServer(cfg, dm, fltrs, connMng, storDBChan)
 	ccM := &ccMock{
 		calls: map[string]func(ctx *context.Context, args any, reply any) error{
 			utils.EeSv1ProcessEvent: func(ctx *context.Context, args, reply any) error {
@@ -1642,7 +1643,7 @@ func TestCDRsProcessEventMockRateSErrBoolOpts(t *testing.T) {
 	var storDB StorDB
 	storDBChan := make(chan StorDB, 1)
 	storDBChan <- storDB
-	newCDRSrv := NewCDRServer(cfg, storDBChan, dm, fltrs, connMng)
+	newCDRSrv := NewCDRServer(cfg, dm, fltrs, connMng, storDBChan)
 	ccM := &ccMock{
 		calls: map[string]func(ctx *context.Context, args any, reply any) error{
 			utils.EeSv1ProcessEvent: func(ctx *context.Context, args, reply any) error {
@@ -1707,7 +1708,7 @@ func TestCDRsProcessEventMockAcntsErr(t *testing.T) {
 	var storDB StorDB
 	storDBChan := make(chan StorDB, 1)
 	storDBChan <- storDB
-	newCDRSrv := NewCDRServer(cfg, storDBChan, dm, fltrs, connMng)
+	newCDRSrv := NewCDRServer(cfg, dm, fltrs, connMng, storDBChan)
 	ccM := &ccMock{
 		calls: map[string]func(ctx *context.Context, args any, reply any) error{
 			utils.EeSv1ProcessEvent: func(ctx *context.Context, args, reply any) error {
@@ -1772,7 +1773,7 @@ func TestCDRsProcessEventMockAcntsErrBoolOpts(t *testing.T) {
 	var storDB StorDB
 	storDBChan := make(chan StorDB, 1)
 	storDBChan <- storDB
-	newCDRSrv := NewCDRServer(cfg, storDBChan, dm, fltrs, connMng)
+	newCDRSrv := NewCDRServer(cfg, dm, fltrs, connMng, storDBChan)
 	ccM := &ccMock{
 		calls: map[string]func(ctx *context.Context, args any, reply any) error{
 			utils.EeSv1ProcessEvent: func(ctx *context.Context, args, reply any) error {
@@ -1838,7 +1839,7 @@ func TestCDRsProcessEventMockExportErr(t *testing.T) {
 	var storDB StorDB
 	storDBChan := make(chan StorDB, 1)
 	storDBChan <- storDB
-	newCDRSrv := NewCDRServer(cfg, storDBChan, dm, fltrs, connMng)
+	newCDRSrv := NewCDRServer(cfg, dm, fltrs, connMng, storDBChan)
 	ccM := &ccMock{
 		calls: map[string]func(ctx *context.Context, args any, reply any) error{
 			utils.EeSv1ProcessEvent: func(ctx *context.Context, args, reply any) error {
@@ -1903,7 +1904,7 @@ func TestCDRsProcessEventMockExportErrBoolOpts(t *testing.T) {
 	var storDB StorDB
 	storDBChan := make(chan StorDB, 1)
 	storDBChan <- storDB
-	newCDRSrv := NewCDRServer(cfg, storDBChan, dm, fltrs, connMng)
+	newCDRSrv := NewCDRServer(cfg, dm, fltrs, connMng, storDBChan)
 	ccM := &ccMock{
 		calls: map[string]func(ctx *context.Context, args any, reply any) error{
 			utils.EeSv1ProcessEvent: func(ctx *context.Context, args, reply any) error {
@@ -1968,7 +1969,7 @@ func TestCDRsProcessEventMockThdsErr(t *testing.T) {
 	var storDB StorDB
 	storDBChan := make(chan StorDB, 1)
 	storDBChan <- storDB
-	newCDRSrv := NewCDRServer(cfg, storDBChan, dm, fltrs, connMng)
+	newCDRSrv := NewCDRServer(cfg, dm, fltrs, connMng, storDBChan)
 	ccM := &ccMock{
 		calls: map[string]func(ctx *context.Context, args any, reply any) error{
 			utils.EeSv1ProcessEvent: func(ctx *context.Context, args, reply any) error {
@@ -2033,7 +2034,7 @@ func TestCDRsProcessEventMockThdsErrBoolOpts(t *testing.T) {
 	var storDB StorDB
 	storDBChan := make(chan StorDB, 1)
 	storDBChan <- storDB
-	newCDRSrv := NewCDRServer(cfg, storDBChan, dm, fltrs, connMng)
+	newCDRSrv := NewCDRServer(cfg, dm, fltrs, connMng, storDBChan)
 	ccM := &ccMock{
 		calls: map[string]func(ctx *context.Context, args any, reply any) error{
 			utils.EeSv1ProcessEvent: func(ctx *context.Context, args, reply any) error {
@@ -2098,7 +2099,7 @@ func TestCDRsProcessEventMockStatsErr(t *testing.T) {
 	var storDB StorDB
 	storDBChan := make(chan StorDB, 1)
 	storDBChan <- storDB
-	newCDRSrv := NewCDRServer(cfg, storDBChan, dm, fltrs, connMng)
+	newCDRSrv := NewCDRServer(cfg, dm, fltrs, connMng, storDBChan)
 	ccM := &ccMock{
 		calls: map[string]func(ctx *context.Context, args any, reply any) error{
 			utils.EeSv1ProcessEvent: func(ctx *context.Context, args, reply any) error {
@@ -2163,7 +2164,7 @@ func TestCDRsProcessEventMockStatsErrGetBoolOpts(t *testing.T) {
 	var storDB StorDB
 	storDBChan := make(chan StorDB, 1)
 	storDBChan <- storDB
-	newCDRSrv := NewCDRServer(cfg, storDBChan, dm, fltrs, connMng)
+	newCDRSrv := NewCDRServer(cfg, dm, fltrs, connMng, storDBChan)
 	ccM := &ccMock{
 		calls: map[string]func(ctx *context.Context, args any, reply any) error{
 			utils.EeSv1ProcessEvent: func(ctx *context.Context, args, reply any) error {
@@ -2223,7 +2224,7 @@ func TestCDRsV1ProcessEventMock(t *testing.T) {
 	var storDB StorDB
 	storDBChan := make(chan StorDB, 1)
 	storDBChan <- storDB
-	newCDRSrv := NewCDRServer(cfg, storDBChan, dm, fltrs, connMng)
+	newCDRSrv := NewCDRServer(cfg, dm, fltrs, connMng, storDBChan)
 	ccM := &ccMock{
 		calls: map[string]func(ctx *context.Context, args any, reply any) error{
 			utils.EeSv1ProcessEvent: func(ctx *context.Context, args, reply any) error {
@@ -2302,7 +2303,7 @@ func TestCDRsV1ProcessEventMockErr(t *testing.T) {
 	var storDB StorDB
 	storDBChan := make(chan StorDB, 1)
 	storDBChan <- storDB
-	newCDRSrv := NewCDRServer(cfg, storDBChan, dm, fltrs, connMng)
+	newCDRSrv := NewCDRServer(cfg, dm, fltrs, connMng, storDBChan)
 	ccM := &ccMock{
 		calls: map[string]func(ctx *context.Context, args any, reply any) error{
 			utils.EeSv1ProcessEvent: func(ctx *context.Context, args, reply any) error {
@@ -2384,7 +2385,7 @@ func TestCDRsV1ProcessEventMockCache(t *testing.T) {
 	var storDB StorDB
 	storDBChan := make(chan StorDB, 1)
 	storDBChan <- storDB
-	newCDRSrv := NewCDRServer(cfg, storDBChan, dm, fltrs, connMng)
+	newCDRSrv := NewCDRServer(cfg, dm, fltrs, connMng, storDBChan)
 	ccM := &ccMock{
 		calls: map[string]func(ctx *context.Context, args any, reply any) error{
 			utils.EeSv1ProcessEvent: func(ctx *context.Context, args, reply any) error {
@@ -2468,7 +2469,7 @@ func TestCDRsV1ProcessEventWithGetMockCache(t *testing.T) {
 	var storDB StorDB
 	storDBChan := make(chan StorDB, 1)
 	storDBChan <- storDB
-	newCDRSrv := NewCDRServer(cfg, storDBChan, dm, fltrs, connMng)
+	newCDRSrv := NewCDRServer(cfg, dm, fltrs, connMng, storDBChan)
 	ccM := &ccMock{
 		calls: map[string]func(ctx *context.Context, args any, reply any) error{
 			utils.EeSv1ProcessEvent: func(ctx *context.Context, args, reply any) error {
@@ -2551,7 +2552,7 @@ func TestCDRsV1ProcessEventWithGetMockCacheErr(t *testing.T) {
 	var storDB StorDB
 	storDBChan := make(chan StorDB, 1)
 	storDBChan <- storDB
-	newCDRSrv := NewCDRServer(cfg, storDBChan, dm, fltrs, connMng)
+	newCDRSrv := NewCDRServer(cfg, dm, fltrs, connMng, storDBChan)
 	ccM := &ccMock{
 		calls: map[string]func(ctx *context.Context, args any, reply any) error{
 			utils.EeSv1ProcessEvent: func(ctx *context.Context, args, reply any) error {
@@ -2617,7 +2618,7 @@ func TestCDRsChrgrSProcessEventEmptyChrgrs(t *testing.T) {
 	var storDB StorDB
 	storDBChan := make(chan StorDB, 1)
 	storDBChan <- storDB
-	newCDRSrv := NewCDRServer(cfg, storDBChan, dm, fltrs, connMng)
+	newCDRSrv := NewCDRServer(cfg, dm, fltrs, connMng, storDBChan)
 	ccM := &ccMock{
 		calls: map[string]func(ctx *context.Context, args any, reply any) error{
 			utils.ChargerSv1ProcessEvent: func(ctx *context.Context, args, reply any) error {
@@ -2673,7 +2674,7 @@ func TestCDRsV1ProcessEventCacheGet(t *testing.T) {
 	var storDB StorDB
 	storDBChan := make(chan StorDB, 1)
 	storDBChan <- storDB
-	newCDRSrv := NewCDRServer(cfg, storDBChan, dm, fltrs, nil)
+	newCDRSrv := NewCDRServer(cfg, dm, fltrs, nil, storDBChan)
 	cgrEv := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "testID",
@@ -2723,7 +2724,7 @@ func TestCDRsV1ProcessEventWithGetCacheGet(t *testing.T) {
 	var storDB StorDB
 	storDBChan := make(chan StorDB, 1)
 	storDBChan <- storDB
-	newCDRSrv := NewCDRServer(cfg, storDBChan, dm, fltrs, nil)
+	newCDRSrv := NewCDRServer(cfg, dm, fltrs, nil, storDBChan)
 	cgrEv := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "testID",
@@ -2775,7 +2776,7 @@ func TestCDRServerAccountSRefundCharges(t *testing.T) {
 	var storDB StorDB
 	storDBChan := make(chan StorDB, 1)
 	storDBChan <- storDB
-	newCDRSrv := NewCDRServer(cfg, storDBChan, dm, fltrs, connMng)
+	newCDRSrv := NewCDRServer(cfg, dm, fltrs, connMng, storDBChan)
 	ccM := &ccMock{
 		calls: map[string]func(ctx *context.Context, args any, reply any) error{
 			utils.AccountSv1RefundCharges: func(ctx *context.Context, args, reply any) error {
@@ -2855,7 +2856,7 @@ func TestCDRServerAccountSRefundChargesErr(t *testing.T) {
 	var storDB StorDB
 	storDBChan := make(chan StorDB, 1)
 	storDBChan <- storDB
-	newCDRSrv := NewCDRServer(cfg, storDBChan, dm, fltrs, connMng)
+	newCDRSrv := NewCDRServer(cfg, dm, fltrs, connMng, storDBChan)
 	ccM := &ccMock{
 		calls: map[string]func(ctx *context.Context, args any, reply any) error{
 			utils.ChargerSv1ProcessEvent: func(ctx *context.Context, args, reply any) error {
@@ -2959,7 +2960,7 @@ func TestCDRsProcessEventMockThdsEcCostIface(t *testing.T) {
 	var storDB StorDB
 	storDBChan := make(chan StorDB, 1)
 	storDBChan <- storDB
-	newCDRSrv := NewCDRServer(cfg, storDBChan, dm, fltrs, connMng)
+	newCDRSrv := NewCDRServer(cfg, dm, fltrs, connMng, storDBChan)
 	ccM := &ccMock{
 		calls: map[string]func(ctx *context.Context, args any, reply any) error{
 
@@ -3022,7 +3023,7 @@ func TestCDRsProcessEventMockThdsEcCostIfaceMarshalErr(t *testing.T) {
 	var storDB StorDB
 	storDBChan := make(chan StorDB, 1)
 	storDBChan <- storDB
-	newCDRSrv := NewCDRServer(cfg, storDBChan, dm, fltrs, connMng)
+	newCDRSrv := NewCDRServer(cfg, dm, fltrs, connMng, storDBChan)
 
 	rpcInternal := make(chan birpc.ClientConnector, 1)
 
@@ -3064,7 +3065,7 @@ func TestCDRsProcessEventMockThdsEcCostIfaceUnmarshalErr(t *testing.T) {
 	var storDB StorDB
 	storDBChan := make(chan StorDB, 1)
 	storDBChan <- storDB
-	newCDRSrv := NewCDRServer(cfg, storDBChan, dm, fltrs, connMng)
+	newCDRSrv := NewCDRServer(cfg, dm, fltrs, connMng, storDBChan)
 
 	rpcInternal := make(chan birpc.ClientConnector, 1)
 
@@ -3110,7 +3111,7 @@ func TestCDRsV1ProcessEventWithGetMockCacheErrResp(t *testing.T) {
 	var storDB StorDB
 	storDBChan := make(chan StorDB, 1)
 	storDBChan <- storDB
-	newCDRSrv := NewCDRServer(cfg, storDBChan, dm, fltrs, nil)
+	newCDRSrv := NewCDRServer(cfg, dm, fltrs, nil, storDBChan)
 
 	cgrEv := &utils.CGREvent{
 		Tenant: "cgrates.org",
@@ -3160,7 +3161,7 @@ func TestCDRServerListenAndServe(t *testing.T) {
 	var storDB StorDB
 	storDBChan := make(chan StorDB, 1)
 	storDBChan <- storDB
-	newCDRSrv := NewCDRServer(cfg, storDBChan, dm, fltrs, connMng)
+	newCDRSrv := NewCDRServer(cfg, dm, fltrs, connMng, storDBChan)
 
 	stopChan := make(chan struct{}, 1)
 

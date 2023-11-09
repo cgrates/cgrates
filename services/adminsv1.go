@@ -32,9 +32,9 @@ import (
 )
 
 // NewAPIerSv1Service returns the APIerSv1 Service
-func NewAdminSv1Service(cfg *config.CGRConfig, dm *DataDBService,
-	filterSChan chan *engine.FilterS,
-	server *cores.Server,
+func NewAdminSv1Service(cfg *config.CGRConfig,
+	dm *DataDBService, storDB *StorDBService,
+	filterSChan chan *engine.FilterS, server *cores.Server,
 	internalAPIerSv1Chan chan birpc.ClientConnector,
 	connMgr *engine.ConnManager, anz *AnalyzerService,
 	srvDep map[string]*sync.WaitGroup) servmanager.Service {
@@ -42,6 +42,7 @@ func NewAdminSv1Service(cfg *config.CGRConfig, dm *DataDBService,
 		connChan:    internalAPIerSv1Chan,
 		cfg:         cfg,
 		dm:          dm,
+		storDB:      storDB,
 		filterSChan: filterSChan,
 		server:      server,
 		connMgr:     connMgr,
@@ -55,6 +56,7 @@ type AdminSv1Service struct {
 	sync.RWMutex
 	cfg         *config.CGRConfig
 	dm          *DataDBService
+	storDB      *StorDBService
 	filterSChan chan *engine.FilterS
 	server      *cores.Server
 	connMgr     *engine.ConnManager
@@ -85,10 +87,14 @@ func (apiService *AdminSv1Service) Start(ctx *context.Context, _ context.CancelF
 		return
 	}
 
+	storDBChan := make(chan engine.StorDB, 1)
+	apiService.stopChan = make(chan struct{})
+	apiService.storDB.RegisterSyncChan(storDBChan)
+
 	apiService.Lock()
 	defer apiService.Unlock()
 
-	apiService.api = apis.NewAdminSv1(apiService.cfg, datadb, apiService.connMgr, filterS)
+	apiService.api = apis.NewAdminSv1(apiService.cfg, datadb, apiService.connMgr, filterS, storDBChan)
 
 	// go apiService.api.ListenAndServe(apiService.stopChan)
 	// runtime.Gosched()

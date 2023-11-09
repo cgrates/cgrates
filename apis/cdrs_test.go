@@ -36,7 +36,7 @@ func TestCDRsProcessEvent(t *testing.T) {
 	var storDB engine.StorDB
 	storDBChan := make(chan engine.StorDB, 1)
 	storDBChan <- storDB
-	cdrS := engine.NewCDRServer(cfg, storDBChan, dm, engine.NewFilterS(cfg, connMgr, dm), connMgr)
+	cdrS := engine.NewCDRServer(cfg, dm, engine.NewFilterS(cfg, connMgr, dm), connMgr, storDBChan)
 	cdr := NewCDRsV1(cdrS)
 	var reply string
 	args := &utils.CGREvent{
@@ -63,7 +63,7 @@ func TestCDRsProcessEventWithGet(t *testing.T) {
 	var storDB engine.StorDB
 	storDBChan := make(chan engine.StorDB, 1)
 	storDBChan <- storDB
-	cdrS := engine.NewCDRServer(cfg, storDBChan, dm, engine.NewFilterS(cfg, connMgr, dm), connMgr)
+	cdrS := engine.NewCDRServer(cfg, dm, engine.NewFilterS(cfg, connMgr, dm), connMgr, storDBChan)
 	cdr := NewCDRsV1(cdrS)
 	var reply []*utils.EventsWithOpts
 	args := &utils.CGREvent{

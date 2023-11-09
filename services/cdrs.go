@@ -95,7 +95,7 @@ func (cdrService *CDRServer) Start(ctx *context.Context, _ context.CancelFunc) (
 	cdrService.Lock()
 	defer cdrService.Unlock()
 
-	cdrService.cdrS = engine.NewCDRServer(cdrService.cfg, storDBChan, datadb, filterS, cdrService.connMgr)
+	cdrService.cdrS = engine.NewCDRServer(cdrService.cfg, datadb, filterS, cdrService.connMgr, storDBChan)
 	go cdrService.cdrS.ListenAndServe(cdrService.stopChan)
 	runtime.Gosched()
 	utils.Logger.Info("Registering CDRS RPC service.")

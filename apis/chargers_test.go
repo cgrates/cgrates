@@ -38,7 +38,10 @@ func TestChargerSSetChargerProfileErrMissingID(t *testing.T) {
 	connMgr := engine.NewConnManager(cfg)
 	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
-	admS := NewAdminSv1(cfg, dm, connMgr, nil)
+	var storDB engine.StorDB
+	storDBChan := make(chan engine.StorDB, 1)
+	storDBChan <- storDB
+	admS := NewAdminSv1(cfg, dm, connMgr, nil, storDBChan)
 	var setRply string
 	ext := &ChargerWithAPIOpts{
 		ChargerProfile: &engine.ChargerProfile{
@@ -72,7 +75,10 @@ func TestChargerSDmSetChargerProfileErr(t *testing.T) {
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
 	newCache := engine.NewCacheS(cfg, dm, connMgr, nil)
 	engine.Cache = newCache
-	admS := NewAdminSv1(cfg, dm, connMgr, nil)
+	var storDB engine.StorDB
+	storDBChan := make(chan engine.StorDB, 1)
+	storDBChan <- storDB
+	admS := NewAdminSv1(cfg, dm, connMgr, nil, storDBChan)
 	var setRply string
 	ext := &ChargerWithAPIOpts{
 		ChargerProfile: &engine.ChargerProfile{
@@ -122,7 +128,10 @@ func TestChargerSSetChargerProfileSetLoadIDsErr(t *testing.T) {
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
 	newCache := engine.NewCacheS(cfg, dm, connMgr, nil)
 	engine.Cache = newCache
-	admS := NewAdminSv1(cfg, dm, connMgr, nil)
+	var storDB engine.StorDB
+	storDBChan := make(chan engine.StorDB, 1)
+	storDBChan <- storDB
+	admS := NewAdminSv1(cfg, dm, connMgr, nil, storDBChan)
 	var setRply string
 	ext := &ChargerWithAPIOpts{
 		ChargerProfile: &engine.ChargerProfile{
@@ -179,7 +188,10 @@ func TestChargerSSetChargerProfileCallCacheErr(t *testing.T) {
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
 	newCache := engine.NewCacheS(cfg, dm, connMgr, nil)
 	engine.Cache = newCache
-	admS := NewAdminSv1(cfg, dm, connMgr, nil)
+	var storDB engine.StorDB
+	storDBChan := make(chan engine.StorDB, 1)
+	storDBChan <- storDB
+	admS := NewAdminSv1(cfg, dm, connMgr, nil, storDBChan)
 	var setRply string
 	ext := &ChargerWithAPIOpts{
 		ChargerProfile: &engine.ChargerProfile{
@@ -213,7 +225,10 @@ func TestChargerSSetGetChargerProfileIDs(t *testing.T) {
 	connMgr := engine.NewConnManager(cfg)
 	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
-	admS := NewAdminSv1(cfg, dm, connMgr, nil)
+	var storDB engine.StorDB
+	storDBChan := make(chan engine.StorDB, 1)
+	storDBChan <- storDB
+	admS := NewAdminSv1(cfg, dm, connMgr, nil, storDBChan)
 	ext := &ChargerWithAPIOpts{
 		ChargerProfile: &engine.ChargerProfile{
 			Tenant:       "cgrates.org",
@@ -298,7 +313,10 @@ func TestChargerSSetGetChargerProfileIDsErr(t *testing.T) {
 		},
 	}
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
-	admS := NewAdminSv1(cfg, dm, connMgr, nil)
+	var storDB engine.StorDB
+	storDBChan := make(chan engine.StorDB, 1)
+	storDBChan <- storDB
+	admS := NewAdminSv1(cfg, dm, connMgr, nil, storDBChan)
 	newCache := engine.NewCacheS(cfg, dm, connMgr, nil)
 	engine.Cache = newCache
 	var getRply []string
@@ -319,7 +337,10 @@ func TestChargerSSetGetChargerProfileIDsErr2(t *testing.T) {
 	connMgr := engine.NewConnManager(cfg)
 	dataDB := &engine.DataDBMock{}
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
-	admS := NewAdminSv1(cfg, dm, connMgr, nil)
+	var storDB engine.StorDB
+	storDBChan := make(chan engine.StorDB, 1)
+	storDBChan <- storDB
+	admS := NewAdminSv1(cfg, dm, connMgr, nil, storDBChan)
 	newCache := engine.NewCacheS(cfg, dm, connMgr, nil)
 	engine.Cache = newCache
 	var getRply []string
@@ -339,7 +360,10 @@ func TestChargerSSetGetRmvGetChargerProfile(t *testing.T) {
 	connMgr := engine.NewConnManager(cfg)
 	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
-	admS := NewAdminSv1(cfg, dm, connMgr, nil)
+	var storDB engine.StorDB
+	storDBChan := make(chan engine.StorDB, 1)
+	storDBChan <- storDB
+	admS := NewAdminSv1(cfg, dm, connMgr, nil, storDBChan)
 	ext := &ChargerWithAPIOpts{
 		ChargerProfile: &engine.ChargerProfile{
 			Tenant:       "cgrates.org",
@@ -429,7 +453,10 @@ func TestChargerSSetGetRmvGetChargerProfileNoTenant(t *testing.T) {
 	connMgr := engine.NewConnManager(cfg)
 	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
-	admS := NewAdminSv1(cfg, dm, connMgr, nil)
+	var storDB engine.StorDB
+	storDBChan := make(chan engine.StorDB, 1)
+	storDBChan <- storDB
+	admS := NewAdminSv1(cfg, dm, connMgr, nil, storDBChan)
 	ext := &ChargerWithAPIOpts{
 		ChargerProfile: &engine.ChargerProfile{
 			ID:           "1001",
@@ -517,7 +544,10 @@ func TestChargerSRmvChargerProfileErr(t *testing.T) {
 	connMgr := engine.NewConnManager(cfg)
 	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
-	admS := NewAdminSv1(cfg, dm, connMgr, nil)
+	var storDB engine.StorDB
+	storDBChan := make(chan engine.StorDB, 1)
+	storDBChan <- storDB
+	admS := NewAdminSv1(cfg, dm, connMgr, nil, storDBChan)
 	var rmvRply string
 	err := admS.RemoveChargerProfile(context.Background(),
 		&utils.TenantIDWithAPIOpts{
@@ -540,7 +570,10 @@ func TestChargerSRmvChargerProfileErrRemoveChargerProfile(t *testing.T) {
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
 	newCache := engine.NewCacheS(cfg, dm, connMgr, nil)
 	engine.Cache = newCache
-	admS := NewAdminSv1(cfg, dm, connMgr, nil)
+	var storDB engine.StorDB
+	storDBChan := make(chan engine.StorDB, 1)
+	storDBChan <- storDB
+	admS := NewAdminSv1(cfg, dm, connMgr, nil, storDBChan)
 	var rmvRply string
 	err := admS.RemoveChargerProfile(context.Background(),
 		&utils.TenantIDWithAPIOpts{
@@ -584,7 +617,10 @@ func TestChargerSRmvChargerProfileErrSetLoadIDs(t *testing.T) {
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
 	newCache := engine.NewCacheS(cfg, dm, connMgr, nil)
 	engine.Cache = newCache
-	admS := NewAdminSv1(cfg, dm, connMgr, nil)
+	var storDB engine.StorDB
+	storDBChan := make(chan engine.StorDB, 1)
+	storDBChan <- storDB
+	admS := NewAdminSv1(cfg, dm, connMgr, nil, storDBChan)
 	var rmvRply string
 	err := admS.RemoveChargerProfile(context.Background(),
 		&utils.TenantIDWithAPIOpts{
@@ -636,7 +672,10 @@ func TestChargerSRmvChargerProfileErrRemoveCallCache(t *testing.T) {
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
 	newCache := engine.NewCacheS(cfg, dm, connMgr, nil)
 	engine.Cache = newCache
-	admS := NewAdminSv1(cfg, dm, connMgr, nil)
+	var storDB engine.StorDB
+	storDBChan := make(chan engine.StorDB, 1)
+	storDBChan <- storDB
+	admS := NewAdminSv1(cfg, dm, connMgr, nil, storDBChan)
 	var rmvRply string
 	err := admS.RemoveChargerProfile(context.Background(),
 		&utils.TenantIDWithAPIOpts{
@@ -658,7 +697,10 @@ func TestChargersGetChargerProfilesOK(t *testing.T) {
 	connMgr := engine.NewConnManager(cfg)
 	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
-	admS := NewAdminSv1(cfg, dm, connMgr, nil)
+	var storDB engine.StorDB
+	storDBChan := make(chan engine.StorDB, 1)
+	storDBChan <- storDB
+	admS := NewAdminSv1(cfg, dm, connMgr, nil, storDBChan)
 	args1 := &ChargerWithAPIOpts{
 		ChargerProfile: &engine.ChargerProfile{
 			Tenant: "cgrates.org",
@@ -763,7 +805,10 @@ func TestChargersGetChargerProfilesGetIDsErr(t *testing.T) {
 	connMgr := engine.NewConnManager(cfg)
 	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
-	admS := NewAdminSv1(cfg, dm, connMgr, nil)
+	var storDB engine.StorDB
+	storDBChan := make(chan engine.StorDB, 1)
+	storDBChan <- storDB
+	admS := NewAdminSv1(cfg, dm, connMgr, nil, storDBChan)
 	args := &ChargerWithAPIOpts{
 		ChargerProfile: &engine.ChargerProfile{
 			Tenant: "cgrates.org",
