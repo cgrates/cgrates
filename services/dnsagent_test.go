@@ -48,7 +48,7 @@ func TestDNSAgentCoverage(t *testing.T) {
 	if srv.IsRunning() {
 		t.Errorf("Expected service to be down")
 	}
-	dns, _ := agents.NewDNSAgent(cfg, &engine.FilterS{}, nil, nil)
+	dns := agents.NewDNSAgent(cfg, &engine.FilterS{}, nil, nil)
 	srv2 := DNSAgent{
 		cfg:         cfg,
 		filterSChan: filterSChan,
@@ -70,8 +70,46 @@ func TestDNSAgentCoverage(t *testing.T) {
 	if shouldRun != false {
 		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", false, shouldRun)
 	}
-	srv2.Shutdown()
+	if err := srv2.Shutdown(); err != nil {
+		t.Error(err)
+	}
 	if srv.IsRunning() {
 		t.Errorf("Expected service to be down")
+	}
+}
+
+func TestDNSAgentReload(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfg.SessionSCfg().Enabled = true
+	cfg.SessionSCfg().ListenBijson = ""
+	filterSChan := make(chan *engine.FilterS, 1)
+	filterSChan <- nil
+	shdChan := utils.NewSyncedChan()
+	chS := engine.NewCacheS(cfg, nil, nil)
+	cacheSrv, err := engine.NewService(chS)
+	if err != nil {
+		t.Error(err)
+	}
+	cacheSChan := make(chan birpc.ClientConnector, 1)
+	cacheSChan <- cacheSrv
+	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
+	srv := NewDNSAgent(cfg, filterSChan, shdChan, nil, nil, srvDep)
+	if srv == nil {
+		t.Errorf("\nExpecting <nil>,\n Received <%+v>", utils.ToJSON(srv))
+	}
+	srv2 := &DNSAgent{
+		RWMutex:     sync.RWMutex{},
+		cfg:         cfg,
+		shdChan:     shdChan,
+		filterSChan: filterSChan,
+		stopChan:    nil,
+		connMgr:     nil,
+		dns:         agents.NewDNSAgent(cfg, &engine.FilterS{}, nil, nil),
+		srvDep:      srvDep,
+	}
+	srv2.stopChan = make(chan struct{}, 1)
+	err3 := srv2.Reload()
+	if err3 != nil {
+		t.Errorf("\nExpecting <nil>,\n Received <%+v>", err3)
 	}
 }

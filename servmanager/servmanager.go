@@ -66,6 +66,18 @@ func (srvMngr *ServiceManager) V1StartService(ctx *context.Context, args ArgStar
 		srvMngr.cfg.SchedulerCfg().Enabled = true
 		srvMngr.Unlock()
 		srvMngr.cfg.GetReloadChan(config.SCHEDULER_JSN) <- struct{}{}
+	case utils.MetaDNS:
+		// stop the service using the config
+		srvMngr.Lock()
+		srvMngr.cfg.DNSAgentCfg().Enabled = true
+		srvMngr.Unlock()
+		srvMngr.cfg.GetReloadChan(config.DNSAgentJson) <- struct{}{}
+	case utils.MetaRadius:
+		// stop the service using the config
+		srvMngr.Lock()
+		srvMngr.cfg.RadiusAgentCfg().Enabled = true
+		srvMngr.Unlock()
+		srvMngr.cfg.GetReloadChan(config.RA_JSN) <- struct{}{}
 	default:
 		err = errors.New(utils.UnsupportedServiceIDCaps)
 	}
@@ -85,6 +97,18 @@ func (srvMngr *ServiceManager) V1StopService(ctx *context.Context, args ArgStart
 		srvMngr.cfg.SchedulerCfg().Enabled = false
 		srvMngr.Unlock()
 		srvMngr.cfg.GetReloadChan(config.SCHEDULER_JSN) <- struct{}{}
+	case utils.MetaDNS:
+		// stop the service using the config
+		srvMngr.Lock()
+		srvMngr.cfg.DNSAgentCfg().Enabled = false
+		srvMngr.Unlock()
+		srvMngr.cfg.GetReloadChan(config.DNSAgentJson) <- struct{}{}
+	case utils.MetaRadius:
+		// stop the service using the config
+		srvMngr.Lock()
+		srvMngr.cfg.RadiusAgentCfg().Enabled = false
+		srvMngr.Unlock()
+		srvMngr.cfg.GetReloadChan(config.RA_JSN) <- struct{}{}
 	default:
 		err = errors.New(utils.UnsupportedServiceIDCaps)
 	}

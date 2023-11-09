@@ -344,8 +344,7 @@ func (sa *SIPAgent) handleMessage(sipMessage sipingo.Message, remoteHost string)
 		if lclProcessed {
 			processed = lclProcessed
 		}
-		if err != nil ||
-			(lclProcessed && !reqProcessor.Flags.GetBool(utils.MetaContinue)) {
+		if lclProcessed && !reqProcessor.Flags.GetBool(utils.MetaContinue) {
 			break
 		}
 	}

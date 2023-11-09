@@ -793,7 +793,7 @@ const CGRATES_CFG_JSON = `
 	"enabled": false,				// enables the DNS agent: <true|false>
 	"listeners":[
 		{
-			"address": "127.0.0.1:53",	// address where to listen for DNS requests <x.y.z.y:1234>
+			"address": "127.0.0.1:2053",	// address where to listen for DNS requests <x.y.z.y:1234>
 			"network": "udp"		// network to listen on <udp|tcp|tcp-tls>
 		}
 	],

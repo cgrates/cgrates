@@ -21,8 +21,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package services
 
 import (
+	"bytes"
+	"log"
 	"path"
 	"runtime"
+	"strings"
 	"sync"
 	"testing"
 	"time"
@@ -44,12 +47,12 @@ func TestDNSAgentStartReloadShut(t *testing.T) {
 	cfg.DNSAgentCfg().Enabled = true
 	cfg.DNSAgentCfg().Listeners = []config.DnsListener{
 		{
-			Network: "udp",
+			Network: "tcp",
 			Address: ":2055",
 		},
 		{
-			Network: "tcp",
-			Address: ":2056",
+			Network: "udp",
+			Address: ":2055",
 		},
 	}
 	utils.Logger, _ = utils.Newlogger(utils.MetaSysLog, cfg.GeneralCfg().NodeID)
@@ -161,6 +164,7 @@ func TestDNSAgentReloadFirst(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Fatalf("Expecting OK ,received %s", reply)
 	}
+	time.Sleep(10 * time.Millisecond)
 	if err := cfg.V1ReloadConfig(context.Background(),
 		&config.ReloadArgs{
 			Path:    path.Join("/usr", "share", "cgrates", "conf", "samples", "dnsagent_reload"),
@@ -172,7 +176,6 @@ func TestDNSAgentReloadFirst(t *testing.T) {
 	}
 	time.Sleep(10 * time.Millisecond)
 	cfg.DNSAgentCfg().Enabled = false
-	time.Sleep(10 * time.Millisecond)
 	cfg.GetReloadChan(config.DNSAgentJson) <- struct{}{}
 	time.Sleep(100 * time.Millisecond)
 	if srv.IsRunning() {
@@ -194,29 +197,30 @@ func TestDNSAgentReload2(t *testing.T) {
 	shdChan := utils.NewSyncedChan()
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
 	srv := NewDNSAgent(cfg, filterSChan, shdChan, nil, nil, srvDep)
-	agentSrv, err := agents.NewDNSAgent(cfg, nil, nil, nil)
-	if err != nil {
-		t.Fatal(err)
-	}
+	agentSrv := agents.NewDNSAgent(cfg, nil, nil, nil)
 	runtime.Gosched()
 	dnsSrv := srv.(*DNSAgent)
 	dnsSrv.dns = agentSrv
 
-	err = dnsSrv.listenAndServe(make(chan struct{}))
+	dnsSrv.stopChan = make(chan struct{}, len(dnsSrv.cfg.DNSAgentCfg().Listeners))
+
+	err := dnsSrv.listenAndServe(dnsSrv.stopChan)
 	if err == nil || err.Error() != "dns: bad network" {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", "dns: bad network", err)
 	}
 }
 
-func TestDNSAgentReload4(t *testing.T) {
+func TestDNSAgentReload3(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.SessionSCfg().Enabled = true
 	cfg.DNSAgentCfg().Enabled = true
 	cfg.DNSAgentCfg().Listeners[0].Network = "tls"
 	cfg.TLSCfg().ServerCerificate = "bad_certificate"
 	cfg.TLSCfg().ServerKey = "bad_key"
-	utils.Logger, _ = utils.Newlogger(utils.MetaSysLog, cfg.GeneralCfg().NodeID)
+	utils.Logger, _ = utils.Newlogger(utils.MetaStdLog, cfg.GeneralCfg().NodeID)
 	utils.Logger.SetLogLevel(7)
+	logBuf := new(bytes.Buffer)
+	log.SetOutput(logBuf)
 	filterSChan := make(chan *engine.FilterS, 1)
 	filterSChan <- nil
 	shdChan := utils.NewSyncedChan()
@@ -227,19 +231,24 @@ func TestDNSAgentReload4(t *testing.T) {
 	dnsSrv := srv.(*DNSAgent)
 	dnsSrv.dns = nil
 
-	err := dnsSrv.Start()
-	if err == nil || err.Error() != "load certificate error <open bad_certificate: no such file or directory>" {
-		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", "load certificate error <open bad_certificate: no such file or directory>", err)
+	if err := dnsSrv.Start(); err != nil {
+		t.Error(err)
 	}
-	dnsSrv.dns = nil
+	time.Sleep(10 * time.Millisecond)
+	exp := "load certificate error <open bad_certificate: no such file or directory>"
+	if !strings.Contains(logBuf.String(), exp) {
+		t.Errorf("Expected: %s, Got: %s", exp, logBuf.String())
+	}
+	logBuf.Reset()
 
 }
 
-func TestDNSAgentReload5(t *testing.T) {
+func TestDNSAgentReload4(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.SessionSCfg().Enabled = true
 	cfg.DNSAgentCfg().Enabled = true
-
+	cfg.DNSAgentCfg().Listeners[0].Network = "udp"
+	cfg.DNSAgentCfg().Listeners[0].Address = ":2053"
 	utils.Logger, _ = utils.Newlogger(utils.MetaSysLog, cfg.GeneralCfg().NodeID)
 	utils.Logger.SetLogLevel(7)
 	filterSChan := make(chan *engine.FilterS, 1)
@@ -259,16 +268,23 @@ func TestDNSAgentReload5(t *testing.T) {
 	if err != nil {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
 	}
+	time.Sleep(10 * time.Millisecond)
+	err = srv.Shutdown()
+	if err != nil {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
+	}
 
 }
 
-func TestDNSAgentReload6(t *testing.T) {
+func TestDNSAgentReload5(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.SessionSCfg().Enabled = true
 	cfg.DNSAgentCfg().Enabled = true
 
-	utils.Logger, _ = utils.Newlogger(utils.MetaSysLog, cfg.GeneralCfg().NodeID)
+	utils.Logger, _ = utils.Newlogger(utils.MetaStdLog, cfg.GeneralCfg().NodeID)
 	utils.Logger.SetLogLevel(7)
+	logBuf := new(bytes.Buffer)
+	log.SetOutput(logBuf)
 	filterSChan := make(chan *engine.FilterS, 1)
 	filterSChan <- nil
 	shdChan := utils.NewSyncedChan()
@@ -289,9 +305,14 @@ func TestDNSAgentReload6(t *testing.T) {
 	cfg.DNSAgentCfg().Listeners[0].Network = "tls"
 	cfg.TLSCfg().ServerCerificate = "bad_certificate"
 	cfg.TLSCfg().ServerKey = "bad_key"
-	err = srv.Reload()
-	if err == nil || err.Error() != "load certificate error <open bad_certificate: no such file or directory>" {
-		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", "load certificate error <open bad_certificate: no such file or directory>", err)
+	if err = srv.Reload(); err != nil {
+		t.Error(err)
 	}
+	time.Sleep(10 * time.Millisecond)
+	exp := "load certificate error <open bad_certificate: no such file or directory>"
+	if !strings.Contains(logBuf.String(), exp) {
+		t.Errorf("Expected: %s, \nGot: %s", exp, logBuf.String())
+	}
+	logBuf.Reset()
 
 }

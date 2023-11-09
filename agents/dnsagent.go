@@ -33,14 +33,13 @@ import (
 
 // NewDNSAgent is the constructor for DNSAgent
 func NewDNSAgent(cgrCfg *config.CGRConfig, fltrS *engine.FilterS,
-	connMgr *engine.ConnManager, caps *engine.Caps) (da *DNSAgent, err error) {
+	connMgr *engine.ConnManager, caps *engine.Caps) (da *DNSAgent) {
 	da = &DNSAgent{
 		cgrCfg:  cgrCfg,
 		fltrS:   fltrS,
 		connMgr: connMgr,
 		caps:    caps,
 	}
-	err = da.initDNSServer()
 	return
 }
 
@@ -54,86 +53,106 @@ type DNSAgent struct {
 	servers []*dns.Server
 }
 
-// initDNSServer instantiates the DNS server
-func (da *DNSAgent) initDNSServer() (_ error) {
-	da.servers = make([]*dns.Server, 0, len(da.cgrCfg.DNSAgentCfg().Listeners))
-	for i := range da.cgrCfg.DNSAgentCfg().Listeners {
-		da.servers = append(da.servers, &dns.Server{
-			Addr: da.cgrCfg.DNSAgentCfg().Listeners[i].Address,
-			Net:  da.cgrCfg.DNSAgentCfg().Listeners[i].Network,
-			Handler: dns.HandlerFunc(func(w dns.ResponseWriter, m *dns.Msg) {
-				go da.handleMessage(w, m)
-			}),
-		})
-		if strings.HasSuffix(da.cgrCfg.DNSAgentCfg().Listeners[i].Network, utils.TLSNoCaps) {
-			cert, err := tls.LoadX509KeyPair(da.cgrCfg.TLSCfg().ServerCerificate, da.cgrCfg.TLSCfg().ServerKey)
-			if err != nil {
-				return fmt.Errorf("load certificate error <%v>", err)
-			}
-			da.servers[i].Net = "tcp-tls"
-			da.servers[i].TLSConfig = &tls.Config{
-				Certificates: []tls.Certificate{cert},
+type DNSListener struct {
+	server  *dns.Server // server holds the DNS server configuration.
+	errChan chan error  // used to communicate errors encountered during DNS listenAndServe
+}
+
+// listenAndServe will open a DNS Listener using the configured DNSListener server
+func (dal *DNSListener) listenAndServe() {
+	utils.Logger.Info(fmt.Sprintf("<%s> start listening on <%s:%s>",
+		utils.DNSAgent, dal.server.Net, dal.server.Addr))
+	if err := dal.server.ListenAndServe(); err != nil {
+		dal.errChan <- err
+		return
+	}
+}
+
+// ShutdownListeners shuts down all listeners in servers slice
+func (da *DNSAgent) ShutdownListeners() (err error) {
+	da.RLock()
+	defer da.RUnlock()
+	for _, server := range da.servers {
+		utils.Logger.Info(fmt.Sprintf("<%s> Shutting down <%s:%s>",
+			utils.DNSAgent, server.Net, server.Addr))
+		ctx, cancel := context.WithTimeout(context.Background(), da.cgrCfg.CoreSCfg().ShutdownTimeout) // pass timeout context from configs to server.ShutdownContext
+		defer cancel()
+		if shErr := server.ShutdownContext(ctx); shErr != nil {
+			if shErr.Error() != "dns: server not started" { // ignore error if server is not started
+				err = shErr
 			}
 		}
 	}
 	return
 }
 
-// ListenAndServe will run the DNS handler doing also the connection to listen address
-func (da *DNSAgent) ListenAndServe(stopChan chan struct{}) error {
-	errChan := make(chan error)
-	for _, server := range da.servers {
-		utils.Logger.Info(fmt.Sprintf("<%s> start listening on <%s:%s>",
-			utils.DNSAgent, server.Net, server.Addr))
-		go func(srv *dns.Server) {
-			err := srv.ListenAndServe()
-			if err != nil {
-				utils.Logger.Warning(fmt.Sprintf("<%s> error <%v>, on ListenAndServe <%s:%s>",
-					utils.DNSAgent, err, srv.Net, srv.Addr))
-				if strings.Contains(err.Error(), "address already in use") {
-					return
-				}
-				errChan <- err
-			}
-		}(server)
+// configureTLS provides TLS certificates to the DNS server
+func configureTLS(server *dns.Server, certificateFile, keyFile string) error {
+	cert, err := tls.LoadX509KeyPair(certificateFile, keyFile)
+	if err != nil {
+		return fmt.Errorf("load certificate error <%v>", err)
 	}
-
-	select {
-	case <-stopChan:
-		return da.Shutdown()
-	case err := <-errChan:
-		if shtdErr := da.Shutdown(); shtdErr != nil {
-			return shtdErr
-		}
-		return err
+	server.Net = "tcp-tls"
+	server.TLSConfig = &tls.Config{
+		Certificates: []tls.Certificate{cert},
 	}
-
+	return nil
 }
 
-// Reload will reinitialize the server
-// this is in order to monitor if we receive error on ListenAndServe
-func (da *DNSAgent) Reload() (err error) {
-	return da.initDNSServer()
+// ListenAndServe will create dns server configs, run the DNS handler, and start listeners from the servers created
+func (da *DNSAgent) ListenAndServe(stopChan chan struct{}) (err error) {
+	errChan := make(chan error, 1) // errors coming dnsAL.listenAndServe()
+	da.servers = make([]*dns.Server, 0, len(da.cgrCfg.DNSAgentCfg().Listeners))
+	// populate servers
+	for i := range da.cgrCfg.DNSAgentCfg().Listeners {
+		da.servers = append(da.servers, &dns.Server{
+			Addr: da.cgrCfg.DNSAgentCfg().Listeners[i].Address,
+			Net:  da.cgrCfg.DNSAgentCfg().Listeners[i].Network,
+			Handler: dns.HandlerFunc(func(w dns.ResponseWriter, m *dns.Msg) {
+				go handleMessage(w, m, da.cgrCfg, da.fltrS, da.connMgr, da.caps)
+			}),
+		})
+		if strings.HasSuffix(da.cgrCfg.DNSAgentCfg().Listeners[i].Network, utils.TLSNoCaps) {
+			if err := configureTLS(da.servers[i], da.cgrCfg.TLSCfg().ServerCerificate,
+				da.cgrCfg.TLSCfg().ServerKey); err != nil {
+				return err
+			}
+		}
+	}
+	for _, server := range da.servers { // populate DNSListeners and start listenAndServe
+		dnsAL := DNSListener{
+			server:  server,
+			errChan: errChan,
+		}
+		go dnsAL.listenAndServe()
+	}
+	select {
+	case err := <-errChan: // if error, shutdown engine
+		return err
+	case <-stopChan: // wait signal from service shutdown to close this function
+		return nil
+	}
 }
 
 // handleMessage is the entry point of all DNS requests
 // requests are reaching here asynchronously
-func (da *DNSAgent) handleMessage(w dns.ResponseWriter, req *dns.Msg) {
-	if da.caps.IsLimited() {
-		if err := da.caps.Allocate(); err != nil {
+func handleMessage(w dns.ResponseWriter, req *dns.Msg, cfg *config.CGRConfig,
+	fltrS *engine.FilterS, connMgr *engine.ConnManager, caps *engine.Caps) {
+	if caps.IsLimited() {
+		if err := caps.Allocate(); err != nil {
 			rply := newDnsReply(req)
 			rply.Rcode = dns.RcodeRefused
 			dnsWriteMsg(w, rply)
 			return
 		}
-		defer da.caps.Deallocate()
+		defer caps.Deallocate()
 	}
 	dnsDP := newDnsDP(req)
 
 	rply := newDnsReply(req)
 	rmtAddr := w.RemoteAddr().String()
 	for _, q := range req.Question {
-		if processed, err := da.handleQuestion(dnsDP, rply, &q, rmtAddr); err != nil ||
+		if processed, err := handleQuestion(dnsDP, rply, &q, rmtAddr, cfg, fltrS, connMgr); err != nil ||
 			!processed {
 			rply := newDnsReply(req)
 			rply.Rcode = dns.RcodeServerFailure
@@ -149,26 +168,10 @@ func (da *DNSAgent) handleMessage(w dns.ResponseWriter, req *dns.Msg) {
 	}
 }
 
-// Shutdown stops the DNS server
-func (da *DNSAgent) Shutdown() error {
-	var err error
-	for _, server := range da.servers {
-		shtdErr := server.Shutdown()
-		if shtdErr == nil {
-			continue
-		}
-		utils.Logger.Warning(fmt.Sprintf("<%s> error <%v>, on Shutdown <%s:%s>",
-			utils.DNSAgent, shtdErr, server.Net, server.Addr))
-		if shtdErr.Error() != "dns: server not started" {
-			err = shtdErr
-		}
-	}
-	return err
-}
-
 // handleMessage is the entry point of all DNS requests
 // requests are reaching here asynchronously
-func (da *DNSAgent) handleQuestion(dnsDP utils.DataProvider, rply *dns.Msg, q *dns.Question, rmtAddr string) (processed bool, err error) {
+func handleQuestion(dnsDP utils.DataProvider, rply *dns.Msg, q *dns.Question, rmtAddr string,
+	cfg *config.CGRConfig, fltrS *engine.FilterS, connMgr *engine.ConnManager) (processed bool, err error) {
 	reqVars := &utils.DataNode{
 		Type: utils.NMMapType,
 		Map: map[string]*utils.DataNode{
@@ -181,7 +184,7 @@ func (da *DNSAgent) handleQuestion(dnsDP utils.DataProvider, rply *dns.Msg, q *d
 	cgrRplyNM := &utils.DataNode{Type: utils.NMMapType, Map: make(map[string]*utils.DataNode)}
 	rplyNM := utils.NewOrderedNavigableMap() // share it among different processors
 	opts := utils.MapStorage{}
-	for _, reqProcessor := range da.cgrCfg.DNSAgentCfg().RequestProcessors {
+	for _, reqProcessor := range cfg.DNSAgentCfg().RequestProcessors {
 		var lclProcessed bool
 		if lclProcessed, err = processRequest(
 			context.TODO(),
@@ -189,15 +192,15 @@ func (da *DNSAgent) handleQuestion(dnsDP utils.DataProvider, rply *dns.Msg, q *d
 			NewAgentRequest(
 				dnsDP, reqVars, cgrRplyNM, rplyNM,
 				opts, reqProcessor.Tenant,
-				da.cgrCfg.GeneralCfg().DefaultTenant,
+				cfg.GeneralCfg().DefaultTenant,
 				utils.FirstNonEmpty(
-					da.cgrCfg.DNSAgentCfg().Timezone,
-					da.cgrCfg.GeneralCfg().DefaultTimezone,
+					cfg.DNSAgentCfg().Timezone,
+					cfg.GeneralCfg().DefaultTimezone,
 				),
-				da.fltrS, nil),
-			utils.DNSAgent, da.connMgr,
-			da.cgrCfg.DNSAgentCfg().SessionSConns,
-			da.fltrS); err != nil {
+				fltrS, nil),
+			utils.DNSAgent, connMgr,
+			cfg.DNSAgentCfg().SessionSConns,
+			fltrS); err != nil {
 			utils.Logger.Warning(
 				fmt.Sprintf("<%s> error: %s processing message: %s from %s",
 					utils.DNSAgent, err.Error(), dnsDP, rmtAddr))

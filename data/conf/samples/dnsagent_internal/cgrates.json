@@ -84,7 +84,8 @@
 		{
 			"address":":2054",
 			"network":"tcp-tls"
-		}
+		},
+	
     ],
 	"sessions_conns": ["*localhost"]
 },

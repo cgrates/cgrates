@@ -755,15 +755,18 @@
 
 
 // "dns_agent": {
-// 	"enabled": false,				// enables the DNS agent: <true|false>
-// 	"listeners":[
-// 		{
-// 			"address": "127.0.0.1:53",	// address where to listen for DNS requests <x.y.z.y:1234>
-// 			"network": "udp"		// network to listen on <udp|tcp|tcp-tls>
-// 		}
-// 	],
+// 	"enabled": false,									// enables the DNS agent: <true|false>
+//  "listeners":[
+//     {
+//         "address": "127.0.0.1:2053",					// address where to listen for DNS requests <x.y.z.y:1234>
+//         "network": "udp"								// network to listen on <udp|tcp|tcp-tls>
+//     }
+//  ],
 // 	"sessions_conns": ["*internal"],
-// 	"timezone": "",					// timezone of the events if not specified  <UTC|Local|$IANA_TZ_DB>
+// 	"timezone": "",									    // timezone of the events if not specified  <UTC|Local|$IANA_TZ_DB>
+// 	"request_processors": [],							// request processors to be applied to DNS messages
+// 	"sessions_conns": ["*internal"],
+// 	"timezone": "",					    // timezone of the events if not specified  <UTC|Local|$IANA_TZ_DB>
 // 	"request_processors": []			// request processors to be applied to DNS messages
 // },
 

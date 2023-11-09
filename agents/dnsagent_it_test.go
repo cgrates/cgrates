@@ -145,23 +145,24 @@ func testDNSitClntConn(t *testing.T) {
 	c.TLSConfig = &tls.Config{}
 	var err error
 	dnsClnt = &dnsConns{}
+	c.Net = dnsCfg.DNSAgentCfg().Listeners[0].Network
 	if dnsClnt.UDP, err = c.Dial(dnsCfg.DNSAgentCfg().Listeners[0].Address); err != nil { // just testing the connection, not saving it
 		t.Fatal(err)
 	} else if dnsClnt.UDP == nil {
 		t.Fatalf("conn is nil")
 	}
 
-	c.Net = dnsCfg.DNSAgentCfg().Listeners[0].Network
+	c.Net = dnsCfg.DNSAgentCfg().Listeners[1].Network
 
-	if dnsClnt.TCP, err = c.Dial(dnsCfg.DNSAgentCfg().Listeners[0].Address); err != nil { // tcp has the same address as udp in this case so we can use the same here
+	if dnsClnt.TCP, err = c.Dial(dnsCfg.DNSAgentCfg().Listeners[1].Address); err != nil { // tcp has the same address as udp in this case so we can use the same here
 		t.Fatal(err)
 	} else if dnsClnt.TCP == nil {
 		t.Fatalf("conn is nil")
 	}
 
-	c.Net = dnsCfg.DNSAgentCfg().Listeners[1].Network
+	c.Net = dnsCfg.DNSAgentCfg().Listeners[2].Network
 	c.TLSConfig.InsecureSkipVerify = true
-	if dnsClnt.TCPTLS, err = c.Dial(dnsCfg.DNSAgentCfg().Listeners[1].Address); err != nil { // tcp and tcp-tls cannot be on the same address, otherwise tcp-tls and udp is allowed
+	if dnsClnt.TCPTLS, err = c.Dial(dnsCfg.DNSAgentCfg().Listeners[2].Address); err != nil { // tcp and tcp-tls cannot be on the same address, otherwise tcp-tls and udp is allowed
 		t.Fatal(err)
 	} else if dnsClnt.TCPTLS == nil {
 		t.Fatalf("conn is nil")
