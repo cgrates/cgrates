@@ -201,6 +201,7 @@ type CdrsJsonCfg struct {
 type ERsJsonCfg struct {
 	Enabled           *bool
 	Sessions_conns    *[]string
+	Ees_conns         *[]string
 	Readers           *[]*EventReaderJsonCfg
 	Partial_cache_ttl *string
 }

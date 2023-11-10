@@ -2005,6 +2005,7 @@ func TestDfEventReaderCfg(t *testing.T) {
 	eCfg := &ERsJsonCfg{
 		Enabled:        utils.BoolPointer(false),
 		Sessions_conns: &[]string{utils.MetaInternal},
+		Ees_conns:      &[]string{utils.MetaInternal},
 		Readers: &[]*EventReaderJsonCfg{
 			{
 				Id:                     utils.StringPointer(utils.MetaDefault),
