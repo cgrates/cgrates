@@ -26,6 +26,7 @@ import (
 
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/internal/testutil"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -81,7 +82,7 @@ func TestBalanceBlocker(t *testing.T) {
 
 }`
 
-	client, _, shutdown, err := setupTest(t, "TestBalanceBlocker", utils.EmptyString, utils.EmptyString, content, map[string]string{
+	tpFiles := map[string]string{
 		utils.AccountActionsCsv: `#Tenant,Account,ActionPlanId,ActionTriggersId,AllowNegative,Disabled
 cgrates.org,1001,PACKAGE_1001,,,`,
 		utils.ActionPlansCsv: `#Id,ActionsId,TimingId,Weight
@@ -96,10 +97,17 @@ RT_ANY,0,0.6,60s,1s,0s`,
 RP_ANY,DR_ANY,*any,10`,
 		utils.RatingProfilesCsv: `#Tenant,Category,Subject,ActivationTime,RatingPlanId,RatesFallbackSubject
 cgrates.org,call,1001,2014-01-14T00:00:00Z,RP_ANY,`,
-	})
+	}
 
+	testEnv := testutil.TestEnvironment{
+		Name:       "TestBalanceBlocker",
+		Encoding:   *encoding,
+		ConfigJSON: content,
+		TpFiles:    tpFiles,
+	}
+	client, _, shutdown, err := testEnv.Setup(t, *waitRater)
 	if err != nil {
-		t.Fatalf("failed to do setup for test: %v", err)
+		t.Fatal(err)
 	}
 
 	defer shutdown()

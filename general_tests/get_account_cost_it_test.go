@@ -29,15 +29,20 @@ import (
 	"github.com/cgrates/birpc"
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/internal/testutil"
 	"github.com/cgrates/cgrates/utils"
 )
 
 var aSummaryBefore *engine.AccountSummary
 
 func TestGetAccountCost(t *testing.T) {
-	cfgPath := path.Join(*dataDir, "conf", "samples", "rerate_cdrs_mysql")
-	tpPath := path.Join(*dataDir, "tariffplans", "reratecdrs")
-	client, _, shutdown, err := setupTest(t, "TestRerateCDRs", cfgPath, tpPath, utils.EmptyString, nil)
+	testEnv := testutil.TestEnvironment{
+		Name:       "TestGetAccountCost",
+		Encoding:   *encoding,
+		ConfigPath: path.Join(*dataDir, "conf", "samples", "rerate_cdrs_mysql"),
+		TpPath:     path.Join(*dataDir, "tariffplans", "reratecdrs"),
+	}
+	client, _, shutdown, err := testEnv.Setup(t, *waitRater)
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -29,6 +29,7 @@ import (
 
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/internal/testutil"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -46,9 +47,13 @@ func TestRerateCDRs(t *testing.T) {
 	default:
 		t.Fatal("Unknown Database type")
 	}
-	cfgPath := path.Join(*dataDir, "conf", "samples", cfgDir)
-	tpPath := path.Join(*dataDir, "tariffplans", "reratecdrs")
-	client, _, shutdown, err := setupTest(t, "TestRerateCDRs", cfgPath, tpPath, utils.EmptyString, nil)
+	testEnv := testutil.TestEnvironment{
+		Name:       "TestRerateCDRs",
+		Encoding:   *encoding,
+		ConfigPath: path.Join(*dataDir, "conf", "samples", cfgDir),
+		TpPath:     path.Join(*dataDir, "tariffplans", "reratecdrs"),
+	}
+	client, _, shutdown, err := testEnv.Setup(t, *waitRater)
 	if err != nil {
 		t.Fatal(err)
 	}
