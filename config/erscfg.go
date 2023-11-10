@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package config
 
 import (
+	"slices"
 	"time"
 
 	"github.com/cgrates/cgrates/utils"
@@ -28,6 +29,7 @@ import (
 type ERsCfg struct {
 	Enabled         bool
 	SessionSConns   []string
+	EEsConns        []string
 	Readers         []*EventReaderCfg
 	PartialCacheTTL time.Duration
 }
@@ -40,12 +42,26 @@ func (erS *ERsCfg) loadFromJSONCfg(jsnCfg *ERsJsonCfg, msgTemplates map[string][
 		erS.Enabled = *jsnCfg.Enabled
 	}
 	if jsnCfg.Sessions_conns != nil {
-		erS.SessionSConns = make([]string, len(*jsnCfg.Sessions_conns))
-		for i, fID := range *jsnCfg.Sessions_conns {
+		erS.SessionSConns = make([]string, 0, len(*jsnCfg.Sessions_conns))
+		for _, fID := range *jsnCfg.Sessions_conns {
+
 			// if we have the connection internal we change the name so we can have internal rpc for each subsystem
-			erS.SessionSConns[i] = fID
-			if fID == utils.MetaInternal {
-				erS.SessionSConns[i] = utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS)
+			if fID != utils.MetaInternal {
+				erS.SessionSConns = append(erS.SessionSConns, fID)
+			} else {
+				erS.SessionSConns = append(erS.SessionSConns, utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS))
+			}
+		}
+	}
+	if jsnCfg.Ees_conns != nil {
+		erS.EEsConns = make([]string, 0, len(*jsnCfg.Ees_conns))
+		for _, fID := range *jsnCfg.Ees_conns {
+
+			// if we have the connection internal we change the name so we can have internal rpc for each subsystem
+			if fID != utils.MetaInternal {
+				erS.EEsConns = append(erS.EEsConns, fID)
+			} else {
+				erS.EEsConns = append(erS.EEsConns, utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEEs))
 			}
 		}
 	}
@@ -93,13 +109,11 @@ func (erS *ERsCfg) appendERsReaders(jsnReaders *[]*EventReaderJsonCfg, msgTempla
 func (erS *ERsCfg) Clone() (cln *ERsCfg) {
 	cln = &ERsCfg{
 		Enabled:         erS.Enabled,
-		SessionSConns:   make([]string, len(erS.SessionSConns)),
+		SessionSConns:   slices.Clone(erS.SessionSConns),
+		EEsConns:        slices.Clone(erS.EEsConns),
 		Readers:         make([]*EventReaderCfg, len(erS.Readers)),
 		PartialCacheTTL: erS.PartialCacheTTL,
 	}
-
-	copy(cln.SessionSConns, erS.SessionSConns)
-
 	for idx, rdr := range erS.Readers {
 		cln.Readers[idx] = rdr.Clone()
 	}
@@ -116,19 +130,31 @@ func (erS *ERsCfg) AsMapInterface(separator string) (initialMP map[string]any) {
 		initialMP[utils.PartialCacheTTLCfg] = erS.PartialCacheTTL.String()
 	}
 	if erS.SessionSConns != nil {
-		sessionSConns := make([]string, len(erS.SessionSConns))
-		for i, item := range erS.SessionSConns {
-			sessionSConns[i] = item
+		sessionSConns := make([]string, 0, len(erS.SessionSConns))
+		for _, item := range erS.SessionSConns {
 			if item == utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS) {
-				sessionSConns[i] = utils.MetaInternal
+				sessionSConns = append(sessionSConns, utils.MetaInternal)
+			} else {
+				sessionSConns = append(sessionSConns, item)
 			}
 		}
 		initialMP[utils.SessionSConnsCfg] = sessionSConns
 	}
+	if erS.EEsConns != nil {
+		eesConns := make([]string, 0, len(erS.EEsConns))
+		for _, item := range erS.EEsConns {
+			if item == utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEEs) {
+				eesConns = append(eesConns, utils.MetaInternal)
+			} else {
+				eesConns = append(eesConns, item)
+			}
+		}
+		initialMP[utils.EEsConnsCfg] = eesConns
+	}
 	if erS.Readers != nil {
-		readers := make([]map[string]any, len(erS.Readers))
-		for i, item := range erS.Readers {
-			readers[i] = item.AsMapInterface(separator)
+		readers := make([]map[string]any, 0, len(erS.Readers))
+		for _, item := range erS.Readers {
+			readers = append(readers, item.AsMapInterface(separator))
 		}
 		initialMP[utils.ReadersCfg] = readers
 	}

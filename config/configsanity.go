@@ -694,6 +694,14 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 				return fmt.Errorf("<%s> connection with id: <%s> not defined", utils.ERs, connID)
 			}
 		}
+		for _, connID := range cfg.ersCfg.EEsConns {
+			if strings.HasPrefix(connID, utils.MetaInternal) && !cfg.eesCfg.Enabled {
+				return fmt.Errorf("<%s> not enabled but requested by <%s> component", utils.EEs, utils.ERs)
+			}
+			if _, has := cfg.rpcConns[connID]; !has && !strings.HasPrefix(connID, utils.MetaInternal) {
+				return fmt.Errorf("<%s> connection with id: <%s> not defined", utils.ERs, connID)
+			}
+		}
 		for _, rdr := range cfg.ersCfg.Readers {
 			if !possibleReaderTypes.Has(rdr.Type) {
 				return fmt.Errorf("<%s> unsupported data type: %s for reader with ID: %s", utils.ERs, rdr.Type, rdr.ID)
