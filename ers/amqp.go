@@ -36,9 +36,10 @@ import (
 
 // AMQPER implements EventReader interface for AMQP messaging.
 type AMQPER struct {
-	cgrCfg *config.CGRConfig
-	cfgIdx int // index of current config instance within ERsCfg.Readers
-	fltrS  *engine.FilterS
+	connMgr *engine.ConnManager
+	cgrCfg  *config.CGRConfig
+	cfgIdx  int // index of current config instance within ERsCfg.Readers
+	fltrS   *engine.FilterS
 
 	eventChan     chan *erEvent // channel to dispatch the events created
 	partialEvChan chan *erEvent // channel to dispatch the partial events created
@@ -70,13 +71,13 @@ type amqpClient struct {
 }
 
 // NewAMQPER returns a new AMQP EventReader with the provided configurations.
-func NewAMQPER(cfg *config.CGRConfig, cfgIdx int,
-	eventChan, partialEvChan chan *erEvent, errChan chan error,
-	fltrS *engine.FilterS, exitChan chan struct{}) (EventReader, error) {
+func NewAMQPER(cfg *config.CGRConfig, cfgIdx int, eventChan, partialEvChan chan *erEvent, errChan chan error,
+	fltrS *engine.FilterS, connMgr *engine.ConnManager, exitChan chan struct{}) (EventReader, error) {
 	rdr := &AMQPER{
 		cgrCfg:        cfg,
 		cfgIdx:        cfgIdx,
 		fltrS:         fltrS,
+		connMgr:       connMgr,
 		eventChan:     eventChan,
 		partialEvChan: partialEvChan,
 		errChan:       errChan,
@@ -129,15 +130,9 @@ func (rdr *AMQPER) createPoster() {
 	rdr.poster = ees.NewAMQPee(eeCfg, nil)
 }
 
-func (rdr *AMQPER) processMessage(msg []byte) error {
-	var decodedMessage map[string]any
-	err := json.Unmarshal(msg, &decodedMessage)
-	if err != nil {
-		return err
-	}
-
+func (rdr *AMQPER) processMessage(msg map[string]any) error {
 	agReq := agents.NewAgentRequest(
-		utils.MapStorage(decodedMessage), nil,
+		utils.MapStorage(msg), nil,
 		nil, nil, nil, rdr.Config().Tenant,
 		rdr.cgrCfg.GeneralCfg().DefaultTenant,
 		utils.FirstNonEmpty(rdr.Config().Timezone,
@@ -276,35 +271,62 @@ func (rdr *AMQPER) monitorAndProcess(deliveries <-chan amqp.Delivery, chClosedCh
 
 // handleDelivery processes a single message delivery.
 func (rdr *AMQPER) handleDelivery(dlv amqp.Delivery) {
-	err := rdr.processMessage(dlv.Body)
-	if err != nil {
-		utils.Logger.Warning(fmt.Sprintf(
-			"<%s> Reader %s, processing message %s error: %v",
-			utils.ERs, rdr.Config().ID, dlv.MessageId, err))
 
-		err = dlv.Reject(false)
+	// Ensure the delivery is acknowledged accordingly before exiting
+	// the goroutine.
+	var shouldReject bool
+	defer func() {
+		var err error
+		if !shouldReject {
+			err = dlv.Ack(false)
+		} else {
+			err = dlv.Reject(false)
+		}
 		if err != nil {
 			utils.Logger.Warning(fmt.Sprintf(
-				"<%s> Reader %s, error negatively acknowledging message %s: %v",
-				utils.ERs, rdr.Config().ID, dlv.MessageId, err))
+				"<%s> Reader %s, error acknowledging delivery %d: %v",
+				utils.ERs, rdr.Config().ID, dlv.DeliveryTag, err))
 		}
+	}()
+
+	// Unmarshal the delivery bytes into a map[string]any before going into
+	// the processMessage function, since it will be required later when
+	// exporting. Any error returned by unmarshal makes exporting impossible
+	// so we can return early.
+	var decodedMessage map[string]any
+	if err := json.Unmarshal(dlv.Body, &decodedMessage); err != nil {
+		utils.Logger.Warning(fmt.Sprintf(
+			"<%s> Reader %s, unmarshalling message %v failed: %v",
+			utils.ERs, rdr.Config().ID, dlv.DeliveryTag, err))
+		shouldReject = true
 		return
 	}
 
-	if rdr.poster != nil {
-		err = ees.ExportWithAttempts(rdr.poster, dlv.Body, utils.EmptyString)
-		if err != nil {
-			utils.Logger.Warning(fmt.Sprintf(
-				"<%s> Reader %s, writing message %s error: %v",
-				utils.ERs, rdr.Config().ID, dlv.MessageId, err))
-
-		}
-	}
-	err = dlv.Ack(false)
+	exporterID := rdr.Config().ProcessedPath
+	err := rdr.processMessage(decodedMessage)
 	if err != nil {
 		utils.Logger.Warning(fmt.Sprintf(
-			"<%s> Reader %s, error acknowledging message %s: %v",
-			utils.ERs, rdr.Config().ID, dlv.MessageId, err))
+			"<%s> Reader %s, processing message %v failed: %v",
+			utils.ERs, rdr.Config().ID, dlv.DeliveryTag, err))
+
+		exporterID = rdr.Config().FailedExporterID
+		shouldReject = true
+	}
+
+	if exporterID != utils.EmptyString && len(rdr.cgrCfg.ERsCfg().EEsConns) != 0 {
+		var reply map[string]map[string]any
+		err := rdr.connMgr.Call(context.TODO(), rdr.cgrCfg.ERsCfg().EEsConns,
+			utils.EeSv1ProcessEvent, &engine.CGREventWithEeIDs{
+				EeIDs: []string{exporterID},
+				CGREvent: &utils.CGREvent{
+					Tenant: rdr.cgrCfg.GeneralCfg().DefaultTenant,
+					Event:  decodedMessage,
+				}}, &reply)
+		if err != nil {
+			utils.Logger.Warning(fmt.Sprintf(
+				"<%s> Reader %s, exporting message %v failed: %v",
+				utils.ERs, rdr.Config().ID, dlv.MessageId, err))
+		}
 	}
 }
 

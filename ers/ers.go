@@ -165,7 +165,7 @@ func (erS *ERService) addReader(rdrID string, cfgIdx int) (err error) {
 	var rdr EventReader
 	if rdr, err = NewEventReader(erS.cfg, cfgIdx,
 		erS.rdrEvents, erS.partialEvents, erS.rdrErr,
-		erS.filterS, erS.stopLsn[rdrID]); err != nil {
+		erS.filterS, erS.connMgr, erS.stopLsn[rdrID]); err != nil {
 		return
 	}
 	erS.rdrs[rdrID] = rdr
