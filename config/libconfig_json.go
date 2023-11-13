@@ -287,6 +287,7 @@ type EventReaderJsonCfg struct {
 	Flags                  *[]string
 	Reconnects             *int
 	Max_reconnect_interval *string
+	Failed_exporter_id     *string
 	Opts                   *EventReaderOptsJson
 	Fields                 *[]*FcTemplateJsonCfg
 	Partial_commit_fields  *[]*FcTemplateJsonCfg

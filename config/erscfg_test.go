@@ -62,6 +62,7 @@ func TestERSClone(t *testing.T) {
 	expectedERsCfg := &ERsCfg{
 		Enabled:       true,
 		SessionSConns: []string{"*internal:*sessions"},
+		EEsConns:      []string{},
 		Readers: []*EventReaderCfg{
 			{
 				ID:                   utils.MetaDefault,
@@ -76,6 +77,7 @@ func TestERSClone(t *testing.T) {
 				Flags:                utils.FlagsWithParams{},
 				Reconnects:           -1,
 				MaxReconnectInterval: 5 * time.Minute,
+				FailedExporterID:     "",
 				Fields: []*FCTemplate{
 					{Tag: utils.ToR, Path: utils.MetaCgreq + utils.NestingSep + utils.ToR, Type: utils.MetaVariable,
 						Value: NewRSRParsersMustCompile("~*req.2", utils.InfieldSep), Mandatory: true, Layout: time.RFC3339},
@@ -132,6 +134,7 @@ func TestERSClone(t *testing.T) {
 				Flags:                utils.FlagsWithParams{},
 				Reconnects:           5,
 				MaxReconnectInterval: 3 * time.Minute,
+				FailedExporterID:     "",
 				Fields: []*FCTemplate{
 					{Tag: utils.ToR, Path: utils.MetaCgreq + utils.NestingSep + utils.ToR, Type: utils.MetaVariable,
 						Value: NewRSRParsersMustCompile("~*req.2", utils.InfieldSep), Mandatory: true, Layout: time.RFC3339},
@@ -232,6 +235,7 @@ func TestERSLoadFromjsonCfg(t *testing.T) {
 	expectedERsCfg := &ERsCfg{
 		Enabled:       true,
 		SessionSConns: []string{"conn1", "conn3"},
+		EEsConns:      []string{},
 		Readers: []*EventReaderCfg{
 			{
 				ID:                   utils.MetaDefault,
@@ -246,6 +250,7 @@ func TestERSLoadFromjsonCfg(t *testing.T) {
 				Flags:                utils.FlagsWithParams{},
 				Reconnects:           -1,
 				MaxReconnectInterval: 5 * time.Minute,
+				FailedExporterID:     "",
 				Fields: []*FCTemplate{
 					{Tag: utils.ToR, Path: utils.MetaCgreq + utils.NestingSep + utils.ToR, Type: utils.MetaVariable,
 						Value: NewRSRParsersMustCompile("~*req.2", utils.InfieldSep), Mandatory: true, Layout: time.RFC3339},
@@ -302,6 +307,7 @@ func TestERSLoadFromjsonCfg(t *testing.T) {
 				Flags:                utils.FlagsWithParams{},
 				Reconnects:           5,
 				MaxReconnectInterval: 3 * time.Minute,
+				FailedExporterID:     "",
 				Fields: []*FCTemplate{
 					{Tag: utils.ToR, Path: utils.MetaCgreq + utils.NestingSep + utils.ToR, Type: utils.MetaVariable,
 						Value: NewRSRParsersMustCompile("~*req.2", utils.InfieldSep), Mandatory: true, Layout: time.RFC3339},
@@ -481,6 +487,7 @@ func TestERSloadFromJsonCase3(t *testing.T) {
 	expectedERsCfg := &ERsCfg{
 		Enabled:       true,
 		SessionSConns: []string{"*conn1"},
+		EEsConns:      []string{},
 		Readers: []*EventReaderCfg{
 			{
 				ID:                   utils.MetaDefault,
@@ -622,6 +629,7 @@ func TestERSloadFromJsonCase4(t *testing.T) {
 				Fields:                 &[]*FcTemplateJsonCfg{},
 				Reconnects:             utils.IntPointer(5),
 				Max_reconnect_interval: utils.StringPointer("3m"),
+				Failed_exporter_id:     utils.StringPointer(""),
 				Cache_dump_fields: &[]*FcTemplateJsonCfg{
 					{
 						Tag:   utils.StringPointer("OriginID"),
@@ -636,6 +644,7 @@ func TestERSloadFromJsonCase4(t *testing.T) {
 	expectedERsCfg := &ERsCfg{
 		Enabled:       true,
 		SessionSConns: []string{"*conn1"},
+		EEsConns:      []string{},
 		Readers: []*EventReaderCfg{
 			{
 				ID:                   utils.MetaDefault,
@@ -676,6 +685,7 @@ func TestERSloadFromJsonCase4(t *testing.T) {
 				},
 				CacheDumpFields:     make([]*FCTemplate, 0),
 				PartialCommitFields: make([]*FCTemplate, 0),
+				FailedExporterID:    "",
 				Opts: &EventReaderOpts{
 					CSV: &CSVROpts{
 						FieldSeparator:   utils.StringPointer(utils.FieldsSep),
@@ -716,6 +726,7 @@ func TestERSloadFromJsonCase4(t *testing.T) {
 				PartialCommitFields:  make([]*FCTemplate, 0),
 				Reconnects:           5,
 				MaxReconnectInterval: 3 * time.Minute,
+				FailedExporterID:     "",
 				Opts: &EventReaderOpts{
 					CSV: &CSVROpts{
 						FieldSeparator:   utils.StringPointer(utils.FieldsSep),
@@ -784,6 +795,7 @@ func TestEventReaderSameID(t *testing.T) {
 	expectedERsCfg := &ERsCfg{
 		Enabled:       true,
 		SessionSConns: []string{"conn1"},
+		EEsConns:      []string{},
 		Readers: []*EventReaderCfg{
 			{
 				ID:                   utils.MetaDefault,
@@ -798,6 +810,7 @@ func TestEventReaderSameID(t *testing.T) {
 				Flags:                utils.FlagsWithParams{},
 				Reconnects:           -1,
 				MaxReconnectInterval: 5 * time.Minute,
+				FailedExporterID:     "",
 				Fields: []*FCTemplate{
 					{Tag: utils.ToR, Path: utils.MetaCgreq + utils.NestingSep + utils.ToR, Type: utils.MetaVariable,
 						Value: NewRSRParsersMustCompile("~*req.2", utils.InfieldSep), Mandatory: true, Layout: time.RFC3339},
@@ -860,6 +873,7 @@ func TestEventReaderSameID(t *testing.T) {
 				PartialCommitFields:  make([]*FCTemplate, 0),
 				Reconnects:           5,
 				MaxReconnectInterval: 3 * time.Minute,
+				FailedExporterID:     "",
 				Opts: &EventReaderOpts{
 					CSV: &CSVROpts{
 						FieldSeparator:   utils.StringPointer(utils.FieldsSep),
@@ -951,6 +965,7 @@ func TestERsCfgAsMapInterfaceCase1(t *testing.T) {
 	eMap := map[string]any{
 		utils.EnabledCfg:       true,
 		utils.SessionSConnsCfg: []string{"conn1", "conn3"},
+		utils.EEsConnsCfg:      []string{},
 		utils.ReadersCfg: []map[string]any{
 			{
 				utils.FiltersCfg:              []string{},
@@ -967,6 +982,7 @@ func TestERsCfgAsMapInterfaceCase1(t *testing.T) {
 				utils.TypeCfg:                 "*none",
 				utils.ReconnectsCfg:           -1,
 				utils.MaxReconnectIntervalCfg: "5m0s",
+				utils.FailedExporterIDCfg:     "",
 				utils.FieldsCfg: []map[string]any{
 					{utils.MandatoryCfg: true, utils.PathCfg: "*cgreq.ToR", utils.TagCfg: "ToR", utils.TypeCfg: "*variable", utils.ValueCfg: "~*req.2"},
 					{utils.MandatoryCfg: true, utils.PathCfg: "*cgreq.OriginID", utils.TagCfg: "OriginID", utils.TypeCfg: "*variable", utils.ValueCfg: "~*req.3"},
@@ -1017,6 +1033,7 @@ func TestERsCfgAsMapInterfaceCase1(t *testing.T) {
 				utils.TimezoneCfg:             "",
 				utils.ReconnectsCfg:           5,
 				utils.MaxReconnectIntervalCfg: "3m0s",
+				utils.FailedExporterIDCfg:     "",
 				utils.OptsCfg: map[string]any{
 					"csvFieldSeparator":   ",",
 					"csvHeaderDefineChar": ":",
@@ -1119,6 +1136,7 @@ func TestERSCfgAsMapInterfaceCase2(t *testing.T) {
 	eMap := map[string]any{
 		utils.EnabledCfg:       true,
 		utils.SessionSConnsCfg: []string{"conn1", "conn3"},
+		utils.EEsConnsCfg:      []string{},
 		utils.ReadersCfg: []map[string]any{
 			{
 				utils.FiltersCfg:              []string{},
@@ -1135,6 +1153,7 @@ func TestERSCfgAsMapInterfaceCase2(t *testing.T) {
 				utils.TypeCfg:                 "*none",
 				utils.ReconnectsCfg:           -1,
 				utils.MaxReconnectIntervalCfg: "5m0s",
+				utils.FailedExporterIDCfg:     "",
 				utils.FieldsCfg: []map[string]any{
 					{utils.MandatoryCfg: true, utils.PathCfg: "*cgreq.ToR", utils.TagCfg: "ToR", utils.TypeCfg: "*variable", utils.ValueCfg: "~*req.2"},
 					{utils.MandatoryCfg: true, utils.PathCfg: "*cgreq.OriginID", utils.TagCfg: "OriginID", utils.TypeCfg: "*variable", utils.ValueCfg: "~*req.3"},
@@ -1187,6 +1206,7 @@ func TestERSCfgAsMapInterfaceCase2(t *testing.T) {
 				utils.TimezoneCfg:             "",
 				utils.ReconnectsCfg:           -1,
 				utils.MaxReconnectIntervalCfg: "5m0s",
+				utils.FailedExporterIDCfg:     "",
 				utils.OptsCfg: map[string]any{
 					utils.CSVLazyQuotes:                        false,
 					utils.KafkaGroupID:                         "test",
@@ -1294,6 +1314,7 @@ func TestERsloadFromJsonCfg(t *testing.T) {
 	expectedERsCfg := &ERsCfg{
 		Enabled:       true,
 		SessionSConns: []string{"*conn1"},
+		EEsConns:      []string{},
 		Readers: []*EventReaderCfg{
 			{
 				ID:                   utils.MetaDefault,
@@ -1308,6 +1329,7 @@ func TestERsloadFromJsonCfg(t *testing.T) {
 				Flags:                utils.FlagsWithParams{},
 				Reconnects:           -1,
 				MaxReconnectInterval: 5 * time.Minute,
+				FailedExporterID:     "",
 				Fields: []*FCTemplate{
 					{Tag: utils.ToR, Path: utils.MetaCgreq + utils.NestingSep + utils.ToR, Type: utils.MetaVariable,
 						Value: NewRSRParsersMustCompile("~*req.2", utils.InfieldSep), Mandatory: true, Layout: time.RFC3339},
@@ -1364,6 +1386,7 @@ func TestERsloadFromJsonCfg(t *testing.T) {
 				Flags:                utils.FlagsWithParams{},
 				Reconnects:           -1,
 				MaxReconnectInterval: 5 * time.Minute,
+				FailedExporterID:     "",
 				Fields: []*FCTemplate{
 					{
 						Tag:    utils.CGRID,
@@ -1677,6 +1700,7 @@ func TestEventReaderCfgAsMapInterface(t *testing.T) {
 		utils.RunDelayCfg:             "0",
 		utils.ReconnectsCfg:           0,
 		utils.MaxReconnectIntervalCfg: "0",
+		utils.FailedExporterIDCfg:     "",
 		utils.OptsCfg:                 opts,
 	}
 	rcv := er.AsMapInterface("")

@@ -360,7 +360,8 @@ const CGRATES_CFG_JSON = `
 
 "ers": {														// EventReaderService
 	"enabled": false,											// starts the EventReader service: <true|false>
-	"sessions_conns":["*internal"],								// RPC Connections IDs
+	"sessions_conns": ["*internal"],							// RPC Connections IDs
+	"ees_conns": [],											// connection for routing processed and invalid messages through EEs
 	"partial_cache_ttl": "1s",									// the duration to cache partial records when not pairing	
 	"readers": [
 		{
@@ -376,6 +377,7 @@ const CGRATES_CFG_JSON = `
 			"flags": [],										// flags to influence the event processing
 			"reconnects": -1,									// number of retries in case of connection lost
 			"max_reconnect_interval": "5m", 					// time to wait in between reconnect attempts
+			"failed_exporter_id": "",							// id of the exporter used for moving the raw unprocessed message
 			"opts": {
 				// Partial
 				// "partialPath": "/",							// the path were the partial events will be sent

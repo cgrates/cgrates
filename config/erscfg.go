@@ -489,6 +489,7 @@ type EventReaderCfg struct {
 	Flags                utils.FlagsWithParams
 	Reconnects           int
 	MaxReconnectInterval time.Duration
+	FailedExporterID     string
 	Opts                 *EventReaderOpts
 	Fields               []*FCTemplate
 	PartialCommitFields  []*FCTemplate
@@ -579,6 +580,9 @@ func (er *EventReaderCfg) loadFromJSONCfg(jsnCfg *EventReaderJsonCfg, msgTemplat
 		if er.MaxReconnectInterval, err = utils.ParseDurationWithNanosecs(*jsnCfg.Max_reconnect_interval); err != nil {
 			return err
 		}
+	}
+	if jsnCfg.Failed_exporter_id != nil {
+		er.FailedExporterID = *jsnCfg.Failed_exporter_id
 	}
 	if jsnCfg.Fields != nil {
 		if er.Fields, err = FCTemplatesFromFCTemplatesJSONCfg(*jsnCfg.Fields, sep); err != nil {
@@ -937,6 +941,7 @@ func (er EventReaderCfg) Clone() (cln *EventReaderCfg) {
 		Flags:                er.Flags.Clone(),
 		Reconnects:           er.Reconnects,
 		MaxReconnectInterval: er.MaxReconnectInterval,
+		FailedExporterID:     er.FailedExporterID,
 		Opts:                 er.Opts.Clone(),
 	}
 	if er.Filters != nil {
@@ -1190,6 +1195,7 @@ func (er *EventReaderCfg) AsMapInterface(separator string) (initialMP map[string
 		utils.RunDelayCfg:             "0",
 		utils.ReconnectsCfg:           er.Reconnects,
 		utils.MaxReconnectIntervalCfg: "0",
+		utils.FailedExporterIDCfg:     er.FailedExporterID,
 		utils.OptsCfg:                 opts,
 	}
 

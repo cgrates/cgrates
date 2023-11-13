@@ -2412,6 +2412,7 @@ const (
 	TenantCfg              = "tenant"
 	FlagsCfg               = "flags"
 	FieldsCfg              = "fields"
+	FailedExporterIDCfg    = "failed_exporter_id"
 	CacheDumpFieldsCfg     = "cache_dump_fields"
 	PartialCommitFieldsCfg = "partial_commit_fields"
 	PartialCacheTTLCfg     = "partial_cache_ttl"
