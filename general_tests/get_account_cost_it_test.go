@@ -35,9 +35,13 @@ import (
 var aSummaryBefore *engine.AccountSummary
 
 func TestGetAccountCost(t *testing.T) {
-	cfgPath := path.Join(*dataDir, "conf", "samples", "rerate_cdrs_mysql")
-	tpPath := path.Join(*dataDir, "tariffplans", "reratecdrs")
-	client, _, shutdown, err := setupTest(t, "TestRerateCDRs", cfgPath, tpPath, utils.EmptyString, nil)
+	testEnv := TestEnvironment{
+		Name: "TestGetAccountCost",
+		// Encoding:   *encoding,
+		ConfigPath: path.Join(*dataDir, "conf", "samples", "rerate_cdrs_mysql"),
+		TpPath:     path.Join(*dataDir, "tariffplans", "reratecdrs"),
+	}
+	client, _, shutdown, err := testEnv.Setup(t, *waitRater)
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -21,11 +21,14 @@ import (
 	"errors"
 	"flag"
 	"fmt"
+	"io"
 	"math/rand"
 	"os"
+	"os/exec"
 	"path"
 	"path/filepath"
 	"testing"
+	"time"
 
 	"github.com/cgrates/birpc"
 	"github.com/cgrates/birpc/context"
@@ -54,23 +57,31 @@ func newRPCClient(cfg *config.ListenCfg) (c *birpc.Client, err error) {
 	}
 }
 
-// setupTest prepares the testing environment. It takes optional file paths for
-// existing configuration files or tariff plans and a content string for generating a new configuration
-// if no path is provided. It also takes a map of CSV filenames to content strings for loading data.
-// Returns an RPC client to interact with the engine, the configuration, a shutdown function to close
-// the engine, and an error if any step of the initialization fails.
-//
-// If cfgPath is provided, it loads configuration from the specified file; otherwise, it creates a new
-// configuration with the content provided. If tpPath is given, it uses the path for CSV loading; if it's
-// empty but csvFiles is not, it creates a temporary directory with CSV files for loading into the service.
-func setupTest(t *testing.T, testName, cfgPath, tpPath, content string, csvFiles map[string]string,
-) (client *birpc.Client, cfg *config.CGRConfig, shutdownFunc func(), err error) {
+// TestEnvironment holds the setup parameters and configurations
+// required for running integration tests.
+type TestEnvironment struct {
+	Name       string            // usually the name of the test
+	ConfigPath string            // file path to the main configuration file
+	ConfigJSON string            // contains the configuration JSON content if ConfigPath is missing
+	TpPath     string            // specifies the path to the tariff plans
+	TpFiles    map[string]string // maps CSV filenames to their content for tariff plan loading
+	LogBuffer  io.Writer         // captures the log output of the test environment
+	// Encoding   string         // specifies the data encoding type (e.g., JSON, GOB)
+}
+
+// Setup initializes the testing environment using the provided configuration. It loads the configuration
+// from a specified path or creates a new one if the path is not provided. The method starts the engine,
+// establishes an RPC client connection, and loads CSV data if provided. It returns an RPC client, the
+// configuration, a shutdown function, and any error encountered.
+func (env TestEnvironment) Setup(t *testing.T, engineDelay int,
+) (client *birpc.Client, cfg *config.CGRConfig, shutdownFunc context.CancelFunc, err error) {
+
 	switch {
-	case cfgPath != "":
-		cfg, err = config.NewCGRConfigFromPath(cfgPath)
+	case env.ConfigPath != "":
+		cfg, err = config.NewCGRConfigFromPath(env.ConfigPath)
 	default:
 		var clean func()
-		cfg, cfgPath, clean, err = initTestCfg(content)
+		cfg, env.ConfigPath, clean, err = initCfg(env.ConfigJSON)
 		defer clean() // it is safe to defer clean func before error check
 	}
 
@@ -82,44 +93,37 @@ func setupTest(t *testing.T, testName, cfgPath, tpPath, content string, csvFiles
 		return nil, nil, nil, err
 	}
 
-	_, err = engine.StopStartEngine(cfgPath, *waitRater)
+	exec.Command("pkill", "cgr-engine").Run()
+	time.Sleep(time.Duration(engineDelay) * time.Millisecond)
+
+	cancel, err := startEngine(cfg, env.ConfigPath, engineDelay, env.LogBuffer)
 	if err != nil {
 		return nil, nil, nil, err
 	}
 
-	shutdownFunc = func() {
-		err := engine.KillEngine(*waitRater)
-		if err != nil {
-			t.Log(err)
-		}
-	}
-
 	client, err = newRPCClient(cfg.ListenCfg())
 	if err != nil {
-		shutdownFunc()
+		cancel()
 		return nil, nil, nil, fmt.Errorf("could not connect to cgr-engine: %w", err)
 	}
 
 	var customTpPath string
-	if len(csvFiles) != 0 {
-		customTpPath = fmt.Sprintf("/tmp/testTPs/%s", testName)
+	if len(env.TpFiles) != 0 {
+		customTpPath = fmt.Sprintf("/tmp/testTPs/%s", env.Name)
 	}
 
-	if err := loadCSVs(client, tpPath, customTpPath, csvFiles); err != nil {
-		shutdownFunc()
+	if err := loadCSVs(client, env.TpPath, customTpPath, env.TpFiles); err != nil {
+		cancel()
 		return nil, nil, nil, fmt.Errorf("failed to load csvs: %w", err)
 	}
 
-	return client, cfg, shutdownFunc, nil
+	return client, cfg, cancel, nil
 }
 
-// initTestCfg creates a new CGRConfig from the provided configuration content string.
-// It generates a temporary file path, writes the content to a configuration file,
-// and returns the created CGRConfig, the path to the configuration file,
-// a cleanup function to remove the temporary configuration file,
-// and an error if the content is empty or an issue occurs during file creation or
-// configuration initialization.
-func initTestCfg(cfgContent string) (cfg *config.CGRConfig, cfgPath string, cleanFunc func(), err error) {
+// initCfg creates a new CGRConfig from the provided configuration content string. It generates a
+// temporary directory and file path, writes the content to the configuration file, and returns the
+// created CGRConfig, the file path, a cleanup function, and any error encountered.
+func initCfg(cfgContent string) (cfg *config.CGRConfig, cfgPath string, cleanFunc func(), err error) {
 	if cfgContent == utils.EmptyString {
 		return nil, "", func() {}, errors.New("content should not be empty")
 	}
@@ -144,11 +148,8 @@ func initTestCfg(cfgContent string) (cfg *config.CGRConfig, cfgPath string, clea
 	return cfg, cfgPath, removeFunc, nil
 }
 
-// loadCSVs loads tariff plan data from specified CSV files by calling the 'APIerSv1.LoadTariffPlanFromFolder' method using
-// the client parameter.
-// It handles the creation of a custom temporary path if provided and ensures the data from the given CSV files
-// is written and loaded as well. If no custom path is provided, it will load CSVs from the tpPath if it is not empty.
-// Returns an error if directory creation, file writing, or data loading fails.
+// loadCSVs loads tariff plan data from CSV files into the service. It handles directory creation and file writing for custom
+// paths, and loads data from the specified paths using the provided RPC client. Returns an error if any step fails.
 func loadCSVs(client *birpc.Client, tpPath, customTpPath string, csvFiles map[string]string) (err error) {
 	paths := make([]string, 0, 2)
 	if customTpPath != "" {
@@ -205,4 +206,35 @@ func flushDBs(cfg *config.CGRConfig, flushDataDB, flushStorDB bool) error {
 		}
 	}
 	return nil
+}
+
+// startEngine starts the CGR engine process with the provided configuration. It writes engine logs to the provided logBuffer
+// (if any) and waits for the engine to be ready. Returns a cancel function to stop the engine and any error encountered.
+func startEngine(cfg *config.CGRConfig, cfgPath string, waitEngine int, logBuffer io.Writer) (context.CancelFunc, error) {
+	enginePath, err := exec.LookPath("cgr-engine")
+	if err != nil {
+		return nil, err
+	}
+	ctx, cancel := context.WithCancel(context.TODO())
+	engine := exec.CommandContext(ctx, enginePath, "-config_path", cfgPath)
+	if logBuffer != nil {
+		engine.Stdout = logBuffer
+		engine.Stderr = logBuffer
+	}
+	if err := engine.Start(); err != nil {
+		return nil, err
+	}
+	fib := utils.FibDuration(time.Millisecond, 0)
+	for i := 0; i < 20; i++ {
+		time.Sleep(fib())
+		_, err = jsonrpc.Dial(utils.TCP, cfg.ListenCfg().RPCJSONListen)
+		if err == nil {
+			break
+		}
+	}
+	if err != nil {
+		return nil, fmt.Errorf("starting cgr-engine on port %s failed: %w", cfg.ListenCfg().RPCJSONListen, err)
+	}
+	time.Sleep(time.Duration(waitEngine) * time.Millisecond)
+	return cancel, nil
 }
