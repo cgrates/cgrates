@@ -24,7 +24,6 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/cgrates/birpc"
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
@@ -56,35 +55,17 @@ func TestEscapeCharacters(t *testing.T) {
 }
 
 }`
-	cfg, cfgPath, clean, err := initTestCfg(content)
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer clean()
 
-	// Flush datadb and stordb.
-	err = engine.InitDataDb(cfg)
+	testEnv := TestEnvironment{
+		Name: "TestEscapeCharacters",
+		// Encoding:   *encoding,
+		ConfigJSON: content,
+	}
+	client, _, shutdown, err := testEnv.Setup(t, *waitRater)
 	if err != nil {
 		t.Fatal(err)
 	}
-	err = engine.InitStorDb(cfg)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	// Start the engine.
-	_, err = engine.StopStartEngine(cfgPath, 1000)
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer engine.KillEngine(1000)
-
-	// Initialize a jsonrpc client.
-	var client *birpc.Client
-	client, err = newRPCClient(cfg.ListenCfg())
-	if err != nil {
-		t.Fatal("Could not connect to rater: ", err.Error())
-	}
+	defer shutdown()
 
 	/*
 		When escape sequences are written manually, like \u0000 in the csv file, they are not interpreted as
