@@ -38,7 +38,7 @@ require (
 	github.com/peterh/liner v1.2.2
 	github.com/rabbitmq/amqp091-go v1.5.0
 	github.com/segmentio/kafka-go v0.4.32
-	go.mongodb.org/mongo-driver v1.11.0
+	go.mongodb.org/mongo-driver v1.13.0
 	golang.org/x/crypto v0.13.0
 	golang.org/x/exp v0.0.0-20230905200255-921286631fa9
 	golang.org/x/net v0.15.0
@@ -87,7 +87,6 @@ require (
 	github.com/nats-io/nats-server/v2 v2.10.1
 	github.com/nats-io/nkeys v0.4.5 // indirect
 	github.com/nats-io/nuid v1.0.1 // indirect
-	github.com/pkg/errors v0.9.1 // indirect
 	github.com/prometheus/client_golang v1.12.2
 	github.com/rivo/uniseg v0.2.0 // indirect
 	github.com/steveyen/gtreap v0.1.0 // indirect
@@ -126,8 +125,8 @@ require (
 	github.com/prometheus/common v0.35.0 // indirect
 	github.com/prometheus/procfs v0.7.3 // indirect
 	github.com/xdg-go/pbkdf2 v1.0.0 // indirect
-	github.com/xdg-go/scram v1.1.1 // indirect
-	github.com/xdg-go/stringprep v1.0.3 // indirect
+	github.com/xdg-go/scram v1.1.2 // indirect
+	github.com/xdg-go/stringprep v1.0.4 // indirect
 	github.com/youmark/pkcs8 v0.0.0-20201027041543-1326539a0a0a // indirect
 	golang.org/x/time v0.3.0 // indirect
 )
