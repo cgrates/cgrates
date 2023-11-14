@@ -3823,6 +3823,11 @@ func TestECAsDataProvider3(t *testing.T) {
 			exp:    "*monetary",
 		},
 		{
+			name:   "IncrementCost",
+			fields: []string{"Charges[0]", "Increments[2]", "Cost"},
+			exp:    "0.01",
+		},
+		{
 			name:   "DestinationPrefix",
 			fields: []string{"Charges[2]", "Rating", "RatingFilter", "DestinationPrefix"},
 			exp:    "+49",
