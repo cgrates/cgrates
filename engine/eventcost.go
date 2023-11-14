@@ -1094,7 +1094,7 @@ func (ec *EventCost) getChargesForPath(fldPath []string, chr *ChargingInterval) 
 	if fldPath[1] == utils.Accounting {
 		return ec.getAcountingForPath(fldPath[2:], ec.Accounting[incr.AccountingID])
 	}
-	return incr.FieldAsInterface(fldPath)
+	return incr.FieldAsInterface(fldPath[1:])
 }
 
 func (ec *EventCost) getRatingForPath(fldPath []string, rating *RatingUnit) (val any, err error) {
