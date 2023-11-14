@@ -3868,17 +3868,17 @@ func TestRemoveExpiredErrs(t *testing.T) {
 			&Balance{
 				Value:          10,
 				DestinationIDs: utils.NewStringMap("NAT", "RET"),
-				ExpirationDate: time.Date(2023, time.November, 11, 22, 39, 0, 0, time.UTC),
+				ExpirationDate: time.Date(2050, time.November, 11, 22, 39, 0, 0, time.UTC),
 			},
 			&Balance{
 				Value:          10,
 				DestinationIDs: utils.NewStringMap("NAT", "RET"),
-				ExpirationDate: time.Date(2023, time.November, 15, 22, 39, 0, 0, time.UTC),
+				ExpirationDate: time.Date(2050, time.November, 15, 22, 39, 0, 0, time.UTC),
 			},
 			&Balance{
 				Value:          10,
 				DestinationIDs: utils.NewStringMap("NAT", "RET"),
-				ExpirationDate: time.Date(2024, time.November, 11, 22, 39, 0, 0, time.UTC),
+				ExpirationDate: time.Date(2050, time.November, 11, 22, 39, 0, 0, time.UTC),
 			},
 		},
 	}
