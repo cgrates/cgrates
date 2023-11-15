@@ -1274,6 +1274,8 @@ const (
 	AdminSv1GetAccountIDs             = "AdminSv1.GetAccountIDs"
 	AdminSv1RemoveAccount             = "AdminSv1.RemoveAccount"
 	AdminSv1GetAccountsCount          = "AdminSv1.GetAccountsCount"
+	AdminSv1GetCDRs                   = "AdminSv1.GetCDRs"
+	AdminSv1RemoveCDRs                = "AdminSv1.RemoveCDRs"
 )
 
 const (
