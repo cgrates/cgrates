@@ -94,7 +94,7 @@ func (rdr *AMQPv1ER) Config() *config.EventReaderCfg {
 
 // Serve will start the gorutines needed to watch the amqpv1 topic
 func (rdr *AMQPv1ER) Serve() (err error) {
-	if rdr.conn, err = amqpv1.Dial(rdr.Config().SourcePath, rdr.connOpts); err != nil {
+	if rdr.conn, err = amqpv1.Dial(context.TODO(), rdr.Config().SourcePath, rdr.connOpts); err != nil {
 		return
 	}
 	if rdr.ses, err = rdr.conn.NewSession(context.TODO(), nil); err != nil {
@@ -129,7 +129,7 @@ func (rdr *AMQPv1ER) readLoop(recv *amqpv1.Receiver) (err error) {
 		}
 		ctx := context.Background()
 		var msg *amqpv1.Message
-		if msg, err = recv.Receive(ctx); err != nil {
+		if msg, err = recv.Receive(ctx, nil); err != nil {
 			if err.Error() == "amqp: link closed" {
 				err = nil
 				return

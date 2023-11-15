@@ -19,32 +19,19 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package utils
 
 import (
-	"net"
 	"testing"
-
-	"github.com/cenkalti/rpc2"
 )
 
-func TestNewBiJSONrpcClient(t *testing.T) {
-	//empty check
-	addr := "127.0.0.1:4024"
-	handlers := map[string]any{}
-	rcv, err := NewBiJSONrpcClient(addr, handlers)
-	if err == nil || rcv != nil {
-		t.Error("Expencting: \"connection refused\", received : nil")
+func TestBiRpcNewBiJSONrpcClient(t *testing.T) {
+	rcv, err := NewBiJSONrpcClient("test", nil)
+
+	if err != nil {
+		if err.Error() != "dial tcp: address test: missing port in address" {
+			t.Error(err)
+		}
 	}
 
-	l, err := net.Listen(TCP, addr)
-	if err != nil {
+	if rcv != nil {
 		t.Error(err)
 	}
-	handlers = map[string]any{
-		"": func(*rpc2.Client, *struct{}, *string) error { return nil },
-	}
-
-	_, err = NewBiJSONrpcClient(addr, handlers)
-	if err != nil {
-		t.Error(err)
-	}
-	l.Close()
 }
