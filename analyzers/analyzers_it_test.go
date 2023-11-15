@@ -24,9 +24,6 @@ package analyzers
 import (
 	"errors"
 	"flag"
-	"net"
-	"net/rpc"
-	"net/rpc/jsonrpc"
 	"os"
 	"path"
 	"reflect"
@@ -34,9 +31,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/cenkalti/rpc2"
-	jsonrpc2 "github.com/cenkalti/rpc2/jsonrpc"
+	"github.com/cgrates/birpc"
 	"github.com/cgrates/birpc/context"
+	"github.com/cgrates/birpc/jsonrpc"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/loaders"
@@ -47,8 +44,8 @@ import (
 var (
 	anzCfgPath string
 	anzCfg     *config.CGRConfig
-	anzRPC     *rpc.Client
-	anzBiRPC   *rpc2.Client
+	anzRPC     *birpc.Client
+	anzBiRPC   *birpc.BirpcClient
 
 	sTestsAlsPrf = []func(t *testing.T){
 		testAnalyzerSInitCfg,
@@ -73,15 +70,22 @@ var (
 	encoding  = flag.String("rpc", utils.MetaJSON, "what encoding whould be used for rpc comunication")
 )
 
-func newRPCClient(cfg *config.ListenCfg) (c *rpc.Client, err error) {
+func newRPCClient(cfg *config.ListenCfg) (c *birpc.Client, err error) {
 	switch *encoding {
 	case utils.MetaJSON:
 		return jsonrpc.Dial(utils.TCP, cfg.RPCJSONListen)
 	case utils.MetaGOB:
-		return rpc.Dial(utils.TCP, cfg.RPCGOBListen)
+		return birpc.Dial(utils.TCP, cfg.RPCGOBListen)
 	default:
 		return nil, errors.New("UNSUPPORTED_RPC")
 	}
+}
+
+type smock struct{}
+
+func (*smock) DisconnectPeer(ctx *context.Context,
+	args *utils.AttrDisconnectSession, reply *string) error {
+	return utils.ErrNotFound
 }
 
 // Test start here
@@ -126,24 +130,24 @@ func testAnalyzerSStartEngine(t *testing.T) {
 
 // Connect rpc client to rater
 func testAnalyzerSRPCConn(t *testing.T) {
-	var err error
+	srv, err := birpc.NewService(new(smock), utils.SessionSv1, true)
+	if err != nil {
+		t.Fatal(err)
+	}
 	anzRPC, err = newRPCClient(anzCfg.ListenCfg()) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
 		t.Fatal(err)
 	}
-	conn, err := net.Dial(utils.TCP, anzCfg.SessionSCfg().ListenBijson)
+	anzBiRPC, err = utils.NewBiJSONrpcClient(anzCfg.SessionSCfg().ListenBijson, srv)
 	if err != nil {
 		t.Fatal(err)
 	}
-	anzBiRPC = rpc2.NewClientWithCodec(jsonrpc2.NewJSONCodec(conn))
-	anzBiRPC.Handle(utils.SessionSv1DisconnectPeer, func(clnt *rpc2.Client, args any, rply *string) (err error) { return utils.ErrNotFound })
-	go anzBiRPC.Run()
 }
 
 func testAnalyzerSLoadTarrifPlans(t *testing.T) {
 	var reply string
 	time.Sleep(100 * time.Millisecond)
-	if err := anzRPC.Call(utils.LoaderSv1Run, &loaders.ArgsProcessFolder{
+	if err := anzRPC.Call(context.Background(), utils.LoaderSv1Run, &loaders.ArgsProcessFolder{
 		APIOpts: map[string]any{utils.MetaCache: utils.MetaReload},
 	}, &reply); err != nil {
 		t.Error(err)
@@ -221,7 +225,7 @@ func testAnalyzerSChargerSv1ProcessEvent(t *testing.T) {
 		},
 	}
 
-	if err := anzRPC.Call(utils.ChargerSv1ProcessEvent, cgrEv, &result2); err != nil {
+	if err := anzRPC.Call(context.Background(), utils.ChargerSv1ProcessEvent, cgrEv, &result2); err != nil {
 		t.Fatal(err)
 	}
 	sort.Slice(result2, func(i, j int) bool {
@@ -237,7 +241,7 @@ func testAnalyzerSV1Search(t *testing.T) {
 	// need to wait in order for the log gorutine to execute
 	time.Sleep(50 * time.Millisecond)
 	var result []map[string]any
-	if err := anzRPC.Call(utils.AnalyzerSv1StringQuery, &QueryArgs{HeaderFilters: `+RequestEncoding:\*internal +RequestMethod:AttributeSv1\.ProcessEvent`}, &result); err != nil {
+	if err := anzRPC.Call(context.Background(), utils.AnalyzerSv1StringQuery, &QueryArgs{HeaderFilters: `+RequestEncoding:\*internal +RequestMethod:AttributeSv1\.ProcessEvent`}, &result); err != nil {
 		t.Error(err)
 	} else if len(result) != 1 {
 		t.Errorf("Unexpected result: %s", utils.ToJSON(result))
@@ -246,7 +250,7 @@ func testAnalyzerSV1Search(t *testing.T) {
 
 func testAnalyzerSV1Search2(t *testing.T) {
 	var result []map[string]any
-	if err := anzRPC.Call(utils.AnalyzerSv1StringQuery, &QueryArgs{HeaderFilters: `+RequestEncoding:\*json +RequestMethod:ChargerSv1\.ProcessEvent`}, &result); err != nil {
+	if err := anzRPC.Call(context.Background(), utils.AnalyzerSv1StringQuery, &QueryArgs{HeaderFilters: `+RequestEncoding:\*json +RequestMethod:ChargerSv1\.ProcessEvent`}, &result); err != nil {
 		t.Error(err)
 	} else if len(result) != 1 {
 		t.Errorf("Unexpected result: %s", utils.ToJSON(result))
@@ -255,7 +259,7 @@ func testAnalyzerSV1Search2(t *testing.T) {
 
 func testAnalyzerSV1SearchWithContentFilters(t *testing.T) {
 	var result []map[string]any
-	if err := anzRPC.Call(utils.AnalyzerSv1StringQuery, &QueryArgs{
+	if err := anzRPC.Call(context.Background(), utils.AnalyzerSv1StringQuery, &QueryArgs{
 		HeaderFilters:  `+RequestEncoding:\*json`,
 		ContentFilters: []string{"*string:~*req.Event.Account:1010"},
 	}, &result); err != nil {
@@ -267,15 +271,15 @@ func testAnalyzerSV1SearchWithContentFilters(t *testing.T) {
 
 func testAnalyzerSV1BirPCSession(t *testing.T) {
 	var rply string
-	anzBiRPC.Call(utils.SessionSv1STIRIdentity,
+	anzBiRPC.Call(context.Background(), utils.SessionSv1STIRIdentity,
 		&sessions.V1STIRIdentityArgs{}, &rply) // only call to register the birpc
-	if err := anzRPC.Call(utils.SessionSv1DisconnectPeer, &utils.DPRArgs{}, &rply); err == nil ||
+	if err := anzRPC.Call(context.Background(), utils.SessionSv1DisconnectPeer, &utils.DPRArgs{}, &rply); err == nil ||
 		err.Error() != utils.ErrPartiallyExecuted.Error() {
 		t.Fatal(err)
 	}
 	time.Sleep(50 * time.Millisecond)
 	var result []map[string]any
-	if err := anzRPC.Call(utils.AnalyzerSv1StringQuery, &QueryArgs{HeaderFilters: `+RequestEncoding:\*birpc_json +RequestMethod:"SessionSv1.DisconnectPeer"`}, &result); err != nil {
+	if err := anzRPC.Call(context.Background(), utils.AnalyzerSv1StringQuery, &QueryArgs{HeaderFilters: `+RequestEncoding:\*birpc_json +RequestMethod:"SessionSv1.DisconnectPeer"`}, &result); err != nil {
 		t.Error(err)
 	} else if len(result) != 1 {
 		t.Errorf("Unexpected result: %s", utils.ToJSON(result))
@@ -378,7 +382,7 @@ func testAnalyzerSv1MultipleQuery(t *testing.T) {
 
 	var reply string
 	for _, filterProfile := range filterProfiles {
-		if err := anzRPC.Call(utils.AdminSv1SetFilter,
+		if err := anzRPC.Call(context.Background(), utils.AdminSv1SetFilter,
 			filterProfile, &reply); err != nil {
 			t.Error(err)
 		} else if reply != utils.OK {
@@ -387,7 +391,7 @@ func testAnalyzerSv1MultipleQuery(t *testing.T) {
 	}
 	time.Sleep(50 * time.Millisecond)
 	var result []map[string]any
-	if err := anzRPC.Call(utils.AnalyzerSv1StringQuery, &QueryArgs{
+	if err := anzRPC.Call(context.Background(), utils.AnalyzerSv1StringQuery, &QueryArgs{
 		HeaderFilters:  `+RequestMethod:"AdminSv1.SetFilter"`,
 		ContentFilters: []string{"*prefix:~*req.ID:TestA"},
 	}, &result); err != nil {

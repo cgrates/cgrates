@@ -21,20 +21,19 @@ package utils
 import (
 	"net"
 
-	"github.com/cenkalti/rpc2"
-	rpc2_jsonrpc "github.com/cenkalti/rpc2/jsonrpc"
+	"github.com/cgrates/birpc"
+	"github.com/cgrates/birpc/jsonrpc"
 )
 
 // NewBiJSONrpcClient will create a bidirectional JSON client connection
-func NewBiJSONrpcClient(addr string, handlers map[string]any) (*rpc2.Client, error) {
+func NewBiJSONrpcClient(addr string, obj birpc.ClientConnector) (*birpc.BirpcClient, error) {
 	conn, err := net.Dial(TCP, addr)
 	if err != nil {
 		return nil, err
 	}
-	clnt := rpc2.NewClientWithCodec(rpc2_jsonrpc.NewJSONCodec(conn))
-	for method, handlerFunc := range handlers {
-		clnt.Handle(method, handlerFunc)
+	clnt := birpc.NewBirpcClientWithCodec(jsonrpc.NewJSONBirpcCodec(conn))
+	if obj != nil {
+		clnt.Register(obj)
 	}
-	go clnt.Run()
 	return clnt, nil
 }
