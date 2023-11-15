@@ -239,7 +239,7 @@ func (sqls *SQLStorage) GetCDRs(ctx *context.Context, qryFltr []*Filter, opts ma
 				Event:  val.Event,
 			}
 			var pass bool
-			dP := NewCGREventFromCDR(newCdr).AsDataProvider()
+			dP := newCdr.CGREvent().AsDataProvider()
 			for _, fltr := range excludedCdrQueryFilterTypes {
 				if pass, err = fltr.Pass(ctx, dP); err != nil {
 					return nil, err
@@ -328,7 +328,7 @@ func (sqls *SQLStorage) RemoveCDRs(ctx *context.Context, qryFltr []*Filter) (err
 				Event:  cdr.Event,
 			}
 			var pass bool
-			dP := NewCGREventFromCDR(newCdr).AsDataProvider()
+			dP := newCdr.CGREvent().AsDataProvider()
 			// check if the filter pass
 			for _, fltr := range excludedCdrQueryFilterTypes {
 				if pass, err = fltr.Pass(ctx, dP); err != nil {
