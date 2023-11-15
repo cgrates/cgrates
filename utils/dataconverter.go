@@ -79,6 +79,8 @@ func NewDataConverter(params string) (conv DataConverter, err error) {
 		return new(JSONConverter), nil
 	case params == MetaDuration:
 		return NewDurationConverter(EmptyString)
+	case strings.HasPrefix(params, MetaDurationFormat):
+		return NewDurationFormatConverter(params[len(MetaDurationFormat)+1:])
 	case params == MetaIP2Hex:
 		return new(IP2HexConverter), nil
 	case params == MetaString2Hex:
@@ -272,6 +274,30 @@ type DurationConverter struct{}
 func (mS *DurationConverter) Convert(in any) (
 	out any, err error) {
 	return IfaceAsDuration(in)
+}
+
+func NewDurationFormatConverter(params string) (hdlr DataConverter, err error) {
+	return &DurationFormatConverter{Layout: params}, nil
+}
+
+// DurationFormatConverter formats duration in the same way Time is formatted as string
+type DurationFormatConverter struct {
+	Layout string
+}
+
+func (dfc *DurationFormatConverter) Convert(in any) (
+	out any, err error) {
+	z := time.Unix(0, 0).UTC()
+	dur, err := IfaceAsDuration(in)
+	if err != nil {
+		return nil, err
+	}
+	if dfc.Layout == EmptyString {
+		out = z.Add(time.Duration(dur)).Format("15:04:05")
+		return
+	}
+	out = z.Add(time.Duration(dur)).Format(dfc.Layout)
+	return
 }
 
 // NewPhoneNumberConverter create a new phoneNumber converter

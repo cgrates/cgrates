@@ -41,6 +41,42 @@ func TestDataConvertersConvertString(t *testing.T) {
 	}
 }
 
+func TestConvertDurationFormat1(t *testing.T) {
+	dcs := &DataConverters{
+		&DurationFormatConverter{
+			Layout: "15:04:05",
+		},
+	}
+	if rcv, err := dcs.ConvertString("15m"); err != nil {
+		t.Error(err)
+	} else if rcv != "00:15:00" {
+		t.Errorf("Expecting: <%+q>, received: <%+q>", "00:15:00", rcv)
+	}
+}
+func TestConvertDurationFormat2(t *testing.T) {
+	dcs := &DataConverters{
+		&DurationFormatConverter{
+			Layout: "15-04-05.999999999",
+		},
+	}
+	if rcv, err := dcs.ConvertString("20s423ns"); err != nil {
+		t.Error(err)
+	} else if rcv != "00-00-20.000000423" {
+		t.Errorf("Expecting: <%+q>, received: <%+q>", "00-00-20.000000423", rcv)
+	}
+}
+
+func TestConvertDurationFormatDefault(t *testing.T) {
+	dcs := &DataConverters{
+		&DurationFormatConverter{},
+	}
+	if rcv, err := dcs.ConvertString("15m"); err != nil {
+		t.Error(err)
+	} else if rcv != "00:15:00" {
+		t.Errorf("Expecting: <%+q>, received: <%+q>", "00:15:00", rcv)
+	}
+}
+
 func TestNewDataConverter(t *testing.T) {
 	a, err := NewDataConverter(MetaDurationSeconds)
 	if err != nil {
@@ -169,6 +205,13 @@ func TestNewDataConverter(t *testing.T) {
 	if !reflect.DeepEqual(tm, expTime) {
 		t.Errorf("Expected %+v received: %+v", expTime, tm)
 	}
+	expected := &DurationFormatConverter{Layout: "15:04:05"}
+	if durFmt, err := NewDataConverter(MetaDurationFormat + ":15:04:05"); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(durFmt, expected) {
+		t.Errorf("Expected %+v received: %+v", expected, durFmt)
+	}
+
 }
 
 func TestNewDataConverterMustCompile(t *testing.T) {
