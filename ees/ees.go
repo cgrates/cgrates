@@ -275,10 +275,11 @@ func exportEventWithExporter(exp EventExporter, ev *utils.CGREvent, oneTime bool
 			utils.MetaVars: utils.MapStorage{utils.MetaTenant: ev.Tenant},
 		}
 
-		// Blank statement is needed to avoid panic if the cast would fail. If CostDetails is not present in the
-		// map or it is not castable, the "*ec" key will still be created, but with a nil value inside. This is to
-		// prevent encountering the "unsupported field prefix: <*ec>" error. Might need a revision in the future.
-		dsMap[utils.MetaEC], _ = ev.Event[utils.CostDetails].(*engine.EventCost)
+		var canCast bool
+		dsMap[utils.MetaEC], canCast = ev.Event[utils.CostDetails].(*engine.EventCost)
+		if !canCast {
+			dsMap[utils.MetaEC] = engine.NewBareEventCost()
+		}
 
 		err = engine.NewExportRequest(dsMap,
 			utils.FirstNonEmpty(ev.Tenant, cfg.GeneralCfg().DefaultTenant),
