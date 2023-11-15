@@ -701,6 +701,7 @@ const (
 	ResourceUsage           = "ResourceUsage"
 	MetaStrip               = "*strip"
 	MetaDuration            = "*duration"
+	MetaDurationFormat      = "*durfmt"
 	MetaLibPhoneNumber      = "*libphonenumber"
 	MetaTimeString          = "*time_string"
 	MetaIP2Hex              = "*ip2hex"
