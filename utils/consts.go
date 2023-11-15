@@ -1566,6 +1566,7 @@ const (
 	CDRsV1StoreSessionCost    = "CDRsV1.StoreSessionCost"
 	CDRsV1ProcessEvent        = "CDRsV1.ProcessEvent"
 	CDRsV1ProcessEventWithGet = "CDRsV1.ProcessEventWithGet"
+	CDRsV1ProcessStoredEvents = "CDRsV1.ProcessStoredEvents"
 	CDRsV1Ping                = "CDRsV1.Ping"
 	CDRsV2                    = "CDRsV2"
 	CDRsV2StoreSessionCost    = "CDRsV2.StoreSessionCost"

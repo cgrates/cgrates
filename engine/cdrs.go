@@ -20,6 +20,7 @@ package engine
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
 
@@ -444,5 +445,29 @@ func populateCost(cgrOpts map[string]any) *utils.Decimal {
 	if rtCost, has := cgrOpts[utils.MetaRateSCost]; has {
 		return rtCost.(utils.RateProfileCost).Cost
 	}
+	return nil
+}
+
+// V1ProcessStoredEvents processes stored events based on provided filters.
+func (cdrS *CDRServer) V1ProcessStoredEvents(ctx *context.Context, args *CDRFilters, reply *string) error {
+	if args.Tenant == utils.EmptyString {
+		args.Tenant = cdrS.cfg.GeneralCfg().DefaultTenant
+	}
+	fltrs, err := PrepareFilters(ctx, args.FilterIDs, args.Tenant, cdrS.dm)
+	if err != nil {
+		return fmt.Errorf("preparing filters failed: %w", err)
+	}
+	cdrs, err := cdrS.db.GetCDRs(ctx, fltrs, args.APIOpts)
+	if err != nil {
+		return fmt.Errorf("retrieving CDRs failed: %w", err)
+	}
+	for _, cdr := range cdrs {
+		event := cdr.CGREvent()
+		_, err := cdrS.processEvent(ctx, event)
+		if err != nil && !errors.Is(err, utils.ErrPartiallyExecuted) {
+			return fmt.Errorf("processing event %s failed: %w", event.ID, err)
+		}
+	}
+	*reply = utils.OK
 	return nil
 }

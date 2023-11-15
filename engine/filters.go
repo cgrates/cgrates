@@ -908,3 +908,21 @@ func (fltr *FilterRule) FieldAsInterface(fldPath []string) (_ any, err error) {
 		return fltr.Values, nil
 	}
 }
+
+// PrepareFilters retrieves and compiles the filters identified by filterIDs for the specified tenant.
+func PrepareFilters(ctx *context.Context, filterIDs []string, tenant string,
+	dm *DataManager) ([]*Filter, error) {
+
+	fltrs := make([]*Filter, 0, len(filterIDs))
+	for _, fltrID := range filterIDs {
+		fltr, err := dm.GetFilter(ctx, tenant, fltrID, true, true, utils.NonTransactional)
+		if err != nil {
+			return nil, fmt.Errorf("retrieving filter %s failed: %w", fltrID, err)
+		}
+		if err = fltr.Compile(); err != nil {
+			return nil, fmt.Errorf("compiling filter %s failed: %w", fltrID, err)
+		}
+		fltrs = append(fltrs, fltr)
+	}
+	return fltrs, nil
+}

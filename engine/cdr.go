@@ -85,7 +85,7 @@ func GetUniqueCDRID(cgrEv *utils.CGREvent) string {
 	return utils.UUIDSha1Prefix()
 }
 
-func NewCGREventFromCDR(cdr *CDR) *utils.CGREvent {
+func (cdr *CDR) CGREvent() *utils.CGREvent {
 	return &utils.CGREvent{
 		Tenant:  cdr.Tenant,
 		ID:      utils.Sha1(),
@@ -106,4 +106,10 @@ func checkNestedFields(elem string, values []string) bool {
 	}
 	return false
 
+}
+
+type CDRFilters struct {
+	Tenant    string
+	FilterIDs []string
+	APIOpts   map[string]interface{}
 }

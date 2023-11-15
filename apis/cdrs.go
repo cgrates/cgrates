@@ -27,18 +27,12 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-type CDRFilters struct {
-	Tenant    string
-	FilterIDs []string
-	APIOpts   map[string]interface{}
-}
-
 // GetCDRs retrieves a list of CDRs matching the specified filters.
-func (admS AdminSv1) GetCDRs(ctx *context.Context, args *CDRFilters, reply *[]*engine.CDR) error {
+func (admS AdminSv1) GetCDRs(ctx *context.Context, args *engine.CDRFilters, reply *[]*engine.CDR) error {
 	if args.Tenant == utils.EmptyString {
 		args.Tenant = admS.cfg.GeneralCfg().DefaultTenant
 	}
-	fltrs, err := admS.prepareFilters(ctx, args.FilterIDs, args.Tenant)
+	fltrs, err := engine.PrepareFilters(ctx, args.FilterIDs, args.Tenant, admS.dm)
 	if err != nil {
 		return fmt.Errorf("preparing filters failed: %w", err)
 	}
@@ -51,11 +45,11 @@ func (admS AdminSv1) GetCDRs(ctx *context.Context, args *CDRFilters, reply *[]*e
 }
 
 // RemoveCDRs removes CDRs matching the specified filters.
-func (admS AdminSv1) RemoveCDRs(ctx *context.Context, args *CDRFilters, reply *string) (err error) {
+func (admS AdminSv1) RemoveCDRs(ctx *context.Context, args *engine.CDRFilters, reply *string) (err error) {
 	if args.Tenant == utils.EmptyString {
 		args.Tenant = admS.cfg.GeneralCfg().DefaultTenant
 	}
-	fltrs, err := admS.prepareFilters(ctx, args.FilterIDs, args.Tenant)
+	fltrs, err := engine.PrepareFilters(ctx, args.FilterIDs, args.Tenant, admS.dm)
 	if err != nil {
 		return fmt.Errorf("preparing filters failed: %w", err)
 	}
@@ -64,29 +58,6 @@ func (admS AdminSv1) RemoveCDRs(ctx *context.Context, args *CDRFilters, reply *s
 	}
 	*reply = utils.OK
 	return
-}
-
-// prepareFilters retrieves and compiles the filters identified by filterIDs for the specified tenant.
-func (admS AdminSv1) prepareFilters(ctx *context.Context, filterIDs []string, tenant string,
-) ([]*engine.Filter, error) {
-
-	fltrs := make([]*engine.Filter, 0, len(filterIDs))
-	for _, fltrID := range filterIDs {
-		var singleFltr engine.Filter
-		err := admS.GetFilter(ctx, &utils.TenantIDWithAPIOpts{
-			TenantID: &utils.TenantID{
-				Tenant: tenant,
-				ID:     fltrID,
-			}}, &singleFltr)
-		if err != nil {
-			return nil, fmt.Errorf("retrieving filter %s failed: %w", fltrID, err)
-		}
-		if err = singleFltr.Compile(); err != nil {
-			return nil, fmt.Errorf("compiling filter %s failed: %w", fltrID, err)
-		}
-		fltrs = append(fltrs, &singleFltr)
-	}
-	return fltrs, nil
 }
 
 // NewCDRsV1 constructs the RPC Object for CDRsV1
@@ -110,4 +81,10 @@ func (cdrSv1 *CDRsV1) ProcessEvent(ctx *context.Context, args *utils.CGREvent,
 func (cdrSv1 *CDRsV1) ProcessEventWithGet(ctx *context.Context, args *utils.CGREvent,
 	reply *[]*utils.EventsWithOpts) error {
 	return cdrSv1.cdrS.V1ProcessEventWithGet(ctx, args, reply)
+}
+
+// ProcessStoredEvents processes stored events based on provided filters.
+func (cdrSv1 *CDRsV1) ProcessStoredEvents(ctx *context.Context, args *engine.CDRFilters,
+	reply *string) error {
+	return cdrSv1.cdrS.V1ProcessStoredEvents(ctx, args, reply)
 }
