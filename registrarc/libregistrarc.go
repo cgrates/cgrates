@@ -47,6 +47,11 @@ func NewRegisterArgs(cfg *config.CGRConfig, tnt string, hostCfgs []*config.Remot
 				utils.RegistrarC, err))
 			return
 		}
+
+		if hostCfg.ID == "" {
+			hostCfg.ID = cfg.GeneralCfg().NodeID
+		}
+
 		rargs.Hosts[i] = &RegisterHostCfg{
 			ID:        hostCfg.ID,
 			Port:      port,
