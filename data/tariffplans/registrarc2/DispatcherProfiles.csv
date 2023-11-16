@@ -1,0 +1,2 @@
+#Tenant,ID,Subsystems,FilterIDs,ActivationInterval,Strategy,StrategyParameters,ConnID,ConnFilterIDs,ConnWeight,ConnBlocker,ConnParameters,Weight
+cgrates.org,DSP,*any,,,*weight,,NODE1,,20,false,,10
