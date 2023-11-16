@@ -2,3 +2,4 @@
 TOPUP_RST_MONETARY_10,*topup_reset,,,,*monetary,,*any,,,*unlimited,,10,10,false,false,10
 TOPUP_MONETARY_10,*topup,,,,*monetary,,*any,,,*unlimited,,10,10,false,false,10
 TOPUP_RST_DATA_100,*topup_reset,,,,*data,,*any,,,*monthly,,4096,10,false,false,10
+ACTION_TOPUP_RESET_SMS,*topup_reset,,,,*sms,,*any,,,*unlimited,,500,10,false,false,10
