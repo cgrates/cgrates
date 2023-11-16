@@ -32,7 +32,7 @@ func (admS AdminSv1) GetCDRs(ctx *context.Context, args *engine.CDRFilters, repl
 	if args.Tenant == utils.EmptyString {
 		args.Tenant = admS.cfg.GeneralCfg().DefaultTenant
 	}
-	fltrs, err := engine.PrepareFilters(ctx, args.FilterIDs, args.Tenant, admS.dm)
+	fltrs, err := engine.GetFilters(ctx, args.FilterIDs, args.Tenant, admS.dm)
 	if err != nil {
 		return fmt.Errorf("preparing filters failed: %w", err)
 	}
@@ -49,7 +49,7 @@ func (admS AdminSv1) RemoveCDRs(ctx *context.Context, args *engine.CDRFilters, r
 	if args.Tenant == utils.EmptyString {
 		args.Tenant = admS.cfg.GeneralCfg().DefaultTenant
 	}
-	fltrs, err := engine.PrepareFilters(ctx, args.FilterIDs, args.Tenant, admS.dm)
+	fltrs, err := engine.GetFilters(ctx, args.FilterIDs, args.Tenant, admS.dm)
 	if err != nil {
 		return fmt.Errorf("preparing filters failed: %w", err)
 	}
