@@ -909,8 +909,8 @@ func (fltr *FilterRule) FieldAsInterface(fldPath []string) (_ any, err error) {
 	}
 }
 
-// PrepareFilters retrieves and compiles the filters identified by filterIDs for the specified tenant.
-func PrepareFilters(ctx *context.Context, filterIDs []string, tenant string,
+// GetFilters retrieves and compiles the filters identified by filterIDs for the specified tenant.
+func GetFilters(ctx *context.Context, filterIDs []string, tenant string,
 	dm *DataManager) ([]*Filter, error) {
 
 	fltrs := make([]*Filter, 0, len(filterIDs))

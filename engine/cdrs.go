@@ -453,7 +453,7 @@ func (cdrS *CDRServer) V1ProcessStoredEvents(ctx *context.Context, args *CDRFilt
 	if args.Tenant == utils.EmptyString {
 		args.Tenant = cdrS.cfg.GeneralCfg().DefaultTenant
 	}
-	fltrs, err := PrepareFilters(ctx, args.FilterIDs, args.Tenant, cdrS.dm)
+	fltrs, err := GetFilters(ctx, args.FilterIDs, args.Tenant, cdrS.dm)
 	if err != nil {
 		return fmt.Errorf("preparing filters failed: %w", err)
 	}
