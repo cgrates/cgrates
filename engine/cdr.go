@@ -94,6 +94,15 @@ func (cdr *CDR) CGREvent() *utils.CGREvent {
 	}
 }
 
+// CDRsToCGREvents converts a slice of *CDR to a slice of *utils.CGREvent.
+func CDRsToCGREvents(cdrs []*CDR) []*utils.CGREvent {
+	cgrEvs := make([]*utils.CGREvent, 0, len(cdrs))
+	for _, cdr := range cdrs {
+		cgrEvs = append(cgrEvs, cdr.CGREvent())
+	}
+	return cgrEvs
+}
+
 // checkNestedFields checks if there are elements or values nested (e.g *opts.*rateSCost.Cost)
 func checkNestedFields(elem string, values []string) bool {
 	if len(strings.Split(elem, utils.NestingSep)) > 2 {
