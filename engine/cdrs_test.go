@@ -1183,7 +1183,7 @@ func TestCDRsProcessEventMock(t *testing.T) {
 		},
 		APIOpts: nil,
 	}
-	_, err := newCDRSrv.processEvent(context.Background(), cgrEv)
+	_, err := newCDRSrv.processEvents(context.Background(), []*utils.CGREvent{cgrEv})
 	if err != nil {
 		t.Errorf("\nExpected <%+v> \n, received <%+v>", nil, err)
 	}
@@ -1256,7 +1256,7 @@ func TestCDRsProcessEventMockSkipOpts(t *testing.T) {
 		},
 		APIOpts: nil,
 	}
-	_, err := newCDRSrv.processEvent(context.Background(), cgrEv)
+	_, err := newCDRSrv.processEvents(context.Background(), []*utils.CGREvent{cgrEv})
 	if err != nil {
 		t.Errorf("\nExpected <%+v> \n, received <%+v>", nil, err)
 	}
@@ -1351,7 +1351,7 @@ func TestCDRsProcessEventMockAttrsErr(t *testing.T) {
 			"*context":           utils.MetaCDRs,
 		},
 	}
-	_, err := newCDRSrv.processEvent(context.Background(), cgrEv)
+	_, err := newCDRSrv.processEvents(context.Background(), []*utils.CGREvent{cgrEv})
 	if err == nil || err.Error() != "ATTRIBUTES_ERROR:MANDATORY_IE_MISSING: [connIDs]" {
 		t.Errorf("\nExpected <%+v> \n, received <%+v>", "ATTRIBUTES_ERROR:MANDATORY_IE_MISSING: [connIDs]", err)
 	}
@@ -1415,9 +1415,10 @@ func TestCDRsProcessEventMockAttrsErrBoolOpts(t *testing.T) {
 			"*context":           utils.MetaCDRs,
 		},
 	}
-	_, err := newCDRSrv.processEvent(context.Background(), cgrEv)
-	if err == nil || err.Error() != "cannot convert field: 1s to bool" {
-		t.Errorf("\nExpected <%+v> \n, received <%+v>", "cannot convert field: 1s to bool", err)
+	expectedErr := `retrieving *attributes option failed: cannot convert field: 1s to bool`
+	_, err := newCDRSrv.processEvents(context.Background(), []*utils.CGREvent{cgrEv})
+	if err == nil || err.Error() != expectedErr {
+		t.Errorf("expected <%v>, received <%v>", expectedErr, err)
 	}
 }
 
@@ -1479,7 +1480,7 @@ func TestCDRsProcessEventMockChrgsErr(t *testing.T) {
 			"*context":         utils.MetaCDRs,
 		},
 	}
-	_, err := newCDRSrv.processEvent(context.Background(), cgrEv)
+	_, err := newCDRSrv.processEvents(context.Background(), []*utils.CGREvent{cgrEv})
 	if err == nil || err.Error() != "CHARGERS_ERROR:MANDATORY_IE_MISSING: [connIDs]" {
 		t.Errorf("\nExpected <%+v> \n, received <%+v>", "CHARGERS_ERROR:MANDATORY_IE_MISSING: [connIDs]", err)
 	}
@@ -1544,9 +1545,10 @@ func TestCDRsProcessEventMockChrgsErrBoolOpts(t *testing.T) {
 			"*context":         utils.MetaCDRs,
 		},
 	}
-	_, err := newCDRSrv.processEvent(context.Background(), cgrEv)
-	if err == nil || err.Error() != "cannot convert field: 1s to bool" {
-		t.Errorf("\nExpected <%+v> \n, received <%+v>", "cannot convert field: 1s to bool", err)
+	expectedErr := `retrieving *chargers option failed: cannot convert field: 1s to bool`
+	_, err := newCDRSrv.processEvents(context.Background(), []*utils.CGREvent{cgrEv})
+	if err == nil || err.Error() != expectedErr {
+		t.Errorf("expected <%v>, received <%v>", expectedErr, err)
 	}
 
 }
@@ -1609,7 +1611,7 @@ func TestCDRsProcessEventMockRateSErr(t *testing.T) {
 			"*context":      utils.MetaCDRs,
 		},
 	}
-	_, err := newCDRSrv.processEvent(context.Background(), cgrEv)
+	_, err := newCDRSrv.processEvents(context.Background(), []*utils.CGREvent{cgrEv})
 	if err == nil || err.Error() != "PARTIALLY_EXECUTED" {
 		t.Errorf("\nExpected <%+v> \n, received <%+v>", "PARTIALLY_EXECUTED", err)
 	}
@@ -1674,9 +1676,10 @@ func TestCDRsProcessEventMockRateSErrBoolOpts(t *testing.T) {
 			"*context":      utils.MetaCDRs,
 		},
 	}
-	_, err := newCDRSrv.processEvent(context.Background(), cgrEv)
-	if err == nil || err.Error() != "cannot convert field: 1s to bool" {
-		t.Errorf("\nExpected <%+v> \n, received <%+v>", "cannot convert field: 1s to bool", err)
+	expectedErr := `retrieving *rates option failed: cannot convert field: 1s to bool`
+	_, err := newCDRSrv.processEvents(context.Background(), []*utils.CGREvent{cgrEv})
+	if err == nil || err.Error() != expectedErr {
+		t.Errorf("expected <%v>, received <%v>", expectedErr, err)
 	}
 
 }
@@ -1739,7 +1742,7 @@ func TestCDRsProcessEventMockAcntsErr(t *testing.T) {
 			"*context":         utils.MetaCDRs,
 		},
 	}
-	_, err := newCDRSrv.processEvent(context.Background(), cgrEv)
+	_, err := newCDRSrv.processEvents(context.Background(), []*utils.CGREvent{cgrEv})
 	if err == nil || err.Error() != "PARTIALLY_EXECUTED" {
 		t.Errorf("\nExpected <%+v> \n, received <%+v>", "PARTIALLY_EXECUTED", err)
 	}
@@ -1804,9 +1807,10 @@ func TestCDRsProcessEventMockAcntsErrBoolOpts(t *testing.T) {
 			"*context":         utils.MetaCDRs,
 		},
 	}
-	_, err := newCDRSrv.processEvent(context.Background(), cgrEv)
-	if err == nil || err.Error() != "cannot convert field: 1s to bool" {
-		t.Errorf("\nExpected <%+v> \n, received <%+v>", "cannot convert field: 1s to bool", err)
+	expectedErr := `retrieving *accounts option failed: cannot convert field: 1s to bool`
+	_, err := newCDRSrv.processEvents(context.Background(), []*utils.CGREvent{cgrEv})
+	if err == nil || err.Error() != expectedErr {
+		t.Errorf("expected <%v>, received <%v>", expectedErr, err)
 	}
 
 }
@@ -1870,7 +1874,7 @@ func TestCDRsProcessEventMockExportErr(t *testing.T) {
 			"*context":           utils.MetaCDRs,
 		},
 	}
-	_, err := newCDRSrv.processEvent(context.Background(), cgrEv)
+	_, err := newCDRSrv.processEvents(context.Background(), []*utils.CGREvent{cgrEv})
 	if err == nil || err.Error() != "PARTIALLY_EXECUTED" {
 		t.Errorf("\nExpected <%+v> \n, received <%+v>", "PARTIALLY_EXECUTED", err)
 	}
@@ -1935,9 +1939,10 @@ func TestCDRsProcessEventMockExportErrBoolOpts(t *testing.T) {
 			"*context":           utils.MetaCDRs,
 		},
 	}
-	_, err := newCDRSrv.processEvent(context.Background(), cgrEv)
-	if err == nil || err.Error() != "cannot convert field: 1s to bool" {
-		t.Errorf("\nExpected <%+v> \n, received <%+v>", "cannot convert field: 1s to bool", err)
+	expectedErr := `retrieving *cdrsExport option failed: cannot convert field: 1s to bool`
+	_, err := newCDRSrv.processEvents(context.Background(), []*utils.CGREvent{cgrEv})
+	if err == nil || err.Error() != expectedErr {
+		t.Errorf("expected <%v>, received <%v>", expectedErr, err)
 	}
 
 }
@@ -2000,7 +2005,7 @@ func TestCDRsProcessEventMockThdsErr(t *testing.T) {
 			"*context":           utils.MetaCDRs,
 		},
 	}
-	_, err := newCDRSrv.processEvent(context.Background(), cgrEv)
+	_, err := newCDRSrv.processEvents(context.Background(), []*utils.CGREvent{cgrEv})
 	if err == nil || err.Error() != "PARTIALLY_EXECUTED" {
 		t.Errorf("\nExpected <%+v> \n, received <%+v>", "PARTIALLY_EXECUTED", err)
 	}
@@ -2065,9 +2070,10 @@ func TestCDRsProcessEventMockThdsErrBoolOpts(t *testing.T) {
 			"*context":           utils.MetaCDRs,
 		},
 	}
-	_, err := newCDRSrv.processEvent(context.Background(), cgrEv)
-	if err == nil || err.Error() != "cannot convert field: 1s to bool" {
-		t.Errorf("\nExpected <%+v> \n, received <%+v>", "cannot convert field: 1s to bool", err)
+	expectedErr := `retrieving *thresholds option failed: cannot convert field: 1s to bool`
+	_, err := newCDRSrv.processEvents(context.Background(), []*utils.CGREvent{cgrEv})
+	if err == nil || err.Error() != expectedErr {
+		t.Errorf("expected <%v>, received <%v>", expectedErr, err)
 	}
 
 }
@@ -2130,7 +2136,7 @@ func TestCDRsProcessEventMockStatsErr(t *testing.T) {
 			"*context":      utils.MetaCDRs,
 		},
 	}
-	_, err := newCDRSrv.processEvent(context.Background(), cgrEv)
+	_, err := newCDRSrv.processEvents(context.Background(), []*utils.CGREvent{cgrEv})
 	if err == nil || err.Error() != "PARTIALLY_EXECUTED" {
 		t.Errorf("\nExpected <%+v> \n, received <%+v>", "PARTIALLY_EXECUTED", err)
 	}
@@ -2195,9 +2201,10 @@ func TestCDRsProcessEventMockStatsErrGetBoolOpts(t *testing.T) {
 			"*context":      utils.MetaCDRs,
 		},
 	}
-	_, err := newCDRSrv.processEvent(context.Background(), cgrEv)
-	if err == nil || err.Error() != "cannot convert field: 1s to bool" {
-		t.Errorf("\nExpected <%+v> \n, received <%+v>", "cannot convert field: 1s to bool", err)
+	expectedErr := `retrieving *stats option failed: cannot convert field: 1s to bool`
+	_, err := newCDRSrv.processEvents(context.Background(), []*utils.CGREvent{cgrEv})
+	if err == nil || err.Error() != expectedErr {
+		t.Errorf("expected <%v>, received <%v>", expectedErr, err)
 	}
 
 }
@@ -2589,10 +2596,11 @@ func TestCDRsV1ProcessEventWithGetMockCacheErr(t *testing.T) {
 	defer func() {
 		config.CgrConfig().CacheCfg().Partitions[utils.CacheRPCResponses] = defaultConf
 	}()
+	expectedErr := `retrieving *attributes option failed: cannot convert field: 1s to bool`
 	var rply []*utils.EventsWithOpts
 	err := newCDRSrv.V1ProcessEventWithGet(context.Background(), cgrEv, &rply)
-	if err == nil || err.Error() != "cannot convert field: 1s to bool" {
-		t.Errorf("\nExpected <%+v> \n, received <%+v>", "cannot convert field: 1s to bool", err)
+	if err == nil || err.Error() != expectedErr {
+		t.Errorf("expected <%v>, received <%v>", expectedErr, err)
 	}
 
 }
@@ -2997,7 +3005,7 @@ func TestCDRsProcessEventMockThdsEcCostIface(t *testing.T) {
 			},
 		},
 	}
-	_, err := newCDRSrv.processEvent(context.Background(), cgrEv)
+	_, err := newCDRSrv.processEvents(context.Background(), []*utils.CGREvent{cgrEv})
 	if err == nil || err.Error() != "PARTIALLY_EXECUTED" {
 		t.Errorf("\nExpected <%+v> \n, received <%+v>", "PARTIALLY_EXECUTED", err)
 	}
@@ -3039,7 +3047,7 @@ func TestCDRsProcessEventMockThdsEcCostIfaceMarshalErr(t *testing.T) {
 			},
 		},
 	}
-	_, err := newCDRSrv.processEvent(context.Background(), cgrEv)
+	_, err := newCDRSrv.processEvents(context.Background(), []*utils.CGREvent{cgrEv})
 	if err == nil || err.Error() != "json: unsupported type: chan string" {
 		t.Errorf("\nExpected <%+v> \n, received <%+v>", "json: unsupported type: chan string", err)
 	}
@@ -3082,7 +3090,7 @@ func TestCDRsProcessEventMockThdsEcCostIfaceUnmarshalErr(t *testing.T) {
 		},
 	}
 	expErr := "json: cannot unmarshal string into Go struct field EventCharges.Charges of type []*utils.ChargeEntry"
-	_, err := newCDRSrv.processEvent(context.Background(), cgrEv)
+	_, err := newCDRSrv.processEvents(context.Background(), []*utils.CGREvent{cgrEv})
 	if err == nil || err.Error() != expErr {
 		t.Errorf("\nExpected <%+v> \n, received <%+v>", expErr, err)
 	}

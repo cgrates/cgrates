@@ -200,179 +200,197 @@ func (cdrS *CDRServer) eeSProcessEvent(ctx *context.Context, cgrEv *utils.CGREve
 	return
 }
 
-// processEvent processes a CGREvent based on arguments
-// in case of partially executed, both error and evs will be returned
-func (cdrS *CDRServer) processEvent(ctx *context.Context, ev *utils.CGREvent) (evs []*utils.EventsWithOpts, err error) {
-	// making the options
-	var attrS bool
-	if attrS, err = GetBoolOpts(ctx, ev.Tenant, ev.AsDataProvider(), cdrS.fltrS, cdrS.cfg.CdrsCfg().Opts.Attributes,
-		config.CDRsAttributesDftOpt, utils.MetaAttributes); err != nil {
-		return
-	}
-	if attrS {
+// processEvents processes CGREvents based on arguments.
+// In case of partially executed, both the error and the events will be returned.
+func (cdrS *CDRServer) processEvents(ctx *context.Context, evs []*utils.CGREvent) ([]*utils.EventsWithOpts, error) {
+	for _, ev := range evs {
+		attrS, err := GetBoolOpts(ctx, ev.Tenant, ev.AsDataProvider(), cdrS.fltrS, cdrS.cfg.CdrsCfg().Opts.Attributes,
+			config.CDRsAttributesDftOpt, utils.MetaAttributes)
+		if err != nil {
+			return nil, fmt.Errorf("retrieving %s option failed: %w", utils.MetaAttributes, err)
+		}
+		if !attrS {
+			continue
+		}
 		if err = cdrS.attrSProcessEvent(ctx, ev); err != nil {
 			utils.Logger.Warning(
-				fmt.Sprintf("<%s> error: <%s> processing event %+v with %s",
-					utils.CDRs, err.Error(), utils.ToJSON(ev), utils.AttributeS))
-			err = utils.NewErrAttributeS(err)
-			return
+				fmt.Sprintf("<%s> error: <%v> processing event %s with %s",
+					utils.CDRs, err, utils.ToJSON(ev), utils.AttributeS))
+			return nil, utils.NewErrAttributeS(err)
 		}
 	}
 
-	var cgrEvs []*utils.CGREvent
-	var chrgS bool
-	if chrgS, err = GetBoolOpts(ctx, ev.Tenant, ev.AsDataProvider(), cdrS.fltrS, cdrS.cfg.CdrsCfg().Opts.Chargers,
-		config.CDRsChargersDftOpt, utils.MetaChargers); err != nil {
-		return
-	}
-	if chrgS {
-		if cgrEvs, err = cdrS.chrgrSProcessEvent(ctx, ev); err != nil {
-			utils.Logger.Warning(
-				fmt.Sprintf("<%s> error: <%s> processing event %+v with %s",
-					utils.CDRs, err.Error(), utils.ToJSON(ev), utils.ChargerS))
-			err = utils.NewErrChargerS(err)
-			return
+	// Allocate capacity equal to the number of events for slight optimization.
+	cgrEvs := make([]*utils.CGREvent, 0, len(evs))
+
+	for _, ev := range evs {
+		chrgS, err := GetBoolOpts(ctx, ev.Tenant, ev.AsDataProvider(), cdrS.fltrS, cdrS.cfg.CdrsCfg().Opts.Chargers,
+			config.CDRsChargersDftOpt, utils.MetaChargers)
+		if err != nil {
+			return nil, fmt.Errorf("retrieving %s option failed: %w", utils.MetaChargers, err)
 		}
-	} else { // ChargerS not requested, charge the original event
-		cgrEvs = []*utils.CGREvent{ev}
+		if !chrgS {
+			cgrEvs = append(cgrEvs, ev)
+			continue
+		}
+		chrgEvs, err := cdrS.chrgrSProcessEvent(ctx, ev)
+		if err != nil {
+			utils.Logger.Warning(
+				fmt.Sprintf("<%s> error: <%v> processing event %s with %s",
+					utils.CDRs, err, utils.ToJSON(ev), utils.ChargerS))
+			return nil, utils.NewErrChargerS(err)
+		}
+		cgrEvs = append(cgrEvs, chrgEvs...)
 	}
 
 	var partiallyExecuted bool // from here actions are optional and a general error is returned
 
-	var rateS bool
 	for _, cgrEv := range cgrEvs {
-		if rateS, err = GetBoolOpts(ctx, cgrEv.Tenant, cgrEv.AsDataProvider(), cdrS.fltrS, cdrS.cfg.CdrsCfg().Opts.Rates,
-			config.CDRsRatesDftOpt, utils.MetaRates); err != nil {
-			return
+		rateS, err := GetBoolOpts(ctx, cgrEv.Tenant, cgrEv.AsDataProvider(), cdrS.fltrS, cdrS.cfg.CdrsCfg().Opts.Rates,
+			config.CDRsRatesDftOpt, utils.MetaRates)
+		if err != nil {
+			return nil, fmt.Errorf("retrieving %s option failed: %w", utils.MetaRates, err)
 		}
-		if rateS {
-			if err := cdrS.rateSCostForEvent(ctx, cgrEv); err != nil {
-				utils.Logger.Warning(
-					fmt.Sprintf("<%s> error: <%s> processing event %+v with %s",
-						utils.CDRs, err.Error(), utils.ToJSON(cgrEv), utils.RateS))
-				partiallyExecuted = true
-			}
+		if !rateS {
+			continue
+		}
+		if err := cdrS.rateSCostForEvent(ctx, cgrEv); err != nil {
+			utils.Logger.Warning(
+				fmt.Sprintf("<%s> error: <%v> processing event %s with %s",
+					utils.CDRs, err, utils.ToJSON(cgrEv), utils.RateS))
+			partiallyExecuted = true
 		}
 	}
 
-	var acntS bool
 	for _, cgrEv := range cgrEvs {
-		if acntS, err = GetBoolOpts(ctx, cgrEv.Tenant, cgrEv.AsDataProvider(), cdrS.fltrS, cdrS.cfg.CdrsCfg().Opts.Accounts,
-			config.CDRsAccountsDftOpt, utils.MetaAccounts); err != nil {
-			return
+		acntS, err := GetBoolOpts(ctx, cgrEv.Tenant, cgrEv.AsDataProvider(), cdrS.fltrS, cdrS.cfg.CdrsCfg().Opts.Accounts,
+			config.CDRsAccountsDftOpt, utils.MetaAccounts)
+		if err != nil {
+			return nil, fmt.Errorf("retrieving %s option failed: %w", utils.MetaAccounts, err)
 		}
-		if acntS {
-			if ecCostIface, wasCharged := cgrEv.APIOpts[utils.MetaAccountSCost]; wasCharged {
-				// before converting into EventChargers, we must get the JSON encoding and Unmarshal it into an EventChargers
-				var btsEvCh []byte
-				btsEvCh, err = json.Marshal(ecCostIface.(map[string]any))
-				if err != nil {
-					return
-				}
-				ecCost := new(utils.EventCharges)
-				if err = json.Unmarshal(btsEvCh, &ecCost); err != nil {
-					return
-				}
-				// call the refund
-				if err := cdrS.accountSRefundCharges(ctx, cgrEv.Tenant, ecCost, cgrEv.APIOpts); err != nil {
-					utils.Logger.Warning(
-						fmt.Sprintf("<%s> error: <%s> processing event %+v with %s",
-							utils.CDRs, err.Error(), utils.ToJSON(cgrEv), utils.AccountS))
-					partiallyExecuted = true
-				}
+		if !acntS {
+			continue
+		}
+		if ecCostIface, wasCharged := cgrEv.APIOpts[utils.MetaAccountSCost]; wasCharged {
+			ecCostMap, ok := ecCostIface.(map[string]any)
+			if !ok {
+				return nil, fmt.Errorf("expected %s to be a map[string]any, got %T", utils.MetaAccountSCost, ecCostIface)
 			}
-			if err := cdrS.accountSDebitEvent(ctx, cgrEv); err != nil {
+
+			// before converting into EventChargers, we must get the JSON encoding and Unmarshal it into an EventChargers
+			btsEvCh, err := json.Marshal(ecCostMap)
+			if err != nil {
+				return nil, err
+			}
+
+			var ecCost utils.EventCharges
+			if err = json.Unmarshal(btsEvCh, &ecCost); err != nil {
+				return nil, err
+			}
+
+			if err := cdrS.accountSRefundCharges(ctx, cgrEv.Tenant, &ecCost, cgrEv.APIOpts); err != nil {
 				utils.Logger.Warning(
-					fmt.Sprintf("<%s> error: <%s> processing event %+v with %s",
-						utils.CDRs, err.Error(), utils.ToJSON(cgrEv), utils.AccountS))
+					fmt.Sprintf("<%s> error: <%v> processing event %s with %s",
+						utils.CDRs, err, utils.ToJSON(cgrEv), utils.AccountS))
 				partiallyExecuted = true
 			}
 		}
+		if err := cdrS.accountSDebitEvent(ctx, cgrEv); err != nil {
+			utils.Logger.Warning(
+				fmt.Sprintf("<%s> error: <%v> processing event %s with %s",
+					utils.CDRs, err, utils.ToJSON(cgrEv), utils.AccountS))
+			partiallyExecuted = true
+		}
 	}
+
 	// populate cost from accounts or rates for every event
 	for _, cgrEv := range cgrEvs {
 		if cost := populateCost(cgrEv.APIOpts); cost != nil {
 			cgrEv.APIOpts[utils.MetaCost] = cost
 		}
 	}
-	var export bool
+
 	for _, cgrEv := range cgrEvs {
-		if export, err = GetBoolOpts(ctx, cgrEv.Tenant, cgrEv.AsDataProvider(), cdrS.fltrS, cdrS.cfg.CdrsCfg().Opts.Export,
-			config.CDRsExportDftOpt, utils.OptsCDRsExport); err != nil {
-			return
+		export, err := GetBoolOpts(ctx, cgrEv.Tenant, cgrEv.AsDataProvider(), cdrS.fltrS, cdrS.cfg.CdrsCfg().Opts.Export,
+			config.CDRsExportDftOpt, utils.OptsCDRsExport)
+		if err != nil {
+			return nil, fmt.Errorf("retrieving %s option failed: %w", utils.OptsCDRsExport, err)
 		}
-		if export {
-			evWithOpts := &utils.CGREventWithEeIDs{
-				CGREvent: cgrEv,
-				EeIDs:    cdrS.cfg.CdrsCfg().OnlineCDRExports,
-			}
-			if err := cdrS.eeSProcessEvent(ctx, evWithOpts); err != nil {
-				utils.Logger.Warning(
-					fmt.Sprintf("<%s> error: <%s> exporting cdr %+v",
-						utils.CDRs, err.Error(), utils.ToJSON(evWithOpts)))
-				partiallyExecuted = true
-			}
+		if !export {
+			continue
+		}
+		evWithOpts := &utils.CGREventWithEeIDs{
+			CGREvent: cgrEv,
+			EeIDs:    cdrS.cfg.CdrsCfg().OnlineCDRExports,
+		}
+		if err := cdrS.eeSProcessEvent(ctx, evWithOpts); err != nil {
+			utils.Logger.Warning(
+				fmt.Sprintf("<%s> error: <%v> exporting cdr %s",
+					utils.CDRs, err, utils.ToJSON(evWithOpts)))
+			partiallyExecuted = true
 		}
 	}
 
-	var thdS bool
 	for _, cgrEv := range cgrEvs {
-		if thdS, err = GetBoolOpts(ctx, cgrEv.Tenant, cgrEv.AsDataProvider(), cdrS.fltrS, cdrS.cfg.CdrsCfg().Opts.Thresholds,
-			config.CDRsThresholdsDftOpt, utils.MetaThresholds); err != nil {
-			return
+		thdS, err := GetBoolOpts(ctx, cgrEv.Tenant, cgrEv.AsDataProvider(), cdrS.fltrS, cdrS.cfg.CdrsCfg().Opts.Thresholds,
+			config.CDRsThresholdsDftOpt, utils.MetaThresholds)
+		if err != nil {
+			return nil, fmt.Errorf("retrieving %s option failed: %w", utils.MetaThresholds, err)
 		}
-		if thdS {
-			if err := cdrS.thdSProcessEvent(ctx, cgrEv); err != nil {
-				utils.Logger.Warning(
-					fmt.Sprintf("<%s> error: <%s> processing event %+v with %s",
-						utils.CDRs, err.Error(), utils.ToJSON(cgrEv), utils.ThresholdS))
-				partiallyExecuted = true
-			}
+		if !thdS {
+			continue
+		}
+		if err := cdrS.thdSProcessEvent(ctx, cgrEv); err != nil {
+			utils.Logger.Warning(
+				fmt.Sprintf("<%s> error: <%v> processing event %s with %s",
+					utils.CDRs, err, utils.ToJSON(cgrEv), utils.ThresholdS))
+			partiallyExecuted = true
 		}
 	}
 
-	var stS bool
 	for _, cgrEv := range cgrEvs {
-		if stS, err = GetBoolOpts(ctx, cgrEv.Tenant, cgrEv.AsDataProvider(), cdrS.fltrS, cdrS.cfg.CdrsCfg().Opts.Stats,
-			config.CDRsStatsDftOpt, utils.MetaStats); err != nil {
-			return
+		stS, err := GetBoolOpts(ctx, cgrEv.Tenant, cgrEv.AsDataProvider(), cdrS.fltrS, cdrS.cfg.CdrsCfg().Opts.Stats,
+			config.CDRsStatsDftOpt, utils.MetaStats)
+		if err != nil {
+			return nil, fmt.Errorf("retrieving %s option failed: %w", utils.MetaStats, err)
 		}
-		if stS {
-			if err := cdrS.statSProcessEvent(ctx, cgrEv); err != nil {
-				utils.Logger.Warning(
-					fmt.Sprintf("<%s> error: <%s> processing event %+v with %s",
-						utils.CDRs, err.Error(), utils.ToJSON(cgrEv), utils.StatS))
-				partiallyExecuted = true
-			}
+		if !stS {
+			continue
+		}
+		if err := cdrS.statSProcessEvent(ctx, cgrEv); err != nil {
+			utils.Logger.Warning(
+				fmt.Sprintf("<%s> error: <%v> processing event %s with %s",
+					utils.CDRs, err, utils.ToJSON(cgrEv), utils.StatS))
+			partiallyExecuted = true
 		}
 	}
 
 	// now that we did all the requested processed events, we have to build our EventsWithOpts
-	evs = make([]*utils.EventsWithOpts, len(cgrEvs))
+	outEvs := make([]*utils.EventsWithOpts, len(cgrEvs))
 	for i, cgrEv := range cgrEvs {
-		evs[i] = &utils.EventsWithOpts{
+		outEvs[i] = &utils.EventsWithOpts{
 			Event: cgrEv.Event,
 			Opts:  cgrEv.APIOpts,
 		}
 	}
 
 	if partiallyExecuted {
-		err = utils.ErrPartiallyExecuted
+		return outEvs, utils.ErrPartiallyExecuted
 	}
-	return
+	return outEvs, nil
 }
 
 // V1ProcessEvent will process the CGREvent
-func (cdrS *CDRServer) V1ProcessEvent(ctx *context.Context, arg *utils.CGREvent, reply *string) (err error) {
-	if arg.ID == utils.EmptyString {
-		arg.ID = utils.GenUUID()
+func (cdrS *CDRServer) V1ProcessEvent(ctx *context.Context, args *utils.CGREvent, reply *string) (err error) {
+	if args.ID == utils.EmptyString {
+		args.ID = utils.GenUUID()
 	}
-	if arg.Tenant == utils.EmptyString {
-		arg.Tenant = cdrS.cfg.GeneralCfg().DefaultTenant
+	if args.Tenant == utils.EmptyString {
+		args.Tenant = cdrS.cfg.GeneralCfg().DefaultTenant
 	}
 	// RPC caching
 	if config.CgrConfig().CacheCfg().Partitions[utils.CacheRPCResponses].Limit != 0 {
-		cacheKey := utils.ConcatenatedKey(utils.CDRsV1ProcessEvent, arg.ID)
+		cacheKey := utils.ConcatenatedKey(utils.CDRsV1ProcessEvent, args.ID)
 		refID := guardian.Guardian.GuardIDs("",
 			config.CgrConfig().GeneralCfg().LockingTimeout, cacheKey) // RPC caching needs to be atomic
 		defer guardian.Guardian.UnguardIDs(refID)
@@ -390,7 +408,7 @@ func (cdrS *CDRServer) V1ProcessEvent(ctx *context.Context, arg *utils.CGREvent,
 	}
 	// end of RPC caching
 
-	if _, err = cdrS.processEvent(ctx, arg); err != nil {
+	if _, err = cdrS.processEvents(ctx, []*utils.CGREvent{args}); err != nil {
 		return
 	}
 	*reply = utils.OK
@@ -398,16 +416,16 @@ func (cdrS *CDRServer) V1ProcessEvent(ctx *context.Context, arg *utils.CGREvent,
 }
 
 // V1ProcessEventWithGet has the same logic with V1ProcessEvent except it adds the proccessed events to the reply
-func (cdrS *CDRServer) V1ProcessEventWithGet(ctx *context.Context, arg *utils.CGREvent, evs *[]*utils.EventsWithOpts) (err error) {
-	if arg.ID == utils.EmptyString {
-		arg.ID = utils.GenUUID()
+func (cdrS *CDRServer) V1ProcessEventWithGet(ctx *context.Context, args *utils.CGREvent, evs *[]*utils.EventsWithOpts) (err error) {
+	if args.ID == utils.EmptyString {
+		args.ID = utils.GenUUID()
 	}
-	if arg.Tenant == utils.EmptyString {
-		arg.Tenant = cdrS.cfg.GeneralCfg().DefaultTenant
+	if args.Tenant == utils.EmptyString {
+		args.Tenant = cdrS.cfg.GeneralCfg().DefaultTenant
 	}
 	// RPC caching
 	if config.CgrConfig().CacheCfg().Partitions[utils.CacheRPCResponses].Limit != 0 {
-		cacheKey := utils.ConcatenatedKey(utils.CDRsV1ProcessEventWithGet, arg.ID)
+		cacheKey := utils.ConcatenatedKey(utils.CDRsV1ProcessEventWithGet, args.ID)
 		refID := guardian.Guardian.GuardIDs("",
 			config.CgrConfig().GeneralCfg().LockingTimeout, cacheKey) // RPC caching needs to be atomic
 		defer guardian.Guardian.UnguardIDs(refID)
@@ -425,7 +443,7 @@ func (cdrS *CDRServer) V1ProcessEventWithGet(ctx *context.Context, arg *utils.CG
 	}
 	// end of RPC caching
 	var procEvs []*utils.EventsWithOpts
-	if procEvs, err = cdrS.processEvent(ctx, arg); err != nil {
+	if procEvs, err = cdrS.processEvents(ctx, []*utils.CGREvent{args}); err != nil {
 		return
 	}
 	*evs = procEvs
@@ -461,13 +479,10 @@ func (cdrS *CDRServer) V1ProcessStoredEvents(ctx *context.Context, args *CDRFilt
 	if err != nil {
 		return fmt.Errorf("retrieving CDRs failed: %w", err)
 	}
-	for _, cdr := range cdrs {
-		event := cdr.CGREvent()
-		_, err := cdrS.processEvent(ctx, event)
-		if err != nil && !errors.Is(err, utils.ErrPartiallyExecuted) {
-			return fmt.Errorf("processing event %s failed: %w", event.ID, err)
-		}
+	_, err = cdrS.processEvents(ctx, CDRsToCGREvents(cdrs))
+	if err != nil && !errors.Is(err, utils.ErrPartiallyExecuted) {
+		return fmt.Errorf("processing events failed: %w", err)
 	}
 	*reply = utils.OK
-	return nil
+	return err
 }
