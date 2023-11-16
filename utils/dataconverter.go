@@ -80,6 +80,9 @@ func NewDataConverter(params string) (conv DataConverter, err error) {
 	case params == MetaDuration:
 		return NewDurationConverter(EmptyString)
 	case strings.HasPrefix(params, MetaDurationFormat):
+		if params == MetaDurationFormat {
+			return NewDurationFormatConverter(EmptyString)
+		}
 		return NewDurationFormatConverter(params[len(MetaDurationFormat)+1:])
 	case params == MetaIP2Hex:
 		return new(IP2HexConverter), nil
