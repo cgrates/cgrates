@@ -22,7 +22,6 @@ import (
 	"fmt"
 	"net"
 	"net/url"
-	"path"
 	"strconv"
 	"strings"
 	"time"
@@ -85,21 +84,19 @@ func NewStorDBConn(dbType, host, port, name, user, pass, marshaler string,
 }
 
 func buildURL(scheme, host, port, db, user, pass string) (*url.URL, error) {
-	u, err := url.Parse("//" + host)
-	if err != nil {
-		return nil, err
+	rawURL := scheme + "://"
+	if user != "" && pass != "" {
+		rawURL += url.UserPassword(user, pass).String() + "@"
 	}
 	if port != "0" {
-		u.Host = net.JoinHostPort(u.Host, port)
-	}
-	if user != "" && pass != "" {
-		u.User = url.UserPassword(user, pass)
+		rawURL += net.JoinHostPort(host, port)
+	} else {
+		rawURL += host
 	}
 	if db != "" {
-		u.Path = path.Join(u.Path, db)
+		rawURL += "/" + db
 	}
-	u.Scheme = scheme
-	return u, nil
+	return url.Parse(rawURL)
 }
 
 // SMCost stores one Cost coming from SM
