@@ -1745,10 +1745,7 @@ func (ms *MongoStorage) SetDispatcherProfileDrv(r *DispatcherProfile) error {
 
 func (ms *MongoStorage) RemoveDispatcherProfileDrv(tenant, id string) error {
 	return ms.query(func(sctx mongo.SessionContext) error {
-		dr, err := ms.getCol(ColDpp).DeleteOne(sctx, bson.M{"tenant": tenant, "id": id})
-		if dr.DeletedCount == 0 {
-			return utils.ErrNotFound
-		}
+		_, err := ms.getCol(ColDpp).DeleteOne(sctx, bson.M{"tenant": tenant, "id": id})
 		return err
 	})
 }
@@ -1778,10 +1775,8 @@ func (ms *MongoStorage) SetDispatcherHostDrv(r *DispatcherHost) error {
 
 func (ms *MongoStorage) RemoveDispatcherHostDrv(tenant, id string) error {
 	return ms.query(func(sctx mongo.SessionContext) error {
-		dr, err := ms.getCol(ColDph).DeleteOne(sctx, bson.M{"tenant": tenant, "id": id})
-		if dr.DeletedCount == 0 {
-			return utils.ErrNotFound
-		}
+		_, err := ms.getCol(ColDph).DeleteOne(sctx, bson.M{"tenant": tenant, "id": id})
+
 		return err
 	})
 }

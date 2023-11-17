@@ -111,8 +111,14 @@ func TestHttpJsonPoster(t *testing.T) {
 	} else if len(ev.Events) == 0 {
 		t.Fatal("Expected at least one event")
 	}
-	if !reflect.DeepEqual(jsn, ev.Events[0]) {
-		t.Errorf("Expecting: %q, received: %q", string(jsn), ev.Events[0])
+
+	evBody, cancast := ev.Events[0].(*HTTPPosterRequest)
+	if !cancast {
+		t.Error("Can't cast the event ")
+	}
+
+	if string(evBody.Body.([]uint8)) != string(jsn) {
+		t.Errorf("Expecting: %q, received: %q", utils.ToJSON(evBody.Body), utils.ToJSON(ev.Events[0]))
 	}
 	os.Remove(fs[0])
 }
