@@ -161,14 +161,13 @@ func TestSetGetRemoveConfigSectionsDrvMongo(t *testing.T) {
 	}
 	defer db.Close()
 	sectionIDs := []string{"thresholds", "resources"}
-	expected := make(map[string][]byte)
 
 	// Try to retrieve the values before setting them (should receive an empty map)
 	if rcv, err := db.GetConfigSectionsDrv(context.Background(), "1234", sectionIDs); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ErrNotFound, err)
-	} else if !reflect.DeepEqual(rcv, expected) {
-		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ToJSON(expected), utils.ToJSON(rcv))
+	} else if rcv != nil {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", nil, utils.ToJSON(rcv))
 	}
 
 	ms, err := utils.NewMarshaler(utils.JSON)
@@ -267,8 +266,8 @@ func TestSetGetRemoveConfigSectionsDrvMongo(t *testing.T) {
 	if rcv, err := db.GetConfigSectionsDrv(context.Background(), "1234", sectionIDs); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ErrNotFound, err)
-	} else if !reflect.DeepEqual(rcv, expected) {
-		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ToJSON(expected), utils.ToJSON(rcv))
+	} else if rcv != nil {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", nil, utils.ToJSON(rcv))
 	}
 }
 
