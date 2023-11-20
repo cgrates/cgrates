@@ -30,7 +30,6 @@ import (
 	"github.com/aws/aws-sdk-go/service/sqs"
 	"github.com/cgrates/cgrates/agents"
 	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/ees"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -56,7 +55,6 @@ func NewSQSER(cfg *config.CGRConfig, cfgIdx int,
 		}
 	}
 	rdr.parseOpts(rdr.Config().Opts)
-	rdr.createPoster()
 	return rdr, nil
 }
 
@@ -80,8 +78,6 @@ type SQSER struct {
 	awsToken  string
 	queueID   string
 	session   *session.Session
-
-	poster *ees.SQSee
 }
 
 type sqsClient interface {
@@ -190,7 +186,6 @@ func (rdr *SQSER) getQueueURLWithClient(svc sqsClient) (err error) {
 			return
 		}
 	}
-	utils.Logger.Warning(fmt.Sprintf("<SQSPoster> can not get url for queue with ID=%s because err: %v", rdr.queueID, err))
 	return
 }
 
@@ -216,16 +211,6 @@ func (rdr *SQSER) readLoop(scv sqsClient) (err error) {
 	}
 
 	return
-}
-
-func (rdr *SQSER) createPoster() {
-	processedOpt := getProcessedOptions(rdr.Config().Opts)
-	if processedOpt == nil && len(rdr.Config().ProcessedPath) == 0 {
-		return
-	}
-	eeCfg := config.NewEventExporterCfg(rdr.Config().ID, "", utils.FirstNonEmpty(rdr.Config().ProcessedPath, rdr.Config().SourcePath),
-		rdr.cgrCfg.GeneralCfg().FailedPostsDir, rdr.cgrCfg.GeneralCfg().PosterAttempts, processedOpt)
-	rdr.poster = ees.NewSQSee(eeCfg, nil)
 }
 
 func (rdr *SQSER) isClosed() bool {
@@ -256,16 +241,6 @@ func (rdr *SQSER) readMsg(scv sqsClient, msg *sqs.Message) (err error) {
 		rdr.rdrErr <- err
 		return
 	}
-
-	if rdr.poster != nil { // post it
-		if err = ees.ExportWithAttempts(rdr.poster, body, key); err != nil {
-			utils.Logger.Warning(
-				fmt.Sprintf("<%s> writing message %s error: %s",
-					utils.ERs, key, err.Error()))
-			return
-		}
-	}
-
 	return
 }
 

@@ -703,6 +703,22 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 			}
 		}
 		for _, rdr := range cfg.ersCfg.Readers {
+			if len(rdr.EEsSuccessIDs) != 0 || len(rdr.EEsFailedIDs) != 0 {
+				if len(cfg.ersCfg.EEsConns) == 0 || !cfg.eesCfg.Enabled {
+					return fmt.Errorf("<%s> connection to <%s> required due to exporter ID references", utils.ERs, utils.EEs)
+				}
+			}
+			exporterIDs := cfg.eesCfg.exporterIDs()
+			for _, eesID := range rdr.EEsSuccessIDs {
+				if !slices.Contains(exporterIDs, eesID) {
+					return fmt.Errorf("<%s> exporter with id %s not defined", utils.ERs, eesID)
+				}
+			}
+			for _, eesID := range rdr.EEsFailedIDs {
+				if !slices.Contains(exporterIDs, eesID) {
+					return fmt.Errorf("<%s> exporter with id %s not defined", utils.ERs, eesID)
+				}
+			}
 			if !possibleReaderTypes.Has(rdr.Type) {
 				return fmt.Errorf("<%s> unsupported data type: %s for reader with ID: %s", utils.ERs, rdr.Type, rdr.ID)
 			}

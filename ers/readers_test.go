@@ -214,7 +214,6 @@ func TestNewAMQPReader(t *testing.T) {
 	}
 	exp.Config().ProcessedPath = ""
 	exp.createClient(&config.AMQPROpts{}, nil)
-	exp.createPoster()
 	// var expected EventReader = exp
 	rcv, err := NewEventReader(cfg, 0, nil, nil, nil, fltr, nil)
 	if err != nil {
@@ -239,7 +238,6 @@ func TestNewAMQPv1Reader(t *testing.T) {
 	}
 	exp.Config().ProcessedPath = ""
 	exp.Config().Opts = &config.EventReaderOpts{}
-	exp.createPoster()
 	var expected EventReader = exp
 	rcv, err := NewEventReader(cfg, 0, nil, nil, nil, fltr, nil)
 	if err != nil {
@@ -265,7 +263,6 @@ func TestNewS3Reader(t *testing.T) {
 	}
 	exp.Config().ProcessedPath = ""
 	exp.Config().Opts = &config.EventReaderOpts{}
-	exp.createPoster()
 	var expected EventReader = exp
 	rcv, err := NewEventReader(cfg, 0, nil, nil, nil, fltr, nil)
 	if err != nil {
@@ -302,7 +299,6 @@ func TestNewSQSReader(t *testing.T) {
 	// }
 	exp.Config().ProcessedPath = ""
 	exp.Config().Opts = &config.EventReaderOpts{}
-	exp.createPoster()
 	var expected EventReader = exp
 	rcv, err := NewEventReader(cfg, 0, nil, nil, nil, fltr, nil)
 	exp.session = rcv.(*SQSER).session

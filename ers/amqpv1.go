@@ -27,7 +27,6 @@ import (
 	amqpv1 "github.com/Azure/go-amqp"
 	"github.com/cgrates/cgrates/agents"
 	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/ees"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -62,7 +61,6 @@ func NewAMQPv1ER(cfg *config.CGRConfig, cfgIdx int,
 			}
 		}
 	}
-	rdr.createPoster()
 	return rdr, nil
 }
 
@@ -84,8 +82,6 @@ type AMQPv1ER struct {
 	conn     *amqpv1.Conn
 	connOpts *amqpv1.ConnOptions
 	ses      *amqpv1.Session
-
-	poster *ees.AMQPv1EE
 }
 
 // Config returns the curent configuration
@@ -150,13 +146,6 @@ func (rdr *AMQPv1ER) readLoop(recv *amqpv1.Receiver) (err error) {
 					fmt.Sprintf("<%s> processing message error: %s",
 						utils.ERs, err.Error()))
 			}
-			if rdr.poster != nil { // post it
-				if err := ees.ExportWithAttempts(rdr.poster, body, utils.EmptyString); err != nil {
-					utils.Logger.Warning(
-						fmt.Sprintf("<%s> writing message error: %s",
-							utils.ERs, err.Error()))
-				}
-			}
 			if rdr.Config().ConcurrentReqs != -1 {
 				rdr.cap <- struct{}{}
 			}
@@ -197,23 +186,10 @@ func (rdr *AMQPv1ER) processMessage(msg []byte) (err error) {
 }
 
 func (rdr *AMQPv1ER) close() (err error) {
-	if rdr.poster != nil {
-		rdr.poster.Close()
-	}
 	if rdr.ses != nil {
 		if err = rdr.ses.Close(context.Background()); err != nil {
 			return
 		}
 	}
 	return rdr.conn.Close()
-}
-
-func (rdr *AMQPv1ER) createPoster() {
-	processedOpt := getProcessedOptions(rdr.Config().Opts)
-	if processedOpt == nil && len(rdr.Config().ProcessedPath) == 0 {
-		return
-	}
-	eeCfg := config.NewEventExporterCfg(rdr.Config().ID, "", utils.FirstNonEmpty(rdr.Config().ProcessedPath, rdr.Config().SourcePath),
-		rdr.cgrCfg.GeneralCfg().FailedPostsDir, rdr.cgrCfg.GeneralCfg().PosterAttempts, processedOpt)
-	rdr.poster = ees.NewAMQPv1EE(eeCfg, nil)
 }

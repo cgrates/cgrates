@@ -32,18 +32,10 @@ func TestNewNatsER(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfgIdx := 0
 	expected := &NatsER{
-		cgrCfg:        cfg,
-		cfgIdx:        cfgIdx,
-		fltrS:         nil,
-		rdrEvents:     nil,
-		partialEvents: nil,
-		rdrExit:       nil,
-		rdrErr:        nil,
+		cgrCfg: cfg,
+		cfgIdx: cfgIdx,
 	}
 	expected.Config().ConcurrentReqs = -1
-	if err := expected.createPoster(); err != nil {
-		return
-	}
 	rdr, err := NewNatsER(cfg, cfgIdx, nil, nil, nil, nil, nil)
 	if err != nil {
 		t.Error(err)

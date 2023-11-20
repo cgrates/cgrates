@@ -297,9 +297,25 @@ func TestNatsERJetStream(t *testing.T) {
 	defer natsServer.Shutdown()
 
 	cfg, err := config.NewCGRConfigFromJSONStringWithDefaults(`{
+"ees": {
+	"enabled": true,
+	"exporters": [
+		{
+			"id": "nats_processed",
+			"type": "*nats_json_map",
+			"export_path": "nats://localhost:4222",
+			"attempts": 1,
+			"opts": {
+				"natsJetStream": true,
+				"natsSubject": "processed_cdrs"
+			}
+		}
+	]
+},
 "ers": {									// EventReaderService
 	"enabled": true,						// starts the EventReader service: <true|false>
 	"sessions_conns":["*localhost"],
+    "ees_conns": ["*internal"],								
 	"readers": [
 		{
 			"id": "nats",										
@@ -308,6 +324,7 @@ func TestNatsERJetStream(t *testing.T) {
 			"concurrent_requests": 1024,						
 			"source_path": "nats://localhost:4222",				
 			"processed_path": "",	
+            "ees_success_ids": ["nats_processed"],	
 			"tenant": "cgrates.org",							
 			"filters": [],										
 			"flags": [],										
@@ -317,8 +334,6 @@ func TestNatsERJetStream(t *testing.T) {
 			"opts": {
 				"natsJetStream": true,
 				"natsStreamName": "test",
-				"natsJetStreamProcessed": true,
-				"natsSubjectProcessed": "processed_cdrs",
 			}
 		},
 	],
@@ -345,9 +360,24 @@ func TestNatsER(t *testing.T) {
 	defer natsServer.Shutdown()
 
 	cfg, err := config.NewCGRConfigFromJSONStringWithDefaults(`{
+"ees": {
+	"enabled": true,
+	"exporters": [
+		{
+			"id": "nats_processed",
+			"type": "*nats_json_map",
+			"export_path": "nats://localhost:4222",
+			"attempts": 1,
+			"opts": {
+				"natsSubject": "processed_cdrs"
+			}
+		}
+	]
+},
 "ers": {									// EventReaderService
 	"enabled": true,						// starts the EventReader service: <true|false>
 	"sessions_conns":["*localhost"],
+    "ees_conns": ["*internal"],								
 	"readers": [
 		{
 			"id": "nats",										
@@ -356,15 +386,13 @@ func TestNatsER(t *testing.T) {
 			"concurrent_requests": 1024,						
 			"source_path": "nats://localhost:4222",				
 			"processed_path": "",	
+            "ees_success_ids": ["nats_processed"],	
 			"tenant": "cgrates.org",							
 			"filters": [],										
 			"flags": [],										
 			"fields":[									
 				{"tag": "CGRID", "type": "*composed", "value": "~*req.CGRID", "path": "*cgreq.CGRID"},
 			],
-			"opts": {
-				"natsSubjectProcessed": "processed_cdrs",
-			}
 		},
 	],
 },
@@ -393,9 +421,25 @@ func TestNatsERJetStreamUser(t *testing.T) {
 	defer natsServer.Shutdown()
 
 	cfg, err := config.NewCGRConfigFromJSONStringWithDefaults(`{
+"ees": {
+	"enabled": true,
+	"exporters": [
+		{
+			"id": "nats_processed",
+			"type": "*nats_json_map",
+			"export_path": "nats://localhost:4222",
+			"attempts": 1,
+			"opts": {
+				"natsJetStream": true,
+				"natsSubject": "processed_cdrs"
+			}
+		}
+	]
+},
 "ers": {									// EventReaderService
 	"enabled": true,						// starts the EventReader service: <true|false>
 	"sessions_conns":["*localhost"],
+    "ees_conns": ["*internal"],								
 	"readers": [
 		{
 			"id": "nats",										
@@ -404,6 +448,7 @@ func TestNatsERJetStreamUser(t *testing.T) {
 			"concurrent_requests": 1024,						
 			"source_path": "nats://user:password@localhost:4222",				
 			"processed_path": "",	
+            "ees_success_ids": ["nats_processed"],	
 			"tenant": "cgrates.org",							
 			"filters": [],										
 			"flags": [],										
@@ -413,8 +458,6 @@ func TestNatsERJetStreamUser(t *testing.T) {
 			"opts": {
 				"natsJetStream": true,
 				"natsStreamName": "test",
-				"natsJetStreamProcessed": true,
-				"natsSubjectProcessed": "processed_cdrs",
 			}
 		},
 	],
@@ -443,9 +486,24 @@ func TestNatsERUser(t *testing.T) {
 	defer natsServer.Shutdown()
 
 	cfg, err := config.NewCGRConfigFromJSONStringWithDefaults(`{
+"ees": {
+	"enabled": true,
+	"exporters": [
+		{
+			"id": "nats_processed",
+			"type": "*nats_json_map",
+			"export_path": "nats://localhost:4222",
+			"attempts": 1,
+			"opts": {
+				"natsSubject": "processed_cdrs"
+			}
+		}
+	]
+},
 "ers": {									// EventReaderService
 	"enabled": true,						// starts the EventReader service: <true|false>
 	"sessions_conns":["*localhost"],
+    "ees_conns": ["*internal"],								
 	"readers": [
 		{
 			"id": "nats",										
@@ -454,15 +512,13 @@ func TestNatsERUser(t *testing.T) {
 			"concurrent_requests": 1024,						
 			"source_path": "nats://user:password@localhost:4222",				
 			"processed_path": "",	
+            "ees_success_ids": ["nats_processed"],	
 			"tenant": "cgrates.org",							
 			"filters": [],										
 			"flags": [],										
 			"fields":[									
 				{"tag": "CGRID", "type": "*composed", "value": "~*req.CGRID", "path": "*cgreq.CGRID"},
 			],
-			"opts": {
-				"natsSubjectProcessed": "processed_cdrs",
-			}
 		},
 	],
 },
@@ -490,9 +546,25 @@ func TestNatsERJetStreamToken(t *testing.T) {
 	defer natsServer.Shutdown()
 
 	cfg, err := config.NewCGRConfigFromJSONStringWithDefaults(`{
+"ees": {
+	"enabled": true,
+	"exporters": [
+		{
+			"id": "nats_processed",
+			"type": "*nats_json_map",
+			"export_path": "nats://localhost:4222",
+			"attempts": 1,
+			"opts": {
+				"natsJetStream": true,
+				"natsSubject": "processed_cdrs"
+			}
+		}
+	]
+},
 "ers": {									// EventReaderService
 	"enabled": true,						// starts the EventReader service: <true|false>
 	"sessions_conns":["*localhost"],
+    "ees_conns": ["*internal"],								
 	"readers": [
 		{
 			"id": "nats",										
@@ -501,6 +573,7 @@ func TestNatsERJetStreamToken(t *testing.T) {
 			"concurrent_requests": 1024,						
 			"source_path": "nats://token@localhost:4222",				
 			"processed_path": "",	
+            "ees_success_ids": ["nats_processed"],	
 			"tenant": "cgrates.org",							
 			"filters": [],										
 			"flags": [],										
@@ -510,8 +583,6 @@ func TestNatsERJetStreamToken(t *testing.T) {
 			"opts": {
 				"natsJetStream": true,
 				"natsStreamName": "test",
-				"natsJetStreamProcessed": true,
-				"natsSubjectProcessed": "processed_cdrs",
 			}
 		},
 	],
@@ -540,9 +611,24 @@ func TestNatsERToken(t *testing.T) {
 	defer natsServer.Shutdown()
 
 	cfg, err := config.NewCGRConfigFromJSONStringWithDefaults(`{
+"ees": {
+	"enabled": true,
+	"exporters": [
+		{
+			"id": "nats_processed",
+			"type": "*nats_json_map",
+			"export_path": "nats://localhost:4222",
+			"attempts": 1,
+			"opts": {
+				"natsSubject": "processed_cdrs"
+			}
+		}
+	]
+},
 "ers": {									// EventReaderService
 	"enabled": true,						// starts the EventReader service: <true|false>
 	"sessions_conns":["*localhost"],
+    "ees_conns": ["*internal"],								
 	"readers": [
 		{
 			"id": "nats",										
@@ -551,15 +637,13 @@ func TestNatsERToken(t *testing.T) {
 			"concurrent_requests": 1024,						
 			"source_path": "nats://token@localhost:4222",				
 			"processed_path": "",	
+            "ees_success_ids": ["nats_processed"],	
 			"tenant": "cgrates.org",							
 			"filters": [],										
 			"flags": [],										
 			"fields":[									
 				{"tag": "CGRID", "type": "*composed", "value": "~*req.CGRID", "path": "*cgreq.CGRID"},
 			],
-			"opts": {
-				"natsSubjectProcessed": "processed_cdrs",
-			}
 		},
 	],
 },
@@ -602,9 +686,25 @@ func TestNatsERNkey(t *testing.T) {
 	defer natsServer.Shutdown()
 
 	cfg, err := config.NewCGRConfigFromJSONStringWithDefaults(fmt.Sprintf(`{
+"ees": {
+	"enabled": true,
+	"exporters": [
+		{
+			"id": "nats_processed",
+			"type": "*nats_json_map",
+			"export_path": "nats://localhost:4222",
+			"attempts": 1,
+			"opts": {
+				"natsSubject": "processed_cdrs",
+				"natsSeedFile": %q
+			}
+		}
+	]
+},
 "ers": {									// EventReaderService
 	"enabled": true,						// starts the EventReader service: <true|false>
 	"sessions_conns":["*localhost"],
+    "ees_conns": ["*internal"],								
 	"readers": [
 		{
 			"id": "nats",										
@@ -613,6 +713,7 @@ func TestNatsERNkey(t *testing.T) {
 			"concurrent_requests": 1024,						
 			"source_path": "nats://localhost:4222",				
 			"processed_path": "",	
+            "ees_success_ids": ["nats_processed"],	
 			"tenant": "cgrates.org",							
 			"filters": [],										
 			"flags": [],										
@@ -620,9 +721,7 @@ func TestNatsERNkey(t *testing.T) {
 				{"tag": "CGRID", "type": "*composed", "value": "~*req.CGRID", "path": "*cgreq.CGRID"},
 			],
 			"opts": {
-				"natsSubjectProcessed": "processed_cdrs",
-				"natsSeedFile": %q,
-				"natsSeedFileProcessed": %q,
+				"natsSeedFile": %q
 			}
 		},
 	],
@@ -667,9 +766,26 @@ func TestNatsERJetStreamNKey(t *testing.T) {
 	defer natsServer.Shutdown()
 
 	cfg, err := config.NewCGRConfigFromJSONStringWithDefaults(fmt.Sprintf(`{
+"ees": {
+	"enabled": true,
+	"exporters": [
+		{
+			"id": "nats_processed",
+			"type": "*nats_json_map",
+			"export_path": "nats://localhost:4222",
+			"attempts": 1,
+			"opts": {
+				"natsJetStream": true,
+				"natsSubject": "processed_cdrs",
+				"natsSeedFile": %q
+			}
+		}
+	]
+},
 "ers": {									// EventReaderService
 	"enabled": true,						// starts the EventReader service: <true|false>
 	"sessions_conns":["*localhost"],
+    "ees_conns": ["*internal"],								
 	"readers": [
 		{
 			"id": "nats",										
@@ -678,6 +794,7 @@ func TestNatsERJetStreamNKey(t *testing.T) {
 			"concurrent_requests": 1024,						
 			"source_path": "nats://localhost:4222",				
 			"processed_path": "",	
+            "ees_success_ids": ["nats_processed"],	
 			"tenant": "cgrates.org",							
 			"filters": [],										
 			"flags": [],										
@@ -687,10 +804,7 @@ func TestNatsERJetStreamNKey(t *testing.T) {
 			"opts": {
 				"natsJetStream": true,
 				"natsStreamName": "test",
-				"natsSeedFile": %q,
-				"natsJetStreamProcessed": true,
-				"natsSubjectProcessed": "processed_cdrs",
-				"natsSeedFileProcessed": %q,
+				"natsSeedFile": %q
 			}
 		},
 	],
@@ -755,9 +869,25 @@ resolver_preload: {
 	defer natsServer.Shutdown()
 
 	cfg, err := config.NewCGRConfigFromJSONStringWithDefaults(fmt.Sprintf(`{
+"ees": {
+	"enabled": true,
+	"exporters": [
+		{
+			"id": "nats_processed",
+			"type": "*nats_json_map",
+			"export_path": "nats://localhost:4222",
+			"attempts": 1,
+			"opts": {
+				"natsSubject": "processed_cdrs",
+				"natsJWTFile": %q
+			}
+		}
+	]
+},
 "ers": {									// EventReaderService
 	"enabled": true,						// starts the EventReader service: <true|false>
 	"sessions_conns":["*localhost"],
+    "ees_conns": ["*internal"],								
 	"readers": [
 		{
 			"id": "nats",										
@@ -766,6 +896,7 @@ resolver_preload: {
 			"concurrent_requests": 1024,						
 			"source_path": "nats://localhost:4222",				
 			"processed_path": "",	
+            "ees_success_ids": ["nats_processed"],	
 			"tenant": "cgrates.org",							
 			"filters": [],										
 			"flags": [],										
@@ -773,9 +904,7 @@ resolver_preload: {
 				{"tag": "CGRID", "type": "*composed", "value": "~*req.CGRID", "path": "*cgreq.CGRID"},
 			],
 			"opts": {
-				"natsSubjectProcessed": "processed_cdrs",
 				"natsJWTFile": %q,
-				"natsJWTFileProcessed": %q,
 			}
 		},
 	],
@@ -845,9 +974,26 @@ system_account:AAFIBB6C56ROU5XRVJLJYR3BTGGYK3HJGHEHQV7L7QZMTT3ZRBLHBS7F
 	defer natsServer.Shutdown()
 
 	cfg, err := config.NewCGRConfigFromJSONStringWithDefaults(fmt.Sprintf(`{
+"ees": {
+	"enabled": true,
+	"exporters": [
+		{
+			"id": "nats_processed",
+			"type": "*nats_json_map",
+			"export_path": "nats://localhost:4222",
+			"attempts": 1,
+			"opts": {
+				"natsJetStream": true,
+				"natsSubject": "processed_cdrs",
+				"natsJWTFile": %q
+			}
+		}
+	]
+},
 "ers": {									// EventReaderService
 	"enabled": true,						// starts the EventReader service: <true|false>
 	"sessions_conns":["*localhost"],
+    "ees_conns": ["*internal"],								
 	"readers": [
 		{
 			"id": "nats",										
@@ -856,6 +1002,7 @@ system_account:AAFIBB6C56ROU5XRVJLJYR3BTGGYK3HJGHEHQV7L7QZMTT3ZRBLHBS7F
 			"concurrent_requests": 1024,						
 			"source_path": "nats://localhost:4222",				
 			"processed_path": "",	
+            "ees_success_ids": ["nats_processed"],	
 			"tenant": "cgrates.org",							
 			"filters": [],										
 			"flags": [],										
@@ -866,9 +1013,6 @@ system_account:AAFIBB6C56ROU5XRVJLJYR3BTGGYK3HJGHEHQV7L7QZMTT3ZRBLHBS7F
 				"natsJetStream": true,
 				"natsStreamName": "test",
 				"natsJWTFile": %q,
-				"natsJetStreamProcessed": true,
-				"natsSubjectProcessed": "processed_cdrs",
-				"natsJWTFileProcessed": %q,
 			}
 		},
 	],

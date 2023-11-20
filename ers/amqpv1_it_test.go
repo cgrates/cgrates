@@ -144,7 +144,6 @@ func TestAmqpv1NewAMQPv1ER(t *testing.T) {
 	expected := &AMQPv1ER{
 		cgrCfg: cfg,
 		cfgIdx: cfgIdx,
-		poster: nil,
 	}
 	cfg.ERsCfg().Readers = []*config.EventReaderCfg{
 		{
@@ -163,7 +162,6 @@ func TestAmqpv1NewAMQPv1ER(t *testing.T) {
 	if err != nil {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
 	}
-	expected.poster = result.(*AMQPv1ER).poster
 	if !reflect.DeepEqual(result, expected) {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}
@@ -175,7 +173,6 @@ func TestAmqpv1NewAMQPv1ER2(t *testing.T) {
 	expected := &AMQPv1ER{
 		cgrCfg: cfg,
 		cfgIdx: cfgIdx,
-		poster: nil,
 	}
 	cfg.ERsCfg().Readers = []*config.EventReaderCfg{
 		{
@@ -194,7 +191,6 @@ func TestAmqpv1NewAMQPv1ER2(t *testing.T) {
 	if err != nil {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
 	}
-	expected.poster = result.(*AMQPv1ER).poster
 	expected.cap = result.(*AMQPv1ER).cap
 	if !reflect.DeepEqual(result, expected) {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)

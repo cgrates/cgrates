@@ -28,7 +28,6 @@ import (
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/agents"
 	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/ees"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 	amqp "github.com/rabbitmq/amqp091-go"
@@ -44,7 +43,6 @@ type AMQPER struct {
 	partialEvChan chan *erEvent // channel to dispatch the partial events created
 	errChan       chan error
 
-	poster *ees.AMQPee
 	client *amqpClient // AMQP client for managing connections and subscriptions.
 }
 
@@ -70,8 +68,7 @@ type amqpClient struct {
 }
 
 // NewAMQPER returns a new AMQP EventReader with the provided configurations.
-func NewAMQPER(cfg *config.CGRConfig, cfgIdx int,
-	eventChan, partialEvChan chan *erEvent, errChan chan error,
+func NewAMQPER(cfg *config.CGRConfig, cfgIdx int, eventChan, partialEvChan chan *erEvent, errChan chan error,
 	fltrS *engine.FilterS, exitChan chan struct{}) (EventReader, error) {
 	rdr := &AMQPER{
 		cgrCfg:        cfg,
@@ -82,7 +79,6 @@ func NewAMQPER(cfg *config.CGRConfig, cfgIdx int,
 		errChan:       errChan,
 	}
 	rdr.createClient(rdr.Config().Opts.AMQP, exitChan)
-	rdr.createPoster()
 	return rdr, nil
 }
 
@@ -117,16 +113,6 @@ func (rdr *AMQPER) createClient(opts *config.AMQPROpts, exitChan chan struct{}) 
 	}
 	go rdr.client.handleReconnect(rdrCfg.SourcePath, rdrCfg.ID,
 		rdrCfg.Reconnects, rdrCfg.MaxReconnectInterval)
-}
-
-func (rdr *AMQPER) createPoster() {
-	processedOpt := getProcessedOptions(rdr.Config().Opts)
-	if processedOpt == nil && len(rdr.Config().ProcessedPath) == 0 {
-		return
-	}
-	eeCfg := config.NewEventExporterCfg(rdr.Config().ID, "", utils.FirstNonEmpty(rdr.Config().ProcessedPath, rdr.Config().SourcePath),
-		rdr.cgrCfg.GeneralCfg().FailedPostsDir, rdr.cgrCfg.GeneralCfg().PosterAttempts, processedOpt)
-	rdr.poster = ees.NewAMQPee(eeCfg, nil)
 }
 
 func (rdr *AMQPER) processMessage(msg []byte) error {
@@ -291,15 +277,6 @@ func (rdr *AMQPER) handleDelivery(dlv amqp.Delivery) {
 		return
 	}
 
-	if rdr.poster != nil {
-		err = ees.ExportWithAttempts(rdr.poster, dlv.Body, utils.EmptyString)
-		if err != nil {
-			utils.Logger.Warning(fmt.Sprintf(
-				"<%s> Reader %s, writing message %s error: %v",
-				utils.ERs, rdr.Config().ID, dlv.MessageId, err))
-
-		}
-	}
 	err = dlv.Ack(false)
 	if err != nil {
 		utils.Logger.Warning(fmt.Sprintf(
@@ -311,9 +288,6 @@ func (rdr *AMQPER) handleDelivery(dlv amqp.Delivery) {
 func (rdr *AMQPER) close() error {
 	utils.Logger.Info(fmt.Sprintf(
 		"<%s> Reader %s, stop monitoring amqp queue <%s>", utils.ERs, rdr.Config().ID, rdr.Config().SourcePath))
-	if rdr.poster != nil {
-		rdr.poster.Close()
-	}
 	return rdr.client.Close()
 }
 

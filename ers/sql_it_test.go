@@ -596,19 +596,16 @@ func testSQLStop2(t *testing.T) {
 func TestSQLProcessMessageError(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	testSQLEventReader := &SQLEventReader{
-		cgrCfg:        cfg,
-		cfgIdx:        0,
-		fltrS:         &engine.FilterS{},
-		connString:    "",
-		connType:      "",
-		tableName:     "testName",
-		expConnString: "",
-		expConnType:   utils.Postgres,
-		expTableName:  "",
-		rdrEvents:     nil,
-		rdrExit:       nil,
-		rdrErr:        nil,
-		cap:           nil,
+		cgrCfg:     cfg,
+		cfgIdx:     0,
+		fltrS:      &engine.FilterS{},
+		connString: "",
+		connType:   "",
+		tableName:  "testName",
+		rdrEvents:  nil,
+		rdrExit:    nil,
+		rdrErr:     nil,
+		cap:        nil,
 	}
 
 	msgTest := map[string]any{}
@@ -622,82 +619,22 @@ func TestSQLProcessMessageError(t *testing.T) {
 func TestSQLSetURLError(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	testSQLEventReader := &SQLEventReader{
-		cgrCfg:        cfg,
-		cfgIdx:        0,
-		fltrS:         &engine.FilterS{},
-		connString:    "",
-		connType:      "",
-		tableName:     "testName",
-		expConnString: "",
-		expConnType:   utils.Postgres,
-		expTableName:  "",
-		rdrEvents:     nil,
-		rdrExit:       nil,
-		rdrErr:        nil,
-		cap:           nil,
+		cgrCfg:     cfg,
+		cfgIdx:     0,
+		fltrS:      &engine.FilterS{},
+		connString: "",
+		connType:   "",
+		tableName:  "testName",
+		rdrEvents:  nil,
+		rdrExit:    nil,
+		rdrErr:     nil,
+		cap:        nil,
 	}
-	err := testSQLEventReader.setURL("http://user^:passwo^rd@foo.com/", "", nil)
+	err := testSQLEventReader.setURL("http://user^:passwo^rd@foo.com/", nil)
 	expected := `parse "http://user^:passwo^rd@foo.com/": net/url: invalid userinfo`
 	if err == nil || err.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, err)
 	}
-}
-
-func TestSQLSetURLError2(t *testing.T) {
-	cfg := config.NewDefaultCGRConfig()
-	testSQLEventReader := &SQLEventReader{
-		cgrCfg:        cfg,
-		cfgIdx:        0,
-		fltrS:         &engine.FilterS{},
-		connString:    "",
-		connType:      "",
-		tableName:     "testName",
-		expConnString: "",
-		expConnType:   utils.Postgres,
-		expTableName:  "",
-		rdrEvents:     nil,
-		rdrExit:       nil,
-		rdrErr:        nil,
-		cap:           nil,
-	}
-	err := testSQLEventReader.setURL("*mysql://cgrates:CGRateS.org@127.0.0.1:3306", "http://user^:passwo^rd@foo.com/", &config.EventReaderOpts{})
-	expected := `parse "http://user^:passwo^rd@foo.com/": net/url: invalid userinfo`
-	if err == nil || err.Error() != expected {
-		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, err)
-	}
-}
-
-func TestErsSqlPostCDRS(t *testing.T) {
-	tmp := logger.Default
-	logger.Default = logger.Default.LogMode(logger.Silent)
-	cfg := config.NewDefaultCGRConfig()
-	fltr := &engine.FilterS{}
-	reader := cfg.ERsCfg().Readers[0].Clone()
-	reader.Type = utils.MetaSQL
-	reader.ID = "file_reader"
-	reader.ConcurrentReqs = -1
-	reader.Opts = &config.EventReaderOpts{
-		SQL: &config.SQLROpts{
-			DBName: utils.StringPointer("cgrates2"),
-		},
-	}
-	reader.SourcePath = "*mysql://cgrates:CGRateS.org@127.0.0.1:3306"
-	reader.ProcessedPath = ""
-	cfg.ERsCfg().Readers = append(cfg.ERsCfg().Readers, reader)
-	if len(cfg.ERsCfg().Readers) != 2 {
-		t.Errorf("Expecting: <2>, received: <%+v>", len(cfg.ERsCfg().Readers))
-	}
-	sqlEvReader, err := NewSQLEventReader(cfg, 1, nil, nil, nil, fltr, nil)
-	if err != nil {
-		t.Errorf("Expecting: <nil>, received: <%+v>", err)
-	}
-	sqlEvReader.(*SQLEventReader).expConnType = utils.MySQL
-	result := sqlEvReader.(*SQLEventReader).postCDR([]any{})
-	expected := "Error 1045: Access denied for user ''@'localhost' (using password: NO)"
-	if result == nil {
-		t.Errorf("\nExpected: <%+v>, \nreceived: <%+v>", expected, result)
-	}
-	logger.Default = tmp
 }
 
 //	type mockDialector interface {
@@ -724,19 +661,16 @@ func (mockDialect) Explain(sql string, vars ...any) string                      
 func TestMockOpenDB(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	sqlRdr := &SQLEventReader{
-		cgrCfg:        cfg,
-		cfgIdx:        0,
-		fltrS:         &engine.FilterS{},
-		connString:    "cgrates:CGRateS.org@tcp(127.0.0.1:3306)/cgrates?charset=utf8&loc=Local&parseTime=true&sql_mode='ALLOW_INVALID_DATES'",
-		connType:      utils.MySQL,
-		tableName:     "testName",
-		expConnString: "",
-		expConnType:   utils.Postgres,
-		expTableName:  "",
-		rdrEvents:     nil,
-		rdrExit:       nil,
-		rdrErr:        nil,
-		cap:           nil,
+		cgrCfg:     cfg,
+		cfgIdx:     0,
+		fltrS:      &engine.FilterS{},
+		connString: "cgrates:CGRateS.org@tcp(127.0.0.1:3306)/cgrates?charset=utf8&loc=Local&parseTime=true&sql_mode='ALLOW_INVALID_DATES'",
+		connType:   utils.MySQL,
+		tableName:  "testName",
+		rdrEvents:  nil,
+		rdrExit:    nil,
+		rdrErr:     nil,
+		cap:        nil,
 	}
 	var mckDlct mockDialect
 	errExpect := "invalid db"
@@ -748,19 +682,16 @@ func TestMockOpenDB(t *testing.T) {
 func TestSQLServeErr1(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	sqlRdr := &SQLEventReader{
-		cgrCfg:        cfg,
-		cfgIdx:        0,
-		fltrS:         &engine.FilterS{},
-		connString:    "cgrates:CGRateS.org@tcp(127.0.0.1:3306)/cgrates?charset=utf8&loc=Local&parseTime=true&sql_mode='ALLOW_INVALID_DATES'",
-		connType:      utils.MySQL,
-		tableName:     "testName",
-		expConnString: "",
-		expConnType:   utils.Postgres,
-		expTableName:  "",
-		rdrEvents:     nil,
-		rdrExit:       nil,
-		rdrErr:        nil,
-		cap:           nil,
+		cgrCfg:     cfg,
+		cfgIdx:     0,
+		fltrS:      &engine.FilterS{},
+		connString: "cgrates:CGRateS.org@tcp(127.0.0.1:3306)/cgrates?charset=utf8&loc=Local&parseTime=true&sql_mode='ALLOW_INVALID_DATES'",
+		connType:   utils.MySQL,
+		tableName:  "testName",
+		rdrEvents:  nil,
+		rdrExit:    nil,
+		rdrErr:     nil,
+		cap:        nil,
 	}
 	cfg.StorDbCfg().Password = "CGRateS.org"
 	sqlRdr.Config().RunDelay = time.Duration(0)

@@ -29,7 +29,6 @@ import (
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/agents"
 	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/ees"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/nats-io/nats.go"
@@ -55,12 +54,7 @@ func NewNatsER(cfg *config.CGRConfig, cfgIdx int,
 			rdr.cap <- struct{}{}
 		}
 	}
-	err := rdr.processOpts()
-	if err != nil {
-		return nil, err
-	}
-	err = rdr.createPoster()
-	if err != nil {
+	if err := rdr.processOpts(); err != nil {
 		return nil, err
 	}
 	return rdr, nil
@@ -85,8 +79,6 @@ type NatsER struct {
 	consumerName string
 	streamName   string
 	opts         []nats.Option
-
-	poster *ees.NatsEE
 }
 
 // Config returns the curent configuration
@@ -118,16 +110,6 @@ func (rdr *NatsER) Serve() error {
 				utils.Logger.Warning(
 					fmt.Sprintf("<%s> processing message %s error: %s",
 						utils.ERs, string(msgData), handlerErr.Error()))
-			}
-
-			// Export the received message if a poster has been defined.
-			if rdr.poster != nil {
-				handlerErr = ees.ExportWithAttempts(rdr.poster, msgData, utils.EmptyString)
-				if handlerErr != nil {
-					utils.Logger.Warning(
-						fmt.Sprintf("<%s> writing message %s error: %s",
-							utils.ERs, string(msgData), handlerErr.Error()))
-				}
 			}
 
 			// Release the resource back to rdr.cap channel.
@@ -189,9 +171,6 @@ func (rdr *NatsER) Serve() error {
 			fmt.Sprintf("<%s> stop monitoring nats path <%s>",
 				utils.ERs, rdr.Config().SourcePath))
 		nc.Drain()
-		if rdr.poster != nil {
-			rdr.poster.Close()
-		}
 	}()
 
 	return nil
@@ -226,18 +205,6 @@ func (rdr *NatsER) processMessage(msg []byte) (err error) {
 		cgrEvent: cgrEv,
 		rdrCfg:   rdr.Config(),
 	}
-	return
-}
-
-func (rdr *NatsER) createPoster() (err error) {
-	processedOpt := getProcessedOptions(rdr.Config().Opts)
-	if processedOpt == nil && len(rdr.Config().ProcessedPath) == 0 {
-		return
-	}
-	eeCfg := config.NewEventExporterCfg(rdr.Config().ID, "", utils.FirstNonEmpty(rdr.Config().ProcessedPath, rdr.Config().SourcePath),
-		rdr.cgrCfg.GeneralCfg().FailedPostsDir, rdr.cgrCfg.GeneralCfg().PosterAttempts, processedOpt)
-	rdr.poster, err = ees.NewNatsEE(eeCfg, rdr.cgrCfg.GeneralCfg().NodeID,
-		rdr.cgrCfg.GeneralCfg().ConnectTimeout, nil)
 	return
 }
 

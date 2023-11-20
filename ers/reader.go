@@ -33,8 +33,7 @@ type EventReader interface {
 }
 
 // NewEventReader instantiates the event reader based on configuration at index
-func NewEventReader(cfg *config.CGRConfig, cfgIdx int,
-	rdrEvents, partialEvents chan *erEvent, rdrErr chan error,
+func NewEventReader(cfg *config.CGRConfig, cfgIdx int, rdrEvents, partialEvents chan *erEvent, rdrErr chan error,
 	fltrS *engine.FilterS, rdrExit chan struct{}) (er EventReader, err error) {
 	switch cfg.ERsCfg().Readers[cfgIdx].Type {
 	default:

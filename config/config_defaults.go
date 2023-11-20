@@ -360,7 +360,8 @@ const CGRATES_CFG_JSON = `
 
 "ers": {														// EventReaderService
 	"enabled": false,											// starts the EventReader service: <true|false>
-	"sessions_conns":["*internal"],								// RPC Connections IDs
+	"sessions_conns": ["*internal"],							// RPC Connections IDs
+	"ees_conns": [],											// connection for routing processed and invalid messages through EEs
 	"partial_cache_ttl": "1s",									// the duration to cache partial records when not pairing	
 	"readers": [
 		{
@@ -375,6 +376,8 @@ const CGRATES_CFG_JSON = `
 			"filters": [],										// limit parsing based on the filters
 			"flags": [],										// flags to influence the event processing
 			"reconnects": -1,									// number of retries in case of connection lost
+			"ees_success_ids": [],								// ids of exporters used for moving the successfully processed event
+			"ees_failed_ids": [],								// ids of exporters used for moving the unprocessed event
 			"max_reconnect_interval": "5m", 					// time to wait in between reconnect attempts
 			"opts": {
 				// Partial
@@ -394,60 +397,36 @@ const CGRATES_CFG_JSON = `
 				
 				// AMQP and AMQPv1
 				// "amqpQueueID": "cgrates_cdrs",               // identifier for the primary queue where messages are consumed (0.9.1/1.0)
-				// "amqpQueueIDProcessed": "",                  // identifier for the queue where processed events are sent (0.9.1/1.0)
 				
 				// "amqpUsername": "",                          // username for SASL PLAIN auth, exclusive to AMQP 1.0, often representing the policy name
 				// "amqpPassword": "",                          // password for authentication, exclusive to AMQP 1.0
-
-				// "amqpUsernameProcessed": "",                 // username for authentication related to processed messages queue
-				// "amqpPasswordProcessed": "",                 // password for authentication related to processed messages queue
 
 				// "amqpConsumerTag": "cgrates",                // unique tag for the consumer, useful for message tracking and consumer management (0.9.1)
 				// "amqpExchange": "",                          // name of the primary exchange where messages will be published (0.9.1)
 				// "amqpExchangeType": "",                      // type of the primary exchange (direct, topic, fanout, headers) (0.9.1)
 				// "amqpRoutingKey": "",                        // key used for routing messages to the primary queue (0.9.1)
 
-				// "amqpExchangeProcessed": "",                 // name of the exchange where processed messages will be published
-				// "amqpExchangeTypeProcessed": "",             // type of the exchange for processed messages
-				// "amqpRoutingKeyProcessed": "",               // key used for routing processed messages
-				
 				// Kafka
 				// "kafkaTopic": "cgrates",						// the topic from were the events are read
 				// "kafkaGroupID": "cgrates",					// the group that reads the events
 				// "kafkaMaxWait": "1ms",						// the maximum amount of time to wait for new data to come
-
-				// "kafkaTopicProcessed": "",					// the topic were the events are sent after they are processed
 
 				// SQL
 				// "sqlDBName": "cgrates", 						// the name of the database from were the events are read
 				// "sqlTableName": "cdrs",						// the name of the table from were the events are read
 				// "pgSSLMode": "disable",						// the ssl mode for postgres db
 
-				// "sqlDBNameProcessed": "", 					// the name of the database were the events are sent after they are processed
-				// "sqlTableNameProcessed": "",					// the name of the table were the events are sent after they are processed
-				// "pgSSLModeProcessed": "",					// the ssl mode for postgres db
-				
 				// SQS and S3
 				// "awsRegion": "",
 				// "awsKey": "",
 				// "awsSecret": "",
 				// "awsToken": "",
 				
-				// "awsRegionProcessed": "",
-				// "awsKeyProcessed": "",
-				// "awsSecretProcessed": "",
-				// "awsTokenProcessed": "",
-
 				// SQS
 				// "sqsQueueID": "cgrates_cdrs", 				// the queue id for SQS readers from were the events are read
 				
-				// "sqsQueueIDProcessed": "", 					// the queue id for SQS readers were the events are sent after they are processed
-				
 				// S3
 				// "s3BucketID": "cgrates_cdrs", 				// the bucket id for S3 readers from were the events are read
-				// "s3FolderPathProcessed": "", 				// only for S3 event posting 
-				
-				// "s3BucketIDProcessed": "cgrates_cdrs", 		// the bucket id for S3 readers were the events are sent after they are processed
 
 				// nats
 				// "natsJetStream": false,						// controls if the nats reader uses the JetStream
@@ -461,15 +440,6 @@ const CGRATES_CFG_JSON = `
 				// "natsClientCertificate": "",					// the path to a client certificate( used by tls)
 				// "natsClientKey": "",							// the path to a client key( used by tls)
 				// "natsJetStreamMaxWait": "5s",				// the maximum amount of time to wait for a response
-
-				// "natsJetStreamProcessed": false,				// controls if the nats poster uses the JetStream
-				// "natsSubjectProcessed": "cgrates_cdrs",		// the subject were the events are posted
-				// "natsJWTFileProcessed": "",					// the path to the JWT file( can be the chained file or the user file)
-				// "natsSeedFileProcessed": "",					// the path to the seed files( if the JWT file is mention this is used as seedFile for the JWT user mentioned above)
-				// "natsCertificateAuthorityProcessed": "",		// the path to a custom certificate authority file( used by tls)
-				// "natsClientCertificateProcessed": "",		// the path to a client certificate( used by tls)
-				// "natsClientKeyProcessed": "",				// the path to a client key( used by tls)
-				// "natsJetStreamMaxWaitProcessed": "5s",		// the maximum amount of time to wait for a response
 			},
 			"fields":[											// import fields template, tag will match internally CDR field, in case of .csv value will be represented by index of the field value
 				{"tag": "ToR", "path": "*cgreq.ToR", "type": "*variable", "value": "~*req.2", "mandatory": true},
