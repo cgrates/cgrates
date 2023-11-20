@@ -289,6 +289,7 @@ func TestDfDataDbJsonCfg(t *testing.T) {
 			RedisReadTimeout:        utils.StringPointer("0"),
 			RedisWriteTimeout:       utils.StringPointer("0"),
 			MongoQueryTimeout:       utils.StringPointer("10s"),
+			MongoScheme:             utils.StringPointer("mongodb"),
 			RedisTLS:                utils.BoolPointer(false),
 			RedisClientCertificate:  utils.StringPointer(utils.EmptyString),
 			RedisClientKey:          utils.StringPointer(utils.EmptyString),
@@ -554,6 +555,7 @@ func TestDfStorDBJsonCfg(t *testing.T) {
 			SQLMaxOpenConns:    utils.IntPointer(100),
 			SQLMaxIdleConns:    utils.IntPointer(10),
 			MongoQueryTimeout:  utils.StringPointer("10s"),
+			MongoScheme:        utils.StringPointer("mongodb"),
 			SQLConnMaxLifetime: utils.StringPointer("0"),
 			MySQLDSNParams:     make(map[string]string),
 			PgSSLMode:          utils.StringPointer(utils.PostgresSSLModeDisable),
@@ -1891,7 +1893,9 @@ func TestDfMigratorCfg(t *testing.T) {
 		Out_storDB_user:     utils.StringPointer("cgrates"),
 		Out_storDB_password: utils.StringPointer(""),
 		Users_filters:       &[]string{},
-		Out_storDB_opts:     &DBOptsJson{},
+		Out_storDB_opts: &DBOptsJson{
+			MongoScheme: utils.StringPointer("mongodb"),
+		},
 		Out_dataDB_opts: &DBOptsJson{
 			RedisMaxConns:           utils.IntPointer(10),
 			RedisConnectAttempts:    utils.IntPointer(20),
@@ -1906,6 +1910,7 @@ func TestDfMigratorCfg(t *testing.T) {
 			RedisClientCertificate:  utils.StringPointer(utils.EmptyString),
 			RedisClientKey:          utils.StringPointer(utils.EmptyString),
 			RedisCACertificate:      utils.StringPointer(utils.EmptyString),
+			MongoScheme:             utils.StringPointer("mongodb"),
 		},
 	}
 	dfCgrJSONCfg, err := NewCgrJsonCfgFromBytes([]byte(CGRATES_CFG_JSON))

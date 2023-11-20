@@ -112,7 +112,7 @@ func TestFilterIndexerIT(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		mongoDB, err := NewMongoStorage(mgoITCfg.DataDbCfg().Host,
+		mongoDB, err := NewMongoStorage("mongodb", mgoITCfg.DataDbCfg().Host,
 			mgoITCfg.DataDbCfg().Port, mgoITCfg.DataDbCfg().Name,
 			mgoITCfg.DataDbCfg().User, mgoITCfg.DataDbCfg().Password,
 			mgoITCfg.GeneralCfg().DBDataEncoding,

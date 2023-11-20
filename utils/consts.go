@@ -1998,6 +1998,7 @@ const (
 	PrefixIndexedFieldsCfg = "prefix_indexed_fields"
 	SuffixIndexedFieldsCfg = "suffix_indexed_fields"
 	MongoQueryTimeoutCfg   = "mongoQueryTimeout"
+	MongoSchemeCfg         = "mongoScheme"
 	PgSSLModeCfg           = "pgSSLMode"
 	ItemsCfg               = "items"
 	OptsCfg                = "opts"

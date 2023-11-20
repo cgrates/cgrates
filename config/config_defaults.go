@@ -144,6 +144,7 @@ const CGRATES_CFG_JSON = `
 		"redisReadTimeout": "0",				// the amount of wait time until timeout for reading operations
 		"redisWriteTimeout": "0",   			// the amount of wait time until timeout for writing operations
 		"mongoQueryTimeout":"10s",				// timeout for query when mongo is used
+		"mongoScheme": "mongodb",				// scheme for MongoDB connection <mongodb|mongodb+srv>
 		"redisTLS": false,						// if true it will use a tls connection and use the redisClientCertificate, redisClientKey and redisCACertificate for tls connection
 		"redisClientCertificate":"",			// path to client certificate
 		"redisClientKey":"",					// path to client key
@@ -167,6 +168,7 @@ const CGRATES_CFG_JSON = `
 		"sqlConnMaxLifetime": "0", 			// maximum amount of time a connection may be reused (0 for unlimited), not applying for mongo
 		"mysqlDSNParams": {},               // DSN extra paramss
 		"mongoQueryTimeout": "10s",			// timeout for query when mongo is used
+		"mongoScheme": "mongodb",			// scheme for MongoDB connection <mongodb|mongodb+srv>
 		"pgSSLMode": "disable",		 		// pgSSLMode in case of *postgres
 		"mysqlLocation": "Local",			// the location the time from mysql is retrieved
 	},
@@ -1082,8 +1084,11 @@ const CGRATES_CFG_JSON = `
 		"redisClientCertificate":"",		// path to client certificate
 		"redisClientKey":"",				// path to client key
 		"redisCACertificate":"",			// path to CA certificate (populate for self-signed certificate otherwise let it empty)
+		"mongoScheme": "mongodb",			// scheme for MongoDB connection <mongodb|mongodb+srv>
 	},
-	"out_stordb_opts":{},
+	"out_stordb_opts":{
+		"mongoScheme": "mongodb"			// scheme for MongoDB connection <mongodb|mongodb+srv>
+	},
 },
 
 
