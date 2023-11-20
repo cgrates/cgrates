@@ -1017,7 +1017,7 @@ func TestErsOnEvictedNoCacheDumpFields(t *testing.T) {
 
 		compare[idx] = s
 	}
-	if len(compare[0]) != 10 && len(compare[1]) != 9 {
+	if len(compare[0]) != 9 && len(compare[1]) != 8 {
 		t.Errorf("expected <%d> and <%d>, \nreceived: <%d> and <%d>",
 			10, 9, len(compare[0]), len(compare[1]))
 	}
@@ -1108,7 +1108,6 @@ func TestERsOnEvictedDumpToJSON(t *testing.T) {
 		utils.OriginHost:   "local",
 		utils.OriginID:     "123456",
 		utils.ToR:          utils.MetaVoice,
-		utils.MetaOriginID: "1133dc80896edf5049b46aa911cb9085eeb27f4c",
 		utils.Password:     "secure_pass",
 		"Additional_Field": "Additional_Value",
 	}

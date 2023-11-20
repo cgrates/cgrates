@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"errors"
 	"slices"
 	"time"
 
@@ -178,10 +179,9 @@ func GetBoolOpts(ctx *context.Context, tnt string, dP utils.DataProvider, fS *Fi
 	if err != nil {
 		return false, err
 	}
-	var opts map[string]any
-	opts, canCast := values.(map[string]any)
-	if !canCast {
-		return false, utils.ErrCastFailed
+	opts, err := ConvertOptsToMapStringAny(values)
+	if err != nil {
+		return
 	}
 	for _, optName := range optNames {
 		if opt, has := opts[optName]; has {
@@ -338,4 +338,23 @@ func GetDurationOptsFromMultipleMaps(ctx *context.Context, tnt string, eventStar
 		}
 	}
 	return dftOpt, nil // return the default value if there are no options and none of the filters pass
+}
+
+func ConvertOptsToMapStringAny(in any) (map[string]any, error) {
+	out := make(map[string]any)
+	switch val := in.(type) {
+	case MapEvent:
+		for k, v := range val {
+			out[k] = v
+		}
+	case utils.MapStorage:
+		for k, v := range val {
+			out[k] = v
+		}
+	case map[string]any:
+		return val, nil
+	default:
+		return nil, errors.New("cannot convert to map[string]any")
+	}
+	return out, nil
 }
