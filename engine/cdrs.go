@@ -467,10 +467,33 @@ func populateCost(cgrOpts map[string]any) *utils.Decimal {
 }
 
 // V1ProcessStoredEvents processes stored events based on provided filters.
-func (cdrS *CDRServer) V1ProcessStoredEvents(ctx *context.Context, args *CDRFilters, reply *string) error {
+func (cdrS *CDRServer) V1ProcessStoredEvents(ctx *context.Context, args *CDRFilters, reply *string) (err error) {
+	if args.ID == utils.EmptyString {
+		args.ID = utils.GenUUID()
+	}
 	if args.Tenant == utils.EmptyString {
 		args.Tenant = cdrS.cfg.GeneralCfg().DefaultTenant
 	}
+
+	// RPC caching
+	if config.CgrConfig().CacheCfg().Partitions[utils.CacheRPCResponses].Limit != 0 {
+		cacheKey := utils.ConcatenatedKey(utils.CDRsV1ProcessStoredEvents, args.ID)
+		refID := guardian.Guardian.GuardIDs("",
+			config.CgrConfig().GeneralCfg().LockingTimeout, cacheKey)
+		defer guardian.Guardian.UnguardIDs(refID)
+
+		if itm, has := Cache.Get(utils.CacheRPCResponses, cacheKey); has {
+			cachedResp := itm.(*utils.CachedRPCResponse)
+			if cachedResp.Error == nil {
+				*reply = *cachedResp.Result.(*string)
+			}
+			return cachedResp.Error
+		}
+		defer Cache.Set(ctx, utils.CacheRPCResponses, cacheKey,
+			&utils.CachedRPCResponse{Result: reply, Error: err},
+			nil, true, utils.NonTransactional)
+	}
+
 	fltrs, err := GetFilters(ctx, args.FilterIDs, args.Tenant, cdrS.dm)
 	if err != nil {
 		return fmt.Errorf("preparing filters failed: %w", err)
