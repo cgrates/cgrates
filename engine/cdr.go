@@ -119,6 +119,7 @@ func checkNestedFields(elem string, values []string) bool {
 
 type CDRFilters struct {
 	Tenant    string
+	ID        string
 	FilterIDs []string
 	APIOpts   map[string]interface{}
 }
