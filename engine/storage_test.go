@@ -1696,14 +1696,6 @@ func TestStorageUtilsNewStorDBConn(t *testing.T) {
 	}
 }
 
-func TestStorageUtilsBuildURL(t *testing.T) {
-	s := "test"
-	_, err := buildURL(s, "!£%$%$£&$%/&%(/&)&)", s, s, s, s)
-	if err.Error() != `parse "//!£%$%$£&$%/&%(/&)&)": invalid URL escape "%$%"` {
-		t.Error(err)
-	}
-}
-
 func TestCSVNewGoogleCSVStorage(t *testing.T) {
 	type args struct {
 		sep                    rune
@@ -1736,6 +1728,90 @@ func TestCSVNewGoogleCSVStorage(t *testing.T) {
 
 			if !reflect.DeepEqual(rcv, tt.exp.c) {
 				t.Errorf("received %v, expected %v", rcv, tt.exp.c)
+			}
+		})
+	}
+}
+
+func TestComposeURI(t *testing.T) {
+	tests := []struct {
+		name     string
+		scheme   string
+		host     string
+		port     string
+		db       string
+		user     string
+		pass     string
+		expected string
+		parseErr bool
+	}{
+		{
+			name:     "multiple nodes",
+			scheme:   "mongodb",
+			host:     "clusternode1:1230,clusternode2:1231,clusternode3",
+			port:     "1232",
+			db:       "cgrates",
+			user:     "user",
+			pass:     "pass",
+			expected: "mongodb://user:pass@clusternode1:1230,clusternode2:1231,clusternode3:1232/cgrates",
+		},
+		{
+			name:     "no port",
+			scheme:   "mongodb",
+			host:     "localhost:1234",
+			port:     "0",
+			db:       "cgrates",
+			user:     "user",
+			pass:     "pass",
+			expected: "mongodb://user:pass@localhost:1234/cgrates",
+		},
+		{
+			name:     "with port",
+			scheme:   "mongodb",
+			host:     "localhost",
+			port:     "1234",
+			db:       "cgrates",
+			user:     "user",
+			pass:     "pass",
+			expected: "mongodb://user:pass@localhost:1234/cgrates",
+		},
+		{
+			name:     "no password",
+			scheme:   "mongodb",
+			host:     "localhost",
+			port:     "1234",
+			db:       "cgrates",
+			user:     "user",
+			pass:     "",
+			expected: "mongodb://localhost:1234/cgrates",
+		},
+		{
+			name:     "no db",
+			scheme:   "mongodb",
+			host:     "localhost",
+			port:     "1234",
+			db:       "",
+			user:     "user",
+			pass:     "pass",
+			expected: "mongodb://user:pass@localhost:1234",
+		},
+		{
+			name:     "different scheme",
+			scheme:   "mongodb+srv",
+			host:     "cgr.abcdef.mongodb.net",
+			port:     "0",
+			db:       "?retryWrites=true&w=majority",
+			user:     "user",
+			pass:     "pass",
+			expected: "mongodb+srv://user:pass@cgr.abcdef.mongodb.net/?retryWrites=true&w=majority",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			url := composeURI(tt.scheme, tt.host, tt.port, tt.db, tt.user, tt.pass)
+			if url != tt.expected {
+				t.Errorf("expected %v,\nreceived %v", tt.expected, url)
 			}
 		})
 	}
