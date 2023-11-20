@@ -105,28 +105,26 @@ var (
 func NewMongoStorage(host, port, db, user, pass, mrshlerStr string, cdrsIndexes []string,
 	isDataDB bool,
 ) (*MongoStorage, error) {
-	url, err := buildURL("mongodb", host, port, db, user, pass)
-	if err != nil {
-		return nil, err
-	}
 	mongoStorage := &MongoStorage{
 		ctx:         context.TODO(),
 		cdrsIndexes: cdrsIndexes,
 		isDataDB:    isDataDB,
 		counter:     utils.NewCounter(time.Now().UnixNano(), 0),
 	}
+	uri := composeURI("mongodb", host, port, db, user, pass)
 	mongoStorage.ctxTTL = config.CgrConfig().DataDbCfg().QueryTimeout
 	if !isDataDB {
 		mongoStorage.ctxTTL = config.CgrConfig().StorDbCfg().QueryTimeout
 	}
 	// serverAPI := options.ServerAPI(options.ServerAPIVersion1).SetStrict(true).SetDeprecationErrors(true)
 	opts := options.Client().
-		ApplyURI(url.String()).
+		ApplyURI(uri).
 		SetServerSelectionTimeout(mongoStorage.ctxTTL).
 		SetRetryWrites(false) // default is true
 		// SetServerAPIOptions(serverAPI)
 
 	// Create a new client and connect to the server
+	var err error
 	mongoStorage.client, err = mongo.Connect(mongoStorage.ctx, opts)
 	if err != nil {
 		return nil, err
