@@ -12,26 +12,40 @@
     "db_type": "*internal"
 },
 
+"ees": {
+	"enabled": true,
+	"exporters": [
+		{
+			"id": "nats_processed",
+			"type": "*nats_json_map",
+			"export_path": "nats://localhost:4222",
+			"attempts": 1,
+			"opts": {
+				"natsJetStream": true,
+				"natsSubject": "cgrates_cdrs_processed"
+			}
+		}
+	]
+},
+
 "ers": {														
     "enabled": true,											
-    "sessions_conns":[],								
+    "sessions_conns":[],
+    "ees_conns": ["*internal"],								
     "readers": [
         {
             "id": "nats_reader1",									
             "type": "*nats_json_map",									
             "source_path": "nats://127.0.0.1:4222",			
-            "processed_path": "nats://127.0.0.1:4222",		
+            "processed_path": "nats://127.0.0.1:4222",
+            "ees_success_ids": ["nats_processed"],	
             "opts": {
                 "natsJetStream": true,						
                 "natsConsumerName": "cgrates",				
                 "natsStreamName": "stream",				
                 "natsSubject": "cgrates_cdrs",					
                 "natsQueueID": "queue",							
-                "natsJetStreamMaxWait": "5s",				
-
-                "natsJetStreamProcessed": true,				
-                "natsSubjectProcessed": "cgrates_cdrs_processed",		
-                "natsJetStreamMaxWaitProcessed": "5s"		
+                "natsJetStreamMaxWait": "5s"			
             },
             "flags": ["*dryrun"],										
             "fields":[											
@@ -43,17 +57,14 @@
             "type": "*nats_json_map",									
             "source_path": "nats://127.0.0.1:4222",			
             "processed_path": "nats://127.0.0.1:4222",		
+            "ees_success_ids": ["nats_processed"],	
             "opts": {
                 "natsJetStream": true,						
                 "natsConsumerName": "cgrates",				
                 "natsStreamName": "stream",				
                 "natsSubject": "cgrates_cdrs",					
                 "natsQueueID": "queue",							
-                "natsJetStreamMaxWait": "5s",				
-
-                "natsJetStreamProcessed": true,				
-                "natsSubjectProcessed": "cgrates_cdrs_processed",		
-                "natsJetStreamMaxWaitProcessed": "5s"		
+                "natsJetStreamMaxWait": "5s"			
             },
             "flags": ["*dryrun"],										
             "fields":[											
@@ -68,7 +79,7 @@
     "cdr_template": [
         {"tag": "Account", "path": "*cgreq.Account", "type": "*variable", "value": "~*req.Account", "mandatory": true},
         {"tag": "Subject", "path": "*cgreq.Subject", "type": "*variable", "value": "~*req.Subject", "mandatory": true},
-        {"tag": "Destination", "path": "*cgreq.Destination", "type": "*variable", "value": "~*req.Destination", "mandatory": true},
+        {"tag": "Destination", "path": "*cgreq.Destination", "type": "*variable", "value": "~*req.Destination", "mandatory": true}
     ]
 }
     

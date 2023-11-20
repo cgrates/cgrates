@@ -162,39 +162,24 @@ func (erS *ERsCfg) AsMapInterface(separator string) (initialMP map[string]any) {
 }
 
 type AMQPROpts struct {
-	QueueID               *string
-	QueueIDProcessed      *string
-	Username              *string
-	Password              *string
-	UsernameProcessed     *string
-	PasswordProcessed     *string
-	ConsumerTag           *string
-	Exchange              *string
-	ExchangeType          *string
-	RoutingKey            *string
-	ExchangeProcessed     *string
-	ExchangeTypeProcessed *string
-	RoutingKeyProcessed   *string
+	QueueID      *string
+	Username     *string
+	Password     *string
+	ConsumerTag  *string
+	Exchange     *string
+	ExchangeType *string
+	RoutingKey   *string
 }
 
 func (amqpr *AMQPROpts) loadFromJSONCfg(jsnCfg *EventReaderOptsJson) (err error) {
 	if jsnCfg.AMQPQueueID != nil {
 		amqpr.QueueID = jsnCfg.AMQPQueueID
 	}
-	if jsnCfg.AMQPQueueIDProcessed != nil {
-		amqpr.QueueIDProcessed = jsnCfg.AMQPQueueIDProcessed
-	}
 	if jsnCfg.AMQPUsername != nil {
 		amqpr.Username = jsnCfg.AMQPUsername
 	}
 	if jsnCfg.AMQPPassword != nil {
 		amqpr.Password = jsnCfg.AMQPPassword
-	}
-	if jsnCfg.AMQPUsernameProcessed != nil {
-		amqpr.UsernameProcessed = jsnCfg.AMQPUsernameProcessed
-	}
-	if jsnCfg.AMQPPasswordProcessed != nil {
-		amqpr.PasswordProcessed = jsnCfg.AMQPPasswordProcessed
 	}
 	if jsnCfg.AMQPConsumerTag != nil {
 		amqpr.ConsumerTag = jsnCfg.AMQPConsumerTag
@@ -208,23 +193,13 @@ func (amqpr *AMQPROpts) loadFromJSONCfg(jsnCfg *EventReaderOptsJson) (err error)
 	if jsnCfg.AMQPRoutingKey != nil {
 		amqpr.RoutingKey = jsnCfg.AMQPRoutingKey
 	}
-	if jsnCfg.AMQPExchangeProcessed != nil {
-		amqpr.ExchangeProcessed = jsnCfg.AMQPExchangeProcessed
-	}
-	if jsnCfg.AMQPExchangeTypeProcessed != nil {
-		amqpr.ExchangeTypeProcessed = jsnCfg.AMQPExchangeTypeProcessed
-	}
-	if jsnCfg.AMQPRoutingKeyProcessed != nil {
-		amqpr.RoutingKeyProcessed = jsnCfg.AMQPRoutingKeyProcessed
-	}
 	return
 }
 
 type KafkaROpts struct {
-	Topic          *string
-	GroupID        *string
-	MaxWait        *time.Duration
-	TopicProcessed *string
+	Topic   *string
+	GroupID *string
+	MaxWait *time.Duration
 }
 
 func (kafkaROpts *KafkaROpts) loadFromJSONCfg(jsnCfg *EventReaderOptsJson) (err error) {
@@ -241,19 +216,13 @@ func (kafkaROpts *KafkaROpts) loadFromJSONCfg(jsnCfg *EventReaderOptsJson) (err 
 		}
 		kafkaROpts.MaxWait = utils.DurationPointer(kafkaMaxWait)
 	}
-	if jsnCfg.KafkaTopicProcessed != nil {
-		kafkaROpts.TopicProcessed = jsnCfg.KafkaTopicProcessed
-	}
 	return
 }
 
 type SQLROpts struct {
-	DBName             *string
-	TableName          *string
-	PgSSLMode          *string
-	DBNameProcessed    *string
-	TableNameProcessed *string
-	PgSSLModeProcessed *string
+	DBName    *string
+	TableName *string
+	PgSSLMode *string
 }
 
 func (sqlOpts *SQLROpts) loadFromJSONCfg(jsnCfg *EventReaderOptsJson) (err error) {
@@ -266,32 +235,16 @@ func (sqlOpts *SQLROpts) loadFromJSONCfg(jsnCfg *EventReaderOptsJson) (err error
 	if jsnCfg.PgSSLMode != nil {
 		sqlOpts.PgSSLMode = jsnCfg.PgSSLMode
 	}
-	if jsnCfg.SQLDBNameProcessed != nil {
-		sqlOpts.DBNameProcessed = jsnCfg.SQLDBNameProcessed
-	}
-	if jsnCfg.SQLTableNameProcessed != nil {
-		sqlOpts.TableNameProcessed = jsnCfg.SQLTableNameProcessed
-	}
-	if jsnCfg.PgSSLModeProcessed != nil {
-		sqlOpts.PgSSLModeProcessed = jsnCfg.PgSSLModeProcessed
-	}
 	return
 }
 
 type AWSROpts struct {
-	Region                *string
-	Key                   *string
-	Secret                *string
-	Token                 *string
-	RegionProcessed       *string
-	KeyProcessed          *string
-	SecretProcessed       *string
-	TokenProcessed        *string
-	SQSQueueID            *string
-	SQSQueueIDProcessed   *string
-	S3BucketID            *string
-	S3FolderPathProcessed *string
-	S3BucketIDProcessed   *string
+	Region     *string
+	Key        *string
+	Secret     *string
+	Token      *string
+	SQSQueueID *string
+	S3BucketID *string
 }
 
 func (awsROpts *AWSROpts) loadFromJSONCfg(jsnCfg *EventReaderOptsJson) (err error) {
@@ -308,56 +261,27 @@ func (awsROpts *AWSROpts) loadFromJSONCfg(jsnCfg *EventReaderOptsJson) (err erro
 	if jsnCfg.AWSToken != nil {
 		awsROpts.Token = jsnCfg.AWSToken
 	}
-	if jsnCfg.AWSRegionProcessed != nil {
-		awsROpts.RegionProcessed = jsnCfg.AWSRegionProcessed
-	}
-	if jsnCfg.AWSKeyProcessed != nil {
-		awsROpts.KeyProcessed = jsnCfg.AWSKeyProcessed
-	}
-	if jsnCfg.AWSSecretProcessed != nil {
-		awsROpts.SecretProcessed = jsnCfg.AWSSecretProcessed
-	}
-	if jsnCfg.AWSTokenProcessed != nil {
-		awsROpts.TokenProcessed = jsnCfg.AWSTokenProcessed
-	}
 	if jsnCfg.SQSQueueID != nil {
 		awsROpts.SQSQueueID = jsnCfg.SQSQueueID
 	}
-	if jsnCfg.SQSQueueIDProcessed != nil {
-		awsROpts.SQSQueueIDProcessed = jsnCfg.SQSQueueIDProcessed
-	}
 	if jsnCfg.S3BucketID != nil {
 		awsROpts.S3BucketID = jsnCfg.S3BucketID
-	}
-	if jsnCfg.S3FolderPathProcessed != nil {
-		awsROpts.S3FolderPathProcessed = jsnCfg.S3FolderPathProcessed
-	}
-	if jsnCfg.S3BucketIDProcessed != nil {
-		awsROpts.S3BucketIDProcessed = jsnCfg.S3BucketIDProcessed
 	}
 	return
 }
 
 type NATSROpts struct {
-	JetStream                     *bool
-	ConsumerName                  *string
-	StreamName                    *string
-	Subject                       *string
-	QueueID                       *string
-	JWTFile                       *string
-	SeedFile                      *string
-	CertificateAuthority          *string
-	ClientCertificate             *string
-	ClientKey                     *string
-	JetStreamMaxWait              *time.Duration
-	JetStreamProcessed            *bool
-	SubjectProcessed              *string
-	JWTFileProcessed              *string
-	SeedFileProcessed             *string
-	CertificateAuthorityProcessed *string
-	ClientCertificateProcessed    *string
-	ClientKeyProcessed            *string
-	JetStreamMaxWaitProcessed     *time.Duration
+	JetStream            *bool
+	ConsumerName         *string
+	StreamName           *string
+	Subject              *string
+	QueueID              *string
+	JWTFile              *string
+	SeedFile             *string
+	CertificateAuthority *string
+	ClientCertificate    *string
+	ClientKey            *string
+	JetStreamMaxWait     *time.Duration
 }
 
 func (natsOpts *NATSROpts) loadFromJSONCfg(jsnCfg *EventReaderOptsJson) (err error) {
@@ -397,34 +321,6 @@ func (natsOpts *NATSROpts) loadFromJSONCfg(jsnCfg *EventReaderOptsJson) (err err
 			return
 		}
 		natsOpts.JetStreamMaxWait = utils.DurationPointer(jetStreamMaxWait)
-	}
-	if jsnCfg.NATSJetStreamProcessed != nil {
-		natsOpts.JetStreamProcessed = jsnCfg.NATSJetStreamProcessed
-	}
-	if jsnCfg.NATSSubjectProcessed != nil {
-		natsOpts.SubjectProcessed = jsnCfg.NATSSubjectProcessed
-	}
-	if jsnCfg.NATSJWTFileProcessed != nil {
-		natsOpts.JWTFileProcessed = jsnCfg.NATSJWTFileProcessed
-	}
-	if jsnCfg.NATSSeedFileProcessed != nil {
-		natsOpts.SeedFileProcessed = jsnCfg.NATSSeedFileProcessed
-	}
-	if jsnCfg.NATSCertificateAuthorityProcessed != nil {
-		natsOpts.CertificateAuthorityProcessed = jsnCfg.NATSCertificateAuthorityProcessed
-	}
-	if jsnCfg.NATSClientCertificateProcessed != nil {
-		natsOpts.ClientCertificateProcessed = jsnCfg.NATSClientCertificateProcessed
-	}
-	if jsnCfg.NATSClientKeyProcessed != nil {
-		natsOpts.ClientKeyProcessed = jsnCfg.NATSClientKeyProcessed
-	}
-	if jsnCfg.NATSJetStreamMaxWaitProcessed != nil {
-		var jetStreamMaxWait time.Duration
-		if jetStreamMaxWait, err = utils.ParseDurationWithNanosecs(*jsnCfg.NATSJetStreamMaxWaitProcessed); err != nil {
-			return
-		}
-		natsOpts.JetStreamMaxWaitProcessed = utils.DurationPointer(jetStreamMaxWait)
 	}
 	return
 }
@@ -489,6 +385,8 @@ type EventReaderCfg struct {
 	Flags                utils.FlagsWithParams
 	Reconnects           int
 	MaxReconnectInterval time.Duration
+	EEsSuccessIDs        []string
+	EEsFailedIDs         []string
 	Opts                 *EventReaderOpts
 	Fields               []*FCTemplate
 	PartialCommitFields  []*FCTemplate
@@ -580,6 +478,14 @@ func (er *EventReaderCfg) loadFromJSONCfg(jsnCfg *EventReaderJsonCfg, msgTemplat
 			return err
 		}
 	}
+	if jsnCfg.Ees_success_ids != nil {
+		er.EEsSuccessIDs = make([]string, len(*jsnCfg.Ees_success_ids))
+		copy(er.EEsSuccessIDs, *jsnCfg.Ees_success_ids)
+	}
+	if jsnCfg.Ees_failed_ids != nil {
+		er.EEsFailedIDs = make([]string, len(*jsnCfg.Ees_failed_ids))
+		copy(er.EEsFailedIDs, *jsnCfg.Ees_failed_ids)
+	}
 	if jsnCfg.Fields != nil {
 		if er.Fields, err = FCTemplatesFromFCTemplatesJSONCfg(*jsnCfg.Fields, sep); err != nil {
 			return err
@@ -621,10 +527,6 @@ func (amqpOpts *AMQPROpts) Clone() *AMQPROpts {
 		cln.QueueID = new(string)
 		*cln.QueueID = *amqpOpts.QueueID
 	}
-	if amqpOpts.QueueIDProcessed != nil {
-		cln.QueueIDProcessed = new(string)
-		*cln.QueueIDProcessed = *amqpOpts.QueueIDProcessed
-	}
 	if amqpOpts.Username != nil {
 		cln.Username = new(string)
 		*cln.Username = *amqpOpts.Username
@@ -632,14 +534,6 @@ func (amqpOpts *AMQPROpts) Clone() *AMQPROpts {
 	if amqpOpts.Password != nil {
 		cln.Password = new(string)
 		*cln.Password = *amqpOpts.Password
-	}
-	if amqpOpts.UsernameProcessed != nil {
-		cln.UsernameProcessed = new(string)
-		*cln.UsernameProcessed = *amqpOpts.UsernameProcessed
-	}
-	if amqpOpts.PasswordProcessed != nil {
-		cln.PasswordProcessed = new(string)
-		*cln.PasswordProcessed = *amqpOpts.PasswordProcessed
 	}
 	if amqpOpts.ConsumerTag != nil {
 		cln.ConsumerTag = new(string)
@@ -656,18 +550,6 @@ func (amqpOpts *AMQPROpts) Clone() *AMQPROpts {
 	if amqpOpts.RoutingKey != nil {
 		cln.RoutingKey = new(string)
 		*cln.RoutingKey = *amqpOpts.RoutingKey
-	}
-	if amqpOpts.ExchangeProcessed != nil {
-		cln.ExchangeProcessed = new(string)
-		*cln.ExchangeProcessed = *amqpOpts.ExchangeProcessed
-	}
-	if amqpOpts.ExchangeTypeProcessed != nil {
-		cln.ExchangeTypeProcessed = new(string)
-		*cln.ExchangeTypeProcessed = *amqpOpts.ExchangeTypeProcessed
-	}
-	if amqpOpts.RoutingKeyProcessed != nil {
-		cln.RoutingKeyProcessed = new(string)
-		*cln.RoutingKeyProcessed = *amqpOpts.RoutingKeyProcessed
 	}
 	return cln
 }
@@ -710,10 +592,6 @@ func (kafkaOpts *KafkaROpts) Clone() *KafkaROpts {
 		cln.MaxWait = new(time.Duration)
 		*cln.MaxWait = *kafkaOpts.MaxWait
 	}
-	if kafkaOpts.TopicProcessed != nil {
-		cln.TopicProcessed = new(string)
-		*cln.TopicProcessed = *kafkaOpts.TopicProcessed
-	}
 	return cln
 }
 
@@ -730,18 +608,6 @@ func (sqlOpts *SQLROpts) Clone() *SQLROpts {
 	if sqlOpts.PgSSLMode != nil {
 		cln.PgSSLMode = new(string)
 		*cln.PgSSLMode = *sqlOpts.PgSSLMode
-	}
-	if sqlOpts.DBNameProcessed != nil {
-		cln.DBNameProcessed = new(string)
-		*cln.DBNameProcessed = *sqlOpts.DBNameProcessed
-	}
-	if sqlOpts.TableNameProcessed != nil {
-		cln.TableNameProcessed = new(string)
-		*cln.TableNameProcessed = *sqlOpts.TableNameProcessed
-	}
-	if sqlOpts.PgSSLModeProcessed != nil {
-		cln.PgSSLModeProcessed = new(string)
-		*cln.PgSSLModeProcessed = *sqlOpts.PgSSLModeProcessed
 	}
 	return cln
 }
@@ -764,41 +630,13 @@ func (awsOpt *AWSROpts) Clone() *AWSROpts {
 		cln.Token = new(string)
 		*cln.Token = *awsOpt.Token
 	}
-	if awsOpt.RegionProcessed != nil {
-		cln.RegionProcessed = new(string)
-		*cln.RegionProcessed = *awsOpt.RegionProcessed
-	}
-	if awsOpt.KeyProcessed != nil {
-		cln.KeyProcessed = new(string)
-		*cln.KeyProcessed = *awsOpt.KeyProcessed
-	}
-	if awsOpt.SecretProcessed != nil {
-		cln.SecretProcessed = new(string)
-		*cln.SecretProcessed = *awsOpt.SecretProcessed
-	}
-	if awsOpt.TokenProcessed != nil {
-		cln.TokenProcessed = new(string)
-		*cln.TokenProcessed = *awsOpt.TokenProcessed
-	}
 	if awsOpt.SQSQueueID != nil {
 		cln.SQSQueueID = new(string)
 		*cln.SQSQueueID = *awsOpt.SQSQueueID
 	}
-	if awsOpt.SQSQueueIDProcessed != nil {
-		cln.SQSQueueIDProcessed = new(string)
-		*cln.SQSQueueIDProcessed = *awsOpt.SQSQueueIDProcessed
-	}
 	if awsOpt.S3BucketID != nil {
 		cln.S3BucketID = new(string)
 		*cln.S3BucketID = *awsOpt.S3BucketID
-	}
-	if awsOpt.S3FolderPathProcessed != nil {
-		cln.S3FolderPathProcessed = new(string)
-		*cln.S3FolderPathProcessed = *awsOpt.S3FolderPathProcessed
-	}
-	if awsOpt.S3BucketIDProcessed != nil {
-		cln.S3BucketIDProcessed = new(string)
-		*cln.S3BucketIDProcessed = *awsOpt.S3BucketIDProcessed
 	}
 	return cln
 }
@@ -847,38 +685,6 @@ func (natOpts *NATSROpts) Clone() *NATSROpts {
 	if natOpts.JetStreamMaxWait != nil {
 		cln.JetStreamMaxWait = new(time.Duration)
 		*cln.JetStreamMaxWait = *natOpts.JetStreamMaxWait
-	}
-	if natOpts.JetStreamProcessed != nil {
-		cln.JetStreamProcessed = new(bool)
-		*cln.JetStreamProcessed = *natOpts.JetStreamProcessed
-	}
-	if natOpts.SubjectProcessed != nil {
-		cln.SubjectProcessed = new(string)
-		*cln.SubjectProcessed = *natOpts.SubjectProcessed
-	}
-	if natOpts.JWTFileProcessed != nil {
-		cln.JWTFileProcessed = new(string)
-		*cln.JWTFileProcessed = *natOpts.JWTFileProcessed
-	}
-	if natOpts.SeedFileProcessed != nil {
-		cln.SeedFileProcessed = new(string)
-		*cln.SeedFileProcessed = *natOpts.SeedFileProcessed
-	}
-	if natOpts.CertificateAuthorityProcessed != nil {
-		cln.CertificateAuthorityProcessed = new(string)
-		*cln.CertificateAuthorityProcessed = *natOpts.CertificateAuthorityProcessed
-	}
-	if natOpts.ClientCertificateProcessed != nil {
-		cln.ClientCertificateProcessed = new(string)
-		*cln.ClientCertificateProcessed = *natOpts.ClientCertificateProcessed
-	}
-	if natOpts.ClientKeyProcessed != nil {
-		cln.ClientKeyProcessed = new(string)
-		*cln.ClientKeyProcessed = *natOpts.ClientKeyProcessed
-	}
-	if natOpts.JetStreamMaxWaitProcessed != nil {
-		cln.JetStreamMaxWaitProcessed = new(time.Duration)
-		*cln.JetStreamMaxWaitProcessed = *natOpts.JetStreamMaxWaitProcessed
 	}
 	return cln
 }
@@ -932,16 +738,15 @@ func (er EventReaderCfg) Clone() (cln *EventReaderCfg) {
 		ConcurrentReqs:       er.ConcurrentReqs,
 		SourcePath:           er.SourcePath,
 		ProcessedPath:        er.ProcessedPath,
+		Filters:              slices.Clone(er.Filters),
 		Tenant:               er.Tenant.Clone(),
 		Timezone:             er.Timezone,
 		Flags:                er.Flags.Clone(),
 		Reconnects:           er.Reconnects,
 		MaxReconnectInterval: er.MaxReconnectInterval,
+		EEsSuccessIDs:        slices.Clone(er.EEsFailedIDs),
+		EEsFailedIDs:         slices.Clone(er.EEsFailedIDs),
 		Opts:                 er.Opts.Clone(),
-	}
-	if er.Filters != nil {
-		cln.Filters = make([]string, len(er.Filters))
-		copy(cln.Filters, er.Filters)
 	}
 	if er.Fields != nil {
 		cln.Fields = make([]*FCTemplate, len(er.Fields))
@@ -1002,20 +807,11 @@ func (er *EventReaderCfg) AsMapInterface(separator string) (initialMP map[string
 		if amqpOpts.QueueID != nil {
 			opts[utils.AMQPQueueID] = *amqpOpts.QueueID
 		}
-		if amqpOpts.QueueIDProcessed != nil {
-			opts[utils.AMQPQueueIDProcessedCfg] = *amqpOpts.QueueIDProcessed
-		}
 		if amqpOpts.Username != nil {
 			opts[utils.AMQPUsername] = *amqpOpts.Username
 		}
 		if amqpOpts.Password != nil {
 			opts[utils.AMQPPassword] = *amqpOpts.Password
-		}
-		if amqpOpts.UsernameProcessed != nil {
-			opts[utils.AMQPUsernameProcessedCfg] = *amqpOpts.UsernameProcessed
-		}
-		if amqpOpts.PasswordProcessed != nil {
-			opts[utils.AMQPPasswordProcessedCfg] = *amqpOpts.PasswordProcessed
 		}
 		if amqpOpts.ConsumerTag != nil {
 			opts[utils.AMQPConsumerTag] = *amqpOpts.ConsumerTag
@@ -1029,15 +825,6 @@ func (er *EventReaderCfg) AsMapInterface(separator string) (initialMP map[string
 		if amqpOpts.RoutingKey != nil {
 			opts[utils.AMQPRoutingKey] = *amqpOpts.RoutingKey
 		}
-		if amqpOpts.ExchangeProcessed != nil {
-			opts[utils.AMQPExchangeProcessedCfg] = *amqpOpts.ExchangeProcessed
-		}
-		if amqpOpts.ExchangeTypeProcessed != nil {
-			opts[utils.AMQPExchangeTypeProcessedCfg] = *amqpOpts.ExchangeTypeProcessed
-		}
-		if amqpOpts.RoutingKeyProcessed != nil {
-			opts[utils.AMQPRoutingKeyProcessedCfg] = *amqpOpts.RoutingKeyProcessed
-		}
 	}
 
 	if kafkaOpts := er.Opts.Kafka; kafkaOpts != nil {
@@ -1050,9 +837,6 @@ func (er *EventReaderCfg) AsMapInterface(separator string) (initialMP map[string
 		if kafkaOpts.MaxWait != nil {
 			opts[utils.KafkaMaxWait] = kafkaOpts.MaxWait.String()
 		}
-		if kafkaOpts.TopicProcessed != nil {
-			opts[utils.KafkaTopicProcessedCfg] = *kafkaOpts.TopicProcessed
-		}
 	}
 
 	if sqlOpts := er.Opts.SQL; sqlOpts != nil {
@@ -1064,15 +848,6 @@ func (er *EventReaderCfg) AsMapInterface(separator string) (initialMP map[string
 		}
 		if sqlOpts.PgSSLMode != nil {
 			opts[utils.PgSSLModeCfg] = *sqlOpts.PgSSLMode
-		}
-		if sqlOpts.DBNameProcessed != nil {
-			opts[utils.SQLDBNameProcessedCfg] = *sqlOpts.DBNameProcessed
-		}
-		if sqlOpts.TableNameProcessed != nil {
-			opts[utils.SQLTableNameProcessedCfg] = *sqlOpts.TableNameProcessed
-		}
-		if sqlOpts.PgSSLModeProcessed != nil {
-			opts[utils.PgSSLModeProcessedCfg] = *sqlOpts.PgSSLModeProcessed
 		}
 	}
 
@@ -1089,32 +864,11 @@ func (er *EventReaderCfg) AsMapInterface(separator string) (initialMP map[string
 		if awsOpts.Token != nil {
 			opts[utils.AWSToken] = *awsOpts.Token
 		}
-		if awsOpts.RegionProcessed != nil {
-			opts[utils.AWSRegionProcessedCfg] = *awsOpts.RegionProcessed
-		}
-		if awsOpts.KeyProcessed != nil {
-			opts[utils.AWSKeyProcessedCfg] = *awsOpts.KeyProcessed
-		}
-		if awsOpts.SecretProcessed != nil {
-			opts[utils.AWSSecretProcessedCfg] = *awsOpts.SecretProcessed
-		}
-		if awsOpts.TokenProcessed != nil {
-			opts[utils.AWSTokenProcessedCfg] = *awsOpts.TokenProcessed
-		}
 		if awsOpts.SQSQueueID != nil {
 			opts[utils.SQSQueueID] = *awsOpts.SQSQueueID
 		}
-		if awsOpts.SQSQueueIDProcessed != nil {
-			opts[utils.SQSQueueIDProcessedCfg] = *awsOpts.SQSQueueIDProcessed
-		}
 		if awsOpts.S3BucketID != nil {
 			opts[utils.S3Bucket] = *awsOpts.S3BucketID
-		}
-		if awsOpts.S3FolderPathProcessed != nil {
-			opts[utils.S3FolderPathProcessedCfg] = *awsOpts.S3FolderPathProcessed
-		}
-		if awsOpts.S3BucketIDProcessed != nil {
-			opts[utils.S3BucketIDProcessedCfg] = *awsOpts.S3BucketIDProcessed
 		}
 	}
 
@@ -1152,30 +906,6 @@ func (er *EventReaderCfg) AsMapInterface(separator string) (initialMP map[string
 		if natsOpts.JetStreamMaxWait != nil {
 			opts[utils.NatsJetStreamMaxWait] = natsOpts.JetStreamMaxWait.String()
 		}
-		if natsOpts.JetStreamProcessed != nil {
-			opts[utils.NATSJetStreamProcessedCfg] = *natsOpts.JetStreamProcessed
-		}
-		if natsOpts.SubjectProcessed != nil {
-			opts[utils.NATSSubjectProcessedCfg] = *natsOpts.SubjectProcessed
-		}
-		if natsOpts.JWTFileProcessed != nil {
-			opts[utils.NATSJWTFileProcessedCfg] = *natsOpts.JWTFileProcessed
-		}
-		if natsOpts.SeedFileProcessed != nil {
-			opts[utils.NATSSeedFileProcessedCfg] = *natsOpts.SeedFileProcessed
-		}
-		if natsOpts.CertificateAuthorityProcessed != nil {
-			opts[utils.NATSCertificateAuthorityProcessedCfg] = *natsOpts.CertificateAuthorityProcessed
-		}
-		if natsOpts.ClientCertificateProcessed != nil {
-			opts[utils.NATSClientCertificateProcessed] = *natsOpts.ClientCertificateProcessed
-		}
-		if natsOpts.ClientKeyProcessed != nil {
-			opts[utils.NATSClientKeyProcessedCfg] = *natsOpts.ClientKeyProcessed
-		}
-		if natsOpts.JetStreamMaxWaitProcessed != nil {
-			opts[utils.NATSJetStreamMaxWaitProcessedCfg] = natsOpts.JetStreamMaxWaitProcessed.String()
-		}
 	}
 	initialMP = map[string]any{
 		utils.IDCfg:                   er.ID,
@@ -1191,6 +921,13 @@ func (er *EventReaderCfg) AsMapInterface(separator string) (initialMP map[string
 		utils.ReconnectsCfg:           er.Reconnects,
 		utils.MaxReconnectIntervalCfg: "0",
 		utils.OptsCfg:                 opts,
+	}
+
+	if len(er.EEsSuccessIDs) != 0 {
+		initialMP[utils.EEsSuccessIDsCfg] = er.EEsSuccessIDs
+	}
+	if len(er.EEsFailedIDs) != 0 {
+		initialMP[utils.EEsFailedIDsCfg] = er.EEsFailedIDs
 	}
 
 	if er.MaxReconnectInterval != 0 {

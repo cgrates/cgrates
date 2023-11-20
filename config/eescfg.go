@@ -152,6 +152,14 @@ func (eeS *EEsCfg) AsMapInterface(separator string) (initialMP map[string]any) {
 	return
 }
 
+func (eeS *EEsCfg) exporterIDs() []string {
+	ids := make([]string, 0, len(eeS.Exporters))
+	for _, exporter := range eeS.Exporters {
+		ids = append(ids, exporter.ID)
+	}
+	return ids
+}
+
 type ElsOpts struct {
 	Index                    *string
 	IfPrimaryTerm            *int
@@ -198,6 +206,7 @@ type AMQPOpts struct {
 	Username     *string
 	Password     *string
 }
+
 type AWSOpts struct {
 	Region       *string
 	Key          *string
@@ -207,6 +216,7 @@ type AWSOpts struct {
 	S3BucketID   *string
 	S3FolderPath *string
 }
+
 type NATSOpts struct {
 	JetStream            *bool
 	Subject              *string
@@ -230,9 +240,11 @@ type RPCOpts struct {
 	RPCReplyTimeout *time.Duration
 	RPCAPIOpts      map[string]any
 }
+
 type KafkaOpts struct {
 	KafkaTopic *string
 }
+
 type EventExporterOpts struct {
 	CSVFieldSeparator *string
 	Els               *ElsOpts

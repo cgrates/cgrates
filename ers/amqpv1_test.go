@@ -39,7 +39,6 @@ func TestAMQPv1ERProcessMessage(t *testing.T) {
 		rdrErr:    make(chan error, 1),
 		cap:       nil,
 		queueID:   "cgrates_cdrs",
-		poster:    nil,
 	}
 	expEvent := &utils.CGREvent{
 		Tenant: "cgrates.org",
@@ -84,7 +83,6 @@ func TestAMQPv1ERProcessMessageError1(t *testing.T) {
 		rdrErr:    make(chan error, 1),
 		cap:       nil,
 		queueID:   "cgrates_cdrs",
-		poster:    nil,
 	}
 	rdr.Config().Fields = []*config.FCTemplate{
 		{},
@@ -111,7 +109,6 @@ func TestAMQPv1ERProcessMessageError2(t *testing.T) {
 		rdrErr:    make(chan error, 1),
 		cap:       nil,
 		queueID:   "cgrates_cdrs",
-		poster:    nil,
 	}
 	body := []byte(`{"CGRID":"testCgrId"}`)
 	rdr.Config().Filters = []string{"Filter1"}
@@ -138,7 +135,6 @@ func TestAMQPv1ERProcessMessageError3(t *testing.T) {
 		rdrErr:    make(chan error, 1),
 		cap:       nil,
 		queueID:   "cgrates_cdrs",
-		poster:    nil,
 	}
 	body := []byte("invalid_format")
 	errExpect := "invalid character 'i' looking for beginning of value"

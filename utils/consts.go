@@ -2413,6 +2413,8 @@ const (
 	TenantCfg              = "tenant"
 	FlagsCfg               = "flags"
 	FieldsCfg              = "fields"
+	EEsSuccessIDsCfg       = "ees_success_ids"
+	EEsFailedIDsCfg        = "ees_failed_ids"
 	CacheDumpFieldsCfg     = "cache_dump_fields"
 	PartialCommitFieldsCfg = "partial_commit_fields"
 	PartialCacheTTLCfg     = "partial_cache_ttl"
@@ -2594,7 +2596,6 @@ const (
 
 	// General constants for posters and readers
 	DefaultQueueID = "cgrates_cdrs"
-	ProcessedOpt   = "Processed"
 
 	// sqs and s3
 	AWSRegion = "awsRegion"
@@ -2699,39 +2700,6 @@ const (
 	RpcConnTimeout  = "rpcConnTimeout"
 	RpcReplyTimeout = "rpcReplyTimeout"
 	RPCAPIOpts      = "rpcAPIOpts"
-
-	// processed opts
-	AMQPQueueIDProcessedCfg      = "amqpQueueIDProcessed"
-	AMQPUsernameProcessedCfg     = "amqpUsernameProcessed"
-	AMQPPasswordProcessedCfg     = "amqpPasswordProcessed"
-	AMQPExchangeProcessedCfg     = "amqpExchangeProcessed"
-	AMQPExchangeTypeProcessedCfg = "amqpExchangeTypeProcessed"
-	AMQPRoutingKeyProcessedCfg   = "amqpRoutingKeyProcessed"
-
-	KafkaTopicProcessedCfg = "kafkaTopicProcessed"
-
-	SQLDBNameProcessedCfg    = "sqlDBNameProcessed"
-	SQLTableNameProcessedCfg = "sqlTableNameProcessed"
-	PgSSLModeProcessedCfg    = "pgSSLModeProcessed"
-
-	AWSRegionProcessedCfg = "awsRegionProcessed"
-	AWSKeyProcessedCfg    = "awsKeyProcessed"
-	AWSSecretProcessedCfg = "awsSecretProcessed"
-	AWSTokenProcessedCfg  = "awsTokenProcessed"
-
-	SQSQueueIDProcessedCfg = "sqsQueueIDProcessed"
-
-	S3FolderPathProcessedCfg = "s3FolderPathProcessed"
-	S3BucketIDProcessedCfg   = "s3BucketIDProcessed"
-
-	NATSJetStreamProcessedCfg            = "natsJetStreamProcessed"
-	NATSSubjectProcessedCfg              = "natsSubjectProcessed"
-	NATSJWTFileProcessedCfg              = "natsJWTFileProcessed"
-	NATSSeedFileProcessedCfg             = "natsSeedFileProcessed"
-	NATSCertificateAuthorityProcessedCfg = "natsCertificateAuthorityProcessed"
-	NATSClientCertificateProcessed       = "natsClientCertificateProcessed"
-	NATSClientKeyProcessedCfg            = "natsClientKeyProcessed"
-	NATSJetStreamMaxWaitProcessedCfg     = "natsJetStreamMaxWaitProcessed"
 )
 
 // Analyzers constants

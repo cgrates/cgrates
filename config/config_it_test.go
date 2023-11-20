@@ -594,6 +594,7 @@ func testCGRConfigReloadERs(t *testing.T) {
 	expAttr := &ERsCfg{
 		Enabled:       true,
 		SessionSConns: []string{utils.MetaLocalHost},
+		EEsConns:      []string{},
 		Readers: []*EventReaderCfg{
 			{
 				ID:                   utils.MetaDefault,
@@ -609,6 +610,8 @@ func testCGRConfigReloadERs(t *testing.T) {
 				PartialCommitFields:  []*FCTemplate{},
 				Reconnects:           -1,
 				MaxReconnectInterval: 5 * time.Minute,
+				EEsSuccessIDs:        []string{},
+				EEsFailedIDs:         []string{},
 				Opts: &EventReaderOpts{
 					CSV: &CSVROpts{
 						FieldSeparator:   utils.StringPointer(utils.FieldsSep),
@@ -640,6 +643,8 @@ func testCGRConfigReloadERs(t *testing.T) {
 				PartialCommitFields:  []*FCTemplate{},
 				Reconnects:           -1,
 				MaxReconnectInterval: 5 * time.Minute,
+				EEsSuccessIDs:        []string{},
+				EEsFailedIDs:         []string{},
 				Opts: &EventReaderOpts{
 					CSV: &CSVROpts{
 						FieldSeparator:   utils.StringPointer(utils.FieldsSep),
@@ -884,6 +889,7 @@ func testCgrCfgV1ReloadConfigSection(t *testing.T) {
 		"sessions_conns": []string{
 			utils.MetaLocalHost,
 		},
+		utils.EEsConnsCfg: []string{},
 	}
 
 	cfg := NewDefaultCGRConfig()

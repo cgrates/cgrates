@@ -30,7 +30,6 @@ import (
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/cgrates/cgrates/agents"
 	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/ees"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -56,7 +55,6 @@ func NewS3ER(cfg *config.CGRConfig, cfgIdx int,
 		}
 	}
 	rdr.parseOpts(rdr.Config().Opts)
-	rdr.createPoster()
 	return rdr, nil
 }
 
@@ -79,8 +77,6 @@ type S3ER struct {
 	awsToken  string
 	bucket    string
 	session   *session.Session
-
-	poster *ees.S3EE
 }
 
 type s3Client interface {
@@ -194,16 +190,6 @@ func (rdr *S3ER) readLoop(scv s3Client) (err error) {
 	return
 }
 
-func (rdr *S3ER) createPoster() {
-	processedOpt := getProcessedOptions(rdr.Config().Opts)
-	if processedOpt == nil && len(rdr.Config().ProcessedPath) == 0 {
-		return
-	}
-	eeCfg := config.NewEventExporterCfg(rdr.Config().ID, "", utils.FirstNonEmpty(rdr.Config().ProcessedPath, rdr.Config().SourcePath),
-		rdr.cgrCfg.GeneralCfg().FailedPostsDir, rdr.cgrCfg.GeneralCfg().PosterAttempts, processedOpt)
-	rdr.poster = ees.NewS3EE(eeCfg, nil)
-}
-
 func (rdr *S3ER) isClosed() bool {
 	select {
 	case <-rdr.rdrExit:
@@ -246,13 +232,5 @@ func (rdr *S3ER) readMsg(scv s3Client, key string) (err error) {
 		return
 	}
 
-	if rdr.poster != nil { // post it
-		if err = ees.ExportWithAttempts(rdr.poster, msg, key); err != nil {
-			utils.Logger.Warning(
-				fmt.Sprintf("<%s> writing message %s error: %s",
-					utils.ERs, key, err.Error()))
-			return
-		}
-	}
 	return
 }

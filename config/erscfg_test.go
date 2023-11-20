@@ -62,6 +62,7 @@ func TestERSClone(t *testing.T) {
 	expectedERsCfg := &ERsCfg{
 		Enabled:       true,
 		SessionSConns: []string{"*internal:*sessions"},
+		EEsConns:      []string{},
 		Readers: []*EventReaderCfg{
 			{
 				ID:                   utils.MetaDefault,
@@ -102,6 +103,8 @@ func TestERSClone(t *testing.T) {
 				},
 				CacheDumpFields:     make([]*FCTemplate, 0),
 				PartialCommitFields: make([]*FCTemplate, 0),
+				EEsSuccessIDs:       []string{},
+				EEsFailedIDs:        []string{},
 				Opts: &EventReaderOpts{
 					CSV: &CSVROpts{
 						HeaderDefineChar: utils.StringPointer(utils.InInFieldSep),
@@ -143,6 +146,8 @@ func TestERSClone(t *testing.T) {
 						Value: NewRSRParsersMustCompile("~*req.2", utils.InfieldSep), Mandatory: true, Layout: time.RFC3339},
 				},
 				PartialCommitFields: make([]*FCTemplate, 0),
+				EEsSuccessIDs:       []string{},
+				EEsFailedIDs:        []string{},
 				Opts: &EventReaderOpts{
 					CSV: &CSVROpts{
 						FieldSeparator:   utils.StringPointer(utils.FieldsSep),
@@ -232,6 +237,7 @@ func TestERSLoadFromjsonCfg(t *testing.T) {
 	expectedERsCfg := &ERsCfg{
 		Enabled:       true,
 		SessionSConns: []string{"conn1", "conn3"},
+		EEsConns:      []string{},
 		Readers: []*EventReaderCfg{
 			{
 				ID:                   utils.MetaDefault,
@@ -272,6 +278,8 @@ func TestERSLoadFromjsonCfg(t *testing.T) {
 				},
 				CacheDumpFields:     make([]*FCTemplate, 0),
 				PartialCommitFields: make([]*FCTemplate, 0),
+				EEsSuccessIDs:       []string{},
+				EEsFailedIDs:        []string{},
 				Opts: &EventReaderOpts{
 					CSV: &CSVROpts{
 						FieldSeparator:   utils.StringPointer(utils.FieldsSep),
@@ -328,6 +336,8 @@ func TestERSLoadFromjsonCfg(t *testing.T) {
 				},
 				CacheDumpFields:     make([]*FCTemplate, 0),
 				PartialCommitFields: make([]*FCTemplate, 0),
+				EEsSuccessIDs:       []string{},
+				EEsFailedIDs:        []string{},
 				Opts: &EventReaderOpts{
 					CSV: &CSVROpts{
 						FieldSeparator:   utils.StringPointer(utils.FieldsSep),
@@ -481,6 +491,7 @@ func TestERSloadFromJsonCase3(t *testing.T) {
 	expectedERsCfg := &ERsCfg{
 		Enabled:       true,
 		SessionSConns: []string{"*conn1"},
+		EEsConns:      []string{},
 		Readers: []*EventReaderCfg{
 			{
 				ID:                   utils.MetaDefault,
@@ -521,6 +532,8 @@ func TestERSloadFromJsonCase3(t *testing.T) {
 				},
 				CacheDumpFields:     make([]*FCTemplate, 0),
 				PartialCommitFields: make([]*FCTemplate, 0),
+				EEsSuccessIDs:       []string{},
+				EEsFailedIDs:        []string{},
 				Opts: &EventReaderOpts{
 					CSV: &CSVROpts{
 						FieldSeparator:   utils.StringPointer(utils.FieldsSep),
@@ -561,6 +574,8 @@ func TestERSloadFromJsonCase3(t *testing.T) {
 				PartialCommitFields:  make([]*FCTemplate, 0),
 				Reconnects:           5,
 				MaxReconnectInterval: 3 * time.Minute,
+				EEsSuccessIDs:        []string{},
+				EEsFailedIDs:         []string{},
 				Opts: &EventReaderOpts{
 					CSV: &CSVROpts{
 						FieldSeparator:   utils.StringPointer(utils.FieldsSep),
@@ -636,6 +651,7 @@ func TestERSloadFromJsonCase4(t *testing.T) {
 	expectedERsCfg := &ERsCfg{
 		Enabled:       true,
 		SessionSConns: []string{"*conn1"},
+		EEsConns:      []string{},
 		Readers: []*EventReaderCfg{
 			{
 				ID:                   utils.MetaDefault,
@@ -676,6 +692,8 @@ func TestERSloadFromJsonCase4(t *testing.T) {
 				},
 				CacheDumpFields:     make([]*FCTemplate, 0),
 				PartialCommitFields: make([]*FCTemplate, 0),
+				EEsSuccessIDs:       []string{},
+				EEsFailedIDs:        []string{},
 				Opts: &EventReaderOpts{
 					CSV: &CSVROpts{
 						FieldSeparator:   utils.StringPointer(utils.FieldsSep),
@@ -705,6 +723,8 @@ func TestERSloadFromJsonCase4(t *testing.T) {
 				Filters:        []string{},
 				Flags:          utils.FlagsWithParams{},
 				Fields:         []*FCTemplate{},
+				EEsSuccessIDs:  []string{},
+				EEsFailedIDs:   []string{},
 				CacheDumpFields: []*FCTemplate{
 					{
 						Tag:   "OrderID",
@@ -784,6 +804,7 @@ func TestEventReaderSameID(t *testing.T) {
 	expectedERsCfg := &ERsCfg{
 		Enabled:       true,
 		SessionSConns: []string{"conn1"},
+		EEsConns:      []string{},
 		Readers: []*EventReaderCfg{
 			{
 				ID:                   utils.MetaDefault,
@@ -798,6 +819,8 @@ func TestEventReaderSameID(t *testing.T) {
 				Flags:                utils.FlagsWithParams{},
 				Reconnects:           -1,
 				MaxReconnectInterval: 5 * time.Minute,
+				EEsSuccessIDs:        []string{},
+				EEsFailedIDs:         []string{},
 				Fields: []*FCTemplate{
 					{Tag: utils.ToR, Path: utils.MetaCgreq + utils.NestingSep + utils.ToR, Type: utils.MetaVariable,
 						Value: NewRSRParsersMustCompile("~*req.2", utils.InfieldSep), Mandatory: true, Layout: time.RFC3339},
@@ -852,6 +875,8 @@ func TestEventReaderSameID(t *testing.T) {
 				Timezone:       utils.EmptyString,
 				Filters:        []string{},
 				Flags:          utils.FlagsWithParams{},
+				EEsSuccessIDs:  []string{},
+				EEsFailedIDs:   []string{},
 				Fields: []*FCTemplate{
 					{Tag: "CustomTag2", Path: "CustomPath2", Type: utils.MetaVariable,
 						Value: NewRSRParsersMustCompile("CustomValue2", utils.InfieldSep), Mandatory: true, Layout: time.RFC3339},
@@ -951,6 +976,7 @@ func TestERsCfgAsMapInterfaceCase1(t *testing.T) {
 	eMap := map[string]any{
 		utils.EnabledCfg:       true,
 		utils.SessionSConnsCfg: []string{"conn1", "conn3"},
+		utils.EEsConnsCfg:      []string{},
 		utils.ReadersCfg: []map[string]any{
 			{
 				utils.FiltersCfg:              []string{},
@@ -1060,38 +1086,23 @@ func TestERSCfgAsMapInterfaceCase2(t *testing.T) {
 					"csvLazyQuotes": false,
 					"xmlRootPath": "root.A",
 					"amqpQueueID": "id",
-					"amqpQueueIDProcessed":"queue",
 					"amqpConsumerTag": "tag",
 					"amqpExchange":"exchange",
 					"amqpExchangeType":"type",
 					"amqpRoutingKey":"key",
-					"amqpExchangeProcessed":"amqprocess",
-					"amqpExchangeTypeProcessed":"amqtype",
-					"amqpRoutingKeyProcessed":"routekey",
 					"partialPath":"optpath",
 					"partialcsvFieldSeparator":",",
 					"kafkaTopic":"topic",
 					"kafkaMaxWait":"1m",
-					"kafkaTopicProcessed":"process",
 					"sqlDBName":"db",
 					"sqlTableName":"table",
 					"pgSSLMode":"pg",
-					"sqlDBNameProcessed":"dbname",
-					"sqlTableNameProcessed":"tablename",
-					"pgSSLModeProcessed":"sslprocess",
 					"awsRegion":"eu",
 					"awsKey":"key",
 					"awsSecret":"secret",
 					"awsToken":"token",
-					"awsRegionProcessed":"awsRegion",
-					"awsKeyProcessed":"keyprocess",
-					"awsSecretProcessed":"secretkey",
-					"awsTokenProcessed": "tokenprocess",
 					"sqsQueueID":"sqs",
-					"sqsQueueIDProcessed":"sqsid",
 					"s3BucketID":"s3bucket",
-					"s3FolderPathProcessed": "s3folder",
-					"s3BucketIDProcessed":"s3bucketid",
 					"natsJetStream":true,
 					"natsConsumerName": "NATConsumer",
 					"natsStreamName": "NATStream",
@@ -1102,15 +1113,6 @@ func TestERSCfgAsMapInterfaceCase2(t *testing.T) {
 					"natsSeedFile":"seed",
 					"natsClientKey":"clientkey",
 					"natsJetStreamMaxWait":"1m",
-					"natsJetStreamProcessed":false,
-					"natsSubjectProcessed":"NATProcess",
-					"natsJWTFileProcessed":"jwtfile",
-					"natsSeedFileProcessed":"NATSeed",
-					"natsCertificateAuthorityProcessed":"CertificateAuth",
-					"natsClientCertificateProcessed":"ClientCertificate",
-					"natsClientKeyProcessed":"ClientKey",
-					"natsJetStreamMaxWaitProcessed":"1m",
-					
 				},
 			},
 		],
@@ -1119,6 +1121,7 @@ func TestERSCfgAsMapInterfaceCase2(t *testing.T) {
 	eMap := map[string]any{
 		utils.EnabledCfg:       true,
 		utils.SessionSConnsCfg: []string{"conn1", "conn3"},
+		utils.EEsConnsCfg:      []string{},
 		utils.ReadersCfg: []map[string]any{
 			{
 				utils.FiltersCfg:              []string{},
@@ -1188,66 +1191,43 @@ func TestERSCfgAsMapInterfaceCase2(t *testing.T) {
 				utils.ReconnectsCfg:           -1,
 				utils.MaxReconnectIntervalCfg: "5m0s",
 				utils.OptsCfg: map[string]any{
-					utils.CSVLazyQuotes:                        false,
-					utils.KafkaGroupID:                         "test",
-					utils.CSVFieldSepOpt:                       ",",
-					utils.XMLRootPathOpt:                       "root.A",
-					"csvHeaderDefineChar":                      ":",
-					"csvRowLength":                             0,
-					"partialOrderField":                        "~*req.AnswerTime",
-					"partialCacheAction":                       utils.MetaNone,
-					"natsSubject":                              "cgrates_cdrs",
-					utils.AMQPQueueID:                          "id",
-					utils.AMQPQueueIDProcessedCfg:              "queue",
-					utils.AMQPConsumerTag:                      "tag",
-					utils.AMQPExchange:                         "exchange",
-					utils.AMQPExchangeType:                     "type",
-					utils.AMQPRoutingKey:                       "key",
-					utils.AMQPExchangeProcessedCfg:             "amqprocess",
-					utils.AMQPExchangeTypeProcessedCfg:         "amqtype",
-					utils.AMQPRoutingKeyProcessedCfg:           "routekey",
-					utils.PartialPathOpt:                       "optpath",
-					utils.PartialCSVFieldSepartorOpt:           ",",
-					utils.KafkaTopic:                           "topic",
-					utils.KafkaMaxWait:                         "1m0s",
-					utils.KafkaTopicProcessedCfg:               "process",
-					utils.SQLDBNameOpt:                         "db",
-					utils.SQLTableNameOpt:                      "table",
-					utils.PgSSLModeCfg:                         "pg",
-					utils.SQLDBNameProcessedCfg:                "dbname",
-					utils.SQLTableNameProcessedCfg:             "tablename",
-					utils.PgSSLModeProcessedCfg:                "sslprocess",
-					utils.AWSRegion:                            "eu",
-					utils.AWSKey:                               "key",
-					utils.AWSSecret:                            "secret",
-					utils.AWSToken:                             "token",
-					utils.AWSRegionProcessedCfg:                "awsRegion",
-					utils.AWSKeyProcessedCfg:                   "keyprocess",
-					utils.AWSSecretProcessedCfg:                "secretkey",
-					utils.AWSTokenProcessedCfg:                 "tokenprocess",
-					utils.SQSQueueID:                           "sqs",
-					utils.SQSQueueIDProcessedCfg:               "sqsid",
-					utils.S3Bucket:                             "s3bucket",
-					utils.S3FolderPathProcessedCfg:             "s3folder",
-					utils.S3BucketIDProcessedCfg:               "s3bucketid",
-					utils.NatsJetStream:                        true,
-					utils.NatsConsumerName:                     "NATConsumer",
-					utils.NatsStreamName:                       "NATStream",
-					utils.NatsQueueID:                          "NATid",
-					utils.NatsJWTFile:                          "jwt",
-					utils.NatsSeedFile:                         "seed",
-					utils.NatsCertificateAuthority:             "auth",
-					utils.NatsClientCertificate:                "certificate",
-					utils.NatsClientKey:                        "clientkey",
-					utils.NatsJetStreamMaxWait:                 "1m0s",
-					utils.NATSJetStreamProcessedCfg:            false,
-					utils.NATSSubjectProcessedCfg:              "NATProcess",
-					utils.NATSJWTFileProcessedCfg:              "jwtfile",
-					utils.NATSSeedFileProcessedCfg:             "NATSeed",
-					utils.NATSCertificateAuthorityProcessedCfg: "CertificateAuth",
-					utils.NATSClientCertificateProcessed:       "ClientCertificate",
-					utils.NATSClientKeyProcessedCfg:            "ClientKey",
-					utils.NATSJetStreamMaxWaitProcessedCfg:     "1m0s",
+					utils.CSVLazyQuotes:              false,
+					utils.KafkaGroupID:               "test",
+					utils.CSVFieldSepOpt:             ",",
+					utils.XMLRootPathOpt:             "root.A",
+					"csvHeaderDefineChar":            ":",
+					"csvRowLength":                   0,
+					"partialOrderField":              "~*req.AnswerTime",
+					"partialCacheAction":             utils.MetaNone,
+					"natsSubject":                    "cgrates_cdrs",
+					utils.AMQPQueueID:                "id",
+					utils.AMQPConsumerTag:            "tag",
+					utils.AMQPExchange:               "exchange",
+					utils.AMQPExchangeType:           "type",
+					utils.AMQPRoutingKey:             "key",
+					utils.PartialPathOpt:             "optpath",
+					utils.PartialCSVFieldSepartorOpt: ",",
+					utils.KafkaTopic:                 "topic",
+					utils.KafkaMaxWait:               "1m0s",
+					utils.SQLDBNameOpt:               "db",
+					utils.SQLTableNameOpt:            "table",
+					utils.PgSSLModeCfg:               "pg",
+					utils.AWSRegion:                  "eu",
+					utils.AWSKey:                     "key",
+					utils.AWSSecret:                  "secret",
+					utils.AWSToken:                   "token",
+					utils.SQSQueueID:                 "sqs",
+					utils.S3Bucket:                   "s3bucket",
+					utils.NatsJetStream:              true,
+					utils.NatsConsumerName:           "NATConsumer",
+					utils.NatsStreamName:             "NATStream",
+					utils.NatsQueueID:                "NATid",
+					utils.NatsJWTFile:                "jwt",
+					utils.NatsSeedFile:               "seed",
+					utils.NatsCertificateAuthority:   "auth",
+					utils.NatsClientCertificate:      "certificate",
+					utils.NatsClientKey:              "clientkey",
+					utils.NatsJetStreamMaxWait:       "1m0s",
 				},
 			},
 		},
@@ -1294,6 +1274,7 @@ func TestERsloadFromJsonCfg(t *testing.T) {
 	expectedERsCfg := &ERsCfg{
 		Enabled:       true,
 		SessionSConns: []string{"*conn1"},
+		EEsConns:      []string{},
 		Readers: []*EventReaderCfg{
 			{
 				ID:                   utils.MetaDefault,
@@ -1308,6 +1289,8 @@ func TestERsloadFromJsonCfg(t *testing.T) {
 				Flags:                utils.FlagsWithParams{},
 				Reconnects:           -1,
 				MaxReconnectInterval: 5 * time.Minute,
+				EEsSuccessIDs:        []string{},
+				EEsFailedIDs:         []string{},
 				Fields: []*FCTemplate{
 					{Tag: utils.ToR, Path: utils.MetaCgreq + utils.NestingSep + utils.ToR, Type: utils.MetaVariable,
 						Value: NewRSRParsersMustCompile("~*req.2", utils.InfieldSep), Mandatory: true, Layout: time.RFC3339},
@@ -1364,6 +1347,8 @@ func TestERsloadFromJsonCfg(t *testing.T) {
 				Flags:                utils.FlagsWithParams{},
 				Reconnects:           -1,
 				MaxReconnectInterval: 5 * time.Minute,
+				EEsSuccessIDs:        []string{},
+				EEsFailedIDs:         []string{},
 				Fields: []*FCTemplate{
 					{
 						Tag:    utils.CGRID,
@@ -1408,7 +1393,7 @@ func TestERsloadFromJsonCfg(t *testing.T) {
 	if err := cfgCgr.ersCfg.loadFromJSONCfg(cfgJSON, cfgCgr.templates, cfgCgr.generalCfg.RSRSep, cfgCgr.dfltEvRdr, cfgCgr.generalCfg.RSRSep); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(cfgCgr.ersCfg, expectedERsCfg) {
-		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expectedERsCfg), utils.ToJSON(cgrCfg.ersCfg))
+		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expectedERsCfg), utils.ToJSON(cfgCgr.ersCfg))
 	}
 }
 func TestGetDefaultExporter(t *testing.T) {
@@ -1427,58 +1412,35 @@ func TestEventReaderOptsCfg(t *testing.T) {
 		t.Error(err)
 	}
 	eventReaderOptsJson := &EventReaderOptsJson{
-		PartialPath:                       utils.StringPointer("path"),
-		PartialCSVFieldSeparator:          utils.StringPointer("/"),
-		CSVLazyQuotes:                     utils.BoolPointer(false),
-		AMQPQueueID:                       utils.StringPointer("id"),
-		AMQPQueueIDProcessed:              utils.StringPointer("id"),
-		AMQPConsumerTag:                   utils.StringPointer("tag"),
-		AMQPExchange:                      utils.StringPointer("exchange"),
-		AMQPExchangeType:                  utils.StringPointer("type"),
-		AMQPRoutingKey:                    utils.StringPointer("key1"),
-		AMQPExchangeProcessed:             utils.StringPointer("amq"),
-		AMQPExchangeTypeProcessed:         utils.StringPointer("amqtype"),
-		AMQPRoutingKeyProcessed:           utils.StringPointer("key"),
-		KafkaTopic:                        utils.StringPointer("kafka"),
-		KafkaMaxWait:                      utils.StringPointer("1m"),
-		KafkaTopicProcessed:               utils.StringPointer("kafkaproc"),
-		SQLDBName:                         utils.StringPointer("dbname"),
-		SQLTableName:                      utils.StringPointer("tablename"),
-		PgSSLMode:                         utils.StringPointer("sslmode"),
-		SQLDBNameProcessed:                utils.StringPointer("dbnameproc"),
-		SQLTableNameProcessed:             utils.StringPointer("tablenameproc"),
-		PgSSLModeProcessed:                utils.StringPointer("sslproc"),
-		AWSRegion:                         utils.StringPointer("eu"),
-		AWSKey:                            utils.StringPointer("key"),
-		AWSSecret:                         utils.StringPointer("secret"),
-		AWSToken:                          utils.StringPointer("token"),
-		AWSKeyProcessed:                   utils.StringPointer("secret"),
-		AWSSecretProcessed:                utils.StringPointer("secret"),
-		AWSTokenProcessed:                 utils.StringPointer("token"),
-		SQSQueueID:                        utils.StringPointer("SQSQueue"),
-		SQSQueueIDProcessed:               utils.StringPointer("SQSQueueId"),
-		S3BucketID:                        utils.StringPointer("S3BucketID"),
-		S3FolderPathProcessed:             utils.StringPointer("S3Path"),
-		S3BucketIDProcessed:               utils.StringPointer("S3BucketProc"),
-		NATSJetStream:                     utils.BoolPointer(false),
-		NATSConsumerName:                  utils.StringPointer("user"),
-		NATSQueueID:                       utils.StringPointer("id"),
-		NATSJWTFile:                       utils.StringPointer("jwt"),
-		NATSSeedFile:                      utils.StringPointer("seed"),
-		NATSCertificateAuthority:          utils.StringPointer("authority"),
-		NATSClientCertificate:             utils.StringPointer("certificate"),
-		NATSClientKey:                     utils.StringPointer("key5"),
-		NATSJetStreamMaxWait:              utils.StringPointer("1m"),
-		NATSJetStreamProcessed:            utils.BoolPointer(true),
-		NATSJWTFileProcessed:              utils.StringPointer("file"),
-		NATSSeedFileProcessed:             utils.StringPointer("natseed"),
-		NATSCertificateAuthorityProcessed: utils.StringPointer("natsauth"),
-		NATSClientCertificateProcessed:    utils.StringPointer("natcertificate"),
-		NATSClientKeyProcessed:            utils.StringPointer("natsprocess"),
-		NATSJetStreamMaxWaitProcessed:     utils.StringPointer("1m"),
-		AWSRegionProcessed:                utils.StringPointer("eu"),
-		NATSSubjectProcessed:              utils.StringPointer("process"),
-		KafkaGroupID:                      utils.StringPointer("groupId"),
+		PartialPath:              utils.StringPointer("path"),
+		PartialCSVFieldSeparator: utils.StringPointer("/"),
+		CSVLazyQuotes:            utils.BoolPointer(false),
+		AMQPQueueID:              utils.StringPointer("id"),
+		AMQPConsumerTag:          utils.StringPointer("tag"),
+		AMQPExchange:             utils.StringPointer("exchange"),
+		AMQPExchangeType:         utils.StringPointer("type"),
+		AMQPRoutingKey:           utils.StringPointer("key1"),
+		KafkaTopic:               utils.StringPointer("kafka"),
+		KafkaMaxWait:             utils.StringPointer("1m"),
+		SQLDBName:                utils.StringPointer("dbname"),
+		SQLTableName:             utils.StringPointer("tablename"),
+		PgSSLMode:                utils.StringPointer("sslmode"),
+		AWSRegion:                utils.StringPointer("eu"),
+		AWSKey:                   utils.StringPointer("key"),
+		AWSSecret:                utils.StringPointer("secret"),
+		AWSToken:                 utils.StringPointer("token"),
+		SQSQueueID:               utils.StringPointer("SQSQueue"),
+		S3BucketID:               utils.StringPointer("S3BucketID"),
+		NATSJetStream:            utils.BoolPointer(false),
+		NATSConsumerName:         utils.StringPointer("user"),
+		NATSQueueID:              utils.StringPointer("id"),
+		NATSJWTFile:              utils.StringPointer("jwt"),
+		NATSSeedFile:             utils.StringPointer("seed"),
+		NATSCertificateAuthority: utils.StringPointer("authority"),
+		NATSClientCertificate:    utils.StringPointer("certificate"),
+		NATSClientKey:            utils.StringPointer("key5"),
+		NATSJetStreamMaxWait:     utils.StringPointer("1m"),
+		KafkaGroupID:             utils.StringPointer("groupId"),
 	}
 	eventReader := &EventReaderCfg{
 		Opts: &EventReaderOpts{
@@ -1499,10 +1461,6 @@ func TestEventReaderOptsCfg(t *testing.T) {
 		t.Error(err)
 	} else if err := eventReader.Opts.loadFromJSONCfg(&EventReaderOptsJson{
 		NATSJetStreamMaxWait: utils.StringPointer("nil"),
-	}); err == nil {
-		t.Error(err)
-	} else if err := eventReader.Opts.loadFromJSONCfg(&EventReaderOptsJson{
-		NATSJetStreamMaxWaitProcessed: utils.StringPointer("nil"),
 	}); err == nil {
 		t.Error(err)
 	}
@@ -1537,65 +1495,42 @@ func TestEventReaderCfgClone(t *testing.T) {
 				LazyQuotes:               utils.BoolPointer(false),
 			},
 			AMQP: &AMQPROpts{
-				QueueID:               utils.StringPointer("id"),
-				QueueIDProcessed:      utils.StringPointer("id"),
-				ConsumerTag:           utils.StringPointer("tag"),
-				Exchange:              utils.StringPointer("exchange"),
-				ExchangeType:          utils.StringPointer("type"),
-				RoutingKey:            utils.StringPointer("key1"),
-				ExchangeProcessed:     utils.StringPointer("amq"),
-				ExchangeTypeProcessed: utils.StringPointer("amqtype"),
-				RoutingKeyProcessed:   utils.StringPointer("key"),
+				QueueID:      utils.StringPointer("id"),
+				ConsumerTag:  utils.StringPointer("tag"),
+				Exchange:     utils.StringPointer("exchange"),
+				ExchangeType: utils.StringPointer("type"),
+				RoutingKey:   utils.StringPointer("key1"),
 			},
 			SQL: &SQLROpts{
-				DBName:             utils.StringPointer("dbname"),
-				TableName:          utils.StringPointer("tablename"),
-				PgSSLMode:          utils.StringPointer("sslmode"),
-				DBNameProcessed:    utils.StringPointer("dbnameproc"),
-				TableNameProcessed: utils.StringPointer("tablenameproc"),
-				PgSSLModeProcessed: utils.StringPointer("sslproc"),
+				DBName:    utils.StringPointer("dbname"),
+				TableName: utils.StringPointer("tablename"),
+				PgSSLMode: utils.StringPointer("sslmode"),
 			},
 			AWS: &AWSROpts{
 
-				Region:                utils.StringPointer("eu"),
-				Key:                   utils.StringPointer("key"),
-				Secret:                utils.StringPointer("secret"),
-				Token:                 utils.StringPointer("token"),
-				KeyProcessed:          utils.StringPointer("secret"),
-				RegionProcessed:       utils.StringPointer("eu"),
-				SecretProcessed:       utils.StringPointer("secret"),
-				TokenProcessed:        utils.StringPointer("token"),
-				SQSQueueID:            utils.StringPointer("SQSQueue"),
-				SQSQueueIDProcessed:   utils.StringPointer("SQSQueueId"),
-				S3BucketID:            utils.StringPointer("S3BucketID"),
-				S3FolderPathProcessed: utils.StringPointer("S3Path"),
-				S3BucketIDProcessed:   utils.StringPointer("S3BucketProc"),
+				Region:     utils.StringPointer("eu"),
+				Key:        utils.StringPointer("key"),
+				Secret:     utils.StringPointer("secret"),
+				Token:      utils.StringPointer("token"),
+				SQSQueueID: utils.StringPointer("SQSQueue"),
+				S3BucketID: utils.StringPointer("S3BucketID"),
 			},
 			NATS: &NATSROpts{
-				JetStream:                     utils.BoolPointer(false),
-				ConsumerName:                  utils.StringPointer("user"),
-				StreamName:                    utils.StringPointer("stream"),
-				QueueID:                       utils.StringPointer("id"),
-				JWTFile:                       utils.StringPointer("jwt"),
-				SeedFile:                      utils.StringPointer("seed"),
-				CertificateAuthority:          utils.StringPointer("authority"),
-				ClientCertificate:             utils.StringPointer("certificate"),
-				ClientKey:                     utils.StringPointer("key5"),
-				JetStreamMaxWait:              utils.DurationPointer(1 * time.Minute),
-				JetStreamProcessed:            utils.BoolPointer(true),
-				JWTFileProcessed:              utils.StringPointer("file"),
-				SeedFileProcessed:             utils.StringPointer("natseed"),
-				CertificateAuthorityProcessed: utils.StringPointer("natsauth"),
-				ClientCertificateProcessed:    utils.StringPointer("natcertificate"),
-				ClientKeyProcessed:            utils.StringPointer("natsprocess"),
-				JetStreamMaxWaitProcessed:     utils.DurationPointer(1 * time.Minute),
-				SubjectProcessed:              utils.StringPointer("process"),
+				JetStream:            utils.BoolPointer(false),
+				ConsumerName:         utils.StringPointer("user"),
+				StreamName:           utils.StringPointer("stream"),
+				QueueID:              utils.StringPointer("id"),
+				JWTFile:              utils.StringPointer("jwt"),
+				SeedFile:             utils.StringPointer("seed"),
+				CertificateAuthority: utils.StringPointer("authority"),
+				ClientCertificate:    utils.StringPointer("certificate"),
+				ClientKey:            utils.StringPointer("key5"),
+				JetStreamMaxWait:     utils.DurationPointer(1 * time.Minute),
 			},
 			Kafka: &KafkaROpts{
-				Topic:          utils.StringPointer("kafka"),
-				MaxWait:        utils.DurationPointer(1 * time.Minute),
-				TopicProcessed: utils.StringPointer("kafkaproc"),
-				GroupID:        utils.StringPointer("groupId"),
+				Topic:   utils.StringPointer("kafka"),
+				MaxWait: utils.DurationPointer(1 * time.Minute),
+				GroupID: utils.StringPointer("groupId"),
 			},
 		},
 	}
@@ -1610,16 +1545,12 @@ func TestEventReaderCfgloadFromJSONCfg(t *testing.T) {
 	str := "test"
 	amqpr := &AMQPROpts{}
 	exp := &AMQPROpts{
-		Username:          &str,
-		Password:          &str,
-		UsernameProcessed: &str,
-		PasswordProcessed: &str,
+		Username: &str,
+		Password: &str,
 	}
 	jsnCfg := &EventReaderOptsJson{
-		AMQPUsername:          &str,
-		AMQPPassword:          &str,
-		AMQPUsernameProcessed: &str,
-		AMQPPasswordProcessed: &str,
+		AMQPUsername: &str,
+		AMQPPassword: &str,
 	}
 	err := amqpr.loadFromJSONCfg(jsnCfg)
 	if err != nil {
@@ -1634,10 +1565,8 @@ func TestEventReaderCfgloadFromJSONCfg(t *testing.T) {
 func TestEventReaderCfgClone2(t *testing.T) {
 	str := "test"
 	amqpr := &AMQPROpts{
-		Username:          &str,
-		Password:          &str,
-		UsernameProcessed: &str,
-		PasswordProcessed: &str,
+		Username: &str,
+		Password: &str,
 	}
 	rcv := amqpr.Clone()
 
@@ -1648,10 +1577,8 @@ func TestEventReaderCfgClone2(t *testing.T) {
 func TestEventReaderCfgAsMapInterface(t *testing.T) {
 	str := "test"
 	amqpr := &AMQPROpts{
-		Username:          &str,
-		Password:          &str,
-		UsernameProcessed: &str,
-		PasswordProcessed: &str,
+		Username: &str,
+		Password: &str,
 	}
 	er := &EventReaderCfg{
 		Opts: &EventReaderOpts{
@@ -1659,10 +1586,8 @@ func TestEventReaderCfgAsMapInterface(t *testing.T) {
 		},
 	}
 	opts := map[string]any{
-		utils.AMQPUsername:             str,
-		utils.AMQPPassword:             str,
-		utils.AMQPUsernameProcessedCfg: str,
-		utils.AMQPPasswordProcessedCfg: str,
+		utils.AMQPUsername: str,
+		utils.AMQPPassword: str,
 	}
 	exp := map[string]any{
 		utils.IDCfg:                   er.ID,

@@ -2005,7 +2005,7 @@ func TestDfEventReaderCfg(t *testing.T) {
 	eCfg := &ERsJsonCfg{
 		Enabled:        utils.BoolPointer(false),
 		Sessions_conns: &[]string{utils.MetaInternal},
-		Ees_conns:      &[]string{utils.MetaInternal},
+		Ees_conns:      &[]string{},
 		Readers: &[]*EventReaderJsonCfg{
 			{
 				Id:                     utils.StringPointer(utils.MetaDefault),
@@ -2023,6 +2023,8 @@ func TestDfEventReaderCfg(t *testing.T) {
 				Partial_commit_fields:  &[]*FcTemplateJsonCfg{},
 				Reconnects:             utils.IntPointer(-1),
 				Max_reconnect_interval: utils.StringPointer("5m"),
+				Ees_success_ids:        &[]string{},
+				Ees_failed_ids:         &[]string{},
 				Opts: &EventReaderOptsJson{
 					CSVFieldSeparator:   utils.StringPointer(utils.FieldsSep),
 					CSVHeaderDefineChar: utils.StringPointer(utils.InInFieldSep),

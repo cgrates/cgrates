@@ -27,7 +27,6 @@ import (
 
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/ees"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -61,7 +60,6 @@ func TestS3ERServe2(t *testing.T) {
 		awsToken:  "",
 		bucket:    "cgrates_cdrs",
 		session:   nil,
-		poster:    nil,
 	}
 	if err := rdr.Serve(); err != nil {
 		t.Error(err)
@@ -84,7 +82,6 @@ func TestS3ERProcessMessage(t *testing.T) {
 		awsToken:  "",
 		bucket:    "cgrates_cdrs",
 		session:   nil,
-		poster:    nil,
 	}
 	expEvent := &utils.CGREvent{
 		Tenant: "cgrates.org",
@@ -134,7 +131,6 @@ func TestS3ERProcessMessageError1(t *testing.T) {
 		awsToken:  "",
 		bucket:    "cgrates_cdrs",
 		session:   nil,
-		poster:    nil,
 	}
 	rdr.Config().Fields = []*config.FCTemplate{
 		{},
@@ -166,7 +162,6 @@ func TestS3ERProcessMessageError2(t *testing.T) {
 		awsToken:  "",
 		bucket:    "cgrates_cdrs",
 		session:   nil,
-		poster:    nil,
 	}
 	body := []byte(`{"CGRID":"testCgrId"}`)
 	rdr.Config().Filters = []string{"Filter1"}
@@ -198,7 +193,6 @@ func TestS3ERProcessMessageError3(t *testing.T) {
 		awsToken:  "",
 		bucket:    "cgrates_cdrs",
 		session:   nil,
-		poster:    nil,
 	}
 	body := []byte("invalid_format")
 	errExpect := "invalid character 'i' looking for beginning of value"
@@ -223,7 +217,6 @@ func TestS3ERParseOpts(t *testing.T) {
 		awsToken:  "",
 		bucket:    "cgrates_cdrs",
 		session:   nil,
-		poster:    nil,
 	}
 
 	opts := &config.EventReaderOpts{
@@ -245,7 +238,6 @@ func TestS3ERParseOpts(t *testing.T) {
 	}
 	rdr.Config().Opts = &config.EventReaderOpts{}
 	rdr.Config().ProcessedPath = utils.EmptyString
-	rdr.createPoster()
 }
 
 func TestS3ERIsClosed(t *testing.T) {
@@ -264,7 +256,6 @@ func TestS3ERIsClosed(t *testing.T) {
 		awsToken:  "",
 		bucket:    "cgrates_cdrs",
 		session:   nil,
-		poster:    nil,
 	}
 	if rcv := rdr.isClosed(); rcv != false {
 		t.Errorf("Expected %v but received %v", false, true)
@@ -319,7 +310,6 @@ func TestS3ERReadLoop(t *testing.T) {
 		awsToken:  "",
 		bucket:    "cgrates_cdrs",
 		session:   nil,
-		poster:    nil,
 	}
 	listObjects := func(input *s3.ListObjectsV2Input, fn func(*s3.ListObjectsV2Output, bool) bool) error {
 		obj := &s3.ListObjectsV2Output{
@@ -356,7 +346,6 @@ func TestS3ERReadLoopIsClosed(t *testing.T) {
 		awsToken:  "",
 		bucket:    "cgrates_cdrs",
 		session:   nil,
-		poster:    nil,
 	}
 	listObjects := func(input *s3.ListObjectsV2Input, fn func(*s3.ListObjectsV2Output, bool) bool) error {
 		return nil
@@ -386,7 +375,6 @@ func TestS3ERReadMsg(t *testing.T) {
 		awsToken:  "",
 		bucket:    "cgrates_cdrs",
 		session:   nil,
-		poster:    nil,
 	}
 	// rdr.poster = engine.NewS3Poster(rdr.Config().SourcePath, 1, make(map[string]any))
 	rdr.Config().SourcePath = rdr.awsRegion
@@ -436,7 +424,6 @@ func TestS3ERReadMsgError1(t *testing.T) {
 		awsToken:  "",
 		bucket:    "cgrates_cdrs",
 		session:   nil,
-		poster:    nil,
 	}
 	rdr.Config().ConcurrentReqs = 1
 	listObjects := func(input *s3.ListObjectsV2Input, fn func(*s3.ListObjectsV2Output, bool) bool) error {
@@ -476,7 +463,6 @@ func TestS3ERReadMsgError2(t *testing.T) {
 		awsToken:  "",
 		bucket:    "cgrates_cdrs",
 		session:   nil,
-		poster:    nil,
 	}
 	rdr.Config().ConcurrentReqs = 1
 	scv := &s3ClientMock{}
@@ -503,7 +489,6 @@ func TestS3ERReadMsgError3(t *testing.T) {
 		awsToken:  "",
 		bucket:    "cgrates_cdrs",
 		session:   nil,
-		poster:    nil,
 	}
 	rdr.Config().ConcurrentReqs = -1
 	scv := &s3ClientMock{}
@@ -529,7 +514,6 @@ func TestS3ERReadMsgError4(t *testing.T) {
 		awsToken:  "",
 		bucket:    "cgrates_cdrs",
 		session:   nil,
-		poster:    nil,
 	}
 	rdr.Config().SourcePath = rdr.awsRegion
 	rdr.Config().ConcurrentReqs = -1
@@ -557,59 +541,6 @@ func TestS3ERReadMsgError4(t *testing.T) {
 		DeleteObjectF:       deleteObject,
 	}
 	errExp := "INVALID_PATH"
-	if err := rdr.readMsg(scv, "AWSKey"); err == nil || err.Error() != errExp {
-		t.Errorf("Expected %v but received %v", errExp, err)
-	}
-}
-
-func TestS3ERReadMsgError5(t *testing.T) {
-	cfg := config.NewDefaultCGRConfig()
-	rdr := &S3ER{
-		cgrCfg:    cfg,
-		cfgIdx:    0,
-		fltrS:     new(engine.FilterS),
-		rdrEvents: make(chan *erEvent, 1),
-		rdrExit:   make(chan struct{}, 1),
-		rdrErr:    make(chan error, 1),
-		cap:       make(chan struct{}, 1),
-		awsRegion: "us-east-2",
-		awsID:     "AWSId",
-		awsKey:    "AWSAccessKeyId",
-		awsToken:  "",
-		bucket:    "cgrates_cdrs",
-		session:   nil,
-		poster: ees.NewS3EE(&config.EventExporterCfg{
-			ExportPath: "url",
-			Attempts:   1,
-			Opts:       &config.EventExporterOpts{},
-		}, nil),
-	}
-	rdr.Config().SourcePath = rdr.awsRegion
-	rdr.Config().ConcurrentReqs = -1
-	rdr.Config().Fields = []*config.FCTemplate{
-		{
-			Tag:   "Tor",
-			Type:  utils.MetaConstant,
-			Value: config.NewRSRParsersMustCompile("*voice", utils.InfieldSep),
-			Path:  "*cgreq.ToR",
-		},
-	}
-	rdr.Config().Fields[0].ComputePath()
-	listObjects := func(input *s3.ListObjectsV2Input, fn func(*s3.ListObjectsV2Output, bool) bool) error {
-		return nil
-	}
-	getObject := func(input *s3.GetObjectInput) (*s3.GetObjectOutput, error) {
-		return &s3.GetObjectOutput{Body: io.NopCloser(bytes.NewBuffer([]byte(`{"key":"value"}`)))}, nil
-	}
-	deleteObject := func(input *s3.DeleteObjectInput) (*s3.DeleteObjectOutput, error) {
-		return nil, nil
-	}
-	scv := &s3ClientMock{
-		ListObjectsV2PagesF: listObjects,
-		GetObjectF:          getObject,
-		DeleteObjectF:       deleteObject,
-	}
-	errExp := "MissingRegion: could not find region configuration"
 	if err := rdr.readMsg(scv, "AWSKey"); err == nil || err.Error() != errExp {
 		t.Errorf("Expected %v but received %v", errExp, err)
 	}
