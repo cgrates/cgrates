@@ -110,6 +110,7 @@ type DBOptsJson struct {
 	RedisReadTimeout        *string           `json:"redisReadTimeout"`
 	RedisWriteTimeout       *string           `json:"redisWriteTimeout"`
 	MongoQueryTimeout       *string           `json:"mongoQueryTimeout"`
+	MongoScheme             *string           `json:"mongoScheme"`
 	RedisTLS                *bool             `json:"redisTLS"`
 	RedisClientCertificate  *string           `json:"redisClientCertificate"`
 	RedisClientKey          *string           `json:"redisClientKey"`

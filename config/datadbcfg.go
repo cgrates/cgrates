@@ -38,6 +38,7 @@ type DataDBOpts struct {
 	RedisReadTimeout        time.Duration
 	RedisWriteTimeout       time.Duration
 	MongoQueryTimeout       time.Duration
+	MongoScheme             string
 	RedisTLS                bool
 	RedisClientCertificate  string
 	RedisClientKey          string
@@ -106,6 +107,9 @@ func (dbOpts *DataDBOpts) loadFromJSONCfg(jsnCfg *DBOptsJson) (err error) {
 		if dbOpts.MongoQueryTimeout, err = utils.ParseDurationWithNanosecs(*jsnCfg.MongoQueryTimeout); err != nil {
 			return
 		}
+	}
+	if jsnCfg.MongoScheme != nil {
+		dbOpts.MongoScheme = *jsnCfg.MongoScheme
 	}
 	if jsnCfg.RedisTLS != nil {
 		dbOpts.RedisTLS = *jsnCfg.RedisTLS
@@ -212,6 +216,7 @@ func (dbOpts *DataDBOpts) Clone() *DataDBOpts {
 		RedisReadTimeout:        dbOpts.RedisReadTimeout,
 		RedisWriteTimeout:       dbOpts.RedisWriteTimeout,
 		MongoQueryTimeout:       dbOpts.MongoQueryTimeout,
+		MongoScheme:             dbOpts.MongoScheme,
 		RedisTLS:                dbOpts.RedisTLS,
 		RedisClientCertificate:  dbOpts.RedisClientCertificate,
 		RedisClientKey:          dbOpts.RedisClientKey,
@@ -261,6 +266,7 @@ func (dbcfg *DataDbCfg) AsMapInterface() (mp map[string]any) {
 		utils.RedisReadTimeoutCfg:        dbcfg.Opts.RedisReadTimeout.String(),
 		utils.RedisWriteTimeoutCfg:       dbcfg.Opts.RedisWriteTimeout.String(),
 		utils.MongoQueryTimeoutCfg:       dbcfg.Opts.MongoQueryTimeout.String(),
+		utils.MongoSchemeCfg:             dbcfg.Opts.MongoScheme,
 		utils.RedisTLS:                   dbcfg.Opts.RedisTLS,
 		utils.RedisClientCertificate:     dbcfg.Opts.RedisClientCertificate,
 		utils.RedisClientKey:             dbcfg.Opts.RedisClientKey,

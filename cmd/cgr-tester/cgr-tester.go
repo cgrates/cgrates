@@ -77,6 +77,8 @@ var (
 		"The amount of wait time until timeout for reading operations")
 	dbRedisWriteTimeout = cgrTesterFlags.Duration(utils.RedisWriteTimeoutCfg, cgrConfig.DataDbCfg().Opts.RedisWriteTimeout,
 		"The amount of wait time until timeout for writing operations")
+	dbMongoScheme = cgrTesterFlags.String(utils.MongoSchemeCfg, cgrConfig.DataDbCfg().Opts.MongoScheme,
+		"Scheme for MongoDB connection <mongodb|mongodb+srv>")
 	raterAddress   = cgrTesterFlags.String("rater_address", "", "Rater address for remote tests. Empty for internal rater.")
 	minUsage       = cgrTesterFlags.Duration("min_usage", 1*time.Second, "Minimum usage a session can have")
 	maxUsage       = cgrTesterFlags.Duration("max_usage", 5*time.Second, "Maximum usage a session can have")
@@ -298,6 +300,9 @@ func main() {
 	}
 	if *dbQueryTimeout != cgrConfig.DataDbCfg().Opts.MongoQueryTimeout {
 		tstCfg.DataDbCfg().Opts.MongoQueryTimeout = *dbQueryTimeout
+	}
+	if *dbMongoScheme != cgrConfig.DataDbCfg().Opts.MongoScheme {
+		tstCfg.DataDbCfg().Opts.MongoScheme = *dbMongoScheme
 	}
 
 	if *cpuprofile != "" {

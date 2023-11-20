@@ -83,6 +83,8 @@ var (
 		"The amount of wait time until timeout for writing operations")
 	dbQueryTimeout = cgrMigratorFlags.Duration(utils.MongoQueryTimeoutCfg, dfltCfg.DataDbCfg().Opts.MongoQueryTimeout,
 		"The timeout for queries")
+	dbMongoScheme = cgrMigratorFlags.String(utils.MongoSchemeCfg, dfltCfg.DataDbCfg().Opts.MongoScheme,
+		"Scheme for MongoDB connection <mongodb|mongodb+srv>")
 	dbRedisTls               = cgrMigratorFlags.Bool(utils.RedisTLS, false, "Enable TLS when connecting to Redis")
 	dbRedisClientCertificate = cgrMigratorFlags.String(utils.RedisClientCertificate, utils.EmptyString, "Path to the client certificate")
 	dbRedisClientKey         = cgrMigratorFlags.String(utils.RedisClientKey, utils.EmptyString, "Path to the client key")
@@ -209,7 +211,9 @@ func main() {
 	if *dbQueryTimeout != dfltCfg.DataDbCfg().Opts.MongoQueryTimeout {
 		mgrCfg.DataDbCfg().Opts.MongoQueryTimeout = *dbQueryTimeout
 	}
-
+	if *dbMongoScheme != dfltCfg.DataDbCfg().Opts.MongoScheme {
+		mgrCfg.DataDbCfg().Opts.MongoScheme = *dbMongoScheme
+	}
 	if *dbRedisTls != dfltCfg.DataDbCfg().Opts.RedisTLS {
 		mgrCfg.DataDbCfg().Opts.RedisTLS = *dbRedisTls
 	}

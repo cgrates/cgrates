@@ -63,7 +63,7 @@ func TestDMitinitDB(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		dataDB, err = NewMongoStorage(mgoITCfg.StorDbCfg().Host,
+		dataDB, err = NewMongoStorage("mongodb", mgoITCfg.StorDbCfg().Host,
 			mgoITCfg.StorDbCfg().Port, mgoITCfg.StorDbCfg().Name,
 			mgoITCfg.StorDbCfg().User, mgoITCfg.StorDbCfg().Password,
 			mgoITCfg.GeneralCfg().DBDataEncoding,

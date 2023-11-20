@@ -97,7 +97,7 @@ func testActionsInitCdrsStore(t *testing.T) {
 			t.Fatal("Could not connect to mysql", err.Error())
 		}
 	case utils.MetaMongo:
-		if actsCdrStore, err = NewMongoStorage(actsCfg.StorDbCfg().Host,
+		if actsCdrStore, err = NewMongoStorage("mongodb", actsCfg.StorDbCfg().Host,
 			actsCfg.StorDbCfg().Port, actsCfg.StorDbCfg().Name,
 			actsCfg.StorDbCfg().User, actsCfg.StorDbCfg().Password,
 			actsCfg.GeneralCfg().DBDataEncoding,

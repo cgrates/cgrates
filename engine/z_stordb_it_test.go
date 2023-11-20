@@ -94,7 +94,7 @@ func TestStorDBit(t *testing.T) {
 		if storDBCfg, err = config.NewCGRConfigFromPath(path.Join(*dataDir, "conf", "samples", "storage", "mongo")); err != nil {
 			t.Fatal(err)
 		}
-		if storDB, err = NewMongoStorage(storDBCfg.StorDbCfg().Host,
+		if storDB, err = NewMongoStorage("mongodb", storDBCfg.StorDbCfg().Host,
 			storDBCfg.StorDbCfg().Port, storDBCfg.StorDbCfg().Name,
 			storDBCfg.StorDbCfg().User, storDBCfg.StorDbCfg().Password,
 			storDBCfg.GeneralCfg().DBDataEncoding,

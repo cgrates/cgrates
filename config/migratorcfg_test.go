@@ -63,6 +63,7 @@ func TestMigratorCgrCfgloadFromJsonCfg(t *testing.T) {
 		OutStorDBUser:     utils.CGRateSLwr,
 		OutStorDBPassword: utils.EmptyString,
 		OutDataDBOpts: &DataDBOpts{
+			MongoScheme:             "mongodb",
 			RedisMaxConns:           10,
 			RedisConnectAttempts:    20,
 			RedisSentinel:           utils.EmptyString,
@@ -76,6 +77,7 @@ func TestMigratorCgrCfgloadFromJsonCfg(t *testing.T) {
 		},
 		OutStorDBOpts: &StorDBOpts{
 			SQLMaxOpenConns: 100,
+			MongoScheme:     "mongodb",
 		},
 	}
 	cfg := NewDefaultCGRConfig()
@@ -129,6 +131,7 @@ func TestMigratorCgrCfgAsMapInterface(t *testing.T) {
 		utils.UsersFiltersCfg:      []string{"users", "filters", "Account"},
 		utils.OutStorDBOptsCfg: map[string]any{
 			utils.MongoQueryTimeoutCfg: "0s",
+			utils.MongoSchemeCfg:       "mongodb",
 			utils.MYSQLDSNParams: map[string]string{
 				"key": "value",
 			},
@@ -140,6 +143,7 @@ func TestMigratorCgrCfgAsMapInterface(t *testing.T) {
 		},
 		utils.OutDataDBOptsCfg: map[string]any{
 			utils.MongoQueryTimeoutCfg:       "0s",
+			utils.MongoSchemeCfg:             "mongodb",
 			utils.RedisMaxConnsCfg:           5,
 			utils.RedisConnectAttemptsCfg:    15,
 			utils.RedisSentinelNameCfg:       "",
@@ -189,6 +193,7 @@ func TestMigratorCgrCfgAsMapInterface1(t *testing.T) {
 		utils.UsersFiltersCfg:      []string{"users", "filters", "Account"},
 		utils.OutStorDBOptsCfg: map[string]any{
 			utils.MongoQueryTimeoutCfg:  "0s",
+			utils.MongoSchemeCfg:        "mongodb",
 			utils.MYSQLDSNParams:        map[string]string(nil),
 			utils.MysqlLocation:         utils.EmptyString,
 			utils.PgSSLModeCfg:          utils.EmptyString,
@@ -198,6 +203,7 @@ func TestMigratorCgrCfgAsMapInterface1(t *testing.T) {
 		},
 		utils.OutDataDBOptsCfg: map[string]any{
 			utils.MongoQueryTimeoutCfg:       "0s",
+			utils.MongoSchemeCfg:             "mongodb",
 			utils.RedisMaxConnsCfg:           10,
 			utils.RedisConnectAttemptsCfg:    20,
 			utils.RedisSentinelNameCfg:       "out_datadb_redis_sentinel",
@@ -241,6 +247,7 @@ func TestMigratorCgrCfgAsMapInterface2(t *testing.T) {
 		utils.UsersFiltersCfg:      []string(nil),
 		utils.OutStorDBOptsCfg: map[string]any{
 			utils.MongoQueryTimeoutCfg:  "0s",
+			utils.MongoSchemeCfg:        "mongodb",
 			utils.MYSQLDSNParams:        map[string]string(nil),
 			utils.MysqlLocation:         utils.EmptyString,
 			utils.PgSSLModeCfg:          utils.EmptyString,
@@ -250,6 +257,7 @@ func TestMigratorCgrCfgAsMapInterface2(t *testing.T) {
 		},
 		utils.OutDataDBOptsCfg: map[string]any{
 			utils.MongoQueryTimeoutCfg:       "0s",
+			utils.MongoSchemeCfg:             "mongodb",
 			utils.RedisMaxConnsCfg:           10,
 			utils.RedisConnectAttemptsCfg:    20,
 			utils.RedisSentinelNameCfg:       "",
