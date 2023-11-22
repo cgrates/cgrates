@@ -58,7 +58,8 @@ func TestRalsCfgFromJsonCfgCase1(t *testing.T) {
 			utils.MetaSMS:   5000,
 			utils.MetaMMS:   10000,
 		},
-		MaxIncrements: 1000000,
+		MaxIncrements:     1000000,
+		MaxRecursionDepth: 3,
 		BalanceRatingSubject: map[string]string{
 			utils.MetaAny:   "*zero1ns",
 			utils.MetaVoice: "*zero1s",
@@ -112,7 +113,8 @@ func TestRalsCfgAsMapInterfaceCase1(t *testing.T) {
 			"*sms":   "5000",
 			"*mms":   "10000",
 		},
-		utils.MaxIncrementsCfg: 1000000,
+		utils.MaxIncrementsCfg:     1000000,
+		utils.MaxRecursionDepthCfg: 3,
 		utils.BalanceRatingSubjectCfg: map[string]string{
 			"*any":   "*zero1ns",
 			"*voice": "*zero1s",
@@ -145,7 +147,8 @@ func TestRalsCfgAsMapInterfaceCase2(t *testing.T) {
 			"*sms":   "10000",
 			"*mms":   "10000",
 		},
-		utils.MaxIncrementsCfg: 1000000,
+		utils.MaxIncrementsCfg:     1000000,
+		utils.MaxRecursionDepthCfg: 3,
 		utils.BalanceRatingSubjectCfg: map[string]string{
 			"*any":   "*zero1ns",
 			"*voice": "*zero1s",
@@ -172,7 +175,8 @@ func TestRalsCfgClone(t *testing.T) {
 			utils.MetaSMS:   5000,
 			utils.MetaMMS:   10000,
 		},
-		MaxIncrements: 1000000,
+		MaxIncrements:     1000000,
+		MaxRecursionDepth: 3,
 		BalanceRatingSubject: map[string]string{
 			utils.MetaAny:   "*zero1ns",
 			utils.MetaVoice: "*zero1s",

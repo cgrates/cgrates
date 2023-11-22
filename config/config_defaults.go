@@ -334,6 +334,7 @@ const CGRATES_CFG_JSON = `
 		"*mms": "10000"
 	},
 	"max_increments": 1000000,
+	"max_recursion_depth": 3,
 	"balance_rating_subject":{				// default rating subject in case that balance rating subject is empty
 		"*any": "*zero1ns",
 		"*voice": "*zero1s"
