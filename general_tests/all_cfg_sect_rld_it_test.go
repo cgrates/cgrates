@@ -432,13 +432,13 @@ func testSectConfigSReloadRALS(t *testing.T) {
 	var reply string
 	if err := testSectRPC.Call(context.Background(), utils.ConfigSv1SetConfigFromJSON, &config.SetConfigFromJSONArgs{
 		Tenant: "cgrates.org",
-		Config: "{\"rals\":{\"balance_rating_subject\":{\"*any\":\"*zero1ns\",\"*voice\":\"*zero1s\"},\"enabled\":true,\"max_computed_usage\":{\"*any\":\"189h0m0s\",\"*data\":\"107374182400\",\"*mms\":\"10000\",\"*sms\":\"10000\",\"*voice\":\"72h0m0s\"},\"max_increments\":3000000,\"remove_expired\":true,\"rp_subject_prefix_matching\":false,\"stats_conns\":[],\"thresholds_conns\":[\"*internal\"]}}",
+		Config: "{\"rals\":{\"balance_rating_subject\":{\"*any\":\"*zero1ns\",\"*voice\":\"*zero1s\"},\"enabled\":true,\"max_computed_usage\":{\"*any\":\"189h0m0s\",\"*data\":\"107374182400\",\"*mms\":\"10000\",\"*sms\":\"10000\",\"*voice\":\"72h0m0s\"},\"max_increments\":3000000,\"max_recursion_depth\":3,\"remove_expired\":true,\"rp_subject_prefix_matching\":false,\"stats_conns\":[],\"thresholds_conns\":[\"*internal\"]}}",
 	}, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf("Expected OK received: %+v", reply)
 	}
-	cfgStr := "{\"rals\":{\"balance_rating_subject\":{\"*any\":\"*zero1ns\",\"*voice\":\"*zero1s\"},\"enabled\":true,\"max_computed_usage\":{\"*any\":\"189h0m0s\",\"*data\":\"107374182400\",\"*mms\":\"10000\",\"*sms\":\"10000\",\"*voice\":\"72h0m0s\"},\"max_increments\":3000000,\"remove_expired\":true,\"rp_subject_prefix_matching\":false,\"stats_conns\":[],\"thresholds_conns\":[\"*internal\"]}}"
+	cfgStr := "{\"rals\":{\"balance_rating_subject\":{\"*any\":\"*zero1ns\",\"*voice\":\"*zero1s\"},\"enabled\":true,\"max_computed_usage\":{\"*any\":\"189h0m0s\",\"*data\":\"107374182400\",\"*mms\":\"10000\",\"*sms\":\"10000\",\"*voice\":\"72h0m0s\"},\"max_increments\":3000000,\"max_recursion_depth\":3,\"remove_expired\":true,\"rp_subject_prefix_matching\":false,\"stats_conns\":[],\"thresholds_conns\":[\"*internal\"]}}"
 	var rpl string
 	if err := testSectRPC.Call(context.Background(), utils.ConfigSv1GetConfigAsJSON, &config.SectionWithAPIOpts{
 		Tenant:  "cgrates.org",

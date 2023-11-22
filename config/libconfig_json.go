@@ -168,6 +168,7 @@ type RalsJsonCfg struct {
 	Remove_expired             *bool
 	Max_computed_usage         *map[string]string
 	Max_increments             *int
+	Max_recursion_depth        *int
 	Balance_rating_subject     *map[string]string
 }
 

@@ -35,6 +35,7 @@ type RalsCfg struct {
 	MaxComputedUsage        map[string]time.Duration
 	BalanceRatingSubject    map[string]string
 	MaxIncrements           int
+	MaxRecursionDepth       int
 }
 
 // loadFromJSONCfg loads Rals config from JsonCfg
@@ -81,6 +82,9 @@ func (ralsCfg *RalsCfg) loadFromJSONCfg(jsnRALsCfg *RalsJsonCfg) (err error) {
 	if jsnRALsCfg.Max_increments != nil {
 		ralsCfg.MaxIncrements = *jsnRALsCfg.Max_increments
 	}
+	if jsnRALsCfg.Max_recursion_depth != nil {
+		ralsCfg.MaxRecursionDepth = *jsnRALsCfg.Max_recursion_depth
+	}
 	if jsnRALsCfg.Balance_rating_subject != nil {
 		for k, v := range *jsnRALsCfg.Balance_rating_subject {
 			ralsCfg.BalanceRatingSubject[k] = v
@@ -97,6 +101,7 @@ func (ralsCfg *RalsCfg) AsMapInterface() (initialMP map[string]any) {
 		utils.RpSubjectPrefixMatchingCfg: ralsCfg.RpSubjectPrefixMatching,
 		utils.RemoveExpiredCfg:           ralsCfg.RemoveExpired,
 		utils.MaxIncrementsCfg:           ralsCfg.MaxIncrements,
+		utils.MaxRecursionDepthCfg:       ralsCfg.MaxRecursionDepth,
 	}
 	if ralsCfg.ThresholdSConns != nil {
 		threSholds := make([]string, len(ralsCfg.ThresholdSConns))
@@ -142,6 +147,7 @@ func (ralsCfg RalsCfg) Clone() (cln *RalsCfg) {
 		RpSubjectPrefixMatching: ralsCfg.RpSubjectPrefixMatching,
 		RemoveExpired:           ralsCfg.RemoveExpired,
 		MaxIncrements:           ralsCfg.MaxIncrements,
+		MaxRecursionDepth:       ralsCfg.MaxRecursionDepth,
 
 		MaxComputedUsage:     make(map[string]time.Duration),
 		BalanceRatingSubject: make(map[string]string),

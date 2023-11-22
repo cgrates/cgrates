@@ -489,6 +489,7 @@ func testCGRConfigReloadRALs(t *testing.T) {
 		ThresholdSConns:         []string{utils.MetaLocalHost},
 		StatSConns:              []string{utils.MetaLocalHost},
 		MaxIncrements:           1000000,
+		MaxRecursionDepth:       3,
 	}
 	if !reflect.DeepEqual(expAttr, cfg.RalsCfg()) {
 		t.Errorf("Expected %s , received: %s ", utils.ToJSON(expAttr), utils.ToJSON(cfg.RalsCfg()))

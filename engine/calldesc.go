@@ -31,9 +31,8 @@ import (
 
 const (
 	// these might be better in the confs under optimizations section
-	RECURSION_MAX_DEPTH = 3
-	MIN_PREFIX_MATCH    = 1
-	FALLBACK_SUBJECT    = utils.MetaAny
+	MIN_PREFIX_MATCH = 1
+	FALLBACK_SUBJECT = utils.MetaAny
 )
 
 var (
@@ -271,7 +270,7 @@ func (cd *CallDescriptor) LoadRatingPlans() (err error) {
 // FIXME: this method is not exhaustive but will cover 99% of cases just good
 // it will not cover very long calls with very short activation periods for rates
 func (cd *CallDescriptor) getRatingPlansForPrefix(key string, recursionDepth int) (int, error) {
-	if recursionDepth > RECURSION_MAX_DEPTH {
+	if recursionDepth > config.CgrConfig().RalsCfg().MaxRecursionDepth {
 		return recursionDepth, utils.ErrMaxRecursionDepth
 	}
 	rpf, err := RatingProfileSubjectPrefixMatching(key)
