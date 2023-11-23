@@ -55,7 +55,7 @@ func TestListenAndServe(t *testing.T) {
 	cfgRld := make(chan struct{}, 1)
 	cfgRld <- struct{}{}
 	go func() {
-		time.Sleep(10 * time.Nanosecond)
+		time.Sleep(20 * time.Nanosecond)
 		stopChan <- struct{}{}
 	}()
 	tmpLogger := utils.Logger

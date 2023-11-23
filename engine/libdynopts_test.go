@@ -1921,7 +1921,7 @@ func TestGetBoolOptsCantCastErr(t *testing.T) {
 		},
 	}
 	if _, err := GetBoolOpts(context.Background(), "cgrates.org", utils.StringSet{utils.MetaOpts: {}}, fS, dynOpts,
-		config.ThresholdsProfileIgnoreFiltersDftOpt, "nonExistingAPIOpt", utils.MetaProfileIgnoreFilters); err != utils.ErrCastFailed {
+		config.ThresholdsProfileIgnoreFiltersDftOpt, "nonExistingAPIOpt", utils.MetaProfileIgnoreFilters); err.Error() != "cannot convert to map[string]any" {
 		t.Errorf("Expecting error <%+v>,\n Recevied  error <%+v>", utils.ErrCastFailed, err)
 	}
 
