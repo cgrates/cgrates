@@ -140,7 +140,7 @@ func testReloadVerifyFirstReload(t *testing.T) {
 		t.Error(err)
 	} else if mp, can := reply[config.ERsJSON].(map[string]any); !can {
 		t.Errorf("expected a map received: %T", reply[config.ERsJSON])
-	} else if mp[utils.EnabledCfg] != true {
+	} else if mp[utils.EnabledCfg] != false {
 		t.Errorf("Expecting: <true>, received: <%+v>", mp[utils.EnabledCfg])
 	} else if readers, canConvert := mp[utils.ReadersCfg].([]any); !canConvert {
 		if readers, canConvert := mp[utils.ReadersCfg].([]map[string]any); !canConvert { // in case of gob

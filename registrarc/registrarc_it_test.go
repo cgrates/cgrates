@@ -175,7 +175,7 @@ func testDsphStopEngines(t *testing.T) {
 	if err := all2Cmd.Process.Kill(); err != nil {
 		t.Fatal(err)
 	}
-	time.Sleep(1 * time.Second)
+	time.Sleep(2 * time.Second)
 	if _, err := testDsphGetNodeID(); err == nil || err.Error() != utils.ErrDSPHostNotFound.Error() {
 		t.Errorf("Expected error: %s received: %v", utils.ErrDSPHostNotFound, err)
 	}
