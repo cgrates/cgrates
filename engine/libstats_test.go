@@ -730,6 +730,10 @@ func (sMM *statMetricMock) AddEvent(evID string, ev utils.DataProvider) error {
 	return nil
 }
 
+func (sMM *statMetricMock) OneEvent(ev utils.DataProvider) error {
+	return nil
+}
+
 func (sMM *statMetricMock) RemEvent(evTenantID string) error {
 	switch sMM.testcase {
 	case "remExpired error":

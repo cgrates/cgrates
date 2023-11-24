@@ -234,13 +234,46 @@ func (sq *StatQueue) TenantID() string {
 
 // ProcessEvent processes a utils.CGREvent, returns true if processed
 func (sq *StatQueue) ProcessEvent(tnt, evID string, filterS *FilterS, evNm utils.MapStorage) (err error) {
+	var oneEv bool
+	if oneEv, err = sq.isOneEvent(tnt, filterS, evNm); oneEv {
+		return err
+	}
 	if _, err = sq.remExpired(); err != nil {
 		return
 	}
+
 	if err = sq.remOnQueueLength(); err != nil {
 		return
 	}
 	return sq.addStatEvent(tnt, evID, filterS, evNm)
+}
+
+func (sq *StatQueue) isOneEvent(tnt string, filterS *FilterS, evNm utils.MapStorage) (bool, error) {
+	if sq.ttl != nil && *sq.ttl == -1 {
+		sq.SQItems = make([]SQItem, 0)
+		return true, sq.addOneEvent(tnt, filterS, evNm)
+	}
+	return false, nil
+}
+
+func (sq *StatQueue) addOneEvent(tnt string, filterS *FilterS, evNm utils.MapStorage) (err error) {
+	var pass bool
+	dDP := newDynamicDP(config.CgrConfig().FilterSCfg().ResourceSConns, config.CgrConfig().FilterSCfg().StatSConns,
+		config.CgrConfig().FilterSCfg().ApierSConns, tnt, utils.MapStorage{utils.MetaReq: evNm[utils.MetaReq]})
+	for metricID, metric := range sq.SQMetrics {
+		if pass, err = filterS.Pass(tnt, metric.GetFilterIDs(),
+			evNm); err != nil {
+			return
+		} else if !pass {
+			continue
+		}
+		if err = metric.OneEvent(dDP); err != nil {
+			utils.Logger.Warning(fmt.Sprintf("<StatQueue> metricID: %s, OneEvent, error: %s",
+				metricID, err.Error()))
+			return
+		}
+	}
+	return
 }
 
 // remStatEvent removes an event from metrics
