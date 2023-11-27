@@ -234,9 +234,8 @@ func (sq *StatQueue) TenantID() string {
 
 // ProcessEvent processes a utils.CGREvent, returns true if processed
 func (sq *StatQueue) ProcessEvent(tnt, evID string, filterS *FilterS, evNm utils.MapStorage) (err error) {
-	var oneEv bool
-	if oneEv, err = sq.isOneEvent(tnt, filterS, evNm); oneEv {
-		return err
+	if oneEv := sq.isOneEvent(); oneEv {
+		return sq.addOneEvent(tnt, filterS, evNm)
 	}
 	if _, err = sq.remExpired(); err != nil {
 		return
@@ -248,12 +247,8 @@ func (sq *StatQueue) ProcessEvent(tnt, evID string, filterS *FilterS, evNm utils
 	return sq.addStatEvent(tnt, evID, filterS, evNm)
 }
 
-func (sq *StatQueue) isOneEvent(tnt string, filterS *FilterS, evNm utils.MapStorage) (bool, error) {
-	if sq.ttl != nil && *sq.ttl == -1 {
-		sq.SQItems = make([]SQItem, 0)
-		return true, sq.addOneEvent(tnt, filterS, evNm)
-	}
-	return false, nil
+func (sq *StatQueue) isOneEvent() bool {
+	return sq.ttl != nil && *sq.ttl == -1
 }
 
 func (sq *StatQueue) addOneEvent(tnt string, filterS *FilterS, evNm utils.MapStorage) (err error) {
@@ -267,7 +262,7 @@ func (sq *StatQueue) addOneEvent(tnt string, filterS *FilterS, evNm utils.MapSto
 		} else if !pass {
 			continue
 		}
-		if err = metric.OneEvent(dDP); err != nil {
+		if err = metric.AddOneEvent(dDP); err != nil {
 			utils.Logger.Warning(fmt.Sprintf("<StatQueue> metricID: %s, OneEvent, error: %s",
 				metricID, err.Error()))
 			return

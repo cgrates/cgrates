@@ -322,6 +322,33 @@ func TestASRGetCompressFactor(t *testing.T) {
 	}
 }
 
+func TestASRAddOneEvent(t *testing.T) {
+	asr, _ := NewASR(2, "", []string{})
+	ev := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
+		Event: map[string]any{
+			"AnswerTime": time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC)}}
+	ev2 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_2"}
+	ev4 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1"}
+	asr.AddOneEvent(utils.MapStorage{utils.MetaReq: ev.Event})
+	asr.AddOneEvent(utils.MapStorage{utils.MetaReq: ev2.Event})
+	if strVal := asr.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != "50%" {
+		t.Errorf("wrong asr value: %s", strVal)
+	}
+	asr.AddOneEvent(utils.MapStorage{utils.MetaReq: ev2.Event})
+	if strVal := asr.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != "33.33333%" {
+		t.Errorf("wrong asr value: %s", strVal)
+	}
+	asr.AddOneEvent(utils.MapStorage{utils.MetaReq: ev4.Event})
+	if strVal := asr.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != "25%" {
+		t.Errorf("wrong asr value: %s", strVal)
+	}
+	asr.RemEvent(ev4.ID)
+	asr.RemEvent(ev2.ID)
+	if strVal := asr.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != "25%" {
+		t.Errorf("wrong asr value: %s", strVal)
+	}
+}
+
 func TestACDGetStringValue(t *testing.T) {
 	acd, _ := NewACD(2, "", []string{})
 	ev := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
@@ -677,6 +704,30 @@ func TestACDGetValue(t *testing.T) {
 	}
 }
 
+func TestACDAddOneEvent(t *testing.T) {
+	acd, _ := NewACD(2, "", []string{})
+	ev1 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
+		Event: map[string]any{utils.Usage: 2 * time.Minute}}
+	if err := acd.AddOneEvent(utils.MapStorage{utils.MetaReq: ev1.Event}); err != nil {
+		t.Error(err)
+	}
+	ev2 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_2",
+		Event: map[string]any{"Usage": time.Minute}}
+	acd.AddOneEvent(utils.MapStorage{utils.MetaReq: ev2.Event})
+	if strVal := acd.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != "1m30s" {
+		t.Errorf("wrong acd value: %s", strVal)
+	}
+	acd.AddOneEvent(utils.MapStorage{utils.MetaReq: ev2.Event})
+	acd.AddOneEvent(utils.MapStorage{utils.MetaReq: ev2.Event})
+	if strVal := acd.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != "1m15s" {
+		t.Errorf("wrong acd value: %s", strVal)
+	}
+	acd.RemEvent(ev2.ID)
+	if strVal := acd.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != "1m15s" {
+		t.Errorf("wrong acd value: %s", strVal)
+	}
+}
+
 func TestTCDGetStringValue(t *testing.T) {
 	tcd, _ := NewTCD(2, "", []string{})
 	ev := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
@@ -1002,6 +1053,30 @@ func TestTCDGetCompressFactor(t *testing.T) {
 	}
 }
 
+func TestTCDAddOneEvent(t *testing.T) {
+	tcd, _ := NewTCD(2, "", []string{})
+	ev1 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
+		Event: map[string]any{utils.Usage: 2 * time.Minute}}
+	if err := tcd.AddOneEvent(utils.MapStorage{utils.MetaReq: ev1.Event}); err != nil {
+		t.Error(err)
+	}
+	ev2 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_2",
+		Event: map[string]any{"Usage": time.Minute}}
+	tcd.AddOneEvent(utils.MapStorage{utils.MetaReq: ev2.Event})
+	if strVal := tcd.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != "3m0s" {
+		t.Errorf("wrong tcd value: %s", strVal)
+	}
+	tcd.AddOneEvent(utils.MapStorage{utils.MetaReq: ev2.Event})
+	tcd.AddOneEvent(utils.MapStorage{utils.MetaReq: ev2.Event})
+	if strVal := tcd.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != "5m0s" {
+		t.Errorf("wrong tcd value: %s", strVal)
+	}
+	tcd.RemEvent(ev2.ID)
+	if strVal := tcd.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != "5m0s" {
+		t.Errorf("wrong tcd value: %s", strVal)
+	}
+}
+
 func TestACCGetStringValue(t *testing.T) {
 	acc, _ := NewACC(2, "", []string{})
 	ev := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
@@ -1275,6 +1350,29 @@ func TestACCGetCompressFactor(t *testing.T) {
 	CF["EVENT_2"] = 3
 	if CF = acc.GetCompressFactor(CF); !reflect.DeepEqual(expectedCF, CF) {
 		t.Errorf("Expected: %s , received: %s", utils.ToJSON(expectedCF), utils.ToJSON(CF))
+	}
+}
+func TestACCAddOneEvent(t *testing.T) {
+	acc, _ := NewACC(2, "", []string{})
+	ev1 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
+		Event: map[string]any{"Cost": 12.3}}
+	if err := acc.AddOneEvent(utils.MapStorage{utils.MetaReq: ev1.Event}); err != nil {
+		t.Error(err)
+	}
+	ev2 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_2",
+		Event: map[string]any{"Cost": 18.3}}
+	acc.AddOneEvent(utils.MapStorage{utils.MetaReq: ev2.Event})
+	if strVal := acc.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != "15.3" {
+		t.Errorf("wrong acc value: %s", strVal)
+	}
+	acc.AddOneEvent(utils.MapStorage{utils.MetaReq: ev2.Event})
+	acc.AddOneEvent(utils.MapStorage{utils.MetaReq: ev2.Event})
+	if strVal := acc.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != "16.8" {
+		t.Errorf("wrong acc value: %s", strVal)
+	}
+	acc.RemEvent(ev2.ID)
+	if strVal := acc.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != "16.8" {
+		t.Errorf("wrong acc value: %s", strVal)
 	}
 }
 
@@ -1555,6 +1653,30 @@ func TestTCCGetCompressFactor(t *testing.T) {
 	CF["EVENT_2"] = 3
 	if CF = tcc.GetCompressFactor(CF); !reflect.DeepEqual(expectedCF, CF) {
 		t.Errorf("Expected: %s , received: %s", utils.ToJSON(expectedCF), utils.ToJSON(CF))
+	}
+}
+
+func TestTCCAddOneEvent(t *testing.T) {
+	tcc, _ := NewTCC(2, "", []string{})
+	ev1 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
+		Event: map[string]any{"Cost": 12.3}}
+	if err := tcc.AddOneEvent(utils.MapStorage{utils.MetaReq: ev1.Event}); err != nil {
+		t.Error(err)
+	}
+	ev2 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_2",
+		Event: map[string]any{"Cost": 18.3}}
+	tcc.AddOneEvent(utils.MapStorage{utils.MetaReq: ev2.Event})
+	if strVal := tcc.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != "30.6" {
+		t.Errorf("wrong tcc value: %s", strVal)
+	}
+	tcc.AddOneEvent(utils.MapStorage{utils.MetaReq: ev2.Event})
+	tcc.AddOneEvent(utils.MapStorage{utils.MetaReq: ev2.Event})
+	if strVal := tcc.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != "67.2" {
+		t.Errorf("wrong tcc value: %s", strVal)
+	}
+	tcc.RemEvent(ev2.ID)
+	if strVal := tcc.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != "67.2" {
+		t.Errorf("wrong tcc value: %s", strVal)
 	}
 }
 
@@ -1901,6 +2023,30 @@ func TestPDDGetCompressFactor(t *testing.T) {
 	}
 }
 
+func TestPDDAddOneEvent(t *testing.T) {
+	pdd, _ := NewPDD(2, "", []string{})
+	ev1 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
+		Event: map[string]any{utils.PDD: 2 * time.Minute}}
+	if err := pdd.AddOneEvent(utils.MapStorage{utils.MetaReq: ev1.Event}); err != nil {
+		t.Error(err)
+	}
+	ev2 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_2",
+		Event: map[string]any{utils.PDD: time.Minute}}
+	pdd.AddOneEvent(utils.MapStorage{utils.MetaReq: ev2.Event})
+	if strVal := pdd.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != "1m30s" {
+		t.Errorf("wrong pdd value: %s", strVal)
+	}
+	pdd.AddOneEvent(utils.MapStorage{utils.MetaReq: ev2.Event})
+	pdd.AddOneEvent(utils.MapStorage{utils.MetaReq: ev2.Event})
+	if strVal := pdd.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != "1m15s" {
+		t.Errorf("wrong pdd value: %s", strVal)
+	}
+	pdd.RemEvent(ev2.ID)
+	if strVal := pdd.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != "1m15s" {
+		t.Errorf("wrong pdd value: %s", strVal)
+	}
+}
+
 func TestDDCGetStringValue(t *testing.T) {
 	ddc, _ := NewDDC(2, "", []string{})
 	ev := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
@@ -2114,6 +2260,30 @@ func TestDDCGetCompressFactor(t *testing.T) {
 	CF["EVENT_2"] = 3
 	if CF = ddc.GetCompressFactor(CF); !reflect.DeepEqual(expectedCF, CF) {
 		t.Errorf("Expected: %s , received: %s", utils.ToJSON(expectedCF), utils.ToJSON(CF))
+	}
+}
+
+func TestDDCAddOneEvent(t *testing.T) {
+	statDistinct, _ := NewDDC(2, "", []string{})
+	ev := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
+		Event: map[string]any{utils.Destination: "1001"}}
+	if strVal := statDistinct.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != utils.NotAvailable {
+		t.Errorf("wrong statDistinct value: %s", strVal)
+	}
+
+	statDistinct.AddOneEvent(utils.MapStorage{utils.MetaReq: ev.Event})
+	if strVal := statDistinct.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != utils.NotAvailable {
+		t.Errorf("wrong statDistinct value: %s", strVal)
+	}
+	ev2 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
+		Event: map[string]any{utils.Destination: "1002"}}
+	statDistinct.AddOneEvent(utils.MapStorage{utils.MetaReq: ev2.Event})
+	if strVal := statDistinct.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != "2" {
+		t.Errorf("wrong statDistinct value: %s", strVal)
+	}
+	statDistinct.RemEvent(ev.ID)
+	if strVal := statDistinct.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != "2" {
+		t.Errorf("wrong statDistinct value: %s", strVal)
 	}
 }
 
@@ -2397,6 +2567,30 @@ func TestStatSumGetCompressFactor(t *testing.T) {
 	}
 }
 
+func TestStatSumAddOneEvent(t *testing.T) {
+	statSum, _ := NewStatSum(2, "~*req.Cost", []string{})
+	ev1 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
+		Event: map[string]any{"Cost": 12.3}}
+	if err := statSum.AddOneEvent(utils.MapStorage{utils.MetaReq: ev1.Event}); err != nil {
+		t.Error(err)
+	}
+	ev2 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_2",
+		Event: map[string]any{"Cost": 18.3}}
+	statSum.AddOneEvent(utils.MapStorage{utils.MetaReq: ev2.Event})
+	if strVal := statSum.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != "30.6" {
+		t.Errorf("wrong statSum value: %s", strVal)
+	}
+	statSum.AddOneEvent(utils.MapStorage{utils.MetaReq: ev2.Event})
+	statSum.AddOneEvent(utils.MapStorage{utils.MetaReq: ev2.Event})
+	if strVal := statSum.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != "67.2" {
+		t.Errorf("wrong statSum value: %s", strVal)
+	}
+	statSum.RemEvent(ev2.ID)
+	if strVal := statSum.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != "67.2" {
+		t.Errorf("wrong statSum value: %s", strVal)
+	}
+}
+
 func TestStatAverageGetFloat64Value(t *testing.T) {
 	statAvg, _ := NewStatAverage(2, "~*req.Cost", []string{})
 	ev := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
@@ -2676,6 +2870,30 @@ func TestStatAverageGetCompressFactor(t *testing.T) {
 	}
 }
 
+func TestStatAverageAddOneEvent(t *testing.T) {
+	statAvg, _ := NewStatAverage(2, "~*req.Cost", []string{})
+	ev1 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
+		Event: map[string]any{"Cost": 12.3}}
+	if err := statAvg.AddOneEvent(utils.MapStorage{utils.MetaReq: ev1.Event}); err != nil {
+		t.Error(err)
+	}
+	ev2 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_2",
+		Event: map[string]any{"Cost": 18.3}}
+	statAvg.AddOneEvent(utils.MapStorage{utils.MetaReq: ev2.Event})
+	if strVal := statAvg.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != "15.3" {
+		t.Errorf("wrong statAvg value: %s", strVal)
+	}
+	statAvg.AddOneEvent(utils.MapStorage{utils.MetaReq: ev2.Event})
+	statAvg.AddOneEvent(utils.MapStorage{utils.MetaReq: ev2.Event})
+	if strVal := statAvg.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != "16.8" {
+		t.Errorf("wrong statAvg value: %s", strVal)
+	}
+	statAvg.RemEvent(ev2.ID)
+	if strVal := statAvg.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != "16.8" {
+		t.Errorf("wrong statAvg value: %s", strVal)
+	}
+}
+
 func TestStatDistinctGetFloat64Value(t *testing.T) {
 	statDistinct, _ := NewStatDistinct(2, "~*req.Usage", []string{})
 	ev := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
@@ -2877,6 +3095,30 @@ func TestStatDistinctGetCompressFactor(t *testing.T) {
 	CF["EVENT_2"] = 3
 	if CF = ddc.GetCompressFactor(CF); !reflect.DeepEqual(expectedCF, CF) {
 		t.Errorf("Expected: %s , received: %s", utils.ToJSON(expectedCF), utils.ToJSON(CF))
+	}
+}
+
+func TestStatDistinct(t *testing.T) {
+	statDistinct, _ := NewStatDistinct(2, "~*req.Cost", []string{})
+	ev := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
+		Event: map[string]any{"Cost": "20"}}
+	if strVal := statDistinct.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != utils.NotAvailable {
+		t.Errorf("wrong statDistinct value: %s", strVal)
+	}
+
+	statDistinct.AddOneEvent(utils.MapStorage{utils.MetaReq: ev.Event})
+	if strVal := statDistinct.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != utils.NotAvailable {
+		t.Errorf("wrong statDistinct value: %s", strVal)
+	}
+	ev2 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
+		Event: map[string]any{"Cost": "40"}}
+	statDistinct.AddOneEvent(utils.MapStorage{utils.MetaReq: ev2.Event})
+	if strVal := statDistinct.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != "2" {
+		t.Errorf("wrong statDistinct value: %s", strVal)
+	}
+	statDistinct.RemEvent(ev.ID)
+	if strVal := statDistinct.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != "2" {
+		t.Errorf("wrong statDistinct value: %s", strVal)
 	}
 }
 
@@ -3301,8 +3543,8 @@ func TestStatMetricsStatDistinctAddEventErr(t *testing.T) {
 		Count:     3,
 	}
 	err := dst.AddEvent("Event1", utils.MapStorage{utils.MetaReq: ev.Event})
-	if err == nil || err.Error() != "Invalid format for field <Test_Field_Name>" {
-		t.Errorf("\nExpecting <Invalid format for field <Test_Field_Name>>,\n Recevied <%+v>", err)
+	if err == nil || err.Error() != "invalid format for field <Test_Field_Name>" {
+		t.Errorf("\nExpecting <invalid format for field <Test_Field_Name>>,\n Recevied <%+v>", err)
 	}
 }
 

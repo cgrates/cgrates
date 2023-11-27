@@ -74,7 +74,7 @@ type StatMetric interface {
 	GetStringValue(roundingDecimal int) (val string)
 	GetFloat64Value(roundingDecimal int) (val float64)
 	AddEvent(evID string, ev utils.DataProvider) error
-	OneEvent(ev utils.DataProvider) error
+	AddOneEvent(ev utils.DataProvider) error
 	RemEvent(evTenantID string) error
 	Marshal(ms Marshaler) (marshaled []byte, err error)
 	LoadMarshaled(ms Marshaler, marshaled []byte) (err error)
@@ -166,11 +166,8 @@ func (asr *StatASR) AddEvent(evID string, ev utils.DataProvider) (err error) {
 	return
 }
 
-func (asr *StatASR) OneEvent(ev utils.DataProvider) (err error) {
+func (asr *StatASR) AddOneEvent(ev utils.DataProvider) (err error) {
 	var answered int
-	if len(asr.Events) != 0 {
-		asr.Events = make(map[string]*StatWithCompress)
-	}
 	if answered, err = asr.getFieldVal(ev); err != nil {
 		return
 	}
@@ -331,10 +328,7 @@ func (acd *StatACD) AddEvent(evID string, ev utils.DataProvider) (err error) {
 	return
 }
 
-func (acd *StatACD) OneEvent(ev utils.DataProvider) (err error) {
-	if len(acd.Events) != 0 {
-		acd.Events = make(map[string]*DurationWithCompress)
-	}
+func (acd *StatACD) AddOneEvent(ev utils.DataProvider) (err error) {
 	var dur time.Duration
 	if dur, err = acd.getFieldVal(ev); err != nil {
 		return
@@ -489,10 +483,7 @@ func (tcd *StatTCD) AddEvent(evID string, ev utils.DataProvider) (err error) {
 	return
 }
 
-func (tcd *StatTCD) OneEvent(ev utils.DataProvider) (err error) {
-	if len(tcd.Events) != 0 {
-		tcd.Events = make(map[string]*DurationWithCompress)
-	}
+func (tcd *StatTCD) AddOneEvent(ev utils.DataProvider) (err error) {
 	var dur time.Duration
 	if dur, err = tcd.getFieldVal(ev); err != nil {
 		return
@@ -644,11 +635,7 @@ func (acc *StatACC) AddEvent(evID string, ev utils.DataProvider) (err error) {
 	return
 }
 
-func (acc *StatACC) OneEvent(ev utils.DataProvider) (err error) {
-	if len(acc.Events) != 0 {
-		acc.Events = make(map[string]*StatWithCompress)
-	}
-
+func (acc *StatACC) AddOneEvent(ev utils.DataProvider) (err error) {
 	var cost float64
 	if cost, err = acc.getFieldVal(ev); err != nil {
 		return
@@ -799,11 +786,7 @@ func (tcc *StatTCC) AddEvent(evID string, ev utils.DataProvider) (err error) {
 	return
 }
 
-func (tcc *StatTCC) OneEvent(ev utils.DataProvider) (err error) {
-	if len(tcc.Events) != 0 {
-		tcc.Events = make(map[string]*StatWithCompress)
-	}
-
+func (tcc *StatTCC) AddOneEvent(ev utils.DataProvider) (err error) {
 	var cost float64
 	if cost, err = tcc.getFieldVal(ev); err != nil {
 		return
@@ -958,10 +941,7 @@ func (pdd *StatPDD) AddEvent(evID string, ev utils.DataProvider) (err error) {
 	pdd.val = nil
 	return
 }
-func (pdd *StatPDD) OneEvent(ev utils.DataProvider) (err error) {
-	if len(pdd.Events) != 0 {
-		pdd.Events = make(map[string]*DurationWithCompress)
-	}
+func (pdd *StatPDD) AddOneEvent(ev utils.DataProvider) (err error) {
 	var dur time.Duration
 	if dur, err = pdd.getFieldVal(ev); err != nil {
 		return
@@ -1107,11 +1087,7 @@ func (ddc *StatDDC) AddEvent(evID string, ev utils.DataProvider) (err error) {
 	return
 }
 
-func (ddc *StatDDC) OneEvent(ev utils.DataProvider) (err error) {
-	if len(ddc.Events) != 0 {
-		ddc.Events = make(map[string]map[string]int64)
-	}
-
+func (ddc *StatDDC) AddOneEvent(ev utils.DataProvider) (err error) {
 	var fieldValue string
 	if fieldValue, err = ddc.getFieldVal(ev); err != nil {
 		return
@@ -1218,7 +1194,7 @@ type StatSum struct {
 // getValue returns tcd.val
 func (sum *StatSum) getValue(roundingDecimal int) float64 {
 	if sum.val == nil {
-		if len(sum.Events) == 0 || sum.Count < int64(sum.MinItems) {
+		if sum.Count < int64(sum.MinItems) {
 			sum.val = utils.Float64Pointer(utils.StatsNA)
 		} else {
 			sum.val = utils.Float64Pointer(utils.Round(sum.Sum,
@@ -1277,11 +1253,7 @@ func (sum *StatSum) AddEvent(evID string, ev utils.DataProvider) (err error) {
 	return
 }
 
-func (sum *StatSum) OneEvent(ev utils.DataProvider) (err error) {
-	if len(sum.Events) != 0 {
-		sum.Events = make(map[string]*StatWithCompress)
-	}
-
+func (sum *StatSum) AddOneEvent(ev utils.DataProvider) (err error) {
 	var val float64
 	if val, err = sum.getFieldVal(ev); err != nil {
 		return
@@ -1436,10 +1408,7 @@ func (avg *StatAverage) AddEvent(evID string, ev utils.DataProvider) (err error)
 }
 
 // simply remove the ~*req. prefix and do normal process
-func (avg *StatAverage) OneEvent(ev utils.DataProvider) (err error) {
-	if len(avg.Events) != 0 {
-		avg.Events = make(map[string]*StatWithCompress)
-	}
+func (avg *StatAverage) AddOneEvent(ev utils.DataProvider) (err error) {
 	var val float64
 	if val, err = avg.getFieldVal(ev); err != nil {
 		return
@@ -1590,10 +1559,7 @@ func (dst *StatDistinct) AddEvent(evID string, ev utils.DataProvider) (err error
 	return
 }
 
-func (dst *StatDistinct) OneEvent(ev utils.DataProvider) (err error) {
-	if len(dst.Events) != 0 {
-		dst.Events = make(map[string]map[string]int64)
-	}
+func (dst *StatDistinct) AddOneEvent(ev utils.DataProvider) (err error) {
 	var fieldValue string
 	if fieldValue, err = dst.getFieldVal(ev); err != nil {
 		return
