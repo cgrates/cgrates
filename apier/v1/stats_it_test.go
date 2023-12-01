@@ -963,6 +963,13 @@ func testV1STSProcessStatsOneEvent(t *testing.T) {
 	} else if !reflect.DeepEqual(expectedMetrics, metrics) {
 		t.Errorf("expecting: %+v, received reply: %s", expectedMetrics, metrics)
 	}
+	var statQueue engine.StatQueue
+	if err := stsV1Rpc.Call(context.Background(), utils.StatSv1GetStatQueue, &utils.TenantIDWithAPIOpts{
+		TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "StatQueueOne"}}, &statQueue); err != nil {
+		t.Error(err)
+	} else if len(statQueue.SQItems) != 0 {
+		t.Errorf("Expected 0, Received %v", len(statQueue.SQItems))
+	}
 }
 
 func testV1STSStatsPing(t *testing.T) {

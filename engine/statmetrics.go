@@ -166,6 +166,7 @@ func (asr *StatASR) AddEvent(evID string, ev utils.DataProvider) (err error) {
 	return
 }
 
+// AddOneEvent aggregates the  metric value without storing the events
 func (asr *StatASR) AddOneEvent(ev utils.DataProvider) (err error) {
 	var answered int
 	if answered, err = asr.getFieldVal(ev); err != nil {
@@ -179,6 +180,7 @@ func (asr *StatASR) AddOneEvent(ev utils.DataProvider) (err error) {
 	return
 }
 
+// RemEvent deletes  a stored event and  decrements statistics of the metric for recalculation
 func (asr *StatASR) RemEvent(evID string) (err error) {
 	val, has := asr.Events[evID]
 	if !has {
