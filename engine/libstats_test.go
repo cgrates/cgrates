@@ -795,6 +795,10 @@ func (statMetricMock) AddEvent(string, utils.DataProvider) error {
 	return nil
 }
 
+func (statMetricMock) AddOneEvent(utils.DataProvider) error {
+	return nil
+}
+
 func (sMM statMetricMock) RemEvent(string) error {
 	if sMM == "remExpired error" {
 		return fmt.Errorf("remExpired mock error")

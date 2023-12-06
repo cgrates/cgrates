@@ -220,6 +220,11 @@ func (sS *StatS) matchingStatQueuesForEvent(ctx *context.Context, tnt string, st
 		if sqPrfl.TTL > 0 {
 			sq.ttl = utils.DurationPointer(sqPrfl.TTL)
 		}
+
+		if sqPrfl.TTL == -1 && sqPrfl.QueueLength == -1 {
+			sq.ttl = utils.DurationPointer(sqPrfl.TTL)
+		}
+
 		sq.sqPrfl = sqPrfl
 		if sq.weight, err = WeightFromDynamics(ctx, sqPrfl.Weights,
 			sS.fltrS, tnt, evNm); err != nil {

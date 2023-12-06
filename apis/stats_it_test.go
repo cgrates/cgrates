@@ -27,6 +27,7 @@ import (
 	"net/http/httptest"
 	"path"
 	"reflect"
+	"slices"
 	"sort"
 	"testing"
 	"time"
@@ -67,6 +68,7 @@ var (
 		testStatsProcessEventWithBlockersOnMetricsSecond,
 		testStatsProcessEventNoBlockers,
 		testStatsGetStatQueueForEventWithBlockers,
+		testStatsStatOneEvent,
 		// check if stats, thresholds and actions subsystems function properly together
 		testStatsStartServer,
 		testStatsSetActionProfileBeforeProcessEv,
@@ -945,6 +947,231 @@ func testStatsGetStatQueueForEventWithBlockers(t *testing.T) {
 			t.Errorf("Expected %v, received %v", expected, rplySqs)
 		}
 	}
+}
+
+func testStatsStatOneEvent(t *testing.T) {
+	sqPrf := &engine.StatQueueProfileWithAPIOpts{
+		StatQueueProfile: &engine.StatQueueProfile{
+			Tenant: "cgrates.org",
+			ID:     "SQ_OneEv",
+			//FilterIDs:   []string{"*string:~*req.StatsMetrics:*exist"},
+			QueueLength: -1,
+			TTL:         -1,
+			MinItems:    2,
+			Blockers: utils.DynamicBlockers{
+				{
+					Blocker: false,
+				},
+			},
+			Weights: utils.DynamicWeights{
+				&utils.DynamicWeight{
+					Weight: 100,
+				},
+			},
+			Stored: true,
+			Metrics: []*engine.MetricWithFilters{
+				{
+					MetricID: utils.MetaASR,
+				},
+				{
+					MetricID: utils.MetaDDC,
+				},
+				{
+					MetricID: utils.MetaPDD,
+				},
+				{
+					MetricID: utils.MetaTCC,
+				},
+				{
+					MetricID: utils.MetaACD,
+				},
+				{
+					MetricID: utils.MetaTCD,
+				},
+				{
+					MetricID: utils.MetaACC,
+				},
+				{
+					MetricID: utils.MetaDistinct + utils.HashtagSep + utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.AccountField,
+				},
+				{
+					MetricID: utils.MetaAverage + utils.HashtagSep + utils.DynamicDataPrefix + utils.MetaOpts + utils.NestingSep + utils.OptsResourcesUnits,
+				},
+				{
+					MetricID: utils.MetaSum + utils.HashtagSep + utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + "RandomVal",
+				},
+			},
+			ThresholdIDs: []string{"*none"},
+		},
+	}
+
+	var reply string
+	if err := sqRPC.Call(context.Background(), utils.AdminSv1SetStatQueueProfile, sqPrf, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply returned:", reply)
+	}
+
+	args := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "SQ_Event1",
+		Event: map[string]any{
+			utils.AccountField: "1001",
+			"RandomVal":        "11",
+		},
+		APIOpts: map[string]any{
+			utils.MetaUsage:           20 * time.Second,
+			utils.MetaCost:            102.1,
+			utils.MetaDestination:     "332214",
+			utils.MetaStartTime:       time.Date(2021, 7, 14, 14, 25, 0, 0, time.UTC),
+			utils.MetaPDD:             5 * time.Second,
+			utils.OptsStatsProfileIDs: []string{"SQ_OneEv"},
+			utils.OptsResourcesUnits:  6,
+		},
+	}
+
+	expected := []string{"SQ_OneEv"}
+	var replyStats []string
+
+	if err := sqRPC.Call(context.Background(), utils.StatSv1ProcessEvent, args, &replyStats); err != nil {
+		t.Error(err)
+	} else if !slices.Equal(expected, replyStats) {
+		t.Errorf("Expected %v, Received %v", expected, replyStats)
+	}
+
+	expFloat := map[string]float64{
+		utils.MetaPDD: -1,
+		utils.MetaACD: -1,
+		utils.MetaDDC: -1,
+		utils.MetaTCD: -1,
+		utils.MetaTCC: -1,
+		utils.MetaASR: -1,
+		utils.MetaACC: -1,
+		utils.MetaDistinct + utils.HashtagSep + utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.AccountField:       -1,
+		utils.MetaAverage + utils.HashtagSep + utils.DynamicDataPrefix + utils.MetaOpts + utils.NestingSep + utils.OptsResourcesUnits: -1,
+		utils.MetaSum + utils.HashtagSep + utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + "RandomVal":                   -1,
+	}
+	expString := map[string]string{
+		utils.MetaPDD: utils.NotAvailable,
+		utils.MetaACD: utils.NotAvailable,
+		utils.MetaDDC: utils.NotAvailable,
+		utils.MetaTCD: utils.NotAvailable,
+		utils.MetaTCC: utils.NotAvailable,
+		utils.MetaASR: utils.NotAvailable,
+		utils.MetaACC: utils.NotAvailable,
+		utils.MetaDistinct + utils.HashtagSep + utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.AccountField:       utils.NotAvailable,
+		utils.MetaAverage + utils.HashtagSep + utils.DynamicDataPrefix + utils.MetaOpts + utils.NestingSep + utils.OptsResourcesUnits: utils.NotAvailable,
+		utils.MetaSum + utils.HashtagSep + utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + "RandomVal":                   utils.NotAvailable,
+	}
+
+	var replFlts map[string]float64
+	if err := sqRPC.Call(context.Background(), utils.StatSv1GetQueueFloatMetrics, &utils.TenantIDWithAPIOpts{
+		TenantID: &utils.TenantID{
+			Tenant: "cgrates.org",
+			ID:     "SQ_OneEv",
+		},
+	}, &replFlts); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(replFlts, expFloat) {
+		t.Errorf("Expected %v,Received %v", utils.ToJSON(expFloat), utils.ToJSON(replFlts))
+	}
+
+	var rplString map[string]string
+	if err := sqRPC.Call(context.Background(), utils.StatSv1GetQueueStringMetrics, &utils.TenantIDWithAPIOpts{
+		TenantID: &utils.TenantID{
+			Tenant: "cgrates.org",
+			ID:     "SQ_OneEv",
+		},
+	}, &rplString); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(rplString, expString) {
+		t.Errorf("Expected %v,Received %v", expString, rplString)
+	}
+
+	//processing second event to stats
+	args = &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "SQ_Event1",
+		Event: map[string]any{
+			utils.AccountField: "1002",
+			"RandomVal":        25,
+		},
+		APIOpts: map[string]any{
+			utils.MetaUsage:           13 * time.Second,
+			utils.MetaCost:            57.8,
+			utils.MetaDestination:     "332214",
+			utils.MetaPDD:             2 * time.Second,
+			utils.OptsStatsProfileIDs: []string{"SQ_OneEv"},
+			utils.OptsResourcesUnits:  7,
+		},
+	}
+
+	if err := sqRPC.Call(context.Background(), utils.StatSv1ProcessEvent, args, &replyStats); err != nil {
+		t.Error(err)
+	} else if !slices.Equal(expected, replyStats) {
+		t.Errorf("Expected %v, Received %v", expected, replyStats)
+	}
+
+	expFloat = map[string]float64{
+		utils.MetaACC: 79.95,
+		utils.MetaTCC: 159.9,
+		utils.MetaACD: 16500000000,
+		utils.MetaTCD: 33000000000,
+		utils.MetaASR: 50,
+		utils.MetaDDC: 1,
+		utils.MetaAverage + utils.HashtagSep + utils.DynamicDataPrefix + utils.MetaOpts + utils.NestingSep + utils.OptsResourcesUnits: 6.5,
+		utils.MetaSum + utils.HashtagSep + utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + "RandomVal":                   36,
+		utils.MetaPDD: 3500000000,
+		utils.MetaDistinct + utils.HashtagSep + utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.AccountField: 2,
+	}
+
+	expString = map[string]string{
+		utils.MetaACC: "79.95",
+		utils.MetaTCC: "159.9",
+		utils.MetaACD: "16.5s",
+		utils.MetaTCD: "33s",
+		utils.MetaASR: "50%",
+		utils.MetaDDC: "1",
+		utils.MetaAverage + utils.HashtagSep + utils.DynamicDataPrefix + utils.MetaOpts + utils.NestingSep + utils.OptsResourcesUnits: "6.5",
+		utils.MetaSum + utils.HashtagSep + utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + "RandomVal":                   "36",
+		utils.MetaPDD: "3.5s",
+		utils.MetaDistinct + utils.HashtagSep + utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.AccountField: "2",
+	}
+
+	if err := sqRPC.Call(context.Background(), utils.StatSv1GetQueueFloatMetrics, &utils.TenantIDWithAPIOpts{
+		TenantID: &utils.TenantID{
+			Tenant: "cgrates.org",
+			ID:     "SQ_OneEv",
+		},
+	}, &replFlts); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(replFlts, expFloat) {
+		t.Errorf("Expected %v,Received %v", utils.ToJSON(expFloat), utils.ToJSON(replFlts))
+	}
+
+	if err := sqRPC.Call(context.Background(), utils.StatSv1GetQueueStringMetrics, &utils.TenantIDWithAPIOpts{
+		TenantID: &utils.TenantID{
+			Tenant: "cgrates.org",
+			ID:     "SQ_OneEv",
+		},
+	}, &rplString); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(rplString, expString) {
+		t.Errorf("Expected %v,Received %v", expString, rplString)
+	}
+
+	var sQ *engine.StatQueue
+	if err := sqRPC.Call(context.Background(), utils.StatSv1GetStatQueue, &utils.TenantIDWithAPIOpts{
+		TenantID: &utils.TenantID{
+			Tenant: "cgrates.org",
+			ID:     "SQ_OneEv",
+		},
+	}, &sQ); err != nil {
+		t.Error(err)
+	} else if len(sQ.SQItems) != 0 {
+		t.Errorf("Expected to be stored 0 events on queue,got %v ", len(sQ.SQItems))
+	}
+
 }
 
 func testStatsStartServer(t *testing.T) {
