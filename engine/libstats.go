@@ -233,6 +233,11 @@ func (sq *StatQueue) TenantID() string {
 
 // ProcessEvent processes a utils.CGREvent, returns true if processed
 func (sq *StatQueue) ProcessEvent(ctx *context.Context, tnt, evID string, filterS *FilterS, evNm utils.MapStorage) (err error) {
+
+	//processing metrics without storing in the queue
+	if oneEv := sq.isOneEvent(); oneEv {
+		return sq.addStatOneEvent(ctx, tnt, filterS, evNm)
+	}
 	if _, err = sq.remExpired(); err != nil {
 		return
 	}
@@ -320,6 +325,40 @@ func (sq *StatQueue) addStatEvent(ctx *context.Context, tnt, evID string, filter
 			return
 		}
 		// every metric has a blocker, verify them
+		var blocker bool
+		if blocker, err = BlockerFromDynamics(ctx, metricCfg.Blockers, filterS, tnt, evNm); err != nil {
+			return
+		}
+		if blocker && idx != len(sq.sqPrfl.Metrics)-1 {
+			break
+		}
+	}
+	return
+}
+
+func (sq *StatQueue) isOneEvent() bool {
+	return sq.ttl != nil && *sq.ttl == -1
+}
+
+func (sq *StatQueue) addStatOneEvent(ctx *context.Context, tnt string, filterS *FilterS, evNm utils.MapStorage) (err error) {
+	var pass bool
+
+	dDP := newDynamicDP(ctx, config.CgrConfig().FilterSCfg().ResourceSConns, config.CgrConfig().FilterSCfg().StatSConns,
+		config.CgrConfig().FilterSCfg().AccountSConns, tnt, utils.MapStorage{utils.MetaReq: evNm[utils.MetaReq], utils.MetaOpts: evNm[utils.MetaOpts]})
+
+	for idx, metricCfg := range sq.sqPrfl.Metrics {
+		if pass, err = filterS.Pass(ctx, tnt, metricCfg.FilterIDs,
+			evNm); err != nil {
+			return
+		} else if !pass {
+			continue
+		}
+
+		if err = sq.SQMetrics[metricCfg.MetricID].AddOneEvent(dDP); err != nil {
+			utils.Logger.Warning(fmt.Sprintf("<StatQueue>: metric: %s, error: %s", metricCfg.MetricID, err.Error()))
+			return
+		}
+
 		var blocker bool
 		if blocker, err = BlockerFromDynamics(ctx, metricCfg.Blockers, filterS, tnt, evNm); err != nil {
 			return

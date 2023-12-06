@@ -62,6 +62,7 @@ func NewStatMetric(metricID string, minItems uint64, filterIDs []string) (sm Sta
 type StatMetric interface {
 	GetValue() *utils.Decimal
 	GetStringValue(rounding int) string
+	AddOneEvent(ev utils.DataProvider) error
 	AddEvent(evID string, ev utils.DataProvider) error
 	RemEvent(evID string) error
 	GetMinItems() (minIts uint64)
@@ -94,6 +95,24 @@ func (asr *StatASR) GetValue() (val *utils.Decimal) {
 		val = utils.MultiplyDecimal(val, utils.NewDecimal(100, 0))
 	}
 	return
+}
+
+func (asr *StatASR) AddOneEvent(ev utils.DataProvider) (err error) {
+	var (
+		answered int64
+		val      any
+	)
+	if val, err = ev.FieldAsInterface([]string{utils.MetaOpts, utils.MetaStartTime}); err != nil {
+		if err != utils.ErrNotFound {
+			return
+		}
+	} else if at, err := utils.IfaceAsTime(val, config.CgrConfig().GeneralCfg().DefaultTimezone); err != nil {
+		return err
+	} else if !at.IsZero() {
+		answered = 1
+	}
+
+	return asr.addOneEvent(answered)
 }
 
 // AddEvent is part of StatMetric interface
@@ -153,7 +172,7 @@ type StatACD struct {
 }
 
 func (acd *StatACD) GetStringValue(rounding int) string {
-	if len(acd.Events) == 0 || acd.Count < acd.MinItems {
+	if acd.Count == 0 || acd.Count < acd.MinItems {
 		return utils.NotAvailable
 	}
 	v, _ := acd.getAvgValue().Round(rounding).Duration()
@@ -175,6 +194,19 @@ func (acd *StatACD) AddEvent(evID string, ev utils.DataProvider) (err error) {
 	return acd.addEvent(evID, ival)
 }
 
+func (acd *StatACD) AddOneEvent(ev utils.DataProvider) (err error) {
+	ival, err := ev.FieldAsInterface([]string{utils.MetaOpts, utils.MetaUsage})
+	if err != nil {
+		if err == utils.ErrNotFound {
+			err = utils.ErrPrefix(err, utils.MetaUsage)
+		}
+		return err
+	}
+
+	return acd.addOneEvent(ival)
+
+}
+
 func (acd *StatACD) Clone() StatMetric {
 	return &StatACD{
 		Metric: acd.Metric.Clone(),
@@ -191,7 +223,7 @@ type StatTCD struct {
 }
 
 func (sum *StatTCD) GetStringValue(rounding int) string {
-	if len(sum.Events) == 0 || sum.Count < sum.MinItems {
+	if sum.Count == 0 || sum.Count < sum.MinItems {
 		return utils.NotAvailable
 	}
 	v, _ := sum.Value.Round(rounding).Duration()
@@ -207,6 +239,18 @@ func (sum *StatTCD) AddEvent(evID string, ev utils.DataProvider) (err error) {
 		return err
 	}
 	return sum.addEvent(evID, ival)
+}
+
+func (sum *StatTCD) AddOneEvent(ev utils.DataProvider) (err error) {
+	ival, err := ev.FieldAsInterface([]string{utils.MetaOpts, utils.MetaUsage})
+	if err != nil {
+		if err == utils.ErrNotFound {
+			err = utils.ErrPrefix(err, utils.MetaUsage)
+		}
+		return err
+	}
+	return sum.addOneEvent(ival)
+
 }
 
 func (sum *StatTCD) Clone() StatMetric {
@@ -250,6 +294,24 @@ func (acc *StatACC) AddEvent(evID string, ev utils.DataProvider) error {
 	return acc.addEvent(evID, val)
 }
 
+func (acc *StatACC) AddOneEvent(ev utils.DataProvider) error {
+	ival, err := ev.FieldAsInterface([]string{utils.MetaOpts, utils.MetaCost})
+	if err != nil {
+		if err == utils.ErrNotFound {
+			err = utils.ErrPrefix(err, utils.MetaCost)
+		}
+		return err
+	}
+	val, err := utils.IfaceAsBig(ival)
+	if err != nil {
+		return err
+	}
+	if val.Cmp(decimal.New(0, 0)) < 0 {
+		return utils.ErrPrefix(utils.ErrNegative, utils.MetaCost)
+	}
+	return acc.addOneEvent(val)
+}
+
 func (acc *StatACC) Clone() StatMetric {
 	return &StatACC{
 		Metric: acc.Metric.Clone(),
@@ -283,6 +345,24 @@ func (tcc *StatTCC) AddEvent(evID string, ev utils.DataProvider) error {
 	return tcc.addEvent(evID, val)
 }
 
+func (tcc *StatTCC) AddOneEvent(ev utils.DataProvider) error {
+	ival, err := ev.FieldAsInterface([]string{utils.MetaOpts, utils.MetaCost})
+	if err != nil {
+		if err == utils.ErrNotFound {
+			err = utils.ErrPrefix(err, utils.MetaCost)
+		}
+		return err
+	}
+	val, err := utils.IfaceAsBig(ival)
+	if err != nil {
+		return err
+	}
+	if val.Cmp(decimal.New(0, 0)) < 0 {
+		return utils.ErrPrefix(utils.ErrNegative, utils.MetaCost)
+	}
+	return tcc.addOneEvent(ival)
+}
+
 func (tcc *StatTCC) Clone() StatMetric {
 	return &StatTCC{
 		Metric: tcc.Metric.Clone(),
@@ -299,7 +379,7 @@ type StatPDD struct {
 }
 
 func (pdd *StatPDD) GetStringValue(rounding int) string {
-	if len(pdd.Events) == 0 || pdd.Count < pdd.MinItems {
+	if pdd.Count == 0 || pdd.Count < pdd.MinItems {
 		return utils.NotAvailable
 	}
 	v, _ := pdd.getAvgValue().Round(rounding).Duration()
@@ -321,6 +401,17 @@ func (pdd *StatPDD) AddEvent(evID string, ev utils.DataProvider) error {
 	return pdd.addEvent(evID, ival)
 }
 
+func (pdd *StatPDD) AddOneEvent(ev utils.DataProvider) error {
+	ival, err := ev.FieldAsInterface([]string{utils.MetaOpts, utils.MetaPDD})
+	if err != nil {
+		if err == utils.ErrNotFound {
+			err = utils.ErrPrefix(err, utils.MetaPDD)
+		}
+		return err
+	}
+	return pdd.addOneEvent(ival)
+}
+
 func (pdd *StatPDD) Clone() StatMetric {
 	return &StatPDD{
 		Metric: pdd.Metric.Clone(),
@@ -336,6 +427,7 @@ func NewDDC(minItems uint64, _ string, filterIDs []string) StatMetric {
 	}
 }
 
+// StatDDC count  values occurring in destination field
 type StatDDC struct {
 	FieldValues map[string]utils.StringSet   // map[fieldValue]map[eventID]
 	Events      map[string]map[string]uint64 // map[EventTenantID]map[fieldValue]compressfactor
@@ -387,6 +479,21 @@ func (ddc *StatDDC) AddEvent(evID string, ev utils.DataProvider) (err error) {
 		return
 	}
 	ddc.Events[evID][fieldValue] = ddc.Events[evID][fieldValue] + 1
+	return
+}
+
+func (ddc *StatDDC) AddOneEvent(ev utils.DataProvider) (err error) {
+	var fieldValue string
+	if fieldValue, err = ev.FieldAsString([]string{utils.MetaOpts, utils.MetaDestination}); err != nil {
+		if err == utils.ErrNotFound {
+			err = utils.ErrPrefix(err, utils.MetaDestination)
+		}
+		return
+	}
+	if _, has := ddc.FieldValues[fieldValue]; !has {
+		ddc.FieldValues[fieldValue] = make(utils.StringSet)
+	}
+	ddc.Count++
 	return
 }
 
@@ -498,21 +605,21 @@ type Metric struct {
 func (sum *Metric) GetFilterIDs() []string { return sum.FilterIDs }
 
 func (sum *Metric) getTotalValue() *utils.Decimal {
-	if len(sum.Events) == 0 || sum.Count < sum.MinItems {
+	if sum.Count == 0 || sum.Count < sum.MinItems {
 		return utils.DecimalNaN
 	}
 	return sum.Value
 }
 
 func (sum *Metric) getAvgValue() *utils.Decimal {
-	if len(sum.Events) == 0 || sum.Count < sum.MinItems {
+	if sum.Count == 0 || sum.Count < sum.MinItems {
 		return utils.DecimalNaN
 	}
 	return utils.DivideDecimal(sum.Value, utils.NewDecimal(int64(sum.Count), 0))
 }
 
 func (sum *Metric) getAvgStringValue(rounding int) string {
-	if len(sum.Events) == 0 || sum.Count < sum.MinItems {
+	if sum.Count == 0 || sum.Count < sum.MinItems {
 		return utils.NotAvailable
 	}
 	v, _ := utils.DivideDecimal(sum.Value, utils.NewDecimal(int64(sum.Count), 0)).Round(rounding).Float64()
@@ -520,7 +627,7 @@ func (sum *Metric) getAvgStringValue(rounding int) string {
 }
 
 func (sum *Metric) GetStringValue(rounding int) string {
-	if len(sum.Events) == 0 || sum.Count < sum.MinItems {
+	if sum.Count == 0 || sum.Count < sum.MinItems {
 		return utils.NotAvailable
 	}
 	v, _ := sum.Value.Round(rounding).Float64()
@@ -552,6 +659,19 @@ func (sum *Metric) addEvent(evID string, ival any) (err error) {
 	return
 }
 
+// Adding aggregated metrics without events
+func (sum *Metric) addOneEvent(ival any) (err error) {
+	var val *decimal.Big
+	if val, err = utils.IfaceAsBig(ival); err != nil {
+		return
+	}
+	dVal := &utils.Decimal{Big: val}
+	sum.Value = utils.SumDecimal(sum.Value, dVal)
+	sum.Count++
+	return
+}
+
+// Deleting a specific event and updating metrics
 func (sum *Metric) RemEvent(evID string) (err error) {
 	val, has := sum.Events[evID]
 	if !has {
@@ -610,7 +730,7 @@ func (sum *Metric) Clone() (cln *Metric) {
 		FilterIDs: slices.Clone(sum.FilterIDs),
 	}
 	for k, v := range sum.Events {
-		cln.Events[k] = &(*v)
+		cln.Events[k] = v
 	}
 	return
 }
@@ -653,6 +773,17 @@ func (sum *StatSum) AddEvent(evID string, ev utils.DataProvider) error {
 	}
 	return sum.addEvent(evID, ival)
 }
+func (sum *StatSum) AddOneEvent(ev utils.DataProvider) error {
+	ival, err := utils.DPDynamicInterface(sum.FieldName, ev)
+	if err != nil {
+		if err == utils.ErrNotFound {
+			err = utils.ErrPrefix(err, sum.FieldName)
+		}
+		return err
+	}
+
+	return sum.addOneEvent(ival)
+}
 
 func (sum *StatSum) Clone() StatMetric {
 	return &StatSum{
@@ -691,6 +822,17 @@ func (avg *StatAverage) AddEvent(evID string, ev utils.DataProvider) error {
 	return avg.addEvent(evID, ival)
 }
 
+func (avg *StatAverage) AddOneEvent(ev utils.DataProvider) error {
+	ival, err := utils.DPDynamicInterface(avg.FieldName, ev)
+	if err != nil {
+		if err == utils.ErrNotFound {
+			err = utils.ErrPrefix(err, avg.FieldName)
+		}
+		return err
+	}
+	return avg.addOneEvent(ival)
+}
+
 func (avg *StatAverage) Clone() StatMetric {
 	return &StatAverage{
 		Metric:    avg.Metric.Clone(),
@@ -698,6 +840,7 @@ func (avg *StatAverage) Clone() StatMetric {
 	}
 }
 
+// StatDistinct counts the different values occurring  in a specific event field
 func NewStatDistinct(minItems uint64, fieldName string, filterIDs []string) StatMetric {
 	return &StatDistinct{
 		Events:      make(map[string]map[string]uint64),
@@ -739,7 +882,7 @@ func (dst *StatDistinct) AddEvent(evID string, ev utils.DataProvider) (err error
 	var fieldValue string
 	// simply remove the ~*req./~*opts. prefix and do normal process
 	if !strings.HasPrefix(dst.FieldName, utils.DynamicDataPrefix+utils.MetaReq+utils.NestingSep) && !strings.HasPrefix(dst.FieldName, utils.DynamicDataPrefix+utils.MetaOpts+utils.NestingSep) {
-		return fmt.Errorf("Invalid format for field <%s>", dst.FieldName)
+		return fmt.Errorf("invalid format for field <%s>", dst.FieldName)
 	}
 
 	if fieldValue, err = utils.DPDynamicString(dst.FieldName, ev); err != nil {
@@ -765,6 +908,27 @@ func (dst *StatDistinct) AddEvent(evID string, ev utils.DataProvider) (err error
 		return
 	}
 	dst.Events[evID][fieldValue] = dst.Events[evID][fieldValue] + 1
+	return
+}
+
+func (dst *StatDistinct) AddOneEvent(ev utils.DataProvider) (err error) {
+	var fieldValue string
+	// simply remove the ~*req./~*opts. prefix and do normal process
+	if !strings.HasPrefix(dst.FieldName, utils.DynamicDataPrefix+utils.MetaReq+utils.NestingSep) && !strings.HasPrefix(dst.FieldName, utils.DynamicDataPrefix+utils.MetaOpts+utils.NestingSep) {
+		return fmt.Errorf("invalid format for field <%s>", dst.FieldName)
+	}
+	if fieldValue, err = utils.DPDynamicString(dst.FieldName, ev); err != nil {
+		if err == utils.ErrNotFound {
+			err = utils.ErrPrefix(err, dst.FieldName)
+		}
+		return
+	}
+	// add to fieldValues
+	if _, has := dst.FieldValues[fieldValue]; !has {
+		dst.FieldValues[fieldValue] = make(utils.StringSet)
+	}
+
+	dst.Count++
 	return
 }
 

@@ -3242,8 +3242,8 @@ func TestStatMetricsStatDistinctAddEventErr(t *testing.T) {
 		Count:     3,
 	}
 	err := dst.AddEvent("Event1", utils.MapStorage{utils.MetaOpts: ev.APIOpts})
-	if err == nil || err.Error() != "Invalid format for field <Test_Field_Name>" {
-		t.Errorf("\nExpecting <Invalid format for field <Test_Field_Name>>,\n Recevied <%+v>", err)
+	if err == nil || err.Error() != "invalid format for field <Test_Field_Name>" {
+		t.Errorf("\nExpecting <invalid format for field <Test_Field_Name>>,\n Recevied <%+v>", err)
 	}
 }
 
