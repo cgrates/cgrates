@@ -158,7 +158,7 @@ func NewMongoStorage(host, port, db, user, pass, mrshlerStr string, storageType 
 		storageType: storageType,
 		counter:     utils.NewCounter(time.Now().UnixNano(), 0),
 	}
-	uri := composeURI("mongodb", host, port, db, user, pass)
+	uri := composeMongoURI("mongodb", host, port, db, user, pass)
 	reg := bson.NewRegistry()
 	decimalType := reflect.TypeOf(utils.Decimal{})
 	reg.RegisterTypeEncoder(decimalType, bsoncodec.ValueEncoderFunc(decimalEncoder))
