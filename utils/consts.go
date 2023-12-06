@@ -2109,7 +2109,7 @@ const (
 	MaxComputedUsageCfg        = "max_computed_usage"
 	BalanceRatingSubjectCfg    = "balance_rating_subject"
 	MaxIncrementsCfg           = "max_increments"
-	MaxRecursionDepthCfg       = "max_recursion_depth"
+	FallbackDepthCfg           = "fallback_depth"
 )
 
 // SchedulerCfg

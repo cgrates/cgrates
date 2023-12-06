@@ -270,7 +270,7 @@ func (cd *CallDescriptor) LoadRatingPlans() (err error) {
 // FIXME: this method is not exhaustive but will cover 99% of cases just good
 // it will not cover very long calls with very short activation periods for rates
 func (cd *CallDescriptor) getRatingPlansForPrefix(key string, recursionDepth int) (int, error) {
-	if recursionDepth > config.CgrConfig().RalsCfg().MaxRecursionDepth {
+	if recursionDepth > config.CgrConfig().RalsCfg().FallbackDepth {
 		return recursionDepth, utils.ErrMaxRecursionDepth
 	}
 	rpf, err := RatingProfileSubjectPrefixMatching(key)

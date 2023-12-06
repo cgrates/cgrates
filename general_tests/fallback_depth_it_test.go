@@ -33,7 +33,7 @@ import (
 )
 
 /*
-TestRecursionDepth tests max_recursion_depth configuration.
+TestFallbackDepth tests fallback_depth configuration.
 
 Previously, the max depth was always 3. The test ensures that the functionality works properly when
 the depth exceeds the previous hard-coded value.
@@ -55,15 +55,15 @@ The test steps are as follows:
 	- third fallback subject will have a rating plan defined for destination 1002
 	- fourth fallback subject will have a rating plan defined for any destination
 
-3. Configure max_recursion_depth to be 4.
+3. Configure fallback_depth to be 4.
 4. Process a CDR where the destination is 1002. This is expected to return CostDetails mentioning that
    FallbackSubject3 was taken into consideration during rating.
 5. Process CDR where the destination is 1003. This is expected to encounter an error log saying that the
-   destination is not authorized. For it to reach the fourth fallback subject, a recursion depth of 5 would
+   destination is not authorized. For it to reach the fourth fallback subject, a fallback depth of 5 would
    be required.
 */
 
-func TestRecursionDepth(t *testing.T) {
+func TestFallbackDepth(t *testing.T) {
 	switch *dbType {
 	case utils.MetaInternal:
 	case utils.MetaMySQL, utils.MetaMongo, utils.MetaPostgres:
@@ -88,7 +88,7 @@ func TestRecursionDepth(t *testing.T) {
 
 "rals": {
 	"enabled": true,
-	"max_recursion_depth": 4
+	"fallback_depth": 4
 },
 
 "cdrs": {
@@ -133,7 +133,7 @@ cgrates.org,call,FallbackSubject4,2014-01-01T00:00:00Z,RP_ANY,`,
 
 	buf := &bytes.Buffer{}
 	testEnv := TestEnvironment{
-		Name: "TestRecursionDepth",
+		Name: "TestFallbackDepth",
 		// Encoding:   *encoding,
 		ConfigJSON: content,
 		TpFiles:    tpFiles,
