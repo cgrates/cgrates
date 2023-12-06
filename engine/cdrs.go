@@ -311,6 +311,35 @@ func (cdrS *CDRServer) processEvents(ctx *context.Context, evs []*utils.CGREvent
 	}
 
 	for _, cgrEv := range cgrEvs {
+		store, err := GetBoolOpts(ctx, cgrEv.Tenant, cgrEv.AsDataProvider(), cdrS.fltrS, cdrS.cfg.CdrsCfg().Opts.Store,
+			config.CDRsStoreDftOpt, utils.MetaStore)
+		if err != nil {
+			return nil, fmt.Errorf("retrieving %s option failed: %w", utils.MetaStore, err)
+		}
+		if !store {
+			continue
+		}
+		rerate, err := GetBoolOpts(ctx, cgrEv.Tenant, cgrEv.AsDataProvider(), cdrS.fltrS, cdrS.cfg.CdrsCfg().Opts.Rerate,
+			config.CDRsRerateDftOpt, utils.MetaRerate)
+		if err != nil {
+			return nil, fmt.Errorf("retrieving %s option failed: %w", utils.MetaRerate, err)
+		}
+		if err := cdrS.db.SetCDR(cgrEv, false); err != nil {
+			if err != utils.ErrExists || !rerate {
+
+				// ToDo: add refund logic
+				return nil, fmt.Errorf("storing CDR %s failed: %w", utils.ToJSON(cgrEv), err)
+			}
+			if err = cdrS.db.SetCDR(cgrEv, true); err != nil {
+				utils.Logger.Warning(
+					fmt.Sprintf("<%s> error: <%s> updating CDR %+v",
+						utils.CDRs, err.Error(), utils.ToJSON(cgrEv)))
+				return nil, utils.ErrPartiallyExecuted
+			}
+		}
+	}
+
+	for _, cgrEv := range cgrEvs {
 		export, err := GetBoolOpts(ctx, cgrEv.Tenant, cgrEv.AsDataProvider(), cdrS.fltrS, cdrS.cfg.CdrsCfg().Opts.Export,
 			config.CDRsExportDftOpt, utils.OptsCDRsExport)
 		if err != nil {

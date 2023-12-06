@@ -309,7 +309,6 @@ const CGRATES_CFG_JSON = `
 "cdrs": {									// CDRs config
 	"enabled": false,						// start the CDR Server:  <true|false>
 	"extra_fields": [],						// extra fields to store in CDRs for non-generic CDRs (ie: FreeSWITCH JSON)
-	"store_cdrs": true, 					// store cdrs in StorDB
 	"session_cost_retries": 5,				// number of queries to session_costs before recalculating CDR
 	"chargers_conns": [],					// connection to ChargerS for CDR forking, empty to disable billing for CDRs: <""|*internal|$rpc_conns_id>
 	"attributes_conns": [],					// connection to AttributeS for altering *raw CDRs, empty to disable attributes functionality: <""|*internal|$rpc_conns_id>
@@ -368,6 +367,20 @@ const CGRATES_CFG_JSON = `
 		// 		"Tenant": "*any",
 		// 		"FilterIDs": [],
 		// 		"Value": false,
+		// 	},
+		// ],
+		// "*rerate": [					
+		// 	{
+		// 		"Tenant": "*any",
+		// 		"FilterIDs": [],
+		// 		"Value": false,
+		// 	},
+		// ],
+		// "*store": [					
+		// 	{
+		// 		"Tenant": "*any",
+		// 		"FilterIDs": [],
+		// 		"Value": true,
 		// 	},
 		// ],
 	},

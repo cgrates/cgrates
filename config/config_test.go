@@ -315,7 +315,6 @@ func TestCgrCfgJSONDefaultsCDRS(t *testing.T) {
 	eCdrsCfg := &CdrsCfg{
 		Enabled:         false,
 		SMCostRetries:   5,
-		StoreCdrs:       true,
 		ChargerSConns:   []string{},
 		AttributeSConns: []string{},
 		ThresholdSConns: []string{},
@@ -333,6 +332,8 @@ func TestCgrCfgJSONDefaultsCDRS(t *testing.T) {
 			Rates:      []*utils.DynamicBoolOpt{},
 			Stats:      []*utils.DynamicBoolOpt{},
 			Thresholds: []*utils.DynamicBoolOpt{},
+			Rerate:     []*utils.DynamicBoolOpt{},
+			Store:      []*utils.DynamicBoolOpt{},
 		},
 	}
 	if !reflect.DeepEqual(eCdrsCfg, cgrCfg.cdrsCfg) {
@@ -3967,7 +3968,6 @@ func TestV1GetConfigCdrs(t *testing.T) {
 		CDRsJSON: map[string]any{
 			utils.EnabledCfg:          false,
 			utils.ExtraFieldsCfg:      []string{},
-			utils.StoreCdrsCfg:        true,
 			utils.SessionCostRetires:  5,
 			utils.ChargerSConnsCfg:    []string{},
 			utils.AttributeSConnsCfg:  []string{},
@@ -3986,6 +3986,8 @@ func TestV1GetConfigCdrs(t *testing.T) {
 				utils.MetaRates:      []*utils.DynamicBoolOpt{},
 				utils.MetaStats:      []*utils.DynamicBoolOpt{},
 				utils.MetaThresholds: []*utils.DynamicBoolOpt{},
+				utils.MetaRerate:     []*utils.DynamicBoolOpt{},
+				utils.MetaStore:      []*utils.DynamicBoolOpt{},
 			},
 		},
 	}
@@ -5084,7 +5086,7 @@ func TestV1GetConfigAsJSONFilterS(t *testing.T) {
 
 func TestV1GetConfigAsJSONCdrs(t *testing.T) {
 	var reply string
-	expected := `{"cdrs":{"accounts_conns":[],"actions_conns":[],"attributes_conns":[],"chargers_conns":[],"ees_conns":[],"enabled":false,"extra_fields":[],"online_cdr_exports":null,"opts":{"*accounts":[],"*attributes":[],"*chargers":[],"*ees":[],"*rates":[],"*stats":[],"*thresholds":[]},"rates_conns":[],"session_cost_retries":5,"stats_conns":[],"store_cdrs":true,"thresholds_conns":[]}}`
+	expected := `{"cdrs":{"accounts_conns":[],"actions_conns":[],"attributes_conns":[],"chargers_conns":[],"ees_conns":[],"enabled":false,"extra_fields":[],"online_cdr_exports":null,"opts":{"*accounts":[],"*attributes":[],"*chargers":[],"*ees":[],"*rates":[],"*rerate":[],"*stats":[],"*store":[],"*thresholds":[]},"rates_conns":[],"session_cost_retries":5,"stats_conns":[],"thresholds_conns":[]}}`
 	cfgCgr := NewDefaultCGRConfig()
 	if err := cfgCgr.V1GetConfigAsJSON(context.Background(), &SectionWithAPIOpts{Sections: []string{CDRsJSON}}, &reply); err != nil {
 		t.Error(err)

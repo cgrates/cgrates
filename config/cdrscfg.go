@@ -33,6 +33,8 @@ const (
 	CDRsRatesDftOpt      = false
 	CDRsStatsDftOpt      = false
 	CDRsThresholdsDftOpt = false
+	CDRsRerateDftOpt     = false
+	CDRsStoreDftOpt      = true
 )
 
 type CdrsOpts struct {
@@ -43,13 +45,14 @@ type CdrsOpts struct {
 	Rates      []*utils.DynamicBoolOpt
 	Stats      []*utils.DynamicBoolOpt
 	Thresholds []*utils.DynamicBoolOpt
+	Rerate     []*utils.DynamicBoolOpt
+	Store      []*utils.DynamicBoolOpt
 }
 
 // CdrsCfg is the CDR server
 type CdrsCfg struct {
 	Enabled          bool       // Enable CDR Server service
 	ExtraFields      RSRParsers // Extra fields to store in CDRs
-	StoreCdrs        bool       // store cdrs in storDb
 	SMCostRetries    int
 	ChargerSConns    []string
 	AttributeSConns  []string
@@ -97,6 +100,12 @@ func (cdrsOpts *CdrsOpts) loadFromJSONCfg(jsnCfg *CdrsOptsJson) {
 	if jsnCfg.Thresholds != nil {
 		cdrsOpts.Thresholds = append(cdrsOpts.Thresholds, jsnCfg.Thresholds...)
 	}
+	if jsnCfg.Store != nil {
+		cdrsOpts.Store = append(cdrsOpts.Store, jsnCfg.Store...)
+	}
+	if jsnCfg.Rerate != nil {
+		cdrsOpts.Rerate = append(cdrsOpts.Rerate, jsnCfg.Rerate...)
+	}
 }
 
 // loadFromJSONCfg loads Cdrs config from JsonCfg
@@ -111,9 +120,6 @@ func (cdrscfg *CdrsCfg) loadFromJSONCfg(jsnCdrsCfg *CdrsJsonCfg) (err error) {
 		if cdrscfg.ExtraFields, err = NewRSRParsersFromSlice(*jsnCdrsCfg.Extra_fields); err != nil {
 			return
 		}
-	}
-	if jsnCdrsCfg.Store_cdrs != nil {
-		cdrscfg.StoreCdrs = *jsnCdrsCfg.Store_cdrs
 	}
 	if jsnCdrsCfg.Session_cost_retries != nil {
 		cdrscfg.SMCostRetries = *jsnCdrsCfg.Session_cost_retries
@@ -161,11 +167,12 @@ func (cdrscfg CdrsCfg) AsMapInterface(string) any {
 		utils.MetaRates:      cdrscfg.Opts.Rates,
 		utils.MetaStats:      cdrscfg.Opts.Stats,
 		utils.MetaThresholds: cdrscfg.Opts.Thresholds,
+		utils.MetaRerate:     cdrscfg.Opts.Rerate,
+		utils.MetaStore:      cdrscfg.Opts.Store,
 	}
 	mp := map[string]any{
 		utils.EnabledCfg:          cdrscfg.Enabled,
 		utils.SMCostRetriesCfg:    cdrscfg.SMCostRetries,
-		utils.StoreCdrsCfg:        cdrscfg.StoreCdrs,
 		utils.ExtraFieldsCfg:      cdrscfg.ExtraFields.AsStringSlice(),
 		utils.OnlineCDRExportsCfg: slices.Clone(cdrscfg.OnlineCDRExports),
 		utils.OptsCfg:             opts,
@@ -230,6 +237,14 @@ func (cdrsOpts *CdrsOpts) Clone() *CdrsOpts {
 	if cdrsOpts.Thresholds != nil {
 		thdS = utils.CloneDynamicBoolOpt(cdrsOpts.Thresholds)
 	}
+	var rerate []*utils.DynamicBoolOpt
+	if cdrsOpts.Rerate != nil {
+		rerate = utils.CloneDynamicBoolOpt(cdrsOpts.Rerate)
+	}
+	var store []*utils.DynamicBoolOpt
+	if cdrsOpts.Store != nil {
+		store = utils.CloneDynamicBoolOpt(cdrsOpts.Store)
+	}
 	return &CdrsOpts{
 		Accounts:   accS,
 		Attributes: attrS,
@@ -238,6 +253,8 @@ func (cdrsOpts *CdrsOpts) Clone() *CdrsOpts {
 		Rates:      rtS,
 		Stats:      stS,
 		Thresholds: thdS,
+		Rerate:     rerate,
+		Store:      store,
 	}
 }
 
@@ -246,7 +263,6 @@ func (cdrscfg CdrsCfg) Clone() (cln *CdrsCfg) {
 	cln = &CdrsCfg{
 		Enabled:       cdrscfg.Enabled,
 		ExtraFields:   cdrscfg.ExtraFields.Clone(),
-		StoreCdrs:     cdrscfg.StoreCdrs,
 		SMCostRetries: cdrscfg.SMCostRetries,
 		Opts:          cdrscfg.Opts.Clone(),
 	}
@@ -289,13 +305,14 @@ type CdrsOptsJson struct {
 	Rates      []*utils.DynamicBoolOpt `json:"*rates"`
 	Stats      []*utils.DynamicBoolOpt `json:"*stats"`
 	Thresholds []*utils.DynamicBoolOpt `json:"*thresholds"`
+	Rerate     []*utils.DynamicBoolOpt `json:"*rerate"`
+	Store      []*utils.DynamicBoolOpt `json:"*store"`
 }
 
 // Cdrs config section
 type CdrsJsonCfg struct {
 	Enabled              *bool
 	Extra_fields         *[]string
-	Store_cdrs           *bool
 	Session_cost_retries *int
 	Chargers_conns       *[]string
 	Attributes_conns     *[]string
@@ -334,6 +351,12 @@ func diffCdrsOptsJsonCfg(d *CdrsOptsJson, v1, v2 *CdrsOpts) *CdrsOptsJson {
 	if !utils.DynamicBoolOptEqual(v1.Thresholds, v2.Thresholds) {
 		d.Thresholds = v2.Thresholds
 	}
+	if !utils.DynamicBoolOptEqual(v1.Rerate, v2.Rerate) {
+		d.Rerate = v2.Rerate
+	}
+	if !utils.DynamicBoolOptEqual(v1.Store, v2.Store) {
+		d.Store = v2.Store
+	}
 	return d
 }
 
@@ -348,9 +371,6 @@ func diffCdrsJsonCfg(d *CdrsJsonCfg, v1, v2 *CdrsCfg) *CdrsJsonCfg {
 	extra2 := v2.ExtraFields.AsStringSlice()
 	if !slices.Equal(extra1, extra2) {
 		d.Extra_fields = &extra2
-	}
-	if v1.StoreCdrs != v2.StoreCdrs {
-		d.Store_cdrs = utils.BoolPointer(v2.StoreCdrs)
 	}
 	if v1.SMCostRetries != v2.SMCostRetries {
 		d.Session_cost_retries = utils.IntPointer(v2.SMCostRetries)
