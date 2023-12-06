@@ -310,6 +310,24 @@ func (cdrS *CDRServer) processEvents(ctx *context.Context, evs []*utils.CGREvent
 		}
 	}
 
+	if cdrS.cfg.CdrsCfg().StoreCdrs {
+		for _, cgrEv := range cgrEvs {
+			if err := cdrS.db.SetCDR(cgrEv, false); err != nil {
+				if err != utils.ErrExists { // consider the rerate option as well when support for it will be added
+
+					// ToDo: add refund logic
+					return nil, err
+				}
+				if err := cdrS.db.SetCDR(cgrEv, true); err != nil {
+					utils.Logger.Warning(
+						fmt.Sprintf("<%s> error: <%s> updating CDR %+v",
+							utils.CDRs, err.Error(), utils.ToJSON(cgrEv)))
+					return nil, utils.ErrPartiallyExecuted
+				}
+			}
+		}
+	}
+
 	for _, cgrEv := range cgrEvs {
 		export, err := GetBoolOpts(ctx, cgrEv.Tenant, cgrEv.AsDataProvider(), cdrS.fltrS, cdrS.cfg.CdrsCfg().Opts.Export,
 			config.CDRsExportDftOpt, utils.OptsCDRsExport)
