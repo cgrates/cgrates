@@ -748,8 +748,8 @@ func TestDfRalsJsonCfg(t *testing.T) {
 			utils.MetaSMS:   "10000",
 			utils.MetaMMS:   "10000",
 		},
-		Max_increments:      utils.IntPointer(1000000),
-		Max_recursion_depth: utils.IntPointer(3),
+		Max_increments: utils.IntPointer(1000000),
+		Fallback_depth: utils.IntPointer(3),
 		Balance_rating_subject: &map[string]string{
 			utils.MetaAny:   "*zero1ns",
 			utils.MetaVoice: "*zero1s",
