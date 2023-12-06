@@ -52,7 +52,6 @@ func TestCdrsCfgloadFromJsonCfg(t *testing.T) {
 		RateSConns:       []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRates), "*conn1"},
 		AccountSConns:    []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts), "*conn1"},
 		ExtraFields:      RSRParsers{},
-		StoreCdrs:        true,
 		Opts: &CdrsOpts{
 			Accounts:   []*utils.DynamicBoolOpt{},
 			Attributes: []*utils.DynamicBoolOpt{},
@@ -61,6 +60,8 @@ func TestCdrsCfgloadFromJsonCfg(t *testing.T) {
 			Rates:      []*utils.DynamicBoolOpt{},
 			Stats:      []*utils.DynamicBoolOpt{},
 			Thresholds: []*utils.DynamicBoolOpt{},
+			Rerate:     []*utils.DynamicBoolOpt{},
+			Store:      []*utils.DynamicBoolOpt{},
 		},
 	}
 	jsnCfg := NewDefaultCGRConfig()
@@ -175,7 +176,6 @@ func TestCdrsCfgAsMapInterface(t *testing.T) {
 	"cdrs": {
 		"enabled": true,						
 		"extra_fields": ["~*req.PayPalAccount", "~*req.LCRProfile", "~*req.ResourceID"],
-		"store_cdrs": false,	
 		"session_cost_retries": 5,				
 		"chargers_conns":["*internal:*chargers","*conn1"],			
 		"attributes_conns": ["*internal:*attributes","*conn1"],					
@@ -201,7 +201,6 @@ func TestCdrsCfgAsMapInterface(t *testing.T) {
 		utils.EEsConnsCfg:         []string{utils.MetaInternal, "*conn1"},
 		utils.RateSConnsCfg:       []string{utils.MetaInternal, "*conn1"},
 		utils.AccountSConnsCfg:    []string{utils.MetaInternal, "*conn1"},
-		utils.StoreCdrsCfg:        false,
 		utils.OptsCfg: map[string]any{
 			utils.MetaAccounts:   []*utils.DynamicBoolOpt{},
 			utils.MetaAttributes: []*utils.DynamicBoolOpt{},
@@ -210,6 +209,8 @@ func TestCdrsCfgAsMapInterface(t *testing.T) {
 			utils.MetaRates:      []*utils.DynamicBoolOpt{},
 			utils.MetaStats:      []*utils.DynamicBoolOpt{},
 			utils.MetaThresholds: []*utils.DynamicBoolOpt{},
+			utils.MetaRerate:     []*utils.DynamicBoolOpt{},
+			utils.MetaStore:      []*utils.DynamicBoolOpt{},
 		},
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
@@ -223,7 +224,6 @@ func TestCdrsCfgAsMapInterface2(t *testing.T) {
 	cfgJSONStr := `{
        "cdrs": {
           "enabled":true,
-		  "store_cdrs": false,
           "chargers_conns": ["conn1", "conn2"],
           "attributes_conns": ["*internal"],
           "ees_conns": ["conn1"],
@@ -232,7 +232,6 @@ func TestCdrsCfgAsMapInterface2(t *testing.T) {
 	eMap := map[string]any{
 		utils.EnabledCfg:          true,
 		utils.ExtraFieldsCfg:      []string{},
-		utils.StoreCdrsCfg:        false,
 		utils.SessionCostRetires:  5,
 		utils.ChargerSConnsCfg:    []string{"conn1", "conn2"},
 		utils.AttributeSConnsCfg:  []string{"*internal"},
@@ -251,6 +250,8 @@ func TestCdrsCfgAsMapInterface2(t *testing.T) {
 			utils.MetaRates:      []*utils.DynamicBoolOpt{},
 			utils.MetaStats:      []*utils.DynamicBoolOpt{},
 			utils.MetaThresholds: []*utils.DynamicBoolOpt{},
+			utils.MetaRerate:     []*utils.DynamicBoolOpt{},
+			utils.MetaStore:      []*utils.DynamicBoolOpt{},
 		},
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
@@ -558,16 +559,16 @@ func TestCdrsCfgdiffCdrsJsonCfg(t *testing.T) {
 	bl := true
 	d := &CdrsJsonCfg{}
 	v2 := &CdrsCfg{
-		StoreCdrs: true,
-		Opts:      co,
+		Enabled: true,
+		Opts:    co,
 	}
 	v1 := &CdrsCfg{
-		StoreCdrs: false,
-		Opts:      co,
+		Enabled: false,
+		Opts:    co,
 	}
 	exp := &CdrsJsonCfg{
-		Store_cdrs: &bl,
-		Opts:       coj,
+		Enabled: &bl,
+		Opts:    coj,
 	}
 	rcv := diffCdrsJsonCfg(d, v1, v2)
 

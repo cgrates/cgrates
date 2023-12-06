@@ -1082,7 +1082,7 @@ func TestCDRProcessRatesCostForEvent(t *testing.T) {
 	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(data, cfg.CacheCfg(), connMgr)
 	filters := engine.NewFilterS(cfg, connMgr, dm)
-	var storDB engine.StorDB
+	storDB := engine.NewInternalDB(nil, nil, nil)
 	storDBChan := make(chan engine.StorDB, 1)
 	storDBChan <- storDB
 	cdrs := engine.NewCDRServer(cfg, dm, filters, connMgr, storDBChan)
