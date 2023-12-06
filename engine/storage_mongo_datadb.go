@@ -111,7 +111,7 @@ func NewMongoStorage(host, port, db, user, pass, mrshlerStr string, cdrsIndexes 
 		isDataDB:    isDataDB,
 		counter:     utils.NewCounter(time.Now().UnixNano(), 0),
 	}
-	uri := composeURI("mongodb", host, port, db, user, pass)
+	uri := composeMongoURI("mongodb", host, port, db, user, pass)
 	mongoStorage.ctxTTL = config.CgrConfig().DataDbCfg().QueryTimeout
 	if !isDataDB {
 		mongoStorage.ctxTTL = config.CgrConfig().StorDbCfg().QueryTimeout

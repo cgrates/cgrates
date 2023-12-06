@@ -78,7 +78,16 @@ func NewStorDBConn(dbType, host, port, name, user, pass, marshaler, sslmode stri
 	return
 }
 
-func composeURI(scheme, host, port, db, user, pass string) string {
+// composeMongoURI constructs a MongoDB URI from the given parameters:
+//   - scheme: only "mongodb" for now.
+//   - host: MongoDB server host (e.g., "localhost").
+//   - port: MongoDB server port, excluded if "0".
+//   - db: Database name, may include additional parameters (e.g., "db?retryWrites=true").
+//   - user: Username for auth, omitted if empty.
+//   - pass: Password for auth, only if username is set.
+//
+// TODO: Should probably remove scheme parameter, as only "mongodb" is supported.
+func composeMongoURI(scheme, host, port, db, user, pass string) string {
 	uri := scheme + "://"
 	if user != "" && pass != "" {
 		uri += user + ":" + pass + "@"
