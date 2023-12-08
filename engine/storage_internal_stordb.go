@@ -28,10 +28,9 @@ import (
 )
 
 // SetCDR for ManagerDB interface. SetCDR will set a single CDR in internal based on the CGREvent
-func (iDB *InternalDB) SetCDR(_ *context.Context, cgrEv *utils.CGREvent, allowUpdate bool) error {
-	uniqueID := utils.IfaceAsString(cgrEv.APIOpts[utils.MetaCDRID])
+func (iDB *InternalDB) SetCDR(_ *context.Context, cdrID string, cgrEv *utils.CGREvent, allowUpdate bool) error {
 	if !allowUpdate {
-		if _, has := iDB.db.Get(utils.MetaCDRs, uniqueID); has {
+		if _, has := iDB.db.Get(utils.MetaCDRs, cdrID); has {
 			return utils.ErrExists
 		}
 	}
@@ -63,7 +62,7 @@ func (iDB *InternalDB) SetCDR(_ *context.Context, cgrEv *utils.CGREvent, allowUp
 	}
 	iDB.indexedFieldsMutex.RUnlock()
 
-	iDB.db.Set(utils.MetaCDRs, uniqueID, cgrEv, idx.AsSlice(), true, utils.NonTransactional)
+	iDB.db.Set(utils.MetaCDRs, cdrID, cgrEv, idx.AsSlice(), true, utils.NonTransactional)
 	return nil
 }
 

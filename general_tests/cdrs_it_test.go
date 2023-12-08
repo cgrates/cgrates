@@ -168,6 +168,7 @@ func testCDRsProcessCDR(t *testing.T) {
 			"fieldextr2":       "valextr2",
 		},
 		APIOpts: map[string]any{
+			utils.MetaOriginID:   "abcdef1",
 			utils.MetaAttributes: true,
 			utils.MetaChargers:   true,
 			utils.MetaRates:      true,
@@ -220,6 +221,7 @@ func testCDRsProcessCDR2(t *testing.T) {
 			"fieldextr2":       "valextr2",
 		},
 		APIOpts: map[string]any{
+			utils.MetaOriginID:   "abcdef2",
 			utils.MetaAttributes: false,
 			utils.MetaChargers:   true,
 			utils.MetaRates:      true,
@@ -273,6 +275,7 @@ func testCDRsProcessCDR3(t *testing.T) {
 			"fieldextr2":       "valextr2",
 		},
 		APIOpts: map[string]any{
+			utils.MetaOriginID:   "abcdef3",
 			utils.MetaAttributes: false,
 			utils.MetaChargers:   false,
 			utils.MetaRates:      true,
@@ -430,6 +433,7 @@ func testCDRsProcessCDR4(t *testing.T) {
 			"fieldextr2":       "valextr2",
 		},
 		APIOpts: map[string]any{
+			utils.MetaOriginID:   "abcdef4",
 			utils.MetaAttributes: true,
 			utils.MetaChargers:   true,
 			utils.MetaRates:      true,
@@ -502,6 +506,7 @@ func testCDRsProcessCDR5(t *testing.T) {
 			"fieldextr2":       "valextr2",
 		},
 		APIOpts: map[string]any{
+			utils.MetaOriginID:   "abcdef5",
 			utils.MetaAttributes: true,
 			utils.MetaChargers:   true,
 			utils.MetaRates:      true,

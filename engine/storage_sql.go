@@ -141,7 +141,7 @@ func (sqls *SQLStorage) RemoveVersions(vrs Versions) (err error) {
 	return
 }
 
-func (sqls *SQLStorage) SetCDR(_ *context.Context, cdr *utils.CGREvent, allowUpdate bool) error {
+func (sqls *SQLStorage) SetCDR(_ *context.Context, cdrID string, cdr *utils.CGREvent, allowUpdate bool) error {
 	tx := sqls.db.Begin()
 	if tx.Error != nil {
 		return tx.Error
@@ -167,7 +167,7 @@ func (sqls *SQLStorage) SetCDR(_ *context.Context, cdr *utils.CGREvent, allowUpd
 		}
 
 		updated := tx.Model(&CDRSQLTable{}).Where(
-			sqls.cdrIDQuery(utils.IfaceAsString(cdr.APIOpts[utils.MetaCDRID]))).Updates(
+			sqls.cdrIDQuery(cdrID)).Updates(
 			CDRSQLTable{Opts: cdr.APIOpts, Event: cdr.Event, UpdatedAt: time.Now()})
 		if updated.Error != nil {
 			tx.Rollback()
