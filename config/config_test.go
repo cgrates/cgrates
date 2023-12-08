@@ -332,6 +332,7 @@ func TestCgrCfgJSONDefaultsCDRS(t *testing.T) {
 			Rates:      []*utils.DynamicBoolOpt{},
 			Stats:      []*utils.DynamicBoolOpt{},
 			Thresholds: []*utils.DynamicBoolOpt{},
+			Refund:     []*utils.DynamicBoolOpt{},
 			Rerate:     []*utils.DynamicBoolOpt{},
 			Store:      []*utils.DynamicBoolOpt{},
 		},
@@ -3986,6 +3987,7 @@ func TestV1GetConfigCdrs(t *testing.T) {
 				utils.MetaRates:      []*utils.DynamicBoolOpt{},
 				utils.MetaStats:      []*utils.DynamicBoolOpt{},
 				utils.MetaThresholds: []*utils.DynamicBoolOpt{},
+				utils.MetaRefund:     []*utils.DynamicBoolOpt{},
 				utils.MetaRerate:     []*utils.DynamicBoolOpt{},
 				utils.MetaStore:      []*utils.DynamicBoolOpt{},
 			},
@@ -5086,7 +5088,7 @@ func TestV1GetConfigAsJSONFilterS(t *testing.T) {
 
 func TestV1GetConfigAsJSONCdrs(t *testing.T) {
 	var reply string
-	expected := `{"cdrs":{"accounts_conns":[],"actions_conns":[],"attributes_conns":[],"chargers_conns":[],"ees_conns":[],"enabled":false,"extra_fields":[],"online_cdr_exports":null,"opts":{"*accounts":[],"*attributes":[],"*chargers":[],"*ees":[],"*rates":[],"*rerate":[],"*stats":[],"*store":[],"*thresholds":[]},"rates_conns":[],"session_cost_retries":5,"stats_conns":[],"thresholds_conns":[]}}`
+	expected := `{"cdrs":{"accounts_conns":[],"actions_conns":[],"attributes_conns":[],"chargers_conns":[],"ees_conns":[],"enabled":false,"extra_fields":[],"online_cdr_exports":null,"opts":{"*accounts":[],"*attributes":[],"*chargers":[],"*ees":[],"*rates":[],"*refund":[],"*rerate":[],"*stats":[],"*store":[],"*thresholds":[]},"rates_conns":[],"session_cost_retries":5,"stats_conns":[],"thresholds_conns":[]}}`
 	cfgCgr := NewDefaultCGRConfig()
 	if err := cfgCgr.V1GetConfigAsJSON(context.Background(), &SectionWithAPIOpts{Sections: []string{CDRsJSON}}, &reply); err != nil {
 		t.Error(err)
