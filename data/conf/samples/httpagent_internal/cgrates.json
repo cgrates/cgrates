@@ -3,8 +3,8 @@
 //
 
 
-"general": {
-	"log_level": 7,
+"logger": {
+	"level": 7
 },
 
 

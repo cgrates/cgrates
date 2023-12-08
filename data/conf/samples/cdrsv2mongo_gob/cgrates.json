@@ -1,8 +1,7 @@
 {
-	"general": {
-		"log_level": 7
+	"logger": {
+		"level": 7
 	},
-
 
 	"rpc_conns": {
 		"conn1": {
@@ -10,7 +9,6 @@
 			"conns": [{"address": "127.0.0.1:2013", "transport":"*gob"}]
 		}
 	},
-
 
 	"rates": {
 		"enabled": true

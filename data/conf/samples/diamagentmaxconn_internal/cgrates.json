@@ -4,8 +4,8 @@
 // Used for cgradmin
 // Starts rater, scheduler
 
-"general": {
-	"log_level": 7,
+"logger": {
+	"level": 7
 },
 
 "listen": {
