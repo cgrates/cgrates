@@ -302,8 +302,7 @@ func (ms *MongoStorage) ensureIndexesForCol(col string) error { // exported for 
 	case ColRpf, ColShg, ColAcc:
 		err = ms.ensureIndex(col, true, "id")
 	case utils.CDRsTBL:
-		err = ms.ensureIndex(col, true, MetaOriginLow, RunIDLow,
-			OriginIDLow)
+		err = ms.ensureIndex(col, true, "opts.*cdrID") // should probably create a constant for the key
 		if err == nil {
 			for _, idxKey := range ms.cdrsIndexes {
 				err = ms.ensureIndex(col, false, idxKey)

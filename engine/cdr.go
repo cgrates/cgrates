@@ -79,7 +79,8 @@ func (j JSON) Value() (driver.Value, error) {
 func GetUniqueCDRID(cgrEv *utils.CGREvent) string {
 	if chargeId, ok := cgrEv.APIOpts[utils.MetaChargeID]; ok {
 		return utils.IfaceAsString(chargeId)
-	} else if originID, ok := cgrEv.APIOpts[utils.MetaOriginID]; ok {
+	}
+	if originID, ok := cgrEv.APIOpts[utils.MetaOriginID]; ok {
 		return utils.IfaceAsString(originID)
 	}
 	return utils.UUIDSha1Prefix()

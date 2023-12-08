@@ -324,13 +324,18 @@ func (cdrS *CDRServer) processEvents(ctx *context.Context, evs []*utils.CGREvent
 		if err != nil {
 			return nil, fmt.Errorf("retrieving %s option failed: %w", utils.MetaRerate, err)
 		}
-		if err := cdrS.db.SetCDR(ctx, cgrEv, false); err != nil {
+		cdrID := GetUniqueCDRID(cgrEv)
+		if cgrEv.APIOpts == nil {
+			cgrEv.APIOpts = make(map[string]any)
+		}
+		cgrEv.APIOpts[utils.MetaCDRID] = cdrID
+		if err := cdrS.db.SetCDR(ctx, cdrID, cgrEv, false); err != nil {
 			if err != utils.ErrExists || !rerate {
 
 				// ToDo: add refund logic
 				return nil, fmt.Errorf("storing CDR %s failed: %w", utils.ToJSON(cgrEv), err)
 			}
-			if err = cdrS.db.SetCDR(ctx, cgrEv, true); err != nil {
+			if err = cdrS.db.SetCDR(ctx, cdrID, cgrEv, true); err != nil {
 				utils.Logger.Warning(
 					fmt.Sprintf("<%s> error: <%s> updating CDR %+v",
 						utils.CDRs, err.Error(), utils.ToJSON(cgrEv)))
