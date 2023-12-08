@@ -1,7 +1,7 @@
 {
 
-"general": {
-	"log_level": 7
+"logger": {
+	"level": 7                                                 
 },
 
 "data_db": {
@@ -44,7 +44,7 @@
 
 "chargers": {
 	"enabled": true,
-	"attributes_conns": ["*internal"]
+	"attributes_conns": ["*localhost"]
 },
 
 "admins": {
