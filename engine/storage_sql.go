@@ -141,7 +141,7 @@ func (sqls *SQLStorage) RemoveVersions(vrs Versions) (err error) {
 	return
 }
 
-func (sqls *SQLStorage) SetCDR(cdr *utils.CGREvent, allowUpdate bool) error {
+func (sqls *SQLStorage) SetCDR(_ *context.Context, cdr *utils.CGREvent, allowUpdate bool) error {
 	tx := sqls.db.Begin()
 	if tx.Error != nil {
 		return tx.Error
