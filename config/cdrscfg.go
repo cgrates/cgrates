@@ -33,6 +33,7 @@ const (
 	CDRsRatesDftOpt      = false
 	CDRsStatsDftOpt      = false
 	CDRsThresholdsDftOpt = false
+	CDRsRefundDftOpt     = false
 	CDRsRerateDftOpt     = false
 	CDRsStoreDftOpt      = true
 )
@@ -45,6 +46,7 @@ type CdrsOpts struct {
 	Rates      []*utils.DynamicBoolOpt
 	Stats      []*utils.DynamicBoolOpt
 	Thresholds []*utils.DynamicBoolOpt
+	Refund     []*utils.DynamicBoolOpt
 	Rerate     []*utils.DynamicBoolOpt
 	Store      []*utils.DynamicBoolOpt
 }
@@ -100,11 +102,14 @@ func (cdrsOpts *CdrsOpts) loadFromJSONCfg(jsnCfg *CdrsOptsJson) {
 	if jsnCfg.Thresholds != nil {
 		cdrsOpts.Thresholds = append(cdrsOpts.Thresholds, jsnCfg.Thresholds...)
 	}
-	if jsnCfg.Store != nil {
-		cdrsOpts.Store = append(cdrsOpts.Store, jsnCfg.Store...)
+	if jsnCfg.Refund != nil {
+		cdrsOpts.Refund = append(cdrsOpts.Refund, jsnCfg.Refund...)
 	}
 	if jsnCfg.Rerate != nil {
 		cdrsOpts.Rerate = append(cdrsOpts.Rerate, jsnCfg.Rerate...)
+	}
+	if jsnCfg.Store != nil {
+		cdrsOpts.Store = append(cdrsOpts.Store, jsnCfg.Store...)
 	}
 }
 
@@ -167,6 +172,7 @@ func (cdrscfg CdrsCfg) AsMapInterface(string) any {
 		utils.MetaRates:      cdrscfg.Opts.Rates,
 		utils.MetaStats:      cdrscfg.Opts.Stats,
 		utils.MetaThresholds: cdrscfg.Opts.Thresholds,
+		utils.MetaRefund:     cdrscfg.Opts.Refund,
 		utils.MetaRerate:     cdrscfg.Opts.Rerate,
 		utils.MetaStore:      cdrscfg.Opts.Store,
 	}
@@ -237,6 +243,10 @@ func (cdrsOpts *CdrsOpts) Clone() *CdrsOpts {
 	if cdrsOpts.Thresholds != nil {
 		thdS = utils.CloneDynamicBoolOpt(cdrsOpts.Thresholds)
 	}
+	var refund []*utils.DynamicBoolOpt
+	if cdrsOpts.Refund != nil {
+		refund = utils.CloneDynamicBoolOpt(cdrsOpts.Refund)
+	}
 	var rerate []*utils.DynamicBoolOpt
 	if cdrsOpts.Rerate != nil {
 		rerate = utils.CloneDynamicBoolOpt(cdrsOpts.Rerate)
@@ -253,6 +263,7 @@ func (cdrsOpts *CdrsOpts) Clone() *CdrsOpts {
 		Rates:      rtS,
 		Stats:      stS,
 		Thresholds: thdS,
+		Refund:     refund,
 		Rerate:     rerate,
 		Store:      store,
 	}
@@ -305,6 +316,7 @@ type CdrsOptsJson struct {
 	Rates      []*utils.DynamicBoolOpt `json:"*rates"`
 	Stats      []*utils.DynamicBoolOpt `json:"*stats"`
 	Thresholds []*utils.DynamicBoolOpt `json:"*thresholds"`
+	Refund     []*utils.DynamicBoolOpt `json:"*refund"`
 	Rerate     []*utils.DynamicBoolOpt `json:"*rerate"`
 	Store      []*utils.DynamicBoolOpt `json:"*store"`
 }
@@ -350,6 +362,9 @@ func diffCdrsOptsJsonCfg(d *CdrsOptsJson, v1, v2 *CdrsOpts) *CdrsOptsJson {
 	}
 	if !utils.DynamicBoolOptEqual(v1.Thresholds, v2.Thresholds) {
 		d.Thresholds = v2.Thresholds
+	}
+	if !utils.DynamicBoolOptEqual(v1.Refund, v2.Refund) {
+		d.Refund = v2.Refund
 	}
 	if !utils.DynamicBoolOptEqual(v1.Rerate, v2.Rerate) {
 		d.Rerate = v2.Rerate

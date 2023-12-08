@@ -130,6 +130,7 @@ func newCGRConfig(config []byte) (cfg *CGRConfig, err error) {
 			Rates:      []*utils.DynamicBoolOpt{},
 			Stats:      []*utils.DynamicBoolOpt{},
 			Thresholds: []*utils.DynamicBoolOpt{},
+			Refund:     []*utils.DynamicBoolOpt{},
 			Rerate:     []*utils.DynamicBoolOpt{},
 			Store:      []*utils.DynamicBoolOpt{},
 		}},

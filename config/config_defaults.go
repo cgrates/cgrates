@@ -369,6 +369,13 @@ const CGRATES_CFG_JSON = `
 		// 		"Value": false,
 		// 	},
 		// ],
+		// "*refund": [					
+		// 	{
+		// 		"Tenant": "*any",
+		// 		"FilterIDs": [],
+		// 		"Value": false,
+		// 	},
+		// ],
 		// "*rerate": [					
 		// 	{
 		// 		"Tenant": "*any",
