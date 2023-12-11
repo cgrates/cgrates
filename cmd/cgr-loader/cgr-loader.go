@@ -74,7 +74,7 @@ var (
 		"The amount of wait time until timeout for writing operations")
 	dbQueryTimeout = cgrLoaderFlags.Duration(utils.MongoQueryTimeoutCfg, dfltCfg.DataDbCfg().Opts.MongoQueryTimeout,
 		"The timeout for queries")
-	dbMongoScheme = cgrLoaderFlags.String(utils.MongoSchemeCfg, dfltCfg.DataDbCfg().Opts.MongoScheme,
+	dbMongoConnScheme = cgrLoaderFlags.String(utils.MongoConnSchemeCfg, dfltCfg.DataDbCfg().Opts.MongoConnScheme,
 		"Scheme for MongoDB connection <mongodb|mongodb+srv>")
 	dbRedisTls               = cgrLoaderFlags.Bool(utils.RedisTLS, false, "Enable TLS when connecting to Redis")
 	dbRedisClientCertificate = cgrLoaderFlags.String(utils.RedisClientCertificate, utils.EmptyString, "Path to the client certificate")
@@ -189,8 +189,8 @@ func loadConfig() (ldrCfg *config.CGRConfig) {
 	if *dbQueryTimeout != dfltCfg.DataDbCfg().Opts.MongoQueryTimeout {
 		ldrCfg.DataDbCfg().Opts.MongoQueryTimeout = *dbQueryTimeout
 	}
-	if *dbMongoScheme != dfltCfg.DataDbCfg().Opts.MongoScheme {
-		ldrCfg.DataDbCfg().Opts.MongoScheme = *dbMongoScheme
+	if *dbMongoConnScheme != dfltCfg.DataDbCfg().Opts.MongoConnScheme {
+		ldrCfg.DataDbCfg().Opts.MongoConnScheme = *dbMongoConnScheme
 	}
 	if *dbRedisTls != dfltCfg.DataDbCfg().Opts.RedisTLS {
 		ldrCfg.DataDbCfg().Opts.RedisTLS = *dbRedisTls
