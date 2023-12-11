@@ -21,6 +21,7 @@ package services
 import (
 	"fmt"
 	"runtime"
+	"strings"
 	"sync"
 
 	"github.com/cgrates/birpc"
@@ -72,42 +73,44 @@ type CDRServer struct {
 }
 
 // Start should handle the sercive start
-func (cdrService *CDRServer) Start(ctx *context.Context, _ context.CancelFunc) (err error) {
-	if cdrService.IsRunning() {
+func (cdrS *CDRServer) Start(ctx *context.Context, _ context.CancelFunc) (err error) {
+	if cdrS.IsRunning() {
 		return utils.ErrServiceAlreadyRunning
 	}
 
 	utils.Logger.Info(fmt.Sprintf("<%s> starting <%s> subsystem", utils.CoreS, utils.CDRs))
 
 	var filterS *engine.FilterS
-	if filterS, err = waitForFilterS(ctx, cdrService.filterSChan); err != nil {
+	if filterS, err = waitForFilterS(ctx, cdrS.filterSChan); err != nil {
 		return
 	}
 
 	var datadb *engine.DataManager
-	if datadb, err = cdrService.dm.WaitForDM(ctx); err != nil {
+	if datadb, err = cdrS.dm.WaitForDM(ctx); err != nil {
 		return
 	}
 
 	storDBChan := make(chan engine.StorDB, 1)
-	cdrService.stopChan = make(chan struct{})
-	cdrService.storDB.RegisterSyncChan(storDBChan)
+	cdrS.stopChan = make(chan struct{})
+	cdrS.storDB.RegisterSyncChan(storDBChan)
 
-	cdrService.Lock()
-	defer cdrService.Unlock()
+	cdrS.Lock()
+	defer cdrS.Unlock()
 
-	cdrService.cdrS = cdrs.NewCDRServer(cdrService.cfg, datadb, filterS, cdrService.connMgr, storDBChan)
-	go cdrService.cdrS.ListenAndServe(cdrService.stopChan)
+	cdrS.cdrS = cdrs.NewCDRServer(cdrS.cfg, datadb, filterS, cdrS.connMgr, storDBChan)
+	go cdrS.cdrS.ListenAndServe(cdrS.stopChan)
 	runtime.Gosched()
 	utils.Logger.Info("Registering CDRS RPC service.")
-	srv, _ := engine.NewServiceWithName(cdrService.cdrS, utils.CDRs, true)
-	// srv, _ := birpc.NewService(apis.NewCDRsV1(cdrService.cdrS), "", false)
-	if !cdrService.cfg.DispatcherSCfg().Enabled {
-		for _, s := range srv {
-			cdrService.server.RpcRegister(s)
-		}
+	srv, err := birpc.NewServiceWithMethodsRename(cdrS, utils.CDRsV1, true, func(oldFn string) (newFn string) {
+		return strings.TrimPrefix(oldFn, utils.V1Prfx)
+	})
+	if err != nil {
+		return err
 	}
-	cdrService.connChan <- cdrService.anz.GetInternalCodec(srv, utils.CDRServer) // Signal that cdrS is operational
+	if !cdrS.cfg.DispatcherSCfg().Enabled {
+		cdrS.server.RpcRegister(srv)
+	}
+	cdrS.connChan <- cdrS.anz.GetInternalCodec(srv, utils.CDRServer) // Signal that cdrS is operational
 	return
 }
 
