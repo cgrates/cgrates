@@ -108,7 +108,7 @@ func (ms *MongoStorage) GetStorageType() string {
 // SetCDR inserts or updates a CDR in MongoDB.
 // If a CDR with the same cdrID already exists and allowUpdate is true, it updates the existing CDR.
 // If allowUpdate is false and a CDR with the same cdrID exists, it returns an EXISTS error.
-func (ms *MongoStorage) SetCDR(ctx *context.Context, cdrID string, cdr *utils.CGREvent, allowUpdate bool) error {
+func (ms *MongoStorage) SetCDR(ctx *context.Context, cdr *utils.CGREvent, allowUpdate bool) error {
 	// Assign a new order ID if it's not already set.
 	if val, has := cdr.Event[utils.OrderID]; has && val == 0 {
 		cdr.Event[utils.OrderID] = ms.counter.Next()
@@ -142,6 +142,7 @@ func (ms *MongoStorage) SetCDR(ctx *context.Context, cdrID string, cdr *utils.CG
 				"updatedAt": currentTime,
 			}}
 
+			cdrID := utils.IfaceAsString(cdr.APIOpts[utils.MetaCDRID])
 			_, err = ms.getCol(ColCDRs).UpdateOne(
 				sctx,
 				bson.M{
