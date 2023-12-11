@@ -50,7 +50,7 @@ func NewDataDBConn(dbType, host, port, name, user,
 			opts.RedisConnectTimeout, opts.RedisReadTimeout, opts.RedisWriteTimeout, opts.RedisTLS,
 			opts.RedisClientCertificate, opts.RedisClientKey, opts.RedisCACertificate)
 	case utils.MetaMongo:
-		d, err = NewMongoStorage(opts.MongoScheme, host, port, name, user, pass, marshaler, utils.DataDB, nil, opts.MongoQueryTimeout)
+		d, err = NewMongoStorage(opts.MongoConnScheme, host, port, name, user, pass, marshaler, utils.DataDB, nil, opts.MongoQueryTimeout)
 	case utils.MetaInternal:
 		d = NewInternalDB(nil, nil, true, itmsCfg)
 	default:
@@ -65,7 +65,7 @@ func NewStorDBConn(dbType, host, port, name, user, pass, marshaler string,
 	opts *config.StorDBOpts, itmsCfg map[string]*config.ItemOpt) (db StorDB, err error) {
 	switch dbType {
 	case utils.MetaMongo:
-		db, err = NewMongoStorage(opts.MongoScheme, host, port, name, user, pass, marshaler, utils.StorDB, stringIndexedFields, opts.MongoQueryTimeout)
+		db, err = NewMongoStorage(opts.MongoConnScheme, host, port, name, user, pass, marshaler, utils.StorDB, stringIndexedFields, opts.MongoQueryTimeout)
 	case utils.MetaPostgres:
 		db, err = NewPostgresStorage(host, port, name, user, pass, opts.PgSSLMode,
 			opts.SQLMaxOpenConns, opts.SQLMaxIdleConns, opts.SQLConnMaxLifetime)

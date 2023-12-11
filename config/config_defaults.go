@@ -144,7 +144,7 @@ const CGRATES_CFG_JSON = `
 		"redisReadTimeout": "0",				// the amount of wait time until timeout for reading operations
 		"redisWriteTimeout": "0",   			// the amount of wait time until timeout for writing operations
 		"mongoQueryTimeout":"10s",				// timeout for query when mongo is used
-		"mongoScheme": "mongodb",				// scheme for MongoDB connection <mongodb|mongodb+srv>
+		"mongoConnScheme": "mongodb",			// scheme for MongoDB connection <mongodb|mongodb+srv>
 		"redisTLS": false,						// if true it will use a tls connection and use the redisClientCertificate, redisClientKey and redisCACertificate for tls connection
 		"redisClientCertificate":"",			// path to client certificate
 		"redisClientKey":"",					// path to client key
@@ -159,7 +159,7 @@ const CGRATES_CFG_JSON = `
 	"db_port": 3306,						// the port to reach the stor_db
 	"db_name": "cgrates",					// stor database name
 	"db_user": "cgrates",					// username to use when connecting to stor_db
-	"db_password": "CGRateS.org",						// password to use when connecting to stor_db
+	"db_password": "CGRateS.org",			// password to use when connecting to stor_db
 	"string_indexed_fields": [],			// indexes on cdrs table to speed up queries, used in case of *mongo and *internal
 	"prefix_indexed_fields":[],				// prefix indexes on cdrs table to speed up queries, used in case of *internal
 	"opts": {
@@ -168,7 +168,7 @@ const CGRATES_CFG_JSON = `
 		"sqlConnMaxLifetime": "0", 			// maximum amount of time a connection may be reused (0 for unlimited), not applying for mongo
 		"mysqlDSNParams": {},               // DSN extra paramss
 		"mongoQueryTimeout": "10s",			// timeout for query when mongo is used
-		"mongoScheme": "mongodb",			// scheme for MongoDB connection <mongodb|mongodb+srv>
+		"mongoConnScheme": "mongodb",		// scheme for MongoDB connection <mongodb|mongodb+srv>
 		"pgSSLMode": "disable",		 		// pgSSLMode in case of *postgres
 		"mysqlLocation": "Local",			// the location the time from mysql is retrieved
 	},
@@ -1084,10 +1084,10 @@ const CGRATES_CFG_JSON = `
 		"redisClientCertificate":"",		// path to client certificate
 		"redisClientKey":"",				// path to client key
 		"redisCACertificate":"",			// path to CA certificate (populate for self-signed certificate otherwise let it empty)
-		"mongoScheme": "mongodb",			// scheme for MongoDB connection <mongodb|mongodb+srv>
+		"mongoConnScheme": "mongodb",		// scheme for MongoDB connection <mongodb|mongodb+srv>
 	},
 	"out_stordb_opts":{
-		"mongoScheme": "mongodb"			// scheme for MongoDB connection <mongodb|mongodb+srv>
+		"mongoConnScheme": "mongodb"		// scheme for MongoDB connection <mongodb|mongodb+srv>
 	},
 },
 
