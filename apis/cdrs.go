@@ -28,7 +28,7 @@ import (
 )
 
 // GetCDRs retrieves a list of CDRs matching the specified filters.
-func (admS AdminSv1) GetCDRs(ctx *context.Context, args *engine.CDRFilters, reply *[]*engine.CDR) error {
+func (admS AdminSv1) GetCDRs(ctx *context.Context, args *utils.CDRFilters, reply *[]*utils.CDR) error {
 	if args.Tenant == utils.EmptyString {
 		args.Tenant = admS.cfg.GeneralCfg().DefaultTenant
 	}
@@ -45,7 +45,7 @@ func (admS AdminSv1) GetCDRs(ctx *context.Context, args *engine.CDRFilters, repl
 }
 
 // RemoveCDRs removes CDRs matching the specified filters.
-func (admS AdminSv1) RemoveCDRs(ctx *context.Context, args *engine.CDRFilters, reply *string) (err error) {
+func (admS AdminSv1) RemoveCDRs(ctx *context.Context, args *utils.CDRFilters, reply *string) (err error) {
 	if args.Tenant == utils.EmptyString {
 		args.Tenant = admS.cfg.GeneralCfg().DefaultTenant
 	}
@@ -58,33 +58,4 @@ func (admS AdminSv1) RemoveCDRs(ctx *context.Context, args *engine.CDRFilters, r
 	}
 	*reply = utils.OK
 	return
-}
-
-// NewCDRsV1 constructs the RPC Object for CDRsV1
-func NewCDRsV1(cdrS *engine.CDRServer) *CDRsV1 {
-	return &CDRsV1{cdrS: cdrS}
-}
-
-// CDRsV1 Exports RPC from CDRs
-type CDRsV1 struct {
-	ping
-	cdrS *engine.CDRServer
-}
-
-// ProcessEvent will process the CGREvent
-func (cdrSv1 *CDRsV1) ProcessEvent(ctx *context.Context, args *utils.CGREvent,
-	reply *string) error {
-	return cdrSv1.cdrS.V1ProcessEvent(ctx, args, reply)
-}
-
-// ProcessEventWithGet has the same logic with V1ProcessEvent except it adds the proccessed events to the reply
-func (cdrSv1 *CDRsV1) ProcessEventWithGet(ctx *context.Context, args *utils.CGREvent,
-	reply *[]*utils.EventsWithOpts) error {
-	return cdrSv1.cdrS.V1ProcessEventWithGet(ctx, args, reply)
-}
-
-// ProcessStoredEvents processes stored events based on provided filters.
-func (cdrSv1 *CDRsV1) ProcessStoredEvents(ctx *context.Context, args *engine.CDRFilters,
-	reply *string) error {
-	return cdrSv1.cdrS.V1ProcessStoredEvents(ctx, args, reply)
 }

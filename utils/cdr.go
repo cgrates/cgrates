@@ -16,17 +16,14 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 
-package engine
+package utils
 
 import (
 	"database/sql/driver"
 	"encoding/json"
 	"errors"
 	"fmt"
-	"strings"
 	"time"
-
-	"github.com/cgrates/cgrates/utils"
 )
 
 type CDR struct {
@@ -41,26 +38,26 @@ type CDR struct {
 type CDRSQLTable struct {
 	ID        int64 // this is used for incrementing while seting
 	Tenant    string
-	Opts      JSON       `gorm:"type:jsonb"` //string
-	Event     JSON       `gorm:"type:jsonb"` //string
+	Opts      JSONB      `gorm:"type:jsonb"` //string
+	Event     JSONB      `gorm:"type:jsonb"` //string
 	CreatedAt time.Time  `json:",omitempty"`
 	UpdatedAt time.Time  `json:",omitempty"`
 	DeletedAt *time.Time `json:",omitempty"`
 }
 
 func (CDRSQLTable) TableName() string {
-	return utils.CDRsTBL
+	return CDRsTBL
 }
 
-// JSON type for storing maps of events and opts into gorm columns as jsob type
-type JSON map[string]interface{}
+// JSONB type for storing maps of events and opts into gorm columns as jsob type
+type JSONB map[string]interface{}
 
-func (j JSON) GormDataType() string {
+func (j JSONB) GormDataType() string {
 	return "JSONB"
 }
 
 // Scan scan value into Jsonb, implements sql.Scanner interface
-func (j *JSON) Scan(value interface{}) (err error) {
+func (j *JSONB) Scan(value interface{}) (err error) {
 	switch v := value.(type) {
 	case []byte:
 		return json.Unmarshal(v, &j)
@@ -72,50 +69,36 @@ func (j *JSON) Scan(value interface{}) (err error) {
 }
 
 // Value return json value, implement driver.Valuer interface
-func (j JSON) Value() (driver.Value, error) {
+func (j JSONB) Value() (driver.Value, error) {
 	return json.Marshal(j)
 }
 
-func GetUniqueCDRID(cgrEv *utils.CGREvent) string {
-	if chargeId, ok := cgrEv.APIOpts[utils.MetaChargeID]; ok {
-		return utils.IfaceAsString(chargeId)
+func GetUniqueCDRID(cgrEv *CGREvent) string {
+	if chargeId, ok := cgrEv.APIOpts[MetaChargeID]; ok {
+		return IfaceAsString(chargeId)
 	}
-	if originID, ok := cgrEv.APIOpts[utils.MetaOriginID]; ok {
-		return utils.IfaceAsString(originID)
+	if originID, ok := cgrEv.APIOpts[MetaOriginID]; ok {
+		return IfaceAsString(originID)
 	}
-	return utils.UUIDSha1Prefix()
+	return UUIDSha1Prefix()
 }
 
-func (cdr *CDR) CGREvent() *utils.CGREvent {
-	return &utils.CGREvent{
+func (cdr *CDR) CGREvent() *CGREvent {
+	return &CGREvent{
 		Tenant:  cdr.Tenant,
-		ID:      utils.Sha1(),
+		ID:      Sha1(),
 		Event:   cdr.Event,
 		APIOpts: cdr.Opts,
 	}
 }
 
 // CDRsToCGREvents converts a slice of *CDR to a slice of *utils.CGREvent.
-func CDRsToCGREvents(cdrs []*CDR) []*utils.CGREvent {
-	cgrEvs := make([]*utils.CGREvent, 0, len(cdrs))
+func CDRsToCGREvents(cdrs []*CDR) []*CGREvent {
+	cgrEvs := make([]*CGREvent, 0, len(cdrs))
 	for _, cdr := range cdrs {
 		cgrEvs = append(cgrEvs, cdr.CGREvent())
 	}
 	return cgrEvs
-}
-
-// checkNestedFields checks if there are elements or values nested (e.g *opts.*rateSCost.Cost)
-func checkNestedFields(elem string, values []string) bool {
-	if len(strings.Split(elem, utils.NestingSep)) > 2 {
-		return true
-	}
-	for _, val := range values {
-		if len(strings.Split(val, utils.NestingSep)) > 2 {
-			return true
-		}
-	}
-	return false
-
 }
 
 type CDRFilters struct {

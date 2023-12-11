@@ -22,6 +22,7 @@ import (
 	"testing"
 
 	"github.com/cgrates/birpc"
+	"github.com/cgrates/cgrates/cdrs"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/cores"
 	"github.com/cgrates/cgrates/engine"
@@ -59,7 +60,7 @@ func TestCdrsCoverage(t *testing.T) {
 		stopChan:    make(chan struct{}, 1),
 		anz:         anz,
 		srvDep:      srvDep,
-		cdrS:        &engine.CDRServer{},
+		cdrS:        &cdrs.CDRServer{},
 	}
 	cdrS2.connChan <- &testMockClients{}
 	cdrS2.stopChan <- struct{}{}

@@ -146,7 +146,7 @@ func (sqls *SQLStorage) SetCDR(_ *context.Context, cdrID string, cdr *utils.CGRE
 	if tx.Error != nil {
 		return tx.Error
 	}
-	cdrTable := &CDRSQLTable{
+	cdrTable := &utils.CDRSQLTable{
 		Tenant:    cdr.Tenant,
 		Opts:      cdr.APIOpts,
 		Event:     cdr.Event,
@@ -166,9 +166,9 @@ func (sqls *SQLStorage) SetCDR(_ *context.Context, cdrID string, cdr *utils.CGRE
 			return tx.Error
 		}
 
-		updated := tx.Model(&CDRSQLTable{}).Where(
+		updated := tx.Model(&utils.CDRSQLTable{}).Where(
 			sqls.cdrIDQuery(cdrID)).Updates(
-			CDRSQLTable{Opts: cdr.APIOpts, Event: cdr.Event, UpdatedAt: time.Now()})
+			utils.CDRSQLTable{Opts: cdr.APIOpts, Event: cdr.Event, UpdatedAt: time.Now()})
 		if updated.Error != nil {
 			tx.Rollback()
 			return updated.Error
@@ -180,7 +180,7 @@ func (sqls *SQLStorage) SetCDR(_ *context.Context, cdrID string, cdr *utils.CGRE
 
 // GetCDRs has ability to get the filtered CDRs, count them or simply return them
 // qryFltr.Unscoped will ignore soft deletes or delete records permanently
-func (sqls *SQLStorage) GetCDRs(ctx *context.Context, qryFltr []*Filter, opts map[string]interface{}) (cdrs []*CDR, err error) {
+func (sqls *SQLStorage) GetCDRs(ctx *context.Context, qryFltr []*Filter, opts map[string]interface{}) (cdrs []*utils.CDR, err error) {
 	q := sqls.db.Table(utils.CDRsTBL)
 	var excludedCdrQueryFilterTypes []*FilterRule
 	for _, fltr := range qryFltr {
@@ -221,7 +221,7 @@ func (sqls *SQLStorage) GetCDRs(ctx *context.Context, qryFltr []*Filter, opts ma
 	q = q.Offset(offset)
 
 	// Execute query
-	results := make([]*CDRSQLTable, 0)
+	results := make([]*utils.CDRSQLTable, 0)
 	if err = q.Find(&results).Error; err != nil {
 		return
 	}
@@ -229,11 +229,11 @@ func (sqls *SQLStorage) GetCDRs(ctx *context.Context, qryFltr []*Filter, opts ma
 		return nil, utils.ErrNotFound
 	}
 	//convert into CDR
-	resultCdr := make([]*CDR, 0, len(results))
+	resultCdr := make([]*utils.CDR, 0, len(results))
 	for _, val := range results {
 		// here we wil do our filtration, meaning that we will filter those cdrs who cannot be filtered in the databes eg: *ai, *rsr..
 		if len(excludedCdrQueryFilterTypes) != 0 {
-			newCdr := &CDR{
+			newCdr := &utils.CDR{
 				Tenant: val.Tenant,
 				Opts:   val.Opts,
 				Event:  val.Event,
@@ -252,7 +252,7 @@ func (sqls *SQLStorage) GetCDRs(ctx *context.Context, qryFltr []*Filter, opts ma
 				continue
 			}
 		}
-		resultCdr = append(resultCdr, &CDR{
+		resultCdr = append(resultCdr, &utils.CDR{
 			Tenant:    val.Tenant,
 			Opts:      val.Opts,
 			Event:     val.Event,
@@ -309,7 +309,7 @@ func (sqls *SQLStorage) RemoveCDRs(ctx *context.Context, qryFltr []*Filter) (err
 		return
 	}
 	// in the other case, if we have such filters, check the results based on those filters
-	results := make([]*CDRSQLTable, 0)
+	results := make([]*utils.CDRSQLTable, 0)
 	if err = q.Find(&results).Error; err != nil {
 		return
 	}
@@ -322,7 +322,7 @@ func (sqls *SQLStorage) RemoveCDRs(ctx *context.Context, qryFltr []*Filter) (err
 	remCdr := make([]string, 0, len(results)) // we will keep the *cdrID of every CDR taht matched the those filters
 	for _, cdr := range results {
 		if len(excludedCdrQueryFilterTypes) != 0 {
-			newCdr := &CDR{
+			newCdr := &utils.CDR{
 				Tenant: cdr.Tenant,
 				Opts:   cdr.Opts,
 				Event:  cdr.Event,

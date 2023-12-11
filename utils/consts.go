@@ -472,7 +472,7 @@ const (
 	BalanceUpdate         = "BalanceUpdate"
 	StatUpdate            = "StatUpdate"
 	ResourceUpdate        = "ResourceUpdate"
-	CDR                   = "CDR"
+	CDRKey                = "CDR"
 	CDRs                  = "CDRs"
 	ExpiryTime            = "ExpiryTime"
 	AllowNegative         = "AllowNegative"

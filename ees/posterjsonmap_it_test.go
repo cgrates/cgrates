@@ -135,7 +135,7 @@ func testHTTPJsonMapExportEvent(t *testing.T) {
 			},
 			APIOpts: map[string]any{
 				utils.MetaOriginID:  utils.Sha1("dsafdsaf", time.Unix(1383813745, 0).UTC().String()),
-				utils.MetaEventType: utils.CDR,
+				utils.MetaEventType: utils.CDRKey,
 				utils.RunID:         utils.MetaDefault,
 			},
 		},
@@ -167,7 +167,7 @@ func testHTTPJsonMapExportEvent(t *testing.T) {
 			},
 			APIOpts: map[string]any{
 				utils.MetaOriginID:  utils.Sha1("abcdef", time.Unix(1383813745, 0).UTC().String()),
-				utils.MetaEventType: utils.CDR,
+				utils.MetaEventType: utils.CDRKey,
 				utils.RunID:         utils.MetaDefault,
 			},
 		},
@@ -200,7 +200,7 @@ func testHTTPJsonMapExportEvent(t *testing.T) {
 			},
 			APIOpts: map[string]any{
 				utils.MetaOriginID:  utils.Sha1("sdfwer", time.Unix(1383813745, 0).UTC().String()),
-				utils.MetaEventType: utils.CDR,
+				utils.MetaEventType: utils.CDRKey,
 				utils.RunID:         utils.MetaDefault,
 			},
 		},
@@ -239,7 +239,7 @@ func testHTTPJsonMapExportEvent(t *testing.T) {
 		utils.Subject:      utils.IfaceAsString(eventVoice.Event[utils.Subject]),
 		utils.Destination:  utils.IfaceAsString(eventVoice.Event[utils.Destination]),
 		utils.Cost:         utils.IfaceAsString(eventVoice.Event[utils.Cost]),
-		utils.EventType:    utils.CDR,
+		utils.EventType:    utils.CDRKey,
 	} {
 		if rcv := httpJsonMap[key]; rcv != strVal {
 			t.Errorf("Expected %+v, received: %+v", strVal, rcv)
@@ -262,7 +262,7 @@ func testHTTPJsonMapExportEvent(t *testing.T) {
 		utils.Subject:      utils.IfaceAsString(eventData.Event[utils.Subject]),
 		utils.Destination:  utils.IfaceAsString(eventData.Event[utils.Destination]),
 		utils.Cost:         utils.IfaceAsString(eventData.Event[utils.Cost]),
-		utils.EventType:    utils.CDR,
+		utils.EventType:    utils.CDRKey,
 	} {
 		if rcv := httpJsonMap[key]; rcv != strVal {
 			t.Errorf("Expected %+v, received: %+v", strVal, rcv)
@@ -285,7 +285,7 @@ func testHTTPJsonMapExportEvent(t *testing.T) {
 		utils.Subject:      utils.IfaceAsString(eventSMS.Event[utils.Subject]),
 		utils.Destination:  utils.IfaceAsString(eventSMS.Event[utils.Destination]),
 		utils.Cost:         utils.IfaceAsString(eventSMS.Event[utils.Cost]),
-		utils.EventType:    utils.CDR,
+		utils.EventType:    utils.CDRKey,
 	} {
 		if rcv := httpJsonMap[key]; rcv != strVal {
 			t.Errorf("Expected %+v, received: %+v", strVal, rcv)
