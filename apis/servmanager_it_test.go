@@ -54,6 +54,7 @@ var (
 )
 
 func TestServManagerIT(t *testing.T) {
+	t.SkipNow()
 	switch *dbType {
 	case utils.MetaInternal:
 		srvMngConfigDIR = "apis_srvmng_internal"

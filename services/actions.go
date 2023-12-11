@@ -101,12 +101,13 @@ func (acts *ActionService) Start(ctx *context.Context, _ context.CancelFunc) (er
 	go acts.acts.ListenAndServe(acts.stopChan, acts.rldChan)
 
 	utils.Logger.Info(fmt.Sprintf("<%s> starting <%s> subsystem", utils.CoreS, utils.ActionS))
-	srv, _ := engine.NewService(acts.acts)
+	srv, err := engine.NewService2(acts.acts, utils.ActionSv1, utils.V1Prfx)
+	if err != nil {
+		return
+	}
 	// srv, _ := birpc.NewService(apis.NewActionSv1(acts.acts), "", false)
 	if !acts.cfg.DispatcherSCfg().Enabled {
-		for _, s := range srv {
-			acts.server.RpcRegister(s)
-		}
+		acts.server.RpcRegister(srv)
 	}
 	acts.connChan <- acts.anz.GetInternalCodec(srv, utils.ActionS)
 	return
