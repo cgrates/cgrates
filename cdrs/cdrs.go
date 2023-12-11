@@ -16,27 +16,27 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 
-package engine
+package cdrs
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	"net/http"
 
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/guardian"
 	"github.com/cgrates/cgrates/utils"
 )
 
-func newMapEventFromReqForm(r *http.Request) (mp MapEvent, err error) {
+func newMapEventFromReqForm(r *http.Request) (mp engine.MapEvent, err error) {
 	if r.Form == nil {
 		if err = r.ParseForm(); err != nil {
 			return
 		}
 	}
-	mp = MapEvent{utils.Source: r.RemoteAddr}
+	mp = engine.MapEvent{utils.Source: r.RemoteAddr}
 	for k, vals := range r.Form {
 		mp[k] = vals[0] // We only support the first value for now, if more are provided it is considered remote's fault
 	}
@@ -44,8 +44,8 @@ func newMapEventFromReqForm(r *http.Request) (mp MapEvent, err error) {
 }
 
 // NewCDRServer is a constructor for CDRServer
-func NewCDRServer(cfg *config.CGRConfig, dm *DataManager, filterS *FilterS, connMgr *ConnManager,
-	storDBChan chan StorDB) *CDRServer {
+func NewCDRServer(cfg *config.CGRConfig, dm *engine.DataManager, filterS *engine.FilterS, connMgr *engine.ConnManager,
+	storDBChan chan engine.StorDB) *CDRServer {
 	cdrDB := <-storDBChan
 	return &CDRServer{
 		cfg:     cfg,
@@ -61,12 +61,12 @@ func NewCDRServer(cfg *config.CGRConfig, dm *DataManager, filterS *FilterS, conn
 // CDRServer stores and rates CDRs
 type CDRServer struct {
 	cfg     *config.CGRConfig
-	dm      *DataManager
-	db      StorDB
+	dm      *engine.DataManager
+	db      engine.StorDB
 	guard   *guardian.GuardianLocker
-	fltrS   *FilterS
-	connMgr *ConnManager
-	dbChan  chan StorDB
+	fltrS   *engine.FilterS
+	connMgr *engine.ConnManager
+	dbChan  chan engine.StorDB
 }
 
 // ListenAndServe listen for storbd reload
@@ -85,7 +85,7 @@ func (cdrS *CDRServer) ListenAndServe(stopChan chan struct{}) {
 
 // chrgrSProcessEvent forks CGREventWithOpts into multiples based on matching ChargerS profiles
 func (cdrS *CDRServer) chrgrSProcessEvent(ctx *context.Context, cgrEv *utils.CGREvent) (cgrEvs []*utils.CGREvent, err error) {
-	var chrgrs []*ChrgSProcessEventReply
+	var chrgrs []*engine.ChrgSProcessEventReply
 	if err = cdrS.connMgr.Call(ctx, cdrS.cfg.CdrsCfg().ChargerSConns,
 		utils.ChargerSv1ProcessEvent,
 		cgrEv, &chrgrs); err != nil {
@@ -103,7 +103,7 @@ func (cdrS *CDRServer) chrgrSProcessEvent(ctx *context.Context, cgrEv *utils.CGR
 
 // attrSProcessEvent will send the event to StatS if the connection is configured
 func (cdrS *CDRServer) attrSProcessEvent(ctx *context.Context, cgrEv *utils.CGREvent) (err error) {
-	var rplyEv AttrSProcessEventReply
+	var rplyEv engine.AttrSProcessEventReply
 	if cgrEv.APIOpts == nil {
 		cgrEv.APIOpts = make(map[string]any)
 	}
@@ -166,7 +166,7 @@ func (cdrS *CDRServer) thdSProcessEvent(ctx *context.Context, cgrEv *utils.CGREv
 	var tIDs []string
 	// we clone the CGREvent so we can add EventType without being propagated
 	cgrEv = cgrEv.Clone()
-	cgrEv.APIOpts[utils.MetaEventType] = utils.CDR
+	cgrEv.APIOpts[utils.MetaEventType] = utils.CDRKey
 	if err = cdrS.connMgr.Call(ctx, cdrS.cfg.CdrsCfg().ThresholdSConns,
 		utils.ThresholdSv1ProcessEvent,
 		cgrEv, &tIDs); err != nil &&
@@ -204,7 +204,7 @@ func (cdrS *CDRServer) eeSProcessEvent(ctx *context.Context, cgrEv *utils.CGREve
 // In case of partially executed, both the error and the events will be returned.
 func (cdrS *CDRServer) processEvents(ctx *context.Context, evs []*utils.CGREvent) ([]*utils.EventsWithOpts, error) {
 	for _, ev := range evs {
-		attrS, err := GetBoolOpts(ctx, ev.Tenant, ev.AsDataProvider(), cdrS.fltrS, cdrS.cfg.CdrsCfg().Opts.Attributes,
+		attrS, err := engine.GetBoolOpts(ctx, ev.Tenant, ev.AsDataProvider(), cdrS.fltrS, cdrS.cfg.CdrsCfg().Opts.Attributes,
 			config.CDRsAttributesDftOpt, utils.MetaAttributes)
 		if err != nil {
 			return nil, fmt.Errorf("retrieving %s option failed: %w", utils.MetaAttributes, err)
@@ -224,7 +224,7 @@ func (cdrS *CDRServer) processEvents(ctx *context.Context, evs []*utils.CGREvent
 	cgrEvs := make([]*utils.CGREvent, 0, len(evs))
 
 	for _, ev := range evs {
-		chrgS, err := GetBoolOpts(ctx, ev.Tenant, ev.AsDataProvider(), cdrS.fltrS, cdrS.cfg.CdrsCfg().Opts.Chargers,
+		chrgS, err := engine.GetBoolOpts(ctx, ev.Tenant, ev.AsDataProvider(), cdrS.fltrS, cdrS.cfg.CdrsCfg().Opts.Chargers,
 			config.CDRsChargersDftOpt, utils.MetaChargers)
 		if err != nil {
 			return nil, fmt.Errorf("retrieving %s option failed: %w", utils.MetaChargers, err)
@@ -246,7 +246,7 @@ func (cdrS *CDRServer) processEvents(ctx *context.Context, evs []*utils.CGREvent
 	var partiallyExecuted bool // from here actions are optional and a general error is returned
 
 	for _, cgrEv := range cgrEvs {
-		rateS, err := GetBoolOpts(ctx, cgrEv.Tenant, cgrEv.AsDataProvider(), cdrS.fltrS, cdrS.cfg.CdrsCfg().Opts.Rates,
+		rateS, err := engine.GetBoolOpts(ctx, cgrEv.Tenant, cgrEv.AsDataProvider(), cdrS.fltrS, cdrS.cfg.CdrsCfg().Opts.Rates,
 			config.CDRsRatesDftOpt, utils.MetaRates)
 		if err != nil {
 			return nil, fmt.Errorf("retrieving %s option failed: %w", utils.MetaRates, err)
@@ -263,7 +263,7 @@ func (cdrS *CDRServer) processEvents(ctx *context.Context, evs []*utils.CGREvent
 	}
 
 	for _, cgrEv := range cgrEvs {
-		acntS, err := GetBoolOpts(ctx, cgrEv.Tenant, cgrEv.AsDataProvider(), cdrS.fltrS, cdrS.cfg.CdrsCfg().Opts.Accounts,
+		acntS, err := engine.GetBoolOpts(ctx, cgrEv.Tenant, cgrEv.AsDataProvider(), cdrS.fltrS, cdrS.cfg.CdrsCfg().Opts.Accounts,
 			config.CDRsAccountsDftOpt, utils.MetaAccounts)
 		if err != nil {
 			return nil, fmt.Errorf("retrieving %s option failed: %w", utils.MetaAccounts, err)
@@ -311,7 +311,7 @@ func (cdrS *CDRServer) processEvents(ctx *context.Context, evs []*utils.CGREvent
 	}
 
 	for _, cgrEv := range cgrEvs {
-		store, err := GetBoolOpts(ctx, cgrEv.Tenant, cgrEv.AsDataProvider(), cdrS.fltrS, cdrS.cfg.CdrsCfg().Opts.Store,
+		store, err := engine.GetBoolOpts(ctx, cgrEv.Tenant, cgrEv.AsDataProvider(), cdrS.fltrS, cdrS.cfg.CdrsCfg().Opts.Store,
 			config.CDRsStoreDftOpt, utils.MetaStore)
 		if err != nil {
 			return nil, fmt.Errorf("retrieving %s option failed: %w", utils.MetaStore, err)
@@ -319,23 +319,29 @@ func (cdrS *CDRServer) processEvents(ctx *context.Context, evs []*utils.CGREvent
 		if !store {
 			continue
 		}
-		rerate, err := GetBoolOpts(ctx, cgrEv.Tenant, cgrEv.AsDataProvider(), cdrS.fltrS, cdrS.cfg.CdrsCfg().Opts.Rerate,
+		rerate, err := engine.GetBoolOpts(ctx, cgrEv.Tenant, cgrEv.AsDataProvider(), cdrS.fltrS, cdrS.cfg.CdrsCfg().Opts.Rerate,
 			config.CDRsRerateDftOpt, utils.MetaRerate)
 		if err != nil {
 			return nil, fmt.Errorf("retrieving %s option failed: %w", utils.MetaRerate, err)
 		}
-		cdrID := GetUniqueCDRID(cgrEv)
+
+		// Prevent 'assignment to entry in nil map' panic.
 		if cgrEv.APIOpts == nil {
 			cgrEv.APIOpts = make(map[string]any)
 		}
-		cgrEv.APIOpts[utils.MetaCDRID] = cdrID
-		if err := cdrS.db.SetCDR(ctx, cdrID, cgrEv, false); err != nil {
+
+		// Make sure *cdrID key exists in opts, as it's needed to identify CDRs during CRUD operations.
+		if _, ok := cgrEv.APIOpts[utils.MetaCDRID]; !ok {
+			cgrEv.APIOpts[utils.MetaCDRID] = utils.GetUniqueCDRID(cgrEv)
+		}
+
+		if err := cdrS.db.SetCDR(ctx, cgrEv, false); err != nil {
 			if err != utils.ErrExists || !rerate {
 
 				// ToDo: add refund logic
 				return nil, fmt.Errorf("storing CDR %s failed: %w", utils.ToJSON(cgrEv), err)
 			}
-			if err = cdrS.db.SetCDR(ctx, cdrID, cgrEv, true); err != nil {
+			if err = cdrS.db.SetCDR(ctx, cgrEv, true); err != nil {
 				utils.Logger.Warning(
 					fmt.Sprintf("<%s> error: <%s> updating CDR %+v",
 						utils.CDRs, err.Error(), utils.ToJSON(cgrEv)))
@@ -345,7 +351,7 @@ func (cdrS *CDRServer) processEvents(ctx *context.Context, evs []*utils.CGREvent
 	}
 
 	for _, cgrEv := range cgrEvs {
-		export, err := GetBoolOpts(ctx, cgrEv.Tenant, cgrEv.AsDataProvider(), cdrS.fltrS, cdrS.cfg.CdrsCfg().Opts.Export,
+		export, err := engine.GetBoolOpts(ctx, cgrEv.Tenant, cgrEv.AsDataProvider(), cdrS.fltrS, cdrS.cfg.CdrsCfg().Opts.Export,
 			config.CDRsExportDftOpt, utils.OptsCDRsExport)
 		if err != nil {
 			return nil, fmt.Errorf("retrieving %s option failed: %w", utils.OptsCDRsExport, err)
@@ -366,7 +372,7 @@ func (cdrS *CDRServer) processEvents(ctx *context.Context, evs []*utils.CGREvent
 	}
 
 	for _, cgrEv := range cgrEvs {
-		thdS, err := GetBoolOpts(ctx, cgrEv.Tenant, cgrEv.AsDataProvider(), cdrS.fltrS, cdrS.cfg.CdrsCfg().Opts.Thresholds,
+		thdS, err := engine.GetBoolOpts(ctx, cgrEv.Tenant, cgrEv.AsDataProvider(), cdrS.fltrS, cdrS.cfg.CdrsCfg().Opts.Thresholds,
 			config.CDRsThresholdsDftOpt, utils.MetaThresholds)
 		if err != nil {
 			return nil, fmt.Errorf("retrieving %s option failed: %w", utils.MetaThresholds, err)
@@ -383,7 +389,7 @@ func (cdrS *CDRServer) processEvents(ctx *context.Context, evs []*utils.CGREvent
 	}
 
 	for _, cgrEv := range cgrEvs {
-		stS, err := GetBoolOpts(ctx, cgrEv.Tenant, cgrEv.AsDataProvider(), cdrS.fltrS, cdrS.cfg.CdrsCfg().Opts.Stats,
+		stS, err := engine.GetBoolOpts(ctx, cgrEv.Tenant, cgrEv.AsDataProvider(), cdrS.fltrS, cdrS.cfg.CdrsCfg().Opts.Stats,
 			config.CDRsStatsDftOpt, utils.MetaStats)
 		if err != nil {
 			return nil, fmt.Errorf("retrieving %s option failed: %w", utils.MetaStats, err)
@@ -414,76 +420,6 @@ func (cdrS *CDRServer) processEvents(ctx *context.Context, evs []*utils.CGREvent
 	return outEvs, nil
 }
 
-// V1ProcessEvent will process the CGREvent
-func (cdrS *CDRServer) V1ProcessEvent(ctx *context.Context, args *utils.CGREvent, reply *string) (err error) {
-	if args.ID == utils.EmptyString {
-		args.ID = utils.GenUUID()
-	}
-	if args.Tenant == utils.EmptyString {
-		args.Tenant = cdrS.cfg.GeneralCfg().DefaultTenant
-	}
-	// RPC caching
-	if config.CgrConfig().CacheCfg().Partitions[utils.CacheRPCResponses].Limit != 0 {
-		cacheKey := utils.ConcatenatedKey(utils.CDRsV1ProcessEvent, args.ID)
-		refID := guardian.Guardian.GuardIDs("",
-			config.CgrConfig().GeneralCfg().LockingTimeout, cacheKey) // RPC caching needs to be atomic
-		defer guardian.Guardian.UnguardIDs(refID)
-
-		if itm, has := Cache.Get(utils.CacheRPCResponses, cacheKey); has {
-			cachedResp := itm.(*utils.CachedRPCResponse)
-			if cachedResp.Error == nil {
-				*reply = *cachedResp.Result.(*string)
-			}
-			return cachedResp.Error
-		}
-		defer Cache.Set(ctx, utils.CacheRPCResponses, cacheKey,
-			&utils.CachedRPCResponse{Result: reply, Error: err},
-			nil, true, utils.NonTransactional)
-	}
-	// end of RPC caching
-
-	if _, err = cdrS.processEvents(ctx, []*utils.CGREvent{args}); err != nil {
-		return
-	}
-	*reply = utils.OK
-	return nil
-}
-
-// V1ProcessEventWithGet has the same logic with V1ProcessEvent except it adds the proccessed events to the reply
-func (cdrS *CDRServer) V1ProcessEventWithGet(ctx *context.Context, args *utils.CGREvent, evs *[]*utils.EventsWithOpts) (err error) {
-	if args.ID == utils.EmptyString {
-		args.ID = utils.GenUUID()
-	}
-	if args.Tenant == utils.EmptyString {
-		args.Tenant = cdrS.cfg.GeneralCfg().DefaultTenant
-	}
-	// RPC caching
-	if config.CgrConfig().CacheCfg().Partitions[utils.CacheRPCResponses].Limit != 0 {
-		cacheKey := utils.ConcatenatedKey(utils.CDRsV1ProcessEventWithGet, args.ID)
-		refID := guardian.Guardian.GuardIDs("",
-			config.CgrConfig().GeneralCfg().LockingTimeout, cacheKey) // RPC caching needs to be atomic
-		defer guardian.Guardian.UnguardIDs(refID)
-
-		if itm, has := Cache.Get(utils.CacheRPCResponses, cacheKey); has {
-			cachedResp := itm.(*utils.CachedRPCResponse)
-			if cachedResp.Error == nil {
-				*evs = *cachedResp.Result.(*[]*utils.EventsWithOpts)
-			}
-			return cachedResp.Error
-		}
-		defer Cache.Set(ctx, utils.CacheRPCResponses, cacheKey,
-			&utils.CachedRPCResponse{Result: evs, Error: err},
-			nil, true, utils.NonTransactional)
-	}
-	// end of RPC caching
-	var procEvs []*utils.EventsWithOpts
-	if procEvs, err = cdrS.processEvents(ctx, []*utils.CGREvent{args}); err != nil {
-		return
-	}
-	*evs = procEvs
-	return nil
-}
-
 func populateCost(cgrOpts map[string]any) *utils.Decimal {
 	// if the cost is already present, get out
 	if _, has := cgrOpts[utils.MetaCost]; has {
@@ -498,48 +434,4 @@ func populateCost(cgrOpts map[string]any) *utils.Decimal {
 		return rtCost.(utils.RateProfileCost).Cost
 	}
 	return nil
-}
-
-// V1ProcessStoredEvents processes stored events based on provided filters.
-func (cdrS *CDRServer) V1ProcessStoredEvents(ctx *context.Context, args *CDRFilters, reply *string) (err error) {
-	if args.ID == utils.EmptyString {
-		args.ID = utils.GenUUID()
-	}
-	if args.Tenant == utils.EmptyString {
-		args.Tenant = cdrS.cfg.GeneralCfg().DefaultTenant
-	}
-
-	// RPC caching
-	if config.CgrConfig().CacheCfg().Partitions[utils.CacheRPCResponses].Limit != 0 {
-		cacheKey := utils.ConcatenatedKey(utils.CDRsV1ProcessStoredEvents, args.ID)
-		refID := guardian.Guardian.GuardIDs("",
-			config.CgrConfig().GeneralCfg().LockingTimeout, cacheKey)
-		defer guardian.Guardian.UnguardIDs(refID)
-
-		if itm, has := Cache.Get(utils.CacheRPCResponses, cacheKey); has {
-			cachedResp := itm.(*utils.CachedRPCResponse)
-			if cachedResp.Error == nil {
-				*reply = *cachedResp.Result.(*string)
-			}
-			return cachedResp.Error
-		}
-		defer Cache.Set(ctx, utils.CacheRPCResponses, cacheKey,
-			&utils.CachedRPCResponse{Result: reply, Error: err},
-			nil, true, utils.NonTransactional)
-	}
-
-	fltrs, err := GetFilters(ctx, args.FilterIDs, args.Tenant, cdrS.dm)
-	if err != nil {
-		return fmt.Errorf("preparing filters failed: %w", err)
-	}
-	cdrs, err := cdrS.db.GetCDRs(ctx, fltrs, args.APIOpts)
-	if err != nil {
-		return fmt.Errorf("retrieving CDRs failed: %w", err)
-	}
-	_, err = cdrS.processEvents(ctx, CDRsToCGREvents(cdrs))
-	if err != nil && !errors.Is(err, utils.ErrPartiallyExecuted) {
-		return fmt.Errorf("processing events failed: %w", err)
-	}
-	*reply = utils.OK
-	return err
 }

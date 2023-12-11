@@ -25,6 +25,7 @@ import (
 
 	"github.com/cgrates/birpc"
 	"github.com/cgrates/birpc/context"
+	"github.com/cgrates/cgrates/cdrs"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/cores"
 	"github.com/cgrates/cgrates/engine"
@@ -61,7 +62,7 @@ type CDRServer struct {
 	filterSChan chan *engine.FilterS
 	server      *cores.Server
 
-	cdrS     *engine.CDRServer
+	cdrS     *cdrs.CDRServer
 	connChan chan birpc.ClientConnector
 	connMgr  *engine.ConnManager
 
@@ -95,7 +96,7 @@ func (cdrService *CDRServer) Start(ctx *context.Context, _ context.CancelFunc) (
 	cdrService.Lock()
 	defer cdrService.Unlock()
 
-	cdrService.cdrS = engine.NewCDRServer(cdrService.cfg, datadb, filterS, cdrService.connMgr, storDBChan)
+	cdrService.cdrS = cdrs.NewCDRServer(cdrService.cfg, datadb, filterS, cdrService.connMgr, storDBChan)
 	go cdrService.cdrS.ListenAndServe(cdrService.stopChan)
 	runtime.Gosched()
 	utils.Logger.Info("Registering CDRS RPC service.")

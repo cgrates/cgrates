@@ -37,6 +37,7 @@ import (
 	"github.com/cgrates/cgrates/actions"
 	"github.com/cgrates/cgrates/analyzers"
 	"github.com/cgrates/cgrates/apis"
+	"github.com/cgrates/cgrates/cdrs"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/cores"
 	"github.com/cgrates/cgrates/ees"
@@ -63,7 +64,7 @@ func main() {
 		{"actions.go", "MetaActions", new(actions.ActionS), utils.EmptyString},
 		{"attributes.go", "MetaAttributes", new(engine.AttributeS), utils.EmptyString},
 		{"caches.go", "MetaCaches", engine.Cache, utils.EmptyString},
-		{"cdrs.go", "MetaCDRs", new(engine.CDRServer), utils.CDRs},
+		{"cdrs.go", "MetaCDRs", new(cdrs.CDRServer), utils.CDRs},
 		{"chargers.go", "MetaChargers", new(engine.ChargerS), utils.EmptyString},
 		{"config.go", "MetaConfig", new(config.CGRConfig), utils.ConfigS},
 		{"rates.go", "RateS", new(rates.RateS), utils.EmptyString},

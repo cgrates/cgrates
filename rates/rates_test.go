@@ -26,6 +26,7 @@ import (
 
 	"github.com/cgrates/birpc"
 	"github.com/cgrates/birpc/context"
+	"github.com/cgrates/cgrates/cdrs"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -1085,7 +1086,7 @@ func TestCDRProcessRatesCostForEvent(t *testing.T) {
 	storDB := engine.NewInternalDB(nil, nil, nil)
 	storDBChan := make(chan engine.StorDB, 1)
 	storDBChan <- storDB
-	cdrs := engine.NewCDRServer(cfg, dm, filters, connMgr, storDBChan)
+	cdrs := cdrs.NewCDRServer(cfg, dm, filters, connMgr, storDBChan)
 	ratesConns := make(chan birpc.ClientConnector, 1)
 	rateSrv, err := birpc.NewServiceWithMethodsRename(NewRateS(cfg, filters, dm), utils.RateSv1, true, func(key string) (newKey string) {
 		return strings.TrimPrefix(key, utils.V1Prfx)

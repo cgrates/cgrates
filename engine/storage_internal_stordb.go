@@ -66,7 +66,7 @@ func (iDB *InternalDB) SetCDR(_ *context.Context, cdrID string, cgrEv *utils.CGR
 	return nil
 }
 
-func (iDB *InternalDB) GetCDRs(ctx *context.Context, qryFltr []*Filter, opts map[string]interface{}) (cdrs []*CDR, err error) {
+func (iDB *InternalDB) GetCDRs(ctx *context.Context, qryFltr []*Filter, opts map[string]interface{}) (cdrs []*utils.CDR, err error) {
 	pairFltrs := make(map[string][]string)
 	notPairFltrs := make(map[string][]string)
 	notIndexed := []*FilterRule{}
@@ -154,9 +154,9 @@ func (iDB *InternalDB) GetCDRs(ctx *context.Context, qryFltr []*Filter, opts map
 		return nil, utils.ErrNotFound
 	}
 	// convert from event into CDRs
-	cdrs = make([]*CDR, len(events))
+	cdrs = make([]*utils.CDR, len(events))
 	for i, event := range events {
-		cdrs[i] = &CDR{
+		cdrs[i] = &utils.CDR{
 			Tenant:    event.Tenant,
 			Opts:      event.APIOpts,
 			Event:     event.Event,

@@ -121,7 +121,7 @@ func (ms *MongoStorage) SetCDR(ctx *context.Context, cdrID string, cdr *utils.CG
 
 		_, err := ms.getCol(ColCDRs).InsertOne(
 			sctx,
-			&CDR{
+			&utils.CDR{
 				Tenant:    cdr.Tenant,
 				Opts:      cdr.APIOpts,
 				Event:     cdr.Event,
@@ -169,7 +169,7 @@ func isMongoDuplicateError(err error) bool {
 	return false
 }
 
-func (ms *MongoStorage) GetCDRs(ctx *context.Context, qryFltr []*Filter, opts map[string]interface{}) (cdrs []*CDR, err error) {
+func (ms *MongoStorage) GetCDRs(ctx *context.Context, qryFltr []*Filter, opts map[string]interface{}) (cdrs []*utils.CDR, err error) {
 	fltrs := make(bson.M)
 	for _, fltr := range qryFltr {
 		for _, rule := range fltr.Rules {
@@ -209,7 +209,7 @@ func (ms *MongoStorage) GetCDRs(ctx *context.Context, qryFltr []*Filter, opts ma
 			return err
 		}
 		for cur.Next(sctx) {
-			cdr := CDR{}
+			cdr := utils.CDR{}
 			err := cur.Decode(&cdr)
 			if err != nil {
 				return err
@@ -372,7 +372,7 @@ func (ms *MongoStorage) RemoveCDRs(ctx *context.Context, qryFltr []*Filter) (err
 		}
 		defer cur.Close(sctx)
 		for cur.Next(sctx) {
-			cdr := CDR{}
+			cdr := utils.CDR{}
 			if err := cur.Decode(&cdr); err != nil {
 				return err
 			}
