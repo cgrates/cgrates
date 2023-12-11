@@ -121,12 +121,10 @@ func (es *EventExporterService) Start(ctx *context.Context, _ context.CancelFunc
 	es.stopChan = make(chan struct{})
 	go es.eeS.ListenAndServe(es.stopChan, es.rldChan)
 
-	srv, _ := engine.NewService(es.eeS)
+	srv, _ := engine.NewService2(es.eeS, utils.EeSv1, utils.V1Prfx)
 	// srv, _ := birpc.NewService(es.rpc, "", false)
 	if !es.cfg.DispatcherSCfg().Enabled {
-		for _, s := range srv {
-			es.server.RpcRegister(s)
-		}
+		es.server.RpcRegister(srv)
 	}
 	es.intConnChan <- es.anz.GetInternalCodec(srv, utils.EEs)
 	return

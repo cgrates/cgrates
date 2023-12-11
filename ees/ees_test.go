@@ -554,3 +554,90 @@ func TestUpdateEEMetrics(t *testing.T) {
 		t.Errorf("Expected: %s,received: %s", utils.ToJSON(exp), utils.ToJSON(dc))
 	}
 }
+
+func TestEeSProcessEvent(t *testing.T) {
+	filePath := "/tmp/TestV1ProcessEvent"
+	if err := os.MkdirAll(filePath, 0777); err != nil {
+		t.Error(err)
+	}
+	cfg := config.NewDefaultCGRConfig()
+	cfg.EEsCfg().Exporters[0].Type = "*fileCSV"
+	cfg.EEsCfg().Exporters[0].ID = "SQLExporterFull"
+	cfg.EEsCfg().Exporters[0].ExportPath = filePath
+	newIDb := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	newDM := engine.NewDataManager(newIDb, cfg.CacheCfg(), nil)
+	filterS := engine.NewFilterS(cfg, nil, newDM)
+	eeS := NewEventExporterS(cfg, filterS, nil)
+	cgrEv := &utils.CGREventWithEeIDs{
+		EeIDs: []string{"SQLExporterFull"},
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "voiceEvent",
+			Event: map[string]any{
+
+				utils.ToR:          utils.MetaVoice,
+				utils.OriginID:     "dsafdsaf",
+				utils.OriginHost:   "192.168.1.1",
+				utils.RequestType:  utils.MetaRated,
+				utils.Tenant:       "cgrates.org",
+				utils.Category:     "call",
+				utils.AccountField: "1001",
+				utils.Subject:      "1001",
+				utils.Destination:  "1002",
+				utils.SetupTime:    time.Unix(1383813745, 0).UTC(),
+				utils.AnswerTime:   time.Unix(1383813746, 0).UTC(),
+				utils.Usage:        10 * time.Second,
+				utils.MetaRunID:    utils.MetaDefault,
+				utils.Cost:         1.01,
+				"ExtraFields": map[string]string{"extra1": "val_extra1",
+					"extra2": "val_extra2", "extra3": "val_extra3"},
+			},
+			APIOpts: map[string]any{
+				utils.MetaOriginID: utils.Sha1("dsafdsaf", time.Unix(1383813745, 0).UTC().String()),
+			},
+		},
+	}
+	var reply map[string]map[string]any
+	replyExpect := map[string]map[string]any{
+		"SQLExporterFull": {},
+	}
+	if err := eeS.V1ProcessEvent(context.Background(), cgrEv, &reply); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(reply, replyExpect) {
+		t.Errorf("Expected %v \n but received \n %v", replyExpect, reply)
+	}
+
+	if err := os.RemoveAll(filePath); err != nil {
+		t.Error(err)
+	}
+}
+
+func TestArchiveEventsInReply(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	// cfg.EEsCfg().Exporters[0].Type = "*fileCSV"
+	cfg.EEsCfg().Exporters[0].ID = "SQLExporterFull"
+	newIDb := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	newDM := engine.NewDataManager(newIDb, cfg.CacheCfg(), nil)
+	filterS := engine.NewFilterS(cfg, nil, newDM)
+	eeS := NewEventExporterS(cfg, filterS, nil)
+
+	args := &ArchiveEventsArgs{
+		Tenant: "cgrates.org",
+		APIOpts: map[string]any{
+			utils.MetaExporterID: "SQLExporterFull",
+		},
+		Events: []*utils.EventsWithOpts{
+			{
+				Event: map[string]any{
+					"Account": "1001",
+				},
+			},
+		},
+	}
+
+	var reply []byte
+	errExp := "exporter with ID: SQLExporterFull is not synchronous"
+	if err := eeS.V1ArchiveEventsInReply(context.Background(), args, &reply); err.Error() != errExp {
+		t.Errorf("Expected %v\n but received %v", errExp, err)
+	}
+}

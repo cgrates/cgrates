@@ -134,12 +134,13 @@ func (rs *RateService) Start(ctx *context.Context, _ context.CancelFunc) (err er
 	rs.stopChan = make(chan struct{})
 	go rs.rateS.ListenAndServe(rs.stopChan, rs.rldChan)
 
-	srv, _ := engine.NewService(rs.rateS)
+	srv, err := engine.NewService2(rs.rateS, utils.RateSv1, utils.V1Prfx)
+	if err != nil {
+		return err
+	}
 	// srv, _ := birpc.NewService(apis.NewRateSv1(rs.rateS), "", false)
 	if !rs.cfg.DispatcherSCfg().Enabled {
-		for _, s := range srv {
-			rs.server.RpcRegister(s)
-		}
+		rs.server.RpcRegister(srv)
 	}
 	rs.intConnChan <- rs.anz.GetInternalCodec(srv, utils.RateS)
 	return

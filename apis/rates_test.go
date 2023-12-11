@@ -24,7 +24,6 @@ import (
 	"testing"
 
 	"github.com/cgrates/birpc/context"
-	"github.com/cgrates/cgrates/rates"
 
 	"github.com/cgrates/cgrates/utils"
 
@@ -634,52 +633,6 @@ func TestRatesSetRateProfile(t *testing.T) {
 	expected.Rates = nil
 	if !reflect.DeepEqual(result, expected) {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
-	}
-}
-
-func TestRatesNewRateSv1(t *testing.T) {
-	rateS := &rates.RateS{}
-	expected := &RateSv1{
-		rS: rateS,
-	}
-	result := NewRateSv1(rateS)
-	if !reflect.DeepEqual(result, expected) {
-		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
-	}
-}
-
-func TestRatesCostForEvent(t *testing.T) {
-	engine.Cache.Clear(nil)
-	cfg := config.NewDefaultCGRConfig()
-	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
-	connMgr := engine.NewConnManager(cfg)
-	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dm := engine.NewDataManager(dataDB, nil, connMgr)
-	rateS := rates.NewRateS(cfg, nil, dm)
-	expected := &RateSv1{
-		rS: rateS,
-	}
-	rateSv1 := NewRateSv1(rateS)
-	if !reflect.DeepEqual(rateSv1, expected) {
-		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, rateSv1)
-	}
-	ev := &utils.CGREvent{
-		Tenant: "tenant",
-		ID:     "ID",
-		Event:  nil,
-		APIOpts: map[string]any{
-			utils.OptsRatesProfileIDs: []string{"rtID"},
-		},
-	}
-
-	rpCost := &utils.RateProfileCost{}
-	err := rateSv1.CostForEvent(context.Background(), ev, rpCost)
-	if err == nil || err != utils.ErrNotFound {
-		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", utils.ErrNotFound, err)
-	}
-	expected2 := &utils.RateProfileCost{}
-	if !reflect.DeepEqual(rpCost, expected2) {
-		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected2, rpCost)
 	}
 }
 
@@ -1757,125 +1710,6 @@ func TestRatesRemoveRateProfileErrorSetCache(t *testing.T) {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, err)
 	}
 	dm.DataDB().Flush(utils.EmptyString)
-}
-
-func TestRatesCostForEventRateIDxSelects(t *testing.T) {
-	jsonCfg := `{
-"rates": {
-    "enabled": true,
-    "rate_indexed_selects": true,
-  },
-}
-`
-	cfg, err := config.NewCGRConfigFromJSONStringWithDefaults(jsonCfg)
-	if err != nil {
-		t.Error(err)
-	}
-	db := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dm := engine.NewDataManager(db, cfg.CacheCfg(), nil)
-	fltrs := engine.NewFilterS(cfg, nil, dm)
-	rts := rates.NewRateS(cfg, fltrs, dm)
-
-	rtPrf := &utils.RateProfile{
-		Tenant:    "cgrates.org",
-		ID:        "RATE_1",
-		FilterIDs: []string{"*string:~*req.Account:1001"},
-		Rates: map[string]*utils.Rate{
-			"RT_ALWAYS": {
-				ID: "RT_ALWAYS",
-				FilterIDs: []string{
-					"*string:~*req.ToR:*voice"},
-				ActivationTimes: "* * * * *",
-				IntervalRates: []*utils.IntervalRate{
-					{
-						IntervalStart: utils.NewDecimal(0, 0),
-						RecurrentFee:  utils.NewDecimal(1, 2),
-						Increment:     utils.NewDecimal(1, 1),
-						Unit:          utils.NewDecimal(2, 0),
-						//FixedFee:      utils.Float64Pointer(0.3),
-					},
-				},
-			},
-			"RT_CHRISTMAS": {
-				ID: "RT_CHRISTMAS",
-				FilterIDs: []string{"*prefix:~*req.Destination:+332",
-					"*string:~*req.RequestType:*postpaid"},
-				ActivationTimes: "* * * * *",
-				IntervalRates: []*utils.IntervalRate{
-					{
-						IntervalStart: utils.NewDecimal(0, 0),
-						RecurrentFee:  utils.NewDecimal(4, 1),
-						Increment:     utils.NewDecimal(1, 1),
-						Unit:          utils.NewDecimal(3, 1),
-						//FixedFee:      utils.Float64Pointer(0.5),
-					},
-				},
-			},
-		},
-	}
-	if err := dm.SetRateProfile(context.Background(), rtPrf, false, true); err != nil {
-		t.Error(err)
-	}
-
-	//math the rates with true rates index selects from config
-	ev := &utils.CGREvent{
-		Tenant: "cgrates.org",
-		Event: map[string]any{
-			utils.AccountField: "1001",
-			utils.RequestType:  "*postpaid",
-			utils.Destination:  "+332145",
-		},
-		APIOpts: map[string]any{
-			utils.OptsRatesUsage: "1m24s",
-		},
-	}
-	usg, err := utils.NewDecimalFromUsage("1m24s")
-	if err != nil {
-		t.Error(err)
-	}
-	var rpCost utils.RateProfileCost
-	expRpCost := &utils.RateProfileCost{
-		ID:   "RATE_1",
-		Cost: utils.NewDecimal(1120000000000000, 4),
-		CostIntervals: []*utils.RateSIntervalCost{
-			{
-				Increments: []*utils.RateSIncrementCost{
-					{
-						Usage:             usg,
-						RateID:            "random",
-						RateIntervalIndex: 0,
-						CompressFactor:    840000000000,
-					},
-				},
-				CompressFactor: 1,
-			},
-		},
-		Rates: map[string]*utils.IntervalRate{
-			"random": {
-				IntervalStart: utils.NewDecimal(0, 0),
-				RecurrentFee:  utils.NewDecimal(4, 1),
-				Increment:     utils.NewDecimal(1, 1),
-				Unit:          utils.NewDecimal(3, 1),
-				//	FixedFee:      utils.NewDecimal(5, 1),
-			},
-		},
-	}
-
-	if err := rts.V1CostForEvent(context.Background(), ev,
-		&rpCost); err != nil {
-		t.Error(err)
-	} else if !rpCost.Equals(expRpCost) {
-		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expRpCost), utils.ToJSON(rpCost))
-	}
-
-	cfg.RateSCfg().RateIndexedSelects = false
-	rts = rates.NewRateS(cfg, fltrs, dm)
-	if err := rts.V1CostForEvent(context.Background(), ev,
-		&rpCost); err != nil {
-		t.Error(err)
-	} else if !rpCost.Equals(expRpCost) {
-		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expRpCost), utils.ToJSON(rpCost))
-	}
 }
 
 func TestRatesGetRateProfilesOK(t *testing.T) {

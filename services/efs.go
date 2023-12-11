@@ -25,7 +25,6 @@ import (
 	"github.com/cgrates/birpc/context"
 
 	"github.com/cgrates/birpc"
-	"github.com/cgrates/cgrates/apis"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/cores"
 	"github.com/cgrates/cgrates/efs"
@@ -70,7 +69,7 @@ func (efServ *ExportFailoverService) Start(ctx *context.Context, _ context.Cance
 	efServ.efS = efs.NewEfs(efServ.cfg, efServ.connMgr)
 	utils.Logger.Info(fmt.Sprintf("<%s> starting <%s> subsystem", utils.CoreS, utils.EFs))
 	efServ.stopChan = make(chan struct{})
-	efServ.srv, _ = birpc.NewService(apis.NewEfSv1(efServ.efS), utils.EmptyString, false)
+	efServ.srv, _ = engine.NewService2(efServ.efS, utils.EfSv1, utils.V1Prfx)
 	efServ.server.RpcRegister(efServ.srv)
 	efServ.Unlock()
 	return
