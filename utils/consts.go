@@ -1177,6 +1177,7 @@ const (
 	MetaNumber             = "*number"
 	MetaActivationInterval = "*ai"
 	MetaRegex              = "*regex"
+	MetaContains           = "*contains"
 
 	MetaNotString             = "*notstring"
 	MetaNotPrefix             = "*notprefix"
@@ -1194,6 +1195,7 @@ const (
 	MetaNotSentryPeer         = "*notsentrypeer"
 	MetaNotActivationInterval = "*notai"
 	MetaNotRegex              = "*notregex"
+	MetaNotContains           = "*notcontains"
 
 	MetaEC = "*ec"
 )

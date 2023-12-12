@@ -5014,3 +5014,66 @@ func TestDmUpdateReverseDestination(t *testing.T) {
 		}
 	}
 }
+
+func TestIndxFilterContains(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	dm := NewDataManager(NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items), cfg.CacheCfg(), nil)
+
+	ft := &Filter{
+		Tenant: "cgrates.org",
+		ID:     "Filter1",
+		Rules: []*FilterRule{
+			{
+				Type:    utils.MetaContains,
+				Element: "~*req.EventType",
+				Values:  []string{"Ev"},
+			},
+		},
+	}
+	if err := dm.SetFilter(ft, true); err != nil {
+		t.Error(err)
+	}
+	fs := &Filter{
+		Tenant: "cgrates.org",
+		ID:     "Filter2",
+		Rules: []*FilterRule{
+			{
+				Type:    utils.MetaString,
+				Element: "~*req.EventType",
+				Values:  []string{"Event1"},
+			},
+		},
+	}
+	if err := dm.SetFilter(fs, true); err != nil {
+		t.Error(err)
+	}
+
+	th := &ThresholdProfile{
+		Tenant:             "cgrates.org",
+		ID:                 "THD_Test",
+		ActivationInterval: &utils.ActivationInterval{},
+		FilterIDs:          []string{"Filter1", "Filter2"},
+		MaxHits:            12,
+		MinSleep:           0,
+		Blocker:            true,
+		Weight:             1.4,
+		ActionIDs:          []string{},
+	}
+
+	if err := dm.SetThresholdProfile(th, true); err != nil {
+		t.Error(err)
+	}
+	eIdxes := map[string]utils.StringSet{
+		"*string:*req.EventType:Event1": {
+			"THD_Test": struct{}{},
+		},
+	}
+	if rcvIdx, err := dm.GetIndexes(
+		utils.CacheThresholdFilterIndexes, th.Tenant,
+		utils.EmptyString, false, false); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eIdxes, rcvIdx) {
+		t.Errorf("Expecting %+v, received: %+v", eIdxes, rcvIdx)
+	}
+
+}
