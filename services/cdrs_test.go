@@ -48,7 +48,7 @@ func TestCdrsCoverage(t *testing.T) {
 		t.Errorf("Expected service to be down")
 	}
 	//populates cdrS2  with something in order to call the close funct
-	cdrS2 := &CDRServer{
+	cdrS2 := &CDRService{
 		RWMutex:     sync.RWMutex{},
 		cfg:         cfg,
 		dm:          db,
