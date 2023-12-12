@@ -89,6 +89,40 @@ func TestFilterPassString(t *testing.T) {
 	}
 }
 
+func TestFilterPassContains(t *testing.T) {
+	dp := utils.MapStorage{
+		utils.MetaReq: map[string]any{
+			"Attribute":      "AttributeProfile1",
+			utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
+			"UsageInterval":  "1s",
+			utils.Weight:     "20.0",
+			"Account":        "1001",
+			"OriginHost":     "22.15.81.122",
+		}}
+
+	rF, _ := NewFilterRule(utils.MetaContains, "~*req.Attribute", []string{"Profile"})
+
+	if pass, err := rF.passContains(dp); err != nil {
+		t.Error(err)
+	} else if !pass {
+		t.Error("FilterRule should pass")
+	}
+
+	rF, _ = NewFilterRule(utils.MetaContains, "~*req.OriginHost", []string{"81"})
+	if pass, err := rF.passContains(dp); err != nil {
+		t.Error(err)
+	} else if !pass {
+		t.Error("FilterRule should pass")
+	}
+
+	rF, _ = NewFilterRule(utils.MetaContains, "~*req.Account", []string{"200"})
+	if pass, err := rF.passContains(dp); err != nil {
+		t.Error(err)
+	} else if pass {
+		t.Error("FilterRule should not pass")
+	}
+}
+
 func TestFilterPassRegex(t *testing.T) {
 	cd := &CallDescriptor{
 		Category:      "call",
