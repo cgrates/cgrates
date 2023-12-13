@@ -105,19 +105,28 @@ var testEC = &EventCost{
 		ID:     "dan",
 		BalanceSummaries: []*BalanceSummary{
 			{
-				UUID:  "8c54a9e9-d610-4c82-bcb5-a315b9a65010",
-				Type:  utils.MetaMonetary,
-				Value: 50,
+				UUID:     "8c54a9e9-d610-4c82-bcb5-a315b9a65010",
+				ID:       "BALANCE_1",
+				Type:     utils.MetaMonetary,
+				Value:    50,
+				Initial:  60,
+				Disabled: false,
 			},
 			{
-				UUID:  "7a54a9e9-d610-4c82-bcb5-a315b9a65010",
-				Type:  utils.MetaMonetary,
-				Value: 25,
+				UUID:     "7a54a9e9-d610-4c82-bcb5-a315b9a65010",
+				ID:       "BALANCE_2",
+				Type:     utils.MetaMonetary,
+				Value:    25,
+				Initial:  60,
+				Disabled: false,
 			},
 			{
-				UUID:  "4b8b53d7-c1a1-4159-b845-4623a00a0165",
-				Type:  utils.MetaVoice,
-				Value: 200,
+				UUID:     "4b8b53d7-c1a1-4159-b845-4623a00a0165",
+				ID:       "BALANCE_3",
+				Type:     utils.MetaVoice,
+				Value:    200,
+				Initial:  250,
+				Disabled: true,
 			},
 		},
 		AllowNegative: false,
@@ -125,8 +134,10 @@ var testEC = &EventCost{
 	},
 	Rating: Rating{
 		"3cd6425": &RatingUnit{
+			ConnectFee:       0.4,
 			RoundingMethod:   "*up",
 			RoundingDecimals: 5,
+			MaxCostStrategy:  utils.MetaMaxCostDisconnect,
 			TimingID:         "7f324ab",
 			RatesID:          "4910ecf",
 			RatingFiltersID:  "43e77dc",
@@ -135,6 +146,7 @@ var testEC = &EventCost{
 			ConnectFee:       0.1,
 			RoundingMethod:   "*up",
 			RoundingDecimals: 5,
+			MaxCostStrategy:  utils.MetaMaxCostDisconnect,
 			TimingID:         "7f324ab",
 			RatesID:          "ec1a177",
 			RatingFiltersID:  "43e77dc",
@@ -2382,6 +2394,7 @@ func TestECSyncKeys(t *testing.T) {
 				ConnectFee:       0.1,
 				RoundingMethod:   "*up",
 				RoundingDecimals: 5,
+				MaxCostStrategy:  utils.MetaMaxCostDisconnect,
 				TimingID:         "2f324ab",
 				RatesID:          "2c1a177",
 				RatingFiltersID:  "23e77dc",
@@ -2509,19 +2522,27 @@ func TestECSyncKeys(t *testing.T) {
 			BalanceSummaries: []*BalanceSummary{
 				{
 					UUID:     "8c54a9e9-d610-4c82-bcb5-a315b9a65010",
+					ID:       "BALANCE_1",
 					Type:     utils.MetaMonetary,
 					Value:    50,
-					Disabled: false},
+					Initial:  60,
+					Disabled: false,
+				},
 				{
 					UUID:     "7a54a9e9-d610-4c82-bcb5-a315b9a65010",
+					ID:       "BALANCE_2",
 					Type:     utils.MetaMonetary,
 					Value:    25,
-					Disabled: false},
+					Initial:  60,
+					Disabled: false,
+				},
 				{
 					UUID:     "4b8b53d7-c1a1-4159-b845-4623a00a0165",
-					Type:     "*voice",
+					ID:       "BALANCE_3",
+					Type:     utils.MetaVoice,
 					Value:    200,
-					Disabled: false,
+					Initial:  250,
+					Disabled: true,
 				},
 			},
 			AllowNegative: false,
@@ -2529,8 +2550,10 @@ func TestECSyncKeys(t *testing.T) {
 		},
 		Rating: Rating{
 			"3cd6425": &RatingUnit{
+				ConnectFee:       0.4,
 				RoundingMethod:   "*up",
 				RoundingDecimals: 5,
+				MaxCostStrategy:  utils.MetaMaxCostDisconnect,
 				TimingID:         "2f324ab",
 				RatesID:          "4910ecf",
 				RatingFiltersID:  "23e77dc",
@@ -2539,6 +2562,7 @@ func TestECSyncKeys(t *testing.T) {
 				ConnectFee:       0.1,
 				RoundingMethod:   "*up",
 				RoundingDecimals: 5,
+				MaxCostStrategy:  utils.MetaMaxCostDisconnect,
 				TimingID:         "2f324ab",
 				RatesID:          "2c1a177",
 				RatingFiltersID:  "23e77dc",
@@ -2615,7 +2639,7 @@ func TestECSyncKeys(t *testing.T) {
 	ec.SyncKeys(refEC)
 	if !reflect.DeepEqual(eEC, ec) {
 		t.Errorf("expecting: %s \nreceived: %s",
-			utils.ToIJSON(eEC), utils.ToIJSON(ec))
+			utils.ToJSON(eEC), utils.ToJSON(ec))
 	}
 }
 
@@ -3823,6 +3847,26 @@ func TestECAsDataProvider3(t *testing.T) {
 			exp:    "*monetary",
 		},
 		{
+			name:   "UUID",
+			fields: []string{"Charges[0]", "Increments[3]", "Accounting", "Balance", "UUID"},
+			exp:    "4b8b53d7-c1a1-4159-b845-4623a00a0165",
+		},
+		{
+			name:   "ID",
+			fields: []string{"Charges[0]", "Increments[3]", "Accounting", "Balance", "ID"},
+			exp:    "BALANCE_3",
+		},
+		{
+			name:   "Initial",
+			fields: []string{"Charges[0]", "Increments[3]", "Accounting", "Balance", "Initial"},
+			exp:    "250",
+		},
+		{
+			name:   "Disabled",
+			fields: []string{"Charges[0]", "Increments[3]", "Accounting", "Balance", "Disabled"},
+			exp:    "true",
+		},
+		{
 			name:   "IncrementCost",
 			fields: []string{"Charges[0]", "Increments[2]", "Cost"},
 			exp:    "0.01",
@@ -3872,6 +3916,134 @@ func TestECAsDataProvider3(t *testing.T) {
 			fields: []string{"Charges[0]", "CompressFactor"},
 			exp:    "1",
 		},
+		{
+			name:   "ConnectFee through Accounting",
+			fields: []string{"Charges[0]", "Increments[3]", "Accounting", "Rating", "ConnectFee"},
+			exp:    "0.4",
+		},
+		{
+			name:   "RoundingMethod through Accounting",
+			fields: []string{"Charges[0]", "Increments[3]", "Accounting", "Rating", "RoundingMethod"},
+			exp:    utils.MetaRoundingUp,
+		},
+		{
+			name:   "RoundingDecimals through Accounting",
+			fields: []string{"Charges[0]", "Increments[3]", "Accounting", "Rating", "RoundingDecimals"},
+			exp:    "5",
+		},
+		{
+			name:   "MaxCost through Accounting",
+			fields: []string{"Charges[0]", "Increments[3]", "Accounting", "Rating", "MaxCost"},
+			exp:    "0",
+		},
+		{
+			name:   "MaxCostStrategy through Accounting",
+			fields: []string{"Charges[0]", "Increments[3]", "Accounting", "Rating", "MaxCostStrategy"},
+			exp:    utils.MetaMaxCostDisconnect,
+		},
+		{
+			name:   "TimingID through Accounting",
+			fields: []string{"Charges[0]", "Increments[3]", "Accounting", "Rating", "TimingID"},
+			exp:    "7f324ab",
+		},
+		{
+			name:   "RatesID through Accounting",
+			fields: []string{"Charges[0]", "Increments[3]", "Accounting", "Rating", "RatesID"},
+			exp:    "4910ecf",
+		},
+		{
+			name:   "RatingFiltersID through Accounting",
+			fields: []string{"Charges[0]", "Increments[3]", "Accounting", "Rating", "RatingFiltersID"},
+			exp:    "43e77dc",
+		},
+		{
+			name:   "ConnectFee",
+			fields: []string{"Charges[0]", "Rating", "ConnectFee"},
+			exp:    "0.1",
+		},
+		{
+			name:   "RoundingMethod",
+			fields: []string{"Charges[0]", "Rating", "RoundingMethod"},
+			exp:    utils.MetaRoundingUp,
+		},
+		{
+			name:   "RoundingDecimals",
+			fields: []string{"Charges[0]", "Rating", "RoundingDecimals"},
+			exp:    "5",
+		},
+		{
+			name:   "MaxCost",
+			fields: []string{"Charges[0]", "Rating", "MaxCost"},
+			exp:    "0",
+		},
+		{
+			name:   "MaxCostStrategy",
+			fields: []string{"Charges[0]", "Rating", "MaxCostStrategy"},
+			exp:    utils.MetaMaxCostDisconnect,
+		},
+		{
+			name:   "TimingID",
+			fields: []string{"Charges[0]", "Rating", "TimingID"},
+			exp:    "7f324ab",
+		},
+		{
+			name:   "RatesID",
+			fields: []string{"Charges[0]", "Rating", "RatesID"},
+			exp:    "ec1a177",
+		},
+		{
+			name:   "RatingFiltersID",
+			fields: []string{"Charges[0]", "Rating", "RatingFiltersID"},
+			exp:    "43e77dc",
+		},
+		{
+			name:   "DestinationID through Accounting",
+			fields: []string{"Charges[0]", "Increments[3]", "Accounting", "Rating", "RatingFilter", "DestinationID"},
+			exp:    "GERMANY",
+		},
+		{
+			name:   "Value through ExtraCharge",
+			fields: []string{"Charges[0]", "Increments[3]", "Accounting", "ExtraCharge", "Balance", "Value"},
+			exp:    "50",
+		},
+		{
+			name:   "Type through ExtraCharge",
+			fields: []string{"Charges[0]", "Increments[3]", "Accounting", "ExtraCharge", "Balance", "Type"},
+			exp:    utils.MetaMonetary,
+		},
+		{
+			name:   "UUID through ExtraCharge",
+			fields: []string{"Charges[0]", "Increments[3]", "Accounting", "ExtraCharge", "Balance", "UUID"},
+			exp:    "8c54a9e9-d610-4c82-bcb5-a315b9a65010",
+		},
+		{
+			name:   "ID through ExtraCharge",
+			fields: []string{"Charges[0]", "Increments[3]", "Accounting", "ExtraCharge", "Balance", "ID"},
+			exp:    "BALANCE_1",
+		},
+		{
+			name:   "Initial through ExtraCharge",
+			fields: []string{"Charges[0]", "Increments[3]", "Accounting", "ExtraCharge", "Balance", "Initial"},
+			exp:    "60",
+		},
+		{
+			name:   "Disabled through ExtraCharge",
+			fields: []string{"Charges[0]", "Increments[3]", "Accounting", "ExtraCharge", "Balance", "Disabled"},
+			exp:    "false",
+		},
+		{
+			name:   "AccountID through ExtraCharge",
+			fields: []string{"Charges[0]", "Increments[3]", "Accounting", "ExtraCharge", "AccountID"},
+			exp:    "cgrates.org:dan",
+		},
+		{
+			name:   "Units through ExtraCharge",
+			fields: []string{"Charges[0]", "Increments[3]", "Accounting", "ExtraCharge", "Units"},
+			exp:    "0.005",
+		},
+		// ~*ec.Charges[0].Increments[3].Accounting.Rating.ConnectFee
+		// ~*ec.Charges[0].Rating.ConnectFee
+		// ~*ec.Charges[0].Increments[0].Accounting.Rating.RatingFilter.DestinationID
 	}
 
 	for _, testDp := range testDPs {

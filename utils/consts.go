@@ -565,6 +565,7 @@ const (
 	Increments               = "Increments"
 	BalanceField             = "Balance"
 	BalanceSummaries         = "BalanceSummaries"
+	ExtraCharge              = "ExtraCharge"
 	Type                     = "Type"
 	Element                  = "Element"
 	Values                   = "Values"
