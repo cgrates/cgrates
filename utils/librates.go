@@ -247,6 +247,42 @@ func (rI *RateSInterval) AsRatesIntervalsCost() (rIc *RateSIntervalCost) {
 	return
 }
 
+func (rI *RateSInterval) FieldAsInterface(fldPath []string) (any, error) {
+	switch fldPath[0] {
+	case IntervalStart:
+		if len(fldPath) != 1 {
+			return nil, ErrNotFound
+		}
+		return rI.IntervalStart, nil
+	case CompressFactor:
+		if len(fldPath) != 1 {
+			return nil, ErrNotFound
+		}
+		return rI.CompressFactor, nil
+	case Increments:
+		if len(fldPath) != 1 {
+			return nil, ErrNotFound
+		}
+		return rI.Increments, nil
+	}
+
+	opath, indx := GetPathIndex(fldPath[0])
+	if opath != Increments {
+		return nil, fmt.Errorf("unsupported field prefix: <%s>", opath)
+	}
+	if indx == nil {
+		return nil, fmt.Errorf("invalid index for '%s' field", JoinedCharge)
+	}
+	if len(rI.Increments) <= *indx {
+		return nil, ErrNotFound
+	}
+	incr := rI.Increments[*indx]
+	if len(fldPath) == 1 {
+		return incr, nil
+	}
+	return incr.FieldAsInterface(fldPath[1:])
+}
+
 type RateSIncrement struct {
 	IncrementStart    *Decimal
 	RateIntervalIndex int
@@ -317,6 +353,25 @@ func (rI *RateSIncrement) Equals(rtIn *RateSIncrement, rIRef, rtInRef map[string
 		(rIRef != nil && rtInRef != nil &&
 			rI.RateID != EmptyString && rtIn.RateID != EmptyString &&
 			!rIRef[rI.RateID].Equals(rtInRef[rtIn.RateID])))
+}
+
+func (rI *RateSIncrement) FieldAsInterface(fldPath []string) (_ any, err error) {
+	if len(fldPath) != 1 {
+		return nil, ErrNotFound
+	}
+	switch fldPath[0] {
+	case IncrementStart:
+		return rI.IncrementStart, nil
+	case RateIntervalIndex:
+		return rI.RateIntervalIndex, nil
+	case RateID:
+		return rI.RateID, nil
+	case CompressFactor:
+		return rI.CompressFactor, nil
+	case Usage:
+		return rI.Usage, nil
+	}
+	return nil, fmt.Errorf("unsupported field prefix: <%s>", fldPath[0])
 }
 
 // RateProfileCost is the cost returned by RateS at cost queries

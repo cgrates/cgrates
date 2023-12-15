@@ -800,6 +800,22 @@ func (ap *Account) FieldAsInterface(fldPath []string) (_ any, err error) {
 					if idx < len(ap.FilterIDs) {
 						return ap.FilterIDs[idx], nil
 					}
+				case Weights:
+					var idx int
+					if idx, err = strconv.Atoi(*idxStr); err != nil {
+						return nil, err
+					}
+					if idx < len(ap.Weights) {
+						return ap.Weights[idx], nil
+					}
+				case Blockers:
+					var idx int
+					if idx, err = strconv.Atoi(*idxStr); err != nil {
+						return nil, err
+					}
+					if idx < len(ap.Blockers) {
+						return ap.Blockers[idx], nil
+					}
 				case ThresholdIDs:
 					var idx int
 					if idx, err = strconv.Atoi(*idxStr); err != nil {
@@ -861,6 +877,24 @@ func (ap *Account) FieldAsInterface(fldPath []string) (_ any, err error) {
 			return bl, nil
 		}
 		return bl.FieldAsInterface(fldPath[1:])
+	case Weights:
+		var idx int
+		if idx, err = strconv.Atoi(*idxStr); err != nil {
+			return
+		}
+		if idx >= len(ap.Weights) {
+			return nil, fmt.Errorf("invalid index for '%s' field", Weights)
+		}
+		return ap.Weights[idx].FieldAsInterface(fldPath[1:])
+	case Blockers:
+		var idx int
+		if idx, err = strconv.Atoi(*idxStr); err != nil {
+			return
+		}
+		if idx >= len(ap.Blockers) {
+			return nil, fmt.Errorf("invalid index for '%s' field", Blockers)
+		}
+		return ap.Blockers[idx].FieldAsInterface(fldPath[1:])
 	}
 }
 
@@ -886,6 +920,22 @@ func (bL *Balance) FieldAsInterface(fldPath []string) (_ any, err error) {
 					}
 					if idx < len(bL.FilterIDs) {
 						return bL.FilterIDs[idx], nil
+					}
+				case Weights:
+					var idx int
+					if idx, err = strconv.Atoi(*idxStr); err != nil {
+						return nil, err
+					}
+					if idx < len(bL.Weights) {
+						return bL.Weights[idx], nil
+					}
+				case Blockers:
+					var idx int
+					if idx, err = strconv.Atoi(*idxStr); err != nil {
+						return nil, err
+					}
+					if idx < len(bL.Blockers) {
+						return bL.Blockers[idx], nil
 					}
 				case AttributeIDs:
 					var idx int
@@ -955,6 +1005,24 @@ func (bL *Balance) FieldAsInterface(fldPath []string) (_ any, err error) {
 	switch fld {
 	default:
 		return nil, ErrNotFound
+	case Weights:
+		var idx int
+		if idx, err = strconv.Atoi(*idxStr); err != nil {
+			return
+		}
+		if idx >= len(bL.Weights) {
+			return nil, fmt.Errorf("invalid index for '%s' field", Weights)
+		}
+		return bL.Weights[idx].FieldAsInterface(fldPath[1:])
+	case Blockers:
+		var idx int
+		if idx, err = strconv.Atoi(*idxStr); err != nil {
+			return
+		}
+		if idx >= len(bL.Blockers) {
+			return nil, fmt.Errorf("invalid index for '%s' field", Blockers)
+		}
+		return bL.Blockers[idx].FieldAsInterface(fldPath[1:])
 	case Opts:
 		path := fldPath[1:]
 		if idxStr != nil {

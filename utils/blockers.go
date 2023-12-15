@@ -78,6 +78,27 @@ func (blckr DynamicBlocker) String(blkSep, fltrSep string) (out string) {
 	return strings.Join(blckr.FilterIDs, fltrSep) + blkSep + blocker
 }
 
+func (dB *DynamicBlocker) FieldAsInterface(fldPath []string) (any, error) {
+	if len(fldPath) != 1 {
+		return nil, ErrNotFound
+	}
+	switch fldPath[0] {
+	case FilterIDs:
+		return dB.FilterIDs, nil
+	case Blocker:
+		return dB.Blocker, nil
+	default:
+		fld, idx := GetPathIndex(fldPath[0])
+		if idx != nil &&
+			fld == FilterIDs {
+			if *idx < len(dB.FilterIDs) {
+				return dB.FilterIDs[*idx], nil
+			}
+		}
+	}
+	return nil, ErrNotFound
+}
+
 // Clone will clone the Blockers
 func (blckrs DynamicBlockers) Clone() (clBlkrs DynamicBlockers) {
 	if blckrs == nil {

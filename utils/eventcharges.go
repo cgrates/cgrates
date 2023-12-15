@@ -18,7 +18,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package utils
 
-import "slices"
+import (
+	"fmt"
+	"slices"
+)
 
 // NewEventChargers instantiates the EventChargers in a central place
 func NewEventCharges() (ec *EventCharges) {
@@ -107,6 +110,19 @@ func (ce *ChargeEntry) Clone() *ChargeEntry {
 		ChargingID:     ce.ChargingID,
 		CompressFactor: ce.CompressFactor,
 	}
+}
+
+func (ce *ChargeEntry) FieldAsInterface(fldPath []string) (_ any, err error) {
+	if len(fldPath) != 1 {
+		return nil, ErrNotFound
+	}
+	switch fldPath[0] {
+	case CompressFactor:
+		return ce.CompressFactor, nil
+	case ChargingID:
+		return ce.ChargingID, nil
+	}
+	return nil, fmt.Errorf("unsupported field prefix: <%s>", fldPath[0])
 }
 
 // Merge will merge the event charges into existing
@@ -317,6 +333,46 @@ type AccountCharge struct {
 	JoinedChargeIDs []string // identificator of extra account charges
 }
 
+func (ac *AccountCharge) FieldAsInterface(fldPath []string) (any, error) {
+	if len(fldPath) != 1 {
+		return nil, ErrNotFound
+	}
+	switch fldPath[0] {
+	case AccountID:
+		return ac.AccountID, nil
+	case BalanceID:
+		return ac.BalanceID, nil
+	case Units:
+		return ac.Units, nil
+	case BalanceLimit:
+		return ac.BalanceLimit, nil
+	case UnitFactorID:
+		return ac.UnitFactorID, nil
+	case AttributeIDs:
+		return ac.AttributeIDs, nil
+	case RatingID:
+		return ac.RatingID, nil
+	case JoinedChargeIDs:
+		return ac.JoinedChargeIDs, nil
+	default:
+		opath, indx := GetPathIndex(fldPath[0])
+		if indx != nil {
+			switch opath {
+			case AttributeIDs:
+				if *indx < len(ac.AttributeIDs) {
+					return ac.AttributeIDs[*indx], nil
+				}
+			case JoinedChargeIDs:
+				if *indx < len(ac.JoinedChargeIDs) {
+					return ac.JoinedChargeIDs[*indx], nil
+				}
+			}
+			return nil, ErrNotFound
+		}
+	}
+	return nil, fmt.Errorf("unsupported field prefix: <%s>", fldPath[0])
+}
+
 // Clone returns a copy of ac
 func (ac *AccountCharge) Clone() *AccountCharge {
 	cln := &AccountCharge{
@@ -378,4 +434,237 @@ type APIEventCharges struct {
 	Tenant  string
 	APIOpts map[string]any
 	*EventCharges
+}
+
+// String returns the string representation of an *EventCharges value. Needed
+// in order to satisfy the DataProvider interface.
+func (ec *EventCharges) String() string {
+	return ToJSON(ec)
+}
+
+// FieldAsInterface retrieves a value of a field based on its path from within an *EventCharges
+// value. Needed in order to satisfy the DataProvider interface.
+func (ec *EventCharges) FieldAsInterface(fldPath []string) (any, error) {
+	switch fldPath[0] {
+	default: // "e.g. Charges[1]"
+		opath, indx := GetPathIndex(fldPath[0])
+		if opath != Charges {
+			return nil, fmt.Errorf("unsupported field prefix: <%s>", opath)
+		}
+		if indx == nil {
+			return nil, fmt.Errorf("invalid index for '%s' field", Charges)
+		}
+		if len(ec.Charges) <= *indx {
+			return nil, ErrNotFound
+		}
+		return ec.getChargesForPath(fldPath[1:], ec.Charges[*indx])
+	case Abstracts:
+		if len(fldPath) != 1 {
+			return nil, ErrNotFound
+		}
+		return ec.Abstracts, nil
+	case Concretes:
+		if len(fldPath) != 1 {
+			return nil, ErrNotFound
+		}
+		return ec.Concretes, nil
+	case Charges:
+		if len(fldPath) != 1 { // slice has no members
+			return nil, ErrNotFound
+		}
+		return ec.Charges, nil
+	case Accounting:
+		if len(fldPath) == 1 {
+			return ec.Accounting, nil
+		}
+		if ec.Accounting == nil {
+			return nil, ErrNotFound
+		}
+		accCharge, has := ec.Accounting[fldPath[1]]
+		if !has || accCharge == nil {
+			return nil, ErrNotFound
+		}
+		if len(fldPath) == 2 {
+			return accCharge, nil
+		}
+		return accCharge.FieldAsInterface(fldPath[2:])
+	case UnitFactorField:
+		if len(fldPath) == 1 {
+			return ec.UnitFactors, nil
+		}
+		if ec.UnitFactors == nil {
+			return nil, ErrNotFound
+		}
+		unitFactor, has := ec.UnitFactors[fldPath[1]]
+		if !has || unitFactor == nil {
+			return nil, ErrNotFound
+		}
+		if len(fldPath) == 2 {
+			return unitFactor, nil
+		}
+		return unitFactor.FieldAsInterface(fldPath[2:])
+	case Rating:
+		if len(fldPath) == 1 {
+			return ec.Rating, nil
+		}
+		if ec.Rating == nil {
+			return nil, ErrNotFound
+		}
+		rtInterval, has := ec.Rating[fldPath[1]]
+		if !has || rtInterval == nil {
+			return nil, ErrNotFound
+		}
+		if len(fldPath) == 2 {
+			return rtInterval, nil
+		}
+		return rtInterval.FieldAsInterface(fldPath[2:])
+	case RateField:
+		if len(fldPath) == 1 {
+			return ec.Rates, nil
+		}
+		if ec.Rates == nil {
+			return nil, ErrNotFound
+		}
+		rate, has := ec.Rates[fldPath[1]]
+		if !has || rate == nil {
+			return nil, ErrNotFound
+		}
+		if len(fldPath) == 2 {
+			return rate, nil
+		}
+		return rate.FieldAsInterface(fldPath[2:])
+	case AccountField:
+		if len(fldPath) == 1 {
+			return ec.Accounts, nil
+		}
+		if ec.Accounts == nil {
+			return nil, ErrNotFound
+		}
+		acc, has := ec.Accounts[fldPath[1]]
+		if !has || acc == nil {
+			return nil, ErrNotFound
+		}
+		if len(fldPath) == 2 {
+			return acc, nil
+		}
+		return acc.FieldAsInterface(fldPath[2:])
+	}
+}
+
+func (ec *EventCharges) FieldAsString(fldPath []string) (string, error) {
+	val, err := ec.FieldAsInterface(fldPath)
+	if err != nil {
+		return "", nil
+	}
+	return IfaceAsString(val), nil
+}
+
+func (ec *EventCharges) getChargesForPath(fldPath []string, chr *ChargeEntry) (val any, err error) {
+	if chr == nil {
+		return nil, ErrNotFound
+	}
+	if len(fldPath) == 0 {
+		return chr, nil
+	}
+	switch fldPath[0] {
+	case Rating:
+		return ec.getRatingForPath(fldPath[1:], ec.Rating[chr.ChargingID])
+	case Accounting:
+		return ec.getAccountingForPath(fldPath[1:], ec.Accounting[chr.ChargingID])
+	}
+	return chr.FieldAsInterface(fldPath)
+}
+
+func (ec *EventCharges) getAccountingForPath(fldPath []string, accCharge *AccountCharge) (val any, err error) {
+	if accCharge == nil {
+		return nil, ErrNotFound
+	}
+	if len(fldPath) == 0 {
+		return accCharge, nil
+	}
+
+	switch fldPath[0] {
+	case AccountField:
+		acc := ec.Accounts[accCharge.AccountID]
+		if acc == nil {
+			return nil, ErrNotFound
+		}
+		if len(fldPath) == 1 {
+			return acc, nil
+		}
+		return acc.FieldAsInterface(fldPath[1:])
+	case BalanceField:
+		acc := ec.Accounts[accCharge.AccountID]
+		if acc == nil {
+			return nil, ErrNotFound
+		}
+		balance := acc.Balances[accCharge.BalanceID]
+		if balance == nil {
+			return nil, ErrNotFound
+		}
+		if len(fldPath) == 1 {
+			return balance, nil
+		}
+		return balance.FieldAsInterface(fldPath[1:])
+	case UnitFactorField:
+		unitFactor := ec.UnitFactors[accCharge.UnitFactorID]
+		if unitFactor == nil {
+			return nil, ErrNotFound
+		}
+		if len(fldPath) == 1 {
+			return unitFactor, nil
+		}
+		return unitFactor.FieldAsInterface(fldPath[1:])
+	case Rating:
+		return ec.getRatingForPath(fldPath[1:], ec.Rating[accCharge.RatingID])
+	default: // JoinedCharge[0]
+		opath, indx := GetPathIndex(fldPath[0])
+		if opath != JoinedCharge {
+			break
+		}
+		if indx == nil {
+			return nil, fmt.Errorf("invalid index for '%s' field", JoinedCharge)
+		}
+		if len(accCharge.JoinedChargeIDs) <= *indx {
+			return nil, ErrNotFound
+		}
+		return ec.getAccountingForPath(fldPath[1:], ec.Accounting[accCharge.JoinedChargeIDs[*indx]])
+	}
+
+	return accCharge.FieldAsInterface(fldPath)
+}
+
+func (ec *EventCharges) getRatingForPath(fldPath []string, rtInterval *RateSInterval) (val any, err error) {
+	if rtInterval == nil {
+		return nil, ErrNotFound
+	}
+	if len(fldPath) == 0 {
+		return rtInterval, nil
+	}
+
+	opath, indx := GetPathIndex(fldPath[0])
+	if opath != Increments || indx == nil {
+		return rtInterval.FieldAsInterface(fldPath)
+	}
+	if len(rtInterval.Increments) <= *indx {
+		return nil, ErrNotFound
+	}
+	incr := rtInterval.Increments[*indx]
+	if len(fldPath) == 1 {
+		return incr, nil
+	}
+	if incr == nil {
+		return nil, ErrNotFound
+	}
+	if fldPath[1] == RateField {
+		rate := ec.Rates[incr.RateID]
+		if rate == nil {
+			return nil, ErrNotFound
+		}
+		if len(fldPath) == 2 {
+			return rate, nil
+		}
+		return rate.FieldAsInterface(fldPath[2:])
+	}
+	return incr.FieldAsInterface(fldPath[1:])
 }
