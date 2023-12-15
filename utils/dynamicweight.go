@@ -100,6 +100,27 @@ func (dW *DynamicWeight) Clone() (cln *DynamicWeight) {
 	return cln
 }
 
+func (dW *DynamicWeight) FieldAsInterface(fldPath []string) (any, error) {
+	if len(fldPath) != 1 {
+		return nil, ErrNotFound
+	}
+	switch fldPath[0] {
+	case FilterIDs:
+		return dW.FilterIDs, nil
+	case Weight:
+		return dW.Weight, nil
+	default:
+		fld, idx := GetPathIndex(fldPath[0])
+		if idx != nil &&
+			fld == FilterIDs {
+			if *idx < len(dW.FilterIDs) {
+				return dW.FilterIDs[*idx], nil
+			}
+		}
+	}
+	return nil, ErrNotFound
+}
+
 func (dW DynamicWeights) Clone() (dinWeight DynamicWeights) {
 	if dW == nil {
 		return
