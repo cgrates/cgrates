@@ -229,6 +229,41 @@ func TestFilterPassGreaterThan(t *testing.T) {
 	}
 }
 
+func TestFilterPassContains(t *testing.T) {
+	rF, err := NewFilterRule(utils.MetaContains, "~Subject", []string{"Any"})
+	if err != nil {
+		t.Error(err)
+	}
+	eV := utils.MapStorage{}
+	eV.Set([]string{"Subject"}, "SubAnyAcc")
+
+	if pass, err := rF.passContains(eV); err != nil {
+		t.Error(err)
+	} else if !pass {
+		t.Error("not passing")
+	}
+
+	eV.Set([]string{"Subject"}, "1001")
+	if pass, err := rF.passContains(eV); err != nil {
+		t.Error(err)
+	} else if pass {
+		t.Error("passes")
+	}
+	rF, err = NewFilterRule(utils.MetaContains, "~Resource", []string{"Prf"})
+	if err != nil {
+		t.Error(err)
+	}
+
+	eV.Set([]string{"Resource"}, "ResPrf1")
+
+	if pass, err := rF.Pass(context.TODO(), eV); err != nil {
+		t.Error(err)
+	} else if !pass {
+		t.Error("not passing")
+	}
+
+}
+
 func TestFilterpassEqualTo(t *testing.T) {
 	rf, err := NewFilterRule(utils.MetaEqual, "~ASR", []string{"40"})
 	if err != nil {

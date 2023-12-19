@@ -1054,6 +1054,7 @@ const (
 const (
 	MetaNot                = "*not"
 	MetaString             = "*string"
+	MetaContains           = "*contains"
 	MetaPrefix             = "*prefix"
 	MetaSuffix             = "*suffix"
 	MetaBoth               = "*both"
@@ -1078,6 +1079,7 @@ const (
 	MetaNever              = "*never"
 
 	MetaNotString             = "*notstring"
+	MetaNotContains           = "*notcontains"
 	MetaNotPrefix             = "*notprefix"
 	MetaNotSuffix             = "*notsuffix"
 	MetaNotEmpty              = "*notempty"
