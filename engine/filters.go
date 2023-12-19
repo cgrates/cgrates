@@ -225,6 +225,7 @@ func (fltr *Filter) Compile() (err error) {
 var (
 	cdrQueryFilterTypes = utils.NewStringSet([]string{
 		utils.MetaString, utils.MetaNotString,
+		utils.MetaContains, utils.MetaNotContains,
 		utils.MetaGreaterThan, utils.MetaGreaterOrEqual,
 		utils.MetaLessThan, utils.MetaLessOrEqual,
 		utils.MetaExists, utils.MetaNotExists,
@@ -237,6 +238,7 @@ var (
 
 	supportedFiltersType utils.StringSet = utils.NewStringSet([]string{
 		utils.MetaString, utils.MetaNotString,
+		utils.MetaContains, utils.MetaNotContains,
 		utils.MetaPrefix, utils.MetaNotPrefix,
 		utils.MetaSuffix, utils.MetaNotSuffix,
 		utils.MetaCronExp, utils.MetaNotCronExp,
@@ -255,6 +257,7 @@ var (
 
 	needsFieldName utils.StringSet = utils.NewStringSet([]string{
 		utils.MetaString, utils.MetaNotString,
+		utils.MetaContains, utils.MetaNotContains,
 		utils.MetaPrefix, utils.MetaNotPrefix,
 		utils.MetaSuffix, utils.MetaNotSuffix,
 		utils.MetaCronExp, utils.MetaNotCronExp,
@@ -273,6 +276,7 @@ var (
 
 	needsValues utils.StringSet = utils.NewStringSet([]string{
 		utils.MetaString, utils.MetaNotString,
+		utils.MetaContains, utils.MetaNotContains,
 		utils.MetaPrefix, utils.MetaNotPrefix,
 		utils.MetaSuffix, utils.MetaNotSuffix,
 		utils.MetaCronExp, utils.MetaNotCronExp,
@@ -390,6 +394,8 @@ func (fltr *FilterRule) Pass(ctx *context.Context, dDP utils.DataProvider) (resu
 	switch fltr.Type {
 	case utils.MetaString, utils.MetaNotString:
 		result, err = fltr.passString(dDP)
+	case utils.MetaContains, utils.MetaNotContains:
+		result, err = fltr.passContains(dDP)
 	case utils.MetaEmpty, utils.MetaNotEmpty:
 		result, err = fltr.passEmpty(dDP)
 	case utils.MetaExists, utils.MetaNotExists:
@@ -441,6 +447,26 @@ func (fltr *FilterRule) passString(dDP utils.DataProvider) (bool, error) {
 			continue
 		}
 		if strVal == sval {
+			return true, nil
+		}
+	}
+	return false, nil
+}
+
+func (fltr *FilterRule) passContains(dDP utils.DataProvider) (bool, error) {
+	strVal, err := fltr.rsrElement.ParseDataProvider(dDP)
+	if err != nil {
+		if err == utils.ErrNotFound {
+			return false, nil
+		}
+		return false, err
+	}
+	for _, val := range fltr.rsrValues {
+		sval, err := val.ParseDataProvider(dDP)
+		if err != nil {
+			continue
+		}
+		if strings.Contains(strVal, sval) {
 			return true, nil
 		}
 	}
