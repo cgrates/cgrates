@@ -4,10 +4,12 @@
 
 
 "general": {
-	"log_level": 7,
 	"reply_timeout": "5m",
 },
 
+"logger": {
+	"level": 7
+},
 
 "data_db": {
 	"db_type": "*internal",	

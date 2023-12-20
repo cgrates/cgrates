@@ -2,8 +2,8 @@
   // CGRateS Configuration file
   // will be used in apis/filter_indexes_it_test.go
 
-  "general": {
-    "log_level": 7,											// control the level of messages logged (0-emerg to 7-debug)
+  "logger": {
+    "level": 7
   },
 
   "data_db": {

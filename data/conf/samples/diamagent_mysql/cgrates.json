@@ -5,8 +5,11 @@
 // Starts rater, scheduler
 
 "general": {
-	"log_level": 7,
 	"default_tenant": "cgrates.com",
+},
+
+"logger": {
+    "level": 7
 },
 
 "stor_db": {

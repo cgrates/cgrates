@@ -4,10 +4,12 @@
 
 
 "general": {
-	"log_level": 7,
 	"reply_timeout": "50s",
 },
 
+"logger": {
+    "level": 7
+},
 
 "listen": {
 	"rpc_json": "*env:DOCKER_IP:2012",			// RPC JSON listening address

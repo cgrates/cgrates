@@ -1,9 +1,12 @@
 {
 
 "general": {
-	"log_level": 7,
 	"reply_timeout": "10s",									
 	"default_timezone": "UTC"
+},
+
+"logger": {
+    "level": 7
 },
 
 "listen": {

@@ -5,8 +5,11 @@
 // Starts rater, cdrs and mediator connecting over internal channel
 
 "general": {
-    "log_level": 7,
 	"node_id": "TestFailCDRS",
+},
+
+"logger": {
+	"level": 7
 },
 
 "stor_db": {

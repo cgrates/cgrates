@@ -4,8 +4,8 @@
     // Used for SessionSv1 integration tests
     
     
-    "general": {
-        "log_level": 7,
+    "logger": {
+        "level": 7
     },
     
     

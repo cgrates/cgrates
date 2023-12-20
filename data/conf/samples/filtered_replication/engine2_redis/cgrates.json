@@ -1,8 +1,11 @@
 {
 
 "general": {
-	"log_level": 7,
 	"node_id" : "EngineMongo2"
+},
+
+"logger": {
+    "level": 7
 },
 
 "listen": {

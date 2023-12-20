@@ -2,8 +2,11 @@
 
 "general": {
  	"node_id": "DispatcherS1",
-	"log_level": 7,
  	"reconnects": 1
+},
+
+"logger": {
+    "level": 7
 },
 
 "listen": {

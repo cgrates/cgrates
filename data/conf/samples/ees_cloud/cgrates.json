@@ -1,9 +1,12 @@
 {
 
 "general": {
-    "log_level": 7,
     "poster_attempts": 2,
     "failed_posts_ttl": "1s"
+},
+
+"logger": {
+    "level": 7
 },
 
 "data_db": {

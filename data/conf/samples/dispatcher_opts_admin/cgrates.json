@@ -2,9 +2,12 @@
 
 "general": {
     "node_id": "HOST2",
-    "log_level": 7
 },
-    
+  
+"logger": {
+    "level": 7
+},
+
 "listen": {
     "rpc_json": ":4012",			
     "rpc_gob": ":4013",			

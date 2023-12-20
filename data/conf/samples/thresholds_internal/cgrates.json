@@ -2,10 +2,10 @@
     // CGRateS Configuration file
     // will be used in apis/thresholds_it_test.go
   
-    "general": {
-        "log_level": 7,
+    "logger": {
+      "level": 7
     },
-
+    
     "data_db": {
       "db_type": "*internal",
     },

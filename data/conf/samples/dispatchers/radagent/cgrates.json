@@ -4,10 +4,12 @@
 
 "general": {
  	"node_id": "DispatcherS1",
-	"log_level": 7,
  	"reconnects": 1,	
 },
 
+"logger": {
+    "level": 7
+},
 
 "listen": {
 	"rpc_json": ":2012",				// RPC JSON listening address

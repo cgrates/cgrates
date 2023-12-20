@@ -2,7 +2,10 @@
 
 "general": {
 	"node_id": "ALL2",
-	"log_level": 7
+},
+
+"logger": {
+	"level": 7
 },
 
 "listen": {

@@ -2,10 +2,12 @@
 
 "general": {
 	"node_id": "DispatcherEngine2",
-	"log_level": 7,
 	"reconnects": 1,
 },
 
+"logger": {
+	"level": 7
+},
 
 "listen": {
 	"rpc_json": ":3012",

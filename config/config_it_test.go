@@ -1249,10 +1249,12 @@ func testApisLoadFromPath(t *testing.T) {
 		
 		
 		"general": {
-			"log_level": 7,
 			"reply_timeout": "50s"
 		},
 		
+		"logger": {
+			"level": 7,
+		},
 		
 		"listen": {
 			"rpc_json": ":2012",

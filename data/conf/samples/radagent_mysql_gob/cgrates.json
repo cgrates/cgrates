@@ -2,8 +2,8 @@
 // CGRateS Configuration file
 //
 
-"general": {
-    "log_level": 7,
+"logger": {
+	"level": 7
 },
 
 

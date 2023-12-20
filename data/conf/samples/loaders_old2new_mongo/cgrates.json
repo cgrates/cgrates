@@ -1,9 +1,11 @@
 {
 "general": {
-	"log_level": 7,
 	"reply_timeout": "30s",
 },
 
+"logger": {
+	"level": 7
+},
 
 "data_db": {
 	"db_type": "mongo",

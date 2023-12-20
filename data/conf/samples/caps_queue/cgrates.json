@@ -1,11 +1,13 @@
 {
 
 "general": {
-	"log_level": 7,
 	"node_id": "ConcurrentQueueEngine",
 	"reply_timeout": "50s",
 },
 
+"logger": {
+	"level": 7
+},
 
 "cores": {
 	"caps": 2,							

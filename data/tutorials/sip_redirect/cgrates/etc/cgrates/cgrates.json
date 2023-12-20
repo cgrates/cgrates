@@ -4,10 +4,12 @@
 // Copyright (C) ITsysCOM GmbH
 
 "general": {
-    "log_level": 7,
 	"node_id":"CGRSIP",
 },
 
+"logger": {
+	"level": 7
+},
 
 "listen": {
 	"rpc_json": ":2012",
