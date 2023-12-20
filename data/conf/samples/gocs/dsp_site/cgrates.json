@@ -1,12 +1,14 @@
 {
 
   "general": {
-    "log_level": 7,
     "node_id": "DISPATCH_SITE",
     "reconnects": 2,
     "reply_timeout": "5s",
   },
 
+  "logger": {
+    "level": 7
+  },
 
   "listen": {
     "rpc_json": ":2012",

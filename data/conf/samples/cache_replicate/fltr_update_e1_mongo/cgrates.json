@@ -4,10 +4,12 @@
     
     "general": {
         "node_id": "fltr_update_e1_mongo",
-        "log_level": 7
     },
     
-    
+    "logger": {
+        "level": 7
+    },
+
     "listen": {
         "rpc_json": ":22012",
         "rpc_gob": ":22013",

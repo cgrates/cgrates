@@ -5,9 +5,11 @@
     
     "general": {
         "node_id": "fltr_update_e1_mysql",
-        "log_level": 7
     },
     
+    "logger": {
+        "level": 7
+    },
     
     "listen": {
         "rpc_json": ":22012",

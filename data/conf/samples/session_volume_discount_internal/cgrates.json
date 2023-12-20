@@ -4,8 +4,11 @@
     // Used for sessions/sessions_volume_discount_it_test.go
         
     "general": {
-        "log_level": 7,
         "reply_timeout": "10s",
+    },
+
+    "logger": {
+        "level": 7
     },
         
     "data_db": {

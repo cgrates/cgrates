@@ -1,9 +1,12 @@
 {
 
   "general": {
-    "log_level": 7,
     "node_id": "AU_SITE",
   },
+
+  "logger": {
+    "level": 7
+},
 
   "listen": {
     "rpc_json": ":3012",

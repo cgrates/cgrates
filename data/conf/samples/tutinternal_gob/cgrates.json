@@ -4,8 +4,11 @@
 
 
 "general": {
-	"log_level": 7,
 	"reply_timeout": "50s",
+},
+
+"logger": {
+	"level": 7
 },
 
 "rpc_conns": {

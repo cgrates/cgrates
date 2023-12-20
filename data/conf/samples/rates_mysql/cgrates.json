@@ -1,8 +1,11 @@
 {
 
 "general": {
-  "node_id": "id",									
-  "log_level": 7
+  "node_id": "id",						
+},
+
+"logger": {
+  "level": 7
 },
 
 "data_db": {							

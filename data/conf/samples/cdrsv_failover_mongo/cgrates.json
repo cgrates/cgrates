@@ -1,8 +1,11 @@
 {
 
 "general": {
-	"log_level": 7,
 	"node_id": "TestFailCDRS"
+},
+
+"logger": {
+	"level": 7
 },
 
 "efs": {                                                    
