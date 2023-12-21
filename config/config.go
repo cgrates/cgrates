@@ -410,40 +410,6 @@ func (cfg *CGRConfig) GetAllSectionIDs() (s []string) {
 	return
 }
 
-// LazySanityCheck used after check config sanity to display warnings related to the config
-func (cfg *CGRConfig) LazySanityCheck() {
-	for _, expID := range cfg.cdrsCfg.OnlineCDRExports {
-		for _, ee := range cfg.eesCfg.Exporters {
-			if ee.ID == expID && ee.Type == utils.MetaS3jsonMap || ee.Type == utils.MetaSQSjsonMap {
-				poster := utils.SQSPoster
-				if ee.Type == utils.MetaS3jsonMap {
-					poster = utils.S3Poster
-				}
-				argsMap := utils.GetUrlRawArguments(ee.ExportPath)
-				for _, arg := range []string{utils.AWSRegion, utils.AWSKey, utils.AWSSecret} {
-					if _, has := argsMap[arg]; !has {
-						utils.Logger.Warning(fmt.Sprintf("<%s> No %s present for AWS for exporter with ID : <%s>.", poster, arg, ee.ID))
-					}
-				}
-			}
-		}
-	}
-	for _, exporter := range cfg.eesCfg.Exporters {
-		if exporter.Type == utils.MetaS3jsonMap || exporter.Type == utils.MetaSQSjsonMap {
-			poster := utils.SQSPoster
-			if exporter.Type == utils.MetaS3jsonMap {
-				poster = utils.S3Poster
-			}
-			argsMap := utils.GetUrlRawArguments(exporter.ExportPath)
-			for _, arg := range []string{utils.AWSRegion, utils.AWSKey, utils.AWSSecret} {
-				if _, has := argsMap[arg]; !has {
-					utils.Logger.Warning(fmt.Sprintf("<%s> No %s present for AWS for exporter with ID: <%s>.", poster, arg, exporter.ID))
-				}
-			}
-		}
-	}
-}
-
 // loadConfigDBCfg loads the ConfigDB section of the configuration
 func (cfg *CGRConfig) loadConfigDBCfg(ctx *context.Context, jsnCfg ConfigDB) (err error) {
 	jsnDBCfg := new(DbJsonCfg)
