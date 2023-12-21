@@ -204,8 +204,8 @@ func TestDNSAgentReload4(t *testing.T) {
 	dnsSrv.dns = nil
 	ctx, cancel := context.WithCancel(context.TODO())
 	err := dnsSrv.Start(ctx, cancel)
-	if err == nil || err.Error() != "open bad_certificate: no such file or directory" {
-		t.Fatalf("\nExpected <%+v>, \nReceived <%+v>", "open bad_certificate: no such file or directory", err)
+	if err == nil || err.Error() != "load certificate error <open bad_certificate: no such file or directory>" {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", "load certificate error <open bad_certificate: no such file or directory>", err)
 	}
 	dnsSrv.dns = nil
 }
@@ -255,7 +255,7 @@ func TestDNSAgentReload6(t *testing.T) {
 	runtime.Gosched()
 	runtime.Gosched()
 	err = srv.Reload(ctx, cancel)
-	if err == nil || err.Error() != "open bad_certificate: no such file or directory" {
-		t.Fatalf("\nExpected <%+v>, \nReceived <%+v>", "open bad_certificate: no such file or directory", err)
+	if err == nil || err.Error() != "load certificate error <open bad_certificate: no such file or directory>" {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", "load certificate error <open bad_certificate: no such file or directory>", err)
 	}
 }
