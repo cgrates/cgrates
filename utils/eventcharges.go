@@ -21,6 +21,7 @@ package utils
 import (
 	"fmt"
 	"slices"
+	"strings"
 )
 
 // NewEventChargers instantiates the EventChargers in a central place
@@ -566,13 +567,22 @@ func (ec *EventCharges) getChargesForPath(fldPath []string, chr *ChargeEntry) (v
 	if len(fldPath) == 0 {
 		return chr, nil
 	}
-	switch fldPath[0] {
-	case Rating:
-		return ec.getRatingForPath(fldPath[1:], ec.Rating[chr.ChargingID])
-	case Accounting:
-		return ec.getAccountingForPath(fldPath[1:], ec.Accounting[chr.ChargingID])
+	if fldPath[0] != Charging {
+		return chr.FieldAsInterface(fldPath)
 	}
-	return chr.FieldAsInterface(fldPath)
+	chargingType, chargingID, sepFound := strings.Cut(chr.ChargingID, InInFieldSep)
+	if !sepFound {
+		return nil, fmt.Errorf("expected ChargingID format '*accounting:*' or '*rating:*', got '%s'", chr.ChargingID)
+	}
+
+	// Handle different charging types.
+	switch chargingType {
+	case MetaRating:
+		return ec.getRatingForPath(fldPath[1:], ec.Rating[chargingID])
+	case MetaAccounting:
+		return ec.getAccountingForPath(fldPath[1:], ec.Accounting[chargingID])
+	}
+	return nil, fmt.Errorf("unsupported field prefix: <%s>", fldPath[0])
 }
 
 func (ec *EventCharges) getAccountingForPath(fldPath []string, accCharge *AccountCharge) (val any, err error) {
