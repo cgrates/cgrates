@@ -1978,6 +1978,7 @@ const (
 	DefaultTenantCfg        = "default_tenant"
 	DefaultTimezoneCfg      = "default_timezone"
 	DefaultCachingCfg       = "default_caching"
+	CachingDlayCfg          = "caching_delay"
 	ConnectAttemptsCfg      = "connect_attempts"
 	ReconnectsCfg           = "reconnects"
 	MaxReconnectIntervalCfg = "max_reconnect_interval"
