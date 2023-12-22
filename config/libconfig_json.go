@@ -38,6 +38,7 @@ type GeneralJsonCfg struct {
 	Default_tenant         *string
 	Default_timezone       *string
 	Default_caching        *string
+	Caching_delay          *string
 	Connect_attempts       *int
 	Reconnects             *int
 	Max_reconnect_interval *string

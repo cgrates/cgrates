@@ -25,6 +25,7 @@ import (
 	"log"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
@@ -96,7 +97,8 @@ var (
 
 	cachingArg = cgrLoaderFlags.String(utils.CachingArgCgr, utils.EmptyString,
 		"Caching strategy used when loading TP")
-	tpid = cgrLoaderFlags.String(utils.TpIDCfg, dfltCfg.LoaderCgrCfg().TpID,
+	cachingDlay = cgrLoaderFlags.Duration(utils.CachingDlayCfg, 0, "Adds delay before cache reload")
+	tpid        = cgrLoaderFlags.String(utils.TpIDCfg, dfltCfg.LoaderCgrCfg().TpID,
 		"The tariff plan ID from the database")
 	dataPath = cgrLoaderFlags.String(utils.PathCfg, dfltCfg.LoaderCgrCfg().DataPath,
 		"The path to folder containing the data files")
@@ -294,6 +296,9 @@ func loadConfig() (ldrCfg *config.CGRConfig) {
 	if *cachingArg != utils.EmptyString {
 		ldrCfg.GeneralCfg().DefaultCaching = *cachingArg
 	}
+	if *cachingDlay != 0 {
+		ldrCfg.GeneralCfg().CachingDelay = *cachingDlay
+	}
 	return
 }
 
@@ -407,6 +412,14 @@ func main() {
 		if err = tpReader.WriteToDatabase(*verbose, *disableReverse); err != nil {
 			log.Fatal("Could not write to database: ", err)
 		}
+	}
+
+	// delay if needed before cache reload
+	if ldrCfg.GeneralCfg().CachingDelay != 0 {
+		if *verbose {
+			log.Printf("Delaying %v", ldrCfg.GeneralCfg().CachingDelay)
+		}
+		time.Sleep(ldrCfg.GeneralCfg().CachingDelay)
 	}
 
 	// reload cache
