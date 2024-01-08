@@ -120,7 +120,7 @@ cgrates.org,NewRes1`)); err != nil {
 	for _, tmp := range cfg[0].Data[0].Fields {
 		tmp.ComputePath()
 	}
-	ldrs := NewLoaderService(dm, cfg, "UTC", nil, nil)
+	ldrs := NewLoaderService(dm, cfg, "UTC", 0, nil, nil)
 
 	var reply string
 	expected := "ANOTHER_LOADER_RUNNING"
@@ -183,7 +183,7 @@ cgrates.org,NewRes1
 	}
 
 	var reply string
-	ldrs := NewLoaderService(dm, cfgLdr, "UTC", nil, nil)
+	ldrs := NewLoaderService(dm, cfgLdr, "UTC", 0, nil, nil)
 	if err := ldrs.V1Load(context.Background(), &ArgsProcessFolder{
 		LoaderID: utils.EmptyString}, &reply); err == nil && reply != utils.EmptyString && err.Error() != utils.EmptyString {
 		t.Errorf("Expected %+v and %+v \n, received %+v and %+v", utils.EmptyString, utils.EmptyString, err, reply)
@@ -219,7 +219,7 @@ func testV1LoadUnableToDeleteFile(t *testing.T) {
 		Data:           nil,
 	}
 	var reply string
-	ldrs := NewLoaderService(dm, cfgLdr, "UTC", nil, nil)
+	ldrs := NewLoaderService(dm, cfgLdr, "UTC", 0, nil, nil)
 	expected := "SERVER_ERROR: stat /\x00/Resources.csv: invalid argument"
 	if err := ldrs.V1Load(context.Background(),
 		&ArgsProcessFolder{
@@ -262,7 +262,7 @@ NOT_UINT
 		LockFilePath:   utils.ResourcesCsv,
 		Data:           nil,
 	}
-	ldrs := NewLoaderService(dm, cfgLdr, "UTC", nil, nil)
+	ldrs := NewLoaderService(dm, cfgLdr, "UTC", 0, nil, nil)
 	ldrs.ldrs["testV1LoadResource"].dataTpls = map[string][]*config.FCTemplate{
 		utils.MetaFilters: {
 			{Tag: "PK",
@@ -359,7 +359,7 @@ cgrates.org,NewRes1`))
 	for _, tmp := range cfg[0].Data[0].Fields {
 		tmp.ComputePath()
 	}
-	ldrs := NewLoaderService(dm, cfg, time.UTC.String(), nil, nil)
+	ldrs := NewLoaderService(dm, cfg, time.UTC.String(), 0, nil, nil)
 	//To remove a resource, we need to set it first
 	if err := dm.SetResourceProfile(&engine.ResourceProfile{
 		Tenant: "cgrates.org",
@@ -423,7 +423,7 @@ cgrates.org,NewRes1
 	}
 
 	var reply string
-	ldrs := NewLoaderService(dm, cfgLdr, "UTC", nil, nil)
+	ldrs := NewLoaderService(dm, cfgLdr, "UTC", 0, nil, nil)
 	expected := "UNKNOWN_LOADER: *default"
 	if err := ldrs.V1Remove(context.Background(), &ArgsProcessFolder{
 		LoaderID: utils.EmptyString}, &reply); err == nil || reply != utils.EmptyString || err.Error() != expected {
@@ -460,7 +460,7 @@ func testV1RemoveUnableToDeleteFile(t *testing.T) {
 		Data:           nil,
 	}
 	var reply string
-	ldrs := NewLoaderService(dm, cfgLdr, "UTC", nil, nil)
+	ldrs := NewLoaderService(dm, cfgLdr, "UTC", 0, nil, nil)
 	expected := "SERVER_ERROR: stat /\x00/Resources.csv: invalid argument"
 	if err := ldrs.V1Remove(context.Background(),
 		&ArgsProcessFolder{
@@ -497,7 +497,7 @@ func testV1LoadAndRemoveProcessRemoveFolderError(t *testing.T) {
 		TpOutDir:       "/tmp",
 		Data:           nil,
 	}
-	ldrs := NewLoaderService(dm, cfgLdr, "UTC", nil, nil)
+	ldrs := NewLoaderService(dm, cfgLdr, "UTC", 0, nil, nil)
 
 	ldrs.ldrs["testV1RemoveProcessFolderError"].lockFilepath = flPath
 
@@ -558,7 +558,7 @@ func testV1RemoveProcessFolderError(t *testing.T) {
 		LockFilePath:   "notResource.csv",
 		Data:           nil,
 	}
-	ldrs := NewLoaderService(dm, cfgLdr, "UTC", nil, nil)
+	ldrs := NewLoaderService(dm, cfgLdr, "UTC", 0, nil, nil)
 	ldrs.ldrs["testV1RemoveProcessFolderError"].rdrs = map[string]map[string]*openedCSVFile{
 		utils.MetaResources: {
 			"not_a_file2": &openedCSVFile{
@@ -624,7 +624,7 @@ func testLoaderServiceReload(t *testing.T) {
 		Data:           nil,
 	}
 	ldrs := &LoaderService{}
-	ldrs.Reload(dm, cfgLdr, "UTC", nil, nil)
+	ldrs.Reload(dm, cfgLdr, "UTC", 0, nil, nil)
 	if ldrs.ldrs == nil {
 		t.Error("Expected to be populated")
 	}

@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package v1
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/cgrates/birpc/context"
@@ -115,7 +116,11 @@ func (apierSv1 *APIerSv1) SetAttributeProfile(ctx *context.Context, alsWrp *engi
 	if err := apierSv1.DataManager.SetLoadIDs(map[string]int64{utils.CacheAttributeProfiles: time.Now().UnixNano()}); err != nil {
 		return utils.APIErrorHandler(err)
 	}
-
+	// delay if needed before cache call
+	if apierSv1.Config.GeneralCfg().CachingDelay != 0 {
+		utils.Logger.Info(fmt.Sprintf("<SetAttributeProfile> Delaying cache call for %v", apierSv1.Config.GeneralCfg().CachingDelay))
+	}
+	time.Sleep(apierSv1.Config.GeneralCfg().CachingDelay)
 	if err := apierSv1.CallCache(utils.IfaceAsString(alsWrp.APIOpts[utils.CacheOpt]), alsWrp.Tenant, utils.CacheAttributeProfiles,
 		alsWrp.TenantID(), utils.EmptyString, &alsWrp.FilterIDs, alsWrp.Contexts, alsWrp.APIOpts); err != nil {
 		return utils.APIErrorHandler(err)
@@ -140,6 +145,11 @@ func (apierSv1 *APIerSv1) RemoveAttributeProfile(ctx *context.Context, arg *util
 	if err := apierSv1.DataManager.SetLoadIDs(map[string]int64{utils.CacheAttributeProfiles: time.Now().UnixNano()}); err != nil {
 		return utils.APIErrorHandler(err)
 	}
+	// delay if needed before cache call
+	if apierSv1.Config.GeneralCfg().CachingDelay != 0 {
+		utils.Logger.Info(fmt.Sprintf("<RemoveAttributeProfile> Delaying cache call for %v", apierSv1.Config.GeneralCfg().CachingDelay))
+	}
+	time.Sleep(apierSv1.Config.GeneralCfg().CachingDelay)
 	if err := apierSv1.CallCache(utils.IfaceAsString(arg.APIOpts[utils.CacheOpt]), tnt, utils.CacheAttributeProfiles,
 		utils.ConcatenatedKey(tnt, arg.ID), utils.EmptyString, nil, nil, arg.APIOpts); err != nil {
 		return utils.APIErrorHandler(err)

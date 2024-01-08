@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package v1
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/cgrates/birpc/context"
@@ -85,6 +86,11 @@ func (apierSv1 *APIerSv1) SetRouteProfile(ctx *context.Context, args *RouteWithA
 	if err := apierSv1.DataManager.SetLoadIDs(map[string]int64{utils.CacheRouteProfiles: time.Now().UnixNano()}); err != nil {
 		return utils.APIErrorHandler(err)
 	}
+	// delay if needed before cache call
+	if apierSv1.Config.GeneralCfg().CachingDelay != 0 {
+		utils.Logger.Info(fmt.Sprintf("<SetRouteProfile> Delaying cache call for %v", apierSv1.Config.GeneralCfg().CachingDelay))
+	}
+	time.Sleep(apierSv1.Config.GeneralCfg().CachingDelay)
 	//handle caching for SupplierProfile
 	if err := apierSv1.CallCache(utils.IfaceAsString(args.APIOpts[utils.CacheOpt]), args.Tenant, utils.CacheRouteProfiles,
 		args.TenantID(), utils.EmptyString, &args.FilterIDs, nil, args.APIOpts); err != nil {
@@ -110,6 +116,11 @@ func (apierSv1 *APIerSv1) RemoveRouteProfile(ctx *context.Context, args *utils.T
 	if err := apierSv1.DataManager.SetLoadIDs(map[string]int64{utils.CacheRouteProfiles: time.Now().UnixNano()}); err != nil {
 		return utils.APIErrorHandler(err)
 	}
+	// delay if needed before cache call
+	if apierSv1.Config.GeneralCfg().CachingDelay != 0 {
+		utils.Logger.Info(fmt.Sprintf("<RemoveRouteProfile> Delaying cache call for %v", apierSv1.Config.GeneralCfg().CachingDelay))
+	}
+	time.Sleep(apierSv1.Config.GeneralCfg().CachingDelay)
 	//handle caching for SupplierProfile
 	if err := apierSv1.CallCache(utils.IfaceAsString(args.APIOpts[utils.CacheOpt]), tnt, utils.CacheRouteProfiles,
 		utils.ConcatenatedKey(tnt, args.ID), utils.EmptyString, nil, nil, args.APIOpts); err != nil {

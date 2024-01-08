@@ -39,7 +39,7 @@ type openedCSVFile struct {
 }
 
 func NewLoader(dm *engine.DataManager, cfg *config.LoaderSCfg,
-	timezone string, filterS *engine.FilterS,
+	timezone string, cachingDlay time.Duration, filterS *engine.FilterS,
 	connMgr *engine.ConnManager, cacheConns []string) (ldr *Loader) {
 	ldr = &Loader{
 		enabled:       cfg.Enabled,
@@ -51,6 +51,7 @@ func NewLoader(dm *engine.DataManager, cfg *config.LoaderSCfg,
 		lockFilepath:  cfg.GetLockFilePath(),
 		fieldSep:      cfg.FieldSeparator,
 		runDelay:      cfg.RunDelay,
+		cachingDelay:  cachingDlay,
 		dataTpls:      make(map[string][]*config.FCTemplate),
 		flagsTpls:     make(map[string]utils.FlagsWithParams),
 		rdrs:          make(map[string]map[string]*openedCSVFile),
@@ -94,6 +95,7 @@ type Loader struct {
 	lockFilepath  string
 	fieldSep      string
 	runDelay      time.Duration
+	cachingDelay  time.Duration
 	dataTpls      map[string][]*config.FCTemplate      // map[loaderType]*config.FCTemplate
 	flagsTpls     map[string]utils.FlagsWithParams     //map[loaderType]utils.FlagsWithParams
 	rdrs          map[string]map[string]*openedCSVFile // map[loaderType]map[fileName]*openedCSVFile for common incremental read
@@ -555,7 +557,11 @@ func (ldr *Loader) storeLoadedData(loaderType string,
 			}
 		}
 	}
-
+	// delay if needed before cache reload
+	if ldr.cachingDelay != 0 {
+		utils.Logger.Info(fmt.Sprintf("<%v> Delaying cache reload for %v", utils.LoaderS, ldr.cachingDelay))
+	}
+	time.Sleep(ldr.cachingDelay)
 	if len(ldr.cacheConns) != 0 {
 		return engine.CallCache(ldr.connMgr, ldr.cacheConns, caching, cacheArgs, cacheIDs, nil, false, ldr.tenant)
 	}
@@ -802,7 +808,11 @@ func (ldr *Loader) removeLoadedData(loaderType string, lds map[string][]LoaderDa
 			}
 		}
 	}
-
+	// delay if needed before cache reload
+	if ldr.cachingDelay != 0 {
+		utils.Logger.Info(fmt.Sprintf("<%v> Delaying cache reload for %v", utils.LoaderS, ldr.cachingDelay))
+	}
+	time.Sleep(ldr.cachingDelay)
 	if len(ldr.cacheConns) != 0 {
 		return engine.CallCache(ldr.connMgr, ldr.cacheConns, caching, cacheArgs, cacheIDs, nil, false, ldr.tenant)
 	}

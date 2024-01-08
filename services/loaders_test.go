@@ -66,7 +66,7 @@ func TestLoaderSCoverage(t *testing.T) {
 			TpInDir:        "",
 			TpOutDir:       "",
 			Data:           nil,
-		}}, "",
+		}}, "", 0,
 		&engine.FilterS{}, nil)
 	if !srv.IsRunning() {
 		t.Errorf("Expected service to be running")

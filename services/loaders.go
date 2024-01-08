@@ -80,7 +80,7 @@ func (ldrs *LoaderService) Start() error {
 	defer ldrs.Unlock()
 
 	ldrs.ldrs = loaders.NewLoaderService(datadb, ldrs.cfg.LoaderCfg(),
-		ldrs.cfg.GeneralCfg().DefaultTimezone, filterS, ldrs.connMgr)
+		ldrs.cfg.GeneralCfg().DefaultTimezone, ldrs.cfg.GeneralCfg().CachingDelay, filterS, ldrs.connMgr)
 
 	if !ldrs.ldrs.Enabled() {
 		return nil
@@ -113,7 +113,7 @@ func (ldrs *LoaderService) Reload() (err error) {
 
 	ldrs.RLock()
 
-	ldrs.ldrs.Reload(datadb, ldrs.cfg.LoaderCfg(), ldrs.cfg.GeneralCfg().DefaultTimezone,
+	ldrs.ldrs.Reload(datadb, ldrs.cfg.LoaderCfg(), ldrs.cfg.GeneralCfg().DefaultTimezone, ldrs.cfg.GeneralCfg().CachingDelay,
 		filterS, ldrs.connMgr)
 	if err = ldrs.ldrs.ListenAndServe(ldrs.stopChan); err != nil {
 		return
