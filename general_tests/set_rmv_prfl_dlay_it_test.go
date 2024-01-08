@@ -728,7 +728,7 @@ func TestSetRemoveProfilesWithCachingDelay(t *testing.T) {
 		eRoutePrf := &utils.TenantIDWithAPIOpts{
 			TenantID: &utils.TenantID{
 				Tenant: "cgrates.org",
-				ID:     "ROUTE_1",
+				ID:     "ROUTE_2",
 			},
 		}
 
