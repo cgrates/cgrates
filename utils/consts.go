@@ -1034,6 +1034,7 @@ const (
 	MetaTopUp                   = "*topup"
 	MetaDebitReset              = "*debit_reset"
 	MetaDebit                   = "*debit"
+	MetaTransferBalance         = "*transfer_balance"
 	MetaResetCounters           = "*reset_counters"
 	MetaEnableAccount           = "*enable_account"
 	MetaDisableAccount          = "*disable_account"

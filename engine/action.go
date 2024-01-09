@@ -91,6 +91,7 @@ func init() {
 	actionFuncMap[utils.MetaTopUp] = topupAction
 	actionFuncMap[utils.MetaDebitReset] = debitResetAction
 	actionFuncMap[utils.MetaDebit] = debitAction
+	actionFuncMap[utils.MetaTransferBalance] = transferBalanceAction
 	actionFuncMap[utils.MetaResetCounters] = resetCountersAction
 	actionFuncMap[utils.MetaEnableAccount] = enableAccountAction
 	actionFuncMap[utils.MetaDisableAccount] = disableAccountAction
@@ -120,6 +121,84 @@ func getActionFunc(typ string) (f actionTypeFunc, exists bool) {
 
 func RegisterActionFunc(action string, f actionTypeFunc) {
 	actionFuncMap[action] = f
+}
+
+// transferBalanceAction transfers units between accounts' balances.
+// It ensures both source and destination balances are of the same type and non-expired.
+// Destination account and balance IDs are obtained from Action's ExtraParameters.
+// ExtraParameters should be a JSON string containing keys 'DestAccountID' and 'DestBalanceID',
+// which identify the destination account and balance for the transfer.
+func transferBalanceAction(srcAcc *Account, act *Action, _ Actions, fltrS *FilterS, _ any) error {
+	if srcAcc == nil {
+		return errors.New("source account is nil")
+	}
+	if act.Balance.Type == nil {
+		return errors.New("balance type is missing")
+	}
+	if act.Balance.ID == nil {
+		return errors.New("source balance ID is missing")
+	}
+	if act.ExtraParameters == "" {
+		return errors.New("ExtraParameters used to identify the destination balance are missing")
+	}
+	if len(srcAcc.BalanceMap) == 0 {
+		return fmt.Errorf("account %s has no balances to transfer from", srcAcc.ID)
+	}
+
+	srcBalance := srcAcc.GetBalanceWithID(*act.Balance.Type, *act.Balance.ID)
+	if srcBalance == nil || srcBalance.IsExpiredAt(time.Now()) {
+		return errors.New("source balance not found or expired")
+	}
+
+	transferUnits := act.Balance.GetValue()
+	if transferUnits == 0 {
+		return errors.New("balance value is missing or 0")
+	}
+	if transferUnits > srcBalance.Value {
+		return utils.ErrInsufficientCredit
+	}
+
+	accDestInfo := struct {
+		DestAccountID string
+		DestBalanceID string
+	}{}
+	if err := json.Unmarshal([]byte(act.ExtraParameters), &accDestInfo); err != nil {
+		return err
+	}
+
+	// This guard is meant to lock the destination account as we are making changes to it. It was not needed
+	// for the source account due to it being locked from outside this function.
+	guardErr := guardian.Guardian.Guard(func() error {
+		destAcc, err := dm.GetAccount(accDestInfo.DestAccountID)
+		if err != nil {
+			return fmt.Errorf("retrieving destination account failed: %w", err)
+		}
+		destBalance := destAcc.GetBalanceWithID(*act.Balance.Type, accDestInfo.DestBalanceID)
+		if destBalance == nil || destBalance.IsExpiredAt(time.Now()) {
+			return errors.New("destination balance not found or expired")
+		}
+
+		srcBalance.SubtractValue(transferUnits)
+		srcBalance.dirty = true
+		destBalance.AddValue(transferUnits)
+		destBalance.dirty = true
+
+		destAcc.InitCounters()
+		destAcc.ExecuteActionTriggers(act, fltrS)
+
+		if err := dm.SetAccount(destAcc); err != nil {
+			return fmt.Errorf("updating destination account failed: %w", err)
+		}
+		return nil
+	}, config.CgrConfig().GeneralCfg().LockingTimeout, utils.AccountPrefix+accDestInfo.DestAccountID)
+	if guardErr != nil {
+		return guardErr
+	}
+
+	// Execute action triggers for the source account. This account will be updated in the parent function.
+	srcAcc.InitCounters()
+	srcAcc.ExecuteActionTriggers(act, fltrS)
+	return nil
 }
 
 func logAction(ub *Account, a *Action, acs Actions, _ *FilterS, extraData any) (err error) {
