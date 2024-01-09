@@ -145,8 +145,8 @@ func (apierSv1 *APIerSv1) SetThresholdProfile(ctx *context.Context, args *engine
 	// delay if needed before cache call
 	if apierSv1.Config.GeneralCfg().CachingDelay != 0 {
 		utils.Logger.Info(fmt.Sprintf("<SetThresholdProfile> Delaying cache call for %v", apierSv1.Config.GeneralCfg().CachingDelay))
+		time.Sleep(apierSv1.Config.GeneralCfg().CachingDelay)
 	}
-	time.Sleep(apierSv1.Config.GeneralCfg().CachingDelay)
 	//handle caching for ThresholdProfile and Threshold
 	if err := apierSv1.CallCache(utils.IfaceAsString(args.APIOpts[utils.CacheOpt]), args.Tenant, utils.CacheThresholdProfiles,
 		args.TenantID(), utils.EmptyString, &args.FilterIDs, nil, args.APIOpts); err != nil {
@@ -171,8 +171,8 @@ func (apierSv1 *APIerSv1) RemoveThresholdProfile(ctx *context.Context, args *uti
 	// delay if needed before cache call
 	if apierSv1.Config.GeneralCfg().CachingDelay != 0 {
 		utils.Logger.Info(fmt.Sprintf("<RemoveThresholdProfile> Delaying cache call for %v", apierSv1.Config.GeneralCfg().CachingDelay))
+		time.Sleep(apierSv1.Config.GeneralCfg().CachingDelay)
 	}
-	time.Sleep(apierSv1.Config.GeneralCfg().CachingDelay)
 	//handle caching for ThresholdProfile
 	if err := apierSv1.CallCache(utils.IfaceAsString(args.APIOpts[utils.CacheOpt]), tnt, utils.CacheThresholdProfiles,
 		utils.ConcatenatedKey(tnt, args.ID), utils.EmptyString, nil, nil, args.APIOpts); err != nil {

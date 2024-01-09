@@ -87,8 +87,8 @@ func (apierSv1 *APIerSv1) SetStatQueueProfile(ctx *context.Context, arg *engine.
 	// delay if needed before cache call
 	if apierSv1.Config.GeneralCfg().CachingDelay != 0 {
 		utils.Logger.Info(fmt.Sprintf("<SetStatQueueProfile> Delaying cache call for %v", apierSv1.Config.GeneralCfg().CachingDelay))
+		time.Sleep(apierSv1.Config.GeneralCfg().CachingDelay)
 	}
-	time.Sleep(apierSv1.Config.GeneralCfg().CachingDelay)
 	//handle caching for StatQueueProfile
 	if err = apierSv1.CallCache(utils.IfaceAsString(arg.APIOpts[utils.CacheOpt]), arg.Tenant, utils.CacheStatQueueProfiles,
 		arg.TenantID(), utils.EmptyString, &arg.FilterIDs, nil, arg.APIOpts); err != nil {
@@ -113,8 +113,8 @@ func (apierSv1 *APIerSv1) RemoveStatQueueProfile(ctx *context.Context, args *uti
 	// delay if needed before cache call
 	if apierSv1.Config.GeneralCfg().CachingDelay != 0 {
 		utils.Logger.Info(fmt.Sprintf("<RemoveStatQueueProfile> Delaying cache call for %v", apierSv1.Config.GeneralCfg().CachingDelay))
+		time.Sleep(apierSv1.Config.GeneralCfg().CachingDelay)
 	}
-	time.Sleep(apierSv1.Config.GeneralCfg().CachingDelay)
 	//handle caching for StatQueueProfile
 	if err := apierSv1.CallCache(utils.IfaceAsString(args.APIOpts[utils.CacheOpt]), tnt, utils.CacheStatQueueProfiles,
 		utils.ConcatenatedKey(tnt, args.ID), utils.EmptyString, nil, nil, args.APIOpts); err != nil {

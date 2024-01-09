@@ -89,8 +89,8 @@ func (apierSv1 *APIerSv1) SetRouteProfile(ctx *context.Context, args *RouteWithA
 	// delay if needed before cache call
 	if apierSv1.Config.GeneralCfg().CachingDelay != 0 {
 		utils.Logger.Info(fmt.Sprintf("<SetRouteProfile> Delaying cache call for %v", apierSv1.Config.GeneralCfg().CachingDelay))
+		time.Sleep(apierSv1.Config.GeneralCfg().CachingDelay)
 	}
-	time.Sleep(apierSv1.Config.GeneralCfg().CachingDelay)
 	//handle caching for SupplierProfile
 	if err := apierSv1.CallCache(utils.IfaceAsString(args.APIOpts[utils.CacheOpt]), args.Tenant, utils.CacheRouteProfiles,
 		args.TenantID(), utils.EmptyString, &args.FilterIDs, nil, args.APIOpts); err != nil {
@@ -119,8 +119,8 @@ func (apierSv1 *APIerSv1) RemoveRouteProfile(ctx *context.Context, args *utils.T
 	// delay if needed before cache call
 	if apierSv1.Config.GeneralCfg().CachingDelay != 0 {
 		utils.Logger.Info(fmt.Sprintf("<RemoveRouteProfile> Delaying cache call for %v", apierSv1.Config.GeneralCfg().CachingDelay))
+		time.Sleep(apierSv1.Config.GeneralCfg().CachingDelay)
 	}
-	time.Sleep(apierSv1.Config.GeneralCfg().CachingDelay)
 	//handle caching for SupplierProfile
 	if err := apierSv1.CallCache(utils.IfaceAsString(args.APIOpts[utils.CacheOpt]), tnt, utils.CacheRouteProfiles,
 		utils.ConcatenatedKey(tnt, args.ID), utils.EmptyString, nil, nil, args.APIOpts); err != nil {

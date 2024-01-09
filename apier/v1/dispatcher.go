@@ -93,8 +93,8 @@ func (apierSv1 *APIerSv1) SetDispatcherProfile(ctx *context.Context, args *Dispa
 	// delay if needed before cache call
 	if apierSv1.Config.GeneralCfg().CachingDelay != 0 {
 		utils.Logger.Info(fmt.Sprintf("<SetDispatcherProfile> Delaying cache call for %v", apierSv1.Config.GeneralCfg().CachingDelay))
+		time.Sleep(apierSv1.Config.GeneralCfg().CachingDelay)
 	}
-	time.Sleep(apierSv1.Config.GeneralCfg().CachingDelay)
 	//handle caching for DispatcherProfile
 	if err := apierSv1.CallCache(utils.IfaceAsString(args.APIOpts[utils.CacheOpt]), args.Tenant, utils.CacheDispatcherProfiles,
 		args.TenantID(), utils.EmptyString, &args.FilterIDs, args.Subsystems, args.APIOpts); err != nil {
@@ -136,8 +136,8 @@ func (apierSv1 *APIerSv1) RemoveDispatcherProfile(ctx *context.Context, arg *uti
 	// delay if needed before cache call
 	if apierSv1.Config.GeneralCfg().CachingDelay != 0 {
 		utils.Logger.Info(fmt.Sprintf("<RemoveDispatcherProfile> Delaying cache call for %v", apierSv1.Config.GeneralCfg().CachingDelay))
+		time.Sleep(apierSv1.Config.GeneralCfg().CachingDelay)
 	}
-	time.Sleep(apierSv1.Config.GeneralCfg().CachingDelay)
 	//handle caching for DispatcherProfile
 	if err := apierSv1.CallCache(utils.IfaceAsString(arg.APIOpts[utils.CacheOpt]), tnt, utils.CacheDispatcherProfiles,
 		utils.ConcatenatedKey(tnt, arg.ID), utils.EmptyString, nil, nil, arg.APIOpts); err != nil {

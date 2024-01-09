@@ -71,8 +71,8 @@ func (apiv2 *APIerSv2) LoadRatingProfile(ctx *context.Context, attrs *AttrLoadRa
 	// delay if needed before cache reload
 	if apiv2.Config.GeneralCfg().CachingDelay != 0 {
 		utils.Logger.Info(fmt.Sprintf("<V2LoadRatingProfile>Delaying cache reload for %v", apiv2.Config.GeneralCfg().CachingDelay))
+		time.Sleep(apiv2.Config.GeneralCfg().CachingDelay)
 	}
-	time.Sleep(apiv2.Config.GeneralCfg().CachingDelay)
 	if err = dbReader.ReloadCache(config.CgrConfig().GeneralCfg().DefaultCaching, true, make(map[string]any), apiv2.Config.GeneralCfg().DefaultTenant); err != nil {
 		return utils.NewErrServerError(err)
 	}
@@ -165,8 +165,8 @@ func (apiv2 *APIerSv2) LoadTariffPlanFromFolder(ctx *context.Context, attrs *uti
 	// delay if needed before cache reload
 	if apiv2.Config.GeneralCfg().CachingDelay != 0 {
 		utils.Logger.Info(fmt.Sprintf("<V2LoadTariffPlanFromFolder> Delaying cache reload for %v", apiv2.Config.GeneralCfg().CachingDelay))
+		time.Sleep(apiv2.Config.GeneralCfg().CachingDelay)
 	}
-	time.Sleep(apiv2.Config.GeneralCfg().CachingDelay)
 	if err := loader.ReloadCache(caching, true, attrs.APIOpts, apiv2.Config.GeneralCfg().DefaultTimezone); err != nil {
 		return utils.NewErrServerError(err)
 	}

@@ -560,8 +560,8 @@ func (ldr *Loader) storeLoadedData(loaderType string,
 	// delay if needed before cache reload
 	if ldr.cachingDelay != 0 {
 		utils.Logger.Info(fmt.Sprintf("<%v> Delaying cache reload for %v", utils.LoaderS, ldr.cachingDelay))
+		time.Sleep(ldr.cachingDelay)
 	}
-	time.Sleep(ldr.cachingDelay)
 	if len(ldr.cacheConns) != 0 {
 		return engine.CallCache(ldr.connMgr, ldr.cacheConns, caching, cacheArgs, cacheIDs, nil, false, ldr.tenant)
 	}
@@ -811,8 +811,8 @@ func (ldr *Loader) removeLoadedData(loaderType string, lds map[string][]LoaderDa
 	// delay if needed before cache reload
 	if ldr.cachingDelay != 0 {
 		utils.Logger.Info(fmt.Sprintf("<%v> Delaying cache reload for %v", utils.LoaderS, ldr.cachingDelay))
+		time.Sleep(ldr.cachingDelay)
 	}
-	time.Sleep(ldr.cachingDelay)
 	if len(ldr.cacheConns) != 0 {
 		return engine.CallCache(ldr.connMgr, ldr.cacheConns, caching, cacheArgs, cacheIDs, nil, false, ldr.tenant)
 	}
