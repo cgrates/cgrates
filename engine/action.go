@@ -91,6 +91,7 @@ func init() {
 	actionFuncMap[utils.MetaTopUp] = topupAction
 	actionFuncMap[utils.MetaDebitReset] = debitResetAction
 	actionFuncMap[utils.MetaDebit] = debitAction
+	actionFuncMap[utils.MetaTransferBalance] = transferBalanceAction
 	actionFuncMap[utils.MetaResetCounters] = resetCountersAction
 	actionFuncMap[utils.MetaEnableAccount] = enableAccountAction
 	actionFuncMap[utils.MetaDisableAccount] = disableAccountAction
@@ -120,6 +121,94 @@ func getActionFunc(typ string) (f actionTypeFunc, exists bool) {
 
 func RegisterActionFunc(action string, f actionTypeFunc) {
 	actionFuncMap[action] = f
+}
+
+// transferBalanceAction transfers units from a balance of one account to a balance of another account.
+// Both balances must be of the same type. Destination account/balance information is extracted
+// from act's ExtraParameters.
+func transferBalanceAction(acc *Account, act *Action, _ Actions, _ *FilterS, _ any) error {
+	if acc == nil {
+		return errors.New("account cannot be nil for *transfer_balance action")
+	}
+	if act.Balance.Type == nil {
+		return errors.New("balance type must be specified")
+	}
+	if act.Balance.ID == nil {
+		return errors.New("source balance ID must be specified")
+	}
+	if act.ExtraParameters == "" {
+		return errors.New("destination account parameters required")
+	}
+	if len(acc.BalanceMap) == 0 {
+		return fmt.Errorf("account %s has no balances to transfer from", acc.ID)
+	}
+
+	// Retrieve the source balance.
+	var balanceSource *Balance
+	for _, balance := range acc.BalanceMap[*act.Balance.Type] {
+		if balance.ID == *act.Balance.ID && !balance.IsExpiredAt(time.Now()) {
+			balanceSource = balance
+			break
+		}
+	}
+	if balanceSource == nil {
+		return errors.New("could not find source balance")
+	}
+
+	// Retrieve the destination balance.
+	accDestInfo := struct {
+		DestAccountID string
+		DestBalanceID string
+	}{}
+	if err := json.Unmarshal([]byte(act.ExtraParameters), &accDestInfo); err != nil {
+		return err
+	}
+	accDest, err := dm.GetAccount(accDestInfo.DestAccountID)
+	if err != nil {
+		return fmt.Errorf("retrieving destination account failed: %w", err)
+	}
+	var balanceDest *Balance
+	for _, balance := range accDest.BalanceMap[*act.Balance.Type] {
+		if balance.ID == accDestInfo.DestBalanceID && !balance.IsExpiredAt(time.Now()) {
+			balanceDest = balance
+			break
+		}
+	}
+	if balanceDest == nil {
+		return errors.New("could not find destination balance")
+	}
+
+	// Retrieve the amount of units that will be transferred.
+	transferUnits := act.Balance.GetValue()
+	if transferUnits == 0 {
+		return errors.New("balance value is 0 or not specified")
+	}
+	if transferUnits > balanceSource.Value {
+		return errors.New("not enough funds in the source balance")
+	}
+
+	// Make the unit transfer.
+	balanceSource.SubtractValue(transferUnits)
+	balanceDest.AddValue(transferUnits)
+
+	// Update the accounts after the transfer went through.
+	if err = dm.SetAccount(acc); err != nil {
+		return fmt.Errorf("updating source account failed: %w", err)
+	}
+	if err = dm.SetAccount(accDest); err != nil {
+		err = fmt.Errorf("updating destination account failed: %w", err)
+
+		// Setting the destination account failed. Rolling back changes made to the source balance.
+		balanceSource.AddValue(transferUnits)
+		if rollbackErr := dm.SetAccount(acc); rollbackErr != nil {
+			err = errors.Join(
+				err,
+				fmt.Errorf("rolling back source balance changes failed: %w", rollbackErr),
+			)
+		}
+		return err
+	}
+	return nil
 }
 
 func logAction(ub *Account, a *Action, acs Actions, _ *FilterS, extraData any) (err error) {

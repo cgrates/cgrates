@@ -43,6 +43,9 @@ type DataDBMock struct {
 	RemoveActionPlanDrvF      func(key string) (err error)
 	GetRouteProfileDrvF       func(tenant, id string) (rp *RouteProfile, err error)
 	RemoveRouteProfileDrvF    func(tenant, id string) error
+	GetAccountDrvF            func(id string) (*Account, error)
+	SetAccountDrvF            func(acc *Account) error
+	RemoveAccountDrvF         func(id string) error
 }
 
 // Storage methods
@@ -213,15 +216,24 @@ func (dbM *DataDBMock) PopTask() (*Task, error) {
 	return nil, utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) GetAccountDrv(string) (*Account, error) {
+func (dbM *DataDBMock) GetAccountDrv(id string) (*Account, error) {
+	if dbM.GetAccountDrvF != nil {
+		return dbM.GetAccountDrvF(id)
+	}
 	return nil, utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) SetAccountDrv(*Account) error {
+func (dbM *DataDBMock) SetAccountDrv(acc *Account) error {
+	if dbM.SetAccountDrvF != nil {
+		return dbM.SetAccountDrvF(acc)
+	}
 	return utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) RemoveAccountDrv(string) error {
+func (dbM *DataDBMock) RemoveAccountDrv(id string) error {
+	if dbM.RemoveAccountDrvF != nil {
+		return dbM.RemoveAccountDrvF(id)
+	}
 	return utils.ErrNotImplemented
 }
 
