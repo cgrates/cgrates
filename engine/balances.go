@@ -282,7 +282,7 @@ func (b *Balance) AddValue(amount float64) {
 	b.SetValue(b.GetValue() + amount)
 }
 
-func (b *Balance) SubstractValue(amount float64) {
+func (b *Balance) SubtractValue(amount float64) {
 	b.SetValue(b.GetValue() - amount)
 }
 
@@ -347,7 +347,7 @@ func (b *Balance) debitUnits(cd *CallDescriptor, ub *Account, moneyBalances Bala
 					globalRoundingDecimals, utils.MetaRoundingUp)
 			}
 			if b.GetValue() >= amount {
-				b.SubstractValue(amount)
+				b.SubtractValue(amount)
 				inc.BalanceInfo.Unit = &UnitInfo{
 					UUID:          b.Uuid,
 					ID:            b.ID,
@@ -477,7 +477,7 @@ func (b *Balance) debitUnits(cd *CallDescriptor, ub *Account, moneyBalances Bala
 					moneyBal = ub.GetDefaultMoneyBalance()
 				}
 				if b.GetValue() >= amount && (moneyBal != nil || cost == 0) {
-					b.SubstractValue(amount)
+					b.SubtractValue(amount)
 					inc.BalanceInfo.Unit = &UnitInfo{
 						UUID:          b.Uuid,
 						ID:            b.ID,
@@ -489,7 +489,7 @@ func (b *Balance) debitUnits(cd *CallDescriptor, ub *Account, moneyBalances Bala
 					}
 					inc.BalanceInfo.AccountID = ub.ID
 					if cost != 0 {
-						moneyBal.SubstractValue(cost)
+						moneyBal.SubtractValue(cost)
 						inc.BalanceInfo.Monetary = &MonetaryInfo{
 							UUID:  moneyBal.Uuid,
 							ID:    moneyBal.ID,
@@ -635,7 +635,7 @@ func (b *Balance) debitMoney(cd *CallDescriptor, ub *Account, moneyBalances Bala
 			}
 
 			if b.GetValue() >= amount {
-				b.SubstractValue(amount)
+				b.SubtractValue(amount)
 				cd.MaxCostSoFar += amount
 				inc.BalanceInfo.Monetary = &MonetaryInfo{
 					UUID:  b.Uuid,
@@ -880,7 +880,7 @@ func (b *Balance) debit(cd *CallDescriptor, ub *Account, moneyBalances Balances,
 					globalRoundingDecimals, utils.MetaRoundingUp)
 			}
 			if b.GetValue() >= amount {
-				b.SubstractValue(amount)
+				b.SubtractValue(amount)
 				inc.BalanceInfo.Unit = &UnitInfo{
 					UUID:          b.Uuid,
 					ID:            b.ID,
@@ -1049,7 +1049,7 @@ func (b *Balance) debit(cd *CallDescriptor, ub *Account, moneyBalances Balances,
 			}
 
 			if isUnitBal { // unit balance
-				b.SubstractValue(amount)
+				b.SubtractValue(amount)
 				inc.BalanceInfo.Unit = &UnitInfo{
 					UUID:          b.Uuid,
 					ID:            b.ID,
@@ -1061,7 +1061,7 @@ func (b *Balance) debit(cd *CallDescriptor, ub *Account, moneyBalances Balances,
 				}
 				inc.BalanceInfo.AccountID = ub.ID
 				if cost != 0 {
-					moneyBal.SubstractValue(cost)
+					moneyBal.SubtractValue(cost)
 					inc.BalanceInfo.Monetary = &MonetaryInfo{
 						UUID:  moneyBal.Uuid,
 						ID:    moneyBal.ID,
@@ -1076,7 +1076,7 @@ func (b *Balance) debit(cd *CallDescriptor, ub *Account, moneyBalances Balances,
 					}
 				}
 			} else { // monetary balance
-				b.SubstractValue(cost)
+				b.SubtractValue(cost)
 				cd.MaxCostSoFar += cost
 				inc.BalanceInfo.Monetary = &MonetaryInfo{
 					UUID:  b.Uuid,

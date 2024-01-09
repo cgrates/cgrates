@@ -4197,3 +4197,403 @@ func TestRemoveAccountActionLogg(t *testing.T) {
 	}
 
 }
+
+func TestActionsTransferBalance(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	var srcAcc *Account
+	var destAcc *Account
+	db := &DataDBMock{
+		SetAccountDrvF: func(acc *Account) error {
+			switch {
+			case strings.HasSuffix(acc.ID, "_FAIL"):
+				return utils.ErrServerError
+			case srcAcc.ID == acc.ID:
+				srcAcc = acc
+			case destAcc.ID == acc.ID:
+				destAcc = acc
+			default:
+				return utils.ErrAccountNotFound
+			}
+			return nil
+		},
+		GetAccountDrvF: func(id string) (*Account, error) {
+			if destAcc == nil || destAcc.ID != id {
+				return nil, utils.ErrNotFound
+			}
+			return destAcc, nil
+		},
+	}
+	mockedDM := NewDataManager(db, cfg.CacheCfg(), nil)
+	originalDM := dm
+	defer func() { dm = originalDM }()
+	dm = mockedDM
+
+	testcases := []struct {
+		name                string
+		srcAcc              *Account
+		destAcc             *Account
+		act                 *Action
+		expectedSrcBalance  float64
+		expectedDestBalance float64
+		expectedErr         string
+	}{
+		{
+			name: "SuccessfulTransfer",
+			srcAcc: &Account{
+				ID: "cgrates.org:ACC_SRC",
+				BalanceMap: map[string]Balances{
+					utils.MetaMonetary: {
+						{
+							ID:    "BALANCE_SRC",
+							Value: 10,
+						},
+					},
+				},
+			},
+			destAcc: &Account{
+				ID: "cgrates.org:ACC_DEST",
+				BalanceMap: map[string]Balances{
+					utils.MetaMonetary: {
+						{
+							ID:    "BALANCE_DEST",
+							Value: 5,
+						},
+					},
+				},
+			},
+			act: &Action{
+				Id:         "ACT_TRANSFER_BALANCE",
+				ActionType: utils.MetaTransferBalance,
+				ExtraParameters: `{
+					"DestAccountID": "cgrates.org:ACC_DEST",
+					"DestBalanceID": "BALANCE_DEST"
+				}`,
+				Balance: &BalanceFilter{
+					ID:   utils.StringPointer("BALANCE_SRC"),
+					Type: utils.StringPointer(utils.MetaMonetary),
+					Value: &utils.ValueFormula{
+						Static: 3,
+					},
+				},
+			},
+			expectedSrcBalance:  7,
+			expectedDestBalance: 8,
+		},
+		{
+			name:        "NilAccount",
+			expectedErr: "source account is nil",
+		},
+		{
+			name: "UnspecifiedBalanceType",
+			srcAcc: &Account{
+				ID: "cgrates.org:ACC_SRC",
+			},
+			act: &Action{
+				Id:      "ACT_TRANSFER_BALANCE",
+				Balance: &BalanceFilter{},
+			},
+			expectedErr: "balance type is missing",
+		},
+		{
+			name: "UnspecifiedBalanceID",
+			srcAcc: &Account{
+				ID: "cgrates.org:ACC_SRC",
+			},
+			act: &Action{
+				Id: "ACT_TRANSFER_BALANCE",
+				Balance: &BalanceFilter{
+					Type: utils.StringPointer(utils.MetaMonetary),
+				},
+			},
+			expectedErr: "source balance ID is missing",
+		},
+		{
+			name: "MissingDestinationParameters",
+			srcAcc: &Account{
+				ID: "cgrates.org:ACC_SRC",
+			},
+			act: &Action{
+				Id: "ACT_TRANSFER_BALANCE",
+				Balance: &BalanceFilter{
+					Type: utils.StringPointer(utils.MetaMonetary),
+					ID:   utils.StringPointer("BALANCE_SRC"),
+				},
+			},
+			expectedErr: "ExtraParameters used to identify the destination balance are missing",
+		},
+		{
+			name: "MissingSourceAccountBalances",
+			srcAcc: &Account{
+				ID: "cgrates.org:ACC_SRC",
+			},
+			act: &Action{
+				Id:              "ACT_TRANSFER_BALANCE",
+				ExtraParameters: "invalid_params",
+				Balance: &BalanceFilter{
+					Type: utils.StringPointer(utils.MetaMonetary),
+					ID:   utils.StringPointer("BALANCE_SRC"),
+				},
+			},
+			expectedErr: "account cgrates.org:ACC_SRC has no balances to transfer from",
+		},
+		{
+			name: "SourceAccountBalanceNotFound",
+			srcAcc: &Account{
+				ID: "cgrates.org:ACC_SRC",
+				BalanceMap: map[string]Balances{
+					utils.MetaMonetary: {
+						{
+							ID:    "*default",
+							Value: 10,
+						},
+					},
+				},
+			},
+			act: &Action{
+				Id:              "ACT_TRANSFER_BALANCE",
+				ExtraParameters: "invalid_params",
+				Balance: &BalanceFilter{
+					Type: utils.StringPointer(utils.MetaMonetary),
+					ID:   utils.StringPointer("BALANCE_SRC"),
+				},
+			},
+			expectedErr: "source balance not found or expired",
+		},
+		{
+			name: "InvalidExtraParameters",
+			srcAcc: &Account{
+				ID: "cgrates.org:ACC_SRC",
+				BalanceMap: map[string]Balances{
+					utils.MetaMonetary: {
+						{
+							ID:    "BALANCE_SRC",
+							Value: 10,
+						},
+					},
+				},
+			},
+			act: &Action{
+				Id:              "ACT_TRANSFER_BALANCE",
+				ExtraParameters: "invalid_params",
+				Balance: &BalanceFilter{
+					Type: utils.StringPointer(utils.MetaMonetary),
+					ID:   utils.StringPointer("BALANCE_SRC"),
+					Value: &utils.ValueFormula{
+						Static: 3,
+					},
+				},
+			},
+			expectedErr: "invalid character 'i' looking for beginning of value",
+		},
+		{
+			name: "DestinationAccountNotFound",
+			srcAcc: &Account{
+				ID: "cgrates.org:ACC_SRC",
+				BalanceMap: map[string]Balances{
+					utils.MetaMonetary: {
+						{
+							ID:    "BALANCE_SRC",
+							Value: 10,
+						},
+					},
+				},
+			},
+			act: &Action{
+				Id: "ACT_TRANSFER_BALANCE",
+				ExtraParameters: `{
+					"DestAccountID": "cgrates.org:ACC_DEST",
+					"DestBalanceID": "BALANCE_DEST"
+				}`,
+				Balance: &BalanceFilter{
+					Type: utils.StringPointer(utils.MetaMonetary),
+					ID:   utils.StringPointer("BALANCE_SRC"),
+					Value: &utils.ValueFormula{
+						Static: 3,
+					},
+				},
+			},
+			expectedErr: "retrieving destination account failed: NOT_FOUND",
+		},
+		{
+			name: "DestinationBalanceNotFound",
+			srcAcc: &Account{
+				ID: "cgrates.org:ACC_SRC",
+				BalanceMap: map[string]Balances{
+					utils.MetaMonetary: {
+						{
+							ID:    "BALANCE_SRC",
+							Value: 10,
+						},
+					},
+				},
+			},
+			destAcc: &Account{
+				ID: "cgrates.org:ACC_DEST",
+			},
+			act: &Action{
+				Id: "ACT_TRANSFER_BALANCE",
+				ExtraParameters: `{
+					"DestAccountID": "cgrates.org:ACC_DEST",
+					"DestBalanceID": "BALANCE_DEST"
+				}`,
+				Balance: &BalanceFilter{
+					Type: utils.StringPointer(utils.MetaMonetary),
+					ID:   utils.StringPointer("BALANCE_SRC"),
+					Value: &utils.ValueFormula{
+						Static: 3,
+					},
+				},
+			},
+			expectedErr: "destination balance not found or expired",
+		},
+		{
+			name: "TransferUnitsNotSpecifiedOr0",
+			srcAcc: &Account{
+				ID: "cgrates.org:ACC_SRC",
+				BalanceMap: map[string]Balances{
+					utils.MetaMonetary: {
+						{
+							ID:    "BALANCE_SRC",
+							Value: 1,
+						},
+					},
+				},
+			},
+			destAcc: &Account{
+				ID: "cgrates.org:ACC_DEST",
+				BalanceMap: map[string]Balances{
+					utils.MetaMonetary: {
+						{
+							ID:    "BALANCE_DEST",
+							Value: 5,
+						},
+					},
+				},
+			},
+			act: &Action{
+				Id: "ACT_TRANSFER_BALANCE",
+				ExtraParameters: `{
+					"DestAccountID": "cgrates.org:ACC_DEST",
+					"DestBalanceID": "BALANCE_DEST"
+				}`,
+				Balance: &BalanceFilter{
+					Type: utils.StringPointer(utils.MetaMonetary),
+					ID:   utils.StringPointer("BALANCE_SRC"),
+					Value: &utils.ValueFormula{
+						Static: 0,
+					},
+				},
+			},
+			expectedErr: "balance value is missing or 0",
+		},
+		{
+			name: "NotEnoughFundsInSourceBalance",
+			srcAcc: &Account{
+				ID: "cgrates.org:ACC_SRC",
+				BalanceMap: map[string]Balances{
+					utils.MetaMonetary: {
+						{
+							ID:    "BALANCE_SRC",
+							Value: 1,
+						},
+					},
+				},
+			},
+			destAcc: &Account{
+				ID: "cgrates.org:ACC_DEST",
+				BalanceMap: map[string]Balances{
+					utils.MetaMonetary: {
+						{
+							ID:    "BALANCE_DEST",
+							Value: 5,
+						},
+					},
+				},
+			},
+			act: &Action{
+				Id: "ACT_TRANSFER_BALANCE",
+				ExtraParameters: `{
+					"DestAccountID": "cgrates.org:ACC_DEST",
+					"DestBalanceID": "BALANCE_DEST"
+				}`,
+				Balance: &BalanceFilter{
+					Type: utils.StringPointer(utils.MetaMonetary),
+					ID:   utils.StringPointer("BALANCE_SRC"),
+					Value: &utils.ValueFormula{
+						Static: 3,
+					},
+				},
+			},
+			expectedErr: "INSUFFICIENT_CREDIT",
+		},
+		{
+			name: "DestinationBalanceFailedUpdate",
+			srcAcc: &Account{
+				ID: "cgrates.org:ACC_SRC",
+				BalanceMap: map[string]Balances{
+					utils.MetaMonetary: {
+						{
+							ID:    "BALANCE_SRC",
+							Value: 10,
+						},
+					},
+				},
+			},
+			destAcc: &Account{
+				ID: "cgrates.org:ACC_DEST_FAIL",
+				BalanceMap: map[string]Balances{
+					utils.MetaMonetary: {
+						{
+							ID:    "BALANCE_DEST",
+							Value: 5,
+						},
+					},
+				},
+			},
+			act: &Action{
+				Id: "ACT_TRANSFER_BALANCE",
+				ExtraParameters: `{
+					"DestAccountID": "cgrates.org:ACC_DEST_FAIL",
+					"DestBalanceID": "BALANCE_DEST"
+				}`,
+				Balance: &BalanceFilter{
+					Type: utils.StringPointer(utils.MetaMonetary),
+					ID:   utils.StringPointer("BALANCE_SRC"),
+					Value: &utils.ValueFormula{
+						Static: 3,
+					},
+				},
+			},
+			expectedErr: "updating destination account failed: SERVER_ERROR",
+		},
+	}
+
+	verifyBalance := func(t *testing.T, acc *Account, expected float64, accType, balanceType string, balanceIdx int) {
+		t.Helper()
+		balance := acc.BalanceMap[balanceType]
+		balanceValue := balance[balanceIdx].Value
+		if balanceValue != expected {
+			t.Errorf("received wrong %s balance value: expected %v, received %v",
+				accType, expected, balanceValue)
+		}
+	}
+
+	for _, tc := range testcases {
+		t.Run(tc.name, func(t *testing.T) {
+			srcAcc = tc.srcAcc
+			destAcc = tc.destAcc
+			err := transferBalanceAction(srcAcc, tc.act, nil, nil, nil)
+			if tc.expectedErr != "" {
+				if err == nil || err.Error() != tc.expectedErr {
+					t.Errorf("expected error %v, received %v", tc.expectedErr, err)
+				}
+				return
+			}
+			if err != nil {
+				t.Fatal(err)
+			}
+			verifyBalance(t, srcAcc, tc.expectedSrcBalance, "source", utils.MetaMonetary, 0)
+			verifyBalance(t, destAcc, tc.expectedDestBalance, "destination", utils.MetaMonetary, 0)
+		})
+	}
+}

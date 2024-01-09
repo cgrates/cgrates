@@ -214,7 +214,7 @@ func (acc *Account) debitBalanceAction(a *Action, reset, resetIfNegative bool, f
 			if reset || (resetIfNegative && b.Value < 0) {
 				b.SetValue(0)
 			}
-			b.SubstractValue(bClone.GetValue())
+			b.SubtractValue(bClone.GetValue())
 			b.dirty = true
 			found = true
 			a.balanceValue = b.GetValue()
@@ -527,7 +527,7 @@ func (acc *Account) debitCreditBalance(cd *CallDescriptor, count bool, dryRun bo
 				}
 				cost := increment.Cost
 				defaultBalance := acc.GetDefaultMoneyBalance()
-				defaultBalance.SubstractValue(cost)
+				defaultBalance.SubtractValue(cost)
 
 				increment.BalanceInfo.Monetary = &MonetaryInfo{
 					UUID:  defaultBalance.Uuid,
@@ -868,7 +868,7 @@ func (acc *Account) DebitConnectionFee(cc *CallCost, ufMoneyBalances Balances, c
 	var connectFeePaid bool
 	for _, b := range ufMoneyBalances {
 		if b.GetValue() >= connectFee {
-			b.SubstractValue(connectFee)
+			b.SubtractValue(connectFee)
 			// the conect fee is not refundable!
 			if count {
 				acc.countUnits(connectFee, utils.MetaMonetary, cc, b, fltrS)
@@ -886,7 +886,7 @@ func (acc *Account) DebitConnectionFee(cc *CallCost, ufMoneyBalances Balances, c
 		cc.negativeConnectFee = true
 		// there are no money for the connect fee; go negative
 		b := acc.GetDefaultMoneyBalance()
-		b.SubstractValue(connectFee)
+		b.SubtractValue(connectFee)
 		debitedBalance = *b
 		// the conect fee is not refundable!
 		if count {
