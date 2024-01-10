@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"errors"
 	"fmt"
 	"net"
 	"reflect"
@@ -226,7 +227,7 @@ func (fltr *Filter) Compile() (err error) {
 
 var supportedFiltersType utils.StringSet = utils.NewStringSet([]string{
 	utils.MetaString, utils.MetaContains, utils.MetaPrefix, utils.MetaSuffix,
-	utils.MetaTimings, utils.MetaRSR, utils.MetaDestinations,
+	utils.MetaTimings, utils.MetaRSR, utils.MetaDestinations, utils.MetaHTTP,
 	utils.MetaEmpty, utils.MetaExists, utils.MetaLessThan, utils.MetaLessOrEqual,
 	utils.MetaGreaterThan, utils.MetaGreaterOrEqual, utils.MetaEqual,
 	utils.MetaIPNet, utils.MetaAPIBan, utils.MetaSentryPeer, utils.MetaActivationInterval,
@@ -251,6 +252,9 @@ func NewFilterRule(rfType, fieldName string, vals []string) (*FilterRule, error)
 	if strings.HasPrefix(rfType, utils.MetaNot) {
 		rType = utils.Meta + strings.TrimPrefix(rfType, utils.MetaNot)
 		negative = true
+	}
+	if strings.HasPrefix(rfType, utils.MetaHTTP) {
+		rType = utils.MetaHTTP
 	}
 	if !supportedFiltersType.Has(rType) {
 		return nil, fmt.Errorf("Unsupported filter Type: %s", rfType)
@@ -361,6 +365,10 @@ func (fltr *FilterRule) Pass(dDP utils.DataProvider) (result bool, err error) {
 	case utils.MetaRegex, utils.MetaNotRegex:
 		result, err = fltr.passRegex(dDP)
 	default:
+		if strings.HasPrefix(fltr.Type, utils.MetaHTTP) && strings.Index(fltr.Type, "#") == len(utils.MetaHTTP) {
+			result, err = fltr.passHttp(dDP)
+			break
+		}
 		err = utils.ErrPrefixNotErrNotImplemented(fltr.Type)
 	}
 	if err != nil {
@@ -770,4 +778,23 @@ func (fltr *FilterRule) passRegex(dDP utils.DataProvider) (bool, error) {
 		}
 	}
 	return false, nil
+}
+
+func (fltr *FilterRule) passHttp(dDP utils.DataProvider) (bool, error) {
+	strVal, err := fltr.rsrElement.ParseDataProvider(dDP)
+	if err != nil {
+		if err == utils.ErrNotFound {
+			return false, nil
+		}
+		return false, err
+	}
+
+	parts := strings.Split(fltr.Type, utils.HashtagSep)
+	if len(parts) != 2 {
+		return false, errors.New("url is not specified")
+	}
+	//extracting  the url from the type
+	url := strings.Trim(parts[1], "[]")
+	return externalAPI(url, dDP, fltr.Element, strVal)
+
 }

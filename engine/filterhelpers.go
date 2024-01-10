@@ -197,7 +197,7 @@ func sentrypeerGetToken(tokenUrl, clientID, clientSecret, audience, grantType st
 		utils.GrantTypeCfg:    grantType,
 	}
 	jsonPayload, _ := json.Marshal(payload)
-	resp, err = getHTTP(http.MethodPost, tokenUrl, bytes.NewBuffer(jsonPayload), map[string][]string{utils.ContentType: {utils.JsonBody}})
+	resp, err = getHTTP(http.MethodPost, tokenUrl, bytes.NewBuffer(jsonPayload), map[string]string{utils.ContentType: utils.JsonBody})
 	if err != nil {
 		return
 	}
@@ -216,7 +216,7 @@ func sentrypeerGetToken(tokenUrl, clientID, clientSecret, audience, grantType st
 // sentrypeerHasData return a boolean based on query response on finding ip/number
 func sentrypeerHasData(itemId, token, url string) (found bool, err error) {
 	var resp *http.Response
-	resp, err = getHTTP(http.MethodGet, url, nil, map[string][]string{utils.AuthorizationHdr: {fmt.Sprintf("%s %s", utils.BearerAuth, token)}})
+	resp, err = getHTTP(http.MethodGet, url, nil, map[string]string{utils.AuthorizationHdr: fmt.Sprintf("%s %s", utils.BearerAuth, token)})
 	if err != nil {
 		return
 	}
@@ -238,11 +238,56 @@ func sentrypeerHasData(itemId, token, url string) (found bool, err error) {
 	return false, err
 }
 
-func getHTTP(method, url string, payload io.Reader, headers map[string][]string) (resp *http.Response, err error) {
+// send an http get request to a server
+// expects a boolean reply
+// when element is set to *any the  CGREvent is sent as JSON body
+// when the element is  specified  as a path e.g ~*req.Account  is sent as  query string pair  ,the path being the key with the value extracted from dataprovider
+func externalAPI(urlStr string, dDP any, fieldname, value string) (reply bool, err error) {
+	var resp *http.Response
+	parsedURL, err := url.Parse(urlStr)
+	if err != nil {
+		return false, err
+	}
+	if fieldname != utils.MetaAny {
+		queryParams := parsedURL.Query()
+		queryParams.Set(fieldname, value)
+		parsedURL.RawQuery = queryParams.Encode()
+		resp, err = getHTTP(http.MethodGet, parsedURL.String(), nil, nil)
+	} else {
+		var data []byte
+		data, err = json.Marshal(dDP)
+		if err != nil {
+			return false, fmt.Errorf("error marshaling data: %w", err)
+		}
+		resp, err = getHTTP(http.MethodGet, parsedURL.String(), bytes.NewReader(data), nil)
+	}
+
+	if err != nil {
+		return false, fmt.Errorf("error processing the request: %w", err)
+	}
+
+	defer resp.Body.Close()
+
+	if resp.StatusCode < http.StatusOK || resp.StatusCode > http.StatusMultipleChoices {
+		body, err := io.ReadAll(resp.Body)
+		return false, fmt.Errorf("http request returned non-OK status code: %d ,body: %v ,err: %w", resp.StatusCode, string(body), err)
+	}
+
+	if err := json.NewDecoder(resp.Body).Decode(&reply); err != nil {
+		return false, fmt.Errorf("error decoding response: %w", err)
+	}
+
+	return
+}
+
+// constructs an request via parameters provided,url,header and payload ,uses defaultclient for sending the request
+func getHTTP(method, url string, payload io.Reader, headers map[string]string) (resp *http.Response, err error) {
 	var req *http.Request
 	if req, err = http.NewRequest(method, url, payload); err != nil {
 		return
 	}
-	req.Header = headers
+	for k, hVal := range headers {
+		req.Header.Add(k, hVal)
+	}
 	return http.DefaultClient.Do(req)
 }
