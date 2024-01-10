@@ -1179,6 +1179,7 @@ const (
 	MetaActivationInterval = "*ai"
 	MetaRegex              = "*regex"
 	MetaContains           = "*contains"
+	MetaHTTP               = "*http"
 
 	MetaNotString             = "*notstring"
 	MetaNotPrefix             = "*notprefix"
