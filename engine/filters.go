@@ -19,7 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
-	"errors"
 	"fmt"
 	"net"
 	"reflect"
@@ -789,12 +788,6 @@ func (fltr *FilterRule) passHttp(dDP utils.DataProvider) (bool, error) {
 		return false, err
 	}
 
-	parts := strings.Split(fltr.Type, utils.HashtagSep)
-	if len(parts) != 2 {
-		return false, errors.New("url is not specified")
-	}
-	//extracting  the url from the type
-	url := strings.Trim(parts[1], "[]")
-	return externalAPI(url, dDP, fltr.Element, strVal)
+	return filterHTTP(fltr.Type, dDP, fltr.Element, strVal)
 
 }

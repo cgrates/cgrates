@@ -19,6 +19,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"bytes"
+	"encoding/json"
 	"fmt"
 	"sort"
 	"strings"
@@ -148,8 +150,8 @@ func NewAttributeFromInline(tenant, inlnRule string) (attr *AttributeProfile, er
 		Contexts: []string{utils.MetaAny},
 	}
 	for _, rule := range strings.Split(inlnRule, utils.InfieldSep) {
-		ruleSplt := strings.SplitN(rule, utils.InInFieldSep, 3)
-		if len(ruleSplt) < 3 {
+		ruleSplt := utils.SplitPath(rule, utils.InInFieldSep[0], 3)
+		if len(ruleSplt) != 3 {
 			return nil, fmt.Errorf("inline parse error for string: <%s>", rule)
 		}
 		var vals config.RSRParsers
@@ -167,4 +169,16 @@ func NewAttributeFromInline(tenant, inlnRule string) (attr *AttributeProfile, er
 		})
 	}
 	return
+}
+
+func externalAttributeAPI(httpType string, dDP utils.DataProvider) (string, error) {
+	urlS, err := extractUrlFromType(httpType)
+	if err != nil {
+		return "", err
+	}
+	data, err := json.Marshal(dDP)
+	if err != nil {
+		return "", fmt.Errorf("error marshaling data: %w", err)
+	}
+	return externalAPI(urlS, bytes.NewReader(data), nil)
 }
