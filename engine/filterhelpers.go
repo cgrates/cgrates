@@ -21,10 +21,12 @@ package engine
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
 	"net/url"
+	"strings"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/guardian"
@@ -242,9 +244,18 @@ func sentrypeerHasData(itemId, token, url string) (found bool, err error) {
 // expects a boolean reply
 // when element is set to *any the  CGREvent is sent as JSON body
 // when the element is  specified  as a path e.g ~*req.Account  is sent as  query string pair  ,the path being the key with the value extracted from dataprovider
-func externalAPI(urlStr string, dDP any, fieldname, value string) (reply bool, err error) {
-	var resp *http.Response
-	parsedURL, err := url.Parse(urlStr)
+func filterHTTP(httpType string, dDP any, fieldname, value string) (bool, error) {
+	var (
+		parsedURL *url.URL
+		resp      string
+		err       error
+	)
+	urlS, err := extractUrlFromType(httpType)
+	if err != nil {
+		return false, err
+	}
+
+	parsedURL, err = url.Parse(urlS)
 	if err != nil {
 		return false, err
 	}
@@ -252,32 +263,40 @@ func externalAPI(urlStr string, dDP any, fieldname, value string) (reply bool, e
 		queryParams := parsedURL.Query()
 		queryParams.Set(fieldname, value)
 		parsedURL.RawQuery = queryParams.Encode()
-		resp, err = getHTTP(http.MethodGet, parsedURL.String(), nil, nil)
+		resp, err = externalAPI(parsedURL.String(), nil, nil)
 	} else {
 		var data []byte
 		data, err = json.Marshal(dDP)
 		if err != nil {
 			return false, fmt.Errorf("error marshaling data: %w", err)
 		}
-		resp, err = getHTTP(http.MethodGet, parsedURL.String(), bytes.NewReader(data), nil)
+		resp, err = externalAPI(parsedURL.String(), bytes.NewReader(data), nil)
 	}
-
 	if err != nil {
-		return false, fmt.Errorf("error processing the request: %w", err)
+		return false, err
+	}
+	return utils.IfaceAsBool(resp)
+}
+
+func externalAPI(url string, rdr io.Reader, hdr map[string]string) (string, error) {
+	resp, err := getHTTP(http.MethodGet, url, rdr, hdr)
+	if err != nil {
+		return "", fmt.Errorf("error processing the request: %w", err)
 	}
 
 	defer resp.Body.Close()
 
 	if resp.StatusCode < http.StatusOK || resp.StatusCode > http.StatusMultipleChoices {
 		body, err := io.ReadAll(resp.Body)
-		return false, fmt.Errorf("http request returned non-OK status code: %d ,body: %v ,err: %w", resp.StatusCode, string(body), err)
+		return "", fmt.Errorf("http request returned non-OK status code: %d ,body: %v ,err: %w", resp.StatusCode, string(body), err)
 	}
 
-	if err := json.NewDecoder(resp.Body).Decode(&reply); err != nil {
-		return false, fmt.Errorf("error decoding response: %w", err)
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return "", fmt.Errorf("error decoding response: %w", err)
 	}
 
-	return
+	return string(body), nil
 }
 
 // constructs an request via parameters provided,url,header and payload ,uses defaultclient for sending the request
@@ -290,4 +309,14 @@ func getHTTP(method, url string, payload io.Reader, headers map[string]string) (
 		req.Header.Add(k, hVal)
 	}
 	return http.DefaultClient.Do(req)
+}
+
+func extractUrlFromType(httpType string) (string, error) {
+	parts := strings.Split(httpType, utils.HashtagSep)
+	if len(parts) != 2 {
+		return "", errors.New("url is not specified")
+	}
+	//extracting  the url from the type
+	url := strings.Trim(parts[1], utils.IdxStart+utils.IdxEnd)
+	return url, nil
 }

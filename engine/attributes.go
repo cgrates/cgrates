@@ -560,6 +560,10 @@ func ParseAttribute(dp utils.DataProvider, attrType, path string, value config.R
 		sort.Strings(values[1:])
 		out = strings.Join(values, utils.InfieldSep)
 	default:
+		if strings.HasPrefix(attrType, utils.MetaHTTP) {
+			out, err = externalAttributeAPI(attrType, dp)
+			break
+		}
 		return utils.EmptyString, fmt.Errorf("unsupported type: <%s>", attrType)
 	}
 	return

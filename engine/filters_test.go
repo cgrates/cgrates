@@ -2711,6 +2711,7 @@ func TestHttpInlineFilter(t *testing.T) {
 		fmt.Fprint(w, has)
 
 	}))
+	defer srv.Close()
 	url := "*http#" + "[" + srv.URL + "]"
 
 	exp := &Filter{

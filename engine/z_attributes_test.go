@@ -18,7 +18,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"fmt"
+	"net/http"
+	"net/http/httptest"
 	"reflect"
+	"slices"
 	"sort"
 	"testing"
 	"time"
@@ -2631,6 +2635,104 @@ func TestProcessAttributeSuffix(t *testing.T) {
 	if !reflect.DeepEqual(eRply, rcv) {
 		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(eRply), utils.ToJSON(rcv))
 	}
+}
+
+func TestProcessAttributeHTTP(t *testing.T) {
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodGet {
+			w.WriteHeader(http.StatusMethodNotAllowed)
+			return
+		}
+		responses := map[string]struct {
+			code  int
+			reply string
+		}{
+			"/passwd":  {code: http.StatusOK, reply: "passwd1"},
+			"/account": {code: http.StatusOK, reply: "1001"},
+		}
+		if val, has := responses[r.URL.EscapedPath()]; has {
+			w.WriteHeader(val.code)
+			fmt.Fprint(w, val.reply)
+			return
+		}
+		http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
+	}))
+	defer ts.Close()
+	cfg := config.NewDefaultCGRConfig()
+	cfg.AttributeSCfg().Opts.ProcessRuns = 1
+	data := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dmAtr = NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
+	attrS = NewAttributeService(dmAtr, &FilterS{dm: dmAtr, cfg: cfg}, cfg)
+
+	//refresh the DM
+	if err := dmAtr.DataDB().Flush(""); err != nil {
+		t.Error(err)
+	}
+	Cache.Clear(nil)
+
+	attrPrf := &AttributeProfile{
+		Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
+		ID:        "ATTR_HTTP",
+		Contexts:  []string{utils.MetaSessionS},
+		FilterIDs: []string{"*string:~*req.Field1:Value1"},
+		Attributes: []*Attribute{
+			{
+				Path:  utils.MetaReq + utils.NestingSep + utils.AccountField,
+				Type:  utils.MetaHTTP + utils.HashtagSep + utils.IdxStart + ts.URL + "/account" + utils.IdxEnd,
+				Value: config.NewRSRParsersMustCompile("*attributes", utils.InfieldSep),
+			},
+			{
+				Path:  utils.MetaReq + utils.NestingSep + "Password",
+				Type:  utils.MetaHTTP + utils.HashtagSep + utils.IdxStart + ts.URL + "/passwd" + utils.IdxEnd,
+				Value: config.NewRSRParsersMustCompile("*attributes", utils.InfieldSep),
+			},
+		},
+		Weight: 10,
+	}
+	// Add attribute in DM
+	if err := dmAtr.SetAttributeProfile(attrPrf, true); err != nil {
+		t.Error(err)
+	}
+	attrArgs := &utils.CGREvent{
+		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
+		ID:     utils.GenUUID(),
+		Event: map[string]any{
+			"Field1": "Value1",
+		},
+		APIOpts: map[string]any{
+			utils.OptsAttributesProcessRuns: 1,
+			utils.OptsContext:               utils.MetaSessionS,
+		},
+	}
+	eRply := &AttrSProcessEventReply{
+		MatchedProfiles: []string{"cgrates.org:ATTR_HTTP"},
+		AlteredFields:   []string{utils.MetaReq + utils.NestingSep + utils.AccountField, utils.MetaReq + utils.NestingSep + "Password"},
+		CGREvent: &utils.CGREvent{
+			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
+			ID:     "TestProcessAttributeHTTP",
+			Event: map[string]any{
+				"Field1":   "Value1",
+				"Account":  "1001",
+				"Password": "passwd1",
+			},
+		},
+	}
+	var reply AttrSProcessEventReply
+	if err := attrS.V1ProcessEvent(context.Background(), attrArgs, &reply); err != nil {
+		t.Errorf("Error: %+v", err)
+	}
+	if !slices.Equal(eRply.MatchedProfiles, reply.MatchedProfiles) {
+		t.Errorf("Expecting %+v, received: %+v", eRply.MatchedProfiles, reply.MatchedProfiles)
+	}
+	if sort.Slice(reply.AlteredFields, func(i, j int) bool {
+		return reply.AlteredFields[i] < reply.AlteredFields[j]
+	}); !slices.Equal(reply.AlteredFields, eRply.AlteredFields) {
+		t.Errorf("Expecting %+v, received: %+v", eRply.AlteredFields, reply.AlteredFields)
+	}
+	if !reflect.DeepEqual(eRply.CGREvent.Event, reply.CGREvent.Event) {
+		t.Errorf("Expecting %+v, received: %+v", eRply.CGREvent.Event, reply.CGREvent.Event)
+	}
+
 }
 
 func TestAttributeIndexSelectsFalse(t *testing.T) {
