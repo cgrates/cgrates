@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package v2
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/cgrates/birpc/context"
@@ -50,6 +51,11 @@ func (APIerSv2 *APIerSv2) SetAttributeProfile(ctx *context.Context, arg *Attribu
 	if err := APIerSv2.DataManager.SetLoadIDs(
 		map[string]int64{utils.CacheAttributeProfiles: time.Now().UnixNano()}); err != nil {
 		return utils.APIErrorHandler(err)
+	}
+	// delay if needed before cache call
+	if APIerSv2.Config.GeneralCfg().CachingDelay != 0 {
+		utils.Logger.Info(fmt.Sprintf("<V2SetAttributeProfile> Delaying cache call for %v", APIerSv2.Config.GeneralCfg().CachingDelay))
+		time.Sleep(APIerSv2.Config.GeneralCfg().CachingDelay)
 	}
 	if err := APIerSv2.APIerSv1.CallCache(utils.IfaceAsString(arg.APIOpts[utils.CacheOpt]), alsPrf.Tenant, utils.CacheAttributeProfiles,
 		alsPrf.TenantID(), utils.EmptyString, &alsPrf.FilterIDs, alsPrf.Contexts, arg.APIOpts); err != nil {

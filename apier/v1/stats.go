@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package v1
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/cgrates/birpc/context"
@@ -83,6 +84,11 @@ func (apierSv1 *APIerSv1) SetStatQueueProfile(ctx *context.Context, arg *engine.
 	if err = apierSv1.DataManager.SetLoadIDs(map[string]int64{utils.CacheStatQueueProfiles: loadID, utils.CacheStatQueues: loadID}); err != nil {
 		return utils.APIErrorHandler(err)
 	}
+	// delay if needed before cache call
+	if apierSv1.Config.GeneralCfg().CachingDelay != 0 {
+		utils.Logger.Info(fmt.Sprintf("<SetStatQueueProfile> Delaying cache call for %v", apierSv1.Config.GeneralCfg().CachingDelay))
+		time.Sleep(apierSv1.Config.GeneralCfg().CachingDelay)
+	}
 	//handle caching for StatQueueProfile
 	if err = apierSv1.CallCache(utils.IfaceAsString(arg.APIOpts[utils.CacheOpt]), arg.Tenant, utils.CacheStatQueueProfiles,
 		arg.TenantID(), utils.EmptyString, &arg.FilterIDs, nil, arg.APIOpts); err != nil {
@@ -103,6 +109,11 @@ func (apierSv1 *APIerSv1) RemoveStatQueueProfile(ctx *context.Context, args *uti
 	}
 	if err := apierSv1.DataManager.RemoveStatQueueProfile(tnt, args.ID, true); err != nil {
 		return utils.APIErrorHandler(err)
+	}
+	// delay if needed before cache call
+	if apierSv1.Config.GeneralCfg().CachingDelay != 0 {
+		utils.Logger.Info(fmt.Sprintf("<RemoveStatQueueProfile> Delaying cache call for %v", apierSv1.Config.GeneralCfg().CachingDelay))
+		time.Sleep(apierSv1.Config.GeneralCfg().CachingDelay)
 	}
 	//handle caching for StatQueueProfile
 	if err := apierSv1.CallCache(utils.IfaceAsString(args.APIOpts[utils.CacheOpt]), tnt, utils.CacheStatQueueProfiles,

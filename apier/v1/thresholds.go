@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package v1
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/cgrates/birpc/context"
@@ -141,6 +142,11 @@ func (apierSv1 *APIerSv1) SetThresholdProfile(ctx *context.Context, args *engine
 	if err := apierSv1.DataManager.SetLoadIDs(map[string]int64{utils.CacheThresholdProfiles: loadID, utils.CacheThresholds: loadID}); err != nil {
 		return utils.APIErrorHandler(err)
 	}
+	// delay if needed before cache call
+	if apierSv1.Config.GeneralCfg().CachingDelay != 0 {
+		utils.Logger.Info(fmt.Sprintf("<SetThresholdProfile> Delaying cache call for %v", apierSv1.Config.GeneralCfg().CachingDelay))
+		time.Sleep(apierSv1.Config.GeneralCfg().CachingDelay)
+	}
 	//handle caching for ThresholdProfile and Threshold
 	if err := apierSv1.CallCache(utils.IfaceAsString(args.APIOpts[utils.CacheOpt]), args.Tenant, utils.CacheThresholdProfiles,
 		args.TenantID(), utils.EmptyString, &args.FilterIDs, nil, args.APIOpts); err != nil {
@@ -161,6 +167,11 @@ func (apierSv1 *APIerSv1) RemoveThresholdProfile(ctx *context.Context, args *uti
 	}
 	if err := apierSv1.DataManager.RemoveThresholdProfile(tnt, args.ID, true); err != nil {
 		return utils.APIErrorHandler(err)
+	}
+	// delay if needed before cache call
+	if apierSv1.Config.GeneralCfg().CachingDelay != 0 {
+		utils.Logger.Info(fmt.Sprintf("<RemoveThresholdProfile> Delaying cache call for %v", apierSv1.Config.GeneralCfg().CachingDelay))
+		time.Sleep(apierSv1.Config.GeneralCfg().CachingDelay)
 	}
 	//handle caching for ThresholdProfile
 	if err := apierSv1.CallCache(utils.IfaceAsString(args.APIOpts[utils.CacheOpt]), tnt, utils.CacheThresholdProfiles,

@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package v1
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/cgrates/birpc/context"
@@ -127,6 +128,11 @@ func (apierSv1 *APIerSv1) SetResourceProfile(ctx *context.Context, arg *engine.R
 			utils.CacheResources: loadID}); err != nil {
 		return utils.APIErrorHandler(err)
 	}
+	// delay if needed before cache call
+	if apierSv1.Config.GeneralCfg().CachingDelay != 0 {
+		utils.Logger.Info(fmt.Sprintf("<SetResourceProfile> Delaying cache call for %v", apierSv1.Config.GeneralCfg().CachingDelay))
+		time.Sleep(apierSv1.Config.GeneralCfg().CachingDelay)
+	}
 	//handle caching for ResourceProfile
 	if err = apierSv1.CallCache(utils.IfaceAsString(arg.APIOpts[utils.CacheOpt]), arg.Tenant, utils.CacheResourceProfiles,
 		arg.TenantID(), utils.EmptyString, &arg.FilterIDs, nil, arg.APIOpts); err != nil {
@@ -147,6 +153,11 @@ func (apierSv1 *APIerSv1) RemoveResourceProfile(ctx *context.Context, arg *utils
 	}
 	if err := apierSv1.DataManager.RemoveResourceProfile(tnt, arg.ID, true); err != nil {
 		return utils.APIErrorHandler(err)
+	}
+	// delay if needed before cache call
+	if apierSv1.Config.GeneralCfg().CachingDelay != 0 {
+		utils.Logger.Info(fmt.Sprintf("<RemoveResourceProfile> Delaying cache call for %v", apierSv1.Config.GeneralCfg().CachingDelay))
+		time.Sleep(apierSv1.Config.GeneralCfg().CachingDelay)
 	}
 	//handle caching for ResourceProfile
 	if err := apierSv1.CallCache(utils.IfaceAsString(arg.APIOpts[utils.CacheOpt]), tnt, utils.CacheResourceProfiles,

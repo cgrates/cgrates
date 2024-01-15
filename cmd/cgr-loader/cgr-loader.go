@@ -415,10 +415,8 @@ func main() {
 	}
 
 	// delay if needed before cache reload
-	if ldrCfg.GeneralCfg().CachingDelay != 0 {
-		if *verbose {
-			log.Printf("Delaying %v", ldrCfg.GeneralCfg().CachingDelay)
-		}
+	if *verbose && ldrCfg.GeneralCfg().CachingDelay != 0 {
+		log.Printf("Delaying cache reload for %v", ldrCfg.GeneralCfg().CachingDelay)
 		time.Sleep(ldrCfg.GeneralCfg().CachingDelay)
 	}
 

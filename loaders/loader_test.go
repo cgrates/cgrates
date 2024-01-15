@@ -1434,7 +1434,7 @@ func TestNewLoaderWithMultiFiles(t *testing.T) {
 			Type:  utils.MetaString,
 			Value: config.NewRSRParsersMustCompile("10", utils.InfieldSep)},
 	}
-	ldr := NewLoader(engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil), ldrCfg, "", nil, nil, nil)
+	ldr := NewLoader(engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil), ldrCfg, "", 0, nil, nil, nil)
 
 	openRdrs := make(utils.StringSet)
 	for _, rdr := range ldr.rdrs {
@@ -3086,7 +3086,7 @@ func TestStoreLoadedDataAttributes(t *testing.T) {
 	cacheConns := []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)}
 	loaderCfg := config.CgrConfig().LoaderCfg()
 	fltrS := engine.NewFilterS(cfg, connMgr, dm)
-	ldr := NewLoader(dm, loaderCfg[0], "", fltrS, connMgr, cacheConns)
+	ldr := NewLoader(dm, loaderCfg[0], "", 0, fltrS, connMgr, cacheConns)
 	lds := map[string][]LoaderData{
 		"Attributes": {
 			{
@@ -3135,7 +3135,7 @@ func TestStoreLoadedDataResources(t *testing.T) {
 	cacheConns := []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)}
 	loaderCfg := config.CgrConfig().LoaderCfg()
 	fltrS := engine.NewFilterS(cfg, connMgr, dm)
-	ldr := NewLoader(dm, loaderCfg[0], "", fltrS, connMgr, cacheConns)
+	ldr := NewLoader(dm, loaderCfg[0], "", 0, fltrS, connMgr, cacheConns)
 	lds := map[string][]LoaderData{
 		"Resources": {
 			{
@@ -3183,7 +3183,7 @@ func TestStoreLoadedDataFilters(t *testing.T) {
 	cacheConns := []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)}
 	loaderCfg := config.CgrConfig().LoaderCfg()
 	fltrS := engine.NewFilterS(cfg, connMgr, dm)
-	ldr := NewLoader(dm, loaderCfg[0], "", fltrS, connMgr, cacheConns)
+	ldr := NewLoader(dm, loaderCfg[0], "", 0, fltrS, connMgr, cacheConns)
 	lds := map[string][]LoaderData{
 		"Filters": {
 			{
@@ -3232,7 +3232,7 @@ func TestStoreLoadedDataStats(t *testing.T) {
 	cacheConns := []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)}
 	loaderCfg := config.CgrConfig().LoaderCfg()
 	fltrS := engine.NewFilterS(cfg, connMgr, dm)
-	ldr := NewLoader(dm, loaderCfg[0], "", fltrS, connMgr, cacheConns)
+	ldr := NewLoader(dm, loaderCfg[0], "", 0, fltrS, connMgr, cacheConns)
 	lds := map[string][]LoaderData{
 		"StatsQueue": {
 			{
@@ -3281,7 +3281,7 @@ func TestStoreLoadedDataThresholds(t *testing.T) {
 	cacheConns := []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)}
 	loaderCfg := config.CgrConfig().LoaderCfg()
 	fltrS := engine.NewFilterS(cfg, connMgr, dm)
-	ldr := NewLoader(dm, loaderCfg[0], "", fltrS, connMgr, cacheConns)
+	ldr := NewLoader(dm, loaderCfg[0], "", 0, fltrS, connMgr, cacheConns)
 	lds := map[string][]LoaderData{
 		"Thresholds": {
 			{
@@ -3329,7 +3329,7 @@ func TestStoreLoadedDataRoutes(t *testing.T) {
 	cacheConns := []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)}
 	loaderCfg := config.CgrConfig().LoaderCfg()
 	fltrS := engine.NewFilterS(cfg, connMgr, dm)
-	ldr := NewLoader(dm, loaderCfg[0], "", fltrS, connMgr, cacheConns)
+	ldr := NewLoader(dm, loaderCfg[0], "", 0, fltrS, connMgr, cacheConns)
 	lds := map[string][]LoaderData{
 		"Routes": {
 			{
@@ -3377,7 +3377,7 @@ func TestStoreLoadedDataChargers(t *testing.T) {
 	cacheConns := []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)}
 	loaderCfg := config.CgrConfig().LoaderCfg()
 	fltrS := engine.NewFilterS(cfg, connMgr, dm)
-	ldr := NewLoader(dm, loaderCfg[0], "", fltrS, connMgr, cacheConns)
+	ldr := NewLoader(dm, loaderCfg[0], "", 0, fltrS, connMgr, cacheConns)
 	lds := map[string][]LoaderData{
 		"Chargers": {
 			{
@@ -3425,7 +3425,7 @@ func TestStoreLoadedDataDispatchers(t *testing.T) {
 	cacheConns := []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)}
 	loaderCfg := config.CgrConfig().LoaderCfg()
 	fltrS := engine.NewFilterS(cfg, connMgr, dm)
-	ldr := NewLoader(dm, loaderCfg[0], "", fltrS, connMgr, cacheConns)
+	ldr := NewLoader(dm, loaderCfg[0], "", 0, fltrS, connMgr, cacheConns)
 	lds := map[string][]LoaderData{
 		"Dispatchers": {
 			{
@@ -3473,7 +3473,7 @@ func TestStoreLoadedDataDispatcherHosts(t *testing.T) {
 	cacheConns := []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)}
 	loaderCfg := config.CgrConfig().LoaderCfg()
 	fltrS := engine.NewFilterS(cfg, connMgr, dm)
-	ldr := NewLoader(dm, loaderCfg[0], "", fltrS, connMgr, cacheConns)
+	ldr := NewLoader(dm, loaderCfg[0], "", 0, fltrS, connMgr, cacheConns)
 	lds := map[string][]LoaderData{
 		"DispatcherHosts": {
 			{
@@ -3485,5 +3485,58 @@ func TestStoreLoadedDataDispatcherHosts(t *testing.T) {
 	}
 	if err := ldr.storeLoadedData(utils.MetaDispatcherHosts, lds, utils.MetaReload); err != nil {
 		t.Error(err)
+	}
+}
+
+func TestStoreLoadedDataWithDelay(t *testing.T) {
+	engine.Cache.Clear(nil)
+	cfg := config.NewDefaultCGRConfig()
+	cfg.GeneralCfg().CachingDelay = 1 * time.Second
+	argExpect := &utils.AttrReloadCacheWithAPIOpts{
+		APIOpts:           nil,
+		Tenant:            "",
+		DispatcherHostIDs: []string{"cgrates.org:dispatcherHostsID"},
+	}
+	cM := &ccMock{
+		calls: map[string]func(args any, reply any) error{
+			utils.CacheSv1ReloadCache: func(args any, reply any) error {
+				if !reflect.DeepEqual(args, argExpect) {
+					t.Errorf("Expected %v \nbut received %v", utils.ToJSON(argExpect), utils.ToJSON(args))
+				}
+				return nil
+			},
+			utils.CacheSv1Clear: func(args any, reply any) error {
+				return nil
+			},
+		},
+	}
+
+	rpcInternal := make(chan birpc.ClientConnector, 1)
+	rpcInternal <- cM
+	connMgr := engine.NewConnManager(cfg, map[string]chan birpc.ClientConnector{
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches): rpcInternal,
+	})
+	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), connMgr)
+	cacheConns := []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)}
+	loaderCfg := config.CgrConfig().LoaderCfg()
+	fltrS := engine.NewFilterS(cfg, connMgr, dm)
+	ldr := NewLoader(dm, loaderCfg[0], "", cfg.GeneralCfg().CachingDelay, fltrS, connMgr, cacheConns)
+	lds := map[string][]LoaderData{
+		"DispatcherHosts": {
+			{
+				"Tenant":  "cgrates.org",
+				"ID":      "dispatcherHostsID",
+				"Address": "192.168.100.1",
+			},
+		},
+	}
+	startTime := time.Now()
+	if err := ldr.storeLoadedData(utils.MetaDispatcherHosts, lds, utils.MetaReload); err != nil {
+		t.Error(err)
+	}
+	elapsedTime := time.Since(startTime)
+	expectedDuration := 1 * time.Second
+	if elapsedTime < expectedDuration || elapsedTime >= 2*time.Second {
+		t.Errorf("Expected elapsed time of at least %v, but got %v", expectedDuration, elapsedTime)
 	}
 }

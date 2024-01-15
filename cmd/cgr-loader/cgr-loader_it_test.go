@@ -115,6 +115,7 @@ func TestLoadConfig(t *testing.T) {
 	*schedulerAddress = ""
 	// General
 	*cachingArg = utils.MetaLoad
+	*cachingDlay = 5 * time.Second
 	*dbDataEncoding = utils.MetaJSON
 	*timezone = utils.Local
 	ldrCfg := loadConfig()
@@ -137,6 +138,9 @@ func TestLoadConfig(t *testing.T) {
 	}
 	if ldrCfg.GeneralCfg().DefaultCaching != utils.MetaLoad {
 		t.Errorf("Expected %s received %s", utils.MetaLoad, ldrCfg.GeneralCfg().DefaultCaching)
+	}
+	if ldrCfg.GeneralCfg().CachingDelay != 5*time.Second {
+		t.Errorf("Expected %s received %s", 5*time.Second, ldrCfg.GeneralCfg().CachingDelay)
 	}
 	if *importID == utils.EmptyString {
 		t.Errorf("Expected importID to be populated")
@@ -238,6 +242,9 @@ var (
 		testLoadItCheckAttributes2,
 		testLoadItStartLoaderFromStorDB,
 		testLoadItCheckAttributes,
+
+		testLoadItStartLoaderWithDelayWConf,
+		testLoadItStartLoaderWithDelayWFlag,
 	}
 )
 
@@ -433,6 +440,34 @@ func testLoadItCheckTenantFlag(t *testing.T) {
 
 func testLoadItStartLoaderFlushStorDB(t *testing.T) {
 	cmd := exec.Command("cgr-loader", "-config_path="+ldrItCfgPath, "-path="+path.Join(*dataDir, "tariffplans", "dispatchers"), "-caches_address=", "-scheduler_address=", "-to_stordb", "-flush_stordb", "-tpid=TPID")
+	output := bytes.NewBuffer(nil)
+	outerr := bytes.NewBuffer(nil)
+	cmd.Stdout = output
+	cmd.Stderr = outerr
+	if err := cmd.Run(); err != nil {
+		t.Log(cmd.Args)
+		t.Log(output.String())
+		t.Log(outerr.String())
+		t.Fatal(err)
+	}
+}
+
+func testLoadItStartLoaderWithDelayWConf(t *testing.T) {
+	cmd := exec.Command("cgr-loader", "-config_path="+path.Join(*dataDir, "conf", "samples", "apier_mysql"), "-path="+path.Join(*dataDir, "tariffplans", "tutorial"), "-caches_address=", "-scheduler_address=", "-to_stordb", "-flush_stordb", "-tpid=TPID")
+	output := bytes.NewBuffer(nil)
+	outerr := bytes.NewBuffer(nil)
+	cmd.Stdout = output
+	cmd.Stderr = outerr
+	if err := cmd.Run(); err != nil {
+		t.Log(cmd.Args)
+		t.Log(output.String())
+		t.Log(outerr.String())
+		t.Fatal(err)
+	}
+}
+
+func testLoadItStartLoaderWithDelayWFlag(t *testing.T) {
+	cmd := exec.Command("cgr-loader", "-path="+path.Join(*dataDir, "tariffplans", "tutorial"), "-caches_address=", "-scheduler_address=", "-to_stordb", "-flush_stordb", "-tpid=TPID", "-caching_delay=5s")
 	output := bytes.NewBuffer(nil)
 	outerr := bytes.NewBuffer(nil)
 	cmd.Stdout = output

@@ -335,6 +335,11 @@ func (apierSv1 *APIerSv1) LoadRatingProfile(ctx *context.Context, attrs *utils.T
 	if err := apierSv1.DataManager.SetLoadIDs(map[string]int64{utils.CacheRatingProfiles: time.Now().UnixNano()}); err != nil {
 		return utils.APIErrorHandler(err)
 	}
+	// delay if needed before cache reload
+	if apierSv1.Config.GeneralCfg().CachingDelay != 0 {
+		utils.Logger.Info(fmt.Sprintf("<LoadRatingProfile> Delaying cache reload for %v", apierSv1.Config.GeneralCfg().CachingDelay))
+		time.Sleep(apierSv1.Config.GeneralCfg().CachingDelay)
+	}
 	if err = dbReader.ReloadCache(config.CgrConfig().GeneralCfg().DefaultCaching, true, make(map[string]any), attrs.Tenant); err != nil {
 		return utils.NewErrServerError(err)
 	}
@@ -406,6 +411,11 @@ func (apierSv1 *APIerSv1) LoadTariffPlanFromStorDb(ctx *context.Context, attrs *
 	caching := config.CgrConfig().GeneralCfg().DefaultCaching
 	if attrs.Caching != nil {
 		caching = *attrs.Caching
+	}
+	// delay if needed before cache reload
+	if apierSv1.Config.GeneralCfg().CachingDelay != 0 {
+		utils.Logger.Info(fmt.Sprintf("<LoadTariffPlanFromStorDb> Delaying cache reload for %v", apierSv1.Config.GeneralCfg().CachingDelay))
+		time.Sleep(apierSv1.Config.GeneralCfg().CachingDelay)
 	}
 	// reload cache
 	utils.Logger.Info("APIerSv1.LoadTariffPlanFromStorDb, reloading cache.")
@@ -505,6 +515,11 @@ func (apierSv1 *APIerSv1) SetRatingProfile(ctx *context.Context, attrs *utils.At
 	//generate a loadID for CacheRatingProfiles and store it in database
 	if err := apierSv1.DataManager.SetLoadIDs(map[string]int64{utils.CacheRatingProfiles: time.Now().UnixNano()}); err != nil {
 		return utils.APIErrorHandler(err)
+	}
+	// delay if needed before cache call
+	if apierSv1.Config.GeneralCfg().CachingDelay != 0 {
+		utils.Logger.Info(fmt.Sprintf("<SetRatingProfile> Delaying cache call for %v", apierSv1.Config.GeneralCfg().CachingDelay))
+		time.Sleep(apierSv1.Config.GeneralCfg().CachingDelay)
 	}
 	if err := apierSv1.CallCache(utils.IfaceAsString(attrs.APIOpts[utils.CacheOpt]), attrs.Tenant, utils.CacheRatingProfiles, keyID, utils.EmptyString, nil, nil, attrs.APIOpts); err != nil {
 		return utils.APIErrorHandler(err)
@@ -1089,6 +1104,11 @@ func (apierSv1 *APIerSv1) LoadTariffPlanFromFolder(ctx *context.Context, attrs *
 	if attrs.Caching != nil {
 		caching = *attrs.Caching
 	}
+	// delay if needed before cache reload
+	if apierSv1.Config.GeneralCfg().CachingDelay != 0 {
+		utils.Logger.Info(fmt.Sprintf("<V1LoadTariffPlanFromFolder> Delaying cache reload for %v", apierSv1.Config.GeneralCfg().CachingDelay))
+		time.Sleep(apierSv1.Config.GeneralCfg().CachingDelay)
+	}
 	// reload cache
 	utils.Logger.Info("APIerSv1.LoadTariffPlanFromFolder, reloading cache.")
 	if err := loader.ReloadCache(caching, true, attrs.APIOpts, apierSv1.Config.GeneralCfg().DefaultTenant); err != nil {
@@ -1161,6 +1181,11 @@ func (apierSv1 *APIerSv1) RemoveTPFromFolder(ctx *context.Context, attrs *utils.
 	if attrs.Caching != nil {
 		caching = *attrs.Caching
 	}
+	// delay if needed before cache reload
+	if apierSv1.Config.GeneralCfg().CachingDelay != 0 {
+		utils.Logger.Info(fmt.Sprintf("<RemoveTPFromFolder> Delaying cache reload for %v", apierSv1.Config.GeneralCfg().CachingDelay))
+		time.Sleep(apierSv1.Config.GeneralCfg().CachingDelay)
+	}
 	// reload cache
 	utils.Logger.Info("APIerSv1.RemoveTPFromFolder, reloading cache.")
 	if err := loader.ReloadCache(caching, true, attrs.APIOpts, apierSv1.Config.GeneralCfg().DefaultTenant); err != nil {
@@ -1212,6 +1237,11 @@ func (apierSv1 *APIerSv1) RemoveTPFromStorDB(ctx *context.Context, attrs *AttrLo
 	caching := config.CgrConfig().GeneralCfg().DefaultCaching
 	if attrs.Caching != nil {
 		caching = *attrs.Caching
+	}
+	// delay if needed before cache reload
+	if apierSv1.Config.GeneralCfg().CachingDelay != 0 {
+		utils.Logger.Info(fmt.Sprintf("<RemoveTPFromStorDB> Delaying cache reload for %v", apierSv1.Config.GeneralCfg().CachingDelay))
+		time.Sleep(apierSv1.Config.GeneralCfg().CachingDelay)
 	}
 	// reload cache
 	utils.Logger.Info("APIerSv1.RemoveTPFromStorDB, reloading cache.")
@@ -1275,6 +1305,11 @@ func (apierSv1 *APIerSv1) RemoveRatingProfile(ctx *context.Context, attr *AttrRe
 	//generate a loadID for CacheActionPlans and store it in database
 	if err := apierSv1.DataManager.SetLoadIDs(map[string]int64{utils.CacheRatingProfiles: time.Now().UnixNano()}); err != nil {
 		return utils.APIErrorHandler(err)
+	}
+	// delay if needed before cache call
+	if apierSv1.Config.GeneralCfg().CachingDelay != 0 {
+		utils.Logger.Info(fmt.Sprintf("<RemoveRatingProfile> Delaying cache call for %v", apierSv1.Config.GeneralCfg().CachingDelay))
+		time.Sleep(apierSv1.Config.GeneralCfg().CachingDelay)
 	}
 	if err := apierSv1.CallCache(utils.IfaceAsString(attr.APIOpts[utils.CacheOpt]), attr.Tenant, utils.CacheRatingProfiles, keyID, utils.EmptyString, nil, nil, attr.APIOpts); err != nil {
 		return utils.APIErrorHandler(err)

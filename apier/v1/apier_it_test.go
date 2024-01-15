@@ -826,10 +826,16 @@ func testApierLoadRatingProfile(t *testing.T) {
 	rpf := &utils.TPRatingProfile{
 		TPid: utils.TestSQL, LoadId: utils.TestSQL,
 		Tenant: "cgrates.org", Category: "call", Subject: "*any"}
+	startTime := time.Now()
 	if err := rater.Call(context.Background(), utils.APIerSv1LoadRatingProfile, &rpf, &reply); err != nil {
 		t.Error("Got error on APIerSv1.LoadRatingProfile: ", err.Error())
 	} else if reply != utils.OK {
 		t.Error("Calling APIerSv1.LoadRatingProfile got reply: ", reply)
+	}
+	elapsedTime := time.Since(startTime)
+	expectedDuration := 1 * time.Second
+	if elapsedTime < expectedDuration || elapsedTime >= 2*time.Second {
+		t.Errorf("Expected elapsed time of at least %v, but got %v", expectedDuration, elapsedTime)
 	}
 }
 
@@ -893,10 +899,16 @@ func testApierSetRatingProfile(t *testing.T) {
 	rpa := &utils.TPRatingActivation{ActivationTime: "2012-01-01T00:00:00Z", RatingPlanId: "RETAIL1", FallbackSubjects: "dan2"}
 	rpf := &utils.AttrSetRatingProfile{Tenant: "cgrates.org", Category: "call",
 		Subject: "dan", RatingPlanActivations: []*utils.TPRatingActivation{rpa}}
+	startTime := time.Now()
 	if err := rater.Call(context.Background(), utils.APIerSv1SetRatingProfile, &rpf, &reply); err != nil {
 		t.Error("Got error on APIerSv1.SetRatingProfile: ", err.Error())
 	} else if reply != utils.OK {
 		t.Error("Calling APIerSv1.SetRatingProfile got reply: ", reply)
+	}
+	elapsedTime := time.Since(startTime)
+	expectedDuration := 1 * time.Second
+	if elapsedTime < expectedDuration || elapsedTime >= 2*time.Second {
+		t.Errorf("Expected elapsed time of at least %v, but got %v", expectedDuration, elapsedTime)
 	}
 	var rcvStats map[string]*ltcache.CacheStats
 	expectedStats := engine.GetDefaultEmptyCacheStats()
@@ -1622,10 +1634,16 @@ func testApierLoadTariffPlanFromFolder(t *testing.T) {
 	}
 	// Simple test that command is executed without errors
 	attrs = &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "testtp")}
+	startTime := time.Now()
 	if err := rater.Call(context.Background(), utils.APIerSv1LoadTariffPlanFromFolder, attrs, &reply); err != nil {
 		t.Error("Got error on APIerSv1.LoadTariffPlanFromFolder: ", err.Error())
 	} else if reply != utils.OK {
 		t.Error("Calling APIerSv1.LoadTariffPlanFromFolder got reply: ", reply)
+	}
+	elapsedTime := time.Since(startTime)
+	expectedDuration := 1 * time.Second
+	if elapsedTime < expectedDuration || elapsedTime >= 2*time.Second {
+		t.Errorf("Expected elapsed time of at least %v, but got %v", expectedDuration, elapsedTime)
 	}
 	time.Sleep(100 * time.Millisecond)
 }
@@ -1717,10 +1735,16 @@ func testApierSetChargerS(t *testing.T) {
 		},
 	}
 	var result string
+	startTime := time.Now()
 	if err := rater.Call(context.Background(), utils.APIerSv1SetChargerProfile, chargerProfile, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
+	}
+	elapsedTime := time.Since(startTime)
+	expectedDuration := 1 * time.Second
+	if elapsedTime < expectedDuration || elapsedTime >= 2*time.Second {
+		t.Errorf("Expected elapsed time of at least %v, but got %v", expectedDuration, elapsedTime)
 	}
 }
 
@@ -2041,11 +2065,17 @@ func testApierGetCacheStats2(t *testing.T) {
 
 func testApierLoadTariffPlanFromStorDb(t *testing.T) {
 	var reply string
+	startTime := time.Now()
 	if err := rater.Call(context.Background(), utils.APIerSv1LoadTariffPlanFromStorDb,
 		&AttrLoadTpFromStorDb{TPid: "TEST_TPID2"}, &reply); err != nil {
 		t.Error("Got error on APIerSv1.LoadTariffPlanFromStorDb: ", err.Error())
 	} else if reply != utils.OK {
 		t.Error("Calling APIerSv1.LoadTariffPlanFromStorDb got reply: ", reply)
+	}
+	elapsedTime := time.Since(startTime)
+	expectedDuration := 1 * time.Second
+	if elapsedTime < expectedDuration || elapsedTime >= 2*time.Second {
+		t.Errorf("Expected elapsed time of at least %v, but got %v", expectedDuration, elapsedTime)
 	}
 }
 
@@ -2114,6 +2144,7 @@ func testApierSetRatingProfileWithoutTenant(t *testing.T) {
 
 func testApierRemoveRatingProfilesWithoutTenant(t *testing.T) {
 	var reply string
+	startTime := time.Now()
 	if err := rater.Call(context.Background(), utils.APIerSv1RemoveRatingProfile, &AttrRemoveRatingProfile{
 		Category: utils.Call,
 		Subject:  "dan3",
@@ -2121,6 +2152,11 @@ func testApierRemoveRatingProfilesWithoutTenant(t *testing.T) {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf("Expected: %s, received: %s ", utils.OK, reply)
+	}
+	elapsedTime := time.Since(startTime)
+	expectedDuration := 1 * time.Second
+	if elapsedTime < expectedDuration || elapsedTime >= 2*time.Second {
+		t.Errorf("Expected elapsed time of at least %v, but got %v", expectedDuration, elapsedTime)
 	}
 	var result *engine.RatingProfile
 	if err := rater.Call(context.Background(), utils.APIerSv1GetRatingProfile,

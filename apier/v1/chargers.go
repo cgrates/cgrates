@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package v1
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/cgrates/birpc/context"
@@ -85,6 +86,11 @@ func (apierSv1 *APIerSv1) SetChargerProfile(ctx *context.Context, arg *ChargerWi
 	if err := apierSv1.DataManager.SetLoadIDs(map[string]int64{utils.CacheChargerProfiles: time.Now().UnixNano()}); err != nil {
 		return utils.APIErrorHandler(err)
 	}
+	// delay if needed before cache call
+	if apierSv1.Config.GeneralCfg().CachingDelay != 0 {
+		utils.Logger.Info(fmt.Sprintf("<SetChargerProfile> Delaying cache call for %v", apierSv1.Config.GeneralCfg().CachingDelay))
+		time.Sleep(apierSv1.Config.GeneralCfg().CachingDelay)
+	}
 	//handle caching for ChargerProfile
 	if err := apierSv1.CallCache(utils.IfaceAsString(arg.APIOpts[utils.CacheOpt]), arg.Tenant, utils.CacheChargerProfiles,
 		arg.TenantID(), utils.EmptyString, &arg.FilterIDs, nil, arg.APIOpts); err != nil {
@@ -110,6 +116,11 @@ func (apierSv1 *APIerSv1) RemoveChargerProfile(ctx *context.Context, arg *utils.
 	//generate a loadID for CacheChargerProfiles and store it in database
 	if err := apierSv1.DataManager.SetLoadIDs(map[string]int64{utils.CacheChargerProfiles: time.Now().UnixNano()}); err != nil {
 		return utils.APIErrorHandler(err)
+	}
+	// delay if needed before cache call
+	if apierSv1.Config.GeneralCfg().CachingDelay != 0 {
+		utils.Logger.Info(fmt.Sprintf("<RemoveChargerProfile> Delaying cache call for %v", apierSv1.Config.GeneralCfg().CachingDelay))
+		time.Sleep(apierSv1.Config.GeneralCfg().CachingDelay)
 	}
 	//handle caching for ChargerProfile
 	if err := apierSv1.CallCache(utils.IfaceAsString(arg.APIOpts[utils.CacheOpt]), tnt, utils.CacheChargerProfiles,
