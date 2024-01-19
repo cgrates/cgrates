@@ -21,7 +21,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package general_tests
 
 import (
-	"fmt"
+	//"fmt"
 	"testing"
 	"time"
 
@@ -53,6 +53,10 @@ func TestBalanceBlocker(t *testing.T) {
 	}
 
 	content := `{
+
+"general": {
+	"log_level": 7,
+},
 
 "data_db": {								
 	"db_type": "*internal"
@@ -119,7 +123,7 @@ cgrates.org,sms,1001,2014-01-14T00:00:00Z,RP_ANY,`,
 		if err := client.Call(context.Background(), utils.APIerSv2GetAccount, attrs, &acnt); err != nil {
 			t.Fatal(err)
 		}
-		fmt.Println(utils.ToJSON(acnt))
+		//fmt.Println("initial account: " + utils.ToJSON(acnt))
 	})
 
 	t.Run("ProcessCDR", func(t *testing.T) {
@@ -156,7 +160,7 @@ cgrates.org,sms,1001,2014-01-14T00:00:00Z,RP_ANY,`,
 			t.Fatal(err)
 		}
 
-		fmt.Println(utils.ToJSON(cdrs))
+		//fmt.Println(utils.ToJSON(cdrs))
 	})
 
 	t.Run("CheckFinalBalance", func(t *testing.T) {
@@ -166,6 +170,6 @@ cgrates.org,sms,1001,2014-01-14T00:00:00Z,RP_ANY,`,
 			t.Fatal(err)
 		}
 
-		fmt.Println(utils.ToJSON(acnt))
+		//fmt.Println("final account: " + utils.ToJSON(acnt))
 	})
 }
