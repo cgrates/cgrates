@@ -215,8 +215,10 @@ func startEngine(cfg *config.CGRConfig, cfgPath string, waitEngine int, logBuffe
 	if err != nil {
 		return nil, err
 	}
-	ctx, cancel := context.WithCancel(context.TODO())
-	engine := exec.CommandContext(ctx, enginePath, "-config_path", cfgPath)
+	cancel := func() {
+		exec.Command("pkill", "cgr-engine").Run()
+	}
+	engine := exec.Command(enginePath, "-config_path", cfgPath)
 	if logBuffer != nil {
 		engine.Stdout = logBuffer
 		engine.Stderr = logBuffer
