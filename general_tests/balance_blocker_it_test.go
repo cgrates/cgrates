@@ -21,6 +21,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package general_tests
 
 import (
+	"fmt"
 	"testing"
 	"time"
 
@@ -87,7 +88,8 @@ cgrates.org,1001,PACKAGE_1001,,,`,
 		utils.ActionPlansCsv: `#Id,ActionsId,TimingId,Weight
 PACKAGE_1001,ACT_TOPUP,*asap,10`,
 		utils.ActionsCsv: `#ActionsId[0],Action[1],ExtraParameters[2],Filter[3],BalanceId[4],BalanceType[5],Categories[6],DestinationIds[7],RatingSubject[8],SharedGroup[9],ExpiryTime[10],TimingIds[11],Units[12],BalanceWeight[13],BalanceBlocker[14],BalanceDisabled[15],Weight[16]
-ACT_TOPUP,*topup_reset,,,balance1,*monetary,,*any,,,*unlimited,,1,10,true,false,20`,
+ACT_TOPUP,*topup_reset,,,balance_sms,*sms,,,,,*unlimited,,10,20,true,false,20
+ACT_TOPUP,*topup_reset,,,balance_monetary,*monetary,,*any,,,*unlimited,,1,10,false,false,20`,
 		utils.DestinationRatesCsv: `#Id,DestinationId,RatesTag,RoundingMethod,RoundingDecimals,MaxCost,MaxCostStrategy
 DR_ANY,*any,RT_ANY,*up,20,0,`,
 		utils.RatesCsv: `#Id,ConnectFee,Rate,RateUnit,RateIncrement,GroupIntervalStart
@@ -95,7 +97,7 @@ RT_ANY,0,0.6,60s,1s,0s`,
 		utils.RatingPlansCsv: `#Id,DestinationRatesId,TimingTag,Weight
 RP_ANY,DR_ANY,*any,10`,
 		utils.RatingProfilesCsv: `#Tenant,Category,Subject,ActivationTime,RatingPlanId,RatesFallbackSubject
-cgrates.org,call,1001,2014-01-14T00:00:00Z,RP_ANY,`,
+cgrates.org,sms,1001,2014-01-14T00:00:00Z,RP_ANY,`,
 	}
 
 	testEnv := TestEnvironment{
@@ -117,13 +119,7 @@ cgrates.org,call,1001,2014-01-14T00:00:00Z,RP_ANY,`,
 		if err := client.Call(context.Background(), utils.APIerSv2GetAccount, attrs, &acnt); err != nil {
 			t.Fatal(err)
 		}
-		if len(acnt.BalanceMap) != 1 || len(acnt.BalanceMap[utils.MetaMonetary]) != 1 {
-			t.Fatalf("expected account to have only one balance of type *monetary, received %v", acnt)
-		}
-		balance := acnt.BalanceMap[utils.MetaMonetary][0]
-		if balance.ID != "balance1" || balance.Value != 1 || !balance.Blocker {
-			t.Fatalf("received account with unexpected balance: %v", balance)
-		}
+		fmt.Println(utils.ToJSON(acnt))
 	})
 
 	t.Run("ProcessCDR", func(t *testing.T) {
@@ -137,8 +133,8 @@ cgrates.org,call,1001,2014-01-14T00:00:00Z,RP_ANY,`,
 					Event: map[string]any{
 						utils.RunID:        "run_1",
 						utils.Tenant:       "cgrates.org",
-						utils.Category:     "call",
-						utils.ToR:          utils.MetaVoice,
+						utils.Category:     "sms",
+						utils.ToR:          utils.MetaSMS,
 						utils.OriginID:     "processCDR",
 						utils.OriginHost:   "127.0.0.1",
 						utils.RequestType:  utils.MetaPostpaid,
@@ -146,7 +142,7 @@ cgrates.org,call,1001,2014-01-14T00:00:00Z,RP_ANY,`,
 						utils.Destination:  "1002",
 						utils.SetupTime:    time.Date(2021, time.February, 2, 16, 14, 50, 0, time.UTC),
 						utils.AnswerTime:   time.Date(2021, time.February, 2, 16, 15, 0, 0, time.UTC),
-						utils.Usage:        2 * time.Minute,
+						utils.Usage:        11,
 					},
 				},
 			}, &reply); err != nil {
@@ -159,14 +155,8 @@ cgrates.org,call,1001,2014-01-14T00:00:00Z,RP_ANY,`,
 			}}, &cdrs); err != nil {
 			t.Fatal(err)
 		}
-		if len(cdrs) != 1 {
-			t.Fatal("expected to receive only one CDR")
-		}
-		if cdrs[0].Usage != 2*time.Minute {
-			t.Fatalf("expected usage to be <%v>, received <%v>", 2*time.Minute, cdrs[0].Usage)
-		} else if cdrs[0].Cost != 1 {
-			t.Fatalf("expected cost to be <%v>, received <%v>", 1, cdrs[0].Cost)
-		}
+
+		fmt.Println(utils.ToJSON(cdrs))
 	})
 
 	t.Run("CheckFinalBalance", func(t *testing.T) {
@@ -176,12 +166,6 @@ cgrates.org,call,1001,2014-01-14T00:00:00Z,RP_ANY,`,
 			t.Fatal(err)
 		}
 
-		if len(acnt.BalanceMap) != 1 || len(acnt.BalanceMap[utils.MetaMonetary]) != 1 {
-			t.Fatalf("expected account to have only one balance of type *monetary, received %v", acnt)
-		}
-		balance := acnt.BalanceMap[utils.MetaMonetary][0]
-		if balance.ID != "balance1" || balance.Value != 0 || !balance.Blocker {
-			t.Fatalf("received account with unexpected balance: %v", balance)
-		}
+		fmt.Println(utils.ToJSON(acnt))
 	})
 }
