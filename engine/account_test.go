@@ -274,15 +274,15 @@ func TestDebitCreditBlocker(t *testing.T) {
 	var err error
 	cc, err = rifsBalance.debitCreditBalance(cd, false, true, true, nil)
 	if err != nil {
-		t.Error("Error debiting balance: ", err)
+		t.Fatal("Error debiting balance: ", err)
 	}
 	if len(cc.Timespans) != 0 {
-		t.Error("Wrong call cost: ", utils.ToIJSON(cc))
+		t.Error("Wrong call cost: ", utils.ToJSON(cc))
 	}
 	if rifsBalance.BalanceMap[utils.MetaMonetary][0].GetValue() != 0.1152 ||
 		rifsBalance.BalanceMap[utils.MetaMonetary][1].GetValue() != 1.5 {
 		t.Error("should not have touched the balances: ",
-			utils.ToIJSON(rifsBalance.BalanceMap[utils.MetaMonetary]))
+			utils.ToJSON(rifsBalance.BalanceMap[utils.MetaMonetary]))
 	}
 }
 

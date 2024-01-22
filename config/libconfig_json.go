@@ -229,6 +229,9 @@ type EventReaderOptsJson struct {
 	KafkaTopic               *string `json:"kafkaTopic"`
 	KafkaGroupID             *string `json:"kafkaGroupID"`
 	KafkaMaxWait             *string `json:"kafkaMaxWait"`
+	KafkaTLS                 *bool   `json:"kafkaTLS"`
+	KafkaCAPath              *string `json:"kafkaCAPath"`
+	KafkaSkipTLSVerify       *bool   `json:"kafkaSkipTLSVerify"`
 	SQLDBName                *string `json:"sqlDBName"`
 	SQLTableName             *string `json:"sqlTableName"`
 	PgSSLMode                *string `json:"pgSSLMode"`
@@ -316,6 +319,9 @@ type EventExporterOptsJson struct {
 	SQLDBName                   *string           `json:"sqlDBName"`
 	PgSSLMode                   *string           `json:"pgSSLMode"`
 	KafkaTopic                  *string           `json:"kafkaTopic"`
+	KafkaTLS                    *bool             `json:"kafkaTLS"`
+	KafkaCAPath                 *string           `json:"kafkaCAPath"`
+	KafkaSkipTLSVerify          *bool             `json:"kafkaSkipTLSVerify"`
 	AMQPQueueID                 *string           `json:"amqpQueueID"`
 	AMQPRoutingKey              *string           `json:"amqpRoutingKey"`
 	AMQPExchange                *string           `json:"amqpExchange"`

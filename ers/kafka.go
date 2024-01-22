@@ -20,9 +20,12 @@ package ers
 
 import (
 	"context"
+	"crypto/tls"
+	"crypto/x509"
 	"encoding/json"
 	"fmt"
 	"io"
+	"os"
 	"time"
 
 	"github.com/cgrates/cgrates/agents"
@@ -67,10 +70,13 @@ type KafkaER struct {
 	cfgIdx int // index of config instance within ERsCfg.Readers
 	fltrS  *engine.FilterS
 
-	dialURL string
-	topic   string
-	groupID string
-	maxWait time.Duration
+	dialURL       string
+	topic         string
+	groupID       string
+	maxWait       time.Duration
+	tls           bool   // if true it will attempt to authenticate the server it connects to
+	caPath        string // path to CA pem file
+	skipTLSVerify bool   // if true it skips certificate validation
 
 	rdrEvents     chan *erEvent // channel to dispatch the events created to
 	partialEvents chan *erEvent // channel to dispatch the partial events created to
@@ -86,12 +92,41 @@ func (rdr *KafkaER) Config() *config.EventReaderCfg {
 
 // Serve will start the gorutines needed to watch the kafka topic
 func (rdr *KafkaER) Serve() (err error) {
-	r := kafka.NewReader(kafka.ReaderConfig{
+	readerCfg := kafka.ReaderConfig{
 		Brokers: []string{rdr.dialURL},
 		GroupID: rdr.groupID,
 		Topic:   rdr.topic,
 		MaxWait: rdr.maxWait,
-	})
+	}
+
+	if rdr.tls {
+		var rootCAs *x509.CertPool
+		if rootCAs, err = x509.SystemCertPool(); err != nil {
+			return
+		}
+		if rootCAs == nil {
+			rootCAs = x509.NewCertPool()
+		}
+		if rdr.caPath != "" {
+			var ca []byte
+			if ca, err = os.ReadFile(rdr.caPath); err != nil {
+				return
+			}
+			if !rootCAs.AppendCertsFromPEM(ca) {
+				return
+			}
+		}
+		readerCfg.Dialer = &kafka.Dialer{
+			Timeout:   10 * time.Second,
+			DualStack: true,
+			TLS: &tls.Config{
+				RootCAs:            rootCAs,
+				InsecureSkipVerify: rdr.skipTLSVerify,
+			},
+		}
+	}
+
+	r := kafka.NewReader(readerCfg)
 
 	if rdr.Config().RunDelay == time.Duration(0) { // 0 disables the automatic read, maybe done per API
 		return
@@ -183,6 +218,15 @@ func (rdr *KafkaER) setOpts(opts *config.EventReaderOpts) (err error) {
 		}
 		if kfkOpts.MaxWait != nil {
 			rdr.maxWait = *kfkOpts.MaxWait
+		}
+		if kfkOpts.TLS != nil && *kfkOpts.TLS {
+			rdr.tls = true
+		}
+		if kfkOpts.CAPath != nil {
+			rdr.caPath = *kfkOpts.CAPath
+		}
+		if kfkOpts.SkipTLSVerify != nil && *kfkOpts.SkipTLSVerify {
+			rdr.skipTLSVerify = true
 		}
 	}
 	return
