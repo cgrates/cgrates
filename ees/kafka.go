@@ -19,7 +19,12 @@ package ees
 
 import (
 	"context"
+	"crypto/tls"
+	"crypto/x509"
+	"net"
+	"os"
 	"sync"
+	"time"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
@@ -34,18 +39,28 @@ func NewKafkaEE(cfg *config.EventExporterCfg, dc *utils.SafeMapStorage) *KafkaEE
 		topic: utils.DefaultQueueID,
 		reqs:  newConcReq(cfg.ConcurrentRequests),
 	}
-	if kafkaOpts := cfg.Opts.Kafka; kafkaOpts != nil {
-		if kafkaOpts.KafkaTopic != nil {
-			kfkPstr.topic = *cfg.Opts.Kafka.KafkaTopic
-		}
+	if cfg.Opts.Kafka.Topic != nil {
+		kfkPstr.topic = *cfg.Opts.Kafka.Topic
+	}
+	if cfg.Opts.Kafka.TLS != nil && *cfg.Opts.Kafka.TLS {
+		kfkPstr.tls = true
+	}
+	if cfg.Opts.Kafka.CAPath != nil {
+		kfkPstr.caPath = *cfg.Opts.Kafka.CAPath
+	}
+	if cfg.Opts.Kafka.SkipTLSVerify != nil && *cfg.Opts.Kafka.SkipTLSVerify {
+		kfkPstr.skipTLSVerify = true
 	}
 	return kfkPstr
 }
 
 // KafkaEE is a kafka poster
 type KafkaEE struct {
-	topic  string // identifier of the CDR queue where we publish
-	writer *kafka.Writer
+	topic         string // identifier of the CDR queue where we publish
+	tls           bool   // if true, it will attempt to authenticate the server
+	caPath        string // path to CA pem file
+	skipTLSVerify bool   // if true, it skips certificate verification
+	writer        *kafka.Writer
 
 	cfg          *config.EventExporterCfg
 	dc           *utils.SafeMapStorage
@@ -58,6 +73,7 @@ func (pstr *KafkaEE) Cfg() *config.EventExporterCfg { return pstr.cfg }
 
 func (pstr *KafkaEE) Connect() (_ error) {
 	pstr.Lock()
+	defer pstr.Unlock()
 	if pstr.writer == nil {
 		pstr.writer = &kafka.Writer{
 			Addr:        kafka.TCP(pstr.Cfg().ExportPath),
@@ -65,7 +81,35 @@ func (pstr *KafkaEE) Connect() (_ error) {
 			MaxAttempts: pstr.Cfg().Attempts,
 		}
 	}
-	pstr.Unlock()
+	if pstr.tls {
+		rootCAs, err := x509.SystemCertPool()
+		if err != nil {
+			return
+		}
+		if rootCAs == nil {
+			rootCAs = x509.NewCertPool()
+		}
+		if pstr.caPath != "" {
+			ca, err := os.ReadFile(pstr.caPath)
+			if err != nil {
+				return
+			}
+			if !rootCAs.AppendCertsFromPEM(ca) {
+				return
+			}
+		}
+		pstr.writer.Transport = &kafka.Transport{
+			Dial: (&net.Dialer{
+				Timeout:   3 * time.Second,
+				DualStack: true,
+			}).DialContext,
+			TLS: &tls.Config{
+				RootCAs:            rootCAs,
+				InsecureSkipVerify: pstr.skipTLSVerify,
+			},
+		}
+	}
+
 	return
 }
 

@@ -56,7 +56,7 @@ func TestKafkaParseURL(t *testing.T) {
 		Attempts:   10,
 		Opts: &config.EventExporterOpts{
 			Kafka: &config.KafkaOpts{
-				KafkaTopic: utils.StringPointer("cdr_billing"),
+				Topic: utils.StringPointer("cdr_billing"),
 			},
 		},
 	}

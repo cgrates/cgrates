@@ -2655,9 +2655,12 @@ const (
 	KafkaDefaultGroupID = "cgrates"
 	KafkaDefaultMaxWait = time.Millisecond
 
-	KafkaTopic   = "kafkaTopic"
-	KafkaGroupID = "kafkaGroupID"
-	KafkaMaxWait = "kafkaMaxWait"
+	KafkaTopic         = "kafkaTopic"
+	KafkaTLS           = "kafkaTLS"
+	KafkaCAPath        = "kafkaCAPath"
+	KafkaSkipTLSVerify = "kafkaSkipTLSVerify"
+	KafkaGroupID       = "kafkaGroupID"
+	KafkaMaxWait       = "kafkaMaxWait"
 
 	// partial
 	PartialOpt = "*partial"

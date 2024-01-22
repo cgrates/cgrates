@@ -197,9 +197,12 @@ func (amqpr *AMQPROpts) loadFromJSONCfg(jsnCfg *EventReaderOptsJson) (err error)
 }
 
 type KafkaROpts struct {
-	Topic   *string
-	GroupID *string
-	MaxWait *time.Duration
+	Topic         *string
+	GroupID       *string
+	MaxWait       *time.Duration
+	TLS           *bool
+	CAPath        *string
+	SkipTLSVerify *bool
 }
 
 func (kafkaROpts *KafkaROpts) loadFromJSONCfg(jsnCfg *EventReaderOptsJson) (err error) {
@@ -215,6 +218,15 @@ func (kafkaROpts *KafkaROpts) loadFromJSONCfg(jsnCfg *EventReaderOptsJson) (err 
 			return
 		}
 		kafkaROpts.MaxWait = utils.DurationPointer(kafkaMaxWait)
+	}
+	if jsnCfg.KafkaTLS != nil {
+		kafkaROpts.TLS = jsnCfg.KafkaTLS
+	}
+	if jsnCfg.KafkaCAPath != nil {
+		kafkaROpts.CAPath = jsnCfg.KafkaCAPath
+	}
+	if jsnCfg.KafkaSkipTLSVerify != nil {
+		kafkaROpts.SkipTLSVerify = jsnCfg.KafkaSkipTLSVerify
 	}
 	return
 }
@@ -592,6 +604,18 @@ func (kafkaOpts *KafkaROpts) Clone() *KafkaROpts {
 		cln.MaxWait = new(time.Duration)
 		*cln.MaxWait = *kafkaOpts.MaxWait
 	}
+	if kafkaOpts.TLS != nil {
+		cln.TLS = new(bool)
+		*cln.TLS = *kafkaOpts.TLS
+	}
+	if kafkaOpts.CAPath != nil {
+		cln.CAPath = new(string)
+		*cln.CAPath = *kafkaOpts.CAPath
+	}
+	if kafkaOpts.SkipTLSVerify != nil {
+		cln.SkipTLSVerify = new(bool)
+		*cln.SkipTLSVerify = *kafkaOpts.SkipTLSVerify
+	}
 	return cln
 }
 
@@ -836,6 +860,15 @@ func (er *EventReaderCfg) AsMapInterface(separator string) (initialMP map[string
 		}
 		if kafkaOpts.MaxWait != nil {
 			opts[utils.KafkaMaxWait] = kafkaOpts.MaxWait.String()
+		}
+		if kafkaOpts.TLS != nil {
+			opts[utils.KafkaTLS] = *kafkaOpts.TLS
+		}
+		if kafkaOpts.CAPath != nil {
+			opts[utils.KafkaCAPath] = *kafkaOpts.CAPath
+		}
+		if kafkaOpts.SkipTLSVerify != nil {
+			opts[utils.KafkaSkipTLSVerify] = *kafkaOpts.SkipTLSVerify
 		}
 	}
 

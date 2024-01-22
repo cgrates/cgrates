@@ -79,8 +79,8 @@ func AddFailedPost(failedPostsDir, expPath, format string, ev any, opts *config.
 		}
 	}
 	if kfkOpts := opts.Kafka; kfkOpts != nil {
-		if opts.Kafka.KafkaTopic != nil {
-			kafkaTopic = *opts.Kafka.KafkaTopic
+		if opts.Kafka.Topic != nil {
+			kafkaTopic = *opts.Kafka.Topic
 		}
 	}
 	if qID := utils.FirstNonEmpty(amqpQueueID, s3BucketID, sqsQueueID,

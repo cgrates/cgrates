@@ -255,7 +255,7 @@ func TestEESClone(t *testing.T) {
 						WaitForActiveShards: utils.StringPointer("test6"),
 					},
 					Kafka: &KafkaOpts{
-						KafkaTopic: utils.StringPointer("kafka"),
+						Topic: utils.StringPointer("kafka"),
 					},
 					AWS: &AWSOpts{
 						Token:        utils.StringPointer("token"),

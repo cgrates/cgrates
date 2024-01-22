@@ -242,7 +242,10 @@ type RPCOpts struct {
 }
 
 type KafkaOpts struct {
-	KafkaTopic *string
+	Topic         *string
+	TLS           *bool
+	CAPath        *string
+	SkipTLSVerify *bool
 }
 
 type EventExporterOpts struct {
@@ -381,7 +384,16 @@ func (elsOpts *ElsOpts) loadFromJSONCfg(jsnCfg *EventExporterOptsJson) (err erro
 
 func (kafkaOpts *KafkaOpts) loadFromJSONCfg(jsnCfg *EventExporterOptsJson) (err error) {
 	if jsnCfg.KafkaTopic != nil {
-		kafkaOpts.KafkaTopic = jsnCfg.KafkaTopic
+		kafkaOpts.Topic = jsnCfg.KafkaTopic
+	}
+	if jsnCfg.KafkaTLS != nil {
+		kafkaOpts.TLS = jsnCfg.KafkaTLS
+	}
+	if jsnCfg.KafkaCAPath != nil {
+		kafkaOpts.CAPath = jsnCfg.KafkaCAPath
+	}
+	if jsnCfg.KafkaSkipTLSVerify != nil {
+		kafkaOpts.SkipTLSVerify = jsnCfg.KafkaSkipTLSVerify
 	}
 	return
 }
@@ -711,10 +723,21 @@ func (elsOpts *ElsOpts) Clone() *ElsOpts {
 
 func (kafkaOpts *KafkaOpts) Clone() *KafkaOpts {
 	cln := &KafkaOpts{}
-
-	if kafkaOpts.KafkaTopic != nil {
-		cln.KafkaTopic = new(string)
-		*cln.KafkaTopic = *kafkaOpts.KafkaTopic
+	if kafkaOpts.Topic != nil {
+		cln.Topic = new(string)
+		*cln.Topic = *kafkaOpts.Topic
+	}
+	if kafkaOpts.TLS != nil {
+		cln.TLS = new(bool)
+		*cln.TLS = *kafkaOpts.TLS
+	}
+	if kafkaOpts.CAPath != nil {
+		cln.CAPath = new(string)
+		*cln.CAPath = *kafkaOpts.CAPath
+	}
+	if kafkaOpts.SkipTLSVerify != nil {
+		cln.SkipTLSVerify = new(bool)
+		*cln.SkipTLSVerify = *kafkaOpts.SkipTLSVerify
 	}
 	return cln
 }
@@ -1032,8 +1055,17 @@ func (eeC *EventExporterCfg) AsMapInterface(separator string) (initialMP map[str
 		}
 	}
 	if kafkaOpts := eeC.Opts.Kafka; kafkaOpts != nil {
-		if kafkaOpts.KafkaTopic != nil {
-			opts[utils.KafkaTopic] = *kafkaOpts.KafkaTopic
+		if kafkaOpts.Topic != nil {
+			opts[utils.KafkaTopic] = *kafkaOpts.Topic
+		}
+		if kafkaOpts.TLS != nil {
+			opts[utils.KafkaTLS] = *kafkaOpts.TLS
+		}
+		if kafkaOpts.CAPath != nil {
+			opts[utils.KafkaCAPath] = *kafkaOpts.CAPath
+		}
+		if kafkaOpts.SkipTLSVerify != nil {
+			opts[utils.KafkaSkipTLSVerify] = *kafkaOpts.SkipTLSVerify
 		}
 	}
 	if amOpts := eeC.Opts.AMQP; amOpts != nil {
