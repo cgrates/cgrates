@@ -764,10 +764,10 @@ func TestGetMaxSessiontWithBlocker(t *testing.T) {
 		TimeEnd:      time.Date(2016, 1, 13, 14, 30, 0, 0, time.UTC),
 		MaxCostSoFar: 0,
 	}
+	expectedErr := "insufficient credit with balance Blocker"
 	result, err := cd.GetMaxSessionDuration(nil)
-	expected := 17 * time.Minute
-	if result != expected || err != nil {
-		t.Errorf("Expected %v was %v (%v)", expected, result, err)
+	if result != 0 || err == nil || err.Error() != expectedErr {
+		t.Errorf("expected %v, received %v", expectedErr, err)
 	}
 	cd = &CallDescriptor{
 		Category:     "call",
@@ -780,7 +780,7 @@ func TestGetMaxSessiontWithBlocker(t *testing.T) {
 		MaxCostSoFar: 0,
 	}
 	result, err = cd.GetMaxSessionDuration(nil)
-	expected = 30 * time.Minute
+	expected := 30 * time.Minute
 	if result != expected || err != nil {
 		t.Errorf("Expected %v was %v (%v)", expected, result, err)
 	}
@@ -813,10 +813,10 @@ func TestGetMaxSessiontWithBlockerEmpty(t *testing.T) {
 		TimeEnd:      time.Date(2016, 1, 13, 14, 30, 0, 0, time.UTC),
 		MaxCostSoFar: 0,
 	}
+	expectedErr := "insufficient credit with balance Blocker"
 	result, err := cd.GetMaxSessionDuration(nil)
-	expected := 0 * time.Minute
-	if result != expected || err != nil {
-		t.Errorf("Expected %v was %v (%v)", expected, result, err)
+	if result != 0 || err == nil || err.Error() != expectedErr {
+		t.Errorf("expected %v, received %v", expectedErr, err)
 	}
 	cd = &CallDescriptor{
 		Category:     "call",
@@ -829,7 +829,7 @@ func TestGetMaxSessiontWithBlockerEmpty(t *testing.T) {
 		MaxCostSoFar: 0,
 	}
 	result, err = cd.GetMaxSessionDuration(nil)
-	expected = 30 * time.Minute
+	expected := 30 * time.Minute
 	if result != expected || err != nil {
 		t.Errorf("Expected %v was %v (%v)", expected, result, err)
 	}
