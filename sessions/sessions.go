@@ -416,9 +416,9 @@ func (sS *SessionS) forceSTerminate(s *Session, extraUsage time.Duration, tUsage
 					Reason:     ErrForcedDisconnect.Error()},
 				&rply); err != nil {
 				if err != utils.ErrNotImplemented {
-					utils.Logger.Warning(
-						fmt.Sprintf("<%s> err: %s remotely disconnect session with id: %s",
-							utils.SessionS, err.Error(), s.CGRID))
+					utils.Logger.Warning(fmt.Sprintf(
+						"<%s> remotely disconnecting session with id <%s> failed: %v",
+						utils.SessionS, s.CGRID, err))
 				}
 			}
 		}()

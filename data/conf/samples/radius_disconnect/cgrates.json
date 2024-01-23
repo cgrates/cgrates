@@ -1,0 +1,72 @@
+{
+
+"general": {
+	"log_level": 7
+},
+
+"data_db": {
+	"db_type": "*internal"
+},
+
+"stor_db": {
+	"db_type": "*internal"
+},
+
+"rals": {
+	"enabled": true
+},
+
+"schedulers": {
+	"enabled": true
+},
+
+"cdrs": {
+	"enabled": true,
+	"rals_conns": ["*internal"]
+},
+
+"resources": {
+	"enabled": true,
+	"store_interval": "-1"
+},
+
+"attributes": {
+	"enabled": true
+},
+
+"chargers": {
+	"enabled": true
+},
+
+"sessions": {
+	"enabled": true,
+	"attributes_conns": ["*localhost"],
+	"cdrs_conns": ["*localhost"],
+	"rals_conns": ["*localhost"],
+	"resources_conns": ["*localhost"],
+	"chargers_conns": ["*localhost"],
+	"debit_interval": "10s"
+},
+
+"radius_agent": {
+	"enabled": true,
+	"sessions_conns": ["*bijson_localhost"],
+	"client_da_addresses": {
+		"127.0.0.1": ":3799"
+	},
+	"listeners":[
+		{
+			"network": "udp",
+			"auth_address": "127.0.0.1:1812",
+			"acct_address": "127.0.0.1:1813"
+		}
+	],
+	"dmr_template": "*dmr"
+},
+
+"apiers": {
+	"enabled": true,
+	"scheduler_conns": ["*localhost"]
+}
+
+}

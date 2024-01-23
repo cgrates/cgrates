@@ -34,7 +34,9 @@ type RadiusAgentCfg struct {
 	Listeners          []RadiusListener
 	ClientSecrets      map[string]string
 	ClientDictionaries map[string][]string
+	ClientDaAddresses  map[string]string
 	SessionSConns      []string
+	DMRTemplate        string
 	RequestProcessors  []*RequestProcessor
 }
 
@@ -77,6 +79,14 @@ func (ra *RadiusAgentCfg) loadFromJSONCfg(jsnCfg *RadiusAgentJsonCfg, separator 
 			ra.ClientDictionaries[k] = v
 		}
 	}
+	if len(jsnCfg.Client_da_addresses) != 0 {
+		if ra.ClientDaAddresses == nil {
+			ra.ClientDaAddresses = make(map[string]string)
+		}
+		for k, v := range jsnCfg.Client_da_addresses {
+			ra.ClientDaAddresses[k] = v
+		}
+	}
 	if jsnCfg.Sessions_conns != nil {
 		ra.SessionSConns = make([]string, len(*jsnCfg.Sessions_conns))
 		for idx, attrConn := range *jsnCfg.Sessions_conns {
@@ -86,6 +96,9 @@ func (ra *RadiusAgentCfg) loadFromJSONCfg(jsnCfg *RadiusAgentJsonCfg, separator 
 				ra.SessionSConns[idx] = utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS)
 			}
 		}
+	}
+	if jsnCfg.Dmr_template != nil {
+		ra.DMRTemplate = *jsnCfg.Dmr_template
 	}
 	if jsnCfg.Request_processors != nil {
 		for _, reqProcJsn := range *jsnCfg.Request_processors {
@@ -122,7 +135,8 @@ func (lstn *RadiusListener) AsMapInterface(separator string) map[string]any {
 // AsMapInterface returns the config as a map[string]any
 func (ra *RadiusAgentCfg) AsMapInterface(separator string) (initialMP map[string]any) {
 	initialMP = map[string]any{
-		utils.EnabledCfg: ra.Enabled,
+		utils.EnabledCfg:     ra.Enabled,
+		utils.DMRTemplateCfg: ra.DMRTemplate,
 	}
 
 	listeners := make([]map[string]any, len(ra.Listeners))
@@ -157,6 +171,13 @@ func (ra *RadiusAgentCfg) AsMapInterface(separator string) (initialMP map[string
 		clientDictionaries[k] = v
 	}
 	initialMP[utils.ClientDictionariesCfg] = clientDictionaries
+	if len(ra.ClientDaAddresses) != 0 {
+		clientDaAddresses := make(map[string]string)
+		for k, v := range ra.ClientDaAddresses {
+			clientDaAddresses[k] = v
+		}
+		initialMP[utils.ClientDaAddressesCfg] = clientDaAddresses
+	}
 	return
 }
 
@@ -167,6 +188,7 @@ func (ra RadiusAgentCfg) Clone() (cln *RadiusAgentCfg) {
 		Listeners:          ra.Listeners,
 		ClientSecrets:      make(map[string]string),
 		ClientDictionaries: make(map[string][]string),
+		DMRTemplate:        ra.DMRTemplate,
 	}
 
 	if ra.Listeners != nil {
@@ -183,6 +205,12 @@ func (ra RadiusAgentCfg) Clone() (cln *RadiusAgentCfg) {
 	}
 	for k, v := range ra.ClientDictionaries {
 		cln.ClientDictionaries[k] = v
+	}
+	if len(ra.ClientDaAddresses) != 0 {
+		cln.ClientDaAddresses = make(map[string]string)
+		for k, v := range ra.ClientDaAddresses {
+			cln.ClientDaAddresses[k] = v
+		}
 	}
 	if ra.RequestProcessors != nil {
 		cln.RequestProcessors = make([]*RequestProcessor, len(ra.RequestProcessors))

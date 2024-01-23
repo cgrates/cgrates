@@ -25,14 +25,14 @@ import (
 	"github.com/cgrates/radigo"
 )
 
-// radReplyAppendAttributes appends attributes to a RADIUS reply based on predefined template
-func radReplyAppendAttributes(reply *radigo.Packet, rplNM *utils.OrderedNavigableMap) (err error) {
-	for el := rplNM.GetFirstElement(); el != nil; el = el.Next() {
+// radAppendAttributes appends attributes to a RADIUS packet based on predefined template
+func radAppendAttributes(packet *radigo.Packet, nm *utils.OrderedNavigableMap) error {
+	for el := nm.GetFirstElement(); el != nil; el = el.Next() {
 		path := el.Value
-		cfgItm, _ := rplNM.Field(path)
+		cfgItm, _ := nm.Field(path)
 		path = path[:len(path)-1]        // remove the last index
 		if path[0] == MetaRadReplyCode { // Special case used to control the reply code of RADIUS reply
-			if err = reply.SetCodeWithName(utils.IfaceAsString(cfgItm.Data)); err != nil {
+			if err := packet.SetCodeWithName(utils.IfaceAsString(cfgItm.Data)); err != nil {
 				return err
 			}
 			continue
@@ -44,11 +44,11 @@ func radReplyAppendAttributes(reply *radigo.Packet, rplNM *utils.OrderedNavigabl
 			attrName = path[0]
 		}
 
-		if err = reply.AddAVPWithName(attrName, utils.IfaceAsString(cfgItm.Data), vendorName); err != nil {
+		if err := packet.AddAVPWithName(attrName, utils.IfaceAsString(cfgItm.Data), vendorName); err != nil {
 			return err
 		}
 	}
-	return
+	return nil
 }
 
 // newRADataProvider constructs a DataProvider

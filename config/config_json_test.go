@@ -192,6 +192,9 @@ func TestCacheJsonCfg(t *testing.T) {
 			utils.CacheDiameterMessages: {Limit: utils.IntPointer(-1),
 				Ttl: utils.StringPointer("3h"), Static_ttl: utils.BoolPointer(false),
 				Remote: utils.BoolPointer(false), Replicate: utils.BoolPointer(false)},
+			utils.CacheRadiusPackets: {Limit: utils.IntPointer(-1),
+				Ttl: utils.StringPointer("3h"), Static_ttl: utils.BoolPointer(false),
+				Remote: utils.BoolPointer(false), Replicate: utils.BoolPointer(false)},
 			utils.CacheRPCResponses: {Limit: utils.IntPointer(0),
 				Ttl: utils.StringPointer("2s"), Static_ttl: utils.BoolPointer(false),
 				Remote: utils.BoolPointer(false), Replicate: utils.BoolPointer(false)},
@@ -993,8 +996,10 @@ func TestRadiusAgentJsonCfg(t *testing.T) {
 		Client_dictionaries: utils.MapStringSlicePointer(map[string][]string{
 			utils.MetaDefault: {"/usr/share/cgrates/radius/dict/"},
 		}),
-		Sessions_conns:     &[]string{utils.MetaInternal},
-		Request_processors: &[]*ReqProcessorJsnCfg{},
+		Sessions_conns:      &[]string{utils.MetaInternal},
+		Request_processors:  &[]*ReqProcessorJsnCfg{},
+		Dmr_template:        utils.StringPointer(""),
+		Client_da_addresses: map[string]string{},
 	}
 	dfCgrJSONCfg, err := NewCgrJsonCfgFromBytes([]byte(CGRATES_CFG_JSON))
 	if err != nil {
@@ -1003,8 +1008,7 @@ func TestRadiusAgentJsonCfg(t *testing.T) {
 	if cfg, err := dfCgrJSONCfg.RadiusAgentJsonCfg(); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCfg, cfg) {
-		rcv := *cfg.Request_processors
-		t.Errorf("Expected <%+v>, \nReceived: \n<%+v>", eCfg.Request_processors, rcv)
+		t.Errorf("Expected <%+v>, \nReceived: \n<%+v>", utils.ToJSON(eCfg), utils.ToJSON(cfg))
 	}
 }
 
@@ -2249,6 +2253,32 @@ func TestDfTemplateSJsonCfg(t *testing.T) {
 				Path:  utils.StringPointer(fmt.Sprintf("%s.Re-Auth-Request-Type", utils.MetaDiamreq)),
 				Type:  utils.StringPointer(utils.MetaConstant),
 				Value: utils.StringPointer("0"),
+			},
+		},
+		utils.MetaDMR: {
+			{
+				Tag:   utils.StringPointer("User-Name"),
+				Path:  utils.StringPointer(fmt.Sprintf("%s.User-Name", utils.MetaRadDAdiscMsg)),
+				Type:  utils.StringPointer(utils.MetaVariable),
+				Value: utils.StringPointer("~*req.User-Name"),
+			},
+			{
+				Tag:   utils.StringPointer("NAS-IP-Address"),
+				Path:  utils.StringPointer(fmt.Sprintf("%s.NAS-IP-Address", utils.MetaRadDAdiscMsg)),
+				Type:  utils.StringPointer(utils.MetaVariable),
+				Value: utils.StringPointer("~*req.NAS-IP-Address"),
+			},
+			{
+				Tag:   utils.StringPointer("Acct-Session-Id"),
+				Path:  utils.StringPointer(fmt.Sprintf("%s.Acct-Session-Id", utils.MetaRadDAdiscMsg)),
+				Type:  utils.StringPointer(utils.MetaVariable),
+				Value: utils.StringPointer("~*req.Acct-Session-Id"),
+			},
+			{
+				Tag:   utils.StringPointer("Reply-Message"),
+				Path:  utils.StringPointer(fmt.Sprintf("%s.Reply-Message", utils.MetaRadDAdiscMsg)),
+				Type:  utils.StringPointer(utils.MetaVariable),
+				Value: utils.StringPointer("~*vars.DisconnectCause"),
 			},
 		},
 		utils.MetaCdrLog: {

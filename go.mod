@@ -23,7 +23,7 @@ require (
 	github.com/cgrates/fsock v0.0.0-20231222174700-7257ce894e23
 	github.com/cgrates/kamevapi v0.0.0-20220525160402-5b8036487a6c
 	github.com/cgrates/ltcache v0.0.0-20210405185848-da943e80c1ab
-	github.com/cgrates/radigo v0.0.0-20231107162145-dac6e5c377ea
+	github.com/cgrates/radigo v0.0.0-20240123163129-491c899df727
 	github.com/cgrates/rpcclient v0.0.0-20230605090759-8bb5188b73e5
 	github.com/cgrates/sipingo v1.0.1-0.20200514112313-699ebc1cdb8e
 	github.com/cgrates/ugocodec v0.0.0-20201023092048-df93d0123f60
@@ -46,7 +46,7 @@ require (
 	github.com/rabbitmq/amqp091-go v1.9.0
 	github.com/segmentio/kafka-go v0.4.44
 	go.mongodb.org/mongo-driver v1.12.1
-	golang.org/x/crypto v0.14.0
+	golang.org/x/crypto v0.18.0
 	golang.org/x/net v0.17.0
 	golang.org/x/oauth2 v0.13.0
 	google.golang.org/api v0.150.0
@@ -112,7 +112,7 @@ require (
 	go.opencensus.io v0.24.0 // indirect
 	golang.org/x/mod v0.14.0 // indirect
 	golang.org/x/sync v0.5.0 // indirect
-	golang.org/x/sys v0.14.0 // indirect
+	golang.org/x/sys v0.16.0 // indirect
 	golang.org/x/text v0.14.0 // indirect
 	golang.org/x/time v0.4.0 // indirect
 	golang.org/x/tools v0.14.0 // indirect
