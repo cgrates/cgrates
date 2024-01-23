@@ -244,7 +244,7 @@ func sentrypeerHasData(itemId, token, url string) (found bool, err error) {
 // expects a boolean reply
 // when element is set to *any the  CGREvent is sent as JSON body
 // when the element is  specified  as a path e.g ~*req.Account  is sent as  query string pair  ,the path being the key with the value extracted from dataprovider
-func filterHTTP(httpType string, dDP any, fieldname, value string) (bool, error) {
+func filterHTTP(httpType string, dDP utils.DataProvider, fieldname, value string) (bool, error) {
 	var (
 		parsedURL *url.URL
 		resp      string
@@ -263,14 +263,9 @@ func filterHTTP(httpType string, dDP any, fieldname, value string) (bool, error)
 		queryParams := parsedURL.Query()
 		queryParams.Set(fieldname, value)
 		parsedURL.RawQuery = queryParams.Encode()
-		resp, err = externalAPI(parsedURL.String(), nil, nil)
+		resp, err = externalAPI(parsedURL.String(), nil)
 	} else {
-		var data []byte
-		data, err = json.Marshal(dDP)
-		if err != nil {
-			return false, fmt.Errorf("error marshaling data: %w", err)
-		}
-		resp, err = externalAPI(parsedURL.String(), bytes.NewReader(data), nil)
+		resp, err = externalAPI(parsedURL.String(), bytes.NewReader([]byte(dDP.String())))
 	}
 	if err != nil {
 		return false, err
@@ -278,7 +273,10 @@ func filterHTTP(httpType string, dDP any, fieldname, value string) (bool, error)
 	return utils.IfaceAsBool(resp)
 }
 
-func externalAPI(url string, rdr io.Reader, hdr map[string]string) (string, error) {
+func externalAPI(url string, rdr io.Reader) (string, error) {
+	hdr := map[string]string{
+		"Content-Type": "application/json",
+	}
 	resp, err := getHTTP(http.MethodGet, url, rdr, hdr)
 	if err != nil {
 		return "", fmt.Errorf("error processing the request: %w", err)
