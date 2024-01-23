@@ -20,7 +20,6 @@ package engine
 
 import (
 	"bytes"
-	"encoding/json"
 	"fmt"
 	"sort"
 	"strings"
@@ -176,9 +175,5 @@ func externalAttributeAPI(httpType string, dDP utils.DataProvider) (string, erro
 	if err != nil {
 		return "", err
 	}
-	data, err := json.Marshal(dDP)
-	if err != nil {
-		return "", fmt.Errorf("error marshaling data: %w", err)
-	}
-	return externalAPI(urlS, bytes.NewReader(data), nil)
+	return externalAPI(urlS, bytes.NewReader([]byte(dDP.String())))
 }

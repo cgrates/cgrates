@@ -787,7 +787,6 @@ func (fltr *FilterRule) passHttp(dDP utils.DataProvider) (bool, error) {
 		}
 		return false, err
 	}
-
 	return filterHTTP(fltr.Type, dDP, fltr.Element, strVal)
 
 }
