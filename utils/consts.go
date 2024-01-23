@@ -31,7 +31,7 @@ var (
 	GitLastLog string // If set, it will be processed as part of versioning
 
 	extraDBPartition = NewStringSet([]string{CacheDispatchers,
-		CacheDispatcherRoutes, CacheDispatcherLoads, CacheDiameterMessages, CacheRPCResponses, CacheClosedSessions,
+		CacheDispatcherRoutes, CacheDispatcherLoads, CacheDiameterMessages, CacheRadiusPackets, CacheRPCResponses, CacheClosedSessions,
 		CacheCDRIDs, CacheRPCConnections, CacheUCH, CacheSTIR, CacheEventCharges, MetaAPIBan, MetaSentryPeer,
 		CacheRatingProfilesTmp, CacheCapsEvents, CacheReplicationHosts})
 
@@ -681,7 +681,6 @@ const (
 	RSRDynStartChar          = '<'
 	RSRDynEndChar            = '>'
 	MetaApp                  = "*app"
-	MetaAppID                = "*appid"
 	MetaCmd                  = "*cmd"
 	MetaEnv                  = "*env:" // use in config for describing enviormant variables
 	MetaTemplate             = "*template"
@@ -692,6 +691,10 @@ const (
 	IdxStart                 = "["
 	IdxEnd                   = "]"
 	IdxCombination           = "]["
+
+	// *vars consts in agents
+	MetaAppID     = "*appid"
+	MetaSessionID = "*sessionID" // used to retrieve RADIUS Access-Reqest packets of active sessions
 
 	RemoteHost              = "RemoteHost"
 	Local                   = "local"
@@ -790,6 +793,7 @@ const (
 	MetaLoaders             = "*loaders"
 	TmpSuffix               = ".tmp"
 	MetaDiamreq             = "*diamreq"
+	MetaRadDAdiscMsg        = "*radDAdiscMsg"
 	MetaCost                = "*cost"
 	MetaGroup               = "*group"
 	InternalRPCSet          = "InternalRPCSet"
@@ -973,6 +977,7 @@ const (
 	MetaAverage  = "*average"
 	MetaDistinct = "*distinct"
 	MetaRAR      = "*rar"
+	MetaDMR      = "*dmr"
 )
 
 // Services
@@ -1880,6 +1885,7 @@ const (
 	CacheChargerFilterIndexes    = "*charger_filter_indexes"
 	CacheDispatcherFilterIndexes = "*dispatcher_filter_indexes"
 	CacheDiameterMessages        = "*diameter_messages"
+	CacheRadiusPackets           = "*radius_packets"
 	CacheRPCResponses            = "*rpc_responses"
 	CacheClosedSessions          = "*closed_sessions"
 	MetaPrecaching               = "*precaching"
@@ -2232,6 +2238,8 @@ const (
 	AcctAddrCfg           = "acct_address"
 	ClientSecretsCfg      = "client_secrets"
 	ClientDictionariesCfg = "client_dictionaries"
+	ClientDaAddressesCfg  = "client_da_addresses"
+	DMRTemplateCfg        = "dmr_template"
 
 	// AttributeSCfg
 	IndexedSelectsCfg           = "indexed_selects"

@@ -298,6 +298,7 @@ const CGRATES_CFG_JSON = `
 		"*dispatcher_loads": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false},							// control dispatcher load( in case of *ratio ConnParams is present)
 		"*dispatchers": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false}, 								// control dispatcher interface
 		"*diameter_messages": {"limit": -1, "ttl": "3h", "static_ttl": false, "remote":false, "replicate": false},						// diameter messages caching
+		"*radius_packets": {"limit": -1, "ttl": "3h", "static_ttl": false, "remote":false, "replicate": false},							// radius packets caching
 		"*rpc_responses": {"limit": 0, "ttl": "2s", "static_ttl": false, "remote":false, "replicate": false},							// RPC responses caching
 		"*closed_sessions": {"limit": -1, "ttl": "10s", "static_ttl": false, "remote":false, "replicate": false},						// closed sessions cached for CDRs
 		"*event_charges": {"limit": 0, "ttl": "10s", "static_ttl": false, "remote":false, "replicate": false},							// events proccessed by ChargerS
@@ -708,12 +709,13 @@ const CGRATES_CFG_JSON = `
 	"client_dictionaries": {									// per client path towards directory holding additional dictionaries to load (extra to RFC)
 		"*default": [											// key represents the client IP or catch-all <*default|$client_ip>
 			"/usr/share/cgrates/radius/dict/",
-		],
-			
+		]
 	},
+	"client_da_addresses": {},									// list of clients supporting dynamic authorization
 	"sessions_conns": ["*internal"],
+	"dmr_template": "",											// template used to build the Disconnect-Request packet
 	"request_processors": [										// request processors to be applied to Radius messages
-	],
+	]
 },
 
 
@@ -1212,6 +1214,48 @@ const CGRATES_CFG_JSON = `
 			 "value": "~*vars.*appid", "mandatory": true},
 		{"tag": "ReAuthRequestType", "path": "*diamreq.Re-Auth-Request-Type", "type": "*constant",
 			"value": "0"},
+	],
+	"*dmr": [
+		{"tag": "User-Name", "path": "*radDAdiscMsg.User-Name", "type": "*variable", 
+			"value": "~*req.User-Name"},
+		{"tag": "NAS-IP-Address", "path": "*radDAdiscMsg.NAS-IP-Address", "type": "*variable", 
+			"value": "~*req.NAS-IP-Address"},
+		{"tag": "Acct-Session-Id", "path": "*radDAdiscMsg.Acct-Session-Id", "type": "*variable", 
+			"value": "~*req.Acct-Session-Id"},
+		{"tag": "Reply-Message", "path": "*radDAdiscMsg.Reply-Message", "type": "*variable", 
+			"value": "~*vars.DisconnectCause"},
+
+		// Remaining possible attributes based on RFC 5176, commented and populated with dummy data.
+		// {"tag": "Acct-Terminate-Cause", "path": "*radDAdiscMsg.Acct-Terminate-Cause", "type": "*variable", 
+		// 		"value": "~*req.Acct-Terminate-Cause"},
+		// {"tag": "NAS-Port", "path": "*radDAdiscMsg.NAS-Port", "type": "*variable", 
+		// 		"value": "~*req.NAS-Port"},
+		// {"tag": "Class", "path": "*radDAdiscMsg.Class", "type": "*variable",	
+		// 		"value": "~*req.Class"},
+		// {"tag": "Vendor-Specific", "path": "*radDAdiscMsg.Vendor-Specific", "type": "*variable", 
+		// 		"value": "~*req.Vendor-Specific"},
+		// {"tag": "Called-Station-Id", "path": "*radDAdiscMsg.Called-Station-Id", "type": "*variable", 
+		// 		"value": "~*req.Called-Station-Id"},
+		// {"tag": "Calling-Station-Id", "path": "*radDAdiscMsg.Calling-Station-Id", "type": "*variable", 
+		// 		"value": "~*req.Calling-Station-Id"},
+		// {"tag": "NAS-Identifier", "path": "*radDAdiscMsg.NAS-Identifier", "type": "*variable", 
+		// 		"value": "~*req.NAS-Identifier"},
+		// {"tag": "Proxy-State", "path": "*radDAdiscMsg.Proxy-State", "type": "*variable", 
+		// 		"value": "~*req.Proxy-State"},
+		// {"tag": "Acct-Multi-Session-Id", "path": "*radDAdiscMsg.Acct-Multi-Session-Id", "type": "*variable", 
+		// 		"value": "~*req.Acct-Multi-Session-Id"},
+		// {"tag": "Event-Timestamp", "path": "*radDAdiscMsg.Event-Timestamp", "type": "*variable", 
+		// 		"value": "~*req.Event-Timestamp"},
+		// {"tag": "EAP-Message", "path": "*radDAdiscMsg.EAP-Message", "type": "*variable", 
+		// 		"value": "~*req.EAP-Message"},
+		// {"tag": "Message-Authenticator", "path": "*radDAdiscMsg.Message-Authenticator", "type": "*variable", 
+		// 		"value": "~*req.Message-Authenticator"},
+		// {"tag": "NAS-Port-Id", "path": "*radDAdiscMsg.NAS-Port-Id", "type": "*variable", 
+		// 		"value": "~*req.NAS-Port-Id"},
+		// {"tag": "Chargeable-User-Identity", "path": "*radDAdiscMsg.Chargeable-User-Identity", "type": "*variable", 
+		// 		"value": "~*req.Chargeable-User-Identity"},
+		// {"tag": "NAS-IPv6-Address", "path": "*radDAdiscMsg.NAS-IPv6-Address", "type": "*variable", 
+		// 		"value": "~*req.NAS-IPv6-Address"},
 	],
 	"*errSip": [
 			{"tag": "Request", "path": "*rep.Request", "type": "*constant",
