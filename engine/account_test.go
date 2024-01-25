@@ -1703,6 +1703,7 @@ func TestDebitGeneric(t *testing.T) {
 
 func TestDebitGenericBalance(t *testing.T) {
 	cc := &CallCost{
+		Category:    "call",
 		Destination: "0723045326",
 		Timespans: []*TimeSpan{
 			{
@@ -1722,6 +1723,7 @@ func TestDebitGenericBalance(t *testing.T) {
 		ToR: utils.MetaVoice,
 	}
 	cd := &CallDescriptor{
+		Category:      "call",
 		TimeStart:     cc.Timespans[0].TimeStart,
 		TimeEnd:       cc.Timespans[0].TimeEnd,
 		Destination:   cc.Destination,
@@ -1734,7 +1736,7 @@ func TestDebitGenericBalance(t *testing.T) {
 			utils.MetaGeneric: {
 				&Balance{Uuid: "testm", Value: 100, Weight: 5,
 					DestinationIDs: utils.StringMap{"NAT": true},
-					Factor:         ValueFactor{utils.MetaVoice: 60 * float64(time.Second)}}},
+					Factor:         ValueFactor{"call": 60 * float64(time.Second)}}},
 			utils.MetaMonetary: {&Balance{Value: 21}},
 		}}
 	var err error
@@ -1756,6 +1758,7 @@ func TestDebitGenericBalance(t *testing.T) {
 
 func TestDebitGenericBalanceWithRatingSubject(t *testing.T) {
 	cc := &CallCost{
+		Category:    "call",
 		Destination: "0723045326",
 		Timespans: []*TimeSpan{
 			{
@@ -1774,6 +1777,7 @@ func TestDebitGenericBalanceWithRatingSubject(t *testing.T) {
 		ToR: utils.MetaVoice,
 	}
 	cd := &CallDescriptor{
+		Category:      "call",
 		TimeStart:     cc.Timespans[0].TimeStart,
 		TimeEnd:       cc.Timespans[0].TimeEnd,
 		Destination:   cc.Destination,
@@ -1786,7 +1790,7 @@ func TestDebitGenericBalanceWithRatingSubject(t *testing.T) {
 			utils.MetaGeneric: {
 				&Balance{Uuid: "testm", Value: 100,
 					Weight: 5, DestinationIDs: utils.StringMap{"NAT": true},
-					Factor:        ValueFactor{utils.MetaVoice: 60 * float64(time.Second)},
+					Factor:        ValueFactor{"call": 60 * float64(time.Second)},
 					RatingSubject: "free"}},
 			utils.MetaMonetary: {&Balance{Value: 21}},
 		}}
