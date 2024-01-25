@@ -770,8 +770,8 @@ func (bc Balances) SaveDirtyBalances(acc *Account, initBal map[string]float64) {
 
 type ValueFactor map[string]float64
 
-func (f ValueFactor) GetValue(tor string) float64 {
-	if value, ok := f[tor]; ok {
+func (f ValueFactor) GetValue(category string) float64 {
+	if value, ok := f[category]; ok {
 		return value
 	}
 	return 1.0
@@ -876,7 +876,7 @@ func (b *Balance) debit(cd *CallDescriptor, ub *Account, moneyBalances Balances,
 			//log.Printf("INCREMENET: %+v", inc)
 			amount := float64(inc.Duration)
 			if b.Factor != nil {
-				amount = utils.Round(amount/b.Factor.GetValue(tor),
+				amount = utils.Round(amount/b.Factor.GetValue(cd.Category),
 					globalRoundingDecimals, utils.MetaRoundingUp)
 			}
 			if b.GetValue() >= amount {
@@ -887,7 +887,8 @@ func (b *Balance) debit(cd *CallDescriptor, ub *Account, moneyBalances Balances,
 					Value:         b.Value,
 					DestinationID: cc.Destination,
 					Consumed:      amount,
-					ToR:           tor, //aici
+					Category:      cd.Category,
+					ToR:           tor,
 					RateInterval:  nil,
 				}
 				inc.BalanceInfo.AccountID = ub.ID
@@ -1019,7 +1020,7 @@ func (b *Balance) debit(cd *CallDescriptor, ub *Account, moneyBalances Balances,
 			var moneyBal *Balance
 			if isUnitBal {
 				if b.Factor != nil {
-					amount = utils.Round(amount/b.Factor.GetValue(cd.ToR), globalRoundingDecimals, utils.MetaRoundingUp)
+					amount = utils.Round(amount/b.Factor.GetValue(cd.Category), globalRoundingDecimals, utils.MetaRoundingUp)
 				}
 				for _, mb := range moneyBalances {
 					if mb.GetValue() >= cost {
@@ -1056,6 +1057,7 @@ func (b *Balance) debit(cd *CallDescriptor, ub *Account, moneyBalances Balances,
 					Value:         b.Value,
 					DestinationID: cc.Destination,
 					Consumed:      amount,
+					Category:      cc.Category,
 					ToR:           cc.ToR,
 					RateInterval:  ts.RateInterval,
 				}
