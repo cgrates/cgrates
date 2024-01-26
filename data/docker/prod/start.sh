@@ -1,3 +1,5 @@
+#!/bin/sh
+
 /etc/init.d/mysql start
 /etc/init.d/postgresql start
 /etc/init.d/redis-server start
