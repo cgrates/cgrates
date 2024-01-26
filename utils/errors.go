@@ -25,102 +25,104 @@ import (
 )
 
 var (
-	ErrNoMoreData                     = errors.New("NO_MORE_DATA")
-	ErrNotImplemented                 = errors.New("NOT_IMPLEMENTED")
-	ErrNotFound                       = errors.New("NOT_FOUND")
-	ErrDSPHostNotFound                = errors.New("DSP_HOST_NOT_FOUND")
-	ErrDSPProfileNotFound             = errors.New("DSP_PROFILE_NOT_FOUND")
-	ErrTimedOut                       = errors.New("TIMED_OUT")
-	ErrServerError                    = errors.New("SERVER_ERROR")
-	ErrMaxRecursionDepth              = errors.New("MAX_RECURSION_DEPTH")
-	ErrMandatoryIeMissing             = errors.New("MANDATORY_IE_MISSING")
-	ErrExists                         = errors.New("EXISTS")
-	ErrBrokenReference                = errors.New("BROKEN_REFERENCE")
-	ErrParserError                    = errors.New("PARSER_ERROR")
-	ErrInvalidPath                    = errors.New("INVALID_PATH")
-	ErrInvalidKey                     = errors.New("INVALID_KEY")
-	ErrUnauthorizedDestination        = errors.New("UNAUTHORIZED_DESTINATION")
-	ErrRatingPlanNotFound             = errors.New("RATING_PLAN_NOT_FOUND")
-	ErrAccountNotFound                = errors.New("ACCOUNT_NOT_FOUND")
-	ErrAccountDisabled                = errors.New("ACCOUNT_DISABLED")
-	ErrInsufficientCredit             = errors.New("INSUFFICIENT_CREDIT")
-	ErrNotConvertible                 = errors.New("NOT_CONVERTIBLE")
-	ErrResourceUnavailable            = errors.New("RESOURCE_UNAVAILABLE")
-	ErrResourceUnauthorized           = errors.New("RESOURCE_UNAUTHORIZED")
-	ErrNoActiveSession                = errors.New("NO_ACTIVE_SESSION")
-	ErrPartiallyExecuted              = errors.New("PARTIALLY_EXECUTED")
-	ErrMaxUsageExceeded               = errors.New("MAX_USAGE_EXCEEDED")
-	ErrMaxCostExceeded                = errors.New("MAX_COST_EXCEEDED")
-	ErrFilterNotPassingNoCaps         = errors.New("filter not passing")
-	ErrNotConvertibleNoCaps           = errors.New("not convertible")
-	ErrMandatoryIeMissingNoCaps       = errors.New("mandatory information missing")
-	ErrUnauthorizedApi                = errors.New("UNAUTHORIZED_API")
-	ErrUnknownApiKey                  = errors.New("UNKNOWN_API_KEY")
-	ErrReqUnsynchronized              = errors.New("REQ_UNSYNCHRONIZED")
-	ErrUnsupporteServiceMethod        = errors.New("UNSUPPORTED_SERVICE_METHOD")
-	ErrDisconnected                   = errors.New("DISCONNECTED")
-	ErrReplyTimeout                   = errors.New("REPLY_TIMEOUT")
-	ErrSessionNotFound                = errors.New("SESSION_NOT_FOUND")
-	ErrJsonIncompleteComment          = errors.New("JSON_INCOMPLETE_COMMENT")
-	ErrNotEnoughParameters            = errors.New("NotEnoughParameters")
-	ErrNotConnected                   = errors.New("NOT_CONNECTED")
-	RalsErrorPrfx                     = "RALS_ERROR"
-	DispatcherErrorPrefix             = "DISPATCHER_ERROR"
-	RateSErrPrfx                      = "RATES_ERROR"
-	ErrNotAuthorized                  = errors.New("NOT_AUTHORIZED")
-	ErrUnsupportedFormat              = errors.New("UNSUPPORTED_FORMAT")
-	ErrNoDatabaseConn                 = errors.New("NO_DATABASE_CONNECTION")
-	ErrMaxIncrementsExceeded          = errors.New("MAX_INCREMENTS_EXCEEDED")
-	ErrUncomputableIncrement          = errors.New("UNCOMPUTABLE_INCREMENT")
-	ErrIndexOutOfBounds               = errors.New("INDEX_OUT_OF_BOUNDS")
-	ErrWrongPath                      = errors.New("WRONG_PATH")
-	ErrServiceAlreadyRunning          = fmt.Errorf("service already running")
-	ErrMaxConcurrentRPCExceededNoCaps = errors.New("max concurrent rpc exceeded") // on internal we return this error for concureq
-	ErrMaxConcurrentRPCExceeded       = errors.New("MAX_CONCURRENT_RPC_EXCEEDED") // but the codec will rewrite it with this one to be sure that we corectly dealocate the request
-	ErrMaxIterationsReached           = errors.New("maximum iterations reached")
-	ErrNegative                       = errors.New("NEGATIVE")
-	ErrCastFailed                     = errors.New("CAST_FAILED")
+	ErrNoMoreData                       = errors.New("NO_MORE_DATA")
+	ErrNotImplemented                   = errors.New("NOT_IMPLEMENTED")
+	ErrNotFound                         = errors.New("NOT_FOUND")
+	ErrDSPHostNotFound                  = errors.New("DSP_HOST_NOT_FOUND")
+	ErrDSPProfileNotFound               = errors.New("DSP_PROFILE_NOT_FOUND")
+	ErrTimedOut                         = errors.New("TIMED_OUT")
+	ErrServerError                      = errors.New("SERVER_ERROR")
+	ErrMaxRecursionDepth                = errors.New("MAX_RECURSION_DEPTH")
+	ErrMandatoryIeMissing               = errors.New("MANDATORY_IE_MISSING")
+	ErrExists                           = errors.New("EXISTS")
+	ErrBrokenReference                  = errors.New("BROKEN_REFERENCE")
+	ErrParserError                      = errors.New("PARSER_ERROR")
+	ErrInvalidPath                      = errors.New("INVALID_PATH")
+	ErrInvalidKey                       = errors.New("INVALID_KEY")
+	ErrUnauthorizedDestination          = errors.New("UNAUTHORIZED_DESTINATION")
+	ErrRatingPlanNotFound               = errors.New("RATING_PLAN_NOT_FOUND")
+	ErrAccountNotFound                  = errors.New("ACCOUNT_NOT_FOUND")
+	ErrAccountDisabled                  = errors.New("ACCOUNT_DISABLED")
+	ErrInsufficientCredit               = errors.New("INSUFFICIENT_CREDIT")
+	ErrInsufficientCreditBalanceBlocker = errors.New("INSUFFICIENT_CREDIT_BALANCE_BLOCKER")
+	ErrNotConvertible                   = errors.New("NOT_CONVERTIBLE")
+	ErrResourceUnavailable              = errors.New("RESOURCE_UNAVAILABLE")
+	ErrResourceUnauthorized             = errors.New("RESOURCE_UNAUTHORIZED")
+	ErrNoActiveSession                  = errors.New("NO_ACTIVE_SESSION")
+	ErrPartiallyExecuted                = errors.New("PARTIALLY_EXECUTED")
+	ErrMaxUsageExceeded                 = errors.New("MAX_USAGE_EXCEEDED")
+	ErrMaxCostExceeded                  = errors.New("MAX_COST_EXCEEDED")
+	ErrFilterNotPassingNoCaps           = errors.New("filter not passing")
+	ErrNotConvertibleNoCaps             = errors.New("not convertible")
+	ErrMandatoryIeMissingNoCaps         = errors.New("mandatory information missing")
+	ErrUnauthorizedApi                  = errors.New("UNAUTHORIZED_API")
+	ErrUnknownApiKey                    = errors.New("UNKNOWN_API_KEY")
+	ErrReqUnsynchronized                = errors.New("REQ_UNSYNCHRONIZED")
+	ErrUnsupporteServiceMethod          = errors.New("UNSUPPORTED_SERVICE_METHOD")
+	ErrDisconnected                     = errors.New("DISCONNECTED")
+	ErrReplyTimeout                     = errors.New("REPLY_TIMEOUT")
+	ErrSessionNotFound                  = errors.New("SESSION_NOT_FOUND")
+	ErrJsonIncompleteComment            = errors.New("JSON_INCOMPLETE_COMMENT")
+	ErrNotEnoughParameters              = errors.New("NotEnoughParameters")
+	ErrNotConnected                     = errors.New("NOT_CONNECTED")
+	RalsErrorPrfx                       = "RALS_ERROR"
+	DispatcherErrorPrefix               = "DISPATCHER_ERROR"
+	RateSErrPrfx                        = "RATES_ERROR"
+	ErrNotAuthorized                    = errors.New("NOT_AUTHORIZED")
+	ErrUnsupportedFormat                = errors.New("UNSUPPORTED_FORMAT")
+	ErrNoDatabaseConn                   = errors.New("NO_DATABASE_CONNECTION")
+	ErrMaxIncrementsExceeded            = errors.New("MAX_INCREMENTS_EXCEEDED")
+	ErrUncomputableIncrement            = errors.New("UNCOMPUTABLE_INCREMENT")
+	ErrIndexOutOfBounds                 = errors.New("INDEX_OUT_OF_BOUNDS")
+	ErrWrongPath                        = errors.New("WRONG_PATH")
+	ErrServiceAlreadyRunning            = fmt.Errorf("service already running")
+	ErrMaxConcurrentRPCExceededNoCaps   = errors.New("max concurrent rpc exceeded") // on internal we return this error for concureq
+	ErrMaxConcurrentRPCExceeded         = errors.New("MAX_CONCURRENT_RPC_EXCEEDED") // but the codec will rewrite it with this one to be sure that we corectly dealocate the request
+	ErrMaxIterationsReached             = errors.New("maximum iterations reached")
+	ErrNegative                         = errors.New("NEGATIVE")
+	ErrCastFailed                       = errors.New("CAST_FAILED")
 
 	ErrMap = map[string]error{
-		ErrNoMoreData.Error():              ErrNoMoreData,
-		ErrNotImplemented.Error():          ErrNotImplemented,
-		ErrDSPProfileNotFound.Error():      ErrDSPProfileNotFound,
-		ErrDSPHostNotFound.Error():         ErrDSPHostNotFound,
-		ErrNotFound.Error():                ErrNotFound,
-		ErrTimedOut.Error():                ErrTimedOut,
-		ErrServerError.Error():             ErrServerError,
-		ErrMaxRecursionDepth.Error():       ErrMaxRecursionDepth,
-		ErrExists.Error():                  ErrExists,
-		ErrBrokenReference.Error():         ErrBrokenReference,
-		ErrParserError.Error():             ErrParserError,
-		ErrInvalidPath.Error():             ErrInvalidPath,
-		ErrInvalidKey.Error():              ErrInvalidKey,
-		ErrUnauthorizedDestination.Error(): ErrUnauthorizedDestination,
-		ErrRatingPlanNotFound.Error():      ErrRatingPlanNotFound,
-		ErrInsufficientCredit.Error():      ErrInsufficientCredit,
-		ErrNotConvertible.Error():          ErrNotConvertible,
-		ErrResourceUnavailable.Error():     ErrResourceUnavailable,
-		ErrResourceUnauthorized.Error():    ErrResourceUnauthorized,
-		ErrNoActiveSession.Error():         ErrNoActiveSession,
-		ErrPartiallyExecuted.Error():       ErrPartiallyExecuted,
-		ErrMaxUsageExceeded.Error():        ErrMaxUsageExceeded,
-		ErrFilterNotPassingNoCaps.Error():  ErrFilterNotPassingNoCaps,
-		ErrNotConvertibleNoCaps.Error():    ErrNotConvertibleNoCaps,
-		ErrUnauthorizedApi.Error():         ErrUnauthorizedApi,
-		ErrUnknownApiKey.Error():           ErrUnknownApiKey,
-		ErrReqUnsynchronized.Error():       ErrReqUnsynchronized,
-		ErrUnsupporteServiceMethod.Error(): ErrUnsupporteServiceMethod,
-		ErrDisconnected.Error():            ErrDisconnected,
-		ErrReplyTimeout.Error():            ErrReplyTimeout,
-		ErrSessionNotFound.Error():         ErrSessionNotFound,
-		ErrJsonIncompleteComment.Error():   ErrJsonIncompleteComment,
-		ErrNotEnoughParameters.Error():     ErrNotEnoughParameters,
-		ErrUnsupportedFormat.Error():       ErrUnsupportedFormat,
-		ErrNoDatabaseConn.Error():          ErrNoDatabaseConn,
-		ErrMaxIncrementsExceeded.Error():   ErrMaxIncrementsExceeded,
-		ErrIndexOutOfBounds.Error():        ErrIndexOutOfBounds,
-		ErrWrongPath.Error():               ErrWrongPath,
-		ErrDSPHostNotFound.Error():         ErrDSPHostNotFound,
+		ErrNoMoreData.Error():                       ErrNoMoreData,
+		ErrNotImplemented.Error():                   ErrNotImplemented,
+		ErrDSPProfileNotFound.Error():               ErrDSPProfileNotFound,
+		ErrDSPHostNotFound.Error():                  ErrDSPHostNotFound,
+		ErrNotFound.Error():                         ErrNotFound,
+		ErrTimedOut.Error():                         ErrTimedOut,
+		ErrServerError.Error():                      ErrServerError,
+		ErrMaxRecursionDepth.Error():                ErrMaxRecursionDepth,
+		ErrExists.Error():                           ErrExists,
+		ErrBrokenReference.Error():                  ErrBrokenReference,
+		ErrParserError.Error():                      ErrParserError,
+		ErrInvalidPath.Error():                      ErrInvalidPath,
+		ErrInvalidKey.Error():                       ErrInvalidKey,
+		ErrUnauthorizedDestination.Error():          ErrUnauthorizedDestination,
+		ErrRatingPlanNotFound.Error():               ErrRatingPlanNotFound,
+		ErrInsufficientCredit.Error():               ErrInsufficientCredit,
+		ErrInsufficientCreditBalanceBlocker.Error(): ErrInsufficientCreditBalanceBlocker,
+		ErrNotConvertible.Error():                   ErrNotConvertible,
+		ErrResourceUnavailable.Error():              ErrResourceUnavailable,
+		ErrResourceUnauthorized.Error():             ErrResourceUnauthorized,
+		ErrNoActiveSession.Error():                  ErrNoActiveSession,
+		ErrPartiallyExecuted.Error():                ErrPartiallyExecuted,
+		ErrMaxUsageExceeded.Error():                 ErrMaxUsageExceeded,
+		ErrFilterNotPassingNoCaps.Error():           ErrFilterNotPassingNoCaps,
+		ErrNotConvertibleNoCaps.Error():             ErrNotConvertibleNoCaps,
+		ErrUnauthorizedApi.Error():                  ErrUnauthorizedApi,
+		ErrUnknownApiKey.Error():                    ErrUnknownApiKey,
+		ErrReqUnsynchronized.Error():                ErrReqUnsynchronized,
+		ErrUnsupporteServiceMethod.Error():          ErrUnsupporteServiceMethod,
+		ErrDisconnected.Error():                     ErrDisconnected,
+		ErrReplyTimeout.Error():                     ErrReplyTimeout,
+		ErrSessionNotFound.Error():                  ErrSessionNotFound,
+		ErrJsonIncompleteComment.Error():            ErrJsonIncompleteComment,
+		ErrNotEnoughParameters.Error():              ErrNotEnoughParameters,
+		ErrUnsupportedFormat.Error():                ErrUnsupportedFormat,
+		ErrNoDatabaseConn.Error():                   ErrNoDatabaseConn,
+		ErrMaxIncrementsExceeded.Error():            ErrMaxIncrementsExceeded,
+		ErrIndexOutOfBounds.Error():                 ErrIndexOutOfBounds,
+		ErrWrongPath.Error():                        ErrWrongPath,
+		ErrDSPHostNotFound.Error():                  ErrDSPHostNotFound,
 	}
 )
 
