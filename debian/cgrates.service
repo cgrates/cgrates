@@ -3,6 +3,7 @@
 
 [Unit]
 Description=Control CGRateS - carrier grade real-time charging system
+Documentation=https://cgrates.readthedocs.io/en/latest/
 After=network.target
 
 [Service]
