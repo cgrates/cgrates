@@ -1,3 +1,5 @@
+#!/bin/bash
+
 # check for arguments
 if [ $# -ne 1 ]
 then
