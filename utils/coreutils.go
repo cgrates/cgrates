@@ -755,41 +755,23 @@ func (slc Int64Slice) Less(i, j int) bool {
 
 func GetCGRVersion() (vers string, err error) {
 	vers = fmt.Sprintf("%s@%s", CGRateS, Version)
-	if GitLastLog == "" {
+	if GitCommitDate == "" || GitCommitHash == "" {
 		return vers, nil
 	}
-	rdr := bytes.NewBufferString(GitLastLog)
 	var commitHash string
 	var commitDate time.Time
-	for i := 0; i < 5; i++ { // read a maximum of 5 lines
-		var ln string
-		ln, err = rdr.ReadString('\n')
-		if err != nil {
-			return vers, fmt.Errorf("Building version - error: <%s> reading line from file", err.Error()) //or errorsNew()
-		}
-		if strings.HasPrefix(ln, "commit ") {
-			commitSplt := strings.Split(ln, " ")
-			if len(commitSplt) != 2 {
-				return vers, fmt.Errorf("Building version - cannot extract commit hash")
-			}
-			commitHash = commitSplt[1]
-			continue
-		}
-		if strings.HasPrefix(ln, "CommitDate:") {
-			dateSplt := strings.Split(ln, ": ")
-			if len(dateSplt) != 2 {
-				return vers, fmt.Errorf("Building version - cannot split commit date")
-			}
-			commitDate, err = time.Parse("Mon Jan 2 15:04:05 2006 -0700", strings.TrimSpace(dateSplt[1]))
-			if err != nil {
-				return vers, fmt.Errorf("Building version - error: <%s> compiling commit date", err.Error())
-			}
-			break
-		}
+	var matched bool
+	commitDate, err = time.Parse("2006-01-02T15:04:05-07:00", strings.TrimSpace(GitCommitDate))
+	if err != nil {
+		return vers, fmt.Errorf("Building version - error: <%s> compiling commit date", err.Error())
 	}
-	if commitHash == "" || commitDate.IsZero() {
-		return vers, fmt.Errorf("Cannot find commitHash or commitDate information")
+	matched, err = regexp.MatchString("^[0-9a-f]{12,}$", GitCommitHash)
+	if err != nil {
+		return vers, fmt.Errorf("Building version - error: <%s> compiling commit hash", err.Error())
+	} else if !matched {
+		return vers, fmt.Errorf("Building version - error: <%s> compiling commit hash", "Regex not matched")
 	}
+	commitHash = GitCommitHash
 	//CGRateS@v0.11.0~dev-20200110075344-7572e7b11e00
 	return fmt.Sprintf("%s@%s-%s-%s", CGRateS, Version, commitDate.UTC().Format("20060102150405"), commitHash[:12]), nil
 }

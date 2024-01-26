@@ -105,11 +105,12 @@ func TestCoreServiceStatus(t *testing.T) {
 	if !reflect.DeepEqual(expected[utils.NodeID], reply[utils.NodeID]) {
 		t.Errorf("Expected %+v, received %+v", utils.ToJSON(expected[utils.NodeID]), utils.ToJSON(reply[utils.NodeID]))
 	}
-	utils.GitLastLog = `Date: wrong format
-`
+	utils.GitCommitDate = "wrong format"
+	utils.GitCommitHash = "73014DAA0C1D7EDCB532D5FE600B8A20D588CDF8"
 	if err := cores.V1Status(context.Background(), args, &reply); err != nil {
 		t.Error(err)
 	}
 
-	utils.GitLastLog = ""
+	utils.GitCommitDate = ""
+	utils.GitCommitHash = ""
 }
