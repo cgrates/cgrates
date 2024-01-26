@@ -178,6 +178,8 @@ func (b *Balance) Clone() *Balance {
 		Timings:        b.Timings, // should not be a problem with aliasing
 		Blocker:        b.Blocker,
 		Disabled:       b.Disabled,
+		DestinationIDs: b.DestinationIDs,
+		Factor:         b.Factor,
 		dirty:          b.dirty,
 	}
 	if b.DestinationIDs != nil {
