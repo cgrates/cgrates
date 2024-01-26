@@ -220,7 +220,7 @@ cgrates.org,sms,1001,2014-01-14T00:00:00Z,RP_ANY,`,
 		if len(cdrs) != 1 {
 			t.Fatalf("expected to receive only one CDR: %v", utils.ToJSON(cdrs))
 		}
-		if cdrs[0].ExtraInfo != "insufficient credit with balance Blocker" {
+		if cdrs[0].ExtraInfo != utils.ErrInsufficientCreditBalanceBlocker.Error() {
 			t.Errorf("Unexpected ExtraInfo field value: %v", cdrs[0].ExtraInfo)
 		}
 	})

@@ -19,6 +19,7 @@ package engine
 
 import (
 	"bytes"
+	"errors"
 	"log"
 	"os"
 	"reflect"
@@ -764,10 +765,9 @@ func TestGetMaxSessiontWithBlocker(t *testing.T) {
 		TimeEnd:      time.Date(2016, 1, 13, 14, 30, 0, 0, time.UTC),
 		MaxCostSoFar: 0,
 	}
-	expectedErr := "insufficient credit with balance Blocker"
 	result, err := cd.GetMaxSessionDuration(nil)
-	if result != 0 || err == nil || err.Error() != expectedErr {
-		t.Errorf("expected %v, received %v", expectedErr, err)
+	if !errors.Is(err, utils.ErrInsufficientCreditBalanceBlocker) || result != 0 {
+		t.Fatalf("expected %v, received %v", utils.ErrInsufficientCreditBalanceBlocker, err)
 	}
 	cd = &CallDescriptor{
 		Category:     "call",
@@ -813,10 +813,9 @@ func TestGetMaxSessiontWithBlockerEmpty(t *testing.T) {
 		TimeEnd:      time.Date(2016, 1, 13, 14, 30, 0, 0, time.UTC),
 		MaxCostSoFar: 0,
 	}
-	expectedErr := "insufficient credit with balance Blocker"
 	result, err := cd.GetMaxSessionDuration(nil)
-	if result != 0 || err == nil || err.Error() != expectedErr {
-		t.Errorf("expected %v, received %v", expectedErr, err)
+	if !errors.Is(err, utils.ErrInsufficientCreditBalanceBlocker) || result != 0 {
+		t.Fatalf("expected %v, received %v", utils.ErrInsufficientCreditBalanceBlocker, err)
 	}
 	cd = &CallDescriptor{
 		Category:     "call",

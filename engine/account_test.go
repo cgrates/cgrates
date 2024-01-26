@@ -271,10 +271,9 @@ func TestDebitCreditBlocker(t *testing.T) {
 	}
 	rifsBalance := &Account{ID: "other",
 		BalanceMap: map[string]Balances{utils.MetaMonetary: {b1, b2}}}
-	expectedErr := "insufficient credit with balance Blocker"
 	_, err := rifsBalance.debitCreditBalance(cd, false, true, true, nil)
-	if err == nil || err.Error() != expectedErr {
-		t.Fatalf("expected %v, received %v", expectedErr, err)
+	if !errors.Is(err, utils.ErrInsufficientCreditBalanceBlocker) {
+		t.Fatalf("expected %v, received %v", utils.ErrInsufficientCreditBalanceBlocker, err)
 	}
 	if rifsBalance.BalanceMap[utils.MetaMonetary][0].GetValue() != 0.1152 ||
 		rifsBalance.BalanceMap[utils.MetaMonetary][1].GetValue() != 1.5 {
