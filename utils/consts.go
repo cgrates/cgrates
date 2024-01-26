@@ -28,7 +28,8 @@ var (
 		PreRated, CostSource, CostDetails, ExtraInfo, OrderID})
 	PostPaidRatedSlice = []string{MetaPostpaid, MetaRated}
 
-	GitLastLog string // If set, it will be processed as part of versioning
+	GitCommitDate string // If set, it will be processed as part of versioning
+	GitCommitHash string // If set, it will be processed as part of versioning
 
 	extraDBPartition = NewStringSet([]string{CacheDispatchers,
 		CacheDispatcherRoutes, CacheDispatcherLoads, CacheDiameterMessages, CacheRPCResponses, CacheClosedSessions,
