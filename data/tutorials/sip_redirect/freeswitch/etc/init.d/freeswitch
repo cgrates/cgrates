@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 ### -*- mode:shell-script; indent-tabs-mode:nil; sh-basic-offset:2 -*-
 ### BEGIN INIT INFO
 # Provides: freeswitch
