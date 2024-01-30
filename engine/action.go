@@ -215,7 +215,7 @@ func logAction(ub *Account, a *Action, acs Actions, _ *FilterS, extraData any) (
 
 func cdrLogAction(acc *Account, a *Action, acs Actions, _ *FilterS, extraData any) (err error) {
 	if len(config.CgrConfig().SchedulerCfg().CDRsConns) == 0 {
-		return fmt.Errorf("No connection with CDR Server")
+		return errors.New("No connection with CDR Server")
 	}
 	defaultTemplate := map[string]config.RSRParsers{
 		utils.ToR:          config.NewRSRParsersMustCompile(utils.DynamicDataPrefix+utils.MetaAcnt+utils.NestingSep+utils.BalanceType, utils.InfieldSep),
@@ -224,7 +224,6 @@ func cdrLogAction(acc *Account, a *Action, acs Actions, _ *FilterS, extraData an
 		utils.Tenant:       config.NewRSRParsersMustCompile(utils.DynamicDataPrefix+utils.MetaAcnt+utils.NestingSep+utils.Tenant, utils.InfieldSep),
 		utils.AccountField: config.NewRSRParsersMustCompile(utils.DynamicDataPrefix+utils.MetaAcnt+utils.NestingSep+utils.AccountField, utils.InfieldSep),
 		utils.Subject:      config.NewRSRParsersMustCompile(utils.DynamicDataPrefix+utils.MetaAcnt+utils.NestingSep+utils.AccountField, utils.InfieldSep),
-		utils.Cost:         config.NewRSRParsersMustCompile(utils.DynamicDataPrefix+utils.MetaAct+utils.NestingSep+utils.ActionValue, utils.InfieldSep),
 	}
 	template := make(map[string]string)
 	// overwrite default template
@@ -251,11 +250,14 @@ func cdrLogAction(acc *Account, a *Action, acs Actions, _ *FilterS, extraData an
 	// set stored cdr values
 	var cdrs []*CDR
 	for _, action := range acs {
-		if !slices.Contains([]string{utils.MetaDebit, utils.MetaDebitReset, utils.MetaSetBalance, utils.MetaTopUp, utils.MetaTopUpReset}, action.ActionType) ||
-			action.Balance == nil {
+		if !slices.Contains(
+			[]string{utils.MetaDebit, utils.MetaDebitReset,
+				utils.MetaTopUp, utils.MetaTopUpReset,
+				utils.MetaSetBalance, utils.MetaRemoveBalance,
+			}, action.ActionType) || action.Balance == nil {
 			continue // Only log specific actions
 		}
-		cdrLogProvider := newCdrLogProvider(acc, action)
+
 		cdr := &CDR{
 			RunID:       action.ActionType,
 			Source:      utils.CDRLog,
@@ -267,6 +269,34 @@ func cdrLogAction(acc *Account, a *Action, acs Actions, _ *FilterS, extraData an
 			Usage:       time.Duration(1),
 		}
 		cdr.CGRID = utils.Sha1(cdr.OriginID, cdr.OriginHost)
+
+		// If the action is of type *remove_balance, retrieve the balance value from the account
+		// and assign it to the CDR's Cost field.
+		if action.ActionType == utils.MetaRemoveBalance {
+			if acc == nil {
+				return fmt.Errorf("nil account for action %s", utils.ToJSON(action))
+			}
+			balanceChain, exists := acc.BalanceMap[action.Balance.GetType()]
+			if !exists {
+				return utils.ErrNotFound
+			}
+			found := false
+			for _, balance := range balanceChain {
+				if balance.MatchFilter(action.Balance, false, false) {
+					cdr.Cost = balance.Value
+					found = true
+					break
+				}
+			}
+			if !found {
+				return utils.ErrNotFound
+			}
+		} else {
+			// Otherwise, update the template to retrieve it from Action's BalanceValue.
+			defaultTemplate[utils.Cost] = config.NewRSRParsersMustCompile(utils.DynamicDataPrefix+utils.MetaAct+utils.NestingSep+utils.ActionValue, utils.InfieldSep)
+		}
+
+		cdrLogProvider := newCdrLogProvider(acc, action)
 		elem := reflect.ValueOf(cdr).Elem()
 		for key, rsrFlds := range defaultTemplate {
 			parsedValue, err := rsrFlds.ParseDataProvider(cdrLogProvider)

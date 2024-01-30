@@ -407,3 +407,150 @@ cgrates.org,sms,1001,2014-01-14T00:00:00Z,RP_ANY,`,
 		}
 	})
 }
+
+// TestBalanceCDRLog tests the usage of balance related actions together with a "*cdrlog" action.
+//
+// The test steps are as follows:
+//  1. Create an account with 2 balances of types *sms and *monetary. The topup action for the *monetary one will also include
+//     the creation of a CDR.
+//  2. Set an action bundle with both "*remove_balance" and "*cdrlog" actions.
+//  3. Retrieve both CDRs and check whether the their fields are set correctly.
+func TestBalanceCDRLog(t *testing.T) {
+	switch *dbType {
+	case utils.MetaInternal:
+	case utils.MetaMySQL, utils.MetaMongo, utils.MetaPostgres:
+		t.SkipNow()
+	default:
+		t.Fatal("unsupported dbtype value")
+	}
+
+	content := `{
+
+"general": {
+	"log_level": 7
+},
+
+"data_db": {								
+	"db_type": "*internal"
+},
+
+"stor_db": {
+	"db_type": "*internal"
+},
+
+"cdrs": {
+	"enabled": true,
+},
+
+"schedulers": {
+	"enabled": true,
+	"cdrs_conns": ["*localhost"]
+},
+
+"apiers": {
+	"enabled": true,
+	"scheduler_conns": ["*internal"]
+}
+
+}`
+
+	tpFiles := map[string]string{
+		utils.AccountActionsCsv: `#Tenant,Account,ActionPlanId,ActionTriggersId,AllowNegative,Disabled
+cgrates.org,ACC_TEST,PACKAGE_ACC_TEST,,,`,
+		utils.ActionPlansCsv: `#Id,ActionsId,TimingId,Weight
+PACKAGE_ACC_TEST,ACT_TOPUP_MONETARY,*asap,10
+PACKAGE_ACC_TEST,ACT_TOPUP_SMS,*asap,10`,
+		utils.ActionsCsv: `#ActionsId[0],Action[1],ExtraParameters[2],Filter[3],BalanceId[4],BalanceType[5],Categories[6],DestinationIds[7],RatingSubject[8],SharedGroup[9],ExpiryTime[10],TimingIds[11],Units[12],BalanceWeight[13],BalanceBlocker[14],BalanceDisabled[15],Weight[16]
+ACT_REMOVE_BALANCE_MONETARY,*cdrlog,"{""BalanceID"":""~*acnt.BalanceID""}",,,,,,,,,,,,,,
+ACT_REMOVE_BALANCE_MONETARY,*remove_balance,,,balance_monetary,*monetary,,,,,,,,,,,
+ACT_TOPUP_MONETARY,*cdrlog,"{""BalanceID"":""~*acnt.BalanceID""}",,,,,,,,,,,,,,
+ACT_TOPUP_MONETARY,*topup_reset,,,balance_monetary,*monetary,,*any,,,*unlimited,,150,20,false,false,20
+ACT_TOPUP_SMS,*topup_reset,,,balance_sms,*sms,,*any,,,*unlimited,,1000,10,false,false,10`,
+	}
+
+	testEnv := TestEnvironment{
+		Name: "TestBalanceCDRLog",
+		// Encoding:   *encoding,
+		ConfigJSON: content,
+		TpFiles:    tpFiles,
+	}
+	client, _, shutdown, err := testEnv.Setup(t, *waitRater)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	defer shutdown()
+
+	t.Run("CheckInitialBalances", func(t *testing.T) {
+		time.Sleep(time.Second)
+		var acnt engine.Account
+		if err := client.Call(context.Background(), utils.APIerSv2GetAccount,
+			&utils.AttrGetAccount{
+				Tenant:  "cgrates.org",
+				Account: "ACC_TEST",
+			}, &acnt); err != nil {
+			t.Fatal(err)
+		}
+		if len(acnt.BalanceMap) != 2 || len(acnt.BalanceMap[utils.MetaMonetary]) != 1 || len(acnt.BalanceMap[utils.MetaSMS]) != 1 {
+			t.Errorf("unexpected accont received: %v", utils.ToJSON(acnt))
+		}
+	})
+
+	t.Run("CheckTopupCDR", func(t *testing.T) {
+		var cdrs []*engine.CDR
+		if err := client.Call(context.Background(), utils.CDRsV1GetCDRs, &utils.RPCCDRsFilterWithAPIOpts{
+			RPCCDRsFilter: &utils.RPCCDRsFilter{}}, &cdrs); err != nil {
+			t.Fatal(err)
+		}
+
+		if len(cdrs) != 1 ||
+			cdrs[0].RunID != utils.MetaTopUpReset ||
+			cdrs[0].Source != utils.CDRLog ||
+			cdrs[0].ToR != utils.MetaMonetary ||
+			cdrs[0].ExtraFields["BalanceID"] != "balance_monetary" ||
+			cdrs[0].Cost != 150 {
+			t.Errorf("unexpected cdr received: %v", utils.ToJSON(cdrs))
+		}
+	})
+
+	t.Run("RemoveMonetaryBalance", func(t *testing.T) {
+		var reply string
+		attrsEA := &utils.AttrExecuteAction{Tenant: "cgrates.org", Account: "ACC_TEST", ActionsId: "ACT_REMOVE_BALANCE_MONETARY"}
+		if err := client.Call(context.Background(), utils.APIerSv1ExecuteAction, attrsEA, &reply); err != nil {
+			t.Error(err)
+		}
+	})
+
+	t.Run("CheckRemoveBalanceCDR", func(t *testing.T) {
+		var cdrs []*engine.CDR
+		if err := client.Call(context.Background(), utils.CDRsV1GetCDRs, &utils.RPCCDRsFilterWithAPIOpts{
+			RPCCDRsFilter: &utils.RPCCDRsFilter{
+				RunIDs: []string{"*remove_balance"},
+			}}, &cdrs); err != nil {
+			t.Fatal(err)
+		}
+
+		if len(cdrs) != 1 ||
+			cdrs[0].RunID != utils.MetaRemoveBalance ||
+			cdrs[0].Source != utils.CDRLog ||
+			cdrs[0].ToR != utils.MetaMonetary ||
+			cdrs[0].ExtraFields["BalanceID"] != "balance_monetary" ||
+			cdrs[0].Cost != 150 {
+			t.Errorf("unexpected cdr received: %v", utils.ToJSON(cdrs))
+		}
+	})
+
+	t.Run("CheckFinalBalances", func(t *testing.T) {
+		var acnt engine.Account
+		if err := client.Call(context.Background(), utils.APIerSv2GetAccount,
+			&utils.AttrGetAccount{
+				Tenant:  "cgrates.org",
+				Account: "ACC_TEST",
+			}, &acnt); err != nil {
+			t.Error(err)
+		}
+		if len(acnt.BalanceMap) != 2 || len(acnt.BalanceMap[utils.MetaSMS]) != 1 || len(acnt.BalanceMap[utils.MetaMonetary]) != 0 {
+			t.Errorf("unexpected account received: %v", utils.ToJSON(acnt))
+		}
+	})
+}
