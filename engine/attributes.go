@@ -266,12 +266,17 @@ func (alS *AttributeService) V1GetAttributeForEvent(ctx *context.Context, args *
 		utils.OptsAttributesProfileIgnoreFilters); err != nil {
 		return
 	}
+	eventCost, canCast := args.Event[utils.CostDetails].(*EventCost)
+	if !canCast {
+		eventCost = NewBareEventCost()
+	}
 	attrPrf, err := alS.attributeProfileForEvent(tnt, context, attrIDs, args.Time, utils.MapStorage{
 		utils.MetaReq:  args.Event,
 		utils.MetaOpts: args.APIOpts,
 		utils.MetaVars: utils.MapStorage{
 			utils.MetaProcessRuns: 0,
 		},
+		utils.MetaEC: eventCost,
 	}, utils.EmptyString, make(map[string]int), 0, ignFilters)
 	if err != nil {
 		if err != utils.ErrNotFound {
@@ -309,9 +314,14 @@ func (alS *AttributeService) V1ProcessEvent(ctx *context.Context, args *utils.CG
 	args = args.Clone()
 	processedPrf := make(utils.StringSet)
 	processedPrfNo := make(map[string]int)
+	eventCost, canCast := args.Event[utils.CostDetails].(*EventCost)
+	if !canCast {
+		eventCost = NewBareEventCost()
+	}
 	eNV := utils.MapStorage{
 		utils.MetaReq:  args.Event,
 		utils.MetaOpts: args.APIOpts,
+		utils.MetaEC:   eventCost,
 		utils.MetaVars: utils.MapStorage{
 			utils.MetaProcessRuns:         0,
 			utils.MetaProcessedProfileIDs: processedPrf,

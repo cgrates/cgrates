@@ -556,11 +556,16 @@ func (rS *ResourceService) processThresholds(rs Resources, opts map[string]any) 
 // matchingResourcesForEvent returns ordered list of matching resources which are active by the time of the call
 func (rS *ResourceService) matchingResourcesForEvent(tnt string, ev *utils.CGREvent,
 	evUUID string, usageTTL *time.Duration) (rs Resources, err error) {
-	var rIDs utils.StringSet
+	eventCost, canCast := ev.Event[utils.CostDetails].(*EventCost)
+	if !canCast {
+		eventCost = NewBareEventCost()
+	}
 	evNm := utils.MapStorage{
 		utils.MetaReq:  ev.Event,
 		utils.MetaOpts: ev.APIOpts,
+		utils.MetaEC:   eventCost,
 	}
+	var rIDs utils.StringSet
 	if x, ok := Cache.Get(utils.CacheEventResources, evUUID); ok { // The ResourceIDs were cached as utils.StringSet{"resID":bool}
 		if x == nil {
 			return nil, utils.ErrNotFound

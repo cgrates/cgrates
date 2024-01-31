@@ -143,9 +143,14 @@ func (rpS *RouteService) Shutdown() {
 
 // matchingRouteProfilesForEvent returns ordered list of matching resources which are active by the time of the call
 func (rpS *RouteService) matchingRouteProfilesForEvent(tnt string, ev *utils.CGREvent) (matchingRPrf []*RouteProfile, err error) {
+	eventCost, canCast := ev.Event[utils.CostDetails].(*EventCost)
+	if !canCast {
+		eventCost = NewBareEventCost()
+	}
 	evNm := utils.MapStorage{
 		utils.MetaReq:  ev.Event,
 		utils.MetaOpts: ev.APIOpts,
+		utils.MetaEC:   eventCost,
 	}
 	rPrfIDs, err := MatchingItemIDsForEvent(evNm,
 		rpS.cgrcfg.RouteSCfg().StringIndexedFields,
@@ -482,11 +487,16 @@ func (rpS *RouteService) populateSortingData(ev *utils.CGREvent, route *Route,
 	//filter the route
 	if len(route.lazyCheckRules) != 0 {
 		//construct the DP and pass it to filterS
+		eventCost, canCast := ev.Event[utils.CostDetails].(*EventCost)
+		if !canCast {
+			eventCost = NewBareEventCost()
+		}
 		dynDP := newDynamicDP(rpS.cgrcfg.FilterSCfg().ResourceSConns, rpS.cgrcfg.FilterSCfg().StatSConns,
 			rpS.cgrcfg.FilterSCfg().ApierSConns,
 			ev.Tenant, utils.MapStorage{
 				utils.MetaReq:  ev.Event,
 				utils.MetaVars: sortedSpl.SortingData,
+				utils.MetaEC:   eventCost,
 			})
 
 		for _, rule := range route.lazyCheckRules { // verify the rules remaining from PartialPass
@@ -628,9 +638,14 @@ func (rpS *RouteService) sortedRoutesForProfile(tnt string, rPrfl *RouteProfile,
 	extraOpts.sortingParameters = rPrfl.SortingParameters // populate sortingParameters in extraOpts
 	extraOpts.sortingStrategy = rPrfl.Sorting             // populate sortingStrategy in extraOpts
 	//construct the DP and pass it to filterS
+	eventCost, canCast := ev.Event[utils.CostDetails].(*EventCost)
+	if !canCast {
+		eventCost = NewBareEventCost()
+	}
 	nM := utils.MapStorage{
 		utils.MetaReq:  ev.Event,
 		utils.MetaOpts: ev.APIOpts,
+		utils.MetaEC:   eventCost,
 	}
 	passedRoutes := make(map[string]*Route)
 	// apply filters for event

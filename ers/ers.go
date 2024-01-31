@@ -428,6 +428,10 @@ func (erS *ERService) onEvicted(id string, value any) {
 					utils.ERs, utils.ToJSON(eEvs.events), err.Error()))
 			return
 		}
+		eventCost, canCast := cgrEv.Event[utils.CostDetails].(*engine.EventCost)
+		if !canCast {
+			eventCost = engine.NewBareEventCost()
+		}
 		var record []string
 		if len(eEvs.rdrCfg.CacheDumpFields) != 0 {
 			// convert the event to record
@@ -435,6 +439,7 @@ func (erS *ERService) onEvicted(id string, value any) {
 				utils.MetaReq:  utils.MapStorage(cgrEv.Event),
 				utils.MetaOpts: utils.MapStorage(cgrEv.APIOpts),
 				utils.MetaCfg:  erS.cfg.GetDataProvider(),
+				utils.MetaEC:   eventCost,
 			}, utils.FirstNonEmpty(cgrEv.Tenant, erS.cfg.GeneralCfg().DefaultTenant),
 				erS.filterS, map[string]*utils.OrderedNavigableMap{
 					utils.MetaExp: utils.NewOrderedNavigableMap(),
@@ -497,6 +502,10 @@ func (erS *ERService) onEvicted(id string, value any) {
 					utils.ERs, utils.ToJSON(eEvs.events), err.Error()))
 			return
 		}
+		eventCost, canCast := cgrEv.Event[utils.CostDetails].(*engine.EventCost)
+		if !canCast {
+			eventCost = engine.NewBareEventCost()
+		}
 		var record map[string]any
 		if len(eEvs.rdrCfg.CacheDumpFields) != 0 {
 			// convert the event to record
@@ -504,6 +513,7 @@ func (erS *ERService) onEvicted(id string, value any) {
 				utils.MetaReq:  utils.MapStorage(cgrEv.Event),
 				utils.MetaOpts: utils.MapStorage(cgrEv.APIOpts),
 				utils.MetaCfg:  erS.cfg.GetDataProvider(),
+				utils.MetaEC:   eventCost,
 			}, utils.FirstNonEmpty(cgrEv.Tenant, erS.cfg.GeneralCfg().DefaultTenant),
 				erS.filterS, map[string]*utils.OrderedNavigableMap{
 					utils.MetaExp: utils.NewOrderedNavigableMap(),

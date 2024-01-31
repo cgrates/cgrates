@@ -329,9 +329,14 @@ func (tS *ThresholdService) StoreThreshold(t *Threshold) (err error) {
 
 // matchingThresholdsForEvent returns ordered list of matching thresholds which are active for an Event
 func (tS *ThresholdService) matchingThresholdsForEvent(tnt string, args *utils.CGREvent) (ts Thresholds, err error) {
+	eventCost, canCast := args.Event[utils.CostDetails].(*EventCost)
+	if !canCast {
+		eventCost = NewBareEventCost()
+	}
 	evNm := utils.MapStorage{
 		utils.MetaReq:  args.Event,
 		utils.MetaOpts: args.APIOpts,
+		utils.MetaEC:   eventCost,
 	}
 	var thdIDs []string
 	if thdIDs, err = utils.GetStringSliceOpts(args, tS.cgrcfg.ThresholdSCfg().Opts.ProfileIDs,

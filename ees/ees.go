@@ -130,9 +130,14 @@ func (eeS *EventExporterS) V1ProcessEvent(ctx *context.Context, cgrEv *engine.CG
 
 	expIDs := utils.NewStringSet(cgrEv.EeIDs)
 	lenExpIDs := expIDs.Size()
+	eventCost, canCast := cgrEv.Event[utils.CostDetails].(*engine.EventCost)
+	if !canCast {
+		eventCost = engine.NewBareEventCost()
+	}
 	cgrDp := utils.MapStorage{
 		utils.MetaReq:  cgrEv.Event,
 		utils.MetaOpts: cgrEv.APIOpts,
+		utils.MetaEC:   eventCost,
 	}
 
 	var wg sync.WaitGroup

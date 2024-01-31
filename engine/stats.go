@@ -326,9 +326,14 @@ func (sS *StatService) processThresholds(sQs StatQueues, opts map[string]any) (e
 // processEvent processes a new event, dispatching to matching queues
 // queues matching are also cached to speed up
 func (sS *StatService) processEvent(tnt string, args *utils.CGREvent) (statQueueIDs []string, err error) {
+	eventCost, canCast := args.Event[utils.CostDetails].(*EventCost)
+	if !canCast {
+		eventCost = NewBareEventCost()
+	}
 	evNm := utils.MapStorage{
 		utils.MetaReq:  args.Event,
 		utils.MetaOpts: args.APIOpts,
+		utils.MetaEC:   eventCost,
 	}
 	var stsIDs []string
 	if stsIDs, err = utils.GetStringSliceOpts(args, sS.cgrcfg.StatSCfg().Opts.ProfileIDs,
@@ -411,10 +416,15 @@ func (sS *StatService) V1GetStatQueuesForEvent(ctx *context.Context, args *utils
 		utils.OptsStatsProfileIgnoreFilters); err != nil {
 		return
 	}
+	eventCost, canCast := args.Event[utils.CostDetails].(*EventCost)
+	if !canCast {
+		eventCost = NewBareEventCost()
+	}
 	var sQs StatQueues
 	if sQs, err = sS.matchingStatQueuesForEvent(tnt, stsIDs, args.Time, utils.MapStorage{
 		utils.MetaReq:  args.Event,
 		utils.MetaOpts: args.APIOpts,
+		utils.MetaEC:   eventCost,
 	}, ignFilters); err != nil {
 		return
 	}
