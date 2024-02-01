@@ -18,10 +18,22 @@
 
     dependencies:
       - build-essential
-      - git
+      - cowbuilder
+      - debhelper
       - devscripts
+      - dh-golang
+      - distro-info
+      - dpkg-dev
+      - git
+      - pbuilder
       - reprepro
       - nginx
+
+    distributions:
+      - codename: bookworm
+        version: 12
+      - codename: bullseye
+        version: 11
 
   remote_user: "{{ user }}"
   tasks:
@@ -56,18 +68,80 @@
       import_role:
         name: ../roles/go
 
+    - name: Create chroots
+      become: yes
+      command: "cowbuilder --create --distribution {{ item.codename }} --architecture amd64 --basepath /var/cache/pbuilder/base-{{ item.codename }}+go.cow --mirror http://deb.debian.org/debian --components main"
+      args:
+        creates: "/var/cache/pbuilder/base-{{ item.codename }}+go.cow"
+      with_items: "{{ distributions }}"
+
+    - name: Check Go tarball
+      stat:
+        path: "/usr/local/src/{{ go_tarball }}"
+      register: downloaded_go_tarball
+
+    - name: Download Go tarball
+      become: yes
+      get_url:
+        url: "{{ go_download_url }}"
+        dest: "/usr/local/src/{{ go_tarball }}"
+        checksum: "sha256:{{ go_checksum }}"
+      when: not downloaded_go_tarball.stat.exists
+
+    - name: Install Go in chroots
+      become: yes
+      unarchive:
+        src: "/usr/local/src/{{ go_tarball }}"
+        dest: "/var/cache/pbuilder/base-{{ item.codename }}+go.cow/usr/local"
+        copy: no
+        creates: "/var/cache/pbuilder/base-{{ item.codename }}+go.cow/usr/local/go"
+      with_items: "{{ distributions }}"
+
+    - name: Customize .bashrc in chroots
+      become: true
+      template:
+        src: bashrc.j2
+        dest: "/var/cache/pbuilder/base-{{ item.codename }}+go.cow/root/.bashrc"
+        mode: "0644"
+        owner: "root"
+        group: "root"
+      with_items: "{{ distributions }}"
+
+    - name: Customize .pbuilderrc
+      template:
+        src: pbuilderrc.j2
+        dest: "/home/{{ user }}/.pbuilderrc"
+        mode: "0644"
+
+    - name: Check update timestamp
+      stat:
+        path: "/var/cache/pbuilder/update-timestamp"
+      register: update_timestamp
+
+    - name: Update chroots
+      become: yes
+      command: "cowbuilder --update --basepath /var/cache/pbuilder/base-{{ item.codename }}+go.cow"
+      with_items: "{{ distributions }}"
+      when: not update_timestamp.stat.exists or update_timestamp.stat.mtime <= (ansible_date_time.epoch | int - 86400)
+      register: update_chroots
+
+    - name: Update timestamp
+      become: yes
+      file:
+        path: "/var/cache/pbuilder/update-timestamp"
+        state: touch
+      when: update_chroots.changed
+
     ###########################################################################################################################
     ###########################################################################################################################
     # Install CGRateS
     - name: create cgrates directory
-      become: yes
       file:
         state: directory
         mode: "u=rwx,go=rx"
         owner: "{{ user }}"
         group: "{{ user }}"
         dest: "{{ cgrates_dir }}"
-      become_user: "{{ user }}"
 
     - name: git clone cgrates
       git:
@@ -76,33 +150,28 @@
         update: yes
         force: yes
         version: "{{ cgrates_branch }}"
-      become: yes
-      become_user: "{{ user }}"
 
     - name: clean go cache
-      become: yes
       shell: "go clean --cache"
       environment:
-        PATH: "{{ lookup('env','PATH') }}:/home/{{ user }}/go/bin:/usr/local/go/bin:{{ ansible_env.PATH }}"
+        PATH: "{{ customPath }}"
 
     - name: clean go modcache
-      become: yes
       shell: "go clean --modcache"
       environment:
-        PATH: "{{ lookup('env','PATH') }}:/home/{{ user }}/go/bin:/usr/local/go/bin:{{ ansible_env.PATH }}"
+        PATH: "{{ customPath }}"
 
     - name: sync the go mod with vendor
-      become: yes
       shell: "go mod vendor"
       environment:
-        PATH: "{{ lookup('env','PATH') }}:/home/{{ user }}/go/bin:/usr/local/go/bin:{{ ansible_env.PATH }}"
+        PATH: "{{ customPath }}"
       args:
         chdir: "{{ cgrates_dir }}"
 
     - name: build cgrates
       shell: "sh {{ cgrates_dir }}/build.sh"
       environment:
-        PATH: "{{ lookup('env','PATH') }}:/home/{{ user }}/go/bin:/usr/local/go/bin:{{ ansible_env.PATH }}"
+        PATH: "{{ customPath }}"
       args:
         chdir: "{{ cgrates_dir }}"
 
@@ -118,56 +187,50 @@
       args:
         chdir: "{{ cgrates_dir }}"
       register: gitTagVar
+
     ###########################################################################################################################
     ###########################################################################################################################
     # Generate package
-    - name: Generate package
-      command: 'sudo env "PATH={{ customPath }}" make deb'
+    - name: Generate packages
+      command: 'env "DISTRIBUTION={{ item.codename }}" make -C packages deb'
       args:
-        chdir: "{{ cgrates_dir }}/packages"
+        chdir: "{{ cgrates_dir }}"
+      with_items: "{{ distributions }}"
 
-    - name: Check if the package was generated
-      become: yes
-      shell: "sudo ls /home/{{ user }}/go/src/github.com/cgrates | grep 'cgrates_'"
+    - name: Check if the packages were generated
+      shell: "ls /home/{{ user }}/go/src/github.com/cgrates | grep -E 'cgrates(-dbgsym)?_'"
       ignore_errors: true
-      register: packageVar
+      register: packagesVar
 
     - name: Move the files to /var/packages/debian/incoming
       become: yes
-      command: sudo mv {{item}} /var/packages/debian/incoming/
+      command: mv {{item}} /var/packages/debian/incoming/
       args:
         chdir: "/home/{{ user }}/go/src/github.com/cgrates"
-      when: packageVar.stdout_lines|length > 0
-      with_items: "{{ packageVar.stdout_lines }}"
+      when: packagesVar.stdout_lines|length > 0
+      with_items: "{{ packagesVar.stdout_lines }}"
 
-    - name: Get the name of the deb file
-      become: yes
-      shell: "sudo ls /var/packages/debian/incoming/ | grep '.deb'"
-      register: debFileName
+    - name: Get the name of the deb files
+      shell: "ls /var/packages/debian/incoming/ | grep -E '.(build|buildinfo|changes|deb|debian.tar.*|dsc|orig.*.tar.*)$'"
+      register: packageFileNames
 
-    - name: Get the name of the changes file
+    - name: Include the packages with reprepro
       become: yes
-      shell: "sudo ls /var/packages/debian/incoming/ | grep '.changes'"
-      register: changesFileNames
-
-    - name: Include the package with reprepro
-      become: yes
-      command: sudo reprepro -A amd64 -Vb . include {{ cgrates_branch }} /var/packages/debian/incoming/{{ item }}
-      ignore_errors: true
+      shell: reprepro -Vb . --ignore=wrongdistribution include {{ cgrates_branch }}-{{ item.codename }} /var/packages/debian/incoming/*~deb{{ item.version }}u1_amd64.changes
       args:
         chdir: /var/packages/debian
-      with_items: "{{ changesFileNames.stdout_lines }}"
-      when: gitTagVar.stdout_lines|length > 0
+      with_items: "{{ distributions }}"
+      when: cgrates_branch == "master" or gitTagVar.stdout_lines|length > 0
 
     - name: Copy the file to PKG server
       shell: "scp /var/packages/debian/incoming/{{ item }} {{ pkgAddr }}:/tmp/"
       args:
         chdir: /var/packages/debian/incoming/
-      with_items: "{{ debFileName.stdout_lines }}"
+      with_items: "{{ packageFileNames.stdout_lines }}"
 
     - name: Clean the incoming folder
       become: yes
-      shell: "sudo rm /var/packages/debian/incoming/*"
+      shell: "rm /var/packages/debian/incoming/*"
       args:
         chdir: /var/packages/debian
 
@@ -175,6 +238,11 @@
   vars:
     nginx_user: "www-data"
     cgrates_branch: "v0.10"
+    distributions:
+      - codename: bookworm
+        version: 12
+      - codename: bullseye
+        version: 11
   tasks:
     - name: Add user to www-data group
       become: yes
@@ -183,40 +251,73 @@
         groups: "{{ nginx_user }}"
         append: yes
 
-    - name: Creates directory
+    - name: Create directory
       become: yes
       file:
-        path: /var/packages/deb/{{ cgrates_branch }}/
+        path: /var/packages/deb/{{ cgrates_branch }}/{{ item.codename }}
         state: directory
         mode: "0775"
         owner: "{{ nginx_user }}"
         group: "{{ nginx_user }}"
+      with_items: "{{ distributions }}"
 
     - name: Remove symlink from current deb package
       file:
-        path: /var/packages/deb/{{ cgrates_branch }}/cgrates_current_amd64.deb
+        path: /var/packages/deb/{{ cgrates_branch }}/{{ item.codename }}/cgrates_current_amd64.deb
         state: absent
-      when: hostvars['apt']['gitTagVar'].stdout_lines|length > 0
+      with_items: "{{ distributions }}"
+      when: cgrates_branch == "master" or hostvars['apt']['gitTagVar'].stdout_lines|length > 0
+
+    - name: Move the new .orig.tar.gz to /var/packages/deb
+      become: yes
+      shell: "mv /tmp/cgrates*.orig*.tar.* /var/packages/deb/{{ cgrates_branch }}/"
+      when: cgrates_branch == "master" or hostvars['apt']['gitTagVar'].stdout_lines|length > 0
 
     - name: Move the new package to /var/packages/deb
-      become: true
-      shell: "mv /tmp/{{ item}} /var/packages/deb/{{ cgrates_branch }}/"
-      with_items: "{{ hostvars['apt']['debFileName']['stdout_lines'] }}"
+      become: yes
+      shell: "mv /tmp/cgrates*~deb{{ item.version }}u1* /var/packages/deb/{{ cgrates_branch }}/{{ item.codename }}/"
+      with_items: "{{ distributions }}"
+      when: cgrates_branch == "master" or hostvars['apt']['gitTagVar'].stdout_lines|length > 0
+
+    - name: Find all package files
+      become: yes
+      find:
+        path: "/var/packages/deb/{{ cgrates_branch }}/"
+        patterns: "*.deb"
+        recurse: yes
+      when: cgrates_branch == "master" or hostvars['apt']['gitTagVar'].stdout_lines|length > 0
+      register: package_files
 
     - name: Set ownership and permissions for moved files
       become: yes
       file:
-        path: "/var/packages/deb/{{ cgrates_branch }}/{{ item }}"
+        path: "{{ item.path }}"
         owner: "{{  nginx_user  }}"
         group: "{{  nginx_user  }}"
-        mode: "0775"
-      loop: "{{ hostvars['apt']['debFileName']['stdout_lines'] }}"
+        mode: "0644"
+      loop: "{{ package_files.files }}"
+      when: cgrates_branch == "master" or hostvars['apt']['gitTagVar'].stdout_lines|length > 0
+
+    - name: Find package files per distribution
+      become: yes
+      find:
+        path: "/var/packages/deb/{{ cgrates_branch }}/{{ item.codename }}/"
+        patterns: "cgrates_*_amd64.deb"
+      with_items: "{{ distributions }}"
+      register: distribution_package_files
+      when: cgrates_branch == "master" or hostvars['apt']['gitTagVar'].stdout_lines|length > 0
+
+    - set_fact:
+        latest_file: "{{ item.files | sort(attribute='mtime', reverse=true) | first }}"
+      with_items: "{{ distribution_package_files.results }}"
+      register: latest_files
+      when: cgrates_branch == "master" or hostvars['apt']['gitTagVar'].stdout_lines|length > 0
 
     - name: Create the new symlink cgrates_current_amd64.deb
       become: yes
       file:
-        src: /var/packages/deb/{{ cgrates_branch }}/{{ item }}
-        dest: /var/packages/deb/{{ cgrates_branch }}/cgrates_current_amd64.deb
+        src: "{{ item.ansible_facts.latest_file.path }}"
+        dest: /var/packages/deb/{{ cgrates_branch }}/{{ item.item.item.codename }}/cgrates_current_amd64.deb
         state: link
-      with_items: "{{ hostvars['apt']['debFileName']['stdout_lines'] }}"
-      when: hostvars['apt']['gitTagVar'].stdout_lines|length > 0
+      with_items: "{{ latest_files.results }}"
+      when: cgrates_branch == "master" or hostvars['apt']['gitTagVar'].stdout_lines|length > 0
