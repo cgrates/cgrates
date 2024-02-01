@@ -20,3 +20,36 @@ Description: CGRateS master APT repository
 SignWith: yes
 DebOverride: override.testing
 DscOverride: override.testing
+
+{% for distribution in distributions %}
+Origin: apt.cgrates.org
+Label: apt.cgrates.org
+Suite: stable-{{ distribution['codename'] }}
+Codename: v0.10-{{ distribution['codename'] }}
+Architectures: amd64 source
+Components: main
+Description: CGRateS v0.10 APT repository for {{ distribution['codename'] }}
+DebIndices: Packages Release . .gz
+Contents: . .gz
+ContentsArchitectures: amd64 source
+ContentsComponents: main
+SignWith: yes
+DebOverride: override.testing
+DscOverride: override.testing
+
+Origin: apt.cgrates.org
+Label: apt.cgrates.org
+Suite: master-{{ distribution['codename'] }}
+Codename: master-{{ distribution['codename'] }}
+Architectures: amd64 source
+Components: main
+Description: CGRateS master APT repository for {{ distribution['codename'] }}
+DebIndices: Packages Release . .gz
+Contents: . .gz
+ContentsArchitectures: amd64 source
+ContentsComponents: main
+SignWith: yes
+DebOverride: override.testing
+DscOverride: override.testing
+
+{% endfor %}
