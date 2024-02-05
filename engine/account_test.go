@@ -1735,7 +1735,7 @@ func TestDebitGenericBalance(t *testing.T) {
 			utils.MetaGeneric: {
 				&Balance{Uuid: "testm", Value: 100, Weight: 5,
 					DestinationIDs: utils.StringMap{"NAT": true},
-					Factor:         ValueFactor{"call": 60 * float64(time.Second)}}},
+					Factor:         ValueFactor{"call": 1 / (60 * float64(time.Second))}}},
 			utils.MetaMonetary: {&Balance{Value: 21}},
 		}}
 	var err error
@@ -1789,7 +1789,7 @@ func TestDebitGenericBalanceWithRatingSubject(t *testing.T) {
 			utils.MetaGeneric: {
 				&Balance{Uuid: "testm", Value: 100,
 					Weight: 5, DestinationIDs: utils.StringMap{"NAT": true},
-					Factor:        ValueFactor{"call": 60 * float64(time.Second)},
+					Factor:        ValueFactor{"call": 1 / (60 * float64(time.Second))},
 					RatingSubject: "free"}},
 			utils.MetaMonetary: {&Balance{Value: 21}},
 		}}

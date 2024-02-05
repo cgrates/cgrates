@@ -254,11 +254,11 @@ cgrates.org,sms,1001,2014-01-14T00:00:00Z,RP_ANY,`,
 // the session being processed. This has now been updated to depend on Category instead of ToR.
 //
 // The test steps are as follows:
-//  1. Create an account with an *sms balance of 10 units with a factor of 0.25 (essentially, this means that for every 1 sms, 4 will
+//  1. Create an account with an *sms balance of 10 units with a factor of 4 (essentially, this means that for every 1 sms, 4 will
 //     be exhausted), and a *monetary balance of 5 units. The RatingPlan used when debiting the *monetary balance will charge 1 unit
 //     per second.
 //  2. Process an 3 usage (representing 12 sms, when taking into consideration the balance factor) event.
-//  3. Ensure that the *sms balance has 2 units left (10 - (2 sms / 0.25 factor)) and that 1 unit was subtracted from the *monetary balance.
+//  3. Ensure that the *sms balance has 2 units left (10 - (2 sms * 4 factor)) and that 1 unit was subtracted from the *monetary balance.
 func TestBalanceFactor(t *testing.T) {
 	switch *dbType {
 	case utils.MetaInternal:
@@ -308,7 +308,7 @@ cgrates.org,1001,PACKAGE_1001,,,`,
 		utils.ActionPlansCsv: `#Id,ActionsId,TimingId,Weight
 PACKAGE_1001,ACT_TOPUP,*asap,10`,
 		utils.ActionsCsv: `#ActionsId[0],Action[1],ExtraParameters[2],Filter[3],BalanceId[4],BalanceType[5],Categories[6],DestinationIds[7],RatingSubject[8],SharedGroup[9],ExpiryTime[10],TimingIds[11],Units[12],BalanceWeight[13],BalanceBlocker[14],BalanceDisabled[15],Weight[16]
-ACT_TOPUP,*topup_reset,"{""sms"":0.25}",,balance_sms,*sms,,,,,*unlimited,,10,20,false,false,20
+ACT_TOPUP,*topup_reset,"{""sms"":4}",,balance_sms,*sms,,,,,*unlimited,,10,20,false,false,20
 ACT_TOPUP,*topup_reset,,,balance_monetary,*monetary,,*any,,,*unlimited,,5,10,false,false,20`,
 		utils.DestinationRatesCsv: `#Id,DestinationId,RatesTag,RoundingMethod,RoundingDecimals,MaxCost,MaxCostStrategy
 DR_ANY,*any,RT_ANY,*up,20,0,`,
