@@ -232,7 +232,7 @@ func TestBalanceLoadFromBalance(t *testing.T) {
 			"timing": true,
 		},
 		Factor: ValueFactor{
-			"valfac": 22,
+			"valfac": 1 / 22,
 		},
 		Disabled: true,
 		Blocker:  true,
@@ -274,7 +274,7 @@ func TestBalanceLoadFromBalance(t *testing.T) {
 			"timing": true,
 		},
 		Factor: &ValueFactor{
-			"valfac": 22,
+			"valfac": 1 / 22,
 		},
 		Disabled: utils.BoolPointer(true),
 		Blocker:  utils.BoolPointer(true),

@@ -1086,7 +1086,7 @@ func TestActionTopupValueFactor(t *testing.T) {
 			Type:  utils.StringPointer(utils.MetaMonetary),
 			Value: &utils.ValueFormula{Static: 10},
 		},
-		ExtraParameters: `{"*monetary":2.0}`,
+		ExtraParameters: `{"*monetary":2}`,
 	}
 	topupResetAction(ub, a, nil, nil, nil)
 	if len(ub.BalanceMap) != 1 ||
