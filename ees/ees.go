@@ -204,7 +204,8 @@ func (eeS *EventExporterS) V1ProcessEvent(ctx *context.Context, cgrEv *engine.CG
 					utils.EEs, ee.Cfg().ID))
 		}
 		go func(evict, sync bool, ee EventExporter) {
-			if err := exportEventWithExporter(ee, cgrEv.CGREvent, evict, eeS.cfg, eeS.filterS); err != nil {
+			cgrEvClone := cgrEv.CGREvent.Clone()
+			if err := exportEventWithExporter(ee, cgrEvClone, evict, eeS.cfg, eeS.filterS); err != nil {
 				withErr = true
 			}
 			if sync {
