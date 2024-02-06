@@ -19,6 +19,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"fmt"
+	"net/http"
+	"net/http/httptest"
 	"reflect"
 	"testing"
 	"time"
@@ -921,5 +924,50 @@ func TestParseAtributeCCUsageNegativeReqNr(t *testing.T) {
 	exp := -20 * time.Nanosecond
 	if out.(time.Duration) != exp {
 		t.Errorf("Expected %v\n but received %v", exp, out)
+	}
+}
+func TestAttributeFromHTTP(t *testing.T) {
+	exp := "Account"
+	testServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodGet {
+			w.WriteHeader(http.StatusMethodNotAllowed)
+			return
+		}
+		w.WriteHeader(http.StatusOK)
+		fmt.Fprint(w, exp)
+
+	}))
+
+	defer testServer.Close()
+	attrType := utils.MetaHTTP + utils.HashtagSep + utils.IdxStart + testServer.URL + utils.IdxEnd
+
+	attrID := attrType + ":*req.Category:*attributes"
+	expAttrPrf1 := &AttributeProfile{
+		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
+		ID:     attrType + ":*req.Category:*attributes",
+		Attributes: []*Attribute{
+			{
+				Path:  utils.MetaReq + utils.NestingSep + "Category",
+				Type:  attrType,
+				Value: config.NewRSRParsersMustCompile("*attributes", utils.InfieldSep),
+			},
+		},
+	}
+	attrPrf, err := NewAttributeFromInline(config.CgrConfig().GeneralCfg().DefaultTenant, attrID)
+	if err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expAttrPrf1, attrPrf) {
+		t.Errorf("Expecting %+v, received: %+v", utils.ToJSON(expAttrPrf1), utils.ToJSON(attrPrf))
+	}
+	dp := utils.MapStorage{
+		utils.MetaReq: utils.MapStorage{},
+	}
+
+	attr := attrPrf.Attributes[0]
+	if out, err := ParseAttribute(dp, attr.Type, attr.Path, attr.Value,
+		0, utils.EmptyString, utils.EmptyString, utils.InfieldSep); err != nil {
+		t.Fatal(err)
+	} else if exp != out {
+		t.Errorf("Expected %q, Received %q", exp, out)
 	}
 }

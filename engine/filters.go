@@ -425,6 +425,10 @@ func (fltr *FilterRule) Pass(ctx *context.Context, dDP utils.DataProvider) (resu
 	case utils.MetaNever:
 		result, err = fltr.passNever(dDP)
 	default:
+		if strings.HasPrefix(fltr.Type, utils.MetaHTTP) && strings.Index(fltr.Type, "#") == len(utils.MetaHTTP) {
+			result, err = fltr.passHttp(dDP)
+			break
+		}
 		err = utils.ErrPrefixNotErrNotImplemented(fltr.Type)
 	}
 	if err != nil {
@@ -799,6 +803,17 @@ func (fltr *FilterRule) passRegex(dDP utils.DataProvider) (bool, error) {
 
 func (fltr *FilterRule) passNever(dDP utils.DataProvider) (bool, error) {
 	return false, nil
+}
+func (fltr *FilterRule) passHttp(dDP utils.DataProvider) (bool, error) {
+	strVal, err := fltr.rsrElement.ParseDataProvider(dDP)
+	if err != nil {
+		if err == utils.ErrNotFound {
+			return false, nil
+		}
+		return false, err
+	}
+	return filterHTTP(fltr.Type, dDP, fltr.Element, strVal)
+
 }
 
 func (fltr *Filter) Set(path []string, val any, newBranch bool, _ string) (err error) {

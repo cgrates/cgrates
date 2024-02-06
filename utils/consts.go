@@ -1106,6 +1106,7 @@ const (
 	MetaNotSentryPeer         = "*notsentrypeer"
 	MetaNotActivationInterval = "*notai"
 	MetaNotRegex              = "*notregex"
+	MetaHTTP                  = "*http"
 
 	MetaEC = "*ec"
 )

@@ -21,10 +21,12 @@ package engine
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
 	"net/url"
+	"strings"
 
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
@@ -216,7 +218,7 @@ func sentrypeerGetToken(tokenUrl, clientID, clientSecret, audience, grantType st
 		utils.GrantTypeCfg:    grantType,
 	}
 	jsonPayload, _ := json.Marshal(payload)
-	resp, err = getHTTP(http.MethodPost, tokenUrl, bytes.NewBuffer(jsonPayload), map[string][]string{"Content-Type": {"application/json"}})
+	resp, err = getHTTP(http.MethodPost, tokenUrl, bytes.NewBuffer(jsonPayload), map[string]string{"Content-Type": "application/json"})
 	if err != nil {
 		return
 	}
@@ -235,7 +237,7 @@ func sentrypeerGetToken(tokenUrl, clientID, clientSecret, audience, grantType st
 // sentrypeerHasData return a boolean based on query response on finding ip/number
 func sentrypeerHasData(itemId, token, url string) (found bool, err error) {
 	var resp *http.Response
-	resp, err = getHTTP(http.MethodGet, url, nil, map[string][]string{"Authorization": {fmt.Sprintf("Bearer %s", token)}})
+	resp, err = getHTTP(http.MethodGet, url, nil, map[string]string{"Authorization": fmt.Sprintf("Bearer %s", token)})
 	if err != nil {
 		return
 	}
@@ -256,12 +258,77 @@ func sentrypeerHasData(itemId, token, url string) (found bool, err error) {
 	}
 	return false, err
 }
+func filterHTTP(httpType string, dDP utils.DataProvider, fieldname, value string) (bool, error) {
+	var (
+		parsedURL *url.URL
+		resp      string
+		err       error
+	)
+	urlS, err := extractUrlFromType(httpType)
+	if err != nil {
+		return false, err
+	}
 
-func getHTTP(method, url string, payload io.Reader, headers map[string][]string) (resp *http.Response, err error) {
+	parsedURL, err = url.Parse(urlS)
+	if err != nil {
+		return false, err
+	}
+	if fieldname != utils.MetaAny {
+		queryParams := parsedURL.Query()
+		queryParams.Set(fieldname, value)
+		parsedURL.RawQuery = queryParams.Encode()
+		resp, err = externalAPI(parsedURL.String(), nil)
+	} else {
+		resp, err = externalAPI(parsedURL.String(), bytes.NewReader([]byte(dDP.String())))
+	}
+	if err != nil {
+		return false, err
+	}
+	return utils.IfaceAsBool(resp)
+}
+
+func externalAPI(url string, rdr io.Reader) (string, error) {
+	hdr := map[string]string{
+		"Content-Type": "application/json",
+	}
+	resp, err := getHTTP(http.MethodGet, url, rdr, hdr)
+	if err != nil {
+		return "", fmt.Errorf("error processing the request: %w", err)
+	}
+
+	defer resp.Body.Close()
+
+	if resp.StatusCode < http.StatusOK || resp.StatusCode > http.StatusMultipleChoices {
+		body, err := io.ReadAll(resp.Body)
+		return "", fmt.Errorf("http request returned non-OK status code: %d ,body: %v ,err: %w", resp.StatusCode, string(body), err)
+	}
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return "", fmt.Errorf("error decoding response: %w", err)
+	}
+
+	return string(body), nil
+}
+
+// constructs an request via parameters provided,url,header and payload ,uses defaultclient for sending the request
+func getHTTP(method, url string, payload io.Reader, headers map[string]string) (resp *http.Response, err error) {
 	var req *http.Request
 	if req, err = http.NewRequest(method, url, payload); err != nil {
 		return
 	}
-	req.Header = headers
+	for k, hVal := range headers {
+		req.Header.Add(k, hVal)
+	}
 	return http.DefaultClient.Do(req)
+}
+
+func extractUrlFromType(httpType string) (string, error) {
+	parts := strings.Split(httpType, utils.HashtagSep)
+	if len(parts) != 2 {
+		return "", errors.New("url is not specified")
+	}
+	//extracting  the url from the type
+	url := strings.Trim(parts[1], utils.IdxStart+utils.IdxEnd)
+	return url, nil
 }
