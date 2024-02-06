@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"bytes"
 	"fmt"
 	"strings"
 
@@ -170,7 +171,7 @@ func NewAttributeFromInline(tenant, inlnRule string) (attr *AttributeProfile, er
 		ID:     inlnRule,
 	}
 	for _, rule := range strings.Split(inlnRule, utils.InfieldSep) {
-		ruleSplt := strings.SplitN(rule, utils.InInFieldSep, 3)
+		ruleSplt := utils.SplitPath(rule, utils.InInFieldSep[0], 3)
 		if len(ruleSplt) < 3 {
 			return nil, fmt.Errorf("inline parse error for string: <%s>", rule)
 		}
@@ -189,6 +190,13 @@ func NewAttributeFromInline(tenant, inlnRule string) (attr *AttributeProfile, er
 		})
 	}
 	return
+}
+func externalAttributeAPI(httpType string, dDP utils.DataProvider) (string, error) {
+	urlS, err := extractUrlFromType(httpType)
+	if err != nil {
+		return "", err
+	}
+	return externalAPI(urlS, bytes.NewReader([]byte(dDP.String())))
 }
 
 func (ap *AttributeProfile) Set(path []string, val any, newBranch bool, rsrSep string) (err error) {

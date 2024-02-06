@@ -18,6 +18,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"encoding/json"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"reflect"
@@ -2431,4 +2433,86 @@ func TestFRPassStringParseDataProviderErr(t *testing.T) {
 		t.Errorf("Expected to never pass")
 	}
 
+}
+func TestHttpInlineFilter(t *testing.T) {
+
+	dP := &utils.MapStorage{
+		utils.MetaReq: map[string]any{
+			"Attribute":        "AttributeProfile1",
+			"CGRID":            "CGRATES_ID1",
+			utils.AccountField: "1002",
+			utils.AnswerTime:   time.Date(2013, 12, 30, 14, 59, 31, 0, time.UTC),
+		},
+	}
+
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodGet {
+			w.WriteHeader(http.StatusMethodNotAllowed)
+			return
+		}
+		if len(r.URL.Query()) != 0 {
+			queryVal := r.URL.Query()
+			reply := queryVal.Has("~*req.Account") && queryVal.Get("~*req.Account") == "1002"
+			w.WriteHeader(http.StatusOK)
+			fmt.Fprint(w, reply)
+			return
+		}
+
+		var data map[string]any
+		if err := json.NewDecoder(r.Body).Decode(&data); err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+		_, has := data["*req"]
+		w.WriteHeader(http.StatusOK)
+		fmt.Fprint(w, has)
+
+	}))
+	defer srv.Close()
+	url := "*http#" + "[" + srv.URL + "]"
+
+	exp := &Filter{
+		Tenant: "cgrates.org",
+		ID:     url + ":" + "~*req.Account:",
+		Rules: []*FilterRule{
+			{
+				Type:    url,
+				Element: "~*req.Account",
+			},
+		},
+	}
+	if err := exp.Compile(); err != nil {
+		t.Fatal(err)
+	}
+	if fl, err := NewFilterFromInline("cgrates.org", url+":"+"~*req.Account:"); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(exp, fl) {
+		t.Errorf("Expected: %s , received: %s", utils.ToJSON(exp), utils.ToJSON(fl))
+	}
+	if pass, err := exp.Rules[0].Pass(context.Background(), dP); err != nil {
+		t.Error(err)
+	} else if !pass {
+		t.Error("should had passed")
+	}
+
+	exp2 := &Filter{
+		Tenant: "cgrates.org",
+		ID:     url + ":" + "*any:",
+		Rules: []*FilterRule{
+			{
+				Type:    url,
+				Element: "*any",
+			},
+		},
+	}
+
+	if fl2, err := NewFilterFromInline("cgrates.org", url+":"+"*any:"); err != nil {
+		t.Error(err)
+	} else if fl2.Rules[0].Type != exp2.Rules[0].Type {
+		t.Errorf("Expected: %s , received: %s", utils.ToJSON(exp2), utils.ToJSON(fl2))
+	} else if pass, err := fl2.Rules[0].Pass(context.Background(), dP); err != nil {
+		t.Error(err)
+	} else if !pass {
+		t.Error("should had passed")
+	}
 }
