@@ -999,6 +999,7 @@ func TestRadiusAgentJsonCfg(t *testing.T) {
 		Sessions_conns:      &[]string{utils.MetaInternal},
 		Request_processors:  &[]*ReqProcessorJsnCfg{},
 		Dmr_template:        utils.StringPointer(""),
+		Coa_template:        utils.StringPointer(""),
 		Client_da_addresses: map[string]string{},
 	}
 	dfCgrJSONCfg, err := NewCgrJsonCfgFromBytes([]byte(CGRATES_CFG_JSON))
@@ -2258,25 +2259,25 @@ func TestDfTemplateSJsonCfg(t *testing.T) {
 		utils.MetaDMR: {
 			{
 				Tag:   utils.StringPointer("User-Name"),
-				Path:  utils.StringPointer(fmt.Sprintf("%s.User-Name", utils.MetaRadDAdiscMsg)),
+				Path:  utils.StringPointer(fmt.Sprintf("%s.User-Name", utils.MetaRadDAReq)),
 				Type:  utils.StringPointer(utils.MetaVariable),
 				Value: utils.StringPointer("~*req.User-Name"),
 			},
 			{
 				Tag:   utils.StringPointer("NAS-IP-Address"),
-				Path:  utils.StringPointer(fmt.Sprintf("%s.NAS-IP-Address", utils.MetaRadDAdiscMsg)),
+				Path:  utils.StringPointer(fmt.Sprintf("%s.NAS-IP-Address", utils.MetaRadDAReq)),
 				Type:  utils.StringPointer(utils.MetaVariable),
 				Value: utils.StringPointer("~*req.NAS-IP-Address"),
 			},
 			{
 				Tag:   utils.StringPointer("Acct-Session-Id"),
-				Path:  utils.StringPointer(fmt.Sprintf("%s.Acct-Session-Id", utils.MetaRadDAdiscMsg)),
+				Path:  utils.StringPointer(fmt.Sprintf("%s.Acct-Session-Id", utils.MetaRadDAReq)),
 				Type:  utils.StringPointer(utils.MetaVariable),
 				Value: utils.StringPointer("~*req.Acct-Session-Id"),
 			},
 			{
 				Tag:   utils.StringPointer("Reply-Message"),
-				Path:  utils.StringPointer(fmt.Sprintf("%s.Reply-Message", utils.MetaRadDAdiscMsg)),
+				Path:  utils.StringPointer(fmt.Sprintf("%s.Reply-Message", utils.MetaRadDAReq)),
 				Type:  utils.StringPointer(utils.MetaVariable),
 				Value: utils.StringPointer("~*vars.DisconnectCause"),
 			},

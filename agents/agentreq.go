@@ -53,19 +53,19 @@ func NewAgentRequest(req utils.DataProvider,
 		extraDP = make(map[string]utils.DataProvider)
 	}
 	ar = &AgentRequest{
-		Request:      req,
-		Tenant:       dfltTenant,
-		Vars:         vars,
-		CGRRequest:   utils.NewOrderedNavigableMap(),
-		diamreq:      utils.NewOrderedNavigableMap(), // special case when CGRateS is building the request
-		radDAdiscMsg: utils.NewOrderedNavigableMap(),
-		CGRReply:     cgrRply,
-		Reply:        rply,
-		Timezone:     timezone,
-		filterS:      filterS,
-		Opts:         opts,
-		Cfg:          config.CgrConfig().GetDataProvider(),
-		ExtraDP:      extraDP,
+		Request:    req,
+		Tenant:     dfltTenant,
+		Vars:       vars,
+		CGRRequest: utils.NewOrderedNavigableMap(),
+		diamreq:    utils.NewOrderedNavigableMap(), // special case when CGRateS is building the request
+		radDAReq:   utils.NewOrderedNavigableMap(),
+		CGRReply:   cgrRply,
+		Reply:      rply,
+		Timezone:   timezone,
+		filterS:    filterS,
+		Opts:       opts,
+		Cfg:        config.CgrConfig().GetDataProvider(),
+		ExtraDP:    extraDP,
 	}
 	if tnt, err := tntTpl.ParseDataProvider(ar); err == nil && tnt != utils.EmptyString {
 		ar.Tenant = tnt
@@ -77,20 +77,20 @@ func NewAgentRequest(req utils.DataProvider,
 // AgentRequest represents data related to one request towards agent
 // implements utils.DataProvider so we can pass it to filters
 type AgentRequest struct {
-	Request      utils.DataProvider         // request
-	Vars         *utils.DataNode            // shared data
-	CGRRequest   *utils.OrderedNavigableMap // Used in reply to access the request that was send
-	CGRReply     *utils.DataNode
-	Reply        *utils.OrderedNavigableMap
-	Tenant       string
-	Timezone     string
-	filterS      *engine.FilterS
-	diamreq      *utils.OrderedNavigableMap // used in case of building requests (ie. DisconnectSession)
-	radDAdiscMsg *utils.OrderedNavigableMap // used for building RADIUS server-initiated Disconnect Requests
-	tmp          *utils.DataNode            // used in case you want to store temporary items and access them later
-	Opts         utils.MapStorage
-	Cfg          utils.DataProvider
-	ExtraDP      map[string]utils.DataProvider
+	Request    utils.DataProvider         // request
+	Vars       *utils.DataNode            // shared data
+	CGRRequest *utils.OrderedNavigableMap // Used in reply to access the request that was send
+	CGRReply   *utils.DataNode
+	Reply      *utils.OrderedNavigableMap
+	Tenant     string
+	Timezone   string
+	filterS    *engine.FilterS
+	diamreq    *utils.OrderedNavigableMap // used in case of building requests (ie. DisconnectSession)
+	radDAReq   *utils.OrderedNavigableMap // used for building RADIUS server-initiated Disconnect Requests
+	tmp        *utils.DataNode            // used in case you want to store temporary items and access them later
+	Opts       utils.MapStorage
+	Cfg        utils.DataProvider
+	ExtraDP    map[string]utils.DataProvider
 }
 
 // String implements utils.DataProvider
@@ -137,9 +137,9 @@ func (ar *AgentRequest) FieldAsInterface(fldPath []string) (val any, err error) 
 		} else {
 			val = ar.diamreq
 		}
-	case utils.MetaRadDAdiscMsg:
+	case utils.MetaRadDAReq:
 		if len(fldPath) != 1 {
-			val, err = ar.radDAdiscMsg.FieldAsInterface(fldPath[1:])
+			val, err = ar.radDAReq.FieldAsInterface(fldPath[1:])
 		}
 	case utils.MetaRep:
 		if len(fldPath) != 1 {
@@ -287,8 +287,8 @@ func (ar *AgentRequest) SetAsSlice(fullPath *utils.FullPath, nm *utils.DataLeaf)
 			PathSlice: fullPath.PathSlice[1:],
 			Path:      fullPath.Path[9:],
 		}, []*utils.DataNode{{Type: utils.NMDataType, Value: nm}})
-	case utils.MetaRadDAdiscMsg:
-		return ar.radDAdiscMsg.SetAsSlice(&utils.FullPath{
+	case utils.MetaRadDAReq:
+		return ar.radDAReq.SetAsSlice(&utils.FullPath{
 			PathSlice: fullPath.PathSlice[1:],
 			Path:      fullPath.Path[14:],
 		}, []*utils.DataNode{{Type: utils.NMDataType, Value: nm}})
@@ -317,8 +317,8 @@ func (ar *AgentRequest) RemoveAll(prefix string) error {
 		ar.Reply.RemoveAll()
 	case utils.MetaDiamreq:
 		ar.diamreq.RemoveAll()
-	case utils.MetaRadDAdiscMsg:
-		ar.radDAdiscMsg.RemoveAll()
+	case utils.MetaRadDAReq:
+		ar.radDAReq.RemoveAll()
 	case utils.MetaTmp:
 		ar.tmp = &utils.DataNode{Type: utils.NMMapType, Map: make(map[string]*utils.DataNode)}
 	case utils.MetaUCH:
@@ -353,8 +353,8 @@ func (ar *AgentRequest) Remove(fullPath *utils.FullPath) error {
 			PathSlice: fullPath.PathSlice[1:],
 			Path:      fullPath.Path[9:],
 		})
-	case utils.MetaRadDAdiscMsg:
-		return ar.radDAdiscMsg.Remove(&utils.FullPath{
+	case utils.MetaRadDAReq:
+		return ar.radDAReq.Remove(&utils.FullPath{
 			PathSlice: fullPath.PathSlice[1:],
 			Path:      fullPath.Path[14:],
 		})
@@ -438,8 +438,8 @@ func (ar *AgentRequest) Append(fullPath *utils.FullPath, val *utils.DataLeaf) (e
 			PathSlice: fullPath.PathSlice[1:],
 			Path:      fullPath.Path[9:],
 		}, val)
-	case utils.MetaRadDAdiscMsg:
-		return ar.radDAdiscMsg.Append(&utils.FullPath{
+	case utils.MetaRadDAReq:
+		return ar.radDAReq.Append(&utils.FullPath{
 			PathSlice: fullPath.PathSlice[1:],
 			Path:      fullPath.Path[14:],
 		}, val)
@@ -478,8 +478,8 @@ func (ar *AgentRequest) Compose(fullPath *utils.FullPath, val *utils.DataLeaf) (
 			PathSlice: fullPath.PathSlice[1:],
 			Path:      fullPath.Path[9:],
 		}, val)
-	case utils.MetaRadDAdiscMsg:
-		return ar.radDAdiscMsg.Compose(&utils.FullPath{
+	case utils.MetaRadDAReq:
+		return ar.radDAReq.Compose(&utils.FullPath{
 			PathSlice: fullPath.PathSlice[1:],
 			Path:      fullPath.Path[14:],
 		}, val)

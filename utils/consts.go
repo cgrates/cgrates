@@ -793,7 +793,7 @@ const (
 	MetaLoaders             = "*loaders"
 	TmpSuffix               = ".tmp"
 	MetaDiamreq             = "*diamreq"
-	MetaRadDAdiscMsg        = "*radDAdiscMsg"
+	MetaRadDAReq            = "*radDAReq"
 	MetaCost                = "*cost"
 	MetaGroup               = "*group"
 	InternalRPCSet          = "InternalRPCSet"
@@ -2240,6 +2240,7 @@ const (
 	ClientDictionariesCfg = "client_dictionaries"
 	ClientDaAddressesCfg  = "client_da_addresses"
 	DMRTemplateCfg        = "dmr_template"
+	CoATemplateCfg        = "coa_template"
 
 	// AttributeSCfg
 	IndexedSelectsCfg           = "indexed_selects"
