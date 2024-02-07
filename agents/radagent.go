@@ -193,8 +193,8 @@ func (ra *RadiusAgent) handleAuth(reqPacket *radigo.Packet) (*radigo.Packet, err
 		return nil, nil
 	}
 
-	// Cache the RADIUS Packet for future Disconnect Requests.
-	if ra.cgrCfg.RadiusAgentCfg().DMRTemplate != "" {
+	// Cache the RADIUS Packet for future CoA/Disconnect Requests.
+	if ra.cgrCfg.RadiusAgentCfg().DMRTemplate != "" || ra.cgrCfg.RadiusAgentCfg().CoATemplate != "" {
 
 		// Retrieve the identifying sessionID from the *vars map, as it was probably modified
 		// by one of the processed requests. The path element is suffixed by '[0]' due to the
@@ -496,48 +496,18 @@ func (ra *RadiusAgent) V1DisconnectSession(_ *context.Context, attr utils.AttrDi
 	}
 	originID := utils.IfaceAsString(ifaceOriginID)
 
-	cachedPacket, has := engine.Cache.Get(utils.CacheRadiusPackets, originID)
-	if !has {
-		return fmt.Errorf("failed to retrieve packet from cache: %w", utils.ErrNotFound)
-	}
-	packet := cachedPacket.(*radigo.Packet)
-
 	reqVars := &utils.DataNode{
 		Type: utils.NMMapType,
 		Map: map[string]*utils.DataNode{
 			utils.DisconnectCause: utils.NewLeafNode(attr.Reason),
 		},
 	}
-	agReq := NewAgentRequest(
-		newRADataProvider(packet), reqVars, nil, nil, nil, nil,
-		ra.cgrCfg.GeneralCfg().DefaultTenant,
-		ra.cgrCfg.GeneralCfg().DefaultTimezone,
-		ra.filterS, nil)
-	err := agReq.SetFields(ra.cgrCfg.TemplatesCfg()[ra.cgrCfg.RadiusAgentCfg().DMRTemplate])
-	if err != nil {
-		return fmt.Errorf("could not set attributes: %w", err)
-	}
 
-	remoteAddr, remoteHost, err := dmRemoteAddr(packet.RemoteAddr().String(), ra.cgrCfg.RadiusAgentCfg().ClientDaAddresses)
+	replyCode, err := ra.sendRadDaReq(radigo.DisconnectRequest, ra.cgrCfg.RadiusAgentCfg().DMRTemplate, originID, reqVars)
 	if err != nil {
-		return fmt.Errorf("retrieving remote address failed: %w", err)
+		return err
 	}
-	dynAuthClient, err := radigo.NewClient(utils.UDP, remoteAddr,
-		ra.dacCfg.secrets.GetSecret(remoteHost),
-		ra.dacCfg.dicts.GetInstance(remoteHost),
-		ra.cgrCfg.GeneralCfg().ConnectAttempts, nil, utils.Logger)
-	if err != nil {
-		return fmt.Errorf("dynamic authorization client init failed: %w", err)
-	}
-	dscReq := dynAuthClient.NewRequest(radigo.DisconnectRequest, 1)
-	if err = radAppendAttributes(dscReq, agReq.radDAdiscMsg); err != nil {
-		return errors.New("could not append attributes to the request packet")
-	}
-	dscReply, err := dynAuthClient.SendRequest(dscReq)
-	if err != nil {
-		return fmt.Errorf("failed to send request: %w", err)
-	}
-	switch dscReply.Code {
+	switch replyCode {
 	case radigo.DisconnectACK:
 		*reply = utils.OK
 	case radigo.DisconnectNAK:
@@ -546,6 +516,63 @@ func (ra *RadiusAgent) V1DisconnectSession(_ *context.Context, attr utils.AttrDi
 		return errors.New("unexpected reply code")
 	}
 	return nil
+}
+
+// V1ChangeAuthorization updates session authorization using RADIUS CoA functionality.
+func (ra *RadiusAgent) V1ChangeOfAuthorization(ctx *context.Context, sessionID string, reply *string) error {
+	replyCode, err := ra.sendRadDaReq(radigo.CoARequest, ra.cgrCfg.RadiusAgentCfg().CoATemplate, sessionID, nil)
+	if err != nil {
+		return fmt.Errorf("change of authorization failed: %w", err)
+	}
+	switch replyCode {
+	case radigo.CoAACK:
+		*reply = utils.OK
+	case radigo.CoANAK:
+		return errors.New("received CoANAK from RADIUS client")
+	default:
+		return errors.New("unexpected reply code")
+	}
+	return nil
+}
+
+// sendRadDaReq prepares and sends a Radius CoA/Disconnect Request and returns the reply code or an error.
+func (ra *RadiusAgent) sendRadDaReq(requestType radigo.PacketCode, requestTemplate, sessionID string, requestVars *utils.DataNode) (radigo.PacketCode, error) {
+	cachedPacket, has := engine.Cache.Get(utils.CacheRadiusPackets, sessionID)
+	if !has {
+		return 0, fmt.Errorf("failed to retrieve packet from cache: %w", utils.ErrNotFound)
+	}
+	packet := cachedPacket.(*radigo.Packet)
+
+	agReq := NewAgentRequest(
+		newRADataProvider(packet), requestVars, nil, nil, nil, nil,
+		ra.cgrCfg.GeneralCfg().DefaultTenant,
+		ra.cgrCfg.GeneralCfg().DefaultTimezone,
+		ra.filterS, nil)
+	err := agReq.SetFields(ra.cgrCfg.TemplatesCfg()[requestTemplate])
+	if err != nil {
+		return 0, fmt.Errorf("could not set attributes: %w", err)
+	}
+
+	remoteAddr, remoteHost, err := dmRemoteAddr(packet.RemoteAddr().String(), ra.cgrCfg.RadiusAgentCfg().ClientDaAddresses)
+	if err != nil {
+		return 0, fmt.Errorf("retrieving remote address failed: %w", err)
+	}
+	dynAuthClient, err := radigo.NewClient(utils.UDP, remoteAddr,
+		ra.dacCfg.secrets.GetSecret(remoteHost),
+		ra.dacCfg.dicts.GetInstance(remoteHost),
+		ra.cgrCfg.GeneralCfg().ConnectAttempts, nil, utils.Logger)
+	if err != nil {
+		return 0, fmt.Errorf("dynamic authorization client init failed: %w", err)
+	}
+	dynAuthReq := dynAuthClient.NewRequest(requestType, 1)
+	if err = radAppendAttributes(dynAuthReq, agReq.radDAReq); err != nil {
+		return 0, errors.New("could not append attributes to the request packet")
+	}
+	dynAuthReply, err := dynAuthClient.SendRequest(dynAuthReq)
+	if err != nil {
+		return 0, fmt.Errorf("failed to send request: %w", err)
+	}
+	return dynAuthReply.Code, nil
 }
 
 // dmRemoteAddr ranges over the client_da_addresses map and returns the address configured for a

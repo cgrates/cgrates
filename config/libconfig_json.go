@@ -541,6 +541,7 @@ type RadiusAgentJsonCfg struct {
 	Client_da_addresses map[string]string
 	Sessions_conns      *[]string
 	Dmr_template        *string
+	Coa_template        *string
 	Request_processors  *[]*ReqProcessorJsnCfg
 }
 

@@ -37,6 +37,7 @@ type RadiusAgentCfg struct {
 	ClientDaAddresses  map[string]string
 	SessionSConns      []string
 	DMRTemplate        string
+	CoATemplate        string
 	RequestProcessors  []*RequestProcessor
 }
 
@@ -100,6 +101,9 @@ func (ra *RadiusAgentCfg) loadFromJSONCfg(jsnCfg *RadiusAgentJsonCfg, separator 
 	if jsnCfg.Dmr_template != nil {
 		ra.DMRTemplate = *jsnCfg.Dmr_template
 	}
+	if jsnCfg.Coa_template != nil {
+		ra.CoATemplate = *jsnCfg.Coa_template
+	}
 	if jsnCfg.Request_processors != nil {
 		for _, reqProcJsn := range *jsnCfg.Request_processors {
 			rp := new(RequestProcessor)
@@ -137,6 +141,7 @@ func (ra *RadiusAgentCfg) AsMapInterface(separator string) (initialMP map[string
 	initialMP = map[string]any{
 		utils.EnabledCfg:     ra.Enabled,
 		utils.DMRTemplateCfg: ra.DMRTemplate,
+		utils.CoATemplateCfg: ra.CoATemplate,
 	}
 
 	listeners := make([]map[string]any, len(ra.Listeners))
@@ -189,6 +194,7 @@ func (ra RadiusAgentCfg) Clone() (cln *RadiusAgentCfg) {
 		ClientSecrets:      make(map[string]string),
 		ClientDictionaries: make(map[string][]string),
 		DMRTemplate:        ra.DMRTemplate,
+		CoATemplate:        ra.CoATemplate,
 	}
 
 	if ra.Listeners != nil {

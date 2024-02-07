@@ -271,11 +271,11 @@ func TestAgentRequestSetFields(t *testing.T) {
 		t.Error("Expecting 1009, received: ", nm[0].Value.Data)
 	}
 
-	// case utils.MetaRadDAdiscMsg
+	// case utils.MetaRadDAReq
 	input = []*config.FCTemplate{
 		{
-			Path:  fmt.Sprintf("%s.Account", utils.MetaRadDAdiscMsg),
-			Tag:   fmt.Sprintf("%s.Account", utils.MetaRadDAdiscMsg),
+			Path:  fmt.Sprintf("%s.Account", utils.MetaRadDAReq),
+			Tag:   fmt.Sprintf("%s.Account", utils.MetaRadDAReq),
 			Type:  utils.MetaVariable,
 			Value: config.NewRSRParsersMustCompile("~"+utils.MetaReq+".Account", utils.InfieldSep),
 		},
@@ -283,7 +283,7 @@ func TestAgentRequestSetFields(t *testing.T) {
 	input[0].ComputePath()
 	if err := ar.SetFields(input); err != nil {
 		t.Error(err)
-	} else if val, err := ar.radDAdiscMsg.FieldAsInterface([]string{"Account"}); err != nil {
+	} else if val, err := ar.radDAReq.FieldAsInterface([]string{"Account"}); err != nil {
 		t.Error(err)
 	} else if nm, ok := val.([]*utils.DataNode); !ok {
 		t.Error("Expecting NM items")
@@ -2794,7 +2794,7 @@ func TestAgentRequestRemove(t *testing.T) {
 		{fullPath: &utils.FullPath{PathSlice: []string{utils.MetaCgrep}}, isError: false},
 		{fullPath: &utils.FullPath{PathSlice: []string{utils.MetaRep}, Path: utils.MetaRep + utils.NestingSep + "MaxUsage"}, isError: false},
 		{fullPath: &utils.FullPath{PathSlice: []string{utils.MetaDiamreq}, Path: utils.MetaDiamreq + utils.NestingSep + "Destination-Host"}, isError: false},
-		{fullPath: &utils.FullPath{PathSlice: []string{utils.MetaRadDAdiscMsg}, Path: utils.MetaRadDAdiscMsg + utils.NestingSep + "User-Name"}, isError: false},
+		{fullPath: &utils.FullPath{PathSlice: []string{utils.MetaRadDAReq}, Path: utils.MetaRadDAReq + utils.NestingSep + "User-Name"}, isError: false},
 		{fullPath: &utils.FullPath{PathSlice: []string{"unsupported_prefix"}}, isError: true},
 	}
 

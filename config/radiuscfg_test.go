@@ -170,6 +170,7 @@ func TestRadiusAgentCfgAsMapInterface(t *testing.T) {
 	     },
 	     "sessions_conns": ["*birpc_internal", "*conn1","*conn2"],
 		 "dmr_template": "*dmr",
+		 "coa_template": "*coa",
          "request_processors": [
 			{
 				"id": "OutboundAUTHDryRun",
@@ -201,6 +202,7 @@ func TestRadiusAgentCfgAsMapInterface(t *testing.T) {
 		},
 		utils.SessionSConnsCfg: []string{rpcclient.BiRPCInternal, "*conn1", "*conn2"},
 		utils.DMRTemplateCfg:   "*dmr",
+		utils.CoATemplateCfg:   "*coa",
 		utils.RequestProcessorsCfg: []map[string]any{
 			{
 				utils.IDCfg:            "OutboundAUTHDryRun",
@@ -243,6 +245,7 @@ func TestRadiusAgentCfgAsMapInterface1(t *testing.T) {
 		},
 		utils.SessionSConnsCfg:     []string{"*internal"},
 		utils.DMRTemplateCfg:       "",
+		utils.CoATemplateCfg:       "",
 		utils.RequestProcessorsCfg: []map[string]any{},
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
