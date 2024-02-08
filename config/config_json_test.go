@@ -2282,6 +2282,32 @@ func TestDfTemplateSJsonCfg(t *testing.T) {
 				Value: utils.StringPointer("~*vars.DisconnectCause"),
 			},
 		},
+		utils.MetaCoA: {
+			{
+				Tag:   utils.StringPointer("User-Name"),
+				Path:  utils.StringPointer(fmt.Sprintf("%s.User-Name", utils.MetaRadDAReq)),
+				Type:  utils.StringPointer(utils.MetaVariable),
+				Value: utils.StringPointer("~*req.User-Name"),
+			},
+			{
+				Tag:   utils.StringPointer("NAS-IP-Address"),
+				Path:  utils.StringPointer(fmt.Sprintf("%s.NAS-IP-Address", utils.MetaRadDAReq)),
+				Type:  utils.StringPointer(utils.MetaVariable),
+				Value: utils.StringPointer("~*req.NAS-IP-Address"),
+			},
+			{
+				Tag:   utils.StringPointer("Acct-Session-Id"),
+				Path:  utils.StringPointer(fmt.Sprintf("%s.Acct-Session-Id", utils.MetaRadDAReq)),
+				Type:  utils.StringPointer(utils.MetaVariable),
+				Value: utils.StringPointer("~*req.Acct-Session-Id"),
+			},
+			{
+				Tag:   utils.StringPointer("Filter-Id"),
+				Path:  utils.StringPointer(fmt.Sprintf("%s.Filter-Id", utils.MetaRadDAReq)),
+				Type:  utils.StringPointer(utils.MetaConstant),
+				Value: utils.StringPointer("custom_filter"),
+			},
+		},
 		utils.MetaCdrLog: {
 			{
 				Tag:       utils.StringPointer("ToR"),
