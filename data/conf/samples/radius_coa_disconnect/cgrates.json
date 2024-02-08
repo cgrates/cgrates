@@ -61,7 +61,8 @@
 			"acct_address": "127.0.0.1:1813"
 		}
 	],
-	"dmr_template": "*dmr"
+	"dmr_template": "*dmr",
+	"coa_template": "*coa"
 },
 
 "apiers": {

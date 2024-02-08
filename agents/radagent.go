@@ -518,11 +518,11 @@ func (ra *RadiusAgent) V1DisconnectSession(_ *context.Context, attr utils.AttrDi
 	return nil
 }
 
-// V1ChangeAuthorization updates session authorization using RADIUS CoA functionality.
-func (ra *RadiusAgent) V1ChangeOfAuthorization(ctx *context.Context, sessionID string, reply *string) error {
-	replyCode, err := ra.sendRadDaReq(radigo.CoARequest, ra.cgrCfg.RadiusAgentCfg().CoATemplate, sessionID, nil)
+// V1ReAuthorize updates session authorization using RADIUS CoA functionality.
+func (ra *RadiusAgent) V1ReAuthorize(_ *context.Context, originID string, reply *string) error {
+	replyCode, err := ra.sendRadDaReq(radigo.CoARequest, ra.cgrCfg.RadiusAgentCfg().CoATemplate, originID, nil)
 	if err != nil {
-		return fmt.Errorf("change of authorization failed: %w", err)
+		return err
 	}
 	switch replyCode {
 	case radigo.CoAACK:
@@ -566,7 +566,7 @@ func (ra *RadiusAgent) sendRadDaReq(requestType radigo.PacketCode, requestTempla
 	}
 	dynAuthReq := dynAuthClient.NewRequest(requestType, 1)
 	if err = radAppendAttributes(dynAuthReq, agReq.radDAReq); err != nil {
-		return 0, errors.New("could not append attributes to the request packet")
+		return 0, fmt.Errorf("could not append attributes to the request packet: %w", err)
 	}
 	dynAuthReply, err := dynAuthClient.SendRequest(dynAuthReq)
 	if err != nil {
@@ -591,11 +591,6 @@ func dmRemoteAddr(remoteAddr string, dynAuthAddresses map[string]string) (string
 		}
 	}
 	return "", "", utils.ErrNotFound
-}
-
-// V1ReAuthorize is needed to satisfy the sessions.BiRPClient interface
-func (*RadiusAgent) V1ReAuthorize(_ *context.Context, _ string, _ *string) error {
-	return utils.ErrNotImplemented
 }
 
 // V1WarnDisconnect is needed to satisfy the sessions.BiRPClient interface

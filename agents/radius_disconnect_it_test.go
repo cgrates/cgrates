@@ -25,6 +25,7 @@ import (
 	"bytes"
 	"encoding/base64"
 	"path"
+	"sync"
 	"testing"
 	"time"
 
@@ -36,26 +37,28 @@ import (
 )
 
 /*
-TestRadiusDisconnect scenario:
+TestRadiusCoADisconnect scenario:
 1. Configure a radius_agent with:
   - a bidirectional connection to sessions
   - dmr_template field pointing to the predefined *dmr template
+  - coa_template field pointing to the predefined *coa template
   - localhost:3799 inside client_da_addresses
   - an auth request processor
   - an accounting request processor
 
-2. Set up a 'client' (acting as a server) that will handle incoming Disconnect Requests.
+2. Set up a 'client' (acting as a server) that will handle incoming CoA/Disconnect Requests.
 
 3. Send an AccessRequest to cgr-engine's RADIUS server in order to register the packet.
 
 4. Send an AccountingRequest to initialize a session.
 
-5. Send a SessionSv1ForceDisconnect request, that will attempt to remotely disconnect the
-session created previously.
+5. Send a SessionSv1ReAuthorize request, that will send a CoA request to the client. The
+client will then verify that the packet was populated correctly.
 
-6. Verify that the request fields from the 'client' handler are correctly sent.
+6. Send a SessionSv1ForceDisconnect request, that will attempt to remotely disconnect the
+session created previously and verify the request packet fields.
 */
-func TestRadiusDisconnect(t *testing.T) {
+func TestRadiusCoADisconnect(t *testing.T) {
 	switch *dbType {
 	case utils.MetaInternal:
 	case utils.MetaMySQL, utils.MetaMongo, utils.MetaPostgres:
@@ -65,7 +68,7 @@ func TestRadiusDisconnect(t *testing.T) {
 	}
 
 	// Set up test environment.
-	cfgPath := path.Join(*dataDir, "conf", "samples", "radius_disconnect")
+	cfgPath := path.Join(*dataDir, "conf", "samples", "radius_coa_disconnect")
 	raDiscCfg, err := config.NewCGRConfigFromPath(cfgPath)
 	if err != nil {
 		t.Fatal(err)
@@ -92,9 +95,15 @@ func TestRadiusDisconnect(t *testing.T) {
 	time.Sleep(time.Duration(*waitRater) * time.Millisecond)
 
 	// Testing the functionality itself starts here.
-	done := make(chan struct{}) // signal to end the test when the handler has finished processing
+	var wg sync.WaitGroup
+	done := make(chan struct{}) // signal to end the test when the handlers have finished processing
+	go func() {
+		wg.Wait()
+		close(done)
+	}()
+	wg.Add(2)
 	handleDisconnect := func(request *radigo.Packet) (*radigo.Packet, error) {
-		defer close(done)
+		defer wg.Done()
 		encodedNasIPAddr := "fwAAAQ=="
 		decodedNasIPAddr, err := base64.StdEncoding.DecodeString(encodedNasIPAddr)
 		if err != nil {
@@ -112,6 +121,25 @@ func TestRadiusDisconnect(t *testing.T) {
 		}
 		return reply, nil
 	}
+	handleCoA := func(request *radigo.Packet) (*radigo.Packet, error) {
+		defer wg.Done()
+		encodedNasIPAddr := "fwAAAQ=="
+		decodedNasIPAddr, err := base64.StdEncoding.DecodeString(encodedNasIPAddr)
+		if err != nil {
+			t.Error("error decoding base64 NAS-IP-Address:", err)
+		}
+		reply := request.Reply()
+		if string(request.AVPs[0].RawValue) != "1001" ||
+			!bytes.Equal(request.AVPs[1].RawValue, decodedNasIPAddr) ||
+			string(request.AVPs[2].RawValue) != "e4921177ab0e3586c37f6a185864b71a@0:0:0:0:0:0:0:0" ||
+			string(request.AVPs[3].RawValue) != "custom_filter" {
+			t.Errorf("unexpected request received: %v", utils.ToJSON(request))
+			reply.Code = radigo.CoANAK
+		} else {
+			reply.Code = radigo.CoAACK
+		}
+		return reply, nil
+	}
 	type testNAS struct {
 		clientAuth *radigo.Client
 		clientAcct *radigo.Client
@@ -123,6 +151,7 @@ func TestRadiusDisconnect(t *testing.T) {
 	testRadClient.server = radigo.NewServer("udp", "127.0.0.1:3799", secrets, dicts,
 		map[radigo.PacketCode]func(*radigo.Packet) (*radigo.Packet, error){
 			radigo.DisconnectRequest: handleDisconnect,
+			radigo.CoARequest:        handleCoA,
 		}, nil, utils.Logger)
 	stopChan := make(chan struct{})
 	defer close(stopChan)
@@ -203,14 +232,18 @@ func TestRadiusDisconnect(t *testing.T) {
 		t.Errorf("unexpected reply received to AccountingRequest: %+v", replyPacket)
 	}
 
-	var replyFD string
-	if err = raDiscRPC.Call(context.Background(), utils.SessionSv1ForceDisconnect, nil, &replyFD); err != nil {
+	var reply string
+	if err := raDiscRPC.Call(context.Background(), utils.SessionSv1ReAuthorize, &utils.SessionFilter{}, &reply); err != nil {
+		t.Error(err)
+	}
+
+	if err = raDiscRPC.Call(context.Background(), utils.SessionSv1ForceDisconnect, nil, &reply); err != nil {
 		t.Error(err)
 	}
 
 	select {
 	case <-done:
 	case <-time.After(time.Second):
-		t.Error("client did not receive a DisconnectRequest in time")
+		t.Error("client did not receive a the expected requests in time")
 	}
 }
