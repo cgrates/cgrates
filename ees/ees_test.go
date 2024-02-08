@@ -128,9 +128,9 @@ func TestAttrSProcessEvent(t *testing.T) {
 	eeS := NewEventExporterS(cfg, filterS, connMgr)
 	// cgrEv := &utils.CGREvent{}
 	exp := &utils.CGREvent{Event: map[string]any{"testcase": 1}}
-	if err := eeS.attrSProcessEvent(cgrEv, []string{}, utils.EmptyString); err != nil {
+	if rplyEv, err := eeS.attrSProcessEvent(cgrEv, []string{}, utils.EmptyString); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(exp, cgrEv) {
+	} else if !reflect.DeepEqual(exp, rplyEv) {
 		t.Errorf("Expected %v but received %v", utils.ToJSON(exp), utils.ToJSON(cgrEv))
 	}
 }
@@ -155,8 +155,10 @@ func TestAttrSProcessEvent2(t *testing.T) {
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes): clientConn,
 	})
 	eeS := NewEventExporterS(cfg, filterS, connMgr)
-	cgrEv := &utils.CGREvent{}
-	if err := eeS.attrSProcessEvent(cgrEv, []string{}, utils.EmptyString); err != nil {
+	cgrEv := &utils.CGREvent{
+		APIOpts: make(map[string]any),
+	}
+	if _, err := eeS.attrSProcessEvent(cgrEv, []string{}, utils.EmptyString); err != nil {
 		t.Error(err)
 	}
 }
