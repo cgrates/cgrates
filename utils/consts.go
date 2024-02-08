@@ -978,6 +978,7 @@ const (
 	MetaDistinct = "*distinct"
 	MetaRAR      = "*rar"
 	MetaDMR      = "*dmr"
+	MetaCoA      = "*coa"
 )
 
 // Services
