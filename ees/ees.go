@@ -156,13 +156,15 @@ func (eeS *EventExporterS) V1ProcessEvent(ctx *context.Context, cgrEv *engine.CG
 			}
 		}
 
+		clonedCgrEv := cgrEv.CGREvent.Clone()
+		clonedCgrEv.APIOpts[utils.MetaExporterID] = eeCfg.ID
 		if eeCfg.Flags.GetBool(utils.MetaAttributes) {
 			if err = eeS.attrSProcessEvent(
-				cgrEv.CGREvent,
+				clonedCgrEv,
 				eeCfg.AttributeSIDs,
 				utils.FirstNonEmpty(
 					eeCfg.AttributeSCtx,
-					utils.IfaceAsString(cgrEv.APIOpts[utils.OptsContext]),
+					utils.IfaceAsString(clonedCgrEv.APIOpts[utils.OptsContext]),
 					utils.MetaEEs)); err != nil {
 				return
 			}
@@ -204,7 +206,7 @@ func (eeS *EventExporterS) V1ProcessEvent(ctx *context.Context, cgrEv *engine.CG
 					utils.EEs, ee.Cfg().ID))
 		}
 		go func(evict, sync bool, ee EventExporter) {
-			if err := exportEventWithExporter(ee, cgrEv.CGREvent, evict, eeS.cfg, eeS.filterS); err != nil {
+			if err := exportEventWithExporter(ee, clonedCgrEv, evict, eeS.cfg, eeS.filterS); err != nil {
 				withErr = true
 			}
 			if sync {

@@ -726,7 +726,7 @@ const (
 	MetaStore               = "*store"
 	MetaClear               = "*clear"
 	MetaExport              = "*export"
-	MetaExportID            = "*export_id"
+	MetaExporterID          = "*exporterID"
 	MetaTimeNow             = "*time_now"
 	MetaFirstEventATime     = "*first_event_atime"
 	MetaLastEventATime      = "*last_event_atime"
