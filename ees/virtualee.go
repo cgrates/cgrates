@@ -19,6 +19,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package ees
 
 import (
+	"fmt"
+	"strings"
+
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -36,12 +39,30 @@ type VirtualEE struct {
 	dc  *utils.SafeMapStorage
 }
 
-func (vEe *VirtualEE) Cfg() *config.EventExporterCfg           { return vEe.cfg }
-func (vEe *VirtualEE) Connect() error                          { return nil }
-func (vEe *VirtualEE) ExportEvent(any, string) error           { return nil }
-func (vEe *VirtualEE) Close() error                            { return nil }
-func (vEe *VirtualEE) GetMetrics() *utils.SafeMapStorage       { return vEe.dc }
-func (vEe *VirtualEE) PrepareMap(*utils.CGREvent) (any, error) { return nil, nil }
-func (vEe *VirtualEE) PrepareOrderMap(*utils.OrderedNavigableMap) (any, error) {
-	return nil, nil
+func (vEe *VirtualEE) Cfg() *config.EventExporterCfg { return vEe.cfg }
+func (vEe *VirtualEE) Connect() error                { return nil }
+
+func (vEe *VirtualEE) ExportEvent(payload any, _ string) error {
+	utils.Logger.Info(
+		fmt.Sprintf("<%s> <%s> exported: <%s>",
+			utils.EEs, vEe.Cfg().ID, utils.ToJSON(payload)))
+	return nil
+}
+
+func (vEe *VirtualEE) Close() error                      { return nil }
+func (vEe *VirtualEE) GetMetrics() *utils.SafeMapStorage { return vEe.dc }
+
+func (vEe *VirtualEE) PrepareMap(cgrEv *utils.CGREvent) (any, error) {
+	return cgrEv.Event, nil
+}
+
+func (vEe *VirtualEE) PrepareOrderMap(onm *utils.OrderedNavigableMap) (any, error) {
+	preparedMap := make(map[string]any)
+	for el := onm.GetFirstElement(); el != nil; el = el.Next() {
+		path := el.Value
+		item, _ := onm.Field(path)
+		path = path[:len(path)-1] // remove the last index
+		preparedMap[strings.Join(path, utils.NestingSep)] = item.String()
+	}
+	return preparedMap, nil
 }

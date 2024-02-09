@@ -22,6 +22,7 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -39,7 +40,11 @@ func TestVirtualEeGetMetrics(t *testing.T) {
 	}
 }
 func TestVirtualEeExportEvent(t *testing.T) {
-	vEe := &VirtualEE{}
+	vEe := &VirtualEE{
+		cfg: &config.EventExporterCfg{
+			ID: "testEE",
+		},
+	}
 	if err := vEe.ExportEvent([]byte{}, ""); err != nil {
 		t.Error(err)
 	}
