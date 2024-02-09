@@ -67,7 +67,7 @@ Regarding the SIP Servers, click on the tab corresponding to the choice you made
       .. code-block:: bash
 
          TOKEN=YOURSIGNALWIRETOKEN # Insert your SignalWire Personal Access Token here
-         apt-get update && apt-get install -y gnupg2 wget lsb-release
+         sudo apt-get update && apt-get install -y gnupg2 wget lsb-release
          wget --http-user=signalwire --http-password=$TOKEN -O /usr/share/keyrings/signalwire-freeswitch-repo.gpg https://freeswitch.signalwire.com/repo/deb/debian-release/signalwire-freeswitch-repo.gpg
          echo "machine freeswitch.signalwire.com login signalwire password $TOKEN" > /etc/apt/auth.conf
          chmod 600 /etc/apt/auth.conf
@@ -75,7 +75,7 @@ Regarding the SIP Servers, click on the tab corresponding to the choice you made
          echo "deb-src [signed-by=/usr/share/keyrings/signalwire-freeswitch-repo.gpg] https://freeswitch.signalwire.com/repo/deb/debian-release/ `lsb_release -sc` main" >> /etc/apt/sources.list.d/freeswitch.list
 
          # If /etc/freeswitch does not exist, the standard vanilla configuration is deployed
-         apt-get update && apt-get install -y freeswitch-meta-all
+         sudo apt-get update && apt-get install -y freeswitch-meta-all
 
    .. group-tab:: Asterisk
 
@@ -118,9 +118,9 @@ Regarding the SIP Servers, click on the tab corresponding to the choice you made
       .. code-block:: bash
 
          wget -O- http://deb.kamailio.org/kamailiodebkey.gpg | sudo apt-key add -
-         echo "deb http://deb.kamailio.org/kamailio56 bullseye main" > /etc/apt/sources.list.d/kamailio.list
-         apt-get update
-         apt-get install kamailio kamailio-extra-modules kamailio-json-modules 
+         echo "deb http://deb.kamailio.org/kamailio57 bullseye main" > /etc/apt/sources.list.d/kamailio.list
+         sudo apt-get update
+         sudo apt-get install kamailio kamailio-extra-modules kamailio-json-modules 
 
    .. group-tab:: OpenSIPS
 
@@ -131,7 +131,7 @@ Regarding the SIP Servers, click on the tab corresponding to the choice you made
        curl https://apt.opensips.org/opensips-org.gpg -o /usr/share/keyrings/opensips-org.gpg
        echo "deb [signed-by=/usr/share/keyrings/opensips-org.gpg] https://apt.opensips.org bookworm 3.4-releases" >/etc/apt/sources.list.d/opensips.list
        echo "deb [signed-by=/usr/share/keyrings/opensips-org.gpg] https://apt.opensips.org bookworm cli-nightly" >/etc/apt/sources.list.d/opensips-cli.list
-       apt-get update
+       sudo apt-get update
        sudo apt-get install opensips opensips-mysql-module opensips-cgrates-module opensips-cli
 
 Configuration and initialization
@@ -157,13 +157,13 @@ Regarding the SIP Servers, we have prepared custom configurations in advance, as
 
       .. code-block:: bash
 
-         /usr/share/cgrates/tutorials/fs_evsock/freeswitch/etc/init.d/freeswitch start
+         sudo /usr/share/cgrates/tutorials/fs_evsock/freeswitch/etc/init.d/freeswitch start
 
       To verify that FreeSWITCH_ is running, run the following command:
 
       .. code-block:: bash
 
-         fs_cli -x status
+         sudo fs_cli -x status
 
 
    .. group-tab:: Asterisk
@@ -179,14 +179,14 @@ Regarding the SIP Servers, we have prepared custom configurations in advance, as
 
       .. code-block:: bash
 
-         /usr/share/cgrates/tutorials/asterisk_ari/asterisk/etc/init.d/asterisk start
+         sudo /usr/share/cgrates/tutorials/asterisk_ari/asterisk/etc/init.d/asterisk start
       
 
       To verify that Asterisk_ is running, run the following commands:
 
       .. code-block:: bash
 
-         asterisk -r -s /tmp/cgr_asterisk_ari/asterisk/run/asterisk.ctl
+         sudo asterisk -r -s /tmp/cgr_asterisk_ari/asterisk/run/asterisk.ctl
          ari show status
 
    .. group-tab:: Kamailio
@@ -202,13 +202,13 @@ Regarding the SIP Servers, we have prepared custom configurations in advance, as
 
       .. code-block:: bash
 
-         /usr/share/cgrates/tutorials/kamevapi/kamailio/etc/init.d/kamailio start
+         sudo /usr/share/cgrates/tutorials/kamevapi/kamailio/etc/init.d/kamailio start
 
       To verify that Kamailio_ is running, run the following command:
 
       .. code-block:: bash
 
-         kamctl moni
+         sudo kamctl moni
 
    .. group-tab:: OpenSIPS
 
@@ -347,7 +347,7 @@ Regarding the SIP Servers, we have prepared custom configurations in advance, as
  - **SupplierS**: selection of suppliers for each session (in case of OpenSIPS_, it will work in tandem with their DRouting module);
  - **StatS**: computing statistics in real-time regarding sessions and their charging;
  - **ThresholdS**: monitoring and reacting to events coming from above subsystems;
- - **CDRe**: exporting rated CDRs from CGR StorDB (export path: */tmp*).
+ - **EEs**: exporting rated CDRs from CGR StorDB (export path: */tmp*).
 
 Just as with the SIP Servers, we have also prepared configurations and init scripts for CGRateS. And just as well, you can manage the CGRateS service using systemctl if you prefer. You can even start it using the cgr-engine binary, like so:
 
@@ -365,19 +365,19 @@ Just as with the SIP Servers, we have also prepared configurations and init scri
 
       .. code-block:: bash
 
-         /usr/share/cgrates/tutorials/fs_evsock/cgrates/etc/init.d/cgrates start
+         sudo /usr/share/cgrates/tutorials/fs_evsock/cgrates/etc/init.d/cgrates start
 
    .. group-tab:: Asterisk
 
       .. code-block:: bash
 
-         /usr/share/cgrates/tutorials/asterisk_ari/cgrates/etc/init.d/cgrates start
+         sudo /usr/share/cgrates/tutorials/asterisk_ari/cgrates/etc/init.d/cgrates start
 
    .. group-tab:: Kamailio
 
       .. code-block:: bash
 
-         /usr/share/cgrates/tutorials/kamevapi/cgrates/etc/init.d/cgrates start
+         sudo /usr/share/cgrates/tutorials/kamevapi/cgrates/etc/init.d/cgrates start
 
    .. group-tab:: OpenSIPS
 
@@ -439,7 +439,7 @@ Test calls
 1001 -> 1002
 ~~~~~~~~~~~~
 
-Since the user 1001 is marked as *prepaid* inside the telecom switch, calling between 1001 and 1002 should generate pre-auth and prepaid debits which can be checked with *get_account* command integrated within *cgr-console* tool. Charging will be done based on time of day as described in the tariff plan definition above.
+Since the user 1001 is marked as *prepaid* inside the telecom switch, calling between 1001 and 1002 should generate pre-auth and prepaid debits which can be checked with *accounts* command integrated within *cgr-console* tool. Charging will be done based on time of day as described in the tariff plan definition above.
 
 .. note::
 
@@ -480,11 +480,11 @@ CDR Processing
 CDR Exporting
 -------------
 
-Once the CDRs are mediated, they are available to be exported. One can use available RPC APIs for that or directly call exports from console:
+Once the CDRs are mediated, they are available to be exported. To export them, you first need to configure your EEs in configs (already done by the cgrates script from earlier). Important fields to populate are "id" (sample: tutorial_export), "type" (sample: *file_csv), "export_path" (sample: /tmp), and "fields" where you define all the data that you want to export. After that, you can use available RPC APIs or directly call export_cdrs from the console to export them:
 
 .. code-block:: bash
 
- cgr-console 'cdrs_export ExportArgs={"ExportFormat":"*file_csv", "ExportPath":"/tmp"}'
+ cgr-console 'export_cdrs ExportArgs={"ExportFormat":"*file_csv", "ExportPath":"/tmp"}'
 
 
 Fraud detection
