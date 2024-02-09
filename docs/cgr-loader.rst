@@ -23,6 +23,8 @@ Customisable through the use of :ref:`JSON configuration <configuration>` or com
     	CacheS component to contact for cache reloads, empty to disable automatic cache reloads (default "*localhost")
   -caching string
     	Caching strategy used when loading TP
+  -caching_delay duration
+    	Adds delay before cache reload
   -config_path string
     	Configuration directory path.
   -datadb_host string
@@ -34,7 +36,7 @@ Customisable through the use of :ref:`JSON configuration <configuration>` or com
   -datadb_port string
     	The DataDb port to bind to. (default "6379")
   -datadb_type string
-    	The type of the DataDB database <*redis|*mongo> (default "redis")
+    	The type of the DataDB database <*redis|*mongo> (default "*redis")
   -datadb_user string
     	The DataDb user to sign in as. (default "cgrates")
   -dbdata_encoding string
@@ -51,20 +53,38 @@ Customisable through the use of :ref:`JSON configuration <configuration>` or com
     	Load the tariff plan from storDb to dataDb
   -import_id string
     	Uniquely identify an import/load, postpended to some automatic fields
+  -mongoConnScheme string
+    	Scheme for MongoDB connection <mongodb|mongodb+srv> (default "mongodb")
+  -mongoQueryTimeout duration
+    	The timeout for queries (default 10s)
   -path string
     	The path to folder containing the data files (default "./")
-  -recursive
-    	Loads data from folder recursive.
+  -redisCACertificate string
+    	Path to the CA certificate
+  -redisClientCertificate string
+    	Path to the client certificate
+  -redisClientKey string
+    	Path to the client key
+  -redisCluster
+    	Is the redis datadb a cluster
+  -redisClusterOndownDelay duration
+    	The delay before executing the commands if the redis cluster is in the CLUSTERDOWN state
+  -redisClusterSync duration
+    	The sync interval for the redis cluster (default 5s)
+  -redisConnectAttempts int
+    	The maximum amount of dial attempts (default 20)
+  -redisConnectTimeout duration
+    	The amount of wait time until timeout for a connection attempt
+  -redisMaxConns int
+    	The connection pool size (default 10)
+  -redisReadTimeout duration
+    	The amount of wait time until timeout for reading operations
   -redisSentinel string
     	The name of redis sentinel
-  -redisCluster bool
-    	Is the redis datadb a cluster
-  -cluster_sync string
-    	The sync interval for the redis cluster
-  -cluster_ondown_delay string
-    	The delay before executing the commands if thredis cluster is in the CLUSTERDOWN state
-  -mongoQueryTimeout string
-    	The timeout for queries
+  -redisTLS
+    	Enable TLS when connecting to Redis
+  -redisWriteTimeout duration
+    	The amount of wait time until timeout for writing operations
   -remove
     	Will remove instead of adding data from DB
   -route_id string
@@ -78,15 +98,17 @@ Customisable through the use of :ref:`JSON configuration <configuration>` or com
   -stordb_name string
     	The name/number of the storDb to connect to. (default "cgrates")
   -stordb_passwd string
-    	The storDb user's password.
+    	The storDb user's password. (default "CGRateS.org")
   -stordb_port string
     	The storDb port to bind to. (default "3306")
   -stordb_type string
-    	The type of the storDb database <*mysql|*postgres|*mongo> (default "mysql")
+    	The type of the storDb database <*mysql|*postgres|*mongo> (default "*mysql")
   -stordb_user string
     	The storDb user to sign in as. (default "cgrates")
+  -tenant string
+    	 (default "cgrates.org")
   -timezone string
-    	Timezone for timestamps where not specified <""|UTC|Local|$IANA_TZ_DB>
+    	Timezone for timestamps where not specified <""|UTC|Local|$IANA_TZ_DB> (default "Local")
   -to_stordb
     	Import the tariff plan from files to storDb
   -tpid string

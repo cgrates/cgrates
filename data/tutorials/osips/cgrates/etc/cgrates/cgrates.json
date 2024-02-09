@@ -96,10 +96,42 @@
 	"prefix_indexed_fields": ["*req.Destination"],
 },
 
+"ees": {
+	"enabled": true,
+	"attributes_conns":["*internal"],
+	"exporters": [
+		{
+			"id": "tutorial_export",
+			"type": "*file_csv",
+			"export_path": "/tmp/",
+			"timezone": "UTC",
+			"synchronous": true,
+			"attempts": 1,
+			"field_separator": ",",
+			"fields":[
+				{"tag": "CGRID", "path": "*exp.CGRID", "type": "*variable", "value": "~*req.CGRID"},
+				{"tag": "RunID", "path": "*exp.RunID", "type": "*variable", "value": "~*req.RunID"},
+				{"tag": "ToR", "path": "*exp.ToR", "type": "*variable", "value": "~*req.ToR"},
+				{"tag": "OriginID", "path": "*exp.OriginID", "type": "*variable", "value": "~*req.OriginID"},
+				{"tag": "RequestType", "path": "*exp.RequestType", "type": "*variable", "value": "~*req.RequestType"},
+				{"tag": "Tenant", "path": "*exp.Tenant", "type": "*variable", "value": "~*req.Tenant"},
+				{"tag": "Category", "path": "*exp.Category", "type": "*variable", "value": "~*req.Category"},
+				{"tag": "Account", "path": "*exp.Account", "type": "*variable", "value": "~*req.Account"},
+				{"tag": "Subject", "path": "*exp.Subject", "type": "*variable", "value": "~*req.Subject"},
+				{"tag": "Destination", "path": "*exp.Destination", "type": "*variable", "value": "~*req.Destination"},
+				{"tag": "SetupTime", "path": "*exp.SetupTime", "type": "*variable", "value": "~*req.SetupTime{*time_string:2006-01-02T15:04:05Z}" },
+				{"tag": "AnswerTime", "path": "*exp.AnswerTime", "type": "*variable", "value": "~*req.AnswerTime{*time_string:2006-01-02T15:04:05Z}"},
+				{"tag": "Usage", "path": "*exp.Usage", "type": "*variable", "value": "~*req.Usage{*duration_seconds}"},
+				{"tag": "Cost", "path": "*exp.Cost", "type": "*variable", "value": "~*req.Cost{*round:4}"},
+			],
+		},
+	]
+},
 
 "apiers": {
 	"enabled": true,
 	"scheduler_conns": ["*localhost"],
+	"ees_conns": ["*localhost"],
 },
 
 

@@ -4,49 +4,31 @@
 .. _Kafka: https://kafka.apache.org/
 
 
-.. _CDRe:
+.. _EEs:
 
-CDRe
+EEs
 ====
 
 
-**CDRe** is an extension of :ref:`CDRs`, responsible for exporting the *CDR* events processed by :ref:`CDRs`. It is accessed via `CGRateS RPC APIs <https://pkg.go.dev/github.com/cgrates/cgrates/apier@master/>`_ and configured within *cdre* section inside :ref:`JSON configuration <configuration>`.
+**EventExporterService/EEs** is a subsystem designed to convert internal, already processed events into external ones and then export them to a defined destination. It is accessible via `CGRateS RPC APIs <https://pkg.go.dev/github.com/cgrates/cgrates/apier@master/>`_.
 
 
-Export types
-------------
+Configuration
+-------------
 
-There are two types of exports with common configuration but different data sources:
+**EEs** is configured within **ees** section from :ref:`JSON configuration <configuration>`.
 
+Config params
+^^^^^^^^^^^^^
 
-Online exports
-^^^^^^^^^^^^^^
+Most of the parameters are explained in :ref:`JSON configuration <configuration>`, hence we mention here only the ones where additional info is necessary or there will be particular implementation for *EventExporterService*.
 
-Are real-time exports, triggered by the CDR event processed by :ref:`CDRs`, and take these events as data source. 
+One **exporters** instance includes the following parameters:
 
-The *online exports* are enabled via *online_cdr_exports* :ref:`JSON configuration <configuration>` option within *cdrs*. 
+id
+    Exporter identificator, used mostly for debug. The id should be unique per each exporter since it can influence updating configuration from different *.json* configuration.
 
-You can control the templates which are to be executed via the filters which are applied for each export template individually.
-
-
-Offline exports
-^^^^^^^^^^^^^^^
-
-Are exports which are triggered via `CGRateS RPC APIs <https://pkg.go.dev/github.com/cgrates/cgrates/apier@master/>`_ and they have as data source the CDRs stored within *StorDB*.
-
-
-
-Parameters
-----------
-
-CDRe
-^^^^
-
-**CDRe** it is configured within **cdre** section from :ref:`JSON configuration <configuration>`.
-
-One **export profile** includes the following parameters:
-
-export_format
+type
 	Specify the type of export which will run. Possible values are:
 
 	**\*file_csv**
@@ -82,6 +64,21 @@ export_format
 	**\*kafka_json_map**
 		Will post the CDR to an `Apache Kafka <Kafka>`_. The export content will be a JSON serialized hmap with fields defined within the *fields* section of the template.
 
+	**\*nats_json_map**
+        Exporter for publishing messages to NATS (Message Queue) in JSON format.
+
+    **\*virt**
+        In-memory exporter.
+
+    **\*els**
+        Exporter for Elasticsearch.
+
+    **\*sql**
+        Exporter for generic content to *SQL* databases. Supported databases are: MySQL_, PostgreSQL_ and MSSQL_.
+
+    **\*rpc**
+        Exporter for calling APIs through node connections.
+
 export_path
 	Specify the export path. It has special format depending of the export type.
 
@@ -111,6 +108,20 @@ export_path
 
 		Sample: *localhost:9092?topic=cgrates_cdrs*
 
+	**\*sql**
+		SQL URL with extra parameters.
+
+		Sample: *mysql://cgrates:CGRateS.org@127.0.0.1:3306*
+
+	**\*nats**
+		NATS URL.
+
+		Sample: *nats://localhost:4222*
+
+	**\*els**
+		Elasticsearch URL
+
+		Sample: *http://localhost:9200*
 
 filters
 	List of filters to pass for the export profile to execute. For the dynamic content (prefixed with *~*) following special variables are available:
@@ -128,13 +139,7 @@ synchronous
 	Block further exports until this one finishes. In case of *false* the control will be given to the next export template as soon as this one was started.
 
 attempts
-	Number of attempts before giving up on the export and writing the failed request to file. The failed request will be written to *failed_posts_dir* defined in *general* section.
-
-field_separator
-	Field separator to be used in some export types (ie. *\*file_csv*).
-
-attributes_context
-	The context used when sending the CDR event to :ref:`AttributeS` for modifications. If empty, there will be no event sent to :ref:`AttributeS`.
+	Number of attempts before giving up on the export and writing the failed request to file. The failed request will be written to *failed_posts_dir*.
 
 fields
 	List of fields for the exported event. Not affecting templates like *\*http_json_cdr* or *\*amqp_json_cdr* with fixed content.
