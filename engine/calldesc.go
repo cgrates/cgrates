@@ -32,7 +32,6 @@ import (
 const (
 	// these might be better in the confs under optimizations section
 	MIN_PREFIX_MATCH = 1
-	FALLBACK_SUBJECT = utils.MetaAny
 )
 
 var (
@@ -243,25 +242,30 @@ func (cd *CallDescriptor) getAccount() (ub *Account, err error) {
 	return cd.account, err
 }
 
-/*
-Restores the activation periods for the specified prefix from storage.
-*/
+// LoadRatingPlans restores the activation periods for the specified prefix from storage.
 func (cd *CallDescriptor) LoadRatingPlans() (err error) {
+
+	// Try to find RatingPlans with specific Category and Subject, falling back to defaults if not found.
+	// Priority: Category + Subject -> Category + default -> default + Subject -> both defaults.
 	var rec int
-	rec, err = cd.getRatingPlansForPrefix(cd.GetKey(cd.Subject), 1)
+	rec, err = cd.getRatingPlansForPrefix(cd.GetKey(cd.Category, cd.Subject), 1)
 	if err == utils.ErrNotFound && rec == 1 {
-		//if err != nil || !cd.continousRatingInfos() {
-		// use the default subject only if the initial one was not found
-		_, err = cd.getRatingPlansForPrefix(cd.GetKey(FALLBACK_SUBJECT), 1)
+		rec, err = cd.getRatingPlansForPrefix(cd.GetKey(cd.Category, utils.MetaAny), 1)
+		if err == utils.ErrNotFound && rec == 1 {
+			rec, err = cd.getRatingPlansForPrefix(cd.GetKey(utils.MetaAny, cd.Subject), 1)
+			if err == utils.ErrNotFound && rec == 1 {
+				_, err = cd.getRatingPlansForPrefix(cd.GetKey(utils.MetaAny, utils.MetaAny), 1)
+			}
+		}
 	}
-	//load the rating plans
+
 	if err != nil {
-		utils.Logger.Err(fmt.Sprintf("Rating plan not found for destination %s and account: %s, subject: %s", cd.Destination, cd.GetAccountKey(), cd.GetKey(cd.Subject)))
+		utils.Logger.Err(fmt.Sprintf("Rating plan not found for destination %s and account: %s, subject: %s", cd.Destination, cd.GetAccountKey(), cd.GetKey(cd.Category, cd.Subject)))
 		return utils.ErrRatingPlanNotFound
 
 	}
 	if !cd.continousRatingInfos() {
-		utils.Logger.Err(fmt.Sprintf("Destination %s not authorized for account: %s, subject: %s", cd.Destination, cd.GetAccountKey(), cd.GetKey(cd.Subject)))
+		utils.Logger.Err(fmt.Sprintf("Destination %s not authorized for account: %s, subject: %s", cd.Destination, cd.GetAccountKey(), cd.GetKey(cd.Category, cd.Subject)))
 		return utils.ErrUnauthorizedDestination
 	}
 	return
@@ -375,8 +379,8 @@ func (cd *CallDescriptor) addRatingInfos(ris RatingInfos) bool {
 
 // GetKey constructs the key for the storage lookup.
 // The prefixLen is limiting the length of the destination prefix.
-func (cd *CallDescriptor) GetKey(subject string) string {
-	return utils.ConcatenatedKey(utils.MetaOut, cd.Tenant, cd.Category, subject)
+func (cd *CallDescriptor) GetKey(category, subject string) string {
+	return utils.ConcatenatedKey(utils.MetaOut, cd.Tenant, category, subject)
 }
 
 // GetAccountKey returns the key used to retrive the user balance involved in this call

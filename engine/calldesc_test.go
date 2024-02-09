@@ -2447,7 +2447,7 @@ func BenchmarkStorageGetting(b *testing.B) {
 		Subject: "rif", Destination: "0256", TimeStart: t1, TimeEnd: t2}
 	b.StartTimer()
 	for i := 0; i < b.N; i++ {
-		dm.GetRatingProfile(cd.GetKey(cd.Subject), false, utils.NonTransactional)
+		dm.GetRatingProfile(cd.GetKey(cd.Category, cd.Subject), false, utils.NonTransactional)
 	}
 }
 
@@ -2703,7 +2703,7 @@ func TestCallDescGetRatingPlansForPrefix(t *testing.T) {
 	})
 	dm.SetReverseDestination("DEST", []string{"1004"}, "")
 	SetDataStorage(dm)
-	if _, err = cd.getRatingPlansForPrefix(cd.GetKey(cd.Subject), 1); err != nil {
+	if _, err = cd.getRatingPlansForPrefix(cd.GetKey(cd.Category, cd.Subject), 1); err != nil {
 		t.Error(err)
 	}
 }

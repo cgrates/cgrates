@@ -28,12 +28,13 @@ import (
 	"time"
 
 	"github.com/cgrates/birpc/context"
+	v1 "github.com/cgrates/cgrates/apier/v1"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
 /*
-TestFallbackDepth tests fallback_depth configuration.
+TestRatingPlansFallbackDepth tests fallback_depth configuration.
 
 Previously, the max depth was always 3. The test ensures that the functionality works properly when
 the depth exceeds the previous hard-coded value.
@@ -63,7 +64,7 @@ The test steps are as follows:
    be required.
 */
 
-func TestFallbackDepth(t *testing.T) {
+func TestRatingPlansFallbackDepth(t *testing.T) {
 	switch *dbType {
 	case utils.MetaInternal:
 	case utils.MetaMySQL, utils.MetaMongo, utils.MetaPostgres:
@@ -133,7 +134,7 @@ cgrates.org,call,FallbackSubject4,2014-01-01T00:00:00Z,RP_ANY,`,
 
 	buf := &bytes.Buffer{}
 	testEnv := TestEnvironment{
-		Name: "TestFallbackDepth",
+		Name: "TestRatingPlansFallbackDepth",
 		// Encoding:   *encoding,
 		ConfigJSON: content,
 		TpFiles:    tpFiles,
@@ -245,4 +246,197 @@ cgrates.org,call,FallbackSubject4,2014-01-01T00:00:00Z,RP_ANY,`,
 		}
 	})
 
+}
+
+// goos: linux
+// goarch: amd64
+// pkg: github.com/cgrates/cgrates/general_tests
+// cpu: Intel(R) Core(TM) i7-10510U CPU @ 1.80GHz
+// GetCostNoFallback
+// GetCostNoFallback         	     176	   6478657 ns/op	    3382 B/op	      74 allocs/op
+// GetCostNoFallback         	     169	   6567780 ns/op	    3401 B/op	      74 allocs/op
+// GetCostNoFallback         	     181	   6520835 ns/op	    3376 B/op	      74 allocs/op
+// GetCostNoFallback         	     174	   7159966 ns/op	    3386 B/op	      74 allocs/op
+// GetCostNoFallback         	     174	   8267882 ns/op	    3386 B/op	      74 allocs/op
+// GetCostFallbackSubject
+// GetCostFallbackSubject    	     159	   6913372 ns/op	    3437 B/op	      74 allocs/op
+// GetCostFallbackSubject    	     272	   5235043 ns/op	    3495 B/op	      74 allocs/op
+// GetCostFallbackSubject    	     205	   5740902 ns/op	    3666 B/op	      74 allocs/op
+// GetCostFallbackSubject    	     276	   5500421 ns/op	    3486 B/op	      74 allocs/op
+// GetCostFallbackSubject    	     256	   6885937 ns/op	    3530 B/op	      74 allocs/op
+// GetCostFallbackCategory
+// GetCostFallbackCategory   	     147	   7001982 ns/op	    3475 B/op	      74 allocs/op
+// GetCostFallbackCategory   	     163	   7489421 ns/op	    3415 B/op	      74 allocs/op
+// GetCostFallbackCategory   	     164	   7048463 ns/op	    3413 B/op	      74 allocs/op
+// GetCostFallbackCategory   	     180	   7447074 ns/op	    3388 B/op	      74 allocs/op
+// GetCostFallbackCategory   	     188	   5950831 ns/op	    3360 B/op	      74 allocs/op
+// GetCostFallbackSubjectAndCategory
+// GetCostFallbackSubjectAndCategory         	     162	   7412799 ns/op	    3581 B/op	      74 allocs/op
+// GetCostFallbackSubjectAndCategory         	     165	   7436020 ns/op	    3569 B/op	      74 allocs/op
+// GetCostFallbackSubjectAndCategory         	     192	   7406939 ns/op	    3507 B/op	      74 allocs/op
+// GetCostFallbackSubjectAndCategory         	     168	   7313485 ns/op	    3568 B/op	      74 allocs/op
+// GetCostFallbackSubjectAndCategory         	     180	   7771994 ns/op	    3530 B/op	      74 allocs/op
+func TestRatingPlansFallbackCategoryAndSubject(t *testing.T) {
+	switch *dbType {
+	case utils.MetaInternal:
+	case utils.MetaMySQL, utils.MetaMongo, utils.MetaPostgres:
+		t.SkipNow()
+	default:
+		t.Fatal("unsupported dbtype value")
+	}
+
+	content := `{
+
+"general": {
+	"log_level": 7
+},
+
+"data_db": {								
+	"db_type": "*internal"
+},
+
+"stor_db": {
+	"db_type": "*internal"
+},
+
+"rals": {
+	"enabled": true
+},
+
+"apiers": {
+	"enabled": true
+}
+
+}`
+
+	tpFiles := map[string]string{
+		utils.DestinationRatesCsv: `#Id,DestinationId,RatesTag,RoundingMethod,RoundingDecimals,MaxCost,MaxCostStrategy
+DR_NO_FALLBACK,DST_TEST,RT_1UNITS_PER_SEC,*up,1,0,
+DR_FALLBACK_ANY_SUBJECT,DST_TEST,RT_2UNITS_PER_SEC,*up,1,0,
+DR_FALLBACK_ANY_CATEGORY,DST_TEST,RT_3UNITS_PER_SEC,*up,1,0,
+DR_FALLBACK_ANY_SUBJECT_AND_CATEGORY,DST_TEST,RT_4UNITS_PER_SEC,*up,1,0,`,
+		utils.DestinationsCsv: `#Id,Prefix
+DST_TEST,+49`,
+		utils.RatesCsv: `#Id,ConnectFee,Rate,RateUnit,RateIncrement,GroupIntervalStart
+RT_1UNITS_PER_SEC,0,1,1s,1s,0s
+RT_2UNITS_PER_SEC,0,2,1s,1s,0s
+RT_3UNITS_PER_SEC,0,3,1s,1s,0s
+RT_4UNITS_PER_SEC,0,4,1s,1s,0s`,
+		utils.RatingPlansCsv: `#Id,DestinationRatesId,TimingTag,Weight
+RP_NO_FALLBACK,DR_NO_FALLBACK,*any,10
+RP_FALLBACK_ANY_SUBJECT,DR_FALLBACK_ANY_SUBJECT,*any,10
+RP_FALLBACK_ANY_CATEGORY,DR_FALLBACK_ANY_CATEGORY,*any,10
+RP_FALLBACK_ANY_SUBJECT_AND_CATEGORY,DR_FALLBACK_ANY_SUBJECT_AND_CATEGORY,*any,10`,
+		utils.RatingProfilesCsv: `#Tenant,Category,Subject,ActivationTime,RatingPlanId,RatesFallbackSubject
+cgrates.org,call,1001,2014-01-14T00:00:00Z,RP_NO_FALLBACK,
+cgrates.org,call,*any,2014-01-14T00:00:00Z,RP_FALLBACK_ANY_SUBJECT,
+cgrates.org,*any,1001,2014-01-14T00:00:00Z,RP_FALLBACK_ANY_CATEGORY,
+cgrates.org,*any,*any,2014-01-14T00:00:00Z,RP_FALLBACK_ANY_SUBJECT_AND_CATEGORY,`,
+	}
+
+	testEnv := TestEnvironment{
+		Name: "TestRatingPlansFallbackCategoryAndSubject",
+		// Encoding:   *encoding,
+		ConfigJSON: content,
+		TpFiles:    tpFiles,
+	}
+	client, _, shutdown, err := testEnv.Setup(t, *waitRater)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	defer shutdown()
+
+	t.Run("GetCostNoFallback", func(t *testing.T) {
+		getCostArgs := &v1.AttrGetCost{
+			Tenant:      "cgrates.org",
+			Category:    "call",
+			Subject:     "1001",
+			Destination: "+491234567890",
+			AnswerTime:  "*now",
+			Usage:       "10s",
+		}
+		var ec engine.EventCost
+		if err := client.Call(context.Background(), utils.APIerSv1GetCost, getCostArgs, &ec); err != nil {
+			t.Error(err)
+		} else if *ec.Cost != 10.000000 {
+			t.Errorf("Unexpected cost received: %f", *ec.Cost)
+		}
+
+		expectedRP := "RP_NO_FALLBACK"
+		if val, err := ec.FieldAsString([]string{"Charges[0]", "Rating", "RatingFilter", "RatingPlanID"}); err != nil {
+			t.Error(err)
+		} else if val != expectedRP {
+			t.Errorf("expected %v, received %v", expectedRP, val)
+		}
+	})
+	t.Run("GetCostFallbackSubject", func(t *testing.T) {
+		getCostArgs := &v1.AttrGetCost{
+			Tenant:      "cgrates.org",
+			Category:    "call",
+			Subject:     "1234",
+			Destination: "+491234567890",
+			AnswerTime:  "*now",
+			Usage:       "10s",
+		}
+		var ec engine.EventCost
+		if err := client.Call(context.Background(), utils.APIerSv1GetCost, getCostArgs, &ec); err != nil {
+			t.Error(err)
+		} else if *ec.Cost != 20.000000 {
+			t.Errorf("Unexpected cost received: %f", *ec.Cost)
+		}
+
+		expectedRP := "RP_FALLBACK_ANY_SUBJECT"
+		if val, err := ec.FieldAsString([]string{"Charges[0]", "Rating", "RatingFilter", "RatingPlanID"}); err != nil {
+			t.Error(err)
+		} else if val != expectedRP {
+			t.Errorf("expected %v, received %v", expectedRP, val)
+		}
+	})
+	t.Run("GetCostFallbackCategory", func(t *testing.T) {
+		getCostArgs := &v1.AttrGetCost{
+			Tenant:      "cgrates.org",
+			Category:    "sms",
+			Subject:     "1001",
+			Destination: "+491234567890",
+			AnswerTime:  "*now",
+			Usage:       "10s",
+		}
+		var ec engine.EventCost
+		if err := client.Call(context.Background(), utils.APIerSv1GetCost, getCostArgs, &ec); err != nil {
+			t.Error(err)
+		} else if *ec.Cost != 30.000000 {
+			t.Errorf("Unexpected cost received: %f", *ec.Cost)
+		}
+
+		expectedRP := "RP_FALLBACK_ANY_CATEGORY"
+		if val, err := ec.FieldAsString([]string{"Charges[0]", "Rating", "RatingFilter", "RatingPlanID"}); err != nil {
+			t.Error(err)
+		} else if val != expectedRP {
+			t.Errorf("expected %v, received %v", expectedRP, val)
+		}
+	})
+	t.Run("GetCostFallbackSubjectAndCategory", func(t *testing.T) {
+		getCostArgs := &v1.AttrGetCost{
+			Tenant:      "cgrates.org",
+			Category:    "sms",
+			Subject:     "1234",
+			Destination: "+491234567890",
+			AnswerTime:  "*now",
+			Usage:       "10s",
+		}
+		var ec engine.EventCost
+		if err := client.Call(context.Background(), utils.APIerSv1GetCost, getCostArgs, &ec); err != nil {
+			t.Error(err)
+		} else if *ec.Cost != 40.000000 {
+			t.Errorf("Unexpected cost received: %f", *ec.Cost)
+		}
+
+		expectedRP := "RP_FALLBACK_ANY_SUBJECT_AND_CATEGORY"
+		if val, err := ec.FieldAsString([]string{"Charges[0]", "Rating", "RatingFilter", "RatingPlanID"}); err != nil {
+			t.Error(err)
+		} else if val != expectedRP {
+			t.Errorf("expected %v, received %v", expectedRP, val)
+		}
+	})
 }

@@ -54,7 +54,7 @@ func TestBalanceBlocker(t *testing.T) {
 	content := `{
 
 "general": {
-	"log_level": 7,
+	"log_level": 7
 },
 
 "data_db": {								
@@ -271,7 +271,7 @@ func TestBalanceFactor(t *testing.T) {
 	content := `{
 
 "general": {
-	"log_level": 7,
+	"log_level": 7
 },
 
 "data_db": {								

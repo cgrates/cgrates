@@ -223,7 +223,11 @@ func (rpf *RatingProfile) GetRatingPlansForPrefix(cd *CallDescriptor) (err error
 				MatchedDestId:  "",
 				ActivationTime: cd.TimeStart,
 				RateIntervals:  nil,
-				FallbackKeys:   []string{cd.GetKey(FALLBACK_SUBJECT)}})
+				FallbackKeys: []string{
+					cd.GetKey(cd.Category, utils.MetaAny),
+					cd.GetKey(utils.MetaAny, cd.Subject),
+					cd.GetKey(utils.MetaAny, utils.MetaAny),
+				}})
 		}
 		if len(prefix) > 0 {
 			ris = append(ris, &RatingInfo{
@@ -260,7 +264,9 @@ type TenantRatingSubject struct {
 }
 
 func RatingProfileSubjectPrefixMatching(key string) (rp *RatingProfile, err error) {
-	if !getRpSubjectPrefixMatching() || strings.HasSuffix(key, utils.MetaAny) {
+	if !getRpSubjectPrefixMatching() ||
+		strings.HasSuffix(key, utils.MetaAny) || // check if subject is *any
+		utils.SplitConcatenatedKey(key)[2] == utils.MetaAny { // check if category is *any
 		return dm.GetRatingProfile(key, false, utils.NonTransactional)
 	}
 	if rp, err = dm.GetRatingProfile(key, false, utils.NonTransactional); err == nil && rp != nil { // rp nil represents cached no-result

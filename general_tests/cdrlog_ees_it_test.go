@@ -42,12 +42,9 @@ func TestCdrLogEes(t *testing.T) {
 	dir := "/tmp/testComposed"
 
 	content := `{
-		// Sample CGRateS Configuration file for EEs
-		//
-		// Copyright (C) ITsysCOM GmbH
-		
+	
 		"general": {
-			"log_level": 7,
+			"log_level": 7
 		},
 		
 		"listen": {
