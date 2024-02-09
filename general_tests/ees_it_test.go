@@ -69,7 +69,7 @@ func TestEEsExportEventChanges(t *testing.T) {
 
 "ees": {
 	"enabled": true,
-	"attributes_conns":["*localhost"],
+	"attributes_conns":["*internal"],
 	"exporters": [
 		{
 			"id": "exporter1",
