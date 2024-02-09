@@ -160,7 +160,7 @@ func (eeS *EventExporterS) V1ProcessEvent(ctx *context.Context, cgrEv *engine.CG
 			}
 		}
 
-		var exportEvent *utils.CGREvent
+		exportEvent := cgrEv.CGREvent
 		if eeCfg.Flags.GetBool(utils.MetaAttributes) {
 			if exportEvent, err = eeS.attrSProcessEvent(
 				cgrEv.CGREvent,
@@ -171,9 +171,6 @@ func (eeS *EventExporterS) V1ProcessEvent(ctx *context.Context, cgrEv *engine.CG
 					utils.MetaEEs)); err != nil {
 				return
 			}
-		}
-		if exportEvent == nil {
-			exportEvent = cgrEv.CGREvent
 		}
 
 		eeS.eesMux.RLock()
