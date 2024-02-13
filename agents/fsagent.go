@@ -457,16 +457,6 @@ func (fsa *FSsessions) Reload() {
 	fsa.senderPools = make([]*fsock.FSockPool, len(fsa.cfg.EventSocketConns))
 }
 
-// V1ReAuthorize is used to implement the sessions.BiRPClient interface
-func (*FSsessions) V1ReAuthorize(ctx *context.Context, originID string, reply *string) (err error) {
-	return utils.ErrNotImplemented
-}
-
-// V1DisconnectPeer is used to implement the sessions.BiRPClient interface
-func (*FSsessions) V1DisconnectPeer(ctx *context.Context, args *utils.DPRArgs, reply *string) (err error) {
-	return utils.ErrNotImplemented
-}
-
 // V1WarnDisconnect is called when call goes under the minimum duration threshold, so FreeSWITCH can play an announcement message
 func (fsa *FSsessions) V1WarnDisconnect(ctx *context.Context, args map[string]any, reply *string) (err error) {
 	if fsa.cfg.LowBalanceAnnFile == utils.EmptyString {
@@ -494,4 +484,14 @@ func (fsa *FSsessions) V1WarnDisconnect(ctx *context.Context, args map[string]an
 	}
 	*reply = utils.OK
 	return
+}
+
+// V1ReAuthorize is used to implement the sessions.BiRPClient interface
+func (*FSsessions) V1ReAuthorize(*context.Context, utils.CGREvent, *string) error {
+	return utils.ErrNotImplemented
+}
+
+// V1DisconnectPeer is used to implement the sessions.BiRPClient interface
+func (*FSsessions) V1DisconnectPeer(*context.Context, *utils.DPRArgs, *string) error {
+	return utils.ErrNotImplemented
 }

@@ -648,6 +648,7 @@ const (
 	MetaDivide               = "*divide"
 	MetaUrl                  = "*url"
 	MetaXml                  = "*xml"
+	MetaOReq                 = "*oreq"
 	MetaReq                  = "*req"
 	MetaAsm                  = "*asm"
 	MetaVars                 = "*vars"

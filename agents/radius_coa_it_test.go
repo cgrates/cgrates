@@ -233,7 +233,11 @@ func TestRadiusCoADisconnect(t *testing.T) {
 	}
 
 	var reply string
-	if err := raDiscRPC.Call(context.Background(), utils.SessionSv1ReAuthorize, &utils.SessionFilter{}, &reply); err != nil {
+	if err := raDiscRPC.Call(context.Background(), utils.SessionSv1ReAuthorize, utils.SessionFilterWithEvent{
+		Event: map[string]any{
+			"CustomFilter": "custom_filter",
+		},
+	}, &reply); err != nil {
 		t.Error(err)
 	}
 

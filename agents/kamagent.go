@@ -462,16 +462,16 @@ func (ka *KamailioAgent) Reload() {
 }
 
 // V1ReAuthorize is used to implement the sessions.BiRPClient interface
-func (*KamailioAgent) V1ReAuthorize(ctx *context.Context, originID string, reply *string) (err error) {
+func (*KamailioAgent) V1ReAuthorize(*context.Context, utils.CGREvent, *string) error {
 	return utils.ErrNotImplemented
 }
 
 // V1DisconnectPeer is used to implement the sessions.BiRPClient interface
-func (*KamailioAgent) V1DisconnectPeer(ctx *context.Context, args *utils.DPRArgs, reply *string) (err error) {
+func (*KamailioAgent) V1DisconnectPeer(*context.Context, *utils.DPRArgs, *string) error {
 	return utils.ErrNotImplemented
 }
 
 // V1WarnDisconnect is used to implement the sessions.BiRPClient interface
-func (*KamailioAgent) V1WarnDisconnect(ctx *context.Context, args map[string]any, reply *string) (err error) {
+func (*KamailioAgent) V1WarnDisconnect(*context.Context, map[string]any, *string) error {
 	return utils.ErrNotImplemented
 }

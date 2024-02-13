@@ -1457,6 +1457,11 @@ type SessionFilter struct {
 	APIOpts map[string]any
 }
 
+type SessionFilterWithEvent struct {
+	*SessionFilter
+	Event map[string]any
+}
+
 type RatingPlanCostArg struct {
 	RatingPlanIDs []string
 	Destination   string

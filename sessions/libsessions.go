@@ -45,11 +45,11 @@ var authReqs = engine.MapEvent{
 // BiRPCClient is the interface implemented by Agents which are able to
 // communicate bidirectionally with SessionS and remote Communication Switch
 type BiRPCClient interface {
-	V1DisconnectSession(ctx *context.Context, args utils.AttrDisconnectSession, reply *string) (err error)
-	V1GetActiveSessionIDs(ctx *context.Context, ignParam string, sessionIDs *[]*SessionID) (err error)
-	V1ReAuthorize(ctx *context.Context, originID string, reply *string) (err error)
-	V1DisconnectPeer(ctx *context.Context, args *utils.DPRArgs, reply *string) (err error)
-	V1WarnDisconnect(ctx *context.Context, args map[string]any, reply *string) (err error)
+	V1DisconnectSession(*context.Context, utils.AttrDisconnectSession, *string) error
+	V1GetActiveSessionIDs(*context.Context, string, *[]*SessionID) error
+	V1ReAuthorize(*context.Context, utils.CGREvent, *string) error
+	V1DisconnectPeer(*context.Context, *utils.DPRArgs, *string) error
+	V1WarnDisconnect(*context.Context, map[string]any, *string) error
 }
 
 // GetSetCGRID will populate the CGRID key if not present and return it

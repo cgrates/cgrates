@@ -140,7 +140,7 @@ func (ssv1 *SessionSv1) DeactivateSessions(ctx *context.Context, args *utils.Ses
 }
 
 // ReAuthorize sends the RAR for filterd sessions
-func (ssv1 *SessionSv1) ReAuthorize(ctx *context.Context, args *utils.SessionFilter, reply *string) error {
+func (ssv1 *SessionSv1) ReAuthorize(ctx *context.Context, args utils.SessionFilterWithEvent, reply *string) error {
 	return ssv1.sS.BiRPCv1ReAuthorize(ctx, args, reply)
 }
 
