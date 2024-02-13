@@ -374,16 +374,16 @@ func (sma *AsteriskAgent) V1GetActiveSessionIDs(ctx *context.Context, ignParam s
 }
 
 // V1ReAuthorize is used to implement the sessions.BiRPClient interface
-func (*AsteriskAgent) V1ReAuthorize(ctx *context.Context, originID string, reply *string) (err error) {
+func (*AsteriskAgent) V1ReAuthorize(*context.Context, utils.CGREvent, *string) error {
 	return utils.ErrNotImplemented
 }
 
 // V1DisconnectPeer is used to implement the sessions.BiRPClient interface
-func (*AsteriskAgent) V1DisconnectPeer(ctx *context.Context, args *utils.DPRArgs, reply *string) (err error) {
+func (*AsteriskAgent) V1DisconnectPeer(*context.Context, *utils.DPRArgs, *string) error {
 	return utils.ErrNotImplemented
 }
 
 // V1WarnDisconnect is used to implement the sessions.BiRPClient interface
-func (sma *AsteriskAgent) V1WarnDisconnect(ctx *context.Context, args map[string]any, reply *string) (err error) {
+func (sma *AsteriskAgent) V1WarnDisconnect(*context.Context, map[string]any, *string) error {
 	return utils.ErrNotImplemented
 }

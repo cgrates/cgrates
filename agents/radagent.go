@@ -503,7 +503,7 @@ func (ra *RadiusAgent) V1DisconnectSession(_ *context.Context, attr utils.AttrDi
 		},
 	}
 
-	replyCode, err := ra.sendRadDaReq(radigo.DisconnectRequest, ra.cgrCfg.RadiusAgentCfg().DMRTemplate, originID, reqVars)
+	replyCode, err := ra.sendRadDaReq(radigo.DisconnectRequest, ra.cgrCfg.RadiusAgentCfg().DMRTemplate, originID, nil, reqVars)
 	if err != nil {
 		return err
 	}
@@ -519,8 +519,16 @@ func (ra *RadiusAgent) V1DisconnectSession(_ *context.Context, attr utils.AttrDi
 }
 
 // V1ReAuthorize updates session authorization using RADIUS CoA functionality.
-func (ra *RadiusAgent) V1ReAuthorize(_ *context.Context, originID string, reply *string) error {
-	replyCode, err := ra.sendRadDaReq(radigo.CoARequest, ra.cgrCfg.RadiusAgentCfg().CoATemplate, originID, nil)
+func (ra *RadiusAgent) V1ReAuthorize(_ *context.Context, cgrEv utils.CGREvent, reply *string) error {
+	originID, err := cgrEv.FieldAsString(utils.OriginID)
+	if err != nil {
+		return fmt.Errorf("could not retrieve OriginID: %w", err)
+	}
+	if originID == "" {
+		return utils.NewErrMandatoryIeMissing(utils.OriginID)
+	}
+	replyCode, err := ra.sendRadDaReq(radigo.CoARequest, ra.cgrCfg.RadiusAgentCfg().CoATemplate,
+		originID, utils.MapStorage(cgrEv.Event), nil)
 	if err != nil {
 		return err
 	}
@@ -536,7 +544,7 @@ func (ra *RadiusAgent) V1ReAuthorize(_ *context.Context, originID string, reply 
 }
 
 // sendRadDaReq prepares and sends a Radius CoA/Disconnect Request and returns the reply code or an error.
-func (ra *RadiusAgent) sendRadDaReq(requestType radigo.PacketCode, requestTemplate, sessionID string, requestVars *utils.DataNode) (radigo.PacketCode, error) {
+func (ra *RadiusAgent) sendRadDaReq(requestType radigo.PacketCode, requestTemplate, sessionID string, requestEv utils.DataProvider, requestVars *utils.DataNode) (radigo.PacketCode, error) {
 	cachedPacket, has := engine.Cache.Get(utils.CacheRadiusPackets, sessionID)
 	if !has {
 		return 0, fmt.Errorf("failed to retrieve packet from cache: %w", utils.ErrNotFound)
@@ -544,10 +552,12 @@ func (ra *RadiusAgent) sendRadDaReq(requestType radigo.PacketCode, requestTempla
 	packet := cachedPacket.(*radigo.Packet)
 
 	agReq := NewAgentRequest(
-		newRADataProvider(packet), requestVars, nil, nil, nil, nil,
+		requestEv, requestVars, nil, nil, nil, nil,
 		ra.cgrCfg.GeneralCfg().DefaultTenant,
 		ra.cgrCfg.GeneralCfg().DefaultTimezone,
-		ra.filterS, nil)
+		ra.filterS, map[string]utils.DataProvider{
+			utils.MetaOReq: newRADataProvider(packet),
+		})
 	err := agReq.SetFields(ra.cgrCfg.TemplatesCfg()[requestTemplate])
 	if err != nil {
 		return 0, fmt.Errorf("could not set attributes: %w", err)

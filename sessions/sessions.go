@@ -4002,18 +4002,31 @@ func (sS *SessionS) BiRPCV1ProcessCDR(ctx *context.Context,
 		rply)
 }
 
-func (sS *SessionS) sendRar(s *Session) (err error) {
+func (sS *SessionS) sendRar(ctx *context.Context, s *Session, event map[string]any) (err error) {
 	clnt := sS.biJClnt(s.ClientConnID)
 	if clnt == nil {
 		return fmt.Errorf("calling %s requires bidirectional JSON connection, connID: <%s>",
 			utils.SessionSv1ReAuthorize, s.ClientConnID)
 	}
-	var originID string
-	if originID, err = s.EventStart.GetString(utils.OriginID); err != nil {
-		return
+
+	// Merge parameter event with the session event. Losing the EventStart OriginID
+	// could create unwanted behaviour.
+	if event == nil {
+		event = make(map[string]any)
 	}
+	for key, val := range s.EventStart {
+		if _, has := event[key]; !has {
+			event[key] = val
+		}
+	}
+	args := utils.CGREvent{
+		ID:    utils.GenUUID(),
+		Time:  utils.TimePointer(time.Now()),
+		Event: event,
+	}
+
 	var rply string
-	if err = clnt.conn.Call(context.TODO(), utils.SessionSv1ReAuthorize, originID, &rply); err == utils.ErrNotImplemented {
+	if err = clnt.conn.Call(ctx, utils.SessionSv1ReAuthorize, args, &rply); err == utils.ErrNotImplemented {
 		err = nil
 	}
 	return
@@ -4021,11 +4034,11 @@ func (sS *SessionS) sendRar(s *Session) (err error) {
 
 // BiRPCv1ReAuthorize sends a RAR for the matching sessions
 func (sS *SessionS) BiRPCv1ReAuthorize(ctx *context.Context,
-	args *utils.SessionFilter, reply *string) (err error) {
-	if args == nil { //protection in case on nil
-		args = &utils.SessionFilter{}
+	args utils.SessionFilterWithEvent, reply *string) (err error) {
+	if args.SessionFilter == nil { //protection in case on nil
+		args.SessionFilter = &utils.SessionFilter{}
 	}
-	aSs := sS.filterSessions(args, false)
+	aSs := sS.filterSessions(args.SessionFilter, false)
 	if len(aSs) == 0 {
 		return utils.ErrNotFound
 	}
@@ -4039,7 +4052,7 @@ func (sS *SessionS) BiRPCv1ReAuthorize(ctx *context.Context,
 		if len(ss) == 0 {
 			continue
 		}
-		if errTerm := sS.sendRar(ss[0]); errTerm != nil {
+		if errTerm := sS.sendRar(ctx, ss[0], args.Event); errTerm != nil {
 			utils.Logger.Warning(
 				fmt.Sprintf(
 					"<%s> failed sending RAR for session with id: <%s>, err: <%s>",
