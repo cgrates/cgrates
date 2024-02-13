@@ -1,6 +1,6 @@
 # Define global variables
 %global version 0.11.0~dev
-%global go_version 1.21.3
+%global go_version 1.22.0
 %global git_commit %(echo $gitLastCommit)
 %global releaseTag %(echo $rpmTag)
 

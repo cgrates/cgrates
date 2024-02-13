@@ -1,6 +1,6 @@
 # Define global variables
 %global version 0.11.0~dev
-%global go_version 1.21.3
+%global go_version 1.22.0
 
 # Define system paths
 %define debug_package  %{nil}
