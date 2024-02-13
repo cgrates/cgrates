@@ -227,6 +227,7 @@ func testPrecacheGetCacheStatsAfterRestart(t *testing.T) {
 		utils.CacheReverseFilterIndexes: {},
 		utils.MetaAPIBan:                {},
 		utils.CacheReplicationHosts:     {},
+		utils.CacheRadiusPackets:        {},
 	}
 	if *apiBan {
 		(*expectedStats)[utils.MetaAPIBan] = &ltcache.CacheStats{Items: 254}

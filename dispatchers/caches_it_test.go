@@ -101,7 +101,7 @@ func testDspChcLoadAfterFolder(t *testing.T) {
 	expStats := engine.GetDefaultEmptyCacheStats()
 	expStats[utils.CacheActions].Items = 1
 	expStats[utils.CacheDestinations].Items = 4
-	expStats[utils.CacheLoadIDs].Items = 18
+	expStats[utils.CacheLoadIDs].Items = 19
 	expStats[utils.CacheRPCConnections].Items = 2
 	args := utils.AttrCacheIDsWithAPIOpts{
 		APIOpts: map[string]any{
@@ -127,7 +127,7 @@ func testDspChcLoadAfterFolder(t *testing.T) {
 		t.Error(reply)
 	}
 	expStats[utils.CacheActionPlans].Items = 1
-	expStats[utils.CacheActions].Items = 2
+	expStats[utils.CacheActions].Items = 3
 	expStats[utils.CacheAttributeProfiles].Items = 11
 	expStats[utils.CacheChargerProfiles].Items = 2
 	expStats[utils.CacheFilters].Items = 7
@@ -157,6 +157,7 @@ func testDspChcLoadAfterFolder(t *testing.T) {
 	expStats[utils.CacheAttributeFilterIndexes].Groups = 4
 	expStats[utils.CacheReverseFilterIndexes].Items = 8
 	expStats[utils.CacheReverseFilterIndexes].Groups = 6
+	expStats[utils.CacheActionTriggers].Items = 1
 	if err := dispEngine.RPC.Call(context.Background(), utils.CacheSv1GetCacheStats, &args, &rcvStats); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expStats, rcvStats) {
@@ -214,8 +215,8 @@ func testDspChcPrecacheStatus(t *testing.T) {
 		utils.CacheCapsEvents:              utils.MetaReady,
 		utils.MetaSentryPeer:               utils.MetaReady,
 		utils.MetaAPIBan:                   utils.MetaReady,
-
-		utils.CacheReplicationHosts: utils.MetaReady,
+		utils.CacheRadiusPackets:           utils.MetaReady,
+		utils.CacheReplicationHosts:        utils.MetaReady,
 	}
 
 	if err := dispEngine.RPC.Call(context.Background(), utils.CacheSv1PrecacheStatus, utils.AttrCacheIDsWithAPIOpts{
