@@ -97,7 +97,7 @@ func TestHttpJsonPoster(t *testing.T) {
 		Kafka: &config.KafkaOpts{},
 		RPC:   &config.RPCOpts{},
 	})
-	time.Sleep(5 * time.Millisecond)
+	time.Sleep(100 * time.Millisecond)
 	fs, err := filepath.Glob("/tmp/EEs*")
 	if err != nil {
 		t.Fatal(err)
@@ -114,7 +114,7 @@ func TestHttpJsonPoster(t *testing.T) {
 
 	evBody, cancast := ev.Events[0].(*HTTPPosterRequest)
 	if !cancast {
-		t.Error("Can't cast the event ")
+		t.Fatal("Can't cast the event")
 	}
 
 	if string(evBody.Body.([]uint8)) != string(jsn) {
