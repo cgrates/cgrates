@@ -486,11 +486,12 @@ Once the CDRs are mediated, they are available to be exported. To export them, y
 
  cgr-console 'export_cdrs ExportArgs={"ExportFormat":"*file_csv", "ExportPath":"/tmp"}'
 
+Your exported files will be appear on your defined "export_path" folder after the command is executed. In this case the folder is /tmp 
 
 Fraud detection
 ---------------
 
-Since we have configured some action triggers (more than 20 units of balance topped-up or less than 2 and more than 5 units spent on *FS_USERS* we should be notified over syslog when things like unexpected events happen, e.g.: fraud with more than 20 units topped-up). Most important is the monitor for 100 units topped-up which will also trigger an account disable together with killing it's calls if prepaid debits are used.
+We have configured some action triggers for our tariffplans where more than 20 units of balance topped-up triggers a notification over syslog, and most importantly, an action trigger to monitor for 100 or more units topped-up which will also trigger an account disable together with killing it's calls if prepaid debits are used.
 
 To verify this mechanism simply add some random units into one account's balance:
 

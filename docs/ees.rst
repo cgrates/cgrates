@@ -40,14 +40,9 @@ type
 	**\*http_post**
 		Will post the CDR to a HTTP server. The export content will be a HTTP form encoded representation of the `internal CDR object <https://godoc.org/github.com/cgrates/cgrates/engine#CDR>`_.
 
-	**\*http_json_cdr**
-		Will post the CDR to a HTTP server. The export content will be a JSON serialized representation of the `internal CDR object <https://godoc.org/github.com/cgrates/cgrates/engine#CDR>`_.
 
 	**\*http_json_map**
 		Will post the CDR to a HTTP server. The export content will be a JSON serialized hmap with fields defined within the *fields* section of the template.
-
-	**\*amqp_json_cdr**
-		Will post the CDR to an AMQP_ queue. The export content will be a JSON serialized representation of the `internal CDR object <https://godoc.org/github.com/cgrates/cgrates/engine#CDR>`_. Uses AMQP_ protocol version 0.9.1.
 
 	**\*amqp_json_map**
 		Will post the CDR to an AMQP_ queue. The export content will be a JSON serialized hmap with fields defined within the *fields* section of the template. Uses AMQP_ protocol version 1.0.
@@ -85,7 +80,7 @@ export_path
 	**\*file_csv**, **\*file_fwv**
 		Standard unix-like filesystem path.
 
-	**\*http_post**, **\*http_json_cdr**, **\*http_json_map**
+	**\*http_post**, **\*http_json_map**
 		Full HTTP URL
 
 	**\*amqp_json_map**, **\*amqpv1_json_map**
@@ -142,7 +137,7 @@ attempts
 	Number of attempts before giving up on the export and writing the failed request to file. The failed request will be written to *failed_posts_dir*.
 
 fields
-	List of fields for the exported event. Not affecting templates like *\*http_json_cdr* or *\*amqp_json_cdr* with fixed content.
+	List of fields for the exported event.
 
 
 One **field template** will contain the following parameters:
