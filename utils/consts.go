@@ -1758,6 +1758,7 @@ const (
 	CDRsV1ProcessExternalCDR = "CDRsV1.ProcessExternalCDR"
 	CDRsV1StoreSessionCost   = "CDRsV1.StoreSessionCost"
 	CDRsV1ProcessEvent       = "CDRsV1.ProcessEvent"
+	CDRsV1ProcessEvents      = "CDRsV1.ProcessEvents"
 	CDRsV1Ping               = "CDRsV1.Ping"
 	CDRsV2                   = "CDRsV2"
 	CDRsV2StoreSessionCost   = "CDRsV2.StoreSessionCost"
