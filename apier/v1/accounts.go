@@ -19,7 +19,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package v1
 
 import (
+	"encoding/json"
 	"errors"
+	"fmt"
 	"math"
 	"slices"
 	"strings"
@@ -709,6 +711,92 @@ func (apierSv1 *APIerSv1) RemoveBalances(ctx *context.Context, attr *utils.AttrS
 		return err
 	}
 	*reply = utils.OK
+	return nil
+}
+
+// TransferBalance sets a temporary *transfer_balance action, which will be executed immediately.
+func (apierSv1 *APIerSv1) TransferBalance(ctx *context.Context, attr utils.AttrTransferBalance, reply *string) (err error) {
+	if missing := utils.MissingStructFields(&attr, []string{
+		utils.SrcAccountID, utils.SrcBalanceID,
+		utils.DestAccountID, utils.DestBalanceID,
+		utils.Units, utils.BalanceType}); len(missing) != 0 {
+		return utils.NewErrMandatoryIeMissing(missing...)
+	}
+	if attr.Tenant == "" {
+		attr.Tenant = apierSv1.Config.GeneralCfg().DefaultTenant
+	}
+
+	// Set *transfer_balance action.
+	actionID := fmt.Sprintf("tmp_act_%s", utils.UUIDSha1Prefix())
+	if !attr.Overwrite {
+		var exists bool
+		if exists, err = apierSv1.DataManager.HasData(utils.ActionPrefix, actionID, ""); err != nil {
+			return utils.NewErrServerError(err)
+		} else if exists {
+			return utils.ErrExists
+		}
+	}
+	var extraParams []byte
+	extraParams, err = json.Marshal(map[string]string{
+		utils.DestAccountID: attr.Tenant + ":" + attr.DestAccountID,
+		utils.DestBalanceID: attr.DestBalanceID,
+	})
+	if err != nil {
+		return utils.NewErrServerError(err)
+	}
+	action := &engine.Action{
+		Id:              actionID,
+		ActionType:      utils.MetaTransferBalance,
+		ExtraParameters: string(extraParams),
+		Balance: &engine.BalanceFilter{
+			ID:    utils.StringPointer(attr.SrcBalanceID),
+			Type:  utils.StringPointer(attr.BalanceType),
+			Value: &utils.ValueFormula{Static: attr.Units},
+		},
+	}
+	if err = apierSv1.DataManager.SetActions(actionID, engine.Actions{action}); err != nil {
+		return utils.NewErrServerError(err)
+	}
+
+	// Remove the action.
+	defer func() {
+		if removeErr := apierSv1.DataManager.RemoveActions(actionID); err != nil {
+			err = errors.Join(err, removeErr)
+			return
+		}
+		if reloadCacheErr := apierSv1.ConnMgr.Call(context.TODO(), apierSv1.Config.ApierCfg().CachesConns,
+			utils.CacheSv1ReloadCache, &utils.AttrReloadCacheWithAPIOpts{
+				ActionIDs: []string{actionID},
+			}, reply); reloadCacheErr != nil {
+			err = errors.Join(err, reloadCacheErr)
+			return
+		}
+		if setLoadIDErr := apierSv1.DataManager.SetLoadIDs(map[string]int64{utils.CacheActions: time.Now().UnixNano()}); setLoadIDErr != nil {
+			err = errors.Join(err, setLoadIDErr)
+			return
+		}
+		*reply = utils.OK
+	}()
+
+	if err = apierSv1.ConnMgr.Call(context.TODO(), apierSv1.Config.ApierCfg().CachesConns,
+		utils.CacheSv1ReloadCache, &utils.AttrReloadCacheWithAPIOpts{
+			ActionIDs: []string{actionID},
+		}, reply); err != nil {
+		return utils.NewErrServerError(err)
+	}
+	//generate a loadID for CacheActions and store it in database
+	if err = apierSv1.DataManager.SetLoadIDs(map[string]int64{utils.CacheActions: time.Now().UnixNano()}); err != nil {
+		return utils.NewErrServerError(err)
+	}
+
+	// Execute the action.
+	at := &engine.ActionTiming{
+		ActionsID: actionID,
+	}
+	at.SetAccountIDs(utils.StringMap{utils.ConcatenatedKey(attr.Tenant, attr.SrcAccountID): true})
+	if err = at.Execute(apierSv1.FilterS); err != nil {
+		return utils.NewErrServerError(err)
+	}
 	return nil
 }
 
