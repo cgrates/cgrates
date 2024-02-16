@@ -224,17 +224,18 @@ func cdrLogAction(acc *Account, a *Action, acs Actions, _ *FilterS, extraData an
 		utils.Tenant:       config.NewRSRParsersMustCompile(utils.DynamicDataPrefix+utils.MetaAcnt+utils.NestingSep+utils.Tenant, utils.InfieldSep),
 		utils.AccountField: config.NewRSRParsersMustCompile(utils.DynamicDataPrefix+utils.MetaAcnt+utils.NestingSep+utils.AccountField, utils.InfieldSep),
 		utils.Subject:      config.NewRSRParsersMustCompile(utils.DynamicDataPrefix+utils.MetaAcnt+utils.NestingSep+utils.AccountField, utils.InfieldSep),
+		utils.Cost:         config.NewRSRParsersMustCompile(utils.DynamicDataPrefix+utils.MetaAct+utils.NestingSep+utils.ActionValue, utils.InfieldSep),
 	}
 	template := make(map[string]string)
 	// overwrite default template
 	if a.ExtraParameters != "" {
 		if err = json.Unmarshal([]byte(a.ExtraParameters), &template); err != nil {
-			return
+			return err
 		}
 		for field, rsr := range template {
 			if defaultTemplate[field], err = config.NewRSRParsers(rsr,
 				config.CgrConfig().GeneralCfg().RSRSep); err != nil {
-				return
+				return err
 			}
 		}
 	}
@@ -243,9 +244,10 @@ func cdrLogAction(acc *Account, a *Action, acs Actions, _ *FilterS, extraData an
 	for key, val := range mapExtraData {
 		if defaultTemplate[key], err = config.NewRSRParsers(utils.IfaceAsString(val),
 			config.CgrConfig().GeneralCfg().RSRSep); err != nil {
-			return
+			return err
 		}
 	}
+	currentTime := time.Now()
 
 	// set stored cdr values
 	var cdrs []*CDR
@@ -254,6 +256,7 @@ func cdrLogAction(acc *Account, a *Action, acs Actions, _ *FilterS, extraData an
 			[]string{utils.MetaDebit, utils.MetaDebitReset,
 				utils.MetaTopUp, utils.MetaTopUpReset,
 				utils.MetaSetBalance, utils.MetaRemoveBalance,
+				utils.MetaRemoveExpired,
 			}, action.ActionType) || action.Balance == nil {
 			continue // Only log specific actions
 		}
@@ -261,40 +264,14 @@ func cdrLogAction(acc *Account, a *Action, acs Actions, _ *FilterS, extraData an
 		cdr := &CDR{
 			RunID:       action.ActionType,
 			Source:      utils.CDRLog,
-			SetupTime:   time.Now(),
-			AnswerTime:  time.Now(),
+			SetupTime:   currentTime,
+			AnswerTime:  currentTime,
 			OriginID:    utils.GenUUID(),
 			ExtraFields: make(map[string]string),
 			PreRated:    true,
 			Usage:       time.Duration(1),
 		}
 		cdr.CGRID = utils.Sha1(cdr.OriginID, cdr.OriginHost)
-
-		// If the action is of type *remove_balance, retrieve the balance value from the account
-		// and assign it to the CDR's Cost field.
-		if action.ActionType == utils.MetaRemoveBalance {
-			if acc == nil {
-				return fmt.Errorf("nil account for action %s", utils.ToJSON(action))
-			}
-			balanceChain, exists := acc.BalanceMap[action.Balance.GetType()]
-			if !exists {
-				return utils.ErrNotFound
-			}
-			found := false
-			for _, balance := range balanceChain {
-				if balance.MatchFilter(action.Balance, false, false) {
-					cdr.Cost = balance.Value
-					found = true
-					break
-				}
-			}
-			if !found {
-				return utils.ErrNotFound
-			}
-		} else {
-			// Otherwise, update the template to retrieve it from Action's BalanceValue.
-			defaultTemplate[utils.Cost] = config.NewRSRParsersMustCompile(utils.DynamicDataPrefix+utils.MetaAct+utils.NestingSep+utils.ActionValue, utils.InfieldSep)
-		}
 
 		cdrLogProvider := newCdrLogProvider(acc, action)
 		elem := reflect.ValueOf(cdr).Elem()
@@ -325,21 +302,73 @@ func cdrLogAction(acc *Account, a *Action, acs Actions, _ *FilterS, extraData an
 				cdr.ExtraFields[key] = parsedValue
 			}
 		}
-		cdrs = append(cdrs, cdr)
-		var rply string
-		// After compute the CDR send it to CDR Server to be processed
-		if err := connMgr.Call(context.TODO(), config.CgrConfig().SchedulerCfg().CDRsConns,
-			utils.CDRsV1ProcessEvent,
-			&ArgV1ProcessEvent{
-				Flags:    []string{utils.ConcatenatedKey(utils.MetaChargers, "false")}, // do not try to get the chargers for cdrlog
-				CGREvent: *cdr.AsCGREvent(),
-			}, &rply); err != nil {
-			return err
+
+		// Function to process balances and append CDR if conditions are met.
+		processBalances := func(checkFunc func(*Balance) bool) error {
+			if acc == nil {
+				return fmt.Errorf("nil account for action %s", utils.ToJSON(action))
+			}
+			balanceChain, exists := acc.BalanceMap[action.Balance.GetType()]
+			if !exists {
+				return utils.ErrNotFound
+			}
+			found := false
+			for _, balance := range balanceChain {
+				if checkFunc(balance) {
+					// Create a new CDR instance for each balance that meets the condition.
+					newCDR := *cdr // Copy CDR's values to a new CDR instance.
+					newCDR.Cost = balance.Value
+					newCDR.OriginID = utils.GenUUID() // OriginID must be unique for every CDR.
+					newCDR.CGRID = utils.Sha1(newCDR.OriginID, newCDR.OriginHost)
+					newCDR.ExtraFields[utils.BalanceID] = balance.ID
+					cdrs = append(cdrs, &newCDR) // Append the address of the new instance.
+					found = true
+				}
+			}
+			if !found {
+				return utils.ErrNotFound
+			}
+			return nil
 		}
+
+		// If the action is of type *remove_balance or *remove_expired, for each matched balance,
+		// assign the balance values to the CDR cost and append to the list of CDRs.
+		switch action.ActionType {
+		case utils.MetaRemoveBalance:
+			if err = processBalances(func(b *Balance) bool {
+				return b.MatchFilter(action.Balance, false, false)
+			}); err != nil {
+				return err
+			}
+			continue
+		case utils.MetaRemoveExpired:
+			if err = processBalances(func(b *Balance) bool {
+				return b.IsExpiredAt(currentTime)
+			}); err != nil {
+				return err
+			}
+			continue
+		}
+
+		cdrs = append(cdrs, cdr)
+	}
+
+	events := make([]*utils.CGREvent, 0, len(cdrs))
+	for _, cdr := range cdrs {
+		events = append(events, cdr.AsCGREvent())
+	}
+	var reply string
+	if err := connMgr.Call(context.TODO(), config.CgrConfig().SchedulerCfg().CDRsConns,
+		utils.CDRsV1ProcessEvents,
+		&ArgV1ProcessEvents{
+			Flags:     []string{utils.ConcatenatedKey(utils.MetaChargers, "false")},
+			CGREvents: events,
+		}, &reply); err != nil {
+		return err
 	}
 	b, _ := json.Marshal(cdrs)
 	a.ExpirationString = string(b) // testing purpose only
-	return
+	return nil
 }
 
 func resetTriggersAction(ub *Account, a *Action, acs Actions, fltrS *FilterS, extraData any) (err error) {
@@ -1002,7 +1031,6 @@ func removeExpired(acc *Account, action *Action, _ Actions, _ *FilterS, extraDat
 	if acc == nil {
 		return fmt.Errorf("nil account for %s action", utils.ToJSON(action))
 	}
-
 	bChain, exists := acc.BalanceMap[action.Balance.GetType()]
 	if !exists {
 		return utils.ErrNotFound

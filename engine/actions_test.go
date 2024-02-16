@@ -2615,17 +2615,17 @@ func TestCacheGetClonedActions(t *testing.T) {
 
 // TestCdrLogAction
 type RPCMock struct {
-	args *ArgV1ProcessEvent
+	args *ArgV1ProcessEvents
 }
 
 func (r *RPCMock) Call(ctx *context.Context, method string, args any, rply any) error {
-	if method != utils.CDRsV1ProcessEvent {
+	if method != utils.CDRsV1ProcessEvents {
 		return rpcclient.ErrUnsupporteServiceMethod
 	}
 	if r.args != nil {
 		return fmt.Errorf("There should be only one call to this function")
 	}
-	r.args = args.(*ArgV1ProcessEvent)
+	r.args = args.(*ArgV1ProcessEvents)
 	rp := rply.(*string)
 	*rp = utils.OK
 	return nil
@@ -2695,40 +2695,40 @@ func TestCdrLogAction(t *testing.T) {
 	if mock.args == nil {
 		t.Fatalf("Expected a call to %s", utils.CDRsV1ProcessEvent)
 	}
-	expCgrEv := utils.CGREvent{
+	expCgrEv := &utils.CGREvent{
 		Tenant: "cgrates.org",
-		ID:     mock.args.CGREvent.ID,
+		ID:     mock.args.CGREvents[0].ID,
 		Event: map[string]any{
 			"Account":      "1001",
 			"ActionID":     "CdrDebit",
-			"AnswerTime":   mock.args.CGREvent.Event["AnswerTime"],
+			"AnswerTime":   mock.args.CGREvents[0].Event["AnswerTime"],
 			"BalanceID":    "*default",
 			"BalanceValue": "10",
-			"CGRID":        mock.args.CGREvent.Event["CGRID"],
+			"CGRID":        mock.args.CGREvents[0].Event["CGRID"],
 			"Category":     "",
 			"Cost":         9.95,
 			"CostSource":   "",
 			"Destination":  "",
 			"ExtraInfo":    "",
-			"OrderID":      mock.args.CGREvent.Event["OrderID"],
+			"OrderID":      mock.args.CGREvents[0].Event["OrderID"],
 			"OriginHost":   "127.0.0.1",
-			"OriginID":     mock.args.CGREvent.Event["OriginID"],
+			"OriginID":     mock.args.CGREvents[0].Event["OriginID"],
 			"Partial":      false,
 			"PreRated":     true,
 			"RequestType":  "*none",
 			"RunID":        "*debit",
-			"SetupTime":    mock.args.CGREvent.Event["SetupTime"],
+			"SetupTime":    mock.args.CGREvents[0].Event["SetupTime"],
 			"Source":       utils.CDRLog,
 			"Subject":      "1001",
 			"Tenant":       "cgrates.org",
 			"ToR":          "*monetary",
-			"Usage":        mock.args.CGREvent.Event["Usage"],
+			"Usage":        mock.args.CGREvents[0].Event["Usage"],
 			"test":         "val",
 		},
 		APIOpts: map[string]any{},
 	}
-	if !reflect.DeepEqual(expCgrEv, mock.args.CGREvent) {
-		t.Errorf("Expected: %+v \n,received: %+v", expCgrEv, mock.args.CGREvent)
+	if !reflect.DeepEqual(expCgrEv, mock.args.CGREvents[0]) {
+		t.Errorf("Expected: %+v \n,received: %+v", utils.ToJSON(expCgrEv), utils.ToJSON(mock.args.CGREvents[0]))
 	}
 }
 

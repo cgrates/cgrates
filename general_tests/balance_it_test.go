@@ -413,8 +413,8 @@ cgrates.org,sms,1001,2014-01-14T00:00:00Z,RP_ANY,`,
 // The test steps are as follows:
 //  1. Create an account with 2 balances of types *sms and *monetary. The topup action for the *monetary one will also include
 //     the creation of a CDR.
-//  2. Set an action bundle with both "*remove_balance" and "*cdrlog" actions.
-//  3. Retrieve both CDRs and check whether the their fields are set correctly.
+//  2. Set 3 action bundles with "*topup_reset", "*remove_balance" and "*remove_expired" actions, each coupled with a "*cdrlog" action.
+//  3. Retrieve the CDRs and check whether the their fields are set correctly.
 func TestBalanceCDRLog(t *testing.T) {
 	switch *dbType {
 	case utils.MetaInternal:
@@ -461,8 +461,10 @@ cgrates.org,ACC_TEST,PACKAGE_ACC_TEST,,,`,
 PACKAGE_ACC_TEST,ACT_TOPUP_MONETARY,*asap,10
 PACKAGE_ACC_TEST,ACT_TOPUP_SMS,*asap,10`,
 		utils.ActionsCsv: `#ActionsId[0],Action[1],ExtraParameters[2],Filter[3],BalanceId[4],BalanceType[5],Categories[6],DestinationIds[7],RatingSubject[8],SharedGroup[9],ExpiryTime[10],TimingIds[11],Units[12],BalanceWeight[13],BalanceBlocker[14],BalanceDisabled[15],Weight[16]
-ACT_REMOVE_BALANCE_MONETARY,*cdrlog,"{""BalanceID"":""~*acnt.BalanceID""}",,,,,,,,,,,,,,
+ACT_REMOVE_BALANCE_MONETARY,*cdrlog,,,,,,,,,,,,,,,
 ACT_REMOVE_BALANCE_MONETARY,*remove_balance,,,balance_monetary,*monetary,,,,,,,,,,,
+ACT_REMOVE_EXPIRED,*cdrlog,,,,*monetary,,,,,,,,,,,
+ACT_REMOVE_EXPIRED,*remove_expired,,,,*monetary,,,,,,,,,,,
 ACT_TOPUP_MONETARY,*cdrlog,"{""BalanceID"":""~*acnt.BalanceID""}",,,,,,,,,,,,,,
 ACT_TOPUP_MONETARY,*topup_reset,,,balance_monetary,*monetary,,*any,,,*unlimited,,150,20,false,false,20
 ACT_TOPUP_SMS,*topup_reset,,,balance_sms,*sms,,*any,,,*unlimited,,1000,10,false,false,10`,
@@ -537,6 +539,76 @@ ACT_TOPUP_SMS,*topup_reset,,,balance_sms,*sms,,*any,,,*unlimited,,1000,10,false,
 			cdrs[0].ExtraFields["BalanceID"] != "balance_monetary" ||
 			cdrs[0].Cost != 150 {
 			t.Errorf("unexpected cdr received: %v", utils.ToJSON(cdrs))
+		}
+	})
+
+	t.Run("RemoveExpiredBalances", func(t *testing.T) {
+		expiryTime := time.Now().Add(10 * time.Millisecond)
+		attrSetBalance := utils.AttrSetBalances{
+			Tenant:  "cgrates.org",
+			Account: "ACC_TEST",
+			Balances: []*utils.AttrBalance{
+				{
+					BalanceType: utils.MetaMonetary,
+					Value:       10,
+					Balance: map[string]any{
+						utils.ID:         "expired_balance1",
+						utils.ExpiryTime: expiryTime,
+					},
+				},
+				{
+					BalanceType: utils.MetaMonetary,
+					Value:       11,
+					Balance: map[string]any{
+						utils.ID:         "expired_balance2",
+						utils.ExpiryTime: expiryTime,
+					},
+				},
+				{
+					BalanceType: utils.MetaMonetary,
+					Value:       12,
+					Balance: map[string]any{
+						utils.ID:         "expired_balance3",
+						utils.ExpiryTime: expiryTime,
+					},
+				},
+			},
+		}
+		var reply string
+		if err := client.Call(context.Background(), utils.APIerSv1SetBalances, &attrSetBalance, &reply); err != nil {
+			t.Error(err)
+		}
+		time.Sleep(10 * time.Millisecond)
+		attrsEA := &utils.AttrExecuteAction{Tenant: "cgrates.org", Account: "ACC_TEST", ActionsId: "ACT_REMOVE_EXPIRED"}
+		if err := client.Call(context.Background(), utils.APIerSv1ExecuteAction, attrsEA, &reply); err != nil {
+			t.Error(err)
+		}
+	})
+
+	t.Run("CheckRemoveExpiredCDR", func(t *testing.T) {
+		var cdrs []*engine.CDR
+		if err := client.Call(context.Background(), utils.CDRsV1GetCDRs, &utils.RPCCDRsFilterWithAPIOpts{
+			RPCCDRsFilter: &utils.RPCCDRsFilter{
+				RunIDs:  []string{"*remove_expired"},
+				OrderBy: utils.Cost,
+			}}, &cdrs); err != nil {
+			t.Fatal(err)
+		}
+
+		if len(cdrs) != 3 ||
+			cdrs[0].RunID != utils.MetaRemoveExpired ||
+			cdrs[0].Source != utils.CDRLog ||
+			cdrs[0].ToR != utils.MetaMonetary ||
+			cdrs[0].Cost != 10 ||
+			cdrs[1].RunID != utils.MetaRemoveExpired ||
+			cdrs[1].Source != utils.CDRLog ||
+			cdrs[1].ToR != utils.MetaMonetary ||
+			cdrs[1].Cost != 11 ||
+			cdrs[2].RunID != utils.MetaRemoveExpired ||
+			cdrs[2].Source != utils.CDRLog ||
+			cdrs[2].ToR != utils.MetaMonetary ||
+			cdrs[2].Cost != 12 {
+			t.Errorf("unexpected cdrs received: %v", utils.ToJSON(cdrs))
 		}
 	})
 
