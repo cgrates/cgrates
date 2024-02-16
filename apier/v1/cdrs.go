@@ -100,6 +100,11 @@ func (cdrSv1 *CDRsV1) ProcessEvent(ctx *context.Context, arg *engine.ArgV1Proces
 	return cdrSv1.CDRs.V1ProcessEvent(ctx, arg, reply)
 }
 
+// ProcessEvent will process multiple events Event based on the flags attached.
+func (cdrSv1 *CDRsV1) ProcessEvents(ctx *context.Context, arg *engine.ArgV1ProcessEvents, reply *string) error {
+	return cdrSv1.CDRs.V1ProcessEvents(ctx, arg, reply)
+}
+
 // ProcessExternalCDR will process a CDR in external format
 func (cdrSv1 *CDRsV1) ProcessExternalCDR(ctx *context.Context, cdr *engine.ExternalCDRWithAPIOpts, reply *string) error {
 	return cdrSv1.CDRs.V1ProcessExternalCDR(ctx, cdr, reply)
