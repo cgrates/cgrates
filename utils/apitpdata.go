@@ -879,6 +879,18 @@ type AttrBalance struct {
 	Cdrlog          bool
 }
 
+type AttrTransferBalance struct {
+	Tenant        string
+	SrcAccountID  string
+	SrcBalanceID  string
+	DestAccountID string
+	DestBalanceID string
+	Units         float64
+	BalanceType   string
+	Overwrite     bool
+	Cdrlog        bool
+}
+
 // TPResourceProfile is used in APIs to manage remotely offline ResourceProfile
 type TPResourceProfile struct {
 	TPid               string

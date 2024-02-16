@@ -21,7 +21,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package general_tests
 
 import (
-	"bytes"
 	"sort"
 	"testing"
 
@@ -81,13 +80,10 @@ ACT_TOPUP_DEST,*topup_reset,,,balance_dest,*monetary,,*any,,,*unlimited,,10,10,f
 ACT_TRANSFER,*transfer_balance,"{""DestAccountID"":""cgrates.org:ACC_DEST"",""DestBalanceID"":""balance_dest""}",,balance_src,*monetary,,,,,*unlimited,,4,,,,`,
 	}
 
-	buf := &bytes.Buffer{}
 	testEnv := TestEnvironment{
-		Name: "TestTransferBalance",
-		// Encoding:   *encoding,
+		Name:       "TestTransferBalance",
 		ConfigJSON: content,
 		TpFiles:    tpFiles,
-		LogBuffer:  buf,
 	}
 	client, _, shutdown, err := testEnv.Setup(t, *waitRater)
 	if err != nil {
@@ -134,7 +130,7 @@ ACT_TRANSFER,*transfer_balance,"{""DestAccountID"":""cgrates.org:ACC_DEST"",""De
 		}
 	})
 
-	t.Run("CheckFinalBalances", func(t *testing.T) {
+	t.Run("CheckBalancesAfterActionExecute", func(t *testing.T) {
 		var acnts []*engine.Account
 		if err := client.Call(context.Background(), utils.APIerSv2GetAccounts,
 			&utils.AttrGetAccounts{
@@ -160,6 +156,51 @@ ACT_TRANSFER,*transfer_balance,"{""DestAccountID"":""cgrates.org:ACC_DEST"",""De
 		}
 		balance = acnts[1].BalanceMap[utils.MetaMonetary][0]
 		if balance.ID != "balance_dest" || balance.Value != 14 {
+			t.Errorf("received account with unexpected balance: %v", balance)
+		}
+	})
+
+	t.Run("TransferBalanceByAPI", func(t *testing.T) {
+		var reply string
+		if err := client.Call(context.Background(), utils.APIerSv1TransferBalance, utils.AttrTransferBalance{
+			Tenant:        "cgrates.org",
+			SrcAccountID:  "ACC_SRC",
+			SrcBalanceID:  "balance_src",
+			DestAccountID: "ACC_DEST",
+			DestBalanceID: "balance_dest",
+			Units:         2,
+			BalanceType:   utils.MetaMonetary,
+		}, &reply); err != nil {
+			t.Error(err)
+		}
+	})
+
+	t.Run("CheckBalancesAfterTransferBalanceAPI", func(t *testing.T) {
+		var acnts []*engine.Account
+		if err := client.Call(context.Background(), utils.APIerSv2GetAccounts,
+			&utils.AttrGetAccounts{
+				Tenant: "cgrates.org",
+			}, &acnts); err != nil {
+			t.Error(err)
+		}
+		if len(acnts) != 2 {
+			t.Fatal("expecting 2 accounts to be retrieved")
+		}
+		sort.Slice(acnts, func(i, j int) bool {
+			return acnts[i].ID > acnts[j].ID
+		})
+		if len(acnts[0].BalanceMap) != 1 || len(acnts[0].BalanceMap[utils.MetaMonetary]) != 1 {
+			t.Errorf("expected account to have only one balance of type *monetary, received %v", acnts[0])
+		}
+		balance := acnts[0].BalanceMap[utils.MetaMonetary][0]
+		if balance.ID != "balance_src" || balance.Value != 4 {
+			t.Errorf("received account with unexpected balance: %v", balance)
+		}
+		if len(acnts[1].BalanceMap) != 1 || len(acnts[1].BalanceMap[utils.MetaMonetary]) != 1 {
+			t.Errorf("expected account to have only one balance of type *monetary, received %v", acnts[1])
+		}
+		balance = acnts[1].BalanceMap[utils.MetaMonetary][0]
+		if balance.ID != "balance_dest" || balance.Value != 16 {
 			t.Errorf("received account with unexpected balance: %v", balance)
 		}
 	})
