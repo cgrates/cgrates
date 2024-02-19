@@ -253,7 +253,7 @@ func cdrLogAction(acc *Account, a *Action, acs Actions, _ *FilterS, extraData an
 			[]string{utils.MetaDebit, utils.MetaDebitReset,
 				utils.MetaTopUp, utils.MetaTopUpReset,
 				utils.MetaSetBalance, utils.MetaRemoveBalance,
-				utils.MetaRemoveExpired,
+				utils.MetaRemoveExpired, utils.MetaTransferBalance,
 			}, action.ActionType) || action.Balance == nil {
 			continue // Only log specific actions
 		}
@@ -345,6 +345,19 @@ func cdrLogAction(acc *Account, a *Action, acs Actions, _ *FilterS, extraData an
 				return err
 			}
 			continue
+		case utils.MetaTransferBalance:
+			cdr.Cost = action.Balance.GetValue()
+			cdr.Account = utils.SplitConcatenatedKey(acc.ID)[1] // Extract ID from TenantID.
+			accDestInfo := struct {
+				DestinationAccountID string
+				DestinationBalanceID string
+			}{}
+			if err := json.Unmarshal([]byte(action.ExtraParameters), &accDestInfo); err != nil {
+				return err
+			}
+			cdr.Destination = utils.SplitConcatenatedKey(accDestInfo.DestinationAccountID)[1] // Extract ID from TenantID.
+			cdr.ExtraFields[utils.SourceBalanceID] = *action.Balance.ID
+			cdr.ExtraFields[utils.DestinationBalanceID] = accDestInfo.DestinationBalanceID
 		}
 
 		cdrs = append(cdrs, cdr)
