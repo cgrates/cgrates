@@ -132,9 +132,6 @@ func transferBalanceAction(srcAcc *Account, act *Action, _ Actions, fltrS *Filte
 	if srcAcc == nil {
 		return errors.New("source account is nil")
 	}
-	if act.Balance.Type == nil {
-		return errors.New("balance type is missing")
-	}
 	if act.Balance.ID == nil {
 		return errors.New("source balance ID is missing")
 	}
@@ -145,7 +142,7 @@ func transferBalanceAction(srcAcc *Account, act *Action, _ Actions, fltrS *Filte
 		return fmt.Errorf("account %s has no balances to transfer from", srcAcc.ID)
 	}
 
-	srcBalance := srcAcc.GetBalanceWithID(*act.Balance.Type, *act.Balance.ID)
+	srcBalance := srcAcc.FindBalanceByID(*act.Balance.ID)
 	if srcBalance == nil || srcBalance.IsExpiredAt(time.Now()) {
 		return errors.New("source balance not found or expired")
 	}
@@ -154,13 +151,13 @@ func transferBalanceAction(srcAcc *Account, act *Action, _ Actions, fltrS *Filte
 	if transferUnits == 0 {
 		return errors.New("balance value is missing or 0")
 	}
-	if transferUnits > srcBalance.Value {
+	if srcBalance.ID != utils.MetaDefault && transferUnits > srcBalance.Value {
 		return utils.ErrInsufficientCredit
 	}
 
 	accDestInfo := struct {
-		DestAccountID string
-		DestBalanceID string
+		DestinationAccountID string
+		DestinationBalanceID string
 	}{}
 	if err := json.Unmarshal([]byte(act.ExtraParameters), &accDestInfo); err != nil {
 		return err
@@ -169,11 +166,11 @@ func transferBalanceAction(srcAcc *Account, act *Action, _ Actions, fltrS *Filte
 	// This guard is meant to lock the destination account as we are making changes to it. It was not needed
 	// for the source account due to it being locked from outside this function.
 	guardErr := guardian.Guardian.Guard(func() error {
-		destAcc, err := dm.GetAccount(accDestInfo.DestAccountID)
+		destAcc, err := dm.GetAccount(accDestInfo.DestinationAccountID)
 		if err != nil {
 			return fmt.Errorf("retrieving destination account failed: %w", err)
 		}
-		destBalance := destAcc.GetBalanceWithID(*act.Balance.Type, accDestInfo.DestBalanceID)
+		destBalance := destAcc.FindBalanceByID(accDestInfo.DestinationBalanceID)
 		if destBalance == nil || destBalance.IsExpiredAt(time.Now()) {
 			return errors.New("destination balance not found or expired")
 		}
@@ -190,7 +187,7 @@ func transferBalanceAction(srcAcc *Account, act *Action, _ Actions, fltrS *Filte
 			return fmt.Errorf("updating destination account failed: %w", err)
 		}
 		return nil
-	}, config.CgrConfig().GeneralCfg().LockingTimeout, utils.AccountPrefix+accDestInfo.DestAccountID)
+	}, config.CgrConfig().GeneralCfg().LockingTimeout, utils.AccountPrefix+accDestInfo.DestinationAccountID)
 	if guardErr != nil {
 		return guardErr
 	}
