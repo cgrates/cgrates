@@ -56,8 +56,13 @@ func TestTransferBalance(t *testing.T) {
 	"db_type": "*internal"
 },
 
+"cdrs": {
+	"enabled": true,
+},
+
 "schedulers": {
-	"enabled": true
+	"enabled": true,
+	"cdrs_conns": ["*internal"]
 },
 
 "apiers": {
@@ -77,7 +82,8 @@ PACKAGE_ACC_DEST,ACT_TOPUP_DEST,*asap,10`,
 		utils.ActionsCsv: `#ActionsId[0],Action[1],ExtraParameters[2],Filter[3],BalanceId[4],BalanceType[5],Categories[6],DestinationIds[7],RatingSubject[8],SharedGroup[9],ExpiryTime[10],TimingIds[11],Units[12],BalanceWeight[13],BalanceBlocker[14],BalanceDisabled[15],Weight[16]
 ACT_TOPUP_SRC,*topup_reset,,,balance_src,*monetary,,*any,,,*unlimited,,10,20,false,false,20
 ACT_TOPUP_DEST,*topup_reset,,,balance_dest,*monetary,,*any,,,*unlimited,,10,10,false,false,10
-ACT_TRANSFER,*transfer_balance,"{""DestinationAccountID"":""cgrates.org:ACC_DEST"",""DestinationBalanceID"":""balance_dest""}",,balance_src,*monetary,,,,,*unlimited,,4,,,,`,
+ACT_TRANSFER,*cdrlog,,,,,,,,,,,,,,,
+ACT_TRANSFER,*transfer_balance,"{""DestinationAccountID"":""cgrates.org:ACC_DEST"",""DestinationBalanceID"":""balance_dest""}",,balance_src,,,,,,*unlimited,,4,,,,`,
 	}
 
 	testEnv := TestEnvironment{
@@ -169,6 +175,7 @@ ACT_TRANSFER,*transfer_balance,"{""DestinationAccountID"":""cgrates.org:ACC_DEST
 			DestinationAccountID: "ACC_DEST",
 			DestinationBalanceID: "balance_dest",
 			Units:                2,
+			Cdrlog:               true,
 		}, &reply); err != nil {
 			t.Error(err)
 		}
@@ -201,6 +208,37 @@ ACT_TRANSFER,*transfer_balance,"{""DestinationAccountID"":""cgrates.org:ACC_DEST
 		balance = acnts[1].BalanceMap[utils.MetaMonetary][0]
 		if balance.ID != "balance_dest" || balance.Value != 16 {
 			t.Errorf("received account with unexpected balance: %v", balance)
+		}
+	})
+
+	t.Run("CheckTransferBalanceCDRs", func(t *testing.T) {
+		var cdrs []*engine.CDR
+		if err := client.Call(context.Background(), utils.CDRsV1GetCDRs, &utils.RPCCDRsFilterWithAPIOpts{
+			RPCCDRsFilter: &utils.RPCCDRsFilter{
+				OrderBy: utils.Cost,
+			}}, &cdrs); err != nil {
+			t.Fatal(err)
+		}
+
+		if len(cdrs) != 2 {
+			t.Errorf("expected to receive 2 cdrs: %v", utils.ToJSON(cdrs))
+		}
+
+		expectedCost := 2. // expected cost of first cdr
+		for _, cdr := range cdrs {
+			if cdr.Account != "ACC_SRC" ||
+				cdr.Destination != "ACC_DEST" ||
+				cdr.RunID != utils.MetaTransferBalance ||
+				cdr.Source != utils.CDRLog ||
+				cdr.ToR != utils.MetaVoice ||
+				cdr.ExtraFields["DestinationBalanceID"] != "balance_dest" ||
+				cdr.ExtraFields["SourceBalanceID"] != "balance_src" {
+				t.Errorf("unexpected cdr received: %v", utils.ToJSON(cdr))
+			}
+			if cdr.Cost != expectedCost {
+				t.Errorf("cost expected to be %v, received %v", expectedCost, cdr.Cost)
+			}
+			expectedCost = 4 // expected cost of second cdr
 		}
 	})
 }

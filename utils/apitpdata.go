@@ -886,7 +886,6 @@ type AttrTransferBalance struct {
 	DestinationAccountID string
 	DestinationBalanceID string
 	Units                float64
-	Overwrite            bool
 	Cdrlog               bool
 	APIOpts              map[string]any
 }
