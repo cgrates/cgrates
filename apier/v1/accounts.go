@@ -21,7 +21,6 @@ package v1
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"math"
 	"slices"
 	"strings"
@@ -714,28 +713,23 @@ func (apierSv1 *APIerSv1) RemoveBalances(ctx *context.Context, attr *utils.AttrS
 	return nil
 }
 
-// TransferBalance sets a temporary *transfer_balance action, which will be executed immediately.
+// TransferBalance initiates a balance transfer between accounts, immediately executing the configured actions.
 func (apierSv1 *APIerSv1) TransferBalance(ctx *context.Context, attr utils.AttrTransferBalance, reply *string) (err error) {
+
+	// Check for missing mandatory fields in the request attributes.
 	if missing := utils.MissingStructFields(&attr, []string{
 		utils.SourceAccountID, utils.SourceBalanceID,
 		utils.DestinationAccountID, utils.DestinationBalanceID,
 		utils.Units}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
+
+	// Use default tenant if not specified in the request attributes.
 	if attr.Tenant == "" {
 		attr.Tenant = apierSv1.Config.GeneralCfg().DefaultTenant
 	}
 
-	// Set *transfer_balance action.
-	actionID := fmt.Sprintf("tmp_act_%s", utils.UUIDSha1Prefix())
-	if !attr.Overwrite {
-		var exists bool
-		if exists, err = apierSv1.DataManager.HasData(utils.ActionPrefix, actionID, ""); err != nil {
-			return utils.NewErrServerError(err)
-		} else if exists {
-			return utils.ErrExists
-		}
-	}
+	// Marshal extra parameters including the destination account and balance ID.
 	var extraParams []byte
 	extraParams, err = json.Marshal(map[string]string{
 		utils.DestinationAccountID: attr.Tenant + ":" + attr.DestinationAccountID,
@@ -744,54 +738,26 @@ func (apierSv1 *APIerSv1) TransferBalance(ctx *context.Context, attr utils.AttrT
 	if err != nil {
 		return utils.NewErrServerError(err)
 	}
-	action := &engine.Action{
-		Id:              actionID,
+
+	// Prepare actions for the balance transfer and optional CDR logging.
+	actions := make([]*engine.Action, 0, 2)
+	actions = append(actions, &engine.Action{
 		ActionType:      utils.MetaTransferBalance,
 		ExtraParameters: string(extraParams),
 		Balance: &engine.BalanceFilter{
 			ID:    utils.StringPointer(attr.SourceBalanceID),
 			Value: &utils.ValueFormula{Static: attr.Units},
 		},
-	}
-	if err = apierSv1.DataManager.SetActions(actionID, engine.Actions{action}); err != nil {
-		return utils.NewErrServerError(err)
-	}
-
-	// Remove the action.
-	defer func() {
-		if removeErr := apierSv1.DataManager.RemoveActions(actionID); err != nil {
-			err = errors.Join(err, removeErr)
-			return
-		}
-		if reloadCacheErr := apierSv1.ConnMgr.Call(context.TODO(), apierSv1.Config.ApierCfg().CachesConns,
-			utils.CacheSv1ReloadCache, &utils.AttrReloadCacheWithAPIOpts{
-				ActionIDs: []string{actionID},
-			}, reply); reloadCacheErr != nil {
-			err = errors.Join(err, reloadCacheErr)
-			return
-		}
-		if setLoadIDErr := apierSv1.DataManager.SetLoadIDs(map[string]int64{utils.CacheActions: time.Now().UnixNano()}); setLoadIDErr != nil {
-			err = errors.Join(err, setLoadIDErr)
-			return
-		}
-		*reply = utils.OK
-	}()
-
-	if err = apierSv1.ConnMgr.Call(context.TODO(), apierSv1.Config.ApierCfg().CachesConns,
-		utils.CacheSv1ReloadCache, &utils.AttrReloadCacheWithAPIOpts{
-			ActionIDs: []string{actionID},
-		}, reply); err != nil {
-		return utils.NewErrServerError(err)
-	}
-	//generate a loadID for CacheActions and store it in database
-	if err = apierSv1.DataManager.SetLoadIDs(map[string]int64{utils.CacheActions: time.Now().UnixNano()}); err != nil {
-		return utils.NewErrServerError(err)
+	})
+	if attr.Cdrlog {
+		actions = append(actions, &engine.Action{
+			ActionType: utils.CDRLog,
+		})
 	}
 
-	// Execute the action.
-	at := &engine.ActionTiming{
-		ActionsID: actionID,
-	}
+	// Execute the prepared actions for the account specified.
+	at := &engine.ActionTiming{}
+	at.SetActions(actions)
 	at.SetAccountIDs(utils.StringMap{utils.ConcatenatedKey(attr.Tenant, attr.SourceAccountID): true})
 	if err = at.Execute(apierSv1.FilterS); err != nil {
 		return utils.NewErrServerError(err)

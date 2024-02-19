@@ -463,7 +463,7 @@ PACKAGE_ACC_TEST,ACT_TOPUP_SMS,*asap,10`,
 		utils.ActionsCsv: `#ActionsId[0],Action[1],ExtraParameters[2],Filter[3],BalanceId[4],BalanceType[5],Categories[6],DestinationIds[7],RatingSubject[8],SharedGroup[9],ExpiryTime[10],TimingIds[11],Units[12],BalanceWeight[13],BalanceBlocker[14],BalanceDisabled[15],Weight[16]
 ACT_REMOVE_BALANCE_MONETARY,*cdrlog,,,,,,,,,,,,,,,
 ACT_REMOVE_BALANCE_MONETARY,*remove_balance,,,balance_monetary,*monetary,,,,,,,,,,,
-ACT_REMOVE_EXPIRED,*cdrlog,,,,*monetary,,,,,,,,,,,
+ACT_REMOVE_EXPIRED,*cdrlog,,,,,,,,,,,,,,,
 ACT_REMOVE_EXPIRED,*remove_expired,,,,*monetary,,,,,,,,,,,
 ACT_TOPUP_MONETARY,*cdrlog,"{""BalanceID"":""~*acnt.BalanceID""}",,,,,,,,,,,,,,
 ACT_TOPUP_MONETARY,*topup_reset,,,balance_monetary,*monetary,,*any,,,*unlimited,,150,20,false,false,20
