@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"encoding/json"
 	"fmt"
 
 	"github.com/nyaruka/phonenumbers"
@@ -71,6 +72,31 @@ func (dDP *dynamicDP) FieldAsInterface(fldPath []string) (val any, err error) {
 	if len(fldPath) == 0 {
 		return nil, utils.ErrNotFound
 	}
+
+	// Parsing a *req.CostDetails field deeper than the first level requires the CostDetails field
+	// to have *EventCost as an underlying type. If it's not, serializing and deserializing into
+	// an *EventCost variable will be attempted.
+	if len(fldPath) > 3 && fldPath[0] == utils.MetaReq && fldPath[1] == utils.CostDetails {
+		if mp, canCast := dDP.initialDP.(utils.MapStorage); canCast {
+			if event, canCast := mp[utils.MetaReq].(map[string]any); canCast {
+				if cd, has := event[utils.CostDetails]; has {
+					var ec *EventCost
+					if ec, canCast = cd.(*EventCost); canCast {
+						return ec.FieldAsInterface(fldPath[2:])
+					}
+					cdBytes, err := json.Marshal(cd)
+					if err != nil {
+						return nil, err
+					}
+					if err = json.Unmarshal(cdBytes, &ec); err != nil {
+						return nil, err
+					}
+					return ec.FieldAsInterface(fldPath[2:])
+				}
+			}
+		}
+	}
+
 	if initialDPPrefixes.Has(fldPath[0]) {
 		return dDP.initialDP.FieldAsInterface(fldPath)
 	}

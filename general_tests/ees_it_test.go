@@ -69,7 +69,7 @@ func TestEEsExportEventChanges(t *testing.T) {
 
 "ees": {
 	"enabled": true,
-	"attributes_conns":["*internal"],
+	"attributes_conns":["*localhost"],
 	"exporters": [
 		{
 			"id": "exporter1",
@@ -82,6 +82,8 @@ func TestEEsExportEventChanges(t *testing.T) {
 			"fields":[
 				{"tag": "CGRID", "path": "*uch.CGRID1", "type": "*variable", "value": "~*req.CGRID"},
 				{"tag": "RequestType", "path": "*uch.RequestType1", "type": "*variable", "value": "~*req.RequestType"},
+				{"tag": "BalanceID", "path": "*uch.BalanceID", "type": "*variable", "value": "~*req.CostDetails.Charges[0].Increments[0].Accounting.Balance.ID"},
+				{"tag": "BalanceFound", "path": "*uch.BalanceFound", "type": "*variable", "value": "~*req.BalanceFound"},
 				{"tag": "ExporterID", "path": "*uch.ExporterID1", "type": "*variable", "value": "~*opts.*exporterID"}
 			],
 		},
@@ -136,6 +138,16 @@ func TestEEsExportEventChanges(t *testing.T) {
 							},
 						},
 					},
+					{
+						FilterIDs: []string{"*string:~*req.CostDetails.Charges[0].Increments[0].Accounting.Balance.ID:BALANCE_TEST"},
+						Path:      "*req.BalanceFound",
+						Type:      utils.MetaVariable,
+						Value: config.RSRParsers{
+							&config.RSRParser{
+								Rules: utils.TrueStr,
+							},
+						},
+					},
 				},
 				Blocker: false,
 				Weight:  10,
@@ -157,6 +169,30 @@ func TestEEsExportEventChanges(t *testing.T) {
 				Event: map[string]any{
 					utils.CGRID:       "TEST",
 					utils.RequestType: utils.MetaRated,
+					utils.CostDetails: &engine.EventCost{
+						Charges: []*engine.ChargingInterval{
+							{
+								Increments: []*engine.ChargingIncrement{
+									{
+										AccountingID: "ACCOUNTING_TEST",
+									},
+								},
+							},
+						},
+						Accounting: engine.Accounting{
+							"ACCOUNTING_TEST": &engine.BalanceCharge{
+								BalanceUUID: "123456",
+							},
+						},
+						AccountSummary: &engine.AccountSummary{
+							BalanceSummaries: engine.BalanceSummaries{
+								{
+									ID:   "BALANCE_TEST",
+									UUID: "123456",
+								},
+							},
+						},
+					},
 				},
 			},
 		}
@@ -218,6 +254,33 @@ func TestEEsExportEventChanges(t *testing.T) {
 			t.Error(err)
 		} else if exporterID2 != "exporter2" {
 			t.Errorf("expected %v, received %v", "exporter2", exporterID2)
+		}
+	})
+
+	t.Run("CheckAttributesAlteredFields", func(t *testing.T) {
+		var balanceID any
+		if err = client.Call(context.Background(), utils.CacheSv1GetItem, &utils.ArgsGetCacheItemWithAPIOpts{
+			Tenant: "cgrates.org",
+			ArgsGetCacheItem: utils.ArgsGetCacheItem{
+				CacheID: utils.CacheUCH,
+				ItemID:  "BalanceID",
+			},
+		}, &balanceID); err != nil {
+			t.Error(err)
+		} else if balanceID != "BALANCE_TEST" {
+			t.Errorf("expected %v, received %v", "BALANCE_TEST", balanceID)
+		}
+		var balanceFound any
+		if err = client.Call(context.Background(), utils.CacheSv1GetItem, &utils.ArgsGetCacheItemWithAPIOpts{
+			Tenant: "cgrates.org",
+			ArgsGetCacheItem: utils.ArgsGetCacheItem{
+				CacheID: utils.CacheUCH,
+				ItemID:  "BalanceFound",
+			},
+		}, &balanceFound); err != nil {
+			t.Error(err)
+		} else if balanceFound != "true" {
+			t.Errorf("expected %v, received %v", "true", balanceFound)
 		}
 	})
 }
