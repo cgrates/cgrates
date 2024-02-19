@@ -77,7 +77,7 @@ PACKAGE_ACC_DEST,ACT_TOPUP_DEST,*asap,10`,
 		utils.ActionsCsv: `#ActionsId[0],Action[1],ExtraParameters[2],Filter[3],BalanceId[4],BalanceType[5],Categories[6],DestinationIds[7],RatingSubject[8],SharedGroup[9],ExpiryTime[10],TimingIds[11],Units[12],BalanceWeight[13],BalanceBlocker[14],BalanceDisabled[15],Weight[16]
 ACT_TOPUP_SRC,*topup_reset,,,balance_src,*monetary,,*any,,,*unlimited,,10,20,false,false,20
 ACT_TOPUP_DEST,*topup_reset,,,balance_dest,*monetary,,*any,,,*unlimited,,10,10,false,false,10
-ACT_TRANSFER,*transfer_balance,"{""DestAccountID"":""cgrates.org:ACC_DEST"",""DestBalanceID"":""balance_dest""}",,balance_src,*monetary,,,,,*unlimited,,4,,,,`,
+ACT_TRANSFER,*transfer_balance,"{""DestinationAccountID"":""cgrates.org:ACC_DEST"",""DestinationBalanceID"":""balance_dest""}",,balance_src,*monetary,,,,,*unlimited,,4,,,,`,
 	}
 
 	testEnv := TestEnvironment{
@@ -163,13 +163,12 @@ ACT_TRANSFER,*transfer_balance,"{""DestAccountID"":""cgrates.org:ACC_DEST"",""De
 	t.Run("TransferBalanceByAPI", func(t *testing.T) {
 		var reply string
 		if err := client.Call(context.Background(), utils.APIerSv1TransferBalance, utils.AttrTransferBalance{
-			Tenant:        "cgrates.org",
-			SrcAccountID:  "ACC_SRC",
-			SrcBalanceID:  "balance_src",
-			DestAccountID: "ACC_DEST",
-			DestBalanceID: "balance_dest",
-			Units:         2,
-			BalanceType:   utils.MetaMonetary,
+			Tenant:               "cgrates.org",
+			SourceAccountID:      "ACC_SRC",
+			SourceBalanceID:      "balance_src",
+			DestinationAccountID: "ACC_DEST",
+			DestinationBalanceID: "balance_dest",
+			Units:                2,
 		}, &reply); err != nil {
 			t.Error(err)
 		}

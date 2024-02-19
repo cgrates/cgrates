@@ -4265,12 +4265,11 @@ func TestActionsTransferBalance(t *testing.T) {
 				Id:         "ACT_TRANSFER_BALANCE",
 				ActionType: utils.MetaTransferBalance,
 				ExtraParameters: `{
-					"DestAccountID": "cgrates.org:ACC_DEST",
-					"DestBalanceID": "BALANCE_DEST"
+					"DestinationAccountID": "cgrates.org:ACC_DEST",
+					"DestinationBalanceID": "BALANCE_DEST"
 				}`,
 				Balance: &BalanceFilter{
-					ID:   utils.StringPointer("BALANCE_SRC"),
-					Type: utils.StringPointer(utils.MetaMonetary),
+					ID: utils.StringPointer("BALANCE_SRC"),
 					Value: &utils.ValueFormula{
 						Static: 3,
 					},
@@ -4284,26 +4283,13 @@ func TestActionsTransferBalance(t *testing.T) {
 			expectedErr: "source account is nil",
 		},
 		{
-			name: "UnspecifiedBalanceType",
+			name: "UnspecifiedBalanceID",
 			srcAcc: &Account{
 				ID: "cgrates.org:ACC_SRC",
 			},
 			act: &Action{
 				Id:      "ACT_TRANSFER_BALANCE",
 				Balance: &BalanceFilter{},
-			},
-			expectedErr: "balance type is missing",
-		},
-		{
-			name: "UnspecifiedBalanceID",
-			srcAcc: &Account{
-				ID: "cgrates.org:ACC_SRC",
-			},
-			act: &Action{
-				Id: "ACT_TRANSFER_BALANCE",
-				Balance: &BalanceFilter{
-					Type: utils.StringPointer(utils.MetaMonetary),
-				},
 			},
 			expectedErr: "source balance ID is missing",
 		},
@@ -4315,8 +4301,7 @@ func TestActionsTransferBalance(t *testing.T) {
 			act: &Action{
 				Id: "ACT_TRANSFER_BALANCE",
 				Balance: &BalanceFilter{
-					Type: utils.StringPointer(utils.MetaMonetary),
-					ID:   utils.StringPointer("BALANCE_SRC"),
+					ID: utils.StringPointer("BALANCE_SRC"),
 				},
 			},
 			expectedErr: "ExtraParameters used to identify the destination balance are missing",
@@ -4330,8 +4315,7 @@ func TestActionsTransferBalance(t *testing.T) {
 				Id:              "ACT_TRANSFER_BALANCE",
 				ExtraParameters: "invalid_params",
 				Balance: &BalanceFilter{
-					Type: utils.StringPointer(utils.MetaMonetary),
-					ID:   utils.StringPointer("BALANCE_SRC"),
+					ID: utils.StringPointer("BALANCE_SRC"),
 				},
 			},
 			expectedErr: "account cgrates.org:ACC_SRC has no balances to transfer from",
@@ -4353,8 +4337,7 @@ func TestActionsTransferBalance(t *testing.T) {
 				Id:              "ACT_TRANSFER_BALANCE",
 				ExtraParameters: "invalid_params",
 				Balance: &BalanceFilter{
-					Type: utils.StringPointer(utils.MetaMonetary),
-					ID:   utils.StringPointer("BALANCE_SRC"),
+					ID: utils.StringPointer("BALANCE_SRC"),
 				},
 			},
 			expectedErr: "source balance not found or expired",
@@ -4376,8 +4359,7 @@ func TestActionsTransferBalance(t *testing.T) {
 				Id:              "ACT_TRANSFER_BALANCE",
 				ExtraParameters: "invalid_params",
 				Balance: &BalanceFilter{
-					Type: utils.StringPointer(utils.MetaMonetary),
-					ID:   utils.StringPointer("BALANCE_SRC"),
+					ID: utils.StringPointer("BALANCE_SRC"),
 					Value: &utils.ValueFormula{
 						Static: 3,
 					},
@@ -4401,12 +4383,11 @@ func TestActionsTransferBalance(t *testing.T) {
 			act: &Action{
 				Id: "ACT_TRANSFER_BALANCE",
 				ExtraParameters: `{
-					"DestAccountID": "cgrates.org:ACC_DEST",
-					"DestBalanceID": "BALANCE_DEST"
+					"DestinationAccountID": "cgrates.org:ACC_DEST",
+					"DestinationBalanceID": "BALANCE_DEST"
 				}`,
 				Balance: &BalanceFilter{
-					Type: utils.StringPointer(utils.MetaMonetary),
-					ID:   utils.StringPointer("BALANCE_SRC"),
+					ID: utils.StringPointer("BALANCE_SRC"),
 					Value: &utils.ValueFormula{
 						Static: 3,
 					},
@@ -4433,12 +4414,11 @@ func TestActionsTransferBalance(t *testing.T) {
 			act: &Action{
 				Id: "ACT_TRANSFER_BALANCE",
 				ExtraParameters: `{
-					"DestAccountID": "cgrates.org:ACC_DEST",
-					"DestBalanceID": "BALANCE_DEST"
+					"DestinationAccountID": "cgrates.org:ACC_DEST",
+					"DestinationBalanceID": "BALANCE_DEST"
 				}`,
 				Balance: &BalanceFilter{
-					Type: utils.StringPointer(utils.MetaMonetary),
-					ID:   utils.StringPointer("BALANCE_SRC"),
+					ID: utils.StringPointer("BALANCE_SRC"),
 					Value: &utils.ValueFormula{
 						Static: 3,
 					},
@@ -4473,12 +4453,11 @@ func TestActionsTransferBalance(t *testing.T) {
 			act: &Action{
 				Id: "ACT_TRANSFER_BALANCE",
 				ExtraParameters: `{
-					"DestAccountID": "cgrates.org:ACC_DEST",
-					"DestBalanceID": "BALANCE_DEST"
+					"DestinationAccountID": "cgrates.org:ACC_DEST",
+					"DestinationBalanceID": "BALANCE_DEST"
 				}`,
 				Balance: &BalanceFilter{
-					Type: utils.StringPointer(utils.MetaMonetary),
-					ID:   utils.StringPointer("BALANCE_SRC"),
+					ID: utils.StringPointer("BALANCE_SRC"),
 					Value: &utils.ValueFormula{
 						Static: 0,
 					},
@@ -4513,12 +4492,11 @@ func TestActionsTransferBalance(t *testing.T) {
 			act: &Action{
 				Id: "ACT_TRANSFER_BALANCE",
 				ExtraParameters: `{
-					"DestAccountID": "cgrates.org:ACC_DEST",
-					"DestBalanceID": "BALANCE_DEST"
+					"DestinationAccountID": "cgrates.org:ACC_DEST",
+					"DestinationBalanceID": "BALANCE_DEST"
 				}`,
 				Balance: &BalanceFilter{
-					Type: utils.StringPointer(utils.MetaMonetary),
-					ID:   utils.StringPointer("BALANCE_SRC"),
+					ID: utils.StringPointer("BALANCE_SRC"),
 					Value: &utils.ValueFormula{
 						Static: 3,
 					},
@@ -4553,12 +4531,11 @@ func TestActionsTransferBalance(t *testing.T) {
 			act: &Action{
 				Id: "ACT_TRANSFER_BALANCE",
 				ExtraParameters: `{
-					"DestAccountID": "cgrates.org:ACC_DEST_FAIL",
-					"DestBalanceID": "BALANCE_DEST"
+					"DestinationAccountID": "cgrates.org:ACC_DEST_FAIL",
+					"DestinationBalanceID": "BALANCE_DEST"
 				}`,
 				Balance: &BalanceFilter{
-					Type: utils.StringPointer(utils.MetaMonetary),
-					ID:   utils.StringPointer("BALANCE_SRC"),
+					ID: utils.StringPointer("BALANCE_SRC"),
 					Value: &utils.ValueFormula{
 						Static: 3,
 					},

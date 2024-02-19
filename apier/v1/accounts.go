@@ -717,9 +717,9 @@ func (apierSv1 *APIerSv1) RemoveBalances(ctx *context.Context, attr *utils.AttrS
 // TransferBalance sets a temporary *transfer_balance action, which will be executed immediately.
 func (apierSv1 *APIerSv1) TransferBalance(ctx *context.Context, attr utils.AttrTransferBalance, reply *string) (err error) {
 	if missing := utils.MissingStructFields(&attr, []string{
-		utils.SrcAccountID, utils.SrcBalanceID,
-		utils.DestAccountID, utils.DestBalanceID,
-		utils.Units, utils.BalanceType}); len(missing) != 0 {
+		utils.SourceAccountID, utils.SourceBalanceID,
+		utils.DestinationAccountID, utils.DestinationBalanceID,
+		utils.Units}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	if attr.Tenant == "" {
@@ -738,8 +738,8 @@ func (apierSv1 *APIerSv1) TransferBalance(ctx *context.Context, attr utils.AttrT
 	}
 	var extraParams []byte
 	extraParams, err = json.Marshal(map[string]string{
-		utils.DestAccountID: attr.Tenant + ":" + attr.DestAccountID,
-		utils.DestBalanceID: attr.DestBalanceID,
+		utils.DestinationAccountID: attr.Tenant + ":" + attr.DestinationAccountID,
+		utils.DestinationBalanceID: attr.DestinationBalanceID,
 	})
 	if err != nil {
 		return utils.NewErrServerError(err)
@@ -749,8 +749,7 @@ func (apierSv1 *APIerSv1) TransferBalance(ctx *context.Context, attr utils.AttrT
 		ActionType:      utils.MetaTransferBalance,
 		ExtraParameters: string(extraParams),
 		Balance: &engine.BalanceFilter{
-			ID:    utils.StringPointer(attr.SrcBalanceID),
-			Type:  utils.StringPointer(attr.BalanceType),
+			ID:    utils.StringPointer(attr.SourceBalanceID),
 			Value: &utils.ValueFormula{Static: attr.Units},
 		},
 	}
@@ -793,7 +792,7 @@ func (apierSv1 *APIerSv1) TransferBalance(ctx *context.Context, attr utils.AttrT
 	at := &engine.ActionTiming{
 		ActionsID: actionID,
 	}
-	at.SetAccountIDs(utils.StringMap{utils.ConcatenatedKey(attr.Tenant, attr.SrcAccountID): true})
+	at.SetAccountIDs(utils.StringMap{utils.ConcatenatedKey(attr.Tenant, attr.SourceAccountID): true})
 	if err = at.Execute(apierSv1.FilterS); err != nil {
 		return utils.NewErrServerError(err)
 	}
