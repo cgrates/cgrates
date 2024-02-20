@@ -94,6 +94,52 @@ func TestRadiusCoADisconnect(t *testing.T) {
 	}
 	time.Sleep(time.Duration(*waitRater) * time.Millisecond)
 
+	var reply string
+
+	// Set Action which will be called by Threshold when account gets debitted
+	actRadCoaAcnt1001 := &utils.AttrSetActions{
+		ActionsId: "ACT_RAD_COA_ACNT_1001",
+		Actions: []*utils.TPAction{{
+			Identifier: utils.MetaCgrRpc,
+			ExtraParameters: `{
+		                    "Address":"localhost:2012",
+		                    "Attempts":1,
+		                    "Transport":"*json",
+		                    "Method":"SessionSv1.ReAuthorize",
+		                    "Params":{
+		                        "Filters":["*string:~*req.Account:1001"],
+		                        "Tenant":"cgrates.org",
+		                        "APIOpts":{"*radCoATemplate":"mycoa"},
+		                        "Event":{"CustomFilter":"custom_filter"}},
+		                    "Id":2}`,
+		}}}
+	if err := raDiscRPC.Call(context.Background(), utils.APIerSv2SetActions,
+		actRadCoaAcnt1001, &reply); err != nil {
+		t.Error("Got error on APIerSv2.SetActions: ", err.Error())
+	} else if reply != utils.OK {
+		t.Errorf("Calling APIerSv2.SetActions received: %s", reply)
+	}
+
+	// Set the Threshold profile which will call the action when account will be modified
+
+	tPrfl := &engine.ThresholdProfileWithAPIOpts{
+		ThresholdProfile: &engine.ThresholdProfile{
+			Tenant:    "cgrates.org",
+			ID:        "THD_ACNT_1001",
+			FilterIDs: []string{"*string:~*opts.*eventType:AccountUpdate", "*string:~*req.ID:1001"},
+			//MinHits:   1,
+			MaxHits:   1,
+			ActionIDs: []string{"LOG_WARNING", "ACT_RAD_COA_ACNT_1001"},
+			Async:     true,
+		},
+	}
+	if err := raDiscRPC.Call(context.Background(), utils.APIerSv1SetThresholdProfile,
+		tPrfl, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply returned", reply)
+	}
+
 	// Testing the functionality itself starts here.
 	var wg sync.WaitGroup
 	done := make(chan struct{}) // signal to end the test when the handlers have finished processing
@@ -231,22 +277,23 @@ func TestRadiusCoADisconnect(t *testing.T) {
 	if replyPacket.Code != radigo.AccountingResponse {
 		t.Errorf("unexpected reply received to AccountingRequest: %+v", replyPacket)
 	}
-
-	var reply string
-	if err := raDiscRPC.Call(context.Background(), utils.SessionSv1ReAuthorize,
-		utils.SessionFilterWithEvent{
-			SessionFilter: &utils.SessionFilter{
-				APIOpts: map[string]any{
-					utils.MetaRadCoATemplate: "mycoa",
-				}},
-			Event: map[string]any{
-				"CustomFilter": "custom_filter",
-			},
-		}, &reply); err != nil {
-		t.Error(err)
-	}
-
-	if err = raDiscRPC.Call(context.Background(), utils.SessionSv1ForceDisconnect, nil, &reply); err != nil {
+	/*
+		if err := raDiscRPC.Call(context.Background(), utils.SessionSv1ReAuthorize,
+			utils.SessionFilterWithEvent{
+				SessionFilter: &utils.SessionFilter{
+					APIOpts: map[string]any{
+						utils.MetaRadCoATemplate: "mycoa",
+					}},
+				Event: map[string]any{
+					"CustomFilter": "custom_filter",
+				},
+			}, &reply); err != nil {
+			t.Error(err)
+		}
+	*/
+	time.Sleep(1 * time.Second)
+	if err = raDiscRPC.Call(context.Background(), utils.SessionSv1ForceDisconnect,
+		nil, &reply); err != nil {
 		t.Error(err)
 	}
 

@@ -116,7 +116,8 @@ type radiusDAClientCfg struct {
 }
 
 // newRadiusDAClientCfg is a constructor for the radiusDAClientCfg type.
-func newRadiusDAClientCfg(dicts *radigo.Dictionaries, secrets *radigo.Secrets, radAgentCfg *config.RadiusAgentCfg) radiusDAClientCfg {
+func newRadiusDAClientCfg(dicts *radigo.Dictionaries, secrets *radigo.Secrets,
+	radAgentCfg *config.RadiusAgentCfg) radiusDAClientCfg {
 	dacDicts := make(map[string]*radigo.Dictionary, len(radAgentCfg.ClientDaAddresses))
 	dacSecrets := make(map[string]string, len(radAgentCfg.ClientDaAddresses))
 	for client := range radAgentCfg.ClientDaAddresses {
@@ -229,7 +230,8 @@ func (ra *RadiusAgent) handleAcct(req *radigo.Packet) (rpl *radigo.Packet, err e
 	rplyNM := utils.NewOrderedNavigableMap()
 	opts := utils.MapStorage{}
 	var processed bool
-	reqVars := &utils.DataNode{Type: utils.NMMapType, Map: map[string]*utils.DataNode{utils.RemoteHost: utils.NewLeafNode(req.RemoteAddr().String())}}
+	reqVars := &utils.DataNode{Type: utils.NMMapType,
+		Map: map[string]*utils.DataNode{utils.RemoteHost: utils.NewLeafNode(req.RemoteAddr().String())}}
 	for _, reqProcessor := range ra.cgrCfg.RadiusAgentCfg().RequestProcessors {
 		agReq := NewAgentRequest(dcdr, reqVars, cgrRplyNM, rplyNM, opts,
 			reqProcessor.Tenant, ra.cgrCfg.GeneralCfg().DefaultTenant,
@@ -384,7 +386,8 @@ func (ra *RadiusAgent) processRequest(req *radigo.Packet, reqProcessor *config.R
 			reqProcessor.Flags.ParamValue(utils.MetaRoutesMaxCost),
 		)
 		rply := new(sessions.V1ProcessMessageReply)
-		err = ra.connMgr.Call(ra.ctx, ra.cgrCfg.RadiusAgentCfg().SessionSConns, utils.SessionSv1ProcessMessage, evArgs, rply)
+		err = ra.connMgr.Call(ra.ctx, ra.cgrCfg.RadiusAgentCfg().SessionSConns,
+			utils.SessionSv1ProcessMessage, evArgs, rply)
 		if utils.ErrHasPrefix(err, utils.RalsErrorPrfx) {
 			cgrEv.Event[utils.Usage] = 0 // avoid further debits
 		} else if evArgs.Debit {
@@ -399,8 +402,8 @@ func (ra *RadiusAgent) processRequest(req *radigo.Packet, reqProcessor *config.R
 			Paginator: cgrArgs,
 		}
 		rply := new(sessions.V1ProcessEventReply)
-		err = ra.connMgr.Call(ra.ctx, ra.cgrCfg.RadiusAgentCfg().SessionSConns, utils.SessionSv1ProcessEvent,
-			evArgs, rply)
+		err = ra.connMgr.Call(ra.ctx, ra.cgrCfg.RadiusAgentCfg().SessionSConns,
+			utils.SessionSv1ProcessEvent, evArgs, rply)
 		if utils.ErrHasPrefix(err, utils.RalsErrorPrfx) {
 			cgrEv.Event[utils.Usage] = 0 // avoid further debits
 		} else if needsMaxUsage(reqProcessor.Flags[utils.MetaRALs]) {
@@ -418,8 +421,8 @@ func (ra *RadiusAgent) processRequest(req *radigo.Packet, reqProcessor *config.R
 	// separate request so we can capture the Terminate/Event also here
 	if reqProcessor.Flags.GetBool(utils.MetaCDRs) {
 		var rplyCDRs string
-		if err = ra.connMgr.Call(ra.ctx, ra.cgrCfg.RadiusAgentCfg().SessionSConns, utils.SessionSv1ProcessCDR,
-			cgrEv, &rplyCDRs); err != nil {
+		if err = ra.connMgr.Call(ra.ctx, ra.cgrCfg.RadiusAgentCfg().SessionSConns,
+			utils.SessionSv1ProcessCDR, cgrEv, &rplyCDRs); err != nil {
 			agReq.CGRReply.Map[utils.Error] = utils.NewLeafNode(err.Error())
 		}
 	}
@@ -549,7 +552,8 @@ func (ra *RadiusAgent) V1ReAuthorize(_ *context.Context, cgrEv utils.CGREvent, r
 }
 
 // sendRadDaReq prepares and sends a Radius CoA/Disconnect Request and returns the reply code or an error.
-func (ra *RadiusAgent) sendRadDaReq(requestType radigo.PacketCode, requestTemplate, sessionID string, requestEv utils.DataProvider, requestVars *utils.DataNode) (radigo.PacketCode, error) {
+func (ra *RadiusAgent) sendRadDaReq(requestType radigo.PacketCode, requestTemplate, sessionID string,
+	requestEv utils.DataProvider, requestVars *utils.DataNode) (radigo.PacketCode, error) {
 	cachedPacket, has := engine.Cache.Get(utils.CacheRadiusPackets, sessionID)
 	if !has {
 		return 0, fmt.Errorf("failed to retrieve packet from cache: %w", utils.ErrNotFound)
@@ -568,7 +572,8 @@ func (ra *RadiusAgent) sendRadDaReq(requestType radigo.PacketCode, requestTempla
 		return 0, fmt.Errorf("could not set attributes: %w", err)
 	}
 
-	remoteAddr, remoteHost, err := dmRemoteAddr(packet.RemoteAddr().String(), ra.cgrCfg.RadiusAgentCfg().ClientDaAddresses)
+	remoteAddr, remoteHost, err := dmRemoteAddr(packet.RemoteAddr().String(),
+		ra.cgrCfg.RadiusAgentCfg().ClientDaAddresses)
 	if err != nil {
 		return 0, fmt.Errorf("retrieving remote address failed: %w", err)
 	}

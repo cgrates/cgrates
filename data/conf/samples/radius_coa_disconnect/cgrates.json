@@ -13,7 +13,8 @@
 },
 
 "rals": {
-	"enabled": true
+	"enabled": true,
+	"thresholds_conns": ["*localhost"],
 },
 
 "schedulers": {
@@ -36,6 +37,11 @@
 
 "chargers": {
 	"enabled": true
+},
+
+"thresholds": {
+	"enabled": true,
+	"store_interval": "-1"
 },
 
 "sessions": {
