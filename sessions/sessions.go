@@ -4002,7 +4002,7 @@ func (sS *SessionS) BiRPCV1ProcessCDR(ctx *context.Context,
 		rply)
 }
 
-func (sS *SessionS) sendRar(ctx *context.Context, s *Session, event map[string]any) (err error) {
+func (sS *SessionS) sendRar(ctx *context.Context, s *Session, apiOpts map[string]any, event map[string]any) (err error) {
 	clnt := sS.biJClnt(s.ClientConnID)
 	if clnt == nil {
 		return fmt.Errorf("calling %s requires bidirectional JSON connection, connID: <%s>",
@@ -4020,9 +4020,10 @@ func (sS *SessionS) sendRar(ctx *context.Context, s *Session, event map[string]a
 		}
 	}
 	args := utils.CGREvent{
-		ID:    utils.GenUUID(),
-		Time:  utils.TimePointer(time.Now()),
-		Event: event,
+		ID:      utils.GenUUID(),
+		Time:    utils.TimePointer(time.Now()),
+		APIOpts: apiOpts,
+		Event:   event,
 	}
 
 	var rply string
@@ -4042,17 +4043,17 @@ func (sS *SessionS) BiRPCv1ReAuthorize(ctx *context.Context,
 	if len(aSs) == 0 {
 		return utils.ErrNotFound
 	}
-	cache := utils.NewStringSet(nil)
+	uniqueSIDs := utils.NewStringSet(nil)
 	for _, as := range aSs {
-		if cache.Has(as.CGRID) {
+		if uniqueSIDs.Has(as.CGRID) {
 			continue
 		}
-		cache.Add(as.CGRID)
+		uniqueSIDs.Add(as.CGRID)
 		ss := sS.getSessions(as.CGRID, false)
 		if len(ss) == 0 {
 			continue
 		}
-		if errTerm := sS.sendRar(ctx, ss[0], args.Event); errTerm != nil {
+		if errTerm := sS.sendRar(ctx, ss[0], args.APIOpts, args.Event); errTerm != nil {
 			utils.Logger.Warning(
 				fmt.Sprintf(
 					"<%s> failed sending RAR for session with id: <%s>, err: <%s>",

@@ -797,6 +797,7 @@ const (
 	TmpSuffix               = ".tmp"
 	MetaDiamreq             = "*diamreq"
 	MetaRadDAReq            = "*radDAReq"
+	MetaRadCoATemplate      = "*radCoATemplate"
 	MetaCost                = "*cost"
 	MetaGroup               = "*group"
 	InternalRPCSet          = "InternalRPCSet"

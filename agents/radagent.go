@@ -527,7 +527,12 @@ func (ra *RadiusAgent) V1ReAuthorize(_ *context.Context, cgrEv utils.CGREvent, r
 	if originID == "" {
 		return utils.NewErrMandatoryIeMissing(utils.OriginID)
 	}
-	replyCode, err := ra.sendRadDaReq(radigo.CoARequest, ra.cgrCfg.RadiusAgentCfg().CoATemplate,
+	coaTpl := ra.cgrCfg.RadiusAgentCfg().CoATemplate
+	if optTpl, err := cgrEv.OptAsString(utils.MetaRadCoATemplate); err == nil {
+		coaTpl = optTpl
+	}
+
+	replyCode, err := ra.sendRadDaReq(radigo.CoARequest, coaTpl,
 		originID, utils.MapStorage(cgrEv.Event), nil)
 	if err != nil {
 		return err

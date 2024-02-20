@@ -132,7 +132,7 @@ func TestRadiusCoADisconnect(t *testing.T) {
 		if string(request.AVPs[0].RawValue) != "1001" ||
 			!bytes.Equal(request.AVPs[1].RawValue, decodedNasIPAddr) ||
 			string(request.AVPs[2].RawValue) != "e4921177ab0e3586c37f6a185864b71a@0:0:0:0:0:0:0:0" ||
-			string(request.AVPs[3].RawValue) != "custom_filter" {
+			string(request.AVPs[3].RawValue) != "mycustomvalue" {
 			t.Errorf("unexpected request received: %v", utils.ToJSON(request))
 			reply.Code = radigo.CoANAK
 		} else {
@@ -233,11 +233,16 @@ func TestRadiusCoADisconnect(t *testing.T) {
 	}
 
 	var reply string
-	if err := raDiscRPC.Call(context.Background(), utils.SessionSv1ReAuthorize, utils.SessionFilterWithEvent{
-		Event: map[string]any{
-			"CustomFilter": "custom_filter",
-		},
-	}, &reply); err != nil {
+	if err := raDiscRPC.Call(context.Background(), utils.SessionSv1ReAuthorize,
+		utils.SessionFilterWithEvent{
+			SessionFilter: &utils.SessionFilter{
+				APIOpts: map[string]any{
+					utils.MetaRadCoATemplate: "mycoa",
+				}},
+			Event: map[string]any{
+				"CustomFilter": "custom_filter",
+			},
+		}, &reply); err != nil {
 		t.Error(err)
 	}
 
