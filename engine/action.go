@@ -102,6 +102,7 @@ func init() {
 	actionFuncMap[utils.MetaSetBalance] = setBalanceAction
 	actionFuncMap[utils.MetaTransferMonetaryDefault] = transferMonetaryDefaultAction
 	actionFuncMap[utils.MetaCgrRpc] = cgrRPCAction
+	actionFuncMap[utils.MetaAlterSessions] = alterSessionsAction
 	actionFuncMap[utils.TopUpZeroNegative] = topupZeroNegativeAction
 	actionFuncMap[utils.SetExpiry] = setExpiryAction
 	actionFuncMap[utils.MetaPublishAccount] = publishAccount
@@ -847,6 +848,73 @@ func cgrRPCAction(ub *Account, a *Action, acs Actions, _ *FilterS, extraData any
 		utils.Logger.Info(fmt.Sprintf("<*cgr_rpc> result: %s err: %v", utils.ToJSON(params.OutParam), err))
 	}()
 	return
+}
+
+func alterSessionsAction(_ *Account, a *Action, _ Actions, _ *FilterS, _ any) error {
+	client, err := rpcclient.NewRPCClient(context.TODO(), utils.TCP,
+		config.CgrConfig().ListenCfg().RPCJSONListen,
+		false, "", "", "", 1, 0,
+		config.CgrConfig().GeneralCfg().MaxReconnectInterval,
+		utils.FibDuration,
+		config.CgrConfig().GeneralCfg().ConnectTimeout,
+		config.CgrConfig().GeneralCfg().ReplyTimeout,
+		utils.MetaJSON, nil, false, nil)
+	if err != nil {
+		return err
+	}
+
+	// Parse action parameters, expecting 5 parameters separated by ";".
+	params := strings.Split(a.ExtraParameters, ";")
+	if len(params) != 5 {
+		return errors.New("invalid number of parameters; expected 5")
+	}
+
+	// Default limit to 1 if not specified, else parse the limit from parameters.
+	var limit int
+	if params[2] == "" {
+		limit = 1
+	} else {
+		if limit, err = strconv.Atoi(params[2]); err != nil {
+			return fmt.Errorf("invalid limit parameter: %s", params[2])
+		}
+	}
+
+	// Prepare request argument with provided parameters.
+	attr := utils.SessionFilterWithEvent{
+		SessionFilter: &utils.SessionFilter{
+			Limit:   &limit,
+			Tenant:  params[0],
+			Filters: strings.Split(params[1], "&"),
+			APIOpts: make(map[string]any),
+		},
+		Event: make(map[string]any),
+	}
+
+	// Use default tenant if not specified.
+	if attr.Tenant == "" {
+		attr.Tenant = config.CgrConfig().GeneralCfg().DefaultTenant
+	}
+
+	// Parse API options and event parameters from provided strings.
+	parseKVParams := func(paramStr string, targetMap map[string]any) error {
+		for _, tuple := range strings.Split(paramStr, "&") {
+			key, value, found := strings.Cut(tuple, ":")
+			if !found {
+				return fmt.Errorf("invalid key-value pair: %s", tuple)
+			}
+			targetMap[key] = value
+		}
+		return nil
+	}
+	if err := parseKVParams(params[3], attr.APIOpts); err != nil {
+		return err
+	}
+	if err := parseKVParams(params[4], attr.Event); err != nil {
+		return err
+	}
+
+	var reply string
+	return client.Call(context.Background(), utils.SessionSv1AlterSessions, attr, &reply)
 }
 
 func topupZeroNegativeAction(ub *Account, a *Action, acs Actions, fltrS *FilterS, extraData any) error {

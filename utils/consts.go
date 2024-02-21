@@ -1056,6 +1056,7 @@ const (
 	MetaSetDDestinations        = "*set_ddestinations"
 	MetaTransferMonetaryDefault = "*transfer_monetary_default"
 	MetaCgrRpc                  = "*cgr_rpc"
+	MetaAlterSessions           = "*alter_sessions"
 	TopUpZeroNegative           = "*topup_zero_negative"
 	SetExpiry                   = "*set_expiry"
 	MetaPublishAccount          = "*publish_account"

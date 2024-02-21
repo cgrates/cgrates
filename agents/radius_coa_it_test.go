@@ -100,18 +100,8 @@ func TestRadiusCoADisconnect(t *testing.T) {
 	actRadCoaAcnt1001 := &utils.AttrSetActions{
 		ActionsId: "ACT_RAD_COA_ACNT_1001",
 		Actions: []*utils.TPAction{{
-			Identifier: utils.MetaCgrRpc,
-			ExtraParameters: `{
-		                    "Address":"localhost:2012",
-		                    "Attempts":1,
-		                    "Transport":"*json",
-		                    "Method":"SessionSv1.AlterSessions",
-		                    "Params":{
-		                        "Filters":["*string:~*req.Account:1001"],
-		                        "Tenant":"cgrates.org",
-		                        "APIOpts":{"*radCoATemplate":"mycoa"},
-		                        "Event":{"CustomFilter":"custom_filter"}},
-		                    "Id":2}`,
+			Identifier:      utils.MetaAlterSessions,
+			ExtraParameters: "cgrates.org;*string:~*req.Account:1001;1;*radCoATemplate:mycoa;CustomFilter:custom_filter",
 		}}}
 	if err := raDiscRPC.Call(context.Background(), utils.APIerSv2SetActions,
 		actRadCoaAcnt1001, &reply); err != nil {
