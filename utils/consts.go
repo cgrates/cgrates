@@ -1650,7 +1650,6 @@ const (
 	SessionSv1ProcessMessage             = "SessionSv1.ProcessMessage"
 	SessionSv1ProcessEvent               = "SessionSv1.ProcessEvent"
 	SessionSv1GetCost                    = "SessionSv1.GetCost"
-	SessionSv1DisconnectSession          = "SessionSv1.DisconnectSession"
 	SessionSv1GetActiveSessions          = "SessionSv1.GetActiveSessions"
 	SessionSv1GetActiveSessionsCount     = "SessionSv1.GetActiveSessionsCount"
 	SessionSv1ForceDisconnect            = "SessionSv1.ForceDisconnect"
@@ -1658,7 +1657,6 @@ const (
 	SessionSv1GetPassiveSessionsCount    = "SessionSv1.GetPassiveSessionsCount"
 	SessionSv1SetPassiveSession          = "SessionSv1.SetPassiveSession"
 	SessionSv1Ping                       = "SessionSv1.Ping"
-	SessionSv1GetActiveSessionIDs        = "SessionSv1.GetActiveSessionIDs"
 	SessionSv1RegisterInternalBiJSONConn = "SessionSv1.RegisterInternalBiJSONConn"
 	SessionSv1ReplicateSessions          = "SessionSv1.ReplicateSessions"
 	SessionSv1ActivateSessions           = "SessionSv1.ActivateSessions"
@@ -1666,11 +1664,20 @@ const (
 	SMGenericV1InitiateSession           = "SMGenericV1.InitiateSession"
 	SessionSv1AlterSessions              = "SessionSv1.AlterSessions"
 	SessionSv1DisconnectPeer             = "SessionSv1.DisconnectPeer"
-	SessionSv1WarnDisconnect             = "SessionSv1.WarnDisconnect"
 	SessionSv1STIRAuthenticate           = "SessionSv1.STIRAuthenticate"
 	SessionSv1STIRIdentity               = "SessionSv1.STIRIdentity"
 	SessionSv1Sleep                      = "SessionSv1.Sleep"
 	SessionSv1CapsError                  = "SessionSv1.CapsError"
+)
+
+// Agent APIs
+const (
+	AgentV1                    = "AgentV1"
+	AgentV1DisconnectSession   = "AgentV1.DisconnectSession"
+	AgentV1GetActiveSessionIDs = "AgentV1.GetActiveSessionIDs"
+	AgentV1AlterSessions       = "AgentV1.AlterSessions"
+	AgentV1DisconnectPeer      = "AgentV1.DisconnectPeer"
+	AgentV1WarnDisconnect      = "AgentV1.WarnDisconnect"
 )
 
 // Responder APIs

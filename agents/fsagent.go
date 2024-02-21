@@ -42,7 +42,7 @@ func NewFSsessions(fsAgentConfig *config.FsAgentCfg,
 		timezone:    timezone,
 		connMgr:     connMgr,
 	}
-	srv, err := birpc.NewServiceWithMethodsRename(fsa, utils.SessionSv1, true, func(oldFn string) (newFn string) {
+	srv, err := birpc.NewServiceWithMethodsRename(fsa, utils.AgentV1, true, func(oldFn string) (newFn string) {
 		return strings.TrimPrefix(oldFn, "V1")
 	})
 	if err != nil {
