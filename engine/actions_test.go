@@ -4574,3 +4574,44 @@ func TestActionsTransferBalance(t *testing.T) {
 		})
 	}
 }
+
+// func TestActionsAlterSessions(t *testing.T) {
+
+// 	testcases := []struct {
+// 		name        string
+// 		extraParams string
+// 		expectedErr string
+// 	}{
+// 		{
+// 			name:        "SuccessfulParse",
+// 			extraParams: "tenant.com;*string:~*req.Account:1001&*prefix:~*req.Destination:+40;1;*radCoATemplate:mytemplate&secondopt:secondval;Account:1002&Destination:+40123456",
+// 			expectedErr: utils.ErrNotFound.Error(),
+// 		},
+// 		{
+// 			name:        "WrongNumberOfParams",
+// 			extraParams: "tenant;;1;",
+// 		},
+// 		{
+// 			name:        "InvalidMap",
+// 			extraParams: "tenant;;1;opt:value;key",
+// 		},
+// 	}
+
+// 	for _, tc := range testcases {
+// 		t.Run(tc.name, func(t *testing.T) {
+// 			action := &Action{
+// 				ExtraParameters: tc.extraParams,
+// 			}
+// 			err := alterSessionsAction(nil, action, nil, nil, nil)
+// 			if tc.expectedErr != "" {
+// 				if err == nil || err.Error() != tc.expectedErr {
+// 					t.Errorf("expected error %v, received %v", tc.expectedErr, err)
+// 				}
+// 				return
+// 			}
+// 			if err != nil {
+// 				t.Error(err)
+// 			}
+// 		})
+// 	}
+// }
