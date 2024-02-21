@@ -97,18 +97,20 @@ func TestRadiusCoADisconnect(t *testing.T) {
 	var reply string
 
 	// Set Action which will be called by Threshold when account gets debitted
-	actRadCoaAcnt1001 := &utils.AttrSetActions{
-		ActionsId: "ACT_RAD_COA_ACNT_1001",
-		Actions: []*utils.TPAction{{
-			Identifier:      utils.MetaAlterSessions,
-			ExtraParameters: "cgrates.org;*string:~*req.Account:1001;1;*radCoATemplate:mycoa;CustomFilter:custom_filter",
-		}}}
-	if err := raDiscRPC.Call(context.Background(), utils.APIerSv2SetActions,
-		actRadCoaAcnt1001, &reply); err != nil {
-		t.Error("Got error on APIerSv2.SetActions: ", err.Error())
-	} else if reply != utils.OK {
-		t.Errorf("Calling APIerSv2.SetActions received: %s", reply)
-	}
+	/*
+		actRadCoaAcnt1001 := &utils.AttrSetActions{
+			ActionsId: "ACT_RAD_COA_ACNT_1001",
+			Actions: []*utils.TPAction{{
+				Identifier:      utils.MetaAlterSessions,
+				ExtraParameters: "cgrates.org;*string:~*req.Account:1001;1;*radCoATemplate:mycoa;CustomFilter:custom_filter",
+			}}}
+		if err := raDiscRPC.Call(context.Background(), utils.APIerSv2SetActions,
+			actRadCoaAcnt1001, &reply); err != nil {
+			t.Error("Got error on APIerSv2.SetActions: ", err.Error())
+		} else if reply != utils.OK {
+			t.Errorf("Calling APIerSv2.SetActions received: %s", reply)
+		}
+	*/
 
 	// Set the Threshold profile which will call the action when account will be modified
 
@@ -267,21 +269,8 @@ func TestRadiusCoADisconnect(t *testing.T) {
 	if replyPacket.Code != radigo.AccountingResponse {
 		t.Errorf("unexpected reply received to AccountingRequest: %+v", replyPacket)
 	}
-	/*
-		if err := raDiscRPC.Call(context.Background(), utils.SessionSv1AlterSessions,
-			utils.SessionFilterWithEvent{
-				SessionFilter: &utils.SessionFilter{
-					APIOpts: map[string]any{
-						utils.MetaRadCoATemplate: "mycoa",
-					}},
-				Event: map[string]any{
-					"CustomFilter": "custom_filter",
-				},
-			}, &reply); err != nil {
-			t.Error(err)
-		}
-	*/
-	time.Sleep(1 * time.Second)
+
+	time.Sleep(1 * time.Second) // Give time for the ThresholdS to execute the *alter_sessions API
 	if err = raDiscRPC.Call(context.Background(), utils.SessionSv1ForceDisconnect,
 		nil, &reply); err != nil {
 		t.Error(err)

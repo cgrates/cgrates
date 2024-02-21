@@ -11,7 +11,7 @@
 		{"tag": "Acct-Session-Id", "path": "*radDAReq.Acct-Session-Id", "type": "*variable", 
 			"value": "~*oreq.Acct-Session-Id"},
 		{"tag": "Filter-Id", "path": "*radDAReq.Filter-Id", "type": "*variable", 
-			"value": "mycustomvalue"},
+			"value": "~*req.CustomFilter"},
 	]
 }
 
