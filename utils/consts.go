@@ -1664,7 +1664,7 @@ const (
 	SessionSv1ActivateSessions           = "SessionSv1.ActivateSessions"
 	SessionSv1DeactivateSessions         = "SessionSv1.DeactivateSessions"
 	SMGenericV1InitiateSession           = "SMGenericV1.InitiateSession"
-	SessionSv1ReAuthorize                = "SessionSv1.ReAuthorize"
+	SessionSv1AlterSessions              = "SessionSv1.AlterSessions"
 	SessionSv1DisconnectPeer             = "SessionSv1.DisconnectPeer"
 	SessionSv1WarnDisconnect             = "SessionSv1.WarnDisconnect"
 	SessionSv1STIRAuthenticate           = "SessionSv1.STIRAuthenticate"

@@ -461,8 +461,8 @@ func (ka *KamailioAgent) Reload() {
 	ka.conns = make([]*kamevapi.KamEvapi, len(ka.cfg.EvapiConns))
 }
 
-// V1ReAuthorize is used to implement the sessions.BiRPClient interface
-func (*KamailioAgent) V1ReAuthorize(*context.Context, utils.CGREvent, *string) error {
+// V1AlterSessions is used to implement the sessions.BiRPClient interface
+func (*KamailioAgent) V1AlterSessions(*context.Context, utils.CGREvent, *string) error {
 	return utils.ErrNotImplemented
 }
 

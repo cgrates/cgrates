@@ -4006,7 +4006,7 @@ func (sS *SessionS) sendRar(ctx *context.Context, s *Session, apiOpts map[string
 	clnt := sS.biJClnt(s.ClientConnID)
 	if clnt == nil {
 		return fmt.Errorf("calling %s requires bidirectional JSON connection, connID: <%s>",
-			utils.SessionSv1ReAuthorize, s.ClientConnID)
+			utils.SessionSv1AlterSessions, s.ClientConnID)
 	}
 
 	// Merge parameter event with the session event. Losing the EventStart OriginID
@@ -4027,14 +4027,14 @@ func (sS *SessionS) sendRar(ctx *context.Context, s *Session, apiOpts map[string
 	}
 
 	var rply string
-	if err = clnt.conn.Call(ctx, utils.SessionSv1ReAuthorize, args, &rply); err == utils.ErrNotImplemented {
+	if err = clnt.conn.Call(ctx, utils.SessionSv1AlterSessions, args, &rply); err == utils.ErrNotImplemented {
 		err = nil
 	}
 	return
 }
 
-// BiRPCv1ReAuthorize sends a RAR for the matching sessions
-func (sS *SessionS) BiRPCv1ReAuthorize(ctx *context.Context,
+// BiRPCv1AlterSessions sends a RAR for the matching sessions
+func (sS *SessionS) BiRPCv1AlterSessions(ctx *context.Context,
 	args utils.SessionFilterWithEvent, reply *string) (err error) {
 	if args.SessionFilter == nil { //protection in case on nil
 		args.SessionFilter = &utils.SessionFilter{}
