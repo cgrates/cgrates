@@ -521,8 +521,8 @@ func (ra *RadiusAgent) V1DisconnectSession(_ *context.Context, attr utils.AttrDi
 	return nil
 }
 
-// V1ReAuthorize updates session authorization using RADIUS CoA functionality.
-func (ra *RadiusAgent) V1ReAuthorize(_ *context.Context, cgrEv utils.CGREvent, reply *string) error {
+// V1AlterSessions updates session authorization using RADIUS CoA functionality.
+func (ra *RadiusAgent) V1AlterSessions(_ *context.Context, cgrEv utils.CGREvent, reply *string) error {
 	originID, err := cgrEv.FieldAsString(utils.OriginID)
 	if err != nil {
 		return fmt.Errorf("could not retrieve OriginID: %w", err)

@@ -139,9 +139,9 @@ func (ssv1 *SessionSv1) DeactivateSessions(ctx *context.Context, args *utils.Ses
 	return ssv1.sS.BiRPCv1DeactivateSessions(ctx, args, reply)
 }
 
-// ReAuthorize sends the RAR for filterd sessions
-func (ssv1 *SessionSv1) ReAuthorize(ctx *context.Context, args utils.SessionFilterWithEvent, reply *string) error {
-	return ssv1.sS.BiRPCv1ReAuthorize(ctx, args, reply)
+// AlterSessions sends the RAR for filterd sessions
+func (ssv1 *SessionSv1) AlterSessions(ctx *context.Context, args utils.SessionFilterWithEvent, reply *string) error {
+	return ssv1.sS.BiRPCv1AlterSessions(ctx, args, reply)
 }
 
 // DisconnectPeer sends the DPR for the OriginHost and OriginRealm

@@ -1234,7 +1234,7 @@ func testDiamItRAR(t *testing.T) {
 	wait.Add(1)
 	go func() {
 		var reply string
-		if err := apierRpc.Call(context.Background(), utils.SessionSv1ReAuthorize, utils.SessionFilterWithEvent{}, &reply); err != nil {
+		if err := apierRpc.Call(context.Background(), utils.SessionSv1AlterSessions, utils.SessionFilterWithEvent{}, &reply); err != nil {
 			t.Error(err)
 		}
 		wait.Done()

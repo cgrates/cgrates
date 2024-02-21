@@ -52,7 +52,7 @@ TestRadiusCoADisconnect scenario:
 
 4. Send an AccountingRequest to initialize a session.
 
-5. Send a SessionSv1ReAuthorize request, that will send a CoA request to the client. The
+5. Send a SessionSv1AlterSessions request, that will send a CoA request to the client. The
 client will then verify that the packet was populated correctly.
 
 6. Send a SessionSv1ForceDisconnect request, that will attempt to remotely disconnect the
@@ -105,7 +105,7 @@ func TestRadiusCoADisconnect(t *testing.T) {
 		                    "Address":"localhost:2012",
 		                    "Attempts":1,
 		                    "Transport":"*json",
-		                    "Method":"SessionSv1.ReAuthorize",
+		                    "Method":"SessionSv1.AlterSessions",
 		                    "Params":{
 		                        "Filters":["*string:~*req.Account:1001"],
 		                        "Tenant":"cgrates.org",
@@ -278,7 +278,7 @@ func TestRadiusCoADisconnect(t *testing.T) {
 		t.Errorf("unexpected reply received to AccountingRequest: %+v", replyPacket)
 	}
 	/*
-		if err := raDiscRPC.Call(context.Background(), utils.SessionSv1ReAuthorize,
+		if err := raDiscRPC.Call(context.Background(), utils.SessionSv1AlterSessions,
 			utils.SessionFilterWithEvent{
 				SessionFilter: &utils.SessionFilter{
 					APIOpts: map[string]any{
