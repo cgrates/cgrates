@@ -57,7 +57,7 @@ func NewDiameterAgent(cgrCfg *config.CGRConfig, filterS *engine.FilterS,
 		dpa:     make(map[string]chan *diam.Message),
 		peers:   make(map[string]diam.Conn),
 	}
-	srv, err := birpc.NewServiceWithMethodsRename(da, utils.SessionSv1, true, func(oldFn string) (newFn string) {
+	srv, err := birpc.NewServiceWithMethodsRename(da, utils.AgentV1, true, func(oldFn string) (newFn string) {
 		return strings.TrimPrefix(oldFn, "V1")
 	})
 	if err != nil {

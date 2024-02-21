@@ -410,7 +410,7 @@ func (sS *SessionS) forceSTerminate(s *Session, extraUsage time.Duration, tUsage
 		go func() {
 			var rply string
 			if err := clntConn.conn.Call(context.TODO(),
-				utils.SessionSv1DisconnectSession,
+				utils.AgentV1DisconnectSession,
 				utils.AttrDisconnectSession{
 					EventStart: s.EventStart,
 					Reason:     ErrForcedDisconnect.Error()},
@@ -768,10 +768,10 @@ func (sS *SessionS) disconnectSession(s *Session, rsn string) (err error) {
 	clnt := sS.biJClnt(s.ClientConnID)
 	if clnt == nil {
 		return fmt.Errorf("calling %s requires bidirectional JSON connection, connID: <%s>",
-			utils.SessionSv1DisconnectSession, s.ClientConnID)
+			utils.AgentV1DisconnectSession, s.ClientConnID)
 	}
 	s.EventStart[utils.Usage] = s.totalUsage() // Set the usage to total one debitted
-	servMethod := utils.SessionSv1DisconnectSession
+	servMethod := utils.AgentV1DisconnectSession
 	if clnt.proto == 0 { // compatibility with OpenSIPS 2.3
 		servMethod = "SMGClientV1.DisconnectSession"
 	}
@@ -794,10 +794,10 @@ func (sS *SessionS) warnSession(connID string, ev map[string]any) (err error) {
 	clnt := sS.biJClnt(connID)
 	if clnt == nil {
 		return fmt.Errorf("calling %s requires bidirectional JSON connection, connID: <%s>",
-			utils.SessionSv1WarnDisconnect, connID)
+			utils.AgentV1WarnDisconnect, connID)
 	}
 	var rply string
-	if err = clnt.conn.Call(context.TODO(), utils.SessionSv1WarnDisconnect,
+	if err = clnt.conn.Call(context.TODO(), utils.AgentV1WarnDisconnect,
 		ev, &rply); err != nil {
 		if err != utils.ErrNotImplemented {
 			utils.Logger.Warning(fmt.Sprintf("<%s> failed to warn session: <%s>, err: <%s>",
@@ -1379,7 +1379,7 @@ func (sS *SessionS) syncSessions() {
 		wg.Add(1)
 		go func(c *biJClient) { // query all connections at once
 			var queriedSessionIDs []*SessionID
-			if err := c.conn.Call(context.TODO(), utils.SessionSv1GetActiveSessionIDs,
+			if err := c.conn.Call(context.TODO(), utils.AgentV1GetActiveSessionIDs,
 				utils.EmptyString, &queriedSessionIDs); err != nil &&
 				err.Error() != utils.ErrNoActiveSession.Error() {
 				utils.Logger.Warning(
@@ -4006,7 +4006,7 @@ func (sS *SessionS) sendRar(ctx *context.Context, s *Session, apiOpts map[string
 	clnt := sS.biJClnt(s.ClientConnID)
 	if clnt == nil {
 		return fmt.Errorf("calling %s requires bidirectional JSON connection, connID: <%s>",
-			utils.SessionSv1AlterSessions, s.ClientConnID)
+			utils.AgentV1AlterSessions, s.ClientConnID)
 	}
 
 	// Merge parameter event with the session event. Losing the EventStart OriginID
@@ -4027,7 +4027,7 @@ func (sS *SessionS) sendRar(ctx *context.Context, s *Session, apiOpts map[string
 	}
 
 	var rply string
-	if err = clnt.conn.Call(ctx, utils.SessionSv1AlterSessions, args, &rply); err == utils.ErrNotImplemented {
+	if err = clnt.conn.Call(ctx, utils.AgentV1AlterSessions, args, &rply); err == utils.ErrNotImplemented {
 		err = nil
 	}
 	return
@@ -4079,7 +4079,7 @@ func (sS *SessionS) BiRPCv1DisconnectPeer(ctx *context.Context,
 	}
 	sS.biJMux.RUnlock()
 	for ID, clnt := range clients {
-		if err = clnt.conn.Call(context.TODO(), utils.SessionSv1DisconnectPeer, args, reply); err != nil && err != utils.ErrNotImplemented {
+		if err = clnt.conn.Call(ctx, utils.AgentV1DisconnectPeer, args, reply); err != nil && err != utils.ErrNotImplemented {
 			utils.Logger.Warning(
 				fmt.Sprintf(
 					"<%s> failed sending DPR for connection with id: <%s>, err: <%s>",

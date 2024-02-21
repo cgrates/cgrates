@@ -54,8 +54,8 @@ func NewRadiusAgent(cgrCfg *config.CGRConfig, filterS *engine.FilterS,
 		connMgr: connMgr,
 	}
 
-	// Register RadiusAgent methods whose names start with "V1" under the "SessionSv1" object name.
-	srv, err := birpc.NewServiceWithMethodsRename(radAgent, utils.SessionSv1, true, func(oldFn string) (newFn string) {
+	// Register RadiusAgent methods whose names start with "V1" under the "AgentV1" object name.
+	srv, err := birpc.NewServiceWithMethodsRename(radAgent, utils.AgentV1, true, func(oldFn string) (newFn string) {
 		return strings.TrimPrefix(oldFn, "V1")
 	})
 	if err != nil {

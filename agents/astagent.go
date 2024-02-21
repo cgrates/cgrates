@@ -64,7 +64,7 @@ func NewAsteriskAgent(cgrCfg *config.CGRConfig, astConnIdx int,
 		connMgr:     connMgr,
 		eventsCache: make(map[string]*utils.CGREvent),
 	}
-	srv, err := birpc.NewServiceWithMethodsRename(sma, utils.SessionSv1, true, func(oldFn string) (newFn string) {
+	srv, err := birpc.NewServiceWithMethodsRename(sma, utils.AgentV1, true, func(oldFn string) (newFn string) {
 		return strings.TrimPrefix(oldFn, "V1")
 	})
 	if err != nil {

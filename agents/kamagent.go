@@ -54,7 +54,7 @@ func NewKamailioAgent(kaCfg *config.KamAgentCfg,
 		conns:            make([]*kamevapi.KamEvapi, len(kaCfg.EvapiConns)),
 		activeSessionIDs: make(chan []*sessions.SessionID),
 	}
-	srv, err := birpc.NewServiceWithMethodsRename(ka, utils.SessionSv1, true, func(oldFn string) (newFn string) {
+	srv, err := birpc.NewServiceWithMethodsRename(ka, utils.AgentV1, true, func(oldFn string) (newFn string) {
 		return strings.TrimPrefix(oldFn, "V1")
 	})
 	if err != nil {
