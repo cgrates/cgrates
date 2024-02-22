@@ -167,7 +167,7 @@ func testSSv1ItRpcConn(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	srv, err := birpc.NewService(new(smock), utils.SessionSv1, true)
+	srv, err := birpc.NewService(new(smock), utils.AgentV1, true)
 	if err != nil {
 		t.Fatal(err)
 	}
