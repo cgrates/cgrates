@@ -21,6 +21,7 @@ package utils
 import (
 	"fmt"
 	"reflect"
+	"strings"
 	"sync"
 
 	"github.com/cgrates/birpc"
@@ -85,4 +86,15 @@ func GetRpcParams(method string) (params *RpcParams, err error) {
 		return nil, ErrNotFound
 	}
 	return
+}
+
+func UnregisterRpcParams(name string) {
+	rpcParamsLock.Lock()
+	defer rpcParamsLock.Unlock()
+	for method := range rpcParamsMap {
+		if strings.HasPrefix(method, name) {
+			delete(rpcParamsMap, method)
+		}
+	}
+	delete(rpcParamsMap, name)
 }

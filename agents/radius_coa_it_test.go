@@ -102,7 +102,7 @@ func TestRadiusCoADisconnect(t *testing.T) {
 			ActionsId: "ACT_RAD_COA_ACNT_1001",
 			Actions: []*utils.TPAction{{
 				Identifier:      utils.MetaAlterSessions,
-				ExtraParameters: "cgrates.org;*string:~*req.Account:1001;1;*radCoATemplate:mycoa;CustomFilter:custom_filter",
+				ExtraParameters: "localhost:2012;*json;cgrates.org;*string:~*req.Account:1001;1;*radCoATemplate:mycoa;CustomFilter:custom_filter",
 			}}}
 		if err := raDiscRPC.Call(context.Background(), utils.APIerSv2SetActions,
 			actRadCoaAcnt1001, &reply); err != nil {
@@ -279,6 +279,6 @@ func TestRadiusCoADisconnect(t *testing.T) {
 	select {
 	case <-done:
 	case <-time.After(time.Second):
-		t.Error("client did not receive a the expected requests in time")
+		t.Error("client did not receive the expected requests in time")
 	}
 }

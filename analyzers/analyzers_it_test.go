@@ -123,7 +123,7 @@ func testAnalyzerSStartEngine(t *testing.T) {
 
 // Connect rpc client to rater
 func testAnalyzerSRPCConn(t *testing.T) {
-	srv, err := birpc.NewService(new(smock), utils.SessionSv1, true)
+	srv, err := birpc.NewService(new(smock), utils.AgentV1, true)
 	if err != nil {
 		t.Fatal(err)
 	}

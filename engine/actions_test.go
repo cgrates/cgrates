@@ -4575,43 +4575,78 @@ func TestActionsTransferBalance(t *testing.T) {
 	}
 }
 
-// func TestActionsAlterSessions(t *testing.T) {
+type mockSessionSv1Obj struct {
+	request string
+}
 
-// 	testcases := []struct {
-// 		name        string
-// 		extraParams string
-// 		expectedErr string
-// 	}{
-// 		{
-// 			name:        "SuccessfulParse",
-// 			extraParams: "tenant.com;*string:~*req.Account:1001&*prefix:~*req.Destination:+40;1;*radCoATemplate:mytemplate&secondopt:secondval;Account:1002&Destination:+40123456",
-// 			expectedErr: utils.ErrNotFound.Error(),
-// 		},
-// 		{
-// 			name:        "WrongNumberOfParams",
-// 			extraParams: "tenant;;1;",
-// 		},
-// 		{
-// 			name:        "InvalidMap",
-// 			extraParams: "tenant;;1;opt:value;key",
-// 		},
-// 	}
+func (m *mockSessionSv1Obj) AlterSessions(_ *context.Context, params utils.SessionFilterWithEvent, reply *string) error {
+	m.request = utils.ToJSON(params)
+	return nil
+}
 
-// 	for _, tc := range testcases {
-// 		t.Run(tc.name, func(t *testing.T) {
-// 			action := &Action{
-// 				ExtraParameters: tc.extraParams,
-// 			}
-// 			err := alterSessionsAction(nil, action, nil, nil, nil)
-// 			if tc.expectedErr != "" {
-// 				if err == nil || err.Error() != tc.expectedErr {
-// 					t.Errorf("expected error %v, received %v", tc.expectedErr, err)
-// 				}
-// 				return
-// 			}
-// 			if err != nil {
-// 				t.Error(err)
-// 			}
-// 		})
-// 	}
-// }
+func TestActionsAlterSessions(t *testing.T) {
+	testcases := []struct {
+		name            string
+		registerRpc     bool
+		extraParams     string
+		expectedRequest string
+		expectedErr     string
+	}{
+		{
+			name:            "SuccessfulRequest",
+			registerRpc:     true,
+			expectedRequest: `{"Limit":1,"Filters":["*string:~*req.Account:1001","*prefix:~*req.Destination:+40"],"Tenant":"tenant.com","APIOpts":{"*radCoATemplate":"mytemplate","secondopt":"secondval"},"Event":{"Account":"1002","Destination":"+40123456"}}`,
+			extraParams:     "*internal;;tenant.com;*string:~*req.Account:1001&*prefix:~*req.Destination:+40;1;*radCoATemplate:mytemplate&secondopt:secondval;Account:1002&Destination:+40123456",
+		},
+		{
+			name:        "FailedServiceRetrieval",
+			extraParams: "*internal;;tenant.com;*string:~*req.Account:1001&*prefix:~*req.Destination:+40;1;*radCoATemplate:mytemplate&secondopt:secondval;Account:1002&Destination:+40123456",
+			expectedErr: "retrieving service for *internal calls failed: NOT_FOUND",
+		},
+		{
+			name:        "FailedExternalConnSetup",
+			extraParams: "localhost:1234;*json;tenant.com;*string:~*req.Account:1001&*prefix:~*req.Destination:+40;1;*radCoATemplate:mytemplate&secondopt:secondval;Account:1002&Destination:+40123456",
+			expectedErr: "failed to init RPCClient: dial tcp [::1]:1234: connect: connection refused",
+		},
+		{
+			name:        "WrongNumberOfParams",
+			extraParams: "*internal;;tenant;;1;",
+			expectedErr: "invalid number of parameters; expected 7",
+		},
+		{
+			name:        "InvalidEventMap",
+			registerRpc: true,
+			extraParams: "*internal;;tenant;;1;opt:value;key",
+			expectedErr: "invalid key-value pair: key",
+		},
+		{
+			name:        "InvalidOptsMap",
+			registerRpc: true,
+			extraParams: "*internal;;tenant;;1;opt;key:value",
+			expectedErr: "invalid key-value pair: opt",
+		},
+	}
+
+	for _, tc := range testcases {
+		t.Run(tc.name, func(t *testing.T) {
+			action := &Action{ExtraParameters: tc.extraParams}
+			var mockObj mockSessionSv1Obj
+			if tc.registerRpc {
+				utils.RegisterRpcParams(utils.SessionSv1, &mockObj)
+				t.Cleanup(func() {
+					utils.UnregisterRpcParams(utils.SessionSv1)
+				})
+			}
+			err := alterSessionsAction(nil, action, nil, nil, nil)
+			if tc.expectedErr != "" {
+				if err == nil || err.Error() != tc.expectedErr {
+					t.Errorf("expected error %v, received %v", tc.expectedErr, err)
+				}
+			} else if err != nil {
+				t.Error(err)
+			} else if tc.registerRpc && mockObj.request != tc.expectedRequest {
+				t.Errorf("expected: %v\nreceived: %v", tc.expectedRequest, mockObj.request)
+			}
+		})
+	}
+}

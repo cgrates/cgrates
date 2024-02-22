@@ -11,4 +11,4 @@ DISABLE_AND_LOG,*log,,,,,,,,,,,,,false,false,10
 DISABLE_AND_LOG,*disable_account,,,,,,,,,,,,,false,false,10
 TOPUP_100SMS_DE_MOBILE,*topup,,,,*sms,,DST_DE_MOBILE,,,,,100,10,false,false,10
 #ACT_RAD_COA_ACNT_1001,*cgr_rpc,"{""Address"":""localhost:2012"",""Transport"":""*json"",""Method"":""SessionSv1.AlterSessions"",""Attempts"":1,""Async"":false,""Params"":{""Filters"":[""*string:~*req.Account:1001""],""Tenant"":""cgrates.org"",""APIOpts"":{""*radCoATemplate"":""mycoa""},""Event"":{""CustomFilter"":""custom_filter""}}}",,,,,,,,,,,,,,20
-ACT_RAD_COA_ACNT_1001,*alter_sessions,cgrates.org;*string:~*req.Account:1001;1;*radCoATemplate:mycoa;CustomFilter:mycustomvalue,,,,,,,,,,,,,,
+ACT_RAD_COA_ACNT_1001,*alter_sessions,localhost:2012;*json;cgrates.org;*string:~*req.Account:1001;1;*radCoATemplate:mycoa;CustomFilter:mycustomvalue,,,,,,,,,,,,,,

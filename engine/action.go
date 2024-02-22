@@ -850,54 +850,73 @@ func cgrRPCAction(ub *Account, a *Action, acs Actions, _ *FilterS, extraData any
 	return
 }
 
-func alterSessionsAction(_ *Account, a *Action, _ Actions, _ *FilterS, _ any) error {
-	client, err := rpcclient.NewRPCClient(context.TODO(), utils.TCP,
-		config.CgrConfig().ListenCfg().RPCJSONListen,
-		false, "", "", "", 1, 0,
-		config.CgrConfig().GeneralCfg().MaxReconnectInterval,
-		utils.FibDuration,
-		config.CgrConfig().GeneralCfg().ConnectTimeout,
-		config.CgrConfig().GeneralCfg().ReplyTimeout,
-		utils.MetaJSON, nil, false, nil)
-	if err != nil {
-		return err
+// alterSessionsAction processes the `ExtraParameters` field from the action to construct a request
+// for the `SessionSv1.AlterSessions` API call.
+//
+// The ExtraParameters field format is expected as follows:
+//   - address: string, specifies the server address in the format host:port or *internal.
+//   - codec: string, specifies the encoding used for communication <*json|*gob|*http_jsonrpc>.
+//   - tenant: string
+//   - limit: integer, specifying the maximum number of sessions to alter.
+//   - filters: strings separated by "&".
+//   - APIOpts: set of key-value pairs (separated by "&").
+//   - Event: set of key-value pairs (separated by "&").
+//
+// Parameters are separated by ";" and must be provided in the specified order.
+func alterSessionsAction(_ *Account, act *Action, _ Actions, _ *FilterS, _ any) (err error) {
+
+	// Parse action parameters based on the predefined format.
+	params := strings.Split(act.ExtraParameters, ";")
+	if len(params) != 7 {
+		return errors.New("invalid number of parameters; expected 7")
 	}
 
-	// Parse action parameters, expecting 5 parameters separated by ";".
-	params := strings.Split(a.ExtraParameters, ";")
-	if len(params) != 5 {
-		return errors.New("invalid number of parameters; expected 5")
-	}
-
-	// Default limit to 1 if not specified, else parse the limit from parameters.
-	var limit int
-	if params[2] == "" {
-		limit = 1
-	} else {
-		if limit, err = strconv.Atoi(params[2]); err != nil {
-			return fmt.Errorf("invalid limit parameter: %s", params[2])
+	// Establish a client connection.
+	address := params[0]
+	codec := params[1]
+	var client birpc.ClientConnector
+	switch address {
+	case utils.MetaInternal:
+		// For internal connections, use the already registered SessionSv1 birpc.Service object.
+		var rpcParams *utils.RpcParams
+		rpcParams, err = utils.GetRpcParams(utils.SessionSv1AlterSessions)
+		if err != nil {
+			return fmt.Errorf("retrieving service for *internal calls failed: %w", err)
+		}
+		client = rpcParams.Object.(birpc.ClientConnector)
+	default:
+		// For external connections, create a new RPCClient.
+		client, err = rpcclient.NewRPCClient(context.TODO(), utils.TCP, address,
+			false, "", "", "", 1, 0,
+			config.CgrConfig().GeneralCfg().MaxReconnectInterval,
+			utils.FibDuration,
+			config.CgrConfig().GeneralCfg().ConnectTimeout,
+			config.CgrConfig().GeneralCfg().ReplyTimeout,
+			codec, nil, false, nil)
+		if err != nil {
+			return fmt.Errorf("failed to init RPCClient: %w", err)
 		}
 	}
 
-	// Prepare request argument with provided parameters.
+	// If conversion fails, limit will default to 0.
+	limit, _ := strconv.Atoi(params[4])
+
+	// Prepare request arguments based on provided parameters.
 	attr := utils.SessionFilterWithEvent{
 		SessionFilter: &utils.SessionFilter{
 			Limit:   &limit,
-			Tenant:  params[0],
-			Filters: strings.Split(params[1], "&"),
+			Tenant:  params[2],
+			Filters: strings.Split(params[3], "&"),
 			APIOpts: make(map[string]any),
 		},
 		Event: make(map[string]any),
 	}
 
-	// Use default tenant if not specified.
-	if attr.Tenant == "" {
-		attr.Tenant = config.CgrConfig().GeneralCfg().DefaultTenant
-	}
-
-	// Parse API options and event parameters from provided strings.
+	// Helper function to parse key-value pairs for API options and event data.
 	parseKVParams := func(paramStr string, targetMap map[string]any) error {
 		for _, tuple := range strings.Split(paramStr, "&") {
+			// Use strings.Cut to split 'tuple' into key-value pairs at the first occurrence of ':'.
+			// This ensures that additional ':' characters within the value do not affect parsing.
 			key, value, found := strings.Cut(tuple, ":")
 			if !found {
 				return fmt.Errorf("invalid key-value pair: %s", tuple)
@@ -906,10 +925,10 @@ func alterSessionsAction(_ *Account, a *Action, _ Actions, _ *FilterS, _ any) er
 		}
 		return nil
 	}
-	if err := parseKVParams(params[3], attr.APIOpts); err != nil {
+	if err := parseKVParams(params[5], attr.APIOpts); err != nil {
 		return err
 	}
-	if err := parseKVParams(params[4], attr.Event); err != nil {
+	if err := parseKVParams(params[6], attr.Event); err != nil {
 		return err
 	}
 

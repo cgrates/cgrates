@@ -74,7 +74,7 @@ func callSessions(ctx *context.Context, authDur, initDur, updateDur, terminateDu
 		APIOpts: map[string]any{},
 	}
 
-	srv, err := birpc.NewService(new(smock), utils.SessionSv1, true)
+	srv, err := birpc.NewService(new(smock), utils.AgentV1, true)
 	if err != nil {
 		return err
 	}
