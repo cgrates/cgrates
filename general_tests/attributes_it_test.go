@@ -21,6 +21,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package general_tests
 
 import (
+	"fmt"
 	"path"
 	"reflect"
 	"sort"
@@ -1055,4 +1056,384 @@ func testAttributeSStopEngine(t *testing.T) {
 	if err := engine.KillEngine(accDelay); err != nil {
 		t.Error(err)
 	}
+}
+
+func TestAttributesDestinationFilters(t *testing.T) {
+	switch *dbType {
+	case utils.MetaInternal:
+	case utils.MetaMySQL, utils.MetaMongo, utils.MetaPostgres:
+		t.SkipNow()
+	default:
+		t.Fatal("unsupported dbtype value")
+	}
+
+	content := `{
+
+"general": {
+	"log_level": 7,
+},
+
+"data_db": {								
+	"db_type": "*internal"
+},
+
+"stor_db": {
+	"db_type": "*internal"
+},
+
+"attributes": {
+	"enabled": true
+},
+
+"filters": {			
+	"apiers_conns": ["*localhost"]
+},
+
+"apiers": {
+	"enabled": true,
+}
+
+}`
+
+	tpFiles := map[string]string{
+		utils.AttributesCsv: `#Tenant,ID,Context,FilterIDs,ActivationInterval,AttributeFilterIDs,Path,Type,Value,Blocker,Weight
+cgrates.org,ATTR_INLINE_FILTER,,*string:~*req.Account:1001,,,,,,,30
+cgrates.org,ATTR_INLINE_FILTER,,,,*destinations:~*req.Destination:1002,*req.InlinePrefixCase,*constant,shouldnotmatch,,
+cgrates.org,ATTR_INLINE_FILTER,,,,*destinations:~*req.Destination:DST_20,*req.InlineWrongDestination,*constant,shouldnotmatch,,
+cgrates.org,ATTR_INLINE_FILTER,,,,*destinations:~*req.Destination:DST_20|DST_10,*req.InlineOrDestinationMatch,*constant,shouldmatch,,
+cgrates.org,ATTR_INLINE_FILTER,,,,*destinations:~*req.Destination:DST_10,*req.InlineDestinationMatch,*constant,shouldmatch,,
+cgrates.org,ATTR_PREDEFINED_FILTER,,*string:~*req.Account:2001,,,,,,,
+cgrates.org,ATTR_PREDEFINED_FILTER,,,,FLTR_DESTINATION_DIRECT,*req.PredefinedPrefixCase,*constant,shouldnotmatch,,
+cgrates.org,ATTR_PREDEFINED_FILTER,,,,FLTR_WRONG_DESTINATION,*req.PredefinedWrongDestination,*constant,shouldnotmatch,,
+cgrates.org,ATTR_PREDEFINED_FILTER,,,,FLTR_OR_DESTINATION_MATCH,*req.PredefinedOrDestinationMatch,*constant,shouldmatch,,
+cgrates.org,ATTR_PREDEFINED_FILTER,,,,FLTR_DESTINATION_MATCH,*req.PredefinedDestinationMatch,*constant,shouldmatch,,`,
+		utils.DestinationsCsv: `#Id,Prefix
+DST_10,10
+DST_20,20`,
+		utils.FiltersCsv: `#Tenant[0],ID[1],Type[2],Path[3],Values[4],ActivationInterval[5]
+cgrates.org,FLTR_DESTINATION_DIRECT,*destinations,~*req.Destination,1002,
+cgrates.org,FLTR_WRONG_DESTINATION,*destinations,~*req.Destination,DST_20,
+cgrates.org,FLTR_OR_DESTINATION_MATCH,*destinations,~*req.Destination,DST_20;DST_10,
+cgrates.org,FLTR_DESTINATION_MATCH,*destinations,~*req.Destination,DST_10,`,
+	}
+
+	testEnv := TestEnvironment{
+		Name: "TestAttributesDestinationFilters",
+		// Encoding:   *encoding,
+		ConfigJSON: content,
+		TpFiles:    tpFiles,
+	}
+	client, _, shutdown, err := testEnv.Setup(t, *waitRater)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	defer shutdown()
+
+	t.Run("SetAttributesThroughAPI", func(t *testing.T) {
+		var reply string
+		attrPrf := &engine.AttributeProfileWithAPIOpts{
+			AttributeProfile: &engine.AttributeProfile{
+				Tenant:    "cgrates.org",
+				ID:        "ATTR_API",
+				FilterIDs: []string{"*string:~*req.Account:3001"},
+				Contexts:  []string{utils.MetaAny},
+				Attributes: []*engine.Attribute{
+					{
+						FilterIDs: []string{"FLTR_DESTINATION_DIRECT", "*destinations:~*req.Destination:1002"},
+						Path:      "*req.PrefixCase",
+						Type:      utils.MetaConstant,
+						Value:     config.NewRSRParsersMustCompile("shouldnotmatch", utils.InfieldSep),
+					},
+					{
+						FilterIDs: []string{"FLTR_WRONG_DESTINATION", "*destinations:~*req.Destination:DST_20"},
+						Path:      "*req.WrongDestination",
+						Type:      utils.MetaConstant,
+						Value:     config.NewRSRParsersMustCompile("shouldnotmatch", utils.InfieldSep),
+					},
+					{
+						FilterIDs: []string{"FLTR_OR_DESTINATION_MATCH", "*destinations:~*req.Destination:DST_20|DST_10"},
+						Path:      "*req.OrDestinationMatch",
+						Type:      utils.MetaConstant,
+						Value:     config.NewRSRParsersMustCompile("shouldmatch", utils.InfieldSep),
+					},
+					{
+						FilterIDs: []string{"FLTR_DESTINATION_MATCH", "*destinations:~*req.Destination:DST_10"},
+						Path:      "*req.DestinationMatch",
+						Type:      utils.MetaConstant,
+						Value:     config.NewRSRParsersMustCompile("shouldmatch", utils.InfieldSep),
+					},
+				},
+				Weight: 10,
+			},
+		}
+		attrPrf.Compile()
+		if err := client.Call(context.Background(), utils.APIerSv1SetAttributeProfile, attrPrf, &reply); err != nil {
+			t.Error(err)
+		}
+	})
+
+	t.Run("CheckFieldsAlteredByAttributeS", func(t *testing.T) {
+		ev := &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "event_test",
+			Event: map[string]any{
+				utils.AccountField: "1001",
+				utils.Destination:  "1002",
+			},
+		}
+		expected := engine.AttrSProcessEventReply{
+			MatchedProfiles: []string{"cgrates.org:ATTR_INLINE_FILTER"},
+			AlteredFields:   []string{"*req.InlineDestinationMatch", "*req.InlineOrDestinationMatch"},
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "event_test",
+				Event: map[string]any{
+					utils.AccountField:         "1001",
+					utils.Destination:          "1002",
+					"InlineDestinationMatch":   "shouldmatch",
+					"InlineOrDestinationMatch": "shouldmatch",
+				},
+				APIOpts: make(map[string]any),
+			},
+		}
+
+		var reply engine.AttrSProcessEventReply
+		if err := client.Call(context.Background(), utils.AttributeSv1ProcessEvent,
+			ev, &reply); err != nil {
+			t.Error(err)
+		} else {
+			sort.Strings(expected.AlteredFields)
+			sort.Strings(reply.AlteredFields)
+			if !reflect.DeepEqual(expected, reply) {
+				t.Errorf("\nexpected: %s, \nreceived: %s",
+					utils.ToJSON(expected), utils.ToJSON(reply))
+			}
+		}
+
+		ev.Event = map[string]any{
+			utils.AccountField: "2001",
+			utils.Destination:  "1002",
+		}
+		expected.MatchedProfiles = []string{"cgrates.org:ATTR_PREDEFINED_FILTER"}
+		expected.AlteredFields = []string{"*req.PredefinedDestinationMatch", "*req.PredefinedOrDestinationMatch"}
+		expected.CGREvent.Event = map[string]any{
+			utils.AccountField:             "2001",
+			utils.Destination:              "1002",
+			"PredefinedDestinationMatch":   "shouldmatch",
+			"PredefinedOrDestinationMatch": "shouldmatch",
+		}
+
+		reply = engine.AttrSProcessEventReply{}
+		if err := client.Call(context.Background(), utils.AttributeSv1ProcessEvent,
+			ev, &reply); err != nil {
+			t.Error(err)
+		} else {
+			sort.Strings(expected.AlteredFields)
+			sort.Strings(reply.AlteredFields)
+			if !reflect.DeepEqual(expected, reply) {
+				t.Errorf("\nexpected: %s, \nreceived: %s",
+					utils.ToJSON(expected), utils.ToJSON(reply))
+			}
+		}
+
+		ev.Event = map[string]any{
+			utils.AccountField: "3001",
+			utils.Destination:  "1002",
+		}
+		expected.MatchedProfiles = []string{"cgrates.org:ATTR_API"}
+		expected.AlteredFields = []string{"*req.DestinationMatch", "*req.OrDestinationMatch"}
+		expected.CGREvent.Event = map[string]any{
+			utils.AccountField:   "3001",
+			utils.Destination:    "1002",
+			"DestinationMatch":   "shouldmatch",
+			"OrDestinationMatch": "shouldmatch",
+		}
+
+		reply = engine.AttrSProcessEventReply{}
+		if err := client.Call(context.Background(), utils.AttributeSv1ProcessEvent,
+			ev, &reply); err != nil {
+			t.Error(err)
+		} else {
+			sort.Strings(expected.AlteredFields)
+			sort.Strings(reply.AlteredFields)
+			if !reflect.DeepEqual(expected, reply) {
+				t.Errorf("\nexpected: %s, \nreceived: %s",
+					utils.ToJSON(expected), utils.ToJSON(reply))
+			}
+		}
+	})
+}
+
+func TestAttributesArith(t *testing.T) {
+	switch *dbType {
+	case utils.MetaInternal:
+	case utils.MetaMySQL, utils.MetaMongo, utils.MetaPostgres:
+		t.SkipNow()
+	default:
+		t.Fatal("unsupported dbtype value")
+	}
+
+	content := `{
+
+"general": {
+	"log_level": 7,
+},
+
+"data_db": {								
+	"db_type": "*internal"
+},
+
+"stor_db": {
+	"db_type": "*internal"
+},
+
+"attributes": {
+	"enabled": true
+},
+
+"apiers": {
+	"enabled": true,
+}
+
+}`
+
+	tpFiles := map[string]string{
+		utils.AttributesCsv: `#Tenant,ID,Context,FilterIDs,ActivationInterval,AttributeFilterIDs,Path,Type,Value,Blocker,Weight
+cgrates.org,ATTR_ARITH,,*string:~*req.AttrSource:csv,,,,,,,
+cgrates.org,ATTR_ARITH,,,,,*req.3*4,*multiply,3;4,,
+cgrates.org,ATTR_ARITH,,,,,*req.12/4,*divide,12;4,,
+cgrates.org,ATTR_ARITH,,,,,*req.3+4,*sum,3;4,,
+cgrates.org,ATTR_ARITH,,,,,*req.3-4,*difference,3;4,,
+cgrates.org,ATTR_ARITH,,,,,*req.MultiplyBetweenVariables,*multiply,~*req.Elem1;~*req.Elem2,,`,
+	}
+
+	testEnv := TestEnvironment{
+		Name: "TestAttributesArith",
+		// Encoding:   *encoding,
+		ConfigJSON: content,
+		TpFiles:    tpFiles,
+	}
+	client, _, shutdown, err := testEnv.Setup(t, *waitRater)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	defer shutdown()
+
+	t.Run("SetAttributesThroughAPI", func(t *testing.T) {
+		var reply string
+		attrPrf := &engine.AttributeProfileWithAPIOpts{
+			AttributeProfile: &engine.AttributeProfile{
+				Tenant:    "cgrates.org",
+				ID:        "ATTR_API",
+				FilterIDs: []string{"*string:~*req.AttrSource:api"},
+				Contexts:  []string{utils.MetaAny},
+				Attributes: []*engine.Attribute{
+					{
+						Path:  "*req.3*4",
+						Type:  utils.MetaMultiply,
+						Value: config.NewRSRParsersMustCompile("3;4", utils.InfieldSep),
+					},
+					{
+						Path:  "*req.12/4",
+						Type:  utils.MetaDivide,
+						Value: config.NewRSRParsersMustCompile("12;4", utils.InfieldSep),
+					},
+					{
+						Path:  "*req.3+4",
+						Type:  utils.MetaSum,
+						Value: config.NewRSRParsersMustCompile("3;4", utils.InfieldSep),
+					},
+					{
+						Path:  "*req.3-4",
+						Type:  utils.MetaDifference,
+						Value: config.NewRSRParsersMustCompile("3;4", utils.InfieldSep),
+					},
+					{
+						Path:  "*req.MultiplyBetweenVariables",
+						Type:  utils.MetaMultiply,
+						Value: config.NewRSRParsersMustCompile("~*req.Elem1;~*req.Elem2", utils.InfieldSep),
+					},
+				},
+				Weight: 10,
+			},
+		}
+		attrPrf.Compile()
+		if err := client.Call(context.Background(), utils.APIerSv1SetAttributeProfile, attrPrf, &reply); err != nil {
+			t.Error(err)
+		}
+	})
+
+	t.Run("CheckFieldsAlteredByAttributeS", func(t *testing.T) {
+		ev := &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "event_test",
+			Event: map[string]any{
+				"AttrSource": "csv",
+				"Elem1":      "3",
+				"Elem2":      "4",
+			},
+		}
+		expected := engine.AttrSProcessEventReply{
+			MatchedProfiles: []string{"cgrates.org:ATTR_ARITH"},
+			AlteredFields:   []string{"*req.12/4", "*req.3*4", "*req.3+4", "*req.3-4", "*req.MultiplyBetweenVariables"},
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "event_test",
+				Event: map[string]any{
+					"AttrSource":               "csv",
+					"Elem1":                    "3",
+					"Elem2":                    "4",
+					"12/4":                     "3",
+					"3*4":                      "12",
+					"3+4":                      "7",
+					"3-4":                      "-1",
+					"MultiplyBetweenVariables": "12",
+				},
+				APIOpts: make(map[string]any),
+			},
+		}
+
+		var reply engine.AttrSProcessEventReply
+		if err := client.Call(context.Background(), utils.AttributeSv1ProcessEvent,
+			ev, &reply); err != nil {
+			t.Error(err)
+		} else {
+			sort.Strings(expected.AlteredFields)
+			sort.Strings(reply.AlteredFields)
+			fmt.Printf("type %T\n", reply.Event["MultiplyBetweenVariables"])
+			if !reflect.DeepEqual(expected, reply) {
+				t.Errorf("\nexpected: %s, \nreceived: %s",
+					utils.ToJSON(expected), utils.ToJSON(reply))
+			}
+		}
+
+		ev.Event["AttrSource"] = "api"
+		expected.MatchedProfiles = []string{"cgrates.org:ATTR_API"}
+		expected.AlteredFields = []string{"*req.12/4", "*req.3*4", "*req.3+4", "*req.3-4", "*req.MultiplyBetweenVariables"}
+		expected.CGREvent.Event = map[string]any{
+			"AttrSource":               "api",
+			"Elem1":                    "3",
+			"Elem2":                    "4",
+			"12/4":                     "3",
+			"3*4":                      "12",
+			"3+4":                      "7",
+			"3-4":                      "-1",
+			"MultiplyBetweenVariables": "12",
+		}
+
+		reply = engine.AttrSProcessEventReply{}
+		if err := client.Call(context.Background(), utils.AttributeSv1ProcessEvent,
+			ev, &reply); err != nil {
+			t.Error(err)
+		} else {
+			sort.Strings(expected.AlteredFields)
+			sort.Strings(reply.AlteredFields)
+			if !reflect.DeepEqual(expected, reply) {
+				t.Errorf("\nexpected: %s, \nreceived: %s",
+					utils.ToJSON(expected), utils.ToJSON(reply))
+			}
+		}
+	})
 }
