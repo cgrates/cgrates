@@ -808,6 +808,7 @@ const CGRATES_CFG_JSON = `
 	"enabled": false,						// starts ThresholdS service: <true|false>.
 	"store_interval": "",					// dump cache regularly to dataDB, 0 - dump at start/shutdown: <""|$dur>
 	"indexed_selects": true,				// enable profile matching exclusively on indexes
+	"sessions_conns":[],					// connections to SessionS <*internal|$rpc_conns_id>
 	//"string_indexed_fields": [],			// query indexes based on these fields for faster processing
 	"prefix_indexed_fields": [],			// query indexes based on these fields for faster processing
 	"suffix_indexed_fields": [],			// query indexes based on these fields for faster processing
