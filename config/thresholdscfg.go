@@ -35,6 +35,7 @@ type ThresholdSCfg struct {
 	Enabled             bool
 	IndexedSelects      bool
 	StoreInterval       time.Duration // Dump regularly from cache into dataDB
+	SessionSConns       []string
 	StringIndexedFields *[]string
 	PrefixIndexedFields *[]string
 	SuffixIndexedFields *[]string
@@ -67,6 +68,16 @@ func (t *ThresholdSCfg) loadFromJSONCfg(jsnCfg *ThresholdSJsonCfg) (err error) {
 	if jsnCfg.Store_interval != nil {
 		if t.StoreInterval, err = utils.ParseDurationWithNanosecs(*jsnCfg.Store_interval); err != nil {
 			return err
+		}
+	}
+	if len(jsnCfg.Sessions_conns) != 0 {
+		t.SessionSConns = make([]string, len(jsnCfg.Sessions_conns))
+		for idx, conn := range jsnCfg.Sessions_conns {
+			// if we have the connection internal we change the name so we can have internal rpc for each subsystem
+			t.SessionSConns[idx] = conn
+			if conn == utils.MetaInternal {
+				t.SessionSConns[idx] = utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS)
+			}
 		}
 	}
 	if jsnCfg.String_indexed_fields != nil {
@@ -109,7 +120,16 @@ func (t *ThresholdSCfg) AsMapInterface() (initialMP map[string]any) {
 	if t.StoreInterval != 0 {
 		initialMP[utils.StoreIntervalCfg] = t.StoreInterval.String()
 	}
-
+	if t.SessionSConns != nil {
+		sessionConns := make([]string, len(t.SessionSConns))
+		for i, item := range t.SessionSConns {
+			sessionConns[i] = item
+			if item == utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS) {
+				sessionConns[i] = utils.MetaInternal
+			}
+		}
+		initialMP[utils.SessionSConnsCfg] = sessionConns
+	}
 	if t.StringIndexedFields != nil {
 		stringIndexedFields := make([]string, len(*t.StringIndexedFields))
 		copy(stringIndexedFields, *t.StringIndexedFields)
@@ -144,7 +164,10 @@ func (t ThresholdSCfg) Clone() (cln *ThresholdSCfg) {
 		NestedFields:   t.NestedFields,
 		Opts:           t.Opts.Clone(),
 	}
-
+	if t.SessionSConns != nil {
+		cln.SessionSConns = make([]string, len(t.SessionSConns))
+		copy(cln.SessionSConns, t.SessionSConns)
+	}
 	if t.StringIndexedFields != nil {
 		idx := make([]string, len(*t.StringIndexedFields))
 		copy(idx, *t.StringIndexedFields)

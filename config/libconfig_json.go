@@ -661,6 +661,7 @@ type ThresholdSJsonCfg struct {
 	Enabled               *bool
 	Indexed_selects       *bool
 	Store_interval        *string
+	Sessions_conns        []string
 	String_indexed_fields *[]string
 	Prefix_indexed_fields *[]string
 	Suffix_indexed_fields *[]string

@@ -1176,6 +1176,7 @@ func TestDfThresholdSJsonCfg(t *testing.T) {
 		Enabled:               utils.BoolPointer(false),
 		Indexed_selects:       utils.BoolPointer(true),
 		Store_interval:        utils.StringPointer(""),
+		Sessions_conns:        []string{},
 		String_indexed_fields: nil,
 		Prefix_indexed_fields: &[]string{},
 		Suffix_indexed_fields: &[]string{},
