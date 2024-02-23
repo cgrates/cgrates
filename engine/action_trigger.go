@@ -94,7 +94,8 @@ func (at *ActionTrigger) Execute(ub *Account, fltrS *FilterS) (err error) {
 			break
 		}
 		//go utils.Logger.Info(fmt.Sprintf("Executing %v, %v: %v", ub, sq, a))
-		if err := actionFunction(ub, a, aac, fltrS, nil); err != nil {
+		if err := actionFunction(ub, a, aac, fltrS, nil,
+			newActionConnCfg(utils.RALs, a.ActionType, config.CgrConfig())); err != nil {
 			utils.Logger.Err(fmt.Sprintf("Error executing action %s: %v!", a.ActionType, err))
 			transactionFailed = false
 			break

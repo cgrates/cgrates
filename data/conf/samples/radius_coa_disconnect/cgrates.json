@@ -14,7 +14,7 @@
 
 "rals": {
 	"enabled": true,
-	"thresholds_conns": ["*localhost"],
+	"thresholds_conns": ["*localhost"]
 },
 
 "schedulers": {
@@ -41,7 +41,8 @@
 
 "thresholds": {
 	"enabled": true,
-	"store_interval": "-1"
+	"store_interval": "-1",
+	"sessions_conns": ["*localhost"]
 },
 
 "sessions": {
