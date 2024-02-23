@@ -193,7 +193,7 @@ func (at *ActionTiming) getActions() (as []*Action, err error) {
 
 // Execute will execute all actions in an action plan
 // Reports on success/fail via channel if != nil
-func (at *ActionTiming) Execute(fltrS *FilterS) (err error) {
+func (at *ActionTiming) Execute(fltrS *FilterS, originService string) (err error) {
 	at.ResetStartTimeCache()
 	aac, err := at.getActions()
 	if err != nil {
@@ -246,7 +246,8 @@ func (at *ActionTiming) Execute(fltrS *FilterS) (err error) {
 					transactionFailed = true
 					break
 				}
-				if err := actionFunction(acc, a, aac, fltrS, at.ExtraData); err != nil {
+				if err := actionFunction(acc, a, aac, fltrS, at.ExtraData,
+					newActionConnCfg(originService, a.ActionType, config.CgrConfig())); err != nil {
 					utils.Logger.Err(fmt.Sprintf("Error executing action %s: %v!", a.ActionType, err))
 					partialyExecuted = true
 					transactionFailed = true
@@ -281,7 +282,8 @@ func (at *ActionTiming) Execute(fltrS *FilterS) (err error) {
 				partialyExecuted = true
 				break
 			}
-			if err := actionFunction(nil, a, aac, fltrS, at.ExtraData); err != nil {
+			if err := actionFunction(nil, a, aac, fltrS, at.ExtraData,
+				newActionConnCfg(originService, a.ActionType, config.CgrConfig())); err != nil {
 				utils.Logger.Err(fmt.Sprintf("Error executing accountless action %s: %v!", a.ActionType, err))
 				partialyExecuted = true
 				break

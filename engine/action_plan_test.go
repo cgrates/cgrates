@@ -453,25 +453,25 @@ func TestActionTimingExErr(t *testing.T) {
 		},
 	}
 	fltrs := NewFilterS(cfg, nil, dm)
-	if err := at.Execute(nil); err == nil || err != utils.ErrPartiallyExecuted {
+	if err := at.Execute(nil, ""); err == nil || err != utils.ErrPartiallyExecuted {
 		t.Error(err)
 	}
 	at.actions[0].ActionType = utils.MetaDebitReset
-	if err := at.Execute(nil); err == nil || err != utils.ErrPartiallyExecuted {
+	if err := at.Execute(nil, ""); err == nil || err != utils.ErrPartiallyExecuted {
 		t.Error(err)
 	}
 	at.accountIDs = utils.StringMap{"cgrates.org:zeroNegative": true}
 	at.actions[0].ActionType = utils.MetaResetStatQueue
-	if err := at.Execute(nil); err == nil || err != utils.ErrPartiallyExecuted {
+	if err := at.Execute(nil, ""); err == nil || err != utils.ErrPartiallyExecuted {
 		t.Error(err)
 	}
 	Cache.Set(utils.CacheFilters, "cgrates.org:*string:~*req.BalanceMap.*monetary[0].ID:*default", nil, []string{}, true, utils.NonTransactional)
 	at.actions[0].Filters = []string{"*string:~*req.BalanceMap.*monetary[0].ID:*default"}
-	if err := at.Execute(fltrs); err != nil {
+	if err := at.Execute(fltrs, ""); err != nil {
 		t.Error(err)
 	}
 	SetDataStorage(nil)
-	if err := at.Execute(nil); err != nil {
+	if err := at.Execute(nil, ""); err != nil {
 		t.Error(err)
 	}
 }

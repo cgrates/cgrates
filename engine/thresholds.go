@@ -176,11 +176,11 @@ func (t *Threshold) ProcessEvent(args *utils.CGREvent, dm *DataManager, fltrS *F
 		}
 		if t.tPrfl.Async {
 			go func(setID string) {
-				if errExec := at.Execute(fltrS); errExec != nil {
+				if errExec := at.Execute(fltrS, utils.ThresholdS); errExec != nil {
 					utils.Logger.Warning(fmt.Sprintf("<ThresholdS> failed executing actions: %s, error: %s", setID, errExec.Error()))
 				}
 			}(actionSetID)
-		} else if errExec := at.Execute(fltrS); errExec != nil {
+		} else if errExec := at.Execute(fltrS, utils.ThresholdS); errExec != nil {
 			utils.Logger.Warning(fmt.Sprintf("<ThresholdS> failed executing actions: %s, error: %s", actionSetID, errExec.Error()))
 			err = utils.ErrPartiallyExecuted
 		}
