@@ -752,7 +752,7 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 					// Find the minimum rule length for dynamic RSRParser within the field value.
 					minRuleLength := math.MaxInt
 					for _, parser := range field.Value {
-						if !strings.HasPrefix(parser.Rules, utils.DynamicDataPrefix) {
+						if !strings.HasPrefix(parser.Rules, utils.MetaDynReq) {
 							continue
 						}
 						ruleLen := len(strings.Split(parser.Rules, utils.NestingSep))
