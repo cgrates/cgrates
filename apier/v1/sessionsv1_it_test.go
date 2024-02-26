@@ -998,7 +998,7 @@ func testSSv1ItDynamicDebit(t *testing.T) {
 	} else if len(aSessions) != 3 {
 		t.Errorf("wrong active sessions: %+v , %s ", len(aSessions), utils.ToJSON(aSessions))
 	}
-	time.Sleep(time.Millisecond)
+	time.Sleep(3 * time.Millisecond)
 	eAcntVal -= float64(time.Millisecond) * 30 * 2 // 2 session
 	if err := sSApierRpc.Call(context.Background(), utils.APIerSv2GetAccount, attrs, &acnt); err != nil {
 		t.Error(err)
