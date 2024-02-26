@@ -484,7 +484,7 @@ func testV2CDRsSetStats(t *testing.T) {
 			Blocker:      true,
 			Stored:       true,
 			Weight:       20,
-			MinItems:     0,
+			MinItems:     1,
 		},
 	}
 	var result string
