@@ -243,12 +243,12 @@ func TestDispatcherHostCall(t *testing.T) {
 	dspHost := &DispatcherHost{}
 	etRPC := &testRPCHost{
 		serviceMethod: utils.AttributeSv1Ping,
-		args:          &utils.CGREvent{},
+		args:          &CGREvent{},
 		reply:         utils.StringPointer(""),
 	}
 	var reply string
 	dspHost.rpcConn = tRPC
-	if err := dspHost.Call(context.Background(), utils.AttributeSv1Ping, &utils.CGREvent{}, &reply); err != nil {
+	if err := dspHost.Call(context.Background(), utils.AttributeSv1Ping, &CGREvent{}, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(*etRPC, *tRPC) {
 		t.Errorf("Expected: %s , received: %s", utils.ToJSON(etRPC), utils.ToJSON(tRPC))
@@ -335,7 +335,7 @@ func TestDispatcherHostCallErr(t *testing.T) {
 		},
 	}
 	var reply string
-	if err := dH.Call(context.Background(), utils.AttributeSv1Ping, &utils.CGREvent{}, &reply); err == nil || err.Error() != "dial tcp: missing address" {
+	if err := dH.Call(context.Background(), utils.AttributeSv1Ping, &CGREvent{}, &reply); err == nil || err.Error() != "dial tcp: missing address" {
 		t.Error(err)
 	}
 }

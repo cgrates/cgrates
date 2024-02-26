@@ -188,7 +188,7 @@ func testV2CDRsOfflineBalanceUpdate(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", tPrfl, thReply)
 	}
 
-	cgrEv := &utils.CGREvent{
+	cgrEv := &engine.CGREvent{
 		Tenant: "cgrates.org",
 		Event: map[string]any{
 			utils.OriginID:     "testV2CDRsOfflineProcessCDR2",
@@ -307,7 +307,7 @@ func testV2CDRsOfflineExpiryBalance(t *testing.T) {
 	}
 
 	args := &engine.ArgV1ProcessEvent{
-		CGREvent: utils.CGREvent{
+		CGREvent: engine.CGREvent{
 			Tenant: "cgrates.org",
 			Event: map[string]any{
 				utils.OriginID:     "testV2CDRsOfflineProcessCDR1",
@@ -359,7 +359,7 @@ func testV2CDRsBalancesWithSameWeight(t *testing.T) {
 		t.Errorf("Unexpected balance received: %+v", acnt.BalanceMap[utils.MetaMonetary])
 	}
 
-	cgrEv := &utils.CGREvent{
+	cgrEv := &engine.CGREvent{
 		Tenant: "cgrates.org",
 		Event: map[string]any{
 			utils.OriginID:     "testV2CDRsBalancesWithSameWeight",

@@ -1566,7 +1566,7 @@ func (apierSv1 *APIerSv1) ListenAndServe(stopChan chan struct{}) {
 }
 
 // Ping return pong if the service is active
-func (apierSv1 *APIerSv1) Ping(ctx *context.Context, ign *utils.CGREvent, reply *string) error {
+func (apierSv1 *APIerSv1) Ping(ctx *context.Context, ign *engine.CGREvent, reply *string) error {
 	*reply = utils.Pong
 	return nil
 }

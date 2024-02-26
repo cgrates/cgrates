@@ -135,7 +135,7 @@ func testSessionsItTerminatNonexist(t *testing.T) {
 	usage := 2 * time.Minute
 	termArgs := &V1TerminateSessionArgs{
 		TerminateSession: true,
-		CGREvent: &utils.CGREvent{
+		CGREvent: &engine.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testSessionsItTerminatNonexist",
 			Event: map[string]any{
@@ -210,7 +210,7 @@ func testSessionsItUpdateNonexist(t *testing.T) {
 	usage := 2 * time.Minute
 	updtArgs := &V1UpdateSessionArgs{
 		UpdateSession: true,
-		CGREvent: &utils.CGREvent{
+		CGREvent: &engine.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testSessionsItUpdateNonexist",
 			Event: map[string]any{
@@ -252,7 +252,7 @@ func testSessionsItUpdateNonexist(t *testing.T) {
 	var rpl string
 	termArgs := &V1TerminateSessionArgs{
 		TerminateSession: true,
-		CGREvent: &utils.CGREvent{
+		CGREvent: &engine.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testSessionsItTerminatNonexist",
 			Event: map[string]any{
@@ -332,7 +332,7 @@ func testSessionsItTerminatePassive(t *testing.T) {
 
 	termArgs := &V1TerminateSessionArgs{
 		TerminateSession: true,
-		CGREvent: &utils.CGREvent{
+		CGREvent: &engine.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testSessionsItTerminatNonexist",
 			Event: map[string]any{
@@ -391,7 +391,7 @@ func testSessionsItEventCostCompressing(t *testing.T) {
 	// Init the session
 	initArgs := &V1InitSessionArgs{
 		InitSession: true,
-		CGREvent: &utils.CGREvent{
+		CGREvent: &engine.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSessionsItEventCostCompressing",
 			Event: map[string]any{
@@ -414,7 +414,7 @@ func testSessionsItEventCostCompressing(t *testing.T) {
 	}
 	updateArgs := &V1UpdateSessionArgs{
 		UpdateSession: true,
-		CGREvent: &utils.CGREvent{
+		CGREvent: &engine.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSessionsItEventCostCompressing",
 			Event: map[string]any{
@@ -438,7 +438,7 @@ func testSessionsItEventCostCompressing(t *testing.T) {
 	}
 	termArgs := &V1TerminateSessionArgs{
 		TerminateSession: true,
-		CGREvent: &utils.CGREvent{
+		CGREvent: &engine.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSessionsDataLastUsedData",
 			Event: map[string]any{

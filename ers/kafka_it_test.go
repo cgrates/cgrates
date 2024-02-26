@@ -141,7 +141,7 @@ func TestKafkaER(t *testing.T) {
 		if ev.rdrCfg.ID != "kafka" {
 			t.Errorf("expected %s, received %s", "kafka", ev.rdrCfg.ID)
 		}
-		expected := &utils.CGREvent{
+		expected := &engine.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     ev.cgrEvent.ID,
 			Time:   ev.cgrEvent.Time,

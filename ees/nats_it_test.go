@@ -108,7 +108,7 @@ func TestNatsEEJetStream(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	cgrEv := &utils.CGREvent{
+	cgrEv := &engine.CGREvent{
 		Tenant: "cgrates.org",
 		Event: map[string]any{
 			"Account":     "1001",
@@ -176,7 +176,7 @@ func TestNatsEE(t *testing.T) {
 
 	defer nc.Drain()
 
-	cgrEv := &utils.CGREvent{
+	cgrEv := &engine.CGREvent{
 		Tenant: "cgrates.org",
 		Event: map[string]any{
 			"Account":     "1001",

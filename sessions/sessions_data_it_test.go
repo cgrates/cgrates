@@ -156,7 +156,7 @@ func testSessionsDataLastUsedData(t *testing.T) {
 	usage := int64(5120)
 	initArgs := &V1InitSessionArgs{
 		InitSession: true,
-		CGREvent: &utils.CGREvent{
+		CGREvent: &engine.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSessionsDataLastUsedData",
 			Event: map[string]any{
@@ -195,7 +195,7 @@ func testSessionsDataLastUsedData(t *testing.T) {
 
 	updateArgs := &V1UpdateSessionArgs{
 		UpdateSession: true,
-		CGREvent: &utils.CGREvent{
+		CGREvent: &engine.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSessionsDataLastUsedData",
 			Event: map[string]any{
@@ -233,7 +233,7 @@ func testSessionsDataLastUsedData(t *testing.T) {
 
 	termArgs := &V1TerminateSessionArgs{
 		TerminateSession: true,
-		CGREvent: &utils.CGREvent{
+		CGREvent: &engine.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSessionsDataLastUsedData",
 			Event: map[string]any{
@@ -294,7 +294,7 @@ func testSessionsDataLastUsedMultipleUpdates(t *testing.T) {
 	usage := int64(6144)
 	initArgs := &V1InitSessionArgs{
 		InitSession: true,
-		CGREvent: &utils.CGREvent{
+		CGREvent: &engine.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSessionsDataLastUsedMultipleUpdates",
 			Event: map[string]any{
@@ -340,7 +340,7 @@ func testSessionsDataLastUsedMultipleUpdates(t *testing.T) {
 	usage = int64(8192)
 	updateArgs := &V1UpdateSessionArgs{
 		UpdateSession: true,
-		CGREvent: &utils.CGREvent{
+		CGREvent: &engine.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSessionsDataLastUsedMultipleUpdates",
 			Event: map[string]any{
@@ -388,7 +388,7 @@ func testSessionsDataLastUsedMultipleUpdates(t *testing.T) {
 	usage = int64(1024)
 	updateArgs = &V1UpdateSessionArgs{
 		UpdateSession: true,
-		CGREvent: &utils.CGREvent{
+		CGREvent: &engine.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSessionsDataLastUsedMultipleUpdates",
 			Event: map[string]any{
@@ -438,7 +438,7 @@ func testSessionsDataLastUsedMultipleUpdates(t *testing.T) {
 	usage = int64(1024)
 	updateArgs = &V1UpdateSessionArgs{
 		UpdateSession: true,
-		CGREvent: &utils.CGREvent{
+		CGREvent: &engine.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSessionsDataLastUsedMultipleUpdates",
 			Event: map[string]any{
@@ -480,7 +480,7 @@ func testSessionsDataLastUsedMultipleUpdates(t *testing.T) {
 
 	termArgs := &V1TerminateSessionArgs{
 		TerminateSession: true,
-		CGREvent: &utils.CGREvent{
+		CGREvent: &engine.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSessionsDataLastUsedMultipleUpdates",
 			Event: map[string]any{
@@ -569,7 +569,7 @@ func testSessionsDataTTLExpired(t *testing.T) {
 	usage := int64(1024)
 	initArgs := &V1InitSessionArgs{
 		InitSession: true,
-		CGREvent: &utils.CGREvent{
+		CGREvent: &engine.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSessionsDataTTLExpired",
 			Event: map[string]any{
@@ -661,7 +661,7 @@ func testSessionsDataTTLExpMultiUpdates(t *testing.T) {
 	usage := int64(4096)
 	initArgs := &V1InitSessionArgs{
 		InitSession: true,
-		CGREvent: &utils.CGREvent{
+		CGREvent: &engine.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSessionsDataTTLExpMultiUpdates",
 			Event: map[string]any{
@@ -709,7 +709,7 @@ func testSessionsDataTTLExpMultiUpdates(t *testing.T) {
 	updateArgs := &V1UpdateSessionArgs{
 		UpdateSession: true,
 
-		CGREvent: &utils.CGREvent{
+		CGREvent: &engine.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSessionsDataTTLExpMultiUpdates",
 			Event: map[string]any{
@@ -803,7 +803,7 @@ func testSessionsDataMultipleDataNoUsage(t *testing.T) {
 	usage := int64(2048)
 	initArgs := &V1InitSessionArgs{
 		InitSession: true,
-		CGREvent: &utils.CGREvent{
+		CGREvent: &engine.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSessionsDataMultipleDataNoUsage",
 			Event: map[string]any{
@@ -849,7 +849,7 @@ func testSessionsDataMultipleDataNoUsage(t *testing.T) {
 	usage = int64(1024)
 	updateArgs := &V1UpdateSessionArgs{
 		UpdateSession: true,
-		CGREvent: &utils.CGREvent{
+		CGREvent: &engine.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSessionsDataMultipleDataNoUsage",
 			Event: map[string]any{
@@ -898,7 +898,7 @@ func testSessionsDataMultipleDataNoUsage(t *testing.T) {
 	usage = int64(0)
 	updateArgs = &V1UpdateSessionArgs{
 		UpdateSession: true,
-		CGREvent: &utils.CGREvent{
+		CGREvent: &engine.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSessionsDataMultipleDataNoUsage",
 			Event: map[string]any{
@@ -952,7 +952,7 @@ func testSessionsDataMultipleDataNoUsage(t *testing.T) {
 
 	termArgs := &V1TerminateSessionArgs{
 		TerminateSession: true,
-		CGREvent: &utils.CGREvent{
+		CGREvent: &engine.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSessionsDataMultipleDataNoUsage",
 			Event: map[string]any{
@@ -1021,7 +1021,7 @@ func testSessionsDataTTLUsageProtection(t *testing.T) {
 	usage := int64(2048)
 	initArgs := &V1InitSessionArgs{
 		InitSession: true,
-		CGREvent: &utils.CGREvent{
+		CGREvent: &engine.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSessionsDataTTLUsageProtection",
 			Event: map[string]any{
@@ -1098,7 +1098,7 @@ func testSessionsDataTTLLastUsage(t *testing.T) {
 	usage := int64(1024)
 	initArgs := &V1InitSessionArgs{
 		InitSession: true,
-		CGREvent: &utils.CGREvent{
+		CGREvent: &engine.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSessionsDataTTLLastUsage",
 			Event: map[string]any{

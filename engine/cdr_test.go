@@ -814,7 +814,7 @@ func TestCDRAsCGREvent(t *testing.T) {
 		Cost:        1.01,
 		ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"},
 	}
-	eCGREvent := utils.CGREvent{
+	eCGREvent := CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "GenePreRated",
 		Event: map[string]any{

@@ -142,7 +142,7 @@ func (rpS *RouteService) Shutdown() {
 }
 
 // matchingRouteProfilesForEvent returns ordered list of matching resources which are active by the time of the call
-func (rpS *RouteService) matchingRouteProfilesForEvent(tnt string, ev *utils.CGREvent) (matchingRPrf []*RouteProfile, err error) {
+func (rpS *RouteService) matchingRouteProfilesForEvent(tnt string, ev *CGREvent) (matchingRPrf []*RouteProfile, err error) {
 	evNm := utils.MapStorage{
 		utils.MetaReq:  ev.Event,
 		utils.MetaOpts: ev.APIOpts,
@@ -188,7 +188,7 @@ func (rpS *RouteService) matchingRouteProfilesForEvent(tnt string, ev *utils.CGR
 
 // costForEvent will compute cost out of accounts and rating plans for event
 // returns map[string]any with cost and relevant matching information inside
-func (rpS *RouteService) costForEvent(ev *utils.CGREvent,
+func (rpS *RouteService) costForEvent(ev *CGREvent,
 	acntIDs, rpIDs []string) (costData map[string]any, err error) {
 	costData = make(map[string]any)
 	if err = ev.CheckMandatoryFields([]string{utils.AccountField,
@@ -373,7 +373,7 @@ func (rpS *RouteService) resourceUsage(resIDs []string, tenant string) (tUsage f
 	return
 }
 
-func (rpS *RouteService) populateSortingData(ev *utils.CGREvent, route *Route,
+func (rpS *RouteService) populateSortingData(ev *CGREvent, route *Route,
 	extraOpts *optsGetRoutes) (srtRoute *SortedRoute, pass bool, err error) {
 	sortedSpl := &SortedRoute{
 		RouteID: route.ID,
@@ -500,9 +500,9 @@ func (rpS *RouteService) populateSortingData(ev *utils.CGREvent, route *Route,
 	return sortedSpl, true, nil
 }
 
-func newOptsGetRoutes(ev *utils.CGREvent, fS *FilterS, cfgOpts *config.RoutesOpts) (opts *optsGetRoutes, err error) {
+func newOptsGetRoutes(ev *CGREvent, fS *FilterS, cfgOpts *config.RoutesOpts) (opts *optsGetRoutes, err error) {
 	var ignoreErrors bool
-	if ignoreErrors, err = utils.GetBoolOpts(ev, cfgOpts.IgnoreErrors, utils.OptsRoutesIgnoreErrors); err != nil {
+	if ignoreErrors, err = GetBoolOpts(ev, cfgOpts.IgnoreErrors, utils.OptsRoutesIgnoreErrors); err != nil {
 		return
 	}
 	opts = &optsGetRoutes{
@@ -510,20 +510,20 @@ func newOptsGetRoutes(ev *utils.CGREvent, fS *FilterS, cfgOpts *config.RoutesOpt
 		paginator:    &utils.Paginator{},
 	}
 	var limit *int
-	if limit, err = utils.GetIntPointerOpts(ev, cfgOpts.Limit, utils.OptsRoutesLimit); err != nil {
+	if limit, err = GetIntPointerOpts(ev, cfgOpts.Limit, utils.OptsRoutesLimit); err != nil {
 		return
 	}
 	if limit != nil {
 		opts.paginator.Limit = limit
 	}
 	var offset *int
-	if offset, err = utils.GetIntPointerOpts(ev, cfgOpts.Offset, utils.OptsRoutesOffset); err != nil {
+	if offset, err = GetIntPointerOpts(ev, cfgOpts.Offset, utils.OptsRoutesOffset); err != nil {
 		return
 	}
 	if offset != nil {
 		opts.paginator.Offset = offset
 	}
-	maxCost := utils.GetInterfaceOpts(ev, cfgOpts.MaxCost, utils.OptsRoutesMaxCost)
+	maxCost := GetInterfaceOpts(ev, cfgOpts.MaxCost, utils.OptsRoutesMaxCost)
 
 	switch maxCost {
 	case utils.EmptyString, nil:
@@ -558,7 +558,7 @@ type optsGetRoutes struct {
 }
 
 // V1GetRoutes returns the list of valid routes
-func (rpS *RouteService) V1GetRoutes(ctx *context.Context, args *utils.CGREvent, reply *SortedRoutesList) (err error) {
+func (rpS *RouteService) V1GetRoutes(ctx *context.Context, args *CGREvent, reply *SortedRoutesList) (err error) {
 	if args == nil {
 		return utils.NewErrMandatoryIeMissing(utils.CGREventString)
 	}
@@ -577,7 +577,7 @@ func (rpS *RouteService) V1GetRoutes(ctx *context.Context, args *utils.CGREvent,
 		}
 		args.APIOpts[utils.MetaSubsys] = utils.MetaRoutes
 		args.APIOpts[utils.OptsContext] = utils.FirstNonEmpty(
-			utils.GetStringOpts(args, rpS.cgrcfg.RouteSCfg().Opts.Context, utils.OptsContext),
+			GetStringOpts(args, rpS.cgrcfg.RouteSCfg().Opts.Context, utils.OptsContext),
 			utils.MetaRoutes,
 		)
 		var rplyEv AttrSProcessEventReply
@@ -600,7 +600,7 @@ func (rpS *RouteService) V1GetRoutes(ctx *context.Context, args *utils.CGREvent,
 }
 
 // V1GetRouteProfilesForEvent returns the list of valid route profiles
-func (rpS *RouteService) V1GetRouteProfilesForEvent(ctx *context.Context, args *utils.CGREvent, reply *[]*RouteProfile) (err error) {
+func (rpS *RouteService) V1GetRouteProfilesForEvent(ctx *context.Context, args *CGREvent, reply *[]*RouteProfile) (err error) {
 	if missing := utils.MissingStructFields(args, []string{utils.ID}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	} else if args.Event == nil {
@@ -623,7 +623,7 @@ func (rpS *RouteService) V1GetRouteProfilesForEvent(ctx *context.Context, args *
 
 // sortedRoutesForEvent will return the list of valid route IDs
 // for event based on filters and sorting algorithms
-func (rpS *RouteService) sortedRoutesForProfile(tnt string, rPrfl *RouteProfile, ev *utils.CGREvent,
+func (rpS *RouteService) sortedRoutesForProfile(tnt string, rPrfl *RouteProfile, ev *CGREvent,
 	pag utils.Paginator, extraOpts *optsGetRoutes) (sortedRoutes *SortedRoutes, err error) {
 	extraOpts.sortingParameters = rPrfl.SortingParameters // populate sortingParameters in extraOpts
 	extraOpts.sortingStrategy = rPrfl.Sorting             // populate sortingStrategy in extraOpts
@@ -672,7 +672,7 @@ func (rpS *RouteService) sortedRoutesForProfile(tnt string, rPrfl *RouteProfile,
 
 // sortedRoutesForEvent will return the list of valid route IDs
 // for event based on filters and sorting algorithms
-func (rpS *RouteService) sortedRoutesForEvent(tnt string, args *utils.CGREvent) (sortedRoutes SortedRoutesList, err error) {
+func (rpS *RouteService) sortedRoutesForEvent(tnt string, args *CGREvent) (sortedRoutes SortedRoutesList, err error) {
 	if _, has := args.Event[utils.Usage]; !has {
 		args.Event[utils.Usage] = time.Minute // make sure we have default set for Usage
 	}
@@ -682,7 +682,7 @@ func (rpS *RouteService) sortedRoutesForEvent(tnt string, args *utils.CGREvent) 
 	}
 	prfCount := len(rPrfs) // if the option is not present return for all profiles
 	var prfCountOpt *int
-	if prfCountOpt, err = utils.GetIntPointerOpts(args, rpS.cgrcfg.RouteSCfg().Opts.ProfileCount,
+	if prfCountOpt, err = GetIntPointerOpts(args, rpS.cgrcfg.RouteSCfg().Opts.ProfileCount,
 		utils.OptsRoutesProfileCount); err != nil {
 		return
 	}
@@ -739,7 +739,7 @@ func (rpS *RouteService) sortedRoutesForEvent(tnt string, args *utils.CGREvent) 
 }
 
 // V1GetRoutesList returns the list of valid routes
-func (rpS *RouteService) V1GetRoutesList(ctx *context.Context, args *utils.CGREvent, reply *[]string) (err error) {
+func (rpS *RouteService) V1GetRoutesList(ctx *context.Context, args *CGREvent, reply *[]string) (err error) {
 	sR := new(SortedRoutesList)
 	if err = rpS.V1GetRoutes(ctx, args, sR); err != nil {
 		return

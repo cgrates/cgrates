@@ -162,7 +162,7 @@ func testAttributeSetProfile(t *testing.T) {
 		t.Error("Unexpected reply returned", result)
 	}
 
-	ev := &utils.CGREvent{
+	ev := &engine.CGREvent{
 		Tenant: "cgrates.org",
 		Event: map[string]any{
 			"Subject": "44",
@@ -212,7 +212,7 @@ func testAttributeSetFltr2(t *testing.T) {
 	}
 
 	//same event for process
-	ev := &utils.CGREvent{
+	ev := &engine.CGREvent{
 		Tenant: "cgrates.org",
 		Event: map[string]any{
 			"Subject": "4444",
@@ -224,7 +224,7 @@ func testAttributeSetFltr2(t *testing.T) {
 	exp := engine.AttrSProcessEventReply{
 		MatchedProfiles: []string{"cgrates.org:ApierTest"},
 		AlteredFields:   []string{"*req.FL1"},
-		CGREvent: &utils.CGREvent{
+		CGREvent: &engine.CGREvent{
 			Tenant: "cgrates.org",
 			Event: map[string]any{
 				"Subject": "4444",

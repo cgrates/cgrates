@@ -29,6 +29,7 @@ import (
 	"time"
 
 	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -52,7 +53,7 @@ func TestHttpPostGetMetrics(t *testing.T) {
 func TestHttpPostExportEvent(t *testing.T) {
 	cgrCfg := config.NewDefaultCGRConfig()
 	cgrCfg.EEsCfg().Exporters[0].Type = utils.MetaHTTPPost
-	cgrEv := new(utils.CGREvent)
+	cgrEv := new(engine.CGREvent)
 	httpPost, err := NewHTTPPostEE(cgrCfg.EEsCfg().Exporters[0], cgrCfg, nil, nil)
 	if err != nil {
 		t.Error(err)
@@ -87,7 +88,7 @@ func TestHttpPostExportEvent2(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	vals, err := httpPost.PrepareMap(&utils.CGREvent{
+	vals, err := httpPost.PrepareMap(&engine.CGREvent{
 		Event: map[string]any{
 			"2": "*req.field2",
 		},
@@ -130,7 +131,7 @@ func TestHttpPostSync(t *testing.T) {
 		t.Error(err)
 	}
 
-	req1, err := exp.PrepareMap(&utils.CGREvent{
+	req1, err := exp.PrepareMap(&engine.CGREvent{
 		Event: map[string]any{
 			"Account":     "1001",
 			"Destination": "1002",
@@ -139,7 +140,7 @@ func TestHttpPostSync(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	req2, err := exp.PrepareMap(&utils.CGREvent{
+	req2, err := exp.PrepareMap(&engine.CGREvent{
 		Event: map[string]any{
 			"Account":     "1001",
 			"Destination": "1003",
@@ -148,7 +149,7 @@ func TestHttpPostSync(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	req3, err := exp.PrepareMap(&utils.CGREvent{
+	req3, err := exp.PrepareMap(&engine.CGREvent{
 		Event: map[string]any{
 			"Account":     "1003",
 			"Destination": "1001",
@@ -205,7 +206,7 @@ func TestHttpPostSyncLimit(t *testing.T) {
 		t.Error(err)
 	}
 
-	vals, err := exp.PrepareMap(&utils.CGREvent{
+	vals, err := exp.PrepareMap(&engine.CGREvent{
 		Event: map[string]any{
 			"Account":     "1001",
 			"Destination": "1002",

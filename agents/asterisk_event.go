@@ -24,6 +24,7 @@ import (
 	"time"
 
 	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/sessions"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -201,7 +202,7 @@ func (smaEv *SMAsteriskEvent) ExtraParameters() (extraParams map[string]string) 
 	return
 }
 
-func (smaEv *SMAsteriskEvent) UpdateCGREvent(cgrEv *utils.CGREvent) error {
+func (smaEv *SMAsteriskEvent) UpdateCGREvent(cgrEv *engine.CGREvent) error {
 	resCGREv := *cgrEv
 	switch smaEv.EventType() {
 	case ARIChannelStateChange:
@@ -270,13 +271,13 @@ func (smaEv *SMAsteriskEvent) AsMapStringInterface() (mp map[string]any) {
 }
 
 // AsCGREvent converts AsteriskEvent into CGREvent
-func (smaEv *SMAsteriskEvent) AsCGREvent(timezone string) (cgrEv *utils.CGREvent, err error) {
+func (smaEv *SMAsteriskEvent) AsCGREvent(timezone string) (cgrEv *engine.CGREvent, err error) {
 	var setupTime time.Time
 	if setupTime, err = utils.ParseTimeDetectLayout(
 		smaEv.Timestamp(), timezone); err != nil {
 		return
 	}
-	cgrEv = &utils.CGREvent{
+	cgrEv = &engine.CGREvent{
 		Tenant: utils.FirstNonEmpty(smaEv.Tenant(),
 			config.CgrConfig().GeneralCfg().DefaultTenant),
 		ID:      utils.UUIDSha1Prefix(),
@@ -305,7 +306,7 @@ func (smaEv *SMAsteriskEvent) V1AuthorizeArgs() (args *sessions.V1AuthorizeArgs)
 	return
 }
 
-func (smaEv *SMAsteriskEvent) V1InitSessionArgs(cgrEvDisp utils.CGREvent) (args *sessions.V1InitSessionArgs) {
+func (smaEv *SMAsteriskEvent) V1InitSessionArgs(cgrEvDisp engine.CGREvent) (args *sessions.V1InitSessionArgs) {
 	args = &sessions.V1InitSessionArgs{ // defaults
 		CGREvent: &cgrEvDisp,
 	}
@@ -320,7 +321,7 @@ func (smaEv *SMAsteriskEvent) V1InitSessionArgs(cgrEvDisp utils.CGREvent) (args 
 	return
 }
 
-func (smaEv *SMAsteriskEvent) V1TerminateSessionArgs(cgrEvDisp utils.CGREvent) (args *sessions.V1TerminateSessionArgs) {
+func (smaEv *SMAsteriskEvent) V1TerminateSessionArgs(cgrEvDisp engine.CGREvent) (args *sessions.V1TerminateSessionArgs) {
 	args = &sessions.V1TerminateSessionArgs{ // defaults
 		CGREvent: &cgrEvDisp,
 	}

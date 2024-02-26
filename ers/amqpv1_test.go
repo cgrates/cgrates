@@ -40,7 +40,7 @@ func TestAMQPv1ERProcessMessage(t *testing.T) {
 		cap:       nil,
 		queueID:   "cgrates_cdrs",
 	}
-	expEvent := &utils.CGREvent{
+	expEvent := &engine.CGREvent{
 		Tenant: "cgrates.org",
 		Event: map[string]any{
 			utils.CGRID: "testCgrId",

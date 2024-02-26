@@ -42,7 +42,7 @@ var (
 	statConfig   *engine.StatQueueProfileWithAPIOpts
 	stsV1ConfDIR string //run tests for specific configuration
 
-	evs = []*utils.CGREvent{
+	evs = []*engine.CGREvent{
 		{
 			Tenant: "cgrates.org",
 			ID:     "event1",
@@ -290,7 +290,7 @@ func testV1STSV1StatSv1ResetAction(t *testing.T) {
 func testV1STSProcessEvent(t *testing.T) {
 	var reply []string
 	expected := []string{"Stats1"}
-	args := &utils.CGREvent{
+	args := &engine.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "event1",
 		Event: map[string]any{
@@ -344,7 +344,7 @@ func testV1STSProcessEvent(t *testing.T) {
 		t.Errorf("expecting: %+v, received reply: %+v", expectedFloatMetrics, floatMetrics)
 	}
 
-	args2 := &utils.CGREvent{
+	args2 := &engine.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "event2",
 		Event: map[string]any{
@@ -359,7 +359,7 @@ func testV1STSProcessEvent(t *testing.T) {
 	} else if !reflect.DeepEqual(reply, expected) {
 		t.Errorf("Expecting: %+v, received: %+v", expected, reply)
 	}
-	args3 := &utils.CGREvent{
+	args3 := &engine.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "event3",
 		Event: map[string]any{
@@ -672,7 +672,7 @@ func testV1STSProcessMetricsWithFilter(t *testing.T) {
 	//process event
 	var reply2 []string
 	expected := []string{"CustomStatProfile"}
-	args := &utils.CGREvent{
+	args := &engine.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "event1",
 		Event: map[string]any{
@@ -700,7 +700,7 @@ func testV1STSProcessMetricsWithFilter(t *testing.T) {
 		t.Errorf("expecting: %+v, received reply: %s", expectedMetrics, metrics)
 	}
 	//second process
-	args = &utils.CGREvent{
+	args = &engine.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "event2",
 		Event: map[string]any{
@@ -779,7 +779,7 @@ func testV1STSProcessStaticMetrics(t *testing.T) {
 	//process event
 	var reply2 []string
 	expected := []string{"StaticStatQueue"}
-	args := &utils.CGREvent{
+	args := &engine.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "event1",
 		Event: map[string]any{
@@ -904,7 +904,7 @@ func testV1STSProcessStatsOneEvent(t *testing.T) {
 
 	var reply2 []string
 	expected := []string{"StatQueueOne"}
-	args := &utils.CGREvent{
+	args := &engine.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "event1",
 		Event: map[string]any{
@@ -934,7 +934,7 @@ func testV1STSProcessStatsOneEvent(t *testing.T) {
 		t.Errorf("expecting: %+v, received reply: %s", expectedMetrics, metrics)
 	}
 
-	args = &utils.CGREvent{
+	args = &engine.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "event1",
 		Event: map[string]any{
@@ -974,7 +974,7 @@ func testV1STSProcessStatsOneEvent(t *testing.T) {
 
 func testV1STSStatsPing(t *testing.T) {
 	var resp string
-	if err := stsV1Rpc.Call(context.Background(), utils.StatSv1Ping, new(utils.CGREvent), &resp); err != nil {
+	if err := stsV1Rpc.Call(context.Background(), utils.StatSv1Ping, new(engine.CGREvent), &resp); err != nil {
 		t.Error(err)
 	} else if resp != utils.Pong {
 		t.Error("Unexpected reply returned", resp)
@@ -1035,7 +1035,7 @@ func testV1STSProcessStatWithThreshold(t *testing.T) {
 	//process event
 	var reply2 []string
 	expected := []string{"StatWithThreshold"}
-	args := &utils.CGREvent{
+	args := &engine.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "event1",
 		Event: map[string]any{
@@ -1338,7 +1338,7 @@ func testV1STSProcessStatWithThreshold2(t *testing.T) {
 	//process event
 	var reply2 []string
 	expected := []string{"StatWithThreshold2"}
-	args := &utils.CGREvent{
+	args := &engine.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "event1",
 		Event: map[string]any{
@@ -1493,7 +1493,7 @@ func testV1STSV1GetQueueIDs(t *testing.T) {
 func testV1STSV1GetStatQueuesForEventWithoutTenant(t *testing.T) {
 	var reply []string
 	estats := []string{"Stats1"}
-	if err := stsV1Rpc.Call(context.Background(), utils.StatSv1GetStatQueuesForEvent, &utils.CGREvent{
+	if err := stsV1Rpc.Call(context.Background(), utils.StatSv1GetStatQueuesForEvent, &engine.CGREvent{
 		ID: "GetStats",
 		Event: map[string]any{
 			utils.AccountField: "1002",
@@ -1587,7 +1587,7 @@ func testV1STSSimulateAccountUpdate(t *testing.T) {
 		t.Error(err)
 	}
 
-	acntUpdateEv := &utils.CGREvent{ // hitting TH_ACNT_UPDATE_EV
+	acntUpdateEv := &engine.CGREvent{ // hitting TH_ACNT_UPDATE_EV
 		Tenant: "cgrates.org",
 		ID:     "SIMULATE_ACNT_UPDATE_EV",
 		Event:  acnt.AsAccountSummary().AsMapInterface(),
@@ -1668,7 +1668,7 @@ func testV1STSGetStatQueueWithoutExpired(t *testing.T) {
 	//process event
 	var reply2 []string
 	expected := []string{"Sq1Nanao"}
-	args := &utils.CGREvent{
+	args := &engine.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "event1012",
 		Event: map[string]any{
@@ -1731,7 +1731,7 @@ func testV1STSGetStatQueueWithoutStored(t *testing.T) {
 	//process event
 	var reply2 []string
 	expected := []string{"Sq1NotStored"}
-	args := &utils.CGREvent{
+	args := &engine.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "Sq1NotStored",
 		Event: map[string]any{
@@ -1800,7 +1800,7 @@ func testV1STSCheckMetricsAfterRestart(t *testing.T) {
 
 func testStatSCacheProcessEventNotFound(t *testing.T) {
 	var reply []string
-	args := &utils.CGREvent{
+	args := &engine.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "STAT_CACHE",
 		Event: map[string]any{
@@ -1820,7 +1820,7 @@ func testStatSCacheProcessEventNotFound(t *testing.T) {
 }
 func testStatSCacheProcessEventFound(t *testing.T) {
 	var reply []string
-	args := &utils.CGREvent{
+	args := &engine.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "STAT_CACHE",
 		Event: map[string]any{

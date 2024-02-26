@@ -37,7 +37,7 @@ import (
 var attrs = &engine.AttrSProcessEventReply{
 	MatchedProfiles: []string{"ATTR_ACNT_1001"},
 	AlteredFields:   []string{"*req.OfficeGroup"},
-	CGREvent: &utils.CGREvent{
+	CGREvent: &engine.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "TestSSv1ItAuth",
 		Event: map[string]any{
@@ -891,7 +891,7 @@ func TestSessionSRegisterAndUnregisterPSessions(t *testing.T) {
 }
 
 func TestSessionSNewV1AuthorizeArgs(t *testing.T) {
-	cgrEv := &utils.CGREvent{
+	cgrEv := &engine.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "Event",
 		Event: map[string]any{
@@ -971,9 +971,9 @@ func TestSessionSNewV1AuthorizeArgs(t *testing.T) {
 
 func TestV1AuthorizeArgsParseFlags11(t *testing.T) {
 	v1authArgs := new(V1AuthorizeArgs)
-	v1authArgs.CGREvent = new(utils.CGREvent)
+	v1authArgs.CGREvent = new(engine.CGREvent)
 	eOut := new(V1AuthorizeArgs)
-	eOut.CGREvent = new(utils.CGREvent)
+	eOut.CGREvent = new(engine.CGREvent)
 	//empty check
 	strArg := ""
 	v1authArgs.ParseFlags(strArg, utils.InfieldSep)
@@ -981,7 +981,7 @@ func TestV1AuthorizeArgsParseFlags11(t *testing.T) {
 		t.Errorf("Expecting %+v,\n received: %+v", eOut, v1authArgs)
 	}
 	//normal check -> without *dispatchers
-	cgrArgs, _ := utils.GetRoutePaginatorFromOpts(v1authArgs.APIOpts)
+	cgrArgs, _ := engine.GetRoutePaginatorFromOpts(v1authArgs.APIOpts)
 	eOut = &V1AuthorizeArgs{
 		GetMaxUsage:        true,
 		AuthorizeResources: true,
@@ -1001,13 +1001,13 @@ func TestV1AuthorizeArgsParseFlags11(t *testing.T) {
 
 	strArg = "*accounts;*fd;*resources;*routes;*routes_ignore_errors;*routes_event_cost;*attributes:Attr1&Attr2;*thresholds:tr1&tr2&tr3;*stats:st1&st2&st3"
 	v1authArgs = new(V1AuthorizeArgs)
-	v1authArgs.CGREvent = new(utils.CGREvent)
+	v1authArgs.CGREvent = new(engine.CGREvent)
 	v1authArgs.ParseFlags(strArg, utils.InfieldSep)
 	if !reflect.DeepEqual(eOut, v1authArgs) {
 		t.Errorf("Expecting %+v,\n received: %+v\n", utils.ToJSON(eOut), utils.ToJSON(v1authArgs))
 	}
 	// //normal check -> with *dispatchers
-	cgrArgs, _ = utils.GetRoutePaginatorFromOpts(v1authArgs.APIOpts)
+	cgrArgs, _ = engine.GetRoutePaginatorFromOpts(v1authArgs.APIOpts)
 	eOut = &V1AuthorizeArgs{
 		GetMaxUsage:        true,
 		AuthorizeResources: true,
@@ -1027,7 +1027,7 @@ func TestV1AuthorizeArgsParseFlags11(t *testing.T) {
 
 	strArg = "*accounts;*fd;*resources;;*dispatchers;*routes;*routes_ignore_errors;*routes_event_cost;*attributes:Attr1&Attr2;*thresholds:tr1&tr2&tr3;*stats:st1&st2&st3"
 	v1authArgs = new(V1AuthorizeArgs)
-	v1authArgs.CGREvent = new(utils.CGREvent)
+	v1authArgs.CGREvent = new(engine.CGREvent)
 	v1authArgs.ParseFlags(strArg, utils.InfieldSep)
 	if !reflect.DeepEqual(eOut, v1authArgs) {
 		t.Errorf("Expecting %+v,\n received: %+v\n", utils.ToJSON(eOut), utils.ToJSON(v1authArgs))
@@ -1051,7 +1051,7 @@ func TestV1AuthorizeArgsParseFlags11(t *testing.T) {
 
 	strArg = "*accounts;*fd;*resources;;*dispatchers;*routes;*routes_ignore_errors;*routes_maxcost:100;*attributes:Attr1&Attr2;*thresholds:tr1&tr2&tr3;*stats:st1&st2&st3"
 	v1authArgs = new(V1AuthorizeArgs)
-	v1authArgs.CGREvent = new(utils.CGREvent)
+	v1authArgs.CGREvent = new(engine.CGREvent)
 	v1authArgs.ParseFlags(strArg, utils.InfieldSep)
 	if !reflect.DeepEqual(eOut, v1authArgs) {
 		t.Errorf("Expecting %+v,\n received: %+v\n", utils.ToJSON(eOut), utils.ToJSON(v1authArgs))
@@ -1059,7 +1059,7 @@ func TestV1AuthorizeArgsParseFlags11(t *testing.T) {
 }
 
 func TestSessionSNewV1UpdateSessionArgs(t *testing.T) {
-	cgrEv := &utils.CGREvent{
+	cgrEv := &engine.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "Event",
 		Event: map[string]any{
@@ -1097,7 +1097,7 @@ func TestSessionSNewV1UpdateSessionArgs(t *testing.T) {
 }
 
 func TestSessionSNewV1TerminateSessionArgs(t *testing.T) {
-	cgrEv := &utils.CGREvent{
+	cgrEv := &engine.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "Event",
 		Event: map[string]any{
@@ -1140,7 +1140,7 @@ func TestSessionSNewV1TerminateSessionArgs(t *testing.T) {
 }
 
 func TestSessionSNewV1ProcessMessageArgs(t *testing.T) {
-	cgrEv := &utils.CGREvent{
+	cgrEv := &engine.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "Event",
 		Event: map[string]any{
@@ -1215,7 +1215,7 @@ func TestSessionSNewV1ProcessMessageArgs(t *testing.T) {
 
 func TestSessionSNewV1InitSessionArgs(t *testing.T) {
 	//t1
-	cgrEv := &utils.CGREvent{
+	cgrEv := &engine.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "Event",
 		Event: map[string]any{
@@ -1244,7 +1244,7 @@ func TestSessionSNewV1InitSessionArgs(t *testing.T) {
 	}
 
 	//t2
-	cgrEv = &utils.CGREvent{
+	cgrEv = &engine.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "Event",
 		Event: map[string]any{
@@ -1682,7 +1682,7 @@ func TestSessionSrelocateSessionS(t *testing.T) {
 
 func TestSessionSNewV1AuthorizeArgsWithOpts(t *testing.T) {
 
-	cgrEv := &utils.CGREvent{
+	cgrEv := &engine.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "Event",
 		Event: map[string]any{
@@ -1700,7 +1700,7 @@ func TestSessionSNewV1AuthorizeArgsWithOpts(t *testing.T) {
 		CGREvent:           cgrEv,
 		ForceDuration:      true,
 	}
-	cgrArgs, _ := utils.GetRoutePaginatorFromOpts(cgrEv.APIOpts)
+	cgrArgs, _ := engine.GetRoutePaginatorFromOpts(cgrEv.APIOpts)
 	rply := NewV1AuthorizeArgs(true, nil, false, nil, false, nil, true, false,
 		false, false, false, cgrEv, cgrArgs, true, "")
 	if !reflect.DeepEqual(expected, rply) {
@@ -1727,7 +1727,7 @@ func TestSessionSNewV1AuthorizeArgsWithOpts(t *testing.T) {
 
 func TestSessionSNewV1AuthorizeArgsWithOpts2(t *testing.T) {
 
-	cgrEv := &utils.CGREvent{
+	cgrEv := &engine.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "Event",
 		Event: map[string]any{
@@ -1744,7 +1744,7 @@ func TestSessionSNewV1AuthorizeArgsWithOpts2(t *testing.T) {
 		CGREvent:           cgrEv,
 		ForceDuration:      true,
 	}
-	cgrArgs, _ := utils.GetRoutePaginatorFromOpts(cgrEv.APIOpts)
+	cgrArgs, _ := engine.GetRoutePaginatorFromOpts(cgrEv.APIOpts)
 	rply := NewV1AuthorizeArgs(true, nil, false, nil, false, nil, true, false, false,
 		false, false, cgrEv, cgrArgs, true, "")
 	if !reflect.DeepEqual(expected, rply) {
@@ -2050,9 +2050,9 @@ func TestV1TerminateSessionArgsParseFlags(t *testing.T) {
 
 func TestV1ProcessMessageArgsParseFlags(t *testing.T) {
 	v1ProcessMsgArgs := new(V1ProcessMessageArgs)
-	v1ProcessMsgArgs.CGREvent = new(utils.CGREvent)
+	v1ProcessMsgArgs.CGREvent = new(engine.CGREvent)
 	eOut := new(V1ProcessMessageArgs)
-	eOut.CGREvent = new(utils.CGREvent)
+	eOut.CGREvent = new(engine.CGREvent)
 	//empty check
 	strArg := ""
 	v1ProcessMsgArgs.ParseFlags(strArg, utils.InfieldSep)
@@ -2077,7 +2077,7 @@ func TestV1ProcessMessageArgsParseFlags(t *testing.T) {
 
 	strArg = "*accounts;*resources;*routes;*routes_ignore_errors;*routes_event_cost;*attributes:Attr1&Attr2;*thresholds:tr1&tr2&tr3;*stats:st1&st2&st3"
 	v1ProcessMsgArgs = new(V1ProcessMessageArgs)
-	v1ProcessMsgArgs.CGREvent = new(utils.CGREvent)
+	v1ProcessMsgArgs.CGREvent = new(engine.CGREvent)
 	v1ProcessMsgArgs.ParseFlags(strArg, utils.InfieldSep)
 	if !reflect.DeepEqual(eOut, v1ProcessMsgArgs) {
 		t.Errorf("Expecting %+v,\n received: %+v\n", utils.ToJSON(eOut), utils.ToJSON(v1ProcessMsgArgs))
@@ -2102,7 +2102,7 @@ func TestV1ProcessMessageArgsParseFlags(t *testing.T) {
 
 	strArg = "*accounts;*resources;*dispatchers;*routes;*routes_ignore_errors;*routes_event_cost;*attributes:Attr1&Attr2;*thresholds:tr1&tr2&tr3;*stats:st1&st2&st3;*fd"
 	v1ProcessMsgArgs = new(V1ProcessMessageArgs)
-	v1ProcessMsgArgs.CGREvent = new(utils.CGREvent)
+	v1ProcessMsgArgs.CGREvent = new(engine.CGREvent)
 	v1ProcessMsgArgs.ParseFlags(strArg, utils.InfieldSep)
 	if !reflect.DeepEqual(eOut, v1ProcessMsgArgs) {
 		t.Errorf("Expecting %+v,\n received: %+v\n", utils.ToJSON(eOut), utils.ToJSON(v1ProcessMsgArgs))
@@ -2125,7 +2125,7 @@ func TestV1ProcessMessageArgsParseFlags(t *testing.T) {
 
 	strArg = "*accounts;*resources;*dispatchers;*routes;*routes_ignore_errors;*routes_maxcost:100;*attributes:Attr1&Attr2;*thresholds:tr1&tr2&tr3;*stats:st1&st2&st3"
 	v1ProcessMsgArgs = new(V1ProcessMessageArgs)
-	v1ProcessMsgArgs.CGREvent = new(utils.CGREvent)
+	v1ProcessMsgArgs.CGREvent = new(engine.CGREvent)
 	v1ProcessMsgArgs.ParseFlags(strArg, utils.InfieldSep)
 	if !reflect.DeepEqual(eOut, v1ProcessMsgArgs) {
 		t.Errorf("Expecting %+v,\n received: %+v\n", utils.ToJSON(eOut), utils.ToJSON(v1ProcessMsgArgs))
@@ -2618,7 +2618,7 @@ func TestInitSession(t *testing.T) {
 				ChargerSProfile:    "raw",
 				AttributeSProfiles: []string{utils.MetaNone},
 				AlteredFields:      []string{"~*req.RunID"},
-				CGREvent:           args.(*utils.CGREvent),
+				CGREvent:           args.(*engine.CGREvent),
 			},
 		}
 		return nil
@@ -2627,7 +2627,7 @@ func TestInitSession(t *testing.T) {
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers): clientConect,
 	})
 	sS := NewSessionS(cfg, nil, conMng)
-	s, err := sS.initSession(&utils.CGREvent{
+	s, err := sS.initSession(&engine.CGREvent{
 		Tenant: "cgrates.org",
 		Event: map[string]any{
 			utils.Category:     "call",
@@ -2694,7 +2694,7 @@ func TestBiRPCv1AuthorizeEventNoTenant(t *testing.T) {
 		if !cancast {
 			return fmt.Errorf("can't cast")
 		}
-		newArgs, cancast := args.(*utils.CGREvent)
+		newArgs, cancast := args.(*engine.CGREvent)
 		if !cancast {
 			return fmt.Errorf("can't cast")
 		}
@@ -2702,7 +2702,7 @@ func TestBiRPCv1AuthorizeEventNoTenant(t *testing.T) {
 			return fmt.Errorf("Tenant is missing")
 		}
 		*rply = engine.AttrSProcessEventReply{
-			CGREvent: &utils.CGREvent{
+			CGREvent: &engine.CGREvent{
 				Tenant: "cgrates.org",
 				ID:     "TestBiRPCv1AuthorizeEventNoTenant",
 				Time:   utils.TimePointer(time.Date(2016, time.January, 5, 18, 30, 49, 0, time.UTC)),
@@ -2731,7 +2731,7 @@ func TestBiRPCv1AuthorizeEventNoTenant(t *testing.T) {
 
 	args := &V1AuthorizeArgs{
 		GetAttributes: true,
-		CGREvent: &utils.CGREvent{
+		CGREvent: &engine.CGREvent{
 			ID:   "TestBiRPCv1AuthorizeEventNoTenant",
 			Time: utils.TimePointer(time.Date(2016, time.January, 5, 18, 30, 49, 0, time.UTC)),
 			Event: map[string]any{
@@ -2764,7 +2764,7 @@ func TestBiRPCv1AuthorizeEventWithDigestNoTenant(t *testing.T) {
 		if !cancast {
 			return fmt.Errorf("can't cast")
 		}
-		newArgs, cancast := args.(*utils.CGREvent)
+		newArgs, cancast := args.(*engine.CGREvent)
 		if !cancast {
 			return fmt.Errorf("can't cast")
 		}
@@ -2772,7 +2772,7 @@ func TestBiRPCv1AuthorizeEventWithDigestNoTenant(t *testing.T) {
 			return fmt.Errorf("Tenant is missing")
 		}
 		*rply = engine.AttrSProcessEventReply{
-			CGREvent: &utils.CGREvent{
+			CGREvent: &engine.CGREvent{
 				Tenant: "cgrates.org",
 				ID:     "TestBiRPCv1AuthorizeEventNoTenant",
 				Time:   utils.TimePointer(time.Date(2016, time.January, 5, 18, 30, 49, 0, time.UTC)),
@@ -2801,7 +2801,7 @@ func TestBiRPCv1AuthorizeEventWithDigestNoTenant(t *testing.T) {
 
 	args := &V1AuthorizeArgs{
 		GetAttributes: true,
-		CGREvent: &utils.CGREvent{
+		CGREvent: &engine.CGREvent{
 			ID:   "TestBiRPCv1AuthorizeEventNoTenant",
 			Time: utils.TimePointer(time.Date(2016, time.January, 5, 18, 30, 49, 0, time.UTC)),
 			Event: map[string]any{
@@ -2832,7 +2832,7 @@ func TestBiRPCv1InitiateSessionNoTenant(t *testing.T) {
 		if !cancast {
 			return fmt.Errorf("can't cast")
 		}
-		newArgs, cancast := args.(*utils.CGREvent)
+		newArgs, cancast := args.(*engine.CGREvent)
 		if !cancast {
 			return fmt.Errorf("can't cast")
 		}
@@ -2840,7 +2840,7 @@ func TestBiRPCv1InitiateSessionNoTenant(t *testing.T) {
 			return fmt.Errorf("Tenant is missing")
 		}
 		*rply = engine.AttrSProcessEventReply{
-			CGREvent: &utils.CGREvent{
+			CGREvent: &engine.CGREvent{
 				Tenant: "cgrates.org",
 				ID:     "TestBiRPCv1AuthorizeEventNoTenant",
 				Time:   utils.TimePointer(time.Date(2016, time.January, 5, 18, 30, 49, 0, time.UTC)),
@@ -2869,7 +2869,7 @@ func TestBiRPCv1InitiateSessionNoTenant(t *testing.T) {
 
 	args := &V1InitSessionArgs{
 		GetAttributes: true,
-		CGREvent: &utils.CGREvent{
+		CGREvent: &engine.CGREvent{
 			ID:   "TestBiRPCv1AuthorizeEventNoTenant",
 			Time: utils.TimePointer(time.Date(2016, time.January, 5, 18, 30, 49, 0, time.UTC)),
 			Event: map[string]any{
@@ -2900,7 +2900,7 @@ func TestBiRPCv1InitiateSessionWithDigestNoTenant(t *testing.T) {
 		if !cancast {
 			return fmt.Errorf("can't cast")
 		}
-		newArgs, cancast := args.(*utils.CGREvent)
+		newArgs, cancast := args.(*engine.CGREvent)
 		if !cancast {
 			return fmt.Errorf("can't cast")
 		}
@@ -2908,7 +2908,7 @@ func TestBiRPCv1InitiateSessionWithDigestNoTenant(t *testing.T) {
 			return fmt.Errorf("Tenant is missing")
 		}
 		*rply = engine.AttrSProcessEventReply{
-			CGREvent: &utils.CGREvent{
+			CGREvent: &engine.CGREvent{
 				Tenant: "cgrates.org",
 				ID:     "TestBiRPCv1AuthorizeEventNoTenant",
 				Time:   utils.TimePointer(time.Date(2016, time.January, 5, 18, 30, 49, 0, time.UTC)),
@@ -2936,7 +2936,7 @@ func TestBiRPCv1InitiateSessionWithDigestNoTenant(t *testing.T) {
 
 	args := &V1InitSessionArgs{
 		GetAttributes: true,
-		CGREvent: &utils.CGREvent{
+		CGREvent: &engine.CGREvent{
 			ID:   "TestBiRPCv1AuthorizeEventNoTenant",
 			Time: utils.TimePointer(time.Date(2016, time.January, 5, 18, 30, 49, 0, time.UTC)),
 			Event: map[string]any{
@@ -2965,7 +2965,7 @@ func TestBiRPCv1UpdateSessionNoTenant(t *testing.T) {
 		if !cancast {
 			return fmt.Errorf("can't cast")
 		}
-		newArgs, cancast := args.(*utils.CGREvent)
+		newArgs, cancast := args.(*engine.CGREvent)
 		if !cancast {
 			return fmt.Errorf("can't cast")
 		}
@@ -2973,7 +2973,7 @@ func TestBiRPCv1UpdateSessionNoTenant(t *testing.T) {
 			return fmt.Errorf("Tenant is missing")
 		}
 		*rply = engine.AttrSProcessEventReply{
-			CGREvent: &utils.CGREvent{
+			CGREvent: &engine.CGREvent{
 				Tenant: "cgrates.org",
 				ID:     "TestBiRPCv1AuthorizeEventNoTenant",
 				Time:   utils.TimePointer(time.Date(2016, time.January, 5, 18, 30, 49, 0, time.UTC)),
@@ -3001,7 +3001,7 @@ func TestBiRPCv1UpdateSessionNoTenant(t *testing.T) {
 
 	args := &V1UpdateSessionArgs{
 		GetAttributes: true,
-		CGREvent: &utils.CGREvent{
+		CGREvent: &engine.CGREvent{
 			ID:   "TestBiRPCv1AuthorizeEventNoTenant",
 			Time: utils.TimePointer(time.Date(2016, time.January, 5, 18, 30, 49, 0, time.UTC)),
 			Event: map[string]any{
@@ -3030,7 +3030,7 @@ func TestBiRPCv1TerminateSessionNoTenant(t *testing.T) {
 		if !cancast {
 			return fmt.Errorf("can't cast")
 		}
-		newArgs, cancast := args.(*utils.CGREvent)
+		newArgs, cancast := args.(*engine.CGREvent)
 		if !cancast {
 			return fmt.Errorf("can't cast")
 		}
@@ -3051,7 +3051,7 @@ func TestBiRPCv1TerminateSessionNoTenant(t *testing.T) {
 
 	args := &V1TerminateSessionArgs{
 		TerminateSession: true,
-		CGREvent: &utils.CGREvent{
+		CGREvent: &engine.CGREvent{
 			ID:   "TestBiRPCv1AuthorizeEventNoTenant",
 			Time: utils.TimePointer(time.Date(2016, time.January, 5, 18, 30, 49, 0, time.UTC)),
 			Event: map[string]any{
@@ -3081,7 +3081,7 @@ func TestBiRPCv1ProcessMessageNoTenant(t *testing.T) {
 		if !cancast {
 			return fmt.Errorf("can't cast")
 		}
-		newArgs, cancast := args.(*utils.CGREvent)
+		newArgs, cancast := args.(*engine.CGREvent)
 		if !cancast {
 			return fmt.Errorf("can't cast")
 		}
@@ -3089,7 +3089,7 @@ func TestBiRPCv1ProcessMessageNoTenant(t *testing.T) {
 			return fmt.Errorf("Tenant is missing")
 		}
 		*rply = engine.AttrSProcessEventReply{
-			CGREvent: &utils.CGREvent{
+			CGREvent: &engine.CGREvent{
 				Tenant: "cgrates.org",
 				ID:     "TestBiRPCv1AuthorizeEventNoTenant",
 				Time:   utils.TimePointer(time.Date(2016, time.January, 5, 18, 30, 49, 0, time.UTC)),
@@ -3117,7 +3117,7 @@ func TestBiRPCv1ProcessMessageNoTenant(t *testing.T) {
 
 	args := &V1ProcessMessageArgs{
 		GetAttributes: true,
-		CGREvent: &utils.CGREvent{
+		CGREvent: &engine.CGREvent{
 			ID:   "TestBiRPCv1AuthorizeEventNoTenant",
 			Time: utils.TimePointer(time.Date(2016, time.January, 5, 18, 30, 49, 0, time.UTC)),
 			Event: map[string]any{
@@ -3149,7 +3149,7 @@ func TestBiRPCv1ProcessEventNoTenant(t *testing.T) {
 		if !cancast {
 			return fmt.Errorf("can't cast")
 		}
-		newArgs, cancast := args.(*utils.CGREvent)
+		newArgs, cancast := args.(*engine.CGREvent)
 		if !cancast {
 			return fmt.Errorf("can't cast")
 		}
@@ -3157,7 +3157,7 @@ func TestBiRPCv1ProcessEventNoTenant(t *testing.T) {
 			return fmt.Errorf("Tenant is missing")
 		}
 		*rply = engine.AttrSProcessEventReply{
-			CGREvent: &utils.CGREvent{
+			CGREvent: &engine.CGREvent{
 				Tenant: "cgrates.org",
 				ID:     "TestBiRPCv1AuthorizeEventNoTenant",
 				Time:   utils.TimePointer(time.Date(2016, time.January, 5, 18, 30, 49, 0, time.UTC)),
@@ -3185,7 +3185,7 @@ func TestBiRPCv1ProcessEventNoTenant(t *testing.T) {
 
 	args := &V1ProcessEventArgs{
 		Flags: []string{utils.MetaAttributes},
-		CGREvent: &utils.CGREvent{
+		CGREvent: &engine.CGREvent{
 			ID:   "TestBiRPCv1AuthorizeEventNoTenant",
 			Time: utils.TimePointer(time.Date(2016, time.January, 5, 18, 30, 49, 0, time.UTC)),
 			Event: map[string]any{

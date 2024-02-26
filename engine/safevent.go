@@ -239,9 +239,9 @@ func (se *SafEvent) AsCDR(cfg *config.CGRConfig, tnt, tmz string) (cdr *CDR, err
 }
 
 // AsCGREvent exports the SafEvent as CGREvent
-func (se *SafEvent) AsCGREvent(tnt string) (cgrEv *utils.CGREvent) {
+func (se *SafEvent) AsCGREvent(tnt string) (cgrEv *CGREvent) {
 	se.RLock()
-	cgrEv = &utils.CGREvent{
+	cgrEv = &CGREvent{
 		Tenant: tnt,
 		ID:     utils.UUIDSha1Prefix(),
 		Time:   utils.TimePointer(time.Now()),

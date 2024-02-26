@@ -22,6 +22,7 @@ import (
 	"time"
 
 	"github.com/cgrates/birpc/context"
+	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -41,9 +42,9 @@ func (dS *DispatcherService) CoreSv1Panic(ctx *context.Context, args *utils.Pani
 			return
 		}
 	}
-	return dS.Dispatch(&utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaCore, utils.CoreSv1Panic, args, reply)
+	return dS.Dispatch(&engine.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaCore, utils.CoreSv1Panic, args, reply)
 }
-func (dS *DispatcherService) CoreSv1Ping(ctx *context.Context, args *utils.CGREvent, reply *string) (err error) {
+func (dS *DispatcherService) CoreSv1Ping(ctx *context.Context, args *engine.CGREvent, reply *string) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
 	if args != nil && len(args.Tenant) != 0 {
 		tnt = args.Tenant
@@ -62,7 +63,7 @@ func (dS *DispatcherService) CoreSv1Ping(ctx *context.Context, args *utils.CGREv
 			return
 		}
 	}
-	return dS.Dispatch(&utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaCore, utils.CoreSv1Ping, args, reply)
+	return dS.Dispatch(&engine.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaCore, utils.CoreSv1Ping, args, reply)
 }
 
 func (dS *DispatcherService) CoreSv1Sleep(ctx *context.Context, args *utils.DurationArgs, reply *string) (err error) {
@@ -81,7 +82,7 @@ func (dS *DispatcherService) CoreSv1Sleep(ctx *context.Context, args *utils.Dura
 			return
 		}
 	}
-	return dS.Dispatch(&utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaCore, utils.CoreSv1Sleep, args, reply)
+	return dS.Dispatch(&engine.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaCore, utils.CoreSv1Sleep, args, reply)
 }
 
 func (dS *DispatcherService) CoreSv1StartCPUProfiling(ctx *context.Context, args *utils.DirectoryArgs, reply *string) (err error) {
@@ -100,7 +101,7 @@ func (dS *DispatcherService) CoreSv1StartCPUProfiling(ctx *context.Context, args
 			return
 		}
 	}
-	return dS.Dispatch(&utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaCore, utils.CoreSv1StartCPUProfiling, args, reply)
+	return dS.Dispatch(&engine.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaCore, utils.CoreSv1StartCPUProfiling, args, reply)
 }
 func (dS *DispatcherService) CoreSv1StartMemoryProfiling(ctx *context.Context, args *utils.MemoryPrf, reply *string) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
@@ -118,7 +119,7 @@ func (dS *DispatcherService) CoreSv1StartMemoryProfiling(ctx *context.Context, a
 			return
 		}
 	}
-	return dS.Dispatch(&utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaCore, utils.CoreSv1StartMemoryProfiling, args, reply)
+	return dS.Dispatch(&engine.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaCore, utils.CoreSv1StartMemoryProfiling, args, reply)
 }
 func (dS *DispatcherService) CoreSv1Status(ctx *context.Context, args *utils.TenantWithAPIOpts, reply *map[string]any) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
@@ -136,7 +137,7 @@ func (dS *DispatcherService) CoreSv1Status(ctx *context.Context, args *utils.Ten
 			return
 		}
 	}
-	return dS.Dispatch(&utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaCore, utils.CoreSv1Status, args, reply)
+	return dS.Dispatch(&engine.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaCore, utils.CoreSv1Status, args, reply)
 }
 func (dS *DispatcherService) CoreSv1StopCPUProfiling(ctx *context.Context, args *utils.TenantWithAPIOpts, reply *string) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
@@ -154,7 +155,7 @@ func (dS *DispatcherService) CoreSv1StopCPUProfiling(ctx *context.Context, args 
 			return
 		}
 	}
-	return dS.Dispatch(&utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaCore, utils.CoreSv1StopCPUProfiling, args, reply)
+	return dS.Dispatch(&engine.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaCore, utils.CoreSv1StopCPUProfiling, args, reply)
 }
 func (dS *DispatcherService) CoreSv1StopMemoryProfiling(ctx *context.Context, args *utils.TenantWithAPIOpts, reply *string) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
@@ -172,5 +173,5 @@ func (dS *DispatcherService) CoreSv1StopMemoryProfiling(ctx *context.Context, ar
 			return
 		}
 	}
-	return dS.Dispatch(&utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaCore, utils.CoreSv1StopMemoryProfiling, args, reply)
+	return dS.Dispatch(&engine.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaCore, utils.CoreSv1StopMemoryProfiling, args, reply)
 }

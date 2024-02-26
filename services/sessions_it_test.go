@@ -92,7 +92,7 @@ func TestSessionSReload1(t *testing.T) {
 					ChargerSProfile:    "raw",
 					AttributeSProfiles: []string{utils.MetaNone},
 					AlteredFields:      []string{"~*req.RunID"},
-					CGREvent:           args.(*utils.CGREvent),
+					CGREvent:           args.(*engine.CGREvent),
 				},
 			}
 			return nil
@@ -113,7 +113,7 @@ func TestSessionSReload1(t *testing.T) {
 	args := &sessions.V1InitSessionArgs{
 		InitSession:       true,
 		ProcessThresholds: true,
-		CGREvent: &utils.CGREvent{
+		CGREvent: &engine.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testSSv1ItProcessEventInitiateSession",
 			Event: map[string]any{

@@ -247,7 +247,7 @@ func testSQLReader(t *testing.T) {
 		if ev.rdrCfg.ID != "mysql" {
 			t.Errorf("Expected 'mysql' received `%s`", ev.rdrCfg.ID)
 		}
-		expected := &utils.CGREvent{
+		expected := &engine.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     ev.cgrEvent.ID,
 			Time:   ev.cgrEvent.Time,
@@ -281,7 +281,7 @@ func testSQLReader2(t *testing.T) {
 		if ev.rdrCfg.ID != "mysql" {
 			t.Errorf("Expected 'mysql' received `%s`", ev.rdrCfg.ID)
 		}
-		expected := &utils.CGREvent{
+		expected := &engine.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     ev.cgrEvent.ID,
 			Time:   ev.cgrEvent.Time,
@@ -494,7 +494,7 @@ func testSQLReader3(t *testing.T) {
 		if ev.rdrCfg.ID != "mysql" {
 			t.Errorf("Expected 'mysql' received `%s`", ev.rdrCfg.ID)
 		}
-		expected := &utils.CGREvent{
+		expected := &engine.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     ev.cgrEvent.ID,
 			Time:   ev.cgrEvent.Time,
@@ -528,7 +528,7 @@ func testSQLReader4(t *testing.T) {
 		if ev.rdrCfg.ID != "mysql" {
 			t.Errorf("Expected 'mysql' received `%s`", ev.rdrCfg.ID)
 		}
-		expected := &utils.CGREvent{
+		expected := &engine.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     ev.cgrEvent.ID,
 			Time:   ev.cgrEvent.Time,

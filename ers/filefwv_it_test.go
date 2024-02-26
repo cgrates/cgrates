@@ -449,7 +449,7 @@ func TestFileFWVProcessTrailer(t *testing.T) {
 		rdrExit:   make(chan struct{}),
 		conReqs:   make(chan struct{}, 1),
 	}
-	expEvent := &utils.CGREvent{
+	expEvent := &engine.CGREvent{
 		Tenant: "cgrates.org",
 		Event: map[string]any{
 			"OriginID": "testOriginID",
@@ -624,7 +624,7 @@ func TestFileFWVCreateHeaderMap(t *testing.T) {
 		conReqs:   make(chan struct{}, 1),
 	}
 	eR.conReqs <- struct{}{}
-	expEvent := &utils.CGREvent{
+	expEvent := &engine.CGREvent{
 		Tenant: "cgrates.org",
 		Event: map[string]any{
 			"OriginID": "testOriginID",

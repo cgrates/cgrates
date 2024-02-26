@@ -194,7 +194,7 @@ func (rdr *XMLFileER) processFile(fPath, fName string) error {
 					utils.ERs, absPath, rowNr, err.Error()))
 			continue
 		}
-		cgrEv := utils.NMAsCGREvent(agReq.CGRRequest, agReq.Tenant, utils.NestingSep, agReq.Opts)
+		cgrEv := engine.NMAsCGREvent(agReq.CGRRequest, agReq.Tenant, utils.NestingSep, agReq.Opts)
 		rdrEv := rdr.rdrEvents
 		if _, isPartial := cgrEv.APIOpts[utils.PartialOpt]; isPartial {
 			rdrEv = rdr.partialEvents

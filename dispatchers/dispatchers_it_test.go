@@ -179,7 +179,7 @@ func TestDispatcherServiceDispatcherProfileForEventGetDispatchertWithoutAuthenti
 	}
 	fltrs := engine.NewFilterS(cfg, connMng, dm)
 	dss := NewDispatcherService(dm, cfg, fltrs, connMng)
-	ev := &utils.CGREvent{
+	ev := &engine.CGREvent{
 		ID: "321",
 		Event: map[string]any{
 			utils.AccountField: "1001",

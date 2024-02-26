@@ -124,7 +124,7 @@ func (chSv1 *CacheSv1) LoadCache(ctx *context.Context, args *utils.AttrReloadCac
 }
 
 // Ping used to determinate if component is active
-func (chSv1 *CacheSv1) Ping(ctx *context.Context, ign *utils.CGREvent, reply *string) error {
+func (chSv1 *CacheSv1) Ping(ctx *context.Context, ign *engine.CGREvent, reply *string) error {
 	*reply = utils.Pong
 	return nil
 }

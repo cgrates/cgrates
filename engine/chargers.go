@@ -47,7 +47,7 @@ func (cS *ChargerService) Shutdown() {
 }
 
 // matchingChargingProfilesForEvent returns ordered list of matching chargers which are active by the time of the function call
-func (cS *ChargerService) matchingChargerProfilesForEvent(tnt string, cgrEv *utils.CGREvent) (cPs ChargerProfiles, err error) {
+func (cS *ChargerService) matchingChargerProfilesForEvent(tnt string, cgrEv *CGREvent) (cPs ChargerProfiles, err error) {
 	evNm := utils.MapStorage{
 		utils.MetaReq:  cgrEv.Event,
 		utils.MetaOpts: cgrEv.APIOpts,
@@ -102,10 +102,10 @@ type ChrgSProcessEventReply struct {
 	ChargerSProfile    string
 	AttributeSProfiles []string
 	AlteredFields      []string
-	CGREvent           *utils.CGREvent
+	CGREvent           *CGREvent
 }
 
-func (cS *ChargerService) processEvent(tnt string, cgrEv *utils.CGREvent) (rply []*ChrgSProcessEventReply, err error) {
+func (cS *ChargerService) processEvent(tnt string, cgrEv *CGREvent) (rply []*ChrgSProcessEventReply, err error) {
 	var cPs ChargerProfiles
 	if cPs, err = cS.matchingChargerProfilesForEvent(tnt, cgrEv); err != nil {
 		return nil, err
@@ -150,7 +150,7 @@ func (cS *ChargerService) processEvent(tnt string, cgrEv *utils.CGREvent) (rply 
 }
 
 // V1ProcessEvent will process the event received via API and return list of events forked
-func (cS *ChargerService) V1ProcessEvent(ctx *context.Context, args *utils.CGREvent,
+func (cS *ChargerService) V1ProcessEvent(ctx *context.Context, args *CGREvent,
 	reply *[]*ChrgSProcessEventReply) (err error) {
 	if args == nil ||
 		args.Event == nil {
@@ -172,7 +172,7 @@ func (cS *ChargerService) V1ProcessEvent(ctx *context.Context, args *utils.CGREv
 }
 
 // V1GetChargersForEvent exposes the list of ordered matching ChargingProfiles for an event
-func (cS *ChargerService) V1GetChargersForEvent(ctx *context.Context, args *utils.CGREvent,
+func (cS *ChargerService) V1GetChargersForEvent(ctx *context.Context, args *CGREvent,
 	rply *ChargerProfiles) (err error) {
 	tnt := args.Tenant
 	if tnt == utils.EmptyString {

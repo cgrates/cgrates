@@ -23,6 +23,7 @@ import (
 	"testing"
 
 	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/sessions"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -395,7 +396,7 @@ func TestSMAEventV1AuthorizeArgs(t *testing.T) {
 }
 
 func TestSMAEventV1InitSessionArgs(t *testing.T) {
-	cgrEv := &utils.CGREvent{
+	cgrEv := &engine.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "AsteriskEvent",
 		Event: map[string]any{
@@ -428,7 +429,7 @@ func TestSMAEventV1InitSessionArgs(t *testing.T) {
 }
 
 func TestSMAEventV1TerminateSessionArgs(t *testing.T) {
-	cgrEv := &utils.CGREvent{
+	cgrEv := &engine.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "AsteriskEvent",
 		Event: map[string]any{
@@ -477,7 +478,7 @@ func TestRequestType(t *testing.T) {
 }
 
 func TestSMAsteriskEventUpdateCGREvent(t *testing.T) {
-	cgrEv := &utils.CGREvent{
+	cgrEv := &engine.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "event1",
 		Event:  make(map[string]any),

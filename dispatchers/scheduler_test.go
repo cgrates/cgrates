@@ -23,6 +23,7 @@ import (
 
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -42,7 +43,7 @@ func TestDspSchedulerSv1PingErrorNil(t *testing.T) {
 	cgrCfg := config.NewDefaultCGRConfig()
 	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
 	cgrCfg.DispatcherSCfg().AttributeSConns = []string{"test"}
-	CGREvent := &utils.CGREvent{
+	CGREvent := &engine.CGREvent{
 		Tenant: "tenant",
 	}
 	var reply *string
@@ -56,7 +57,7 @@ func TestDspSchedulerSv1PingErrorNil(t *testing.T) {
 func TestDspSchedulerSv1PingNil(t *testing.T) {
 	cgrCfg := config.NewDefaultCGRConfig()
 	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
-	CGREvent := &utils.CGREvent{
+	CGREvent := &engine.CGREvent{
 		Tenant: "tenant",
 	}
 	var reply *string
@@ -71,7 +72,7 @@ func TestDspSchedulerSv1ReloadErrorNil(t *testing.T) {
 	cgrCfg := config.NewDefaultCGRConfig()
 	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
 	cgrCfg.DispatcherSCfg().AttributeSConns = []string{"test"}
-	CGREvent := &utils.CGREvent{
+	CGREvent := &engine.CGREvent{
 		Tenant: "tenant",
 	}
 	var reply *string
@@ -85,7 +86,7 @@ func TestDspSchedulerSv1ReloadErrorNil(t *testing.T) {
 func TestDspSchedulerSv1ReloadPingNil(t *testing.T) {
 	cgrCfg := config.NewDefaultCGRConfig()
 	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
-	CGREvent := &utils.CGREvent{
+	CGREvent := &engine.CGREvent{
 		Tenant: "tenant",
 	}
 	var reply *string

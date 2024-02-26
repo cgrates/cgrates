@@ -103,7 +103,7 @@ func TestEscapeCharacters(t *testing.T) {
 	}
 
 	// Call AttributeSv1.ProcessEvent to check if filters match.
-	ev := &utils.CGREvent{
+	ev := &engine.CGREvent{
 		Tenant: "cgrates.org",
 		Event: map[string]any{
 			"Password": "password\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000",

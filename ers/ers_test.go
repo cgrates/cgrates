@@ -35,7 +35,7 @@ import (
 func TestERsProcessPartialEvent(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	erS := NewERService(cfg, nil, nil)
-	event := &utils.CGREvent{
+	event := &engine.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "EventERsProcessPartial",
 		Event: map[string]any{
@@ -80,7 +80,7 @@ func TestErsOnEvictedNilValue(t *testing.T) {
 
 func TestErsOnEvictedMetaPostCDROK(t *testing.T) {
 	value := &erEvents{
-		events: []*utils.CGREvent{
+		events: []*engine.CGREvent{
 			{
 				Tenant: "cgrates.org",
 				ID:     "EventErsOnEvicted",
@@ -134,7 +134,7 @@ func TestErsOnEvictedMetaPostCDRMergeErr(t *testing.T) {
 	}()
 
 	value := &erEvents{
-		events: []*utils.CGREvent{
+		events: []*engine.CGREvent{
 			{
 				Tenant: "cgrates.org",
 				ID:     "EventErsOnEvicted",
@@ -194,7 +194,7 @@ func TestErsOnEvictedMetaDumpToFileSetFieldsErr(t *testing.T) {
 
 	dirPath := "/tmp/TestErsOnEvictedMetaDumpToFile"
 	value := &erEvents{
-		events: []*utils.CGREvent{
+		events: []*engine.CGREvent{
 			{
 				Tenant: "cgrates.org",
 				ID:     "EventErsOnEvicted",
@@ -250,7 +250,7 @@ func TestErsOnEvictedMetaDumpToFileMergeErr(t *testing.T) {
 
 	dirPath := "/tmp/TestErsOnEvictedMetaDumpToFile"
 	value := &erEvents{
-		events: []*utils.CGREvent{
+		events: []*engine.CGREvent{
 			{
 				Tenant: "cgrates.org",
 				ID:     "EventErsOnEvicted",
@@ -303,7 +303,7 @@ func TestErsOnEvictedMetaDumpToFileMergeErr(t *testing.T) {
 
 func TestErsOnEvictedMetaDumpToFileEmptyPath(t *testing.T) {
 	value := &erEvents{
-		events: []*utils.CGREvent{
+		events: []*engine.CGREvent{
 			{
 				Tenant: "cgrates.org",
 				ID:     "EventErsOnEvicted",

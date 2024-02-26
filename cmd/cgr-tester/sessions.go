@@ -28,6 +28,7 @@ import (
 
 	"github.com/cgrates/birpc"
 	"github.com/cgrates/birpc/context"
+	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/sessions"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -59,7 +60,7 @@ func callSessions(ctx *context.Context, authDur, initDur, updateDur, terminateDu
 	acc := utils.RandomInteger(digitMin, digitMax)
 	dest := utils.RandomInteger(digitMin, digitMax)
 
-	event := &utils.CGREvent{
+	event := &engine.CGREvent{
 		Tenant: *tenant,
 		ID:     "EventID1",
 		Time:   utils.TimePointer(time.Now()),

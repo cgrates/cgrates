@@ -168,7 +168,7 @@ func TestRPCPrepareMap(t *testing.T) {
 		t.Error(err)
 	}
 
-	cgrEv := &utils.CGREvent{
+	cgrEv := &engine.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "CGRID1",
 		Event: map[string]any{

@@ -102,7 +102,7 @@ func (eeS *EventExporterS) setupCache(chCfgs map[string]*config.CacheParamCfg) {
 	eeS.eesMux.Unlock()
 }
 
-func (eeS *EventExporterS) attrSProcessEvent(cgrEv *utils.CGREvent, attrIDs []string, ctx string) (*utils.CGREvent, error) {
+func (eeS *EventExporterS) attrSProcessEvent(cgrEv *engine.CGREvent, attrIDs []string, ctx string) (*engine.CGREvent, error) {
 	var rplyEv engine.AttrSProcessEventReply
 	cgrEv.APIOpts[utils.MetaSubsys] = utils.MetaEEs
 	cgrEv.APIOpts[utils.OptsAttributesProfileIDs] = attrIDs
@@ -253,7 +253,7 @@ func (eeS *EventExporterS) V1ProcessEvent(ctx *context.Context, cgrEv *engine.CG
 	return
 }
 
-func exportEventWithExporter(exp EventExporter, ev *utils.CGREvent, oneTime bool, cfg *config.CGRConfig, filterS *engine.FilterS) (err error) {
+func exportEventWithExporter(exp EventExporter, ev *engine.CGREvent, oneTime bool, cfg *config.CGRConfig, filterS *engine.FilterS) (err error) {
 	defer func() {
 		updateEEMetrics(exp.GetMetrics(), ev.ID, ev.Event, err != nil, utils.FirstNonEmpty(exp.Cfg().Timezone,
 			cfg.GeneralCfg().DefaultTimezone))

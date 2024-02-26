@@ -2289,7 +2289,7 @@ func testApierGetStorDBVesions(t *testing.T) {
 
 func testApierBackwardsCompatible(t *testing.T) {
 	var reply string
-	if err := rater.Call(context.Background(), "ApierV1.Ping", new(utils.CGREvent), &reply); err != nil {
+	if err := rater.Call(context.Background(), "ApierV1.Ping", new(engine.CGREvent), &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.Pong {
 		t.Errorf("Expecting : %+v, received: %+v", utils.Pong, reply)

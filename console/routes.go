@@ -29,7 +29,7 @@ func init() {
 	c := &CmdRoutesSort{
 		name:      "routes",
 		rpcMethod: utils.RouteSv1GetRoutes,
-		rpcParams: &utils.CGREvent{},
+		rpcParams: &engine.CGREvent{},
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}
@@ -38,7 +38,7 @@ func init() {
 type CmdRoutesSort struct {
 	name      string
 	rpcMethod string
-	rpcParams *utils.CGREvent
+	rpcParams *engine.CGREvent
 	*CommandExecuter
 }
 
@@ -52,7 +52,7 @@ func (self *CmdRoutesSort) RpcMethod() string {
 
 func (self *CmdRoutesSort) RpcParams(reset bool) any {
 	if reset || self.rpcParams == nil {
-		self.rpcParams = new(utils.CGREvent)
+		self.rpcParams = new(engine.CGREvent)
 	}
 	return self.rpcParams
 }

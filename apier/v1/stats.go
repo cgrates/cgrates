@@ -151,12 +151,12 @@ func (stsv1 *StatSv1) GetQueueIDs(ctx *context.Context, tenant *utils.TenantWith
 }
 
 // ProcessEvent returns processes a new Event
-func (stsv1 *StatSv1) ProcessEvent(ctx *context.Context, args *utils.CGREvent, reply *[]string) error {
+func (stsv1 *StatSv1) ProcessEvent(ctx *context.Context, args *engine.CGREvent, reply *[]string) error {
 	return stsv1.sS.V1ProcessEvent(ctx, args, reply)
 }
 
 // GetStatQueuesForEvent returns the list of queues IDs in the system
-func (stsv1 *StatSv1) GetStatQueuesForEvent(ctx *context.Context, args *utils.CGREvent, reply *[]string) (err error) {
+func (stsv1 *StatSv1) GetStatQueuesForEvent(ctx *context.Context, args *engine.CGREvent, reply *[]string) (err error) {
 	return stsv1.sS.V1GetStatQueuesForEvent(ctx, args, reply)
 }
 
@@ -181,7 +181,7 @@ func (stsv1 *StatSv1) ResetStatQueue(ctx *context.Context, args *utils.TenantIDW
 }
 
 // Ping .
-func (stsv1 *StatSv1) Ping(ctx *context.Context, ign *utils.CGREvent, reply *string) error {
+func (stsv1 *StatSv1) Ping(ctx *context.Context, ign *engine.CGREvent, reply *string) error {
 	*reply = utils.Pong
 	return nil
 }

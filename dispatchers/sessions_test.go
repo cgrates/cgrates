@@ -23,6 +23,7 @@ import (
 
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/sessions"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -30,7 +31,7 @@ import (
 func TestDspSessionSv1PingNil(t *testing.T) {
 	cgrCfg := config.NewDefaultCGRConfig()
 	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
-	CGREvent := &utils.CGREvent{
+	CGREvent := &engine.CGREvent{
 		Tenant: "tenant",
 	}
 	var reply *string
@@ -45,7 +46,7 @@ func TestDspSessionSv1PingErrorNil(t *testing.T) {
 	cgrCfg := config.NewDefaultCGRConfig()
 	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
 	cgrCfg.DispatcherSCfg().AttributeSConns = []string{"test"}
-	CGREvent := &utils.CGREvent{
+	CGREvent := &engine.CGREvent{
 		Tenant: "tenant",
 	}
 	var reply *string
@@ -60,7 +61,7 @@ func TestDspSessionSv1AuthorizeEventNil(t *testing.T) {
 	cgrCfg := config.NewDefaultCGRConfig()
 	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
 	CGREvent := &sessions.V1AuthorizeArgs{
-		CGREvent: &utils.CGREvent{
+		CGREvent: &engine.CGREvent{
 			Tenant: "tenant",
 		},
 	}
@@ -77,7 +78,7 @@ func TestDspSessionSv1AuthorizeEventErrorNil(t *testing.T) {
 	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
 	cgrCfg.DispatcherSCfg().AttributeSConns = []string{"test"}
 	CGREvent := &sessions.V1AuthorizeArgs{
-		CGREvent: &utils.CGREvent{
+		CGREvent: &engine.CGREvent{
 			Tenant: "tenant",
 		},
 	}
@@ -93,7 +94,7 @@ func TestDspSessionSv1AuthorizeEventWithDigestNil(t *testing.T) {
 	cgrCfg := config.NewDefaultCGRConfig()
 	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
 	CGREvent := &sessions.V1AuthorizeArgs{
-		CGREvent: &utils.CGREvent{
+		CGREvent: &engine.CGREvent{
 			Tenant: "tenant",
 		},
 	}
@@ -110,7 +111,7 @@ func TestDspSessionSv1AuthorizeEventWithDigestErrorNil(t *testing.T) {
 	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
 	cgrCfg.DispatcherSCfg().AttributeSConns = []string{"test"}
 	CGREvent := &sessions.V1AuthorizeArgs{
-		CGREvent: &utils.CGREvent{
+		CGREvent: &engine.CGREvent{
 			Tenant: "tenant",
 		},
 	}
@@ -126,7 +127,7 @@ func TestDspSessionSv1InitiateSessionNil(t *testing.T) {
 	cgrCfg := config.NewDefaultCGRConfig()
 	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
 	CGREvent := &sessions.V1InitSessionArgs{
-		CGREvent: &utils.CGREvent{
+		CGREvent: &engine.CGREvent{
 			Tenant: "tenant",
 		},
 	}
@@ -143,7 +144,7 @@ func TestDspSessionSv1InitiateSessionErrorNil(t *testing.T) {
 	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
 	cgrCfg.DispatcherSCfg().AttributeSConns = []string{"test"}
 	CGREvent := &sessions.V1InitSessionArgs{
-		CGREvent: &utils.CGREvent{
+		CGREvent: &engine.CGREvent{
 			Tenant: "tenant",
 		},
 	}
@@ -159,7 +160,7 @@ func TestDspSessionSv1InitiateSessionWithDigestNil(t *testing.T) {
 	cgrCfg := config.NewDefaultCGRConfig()
 	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
 	CGREvent := &sessions.V1InitSessionArgs{
-		CGREvent: &utils.CGREvent{
+		CGREvent: &engine.CGREvent{
 			Tenant: "tenant",
 		},
 	}
@@ -176,7 +177,7 @@ func TestDspSessionSv1InitiateSessionWithDigestErrorNil(t *testing.T) {
 	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
 	cgrCfg.DispatcherSCfg().AttributeSConns = []string{"test"}
 	CGREvent := &sessions.V1InitSessionArgs{
-		CGREvent: &utils.CGREvent{
+		CGREvent: &engine.CGREvent{
 			Tenant: "tenant",
 		},
 	}
@@ -192,7 +193,7 @@ func TestDspSessionSv1UpdateSessionNil(t *testing.T) {
 	cgrCfg := config.NewDefaultCGRConfig()
 	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
 	CGREvent := &sessions.V1UpdateSessionArgs{
-		CGREvent: &utils.CGREvent{
+		CGREvent: &engine.CGREvent{
 			Tenant: "tenant",
 		},
 	}
@@ -209,7 +210,7 @@ func TestDspSessionSv1UpdateSessionErrorNil(t *testing.T) {
 	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
 	cgrCfg.DispatcherSCfg().AttributeSConns = []string{"test"}
 	CGREvent := &sessions.V1UpdateSessionArgs{
-		CGREvent: &utils.CGREvent{
+		CGREvent: &engine.CGREvent{
 			Tenant: "tenant",
 		},
 	}
@@ -254,7 +255,7 @@ func TestDspSessionSv1TerminateSessionNil(t *testing.T) {
 	cgrCfg := config.NewDefaultCGRConfig()
 	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
 	CGREvent := &sessions.V1TerminateSessionArgs{
-		CGREvent: &utils.CGREvent{
+		CGREvent: &engine.CGREvent{
 			Tenant: "tenant",
 		},
 	}
@@ -271,7 +272,7 @@ func TestDspSessionSv1TerminateSessionErrorNil(t *testing.T) {
 	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
 	cgrCfg.DispatcherSCfg().AttributeSConns = []string{"test"}
 	CGREvent := &sessions.V1TerminateSessionArgs{
-		CGREvent: &utils.CGREvent{
+		CGREvent: &engine.CGREvent{
 			Tenant: "tenant",
 		},
 	}
@@ -286,7 +287,7 @@ func TestDspSessionSv1TerminateSessionErrorNil(t *testing.T) {
 func TestDspSessionSv1ProcessCDRNil(t *testing.T) {
 	cgrCfg := config.NewDefaultCGRConfig()
 	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
-	CGREvent := &utils.CGREvent{
+	CGREvent := &engine.CGREvent{
 		Tenant: "tenant",
 	}
 	var reply *string
@@ -301,7 +302,7 @@ func TestDspSessionSv1ProcessCDRErrorNil(t *testing.T) {
 	cgrCfg := config.NewDefaultCGRConfig()
 	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
 	cgrCfg.DispatcherSCfg().AttributeSConns = []string{"test"}
-	CGREvent := &utils.CGREvent{
+	CGREvent := &engine.CGREvent{
 		Tenant: "tenant",
 	}
 	var reply *string
@@ -316,7 +317,7 @@ func TestDspSessionSv1ProcessMessageNil(t *testing.T) {
 	cgrCfg := config.NewDefaultCGRConfig()
 	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
 	CGREvent := &sessions.V1ProcessMessageArgs{
-		CGREvent: &utils.CGREvent{
+		CGREvent: &engine.CGREvent{
 			Tenant: "tenant",
 		},
 	}
@@ -333,7 +334,7 @@ func TestDspSessionSv1ProcessMessageErrorNil(t *testing.T) {
 	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
 	cgrCfg.DispatcherSCfg().AttributeSConns = []string{"test"}
 	CGREvent := &sessions.V1ProcessMessageArgs{
-		CGREvent: &utils.CGREvent{
+		CGREvent: &engine.CGREvent{
 			Tenant: "tenant",
 		},
 	}
@@ -349,7 +350,7 @@ func TestDspSessionSv1ProcessEventNil(t *testing.T) {
 	cgrCfg := config.NewDefaultCGRConfig()
 	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
 	CGREvent := &sessions.V1ProcessEventArgs{
-		CGREvent: &utils.CGREvent{
+		CGREvent: &engine.CGREvent{
 			Tenant: "tenant",
 		},
 	}
@@ -366,7 +367,7 @@ func TestDspSessionSv1ProcessEventErrorNil(t *testing.T) {
 	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
 	cgrCfg.DispatcherSCfg().AttributeSConns = []string{"test"}
 	CGREvent := &sessions.V1ProcessEventArgs{
-		CGREvent: &utils.CGREvent{
+		CGREvent: &engine.CGREvent{
 			Tenant: "tenant",
 		},
 	}
@@ -382,7 +383,7 @@ func TestDspSessionSv1GetCostNil(t *testing.T) {
 	cgrCfg := config.NewDefaultCGRConfig()
 	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
 	CGREvent := &sessions.V1ProcessEventArgs{
-		CGREvent: &utils.CGREvent{
+		CGREvent: &engine.CGREvent{
 			Tenant: "tenant",
 		},
 	}
@@ -399,7 +400,7 @@ func TestDspSessionSv1GetCostErrorNil(t *testing.T) {
 	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
 	cgrCfg.DispatcherSCfg().AttributeSConns = []string{"test"}
 	CGREvent := &sessions.V1ProcessEventArgs{
-		CGREvent: &utils.CGREvent{
+		CGREvent: &engine.CGREvent{
 			Tenant: "tenant",
 		},
 	}

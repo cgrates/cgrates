@@ -108,7 +108,7 @@ func (rsv1 *RALsV1) GetRatingPlansCost(ctx *context.Context, arg *utils.RatingPl
 	return nil
 }
 
-func (rsv1 *RALsV1) Ping(ctx *context.Context, ign *utils.CGREvent, reply *string) error {
+func (rsv1 *RALsV1) Ping(ctx *context.Context, ign *engine.CGREvent, reply *string) error {
 	*reply = utils.Pong
 	return nil
 }

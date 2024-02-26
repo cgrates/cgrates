@@ -296,7 +296,7 @@ func (sS *StatService) processThresholds(sQs StatQueues, opts map[string]any) (e
 			thIDs = sq.sqPrfl.ThresholdIDs
 		}
 		opts[utils.OptsThresholdsProfileIDs] = thIDs
-		thEv := &utils.CGREvent{
+		thEv := &CGREvent{
 			Tenant: sq.Tenant,
 			ID:     utils.GenUUID(),
 			Event: map[string]any{
@@ -325,18 +325,18 @@ func (sS *StatService) processThresholds(sQs StatQueues, opts map[string]any) (e
 
 // processEvent processes a new event, dispatching to matching queues
 // queues matching are also cached to speed up
-func (sS *StatService) processEvent(tnt string, args *utils.CGREvent) (statQueueIDs []string, err error) {
+func (sS *StatService) processEvent(tnt string, args *CGREvent) (statQueueIDs []string, err error) {
 	evNm := utils.MapStorage{
 		utils.MetaReq:  args.Event,
 		utils.MetaOpts: args.APIOpts,
 	}
 	var stsIDs []string
-	if stsIDs, err = utils.GetStringSliceOpts(args, sS.cgrcfg.StatSCfg().Opts.ProfileIDs,
+	if stsIDs, err = GetStringSliceOpts(args, sS.cgrcfg.StatSCfg().Opts.ProfileIDs,
 		utils.OptsStatsProfileIDs); err != nil {
 		return
 	}
 	var ignFilters bool
-	if ignFilters, err = utils.GetBoolOpts(args, sS.cgrcfg.StatSCfg().Opts.ProfileIgnoreFilters,
+	if ignFilters, err = GetBoolOpts(args, sS.cgrcfg.StatSCfg().Opts.ProfileIgnoreFilters,
 		utils.OptsStatsProfileIgnoreFilters); err != nil {
 		return
 	}
@@ -366,7 +366,7 @@ func (sS *StatService) processEvent(tnt string, args *utils.CGREvent) (statQueue
 }
 
 // V1ProcessEvent implements StatV1 method for processing an Event
-func (sS *StatService) V1ProcessEvent(ctx *context.Context, args *utils.CGREvent, reply *[]string) (err error) {
+func (sS *StatService) V1ProcessEvent(ctx *context.Context, args *CGREvent, reply *[]string) (err error) {
 	if args == nil {
 		return utils.NewErrMandatoryIeMissing(utils.CGREventString)
 	}
@@ -388,7 +388,7 @@ func (sS *StatService) V1ProcessEvent(ctx *context.Context, args *utils.CGREvent
 }
 
 // V1GetStatQueuesForEvent implements StatV1 method for processing an Event
-func (sS *StatService) V1GetStatQueuesForEvent(ctx *context.Context, args *utils.CGREvent, reply *[]string) (err error) {
+func (sS *StatService) V1GetStatQueuesForEvent(ctx *context.Context, args *CGREvent, reply *[]string) (err error) {
 	if args == nil {
 		return utils.NewErrMandatoryIeMissing(utils.CGREventString)
 	}
@@ -402,12 +402,12 @@ func (sS *StatService) V1GetStatQueuesForEvent(ctx *context.Context, args *utils
 		tnt = sS.cgrcfg.GeneralCfg().DefaultTenant
 	}
 	var stsIDs []string
-	if stsIDs, err = utils.GetStringSliceOpts(args, sS.cgrcfg.StatSCfg().Opts.ProfileIDs,
+	if stsIDs, err = GetStringSliceOpts(args, sS.cgrcfg.StatSCfg().Opts.ProfileIDs,
 		utils.OptsStatsProfileIDs); err != nil {
 		return
 	}
 	var ignFilters bool
-	if ignFilters, err = utils.GetBoolOpts(args, sS.cgrcfg.StatSCfg().Opts.ProfileIgnoreFilters,
+	if ignFilters, err = GetBoolOpts(args, sS.cgrcfg.StatSCfg().Opts.ProfileIgnoreFilters,
 		utils.OptsStatsProfileIgnoreFilters); err != nil {
 		return
 	}

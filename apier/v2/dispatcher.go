@@ -22,7 +22,6 @@ import (
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/dispatchers"
 	"github.com/cgrates/cgrates/engine"
-	"github.com/cgrates/cgrates/utils"
 )
 
 func NewDispatcherSCDRsV2(dps *dispatchers.DispatcherService) *DispatcherSCDRsV2 {
@@ -38,6 +37,6 @@ func (dS *DispatcherSCDRsV2) StoreSessionCost(ctx *context.Context, args *engine
 	return dS.dS.CDRsV2StoreSessionCost(ctx, args, reply)
 }
 
-func (dS *DispatcherSCDRsV2) ProcessEvent(ctx *context.Context, args *engine.ArgV1ProcessEvent, reply *[]*utils.EventWithFlags) error {
+func (dS *DispatcherSCDRsV2) ProcessEvent(ctx *context.Context, args *engine.ArgV1ProcessEvent, reply *[]*engine.EventWithFlags) error {
 	return dS.dS.CDRsV2ProcessEvent(ctx, args, reply)
 }

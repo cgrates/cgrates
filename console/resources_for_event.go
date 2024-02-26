@@ -29,7 +29,7 @@ func init() {
 	c := &CmdGetResourceForEvent{
 		name:      "resources_for_event",
 		rpcMethod: utils.ResourceSv1GetResourcesForEvent,
-		rpcParams: &utils.CGREvent{},
+		rpcParams: &engine.CGREvent{},
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}
@@ -39,7 +39,7 @@ func init() {
 type CmdGetResourceForEvent struct {
 	name      string
 	rpcMethod string
-	rpcParams *utils.CGREvent
+	rpcParams *engine.CGREvent
 	*CommandExecuter
 }
 
@@ -53,7 +53,7 @@ func (self *CmdGetResourceForEvent) RpcMethod() string {
 
 func (self *CmdGetResourceForEvent) RpcParams(reset bool) any {
 	if reset || self.rpcParams == nil {
-		self.rpcParams = new(utils.CGREvent)
+		self.rpcParams = new(engine.CGREvent)
 	}
 	return self.rpcParams
 }

@@ -21,6 +21,7 @@ package console
 import (
 	"time"
 
+	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -28,7 +29,7 @@ func init() {
 	c := &CmdStatQueueProcessEvent{
 		name:      "stats_process_event",
 		rpcMethod: utils.StatSv1ProcessEvent,
-		rpcParams: &utils.CGREvent{},
+		rpcParams: &engine.CGREvent{},
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}
@@ -38,7 +39,7 @@ func init() {
 type CmdStatQueueProcessEvent struct {
 	name      string
 	rpcMethod string
-	rpcParams *utils.CGREvent
+	rpcParams *engine.CGREvent
 	*CommandExecuter
 }
 
@@ -52,7 +53,7 @@ func (self *CmdStatQueueProcessEvent) RpcMethod() string {
 
 func (self *CmdStatQueueProcessEvent) RpcParams(reset bool) any {
 	if reset || self.rpcParams == nil {
-		self.rpcParams = new(utils.CGREvent)
+		self.rpcParams = new(engine.CGREvent)
 	}
 	return self.rpcParams
 }

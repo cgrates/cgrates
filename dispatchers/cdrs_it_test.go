@@ -100,12 +100,12 @@ func TestDspCDRsITMySQLWithoutAuth(t *testing.T) {
 
 func testDspCDRsPing(t *testing.T) {
 	var reply string
-	if err := allEngine.RPC.Call(context.Background(), utils.CDRsV1Ping, new(utils.CGREvent), &reply); err != nil {
+	if err := allEngine.RPC.Call(context.Background(), utils.CDRsV1Ping, new(engine.CGREvent), &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.Pong {
 		t.Errorf("Received: %s", reply)
 	}
-	if err := dispEngine.RPC.Call(context.Background(), utils.CDRsV1Ping, &utils.CGREvent{
+	if err := dispEngine.RPC.Call(context.Background(), utils.CDRsV1Ping, &engine.CGREvent{
 		Tenant: "cgrates.org",
 		APIOpts: map[string]any{
 			utils.OptsAPIKey: "cdrs12345",
@@ -120,7 +120,7 @@ func testDspCDRsPing(t *testing.T) {
 func testDspCDRsProcessEvent(t *testing.T) {
 	var reply string
 	args := &engine.ArgV1ProcessEvent{
-		CGREvent: utils.CGREvent{
+		CGREvent: engine.CGREvent{
 			Tenant: "cgrates.org",
 			Event: map[string]any{
 				utils.OriginID:     "testDspCDRsProcessEvent",
@@ -315,10 +315,10 @@ func testDspCDRsGetCDR3(t *testing.T) {
 }
 
 func testDspCDRsV2ProcessEvent(t *testing.T) {
-	var reply []*utils.EventWithFlags
+	var reply []*engine.EventWithFlags
 	args := &engine.ArgV1ProcessEvent{
 		Flags: []string{utils.MetaRALs},
-		CGREvent: utils.CGREvent{
+		CGREvent: engine.CGREvent{
 			Tenant: "cgrates.org",
 			Event: map[string]any{
 				utils.OriginID:     "testDspCDRsV2ProcessEvent",
@@ -389,12 +389,12 @@ func testDspCDRsV2StoreSessionCost(t *testing.T) {
 
 func testDspCDRsPingNoAuth(t *testing.T) {
 	var reply string
-	if err := allEngine.RPC.Call(context.Background(), utils.CDRsV1Ping, new(utils.CGREvent), &reply); err != nil {
+	if err := allEngine.RPC.Call(context.Background(), utils.CDRsV1Ping, new(engine.CGREvent), &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.Pong {
 		t.Errorf("Received: %s", reply)
 	}
-	if err := dispEngine.RPC.Call(context.Background(), utils.CDRsV1Ping, &utils.CGREvent{
+	if err := dispEngine.RPC.Call(context.Background(), utils.CDRsV1Ping, &engine.CGREvent{
 		Tenant: "cgrates.org",
 	}, &reply); err != nil {
 		t.Error(err)
@@ -406,7 +406,7 @@ func testDspCDRsPingNoAuth(t *testing.T) {
 func testDspCDRsProcessEventNoAuth(t *testing.T) {
 	var reply string
 	args := &engine.ArgV1ProcessEvent{
-		CGREvent: utils.CGREvent{
+		CGREvent: engine.CGREvent{
 			Tenant: "cgrates.org",
 			Event: map[string]any{
 				utils.OriginID:     "testDspCDRsProcessEvent",
@@ -576,10 +576,10 @@ func testDspCDRsGetCDR3NoAuth(t *testing.T) {
 }
 
 func testDspCDRsV2ProcessEventNoAuth(t *testing.T) {
-	var reply []*utils.EventWithFlags
+	var reply []*engine.EventWithFlags
 	args := &engine.ArgV1ProcessEvent{
 		Flags: []string{utils.MetaRALs},
-		CGREvent: utils.CGREvent{
+		CGREvent: engine.CGREvent{
 			Tenant: "cgrates.org",
 			Event: map[string]any{
 				utils.OriginID:     "testDspCDRsV2ProcessEventNoAuth",

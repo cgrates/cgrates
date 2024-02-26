@@ -205,7 +205,7 @@ func testChargerSAuthProcessEventAuth(t *testing.T) {
 
 	ev := &sessions.V1AuthorizeArgs{
 		GetMaxUsage: true,
-		CGREvent: &utils.CGREvent{
+		CGREvent: &engine.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestEv1",
 			Event: map[string]any{

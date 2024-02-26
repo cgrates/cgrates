@@ -114,7 +114,7 @@ func testSQSRPCConn(t *testing.T) {
 func testSQSExportEvent(t *testing.T) {
 	ev := &engine.CGREventWithEeIDs{
 		EeIDs: []string{"sqs_test_file"},
-		CGREvent: &utils.CGREvent{
+		CGREvent: &engine.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "voiceEvent",
 			Time:   utils.TimePointer(time.Now()),

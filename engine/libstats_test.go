@@ -222,7 +222,7 @@ func TestStatAddStatEvent(t *testing.T) {
 	if asr := asrMetric.GetFloat64Value(config.CgrConfig().GeneralCfg().RoundingDecimals); asr != 100 {
 		t.Errorf("received ASR: %v", asr)
 	}
-	ev1 := &utils.CGREvent{Tenant: "cgrates.org", ID: "TestStatAddStatEvent_1"}
+	ev1 := &CGREvent{Tenant: "cgrates.org", ID: "TestStatAddStatEvent_1"}
 	sq.addStatEvent(ev1.Tenant, ev1.ID, nil, utils.MapStorage{utils.MetaReq: ev1.Event})
 	if asr := asrMetric.GetFloat64Value(config.CgrConfig().GeneralCfg().RoundingDecimals); asr != 50 {
 		t.Errorf("received ASR: %v", asr)
@@ -636,7 +636,7 @@ func TestStatRemoveExpiredTTL(t *testing.T) {
 	}
 
 	//add ev1 with ttl 100ms (after 100ms the event should be removed)
-	ev1 := &utils.CGREvent{Tenant: "cgrates.org", ID: "TestStatAddStatEvent_1"}
+	ev1 := &CGREvent{Tenant: "cgrates.org", ID: "TestStatAddStatEvent_1"}
 	sq.ProcessEvent(ev1.Tenant, ev1.ID, nil, utils.MapStorage{utils.MetaReq: ev1.Event})
 
 	if len(sq.SQItems) != 1 && sq.SQItems[0].EventID != "TestStatAddStatEvent_1" {
@@ -646,7 +646,7 @@ func TestStatRemoveExpiredTTL(t *testing.T) {
 	time.Sleep(150 * time.Millisecond)
 
 	//processing a new event should clean the expired events and add the new one
-	ev2 := &utils.CGREvent{Tenant: "cgrates.org", ID: "TestStatAddStatEvent_2"}
+	ev2 := &CGREvent{Tenant: "cgrates.org", ID: "TestStatAddStatEvent_2"}
 	sq.ProcessEvent(ev2.Tenant, ev2.ID, nil, utils.MapStorage{utils.MetaReq: ev2.Event})
 	if len(sq.SQItems) != 1 && sq.SQItems[0].EventID != "TestStatAddStatEvent_2" {
 		t.Errorf("Expecting: 1, received: %+v", len(sq.SQItems))
@@ -670,7 +670,7 @@ func TestStatRemoveExpiredQueue(t *testing.T) {
 	}
 
 	//add ev1 with ttl 100ms (after 100ms the event should be removed)
-	ev1 := &utils.CGREvent{Tenant: "cgrates.org", ID: "TestStatAddStatEvent_1"}
+	ev1 := &CGREvent{Tenant: "cgrates.org", ID: "TestStatAddStatEvent_1"}
 	sq.ProcessEvent(ev1.Tenant, ev1.ID, nil, utils.MapStorage{utils.MetaReq: ev1.Event})
 
 	if len(sq.SQItems) != 1 && sq.SQItems[0].EventID != "TestStatAddStatEvent_1" {
@@ -680,7 +680,7 @@ func TestStatRemoveExpiredQueue(t *testing.T) {
 	time.Sleep(150 * time.Millisecond)
 
 	//processing a new event should clean the expired events and add the new one
-	ev2 := &utils.CGREvent{Tenant: "cgrates.org", ID: "TestStatAddStatEvent_2"}
+	ev2 := &CGREvent{Tenant: "cgrates.org", ID: "TestStatAddStatEvent_2"}
 	sq.ProcessEvent(ev2.Tenant, ev2.ID, nil, utils.MapStorage{utils.MetaReq: ev2.Event})
 	if len(sq.SQItems) != 2 && sq.SQItems[0].EventID != "TestStatAddStatEvent_1" &&
 		sq.SQItems[1].EventID != "TestStatAddStatEvent_2" {
@@ -688,7 +688,7 @@ func TestStatRemoveExpiredQueue(t *testing.T) {
 	}
 
 	//processing a new event should clean the expired events and add the new one
-	ev3 := &utils.CGREvent{Tenant: "cgrates.org", ID: "TestStatAddStatEvent_3"}
+	ev3 := &CGREvent{Tenant: "cgrates.org", ID: "TestStatAddStatEvent_3"}
 	sq.ProcessEvent(ev3.Tenant, ev3.ID, nil, utils.MapStorage{utils.MetaReq: ev3.Event})
 	if len(sq.SQItems) != 2 && sq.SQItems[0].EventID != "TestStatAddStatEvent_2" &&
 		sq.SQItems[1].EventID != "TestStatAddStatEvent_3" {

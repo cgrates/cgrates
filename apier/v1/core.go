@@ -21,6 +21,7 @@ package v1
 import (
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/cores"
+	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -44,7 +45,7 @@ func (cS *CoreSv1) Status(ctx *context.Context, arg *utils.TenantWithAPIOpts, re
 }
 
 // Ping used to determinate if component is active
-func (cS *CoreSv1) Ping(ctx *context.Context, ign *utils.CGREvent, reply *string) error {
+func (cS *CoreSv1) Ping(ctx *context.Context, ign *engine.CGREvent, reply *string) error {
 	*reply = utils.Pong
 	return nil
 }

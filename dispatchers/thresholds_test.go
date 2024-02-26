@@ -41,7 +41,7 @@ func TestDspThresholdSv1PingNilEvent(t *testing.T) {
 func TestDspThresholdSv1PingNil(t *testing.T) {
 	cgrCfg := config.NewDefaultCGRConfig()
 	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
-	CGREvent := &utils.CGREvent{
+	CGREvent := &engine.CGREvent{
 		Tenant: "tenant",
 	}
 	var reply *string
@@ -56,7 +56,7 @@ func TestDspThresholdSv1PingErrorNil(t *testing.T) {
 	cgrCfg := config.NewDefaultCGRConfig()
 	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
 	cgrCfg.DispatcherSCfg().AttributeSConns = []string{"test"}
-	CGREvent := &utils.CGREvent{}
+	CGREvent := &engine.CGREvent{}
 	var reply *string
 	result := dspSrv.ThresholdSv1Ping(context.Background(), CGREvent, reply)
 	expected := "MANDATORY_IE_MISSING: [ApiKey]"
@@ -68,7 +68,7 @@ func TestDspThresholdSv1PingErrorNil(t *testing.T) {
 func TestDspThresholdSv1GetThresholdsForEventNil(t *testing.T) {
 	cgrCfg := config.NewDefaultCGRConfig()
 	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
-	CGREvent := &utils.CGREvent{
+	CGREvent := &engine.CGREvent{
 		Tenant: "tenant",
 	}
 	var reply *engine.Thresholds
@@ -83,7 +83,7 @@ func TestDspThresholdSv1GetThresholdsEvnil(t *testing.T) {
 	cgrCfg := config.NewDefaultCGRConfig()
 	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
 	cgrCfg.DispatcherSCfg().AttributeSConns = []string{"test"}
-	CGREvent := &utils.CGREvent{
+	CGREvent := &engine.CGREvent{
 		Tenant: "tenant",
 	}
 	var reply *engine.Thresholds
@@ -97,7 +97,7 @@ func TestDspThresholdSv1GetThresholdsEvnil(t *testing.T) {
 func TestDspThresholdSv1ProcessEventNil(t *testing.T) {
 	cgrCfg := config.NewDefaultCGRConfig()
 	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
-	CGREvent := &utils.CGREvent{
+	CGREvent := &engine.CGREvent{
 		Tenant: "tenant",
 	}
 	var reply *[]string
@@ -112,7 +112,7 @@ func TestDspThresholdSv1ProcessEventnNil(t *testing.T) {
 	cgrCfg := config.NewDefaultCGRConfig()
 	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
 	cgrCfg.DispatcherSCfg().AttributeSConns = []string{"test"}
-	CGREvent := &utils.CGREvent{
+	CGREvent := &engine.CGREvent{
 		Tenant: "tenant",
 	}
 	var reply *[]string

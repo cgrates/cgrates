@@ -303,7 +303,7 @@ func (s IntService) Call(ctx *context.Context, serviceMethod string, args, reply
 	return service.Call(ctx, serviceMethod, args, reply)
 }
 
-func ping(_ any, _ *context.Context, _ *utils.CGREvent, reply *string) error {
+func ping(_ any, _ *context.Context, _ *CGREvent, reply *string) error {
 	*reply = utils.Pong
 	return nil
 }
@@ -314,7 +314,7 @@ var pingM = &birpc.MethodType{
 		Type: reflect.TypeOf(ping),
 		Func: reflect.ValueOf(ping),
 	},
-	ArgType:   reflect.TypeOf(new(utils.CGREvent)),
+	ArgType:   reflect.TypeOf(new(CGREvent)),
 	ReplyType: reflect.TypeOf(new(string)),
 }
 

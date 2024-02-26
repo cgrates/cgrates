@@ -111,17 +111,17 @@ func testTLSRpcConn(t *testing.T) {
 func testTLSPing(t *testing.T) {
 	var reply string
 
-	if err := tlsRpcClientJson.Call(context.Background(), utils.ThresholdSv1Ping, new(utils.CGREvent), &reply); err != nil {
+	if err := tlsRpcClientJson.Call(context.Background(), utils.ThresholdSv1Ping, new(engine.CGREvent), &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.Pong {
 		t.Errorf("Received: %s", reply)
 	}
-	if err := tlsRpcClientGob.Call(context.Background(), utils.ThresholdSv1Ping, new(utils.CGREvent), &reply); err != nil {
+	if err := tlsRpcClientGob.Call(context.Background(), utils.ThresholdSv1Ping, new(engine.CGREvent), &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.Pong {
 		t.Errorf("Received: %s", reply)
 	}
-	if err := tlsHTTPJson.Call(context.Background(), utils.ThresholdSv1Ping, new(utils.CGREvent), &reply); err != nil {
+	if err := tlsHTTPJson.Call(context.Background(), utils.ThresholdSv1Ping, new(engine.CGREvent), &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.Pong {
 		t.Errorf("Received: %s", reply)
@@ -142,7 +142,7 @@ func testTLSPing(t *testing.T) {
 		AllocateResources: true,
 		GetAttributes:     true,
 
-		CGREvent: &utils.CGREvent{
+		CGREvent: &engine.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSSv1ItInitiateSession",
 			Event: map[string]any{

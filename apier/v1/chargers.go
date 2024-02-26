@@ -146,19 +146,19 @@ func (cSv1 *ChargerSv1) Call(ctx *context.Context, serviceMethod string,
 	return utils.APIerRPCCall(cSv1, serviceMethod, args, reply)
 }
 
-func (cSv1 *ChargerSv1) Ping(ctx *context.Context, ign *utils.CGREvent, reply *string) error {
+func (cSv1 *ChargerSv1) Ping(ctx *context.Context, ign *engine.CGREvent, reply *string) error {
 	*reply = utils.Pong
 	return nil
 }
 
 // GetChargerForEvent  returns matching ChargerProfile for Event
-func (cSv1 *ChargerSv1) GetChargersForEvent(ctx *context.Context, cgrEv *utils.CGREvent,
+func (cSv1 *ChargerSv1) GetChargersForEvent(ctx *context.Context, cgrEv *engine.CGREvent,
 	reply *engine.ChargerProfiles) error {
 	return cSv1.cS.V1GetChargersForEvent(ctx, cgrEv, reply)
 }
 
 // ProcessEvent
-func (cSv1 *ChargerSv1) ProcessEvent(ctx *context.Context, args *utils.CGREvent,
+func (cSv1 *ChargerSv1) ProcessEvent(ctx *context.Context, args *engine.CGREvent,
 	reply *[]*engine.ChrgSProcessEventReply) error {
 	return cSv1.cS.V1ProcessEvent(ctx, args, reply)
 }

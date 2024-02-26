@@ -306,8 +306,8 @@ func (cdr *CDR) AsCDRsql() (cdrSQL *CDRsql) {
 	return
 }
 
-func (cdr *CDR) AsCGREvent() *utils.CGREvent {
-	return &utils.CGREvent{
+func (cdr *CDR) AsCGREvent() *CGREvent {
+	return &CGREvent{
 		Tenant:  cdr.Tenant,
 		ID:      utils.UUIDSha1Prefix(),
 		Event:   cdr.AsMapStringIface(),

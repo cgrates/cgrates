@@ -395,7 +395,7 @@ func testV1RtsCaseGetRoutesAfterLoading(t *testing.T) {
 }
 
 func testV1RtsCasesSortingRoutesWeightAccountValue(t *testing.T) {
-	ev := &utils.CGREvent{
+	ev := &engine.CGREvent{
 		ID:     "WEIGHT_SORT",
 		Tenant: "cgrates.org",
 		Event: map[string]any{
@@ -432,7 +432,7 @@ func testV1RtsCasesSortingRoutesWeightAccountValue(t *testing.T) {
 }
 
 func testV1RtsCasesSortingRoutesWeightAllRoutes(t *testing.T) {
-	ev := &utils.CGREvent{
+	ev := &engine.CGREvent{
 		ID:     "WEIGHT_SORT",
 		Tenant: "cgrates.org",
 		Event: map[string]any{
@@ -500,7 +500,7 @@ func testV1RtsCasesSortingRoutesWeightNotMatchingValue(t *testing.T) {
 		t.Errorf("Unexpected result returned")
 	}
 
-	ev := &utils.CGREvent{
+	ev := &engine.CGREvent{
 		ID:     "WEIGHT_SORT",
 		Tenant: "cgrates.org",
 		Event: map[string]any{
@@ -544,7 +544,7 @@ func testV1RtsCasesSortingRoutesWeightNotMatchingValue(t *testing.T) {
 }
 
 func testV1RtsCasesSortingRoutesLowestCost(t *testing.T) {
-	ev := &utils.CGREvent{
+	ev := &engine.CGREvent{
 		ID:     "LC_SORT",
 		Tenant: "cgrates.org",
 		Event: map[string]any{
@@ -590,7 +590,7 @@ func testV1RtsCasesSortingRoutesLowestCost(t *testing.T) {
 
 func testV1RtsCasesSortingRoutesLowestCostDefaultUsage(t *testing.T) {
 	// default usage given by routes is 1m
-	ev := &utils.CGREvent{
+	ev := &engine.CGREvent{
 		ID:     "LC_SORT",
 		Tenant: "cgrates.org",
 		Event: map[string]any{
@@ -644,7 +644,7 @@ func testV1RtsCasesSortingRoutesLowestCostDefaultUsage(t *testing.T) {
 
 func testV1RtsCasesSortingRoutesLCSetStatsAndResForMatching(t *testing.T) {
 	//not gonna match our vendor1 filter because 6 > 5
-	ev := &utils.CGREvent{
+	ev := &engine.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     utils.UUIDSha1Prefix(),
 		Event: map[string]any{
@@ -666,7 +666,7 @@ func testV1RtsCasesSortingRoutesLCSetStatsAndResForMatching(t *testing.T) {
 	//gonna match one stats for matching vendor 2 acd filter
 	var result []string
 	expected := []string{"STATS_VENDOR_2", "STATS_TCC1"}
-	ev1 := &utils.CGREvent{
+	ev1 := &engine.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "event1",
 		Event: map[string]any{
@@ -690,7 +690,7 @@ func testV1RtsCasesSortingRoutesLCSetStatsAndResForMatching(t *testing.T) {
 
 func testV1RtsCasesSortingRoutesLowestCostStats(t *testing.T) {
 	//not gonna match vendor1 because of its TotalUsage by allocating resources
-	ev := &utils.CGREvent{
+	ev := &engine.CGREvent{
 		ID:     "LC_SORT",
 		Tenant: "cgrates.org",
 		Event: map[string]any{
@@ -745,7 +745,7 @@ func testV1RtsCasesSortingRoutesLowestCostStats(t *testing.T) {
 
 func testV1RtsCasesSortingRoutesLowestCosMatchingAllRoutes(t *testing.T) {
 	// deallocate resources for matching vendor1
-	evRes := &utils.CGREvent{
+	evRes := &engine.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     utils.UUIDSha1Prefix(),
 		Event: map[string]any{
@@ -764,7 +764,7 @@ func testV1RtsCasesSortingRoutesLowestCosMatchingAllRoutes(t *testing.T) {
 		t.Errorf("Unexpected result returned: %s", result)
 	}
 
-	ev := &utils.CGREvent{
+	ev := &engine.CGREvent{
 		ID:     "LC_SORT",
 		Tenant: "cgrates.org",
 		Event: map[string]any{
@@ -825,7 +825,7 @@ func testV1RtsCasesSortingRoutesLowestCosMatchingAllRoutes(t *testing.T) {
 }
 
 func testV1RtsCasesSortingRoutesLowestCosMaxCost(t *testing.T) {
-	ev := &utils.CGREvent{
+	ev := &engine.CGREvent{
 		ID:     "LC_SORT",
 		Tenant: "cgrates.org",
 		Event: map[string]any{
@@ -881,7 +881,7 @@ func testV1RtsCasesSortingRoutesLowestCosMaxCost(t *testing.T) {
 }
 
 func testV1RtsCasesSortingRoutesLowestCosMaxCostNotMatch(t *testing.T) {
-	ev := &utils.CGREvent{
+	ev := &engine.CGREvent{
 		ID:     "LC_SORT",
 		Tenant: "cgrates.org",
 		Event: map[string]any{
@@ -906,7 +906,7 @@ func testV1RtsCasesSortingRoutesProcessMetrics(t *testing.T) {
 	//we will process this stats 2 times
 	//Vendor2
 	expected := []string{"STATS_TCC1", "STATS_VENDOR_2"}
-	ev1 := &utils.CGREvent{
+	ev1 := &engine.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "event1",
 		Event: map[string]any{
@@ -939,7 +939,7 @@ func testV1RtsCasesSortingRoutesProcessMetrics(t *testing.T) {
 
 	//Vendor1
 	expected = []string{"STATS_TCC1", "STATS_VENDOR_1"}
-	ev1 = &utils.CGREvent{
+	ev1 = &engine.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "event1",
 		Event: map[string]any{
@@ -972,7 +972,7 @@ func testV1RtsCasesSortingRoutesProcessMetrics(t *testing.T) {
 
 func testV1RtsCasesSortingRoutesQOS(t *testing.T) {
 	//not gonna match vendor3 because *tcc is not bigger that 6
-	ev := &utils.CGREvent{
+	ev := &engine.CGREvent{
 		ID:     "LC_SORT",
 		Tenant: "cgrates.org",
 		Event: map[string]any{
@@ -1025,7 +1025,7 @@ func testV1RtsCasesSortingRoutesQOS(t *testing.T) {
 
 func testV1RtsCasesSortingRoutesQOSAllRoutes(t *testing.T) {
 	// process *tcc metric for matching vendor3
-	ev1 := &utils.CGREvent{
+	ev1 := &engine.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "event1",
 		Event: map[string]any{
@@ -1042,7 +1042,7 @@ func testV1RtsCasesSortingRoutesQOSAllRoutes(t *testing.T) {
 	}
 
 	// match all 3 routes
-	ev := &utils.CGREvent{
+	ev := &engine.CGREvent{
 		ID:     "LC_SORT",
 		Tenant: "cgrates.org",
 		Event: map[string]any{
@@ -1105,7 +1105,7 @@ func testV1RtsCasesSortingRoutesQOSAllRoutes(t *testing.T) {
 }
 
 func testV1RtsCasesSortingRoutesQOSNotFound(t *testing.T) {
-	ev := &utils.CGREvent{
+	ev := &engine.CGREvent{
 		ID:     "LC_SORT",
 		Tenant: "cgrates.org",
 		Event: map[string]any{
@@ -1124,7 +1124,7 @@ func testV1RtsCasesSortingRoutesQOSNotFound(t *testing.T) {
 }
 
 func testV1RtsCasesSortingRoutesAllocateResources(t *testing.T) {
-	ev := &utils.CGREvent{
+	ev := &engine.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     utils.UUIDSha1Prefix(),
 		Event: map[string]any{
@@ -1143,7 +1143,7 @@ func testV1RtsCasesSortingRoutesAllocateResources(t *testing.T) {
 		t.Errorf("Unexpected reply returned: %s", reply)
 	}
 
-	ev = &utils.CGREvent{
+	ev = &engine.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     utils.UUIDSha1Prefix(),
 		Event: map[string]any{
@@ -1163,7 +1163,7 @@ func testV1RtsCasesSortingRoutesAllocateResources(t *testing.T) {
 }
 
 func testV1RtsCasesSortingRoutesReasNotAllRoutes(t *testing.T) {
-	ev := &utils.CGREvent{
+	ev := &engine.CGREvent{
 		ID:     "LC_SORT",
 		Tenant: "cgrates.org",
 		Event: map[string]any{
@@ -1203,7 +1203,7 @@ func testV1RtsCasesSortingRoutesReasNotAllRoutes(t *testing.T) {
 }
 
 func testV1RtsCasesSortingRoutesReasAllRoutes(t *testing.T) {
-	evRs := &utils.CGREvent{
+	evRs := &engine.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     utils.UUIDSha1Prefix(),
 		Event: map[string]any{
@@ -1222,7 +1222,7 @@ func testV1RtsCasesSortingRoutesReasAllRoutes(t *testing.T) {
 		t.Errorf("Unexpected reply returned: %s", replyStr)
 	}
 	//allocate more resources for matching
-	ev := &utils.CGREvent{
+	ev := &engine.CGREvent{
 		ID:     "LC_SORT",
 		Tenant: "cgrates.org",
 		Event: map[string]any{
@@ -1272,7 +1272,7 @@ func testV1RtsCasesRoutesProcessStatsForLoadRtsSorting(t *testing.T) {
 	// "STATS_VENDOR_1"
 	var reply []string
 	expected := []string{"STATS_VENDOR_1", "STATS_TCC1"}
-	ev1 := &utils.CGREvent{
+	ev1 := &engine.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "event1",
 		Event: map[string]any{
@@ -1295,7 +1295,7 @@ func testV1RtsCasesRoutesProcessStatsForLoadRtsSorting(t *testing.T) {
 		}
 	}
 	// different usage for *distinct metric
-	ev1 = &utils.CGREvent{
+	ev1 = &engine.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "event1",
 		Event: map[string]any{
@@ -1320,7 +1320,7 @@ func testV1RtsCasesRoutesProcessStatsForLoadRtsSorting(t *testing.T) {
 
 	// "STATS_VENDOR_2"
 	expected = []string{"STATS_VENDOR_2", "STATS_TCC1"}
-	ev1 = &utils.CGREvent{
+	ev1 = &engine.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "event1",
 		Event: map[string]any{
@@ -1343,7 +1343,7 @@ func testV1RtsCasesRoutesProcessStatsForLoadRtsSorting(t *testing.T) {
 }
 
 func testV1RtsCasesRoutesLoadRtsSorting(t *testing.T) {
-	ev := &utils.CGREvent{
+	ev := &engine.CGREvent{
 		ID:     "LC_SORT",
 		Tenant: "cgrates.org",
 		Event: map[string]any{
@@ -1393,7 +1393,7 @@ func testV1RtsCasesRoutesLoadRtsSorting(t *testing.T) {
 }
 
 func testV1RtsCasesSortRoutesHigherCostV2V3(t *testing.T) {
-	ev := &utils.CGREvent{
+	ev := &engine.CGREvent{
 		ID:     "LC_SORT",
 		Tenant: "cgrates.org",
 		Event: map[string]any{
@@ -1442,7 +1442,7 @@ func testV1RtsCasesSortRoutesHigherCostAllocateRes(t *testing.T) {
 	// to match route 1, RES_GRP2 must have *gte available 6 resources
 	// first we have to remove them
 	var result string
-	evRs := &utils.CGREvent{
+	evRs := &engine.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     utils.UUIDSha1Prefix(),
 		Event: map[string]any{
@@ -1460,7 +1460,7 @@ func testV1RtsCasesSortRoutesHigherCostAllocateRes(t *testing.T) {
 		t.Errorf("Unexpected result returned: %s", result)
 	}
 
-	evRs = &utils.CGREvent{
+	evRs = &engine.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     utils.UUIDSha1Prefix(),
 		Event: map[string]any{
@@ -1478,7 +1478,7 @@ func testV1RtsCasesSortRoutesHigherCostAllocateRes(t *testing.T) {
 		t.Errorf("Unexpected result returned: %s", result)
 	}
 
-	evRs = &utils.CGREvent{
+	evRs = &engine.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     utils.UUIDSha1Prefix(),
 		Event: map[string]any{
@@ -1497,7 +1497,7 @@ func testV1RtsCasesSortRoutesHigherCostAllocateRes(t *testing.T) {
 	}
 
 	// also, to not match route2, totalUsage of RES_GRP1 must be lower than 9
-	evRs = &utils.CGREvent{
+	evRs = &engine.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     utils.UUIDSha1Prefix(),
 		Event: map[string]any{
@@ -1517,7 +1517,7 @@ func testV1RtsCasesSortRoutesHigherCostAllocateRes(t *testing.T) {
 }
 
 func testV1RtsCasesSortRoutesHigherCostV1V3(t *testing.T) {
-	ev := &utils.CGREvent{
+	ev := &engine.CGREvent{
 		ID:     "LC_SORT",
 		Tenant: "cgrates.org",
 		Event: map[string]any{
@@ -1564,7 +1564,7 @@ func testV1RtsCasesSortRoutesHigherCostV1V3(t *testing.T) {
 
 func testV1RtsCasesSortRoutesHigherCostAllRoutes(t *testing.T) {
 	//allocate for matching all routes
-	evRs := &utils.CGREvent{
+	evRs := &engine.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     utils.UUIDSha1Prefix(),
 		Event: map[string]any{
@@ -1581,7 +1581,7 @@ func testV1RtsCasesSortRoutesHigherCostAllRoutes(t *testing.T) {
 	} else if result != "RES_GRP1" {
 		t.Errorf("Unexpected result returned: %s", result)
 	}
-	ev := &utils.CGREvent{
+	ev := &engine.CGREvent{
 		ID:     "LC_SORT",
 		Tenant: "cgrates.org",
 		Event: map[string]any{

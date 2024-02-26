@@ -322,7 +322,7 @@ func testCacheRplPing(t *testing.T) {
 	}
 
 	var rpl string
-	if err := dspEngine1RPC.Call(context.Background(), utils.AttributeSv1Ping, &utils.CGREvent{
+	if err := dspEngine1RPC.Call(context.Background(), utils.AttributeSv1Ping, &engine.CGREvent{
 		Tenant: "cgrates.org",
 
 		APIOpts: map[string]any{
@@ -363,7 +363,7 @@ func testCacheRplCheckReplication(t *testing.T) {
 	}
 
 	var rpl string
-	if err := dspEngine2RPC.Call(context.Background(), utils.AttributeSv1Ping, &utils.CGREvent{
+	if err := dspEngine2RPC.Call(context.Background(), utils.AttributeSv1Ping, &engine.CGREvent{
 		Tenant: "cgrates.org",
 
 		APIOpts: map[string]any{
@@ -394,7 +394,7 @@ func testCacheRplAACheckReplication(t *testing.T) {
 	}
 
 	var rpl string
-	if err := dspEngine2RPC.Call(context.Background(), utils.AttributeSv1Ping, &utils.CGREvent{
+	if err := dspEngine2RPC.Call(context.Background(), utils.AttributeSv1Ping, &engine.CGREvent{
 		Tenant: "cgrates.org",
 
 		APIOpts: map[string]any{
@@ -406,7 +406,7 @@ func testCacheRplAACheckReplication(t *testing.T) {
 		t.Errorf("Received: %s", rpl)
 	}
 
-	if err := dspEngine1RPC.Call(context.Background(), utils.AttributeSv1Ping, &utils.CGREvent{
+	if err := dspEngine1RPC.Call(context.Background(), utils.AttributeSv1Ping, &engine.CGREvent{
 		Tenant: "cgrates.org",
 		APIOpts: map[string]any{
 			utils.OptsRouteID: "testRouteFromDispatcher1",
@@ -463,7 +463,7 @@ func testCacheRplAACheckLoadReplication(t *testing.T) {
 		wgDisp2.Add(1)
 		go func() {
 			var rpl []*engine.ChrgSProcessEventReply
-			if err := dspEngine1RPC.Call(context.Background(), utils.ChargerSv1ProcessEvent, &utils.CGREvent{
+			if err := dspEngine1RPC.Call(context.Background(), utils.ChargerSv1ProcessEvent, &engine.CGREvent{
 				Tenant: "cgrates.org",
 				ID:     "testCacheRplAACheckLoadReplication",
 				Event: map[string]any{
@@ -484,7 +484,7 @@ func testCacheRplAACheckLoadReplication(t *testing.T) {
 		}()
 		go func() {
 			var rpl []*engine.ChrgSProcessEventReply
-			if err := dspEngine2RPC.Call(context.Background(), utils.ChargerSv1ProcessEvent, &utils.CGREvent{
+			if err := dspEngine2RPC.Call(context.Background(), utils.ChargerSv1ProcessEvent, &engine.CGREvent{
 
 				Tenant: "cgrates.org",
 				ID:     "testCacheRplAACheckLoadReplication",
@@ -575,7 +575,7 @@ func testCacheRplCheckLoadReplication(t *testing.T) {
 	for i := 0; i < 10; i++ {
 		wg.Add(1)
 		go func() {
-			if err := dspEngine1RPC.Call(context.Background(), utils.ChargerSv1ProcessEvent, &utils.CGREvent{
+			if err := dspEngine1RPC.Call(context.Background(), utils.ChargerSv1ProcessEvent, &engine.CGREvent{
 
 				Tenant: "cgrates.org",
 				ID:     "testCacheRplCheckLoadReplication",

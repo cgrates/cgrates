@@ -21,6 +21,7 @@ package v1
 import (
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/dispatchers"
+	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/guardian"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -44,7 +45,7 @@ func (self *GuardianSv1) RemoteUnlock(ctx *context.Context, refID *dispatchers.A
 }
 
 // Ping return pong if the service is active
-func (self *GuardianSv1) Ping(ctx *context.Context, ign *utils.CGREvent, reply *string) error {
+func (self *GuardianSv1) Ping(ctx *context.Context, ign *engine.CGREvent, reply *string) error {
 	*reply = utils.Pong
 	return nil
 }

@@ -144,7 +144,7 @@ func (t *Threshold) isLocked() bool {
 
 // ProcessEvent processes an ThresholdEvent
 // concurrentActions limits the number of simultaneous action sets executed
-func (t *Threshold) ProcessEvent(args *utils.CGREvent, dm *DataManager, fltrS *FilterS) (err error) {
+func (t *Threshold) ProcessEvent(args *CGREvent, dm *DataManager, fltrS *FilterS) (err error) {
 	if t.Snooze.After(time.Now()) || // snoozed, not executing actions
 		t.Hits < t.tPrfl.MinHits || // number of hits was not met, will not execute actions
 		(t.tPrfl.MaxHits != -1 &&
@@ -328,18 +328,18 @@ func (tS *ThresholdService) StoreThreshold(t *Threshold) (err error) {
 }
 
 // matchingThresholdsForEvent returns ordered list of matching thresholds which are active for an Event
-func (tS *ThresholdService) matchingThresholdsForEvent(tnt string, args *utils.CGREvent) (ts Thresholds, err error) {
+func (tS *ThresholdService) matchingThresholdsForEvent(tnt string, args *CGREvent) (ts Thresholds, err error) {
 	evNm := utils.MapStorage{
 		utils.MetaReq:  args.Event,
 		utils.MetaOpts: args.APIOpts,
 	}
 	var thdIDs []string
-	if thdIDs, err = utils.GetStringSliceOpts(args, tS.cgrcfg.ThresholdSCfg().Opts.ProfileIDs,
+	if thdIDs, err = GetStringSliceOpts(args, tS.cgrcfg.ThresholdSCfg().Opts.ProfileIDs,
 		utils.OptsThresholdsProfileIDs); err != nil {
 		return
 	}
 	var ignFilters bool
-	if ignFilters, err = utils.GetBoolOpts(args, tS.cgrcfg.ThresholdSCfg().Opts.ProfileIgnoreFilters,
+	if ignFilters, err = GetBoolOpts(args, tS.cgrcfg.ThresholdSCfg().Opts.ProfileIgnoreFilters,
 		utils.OptsThresholdsProfileIgnoreFilters); err != nil {
 		return
 	}
@@ -428,7 +428,7 @@ func (tS *ThresholdService) matchingThresholdsForEvent(tnt string, args *utils.C
 }
 
 // processEvent processes a new event, dispatching to matching thresholds
-func (tS *ThresholdService) processEvent(tnt string, args *utils.CGREvent) (thresholdsIDs []string, err error) {
+func (tS *ThresholdService) processEvent(tnt string, args *CGREvent) (thresholdsIDs []string, err error) {
 	var matchTs Thresholds
 	if matchTs, err = tS.matchingThresholdsForEvent(tnt, args); err != nil {
 		return nil, err
@@ -483,7 +483,7 @@ func (tS *ThresholdService) processEvent(tnt string, args *utils.CGREvent) (thre
 }
 
 // V1ProcessEvent implements ThresholdService method for processing an Event
-func (tS *ThresholdService) V1ProcessEvent(ctx *context.Context, args *utils.CGREvent, reply *[]string) (err error) {
+func (tS *ThresholdService) V1ProcessEvent(ctx *context.Context, args *CGREvent, reply *[]string) (err error) {
 	if args == nil {
 		return utils.NewErrMandatoryIeMissing(utils.CGREventString)
 	}
@@ -505,7 +505,7 @@ func (tS *ThresholdService) V1ProcessEvent(ctx *context.Context, args *utils.CGR
 }
 
 // V1GetThresholdsForEvent queries thresholds matching an Event
-func (tS *ThresholdService) V1GetThresholdsForEvent(ctx *context.Context, args *utils.CGREvent, reply *Thresholds) (err error) {
+func (tS *ThresholdService) V1GetThresholdsForEvent(ctx *context.Context, args *CGREvent, reply *Thresholds) (err error) {
 	if args == nil {
 		return utils.NewErrMandatoryIeMissing(utils.CGREventString)
 	}

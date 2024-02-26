@@ -228,7 +228,7 @@ cgrates.org,ROUTE_RPC,,,,,route2,,,,,,10,,,
 				ChargerSProfile:    "DEFAULT",
 				AttributeSProfiles: []string{"cgrates.org:ATTR_RPC"},
 				AlteredFields:      []string{utils.MetaReqRunID, "*req.Password"},
-				CGREvent: &utils.CGREvent{
+				CGREvent: &engine.CGREvent{
 					Tenant: "cgrates.org",
 					ID:     "event1",
 					Event: map[string]any{
@@ -248,7 +248,7 @@ cgrates.org,ROUTE_RPC,,,,,route2,,,,,,10,,,
 		for i := 0; i < b.N; i++ {
 			if err := benchRPC.Call(
 				context.Background(),
-				utils.ChargerSv1ProcessEvent, &utils.CGREvent{
+				utils.ChargerSv1ProcessEvent, &engine.CGREvent{
 					Tenant: "cgrates.org",
 					ID:     "event1",
 					Event: map[string]any{
@@ -270,7 +270,7 @@ cgrates.org,ROUTE_RPC,,,,,route2,,,,,,10,,,
 			Attributes: &engine.AttrSProcessEventReply{
 				MatchedProfiles: []string{"cgrates.org:ATTR_RPC"},
 				AlteredFields:   []string{"*req.Password"},
-				CGREvent: &utils.CGREvent{
+				CGREvent: &engine.CGREvent{
 					Tenant: "cgrates.org",
 					ID:     "benchmarkSession",
 					Event: map[string]any{
@@ -326,7 +326,7 @@ cgrates.org,ROUTE_RPC,,,,,route2,,,,,,10,,,
 			AuthorizeResources: true,
 			GetRoutes:          true,
 			GetAttributes:      true,
-			CGREvent: &utils.CGREvent{
+			CGREvent: &engine.CGREvent{
 				Tenant: "cgrates.org",
 				ID:     "benchmarkSession",
 				Event: map[string]any{
