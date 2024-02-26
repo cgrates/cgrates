@@ -62,7 +62,7 @@ func getRpSubjectPrefixMatching() (flag bool) {
 }
 
 // NewCallDescriptorFromCGREvent converts a CGREvent into CallDescriptor
-func NewCallDescriptorFromCGREvent(cgrEv *utils.CGREvent,
+func NewCallDescriptorFromCGREvent(cgrEv *CGREvent,
 	timezone string) (cd *CallDescriptor, err error) {
 	cd = &CallDescriptor{Tenant: cgrEv.Tenant}
 	if _, has := cgrEv.Event[utils.Category]; has {
@@ -140,8 +140,8 @@ type CallDescriptor struct {
 }
 
 // AsCGREvent converts the CallDescriptor into CGREvent
-func (cd *CallDescriptor) AsCGREvent(opts map[string]any) *utils.CGREvent {
-	cgrEv := &utils.CGREvent{
+func (cd *CallDescriptor) AsCGREvent(opts map[string]any) *CGREvent {
+	cgrEv := &CGREvent{
 		Tenant:  cd.Tenant,
 		ID:      utils.UUIDSha1Prefix(), // make it unique
 		Event:   make(map[string]any),
@@ -164,7 +164,7 @@ func (cd *CallDescriptor) AsCGREvent(opts map[string]any) *utils.CGREvent {
 // UpdateFromCGREvent will update CallDescriptor with fields from CGREvent
 // cgrEv contains both fields and their values
 // fields represent fields needing update
-func (cd *CallDescriptor) UpdateFromCGREvent(cgrEv *utils.CGREvent, fields []string) (err error) {
+func (cd *CallDescriptor) UpdateFromCGREvent(cgrEv *CGREvent, fields []string) (err error) {
 	for _, fldName := range fields {
 		switch fldName {
 		case utils.ToR:

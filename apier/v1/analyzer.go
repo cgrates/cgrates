@@ -21,6 +21,7 @@ package v1
 import (
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/analyzers"
+	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -41,7 +42,7 @@ func (aSv1 *AnalyzerSv1) Call(ctx *context.Context, serviceMethod string,
 }
 
 // Ping return pong if the service is active
-func (aSv1 *AnalyzerSv1) Ping(ctx *context.Context, ign *utils.CGREvent, reply *string) error {
+func (aSv1 *AnalyzerSv1) Ping(ctx *context.Context, ign *engine.CGREvent, reply *string) error {
 	*reply = utils.Pong
 	return nil
 }

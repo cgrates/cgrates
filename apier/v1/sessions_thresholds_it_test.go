@@ -210,7 +210,7 @@ func testSessionSv1ItAuth(t *testing.T) {
 	args := &sessions.V1AuthorizeArgs{
 		AuthorizeResources: true,
 		ProcessThresholds:  true,
-		CGREvent: &utils.CGREvent{
+		CGREvent: &engine.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSSv1ItAuth",
 			Event: map[string]any{
@@ -271,7 +271,7 @@ func testSessionSv1ItInitiateSession(t *testing.T) {
 		InitSession:       true,
 		AllocateResources: true,
 		ProcessThresholds: true,
-		CGREvent: &utils.CGREvent{
+		CGREvent: &engine.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSSv1ItInitiateSession",
 			Event: map[string]any{
@@ -333,7 +333,7 @@ func testSessionSv1ItTerminateSession(t *testing.T) {
 		TerminateSession:  true,
 		ReleaseResources:  true,
 		ProcessThresholds: true,
-		CGREvent: &utils.CGREvent{
+		CGREvent: &engine.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSSv1ItTerminateSession",
 			Event: map[string]any{
@@ -390,7 +390,7 @@ func testSessionSv1ItAuthNotFoundThreshold(t *testing.T) {
 		ProcessStats:      true,
 		GetMaxUsage:       true,
 		ProcessThresholds: true,
-		CGREvent: &utils.CGREvent{
+		CGREvent: &engine.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSesssonSv1ItNotFoundThreshold",
 			Event: map[string]any{
@@ -423,7 +423,7 @@ func testSessionSv1ItInitNotFoundThreshold(t *testing.T) {
 		ProcessStats:      true,
 		InitSession:       true,
 		ProcessThresholds: true,
-		CGREvent: &utils.CGREvent{
+		CGREvent: &engine.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSessionSv1ItInitNotFoundThreshold",
 			Event: map[string]any{
@@ -474,7 +474,7 @@ func testSessionSv1ItTerminateNotFoundThreshold(t *testing.T) {
 		ProcessStats:      true,
 		TerminateSession:  true,
 		ProcessThresholds: true,
-		CGREvent: &utils.CGREvent{
+		CGREvent: &engine.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSessionSv1ItTerminateNotFoundThreshold",
 			Event: map[string]any{
@@ -522,7 +522,7 @@ func testSessionSv1ItAuthNotFoundThresholdAndStats(t *testing.T) {
 		ProcessStats:      true,
 		GetMaxUsage:       true,
 		ProcessThresholds: true,
-		CGREvent: &utils.CGREvent{
+		CGREvent: &engine.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSesssonSv1ItNotFoundThreshold",
 			Event: map[string]any{
@@ -556,7 +556,7 @@ func testSessionSv1ItInitNotFoundThresholdAndStats(t *testing.T) {
 		ProcessStats:      true,
 		InitSession:       true,
 		ProcessThresholds: true,
-		CGREvent: &utils.CGREvent{
+		CGREvent: &engine.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSessionSv1ItInitNotFoundThreshold",
 			Event: map[string]any{
@@ -608,7 +608,7 @@ func testSessionSv1ItTerminateNotFoundThresholdAndStats(t *testing.T) {
 		ProcessStats:      true,
 		TerminateSession:  true,
 		ProcessThresholds: true,
-		CGREvent: &utils.CGREvent{
+		CGREvent: &engine.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSessionSv1ItTerminateNotFoundThreshold",
 			Event: map[string]any{

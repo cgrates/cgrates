@@ -93,7 +93,7 @@ func (httpEE *HTTPjsonMapEE) Close() (_ error) { return }
 
 func (httpEE *HTTPjsonMapEE) GetMetrics() *utils.SafeMapStorage { return httpEE.dc }
 
-func (httpEE *HTTPjsonMapEE) PrepareMap(mp *utils.CGREvent) (any, error) {
+func (httpEE *HTTPjsonMapEE) PrepareMap(mp *engine.CGREvent) (any, error) {
 	body, err := json.Marshal(mp.Event)
 	return &HTTPPosterRequest{
 		Header: httpEE.hdr.Clone(),

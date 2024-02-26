@@ -30,7 +30,7 @@ import (
 // CGREventWithEeIDs is CGREvent with EventExporterIDs
 type CGREventWithEeIDs struct {
 	EeIDs []string
-	*utils.CGREvent
+	*CGREvent
 	clnb bool
 }
 
@@ -67,7 +67,7 @@ func (cgr *CGREventWithEeIDs) UnmarshalJSON(data []byte) (err error) {
 	}
 	cgr.EeIDs = eeIDs
 	// populate the entire CGRevent struct in case of it's existance
-	var cgrEv *utils.CGREvent
+	var cgrEv *CGREvent
 	if err = json.Unmarshal(data, &cgrEv); err != nil {
 		return
 	}

@@ -60,7 +60,7 @@ func (dS *DispatcherService) Shutdown() {
 	utils.Logger.Info(fmt.Sprintf("<%s> service shutdown complete", utils.DispatcherS))
 }
 
-func (dS *DispatcherService) authorizeEvent(ev *utils.CGREvent,
+func (dS *DispatcherService) authorizeEvent(ev *engine.CGREvent,
 	reply *engine.AttrSProcessEventReply) (err error) {
 	ev.APIOpts[utils.OptsContext] = utils.MetaAuth
 	if err = dS.connMgr.Call(context.TODO(), dS.cfg.DispatcherSCfg().AttributeSConns,
@@ -77,7 +77,7 @@ func (dS *DispatcherService) authorize(method, tenant string, apiKey string, evT
 	if apiKey == "" {
 		return utils.NewErrMandatoryIeMissing(utils.APIKey)
 	}
-	ev := &utils.CGREvent{
+	ev := &engine.CGREvent{
 		Tenant: tenant,
 		ID:     utils.UUIDSha1Prefix(),
 		Time:   evTime,
@@ -102,11 +102,11 @@ func (dS *DispatcherService) authorize(method, tenant string, apiKey string, evT
 
 // dispatcherForEvent returns a dispatcher instance configured for specific event
 // or utils.ErrNotFound if none present
-func (dS *DispatcherService) dispatcherProfilesForEvent(tnt string, ev *utils.CGREvent,
+func (dS *DispatcherService) dispatcherProfilesForEvent(tnt string, ev *engine.CGREvent,
 	evNm utils.MapStorage, subsys string) (dPrlfs engine.DispatcherProfiles, err error) {
 	// make sure dispatching is allowed
 	var shouldDispatch bool
-	if shouldDispatch, err = utils.GetBoolOpts(ev, true, utils.MetaDispatchers); err != nil {
+	if shouldDispatch, err = engine.GetBoolOpts(ev, true, utils.MetaDispatchers); err != nil {
 		return
 	} else {
 		var subsys string
@@ -200,7 +200,7 @@ func (dS *DispatcherService) dispatcherProfilesForEvent(tnt string, ev *utils.CG
 }
 
 // Dispatch is the method forwarding the request towards the right connection
-func (dS *DispatcherService) Dispatch(ev *utils.CGREvent, subsys string,
+func (dS *DispatcherService) Dispatch(ev *engine.CGREvent, subsys string,
 	serviceMethod string, args any, reply any) (err error) {
 	tnt := ev.Tenant
 	if tnt == utils.EmptyString {
@@ -223,7 +223,7 @@ func (dS *DispatcherService) Dispatch(ev *utils.CGREvent, subsys string,
 	}
 	// avoid further processing if the request is internal
 	var shouldDispatch bool
-	if shouldDispatch, err = utils.GetBoolOpts(ev, true, utils.MetaDispatchers); err != nil {
+	if shouldDispatch, err = engine.GetBoolOpts(ev, true, utils.MetaDispatchers); err != nil {
 		return utils.NewErrDispatcherS(err)
 	} else {
 		var subsys string
@@ -313,7 +313,7 @@ func (dS *DispatcherService) Dispatch(ev *utils.CGREvent, subsys string,
 	return // return the last error
 }
 
-func (dS *DispatcherService) DispatcherSv1GetProfilesForEvent(ctx *context.Context, ev *utils.CGREvent,
+func (dS *DispatcherService) DispatcherSv1GetProfilesForEvent(ctx *context.Context, ev *engine.CGREvent,
 	dPfl *engine.DispatcherProfiles) (err error) {
 	tnt := ev.Tenant
 	if tnt == utils.EmptyString {
@@ -418,7 +418,7 @@ func (dS *DispatcherService) V1Apier(ctx *context.Context,apier any, args *utils
 	if argD != nil {
 		routeID = argD.RouteID
 	}
-	if err := dS.Dispatch(&utils.CGREvent{Tenant: tenant, Event: parameters}, utils.MetaApier, routeID,
+	if err := dS.Dispatch(&engine.CGREvent{Tenant: tenant, Event: parameters}, utils.MetaApier, routeID,
 		args.Method, realArgs, realReply); err != nil {
 		return err
 	}
@@ -466,7 +466,7 @@ func (dS *DispatcherService) DispatcherSv1RemoteStatus(ctx *context.Context, arg
 			return
 		}
 	}
-	return dS.Dispatch(&utils.CGREvent{
+	return dS.Dispatch(&engine.CGREvent{
 		Tenant:  tnt,
 		APIOpts: args.APIOpts,
 	}, utils.MetaCore, utils.CoreSv1Status, args, reply)
@@ -483,13 +483,13 @@ func (dS *DispatcherService) DispatcherSv1RemoteSleep(ctx *context.Context, args
 			return
 		}
 	}
-	return dS.Dispatch(&utils.CGREvent{
+	return dS.Dispatch(&engine.CGREvent{
 		Tenant:  tnt,
 		APIOpts: args.APIOpts,
 	}, utils.MetaCore, utils.CoreSv1Sleep, args, reply)
 }
 
-func (dS *DispatcherService) DispatcherSv1RemotePing(ctx *context.Context, args *utils.CGREvent, reply *string) (err error) {
+func (dS *DispatcherService) DispatcherSv1RemotePing(ctx *context.Context, args *engine.CGREvent, reply *string) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
 	if args != nil && args.Tenant != utils.EmptyString {
 		tnt = args.Tenant

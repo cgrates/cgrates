@@ -27,10 +27,10 @@ import (
 )
 
 // ResponderPing interogates Responder server responsible to process the event
-func (dS *DispatcherService) ResponderPing(ctx *context.Context, args *utils.CGREvent,
+func (dS *DispatcherService) ResponderPing(ctx *context.Context, args *engine.CGREvent,
 	reply *string) (err error) {
 	if args == nil {
-		args = new(utils.CGREvent)
+		args = new(engine.CGREvent)
 	}
 	args.Tenant = utils.FirstNonEmpty(args.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
@@ -117,7 +117,7 @@ func (dS *DispatcherService) ResponderShutdown(ctx *context.Context, args *utils
 			return
 		}
 	}
-	return dS.Dispatch(&utils.CGREvent{
+	return dS.Dispatch(&engine.CGREvent{
 		Tenant:  tnt,
 		APIOpts: args.APIOpts,
 	}, utils.MetaResponder, utils.ResponderShutdown, args, reply)
@@ -131,7 +131,7 @@ func (dS *DispatcherService) ResponderGetCostOnRatingPlans(ctx *context.Context,
 			return
 		}
 	}
-	return dS.Dispatch(&utils.CGREvent{
+	return dS.Dispatch(&engine.CGREvent{
 		Tenant:  tnt,
 		APIOpts: arg.APIOpts,
 	}, utils.MetaResponder, utils.ResponderGetCostOnRatingPlans, arg, reply)
@@ -145,7 +145,7 @@ func (dS *DispatcherService) ResponderGetMaxSessionTimeOnAccounts(ctx *context.C
 			return
 		}
 	}
-	return dS.Dispatch(&utils.CGREvent{
+	return dS.Dispatch(&engine.CGREvent{
 		Tenant:  tnt,
 		APIOpts: arg.APIOpts,
 	}, utils.MetaResponder, utils.ResponderGetMaxSessionTimeOnAccounts, arg, reply)

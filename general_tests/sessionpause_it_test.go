@@ -122,7 +122,7 @@ func testSesPauseItLoadFromFolder(t *testing.T) {
 func testSesPauseItInitSession(t *testing.T, cgrID string, chargeable bool, usage time.Duration) {
 	args1 := &sessions.V1InitSessionArgs{
 		InitSession: true,
-		CGREvent: &utils.CGREvent{
+		CGREvent: &engine.CGREvent{
 			Tenant: "cgrates.org",
 			Event: map[string]any{
 				utils.CGRID:        cgrID,
@@ -156,7 +156,7 @@ func testSesPauseItInitSession(t *testing.T, cgrID string, chargeable bool, usag
 func testSesPauseItUpdateSession(t *testing.T, cgrID string, chargeable bool, usage time.Duration) {
 	updtArgs := &sessions.V1UpdateSessionArgs{
 		UpdateSession: true,
-		CGREvent: &utils.CGREvent{
+		CGREvent: &engine.CGREvent{
 			Tenant: "cgrates.org",
 			Event: map[string]any{
 				utils.CGRID:        cgrID,
@@ -189,7 +189,7 @@ func testSesPauseItUpdateSession(t *testing.T, cgrID string, chargeable bool, us
 func testSesPauseItTerminateSession(t *testing.T, cgrID string, chargeable bool, usage time.Duration) {
 	args := &sessions.V1TerminateSessionArgs{
 		TerminateSession: true,
-		CGREvent: &utils.CGREvent{
+		CGREvent: &engine.CGREvent{
 			Tenant: "cgrates.org",
 			Event: map[string]any{
 				utils.CGRID:        cgrID,
@@ -217,7 +217,7 @@ func testSesPauseItTerminateSession(t *testing.T, cgrID string, chargeable bool,
 	if rply != utils.OK {
 		t.Errorf("Unexpected reply: %s", rply)
 	}
-	if err := sesPauseRPC.Call(context.Background(), utils.SessionSv1ProcessCDR, &utils.CGREvent{
+	if err := sesPauseRPC.Call(context.Background(), utils.SessionSv1ProcessCDR, &engine.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "testSesPauseItProccesCDR",
 		Event: map[string]any{

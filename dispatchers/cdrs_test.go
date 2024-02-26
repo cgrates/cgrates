@@ -31,7 +31,7 @@ func TestDspCDRsV1PingError(t *testing.T) {
 	cgrCfg := config.NewDefaultCGRConfig()
 	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
 	cgrCfg.DispatcherSCfg().AttributeSConns = []string{"test"}
-	CGREvent := &utils.CGREvent{}
+	CGREvent := &engine.CGREvent{}
 	var reply *string
 	result := dspSrv.CDRsV1Ping(context.Background(), CGREvent, reply)
 	expected := "MANDATORY_IE_MISSING: [ApiKey]"
@@ -43,7 +43,7 @@ func TestDspCDRsV1PingError(t *testing.T) {
 func TestDspCDRsV1PingNil(t *testing.T) {
 	cgrCfg := config.NewDefaultCGRConfig()
 	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
-	CGREvent := &utils.CGREvent{
+	CGREvent := &engine.CGREvent{
 		Tenant: "tenant",
 	}
 	var reply *string
@@ -185,7 +185,7 @@ func TestDspCDRsV1ProcessEventError(t *testing.T) {
 	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
 	cgrCfg.DispatcherSCfg().AttributeSConns = []string{"test"}
 	CGREvent := &engine.ArgV1ProcessEvent{
-		CGREvent: utils.CGREvent{
+		CGREvent: engine.CGREvent{
 			Tenant: "tenant",
 		},
 	}
@@ -201,7 +201,7 @@ func TestDspCDRsV1ProcessEventNil(t *testing.T) {
 	cgrCfg := config.NewDefaultCGRConfig()
 	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
 	CGREvent := &engine.ArgV1ProcessEvent{
-		CGREvent: utils.CGREvent{
+		CGREvent: engine.CGREvent{
 			Tenant: "tenant",
 		},
 	}
@@ -252,11 +252,11 @@ func TestDspCDRsV2ProcessEventError(t *testing.T) {
 	cgrCfg.DispatcherSCfg().AttributeSConns = []string{"test"}
 	CGREvent := &engine.ArgV1ProcessEvent{
 		Flags: nil,
-		CGREvent: utils.CGREvent{
+		CGREvent: engine.CGREvent{
 			Tenant: "tenant",
 		},
 	}
-	var reply *[]*utils.EventWithFlags
+	var reply *[]*engine.EventWithFlags
 	result := dspSrv.CDRsV2ProcessEvent(context.Background(), CGREvent, reply)
 	expected := "MANDATORY_IE_MISSING: [ApiKey]"
 	if result == nil || result.Error() != expected {
@@ -269,11 +269,11 @@ func TestDspCDRsV2ProcessEventNil(t *testing.T) {
 	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
 	CGREvent := &engine.ArgV1ProcessEvent{
 		Flags: nil,
-		CGREvent: utils.CGREvent{
+		CGREvent: engine.CGREvent{
 			Tenant: "tenant",
 		},
 	}
-	var reply *[]*utils.EventWithFlags
+	var reply *[]*engine.EventWithFlags
 	result := dspSrv.CDRsV2ProcessEvent(context.Background(), CGREvent, reply)
 	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
@@ -287,9 +287,9 @@ func TestDspCDRsV2ProcessEventErrorNil(t *testing.T) {
 	cgrCfg.DispatcherSCfg().AttributeSConns = []string{"test"}
 	CGREvent := &engine.ArgV1ProcessEvent{
 		Flags:    nil,
-		CGREvent: utils.CGREvent{},
+		CGREvent: engine.CGREvent{},
 	}
-	var reply *[]*utils.EventWithFlags
+	var reply *[]*engine.EventWithFlags
 	result := dspSrv.CDRsV2ProcessEvent(context.Background(), CGREvent, reply)
 	expected := "MANDATORY_IE_MISSING: [ApiKey]"
 	if result == nil || result.Error() != expected {

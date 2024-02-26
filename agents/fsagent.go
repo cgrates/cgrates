@@ -487,7 +487,7 @@ func (fsa *FSsessions) V1WarnDisconnect(ctx *context.Context, args map[string]an
 }
 
 // V1AlterSessions is used to implement the sessions.BiRPClient interface
-func (*FSsessions) V1AlterSessions(*context.Context, utils.CGREvent, *string) error {
+func (*FSsessions) V1AlterSessions(*context.Context, engine.CGREvent, *string) error {
 	return utils.ErrNotImplemented
 }
 

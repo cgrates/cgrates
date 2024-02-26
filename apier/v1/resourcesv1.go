@@ -42,22 +42,22 @@ func (rsv1 *ResourceSv1) Call(ctx *context.Context, serviceMethod string, args a
 }
 
 // GetResourcesForEvent returns Resources matching a specific event
-func (rsv1 *ResourceSv1) GetResourcesForEvent(ctx *context.Context, args *utils.CGREvent, reply *engine.Resources) error {
+func (rsv1 *ResourceSv1) GetResourcesForEvent(ctx *context.Context, args *engine.CGREvent, reply *engine.Resources) error {
 	return rsv1.rls.V1GetResourcesForEvent(ctx, args, reply)
 }
 
 // AuthorizeResources checks if there are limits imposed for event
-func (rsv1 *ResourceSv1) AuthorizeResources(ctx *context.Context, args *utils.CGREvent, reply *string) error {
+func (rsv1 *ResourceSv1) AuthorizeResources(ctx *context.Context, args *engine.CGREvent, reply *string) error {
 	return rsv1.rls.V1AuthorizeResources(ctx, args, reply)
 }
 
 // V1InitiateResourceUsage records usage for an event
-func (rsv1 *ResourceSv1) AllocateResources(ctx *context.Context, args *utils.CGREvent, reply *string) error {
+func (rsv1 *ResourceSv1) AllocateResources(ctx *context.Context, args *engine.CGREvent, reply *string) error {
 	return rsv1.rls.V1AllocateResources(ctx, args, reply)
 }
 
 // V1TerminateResourceUsage releases usage for an event
-func (rsv1 *ResourceSv1) ReleaseResources(ctx *context.Context, args *utils.CGREvent, reply *string) error {
+func (rsv1 *ResourceSv1) ReleaseResources(ctx *context.Context, args *engine.CGREvent, reply *string) error {
 	return rsv1.rls.V1ReleaseResources(ctx, args, reply)
 }
 
@@ -174,7 +174,7 @@ func (apierSv1 *APIerSv1) RemoveResourceProfile(ctx *context.Context, arg *utils
 	return nil
 }
 
-func (rsv1 *ResourceSv1) Ping(ctx *context.Context, ign *utils.CGREvent, reply *string) error {
+func (rsv1 *ResourceSv1) Ping(ctx *context.Context, ign *engine.CGREvent, reply *string) error {
 	*reply = utils.Pong
 	return nil
 }

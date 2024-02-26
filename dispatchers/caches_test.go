@@ -32,7 +32,7 @@ import (
 func TestDspCacheSv1PingError(t *testing.T) {
 	cgrCfg := config.NewDefaultCGRConfig()
 	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
-	CGREvent := &utils.CGREvent{
+	CGREvent := &engine.CGREvent{
 		Tenant:  "tenant",
 		ID:      "",
 		Time:    &time.Time{},
@@ -62,7 +62,7 @@ func TestDspCacheSv1PingErrorAttributeSConns(t *testing.T) {
 	cgrCfg := config.NewDefaultCGRConfig()
 	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
 	cgrCfg.DispatcherSCfg().AttributeSConns = []string{"test"}
-	CGREvent := &utils.CGREvent{
+	CGREvent := &engine.CGREvent{
 		Tenant:  "tenant",
 		ID:      "",
 		Time:    &time.Time{},

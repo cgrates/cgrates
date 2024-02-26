@@ -41,7 +41,7 @@ var (
 	rrErsCdrsRPC     *birpc.Client
 	rrErsCdrsDelay   int
 	rrErsCdrsUUID    = "38e4d9f4-577f-4260-a7a5-bae8cd5417de"
-	cdrEvent         *utils.CGREvent
+	cdrEvent         *engine.CGREvent
 
 	rrErsCdrsTests = []func(t *testing.T){
 		testRerateCDRsERsCreateFolders,
@@ -191,7 +191,7 @@ func testRerateCDRsERsGetAccountAfterBalanceSet(t *testing.T) {
 func testRerateCDRsERsProcessEventCDR1(t *testing.T) {
 	argsEv := &engine.ArgV1ProcessEvent{
 		Flags: []string{utils.MetaRALs, "*export:false"},
-		CGREvent: utils.CGREvent{
+		CGREvent: engine.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "event1",
 			Event: map[string]any{

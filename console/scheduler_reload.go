@@ -18,7 +18,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package console
 
-import "github.com/cgrates/cgrates/utils"
+import (
+	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/utils"
+)
 
 func init() {
 	c := &CmdReloadScheduler{
@@ -33,7 +36,7 @@ func init() {
 type CmdReloadScheduler struct {
 	name      string
 	rpcMethod string
-	rpcParams *utils.CGREvent
+	rpcParams *engine.CGREvent
 	*CommandExecuter
 }
 
@@ -47,7 +50,7 @@ func (self *CmdReloadScheduler) RpcMethod() string {
 
 func (self *CmdReloadScheduler) RpcParams(reset bool) any {
 	if reset || self.rpcParams == nil {
-		self.rpcParams = &utils.CGREvent{}
+		self.rpcParams = &engine.CGREvent{}
 	}
 	return self.rpcParams
 }

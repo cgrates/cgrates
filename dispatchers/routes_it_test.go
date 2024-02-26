@@ -75,12 +75,12 @@ func TestDspSupplierS(t *testing.T) {
 
 func testDspSupPing(t *testing.T) {
 	var reply string
-	if err := allEngine.RPC.Call(context.Background(), utils.RouteSv1Ping, new(utils.CGREvent), &reply); err != nil {
+	if err := allEngine.RPC.Call(context.Background(), utils.RouteSv1Ping, new(engine.CGREvent), &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.Pong {
 		t.Errorf("Received: %s", reply)
 	}
-	if err := dispEngine.RPC.Call(context.Background(), utils.RouteSv1Ping, &utils.CGREvent{
+	if err := dispEngine.RPC.Call(context.Background(), utils.RouteSv1Ping, &engine.CGREvent{
 		Tenant: "cgrates.org",
 		APIOpts: map[string]any{
 			utils.OptsAPIKey: "sup12345",
@@ -94,12 +94,12 @@ func testDspSupPing(t *testing.T) {
 
 func testDspSupPingFailover(t *testing.T) {
 	var reply string
-	if err := allEngine.RPC.Call(context.Background(), utils.RouteSv1Ping, new(utils.CGREvent), &reply); err != nil {
+	if err := allEngine.RPC.Call(context.Background(), utils.RouteSv1Ping, new(engine.CGREvent), &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.Pong {
 		t.Errorf("Received: %s", reply)
 	}
-	ev := utils.CGREvent{
+	ev := engine.CGREvent{
 		Tenant: "cgrates.org",
 
 		APIOpts: map[string]any{
@@ -164,7 +164,7 @@ func testDspSupGetSupFailover(t *testing.T) {
 			},
 		},
 	}}
-	args := &utils.CGREvent{
+	args := &engine.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     utils.UUIDSha1Prefix(),
 		Time:   &nowTime,
@@ -199,7 +199,7 @@ func testDspSupGetSupFailover(t *testing.T) {
 
 func testDspSupTestAuthKey(t *testing.T) {
 	var rpl engine.SortedRoutesList
-	args := &utils.CGREvent{
+	args := &engine.CGREvent{
 		ID:   utils.UUIDSha1Prefix(),
 		Time: &nowTime,
 		Event: map[string]any{
@@ -246,7 +246,7 @@ func testDspSupTestAuthKey2(t *testing.T) {
 			},
 		},
 	}}
-	args := &utils.CGREvent{
+	args := &engine.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     utils.UUIDSha1Prefix(),
 		Time:   &nowTime,
@@ -309,7 +309,7 @@ func testDspSupGetSupRoundRobin(t *testing.T) {
 			},
 		},
 	}}
-	args := &utils.CGREvent{
+	args := &engine.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     utils.UUIDSha1Prefix(),
 		Time:   &nowTime,
@@ -341,7 +341,7 @@ func testDspSupGetSupRoundRobin(t *testing.T) {
 }
 
 func testDspSupGetSupplierForEvent(t *testing.T) {
-	ev := &utils.CGREvent{
+	ev := &engine.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "testV1SplSGetHighestCostSuppliers",
 		Event: map[string]any{

@@ -124,7 +124,7 @@ func TestKamEvAsCGREvent(t *testing.T) {
 	if err != nil {
 		return
 	}
-	expected := &utils.CGREvent{
+	expected := &engine.CGREvent{
 		Tenant: utils.FirstNonEmpty(kamEv[utils.Tenant],
 			config.CgrConfig().GeneralCfg().DefaultTenant),
 		ID:    utils.UUIDSha1Prefix(),
@@ -159,7 +159,7 @@ func TestKamEvV1AuthorizeArgs(t *testing.T) {
 	}
 	expected := &sessions.V1AuthorizeArgs{
 		GetMaxUsage: true,
-		CGREvent: &utils.CGREvent{
+		CGREvent: &engine.CGREvent{
 			Tenant: utils.FirstNonEmpty(kamEv[utils.Tenant],
 				config.CgrConfig().GeneralCfg().DefaultTenant),
 			ID:    utils.UUIDSha1Prefix(),
@@ -209,7 +209,7 @@ func TestKamEvV1AuthorizeArgs2(t *testing.T) {
 	}
 	expected := &sessions.V1AuthorizeArgs{
 		GetMaxUsage: true,
-		CGREvent: &utils.CGREvent{
+		CGREvent: &engine.CGREvent{
 			Tenant: utils.FirstNonEmpty(kamEv[utils.Tenant],
 				config.CgrConfig().GeneralCfg().DefaultTenant),
 			ID:    utils.UUIDSha1Prefix(),
@@ -258,7 +258,7 @@ func TestKamEvAsKamAuthReply(t *testing.T) {
 	}
 	authArgs := &sessions.V1AuthorizeArgs{
 		GetMaxUsage: true,
-		CGREvent: &utils.CGREvent{
+		CGREvent: &engine.CGREvent{
 			Tenant: utils.FirstNonEmpty(kamEv[utils.Tenant],
 				config.CgrConfig().GeneralCfg().DefaultTenant),
 			ID:    utils.UUIDSha1Prefix(),
@@ -283,7 +283,7 @@ func TestKamEvAsKamAuthReply(t *testing.T) {
 		KamReplyRoute: "CGR_PROFILE_REPLY"}
 	authArgs = &sessions.V1AuthorizeArgs{
 		GetAttributes: true,
-		CGREvent: &utils.CGREvent{
+		CGREvent: &engine.CGREvent{
 			Tenant: utils.FirstNonEmpty(kamEv[utils.Tenant],
 				config.CgrConfig().GeneralCfg().DefaultTenant),
 			ID:    utils.UUIDSha1Prefix(),
@@ -295,7 +295,7 @@ func TestKamEvAsKamAuthReply(t *testing.T) {
 		Attributes: &engine.AttrSProcessEventReply{
 			MatchedProfiles: []string{"ATTR_1001_ACCOUNT_PROFILE"},
 			AlteredFields:   []string{"*req.Password", utils.MetaReq + utils.NestingSep + utils.RequestType},
-			CGREvent: &utils.CGREvent{
+			CGREvent: &engine.CGREvent{
 				Tenant: "cgrates.org",
 				ID:     "TestKamEvAsKamAuthReply",
 				Event: map[string]any{
@@ -334,7 +334,7 @@ func TestKamEvV1InitSessionArgs(t *testing.T) {
 	}
 	expected := &sessions.V1InitSessionArgs{
 		InitSession: true,
-		CGREvent: &utils.CGREvent{
+		CGREvent: &engine.CGREvent{
 			Tenant: utils.FirstNonEmpty(kamEv[utils.Tenant],
 				config.CgrConfig().GeneralCfg().DefaultTenant),
 			ID:    utils.UUIDSha1Prefix(),
@@ -372,7 +372,7 @@ func TestKamEvV1TerminateSessionArgs(t *testing.T) {
 	}
 	expected := &sessions.V1TerminateSessionArgs{
 		TerminateSession: true,
-		CGREvent: &utils.CGREvent{
+		CGREvent: &engine.CGREvent{
 			Tenant: utils.FirstNonEmpty(kamEv[utils.Tenant],
 				config.CgrConfig().GeneralCfg().DefaultTenant),
 			ID:    utils.UUIDSha1Prefix(),
@@ -409,7 +409,7 @@ func TestKamEvV1ProcessMessageArgs(t *testing.T) {
 		return
 	}
 	expected := &sessions.V1ProcessMessageArgs{
-		CGREvent: &utils.CGREvent{
+		CGREvent: &engine.CGREvent{
 			Tenant: utils.FirstNonEmpty(kamEv[utils.Tenant],
 				config.CgrConfig().GeneralCfg().DefaultTenant),
 			ID:    utils.UUIDSha1Prefix(),
@@ -445,7 +445,7 @@ func TestKamEvAsKamProcessEventReply(t *testing.T) {
 	}
 	procEvArgs := &sessions.V1ProcessMessageArgs{
 		Debit: true,
-		CGREvent: &utils.CGREvent{
+		CGREvent: &engine.CGREvent{
 			Tenant: utils.FirstNonEmpty(kamEv[utils.Tenant],
 				config.CgrConfig().GeneralCfg().DefaultTenant),
 			ID:    utils.UUIDSha1Prefix(),
@@ -470,7 +470,7 @@ func TestKamEvAsKamProcessEventReply(t *testing.T) {
 		KamReplyRoute: "CGR_PROFILE_REPLY"}
 	procEvArgs = &sessions.V1ProcessMessageArgs{
 		GetAttributes: true,
-		CGREvent: &utils.CGREvent{
+		CGREvent: &engine.CGREvent{
 			Tenant: utils.FirstNonEmpty(kamEv[utils.Tenant],
 				config.CgrConfig().GeneralCfg().DefaultTenant),
 			ID:    utils.UUIDSha1Prefix(),
@@ -482,7 +482,7 @@ func TestKamEvAsKamProcessEventReply(t *testing.T) {
 		Attributes: &engine.AttrSProcessEventReply{
 			MatchedProfiles: []string{"ATTR_1001_ACCOUNT_PROFILE"},
 			AlteredFields:   []string{"*req.Password", utils.MetaReq + utils.NestingSep + utils.RequestType},
-			CGREvent: &utils.CGREvent{
+			CGREvent: &engine.CGREvent{
 				Tenant: "cgrates.org",
 				ID:     "TestKamEvAsKamAuthReply",
 				Event: map[string]any{

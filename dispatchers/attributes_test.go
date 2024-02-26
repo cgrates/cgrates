@@ -25,13 +25,12 @@ import (
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
-	"github.com/cgrates/cgrates/utils"
 )
 
 func TestDspAttributeSv1PingError(t *testing.T) {
 	cgrCfg := config.NewDefaultCGRConfig()
 	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
-	cgrEvent := &utils.CGREvent{}
+	cgrEvent := &engine.CGREvent{}
 	var reply *string
 	err := dspSrv.AttributeSv1Ping(context.Background(), cgrEvent, reply)
 	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
@@ -43,7 +42,7 @@ func TestDspAttributeSv1PingError(t *testing.T) {
 func TestDspAttributeSv1PingErrorTenant(t *testing.T) {
 	cgrCfg := config.NewDefaultCGRConfig()
 	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
-	cgrEvent := &utils.CGREvent{
+	cgrEvent := &engine.CGREvent{
 		Tenant:  "tenant",
 		ID:      "",
 		Time:    nil,
@@ -73,7 +72,7 @@ func TestDspAttributeSv1PingErrorAttributeSConns(t *testing.T) {
 	cgrCfg := config.NewDefaultCGRConfig()
 	cgrCfg.DispatcherSCfg().AttributeSConns = []string{"test"}
 	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
-	cgrEvent := &utils.CGREvent{
+	cgrEvent := &engine.CGREvent{
 		Tenant:  "tenant",
 		ID:      "ID",
 		Time:    nil,
@@ -92,7 +91,7 @@ func TestDspAttributeSv1GetAttributeForEventError(t *testing.T) {
 	cgrCfg := config.NewDefaultCGRConfig()
 	cgrCfg.DispatcherSCfg().AttributeSConns = []string{"test"}
 	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
-	processEvent := &utils.CGREvent{
+	processEvent := &engine.CGREvent{
 		Time: &time.Time{},
 	}
 	var reply *engine.AttributeProfile
@@ -107,7 +106,7 @@ func TestDspAttributeSv1GetAttributeForEventErrorTenant(t *testing.T) {
 	cgrCfg := config.NewDefaultCGRConfig()
 	cgrCfg.DispatcherSCfg().AttributeSConns = []string{"test"}
 	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
-	processEvent := &utils.CGREvent{
+	processEvent := &engine.CGREvent{
 		Tenant: "tenant",
 		Time:   &time.Time{},
 	}
@@ -122,7 +121,7 @@ func TestDspAttributeSv1GetAttributeForEventErrorTenant(t *testing.T) {
 func TestDspAttributeSv1GetAttributeForEventErrorAttributeS(t *testing.T) {
 	cgrCfg := config.NewDefaultCGRConfig()
 	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
-	processEvent := &utils.CGREvent{
+	processEvent := &engine.CGREvent{
 		Tenant: "tenant",
 		Time:   &time.Time{},
 	}
@@ -138,7 +137,7 @@ func TestDspAttributeSv1GetAttributeForEventErrorAttributeS(t *testing.T) {
 func TestDspAttributeSv1ProcessEventError(t *testing.T) {
 	cgrCfg := config.NewDefaultCGRConfig()
 	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
-	processEvent := &utils.CGREvent{
+	processEvent := &engine.CGREvent{
 		Tenant: "tenant",
 		Time:   &time.Time{},
 	}
@@ -155,7 +154,7 @@ func TestDspAttributeSv1ProcessEventErrorAttributeSConns(t *testing.T) {
 	cgrCfg := config.NewDefaultCGRConfig()
 	cgrCfg.DispatcherSCfg().AttributeSConns = []string{"test"}
 	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
-	processEvent := &utils.CGREvent{
+	processEvent := &engine.CGREvent{
 		Tenant: "tenant",
 		Time:   &time.Time{},
 	}

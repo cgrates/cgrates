@@ -28,6 +28,7 @@ import (
 	"time"
 
 	"github.com/cgrates/birpc/context"
+	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -70,12 +71,12 @@ func TestDspStatS(t *testing.T) {
 
 func testDspStsPingFailover(t *testing.T) {
 	var reply string
-	if err := allEngine.RPC.Call(context.Background(), utils.StatSv1Ping, new(utils.CGREvent), &reply); err != nil {
+	if err := allEngine.RPC.Call(context.Background(), utils.StatSv1Ping, new(engine.CGREvent), &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.Pong {
 		t.Errorf("Received: %s", reply)
 	}
-	ev := utils.CGREvent{
+	ev := engine.CGREvent{
 		Tenant: "cgrates.org",
 		APIOpts: map[string]any{
 			utils.OptsAPIKey: "stat12345",
@@ -104,7 +105,7 @@ func testDspStsGetStatFailover(t *testing.T) {
 	var reply []string
 	var metrics map[string]string
 	expected := []string{"Stats1"}
-	args := &utils.CGREvent{
+	args := &engine.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "event1",
 		Event: map[string]any{
@@ -154,12 +155,12 @@ func testDspStsGetStatFailover(t *testing.T) {
 
 func testDspStsPing(t *testing.T) {
 	var reply string
-	if err := allEngine.RPC.Call(context.Background(), utils.StatSv1Ping, new(utils.CGREvent), &reply); err != nil {
+	if err := allEngine.RPC.Call(context.Background(), utils.StatSv1Ping, new(engine.CGREvent), &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.Pong {
 		t.Errorf("Received: %s", reply)
 	}
-	if err := dispEngine.RPC.Call(context.Background(), utils.StatSv1Ping, &utils.CGREvent{
+	if err := dispEngine.RPC.Call(context.Background(), utils.StatSv1Ping, &engine.CGREvent{
 		Tenant: "cgrates.org",
 		APIOpts: map[string]any{
 			utils.OptsAPIKey: "stat12345",
@@ -173,7 +174,7 @@ func testDspStsPing(t *testing.T) {
 
 func testDspStsTestAuthKey(t *testing.T) {
 	var reply []string
-	args := &utils.CGREvent{
+	args := &engine.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "event1",
 		Event: map[string]any{
@@ -212,7 +213,7 @@ func testDspStsTestAuthKey2(t *testing.T) {
 	var reply []string
 	var metrics map[string]string
 	expected := []string{"Stats2"}
-	args := &utils.CGREvent{
+	args := &engine.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "event1",
 		Event: map[string]any{
@@ -253,7 +254,7 @@ func testDspStsTestAuthKey2(t *testing.T) {
 		t.Errorf("expecting: %+v, received reply: %s", expectedMetrics, metrics)
 	}
 
-	args = &utils.CGREvent{
+	args = &engine.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "event1",
 		Event: map[string]any{
@@ -328,7 +329,7 @@ func testDspStsTestAuthKey3(t *testing.T) {
 	}
 
 	estats = []string{"Stats2"}
-	if err := dispEngine.RPC.Call(context.Background(), utils.StatSv1GetStatQueuesForEvent, &utils.CGREvent{
+	if err := dispEngine.RPC.Call(context.Background(), utils.StatSv1GetStatQueuesForEvent, &engine.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "GetStats",
 		Event: map[string]any{

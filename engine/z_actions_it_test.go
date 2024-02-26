@@ -374,7 +374,7 @@ func testActionsitThresholdCDrLog(t *testing.T) {
 	} else if !reflect.DeepEqual(tPrfl.ThresholdProfile, thReply) {
 		t.Errorf("Expecting: %+v, received: %+v", tPrfl.ThresholdProfile, thReply)
 	}
-	ev := &utils.CGREvent{
+	ev := &CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "cdrev1",
 		Event: map[string]any{
@@ -590,7 +590,7 @@ func testActionsitThresholdCgrRpcAction(t *testing.T) {
 	} else if !reflect.DeepEqual(tPrfl.ThresholdProfile, thReply) {
 		t.Errorf("Expecting: %+v, received: %+v", tPrfl.ThresholdProfile, thReply)
 	}
-	ev := &utils.CGREvent{
+	ev := &CGREvent{
 		Tenant: "cgrates.org",
 		ID:     utils.UUIDSha1Prefix(),
 		Event: map[string]any{
@@ -654,7 +654,7 @@ func testActionsitThresholdPostEvent(t *testing.T) {
 	} else if !reflect.DeepEqual(tPrfl.ThresholdProfile, thReply) {
 		t.Errorf("Expecting: %+v, received: %+v", tPrfl.ThresholdProfile, thReply)
 	}
-	ev := &utils.CGREvent{
+	ev := &CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "cdrev1",
 		Event: map[string]any{
@@ -766,7 +766,7 @@ func testActionsitSetSDestinations(t *testing.T) {
 
 	var reply2 []string
 	expected := []string{"DistinctMetricProfile"}
-	args := &utils.CGREvent{
+	args := &CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "event1",
 		Event: map[string]any{
@@ -780,7 +780,7 @@ func testActionsitSetSDestinations(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", expected, reply2)
 	}
 
-	args = &utils.CGREvent{
+	args = &CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "event2",
 		Event: map[string]any{

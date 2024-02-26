@@ -1676,7 +1676,7 @@ func TestSortedRoutesListDigest(t *testing.T) {
 func TestRouteSortDispatcher(t *testing.T) {
 	ssd := RouteSortDispatcher{}
 	strategy := "strategy"
-	if _, err := ssd.SortRoutes("prfID", strategy, map[string]*Route{}, &utils.CGREvent{}, &optsGetRoutes{}); err == nil || err.Error() != fmt.Sprintf("unsupported sorting strategy: %s", strategy) {
+	if _, err := ssd.SortRoutes("prfID", strategy, map[string]*Route{}, &CGREvent{}, &optsGetRoutes{}); err == nil || err.Error() != fmt.Sprintf("unsupported sorting strategy: %s", strategy) {
 		t.Error(err)
 	}
 }

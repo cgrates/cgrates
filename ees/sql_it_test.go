@@ -274,7 +274,7 @@ func testSqlEeExportEventFull(t *testing.T) {
 	}
 	eventVoice := &engine.CGREventWithEeIDs{
 		EeIDs: []string{"SQLExporterFull"},
-		CGREvent: &utils.CGREvent{
+		CGREvent: &engine.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "voiceEvent",
 			Time:   utils.TimePointer(time.Now()),
@@ -311,7 +311,7 @@ func testSqlEeExportEventFull(t *testing.T) {
 func testSqlEeExportEventPartial(t *testing.T) {
 	eventVoice := &engine.CGREventWithEeIDs{
 		EeIDs: []string{"SQLExporterPartial"},
-		CGREvent: &utils.CGREvent{
+		CGREvent: &engine.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "voiceEvent",
 			Time:   utils.TimePointer(time.Now()),

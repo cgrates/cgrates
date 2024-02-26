@@ -2373,7 +2373,7 @@ func (tpr *TpReader) ReloadScheduler(verbose bool) (err error) {
 		log.Print("Reloading scheduler")
 	}
 	if err = connMgr.Call(context.TODO(), tpr.schedulerConns, utils.SchedulerSv1Reload,
-		new(utils.CGREvent), &reply); err != nil {
+		new(CGREvent), &reply); err != nil {
 		log.Printf("WARNING: Got error on scheduler reload: %s\n", err.Error())
 	}
 	return

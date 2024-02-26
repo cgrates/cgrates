@@ -220,7 +220,7 @@ func (rdr *FWVFileER) processFile(fPath, fName string) (err error) {
 			return
 		}
 		rdr.offset += rdr.lineLen // increase the offset
-		cgrEv := utils.NMAsCGREvent(agReq.CGRRequest, agReq.Tenant, utils.NestingSep, agReq.Opts)
+		cgrEv := engine.NMAsCGREvent(agReq.CGRRequest, agReq.Tenant, utils.NestingSep, agReq.Opts)
 		rdrEv := rdr.rdrEvents
 		if _, isPartial := cgrEv.APIOpts[utils.PartialOpt]; isPartial {
 			rdrEv = rdr.partialEvents
@@ -312,7 +312,7 @@ func (rdr *FWVFileER) processTrailer(file *os.File, rowNr, evsPosted int, absPat
 				utils.ERs, absPath, rowNr, err.Error()))
 		return err
 	}
-	cgrEv := utils.NMAsCGREvent(agReq.CGRRequest, agReq.Tenant, utils.NestingSep, agReq.Opts)
+	cgrEv := engine.NMAsCGREvent(agReq.CGRRequest, agReq.Tenant, utils.NestingSep, agReq.Opts)
 	rdrEv := rdr.rdrEvents
 	if _, isPartial := cgrEv.APIOpts[utils.PartialOpt]; isPartial {
 		rdrEv = rdr.partialEvents
@@ -357,7 +357,7 @@ func (rdr *FWVFileER) createHeaderMap(record string, rowNr, evsPosted int, absPa
 				utils.ERs, absPath, rowNr, err.Error()))
 		return err
 	}
-	cgrEv := utils.NMAsCGREvent(agReq.CGRRequest, agReq.Tenant, utils.NestingSep, agReq.Opts)
+	cgrEv := engine.NMAsCGREvent(agReq.CGRRequest, agReq.Tenant, utils.NestingSep, agReq.Opts)
 	rdrEv := rdr.rdrEvents
 	if _, isPartial := cgrEv.APIOpts[utils.PartialOpt]; isPartial {
 		rdrEv = rdr.partialEvents

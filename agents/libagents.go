@@ -39,7 +39,7 @@ func processRequest(ctx *context.Context, reqProcessor *config.RequestProcessor,
 	if err = agReq.SetFields(reqProcessor.RequestFields); err != nil {
 		return
 	}
-	cgrEv := utils.NMAsCGREvent(agReq.CGRRequest, agReq.Tenant, utils.NestingSep, agReq.Opts)
+	cgrEv := engine.NMAsCGREvent(agReq.CGRRequest, agReq.Tenant, utils.NestingSep, agReq.Opts)
 	var reqType string
 	for _, typ := range []string{
 		utils.MetaDryRun, utils.MetaAuthorize,
@@ -53,7 +53,7 @@ func processRequest(ctx *context.Context, reqProcessor *config.RequestProcessor,
 	}
 	var cgrArgs utils.Paginator
 	if reqType == utils.MetaAuthorize || reqType == utils.MetaMessage || reqType == utils.MetaEvent {
-		if cgrArgs, err = utils.GetRoutePaginatorFromOpts(cgrEv.APIOpts); err != nil {
+		if cgrArgs, err = engine.GetRoutePaginatorFromOpts(cgrEv.APIOpts); err != nil {
 			utils.Logger.Warning(fmt.Sprintf("<%s> args extraction failed because <%s>",
 				agentName, err.Error()))
 			err = nil // reset the error and continue the processing

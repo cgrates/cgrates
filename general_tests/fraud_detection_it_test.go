@@ -261,7 +261,7 @@ cgrates.org,THD_FRD,*gte:~*req.*tcc:2,,-1,1,0,false,0,ACT_FRD_STOP;ACT_FRD_LOG,t
 
 func testFraudAuthorizeandProcess1(t *testing.T) {
 	originID := utils.GenUUID()
-	cgrEv := &utils.CGREvent{
+	cgrEv := &engine.CGREvent{
 		Tenant: "cgrates.org",
 		Event: map[string]any{
 			utils.Tenant:       "cgrates.org",
@@ -285,7 +285,7 @@ func testFraudAuthorizeandProcess1(t *testing.T) {
 	if err := fraudRPC.Call(context.Background(), utils.SessionSv1AuthorizeEvent, args, &rply); err != nil {
 		t.Error(err)
 	}
-	cgrEv = &utils.CGREvent{
+	cgrEv = &engine.CGREvent{
 		Tenant: "cgrates.org",
 		Event: map[string]any{
 			utils.Tenant:       "cgrates.org",
@@ -311,7 +311,7 @@ func testFraudAuthorizeandProcess1(t *testing.T) {
 
 func testFraudAuthorizeandProcess2(t *testing.T) {
 	originID := utils.GenUUID()
-	cgrEv := &utils.CGREvent{
+	cgrEv := &engine.CGREvent{
 		Tenant: "cgrates.org",
 		Event: map[string]any{
 			utils.Tenant:       "cgrates.org",
@@ -335,7 +335,7 @@ func testFraudAuthorizeandProcess2(t *testing.T) {
 	if err := fraudRPC.Call(context.Background(), utils.SessionSv1AuthorizeEvent, args, &rply); err != nil {
 		t.Error(err)
 	}
-	cgrEv = &utils.CGREvent{
+	cgrEv = &engine.CGREvent{
 		Tenant: "cgrates.org",
 		Event: map[string]any{
 			utils.Tenant:       "cgrates.org",
@@ -361,7 +361,7 @@ func testFraudAuthorizeandProcess2(t *testing.T) {
 
 func testFraudAuthorizeandProcess3(t *testing.T) {
 	originID := utils.GenUUID()
-	cgrEv := &utils.CGREvent{
+	cgrEv := &engine.CGREvent{
 		Tenant: "cgrates.org",
 		Event: map[string]any{
 			utils.Tenant:       "cgrates.org",
@@ -385,7 +385,7 @@ func testFraudAuthorizeandProcess3(t *testing.T) {
 	if err := fraudRPC.Call(context.Background(), utils.SessionSv1AuthorizeEvent, args, &rply); err != nil {
 		t.Error(err)
 	}
-	cgrEv = &utils.CGREvent{
+	cgrEv = &engine.CGREvent{
 		Tenant: "cgrates.org",
 		Event: map[string]any{
 			utils.Tenant:       "cgrates.org",
@@ -412,7 +412,7 @@ func testFraudAuthorizeandProcess3(t *testing.T) {
 }
 
 func testFraudFinalAuthorize(t *testing.T) {
-	cgrEv := &utils.CGREvent{
+	cgrEv := &engine.CGREvent{
 		Tenant: "cgrates.org",
 		Event: map[string]any{
 			utils.Tenant:       "cgrates.org",

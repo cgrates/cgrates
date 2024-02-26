@@ -168,7 +168,7 @@ func testSesMFDItProcessMessage(t *testing.T) {
 		&sessions.V1ProcessMessageArgs{
 			Debit:         true,
 			ForceDuration: true,
-			CGREvent: &utils.CGREvent{
+			CGREvent: &engine.CGREvent{
 				Tenant: "cgrates.org",
 				ID:     utils.UUIDSha1Prefix(),
 				Event: map[string]any{

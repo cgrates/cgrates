@@ -132,7 +132,7 @@ func testSes3ItProcessEvent(t *testing.T) {
 		GetAttributes:     true,
 		ProcessThresholds: true,
 		ProcessStats:      true,
-		CGREvent: &utils.CGREvent{
+		CGREvent: &engine.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSSv1ItProcessEvent",
 			Event: map[string]any{
@@ -168,7 +168,7 @@ func testSes3ItProcessEvent(t *testing.T) {
 		MatchedProfiles: []string{"cgrates.org:ATTR_ACNT_1001"},
 		AlteredFields:   []string{"*req.OfficeGroup"},
 
-		CGREvent: &utils.CGREvent{
+		CGREvent: &engine.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSSv1ItProcessEvent",
 			Event: map[string]any{
@@ -305,7 +305,7 @@ func testSes3ItTerminatWithoutInit(t *testing.T) {
 		// because it needs to call initSession when the call for Teminate is still active
 		args := &sessions.V1TerminateSessionArgs{
 			TerminateSession: true,
-			CGREvent: &utils.CGREvent{
+			CGREvent: &engine.CGREvent{
 				Tenant: "cgrates.org",
 				ID:     "TestSesItUpdateSession",
 				Event: map[string]any{
@@ -336,7 +336,7 @@ func testSes3ItTerminatWithoutInit(t *testing.T) {
 	time.Sleep(time.Millisecond)
 	args1 := &sessions.V1InitSessionArgs{
 		InitSession: true,
-		CGREvent: &utils.CGREvent{
+		CGREvent: &engine.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSesItInitiateSession",
 			Event: map[string]any{
@@ -386,7 +386,7 @@ func testSes3ItBalance(t *testing.T) {
 
 func testSes3ItCDRs(t *testing.T) {
 	var reply string
-	if err := ses3RPC.Call(context.Background(), utils.SessionSv1ProcessCDR, &utils.CGREvent{
+	if err := ses3RPC.Call(context.Background(), utils.SessionSv1ProcessCDR, &engine.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "TestSesItProccesCDR",
 		Event: map[string]any{

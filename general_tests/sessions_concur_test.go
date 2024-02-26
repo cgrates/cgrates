@@ -229,7 +229,7 @@ package general_tests
 // 	authDur := 5 * time.Minute
 // 	authArgs := &sessions.V1AuthorizeArgs{
 // 		GetMaxUsage: true,
-// 		CGREvent: &utils.CGREvent{
+// 		CGREvent: &engine.CGREvent{
 // 			Tenant: "cgrates.org",
 // 			ID:     fmt.Sprintf("TestSCncrAuth%s", originID),
 // 			Event: map[string]any{
@@ -255,7 +255,7 @@ package general_tests
 // 	initArgs := &sessions.V1InitSessionArgs{
 // 		InitSession:   true,
 // 		GetAttributes: true,
-// 		CGREvent: &utils.CGREvent{
+// 		CGREvent: &engine.CGREvent{
 // 			Tenant: "cgrates.org",
 // 			ID:     fmt.Sprintf("TestSCncrInit%s", originID),
 // 			Event: map[string]any{
@@ -285,7 +285,7 @@ package general_tests
 // 	updtArgs := &sessions.V1UpdateSessionArgs{
 // 		GetAttributes: true,
 // 		UpdateSession: true,
-// 		CGREvent: &utils.CGREvent{
+// 		CGREvent: &engine.CGREvent{
 // 			Tenant: "cgrates.org",
 // 			ID:     fmt.Sprintf("TestSCncrUpdate%s", originID),
 // 			Event: map[string]any{
@@ -308,7 +308,7 @@ package general_tests
 // 	// Terminate the session
 // 	trmntArgs := &sessions.V1TerminateSessionArgs{
 // 		TerminateSession: true,
-// 		CGREvent: &utils.CGREvent{
+// 		CGREvent: &engine.CGREvent{
 // 			Tenant: "cgrates.org",
 // 			ID:     fmt.Sprintf("TestSCncrTerminate%s", originID),
 // 			Event: map[string]any{
@@ -328,8 +328,8 @@ package general_tests
 // 		utils.RandomInteger(0, 100)) * time.Millisecond)
 
 // 	// processCDR
-// 	argsCDR := &utils.CGREventWithOpts{
-// 		CGREvent: &utils.CGREvent{
+// 	argsCDR := &engine.CGREventWithOpts{
+// 		CGREvent: &engine.CGREvent{
 // 			Tenant: "cgrates.org",
 // 			ID:     fmt.Sprintf("TestSCncrCDR%s", originID),
 // 			Event: map[string]any{

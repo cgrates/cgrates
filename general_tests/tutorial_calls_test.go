@@ -307,7 +307,7 @@ func testCallStatMetricsBefore(t *testing.T) {
 
 func testCallCheckResourceBeforeAllocation(t *testing.T) {
 	var rs *engine.Resources
-	args := &utils.CGREvent{
+	args := &engine.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "ResourceEvent",
 		Event: map[string]any{
@@ -458,7 +458,7 @@ func testCallCall1003To1001SecondTime(t *testing.T) {
 // Check if the resource was Allocated
 func testCallCheckResourceAllocation(t *testing.T) {
 	var rs *engine.Resources
-	args := &utils.CGREvent{
+	args := &engine.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "ResourceAllocation",
 		Event: map[string]any{
@@ -648,7 +648,7 @@ func testCallStatMetrics(t *testing.T) {
 
 func testCallCheckResourceRelease(t *testing.T) {
 	var rs *engine.Resources
-	args := &utils.CGREvent{
+	args := &engine.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "ResourceRelease",
 		Event: map[string]any{
@@ -725,7 +725,7 @@ func testCallSyncSessions(t *testing.T) {
 	}
 	//check if resource was allocated for 2 calls(1001->1002;1001->1003)
 	var rs *engine.Resources
-	args := &utils.CGREvent{
+	args := &engine.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "AllocateResource",
 		Event: map[string]any{

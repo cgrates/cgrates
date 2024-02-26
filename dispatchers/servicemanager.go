@@ -22,14 +22,15 @@ import (
 	"time"
 
 	"github.com/cgrates/birpc/context"
+	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
 // ServiceManagerV1Ping interogates ServiceManager server responsible to process the event
-func (dS *DispatcherService) ServiceManagerV1Ping(ctx *context.Context, args *utils.CGREvent,
+func (dS *DispatcherService) ServiceManagerV1Ping(ctx *context.Context, args *engine.CGREvent,
 	reply *string) (err error) {
 	if args == nil {
-		args = new(utils.CGREvent)
+		args = new(engine.CGREvent)
 	}
 	args.Tenant = utils.FirstNonEmpty(args.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
@@ -53,7 +54,7 @@ func (dS *DispatcherService) ServiceManagerV1StartService(ctx *context.Context, 
 			return
 		}
 	}
-	return dS.Dispatch(&utils.CGREvent{
+	return dS.Dispatch(&engine.CGREvent{
 		Tenant:  tnt,
 		APIOpts: args.APIOpts,
 	}, utils.MetaServiceManager, utils.ServiceManagerV1StartService, args, reply)
@@ -71,7 +72,7 @@ func (dS *DispatcherService) ServiceManagerV1StopService(ctx *context.Context, a
 			return
 		}
 	}
-	return dS.Dispatch(&utils.CGREvent{
+	return dS.Dispatch(&engine.CGREvent{
 		Tenant:  tnt,
 		APIOpts: args.APIOpts,
 	}, utils.MetaServiceManager, utils.ServiceManagerV1StopService, args, reply)
@@ -89,7 +90,7 @@ func (dS *DispatcherService) ServiceManagerV1ServiceStatus(ctx *context.Context,
 			return
 		}
 	}
-	return dS.Dispatch(&utils.CGREvent{
+	return dS.Dispatch(&engine.CGREvent{
 		Tenant:  tnt,
 		APIOpts: args.APIOpts,
 	}, utils.MetaServiceManager, utils.ServiceManagerV1ServiceStatus, args, reply)

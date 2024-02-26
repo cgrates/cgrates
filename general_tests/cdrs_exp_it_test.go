@@ -57,7 +57,7 @@ var (
 
 	cdrsExpAMQPCon *amqp.Connection
 
-	cdrsExpEv = &utils.CGREvent{
+	cdrsExpEv = &engine.CGREvent{
 
 		ID:     "Export",
 		Tenant: "cgrates.org",

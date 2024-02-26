@@ -150,7 +150,7 @@ func TestEEsExportEventChanges(t *testing.T) {
 
 	t.Run("ExportEvent", func(t *testing.T) {
 		eventToExport := &engine.CGREventWithEeIDs{
-			CGREvent: &utils.CGREvent{
+			CGREvent: &engine.CGREvent{
 				Tenant: "cgrates.org",
 				ID:     "voiceEvent",
 				Time:   utils.TimePointer(time.Now()),

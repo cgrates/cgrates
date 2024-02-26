@@ -101,7 +101,7 @@ func testFwvRPCConn(t *testing.T) {
 func testFwvExportEvent(t *testing.T) {
 	event := &engine.CGREventWithEeIDs{
 		EeIDs: []string{"FwvExporter"},
-		CGREvent: &utils.CGREvent{
+		CGREvent: &engine.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "Event",
 			Time:   utils.TimePointer(time.Now()),

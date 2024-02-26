@@ -43,7 +43,7 @@ func TestDspResourceSv1PingNil(t *testing.T) {
 	cgrCfg := config.NewDefaultCGRConfig()
 	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
 	cgrCfg.DispatcherSCfg().AttributeSConns = []string{"test"}
-	CGREvent := &utils.CGREvent{
+	CGREvent := &engine.CGREvent{
 		Tenant: "tenant",
 	}
 	var reply *string
@@ -57,7 +57,7 @@ func TestDspResourceSv1PingNil(t *testing.T) {
 func TestDspResourceSv1PingErrorNil(t *testing.T) {
 	cgrCfg := config.NewDefaultCGRConfig()
 	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
-	CGREvent := &utils.CGREvent{
+	CGREvent := &engine.CGREvent{
 		Tenant: "tenant",
 	}
 	var reply *string
@@ -72,7 +72,7 @@ func TestDspResourceSv1GetResourcesForEventNil(t *testing.T) {
 	cgrCfg := config.NewDefaultCGRConfig()
 	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
 	cgrCfg.DispatcherSCfg().AttributeSConns = []string{"test"}
-	CGREvent := &utils.CGREvent{
+	CGREvent := &engine.CGREvent{
 		Tenant: "tenant",
 	}
 	var reply *engine.Resources
@@ -86,7 +86,7 @@ func TestDspResourceSv1GetResourcesForEventNil(t *testing.T) {
 func TestDspResourceSv1GetResourcesForEventErrorNil(t *testing.T) {
 	cgrCfg := config.NewDefaultCGRConfig()
 	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
-	CGREvent := &utils.CGREvent{
+	CGREvent := &engine.CGREvent{
 		Tenant: "tenant",
 	}
 	var reply *engine.Resources
@@ -101,7 +101,7 @@ func TestDspResourceSv1AuthorizeResourcesNil(t *testing.T) {
 	cgrCfg := config.NewDefaultCGRConfig()
 	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
 	cgrCfg.DispatcherSCfg().AttributeSConns = []string{"test"}
-	CGREvent := &utils.CGREvent{
+	CGREvent := &engine.CGREvent{
 		Tenant: "tenant",
 	}
 	var reply *string
@@ -115,7 +115,7 @@ func TestDspResourceSv1AuthorizeResourcesNil(t *testing.T) {
 func TestDspResourceSv1AuthorizeResourcesErrorNil(t *testing.T) {
 	cgrCfg := config.NewDefaultCGRConfig()
 	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
-	CGREvent := &utils.CGREvent{
+	CGREvent := &engine.CGREvent{
 		Tenant: "tenant",
 	}
 	var reply *string
@@ -130,7 +130,7 @@ func TestDspResourceSv1ReleaseResourcesNil(t *testing.T) {
 	cgrCfg := config.NewDefaultCGRConfig()
 	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
 	cgrCfg.DispatcherSCfg().AttributeSConns = []string{"test"}
-	CGREvent := &utils.CGREvent{
+	CGREvent := &engine.CGREvent{
 		Tenant: "tenant",
 	}
 	var reply *string
@@ -144,7 +144,7 @@ func TestDspResourceSv1ReleaseResourcesNil(t *testing.T) {
 func TestDspResourceSv1ReleaseResourcesErrorNil(t *testing.T) {
 	cgrCfg := config.NewDefaultCGRConfig()
 	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
-	CGREvent := &utils.CGREvent{
+	CGREvent := &engine.CGREvent{
 		Tenant: "tenant",
 	}
 	var reply *string
@@ -192,7 +192,7 @@ func TestDspResourceSv1AllocateResourcesNil(t *testing.T) {
 	cgrCfg := config.NewDefaultCGRConfig()
 	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
 	cgrCfg.DispatcherSCfg().AttributeSConns = []string{"test"}
-	CGREvent := &utils.CGREvent{
+	CGREvent := &engine.CGREvent{
 		Tenant: "tenant",
 	}
 	var reply *string
@@ -206,7 +206,7 @@ func TestDspResourceSv1AllocateResourcesNil(t *testing.T) {
 func TestDspResourceSv1AllocateResourcesErrorNil(t *testing.T) {
 	cgrCfg := config.NewDefaultCGRConfig()
 	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
-	CGREvent := &utils.CGREvent{
+	CGREvent := &engine.CGREvent{
 		Tenant: "tenant",
 	}
 	var reply *string

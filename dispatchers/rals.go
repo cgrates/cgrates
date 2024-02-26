@@ -22,12 +22,13 @@ import (
 	"time"
 
 	"github.com/cgrates/birpc/context"
+	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
-func (dS *DispatcherService) RALsV1Ping(ctx *context.Context, args *utils.CGREvent, rpl *string) (err error) {
+func (dS *DispatcherService) RALsV1Ping(ctx *context.Context, args *engine.CGREvent, rpl *string) (err error) {
 	if args == nil {
-		args = new(utils.CGREvent)
+		args = new(engine.CGREvent)
 	}
 	args.Tenant = utils.FirstNonEmpty(args.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
@@ -47,7 +48,7 @@ func (dS *DispatcherService) RALsV1GetRatingPlansCost(ctx *context.Context, args
 			return
 		}
 	}
-	return dS.Dispatch(&utils.CGREvent{
+	return dS.Dispatch(&engine.CGREvent{
 		Tenant:  tenant,
 		APIOpts: args.APIOpts,
 	}, utils.MetaRALs, utils.RALsV1GetRatingPlansCost, args, rpl)

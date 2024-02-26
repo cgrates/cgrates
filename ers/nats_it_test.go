@@ -132,7 +132,7 @@ func testCheckNatsData(t *testing.T, randomCGRID, expData string, ch chan string
 		if ev.rdrCfg.ID != "nats" {
 			t.Fatalf("Expected 'nats' received `%s`", ev.rdrCfg.ID)
 		}
-		expected := &utils.CGREvent{
+		expected := &engine.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     ev.cgrEvent.ID,
 			Time:   ev.cgrEvent.Time,

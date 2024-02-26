@@ -135,12 +135,12 @@ func testDspSessionAddBalacne(t *testing.T) {
 
 func testDspSessionPing(t *testing.T) {
 	var reply string
-	if err := allEngine.RPC.Call(context.Background(), utils.SessionSv1Ping, new(utils.CGREvent), &reply); err != nil {
+	if err := allEngine.RPC.Call(context.Background(), utils.SessionSv1Ping, new(engine.CGREvent), &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.Pong {
 		t.Errorf("Received: %s", reply)
 	}
-	if err := dispEngine.RPC.Call(context.Background(), utils.SessionSv1Ping, &utils.CGREvent{
+	if err := dispEngine.RPC.Call(context.Background(), utils.SessionSv1Ping, &engine.CGREvent{
 		Tenant: "cgrates.org",
 
 		APIOpts: map[string]any{
@@ -155,12 +155,12 @@ func testDspSessionPing(t *testing.T) {
 
 func testDspSessionPingFailover(t *testing.T) {
 	var reply string
-	if err := allEngine.RPC.Call(context.Background(), utils.SessionSv1Ping, new(utils.CGREvent), &reply); err != nil {
+	if err := allEngine.RPC.Call(context.Background(), utils.SessionSv1Ping, new(engine.CGREvent), &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.Pong {
 		t.Errorf("Received: %s", reply)
 	}
-	ev := &utils.CGREvent{
+	ev := &engine.CGREvent{
 		Tenant: "cgrates.org",
 
 		APIOpts: map[string]any{
@@ -193,7 +193,7 @@ func testDspSessionTestAuthKey(t *testing.T) {
 		AuthorizeResources: true,
 		GetRoutes:          true,
 		GetAttributes:      true,
-		CGREvent: &utils.CGREvent{
+		CGREvent: &engine.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSSv1ItAuth",
 			Event: map[string]any{
@@ -227,7 +227,7 @@ func testDspSessionAuthorize(t *testing.T) {
 		AuthorizeResources: true,
 		GetRoutes:          true,
 		GetAttributes:      true,
-		CGREvent: &utils.CGREvent{
+		CGREvent: &engine.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSSv1ItAuth",
 			Event: map[string]any{
@@ -280,7 +280,7 @@ func testDspSessionInit(t *testing.T) {
 		InitSession:       true,
 		AllocateResources: true,
 		GetAttributes:     true,
-		CGREvent: &utils.CGREvent{
+		CGREvent: &engine.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSSv1ItInitiateSession",
 			Event: map[string]any{
@@ -356,7 +356,7 @@ func testDspSessionUpdate(t *testing.T) {
 	argsUpdate := &sessions.V1UpdateSessionArgs{
 		GetAttributes: true,
 		UpdateSession: true,
-		CGREvent: &utils.CGREvent{
+		CGREvent: &engine.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSSv1ItUpdateSession",
 			Event: map[string]any{
@@ -386,7 +386,7 @@ func testDspSessionUpdate(t *testing.T) {
 	eAttrs := &engine.AttrSProcessEventReply{
 		MatchedProfiles: []string{"cgrates.org:ATTR_ACNT_1001"},
 		AlteredFields:   []string{"*req.OfficeGroup"},
-		CGREvent: &utils.CGREvent{
+		CGREvent: &engine.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSSv1ItUpdateSession",
 			Event: map[string]any{
@@ -430,7 +430,7 @@ func testDspSessionUpdate2(t *testing.T) {
 	argsUpdate := &sessions.V1UpdateSessionArgs{
 		GetAttributes: true,
 		UpdateSession: true,
-		CGREvent: &utils.CGREvent{
+		CGREvent: &engine.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSSv1ItUpdateSession",
 			Event: map[string]any{
@@ -460,7 +460,7 @@ func testDspSessionUpdate2(t *testing.T) {
 		MatchedProfiles: []string{"cgrates.org:ATTR_1001_SESSIONAUTH"},
 		AlteredFields:   []string{"*req.LCRProfile", "*req.Password", "*req.RequestType", "*req.PaypalAccount"},
 
-		CGREvent: &utils.CGREvent{
+		CGREvent: &engine.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSSv1ItUpdateSession",
 			Event: map[string]any{
@@ -510,7 +510,7 @@ func testDspSessionTerminate(t *testing.T) {
 		TerminateSession: true,
 		ReleaseResources: true,
 
-		CGREvent: &utils.CGREvent{
+		CGREvent: &engine.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSSv1ItUpdateSession",
 			Event: map[string]any{
@@ -543,7 +543,7 @@ func testDspSessionTerminate(t *testing.T) {
 }
 
 func testDspSessionProcessCDR(t *testing.T) {
-	args := utils.CGREvent{
+	args := engine.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "TestSSv1ItProcessCDR",
 		Event: map[string]any{
@@ -579,7 +579,7 @@ func testDspSessionProcessEvent(t *testing.T) {
 		AllocateResources: true,
 		Debit:             true,
 		GetAttributes:     true,
-		CGREvent: &utils.CGREvent{
+		CGREvent: &engine.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSSv1ItProcessEvent",
 			Event: map[string]any{
@@ -617,7 +617,7 @@ func testDspSessionProcessEvent(t *testing.T) {
 		MatchedProfiles: []string{"cgrates.org:ATTR_ACNT_1001"},
 		AlteredFields:   []string{"*req.OfficeGroup"},
 
-		CGREvent: &utils.CGREvent{
+		CGREvent: &engine.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSSv1ItProcessEvent",
 			Event: map[string]any{
@@ -662,7 +662,7 @@ func testDspSessionProcessEvent2(t *testing.T) {
 		AllocateResources: true,
 		Debit:             true,
 		GetAttributes:     true,
-		CGREvent: &utils.CGREvent{
+		CGREvent: &engine.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSSv1ItProcessEvent",
 			Event: map[string]any{
@@ -700,7 +700,7 @@ func testDspSessionProcessEvent2(t *testing.T) {
 		MatchedProfiles: []string{"cgrates.org:ATTR_1001_SIMPLEAUTH"},
 		AlteredFields:   []string{"*req.EventName", "*req.Password"},
 
-		CGREvent: &utils.CGREvent{
+		CGREvent: &engine.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSSv1ItProcessEvent",
 			Event: map[string]any{
@@ -941,7 +941,7 @@ func testDspSessionForceDisconect(t *testing.T) {
 func testDspSessionProcessEvent3(t *testing.T) {
 	args := &sessions.V1ProcessEventArgs{
 		Flags: []string{"*rals:*terminate", "*resources:*release"},
-		CGREvent: &utils.CGREvent{
+		CGREvent: &engine.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testSSv1ItProcessEventTerminateSession",
 			Event: map[string]any{
@@ -986,7 +986,7 @@ func testDspSessionProcessEvent3(t *testing.T) {
 func testDspSessionGetCost(t *testing.T) {
 
 	args := &sessions.V1ProcessEventArgs{
-		CGREvent: &utils.CGREvent{
+		CGREvent: &engine.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testSSv1ItGetCost",
 			Event: map[string]any{

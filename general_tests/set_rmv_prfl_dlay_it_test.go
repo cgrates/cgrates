@@ -77,7 +77,7 @@ func TestSetRemoveProfilesWithCachingDelay(t *testing.T) {
 	})
 
 	t.Run("SetAttributeProfile", func(t *testing.T) {
-		ev := &utils.CGREvent{
+		ev := &engine.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testAttributeSGetAttributeForEventWihMetaAnyContext",
 			Event: map[string]any{
@@ -546,7 +546,7 @@ func TestSetRemoveProfilesWithCachingDelay(t *testing.T) {
 
 	t.Run("ReplicatorSv1SetAttributeProfile", func(t *testing.T) {
 
-		ev := &utils.CGREvent{
+		ev := &engine.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testAttributeSGetAttributeForEventWihMetaAnyContext",
 			Event: map[string]any{

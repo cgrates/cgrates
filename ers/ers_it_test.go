@@ -114,7 +114,7 @@ func TestERsProcessEventErr(t *testing.T) {
 		ID:   "",
 		Type: "",
 	}
-	cgrEvent := &utils.CGREvent{
+	cgrEvent := &engine.CGREvent{
 		Tenant: "",
 		ID:     "",
 	}
@@ -193,7 +193,7 @@ func TestERsListenAndServeRdrEvents(t *testing.T) {
 	srv.rdrErr = make(chan error, 1)
 	srv.rdrEvents = make(chan *erEvent, 1)
 	srv.rdrEvents <- &erEvent{
-		cgrEvent: &utils.CGREvent{
+		cgrEvent: &engine.CGREvent{
 			Tenant:  "",
 			ID:      "",
 			Time:    nil,
@@ -438,7 +438,7 @@ func TestERsProcessEvent(t *testing.T) {
 			},
 		},
 	}
-	cgrEvent := &utils.CGREvent{
+	cgrEvent := &engine.CGREvent{
 		Tenant:  "",
 		ID:      "",
 		Time:    nil,
@@ -467,7 +467,7 @@ func TestERsProcessEvent2(t *testing.T) {
 			},
 		},
 	}
-	cgrEvent := &utils.CGREvent{
+	cgrEvent := &engine.CGREvent{
 		Tenant:  "",
 		ID:      "",
 		Time:    nil,
@@ -495,7 +495,7 @@ func TestERsProcessEvent3(t *testing.T) {
 			utils.MetaEvent: map[string][]string{},
 		},
 	}
-	cgrEvent := &utils.CGREvent{
+	cgrEvent := &engine.CGREvent{
 		APIOpts: map[string]any{
 			utils.OptsRoutesLimit: true,
 		},
@@ -522,7 +522,7 @@ func TestERsProcessEvent4(t *testing.T) {
 			utils.MetaAuthorize: map[string][]string{},
 		},
 	}
-	cgrEvent := &utils.CGREvent{
+	cgrEvent := &engine.CGREvent{
 		APIOpts: map[string]any{
 			utils.OptsRoutesLimit: true,
 		},
@@ -549,7 +549,7 @@ func TestERsProcessEvent5(t *testing.T) {
 			utils.MetaTerminate: map[string][]string{},
 		},
 	}
-	cgrEvent := &utils.CGREvent{
+	cgrEvent := &engine.CGREvent{
 		Tenant: "",
 		ID:     "",
 		Time:   nil,
@@ -580,7 +580,7 @@ func TestERsProcessEvent6(t *testing.T) {
 			utils.MetaInitiate: map[string][]string{},
 		},
 	}
-	cgrEvent := &utils.CGREvent{
+	cgrEvent := &engine.CGREvent{
 		APIOpts: map[string]any{
 			utils.OptsRoutesLimit: true,
 		},
@@ -606,7 +606,7 @@ func TestERsProcessEvent7(t *testing.T) {
 			utils.MetaUpdate: map[string][]string{},
 		},
 	}
-	cgrEvent := &utils.CGREvent{
+	cgrEvent := &engine.CGREvent{
 		APIOpts: map[string]any{
 			utils.OptsRoutesLimit: true,
 		},
@@ -632,7 +632,7 @@ func TestERsProcessEvent8(t *testing.T) {
 			utils.MetaMessage: map[string][]string{},
 		},
 	}
-	cgrEvent := &utils.CGREvent{
+	cgrEvent := &engine.CGREvent{
 		Tenant: "",
 		ID:     "",
 		Time:   nil,
@@ -663,7 +663,7 @@ func TestERsProcessEvent9(t *testing.T) {
 			utils.MetaCDRs: map[string][]string{},
 		},
 	}
-	cgrEvent := &utils.CGREvent{
+	cgrEvent := &engine.CGREvent{
 		Tenant: "",
 		ID:     "",
 		Time:   nil,
@@ -695,7 +695,7 @@ func TestERsProcessEvent10(t *testing.T) {
 			utils.MetaAccounts: map[string][]string{},
 		},
 	}
-	cgrEvent := &utils.CGREvent{
+	cgrEvent := &engine.CGREvent{
 		Tenant: "",
 		ID:     "",
 		Time:   nil,
@@ -752,7 +752,7 @@ func TestERsProcessEvent11(t *testing.T) {
 			utils.MetaMessage: map[string][]string{},
 		},
 	}
-	cgrEvent := &utils.CGREvent{
+	cgrEvent := &engine.CGREvent{
 		Tenant: "",
 		ID:     "",
 		Time:   nil,
@@ -781,7 +781,7 @@ func TestErsOnEvictedMetaDumpToFileOK(t *testing.T) {
 	val2 := config.NewRSRParsersMustCompile("1001", ",")
 	val3 := config.NewRSRParsersMustCompile("1002", ",")
 	value := &erEvents{
-		events: []*utils.CGREvent{
+		events: []*engine.CGREvent{
 			{
 				Tenant: "cgrates.org",
 				ID:     "EventErsOnEvicted",
@@ -865,7 +865,7 @@ func TestErsOnEvictedMetaDumpToFileCSVWriteErr(t *testing.T) {
 	defer os.RemoveAll(dirPath)
 
 	value := &erEvents{
-		events: []*utils.CGREvent{
+		events: []*engine.CGREvent{
 			{
 				Tenant: "cgrates.org",
 				ID:     "EventErsOnEvicted",
@@ -923,7 +923,7 @@ func TestErsOnEvictedMetaDumpToFileCreateErr(t *testing.T) {
 	defer os.RemoveAll(dirPath)
 
 	value := &erEvents{
-		events: []*utils.CGREvent{
+		events: []*engine.CGREvent{
 			{
 				Tenant: "cgrates.org",
 				ID:     "EventErsOnEvicted",
@@ -973,7 +973,7 @@ func TestERsOnEvictedDumpToJSON(t *testing.T) {
 	}
 
 	value := &erEvents{
-		events: []*utils.CGREvent{
+		events: []*engine.CGREvent{
 			{
 				Tenant: "cgrates.org",
 				ID:     "EventErsOnEvicted",
@@ -1057,7 +1057,7 @@ func TestERsOnEvictedDumpToJSON(t *testing.T) {
 func TestErsOnEvictedDumpToJSONNoPath(t *testing.T) {
 	dirPath := ""
 	value := &erEvents{
-		events: []*utils.CGREvent{
+		events: []*engine.CGREvent{
 			{
 				Tenant: "cgrates.org",
 				ID:     "EventErsOnEvicted",
@@ -1118,7 +1118,7 @@ func TestErsOnEvictedDumpToJSONMergeError(t *testing.T) {
 	}
 
 	value := &erEvents{
-		events: []*utils.CGREvent{
+		events: []*engine.CGREvent{
 			{
 				Tenant: "cgrates.org",
 				ID:     "EventErsOnEvicted",
@@ -1202,7 +1202,7 @@ func TestERsOnEvictedDumpToJSONWithCacheDumpFieldsErrPrefix(t *testing.T) {
 	}()
 
 	value := &erEvents{
-		events: []*utils.CGREvent{
+		events: []*engine.CGREvent{
 			{
 				Tenant: "cgrates.org",
 				ID:     "EventErsOnEvicted",
@@ -1274,7 +1274,7 @@ func TestERsOnEvictedDumpToJSONWithCacheDumpFields(t *testing.T) {
 	}
 
 	value := &erEvents{
-		events: []*utils.CGREvent{
+		events: []*engine.CGREvent{
 			{
 				Tenant: "cgrates.org",
 				ID:     "EventErsOnEvicted",
@@ -1374,7 +1374,7 @@ func TestErsOnEvictedDumpToJSONInvalidPath(t *testing.T) {
 	// 	t.Error(err)
 	// }
 	value := &erEvents{
-		events: []*utils.CGREvent{
+		events: []*engine.CGREvent{
 			{
 				Tenant: "cgrates.org",
 				ID:     "EventErsOnEvicted",
@@ -1441,7 +1441,7 @@ func TestErsOnEvictedDumpToJSONEncodeErr(t *testing.T) {
 		t.Error(err)
 	}
 	value := &erEvents{
-		events: []*utils.CGREvent{
+		events: []*engine.CGREvent{
 			{
 				Tenant: "cgrates.org",
 				ID:     "EventErsOnEvicted",

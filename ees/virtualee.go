@@ -23,6 +23,7 @@ import (
 	"strings"
 
 	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -52,7 +53,7 @@ func (vEe *VirtualEE) ExportEvent(payload any, _ string) error {
 func (vEe *VirtualEE) Close() error                      { return nil }
 func (vEe *VirtualEE) GetMetrics() *utils.SafeMapStorage { return vEe.dc }
 
-func (vEe *VirtualEE) PrepareMap(cgrEv *utils.CGREvent) (any, error) {
+func (vEe *VirtualEE) PrepareMap(cgrEv *engine.CGREvent) (any, error) {
 	return cgrEv.Event, nil
 }
 

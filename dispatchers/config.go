@@ -23,6 +23,7 @@ import (
 
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -37,7 +38,7 @@ func (dS *DispatcherService) ConfigSv1GetConfig(ctx *context.Context, args *conf
 			return
 		}
 	}
-	return dS.Dispatch(&utils.CGREvent{
+	return dS.Dispatch(&engine.CGREvent{
 		Tenant:  tnt,
 		APIOpts: args.APIOpts,
 	}, utils.MetaConfig, utils.ConfigSv1GetConfig, args, reply)
@@ -54,7 +55,7 @@ func (dS *DispatcherService) ConfigSv1ReloadConfig(ctx *context.Context, args *c
 			return
 		}
 	}
-	return dS.Dispatch(&utils.CGREvent{
+	return dS.Dispatch(&engine.CGREvent{
 		Tenant:  tnt,
 		APIOpts: args.APIOpts,
 	}, utils.MetaConfig, utils.ConfigSv1ReloadConfig, args, reply)
@@ -71,7 +72,7 @@ func (dS *DispatcherService) ConfigSv1SetConfig(ctx *context.Context, args *conf
 			return
 		}
 	}
-	return dS.Dispatch(&utils.CGREvent{
+	return dS.Dispatch(&engine.CGREvent{
 		Tenant:  tnt,
 		APIOpts: args.APIOpts,
 	}, utils.MetaConfig, utils.ConfigSv1SetConfig, args, reply)
@@ -88,7 +89,7 @@ func (dS *DispatcherService) ConfigSv1SetConfigFromJSON(ctx *context.Context, ar
 			return
 		}
 	}
-	return dS.Dispatch(&utils.CGREvent{
+	return dS.Dispatch(&engine.CGREvent{
 		Tenant:  tnt,
 		APIOpts: args.APIOpts,
 	}, utils.MetaConfig, utils.ConfigSv1SetConfigFromJSON, args, reply)
@@ -105,7 +106,7 @@ func (dS *DispatcherService) ConfigSv1GetConfigAsJSON(ctx *context.Context, args
 			return
 		}
 	}
-	return dS.Dispatch(&utils.CGREvent{
+	return dS.Dispatch(&engine.CGREvent{
 		Tenant:  tnt,
 		APIOpts: args.APIOpts,
 	}, utils.MetaConfig, utils.ConfigSv1GetConfigAsJSON, args, reply)

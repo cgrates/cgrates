@@ -163,7 +163,7 @@ func testV1SplSSetRouteProfilesWithoutRatingPlanIDs(t *testing.T) {
 	} else if !reflect.DeepEqual(splPrf.RouteProfile, reply) {
 		t.Errorf("Expecting: %+v, received: %+v", splPrf.RouteProfile, reply)
 	}
-	ev := &utils.CGREvent{
+	ev := &engine.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "testV1SplSGetLeastCostSuppliers",
 		Event: map[string]any{
@@ -340,7 +340,7 @@ func testV1SplSAddNewResPrf(t *testing.T) {
 
 func testV1SplSPopulateResUsage(t *testing.T) {
 	var reply string
-	cgrEv := &utils.CGREvent{
+	cgrEv := &engine.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "Event1",
 		Event: map[string]any{
@@ -362,7 +362,7 @@ func testV1SplSPopulateResUsage(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", eAllocationMsg, reply)
 	}
 
-	cgrEv = &utils.CGREvent{
+	cgrEv = &engine.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "Event2",
 		Event: map[string]any{
@@ -384,7 +384,7 @@ func testV1SplSPopulateResUsage(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", eAllocationMsg, reply)
 	}
 
-	cgrEv = &utils.CGREvent{
+	cgrEv = &engine.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "Event3",
 		Event: map[string]any{
@@ -406,7 +406,7 @@ func testV1SplSPopulateResUsage(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", eAllocationMsg, reply)
 	}
 
-	cgrEv = &utils.CGREvent{
+	cgrEv = &engine.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "Event4",
 		Event: map[string]any{
@@ -431,7 +431,7 @@ func testV1SplSPopulateResUsage(t *testing.T) {
 }
 
 func testV1SplSGetSortedRoutes(t *testing.T) {
-	ev := &utils.CGREvent{
+	ev := &engine.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "testV1SplSGetSortedRoutes",
 		Event: map[string]any{
@@ -513,7 +513,7 @@ func testV1SplSAddNewRoutePrf2(t *testing.T) {
 }
 
 func testV1SplSGetSortedRoutes2(t *testing.T) {
-	ev := &utils.CGREvent{
+	ev := &engine.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "testV1SplSGetSortedSuppliers2",
 		Event: map[string]any{
@@ -546,7 +546,7 @@ func testV1SplSPopulateStats(t *testing.T) {
 	// so we can check the metrics in Suppliers for *load strategy
 	var reply []string
 	expected := []string{"Stat_Supplier1"}
-	ev1 := &utils.CGREvent{
+	ev1 := &engine.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "event1",
 		Event: map[string]any{
@@ -561,7 +561,7 @@ func testV1SplSPopulateStats(t *testing.T) {
 	}
 
 	expected = []string{"Stat_Supplier1"}
-	ev1 = &utils.CGREvent{
+	ev1 = &engine.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "event2",
 		Event: map[string]any{
@@ -588,7 +588,7 @@ func testV1SplSPopulateStats(t *testing.T) {
 	}
 
 	expected = []string{"Stat_Supplier2"}
-	ev1 = &utils.CGREvent{
+	ev1 = &engine.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "event3",
 		Event: map[string]any{
@@ -603,7 +603,7 @@ func testV1SplSPopulateStats(t *testing.T) {
 	}
 
 	expected = []string{"Stat_Supplier2"}
-	ev1 = &utils.CGREvent{
+	ev1 = &engine.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "event4",
 		Event: map[string]any{
@@ -626,7 +626,7 @@ func testV1SplSPopulateStats(t *testing.T) {
 	}
 
 	expected = []string{"Stat_Supplier3"}
-	ev1 = &utils.CGREvent{
+	ev1 = &engine.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "event5",
 		Event: map[string]any{
@@ -641,7 +641,7 @@ func testV1SplSPopulateStats(t *testing.T) {
 	}
 
 	expected = []string{"Stat_Supplier3"}
-	ev1 = &utils.CGREvent{
+	ev1 = &engine.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "event6",
 		Event: map[string]any{
@@ -656,7 +656,7 @@ func testV1SplSPopulateStats(t *testing.T) {
 	}
 
 	expected = []string{"Stat_Supplier3"}
-	ev1 = &utils.CGREvent{
+	ev1 = &engine.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "event7",
 		Event: map[string]any{
@@ -684,7 +684,7 @@ func testV1SplSPopulateStats(t *testing.T) {
 }
 
 func testV1SplSGetSoredRoutesWithLoad(t *testing.T) {
-	ev := &utils.CGREvent{
+	ev := &engine.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "testV1SplSGetSoredSuppliersWithLoad",
 		Event: map[string]any{

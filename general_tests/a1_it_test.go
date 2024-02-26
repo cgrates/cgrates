@@ -188,7 +188,7 @@ func testA1itDataSession1(t *testing.T) {
 	initArgs := &sessions.V1InitSessionArgs{
 		InitSession: true,
 
-		CGREvent: &utils.CGREvent{
+		CGREvent: &engine.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestA1itDataSession1",
 			Event: map[string]any{
@@ -225,7 +225,7 @@ func testA1itDataSession1(t *testing.T) {
 	updateArgs := &sessions.V1UpdateSessionArgs{
 		UpdateSession: true,
 
-		CGREvent: &utils.CGREvent{
+		CGREvent: &engine.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSessionsVoiceLastUsed",
 			Event: map[string]any{
@@ -264,7 +264,7 @@ func testA1itDataSession1(t *testing.T) {
 	usage = time.Minute
 	termArgs := &sessions.V1TerminateSessionArgs{
 		TerminateSession: true,
-		CGREvent: &utils.CGREvent{
+		CGREvent: &engine.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSessionsVoiceLastUsed",
 			Event: map[string]any{

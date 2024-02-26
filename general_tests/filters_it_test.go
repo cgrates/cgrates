@@ -146,7 +146,7 @@ func testV1FltrLoadTarrifPlans(t *testing.T) {
 func testV1FltrAddStats(t *testing.T) {
 	var reply []string
 	expected := []string{"Stat_1"}
-	ev1 := &utils.CGREvent{
+	ev1 := &engine.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "event1",
 		Event: map[string]any{
@@ -163,7 +163,7 @@ func testV1FltrAddStats(t *testing.T) {
 	}
 
 	expected = []string{"Stat_1"}
-	ev1 = &utils.CGREvent{
+	ev1 = &engine.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "event2",
 		Event: map[string]any{
@@ -180,7 +180,7 @@ func testV1FltrAddStats(t *testing.T) {
 	}
 
 	expected = []string{"Stat_2"}
-	ev1 = &utils.CGREvent{
+	ev1 = &engine.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "event2",
 		Event: map[string]any{
@@ -197,7 +197,7 @@ func testV1FltrAddStats(t *testing.T) {
 	}
 
 	expected = []string{"Stat_2"}
-	ev1 = &utils.CGREvent{
+	ev1 = &engine.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "event2",
 		Event: map[string]any{
@@ -214,7 +214,7 @@ func testV1FltrAddStats(t *testing.T) {
 	}
 
 	expected = []string{"Stat_3"}
-	ev1 = &utils.CGREvent{
+	ev1 = &engine.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "event3",
 		Event: map[string]any{
@@ -231,7 +231,7 @@ func testV1FltrAddStats(t *testing.T) {
 	}
 
 	expected = []string{"Stat_1_1"}
-	ev1 = &utils.CGREvent{
+	ev1 = &engine.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "event3",
 		Event: map[string]any{
@@ -249,7 +249,7 @@ func testV1FltrAddStats(t *testing.T) {
 	}
 
 	expected = []string{"Stat_1_1"}
-	ev1 = &utils.CGREvent{
+	ev1 = &engine.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "event3",
 		Event: map[string]any{
@@ -334,7 +334,7 @@ func testV1FltrPopulateThreshold(t *testing.T) {
 
 func testV1FltrGetThresholdForEvent(t *testing.T) {
 	// check the event
-	tEv := &utils.CGREvent{
+	tEv := &engine.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "event1",
 		Event: map[string]any{
@@ -395,7 +395,7 @@ func testV1FltrGetThresholdForEvent2(t *testing.T) {
 		t.Error("Unexpected reply returned", result)
 	}
 
-	tEv := &utils.CGREvent{
+	tEv := &engine.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "event1",
 		Event: map[string]any{
@@ -437,7 +437,7 @@ func testV1FltrPopulateResources(t *testing.T) {
 	}
 
 	// Allocate 3 units for resource ResTest
-	argsRU := &utils.CGREvent{
+	argsRU := &engine.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     utils.UUIDSha1Prefix(),
 		Event: map[string]any{
@@ -502,7 +502,7 @@ func testV1FltrPopulateResources(t *testing.T) {
 	}
 
 	// check the event
-	tEv := &utils.CGREvent{
+	tEv := &engine.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "event1",
 		Event: map[string]any{
@@ -581,7 +581,7 @@ func testV1FltrPopulateResourcesAvailableUnits(t *testing.T) {
 	}
 
 	//Allocate 9 units for resource ResTest
-	argsRU := &utils.CGREvent{
+	argsRU := &engine.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     utils.UUIDSha1Prefix(),
 		Event: map[string]any{
@@ -650,7 +650,7 @@ func testV1FltrPopulateResourcesAvailableUnits(t *testing.T) {
 	}
 
 	//here will check the event
-	statsEv := &utils.CGREvent{
+	statsEv := &engine.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "event_nr2",
 		Event: map[string]any{
@@ -770,7 +770,7 @@ func testV1FltrAccounts(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", tPrfl.ThresholdProfile, rcvTh)
 	}
 
-	tEv := &utils.CGREvent{
+	tEv := &engine.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "event1",
 		Event: map[string]any{
@@ -856,7 +856,7 @@ func testV1FltrAccountsExistsDynamicaly(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", tPrfl.ThresholdProfile, rcvTh)
 	}
 
-	tEv := &utils.CGREvent{
+	tEv := &engine.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "event1",
 		Event: map[string]any{
@@ -869,7 +869,7 @@ func testV1FltrAccountsExistsDynamicaly(t *testing.T) {
 		t.Error("Unexpected reply returned", ids)
 	}
 
-	tEv = &utils.CGREvent{
+	tEv = &engine.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "event2",
 		Event: map[string]any{
@@ -929,7 +929,7 @@ func testV1FltrChargerSuffix(t *testing.T) {
 			AttributeSProfiles: []string{"*constant:*req.Subject:intraState"},
 			AlteredFields:      []string{utils.MetaReqRunID, "*req.Subject"},
 
-			CGREvent: &utils.CGREvent{ // matching Charger1
+			CGREvent: &engine.CGREvent{ // matching Charger1
 				Tenant: "cgrates.org",
 				ID:     "event1",
 				Event: map[string]any{
@@ -945,7 +945,7 @@ func testV1FltrChargerSuffix(t *testing.T) {
 			},
 		},
 	}
-	cgrEv := &utils.CGREvent{
+	cgrEv := &engine.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "event1",
 		Event: map[string]any{
@@ -967,7 +967,7 @@ func testV1FltrChargerSuffix(t *testing.T) {
 			AttributeSProfiles: []string{"*constant:*req.Subject:interState"},
 			AlteredFields:      []string{utils.MetaReqRunID, "*req.Subject"},
 
-			CGREvent: &utils.CGREvent{ // matching Charger1
+			CGREvent: &engine.CGREvent{ // matching Charger1
 				Tenant: "cgrates.org",
 				ID:     "event1",
 				Event: map[string]any{
@@ -983,7 +983,7 @@ func testV1FltrChargerSuffix(t *testing.T) {
 			},
 		},
 	}
-	cgrEv = &utils.CGREvent{
+	cgrEv = &engine.CGREvent{
 
 		Tenant: "cgrates.org",
 		ID:     "event1",
@@ -1029,7 +1029,7 @@ func testV1FltrAttributesPrefix(t *testing.T) {
 		AlteredFields:   []string{"*req.CustomField"},
 		MatchedProfiles: []string{"cgrates.new:ATTR_1001"},
 
-		CGREvent: &utils.CGREvent{
+		CGREvent: &engine.CGREvent{
 			Tenant: "cgrates.new",
 			ID:     "event1",
 			Event: map[string]any{
@@ -1042,7 +1042,7 @@ func testV1FltrAttributesPrefix(t *testing.T) {
 			},
 		},
 	}
-	cgrEv := &utils.CGREvent{
+	cgrEv := &engine.CGREvent{
 		Tenant: "cgrates.new",
 		ID:     "event1",
 		Event: map[string]any{
@@ -1124,7 +1124,7 @@ func testV1FltrPopulateTimings(t *testing.T) {
 		t.Error("Unexpected reply returned", result)
 	}
 
-	ev := &utils.CGREvent{
+	ev := &engine.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "testV1FltrPopulateTimings",
 		Event: map[string]any{
@@ -1138,7 +1138,7 @@ func testV1FltrPopulateTimings(t *testing.T) {
 	eRply := &engine.AttrSProcessEventReply{
 		MatchedProfiles: []string{"cgrates.org:FltrTest"},
 		AlteredFields:   []string{utils.MetaReq + utils.NestingSep + utils.AnswerTime},
-		CGREvent: &utils.CGREvent{
+		CGREvent: &engine.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testV1FltrPopulateTimings",
 			Event: map[string]any{

@@ -74,7 +74,7 @@ func TestDspCacheSv1(t *testing.T) {
 
 func testDspChcPing(t *testing.T) {
 	var reply string
-	if err := allEngine.RPC.Call(context.Background(), utils.CacheSv1Ping, new(utils.CGREvent), &reply); err != nil {
+	if err := allEngine.RPC.Call(context.Background(), utils.CacheSv1Ping, new(engine.CGREvent), &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.Pong {
 		t.Errorf("Received: %s", reply)
@@ -82,7 +82,7 @@ func testDspChcPing(t *testing.T) {
 	if dispEngine.RPC == nil {
 		t.Fatal(dispEngine.RPC)
 	}
-	if err := dispEngine.RPC.Call(context.Background(), utils.CacheSv1Ping, &utils.CGREvent{
+	if err := dispEngine.RPC.Call(context.Background(), utils.CacheSv1Ping, &engine.CGREvent{
 
 		Tenant: "cgrates.org",
 

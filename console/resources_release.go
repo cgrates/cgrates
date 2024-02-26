@@ -21,6 +21,7 @@ package console
 import (
 	"time"
 
+	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -28,7 +29,7 @@ func init() {
 	c := &CmdResourceRelease{
 		name:      "resources_release",
 		rpcMethod: utils.ResourceSv1ReleaseResources,
-		rpcParams: &utils.CGREvent{},
+		rpcParams: &engine.CGREvent{},
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}
@@ -38,7 +39,7 @@ func init() {
 type CmdResourceRelease struct {
 	name      string
 	rpcMethod string
-	rpcParams *utils.CGREvent
+	rpcParams *engine.CGREvent
 	*CommandExecuter
 }
 
@@ -52,7 +53,7 @@ func (self *CmdResourceRelease) RpcMethod() string {
 
 func (self *CmdResourceRelease) RpcParams(reset bool) any {
 	if reset || self.rpcParams == nil {
-		self.rpcParams = new(utils.CGREvent)
+		self.rpcParams = new(engine.CGREvent)
 	}
 	return self.rpcParams
 }

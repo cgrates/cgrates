@@ -393,7 +393,7 @@ func (rs *Responder) Shutdown(ctx *context.Context, arg *utils.TenantWithAPIOpts
 }
 
 // Ping used to detreminate if component is active
-func (chSv1 *Responder) Ping(ctx *context.Context, ign *utils.CGREvent, reply *string) error {
+func (chSv1 *Responder) Ping(ctx *context.Context, ign *CGREvent, reply *string) error {
 	*reply = utils.Pong
 	return nil
 }

@@ -209,7 +209,7 @@ func testRerateExpGetAccountAfterBalanceSet(t *testing.T) {
 func testRerateExpProcessEventCDR1(t *testing.T) {
 	argsEv := &engine.ArgV1ProcessEvent{
 		Flags: []string{utils.MetaRALs, utils.MetaExport},
-		CGREvent: utils.CGREvent{
+		CGREvent: engine.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "event1",
 			Event: map[string]any{
@@ -286,7 +286,7 @@ func testRerateExpGetAccountAfterProcessEvent1(t *testing.T) {
 func testRerateExpProcessEventCDR2(t *testing.T) {
 	argsEv := &engine.ArgV1ProcessEvent{
 		Flags: []string{utils.MetaRALs, utils.MetaExport},
-		CGREvent: utils.CGREvent{
+		CGREvent: engine.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "event2",
 			Event: map[string]any{
@@ -362,7 +362,7 @@ func testRerateExpGetAccountAfterProcessEvent2(t *testing.T) {
 
 func testRerateExpProcessEventCDR3(t *testing.T) {
 	argsEv := &engine.ArgV1ProcessEvent{
-		CGREvent: utils.CGREvent{
+		CGREvent: engine.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "event3",
 			Event: map[string]any{

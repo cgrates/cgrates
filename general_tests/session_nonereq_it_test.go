@@ -128,7 +128,7 @@ func testSesNoneReqTypeItAddChargerS(t *testing.T) {
 func testSesNoneReqTypeItInit(t *testing.T) {
 	args1 := &sessions.V1InitSessionArgs{
 		InitSession: true,
-		CGREvent: &utils.CGREvent{
+		CGREvent: &engine.CGREvent{
 			Tenant: "cgrates.org",
 			Event: map[string]any{
 				utils.CGRID:        "cgrID",

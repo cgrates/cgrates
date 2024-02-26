@@ -176,7 +176,7 @@ func testSessionSRplcApierSetChargerS(t *testing.T) {
 func testSessionSRplcApierGetInitateSessions(t *testing.T) {
 	args := &sessions.V1InitSessionArgs{
 		InitSession: true,
-		CGREvent: &utils.CGREvent{
+		CGREvent: &engine.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSSv1ItInitiateSession",
 			Event: map[string]any{

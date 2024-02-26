@@ -120,7 +120,7 @@ func TestAMQPERv1(t *testing.T) {
 		if ev.rdrCfg.ID != "amqpv1" {
 			t.Errorf("Expected 'amqpv1' received `%s`", ev.rdrCfg.ID)
 		}
-		expected := &utils.CGREvent{
+		expected := &engine.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     ev.cgrEvent.ID,
 			Time:   ev.cgrEvent.Time,

@@ -200,7 +200,7 @@ func TestAnalyzersV1Search(t *testing.T) {
 	// generate trafic
 	t1 := time.Now()
 	if err = anz.logTrafic(0, utils.CoreSv1Ping,
-		&utils.CGREvent{
+		&engine.CGREvent{
 			APIOpts: map[string]any{
 				utils.EventSource: utils.MetaCDRs,
 			},
@@ -210,7 +210,7 @@ func TestAnalyzersV1Search(t *testing.T) {
 	}
 
 	if err = anz.logTrafic(1, utils.CoreSv1Ping,
-		&utils.CGREvent{
+		&engine.CGREvent{
 			APIOpts: map[string]any{
 				utils.EventSource: utils.MetaAttributes,
 			},
@@ -222,7 +222,7 @@ func TestAnalyzersV1Search(t *testing.T) {
 	}
 
 	if err = anz.logTrafic(2, utils.CoreSv1Ping,
-		&utils.CGREvent{
+		&engine.CGREvent{
 			APIOpts: map[string]any{
 				utils.EventSource: utils.MetaAttributes,
 			},
@@ -234,7 +234,7 @@ func TestAnalyzersV1Search(t *testing.T) {
 	}
 
 	if err = anz.logTrafic(3, utils.CoreSv1Ping,
-		&utils.CGREvent{
+		&engine.CGREvent{
 			APIOpts: map[string]any{
 				utils.EventSource: utils.MetaAttributes,
 			},
@@ -245,7 +245,7 @@ func TestAnalyzersV1Search(t *testing.T) {
 		t.Fatal(err)
 	}
 	if err = anz.logTrafic(3, utils.CoreSv1Status,
-		&utils.CGREvent{
+		&engine.CGREvent{
 			APIOpts: map[string]any{
 				utils.EventSource: utils.MetaEEs,
 			},

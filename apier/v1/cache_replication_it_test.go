@@ -125,7 +125,7 @@ func testCacheSReplicateLoadTariffPlanFromFolder(t *testing.T) {
 }
 
 func testCacheSReplicateProcessAttributes(t *testing.T) {
-	ev := &utils.CGREvent{
+	ev := &engine.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "testCacheSReplicateProcessAttributes",
 		Event: map[string]any{
@@ -138,7 +138,7 @@ func testCacheSReplicateProcessAttributes(t *testing.T) {
 	eRply := &engine.AttrSProcessEventReply{
 		MatchedProfiles: []string{"cgrates.org:ATTR_ACNT_1001"},
 		AlteredFields:   []string{utils.MetaReq + utils.NestingSep + "OfficeGroup"},
-		CGREvent: &utils.CGREvent{
+		CGREvent: &engine.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testCacheSReplicateProcessAttributes",
 			Event: map[string]any{

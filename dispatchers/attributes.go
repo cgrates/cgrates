@@ -25,10 +25,10 @@ import (
 )
 
 // AttributeSv1Ping interrogates AttributeS server responsible to process the event
-func (dS *DispatcherService) AttributeSv1Ping(ctx *context.Context, args *utils.CGREvent,
+func (dS *DispatcherService) AttributeSv1Ping(ctx *context.Context, args *engine.CGREvent,
 	reply *string) (err error) {
 	if args == nil {
-		args = new(utils.CGREvent)
+		args = new(engine.CGREvent)
 	}
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
 	if args.Tenant != utils.EmptyString {
@@ -44,7 +44,7 @@ func (dS *DispatcherService) AttributeSv1Ping(ctx *context.Context, args *utils.
 }
 
 // AttributeSv1GetAttributeForEvent is the dispatcher method for AttributeSv1.GetAttributeForEvent
-func (dS *DispatcherService) AttributeSv1GetAttributeForEvent(ctx *context.Context, args *utils.CGREvent,
+func (dS *DispatcherService) AttributeSv1GetAttributeForEvent(ctx *context.Context, args *engine.CGREvent,
 	reply *engine.AttributeProfile) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
 	if args != nil && args.Tenant != utils.EmptyString {
@@ -60,7 +60,7 @@ func (dS *DispatcherService) AttributeSv1GetAttributeForEvent(ctx *context.Conte
 }
 
 // AttributeSv1ProcessEvent .
-func (dS *DispatcherService) AttributeSv1ProcessEvent(ctx *context.Context, args *utils.CGREvent,
+func (dS *DispatcherService) AttributeSv1ProcessEvent(ctx *context.Context, args *engine.CGREvent,
 	reply *engine.AttrSProcessEventReply) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
 	if args != nil && args.Tenant != utils.EmptyString {

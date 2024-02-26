@@ -36,7 +36,7 @@ type LeastCostSorter struct {
 }
 
 func (lcs *LeastCostSorter) SortRoutes(prflID string, routes map[string]*Route,
-	ev *utils.CGREvent, extraOpts *optsGetRoutes) (sortedRoutes *SortedRoutes, err error) {
+	ev *CGREvent, extraOpts *optsGetRoutes) (sortedRoutes *SortedRoutes, err error) {
 	sortedRoutes = &SortedRoutes{ProfileID: prflID,
 		Sorting: lcs.sorting,
 		Routes:  make([]*SortedRoute, 0)}

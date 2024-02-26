@@ -1852,7 +1852,7 @@ func TestCDDebitBalanceSubjectWithFallback(t *testing.T) {
 	}
 }
 func TestCallDescriptorUpdateFromCGREvent(t *testing.T) {
-	cgrEv := &utils.CGREvent{
+	cgrEv := &CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "Generated",
 		Event: map[string]any{
@@ -1900,7 +1900,7 @@ func TestCallDescriptorUpdateFromCGREvent(t *testing.T) {
 			t.Errorf("Expecting: %+v, received: %+v", cdExpected, cd)
 		}
 	}
-	cgrEv = &utils.CGREvent{
+	cgrEv = &CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "Generated",
 		Event: map[string]any{
@@ -1921,7 +1921,7 @@ func TestCallDescriptorUpdateFromCGREvent(t *testing.T) {
 			t.Errorf("Expecting: %+v, received: %+v", cdExpected, cd)
 		}
 	}
-	cgrEv = &utils.CGREvent{}
+	cgrEv = &CGREvent{}
 	if err = cd.UpdateFromCGREvent(cgrEv, []string{utils.Usage}); err == nil {
 		t.Error(err)
 	} else if err = cd.UpdateFromCGREvent(cgrEv, []string{utils.AnswerTime}); err == nil {
@@ -1941,7 +1941,7 @@ func TestCallDescriptorUpdateFromCGREvent(t *testing.T) {
 	} else if err = cd.UpdateFromCGREvent(cgrEv, []string{"Extra"}); err == nil {
 		t.Error(err)
 	}
-	cgrEv = &utils.CGREvent{
+	cgrEv = &CGREvent{
 		Event: map[string]any{
 			"Extra": "Value",
 		},
@@ -1974,7 +1974,7 @@ func TestCallDescriptorAsCGREvent(t *testing.T) {
 		TimeEnd:      time.Date(2015, 3, 23, 6, 30, 0, 0, time.UTC),
 		MaxCostSoFar: 0,
 	}
-	eCGREvent := &utils.CGREvent{Tenant: "cgrates.org",
+	eCGREvent := &CGREvent{Tenant: "cgrates.org",
 		ID: "Generated",
 		Event: map[string]any{
 			"Account":     "max",
@@ -2107,7 +2107,7 @@ func TestCalldescSetRpSubjectPrefixMatching(t *testing.T) {
 }
 
 func TestCalldescNewCallDescriptorFromCGREventNoAccount(t *testing.T) {
-	cgrEv := &utils.CGREvent{
+	cgrEv := &CGREvent{
 		Event: map[string]any{
 			"testKey": 5,
 		},
@@ -2128,7 +2128,7 @@ func TestCalldescNewCallDescriptorFromCGREventNoAccount(t *testing.T) {
 }
 
 func TestCalldescNewCallDescriptorFromCGREventNoDestination(t *testing.T) {
-	cgrEv := &utils.CGREvent{
+	cgrEv := &CGREvent{
 		Event: map[string]any{
 			utils.Category:     "catField",
 			utils.AccountField: "accField",
@@ -2150,7 +2150,7 @@ func TestCalldescNewCallDescriptorFromCGREventNoDestination(t *testing.T) {
 }
 
 func TestCalldescNewCallDescriptorFromCGREventNoTimeStart(t *testing.T) {
-	cgrEv := &utils.CGREvent{
+	cgrEv := &CGREvent{
 		Event: map[string]any{
 			utils.Category:     "catField",
 			utils.AccountField: "accField",
@@ -2173,7 +2173,7 @@ func TestCalldescNewCallDescriptorFromCGREventNoTimeStart(t *testing.T) {
 }
 
 func TestCalldescNewCallDescriptorFromCGREventInvalidAnswerTime(t *testing.T) {
-	cgrEv := &utils.CGREvent{
+	cgrEv := &CGREvent{
 		Event: map[string]any{
 			utils.Category:     "catField",
 			utils.AccountField: "accField",
@@ -2198,7 +2198,7 @@ func TestCalldescNewCallDescriptorFromCGREventInvalidAnswerTime(t *testing.T) {
 }
 
 func TestCalldescNewCallDescriptorFromCGREventNoUsage(t *testing.T) {
-	cgrEv := &utils.CGREvent{
+	cgrEv := &CGREvent{
 		Event: map[string]any{
 			utils.Category:     "catField",
 			utils.AccountField: "accField",
@@ -2223,7 +2223,7 @@ func TestCalldescNewCallDescriptorFromCGREventNoUsage(t *testing.T) {
 }
 
 func TestCalldescNewCallDescriptorFromCGREvent(t *testing.T) {
-	cgrEv := &utils.CGREvent{
+	cgrEv := &CGREvent{
 		Event: map[string]any{
 			utils.Category:     "catField",
 			utils.AccountField: "accField",
@@ -2277,7 +2277,7 @@ func TestCalldescAsCGREvent(t *testing.T) {
 	}
 	opts := make(map[string]any)
 
-	exp := &utils.CGREvent{
+	exp := &CGREvent{
 		Event: map[string]any{
 			utils.Category:     "catField",
 			utils.Subject:      "accField",

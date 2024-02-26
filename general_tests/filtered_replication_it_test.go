@@ -493,7 +493,7 @@ func testFltrRplThresholdProfile(t *testing.T) {
 		t.Fatalf("Unexpected error: %v", err)
 	}
 
-	tEv := &utils.CGREvent{
+	tEv := &engine.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "event1",
 		Event: map[string]any{
@@ -680,7 +680,7 @@ func testFltrRplStatQueueProfile(t *testing.T) {
 		t.Fatalf("Unexpected error: %v", err)
 	}
 
-	sEv := &utils.CGREvent{
+	sEv := &engine.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "event1",
 		Event: map[string]any{
@@ -858,7 +858,7 @@ func testFltrRplResourceProfile(t *testing.T) {
 		t.Fatalf("Unexpected error: %v", err)
 	}
 
-	rEv := &utils.CGREvent{
+	rEv := &engine.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     utils.UUIDSha1Prefix(),
 		Event: map[string]any{

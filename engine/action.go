@@ -380,7 +380,7 @@ func cdrLogAction(acc *Account, a *Action, acs Actions, _ *FilterS, extraData an
 		cdrs = append(cdrs, cdr)
 	}
 
-	events := make([]*utils.CGREvent, 0, len(cdrs))
+	events := make([]*CGREvent, 0, len(cdrs))
 	for _, cdr := range cdrs {
 		events = append(events, cdr.AsCGREvent())
 	}
@@ -1186,10 +1186,10 @@ func resetAccountCDR(ub *Account, action *Action, acts Actions, fltrS *FilterS, 
 }
 
 func export(ub *Account, a *Action, acs Actions, _ *FilterS, extraData any, _ ActionConnCfg) (err error) {
-	var cgrEv *utils.CGREvent
+	var cgrEv *CGREvent
 	switch {
 	case ub != nil:
-		cgrEv = &utils.CGREvent{
+		cgrEv = &CGREvent{
 			Tenant: utils.NewTenantID(ub.ID).Tenant,
 			ID:     utils.GenUUID(),
 			Event: map[string]any{
@@ -1209,7 +1209,7 @@ func export(ub *Account, a *Action, acs Actions, _ *FilterS, extraData any, _ Ac
 			},
 		}
 	case extraData != nil:
-		ev, canCast := extraData.(*utils.CGREvent)
+		ev, canCast := extraData.(*CGREvent)
 		if !canCast {
 			return
 		}

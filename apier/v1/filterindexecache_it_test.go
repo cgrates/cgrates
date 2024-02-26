@@ -145,7 +145,7 @@ func testV1FIdxCaFromFolder(t *testing.T) {
 
 // ThresholdProfile
 func testV1FIdxCaProcessEventWithNotFound(t *testing.T) {
-	tEv := &utils.CGREvent{
+	tEv := &engine.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "event1",
 		Event: map[string]any{
@@ -213,7 +213,7 @@ func testV1FIdxCaSetThresholdProfile(t *testing.T) {
 		t.Error("Unexpected reply returned", result)
 	}
 	//matches TEST_PROFILE1
-	tEv := &utils.CGREvent{
+	tEv := &engine.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "event1",
 		Event: map[string]any{
@@ -238,7 +238,7 @@ func testV1FIdxCaSetThresholdProfile(t *testing.T) {
 
 func testV1FIdxCaGetThresholdFromTP(t *testing.T) {
 	//matches THD_ACNT_BALANCE_1
-	tEv := &utils.CGREvent{
+	tEv := &engine.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "event1",
 		Event: map[string]any{
@@ -312,7 +312,7 @@ func testV1FIdxCaUpdateThresholdProfile(t *testing.T) {
 		t.Error("Unexpected reply returned", result)
 	}
 	//make sure doesn't match the thresholdprofile after update
-	tEv := &utils.CGREvent{
+	tEv := &engine.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "event1",
 		Event: map[string]any{
@@ -331,7 +331,7 @@ func testV1FIdxCaUpdateThresholdProfile(t *testing.T) {
 		t.Error(err)
 	}
 	//matches thresholdprofile after update
-	tEv2 := &utils.CGREvent{
+	tEv2 := &engine.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "event1",
 		Event: map[string]any{
@@ -399,7 +399,7 @@ func testV1FIdxCaUpdateThresholdProfileFromTP(t *testing.T) {
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	tEv := &utils.CGREvent{
+	tEv := &engine.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "event1",
 		Event: map[string]any{
@@ -416,7 +416,7 @@ func testV1FIdxCaUpdateThresholdProfileFromTP(t *testing.T) {
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
-	tEv2 := &utils.CGREvent{
+	tEv2 := &engine.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "event3",
 		Event: map[string]any{
@@ -438,7 +438,7 @@ func testV1FIdxCaUpdateThresholdProfileFromTP(t *testing.T) {
 
 func testV1FIdxCaRemoveThresholdProfile(t *testing.T) {
 	var resp string
-	tEv := &utils.CGREvent{
+	tEv := &engine.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "event8",
 		Event: map[string]any{
@@ -457,7 +457,7 @@ func testV1FIdxCaRemoveThresholdProfile(t *testing.T) {
 		t.Errorf("Expecting : %s, received: %s", eIDs, thIDs)
 	}
 
-	tEv2 := &utils.CGREvent{
+	tEv2 := &engine.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "event9",
 		Event: map[string]any{
@@ -514,7 +514,7 @@ func testV1FIdxCaRemoveThresholdProfile(t *testing.T) {
 // StatQueue
 func testV1FIdxCaGetStatQueuesWithNotFound(t *testing.T) {
 	var reply *[]string
-	tEv := &utils.CGREvent{
+	tEv := &engine.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "event1",
 		Event: map[string]any{
@@ -595,7 +595,7 @@ func testV1FIdxCaSetStatQueueProfile(t *testing.T) {
 		t.Error("Unexpected reply returned", result)
 	}
 
-	tEv := &utils.CGREvent{
+	tEv := &engine.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "event1",
 		Event: map[string]any{
@@ -620,7 +620,7 @@ func testV1FIdxCaSetStatQueueProfile(t *testing.T) {
 func testV1FIdxCaGetStatQueuesFromTP(t *testing.T) {
 	var reply []string
 	expected := []string{"Stats1"}
-	ev2 := &utils.CGREvent{
+	ev2 := &engine.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "event2",
 		Event: map[string]any{
@@ -635,7 +635,7 @@ func testV1FIdxCaGetStatQueuesFromTP(t *testing.T) {
 	} else if !reflect.DeepEqual(reply, expected) {
 		t.Errorf("Expecting: %+v, received: %+v", expected, reply)
 	}
-	ev3 := &utils.CGREvent{
+	ev3 := &engine.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "event3",
 		Event: map[string]any{
@@ -651,7 +651,7 @@ func testV1FIdxCaGetStatQueuesFromTP(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", expected, reply)
 	}
 
-	tEv := &utils.CGREvent{
+	tEv := &engine.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "event1",
 		Event: map[string]any{
@@ -670,7 +670,7 @@ func testV1FIdxCaGetStatQueuesFromTP(t *testing.T) {
 	} else if !reflect.DeepEqual(reply, expected) {
 		t.Errorf("Expecting: %+v, received: %+v", expected, reply)
 	}
-	tEv2 := &utils.CGREvent{
+	tEv2 := &engine.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "event1",
 		Event: map[string]any{
@@ -748,7 +748,7 @@ func testV1FIdxCaUpdateStatQueueProfile(t *testing.T) {
 	}
 	var reply []string
 	expected := []string{"TEST_PROFILE1"}
-	tEv := &utils.CGREvent{
+	tEv := &engine.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "event1",
 		Event: map[string]any{
@@ -808,7 +808,7 @@ func testV1FIdxCaUpdateStatQueueProfileFromTP(t *testing.T) {
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	tEv := &utils.CGREvent{
+	tEv := &engine.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "event1",
 		Event: map[string]any{
@@ -835,7 +835,7 @@ func testV1FIdxCaUpdateStatQueueProfileFromTP(t *testing.T) {
 func testV1FIdxCaRemoveStatQueueProfile(t *testing.T) {
 	var reply []string
 	expected := []string{"TEST_PROFILE1"}
-	tEv := &utils.CGREvent{
+	tEv := &engine.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "event1",
 		Event: map[string]any{
@@ -853,7 +853,7 @@ func testV1FIdxCaRemoveStatQueueProfile(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", expected, reply)
 	}
 	expected = []string{"Stats1"}
-	tEv2 := &utils.CGREvent{
+	tEv2 := &engine.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "event1",
 		Event: map[string]any{
@@ -913,7 +913,7 @@ func testV1FIdxCaRemoveStatQueueProfile(t *testing.T) {
 
 // AttributeProfile
 func testV1FIdxCaProcessAttributeProfileEventWithNotFound(t *testing.T) {
-	ev := &utils.CGREvent{
+	ev := &engine.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "testAttributeSProcessEvent",
 		Event: map[string]any{
@@ -987,7 +987,7 @@ func testV1FIdxCaSetAttributeProfile(t *testing.T) {
 		t.Error("Unexpected reply returned", result)
 	}
 	//matches TEST_PROFILE1
-	ev := &utils.CGREvent{
+	ev := &engine.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "testAttributeSProcessEvent",
 		Event: map[string]any{
@@ -1007,7 +1007,7 @@ func testV1FIdxCaSetAttributeProfile(t *testing.T) {
 
 func testV1FIdxCaGetAttributeProfileFromTP(t *testing.T) {
 	//matches ATTR_1
-	ev := &utils.CGREvent{
+	ev := &engine.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "testAttributeSProcessEvent",
 		Event: map[string]any{
@@ -1080,7 +1080,7 @@ func testV1FIdxCaUpdateAttributeProfile(t *testing.T) {
 		t.Error("Unexpected reply returned", result)
 	}
 	//matches TEST_PROFILE1
-	ev := &utils.CGREvent{
+	ev := &engine.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "testAttributeSProcessEvent",
 		Event: map[string]any{
@@ -1138,7 +1138,7 @@ func testV1FIdxCaUpdateAttributeProfileFromTP(t *testing.T) {
 		t.Error("Unexpected reply returned", result)
 	}
 	//matches TEST_PROFILE1
-	ev := &utils.CGREvent{
+	ev := &engine.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "testAttributeSProcessEvent",
 		Event: map[string]any{
@@ -1157,7 +1157,7 @@ func testV1FIdxCaUpdateAttributeProfileFromTP(t *testing.T) {
 
 func testV1FIdxCaRemoveAttributeProfile(t *testing.T) {
 	var resp string
-	ev := &utils.CGREvent{
+	ev := &engine.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "testAttributeSProcessEvent",
 		Event: map[string]any{
@@ -1173,7 +1173,7 @@ func testV1FIdxCaRemoveAttributeProfile(t *testing.T) {
 		t.Error(err)
 	}
 
-	ev2 := &utils.CGREvent{
+	ev2 := &engine.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "testAttributeSProcessEvent",
 		Event: map[string]any{
@@ -1229,7 +1229,7 @@ func testV1FIdxCaRemoveAttributeProfile(t *testing.T) {
 // ResourceProfile
 func testV1FIdxCaGetResourceProfileWithNotFound(t *testing.T) {
 	var reply string
-	cgrEv := &utils.CGREvent{
+	cgrEv := &engine.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     utils.UUIDSha1Prefix(),
 		Event: map[string]any{
@@ -1317,7 +1317,7 @@ func testV1FIdxCaSetResourceProfile(t *testing.T) {
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	cgrEv := &utils.CGREvent{
+	cgrEv := &engine.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     utils.UUIDSha1Prefix(),
 		Event: map[string]any{
@@ -1347,7 +1347,7 @@ func testV1FIdxCaSetResourceProfile(t *testing.T) {
 
 func testV1FIdxCaGetResourceProfileFromTP(t *testing.T) {
 	var reply string
-	cgrEv := &utils.CGREvent{
+	cgrEv := &engine.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     utils.UUIDSha1Prefix(),
 		Event: map[string]any{
@@ -1373,7 +1373,7 @@ func testV1FIdxCaGetResourceProfileFromTP(t *testing.T) {
 		t.Error("Unexpected reply returned", reply)
 	}
 
-	ev := &utils.CGREvent{
+	ev := &engine.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     utils.UUIDSha1Prefix(),
 		Event: map[string]any{
@@ -1450,7 +1450,7 @@ func testV1FIdxCaUpdateResourceProfile(t *testing.T) {
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	cgrEv := &utils.CGREvent{
+	cgrEv := &engine.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     utils.UUIDSha1Prefix(),
 		Event: map[string]any{
@@ -1517,7 +1517,7 @@ func testV1FIdxCaUpdateResourceProfileFromTP(t *testing.T) {
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	ev := &utils.CGREvent{
+	ev := &engine.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     utils.UUIDSha1Prefix(),
 		Event: map[string]any{
@@ -1539,7 +1539,7 @@ func testV1FIdxCaUpdateResourceProfileFromTP(t *testing.T) {
 
 func testV1FIdxCaRemoveResourceProfile(t *testing.T) {
 	var resp string
-	ev := &utils.CGREvent{
+	ev := &engine.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     utils.UUIDSha1Prefix(),
 		Event: map[string]any{
@@ -1562,7 +1562,7 @@ func testV1FIdxCaRemoveResourceProfile(t *testing.T) {
 	} else if resp != "MessageAllocation" {
 		t.Error("Unexpected reply returned", resp)
 	}
-	ev2 := &utils.CGREvent{
+	ev2 := &engine.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     utils.UUIDSha1Prefix(),
 		Event: map[string]any{

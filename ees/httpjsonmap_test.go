@@ -28,6 +28,7 @@ import (
 	"time"
 
 	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -204,7 +205,7 @@ func TestHTTPJsonMapPrepareMap(t *testing.T) {
 	valMp := map[string]any{
 		"*req.*tenant": "value1",
 	}
-	rcv, err := httpEE.PrepareMap(&utils.CGREvent{
+	rcv, err := httpEE.PrepareMap(&engine.CGREvent{
 		Event: valMp,
 	})
 	if err != nil {

@@ -133,7 +133,7 @@ func TestSQSERProcessMessage(t *testing.T) {
 		queueID:   "cgrates_cdrs",
 		session:   nil,
 	}
-	expEvent := &utils.CGREvent{
+	expEvent := &engine.CGREvent{
 		Tenant: "cgrates.org",
 		Event: map[string]any{
 			utils.CGRID: "testCgrId",
