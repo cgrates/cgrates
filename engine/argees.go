@@ -21,13 +21,13 @@ package engine
 import (
 	"encoding/json"
 	"slices"
-
-	"github.com/cgrates/cgrates/utils"
 )
 
-// CGREventWithEeIDs struct is moved in engine due to importing ciclying packages in order to unmarshalling properly for our EventCost type. This is the API struct argument
-
-// CGREventWithEeIDs is CGREvent with EventExporterIDs
+// CGREventWithEeIDs is CGREvent with EventExporterIDs. This
+// struct is used as an API argument. It has been moved into
+// the engine package to avoid import cycling issues that were
+// encountered when trying to properly handle unmarshalling
+// for our EventCost type.
 type CGREventWithEeIDs struct {
 	EeIDs []string
 	*CGREvent
@@ -54,49 +54,32 @@ func (attr *CGREventWithEeIDs) RPCClone() (any, error) {
 	return attr.Clone(), nil
 }
 
-func (cgr *CGREventWithEeIDs) UnmarshalJSON(data []byte) (err error) {
-	// firstly, we will unamrshall the entire data into raw bytes
-	ids := make(map[string]json.RawMessage)
-	if err = json.Unmarshal(data, &ids); err != nil {
-		return
+// UnmarshalJSON ensures that JSON data is correctly decoded into a
+// CGREventWithEeIDs while respecting the different unmarshalling logic
+// required by the embedded CGREvent.
+func (cgr *CGREventWithEeIDs) UnmarshalJSON(data []byte) error {
+
+	// Define a temporary struct to capture only
+	// the EeIDs field from the JSON data.
+	var tempEeIDs struct {
+		EeIDs []string
 	}
-	// populate eeids in case of it's existance
-	eeIDs := make([]string, len(ids[utils.EeIDs]))
-	if err = json.Unmarshal(ids[utils.EeIDs], &eeIDs); err != nil {
-		return
+
+	// Unmarshal JSON data into the temporary struct to extract EeIDs.
+	// Will use the default unmarshaler.
+	if err := json.Unmarshal(data, &tempEeIDs); err != nil {
+		return err
 	}
-	cgr.EeIDs = eeIDs
-	// populate the entire CGRevent struct in case of it's existance
-	var cgrEv *CGREvent
-	if err = json.Unmarshal(data, &cgrEv); err != nil {
-		return
-	}
-	cgr.CGREvent = cgrEv
-	// check if we have CostDetails and modify it's type (by default it was map[string]any by unrmarshaling, now it will be EventCost)
-	if ecEv, has := cgrEv.Event[utils.CostDetails]; has {
-		var bts []byte
-		switch ecEv.(type) {
-		case string:
-			btsToStr, err := json.Marshal(ecEv)
-			if err != nil {
-				return err
-			}
-			var toString string
-			if err = json.Unmarshal(btsToStr, &toString); err != nil {
-				return err
-			}
-			bts = []byte(toString)
-		default:
-			bts, err = json.Marshal(ecEv)
-			if err != nil {
-				return err
-			}
-		}
-		ec := new(EventCost)
-		if err = json.Unmarshal(bts, &ec); err != nil {
-			return err
-		}
-		cgr.Event[utils.CostDetails] = ec
-	}
-	return
+
+	// Assign the extracted EeIDs to the main struct's EeIDs field.
+	cgr.EeIDs = tempEeIDs.EeIDs
+
+	// Ensure the embedded CGREvent is initialized before attempting
+	// to unmarshal into it. This is needed to avoid a nil pointer
+	// dereference during the unmarshalling process.
+	cgr.CGREvent = &CGREvent{}
+
+	// Directly unmarshal the original JSON data into the embedded
+	// CGREvent. Will be using CGREvent's UnmarshalJSON method.
+	return json.Unmarshal(data, cgr.CGREvent)
 }

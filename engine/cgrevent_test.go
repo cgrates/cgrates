@@ -18,6 +18,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"encoding/json"
+	"fmt"
 	"reflect"
 	"strings"
 	"testing"
@@ -150,7 +152,7 @@ func TestCGREventFieldAsTime(t *testing.T) {
 	if answ != se.Event[utils.AnswerTime] {
 		t.Errorf("Expecting: %+v, received: %+v", se.Event[utils.AnswerTime], answ)
 	}
-	answ, err = seErr.FieldAsTime(utils.AnswerTime, "CET")
+	_, err = seErr.FieldAsTime(utils.AnswerTime, "CET")
 	if err != utils.ErrNotFound {
 		t.Error(err)
 	}
@@ -1020,4 +1022,103 @@ func TestOptionsGetDecimalBigOpts(t *testing.T) {
 		err.Error() != expectedErr {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", expectedErr, err)
 	}
+}
+
+func TestCGREventUnmarshalJSON(t *testing.T) {
+	var testEC = &EventCost{
+		CGRID:     "164b0422fdc6a5117031b427439482c6a4f90e41",
+		RunID:     utils.MetaDefault,
+		StartTime: time.Date(2017, 1, 9, 16, 18, 21, 0, time.UTC),
+		AccountSummary: &AccountSummary{
+			Tenant: "cgrates.org",
+			ID:     "dan",
+			BalanceSummaries: []*BalanceSummary{
+				{
+					UUID:     "8c54a9e9-d610-4c82-bcb5-a315b9a65010",
+					ID:       "BALANCE_1",
+					Type:     utils.MetaMonetary,
+					Value:    50,
+					Initial:  60,
+					Disabled: false,
+				},
+			},
+			AllowNegative: false,
+			Disabled:      false,
+		},
+	}
+	cdBytes, err := json.Marshal(testEC)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	cgrEv := CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "ev1",
+		Event: map[string]any{
+			utils.AccountField: "1001",
+		},
+	}
+
+	t.Run("UnmarshalFromMap", func(t *testing.T) {
+		var cdMap map[string]any
+		if err = json.Unmarshal(cdBytes, &cdMap); err != nil {
+			t.Fatal(err)
+		}
+
+		cgrEv.Event[utils.CostDetails] = cdMap
+
+		cgrEvBytes, err := json.Marshal(cgrEv)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		var rcvCGREv CGREvent
+		if err = json.Unmarshal(cgrEvBytes, &rcvCGREv); err != nil {
+			t.Fatal(err)
+		}
+
+		expectedType := "*engine.EventCost"
+		if cdType := fmt.Sprintf("%T", rcvCGREv.Event[utils.CostDetails]); cdType != expectedType {
+			t.Fatalf("expected type to be %v, received %v", expectedType, cdType)
+		}
+
+		cgrEv.Event[utils.CostDetails] = testEC
+		if !reflect.DeepEqual(rcvCGREv, cgrEv) {
+			t.Errorf("expected: %v,\nreceived: %v",
+				utils.ToJSON(cgrEv), utils.ToJSON(rcvCGREv))
+		}
+	})
+	t.Run("UnmarshalFromString", func(t *testing.T) {
+		cdStringBytes, err := json.Marshal(string(cdBytes))
+		if err != nil {
+			t.Fatal(err)
+		}
+		var cdString string
+		if err = json.Unmarshal(cdStringBytes, &cdString); err != nil {
+			t.Fatal(err)
+		}
+
+		cgrEv.Event[utils.CostDetails] = cdString
+
+		cgrEvBytes, err := json.Marshal(cgrEv)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		var rcvCGREv CGREvent
+		if err = json.Unmarshal(cgrEvBytes, &rcvCGREv); err != nil {
+			t.Fatal(err)
+		}
+
+		expectedType := "*engine.EventCost"
+		if cdType := fmt.Sprintf("%T", rcvCGREv.Event[utils.CostDetails]); cdType != expectedType {
+			t.Fatalf("expected type to be %v, received %v", expectedType, cdType)
+		}
+
+		cgrEv.Event[utils.CostDetails] = testEC
+		if !reflect.DeepEqual(rcvCGREv, cgrEv) {
+			t.Errorf("expected: %v,\nreceived: %v",
+				utils.ToJSON(cgrEv), utils.ToJSON(rcvCGREv))
+		}
+	})
 }

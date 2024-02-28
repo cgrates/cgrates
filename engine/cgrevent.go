@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"encoding/json"
 	"strings"
 	"time"
 
@@ -34,6 +35,56 @@ type CGREvent struct {
 	Event   map[string]any
 	APIOpts map[string]any
 	clnb    bool //rpcclonable
+}
+
+// UnmarshalJSON ensures that CostDetails is of type *EventCost if it exists.
+func (cgrEv *CGREvent) UnmarshalJSON(data []byte) (err error) {
+
+	// Alias CGREvent to avoid recursion during json.Unmarshal.
+	type Alias CGREvent
+	aux := &struct{ *Alias }{Alias: (*Alias)(cgrEv)}
+
+	// Use default unmarshaler to unmarshal the JSON data
+	// into the auxiliary struct.
+	if err = json.Unmarshal(data, aux); err != nil {
+		return err
+	}
+
+	// Check if the Event map contains the "CostDetails" key,
+	// which requires special handling.
+	if ecEv, has := cgrEv.Event[utils.CostDetails]; has {
+		var ecBytes []byte
+
+		// CostDetails value can either be a JSON string (which is
+		// the marshaled form of an EventCost) or a map representing
+		// the EventCost directly.
+		switch v := ecEv.(type) {
+		case string:
+			// If string, it's assumed to be the JSON
+			// representation of EventCost.
+			ecBytes = []byte(v)
+		default:
+			// Otherwise we assume it's a map and we marshal
+			// it back to JSON to prepare for unmarshalling
+			// into EventCost.
+			ecBytes, err = json.Marshal(v)
+			if err != nil {
+				return err
+			}
+		}
+
+		// Unmarshal the JSON (either directly from the string case
+		// or from the marshaled map) into an EventCost struct.
+		var ec EventCost
+		if err := json.Unmarshal(ecBytes, &ec); err != nil {
+			return err
+		}
+
+		// Update the Event map with the unmarshalled EventCost,
+		// ensuring the type of CostDetails is *EventCost.
+		cgrEv.Event[utils.CostDetails] = &ec
+	}
+	return nil
 }
 
 func (ev *CGREvent) HasField(fldName string) (has bool) {
