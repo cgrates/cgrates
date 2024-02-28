@@ -271,13 +271,11 @@
     - name: Move the new .orig.tar.gz to /var/packages/deb
       become: yes
       shell: "mv /tmp/cgrates*.orig*.tar.* /var/packages/deb/{{ cgrates_branch }}/"
-      when: cgrates_branch == "master" or hostvars['apt']['gitTagVar'].stdout_lines|length > 0
 
     - name: Move the new package to /var/packages/deb
       become: yes
       shell: "mv /tmp/cgrates*~deb{{ item.version }}u1* /var/packages/deb/{{ cgrates_branch }}/{{ item.codename }}/"
       with_items: "{{ distributions }}"
-      when: cgrates_branch == "master" or hostvars['apt']['gitTagVar'].stdout_lines|length > 0
 
     - name: Find all package files
       become: yes
@@ -285,7 +283,6 @@
         path: "/var/packages/deb/{{ cgrates_branch }}/"
         patterns: "*.deb"
         recurse: yes
-      when: cgrates_branch == "master" or hostvars['apt']['gitTagVar'].stdout_lines|length > 0
       register: package_files
 
     - name: Set ownership and permissions for moved files
@@ -296,7 +293,6 @@
         group: "{{  nginx_user  }}"
         mode: "0644"
       loop: "{{ package_files.files }}"
-      when: cgrates_branch == "master" or hostvars['apt']['gitTagVar'].stdout_lines|length > 0
 
     - name: Find package files per distribution
       become: yes
