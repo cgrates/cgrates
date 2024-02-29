@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"encoding/json"
 	"fmt"
 	"math"
 	"slices"
@@ -147,6 +148,40 @@ type AttrSProcessEventReply struct {
 	AlteredFields   []string
 	*CGREvent
 	blocker bool // internally used to stop further processRuns
+}
+
+// UnmarshalJSON ensures that JSON data is correctly decoded into a
+// AttrSProcessEventReply while respecting the different unmarshalling logic
+// required by the embedded CGREvent.
+func (attrReply *AttrSProcessEventReply) UnmarshalJSON(data []byte) error {
+
+	// Define a temporary struct to capture only the
+	// MatchedProfiles and AlteredFields fields from
+	// the JSON data.
+	var temp struct {
+		MatchedProfiles []string
+		AlteredFields   []string
+	}
+
+	// Unmarshal JSON data into the temporary struct to extract
+	// MatchedProfiles and AlteredFields. Will use the default
+	// unmarshaler.
+	if err := json.Unmarshal(data, &temp); err != nil {
+		return err
+	}
+
+	// Assign the extracted fields to the main struct's counterpart.
+	attrReply.MatchedProfiles = temp.MatchedProfiles
+	attrReply.AlteredFields = temp.AlteredFields
+
+	// Ensure the embedded CGREvent is initialized before attempting
+	// to unmarshal into it. This is needed to avoid a nil pointer
+	// dereference during the unmarshalling process.
+	attrReply.CGREvent = &CGREvent{}
+
+	// Directly unmarshal the original JSON data into the embedded
+	// CGREvent. Will be using CGREvent's UnmarshalJSON method.
+	return json.Unmarshal(data, attrReply.CGREvent)
 }
 
 // Digest returns serialized version of alteredFields in AttrSProcessEventReply

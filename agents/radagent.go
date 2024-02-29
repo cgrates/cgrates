@@ -164,7 +164,6 @@ func (ra *RadiusAgent) handleAuth(reqPacket *radigo.Packet) (*radigo.Packet, err
 		utils.Logger.Warning(fmt.Sprintf(
 			"<%s> setting default *vars.*sessionID (used to track packets of active sessions) failed: %v",
 			utils.RadiusAgent, err))
-
 	}
 
 	var processed bool

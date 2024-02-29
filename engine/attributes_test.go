@@ -1627,3 +1627,106 @@ func TestAttributeFromHTTP(t *testing.T) {
 		t.Errorf("Expected %q, Received %q", exp, out)
 	}
 }
+
+func TestAttributesProcessEventReplyUnmarshalJSON(t *testing.T) {
+	var testEC = &EventCost{
+		CGRID:     "164b0422fdc6a5117031b427439482c6a4f90e41",
+		RunID:     utils.MetaDefault,
+		StartTime: time.Date(2017, 1, 9, 16, 18, 21, 0, time.UTC),
+		AccountSummary: &AccountSummary{
+			Tenant: "cgrates.org",
+			ID:     "dan",
+			BalanceSummaries: []*BalanceSummary{
+				{
+					UUID:     "8c54a9e9-d610-4c82-bcb5-a315b9a65010",
+					ID:       "BALANCE_1",
+					Type:     utils.MetaMonetary,
+					Value:    50,
+					Initial:  60,
+					Disabled: false,
+				},
+			},
+			AllowNegative: false,
+			Disabled:      false,
+		},
+	}
+	cdBytes, err := json.Marshal(testEC)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	attrReply := AttrSProcessEventReply{
+		MatchedProfiles: []string{"ATTR_TEST"},
+		AlteredFields:   []string{"*req.Field1", "*req.Field2"},
+		CGREvent: &CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "ev1",
+			Event: map[string]any{
+				utils.AccountField: "1001",
+			},
+		},
+	}
+
+	t.Run("UnmarshalFromMap", func(t *testing.T) {
+		var cdMap map[string]any
+		if err = json.Unmarshal(cdBytes, &cdMap); err != nil {
+			t.Fatal(err)
+		}
+
+		attrReply.Event[utils.CostDetails] = cdMap
+
+		attrReplyBytes, err := json.Marshal(attrReply)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		var rcvAttrReply AttrSProcessEventReply
+		if err = json.Unmarshal(attrReplyBytes, &rcvAttrReply); err != nil {
+			t.Fatal(err)
+		}
+
+		expectedType := "*engine.EventCost"
+		if cdType := fmt.Sprintf("%T", rcvAttrReply.Event[utils.CostDetails]); cdType != expectedType {
+			t.Fatalf("expected type to be %v, received %v", expectedType, cdType)
+		}
+
+		attrReply.Event[utils.CostDetails] = testEC
+		if !reflect.DeepEqual(rcvAttrReply, attrReply) {
+			t.Errorf("expected: %v,\nreceived: %v",
+				utils.ToJSON(attrReply), utils.ToJSON(rcvAttrReply))
+		}
+	})
+	t.Run("UnmarshalFromString", func(t *testing.T) {
+		cdStringBytes, err := json.Marshal(string(cdBytes))
+		if err != nil {
+			t.Fatal(err)
+		}
+		var cdString string
+		if err = json.Unmarshal(cdStringBytes, &cdString); err != nil {
+			t.Fatal(err)
+		}
+
+		attrReply.Event[utils.CostDetails] = cdString
+
+		attrReplyBytes, err := json.Marshal(attrReply)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		var rcvAttrReply AttrSProcessEventReply
+		if err = json.Unmarshal(attrReplyBytes, &rcvAttrReply); err != nil {
+			t.Fatal(err)
+		}
+
+		expectedType := "*engine.EventCost"
+		if cdType := fmt.Sprintf("%T", rcvAttrReply.Event[utils.CostDetails]); cdType != expectedType {
+			t.Fatalf("expected type to be %v, received %v", expectedType, cdType)
+		}
+
+		attrReply.Event[utils.CostDetails] = testEC
+		if !reflect.DeepEqual(rcvAttrReply, attrReply) {
+			t.Errorf("expected: %v,\nreceived: %v",
+				utils.ToJSON(attrReply), utils.ToJSON(rcvAttrReply))
+		}
+	})
+}

@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"reflect"
@@ -739,6 +740,31 @@ type ArgV1ProcessEvent struct {
 	Flags []string
 	CGREvent
 	clnb bool //rpcclonable
+}
+
+// UnmarshalJSON ensures that JSON data is correctly decoded into a
+// ArgV1ProcessEvent while respecting the different unmarshalling logic
+// required by the embedded CGREvent.
+func (attrReply *ArgV1ProcessEvent) UnmarshalJSON(data []byte) error {
+
+	// Define a temporary struct to capture only the
+	// Flags field from the JSON data.
+	var temp struct {
+		Flags []string
+	}
+
+	// Unmarshal JSON data into the temporary struct to
+	// extract Flags. Will use the default unmarshaler.
+	if err := json.Unmarshal(data, &temp); err != nil {
+		return err
+	}
+
+	// Assign the extracted fields to the main struct's counterpart.
+	attrReply.Flags = temp.Flags
+
+	// Directly unmarshal the original JSON data into the embedded
+	// CGREvent. Will be using CGREvent's UnmarshalJSON method.
+	return json.Unmarshal(data, &attrReply.CGREvent)
 }
 
 // SetCloneable sets if the args should be clonned on internal connections
