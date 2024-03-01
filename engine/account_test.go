@@ -1729,6 +1729,9 @@ func TestDebitGenericBalance(t *testing.T) {
 		ToR:           cc.ToR,
 		DurationIndex: cc.GetDuration(),
 		testCallcost:  cc,
+		ExtraFields: map[string]string{
+			utils.BalanceFactorID: "call",
+		},
 	}
 	rifsBalance := &Account{
 		ID: "other", BalanceMap: map[string]Balances{
@@ -1783,6 +1786,9 @@ func TestDebitGenericBalanceWithRatingSubject(t *testing.T) {
 		ToR:           cc.ToR,
 		DurationIndex: cc.GetDuration(),
 		testCallcost:  cc,
+		ExtraFields: map[string]string{
+			utils.BalanceFactorID: "call",
+		},
 	}
 	rifsBalance := &Account{ID: "other",
 		BalanceMap: map[string]Balances{

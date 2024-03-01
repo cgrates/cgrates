@@ -878,7 +878,8 @@ func (b *Balance) debit(cd *CallDescriptor, ub *Account, moneyBalances Balances,
 			//log.Printf("INCREMENET: %+v", inc)
 			amount := float64(inc.Duration)
 			if b.Factor != nil {
-				amount = utils.Round(amount*b.Factor.GetValue(cd.Category),
+				amount = utils.Round(
+					amount*b.Factor.GetValue(cd.ExtraFields[utils.BalanceFactorID]),
 					globalRoundingDecimals, utils.MetaRoundingUp)
 			}
 			if b.GetValue() >= amount {
@@ -1022,7 +1023,9 @@ func (b *Balance) debit(cd *CallDescriptor, ub *Account, moneyBalances Balances,
 			var moneyBal *Balance
 			if isUnitBal {
 				if b.Factor != nil {
-					amount = utils.Round(amount*b.Factor.GetValue(cd.Category), globalRoundingDecimals, utils.MetaRoundingUp)
+					amount = utils.Round(
+						amount*b.Factor.GetValue(cd.ExtraFields[utils.BalanceFactorID]),
+						globalRoundingDecimals, utils.MetaRoundingUp)
 				}
 				for _, mb := range moneyBalances {
 					if mb.GetValue() >= cost {
