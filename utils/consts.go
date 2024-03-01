@@ -1358,6 +1358,7 @@ const (
 	APIerSv1GetDataDBVersions                 = "APIerSv1.GetDataDBVersions"
 	APIerSv1GetStorDBVersions                 = "APIerSv1.GetStorDBVersions"
 	APIerSv1GetCDRs                           = "APIerSv1.GetCDRs"
+	APIerSv1RemoveCDRs                        = "APIerSv1.RemoveCDRs"
 	APIerSv1GetTPAccountActions               = "APIerSv1.GetTPAccountActions"
 	APIerSv1SetTPAccountActions               = "APIerSv1.SetTPAccountActions"
 	APIerSv1GetTPAccountActionsByLoadId       = "APIerSv1.GetTPAccountActionsByLoadId"
