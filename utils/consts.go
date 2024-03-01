@@ -362,6 +362,8 @@ const (
 	UpdatedAt                = "UpdatedAt"
 	NodeID                   = "NodeID"
 	ActiveGoroutines         = "ActiveGoroutines"
+	CAPSAllocated            = "CAPSAllocated"
+	CAPSPeak                 = "CAPSPeak"
 	MemoryUsage              = "MemoryUsage"
 	RunningSince             = "RunningSince"
 	GoVersion                = "GoVersion"

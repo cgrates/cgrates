@@ -49,6 +49,7 @@ func NewCoreService(cfg *config.CGRConfig, caps *engine.Caps, fileCPU io.Closer,
 		CapsStats:  st,
 		fileCPU:    fileCPU,
 		fileMEM:    fileMem,
+		caps:       caps,
 	}
 }
 
@@ -61,6 +62,7 @@ type CoreService struct {
 	fileMEM    string
 	fileCPU    io.Closer
 	fileMx     sync.Mutex
+	caps       *engine.Caps
 }
 
 // Shutdown is called to shutdown the service
@@ -141,6 +143,12 @@ func (cS *CoreService) V1Status(_ *context.Context, _ *utils.TenantWithAPIOpts, 
 	}
 	response[utils.RunningSince] = utils.GetStartTime()
 	response[utils.GoVersion] = runtime.Version()
+	if cS.cfg.CoreSCfg().Caps != 0 {
+		response[utils.CAPSAllocated] = cS.caps.Allocated()
+		if cS.cfg.CoreSCfg().CapsStatsInterval != 0 {
+			response[utils.CAPSPeak] = cS.CapsStats.GetPeak()
+		}
+	}
 	*reply = response
 	return
 }
