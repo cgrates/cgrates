@@ -21,7 +21,6 @@ package console
 import (
 	"time"
 
-	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -29,7 +28,7 @@ func init() {
 	c := &CmdResourceAuthorize{
 		name:      "resources_authorize",
 		rpcMethod: utils.ResourceSv1AuthorizeResources,
-		rpcParams: &engine.CGREvent{},
+		rpcParams: &utils.CGREvent{},
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}
@@ -39,7 +38,7 @@ func init() {
 type CmdResourceAuthorize struct {
 	name      string
 	rpcMethod string
-	rpcParams *engine.CGREvent
+	rpcParams *utils.CGREvent
 	*CommandExecuter
 }
 
@@ -53,7 +52,7 @@ func (self *CmdResourceAuthorize) RpcMethod() string {
 
 func (self *CmdResourceAuthorize) RpcParams(reset bool) any {
 	if reset || self.rpcParams == nil {
-		self.rpcParams = new(engine.CGREvent)
+		self.rpcParams = new(utils.CGREvent)
 	}
 	return self.rpcParams
 }

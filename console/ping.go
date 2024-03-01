@@ -21,7 +21,6 @@ package console
 import (
 	"strings"
 
-	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -98,7 +97,7 @@ func (self *CmdApierPing) PostprocessRpcParams() error {
 	if val, can := self.rpcParams.(*StringWrapper); can {
 		self.item = val.Item
 	}
-	self.rpcParams = &engine.CGREvent{}
+	self.rpcParams = &utils.CGREvent{}
 	return nil
 }
 

@@ -114,7 +114,7 @@ func testKafkaSSLRPCConn(t *testing.T) {
 
 func testKafkaSSLExportEvent(t *testing.T) {
 	event := &engine.CGREventWithEeIDs{
-		CGREvent: &engine.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "KafkaEvent",
 			Event: map[string]interface{}{

@@ -437,7 +437,7 @@ func testAPIerSv2itSetActionPlanWithWrongTiming2(t *testing.T) {
 
 func testAPIerSv2itBackwardsCompatible(t *testing.T) {
 	var reply string
-	if err := apierRPC.Call(context.Background(), "ApierV2.Ping", new(engine.CGREvent), &reply); err != nil {
+	if err := apierRPC.Call(context.Background(), "ApierV2.Ping", new(utils.CGREvent), &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.Pong {
 		t.Errorf("Expecting : %+v, received: %+v", utils.Pong, reply)

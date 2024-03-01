@@ -447,7 +447,7 @@ func testV1DataInitSession(t *testing.T) {
 	args := &sessions.V1InitSessionArgs{
 		InitSession: true,
 
-		CGREvent: &engine.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testV1DataInitSession",
 			Event: map[string]any{
@@ -492,7 +492,7 @@ func testV1DataUpdateWith1Mo(t *testing.T) {
 	args := &sessions.V1UpdateSessionArgs{
 		UpdateSession: true,
 
-		CGREvent: &engine.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testV1DataUpdateWith1Mo",
 			Event: map[string]any{
@@ -536,7 +536,7 @@ func testV1DataUpdateWith1Go(t *testing.T) {
 	reqUsage := 1000000000
 	args := &sessions.V1UpdateSessionArgs{
 		UpdateSession: true,
-		CGREvent: &engine.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testV1DataUpdateWith1Go",
 			Event: map[string]any{

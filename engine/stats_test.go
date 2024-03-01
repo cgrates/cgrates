@@ -102,7 +102,7 @@ var (
 		{Tenant: "cgrates.org", ID: "StatQueueProfile2", sqPrfl: testStatsPrfs[1], SQMetrics: make(map[string]StatMetric)},
 		{Tenant: "cgrates.org", ID: "StatQueueProfilePrefix", sqPrfl: testStatsPrfs[2], SQMetrics: make(map[string]StatMetric)},
 	}
-	testStatsArgs = []*CGREvent{
+	testStatsArgs = []*utils.CGREvent{
 		{
 			Tenant: "cgrates.org",
 			ID:     "event1",
@@ -1235,7 +1235,7 @@ func TestStatQueueProcessEventOK(t *testing.T) {
 		t.Error(err)
 	}
 
-	args := &CGREvent{
+	args := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "SqProcessEvent",
 		Event: map[string]any{
@@ -1293,7 +1293,7 @@ func TestStatQueueProcessEventProcessThPartExec(t *testing.T) {
 		t.Error(err)
 	}
 
-	args := &CGREvent{
+	args := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "SqProcessEvent",
 		Event: map[string]any{
@@ -1362,7 +1362,7 @@ func TestStatQueueProcessEventProcessEventErr(t *testing.T) {
 		t.Error(err)
 	}
 
-	args := &CGREvent{
+	args := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "SqProcessEvent",
 		Event: map[string]any{
@@ -1440,7 +1440,7 @@ func TestStatQueueV1ProcessEventProcessEventErr(t *testing.T) {
 		t.Error(err)
 	}
 
-	args := &CGREvent{
+	args := &utils.CGREvent{
 		ID: "SqProcessEvent",
 		Event: map[string]any{
 			utils.AccountField: "1001",
@@ -1516,7 +1516,7 @@ func TestStatQueueV1ProcessEventMissingArgs(t *testing.T) {
 		t.Errorf("expected: <%+v>, received: <%+v>", experr, err)
 	}
 
-	args := &CGREvent{
+	args := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		Event: map[string]any{
 			utils.AccountField: "1001",
@@ -1532,7 +1532,7 @@ func TestStatQueueV1ProcessEventMissingArgs(t *testing.T) {
 		t.Errorf("expected: <%+v>, received: <%+v>", experr, err)
 	}
 
-	args = &CGREvent{
+	args = &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "SqProcessEvent",
 		Event:  nil,
@@ -1859,7 +1859,7 @@ func TestStatQueueV1GetStatQueuesForEventOK(t *testing.T) {
 		t.Error(err)
 	}
 
-	args := &CGREvent{
+	args := &utils.CGREvent{
 		ID: "TestGetStatQueuesForEvent",
 		Event: map[string]any{
 			utils.AccountField: "1001",
@@ -1914,7 +1914,7 @@ func TestStatQueueV1GetStatQueuesForEventNotFoundErr(t *testing.T) {
 		t.Error(err)
 	}
 
-	args := &CGREvent{
+	args := &utils.CGREvent{
 		ID: "TestGetStatQueuesForEvent",
 		Event: map[string]any{
 			utils.AccountField: "1002",
@@ -1971,7 +1971,7 @@ func TestStatQueueV1GetStatQueuesForEventMissingArgs(t *testing.T) {
 		t.Errorf("expected: <%+v>, received: <%+v>", experr, err)
 	}
 
-	args := &CGREvent{
+	args := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     utils.EmptyString,
 		Event: map[string]any{
@@ -1985,7 +1985,7 @@ func TestStatQueueV1GetStatQueuesForEventMissingArgs(t *testing.T) {
 		t.Errorf("expected: <%+v>, received: <%+v>", experr, err)
 	}
 
-	args = &CGREvent{
+	args = &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "TestGetStatQueuesForEvent",
 		Event:  nil,
@@ -2356,9 +2356,9 @@ func TestStatQueueProcessThresholdsOK(t *testing.T) {
 	ccM := &ccMock{
 		calls: map[string]func(ctx *context.Context, args any, reply any) error{
 			utils.ThresholdSv1ProcessEvent: func(ctx *context.Context, args, reply any) error {
-				exp := &CGREvent{
+				exp := &utils.CGREvent{
 					Tenant: "cgrates.org",
-					ID:     args.(*CGREvent).ID,
+					ID:     args.(*utils.CGREvent).ID,
 					Event: map[string]any{
 						utils.EventType:  utils.StatUpdate,
 						utils.StatID:     "SQ1",
@@ -3159,7 +3159,7 @@ func TestStatQueueV1GetStatQueuesForSliceOptsErr(t *testing.T) {
 	if err := dm.SetStatQueueProfile(sqPrf2, true); err != nil {
 		t.Error(err)
 	}
-	args := &CGREvent{
+	args := &utils.CGREvent{
 		ID: "TestGetStatQueuesForEvent",
 		Event: map[string]any{
 			utils.AccountField: "1001",
@@ -3227,7 +3227,7 @@ func TestStatQueueV1GetStatQueuesForEventBoolOptsErr(t *testing.T) {
 	if err := dm.SetStatQueueProfile(sqPrf2, true); err != nil {
 		t.Error(err)
 	}
-	args := &CGREvent{
+	args := &utils.CGREvent{
 		ID: "TestGetStatQueuesForEvent",
 		Event: map[string]any{
 			utils.AccountField: "1001",
@@ -3254,7 +3254,7 @@ func TestMatchingStatQueuesForEventErr(t *testing.T) {
 	filterS := NewFilterS(cfg, nil, dm)
 	sS := NewStatService(dm, cfg, filterS, nil)
 
-	args := &CGREvent{
+	args := &utils.CGREvent{
 		ID: "TestGetStatQueuesForEvent",
 		Event: map[string]any{
 			utils.AccountField: "1001",
@@ -3313,7 +3313,7 @@ func TestStatQueueProcessEventErr(t *testing.T) {
 		t.Error(err)
 	}
 
-	args := &CGREvent{
+	args := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "SqProcessEvent",
 		Event: map[string]any{

@@ -30,7 +30,7 @@ import (
 )
 
 // mergePartialEvents will unite the events using the reader configuration
-func mergePartialEvents(cgrEvs []*engine.CGREvent, cfg *config.EventReaderCfg, fltrS *engine.FilterS, dftTnt, dftTmz, rsrSep string) (cgrEv *engine.CGREvent, err error) {
+func mergePartialEvents(cgrEvs []*utils.CGREvent, cfg *config.EventReaderCfg, fltrS *engine.FilterS, dftTnt, dftTmz, rsrSep string) (cgrEv *utils.CGREvent, err error) {
 	cgrEv = cgrEvs[0]     // by default there is at least one event
 	if len(cgrEvs) != 1 { // need to merge the incoming events
 		// prepare the field after which the events are ordered
@@ -66,7 +66,7 @@ func mergePartialEvents(cgrEvs []*engine.CGREvent, cfg *config.EventReaderCfg, f
 		}
 
 		// compose the CGREvent from slice
-		cgrEv = &engine.CGREvent{
+		cgrEv = &utils.CGREvent{
 			Tenant:  cgrEvs[0].Tenant,
 			ID:      utils.UUIDSha1Prefix(),
 			Time:    utils.TimePointer(time.Now()),
@@ -94,7 +94,7 @@ func mergePartialEvents(cgrEvs []*engine.CGREvent, cfg *config.EventReaderCfg, f
 					utils.ERs, utils.ToJSON(cgrEv), err.Error()))
 			return
 		}
-		if ev := engine.NMAsCGREvent(agReq.CGRRequest, agReq.Tenant,
+		if ev := utils.NMAsCGREvent(agReq.CGRRequest, agReq.Tenant,
 			utils.NestingSep, agReq.Opts); ev != nil { // add the modified fields in the event
 			for k, v := range ev.Event {
 				cgrEv.Event[k] = v

@@ -121,7 +121,7 @@ func testFltrSepLoadTarrifPlans(t *testing.T) {
 }
 
 func testFltrSepFilterSeparation(t *testing.T) {
-	ev := &engine.CGREvent{
+	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "filter_separation_test",
 		Event: map[string]any{

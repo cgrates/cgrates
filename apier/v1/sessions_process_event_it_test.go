@@ -165,7 +165,7 @@ func testSSv1ItProcessEventAuth(t *testing.T) {
 			utils.ConcatenatedKey(utils.MetaRALs, utils.MetaAuthorize),
 			utils.ConcatenatedKey(utils.MetaRALs, utils.MetaDerivedReply),
 			utils.MetaRoutes, utils.MetaAttributes, utils.MetaChargers},
-		CGREvent: &engine.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testSSv1ItProcessEventAuth",
 			Event: map[string]any{
@@ -231,7 +231,7 @@ func testSSv1ItProcessEventAuth(t *testing.T) {
 		MatchedProfiles: []string{"cgrates.org:ATTR_ACNT_1001"},
 		AlteredFields:   []string{"*req.OfficeGroup"},
 
-		CGREvent: &engine.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testSSv1ItProcessEventAuth",
 			Event: map[string]any{
@@ -269,7 +269,7 @@ func testSSv1ItProcessEventInitiateSession(t *testing.T) {
 			utils.ConcatenatedKey(utils.MetaResources, utils.MetaAllocate),
 			utils.ConcatenatedKey(utils.MetaResources, utils.MetaDerivedReply),
 			utils.MetaAttributes, utils.MetaChargers},
-		CGREvent: &engine.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testSSv1ItProcessEventInitiateSession",
 			Event: map[string]any{
@@ -309,7 +309,7 @@ func testSSv1ItProcessEventInitiateSession(t *testing.T) {
 	eAttrs := &engine.AttrSProcessEventReply{
 		MatchedProfiles: []string{"cgrates.org:ATTR_ACNT_1001"},
 		AlteredFields:   []string{"*req.OfficeGroup"},
-		CGREvent: &engine.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testSSv1ItProcessEventInitiateSession",
 			Event: map[string]any{
@@ -352,7 +352,7 @@ func testSSv1ItProcessEventUpdateSession(t *testing.T) {
 		Flags: []string{utils.ConcatenatedKey(utils.MetaRALs, utils.MetaUpdate),
 			utils.ConcatenatedKey(utils.MetaRALs, utils.MetaDerivedReply),
 			utils.MetaAttributes},
-		CGREvent: &engine.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testSSv1ItProcessEventUpdateSession",
 			Event: map[string]any{
@@ -377,7 +377,7 @@ func testSSv1ItProcessEventUpdateSession(t *testing.T) {
 	eAttrs := &engine.AttrSProcessEventReply{
 		MatchedProfiles: []string{"cgrates.org:ATTR_ACNT_1001"},
 		AlteredFields:   []string{"*req.OfficeGroup"},
-		CGREvent: &engine.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testSSv1ItProcessEventUpdateSession",
 			Event: map[string]any{
@@ -428,7 +428,7 @@ func testSSv1ItProcessEventTerminateSession(t *testing.T) {
 	args := &sessions.V1ProcessEventArgs{
 		Flags: []string{utils.ConcatenatedKey(utils.MetaRALs, utils.MetaTerminate),
 			utils.ConcatenatedKey(utils.MetaResources, utils.MetaRelease)},
-		CGREvent: &engine.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testSSv1ItProcessEventTerminateSession",
 			Event: map[string]any{
@@ -458,7 +458,7 @@ func testSSv1ItProcessEventTerminateSession(t *testing.T) {
 }
 
 func testSSv1ItProcessCDRForSessionFromProcessEvent(t *testing.T) {
-	args := engine.CGREvent{
+	args := utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "testSSv1ItProcessCDRForSessionFromProcessEvent",
 		Event: map[string]any{
@@ -532,7 +532,7 @@ func testSSv1ItProcessEventWithGetCost(t *testing.T) {
 	// GetCost for ANY2CNT Subject
 	args := &sessions.V1ProcessEventArgs{
 		Flags: []string{utils.MetaAttributes, utils.ConcatenatedKey(utils.MetaRALs, utils.MetaCost)},
-		CGREvent: &engine.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testSSv1ItProcessEventWithGetCost",
 			Event: map[string]any{
@@ -571,7 +571,7 @@ func testSSv1ItProcessEventWithGetCost2(t *testing.T) {
 	// GetCost for SPECIAL_1002 Subject
 	args := &sessions.V1ProcessEventArgs{
 		Flags: []string{utils.MetaAttributes, utils.ConcatenatedKey(utils.MetaRALs, utils.MetaCost)},
-		CGREvent: &engine.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testSSv1ItProcessEventWithGetCost2",
 			Event: map[string]any{
@@ -612,7 +612,7 @@ func testSSv1ItProcessEventWithGetCost3(t *testing.T) {
 	// for the 9 minutes remaining apply
 	args := &sessions.V1ProcessEventArgs{
 		Flags: []string{utils.MetaAttributes, utils.ConcatenatedKey(utils.MetaRALs, utils.MetaCost)},
-		CGREvent: &engine.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testSSv1ItProcessEventWithGetCost3",
 			Event: map[string]any{
@@ -650,7 +650,7 @@ func testSSv1ItProcessEventWithGetCost3(t *testing.T) {
 func testSSv1ItProcessEventWithGetCost4(t *testing.T) {
 	args := &sessions.V1ProcessEventArgs{
 		Flags: []string{utils.MetaAttributes, utils.ConcatenatedKey(utils.MetaRALs, utils.MetaCost)},
-		CGREvent: &engine.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testSSv1ItProcessEventWithGetCost4",
 			Event: map[string]any{
@@ -678,7 +678,7 @@ func testSSv1ItGetCost(t *testing.T) {
 	// GetCost for ANY2CNT Subject
 	args := &sessions.V1ProcessEventArgs{
 		Flags: []string{utils.MetaAttributes},
-		CGREvent: &engine.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testSSv1ItGetCost",
 			Event: map[string]any{
@@ -718,7 +718,7 @@ func testSSv1ItGetCost(t *testing.T) {
 func testSSv1ItProcessEventWithCDR(t *testing.T) {
 	args := &sessions.V1ProcessEventArgs{
 		Flags: []string{utils.MetaCDRs + utils.InInFieldSep + utils.MetaRALs}, // *cdrs:*rals
-		CGREvent: &engine.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testSSv1ItProcessEventWithCDR",
 			Event: map[string]any{
@@ -795,7 +795,7 @@ func testSSv1ItProcessEventWithCDRResourceError(t *testing.T) {
 	args := &sessions.V1ProcessEventArgs{
 		Flags: []string{utils.MetaCDRs + utils.InInFieldSep + utils.MetaRALs,
 			utils.ConcatenatedKey(utils.MetaResources, utils.MetaRelease)}, // force a resource error and expect that the cdr to be written
-		CGREvent: &engine.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testSSv1ItProcessEventWithCDRResourceError",
 			Event: map[string]any{
@@ -873,7 +873,7 @@ func testSSv1ItProcessEventWithCDRResourceErrorBlockError(t *testing.T) {
 		Flags: []string{utils.MetaCDRs + utils.InInFieldSep + utils.MetaRALs,
 			utils.ConcatenatedKey(utils.MetaResources, utils.MetaRelease),
 			utils.MetaBlockerError}, // expended to stop the processing because we have error at resource
-		CGREvent: &engine.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testSSv1ItProcessEventWithCDRResourceErrorBlockError",
 			Event: map[string]any{

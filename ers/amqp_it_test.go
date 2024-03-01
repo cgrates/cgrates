@@ -115,7 +115,7 @@ func TestAMQPER(t *testing.T) {
 		if ev.rdrCfg.ID != "amqp" {
 			t.Errorf("Expected 'amqp' received `%s`", ev.rdrCfg.ID)
 		}
-		expected := &engine.CGREvent{
+		expected := &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     ev.cgrEvent.ID,
 			Time:   ev.cgrEvent.Time,

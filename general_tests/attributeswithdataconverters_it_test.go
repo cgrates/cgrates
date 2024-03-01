@@ -120,7 +120,7 @@ func testAttrWDcLoadFromFolder(t *testing.T) {
 }
 
 func testAttrWDcProcessEvent(t *testing.T) {
-	ev := &engine.CGREvent{
+	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "testAttrWDcProcessEvent",
 		Event: map[string]any{
@@ -133,7 +133,7 @@ func testAttrWDcProcessEvent(t *testing.T) {
 	eRply := engine.AttrSProcessEventReply{
 		MatchedProfiles: []string{"cgrates.org:ATTR_SEC"},
 		AlteredFields:   []string{"*req.Cost"},
-		CGREvent: &engine.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testAttrWDcProcessEvent",
 			Event: map[string]any{
@@ -158,7 +158,7 @@ func testAttrWDcProcessEvent(t *testing.T) {
 func testAttrWDcProcessEventWithStat(t *testing.T) {
 	var reply []string
 	expected := []string{"Stat_1"}
-	ev1 := &engine.CGREvent{
+	ev1 := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "event1",
 		Event: map[string]any{
@@ -174,7 +174,7 @@ func testAttrWDcProcessEventWithStat(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", expected, reply)
 	}
 
-	ev1 = &engine.CGREvent{
+	ev1 = &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "event2",
 		Event: map[string]any{
@@ -190,7 +190,7 @@ func testAttrWDcProcessEventWithStat(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", expected, reply)
 	}
 
-	ev := &engine.CGREvent{
+	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "testAttrWDcProcessEventWithStat",
 		Event: map[string]any{
@@ -204,7 +204,7 @@ func testAttrWDcProcessEventWithStat(t *testing.T) {
 	eRply := engine.AttrSProcessEventReply{
 		MatchedProfiles: []string{"cgrates.org:ATTR_STAT"},
 		AlteredFields:   []string{"*req.AcdMetric"},
-		CGREvent: &engine.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testAttrWDcProcessEventWithStat",
 			Event: map[string]any{
@@ -227,7 +227,7 @@ func testAttrWDcProcessEventWithStat(t *testing.T) {
 	}
 }
 func testAttrWDcStripConverter(t *testing.T) {
-	ev := &engine.CGREvent{
+	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "testAttrWDcStripConverter",
 		Event: map[string]any{
@@ -243,7 +243,7 @@ func testAttrWDcStripConverter(t *testing.T) {
 	eRply := engine.AttrSProcessEventReply{
 		MatchedProfiles: []string{"cgrates.org:ATTR_VARIABLE"},
 		AlteredFields:   []string{"*req.AnswerTime", "*req.Category"},
-		CGREvent: &engine.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testAttrWDcStripConverter",
 			Event: map[string]any{

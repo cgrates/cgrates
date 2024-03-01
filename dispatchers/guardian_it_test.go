@@ -27,7 +27,6 @@ import (
 	"time"
 
 	"github.com/cgrates/birpc/context"
-	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -65,12 +64,12 @@ func TestDspGuardianST(t *testing.T) {
 
 func testDspGrdPing(t *testing.T) {
 	var reply string
-	if err := allEngine.RPC.Call(context.Background(), utils.GuardianSv1Ping, new(engine.CGREvent), &reply); err != nil {
+	if err := allEngine.RPC.Call(context.Background(), utils.GuardianSv1Ping, new(utils.CGREvent), &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.Pong {
 		t.Errorf("Received: %s", reply)
 	}
-	if err := dispEngine.RPC.Call(context.Background(), utils.GuardianSv1Ping, &engine.CGREvent{
+	if err := dispEngine.RPC.Call(context.Background(), utils.GuardianSv1Ping, &utils.CGREvent{
 		Tenant: "cgrates.org",
 
 		APIOpts: map[string]any{

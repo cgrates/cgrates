@@ -23,7 +23,6 @@ import (
 	"strings"
 
 	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -50,7 +49,7 @@ func (vEe *LogEE) ExportEvent(mp any, _ string) error {
 }
 func (vEe *LogEE) Close() error                      { return nil }
 func (vEe *LogEE) GetMetrics() *utils.SafeMapStorage { return vEe.dc }
-func (vEe *LogEE) PrepareMap(mp *engine.CGREvent) (any, error) {
+func (vEe *LogEE) PrepareMap(mp *utils.CGREvent) (any, error) {
 	return mp.Event, nil
 }
 func (vEe *LogEE) PrepareOrderMap(mp *utils.OrderedNavigableMap) (any, error) {

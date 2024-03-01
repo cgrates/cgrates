@@ -116,7 +116,7 @@ func TestSQSER(t *testing.T) {
 		if ev.rdrCfg.ID != "sqs" {
 			t.Errorf("Expected 'sqs' received `%s`", ev.rdrCfg.ID)
 		}
-		expected := &engine.CGREvent{
+		expected := &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     ev.cgrEvent.ID,
 			Time:   ev.cgrEvent.Time,

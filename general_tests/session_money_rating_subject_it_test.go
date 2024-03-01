@@ -41,7 +41,7 @@ var (
 	sesMRSAccount = "refundAcc"
 	sesMRSTenant  = "cgrates.org"
 
-	sesMRSCgrEv = &engine.CGREvent{
+	sesMRSCgrEv = &utils.CGREvent{
 		Tenant: sesMRSTenant,
 		Event: map[string]any{
 			utils.Tenant:       sesMRSTenant,

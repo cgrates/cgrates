@@ -158,7 +158,7 @@ func (sqlEe *SQLEe) Close() (err error) {
 
 func (sqlEe *SQLEe) GetMetrics() *utils.SafeMapStorage { return sqlEe.dc }
 
-func (sqlEe *SQLEe) PrepareMap(*engine.CGREvent) (any, error) { return nil, nil }
+func (sqlEe *SQLEe) PrepareMap(*utils.CGREvent) (any, error) { return nil, nil }
 
 func (sqlEe *SQLEe) PrepareOrderMap(mp *utils.OrderedNavigableMap) (any, error) {
 	var vals []any

@@ -34,7 +34,7 @@ type QOSRouteSorter struct {
 }
 
 func (qos *QOSRouteSorter) SortRoutes(prflID string, routes map[string]*Route,
-	ev *CGREvent, extraOpts *optsGetRoutes) (sortedRoutes *SortedRoutes, err error) {
+	ev *utils.CGREvent, extraOpts *optsGetRoutes) (sortedRoutes *SortedRoutes, err error) {
 	sortedRoutes = &SortedRoutes{ProfileID: prflID,
 		Sorting: qos.sorting,
 		Routes:  make([]*SortedRoute, 0)}

@@ -731,7 +731,7 @@ func TestLibDispatcherLoadDispatcherCacheError7(t *testing.T) {
 		defaultRatio: 0,
 		sorter:       new(noSort),
 	}
-	err := wgDsp.Dispatch(dm, nil, nil, "testTENANT", "testID", &DispatcherRoute{}, utils.AttributeSv1Ping, &engine.CGREvent{}, &wgDsp)
+	err := wgDsp.Dispatch(dm, nil, nil, "testTENANT", "testID", &DispatcherRoute{}, utils.AttributeSv1Ping, &utils.CGREvent{}, &wgDsp)
 	expected := "UNSUPPORTED_SERVICE_METHOD"
 	if err == nil || err.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, err)
@@ -784,7 +784,7 @@ func TestLibDispatcherLoadDispatcherCacheError5(t *testing.T) {
 		defaultRatio: 0,
 		sorter:       new(noSort),
 	}
-	err := wgDsp.Dispatch(nil, nil, nil, "testTenant", "testID", &DispatcherRoute{}, utils.AttributeSv1Ping, &engine.CGREvent{}, &wgDsp)
+	err := wgDsp.Dispatch(nil, nil, nil, "testTenant", "testID", &DispatcherRoute{}, utils.AttributeSv1Ping, &utils.CGREvent{}, &wgDsp)
 	if err == nil {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", "connection is shut down", err)
 	}
@@ -814,7 +814,7 @@ func TestLibDispatcherSingleResultDispatcherCase1(t *testing.T) {
 	engine.Cache.SetWithoutReplicate(utils.CacheDispatcherHosts, "testTenant:testID",
 		value, nil, true, utils.NonTransactional)
 	wgDsp := &singleResultDispatcher{sorter: new(noSort), hosts: engine.DispatcherHostProfiles{{ID: "testID"}}}
-	err := wgDsp.Dispatch(dm, nil, nil, "testTenant", "", &DispatcherRoute{}, utils.AttributeSv1Ping, &engine.CGREvent{}, &wgDsp)
+	err := wgDsp.Dispatch(dm, nil, nil, "testTenant", "", &DispatcherRoute{}, utils.AttributeSv1Ping, &utils.CGREvent{}, &wgDsp)
 	if err == nil {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", "connection is shut down", err)
 	}
@@ -851,7 +851,7 @@ func TestLibDispatcherSingleResultDispatcherCase2(t *testing.T) {
 	engine.Cache.SetWithoutReplicate(utils.CacheDispatcherHosts, "testTenant:testID",
 		value, nil, true, utils.NonTransactional)
 	wgDsp := &singleResultDispatcher{sorter: new(noSort), hosts: engine.DispatcherHostProfiles{{ID: "testID"}}}
-	err := wgDsp.Dispatch(dm, nil, nil, "testTenant", "routeID", &DispatcherRoute{}, utils.AttributeSv1Ping, &engine.CGREvent{}, &wgDsp)
+	err := wgDsp.Dispatch(dm, nil, nil, "testTenant", "routeID", &DispatcherRoute{}, utils.AttributeSv1Ping, &utils.CGREvent{}, &wgDsp)
 	if err != nil {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
 	}
@@ -898,7 +898,7 @@ func TestLibDispatcherSingleResultDispatcherCase3(t *testing.T) {
 	engine.Cache.SetWithoutReplicate(utils.CacheDispatcherHosts, "testTenant:testID",
 		value, nil, true, utils.NonTransactional)
 	wgDsp := &singleResultDispatcher{sorter: new(noSort), hosts: engine.DispatcherHostProfiles{{ID: "testID"}}}
-	err := wgDsp.Dispatch(dm, nil, nil, "testTenant", "routeID", &DispatcherRoute{}, utils.AttributeSv1Ping, &engine.CGREvent{}, &wgDsp)
+	err := wgDsp.Dispatch(dm, nil, nil, "testTenant", "routeID", &DispatcherRoute{}, utils.AttributeSv1Ping, &utils.CGREvent{}, &wgDsp)
 	expected := "INTERNALLY_DISCONNECTED"
 	if err == nil || err.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, err)
@@ -959,7 +959,7 @@ func TestLibDispatcherLoadStrategyDispatchCaseCallError(t *testing.T) {
 		defaultRatio: 1,
 		sorter:       new(noSort),
 	}
-	err := wgDsp.Dispatch(nil, nil, nil, "cgrates.org", "", &DispatcherRoute{}, utils.AttributeSv1Ping, &engine.CGREvent{}, &wgDsp)
+	err := wgDsp.Dispatch(nil, nil, nil, "cgrates.org", "", &DispatcherRoute{}, utils.AttributeSv1Ping, &utils.CGREvent{}, &wgDsp)
 	expected := "NO_DATABASE_CONNECTION"
 	if err == nil || err.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, err)

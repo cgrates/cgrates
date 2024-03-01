@@ -103,14 +103,14 @@ func TestAttrSProcessEvent(t *testing.T) {
 			utils.AttributeSv1ProcessEvent: func(args, reply any) error {
 				rplyEv := &engine.AttrSProcessEventReply{
 					AlteredFields: []string{"testcase"},
-					CGREvent:      &engine.CGREvent{Event: map[string]any{"testcase": 1}},
+					CGREvent:      &utils.CGREvent{Event: map[string]any{"testcase": 1}},
 				}
 				*reply.(*engine.AttrSProcessEventReply) = *rplyEv
 				return nil
 			},
 		},
 	}
-	cgrEv := &engine.CGREvent{
+	cgrEv := &utils.CGREvent{
 		APIOpts: map[string]any{
 			utils.OptsAttributesProcessRuns: "10",
 		},
@@ -126,8 +126,8 @@ func TestAttrSProcessEvent(t *testing.T) {
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes): clientConn,
 	})
 	eeS := NewEventExporterS(cfg, filterS, connMgr)
-	// cgrEv := &engine.CGREvent{}
-	exp := &engine.CGREvent{Event: map[string]any{"testcase": 1}}
+	// cgrEv := &utils.CGREvent{}
+	exp := &utils.CGREvent{Event: map[string]any{"testcase": 1}}
 	if rplyEv, err := eeS.attrSProcessEvent(cgrEv, []string{}, utils.EmptyString); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(exp, rplyEv) {
@@ -155,7 +155,7 @@ func TestAttrSProcessEvent2(t *testing.T) {
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes): clientConn,
 	})
 	eeS := NewEventExporterS(cfg, filterS, connMgr)
-	cgrEv := &engine.CGREvent{
+	cgrEv := &utils.CGREvent{
 		APIOpts: make(map[string]any),
 	}
 	if _, err := eeS.attrSProcessEvent(cgrEv, []string{}, utils.EmptyString); err != nil {
@@ -178,7 +178,7 @@ func TestV1ProcessEvent(t *testing.T) {
 	eeS := NewEventExporterS(cfg, filterS, nil)
 	cgrEv := &engine.CGREventWithEeIDs{
 		EeIDs: []string{"SQLExporterFull"},
-		CGREvent: &engine.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "voiceEvent",
 			Time:   utils.TimePointer(time.Now()),
@@ -228,7 +228,7 @@ func TestV1ProcessEvent2(t *testing.T) {
 	eeS := NewEventExporterS(cfg, filterS, nil)
 	cgrEv := &engine.CGREventWithEeIDs{
 		EeIDs: []string{"SQLExporterFull"},
-		CGREvent: &engine.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "voiceEvent",
 			Time:   utils.TimePointer(time.Now()),
@@ -268,7 +268,7 @@ func TestV1ProcessEvent3(t *testing.T) {
 	eeS := NewEventExporterS(cfg, filterS, nil)
 	cgrEv := &engine.CGREventWithEeIDs{
 		EeIDs: []string{"SQLExporterFull"},
-		CGREvent: &engine.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "voiceEvent",
 			Time:   utils.TimePointer(time.Now()),
@@ -302,7 +302,7 @@ func TestV1ProcessEvent4(t *testing.T) {
 	eeS.eesChs[utils.MetaHTTPPost].Set("SQLExporterFull", newEeS, []string{"grp1"})
 	cgrEv := &engine.CGREventWithEeIDs{
 		EeIDs: []string{"SQLExporterFull"},
-		CGREvent: &engine.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "voiceEvent",
 			Time:   utils.TimePointer(time.Now()),
@@ -364,7 +364,7 @@ func TestV1ProcessEventMockMetrics(t *testing.T) {
 	eeS.eesChs[utils.MetaHTTPPost].Set("SQLExporterFull", mEe, []string{"grp1"})
 	cgrEv := &engine.CGREventWithEeIDs{
 		EeIDs: []string{"SQLExporterFull"},
-		CGREvent: &engine.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "voiceEvent",
 			Time:   utils.TimePointer(time.Now()),
@@ -393,7 +393,7 @@ func TestV1ProcessEvent5(t *testing.T) {
 	}
 	cgrEv := &engine.CGREventWithEeIDs{
 		EeIDs: []string{"SQLExporterFull"},
-		CGREvent: &engine.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "voiceEvent",
 			Time:   utils.TimePointer(time.Now()),
@@ -424,7 +424,7 @@ func TestV1ProcessEvent6(t *testing.T) {
 	eeS := NewEventExporterS(cfg, filterS, nil)
 	cgrEv := &engine.CGREventWithEeIDs{
 		EeIDs: []string{"SQLExporterFull"},
-		CGREvent: &engine.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "voiceEvent",
 			Time:   utils.TimePointer(time.Now()),

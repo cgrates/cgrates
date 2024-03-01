@@ -22,13 +22,12 @@ import (
 	"time"
 
 	"github.com/cgrates/birpc/context"
-	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
-func (dS *DispatcherService) StatSv1Ping(ctx *context.Context, args *engine.CGREvent, reply *string) (err error) {
+func (dS *DispatcherService) StatSv1Ping(ctx *context.Context, args *utils.CGREvent, reply *string) (err error) {
 	if args == nil {
-		args = new(engine.CGREvent)
+		args = new(utils.CGREvent)
 	}
 	args.Tenant = utils.FirstNonEmpty(args.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
@@ -41,7 +40,7 @@ func (dS *DispatcherService) StatSv1Ping(ctx *context.Context, args *engine.CGRE
 	return dS.Dispatch(args, utils.MetaStats, utils.StatSv1Ping, args, reply)
 }
 
-func (dS *DispatcherService) StatSv1GetStatQueuesForEvent(ctx *context.Context, args *engine.CGREvent,
+func (dS *DispatcherService) StatSv1GetStatQueuesForEvent(ctx *context.Context, args *utils.CGREvent,
 	reply *[]string) (err error) {
 	args.Tenant = utils.FirstNonEmpty(args.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
@@ -64,14 +63,14 @@ func (dS *DispatcherService) StatSv1GetQueueStringMetrics(ctx *context.Context, 
 			return
 		}
 	}
-	return dS.Dispatch(&engine.CGREvent{
+	return dS.Dispatch(&utils.CGREvent{
 		Tenant:  args.Tenant,
 		ID:      args.ID,
 		APIOpts: args.APIOpts,
 	}, utils.MetaStats, utils.StatSv1GetQueueStringMetrics, args, reply)
 }
 
-func (dS *DispatcherService) StatSv1ProcessEvent(ctx *context.Context, args *engine.CGREvent,
+func (dS *DispatcherService) StatSv1ProcessEvent(ctx *context.Context, args *utils.CGREvent,
 	reply *[]string) (err error) {
 	args.Tenant = utils.FirstNonEmpty(args.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
@@ -93,7 +92,7 @@ func (dS *DispatcherService) StatSv1GetQueueFloatMetrics(ctx *context.Context, a
 			return
 		}
 	}
-	return dS.Dispatch(&engine.CGREvent{
+	return dS.Dispatch(&utils.CGREvent{
 		Tenant:  args.Tenant,
 		ID:      args.ID,
 		APIOpts: args.APIOpts,
@@ -112,7 +111,7 @@ func (dS *DispatcherService) StatSv1GetQueueIDs(ctx *context.Context, args *util
 			return
 		}
 	}
-	return dS.Dispatch(&engine.CGREvent{
+	return dS.Dispatch(&utils.CGREvent{
 		Tenant:  tnt,
 		APIOpts: args.APIOpts,
 	}, utils.MetaStats, utils.StatSv1GetQueueIDs, args, reply)

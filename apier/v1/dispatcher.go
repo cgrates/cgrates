@@ -246,18 +246,18 @@ type DispatcherThresholdSv1 struct {
 }
 
 // Ping implements ThresholdSv1Ping
-func (dT *DispatcherThresholdSv1) Ping(ctx *context.Context, args *engine.CGREvent, reply *string) error {
+func (dT *DispatcherThresholdSv1) Ping(ctx *context.Context, args *utils.CGREvent, reply *string) error {
 	return dT.dS.ThresholdSv1Ping(ctx, args, reply)
 }
 
 // GetThresholdsForEvent implements ThresholdSv1GetThresholdsForEvent
-func (dT *DispatcherThresholdSv1) GetThresholdsForEvent(ctx *context.Context, tntID *engine.CGREvent,
+func (dT *DispatcherThresholdSv1) GetThresholdsForEvent(ctx *context.Context, tntID *utils.CGREvent,
 	t *engine.Thresholds) error {
 	return dT.dS.ThresholdSv1GetThresholdsForEvent(ctx, tntID, t)
 }
 
 // ProcessEvent implements ThresholdSv1ProcessEvent
-func (dT *DispatcherThresholdSv1) ProcessEvent(ctx *context.Context, args *engine.CGREvent,
+func (dT *DispatcherThresholdSv1) ProcessEvent(ctx *context.Context, args *utils.CGREvent,
 	tIDs *[]string) error {
 	return dT.dS.ThresholdSv1ProcessEvent(ctx, args, tIDs)
 }
@@ -282,12 +282,12 @@ type DispatcherStatSv1 struct {
 }
 
 // Ping implements StatSv1Ping
-func (dSts *DispatcherStatSv1) Ping(ctx *context.Context, args *engine.CGREvent, reply *string) error {
+func (dSts *DispatcherStatSv1) Ping(ctx *context.Context, args *utils.CGREvent, reply *string) error {
 	return dSts.dS.StatSv1Ping(ctx, args, reply)
 }
 
 // GetStatQueuesForEvent implements StatSv1GetStatQueuesForEvent
-func (dSts *DispatcherStatSv1) GetStatQueuesForEvent(ctx *context.Context, args *engine.CGREvent, reply *[]string) error {
+func (dSts *DispatcherStatSv1) GetStatQueuesForEvent(ctx *context.Context, args *utils.CGREvent, reply *[]string) error {
 	return dSts.dS.StatSv1GetStatQueuesForEvent(ctx, args, reply)
 }
 
@@ -308,7 +308,7 @@ func (dSts *DispatcherStatSv1) GetQueueIDs(ctx *context.Context, args *utils.Ten
 }
 
 // GetQueueStringMetrics implements StatSv1ProcessEvent
-func (dSts *DispatcherStatSv1) ProcessEvent(ctx *context.Context, args *engine.CGREvent, reply *[]string) error {
+func (dSts *DispatcherStatSv1) ProcessEvent(ctx *context.Context, args *utils.CGREvent, reply *[]string) error {
 	return dSts.dS.StatSv1ProcessEvent(ctx, args, reply)
 }
 
@@ -322,12 +322,12 @@ type DispatcherResourceSv1 struct {
 }
 
 // Ping implements ResourceSv1Ping
-func (dRs *DispatcherResourceSv1) Ping(ctx *context.Context, args *engine.CGREvent, reply *string) error {
+func (dRs *DispatcherResourceSv1) Ping(ctx *context.Context, args *utils.CGREvent, reply *string) error {
 	return dRs.dRs.ResourceSv1Ping(ctx, args, reply)
 }
 
 // GetResourcesForEvent implements ResourceSv1GetResourcesForEvent
-func (dRs *DispatcherResourceSv1) GetResourcesForEvent(ctx *context.Context, args *engine.CGREvent,
+func (dRs *DispatcherResourceSv1) GetResourcesForEvent(ctx *context.Context, args *utils.CGREvent,
 	reply *engine.Resources) error {
 	return dRs.dRs.ResourceSv1GetResourcesForEvent(ctx, args, reply)
 }
@@ -340,17 +340,17 @@ func (dRs *DispatcherResourceSv1) GetResourceWithConfig(ctx *context.Context, ar
 	return dRs.dRs.ResourceSv1GetResourceWithConfig(ctx, args, reply)
 }
 
-func (dRs *DispatcherResourceSv1) AuthorizeResources(ctx *context.Context, args *engine.CGREvent,
+func (dRs *DispatcherResourceSv1) AuthorizeResources(ctx *context.Context, args *utils.CGREvent,
 	reply *string) error {
 	return dRs.dRs.ResourceSv1AuthorizeResources(ctx, args, reply)
 }
 
-func (dRs *DispatcherResourceSv1) AllocateResources(ctx *context.Context, args *engine.CGREvent,
+func (dRs *DispatcherResourceSv1) AllocateResources(ctx *context.Context, args *utils.CGREvent,
 	reply *string) error {
 	return dRs.dRs.ResourceSv1AllocateResources(ctx, args, reply)
 }
 
-func (dRs *DispatcherResourceSv1) ReleaseResources(ctx *context.Context, args *engine.CGREvent,
+func (dRs *DispatcherResourceSv1) ReleaseResources(ctx *context.Context, args *utils.CGREvent,
 	reply *string) error {
 	return dRs.dRs.ResourceSv1ReleaseResources(ctx, args, reply)
 }
@@ -365,22 +365,22 @@ type DispatcherRouteSv1 struct {
 }
 
 // Ping implements RouteSv1Ping
-func (dRoute *DispatcherRouteSv1) Ping(ctx *context.Context, args *engine.CGREvent, reply *string) error {
+func (dRoute *DispatcherRouteSv1) Ping(ctx *context.Context, args *utils.CGREvent, reply *string) error {
 	return dRoute.dRoute.RouteSv1Ping(ctx, args, reply)
 }
 
 // GetRoutes implements RouteSv1GetRoutes
-func (dRoute *DispatcherRouteSv1) GetRoutes(ctx *context.Context, args *engine.CGREvent, reply *engine.SortedRoutesList) error {
+func (dRoute *DispatcherRouteSv1) GetRoutes(ctx *context.Context, args *utils.CGREvent, reply *engine.SortedRoutesList) error {
 	return dRoute.dRoute.RouteSv1GetRoutes(ctx, args, reply)
 }
 
 // GetRouteProfilesForEvent returns a list of route profiles that match for Event
-func (dRoute *DispatcherRouteSv1) GetRouteProfilesForEvent(ctx *context.Context, args *engine.CGREvent, reply *[]*engine.RouteProfile) error {
+func (dRoute *DispatcherRouteSv1) GetRouteProfilesForEvent(ctx *context.Context, args *utils.CGREvent, reply *[]*engine.RouteProfile) error {
 	return dRoute.dRoute.RouteSv1GetRouteProfilesForEvent(ctx, args, reply)
 }
 
 // GetRoutesList returns sorted list of routes for Event as a string slice
-func (dRoute *DispatcherRouteSv1) GetRoutesList(ctx *context.Context, args *engine.CGREvent, reply *[]string) error {
+func (dRoute *DispatcherRouteSv1) GetRoutesList(ctx *context.Context, args *utils.CGREvent, reply *[]string) error {
 	return dRoute.dRoute.RouteSv1GetRoutesList(ctx, args, reply)
 }
 
@@ -394,18 +394,18 @@ type DispatcherAttributeSv1 struct {
 }
 
 // Ping implements AttributeSv1Ping
-func (dA *DispatcherAttributeSv1) Ping(ctx *context.Context, args *engine.CGREvent, reply *string) error {
+func (dA *DispatcherAttributeSv1) Ping(ctx *context.Context, args *utils.CGREvent, reply *string) error {
 	return dA.dA.AttributeSv1Ping(ctx, args, reply)
 }
 
 // GetAttributeForEvent implements AttributeSv1GetAttributeForEvent
-func (dA *DispatcherAttributeSv1) GetAttributeForEvent(ctx *context.Context, args *engine.CGREvent,
+func (dA *DispatcherAttributeSv1) GetAttributeForEvent(ctx *context.Context, args *utils.CGREvent,
 	reply *engine.AttributeProfile) error {
 	return dA.dA.AttributeSv1GetAttributeForEvent(ctx, args, reply)
 }
 
 // ProcessEvent implements AttributeSv1ProcessEvent
-func (dA *DispatcherAttributeSv1) ProcessEvent(ctx *context.Context, args *engine.CGREvent,
+func (dA *DispatcherAttributeSv1) ProcessEvent(ctx *context.Context, args *utils.CGREvent,
 	reply *engine.AttrSProcessEventReply) error {
 	return dA.dA.AttributeSv1ProcessEvent(ctx, args, reply)
 }
@@ -420,18 +420,18 @@ type DispatcherChargerSv1 struct {
 }
 
 // Ping implements ChargerSv1Ping
-func (dC *DispatcherChargerSv1) Ping(ctx *context.Context, args *engine.CGREvent, reply *string) error {
+func (dC *DispatcherChargerSv1) Ping(ctx *context.Context, args *utils.CGREvent, reply *string) error {
 	return dC.dC.ChargerSv1Ping(ctx, args, reply)
 }
 
 // GetChargersForEvent implements ChargerSv1GetChargersForEvent
-func (dC *DispatcherChargerSv1) GetChargersForEvent(ctx *context.Context, args *engine.CGREvent,
+func (dC *DispatcherChargerSv1) GetChargersForEvent(ctx *context.Context, args *utils.CGREvent,
 	reply *engine.ChargerProfiles) (err error) {
 	return dC.dC.ChargerSv1GetChargersForEvent(ctx, args, reply)
 }
 
 // ProcessEvent implements ChargerSv1ProcessEvent
-func (dC *DispatcherChargerSv1) ProcessEvent(ctx *context.Context, args *engine.CGREvent,
+func (dC *DispatcherChargerSv1) ProcessEvent(ctx *context.Context, args *utils.CGREvent,
 	reply *[]*engine.ChrgSProcessEventReply) (err error) {
 	return dC.dC.ChargerSv1ProcessEvent(ctx, args, reply)
 }
@@ -446,7 +446,7 @@ type DispatcherSessionSv1 struct {
 }
 
 // Ping implements SessionSv1Ping
-func (dS *DispatcherSessionSv1) Ping(ctx *context.Context, args *engine.CGREvent, reply *string) error {
+func (dS *DispatcherSessionSv1) Ping(ctx *context.Context, args *utils.CGREvent, reply *string) error {
 	return dS.dS.SessionSv1Ping(ctx, args, reply)
 }
 
@@ -474,7 +474,7 @@ func (dS *DispatcherSessionSv1) InitiateSession(ctx *context.Context, args *sess
 }
 
 // ProcessCDR implements SessionSv1ProcessCDR
-func (dS *DispatcherSessionSv1) ProcessCDR(ctx *context.Context, args *engine.CGREvent,
+func (dS *DispatcherSessionSv1) ProcessCDR(ctx *context.Context, args *utils.CGREvent,
 	reply *string) (err error) {
 	return dS.dS.SessionSv1ProcessCDR(ctx, args, reply)
 }
@@ -608,7 +608,7 @@ func (dS *DispatcherResponder) GetMaxSessionTimeOnAccounts(ctx *context.Context,
 }
 
 // Ping used to detreminate if component is active
-func (dS *DispatcherResponder) Ping(ctx *context.Context, args *engine.CGREvent, reply *string) error {
+func (dS *DispatcherResponder) Ping(ctx *context.Context, args *utils.CGREvent, reply *string) error {
 	return dS.dS.ResponderPing(ctx, args, reply)
 }
 
@@ -719,7 +719,7 @@ func (dS *DispatcherCacheSv1) ReplicateRemove(ctx *context.Context, args *utils.
 }
 
 // Ping used to determinate if component is active
-func (dS *DispatcherCacheSv1) Ping(ctx *context.Context, args *engine.CGREvent, reply *string) error {
+func (dS *DispatcherCacheSv1) Ping(ctx *context.Context, args *utils.CGREvent, reply *string) error {
 	return dS.dS.CacheSv1Ping(ctx, args, reply)
 }
 
@@ -743,7 +743,7 @@ func (dS *DispatcherGuardianSv1) RemoteUnlock(ctx *context.Context, attr *dispat
 }
 
 // Ping used to detreminate if component is active
-func (dS *DispatcherGuardianSv1) Ping(ctx *context.Context, args *engine.CGREvent, reply *string) error {
+func (dS *DispatcherGuardianSv1) Ping(ctx *context.Context, args *utils.CGREvent, reply *string) error {
 	return dS.dS.GuardianSv1Ping(ctx, args, reply)
 }
 
@@ -757,12 +757,12 @@ type DispatcherSchedulerSv1 struct {
 }
 
 // Reload reloads scheduler instructions
-func (dS *DispatcherSchedulerSv1) Reload(ctx *context.Context, attr *engine.CGREvent, reply *string) (err error) {
+func (dS *DispatcherSchedulerSv1) Reload(ctx *context.Context, attr *utils.CGREvent, reply *string) (err error) {
 	return dS.dS.SchedulerSv1Reload(ctx, attr, reply)
 }
 
 // Ping used to detreminate if component is active
-func (dS *DispatcherSchedulerSv1) Ping(ctx *context.Context, args *engine.CGREvent, reply *string) error {
+func (dS *DispatcherSchedulerSv1) Ping(ctx *context.Context, args *utils.CGREvent, reply *string) error {
 	return dS.dS.SchedulerSv1Ping(ctx, args, reply)
 }
 
@@ -785,7 +785,7 @@ type DispatcherSv1 struct {
 }
 
 // GetProfileForEvent returns the matching dispatcher profile for the provided event
-func (dSv1 DispatcherSv1) GetProfilesForEvent(ctx *context.Context, ev *engine.CGREvent,
+func (dSv1 DispatcherSv1) GetProfilesForEvent(ctx *context.Context, ev *utils.CGREvent,
 	dPrfl *engine.DispatcherProfiles) error {
 	return dSv1.dS.DispatcherSv1GetProfilesForEvent(ctx, ev, dPrfl)
 }
@@ -794,7 +794,7 @@ func (dS *DispatcherSv1) RemoteStatus(ctx *context.Context, args *utils.TenantWi
 	return dS.dS.DispatcherSv1RemoteStatus(ctx, args, reply)
 }
 
-func (dS *DispatcherSv1) RemotePing(ctx *context.Context, args *engine.CGREvent, reply *string) (err error) {
+func (dS *DispatcherSv1) RemotePing(ctx *context.Context, args *utils.CGREvent, reply *string) (err error) {
 	return dS.dS.DispatcherSv1RemotePing(ctx, args, reply)
 }
 
@@ -808,7 +808,7 @@ func (dSv1 DispatcherSv1) Apier(ctx *context.Context,args *utils.MethodParameter
 }
 */
 
-func (rS *DispatcherSv1) Ping(ctx *context.Context, ign *engine.CGREvent, reply *string) error {
+func (rS *DispatcherSv1) Ping(ctx *context.Context, ign *utils.CGREvent, reply *string) error {
 	*reply = utils.Pong
 	return nil
 }
@@ -823,7 +823,7 @@ type DispatcherSCDRsV1 struct {
 }
 
 // Ping used to detreminate if component is active
-func (dS *DispatcherSCDRsV1) Ping(ctx *context.Context, args *engine.CGREvent, reply *string) error {
+func (dS *DispatcherSCDRsV1) Ping(ctx *context.Context, args *utils.CGREvent, reply *string) error {
 	return dS.dS.CDRsV1Ping(ctx, args, reply)
 }
 
@@ -865,7 +865,7 @@ type DispatcherSServiceManagerV1 struct {
 }
 
 // Ping used to detreminate if component is active
-func (dS *DispatcherSServiceManagerV1) Ping(ctx *context.Context, args *engine.CGREvent, reply *string) error {
+func (dS *DispatcherSServiceManagerV1) Ping(ctx *context.Context, args *utils.CGREvent, reply *string) error {
 	return dS.dS.ServiceManagerV1Ping(ctx, args, reply)
 }
 func (dS *DispatcherSServiceManagerV1) StartService(ctx *context.Context, args *dispatchers.ArgStartServiceWithAPIOpts, reply *string) error {
@@ -920,7 +920,7 @@ func (dS *DispatcherRALsV1) GetRatingPlansCost(ctx *context.Context, args *utils
 }
 
 // Ping used to detreminate if component is active
-func (dS *DispatcherRALsV1) Ping(ctx *context.Context, args *engine.CGREvent, reply *string) error {
+func (dS *DispatcherRALsV1) Ping(ctx *context.Context, args *utils.CGREvent, reply *string) error {
 	return dS.dS.RALsV1Ping(ctx, args, reply)
 }
 
@@ -937,7 +937,7 @@ func (dS *DispatcherCoreSv1) Status(ctx *context.Context, args *utils.TenantWith
 	return dS.dS.CoreSv1Status(ctx, args, reply)
 }
 
-func (dS *DispatcherCoreSv1) Ping(ctx *context.Context, args *engine.CGREvent, reply *string) error {
+func (dS *DispatcherCoreSv1) Ping(ctx *context.Context, args *utils.CGREvent, reply *string) error {
 	return dS.dS.CoreSv1Ping(ctx, args, reply)
 }
 
@@ -974,7 +974,7 @@ func NewDispatcherEeSv1(dps *dispatchers.DispatcherService) *DispatcherEeSv1 {
 	return &DispatcherEeSv1{dS: dps}
 }
 
-func (dS *DispatcherEeSv1) Ping(ctx *context.Context, args *engine.CGREvent, reply *string) error {
+func (dS *DispatcherEeSv1) Ping(ctx *context.Context, args *utils.CGREvent, reply *string) error {
 	return dS.dS.EeSv1Ping(ctx, args, reply)
 }
 
@@ -991,7 +991,7 @@ func NewDispatcherReplicatorSv1(dps *dispatchers.DispatcherService) *DispatcherR
 }
 
 // Ping used to detreminate if component is active
-func (dS *DispatcherReplicatorSv1) Ping(ctx *context.Context, args *engine.CGREvent, reply *string) error {
+func (dS *DispatcherReplicatorSv1) Ping(ctx *context.Context, args *utils.CGREvent, reply *string) error {
 	return dS.dS.ReplicatorSv1Ping(ctx, args, reply)
 }
 

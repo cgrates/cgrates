@@ -174,7 +174,7 @@ func testSessionsBiRPCSessionAutomaticDisconnects(t *testing.T) {
 
 	initArgs := &V1InitSessionArgs{
 		InitSession: true,
-		CGREvent: &engine.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSessionsBiRPCSessionAutomaticDisconnects",
 			Event: map[string]any{
@@ -216,7 +216,7 @@ func testSessionsBiRPCSessionAutomaticDisconnects(t *testing.T) {
 	}
 	termArgs := &V1TerminateSessionArgs{
 		TerminateSession: true,
-		CGREvent: &engine.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSessionsDataLastUsedData",
 			Event: map[string]any{
@@ -296,7 +296,7 @@ func testSessionsBiRPCSessionOriginatorTerminate(t *testing.T) {
 
 	initArgs := &V1InitSessionArgs{
 		InitSession: true,
-		CGREvent: &engine.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSessionsBiRPCSessionOriginatorTerminate",
 			Event: map[string]any{
@@ -331,7 +331,7 @@ func testSessionsBiRPCSessionOriginatorTerminate(t *testing.T) {
 
 	termArgs := &V1TerminateSessionArgs{
 		TerminateSession: true,
-		CGREvent: &engine.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSessionsBiRPCSessionOriginatorTerminate",
 			Event: map[string]any{

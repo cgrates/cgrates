@@ -23,7 +23,7 @@ import (
 
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/utils"
 )
 
 func TestDspServiceManagerV1PingErrorNilEvent(t *testing.T) {
@@ -42,7 +42,7 @@ func TestDspServiceManagerV1PingErrorNil(t *testing.T) {
 	cgrCfg := config.NewDefaultCGRConfig()
 	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
 	cgrCfg.DispatcherSCfg().AttributeSConns = []string{"test"}
-	CGREvent := &engine.CGREvent{
+	CGREvent := &utils.CGREvent{
 		Tenant: "tenant",
 	}
 	var reply *string
@@ -56,7 +56,7 @@ func TestDspServiceManagerV1PingErrorNil(t *testing.T) {
 func TestDspServiceManagerV1PingNil(t *testing.T) {
 	cgrCfg := config.NewDefaultCGRConfig()
 	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
-	CGREvent := &engine.CGREvent{
+	CGREvent := &utils.CGREvent{
 		Tenant: "tenant",
 	}
 	var reply *string

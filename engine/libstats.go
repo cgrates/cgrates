@@ -165,7 +165,7 @@ func (ssq *StoredStatQueue) AsStatQueue(ms Marshaler) (sq *StatQueue, err error)
 }
 
 type SQItem struct {
-	EventID    string     // Bounded to the original CGREvent
+	EventID    string     // Bounded to the original utils.CGREvent
 	ExpiryTime *time.Time // Used to auto-expire events
 }
 
@@ -232,7 +232,7 @@ func (sq *StatQueue) TenantID() string {
 	return utils.ConcatenatedKey(sq.Tenant, sq.ID)
 }
 
-// ProcessEvent processes a CGREvent, returns true if processed
+// ProcessEvent processes a utils.CGREvent, returns true if processed
 func (sq *StatQueue) ProcessEvent(tnt, evID string, filterS *FilterS, evNm utils.MapStorage) (err error) {
 	if oneEv := sq.isOneEvent(); oneEv {
 		return sq.addOneEvent(tnt, filterS, evNm)

@@ -118,7 +118,7 @@ func TestS3ER(t *testing.T) {
 		if ev.rdrCfg.ID != "s3" {
 			t.Errorf("Expected 's3' received `%s`", ev.rdrCfg.ID)
 		}
-		expected := &engine.CGREvent{
+		expected := &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     ev.cgrEvent.ID,
 			Time:   ev.cgrEvent.Time,

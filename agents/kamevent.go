@@ -26,7 +26,6 @@ import (
 	"time"
 
 	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/sessions"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -157,7 +156,7 @@ func (kev KamEvent) AsMapStringInterface() (mp map[string]any) {
 }
 
 // AsCGREvent converts KamEvent into CGREvent
-func (kev KamEvent) AsCGREvent(timezone string) (cgrEv *engine.CGREvent, err error) {
+func (kev KamEvent) AsCGREvent(timezone string) (cgrEv *utils.CGREvent, err error) {
 	var sTime time.Time
 	switch kev[EVENT] {
 	case CGR_AUTH_REQUEST:
@@ -189,7 +188,7 @@ func (kev KamEvent) AsCGREvent(timezone string) (cgrEv *engine.CGREvent, err err
 	default: // no/unsupported event
 		return
 	}
-	cgrEv = &engine.CGREvent{
+	cgrEv = &utils.CGREvent{
 		Tenant: utils.FirstNonEmpty(kev[utils.Tenant],
 			config.CgrConfig().GeneralCfg().DefaultTenant),
 		ID:      utils.UUIDSha1Prefix(),
@@ -308,7 +307,7 @@ func (kev KamEvent) V1ProcessMessageArgs() (args *sessions.V1ProcessMessageArgs)
 }
 
 // V1ProcessCDRArgs returns the arguments used in SessionSv1.ProcessCDR
-func (kev KamEvent) V1ProcessCDRArgs() (args *engine.CGREvent) {
+func (kev KamEvent) V1ProcessCDRArgs() (args *utils.CGREvent) {
 	var err error
 	if args, err = kev.AsCGREvent(config.CgrConfig().GeneralCfg().DefaultTimezone); err != nil {
 		return
@@ -354,7 +353,7 @@ func (kev KamEvent) AsKamProcessMessageReply(procEvArgs *sessions.V1ProcessMessa
 }
 
 // AsKamProcessCDRReply builds up a Kamailio ProcessEvent based on arguments and reply from SessionS
-func (kev KamEvent) AsKamProcessCDRReply(cgrEvWithArgDisp *engine.CGREvent,
+func (kev KamEvent) AsKamProcessCDRReply(cgrEvWithArgDisp *utils.CGREvent,
 	rply *string, rplyErr error) (kar *KamReply, err error) {
 	evName := CGR_PROCESS_CDR
 	if kamRouReply, has := kev[KamReplyRoute]; has {

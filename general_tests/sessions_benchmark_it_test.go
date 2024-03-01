@@ -168,7 +168,7 @@ func initSes(n int) (err error) {
 
 	initArgs := &sessions.V1InitSessionArgs{
 		InitSession: true,
-		CGREvent: &engine.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     utils.UUIDSha1Prefix(),
 			Event: map[string]any{

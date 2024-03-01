@@ -23,14 +23,14 @@ import (
 
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/utils"
 )
 
 func TestGuardianGuardianSv1PingErr1(t *testing.T) {
 	cgrCfg := config.NewDefaultCGRConfig()
 	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
 	cgrCfg.DispatcherSCfg().AttributeSConns = []string{"test"}
-	CGREvent := &engine.CGREvent{
+	CGREvent := &utils.CGREvent{
 		Tenant: "tenant",
 	}
 	var reply *string
@@ -46,7 +46,7 @@ func TestGuardianGuardianSv1PingErr1(t *testing.T) {
 func TestGuardianGuardianSv1PingErr2(t *testing.T) {
 	cgrCfg := config.NewDefaultCGRConfig()
 	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
-	CGREvent := &engine.CGREvent{
+	CGREvent := &utils.CGREvent{
 		Tenant: "tenant",
 	}
 	var reply *string
@@ -62,7 +62,7 @@ func TestGuardianGuardianSv1PingErr2(t *testing.T) {
 func TestGuardianGuardianSv1PingErrNil(t *testing.T) {
 	cgrCfg := config.NewDefaultCGRConfig()
 	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
-	var CGREvent *engine.CGREvent
+	var CGREvent *utils.CGREvent
 	var reply *string
 
 	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"

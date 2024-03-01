@@ -137,7 +137,7 @@ func testKafkaCreateTopic(t *testing.T) {
 func testKafkaExportEvent(t *testing.T) {
 	event := &engine.CGREventWithEeIDs{
 		EeIDs: []string{"KafkaExporter"},
-		CGREvent: &engine.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "KafkaEvent",
 			Event: map[string]any{

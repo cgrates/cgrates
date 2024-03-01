@@ -137,7 +137,7 @@ func testSes2ItInitSession(t *testing.T) {
 	// Init session
 	initArgs := &sessions.V1InitSessionArgs{
 		InitSession: true,
-		CGREvent: &engine.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     utils.UUIDSha1Prefix(),
 			Event: map[string]any{
@@ -190,7 +190,7 @@ func testSes2StirAuthenticate(t *testing.T) {
 	args := &sessions.V1ProcessEventArgs{
 		Flags: []string{utils.MetaSTIRAuthenticate},
 
-		CGREvent: &engine.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testSes2StirAuthorize",
 			Event: map[string]any{
@@ -231,7 +231,7 @@ func testSes2StirInit(t *testing.T) {
 	args := &sessions.V1ProcessEventArgs{
 		Flags: []string{utils.MetaSTIRInitiate},
 
-		CGREvent: &engine.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testSes2StirInit",
 			Event: map[string]any{

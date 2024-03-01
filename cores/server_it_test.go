@@ -699,7 +699,7 @@ func testAcceptBiRPC(t *testing.T) {
 	rpc := jsonrpc.NewClient(p2)
 	var reply string
 	expected := "birpc: can't find method AttributeSv1.Ping"
-	if err := rpc.Call(context.Background(), utils.AttributeSv1Ping, engine.CGREvent{}, &reply); err == nil || err.Error() != expected {
+	if err := rpc.Call(context.Background(), utils.AttributeSv1Ping, utils.CGREvent{}, &reply); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 

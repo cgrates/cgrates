@@ -145,7 +145,7 @@ func (alS *AttributeService) attributeProfileForEvent(tnt string, ctx *string, a
 type AttrSProcessEventReply struct {
 	MatchedProfiles []string
 	AlteredFields   []string
-	*CGREvent
+	*utils.CGREvent
 	blocker bool // internally used to stop further processRuns
 }
 
@@ -167,7 +167,7 @@ func (attrReply *AttrSProcessEventReply) Digest() (rplyDigest string) {
 }
 
 // processEvent will match event with attribute profile and do the necessary replacements
-func (alS *AttributeService) processEvent(tnt string, args *CGREvent, evNm utils.MapStorage, dynDP utils.DataProvider,
+func (alS *AttributeService) processEvent(tnt string, args *utils.CGREvent, evNm utils.MapStorage, dynDP utils.DataProvider,
 	lastID string, processedPrfNo map[string]int, profileRuns int) (
 	rply *AttrSProcessEventReply, err error) {
 	context := alS.cgrcfg.AttributeSCfg().Opts.Context
@@ -175,11 +175,11 @@ func (alS *AttributeService) processEvent(tnt string, args *CGREvent, evNm utils
 		context = utils.StringPointer(utils.IfaceAsString(opt))
 	}
 	var attrIDs []string
-	if attrIDs, err = GetStringSliceOpts(args, alS.cgrcfg.AttributeSCfg().Opts.ProfileIDs, utils.OptsAttributesProfileIDs); err != nil {
+	if attrIDs, err = utils.GetStringSliceOpts(args, alS.cgrcfg.AttributeSCfg().Opts.ProfileIDs, utils.OptsAttributesProfileIDs); err != nil {
 		return
 	}
 	var ignFilters bool
-	if ignFilters, err = GetBoolOpts(args, alS.cgrcfg.AttributeSCfg().Opts.ProfileIgnoreFilters,
+	if ignFilters, err = utils.GetBoolOpts(args, alS.cgrcfg.AttributeSCfg().Opts.ProfileIgnoreFilters,
 		utils.OptsAttributesProfileIgnoreFilters); err != nil {
 		return
 	}
@@ -244,7 +244,7 @@ func (alS *AttributeService) processEvent(tnt string, args *CGREvent, evNm utils
 }
 
 // V1GetAttributeForEvent returns the AttributeProfile that matches the event
-func (alS *AttributeService) V1GetAttributeForEvent(ctx *context.Context, args *CGREvent,
+func (alS *AttributeService) V1GetAttributeForEvent(ctx *context.Context, args *utils.CGREvent,
 	attrPrfl *AttributeProfile) (err error) {
 	if args == nil {
 		return utils.NewErrMandatoryIeMissing(utils.CGREventString)
@@ -258,11 +258,11 @@ func (alS *AttributeService) V1GetAttributeForEvent(ctx *context.Context, args *
 		context = utils.StringPointer(utils.IfaceAsString(opt))
 	}
 	var attrIDs []string
-	if attrIDs, err = GetStringSliceOpts(args, alS.cgrcfg.AttributeSCfg().Opts.ProfileIDs, utils.OptsAttributesProfileIDs); err != nil {
+	if attrIDs, err = utils.GetStringSliceOpts(args, alS.cgrcfg.AttributeSCfg().Opts.ProfileIDs, utils.OptsAttributesProfileIDs); err != nil {
 		return
 	}
 	var ignFilters bool
-	if ignFilters, err = GetBoolOpts(args, alS.cgrcfg.AttributeSCfg().Opts.ProfileIgnoreFilters,
+	if ignFilters, err = utils.GetBoolOpts(args, alS.cgrcfg.AttributeSCfg().Opts.ProfileIgnoreFilters,
 		utils.OptsAttributesProfileIgnoreFilters); err != nil {
 		return
 	}
@@ -284,7 +284,7 @@ func (alS *AttributeService) V1GetAttributeForEvent(ctx *context.Context, args *
 }
 
 // V1ProcessEvent proccess the event and returns the result
-func (alS *AttributeService) V1ProcessEvent(ctx *context.Context, args *CGREvent,
+func (alS *AttributeService) V1ProcessEvent(ctx *context.Context, args *utils.CGREvent,
 	reply *AttrSProcessEventReply) (err error) {
 	if args == nil {
 		return utils.NewErrMandatoryIeMissing(utils.CGREventString)
@@ -297,12 +297,12 @@ func (alS *AttributeService) V1ProcessEvent(ctx *context.Context, args *CGREvent
 		tnt = alS.cgrcfg.GeneralCfg().DefaultTenant
 	}
 	var processRuns int
-	if processRuns, err = GetIntOpts(args, alS.cgrcfg.AttributeSCfg().Opts.ProcessRuns,
+	if processRuns, err = utils.GetIntOpts(args, alS.cgrcfg.AttributeSCfg().Opts.ProcessRuns,
 		utils.OptsAttributesProcessRuns); err != nil {
 		return
 	}
 	var profileRuns int
-	if profileRuns, err = GetIntOpts(args, alS.cgrcfg.AttributeSCfg().Opts.ProfileRuns,
+	if profileRuns, err = utils.GetIntOpts(args, alS.cgrcfg.AttributeSCfg().Opts.ProfileRuns,
 		utils.OptsAttributesProfileRuns); err != nil {
 		return
 	}

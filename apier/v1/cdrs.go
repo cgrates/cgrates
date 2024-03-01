@@ -128,7 +128,7 @@ func (cdrSv1 *CDRsV1) GetCDRs(ctx *context.Context, args *utils.RPCCDRsFilterWit
 	return cdrSv1.CDRs.V1GetCDRs(ctx, *args, reply)
 }
 
-func (cdrSv1 *CDRsV1) Ping(ctx *context.Context, ign *engine.CGREvent, reply *string) error {
+func (cdrSv1 *CDRsV1) Ping(ctx *context.Context, ign *utils.CGREvent, reply *string) error {
 	*reply = utils.Pong
 	return nil
 }

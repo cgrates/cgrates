@@ -94,7 +94,7 @@ func TestGuardianSIT(t *testing.T) {
 
 	// ping
 	var resp string
-	if err = guardianRPC.Call(context.Background(), utils.GuardianSv1Ping, new(engine.CGREvent), &resp); err != nil {
+	if err = guardianRPC.Call(context.Background(), utils.GuardianSv1Ping, new(utils.CGREvent), &resp); err != nil {
 		t.Error(err)
 	} else if resp != utils.Pong {
 		t.Error("Unexpected reply returned", resp)

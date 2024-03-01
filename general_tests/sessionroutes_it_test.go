@@ -118,7 +118,7 @@ func testSesRoutesItLoadFromFolder(t *testing.T) {
 }
 
 func testSesRoutesAuthorizeEvent(t *testing.T) {
-	cgrEv := &engine.CGREvent{
+	cgrEv := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		Event: map[string]any{
 			utils.Source:       "testV4CDRsProcessCDR",
@@ -249,7 +249,7 @@ func testSesRoutesAuthorizeEvent(t *testing.T) {
 }
 
 func testSesRoutesProcessMessage(t *testing.T) {
-	cgrEv := &engine.CGREvent{
+	cgrEv := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		Event: map[string]any{
 			utils.Source:       "testV4CDRsProcessCDR",
@@ -384,7 +384,7 @@ func testSesRoutesProcessMessage(t *testing.T) {
 }
 
 func testSesRoutesProcessEvent(t *testing.T) {
-	cgrEv := &engine.CGREvent{
+	cgrEv := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		Event: map[string]any{
 			utils.Source:       "testV4CDRsProcessCDR",

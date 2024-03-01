@@ -40,7 +40,7 @@ import (
 
 // erEvent is passed from reader to ERs
 type erEvent struct {
-	cgrEvent *engine.CGREvent
+	cgrEvent *utils.CGREvent
 	rdrCfg   *config.EventReaderCfg
 }
 
@@ -183,7 +183,7 @@ func (erS *ERService) addReader(rdrID string, cfgIdx int) (err error) {
 }
 
 // processEvent will be called each time a new event is received from readers
-func (erS *ERService) processEvent(cgrEv *engine.CGREvent,
+func (erS *ERService) processEvent(cgrEv *utils.CGREvent,
 	rdrCfg *config.EventReaderCfg) (err error) {
 	// log the event created if requested by flags
 	if rdrCfg.Flags.Has(utils.MetaLog) {
@@ -207,7 +207,7 @@ func (erS *ERService) processEvent(cgrEv *engine.CGREvent,
 	if reqType == utils.MetaAuthorize ||
 		reqType == utils.MetaMessage ||
 		reqType == utils.MetaEvent {
-		if cgrArgs, err = engine.GetRoutePaginatorFromOpts(cgrEv.APIOpts); err != nil {
+		if cgrArgs, err = utils.GetRoutePaginatorFromOpts(cgrEv.APIOpts); err != nil {
 			utils.Logger.Warning(fmt.Sprintf("<%s> args extraction for reader <%s> failed because <%s>",
 				utils.ERs, rdrCfg.ID, err.Error()))
 			err = nil // reset the error and continue the processing
@@ -334,12 +334,12 @@ func (erS *ERService) closeAllRdrs() {
 }
 
 type erEvents struct {
-	events []*engine.CGREvent
+	events []*utils.CGREvent
 	rdrCfg *config.EventReaderCfg
 }
 
 // processPartialEvent process the event as a partial event
-func (erS *ERService) processPartialEvent(ev *engine.CGREvent, rdrCfg *config.EventReaderCfg) (err error) {
+func (erS *ERService) processPartialEvent(ev *utils.CGREvent, rdrCfg *config.EventReaderCfg) (err error) {
 	// to identify the event the originID and originHost is used to create the CGRID
 	orgID, err := ev.FieldAsString(utils.OriginID)
 	if err == utils.ErrNotFound { // the field is missing ignore the event
@@ -355,7 +355,7 @@ func (erS *ERService) processPartialEvent(ev *engine.CGREvent, rdrCfg *config.Ev
 	var cgrEvs *erEvents
 	if !has || evs == nil {
 		cgrEvs = &erEvents{
-			events: []*engine.CGREvent{ev},
+			events: []*utils.CGREvent{ev},
 			rdrCfg: rdrCfg,
 		}
 	} else {
@@ -364,7 +364,7 @@ func (erS *ERService) processPartialEvent(ev *engine.CGREvent, rdrCfg *config.Ev
 		cgrEvs.rdrCfg = rdrCfg
 	}
 
-	var cgrEv *engine.CGREvent
+	var cgrEv *utils.CGREvent
 	if cgrEv, err = mergePartialEvents(cgrEvs.events, cgrEvs.rdrCfg, erS.filterS, // merge the events
 		erS.cfg.GeneralCfg().DefaultTenant,
 		erS.cfg.GeneralCfg().DefaultTimezone,

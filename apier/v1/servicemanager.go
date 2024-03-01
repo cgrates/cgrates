@@ -21,7 +21,6 @@ package v1
 import (
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/dispatchers"
-	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/servmanager"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -47,7 +46,7 @@ func (servManager *ServiceManagerV1) ServiceStatus(ctx *context.Context, args *d
 }
 
 // Ping return pong if the service is active
-func (servManager *ServiceManagerV1) Ping(ctx *context.Context, ign *engine.CGREvent, reply *string) error {
+func (servManager *ServiceManagerV1) Ping(ctx *context.Context, ign *utils.CGREvent, reply *string) error {
 	*reply = utils.Pong
 	return nil
 }

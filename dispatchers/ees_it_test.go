@@ -67,12 +67,12 @@ func TestDspEEsIT(t *testing.T) {
 
 func testDspEEsPingFailover(t *testing.T) {
 	var reply string
-	if err := allEngine.RPC.Call(context.Background(), utils.EeSv1Ping, new(engine.CGREvent), &reply); err != nil {
+	if err := allEngine.RPC.Call(context.Background(), utils.EeSv1Ping, new(utils.CGREvent), &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.Pong {
 		t.Errorf("Unexpected reply: %s", reply)
 	}
-	ev := &engine.CGREvent{
+	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		APIOpts: map[string]any{
 			utils.OptsAPIKey: "ees12345",
@@ -99,7 +99,7 @@ func testDspEEsPingFailover(t *testing.T) {
 
 func testDspEEsProcessEventFailover(t *testing.T) {
 	args := &engine.CGREventWithEeIDs{
-		CGREvent: &engine.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "event1",
 			Event: map[string]any{
@@ -128,12 +128,12 @@ func testDspEEsProcessEventFailover(t *testing.T) {
 
 func testDspEEsPing(t *testing.T) {
 	var reply string
-	if err := allEngine.RPC.Call(context.Background(), utils.EeSv1Ping, new(engine.CGREvent), &reply); err != nil {
+	if err := allEngine.RPC.Call(context.Background(), utils.EeSv1Ping, new(utils.CGREvent), &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.Pong {
 		t.Errorf("Received: %s", reply)
 	}
-	if err := dispEngine.RPC.Call(context.Background(), utils.EeSv1Ping, &engine.CGREvent{
+	if err := dispEngine.RPC.Call(context.Background(), utils.EeSv1Ping, &utils.CGREvent{
 		Tenant: "cgrates.org",
 		APIOpts: map[string]any{
 			utils.OptsAPIKey: "ees12345",
@@ -147,7 +147,7 @@ func testDspEEsPing(t *testing.T) {
 
 func testDspEEsTestAuthKey(t *testing.T) {
 	args := &engine.CGREventWithEeIDs{
-		CGREvent: &engine.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "event1",
 			Event: map[string]any{
@@ -167,7 +167,7 @@ func testDspEEsTestAuthKey(t *testing.T) {
 
 func testDspEEsTestAuthKey2(t *testing.T) {
 	args := &engine.CGREventWithEeIDs{
-		CGREvent: &engine.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "event1",
 			Event: map[string]any{
@@ -189,7 +189,7 @@ func testDspEEsTestAuthKey2(t *testing.T) {
 
 func testDspEEsProcessEventRoundRobin(t *testing.T) {
 	args := &engine.CGREventWithEeIDs{
-		CGREvent: &engine.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "event1",
 			Event: map[string]any{

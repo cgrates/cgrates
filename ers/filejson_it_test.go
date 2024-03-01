@@ -346,7 +346,7 @@ func TestFileJSONProcessEvent(t *testing.T) {
 		rdrExit:   make(chan struct{}),
 		conReqs:   make(chan struct{}, 1),
 	}
-	expEvent := &engine.CGREvent{
+	expEvent := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		Event: map[string]any{
 			utils.AccountField: "account_test",
@@ -363,7 +363,7 @@ func TestFileJSONProcessEvent(t *testing.T) {
 		},
 		APIOpts: map[string]any{},
 	}
-	// expEvent := &engine.CGREvent{}
+	// expEvent := &utils.CGREvent{}
 	eR.conReqs <- struct{}{}
 	fname := "file1.json"
 	if err := eR.processFile(filePath, fname); err != nil {

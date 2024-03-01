@@ -43,7 +43,7 @@ func TestDspReplicatorSv1PingNil(t *testing.T) {
 	cgrCfg := config.NewDefaultCGRConfig()
 	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
 	cgrCfg.DispatcherSCfg().AttributeSConns = []string{"test"}
-	CGREvent := &engine.CGREvent{
+	CGREvent := &utils.CGREvent{
 		Tenant: "tenant",
 	}
 	var reply *string
@@ -57,7 +57,7 @@ func TestDspReplicatorSv1PingNil(t *testing.T) {
 func TestDspReplicatorSv1PingErrorNil(t *testing.T) {
 	cgrCfg := config.NewDefaultCGRConfig()
 	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
-	CGREvent := &engine.CGREvent{
+	CGREvent := &utils.CGREvent{
 		Tenant: "tenant",
 	}
 	var reply *string

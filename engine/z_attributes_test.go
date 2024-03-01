@@ -36,7 +36,7 @@ var (
 	expTimeAttributes = time.Now().Add(20 * time.Minute)
 	attrS             *AttributeService
 	dmAtr             *DataManager
-	attrEvs           = []*CGREvent{
+	attrEvs           = []*utils.CGREvent{
 		{ //matching AttributeProfile1
 			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:     utils.GenUUID(),
@@ -363,7 +363,7 @@ func TestAttributeEventReplyDigest(t *testing.T) {
 	eRpl := &AttrSProcessEventReply{
 		MatchedProfiles: []string{"cgrates.org:ATTR_1"},
 		AlteredFields:   []string{utils.AccountField, utils.Subject},
-		CGREvent: &CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testAttributeSProcessEvent",
 			Event: map[string]any{
@@ -384,7 +384,7 @@ func TestAttributeEventReplyDigest2(t *testing.T) {
 	eRpl := &AttrSProcessEventReply{
 		MatchedProfiles: []string{"cgrates.org:ATTR_1"},
 		AlteredFields:   []string{},
-		CGREvent: &CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testAttributeSProcessEvent",
 			Event: map[string]any{
@@ -405,7 +405,7 @@ func TestAttributeEventReplyDigest3(t *testing.T) {
 	eRpl := &AttrSProcessEventReply{
 		MatchedProfiles: []string{"cgrates.org:ATTR_1"},
 		AlteredFields:   []string{"*req.Subject"},
-		CGREvent: &CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testAttributeSProcessEvent",
 			Event: map[string]any{
@@ -426,7 +426,7 @@ func TestAttributeEventReplyDigest4(t *testing.T) {
 	eRpl := &AttrSProcessEventReply{
 		MatchedProfiles: []string{"cgrates.org:ATTR_1"},
 		AlteredFields:   []string{"*req.Subject"},
-		CGREvent: &CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testAttributeSProcessEvent",
 			Event: map[string]any{
@@ -575,7 +575,7 @@ func TestAttributeProcessWithMultipleRuns1(t *testing.T) {
 	if err = dmAtr.SetAttributeProfile(attrPrf3, true); err != nil {
 		t.Errorf("Error: %+v", err)
 	}
-	attrArgs := &CGREvent{
+	attrArgs := &utils.CGREvent{
 		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:     utils.GenUUID(),
 		Event: map[string]any{
@@ -593,7 +593,7 @@ func TestAttributeProcessWithMultipleRuns1(t *testing.T) {
 			utils.MetaReq + utils.NestingSep + "Field2",
 			utils.MetaReq + utils.NestingSep + "Field3",
 		},
-		CGREvent: &CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:     utils.GenUUID(),
 			Event: map[string]any{
@@ -688,7 +688,7 @@ func TestAttributeProcessWithMultipleRuns2(t *testing.T) {
 	if err = dmAtr.SetAttributeProfile(attrPrf3, true); err != nil {
 		t.Errorf("Error: %+v", err)
 	}
-	attrArgs := &CGREvent{
+	attrArgs := &utils.CGREvent{
 		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:     utils.GenUUID(),
 		Event: map[string]any{
@@ -703,7 +703,7 @@ func TestAttributeProcessWithMultipleRuns2(t *testing.T) {
 		MatchedProfiles: []string{"cgrates.org:ATTR_1", "cgrates.org:ATTR_2", "cgrates.org:ATTR_1", "cgrates.org:ATTR_2"},
 		AlteredFields: []string{utils.MetaReq + utils.NestingSep + "Field1",
 			utils.MetaReq + utils.NestingSep + "Field2"},
-		CGREvent: &CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:     utils.GenUUID(),
 			Event: map[string]any{
@@ -797,7 +797,7 @@ func TestAttributeProcessWithMultipleRuns3(t *testing.T) {
 	if err = dmAtr.SetAttributeProfile(attrPrf3, true); err != nil {
 		t.Errorf("Error: %+v", err)
 	}
-	attrArgs := &CGREvent{
+	attrArgs := &utils.CGREvent{
 		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:     utils.GenUUID(),
 		Event: map[string]any{
@@ -812,7 +812,7 @@ func TestAttributeProcessWithMultipleRuns3(t *testing.T) {
 		MatchedProfiles: []string{"cgrates.org:ATTR_1", "cgrates.org:ATTR_2"},
 		AlteredFields: []string{utils.MetaReq + utils.NestingSep + "Field1",
 			utils.MetaReq + utils.NestingSep + "Field2"},
-		CGREvent: &CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:     utils.GenUUID(),
 			Event: map[string]any{
@@ -887,7 +887,7 @@ func TestAttributeProcessWithMultipleRuns4(t *testing.T) {
 	if err = dmAtr.SetAttributeProfile(attrPrf2, true); err != nil {
 		t.Errorf("Error: %+v", err)
 	}
-	attrArgs := &CGREvent{
+	attrArgs := &utils.CGREvent{
 		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:     utils.GenUUID(),
 		Event: map[string]any{
@@ -902,7 +902,7 @@ func TestAttributeProcessWithMultipleRuns4(t *testing.T) {
 		MatchedProfiles: []string{"cgrates.org:ATTR_1", "cgrates.org:ATTR_2", "cgrates.org:ATTR_1", "cgrates.org:ATTR_2"},
 		AlteredFields: []string{utils.MetaReq + utils.NestingSep + "Field1",
 			utils.MetaReq + utils.NestingSep + "Field2"},
-		CGREvent: &CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:     utils.GenUUID(),
 			Event: map[string]any{
@@ -999,7 +999,7 @@ func TestAttributeMultipleProcessWithBlocker(t *testing.T) {
 	if err = dmAtr.SetAttributeProfile(attrPrf3, true); err != nil {
 		t.Errorf("Error: %+v", err)
 	}
-	attrArgs := &CGREvent{
+	attrArgs := &utils.CGREvent{
 		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:     utils.GenUUID(),
 		Event: map[string]any{
@@ -1014,7 +1014,7 @@ func TestAttributeMultipleProcessWithBlocker(t *testing.T) {
 		MatchedProfiles: []string{"cgrates.org:ATTR_1", "cgrates.org:ATTR_2"},
 		AlteredFields: []string{utils.MetaReq + utils.NestingSep + "Field1",
 			utils.MetaReq + utils.NestingSep + "Field2"},
-		CGREvent: &CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:     utils.GenUUID(),
 			Event: map[string]any{
@@ -1110,7 +1110,7 @@ func TestAttributeMultipleProcessWithBlocker2(t *testing.T) {
 	if err = dmAtr.SetAttributeProfile(attrPrf3, true); err != nil {
 		t.Errorf("Error: %+v", err)
 	}
-	attrArgs := &CGREvent{
+	attrArgs := &utils.CGREvent{
 		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:     utils.GenUUID(),
 		Event: map[string]any{
@@ -1124,7 +1124,7 @@ func TestAttributeMultipleProcessWithBlocker2(t *testing.T) {
 	eRply := &AttrSProcessEventReply{
 		MatchedProfiles: []string{"cgrates.org:ATTR_1"},
 		AlteredFields:   []string{utils.MetaReq + utils.NestingSep + "Field1"},
-		CGREvent: &CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:     utils.GenUUID(),
 			Event: map[string]any{
@@ -1180,7 +1180,7 @@ func TestAttributeProcessValue(t *testing.T) {
 	if err := dmAtr.SetAttributeProfile(attrPrf1, true); err != nil {
 		t.Error(err)
 	}
-	attrArgs := &CGREvent{
+	attrArgs := &utils.CGREvent{
 		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:     utils.GenUUID(),
 		Event: map[string]any{
@@ -1194,7 +1194,7 @@ func TestAttributeProcessValue(t *testing.T) {
 	eRply := &AttrSProcessEventReply{
 		MatchedProfiles: []string{"cgrates.org:ATTR_1"},
 		AlteredFields:   []string{utils.MetaReq + utils.NestingSep + "Field2"},
-		CGREvent: &CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:     utils.GenUUID(),
 			Event: map[string]any{
@@ -1259,7 +1259,7 @@ func TestAttributeAttributeFilterIDs(t *testing.T) {
 	if err := dmAtr.SetAttributeProfile(attrPrf1, true); err != nil {
 		t.Error(err)
 	}
-	attrArgs := &CGREvent{
+	attrArgs := &utils.CGREvent{
 		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:     utils.GenUUID(),
 		Event: map[string]any{
@@ -1274,7 +1274,7 @@ func TestAttributeAttributeFilterIDs(t *testing.T) {
 		MatchedProfiles: []string{"cgrates.org:ATTR_1"},
 		AlteredFields: []string{utils.MetaReq + utils.NestingSep + "PassField",
 			utils.MetaReq + utils.NestingSep + "RandomField"},
-		CGREvent: &CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:     utils.GenUUID(),
 			Event: map[string]any{
@@ -1332,7 +1332,7 @@ func TestAttributeProcessEventConstant(t *testing.T) {
 	if err := dmAtr.SetAttributeProfile(attrPrf1, true); err != nil {
 		t.Error(err)
 	}
-	attrArgs := &CGREvent{
+	attrArgs := &utils.CGREvent{
 		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:     utils.GenUUID(),
 		Event: map[string]any{
@@ -1346,7 +1346,7 @@ func TestAttributeProcessEventConstant(t *testing.T) {
 	eRply := &AttrSProcessEventReply{
 		MatchedProfiles: []string{"cgrates.org:ATTR_1"},
 		AlteredFields:   []string{utils.MetaReq + utils.NestingSep + "Field2"},
-		CGREvent: &CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:     utils.GenUUID(),
 			Event: map[string]any{
@@ -1408,7 +1408,7 @@ func TestAttributeProcessEventVariable(t *testing.T) {
 	if err := dmAtr.SetAttributeProfile(attrPrf1, true); err != nil {
 		t.Error(err)
 	}
-	attrArgs := &CGREvent{
+	attrArgs := &utils.CGREvent{
 		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:     utils.GenUUID(),
 		Event: map[string]any{
@@ -1423,7 +1423,7 @@ func TestAttributeProcessEventVariable(t *testing.T) {
 	eRply := &AttrSProcessEventReply{
 		MatchedProfiles: []string{"cgrates.org:ATTR_1"},
 		AlteredFields:   []string{utils.MetaReq + utils.NestingSep + "Field2"},
-		CGREvent: &CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:     utils.GenUUID(),
 			Event: map[string]any{
@@ -1491,7 +1491,7 @@ func TestAttributeProcessEventComposed(t *testing.T) {
 	if err := dmAtr.SetAttributeProfile(attrPrf1, true); err != nil {
 		t.Error(err)
 	}
-	attrArgs := &CGREvent{
+	attrArgs := &utils.CGREvent{
 		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:     utils.GenUUID(),
 		Event: map[string]any{
@@ -1506,7 +1506,7 @@ func TestAttributeProcessEventComposed(t *testing.T) {
 	eRply := &AttrSProcessEventReply{
 		MatchedProfiles: []string{"cgrates.org:ATTR_1"},
 		AlteredFields:   []string{utils.MetaReq + utils.NestingSep + "Field2"},
-		CGREvent: &CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:     utils.GenUUID(),
 			Event: map[string]any{
@@ -1564,7 +1564,7 @@ func TestAttributeProcessEventSum(t *testing.T) {
 	if err := dmAtr.SetAttributeProfile(attrPrf1, true); err != nil {
 		t.Error(err)
 	}
-	attrArgs := &CGREvent{
+	attrArgs := &utils.CGREvent{
 		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:     utils.GenUUID(),
 		Event: map[string]any{
@@ -1580,7 +1580,7 @@ func TestAttributeProcessEventSum(t *testing.T) {
 	eRply := &AttrSProcessEventReply{
 		MatchedProfiles: []string{"cgrates.org:ATTR_1"},
 		AlteredFields:   []string{utils.MetaReq + utils.NestingSep + "Field2"},
-		CGREvent: &CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:     utils.GenUUID(),
 			Event: map[string]any{
@@ -1639,7 +1639,7 @@ func TestAttributeProcessEventUsageDifference(t *testing.T) {
 	if err := dmAtr.SetAttributeProfile(attrPrf1, true); err != nil {
 		t.Error(err)
 	}
-	attrArgs := &CGREvent{
+	attrArgs := &utils.CGREvent{
 		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:     utils.GenUUID(),
 		Event: map[string]any{
@@ -1656,7 +1656,7 @@ func TestAttributeProcessEventUsageDifference(t *testing.T) {
 	eRply := &AttrSProcessEventReply{
 		MatchedProfiles: []string{"cgrates.org:ATTR_1"},
 		AlteredFields:   []string{utils.MetaReq + utils.NestingSep + "Field2"},
-		CGREvent: &CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:     utils.GenUUID(),
 			Event: map[string]any{
@@ -1716,7 +1716,7 @@ func TestAttributeProcessEventValueExponent(t *testing.T) {
 	if err := dmAtr.SetAttributeProfile(attrPrf1, true); err != nil {
 		t.Error(err)
 	}
-	attrArgs := &CGREvent{
+	attrArgs := &utils.CGREvent{
 		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:     utils.GenUUID(),
 		Event: map[string]any{
@@ -1733,7 +1733,7 @@ func TestAttributeProcessEventValueExponent(t *testing.T) {
 	eRply := &AttrSProcessEventReply{
 		MatchedProfiles: []string{"cgrates.org:ATTR_1"},
 		AlteredFields:   []string{utils.MetaReq + utils.NestingSep + "Field2"},
-		CGREvent: &CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:     utils.GenUUID(),
 			Event: map[string]any{
@@ -1798,7 +1798,7 @@ func BenchmarkAttributeProcessEventConstant(b *testing.B) {
 	if err := dmAtr.SetAttributeProfile(attrPrf1, true); err != nil {
 		b.Error(err)
 	}
-	attrArgs := &CGREvent{
+	attrArgs := &utils.CGREvent{
 		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:     utils.GenUUID(),
 		Event: map[string]any{
@@ -1857,7 +1857,7 @@ func BenchmarkAttributeProcessEventVariable(b *testing.B) {
 	if err := dmAtr.SetAttributeProfile(attrPrf1, true); err != nil {
 		b.Error(err)
 	}
-	attrArgs := &CGREvent{
+	attrArgs := &utils.CGREvent{
 		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:     utils.GenUUID(),
 		Event: map[string]any{
@@ -1931,7 +1931,7 @@ func TestProcessAttributeConstant(t *testing.T) {
 	if err := dmAtr.SetAttributeProfile(attrPrf, true); err != nil {
 		t.Error(err)
 	}
-	ev := &CGREvent{ //matching ATTR_CONSTANT
+	ev := &utils.CGREvent{ //matching ATTR_CONSTANT
 		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:     "TestProcessAttributeConstant",
 		Event: map[string]any{
@@ -1989,7 +1989,7 @@ func TestProcessAttributeVariable(t *testing.T) {
 	if err := dmAtr.SetAttributeProfile(attrPrf, true); err != nil {
 		t.Error(err)
 	}
-	ev := &CGREvent{ //matching ATTR_VARIABLE
+	ev := &utils.CGREvent{ //matching ATTR_VARIABLE
 		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:     "TestProcessAttributeVariable",
 		Event: map[string]any{
@@ -2054,7 +2054,7 @@ func TestProcessAttributeComposed(t *testing.T) {
 	if err := dmAtr.SetAttributeProfile(attrPrf, true); err != nil {
 		t.Error(err)
 	}
-	ev := &CGREvent{ //matching ATTR_COMPOSED
+	ev := &utils.CGREvent{ //matching ATTR_COMPOSED
 		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:     "TestProcessAttributeComposed",
 		Event: map[string]any{
@@ -2115,7 +2115,7 @@ func TestProcessAttributeUsageDifference(t *testing.T) {
 	if err := dmAtr.SetAttributeProfile(attrPrf, true); err != nil {
 		t.Error(err)
 	}
-	ev := &CGREvent{ //matching ATTR_USAGE_DIFF
+	ev := &utils.CGREvent{ //matching ATTR_USAGE_DIFF
 		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:     "TestProcessAttributeUsageDifference",
 		Event: map[string]any{
@@ -2176,7 +2176,7 @@ func TestProcessAttributeSum(t *testing.T) {
 	if err := dmAtr.SetAttributeProfile(attrPrf, true); err != nil {
 		t.Error(err)
 	}
-	ev := &CGREvent{ //matching ATTR_SUM
+	ev := &utils.CGREvent{ //matching ATTR_SUM
 		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:     "TestProcessAttributeSum",
 		Event: map[string]any{
@@ -2237,7 +2237,7 @@ func TestProcessAttributeDiff(t *testing.T) {
 	if err := dmAtr.SetAttributeProfile(attrPrf, true); err != nil {
 		t.Error(err)
 	}
-	ev := &CGREvent{ //matching ATTR_DIFF
+	ev := &utils.CGREvent{ //matching ATTR_DIFF
 		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:     "TestProcessAttributeDiff",
 		Event: map[string]any{
@@ -2298,7 +2298,7 @@ func TestProcessAttributeMultiply(t *testing.T) {
 	if err := dmAtr.SetAttributeProfile(attrPrf, true); err != nil {
 		t.Error(err)
 	}
-	ev := &CGREvent{ //matching ATTR_MULTIPLY
+	ev := &utils.CGREvent{ //matching ATTR_MULTIPLY
 		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:     "TestProcessAttributeMultiply",
 		Event: map[string]any{
@@ -2359,7 +2359,7 @@ func TestProcessAttributeDivide(t *testing.T) {
 	if err := dmAtr.SetAttributeProfile(attrPrf, true); err != nil {
 		t.Error(err)
 	}
-	ev := &CGREvent{ //matching ATTR_DIVIDE
+	ev := &utils.CGREvent{ //matching ATTR_DIVIDE
 		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:     "TestProcessAttributeDivide",
 		Event: map[string]any{
@@ -2420,7 +2420,7 @@ func TestProcessAttributeValueExponent(t *testing.T) {
 	if err := dmAtr.SetAttributeProfile(attrPrf, true); err != nil {
 		t.Error(err)
 	}
-	ev := &CGREvent{ //matching ATTR_VAL_EXP
+	ev := &utils.CGREvent{ //matching ATTR_VAL_EXP
 		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:     "TestProcessAttributeValueExponent",
 		Event: map[string]any{
@@ -2481,7 +2481,7 @@ func TestProcessAttributeUnixTimeStamp(t *testing.T) {
 	if err := dmAtr.SetAttributeProfile(attrPrf, true); err != nil {
 		t.Error(err)
 	}
-	ev := &CGREvent{ //matching ATTR_UNIX_TIMESTAMP
+	ev := &utils.CGREvent{ //matching ATTR_UNIX_TIMESTAMP
 		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:     "TestProcessAttributeUnixTimeStamp",
 		Event: map[string]any{
@@ -2542,7 +2542,7 @@ func TestProcessAttributePrefix(t *testing.T) {
 	if err := dmAtr.SetAttributeProfile(attrPrf, true); err != nil {
 		t.Error(err)
 	}
-	ev := &CGREvent{ //matching ATTR_VAL_EXP
+	ev := &utils.CGREvent{ //matching ATTR_VAL_EXP
 		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:     "TestProcessAttributeValueExponent",
 		Event: map[string]any{
@@ -2602,7 +2602,7 @@ func TestProcessAttributeSuffix(t *testing.T) {
 	if err := dmAtr.SetAttributeProfile(attrPrf, true); err != nil {
 		t.Error(err)
 	}
-	ev := &CGREvent{ //matching ATTR_VAL_EXP
+	ev := &utils.CGREvent{ //matching ATTR_VAL_EXP
 		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:     "TestProcessAttributeValueExponent",
 		Event: map[string]any{
@@ -2693,7 +2693,7 @@ func TestProcessAttributeHTTP(t *testing.T) {
 	if err := dmAtr.SetAttributeProfile(attrPrf, true); err != nil {
 		t.Error(err)
 	}
-	attrArgs := &CGREvent{
+	attrArgs := &utils.CGREvent{
 		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:     utils.GenUUID(),
 		Event: map[string]any{
@@ -2707,7 +2707,7 @@ func TestProcessAttributeHTTP(t *testing.T) {
 	eRply := &AttrSProcessEventReply{
 		MatchedProfiles: []string{"cgrates.org:ATTR_HTTP"},
 		AlteredFields:   []string{utils.MetaReq + utils.NestingSep + utils.AccountField, utils.MetaReq + utils.NestingSep + "Password"},
-		CGREvent: &CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:     "TestProcessAttributeHTTP",
 			Event: map[string]any{
@@ -2776,7 +2776,7 @@ func TestAttributeIndexSelectsFalse(t *testing.T) {
 		t.Error(err)
 	}
 
-	attrArgs := &CGREvent{
+	attrArgs := &utils.CGREvent{
 		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:     utils.GenUUID(),
 		Event: map[string]any{
@@ -2837,7 +2837,7 @@ func TestProcessAttributeWithSameWeight(t *testing.T) {
 	if err := dmAtr.SetAttributeProfile(attrPrf2, true); err != nil {
 		t.Error(err)
 	}
-	ev := &CGREvent{ //matching ATTR_UNIX_TIMESTAMP
+	ev := &utils.CGREvent{ //matching ATTR_UNIX_TIMESTAMP
 		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:     "TestProcessAttributeUnixTimeStamp",
 		Event: map[string]any{
@@ -2922,7 +2922,7 @@ func TestAttributeMultipleProcessWithFiltersExists(t *testing.T) {
 	if _, err := dmAtr.GetAttributeProfile(attrPrf2Exists.Tenant, attrPrf2Exists.ID, true, false, utils.NonTransactional); err != nil {
 		t.Error(err)
 	}
-	attrArgs := &CGREvent{
+	attrArgs := &utils.CGREvent{
 		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:     utils.GenUUID(),
 		Event: map[string]any{
@@ -2937,7 +2937,7 @@ func TestAttributeMultipleProcessWithFiltersExists(t *testing.T) {
 		MatchedProfiles: []string{"cgrates.org:ATTR_1_EXISTS", "cgrates.org:ATTR_2_EXISTS", "cgrates.org:ATTR_1_EXISTS", "cgrates.org:ATTR_2_EXISTS"},
 		AlteredFields: []string{utils.MetaReq + utils.NestingSep + "Field1",
 			utils.MetaReq + utils.NestingSep + "Field2"},
-		CGREvent: &CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:     utils.GenUUID(),
 			Event: map[string]any{
@@ -3019,7 +3019,7 @@ func TestAttributeMultipleProcessWithFiltersNotEmpty(t *testing.T) {
 	if _, err := dmAtr.GetAttributeProfile(attrPrf2NotEmpty.Tenant, attrPrf2NotEmpty.ID, true, false, utils.NonTransactional); err != nil {
 		t.Error(err)
 	}
-	attrArgs := &CGREvent{
+	attrArgs := &utils.CGREvent{
 		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:     utils.GenUUID(),
 		Event: map[string]any{
@@ -3034,7 +3034,7 @@ func TestAttributeMultipleProcessWithFiltersNotEmpty(t *testing.T) {
 		MatchedProfiles: []string{"cgrates.org:ATTR_1_NOTEMPTY", "cgrates.org:ATTR_2_NOTEMPTY", "cgrates.org:ATTR_1_NOTEMPTY", "cgrates.org:ATTR_2_NOTEMPTY"},
 		AlteredFields: []string{utils.MetaReq + utils.NestingSep + "Field1",
 			utils.MetaReq + utils.NestingSep + "Field2"},
-		CGREvent: &CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:     utils.GenUUID(),
 			Event: map[string]any{
@@ -3089,7 +3089,7 @@ func TestAttributeMetaTenant(t *testing.T) {
 	if _, err := dm.GetAttributeProfile(attr1.Tenant, attr1.ID, true, false, utils.NonTransactional); err != nil {
 		t.Error(err)
 	}
-	args := &CGREvent{
+	args := &utils.CGREvent{
 		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 		Event:  map[string]any{},
 		APIOpts: map[string]any{
@@ -3099,7 +3099,7 @@ func TestAttributeMetaTenant(t *testing.T) {
 	eRply := AttrSProcessEventReply{
 		MatchedProfiles: []string{"cgrates.org:ATTR_TNT"},
 		AlteredFields:   []string{utils.MetaTenant},
-		CGREvent: &CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "prfx_" + config.CgrConfig().GeneralCfg().DefaultTenant,
 			Event:  map[string]any{},
 			APIOpts: map[string]any{
@@ -3188,7 +3188,7 @@ func TestAttributesPorcessEventMatchingProcessRuns(t *testing.T) {
 
 	attr := NewAttributeService(dm, fltrS, cfg)
 
-	args := &CGREvent{
+	args := &utils.CGREvent{
 		Event: map[string]any{
 			"Account":     "pc_test",
 			"CompanyName": "MY_company_will_be_changed",
@@ -3202,7 +3202,7 @@ func TestAttributesPorcessEventMatchingProcessRuns(t *testing.T) {
 	expReply := &AttrSProcessEventReply{
 		MatchedProfiles: []string{"cgrates.org:ATTR_MatchSecond", "cgrates.org:ATTR_ProcessRuns"},
 		AlteredFields:   []string{"*req.CompanyName", "*req.Password"},
-		CGREvent: &CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			Event: map[string]any{
 				"Account":     "pc_test",
@@ -3264,7 +3264,7 @@ func TestAttributeMultipleProfileRunns(t *testing.T) {
 	if _, err := dm.GetAttributeProfile(attrPrf2Exists.Tenant, attrPrf2Exists.ID, true, false, utils.NonTransactional); err != nil {
 		t.Error(err)
 	}
-	args := &CGREvent{
+	args := &utils.CGREvent{
 		Tenant: cfg.GeneralCfg().DefaultTenant,
 		ID:     utils.GenUUID(),
 		Event: map[string]any{
@@ -3280,7 +3280,7 @@ func TestAttributeMultipleProfileRunns(t *testing.T) {
 		MatchedProfiles: []string{"cgrates.org:ATTR_1", "cgrates.org:ATTR_2", "cgrates.org:ATTR_1", "cgrates.org:ATTR_2"},
 		AlteredFields: []string{utils.MetaReq + utils.NestingSep + "Field1",
 			utils.MetaReq + utils.NestingSep + "Field2"},
-		CGREvent: &CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: cfg.GeneralCfg().DefaultTenant,
 			ID:     args.ID,
 			Event: map[string]any{
@@ -3304,7 +3304,7 @@ func TestAttributeMultipleProfileRunns(t *testing.T) {
 		t.Errorf("Expecting %+v, received: %+v", utils.ToJSON(eRply), utils.ToJSON(reply))
 	}
 
-	args = &CGREvent{
+	args = &utils.CGREvent{
 		Tenant: cfg.GeneralCfg().DefaultTenant,
 		ID:     utils.GenUUID(),
 		Event: map[string]any{
@@ -3320,7 +3320,7 @@ func TestAttributeMultipleProfileRunns(t *testing.T) {
 		MatchedProfiles: []string{"cgrates.org:ATTR_1", "cgrates.org:ATTR_2"},
 		AlteredFields: []string{utils.MetaReq + utils.NestingSep + "Field1",
 			utils.MetaReq + utils.NestingSep + "Field2"},
-		CGREvent: &CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: cfg.GeneralCfg().DefaultTenant,
 			ID:     args.ID,
 			Event: map[string]any{

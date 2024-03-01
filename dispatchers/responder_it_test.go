@@ -27,7 +27,6 @@ import (
 	"time"
 
 	"github.com/cgrates/birpc/context"
-	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/rpcclient"
 )
@@ -98,7 +97,7 @@ func testDspResponderStatus(t *testing.T) {
 func getNodeWithRoute(route string, t *testing.T) string {
 	var reply map[string]any
 	var pingReply string
-	pingEv := engine.CGREvent{
+	pingEv := utils.CGREvent{
 		Tenant: "cgrates.org",
 		Event: map[string]any{
 			utils.EventName: "Random",
@@ -171,7 +170,7 @@ func testDspResponderShutdown(t *testing.T) {
 
 func testDspResponderBroadcast(t *testing.T) {
 	var pingReply string
-	pingEv := engine.CGREvent{
+	pingEv := utils.CGREvent{
 		Tenant: "cgrates.org",
 		Event: map[string]any{
 			utils.EventName: "Broadcast",
@@ -208,7 +207,7 @@ func testDspResponderInternal(t *testing.T) {
 	var reply map[string]any
 	var pingReply string
 	route := "internal"
-	pingEv := engine.CGREvent{
+	pingEv := utils.CGREvent{
 		Tenant: "cgrates.org",
 		Event: map[string]any{
 			utils.EventName: "Internal",

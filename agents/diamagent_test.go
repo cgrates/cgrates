@@ -129,7 +129,7 @@ func TestProcessRequest(t *testing.T) {
 			}
 			expargs := &sessions.V1AuthorizeArgs{
 				GetMaxUsage: true,
-				CGREvent: &engine.CGREvent{
+				CGREvent: &utils.CGREvent{
 					Tenant: "cgrates.org",
 					ID:     id,
 					Time:   tm,
@@ -172,7 +172,7 @@ func TestProcessRequest(t *testing.T) {
 			expargs := &sessions.V1InitSessionArgs{
 				GetAttributes: true,
 				InitSession:   true,
-				CGREvent: &engine.CGREvent{
+				CGREvent: &utils.CGREvent{
 					Tenant: "cgrates.org",
 					ID:     id,
 					Time:   tm,
@@ -200,7 +200,7 @@ func TestProcessRequest(t *testing.T) {
 				Attributes: &engine.AttrSProcessEventReply{
 					MatchedProfiles: []string{"ATTR_1001_SESSIONAUTH"},
 					AlteredFields:   []string{"*req.Password", "*req.PaypalAccount", "*req.RequestType", "*req.LCRProfile"},
-					CGREvent: &engine.CGREvent{
+					CGREvent: &utils.CGREvent{
 						Tenant: "cgrates.org",
 						ID:     "e7d35bf",
 						Event: map[string]any{
@@ -237,7 +237,7 @@ func TestProcessRequest(t *testing.T) {
 			expargs := &sessions.V1UpdateSessionArgs{
 				GetAttributes: true,
 				UpdateSession: true,
-				CGREvent: &engine.CGREvent{
+				CGREvent: &utils.CGREvent{
 					Tenant: "cgrates.org",
 					ID:     id,
 					Time:   tm,
@@ -265,7 +265,7 @@ func TestProcessRequest(t *testing.T) {
 				Attributes: &engine.AttrSProcessEventReply{
 					MatchedProfiles: []string{"ATTR_1001_SESSIONAUTH"},
 					AlteredFields:   []string{"*req.Password", "*req.PaypalAccount", "*req.RequestType", "*req.LCRProfile"},
-					CGREvent: &engine.CGREvent{
+					CGREvent: &utils.CGREvent{
 						Tenant: "cgrates.org",
 						ID:     "e7d35bf",
 						Event: map[string]any{
@@ -293,13 +293,13 @@ func TestProcessRequest(t *testing.T) {
 			var id string
 			if arg == nil {
 				t.Errorf("args is nil")
-			} else if rargs, can := arg.(*engine.CGREvent); !can {
-				t.Errorf("args is not of engine.CGREventWithOpts type")
+			} else if rargs, can := arg.(*utils.CGREvent); !can {
+				t.Errorf("args is not of utils.CGREventWithOpts type")
 			} else {
 				tm = rargs.Time // need time
 				id = rargs.ID
 			}
-			expargs := &engine.CGREvent{
+			expargs := &utils.CGREvent{
 				Tenant: "cgrates.org",
 				ID:     id,
 				Time:   tm,
@@ -339,7 +339,7 @@ func TestProcessRequest(t *testing.T) {
 			expargs := &sessions.V1TerminateSessionArgs{
 				TerminateSession: true,
 
-				CGREvent: &engine.CGREvent{
+				CGREvent: &utils.CGREvent{
 					Tenant: "cgrates.org",
 					ID:     id,
 					Time:   tm,
@@ -380,7 +380,7 @@ func TestProcessRequest(t *testing.T) {
 			expargs := &sessions.V1ProcessMessageArgs{
 				GetAttributes: true,
 				Debit:         true,
-				CGREvent: &engine.CGREvent{
+				CGREvent: &utils.CGREvent{
 					Tenant: "cgrates.org",
 					ID:     id,
 					Time:   tm,
@@ -408,7 +408,7 @@ func TestProcessRequest(t *testing.T) {
 				Attributes: &engine.AttrSProcessEventReply{
 					MatchedProfiles: []string{"ATTR_1001_SESSIONAUTH"},
 					AlteredFields:   []string{"*req.Password", "*req.PaypalAccount", "*req.RequestType", "*req.LCRProfile"},
-					CGREvent: &engine.CGREvent{
+					CGREvent: &utils.CGREvent{
 						Tenant: "cgrates.org",
 						ID:     "e7d35bf",
 						Event: map[string]any{

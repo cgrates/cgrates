@@ -180,7 +180,7 @@ cgrates.org,ATTR_DEST,*any,FLTR_DST_1002;FLTR_DEST,,,*req.Supplier,*constant,Sup
 
 	t.Run("FilterHTTPFullEvent", func(t *testing.T) {
 
-		ev := &engine.CGREvent{
+		ev := &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testAttributeSProcessEvent",
 			Event: map[string]any{
@@ -195,7 +195,7 @@ cgrates.org,ATTR_DEST,*any,FLTR_DST_1002;FLTR_DEST,,,*req.Supplier,*constant,Sup
 		eRply := engine.AttrSProcessEventReply{
 			MatchedProfiles: []string{"cgrates.org:ATTR_ACNT_1001"},
 			AlteredFields:   []string{"*req.OfficeGroup"},
-			CGREvent: &engine.CGREvent{
+			CGREvent: &utils.CGREvent{
 				Tenant: "cgrates.org",
 				ID:     "testAttributeSProcessEvent",
 				Event: map[string]any{
@@ -224,7 +224,7 @@ cgrates.org,ATTR_DEST,*any,FLTR_DST_1002;FLTR_DEST,,,*req.Supplier,*constant,Sup
 
 	t.Run("FilterHTTPField", func(t *testing.T) {
 
-		ev := &engine.CGREvent{
+		ev := &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testAttributeFilterHTTP",
 			Event: map[string]any{
@@ -239,7 +239,7 @@ cgrates.org,ATTR_DEST,*any,FLTR_DST_1002;FLTR_DEST,,,*req.Supplier,*constant,Sup
 		eRply := engine.AttrSProcessEventReply{
 			MatchedProfiles: []string{"cgrates.org:ATTR_DEST"},
 			AlteredFields:   []string{"*req.Supplier"},
-			CGREvent: &engine.CGREvent{
+			CGREvent: &utils.CGREvent{
 				Tenant: "cgrates.org",
 				ID:     "testAttributeFilterHTTP",
 				Event: map[string]any{

@@ -527,7 +527,7 @@ func (rS *ResourceService) processThresholds(rs Resources, opts map[string]any) 
 			thIDs = r.rPrf.ThresholdIDs
 		}
 		opts[utils.OptsThresholdsProfileIDs] = thIDs
-		thEv := &CGREvent{
+		thEv := &utils.CGREvent{
 			Tenant: r.Tenant,
 			ID:     utils.GenUUID(),
 			Event: map[string]any{
@@ -554,7 +554,7 @@ func (rS *ResourceService) processThresholds(rs Resources, opts map[string]any) 
 }
 
 // matchingResourcesForEvent returns ordered list of matching resources which are active by the time of the call
-func (rS *ResourceService) matchingResourcesForEvent(tnt string, ev *CGREvent,
+func (rS *ResourceService) matchingResourcesForEvent(tnt string, ev *utils.CGREvent,
 	evUUID string, usageTTL *time.Duration) (rs Resources, err error) {
 	var rIDs utils.StringSet
 	evNm := utils.MapStorage{
@@ -667,14 +667,14 @@ func (rS *ResourceService) matchingResourcesForEvent(tnt string, ev *CGREvent,
 }
 
 // V1GetResourcesForEvent returns active resource configs matching the event
-func (rS *ResourceService) V1GetResourcesForEvent(ctx *context.Context, args *CGREvent, reply *Resources) (err error) {
+func (rS *ResourceService) V1GetResourcesForEvent(ctx *context.Context, args *utils.CGREvent, reply *Resources) (err error) {
 	if args == nil {
 		return utils.NewErrMandatoryIeMissing(utils.Event)
 	}
 	if missing := utils.MissingStructFields(args, []string{utils.ID, utils.Event}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	usageID := GetStringOpts(args, rS.cgrcfg.ResourceSCfg().Opts.UsageID, utils.OptsResourcesUsageID)
+	usageID := utils.GetStringOpts(args, rS.cgrcfg.ResourceSCfg().Opts.UsageID, utils.OptsResourcesUsageID)
 	if usageID == utils.EmptyString {
 		return utils.NewErrMandatoryIeMissing(utils.UsageID)
 	}
@@ -703,7 +703,7 @@ func (rS *ResourceService) V1GetResourcesForEvent(ctx *context.Context, args *CG
 	// end of RPC caching
 
 	var usageTTL *time.Duration
-	if usageTTL, err = GetDurationPointerOpts(args, rS.cgrcfg.ResourceSCfg().Opts.UsageTTL,
+	if usageTTL, err = utils.GetDurationPointerOpts(args, rS.cgrcfg.ResourceSCfg().Opts.UsageTTL,
 		utils.OptsResourcesUsageTTL); err != nil {
 		return
 	}
@@ -717,14 +717,14 @@ func (rS *ResourceService) V1GetResourcesForEvent(ctx *context.Context, args *CG
 }
 
 // V1AuthorizeResources queries service to find if an Usage is allowed
-func (rS *ResourceService) V1AuthorizeResources(ctx *context.Context, args *CGREvent, reply *string) (err error) {
+func (rS *ResourceService) V1AuthorizeResources(ctx *context.Context, args *utils.CGREvent, reply *string) (err error) {
 	if args == nil {
 		return utils.NewErrMandatoryIeMissing(utils.Event)
 	}
 	if missing := utils.MissingStructFields(args, []string{utils.ID, utils.Event}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	usageID := GetStringOpts(args, rS.cgrcfg.ResourceSCfg().Opts.UsageID, utils.OptsResourcesUsageID)
+	usageID := utils.GetStringOpts(args, rS.cgrcfg.ResourceSCfg().Opts.UsageID, utils.OptsResourcesUsageID)
 	if usageID == utils.EmptyString {
 		return utils.NewErrMandatoryIeMissing(utils.UsageID)
 	}
@@ -753,7 +753,7 @@ func (rS *ResourceService) V1AuthorizeResources(ctx *context.Context, args *CGRE
 	// end of RPC caching
 
 	var usageTTL *time.Duration
-	if usageTTL, err = GetDurationPointerOpts(args, rS.cgrcfg.ResourceSCfg().Opts.UsageTTL,
+	if usageTTL, err = utils.GetDurationPointerOpts(args, rS.cgrcfg.ResourceSCfg().Opts.UsageTTL,
 		utils.OptsResourcesUsageTTL); err != nil {
 		return
 	}
@@ -764,7 +764,7 @@ func (rS *ResourceService) V1AuthorizeResources(ctx *context.Context, args *CGRE
 	defer mtcRLs.unlock()
 
 	var units float64
-	if units, err = GetFloat64Opts(args, rS.cgrcfg.ResourceSCfg().Opts.Units,
+	if units, err = utils.GetFloat64Opts(args, rS.cgrcfg.ResourceSCfg().Opts.Units,
 		utils.OptsResourcesUnits); err != nil {
 		return
 	}
@@ -784,14 +784,14 @@ func (rS *ResourceService) V1AuthorizeResources(ctx *context.Context, args *CGRE
 }
 
 // V1AllocateResources is called when a resource requires allocation
-func (rS *ResourceService) V1AllocateResources(ctx *context.Context, args *CGREvent, reply *string) (err error) {
+func (rS *ResourceService) V1AllocateResources(ctx *context.Context, args *utils.CGREvent, reply *string) (err error) {
 	if args == nil {
 		return utils.NewErrMandatoryIeMissing(utils.Event)
 	}
 	if missing := utils.MissingStructFields(args, []string{utils.ID, utils.Event}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	usageID := GetStringOpts(args, rS.cgrcfg.ResourceSCfg().Opts.UsageID, utils.OptsResourcesUsageID)
+	usageID := utils.GetStringOpts(args, rS.cgrcfg.ResourceSCfg().Opts.UsageID, utils.OptsResourcesUsageID)
 	if usageID == utils.EmptyString {
 		return utils.NewErrMandatoryIeMissing(utils.UsageID)
 	}
@@ -820,7 +820,7 @@ func (rS *ResourceService) V1AllocateResources(ctx *context.Context, args *CGREv
 	// end of RPC caching
 
 	var usageTTL *time.Duration
-	if usageTTL, err = GetDurationPointerOpts(args, rS.cgrcfg.ResourceSCfg().Opts.UsageTTL,
+	if usageTTL, err = utils.GetDurationPointerOpts(args, rS.cgrcfg.ResourceSCfg().Opts.UsageTTL,
 		utils.OptsResourcesUsageTTL); err != nil {
 		return
 	}
@@ -832,7 +832,7 @@ func (rS *ResourceService) V1AllocateResources(ctx *context.Context, args *CGREv
 	defer mtcRLs.unlock()
 
 	var units float64
-	if units, err = GetFloat64Opts(args, rS.cgrcfg.ResourceSCfg().Opts.Units,
+	if units, err = utils.GetFloat64Opts(args, rS.cgrcfg.ResourceSCfg().Opts.Units,
 		utils.OptsResourcesUnits); err != nil {
 		return
 	}
@@ -855,14 +855,14 @@ func (rS *ResourceService) V1AllocateResources(ctx *context.Context, args *CGREv
 }
 
 // V1ReleaseResources is called when we need to clear an allocation
-func (rS *ResourceService) V1ReleaseResources(ctx *context.Context, args *CGREvent, reply *string) (err error) {
+func (rS *ResourceService) V1ReleaseResources(ctx *context.Context, args *utils.CGREvent, reply *string) (err error) {
 	if args == nil {
 		return utils.NewErrMandatoryIeMissing(utils.Event)
 	}
 	if missing := utils.MissingStructFields(args, []string{utils.ID, utils.Event}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	usageID := GetStringOpts(args, rS.cgrcfg.ResourceSCfg().Opts.UsageID, utils.OptsResourcesUsageID)
+	usageID := utils.GetStringOpts(args, rS.cgrcfg.ResourceSCfg().Opts.UsageID, utils.OptsResourcesUsageID)
 	if usageID == utils.EmptyString {
 		return utils.NewErrMandatoryIeMissing(utils.UsageID)
 	}
@@ -891,7 +891,7 @@ func (rS *ResourceService) V1ReleaseResources(ctx *context.Context, args *CGREve
 	// end of RPC caching
 
 	var usageTTL *time.Duration
-	if usageTTL, err = GetDurationPointerOpts(args, rS.cgrcfg.ResourceSCfg().Opts.UsageTTL,
+	if usageTTL, err = utils.GetDurationPointerOpts(args, rS.cgrcfg.ResourceSCfg().Opts.UsageTTL,
 		utils.OptsResourcesUsageTTL); err != nil {
 		return
 	}

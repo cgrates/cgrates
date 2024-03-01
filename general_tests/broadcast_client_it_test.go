@@ -135,7 +135,7 @@ func testbrodcastItLoadFromFolder(t *testing.T) {
 }
 
 func testbrodcastItProccessEvent(t *testing.T) {
-	args := engine.CGREvent{
+	args := utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "TestSSv1ItProcessCDR",
 		Event: map[string]any{

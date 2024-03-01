@@ -62,7 +62,7 @@ func TestChargersmatchingChargerProfilesForEventErrPass(t *testing.T) {
 		cfg: cfg,
 	}
 	cgrEvTm := time.Date(2021, 4, 19, 12, 0, 0, 0, time.UTC)
-	cgrEv := &CGREvent{
+	cgrEv := &utils.CGREvent{
 		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:     "cgrEvID",
 		Event: map[string]any{
@@ -123,7 +123,7 @@ func TestChargersmatchingChargerProfilesForEventNotActive(t *testing.T) {
 		cfg: cfg,
 	}
 	cgrEvTm := time.Date(2021, 4, 19, 12, 0, 0, 0, time.UTC)
-	cgrEv := &CGREvent{
+	cgrEv := &utils.CGREvent{
 		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:     "cgrEvID",
 		Event: map[string]any{
@@ -184,7 +184,7 @@ func TestChargersprocessEventNoConnIDs(t *testing.T) {
 		cfg: cfg,
 	}
 	cgrEvTm := time.Date(2021, 4, 19, 12, 0, 0, 0, time.UTC)
-	cgrEv := &CGREvent{
+	cgrEv := &utils.CGREvent{
 		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:     "cgrEvID",
 		Event: map[string]any{
@@ -249,7 +249,7 @@ func TestChargersprocessEventCallNilErr(t *testing.T) {
 			utils.AttributeSv1ProcessEvent: func(ctx *context.Context, args, reply any) error {
 				rply := AttrSProcessEventReply{
 					AlteredFields: []string{utils.AccountField},
-					CGREvent: &CGREvent{
+					CGREvent: &utils.CGREvent{
 						Tenant: "cgrates.org",
 						ID:     "cgrEvID",
 						Event: map[string]any{
@@ -277,7 +277,7 @@ func TestChargersprocessEventCallNilErr(t *testing.T) {
 		}),
 	}
 
-	cgrEv := &CGREvent{
+	cgrEv := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "cgrEvID",
 		Event: map[string]any{
@@ -289,7 +289,7 @@ func TestChargersprocessEventCallNilErr(t *testing.T) {
 		{
 			ChargerSProfile: "1001",
 			AlteredFields:   []string{utils.MetaReqRunID, utils.AccountField},
-			CGREvent: &CGREvent{
+			CGREvent: &utils.CGREvent{
 				Tenant: "cgrates.org",
 				ID:     "cgrEvID",
 				Event: map[string]any{
@@ -355,7 +355,7 @@ func TestChargersprocessEventCallErr(t *testing.T) {
 		}),
 	}
 
-	cgrEv := &CGREvent{
+	cgrEv := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "cgrEvID",
 		Event: map[string]any{
@@ -367,7 +367,7 @@ func TestChargersprocessEventCallErr(t *testing.T) {
 		{
 			ChargerSProfile: "1001",
 			AlteredFields:   []string{utils.MetaReqRunID},
-			CGREvent: &CGREvent{
+			CGREvent: &utils.CGREvent{
 				Tenant: "cgrates.org",
 				ID:     "cgrEvID",
 				Event: map[string]any{
@@ -421,7 +421,7 @@ func TestChargersV1ProcessEventErrNotFound(t *testing.T) {
 			utils.AttributeSv1ProcessEvent: func(ctx *context.Context, args, reply any) error {
 				rply := AttrSProcessEventReply{
 					AlteredFields: []string{utils.AccountField},
-					CGREvent: &CGREvent{
+					CGREvent: &utils.CGREvent{
 						Tenant: "cgrates.org",
 						ID:     "cgrEvID",
 						Event: map[string]any{
@@ -448,7 +448,7 @@ func TestChargersV1ProcessEventErrNotFound(t *testing.T) {
 			utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes): rpcInternal,
 		}),
 	}
-	args := &CGREvent{
+	args := &utils.CGREvent{
 		ID: "cgrEvID",
 		Event: map[string]any{
 			utils.AccountField: "1002",
@@ -492,7 +492,7 @@ func TestChargersV1ProcessEventErrOther(t *testing.T) {
 			"invalidMethod": func(ctx *context.Context, args, reply any) error {
 				rply := AttrSProcessEventReply{
 					AlteredFields: []string{utils.AccountField},
-					CGREvent: &CGREvent{
+					CGREvent: &utils.CGREvent{
 						Tenant: "cgrates.org",
 						ID:     "cgrEvID",
 						Event: map[string]any{
@@ -519,7 +519,7 @@ func TestChargersV1ProcessEventErrOther(t *testing.T) {
 			utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes): rpcInternal,
 		}),
 	}
-	args := &CGREvent{
+	args := &utils.CGREvent{
 		ID: "cgrEvID",
 		Event: map[string]any{
 			utils.AccountField: "1001",
@@ -569,7 +569,7 @@ func TestChargersV1ProcessEvent(t *testing.T) {
 			utils.AttributeSv1ProcessEvent: func(ctx *context.Context, args, reply any) error {
 				rply := AttrSProcessEventReply{
 					AlteredFields: []string{utils.AccountField},
-					CGREvent: &CGREvent{
+					CGREvent: &utils.CGREvent{
 						Tenant: "cgrates.org",
 						ID:     "cgrEvID",
 						Event: map[string]any{
@@ -596,7 +596,7 @@ func TestChargersV1ProcessEvent(t *testing.T) {
 			utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes): rpcInternal,
 		}),
 	}
-	args := &CGREvent{
+	args := &utils.CGREvent{
 		ID: "cgrEvID",
 		Event: map[string]any{
 			utils.AccountField: "1001",
@@ -608,7 +608,7 @@ func TestChargersV1ProcessEvent(t *testing.T) {
 		{
 			ChargerSProfile: "1001",
 			AlteredFields:   []string{utils.MetaReqRunID, utils.AccountField},
-			CGREvent: &CGREvent{
+			CGREvent: &utils.CGREvent{
 				Tenant: "cgrates.org",
 				ID:     "cgrEvID",
 				Event: map[string]any{
@@ -660,7 +660,7 @@ func TestChargersV1GetChargersForEventNilErr(t *testing.T) {
 		},
 		cfg: cfg,
 	}
-	args := &CGREvent{
+	args := &utils.CGREvent{
 		ID: "cgrEvID",
 		Event: map[string]any{
 			utils.AccountField: "1001",
@@ -712,7 +712,7 @@ func TestChargersV1GetChargersForEventErr(t *testing.T) {
 		},
 		cfg: cfg,
 	}
-	args := &CGREvent{
+	args := &utils.CGREvent{
 		ID: "cgrEvID",
 		Event: map[string]any{
 			utils.AccountField: "1001",

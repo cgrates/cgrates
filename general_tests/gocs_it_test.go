@@ -224,7 +224,7 @@ func testGOCSAuthSession(t *testing.T) {
 	authUsage := 5 * time.Minute
 	args := &sessions.V1AuthorizeArgs{
 		GetMaxUsage: true,
-		CGREvent: &engine.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSSv1ItAuth",
 			Event: map[string]any{
@@ -254,7 +254,7 @@ func testGOCSInitSession(t *testing.T) {
 	initUsage := 5 * time.Minute
 	args := &sessions.V1InitSessionArgs{
 		InitSession: true,
-		CGREvent: &engine.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSSv1ItInitiateSession",
 			Event: map[string]any{
@@ -319,7 +319,7 @@ func testGOCSUpdateSession(t *testing.T) {
 	reqUsage := 5 * time.Minute
 	args := &sessions.V1UpdateSessionArgs{
 		UpdateSession: true,
-		CGREvent: &engine.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSSv1ItUpdateSession",
 			Event: map[string]any{
@@ -396,7 +396,7 @@ func testGOCSUpdateSession2(t *testing.T) {
 	reqUsage := 5 * time.Minute
 	args := &sessions.V1UpdateSessionArgs{
 		UpdateSession: true,
-		CGREvent: &engine.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSSv1ItUpdateSession2",
 			Event: map[string]any{
@@ -467,7 +467,7 @@ func testGOCSUpdateSession2(t *testing.T) {
 func testGOCSTerminateSession(t *testing.T) {
 	args := &sessions.V1TerminateSessionArgs{
 		TerminateSession: true,
-		CGREvent: &engine.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testGOCSTerminateSession",
 			Event: map[string]any{
@@ -521,7 +521,7 @@ func testGOCSTerminateSession(t *testing.T) {
 }
 
 func testGOCSProcessCDR(t *testing.T) {
-	args := &engine.CGREvent{
+	args := &utils.CGREvent{
 
 		Tenant: "cgrates.org",
 		ID:     "TestSSv1ItProcessCDR",

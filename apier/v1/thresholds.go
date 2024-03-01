@@ -48,7 +48,7 @@ func (tSv1 *ThresholdSv1) GetThresholdIDs(ctx *context.Context, tenant *utils.Te
 }
 
 // GetThresholdsForEvent returns a list of thresholds matching an event
-func (tSv1 *ThresholdSv1) GetThresholdsForEvent(ctx *context.Context, args *engine.CGREvent, reply *engine.Thresholds) error {
+func (tSv1 *ThresholdSv1) GetThresholdsForEvent(ctx *context.Context, args *utils.CGREvent, reply *engine.Thresholds) error {
 	return tSv1.tS.V1GetThresholdsForEvent(ctx, args, reply)
 }
 
@@ -58,7 +58,7 @@ func (tSv1 *ThresholdSv1) GetThreshold(ctx *context.Context, tntID *utils.Tenant
 }
 
 // ProcessEvent will process an Event
-func (tSv1 *ThresholdSv1) ProcessEvent(ctx *context.Context, args *engine.CGREvent, tIDs *[]string) error {
+func (tSv1 *ThresholdSv1) ProcessEvent(ctx *context.Context, args *utils.CGREvent, tIDs *[]string) error {
 	return tSv1.tS.V1ProcessEvent(ctx, args, tIDs)
 }
 
@@ -189,7 +189,7 @@ func (apierSv1 *APIerSv1) RemoveThresholdProfile(ctx *context.Context, args *uti
 }
 
 // Ping .
-func (tSv1 *ThresholdSv1) Ping(ctx *context.Context, ign *engine.CGREvent, reply *string) error {
+func (tSv1 *ThresholdSv1) Ping(ctx *context.Context, ign *utils.CGREvent, reply *string) error {
 	*reply = utils.Pong
 	return nil
 }

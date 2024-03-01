@@ -20,7 +20,6 @@ package v1
 
 import (
 	"github.com/cgrates/birpc/context"
-	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/loaders"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -50,7 +49,7 @@ func (ldrSv1 *LoaderSv1) Remove(ctx *context.Context, args *loaders.ArgsProcessF
 	return ldrSv1.ldrS.V1Remove(ctx, args, rply)
 }
 
-func (rsv1 *LoaderSv1) Ping(ctx *context.Context, ign *engine.CGREvent, reply *string) error {
+func (rsv1 *LoaderSv1) Ping(ctx *context.Context, ign *utils.CGREvent, reply *string) error {
 	*reply = utils.Pong
 	return nil
 }

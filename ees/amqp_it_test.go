@@ -107,7 +107,7 @@ func testAMQPRPCConn(t *testing.T) {
 func testAMQPExportEvent(t *testing.T) {
 	ev := &engine.CGREventWithEeIDs{
 		EeIDs: []string{"AMQPExporter"},
-		CGREvent: &engine.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "voiceEvent",
 			Time:   utils.TimePointer(time.Now()),

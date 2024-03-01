@@ -22,15 +22,14 @@ import (
 	"time"
 
 	"github.com/cgrates/birpc/context"
-	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
 // GuardianSv1Ping interogates GuardianSv1 server responsible to process the event
-func (dS *DispatcherService) GuardianSv1Ping(ctx *context.Context, args *engine.CGREvent,
+func (dS *DispatcherService) GuardianSv1Ping(ctx *context.Context, args *utils.CGREvent,
 	reply *string) (err error) {
 	if args == nil {
-		args = new(engine.CGREvent)
+		args = new(utils.CGREvent)
 	}
 	args.Tenant = utils.FirstNonEmpty(args.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
@@ -55,7 +54,7 @@ func (dS *DispatcherService) GuardianSv1RemoteLock(ctx *context.Context, args At
 			return
 		}
 	}
-	return dS.Dispatch(&engine.CGREvent{
+	return dS.Dispatch(&utils.CGREvent{
 		Tenant:  tnt,
 		APIOpts: args.APIOpts,
 	}, utils.MetaGuardian, utils.GuardianSv1RemoteLock, args, reply)
@@ -74,7 +73,7 @@ func (dS *DispatcherService) GuardianSv1RemoteUnlock(ctx *context.Context, args 
 			return
 		}
 	}
-	return dS.Dispatch(&engine.CGREvent{
+	return dS.Dispatch(&utils.CGREvent{
 		Tenant:  tnt,
 		APIOpts: args.APIOpts,
 	}, utils.MetaGuardian, utils.GuardianSv1RemoteUnlock, args, reply)

@@ -401,7 +401,7 @@ func TestFileCSVProcessEvent(t *testing.T) {
 		rdrExit:   make(chan struct{}),
 		conReqs:   make(chan struct{}, 1),
 	}
-	expEvent := &engine.CGREvent{
+	expEvent := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		Event: map[string]any{
 			utils.AccountField: "1001",

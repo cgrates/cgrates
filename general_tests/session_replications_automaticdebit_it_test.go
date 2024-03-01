@@ -176,7 +176,7 @@ func testSessionSRplInitiate(t *testing.T) {
 
 	argsInit := &sessions.V1InitSessionArgs{
 		InitSession: true,
-		CGREvent: &engine.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSessionSRplInitiate",
 			Event: map[string]any{
@@ -355,7 +355,7 @@ func testSessionSRplCheckAccount(t *testing.T) {
 func testSessionSRplTerminate(t *testing.T) {
 	args := &sessions.V1TerminateSessionArgs{
 		TerminateSession: true,
-		CGREvent: &engine.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSessionSRplTerminate",
 			Event: map[string]any{

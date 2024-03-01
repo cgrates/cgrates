@@ -115,7 +115,7 @@ func testS3ExportEvent(t *testing.T) {
 	cgrID = utils.Sha1("abcdef", time.Unix(1383813745, 0).UTC().String())
 	ev := &engine.CGREventWithEeIDs{
 		EeIDs: []string{"s3_test_file"},
-		CGREvent: &engine.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "dataEvent",
 			Time:   utils.TimePointer(time.Now()),

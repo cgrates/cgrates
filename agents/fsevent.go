@@ -26,7 +26,6 @@ import (
 	"time"
 
 	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/sessions"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/fsock"
@@ -357,12 +356,12 @@ func (fsev FSEvent) ParseEventValue(attrName string, rsrFld *config.RSRParser, t
 }
 
 // AsCGREvent converts FSEvent into CGREvent
-func (fsev FSEvent) AsCGREvent(timezone string) (cgrEv *engine.CGREvent, err error) {
+func (fsev FSEvent) AsCGREvent(timezone string) (cgrEv *utils.CGREvent, err error) {
 	sTime, err := fsev.GetSetupTime(utils.MetaDefault, timezone)
 	if err != nil {
 		return nil, err
 	}
-	cgrEv = &engine.CGREvent{
+	cgrEv = &utils.CGREvent{
 		Tenant:  fsev.GetTenant(utils.MetaDefault),
 		ID:      utils.UUIDSha1Prefix(),
 		Time:    &sTime,

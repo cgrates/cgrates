@@ -58,7 +58,7 @@ func TestNatsERProcessMessage(t *testing.T) {
 		rdrErr:        make(chan error, 1),
 	}
 
-	expEvent := &engine.CGREvent{
+	expEvent := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		Event: map[string]any{
 			utils.ToR: "*voice",

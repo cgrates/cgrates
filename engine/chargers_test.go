@@ -182,7 +182,7 @@ func TestChargerMatchingChargerProfilesForEvent(t *testing.T) {
 			Weight:       20,
 		},
 	}
-	chargerEvents := []*CGREvent{
+	chargerEvents := []*utils.CGREvent{
 		{
 			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:     utils.GenUUID(),
@@ -349,7 +349,7 @@ func TestChargerProcessEvent(t *testing.T) {
 			Weight:       20,
 		},
 	}
-	chargerEvents := []*CGREvent{
+	chargerEvents := []*utils.CGREvent{
 		{
 			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:     utils.GenUUID(),
@@ -512,7 +512,7 @@ func TestChargersmatchingChargerProfilesForEventChargerProfileNotFound(t *testin
 		},
 		cfg: cfg,
 	}
-	cgrEv := &CGREvent{
+	cgrEv := &utils.CGREvent{
 		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:     "cgrEvID",
 		Event: map[string]any{
@@ -558,7 +558,7 @@ func TestChargersmatchingChargerProfilesForEventDoesNotPass(t *testing.T) {
 		},
 		cfg: cfg,
 	}
-	cgrEv := &CGREvent{
+	cgrEv := &utils.CGREvent{
 		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:     "cgrEvID",
 		Event: map[string]any{
@@ -608,7 +608,7 @@ func TestChargersmatchingChargerProfilesForEventErrGetChPrf(t *testing.T) {
 		},
 		cfg: cfg,
 	}
-	cgrEv := &CGREvent{
+	cgrEv := &utils.CGREvent{
 		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:     "cgrEvID",
 		Event: map[string]any{
@@ -640,7 +640,7 @@ func TestChargersprocessEvent(t *testing.T) {
 	cS := &ChargerService{
 		cfg: cfg,
 	}
-	cgrEv := &CGREvent{
+	cgrEv := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		APIOpts: map[string]any{
 			utils.OptsAttributesProcessRuns: 2,
@@ -661,7 +661,7 @@ func TestChargersprocessEvent(t *testing.T) {
 
 func TestChargersV1ProcessEventMissingArgs(t *testing.T) {
 	cS := &ChargerService{}
-	args := &CGREvent{}
+	args := &utils.CGREvent{}
 	var reply *[]*ChrgSProcessEventReply
 
 	experr := "MANDATORY_IE_MISSING: [Event]"

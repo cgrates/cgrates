@@ -50,7 +50,7 @@ func TestCDRSV1ProcessCDRNoTenant(t *testing.T) {
 		if !cancast {
 			return fmt.Errorf("can't cast")
 		}
-		newArgs, cancast := args.(*CGREvent)
+		newArgs, cancast := args.(*utils.CGREvent)
 		if !cancast {
 			return fmt.Errorf("can't cast")
 		}
@@ -59,7 +59,7 @@ func TestCDRSV1ProcessCDRNoTenant(t *testing.T) {
 		}
 		*rply = AttrSProcessEventReply{
 			AlteredFields: []string{utils.AccountField},
-			CGREvent: &CGREvent{
+			CGREvent: &utils.CGREvent{
 				ID:   "TestBiRPCv1AuthorizeEventNoTenant",
 				Time: utils.TimePointer(time.Date(2016, time.January, 5, 18, 30, 49, 0, time.UTC)),
 				Event: map[string]any{
@@ -121,7 +121,7 @@ func TestCDRSV1ProcessEventNoTenant(t *testing.T) {
 		if !cancast {
 			return fmt.Errorf("can't cast")
 		}
-		newArgs, cancast := args.(*CGREvent)
+		newArgs, cancast := args.(*utils.CGREvent)
 		if !cancast {
 			return fmt.Errorf("can't cast")
 		}
@@ -146,7 +146,7 @@ func TestCDRSV1ProcessEventNoTenant(t *testing.T) {
 	}
 	args := &ArgV1ProcessEvent{
 		Flags: []string{utils.MetaChargers},
-		CGREvent: CGREvent{
+		CGREvent: utils.CGREvent{
 			ID: "TestV1ProcessEventNoTenant",
 			Event: map[string]any{
 				utils.CGRID:        "test1",
@@ -177,7 +177,7 @@ func TestCDRSV1V1ProcessExternalCDRNoTenant(t *testing.T) {
 		if !cancast {
 			return fmt.Errorf("can't cast")
 		}
-		newArgs, cancast := args.(*CGREvent)
+		newArgs, cancast := args.(*utils.CGREvent)
 		if !cancast {
 			return fmt.Errorf("can't cast")
 		}
@@ -229,7 +229,7 @@ func TestCDRSV1V1ProcessExternalCDRNoTenant(t *testing.T) {
 func TestArgV1ProcessClone(t *testing.T) {
 	attr := &ArgV1ProcessEvent{
 		Flags: []string{"flg,flg2,flg3"},
-		CGREvent: CGREvent{
+		CGREvent: utils.CGREvent{
 			ID:   "TestBiRPCv1AuthorizeEventNoTenant",
 			Time: utils.TimePointer(time.Date(2016, time.January, 5, 18, 30, 49, 0, time.UTC)),
 			Event: map[string]any{
@@ -352,7 +352,7 @@ func TestCDRServerThdsProcessEvent(t *testing.T) {
 		cdrDb:   db,
 		dm:      dm,
 	}
-	crgEv := &CGREvent{
+	crgEv := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "id",
 		Time:   utils.TimePointer(time.Date(2019, 12, 1, 15, 0, 0, 0, time.UTC)),
@@ -392,7 +392,7 @@ func TestCDRServerStatSProcessEvent(t *testing.T) {
 		cdrDb:   db,
 		connMgr: connMgr,
 	}
-	crgEv := &CGREvent{
+	crgEv := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "id",
 		Time:   utils.TimePointer(time.Date(2019, 12, 1, 15, 0, 0, 0, time.UTC)),
@@ -437,7 +437,7 @@ func TestCDRServerEesProcessEvent(t *testing.T) {
 
 	cgrEv := &CGREventWithEeIDs{
 		EeIDs: []string{"ees"},
-		CGREvent: &CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "id",
 			Time:   utils.TimePointer(time.Date(2019, 12, 1, 15, 0, 0, 0, time.UTC)),
@@ -611,7 +611,7 @@ func TestCDRSV2ProcessEvent(t *testing.T) {
 	Cache = NewCacheS(cfg, dm, nil)
 	args := &ArgV1ProcessEvent{
 		Flags: []string{utils.MetaChargers},
-		CGREvent: CGREvent{
+		CGREvent: utils.CGREvent{
 			ID: "TestV1ProcessEventNoTenant",
 			Event: map[string]any{
 				utils.CGRID:        "test1",
@@ -625,7 +625,7 @@ func TestCDRSV2ProcessEvent(t *testing.T) {
 			},
 		},
 	}
-	evs := &[]*EventWithFlags{}
+	evs := &[]*utils.EventWithFlags{}
 
 	if err := cdrs.V2ProcessEvent(context.Background(), args, evs); err != nil {
 		t.Error(err)
@@ -660,7 +660,7 @@ func TestCDRSV2ProcessEventCacheSet(t *testing.T) {
 	Cache = NewCacheS(cfg, dm, nil)
 	args := &ArgV1ProcessEvent{
 		Flags: []string{utils.MetaChargers},
-		CGREvent: CGREvent{
+		CGREvent: utils.CGREvent{
 			ID: "TestV1ProcessEventNoTenant",
 			Event: map[string]any{
 				utils.CGRID:        "test1",
@@ -674,7 +674,7 @@ func TestCDRSV2ProcessEventCacheSet(t *testing.T) {
 			},
 		},
 	}
-	evs := &[]*EventWithFlags{}
+	evs := &[]*utils.EventWithFlags{}
 	Cache.Set(utils.CacheRPCResponses, utils.ConcatenatedKey(utils.CDRsV2ProcessEvent, args.CGREvent.ID),
 		&utils.CachedRPCResponse{Result: evs, Error: nil},
 		nil, true, utils.NonTransactional)
@@ -720,7 +720,7 @@ func TestCDRSV1ProcessEvent(t *testing.T) {
 	Cache = NewCacheS(cfg, dm, nil)
 	args := &ArgV1ProcessEvent{
 		Flags: []string{utils.MetaChargers},
-		CGREvent: CGREvent{
+		CGREvent: utils.CGREvent{
 			ID: "TestV1ProcessEventNoTenant",
 			Event: map[string]any{
 				utils.CGRID:        "test1",
@@ -769,7 +769,7 @@ func TestCDRSV1ProcessEventCacheSet(t *testing.T) {
 	Cache = NewCacheS(cfg, dm, nil)
 	args := &ArgV1ProcessEvent{
 		Flags: []string{utils.MetaChargers},
-		CGREvent: CGREvent{
+		CGREvent: utils.CGREvent{
 			ID: "TestV1ProcessEventNoTenant",
 			Event: map[string]any{
 				utils.CGRID:        "test1",
@@ -822,7 +822,7 @@ func TestV1ProcessEvent(t *testing.T) {
 			utils.AttributeSv1ProcessEvent: func(ctx *context.Context, args, reply any) error {
 				rpl := &AttrSProcessEventReply{
 					AlteredFields: []string{"*req.OfficeGroup"},
-					CGREvent: &CGREvent{
+					CGREvent: &utils.CGREvent{
 						Event: map[string]any{
 							utils.CGRID: "cgrid",
 						},
@@ -837,7 +837,7 @@ func TestV1ProcessEvent(t *testing.T) {
 					{
 						ChargerSProfile:    "chrgs1",
 						AttributeSProfiles: []string{"attr1", "attr2"},
-						CGREvent: &CGREvent{
+						CGREvent: &utils.CGREvent{
 							Event: map[string]any{
 								utils.CGRID: "cgrid2",
 							},
@@ -901,7 +901,7 @@ func TestV1ProcessEvent(t *testing.T) {
 	}
 	arg := &ArgV1ProcessEvent{
 		Flags: []string{utils.MetaAttributes, utils.MetaStats, utils.MetaExport, utils.MetaStore, utils.OptsThresholdS, utils.MetaThresholds, utils.MetaStats, utils.OptsChargerS, utils.MetaChargers, utils.OptsRALs, utils.MetaRALs, utils.OptsRerate, utils.MetaRerate, utils.OptsRefund, utils.MetaRefund},
-		CGREvent: CGREvent{
+		CGREvent: utils.CGREvent{
 			ID: "TestV1ProcessEventNoTenant",
 			Event: map[string]any{
 				utils.CGRID:        "test1",
@@ -967,7 +967,7 @@ func TestCdrprocessEventsErrLog(t *testing.T) {
 		connMgr: connMgr,
 	}
 
-	evs := []*CGREvent{
+	evs := []*utils.CGREvent{
 		{ID: "TestV1ProcessEventNoTenant",
 			Event: map[string]any{
 				utils.CGRID:        "test1",
@@ -2016,7 +2016,7 @@ func TestChrgrSProcessEvent(t *testing.T) {
 						ChargerSProfile:    "Charger1",
 						AttributeSProfiles: []string{"cgrates.org:ATTR_1001_SIMPLEAUTH"},
 						AlteredFields:      []string{utils.MetaReqRunID, "*req.Password"},
-						CGREvent: &CGREvent{ // matching Charger1
+						CGREvent: &utils.CGREvent{ // matching Charger1
 							Tenant: "cgrates.org",
 							ID:     "event1",
 							Event: map[string]any{
@@ -2045,7 +2045,7 @@ func TestChrgrSProcessEvent(t *testing.T) {
 		dm:      dm,
 		connMgr: connMgr,
 	}
-	cgrEv := CGREvent{
+	cgrEv := utils.CGREvent{
 		ID: "TestV1ProcessEventNoTenant",
 		Event: map[string]any{
 			utils.CGRID:        "test1",
@@ -2058,7 +2058,7 @@ func TestChrgrSProcessEvent(t *testing.T) {
 			utils.Usage:        123 * time.Minute,
 		},
 	}
-	expcgrEv := []*CGREvent{
+	expcgrEv := []*utils.CGREvent{
 		{
 			Tenant: "cgrates.org",
 			ID:     "event1",
@@ -2272,7 +2272,7 @@ func TestCDRSGetCDRs(t *testing.T) {
 		}),
 	}
 	arg := &ArgV1ProcessEvent{
-		CGREvent: CGREvent{
+		CGREvent: utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "Event1",
 			Event: map[string]any{

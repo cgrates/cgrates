@@ -26,7 +26,6 @@ import (
 	"time"
 
 	"github.com/cgrates/birpc/context"
-	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/sessions"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -60,7 +59,7 @@ func TestSSv1AuthorizeEventSMS(t *testing.T) {
 		args := &sessions.V1AuthorizeArgs{
 			GetMaxUsage:   true,
 			GetAttributes: true,
-			CGREvent: &engine.CGREvent{
+			CGREvent: &utils.CGREvent{
 				Tenant: "cgrates.org",
 				ID:     "TestSSv1ItAuthSMS",
 				Event: map[string]any{
@@ -86,7 +85,7 @@ func TestSSv1AuthorizeEventSMS(t *testing.T) {
 	t.Run("AuthorizeEventData", func(t *testing.T) {
 		args := &sessions.V1AuthorizeArgs{
 			GetMaxUsage: true,
-			CGREvent: &engine.CGREvent{
+			CGREvent: &utils.CGREvent{
 				Tenant: "cgrates.org",
 				ID:     "TestSSv1ItAuthData",
 				Event: map[string]any{

@@ -34,7 +34,7 @@ type WeightSorter struct {
 }
 
 func (ws *WeightSorter) SortRoutes(prflID string,
-	routes map[string]*Route, suplEv *CGREvent, extraOpts *optsGetRoutes) (sortedRoutes *SortedRoutes, err error) {
+	routes map[string]*Route, suplEv *utils.CGREvent, extraOpts *optsGetRoutes) (sortedRoutes *SortedRoutes, err error) {
 	sortedRoutes = &SortedRoutes{ProfileID: prflID,
 		Sorting: ws.sorting,
 		Routes:  make([]*SortedRoute, 0)}
