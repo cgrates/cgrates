@@ -41,7 +41,7 @@ type SchedulerSv1 struct {
 }
 
 // Reload reloads scheduler instructions
-func (schdSv1 *SchedulerSv1) Reload(ctx *context.Context, arg *engine.CGREvent, reply *string) error {
+func (schdSv1 *SchedulerSv1) Reload(ctx *context.Context, arg *utils.CGREvent, reply *string) error {
 	schdSv1.cgrcfg.GetReloadChan(config.SCHEDULER_JSN) <- struct{}{}
 	*reply = utils.OK
 	return nil
@@ -174,7 +174,7 @@ func (schdSv1 *SchedulerSv1) ExecuteActionPlans(ctx *context.Context, attr *util
 }
 
 // Ping returns Pong
-func (schdSv1 *SchedulerSv1) Ping(ctx *context.Context, ign *engine.CGREvent, reply *string) error {
+func (schdSv1 *SchedulerSv1) Ping(ctx *context.Context, ign *utils.CGREvent, reply *string) error {
 	*reply = utils.Pong
 	return nil
 }

@@ -803,7 +803,7 @@ func testInternalReplicationSetThreshold(t *testing.T) {
 }
 
 func testInternalMatchThreshold(t *testing.T) {
-	ev := &engine.CGREvent{
+	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "event2",
 		Event: map[string]any{
@@ -817,7 +817,7 @@ func testInternalMatchThreshold(t *testing.T) {
 	} else if !reflect.DeepEqual(ids, eIDs) {
 		t.Errorf("Expecting ids: %s, received: %s", eIDs, ids)
 	}
-	ev = &engine.CGREvent{
+	ev = &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "event2",
 		Event: map[string]any{
@@ -830,7 +830,7 @@ func testInternalMatchThreshold(t *testing.T) {
 	} else if !reflect.DeepEqual(ids, eIDs) {
 		t.Errorf("Expecting ids: %s, received: %s", eIDs, ids)
 	}
-	ev2 := &engine.CGREvent{
+	ev2 := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "event3",
 		Event: map[string]any{

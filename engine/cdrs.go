@@ -352,7 +352,7 @@ func (cdrS *CDRServer) refundEventCost(ec *EventCost, reqType, tor string) (rfnd
 }
 
 // chrgrSProcessEvent forks CGREventWithOpts into multiples based on matching ChargerS profiles
-func (cdrS *CDRServer) chrgrSProcessEvent(cgrEv *CGREvent) (cgrEvs []*CGREvent, err error) {
+func (cdrS *CDRServer) chrgrSProcessEvent(cgrEv *utils.CGREvent) (cgrEvs []*utils.CGREvent, err error) {
 	var chrgrs []*ChrgSProcessEventReply
 	if err = cdrS.connMgr.Call(context.TODO(), cdrS.cgrCfg.CdrsCfg().ChargerSConns,
 		utils.ChargerSv1ProcessEvent,
@@ -362,7 +362,7 @@ func (cdrS *CDRServer) chrgrSProcessEvent(cgrEv *CGREvent) (cgrEvs []*CGREvent, 
 	if len(chrgrs) == 0 {
 		return
 	}
-	cgrEvs = make([]*CGREvent, len(chrgrs))
+	cgrEvs = make([]*utils.CGREvent, len(chrgrs))
 	for i, cgrPrfl := range chrgrs {
 		cgrEvs[i] = cgrPrfl.CGREvent
 	}
@@ -370,7 +370,7 @@ func (cdrS *CDRServer) chrgrSProcessEvent(cgrEv *CGREvent) (cgrEvs []*CGREvent, 
 }
 
 // attrSProcessEvent will send the event to StatS if the connection is configured
-func (cdrS *CDRServer) attrSProcessEvent(cgrEv *CGREvent) (err error) {
+func (cdrS *CDRServer) attrSProcessEvent(cgrEv *utils.CGREvent) (err error) {
 	var rplyEv AttrSProcessEventReply
 	if cgrEv.APIOpts == nil {
 		cgrEv.APIOpts = make(map[string]any)
@@ -395,7 +395,7 @@ func (cdrS *CDRServer) attrSProcessEvent(cgrEv *CGREvent) (err error) {
 }
 
 // thdSProcessEvent will send the event to ThresholdS
-func (cdrS *CDRServer) thdSProcessEvent(cgrEv *CGREvent) (err error) {
+func (cdrS *CDRServer) thdSProcessEvent(cgrEv *utils.CGREvent) (err error) {
 	var tIDs []string
 	// we clone the CGREvent so we can add EventType without being propagated
 	thArgs := cgrEv.Clone()
@@ -413,7 +413,7 @@ func (cdrS *CDRServer) thdSProcessEvent(cgrEv *CGREvent) (err error) {
 }
 
 // statSProcessEvent will send the event to StatS
-func (cdrS *CDRServer) statSProcessEvent(cgrEv *CGREvent) (err error) {
+func (cdrS *CDRServer) statSProcessEvent(cgrEv *utils.CGREvent) (err error) {
 	var reply []string
 	statArgs := cgrEv.Clone()
 	if err = cdrS.connMgr.Call(context.TODO(), cdrS.cgrCfg.CdrsCfg().StatSConns,
@@ -439,8 +439,8 @@ func (cdrS *CDRServer) eeSProcessEvent(cgrEv *CGREventWithEeIDs) (err error) {
 
 // processEvent processes a CGREvent based on arguments
 // in case of partially executed, both error and evs will be returned
-func (cdrS *CDRServer) processEvents(evs []*CGREvent,
-	chrgS, attrS, refund, ralS, store, reRate, export, thdS, stS bool) (outEvs []*EventWithFlags, err error) {
+func (cdrS *CDRServer) processEvents(evs []*utils.CGREvent,
+	chrgS, attrS, refund, ralS, store, reRate, export, thdS, stS bool) (outEvs []*utils.EventWithFlags, err error) {
 	if reRate {
 		refund = true
 	}
@@ -455,10 +455,10 @@ func (cdrS *CDRServer) processEvents(evs []*CGREvent,
 			}
 		}
 	}
-	var cgrEvs []*CGREvent
+	var cgrEvs []*utils.CGREvent
 	if chrgS {
 		for _, ev := range evs {
-			var chrgEvs []*CGREvent
+			var chrgEvs []*utils.CGREvent
 			if chrgEvs, err = cdrS.chrgrSProcessEvent(ev); err != nil {
 				utils.Logger.Warning(
 					fmt.Sprintf("<%s> error: <%s> processing event %+v with %s",
@@ -639,9 +639,9 @@ func (cdrS *CDRServer) processEvents(evs []*CGREvent,
 	if partiallyExecuted {
 		err = utils.ErrPartiallyExecuted
 	}
-	outEvs = make([]*EventWithFlags, len(cgrEvs))
+	outEvs = make([]*utils.EventWithFlags, len(cgrEvs))
 	for i, cgrEv := range cgrEvs {
-		outEvs[i] = &EventWithFlags{
+		outEvs[i] = &utils.EventWithFlags{
 			Flags: procFlgs[i].AsSlice(),
 			Event: cgrEv.Event,
 		}
@@ -718,7 +718,7 @@ func (cdrS *CDRServer) V1ProcessCDR(ctx *context.Context, cdr *CDRWithAPIOpts, r
 	cgrEv := cdr.AsCGREvent()
 	cgrEv.APIOpts = cdr.APIOpts
 
-	if _, err = cdrS.processEvents([]*CGREvent{cgrEv},
+	if _, err = cdrS.processEvents([]*utils.CGREvent{cgrEv},
 		len(cdrS.cgrCfg.CdrsCfg().ChargerSConns) != 0 && !cdr.PreRated,
 		len(cdrS.cgrCfg.CdrsCfg().AttributeSConns) != 0,
 		false,
@@ -737,7 +737,7 @@ func (cdrS *CDRServer) V1ProcessCDR(ctx *context.Context, cdr *CDRWithAPIOpts, r
 // ArgV1ProcessEvent is the CGREvent with proccesing Flags
 type ArgV1ProcessEvent struct {
 	Flags []string
-	CGREvent
+	utils.CGREvent
 	clnb bool //rpcclonable
 }
 
@@ -873,7 +873,7 @@ func (cdrS *CDRServer) V1ProcessEvent(ctx *context.Context, arg *ArgV1ProcessEve
 	}
 	// end of processing options
 
-	if _, err = cdrS.processEvents([]*CGREvent{&arg.CGREvent}, chrgS, attrS, refund,
+	if _, err = cdrS.processEvents([]*utils.CGREvent{&arg.CGREvent}, chrgS, attrS, refund,
 		ralS, store, reRate, export, thdS, stS); err != nil {
 		return
 	}
@@ -882,7 +882,7 @@ func (cdrS *CDRServer) V1ProcessEvent(ctx *context.Context, arg *ArgV1ProcessEve
 }
 
 // V2ProcessEvent has the same logic with V1ProcessEvent except it adds the proccessed events to the reply
-func (cdrS *CDRServer) V2ProcessEvent(ctx *context.Context, arg *ArgV1ProcessEvent, evs *[]*EventWithFlags) (err error) {
+func (cdrS *CDRServer) V2ProcessEvent(ctx *context.Context, arg *ArgV1ProcessEvent, evs *[]*utils.EventWithFlags) (err error) {
 	if arg.ID == "" {
 		arg.ID = utils.GenUUID()
 	}
@@ -896,7 +896,7 @@ func (cdrS *CDRServer) V2ProcessEvent(ctx *context.Context, arg *ArgV1ProcessEve
 		if itm, has := Cache.Get(utils.CacheRPCResponses, cacheKey); has {
 			cachedResp := itm.(*utils.CachedRPCResponse)
 			if cachedResp.Error == nil {
-				*evs = *cachedResp.Result.(*[]*EventWithFlags)
+				*evs = *cachedResp.Result.(*[]*utils.EventWithFlags)
 			}
 			return cachedResp.Error
 		}
@@ -949,8 +949,8 @@ func (cdrS *CDRServer) V2ProcessEvent(ctx *context.Context, arg *ArgV1ProcessEve
 	}
 	// end of processing options
 
-	var procEvs []*EventWithFlags
-	if procEvs, err = cdrS.processEvents([]*CGREvent{&arg.CGREvent}, chrgS, attrS, refund,
+	var procEvs []*utils.EventWithFlags
+	if procEvs, err = cdrS.processEvents([]*utils.CGREvent{&arg.CGREvent}, chrgS, attrS, refund,
 		ralS, store, reRate, export, thdS, stS); err != nil {
 		return
 	}
@@ -961,7 +961,7 @@ func (cdrS *CDRServer) V2ProcessEvent(ctx *context.Context, arg *ArgV1ProcessEve
 // ArgV1ProcessEvents defines the structure for holding CGREvents about to be processed by CDRsV1.ProcessEvents.
 type ArgV1ProcessEvents struct {
 	Flags     []string
-	CGREvents []*CGREvent
+	CGREvents []*utils.CGREvent
 	APIOpts   map[string]any
 	clnb      bool //rpcclonable
 }
@@ -983,7 +983,7 @@ func (attr *ArgV1ProcessEvents) RPCClone() (any, error) {
 func (attr *ArgV1ProcessEvents) Clone() *ArgV1ProcessEvents {
 	cln := &ArgV1ProcessEvents{
 		Flags:     slices.Clone(attr.Flags),
-		CGREvents: make([]*CGREvent, 0, len(attr.CGREvents)),
+		CGREvents: make([]*utils.CGREvent, 0, len(attr.CGREvents)),
 	}
 	for _, cgrEv := range attr.CGREvents {
 		cln.CGREvents = append(cln.CGREvents, cgrEv.Clone())
@@ -1249,7 +1249,7 @@ func (cdrS *CDRServer) V1RateCDRs(ctx *context.Context, arg *ArgRateCDRs, reply 
 	if chrgS && len(cdrS.cgrCfg.CdrsCfg().ChargerSConns) == 0 {
 		return utils.NewErrNotConnected(utils.ChargerS)
 	}
-	cgrEvs := make([]*CGREvent, len(cdrs))
+	cgrEvs := make([]*utils.CGREvent, len(cdrs))
 	for i, cdr := range cdrs {
 		cdr.Cost = -1 // the cost will be recalculated
 		cgrEvs[i] = cdr.AsCGREvent()

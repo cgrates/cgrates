@@ -1028,7 +1028,7 @@ func (rplSv1 *ReplicatorSv1) RemoveIndexes(ctx *context.Context, args *utils.Get
 }
 
 // Ping used to determine if the RPC is active
-func (rplSv1 *ReplicatorSv1) Ping(ctx *context.Context, ign *engine.CGREvent, reply *string) error {
+func (rplSv1 *ReplicatorSv1) Ping(ctx *context.Context, ign *utils.CGREvent, reply *string) error {
 	*reply = utils.Pong
 	return nil
 }

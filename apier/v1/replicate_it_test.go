@@ -1208,7 +1208,7 @@ func testInternalReplicateITThreshold(t *testing.T) {
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
-	tEvs := &engine.CGREvent{
+	tEvs := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "event1",
 		Event: map[string]any{

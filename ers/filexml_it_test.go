@@ -427,7 +427,7 @@ func TestFileXMLProcessEvent(t *testing.T) {
 	if err := eR.processFile(filePath, fileName); err != nil {
 		t.Error(err)
 	}
-	expEvent := &engine.CGREvent{
+	expEvent := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		Event: map[string]any{
 			"OriginID": "25160047719:0",

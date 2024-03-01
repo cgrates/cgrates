@@ -1358,12 +1358,12 @@ func TestNewSession(t *testing.T) {
 	testMock1 := &testMockClients{
 		calls: map[string]func(args any, reply any) error{
 			utils.ChargerSv1ProcessEvent: func(args any, reply any) error {
-				if args.(*engine.CGREvent).ID == utils.EmptyString {
+				if args.(*utils.CGREvent).ID == utils.EmptyString {
 					return utils.ErrNotImplemented
 				}
 				chrgrs := []*engine.ChrgSProcessEventReply{
 					{ChargerSProfile: "TEST_PROFILE1",
-						CGREvent: &engine.CGREvent{
+						CGREvent: &utils.CGREvent{
 							Tenant: "cgrates.org",
 							ID:     "TEST_ID",
 							Event: map[string]any{
@@ -1386,7 +1386,7 @@ func TestNewSession(t *testing.T) {
 
 	sessions := NewSessionS(cfg, dm, connMgr)
 
-	cgrEv := &engine.CGREvent{
+	cgrEv := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "TEST_ID",
 		Event: map[string]any{
@@ -1478,7 +1478,7 @@ func TestProcessChargerS(t *testing.T) {
 
 	sessions := NewSessionS(cfg, dm, connMgr)
 
-	cgrEv := &engine.CGREvent{
+	cgrEv := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "TEST_ID",
 		Event: map[string]any{
@@ -1768,7 +1768,7 @@ func TestAuthEvent(t *testing.T) {
 			utils.ChargerSv1ProcessEvent: func(args any, reply any) error {
 				chrgrs := []*engine.ChrgSProcessEventReply{
 					{ChargerSProfile: "TEST_PROFILE1",
-						CGREvent: &engine.CGREvent{
+						CGREvent: &utils.CGREvent{
 							Tenant: "cgrates.org",
 							ID:     "TEST_ID",
 							Event: map[string]any{
@@ -1793,7 +1793,7 @@ func TestAuthEvent(t *testing.T) {
 	dm := engine.NewDataManager(data, cfg.CacheCfg(), connMgr)
 	sessions := NewSessionS(cfg, dm, connMgr)
 
-	cgrEv := &engine.CGREvent{
+	cgrEv := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "TEST_ID",
 		Event: map[string]any{
@@ -1841,7 +1841,7 @@ func TestAuthEventMockCall(t *testing.T) {
 			utils.ChargerSv1ProcessEvent: func(args any, reply any) error {
 				chrgrs := []*engine.ChrgSProcessEventReply{
 					{ChargerSProfile: "TEST_PROFILE1",
-						CGREvent: &engine.CGREvent{
+						CGREvent: &utils.CGREvent{
 							Tenant: "cgrates.org",
 							ID:     "TEST_ID",
 							Event: map[string]any{
@@ -1866,7 +1866,7 @@ func TestAuthEventMockCall(t *testing.T) {
 	dm := engine.NewDataManager(data, cfg.CacheCfg(), connMgr)
 	sessions := NewSessionS(cfg, dm, connMgr)
 
-	cgrEv := &engine.CGREvent{
+	cgrEv := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "TEST_ID",
 		Event: map[string]any{
@@ -1909,7 +1909,7 @@ func TestChargeEvent(t *testing.T) {
 			utils.ChargerSv1ProcessEvent: func(args any, reply any) error {
 				chrgrs := []*engine.ChrgSProcessEventReply{
 					{ChargerSProfile: "TEST_PROFILE1",
-						CGREvent: &engine.CGREvent{
+						CGREvent: &utils.CGREvent{
 							Tenant: "cgrates.org",
 							ID:     "TEST_ID",
 							Event: map[string]any{
@@ -1918,7 +1918,7 @@ func TestChargeEvent(t *testing.T) {
 							},
 						}},
 				}
-				if args.(*engine.CGREvent).Tenant != "cgrates.org" {
+				if args.(*utils.CGREvent).Tenant != "cgrates.org" {
 					chrgrs[0].CGREvent.Event[utils.RequestType] = utils.MetaPrepaid
 				}
 				*reply.(*[]*engine.ChrgSProcessEventReply) = chrgrs
@@ -1944,7 +1944,7 @@ func TestChargeEvent(t *testing.T) {
 	dm := engine.NewDataManager(data, cfg.CacheCfg(), connMgr)
 	sessions := NewSessionS(cfg, dm, connMgr)
 
-	cgrEv := &engine.CGREvent{
+	cgrEv := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "TEST_ID",
 		Event: map[string]any{
@@ -2392,7 +2392,7 @@ func TestBiRPCv1AuthorizeEvent(t *testing.T) {
 		calls: map[string]func(args any, reply any) error{
 			utils.AttributeSv1ProcessEvent: func(args any, reply any) error {
 				cgrEv := engine.AttrSProcessEventReply{
-					CGREvent: &engine.CGREvent{
+					CGREvent: &utils.CGREvent{
 						ID:     "TestID",
 						Tenant: "cgrates.org",
 						Event:  map[string]any{},
@@ -2413,7 +2413,7 @@ func TestBiRPCv1AuthorizeEvent(t *testing.T) {
 	dm := engine.NewDataManager(data, cfg.CacheCfg(), connMgr)
 	sessions := NewSessionS(cfg, dm, connMgr)
 
-	cgrEvent := &engine.CGREvent{
+	cgrEvent := &utils.CGREvent{
 		ID: "TestID",
 		Event: map[string]any{
 			utils.Usage: "10s",
@@ -2486,7 +2486,7 @@ func TestBiRPCv1AuthorizeEvent2(t *testing.T) {
 			utils.ChargerSv1ProcessEvent: func(args any, reply any) error {
 				cghrgs := []*engine.ChrgSProcessEventReply{
 					{
-						CGREvent: &engine.CGREvent{
+						CGREvent: &utils.CGREvent{
 							Tenant: "cgrates.org",
 							ID:     "TestID",
 							Event: map[string]any{
@@ -2499,7 +2499,7 @@ func TestBiRPCv1AuthorizeEvent2(t *testing.T) {
 				return nil
 			},
 			utils.ResourceSv1AuthorizeResources: func(args any, reply any) error {
-				if args.(*engine.CGREvent).Tenant == "new_tenant" {
+				if args.(*utils.CGREvent).Tenant == "new_tenant" {
 					return utils.ErrNotImplemented
 				}
 				return nil
@@ -2533,7 +2533,7 @@ func TestBiRPCv1AuthorizeEvent2(t *testing.T) {
 	dm := engine.NewDataManager(data, cfg.CacheCfg(), connMgr)
 	sessions := NewSessionS(cfg, dm, connMgr)
 
-	cgrEvent := &engine.CGREvent{
+	cgrEvent := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		Event: map[string]any{
 			utils.Usage: "10s",
@@ -2621,7 +2621,7 @@ func TestBiRPCv1AuthorizeEventWithDigest(t *testing.T) {
 		calls: map[string]func(args any, reply any) error{
 			utils.AttributeSv1ProcessEvent: func(args any, reply any) error {
 				cgrEv := engine.AttrSProcessEventReply{
-					CGREvent: &engine.CGREvent{
+					CGREvent: &utils.CGREvent{
 						ID:      "TestID",
 						Tenant:  "cgrates.org",
 						Event:   map[string]any{},
@@ -2634,7 +2634,7 @@ func TestBiRPCv1AuthorizeEventWithDigest(t *testing.T) {
 			utils.ChargerSv1ProcessEvent: func(args any, reply any) error {
 				cghrgs := []*engine.ChrgSProcessEventReply{
 					{
-						CGREvent: &engine.CGREvent{
+						CGREvent: &utils.CGREvent{
 							Tenant: "cgrates.org",
 							ID:     "TestID",
 							Event: map[string]any{
@@ -2648,7 +2648,7 @@ func TestBiRPCv1AuthorizeEventWithDigest(t *testing.T) {
 				return nil
 			},
 			utils.ResourceSv1AuthorizeResources: func(args any, reply any) error {
-				if args.(*engine.CGREvent).Tenant == "new_tenant" {
+				if args.(*utils.CGREvent).Tenant == "new_tenant" {
 					return utils.ErrNotImplemented
 				}
 				return nil
@@ -2693,7 +2693,7 @@ func TestBiRPCv1AuthorizeEventWithDigest(t *testing.T) {
 	dm := engine.NewDataManager(data, cfg.CacheCfg(), connMgr)
 	sessions := NewSessionS(cfg, dm, connMgr)
 
-	cgrEvent := &engine.CGREvent{
+	cgrEvent := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		Event: map[string]any{
 			utils.Usage: "10s",
@@ -2736,7 +2736,7 @@ func TestBiRPCv1InitiateSession1(t *testing.T) {
 			utils.ChargerSv1ProcessEvent: func(args any, reply any) error {
 				cghrgs := []*engine.ChrgSProcessEventReply{
 					{
-						CGREvent: &engine.CGREvent{
+						CGREvent: &utils.CGREvent{
 							Tenant: "cgrates.org",
 							ID:     "TestID",
 							Event: map[string]any{
@@ -2750,25 +2750,25 @@ func TestBiRPCv1InitiateSession1(t *testing.T) {
 				return nil
 			},
 			utils.ResourceSv1AuthorizeResources: func(args any, reply any) error {
-				if args.(*engine.CGREvent).Tenant == "new_tenant" {
+				if args.(*utils.CGREvent).Tenant == "new_tenant" {
 					return utils.ErrNotImplemented
 				}
 				return nil
 			},
 			utils.ResourceSv1AllocateResources: func(args any, reply any) error {
-				usageID := utils.IfaceAsString(args.(*engine.CGREvent).APIOpts[utils.OptsResourcesUsageID])
+				usageID := utils.IfaceAsString(args.(*utils.CGREvent).APIOpts[utils.OptsResourcesUsageID])
 				if usageID == "ORIGIN_ID" {
 					return utils.ErrNotImplemented
 				}
 				return nil
 			},
 			utils.AttributeSv1ProcessEvent: func(args any, reply any) error {
-				if attrIDs, err := utils.IfaceAsSliceString(args.(*engine.CGREvent).APIOpts[utils.OptsAttributesProfileIDs]); err == nil &&
+				if attrIDs, err := utils.IfaceAsSliceString(args.(*utils.CGREvent).APIOpts[utils.OptsAttributesProfileIDs]); err == nil &&
 					len(attrIDs) != 0 {
 					return utils.ErrNotImplemented
 				}
 				attrRply := engine.AttrSProcessEventReply{
-					CGREvent: &engine.CGREvent{
+					CGREvent: &utils.CGREvent{
 						Tenant: "cgrates.org",
 						ID:     "TestID",
 						Event: map[string]any{
@@ -2798,7 +2798,7 @@ func TestBiRPCv1InitiateSession1(t *testing.T) {
 	dm := engine.NewDataManager(data, cfg.CacheCfg(), connMgr)
 	sessions := NewSessionS(cfg, dm, connMgr)
 
-	cgrEvent := &engine.CGREvent{
+	cgrEvent := &utils.CGREvent{
 		Event: map[string]any{
 			utils.Usage:    "10s",
 			utils.OriginID: "TEST_ID",
@@ -2865,7 +2865,7 @@ func TestBiRPCv1InitiateSession1(t *testing.T) {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 
-	cgrEvent = &engine.CGREvent{
+	cgrEvent = &utils.CGREvent{
 		ID:     "Test_id",
 		Tenant: "cgrates.org",
 		Event: map[string]any{
@@ -2899,7 +2899,7 @@ func TestBiRPCv1InitiateSession2(t *testing.T) {
 			utils.ChargerSv1ProcessEvent: func(args any, reply any) error {
 				cghrgs := []*engine.ChrgSProcessEventReply{
 					{
-						CGREvent: &engine.CGREvent{
+						CGREvent: &utils.CGREvent{
 							Tenant: "cgrates.org",
 							ID:     "TestID",
 							Event: map[string]any{
@@ -2908,14 +2908,14 @@ func TestBiRPCv1InitiateSession2(t *testing.T) {
 						},
 					},
 				}
-				if args.(*engine.CGREvent).ID == "PREPAID" {
+				if args.(*utils.CGREvent).ID == "PREPAID" {
 					cghrgs[0].CGREvent.Event[utils.RequestType] = utils.MetaPrepaid
 				}
 				*reply.(*[]*engine.ChrgSProcessEventReply) = cghrgs
 				return nil
 			},
 			utils.ResourceSv1AuthorizeResources: func(args any, reply any) error {
-				if args.(*engine.CGREvent).Tenant == "new_tenant" {
+				if args.(*utils.CGREvent).Tenant == "new_tenant" {
 					return utils.ErrNotImplemented
 				}
 				return nil
@@ -2940,7 +2940,7 @@ func TestBiRPCv1InitiateSession2(t *testing.T) {
 	dm := engine.NewDataManager(data, cfg.CacheCfg(), connMgr)
 	sessions := NewSessionS(cfg, dm, connMgr)
 
-	cgrEvent := &engine.CGREvent{
+	cgrEvent := &utils.CGREvent{
 		ID:     "Test_id",
 		Tenant: "cgrates.org",
 		Event: map[string]any{
@@ -2989,7 +2989,7 @@ func TestBiRPCv1InitiateSession2(t *testing.T) {
 	}
 
 	//is prepaid
-	cgrEvent = &engine.CGREvent{
+	cgrEvent = &utils.CGREvent{
 		ID: "PREPAID",
 		Event: map[string]any{
 			utils.Usage: "1s",
@@ -3015,7 +3015,7 @@ func TestBiRPCv1InitiateSessionWithDigest(t *testing.T) {
 		calls: map[string]func(args any, reply any) error{
 			utils.AttributeSv1ProcessEvent: func(args any, reply any) error {
 				cgrEv := engine.AttrSProcessEventReply{
-					CGREvent: &engine.CGREvent{
+					CGREvent: &utils.CGREvent{
 						ID:      "TestID",
 						Tenant:  "cgrates.org",
 						Event:   map[string]any{},
@@ -3028,7 +3028,7 @@ func TestBiRPCv1InitiateSessionWithDigest(t *testing.T) {
 			utils.ChargerSv1ProcessEvent: func(args any, reply any) error {
 				cghrgs := []*engine.ChrgSProcessEventReply{
 					{
-						CGREvent: &engine.CGREvent{
+						CGREvent: &utils.CGREvent{
 							Tenant: "cgrates.org",
 							ID:     "TestID",
 							Event: map[string]any{
@@ -3084,7 +3084,7 @@ func TestBiRPCv1InitiateSessionWithDigest(t *testing.T) {
 	dm := engine.NewDataManager(data, cfg.CacheCfg(), connMgr)
 	sessions := NewSessionS(cfg, dm, connMgr)
 
-	cgrEvent := &engine.CGREvent{
+	cgrEvent := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		Event: map[string]any{
 			utils.Usage:    "10s",
@@ -3127,7 +3127,7 @@ func TestBiRPCv1UpdateSession1(t *testing.T) {
 	clnt := &testMockClients{
 		calls: map[string]func(args any, reply any) error{
 			utils.AttributeSv1ProcessEvent: func(args any, reply any) error {
-				if attrIDs, err := utils.IfaceAsSliceString(args.(*engine.CGREvent).APIOpts[utils.OptsAttributesProfileIDs]); err == nil &&
+				if attrIDs, err := utils.IfaceAsSliceString(args.(*utils.CGREvent).APIOpts[utils.OptsAttributesProfileIDs]); err == nil &&
 					len(attrIDs) == 1 {
 					return utils.ErrNotImplemented
 				}
@@ -3147,7 +3147,7 @@ func TestBiRPCv1UpdateSession1(t *testing.T) {
 	dm := engine.NewDataManager(data, cfg.CacheCfg(), connMgr)
 	sessions := NewSessionS(cfg, dm, connMgr)
 
-	cgrEvent := &engine.CGREvent{
+	cgrEvent := &utils.CGREvent{
 		Event: map[string]any{
 			utils.Usage:    "10s",
 			utils.OriginID: "TEST_ID",
@@ -3210,7 +3210,7 @@ func TestBiRPCv1UpdateSession2(t *testing.T) {
 			utils.ChargerSv1ProcessEvent: func(args any, reply any) error {
 				cghrgs := []*engine.ChrgSProcessEventReply{
 					{
-						CGREvent: &engine.CGREvent{
+						CGREvent: &utils.CGREvent{
 							Tenant: "cgrates.org",
 							ID:     "TestID",
 							Event: map[string]any{
@@ -3234,7 +3234,7 @@ func TestBiRPCv1UpdateSession2(t *testing.T) {
 	dm := engine.NewDataManager(data, cfg.CacheCfg(), connMgr)
 	sessions := NewSessionS(cfg, dm, connMgr)
 
-	cgrEvent := &engine.CGREvent{
+	cgrEvent := &utils.CGREvent{
 		ID: "test_id",
 		Event: map[string]any{
 			utils.Usage:    "invalid_dur_format",
@@ -3284,7 +3284,7 @@ func TestBiRPCv1TerminateSession1(t *testing.T) {
 			utils.ChargerSv1ProcessEvent: func(args any, reply any) error {
 				cghrgs := []*engine.ChrgSProcessEventReply{
 					{
-						CGREvent: &engine.CGREvent{
+						CGREvent: &utils.CGREvent{
 							Tenant: "cgrates.org",
 							ID:     "TestID",
 							Event: map[string]any{
@@ -3314,7 +3314,7 @@ func TestBiRPCv1TerminateSession1(t *testing.T) {
 	dm := engine.NewDataManager(data, cfg.CacheCfg(), connMgr)
 	sessions := NewSessionS(cfg, dm, connMgr)
 
-	cgrEvent := &engine.CGREvent{
+	cgrEvent := &utils.CGREvent{
 		ID: "test_id",
 		Event: map[string]any{
 			utils.Usage:    "10s",
@@ -3395,7 +3395,7 @@ func TestBiRPCv1TerminateSession1(t *testing.T) {
 	}
 	cgrEvent.Event[utils.Usage] = "1m"
 
-	cgrEvent = &engine.CGREvent{
+	cgrEvent = &utils.CGREvent{
 		ID: "test_id",
 		Event: map[string]any{
 			utils.Usage:    "10s",
@@ -3430,7 +3430,7 @@ func TestBiRPCv1TerminateSession2(t *testing.T) {
 	clnt := &testMockClients{
 		calls: map[string]func(args any, reply any) error{
 			utils.ResourceSv1ReleaseResources: func(args any, reply any) error {
-				if args.(*engine.CGREvent).Tenant == "CHANGED_ID" {
+				if args.(*utils.CGREvent).Tenant == "CHANGED_ID" {
 					return nil
 				}
 				return utils.ErrNotImplemented
@@ -3448,7 +3448,7 @@ func TestBiRPCv1TerminateSession2(t *testing.T) {
 	dm := engine.NewDataManager(data, cfg.CacheCfg(), connMgr)
 	sessions := NewSessionS(cfg, dm, connMgr)
 
-	cgrEvent := &engine.CGREvent{
+	cgrEvent := &utils.CGREvent{
 		ID: "test_id",
 		Event: map[string]any{
 			utils.Usage:    "10s",
@@ -3496,7 +3496,7 @@ func TestBiRPCv1ProcessCDR(t *testing.T) {
 	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
 	sessions := NewSessionS(cfg, dm, nil)
 
-	cgrEvent := &engine.CGREvent{
+	cgrEvent := &utils.CGREvent{
 		Event: map[string]any{
 			utils.Usage:    "10s",
 			utils.OriginID: "TEST_ID",
@@ -3533,7 +3533,7 @@ func TestBiRPCv1ProcessMessage1(t *testing.T) {
 	clnt := &testMockClients{
 		calls: map[string]func(args any, reply any) error{
 			utils.AttributeSv1ProcessEvent: func(args any, reply any) error {
-				if args.(*engine.CGREvent).ID == "test_id" {
+				if args.(*utils.CGREvent).ID == "test_id" {
 					return nil
 				}
 				return utils.ErrNotImplemented
@@ -3552,7 +3552,7 @@ func TestBiRPCv1ProcessMessage1(t *testing.T) {
 	dm := engine.NewDataManager(data, cfg.CacheCfg(), connMgr)
 	sessions := NewSessionS(cfg, dm, connMgr)
 
-	cgrEvent := &engine.CGREvent{
+	cgrEvent := &utils.CGREvent{
 		ID: "test_id",
 		Event: map[string]any{
 			utils.Usage:    "10s",
@@ -3612,7 +3612,7 @@ func TestBiRPCv1ProcessMessage2(t *testing.T) {
 	clnt := &testMockClients{
 		calls: map[string]func(args any, reply any) error{
 			utils.ResourceSv1AllocateResources: func(args any, reply any) error {
-				usageID := utils.IfaceAsString(args.(*engine.CGREvent).APIOpts[utils.OptsResourcesUsageID])
+				usageID := utils.IfaceAsString(args.(*utils.CGREvent).APIOpts[utils.OptsResourcesUsageID])
 				if usageID == "ORIGIN_ID" {
 					return nil
 				}
@@ -3631,7 +3631,7 @@ func TestBiRPCv1ProcessMessage2(t *testing.T) {
 			utils.ChargerSv1ProcessEvent: func(args any, reply any) error {
 				chrgrs := []*engine.ChrgSProcessEventReply{
 					{ChargerSProfile: "TEST_PROFILE1",
-						CGREvent: &engine.CGREvent{
+						CGREvent: &utils.CGREvent{
 							Tenant: "cgrates.org",
 							ID:     "TEST_ID",
 							Event: map[string]any{
@@ -3658,7 +3658,7 @@ func TestBiRPCv1ProcessMessage2(t *testing.T) {
 	dm := engine.NewDataManager(data, cfg.CacheCfg(), connMgr)
 	sessions := NewSessionS(cfg, dm, connMgr)
 
-	cgrEvent := &engine.CGREvent{
+	cgrEvent := &utils.CGREvent{
 		ID: "test_id",
 		Event: map[string]any{
 			utils.Usage: "10s",
@@ -3720,7 +3720,7 @@ func TestBiRPCv1ProcessEvent(t *testing.T) {
 			utils.ChargerSv1ProcessEvent: func(args any, reply any) error {
 				chrgrs := []*engine.ChrgSProcessEventReply{
 					{ChargerSProfile: "TEST_PROFILE1",
-						CGREvent: &engine.CGREvent{
+						CGREvent: &utils.CGREvent{
 							Tenant: "cgrates.org",
 							ID:     "TEST_ID",
 							Event: map[string]any{
@@ -3733,7 +3733,7 @@ func TestBiRPCv1ProcessEvent(t *testing.T) {
 			},
 			utils.AttributeSv1ProcessEvent: func(args any, reply any) error {
 				attrs := engine.AttrSProcessEventReply{
-					CGREvent: &engine.CGREvent{
+					CGREvent: &utils.CGREvent{
 						Tenant: "cgrates.org",
 						ID:     "TEST_ID",
 						Event: map[string]any{
@@ -3741,14 +3741,14 @@ func TestBiRPCv1ProcessEvent(t *testing.T) {
 						},
 					},
 				}
-				if args.(*engine.CGREvent).ID == "CHANGED_ID" {
+				if args.(*utils.CGREvent).ID == "CHANGED_ID" {
 					*reply.(*engine.AttrSProcessEventReply) = attrs
 					return nil
 				}
 				return utils.ErrNotImplemented
 			},
 			utils.RouteSv1GetRoutes: func(args any, reply any) error {
-				if args.(*engine.CGREvent).ID == "SECOND_ID" {
+				if args.(*utils.CGREvent).ID == "SECOND_ID" {
 					*reply.(*engine.SortedRoutesList) = engine.SortedRoutesList{{
 						ProfileID: "ROUTE_PRFID",
 						Routes: []*engine.SortedRoute{
@@ -3780,7 +3780,7 @@ func TestBiRPCv1ProcessEvent(t *testing.T) {
 	dm := engine.NewDataManager(data, cfg.CacheCfg(), connMgr)
 	sessions := NewSessionS(cfg, dm, connMgr)
 
-	cgrEvent := &engine.CGREvent{
+	cgrEvent := &utils.CGREvent{
 		ID: "test_id",
 		Event: map[string]any{
 			utils.Usage:    "10s",
@@ -3862,7 +3862,7 @@ func TestBiRPCv1ProcessEventStats(t *testing.T) {
 			utils.ChargerSv1ProcessEvent: func(args any, reply any) error {
 				chrgrs := []*engine.ChrgSProcessEventReply{
 					{ChargerSProfile: "TEST_PROFILE1",
-						CGREvent: &engine.CGREvent{
+						CGREvent: &utils.CGREvent{
 							Tenant: "cgrates.org",
 							ID:     "TEST_ID",
 							Event: map[string]any{
@@ -3891,7 +3891,7 @@ func TestBiRPCv1ProcessEventStats(t *testing.T) {
 	dm := engine.NewDataManager(data, cfg.CacheCfg(), connMgr)
 	sessions := NewSessionS(cfg, dm, connMgr)
 
-	cgrEvent := &engine.CGREvent{
+	cgrEvent := &utils.CGREvent{
 		ID: "test_id",
 		Event: map[string]any{
 			utils.Usage:    "10s",
@@ -3966,7 +3966,7 @@ func TestBiRPCv1ProcessEventResources(t *testing.T) {
 			utils.ConcatenatedKey(utils.MetaResources, utils.MetaDerivedReply),
 			utils.ConcatenatedKey(utils.MetaResources, utils.MetaAuthorize),
 			utils.MetaChargers},
-		CGREvent: &engine.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testBiRPCv1ProcessEventStatsResources",
 			Event: map[string]any{
@@ -4043,12 +4043,12 @@ func TestBiRPCv1ProcessEventRals1(t *testing.T) {
 	clnt := &testMockClients{
 		calls: map[string]func(args any, reply any) error{
 			utils.ChargerSv1ProcessEvent: func(args any, reply any) error {
-				if args.(*engine.CGREvent).ID != "RALS_ID" {
+				if args.(*utils.CGREvent).ID != "RALS_ID" {
 					return nil
 				}
 				chrgrs := []*engine.ChrgSProcessEventReply{
 					{ChargerSProfile: "TEST_PROFILE1",
-						CGREvent: &engine.CGREvent{
+						CGREvent: &utils.CGREvent{
 							Tenant: "cgrates.org",
 							ID:     "TEST_ID",
 							Event: map[string]any{
@@ -4087,7 +4087,7 @@ func TestBiRPCv1ProcessEventRals1(t *testing.T) {
 			utils.ConcatenatedKey(utils.MetaRALs, utils.MetaCost),
 			utils.ConcatenatedKey(utils.MetaRALs, utils.MetaDerivedReply),
 			utils.MetaChargers},
-		CGREvent: &engine.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testBiRPCv1ProcessEventStatsResources",
 			Event: map[string]any{
@@ -4158,7 +4158,7 @@ func TestBiRPCv1ProcessEventRals2(t *testing.T) {
 			utils.ChargerSv1ProcessEvent: func(args any, reply any) error {
 				chrgrs := []*engine.ChrgSProcessEventReply{
 					{ChargerSProfile: "TEST_PROFILE1",
-						CGREvent: &engine.CGREvent{
+						CGREvent: &utils.CGREvent{
 							Tenant: "cgrates.org",
 							ID:     "TEST_ID",
 							Event: map[string]any{
@@ -4199,7 +4199,7 @@ func TestBiRPCv1ProcessEventRals2(t *testing.T) {
 		Flags: []string{utils.MetaRALs,
 			utils.ConcatenatedKey(utils.MetaRALs, utils.MetaInitiate),
 			utils.MetaChargers},
-		CGREvent: &engine.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testBiRPCv1ProcessEventStatsResources",
 			Event: map[string]any{
@@ -4297,7 +4297,7 @@ func TestBiRPCv1ProcessEventCDRs11(t *testing.T) {
 			utils.ChargerSv1ProcessEvent: func(args any, reply any) error {
 				chrgrs := []*engine.ChrgSProcessEventReply{
 					{ChargerSProfile: "TEST_PROFILE1",
-						CGREvent: &engine.CGREvent{
+						CGREvent: &utils.CGREvent{
 							Tenant: "cgrates.org",
 							ID:     "TEST_ID",
 							Event: map[string]any{
@@ -4331,7 +4331,7 @@ func TestBiRPCv1ProcessEventCDRs11(t *testing.T) {
 		Flags: []string{utils.MetaCDRs,
 			utils.ConcatenatedKey(utils.MetaRALs, utils.MetaDerivedReply),
 			utils.MetaChargers},
-		CGREvent: &engine.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testBiRPCv1ProcessEventStatsResources",
 			Event: map[string]any{
@@ -4409,7 +4409,7 @@ func TestBiRPCv1GetCost(t *testing.T) {
 		calls: map[string]func(args any, reply any) error{
 			utils.AttributeSv1ProcessEvent: func(args any, reply any) error {
 				attr := &engine.AttrSProcessEventReply{
-					CGREvent: &engine.CGREvent{
+					CGREvent: &utils.CGREvent{
 						Tenant: "cgrates.org",
 						ID:     "ATTRIBUTES",
 						Event: map[string]any{
@@ -4442,7 +4442,7 @@ func TestBiRPCv1GetCost(t *testing.T) {
 			utils.ConcatenatedKey(utils.MetaRALs, utils.MetaDerivedReply),
 			utils.MetaChargers},
 	}
-	cgrEvent := &engine.CGREvent{
+	cgrEvent := &utils.CGREvent{
 		ID: "TestBiRPCv1GetCost",
 		Event: map[string]any{
 			utils.Tenant:      "cgrates.org",
@@ -4492,7 +4492,7 @@ func TestBiRPCv1GetCost(t *testing.T) {
 
 	expectedVal := V1GetCostReply{
 		Attributes: &engine.AttrSProcessEventReply{
-			CGREvent: &engine.CGREvent{
+			CGREvent: &utils.CGREvent{
 				Tenant: "cgrates.org",
 				ID:     "ATTRIBUTES",
 				Event: map[string]any{

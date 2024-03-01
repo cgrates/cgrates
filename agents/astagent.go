@@ -62,7 +62,7 @@ func NewAsteriskAgent(cgrCfg *config.CGRConfig, astConnIdx int,
 		cgrCfg:      cgrCfg,
 		astConnIdx:  astConnIdx,
 		connMgr:     connMgr,
-		eventsCache: make(map[string]*engine.CGREvent),
+		eventsCache: make(map[string]*utils.CGREvent),
 	}
 	srv, err := birpc.NewServiceWithMethodsRename(sma, utils.AgentV1, true, func(oldFn string) (newFn string) {
 		return strings.TrimPrefix(oldFn, "V1")
@@ -82,8 +82,8 @@ type AsteriskAgent struct {
 	astConn     *aringo.ARInGO
 	astEvChan   chan map[string]any
 	astErrChan  chan error
-	eventsCache map[string]*engine.CGREvent // used to gather information about events during various phases
-	evCacheMux  sync.RWMutex                // Protect eventsCache
+	eventsCache map[string]*utils.CGREvent // used to gather information about events during various phases
+	evCacheMux  sync.RWMutex               // Protect eventsCache
 	ctx         *context.Context
 }
 
@@ -374,7 +374,7 @@ func (sma *AsteriskAgent) V1GetActiveSessionIDs(ctx *context.Context, ignParam s
 }
 
 // V1AlterSessions is used to implement the sessions.BiRPClient interface
-func (*AsteriskAgent) V1AlterSessions(*context.Context, engine.CGREvent, *string) error {
+func (*AsteriskAgent) V1AlterSessions(*context.Context, utils.CGREvent, *string) error {
 	return utils.ErrNotImplemented
 }
 

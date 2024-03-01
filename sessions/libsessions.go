@@ -47,7 +47,7 @@ var authReqs = engine.MapEvent{
 type BiRPCClient interface {
 	V1DisconnectSession(*context.Context, utils.AttrDisconnectSession, *string) error
 	V1GetActiveSessionIDs(*context.Context, string, *[]*SessionID) error
-	V1AlterSessions(*context.Context, engine.CGREvent, *string) error
+	V1AlterSessions(*context.Context, utils.CGREvent, *string) error
 	V1DisconnectPeer(*context.Context, *utils.DPRArgs, *string) error
 	V1WarnDisconnect(*context.Context, map[string]any, *string) error
 }
@@ -266,11 +266,11 @@ type V1STIRIdentityArgs struct {
 }
 
 // getDerivedEvents returns only the *raw event if derivedReply flag is not specified
-func getDerivedEvents(events map[string]*engine.CGREvent, derivedReply bool) map[string]*engine.CGREvent {
+func getDerivedEvents(events map[string]*utils.CGREvent, derivedReply bool) map[string]*utils.CGREvent {
 	if derivedReply {
 		return events
 	}
-	return map[string]*engine.CGREvent{
+	return map[string]*utils.CGREvent{
 		utils.MetaRaw: events[utils.MetaRaw],
 	}
 }

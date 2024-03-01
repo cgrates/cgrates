@@ -94,7 +94,7 @@ func (httpPost *HTTPPostEE) Close() (_ error) { return }
 
 func (httpPost *HTTPPostEE) GetMetrics() *utils.SafeMapStorage { return httpPost.dc }
 
-func (httpPost *HTTPPostEE) PrepareMap(mp *engine.CGREvent) (any, error) {
+func (httpPost *HTTPPostEE) PrepareMap(mp *utils.CGREvent) (any, error) {
 	urlVals := url.Values{}
 	for k, v := range mp.Event {
 		urlVals.Set(k, utils.IfaceAsString(v))

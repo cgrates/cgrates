@@ -110,7 +110,7 @@ func testCsvRPCConn(t *testing.T) {
 func testCsvExportEvent(t *testing.T) {
 	eventVoice := &engine.CGREventWithEeIDs{
 		EeIDs: []string{"CSVExporter"},
-		CGREvent: &engine.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "voiceEvent",
 			Time:   utils.TimePointer(time.Now()),
@@ -136,7 +136,7 @@ func testCsvExportEvent(t *testing.T) {
 
 	eventData := &engine.CGREventWithEeIDs{
 		EeIDs: []string{"CSVExporter"},
-		CGREvent: &engine.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "dataEvent",
 			Time:   utils.TimePointer(time.Now()),
@@ -162,7 +162,7 @@ func testCsvExportEvent(t *testing.T) {
 
 	eventSMS := &engine.CGREventWithEeIDs{
 		EeIDs: []string{"CSVExporter"},
-		CGREvent: &engine.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "SMSEvent",
 			Time:   utils.TimePointer(time.Now()),
@@ -355,7 +355,7 @@ func testCsvExportComposedEvent(t *testing.T) {
 	}
 	eventVoice := &engine.CGREventWithEeIDs{
 		EeIDs: []string{"CSVExporterComposed"},
-		CGREvent: &engine.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "voiceEvent",
 			Time:   utils.TimePointer(time.Now()),
@@ -384,7 +384,7 @@ func testCsvExportComposedEvent(t *testing.T) {
 	}
 	eventSMS := &engine.CGREventWithEeIDs{
 		EeIDs: []string{"CSVExporterComposed"},
-		CGREvent: &engine.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "SMSEvent",
 			Time:   utils.TimePointer(time.Now()),
@@ -458,7 +458,7 @@ func testCsvExportMaskedDestination(t *testing.T) {
 
 	eventVoice := &engine.CGREventWithEeIDs{
 		EeIDs: []string{"CSVMaskedDestination"},
-		CGREvent: &engine.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "voiceEvent",
 			Time:   utils.TimePointer(time.Now()),
@@ -513,7 +513,7 @@ func testCsvVerifyMaskedDestination(t *testing.T) {
 func testCsvExportEventWithInflateTemplate(t *testing.T) {
 	eventVoice := &engine.CGREventWithEeIDs{
 		EeIDs: []string{"CSVExporterWIthTemplate"},
-		CGREvent: &engine.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "voiceEvent",
 			Time:   utils.TimePointer(time.Now()),
@@ -541,7 +541,7 @@ func testCsvExportEventWithInflateTemplate(t *testing.T) {
 
 	eventData := &engine.CGREventWithEeIDs{
 		EeIDs: []string{"CSVExporterWIthTemplate"},
-		CGREvent: &engine.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "dataEvent",
 			Time:   utils.TimePointer(time.Now()),
@@ -569,7 +569,7 @@ func testCsvExportEventWithInflateTemplate(t *testing.T) {
 
 	eventSMS := &engine.CGREventWithEeIDs{
 		EeIDs: []string{"CSVExporterWIthTemplate"},
-		CGREvent: &engine.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "SMSEvent",
 			Time:   utils.TimePointer(time.Now()),
@@ -637,7 +637,7 @@ func testCsvVerifyExportsWithInflateTemplate(t *testing.T) {
 func testCsvExportNotFoundExporter(t *testing.T) {
 	eventVoice := &engine.CGREventWithEeIDs{
 		EeIDs: []string{"ExporterNotFound"},
-		CGREvent: &engine.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "voiceEvent",
 			Time:   utils.TimePointer(time.Now()),

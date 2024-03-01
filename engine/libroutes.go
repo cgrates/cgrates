@@ -219,7 +219,7 @@ func (sRoutes *SortedRoutes) AsNavigableMap() (nm *utils.DataNode) {
 
 // RoutesSorter is the interface which needs to be implemented by routes sorters
 type RoutesSorter interface {
-	SortRoutes(string, map[string]*Route, *CGREvent, *optsGetRoutes) (*SortedRoutes, error)
+	SortRoutes(string, map[string]*Route, *utils.CGREvent, *optsGetRoutes) (*SortedRoutes, error)
 }
 
 // NewRouteSortDispatcher constructs RouteSortDispatcher
@@ -240,7 +240,7 @@ func NewRouteSortDispatcher(lcrS *RouteService) (rsd RouteSortDispatcher) {
 type RouteSortDispatcher map[string]RoutesSorter
 
 func (ssd RouteSortDispatcher) SortRoutes(prflID, strategy string,
-	suppls map[string]*Route, suplEv *CGREvent, extraOpts *optsGetRoutes) (sortedRoutes *SortedRoutes, err error) {
+	suppls map[string]*Route, suplEv *utils.CGREvent, extraOpts *optsGetRoutes) (sortedRoutes *SortedRoutes, err error) {
 	sd, has := ssd[strategy]
 	if !has {
 		return nil, fmt.Errorf("unsupported sorting strategy: %s", strategy)

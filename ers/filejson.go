@@ -170,7 +170,7 @@ func (rdr *JSONFileER) processFile(fPath, fName string) (err error) {
 				utils.ERs, absPath, err.Error()))
 		return
 	}
-	cgrEv := engine.NMAsCGREvent(agReq.CGRRequest, agReq.Tenant, utils.NestingSep, agReq.Opts)
+	cgrEv := utils.NMAsCGREvent(agReq.CGRRequest, agReq.Tenant, utils.NestingSep, agReq.Opts)
 	rdrEv := rdr.rdrEvents
 	if _, isPartial := cgrEv.APIOpts[utils.PartialOpt]; isPartial {
 		rdrEv = rdr.partialEvents

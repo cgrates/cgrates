@@ -166,7 +166,7 @@ func testV1CDRsProcessEventAttrS(t *testing.T) {
 	}
 	argsEv := &engine.ArgV1ProcessEvent{
 		Flags: []string{utils.MetaAttributes, utils.MetaStore, "*chargers:false", "*export:false"},
-		CGREvent: engine.CGREvent{
+		CGREvent: utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "test1",
 			Event: map[string]any{
@@ -250,7 +250,7 @@ func testV1CDRsProcessEventAttrS(t *testing.T) {
 func testV1CDRsProcessEventChrgS(t *testing.T) {
 	argsEv := &engine.ArgV1ProcessEvent{
 		Flags: []string{utils.MetaChargers, "*attributes:false", "*export:false"},
-		CGREvent: engine.CGREvent{
+		CGREvent: utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "test2",
 			Event: map[string]any{
@@ -293,7 +293,7 @@ func testV1CDRsProcessEventChrgS(t *testing.T) {
 func testV1CDRsProcessEventRalS(t *testing.T) {
 	argsEv := &engine.ArgV1ProcessEvent{
 		Flags: []string{utils.MetaRALs, "*attributes:false", "*chargers:false", "*export:false"},
-		CGREvent: engine.CGREvent{
+		CGREvent: utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "test3",
 			Event: map[string]any{
@@ -328,7 +328,7 @@ func testV1CDRsProcessEventRalS(t *testing.T) {
 func testV1CDRsProcessEventSts(t *testing.T) {
 	argsEv := &engine.ArgV1ProcessEvent{
 		Flags: []string{utils.MetaStats, "*rals:false", "*attributes:false", "*chargers:false", "*export:false"},
-		CGREvent: engine.CGREvent{
+		CGREvent: utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "test4",
 			Event: map[string]any{
@@ -413,7 +413,7 @@ func testV1CDRsProcessEventSts(t *testing.T) {
 func testV1CDRsProcessEventStore(t *testing.T) {
 	argsEv := &engine.ArgV1ProcessEvent{
 		Flags: []string{"*store:false", "*attributes:false", "*chargers:false", "*export:false"},
-		CGREvent: engine.CGREvent{
+		CGREvent: utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "test5",
 			Event: map[string]any{
@@ -504,7 +504,7 @@ func testV1CDRsProcessEventThreshold(t *testing.T) {
 	}
 	args := &engine.ArgV1ProcessEvent{
 		Flags: []string{utils.MetaThresholds, utils.MetaRALs, utils.ConcatenatedKey(utils.MetaChargers, "false"), "*export:false"},
-		CGREvent: engine.CGREvent{
+		CGREvent: utils.CGREvent{
 			Tenant: "cgrates.org",
 			Event: map[string]any{
 				utils.OriginID:     "testV2CDRsProcessCDRWithThreshold",
@@ -558,7 +558,7 @@ func testV1CDRsProcessEventExport(t *testing.T) {
 	var reply string
 	args := &engine.ArgV1ProcessEvent{
 		Flags: []string{utils.MetaExport, "*store:false", "*attributes:false", "*chargers:false", "*stats:false", "*thresholds:false"},
-		CGREvent: engine.CGREvent{
+		CGREvent: utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "test7",
 			Event: map[string]any{
@@ -611,7 +611,7 @@ func testV1CDRsProcessEventExportCheck(t *testing.T) {
 func testV1CDRsV2ProcessEventRalS(t *testing.T) {
 	argsEv := &engine.ArgV1ProcessEvent{
 		Flags: []string{utils.MetaRALs, "*attributes:false", "*chargers:false", "*export:false"},
-		CGREvent: engine.CGREvent{
+		CGREvent: utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "test101",
 			Event: map[string]any{
@@ -626,7 +626,7 @@ func testV1CDRsV2ProcessEventRalS(t *testing.T) {
 			},
 		},
 	}
-	expRply := []*engine.EventWithFlags{
+	expRply := []*utils.EventWithFlags{
 		{
 			Flags: []string{},
 			Event: map[string]any{
@@ -655,7 +655,7 @@ func testV1CDRsV2ProcessEventRalS(t *testing.T) {
 			},
 		},
 	}
-	var reply []*engine.EventWithFlags
+	var reply []*utils.EventWithFlags
 	if err := pecdrsRpc.Call(context.Background(), utils.CDRsV2ProcessEvent, argsEv, &reply); err != nil {
 		t.Error(err)
 	}

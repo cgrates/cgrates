@@ -161,7 +161,7 @@ func TestKafkaERProcessMessage(t *testing.T) {
 		maxWait:   time.Duration(1),
 		cap:       make(chan struct{}, 1),
 	}
-	expEvent := &engine.CGREvent{
+	expEvent := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		Event: map[string]any{
 			utils.ToR: "*voice",

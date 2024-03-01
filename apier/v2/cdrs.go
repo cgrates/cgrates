@@ -74,6 +74,6 @@ func (cdrSv2 *CDRsV2) StoreSessionCost(ctx *context.Context, args *engine.ArgsV2
 }
 
 // ProcessEvent will process an Event based on the flags attached
-func (cdrSv2 *CDRsV2) ProcessEvent(ctx *context.Context, arg *engine.ArgV1ProcessEvent, evs *[]*engine.EventWithFlags) error {
+func (cdrSv2 *CDRsV2) ProcessEvent(ctx *context.Context, arg *engine.ArgV1ProcessEvent, evs *[]*utils.EventWithFlags) error {
 	return cdrSv2.CDRs.V2ProcessEvent(ctx, arg, evs)
 }

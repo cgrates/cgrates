@@ -72,7 +72,7 @@ func TestDispatcherServiceDispatcherProfileForEventGetDispatcherProfileNF(t *tes
 	}
 	fltrs := engine.NewFilterS(cfg, connMng, dm)
 	dss := NewDispatcherService(dm, cfg, fltrs, connMng)
-	ev := &engine.CGREvent{
+	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "321",
 		Event: map[string]any{
@@ -104,7 +104,7 @@ func TestDispatcherServiceDispatcherProfileForEventMIIDENotFound(t *testing.T) {
 	dataDB := engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(dataDB, nil, connMng)
 	dss := NewDispatcherService(dm, cfg, nil, connMng)
-	ev := &engine.CGREvent{}
+	ev := &utils.CGREvent{}
 	tnt := ""
 	subsys := utils.IfaceAsString(ev.APIOpts[utils.MetaSubsys])
 	_, err := dss.dispatcherProfilesForEvent(tnt, ev, utils.MapStorage{
@@ -116,7 +116,7 @@ func TestDispatcherServiceDispatcherProfileForEventMIIDENotFound(t *testing.T) {
 	}
 }
 
-func (dS *DispatcherService) DispatcherServicePing(ev *engine.CGREvent, reply *string) error {
+func (dS *DispatcherService) DispatcherServicePing(ev *utils.CGREvent, reply *string) error {
 	*reply = utils.Pong
 	return nil
 }
@@ -124,7 +124,7 @@ func (dS *DispatcherService) DispatcherServicePing(ev *engine.CGREvent, reply *s
 func TestDispatcherCall1(t *testing.T) {
 	dS := &DispatcherService{}
 	var reply string
-	if err := dS.Call(context.Background(), utils.DispatcherServicePing, &engine.CGREvent{}, &reply); err != nil {
+	if err := dS.Call(context.Background(), utils.DispatcherServicePing, &utils.CGREvent{}, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.Pong {
 		t.Errorf("Expected: %s , received: %s", utils.Pong, reply)
@@ -134,10 +134,10 @@ func TestDispatcherCall1(t *testing.T) {
 func TestDispatcherCall2(t *testing.T) {
 	dS := &DispatcherService{}
 	var reply string
-	if err := dS.Call(context.Background(), "DispatcherServicePing", &engine.CGREvent{}, &reply); err == nil || err.Error() != rpcclient.ErrUnsupporteServiceMethod.Error() {
+	if err := dS.Call(context.Background(), "DispatcherServicePing", &utils.CGREvent{}, &reply); err == nil || err.Error() != rpcclient.ErrUnsupporteServiceMethod.Error() {
 		t.Error(err)
 	}
-	if err := dS.Call(context.Background(), "DispatcherService.Pong", &engine.CGREvent{}, &reply); err == nil || err.Error() != rpcclient.ErrUnsupporteServiceMethod.Error() {
+	if err := dS.Call(context.Background(), "DispatcherService.Pong", &utils.CGREvent{}, &reply); err == nil || err.Error() != rpcclient.ErrUnsupporteServiceMethod.Error() {
 		t.Error(err)
 	}
 	dS.Shutdown()
@@ -149,7 +149,7 @@ func TestDispatcherauthorizeEvent(t *testing.T) {
 	fltr := &engine.FilterS{}
 	connMgr := &engine.ConnManager{}
 	dsp := NewDispatcherService(dm, cfg, fltr, connMgr)
-	ev := &engine.CGREvent{
+	ev := &utils.CGREvent{
 		APIOpts: make(map[string]any),
 	}
 	reply := &engine.AttrSProcessEventReply{}
@@ -166,7 +166,7 @@ func TestDispatcherAuthorizeEventErr(t *testing.T) {
 	fltr := &engine.FilterS{}
 	connMgr := &engine.ConnManager{}
 	dsp := NewDispatcherService(dm, cfg, fltr, connMgr)
-	ev := &engine.CGREvent{
+	ev := &utils.CGREvent{
 		APIOpts: make(map[string]any),
 	}
 	reply := &engine.AttrSProcessEventReply{}
@@ -181,7 +181,7 @@ func TestDispatcherV1GetProfileForEventErr(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultTenant = utils.EmptyString
 	dsp := NewDispatcherService(nil, cfg, nil, nil)
-	ev := &engine.CGREvent{}
+	ev := &utils.CGREvent{}
 	dPfl := &engine.DispatcherProfiles{}
 	err := dsp.DispatcherSv1GetProfilesForEvent(context.Background(), ev, dPfl)
 	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
@@ -194,7 +194,7 @@ func TestDispatcherV1GetProfileForEvent(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultTenant = utils.EmptyString
 	dsp := NewDispatcherService(nil, cfg, nil, nil)
-	ev := &engine.CGREvent{}
+	ev := &utils.CGREvent{}
 	dPfl := &engine.DispatcherProfiles{}
 	err := dsp.DispatcherSv1GetProfilesForEvent(context.Background(), ev, dPfl)
 	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
@@ -207,7 +207,7 @@ func TestDispatcherDispatch(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultTenant = utils.EmptyString
 	dsp := NewDispatcherService(nil, cfg, nil, nil)
-	ev := &engine.CGREvent{}
+	ev := &utils.CGREvent{}
 	err := dsp.Dispatch(ev, "", "", "", "")
 	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if err == nil || err.Error() != expected {
@@ -273,7 +273,7 @@ func TestDispatcherServiceAuthorizeEvenError1(t *testing.T) {
 	connMgr := &engine.ConnManager{}
 	dsp := NewDispatcherService(dm, cfg, fltr, connMgr)
 	cfg.DispatcherSCfg().AttributeSConns = []string{"connID"}
-	ev := &engine.CGREvent{
+	ev := &utils.CGREvent{
 		APIOpts: make(map[string]any),
 	}
 	reply := &engine.AttrSProcessEventReply{}
@@ -297,7 +297,7 @@ func TestDispatcherServiceAuthorizeEventError2(t *testing.T) {
 	connMgr := &engine.ConnManager{}
 	dsp := NewDispatcherService(dm, cfg, fltr, connMgr)
 	cfg.DispatcherSCfg().AttributeSConns = []string{"connID"}
-	ev := &engine.CGREvent{
+	ev := &utils.CGREvent{
 		APIOpts: make(map[string]any),
 	}
 	reply := &engine.AttrSProcessEventReply{}
@@ -339,7 +339,7 @@ func TestDispatcherServiceAuthorizeEventError3(t *testing.T) {
 	connMgr := engine.NewConnManager(cfg, rpcInt)
 
 	dsp := NewDispatcherService(dm, cfg, nil, connMgr)
-	ev := &engine.CGREvent{
+	ev := &utils.CGREvent{
 		Tenant:  "testTenant",
 		ID:      "testID",
 		Time:    nil,
@@ -371,7 +371,7 @@ type mockTypeCon3 struct{}
 
 func (*mockTypeCon3) Call(_ *context.Context, serviceMethod string, args, reply any) error {
 	eVreply := &engine.AttrSProcessEventReply{
-		CGREvent: &engine.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "testTenant",
 			ID:     "testID",
 			Time:   nil,
@@ -423,7 +423,7 @@ type mockTypeCon4 struct{}
 
 func (*mockTypeCon4) Call(ctx *context.Context, serviceMethod string, args, reply any) error {
 	eVreply := &engine.AttrSProcessEventReply{
-		CGREvent: &engine.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant:  "testTenant",
 			ID:      "testID",
 			Time:    nil,
@@ -473,7 +473,7 @@ type mockTypeCon5 struct{}
 
 func (*mockTypeCon5) Call(ctx *context.Context, serviceMethod string, args, reply any) error {
 	eVreply := &engine.AttrSProcessEventReply{
-		CGREvent: &engine.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "testTenant",
 			ID:     "testID",
 			Time:   nil,
@@ -527,7 +527,7 @@ func TestDispatcherServiceCall1(t *testing.T) {
 	dm := engine.NewDataManager(nil, nil, nil)
 	dsp := NewDispatcherService(dm, cfg, nil, connMng)
 	reply := "reply"
-	args := &engine.CGREvent{
+	args := &utils.CGREvent{
 		Tenant: "tenantTest",
 		ID:     "tenantID",
 		Time:   nil,
@@ -565,7 +565,7 @@ func TestDispatcherServiceDispatcherProfileForEventErrNil(t *testing.T) {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
 	}
 	dss := NewDispatcherService(dm, cfg, nil, connMng)
-	ev := &engine.CGREvent{
+	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "123",
 		Time:   nil,
@@ -612,7 +612,7 @@ func TestDispatcherV1GetProfileForEventReturn(t *testing.T) {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
 	}
 	dss := NewDispatcherService(dm, cfg, nil, connMng)
-	ev := &engine.CGREvent{
+	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "123",
 		Time:   nil,
@@ -665,7 +665,7 @@ func TestDispatcherServiceDispatcherProfileForEventErrNotFound(t *testing.T) {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
 	}
 	dss := NewDispatcherService(dm, cfg, nil, connMng)
-	ev := &engine.CGREvent{
+	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "123",
 		Time:   nil,
@@ -712,7 +712,7 @@ func TestDispatcherServiceDispatcherProfileForEventErrNotFound2(t *testing.T) {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
 	}
 	dss := NewDispatcherService(dm, cfg, nil, connMng)
-	ev := &engine.CGREvent{
+	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "123",
 		Time:   nil,
@@ -764,7 +764,7 @@ func TestDispatcherServiceDispatcherProfileForEventErrNotFoundTime(t *testing.T)
 	}
 	fltrs := engine.NewFilterS(cfg, connMng, dm)
 	dss := NewDispatcherService(dm, cfg, fltrs, connMng)
-	ev := &engine.CGREvent{
+	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "123",
 		Time:   utils.TimePointer(time.Now()),
@@ -813,7 +813,7 @@ func TestDispatcherServiceDispatcherProfileForEventErrNotFoundFilter(t *testing.
 	}
 	fltrs := engine.NewFilterS(cfg, connMng, dm)
 	dss := NewDispatcherService(dm, cfg, fltrs, connMng)
-	ev := &engine.CGREvent{
+	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "123",
 		Event: map[string]any{
@@ -860,7 +860,7 @@ func TestDispatcherServiceDispatchDspErr(t *testing.T) {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
 	}
 	dss := NewDispatcherService(dm, cfg, nil, connMng)
-	ev := &engine.CGREvent{
+	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "123",
 		Time:   nil,
@@ -913,7 +913,7 @@ func TestDispatcherServiceDispatchDspErrHostNotFound(t *testing.T) {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
 	}
 	dss := NewDispatcherService(dm, cfg, nil, connMng)
-	ev := &engine.CGREvent{
+	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "123",
 		Time:   nil,
@@ -973,7 +973,7 @@ func TestDispatcherServiceDispatcherProfileForEventFoundFilter(t *testing.T) {
 	}
 	fltrs := engine.NewFilterS(cfg, connMng, dm)
 	dss := NewDispatcherService(dm, cfg, fltrs, connMng)
-	ev := &engine.CGREvent{
+	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "123",
 		Event: map[string]any{
@@ -1016,7 +1016,7 @@ func TestDispatcherServiceDispatcherProfileForEventNotNotFound(t *testing.T) {
 	}, nil, connMng)
 	fltrs := engine.NewFilterS(cfg, connMng, dm)
 	dss := NewDispatcherService(dm, cfg, fltrs, connMng)
-	ev := &engine.CGREvent{
+	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "123",
 		Event: map[string]any{
@@ -1078,7 +1078,7 @@ func TestDispatcherServiceDispatcherProfileForEventGetDispatcherError(t *testing
 	}
 	fltrs := engine.NewFilterS(cfg, connMng, dm)
 	dss := NewDispatcherService(dm, cfg, fltrs, connMng)
-	ev := &engine.CGREvent{
+	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "123",
 		Event: map[string]any{
@@ -1133,7 +1133,7 @@ func TestDispatcherServiceDispatchDspErrHostNotFound2(t *testing.T) {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
 	}
 	dss := NewDispatcherService(dm, cfg, nil, connMng)
-	ev := &engine.CGREvent{
+	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "123",
 		Time:   nil,
@@ -1196,7 +1196,7 @@ func TestDispatcherServiceDispatchDspErrHostNotFound3(t *testing.T) {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
 	}
 	dss := NewDispatcherService(dm, cfg, nil, connMgr)
-	ev := &engine.CGREvent{
+	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "123",
 		Time:   nil,
@@ -1218,7 +1218,7 @@ func TestDispatcherServiceDispatchDspErrHostNotFound3(t *testing.T) {
 	engine.Cache = cacheInit
 }
 
-func (dS *DispatcherService) DispatcherServiceTest(ev *engine.CGREvent, reply *string) (any, error) {
+func (dS *DispatcherService) DispatcherServiceTest(ev *utils.CGREvent, reply *string) (any, error) {
 	*reply = utils.Pong
 	return nil, nil
 }
@@ -1230,7 +1230,7 @@ func TestDispatcherServiceCall2(t *testing.T) {
 	dm := engine.NewDataManager(nil, nil, nil)
 	dsp := NewDispatcherService(dm, cfg, nil, connMng)
 	reply := "reply"
-	args := &engine.CGREvent{
+	args := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "123",
 		Time:   nil,
@@ -1250,7 +1250,7 @@ func TestDispatcherServiceCall2(t *testing.T) {
 	}
 }
 
-func (dS *DispatcherService) DispatcherServiceTest2(ev *engine.CGREvent, reply *string) any {
+func (dS *DispatcherService) DispatcherServiceTest2(ev *utils.CGREvent, reply *string) any {
 	*reply = utils.Pong
 	return utils.ErrNotImplemented
 }
@@ -1262,7 +1262,7 @@ func TestDispatcherServiceCall3(t *testing.T) {
 	dm := engine.NewDataManager(nil, nil, nil)
 	dsp := NewDispatcherService(dm, cfg, nil, connMng)
 	reply := "reply"
-	args := &engine.CGREvent{
+	args := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "123",
 		Time:   nil,
@@ -1282,7 +1282,7 @@ func TestDispatcherServiceCall3(t *testing.T) {
 	}
 }
 
-func (dS *DispatcherService) DispatcherServiceTest3(ev *engine.CGREvent, reply *string) int {
+func (dS *DispatcherService) DispatcherServiceTest3(ev *utils.CGREvent, reply *string) int {
 	*reply = utils.Pong
 	return 1
 }
@@ -1294,7 +1294,7 @@ func TestDispatcherServiceCall4(t *testing.T) {
 	dm := engine.NewDataManager(nil, nil, nil)
 	dsp := NewDispatcherService(dm, cfg, nil, connMng)
 	reply := "reply"
-	args := &engine.CGREvent{
+	args := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "123",
 		Time:   nil,
@@ -1359,7 +1359,7 @@ func TestDispatchersdispatcherProfileForEventAnySSfalses(t *testing.T) {
 	}
 
 	tnt := "cgrates.org"
-	ev := &engine.CGREvent{
+	ev := &utils.CGREvent{
 		Tenant: tnt,
 		Event: map[string]any{
 			utils.AccountField: "1001",
@@ -1450,7 +1450,7 @@ func TestDispatchersdispatcherProfileForEventAnySSfalseFirstNotFound(t *testing.
 	}
 
 	tnt := "cgrates.org"
-	ev := &engine.CGREvent{
+	ev := &utils.CGREvent{
 		Tenant: tnt,
 		Event: map[string]any{
 			utils.AccountField: "1001",
@@ -1518,7 +1518,7 @@ func TestDispatchersdispatcherProfileForEventAnySSfalseFound(t *testing.T) {
 	}
 
 	tnt := "cgrates.org"
-	ev := &engine.CGREvent{
+	ev := &utils.CGREvent{
 		Tenant: tnt,
 		Event: map[string]any{
 			utils.AccountField: "1001",
@@ -1586,7 +1586,7 @@ func TestDispatchersdispatcherProfileForEventAnySSfalseNotFound(t *testing.T) {
 	}
 
 	tnt := "cgrates.org"
-	ev := &engine.CGREvent{
+	ev := &utils.CGREvent{
 		Tenant: tnt,
 		Event: map[string]any{
 			utils.AccountField: "1001",
@@ -1651,7 +1651,7 @@ func TestDispatchersdispatcherProfileForEventAnySStrueNotFound(t *testing.T) {
 	}
 
 	tnt := "cgrates.org"
-	ev := &engine.CGREvent{
+	ev := &utils.CGREvent{
 		Tenant: tnt,
 		Event: map[string]any{
 			utils.AccountField: "1001",
@@ -1716,7 +1716,7 @@ func TestDispatchersdispatcherProfileForEventAnySStrueBothFound(t *testing.T) {
 	}
 
 	tnt := "cgrates.org"
-	ev := &engine.CGREvent{
+	ev := &utils.CGREvent{
 		Tenant: tnt,
 		Event: map[string]any{
 			utils.AccountField: "1001",

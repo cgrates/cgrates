@@ -86,7 +86,7 @@ var (
 			ID:     "TH_3",
 		},
 	}
-	testThresholdArgs = []*CGREvent{
+	testThresholdArgs = []*utils.CGREvent{
 		{
 			Tenant: "cgrates.org",
 			ID:     "Ev1",
@@ -586,7 +586,7 @@ func TestThresholdsProcessEventAccountUpdateErrPartExec(t *testing.T) {
 		tPrfl:  thPrf,
 	}
 
-	args := &CGREvent{
+	args := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "ThresholdProcessEvent",
 		Event: map[string]any{
@@ -636,7 +636,7 @@ func TestThresholdsProcessEventAsyncExecErr(t *testing.T) {
 		tPrfl:  thPrf,
 	}
 
-	args := &CGREvent{
+	args := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "ThresholdProcessEvent",
 		Event: map[string]any{
@@ -675,7 +675,7 @@ func TestThresholdsProcessEvent3(t *testing.T) {
 		tPrfl:  thPrf,
 	}
 
-	args := &CGREvent{
+	args := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "ThresholdProcessEvent",
 		Event: map[string]any{
@@ -875,7 +875,7 @@ func TestThresholdsProcessEventOK(t *testing.T) {
 		t.Error(err)
 	}
 
-	args := &CGREvent{
+	args := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "ThdProcessEvent",
 		Event: map[string]any{
@@ -922,7 +922,7 @@ func TestThresholdsProcessEventStoreThOK(t *testing.T) {
 		t.Error(err)
 	}
 
-	args := &CGREvent{
+	args := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "ThdProcessEvent",
 		Event: map[string]any{
@@ -1013,7 +1013,7 @@ func TestThresholdsProcessEventMaxHitsDMErr(t *testing.T) {
 	Cache.SetWithoutReplicate(utils.CacheThresholdProfiles, thPrf.TenantID(), thPrf, nil, true, utils.NonTransactional)
 	Cache.SetWithoutReplicate(utils.CacheThresholds, thPrf.TenantID(), th, nil, true, utils.NonTransactional)
 
-	args := &CGREvent{
+	args := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "ThdProcessEvent",
 		Event: map[string]any{
@@ -1075,7 +1075,7 @@ func TestThresholdsProcessEventNotFound(t *testing.T) {
 		t.Error(err)
 	}
 
-	args := &CGREvent{
+	args := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "ThdProcessEvent",
 		Event: map[string]any{
@@ -1126,7 +1126,7 @@ func TestThresholdsV1ProcessEventOK(t *testing.T) {
 		t.Error(err)
 	}
 
-	args := &CGREvent{
+	args := &utils.CGREvent{
 		ID: "V1ProcessEventTest",
 		Event: map[string]any{
 			utils.AccountField: "1001",
@@ -1187,7 +1187,7 @@ func TestThresholdsV1ProcessEventPartExecErr(t *testing.T) {
 		t.Error(err)
 	}
 
-	args := &CGREvent{
+	args := &utils.CGREvent{
 		ID: "V1ProcessEventTest",
 		Event: map[string]any{
 			utils.AccountField: "1001",
@@ -1243,14 +1243,14 @@ func TestThresholdsV1ProcessEventMissingArgs(t *testing.T) {
 		t.Error(err)
 	}
 
-	args := &CGREvent{
+	args := &utils.CGREvent{
 		ID: "V1ProcessEventTest",
 		Event: map[string]any{
 			utils.AccountField: "1001",
 		},
 	}
 
-	args = &CGREvent{
+	args = &utils.CGREvent{
 		Event: map[string]any{
 			utils.AccountField: "1001",
 		},
@@ -1268,7 +1268,7 @@ func TestThresholdsV1ProcessEventMissingArgs(t *testing.T) {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", experr, err)
 	}
 
-	args = &CGREvent{
+	args = &utils.CGREvent{
 		ID:    "V1ProcessEventTest",
 		Event: nil,
 	}
@@ -1378,7 +1378,7 @@ func TestThresholdMatchingThresholdForEventLocks(t *testing.T) {
 		ids.Add(rPrf.ID)
 	}
 	dm.RemoveThreshold("cgrates.org", "TH1")
-	mth, err := rS.matchingThresholdsForEvent("cgrates.org", &CGREvent{
+	mth, err := rS.matchingThresholdsForEvent("cgrates.org", &utils.CGREvent{
 		APIOpts: map[string]any{
 			utils.OptsThresholdsProfileIDs: ids.AsSlice(),
 		},
@@ -1443,7 +1443,7 @@ func TestThresholdMatchingThresholdForEventLocks2(t *testing.T) {
 	}
 	prfs = append(prfs, rPrf)
 	ids.Add(rPrf.ID)
-	_, err := rS.matchingThresholdsForEvent("cgrates.org", &CGREvent{
+	_, err := rS.matchingThresholdsForEvent("cgrates.org", &utils.CGREvent{
 		APIOpts: map[string]any{
 			utils.OptsThresholdsProfileIDs: ids.AsSlice(),
 		},
@@ -1492,7 +1492,7 @@ func TestThresholdMatchingThresholdForEventLocksBlocker(t *testing.T) {
 		prfs = append(prfs, rPrf)
 		ids.Add(rPrf.ID)
 	}
-	mres, err := rS.matchingThresholdsForEvent("cgrates.org", &CGREvent{
+	mres, err := rS.matchingThresholdsForEvent("cgrates.org", &utils.CGREvent{
 		APIOpts: map[string]any{
 			utils.OptsThresholdsProfileIDs: ids.AsSlice(),
 		},
@@ -1559,7 +1559,7 @@ func TestThresholdMatchingThresholdForEventLocksActivationInterval(t *testing.T)
 	}
 	dm.SetThresholdProfile(rPrf, true)
 	ids.Add(rPrf.ID)
-	mres, err := rS.matchingThresholdsForEvent("cgrates.org", &CGREvent{
+	mres, err := rS.matchingThresholdsForEvent("cgrates.org", &utils.CGREvent{
 		Time: utils.TimePointer(time.Now()),
 		APIOpts: map[string]any{
 			utils.OptsThresholdsProfileIDs: ids.AsSlice(),
@@ -1613,7 +1613,7 @@ func TestThresholdMatchingThresholdForEventLocks3(t *testing.T) {
 	for i := 0; i < 10; i++ {
 		ids.Add(fmt.Sprintf("TH%d", i))
 	}
-	_, err := rS.matchingThresholdsForEvent("cgrates.org", &CGREvent{
+	_, err := rS.matchingThresholdsForEvent("cgrates.org", &utils.CGREvent{
 		APIOpts: map[string]any{
 			utils.OptsThresholdsProfileIDs: ids.AsSlice(),
 		},
@@ -1654,7 +1654,7 @@ func TestThresholdMatchingThresholdForEventLocks4(t *testing.T) {
 		ids.Add(rPrf.ID)
 	}
 	ids.Add("TH20")
-	mres, err := rS.matchingThresholdsForEvent("cgrates.org", &CGREvent{
+	mres, err := rS.matchingThresholdsForEvent("cgrates.org", &utils.CGREvent{
 		APIOpts: map[string]any{
 			utils.OptsThresholdsProfileIDs: ids.AsSlice(),
 		},
@@ -1709,7 +1709,7 @@ func TestThresholdMatchingThresholdForEventLocks5(t *testing.T) {
 		ids.Add(rPrf.ID)
 	}
 	dm.RemoveThreshold("cgrates.org", "TH1")
-	_, err := rS.matchingThresholdsForEvent("cgrates.org", &CGREvent{
+	_, err := rS.matchingThresholdsForEvent("cgrates.org", &utils.CGREvent{
 		APIOpts: map[string]any{
 			utils.OptsThresholdsProfileIDs: ids.AsSlice(),
 		},
@@ -1869,7 +1869,7 @@ func TestThresholdsV1GetThresholdsForEventOK(t *testing.T) {
 	if err := dm.SetThresholdProfile(thPrf, true); err != nil {
 		t.Error(err)
 	}
-	args := &CGREvent{
+	args := &utils.CGREvent{
 		ID: "TestGetThresholdsForEvent",
 		Event: map[string]any{
 			utils.AccountField: "1001",
@@ -1927,7 +1927,7 @@ func TestThresholdsV1GetThresholdsForEventMissingArgs(t *testing.T) {
 		t.Error(err)
 	}
 
-	args := &CGREvent{
+	args := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		Event: map[string]any{
 			utils.AccountField: "1001",
@@ -1943,7 +1943,7 @@ func TestThresholdsV1GetThresholdsForEventMissingArgs(t *testing.T) {
 		t.Error(err)
 	}
 
-	args = &CGREvent{
+	args = &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "TestGetThresholdsForEvent",
 		Event:  nil,
@@ -2313,7 +2313,7 @@ func TestThresholdsMatchingThresholdsForEventNotFoundErr(t *testing.T) {
 		t.Error(err)
 	}
 
-	args := &CGREvent{
+	args := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "TestEvent",
 		Event:  map[string]any{},

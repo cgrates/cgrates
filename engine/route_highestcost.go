@@ -36,7 +36,7 @@ type HightCostSorter struct {
 }
 
 func (hcs *HightCostSorter) SortRoutes(prflID string, routes map[string]*Route,
-	ev *CGREvent, extraOpts *optsGetRoutes) (sortedRoutes *SortedRoutes, err error) {
+	ev *utils.CGREvent, extraOpts *optsGetRoutes) (sortedRoutes *SortedRoutes, err error) {
 	sortedRoutes = &SortedRoutes{ProfileID: prflID,
 		Sorting: hcs.sorting,
 		Routes:  make([]*SortedRoute, 0)}

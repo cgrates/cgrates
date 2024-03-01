@@ -930,7 +930,7 @@ func TestResourceV1AuthorizeResourceMissingStruct(t *testing.T) {
 		t.Errorf("Error: %+v", err)
 	}
 	var reply *string
-	argsMissingTenant := &CGREvent{
+	argsMissingTenant := &utils.CGREvent{
 		ID:    "id1",
 		Event: map[string]any{},
 		APIOpts: map[string]any{
@@ -938,7 +938,7 @@ func TestResourceV1AuthorizeResourceMissingStruct(t *testing.T) {
 			utils.OptsResourcesUnits:   20,
 		},
 	}
-	argsMissingUsageID := &CGREvent{
+	argsMissingUsageID := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "id1",
 		Event:  map[string]any{},
@@ -1252,7 +1252,7 @@ func TestResourceMatchingResourcesForEvent(t *testing.T) {
 			rPrf:   resprf[2],
 		},
 	}
-	resEvs := []*CGREvent{
+	resEvs := []*utils.CGREvent{
 		{
 			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:     "event1",
@@ -1360,7 +1360,7 @@ func TestResourceUsageTTLCase1(t *testing.T) {
 		rPrf:   resprf,
 		ttl:    utils.DurationPointer(timeDurationExample),
 	}
-	resEvs := &CGREvent{
+	resEvs := &utils.CGREvent{
 		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:     "event1",
 		Event: map[string]any{
@@ -1503,7 +1503,7 @@ func TestResourceUsageTTLCase2(t *testing.T) {
 			rPrf:   resprf[2],
 		},
 	}
-	resEvs := []*CGREvent{
+	resEvs := []*utils.CGREvent{
 		{
 			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:     "event1",
@@ -1661,7 +1661,7 @@ func TestResourceUsageTTLCase3(t *testing.T) {
 		TTLIdx: []string{},
 		rPrf:   resprf,
 	}
-	resEvs := &CGREvent{
+	resEvs := &utils.CGREvent{
 		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:     "event1",
 		Event: map[string]any{
@@ -1757,7 +1757,7 @@ func TestResourceUsageTTLCase4(t *testing.T) {
 		rPrf:   resprf,
 		ttl:    utils.DurationPointer(timeDurationExample),
 	}
-	resEvs := &CGREvent{
+	resEvs := &utils.CGREvent{
 		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:     "event1",
 		Event: map[string]any{
@@ -2054,7 +2054,7 @@ func TestResourceMatchWithIndexFalse(t *testing.T) {
 			rPrf:   resprf[2],
 		},
 	}
-	resEvs := []*CGREvent{
+	resEvs := []*utils.CGREvent{
 		{
 			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:     "event1",
@@ -2191,7 +2191,7 @@ func TestResourceCaching(t *testing.T) {
 		t.Errorf("Expecting: nil, received: %s", err)
 	}
 
-	ev := &CGREvent{
+	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     utils.UUIDSha1Prefix(),
 		Event: map[string]any{
@@ -2651,7 +2651,7 @@ func TestResourceAllocateResourceOtherDB(t *testing.T) {
 	var reply string
 	exp := rProf.ID
 	if err := rs.V1AllocateResources(context.Background(),
-		&CGREvent{
+		&utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "ef0f554",
 			Event:  map[string]any{"": ""},
@@ -2898,9 +2898,9 @@ func TestResourcesProcessThresholdsOK(t *testing.T) {
 	ccM := &ccMock{
 		calls: map[string]func(ctx *context.Context, args any, reply any) error{
 			utils.ThresholdSv1ProcessEvent: func(ctx *context.Context, args, reply any) error {
-				exp := &CGREvent{
+				exp := &utils.CGREvent{
 					Tenant: "cgrates.org",
-					ID:     args.(*CGREvent).ID,
+					ID:     args.(*utils.CGREvent).ID,
 					Event: map[string]any{
 						utils.EventType:  utils.ResourceUpdate,
 						utils.ResourceID: "RES_1",
@@ -2965,9 +2965,9 @@ func TestResourcesProcessThresholdsCallErr(t *testing.T) {
 	ccM := &ccMock{
 		calls: map[string]func(ctx *context.Context, args any, reply any) error{
 			utils.ThresholdSv1ProcessEvent: func(ctx *context.Context, args, reply any) error {
-				exp := &CGREvent{
+				exp := &utils.CGREvent{
 					Tenant: "cgrates.org",
-					ID:     args.(*CGREvent).ID,
+					ID:     args.(*utils.CGREvent).ID,
 					Event: map[string]any{
 						utils.EventType:  utils.ResourceUpdate,
 						utils.ResourceID: "RES_1",
@@ -3206,7 +3206,7 @@ func TestResourcesV1ResourcesForEventOK(t *testing.T) {
 	fltrs := NewFilterS(cfg, nil, dm)
 	rS := NewResourceService(dm, cfg, fltrs, nil)
 
-	args := &CGREvent{
+	args := &utils.CGREvent{
 		ID: "ResourcesForEventTest",
 		Event: map[string]any{
 			utils.AccountField: "1001",
@@ -3281,7 +3281,7 @@ func TestResourcesV1ResourcesForEventNotFound(t *testing.T) {
 	fltrs := NewFilterS(cfg, nil, dm)
 	rS := NewResourceService(dm, cfg, fltrs, nil)
 
-	args := &CGREvent{
+	args := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "ResourcesForEventTest",
 		Event: map[string]any{
@@ -3344,7 +3344,7 @@ func TestResourcesV1ResourcesForEventMissingParameters(t *testing.T) {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", experr, err)
 	}
 
-	args := &CGREvent{
+	args := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		Event: map[string]any{
 			utils.AccountField: "1001",
@@ -3360,7 +3360,7 @@ func TestResourcesV1ResourcesForEventMissingParameters(t *testing.T) {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", experr, err)
 	}
 
-	args = &CGREvent{
+	args = &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "ResourcesForEventTest",
 		APIOpts: map[string]any{
@@ -3374,7 +3374,7 @@ func TestResourcesV1ResourcesForEventMissingParameters(t *testing.T) {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", experr, err)
 	}
 
-	args = &CGREvent{
+	args = &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "ResourcesForEventTest",
 		Event: map[string]any{
@@ -3440,7 +3440,7 @@ func TestResourcesV1ResourcesForEventCacheReplyExists(t *testing.T) {
 	fltrs := NewFilterS(cfg, nil, dm)
 	rS := NewResourceService(dm, cfg, fltrs, nil)
 
-	args := &CGREvent{
+	args := &utils.CGREvent{
 		ID: "ResourcesForEventTest",
 		Event: map[string]any{
 			utils.AccountField: "1001",
@@ -3535,7 +3535,7 @@ func TestResourcesV1ResourcesForEventCacheReplySet(t *testing.T) {
 	fltrs := NewFilterS(cfg, nil, dm)
 	rS := NewResourceService(dm, cfg, fltrs, nil)
 
-	args := &CGREvent{
+	args := &utils.CGREvent{
 		ID: "ResourcesForEventTest",
 		Event: map[string]any{
 			utils.AccountField: "1001",
@@ -4098,7 +4098,7 @@ func TestResourcesV1AuthorizeResourcesOK(t *testing.T) {
 	fltrs := NewFilterS(cfg, nil, dm)
 	rS := NewResourceService(dm, cfg, fltrs, nil)
 
-	args := &CGREvent{
+	args := &utils.CGREvent{
 		ID: "EventAuthorizeResource",
 		Event: map[string]any{
 			utils.AccountField: "1001",
@@ -4144,7 +4144,7 @@ func TestResourcesV1AuthorizeResourcesNotAuthorized(t *testing.T) {
 	fltrs := NewFilterS(cfg, nil, dm)
 	rS := NewResourceService(dm, cfg, fltrs, nil)
 
-	args := &CGREvent{
+	args := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "EventAuthorizeResource",
 		Event: map[string]any{
@@ -4190,7 +4190,7 @@ func TestResourcesV1AuthorizeResourcesNoMatch(t *testing.T) {
 	fltrs := NewFilterS(cfg, nil, dm)
 	rS := NewResourceService(dm, cfg, fltrs, nil)
 
-	args := &CGREvent{
+	args := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "EventAuthorizeResource",
 		Event: map[string]any{
@@ -4236,7 +4236,7 @@ func TestResourcesV1AuthorizeResourcesNilCGREvent(t *testing.T) {
 	fltrs := NewFilterS(cfg, nil, dm)
 	rS := NewResourceService(dm, cfg, fltrs, nil)
 
-	args := &CGREvent{
+	args := &utils.CGREvent{
 		ID: "Event",
 	}
 	experr := `MANDATORY_IE_MISSING: [Event]`
@@ -4274,7 +4274,7 @@ func TestResourcesV1AuthorizeResourcesMissingUsageID(t *testing.T) {
 	fltrs := NewFilterS(cfg, nil, dm)
 	rS := NewResourceService(dm, cfg, fltrs, nil)
 
-	args := &CGREvent{
+	args := &utils.CGREvent{
 		ID: "EventAuthorizeResource",
 		Event: map[string]any{
 			utils.AccountField: "1001",
@@ -4348,7 +4348,7 @@ func TestResourcesV1AuthorizeResourcesCacheReplyExists(t *testing.T) {
 	fltrs := NewFilterS(cfg, nil, dm)
 	rS := NewResourceService(dm, cfg, fltrs, nil)
 
-	args := &CGREvent{
+	args := &utils.CGREvent{
 		ID: "EventAuthorizeResource",
 		Event: map[string]any{
 			utils.AccountField: "1001",
@@ -4429,7 +4429,7 @@ func TestResourcesV1AuthorizeResourcesCacheReplySet(t *testing.T) {
 	fltrs := NewFilterS(cfg, nil, dm)
 	rS := NewResourceService(dm, cfg, fltrs, nil)
 
-	args := &CGREvent{
+	args := &utils.CGREvent{
 		ID: "EventAuthorizeResource",
 		Event: map[string]any{
 			utils.AccountField: "1001",
@@ -4485,7 +4485,7 @@ func TestResourcesV1AllocateResourcesOK(t *testing.T) {
 	fltrs := NewFilterS(cfg, nil, dm)
 	rS := NewResourceService(dm, cfg, fltrs, nil)
 
-	args := &CGREvent{
+	args := &utils.CGREvent{
 		ID: "EventAuthorizeResource",
 		Event: map[string]any{
 			utils.AccountField: "1001",
@@ -4531,7 +4531,7 @@ func TestResourcesV1AllocateResourcesNoMatch(t *testing.T) {
 	fltrs := NewFilterS(cfg, nil, dm)
 	rS := NewResourceService(dm, cfg, fltrs, nil)
 
-	args := &CGREvent{
+	args := &utils.CGREvent{
 		ID: "EventAuthorizeResource",
 		Event: map[string]any{
 			utils.AccountField: "1002",
@@ -4576,7 +4576,7 @@ func TestResourcesV1AllocateResourcesMissingParameters(t *testing.T) {
 	fltrs := NewFilterS(cfg, nil, dm)
 	rS := NewResourceService(dm, cfg, fltrs, nil)
 
-	args := &CGREvent{
+	args := &utils.CGREvent{
 		ID: "EventAuthorizeResource",
 		Event: map[string]any{
 			utils.AccountField: "1001",
@@ -4594,7 +4594,7 @@ func TestResourcesV1AllocateResourcesMissingParameters(t *testing.T) {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", experr, err)
 	}
 
-	args = &CGREvent{
+	args = &utils.CGREvent{
 		ID: "EventAuthorizeResource",
 		APIOpts: map[string]any{
 			utils.OptsResourcesUsageID:  "RU_Test",
@@ -4609,7 +4609,7 @@ func TestResourcesV1AllocateResourcesMissingParameters(t *testing.T) {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", experr, err)
 	}
 
-	args = &CGREvent{
+	args = &utils.CGREvent{
 		Event: map[string]any{
 			utils.AccountField: "1001",
 		},
@@ -4682,7 +4682,7 @@ func TestResourcesV1AllocateResourcesCacheReplyExists(t *testing.T) {
 	fltrs := NewFilterS(cfg, nil, dm)
 	rS := NewResourceService(dm, cfg, fltrs, nil)
 
-	args := &CGREvent{
+	args := &utils.CGREvent{
 		ID: "EventAllocateResource",
 		Event: map[string]any{
 			utils.AccountField: "1001",
@@ -4763,7 +4763,7 @@ func TestResourcesV1AllocateResourcesCacheReplySet(t *testing.T) {
 	fltrs := NewFilterS(cfg, nil, dm)
 	rS := NewResourceService(dm, cfg, fltrs, nil)
 
-	args := &CGREvent{
+	args := &utils.CGREvent{
 		ID: "EventAllocateResource",
 		Event: map[string]any{
 			utils.AccountField: "1001",
@@ -4818,7 +4818,7 @@ func TestResourcesV1AllocateResourcesResAllocErr(t *testing.T) {
 	fltrs := NewFilterS(cfg, nil, dm)
 	rS := NewResourceService(dm, cfg, fltrs, nil)
 
-	args := &CGREvent{
+	args := &utils.CGREvent{
 		ID: "EventAuthorizeResource",
 		Event: map[string]any{
 			utils.AccountField: "1001",
@@ -4896,7 +4896,7 @@ func TestResourcesV1AllocateResourcesProcessThErr(t *testing.T) {
 	fltrs := NewFilterS(cfg, nil, dm)
 	rS := NewResourceService(dm, cfg, fltrs, cM)
 
-	args := &CGREvent{
+	args := &utils.CGREvent{
 		ID: "EventAuthorizeResource",
 		Event: map[string]any{
 			utils.AccountField: "1001",
@@ -4942,7 +4942,7 @@ func TestResourcesV1ReleaseResourcesOK(t *testing.T) {
 	fltrs := NewFilterS(cfg, nil, dm)
 	rS := NewResourceService(dm, cfg, fltrs, nil)
 
-	args := &CGREvent{
+	args := &utils.CGREvent{
 		ID: "EventAuthorizeResource",
 		Event: map[string]any{
 			utils.AccountField: "1001",
@@ -4993,7 +4993,7 @@ func TestResourcesV1ReleaseResourcesUsageNotFound(t *testing.T) {
 	fltrs := NewFilterS(cfg, nil, dm)
 	rS := NewResourceService(dm, cfg, fltrs, nil)
 
-	args := &CGREvent{
+	args := &utils.CGREvent{
 		ID: "EventAuthorizeResource",
 		Event: map[string]any{
 			utils.AccountField: "1001",
@@ -5011,7 +5011,7 @@ func TestResourcesV1ReleaseResourcesUsageNotFound(t *testing.T) {
 		t.Errorf("Unexpected reply returned: %q", reply)
 	}
 
-	args = &CGREvent{
+	args = &utils.CGREvent{
 		ID: "EventAuthorizeResource",
 		Event: map[string]any{
 			utils.AccountField: "1001",
@@ -5056,7 +5056,7 @@ func TestResourcesV1ReleaseResourcesNoMatch(t *testing.T) {
 	fltrs := NewFilterS(cfg, nil, dm)
 	rS := NewResourceService(dm, cfg, fltrs, nil)
 
-	args := &CGREvent{
+	args := &utils.CGREvent{
 		ID: "EventAuthorizeResource",
 		Event: map[string]any{
 			utils.AccountField: "1002",
@@ -5101,7 +5101,7 @@ func TestResourcesV1ReleaseResourcesMissingParameters(t *testing.T) {
 	fltrs := NewFilterS(cfg, nil, dm)
 	rS := NewResourceService(dm, cfg, fltrs, nil)
 
-	args := &CGREvent{
+	args := &utils.CGREvent{
 		ID: "EventAuthorizeResource",
 		Event: map[string]any{
 			utils.AccountField: "1001",
@@ -5119,7 +5119,7 @@ func TestResourcesV1ReleaseResourcesMissingParameters(t *testing.T) {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", experr, err)
 	}
 
-	args = &CGREvent{
+	args = &utils.CGREvent{
 		ID: "EventAuthorizeResource",
 		APIOpts: map[string]any{
 			utils.OptsResourcesUsageID:  "RU_Test",
@@ -5134,7 +5134,7 @@ func TestResourcesV1ReleaseResourcesMissingParameters(t *testing.T) {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", experr, err)
 	}
 
-	args = &CGREvent{
+	args = &utils.CGREvent{
 		Event: map[string]any{
 			utils.AccountField: "1001",
 		},
@@ -5207,7 +5207,7 @@ func TestResourcesV1ReleaseResourcesCacheReplyExists(t *testing.T) {
 	fltrs := NewFilterS(cfg, nil, dm)
 	rS := NewResourceService(dm, cfg, fltrs, nil)
 
-	args := &CGREvent{
+	args := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "EventReleaseResource",
 		Event: map[string]any{
@@ -5288,7 +5288,7 @@ func TestResourcesV1ReleaseResourcesCacheReplySet(t *testing.T) {
 	fltrs := NewFilterS(cfg, nil, dm)
 	rS := NewResourceService(dm, cfg, fltrs, nil)
 
-	args := &CGREvent{
+	args := &utils.CGREvent{
 		ID: "EventReleaseResource",
 		Event: map[string]any{
 			utils.AccountField: "1001",
@@ -5377,7 +5377,7 @@ func TestResourcesV1ReleaseResourcesProcessThErr(t *testing.T) {
 	fltrs := NewFilterS(cfg, nil, dm)
 	rS := NewResourceService(dm, cfg, fltrs, cM)
 
-	args := &CGREvent{
+	args := &utils.CGREvent{
 		ID: "EventAuthorizeResource",
 		Event: map[string]any{
 			utils.AccountField: "1001",
@@ -5440,7 +5440,7 @@ func TestResourcesStoreResourceError(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	args := &CGREvent{
+	args := &utils.CGREvent{
 		ID: "EventAuthorizeResource",
 		Event: map[string]any{
 			utils.AccountField: "1001",
@@ -5481,7 +5481,7 @@ func TestResourceMatchingResourcesForEventNotFoundInCache(t *testing.T) {
 		&FilterS{dm: dmRES, cfg: cfg}, nil)
 
 	Cache.Set(utils.CacheEventResources, "TestResourceMatchingResourcesForEventNotFoundInCache", nil, nil, true, utils.NonTransactional)
-	_, err := rS.matchingResourcesForEvent("cgrates.org", new(CGREvent),
+	_, err := rS.matchingResourcesForEvent("cgrates.org", new(utils.CGREvent),
 		"TestResourceMatchingResourcesForEventNotFoundInCache", utils.DurationPointer(10*time.Second))
 	if err != utils.ErrNotFound {
 		t.Errorf("Error: %+v", err)
@@ -5499,7 +5499,7 @@ func TestResourceMatchingResourcesForEventNotFoundInDB(t *testing.T) {
 		&FilterS{dm: dmRES, cfg: cfg}, nil)
 
 	Cache.Set(utils.CacheEventResources, "TestResourceMatchingResourcesForEventNotFoundInDB", utils.StringSet{"Res2": {}}, nil, true, utils.NonTransactional)
-	_, err := rS.matchingResourcesForEvent("cgrates.org", new(CGREvent),
+	_, err := rS.matchingResourcesForEvent("cgrates.org", new(utils.CGREvent),
 		"TestResourceMatchingResourcesForEventNotFoundInDB", utils.DurationPointer(10*time.Second))
 	if err != utils.ErrNotFound {
 		t.Errorf("Error: %+v", err)
@@ -5534,7 +5534,7 @@ func TestResourceMatchingResourcesForEventLocks(t *testing.T) {
 	}
 	dm.RemoveResource("cgrates.org", "RES1")
 	Cache.Set(utils.CacheEventResources, "TestResourceMatchingResourcesForEventLocks", ids, nil, true, utils.NonTransactional)
-	_, err := rS.matchingResourcesForEvent("cgrates.org", new(CGREvent),
+	_, err := rS.matchingResourcesForEvent("cgrates.org", new(utils.CGREvent),
 		"TestResourceMatchingResourcesForEventLocks", utils.DurationPointer(10*time.Second))
 	if err != utils.ErrNotFound {
 		t.Errorf("Error: %+v", err)
@@ -5598,7 +5598,7 @@ func TestResourceMatchingResourcesForEventLocks2(t *testing.T) {
 	prfs = append(prfs, rPrf)
 	ids.Add(rPrf.ID)
 	Cache.Set(utils.CacheEventResources, "TestResourceMatchingResourcesForEventLocks2", ids, nil, true, utils.NonTransactional)
-	_, err := rS.matchingResourcesForEvent("cgrates.org", new(CGREvent),
+	_, err := rS.matchingResourcesForEvent("cgrates.org", new(utils.CGREvent),
 		"TestResourceMatchingResourcesForEventLocks2", utils.DurationPointer(10*time.Second))
 	expErr := utils.ErrPrefixNotFound(rPrf.FilterIDs[0])
 	if err == nil || err.Error() != expErr.Error() {
@@ -5647,7 +5647,7 @@ func TestResourceMatchingResourcesForEventLocksBlocker(t *testing.T) {
 		ids.Add(rPrf.ID)
 	}
 	Cache.Set(utils.CacheEventResources, "TestResourceMatchingResourcesForEventLocksBlocker", ids, nil, true, utils.NonTransactional)
-	mres, err := rS.matchingResourcesForEvent("cgrates.org", new(CGREvent),
+	mres, err := rS.matchingResourcesForEvent("cgrates.org", new(utils.CGREvent),
 		"TestResourceMatchingResourcesForEventLocksBlocker", utils.DurationPointer(10*time.Second))
 	if err != nil {
 		t.Errorf("Error: %+v", err)
@@ -5717,7 +5717,7 @@ func TestResourceMatchingResourcesForEventLocksActivationInterval(t *testing.T) 
 	dm.SetResourceProfile(rPrf, true)
 	ids.Add(rPrf.ID)
 	Cache.Set(utils.CacheEventResources, "TestResourceMatchingResourcesForEventLocks2", ids, nil, true, utils.NonTransactional)
-	mres, err := rS.matchingResourcesForEvent("cgrates.org", &CGREvent{Time: utils.TimePointer(time.Now())},
+	mres, err := rS.matchingResourcesForEvent("cgrates.org", &utils.CGREvent{Time: utils.TimePointer(time.Now())},
 		"TestResourceMatchingResourcesForEventLocks2", utils.DurationPointer(10*time.Second))
 	if err != nil {
 		t.Errorf("Error: %+v", err)
@@ -5772,7 +5772,7 @@ func TestResourceMatchingResourcesForEventLocks3(t *testing.T) {
 		ids.Add(fmt.Sprintf("RES%d", i))
 	}
 	Cache.Set(utils.CacheEventResources, "TestResourceMatchingResourcesForEventLocks3", ids, nil, true, utils.NonTransactional)
-	_, err := rS.matchingResourcesForEvent("cgrates.org", new(CGREvent),
+	_, err := rS.matchingResourcesForEvent("cgrates.org", new(utils.CGREvent),
 		"TestResourceMatchingResourcesForEventLocks3", utils.DurationPointer(10*time.Second))
 	if err != utils.ErrNotImplemented {
 		t.Errorf("Error: %+v", err)
@@ -5826,7 +5826,7 @@ func TestResourceMatchingResourcesForEventLocks3(t *testing.T) {
 // 	}
 
 // 	rS := NewResourceService(dm, cfg, fltrs, connMgr)
-// 	ev := &CGREvent{
+// 	ev := &utils.CGREvent{
 // 		Tenant: "cgrates.org",
 // 		ID:     "TestMatchingResourcesForEvent",
 // 		Event: map[string]any{
@@ -6049,7 +6049,7 @@ func TestResourcesMatchingResourcesForEventCacheSetErr(t *testing.T) {
 	fltrs := NewFilterS(cfg, nil, dm)
 
 	rS := NewResourceService(dm, cfg, fltrs, connMgr)
-	ev := &CGREvent{
+	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "TestMatchingResourcesForEvent",
 		Event: map[string]any{
@@ -6106,7 +6106,7 @@ func TestResourcesMatchingResourcesForEventFinalCacheSetErr(t *testing.T) {
 	}
 
 	rS := NewResourceService(dm, cfg, fltrs, connMgr)
-	ev := &CGREvent{
+	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "TestMatchingResourcesForEvent",
 		Event: map[string]any{

@@ -27,10 +27,10 @@ import (
 )
 
 // CDRsV1Ping interogates CDRsV1 server responsible to process the event
-func (dS *DispatcherService) CDRsV1Ping(ctx *context.Context, args *engine.CGREvent,
+func (dS *DispatcherService) CDRsV1Ping(ctx *context.Context, args *utils.CGREvent,
 	reply *string) (err error) {
 	if args == nil {
-		args = new(engine.CGREvent)
+		args = new(utils.CGREvent)
 	}
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
 	if args.Tenant != utils.EmptyString {
@@ -58,7 +58,7 @@ func (dS *DispatcherService) CDRsV1GetCDRs(ctx *context.Context, args *utils.RPC
 			return
 		}
 	}
-	return dS.Dispatch(&engine.CGREvent{
+	return dS.Dispatch(&utils.CGREvent{
 		Tenant:  tnt,
 		APIOpts: args.APIOpts,
 	}, utils.MetaCDRs, utils.CDRsV1GetCDRs, args, reply)
@@ -76,7 +76,7 @@ func (dS *DispatcherService) CDRsV1GetCDRsCount(ctx *context.Context, args *util
 			return
 		}
 	}
-	return dS.Dispatch(&engine.CGREvent{
+	return dS.Dispatch(&utils.CGREvent{
 		Tenant:  tnt,
 		APIOpts: args.APIOpts,
 	}, utils.MetaCDRs, utils.CDRsV1GetCDRsCount, args, reply)
@@ -93,7 +93,7 @@ func (dS *DispatcherService) CDRsV1StoreSessionCost(ctx *context.Context, args *
 			return
 		}
 	}
-	return dS.Dispatch(&engine.CGREvent{
+	return dS.Dispatch(&utils.CGREvent{
 		Tenant:  tnt,
 		APIOpts: args.APIOpts,
 	}, utils.MetaCDRs, utils.CDRsV1StoreSessionCost, args, reply)
@@ -110,7 +110,7 @@ func (dS *DispatcherService) CDRsV1RateCDRs(ctx *context.Context, args *engine.A
 			return
 		}
 	}
-	return dS.Dispatch(&engine.CGREvent{
+	return dS.Dispatch(&utils.CGREvent{
 		Tenant:  tnt,
 		APIOpts: args.APIOpts,
 	}, utils.MetaCDRs, utils.CDRsV1RateCDRs, args, reply)
@@ -127,7 +127,7 @@ func (dS *DispatcherService) CDRsV1ProcessExternalCDR(ctx *context.Context, args
 			return
 		}
 	}
-	return dS.Dispatch(&engine.CGREvent{
+	return dS.Dispatch(&utils.CGREvent{
 		Tenant:  tnt,
 		APIOpts: args.APIOpts,
 	}, utils.MetaCDRs, utils.CDRsV1ProcessExternalCDR, args, reply)
@@ -159,13 +159,13 @@ func (dS *DispatcherService) CDRsV1ProcessCDR(ctx *context.Context, args *engine
 			return
 		}
 	}
-	return dS.Dispatch(&engine.CGREvent{
+	return dS.Dispatch(&utils.CGREvent{
 		Tenant:  tnt,
 		APIOpts: args.APIOpts,
 	}, utils.MetaCDRs, utils.CDRsV1ProcessCDR, args, reply)
 }
 
-func (dS *DispatcherService) CDRsV2ProcessEvent(ctx *context.Context, args *engine.ArgV1ProcessEvent, reply *[]*engine.EventWithFlags) (err error) {
+func (dS *DispatcherService) CDRsV2ProcessEvent(ctx *context.Context, args *engine.ArgV1ProcessEvent, reply *[]*utils.EventWithFlags) (err error) {
 	tnt := args.Tenant
 	if tnt == utils.EmptyString {
 		tnt = dS.cfg.GeneralCfg().DefaultTenant
@@ -191,7 +191,7 @@ func (dS *DispatcherService) CDRsV2StoreSessionCost(ctx *context.Context, args *
 			return
 		}
 	}
-	return dS.Dispatch(&engine.CGREvent{
+	return dS.Dispatch(&utils.CGREvent{
 		Tenant:  tnt,
 		APIOpts: args.APIOpts,
 	}, utils.MetaCDRs, utils.CDRsV2StoreSessionCost, args, reply)

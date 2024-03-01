@@ -83,7 +83,7 @@ func TestS3ERProcessMessage(t *testing.T) {
 		bucket:    "cgrates_cdrs",
 		session:   nil,
 	}
-	expEvent := &engine.CGREvent{
+	expEvent := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		Event: map[string]any{
 			utils.CGRID: "testCgrId",

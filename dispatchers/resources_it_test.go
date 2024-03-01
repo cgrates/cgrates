@@ -68,12 +68,12 @@ func TestDspResourceSIT(t *testing.T) {
 
 func testDspResPingFailover(t *testing.T) {
 	var reply string
-	if err := allEngine.RPC.Call(context.Background(), utils.ResourceSv1Ping, new(engine.CGREvent), &reply); err != nil {
+	if err := allEngine.RPC.Call(context.Background(), utils.ResourceSv1Ping, new(utils.CGREvent), &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.Pong {
 		t.Errorf("Received: %s", reply)
 	}
-	ev := engine.CGREvent{
+	ev := utils.CGREvent{
 		Tenant: "cgrates.org",
 
 		APIOpts: map[string]any{
@@ -101,12 +101,12 @@ func testDspResPingFailover(t *testing.T) {
 
 func testDspResPing(t *testing.T) {
 	var reply string
-	if err := allEngine.RPC.Call(context.Background(), utils.ResourceSv1Ping, new(engine.CGREvent), &reply); err != nil {
+	if err := allEngine.RPC.Call(context.Background(), utils.ResourceSv1Ping, new(utils.CGREvent), &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.Pong {
 		t.Errorf("Received: %s", reply)
 	}
-	if err := dispEngine.RPC.Call(context.Background(), utils.ResourceSv1Ping, &engine.CGREvent{
+	if err := dispEngine.RPC.Call(context.Background(), utils.ResourceSv1Ping, &utils.CGREvent{
 		Tenant: "cgrates.org",
 		APIOpts: map[string]any{
 			utils.OptsAPIKey: "res12345",
@@ -120,7 +120,7 @@ func testDspResPing(t *testing.T) {
 
 func testDspResTestAuthKey(t *testing.T) {
 	var rs *engine.Resources
-	args := &engine.CGREvent{
+	args := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     utils.UUIDSha1Prefix(),
 		Event: map[string]any{
@@ -141,7 +141,7 @@ func testDspResTestAuthKey(t *testing.T) {
 
 func testDspResTestAuthKey2(t *testing.T) {
 	var rs *engine.Resources
-	args := &engine.CGREvent{
+	args := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     utils.UUIDSha1Prefix(),
 		Event: map[string]any{
@@ -172,7 +172,7 @@ func testDspResTestAuthKey2(t *testing.T) {
 func testDspResTestAuthKey3(t *testing.T) {
 	// first event matching Resource1
 	var reply string
-	ev := &engine.CGREvent{
+	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     utils.UUIDSha1Prefix(),
 		Event: map[string]any{
@@ -199,7 +199,7 @@ func testDspResTestAuthKey3(t *testing.T) {
 	} else if reply != eAllocationMsg { // already 3 usages active before allow call, we should have now more than allowed
 		t.Errorf("Expecting: %+v, received: %+v", eAllocationMsg, reply)
 	}
-	ev = &engine.CGREvent{
+	ev = &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     utils.UUIDSha1Prefix(),
 		Event: map[string]any{
@@ -218,7 +218,7 @@ func testDspResTestAuthKey3(t *testing.T) {
 	}
 
 	// relase the only resource active for Resource1
-	ev = &engine.CGREvent{
+	ev = &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     utils.UUIDSha1Prefix(),
 		Event: map[string]any{
@@ -236,7 +236,7 @@ func testDspResTestAuthKey3(t *testing.T) {
 	}
 	// try reserving with full units for Resource1, case which did not work in previous test
 	// only match Resource1 since we don't want for storing of the resource2 bellow
-	ev = &engine.CGREvent{
+	ev = &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     utils.UUIDSha1Prefix(),
 		Event: map[string]any{
@@ -255,7 +255,7 @@ func testDspResTestAuthKey3(t *testing.T) {
 		t.Error("Unexpected reply returned", reply)
 	}
 	var rs *engine.Resources
-	args := &engine.CGREvent{
+	args := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "Event5",
 		Event: map[string]any{

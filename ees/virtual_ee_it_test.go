@@ -103,7 +103,7 @@ func testVirtRPCConn(t *testing.T) {
 func testVirtExportSupplierEvent(t *testing.T) {
 	supplierEvent := &engine.CGREventWithEeIDs{
 		EeIDs: []string{"RouteExporter"},
-		CGREvent: &engine.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "supplierEvent",
 			Time:   utils.TimePointer(time.Now()),
@@ -137,7 +137,7 @@ func testVirtExportSupplierEvent(t *testing.T) {
 func testVirtExportEvents(t *testing.T) {
 	eventVoice := &engine.CGREventWithEeIDs{
 		EeIDs: []string{"CSVExporterFromVirt"},
-		CGREvent: &engine.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "voiceEvent",
 			Time:   utils.TimePointer(time.Now()),

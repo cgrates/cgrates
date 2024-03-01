@@ -191,7 +191,7 @@ func testSharedClientLockSetProfiles(t *testing.T) {
 
 func testSharedClientLockCDRsProcessEvent(t *testing.T) {
 	argsEv := &engine.ArgV1ProcessEvent{
-		CGREvent: engine.CGREvent{
+		CGREvent: utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "cdr_test_event",
 			Event:  make(map[string]any),

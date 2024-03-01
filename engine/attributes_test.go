@@ -88,7 +88,7 @@ func TestAttributesV1GetAttributeForEventProfileNotFound(t *testing.T) {
 		filterS: &FilterS{},
 		cgrcfg:  cfg,
 	}
-	args := &CGREvent{}
+	args := &utils.CGREvent{}
 	reply := &AttributeProfile{}
 
 	experr := utils.ErrNotFound
@@ -108,7 +108,7 @@ func TestAttributesV1GetAttributeForEvent2(t *testing.T) {
 		filterS: &FilterS{},
 		cgrcfg:  cfg,
 	}
-	args := &CGREvent{}
+	args := &utils.CGREvent{}
 	reply := &AttributeProfile{}
 
 	experr := utils.ErrNotFound
@@ -175,7 +175,7 @@ func TestAttributesV1ProcessEvent(t *testing.T) {
 	expected := AttrSProcessEventReply{
 		MatchedProfiles: []string{"cgrates.org:ATTR_CHANGE_TENANT_FROM_USER", "adrian.itsyscom.com.co.uk:ATTR_MATCH_TENANT"},
 		AlteredFields:   []string{"*req.Account", "*req.Password", "*tenant"},
-		CGREvent: &CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "adrian.itsyscom.com.co.uk",
 			Time:   nil,
 			Event: map[string]any{
@@ -189,7 +189,7 @@ func TestAttributesV1ProcessEvent(t *testing.T) {
 		blocker: false,
 	}
 	if err = alS.V1ProcessEvent(context.Background(),
-		&CGREvent{
+		&utils.CGREvent{
 			Tenant: "cgrates.org",
 			Event: map[string]any{
 				utils.AccountField: "adrian@itsyscom.com",
@@ -233,7 +233,7 @@ func TestAttributesV1ProcessEventErrorMetaSum(t *testing.T) {
 	var rply AttrSProcessEventReply
 	expErr := "SERVER_ERROR: NotEnoughParameters"
 	if err = alS.V1ProcessEvent(context.Background(),
-		&CGREvent{
+		&utils.CGREvent{
 			Tenant: "cgrates.org",
 			Event: map[string]any{
 				utils.AccountField: "adrian@itsyscom.com",
@@ -277,7 +277,7 @@ func TestAttributesV1ProcessEventErrorMetaDifference(t *testing.T) {
 	var rply AttrSProcessEventReply
 	expErr := "SERVER_ERROR: NotEnoughParameters"
 	if err := alS.V1ProcessEvent(context.Background(),
-		&CGREvent{
+		&utils.CGREvent{
 			Tenant: "cgrates.org",
 			Event: map[string]any{
 				utils.AccountField: "adrian@itsyscom.com",
@@ -320,7 +320,7 @@ func TestAttributesV1ProcessEventErrorMetaValueExponent(t *testing.T) {
 	var rply AttrSProcessEventReply
 	expErr := "SERVER_ERROR: invalid arguments <[{\"Rules\":\"CGRATES.ORG\"}]> to *value_exponent"
 	if err := alS.V1ProcessEvent(context.Background(),
-		&CGREvent{
+		&utils.CGREvent{
 			Tenant: "cgrates.org",
 			Event: map[string]any{
 				utils.AccountField: "adrian@itsyscom.com",
@@ -1196,7 +1196,7 @@ func TestAttributesV1ProcessEventMultipleRuns1(t *testing.T) {
 		t.Error(err)
 	}
 
-	args := &CGREvent{
+	args := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "AttrProcessEventMultipleRuns",
 		Event: map[string]any{
@@ -1212,7 +1212,7 @@ func TestAttributesV1ProcessEventMultipleRuns1(t *testing.T) {
 	exp := &AttrSProcessEventReply{
 		MatchedProfiles: []string{"cgrates.org:ATTR2", "cgrates.org:ATTR1", "cgrates.org:ATTR2"},
 		AlteredFields:   []string{"*req.Password", "*req.RequestType"},
-		CGREvent: &CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "AttrProcessEventMultipleRuns",
 			Event: map[string]any{
@@ -1310,7 +1310,7 @@ func TestAttributesV1ProcessEventMultipleRuns2(t *testing.T) {
 		t.Error(err)
 	}
 
-	args := &CGREvent{
+	args := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "AttrProcessEventMultipleRuns",
 		Event:  map[string]any{},
@@ -1324,7 +1324,7 @@ func TestAttributesV1ProcessEventMultipleRuns2(t *testing.T) {
 	exp := &AttrSProcessEventReply{
 		MatchedProfiles: []string{"cgrates.org:ATTR1", "cgrates.org:ATTR2", "cgrates.org:ATTR3"},
 		AlteredFields:   []string{"*req.Password", "*req.PaypalAccount", "*req.RequestType"},
-		CGREvent: &CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "AttrProcessEventMultipleRuns",
 			Event: map[string]any{
@@ -1353,7 +1353,7 @@ func TestArgeesUnmarshalJSON(t *testing.T) {
 	cgr := &CGREventWithEeIDs{
 		EeIDs: []string{"eeID1", "eeID2", "eeID3", "eeID$"},
 		clnb:  true,
-		CGREvent: &CGREvent{
+		CGREvent: &utils.CGREvent{
 			Event: map[string]any{
 				utils.CostDetails: "22",
 			},
@@ -1375,7 +1375,7 @@ func TestArgeesRPCClone(t *testing.T) {
 
 	attr := &CGREventWithEeIDs{
 		EeIDs: []string{"eeid1", "eeid2"},
-		CGREvent: &CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant:  "cgrates.org",
 			ID:      "id",
 			Time:    &time.Time{},
@@ -1392,7 +1392,7 @@ func TestArgeesRPCClone(t *testing.T) {
 	attr.clnb = true
 	exp := &CGREventWithEeIDs{
 		EeIDs: []string{"eeid1", "eeid2"},
-		CGREvent: &CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant:  "cgrates.org",
 			ID:      "id",
 			Time:    &time.Time{},
@@ -1415,7 +1415,7 @@ func TestAttrSV1GetAttributeForEvent(t *testing.T) {
 	filterS := NewFilterS(cfg, nil, dm)
 	Cache.Clear(nil)
 	attS := NewAttributeService(dm, filterS, cfg)
-	args := &CGREvent{
+	args := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "AttrEvent",
 		Event: map[string]any{
@@ -1535,7 +1535,7 @@ func TestAttributesV1ProcessEventSentryPeer(t *testing.T) {
 	expected := AttrSProcessEventReply{
 		MatchedProfiles: []string{"cgrates.org:ATTR_CHECK_DESTINATION"},
 		AlteredFields:   []string{"*req.Destination"},
-		CGREvent: &CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			Time:   nil,
 			Event: map[string]any{
@@ -1550,7 +1550,7 @@ func TestAttributesV1ProcessEventSentryPeer(t *testing.T) {
 	}
 	config.SetCgrConfig(cfg)
 	if err = alS.V1ProcessEvent(context.Background(),
-		&CGREvent{
+		&utils.CGREvent{
 			Tenant: "cgrates.org",
 			Event: map[string]any{
 				utils.AccountField: "account_1001",
@@ -1566,7 +1566,7 @@ func TestAttributesV1ProcessEventSentryPeer(t *testing.T) {
 	}
 
 	if err = alS.V1ProcessEvent(context.Background(),
-		&CGREvent{
+		&utils.CGREvent{
 			Tenant: "cgrates.org",
 			Event: map[string]any{
 				utils.AccountField: "account_1001",

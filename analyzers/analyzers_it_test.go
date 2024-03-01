@@ -149,7 +149,7 @@ func testAnalyzerSLoadTarrifPlans(t *testing.T) {
 }
 
 func testAnalyzerSChargerSv1ProcessEvent(t *testing.T) {
-	cgrEv := &engine.CGREvent{
+	cgrEv := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "event1",
 		Event: map[string]any{
@@ -164,7 +164,7 @@ func testAnalyzerSChargerSv1ProcessEvent(t *testing.T) {
 		{
 			ChargerSProfile: "DEFAULT",
 			AlteredFields:   []string{"*req.RunID"},
-			CGREvent: &engine.CGREvent{
+			CGREvent: &utils.CGREvent{
 				Tenant: "cgrates.org",
 				ID:     "event1",
 				Event: map[string]any{
@@ -180,7 +180,7 @@ func testAnalyzerSChargerSv1ProcessEvent(t *testing.T) {
 			ChargerSProfile:    "Raw",
 			AttributeSProfiles: []string{"*constant:*req.RequestType:*none"},
 			AlteredFields:      []string{"*req.RunID", "*req.RequestType"},
-			CGREvent: &engine.CGREvent{
+			CGREvent: &utils.CGREvent{
 				Tenant: "cgrates.org",
 				ID:     "event1",
 				Event: map[string]any{

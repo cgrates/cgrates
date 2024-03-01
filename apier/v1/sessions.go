@@ -21,7 +21,6 @@ package v1
 import (
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/dispatchers"
-	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/sessions"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -72,7 +71,7 @@ func (ssv1 *SessionSv1) TerminateSession(ctx *context.Context, args *sessions.V1
 	return ssv1.sS.BiRPCv1TerminateSession(ctx, args, rply)
 }
 
-func (ssv1 *SessionSv1) ProcessCDR(ctx *context.Context, cgrEv *engine.CGREvent, rply *string) error {
+func (ssv1 *SessionSv1) ProcessCDR(ctx *context.Context, cgrEv *utils.CGREvent, rply *string) error {
 	return ssv1.sS.BiRPCv1ProcessCDR(ctx, cgrEv, rply)
 }
 
@@ -116,7 +115,7 @@ func (ssv1 *SessionSv1) GetPassiveSessionsCount(ctx *context.Context, args *util
 	return ssv1.sS.BiRPCv1GetPassiveSessionsCount(ctx, args, rply)
 }
 
-func (ssv1 *SessionSv1) Ping(ctx *context.Context, ign *engine.CGREvent, reply *string) error {
+func (ssv1 *SessionSv1) Ping(ctx *context.Context, ign *utils.CGREvent, reply *string) error {
 	*reply = utils.Pong
 	return nil
 }

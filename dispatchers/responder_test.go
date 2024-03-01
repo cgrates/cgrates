@@ -44,7 +44,7 @@ func TestDspResponderPingEventNil(t *testing.T) {
 	cgrCfg := config.NewDefaultCGRConfig()
 	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
 	cgrCfg.DispatcherSCfg().AttributeSConns = []string{"test"}
-	CGREvent := &engine.CGREvent{
+	CGREvent := &utils.CGREvent{
 		Tenant: "tenant",
 	}
 	var reply *string
@@ -58,7 +58,7 @@ func TestDspResponderPingEventNil(t *testing.T) {
 func TestDspResponderPingErrorNil(t *testing.T) {
 	cgrCfg := config.NewDefaultCGRConfig()
 	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
-	CGREvent := &engine.CGREvent{
+	CGREvent := &utils.CGREvent{
 		Tenant: "tenant",
 	}
 	var reply *string

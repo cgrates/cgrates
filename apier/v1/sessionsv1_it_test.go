@@ -183,7 +183,7 @@ func testSSv1ItRpcConn(t *testing.T) {
 
 func testSSv1ItPing(t *testing.T) {
 	var resp string
-	if err := sSv1BiRpc.Call(context.Background(), utils.SessionSv1Ping, new(engine.CGREvent), &resp); err != nil {
+	if err := sSv1BiRpc.Call(context.Background(), utils.SessionSv1Ping, new(utils.CGREvent), &resp); err != nil {
 		t.Error(err)
 	} else if resp != utils.Pong {
 		t.Error("Unexpected reply returned", resp)
@@ -209,7 +209,7 @@ func testSSv1ItAuth(t *testing.T) {
 		AuthorizeResources: true,
 		GetRoutes:          true,
 		GetAttributes:      true,
-		CGREvent: &engine.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSSv1ItAuth",
 			Event: map[string]any{
@@ -268,7 +268,7 @@ func testSSv1ItAuth(t *testing.T) {
 	eAttrs := &engine.AttrSProcessEventReply{
 		MatchedProfiles: []string{"cgrates.org:ATTR_ACNT_1001"},
 		AlteredFields:   []string{"*req.OfficeGroup"},
-		CGREvent: &engine.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSSv1ItAuth",
 			Event: map[string]any{
@@ -305,7 +305,7 @@ func testSSv1ItAuthWithDigest(t *testing.T) {
 		AuthorizeResources: true,
 		GetRoutes:          true,
 		GetAttributes:      true,
-		CGREvent: &engine.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSSv1ItAuth",
 			Event: map[string]any{
@@ -350,7 +350,7 @@ func testSSv1ItInitiateSession(t *testing.T) {
 		InitSession:       true,
 		AllocateResources: true,
 		GetAttributes:     true,
-		CGREvent: &engine.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSSv1ItInitiateSession",
 			Event: map[string]any{
@@ -384,7 +384,7 @@ func testSSv1ItInitiateSession(t *testing.T) {
 	eAttrs := &engine.AttrSProcessEventReply{
 		MatchedProfiles: []string{"cgrates.org:ATTR_ACNT_1001"},
 		AlteredFields:   []string{"*req.OfficeGroup"},
-		CGREvent: &engine.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSSv1ItInitiateSession",
 			Event: map[string]any{
@@ -427,7 +427,7 @@ func testSSv1ItInitiateSessionWithDigest(t *testing.T) {
 		InitSession:       true,
 		AllocateResources: true,
 		GetAttributes:     true,
-		CGREvent: &engine.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSSv1ItInitiateSession",
 			Event: map[string]any{
@@ -476,7 +476,7 @@ func testSSv1ItUpdateSession(t *testing.T) {
 	args := &sessions.V1UpdateSessionArgs{
 		GetAttributes: true,
 		UpdateSession: true,
-		CGREvent: &engine.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSSv1ItUpdateSession",
 			Event: map[string]any{
@@ -501,7 +501,7 @@ func testSSv1ItUpdateSession(t *testing.T) {
 	eAttrs := &engine.AttrSProcessEventReply{
 		MatchedProfiles: []string{"cgrates.org:ATTR_ACNT_1001"},
 		AlteredFields:   []string{"*req.OfficeGroup"},
-		CGREvent: &engine.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSSv1ItUpdateSession",
 			Event: map[string]any{
@@ -546,7 +546,7 @@ func testSSv1ItTerminateSession(t *testing.T) {
 	args := &sessions.V1TerminateSessionArgs{
 		TerminateSession: true,
 		ReleaseResources: true,
-		CGREvent: &engine.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSSv1ItUpdateSession",
 			Event: map[string]any{
@@ -579,7 +579,7 @@ func testSSv1ItTerminateSession(t *testing.T) {
 }
 
 func testSSv1ItProcessCDR(t *testing.T) {
-	args := &engine.CGREvent{
+	args := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "TestSSv1ItProcessCDR",
 		Event: map[string]any{
@@ -612,7 +612,7 @@ func testSSv1ItProcessEvent(t *testing.T) {
 		AllocateResources: true,
 		Debit:             true,
 		GetAttributes:     true,
-		CGREvent: &engine.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSSv1ItProcessEvent",
 			Event: map[string]any{
@@ -647,7 +647,7 @@ func testSSv1ItProcessEvent(t *testing.T) {
 	eAttrs := &engine.AttrSProcessEventReply{
 		MatchedProfiles: []string{"cgrates.org:ATTR_ACNT_1001"},
 		AlteredFields:   []string{"*req.OfficeGroup"},
-		CGREvent: &engine.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSSv1ItProcessEvent",
 			Event: map[string]any{
@@ -805,7 +805,7 @@ func testSSv1ItForceUpdateSession(t *testing.T) {
 	args := &sessions.V1UpdateSessionArgs{
 		GetAttributes: true,
 		UpdateSession: true,
-		CGREvent: &engine.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSSv1ItUpdateSession",
 			Event: map[string]any{
@@ -831,7 +831,7 @@ func testSSv1ItForceUpdateSession(t *testing.T) {
 	eAttrs := &engine.AttrSProcessEventReply{
 		MatchedProfiles: []string{"cgrates.org:ATTR_ACNT_1001"},
 		AlteredFields:   []string{"*req.OfficeGroup"},
-		CGREvent: &engine.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSSv1ItUpdateSession",
 			Event: map[string]any{
@@ -962,7 +962,7 @@ func testSSv1ItDynamicDebit(t *testing.T) {
 	args1 := &sessions.V1InitSessionArgs{
 		InitSession:   true,
 		GetAttributes: true,
-		CGREvent: &engine.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSSv1ItInitiateSession2",
 			Event: map[string]any{
@@ -1059,7 +1059,7 @@ func testSSv1ItDeactivateSessions(t *testing.T) {
 	args := &sessions.V1InitSessionArgs{
 		InitSession:   true,
 		GetAttributes: true,
-		CGREvent: &engine.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSSv1ItInitiateSession",
 			Event: map[string]any{
@@ -1109,7 +1109,7 @@ func testSSv1ItAuthNotFoundCharger(t *testing.T) {
 	authUsage := 5 * time.Minute
 	args := &sessions.V1AuthorizeArgs{
 		GetMaxUsage: true,
-		CGREvent: &engine.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "Unexist",
 			ID:     "testSSv1ItAuthNotFoundCharger",
 			Event: map[string]any{
@@ -1136,7 +1136,7 @@ func testSSv1ItInitiateSessionNotFoundCharger(t *testing.T) {
 	initUsage := 5 * time.Minute
 	args := &sessions.V1InitSessionArgs{
 		InitSession: true,
-		CGREvent: &engine.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "Unexist",
 			ID:     "testSSv1ItInitiateSessionNotFoundCharger",
 			Event: map[string]any{

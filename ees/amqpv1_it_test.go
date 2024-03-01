@@ -113,7 +113,7 @@ func testAMQPv1RPCConn(t *testing.T) {
 func testAMQPv1ExportEvent(t *testing.T) {
 	ev := &engine.CGREventWithEeIDs{
 		EeIDs: []string{"amqpv1_test_file"},
-		CGREvent: &engine.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "dataEvent",
 			Event: map[string]any{

@@ -145,21 +145,21 @@ func (rS *RouteSv1) Call(ctx *context.Context, serviceMethod string, args any, r
 }
 
 // GetRoutes returns sorted list of routes for Event
-func (rS *RouteSv1) GetRoutes(ctx *context.Context, args *engine.CGREvent, reply *engine.SortedRoutesList) error {
+func (rS *RouteSv1) GetRoutes(ctx *context.Context, args *utils.CGREvent, reply *engine.SortedRoutesList) error {
 	return rS.rS.V1GetRoutes(ctx, args, reply)
 }
 
 // GetRouteProfilesForEvent returns a list of route profiles that match for Event
-func (rS *RouteSv1) GetRouteProfilesForEvent(ctx *context.Context, args *engine.CGREvent, reply *[]*engine.RouteProfile) error {
+func (rS *RouteSv1) GetRouteProfilesForEvent(ctx *context.Context, args *utils.CGREvent, reply *[]*engine.RouteProfile) error {
 	return rS.rS.V1GetRouteProfilesForEvent(ctx, args, reply)
 }
 
-func (rS *RouteSv1) Ping(ctx *context.Context, ign *engine.CGREvent, reply *string) error {
+func (rS *RouteSv1) Ping(ctx *context.Context, ign *utils.CGREvent, reply *string) error {
 	*reply = utils.Pong
 	return nil
 }
 
 // GetRoutesList returns sorted list of routes for Event as a string slice
-func (rS *RouteSv1) GetRoutesList(ctx *context.Context, args *engine.CGREvent, reply *[]string) error {
+func (rS *RouteSv1) GetRoutesList(ctx *context.Context, args *utils.CGREvent, reply *[]string) error {
 	return rS.rS.V1GetRoutesList(ctx, args, reply)
 }

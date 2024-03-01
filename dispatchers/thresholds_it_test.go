@@ -71,12 +71,12 @@ func TestDspThresholdS(t *testing.T) {
 
 func testDspThPingFailover(t *testing.T) {
 	var reply string
-	if err := allEngine.RPC.Call(context.Background(), utils.ThresholdSv1Ping, new(engine.CGREvent), &reply); err != nil {
+	if err := allEngine.RPC.Call(context.Background(), utils.ThresholdSv1Ping, new(utils.CGREvent), &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.Pong {
 		t.Errorf("Received: %s", reply)
 	}
-	ev := engine.CGREvent{
+	ev := utils.CGREvent{
 		Tenant: "cgrates.org",
 
 		APIOpts: map[string]any{
@@ -106,7 +106,7 @@ func testDspThProcessEventFailover(t *testing.T) {
 	var ids []string
 	eIDs := []string{"THD_ACNT_1001"}
 	nowTime := time.Now()
-	args := &engine.CGREvent{
+	args := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     utils.UUIDSha1Prefix(),
 		Time:   &nowTime,
@@ -134,12 +134,12 @@ func testDspThProcessEventFailover(t *testing.T) {
 
 func testDspThPing(t *testing.T) {
 	var reply string
-	if err := allEngine.RPC.Call(context.Background(), utils.ThresholdSv1Ping, new(engine.CGREvent), &reply); err != nil {
+	if err := allEngine.RPC.Call(context.Background(), utils.ThresholdSv1Ping, new(utils.CGREvent), &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.Pong {
 		t.Errorf("Received: %s", reply)
 	}
-	if err := dispEngine.RPC.Call(context.Background(), utils.ThresholdSv1Ping, &engine.CGREvent{
+	if err := dispEngine.RPC.Call(context.Background(), utils.ThresholdSv1Ping, &utils.CGREvent{
 		Tenant: "cgrates.org",
 
 		APIOpts: map[string]any{
@@ -155,7 +155,7 @@ func testDspThPing(t *testing.T) {
 func testDspThTestAuthKey(t *testing.T) {
 	var ids []string
 	nowTime := time.Now()
-	args := &engine.CGREvent{
+	args := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     utils.UUIDSha1Prefix(),
 		Time:   &nowTime,
@@ -182,7 +182,7 @@ func testDspThTestAuthKey2(t *testing.T) {
 	var ids []string
 	eIDs := []string{"THD_ACNT_1002"}
 	nowTime := time.Now()
-	args := &engine.CGREvent{
+	args := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     utils.UUIDSha1Prefix(),
 		Time:   &nowTime,

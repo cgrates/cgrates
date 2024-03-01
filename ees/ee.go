@@ -35,7 +35,7 @@ type EventExporter interface {
 	ExportEvent(any, string) error     // called on each event to be exported
 	Close() error                      // called when the exporter needs to terminate
 	GetMetrics() *utils.SafeMapStorage // called to get metrics
-	PrepareMap(*engine.CGREvent) (any, error)
+	PrepareMap(*utils.CGREvent) (any, error)
 	PrepareOrderMap(*utils.OrderedNavigableMap) (any, error)
 }
 
@@ -123,7 +123,7 @@ func composeHeaderTrailer(prfx string, fields []*config.FCTemplate, dc utils.Dat
 	return
 }
 
-func composeExp(fields []*config.FCTemplate, cgrEv *engine.CGREvent, dc utils.DataStorage, cfg *config.CGRConfig, fltS *engine.FilterS) (r *utils.OrderedNavigableMap, err error) {
+func composeExp(fields []*config.FCTemplate, cgrEv *utils.CGREvent, dc utils.DataStorage, cfg *config.CGRConfig, fltS *engine.FilterS) (r *utils.OrderedNavigableMap, err error) {
 	r = utils.NewOrderedNavigableMap()
 	err = engine.NewExportRequest(map[string]utils.DataStorage{
 		utils.MetaReq:  utils.MapStorage(cgrEv.Event),
@@ -230,7 +230,7 @@ func updateEEMetrics(dc *utils.SafeMapStorage, cgrID string, ev engine.MapEvent,
 
 type bytePreparing struct{}
 
-func (bytePreparing) PrepareMap(mp *engine.CGREvent) (any, error) {
+func (bytePreparing) PrepareMap(mp *utils.CGREvent) (any, error) {
 	return json.Marshal(mp.Event)
 }
 func (bytePreparing) PrepareOrderMap(mp *utils.OrderedNavigableMap) (any, error) {
@@ -246,7 +246,7 @@ func (bytePreparing) PrepareOrderMap(mp *utils.OrderedNavigableMap) (any, error)
 
 type slicePreparing struct{}
 
-func (slicePreparing) PrepareMap(mp *engine.CGREvent) (any, error) {
+func (slicePreparing) PrepareMap(mp *utils.CGREvent) (any, error) {
 	csvRecord := make([]string, 0, len(mp.Event))
 	for _, val := range mp.Event {
 		csvRecord = append(csvRecord, utils.IfaceAsString(val))

@@ -22,7 +22,6 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -45,7 +44,7 @@ func TestGetCommandValueCase1(t *testing.T) {
 	expected := &CmdGetChargersForEvent{
 		name:      "chargers_for_event",
 		rpcMethod: utils.ChargerSv1GetChargersForEvent,
-		rpcParams: &engine.CGREvent{},
+		rpcParams: &utils.CGREvent{},
 	}
 	result, err := GetCommandValue("chargers_for_event", false)
 	if err != nil {

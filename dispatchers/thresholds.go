@@ -26,9 +26,9 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-func (dS *DispatcherService) ThresholdSv1Ping(ctx *context.Context, args *engine.CGREvent, reply *string) (err error) {
+func (dS *DispatcherService) ThresholdSv1Ping(ctx *context.Context, args *utils.CGREvent, reply *string) (err error) {
 	if args == nil {
-		args = new(engine.CGREvent)
+		args = new(utils.CGREvent)
 	}
 	args.Tenant = utils.FirstNonEmpty(args.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
@@ -40,7 +40,7 @@ func (dS *DispatcherService) ThresholdSv1Ping(ctx *context.Context, args *engine
 	return dS.Dispatch(args, utils.MetaThresholds, utils.ThresholdSv1Ping, args, reply)
 }
 
-func (dS *DispatcherService) ThresholdSv1GetThresholdsForEvent(ctx *context.Context, args *engine.CGREvent,
+func (dS *DispatcherService) ThresholdSv1GetThresholdsForEvent(ctx *context.Context, args *utils.CGREvent,
 	t *engine.Thresholds) (err error) {
 	args.Tenant = utils.FirstNonEmpty(args.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
@@ -53,7 +53,7 @@ func (dS *DispatcherService) ThresholdSv1GetThresholdsForEvent(ctx *context.Cont
 	return dS.Dispatch(args, utils.MetaThresholds, utils.ThresholdSv1GetThresholdsForEvent, args, t)
 }
 
-func (dS *DispatcherService) ThresholdSv1ProcessEvent(ctx *context.Context, args *engine.CGREvent,
+func (dS *DispatcherService) ThresholdSv1ProcessEvent(ctx *context.Context, args *utils.CGREvent,
 	tIDs *[]string) (err error) {
 	args.Tenant = utils.FirstNonEmpty(args.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
@@ -77,7 +77,7 @@ func (dS *DispatcherService) ThresholdSv1GetThresholdIDs(ctx *context.Context, a
 			return
 		}
 	}
-	return dS.Dispatch(&engine.CGREvent{
+	return dS.Dispatch(&utils.CGREvent{
 		Tenant:  tnt,
 		APIOpts: args.APIOpts,
 	}, utils.MetaThresholds, utils.ThresholdSv1GetThresholdIDs, args, tIDs)
@@ -94,7 +94,7 @@ func (dS *DispatcherService) ThresholdSv1GetThreshold(ctx *context.Context, args
 			return
 		}
 	}
-	return dS.Dispatch(&engine.CGREvent{
+	return dS.Dispatch(&utils.CGREvent{
 		Tenant:  tnt,
 		ID:      args.ID,
 		APIOpts: args.APIOpts,

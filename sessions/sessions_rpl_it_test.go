@@ -144,7 +144,7 @@ func testSessionSRplInitiate(t *testing.T) {
 	usage := time.Minute + 30*time.Second
 	argsInit := &V1InitSessionArgs{
 		InitSession: true,
-		CGREvent: &engine.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSessionSRplInitiate",
 			Event: map[string]any{
@@ -210,7 +210,7 @@ func testSessionSRplUpdate(t *testing.T) {
 	usage := time.Minute
 	argsUpdate := &V1UpdateSessionArgs{
 		UpdateSession: true,
-		CGREvent: &engine.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSessionSRplUpdate",
 			Event: map[string]any{
@@ -288,7 +288,7 @@ func testSessionSRplUpdate(t *testing.T) {
 func testSessionSRplTerminate(t *testing.T) {
 	args := &V1TerminateSessionArgs{
 		TerminateSession: true,
-		CGREvent: &engine.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSessionSRplTerminate",
 			Event: map[string]any{
@@ -351,7 +351,7 @@ func testSessionSRplManualReplicate(t *testing.T) {
 	// create two sessions
 	argsInit1 := &V1InitSessionArgs{
 		InitSession: true,
-		CGREvent: &engine.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSSv1ItAuth",
 			Event: map[string]any{
@@ -373,7 +373,7 @@ func testSessionSRplManualReplicate(t *testing.T) {
 
 	argsInit2 := &V1InitSessionArgs{
 		InitSession: true,
-		CGREvent: &engine.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSSv1ItAuth2",
 			Event: map[string]any{

@@ -58,7 +58,7 @@ var (
 		testFilterUpdateGetAttrProfileForEventEv2E2,
 		testFilterUpdateStopEngine,
 	}
-	ev1 = &engine.CGREvent{
+	ev1 = &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "Event1",
 		Event: map[string]any{
@@ -68,7 +68,7 @@ var (
 			utils.OptsContext: utils.MetaAny,
 		},
 	}
-	ev2 = &engine.CGREvent{
+	ev2 = &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "Event2",
 		Event: map[string]any{

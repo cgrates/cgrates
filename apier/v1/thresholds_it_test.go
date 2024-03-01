@@ -42,7 +42,7 @@ var (
 	tPrfl       *engine.ThresholdProfileWithAPIOpts
 	tSv1ConfDIR string //run tests for specific configuration
 
-	tEvs = []*engine.CGREvent{
+	tEvs = []*utils.CGREvent{
 		{ // hitting THD_ACNT_BALANCE_1
 			Tenant: "cgrates.org",
 			ID:     "event1",
@@ -600,7 +600,7 @@ func testV1TSMaxHits(t *testing.T) {
 
 	var ids []string
 	eIDs := []string{"TH3"}
-	thEvent := &engine.CGREvent{ // hitting TH3
+	thEvent := &utils.CGREvent{ // hitting TH3
 		Tenant: "cgrates.org",
 		ID:     "event1",
 		Event: map[string]any{
@@ -705,7 +705,7 @@ func testV1TSUpdateSnooze(t *testing.T) {
 
 	var ids []string
 	eIDs := []string{"TH4"}
-	thEvent := &engine.CGREvent{ // hitting TH4
+	thEvent := &utils.CGREvent{ // hitting TH4
 		Tenant: "cgrates.org",
 		ID:     "event1",
 		Event: map[string]any{
@@ -838,7 +838,7 @@ func testv1TSGetThresholdProfileIDsCount(t *testing.T) {
 func testV1TSProcessEventWithoutTenant(t *testing.T) {
 	var ids []string
 	eIDs := []string{"TH4"}
-	thEvent := &engine.CGREvent{ // hitting TH4
+	thEvent := &utils.CGREvent{ // hitting TH4
 		ID: "event1",
 		Event: map[string]any{
 			"CustomEv": "SnoozeEv",
@@ -929,7 +929,7 @@ func testV1TSProcessAccountUpdateEvent(t *testing.T) {
 		t.Error(err)
 	}
 
-	acntUpdateEv := &engine.CGREvent{ // hitting TH_ACNT_UPDATE_EV
+	acntUpdateEv := &utils.CGREvent{ // hitting TH_ACNT_UPDATE_EV
 		Tenant: "cgrates.org",
 		ID:     "SIMULATE_ACNT_UPDATE_EV",
 		Event:  acnt.AsAccountSummary().AsMapInterface(),
@@ -1013,7 +1013,7 @@ func testV1ThresholdStopCPUProfiling(t *testing.T) {
 
 func testThresholdSCacheProcessEventNotFound(t *testing.T) {
 	var ids []string
-	thEvent := &engine.CGREvent{
+	thEvent := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "THRESHOLD_CACHE",
 		Event: map[string]any{
@@ -1030,7 +1030,7 @@ func testThresholdSCacheProcessEventNotFound(t *testing.T) {
 
 func testThresholdSCacheProcessEventFound(t *testing.T) {
 	var ids []string
-	thEvent := &engine.CGREvent{
+	thEvent := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "THRESHOLD_CACHE",
 		Event: map[string]any{

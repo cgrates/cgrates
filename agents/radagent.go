@@ -273,7 +273,7 @@ func (ra *RadiusAgent) processRequest(req *radigo.Packet, reqProcessor *config.R
 	if err = agReq.SetFields(reqProcessor.RequestFields); err != nil {
 		return
 	}
-	cgrEv := engine.NMAsCGREvent(agReq.CGRRequest, agReq.Tenant, utils.NestingSep, agReq.Opts)
+	cgrEv := utils.NMAsCGREvent(agReq.CGRRequest, agReq.Tenant, utils.NestingSep, agReq.Opts)
 	var reqType string
 	for _, typ := range []string{
 		utils.MetaDryRun, utils.MetaAuthorize,
@@ -289,7 +289,7 @@ func (ra *RadiusAgent) processRequest(req *radigo.Packet, reqProcessor *config.R
 	if reqType == utils.MetaAuthorize ||
 		reqType == utils.MetaMessage ||
 		reqType == utils.MetaEvent {
-		if cgrArgs, err = engine.GetRoutePaginatorFromOpts(cgrEv.APIOpts); err != nil {
+		if cgrArgs, err = utils.GetRoutePaginatorFromOpts(cgrEv.APIOpts); err != nil {
 			utils.Logger.Warning(fmt.Sprintf("<%s> args extraction failed because <%s>",
 				utils.RadiusAgent, err.Error()))
 			err = nil // reset the error and continue the processing
@@ -522,7 +522,7 @@ func (ra *RadiusAgent) V1DisconnectSession(_ *context.Context, attr utils.AttrDi
 }
 
 // V1AlterSessions updates session authorization using RADIUS CoA functionality.
-func (ra *RadiusAgent) V1AlterSessions(_ *context.Context, cgrEv engine.CGREvent, reply *string) error {
+func (ra *RadiusAgent) V1AlterSessions(_ *context.Context, cgrEv utils.CGREvent, reply *string) error {
 	originID, err := cgrEv.FieldAsString(utils.OriginID)
 	if err != nil {
 		return fmt.Errorf("could not retrieve OriginID: %w", err)

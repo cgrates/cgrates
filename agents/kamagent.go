@@ -462,7 +462,7 @@ func (ka *KamailioAgent) Reload() {
 }
 
 // V1AlterSessions is used to implement the sessions.BiRPClient interface
-func (*KamailioAgent) V1AlterSessions(*context.Context, engine.CGREvent, *string) error {
+func (*KamailioAgent) V1AlterSessions(*context.Context, utils.CGREvent, *string) error {
 	return utils.ErrNotImplemented
 }
 

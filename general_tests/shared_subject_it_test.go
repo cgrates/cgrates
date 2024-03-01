@@ -134,11 +134,11 @@ cgrates.org,call,Subject2,2014-01-14T00:00:00Z,RP_Subject2,`,
 	defer shutdown()
 
 	t.Run("Cost1001->1002", func(t *testing.T) {
-		var reply []*engine.EventWithFlags
+		var reply []*utils.EventWithFlags
 		err := client.Call(context.Background(), utils.CDRsV2ProcessEvent,
 			&engine.ArgV1ProcessEvent{
 				Flags: []string{utils.MetaRALs},
-				CGREvent: engine.CGREvent{
+				CGREvent: utils.CGREvent{
 					Tenant: "cgrates.org",
 					ID:     "event1",
 					Event: map[string]any{
@@ -171,11 +171,11 @@ cgrates.org,call,Subject2,2014-01-14T00:00:00Z,RP_Subject2,`,
 	})
 
 	t.Run("Cost1002->1001", func(t *testing.T) {
-		var reply []*engine.EventWithFlags
+		var reply []*utils.EventWithFlags
 		err := client.Call(context.Background(), utils.CDRsV2ProcessEvent,
 			&engine.ArgV1ProcessEvent{
 				Flags: []string{utils.MetaRALs},
-				CGREvent: engine.CGREvent{
+				CGREvent: utils.CGREvent{
 					Tenant: "cgrates.org",
 					ID:     "event1",
 					Event: map[string]any{
@@ -208,11 +208,11 @@ cgrates.org,call,Subject2,2014-01-14T00:00:00Z,RP_Subject2,`,
 	})
 
 	t.Run("Cost1001->1010", func(t *testing.T) {
-		var reply []*engine.EventWithFlags
+		var reply []*utils.EventWithFlags
 		err := client.Call(context.Background(), utils.CDRsV2ProcessEvent,
 			&engine.ArgV1ProcessEvent{
 				Flags: []string{utils.MetaRALs},
-				CGREvent: engine.CGREvent{
+				CGREvent: utils.CGREvent{
 					Tenant: "cgrates.org",
 					ID:     "event1",
 					Event: map[string]any{
@@ -248,11 +248,11 @@ cgrates.org,call,Subject2,2014-01-14T00:00:00Z,RP_Subject2,`,
 	})
 
 	t.Run("Cost1010->1001", func(t *testing.T) {
-		var reply []*engine.EventWithFlags
+		var reply []*utils.EventWithFlags
 		err := client.Call(context.Background(), utils.CDRsV2ProcessEvent,
 			&engine.ArgV1ProcessEvent{
 				Flags: []string{utils.MetaRALs},
-				CGREvent: engine.CGREvent{
+				CGREvent: utils.CGREvent{
 					Tenant: "cgrates.org",
 					ID:     "event1",
 					Event: map[string]any{

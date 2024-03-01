@@ -204,7 +204,7 @@ func testRPCMethodsAuthorizeSession(t *testing.T) {
 	authUsage := 5 * time.Minute
 	args := &sessions.V1AuthorizeArgs{
 		GetMaxUsage: true,
-		CGREvent: &engine.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testRPCMethodsAuthorizeSession",
 			Event: map[string]any{
@@ -231,7 +231,7 @@ func testRPCMethodsAuthorizeSession(t *testing.T) {
 
 	//disable the account
 	var ids []string
-	thEvent := &engine.CGREvent{
+	thEvent := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "DisableAccount",
 		Event: map[string]any{
@@ -276,7 +276,7 @@ func testRPCMethodsAuthorizeSession(t *testing.T) {
 	}
 
 	//enable the account
-	thEvent = &engine.CGREvent{
+	thEvent = &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "EnableAccount",
 		Event: map[string]any{
@@ -296,7 +296,7 @@ func testRPCMethodsInitSession(t *testing.T) {
 	initUsage := 5 * time.Minute
 	args := &sessions.V1InitSessionArgs{
 		InitSession: true,
-		CGREvent: &engine.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testRPCMethodsInitSession",
 			Event: map[string]any{
@@ -324,7 +324,7 @@ func testRPCMethodsInitSession(t *testing.T) {
 
 	//disable the account
 	var ids []string
-	thEvent := &engine.CGREvent{
+	thEvent := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "DisableAccount",
 		Event: map[string]any{
@@ -370,7 +370,7 @@ func testRPCMethodsInitSession(t *testing.T) {
 	}
 
 	//enable the account
-	thEvent = &engine.CGREvent{
+	thEvent = &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "EnableAccount",
 		Event: map[string]any{
@@ -390,7 +390,7 @@ func testRPCMethodsUpdateSession(t *testing.T) {
 	reqUsage := 5 * time.Minute
 	args := &sessions.V1UpdateSessionArgs{
 		UpdateSession: true,
-		CGREvent: &engine.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testRPCMethodsUpdateSession",
 			Event: map[string]any{
@@ -418,7 +418,7 @@ func testRPCMethodsUpdateSession(t *testing.T) {
 
 	//disable the account
 	var ids []string
-	thEvent := &engine.CGREvent{
+	thEvent := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "DisableAccount",
 		Event: map[string]any{
@@ -463,7 +463,7 @@ func testRPCMethodsUpdateSession(t *testing.T) {
 	}
 
 	//enable the account
-	thEvent = &engine.CGREvent{
+	thEvent = &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "EnableAccount",
 		Event: map[string]any{
@@ -482,7 +482,7 @@ func testRPCMethodsUpdateSession(t *testing.T) {
 func testRPCMethodsTerminateSession(t *testing.T) {
 	args := &sessions.V1TerminateSessionArgs{
 		TerminateSession: true,
-		CGREvent: &engine.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testRPCMethodsTerminateSession",
 			Event: map[string]any{
@@ -528,7 +528,7 @@ func testRPCMethodsTerminateSession(t *testing.T) {
 }
 
 func testRPCMethodsProcessCDR(t *testing.T) {
-	args := &engine.CGREvent{
+	args := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "testRPCMethodsProcessCDR",
 		Event: map[string]any{
@@ -601,7 +601,7 @@ func testRPCMethodsProcessEvent(t *testing.T) {
 	initUsage := 5 * time.Minute
 	args := &sessions.V1ProcessMessageArgs{
 		Debit: true,
-		CGREvent: &engine.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testRPCMethodsProcessEvent",
 			Event: map[string]any{
@@ -628,7 +628,7 @@ func testRPCMethodsProcessEvent(t *testing.T) {
 
 	//disable the account
 	var ids []string
-	thEvent := &engine.CGREvent{
+	thEvent := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "DisableAccount",
 		Event: map[string]any{
@@ -674,7 +674,7 @@ func testRPCMethodsProcessEvent(t *testing.T) {
 	}
 
 	//enable the account
-	thEvent = &engine.CGREvent{
+	thEvent = &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "EnableAccount",
 		Event: map[string]any{
@@ -692,7 +692,7 @@ func testRPCMethodsProcessEvent(t *testing.T) {
 
 func testRPCMethodsCdrsProcessCDR(t *testing.T) {
 	args := &engine.ArgV1ProcessEvent{
-		CGREvent: engine.CGREvent{
+		CGREvent: utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testRPCMethodsCdrsProcessCDR",
 			Event: map[string]any{

@@ -559,7 +559,7 @@ func (acc *Account) debitCreditBalance(cd *CallDescriptor, count bool, dryRun bo
 		if len(config.CgrConfig().RalsCfg().ThresholdSConns) != 0 {
 			defaultBalance := acc.GetDefaultMoneyBalance()
 			acntTnt := utils.NewTenantID(acc.ID)
-			thEv := &CGREvent{
+			thEv := &utils.CGREvent{
 				Tenant: acntTnt.Tenant,
 				ID:     utils.GenUUID(),
 				Event: map[string]any{
@@ -1080,7 +1080,7 @@ func (acc *Account) Publish(initBal map[string]float64) {
 	for _, currentBal := range acntSummary.BalanceSummaries {
 		currentBal.Initial = initBal[currentBal.UUID]
 	}
-	cgrEv := &CGREvent{
+	cgrEv := &utils.CGREvent{
 		Tenant: acntSummary.Tenant,
 		ID:     utils.GenUUID(),
 		Time:   utils.TimePointer(time.Now()),

@@ -46,7 +46,7 @@ var (
 	sesRndExpMaxUsage     time.Duration
 	sesRndExpBalanceValue float64
 
-	sesRndCgrEv = &engine.CGREvent{
+	sesRndCgrEv = &utils.CGREvent{
 		Tenant: sesRndTenant,
 		Event: map[string]any{
 			utils.Tenant:       sesRndTenant,

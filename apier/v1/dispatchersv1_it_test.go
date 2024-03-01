@@ -134,7 +134,7 @@ func testDspITLoadData(t *testing.T) {
 }
 
 func testDspDspv1GetProfileForEvent(t *testing.T) {
-	arg := &engine.CGREvent{
+	arg := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "testDspv1",
 		Event: map[string]any{
@@ -184,7 +184,7 @@ func testDspDspv1GetProfileForEvent(t *testing.T) {
 		t.Errorf("expected: %s ,\n received: %s", utils.ToJSON(expected), utils.ToJSON(reply[0]))
 	}
 
-	arg2 := &engine.CGREvent{
+	arg2 := &utils.CGREvent{
 		ID: "testDspvWithoutTenant",
 		Event: map[string]any{
 			utils.EventName: "Event1",
@@ -207,7 +207,7 @@ func testDspDspv1GetProfileForEvent(t *testing.T) {
 }
 
 func testDspDspv1GetProfileForEventWithMethod(t *testing.T) {
-	arg := &engine.CGREvent{
+	arg := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "testDspv2",
 		Event:  map[string]any{},

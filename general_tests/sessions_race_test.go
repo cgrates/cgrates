@@ -50,7 +50,7 @@ var (
 type raceConn struct{}
 
 func (_ raceConn) Call(_ *context.Context, serviceMethod string, args any, reply any) (err error) {
-	cgrev := args.(*engine.CGREvent)
+	cgrev := args.(*utils.CGREvent)
 	for {
 		for k := range cgrev.Event {
 			if _, has := cgrev.Event[k]; !has {
@@ -136,7 +136,7 @@ func TestSessionSRace(t *testing.T) {
 		&sessions.V1InitSessionArgs{
 			InitSession:       true,
 			ProcessThresholds: true,
-			CGREvent: &engine.CGREvent{
+			CGREvent: &utils.CGREvent{
 				Tenant: "cgrates.org",
 				ID:     "testSSv1ItProcessEventInitiateSession",
 				Event: map[string]any{
@@ -162,7 +162,7 @@ func TestSessionSRace(t *testing.T) {
 		&sessions.V1ProcessEventArgs{
 			Flags: []string{utils.ConcatenatedKey(utils.MetaRALs, utils.MetaInitiate),
 				utils.MetaThresholds},
-			CGREvent: &engine.CGREvent{
+			CGREvent: &utils.CGREvent{
 				Tenant: "cgrates.org",
 				ID:     "testSSv1ItProcessEventInitiateSession",
 				Event: map[string]any{

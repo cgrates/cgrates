@@ -1310,20 +1310,19 @@ func TestDataConverterConvertJSONOK(t *testing.T) {
 		t.Error(err)
 	}
 
-	testObj := struct {
-		Tenant string
-		ID     string
-		Event  map[string]any
-	}{
+	obj := &CGREvent{
 		Tenant: "cgrates.org",
-		ID:     "testStruct",
+		ID:     "TestCGREv",
 		Event: map[string]any{
-			"Field": "Value",
+			AccountField: "1001",
+		},
+		APIOpts: map[string]any{
+			"opt": "value",
 		},
 	}
 
-	exp := ToJSON(testObj)
-	if rcv, err := dc.Convert(testObj); err != nil {
+	exp := ToJSON(obj)
+	if rcv, err := dc.Convert(obj); err != nil {
 		t.Error(err)
 	} else if rcv.(string) != exp {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", exp, rcv)

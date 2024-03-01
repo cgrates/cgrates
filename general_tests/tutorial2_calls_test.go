@@ -214,7 +214,7 @@ package general_tests
 // 	var rs *engine.Resources
 // 	args := &utils.ArgRSv1ResourceUsage{
 // 		UsageID: "OriginID",
-// 		CGREvent: &engine.CGREvent{
+// 		CGREvent: &utils.CGREvent{
 // 			Tenant: "cgrates.org",
 // 			ID:     "ResourceEvent",
 // 			Event: map[string]any{
@@ -324,7 +324,7 @@ package general_tests
 // 	var rs *engine.Resources
 // 	args := &utils.ArgRSv1ResourceUsage{
 // 		UsageID: "OriginID1",
-// 		CGREvent: &engine.CGREvent{
+// 		CGREvent: &utils.CGREvent{
 // 			Tenant: "cgrates.org",
 // 			ID:     "ResourceAllocation",
 // 			Event: map[string]any{
@@ -429,7 +429,7 @@ package general_tests
 // 	var rs *engine.Resources
 // 	args := &utils.ArgRSv1ResourceUsage{
 // 		UsageID: "OriginID2",
-// 		CGREvent: &engine.CGREvent{
+// 		CGREvent: &utils.CGREvent{
 // 			Tenant: "cgrates.org",
 // 			ID:     "ResourceRelease",
 // 			Event: map[string]any{
@@ -506,7 +506,7 @@ package general_tests
 // 	var rs *engine.Resources
 // 	args := &utils.ArgRSv1ResourceUsage{
 // 		UsageID: "OriginID3",
-// 		CGREvent: &engine.CGREvent{
+// 		CGREvent: &utils.CGREvent{
 // 			Tenant: "cgrates.org",
 // 			ID:     "AllocateResource",
 // 			Event: map[string]any{

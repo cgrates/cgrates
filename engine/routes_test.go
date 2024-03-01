@@ -170,10 +170,10 @@ var (
 			Weight: 10,
 		},
 	}
-	testRoutesArgs = []*CGREvent{
+	testRoutesArgs = []*utils.CGREvent{
 		{ //matching RouteProfile1
 			Tenant: "cgrates.org",
-			ID:     "CGREvent1",
+			ID:     "utils.CGREvent1",
 			Event: map[string]any{
 				"Route":          "RouteProfile1",
 				utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
@@ -185,7 +185,7 @@ var (
 		},
 		{ //matching RouteProfile2
 			Tenant: "cgrates.org",
-			ID:     "CGREvent1",
+			ID:     "utils.CGREvent1",
 			Event: map[string]any{
 				"Route":          "RouteProfile2",
 				utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
@@ -197,7 +197,7 @@ var (
 		},
 		{ //matching RouteProfilePrefix
 			Tenant: "cgrates.org",
-			ID:     "CGREvent1",
+			ID:     "utils.CGREvent1",
 			Event: map[string]any{
 				"Route": "RouteProfilePrefix",
 			},
@@ -704,9 +704,9 @@ func TestRoutesSortedForEventWithLimitAndOffset2(t *testing.T) {
 			Weight: 0,
 		},
 	}
-	argsGetRoutes := &CGREvent{
+	argsGetRoutes := &utils.CGREvent{
 		Tenant: "cgrates.org",
-		ID:     "CGREvent1",
+		ID:     "utils.CGREvent1",
 		Event:  map[string]any{},
 		APIOpts: map[string]any{
 			utils.OptsRoutesProfileCount: 3,
@@ -936,7 +936,7 @@ func TestRouteServiceV1GetRouteProfilesForEvent(t *testing.T) {
 	cfg.RouteSCfg().StringIndexedFields = nil
 	cfg.RouteSCfg().PrefixIndexedFields = nil
 	rpS := NewRouteService(dmSPP, &FilterS{dm: dmSPP, cfg: cfg, connMgr: nil}, cfg, nil)
-	args := &CGREvent{
+	args := &utils.CGREvent{
 		Tenant: "cgrates.orgs",
 		ID:     "id",
 		Time:   utils.TimePointer(time.Date(2022, 12, 1, 20, 0, 0, 0, time.UTC)),
@@ -1044,7 +1044,7 @@ func TestRouteServiceV1GetRoutes(t *testing.T) {
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes): clientConn,
 	})
 	rpS := NewRouteService(dmSPP, &FilterS{dm: dmSPP, cfg: cfg, connMgr: nil}, cfg, connMgr)
-	args := &CGREvent{
+	args := &utils.CGREvent{
 		ID:     "CGREvent1",
 		Tenant: "cgrates.org",
 		Time:   utils.TimePointer(time.Date(2022, 12, 1, 20, 0, 0, 0, time.UTC)),
@@ -1116,9 +1116,9 @@ func TestRouteServiceSortRoutes(t *testing.T) {
 		},
 	}
 
-	ev := &CGREvent{
+	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
-		ID:     "CGREvent1",
+		ID:     "utils.CGREvent1",
 		Event: map[string]any{
 			"Route":          "RouteProfile1",
 			utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
@@ -1208,9 +1208,9 @@ func TestRDSRSortRoutes(t *testing.T) {
 			},
 		},
 	}
-	ev := &CGREvent{
+	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
-		ID:     "CGREvent1",
+		ID:     "utils.CGREvent1",
 		Event:  map[string]any{},
 		APIOpts: map[string]any{
 			utils.OptsRoutesProfileCount: 3,
@@ -1321,9 +1321,9 @@ func TestQosRSortRoutes(t *testing.T) {
 			},
 		},
 	}
-	ev := &CGREvent{
+	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
-		ID:     "CGREvent1",
+		ID:     "utils.CGREvent1",
 		Event:  map[string]any{},
 		APIOpts: map[string]any{
 			utils.OptsRoutesProfileCount: 3,
@@ -1406,9 +1406,9 @@ func TestReaSortRoutes(t *testing.T) {
 			},
 		},
 	}
-	ev := &CGREvent{
+	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
-		ID:     "CGREvent1",
+		ID:     "utils.CGREvent1",
 		Event: map[string]any{
 			utils.AccountField: "account",
 			utils.Destination:  "destination",
@@ -1473,9 +1473,9 @@ func TestHCRSortRoutes(t *testing.T) {
 			},
 		},
 	}
-	ev := &CGREvent{
+	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
-		ID:     "CGREvent1",
+		ID:     "utils.CGREvent1",
 		Event:  map[string]any{},
 		APIOpts: map[string]any{
 			utils.OptsRoutesProfileCount: 3,
@@ -1571,9 +1571,9 @@ func TestLoadDistributionSorterSortRoutes(t *testing.T) {
 			},
 		},
 	}
-	ev := &CGREvent{
+	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
-		ID:     "CGREvent1",
+		ID:     "utils.CGREvent1",
 		Event: map[string]any{
 			utils.AccountField: "account",
 			utils.Destination:  "destination",
@@ -1693,7 +1693,7 @@ func TestRouteServicePopulateSortingData(t *testing.T) {
 		utils.ConcatenatedKey(utils.MetaInternal, utils.ResourceSConnsCfg): clientconn})
 	routeService := NewRouteService(dmSPP, &FilterS{
 		dm: dmSPP, cfg: cfg, connMgr: nil}, cfg, connMgr)
-	ev := &CGREvent{
+	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "id",
 
@@ -1759,7 +1759,7 @@ func TestNewOptsGetRoutes(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
 	dm := NewDataManager(db, cfg.CacheCfg(), nil)
-	ev := &CGREvent{
+	ev := &utils.CGREvent{
 
 		APIOpts: map[string]any{
 			utils.OptsRoutesMaxCost: utils.MetaEventCost,
@@ -1892,7 +1892,7 @@ func TestRSLazyCheckRule(t *testing.T) {
 		config.SetCgrConfig(config.NewDefaultCGRConfig())
 	}()
 	rps := NewRouteService(dm, nil, cfg, nil)
-	ev := &CGREvent{
+	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "SqProcessEvent",
 		Event: map[string]any{
@@ -1955,7 +1955,7 @@ func TestRSPopulateSortingDataResourceErr(t *testing.T) {
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources): clientConn,
 	})
 	rps := NewRouteService(dm, nil, cfg, connMgr)
-	ev := &CGREvent{
+	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "SqProcessEvent",
 		Event: map[string]any{
@@ -2014,7 +2014,7 @@ func TestPopulateSortingDataStatsErr(t *testing.T) {
 	connMgr := NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats): clientConn,
 	})
-	ev := &CGREvent{
+	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "voiceEvent",
 		Time:   utils.TimePointer(time.Now()),
@@ -2073,7 +2073,7 @@ func TestPopulateSortingDataAccsErr(t *testing.T) {
 	connMgr := NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRALs): clientConn,
 	})
-	ev := &CGREvent{
+	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "voiceEvent",
 		Time:   utils.TimePointer(time.Now()),
@@ -2135,7 +2135,7 @@ func TestPopulateSortingDataAccs2(t *testing.T) {
 	connMgr := NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRALs): clientConn,
 	})
-	ev := &CGREvent{
+	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "voiceEvent",
 		Time:   utils.TimePointer(time.Now()),
@@ -2222,7 +2222,7 @@ func TestRoutesV1GetRoutes(t *testing.T) {
 	}
 	dm.SetRouteProfile(rpp, true)
 
-	args := &CGREvent{
+	args := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "RouteProcessEvent",
 		Event: map[string]any{
@@ -2320,12 +2320,12 @@ func TestRouteServiceV1GetRoutesErr(t *testing.T) {
 
 	testCases := []struct {
 		name  string
-		args  *CGREvent
+		args  *utils.CGREvent
 		reply SortedRoutesList
 	}{
 		{
 			name: "Missing StructFields",
-			args: &CGREvent{
+			args: &utils.CGREvent{
 				Event: map[string]any{
 					"Account": "1003",
 				},
@@ -2334,7 +2334,7 @@ func TestRouteServiceV1GetRoutesErr(t *testing.T) {
 		},
 		{
 			name: "Missing Event",
-			args: &CGREvent{
+			args: &utils.CGREvent{
 				Tenant: "cgrates.org",
 				ID:     "RouteProcessEvent",
 			},
@@ -2342,7 +2342,7 @@ func TestRouteServiceV1GetRoutesErr(t *testing.T) {
 		},
 		{
 			name: "Failed to process event ",
-			args: &CGREvent{
+			args: &utils.CGREvent{
 				Tenant: "cgrates.org",
 				ID:     "RouteProcessEvent",
 				Event: map[string]any{
@@ -2425,7 +2425,7 @@ func TestRouteServiceSortRoutesQos(t *testing.T) {
 		t.Error(err)
 	}
 	var reply SortedRoutesList
-	cgrEv := &CGREvent{
+	cgrEv := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "sortRoutesQosEvent1",
 		Event: map[string]any{

@@ -245,7 +245,7 @@ func testV1RsFromFolder(t *testing.T) {
 
 func testV1RsGetResourcesForEvent(t *testing.T) {
 	var reply *engine.Resources
-	args := &engine.CGREvent{
+	args := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "Event1",
 		Event:  map[string]any{"Unknown": "unknown"},
@@ -320,7 +320,7 @@ func testV1RsGetResourcesForEvent(t *testing.T) {
 
 func testV1RsTTL0(t *testing.T) {
 	// only matching Resource3
-	ev := &engine.CGREvent{
+	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     utils.UUIDSha1Prefix(),
 		Event: map[string]any{
@@ -338,7 +338,7 @@ func testV1RsTTL0(t *testing.T) {
 		t.Error(err)
 	}
 	// overwrite the first allocation
-	ev = &engine.CGREvent{
+	ev = &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     utils.UUIDSha1Prefix(),
 		Event: map[string]any{
@@ -354,7 +354,7 @@ func testV1RsTTL0(t *testing.T) {
 		t.Error(err)
 	}
 	// too many units should be rejected
-	ev = &engine.CGREvent{
+	ev = &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     utils.UUIDSha1Prefix(),
 		Event: map[string]any{
@@ -372,7 +372,7 @@ func testV1RsTTL0(t *testing.T) {
 	}
 	// check the record
 	var rs *engine.Resources
-	args := &engine.CGREvent{
+	args := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     utils.UUIDSha1Prefix(),
 		Event: map[string]any{
@@ -416,7 +416,7 @@ func testV1RsTTL0(t *testing.T) {
 	}
 	// release should not give out errors
 	var releaseReply string
-	ev = &engine.CGREvent{
+	ev = &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     utils.UUIDSha1Prefix(),
 		Event: map[string]any{
@@ -442,7 +442,7 @@ func testV1RsTTL0(t *testing.T) {
 func testV1RsAllocateResource(t *testing.T) {
 	// first event matching Resource1
 	var reply string
-	ev := &engine.CGREvent{
+	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     utils.UUIDSha1Prefix(),
 		Event: map[string]any{
@@ -464,7 +464,7 @@ func testV1RsAllocateResource(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", eAllocationMsg, reply)
 	}
 	// Second event to test matching of exact limit of first resource
-	ev = &engine.CGREvent{
+	ev = &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     utils.UUIDSha1Prefix(),
 		Event: map[string]any{
@@ -486,7 +486,7 @@ func testV1RsAllocateResource(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", eAllocationMsg, reply)
 	}
 	// Third event testing overflow to second resource which still has one resource available
-	ev = &engine.CGREvent{
+	ev = &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     utils.UUIDSha1Prefix(),
 		Event: map[string]any{
@@ -508,7 +508,7 @@ func testV1RsAllocateResource(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", eAllocationMsg, reply)
 	}
 	// Test resource unavailable
-	ev = &engine.CGREvent{
+	ev = &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     utils.UUIDSha1Prefix(),
 		Event: map[string]any{
@@ -528,7 +528,7 @@ func testV1RsAllocateResource(t *testing.T) {
 	eAllocationMsg = "ResGroup1"
 	time.Sleep(time.Second) // Give time for allocations on first resource to expire
 
-	ev = &engine.CGREvent{
+	ev = &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     utils.UUIDSha1Prefix(),
 		Event: map[string]any{
@@ -553,7 +553,7 @@ func testV1RsAllocateResource(t *testing.T) {
 
 func testV1RsAuthorizeResources(t *testing.T) {
 	var reply string
-	argsRU := &engine.CGREvent{
+	argsRU := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     utils.UUIDSha1Prefix(),
 		Event: map[string]any{
@@ -571,7 +571,7 @@ func testV1RsAuthorizeResources(t *testing.T) {
 	} else if reply != "ResGroup1" { // already 3 usages active before allow call, we should have now more than allowed
 		t.Error("Unexpected reply returned", reply)
 	}
-	argsRU = &engine.CGREvent{
+	argsRU = &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     utils.UUIDSha1Prefix(),
 		Event: map[string]any{
@@ -593,7 +593,7 @@ func testV1RsAuthorizeResources(t *testing.T) {
 func testV1RsReleaseResource(t *testing.T) {
 	// release the only resource active for Resource1
 	var reply string
-	argsRU := &engine.CGREvent{
+	argsRU := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     utils.UUIDSha1Prefix(),
 		Event: map[string]any{
@@ -611,7 +611,7 @@ func testV1RsReleaseResource(t *testing.T) {
 	}
 	// try reserving with full units for Resource1, case which did not work in previous test
 	// only match Resource1 since we don't want for storing of the resource2 bellow
-	argsRU = &engine.CGREvent{
+	argsRU = &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     utils.UUIDSha1Prefix(),
 		Event: map[string]any{
@@ -630,7 +630,7 @@ func testV1RsReleaseResource(t *testing.T) {
 		t.Error("Unexpected reply returned", reply)
 	}
 	var rs *engine.Resources
-	args := &engine.CGREvent{
+	args := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "Event5",
 		Event: map[string]any{
@@ -658,7 +658,7 @@ func testV1RsReleaseResource(t *testing.T) {
 		}
 	}
 	// release an empty resource should return error
-	argsRU = &engine.CGREvent{
+	argsRU = &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     utils.UUIDSha1Prefix(),
 		Event: map[string]any{
@@ -680,7 +680,7 @@ func testV1RsDBStore(t *testing.T) {
 	if rlsV1ConfDIR == "tutinternal" {
 		t.SkipNow()
 	}
-	argsRU := &engine.CGREvent{
+	argsRU := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     utils.UUIDSha1Prefix(),
 		Event: map[string]any{
@@ -701,7 +701,7 @@ func testV1RsDBStore(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", eAllocationMsg, reply)
 	}
 	var rs *engine.Resources
-	args := &engine.CGREvent{
+	args := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "Event3",
 		Event: map[string]any{
@@ -743,7 +743,7 @@ func testV1RsDBStore(t *testing.T) {
 		t.Fatal("Could not connect to rater: ", err.Error())
 	}
 	rs = new(engine.Resources)
-	args = &engine.CGREvent{
+	args = &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "Event4",
 		Event: map[string]any{
@@ -893,7 +893,7 @@ func testV1RsGetResourceProfileAfterDelete(t *testing.T) {
 
 func testV1RsResourcePing(t *testing.T) {
 	var resp string
-	if err := rlsV1Rpc.Call(context.Background(), utils.ResourceSv1Ping, new(engine.CGREvent), &resp); err != nil {
+	if err := rlsV1Rpc.Call(context.Background(), utils.ResourceSv1Ping, new(utils.CGREvent), &resp); err != nil {
 		t.Error(err)
 	} else if resp != utils.Pong {
 		t.Error("Unexpected reply returned", resp)
@@ -923,7 +923,7 @@ func testV1RsMatchNotFound(t *testing.T) {
 		t.Error("Unexpected reply returned", result)
 	}
 
-	argsRU := &engine.CGREvent{
+	argsRU := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     utils.UUIDSha1Prefix(),
 		Event: map[string]any{
@@ -967,7 +967,7 @@ func testV1RsAllocateUnlimited(t *testing.T) {
 		t.Error("Unexpected reply returned", result)
 	}
 	var reply string
-	ev := &engine.CGREvent{
+	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     utils.UUIDSha1Prefix(),
 		Event: map[string]any{
@@ -1096,7 +1096,7 @@ func testV1RsSetResourceProfileWithOpts(t *testing.T) {
 
 func testV1RsAuthorizeResourcesWithOpts(t *testing.T) {
 	var reply string
-	ev := &engine.CGREvent{
+	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "TEST_WITH_OPTS",
 		Event: map[string]any{
@@ -1294,7 +1294,7 @@ func testResourceSSetResourceProfile(t *testing.T) {
 
 func testResourceSCheckThresholdAfterResourceAllocate(t *testing.T) {
 	var reply string
-	ev := &engine.CGREvent{
+	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "EV_1",
 		Event: map[string]any{
@@ -1326,7 +1326,7 @@ func testResourceSCheckThresholdAfterResourceAllocate(t *testing.T) {
 }
 
 func testResourceSCheckThresholdAfterResourceRelease(t *testing.T) {
-	ev := &engine.CGREvent{
+	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "EV_1",
 		Event: map[string]any{

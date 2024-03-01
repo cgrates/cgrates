@@ -21,7 +21,6 @@ package console
 import (
 	"time"
 
-	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/sessions"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -54,7 +53,7 @@ func (self *CmdSessionsTerminate) RpcMethod() string {
 func (self *CmdSessionsTerminate) RpcParams(reset bool) any {
 	if reset || self.rpcParams == nil {
 		self.rpcParams = &sessions.V1TerminateSessionArgs{
-			CGREvent: new(engine.CGREvent),
+			CGREvent: new(utils.CGREvent),
 		}
 	}
 	return self.rpcParams

@@ -2695,7 +2695,7 @@ func TestCdrLogAction(t *testing.T) {
 	if mock.args == nil {
 		t.Fatalf("Expected a call to %s", utils.CDRsV1ProcessEvent)
 	}
-	expCgrEv := &CGREvent{
+	expCgrEv := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     mock.args.CGREvents[0].ID,
 		Event: map[string]any{
@@ -3216,7 +3216,7 @@ func TestExportAction(t *testing.T) {
 			balanceValue: 10,
 		},
 	}
-	extraData := &CGREvent{
+	extraData := &utils.CGREvent{
 		Tenant:  "tenant",
 		ID:      "id1",
 		Time:    utils.TimePointer(time.Date(2022, 12, 1, 1, 0, 0, 0, time.UTC)),
@@ -3676,7 +3676,7 @@ func TestRemoveAccountAcc(t *testing.T) {
 			balanceValue: 10,
 		},
 	}
-	extraData := &CGREvent{
+	extraData := &utils.CGREvent{
 		Tenant:  "tenant",
 		ID:      "id1",
 		Time:    utils.TimePointer(time.Date(2022, 12, 1, 1, 0, 0, 0, time.UTC)),
@@ -3765,7 +3765,7 @@ func TestRemoveAccountActionErr(t *testing.T) {
 			balanceValue: 10,
 		},
 	}
-	extraData := &CGREvent{
+	extraData := &utils.CGREvent{
 		Tenant:  "tenant",
 		ID:      "id1",
 		Time:    utils.TimePointer(time.Date(2022, 12, 1, 1, 0, 0, 0, time.UTC)),

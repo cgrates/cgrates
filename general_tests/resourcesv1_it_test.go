@@ -131,7 +131,7 @@ func testV1RsSetProfile(t *testing.T) {
 }
 
 func testV1RsAllocate(t *testing.T) {
-	cgrEv := &engine.CGREvent{
+	cgrEv := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     utils.UUIDSha1Prefix(),
 		Event: map[string]any{
@@ -151,7 +151,7 @@ func testV1RsAllocate(t *testing.T) {
 		t.Error("Unexpected reply returned", reply)
 	}
 
-	cgrEv2 := &engine.CGREvent{
+	cgrEv2 := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     utils.UUIDSha1Prefix(),
 		Event: map[string]any{
@@ -173,7 +173,7 @@ func testV1RsAllocate(t *testing.T) {
 
 func testV1RsAuthorize(t *testing.T) {
 	var reply *engine.Resources
-	args := &engine.CGREvent{
+	args := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     utils.UUIDSha1Prefix(),
 		Event: map[string]any{
@@ -206,7 +206,7 @@ func testV1RsAuthorize(t *testing.T) {
 	}
 
 	var reply2 string
-	cgrEv := &engine.CGREvent{
+	cgrEv := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     utils.UUIDSha1Prefix(),
 		Event: map[string]any{

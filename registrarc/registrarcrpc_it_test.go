@@ -120,7 +120,7 @@ func testRPCLoadData(t *testing.T) {
 }
 
 func testRPCChargerSNoAttr(t *testing.T) {
-	cgrEv := &engine.CGREvent{ // matching Charger1
+	cgrEv := &utils.CGREvent{ // matching Charger1
 		Tenant: "cgrates.org",
 		Event: map[string]any{
 			utils.AccountField: "1010",
@@ -143,7 +143,7 @@ func testRPCStartRegc(t *testing.T) {
 }
 
 func testRPCChargerSWithAttr(t *testing.T) {
-	cgrEv := &engine.CGREvent{ // matching Charger1
+	cgrEv := &utils.CGREvent{ // matching Charger1
 		Tenant: "cgrates.org",
 		Event: map[string]any{
 			utils.AccountField: "1010",
@@ -155,7 +155,7 @@ func testRPCChargerSWithAttr(t *testing.T) {
 		{
 			ChargerSProfile: "CustomerCharges",
 			AlteredFields:   []string{"*req.RunID"},
-			CGREvent: &engine.CGREvent{
+			CGREvent: &utils.CGREvent{
 				Tenant: "cgrates.org",
 				Event: map[string]any{
 					"Account": "1010",
@@ -170,7 +170,7 @@ func testRPCChargerSWithAttr(t *testing.T) {
 			ChargerSProfile:    "Raw",
 			AttributeSProfiles: []string{"*constant:*req.RequestType:*none"},
 			AlteredFields:      []string{"*req.RunID", "*req.RequestType"},
-			CGREvent: &engine.CGREvent{
+			CGREvent: &utils.CGREvent{
 				Tenant: "cgrates.org",
 				Event: map[string]any{
 					"Account":     "1010",
@@ -187,7 +187,7 @@ func testRPCChargerSWithAttr(t *testing.T) {
 			ChargerSProfile:    "SupplierCharges",
 			AttributeSProfiles: []string{"cgrates.org:ATTR_SUPPLIER1"},
 			AlteredFields:      []string{"*req.RunID", "*req.Subject"},
-			CGREvent: &engine.CGREvent{
+			CGREvent: &utils.CGREvent{
 				Tenant: "cgrates.org",
 				Event: map[string]any{
 					"Account": "1010",

@@ -86,19 +86,19 @@ func TestDspReplicator(t *testing.T) {
 
 func testDspRplPingFailover(t *testing.T) {
 	var reply string
-	if err := allEngine.RPC.Call(context.Background(), utils.ReplicatorSv1Ping, new(engine.CGREvent), &reply); err != nil {
+	if err := allEngine.RPC.Call(context.Background(), utils.ReplicatorSv1Ping, new(utils.CGREvent), &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.Pong {
 		t.Errorf("Received: %s", reply)
 	}
 	reply = utils.EmptyString
-	if err := allEngine2.RPC.Call(context.Background(), utils.ReplicatorSv1Ping, new(engine.CGREvent), &reply); err != nil {
+	if err := allEngine2.RPC.Call(context.Background(), utils.ReplicatorSv1Ping, new(utils.CGREvent), &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.Pong {
 		t.Errorf("Received: %s", reply)
 	}
 	reply = utils.EmptyString
-	ev := engine.CGREvent{
+	ev := utils.CGREvent{
 		Tenant: "cgrates.org",
 
 		APIOpts: map[string]any{

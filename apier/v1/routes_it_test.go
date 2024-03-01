@@ -179,7 +179,7 @@ func testV1RouteFromFolder(t *testing.T) {
 }
 
 func testV1RouteGetWeightRoutes(t *testing.T) {
-	ev := &engine.CGREvent{
+	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "testV1RouteGetWeightRoutes",
 		Event: map[string]any{
@@ -226,7 +226,7 @@ func testV1RouteGetWeightRoutes(t *testing.T) {
 }
 
 func testV1RouteGetLeastCostRoutes(t *testing.T) {
-	ev := &engine.CGREvent{
+	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "testV1RouteGetLeastCostRoutes",
 		Event: map[string]any{
@@ -279,7 +279,7 @@ func testV1RouteGetLeastCostRoutes(t *testing.T) {
 }
 
 func testV1RouteGetLeastCostRoutesWithoutUsage(t *testing.T) {
-	ev := &engine.CGREvent{
+	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "testV1RouteGetLeastCostRoutes",
 		Event: map[string]any{
@@ -331,7 +331,7 @@ func testV1RouteGetLeastCostRoutesWithoutUsage(t *testing.T) {
 }
 
 func testV1RouteGetLeastCostRoutesWithMaxCost(t *testing.T) {
-	ev := &engine.CGREvent{
+	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "testV1RouteGetLeastCostRoutes",
 		Event: map[string]any{
@@ -379,7 +379,7 @@ func testV1RouteGetLeastCostRoutesWithMaxCost(t *testing.T) {
 }
 
 func testV1RouteGetLeastCostRoutesWithMaxCostNotFound(t *testing.T) {
-	ev := &engine.CGREvent{
+	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "testV1RouteGetLeastCostRoutes",
 		Event: map[string]any{
@@ -401,7 +401,7 @@ func testV1RouteGetLeastCostRoutesWithMaxCostNotFound(t *testing.T) {
 }
 
 func testV1RouteGetLeastCostRoutesWithMaxCost2(t *testing.T) {
-	ev := &engine.CGREvent{
+	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "testV1RouteGetLeastCostRoutes",
 		Event: map[string]any{
@@ -450,7 +450,7 @@ func testV1RouteGetLeastCostRoutesWithMaxCost2(t *testing.T) {
 }
 
 func testV1RouteGetHighestCostRoutes(t *testing.T) {
-	ev := &engine.CGREvent{
+	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "testV1RouteGetHighestCostRoutes",
 		Event: map[string]any{
@@ -503,7 +503,7 @@ func testV1RouteGetHighestCostRoutes(t *testing.T) {
 }
 
 func testV1RouteGetLeastCostRoutesErr(t *testing.T) {
-	ev := &engine.CGREvent{
+	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "testV1RouteGetHighestCostRoutes",
 		Event: map[string]any{
@@ -541,7 +541,7 @@ func testV1RouteGetLeastCostRoutesErr(t *testing.T) {
 func testV1RoutePolulateStatsForQOS(t *testing.T) {
 	var reply []string
 	expected := []string{"Stat_1"}
-	ev1 := &engine.CGREvent{
+	ev1 := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "event1",
 		Event: map[string]any{
@@ -558,7 +558,7 @@ func testV1RoutePolulateStatsForQOS(t *testing.T) {
 	}
 
 	expected = []string{"Stat_1"}
-	ev1 = &engine.CGREvent{
+	ev1 = &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "event2",
 		Event: map[string]any{
@@ -575,7 +575,7 @@ func testV1RoutePolulateStatsForQOS(t *testing.T) {
 	}
 
 	expected = []string{"Stat_2"}
-	ev1 = &engine.CGREvent{
+	ev1 = &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "event2",
 		Event: map[string]any{
@@ -592,7 +592,7 @@ func testV1RoutePolulateStatsForQOS(t *testing.T) {
 	}
 
 	expected = []string{"Stat_2"}
-	ev1 = &engine.CGREvent{
+	ev1 = &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "event2",
 		Event: map[string]any{
@@ -609,7 +609,7 @@ func testV1RoutePolulateStatsForQOS(t *testing.T) {
 	}
 
 	expected = []string{"Stat_3"}
-	ev1 = &engine.CGREvent{
+	ev1 = &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "event3",
 		Event: map[string]any{
@@ -626,7 +626,7 @@ func testV1RoutePolulateStatsForQOS(t *testing.T) {
 	}
 
 	expected = []string{"Stat_1_1"}
-	ev1 = &engine.CGREvent{
+	ev1 = &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "event3",
 		Event: map[string]any{
@@ -644,7 +644,7 @@ func testV1RoutePolulateStatsForQOS(t *testing.T) {
 	}
 
 	expected = []string{"Stat_1_1"}
-	ev1 = &engine.CGREvent{
+	ev1 = &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "event3",
 		Event: map[string]any{
@@ -663,7 +663,7 @@ func testV1RoutePolulateStatsForQOS(t *testing.T) {
 }
 
 func testV1RouteGetQOSRoutes(t *testing.T) {
-	ev := &engine.CGREvent{
+	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "testV1RouteGetQOSRoutes",
 		Event: map[string]any{
@@ -692,7 +692,7 @@ func testV1RouteGetQOSRoutes(t *testing.T) {
 }
 
 func testV1RouteGetQOSRoutes2(t *testing.T) {
-	ev := &engine.CGREvent{
+	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "testV1RouteGetQOSRoutes",
 		Event: map[string]any{
@@ -721,7 +721,7 @@ func testV1RouteGetQOSRoutes2(t *testing.T) {
 }
 
 func testV1RouteGetQOSRoutes3(t *testing.T) {
-	ev := &engine.CGREvent{
+	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "testV1RouteGetQOSRoutes",
 		Event: map[string]any{
@@ -750,7 +750,7 @@ func testV1RouteGetQOSRoutes3(t *testing.T) {
 }
 
 func testV1RouteGetQOSRoutesFiltred(t *testing.T) {
-	ev := &engine.CGREvent{
+	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "testV1RouteGetQOSRoutes",
 		Event: map[string]any{
@@ -779,7 +779,7 @@ func testV1RouteGetQOSRoutesFiltred(t *testing.T) {
 }
 
 func testV1RouteGetQOSRoutesFiltred2(t *testing.T) {
-	ev := &engine.CGREvent{
+	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "testV1RouteGetQOSRoutes",
 		Event: map[string]any{
@@ -812,7 +812,7 @@ func testV1RouteGetQOSRoutesFiltred2(t *testing.T) {
 }
 
 func testV1RouteGetRouteWithoutFilter(t *testing.T) {
-	ev := &engine.CGREvent{
+	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "testV1RouteGetRouteWithoutFilter",
 		Event: map[string]any{
@@ -999,7 +999,7 @@ func testV1RouteRemRouteProfiles(t *testing.T) {
 
 func testV1RouteRoutePing(t *testing.T) {
 	var resp string
-	if err := routeSv1Rpc.Call(context.Background(), utils.RouteSv1Ping, new(engine.CGREvent), &resp); err != nil {
+	if err := routeSv1Rpc.Call(context.Background(), utils.RouteSv1Ping, new(utils.CGREvent), &resp); err != nil {
 		t.Error(err)
 	} else if resp != utils.Pong {
 		t.Error("Unexpected reply returned", resp)
@@ -1007,7 +1007,7 @@ func testV1RouteRoutePing(t *testing.T) {
 }
 
 func testV1RouteGetRouteForEvent(t *testing.T) {
-	ev := &engine.CGREvent{
+	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "testV1RouteGetHighestCostRoutes",
 		Event: map[string]any{
@@ -1135,7 +1135,7 @@ func testV1RoutesOneRouteWithoutDestination(t *testing.T) {
 		t.Error("Unexpected reply returned", result)
 	}
 
-	ev := &engine.CGREvent{
+	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "testV1RoutesOneRouteWithoutDestination",
 		Event: map[string]any{
@@ -1208,7 +1208,7 @@ func testV1RouteMultipleRouteSameID(t *testing.T) {
 		t.Error("Unexpected reply returned", result)
 	}
 	tNow := time.Now()
-	ev := &engine.CGREvent{
+	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		Time:   &tNow,
 		ID:     "testV1RouteMultipleRouteSameID",
@@ -1244,7 +1244,7 @@ func testV1RouteMultipleRouteSameID(t *testing.T) {
 			utils.ToJSON(eSpls), utils.ToJSON(suplsReply))
 	}
 
-	ev = &engine.CGREvent{
+	ev = &utils.CGREvent{
 		Tenant: "cgrates.org",
 		Time:   &tNow,
 		ID:     "testV1RouteMultipleRouteSameID",
@@ -1340,7 +1340,7 @@ func testV1RouteAccountWithRatingPlan(t *testing.T) {
 	// test for 30 seconds usage
 	// we expect that the route with account to have cost 0
 	tNow := time.Now()
-	ev := &engine.CGREvent{
+	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		Time:   &tNow,
 		ID:     "testV1RouteAccountWithRatingPlan",
@@ -1408,7 +1408,7 @@ func testV1RouteAccountWithRatingPlan(t *testing.T) {
 
 	// test for 60 seconds usage
 	// 30 seconds are covered by account and the remaining will be calculated
-	ev = &engine.CGREvent{
+	ev = &utils.CGREvent{
 		Tenant: "cgrates.org",
 		Time:   &tNow,
 		ID:     "testV1RouteAccountWithRatingPlan",
@@ -1478,7 +1478,7 @@ func testV1RouteAccountWithRatingPlan(t *testing.T) {
 
 	// test for 61 seconds usage
 	// 30 seconds are covered by account and the remaining will be calculated
-	ev = &engine.CGREvent{
+	ev = &utils.CGREvent{
 		Tenant: "cgrates.org",
 		Time:   &tNow,
 		ID:     "testV1RouteAccountWithRatingPlan",

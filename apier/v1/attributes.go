@@ -175,19 +175,19 @@ func (alSv1 *AttributeSv1) Call(ctx *context.Context, serviceMethod string,
 }
 
 // GetAttributeForEvent  returns matching AttributeProfile for Event
-func (alSv1 *AttributeSv1) GetAttributeForEvent(ctx *context.Context, args *engine.CGREvent,
+func (alSv1 *AttributeSv1) GetAttributeForEvent(ctx *context.Context, args *utils.CGREvent,
 	reply *engine.AttributeProfile) (err error) {
 	return alSv1.attrS.V1GetAttributeForEvent(ctx, args, reply)
 }
 
 // ProcessEvent will replace event fields with the ones in matching AttributeProfile
-func (alSv1 *AttributeSv1) ProcessEvent(ctx *context.Context, args *engine.CGREvent,
+func (alSv1 *AttributeSv1) ProcessEvent(ctx *context.Context, args *utils.CGREvent,
 	reply *engine.AttrSProcessEventReply) error {
 	return alSv1.attrS.V1ProcessEvent(ctx, args, reply)
 }
 
 // Ping return pong if the service is active
-func (alSv1 *AttributeSv1) Ping(ctx *context.Context, ign *engine.CGREvent, reply *string) error {
+func (alSv1 *AttributeSv1) Ping(ctx *context.Context, ign *utils.CGREvent, reply *string) error {
 	*reply = utils.Pong
 	return nil
 }
