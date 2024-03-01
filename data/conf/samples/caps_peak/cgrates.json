@@ -1,0 +1,48 @@
+{
+
+    "general": {
+        "log_level": 7,
+        "node_id": "CAPSPeakEngine",
+        "reply_timeout": "50s",
+    },
+    
+    
+    "cores": {
+        "caps": 2,							
+        "caps_strategy": "*queue",
+        "caps_stats_interval":"100ms"
+    },
+    
+    
+    "listen": {
+        "rpc_json": ":2012",
+        "rpc_gob": ":2013",
+        "http": ":2080"
+    },
+    
+    
+    "data_db": {								// database used to store runtime data (eg: accounts, cdr stats)
+        "db_type": "redis",						// data_db type: <redis|mongo>
+        "db_port": 6379, 						// data_db port to reach the database
+        "db_name": "10" 						// data_db database name to connect to
+    },
+    
+    
+    "stor_db": {
+        "db_password": "CGRateS.org"
+    },
+    
+    
+    "apiers": {
+        "enabled": true
+    },
+    
+    
+    "sessions": {
+        "enabled": true,
+        "listen_bijson": "127.0.0.1:2014"
+    },
+    
+    
+    }
+    

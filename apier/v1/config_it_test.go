@@ -58,6 +58,9 @@ var (
 		testConfigSReloadConfigCoreSDryRun,
 		testConfigSReloadConfigCoreS,
 		testConfigSKillEngine,
+		testConfigSStartEngineCAPSAllocated,
+		testConfigSCAPSPeak,
+		testConfigSKillEngine,
 		testConfigStartEngineWithConfigs,
 		testConfigStartEngineFromHTTP,
 		testConfigSKillEngine,
@@ -564,5 +567,64 @@ func testConfigSReloadConfigCoreS(t *testing.T) {
 		t.Error(err)
 	} else if cfgStr != rpl {
 		t.Errorf("Expected %q , received: %q", cfgStr, rpl)
+	}
+}
+
+func testConfigSStartEngineCAPSAllocated(t *testing.T) {
+	var err error
+	configCfgPath = path.Join(*dataDir, "conf", "samples", "caps_peak")
+	configCfg, err = config.NewCGRConfigFromPath(configCfgPath)
+	if err != nil {
+		t.Error(err)
+	}
+	if _, err := engine.StopStartEngine(configCfgPath, *waitRater); err != nil {
+		t.Fatal(err)
+	}
+	configRPC, err = newRPCClient(configCfg.ListenCfg()) // We connect over JSON so we can also troubleshoot if needed
+	if err != nil {
+		t.Fatal(err)
+	}
+	var rply map[string]any
+	if err := configRPC.Call(context.Background(), utils.CoreSv1Status, &utils.TenantWithAPIOpts{}, &rply); err != nil {
+		t.Error(err)
+	} else if rply[utils.NodeID] != "CAPSPeakEngine" {
+		t.Errorf("Expected %+v , received: %+v ", "CAPSPeakEngine", rply)
+	}
+
+	if _, has := rply[utils.CAPSAllocated]; !has {
+		t.Errorf("Expected reply to contain CAPSAllocated , received <%+v>", rply)
+	}
+}
+
+func testConfigSCAPSPeak(t *testing.T) {
+	cfgStr := `{"cores":{"caps":2,"caps_stats_interval":"100ms","caps_strategy":"*queue","shutdown_timeout":"1s"}}`
+	var reply string
+	if err := configRPC.Call(context.Background(), utils.ConfigSv1ReloadConfig, &config.ReloadArgs{
+		Tenant:  "cgrates.org",
+		Path:    path.Join(*dataDir, "conf", "samples", "caps_peak"),
+		Section: config.CoreSCfgJson,
+	}, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Errorf("Expected OK received: %s", reply)
+	}
+
+	var rpl string
+	if err := configRPC.Call(context.Background(), utils.ConfigSv1GetConfigAsJSON, &config.SectionWithAPIOpts{
+		Tenant:  "cgrates.org",
+		Section: config.CoreSCfgJson,
+	}, &rpl); err != nil {
+		t.Error(err)
+	} else if cfgStr != rpl {
+		t.Errorf("Expected %q , received: %q", cfgStr, rpl)
+	}
+
+	var rply map[string]any
+	if err := configRPC.Call(context.Background(), utils.CoreSv1Status, &utils.TenantWithAPIOpts{}, &rply); err != nil {
+		t.Error(err)
+	}
+
+	if _, has := rply[utils.CAPSPeak]; !has {
+		t.Errorf("Expected reply to contain CAPSPeak , received <%+v>", rply)
 	}
 }

@@ -47,11 +47,12 @@ func TestNewCoreService(t *testing.T) {
 		stopMemPrf: stopMemPrf,
 		cfg:        cfgDflt,
 		CapsStats:  sts,
+		caps:       caps,
 	}
 
 	rcv := NewCoreService(cfgDflt, caps, nil, "/tmp", stopchan, shdWg, stopMemPrf, shdChan)
 	if !reflect.DeepEqual(expected, rcv) {
-		t.Errorf("Expected %+v, received %+v", utils.ToJSON(expected), utils.ToJSON(rcv))
+		t.Errorf("Expected %+v, received %+v", expected, rcv)
 	}
 	close(stopchan)
 	//shut down the service
