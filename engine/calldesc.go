@@ -980,7 +980,7 @@ func (cd *CallDescriptor) CreateCallCost() *CallCost {
 }
 
 func (cd *CallDescriptor) Clone() *CallDescriptor {
-	return &CallDescriptor{
+	cln := &CallDescriptor{
 		Category:        cd.Category,
 		Tenant:          cd.Tenant,
 		Subject:         cd.Subject,
@@ -1000,7 +1000,13 @@ func (cd *CallDescriptor) Clone() *CallDescriptor {
 		CgrID:           cd.CgrID,
 		RunID:           cd.RunID,
 	}
-
+	if cd.ExtraFields != nil {
+		cln.ExtraFields = make(map[string]string, len(cd.ExtraFields))
+		for key, value := range cd.ExtraFields {
+			cln.ExtraFields[key] = value
+		}
+	}
+	return cln
 }
 
 // AccountSummary returns the AccountSummary for cached account

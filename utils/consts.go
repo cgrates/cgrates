@@ -510,6 +510,7 @@ const (
 	BalanceSharedGroups   = "BalanceSharedGroups"
 	BalanceBlocker        = "BalanceBlocker"
 	BalanceDisabled       = "BalanceDisabled"
+	BalanceFactorID       = "BalanceFactorID"
 	Units                 = "Units"
 	AccountUpdate         = "AccountUpdate"
 	BalanceUpdate         = "BalanceUpdate"

@@ -26,6 +26,7 @@ import (
 
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/sessions"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -259,6 +260,9 @@ cgrates.org,sms,1001,2014-01-14T00:00:00Z,RP_ANY,`,
 //     per second.
 //  2. Process an 3 usage (representing 12 sms, when taking into consideration the balance factor) event.
 //  3. Ensure that the *sms balance has 2 units left (10 - (2 sms * 4 factor)) and that 1 unit was subtracted from the *monetary balance.
+//  4. Do the above steps also for SessionSv1.ProcessCDR.
+//  5. Initiate a prepaid session (usage 10s), update it twice (usages 5s and 2s), terminate, and process CDR.
+//  6. Check to see if balance_voice was debitted 34s ((10s+5s+2s) * voiceFactor, where voiceFactor is 2).
 func TestBalanceFactor(t *testing.T) {
 	switch *dbType {
 	case utils.MetaInternal:
@@ -298,6 +302,17 @@ func TestBalanceFactor(t *testing.T) {
 "apiers": {
 	"enabled": true,
 	"scheduler_conns": ["*internal"]
+},
+
+"sessions": {
+	"enabled": true,
+	"cdrs_conns": ["*internal"],
+	"chargers_conns": ["*internal"],
+	"rals_conns": ["*internal"]
+},
+
+"chargers": {
+	"enabled": true
 }
 
 }`
@@ -308,8 +323,12 @@ cgrates.org,1001,PACKAGE_1001,,,`,
 		utils.ActionPlansCsv: `#Id,ActionsId,TimingId,Weight
 PACKAGE_1001,ACT_TOPUP,*asap,10`,
 		utils.ActionsCsv: `#ActionsId[0],Action[1],ExtraParameters[2],Filter[3],BalanceId[4],BalanceType[5],Categories[6],DestinationIds[7],RatingSubject[8],SharedGroup[9],ExpiryTime[10],TimingIds[11],Units[12],BalanceWeight[13],BalanceBlocker[14],BalanceDisabled[15],Weight[16]
-ACT_TOPUP,*topup_reset,"{""sms"":4}",,balance_sms,*sms,,,,,*unlimited,,10,20,false,false,20
+ACT_TOPUP,*topup_reset,"{""smsFactor"":4}",,balance_sms,*sms,,,,,*unlimited,,10,20,false,false,20
+ACT_TOPUP,*topup_reset,"{""voiceFactor"":2}",,balance_voice,*voice,call,,,,*unlimited,,100s,20,false,false,20
 ACT_TOPUP,*topup_reset,,,balance_monetary,*monetary,,*any,,,*unlimited,,5,10,false,false,20`,
+		utils.ChargersCsv: `#Id,ActionsId,TimingId,Weight
+#Tenant,ID,FilterIDs,ActivationInterval,RunID,AttributeIDs,Weight
+cgrates.org,DEFAULT,,,DEFAULT,*none,20`,
 		utils.DestinationRatesCsv: `#Id,DestinationId,RatesTag,RoundingMethod,RoundingDecimals,MaxCost,MaxCostStrategy
 DR_ANY,*any,RT_ANY,*up,20,0,`,
 		utils.RatesCsv: `#Id,ConnectFee,Rate,RateUnit,RateIncrement,GroupIntervalStart
@@ -317,7 +336,8 @@ RT_ANY,0,1,1s,1s,0s`,
 		utils.RatingPlansCsv: `#Id,DestinationRatesId,TimingTag,Weight
 RP_ANY,DR_ANY,*any,10`,
 		utils.RatingProfilesCsv: `#Tenant,Category,Subject,ActivationTime,RatingPlanId,RatesFallbackSubject
-cgrates.org,sms,1001,2014-01-14T00:00:00Z,RP_ANY,`,
+cgrates.org,sms,1001,2014-01-14T00:00:00Z,RP_ANY,
+cgrates.org,call,1001,2014-01-14T00:00:00Z,RP_ANY,`,
 	}
 
 	testEnv := TestEnvironment{
@@ -339,10 +359,11 @@ cgrates.org,sms,1001,2014-01-14T00:00:00Z,RP_ANY,`,
 		if err := client.Call(context.Background(), utils.APIerSv2GetAccount, attrs, &acnt); err != nil {
 			t.Fatal(err)
 		}
-		if len(acnt.BalanceMap) != 2 ||
+		if len(acnt.BalanceMap) != 3 ||
 			len(acnt.BalanceMap[utils.MetaMonetary]) != 1 ||
-			len(acnt.BalanceMap[utils.MetaSMS]) != 1 {
-			t.Fatalf("expected account to have one balance of type *monetary and one of type *sms, received %v", acnt)
+			len(acnt.BalanceMap[utils.MetaSMS]) != 1 ||
+			len(acnt.BalanceMap[utils.MetaVoice]) != 1 {
+			t.Fatalf("expected account to have one balance of type *monetary, one of type *sms and one of type *voice, received %v", acnt)
 		}
 		smsBalance := acnt.BalanceMap[utils.MetaSMS][0]
 		if smsBalance.ID != "balance_sms" || smsBalance.Value != 10 {
@@ -352,29 +373,34 @@ cgrates.org,sms,1001,2014-01-14T00:00:00Z,RP_ANY,`,
 		if monetaryBalance.ID != "balance_monetary" || monetaryBalance.Value != 5 {
 			t.Fatalf("received account with unexpected *monetary balance: %v", monetaryBalance)
 		}
+		voiceBalance := acnt.BalanceMap[utils.MetaVoice][0]
+		if voiceBalance.ID != "balance_voice" || voiceBalance.Value != float64(100*time.Second) {
+			t.Fatalf("received account with unexpected *voice balance: %v", voiceBalance)
+		}
 	})
 
-	t.Run("ProcessCDRAndCheckBalance", func(t *testing.T) {
+	t.Run("CDRsV1ProcessCDR", func(t *testing.T) {
 		var reply string
 		if err := client.Call(context.Background(), utils.CDRsV1ProcessEvent,
 			&engine.ArgV1ProcessEvent{
 				Flags: []string{utils.MetaRALs},
 				CGREvent: utils.CGREvent{
 					Tenant: "cgrates.org",
-					ID:     "event1",
+					ID:     "CDRsV1ProcessCDR",
 					Event: map[string]any{
-						utils.RunID:        "*default",
-						utils.Tenant:       "cgrates.org",
-						utils.Category:     "sms",
-						utils.ToR:          utils.MetaSMS,
-						utils.OriginID:     "processCDR",
-						utils.OriginHost:   "127.0.0.1",
-						utils.RequestType:  utils.MetaPostpaid,
-						utils.AccountField: "1001",
-						utils.Destination:  "1002",
-						utils.SetupTime:    time.Date(2021, time.February, 2, 16, 14, 50, 0, time.UTC),
-						utils.AnswerTime:   time.Date(2021, time.February, 2, 16, 15, 0, 0, time.UTC),
-						utils.Usage:        3,
+						utils.RunID:           "*default",
+						utils.Tenant:          "cgrates.org",
+						utils.Category:        "sms",
+						utils.ToR:             utils.MetaSMS,
+						utils.OriginID:        "processCDR1",
+						utils.OriginHost:      "127.0.0.1",
+						utils.RequestType:     utils.MetaPostpaid,
+						utils.AccountField:    "1001",
+						utils.Destination:     "1002",
+						utils.SetupTime:       time.Date(2021, time.February, 2, 16, 14, 50, 0, time.UTC),
+						utils.AnswerTime:      time.Date(2021, time.February, 2, 16, 15, 0, 0, time.UTC),
+						utils.Usage:           3,
+						utils.BalanceFactorID: "smsFactor",
 					},
 				},
 			}, &reply); err != nil {
@@ -383,7 +409,7 @@ cgrates.org,sms,1001,2014-01-14T00:00:00Z,RP_ANY,`,
 		var cdrs []*engine.CDR
 		if err := client.Call(context.Background(), utils.CDRsV1GetCDRs, &utils.RPCCDRsFilterWithAPIOpts{
 			RPCCDRsFilter: &utils.RPCCDRsFilter{
-				RunIDs: []string{"*default"},
+				OriginIDs: []string{"processCDR1"},
 			}}, &cdrs); err != nil {
 			t.Fatal(err)
 		}
@@ -398,12 +424,222 @@ cgrates.org,sms,1001,2014-01-14T00:00:00Z,RP_ANY,`,
 		if smsBalanceValue != 2. {
 			t.Errorf("unexpected balance value: expected %v, received %v", 2., smsBalanceValue)
 		}
-		monetaryBalanceValue, err := cdrs[0].CostDetails.FieldAsInterface([]string{"AccountSummary", "BalanceSummaries[1]", "Value"})
+		monetaryBalanceValue, err := cdrs[0].CostDetails.FieldAsInterface([]string{"AccountSummary", "BalanceSummaries[2]", "Value"})
 		if err != nil {
 			t.Fatalf("could not retrieve *sms balance current value: %v", err)
 		}
 		if monetaryBalanceValue != 4. {
 			t.Errorf("unexpected balance value: expected %v, received %v", 4., monetaryBalanceValue)
+		}
+	})
+
+	t.Run("SessionSv1ProcessCDR", func(t *testing.T) {
+		var reply string
+		if err := client.Call(context.Background(), utils.SessionSv1ProcessCDR,
+			&utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "SessionSv1ProcessCDR",
+				Event: map[string]any{
+					utils.RunID:           "*default",
+					utils.Tenant:          "cgrates.org",
+					utils.Category:        "sms",
+					utils.ToR:             utils.MetaSMS,
+					utils.OriginID:        "processCDR2",
+					utils.OriginHost:      "127.0.0.1",
+					utils.RequestType:     utils.MetaPostpaid,
+					utils.AccountField:    "1001",
+					utils.Destination:     "1002",
+					utils.SetupTime:       time.Date(2021, time.February, 2, 16, 14, 50, 0, time.UTC),
+					utils.AnswerTime:      time.Date(2021, time.February, 2, 16, 15, 0, 0, time.UTC),
+					utils.Usage:           3,
+					utils.BalanceFactorID: "smsFactor",
+				},
+			}, &reply); err != nil {
+			t.Fatal(err)
+		}
+		var cdrs []*engine.CDR
+		if err := client.Call(context.Background(), utils.CDRsV1GetCDRs, &utils.RPCCDRsFilterWithAPIOpts{
+			RPCCDRsFilter: &utils.RPCCDRsFilter{
+				OriginIDs: []string{"processCDR2"},
+			}}, &cdrs); err != nil {
+			t.Fatal(err)
+		}
+
+		if len(cdrs) != 1 {
+			t.Fatalf("expected to receive only one CDR: %v", utils.ToJSON(cdrs))
+		}
+		smsBalanceValue, err := cdrs[0].CostDetails.FieldAsInterface([]string{"AccountSummary", "BalanceSummaries[0]", "Value"})
+		if err != nil {
+			t.Fatalf("could not retrieve *sms balance current value: %v", err)
+		}
+		if smsBalanceValue != 2. {
+			t.Errorf("unexpected balance value: expected %v, received %v", 2., smsBalanceValue)
+		}
+		monetaryBalanceValue, err := cdrs[0].CostDetails.FieldAsInterface([]string{"AccountSummary", "BalanceSummaries[2]", "Value"})
+		if err != nil {
+			t.Fatalf("could not retrieve *sms balance current value: %v", err)
+		}
+		if monetaryBalanceValue != 3. {
+			t.Errorf("unexpected balance value: expected %v, received %v", 4., monetaryBalanceValue)
+		}
+	})
+
+	t.Run("PrepaidSession", func(t *testing.T) {
+		var replyInit sessions.V1InitSessionReply
+		if err := client.Call(context.Background(), utils.SessionSv1InitiateSession,
+			&sessions.V1InitSessionArgs{
+				InitSession: true,
+				CGREvent: &utils.CGREvent{
+					Tenant: "cgrates.org",
+					ID:     "SessionSv1InitiateSession",
+					Event: map[string]any{
+						utils.OriginID:        "prepaidSession",
+						utils.Tenant:          "cgrates.org",
+						utils.Category:        "call",
+						utils.ToR:             utils.MetaVoice,
+						utils.RequestType:     utils.MetaPrepaid,
+						utils.AccountField:    "1001",
+						utils.Subject:         "1001",
+						utils.Destination:     "1002",
+						utils.SetupTime:       time.Date(2023, time.February, 28, 8, 59, 50, 0, time.UTC),
+						utils.AnswerTime:      time.Date(2023, time.February, 28, 9, 0, 0, 0, time.UTC),
+						utils.Usage:           10 * time.Second,
+						utils.BalanceFactorID: "voiceFactor",
+					},
+					APIOpts: map[string]any{
+						utils.OptsDebitInterval: 0,
+					},
+				},
+			}, &replyInit); err != nil {
+			t.Error(err)
+		}
+
+		var replyUpdate sessions.V1UpdateSessionReply
+		if err := client.Call(context.Background(), utils.SessionSv1UpdateSession,
+			&sessions.V1UpdateSessionArgs{
+				UpdateSession: true,
+				CGREvent: &utils.CGREvent{
+					Tenant: "cgrates.org",
+					ID:     "SessionSv1UpdateSession1",
+					Event: map[string]any{
+						utils.OriginID:        "prepaidSession",
+						utils.Tenant:          "cgrates.org",
+						utils.Category:        "call",
+						utils.ToR:             utils.MetaVoice,
+						utils.RequestType:     utils.MetaPrepaid,
+						utils.AccountField:    "1001",
+						utils.Subject:         "1001",
+						utils.Destination:     "1002",
+						utils.SetupTime:       time.Date(2023, time.February, 28, 8, 59, 50, 0, time.UTC),
+						utils.AnswerTime:      time.Date(2023, time.February, 28, 9, 0, 0, 0, time.UTC),
+						utils.Usage:           5 * time.Second,
+						utils.BalanceFactorID: "voiceFactor",
+					},
+					APIOpts: map[string]any{
+						utils.OptsDebitInterval: 0,
+					},
+				},
+			}, &replyUpdate); err != nil {
+			t.Error(err)
+		}
+
+		if err := client.Call(context.Background(), utils.SessionSv1UpdateSession,
+			&sessions.V1UpdateSessionArgs{
+				UpdateSession: true,
+				CGREvent: &utils.CGREvent{
+					Tenant: "cgrates.org",
+					ID:     "SessionSv1UpdateSession2",
+					Event: map[string]any{
+						utils.OriginID:        "prepaidSession",
+						utils.Tenant:          "cgrates.org",
+						utils.Category:        "call",
+						utils.ToR:             utils.MetaVoice,
+						utils.RequestType:     utils.MetaPrepaid,
+						utils.AccountField:    "1001",
+						utils.Subject:         "1001",
+						utils.Destination:     "1002",
+						utils.SetupTime:       time.Date(2023, time.February, 28, 8, 59, 50, 0, time.UTC),
+						utils.AnswerTime:      time.Date(2023, time.February, 28, 9, 0, 0, 0, time.UTC),
+						utils.Usage:           2 * time.Second,
+						utils.BalanceFactorID: "voiceFactor",
+					},
+					APIOpts: map[string]any{
+						utils.OptsDebitInterval: 0,
+					},
+				},
+			}, &replyUpdate); err != nil {
+			t.Error(err)
+		}
+
+		var replyTerminate string
+		if err := client.Call(context.Background(), utils.SessionSv1TerminateSession,
+			&sessions.V1TerminateSessionArgs{
+				TerminateSession: true,
+				CGREvent: &utils.CGREvent{
+					Tenant: "cgrates.org",
+					ID:     "SessionSv1TerminateSession",
+					Event: map[string]any{
+						utils.OriginID:     "prepaidSession",
+						utils.Tenant:       "cgrates.org",
+						utils.Category:     "call",
+						utils.ToR:          utils.MetaVoice,
+						utils.RequestType:  utils.MetaPrepaid,
+						utils.AccountField: "1001",
+						utils.Subject:      "1001",
+						utils.Destination:  "1002",
+						utils.SetupTime:    time.Date(2023, time.February, 28, 8, 59, 50, 0, time.UTC),
+						utils.AnswerTime:   time.Date(2023, time.February, 28, 9, 0, 0, 0, time.UTC),
+					},
+					APIOpts: map[string]any{
+						utils.OptsDebitInterval: 0,
+					},
+				},
+			}, &replyTerminate); err != nil {
+			t.Error(err)
+		}
+
+		var replyProcessCDR string
+		if err := client.Call(context.Background(), utils.SessionSv1ProcessCDR,
+			&utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "testSesRnd2PrepaidProcessCDR",
+				Event: map[string]any{
+					utils.OriginID:     "prepaidSession",
+					utils.Tenant:       "cgrates.org",
+					utils.Category:     "call",
+					utils.ToR:          utils.MetaVoice,
+					utils.RequestType:  utils.MetaPrepaid,
+					utils.AccountField: "1001",
+					utils.Subject:      "1001",
+					utils.Destination:  "1002",
+					utils.SetupTime:    time.Date(2023, time.February, 28, 8, 59, 50, 0, time.UTC),
+					utils.AnswerTime:   time.Date(2023, time.February, 28, 9, 0, 0, 0, time.UTC),
+					utils.Usage:        0,
+				},
+				APIOpts: map[string]any{
+					utils.OptsDebitInterval: 0,
+				},
+			}, &replyProcessCDR); err != nil {
+			t.Error(err)
+		}
+
+		var cdrs []*engine.CDR
+		if err := client.Call(context.Background(), utils.CDRsV1GetCDRs, &utils.RPCCDRsFilterWithAPIOpts{
+			RPCCDRsFilter: &utils.RPCCDRsFilter{
+				OriginIDs: []string{"prepaidSession"},
+			}}, &cdrs); err != nil {
+			t.Fatal(err)
+		}
+
+		if len(cdrs) != 1 {
+			t.Fatalf("expected to receive only one CDR: %v", utils.ToJSON(cdrs))
+		}
+		voiceBalanceValue, err := cdrs[0].CostDetails.FieldAsInterface([]string{"AccountSummary", "BalanceSummaries[1]", "Value"})
+		if err != nil {
+			t.Fatalf("could not retrieve *voice balance current value: %v", err)
+		}
+		if voiceBalanceValue != float64(66*time.Second) {
+			t.Errorf("unexpected balance value: expected %v, received %v", float64(66*time.Second), voiceBalanceValue)
 		}
 	})
 }

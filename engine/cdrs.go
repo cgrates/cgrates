@@ -272,6 +272,7 @@ func (cdrS *CDRServer) getCostFromRater(cdr *CDRWithAPIOpts) (*CallCost, error) 
 		Subject:         cdr.Subject,
 		Account:         cdr.Account,
 		Destination:     cdr.Destination,
+		ExtraFields:     cdr.ExtraFields,
 		TimeStart:       timeStart,
 		TimeEnd:         timeStart.Add(cdr.Usage),
 		DurationIndex:   cdr.Usage,
