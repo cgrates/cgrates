@@ -334,7 +334,15 @@ func cdrLogAction(acc *Account, a *Action, acs Actions, _ *FilterS, extraData an
 					newCDR.Cost = balance.Value
 					newCDR.OriginID = utils.GenUUID() // OriginID must be unique for every CDR.
 					newCDR.CGRID = utils.Sha1(newCDR.OriginID, newCDR.OriginHost)
+
+					// Clone the ExtraFields map to avoid changing its value in
+					// CDRs appended previously.
+					newCDR.ExtraFields = make(map[string]string, len(cdr.ExtraFields)+1)
+					for key, val := range cdr.ExtraFields {
+						newCDR.ExtraFields[key] = val
+					}
 					newCDR.ExtraFields[utils.BalanceID] = balance.ID
+
 					cdrs = append(cdrs, &newCDR) // Append the address of the new instance.
 					found = true
 				}
@@ -357,7 +365,8 @@ func cdrLogAction(acc *Account, a *Action, acs Actions, _ *FilterS, extraData an
 			continue
 		case utils.MetaRemoveExpired:
 			if err = processBalances(func(b *Balance) bool {
-				return b.IsExpiredAt(currentTime)
+				return b.IsExpiredAt(currentTime) &&
+					b.MatchFilter(action.Balance, false, true)
 			}); err != nil {
 				return err
 			}
@@ -1124,11 +1133,13 @@ func removeExpired(acc *Account, action *Action, _ Actions, _ *FilterS, extraDat
 
 	found := false
 	for i := 0; i < len(bChain); i++ {
-		if bChain[i].IsExpiredAt(time.Now()) {
-			// delete without preserving order
-			bChain[i] = bChain[len(bChain)-1]
-			bChain = bChain[:len(bChain)-1]
-			i--
+		if bChain[i].IsExpiredAt(time.Now()) &&
+			bChain[i].MatchFilter(action.Balance, false, true) {
+
+			// Delete balance without preserving order.
+			bChain[i] = bChain[len(bChain)-1] // assign last balance to current balance
+			bChain = bChain[:len(bChain)-1]   // remove last balance
+			i--                               // subtract 1 from index to avoid skipping next balance
 			found = true
 		}
 	}
