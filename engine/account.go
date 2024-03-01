@@ -1205,16 +1205,17 @@ func (acc *Account) GetBalanceWithID(blcType, blcID string) (blc *Balance) {
 	return nil
 }
 
-// FindBalanceByID searches through all balance types for a balance with the specified ID and returns it.
-func (acc *Account) FindBalanceByID(balanceID string) *Balance {
-	for _, balances := range acc.BalanceMap {
+// FindBalanceByID searches through all balance types for a balance with the
+// specified ID and returns it alongside its type.
+func (acc *Account) FindBalanceByID(balanceID string) (blnc *Balance, blncType string) {
+	for balanceType, balances := range acc.BalanceMap {
 		for _, balance := range balances {
 			if balance.ID == balanceID {
-				return balance
+				return balance, balanceType
 			}
 		}
 	}
-	return nil
+	return nil, ""
 }
 
 // FieldAsInterface func to help EventCost FieldAsInterface

@@ -159,7 +159,7 @@ func transferBalanceAction(srcAcc *Account, act *Action, _ Actions, fltrS *Filte
 		return fmt.Errorf("account %s has no balances to transfer from", srcAcc.ID)
 	}
 
-	srcBalance := srcAcc.FindBalanceByID(*act.Balance.ID)
+	srcBalance, srcBalanceType := srcAcc.FindBalanceByID(*act.Balance.ID)
 	if srcBalance == nil || srcBalance.IsExpiredAt(time.Now()) {
 		return errors.New("source balance not found or expired")
 	}
@@ -180,16 +180,34 @@ func transferBalanceAction(srcAcc *Account, act *Action, _ Actions, fltrS *Filte
 		return err
 	}
 
-	// This guard is meant to lock the destination account as we are making changes to it. It was not needed
-	// for the source account due to it being locked from outside this function.
+	// This guard is meant to lock the destination account as we are making changes
+	// to it. It was not needed for the source account due to it being locked from
+	// outside this function.
 	guardErr := guardian.Guardian.Guard(func() error {
 		destAcc, err := dm.GetAccount(accDestInfo.DestinationAccountID)
 		if err != nil {
 			return fmt.Errorf("retrieving destination account failed: %w", err)
 		}
-		destBalance := destAcc.FindBalanceByID(accDestInfo.DestinationBalanceID)
-		if destBalance == nil || destBalance.IsExpiredAt(time.Now()) {
-			return errors.New("destination balance not found or expired")
+
+		if destAcc.BalanceMap == nil {
+			destAcc.BalanceMap = make(map[string]Balances)
+		}
+
+		// We look for the destination balance only through balances of the same
+		// type as the source balance.
+		destBalance := destAcc.GetBalanceWithID(srcBalanceType, accDestInfo.DestinationBalanceID)
+		if destBalance != nil && destBalance.IsExpiredAt(time.Now()) {
+			return errors.New("destination balance expired")
+		}
+
+		if destBalance == nil {
+			// Destination Balance was not found. It will be
+			// created and added to the balance map.
+			destBalance = &Balance{
+				ID:   accDestInfo.DestinationBalanceID,
+				Uuid: utils.GenUUID(),
+			}
+			destAcc.BalanceMap[srcBalanceType] = append(destAcc.BalanceMap[srcBalanceType], destBalance)
 		}
 
 		srcBalance.SubtractValue(transferUnits)
@@ -204,12 +222,14 @@ func transferBalanceAction(srcAcc *Account, act *Action, _ Actions, fltrS *Filte
 			return fmt.Errorf("updating destination account failed: %w", err)
 		}
 		return nil
-	}, config.CgrConfig().GeneralCfg().LockingTimeout, utils.AccountPrefix+accDestInfo.DestinationAccountID)
+	}, config.CgrConfig().GeneralCfg().LockingTimeout,
+		utils.AccountPrefix+accDestInfo.DestinationAccountID)
 	if guardErr != nil {
 		return guardErr
 	}
 
-	// Execute action triggers for the source account. This account will be updated in the parent function.
+	// Execute action triggers for the source account.
+	// This account will be updated in the parent function.
 	srcAcc.InitCounters()
 	srcAcc.ExecuteActionTriggers(act, fltrS)
 	return nil
