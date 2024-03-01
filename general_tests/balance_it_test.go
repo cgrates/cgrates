@@ -699,6 +699,8 @@ PACKAGE_ACC_TEST,ACT_TOPUP_SMS,*asap,10`,
 		utils.ActionsCsv: `#ActionsId[0],Action[1],ExtraParameters[2],Filter[3],BalanceId[4],BalanceType[5],Categories[6],DestinationIds[7],RatingSubject[8],SharedGroup[9],ExpiryTime[10],TimingIds[11],Units[12],BalanceWeight[13],BalanceBlocker[14],BalanceDisabled[15],Weight[16]
 ACT_REMOVE_BALANCE_MONETARY,*cdrlog,,,,,,,,,,,,,,,
 ACT_REMOVE_BALANCE_MONETARY,*remove_balance,,,balance_monetary,*monetary,,,,,,,,,,,
+ACT_REMOVE_EXPIRED_WITH_CATEGORY,*cdrlog,,,,,,,,,,,,,,,
+ACT_REMOVE_EXPIRED_WITH_CATEGORY,*remove_expired,,,,*monetary,category2,,,,,,,,,,
 ACT_REMOVE_EXPIRED,*cdrlog,,,,,,,,,,,,,,,
 ACT_REMOVE_EXPIRED,*remove_expired,,,,*monetary,,,,,,,,,,,
 ACT_TOPUP_MONETARY,*cdrlog,"{""BalanceID"":""~*acnt.BalanceID""}",,,,,,,,,,,,,,
@@ -778,34 +780,79 @@ ACT_TOPUP_SMS,*topup_reset,,,balance_sms,*sms,,*any,,,*unlimited,,1000,10,false,
 		}
 	})
 
-	t.Run("RemoveExpiredBalances", func(t *testing.T) {
+	t.Run("CheckFinalBalances", func(t *testing.T) {
+		var acnt engine.Account
+		if err := client.Call(context.Background(), utils.APIerSv2GetAccount,
+			&utils.AttrGetAccount{
+				Tenant:  "cgrates.org",
+				Account: "ACC_TEST",
+			}, &acnt); err != nil {
+			t.Error(err)
+		}
+		if len(acnt.BalanceMap) != 2 || len(acnt.BalanceMap[utils.MetaSMS]) != 1 || len(acnt.BalanceMap[utils.MetaMonetary]) != 0 {
+			t.Errorf("unexpected account received: %v", utils.ToJSON(acnt))
+		}
+	})
+
+	t.Run("RemoveExpiredBalancesNoFilter", func(t *testing.T) {
 		expiryTime := time.Now().Add(10 * time.Millisecond)
 		attrSetBalance := utils.AttrSetBalances{
 			Tenant:  "cgrates.org",
 			Account: "ACC_TEST",
 			Balances: []*utils.AttrBalance{
 				{
+					// will not be removed
 					BalanceType: utils.MetaMonetary,
 					Value:       10,
 					Balance: map[string]any{
-						utils.ID:         "expired_balance1",
-						utils.ExpiryTime: expiryTime,
+						utils.ID: "ValidBalanceNotMatching",
 					},
 				},
 				{
+					// will be removed
 					BalanceType: utils.MetaMonetary,
 					Value:       11,
 					Balance: map[string]any{
-						utils.ID:         "expired_balance2",
+						utils.ID:         "ExpiredBalanceNotMatching1",
 						utils.ExpiryTime: expiryTime,
 					},
 				},
 				{
+					// will be removed
 					BalanceType: utils.MetaMonetary,
 					Value:       12,
 					Balance: map[string]any{
-						utils.ID:         "expired_balance3",
+						utils.ID:         "ExpiredBalanceNotMatching2",
 						utils.ExpiryTime: expiryTime,
+					},
+				},
+				{
+					// will be removed
+					BalanceType: utils.MetaMonetary,
+					Value:       13,
+					Balance: map[string]any{
+						utils.ID:         "ExpiredBalanceNotMatching3",
+						utils.ExpiryTime: expiryTime,
+						utils.Categories: "category1;category3",
+					},
+				},
+				{
+					// will be removed
+					BalanceType: utils.MetaMonetary,
+					Value:       14,
+					Balance: map[string]any{
+						utils.ID:         "MatchingExpiredBalance",
+						utils.ExpiryTime: expiryTime,
+						utils.Categories: "category1;category2",
+					},
+				},
+				{
+					// will not be removed
+					BalanceType: utils.MetaMonetary,
+					Value:       15,
+					Balance: map[string]any{
+						utils.ID:         "MatchingValidBalance",
+						utils.Categories: "category2",
 					},
 				},
 			},
@@ -821,7 +868,7 @@ ACT_TOPUP_SMS,*topup_reset,,,balance_sms,*sms,,*any,,,*unlimited,,1000,10,false,
 		}
 	})
 
-	t.Run("CheckRemoveExpiredCDR", func(t *testing.T) {
+	t.Run("CheckRemoveExpiredCDRNoFilter", func(t *testing.T) {
 		var cdrs []*engine.CDR
 		if err := client.Call(context.Background(), utils.CDRsV1GetCDRs, &utils.RPCCDRsFilterWithAPIOpts{
 			RPCCDRsFilter: &utils.RPCCDRsFilter{
@@ -831,34 +878,129 @@ ACT_TOPUP_SMS,*topup_reset,,,balance_sms,*sms,,*any,,,*unlimited,,1000,10,false,
 			t.Fatal(err)
 		}
 
-		if len(cdrs) != 3 ||
-			cdrs[0].RunID != utils.MetaRemoveExpired ||
-			cdrs[0].Source != utils.CDRLog ||
-			cdrs[0].ToR != utils.MetaMonetary ||
-			cdrs[0].Cost != 10 ||
-			cdrs[1].RunID != utils.MetaRemoveExpired ||
-			cdrs[1].Source != utils.CDRLog ||
-			cdrs[1].ToR != utils.MetaMonetary ||
-			cdrs[1].Cost != 11 ||
-			cdrs[2].RunID != utils.MetaRemoveExpired ||
-			cdrs[2].Source != utils.CDRLog ||
-			cdrs[2].ToR != utils.MetaMonetary ||
-			cdrs[2].Cost != 12 {
+		if len(cdrs) != 4 ||
+			cdrs[0].Cost != 11 ||
+			cdrs[0].ExtraFields[utils.BalanceID] != "ExpiredBalanceNotMatching1" ||
+			cdrs[1].Cost != 12 ||
+			cdrs[1].ExtraFields[utils.BalanceID] != "ExpiredBalanceNotMatching2" ||
+			cdrs[2].Cost != 13 ||
+			cdrs[2].ExtraFields[utils.BalanceID] != "ExpiredBalanceNotMatching3" ||
+			cdrs[3].Cost != 14 ||
+			cdrs[3].ExtraFields[utils.BalanceID] != "MatchingExpiredBalance" {
 			t.Errorf("unexpected cdrs received: %v", utils.ToJSON(cdrs))
+		}
+
+		assertCommonCDRFields := func(t *testing.T, cdr *engine.CDR) {
+			if cdr.RunID != utils.MetaRemoveExpired ||
+				cdr.Source != utils.CDRLog ||
+				cdr.ToR != utils.MetaMonetary {
+				t.Fatalf("unexpected cdrs received: %v", utils.ToJSON(cdrs))
+			}
+		}
+		for _, cdr := range cdrs {
+			assertCommonCDRFields(t, cdr)
 		}
 	})
 
-	t.Run("CheckFinalBalances", func(t *testing.T) {
-		var acnt engine.Account
-		if err := client.Call(context.Background(), utils.APIerSv2GetAccount,
-			&utils.AttrGetAccount{
-				Tenant:  "cgrates.org",
-				Account: "ACC_TEST",
-			}, &acnt); err != nil {
+	t.Run("RemoveExpiredBalancesFiltered", func(t *testing.T) {
+
+		// Remove cdrs from previous test.
+		var reply string
+		if err := client.Call(context.Background(), utils.APIerSv1RemoveCDRs, &utils.RPCCDRsFilter{
+			RunIDs: []string{"*remove_expired"},
+		}, &reply); err != nil {
+			t.Fatal(err)
+		}
+
+		expiryTime := time.Now().Add(10 * time.Millisecond)
+		attrSetBalance := utils.AttrSetBalances{
+			Tenant:  "cgrates.org",
+			Account: "ACC_TEST",
+			Balances: []*utils.AttrBalance{
+				{
+					// will not be removed
+					BalanceType: utils.MetaMonetary,
+					Value:       10,
+					Balance: map[string]any{
+						utils.ID: "ValidBalanceNotMatching",
+					},
+				},
+				{
+					// will not be removed
+					BalanceType: utils.MetaMonetary,
+					Value:       11,
+					Balance: map[string]any{
+						utils.ID:         "ExpiredBalanceNotMatching1",
+						utils.ExpiryTime: expiryTime,
+					},
+				},
+				{
+					// will not be removed
+					BalanceType: utils.MetaMonetary,
+					Value:       12,
+					Balance: map[string]any{
+						utils.ID:         "ExpiredBalanceNotMatching2",
+						utils.ExpiryTime: expiryTime,
+					},
+				},
+				{
+					// will not be removed
+					BalanceType: utils.MetaMonetary,
+					Value:       13,
+					Balance: map[string]any{
+						utils.ID:         "ExpiredBalanceNotMatching3",
+						utils.ExpiryTime: expiryTime,
+						utils.Categories: "category1;category3",
+					},
+				},
+				{
+					// will be removed
+					BalanceType: utils.MetaMonetary,
+					Value:       14,
+					Balance: map[string]any{
+						utils.ID:         "MatchingExpiredBalance",
+						utils.ExpiryTime: expiryTime,
+						utils.Categories: "category1;category2",
+					},
+				},
+				{
+					// will not be removed
+					BalanceType: utils.MetaMonetary,
+					Value:       15,
+					Balance: map[string]any{
+						utils.ID:         "MatchingValidBalance",
+						utils.Categories: "category2",
+					},
+				},
+			},
+		}
+		if err := client.Call(context.Background(), utils.APIerSv1SetBalances, &attrSetBalance, &reply); err != nil {
 			t.Error(err)
 		}
-		if len(acnt.BalanceMap) != 2 || len(acnt.BalanceMap[utils.MetaSMS]) != 1 || len(acnt.BalanceMap[utils.MetaMonetary]) != 0 {
-			t.Errorf("unexpected account received: %v", utils.ToJSON(acnt))
+		time.Sleep(10 * time.Millisecond)
+		attrsEA := &utils.AttrExecuteAction{Tenant: "cgrates.org", Account: "ACC_TEST", ActionsId: "ACT_REMOVE_EXPIRED_WITH_CATEGORY"}
+		if err := client.Call(context.Background(), utils.APIerSv1ExecuteAction, attrsEA, &reply); err != nil {
+			t.Error(err)
+		}
+	})
+
+	t.Run("CheckRemoveExpiredCDRFiltered", func(t *testing.T) {
+		var cdrs []*engine.CDR
+		if err := client.Call(context.Background(), utils.CDRsV1GetCDRs, &utils.RPCCDRsFilterWithAPIOpts{
+			RPCCDRsFilter: &utils.RPCCDRsFilter{
+				RunIDs:  []string{"*remove_expired"},
+				OrderBy: utils.Cost,
+			}}, &cdrs); err != nil {
+			t.Fatal(err)
+		}
+
+		if len(cdrs) != 1 ||
+			cdrs[0].Cost != 14 ||
+			cdrs[0].ExtraFields[utils.BalanceID] != "MatchingExpiredBalance" ||
+			cdrs[0].RunID != utils.MetaRemoveExpired ||
+			cdrs[0].Source != utils.CDRLog ||
+			cdrs[0].ToR != utils.MetaMonetary {
+			t.Errorf("unexpected cdrs received: %v", utils.ToJSON(cdrs))
 		}
 	})
 }
