@@ -181,7 +181,7 @@ ACT_TRANSFER,*transfer_balance,"{""DestinationAccountID"":""cgrates.org:ACC_DEST
 		}
 	})
 
-	t.Run("CheckBalancesAfterTransferBalanceAPI", func(t *testing.T) {
+	t.Run("CheckBalancesAfterTransferBalanceAPI1", func(t *testing.T) {
 		var acnts []*engine.Account
 		if err := client.Call(context.Background(), utils.APIerSv2GetAccounts,
 			&utils.AttrGetAccounts{
@@ -211,6 +211,51 @@ ACT_TRANSFER,*transfer_balance,"{""DestinationAccountID"":""cgrates.org:ACC_DEST
 		}
 	})
 
+	t.Run("TransferBalanceByAPINonexistentDestBalance", func(t *testing.T) {
+		var reply string
+		if err := client.Call(context.Background(), utils.APIerSv1TransferBalance, utils.AttrTransferBalance{
+			Tenant:               "cgrates.org",
+			SourceAccountID:      "ACC_SRC",
+			SourceBalanceID:      "balance_src",
+			DestinationAccountID: "ACC_DEST",
+			DestinationBalanceID: "nonexistent_balance",
+			Units:                3,
+			Cdrlog:               true,
+		}, &reply); err != nil {
+			t.Error(err)
+		}
+	})
+
+	t.Run("CheckBalancesAfterTransferBalanceAPI2", func(t *testing.T) {
+		var acnts []*engine.Account
+		if err := client.Call(context.Background(), utils.APIerSv2GetAccounts,
+			&utils.AttrGetAccounts{
+				Tenant: "cgrates.org",
+			}, &acnts); err != nil {
+			t.Error(err)
+		}
+		if len(acnts) != 2 {
+			t.Fatal("expecting 2 accounts to be retrieved")
+		}
+		sort.Slice(acnts, func(i, j int) bool {
+			return acnts[i].ID > acnts[j].ID
+		})
+		if len(acnts[0].BalanceMap) != 1 || len(acnts[0].BalanceMap[utils.MetaMonetary]) != 1 {
+			t.Errorf("expected account to have only one balance of type *monetary, received %v", acnts[0])
+		}
+		balance := acnts[0].BalanceMap[utils.MetaMonetary][0]
+		if balance.ID != "balance_src" || balance.Value != 1 {
+			t.Errorf("received account with unexpected balance: %v", balance)
+		}
+		if len(acnts[1].BalanceMap) != 1 || len(acnts[1].BalanceMap[utils.MetaMonetary]) != 2 {
+			t.Errorf("expected account to have only one balance of type *monetary, received %v", acnts[1])
+		}
+		balance = acnts[1].BalanceMap[utils.MetaMonetary][1]
+		if balance.ID != "nonexistent_balance" || balance.Value != 3 {
+			t.Errorf("received account with unexpected balance: %v", balance)
+		}
+	})
+
 	t.Run("CheckTransferBalanceCDRs", func(t *testing.T) {
 		var cdrs []*engine.CDR
 		if err := client.Call(context.Background(), utils.CDRsV1GetCDRs, &utils.RPCCDRsFilterWithAPIOpts{
@@ -220,25 +265,45 @@ ACT_TRANSFER,*transfer_balance,"{""DestinationAccountID"":""cgrates.org:ACC_DEST
 			t.Fatal(err)
 		}
 
-		if len(cdrs) != 2 {
+		if len(cdrs) != 3 {
 			t.Errorf("expected to receive 2 cdrs: %v", utils.ToJSON(cdrs))
 		}
 
-		expectedCost := 2. // expected cost of first cdr
-		for _, cdr := range cdrs {
-			if cdr.Account != "ACC_SRC" ||
-				cdr.Destination != "ACC_DEST" ||
-				cdr.RunID != utils.MetaTransferBalance ||
-				cdr.Source != utils.CDRLog ||
-				cdr.ToR != utils.MetaVoice ||
-				cdr.ExtraFields["DestinationBalanceID"] != "balance_dest" ||
-				cdr.ExtraFields["SourceBalanceID"] != "balance_src" {
-				t.Errorf("unexpected cdr received: %v", utils.ToJSON(cdr))
-			}
-			if cdr.Cost != expectedCost {
-				t.Errorf("cost expected to be %v, received %v", expectedCost, cdr.Cost)
-			}
-			expectedCost = 4 // expected cost of second cdr
+		if cdrs[0].Account != "ACC_SRC" ||
+			cdrs[0].Destination != "ACC_DEST" ||
+			cdrs[0].RunID != utils.MetaTransferBalance ||
+			cdrs[0].Source != utils.CDRLog ||
+			cdrs[0].ToR != utils.MetaVoice ||
+			cdrs[0].ExtraFields["DestinationBalanceID"] != "balance_dest" ||
+			cdrs[0].ExtraFields["SourceBalanceID"] != "balance_src" {
+			t.Errorf("unexpected cdr received: %v", utils.ToJSON(cdrs[0]))
+		}
+		if cdrs[0].Cost != 2 {
+			t.Errorf("cost expected to be %v, received %v", 2, cdrs[0].Cost)
+		}
+		if cdrs[1].Account != "ACC_SRC" ||
+			cdrs[1].Destination != "ACC_DEST" ||
+			cdrs[1].RunID != utils.MetaTransferBalance ||
+			cdrs[1].Source != utils.CDRLog ||
+			cdrs[1].ToR != utils.MetaVoice ||
+			cdrs[1].ExtraFields["DestinationBalanceID"] != "nonexistent_balance" ||
+			cdrs[1].ExtraFields["SourceBalanceID"] != "balance_src" {
+			t.Errorf("unexpected cdr received: %v", utils.ToJSON(cdrs[1]))
+		}
+		if cdrs[1].Cost != 3 {
+			t.Errorf("cost expected to be %v, received %v", 2, cdrs[1].Cost)
+		}
+		if cdrs[2].Account != "ACC_SRC" ||
+			cdrs[2].Destination != "ACC_DEST" ||
+			cdrs[2].RunID != utils.MetaTransferBalance ||
+			cdrs[2].Source != utils.CDRLog ||
+			cdrs[2].ToR != utils.MetaVoice ||
+			cdrs[2].ExtraFields["DestinationBalanceID"] != "balance_dest" ||
+			cdrs[2].ExtraFields["SourceBalanceID"] != "balance_src" {
+			t.Errorf("unexpected cdr received: %v", utils.ToJSON(cdrs[2]))
+		}
+		if cdrs[2].Cost != 4 {
+			t.Errorf("cost expected to be %v, received %v", 2, cdrs[2].Cost)
 		}
 	})
 }

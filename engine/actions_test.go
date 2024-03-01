@@ -4424,7 +4424,8 @@ func TestActionsTransferBalance(t *testing.T) {
 					},
 				},
 			},
-			expectedErr: "destination balance not found or expired",
+			expectedSrcBalance:  7,
+			expectedDestBalance: 3,
 		},
 		{
 			name: "TransferUnitsNotSpecifiedOr0",
