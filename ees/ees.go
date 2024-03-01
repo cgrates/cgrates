@@ -116,6 +116,14 @@ func (eeS *EventExporterS) attrSProcessEvent(cgrEv *utils.CGREvent, attrIDs []st
 		return nil, err
 	}
 	if len(rplyEv.AlteredFields) != 0 {
+
+		// Restore original CostDetails in reply to preserve its type, which is lost after
+		// calling AttributeS via a *json connection. Assumes AttributeS does not modify
+		// CostDetails. If it does, we should probably add a type check against *engine.EventCost
+		// before to stay backwards compatible with *gob and *internal connections.
+		if _, has := cgrEv.Event[utils.CostDetails]; has {
+			rplyEv.Event[utils.CostDetails] = cgrEv.Event[utils.CostDetails]
+		}
 		return rplyEv.CGREvent, nil
 	}
 	return cgrEv, nil

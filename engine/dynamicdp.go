@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"encoding/json"
 	"fmt"
 
 	"github.com/nyaruka/phonenumbers"
@@ -71,6 +72,45 @@ func (dDP *dynamicDP) FieldAsInterface(fldPath []string) (val any, err error) {
 	if len(fldPath) == 0 {
 		return nil, utils.ErrNotFound
 	}
+
+	// Parsing deeper than the first level in *req.CostDetails requires it to be
+	// of type *EventCost. If not, we serialize and deserialize into an *EventCost.
+	if len(fldPath) > 3 &&
+		fldPath[0] == utils.MetaReq && fldPath[1] == utils.CostDetails {
+		if mp, canCast := dDP.initialDP.(utils.MapStorage); canCast {
+			if event, canCast := mp[utils.MetaReq].(map[string]any); canCast {
+				if cd, has := event[utils.CostDetails]; has {
+					var cdBytes []byte
+					switch cd := cd.(type) {
+					case *EventCost:
+						// Directly proceed if already *EventCost.
+						return cd.FieldAsInterface(fldPath[2:])
+					case string:
+						// Convert string to bytes for unmarshalling
+						// if it's a serialized *EventCost.
+						cdBytes = []byte(cd)
+					default:
+						// Marshal non-string types to JSON bytes
+						// for unmarshalling into *EventCost.
+						cdBytes, err = json.Marshal(cd)
+						if err != nil {
+							return nil, err
+						}
+					}
+					var ec EventCost
+					if err = json.Unmarshal(cdBytes, &ec); err != nil {
+						return nil, err
+					}
+
+					// Update CostDetails with the unmarshalled *EventCost
+					// to avoid repetitive serialization.
+					event[utils.CostDetails] = &ec
+					return ec.FieldAsInterface(fldPath[2:])
+				}
+			}
+		}
+	}
+
 	if initialDPPrefixes.Has(fldPath[0]) {
 		return dDP.initialDP.FieldAsInterface(fldPath)
 	}
