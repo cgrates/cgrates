@@ -329,6 +329,8 @@ const (
 	MemoryUsage      = "MemoryUsage"
 	RunningSince     = "RunningSince"
 	GoVersion        = "GoVersion"
+	CAPSAllocated    = "CAPSAllocated"
+	CAPSPeak         = "CAPSPeak"
 	//
 	XML                      = "xml"
 	MetaGOB                  = "*gob"
