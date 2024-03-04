@@ -166,7 +166,7 @@ func TestCMgetConnWithConfigUnsupportedTransport(t *testing.T) {
 	}
 
 	experr := fmt.Sprintf("Unsupported transport: <%+s>", "invalid")
-	rcv, err := cM.getConnWithConfig(context.Background(), connID, cfg.RPCConns()[connID], cc, true)
+	rcv, err := cM.getConnWithConfig(context.Background(), connID, cfg.RPCConns()[connID], cc)
 
 	if err == nil || err.Error() != experr {
 		t.Fatalf("expected: <%+v>, \nreceived: <%+v>", experr, err)
@@ -201,7 +201,7 @@ func TestCMgetConnWithConfigUnsupportedCodec(t *testing.T) {
 
 	experr := rpcclient.ErrUnsupportedCodec
 	var exp *rpcclient.RPCParallelClientPool
-	rcv, err := cM.getConnWithConfig(context.Background(), connID, cfg.RPCConns()[connID], cc, true)
+	rcv, err := cM.getConnWithConfig(context.Background(), connID, cfg.RPCConns()[connID], cc)
 
 	if err == nil || err != experr {
 		t.Fatalf("expected: <%+v>, \nreceived: <%+v>", experr, err)
@@ -236,7 +236,7 @@ func TestCMgetConnWithConfigEmptyTransport(t *testing.T) {
 
 	cM.connCache.Set(connID, nil, nil)
 
-	rcv, err := cM.getConnWithConfig(context.Background(), connID, cfg.RPCConns()[connID], cc, true)
+	rcv, err := cM.getConnWithConfig(context.Background(), connID, cfg.RPCConns()[connID], cc)
 
 	if err != nil {
 		t.Fatalf("expected: <%+v>, \nreceived: <%+v>", nil, err)
@@ -276,7 +276,7 @@ func TestCMgetConnWithConfigInternalRPCCodec(t *testing.T) {
 		connCache: ltcache.NewCache(-1, 0, true, nil),
 	}
 
-	rcv, err := cM.getConnWithConfig(context.Background(), connID, cfg.RPCConns()[connID], cc, true)
+	rcv, err := cM.getConnWithConfig(context.Background(), connID, cfg.RPCConns()[connID], cc)
 
 	if err != nil {
 		t.Fatalf("expected: <%+v>, \nreceived: <%+v>", nil, err)
@@ -309,7 +309,7 @@ func TestCMgetConnWithConfigInternalBiRPCCodecUnsupported(t *testing.T) {
 	}
 
 	experr := rpcclient.ErrUnsupportedCodec
-	rcv, err := cM.getConnWithConfig(context.Background(), connID, cfg.RPCConns()[connID], cc, true)
+	rcv, err := cM.getConnWithConfig(context.Background(), connID, cfg.RPCConns()[connID], cc)
 
 	if err == nil || err != experr {
 		t.Fatalf("expected: <%+v>, \nreceived: <%+v>", experr, err)

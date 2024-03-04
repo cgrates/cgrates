@@ -96,7 +96,7 @@ func (cM *ConnManager) getConn(ctx *context.Context, connID string) (conn birpc.
 			}
 		}
 	}
-	if conn, err = cM.getConnWithConfig(ctx, connID, connCfg, intChan, isInternalRPC); err != nil {
+	if conn, err = cM.getConnWithConfig(ctx, connID, connCfg, intChan); err != nil {
 		return
 	}
 	err = Cache.Set(utils.CacheRPCConnections, connID, conn, nil,
@@ -105,7 +105,7 @@ func (cM *ConnManager) getConn(ctx *context.Context, connID string) (conn birpc.
 }
 
 func (cM *ConnManager) getConnWithConfig(ctx *context.Context, connID string, connCfg *config.RPCConn,
-	intChan chan birpc.ClientConnector, isInternalRPC bool) (conn birpc.ClientConnector, err error) {
+	intChan chan birpc.ClientConnector) (conn birpc.ClientConnector, err error) {
 	if connCfg.Strategy == rpcclient.PoolParallel {
 		rpcConnCfg := connCfg.Conns[0] // for parallel we need only the first connection
 		codec := rpcclient.GOBrpc
@@ -219,7 +219,7 @@ func (cM *ConnManager) CallWithConnIDs(connIDs []string, subsHostIDs utils.Strin
 			// skip this pool if no connection matches
 			continue
 		}
-		if conn, err = cM.getConnWithConfig(context.TODO(), connID, newCfg, nil, false); err != nil {
+		if conn, err = cM.getConnWithConfig(context.TODO(), connID, newCfg, nil); err != nil {
 			continue
 		}
 		if err = conn.Call(context.TODO(), method, arg, reply); !rpcclient.IsNetworkError(err) {
