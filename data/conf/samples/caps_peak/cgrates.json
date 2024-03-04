@@ -1,0 +1,21 @@
+{
+
+    "general": {
+        "node_id": "CAPSPeakEngine"	
+    },
+
+    "logger": {
+        "level": 7
+    },  
+
+    "cores": {
+        "caps": 2,	
+        "caps_strategy": "*queue",
+        "caps_stats_interval": "100ms"
+    },
+
+    "admins": {
+        "enabled": true
+    }
+
+}

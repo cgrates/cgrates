@@ -41,6 +41,7 @@ func TestNewCoreService(t *testing.T) {
 		cfg:        cfgDflt,
 		CapsStats:  sts,
 		fileMEM:    "/tmp",
+		caps:       caps,
 	}
 	rcv := NewCoreService(cfgDflt, caps, nil, "/tmp", stopMemChan, stopchan, nil, nil)
 	if !reflect.DeepEqual(expected, rcv) {
@@ -95,7 +96,7 @@ func TestCoreServiceStatus(t *testing.T) {
 	}
 	utils.GitCommitDate = "wrong format"
 	utils.GitCommitHash = "73014DAA0C1D7EDCB532D5FE600B8A20D588CDF8"
-	if err := cores.V1Status(context.Background(), args, &reply); err != nil {
+	if err := cores.V1Status(nil, nil, &reply); err != nil {
 		t.Error(err)
 	}
 
