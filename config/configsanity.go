@@ -373,6 +373,16 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 	}
 	//Radius Agent
 	if cfg.radiusAgentCfg.Enabled {
+		if cfg.radiusAgentCfg.CoATemplate != "" {
+			if _, found := cfg.templates[cfg.radiusAgentCfg.CoATemplate]; !found {
+				return fmt.Errorf("<%s> CoA Template %s not defined", utils.RadiusAgent, cfg.radiusAgentCfg.CoATemplate)
+			}
+		}
+		if cfg.radiusAgentCfg.DMRTemplate != "" {
+			if _, found := cfg.templates[cfg.radiusAgentCfg.DMRTemplate]; !found {
+				return fmt.Errorf("<%s> DMR Template %s not defined", utils.RadiusAgent, cfg.radiusAgentCfg.DMRTemplate)
+			}
+		}
 		for _, connID := range cfg.radiusAgentCfg.SessionSConns {
 			if strings.HasPrefix(connID, utils.MetaInternal) && !cfg.sessionSCfg.Enabled {
 				return fmt.Errorf("<%s> not enabled but requested by <%s> component", utils.SessionS, utils.RadiusAgent)

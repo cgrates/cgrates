@@ -534,6 +534,9 @@ func (ra *RadiusAgent) V1AlterSessions(_ *context.Context, cgrEv utils.CGREvent,
 	if optTpl, err := cgrEv.OptAsString(utils.MetaRadCoATemplate); err == nil {
 		coaTpl = optTpl
 	}
+	if _, found := ra.cgrCfg.TemplatesCfg()[coaTpl]; !found {
+		return fmt.Errorf("%w: CoA Template %s", utils.ErrNotFound, coaTpl)
+	}
 
 	replyCode, err := ra.sendRadDaReq(radigo.CoARequest, coaTpl,
 		originID, utils.MapStorage(cgrEv.Event), nil)
