@@ -608,8 +608,22 @@ func TestConfigSanityRadiusAgent(t *testing.T) {
 		},
 	}
 
+	cfg.radiusAgentCfg.CoATemplate = "test_coa" // point to non-existent template
+	expected := "<RadiusAgent> CoA Template test_coa not defined"
+	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
+		t.Errorf("expected %v, received %v", expected, err)
+	}
+	cfg.radiusAgentCfg.CoATemplate = "*coa" // point to default CoA template
+
+	cfg.radiusAgentCfg.DMRTemplate = "test_dmr" // point to non-existent template
+	expected = "<RadiusAgent> DMR Template test_dmr not defined"
+	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
+		t.Errorf("expected %v, received %v", expected, err)
+	}
+	cfg.radiusAgentCfg.DMRTemplate = "*dmr" // point to default DMR template
+
 	cfg.radiusAgentCfg.SessionSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS)}
-	expected := "<SessionS> not enabled but requested by <RadiusAgent> component"
+	expected = "<SessionS> not enabled but requested by <RadiusAgent> component"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
@@ -683,6 +697,15 @@ func TestConfigSanityRadiusAgent(t *testing.T) {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
 	cfg.radiusAgentCfg.RequestProcessors[0].Filters = []string{"*string:~*req.Account:1001"}
+	if err := cfg.checkConfigSanity(); err != nil {
+		t.Error(err)
+	}
+
+	cfg.radiusAgentCfg.CoATemplate = ""
+	cfg.radiusAgentCfg.DMRTemplate = ""
+	if err := cfg.checkConfigSanity(); err != nil {
+		t.Error(err)
+	}
 }
 
 func TestConfigSanityDNSAgent(t *testing.T) {
