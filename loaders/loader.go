@@ -239,6 +239,12 @@ func (l *loader) process(ctx *context.Context, obj profile, lType, action string
 		cacheIDs = []string{utils.CacheAccounts, utils.CacheAccountsFilterIndexes}
 	}
 
+	// delay if needed before cache reload
+	if l.cfg.GeneralCfg().CachingDelay != 0 {
+		utils.Logger.Info(fmt.Sprintf("<%v> Delaying cache reload for %v", utils.LoaderS, l.cfg.GeneralCfg().CachingDelay))
+		time.Sleep(l.cfg.GeneralCfg().CachingDelay)
+	}
+
 	return engine.CallCache(l.connMgr, ctx, l.cacheConns,
 		utils.FirstNonEmpty(utils.IfaceAsString(opts[utils.MetaCache]), l.ldrCfg.Opts.Cache, l.cfg.GeneralCfg().DefaultCaching),
 		cacheArgs, cacheIDs, opts, false, l.ldrCfg.Tenant)

@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package admins
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/cgrates/birpc/context"
@@ -131,6 +132,11 @@ func (adms *AdminS) V1SetResourceProfile(ctx *context.Context, arg *engine.Resou
 			utils.CacheResources: loadID}); err != nil {
 		return utils.APIErrorHandler(err)
 	}
+	// delay if needed before cache call
+	if adms.cfg.GeneralCfg().CachingDelay != 0 {
+		utils.Logger.Info(fmt.Sprintf("<V1SetResourceProfile> Delaying cache call for %v", adms.cfg.GeneralCfg().CachingDelay))
+		time.Sleep(adms.cfg.GeneralCfg().CachingDelay)
+	}
 	//handle caching for ResourceProfile
 	if err = adms.CallCache(ctx, utils.IfaceAsString(arg.APIOpts[utils.MetaCache]), arg.Tenant, utils.CacheResourceProfiles,
 		arg.TenantID(), utils.EmptyString, &arg.FilterIDs, arg.APIOpts); err != nil {
@@ -151,6 +157,11 @@ func (adms *AdminS) V1RemoveResourceProfile(ctx *context.Context, arg *utils.Ten
 	}
 	if err := adms.dm.RemoveResourceProfile(ctx, tnt, arg.ID, true); err != nil {
 		return utils.APIErrorHandler(err)
+	}
+	// delay if needed before cache call
+	if adms.cfg.GeneralCfg().CachingDelay != 0 {
+		utils.Logger.Info(fmt.Sprintf("<V1RemoveResourceProfile> Delaying cache call for %v", adms.cfg.GeneralCfg().CachingDelay))
+		time.Sleep(adms.cfg.GeneralCfg().CachingDelay)
 	}
 	//handle caching for ResourceProfile
 	if err := adms.CallCache(ctx, utils.IfaceAsString(arg.APIOpts[utils.MetaCache]), tnt, utils.CacheResourceProfiles,

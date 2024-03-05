@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package admins
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/cgrates/birpc/context"
@@ -131,6 +132,11 @@ func (admS *AdminS) V1SetActionProfile(ctx *context.Context, ap *engine.ActionPr
 	if err := admS.dm.SetLoadIDs(ctx, map[string]int64{utils.CacheActionProfiles: time.Now().UnixNano()}); err != nil {
 		return utils.APIErrorHandler(err)
 	}
+	// delay if needed before cache call
+	if admS.cfg.GeneralCfg().CachingDelay != 0 {
+		utils.Logger.Info(fmt.Sprintf("<V1SetActionProfile> Delaying cache call for %v", admS.cfg.GeneralCfg().CachingDelay))
+		time.Sleep(admS.cfg.GeneralCfg().CachingDelay)
+	}
 	if err := admS.CallCache(ctx, utils.IfaceAsString(ap.APIOpts[utils.MetaCache]), ap.Tenant, utils.CacheActionProfiles,
 		ap.TenantID(), utils.EmptyString, &ap.FilterIDs, ap.APIOpts); err != nil {
 		return utils.APIErrorHandler(err)
@@ -155,6 +161,11 @@ func (admS *AdminS) V1RemoveActionProfile(ctx *context.Context, arg *utils.Tenan
 	//generate a loadID for CacheActionProfiles and store it in database
 	if err := admS.dm.SetLoadIDs(ctx, map[string]int64{utils.CacheActionProfiles: time.Now().UnixNano()}); err != nil {
 		return utils.APIErrorHandler(err)
+	}
+	// delay if needed before cache call
+	if admS.cfg.GeneralCfg().CachingDelay != 0 {
+		utils.Logger.Info(fmt.Sprintf("<V1RemoveActionProfile> Delaying cache call for %v", admS.cfg.GeneralCfg().CachingDelay))
+		time.Sleep(admS.cfg.GeneralCfg().CachingDelay)
 	}
 	if err := admS.CallCache(ctx, utils.IfaceAsString(arg.APIOpts[utils.MetaCache]), tnt, utils.CacheActionProfiles,
 		utils.ConcatenatedKey(tnt, arg.ID), utils.EmptyString, nil, arg.APIOpts); err != nil {

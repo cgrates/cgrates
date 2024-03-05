@@ -63,7 +63,7 @@ func newRPCClient(cfg *config.ListenCfg) (c *birpc.Client, err error) {
 
 func TestLoadConfig(t *testing.T) {
 	// DataDb
-	*cfgPath = path.Join(*dataDir, "conf", "samples", "tutmongo")
+	*cfgPath = path.Join(*dataDir, "conf", "samples", "tutmysql")
 	*dataDBType = utils.MetaRedis
 	*dataDBHost = "localhost"
 	*dataDBPort = "2012"
@@ -100,6 +100,7 @@ func TestLoadConfig(t *testing.T) {
 	*schedulerAddress = ""
 	// General
 	*cachingArg = utils.MetaLoad
+	*cachingDlay = 5 * time.Second
 	*dbDataEncoding = utils.MetaJSON
 	*timezone = utils.Local
 	ldrCfg := loadConfig()
@@ -118,6 +119,9 @@ func TestLoadConfig(t *testing.T) {
 	}
 	if ldrCfg.GeneralCfg().DefaultCaching != utils.MetaLoad {
 		t.Errorf("Expected %s received %s", utils.MetaLoad, ldrCfg.GeneralCfg().DefaultCaching)
+	}
+	if ldrCfg.GeneralCfg().CachingDelay != 5*time.Second {
+		t.Errorf("Expected %s received %s", 5*time.Second, ldrCfg.GeneralCfg().CachingDelay)
 	}
 	if *importID == utils.EmptyString {
 		t.Errorf("Expected importID to be populated")
@@ -213,6 +217,9 @@ var (
 
 		testLoadItCheckAttributes2,
 		testLoadItCheckAttributes,
+
+		testLoadItStartLoaderWithDelayWConf,
+		testLoadItStartLoaderWithDelayWFlag,
 	}
 )
 
@@ -296,6 +303,11 @@ func testLoadItCheckAttributes(t *testing.T) {
 	eAttrPrf.Weights[0] = &utils.DynamicWeight{
 		Weight: 20.0,
 	}
+
+	if err := db.SetAttributeProfileDrv(context.Background(), eAttrPrf); err != nil {
+		t.Fatal(err)
+	}
+
 	if attr, err := db.GetAttributeProfileDrv(context.Background(), "cgrates.org", "ATTR_1001_SIMPLEAUTH"); err != nil {
 		t.Fatal(err)
 	} else {
@@ -382,4 +394,32 @@ func testLoadItCheckTenantFlag(t *testing.T) {
 			go birpc.ServeCodec(jsonrpc.NewServerCodec(conn))
 		}
 	}()
+}
+
+func testLoadItStartLoaderWithDelayWConf(t *testing.T) {
+	cmd := exec.Command("cgr-loader", "-config_path="+path.Join(*dataDir, "conf", "samples", "apis_config_mysql"), "-path="+path.Join(*dataDir, "tariffplans", "tutorial"), "-caches_address=", "-scheduler_address=", "-tpid=TPID")
+	output := bytes.NewBuffer(nil)
+	outerr := bytes.NewBuffer(nil)
+	cmd.Stdout = output
+	cmd.Stderr = outerr
+	if err := cmd.Run(); err != nil {
+		t.Log(cmd.Args)
+		t.Log(output.String())
+		t.Log(outerr.String())
+		t.Fatal(err)
+	}
+}
+
+func testLoadItStartLoaderWithDelayWFlag(t *testing.T) {
+	cmd := exec.Command("cgr-loader", "-path="+path.Join(*dataDir, "tariffplans", "tutorial"), "-caches_address=", "-scheduler_address=", "-tpid=TPID", "-caching_delay=5s")
+	output := bytes.NewBuffer(nil)
+	outerr := bytes.NewBuffer(nil)
+	cmd.Stdout = output
+	cmd.Stderr = outerr
+	if err := cmd.Run(); err != nil {
+		t.Log(cmd.Args)
+		t.Log(output.String())
+		t.Log(outerr.String())
+		t.Fatal(err)
+	}
 }
