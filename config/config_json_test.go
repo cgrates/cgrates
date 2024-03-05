@@ -1000,7 +1000,7 @@ func TestRadiusAgentJsonCfg(t *testing.T) {
 		Request_processors:  &[]*ReqProcessorJsnCfg{},
 		Dmr_template:        utils.StringPointer(""),
 		Coa_template:        utils.StringPointer(""),
-		Client_da_addresses: map[string]string{},
+		Client_da_addresses: map[string]DAClientOptsJson{},
 	}
 	dfCgrJSONCfg, err := NewCgrJsonCfgFromBytes([]byte(CGRATES_CFG_JSON))
 	if err != nil {

@@ -34,7 +34,7 @@ type RadiusAgentCfg struct {
 	Listeners          []RadiusListener
 	ClientSecrets      map[string]string
 	ClientDictionaries map[string][]string
-	ClientDaAddresses  map[string]string
+	ClientDaAddresses  map[string]DAClientOpts
 	SessionSConns      []string
 	DMRTemplate        string
 	CoATemplate        string
@@ -82,10 +82,13 @@ func (ra *RadiusAgentCfg) loadFromJSONCfg(jsnCfg *RadiusAgentJsonCfg, separator 
 	}
 	if len(jsnCfg.Client_da_addresses) != 0 {
 		if ra.ClientDaAddresses == nil {
-			ra.ClientDaAddresses = make(map[string]string)
+			ra.ClientDaAddresses = make(map[string]DAClientOpts)
 		}
-		for k, v := range jsnCfg.Client_da_addresses {
-			ra.ClientDaAddresses[k] = v
+		ra.ClientDaAddresses = make(map[string]DAClientOpts, len(jsnCfg.Client_da_addresses))
+		for hostKey, clientOpts := range jsnCfg.Client_da_addresses {
+			cfg := DAClientOpts{}
+			cfg.loadFromJSONCfg(clientOpts, hostKey)
+			ra.ClientDaAddresses[hostKey] = cfg
 		}
 	}
 	if jsnCfg.Sessions_conns != nil {
@@ -177,9 +180,9 @@ func (ra *RadiusAgentCfg) AsMapInterface(separator string) (initialMP map[string
 	}
 	initialMP[utils.ClientDictionariesCfg] = clientDictionaries
 	if len(ra.ClientDaAddresses) != 0 {
-		clientDaAddresses := make(map[string]string)
+		clientDaAddresses := make(map[string]any)
 		for k, v := range ra.ClientDaAddresses {
-			clientDaAddresses[k] = v
+			clientDaAddresses[k] = v.AsMapInterface()
 		}
 		initialMP[utils.ClientDaAddressesCfg] = clientDaAddresses
 	}
@@ -213,9 +216,9 @@ func (ra RadiusAgentCfg) Clone() (cln *RadiusAgentCfg) {
 		cln.ClientDictionaries[k] = v
 	}
 	if len(ra.ClientDaAddresses) != 0 {
-		cln.ClientDaAddresses = make(map[string]string)
+		cln.ClientDaAddresses = make(map[string]DAClientOpts, len(ra.ClientDaAddresses))
 		for k, v := range ra.ClientDaAddresses {
-			cln.ClientDaAddresses[k] = v
+			cln.ClientDaAddresses[k] = *v.Clone()
 		}
 	}
 	if ra.RequestProcessors != nil {
@@ -225,4 +228,54 @@ func (ra RadiusAgentCfg) Clone() (cln *RadiusAgentCfg) {
 		}
 	}
 	return
+}
+
+type DAClientOpts struct {
+	Transport string                // transport protocol for Dynamic Authorization requests <UDP|TCP>.
+	Host      string                // alternative host for DA requests
+	Port      int                   // port for Dynamic Authorization requests
+	Flags     utils.FlagsWithParams // flags (only *log for now)
+}
+
+func (cda *DAClientOpts) loadFromJSONCfg(jsnCfg DAClientOptsJson, defaultHost string) error {
+	cda.Transport = utils.UDP
+	if jsnCfg.Transport != nil {
+		cda.Transport = *jsnCfg.Transport
+	}
+	cda.Host = defaultHost
+	if jsnCfg.Host != nil {
+		cda.Host = *jsnCfg.Host
+	}
+	cda.Port = 3799
+	if jsnCfg.Port != nil {
+		cda.Port = *jsnCfg.Port
+	}
+	if jsnCfg.Flags != nil {
+		cda.Flags = utils.FlagsWithParamsFromSlice(jsnCfg.Flags)
+	}
+	return nil
+}
+
+func (cda *DAClientOpts) Clone() *DAClientOpts {
+	cln := DAClientOpts{
+		Transport: cda.Transport,
+		Host:      cda.Host,
+		Port:      cda.Port,
+	}
+	if cda.Flags != nil {
+		cln.Flags = cda.Flags.Clone()
+	}
+	return &cln
+}
+
+func (cda *DAClientOpts) AsMapInterface() map[string]any {
+	mp := map[string]any{
+		utils.TransportCfg: cda.Transport,
+		utils.HostCfg:      cda.Host,
+		utils.PortCfg:      cda.Port,
+	}
+	if len(cda.Flags) != 0 {
+		mp[utils.FlagsCfg] = cda.Flags.SliceFlags()
+	}
+	return mp
 }

@@ -695,27 +695,35 @@ const CGRATES_CFG_JSON = `
 
 
 "radius_agent": {
-	"enabled": false,											// enables the radius agent: <true|false>
+	"enabled": false,								// enables the radius agent: <true|false>
 	"listeners":[
 		{
-			"network": "udp",									// network to listen on <udp|tcp>
-			"auth_address": "127.0.0.1:1812",					// address where to listen for radius authentication requests <x.y.z.y:1234>
-			"acct_address": "127.0.0.1:1813"					// address where to listen for radius accounting requests <x.y.z.y:1234>
+			"network": "udp",						// network to listen on <udp|tcp>
+			"auth_address": "127.0.0.1:1812",		// address where to listen for radius authentication requests <x.y.z.y:1234>
+			"acct_address": "127.0.0.1:1813"		// address where to listen for radius accounting requests <x.y.z.y:1234>
 		}
 	],	
-	"client_secrets": {											// hash containing secrets for clients connecting here <*default|$client_ip>
+	"client_secrets": {								// hash containing secrets for clients connecting here <*default|$client_ip>
 		"*default": "CGRateS.org"
 	},
-	"client_dictionaries": {									// per client path towards directory holding additional dictionaries to load (extra to RFC)
-		"*default": [											// key represents the client IP or catch-all <*default|$client_ip>
+	"client_dictionaries": {						// per client path towards directory holding additional dictionaries to load (extra to RFC)
+		"*default": [								// key represents the client IP or catch-all <*default|$client_ip>
 			"/usr/share/cgrates/radius/dict/",
 		]
 	},
-	"client_da_addresses": {},									// list of clients supporting dynamic authorization
+	"client_da_addresses": { 						// configuration for clients capable of handling Dynamic Authorization (CoA/DM) requests.
+		// "nasIdentifier": { 						// identifier for the NAS, typically the host from the initial RADIUS packet.
+		// 	"transport": "udp", 					// transport protocol for Dynamic Authorization requests, defaults to UDP.
+		// 	"host": "", 							// optionally specify an alternative host for DA requests. Defaults to the NAS identifier if empty.
+		// 	"port": 3799, 							// port for Dynamic Authorization requests, default is 3799.
+		// 	"flags": [] 							// additional options, currently supports *log for logging DA requests before sending.
+		// }
+	},
+	"requests_cache_key": "",
 	"sessions_conns": ["*internal"],
-	"dmr_template": "",											// template used to build the Disconnect-Request packet
-	"coa_template": "",											// template used to build the CoA-Request packet
-	"request_processors": [										// request processors to be applied to Radius messages
+	"dmr_template": "",								// template used to build the Disconnect-Request packet
+	"coa_template": "",								// template used to build the CoA-Request packet
+	"request_processors": [							// request processors to be applied to Radius messages
 	]
 },
 
