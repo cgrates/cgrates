@@ -47,7 +47,7 @@ var authReqs = engine.MapEvent{
 type BiRPCClient interface {
 	V1DisconnectSession(*context.Context, utils.AttrDisconnectSession, *string) error
 	V1GetActiveSessionIDs(*context.Context, string, *[]*SessionID) error
-	V1AlterSessions(*context.Context, utils.CGREvent, *string) error
+	V1AlterSession(*context.Context, utils.CGREvent, *string) error
 	V1DisconnectPeer(*context.Context, *utils.DPRArgs, *string) error
 	V1WarnDisconnect(*context.Context, map[string]any, *string) error
 }
