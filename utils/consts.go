@@ -1680,7 +1680,7 @@ const (
 	AgentV1                    = "AgentV1"
 	AgentV1DisconnectSession   = "AgentV1.DisconnectSession"
 	AgentV1GetActiveSessionIDs = "AgentV1.GetActiveSessionIDs"
-	AgentV1AlterSessions       = "AgentV1.AlterSessions"
+	AgentV1AlterSession        = "AgentV1.AlterSession"
 	AgentV1DisconnectPeer      = "AgentV1.DisconnectPeer"
 	AgentV1WarnDisconnect      = "AgentV1.WarnDisconnect"
 )

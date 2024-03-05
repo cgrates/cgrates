@@ -373,8 +373,8 @@ func (sma *AsteriskAgent) V1GetActiveSessionIDs(ctx *context.Context, ignParam s
 
 }
 
-// V1AlterSessions is used to implement the sessions.BiRPClient interface
-func (*AsteriskAgent) V1AlterSessions(*context.Context, utils.CGREvent, *string) error {
+// V1AlterSession is used to implement the sessions.BiRPClient interface
+func (*AsteriskAgent) V1AlterSession(*context.Context, utils.CGREvent, *string) error {
 	return utils.ErrNotImplemented
 }
 

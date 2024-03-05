@@ -4002,11 +4002,11 @@ func (sS *SessionS) BiRPCV1ProcessCDR(ctx *context.Context,
 		rply)
 }
 
-func (sS *SessionS) sendRar(ctx *context.Context, s *Session, apiOpts map[string]any, event map[string]any) (err error) {
+func (sS *SessionS) alterSession(ctx *context.Context, s *Session, apiOpts map[string]any, event map[string]any) (err error) {
 	clnt := sS.biJClnt(s.ClientConnID)
 	if clnt == nil {
 		return fmt.Errorf("calling %s requires bidirectional JSON connection, connID: <%s>",
-			utils.AgentV1AlterSessions, s.ClientConnID)
+			utils.AgentV1AlterSession, s.ClientConnID)
 	}
 
 	// Merge parameter event with the session event. Losing the EventStart OriginID
@@ -4027,7 +4027,7 @@ func (sS *SessionS) sendRar(ctx *context.Context, s *Session, apiOpts map[string
 	}
 
 	var rply string
-	if err = clnt.conn.Call(ctx, utils.AgentV1AlterSessions, args, &rply); err == utils.ErrNotImplemented {
+	if err = clnt.conn.Call(ctx, utils.AgentV1AlterSession, args, &rply); err == utils.ErrNotImplemented {
 		err = nil
 	}
 	return
@@ -4053,11 +4053,11 @@ func (sS *SessionS) BiRPCv1AlterSessions(ctx *context.Context,
 		if len(ss) == 0 {
 			continue
 		}
-		if errTerm := sS.sendRar(ctx, ss[0], args.APIOpts, args.Event); errTerm != nil {
+		if errTerm := sS.alterSession(ctx, ss[0], args.APIOpts, args.Event); errTerm != nil {
 			utils.Logger.Warning(
 				fmt.Sprintf(
-					"<%s> failed sending RAR for session with id: <%s>, err: <%s>",
-					utils.SessionS, ss[0].cgrID(), errTerm.Error()))
+					"<%s> altering session with id '%s' failed: <%v>",
+					utils.SessionS, ss[0].cgrID(), errTerm))
 			err = utils.ErrPartiallyExecuted
 		}
 	}

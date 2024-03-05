@@ -347,7 +347,7 @@ func (da *DiameterAgent) V1DisconnectSession(ctx *context.Context, args utils.At
 	case utils.MetaASR:
 		return da.sendASR(originID, reply)
 	case utils.MetaRAR:
-		return da.V1AlterSessions(ctx, utils.CGREvent{Event: args.EventStart}, reply)
+		return da.V1AlterSession(ctx, utils.CGREvent{Event: args.EventStart}, reply)
 	default:
 		return fmt.Errorf("Unsupported request type <%s>", da.cgrCfg.DiameterAgentCfg().ForcedDisconnect)
 	}
@@ -389,8 +389,8 @@ func (da *DiameterAgent) sendASR(originID string, reply *string) (err error) {
 	return
 }
 
-// V1AlterSessions  sends a rar message to diameter client
-func (da *DiameterAgent) V1AlterSessions(ctx *context.Context, cgrEv utils.CGREvent, reply *string) (err error) {
+// V1AlterSession  sends a rar message to diameter client
+func (da *DiameterAgent) V1AlterSession(ctx *context.Context, cgrEv utils.CGREvent, reply *string) (err error) {
 	originID, err := cgrEv.FieldAsString(utils.OriginID)
 	if err != nil {
 		return fmt.Errorf("could not retrieve OriginID: %w", err)
