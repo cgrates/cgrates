@@ -186,7 +186,7 @@ func TestRadiusCoADisconnect(t *testing.T) {
 	var testRadClient testNAS
 	secrets := radigo.NewSecrets(map[string]string{utils.MetaDefault: "CGRateS.org"})
 	dicts := radigo.NewDictionaries(map[string]*radigo.Dictionary{utils.MetaDefault: dictRad})
-	testRadClient.server = radigo.NewServer("udp", "127.0.0.1:3799", secrets, dicts,
+	testRadClient.server = radigo.NewServer(utils.UDP, "127.0.0.1:3799", secrets, dicts,
 		map[radigo.PacketCode]func(*radigo.Packet) (*radigo.Packet, error){
 			radigo.DisconnectRequest: handleDisconnect,
 			radigo.CoARequest:        handleCoA,

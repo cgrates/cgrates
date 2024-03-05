@@ -2261,6 +2261,8 @@ const (
 	ClientDaAddressesCfg  = "client_da_addresses"
 	DMRTemplateCfg        = "dmr_template"
 	CoATemplateCfg        = "coa_template"
+	HostCfg               = "host"
+	PortCfg               = "port"
 
 	// AttributeSCfg
 	IndexedSelectsCfg           = "indexed_selects"

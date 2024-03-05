@@ -22,6 +22,7 @@ import (
 	"errors"
 	"fmt"
 	"net"
+	"strconv"
 	"strings"
 	"sync"
 
@@ -575,12 +576,13 @@ func (ra *RadiusAgent) sendRadDaReq(requestType radigo.PacketCode, requestTempla
 		return 0, fmt.Errorf("could not set attributes: %w", err)
 	}
 
-	remoteAddr, remoteHost, err := dmRemoteAddr(packet.RemoteAddr().String(),
+	remoteAddr, remoteHost, err := daRequestAddress(packet.RemoteAddr().String(),
 		ra.cgrCfg.RadiusAgentCfg().ClientDaAddresses)
 	if err != nil {
 		return 0, fmt.Errorf("retrieving remote address failed: %w", err)
 	}
-	dynAuthClient, err := radigo.NewClient(utils.UDP, remoteAddr,
+	clientOpts := ra.cgrCfg.RadiusAgentCfg().ClientDaAddresses[remoteHost]
+	dynAuthClient, err := radigo.NewClient(clientOpts.Transport, remoteAddr,
 		ra.dacCfg.secrets.GetSecret(remoteHost),
 		ra.dacCfg.dicts.GetInstance(remoteHost),
 		ra.cgrCfg.GeneralCfg().ConnectAttempts, nil, utils.Logger)
@@ -591,6 +593,11 @@ func (ra *RadiusAgent) sendRadDaReq(requestType radigo.PacketCode, requestTempla
 	if err = radAppendAttributes(dynAuthReq, agReq.radDAReq); err != nil {
 		return 0, fmt.Errorf("could not append attributes to the request packet: %w", err)
 	}
+	if clientOpts.Flags.Has(utils.MetaLog) {
+		utils.Logger.Info(
+			fmt.Sprintf("<%s> LOG, sending %s for session with ID '%s' to '%s': %s",
+				utils.RadiusAgent, requestType, sessionID, remoteAddr, utils.ToJSON(dynAuthReq)))
+	}
 	dynAuthReply, err := dynAuthClient.SendRequest(dynAuthReq)
 	if err != nil {
 		return 0, fmt.Errorf("failed to send request: %w", err)
@@ -598,9 +605,9 @@ func (ra *RadiusAgent) sendRadDaReq(requestType radigo.PacketCode, requestTempla
 	return dynAuthReply.Code, nil
 }
 
-// dmRemoteAddr ranges over the client_da_addresses map and returns the address configured for a
+// daRequestAddress ranges over the client_da_addresses map and returns the address configured for a
 // specific client alongside the host.
-func dmRemoteAddr(remoteAddr string, dynAuthAddresses map[string]string) (string, string, error) {
+func daRequestAddress(remoteAddr string, dynAuthAddresses map[string]config.DAClientOpts) (string, string, error) {
 	if len(dynAuthAddresses) == 0 {
 		return "", "", utils.ErrNotFound
 	}
@@ -608,9 +615,10 @@ func dmRemoteAddr(remoteAddr string, dynAuthAddresses map[string]string) (string
 	if err != nil {
 		return "", "", err
 	}
-	for host, addr := range dynAuthAddresses {
+	for host, opts := range dynAuthAddresses {
 		if host == remoteHost {
-			return addr, host, nil
+			address := opts.Host + ":" + strconv.Itoa(opts.Port)
+			return address, host, nil
 		}
 	}
 	return "", "", utils.ErrNotFound

@@ -532,13 +532,20 @@ type RadiListenerJsnCfg struct {
 	Acct_Address *string
 }
 
+type DAClientOptsJson struct {
+	Transport *string
+	Host      *string
+	Port      *int
+	Flags     []string
+}
+
 // Radius Agent configuration section
 type RadiusAgentJsonCfg struct {
 	Enabled             *bool
 	Listeners           *[]*RadiListenerJsnCfg
 	Client_secrets      *map[string]string
 	Client_dictionaries *map[string][]string
-	Client_da_addresses map[string]string
+	Client_da_addresses map[string]DAClientOptsJson
 	Sessions_conns      *[]string
 	Dmr_template        *string
 	Coa_template        *string
