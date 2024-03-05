@@ -70,6 +70,11 @@ func (adms *AdminS) V1SetFilter(ctx *context.Context, arg *engine.FilterWithAPIO
 		map[string]int64{utils.CacheFilters: time.Now().UnixNano()}); err != nil {
 		return utils.APIErrorHandler(err)
 	}
+	// delay if needed before cache call
+	if adms.cfg.GeneralCfg().CachingDelay != 0 {
+		utils.Logger.Info(fmt.Sprintf("<V1SetFilter> Delaying cache call for %v", adms.cfg.GeneralCfg().CachingDelay))
+		time.Sleep(adms.cfg.GeneralCfg().CachingDelay)
+	}
 	//handle caching for Filter
 	if err := callCacheForFilter(adms.connMgr, adms.cfg.AdminSCfg().CachesConns, ctx,
 		utils.IfaceAsString(arg.APIOpts[utils.MetaCache]),
@@ -162,6 +167,11 @@ func (adms *AdminS) V1RemoveFilter(ctx *context.Context, arg *utils.TenantIDWith
 	//generate a loadID for CacheFilters and store it in database
 	if err := adms.dm.SetLoadIDs(ctx, map[string]int64{utils.CacheFilters: time.Now().UnixNano()}); err != nil {
 		return utils.APIErrorHandler(err)
+	}
+	// delay if needed before cache call
+	if adms.cfg.GeneralCfg().CachingDelay != 0 {
+		utils.Logger.Info(fmt.Sprintf("<V1RemoveFilter> Delaying cache call for %v", adms.cfg.GeneralCfg().CachingDelay))
+		time.Sleep(adms.cfg.GeneralCfg().CachingDelay)
 	}
 	//handle caching for Filter
 	if err := callCacheForFilter(adms.connMgr, adms.cfg.AdminSCfg().CachesConns, ctx,

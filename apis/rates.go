@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package apis
 
 import (
+	"fmt"
 	"sort"
 	"strings"
 	"time"
@@ -234,6 +235,11 @@ func (admS *AdminSv1) SetRateProfile(ctx *context.Context, args *utils.APIRatePr
 	if err := admS.dm.SetLoadIDs(ctx, map[string]int64{utils.CacheRateProfiles: time.Now().UnixNano()}); err != nil {
 		return utils.APIErrorHandler(err)
 	}
+	// delay if needed before cache call
+	if admS.cfg.GeneralCfg().CachingDelay != 0 {
+		utils.Logger.Info(fmt.Sprintf("<AdminSv1.SetRateProfile> Delaying cache call for %v", admS.cfg.GeneralCfg().CachingDelay))
+		time.Sleep(admS.cfg.GeneralCfg().CachingDelay)
+	}
 	if err := admS.CallCache(ctx, utils.IfaceAsString(args.APIOpts[utils.MetaCache]), args.Tenant, utils.CacheRateProfiles,
 		args.TenantID(), utils.EmptyString, &args.FilterIDs, args.APIOpts); err != nil {
 		return utils.APIErrorHandler(err)
@@ -257,6 +263,11 @@ func (admS *AdminSv1) RemoveRateProfileRates(ctx *context.Context, args *utils.R
 	//generate a loadID for CacheRateProfiles and store it in database
 	if err := admS.dm.SetLoadIDs(ctx, map[string]int64{utils.CacheRateProfiles: time.Now().UnixNano()}); err != nil {
 		return utils.APIErrorHandler(err)
+	}
+	// delay if needed before cache call
+	if admS.cfg.GeneralCfg().CachingDelay != 0 {
+		utils.Logger.Info(fmt.Sprintf("<AdminSv1.RemoveRateProfileRates> Delaying cache call for %v", admS.cfg.GeneralCfg().CachingDelay))
+		time.Sleep(admS.cfg.GeneralCfg().CachingDelay)
 	}
 	if err := admS.CallCache(ctx, utils.IfaceAsString(args.APIOpts[utils.MetaCache]), tnt, utils.CacheRateProfiles,
 		utils.ConcatenatedKey(tnt, args.ID), utils.EmptyString, nil, args.APIOpts); err != nil {
@@ -282,6 +293,11 @@ func (admS *AdminSv1) RemoveRateProfile(ctx *context.Context, arg *utils.TenantI
 	//generate a loadID for CacheAttributeProfiles and store it in database
 	if err := admS.dm.SetLoadIDs(ctx, map[string]int64{utils.CacheRateProfiles: time.Now().UnixNano()}); err != nil {
 		return utils.APIErrorHandler(err)
+	}
+	// delay if needed before cache call
+	if admS.cfg.GeneralCfg().CachingDelay != 0 {
+		utils.Logger.Info(fmt.Sprintf("<AdminSv1.RemoveRateProfile> Delaying cache call for %v", admS.cfg.GeneralCfg().CachingDelay))
+		time.Sleep(admS.cfg.GeneralCfg().CachingDelay)
 	}
 	if err := admS.CallCache(ctx, utils.IfaceAsString(arg.APIOpts[utils.MetaCache]), tnt, utils.CacheRateProfiles,
 		utils.ConcatenatedKey(tnt, arg.ID), utils.EmptyString, nil, arg.APIOpts); err != nil {

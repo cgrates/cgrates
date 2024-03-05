@@ -19,6 +19,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package apis
 
 import (
+	"fmt"
+	"time"
+
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -219,6 +222,11 @@ func (rplSv1 *ReplicatorSv1) SetThresholdProfile(ctx *context.Context, th *engin
 	if err = rplSv1.dm.DataDB().SetThresholdProfileDrv(ctx, th.ThresholdProfile); err != nil {
 		return
 	}
+	// delay if needed before cache call
+	if rplSv1.v1.cfg.GeneralCfg().CachingDelay != 0 {
+		utils.Logger.Info(fmt.Sprintf("<ReplicatorSv1.SetThresholdProfile> Delaying cache call for %v", rplSv1.v1.cfg.GeneralCfg().CachingDelay))
+		time.Sleep(rplSv1.v1.cfg.GeneralCfg().CachingDelay)
+	}
 	if err = rplSv1.v1.CallCache(ctx, utils.IfaceAsString(th.APIOpts[utils.MetaCache]),
 		th.Tenant, utils.CacheThresholdProfiles, th.TenantID(), utils.EmptyString, &th.FilterIDs, th.APIOpts); err != nil {
 		return
@@ -231,6 +239,11 @@ func (rplSv1 *ReplicatorSv1) SetThresholdProfile(ctx *context.Context, th *engin
 func (rplSv1 *ReplicatorSv1) SetThreshold(ctx *context.Context, th *engine.ThresholdWithAPIOpts, reply *string) (err error) {
 	if err = rplSv1.dm.DataDB().SetThresholdDrv(ctx, th.Threshold); err != nil {
 		return
+	}
+	// delay if needed before cache call
+	if rplSv1.v1.cfg.GeneralCfg().CachingDelay != 0 {
+		utils.Logger.Info(fmt.Sprintf("<ReplicatorSv1.SetThreshold> Delaying cache call for %v", rplSv1.v1.cfg.GeneralCfg().CachingDelay))
+		time.Sleep(rplSv1.v1.cfg.GeneralCfg().CachingDelay)
 	}
 	if err = rplSv1.v1.CallCache(ctx, utils.IfaceAsString(th.APIOpts[utils.MetaCache]),
 		th.Tenant, utils.CacheThresholds, th.TenantID(), utils.EmptyString, nil, th.APIOpts); err != nil {
@@ -245,6 +258,11 @@ func (rplSv1 *ReplicatorSv1) SetStatQueueProfile(ctx *context.Context, sq *engin
 	if err = rplSv1.dm.DataDB().SetStatQueueProfileDrv(ctx, sq.StatQueueProfile); err != nil {
 		return
 	}
+	// delay if needed before cache call
+	if rplSv1.v1.cfg.GeneralCfg().CachingDelay != 0 {
+		utils.Logger.Info(fmt.Sprintf("<ReplicatorSv1.SetStatQueueProfile> Delaying cache call for %v", rplSv1.v1.cfg.GeneralCfg().CachingDelay))
+		time.Sleep(rplSv1.v1.cfg.GeneralCfg().CachingDelay)
+	}
 	if err = rplSv1.v1.CallCache(ctx, utils.IfaceAsString(sq.APIOpts[utils.MetaCache]),
 		sq.Tenant, utils.CacheStatQueueProfiles, sq.TenantID(), utils.EmptyString, &sq.FilterIDs, sq.APIOpts); err != nil {
 		return
@@ -257,6 +275,11 @@ func (rplSv1 *ReplicatorSv1) SetStatQueueProfile(ctx *context.Context, sq *engin
 func (rplSv1 *ReplicatorSv1) SetStatQueue(ctx *context.Context, sq *engine.StatQueueWithAPIOpts, reply *string) (err error) {
 	if err = rplSv1.dm.DataDB().SetStatQueueDrv(ctx, nil, sq.StatQueue); err != nil {
 		return
+	}
+	// delay if needed before cache call
+	if rplSv1.v1.cfg.GeneralCfg().CachingDelay != 0 {
+		utils.Logger.Info(fmt.Sprintf("<ReplicatorSv1.SetStatQueue> Delaying cache call for %v", rplSv1.v1.cfg.GeneralCfg().CachingDelay))
+		time.Sleep(rplSv1.v1.cfg.GeneralCfg().CachingDelay)
 	}
 	if err = rplSv1.v1.CallCache(ctx, utils.IfaceAsString(sq.APIOpts[utils.MetaCache]),
 		sq.StatQueue.Tenant, utils.CacheStatQueues, sq.StatQueue.TenantID(), utils.EmptyString, nil, sq.APIOpts); err != nil {
@@ -271,6 +294,11 @@ func (rplSv1 *ReplicatorSv1) SetFilter(ctx *context.Context, fltr *engine.Filter
 	if err = rplSv1.dm.DataDB().SetFilterDrv(ctx, fltr.Filter); err != nil {
 		return
 	}
+	// delay if needed before cache call
+	if rplSv1.v1.cfg.GeneralCfg().CachingDelay != 0 {
+		utils.Logger.Info(fmt.Sprintf("<ReplicatorSv1.SetFilter> Delaying cache call for %v", rplSv1.v1.cfg.GeneralCfg().CachingDelay))
+		time.Sleep(rplSv1.v1.cfg.GeneralCfg().CachingDelay)
+	}
 	if err = rplSv1.v1.CallCache(ctx, utils.IfaceAsString(fltr.APIOpts[utils.MetaCache]),
 		fltr.Tenant, utils.CacheFilters, fltr.TenantID(), utils.EmptyString, nil, fltr.APIOpts); err != nil {
 		return
@@ -283,6 +311,11 @@ func (rplSv1 *ReplicatorSv1) SetFilter(ctx *context.Context, fltr *engine.Filter
 func (rplSv1 *ReplicatorSv1) SetResourceProfile(ctx *context.Context, rs *engine.ResourceProfileWithAPIOpts, reply *string) (err error) {
 	if err = rplSv1.dm.DataDB().SetResourceProfileDrv(ctx, rs.ResourceProfile); err != nil {
 		return
+	}
+	// delay if needed before cache call
+	if rplSv1.v1.cfg.GeneralCfg().CachingDelay != 0 {
+		utils.Logger.Info(fmt.Sprintf("<ReplicatorSv1.SetResourceProfile> Delaying cache call for %v", rplSv1.v1.cfg.GeneralCfg().CachingDelay))
+		time.Sleep(rplSv1.v1.cfg.GeneralCfg().CachingDelay)
 	}
 	if err = rplSv1.v1.CallCache(ctx, utils.IfaceAsString(rs.APIOpts[utils.MetaCache]),
 		rs.Tenant, utils.CacheResourceProfiles, rs.TenantID(), utils.EmptyString, &rs.FilterIDs, rs.APIOpts); err != nil {
@@ -297,6 +330,11 @@ func (rplSv1 *ReplicatorSv1) SetResource(ctx *context.Context, rs *engine.Resour
 	if err = rplSv1.dm.DataDB().SetResourceDrv(ctx, rs.Resource); err != nil {
 		return
 	}
+	// delay if needed before cache call
+	if rplSv1.v1.cfg.GeneralCfg().CachingDelay != 0 {
+		utils.Logger.Info(fmt.Sprintf("<ReplicatorSv1.SetResource> Delaying cache call for %v", rplSv1.v1.cfg.GeneralCfg().CachingDelay))
+		time.Sleep(rplSv1.v1.cfg.GeneralCfg().CachingDelay)
+	}
 	if err = rplSv1.v1.CallCache(ctx, utils.IfaceAsString(rs.APIOpts[utils.MetaCache]),
 		rs.Tenant, utils.CacheResources, rs.TenantID(), utils.EmptyString, nil, rs.APIOpts); err != nil {
 		return
@@ -309,6 +347,11 @@ func (rplSv1 *ReplicatorSv1) SetResource(ctx *context.Context, rs *engine.Resour
 func (rplSv1 *ReplicatorSv1) SetRouteProfile(ctx *context.Context, sp *engine.RouteProfileWithAPIOpts, reply *string) (err error) {
 	if err = rplSv1.dm.DataDB().SetRouteProfileDrv(ctx, sp.RouteProfile); err != nil {
 		return
+	}
+	// delay if needed before cache call
+	if rplSv1.v1.cfg.GeneralCfg().CachingDelay != 0 {
+		utils.Logger.Info(fmt.Sprintf("<ReplicatorSv1.SetRouteProfile> Delaying cache call for %v", rplSv1.v1.cfg.GeneralCfg().CachingDelay))
+		time.Sleep(rplSv1.v1.cfg.GeneralCfg().CachingDelay)
 	}
 	if err = rplSv1.v1.CallCache(ctx, utils.IfaceAsString(sp.APIOpts[utils.MetaCache]),
 		sp.Tenant, utils.CacheRouteProfiles, sp.TenantID(), utils.EmptyString, &sp.FilterIDs, sp.APIOpts); err != nil {
@@ -323,6 +366,11 @@ func (rplSv1 *ReplicatorSv1) SetAttributeProfile(ctx *context.Context, ap *engin
 	if err = rplSv1.dm.DataDB().SetAttributeProfileDrv(ctx, ap.AttributeProfile); err != nil {
 		return
 	}
+	// delay if needed before cache call
+	if rplSv1.v1.cfg.GeneralCfg().CachingDelay != 0 {
+		utils.Logger.Info(fmt.Sprintf("<ReplicatorSv1.SetAttributeProfile> Delaying cache call for %v", rplSv1.v1.cfg.GeneralCfg().CachingDelay))
+		time.Sleep(rplSv1.v1.cfg.GeneralCfg().CachingDelay)
+	}
 	if err = rplSv1.v1.CallCache(ctx, utils.IfaceAsString(ap.APIOpts[utils.MetaCache]),
 		ap.Tenant, utils.CacheAttributeProfiles, ap.TenantID(), utils.EmptyString, &ap.FilterIDs, ap.APIOpts); err != nil {
 		return
@@ -335,6 +383,11 @@ func (rplSv1 *ReplicatorSv1) SetAttributeProfile(ctx *context.Context, ap *engin
 func (rplSv1 *ReplicatorSv1) SetChargerProfile(ctx *context.Context, cp *engine.ChargerProfileWithAPIOpts, reply *string) (err error) {
 	if err = rplSv1.dm.DataDB().SetChargerProfileDrv(ctx, cp.ChargerProfile); err != nil {
 		return
+	}
+	// delay if needed before cache call
+	if rplSv1.v1.cfg.GeneralCfg().CachingDelay != 0 {
+		utils.Logger.Info(fmt.Sprintf("<ReplicatorSv1.SetChargerProfile> Delaying cache call for %v", rplSv1.v1.cfg.GeneralCfg().CachingDelay))
+		time.Sleep(rplSv1.v1.cfg.GeneralCfg().CachingDelay)
 	}
 	if err = rplSv1.v1.CallCache(ctx, utils.IfaceAsString(cp.APIOpts[utils.MetaCache]),
 		cp.Tenant, utils.CacheChargerProfiles, cp.TenantID(), utils.EmptyString, &cp.FilterIDs, cp.APIOpts); err != nil {
@@ -349,6 +402,11 @@ func (rplSv1 *ReplicatorSv1) SetDispatcherProfile(ctx *context.Context, dpp *eng
 	if err = rplSv1.dm.DataDB().SetDispatcherProfileDrv(ctx, dpp.DispatcherProfile); err != nil {
 		return
 	}
+	// delay if needed before cache call
+	if rplSv1.v1.cfg.GeneralCfg().CachingDelay != 0 {
+		utils.Logger.Info(fmt.Sprintf("<ReplicatorSv1.SetDispatcherProfile> Delaying cache call for %v", rplSv1.v1.cfg.GeneralCfg().CachingDelay))
+		time.Sleep(rplSv1.v1.cfg.GeneralCfg().CachingDelay)
+	}
 	if err = rplSv1.v1.CallCache(ctx, utils.IfaceAsString(dpp.APIOpts[utils.MetaCache]),
 		dpp.Tenant, utils.CacheDispatcherProfiles, dpp.TenantID(), utils.EmptyString, &dpp.FilterIDs, dpp.APIOpts); err != nil {
 		return
@@ -361,6 +419,11 @@ func (rplSv1 *ReplicatorSv1) SetDispatcherProfile(ctx *context.Context, dpp *eng
 func (rplSv1 *ReplicatorSv1) SetDispatcherHost(ctx *context.Context, dpp *engine.DispatcherHostWithAPIOpts, reply *string) (err error) {
 	if err = rplSv1.dm.DataDB().SetDispatcherHostDrv(ctx, dpp.DispatcherHost); err != nil {
 		return
+	}
+	// delay if needed before cache call
+	if rplSv1.v1.cfg.GeneralCfg().CachingDelay != 0 {
+		utils.Logger.Info(fmt.Sprintf("<ReplicatorSv1.SetDispatcherHost> Delaying cache call for %v", rplSv1.v1.cfg.GeneralCfg().CachingDelay))
+		time.Sleep(rplSv1.v1.cfg.GeneralCfg().CachingDelay)
 	}
 	if err = rplSv1.v1.CallCache(ctx, utils.IfaceAsString(dpp.APIOpts[utils.MetaCache]),
 		dpp.Tenant, utils.CacheDispatcherHosts, dpp.TenantID(), utils.EmptyString, nil, dpp.APIOpts); err != nil {
@@ -409,6 +472,11 @@ func (rplSv1 *ReplicatorSv1) RemoveThreshold(ctx *context.Context, args *utils.T
 	if err = rplSv1.dm.DataDB().RemoveThresholdDrv(ctx, args.Tenant, args.ID); err != nil {
 		return
 	}
+	// delay if needed before cache call
+	if rplSv1.v1.cfg.GeneralCfg().CachingDelay != 0 {
+		utils.Logger.Info(fmt.Sprintf("<ReplicatorSv1.RemoveThreshold> Delaying cache call for %v", rplSv1.v1.cfg.GeneralCfg().CachingDelay))
+		time.Sleep(rplSv1.v1.cfg.GeneralCfg().CachingDelay)
+	}
 	if err = rplSv1.v1.CallCache(ctx, utils.IfaceAsString(args.APIOpts[utils.MetaCache]),
 		args.Tenant, utils.CacheThresholds, args.TenantID.TenantID(), utils.EmptyString, nil, args.APIOpts); err != nil {
 		return
@@ -432,6 +500,11 @@ func (rplSv1 *ReplicatorSv1) RemoveStatQueue(ctx *context.Context, args *utils.T
 	if err = rplSv1.dm.DataDB().RemStatQueueDrv(ctx, args.Tenant, args.ID); err != nil {
 		return
 	}
+	// delay if needed before cache call
+	if rplSv1.v1.cfg.GeneralCfg().CachingDelay != 0 {
+		utils.Logger.Info(fmt.Sprintf("<ReplicatorSv1.RemoveStatQueue> Delaying cache call for %v", rplSv1.v1.cfg.GeneralCfg().CachingDelay))
+		time.Sleep(rplSv1.v1.cfg.GeneralCfg().CachingDelay)
+	}
 	if err = rplSv1.v1.CallCache(ctx, utils.IfaceAsString(args.APIOpts[utils.MetaCache]),
 		args.Tenant, utils.CacheStatQueues, args.TenantID.TenantID(), utils.EmptyString, nil, args.APIOpts); err != nil {
 		return
@@ -444,6 +517,11 @@ func (rplSv1 *ReplicatorSv1) RemoveStatQueue(ctx *context.Context, args *utils.T
 func (rplSv1 *ReplicatorSv1) RemoveFilter(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *string) (err error) {
 	if err = rplSv1.dm.DataDB().RemoveFilterDrv(ctx, args.Tenant, args.ID); err != nil {
 		return
+	}
+	// delay if needed before cache call
+	if rplSv1.v1.cfg.GeneralCfg().CachingDelay != 0 {
+		utils.Logger.Info(fmt.Sprintf("<ReplicatorSv1.RemoveFilter> Delaying cache call for %v", rplSv1.v1.cfg.GeneralCfg().CachingDelay))
+		time.Sleep(rplSv1.v1.cfg.GeneralCfg().CachingDelay)
 	}
 	if err = rplSv1.v1.CallCache(ctx, utils.IfaceAsString(args.APIOpts[utils.MetaCache]),
 		args.Tenant, utils.CacheFilters, args.TenantID.TenantID(), utils.EmptyString, nil, args.APIOpts); err != nil {
@@ -458,6 +536,11 @@ func (rplSv1 *ReplicatorSv1) RemoveThresholdProfile(ctx *context.Context, args *
 	if err = rplSv1.dm.DataDB().RemThresholdProfileDrv(ctx, args.Tenant, args.ID); err != nil {
 		return
 	}
+	// delay if needed before cache call
+	if rplSv1.v1.cfg.GeneralCfg().CachingDelay != 0 {
+		utils.Logger.Info(fmt.Sprintf("<ReplicatorSv1.RemoveThresholdProfile> Delaying cache call for %v", rplSv1.v1.cfg.GeneralCfg().CachingDelay))
+		time.Sleep(rplSv1.v1.cfg.GeneralCfg().CachingDelay)
+	}
 	if err = rplSv1.v1.CallCache(ctx, utils.IfaceAsString(args.APIOpts[utils.MetaCache]),
 		args.Tenant, utils.CacheThresholdProfiles, args.TenantID.TenantID(), utils.EmptyString, nil, args.APIOpts); err != nil {
 		return
@@ -470,6 +553,11 @@ func (rplSv1 *ReplicatorSv1) RemoveThresholdProfile(ctx *context.Context, args *
 func (rplSv1 *ReplicatorSv1) RemoveStatQueueProfile(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *string) (err error) {
 	if err = rplSv1.dm.DataDB().RemStatQueueProfileDrv(ctx, args.Tenant, args.ID); err != nil {
 		return
+	}
+	// delay if needed before cache call
+	if rplSv1.v1.cfg.GeneralCfg().CachingDelay != 0 {
+		utils.Logger.Info(fmt.Sprintf("<ReplicatorSv1.RemoveStatQueueProfile> Delaying cache call for %v", rplSv1.v1.cfg.GeneralCfg().CachingDelay))
+		time.Sleep(rplSv1.v1.cfg.GeneralCfg().CachingDelay)
 	}
 	if err = rplSv1.v1.CallCache(ctx, utils.IfaceAsString(args.APIOpts[utils.MetaCache]),
 		args.Tenant, utils.CacheStatQueueProfiles, args.TenantID.TenantID(), utils.EmptyString, nil, args.APIOpts); err != nil {
@@ -484,6 +572,11 @@ func (rplSv1 *ReplicatorSv1) RemoveResource(ctx *context.Context, args *utils.Te
 	if err = rplSv1.dm.DataDB().RemoveResourceDrv(ctx, args.Tenant, args.ID); err != nil {
 		return
 	}
+	// delay if needed before cache call
+	if rplSv1.v1.cfg.GeneralCfg().CachingDelay != 0 {
+		utils.Logger.Info(fmt.Sprintf("<ReplicatorSv1.RemoveResource> Delaying cache call for %v", rplSv1.v1.cfg.GeneralCfg().CachingDelay))
+		time.Sleep(rplSv1.v1.cfg.GeneralCfg().CachingDelay)
+	}
 	if err = rplSv1.v1.CallCache(ctx, utils.IfaceAsString(args.APIOpts[utils.MetaCache]),
 		args.Tenant, utils.CacheResources, args.TenantID.TenantID(), utils.EmptyString, nil, args.APIOpts); err != nil {
 		return
@@ -496,6 +589,11 @@ func (rplSv1 *ReplicatorSv1) RemoveResource(ctx *context.Context, args *utils.Te
 func (rplSv1 *ReplicatorSv1) RemoveResourceProfile(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *string) (err error) {
 	if err = rplSv1.dm.DataDB().RemoveResourceProfileDrv(ctx, args.Tenant, args.ID); err != nil {
 		return
+	}
+	// delay if needed before cache call
+	if rplSv1.v1.cfg.GeneralCfg().CachingDelay != 0 {
+		utils.Logger.Info(fmt.Sprintf("<ReplicatorSv1.RemoveResourceProfile> Delaying cache call for %v", rplSv1.v1.cfg.GeneralCfg().CachingDelay))
+		time.Sleep(rplSv1.v1.cfg.GeneralCfg().CachingDelay)
 	}
 	if err = rplSv1.v1.CallCache(ctx, utils.IfaceAsString(args.APIOpts[utils.MetaCache]),
 		args.Tenant, utils.CacheResourceProfiles, args.TenantID.TenantID(), utils.EmptyString, nil, args.APIOpts); err != nil {
@@ -510,6 +608,11 @@ func (rplSv1 *ReplicatorSv1) RemoveRouteProfile(ctx *context.Context, args *util
 	if err = rplSv1.dm.DataDB().RemoveRouteProfileDrv(ctx, args.Tenant, args.ID); err != nil {
 		return
 	}
+	// delay if needed before cache call
+	if rplSv1.v1.cfg.GeneralCfg().CachingDelay != 0 {
+		utils.Logger.Info(fmt.Sprintf("<ReplicatorSv1.RemoveRouteProfile> Delaying cache call for %v", rplSv1.v1.cfg.GeneralCfg().CachingDelay))
+		time.Sleep(rplSv1.v1.cfg.GeneralCfg().CachingDelay)
+	}
 	if err = rplSv1.v1.CallCache(ctx, utils.IfaceAsString(args.APIOpts[utils.MetaCache]),
 		args.Tenant, utils.CacheRouteProfiles, args.TenantID.TenantID(), utils.EmptyString, nil, args.APIOpts); err != nil {
 		return
@@ -522,6 +625,11 @@ func (rplSv1 *ReplicatorSv1) RemoveRouteProfile(ctx *context.Context, args *util
 func (rplSv1 *ReplicatorSv1) RemoveAttributeProfile(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *string) (err error) {
 	if err = rplSv1.dm.DataDB().RemoveAttributeProfileDrv(ctx, args.Tenant, args.ID); err != nil {
 		return
+	}
+	// delay if needed before cache call
+	if rplSv1.v1.cfg.GeneralCfg().CachingDelay != 0 {
+		utils.Logger.Info(fmt.Sprintf("<ReplicatorSv1.RemoveAttributeProfile> Delaying cache call for %v", rplSv1.v1.cfg.GeneralCfg().CachingDelay))
+		time.Sleep(rplSv1.v1.cfg.GeneralCfg().CachingDelay)
 	}
 	if err = rplSv1.v1.CallCache(ctx, utils.IfaceAsString(args.APIOpts[utils.MetaCache]),
 		args.Tenant, utils.CacheAttributeProfiles, args.TenantID.TenantID(), utils.EmptyString, nil, args.APIOpts); err != nil {
@@ -536,6 +644,11 @@ func (rplSv1 *ReplicatorSv1) RemoveChargerProfile(ctx *context.Context, args *ut
 	if err = rplSv1.dm.DataDB().RemoveChargerProfileDrv(ctx, args.Tenant, args.ID); err != nil {
 		return
 	}
+	// delay if needed before cache call
+	if rplSv1.v1.cfg.GeneralCfg().CachingDelay != 0 {
+		utils.Logger.Info(fmt.Sprintf("<ReplicatorSv1.RemoveChargerProfile> Delaying cache call for %v", rplSv1.v1.cfg.GeneralCfg().CachingDelay))
+		time.Sleep(rplSv1.v1.cfg.GeneralCfg().CachingDelay)
+	}
 	if err = rplSv1.v1.CallCache(ctx, utils.IfaceAsString(args.APIOpts[utils.MetaCache]),
 		args.Tenant, utils.CacheChargerProfiles, args.TenantID.TenantID(), utils.EmptyString, nil, args.APIOpts); err != nil {
 		return
@@ -548,6 +661,11 @@ func (rplSv1 *ReplicatorSv1) RemoveChargerProfile(ctx *context.Context, args *ut
 func (rplSv1 *ReplicatorSv1) RemoveDispatcherProfile(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *string) (err error) {
 	if err = rplSv1.dm.DataDB().RemoveDispatcherProfileDrv(ctx, args.Tenant, args.ID); err != nil {
 		return
+	}
+	// delay if needed before cache call
+	if rplSv1.v1.cfg.GeneralCfg().CachingDelay != 0 {
+		utils.Logger.Info(fmt.Sprintf("<ReplicatorSv1.RemoveDispatcherProfile> Delaying cache call for %v", rplSv1.v1.cfg.GeneralCfg().CachingDelay))
+		time.Sleep(rplSv1.v1.cfg.GeneralCfg().CachingDelay)
 	}
 	if err = rplSv1.v1.CallCache(ctx, utils.IfaceAsString(args.APIOpts[utils.MetaCache]),
 		args.Tenant, utils.CacheDispatcherProfiles, args.TenantID.TenantID(), utils.EmptyString, nil, args.APIOpts); err != nil {
@@ -562,6 +680,11 @@ func (rplSv1 *ReplicatorSv1) RemoveDispatcherHost(ctx *context.Context, args *ut
 	if err = rplSv1.dm.DataDB().RemoveDispatcherHostDrv(ctx, args.Tenant, args.ID); err != nil {
 		return
 	}
+	// delay if needed before cache call
+	if rplSv1.v1.cfg.GeneralCfg().CachingDelay != 0 {
+		utils.Logger.Info(fmt.Sprintf("<ReplicatorSv1.RemoveDispatcherHost> Delaying cache call for %v", rplSv1.v1.cfg.GeneralCfg().CachingDelay))
+		time.Sleep(rplSv1.v1.cfg.GeneralCfg().CachingDelay)
+	}
 	if err = rplSv1.v1.CallCache(ctx, utils.IfaceAsString(args.APIOpts[utils.MetaCache]),
 		args.Tenant, utils.CacheDispatcherHosts, args.TenantID.TenantID(), utils.EmptyString, nil, args.APIOpts); err != nil {
 		return
@@ -574,6 +697,11 @@ func (rplSv1 *ReplicatorSv1) RemoveDispatcherHost(ctx *context.Context, args *ut
 func (rplSv1 *ReplicatorSv1) RemoveIndexes(ctx *context.Context, args *utils.GetIndexesArg, reply *string) (err error) {
 	if err = rplSv1.dm.DataDB().RemoveIndexesDrv(ctx, args.IdxItmType, args.TntCtx, args.IdxKey); err != nil {
 		return
+	}
+	// delay if needed before cache call
+	if rplSv1.v1.cfg.GeneralCfg().CachingDelay != 0 {
+		utils.Logger.Info(fmt.Sprintf("<ReplicatorSv1.RemoveIndexes> Delaying cache call for %v", rplSv1.v1.cfg.GeneralCfg().CachingDelay))
+		time.Sleep(rplSv1.v1.cfg.GeneralCfg().CachingDelay)
 	}
 	if err = rplSv1.v1.CallCache(ctx, utils.IfaceAsString(args.APIOpts[utils.MetaCache]),
 		args.Tenant, args.IdxItmType, utils.ConcatenatedKey(args.TntCtx, args.IdxKey), utils.EmptyString, nil, args.APIOpts); err != nil {
@@ -614,6 +742,11 @@ func (rplSv1 *ReplicatorSv1) SetRateProfile(ctx *context.Context, sp *utils.Rate
 	if err = rplSv1.dm.DataDB().SetRateProfileDrv(ctx, sp.RateProfile, optOverwrite); err != nil {
 		return
 	}
+	// delay if needed before cache call
+	if rplSv1.v1.cfg.GeneralCfg().CachingDelay != 0 {
+		utils.Logger.Info(fmt.Sprintf("<ReplicatorSv1.SetRateProfile> Delaying cache call for %v", rplSv1.v1.cfg.GeneralCfg().CachingDelay))
+		time.Sleep(rplSv1.v1.cfg.GeneralCfg().CachingDelay)
+	}
 	if err = rplSv1.v1.CallCache(ctx, utils.IfaceAsString(sp.APIOpts[utils.MetaCache]),
 		sp.Tenant, utils.CacheRateProfiles, sp.TenantID(), utils.EmptyString, &sp.FilterIDs, sp.APIOpts); err != nil {
 		return
@@ -624,6 +757,11 @@ func (rplSv1 *ReplicatorSv1) SetRateProfile(ctx *context.Context, sp *utils.Rate
 func (rplSv1 *ReplicatorSv1) SetActionProfile(ctx *context.Context, sp *engine.ActionProfileWithAPIOpts, reply *string) (err error) {
 	if err = rplSv1.dm.DataDB().SetActionProfileDrv(ctx, sp.ActionProfile); err != nil {
 		return
+	}
+	// delay if needed before cache call
+	if rplSv1.v1.cfg.GeneralCfg().CachingDelay != 0 {
+		utils.Logger.Info(fmt.Sprintf("<ReplicatorSv1.SetActionProfile> Delaying cache call for %v", rplSv1.v1.cfg.GeneralCfg().CachingDelay))
+		time.Sleep(rplSv1.v1.cfg.GeneralCfg().CachingDelay)
 	}
 	if err = rplSv1.v1.CallCache(ctx, utils.IfaceAsString(sp.APIOpts[utils.MetaCache]),
 		sp.Tenant, utils.CacheActionProfiles, sp.TenantID(), utils.EmptyString, &sp.FilterIDs, sp.APIOpts); err != nil {
@@ -637,6 +775,11 @@ func (rplSv1 *ReplicatorSv1) RemoveRateProfile(ctx *context.Context, args *utils
 	if err = rplSv1.dm.DataDB().RemoveRateProfileDrv(ctx, args.Tenant, args.ID, nil); err != nil {
 		return
 	}
+	// delay if needed before cache call
+	if rplSv1.v1.cfg.GeneralCfg().CachingDelay != 0 {
+		utils.Logger.Info(fmt.Sprintf("<ReplicatorSv1.RemoveRateProfile> Delaying cache call for %v", rplSv1.v1.cfg.GeneralCfg().CachingDelay))
+		time.Sleep(rplSv1.v1.cfg.GeneralCfg().CachingDelay)
+	}
 	if err = rplSv1.v1.CallCache(ctx, utils.IfaceAsString(args.APIOpts[utils.MetaCache]),
 		args.Tenant, utils.CacheRateProfiles, args.TenantID.TenantID(), utils.EmptyString, nil, args.APIOpts); err != nil {
 		return
@@ -648,6 +791,11 @@ func (rplSv1 *ReplicatorSv1) RemoveRateProfile(ctx *context.Context, args *utils
 func (rplSv1 *ReplicatorSv1) RemoveActionProfile(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *string) (err error) {
 	if err = rplSv1.dm.DataDB().RemoveActionProfileDrv(ctx, args.Tenant, args.ID); err != nil {
 		return
+	}
+	// delay if needed before cache call
+	if rplSv1.v1.cfg.GeneralCfg().CachingDelay != 0 {
+		utils.Logger.Info(fmt.Sprintf("<ReplicatorSv1.RemoveActionProfile> Delaying cache call for %v", rplSv1.v1.cfg.GeneralCfg().CachingDelay))
+		time.Sleep(rplSv1.v1.cfg.GeneralCfg().CachingDelay)
 	}
 	if err = rplSv1.v1.CallCache(ctx, utils.IfaceAsString(args.APIOpts[utils.MetaCache]),
 		args.Tenant, utils.CacheActionProfiles, args.TenantID.TenantID(), utils.EmptyString, nil, args.APIOpts); err != nil {

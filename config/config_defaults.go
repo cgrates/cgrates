@@ -38,6 +38,7 @@ const CGRATES_CFG_JSON = `
 	"default_tenant": "cgrates.org",						// default tenant to consider when missing from requests
 	"default_timezone": "Local",							// default timezone for timestamps where not specified <""|UTC|Local|$IANA_TZ_DB>
 	"default_caching": "*reload",							// default actions to do when caching items
+	"caching_delay": "0s", 									// add delay before cache reload
 	"min_call_duration": "0s",				                // only authorize calls with allowed duration higher than this
 	"max_call_duration": "3h",				                // maximum call duration a prepaid call can last
 	"connect_attempts": 5,									// initial server connect attempts

@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package admins
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/cgrates/birpc/context"
@@ -132,16 +133,31 @@ func (admS *AdminS) V1SetDispatcherProfile(ctx *context.Context, args *Dispatche
 	if err := admS.dm.SetLoadIDs(ctx, map[string]int64{utils.CacheDispatcherProfiles: time.Now().UnixNano()}); err != nil {
 		return utils.APIErrorHandler(err)
 	}
+	// delay if needed before cache call
+	if admS.cfg.GeneralCfg().CachingDelay != 0 {
+		utils.Logger.Info(fmt.Sprintf("<V1SetDispatcherProfile> Delaying cache call for %v", admS.cfg.GeneralCfg().CachingDelay))
+		time.Sleep(admS.cfg.GeneralCfg().CachingDelay)
+	}
 	//handle caching for DispatcherProfile
 	if err := admS.CallCache(ctx, utils.IfaceAsString(args.APIOpts[utils.MetaCache]), args.Tenant, utils.CacheDispatcherProfiles,
 		args.TenantID(), utils.EmptyString, &args.FilterIDs, args.APIOpts); err != nil {
 		return utils.APIErrorHandler(err)
+	}
+	// delay if needed before cache call
+	if admS.cfg.GeneralCfg().CachingDelay != 0 {
+		utils.Logger.Info(fmt.Sprintf("<V1SetDispatcherProfile> (DispatchersInstance) Delaying cache call for %v", admS.cfg.GeneralCfg().CachingDelay))
+		time.Sleep(admS.cfg.GeneralCfg().CachingDelay)
 	}
 	//handle caching for DispatchersInstance
 	cacheAct := utils.MetaRemove
 	if err := admS.CallCache(ctx, utils.FirstNonEmpty(utils.IfaceAsString(args.APIOpts[utils.MetaCache]), cacheAct),
 		args.Tenant, utils.CacheDispatchers, args.TenantID(), utils.EmptyString, &args.FilterIDs, args.APIOpts); err != nil {
 		return utils.APIErrorHandler(err)
+	}
+	// delay if needed before cache call
+	if admS.cfg.GeneralCfg().CachingDelay != 0 {
+		utils.Logger.Info(fmt.Sprintf("<V1SetDispatcherProfile> (DispatcherRoutes) Delaying cache call for %v", admS.cfg.GeneralCfg().CachingDelay))
+		time.Sleep(admS.cfg.GeneralCfg().CachingDelay)
 	}
 	//handle caching for DispatcherRoutes
 	if err := admS.CallCache(ctx, utils.FirstNonEmpty(utils.IfaceAsString(args.APIOpts[utils.MetaCache]), cacheAct),
@@ -170,6 +186,11 @@ func (admS *AdminS) V1RemoveDispatcherProfile(ctx *context.Context, arg *utils.T
 	//generate a loadID for CacheDispatcherProfiles and store it in database
 	if err := admS.dm.SetLoadIDs(ctx, map[string]int64{utils.CacheDispatcherProfiles: time.Now().UnixNano()}); err != nil {
 		return utils.APIErrorHandler(err)
+	}
+	// delay if needed before cache call
+	if admS.cfg.GeneralCfg().CachingDelay != 0 {
+		utils.Logger.Info(fmt.Sprintf("<V1RemoveDispatcherProfile> Delaying cache call for %v", admS.cfg.GeneralCfg().CachingDelay))
+		time.Sleep(admS.cfg.GeneralCfg().CachingDelay)
 	}
 	//handle caching for DispatcherProfile
 	if err := admS.CallCache(ctx, utils.IfaceAsString(arg.APIOpts[utils.MetaCache]), tnt, utils.CacheDispatcherProfiles,
@@ -281,6 +302,11 @@ func (admS *AdminS) V1SetDispatcherHost(ctx *context.Context, args *engine.Dispa
 	if err := admS.dm.SetLoadIDs(ctx, map[string]int64{utils.CacheDispatcherHosts: time.Now().UnixNano()}); err != nil {
 		return utils.APIErrorHandler(err)
 	}
+	// delay if needed before cache call
+	if admS.cfg.GeneralCfg().CachingDelay != 0 {
+		utils.Logger.Info(fmt.Sprintf("<V1SetDispatcherHost> Delaying cache call for %v", admS.cfg.GeneralCfg().CachingDelay))
+		time.Sleep(admS.cfg.GeneralCfg().CachingDelay)
+	}
 	//handle caching for DispatcherProfile
 	if err := admS.CallCache(ctx, utils.IfaceAsString(args.APIOpts[utils.MetaCache]), args.Tenant, utils.CacheDispatcherHosts,
 		args.TenantID(), utils.EmptyString, nil, args.APIOpts); err != nil {
@@ -305,6 +331,11 @@ func (admS *AdminS) V1RemoveDispatcherHost(ctx *context.Context, arg *utils.Tena
 	//generate a loadID for CacheDispatcherHosts and store it in database
 	if err := admS.dm.SetLoadIDs(ctx, map[string]int64{utils.CacheDispatcherHosts: time.Now().UnixNano()}); err != nil {
 		return utils.APIErrorHandler(err)
+	}
+	// delay if needed before cache call
+	if admS.cfg.GeneralCfg().CachingDelay != 0 {
+		utils.Logger.Info(fmt.Sprintf("<V1RemoveDispatcherHost> Delaying cache call for %v", admS.cfg.GeneralCfg().CachingDelay))
+		time.Sleep(admS.cfg.GeneralCfg().CachingDelay)
 	}
 	//handle caching for DispatcherProfile
 	if err := admS.CallCache(ctx, utils.IfaceAsString(arg.APIOpts[utils.MetaCache]), tnt, utils.CacheDispatcherHosts,

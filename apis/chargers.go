@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package apis
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/cgrates/birpc/context"
@@ -133,6 +134,11 @@ func (adms *AdminSv1) SetChargerProfile(ctx *context.Context, arg *ChargerWithAP
 	if err := adms.dm.SetLoadIDs(ctx, map[string]int64{utils.CacheChargerProfiles: time.Now().UnixNano()}); err != nil {
 		return utils.APIErrorHandler(err)
 	}
+	// delay if needed before cache call
+	if adms.cfg.GeneralCfg().CachingDelay != 0 {
+		utils.Logger.Info(fmt.Sprintf("<AdminSv1.SetChargerProfile> Delaying cache call for %v", adms.cfg.GeneralCfg().CachingDelay))
+		time.Sleep(adms.cfg.GeneralCfg().CachingDelay)
+	}
 	//handle caching for ChargerProfile
 	if err := adms.CallCache(ctx, utils.IfaceAsString(arg.APIOpts[utils.MetaCache]), arg.Tenant, utils.CacheChargerProfiles,
 		arg.TenantID(), utils.EmptyString, &arg.FilterIDs, arg.APIOpts); err != nil {
@@ -158,6 +164,11 @@ func (adms *AdminSv1) RemoveChargerProfile(ctx *context.Context, arg *utils.Tena
 	//generate a loadID for CacheChargerProfiles and store it in database
 	if err := adms.dm.SetLoadIDs(ctx, map[string]int64{utils.CacheChargerProfiles: time.Now().UnixNano()}); err != nil {
 		return utils.APIErrorHandler(err)
+	}
+	// delay if needed before cache call
+	if adms.cfg.GeneralCfg().CachingDelay != 0 {
+		utils.Logger.Info(fmt.Sprintf("<AdminSv1.RemoveChargerProfile> Delaying cache call for %v", adms.cfg.GeneralCfg().CachingDelay))
+		time.Sleep(adms.cfg.GeneralCfg().CachingDelay)
 	}
 	//handle caching for ChargerProfile
 	if err := adms.CallCache(ctx, utils.IfaceAsString(arg.APIOpts[utils.MetaCache]), tnt, utils.CacheChargerProfiles,

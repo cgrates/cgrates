@@ -42,6 +42,7 @@ type GeneralCfg struct {
 	DefaultTenant        string // set default tenant
 	DefaultTimezone      string // default timezone for timestamps where not specified <""|UTC|Local|$IANA_TZ_DB>
 	DefaultCaching       string
+	CachingDelay         time.Duration // use to add delay before cache reload
 	ConnectAttempts      int           // number of initial connection attempts before giving up
 	Reconnects           int           // number of recconect attempts in case of connection lost <-1 for infinite | nb>
 	MaxReconnectInterval time.Duration // time to wait in between reconnect attempts
@@ -131,6 +132,11 @@ func (gencfg *GeneralCfg) loadFromJSONCfg(jsnGeneralCfg *GeneralJsonCfg) (err er
 	if jsnGeneralCfg.Default_caching != nil {
 		gencfg.DefaultCaching = *jsnGeneralCfg.Default_caching
 	}
+	if jsnGeneralCfg.Caching_delay != nil {
+		if gencfg.CachingDelay, err = utils.ParseDurationWithNanosecs(*jsnGeneralCfg.Caching_delay); err != nil {
+			return err
+		}
+	}
 	if jsnGeneralCfg.Locking_timeout != nil {
 		if gencfg.LockingTimeout, err = utils.ParseDurationWithNanosecs(*jsnGeneralCfg.Locking_timeout); err != nil {
 			return err
@@ -182,6 +188,7 @@ func (gencfg GeneralCfg) AsMapInterface(string) any {
 		utils.DefaultTenantCfg:        gencfg.DefaultTenant,
 		utils.DefaultTimezoneCfg:      gencfg.DefaultTimezone,
 		utils.DefaultCachingCfg:       gencfg.DefaultCaching,
+		utils.CachingDlayCfg:          "0",
 		utils.ConnectAttemptsCfg:      gencfg.ConnectAttempts,
 		utils.ReconnectsCfg:           gencfg.Reconnects,
 		utils.MaxReconnectIntervalCfg: "0",
@@ -197,6 +204,10 @@ func (gencfg GeneralCfg) AsMapInterface(string) any {
 		utils.DecimalPrecisionCfg:     gencfg.DecimalPrecision,
 		utils.DecimalRoundingModeCfg:  utils.RoundingModeToString(gencfg.DecimalRoundingMode),
 		utils.OptsCfg:                 opts,
+	}
+
+	if gencfg.CachingDelay != 0 {
+		mp[utils.CachingDlayCfg] = gencfg.CachingDelay.String()
 	}
 
 	if gencfg.MaxReconnectInterval != 0 {
@@ -275,6 +286,7 @@ type GeneralJsonCfg struct {
 	Default_tenant         *string
 	Default_timezone       *string
 	Default_caching        *string
+	Caching_delay          *string
 	Connect_attempts       *int
 	Reconnects             *int
 	Max_reconnect_interval *string

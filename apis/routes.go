@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package apis
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/cgrates/birpc/context"
@@ -130,6 +131,11 @@ func (adms *AdminSv1) SetRouteProfile(ctx *context.Context, args *engine.RoutePr
 	if err := adms.dm.SetLoadIDs(ctx, map[string]int64{utils.CacheRouteProfiles: time.Now().UnixNano()}); err != nil {
 		return utils.APIErrorHandler(err)
 	}
+	// delay if needed before cache call
+	if adms.cfg.GeneralCfg().CachingDelay != 0 {
+		utils.Logger.Info(fmt.Sprintf("<AdminSv1.SetRouteProfile> Delaying cache call for %v", adms.cfg.GeneralCfg().CachingDelay))
+		time.Sleep(adms.cfg.GeneralCfg().CachingDelay)
+	}
 	//handle caching for SupplierProfile
 	if err := adms.CallCache(ctx, utils.IfaceAsString(args.APIOpts[utils.MetaCache]), args.Tenant, utils.CacheRouteProfiles,
 		args.TenantID(), utils.EmptyString, &args.FilterIDs, args.APIOpts); err != nil {
@@ -154,6 +160,11 @@ func (adms *AdminSv1) RemoveRouteProfile(ctx *context.Context, args *utils.Tenan
 	//generate a loadID for CacheRouteProfiles and store it in database
 	if err := adms.dm.SetLoadIDs(ctx, map[string]int64{utils.CacheRouteProfiles: time.Now().UnixNano()}); err != nil {
 		return utils.APIErrorHandler(err)
+	}
+	// delay if needed before cache call
+	if adms.cfg.GeneralCfg().CachingDelay != 0 {
+		utils.Logger.Info(fmt.Sprintf("<AdminSv1.RemoveRouteProfile> Delaying cache call for %v", adms.cfg.GeneralCfg().CachingDelay))
+		time.Sleep(adms.cfg.GeneralCfg().CachingDelay)
 	}
 	//handle caching for SupplierProfile
 	if err := adms.CallCache(ctx, utils.IfaceAsString(args.APIOpts[utils.MetaCache]), tnt, utils.CacheRouteProfiles,

@@ -5,6 +5,7 @@
 
 "general": {
   "reply_timeout": "50s",
+  "caching_delay": "1s",
 },
 
 "logger": {
