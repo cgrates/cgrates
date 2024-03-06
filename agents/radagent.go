@@ -165,7 +165,6 @@ func (ra *RadiusAgent) handleAuth(reqPacket *radigo.Packet) (*radigo.Packet, err
 		utils.Logger.Warning(fmt.Sprintf(
 			"<%s> setting default *vars.*sessionID (used to track packets of active sessions) failed: %v",
 			utils.RadiusAgent, err))
-
 	}
 
 	var processed bool
@@ -500,14 +499,16 @@ func (ra *RadiusAgent) V1DisconnectSession(_ *context.Context, cgrEv utils.CGREv
 	}
 	originID := utils.IfaceAsString(ifaceOriginID)
 
-	reqVars := &utils.DataNode{
-		Type: utils.NMMapType,
-		Map: map[string]*utils.DataNode{
-			utils.DisconnectCause: utils.NewLeafNode(cgrEv.Event[utils.DisconnectCause]),
-		},
+	dmrTpl := ra.cgrCfg.RadiusAgentCfg().DMRTemplate
+	if optTpl, err := cgrEv.OptAsString(utils.MetaRadDMRTemplate); err == nil {
+		dmrTpl = optTpl
+	}
+	if _, found := ra.cgrCfg.TemplatesCfg()[dmrTpl]; !found {
+		return fmt.Errorf("%w: DMR Template %s", utils.ErrNotFound, dmrTpl)
 	}
 
-	replyCode, err := ra.sendRadDaReq(radigo.DisconnectRequest, ra.cgrCfg.RadiusAgentCfg().DMRTemplate, originID, nil, reqVars)
+	replyCode, err := ra.sendRadDaReq(radigo.DisconnectRequest, dmrTpl,
+		originID, utils.MapStorage(cgrEv.Event), nil)
 	if err != nil {
 		return err
 	}

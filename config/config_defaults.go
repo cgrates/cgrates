@@ -1234,7 +1234,7 @@ const CGRATES_CFG_JSON = `
 		{"tag": "Acct-Session-Id", "path": "*radDAReq.Acct-Session-Id", "type": "*variable", 
 			"value": "~*oreq.Acct-Session-Id"},
 		{"tag": "Reply-Message", "path": "*radDAReq.Reply-Message", "type": "*variable", 
-			"value": "~*vars.DisconnectCause"},
+			"value": "~*req.DisconnectCause"}
 	],
 	"*coa": [ // used by RadiusAgent when sending ChangeOfAuthorization message towards the client
 		{"tag": "User-Name", "path": "*radDAReq.User-Name", "type": "*variable", 
@@ -1244,7 +1244,7 @@ const CGRATES_CFG_JSON = `
 		{"tag": "Acct-Session-Id", "path": "*radDAReq.Acct-Session-Id", "type": "*variable", 
 			"value": "~*oreq.Acct-Session-Id"},
 		{"tag": "Filter-Id", "path": "*radDAReq.Filter-Id", "type": "*variable", 
-			"value": "~*req.CustomFilter"},
+			"value": "~*req.CustomFilter"}
 	],
 	"*errSip": [
 		{"tag": "Request", "path": "*rep.Request", "type": "*constant",

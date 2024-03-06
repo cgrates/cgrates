@@ -116,9 +116,12 @@ func TestRadiusCoADisconnect(t *testing.T) {
 
 	tPrfl := &engine.ThresholdProfileWithAPIOpts{
 		ThresholdProfile: &engine.ThresholdProfile{
-			Tenant:    "cgrates.org",
-			ID:        "THD_ACNT_1001",
-			FilterIDs: []string{"*string:~*opts.*eventType:AccountUpdate", "*string:~*req.ID:1001"},
+			Tenant: "cgrates.org",
+			ID:     "THD_ACNT_1001",
+			FilterIDs: []string{
+				"*string:~*opts.*eventType:AccountUpdate",
+				"*string:~*req.AccountSummary.ID:1001",
+			},
 			//MinHits:   1,
 			MaxHits:   1,
 			ActionIDs: []string{"LOG_WARNING", "ACT_RAD_COA_ACNT_1001"},
@@ -151,7 +154,7 @@ func TestRadiusCoADisconnect(t *testing.T) {
 		if string(request.AVPs[0].RawValue) != "1001" ||
 			!bytes.Equal(request.AVPs[1].RawValue, decodedNasIPAddr) ||
 			string(request.AVPs[2].RawValue) != "e4921177ab0e3586c37f6a185864b71a@0:0:0:0:0:0:0:0" ||
-			string(request.AVPs[3].RawValue) != "FORCED_DISCONNECT" {
+			string(request.AVPs[3].RawValue) != "NORMAL_DISCONNECT" {
 			t.Errorf("unexpected request received: %v", utils.ToJSON(request))
 			reply.Code = radigo.DisconnectNAK
 		} else {
@@ -272,7 +275,11 @@ func TestRadiusCoADisconnect(t *testing.T) {
 
 	time.Sleep(1 * time.Second) // Give time for the ThresholdS to execute the *alter_sessions API
 	if err = raDiscRPC.Call(context.Background(), utils.SessionSv1ForceDisconnect,
-		nil, &reply); err != nil {
+		utils.SessionFilterWithEvent{
+			Event: map[string]any{
+				utils.DisconnectCause: "NORMAL_DISCONNECT",
+			},
+		}, &reply); err != nil {
 		t.Error(err)
 	}
 

@@ -802,6 +802,7 @@ const (
 	MetaDiamreq             = "*diamreq"
 	MetaRadDAReq            = "*radDAReq"
 	MetaRadCoATemplate      = "*radCoATemplate"
+	MetaRadDMRTemplate      = "*radDMRTemplate"
 	MetaCost                = "*cost"
 	MetaGroup               = "*group"
 	InternalRPCSet          = "InternalRPCSet"

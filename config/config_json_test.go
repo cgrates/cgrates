@@ -2281,7 +2281,7 @@ func TestDfTemplateSJsonCfg(t *testing.T) {
 				Tag:   utils.StringPointer("Reply-Message"),
 				Path:  utils.StringPointer(fmt.Sprintf("%s.Reply-Message", utils.MetaRadDAReq)),
 				Type:  utils.StringPointer(utils.MetaVariable),
-				Value: utils.StringPointer("~*vars.DisconnectCause"),
+				Value: utils.StringPointer("~*req.DisconnectCause"),
 			},
 		},
 		utils.MetaCoA: {
