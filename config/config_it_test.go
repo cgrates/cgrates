@@ -488,6 +488,7 @@ func testCGRConfigReloadRALs(t *testing.T) {
 		BalanceRatingSubject:    blMap,
 		ThresholdSConns:         []string{utils.MetaLocalHost},
 		StatSConns:              []string{utils.MetaLocalHost},
+		SessionSConns:           []string{},
 		MaxIncrements:           1000000,
 		FallbackDepth:           3,
 	}

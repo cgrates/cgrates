@@ -30,6 +30,7 @@ type RalsCfg struct {
 	Enabled                 bool     // start standalone server (no balancer)
 	ThresholdSConns         []string // address where to reach ThresholdS config
 	StatSConns              []string
+	SessionSConns           []string
 	RpSubjectPrefixMatching bool // enables prefix matching for the rating profile subject
 	RemoveExpired           bool
 	MaxComputedUsage        map[string]time.Duration
@@ -63,6 +64,16 @@ func (ralsCfg *RalsCfg) loadFromJSONCfg(jsnRALsCfg *RalsJsonCfg) (err error) {
 			ralsCfg.StatSConns[idx] = conn
 			if conn == utils.MetaInternal {
 				ralsCfg.StatSConns[idx] = utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats)
+			}
+		}
+	}
+	if jsnRALsCfg.Sessions_conns != nil {
+		ralsCfg.SessionSConns = make([]string, len(*jsnRALsCfg.Sessions_conns))
+		for idx, conn := range *jsnRALsCfg.Sessions_conns {
+			// if we have the connection internal we change the name so we can have internal rpc for each subsystem
+			ralsCfg.SessionSConns[idx] = conn
+			if conn == utils.MetaInternal {
+				ralsCfg.SessionSConns[idx] = utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS)
 			}
 		}
 	}
@@ -123,6 +134,16 @@ func (ralsCfg *RalsCfg) AsMapInterface() (initialMP map[string]any) {
 		}
 		initialMP[utils.StatSConnsCfg] = statS
 	}
+	if ralsCfg.SessionSConns != nil {
+		sessionsConns := make([]string, len(ralsCfg.SessionSConns))
+		for i, item := range ralsCfg.SessionSConns {
+			sessionsConns[i] = item
+			if item == utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS) {
+				sessionsConns[i] = utils.MetaInternal
+			}
+		}
+		initialMP[utils.SessionSConnsCfg] = sessionsConns
+	}
 	maxComputed := make(map[string]any)
 	for key, item := range ralsCfg.MaxComputedUsage {
 		if key == utils.MetaAny || key == utils.MetaVoice {
@@ -159,6 +180,10 @@ func (ralsCfg RalsCfg) Clone() (cln *RalsCfg) {
 	if ralsCfg.StatSConns != nil {
 		cln.StatSConns = make([]string, len(ralsCfg.StatSConns))
 		copy(cln.StatSConns, ralsCfg.StatSConns)
+	}
+	if ralsCfg.SessionSConns != nil {
+		cln.SessionSConns = make([]string, len(ralsCfg.SessionSConns))
+		copy(cln.SessionSConns, ralsCfg.SessionSConns)
 	}
 
 	for k, u := range ralsCfg.MaxComputedUsage {
