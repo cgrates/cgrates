@@ -79,16 +79,20 @@ type ActionConnCfg struct {
 }
 
 func newActionConnCfg(source, action string, cfg *config.CGRConfig) ActionConnCfg {
+	sessionActions := []string{
+		utils.MetaAlterSessions,
+		utils.MetaForceDisconnectSessions,
+	}
 	act := ActionConnCfg{}
 	switch source {
 	case utils.ThresholdS:
-		switch action {
-		case utils.MetaAlterSessions:
+		switch {
+		case slices.Contains(sessionActions, action):
 			act.ConnIDs = cfg.ThresholdSCfg().SessionSConns
 		}
 	case utils.RALs:
-		switch action {
-		case utils.MetaAlterSessions:
+		switch {
+		case slices.Contains(sessionActions, action):
 			act.ConnIDs = cfg.RalsCfg().SessionSConns
 		}
 	}
@@ -124,6 +128,7 @@ func init() {
 	actionFuncMap[utils.MetaTransferMonetaryDefault] = transferMonetaryDefaultAction
 	actionFuncMap[utils.MetaCgrRpc] = cgrRPCAction
 	actionFuncMap[utils.MetaAlterSessions] = alterSessionsAction
+	actionFuncMap[utils.MetaForceDisconnectSessions] = forceDisconnectSessionsAction
 	actionFuncMap[utils.TopUpZeroNegative] = topupZeroNegativeAction
 	actionFuncMap[utils.SetExpiry] = setExpiryAction
 	actionFuncMap[utils.MetaPublishAccount] = publishAccount
@@ -942,6 +947,50 @@ func alterSessionsAction(_ *Account, act *Action, _ Actions, _ *FilterS, _ any, 
 
 	var reply string
 	return connMgr.Call(context.Background(), connCfg.ConnIDs, utils.SessionSv1AlterSessions, attr, &reply)
+}
+
+// forceDisconnectSessionsAction processes the `ExtraParameters` field from the action to construct a request
+// for the `SessionSv1.ForceDisconnect` API call.
+//
+// The ExtraParameters field format is expected as follows:
+//   - tenant: string
+//   - filters: strings separated by "&".
+//   - limit: integer, specifying the maximum number of sessions to disconnect.
+//   - APIOpts: set of key-value pairs (separated by "&").
+//   - Event: set of key-value pairs (separated by "&").
+//
+// Parameters are separated by ";" and must be provided in the specified order.
+func forceDisconnectSessionsAction(_ *Account, act *Action, _ Actions, _ *FilterS, _ any, connCfg ActionConnCfg) (err error) {
+
+	// Parse action parameters based on the predefined format.
+	params := strings.Split(act.ExtraParameters, ";")
+	if len(params) != 5 {
+		return errors.New("invalid number of parameters; expected 5")
+	}
+
+	// If conversion fails, limit will default to 0.
+	limit, _ := strconv.Atoi(params[2])
+
+	// Prepare request arguments based on provided parameters.
+	attr := utils.SessionFilterWithEvent{
+		SessionFilter: &utils.SessionFilter{
+			Limit:   &limit,
+			Tenant:  params[0],
+			Filters: strings.Split(params[1], "&"),
+			APIOpts: make(map[string]any),
+		},
+		Event: make(map[string]any),
+	}
+
+	if err := parseParamStringToMap(params[3], attr.APIOpts); err != nil {
+		return err
+	}
+	if err := parseParamStringToMap(params[4], attr.Event); err != nil {
+		return err
+	}
+
+	var reply string
+	return connMgr.Call(context.Background(), connCfg.ConnIDs, utils.SessionSv1ForceDisconnect, attr, &reply)
 }
 
 // parseParamStringToMap parses a string containing key-value pairs separated by "&" and assigns
