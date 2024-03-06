@@ -4576,21 +4576,17 @@ func TestActionsTransferBalance(t *testing.T) {
 	}
 }
 
-type mockSessionSv1Obj struct {
-	request string
-}
-
-func (m *mockSessionSv1Obj) AlterSessions(_ *context.Context, params utils.SessionFilterWithEvent, reply *string) error {
-	m.request = utils.ToJSON(params)
-	return nil
-}
-
-func TestActionsAlterSessions(t *testing.T) {
-	var receivedRequest string
+func TestActionsAlterAndDisconnectSessions(t *testing.T) {
+	var alterSessionsRequest string
+	var disconnectSessionsRequest string
 	ccMock := &ccMock{
 		calls: map[string]func(ctx *context.Context, args any, reply any) error{
 			utils.SessionSv1AlterSessions: func(ctx *context.Context, args, reply any) error {
-				receivedRequest = utils.ToJSON(args)
+				alterSessionsRequest = utils.ToJSON(args)
+				return nil
+			},
+			utils.SessionSv1ForceDisconnect: func(ctx *context.Context, args, reply any) error {
+				disconnectSessionsRequest = utils.ToJSON(args)
 				return nil
 			},
 		},
@@ -4641,7 +4637,8 @@ func TestActionsAlterSessions(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			action := &Action{ExtraParameters: tc.extraParams}
 			t.Cleanup(func() {
-				receivedRequest = ""
+				alterSessionsRequest = ""
+				disconnectSessionsRequest = ""
 			})
 			err := alterSessionsAction(nil, action, nil, nil, nil, ActionConnCfg{
 				ConnIDs: tc.connIDs,
@@ -4652,8 +4649,20 @@ func TestActionsAlterSessions(t *testing.T) {
 				}
 			} else if err != nil {
 				t.Error(err)
-			} else if receivedRequest != tc.expectedRequest {
-				t.Errorf("expected: %v\nreceived: %v", tc.expectedRequest, receivedRequest)
+			} else if alterSessionsRequest != tc.expectedRequest {
+				t.Errorf("expected: %v\nreceived: %v", tc.expectedRequest, alterSessionsRequest)
+			}
+			err = forceDisconnectSessionsAction(nil, action, nil, nil, nil, ActionConnCfg{
+				ConnIDs: tc.connIDs,
+			})
+			if tc.expectedErr != "" {
+				if err == nil || err.Error() != tc.expectedErr {
+					t.Errorf("expected error %v, received %v", tc.expectedErr, err)
+				}
+			} else if err != nil {
+				t.Error(err)
+			} else if disconnectSessionsRequest != tc.expectedRequest {
+				t.Errorf("expected: %v\nreceived: %v", tc.expectedRequest, disconnectSessionsRequest)
 			}
 		})
 	}
