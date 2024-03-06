@@ -271,7 +271,8 @@ func TestForceSTerminatorManualTermination(t *testing.T) {
 	sessions := NewSessionS(cfg, dm, nil)
 
 	expected := "MANDATORY_IE_MISSING: [connIDs]"
-	if err := sessions.forceSTerminate(ss, time.Second, nil, nil); err == nil || err.Error() != expected {
+	if err := sessions.forceSTerminate(ss, time.Second, nil, nil, nil,
+		map[string]any{utils.DisconnectCause: utils.ForcedDisconnect}); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, receive %+v", expected, err)
 	}
 }
@@ -308,7 +309,8 @@ func TestForceSTerminatorPostCDRs(t *testing.T) {
 	}
 
 	expected := "INTERNALLY_DISCONNECTED"
-	if err := sessions.forceSTerminate(ss, time.Second, nil, nil); err == nil || err.Error() != expected {
+	if err := sessions.forceSTerminate(ss, time.Second, nil, nil, nil,
+		map[string]any{utils.DisconnectCause: utils.ForcedDisconnect}); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, receiveD %+v", expected, err)
 	}
 }
@@ -347,7 +349,8 @@ func TestForceSTerminatorReleaseSession(t *testing.T) {
 	}
 
 	expected := "MANDATORY_IE_MISSING: [connIDs]"
-	if err := sessions.forceSTerminate(ss, time.Second, nil, nil); err == nil || err.Error() != expected {
+	if err := sessions.forceSTerminate(ss, time.Second, nil, nil, nil,
+		map[string]any{utils.DisconnectCause: utils.ForcedDisconnect}); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, receiveD %+v", expected, err)
 	}
 }
@@ -397,7 +400,8 @@ func TestForceSTerminatorClientCall(t *testing.T) {
 	}
 
 	expected := "MANDATORY_IE_MISSING: [connIDs]"
-	if err := sessions.forceSTerminate(ss, time.Second, nil, nil); err == nil || err.Error() != expected {
+	if err := sessions.forceSTerminate(ss, time.Second, nil, nil, nil,
+		map[string]any{utils.DisconnectCause: utils.ForcedDisconnect}); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 	time.Sleep(10 * time.Millisecond)

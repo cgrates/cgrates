@@ -338,8 +338,8 @@ func (sma *AsteriskAgent) Call(ctx *context.Context, serviceMethod string, args 
 }
 
 // V1DisconnectSession is internal method to disconnect session in asterisk
-func (sma *AsteriskAgent) V1DisconnectSession(ctx *context.Context, args utils.AttrDisconnectSession, reply *string) error {
-	channelID := engine.NewMapEvent(args.EventStart).GetStringIgnoreErrors(utils.OriginID)
+func (sma *AsteriskAgent) V1DisconnectSession(ctx *context.Context, cgrEv utils.CGREvent, reply *string) error {
+	channelID := engine.NewMapEvent(cgrEv.Event).GetStringIgnoreErrors(utils.OriginID)
 	sma.hangupChannel(channelID, "")
 	*reply = utils.OK
 	return nil

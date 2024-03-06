@@ -472,11 +472,13 @@ func TestDspSessionSv1GetActiveSessionsCountErrorNil(t *testing.T) {
 func TestDspSessionSv1ForceDisconnectNil(t *testing.T) {
 	cgrCfg := config.NewDefaultCGRConfig()
 	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
-	CGREvent := &utils.SessionFilter{
-		Tenant: "tenant",
+	args := utils.SessionFilterWithEvent{
+		SessionFilter: &utils.SessionFilter{
+			Tenant: "tenant",
+		},
 	}
 	var reply *string
-	result := dspSrv.SessionSv1ForceDisconnect(context.Background(), CGREvent, reply)
+	result := dspSrv.SessionSv1ForceDisconnect(context.Background(), args, reply)
 	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
@@ -487,11 +489,13 @@ func TestDspSessionSv1ForceDisconnectErrorNil(t *testing.T) {
 	cgrCfg := config.NewDefaultCGRConfig()
 	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
 	cgrCfg.DispatcherSCfg().AttributeSConns = []string{"test"}
-	CGREvent := &utils.SessionFilter{
-		Tenant: "tenant",
+	args := utils.SessionFilterWithEvent{
+		SessionFilter: &utils.SessionFilter{
+			Tenant: "tenant",
+		},
 	}
 	var reply *string
-	result := dspSrv.SessionSv1ForceDisconnect(context.Background(), CGREvent, reply)
+	result := dspSrv.SessionSv1ForceDisconnect(context.Background(), args, reply)
 	expected := "MANDATORY_IE_MISSING: [ApiKey]"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)

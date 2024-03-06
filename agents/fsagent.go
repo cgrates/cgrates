@@ -394,9 +394,10 @@ func (fsa *FSsessions) Call(ctx *context.Context, serviceMethod string, args any
 }
 
 // V1DisconnectSession internal method to disconnect session in FreeSWITCH
-func (fsa *FSsessions) V1DisconnectSession(ctx *context.Context, args utils.AttrDisconnectSession, reply *string) (err error) {
-	ev := engine.NewMapEvent(args.EventStart)
+func (fsa *FSsessions) V1DisconnectSession(ctx *context.Context, cgrEv utils.CGREvent, reply *string) (err error) {
+	ev := engine.NewMapEvent(cgrEv.Event)
 	channelID := ev.GetStringIgnoreErrors(utils.OriginID)
+	disconnectCause := ev.GetStringIgnoreErrors(utils.DisconnectCause)
 	connIdx, err := ev.GetTInt64(FsConnID)
 	if err != nil {
 		utils.Logger.Err(
@@ -411,7 +412,7 @@ func (fsa *FSsessions) V1DisconnectSession(ctx *context.Context, args utils.Attr
 	}
 	if err = fsa.disconnectSession(int(connIdx), channelID,
 		utils.FirstNonEmpty(ev.GetStringIgnoreErrors(CALL_DEST_NR), ev.GetStringIgnoreErrors(SIP_REQ_USER)),
-		args.Reason); err != nil {
+		disconnectCause); err != nil {
 		return
 	}
 	*reply = utils.OK

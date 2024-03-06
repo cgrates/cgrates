@@ -519,9 +519,14 @@ func (dS *DispatcherSessionSv1) GetActiveSessionsCount(ctx *context.Context, arg
 	return dS.dS.SessionSv1GetActiveSessionsCount(ctx, args, reply)
 }
 
-func (dS *DispatcherSessionSv1) ForceDisconnect(ctx *context.Context, args *utils.SessionFilter,
+func (dS *DispatcherSessionSv1) ForceDisconnect(ctx *context.Context, args utils.SessionFilterWithEvent,
 	reply *string) (err error) {
 	return dS.dS.SessionSv1ForceDisconnect(ctx, args, reply)
+}
+
+func (dS *DispatcherSessionSv1) AlterSessions(ctx *context.Context, args utils.SessionFilterWithEvent,
+	reply *string) (err error) {
+	return dS.dS.SessionSv1AlterSessions(ctx, args, reply)
 }
 
 func (dS *DispatcherSessionSv1) GetPassiveSessions(ctx *context.Context, args *utils.SessionFilter,

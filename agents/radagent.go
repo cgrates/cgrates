@@ -493,8 +493,8 @@ func (*RadiusAgent) V1GetActiveSessionIDs(_ *context.Context, _ string, _ *[]*se
 }
 
 // V1DisconnectSession remotely disconnects a session by making use of the RADIUS Disconnect Message functionality.
-func (ra *RadiusAgent) V1DisconnectSession(_ *context.Context, attr utils.AttrDisconnectSession, reply *string) error {
-	ifaceOriginID, has := attr.EventStart[utils.OriginID]
+func (ra *RadiusAgent) V1DisconnectSession(_ *context.Context, cgrEv utils.CGREvent, reply *string) error {
+	ifaceOriginID, has := cgrEv.Event[utils.OriginID]
 	if !has {
 		return utils.NewErrMandatoryIeMissing(utils.OriginID)
 	}
@@ -503,7 +503,7 @@ func (ra *RadiusAgent) V1DisconnectSession(_ *context.Context, attr utils.AttrDi
 	reqVars := &utils.DataNode{
 		Type: utils.NMMapType,
 		Map: map[string]*utils.DataNode{
-			utils.DisconnectCause: utils.NewLeafNode(attr.Reason),
+			utils.DisconnectCause: utils.NewLeafNode(cgrEv.Event[utils.DisconnectCause]),
 		},
 	}
 

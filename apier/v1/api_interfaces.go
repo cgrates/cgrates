@@ -90,7 +90,8 @@ type SessionSv1Interface interface {
 	GetCost(ctx *context.Context, args *sessions.V1ProcessEventArgs, rply *sessions.V1GetCostReply) error
 	GetActiveSessions(ctx *context.Context, args *utils.SessionFilter, rply *[]*sessions.ExternalSession) error
 	GetActiveSessionsCount(ctx *context.Context, args *utils.SessionFilter, rply *int) error
-	ForceDisconnect(ctx *context.Context, args *utils.SessionFilter, rply *string) error
+	ForceDisconnect(ctx *context.Context, args utils.SessionFilterWithEvent, rply *string) error
+	AlterSessions(ctx *context.Context, args utils.SessionFilterWithEvent, rply *string) error
 	GetPassiveSessions(ctx *context.Context, args *utils.SessionFilter, rply *[]*sessions.ExternalSession) error
 	GetPassiveSessionsCount(ctx *context.Context, args *utils.SessionFilter, rply *int) error
 	Ping(ctx *context.Context, ign *utils.CGREvent, reply *string) error

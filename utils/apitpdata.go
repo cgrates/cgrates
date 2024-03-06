@@ -963,12 +963,6 @@ func (ai *ActivationInterval) IsActiveAtTime(atTime time.Time) bool {
 		(ai.ExpiryTime.IsZero() || ai.ExpiryTime.After(atTime))
 }
 
-// Attributes to send on SessionDisconnect by SMG
-type AttrDisconnectSession struct {
-	EventStart map[string]any
-	Reason     string
-}
-
 // MetricWithFilters is used in TPStatProfile
 type MetricWithFilters struct {
 	FilterIDs []string

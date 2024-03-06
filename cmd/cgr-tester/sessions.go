@@ -34,13 +34,13 @@ import (
 
 var (
 	brpc             *birpc.BirpcClient
-	disconnectEvChan = make(chan *utils.AttrDisconnectSession, 1)
+	disconnectEvChan = make(chan utils.CGREvent, 1)
 )
 
 type smock struct{}
 
 func (*smock) DisconnectSession(ctx *context.Context,
-	args *utils.AttrDisconnectSession, reply *string) error {
+	args utils.CGREvent, reply *string) error {
 	disconnectEvChan <- args
 	*reply = utils.OK
 	return nil
