@@ -1084,7 +1084,9 @@ func (acc *Account) Publish(initBal map[string]float64) {
 		Tenant: acntSummary.Tenant,
 		ID:     utils.GenUUID(),
 		Time:   utils.TimePointer(time.Now()),
-		Event:  acntSummary.AsMapInterface(),
+		Event: map[string]any{
+			utils.AccountSummary: acntSummary,
+		},
 		APIOpts: map[string]any{
 			utils.MetaEventType: utils.AccountUpdate,
 		},
@@ -1195,29 +1197,6 @@ func (as *AccountSummary) SetInitialValue(old *AccountSummary) {
 	}
 }
 
-// GetBalanceWithID returns a Balance given balance type and balance ID
-func (acc *Account) GetBalanceWithID(blcType, blcID string) (blc *Balance) {
-	for _, blc = range acc.BalanceMap[blcType] {
-		if blc.ID == blcID {
-			return
-		}
-	}
-	return nil
-}
-
-// FindBalanceByID searches through all balance types for a balance with the
-// specified ID and returns it alongside its type.
-func (acc *Account) FindBalanceByID(balanceID string) (blnc *Balance, blncType string) {
-	for balanceType, balances := range acc.BalanceMap {
-		for _, balance := range balances {
-			if balance.ID == balanceID {
-				return balance, balanceType
-			}
-		}
-	}
-	return nil, ""
-}
-
 // FieldAsInterface func to help EventCost FieldAsInterface
 func (as *AccountSummary) FieldAsInterface(fldPath []string) (val any, err error) {
 	if as == nil || len(fldPath) == 0 {
@@ -1295,6 +1274,61 @@ func (as *AccountSummary) AsMapInterface() map[string]any {
 		utils.Disabled:         as.Disabled,
 		utils.BalanceSummaries: as.BalanceSummaries,
 	}
+}
+
+// processAccountSummaryField ensures accSummary is an AccountSummary and calls FieldAsInterface on it.
+func processAccountSummaryField(fldPath []string, accSummary any, event map[string]any) (any, error) {
+	var err error
+	var accSummaryBytes []byte
+	switch accSum := accSummary.(type) {
+	case *AccountSummary:
+		// Directly proceed if already *AccountSummary.
+		return accSum.FieldAsInterface(fldPath)
+	case string:
+		// Convert string to bytes for unmarshalling
+		// if it's a serialized *AccountSummary.
+		accSummaryBytes = []byte(accSum)
+	default:
+		// Marshal non-string types to JSON bytes
+		// for unmarshalling into *AccountSummary.
+		accSummaryBytes, err = json.Marshal(accSum)
+		if err != nil {
+			return nil, err
+		}
+	}
+	var as AccountSummary
+	if err = json.Unmarshal(accSummaryBytes, &as); err != nil {
+		return nil, err
+	}
+
+	// Update AccountSummary with the unmarshalled *AccountSummary
+	// to avoid repetitive serialization.
+	event[utils.AccountSummary] = &as
+
+	return as.FieldAsInterface(fldPath)
+}
+
+// GetBalanceWithID returns a Balance given balance type and balance ID
+func (acc *Account) GetBalanceWithID(blcType, blcID string) (blc *Balance) {
+	for _, blc = range acc.BalanceMap[blcType] {
+		if blc.ID == blcID {
+			return
+		}
+	}
+	return nil
+}
+
+// FindBalanceByID searches through all balance types for a balance with the
+// specified ID and returns it alongside its type.
+func (acc *Account) FindBalanceByID(balanceID string) (blnc *Balance, blncType string) {
+	for balanceType, balances := range acc.BalanceMap {
+		for _, balance := range balances {
+			if balance.ID == balanceID {
+				return balance, balanceType
+			}
+		}
+	}
+	return nil, ""
 }
 
 func (acc *Account) String() string {

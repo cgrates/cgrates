@@ -147,6 +147,8 @@ func TestEEsExportEventChanges(t *testing.T) {
 						FilterIDs: []string{
 							"*string:~*req.CostDetails.Charges[0].Increments[0].Accounting.Balance.ID:BALANCE_TEST",
 							"*string:~*req.CostDetails.Charges[0].Increments[0].Accounting.Balance.Type:*voice",
+							"*string:~*req.AccountSummary.BalanceSummaries.BALANCE_TEST.ID:BALANCE_TEST",
+							"*string:~*req.AccountSummary.BalanceSummaries.BALANCE_TEST.Type:*voice",
 						},
 						Path: "*req.BalanceFound",
 						Type: utils.MetaVariable,
@@ -199,6 +201,15 @@ func TestEEsExportEventChanges(t *testing.T) {
 									Type: utils.MetaVoice,
 									UUID: "123456",
 								},
+							},
+						},
+					},
+					utils.AccountSummary: &engine.AccountSummary{
+						BalanceSummaries: engine.BalanceSummaries{
+							{
+								ID:   "BALANCE_TEST",
+								Type: utils.MetaVoice,
+								UUID: "123456",
 							},
 						},
 					},
