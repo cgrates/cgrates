@@ -19,8 +19,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
-	"encoding/json"
 	"fmt"
+	"slices"
 
 	"github.com/nyaruka/phonenumbers"
 
@@ -73,39 +73,19 @@ func (dDP *dynamicDP) FieldAsInterface(fldPath []string) (val any, err error) {
 		return nil, utils.ErrNotFound
 	}
 
-	// Parsing deeper than the first level in *req.CostDetails requires it to be
-	// of type *EventCost. If not, we serialize and deserialize into an *EventCost.
-	if len(fldPath) > 3 &&
-		fldPath[0] == utils.MetaReq && fldPath[1] == utils.CostDetails {
+	// Ensure type for supported path elements to allow calling their specific
+	// FieldAsInterface method.
+	if len(fldPath) > 3 && fldPath[0] == utils.MetaReq &&
+		slices.Contains([]string{utils.CostDetails, utils.AccountSummary}, fldPath[1]) {
 		if mp, canCast := dDP.initialDP.(utils.MapStorage); canCast {
 			if event, canCast := mp[utils.MetaReq].(map[string]any); canCast {
-				if cd, has := event[utils.CostDetails]; has {
-					var cdBytes []byte
-					switch cd := cd.(type) {
-					case *EventCost:
-						// Directly proceed if already *EventCost.
-						return cd.FieldAsInterface(fldPath[2:])
-					case string:
-						// Convert string to bytes for unmarshalling
-						// if it's a serialized *EventCost.
-						cdBytes = []byte(cd)
-					default:
-						// Marshal non-string types to JSON bytes
-						// for unmarshalling into *EventCost.
-						cdBytes, err = json.Marshal(cd)
-						if err != nil {
-							return nil, err
-						}
+				if field, has := event[fldPath[1]]; has {
+					switch fldPath[1] {
+					case utils.CostDetails:
+						return processEventCostField(fldPath[2:], field, event)
+					case utils.AccountSummary:
+						return processAccountSummaryField(fldPath[2:], field, event)
 					}
-					var ec EventCost
-					if err = json.Unmarshal(cdBytes, &ec); err != nil {
-						return nil, err
-					}
-
-					// Update CostDetails with the unmarshalled *EventCost
-					// to avoid repetitive serialization.
-					event[utils.CostDetails] = &ec
-					return ec.FieldAsInterface(fldPath[2:])
 				}
 			}
 		}

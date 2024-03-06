@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"slices"
@@ -1215,4 +1216,36 @@ func (ec *EventCost) Remove(fldPath []string) error {
 // type variables. It has no functionality.
 func (ec *EventCost) GetKeys(nested bool, nesteedLimit int, prefix string) []string {
 	return nil
+}
+
+// processEventCostField ensures cd is an EventCost and calls FieldAsInterface on it.
+func processEventCostField(fldPath []string, cd any, event map[string]any) (any, error) {
+	var err error
+	var cdBytes []byte
+	switch cd := cd.(type) {
+	case *EventCost:
+		// Directly proceed if already *EventCost.
+		return cd.FieldAsInterface(fldPath)
+	case string:
+		// Convert string to bytes for unmarshalling
+		// if it's a serialized *EventCost.
+		cdBytes = []byte(cd)
+	default:
+		// Marshal non-string types to JSON bytes
+		// for unmarshalling into *EventCost.
+		cdBytes, err = json.Marshal(cd)
+		if err != nil {
+			return nil, err
+		}
+	}
+	var ec EventCost
+	if err = json.Unmarshal(cdBytes, &ec); err != nil {
+		return nil, err
+	}
+
+	// Update CostDetails with the unmarshalled *EventCost
+	// to avoid repetitive serialization.
+	event[utils.CostDetails] = &ec
+
+	return ec.FieldAsInterface(fldPath)
 }
