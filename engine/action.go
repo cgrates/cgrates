@@ -86,6 +86,11 @@ func newActionConnCfg(source, action string, cfg *config.CGRConfig) ActionConnCf
 		case utils.MetaAlterSessions:
 			act.ConnIDs = cfg.ThresholdSCfg().SessionSConns
 		}
+	case utils.RALs:
+		switch action {
+		case utils.MetaAlterSessions:
+			act.ConnIDs = cfg.RalsCfg().SessionSConns
+		}
 	}
 	return act
 }

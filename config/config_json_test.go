@@ -744,6 +744,7 @@ func TestDfRalsJsonCfg(t *testing.T) {
 	eCfg := &RalsJsonCfg{
 		Enabled:                    utils.BoolPointer(false),
 		Thresholds_conns:           &[]string{},
+		Sessions_conns:             &[]string{},
 		Stats_conns:                &[]string{},
 		Rp_subject_prefix_matching: utils.BoolPointer(false),
 		Remove_expired:             utils.BoolPointer(true),
