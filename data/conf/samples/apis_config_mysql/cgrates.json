@@ -125,6 +125,17 @@
   "db_type": "redis",
   "db_port": 6379,
   "db_name": "12"
-}
+},
+
+"loaders": [
+	{
+		"id": "*default",
+		"enabled": true,
+		"tenant": "cgrates.org",
+		"lockfile_path": ".cgr.lck",
+		"tp_in_dir": "/usr/share/cgrates/tariffplans/testit",
+		"tp_out_dir": ""
+	}
+]
 
 }

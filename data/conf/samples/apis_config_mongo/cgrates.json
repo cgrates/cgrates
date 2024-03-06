@@ -4,6 +4,7 @@
 
   "general": {
     "reply_timeout": "30s",
+    "caching_delay": "1s",
   },
 
   "logger": {
@@ -131,4 +132,15 @@
     "db_name": "16",
     "db_port": 27017,
   },
+
+  "loaders": [
+    {
+      "id": "*default",
+      "enabled": true,
+      "tenant": "cgrates.org",
+      "lockfile_path": ".cgr.lck",
+      "tp_in_dir": "/usr/share/cgrates/tariffplans/testit",
+      "tp_out_dir": ""
+    }
+  ]
 }
