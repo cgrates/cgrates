@@ -270,6 +270,6 @@ func testAnalyzerSKillEngine(t *testing.T) {
 type smock struct{}
 
 func (*smock) DisconnectPeer(ctx *context.Context,
-	args *utils.AttrDisconnectSession, reply *string) error {
+	args *utils.DPRArgs, reply *string) error {
 	return utils.ErrNotFound
 }

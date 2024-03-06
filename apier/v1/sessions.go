@@ -100,7 +100,7 @@ func (ssv1 *SessionSv1) GetActiveSessionsCount(ctx *context.Context, args *utils
 	return ssv1.sS.BiRPCv1GetActiveSessionsCount(ctx, args, rply)
 }
 
-func (ssv1 *SessionSv1) ForceDisconnect(ctx *context.Context, args *utils.SessionFilter,
+func (ssv1 *SessionSv1) ForceDisconnect(ctx *context.Context, args utils.SessionFilterWithEvent,
 	rply *string) error {
 	return ssv1.sS.BiRPCv1ForceDisconnect(ctx, args, rply)
 }

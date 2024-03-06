@@ -37,11 +37,6 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-var (
-	// ErrForcedDisconnect is used to specify the reason why the session was disconnected
-	ErrForcedDisconnect = errors.New("FORCED_DISCONNECT")
-)
-
 // NewSessionS constructs  a new SessionS instance
 func NewSessionS(cgrCfg *config.CGRConfig,
 	dm *engine.DataManager,
@@ -330,7 +325,9 @@ func (sS *SessionS) setSTerminator(s *Session, opts engine.MapEvent) {
 				lastUsage = *s.sTerminator.ttlLastUsage
 			}
 			sS.forceSTerminate(s, lastUsage, s.sTerminator.ttlUsage,
-				s.sTerminator.ttlLastUsed)
+				s.sTerminator.ttlLastUsed, nil,
+				map[string]any{
+					utils.DisconnectCause: utils.SessionTimeout})
 			s.Unlock()
 		case <-endChan:
 			timer.Stop()
@@ -341,7 +338,8 @@ func (sS *SessionS) setSTerminator(s *Session, opts engine.MapEvent) {
 
 // forceSTerminate is called when a session times-out or it is forced from CGRateS side
 // not thread safe
-func (sS *SessionS) forceSTerminate(s *Session, extraUsage time.Duration, tUsage, lastUsed *time.Duration) (err error) {
+func (sS *SessionS) forceSTerminate(s *Session, extraUsage time.Duration, tUsage, lastUsed *time.Duration,
+	apiOpts, event map[string]any) (err error) {
 	if extraUsage != 0 {
 		for i := range s.SRuns {
 			if _, err = sS.debitSession(s, i, extraUsage, lastUsed); err != nil {
@@ -408,13 +406,25 @@ func (sS *SessionS) forceSTerminate(s *Session, extraUsage time.Duration, tUsage
 	sS.replicateSessions(s.CGRID, false, sS.cgrCfg.SessionSCfg().ReplicationConns)
 	if clntConn := sS.biJClnt(s.ClientConnID); clntConn != nil {
 		go func() {
+			// Merge parameter event with the session event. Losing the EventStart OriginID
+			// could create unwanted behaviour.
+			if event == nil {
+				event = make(map[string]any)
+			}
+			for key, val := range s.EventStart {
+				if _, has := event[key]; !has {
+					event[key] = val
+				}
+			}
+			disconnectArgs := utils.CGREvent{
+				ID:      utils.GenUUID(),
+				Time:    utils.TimePointer(time.Now()),
+				APIOpts: apiOpts,
+				Event:   event,
+			}
 			var rply string
 			if err := clntConn.conn.Call(context.TODO(),
-				utils.AgentV1DisconnectSession,
-				utils.AttrDisconnectSession{
-					EventStart: s.EventStart,
-					Reason:     ErrForcedDisconnect.Error()},
-				&rply); err != nil {
+				utils.AgentV1DisconnectSession, disconnectArgs, &rply); err != nil {
 				if err != utils.ErrNotImplemented {
 					utils.Logger.Warning(fmt.Sprintf(
 						"<%s> remotely disconnecting session with id <%s> failed: %v",
@@ -573,8 +583,11 @@ func (sS *SessionS) debitLoopSession(s *Session, sRunIdx int,
 					fmt.Sprintf("<%s> could not disconnect session: %s, error: %s",
 						utils.SessionS, s.cgrID(), err.Error()))
 			}
-			if err = sS.forceSTerminate(s, 0, nil, nil); err != nil {
-				utils.Logger.Warning(fmt.Sprintf("<%s> failed force-terminating session: <%s>, err: <%s>", utils.SessionS, s.cgrID(), err))
+			if err = sS.forceSTerminate(s, 0, nil, nil, nil,
+				map[string]any{utils.DisconnectCause: utils.ForcedDisconnect}); err != nil {
+				utils.Logger.Warning(
+					fmt.Sprintf("<%s> failed force-terminating session: <%s>, err: <%s>",
+						utils.SessionS, s.cgrID(), err))
 			}
 			s.Unlock()
 			return
@@ -614,9 +627,11 @@ func (sS *SessionS) debitLoopSession(s *Session, sRunIdx int,
 				utils.Logger.Warning(
 					fmt.Sprintf("<%s> could not disconnect session: <%s>, error: <%s>",
 						utils.SessionS, s.cgrID(), err.Error()))
-				if err = sS.forceSTerminate(s, 0, nil, nil); err != nil {
-					utils.Logger.Warning(fmt.Sprintf("<%s> failed force-terminating session: <%s>, err: <%s>",
-						utils.SessionS, s.cgrID(), err))
+				if err = sS.forceSTerminate(s, 0, nil, nil, nil,
+					map[string]any{utils.DisconnectCause: utils.ForcedDisconnect}); err != nil {
+					utils.Logger.Warning(
+						fmt.Sprintf("<%s> failed force-terminating session: <%s>, err: <%s>",
+							utils.SessionS, s.cgrID(), err))
 				}
 			}
 			return
@@ -775,11 +790,15 @@ func (sS *SessionS) disconnectSession(s *Session, rsn string) (err error) {
 	if clnt.proto == 0 { // compatibility with OpenSIPS 2.3
 		servMethod = "SMGClientV1.DisconnectSession"
 	}
+	disconnectArgs := utils.CGREvent{
+		ID:    utils.GenUUID(),
+		Time:  utils.TimePointer(time.Now()),
+		Event: s.EventStart,
+	}
+	disconnectArgs.Event[utils.DisconnectCause] = rsn
 	var rply string
 	if err = clnt.conn.Call(context.TODO(), servMethod,
-		utils.AttrDisconnectSession{
-			EventStart: s.EventStart,
-			Reason:     rsn}, &rply); err != nil {
+		disconnectArgs, &rply); err != nil {
 		if err != utils.ErrNotImplemented {
 			return err
 		}
@@ -1418,10 +1437,11 @@ func (sS *SessionS) terminateSyncSessions(toBeRemoved []string) {
 				rand.Int63n(sS.cgrCfg.SessionSCfg().StaleChanMaxExtraUsage.Milliseconds()) * time.Millisecond.Nanoseconds())
 		}
 		ss[0].Lock()
-		if err := sS.forceSTerminate(ss[0], eUsage, nil, nil); err != nil {
+		if err := sS.forceSTerminate(ss[0], eUsage, nil, nil, nil,
+			map[string]any{utils.DisconnectCause: utils.ForcedDisconnect}); err != nil {
 			utils.Logger.Warning(
-				fmt.Sprintf("<%s> failed force-terminating session: <%s>, err: <%s>",
-					utils.SessionS, cgrID, err.Error()))
+				fmt.Sprintf("<%s> failed force-terminating session: <%s>, err: <%v>",
+					utils.SessionS, cgrID, err))
 		}
 		ss[0].Unlock()
 	}
@@ -3660,14 +3680,14 @@ func (sS *SessionS) BiRPCv1SyncSessions(ctx *context.Context,
 
 // BiRPCv1ForceDisconnect will force disconnecting sessions matching sessions
 func (sS *SessionS) BiRPCv1ForceDisconnect(ctx *context.Context,
-	args *utils.SessionFilter, reply *string) (err error) {
-	if args == nil { //protection in case on nil
-		args = &utils.SessionFilter{}
+	args utils.SessionFilterWithEvent, reply *string) (err error) {
+	if args.SessionFilter == nil { //protection in case on nil
+		args.SessionFilter = &utils.SessionFilter{}
 	}
 	if len(args.Filters) != 0 && sS.dm == nil {
 		return utils.ErrNoDatabaseConn
 	}
-	aSs := sS.filterSessions(args, false)
+	aSs := sS.filterSessions(args.SessionFilter, false)
 	if len(aSs) == 0 {
 		return utils.ErrNotFound
 	}
@@ -3677,11 +3697,11 @@ func (sS *SessionS) BiRPCv1ForceDisconnect(ctx *context.Context,
 			continue
 		}
 		ss[0].Lock()
-		if errTerm := sS.forceSTerminate(ss[0], 0, nil, nil); errTerm != nil {
+		if errTerm := sS.forceSTerminate(ss[0], 0, nil, nil,
+			args.APIOpts, args.Event); errTerm != nil {
 			utils.Logger.Warning(
-				fmt.Sprintf(
-					"<%s> failed force-terminating session with id: <%s>, err: <%s>",
-					utils.SessionS, ss[0].cgrID(), errTerm.Error()))
+				fmt.Sprintf("<%s> failed force-terminating session with id: <%s>, err: <%v>",
+					utils.SessionS, ss[0].cgrID(), errTerm))
 			err = utils.ErrPartiallyExecuted
 		}
 		ss[0].Unlock()

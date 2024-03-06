@@ -331,12 +331,12 @@ func (da *DiameterAgent) Call(ctx *context.Context, serviceMethod string, args a
 }
 
 // V1DisconnectSession is part of the sessions.BiRPClient
-func (da *DiameterAgent) V1DisconnectSession(ctx *context.Context, args utils.AttrDisconnectSession, reply *string) (err error) {
-	ssID, has := args.EventStart[utils.OriginID]
+func (da *DiameterAgent) V1DisconnectSession(ctx *context.Context, cgrEv utils.CGREvent, reply *string) (err error) {
+	ssID, has := cgrEv.Event[utils.OriginID]
 	if !has {
 		utils.Logger.Info(
 			fmt.Sprintf("<%s> cannot disconnect session, missing OriginID in event: %s",
-				utils.DiameterAgent, utils.ToJSON(args.EventStart)))
+				utils.DiameterAgent, utils.ToJSON(cgrEv.Event)))
 		return utils.ErrMandatoryIeMissing
 	}
 	originID := ssID.(string)
@@ -347,7 +347,7 @@ func (da *DiameterAgent) V1DisconnectSession(ctx *context.Context, args utils.At
 	case utils.MetaASR:
 		return da.sendASR(originID, reply)
 	case utils.MetaRAR:
-		return da.V1AlterSession(ctx, utils.CGREvent{Event: args.EventStart}, reply)
+		return da.V1AlterSession(ctx, utils.CGREvent{Event: cgrEv.Event}, reply)
 	default:
 		return fmt.Errorf("Unsupported request type <%s>", da.cgrCfg.DiameterAgentCfg().ForcedDisconnect)
 	}

@@ -26,7 +26,7 @@ func init() {
 	c := &CmdSessionsForceDisconnect{
 		name:      "session_force_disconnect",
 		rpcMethod: utils.SessionSv1ForceDisconnect,
-		rpcParams: &utils.SessionFilter{},
+		rpcParams: utils.SessionFilterWithEvent{},
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}
@@ -35,7 +35,7 @@ func init() {
 type CmdSessionsForceDisconnect struct {
 	name      string
 	rpcMethod string
-	rpcParams *utils.SessionFilter
+	rpcParams utils.SessionFilterWithEvent
 	*CommandExecuter
 }
 
@@ -48,8 +48,10 @@ func (cmd *CmdSessionsForceDisconnect) RpcMethod() string {
 }
 
 func (cmd *CmdSessionsForceDisconnect) RpcParams(reset bool) any {
-	if reset || cmd.rpcParams == nil {
-		cmd.rpcParams = &utils.SessionFilter{APIOpts: make(map[string]any)}
+	if reset || cmd.rpcParams.SessionFilter == nil {
+		cmd.rpcParams.SessionFilter = &utils.SessionFilter{
+			APIOpts: make(map[string]any),
+		}
 	}
 	return cmd.rpcParams
 }

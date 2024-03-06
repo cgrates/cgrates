@@ -211,7 +211,7 @@ func (dS *DispatcherService) SessionSv1GetActiveSessionsCount(ctx *context.Conte
 	}, utils.MetaSessionS, utils.SessionSv1GetActiveSessionsCount, args, reply)
 }
 
-func (dS *DispatcherService) SessionSv1ForceDisconnect(ctx *context.Context, args *utils.SessionFilter,
+func (dS *DispatcherService) SessionSv1ForceDisconnect(ctx *context.Context, args utils.SessionFilterWithEvent,
 	reply *string) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
 	if args.Tenant != utils.EmptyString {
@@ -227,6 +227,24 @@ func (dS *DispatcherService) SessionSv1ForceDisconnect(ctx *context.Context, arg
 		Tenant:  tnt,
 		APIOpts: args.APIOpts,
 	}, utils.MetaSessionS, utils.SessionSv1ForceDisconnect, args, reply)
+}
+
+func (dS *DispatcherService) SessionSv1AlterSessions(ctx *context.Context, args utils.SessionFilterWithEvent,
+	reply *string) (err error) {
+	tnt := dS.cfg.GeneralCfg().DefaultTenant
+	if args.Tenant != utils.EmptyString {
+		tnt = args.Tenant
+	}
+	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
+		if err = dS.authorize(utils.SessionSv1AlterSessions,
+			tnt, utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey]), utils.TimePointer(time.Now())); err != nil {
+			return
+		}
+	}
+	return dS.Dispatch(&utils.CGREvent{
+		Tenant:  tnt,
+		APIOpts: args.APIOpts,
+	}, utils.MetaSessionS, utils.SessionSv1AlterSessions, args, reply)
 }
 
 func (dS *DispatcherService) SessionSv1GetPassiveSessions(ctx *context.Context, args *utils.SessionFilter,

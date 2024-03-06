@@ -2823,6 +2823,13 @@ const (
 	ExecCgr     = "exec"
 )
 
+// SessionS disconnect causes
+
+const (
+	ForcedDisconnect = "FORCED_DISCONNECT"
+	SessionTimeout   = "SESSION_TIMEOUT"
+)
+
 var AnzIndexType = StringSet{ // AnzIndexType are the analyzers possible index types
 	MetaScorch:   {},
 	MetaBoltdb:   {},
