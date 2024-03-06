@@ -25,7 +25,9 @@
         {"tag": "AnswerTime", "path": "*cgreq.AnswerTime", "type": "*composed",
           "value": "~*req.Event-Timestamp", "mandatory": true},
         {"tag": "RemoteAddr" , "path": "*cgreq.RemoteAddr", "type": "*variable",
-          "value": "~*vars.RemoteHost:s/(.*):\\d+/${1}/"}
+          "value": "~*vars.RemoteHost:s/(.*):\\d+/${1}/"},
+        {"tag": "SessionID", "path": "*vars.*sessionID", "type": "*variable", 
+          "value": "~*req.Acct-Session-Id;-;modified"}
       ],
       "reply_fields":[]
     }

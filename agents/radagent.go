@@ -151,22 +151,6 @@ func (ra *RadiusAgent) handleAuth(reqPacket *radigo.Packet) (*radigo.Packet, err
 		},
 	}
 	radDP := newRADataProvider(reqPacket)
-	sessionID, err := radDP.FieldAsString([]string{"Acct-Session-Id"})
-	if err == nil {
-		_, err = varsDataNode.Set([]string{utils.MetaSessionID}, []*utils.DataNode{
-			{
-				Type: utils.NMDataType, Value: &utils.DataLeaf{
-					Data: sessionID,
-				},
-			},
-		})
-	}
-	if err != nil {
-		utils.Logger.Warning(fmt.Sprintf(
-			"<%s> setting default *vars.*sessionID (used to track packets of active sessions) failed: %v",
-			utils.RadiusAgent, err))
-	}
-
 	var processed bool
 	var processReqErr error
 	for _, reqProcessor := range ra.cgrCfg.RadiusAgentCfg().RequestProcessors {
@@ -193,6 +177,70 @@ func (ra *RadiusAgent) handleAuth(reqPacket *radigo.Packet) (*radigo.Packet, err
 			utils.RadiusAgent, utils.ToJSON(reqPacket)))
 		return nil, nil
 	}
+	if err := radAppendAttributes(replyPacket, replyNM); err != nil {
+		utils.Logger.Err(fmt.Sprintf("<%s> err: %v, replying to message: %+v",
+			utils.RadiusAgent, err, utils.ToIJSON(reqPacket)))
+		return nil, err
+	}
+	return replyPacket, nil
+}
+
+// handleAcct handles RADIUS Accounting request
+// supports: Acct-Status-Type = Start, Interim-Update, Stop
+func (ra *RadiusAgent) handleAcct(reqPacket *radigo.Packet) (*radigo.Packet, error) {
+	reqPacket.SetAVPValues() // populate string values in AVPs
+	replyPacket := reqPacket.Reply()
+	replyPacket.Code = radigo.AccountingResponse
+	cgrRplyNM := &utils.DataNode{Type: utils.NMMapType, Map: map[string]*utils.DataNode{}}
+	rplyNM := utils.NewOrderedNavigableMap()
+	opts := utils.MapStorage{}
+	varsDataNode := &utils.DataNode{
+		Type: utils.NMMapType,
+		Map: map[string]*utils.DataNode{
+			utils.RemoteHost: utils.NewLeafNode(reqPacket.RemoteAddr().String()),
+		},
+	}
+	radDP := newRADataProvider(reqPacket)
+	sessionID, err := radDP.FieldAsString([]string{"Acct-Session-Id"})
+	if err == nil {
+		_, err = varsDataNode.Set([]string{utils.MetaSessionID}, []*utils.DataNode{
+			{
+				Type: utils.NMDataType, Value: &utils.DataLeaf{
+					Data: sessionID,
+				},
+			},
+		})
+	}
+	if err != nil {
+		utils.Logger.Warning(fmt.Sprintf(
+			"<%s> setting default *vars.*sessionID (used to track packets of active sessions) failed: %v",
+			utils.RadiusAgent, err))
+	}
+	var processed bool
+	var processedReqErr error
+	for _, reqProcessor := range ra.cgrCfg.RadiusAgentCfg().RequestProcessors {
+		agReq := NewAgentRequest(radDP, varsDataNode, cgrRplyNM, rplyNM, opts,
+			reqProcessor.Tenant, ra.cgrCfg.GeneralCfg().DefaultTenant,
+			utils.FirstNonEmpty(reqProcessor.Timezone,
+				config.CgrConfig().GeneralCfg().DefaultTimezone),
+			ra.filterS, nil)
+		var lclProcessed bool
+		if lclProcessed, processedReqErr = ra.processRequest(reqPacket, reqProcessor, agReq, replyPacket); lclProcessed {
+			processed = lclProcessed
+		}
+		if processedReqErr != nil || (lclProcessed && !reqProcessor.Flags.GetBool(utils.MetaContinue)) {
+			break
+		}
+	}
+	if processedReqErr != nil {
+		utils.Logger.Err(fmt.Sprintf("<%s> error: <%v> ignoring request: %s",
+			utils.RadiusAgent, processedReqErr, utils.ToJSON(reqPacket)))
+		return nil, nil
+	} else if !processed {
+		utils.Logger.Err(fmt.Sprintf("<%s> no request processor enabled, ignoring request %s",
+			utils.RadiusAgent, utils.ToIJSON(reqPacket)))
+		return nil, nil
+	}
 
 	// Cache the RADIUS Packet for future CoA/Disconnect Requests.
 	if ra.cgrCfg.RadiusAgentCfg().DMRTemplate != "" || ra.cgrCfg.RadiusAgentCfg().CoATemplate != "" {
@@ -211,56 +259,12 @@ func (ra *RadiusAgent) handleAuth(reqPacket *radigo.Packet) (*radigo.Packet, err
 		}
 	}
 
-	if err := radAppendAttributes(replyPacket, replyNM); err != nil {
-		utils.Logger.Err(fmt.Sprintf("<%s> err: %v, replying to message: %+v",
-			utils.RadiusAgent, err, utils.ToIJSON(reqPacket)))
+	if err := radAppendAttributes(replyPacket, rplyNM); err != nil {
+		utils.Logger.Err(fmt.Sprintf("<%s> err: %v, replying to message: %s",
+			utils.RadiusAgent, err, utils.ToJSON(reqPacket)))
 		return nil, err
 	}
 	return replyPacket, nil
-}
-
-// handleAcct handles RADIUS Accounting request
-// supports: Acct-Status-Type = Start, Interim-Update, Stop
-func (ra *RadiusAgent) handleAcct(req *radigo.Packet) (rpl *radigo.Packet, err error) {
-	req.SetAVPValues()             // populate string values in AVPs
-	dcdr := newRADataProvider(req) // dcdr will provide information from request
-	rpl = req.Reply()
-	rpl.Code = radigo.AccountingResponse
-	cgrRplyNM := &utils.DataNode{Type: utils.NMMapType, Map: map[string]*utils.DataNode{}}
-	rplyNM := utils.NewOrderedNavigableMap()
-	opts := utils.MapStorage{}
-	var processed bool
-	reqVars := &utils.DataNode{Type: utils.NMMapType,
-		Map: map[string]*utils.DataNode{utils.RemoteHost: utils.NewLeafNode(req.RemoteAddr().String())}}
-	for _, reqProcessor := range ra.cgrCfg.RadiusAgentCfg().RequestProcessors {
-		agReq := NewAgentRequest(dcdr, reqVars, cgrRplyNM, rplyNM, opts,
-			reqProcessor.Tenant, ra.cgrCfg.GeneralCfg().DefaultTenant,
-			utils.FirstNonEmpty(reqProcessor.Timezone,
-				config.CgrConfig().GeneralCfg().DefaultTimezone),
-			ra.filterS, nil)
-		var lclProcessed bool
-		if lclProcessed, err = ra.processRequest(req, reqProcessor, agReq, rpl); lclProcessed {
-			processed = lclProcessed
-		}
-		if err != nil || (lclProcessed && !reqProcessor.Flags.GetBool(utils.MetaContinue)) {
-			break
-		}
-	}
-	if err != nil {
-		utils.Logger.Err(fmt.Sprintf("<%s> error: <%s> ignoring request: %s, ",
-			utils.RadiusAgent, err.Error(), utils.ToIJSON(req)))
-		return nil, nil
-	} else if !processed {
-		utils.Logger.Err(fmt.Sprintf("<%s> no request processor enabled, ignoring request %s",
-			utils.RadiusAgent, utils.ToIJSON(req)))
-		return nil, nil
-	}
-	if err := radAppendAttributes(rpl, rplyNM); err != nil {
-		utils.Logger.Err(fmt.Sprintf("<%s> err: %s, replying to message: %+v",
-			utils.RadiusAgent, err.Error(), utils.ToIJSON(req)))
-		return nil, err
-	}
-	return
 }
 
 // processRequest represents one processor processing the request
