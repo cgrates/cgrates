@@ -36,10 +36,10 @@ func TestRadiusAgentCfgloadFromJsonCfgCase1(t *testing.T) {
 				Acct_Address: utils.StringPointer("127.0.0.1:1813"),
 			},
 		},
-		Client_secrets:      &map[string]string{utils.MetaDefault: "CGRateS.org"},
-		Client_dictionaries: &map[string][]string{utils.MetaDefault: {"/usr/share/cgrates/radius/dict/"}},
-		Sessions_conns:      &[]string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS)},
-		Request_processors: &[]*ReqProcessorJsnCfg{
+		ClientSecrets:      &map[string]string{utils.MetaDefault: "CGRateS.org"},
+		ClientDictionaries: &map[string][]string{utils.MetaDefault: {"/usr/share/cgrates/radius/dict/"}},
+		Sessions_conns:     &[]string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS)},
+		RequestProcessors: &[]*ReqProcessorJsnCfg{
 			{
 				ID:             utils.StringPointer("OutboundAUTHDryRun"),
 				Filters:        &[]string{"*string:~*req.request_type:OutboundAUTH", "*string:~*req.Msisdn:497700056231"},
@@ -72,6 +72,8 @@ func TestRadiusAgentCfgloadFromJsonCfgCase1(t *testing.T) {
 		ClientSecrets:      map[string]string{utils.MetaDefault: "CGRateS.org"},
 		ClientDictionaries: map[string][]string{utils.MetaDefault: {"/usr/share/cgrates/radius/dict/"}},
 		SessionSConns:      []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS)},
+		DMRTemplate:        "*dmr",
+		CoATemplate:        "*coa",
 		RequestProcessors: []*RequestProcessor{
 			{
 				ID:            "OutboundAUTHDryRun",
@@ -115,7 +117,7 @@ func TestRadiusAgentCfgloadFromJsonCfgCase2(t *testing.T) {
      },
 }`
 	cfgJSON := &RadiusAgentJsonCfg{
-		Request_processors: &[]*ReqProcessorJsnCfg{
+		RequestProcessors: &[]*ReqProcessorJsnCfg{
 			{
 				ID: utils.StringPointer("OutboundAUTHDryRun"),
 			},
@@ -140,7 +142,7 @@ func TestRadiusAgentCfgloadFromJsonCfgCase2(t *testing.T) {
 
 func TestRadiusAgentCfgloadFromJsonCfgCase3(t *testing.T) {
 	cfgJSON := &RadiusAgentJsonCfg{
-		Request_processors: &[]*ReqProcessorJsnCfg{
+		RequestProcessors: &[]*ReqProcessorJsnCfg{
 			{
 				Tenant: utils.StringPointer("a{*"),
 			},
@@ -171,6 +173,7 @@ func TestRadiusAgentCfgAsMapInterface(t *testing.T) {
 	     "sessions_conns": ["*birpc_internal", "*conn1","*conn2"],
 		 "dmr_template": "*dmr",
 		 "coa_template": "*coa",
+		 "requests_cache_key": "~*req.Acc-Session-Id",
          "request_processors": [
 			{
 				"id": "OutboundAUTHDryRun",
@@ -200,9 +203,10 @@ func TestRadiusAgentCfgAsMapInterface(t *testing.T) {
 		utils.ClientDictionariesCfg: map[string][]string{
 			utils.MetaDefault: {"/usr/share/cgrates/"},
 		},
-		utils.SessionSConnsCfg: []string{rpcclient.BiRPCInternal, "*conn1", "*conn2"},
-		utils.DMRTemplateCfg:   "*dmr",
-		utils.CoATemplateCfg:   "*coa",
+		utils.SessionSConnsCfg:    []string{rpcclient.BiRPCInternal, "*conn1", "*conn2"},
+		utils.DMRTemplateCfg:      "*dmr",
+		utils.CoATemplateCfg:      "*coa",
+		utils.RequestsCacheKeyCfg: "~*req.Acc-Session-Id",
 		utils.RequestProcessorsCfg: []map[string]any{
 			{
 				utils.IDCfg:            "OutboundAUTHDryRun",
@@ -244,8 +248,9 @@ func TestRadiusAgentCfgAsMapInterface1(t *testing.T) {
 			utils.MetaDefault: {"/usr/share/cgrates/radius/dict/"},
 		},
 		utils.SessionSConnsCfg:     []string{"*internal"},
-		utils.DMRTemplateCfg:       "",
-		utils.CoATemplateCfg:       "",
+		utils.DMRTemplateCfg:       "*dmr",
+		utils.CoATemplateCfg:       "*coa",
+		utils.RequestsCacheKeyCfg:  "",
 		utils.RequestProcessorsCfg: []map[string]any{},
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {

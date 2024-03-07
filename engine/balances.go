@@ -32,7 +32,7 @@ import (
 
 // Can hold different units as seconds or monetary
 type Balance struct {
-	Uuid           string //system wide unique
+	Uuid           string // system wide unique
 	ID             string // account wide unique
 	Value          float64
 	ExpirationDate time.Time

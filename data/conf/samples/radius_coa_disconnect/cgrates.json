@@ -74,7 +74,8 @@
 		}
 	],
 	"dmr_template": "*dmr",
-	"coa_template": "*coa"
+	"coa_template": "*coa",
+	"requests_cache_key": "~*req.Acct-Session-Id;-;modified"
 },
 
 "apiers": {

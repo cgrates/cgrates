@@ -2261,6 +2261,7 @@ const (
 	ClientSecretsCfg      = "client_secrets"
 	ClientDictionariesCfg = "client_dictionaries"
 	ClientDaAddressesCfg  = "client_da_addresses"
+	RequestsCacheKeyCfg   = "requests_cache_key"
 	DMRTemplateCfg        = "dmr_template"
 	CoATemplateCfg        = "coa_template"
 	HostCfg               = "host"
