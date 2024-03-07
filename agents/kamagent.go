@@ -21,7 +21,6 @@ package agents
 import (
 	"errors"
 	"fmt"
-	"log"
 	"regexp"
 	"strings"
 	"time"
@@ -29,11 +28,11 @@ import (
 	"github.com/cgrates/birpc"
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/kamevapi"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/sessions"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/cgrates/kamevapi"
 )
 
 var (
@@ -84,12 +83,10 @@ func (self *KamailioAgent) Connect() (err error) {
 	}
 	errChan := make(chan error)
 	for connIdx, connCfg := range self.cfg.EvapiConns {
-		logger := log.New(utils.Logger, "kamevapi:", 2)
 		if self.conns[connIdx], err = kamevapi.NewKamEvapi(connCfg.Address, connIdx, connCfg.Reconnects, connCfg.MaxReconnectInterval,
-			utils.FibDuration, eventHandlers, logger); err != nil {
+			utils.FibDuration, eventHandlers, utils.Logger); err != nil {
 			return
 		}
-		utils.Logger.Info(fmt.Sprintf("<%s> successfully connected to Kamailio at: <%s>", utils.KamailioAgent, connCfg.Address))
 		go func(conn *kamevapi.KamEvapi) { // Start reading in own goroutine, return on error
 			if err := conn.ReadEvents(); err != nil {
 				errChan <- err

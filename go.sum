@@ -53,8 +53,8 @@ github.com/cgrates/birpc v1.3.1-0.20211117095917-5b0ff29f3084 h1:YIEepjEOjeHaFre
 github.com/cgrates/birpc v1.3.1-0.20211117095917-5b0ff29f3084/go.mod h1:z/PmNnDPqSQALedKJv5T8+eXIq6XHa9J0St1YsvAVns=
 github.com/cgrates/fsock v0.0.0-20231222174700-7257ce894e23 h1:AElRJimochzP6ghx3/sVtV0oPyqiAMwd3ovo4s5YnqM=
 github.com/cgrates/fsock v0.0.0-20231222174700-7257ce894e23/go.mod h1:5A9wag324AzIlaDd7tpPDAg26ouUO1orarAq7Vxr4As=
-github.com/cgrates/kamevapi v0.0.0-20220525160402-5b8036487a6c h1:ILTMiCcBw80hSe1L0LE3u2U7sFQB/vcFc2JZpvTD4/E=
-github.com/cgrates/kamevapi v0.0.0-20220525160402-5b8036487a6c/go.mod h1:R1iZadqJTrjkwWxhK8gVPcYhcWoE4d0A6HZ+y6ZHzys=
+github.com/cgrates/kamevapi v0.0.0-20240307160311-26273f03eedf h1:GbMJzvtwdX1OCEmsqSts/cRCIcIMvo8AYtC2dQExWlg=
+github.com/cgrates/kamevapi v0.0.0-20240307160311-26273f03eedf/go.mod h1:oEq/JbubkOD2pXHvDy4r7519NkxriONisrnVpkCaNJw=
 github.com/cgrates/ltcache v0.0.0-20210405185848-da943e80c1ab h1:dKdAUwrij6vYwewe1WV1+pDSagqGI5JLqjTZZyN2ANo=
 github.com/cgrates/ltcache v0.0.0-20210405185848-da943e80c1ab/go.mod h1:9oSG/6gUoab/vKm/eQ3QcX6KeTR0wRw88N33iCnC/k4=
 github.com/cgrates/radigo v0.0.0-20240123163129-491c899df727 h1:rhYHlbfEPDNreekd1ZtUYi/NbFm5cEl8twQZ3c/0nYU=
