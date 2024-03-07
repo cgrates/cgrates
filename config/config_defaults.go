@@ -720,10 +720,10 @@ const CGRATES_CFG_JSON = `
 		// 	"flags": [] 							// additional options, currently supports *log for logging DA requests before sending.
 		// }
 	},
-	"requests_cache_key": "",
+	"requests_cache_key": "",						// used to choose the cache key of a RADIUS packet <RSRParsers>
 	"sessions_conns": ["*internal"],
-	"dmr_template": "",								// template used to build the Disconnect-Request packet
-	"coa_template": "",								// template used to build the CoA-Request packet
+	"dmr_template": "*dmr",							// template used to build the Disconnect-Request packet
+	"coa_template": "*coa",							// template used to build the CoA-Request packet
 	"request_processors": [							// request processors to be applied to Radius messages
 	]
 },

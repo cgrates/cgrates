@@ -19,6 +19,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package config
 
 import (
+	"fmt"
+
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -36,6 +38,7 @@ type RadiusAgentCfg struct {
 	ClientDictionaries map[string][]string
 	ClientDaAddresses  map[string]DAClientOpts
 	SessionSConns      []string
+	RequestsCacheKey   RSRParsers
 	DMRTemplate        string
 	CoATemplate        string
 	RequestProcessors  []*RequestProcessor
@@ -64,28 +67,28 @@ func (ra *RadiusAgentCfg) loadFromJSONCfg(jsnCfg *RadiusAgentJsonCfg, separator 
 			ra.Listeners = append(ra.Listeners, ls)
 		}
 	}
-	if jsnCfg.Client_secrets != nil {
+	if jsnCfg.ClientSecrets != nil {
 		if ra.ClientSecrets == nil {
 			ra.ClientSecrets = make(map[string]string)
 		}
-		for k, v := range *jsnCfg.Client_secrets {
+		for k, v := range *jsnCfg.ClientSecrets {
 			ra.ClientSecrets[k] = v
 		}
 	}
-	if jsnCfg.Client_dictionaries != nil {
+	if jsnCfg.ClientDictionaries != nil {
 		if ra.ClientDictionaries == nil {
 			ra.ClientDictionaries = make(map[string][]string)
 		}
-		for k, v := range *jsnCfg.Client_dictionaries {
+		for k, v := range *jsnCfg.ClientDictionaries {
 			ra.ClientDictionaries[k] = v
 		}
 	}
-	if len(jsnCfg.Client_da_addresses) != 0 {
+	if len(jsnCfg.ClientDaAddresses) != 0 {
 		if ra.ClientDaAddresses == nil {
 			ra.ClientDaAddresses = make(map[string]DAClientOpts)
 		}
-		ra.ClientDaAddresses = make(map[string]DAClientOpts, len(jsnCfg.Client_da_addresses))
-		for hostKey, clientOpts := range jsnCfg.Client_da_addresses {
+		ra.ClientDaAddresses = make(map[string]DAClientOpts, len(jsnCfg.ClientDaAddresses))
+		for hostKey, clientOpts := range jsnCfg.ClientDaAddresses {
 			cfg := DAClientOpts{}
 			cfg.loadFromJSONCfg(clientOpts, hostKey)
 			ra.ClientDaAddresses[hostKey] = cfg
@@ -101,14 +104,23 @@ func (ra *RadiusAgentCfg) loadFromJSONCfg(jsnCfg *RadiusAgentJsonCfg, separator 
 			}
 		}
 	}
-	if jsnCfg.Dmr_template != nil {
-		ra.DMRTemplate = *jsnCfg.Dmr_template
+	if jsnCfg.RequestsCacheKey != nil {
+		ra.RequestsCacheKey, err = NewRSRParsers(*jsnCfg.RequestsCacheKey, separator)
+		if err != nil {
+			return fmt.Errorf(
+				"failed to initialize RSRParsers based %s value: %w",
+				utils.RequestsCacheKeyCfg, err,
+			)
+		}
 	}
-	if jsnCfg.Coa_template != nil {
-		ra.CoATemplate = *jsnCfg.Coa_template
+	if jsnCfg.DMRTemplate != nil {
+		ra.DMRTemplate = *jsnCfg.DMRTemplate
 	}
-	if jsnCfg.Request_processors != nil {
-		for _, reqProcJsn := range *jsnCfg.Request_processors {
+	if jsnCfg.CoATemplate != nil {
+		ra.CoATemplate = *jsnCfg.CoATemplate
+	}
+	if jsnCfg.RequestProcessors != nil {
+		for _, reqProcJsn := range *jsnCfg.RequestProcessors {
 			rp := new(RequestProcessor)
 			var haveID bool
 			for _, rpSet := range ra.RequestProcessors {
@@ -142,9 +154,10 @@ func (lstn *RadiusListener) AsMapInterface(separator string) map[string]any {
 // AsMapInterface returns the config as a map[string]any
 func (ra *RadiusAgentCfg) AsMapInterface(separator string) (initialMP map[string]any) {
 	initialMP = map[string]any{
-		utils.EnabledCfg:     ra.Enabled,
-		utils.DMRTemplateCfg: ra.DMRTemplate,
-		utils.CoATemplateCfg: ra.CoATemplate,
+		utils.EnabledCfg:          ra.Enabled,
+		utils.RequestsCacheKeyCfg: ra.RequestsCacheKey.GetRule(separator),
+		utils.DMRTemplateCfg:      ra.DMRTemplate,
+		utils.CoATemplateCfg:      ra.CoATemplate,
 	}
 
 	listeners := make([]map[string]any, len(ra.Listeners))
@@ -196,6 +209,7 @@ func (ra RadiusAgentCfg) Clone() (cln *RadiusAgentCfg) {
 		Listeners:          ra.Listeners,
 		ClientSecrets:      make(map[string]string),
 		ClientDictionaries: make(map[string][]string),
+		RequestsCacheKey:   ra.RequestsCacheKey.Clone(),
 		DMRTemplate:        ra.DMRTemplate,
 		CoATemplate:        ra.CoATemplate,
 	}

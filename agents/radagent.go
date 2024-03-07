@@ -185,77 +185,71 @@ func (ra *RadiusAgent) handleAuth(reqPacket *radigo.Packet) (*radigo.Packet, err
 	return replyPacket, nil
 }
 
-// handleAcct handles RADIUS Accounting request
-// supports: Acct-Status-Type = Start, Interim-Update, Stop
+// handleAcct processes RADIUS Accounting requests and generates a reply.
+// It supports Acct-Status-Type values: Start, Interim-Update, Stop.
 func (ra *RadiusAgent) handleAcct(reqPacket *radigo.Packet) (*radigo.Packet, error) {
 	reqPacket.SetAVPValues() // populate string values in AVPs
 	replyPacket := reqPacket.Reply()
 	replyPacket.Code = radigo.AccountingResponse
-	cgrRplyNM := &utils.DataNode{Type: utils.NMMapType, Map: map[string]*utils.DataNode{}}
+	cgrRplyNM := &utils.DataNode{
+		Type: utils.NMMapType,
+		Map:  map[string]*utils.DataNode{},
+	}
 	rplyNM := utils.NewOrderedNavigableMap()
 	opts := utils.MapStorage{}
+
+	remoteAddr := reqPacket.RemoteAddr().String()
 	varsDataNode := &utils.DataNode{
 		Type: utils.NMMapType,
 		Map: map[string]*utils.DataNode{
-			utils.RemoteHost: utils.NewLeafNode(reqPacket.RemoteAddr().String()),
+			utils.RemoteHost: utils.NewLeafNode(remoteAddr),
 		},
 	}
+
 	radDP := newRADataProvider(reqPacket)
-	sessionID, err := radDP.FieldAsString([]string{"Acct-Session-Id"})
-	if err == nil {
-		_, err = varsDataNode.Set([]string{utils.MetaSessionID}, []*utils.DataNode{
-			{
-				Type: utils.NMDataType, Value: &utils.DataLeaf{
-					Data: sessionID,
-				},
-			},
-		})
-	}
-	if err != nil {
-		utils.Logger.Warning(fmt.Sprintf(
-			"<%s> setting default *vars.*sessionID (used to track packets of active sessions) failed: %v",
-			utils.RadiusAgent, err))
-	}
+	radAgentCfg := ra.cgrCfg.RadiusAgentCfg()
 	var processed bool
-	var processedReqErr error
-	for _, reqProcessor := range ra.cgrCfg.RadiusAgentCfg().RequestProcessors {
-		agReq := NewAgentRequest(radDP, varsDataNode, cgrRplyNM, rplyNM, opts,
+	for _, reqProcessor := range radAgentCfg.RequestProcessors {
+		agReq := NewAgentRequest(
+			radDP, varsDataNode, cgrRplyNM, rplyNM, opts,
 			reqProcessor.Tenant, ra.cgrCfg.GeneralCfg().DefaultTenant,
-			utils.FirstNonEmpty(reqProcessor.Timezone,
-				config.CgrConfig().GeneralCfg().DefaultTimezone),
-			ra.filterS, nil)
-		var lclProcessed bool
-		if lclProcessed, processedReqErr = ra.processRequest(reqPacket, reqProcessor, agReq, replyPacket); lclProcessed {
-			processed = lclProcessed
+			utils.FirstNonEmpty(
+				reqProcessor.Timezone,
+				config.CgrConfig().GeneralCfg().DefaultTimezone,
+			),
+			ra.filterS, nil,
+		)
+		lclProcessed, err := ra.processRequest(reqPacket,
+			reqProcessor, agReq, replyPacket)
+		if err != nil {
+			utils.Logger.Err(
+				fmt.Sprintf("<%s> error: <%v> ignoring request: %s",
+					utils.RadiusAgent, err, utils.ToJSON(reqPacket)))
+			return nil, nil
 		}
-		if processedReqErr != nil || (lclProcessed && !reqProcessor.Flags.GetBool(utils.MetaContinue)) {
-			break
+		if lclProcessed {
+			processed = true
+			if !reqProcessor.Flags.GetBool(utils.MetaContinue) {
+				break
+			}
 		}
 	}
-	if processedReqErr != nil {
-		utils.Logger.Err(fmt.Sprintf("<%s> error: <%v> ignoring request: %s",
-			utils.RadiusAgent, processedReqErr, utils.ToJSON(reqPacket)))
-		return nil, nil
-	} else if !processed {
-		utils.Logger.Err(fmt.Sprintf("<%s> no request processor enabled, ignoring request %s",
-			utils.RadiusAgent, utils.ToIJSON(reqPacket)))
+	if !processed {
+		utils.Logger.Err(
+			fmt.Sprintf("<%s> no request processor enabled, ignoring request %s",
+				utils.RadiusAgent, utils.ToIJSON(reqPacket)))
 		return nil, nil
 	}
 
 	// Cache the RADIUS Packet for future CoA/Disconnect Requests.
-	if ra.cgrCfg.RadiusAgentCfg().DMRTemplate != "" || ra.cgrCfg.RadiusAgentCfg().CoATemplate != "" {
-
-		// Retrieve the identifying sessionID from the *vars map, as it was probably modified
-		// by one of the processed requests. The path element is suffixed by '[0]' due to the
-		// fields being set as []*DataNode inside the *AgentRequest.SetFields method.
-		sessionID, err := varsDataNode.FieldAsInterface([]string{utils.MetaSessionID + "[0]"})
+	if cacheKeyTpl := radAgentCfg.RequestsCacheKey; cacheKeyTpl != nil {
+		err := cacheRadiusPacket(reqPacket, remoteAddr, radAgentCfg,
+			utils.MapStorage{
+				utils.MetaReq:  radDP,
+				utils.MetaVars: varsDataNode,
+			})
 		if err != nil {
-			return nil, fmt.Errorf("retrieving sessionID failed: %w", err)
-		}
-
-		if errCh := engine.Cache.Set(utils.CacheRadiusPackets, utils.IfaceAsString(sessionID), reqPacket,
-			nil, true, utils.NonTransactional); errCh != nil {
-			return nil, fmt.Errorf("caching RADIUS Packet failed: %w", err)
+			return nil, err
 		}
 	}
 
@@ -265,6 +259,24 @@ func (ra *RadiusAgent) handleAcct(reqPacket *radigo.Packet) (*radigo.Packet, err
 		return nil, err
 	}
 	return replyPacket, nil
+}
+
+// cacheRadiusPacket caches a RADIUS packet if there are client options found for its source address.
+func cacheRadiusPacket(packet *radigo.Packet, address string, cfg *config.RadiusAgentCfg,
+	dp utils.DataProvider) error {
+	// Match address against configured client DA addresses.
+	if _, _, err := daRequestAddress(address, cfg.ClientDaAddresses); err != nil {
+		return nil // Address did not match any client; proceed without caching.
+	}
+	cacheKey, err := cfg.RequestsCacheKey.ParseDataProvider(dp)
+	if err != nil {
+		return fmt.Errorf("failed to parse the RADIUS packet cache key: %w", err)
+	}
+	if err = engine.Cache.Set(utils.CacheRadiusPackets, cacheKey, packet,
+		nil, true, utils.NonTransactional); err != nil {
+		return fmt.Errorf("failed to cache RADIUS packet: %w", err)
+	}
+	return nil
 }
 
 // processRequest represents one processor processing the request

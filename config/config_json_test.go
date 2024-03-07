@@ -991,17 +991,18 @@ func TestRadiusAgentJsonCfg(t *testing.T) {
 				Acct_Address: utils.StringPointer("127.0.0.1:1813"),
 			},
 		},
-		Client_secrets: utils.MapStringStringPointer(map[string]string{
+		ClientSecrets: utils.MapStringStringPointer(map[string]string{
 			utils.MetaDefault: "CGRateS.org",
 		}),
-		Client_dictionaries: utils.MapStringSlicePointer(map[string][]string{
+		ClientDictionaries: utils.MapStringSlicePointer(map[string][]string{
 			utils.MetaDefault: {"/usr/share/cgrates/radius/dict/"},
 		}),
-		Sessions_conns:      &[]string{utils.MetaInternal},
-		Request_processors:  &[]*ReqProcessorJsnCfg{},
-		Dmr_template:        utils.StringPointer(""),
-		Coa_template:        utils.StringPointer(""),
-		Client_da_addresses: map[string]DAClientOptsJson{},
+		Sessions_conns:    &[]string{utils.MetaInternal},
+		RequestProcessors: &[]*ReqProcessorJsnCfg{},
+		DMRTemplate:       utils.StringPointer("*dmr"),
+		CoATemplate:       utils.StringPointer("*coa"),
+		RequestsCacheKey:  utils.StringPointer(""),
+		ClientDaAddresses: map[string]DAClientOptsJson{},
 	}
 	dfCgrJSONCfg, err := NewCgrJsonCfgFromBytes([]byte(CGRATES_CFG_JSON))
 	if err != nil {

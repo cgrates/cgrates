@@ -542,15 +542,16 @@ type DAClientOptsJson struct {
 
 // Radius Agent configuration section
 type RadiusAgentJsonCfg struct {
-	Enabled             *bool
-	Listeners           *[]*RadiListenerJsnCfg
-	Client_secrets      *map[string]string
-	Client_dictionaries *map[string][]string
-	Client_da_addresses map[string]DAClientOptsJson
-	Sessions_conns      *[]string
-	Dmr_template        *string
-	Coa_template        *string
-	Request_processors  *[]*ReqProcessorJsnCfg
+	Enabled            *bool                       `json:"enabled"`
+	Listeners          *[]*RadiListenerJsnCfg      `json:"listeners"`
+	ClientSecrets      *map[string]string          `json:"client_secrets"`
+	ClientDictionaries *map[string][]string        `json:"client_dictionaries"`
+	ClientDaAddresses  map[string]DAClientOptsJson `json:"client_da_addresses"`
+	Sessions_conns     *[]string                   `json:"sessions_conns"`
+	RequestsCacheKey   *string                     `json:"requests_cache_key"`
+	DMRTemplate        *string                     `json:"dmr_template"`
+	CoATemplate        *string                     `json:"coa_template"`
+	RequestProcessors  *[]*ReqProcessorJsnCfg      `json:"request_processors"`
 }
 
 // Conecto Agent configuration section
