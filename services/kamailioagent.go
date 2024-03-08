@@ -84,7 +84,9 @@ func (kam *KamailioAgent) Reload(_ *context.Context, shtDwn context.CancelFunc) 
 func (kam *KamailioAgent) connect(k *agents.KamailioAgent, shtDwn context.CancelFunc) (err error) {
 	if err = k.Connect(); err != nil {
 		if !strings.Contains(err.Error(), "use of closed network connection") { // if closed by us do not log
-			utils.Logger.Err(fmt.Sprintf("<%s> error: %s", utils.KamailioAgent, err))
+			if !strings.Contains(err.Error(), "KamEvapi") {
+				utils.Logger.Err(fmt.Sprintf("<%s> error: %s", utils.KamailioAgent, err))
+			}
 			shtDwn()
 		}
 	}
