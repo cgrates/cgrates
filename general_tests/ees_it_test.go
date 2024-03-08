@@ -89,7 +89,8 @@ func TestEEsExportEventChanges(t *testing.T) {
 				{"tag": "BalanceID", "path": "*uch.BalanceID", "type": "*variable", "value": "~*req.CostDetails.Charges[0].Increments[0].Accounting.Balance.ID"},
 				{"tag": "BalanceType", "path": "*uch.BalanceType", "type": "*variable", "value": "~*req.CostDetails.Charges[0].Increments[0].Accounting.Balance.Type"},
 				{"tag": "BalanceFound", "path": "*uch.BalanceFound", "type": "*variable", "value": "~*req.BalanceFound"},
-				{"tag": "ExporterID", "path": "*uch.ExporterID1", "type": "*variable", "value": "~*opts.*exporterID"}
+				{"tag": "ExporterID", "path": "*uch.ExporterID1", "type": "*variable", "value": "~*opts.*exporterID"},
+				{"tag": "ChangedValue", "path": "*uch.ChangedValue", "type": "*variable", "value": "~*req.CostDetails.Charges[0].Increments[0].Accounting.Balance.Value"}
 			],
 		},
 		{
@@ -137,9 +138,21 @@ func TestEEsExportEventChanges(t *testing.T) {
 				Attributes: []*engine.Attribute{
 					{
 						Path: "*req.RequestType",
+						Type: utils.MetaVariable,
 						Value: config.RSRParsers{
 							&config.RSRParser{
 								Rules: utils.MetaPrepaid,
+							},
+						},
+					},
+
+					// This attribute will change BALANCE_TEST Value from 10 to 11
+					{
+						Path: "*req.CostDetails",
+						Type: utils.MetaVariable,
+						Value: config.RSRParsers{
+							&config.RSRParser{
+								Rules: `{"CGRID":"","RunID":"","StartTime":"0001-01-01T00:00:00Z","Usage":null,"Cost":null,"Charges":[{"RatingID":"","Increments":[{"Usage":0,"Cost":0,"AccountingID":"ACCOUNTING_TEST","CompressFactor":0}],"CompressFactor":0}],"AccountSummary":{"Tenant":"","ID":"","BalanceSummaries":[{"UUID":"123456","ID":"BALANCE_TEST","Type":"*voice","Initial":0,"Value":11,"Disabled":false}],"AllowNegative":false,"Disabled":false},"Rating":null,"Accounting":{"ACCOUNTING_TEST":{"AccountID":"","BalanceUUID":"123456","RatingID":"","Units":0,"ExtraChargeID":""}},"RatingFilters":null,"Rates":null,"Timings":null}`,
 							},
 						},
 					},
@@ -197,9 +210,10 @@ func TestEEsExportEventChanges(t *testing.T) {
 						AccountSummary: &engine.AccountSummary{
 							BalanceSummaries: engine.BalanceSummaries{
 								{
-									ID:   "BALANCE_TEST",
-									Type: utils.MetaVoice,
-									UUID: "123456",
+									ID:    "BALANCE_TEST",
+									Type:  utils.MetaVoice,
+									UUID:  "123456",
+									Value: 10,
 								},
 							},
 						},
@@ -207,9 +221,10 @@ func TestEEsExportEventChanges(t *testing.T) {
 					utils.AccountSummary: &engine.AccountSummary{
 						BalanceSummaries: engine.BalanceSummaries{
 							{
-								ID:   "BALANCE_TEST",
-								Type: utils.MetaVoice,
-								UUID: "123456",
+								ID:    "BALANCE_TEST",
+								Type:  utils.MetaVoice,
+								UUID:  "123456",
+								Value: 10,
 							},
 						},
 					},
@@ -278,6 +293,18 @@ func TestEEsExportEventChanges(t *testing.T) {
 	})
 
 	t.Run("CheckAttributesAlteredFields", func(t *testing.T) {
+		var changedValue any
+		if err = client.Call(context.Background(), utils.CacheSv1GetItem, &utils.ArgsGetCacheItemWithAPIOpts{
+			Tenant: "cgrates.org",
+			ArgsGetCacheItem: utils.ArgsGetCacheItem{
+				CacheID: utils.CacheUCH,
+				ItemID:  "ChangedValue",
+			},
+		}, &changedValue); err != nil {
+			t.Error(err)
+		} else if changedValue != "11" {
+			t.Errorf("expected %v, received %v", "11", changedValue)
+		}
 		var balanceID any
 		if err = client.Call(context.Background(), utils.CacheSv1GetItem, &utils.ArgsGetCacheItemWithAPIOpts{
 			Tenant: "cgrates.org",
