@@ -18,11 +18,80 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package agents
 
 import (
+	"fmt"
+	"reflect"
 	"testing"
 
+	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/sessions"
+	"github.com/cgrates/radigo"
 )
 
 func TestRadAgentSessionSClientIface(t *testing.T) {
 	_ = sessions.BiRPCClient(new(RadiusAgent))
+}
+
+func TestNewRadiusAgentFailDict(t *testing.T) {
+
+	cfg := config.NewDefaultCGRConfig()
+	cfg.RadiusAgentCfg().ClientDictionaries = map[string][]string{
+		"badpath": {"bad/path"},
+	}
+	exp := "stat bad/path: no such file or directory"
+	if _, err := NewRadiusAgent(cfg, nil, nil); err == nil || err.Error() != exp {
+		t.Errorf("Expected error <%v>, received <%v>", exp, err)
+	}
+}
+
+func TestNewRadiusAgentOK(t *testing.T) {
+
+	cfg := config.NewDefaultCGRConfig()
+	exp := &RadiusAgent{
+		cgrCfg: cfg,
+	}
+	if rcv, err := NewRadiusAgent(cfg, nil, nil); err != nil {
+		if err.Error() == "stat /usr/share/cgrates/radius/dict/: no such file or directory" {
+			t.SkipNow() // skipping if running in gitactions
+		}
+		t.Error(err)
+	} else if exp.RWMutex != rcv.RWMutex || exp.cgrCfg != rcv.cgrCfg || exp.connMgr != rcv.connMgr || exp.filterS != rcv.filterS || exp.dacCfg != rcv.dacCfg || exp.WaitGroup != rcv.WaitGroup {
+		t.Errorf("Expected <%+v>,\nreceived\n<%+v>", exp, rcv)
+	}
+}
+
+func TestNewRadiusDAClientCfgOK(t *testing.T) {
+
+	radAgCfg := &config.RadiusAgentCfg{
+		ClientDaAddresses: map[string]config.DAClientOpts{
+			"udp://127.0.0.1:1813": {
+				Transport: "udp",
+				Host:      "127.0.0.1",
+				Port:      1813,
+			},
+		},
+	}
+	dicts := &radigo.Dictionaries{}
+	secrets := &radigo.Secrets{}
+	exp := radiusDAClientCfg{}
+	expDicts := make(map[string]*radigo.Dictionary, len(radAgCfg.ClientDaAddresses))
+	expSecrets := make(map[string]string, len(radAgCfg.ClientDaAddresses))
+	for client := range radAgCfg.ClientDaAddresses {
+		expDicts[client] = dicts.GetInstance(client)
+		exp.dicts = radigo.NewDictionaries(expDicts)
+		expSecrets[client] = secrets.GetSecret(client)
+		exp.secrets = radigo.NewSecrets(expSecrets)
+	}
+
+	if rcv := newRadiusDAClientCfg(dicts, secrets, radAgCfg); !reflect.DeepEqual(exp, rcv) {
+		rcvStr := map[string]string{
+			"dicts":   fmt.Sprint(rcv.dicts),
+			"secrets": fmt.Sprint(rcv.secrets),
+		}
+		expStr := map[string]any{
+			"dicts":   fmt.Sprint(exp.dicts),
+			"secrets": fmt.Sprint(exp.secrets),
+		}
+		t.Errorf("Expected <%+v>,\nreceived\n<%+v>", expStr, rcvStr)
+	}
+
 }
