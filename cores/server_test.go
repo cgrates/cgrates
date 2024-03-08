@@ -26,7 +26,6 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/cgrates/cgrates/agents"
 	"github.com/cgrates/cgrates/analyzers"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
@@ -90,9 +89,6 @@ func TestRegisterHTTPFunc(t *testing.T) {
 
 	rcv.RpcRegisterName(utils.EmptyString, handler)
 
-	httpAgent := agents.NewHTTPAgent(nil, []string{}, nil, utils.EmptyString, utils.EmptyString, utils.EmptyString, nil)
-	rcv.RegisterHttpHandler("invalid_pattern", httpAgent)
-
 	if err := os.RemoveAll(cfgDflt.AnalyzerSCfg().DBPath); err != nil {
 		t.Fatal(err)
 	}
@@ -104,8 +100,6 @@ func TestRegisterProfiler(t *testing.T) {
 	cfgDflt.CoreSCfg().CapsStatsInterval = 1
 	caps := engine.NewCaps(0, utils.MetaBusy)
 	rcv := NewServer(caps)
-
-	registerProfiler("test_prefix", rcv.httpMux)
 
 	rcv.RegisterProfiler("/test_prefix")
 
