@@ -1220,12 +1220,25 @@ func (ec *EventCost) GetKeys(nested bool, nesteedLimit int, prefix string) []str
 
 // processEventCostField ensures cd is an EventCost and calls FieldAsInterface on it.
 func processEventCostField(fldPath []string, cd any, event map[string]any) (any, error) {
+	ec, err := ConvertToEventCost(cd)
+	if err != nil {
+		return nil, err
+	}
+
+	// Update CostDetails with the unmarshalled *EventCost
+	// to avoid repetitive serialization.
+	event[utils.CostDetails] = ec
+
+	return ec.FieldAsInterface(fldPath)
+}
+
+func ConvertToEventCost(cd any) (*EventCost, error) {
 	var err error
 	var cdBytes []byte
 	switch cd := cd.(type) {
 	case *EventCost:
-		// Directly proceed if already *EventCost.
-		return cd.FieldAsInterface(fldPath)
+		// Already *EventCost, return directly.
+		return cd, nil
 	case string:
 		// Convert string to bytes for unmarshalling
 		// if it's a serialized *EventCost.
@@ -1242,10 +1255,5 @@ func processEventCostField(fldPath []string, cd any, event map[string]any) (any,
 	if err = json.Unmarshal(cdBytes, &ec); err != nil {
 		return nil, err
 	}
-
-	// Update CostDetails with the unmarshalled *EventCost
-	// to avoid repetitive serialization.
-	event[utils.CostDetails] = &ec
-
-	return ec.FieldAsInterface(fldPath)
+	return &ec, nil
 }
