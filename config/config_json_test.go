@@ -870,16 +870,16 @@ func TestSmgJsonCfg(t *testing.T) {
 
 func TestFsAgentJsonCfg(t *testing.T) {
 	eCfg := &FreeswitchAgentJsonCfg{
-		Enabled:             utils.BoolPointer(false),
-		SessionSConns:       &[]string{rpcclient.BiRPCInternal},
-		SubscribePark:       utils.BoolPointer(true),
-		CreateCDR:           utils.BoolPointer(false),
-		ExtraFields:         &[]string{},
-		LowBalanceAnnFile:   utils.StringPointer(""),
-		EmptyBalanceContext: utils.StringPointer(""),
-		EmptyBalanceAnnFile: utils.StringPointer(""),
-		ChanDelimiter:       utils.StringPointer(","),
-		MaxWaitConnection:   utils.StringPointer("2s"),
+		Enabled:                utils.BoolPointer(false),
+		SessionSConns:          &[]string{rpcclient.BiRPCInternal},
+		SubscribePark:          utils.BoolPointer(true),
+		CreateCDR:              utils.BoolPointer(false),
+		ExtraFields:            &[]string{},
+		LowBalanceAnnFile:      utils.StringPointer(""),
+		EmptyBalanceContext:    utils.StringPointer(""),
+		EmptyBalanceAnnFile:    utils.StringPointer(""),
+		ActiveSessionDelimiter: utils.StringPointer(","),
+		MaxWaitConnection:      utils.StringPointer("2s"),
 		EventSocketConns: &[]*FsConnJsonCfg{
 			{
 				Address:                utils.StringPointer("127.0.0.1:8021"),
