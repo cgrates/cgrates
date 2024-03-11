@@ -29,10 +29,10 @@ import (
 
 func TestFsAgentCfgloadFromJsonCfg1(t *testing.T) {
 	fsAgentJsnCfg := &FreeswitchAgentJsonCfg{
-		Enabled:        utils.BoolPointer(true),
-		Create_cdr:     utils.BoolPointer(true),
-		Subscribe_park: utils.BoolPointer(true),
-		Event_socket_conns: &[]*FsConnJsonCfg{
+		Enabled:       utils.BoolPointer(true),
+		CreateCDR:     utils.BoolPointer(true),
+		SubscribePark: utils.BoolPointer(true),
+		EventSocketConns: &[]*FsConnJsonCfg{
 			{
 				Address:    utils.StringPointer("1.2.3.4:8021"),
 				Password:   utils.StringPointer("ClueCon"),
@@ -47,7 +47,7 @@ func TestFsAgentCfgloadFromJsonCfg1(t *testing.T) {
 	}
 	eFsAgentConfig := &FsAgentCfg{
 		Enabled:       true,
-		CreateCdr:     true,
+		CreateCDR:     true,
 		SubscribePark: true,
 		EventSocketConns: []*FsConnCfg{
 			{Address: "1.2.3.4:8021", Password: "ClueCon", Reconnects: 5, Alias: "1.2.3.4:8021"},
@@ -496,16 +496,17 @@ func TestSessionSCfgAsMapInterfaceCase3(t *testing.T) {
 
 func TestFsAgentCfgloadFromJsonCfgCase1(t *testing.T) {
 	fsAgentJsnCfg := &FreeswitchAgentJsonCfg{
-		Enabled:                utils.BoolPointer(true),
-		Sessions_conns:         &[]string{utils.MetaInternal},
-		Create_cdr:             utils.BoolPointer(true),
-		Subscribe_park:         utils.BoolPointer(true),
-		Low_balance_ann_file:   utils.StringPointer("randomFile"),
-		Empty_balance_ann_file: utils.StringPointer("randomEmptyFile"),
-		Empty_balance_context:  utils.StringPointer("randomEmptyContext"),
-		Max_wait_connection:    utils.StringPointer("2"),
-		Extra_fields:           &[]string{},
-		Event_socket_conns: &[]*FsConnJsonCfg{
+		Enabled:             utils.BoolPointer(true),
+		SessionSConns:       &[]string{utils.MetaInternal},
+		CreateCDR:           utils.BoolPointer(true),
+		SubscribePark:       utils.BoolPointer(true),
+		LowBalanceAnnFile:   utils.StringPointer("randomFile"),
+		EmptyBalanceAnnFile: utils.StringPointer("randomEmptyFile"),
+		EmptyBalanceContext: utils.StringPointer("randomEmptyContext"),
+		MaxWaitConnection:   utils.StringPointer("2"),
+		ChanDelimiter:       utils.StringPointer(";"),
+		ExtraFields:         &[]string{},
+		EventSocketConns: &[]*FsConnJsonCfg{
 			{
 				Address:    utils.StringPointer("1.2.3.4:8021"),
 				Password:   utils.StringPointer("ClueCon"),
@@ -518,12 +519,13 @@ func TestFsAgentCfgloadFromJsonCfgCase1(t *testing.T) {
 		Enabled:             true,
 		SessionSConns:       []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS)},
 		SubscribePark:       true,
-		CreateCdr:           true,
+		CreateCDR:           true,
 		LowBalanceAnnFile:   "randomFile",
 		EmptyBalanceAnnFile: "randomEmptyFile",
 		EmptyBalanceContext: "randomEmptyContext",
 		MaxWaitConnection:   2,
 		ExtraFields:         RSRParsers{},
+		ChanDelimiter:       ";",
 		EventSocketConns: []*FsConnCfg{
 			{
 				Address:    "1.2.3.4:8021",
@@ -543,7 +545,7 @@ func TestFsAgentCfgloadFromJsonCfgCase1(t *testing.T) {
 
 func TestFsAgentCfgloadFromJsonCfgCase2(t *testing.T) {
 	fsAgentJsnCfg := &FreeswitchAgentJsonCfg{
-		Max_wait_connection: utils.StringPointer("1ss"),
+		MaxWaitConnection: utils.StringPointer("1ss"),
 	}
 	expected := "time: unknown unit \"ss\" in duration \"1ss\""
 	jsonCfg := NewDefaultCGRConfig()
@@ -554,7 +556,7 @@ func TestFsAgentCfgloadFromJsonCfgCase2(t *testing.T) {
 
 func TestFsAgentCfgloadFromJsonCfgCase3(t *testing.T) {
 	fsAgentJsnCfg := &FreeswitchAgentJsonCfg{
-		Extra_fields: &[]string{"a{*"},
+		ExtraFields: &[]string{"a{*"},
 	}
 	expected := "invalid converter terminator in rule: <a{*>"
 	jsonCfg := NewDefaultCGRConfig()
@@ -576,6 +578,7 @@ func TestFsAgentCfgAsMapInterfaceCase1(t *testing.T) {
 		utils.LowBalanceAnnFileCfg:   "",
 		utils.EmptyBalanceContextCfg: "",
 		utils.EmptyBalanceAnnFileCfg: "",
+		utils.ChanDelimiterCfg:       ",",
 		utils.MaxWaitConnectionCfg:   "2s",
 		utils.EventSocketConnsCfg: []map[string]any{
 			{utils.AddressCfg: "127.0.0.1:8021", utils.Password: "ClueCon", utils.ReconnectsCfg: 5, utils.MaxReconnectIntervalCfg: "0s", utils.AliasCfg: "127.0.0.1:8021"},
@@ -595,7 +598,8 @@ func TestFsAgentCfgAsMapInterfaceCase2(t *testing.T) {
           "sessions_conns": ["*birpc_internal", "*conn1","*conn2"],
 	      "subscribe_park": false,					
 	      "create_cdr": true,
-	      "max_wait_connection": "7s",			
+	      "max_wait_connection": "7s",	
+		  "chan_delimiter": "\tsep\t",		
 	      "event_socket_conns":[					
 		      {"address": "127.0.0.1:8000", "password": "ClueCon123", "reconnects": 8, "alias": "127.0.0.1:8000"}
 	],},
@@ -610,6 +614,7 @@ func TestFsAgentCfgAsMapInterfaceCase2(t *testing.T) {
 		utils.EmptyBalanceContextCfg: "",
 		utils.EmptyBalanceAnnFileCfg: "",
 		utils.MaxWaitConnectionCfg:   "7s",
+		utils.ChanDelimiterCfg:       "\tsep\t",
 		utils.EventSocketConnsCfg: []map[string]any{
 			{utils.AddressCfg: "127.0.0.1:8000", utils.Password: "ClueCon123", utils.ReconnectsCfg: 8, utils.MaxReconnectIntervalCfg: "0s", utils.AliasCfg: "127.0.0.1:8000"},
 		},
@@ -626,7 +631,8 @@ func TestFsAgentCfgAsMapInterfaceCase3(t *testing.T) {
 	"freeswitch_agent": {
           "extra_fields": ["randomFields"],		
           "max_wait_connection": "0",
-		  "sessions_conns": ["*internal"]
+		  "sessions_conns": ["*internal"],
+		  "chan_delimiter": "\t"
     }
 }`
 	eMap := map[string]any{
@@ -639,6 +645,7 @@ func TestFsAgentCfgAsMapInterfaceCase3(t *testing.T) {
 		utils.EmptyBalanceContextCfg: "",
 		utils.EmptyBalanceAnnFileCfg: "",
 		utils.MaxWaitConnectionCfg:   "",
+		utils.ChanDelimiterCfg:       "\t",
 		utils.EventSocketConnsCfg: []map[string]any{
 			{utils.AddressCfg: "127.0.0.1:8021", utils.Password: "ClueCon", utils.ReconnectsCfg: 5, utils.MaxReconnectIntervalCfg: "0s", utils.AliasCfg: "127.0.0.1:8021"},
 		},
@@ -864,7 +871,7 @@ func TestAsteriskAgentCfgClone(t *testing.T) {
 func TestFsAgentCfgClone(t *testing.T) {
 	ban := &FsAgentCfg{
 		Enabled:             true,
-		CreateCdr:           true,
+		CreateCDR:           true,
 		SubscribePark:       true,
 		EmptyBalanceAnnFile: "file",
 		EmptyBalanceContext: "context",

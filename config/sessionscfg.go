@@ -561,11 +561,12 @@ type FsAgentCfg struct {
 	Enabled             bool
 	SessionSConns       []string
 	SubscribePark       bool
-	CreateCdr           bool
+	CreateCDR           bool
 	ExtraFields         RSRParsers
 	LowBalanceAnnFile   string
 	EmptyBalanceContext string
 	EmptyBalanceAnnFile string
+	ChanDelimiter       string
 	MaxWaitConnection   time.Duration
 	EventSocketConns    []*FsConnCfg
 }
@@ -578,9 +579,9 @@ func (fscfg *FsAgentCfg) loadFromJSONCfg(jsnCfg *FreeswitchAgentJsonCfg) error {
 	if jsnCfg.Enabled != nil {
 		fscfg.Enabled = *jsnCfg.Enabled
 	}
-	if jsnCfg.Sessions_conns != nil {
-		fscfg.SessionSConns = make([]string, len(*jsnCfg.Sessions_conns))
-		for idx, connID := range *jsnCfg.Sessions_conns {
+	if jsnCfg.SessionSConns != nil {
+		fscfg.SessionSConns = make([]string, len(*jsnCfg.SessionSConns))
+		for idx, connID := range *jsnCfg.SessionSConns {
 			// if we have the connection internal we change the name so we can have internal rpc for each subsystem
 			fscfg.SessionSConns[idx] = connID
 			if connID == utils.MetaInternal ||
@@ -589,35 +590,38 @@ func (fscfg *FsAgentCfg) loadFromJSONCfg(jsnCfg *FreeswitchAgentJsonCfg) error {
 			}
 		}
 	}
-	if jsnCfg.Subscribe_park != nil {
-		fscfg.SubscribePark = *jsnCfg.Subscribe_park
+	if jsnCfg.SubscribePark != nil {
+		fscfg.SubscribePark = *jsnCfg.SubscribePark
 	}
-	if jsnCfg.Create_cdr != nil {
-		fscfg.CreateCdr = *jsnCfg.Create_cdr
+	if jsnCfg.CreateCDR != nil {
+		fscfg.CreateCDR = *jsnCfg.CreateCDR
 	}
-	if jsnCfg.Extra_fields != nil {
-		if fscfg.ExtraFields, err = NewRSRParsersFromSlice(*jsnCfg.Extra_fields); err != nil {
+	if jsnCfg.ExtraFields != nil {
+		if fscfg.ExtraFields, err = NewRSRParsersFromSlice(*jsnCfg.ExtraFields); err != nil {
 			return err
 		}
 	}
-	if jsnCfg.Low_balance_ann_file != nil {
-		fscfg.LowBalanceAnnFile = *jsnCfg.Low_balance_ann_file
+	if jsnCfg.LowBalanceAnnFile != nil {
+		fscfg.LowBalanceAnnFile = *jsnCfg.LowBalanceAnnFile
 	}
-	if jsnCfg.Empty_balance_context != nil {
-		fscfg.EmptyBalanceContext = *jsnCfg.Empty_balance_context
+	if jsnCfg.EmptyBalanceContext != nil {
+		fscfg.EmptyBalanceContext = *jsnCfg.EmptyBalanceContext
 	}
 
-	if jsnCfg.Empty_balance_ann_file != nil {
-		fscfg.EmptyBalanceAnnFile = *jsnCfg.Empty_balance_ann_file
+	if jsnCfg.EmptyBalanceAnnFile != nil {
+		fscfg.EmptyBalanceAnnFile = *jsnCfg.EmptyBalanceAnnFile
 	}
-	if jsnCfg.Max_wait_connection != nil {
-		if fscfg.MaxWaitConnection, err = utils.ParseDurationWithNanosecs(*jsnCfg.Max_wait_connection); err != nil {
+	if jsnCfg.ChanDelimiter != nil {
+		fscfg.ChanDelimiter = *jsnCfg.ChanDelimiter
+	}
+	if jsnCfg.MaxWaitConnection != nil {
+		if fscfg.MaxWaitConnection, err = utils.ParseDurationWithNanosecs(*jsnCfg.MaxWaitConnection); err != nil {
 			return err
 		}
 	}
-	if jsnCfg.Event_socket_conns != nil {
-		fscfg.EventSocketConns = make([]*FsConnCfg, len(*jsnCfg.Event_socket_conns))
-		for idx, jsnConnCfg := range *jsnCfg.Event_socket_conns {
+	if jsnCfg.EventSocketConns != nil {
+		fscfg.EventSocketConns = make([]*FsConnCfg, len(*jsnCfg.EventSocketConns))
+		for idx, jsnConnCfg := range *jsnCfg.EventSocketConns {
 			fscfg.EventSocketConns[idx] = NewDfltFsConnConfig()
 			fscfg.EventSocketConns[idx].loadFromJSONCfg(jsnConnCfg)
 		}
@@ -630,10 +634,11 @@ func (fscfg *FsAgentCfg) AsMapInterface(separator string) (initialMP map[string]
 	initialMP = map[string]any{
 		utils.EnabledCfg:             fscfg.Enabled,
 		utils.SubscribeParkCfg:       fscfg.SubscribePark,
-		utils.CreateCdrCfg:           fscfg.CreateCdr,
+		utils.CreateCdrCfg:           fscfg.CreateCDR,
 		utils.LowBalanceAnnFileCfg:   fscfg.LowBalanceAnnFile,
 		utils.EmptyBalanceContextCfg: fscfg.EmptyBalanceContext,
 		utils.EmptyBalanceAnnFileCfg: fscfg.EmptyBalanceAnnFile,
+		utils.ChanDelimiterCfg:       fscfg.ChanDelimiter,
 	}
 	if fscfg.SessionSConns != nil {
 		sessionSConns := make([]string, len(fscfg.SessionSConns))
@@ -671,11 +676,12 @@ func (fscfg FsAgentCfg) Clone() (cln *FsAgentCfg) {
 	cln = &FsAgentCfg{
 		Enabled:             fscfg.Enabled,
 		SubscribePark:       fscfg.SubscribePark,
-		CreateCdr:           fscfg.CreateCdr,
+		CreateCDR:           fscfg.CreateCDR,
 		ExtraFields:         fscfg.ExtraFields.Clone(),
 		LowBalanceAnnFile:   fscfg.LowBalanceAnnFile,
 		EmptyBalanceContext: fscfg.EmptyBalanceContext,
 		EmptyBalanceAnnFile: fscfg.EmptyBalanceAnnFile,
+		ChanDelimiter:       fscfg.ChanDelimiter,
 		MaxWaitConnection:   fscfg.MaxWaitConnection,
 	}
 	if fscfg.SessionSConns != nil {

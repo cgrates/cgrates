@@ -2212,6 +2212,7 @@ const (
 	MaxWaitConnectionCfg   = "max_wait_connection"
 	EventSocketConnsCfg    = "event_socket_conns"
 	EmptyBalanceContext    = "empty_balance_context"
+	ChanDelimiterCfg       = "chan_delimiter"
 )
 
 // From Config

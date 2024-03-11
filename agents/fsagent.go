@@ -282,7 +282,7 @@ func (fsa *FSsessions) onChannelHangupComplete(fsev FSEvent, connIdx int) {
 					utils.FreeSWITCHAgent, fsev.GetUUID(), err.Error()))
 		}
 	}
-	if fsa.cfg.CreateCdr {
+	if fsa.cfg.CreateCDR {
 		cgrEv, err := fsev.AsCGREvent(fsa.timezone)
 		if err != nil {
 			return
@@ -430,14 +430,19 @@ func (fsa *FSsessions) V1GetActiveSessionIDs(ctx *context.Context, _ string,
 				utils.FreeSWITCHAgent, err.Error(), connIdx))
 			continue
 		}
-		activeChanStr, err := fsConn.SendApiCmd("show channels")
+		apiCmd := "show channels"
+		if fsa.cfg.ChanDelimiter != "," { // ',' delimiter is used by default
+			apiCmd += " as delim " + fsa.cfg.ChanDelimiter
+		}
+		activeChanStr, err := fsConn.SendApiCmd(apiCmd)
 		senderPool.PushFSock(fsConn)
 		if err != nil {
-			utils.Logger.Err(fmt.Sprintf("<%s> Error on push FSock: %s, connection index: %v",
-				utils.FreeSWITCHAgent, err.Error(), connIdx))
+			utils.Logger.Err(
+				fmt.Sprintf("<%s> Error on push FSock: %v, connection index: %v",
+					utils.FreeSWITCHAgent, err, connIdx))
 			continue
 		}
-		for _, fsAChan := range fsock.MapChanData(activeChanStr) {
+		for _, fsAChan := range fsock.MapChanData(activeChanStr, fsa.cfg.ChanDelimiter) {
 			sIDs = append(sIDs, &sessions.SessionID{
 				OriginHost: fsa.cfg.EventSocketConns[connIdx].Alias,
 				OriginID:   fsAChan["uuid"],

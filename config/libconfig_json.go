@@ -409,16 +409,17 @@ type SessionSJsonCfg struct {
 
 // FreeSWITCHAgent config section
 type FreeswitchAgentJsonCfg struct {
-	Enabled                *bool
-	Sessions_conns         *[]string
-	Subscribe_park         *bool
-	Create_cdr             *bool
-	Extra_fields           *[]string
-	Low_balance_ann_file   *string
-	Empty_balance_context  *string
-	Empty_balance_ann_file *string
-	Max_wait_connection    *string
-	Event_socket_conns     *[]*FsConnJsonCfg
+	Enabled             *bool             `json:"enabled"`
+	SessionSConns       *[]string         `json:"sessions_conns"`
+	SubscribePark       *bool             `json:"subscribe_park"`
+	CreateCDR           *bool             `json:"create_cdr"`
+	ExtraFields         *[]string         `json:"extra_fields"`
+	LowBalanceAnnFile   *string           `json:"low_balance_ann_file"`
+	EmptyBalanceContext *string           `json:"empty_balance_context"`
+	EmptyBalanceAnnFile *string           `json:"empty_balance_ann_file"`
+	ChanDelimiter       *string           `json:"chan_delimiter"`
+	MaxWaitConnection   *string           `json:"max_wait_connection"`
+	EventSocketConns    *[]*FsConnJsonCfg `json:"event_socket_conns"`
 }
 
 // Represents one connection instance towards FreeSWITCH

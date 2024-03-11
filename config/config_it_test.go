@@ -731,6 +731,7 @@ func testCGRConfigReloadFreeswitchAgent(t *testing.T) {
 		SubscribePark:     true,
 		ExtraFields:       RSRParsers{},
 		MaxWaitConnection: 2 * time.Second,
+		ChanDelimiter:     ",",
 		EventSocketConns: []*FsConnCfg{
 			{
 				Address:    "1.2.3.4:8021",
