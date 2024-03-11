@@ -431,8 +431,8 @@ func (fsa *FSsessions) V1GetActiveSessionIDs(ctx *context.Context, _ string,
 			continue
 		}
 		apiCmd := "show channels"
-		if fsa.cfg.ChanDelimiter != "," { // ',' delimiter is used by default
-			apiCmd += " as delim " + fsa.cfg.ChanDelimiter
+		if fsa.cfg.ActiveSessionDelimiter != "," { // ',' delimiter is used by default
+			apiCmd += " as delim " + fsa.cfg.ActiveSessionDelimiter
 		}
 		activeChanStr, err := fsConn.SendApiCmd(apiCmd)
 		senderPool.PushFSock(fsConn)
@@ -442,7 +442,7 @@ func (fsa *FSsessions) V1GetActiveSessionIDs(ctx *context.Context, _ string,
 					utils.FreeSWITCHAgent, err, connIdx))
 			continue
 		}
-		for _, fsAChan := range fsock.MapChanData(activeChanStr, fsa.cfg.ChanDelimiter) {
+		for _, fsAChan := range fsock.MapChanData(activeChanStr, fsa.cfg.ActiveSessionDelimiter) {
 			sIDs = append(sIDs, &sessions.SessionID{
 				OriginHost: fsa.cfg.EventSocketConns[connIdx].Alias,
 				OriginID:   fsAChan["uuid"],

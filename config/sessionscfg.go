@@ -558,17 +558,17 @@ func (scfg SessionSCfg) Clone() (cln *SessionSCfg) {
 
 // FsAgentCfg the config section that describes the FreeSWITCH Agent
 type FsAgentCfg struct {
-	Enabled             bool
-	SessionSConns       []string
-	SubscribePark       bool
-	CreateCDR           bool
-	ExtraFields         RSRParsers
-	LowBalanceAnnFile   string
-	EmptyBalanceContext string
-	EmptyBalanceAnnFile string
-	ChanDelimiter       string
-	MaxWaitConnection   time.Duration
-	EventSocketConns    []*FsConnCfg
+	Enabled                bool
+	SessionSConns          []string
+	SubscribePark          bool
+	CreateCDR              bool
+	ExtraFields            RSRParsers
+	LowBalanceAnnFile      string
+	EmptyBalanceContext    string
+	EmptyBalanceAnnFile    string
+	ActiveSessionDelimiter string
+	MaxWaitConnection      time.Duration
+	EventSocketConns       []*FsConnCfg
 }
 
 func (fscfg *FsAgentCfg) loadFromJSONCfg(jsnCfg *FreeswitchAgentJsonCfg) error {
@@ -611,8 +611,8 @@ func (fscfg *FsAgentCfg) loadFromJSONCfg(jsnCfg *FreeswitchAgentJsonCfg) error {
 	if jsnCfg.EmptyBalanceAnnFile != nil {
 		fscfg.EmptyBalanceAnnFile = *jsnCfg.EmptyBalanceAnnFile
 	}
-	if jsnCfg.ChanDelimiter != nil {
-		fscfg.ChanDelimiter = *jsnCfg.ChanDelimiter
+	if jsnCfg.ActiveSessionDelimiter != nil {
+		fscfg.ActiveSessionDelimiter = *jsnCfg.ActiveSessionDelimiter
 	}
 	if jsnCfg.MaxWaitConnection != nil {
 		if fscfg.MaxWaitConnection, err = utils.ParseDurationWithNanosecs(*jsnCfg.MaxWaitConnection); err != nil {
@@ -632,13 +632,13 @@ func (fscfg *FsAgentCfg) loadFromJSONCfg(jsnCfg *FreeswitchAgentJsonCfg) error {
 // AsMapInterface returns the config as a map[string]any
 func (fscfg *FsAgentCfg) AsMapInterface(separator string) (initialMP map[string]any) {
 	initialMP = map[string]any{
-		utils.EnabledCfg:             fscfg.Enabled,
-		utils.SubscribeParkCfg:       fscfg.SubscribePark,
-		utils.CreateCdrCfg:           fscfg.CreateCDR,
-		utils.LowBalanceAnnFileCfg:   fscfg.LowBalanceAnnFile,
-		utils.EmptyBalanceContextCfg: fscfg.EmptyBalanceContext,
-		utils.EmptyBalanceAnnFileCfg: fscfg.EmptyBalanceAnnFile,
-		utils.ChanDelimiterCfg:       fscfg.ChanDelimiter,
+		utils.EnabledCfg:                fscfg.Enabled,
+		utils.SubscribeParkCfg:          fscfg.SubscribePark,
+		utils.CreateCdrCfg:              fscfg.CreateCDR,
+		utils.LowBalanceAnnFileCfg:      fscfg.LowBalanceAnnFile,
+		utils.EmptyBalanceContextCfg:    fscfg.EmptyBalanceContext,
+		utils.EmptyBalanceAnnFileCfg:    fscfg.EmptyBalanceAnnFile,
+		utils.ActiveSessionDelimiterCfg: fscfg.ActiveSessionDelimiter,
 	}
 	if fscfg.SessionSConns != nil {
 		sessionSConns := make([]string, len(fscfg.SessionSConns))
@@ -674,15 +674,15 @@ func (fscfg *FsAgentCfg) AsMapInterface(separator string) (initialMP map[string]
 // Clone returns a deep copy of FsAgentCfg
 func (fscfg FsAgentCfg) Clone() (cln *FsAgentCfg) {
 	cln = &FsAgentCfg{
-		Enabled:             fscfg.Enabled,
-		SubscribePark:       fscfg.SubscribePark,
-		CreateCDR:           fscfg.CreateCDR,
-		ExtraFields:         fscfg.ExtraFields.Clone(),
-		LowBalanceAnnFile:   fscfg.LowBalanceAnnFile,
-		EmptyBalanceContext: fscfg.EmptyBalanceContext,
-		EmptyBalanceAnnFile: fscfg.EmptyBalanceAnnFile,
-		ChanDelimiter:       fscfg.ChanDelimiter,
-		MaxWaitConnection:   fscfg.MaxWaitConnection,
+		Enabled:                fscfg.Enabled,
+		SubscribePark:          fscfg.SubscribePark,
+		CreateCDR:              fscfg.CreateCDR,
+		ExtraFields:            fscfg.ExtraFields.Clone(),
+		LowBalanceAnnFile:      fscfg.LowBalanceAnnFile,
+		EmptyBalanceContext:    fscfg.EmptyBalanceContext,
+		EmptyBalanceAnnFile:    fscfg.EmptyBalanceAnnFile,
+		ActiveSessionDelimiter: fscfg.ActiveSessionDelimiter,
+		MaxWaitConnection:      fscfg.MaxWaitConnection,
 	}
 	if fscfg.SessionSConns != nil {
 		cln.SessionSConns = make([]string, len(fscfg.SessionSConns))

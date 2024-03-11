@@ -2203,16 +2203,16 @@ const (
 
 // FsAgentCfg
 const (
-	SessionSConnsCfg       = "sessions_conns"
-	SubscribeParkCfg       = "subscribe_park"
-	CreateCdrCfg           = "create_cdr"
-	LowBalanceAnnFileCfg   = "low_balance_ann_file"
-	EmptyBalanceContextCfg = "empty_balance_context"
-	EmptyBalanceAnnFileCfg = "empty_balance_ann_file"
-	MaxWaitConnectionCfg   = "max_wait_connection"
-	EventSocketConnsCfg    = "event_socket_conns"
-	EmptyBalanceContext    = "empty_balance_context"
-	ChanDelimiterCfg       = "chan_delimiter"
+	SessionSConnsCfg          = "sessions_conns"
+	SubscribeParkCfg          = "subscribe_park"
+	CreateCdrCfg              = "create_cdr"
+	LowBalanceAnnFileCfg      = "low_balance_ann_file"
+	EmptyBalanceContextCfg    = "empty_balance_context"
+	EmptyBalanceAnnFileCfg    = "empty_balance_ann_file"
+	MaxWaitConnectionCfg      = "max_wait_connection"
+	EventSocketConnsCfg       = "event_socket_conns"
+	EmptyBalanceContext       = "empty_balance_context"
+	ActiveSessionDelimiterCfg = "active_session_delimiter"
 )
 
 // From Config
