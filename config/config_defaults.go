@@ -133,6 +133,7 @@ const CGRATES_CFG_JSON = `
 		"*charger_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
 		"*dispatcher_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
 		"*reverse_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
+		"*sessions_backup": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false}, 
 	},
 	"opts":{
 		"redisMaxConns": 10,					// the connection pool size
@@ -625,7 +626,7 @@ const CGRATES_CFG_JSON = `
 	"session_indexes": [],					// index sessions based on these fields for GetActiveSessions API
 	"client_protocol": 1.0,					// version of protocol to use when acting as JSON-PRC client <"0","1.0">
 	"channel_sync_interval": "0",			// sync channels to detect stale sessions (0 to disable)
-	"stale_chan_max_extra_usage": "0",		// add random usage belllow max for stale channels
+	"stale_chan_max_extra_usage": "0",		// add random usage below max for stale channels
 	"terminate_attempts": 5,				// attempts to get the session before terminating it
 	"alterable_fields": [],					// the session fields that can be updated
 	//"min_dur_low_balance": "5s",			// threshold which will trigger low balance warnings for prepaid calls (needs to be lower than debit_interval)
@@ -637,6 +638,8 @@ const CGRATES_CFG_JSON = `
 		"privatekey_path": "",				// the path to the private key
 	},
 	"scheduler_conns": [],					// connections to SchedulerS in case of *dynaprepaid request
+	"backup_interval": "",					// backup active sessions regularly to dataDB: "-1" - disables it; 0 - dump at shutdown: <""|$dur>
+	"backup_entry_ttl": "1h",				// backed up sessions (starting from the moment they were created or last updated until starting of engine), that exceed this TTL, will not be restored
 },
 
 

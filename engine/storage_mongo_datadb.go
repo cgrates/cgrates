@@ -75,6 +75,7 @@ const (
 	ColDpp  = "dispatcher_profiles"
 	ColDph  = "dispatcher_hosts"
 	ColLID  = "load_ids"
+	ColBkup = "backedup_sessions"
 )
 
 var (
@@ -1955,4 +1956,37 @@ func (ms *MongoStorage) RemoveIndexesDrv(idxItmType, tntCtx, idxKey string) erro
 		})
 		return err
 	})
+}
+
+// Will backup active sessions in DataDB
+func (ms *MongoStorage) SetBackupSessionsDrv(sessByte []byte, nodeID string, tnt string) error {
+	return ms.query(func(sctx mongo.SessionContext) error {
+		filter := bson.M{"tenant": tnt, "nodeID": nodeID}
+		update := bson.M{"$set": bson.M{"sessions": sessByte}} // sessions key added because bson format needs keys
+		opts := options.Update().SetUpsert(true)
+		_, err := ms.getCol(ColBkup).UpdateOne(sctx, filter, update, opts)
+		if err != nil {
+			return err
+		}
+		return nil
+	})
+}
+
+// Will restore backed up sessions that were active from dataDB
+func (ms *MongoStorage) GetBackedupSessionsDrv(nodeID, tnt string) ([]byte, error) {
+	type sessions struct {
+		Sessions []byte
+	}
+	result := new(sessions)
+	if err := ms.query(func(sctx mongo.SessionContext) error {
+		sr := ms.getCol(ColBkup).FindOne(sctx, bson.M{"tenant": tnt, "nodeID": nodeID})
+		decodeErr := sr.Decode(&result)
+		if errors.Is(decodeErr, mongo.ErrNoDocuments) {
+			return utils.ErrNoBackupFound
+		}
+		return decodeErr
+	}); err != nil {
+		return nil, err
+	}
+	return result.Sessions, nil
 }

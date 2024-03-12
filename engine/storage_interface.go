@@ -128,6 +128,8 @@ type DataDB interface {
 	GetDispatcherHostDrv(string, string) (*DispatcherHost, error)
 	SetDispatcherHostDrv(*DispatcherHost) error
 	RemoveDispatcherHostDrv(string, string) error
+	SetBackupSessionsDrv(sessions []byte, nodeID string, tenant string) error
+	GetBackedupSessionsDrv(nodeID string, tenant string) ([]byte, error)
 }
 
 type StorDB interface {

@@ -79,6 +79,7 @@ type Session struct {
 	Chargeable    bool            // used in case of pausing debit
 	SRuns         []*SRun         // forked based on ChargerS
 	OptsStart     engine.MapEvent
+	UpdatedAt     time.Time // time when session was changed
 
 	debitStop   chan struct{}
 	sTerminator *sTerminator // automatic timeout for the session

@@ -407,6 +407,8 @@ type SessionSJsonCfg struct {
 	Scheduler_conns            *[]string
 	Stir                       *STIRJsonCfg
 	Default_usage              *map[string]string
+	Backup_interval            *string
+	Backup_entry_ttl           *string
 }
 
 // FreeSWITCHAgent config section

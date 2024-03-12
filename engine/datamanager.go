@@ -3263,3 +3263,41 @@ func (dm *DataManager) checkFilters(tenant string, ids []string) (err error) {
 	}
 	return
 }
+
+// GetBackedupSessions gets backed up sessions from dataDB as []byte
+func (dm *DataManager) GetBackedupSessions(nodeID, tenant string) ([]byte, error) {
+	if dm == nil {
+		return nil, utils.ErrNoDatabaseConn
+	}
+	return dm.dataDB.GetBackedupSessionsDrv(nodeID, tenant)
+}
+
+type SetBackupSessionsArgs struct {
+	SessAsBytes []byte // all active sessions marshaled
+	NodeID      string // used as part of binding key in dataDB
+	Tenant      string // used as part of binding key in dataDB
+}
+
+// SetBackupSessions stores the active sessions in dataDB as []byte
+func (dm *DataManager) SetBackupSessions(sessAsBytes []byte, nodeID string,
+	tenant string) (err error) {
+	if dm == nil {
+		return utils.ErrNoDatabaseConn
+	}
+	if err = dm.dataDB.SetBackupSessionsDrv(sessAsBytes, nodeID, tenant); err != nil {
+		return
+	}
+
+	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaSessionsBackup]; itm.Replicate {
+		err = replicate(dm.connMgr, config.CgrConfig().DataDbCfg().RplConns,
+			config.CgrConfig().DataDbCfg().RplFiltered,
+			utils.BackupSessionsPrefix, utils.ConcatenatedKey(tenant, nodeID),
+			utils.ReplicatorSv1SetBackupSessions,
+			&SetBackupSessionsArgs{
+				SessAsBytes: sessAsBytes,
+				NodeID:      nodeID,
+				Tenant:      tenant,
+			})
+	}
+	return
+}

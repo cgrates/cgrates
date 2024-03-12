@@ -1246,3 +1246,18 @@ func (rs *RedisStorage) RemoveIndexesDrv(idxItmType, tntCtx, idxKey string) (err
 	}
 	return rs.Cmd(nil, redis_HDEL, utils.CacheInstanceToPrefix[idxItmType]+tntCtx, idxKey)
 }
+
+// Will backup active sessions in DataDB
+func (rs *RedisStorage) SetBackupSessionsDrv(sessbyte []byte, nodeID string, tnt string) (err error) {
+	return rs.Cmd(nil, redis_SET, utils.BackupSessionsPrefix+utils.ConcatenatedKey(tnt, nodeID), string(sessbyte))
+}
+
+// Will restore backed up sessions that were active from dataDB
+func (rs *RedisStorage) GetBackedupSessionsDrv(nodeID, tnt string) (values []byte, err error) {
+	if err = rs.Cmd(&values, redis_GET, utils.BackupSessionsPrefix+utils.ConcatenatedKey(tnt, nodeID)); err != nil {
+		return
+	} else if len(values) == 0 {
+		return nil, utils.ErrNoBackupFound
+	}
+	return
+}

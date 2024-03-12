@@ -55,6 +55,7 @@ func NewSessionS(cgrCfg *config.CGRConfig,
 		pSessions:     make(map[string]*Session),
 		pSessionsIdx:  make(map[string]map[string]map[string]utils.StringSet),
 		pSessionsRIdx: make(map[string][]*riFieldNameVal),
+		stopBackup:    make(chan struct{}),
 	}
 }
 
@@ -87,6 +88,9 @@ type SessionS struct {
 	pSIMux        sync.RWMutex                                     // protects pSessionsIdx
 	pSessionsIdx  map[string]map[string]map[string]utils.StringSet // map[fieldName]map[fieldValue][cgrID]utils.StringSet[runID]sID
 	pSessionsRIdx map[string][]*riFieldNameVal                     // reverse indexes for passive sessions, used on remove
+
+	stopBackup   chan struct{} // indicate stopping sessions backup
+	storeSessMux sync.RWMutex  // protects storeSessions
 }
 
 // ListenAndServe starts the service and binds it to the listen loop
@@ -106,16 +110,12 @@ func (sS *SessionS) ListenAndServe(stopChan chan struct{}) {
 
 // Shutdown is called by engine to clear states
 func (sS *SessionS) Shutdown() (err error) {
-	if len(sS.cgrCfg.SessionSCfg().ReplicationConns) == 0 {
-		var hasErr bool
-		for _, s := range sS.getSessions("", false) { // Force sessions shutdown
-			if err = sS.terminateSession(s, nil, nil, nil, false); err != nil {
-				hasErr = true
-			}
-		}
-		if hasErr {
-			return utils.ErrPartiallyExecuted
-		}
+	if sS.cgrCfg.SessionSCfg().BackupInterval == -1 {
+		return nil
+	}
+	close(sS.stopBackup)
+	if _, err := sS.storeSessions(); err != nil {
+		utils.Logger.Err(fmt.Sprintf("Backup Sessions error on shutdown: <%v>", err))
 	}
 	return
 }
@@ -865,6 +865,7 @@ func (sS *SessionS) registerSession(s *Session, passive bool) {
 		sMp = sS.pSessions
 	}
 	sMux.Lock()
+	s.UpdatedAt = time.Now()
 	sMp[s.CGRID] = s
 	sMux.Unlock()
 	sS.indexSession(s, passive)
@@ -1504,6 +1505,16 @@ func (sS *SessionS) authEvent(cgrEv *utils.CGREvent, forceDuration bool) (usage 
 	return
 }
 
+// restoreSessions handles backedup sessions
+func (sS *SessionS) restoreSessions(sessions []*Session) {
+	for _, s := range sessions {
+		if time.Since(s.UpdatedAt) <= sS.cgrCfg.SessionSCfg().BackupEntryTTL {
+			sS.initSessionDebitLoops(s)
+			sS.registerSession(s, false)
+		}
+	}
+}
+
 // initSession handles a new session
 // not thread-safe for Session since it is constructed here
 func (sS *SessionS) initSession(cgrEv *utils.CGREvent, clntConnID,
@@ -1538,6 +1549,7 @@ func (sS *SessionS) updateSession(s *Session, updtEv, opts engine.MapEvent, isMs
 		sS.setSTerminator(s, opts) // reset the terminator
 	}
 	s.Chargeable = opts.GetBoolOrDefault(utils.OptsChargeable, true)
+	s.UpdatedAt = time.Now()
 	//init has no updtEv
 	if updtEv == nil {
 		updtEv = engine.MapEvent(s.EventStart.Clone())
@@ -4169,5 +4181,73 @@ func (ssv1 *SessionS) BiRPCv1Sleep(ctx *context.Context, args *utils.DurationArg
 	reply *string) (err error) {
 	time.Sleep(args.Duration)
 	*reply = utils.OK
+	return nil
+}
+
+// RestoreAndLoopBackup will restore previuos sessions backed up and start backup looping
+func (sS *SessionS) RestoreAndLoopBackup() error {
+	var restoredSess []*Session //holds the unmarshaled restored sessions gotten from datadb
+	restoredSessByte, err := sS.dm.GetBackedupSessions(sS.cgrCfg.GeneralCfg().NodeID, sS.cgrCfg.GeneralCfg().DefaultTenant)
+	if err != nil {
+		if err != utils.ErrNoBackupFound { // if backup is not found we still want start the backuploop
+			if err == utils.ErrInternalDBUnsupported {
+				return nil // return nil so we dont start running Backup
+			}
+			return fmt.Errorf("restoring backup: <%v>", err)
+		}
+	} else {
+		if err = engine.NewCodecMsgpackMarshaler().Unmarshal(restoredSessByte, &restoredSess); err != nil {
+			return err
+		}
+		sS.restoreSessions(restoredSess)
+	}
+
+	go sS.runBackup()
+	return nil
+}
+
+// Start running backup loop
+func (sS *SessionS) runBackup() {
+	backupInterval := sS.cgrCfg.SessionSCfg().BackupInterval
+	if backupInterval <= 0 {
+		return
+	}
+	for {
+		if _, err := sS.storeSessions(); err != nil {
+			utils.Logger.Err(fmt.Sprintf("Backup Sessions error: <%v>", err))
+		}
+		select {
+		case <-sS.stopBackup:
+			return
+		case <-time.After(backupInterval):
+		}
+	}
+}
+
+// storeSessions stores active sessions for backup in DataDB
+func (sS *SessionS) storeSessions() (sessStored int, err error) {
+	sS.storeSessMux.Lock() // prevents concurrent execution of the function
+	defer sS.storeSessMux.Unlock()
+	activeSess := sS.getSessions(utils.EmptyString, false)
+	sessStored = len(activeSess)
+	if sessAsBytes, err := engine.NewCodecMsgpackMarshaler().Marshal(activeSess); err != nil {
+		return 0, err
+	} else {
+		if err := sS.dm.SetBackupSessions(sessAsBytes, sS.cgrCfg.GeneralCfg().NodeID,
+			sS.cgrCfg.GeneralCfg().DefaultTenant); err != nil {
+			return 0, err
+		}
+	}
+	return sessStored, nil
+}
+
+// BiRPCv1BackupActiveSessions will store all active sessions in dataDB and reply with the amount of sessions it stored
+func (sS *SessionS) BiRPCv1BackupActiveSessions(ctx *context.Context,
+	args string, reply *int) error {
+	if sessCount, err := sS.storeSessions(); err != nil {
+		return err
+	} else {
+		*reply = sessCount
+	}
 	return nil
 }

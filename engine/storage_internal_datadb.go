@@ -854,3 +854,13 @@ func (iDB *InternalDB) RemoveIndexesDrv(idxItmType, tntCtx, idxKey string) (err 
 	iDB.db.Remove(idxItmType, utils.ConcatenatedKey(tntCtx, idxKey), true, utils.NonTransactional)
 	return
 }
+
+// Backup is not supported on internal dataDB, just continue
+func (iDB *InternalDB) SetBackupSessionsDrv(sessbyte []byte, nodeID string, tnt string) error {
+	return nil
+}
+
+// Backup is not supported on internal dataDB, just continue
+func (iDB *InternalDB) GetBackedupSessionsDrv(nodeID, tnt string) ([]byte, error) {
+	return nil, utils.ErrInternalDBUnsupported // return error to not initiate backup looping
+}

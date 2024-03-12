@@ -301,6 +301,9 @@ func (fsa *FSsessions) onChannelHangupComplete(fsev FSEvent, connIdx int) {
 func (fsa *FSsessions) Connect() error {
 	eventFilters := map[string][]string{"Call-Direction": {"inbound"}}
 	connErr := make(chan error)
+	var reply string
+	// make a call fs -> sessions_conns to create an active client needed for syncSessions when restoring sessions, since prior clients are lost when engine shuts down
+	fsa.connMgr.Call(fsa.ctx, fsa.cfg.SessionSConns, utils.SessionSv1Ping, utils.CGREvent{}, &reply)
 	for connIdx, connCfg := range fsa.cfg.EventSocketConns {
 		fSock, err := fsock.NewFSock(
 			connCfg.Address, connCfg.Password,
@@ -377,9 +380,13 @@ func (fsa *FSsessions) Shutdown() (err error) {
 			utils.Logger.Err(fmt.Sprintf("<%s> Cannot shutdown sessions, fsock not connected for connection index: %v", utils.FreeSWITCHAgent, connIdx))
 			continue
 		}
-		utils.Logger.Info(fmt.Sprintf("<%s> Shutting down all sessions on connection index: %v", utils.FreeSWITCHAgent, connIdx))
-		if _, err = fSock.SendApiCmd("hupall MANAGER_REQUEST cgr_reqtype *prepaid"); err != nil {
-			utils.Logger.Err(fmt.Sprintf("<%s> Error on calls shutdown: %s, connection index: %v", utils.FreeSWITCHAgent, err.Error(), connIdx))
+		// if session backup and replication are disabled hangup fs sessions
+		if config.CgrConfig().SessionSCfg().BackupInterval == -1 &&
+			len(config.CgrConfig().SessionSCfg().ReplicationConns) == 0 {
+			utils.Logger.Info(fmt.Sprintf("<%s> Shutting down all sessions on connection index: %v", utils.FreeSWITCHAgent, connIdx))
+			if _, err = fSock.SendApiCmd("hupall MANAGER_REQUEST cgr_reqtype *prepaid"); err != nil {
+				utils.Logger.Err(fmt.Sprintf("<%s> Error on calls shutdown: %s, connection index: %v", utils.FreeSWITCHAgent, err.Error(), connIdx))
+			}
 		}
 		if err = fSock.Disconnect(); err != nil {
 			utils.Logger.Err(fmt.Sprintf("<%s> Error on disconnect: %s, connection index: %v", utils.FreeSWITCHAgent, err.Error(), connIdx))

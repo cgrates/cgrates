@@ -482,3 +482,11 @@ func (dbM *DataDBMock) SetVersions(vrs Versions, overwrite bool) (err error) {
 func (dbM *DataDBMock) RemoveRatingProfileDrv(string) error {
 	return utils.ErrNotImplemented
 }
+
+func (dbM *DataDBMock) SetBackupSessionsDrv(sessbyte []byte, nodeID string, tnt string) error {
+	return utils.ErrNotImplemented
+}
+
+func (dbM *DataDBMock) GetBackedupSessionsDrv(nodeID string, tnt string) ([]byte, error) {
+	return nil, utils.ErrNotImplemented
+}
