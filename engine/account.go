@@ -210,7 +210,7 @@ func (acc *Account) debitBalanceAction(a *Action, reset, resetIfNegative bool, f
 			continue // just to be safe (cleaned expired balances above)
 		}
 		b.account = acc
-		if b.MatchFilter(a.Balance, false, false) {
+		if b.MatchFilter(a.Balance, "", false, false) {
 			if reset || (resetIfNegative && b.Value < 0) {
 				b.SetValue(0)
 			}

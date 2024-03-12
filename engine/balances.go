@@ -70,9 +70,14 @@ func (b *Balance) Equal(o *Balance) bool {
 		b.Blocker == o.Blocker
 }
 
-func (b *Balance) MatchFilter(o *BalanceFilter, skipIds, skipExpiry bool) bool {
+func (b *Balance) MatchFilter(o *BalanceFilter, bType string, skipIds, skipExpiry bool) bool {
 	if o == nil {
 		return true
+	}
+	if bType != "" && o.Type != nil && *o.Type != "" {
+		if bType != *o.Type {
+			return false
+		}
 	}
 	if !skipIds && o.Uuid != nil && *o.Uuid != "" {
 		return b.Uuid == *o.Uuid
