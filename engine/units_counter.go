@@ -128,7 +128,7 @@ func (ucs UnitCounters) addUnits(amount float64, kind string, cc *CallCost, b *B
 				continue
 			}
 
-			if uc.CounterType == utils.MetaBalance && b != nil && b.MatchFilter(c.Filter, true, false) {
+			if uc.CounterType == utils.MetaBalance && b != nil && b.MatchFilter(c.Filter, "", true, false) {
 				c.Value += amount
 				continue
 			}

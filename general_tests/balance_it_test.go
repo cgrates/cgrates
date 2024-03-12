@@ -700,9 +700,9 @@ PACKAGE_ACC_TEST,ACT_TOPUP_SMS,*asap,10`,
 ACT_REMOVE_BALANCE_MONETARY,*cdrlog,,,,,,,,,,,,,,,
 ACT_REMOVE_BALANCE_MONETARY,*remove_balance,,,balance_monetary,*monetary,,,,,,,,,,,
 ACT_REMOVE_EXPIRED_WITH_CATEGORY,*cdrlog,,,,,,,,,,,,,,,
-ACT_REMOVE_EXPIRED_WITH_CATEGORY,*remove_expired,,,,*monetary,category2,,,,,,,,,,
+ACT_REMOVE_EXPIRED_WITH_CATEGORY,*remove_expired,,,,,category2,,,,,,,,,,
 ACT_REMOVE_EXPIRED,*cdrlog,,,,,,,,,,,,,,,
-ACT_REMOVE_EXPIRED,*remove_expired,,,,*monetary,,,,,,,,,,,
+ACT_REMOVE_EXPIRED,*remove_expired,,,,,,,,,,,,,,,
 ACT_TOPUP_MONETARY,*cdrlog,"{""BalanceID"":""~*acnt.BalanceID""}",,,,,,,,,,,,,,
 ACT_TOPUP_MONETARY,*topup_reset,,,balance_monetary,*monetary,,*any,,,*unlimited,,150,20,false,false,20
 ACT_TOPUP_SMS,*topup_reset,,,balance_sms,*sms,,*any,,,*unlimited,,1000,10,false,false,10`,
@@ -855,6 +855,15 @@ ACT_TOPUP_SMS,*topup_reset,,,balance_sms,*sms,,*any,,,*unlimited,,1000,10,false,
 						utils.Categories: "category2",
 					},
 				},
+				{
+					// will be removed
+					BalanceType: utils.MetaSMS,
+					Value:       16,
+					Balance: map[string]any{
+						utils.ID:         "ExpiredSMSBalance",
+						utils.ExpiryTime: expiryTime,
+					},
+				},
 			},
 		}
 		var reply string
@@ -878,7 +887,7 @@ ACT_TOPUP_SMS,*topup_reset,,,balance_sms,*sms,,*any,,,*unlimited,,1000,10,false,
 			t.Fatal(err)
 		}
 
-		if len(cdrs) != 4 ||
+		if len(cdrs) != 5 ||
 			cdrs[0].Cost != 11 ||
 			cdrs[0].ExtraFields[utils.BalanceID] != "ExpiredBalanceNotMatching1" ||
 			cdrs[1].Cost != 12 ||
@@ -886,19 +895,25 @@ ACT_TOPUP_SMS,*topup_reset,,,balance_sms,*sms,,*any,,,*unlimited,,1000,10,false,
 			cdrs[2].Cost != 13 ||
 			cdrs[2].ExtraFields[utils.BalanceID] != "ExpiredBalanceNotMatching3" ||
 			cdrs[3].Cost != 14 ||
-			cdrs[3].ExtraFields[utils.BalanceID] != "MatchingExpiredBalance" {
+			cdrs[3].ExtraFields[utils.BalanceID] != "MatchingExpiredBalance" ||
+			cdrs[4].Cost != 16 ||
+			cdrs[4].ExtraFields[utils.BalanceID] != "ExpiredSMSBalance" {
 			t.Errorf("unexpected cdrs received: %v", utils.ToJSON(cdrs))
 		}
 
-		assertCommonCDRFields := func(t *testing.T, cdr *engine.CDR) {
+		assertCommonCDRFields := func(t *testing.T, cdr *engine.CDR, expectedType string) {
 			if cdr.RunID != utils.MetaRemoveExpired ||
 				cdr.Source != utils.CDRLog ||
-				cdr.ToR != utils.MetaMonetary {
+				cdr.ToR != expectedType {
 				t.Fatalf("unexpected cdrs received: %v", utils.ToJSON(cdrs))
 			}
 		}
-		for _, cdr := range cdrs {
-			assertCommonCDRFields(t, cdr)
+		expType := utils.MetaMonetary
+		for i, cdr := range cdrs {
+			if i == len(cdrs)-1 {
+				expType = utils.MetaSMS
+			}
+			assertCommonCDRFields(t, cdr, expType)
 		}
 	})
 
@@ -972,6 +987,16 @@ ACT_TOPUP_SMS,*topup_reset,,,balance_sms,*sms,,*any,,,*unlimited,,1000,10,false,
 						utils.Categories: "category2",
 					},
 				},
+				{
+					// will be removed
+					BalanceType: utils.MetaSMS,
+					Value:       16,
+					Balance: map[string]any{
+						utils.ID:         "ExpiredSMSBalance",
+						utils.ExpiryTime: expiryTime,
+						utils.Categories: "category1;category2",
+					},
+				},
 			},
 		}
 		if err := client.Call(context.Background(), utils.APIerSv1SetBalances, &attrSetBalance, &reply); err != nil {
@@ -994,12 +1019,17 @@ ACT_TOPUP_SMS,*topup_reset,,,balance_sms,*sms,,*any,,,*unlimited,,1000,10,false,
 			t.Fatal(err)
 		}
 
-		if len(cdrs) != 1 ||
+		if len(cdrs) != 2 ||
 			cdrs[0].Cost != 14 ||
 			cdrs[0].ExtraFields[utils.BalanceID] != "MatchingExpiredBalance" ||
 			cdrs[0].RunID != utils.MetaRemoveExpired ||
 			cdrs[0].Source != utils.CDRLog ||
-			cdrs[0].ToR != utils.MetaMonetary {
+			cdrs[0].ToR != utils.MetaMonetary ||
+			cdrs[1].Cost != 16 ||
+			cdrs[1].ExtraFields[utils.BalanceID] != "ExpiredSMSBalance" ||
+			cdrs[1].RunID != utils.MetaRemoveExpired ||
+			cdrs[1].Source != utils.CDRLog ||
+			cdrs[1].ToR != utils.MetaSMS {
 			t.Errorf("unexpected cdrs received: %v", utils.ToJSON(cdrs))
 		}
 	})

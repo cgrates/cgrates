@@ -348,33 +348,32 @@ func cdrLogAction(acc *Account, a *Action, acs Actions, _ *FilterS, extraData an
 		}
 
 		// Function to process balances and append CDR if conditions are met.
-		processBalances := func(checkFunc func(*Balance) bool) error {
+		processBalances := func(checkFunc func(*Balance, string) bool) error {
 			if acc == nil {
 				return fmt.Errorf("nil account for action %s", utils.ToJSON(action))
 			}
-			balanceChain, exists := acc.BalanceMap[action.Balance.GetType()]
-			if !exists {
-				return utils.ErrNotFound
-			}
 			found := false
-			for _, balance := range balanceChain {
-				if checkFunc(balance) {
-					// Create a new CDR instance for each balance that meets the condition.
-					newCDR := *cdr // Copy CDR's values to a new CDR instance.
-					newCDR.Cost = balance.Value
-					newCDR.OriginID = utils.GenUUID() // OriginID must be unique for every CDR.
-					newCDR.CGRID = utils.Sha1(newCDR.OriginID, newCDR.OriginHost)
+			for bType, bChain := range acc.BalanceMap {
+				for _, balance := range bChain {
+					if checkFunc(balance, bType) {
+						// Create a new CDR instance for each balance that meets the condition.
+						newCDR := *cdr // Copy CDR's values to a new CDR instance.
+						newCDR.Cost = balance.Value
+						newCDR.OriginID = utils.GenUUID() // OriginID must be unique for every CDR.
+						newCDR.CGRID = utils.Sha1(newCDR.OriginID, newCDR.OriginHost)
+						newCDR.ToR = bType
 
-					// Clone the ExtraFields map to avoid changing its value in
-					// CDRs appended previously.
-					newCDR.ExtraFields = make(map[string]string, len(cdr.ExtraFields)+1)
-					for key, val := range cdr.ExtraFields {
-						newCDR.ExtraFields[key] = val
+						// Clone the ExtraFields map to avoid changing its value in
+						// CDRs appended previously.
+						newCDR.ExtraFields = make(map[string]string, len(cdr.ExtraFields)+1)
+						for key, val := range cdr.ExtraFields {
+							newCDR.ExtraFields[key] = val
+						}
+						newCDR.ExtraFields[utils.BalanceID] = balance.ID
+
+						cdrs = append(cdrs, &newCDR) // Append the address of the new instance.
+						found = true
 					}
-					newCDR.ExtraFields[utils.BalanceID] = balance.ID
-
-					cdrs = append(cdrs, &newCDR) // Append the address of the new instance.
-					found = true
 				}
 			}
 			if !found {
@@ -387,16 +386,16 @@ func cdrLogAction(acc *Account, a *Action, acs Actions, _ *FilterS, extraData an
 		// assign the balance values to the CDR cost and append to the list of CDRs.
 		switch action.ActionType {
 		case utils.MetaRemoveBalance:
-			if err = processBalances(func(b *Balance) bool {
-				return b.MatchFilter(action.Balance, false, false)
+			if err = processBalances(func(b *Balance, typ string) bool {
+				return b.MatchFilter(action.Balance, typ, false, false)
 			}); err != nil {
 				return err
 			}
 			continue
 		case utils.MetaRemoveExpired:
-			if err = processBalances(func(b *Balance) bool {
+			if err = processBalances(func(b *Balance, typ string) bool {
 				return b.IsExpiredAt(currentTime) &&
-					b.MatchFilter(action.Balance, false, true)
+					b.MatchFilter(action.Balance, typ, false, true)
 			}); err != nil {
 				return err
 			}
@@ -758,25 +757,24 @@ func removeAccountAction(ub *Account, a *Action, acs Actions, _ *FilterS, extraD
 	}, config.CgrConfig().GeneralCfg().LockingTimeout, utils.ActionPlanPrefix)
 }
 
-func removeBalanceAction(ub *Account, a *Action, acs Actions, _ *FilterS, extraData any, _ ActionConnCfg) error {
-	if ub == nil {
+func removeBalanceAction(acc *Account, a *Action, _ Actions, _ *FilterS, _ any,
+	_ ActionConnCfg) error {
+	if acc == nil {
 		return fmt.Errorf("nil account for %s action", utils.ToJSON(a))
 	}
-	if _, exists := ub.BalanceMap[a.Balance.GetType()]; !exists {
-		return utils.ErrNotFound
-	}
-	bChain := ub.BalanceMap[a.Balance.GetType()]
 	found := false
-	for i := 0; i < len(bChain); i++ {
-		if bChain[i].MatchFilter(a.Balance, false, false) {
-			// delete without preserving order
-			bChain[i] = bChain[len(bChain)-1]
-			bChain = bChain[:len(bChain)-1]
-			i--
-			found = true
+	for bType, bChain := range acc.BalanceMap {
+		for i := 0; i < len(bChain); i++ {
+			if bChain[i].MatchFilter(a.Balance, bType, false, false) {
+				// Remove balance without preserving order.
+				bChain[i] = bChain[len(bChain)-1]
+				bChain = bChain[:len(bChain)-1]
+				i--
+				found = true
+			}
 		}
+		acc.BalanceMap[bType] = bChain
 	}
-	ub.BalanceMap[a.Balance.GetType()] = bChain
 	if !found {
 		return utils.ErrNotFound
 	}
@@ -803,7 +801,7 @@ func transferMonetaryDefaultAction(ub *Account, a *Action, acs Actions, _ *Filte
 	for _, balance := range bChain {
 		if balance.Uuid != defaultBalance.Uuid &&
 			balance.ID != defaultBalance.ID && // extra caution
-			balance.MatchFilter(a.Balance, false, false) {
+			balance.MatchFilter(a.Balance, "", false, false) {
 			if balance.Value > 0 {
 				defaultBalance.Value += balance.Value
 				balance.Value = 0
@@ -1024,7 +1022,7 @@ func setExpiryAction(ub *Account, a *Action, acs Actions, _ *FilterS, extraData 
 	}
 	balanceType := a.Balance.GetType()
 	for _, b := range ub.BalanceMap[balanceType] {
-		if b.MatchFilter(a.Balance, false, true) {
+		if b.MatchFilter(a.Balance, "", false, true) {
 			b.ExpirationDate = a.Balance.GetExpirationDate()
 		}
 	}
@@ -1196,28 +1194,27 @@ func removeSessionCosts(_ *Account, action *Action, _ Actions, _ *FilterS, _ any
 	return cdrStorage.RemoveSMCosts(smcFilter)
 }
 
-func removeExpired(acc *Account, action *Action, _ Actions, _ *FilterS, extraData any, _ ActionConnCfg) error {
+func removeExpired(acc *Account, action *Action, _ Actions, _ *FilterS, _ any, _ ActionConnCfg) error {
 	if acc == nil {
 		return fmt.Errorf("nil account for %s action", utils.ToJSON(action))
 	}
-	bChain, exists := acc.BalanceMap[action.Balance.GetType()]
-	if !exists {
-		return utils.ErrNotFound
-	}
 
 	found := false
-	for i := 0; i < len(bChain); i++ {
-		if bChain[i].IsExpiredAt(time.Now()) &&
-			bChain[i].MatchFilter(action.Balance, false, true) {
+	for bType, bChain := range acc.BalanceMap {
+		for i := 0; i < len(bChain); i++ {
+			if bChain[i].IsExpiredAt(time.Now()) &&
+				bChain[i].MatchFilter(action.Balance, bType, false, false) {
 
-			// Delete balance without preserving order.
-			bChain[i] = bChain[len(bChain)-1] // assign last balance to current balance
-			bChain = bChain[:len(bChain)-1]   // remove last balance
-			i--                               // subtract 1 from index to avoid skipping next balance
-			found = true
+				// Remove balance without maintaining order.
+				bChain[i] = bChain[len(bChain)-1]
+				bChain = bChain[:len(bChain)-1]
+				i--
+				found = true
+			}
 		}
+		acc.BalanceMap[bType] = bChain
 	}
-	acc.BalanceMap[action.Balance.GetType()] = bChain
+
 	if !found {
 		return utils.ErrNotFound
 	}

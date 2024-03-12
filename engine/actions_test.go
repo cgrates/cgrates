@@ -3938,18 +3938,14 @@ func TestRemoveBalanceActionErr(t *testing.T) {
 		},
 	}
 	acs := &Action{
-		Balance: &BalanceFilter{},
+		Balance: &BalanceFilter{
+			ExpirationDate: utils.TimePointer(time.Date(2022, 11, 12, 2, 0, 0, 0, time.UTC)),
+			Type:           utils.StringPointer(utils.MetaMonetary),
+			Value:          &utils.ValueFormula{Static: 10},
+		},
 	}
 	if err := removeBalanceAction(nil, acs, nil, nil, nil, ActionConnCfg{}); err == nil {
 		t.Error(err)
-	}
-	if err := removeBalanceAction(acc, acs, nil, nil, nil, ActionConnCfg{}); err == nil {
-		t.Error(err)
-	}
-	acs.Balance = &BalanceFilter{
-		ExpirationDate: utils.TimePointer(time.Date(2022, 11, 12, 2, 0, 0, 0, time.UTC)),
-		Type:           utils.StringPointer(utils.MetaMonetary),
-		Value:          &utils.ValueFormula{Static: 10},
 	}
 	if err := removeBalanceAction(acc, acs, nil, nil, nil, ActionConnCfg{}); err == nil || err != utils.ErrNotFound {
 		t.Error(err)
