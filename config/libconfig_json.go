@@ -206,6 +206,7 @@ type ERsJsonCfg struct {
 	Enabled           *bool
 	Sessions_conns    *[]string
 	Ees_conns         *[]string
+	Concurrent_events *int
 	Readers           *[]*EventReaderJsonCfg
 	Partial_cache_ttl *string
 }
