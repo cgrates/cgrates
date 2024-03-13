@@ -39,7 +39,7 @@ You can add the CGRateS repository to your system's sources list, depending of t
          wget https://apt.cgrates.org/apt.cgrates.org.gpg.key -O apt.cgrates.org.asc
          sudo mv apt.cgrates.org.asc /etc/apt/trusted.gpg.d/
 
-         # Add the repository to the apt sources list for Debian versions starting with *Bookworm/12.0*
+         # Add the repository to the apt sources list
          echo "deb http://apt.cgrates.org/debian/ master-bookworm main" | sudo tee /etc/apt/sources.list.d/cgrates.list
 
          # Update the system repository and install CGRateS
