@@ -99,7 +99,7 @@ func newActionConnCfg(source, action string, cfg *config.CGRConfig) ActionConnCf
 	return act
 }
 
-type actionTypeFunc func(*Account, *Action, Actions, *FilterS, any, ActionConnCfg) error
+type actionTypeFunc func(*Account, *Action, Actions, *FilterS, any, time.Time, ActionConnCfg) error
 
 var actionFuncMap = make(map[string]actionTypeFunc)
 
@@ -155,7 +155,7 @@ func RegisterActionFunc(action string, f actionTypeFunc) {
 // Destination account and balance IDs are obtained from Action's ExtraParameters.
 // ExtraParameters should be a JSON string containing keys 'DestAccountID' and 'DestBalanceID',
 // which identify the destination account and balance for the transfer.
-func transferBalanceAction(srcAcc *Account, act *Action, _ Actions, fltrS *FilterS, _ any, _ ActionConnCfg) error {
+func transferBalanceAction(srcAcc *Account, act *Action, _ Actions, fltrS *FilterS, _ any, _ time.Time, _ ActionConnCfg) error {
 	if srcAcc == nil {
 		return errors.New("source account is nil")
 	}
@@ -245,7 +245,7 @@ func transferBalanceAction(srcAcc *Account, act *Action, _ Actions, fltrS *Filte
 	return nil
 }
 
-func logAction(ub *Account, a *Action, acs Actions, _ *FilterS, extraData any, _ ActionConnCfg) (err error) {
+func logAction(ub *Account, a *Action, acs Actions, _ *FilterS, extraData any, _ time.Time, _ ActionConnCfg) (err error) {
 	switch {
 	case ub != nil:
 		body, _ := json.Marshal(ub)
@@ -257,7 +257,8 @@ func logAction(ub *Account, a *Action, acs Actions, _ *FilterS, extraData any, _
 	return
 }
 
-func cdrLogAction(acc *Account, a *Action, acs Actions, _ *FilterS, extraData any, _ ActionConnCfg) (err error) {
+func cdrLogAction(acc *Account, a *Action, acs Actions, _ *FilterS, extraData any,
+	referenceTime time.Time, _ ActionConnCfg) (err error) {
 	if len(config.CgrConfig().SchedulerCfg().CDRsConns) == 0 {
 		return errors.New("No connection with CDR Server")
 	}
@@ -291,7 +292,6 @@ func cdrLogAction(acc *Account, a *Action, acs Actions, _ *FilterS, extraData an
 			return err
 		}
 	}
-	currentTime := time.Now()
 
 	// set stored cdr values
 	var cdrs []*CDR
@@ -308,8 +308,8 @@ func cdrLogAction(acc *Account, a *Action, acs Actions, _ *FilterS, extraData an
 		cdr := &CDR{
 			RunID:       action.ActionType,
 			Source:      utils.CDRLog,
-			SetupTime:   currentTime,
-			AnswerTime:  currentTime,
+			SetupTime:   referenceTime,
+			AnswerTime:  referenceTime,
 			OriginID:    utils.GenUUID(),
 			ExtraFields: make(map[string]string),
 			PreRated:    true,
@@ -394,7 +394,7 @@ func cdrLogAction(acc *Account, a *Action, acs Actions, _ *FilterS, extraData an
 			continue
 		case utils.MetaRemoveExpired:
 			if err = processBalances(func(b *Balance, typ string) bool {
-				return b.IsExpiredAt(currentTime) &&
+				return b.IsExpiredAt(referenceTime) &&
 					b.MatchFilter(action.Balance, typ, false, true)
 			}); err != nil {
 				return err
@@ -436,7 +436,7 @@ func cdrLogAction(acc *Account, a *Action, acs Actions, _ *FilterS, extraData an
 	return nil
 }
 
-func resetTriggersAction(ub *Account, a *Action, acs Actions, fltrS *FilterS, extraData any, _ ActionConnCfg) (err error) {
+func resetTriggersAction(ub *Account, a *Action, acs Actions, fltrS *FilterS, extraData any, _ time.Time, _ ActionConnCfg) (err error) {
 	if ub == nil {
 		return errors.New("nil account")
 	}
@@ -444,7 +444,7 @@ func resetTriggersAction(ub *Account, a *Action, acs Actions, fltrS *FilterS, ex
 	return
 }
 
-func setRecurrentAction(ub *Account, a *Action, acs Actions, _ *FilterS, extraData any, _ ActionConnCfg) (err error) {
+func setRecurrentAction(ub *Account, a *Action, acs Actions, _ *FilterS, extraData any, _ time.Time, _ ActionConnCfg) (err error) {
 	if ub == nil {
 		return errors.New("nil account")
 	}
@@ -452,7 +452,7 @@ func setRecurrentAction(ub *Account, a *Action, acs Actions, _ *FilterS, extraDa
 	return
 }
 
-func unsetRecurrentAction(ub *Account, a *Action, acs Actions, _ *FilterS, extraData any, _ ActionConnCfg) (err error) {
+func unsetRecurrentAction(ub *Account, a *Action, acs Actions, _ *FilterS, extraData any, _ time.Time, _ ActionConnCfg) (err error) {
 	if ub == nil {
 		return errors.New("nil account")
 	}
@@ -460,7 +460,7 @@ func unsetRecurrentAction(ub *Account, a *Action, acs Actions, _ *FilterS, extra
 	return
 }
 
-func allowNegativeAction(ub *Account, a *Action, acs Actions, _ *FilterS, extraData any, _ ActionConnCfg) (err error) {
+func allowNegativeAction(ub *Account, a *Action, acs Actions, _ *FilterS, extraData any, _ time.Time, _ ActionConnCfg) (err error) {
 	if ub == nil {
 		return errors.New("nil account")
 	}
@@ -468,7 +468,7 @@ func allowNegativeAction(ub *Account, a *Action, acs Actions, _ *FilterS, extraD
 	return
 }
 
-func denyNegativeAction(ub *Account, a *Action, acs Actions, _ *FilterS, extraData any, _ ActionConnCfg) (err error) {
+func denyNegativeAction(ub *Account, a *Action, acs Actions, _ *FilterS, extraData any, _ time.Time, _ ActionConnCfg) (err error) {
 	if ub == nil {
 		return errors.New("nil account")
 	}
@@ -476,14 +476,14 @@ func denyNegativeAction(ub *Account, a *Action, acs Actions, _ *FilterS, extraDa
 	return
 }
 
-func resetAccountAction(ub *Account, a *Action, acs Actions, fltrS *FilterS, extraData any, _ ActionConnCfg) (err error) {
+func resetAccountAction(ub *Account, a *Action, acs Actions, fltrS *FilterS, extraData any, _ time.Time, _ ActionConnCfg) (err error) {
 	if ub == nil {
 		return errors.New("nil account")
 	}
 	return genericReset(ub, fltrS)
 }
 
-func topupResetAction(ub *Account, a *Action, acs Actions, fltrS *FilterS, extraData any, _ ActionConnCfg) (err error) {
+func topupResetAction(ub *Account, a *Action, acs Actions, fltrS *FilterS, extraData any, _ time.Time, _ ActionConnCfg) (err error) {
 	if ub == nil {
 		return errors.New("nil account")
 	}
@@ -497,7 +497,7 @@ func topupResetAction(ub *Account, a *Action, acs Actions, fltrS *FilterS, extra
 	return
 }
 
-func topupAction(ub *Account, a *Action, acs Actions, fltrS *FilterS, extraData any, _ ActionConnCfg) (err error) {
+func topupAction(ub *Account, a *Action, acs Actions, fltrS *FilterS, extraData any, _ time.Time, _ ActionConnCfg) (err error) {
 	if ub == nil {
 		return errors.New("nil account")
 	}
@@ -508,7 +508,7 @@ func topupAction(ub *Account, a *Action, acs Actions, fltrS *FilterS, extraData 
 	return
 }
 
-func debitResetAction(ub *Account, a *Action, acs Actions, fltrS *FilterS, extraData any, _ ActionConnCfg) (err error) {
+func debitResetAction(ub *Account, a *Action, acs Actions, fltrS *FilterS, extraData any, _ time.Time, _ ActionConnCfg) (err error) {
 	if ub == nil {
 		return errors.New("nil account")
 	}
@@ -518,7 +518,7 @@ func debitResetAction(ub *Account, a *Action, acs Actions, fltrS *FilterS, extra
 	return genericDebit(ub, a, true, fltrS)
 }
 
-func debitAction(ub *Account, a *Action, acs Actions, fltrS *FilterS, extraData any, _ ActionConnCfg) (err error) {
+func debitAction(ub *Account, a *Action, acs Actions, fltrS *FilterS, extraData any, _ time.Time, _ ActionConnCfg) (err error) {
 	if ub == nil {
 		return errors.New("nil account")
 	}
@@ -526,7 +526,7 @@ func debitAction(ub *Account, a *Action, acs Actions, fltrS *FilterS, extraData 
 	return
 }
 
-func resetCountersAction(ub *Account, a *Action, acs Actions, _ *FilterS, extraData any, _ ActionConnCfg) (err error) {
+func resetCountersAction(ub *Account, a *Action, acs Actions, _ *FilterS, extraData any, _ time.Time, _ ActionConnCfg) (err error) {
 	if ub == nil {
 		return errors.New("nil account")
 	}
@@ -552,7 +552,7 @@ func genericDebit(ub *Account, a *Action, reset bool, fltrS *FilterS) (err error
 	return ub.debitBalanceAction(a, reset, false, fltrS)
 }
 
-func enableAccountAction(acc *Account, a *Action, acs Actions, _ *FilterS, extraData any, _ ActionConnCfg) (err error) {
+func enableAccountAction(acc *Account, a *Action, acs Actions, _ *FilterS, extraData any, _ time.Time, _ ActionConnCfg) (err error) {
 	if acc == nil {
 		return errors.New("nil account")
 	}
@@ -560,7 +560,7 @@ func enableAccountAction(acc *Account, a *Action, acs Actions, _ *FilterS, extra
 	return
 }
 
-func disableAccountAction(acc *Account, a *Action, acs Actions, _ *FilterS, extraData any, _ ActionConnCfg) (err error) {
+func disableAccountAction(acc *Account, a *Action, acs Actions, _ *FilterS, extraData any, _ time.Time, _ ActionConnCfg) (err error) {
 	if acc == nil {
 		return errors.New("nil account")
 	}
@@ -586,7 +586,7 @@ func genericReset(ub *Account, fltrS *FilterS) error {
 }
 
 // Mails the balance hitting the threshold towards predefined list of addresses
-func mailAsync(ub *Account, a *Action, acs Actions, _ *FilterS, extraData any, _ ActionConnCfg) error {
+func mailAsync(ub *Account, a *Action, acs Actions, _ *FilterS, extraData any, _ time.Time, _ ActionConnCfg) error {
 	cgrCfg := config.CgrConfig()
 	params := strings.Split(a.ExtraParameters, string(utils.CSVSep))
 	if len(params) == 0 {
@@ -628,7 +628,7 @@ func mailAsync(ub *Account, a *Action, acs Actions, _ *FilterS, extraData any, _
 	return nil
 }
 
-func setddestinations(ub *Account, a *Action, acs Actions, _ *FilterS, extraData any, _ ActionConnCfg) (err error) {
+func setddestinations(ub *Account, a *Action, acs Actions, _ *FilterS, extraData any, _ time.Time, _ ActionConnCfg) (err error) {
 	var ddcDestID string
 	for _, bchain := range ub.BalanceMap {
 		for _, b := range bchain {
@@ -700,7 +700,7 @@ func setddestinations(ub *Account, a *Action, acs Actions, _ *FilterS, extraData
 	return nil
 }
 
-func removeAccountAction(ub *Account, a *Action, acs Actions, _ *FilterS, extraData any, _ ActionConnCfg) error {
+func removeAccountAction(ub *Account, a *Action, acs Actions, _ *FilterS, extraData any, _ time.Time, _ ActionConnCfg) error {
 	var accID string
 	if ub != nil {
 		accID = ub.ID
@@ -758,7 +758,7 @@ func removeAccountAction(ub *Account, a *Action, acs Actions, _ *FilterS, extraD
 }
 
 func removeBalanceAction(acc *Account, a *Action, _ Actions, _ *FilterS, _ any,
-	_ ActionConnCfg) error {
+	_ time.Time, _ ActionConnCfg) error {
 	if acc == nil {
 		return fmt.Errorf("nil account for %s action", utils.ToJSON(a))
 	}
@@ -781,14 +781,14 @@ func removeBalanceAction(acc *Account, a *Action, _ Actions, _ *FilterS, _ any,
 	return nil
 }
 
-func setBalanceAction(ub *Account, a *Action, acs Actions, fltrS *FilterS, extraData any, _ ActionConnCfg) error {
+func setBalanceAction(ub *Account, a *Action, acs Actions, fltrS *FilterS, extraData any, _ time.Time, _ ActionConnCfg) error {
 	if ub == nil {
 		return fmt.Errorf("nil account for %s action", utils.ToJSON(a))
 	}
 	return ub.setBalanceAction(a, fltrS)
 }
 
-func transferMonetaryDefaultAction(ub *Account, a *Action, acs Actions, _ *FilterS, extraData any, _ ActionConnCfg) error {
+func transferMonetaryDefaultAction(ub *Account, a *Action, acs Actions, _ *FilterS, extraData any, _ time.Time, _ ActionConnCfg) error {
 	if ub == nil {
 		utils.Logger.Err("*transfer_monetary_default called without account")
 		return utils.ErrAccountNotFound
@@ -836,7 +836,7 @@ Sq - CDRStatsQueueTriggered object
 
 We can actually use everythiong that go templates offer. You can read more here: https://golang.org/pkg/text/template/
 */
-func cgrRPCAction(ub *Account, a *Action, acs Actions, _ *FilterS, extraData any, _ ActionConnCfg) (err error) {
+func cgrRPCAction(ub *Account, a *Action, acs Actions, _ *FilterS, extraData any, _ time.Time, _ ActionConnCfg) (err error) {
 	// parse template
 	tmpl := template.New("extra_params")
 	tmpl.Delims("<<", ">>")
@@ -914,7 +914,8 @@ func cgrRPCAction(ub *Account, a *Action, acs Actions, _ *FilterS, extraData any
 //   - Event: set of key-value pairs (separated by "&").
 //
 // Parameters are separated by ";" and must be provided in the specified order.
-func alterSessionsAction(_ *Account, act *Action, _ Actions, _ *FilterS, _ any, connCfg ActionConnCfg) (err error) {
+func alterSessionsAction(_ *Account, act *Action, _ Actions, _ *FilterS, _ any,
+	_ time.Time, connCfg ActionConnCfg) (err error) {
 
 	// Parse action parameters based on the predefined format.
 	params := strings.Split(act.ExtraParameters, ";")
@@ -958,7 +959,8 @@ func alterSessionsAction(_ *Account, act *Action, _ Actions, _ *FilterS, _ any, 
 //   - Event: set of key-value pairs (separated by "&").
 //
 // Parameters are separated by ";" and must be provided in the specified order.
-func forceDisconnectSessionsAction(_ *Account, act *Action, _ Actions, _ *FilterS, _ any, connCfg ActionConnCfg) (err error) {
+func forceDisconnectSessionsAction(_ *Account, act *Action, _ Actions, _ *FilterS, _ any,
+	_ time.Time, connCfg ActionConnCfg) (err error) {
 
 	// Parse action parameters based on the predefined format.
 	params := strings.Split(act.ExtraParameters, ";")
@@ -1006,7 +1008,7 @@ func parseParamStringToMap(paramStr string, targetMap map[string]any) error {
 	return nil
 }
 
-func topupZeroNegativeAction(ub *Account, a *Action, acs Actions, fltrS *FilterS, extraData any, _ ActionConnCfg) error {
+func topupZeroNegativeAction(ub *Account, a *Action, acs Actions, fltrS *FilterS, extraData any, _ time.Time, _ ActionConnCfg) error {
 	if ub == nil {
 		return errors.New("nil account")
 	}
@@ -1016,7 +1018,7 @@ func topupZeroNegativeAction(ub *Account, a *Action, acs Actions, fltrS *FilterS
 	return ub.debitBalanceAction(a, false, true, fltrS)
 }
 
-func setExpiryAction(ub *Account, a *Action, acs Actions, _ *FilterS, extraData any, _ ActionConnCfg) error {
+func setExpiryAction(ub *Account, a *Action, acs Actions, _ *FilterS, extraData any, _ time.Time, _ ActionConnCfg) error {
 	if ub == nil {
 		return errors.New("nil account")
 	}
@@ -1030,7 +1032,7 @@ func setExpiryAction(ub *Account, a *Action, acs Actions, _ *FilterS, extraData 
 }
 
 // publishAccount will publish the account as well as each balance received to ThresholdS
-func publishAccount(ub *Account, a *Action, acs Actions, _ *FilterS, extraData any, _ ActionConnCfg) error {
+func publishAccount(ub *Account, a *Action, acs Actions, _ *FilterS, extraData any, _ time.Time, _ ActionConnCfg) error {
 	if ub == nil {
 		return errors.New("nil account")
 	}
@@ -1171,7 +1173,7 @@ func (cdrP *cdrLogProvider) FieldAsString(fldPath []string) (data string, err er
 	return utils.IfaceAsString(valIface), nil
 }
 
-func removeSessionCosts(_ *Account, action *Action, _ Actions, _ *FilterS, _ any, _ ActionConnCfg) error { // FiltersID;inlineFilter
+func removeSessionCosts(_ *Account, action *Action, _ Actions, _ *FilterS, _ any, _ time.Time, _ ActionConnCfg) error { // FiltersID;inlineFilter
 	tenant := config.CgrConfig().GeneralCfg().DefaultTenant
 	smcFilter := new(utils.SMCostFilter)
 	for _, fltrID := range strings.Split(action.ExtraParameters, utils.InfieldSep) {
@@ -1194,7 +1196,8 @@ func removeSessionCosts(_ *Account, action *Action, _ Actions, _ *FilterS, _ any
 	return cdrStorage.RemoveSMCosts(smcFilter)
 }
 
-func removeExpired(acc *Account, action *Action, _ Actions, _ *FilterS, _ any, _ ActionConnCfg) error {
+func removeExpired(acc *Account, action *Action, _ Actions, _ *FilterS, _ any,
+	referenceTime time.Time, _ ActionConnCfg) error {
 	if acc == nil {
 		return fmt.Errorf("nil account for %s action", utils.ToJSON(action))
 	}
@@ -1202,7 +1205,7 @@ func removeExpired(acc *Account, action *Action, _ Actions, _ *FilterS, _ any, _
 	found := false
 	for bType, bChain := range acc.BalanceMap {
 		for i := 0; i < len(bChain); i++ {
-			if bChain[i].IsExpiredAt(time.Now()) &&
+			if bChain[i].IsExpiredAt(referenceTime) &&
 				bChain[i].MatchFilter(action.Balance, bType, false, false) {
 
 				// Remove balance without maintaining order.
@@ -1222,7 +1225,7 @@ func removeExpired(acc *Account, action *Action, _ Actions, _ *FilterS, _ any, _
 }
 
 // resetAccountCDR resets the account out of values from CDR
-func resetAccountCDR(ub *Account, action *Action, acts Actions, fltrS *FilterS, _ any, _ ActionConnCfg) error {
+func resetAccountCDR(ub *Account, action *Action, acts Actions, fltrS *FilterS, _ any, _ time.Time, _ ActionConnCfg) error {
 	if ub == nil {
 		return errors.New("nil account")
 	}
@@ -1267,7 +1270,7 @@ func resetAccountCDR(ub *Account, action *Action, acts Actions, fltrS *FilterS, 
 	return nil
 }
 
-func export(ub *Account, a *Action, acs Actions, _ *FilterS, extraData any, _ ActionConnCfg) (err error) {
+func export(ub *Account, a *Action, acs Actions, _ *FilterS, extraData any, _ time.Time, _ ActionConnCfg) (err error) {
 	var cgrEv *utils.CGREvent
 	switch {
 	case ub != nil:
@@ -1308,7 +1311,7 @@ func export(ub *Account, a *Action, acs Actions, _ *FilterS, extraData any, _ Ac
 		utils.EeSv1ProcessEvent, args, &rply)
 }
 
-func resetThreshold(ub *Account, a *Action, acs Actions, _ *FilterS, extraData any, _ ActionConnCfg) (err error) {
+func resetThreshold(ub *Account, a *Action, acs Actions, _ *FilterS, extraData any, _ time.Time, _ ActionConnCfg) (err error) {
 	args := &utils.TenantIDWithAPIOpts{
 		TenantID: utils.NewTenantID(a.ExtraParameters),
 	}
@@ -1317,7 +1320,7 @@ func resetThreshold(ub *Account, a *Action, acs Actions, _ *FilterS, extraData a
 		utils.ThresholdSv1ResetThreshold, args, &rply)
 }
 
-func resetStatQueue(ub *Account, a *Action, acs Actions, _ *FilterS, extraData any, _ ActionConnCfg) (err error) {
+func resetStatQueue(ub *Account, a *Action, acs Actions, _ *FilterS, extraData any, _ time.Time, _ ActionConnCfg) (err error) {
 	args := &utils.TenantIDWithAPIOpts{
 		TenantID: utils.NewTenantID(a.ExtraParameters),
 	}
@@ -1326,7 +1329,7 @@ func resetStatQueue(ub *Account, a *Action, acs Actions, _ *FilterS, extraData a
 		utils.StatSv1ResetStatQueue, args, &rply)
 }
 
-func remoteSetAccount(ub *Account, a *Action, acs Actions, _ *FilterS, extraData any, _ ActionConnCfg) (err error) {
+func remoteSetAccount(ub *Account, a *Action, acs Actions, _ *FilterS, extraData any, _ time.Time, _ ActionConnCfg) (err error) {
 	client := &http.Client{Transport: httpPstrTransport}
 	var resp *http.Response
 	req := new(bytes.Buffer)

@@ -107,7 +107,6 @@ func testNewCgrJsonCfgFromHttp(t *testing.T) {
 	} else if !reflect.DeepEqual(expVal, rply) {
 		t.Errorf("Expected: %s ,received: %s", utils.ToJSON(expVal), utils.ToJSON(rply))
 	}
-
 }
 
 func testNewCGRConfigFromPath(t *testing.T) {
