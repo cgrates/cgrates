@@ -53,7 +53,7 @@ You can add the CGRateS repository to your system's sources list, depending of t
          wget http://pkg.cgrates.org/deb/master/bookworm/cgrates_current_amd64.deb
          sudo dpkg -i ./cgrates_current_amd64.deb
 
-   .. group-tab:: Boolseye
+   .. group-tab:: Bullseye
 
       .. code-block:: bash
 
