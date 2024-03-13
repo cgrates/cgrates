@@ -24,36 +24,64 @@ Package installation method varies according to the Linux distribution:
 Debian or Debian-based Distributions 
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-You can add the CGRateS repository to your system's sources list as follows:
+You can add the CGRateS repository to your system's sources list, depending of the Debian version you are running, as follows:
 
-.. code-block:: bash
+.. tabs::
 
-   # Install dependencies
-   sudo apt-get install wget gnupg -y
+   .. group-tab:: Bookworm
 
-   # Download and move the GPG Key to the trusted area
-   wget https://apt.cgrates.org/apt.cgrates.org.gpg.key -O apt.cgrates.org.asc
-   sudo mv apt.cgrates.org.asc /etc/apt/trusted.gpg.d/
+      .. code-block:: bash
 
-   # Add the repository to the apt sources list for Debian versions starting with *Bookworm/12.0*
-   echo "deb http://apt.cgrates.org/debian/ master-bookworm main" | sudo tee /etc/apt/sources.list.d/cgrates.list
+         # Install dependencies
+         sudo apt-get install wget gnupg -y
 
-   # Add the repository to the apt sources list for Debian versions before *Bookworm/12.0*
-   echo "deb http://apt.cgrates.org/debian/ master-bullseye main" | sudo tee /etc/apt/sources.list.d/cgrates.list
+         # Download and move the GPG Key to the trusted area
+         wget https://apt.cgrates.org/apt.cgrates.org.gpg.key -O apt.cgrates.org.asc
+         sudo mv apt.cgrates.org.asc /etc/apt/trusted.gpg.d/
 
-   # Update the system repository and install CGRateS
-   sudo apt-get update -y
-   sudo apt-get install cgrates -y
+         # Add the repository to the apt sources list for Debian versions starting with *Bookworm/12.0*
+         echo "deb http://apt.cgrates.org/debian/ master-bookworm main" | sudo tee /etc/apt/sources.list.d/cgrates.list
 
-Alternatively, you can manually install a specific .deb package as follows:
+         # Update the system repository and install CGRateS
+         sudo apt-get update -y
+         sudo apt-get install cgrates -y
 
-.. code-block:: bash
+      Alternatively, you can manually install a specific .deb package as follows:
 
-   wget http://pkg.cgrates.org/deb/master/bookworm/cgrates_current_amd64.deb
-   sudo dpkg -i ./cgrates_current_amd64.deb
+      .. code-block:: bash
+
+         wget http://pkg.cgrates.org/deb/master/bookworm/cgrates_current_amd64.deb
+         sudo dpkg -i ./cgrates_current_amd64.deb
+
+   .. group-tab:: Boolseye
+
+      .. code-block:: bash
+
+         # Install dependencies
+         sudo apt-get install wget gnupg -y
+
+         # Download and move the GPG Key to the trusted area
+         wget https://apt.cgrates.org/apt.cgrates.org.gpg.key -O apt.cgrates.org.asc
+         sudo mv apt.cgrates.org.asc /etc/apt/trusted.gpg.d/
+
+         # Add the repository to the apt sources list
+         echo "deb http://apt.cgrates.org/debian/ master-bullseye main" | sudo tee /etc/apt/sources.list.d/cgrates.list
+
+         # Update the system repository and install CGRateS
+         sudo apt-get update -y
+         sudo apt-get install cgrates -y
+
+      Alternatively, you can manually install a specific .deb package as follows:
+
+      .. code-block:: bash
+
+         wget http://pkg.cgrates.org/deb/master/bullseye/cgrates_current_amd64.deb
+         sudo dpkg -i ./cgrates_current_amd64.deb
+
 
 .. note::
    A complete archive of CGRateS packages is available at http://pkg.cgrates.org/deb/.
+
 
 Redhat-based Distributions
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
