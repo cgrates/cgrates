@@ -43,13 +43,6 @@ func (erS *ERsCfg) loadFromJSONCfg(jsnCfg *ERsJsonCfg, msgTemplates map[string][
 		erS.Enabled = *jsnCfg.Enabled
 	}
 
-	if jsnCfg.Concurrent_events != nil {
-		erS.ConcurrentEvents = *jsnCfg.Concurrent_events
-		if erS.ConcurrentEvents < 1 {
-			erS.ConcurrentEvents = 1
-		}
-	}
-
 	if jsnCfg.Sessions_conns != nil {
 		erS.SessionSConns = make([]string, 0, len(*jsnCfg.Sessions_conns))
 		for _, fID := range *jsnCfg.Sessions_conns {
@@ -74,6 +67,14 @@ func (erS *ERsCfg) loadFromJSONCfg(jsnCfg *ERsJsonCfg, msgTemplates map[string][
 			}
 		}
 	}
+
+	if jsnCfg.Concurrent_events != nil {
+		erS.ConcurrentEvents = *jsnCfg.Concurrent_events
+		if erS.ConcurrentEvents < 1 {
+			erS.ConcurrentEvents = 1
+		}
+	}
+
 	if jsnCfg.Partial_cache_ttl != nil {
 		if erS.PartialCacheTTL, err = utils.ParseDurationWithNanosecs(*jsnCfg.Partial_cache_ttl); err != nil {
 			return
@@ -133,9 +134,9 @@ func (erS *ERsCfg) Clone() (cln *ERsCfg) {
 // AsMapInterface returns the config as a map[string]any
 func (erS *ERsCfg) AsMapInterface(separator string) (initialMP map[string]any) {
 	initialMP = map[string]any{
-		utils.EnabledCfg:         erS.Enabled,
-		utils.ConcurrentEvents:   erS.ConcurrentEvents,
-		utils.PartialCacheTTLCfg: "0",
+		utils.EnabledCfg:          erS.Enabled,
+		utils.ConcurrentEventsCfg: erS.ConcurrentEvents,
+		utils.PartialCacheTTLCfg:  "0",
 	}
 	if erS.PartialCacheTTL != 0 {
 		initialMP[utils.PartialCacheTTLCfg] = erS.PartialCacheTTL.String()

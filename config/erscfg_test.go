@@ -60,9 +60,10 @@ func TestERSClone(t *testing.T) {
 }
 }`
 	expectedERsCfg := &ERsCfg{
-		Enabled:       true,
-		SessionSConns: []string{"*internal:*sessions"},
-		EEsConns:      []string{},
+		Enabled:          true,
+		SessionSConns:    []string{"*internal:*sessions"},
+		EEsConns:         []string{},
+		ConcurrentEvents: 1,
 		Readers: []*EventReaderCfg{
 			{
 				ID:                   utils.MetaDefault,
@@ -235,9 +236,10 @@ func TestEventReaderloadFromJsonCase3(t *testing.T) {
 
 func TestERSLoadFromjsonCfg(t *testing.T) {
 	expectedERsCfg := &ERsCfg{
-		Enabled:       true,
-		SessionSConns: []string{"conn1", "conn3"},
-		EEsConns:      []string{},
+		Enabled:          true,
+		SessionSConns:    []string{"conn1", "conn3"},
+		EEsConns:         []string{},
+		ConcurrentEvents: 1,
 		Readers: []*EventReaderCfg{
 			{
 				ID:                   utils.MetaDefault,
@@ -460,8 +462,9 @@ func TestERSloadFromJsonCase2(t *testing.T) {
 
 func TestERSloadFromJsonCase3(t *testing.T) {
 	cfgJSON := &ERsJsonCfg{
-		Enabled:        utils.BoolPointer(true),
-		Sessions_conns: &[]string{"*conn1"},
+		Enabled:           utils.BoolPointer(true),
+		Sessions_conns:    &[]string{"*conn1"},
+		Concurrent_events: utils.IntPointer(1),
 		Readers: &[]*EventReaderJsonCfg{
 			{
 				Id:                     utils.StringPointer("file_reader1"),
@@ -489,9 +492,10 @@ func TestERSloadFromJsonCase3(t *testing.T) {
 		},
 	}
 	expectedERsCfg := &ERsCfg{
-		Enabled:       true,
-		SessionSConns: []string{"*conn1"},
-		EEsConns:      []string{},
+		Enabled:          true,
+		SessionSConns:    []string{"*conn1"},
+		EEsConns:         []string{},
+		ConcurrentEvents: 1,
 		Readers: []*EventReaderCfg{
 			{
 				ID:                   utils.MetaDefault,
@@ -649,9 +653,10 @@ func TestERSloadFromJsonCase4(t *testing.T) {
 		},
 	}
 	expectedERsCfg := &ERsCfg{
-		Enabled:       true,
-		SessionSConns: []string{"*conn1"},
-		EEsConns:      []string{},
+		Enabled:          true,
+		SessionSConns:    []string{"*conn1"},
+		EEsConns:         []string{},
+		ConcurrentEvents: 1,
 		Readers: []*EventReaderCfg{
 			{
 				ID:                   utils.MetaDefault,
@@ -802,9 +807,10 @@ func TestEventReaderCacheDumpFieldsloadFromJsonCfg(t *testing.T) {
 
 func TestEventReaderSameID(t *testing.T) {
 	expectedERsCfg := &ERsCfg{
-		Enabled:       true,
-		SessionSConns: []string{"conn1"},
-		EEsConns:      []string{},
+		Enabled:          true,
+		SessionSConns:    []string{"conn1"},
+		EEsConns:         []string{},
+		ConcurrentEvents: 1,
 		Readers: []*EventReaderCfg{
 			{
 				ID:                   utils.MetaDefault,
@@ -974,9 +980,10 @@ func TestERsCfgAsMapInterfaceCase1(t *testing.T) {
 }
 }`
 	eMap := map[string]any{
-		utils.EnabledCfg:       true,
-		utils.SessionSConnsCfg: []string{"conn1", "conn3"},
-		utils.EEsConnsCfg:      []string{},
+		utils.EnabledCfg:          true,
+		utils.SessionSConnsCfg:    []string{"conn1", "conn3"},
+		utils.EEsConnsCfg:         []string{},
+		utils.ConcurrentEventsCfg: 1,
 		utils.ReadersCfg: []map[string]any{
 			{
 				utils.FiltersCfg:              []string{},
@@ -1119,9 +1126,10 @@ func TestERSCfgAsMapInterfaceCase2(t *testing.T) {
 	}
 }`
 	eMap := map[string]any{
-		utils.EnabledCfg:       true,
-		utils.SessionSConnsCfg: []string{"conn1", "conn3"},
-		utils.EEsConnsCfg:      []string{},
+		utils.EnabledCfg:          true,
+		utils.SessionSConnsCfg:    []string{"conn1", "conn3"},
+		utils.EEsConnsCfg:         []string{},
+		utils.ConcurrentEventsCfg: 1,
 		utils.ReadersCfg: []map[string]any{
 			{
 				utils.FiltersCfg:              []string{},
@@ -1272,9 +1280,10 @@ func TestERsloadFromJsonCfg(t *testing.T) {
 		},
 	}
 	expectedERsCfg := &ERsCfg{
-		Enabled:       true,
-		SessionSConns: []string{"*conn1"},
-		EEsConns:      []string{},
+		Enabled:          true,
+		SessionSConns:    []string{"*conn1"},
+		EEsConns:         []string{},
+		ConcurrentEvents: 1,
 		Readers: []*EventReaderCfg{
 			{
 				ID:                   utils.MetaDefault,
