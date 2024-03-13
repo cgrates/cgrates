@@ -195,14 +195,14 @@ func (at *ActionTiming) getActions() (as []*Action, err error) {
 // Reports on success/fail via channel if != nil
 func (at *ActionTiming) Execute(fltrS *FilterS, originService string) (err error) {
 	at.ResetStartTimeCache()
-	aac, err := at.getActions()
+	acts, err := at.getActions()
 	if err != nil {
 		utils.Logger.Err(fmt.Sprintf("Failed to get actions for %s: %s", at.ActionsID, err))
 		return
 	}
 	var partialyExecuted bool
 	for accID := range at.accountIDs {
-		err = guardian.Guardian.Guard(func() error {
+		_ = guardian.Guardian.Guard(func() error {
 			acc, err := dm.GetAccount(accID)
 			if err != nil { // create account
 				if err != utils.ErrNotFound {
@@ -216,45 +216,54 @@ func (at *ActionTiming) Execute(fltrS *FilterS, originService string) (err error
 			}
 			transactionFailed := false
 			removeAccountActionFound := false
-			currentTime := time.Now()
-			for _, a := range aac {
+			accClone := acc.Clone() // *cdrlog action requires the original account
+			referenceTime := time.Now()
+			for _, act := range acts {
 				// check action filter
-				if len(a.Filters) > 0 {
-					if pass, err := fltrS.Pass(utils.NewTenantID(accID).Tenant, a.Filters,
+				if len(act.Filters) > 0 {
+					if pass, err := fltrS.Pass(utils.NewTenantID(accID).Tenant, act.Filters,
 						utils.MapStorage{utils.MetaReq: acc}); err != nil {
 						return err
 					} else if !pass {
 						continue
 					}
 				}
-				if a.Balance == nil {
-					a.Balance = &BalanceFilter{}
+				if act.Balance == nil {
+					act.Balance = &BalanceFilter{}
 				}
-				if a.ExpirationString != "" { // if it's *unlimited then it has to be zero time
-					if expDate, parseErr := utils.ParseTimeDetectLayout(a.ExpirationString,
+				if act.ExpirationString != "" { // if it's *unlimited then it has to be zero time
+					if expDate, parseErr := utils.ParseTimeDetectLayout(act.ExpirationString,
 						config.CgrConfig().GeneralCfg().DefaultTimezone); parseErr == nil {
-						a.Balance.ExpirationDate = &time.Time{}
-						*a.Balance.ExpirationDate = expDate
+						act.Balance.ExpirationDate = &time.Time{}
+						*act.Balance.ExpirationDate = expDate
 					}
 				}
 
-				actionFunction, exists := getActionFunc(a.ActionType)
+				actionFunction, exists := getActionFunc(act.ActionType)
 				if !exists {
 					// do not allow the action plan to be rescheduled
 					at.Timing = nil
-					utils.Logger.Err(fmt.Sprintf("Function type %v not available, aborting execution!", a.ActionType))
+					utils.Logger.Err(
+						fmt.Sprintf("Function type %v not available, aborting execution!",
+							act.ActionType))
 					partialyExecuted = true
 					transactionFailed = true
 					break
 				}
-				if err := actionFunction(acc, a, aac, fltrS, at.ExtraData, currentTime,
-					newActionConnCfg(originService, a.ActionType, config.CgrConfig())); err != nil {
-					utils.Logger.Err(fmt.Sprintf("Error executing action %s: %v!", a.ActionType, err))
+				tmpAcc := acc
+				if act.ActionType == utils.CDRLog {
+					tmpAcc = accClone
+				}
+				if err := actionFunction(tmpAcc, act, acts, fltrS, at.ExtraData, referenceTime,
+					newActionConnCfg(originService, act.ActionType, config.CgrConfig())); err != nil {
+					utils.Logger.Err(
+						fmt.Sprintf("Error executing action %s: %v!",
+							act.ActionType, err))
 					partialyExecuted = true
 					transactionFailed = true
 					break
 				}
-				if a.ActionType == utils.MetaRemoveAccount {
+				if act.ActionType == utils.MetaRemoveAccount {
 					removeAccountActionFound = true
 				}
 			}
@@ -268,33 +277,33 @@ func (at *ActionTiming) Execute(fltrS *FilterS, originService string) (err error
 	err = nil
 	if len(at.accountIDs) == 0 { // action timing executing without accounts
 		referenceTime := time.Now()
-		for _, a := range aac {
-			if expDate, parseErr := utils.ParseTimeDetectLayout(a.ExpirationString,
-				config.CgrConfig().GeneralCfg().DefaultTimezone); (a.Balance == nil || a.Balance.EmptyExpirationDate()) &&
+		for _, act := range acts {
+			if expDate, parseErr := utils.ParseTimeDetectLayout(act.ExpirationString,
+				config.CgrConfig().GeneralCfg().DefaultTimezone); (act.Balance == nil || act.Balance.EmptyExpirationDate()) &&
 				parseErr == nil && !expDate.IsZero() {
-				a.Balance.ExpirationDate = &time.Time{}
-				*a.Balance.ExpirationDate = expDate
+				act.Balance.ExpirationDate = &time.Time{}
+				*act.Balance.ExpirationDate = expDate
 			}
 
-			actionFunction, exists := getActionFunc(a.ActionType)
+			actionFunction, exists := getActionFunc(act.ActionType)
 			if !exists {
 				// do not allow the action plan to be rescheduled
 				at.Timing = nil
-				utils.Logger.Err(fmt.Sprintf("Function type %v not available, aborting execution!", a.ActionType))
+				utils.Logger.Err(
+					fmt.Sprintf("Function type %v not available, aborting execution!",
+						act.ActionType))
 				partialyExecuted = true
 				break
 			}
-			if err := actionFunction(nil, a, aac, fltrS, at.ExtraData, referenceTime,
-				newActionConnCfg(originService, a.ActionType, config.CgrConfig())); err != nil {
-				utils.Logger.Err(fmt.Sprintf("Error executing accountless action %s: %v!", a.ActionType, err))
+			if err := actionFunction(nil, act, acts, fltrS, at.ExtraData, referenceTime,
+				newActionConnCfg(originService, act.ActionType, config.CgrConfig())); err != nil {
+				utils.Logger.Err(
+					fmt.Sprintf("Error executing accountless action %s: %v!",
+						act.ActionType, err))
 				partialyExecuted = true
 				break
 			}
 		}
-	}
-	if err != nil {
-		utils.Logger.Warning(fmt.Sprintf("Error executing action plan: %v", err))
-		return err
 	}
 	if partialyExecuted {
 		return utils.ErrPartiallyExecuted
