@@ -46,70 +46,81 @@ type ActionTrigger struct {
 	LastExecutionTime time.Time
 }
 
-func (at *ActionTrigger) Execute(ub *Account, fltrS *FilterS) (err error) {
+func (at *ActionTrigger) Execute(acc *Account, fltrS *FilterS) (err error) {
 	// check for min sleep time
 	if at.Recurrent && !at.LastExecutionTime.IsZero() && time.Since(at.LastExecutionTime) < at.MinSleep {
 		return
 	}
 	at.LastExecutionTime = time.Now()
-	if ub != nil && ub.Disabled {
-		return fmt.Errorf("User %s is disabled and there are triggers in action!", ub.ID)
+	if acc != nil && acc.Disabled {
+		return fmt.Errorf("User %s is disabled and there are triggers in action!", acc.ID)
 	}
 	// does NOT need to Lock() because it is triggered from a method that took the Lock
-	var aac Actions
-	aac, err = dm.GetActions(at.ActionsID, false, utils.NonTransactional)
+	var acts Actions
+	acts, err = dm.GetActions(at.ActionsID, false, utils.NonTransactional)
 	if err != nil {
-		utils.Logger.Err(fmt.Sprintf("Failed to get actions: %v", err))
+		utils.Logger.Err(
+			fmt.Sprintf("Failed to get actions: %v",
+				err))
 		return
 	}
-	aac.Sort()
+	acts.Sort()
 	at.Executed = true
 	transactionFailed := false
 	removeAccountActionFound := false
+	accClone := acc.Clone() // *cdrlog action requires the original account
 	referenceTime := time.Now()
-	for _, a := range aac {
+	for _, act := range acts {
 		// check action filter
-		if len(a.Filters) > 0 {
-			if pass, err := fltrS.Pass(utils.NewTenantID(a.Id).Tenant, a.Filters,
-				utils.MapStorage{utils.MetaReq: ub}); err != nil {
+		if len(act.Filters) > 0 {
+			if pass, err := fltrS.Pass(utils.NewTenantID(act.Id).Tenant, act.Filters,
+				utils.MapStorage{utils.MetaReq: acc}); err != nil {
 				return err
 			} else if !pass {
 				continue
 			}
 		}
-		if a.Balance == nil {
-			a.Balance = &BalanceFilter{}
+		if act.Balance == nil {
+			act.Balance = &BalanceFilter{}
 		}
-		if a.ExpirationString != "" { // if it's *unlimited then it has to be zero time'
-			if expDate, parseErr := utils.ParseTimeDetectLayout(a.ExpirationString,
+		if act.ExpirationString != "" { // if it's *unlimited then it has to be zero time'
+			if expDate, parseErr := utils.ParseTimeDetectLayout(act.ExpirationString,
 				config.CgrConfig().GeneralCfg().DefaultTimezone); parseErr == nil {
-				a.Balance.ExpirationDate = &time.Time{}
-				*a.Balance.ExpirationDate = expDate
+				act.Balance.ExpirationDate = &time.Time{}
+				*act.Balance.ExpirationDate = expDate
 			}
 		}
 
-		actionFunction, exists := getActionFunc(a.ActionType)
+		actionFunction, exists := getActionFunc(act.ActionType)
 		if !exists {
-			utils.Logger.Err(fmt.Sprintf("Function type %v not available, aborting execution!", a.ActionType))
+			utils.Logger.Err(
+				fmt.Sprintf("Function type %v not available, aborting execution!",
+					act.ActionType))
 			transactionFailed = false
 			break
 		}
 		//go utils.Logger.Info(fmt.Sprintf("Executing %v, %v: %v", ub, sq, a))
-		if err := actionFunction(ub, a, aac, fltrS, nil, referenceTime,
-			newActionConnCfg(utils.RALs, a.ActionType, config.CgrConfig())); err != nil {
-			utils.Logger.Err(fmt.Sprintf("Error executing action %s: %v!", a.ActionType, err))
+		tmpAcc := acc
+		if act.ActionType == utils.CDRLog {
+			tmpAcc = accClone
+		}
+		if err := actionFunction(tmpAcc, act, acts, fltrS, nil, referenceTime,
+			newActionConnCfg(utils.RALs, act.ActionType, config.CgrConfig())); err != nil {
+			utils.Logger.Err(
+				fmt.Sprintf("Error executing action %s: %v!",
+					act.ActionType, err))
 			transactionFailed = false
 			break
 		}
-		if a.ActionType == utils.MetaRemoveAccount {
+		if act.ActionType == utils.MetaRemoveAccount {
 			removeAccountActionFound = true
 		}
 	}
 	if transactionFailed || at.Recurrent {
 		at.Executed = false
 	}
-	if !transactionFailed && ub != nil && !removeAccountActionFound {
-		dm.SetAccount(ub)
+	if !transactionFailed && acc != nil && !removeAccountActionFound {
+		dm.SetAccount(acc)
 	}
 	return
 }
