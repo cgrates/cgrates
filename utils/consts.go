@@ -2449,7 +2449,7 @@ const (
 const (
 	IDCfg                  = "id"
 	CacheCfg               = "cache"
-	ConcurrentEvents       = "concurrent_events"
+	ConcurrentEventsCfg    = "concurrent_events"
 	FieldSepCfg            = "field_separator"
 	RunDelayCfg            = "run_delay"
 	SourcePathCfg          = "source_path"

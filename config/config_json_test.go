@@ -2019,9 +2019,10 @@ func TestDfEventReaderCfg(t *testing.T) {
 			Value: utils.StringPointer("~*req.13"), Mandatory: utils.BoolPointer(true)},
 	}
 	eCfg := &ERsJsonCfg{
-		Enabled:        utils.BoolPointer(false),
-		Sessions_conns: &[]string{utils.MetaInternal},
-		Ees_conns:      &[]string{},
+		Enabled:           utils.BoolPointer(false),
+		Sessions_conns:    &[]string{utils.MetaInternal},
+		Ees_conns:         &[]string{},
+		Concurrent_events: utils.IntPointer(1),
 		Readers: &[]*EventReaderJsonCfg{
 			{
 				Id:                     utils.StringPointer(utils.MetaDefault),
