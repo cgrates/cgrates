@@ -216,6 +216,7 @@ func (at *ActionTiming) Execute(fltrS *FilterS, originService string) (err error
 			}
 			transactionFailed := false
 			removeAccountActionFound := false
+			currentTime := time.Now()
 			for _, a := range aac {
 				// check action filter
 				if len(a.Filters) > 0 {
@@ -246,7 +247,7 @@ func (at *ActionTiming) Execute(fltrS *FilterS, originService string) (err error
 					transactionFailed = true
 					break
 				}
-				if err := actionFunction(acc, a, aac, fltrS, at.ExtraData,
+				if err := actionFunction(acc, a, aac, fltrS, at.ExtraData, currentTime,
 					newActionConnCfg(originService, a.ActionType, config.CgrConfig())); err != nil {
 					utils.Logger.Err(fmt.Sprintf("Error executing action %s: %v!", a.ActionType, err))
 					partialyExecuted = true
@@ -266,6 +267,7 @@ func (at *ActionTiming) Execute(fltrS *FilterS, originService string) (err error
 	//reset the error in case that the account is not found
 	err = nil
 	if len(at.accountIDs) == 0 { // action timing executing without accounts
+		referenceTime := time.Now()
 		for _, a := range aac {
 			if expDate, parseErr := utils.ParseTimeDetectLayout(a.ExpirationString,
 				config.CgrConfig().GeneralCfg().DefaultTimezone); (a.Balance == nil || a.Balance.EmptyExpirationDate()) &&
@@ -282,7 +284,7 @@ func (at *ActionTiming) Execute(fltrS *FilterS, originService string) (err error
 				partialyExecuted = true
 				break
 			}
-			if err := actionFunction(nil, a, aac, fltrS, at.ExtraData,
+			if err := actionFunction(nil, a, aac, fltrS, at.ExtraData, referenceTime,
 				newActionConnCfg(originService, a.ActionType, config.CgrConfig())); err != nil {
 				utils.Logger.Err(fmt.Sprintf("Error executing accountless action %s: %v!", a.ActionType, err))
 				partialyExecuted = true

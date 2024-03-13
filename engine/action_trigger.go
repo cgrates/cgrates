@@ -66,6 +66,7 @@ func (at *ActionTrigger) Execute(ub *Account, fltrS *FilterS) (err error) {
 	at.Executed = true
 	transactionFailed := false
 	removeAccountActionFound := false
+	referenceTime := time.Now()
 	for _, a := range aac {
 		// check action filter
 		if len(a.Filters) > 0 {
@@ -94,7 +95,7 @@ func (at *ActionTrigger) Execute(ub *Account, fltrS *FilterS) (err error) {
 			break
 		}
 		//go utils.Logger.Info(fmt.Sprintf("Executing %v, %v: %v", ub, sq, a))
-		if err := actionFunction(ub, a, aac, fltrS, nil,
+		if err := actionFunction(ub, a, aac, fltrS, nil, referenceTime,
 			newActionConnCfg(utils.RALs, a.ActionType, config.CgrConfig())); err != nil {
 			utils.Logger.Err(fmt.Sprintf("Error executing action %s: %v!", a.ActionType, err))
 			transactionFailed = false
