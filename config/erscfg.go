@@ -27,12 +27,12 @@ import (
 
 // ERsCfg the config for ERs
 type ERsCfg struct {
-	Enabled           bool
-	SessionSConns     []string
-	EEsConns          []string
-	Concurrent_Events int
-	Readers           []*EventReaderCfg
-	PartialCacheTTL   time.Duration
+	Enabled          bool
+	SessionSConns    []string
+	EEsConns         []string
+	ConcurrentEvents int
+	Readers          []*EventReaderCfg
+	PartialCacheTTL  time.Duration
 }
 
 func (erS *ERsCfg) loadFromJSONCfg(jsnCfg *ERsJsonCfg, msgTemplates map[string][]*FCTemplate, sep string, dfltRdrCfg *EventReaderCfg, separator string) (err error) {
@@ -44,9 +44,9 @@ func (erS *ERsCfg) loadFromJSONCfg(jsnCfg *ERsJsonCfg, msgTemplates map[string][
 	}
 
 	if jsnCfg.Concurrent_events != nil {
-		erS.Concurrent_Events = *jsnCfg.Concurrent_events
-		if erS.Concurrent_Events < 1 {
-			erS.Concurrent_Events = 1
+		erS.ConcurrentEvents = *jsnCfg.Concurrent_events
+		if erS.ConcurrentEvents < 1 {
+			erS.ConcurrentEvents = 1
 		}
 	}
 
@@ -117,12 +117,12 @@ func (erS *ERsCfg) appendERsReaders(jsnReaders *[]*EventReaderJsonCfg, msgTempla
 // Clone returns a deep copy of ERsCfg
 func (erS *ERsCfg) Clone() (cln *ERsCfg) {
 	cln = &ERsCfg{
-		Enabled:           erS.Enabled,
-		SessionSConns:     slices.Clone(erS.SessionSConns),
-		EEsConns:          slices.Clone(erS.EEsConns),
-		Readers:           make([]*EventReaderCfg, len(erS.Readers)),
-		Concurrent_Events: erS.Concurrent_Events,
-		PartialCacheTTL:   erS.PartialCacheTTL,
+		Enabled:          erS.Enabled,
+		SessionSConns:    slices.Clone(erS.SessionSConns),
+		EEsConns:         slices.Clone(erS.EEsConns),
+		Readers:          make([]*EventReaderCfg, len(erS.Readers)),
+		ConcurrentEvents: erS.ConcurrentEvents,
+		PartialCacheTTL:  erS.PartialCacheTTL,
 	}
 	for idx, rdr := range erS.Readers {
 		cln.Readers[idx] = rdr.Clone()
@@ -134,7 +134,7 @@ func (erS *ERsCfg) Clone() (cln *ERsCfg) {
 func (erS *ERsCfg) AsMapInterface(separator string) (initialMP map[string]any) {
 	initialMP = map[string]any{
 		utils.EnabledCfg:         erS.Enabled,
-		utils.ConcurrentEvents:   erS.Concurrent_Events,
+		utils.ConcurrentEvents:   erS.ConcurrentEvents,
 		utils.PartialCacheTTLCfg: "0",
 	}
 	if erS.PartialCacheTTL != 0 {
