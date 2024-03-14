@@ -21,7 +21,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package general_tests
 
 import (
-	"fmt"
 	"testing"
 
 	"github.com/cgrates/birpc/context"
@@ -117,9 +116,6 @@ func TestEscapeCharacters(t *testing.T) {
 	if rplyEv.MatchedProfiles[0] != "cgrates.org:ATTR_ESCAPE" ||
 		rplyEv.Event["Password"] != "processed" ||
 		rplyEv.AlteredFields[0] != "*req.Password" {
-		fmt.Println(rplyEv.MatchedProfiles[0] != "ATTR_ESCAPE")
-		fmt.Println(rplyEv.Event["Password"] != "processed")
-		fmt.Println(rplyEv.AlteredFields[0] != "*req.Password")
 		t.Error("unexpected reply:", utils.ToJSON(rplyEv))
 	}
 

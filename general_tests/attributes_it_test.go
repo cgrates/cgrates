@@ -21,7 +21,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package general_tests
 
 import (
-	"fmt"
 	"path"
 	"reflect"
 	"sort"
@@ -1402,7 +1401,6 @@ cgrates.org,ATTR_ARITH,,,,,*req.MultiplyBetweenVariables,*multiply,~*req.Elem1;~
 		} else {
 			sort.Strings(expected.AlteredFields)
 			sort.Strings(reply.AlteredFields)
-			fmt.Printf("type %T\n", reply.Event["MultiplyBetweenVariables"])
 			if !reflect.DeepEqual(expected, reply) {
 				t.Errorf("\nexpected: %s, \nreceived: %s",
 					utils.ToJSON(expected), utils.ToJSON(reply))
