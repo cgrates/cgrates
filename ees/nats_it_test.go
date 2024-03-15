@@ -23,6 +23,7 @@ package ees
 
 import (
 	"os"
+	"os/exec"
 	"path"
 	"testing"
 	"time"
@@ -31,23 +32,18 @@ import (
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/nats-io/nats-server/v2/server"
 	"github.com/nats-io/nats.go"
 	"github.com/nats-io/nats.go/jetstream"
 )
 
 func TestNatsEEJetStream(t *testing.T) {
-
-	natsServer, err := server.NewServer(&server.Options{
-		Host:      "127.0.0.1",
-		Port:      4222,
-		JetStream: true,
-	})
-	if err != nil {
-		t.Fatal(err)
+	exec.Command("pkill", "nats-server")
+	cmd := exec.Command("nats-server", "-js")
+	if err := cmd.Start(); err != nil {
+		t.Fatal(err) // most probably not installed
 	}
-	natsServer.Start()
-	defer natsServer.Shutdown()
+	time.Sleep(50 * time.Millisecond)
+	defer cmd.Process.Kill()
 
 	testCreateDirectory(t)
 	cgrCfg, err := config.NewCGRConfigFromPath(path.Join(*dataDir, "conf", "samples", "ees"))
@@ -132,18 +128,15 @@ func TestNatsEEJetStream(t *testing.T) {
 }
 
 func TestNatsEE(t *testing.T) {
-	testCreateDirectory(t)
-
-	natsServer, err := server.NewServer(&server.Options{
-		Host: "127.0.0.1",
-		Port: 4222,
-	})
-	if err != nil {
-		t.Fatal(err)
+	exec.Command("pkill", "nats-server")
+	cmd := exec.Command("nats-server")
+	if err := cmd.Start(); err != nil {
+		t.Fatal(err) // most probably not installed
 	}
-	natsServer.Start()
-	defer natsServer.Shutdown()
+	time.Sleep(50 * time.Millisecond)
+	defer cmd.Process.Kill()
 
+	testCreateDirectory(t)
 	cgrCfg, err := config.NewCGRConfigFromPath(path.Join(*dataDir, "conf", "samples", "ees"))
 	if err != nil {
 		t.Fatal(err)
