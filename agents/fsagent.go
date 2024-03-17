@@ -303,7 +303,7 @@ func (fsa *FSsessions) Connect() error {
 	errChan := make(chan error)
 	for connIdx, connCfg := range fsa.cfg.EventSocketConns {
 		fSock, err := fsock.NewFSock(connCfg.Address, connCfg.Password, connCfg.Reconnects, connCfg.MaxReconnectInterval, utils.FibDuration,
-			fsa.createHandlers(), eventFilters, utils.Logger, connIdx, true)
+			fsa.createHandlers(), eventFilters, utils.Logger, connIdx, true, errChan)
 		if err != nil {
 			return err
 		}
@@ -312,13 +312,9 @@ func (fsa *FSsessions) Connect() error {
 		}
 		fsa.conns[connIdx] = fSock
 		utils.Logger.Info(fmt.Sprintf("<%s> successfully connected to FreeSWITCH at: <%s>", utils.FreeSWITCHAgent, connCfg.Address))
-		go func(fsock *fsock.FSock) { // Start reading in own goroutine, return on error
-			if err := fsock.ReadEvents(); err != nil {
-				errChan <- err
-			}
-		}(fSock)
 		fsSenderPool := fsock.NewFSockPool(5, connCfg.Address, connCfg.Password, 1, fsa.cfg.MaxWaitConnection,
-			0, utils.FibDuration, make(map[string][]func(string, int)), make(map[string][]string), utils.Logger, connIdx, true)
+			0, utils.FibDuration, make(map[string][]func(string, int)), make(map[string][]string),
+			utils.Logger, connIdx, true, make(chan error))
 		if fsSenderPool == nil {
 			return errors.New("Cannot connect FreeSWITCH senders pool")
 		}

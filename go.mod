@@ -20,7 +20,7 @@ require (
 	github.com/cgrates/aringo v0.0.0-20220525160735-b5990313d99e
 	github.com/cgrates/baningo v0.0.0-20210413080722-004ffd5e429f
 	github.com/cgrates/birpc v1.3.1-0.20211117095917-5b0ff29f3084
-	github.com/cgrates/fsock v0.0.0-20240311151258-8016689eb100
+	github.com/cgrates/fsock v0.0.0-20240317132706-0122a473021f
 	github.com/cgrates/kamevapi v0.0.0-20240307160311-26273f03eedf
 	github.com/cgrates/ltcache v0.0.0-20210405185848-da943e80c1ab
 	github.com/cgrates/radigo v0.0.0-20240123163129-491c899df727
