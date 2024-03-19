@@ -1084,9 +1084,7 @@ func (acc *Account) Publish(initBal map[string]float64) {
 		Tenant: acntSummary.Tenant,
 		ID:     utils.GenUUID(),
 		Time:   utils.TimePointer(time.Now()),
-		Event: map[string]any{
-			utils.AccountSummary: acntSummary,
-		},
+		Event:  acntSummary.AsMapInterface(),
 		APIOpts: map[string]any{
 			utils.MetaEventType: utils.AccountUpdate,
 		},

@@ -61,7 +61,6 @@ func TestDynamicDpFieldAsInterface(t *testing.T) {
 	} else if _, err := dDp.fieldAsInterface([]string{utils.MetaAsm, "+402552663", "val3"}); err == nil || err != utils.ErrNotFound {
 		t.Error(err)
 	}
-
 }
 
 func TestDDPFieldAsInterface(t *testing.T) {
