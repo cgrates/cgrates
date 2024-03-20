@@ -61,6 +61,7 @@
 	"resources_conns": ["*localhost"],
 	"chargers_conns": ["*internal"],
 	"debit_interval": "10s",
+	"backup_interval": "-1",
 },
 
 "radius_agent": {

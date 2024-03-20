@@ -70,7 +70,8 @@
     "enabled": true,
     "rals_conns": ["*localhost"],
     "cdrs_conns": ["*localhost"],
-    "replication_conns": ["rplConn"]
+    "replication_conns": ["rplConn"],
+    "backup_interval": "-1"
 },
 
 "apiers": {

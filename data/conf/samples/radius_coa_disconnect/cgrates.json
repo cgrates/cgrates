@@ -52,7 +52,8 @@
 	"rals_conns": ["*localhost"],
 	"resources_conns": ["*localhost"],
 	"chargers_conns": ["*localhost"],
-	"debit_interval": "10s"
+	"debit_interval": "10s",
+	"backup_interval": "-1"
 },
 
 "radius_agent": {

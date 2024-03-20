@@ -68,6 +68,7 @@
 	"cdrs_conns": ["*internal"],
 	"resources_conns": ["*internal"],
 	"attributes_conns": ["*internal"],
+	"backup_interval": "-1",
 },
 
 

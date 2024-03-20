@@ -56,6 +56,7 @@
 	"resources_conns": ["*localhost"],
 	"chargers_conns": ["*localhost"],
 	"listen_bijson": ":3014",
+	"backup_interval": "-1",
 },
 	
 	

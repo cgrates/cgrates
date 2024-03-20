@@ -532,6 +532,13 @@ func TestDfDataDbJsonCfg(t *testing.T) {
 				Ttl:        utils.StringPointer(utils.EmptyString),
 				Static_ttl: utils.BoolPointer(false),
 			},
+			utils.MetaSessionsBackup: {
+				Replicate:  utils.BoolPointer(false),
+				Remote:     utils.BoolPointer(false),
+				Limit:      utils.IntPointer(-1),
+				Ttl:        utils.StringPointer(utils.EmptyString),
+				Static_ttl: utils.BoolPointer(false),
+			},
 		},
 	}
 	dfCgrJSONCfg, err := NewCgrJsonCfgFromBytes([]byte(CGRATES_CFG_JSON))
@@ -843,6 +850,8 @@ func TestSmgJsonCfg(t *testing.T) {
 		Stale_chan_max_extra_usage: utils.StringPointer("0"),
 		Terminate_attempts:         utils.IntPointer(5),
 		Alterable_fields:           &[]string{},
+		Backup_interval:            utils.StringPointer(utils.EmptyString),
+		Backup_entry_ttl:           utils.StringPointer("1h"),
 		Default_usage: &map[string]string{
 			utils.MetaAny:   "3h",
 			utils.MetaVoice: "3h",
@@ -865,7 +874,7 @@ func TestSmgJsonCfg(t *testing.T) {
 	if cfg, err := dfCgrJSONCfg.SessionSJsonCfg(); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCfg, cfg) {
-		t.Errorf("Expecting: %s, received: %s", utils.ToJSON(eCfg), utils.ToJSON(cfg))
+		t.Errorf("Expecting: %s, \nreceived: %s", utils.ToJSON(eCfg), utils.ToJSON(cfg))
 	}
 }
 

@@ -66,6 +66,7 @@
 		"resources_conns": ["conn1"],
 		"chargers_conns": ["conn1"],
 		"listen_bijson": ":3014",
+		"backup_interval": "-1",
 	},
 	
 	

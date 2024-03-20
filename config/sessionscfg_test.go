@@ -109,6 +109,7 @@ func TestSessionSCfgloadFromJsonCfgCase1(t *testing.T) {
 		DebitInterval:       2,
 		StoreSCosts:         true,
 		SessionTTL:          0,
+		BackupEntryTTL:      time.Duration(1 * time.Hour),
 		SessionIndexes:      utils.StringSet{},
 		ClientProtocol:      2.5,
 		ChannelSyncInterval: 10,
@@ -247,6 +248,7 @@ func TestSessionSCfgloadFromJsonCfgCase10(t *testing.T) {
 		DebitInterval:       0,
 		StoreSCosts:         false,
 		SessionTTL:          0,
+		BackupEntryTTL:      time.Duration(1 * time.Hour),
 		SessionIndexes:      utils.StringSet{},
 		ClientProtocol:      1.0,
 		ChannelSyncInterval: 0,
@@ -369,6 +371,8 @@ func TestSessionSCfgAsMapInterfaceCase1(t *testing.T) {
 		utils.TerminateAttemptsCfg:      5,
 		utils.MinDurLowBalanceCfg:       "0",
 		utils.AlterableFieldsCfg:        []string{},
+		utils.BackupIntervalCfg:         "",
+		utils.BackupEntryTTLCfg:         "1h0m0s",
 		utils.STIRCfg: map[string]any{
 			utils.AllowedAtestCfg:       []string{"*any"},
 			utils.PayloadMaxdurationCfg: "-1",
@@ -444,6 +448,8 @@ func TestSessionSCfgAsMapInterfaceCase2(t *testing.T) {
 		utils.StaleChanMaxExtraUsageCfg: "0",
 		utils.TerminateAttemptsCfg:      10,
 		utils.AlterableFieldsCfg:        []string{},
+		utils.BackupIntervalCfg:         "",
+		utils.BackupEntryTTLCfg:         "1h0m0s",
 		utils.STIRCfg: map[string]any{
 			utils.AllowedAtestCfg:       []string{"any1", "any2"},
 			utils.PayloadMaxdurationCfg: "1s",

@@ -83,6 +83,7 @@
 	"rals_conns": ["*localhost"],
 	"cdrs_conns": ["*localhost"],
 	"chargers_conns": ["*localhost"],
+	"backup_interval": "-1",
 },
 
 

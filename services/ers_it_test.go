@@ -90,6 +90,7 @@ func TestEventReaderSReload(t *testing.T) {
 	}
 	time.Sleep(10 * time.Millisecond)
 	runtime.Gosched()
+	time.Sleep(100 * time.Millisecond)
 	if !erS.IsRunning() {
 		t.Fatalf("Expected service to be running")
 	}

@@ -36,6 +36,7 @@
 	"enabled": true,						// starts SessionManager service: <true|false>
 	"debit_interval": "5ms",					// interval to perform debits on.
 	"listen_bijson": "127.0.0.1:22014",		// address where to listen for bidirectional JSON-RPC requests
+	"backup_interval": "-1",
 },
 
 

@@ -35,6 +35,7 @@
 	"replication_conns": ["rplConn"],
 	"chargers_conns": ["*internal"],
 	"listen_bijson": "127.0.0.1:2014",
+	"backup_interval": "-1"
 },
 
 "apiers": {

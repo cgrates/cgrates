@@ -33,7 +33,8 @@
 	"rals_conns": ["*internal"],
 	"cdrs_conns": ["*internal"],
 	"chargers_conns": ["*internal"],
-	"routes_conns": ["*localhost"]
+	"routes_conns": ["*localhost"],
+	"backup_interval": "-1"
 },
 
 

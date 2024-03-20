@@ -59,6 +59,7 @@
 	"rals_conns": ["conn1"],
 	"cdrs_conns": ["*internal"],
 	"chargers_conns": ["*internal"],
+	"backup_interval": "-1"
 },
 
 "apiers": {

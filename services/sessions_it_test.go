@@ -102,7 +102,11 @@ func TestSessionSReload1(t *testing.T) {
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers): clientConect,
 	})
 	anz := NewAnalyzerService(cfg, server, filterSChan, shdChan, make(chan birpc.ClientConnector, 1), srvDep)
-	srv := NewSessionService(cfg, new(DataDBService), server, make(chan birpc.ClientConnector, 1), shdChan, conMng, anz, srvDep)
+	dmService := NewDataDBService(cfg, conMng, srvDep)
+	if err := dmService.Start(); err != nil {
+		t.Fatal(err)
+	}
+	srv := NewSessionService(cfg, dmService, server, make(chan birpc.ClientConnector, 1), shdChan, conMng, anz, srvDep)
 	err := srv.Start()
 	if err != nil {
 		t.Fatal(err)
@@ -133,9 +137,8 @@ func TestSessionSReload1(t *testing.T) {
 
 	rply := new(sessions.V1InitSessionReply)
 	srv.(*SessionService).sm.BiRPCv1InitiateSession(context.Background(), args, rply)
-	err = srv.Shutdown()
-	if err == nil || err != utils.ErrPartiallyExecuted {
-		t.Fatalf("\nExpecting <%+v>,\n Received <%+v>", utils.ErrPartiallyExecuted, err)
+	if err = srv.Shutdown(); err != nil {
+		t.Error(err)
 	}
 }
 
@@ -252,9 +255,12 @@ func TestSessionSReload3(t *testing.T) {
 	if !srv.IsRunning() {
 		t.Fatalf("\nExpecting service to be running")
 	}
+	go func() {
+		time.Sleep(10 * time.Millisecond)
+		server.StopBiRPC()
+	}()
 	err2 := srv.(*SessionService).start()
 	if err2 != nil {
 		t.Fatalf("\nExpected <%+v>, \nReceived <%+v>", nil, err2)
 	}
-
 }

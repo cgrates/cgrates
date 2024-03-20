@@ -1,0 +1,66 @@
+{
+// Real-time Online/Offline Charging System (OCS) for Telecom & ISP environments
+// Copyright (C) ITsysCOM GmbH
+"general": {
+	"log_level": 7,
+	"node_id":"BackupReplication",
+},
+
+"listen": {
+	"rpc_json": "127.0.0.1:2012",
+	"rpc_gob": "127.0.0.1:2013",
+	"http": "127.0.0.1:2080",
+},
+
+
+"rpc_conns": {
+	"rplConn": {
+		"strategy": "*broadcast_sync",
+		"conns": [{"address": "127.0.0.1:22013", "transport": "*gob"}],
+	},
+},
+
+
+"stor_db": {
+	"db_type": "postgres",		
+	"db_port": 5432, 						
+	"db_password": "CGRateS.org",
+},
+
+"rals": {
+	"enabled": true,
+},
+
+"schedulers": {
+	"enabled": true,
+},
+
+"cdrs": {
+	"enabled": true,
+},
+
+"attributes": {
+	"enabled": true,
+},
+
+
+"chargers": {
+	"enabled": true,
+	"attributes_conns": ["*internal"],
+},
+
+"sessions": {
+	"enabled": true,
+	"replication_conns": ["rplConn"],
+	"rals_conns": ["*internal"],
+	"cdrs_conns": ["*internal"],
+	"chargers_conns": ["*internal"],
+	"backup_interval": "500ms",	
+},
+
+"apiers": {
+	"enabled": true,
+	"scheduler_conns": ["*internal"],
+},
+
+}

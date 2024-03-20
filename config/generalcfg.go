@@ -167,7 +167,7 @@ func (gencfg *GeneralCfg) AsMapInterface() (initialMP map[string]any) {
 		utils.DefaultTenantCfg:        gencfg.DefaultTenant,
 		utils.DefaultTimezoneCfg:      gencfg.DefaultTimezone,
 		utils.DefaultCachingCfg:       gencfg.DefaultCaching,
-		utils.CachingDlayCfg:          gencfg.CachingDelay,
+		utils.CachingDlayCfg:          "0",
 		utils.ConnectAttemptsCfg:      gencfg.ConnectAttempts,
 		utils.ReconnectsCfg:           gencfg.Reconnects,
 		utils.MaxReconnectIntervalCfg: "0",
@@ -199,6 +199,10 @@ func (gencfg *GeneralCfg) AsMapInterface() (initialMP map[string]any) {
 
 	if gencfg.ReplyTimeout != 0 {
 		initialMP[utils.ReplyTimeoutCfg] = gencfg.ReplyTimeout.String()
+	}
+
+	if gencfg.CachingDelay != 0 {
+		initialMP[utils.CachingDlayCfg] = gencfg.CachingDelay.String()
 	}
 
 	return

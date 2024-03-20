@@ -103,6 +103,7 @@ func TestOnBiJSONConnectDisconnect(t *testing.T) {
 	expected := NewSessionS(cfg, dm, nil)
 	expected.biJClnts[client] = "test_conn"
 	expected.biJIDs = nil
+	expected.stopBackup = sessions.stopBackup
 
 	if !reflect.DeepEqual(sessions, expected) {
 		t.Errorf("Expected %+v \n, received %+v", expected, sessions)
@@ -1938,6 +1939,7 @@ func (*testRPCClientConnection) Call(string, any, any) error { return nil }
 func TestNewSessionS(t *testing.T) {
 	cgrCGF := config.NewDefaultCGRConfig()
 
+	sS := NewSessionS(cgrCGF, nil, nil)
 	eOut := &SessionS{
 		cgrCfg:        cgrCGF,
 		dm:            nil,
@@ -1949,10 +1951,10 @@ func TestNewSessionS(t *testing.T) {
 		pSessions:     make(map[string]*Session),
 		pSessionsIdx:  make(map[string]map[string]map[string]utils.StringSet),
 		pSessionsRIdx: make(map[string][]*riFieldNameVal),
+		stopBackup:    sS.stopBackup,
 	}
-	sS := NewSessionS(cgrCGF, nil, nil)
 	if !reflect.DeepEqual(sS, eOut) {
-		t.Errorf("Expected %s , received: %s", utils.ToJSON(sS), utils.ToJSON(eOut))
+		t.Errorf("Expected <%+v> , \nreceived: <%+v>", sS, eOut)
 	}
 }
 
@@ -2663,6 +2665,7 @@ func TestInitSession(t *testing.T) {
 		},
 		DebitInterval: 0,
 		Chargeable:    true,
+		UpdatedAt:     s.UpdatedAt,
 	}
 	s.SRuns = nil
 	if !reflect.DeepEqual(exp, s) {

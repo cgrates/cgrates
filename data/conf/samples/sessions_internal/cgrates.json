@@ -91,6 +91,7 @@
 	"attributes_conns": ["*internal"],
 	"alterable_fields": ["Extra1"],
 	"terminate_attempts": 10,
+	"backup_interval": "-1",
 },
 
 

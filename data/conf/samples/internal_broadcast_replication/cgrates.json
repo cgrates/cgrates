@@ -102,6 +102,7 @@
 	"rals_conns": ["broadcast_conn"],
 	"cdrs_conns": ["broadcast_conn"],
 	"chargers_conns": ["broadcast_conn"],
+	"backup_interval": "-1",
 },
 
 

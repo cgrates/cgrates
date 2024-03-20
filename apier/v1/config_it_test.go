@@ -165,6 +165,8 @@ func testConfigSSetConfigSessionS(t *testing.T) {
 		"scheduler_conns":            []any{},
 		"thresholds_conns":           []any{},
 		"stats_conns":                []any{},
+		utils.BackupEntryTTLCfg:      "1h0m0s",
+		utils.BackupIntervalCfg:      utils.EmptyString,
 		"min_dur_low_balance":        "0",
 		"stir": map[string]any{
 			"allowed_attest":      []any{utils.MetaAny},
@@ -206,6 +208,8 @@ func testConfigSSetConfigSessionS(t *testing.T) {
 			"session_ttl":           "0",
 			"store_session_costs":   false,
 			"min_dur_low_balance":   "0",
+			utils.BackupEntryTTLCfg: "1h0m0s",
+			utils.BackupIntervalCfg: utils.EmptyString,
 			"alterable_fields":      empty,
 			"stir": map[string]any{
 				"allowed_attest":      []string{utils.MetaAny},
@@ -222,6 +226,9 @@ func testConfigSSetConfigSessionS(t *testing.T) {
 			},
 		}
 	}
+	if *utils.DBType == utils.MetaInternal {
+		exp[utils.BackupIntervalCfg] = "-1ns"
+	}
 	exp = map[string]any{
 		config.SessionSJson: exp,
 	}
@@ -232,7 +239,7 @@ func testConfigSSetConfigSessionS(t *testing.T) {
 	}, &rpl); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(exp, rpl) {
-		t.Errorf("Expected %+v , received: %+v ", utils.ToJSON(exp), utils.ToJSON(rpl))
+		t.Errorf("Expected %+v , \nreceived: %+v ", utils.ToJSON(exp), utils.ToJSON(rpl))
 	}
 }
 
@@ -259,6 +266,8 @@ func testConfigSv1GetJSONSectionWithoutTenant(t *testing.T) {
 		"session_ttl":                "0",
 		"stale_chan_max_extra_usage": "0",
 		"store_session_costs":        false,
+		utils.BackupEntryTTLCfg:      "1h0m0s",
+		utils.BackupIntervalCfg:      utils.EmptyString,
 		"min_dur_low_balance":        "0",
 		"alterable_fields":           []any{},
 		"stir": map[string]any{
@@ -299,6 +308,8 @@ func testConfigSv1GetJSONSectionWithoutTenant(t *testing.T) {
 			"stale_chan_max_extra_usage": "0",
 			"store_session_costs":        false,
 			"min_dur_low_balance":        "0",
+			utils.BackupEntryTTLCfg:      "1h0m0s",
+			utils.BackupIntervalCfg:      utils.EmptyString,
 			"alterable_fields":           empty,
 			"stir": map[string]any{
 				"allowed_attest":      []string{utils.MetaAny},
@@ -314,6 +325,9 @@ func testConfigSv1GetJSONSectionWithoutTenant(t *testing.T) {
 				utils.MetaSMS:   "1",
 			},
 		}
+	}
+	if *utils.DBType == utils.MetaInternal {
+		exp[utils.BackupIntervalCfg] = "-1ns"
 	}
 	exp = map[string]any{
 		config.SessionSJson: exp,

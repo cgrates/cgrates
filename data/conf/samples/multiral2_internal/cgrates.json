@@ -37,6 +37,7 @@
 
 "sessions": {
 	"enabled": true,
+	"backup_interval": "-1",
 },
 
 }

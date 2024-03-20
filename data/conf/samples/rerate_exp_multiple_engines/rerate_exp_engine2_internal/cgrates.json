@@ -29,7 +29,8 @@
     "enabled": true,
     "rals_conns": ["*localhost"],
     "cdrs_conns": ["*localhost"],
-    "listen_bijson": "127.0.0.1:22014"		
+    "listen_bijson": "127.0.0.1:22014",		
+    "backup_interval": "-1"
 },
 
 "apiers": {

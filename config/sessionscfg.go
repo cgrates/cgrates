@@ -508,6 +508,8 @@ func (scfg SessionSCfg) Clone() (cln *SessionSCfg) {
 		DebitInterval:          scfg.DebitInterval,
 		StoreSCosts:            scfg.StoreSCosts,
 		SessionTTL:             scfg.SessionTTL,
+		BackupInterval:         scfg.BackupInterval,
+		BackupEntryTTL:         scfg.BackupEntryTTL,
 		ClientProtocol:         scfg.ClientProtocol,
 		ChannelSyncInterval:    scfg.ChannelSyncInterval,
 		StaleChanMaxExtraUsage: scfg.StaleChanMaxExtraUsage,
