@@ -300,10 +300,14 @@ func (fsa *FSsessions) onChannelHangupComplete(fsev FSEvent, connIdx int) {
 // listening for events.
 func (fsa *FSsessions) Connect() error {
 	eventFilters := map[string][]string{"Call-Direction": {"inbound"}}
-	errChan := make(chan error)
+	connErr := make(chan error)
 	for connIdx, connCfg := range fsa.cfg.EventSocketConns {
-		fSock, err := fsock.NewFSock(connCfg.Address, connCfg.Password, connCfg.Reconnects, connCfg.MaxReconnectInterval, utils.FibDuration,
-			fsa.createHandlers(), eventFilters, utils.Logger, connIdx, true, errChan)
+		fSock, err := fsock.NewFSock(
+			connCfg.Address, connCfg.Password,
+			connCfg.Reconnects, connCfg.MaxReconnectInterval,
+			connCfg.ReplyTimeout, utils.FibDuration,
+			fsa.createHandlers(), eventFilters,
+			utils.Logger, connIdx, true, connErr)
 		if err != nil {
 			return err
 		}
@@ -313,14 +317,15 @@ func (fsa *FSsessions) Connect() error {
 		fsa.conns[connIdx] = fSock
 		utils.Logger.Info(fmt.Sprintf("<%s> successfully connected to FreeSWITCH at: <%s>", utils.FreeSWITCHAgent, connCfg.Address))
 		fsSenderPool := fsock.NewFSockPool(5, connCfg.Address, connCfg.Password, 1, fsa.cfg.MaxWaitConnection,
-			0, utils.FibDuration, make(map[string][]func(string, int)), make(map[string][]string),
-			utils.Logger, connIdx, true, make(chan error))
+			0, connCfg.ReplyTimeout, utils.FibDuration,
+			make(map[string][]func(string, int)), make(map[string][]string),
+			utils.Logger, connIdx, true, nil)
 		if fsSenderPool == nil {
 			return errors.New("Cannot connect FreeSWITCH senders pool")
 		}
 		fsa.senderPools[connIdx] = fsSenderPool
 	}
-	err := <-errChan // Will keep the Connect locked until the first error in one of the connections
+	err := <-connErr // Will keep the Connect locked until the first error in one of the connections
 	return err
 }
 

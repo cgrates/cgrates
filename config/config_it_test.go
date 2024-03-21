@@ -593,9 +593,10 @@ func testCGRConfigReloadERs(t *testing.T) {
 		v.ComputePath()
 	}
 	expAttr := &ERsCfg{
-		Enabled:       true,
-		SessionSConns: []string{utils.MetaLocalHost},
-		EEsConns:      []string{},
+		Enabled:          true,
+		SessionSConns:    []string{utils.MetaLocalHost},
+		EEsConns:         []string{},
+		ConcurrentEvents: 1,
 		Readers: []*EventReaderCfg{
 			{
 				ID:                   utils.MetaDefault,
@@ -733,10 +734,11 @@ func testCGRConfigReloadFreeswitchAgent(t *testing.T) {
 		ActiveSessionDelimiter: ",",
 		EventSocketConns: []*FsConnCfg{
 			{
-				Address:    "1.2.3.4:8021",
-				Password:   "ClueCon",
-				Reconnects: 5,
-				Alias:      "1.2.3.4:8021",
+				Address:      "1.2.3.4:8021",
+				Password:     "ClueCon",
+				Reconnects:   5,
+				ReplyTimeout: time.Minute,
+				Alias:        "1.2.3.4:8021",
 			},
 		},
 	}
@@ -836,6 +838,7 @@ func testCgrCfgV1ReloadConfigSection(t *testing.T) {
 	expected := map[string]any{
 		"enabled":           true,
 		"partial_cache_ttl": "1s",
+		"concurrent_events": 1,
 		"readers": []any{
 			map[string]any{
 				"id":                          utils.MetaDefault,
