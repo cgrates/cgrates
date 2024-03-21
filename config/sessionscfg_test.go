@@ -34,9 +34,10 @@ func TestFsAgentCfgloadFromJsonCfg1(t *testing.T) {
 		SubscribePark: utils.BoolPointer(true),
 		EventSocketConns: &[]*FsConnJsonCfg{
 			{
-				Address:    utils.StringPointer("1.2.3.4:8021"),
-				Password:   utils.StringPointer("ClueCon"),
-				Reconnects: utils.IntPointer(5),
+				Address:      utils.StringPointer("1.2.3.4:8021"),
+				Password:     utils.StringPointer("ClueCon"),
+				Reconnects:   utils.IntPointer(5),
+				ReplyTimeout: utils.StringPointer("5s"),
 			},
 			{
 				Address:    utils.StringPointer("2.3.4.5:8021"),
@@ -50,8 +51,8 @@ func TestFsAgentCfgloadFromJsonCfg1(t *testing.T) {
 		CreateCDR:     true,
 		SubscribePark: true,
 		EventSocketConns: []*FsConnCfg{
-			{Address: "1.2.3.4:8021", Password: "ClueCon", Reconnects: 5, Alias: "1.2.3.4:8021"},
-			{Address: "2.3.4.5:8021", Password: "ClueCon", Reconnects: 5, Alias: "2.3.4.5:8021"},
+			{Address: "1.2.3.4:8021", Password: "ClueCon", Reconnects: 5, ReplyTimeout: 5 * time.Second, Alias: "1.2.3.4:8021"},
+			{Address: "2.3.4.5:8021", Password: "ClueCon", Reconnects: 5, ReplyTimeout: time.Minute, Alias: "2.3.4.5:8021"},
 		},
 	}
 	fsAgentCfg := new(FsAgentCfg)
@@ -508,10 +509,11 @@ func TestFsAgentCfgloadFromJsonCfgCase1(t *testing.T) {
 		ExtraFields:            &[]string{},
 		EventSocketConns: &[]*FsConnJsonCfg{
 			{
-				Address:    utils.StringPointer("1.2.3.4:8021"),
-				Password:   utils.StringPointer("ClueCon"),
-				Reconnects: utils.IntPointer(5),
-				Alias:      utils.StringPointer("127.0.0.1:8021"),
+				Address:      utils.StringPointer("1.2.3.4:8021"),
+				Password:     utils.StringPointer("ClueCon"),
+				Reconnects:   utils.IntPointer(5),
+				ReplyTimeout: utils.StringPointer("5s"),
+				Alias:        utils.StringPointer("127.0.0.1:8021"),
 			},
 		},
 	}
@@ -528,10 +530,11 @@ func TestFsAgentCfgloadFromJsonCfgCase1(t *testing.T) {
 		ActiveSessionDelimiter: ";",
 		EventSocketConns: []*FsConnCfg{
 			{
-				Address:    "1.2.3.4:8021",
-				Password:   "ClueCon",
-				Reconnects: 5,
-				Alias:      "127.0.0.1:8021",
+				Address:      "1.2.3.4:8021",
+				Password:     "ClueCon",
+				Reconnects:   5,
+				ReplyTimeout: 5 * time.Second,
+				Alias:        "127.0.0.1:8021",
 			},
 		},
 	}
@@ -581,7 +584,14 @@ func TestFsAgentCfgAsMapInterfaceCase1(t *testing.T) {
 		utils.ActiveSessionDelimiterCfg: ",",
 		utils.MaxWaitConnectionCfg:      "2s",
 		utils.EventSocketConnsCfg: []map[string]any{
-			{utils.AddressCfg: "127.0.0.1:8021", utils.Password: "ClueCon", utils.ReconnectsCfg: 5, utils.MaxReconnectIntervalCfg: "0s", utils.AliasCfg: "127.0.0.1:8021"},
+			{
+				utils.AddressCfg:              "127.0.0.1:8021",
+				utils.Password:                "ClueCon",
+				utils.ReconnectsCfg:           5,
+				utils.MaxReconnectIntervalCfg: "0s",
+				utils.ReplyTimeoutCfg:         "1m0s",
+				utils.AliasCfg:                "127.0.0.1:8021",
+			},
 		},
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
@@ -601,7 +611,7 @@ func TestFsAgentCfgAsMapInterfaceCase2(t *testing.T) {
 	      "max_wait_connection": "7s",	
 		  "active_session_delimiter": "\tsep\t",		
 	      "event_socket_conns":[					
-		      {"address": "127.0.0.1:8000", "password": "ClueCon123", "reconnects": 8, "alias": "127.0.0.1:8000"}
+		      {"address": "127.0.0.1:8000", "password": "ClueCon123", "reconnects": 8, "reply_timeout": "5s", "alias": "127.0.0.1:8000"}
 	],},
 }`
 	eMap := map[string]any{
@@ -616,7 +626,14 @@ func TestFsAgentCfgAsMapInterfaceCase2(t *testing.T) {
 		utils.MaxWaitConnectionCfg:      "7s",
 		utils.ActiveSessionDelimiterCfg: "\tsep\t",
 		utils.EventSocketConnsCfg: []map[string]any{
-			{utils.AddressCfg: "127.0.0.1:8000", utils.Password: "ClueCon123", utils.ReconnectsCfg: 8, utils.MaxReconnectIntervalCfg: "0s", utils.AliasCfg: "127.0.0.1:8000"},
+			{
+				utils.AddressCfg:              "127.0.0.1:8000",
+				utils.Password:                "ClueCon123",
+				utils.ReconnectsCfg:           8,
+				utils.MaxReconnectIntervalCfg: "0s",
+				utils.ReplyTimeoutCfg:         "5s",
+				utils.AliasCfg:                "127.0.0.1:8000",
+			},
 		},
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
@@ -647,7 +664,14 @@ func TestFsAgentCfgAsMapInterfaceCase3(t *testing.T) {
 		utils.MaxWaitConnectionCfg:      "",
 		utils.ActiveSessionDelimiterCfg: "\t",
 		utils.EventSocketConnsCfg: []map[string]any{
-			{utils.AddressCfg: "127.0.0.1:8021", utils.Password: "ClueCon", utils.ReconnectsCfg: 5, utils.MaxReconnectIntervalCfg: "0s", utils.AliasCfg: "127.0.0.1:8021"},
+			{
+				utils.AddressCfg:              "127.0.0.1:8021",
+				utils.Password:                "ClueCon",
+				utils.ReconnectsCfg:           5,
+				utils.MaxReconnectIntervalCfg: "0s",
+				utils.ReplyTimeoutCfg:         "1m0s",
+				utils.AliasCfg:                "127.0.0.1:8021",
+			},
 		},
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
@@ -671,11 +695,11 @@ func TestFsConnCfgloadFromJsonCfg(t *testing.T) {
 		t.Errorf("Expected: %+v ,received: %+v", expected, fscocfg)
 	}
 	json := &FsConnJsonCfg{
-		Address:                utils.StringPointer("127.0.0.1:8448"),
-		Password:               utils.StringPointer("pass123"),
-		Reconnects:             utils.IntPointer(5),
-		Alias:                  utils.StringPointer("127.0.0.1:8448"),
-		Max_reconnect_interval: utils.StringPointer("1"),
+		Address:              utils.StringPointer("127.0.0.1:8448"),
+		Password:             utils.StringPointer("pass123"),
+		Reconnects:           utils.IntPointer(5),
+		Alias:                utils.StringPointer("127.0.0.1:8448"),
+		MaxReconnectInterval: utils.StringPointer("1"),
 	}
 	expected = FsConnCfg{
 		Address:              "127.0.0.1:8448",
@@ -689,7 +713,7 @@ func TestFsConnCfgloadFromJsonCfg(t *testing.T) {
 	} else if !reflect.DeepEqual(expected, fscocfg) {
 		t.Errorf("Expected: %+v , received: %+v", utils.ToJSON(expected), utils.ToJSON(fscocfg))
 	}
-	json.Max_reconnect_interval = utils.StringPointer("test")
+	json.MaxReconnectInterval = utils.StringPointer("test")
 
 	if err := fscocfg.loadFromJSONCfg(json); err == nil {
 		t.Error(err)

@@ -42,6 +42,7 @@ type FsConnCfg struct {
 	Password             string
 	Reconnects           int
 	MaxReconnectInterval time.Duration
+	ReplyTimeout         time.Duration
 	Alias                string
 }
 
@@ -58,8 +59,13 @@ func (fs *FsConnCfg) loadFromJSONCfg(jsnCfg *FsConnJsonCfg) (err error) {
 	if jsnCfg.Reconnects != nil {
 		fs.Reconnects = *jsnCfg.Reconnects
 	}
-	if jsnCfg.Max_reconnect_interval != nil {
-		if fs.MaxReconnectInterval, err = utils.ParseDurationWithNanosecs(*jsnCfg.Max_reconnect_interval); err != nil {
+	if jsnCfg.MaxReconnectInterval != nil {
+		if fs.MaxReconnectInterval, err = utils.ParseDurationWithNanosecs(*jsnCfg.MaxReconnectInterval); err != nil {
+			return
+		}
+	}
+	if jsnCfg.ReplyTimeout != nil {
+		if fs.ReplyTimeout, err = utils.ParseDurationWithNanosecs(*jsnCfg.ReplyTimeout); err != nil {
 			return
 		}
 	}
@@ -78,6 +84,7 @@ func (fs *FsConnCfg) AsMapInterface() map[string]any {
 		utils.Password:                fs.Password,
 		utils.ReconnectsCfg:           fs.Reconnects,
 		utils.MaxReconnectIntervalCfg: fs.MaxReconnectInterval.String(),
+		utils.ReplyTimeoutCfg:         fs.ReplyTimeout.String(),
 		utils.AliasCfg:                fs.Alias,
 	}
 }
@@ -89,6 +96,7 @@ func (fs FsConnCfg) Clone() *FsConnCfg {
 		Password:             fs.Password,
 		Reconnects:           fs.Reconnects,
 		MaxReconnectInterval: fs.MaxReconnectInterval,
+		ReplyTimeout:         fs.ReplyTimeout,
 		Alias:                fs.Alias,
 	}
 }

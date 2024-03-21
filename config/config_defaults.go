@@ -661,7 +661,14 @@ const CGRATES_CFG_JSON = `
 	"max_wait_connection": "2s",			// maximum duration to wait for a connection to be retrieved from the pool
 	"active_session_delimiter": ",",		// delimiter for 'show channels' responses and requests
 	"event_socket_conns":[					// instantiate connections to multiple FreeSWITCH servers
-		{"address": "127.0.0.1:8021", "password": "ClueCon", "reconnects": 5, "max_reconnect_interval": "" ,"alias":""}
+		{
+			"address": "127.0.0.1:8021", 	// FreeSWITCH server address and port
+			"password": "ClueCon",  		// authentication password for FreeSWITCH
+			"reconnects": 5, 				// max reconnect attempts before giving up ("-1" for no limit)
+			"max_reconnect_interval": "",  	// max time between reconnects ("0" for no limit)
+			"reply_timeout": "1m",			// max wait time for FreeSWITCH replies
+			"alias":""
+		}
 	],
 },
 
