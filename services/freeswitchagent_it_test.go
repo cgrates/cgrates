@@ -209,10 +209,7 @@ func TestFreeSwitchAgentReload4(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	err = srv.(*FreeswitchAgent).reload(srv.(*FreeswitchAgent).fS)
-	if err != nil {
-		t.Fatalf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
-	}
+	srv.(*FreeswitchAgent).reload()
 }
 
 func TestFreeSwitchAgentReload5(t *testing.T) {

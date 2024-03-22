@@ -65,7 +65,9 @@ func (fS *FreeswitchAgent) Start() error {
 	var err error
 	fS.fS, err = agents.NewFSsessions(fS.cfg.FsAgentCfg(), fS.cfg.GeneralCfg().DefaultTimezone, fS.connMgr)
 	if err != nil {
-		utils.Logger.Err(fmt.Sprintf("<%s> failed to initialize agent, error: %s", utils.FreeSWITCHAgent, err))
+		utils.Logger.Err(fmt.Sprintf(
+			"<%s> failed to initialize agent, error: %v",
+			utils.FreeSWITCHAgent, err))
 		return err
 	}
 
@@ -86,16 +88,15 @@ func (fS *FreeswitchAgent) Reload() (err error) {
 		return
 	}
 	fS.fS.Reload()
-	go fS.reload(fS.fS)
+	go fS.reload()
 	return
 }
 
-func (fS *FreeswitchAgent) reload(f *agents.FSsessions) (err error) {
+func (fS *FreeswitchAgent) reload() {
 	if err := fS.fS.Connect(); err != nil {
 		utils.Logger.Err(fmt.Sprintf("<%s> error: %s!", utils.FreeSWITCHAgent, err))
 		fS.shdChan.CloseOnce() // stop the engine here
 	}
-	return
 }
 
 // Shutdown stops the service
