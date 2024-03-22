@@ -681,7 +681,15 @@ func (b *Balance) debitMoney(cd *CallDescriptor, ub *Account, moneyBalances Bala
 
 // AsBalanceSummary converts the balance towards compressed information to be displayed
 func (b *Balance) AsBalanceSummary(typ string) *BalanceSummary {
-	bd := &BalanceSummary{UUID: b.Uuid, ID: b.ID, Type: typ, Value: b.Value, Disabled: b.Disabled}
+	bd := &BalanceSummary{
+		UUID:     b.Uuid,
+		ID:       b.ID,
+		Type:     typ,
+		Value:    b.Value,
+		Weight:   b.Weight,
+		Disabled: b.Disabled,
+		Factor:   b.Factor,
+	}
 	if bd.ID == "" {
 		bd.ID = b.Uuid
 	}
@@ -791,7 +799,9 @@ type BalanceSummary struct {
 	Type     string  // *voice, *data, etc
 	Initial  float64 // initial value before the debit operation
 	Value    float64
+	Weight   float64 `json:",omitempty"`
 	Disabled bool
+	Factor   ValueFactor `json:",omitempty"`
 }
 
 // BalanceSummaries is a list of BalanceSummaries
@@ -810,7 +820,7 @@ func (bs BalanceSummaries) BalanceSummaryWithUUD(bsUUID string) (b *BalanceSumma
 
 // FieldAsInterface func to help EventCost FieldAsInterface
 func (bl *BalanceSummary) FieldAsInterface(fldPath []string) (val any, err error) {
-	if bl == nil || len(fldPath) != 1 {
+	if bl == nil || len(fldPath) < 1 {
 		return nil, utils.ErrNotFound
 	}
 	switch fldPath[0] {
@@ -824,10 +834,17 @@ func (bl *BalanceSummary) FieldAsInterface(fldPath []string) (val any, err error
 		return bl.Type, nil
 	case utils.Value:
 		return bl.Value, nil
+	case utils.Weight:
+		return bl.Weight, nil
 	case utils.Disabled:
 		return bl.Disabled, nil
 	case utils.Initial:
 		return bl.Initial, nil
+	case utils.Factor:
+		if len(fldPath) == 1 {
+			return bl.Factor, nil
+		}
+		return bl.Factor.FieldAsInterface(fldPath[1:])
 	}
 }
 

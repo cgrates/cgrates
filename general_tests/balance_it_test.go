@@ -431,6 +431,13 @@ cgrates.org,call,1001,2014-01-14T00:00:00Z,RP_ANY,`,
 		if monetaryBalanceValue != 4. {
 			t.Errorf("unexpected balance value: expected %v, received %v", 4., monetaryBalanceValue)
 		}
+		smsBalanceFactor, err := cdrs[0].CostDetails.FieldAsInterface([]string{"AccountSummary", "BalanceSummaries[0]", "Factor", "smsFactor"})
+		if err != nil {
+			t.Fatalf("could not retrieve *sms balance factor: %v", err)
+		}
+		if smsBalanceFactor != 4. {
+			t.Errorf("unexpected balance factor: expected %v, received %v", 4., smsBalanceValue)
+		}
 	})
 
 	t.Run("SessionSv1ProcessCDR", func(t *testing.T) {
