@@ -469,6 +469,7 @@ func testSesPauseItInitPause(t *testing.T) {
 				Type:    "*monetary",
 				Initial: 10,
 				Value:   9.8,
+				Weight:  10,
 			}},
 		},
 		Rating: engine.Rating{
@@ -664,6 +665,7 @@ func testSesPauseItInitUpdatePause(t *testing.T) {
 				Type:    "*monetary",
 				Initial: 9.8,
 				Value:   9.6,
+				Weight:  10,
 			}},
 		},
 		Rating: engine.Rating{
@@ -861,6 +863,7 @@ func testSesPauseItUpdatePause(t *testing.T) {
 				Type:    "*monetary",
 				Initial: 9.6,
 				Value:   9.,
+				Weight:  10,
 			}},
 		},
 		Rating: engine.Rating{

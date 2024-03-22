@@ -688,7 +688,7 @@ func (b *Balance) AsBalanceSummary(typ string) *BalanceSummary {
 		Value:    b.Value,
 		Weight:   b.Weight,
 		Disabled: b.Disabled,
-		Factor:   b.Factor,
+		Factors:  b.Factor,
 	}
 	if bd.ID == "" {
 		bd.ID = b.Uuid
@@ -801,7 +801,7 @@ type BalanceSummary struct {
 	Value    float64
 	Weight   float64 `json:",omitempty"`
 	Disabled bool
-	Factor   ValueFactor `json:",omitempty"`
+	Factors  ValueFactor `json:",omitempty"`
 }
 
 // BalanceSummaries is a list of BalanceSummaries
@@ -840,11 +840,11 @@ func (bl *BalanceSummary) FieldAsInterface(fldPath []string) (val any, err error
 		return bl.Disabled, nil
 	case utils.Initial:
 		return bl.Initial, nil
-	case utils.Factor:
+	case utils.Factors:
 		if len(fldPath) == 1 {
-			return bl.Factor, nil
+			return bl.Factors, nil
 		}
-		return bl.Factor.FieldAsInterface(fldPath[1:])
+		return bl.Factors.FieldAsInterface(fldPath[1:])
 	}
 }
 
