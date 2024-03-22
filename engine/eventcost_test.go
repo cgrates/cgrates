@@ -112,7 +112,7 @@ var testEC = &EventCost{
 				Initial:  60,
 				Weight:   20,
 				Disabled: false,
-				Factor: ValueFactor{
+				Factors: ValueFactor{
 					"factor2": 2,
 					"factor3": 3,
 				},
@@ -125,7 +125,7 @@ var testEC = &EventCost{
 				Weight:   0,
 				Initial:  60,
 				Disabled: false,
-				Factor: ValueFactor{
+				Factors: ValueFactor{
 					"factor2": 2,
 				},
 			},
@@ -137,7 +137,7 @@ var testEC = &EventCost{
 				Weight:   10,
 				Initial:  250,
 				Disabled: true,
-				Factor: ValueFactor{
+				Factors: ValueFactor{
 					"factor4": 4,
 					"factor5": 5,
 				},
@@ -2542,7 +2542,7 @@ func TestECSyncKeys(t *testing.T) {
 					Initial:  60,
 					Weight:   20,
 					Disabled: false,
-					Factor: ValueFactor{
+					Factors: ValueFactor{
 						"factor2": 2,
 						"factor3": 3,
 					},
@@ -2555,7 +2555,7 @@ func TestECSyncKeys(t *testing.T) {
 					Initial:  60,
 					Weight:   0,
 					Disabled: false,
-					Factor: ValueFactor{
+					Factors: ValueFactor{
 						"factor2": 2,
 					},
 				},
@@ -2567,7 +2567,7 @@ func TestECSyncKeys(t *testing.T) {
 					Initial:  250,
 					Weight:   10,
 					Disabled: true,
-					Factor: ValueFactor{
+					Factors: ValueFactor{
 						"factor4": 4,
 						"factor5": 5,
 					},
@@ -3901,12 +3901,12 @@ func TestECAsDataProvider3(t *testing.T) {
 		},
 		{
 			name:   "Factor map",
-			fields: []string{"Charges[0]", "Increments[3]", "Accounting", "Balance", "Factor"},
+			fields: []string{"Charges[0]", "Increments[3]", "Accounting", "Balance", "Factors"},
 			exp:    `{"factor4":4,"factor5":5}`,
 		},
 		{
 			name:   "Factor value",
-			fields: []string{"Charges[0]", "Increments[3]", "Accounting", "Balance", "Factor", "factor4"},
+			fields: []string{"Charges[0]", "Increments[3]", "Accounting", "Balance", "Factors", "factor4"},
 			exp:    "4",
 		},
 		{
@@ -4081,12 +4081,12 @@ func TestECAsDataProvider3(t *testing.T) {
 		},
 		{
 			name:   "Factor map through ExtraCharge",
-			fields: []string{"Charges[0]", "Increments[3]", "Accounting", "ExtraCharge", "Balance", "Factor"},
+			fields: []string{"Charges[0]", "Increments[3]", "Accounting", "ExtraCharge", "Balance", "Factors"},
 			exp:    `{"factor2":2,"factor3":3}`,
 		},
 		{
 			name:   "Factor value through ExtraCharge",
-			fields: []string{"Charges[0]", "Increments[3]", "Accounting", "ExtraCharge", "Balance", "Factor", "factor3"},
+			fields: []string{"Charges[0]", "Increments[3]", "Accounting", "ExtraCharge", "Balance", "Factors", "factor3"},
 			exp:    "3",
 		},
 		{
