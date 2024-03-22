@@ -140,7 +140,7 @@ func testTutSMGCacheStats(t *testing.T) {
 	expectedStats[utils.CacheReverseDestinations].Items = 7
 	expectedStats[utils.CacheRatingPlans].Items = 4
 	expectedStats[utils.CacheRatingProfiles].Items = 5
-	expectedStats[utils.CacheActions].Items = 9
+	expectedStats[utils.CacheActions].Items = 10
 	expectedStats[utils.CacheActionPlans].Items = 4
 	expectedStats[utils.CacheSharedGroups].Items = 1
 	expectedStats[utils.CacheResourceProfiles].Items = 3
