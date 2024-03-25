@@ -90,6 +90,7 @@ func TestDataDBReload(t *testing.T) {
 		Name: "10",
 		User: "cgrates",
 		Opts: &config.DataDBOpts{
+			MongoConnScheme:         "mongodb",
 			RedisMaxConns:           10,
 			RedisConnectAttempts:    20,
 			RedisSentinel:           "",
