@@ -761,10 +761,12 @@ func GetCGRVersion() (vers string, err error) {
 	var commitHash string
 	var commitDate time.Time
 	var matched bool
-	commitDate, err = time.Parse("2006-01-02T15:04:05-07:00", strings.TrimSpace(GitCommitDate))
-	if err != nil {
-		return vers, fmt.Errorf("Building version - error: <%s> compiling commit date", err.Error())
-	}
+
+	commitDate, _ = time.Parse("2006-01-02T15:04:05-07:00", strings.TrimSpace(GitCommitDate))
+	//ignoring err temporarily until a future fix since we dont get correct date format in older linux distributions
+	//if err != nil {
+	//return vers, fmt.Errorf("Building version - error: <%s> compiling commit date", err.Error())
+	//}
 	matched, err = regexp.MatchString("^[0-9a-f]{12,}$", GitCommitHash)
 	if err != nil {
 		return vers, fmt.Errorf("Building version - error: <%s> compiling commit hash", err.Error())

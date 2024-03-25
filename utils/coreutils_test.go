@@ -1319,13 +1319,13 @@ func TestGetCGRVersion(t *testing.T) {
 	} else if vers != expVers {
 		t.Errorf("Expecting: <%s>, received: <%s>", expVers, vers)
 	}
-	GitCommitDate = "wrong format"
-	GitCommitHash = "73014daa0c1d7edcb532d5fe600b8a20d588cdf8"
-	if vers, err := GetCGRVersion(); err == nil || err.Error() != `Building version - error: <parsing time "wrong format" as "2006-01-02T15:04:05-07:00": cannot parse "wrong format" as "2006"> compiling commit date` {
-		t.Error(err)
-	} else if vers != expVers {
-		t.Errorf("Expecting: <%s>, received: <%s>", expVers, vers)
-	}
+	// GitCommitDate = "wrong format"
+	// GitCommitHash = "73014daa0c1d7edcb532d5fe600b8a20d588cdf8"
+	// if vers, err := GetCGRVersion(); err == nil || err.Error() != `Building version - error: <parsing time "wrong format" as "2006-01-02T15:04:05-07:00": cannot parse "wrong format" as "2006"> compiling commit date` {
+	// 	t.Error(err)
+	// } else if vers != expVers {
+	// 	t.Errorf("Expecting: <%s>, received: <%s>", expVers, vers)
+	// }
 	GitCommitDate = "2016-12-30T19:48:09+01:00"
 	GitCommitHash = "73014DAA0C1D7EDCB532D5FE600B8A20D588CDF8"
 	if vers, err := GetCGRVersion(); err == nil || err.Error() != `Building version - error: <Regex not matched> compiling commit hash` {
