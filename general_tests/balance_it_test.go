@@ -251,18 +251,24 @@ cgrates.org,sms,1001,2014-01-14T00:00:00Z,RP_ANY,`,
 
 // TestBalanceFactor tests the usage of the 'Factor' field in account balances.
 //
-// Previously, the 'Factor' was being populated from the Action's ExtraParameters map, where the key represented the ToR of
-// the session being processed. This has now been updated to depend on Category instead of ToR.
+// Previously, the 'Factor' was being populated from the Action's ExtraParameters map,
+// where the key represented the ToR of the session being processed. This has now been
+// updated to depend on Category instead of ToR.
 //
 // The test steps are as follows:
-//  1. Create an account with an *sms balance of 10 units with a factor of 4 (essentially, this means that for every 1 sms, 4 will
-//     be exhausted), and a *monetary balance of 5 units. The RatingPlan used when debiting the *monetary balance will charge 1 unit
-//     per second.
-//  2. Process an 3 usage (representing 12 sms, when taking into consideration the balance factor) event.
-//  3. Ensure that the *sms balance has 2 units left (10 - (2 sms * 4 factor)) and that 1 unit was subtracted from the *monetary balance.
+//  1. Create an account with an *sms balance of 10 units with a factor of 4 (essentially,
+//     this means that for every 1 sms, 4 will be exhausted), and a *monetary balance of 5
+//     units. The RatingPlan used when debiting the *monetary balance will charge 1 unit per
+//     second.
+//  2. Process an 3 usage (representing 12 sms, when taking into consideration the balance
+//     factor) event.
+//  3. Ensure that the *sms balance has 2 units left (10 - (2 sms * 4 factor)) and that 1
+//     unit was subtracted from the *monetary balance.
 //  4. Do the above steps also for SessionSv1.ProcessCDR.
-//  5. Initiate a prepaid session (usage 10s), update it twice (usages 5s and 2s), terminate, and process CDR.
-//  6. Check to see if balance_voice was debitted 34s ((10s+5s+2s) * voiceFactor, where voiceFactor is 2).
+//  5. Initiate a prepaid session (usage 10s), update it twice (usages 5s and 2s), terminate,
+//     and process CDR.
+//  6. Check to see if balance_voice was debitted 34s ((10s+5s+2s) * voiceFactor, where
+//     voiceFactor is 2) and then also check if it applies correctly for refund.
 func TestBalanceFactor(t *testing.T) {
 	switch *dbType {
 	case utils.MetaInternal:
@@ -647,6 +653,33 @@ cgrates.org,call,1001,2014-01-14T00:00:00Z,RP_ANY,`,
 		}
 		if voiceBalanceValue != float64(66*time.Second) {
 			t.Errorf("unexpected balance value: expected %v, received %v", float64(66*time.Second), voiceBalanceValue)
+		}
+
+		// Attempt refund to check if factor also applies when refunding increments.
+		//
+		// Initial *voice balance value (before ProcessCDR): 100s
+		// CDR Usage: 17s
+		// Factor: 2
+		// Current *voice balance value: 66s
+		var replyProcessEvent string
+		if err := client.Call(context.Background(), utils.CDRsV1ProcessEvent,
+			&engine.ArgV1ProcessEvent{
+				Flags:    []string{utils.MetaRefund, "*store:false"},
+				CGREvent: *cdrs[0].AsCGREvent(),
+			}, &replyProcessEvent); err != nil {
+			t.Fatal(err)
+		}
+		var acnt engine.Account
+		if err := client.Call(context.Background(), utils.APIerSv2GetAccount,
+			&utils.AttrGetAccount{
+				Tenant:  "cgrates.org",
+				Account: "1001",
+			}, &acnt); err != nil {
+			t.Fatal(err)
+		}
+		voiceBalance := acnt.BalanceMap[utils.MetaVoice][0]
+		if voiceBalance.ID != "balance_voice" || voiceBalance.Value != float64(100*time.Second) {
+			t.Fatalf("received account with unexpected *voice balance: %v", voiceBalance)
 		}
 	})
 }
