@@ -786,6 +786,9 @@ func (bc Balances) SaveDirtyBalances(acc *Account, initBal map[string]float64) {
 type ValueFactors map[string]float64
 
 func (f ValueFactors) GetValue(category string) float64 {
+	if f == nil {
+		return 1.0
+	}
 	if value, ok := f[category]; ok {
 		return value
 	}
@@ -859,6 +862,11 @@ func (b *Balance) debit(cd *CallDescriptor, ub *Account, moneyBalances Balances,
 	if !isUnitBal {
 		tor = utils.MetaMonetary
 	}
+
+	// Compute the balance factor ahead of time. If the map is nil, or
+	// the factor is not found, it will default to 1.
+	bFactor := b.Factor.GetValue(cd.ExtraFields[utils.BalanceFactorID])
+
 	if duration, err_ := utils.ParseZeroRatingSubject(tor, b.RatingSubject,
 		config.CgrConfig().RalsCfg().BalanceRatingSubject, isUnitBal); err_ == nil {
 		// we have *zero based units
@@ -899,10 +907,8 @@ func (b *Balance) debit(cd *CallDescriptor, ub *Account, moneyBalances Balances,
 		for incIndex, inc := range ts.Increments {
 			//log.Printf("INCREMENET: %+v", inc)
 			amount := float64(inc.Duration)
-			if b.Factors != nil {
-				amount = utils.Round(
-					amount*b.Factors.GetValue(cd.ExtraFields[utils.BalanceFactorID]),
-					globalRoundingDecimals, utils.MetaRoundingUp)
+			if bFactor != 1 {
+				amount = utils.Round(amount*bFactor, globalRoundingDecimals, utils.MetaRoundingUp)
 			}
 			if b.GetValue() >= amount {
 				b.SubtractValue(amount)
@@ -1044,10 +1050,8 @@ func (b *Balance) debit(cd *CallDescriptor, ub *Account, moneyBalances Balances,
 			canDebitCost := b.GetValue() >= cost
 			var moneyBal *Balance
 			if isUnitBal {
-				if b.Factors != nil {
-					amount = utils.Round(
-						amount*b.Factors.GetValue(cd.ExtraFields[utils.BalanceFactorID]),
-						globalRoundingDecimals, utils.MetaRoundingUp)
+				if bFactor != 1 {
+					amount = utils.Round(amount*bFactor, globalRoundingDecimals, utils.MetaRoundingUp)
 				}
 				for _, mb := range moneyBalances {
 					if mb.GetValue() >= cost {
