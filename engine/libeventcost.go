@@ -128,6 +128,7 @@ func (cIl *ChargingInterval) Clone() (cln *ChargingInterval) {
 type ChargingIncrement struct {
 	Usage          time.Duration
 	Cost           float64
+	BalanceFactor  float64
 	AccountingID   string
 	CompressFactor int
 }
@@ -135,6 +136,7 @@ type ChargingIncrement struct {
 // Equals returns if the structure has the same value
 func (cIt *ChargingIncrement) Equals(oCIt *ChargingIncrement) bool {
 	return cIt.Usage == oCIt.Usage &&
+		cIt.BalanceFactor == oCIt.BalanceFactor &&
 		cIt.Cost == oCIt.Cost &&
 		cIt.AccountingID == oCIt.AccountingID &&
 		cIt.CompressFactor == oCIt.CompressFactor
@@ -143,6 +145,7 @@ func (cIt *ChargingIncrement) Equals(oCIt *ChargingIncrement) bool {
 // PartiallyEquals ignores the CompressFactor when comparing
 func (cIt *ChargingIncrement) PartiallyEquals(oCIt *ChargingIncrement) bool {
 	return cIt.Usage == oCIt.Usage &&
+		cIt.BalanceFactor == oCIt.BalanceFactor &&
 		cIt.Cost == oCIt.Cost &&
 		cIt.AccountingID == oCIt.AccountingID
 }
@@ -161,7 +164,7 @@ func (cIt *ChargingIncrement) TotalUsage() time.Duration {
 
 // TotalCost returns the cost of the increment
 func (cIt *ChargingIncrement) TotalCost() float64 {
-	return cIt.Cost * float64(cIt.CompressFactor)
+	return cIt.Cost * cIt.BalanceFactor * float64(cIt.CompressFactor)
 }
 
 // FieldAsInterface func to help EventCost FieldAsInterface
@@ -176,6 +179,8 @@ func (cIt *ChargingIncrement) FieldAsInterface(fldPath []string) (val any, err e
 		return cIt.Usage, nil
 	case utils.Cost:
 		return cIt.Cost, nil
+	case utils.BalanceFactor:
+		return cIt.BalanceFactor, nil
 	case utils.AccountingID:
 		return cIt.AccountingID, nil
 	case utils.CompressFactor:
@@ -636,6 +641,7 @@ func NewFreeEventCost(cgrID, runID, account string, tStart time.Time, usage time
 			Increments: []*ChargingIncrement{
 				{
 					Usage:          usage,
+					BalanceFactor:  1,
 					AccountingID:   utils.MetaPause,
 					CompressFactor: 1,
 				},

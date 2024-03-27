@@ -1652,13 +1652,39 @@ func TestCDRefundIncrements(t *testing.T) {
 	}
 	dm.SetAccount(ub)
 	increments := Increments{
-		&Increment{Cost: 2, BalanceInfo: &DebitInfo{
-			Monetary: &MonetaryInfo{UUID: "moneya"}, AccountID: ub.ID}},
-		&Increment{Cost: 2, Duration: 3 * time.Second, BalanceInfo: &DebitInfo{
-			Unit:     &UnitInfo{UUID: "minutea"},
-			Monetary: &MonetaryInfo{UUID: "moneya"}, AccountID: ub.ID}},
-		&Increment{Duration: 4 * time.Second, BalanceInfo: &DebitInfo{
-			Unit: &UnitInfo{UUID: "minuteb"}, AccountID: ub.ID}},
+		&Increment{
+			Cost: 2,
+			BalanceInfo: &DebitInfo{
+				Monetary: &MonetaryInfo{
+					UUID: "moneya",
+				},
+				AccountID: ub.ID,
+			},
+		},
+		&Increment{
+			Cost:     2,
+			Duration: 3 * time.Second,
+			BalanceInfo: &DebitInfo{
+				Unit: &UnitInfo{
+					UUID:   "minutea",
+					Factor: 1,
+				},
+				Monetary: &MonetaryInfo{
+					UUID: "moneya",
+				},
+				AccountID: ub.ID,
+			},
+		},
+		&Increment{
+			Duration: 4 * time.Second,
+			BalanceInfo: &DebitInfo{
+				Unit: &UnitInfo{
+					UUID:   "minuteb",
+					Factor: 1,
+				},
+				AccountID: ub.ID,
+			},
+		},
 	}
 	cd := &CallDescriptor{ToR: utils.MetaVoice, Increments: increments}
 	cd.RefundIncrements(nil)

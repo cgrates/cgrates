@@ -598,6 +598,7 @@ const (
 	TimingID                 = "TimingID"
 	RatesID                  = "RatesID"
 	RatingFiltersID          = "RatingFiltersID"
+	BalanceFactor            = "BalanceFactor"
 	AccountingID             = "AccountingID"
 	MetaSessionS             = "*sessions"
 	MetaDefault              = "*default"

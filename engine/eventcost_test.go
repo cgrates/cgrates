@@ -520,22 +520,26 @@ func TestNewEventCostFromCallCost(t *testing.T) {
 					{
 						Usage:          0,
 						Cost:           0.1,
+						BalanceFactor:  1,
 						AccountingID:   "44e97dec-8a7e-43d0-8b0a-736d46b5613e",
 						CompressFactor: 1,
 					},
 					{
 						Usage:          time.Second,
 						Cost:           0,
+						BalanceFactor:  1,
 						AccountingID:   "a555cde8-4bd0-408a-afbc-c3ba64888927",
 						CompressFactor: 30,
 					},
 					{
 						Usage:          time.Second,
 						Cost:           0.005,
+						BalanceFactor:  1,
 						AccountingID:   "906bfd0f-035c-40a3-93a8-46f71627983e",
 						CompressFactor: 30,
 					},
 					{
+						BalanceFactor:  1,
 						Cost:           -0.1,
 						AccountingID:   "44e97dec-8a7e-43d0-8b0a-e34a152",
 						CompressFactor: 1,
@@ -4141,6 +4145,7 @@ func TestECnewChargingIncrementMissingBalanceInfo(t *testing.T) {
 		Usage:          incr.Duration,
 		Cost:           incr.Cost,
 		CompressFactor: incr.CompressFactor,
+		BalanceFactor:  1,
 	}
 	rcv := ec.newChargingIncrement(incr, rf, false, false)
 
@@ -4190,6 +4195,7 @@ func TestECnewChargingIncrementNoUnitInfo(t *testing.T) {
 		Cost:           incr.Cost,
 		CompressFactor: incr.CompressFactor,
 		AccountingID:   utils.MetaPause,
+		BalanceFactor:  1,
 	}
 	expEC := &EventCost{
 		Accounting: Accounting{
