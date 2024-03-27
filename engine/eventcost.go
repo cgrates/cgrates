@@ -81,6 +81,7 @@ func (ec *EventCost) newChargingIncrement(incr *Increment, rf RatingMatchedFilte
 	cIt = &ChargingIncrement{
 		Usage:          incr.Duration,
 		Cost:           incr.Cost,
+		BalanceFactor:  1,
 		CompressFactor: incr.CompressFactor,
 	}
 	if incr.BalanceInfo == nil {
@@ -92,6 +93,7 @@ func (ec *EventCost) newChargingIncrement(incr *Increment, rf RatingMatchedFilte
 	rateID := utils.MetaRounding
 	//AccountingID
 	if incr.BalanceInfo.Unit != nil {
+		cIt.BalanceFactor = incr.BalanceInfo.Unit.Factor
 		// 2 balances work-around
 		ecUUID := utils.MetaNone // populate no matter what due to Unit not nil
 		if incr.BalanceInfo.Monetary != nil {
@@ -374,7 +376,10 @@ func (ec *EventCost) AsRefundIncrements(tor string) (cd *CallDescriptor) {
 					if blncSmry.Type == utils.MetaMonetary {
 						cd.Increments[iIdx].BalanceInfo.Monetary = &MonetaryInfo{UUID: blncSmry.UUID}
 					} else if utils.NonMonetaryBalances.Has(blncSmry.Type) {
-						cd.Increments[iIdx].BalanceInfo.Unit = &UnitInfo{UUID: blncSmry.UUID}
+						cd.Increments[iIdx].BalanceInfo.Unit = &UnitInfo{
+							UUID:   blncSmry.UUID,
+							Factor: cIcrm.BalanceFactor,
+						}
 					}
 					if ec.Accounting[cIcrm.AccountingID].ExtraChargeID == utils.MetaNone ||
 						ec.Accounting[cIcrm.AccountingID].ExtraChargeID == utils.EmptyString {
@@ -387,7 +392,10 @@ func (ec *EventCost) AsRefundIncrements(tor string) (cd *CallDescriptor) {
 					if extraSmry.Type == utils.MetaMonetary {
 						cd.Increments[iIdx].BalanceInfo.Monetary = &MonetaryInfo{UUID: extraSmry.UUID}
 					} else if utils.NonMonetaryBalances.Has(blncSmry.Type) {
-						cd.Increments[iIdx].BalanceInfo.Unit = &UnitInfo{UUID: extraSmry.UUID}
+						cd.Increments[iIdx].BalanceInfo.Unit = &UnitInfo{
+							UUID:   extraSmry.UUID,
+							Factor: cIcrm.BalanceFactor,
+						}
 					}
 				}
 				iIdx++
@@ -478,7 +486,11 @@ func (ec *EventCost) newIntervalFromCharge(cInc *ChargingIncrement) (incr *Incre
 	if cBC.ExtraChargeID != "" { // have both monetary and data
 		// Work around, enforce logic with 2 balances for *voice/*monetary combination
 		// so we can stay compatible with CallCost
-		incr.BalanceInfo.Unit = &UnitInfo{UUID: cBC.BalanceUUID, Consumed: cBC.Units}
+		incr.BalanceInfo.Unit = &UnitInfo{
+			UUID:     cBC.BalanceUUID,
+			Consumed: cBC.Units,
+			Factor:   cInc.BalanceFactor,
+		}
 		incr.BalanceInfo.Unit.RateInterval = ec.rateIntervalForRatingID(cBC.RatingID)
 		if cBC.ExtraChargeID != utils.MetaNone {
 			cBC = ec.Accounting[cBC.ExtraChargeID] // overwrite original balance so we can process it in one place

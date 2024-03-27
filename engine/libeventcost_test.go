@@ -404,6 +404,7 @@ func TestChargingIncrementTotalCost(t *testing.T) {
 	ch1 := &ChargingIncrement{
 		AccountingID:   "Acc1",
 		CompressFactor: 2,
+		BalanceFactor:  1,
 		Cost:           2.345,
 		Usage:          2 * time.Second,
 	}
