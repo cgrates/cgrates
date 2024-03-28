@@ -81,7 +81,6 @@ func (ec *EventCost) newChargingIncrement(incr *Increment, rf RatingMatchedFilte
 	cIt = &ChargingIncrement{
 		Usage:          incr.Duration,
 		Cost:           incr.Cost,
-		BalanceFactor:  1,
 		CompressFactor: incr.CompressFactor,
 	}
 	if incr.BalanceInfo == nil {
@@ -93,7 +92,6 @@ func (ec *EventCost) newChargingIncrement(incr *Increment, rf RatingMatchedFilte
 	rateID := utils.MetaRounding
 	//AccountingID
 	if incr.BalanceInfo.Unit != nil {
-		cIt.BalanceFactor = incr.BalanceInfo.Unit.Factor
 		// 2 balances work-around
 		ecUUID := utils.MetaNone // populate no matter what due to Unit not nil
 		if incr.BalanceInfo.Monetary != nil {
@@ -104,6 +102,7 @@ func (ec *EventCost) newChargingIncrement(incr *Increment, rf RatingMatchedFilte
 				AccountID:   incr.BalanceInfo.AccountID,
 				BalanceUUID: incr.BalanceInfo.Monetary.UUID,
 				Units:       incr.Cost,
+				Factor:      1,
 				RatingID:    rateID,
 			}
 			if isPause {
@@ -120,6 +119,7 @@ func (ec *EventCost) newChargingIncrement(incr *Increment, rf RatingMatchedFilte
 			AccountID:     incr.BalanceInfo.AccountID,
 			BalanceUUID:   incr.BalanceInfo.Unit.UUID,
 			Units:         incr.BalanceInfo.Unit.Consumed,
+			Factor:        incr.BalanceInfo.Unit.Factor,
 			RatingID:      rateID,
 			ExtraChargeID: ecUUID,
 		}
@@ -137,6 +137,7 @@ func (ec *EventCost) newChargingIncrement(incr *Increment, rf RatingMatchedFilte
 			AccountID:   incr.BalanceInfo.AccountID,
 			BalanceUUID: incr.BalanceInfo.Monetary.UUID,
 			Units:       incr.Cost,
+			Factor:      1,
 			RatingID:    rateID,
 		}
 		if isPause {
@@ -369,32 +370,40 @@ func (ec *EventCost) AsRefundIncrements(tor string) (cd *CallDescriptor) {
 					CompressFactor: cIcrm.CompressFactor,
 				}
 				if cIcrm.AccountingID != utils.EmptyString {
-					cd.Increments[iIdx].BalanceInfo = &DebitInfo{
-						AccountID: ec.Accounting[cIcrm.AccountingID].AccountID,
+
+					// It assumes that AccountingID key exists and that the BalanceCharge
+					// value is non-nil. Might be a good idea to check this first before
+					// using the variable to prevent any nil pointer dereference panics
+					// from happening.
+					blncCharge := ec.Accounting[cIcrm.AccountingID]
+
+					blncInfo := &DebitInfo{
+						AccountID: blncCharge.AccountID,
 					}
-					blncSmry := ec.AccountSummary.BalanceSummaries.BalanceSummaryWithUUD(ec.Accounting[cIcrm.AccountingID].BalanceUUID)
+					cd.Increments[iIdx].BalanceInfo = blncInfo
+					blncSmry := ec.AccountSummary.BalanceSummaries.BalanceSummaryWithUUD(blncCharge.BalanceUUID)
 					if blncSmry.Type == utils.MetaMonetary {
-						cd.Increments[iIdx].BalanceInfo.Monetary = &MonetaryInfo{UUID: blncSmry.UUID}
+						blncInfo.Monetary = &MonetaryInfo{UUID: blncSmry.UUID}
 					} else if utils.NonMonetaryBalances.Has(blncSmry.Type) {
-						cd.Increments[iIdx].BalanceInfo.Unit = &UnitInfo{
+						blncInfo.Unit = &UnitInfo{
 							UUID:   blncSmry.UUID,
-							Factor: cIcrm.BalanceFactor,
+							Factor: blncCharge.Factor,
 						}
 					}
-					if ec.Accounting[cIcrm.AccountingID].ExtraChargeID == utils.MetaNone ||
-						ec.Accounting[cIcrm.AccountingID].ExtraChargeID == utils.EmptyString {
+					if blncCharge.ExtraChargeID == utils.MetaNone ||
+						blncCharge.ExtraChargeID == utils.EmptyString {
 						iIdx++
 						continue
 					}
 					// extra charges, ie: non-free *voice
 					extraSmry := ec.AccountSummary.BalanceSummaries.BalanceSummaryWithUUD(
-						ec.Accounting[ec.Accounting[cIcrm.AccountingID].ExtraChargeID].BalanceUUID)
+						ec.Accounting[blncCharge.ExtraChargeID].BalanceUUID)
 					if extraSmry.Type == utils.MetaMonetary {
-						cd.Increments[iIdx].BalanceInfo.Monetary = &MonetaryInfo{UUID: extraSmry.UUID}
+						blncInfo.Monetary = &MonetaryInfo{UUID: extraSmry.UUID}
 					} else if utils.NonMonetaryBalances.Has(blncSmry.Type) {
-						cd.Increments[iIdx].BalanceInfo.Unit = &UnitInfo{
+						blncInfo.Unit = &UnitInfo{
 							UUID:   extraSmry.UUID,
-							Factor: cIcrm.BalanceFactor,
+							Factor: blncCharge.Factor,
 						}
 					}
 				}
@@ -437,16 +446,16 @@ func (ec *EventCost) AsCallCost(tor string) *CallCost {
 		ts.RateInterval = ec.rateIntervalForRatingID(cIl.RatingID)
 
 		incrs := cIl.Increments
-		if l := len(cIl.Increments); l != 0 {
-			if cIl.Increments[l-1].Cost != 0 &&
-				ec.Accounting[cIl.Increments[l-1].AccountingID].RatingID == utils.MetaRounding {
+		if incrLen := len(cIl.Increments); incrLen != 0 {
+			if cIl.Increments[incrLen-1].Cost != 0 &&
+				ec.Accounting[cIl.Increments[incrLen-1].AccountingID].RatingID == utils.MetaRounding {
 				// special case: if the last increment has the ratingID equal to *rounding
 				// we consider it as the roundIncrement
-				l--
-				incrs = incrs[:l]
-				ts.RoundIncrement = ec.newIntervalFromCharge(cIl.Increments[l-1])
+				incrLen--
+				incrs = incrs[:incrLen]
+				ts.RoundIncrement = ec.newIntervalFromCharge(cIl.Increments[incrLen-1])
 			}
-			ts.Increments = make(Increments, l)
+			ts.Increments = make(Increments, incrLen)
 		}
 		for j, cInc := range incrs {
 			ts.Increments[j] = ec.newIntervalFromCharge(cInc)
@@ -489,7 +498,7 @@ func (ec *EventCost) newIntervalFromCharge(cInc *ChargingIncrement) (incr *Incre
 		incr.BalanceInfo.Unit = &UnitInfo{
 			UUID:     cBC.BalanceUUID,
 			Consumed: cBC.Units,
-			Factor:   cInc.BalanceFactor,
+			Factor:   cBC.Factor,
 		}
 		incr.BalanceInfo.Unit.RateInterval = ec.rateIntervalForRatingID(cBC.RatingID)
 		if cBC.ExtraChargeID != utils.MetaNone {
