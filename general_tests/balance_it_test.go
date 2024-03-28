@@ -97,7 +97,7 @@ ACT_TOPUP,*topup_reset,,,balance_monetary,*monetary,,*any,,,*unlimited,,1,10,fal
 		utils.DestinationRatesCsv: `#Id,DestinationId,RatesTag,RoundingMethod,RoundingDecimals,MaxCost,MaxCostStrategy
 DR_ANY,*any,RT_ANY,*up,20,0,`,
 		utils.RatesCsv: `#Id,ConnectFee,Rate,RateUnit,RateIncrement,GroupIntervalStart
-RT_ANY,0,0.6,60s,1s,0s`,
+RT_ANY,0,1,1,1,0`,
 		utils.RatingPlansCsv: `#Id,DestinationRatesId,TimingTag,Weight
 RP_ANY,DR_ANY,*any,10`,
 		utils.RatingProfilesCsv: `#Tenant,Category,Subject,ActivationTime,RatingPlanId,RatesFallbackSubject
@@ -118,6 +118,7 @@ cgrates.org,sms,1001,2014-01-14T00:00:00Z,RP_ANY,`,
 	defer shutdown()
 
 	t.Run("CheckInitialBalance", func(t *testing.T) {
+		time.Sleep(10 * time.Millisecond) // wait for tps to be loaded
 		var acnt engine.Account
 		attrs := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1001"}
 		if err := client.Call(context.Background(), utils.APIerSv2GetAccount, attrs, &acnt); err != nil {
@@ -260,15 +261,18 @@ cgrates.org,sms,1001,2014-01-14T00:00:00Z,RP_ANY,`,
 //     this means that for every 1 sms, 4 will be exhausted), and a *monetary balance of 5
 //     units. The RatingPlan used when debiting the *monetary balance will charge 1 unit per
 //     second.
-//  2. Process an 3 usage (representing 12 sms, when taking into consideration the balance
+//  2. Process a 4 usage (representing 16 sms, when taking into consideration the balance
 //     factor) event.
-//  3. Ensure that the *sms balance has 2 units left (10 - (2 sms * 4 factor)) and that 1
-//     unit was subtracted from the *monetary balance.
-//  4. Do the above steps also for SessionSv1.ProcessCDR.
-//  5. Initiate a prepaid session (usage 10s), update it twice (usages 5s and 2s), terminate,
+//  3. Ensure that the *sms balance has 2 units left (10 - (2 sms * 4 factor)) and that 2
+//     unit were subtracted from the *monetary balance.
+//  4. Try to refund the debit made in the previous step to check whether factor is taken
+//     into consideration for refunds as well.
+//  5. Do the above steps also for SessionSv1.ProcessCDR with a different usage.
+//  6. Initiate a prepaid session (usage 10s), update it twice (usages 5s and 2s), terminate,
 //     and process CDR.
-//  6. Check to see if balance_voice was debitted 34s ((10s+5s+2s) * voiceFactor, where
-//     voiceFactor is 2) and then also check if it applies correctly for refund.
+//  7. Check to see if balance_voice was debitted 34s ((10s+5s+2s) * voiceFactor, where
+//     voiceFactor is 2) and then also check if it applies correctly for refund (similar
+//     to step 4).
 func TestBalanceFactor(t *testing.T) {
 	switch *dbType {
 	case utils.MetaInternal:
@@ -336,14 +340,17 @@ ACT_TOPUP,*topup_reset,,,balance_monetary,*monetary,,*any,,,*unlimited,,5,10,fal
 #Tenant,ID,FilterIDs,ActivationInterval,RunID,AttributeIDs,Weight
 cgrates.org,DEFAULT,,,DEFAULT,*none,20`,
 		utils.DestinationRatesCsv: `#Id,DestinationId,RatesTag,RoundingMethod,RoundingDecimals,MaxCost,MaxCostStrategy
-DR_ANY,*any,RT_ANY,*up,20,0,`,
+DR_SMS,*any,RT_SMS,*up,20,0,
+DR_VOICE,*any,RT_VOICE,*up,20,0,`,
 		utils.RatesCsv: `#Id,ConnectFee,Rate,RateUnit,RateIncrement,GroupIntervalStart
-RT_ANY,0,1,1s,1s,0s`,
+RT_SMS,0,1,1,1,0
+RT_VOICE,0,1,1s,1s,0s`,
 		utils.RatingPlansCsv: `#Id,DestinationRatesId,TimingTag,Weight
-RP_ANY,DR_ANY,*any,10`,
+RP_SMS,DR_SMS,*any,10
+RP_VOICE,DR_VOICE,*any,10`,
 		utils.RatingProfilesCsv: `#Tenant,Category,Subject,ActivationTime,RatingPlanId,RatesFallbackSubject
-cgrates.org,sms,1001,2014-01-14T00:00:00Z,RP_ANY,
-cgrates.org,call,1001,2014-01-14T00:00:00Z,RP_ANY,`,
+cgrates.org,sms,1001,2014-01-14T00:00:00Z,RP_SMS,
+cgrates.org,call,1001,2014-01-14T00:00:00Z,RP_VOICE,`,
 	}
 
 	testEnv := TestEnvironment{
@@ -360,6 +367,7 @@ cgrates.org,call,1001,2014-01-14T00:00:00Z,RP_ANY,`,
 	defer shutdown()
 
 	t.Run("CheckInitialBalance", func(t *testing.T) {
+		time.Sleep(10 * time.Millisecond) // wait for tps to be loaded
 		var acnt engine.Account
 		attrs := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1001"}
 		if err := client.Call(context.Background(), utils.APIerSv2GetAccount, attrs, &acnt); err != nil {
@@ -405,7 +413,7 @@ cgrates.org,call,1001,2014-01-14T00:00:00Z,RP_ANY,`,
 						utils.Destination:     "1002",
 						utils.SetupTime:       time.Date(2021, time.February, 2, 16, 14, 50, 0, time.UTC),
 						utils.AnswerTime:      time.Date(2021, time.February, 2, 16, 15, 0, 0, time.UTC),
-						utils.Usage:           3,
+						utils.Usage:           4,
 						utils.BalanceFactorID: "smsFactor",
 					},
 				},
@@ -434,8 +442,41 @@ cgrates.org,call,1001,2014-01-14T00:00:00Z,RP_ANY,`,
 		if err != nil {
 			t.Fatalf("could not retrieve *sms balance current value: %v", err)
 		}
-		if monetaryBalanceValue != 4. {
-			t.Errorf("unexpected balance value: expected %v, received %v", 4., monetaryBalanceValue)
+		if monetaryBalanceValue != 3. {
+			t.Errorf("unexpected balance value: expected %v, received %v", 3., monetaryBalanceValue)
+		}
+
+		// Attempt refund to check if factor also applies when refunding increments.
+		//
+		// Initial *sms balance value: 10
+		// Initial *monetary balance value: 5
+		// CDR Usage: 4
+		// Factor: 4
+		// Current *sms balance value: 2
+		// Current *monetary balance value: 3
+		var replyProcessEvent string
+		if err := client.Call(context.Background(), utils.CDRsV1ProcessEvent,
+			&engine.ArgV1ProcessEvent{
+				Flags:    []string{utils.MetaRefund, "*store:false"},
+				CGREvent: *cdrs[0].AsCGREvent(),
+			}, &replyProcessEvent); err != nil {
+			t.Fatal(err)
+		}
+		var acnt engine.Account
+		if err := client.Call(context.Background(), utils.APIerSv2GetAccount,
+			&utils.AttrGetAccount{
+				Tenant:  "cgrates.org",
+				Account: "1001",
+			}, &acnt); err != nil {
+			t.Fatal(err)
+		}
+		smsBalance := acnt.BalanceMap[utils.MetaSMS][0]
+		if smsBalance.ID != "balance_sms" || smsBalance.Value != 10 {
+			t.Fatalf("received account with unexpected *sms balance: %v", smsBalance)
+		}
+		monetaryBalance := acnt.BalanceMap[utils.MetaMonetary][0]
+		if monetaryBalance.ID != "balance_monetary" || monetaryBalance.Value != 5 {
+			t.Fatalf("received account with unexpected *monetary balance: %v", monetaryBalance)
 		}
 		smsBalanceFactor, err := cdrs[0].CostDetails.FieldAsInterface([]string{"AccountSummary", "BalanceSummaries[0]", "Factors", "smsFactor"})
 		if err != nil {
@@ -464,7 +505,7 @@ cgrates.org,call,1001,2014-01-14T00:00:00Z,RP_ANY,`,
 					utils.Destination:     "1002",
 					utils.SetupTime:       time.Date(2021, time.February, 2, 16, 14, 50, 0, time.UTC),
 					utils.AnswerTime:      time.Date(2021, time.February, 2, 16, 15, 0, 0, time.UTC),
-					utils.Usage:           3,
+					utils.Usage:           6,
 					utils.BalanceFactorID: "smsFactor",
 				},
 			}, &reply); err != nil {
@@ -492,8 +533,8 @@ cgrates.org,call,1001,2014-01-14T00:00:00Z,RP_ANY,`,
 		if err != nil {
 			t.Fatalf("could not retrieve *sms balance current value: %v", err)
 		}
-		if monetaryBalanceValue != 3. {
-			t.Errorf("unexpected balance value: expected %v, received %v", 4., monetaryBalanceValue)
+		if monetaryBalanceValue != 1. {
+			t.Errorf("unexpected balance value: expected %v, received %v", 1., monetaryBalanceValue)
 		}
 	})
 
@@ -762,7 +803,7 @@ ACT_TOPUP_SMS,*topup_reset,,,balance_sms,*sms,,*any,,,*unlimited,,1000,10,false,
 	defer shutdown()
 
 	t.Run("CheckInitialBalances", func(t *testing.T) {
-		time.Sleep(time.Second)
+		time.Sleep(10 * time.Millisecond) // wait for tps to be loaded
 		var acnt engine.Account
 		if err := client.Call(context.Background(), utils.APIerSv2GetAccount,
 			&utils.AttrGetAccount{
