@@ -434,16 +434,9 @@ func main() {
 		lgLevel = *logLevel
 	}
 	utils.Logger.SetLogLevel(lgLevel)
+
 	// init the concurrentRequests
-	cncReqsLimit := cfg.CoreSCfg().Caps
-	if utils.ConcurrentReqsLimit != 0 { // used as shared variable
-		cncReqsLimit = utils.ConcurrentReqsLimit
-	}
-	cncReqsStrategy := cfg.CoreSCfg().CapsStrategy
-	if len(utils.ConcurrentReqsStrategy) != 0 {
-		cncReqsStrategy = utils.ConcurrentReqsStrategy
-	}
-	caps := engine.NewCaps(cncReqsLimit, cncReqsStrategy)
+	caps := engine.NewCaps(cfg.CoreSCfg().Caps, cfg.CoreSCfg().CapsStrategy)
 	utils.Logger.Info(fmt.Sprintf("<CoreS> starting version <%s><%s>", vers, goVers))
 
 	// init the channel here because we need to pass them to connManager
