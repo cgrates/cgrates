@@ -148,9 +148,6 @@ var (
 
 	// ProtectedSFlds are the fields that sessions should not alter
 	ProtectedSFlds = NewStringSet([]string{CGRID, OriginHost, OriginID, Usage})
-
-	ConcurrentReqsLimit    int
-	ConcurrentReqsStrategy string
 )
 
 const (
