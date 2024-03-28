@@ -877,8 +877,9 @@ func (cd *CallDescriptor) refundIncrements(fltrS *FilterS) (acnt *Account, err e
 				utils.Logger.Warning(fmt.Sprintf("Could not get the balnce: <%s> to be refunded for account: <%s>", increment.BalanceInfo.Unit.UUID, increment.BalanceInfo.AccountID))
 				continue
 			}
-			balance.AddValue(float64(increment.Duration.Nanoseconds()))
-			account.countUnits(-float64(increment.Duration.Nanoseconds()), unitType, cc, balance, fltrS)
+			refundAmount := float64(increment.Duration.Nanoseconds()) * increment.BalanceInfo.Unit.Factor
+			balance.AddValue(refundAmount)
+			account.countUnits(-refundAmount, unitType, cc, balance, fltrS)
 		}
 		// check money too
 		if increment.BalanceInfo.Monetary != nil && increment.BalanceInfo.Monetary.UUID != "" {

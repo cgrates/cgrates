@@ -159,7 +159,9 @@ func (cIt *ChargingIncrement) TotalUsage() time.Duration {
 	return time.Duration(cIt.Usage.Nanoseconds() * int64(cIt.CompressFactor))
 }
 
-// TotalCost returns the cost of the increment
+// TotalCost returns the cost of the increment. DOES NOT have
+// access to Accounting map to extract Factor. Therefore,
+// TotalCost cannot be calculated.
 func (cIt *ChargingIncrement) TotalCost() float64 {
 	return cIt.Cost * float64(cIt.CompressFactor)
 }
@@ -185,10 +187,11 @@ func (cIt *ChargingIncrement) FieldAsInterface(fldPath []string) (val any, err e
 
 // BalanceCharge represents one unit charged to a balance
 type BalanceCharge struct {
-	AccountID     string  // keep reference for shared balances
+	AccountID     string  // reference for shared balances
 	BalanceUUID   string  // balance charged
 	RatingID      string  // special price applied on this balance
 	Units         float64 // number of units charged
+	Factor        float64 // calculation multiplier for units; always 1 for *monetary balances
 	ExtraChargeID string  // used in cases when paying *voice with *monetary
 }
 
@@ -208,33 +211,41 @@ func (bc *BalanceCharge) FieldAsInterface(fldPath []string) (val any, err error)
 		return bc.RatingID, nil
 	case utils.Units:
 		return bc.Units, nil
+	case utils.Factor:
+		return bc.Factor, nil
 	case utils.ExtraChargeID:
 		return bc.ExtraChargeID, nil
 	}
 }
 
-// Equals returns if the structure have the same fields
+// Equals checks if two BalanceCharge instances are equivalent,
+// comparing all fields directly, while treating empty ExtraChargeID
+// as utils.MetaNone.
 func (bc *BalanceCharge) Equals(oBC *BalanceCharge) bool {
 	bcExtraChargeID := bc.ExtraChargeID
 	if bcExtraChargeID == "" {
 		bcExtraChargeID = utils.MetaNone
 	}
-	oBCExtraChargerID := oBC.ExtraChargeID
-	if oBCExtraChargerID == "" { // so we can compare them properly
-		oBCExtraChargerID = utils.MetaNone
+	oBCExtraChargeID := oBC.ExtraChargeID
+	if oBCExtraChargeID == "" { // so we can compare them properly
+		oBCExtraChargeID = utils.MetaNone
 	}
 	return bc.AccountID == oBC.AccountID &&
 		bc.BalanceUUID == oBC.BalanceUUID &&
 		bc.RatingID == oBC.RatingID &&
 		bc.Units == oBC.Units &&
-		bcExtraChargeID == oBCExtraChargerID
+		bc.Factor == oBC.Factor &&
+		bcExtraChargeID == oBCExtraChargeID
 }
 
 // Clone creates a copy of BalanceCharge
 func (bc *BalanceCharge) Clone() *BalanceCharge {
-	clnBC := new(BalanceCharge)
-	*clnBC = *bc
-	return clnBC
+	if bc == nil {
+		return nil
+	}
+	cln := new(BalanceCharge)
+	*cln = *bc
+	return cln
 }
 
 // RatingMatchedFilters a rating filter
@@ -657,6 +668,7 @@ func NewFreeEventCost(cgrID, runID, account string, tStart time.Time, usage time
 				AccountID: account,
 				// BalanceUUID: "",
 				RatingID: utils.MetaPause,
+				Factor:   1,
 			},
 		},
 		RatingFilters: RatingFilters{
