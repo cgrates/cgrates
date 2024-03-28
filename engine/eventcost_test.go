@@ -171,28 +171,33 @@ var testEC = &EventCost{
 			AccountID:   "cgrates.org:dan",
 			BalanceUUID: "8c54a9e9-d610-4c82-bcb5-a315b9a65010",
 			Units:       0.01,
+			Factor:      1,
 		},
 		"188bfa6": &BalanceCharge{
 			AccountID:   "cgrates.org:dan",
 			BalanceUUID: "8c54a9e9-d610-4c82-bcb5-a315b9a65010",
 			Units:       0.005,
+			Factor:      1,
 		},
 		"9bdad10": &BalanceCharge{
 			AccountID:   "cgrates.org:dan",
 			BalanceUUID: "8c54a9e9-d610-4c82-bcb5-a315b9a65010",
 			Units:       0.1,
+			Factor:      1,
 		},
 		"44d6c02": &BalanceCharge{
 			AccountID:     "cgrates.org:dan",
 			BalanceUUID:   "4b8b53d7-c1a1-4159-b845-4623a00a0165",
 			RatingID:      "3cd6425",
 			Units:         1,
+			Factor:        1,
 			ExtraChargeID: "188bfa6",
 		},
 		"3455b83": &BalanceCharge{
 			AccountID:     "cgrates.org:dan",
 			BalanceUUID:   "4b8b53d7-c1a1-4159-b845-4623a00a0165",
 			Units:         1,
+			Factor:        1,
 			ExtraChargeID: "*none",
 		},
 	},
@@ -520,26 +525,22 @@ func TestNewEventCostFromCallCost(t *testing.T) {
 					{
 						Usage:          0,
 						Cost:           0.1,
-						BalanceFactor:  1,
 						AccountingID:   "44e97dec-8a7e-43d0-8b0a-736d46b5613e",
 						CompressFactor: 1,
 					},
 					{
 						Usage:          time.Second,
 						Cost:           0,
-						BalanceFactor:  1,
 						AccountingID:   "a555cde8-4bd0-408a-afbc-c3ba64888927",
 						CompressFactor: 30,
 					},
 					{
 						Usage:          time.Second,
 						Cost:           0.005,
-						BalanceFactor:  1,
 						AccountingID:   "906bfd0f-035c-40a3-93a8-46f71627983e",
 						CompressFactor: 30,
 					},
 					{
-						BalanceFactor:  1,
 						Cost:           -0.1,
 						AccountingID:   "44e97dec-8a7e-43d0-8b0a-e34a152",
 						CompressFactor: 1,
@@ -588,28 +589,33 @@ func TestNewEventCostFromCallCost(t *testing.T) {
 				AccountID:   "cgrates.org:dan",
 				BalanceUUID: "8c54a9e9-d610-4c82-bcb5-a315b9a65010",
 				Units:       0.01,
+				Factor:      1,
 			},
 			"a894f8f1-206a-4457-99ce-df21a0c7fedc": &BalanceCharge{
 				AccountID:   "cgrates.org:dan",
 				BalanceUUID: "8c54a9e9-d610-4c82-bcb5-a315b9a65010",
 				Units:       0.005,
+				Factor:      1,
 			},
 			"44e97dec-8a7e-43d0-8b0a-736d46b5613e": &BalanceCharge{
 				AccountID:   "cgrates.org:dan",
 				BalanceUUID: "8c54a9e9-d610-4c82-bcb5-a315b9a65010",
 				Units:       0.1,
+				Factor:      1,
 			},
 			"906bfd0f-035c-40a3-93a8-46f71627983e": &BalanceCharge{
 				AccountID:     "cgrates.org:dan",
 				BalanceUUID:   "7a54a9e9-d610-4c82-bcb5-a315b9a65010",
 				RatingID:      "4607d907-02c3-4f2b-bc08-95a0dcc7222c",
 				Units:         1,
+				Factor:        1,
 				ExtraChargeID: "a894f8f1-206a-4457-99ce-df21a0c7fedc",
 			},
 			"a555cde8-4bd0-408a-afbc-c3ba64888927": &BalanceCharge{
 				AccountID:     "cgrates.org:dan",
 				BalanceUUID:   "9d54a9e9-d610-4c82-bcb5-a315b9a65089",
 				Units:         1,
+				Factor:        1,
 				ExtraChargeID: "*none",
 			},
 			"44e97dec-8a7e-43d0-8b0a-e34a152": &BalanceCharge{
@@ -617,6 +623,7 @@ func TestNewEventCostFromCallCost(t *testing.T) {
 				BalanceUUID:   "8c54a9e9-d610-4c82-bcb5-a315b9a65010",
 				RatingID:      "*rounding",
 				Units:         -0.1,
+				Factor:        1,
 				ExtraChargeID: "",
 			},
 		},
@@ -782,7 +789,10 @@ func TestECAsRefundIncrements(t *testing.T) {
 			BalanceInfo: &DebitInfo{
 				AccountID: "cgrates.org:dan",
 				Unit: &UnitInfo{
-					UUID: "4b8b53d7-c1a1-4159-b845-4623a00a0165"}},
+					UUID:   "4b8b53d7-c1a1-4159-b845-4623a00a0165",
+					Factor: 1,
+				},
+			},
 		},
 		&Increment{
 			Duration:       10 * time.Second,
@@ -800,9 +810,13 @@ func TestECAsRefundIncrements(t *testing.T) {
 			BalanceInfo: &DebitInfo{
 				AccountID: "cgrates.org:dan",
 				Unit: &UnitInfo{
-					UUID: "4b8b53d7-c1a1-4159-b845-4623a00a0165"},
+					UUID:   "4b8b53d7-c1a1-4159-b845-4623a00a0165",
+					Factor: 1,
+				},
 				Monetary: &MonetaryInfo{
-					UUID: "8c54a9e9-d610-4c82-bcb5-a315b9a65010"}},
+					UUID: "8c54a9e9-d610-4c82-bcb5-a315b9a65010",
+				},
+			},
 		},
 		&Increment{
 			Duration:       time.Second,
@@ -847,7 +861,10 @@ func TestECAsRefundIncrements(t *testing.T) {
 			BalanceInfo: &DebitInfo{
 				AccountID: "cgrates.org:dan",
 				Unit: &UnitInfo{
-					UUID: "4b8b53d7-c1a1-4159-b845-4623a00a0165"}},
+					UUID:   "4b8b53d7-c1a1-4159-b845-4623a00a0165",
+					Factor: 1,
+				},
+			},
 		},
 		&Increment{
 			Duration:       10 * time.Second,
@@ -865,9 +882,13 @@ func TestECAsRefundIncrements(t *testing.T) {
 			BalanceInfo: &DebitInfo{
 				AccountID: "cgrates.org:dan",
 				Unit: &UnitInfo{
-					UUID: "4b8b53d7-c1a1-4159-b845-4623a00a0165"},
+					UUID:   "4b8b53d7-c1a1-4159-b845-4623a00a0165",
+					Factor: 1,
+				},
 				Monetary: &MonetaryInfo{
-					UUID: "8c54a9e9-d610-4c82-bcb5-a315b9a65010"}},
+					UUID: "8c54a9e9-d610-4c82-bcb5-a315b9a65010",
+				},
+			},
 		},
 		&Increment{
 			Duration:       time.Second,
@@ -876,7 +897,10 @@ func TestECAsRefundIncrements(t *testing.T) {
 			BalanceInfo: &DebitInfo{
 				AccountID: "cgrates.org:dan",
 				Unit: &UnitInfo{
-					UUID: "4b8b53d7-c1a1-4159-b845-4623a00a0165"}},
+					UUID:   "4b8b53d7-c1a1-4159-b845-4623a00a0165",
+					Factor: 1,
+				},
+			},
 		},
 		&Increment{
 			Duration:       10 * time.Second,
@@ -894,9 +918,13 @@ func TestECAsRefundIncrements(t *testing.T) {
 			BalanceInfo: &DebitInfo{
 				AccountID: "cgrates.org:dan",
 				Unit: &UnitInfo{
-					UUID: "4b8b53d7-c1a1-4159-b845-4623a00a0165"},
+					UUID:   "4b8b53d7-c1a1-4159-b845-4623a00a0165",
+					Factor: 1,
+				},
 				Monetary: &MonetaryInfo{
-					UUID: "8c54a9e9-d610-4c82-bcb5-a315b9a65010"}},
+					UUID: "8c54a9e9-d610-4c82-bcb5-a315b9a65010",
+				},
+			},
 		},
 		&Increment{
 			Duration:       time.Second,
@@ -905,7 +933,10 @@ func TestECAsRefundIncrements(t *testing.T) {
 			BalanceInfo: &DebitInfo{
 				AccountID: "cgrates.org:dan",
 				Unit: &UnitInfo{
-					UUID: "4b8b53d7-c1a1-4159-b845-4623a00a0165"}},
+					UUID:   "4b8b53d7-c1a1-4159-b845-4623a00a0165",
+					Factor: 1,
+				},
+			},
 		},
 		&Increment{
 			Duration:       10 * time.Second,
@@ -923,9 +954,13 @@ func TestECAsRefundIncrements(t *testing.T) {
 			BalanceInfo: &DebitInfo{
 				AccountID: "cgrates.org:dan",
 				Unit: &UnitInfo{
-					UUID: "4b8b53d7-c1a1-4159-b845-4623a00a0165"},
+					UUID:   "4b8b53d7-c1a1-4159-b845-4623a00a0165",
+					Factor: 1,
+				},
 				Monetary: &MonetaryInfo{
-					UUID: "8c54a9e9-d610-4c82-bcb5-a315b9a65010"}},
+					UUID: "8c54a9e9-d610-4c82-bcb5-a315b9a65010",
+				},
+			},
 		},
 		&Increment{
 			Duration:       time.Second,
@@ -934,7 +969,10 @@ func TestECAsRefundIncrements(t *testing.T) {
 			BalanceInfo: &DebitInfo{
 				AccountID: "cgrates.org:dan",
 				Unit: &UnitInfo{
-					UUID: "4b8b53d7-c1a1-4159-b845-4623a00a0165"}},
+					UUID:   "4b8b53d7-c1a1-4159-b845-4623a00a0165",
+					Factor: 1,
+				},
+			},
 		},
 		&Increment{
 			Duration:       10 * time.Second,
@@ -952,9 +990,13 @@ func TestECAsRefundIncrements(t *testing.T) {
 			BalanceInfo: &DebitInfo{
 				AccountID: "cgrates.org:dan",
 				Unit: &UnitInfo{
-					UUID: "4b8b53d7-c1a1-4159-b845-4623a00a0165"},
+					UUID:   "4b8b53d7-c1a1-4159-b845-4623a00a0165",
+					Factor: 1,
+				},
 				Monetary: &MonetaryInfo{
-					UUID: "8c54a9e9-d610-4c82-bcb5-a315b9a65010"}},
+					UUID: "8c54a9e9-d610-4c82-bcb5-a315b9a65010",
+				},
+			},
 		},
 		&Increment{
 			Duration:       time.Second,
@@ -963,7 +1005,10 @@ func TestECAsRefundIncrements(t *testing.T) {
 			BalanceInfo: &DebitInfo{
 				AccountID: "cgrates.org:dan",
 				Unit: &UnitInfo{
-					UUID: "4b8b53d7-c1a1-4159-b845-4623a00a0165"}},
+					UUID:   "4b8b53d7-c1a1-4159-b845-4623a00a0165",
+					Factor: 1,
+				},
+			},
 		},
 		&Increment{
 			Duration:       10 * time.Second,
@@ -981,9 +1026,13 @@ func TestECAsRefundIncrements(t *testing.T) {
 			BalanceInfo: &DebitInfo{
 				AccountID: "cgrates.org:dan",
 				Unit: &UnitInfo{
-					UUID: "4b8b53d7-c1a1-4159-b845-4623a00a0165"},
+					UUID:   "4b8b53d7-c1a1-4159-b845-4623a00a0165",
+					Factor: 1,
+				},
 				Monetary: &MonetaryInfo{
-					UUID: "8c54a9e9-d610-4c82-bcb5-a315b9a65010"}},
+					UUID: "8c54a9e9-d610-4c82-bcb5-a315b9a65010",
+				},
+			},
 		},
 	}
 
@@ -2423,18 +2472,21 @@ func TestECSyncKeys(t *testing.T) {
 				AccountID:   "cgrates.org:dan",
 				BalanceUUID: "8c54a9e9-d610-4c82-bcb5-a315b9a65010",
 				Units:       0.01,
+				Factor:      1,
 				RatingID:    "21a5ab9",
 			},
 			"288bfa6": &BalanceCharge{
 				AccountID:   "cgrates.org:dan",
 				BalanceUUID: "8c54a9e9-d610-4c82-bcb5-a315b9a65010",
 				Units:       0.005,
+				Factor:      1,
 			},
 			"24d6c02": &BalanceCharge{
 				AccountID:     "cgrates.org:dan",
 				BalanceUUID:   "7a54a9e9-d610-4c82-bcb5-a315b9a65010",
 				RatingID:      "3cd6425",
 				Units:         1,
+				Factor:        1,
 				ExtraChargeID: "288bfa6",
 			},
 		},
@@ -2605,16 +2657,19 @@ func TestECSyncKeys(t *testing.T) {
 				AccountID:   "cgrates.org:dan",
 				BalanceUUID: "8c54a9e9-d610-4c82-bcb5-a315b9a65010",
 				Units:       0.01,
+				Factor:      1,
 				RatingID:    "21a5ab9",
 			},
 			"288bfa6": &BalanceCharge{
 				AccountID:   "cgrates.org:dan",
 				BalanceUUID: "8c54a9e9-d610-4c82-bcb5-a315b9a65010",
+				Factor:      1,
 				Units:       0.005,
 			},
 			"9bdad10": &BalanceCharge{
 				AccountID:   "cgrates.org:dan",
 				BalanceUUID: "8c54a9e9-d610-4c82-bcb5-a315b9a65010",
+				Factor:      1,
 				Units:       0.1,
 			},
 			"44d6c02": &BalanceCharge{
@@ -2622,12 +2677,14 @@ func TestECSyncKeys(t *testing.T) {
 				BalanceUUID:   "4b8b53d7-c1a1-4159-b845-4623a00a0165",
 				RatingID:      "3cd6425",
 				Units:         1,
+				Factor:        1,
 				ExtraChargeID: "288bfa6",
 			},
 			"3455b83": &BalanceCharge{
 				AccountID:     "cgrates.org:dan",
 				BalanceUUID:   "4b8b53d7-c1a1-4159-b845-4623a00a0165",
 				Units:         1,
+				Factor:        1,
 				ExtraChargeID: "*none",
 			},
 		},
@@ -3944,6 +4001,11 @@ func TestECAsDataProvider3(t *testing.T) {
 			exp:    "1s",
 		},
 		{
+			name:   "Factor",
+			fields: []string{"Charges[0]", "Increments[1]", "Accounting", "Factor"},
+			exp:    "1",
+		},
+		{
 			name:   "ExtraCharge",
 			fields: []string{"Charges[0]", "Increments[1]", "Accounting", "ExtraChargeID"},
 			exp:    "*none",
@@ -4103,6 +4165,11 @@ func TestECAsDataProvider3(t *testing.T) {
 			fields: []string{"Charges[0]", "Increments[3]", "Accounting", "ExtraCharge", "Units"},
 			exp:    "0.005",
 		},
+		{
+			name:   "Factor through ExtraCharge",
+			fields: []string{"Charges[0]", "Increments[3]", "Accounting", "ExtraCharge", "Factor"},
+			exp:    "1",
+		},
 		// ~*ec.Charges[0].Increments[3].Accounting.Rating.ConnectFee
 		// ~*ec.Charges[0].Rating.ConnectFee
 		// ~*ec.Charges[0].Increments[0].Accounting.Rating.RatingFilter.DestinationID
@@ -4145,7 +4212,6 @@ func TestECnewChargingIncrementMissingBalanceInfo(t *testing.T) {
 		Usage:          incr.Duration,
 		Cost:           incr.Cost,
 		CompressFactor: incr.CompressFactor,
-		BalanceFactor:  1,
 	}
 	rcv := ec.newChargingIncrement(incr, rf, false, false)
 
@@ -4195,11 +4261,12 @@ func TestECnewChargingIncrementNoUnitInfo(t *testing.T) {
 		Cost:           incr.Cost,
 		CompressFactor: incr.CompressFactor,
 		AccountingID:   utils.MetaPause,
-		BalanceFactor:  1,
 	}
 	expEC := &EventCost{
 		Accounting: Accounting{
-			utils.MetaPause: &BalanceCharge{},
+			utils.MetaPause: &BalanceCharge{
+				Factor: 1,
+			},
 		},
 	}
 	rcv := ec.newChargingIncrement(incr, rf, false, true)
