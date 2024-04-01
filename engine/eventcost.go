@@ -99,11 +99,10 @@ func (ec *EventCost) newChargingIncrement(incr *Increment, rf RatingMatchedFilte
 				rateID = ec.ratingIDForRateInterval(incr.BalanceInfo.Monetary.RateInterval, rf, isPause)
 			}
 			bc := &BalanceCharge{
-				AccountID:     incr.BalanceInfo.AccountID,
-				BalanceUUID:   incr.BalanceInfo.Monetary.UUID,
-				Units:         incr.Cost,
-				BalanceFactor: 1,
-				RatingID:      rateID,
+				AccountID:   incr.BalanceInfo.AccountID,
+				BalanceUUID: incr.BalanceInfo.Monetary.UUID,
+				Units:       incr.Cost,
+				RatingID:    rateID,
 			}
 			if isPause {
 				ecUUID = utils.MetaPause
@@ -119,10 +118,15 @@ func (ec *EventCost) newChargingIncrement(incr *Increment, rf RatingMatchedFilte
 			AccountID:     incr.BalanceInfo.AccountID,
 			BalanceUUID:   incr.BalanceInfo.Unit.UUID,
 			Units:         incr.BalanceInfo.Unit.Consumed,
-			BalanceFactor: incr.BalanceInfo.Unit.Factor,
 			RatingID:      rateID,
 			ExtraChargeID: ecUUID,
 		}
+
+		// Don't assign BalanceFactor unless it's different from 1.
+		if incr.BalanceInfo.Unit.Factor != 1 {
+			bc.BalanceFactor = incr.BalanceInfo.Unit.Factor
+		}
+
 		if isPause {
 			cIt.AccountingID = utils.MetaPause
 			ec.Accounting[utils.MetaPause] = bc
@@ -134,11 +138,10 @@ func (ec *EventCost) newChargingIncrement(incr *Increment, rf RatingMatchedFilte
 			rateID = ec.ratingIDForRateInterval(incr.BalanceInfo.Monetary.RateInterval, rf, isPause)
 		}
 		bc := &BalanceCharge{
-			AccountID:     incr.BalanceInfo.AccountID,
-			BalanceUUID:   incr.BalanceInfo.Monetary.UUID,
-			Units:         incr.Cost,
-			BalanceFactor: 1,
-			RatingID:      rateID,
+			AccountID:   incr.BalanceInfo.AccountID,
+			BalanceUUID: incr.BalanceInfo.Monetary.UUID,
+			Units:       incr.Cost,
+			RatingID:    rateID,
 		}
 		if isPause {
 			cIt.AccountingID = utils.MetaPause
@@ -389,6 +392,9 @@ func (ec *EventCost) AsRefundIncrements(tor string) (cd *CallDescriptor) {
 							UUID:   blncSmry.UUID,
 							Factor: blncCharge.BalanceFactor,
 						}
+						if blncCharge.BalanceFactor == 0 {
+							blncInfo.Unit.Factor = 1
+						}
 					}
 					if blncCharge.ExtraChargeID == utils.MetaNone ||
 						blncCharge.ExtraChargeID == utils.EmptyString {
@@ -404,6 +410,9 @@ func (ec *EventCost) AsRefundIncrements(tor string) (cd *CallDescriptor) {
 						blncInfo.Unit = &UnitInfo{
 							UUID:   extraSmry.UUID,
 							Factor: blncCharge.BalanceFactor,
+						}
+						if blncCharge.BalanceFactor == 0 {
+							blncInfo.Unit.Factor = 1
 						}
 					}
 				}
@@ -500,6 +509,14 @@ func (ec *EventCost) newIntervalFromCharge(cInc *ChargingIncrement) (incr *Incre
 			Consumed: cBC.Units,
 			Factor:   cBC.BalanceFactor,
 		}
+
+		// EventCost's BalanceFactor is changed to 0 when it's 1
+		// to be omitted from the json object. Ensure that the
+		// real value is assigned to the Factor inside UnitInfo.
+		if cBC.BalanceFactor == 0 {
+			incr.BalanceInfo.Unit.Factor = 1
+		}
+
 		incr.BalanceInfo.Unit.RateInterval = ec.rateIntervalForRatingID(cBC.RatingID)
 		if cBC.ExtraChargeID != utils.MetaNone {
 			cBC = ec.Accounting[cBC.ExtraChargeID] // overwrite original balance so we can process it in one place

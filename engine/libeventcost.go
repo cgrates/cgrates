@@ -191,7 +191,7 @@ type BalanceCharge struct {
 	BalanceUUID   string  // balance charged
 	RatingID      string  // special price applied on this balance
 	Units         float64 // number of units charged
-	BalanceFactor float64 // calculation multiplier for units; always 1 for *monetary balances
+	BalanceFactor float64 `json:",omitempty"` // calculation multiplier for units
 	ExtraChargeID string  // used in cases when paying *voice with *monetary
 }
 
@@ -212,6 +212,10 @@ func (bc *BalanceCharge) FieldAsInterface(fldPath []string) (val any, err error)
 	case utils.Units:
 		return bc.Units, nil
 	case utils.BalanceFactor:
+		if bc.BalanceFactor == 0 {
+			// If 0, return the real default value.
+			return 1.0, nil
+		}
 		return bc.BalanceFactor, nil
 	case utils.ExtraChargeID:
 		return bc.ExtraChargeID, nil
@@ -667,8 +671,7 @@ func NewFreeEventCost(cgrID, runID, account string, tStart time.Time, usage time
 			utils.MetaPause: {
 				AccountID: account,
 				// BalanceUUID: "",
-				RatingID:      utils.MetaPause,
-				BalanceFactor: 1,
+				RatingID: utils.MetaPause,
 			},
 		},
 		RatingFilters: RatingFilters{

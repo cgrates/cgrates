@@ -865,7 +865,7 @@ func (b *Balance) debit(cd *CallDescriptor, ub *Account, moneyBalances Balances,
 
 	// Compute the balance factor ahead of time. If the map is nil, or
 	// the factor is not found, it will default to 1.
-	bFactor := b.Factor.GetValue(cd.ExtraFields[utils.BalanceFactorID])
+	bFactor := b.Factors.GetValue(cd.ExtraFields[utils.BalanceFactorID])
 
 	if duration, err_ := utils.ParseZeroRatingSubject(tor, b.RatingSubject,
 		config.CgrConfig().RalsCfg().BalanceRatingSubject, isUnitBal); err_ == nil {
