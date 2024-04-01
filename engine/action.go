@@ -1263,7 +1263,7 @@ func resetAccountCDR(ub *Account, action *Action, acts Actions, fltrS *FilterS, 
 				Value:    &utils.ValueFormula{Static: bsum.Value},
 				Weight:   &bsum.Weight,
 				Disabled: &bsum.Disabled,
-				Factor:   &bsum.Factors,
+				Factors:  &bsum.Factors,
 			},
 		}, fltrS); err != nil {
 			utils.Logger.Warning(fmt.Sprintf("<%s> Error %s setting balance %s for account: %s", utils.Actions, err, bsum.UUID, account))

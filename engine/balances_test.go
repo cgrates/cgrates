@@ -341,7 +341,7 @@ func TestBalanceAsInterface(t *testing.T) {
 			"timingid1": true,
 			"timingid2": false,
 		},
-		Factor: ValueFactor{
+		Factors: ValueFactors{
 			"factor1": 2.21,
 			"factor2": 1.34,
 		},
@@ -365,7 +365,7 @@ func TestBalanceAsInterface(t *testing.T) {
 		t.Error(err)
 	} else if _, err = b.FieldAsInterface([]string{"Timings[2]", "val"}); err == nil {
 		t.Error(err)
-	} else if _, err = b.FieldAsInterface([]string{"Factor[factor1]", "secondVal"}); err == nil || err != utils.ErrNotFound {
+	} else if _, err = b.FieldAsInterface([]string{"Factors[factor1]", "secondVal"}); err == nil || err != utils.ErrNotFound {
 		t.Error(err)
 	}
 
@@ -379,7 +379,7 @@ func TestBalanceAsInterface(t *testing.T) {
 		t.Error(err)
 	} else if _, err = b.FieldAsInterface([]string{"Timings[0]"}); err != nil {
 		t.Error(err)
-	} else if _, err = b.FieldAsInterface([]string{"Factor[factor1]"}); err != nil {
+	} else if _, err = b.FieldAsInterface([]string{"Factors[factor1]"}); err != nil {
 		t.Error(err)
 	}
 	if _, err = b.FieldAsInterface([]string{utils.Uuid}); err != nil {
@@ -402,7 +402,7 @@ func TestBalanceAsInterface(t *testing.T) {
 		t.Error(err)
 	} else if _, err = b.FieldAsInterface([]string{utils.Disabled}); err != nil {
 		t.Error(err)
-	} else if _, err = b.FieldAsInterface([]string{utils.Factor}); err != nil {
+	} else if _, err = b.FieldAsInterface([]string{utils.Factors}); err != nil {
 		t.Error(err)
 	} else if _, err = b.FieldAsInterface([]string{utils.Blocker}); err != nil {
 		t.Error(err)
@@ -434,8 +434,8 @@ func TestBalanceAsInterface(t *testing.T) {
 
 }
 
-func TestValueFactorFieldAsInterface(t *testing.T) {
-	v := &ValueFactor{
+func TestValueFactorsFieldAsInterface(t *testing.T) {
+	v := &ValueFactors{
 		"FACT_VAL": 20.22,
 	}
 	if _, err := v.FieldAsInterface([]string{}); err == nil || err != utils.ErrNotFound {
@@ -447,7 +447,7 @@ func TestValueFactorFieldAsInterface(t *testing.T) {
 	}
 }
 func TestValueFactorFieldAsString(t *testing.T) {
-	v := &ValueFactor{
+	v := &ValueFactors{
 		"FACT_VAL": 20.22,
 	}
 	if _, err = v.FieldAsString([]string{"TEST"}); err == nil {
@@ -674,7 +674,7 @@ func TestBalanceDebitMoneyMaxCostFree(t *testing.T) {
 		Disabled:       false,
 		precision:      2,
 		RatingSubject:  "*val34",
-		Factor: ValueFactor{
+		Factors: ValueFactors{
 			"FACT_VAL": 20.22,
 		},
 	}
@@ -743,7 +743,7 @@ func TestBalanceDebitMoneyMaxCostDisconnect(t *testing.T) {
 		Disabled:       false,
 		precision:      2,
 		RatingSubject:  "*val34",
-		Factor: ValueFactor{
+		Factors: ValueFactors{
 			"FACT_VAL": 20.22,
 		},
 	}
@@ -830,7 +830,7 @@ func TestBalanceDebitMoney(t *testing.T) {
 		ExpirationDate: time.Date(2022, 11, 1, 20, 0, 0, 0, time.UTC),
 		precision:      2,
 		RatingSubject:  "*val34",
-		Factor: ValueFactor{
+		Factors: ValueFactors{
 			"FACT_VAL": 20.22,
 		},
 	}
@@ -911,7 +911,7 @@ func TestBalanceDebitUnits2(t *testing.T) {
 		Disabled:       false,
 		precision:      2,
 		RatingSubject:  "*val34",
-		Factor: ValueFactor{
+		Factors: ValueFactors{
 			"FACT_VAL": 20.22,
 		},
 	}
@@ -1076,7 +1076,7 @@ func TestBalanceDebitUnits5(t *testing.T) {
 		Disabled:       false,
 		precision:      2,
 		RatingSubject:  "*val34",
-		Factor: ValueFactor{
+		Factors: ValueFactors{
 			"FACT_VAL": 20.22,
 		},
 	}

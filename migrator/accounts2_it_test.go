@@ -172,7 +172,7 @@ func testAcc2ITMigrate(t *testing.T) {
 		SharedGroups:   utils.NewStringMap(),
 		Timings:        timingSlice,
 		TimingIDs:      utils.NewStringMap(""),
-		Factor:         engine.ValueFactor{}}
+		Factors:        engine.ValueFactors{}}
 	v2b := &engine.Balance{
 		Uuid: "", ID: "",
 		Value:          0.0001,
@@ -184,7 +184,7 @@ func testAcc2ITMigrate(t *testing.T) {
 		SharedGroups:   utils.NewStringMap(),
 		Timings:        timingSlice,
 		TimingIDs:      utils.NewStringMap(""),
-		Factor:         engine.ValueFactor{}}
+		Factors:        engine.ValueFactors{}}
 	m2 := &engine.Balance{
 		Uuid:           "",
 		ID:             "",
@@ -196,7 +196,7 @@ func testAcc2ITMigrate(t *testing.T) {
 		SharedGroups:   utils.NewStringMap(),
 		Timings:        timingSlice,
 		TimingIDs:      utils.NewStringMap(""),
-		Factor:         engine.ValueFactor{}}
+		Factors:        engine.ValueFactors{}}
 	testAccount := &engine.Account{
 		ID: "CUSTOMER_1:rif",
 		BalanceMap: map[string]engine.Balances{

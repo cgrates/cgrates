@@ -245,7 +245,7 @@ func testAccITMigrateAndMove(t *testing.T) {
 		SharedGroups:   utils.NewStringMap(),
 		Timings:        timingSlice,
 		TimingIDs:      utils.NewStringMap(""),
-		Factor:         engine.ValueFactor{}}
+		Factors:        engine.ValueFactors{}}
 	v2b := &engine.Balance{
 		Uuid: utils.EmptyString, ID: utils.EmptyString,
 		Value:          0.0001,
@@ -257,7 +257,7 @@ func testAccITMigrateAndMove(t *testing.T) {
 		SharedGroups:   utils.NewStringMap(),
 		Timings:        timingSlice,
 		TimingIDs:      utils.NewStringMap(""),
-		Factor:         engine.ValueFactor{}}
+		Factors:        engine.ValueFactors{}}
 	m2 := &engine.Balance{
 		Uuid:           utils.EmptyString,
 		ID:             utils.EmptyString,
@@ -269,7 +269,7 @@ func testAccITMigrateAndMove(t *testing.T) {
 		SharedGroups:   utils.NewStringMap(),
 		Timings:        timingSlice,
 		TimingIDs:      utils.NewStringMap(""),
-		Factor:         engine.ValueFactor{}}
+		Factors:        engine.ValueFactors{}}
 	testAccount := &engine.Account{
 		ID: "CUSTOMER_1:rif",
 		BalanceMap: map[string]engine.Balances{
