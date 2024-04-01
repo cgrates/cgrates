@@ -44,7 +44,7 @@ type Balance struct {
 	Timings        []*RITiming
 	TimingIDs      utils.StringMap
 	Disabled       bool
-	Factor         ValueFactor
+	Factors        ValueFactors
 	Blocker        bool
 	precision      int
 	account        *Account // used to store ub reference for shared balances
@@ -184,7 +184,7 @@ func (b *Balance) Clone() *Balance {
 		Blocker:        b.Blocker,
 		Disabled:       b.Disabled,
 		DestinationIDs: b.DestinationIDs,
-		Factor:         b.Factor,
+		Factors:        b.Factors,
 		dirty:          b.dirty,
 	}
 	if b.DestinationIDs != nil {
@@ -349,8 +349,8 @@ func (b *Balance) debitUnits(cd *CallDescriptor, ub *Account, moneyBalances Bala
 			//log.Printf("INCREMENET: %+v", inc)
 
 			amount := float64(inc.Duration.Nanoseconds())
-			if b.Factor != nil {
-				amount = utils.Round(amount/b.Factor.GetValue(cd.ToR),
+			if b.Factors != nil {
+				amount = utils.Round(amount/b.Factors.GetValue(cd.ToR),
 					globalRoundingDecimals, utils.MetaRoundingUp)
 			}
 			if b.GetValue() >= amount {
@@ -439,8 +439,8 @@ func (b *Balance) debitUnits(cd *CallDescriptor, ub *Account, moneyBalances Bala
 
 				// debit minutes and money
 				amount := float64(inc.Duration.Nanoseconds())
-				if b.Factor != nil {
-					amount = utils.Round(amount/b.Factor.GetValue(cd.ToR), globalRoundingDecimals, utils.MetaRoundingUp)
+				if b.Factors != nil {
+					amount = utils.Round(amount/b.Factors.GetValue(cd.ToR), globalRoundingDecimals, utils.MetaRoundingUp)
 				}
 				cost := inc.Cost
 				if strategy == utils.MetaMaxCostDisconnect && cd.MaxCostSoFar >= maxCost {
@@ -688,7 +688,7 @@ func (b *Balance) AsBalanceSummary(typ string) *BalanceSummary {
 		Value:    b.Value,
 		Weight:   b.Weight,
 		Disabled: b.Disabled,
-		Factors:  b.Factor,
+		Factors:  b.Factors,
 	}
 	if bd.ID == "" {
 		bd.ID = b.Uuid
@@ -783,9 +783,9 @@ func (bc Balances) SaveDirtyBalances(acc *Account, initBal map[string]float64) {
 	}
 }
 
-type ValueFactor map[string]float64
+type ValueFactors map[string]float64
 
-func (f ValueFactor) GetValue(category string) float64 {
+func (f ValueFactors) GetValue(category string) float64 {
 	if value, ok := f[category]; ok {
 		return value
 	}
@@ -801,7 +801,7 @@ type BalanceSummary struct {
 	Value    float64
 	Weight   float64 `json:",omitempty"`
 	Disabled bool
-	Factors  ValueFactor `json:",omitempty"`
+	Factors  ValueFactors `json:",omitempty"`
 }
 
 // BalanceSummaries is a list of BalanceSummaries
@@ -899,9 +899,9 @@ func (b *Balance) debit(cd *CallDescriptor, ub *Account, moneyBalances Balances,
 		for incIndex, inc := range ts.Increments {
 			//log.Printf("INCREMENET: %+v", inc)
 			amount := float64(inc.Duration)
-			if b.Factor != nil {
+			if b.Factors != nil {
 				amount = utils.Round(
-					amount*b.Factor.GetValue(cd.ExtraFields[utils.BalanceFactorID]),
+					amount*b.Factors.GetValue(cd.ExtraFields[utils.BalanceFactorID]),
 					globalRoundingDecimals, utils.MetaRoundingUp)
 			}
 			if b.GetValue() >= amount {
@@ -1044,9 +1044,9 @@ func (b *Balance) debit(cd *CallDescriptor, ub *Account, moneyBalances Balances,
 			canDebitCost := b.GetValue() >= cost
 			var moneyBal *Balance
 			if isUnitBal {
-				if b.Factor != nil {
+				if b.Factors != nil {
 					amount = utils.Round(
-						amount*b.Factor.GetValue(cd.ExtraFields[utils.BalanceFactorID]),
+						amount*b.Factors.GetValue(cd.ExtraFields[utils.BalanceFactorID]),
 						globalRoundingDecimals, utils.MetaRoundingUp)
 				}
 				for _, mb := range moneyBalances {
@@ -1224,8 +1224,8 @@ func (b *Balance) FieldAsInterface(fldPath []string) (val any, err error) {
 					return tm, nil
 				}
 				return tm.FieldAsInterface(fldPath[1:])
-			case utils.Factor:
-				val, has := b.Factor[*indx]
+			case utils.Factors:
+				val, has := b.Factors[*indx]
 				if !has || len(fldPath) != 1 {
 					return nil, utils.ErrNotFound
 				}
@@ -1301,11 +1301,11 @@ func (b *Balance) FieldAsInterface(fldPath []string) (val any, err error) {
 			return nil, utils.ErrNotFound
 		}
 		return b.Disabled, nil
-	case utils.Factor:
+	case utils.Factors:
 		if len(fldPath) == 1 {
-			return b.Factor, nil
+			return b.Factors, nil
 		}
-		return b.Factor.FieldAsInterface(fldPath[1:])
+		return b.Factors.FieldAsInterface(fldPath[1:])
 	case utils.Blocker:
 		if len(fldPath) != 1 {
 			return nil, utils.ErrNotFound
@@ -1323,11 +1323,11 @@ func (b *Balance) FieldAsString(fldPath []string) (val string, err error) {
 	return utils.IfaceAsString(iface), nil
 }
 
-func (f ValueFactor) String() string {
+func (f ValueFactors) String() string {
 	return utils.ToJSON(f)
 }
 
-func (f ValueFactor) FieldAsInterface(fldPath []string) (val any, err error) {
+func (f ValueFactors) FieldAsInterface(fldPath []string) (val any, err error) {
 	if f == nil || len(fldPath) != 1 {
 		return nil, utils.ErrNotFound
 	}
@@ -1338,7 +1338,7 @@ func (f ValueFactor) FieldAsInterface(fldPath []string) (val any, err error) {
 	return c, nil
 }
 
-func (f ValueFactor) FieldAsString(fldPath []string) (val string, err error) {
+func (f ValueFactors) FieldAsString(fldPath []string) (val string, err error) {
 	var iface any
 	iface, err = f.FieldAsInterface(fldPath)
 	if err != nil {

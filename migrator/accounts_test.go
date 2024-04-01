@@ -72,7 +72,7 @@ func TestV1AccountAsAccount(t *testing.T) {
 		SharedGroups:   utils.NewStringMap(""),
 		Timings:        []*engine.RITiming{{StartTime: "00:00:00"}},
 		TimingIDs:      utils.NewStringMap(""),
-		Factor:         engine.ValueFactor{},
+		Factors:        engine.ValueFactors{},
 	}
 	v2 := &engine.Balance{
 		Uuid:           "",
@@ -85,7 +85,7 @@ func TestV1AccountAsAccount(t *testing.T) {
 		SharedGroups:   utils.NewStringMap(""),
 		Timings:        []*engine.RITiming{{StartTime: "00:00:00"}},
 		TimingIDs:      utils.NewStringMap(""),
-		Factor:         engine.ValueFactor{},
+		Factors:        engine.ValueFactors{},
 	}
 	m2 := &engine.Balance{
 		Uuid:           "",
@@ -97,7 +97,7 @@ func TestV1AccountAsAccount(t *testing.T) {
 		SharedGroups:   utils.NewStringMap(""),
 		Timings:        []*engine.RITiming{{StartTime: "00:00:00"}},
 		TimingIDs:      utils.NewStringMap(""),
-		Factor:         engine.ValueFactor{},
+		Factors:        engine.ValueFactors{},
 	}
 	testAccount := &engine.Account{
 		ID: "CUSTOMER_1:rif",

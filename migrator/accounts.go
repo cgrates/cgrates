@@ -291,7 +291,7 @@ func (v1Acc v1Account) V1toV3Account() (ac *engine.Account) {
 				Timings:        oldBal.Timings,
 				TimingIDs:      utils.ParseStringMap(oldBal.TimingIDs),
 				Disabled:       oldBal.Disabled,
-				Factor:         engine.ValueFactor{},
+				Factors:        engine.ValueFactors{},
 			}
 		}
 	}
@@ -426,7 +426,7 @@ func (v2Acc v2Account) V2toV3Account() (ac *engine.Account) {
 				Timings:        oldBal.Timings,
 				TimingIDs:      oldBal.TimingIDs,
 				Disabled:       oldBal.Disabled,
-				Factor:         oldBal.Factor,
+				Factors:        oldBal.Factors,
 			}
 		}
 	}

@@ -42,7 +42,7 @@ type BalanceFilter struct {
 	TimingIDs      *utils.StringMap
 	Timings        []*RITiming
 	Disabled       *bool
-	Factor         *ValueFactor
+	Factors        *ValueFactors
 	Blocker        *bool
 }
 
@@ -125,7 +125,7 @@ func (bp *BalanceFilter) CreateBalance() *Balance {
 		Timings:        bp.Timings,
 		TimingIDs:      bp.GetTimingIDs(),
 		Disabled:       bp.GetDisabled(),
-		Factor:         bp.GetFactor(),
+		Factors:        bp.GetFactor(),
 		Blocker:        bp.GetBlocker(),
 	}
 	return b.Clone()
@@ -186,9 +186,9 @@ func (bf *BalanceFilter) Clone() *BalanceFilter {
 		result.Disabled = new(bool)
 		*result.Disabled = *bf.Disabled
 	}
-	if bf.Factor != nil {
-		result.Factor = new(ValueFactor)
-		*result.Factor = *bf.Factor
+	if bf.Factors != nil {
+		result.Factors = new(ValueFactors)
+		*result.Factors = *bf.Factors
 	}
 	if bf.Blocker != nil {
 		result.Blocker = new(bool)
@@ -233,8 +233,8 @@ func (bf *BalanceFilter) LoadFromBalance(b *Balance) *BalanceFilter {
 		copy(bf.Timings, b.Timings)
 
 	}
-	if len(b.Factor) != 0 {
-		bf.Factor = &b.Factor
+	if len(b.Factors) != 0 {
+		bf.Factors = &b.Factors
 	}
 	if b.Disabled {
 		bf.Disabled = &b.Disabled
@@ -359,11 +359,11 @@ func (bp *BalanceFilter) GetExpirationDate() time.Time {
 	return *bp.ExpirationDate
 }
 
-func (bp *BalanceFilter) GetFactor() ValueFactor {
-	if bp == nil || bp.Factor == nil {
-		return ValueFactor{}
+func (bp *BalanceFilter) GetFactor() ValueFactors {
+	if bp == nil || bp.Factors == nil {
+		return ValueFactors{}
 	}
-	return *bp.Factor
+	return *bp.Factors
 }
 
 func (bp *BalanceFilter) EmptyExpirationDate() bool {
@@ -479,11 +479,11 @@ func (bp *BalanceFilter) FieldAsInterface(fldPath []string) (val any, err error)
 					return tm, nil
 				}
 				return tm.FieldAsInterface(fldPath[1:])
-			case utils.Factor:
-				if bp.Factor == nil {
+			case utils.Factors:
+				if bp.Factors == nil {
 					return nil, utils.ErrNotFound
 				}
-				val, has := (*bp.Factor)[*indx]
+				val, has := (*bp.Factors)[*indx]
 				if !has || len(fldPath) != 1 {
 					return nil, utils.ErrNotFound
 				}
@@ -600,14 +600,14 @@ func (bp *BalanceFilter) FieldAsInterface(fldPath []string) (val any, err error)
 			return nil, utils.ErrNotFound
 		}
 		return bp.TimingIDs.FieldAsInterface(fldPath[1:])
-	case utils.Factor:
+	case utils.Factors:
 		if len(fldPath) == 1 {
-			return bp.Factor, nil
+			return bp.Factors, nil
 		}
-		if bp.Factor == nil {
+		if bp.Factors == nil {
 			return nil, utils.ErrNotFound
 		}
-		return bp.Factor.FieldAsInterface(fldPath[1:])
+		return bp.Factors.FieldAsInterface(fldPath[1:])
 	case utils.Value:
 		if len(fldPath) == 1 {
 			return bp.Value, nil

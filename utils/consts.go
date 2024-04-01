@@ -876,7 +876,6 @@ const (
 	Weights                 = "Weights"
 	UnitFactors             = "UnitFactors"
 	CostIncrements          = "CostIncrements"
-	Factor                  = "Factor"
 	Factors                 = "Factors"
 	Method                  = "Method"
 	Static                  = "Static"

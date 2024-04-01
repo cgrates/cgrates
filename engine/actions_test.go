@@ -1076,7 +1076,7 @@ func TestActionTopupResetCredit(t *testing.T) {
 	}
 }
 
-func TestActionTopupValueFactor(t *testing.T) {
+func TestActionTopupValueFactors(t *testing.T) {
 	ub := &Account{
 		ID:         "TEST_UB",
 		BalanceMap: map[string]Balances{},
@@ -1090,9 +1090,9 @@ func TestActionTopupValueFactor(t *testing.T) {
 	}
 	topupResetAction(ub, a, nil, nil, nil, time.Now(), ActionConnCfg{})
 	if len(ub.BalanceMap) != 1 ||
-		ub.BalanceMap[utils.MetaMonetary][0].Factor[utils.MetaMonetary] != 2.0 {
-		t.Errorf("Topup reset action failed to set Factor: %+v",
-			ub.BalanceMap[utils.MetaMonetary][0].Factor)
+		ub.BalanceMap[utils.MetaMonetary][0].Factors[utils.MetaMonetary] != 2.0 {
+		t.Errorf("Topup reset action failed to set Factors: %+v",
+			ub.BalanceMap[utils.MetaMonetary][0].Factors)
 	}
 }
 

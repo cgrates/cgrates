@@ -133,7 +133,7 @@ func TestBalanceFilterClone(t *testing.T) {
 			{Months: utils.Months{4}},
 		},
 		Disabled: utils.BoolPointer(true),
-		Factor:   &ValueFactor{AccountActionsCSVContent: 0.7},
+		Factors:  &ValueFactors{AccountActionsCSVContent: 0.7},
 		Blocker:  utils.BoolPointer(true),
 	}
 	eOut = &BalanceFilter{
@@ -167,7 +167,7 @@ func TestBalanceFilterClone(t *testing.T) {
 			{Months: utils.Months{4}},
 		},
 		Disabled: utils.BoolPointer(true),
-		Factor:   &ValueFactor{AccountActionsCSVContent: 0.7},
+		Factors:  &ValueFactors{AccountActionsCSVContent: 0.7},
 		Blocker:  utils.BoolPointer(true),
 	}
 	rcv := bf.Clone()
@@ -194,7 +194,7 @@ func TestBalanceLoadFromBalance(t *testing.T) {
 		SharedGroups:   &utils.StringMap{},
 		Timings:        []*RITiming{},
 		TimingIDs:      &utils.StringMap{},
-		Factor:         &ValueFactor{},
+		Factors:        &ValueFactors{},
 		Disabled:       utils.BoolPointer(true),
 		Blocker:        utils.BoolPointer(true),
 	}
@@ -231,8 +231,8 @@ func TestBalanceLoadFromBalance(t *testing.T) {
 		TimingIDs: utils.StringMap{
 			"timing": true,
 		},
-		Factor: ValueFactor{
-			"valfac": 1 / 22,
+		Factors: ValueFactors{
+			"valfac": 1.0 / 22.0,
 		},
 		Disabled: true,
 		Blocker:  true,
@@ -273,8 +273,8 @@ func TestBalanceLoadFromBalance(t *testing.T) {
 		TimingIDs: &utils.StringMap{
 			"timing": true,
 		},
-		Factor: &ValueFactor{
-			"valfac": 1 / 22,
+		Factors: &ValueFactors{
+			"valfac": 1.0 / 22.0,
 		},
 		Disabled: utils.BoolPointer(true),
 		Blocker:  utils.BoolPointer(true),
@@ -300,7 +300,7 @@ func TestBalanceFilterFieldAsInterface(t *testing.T) {
 		t.Error(err)
 	} else if _, err = bp.FieldAsInterface([]string{"Timings[indx]"}); err == nil {
 		t.Error(err)
-	} else if _, err = bp.FieldAsInterface([]string{"Factor[indx]"}); err == nil || err != utils.ErrNotFound {
+	} else if _, err = bp.FieldAsInterface([]string{"Factors[indx]"}); err == nil || err != utils.ErrNotFound {
 		t.Error(err)
 	} else if _, err = bp.FieldAsInterface([]string{"Uuid"}); err != nil {
 		t.Error(err)
@@ -328,7 +328,7 @@ func TestBalanceFilterFieldAsInterface(t *testing.T) {
 		t.Error(err)
 	} else if _, err = bp.FieldAsInterface([]string{"TimingIDs"}); err != nil {
 		t.Error(err)
-	} else if _, err = bp.FieldAsInterface([]string{"Factor"}); err != nil {
+	} else if _, err = bp.FieldAsInterface([]string{"Factors"}); err != nil {
 		t.Error(err)
 	} else if _, err = bp.FieldAsInterface([]string{"Value"}); err != nil {
 		t.Error(err)
@@ -370,7 +370,7 @@ func TestBalanceFilterFieldAsInterface(t *testing.T) {
 		TimingIDs: &utils.StringMap{
 			"timing": true,
 		},
-		Factor: &ValueFactor{
+		Factors: &ValueFactors{
 			"valfac": 22,
 		},
 		Disabled: utils.BoolPointer(false),
@@ -385,7 +385,7 @@ func TestBalanceFilterFieldAsInterface(t *testing.T) {
 		t.Error(err)
 	} else if _, err := bp.FieldAsInterface([]string{"TimingIDs[indx]"}); err == nil {
 		t.Error(err)
-	} else if _, err := bp.FieldAsInterface([]string{"Factor[indx]"}); err == nil || err != utils.ErrNotFound {
+	} else if _, err := bp.FieldAsInterface([]string{"Factors[indx]"}); err == nil || err != utils.ErrNotFound {
 		t.Error(err)
 	}
 
@@ -397,7 +397,7 @@ func TestBalanceFilterFieldAsInterface(t *testing.T) {
 		t.Error(err)
 	} else if _, err := bp.FieldAsInterface([]string{"TimingIDs[timing]"}); err != nil {
 		t.Error(err)
-	} else if _, err := bp.FieldAsInterface([]string{"Factor[valfac]"}); err != nil {
+	} else if _, err := bp.FieldAsInterface([]string{"Factors[valfac]"}); err != nil {
 		t.Error(err)
 	}
 

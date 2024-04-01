@@ -293,7 +293,7 @@ TimingIDs
 Disabled
 	Makes the *Balance* invisible to charging.
 
-Factor
+Factors
 	Used in case of of *\*generic* *BalanceType* to specify the conversion factors for different type of events.
 
 Blocker

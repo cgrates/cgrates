@@ -237,14 +237,14 @@ func (acc *Account) debitBalanceAction(a *Action, reset, resetIfNegative bool, f
 		bClone.dirty = true // Mark the balance as dirty since we have modified and it should be checked by action triggers
 		a.balanceValue = bClone.GetValue()
 		bClone.Uuid = utils.GenUUID() // alway overwrite the uuid for consistency
-		// load ValueFactor if defined in extra parametrs
+		// load ValueFactors if defined in extra parametrs
 		if a.ExtraParameters != "" {
-			vf := ValueFactor{}
+			vf := ValueFactors{}
 			err := json.Unmarshal([]byte(a.ExtraParameters), &vf)
 			if err == nil {
-				bClone.Factor = vf
+				bClone.Factors = vf
 			} else {
-				utils.Logger.Warning(fmt.Sprintf("Could load value factor from actions: extra parametrs: %s", a.ExtraParameters))
+				utils.Logger.Warning(fmt.Sprintf("Could load value factors from actions: extra parametrs: %s", a.ExtraParameters))
 			}
 		}
 		acc.BalanceMap[balanceType] = append(acc.BalanceMap[balanceType], bClone)
