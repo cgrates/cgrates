@@ -581,6 +581,7 @@ const (
 	RateUnit                 = "RateUnit"
 	BalanceUUID              = "BalanceUUID"
 	RatingID                 = "RatingID"
+	BalanceFactor            = "BalanceFactor"
 	ExtraChargeID            = "ExtraChargeID"
 	ConnectFee               = "ConnectFee"
 	RoundingMethod           = "RoundingMethod"
