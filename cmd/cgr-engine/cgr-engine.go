@@ -462,6 +462,7 @@ func main() {
 	internalAPIerSv2Chan := make(chan birpc.ClientConnector, 1)
 	internalLoaderSChan := make(chan birpc.ClientConnector, 1)
 	internalEEsChan := make(chan birpc.ClientConnector, 1)
+	internalERsChan := make(chan birpc.ClientConnector, 1)
 
 	// initialize the connManager before creating the DMService
 	// because we need to pass the connection to it
@@ -625,10 +626,10 @@ func main() {
 
 	ldrs := services.NewLoaderService(cfg, dmService, filterSChan, server,
 		internalLoaderSChan, connManager, anz, srvDep)
+	erS := services.NewEventReaderService(cfg, filterSChan, shdChan, connManager, server, internalERsChan, anz, srvDep)
 
 	srvManager.AddServices(gvService, attrS, chrS, tS, stS, reS, routeS, schS, rals,
-		apiSv1, apiSv2, cdrS, smg, coreS,
-		services.NewEventReaderService(cfg, filterSChan, shdChan, connManager, srvDep),
+		apiSv1, apiSv2, cdrS, smg, coreS, erS,
 		services.NewDNSAgent(cfg, filterSChan, shdChan, connManager, srvDep),
 		services.NewFreeswitchAgent(cfg, shdChan, connManager, srvDep),
 		services.NewKamailioAgent(cfg, shdChan, connManager, srvDep),
