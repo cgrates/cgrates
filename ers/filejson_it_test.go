@@ -340,7 +340,7 @@ func TestFileJSONProcessEvent(t *testing.T) {
 		cgrCfg:    cfg,
 		cfgIdx:    0,
 		fltrS:     fltrs,
-		dir:       "/tmp/ErsJSON/out/",
+		dir:       filePath,
 		rdrEvents: make(chan *erEvent, 1),
 		rdrError:  make(chan error, 1),
 		rdrExit:   make(chan struct{}),
@@ -366,7 +366,7 @@ func TestFileJSONProcessEvent(t *testing.T) {
 	// expEvent := &utils.CGREvent{}
 	eR.conReqs <- struct{}{}
 	fname := "file1.json"
-	if err := eR.processFile(filePath, fname); err != nil {
+	if err := eR.processFile(fname); err != nil {
 		t.Error(err)
 	}
 	select {
@@ -393,7 +393,7 @@ func TestFileJSONProcessEventReadError(t *testing.T) {
 		cgrCfg:    cfg,
 		cfgIdx:    0,
 		fltrS:     fltrs,
-		dir:       "/tmp/ErsJSON/out/",
+		dir:       filePath,
 		rdrEvents: make(chan *erEvent, 1),
 		rdrError:  make(chan error, 1),
 		rdrExit:   make(chan struct{}),
@@ -401,7 +401,7 @@ func TestFileJSONProcessEventReadError(t *testing.T) {
 	}
 	eR.conReqs <- struct{}{}
 	errExpect := "open /tmp/TestFileJSONProcessEvent/file2.json: no such file or directory"
-	if err := eR.processFile(filePath, fname); err == nil || err.Error() != errExpect {
+	if err := eR.processFile(fname); err == nil || err.Error() != errExpect {
 		t.Errorf("Expected %v but received %v", errExpect, err)
 	}
 }
@@ -441,7 +441,7 @@ func TestFileJSONProcessEventError2(t *testing.T) {
 		cgrCfg:    cfg,
 		cfgIdx:    0,
 		fltrS:     fltrs,
-		dir:       "/tmp/ErsJSON/out/",
+		dir:       filePath,
 		rdrEvents: make(chan *erEvent, 1),
 		rdrError:  make(chan error, 1),
 		rdrExit:   make(chan struct{}),
@@ -454,7 +454,7 @@ func TestFileJSONProcessEventError2(t *testing.T) {
 	}
 	fname := "file1.json"
 	errExpect := "unsupported type: <>"
-	if err := eR.processFile(filePath, fname); err == nil || err.Error() != errExpect {
+	if err := eR.processFile(fname); err == nil || err.Error() != errExpect {
 		t.Errorf("Expected %v but received %v", errExpect, err)
 	}
 	if err := os.RemoveAll(filePath); err != nil {
@@ -500,7 +500,7 @@ func TestFileJSONProcessEventError3(t *testing.T) {
 		cgrCfg:    cfg,
 		cfgIdx:    0,
 		fltrS:     fltrs,
-		dir:       "/tmp/ErsJSON/out/",
+		dir:       filePath,
 		rdrEvents: make(chan *erEvent, 1),
 		rdrError:  make(chan error, 1),
 		rdrExit:   make(chan struct{}),
@@ -512,13 +512,13 @@ func TestFileJSONProcessEventError3(t *testing.T) {
 	//
 	eR.Config().Filters = []string{"Filter1"}
 	errExpect := "NOT_FOUND:Filter1"
-	if err := eR.processFile(filePath, fname); err == nil || err.Error() != errExpect {
+	if err := eR.processFile(fname); err == nil || err.Error() != errExpect {
 		t.Errorf("Expected %v but received %v", errExpect, err)
 	}
 
 	//
 	eR.Config().Filters = []string{"*exists:~*req..Account:"}
-	if err := eR.processFile(filePath, fname); err != nil {
+	if err := eR.processFile(fname); err != nil {
 		t.Error(err)
 	}
 	if err := os.RemoveAll(filePath); err != nil {

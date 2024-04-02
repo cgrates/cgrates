@@ -848,7 +848,7 @@ func (ldr *Loader) handleFolder(stopChan chan struct{}) {
 	}
 }
 
-func (ldr *Loader) processFile(_, itmID string) (err error) {
+func (ldr *Loader) processFile(itmID string) (err error) {
 	loaderType := ldr.getLdrType(itmID)
 	if len(loaderType) == 0 {
 		return

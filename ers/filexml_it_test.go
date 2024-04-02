@@ -402,7 +402,7 @@ func TestFileXMLProcessEvent(t *testing.T) {
 		cgrCfg:    cfg,
 		cfgIdx:    0,
 		fltrS:     fltrs,
-		dir:       "/tmp/xmlErs/out",
+		dir:       filePath,
 		rdrEvents: make(chan *erEvent, 1),
 		rdrError:  make(chan error, 1),
 		rdrExit:   make(chan struct{}),
@@ -424,7 +424,7 @@ func TestFileXMLProcessEvent(t *testing.T) {
 
 	eR.conReqs <- struct{}{}
 	fileName := "file1.xml"
-	if err := eR.processFile(filePath, fileName); err != nil {
+	if err := eR.processFile(fileName); err != nil {
 		t.Error(err)
 	}
 	expEvent := &utils.CGREvent{
@@ -458,7 +458,7 @@ func TestFileXMLProcessEventError1(t *testing.T) {
 		cgrCfg:    cfg,
 		cfgIdx:    0,
 		fltrS:     fltrs,
-		dir:       "/tmp/xmlErs/out/",
+		dir:       filePath,
 		rdrEvents: make(chan *erEvent, 1),
 		rdrError:  make(chan error, 1),
 		rdrExit:   make(chan struct{}),
@@ -466,7 +466,7 @@ func TestFileXMLProcessEventError1(t *testing.T) {
 	}
 	eR.conReqs <- struct{}{}
 	errExpect := "open /tmp/TestFileXMLProcessEvent/file1.xml: no such file or directory"
-	if err := eR.processFile(filePath, fname); err == nil || err.Error() != errExpect {
+	if err := eR.processFile(fname); err == nil || err.Error() != errExpect {
 		t.Errorf("Expected %v but received %v", errExpect, err)
 	}
 }
@@ -504,7 +504,7 @@ func TestFileXMLProcessEVentError2(t *testing.T) {
 		cgrCfg:    cfg,
 		cfgIdx:    0,
 		fltrS:     fltrs,
-		dir:       "/tmp/xmlErs/out/",
+		dir:       filePath,
 		rdrEvents: make(chan *erEvent, 1),
 		rdrError:  make(chan error, 1),
 		rdrExit:   make(chan struct{}),
@@ -520,14 +520,14 @@ func TestFileXMLProcessEVentError2(t *testing.T) {
 	//
 	eR.Config().Filters = []string{"Filter1"}
 	errExpect := "NOT_FOUND:Filter1"
-	if err := eR.processFile(filePath, fname); err == nil || err.Error() != errExpect {
+	if err := eR.processFile(fname); err == nil || err.Error() != errExpect {
 		t.Errorf("Expected %v but received %v", errExpect, err)
 	}
 
 	//
 	eR.Config().Filters = []string{"*exists:~*req..Account:"}
 	errExpect = "rename /tmp/TestFileXMLProcessEvent/file1.xml /var/spool/cgrates/ers/out/file1.xml: no such file or directory"
-	if err := eR.processFile(filePath, fname); err == nil || err.Error() != errExpect {
+	if err := eR.processFile(fname); err == nil || err.Error() != errExpect {
 		t.Errorf("Expected %v but received %v", errExpect, err)
 	}
 	if err := os.RemoveAll(filePath); err != nil {
@@ -554,7 +554,7 @@ func TestFileXMLProcessEventParseError(t *testing.T) {
 		cgrCfg:    cfg,
 		cfgIdx:    0,
 		fltrS:     fltrs,
-		dir:       "/tmp/xmlErs/out",
+		dir:       filePath,
 		rdrEvents: make(chan *erEvent, 1),
 		rdrError:  make(chan error, 1),
 		rdrExit:   make(chan struct{}),
@@ -564,7 +564,7 @@ func TestFileXMLProcessEventParseError(t *testing.T) {
 
 	fileName := "file1.xml"
 	errExpect := "XML syntax error on line 2: unexpected EOF"
-	if err := eR.processFile(filePath, fileName); err == nil || err.Error() != errExpect {
+	if err := eR.processFile(fileName); err == nil || err.Error() != errExpect {
 		t.Errorf("Expected %v but received %v", errExpect, err)
 	}
 	if err := os.RemoveAll(filePath); err != nil {

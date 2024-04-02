@@ -75,9 +75,9 @@ func testWatchWatcherEvents(t *testing.T) {
 		Op:   fsnotify.Create,
 	}
 	stopWatching := make(chan struct{}, 1)
-	f := func(itmPath, itmID string) error {
+	f := func(itmID string) error {
 		close(stopWatching)
-		if itmPath != "/tmp" || itmID != "file.txt" {
+		if itmID != "file.txt" {
 			t.Errorf("Invalid directory or file")
 		}
 		return fmt.Errorf("Can't match path")

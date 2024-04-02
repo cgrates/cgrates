@@ -395,7 +395,7 @@ func TestFileCSVProcessEvent(t *testing.T) {
 		cgrCfg:    cfg,
 		cfgIdx:    0,
 		fltrS:     fltrs,
-		dir:       "/tmp/ers/out/",
+		dir:       filePath,
 		rdrEvents: make(chan *erEvent, 1),
 		rdrError:  make(chan error, 1),
 		rdrExit:   make(chan struct{}),
@@ -505,7 +505,7 @@ func TestFileCSVProcessEvent(t *testing.T) {
 	}
 
 	fname := "file1.csv"
-	if err := eR.processFile(filePath, fname); err != nil {
+	if err := eR.processFile(fname); err != nil {
 		t.Error(err)
 	}
 	select {
@@ -532,7 +532,7 @@ func TestFileCSVProcessEventError(t *testing.T) {
 		cgrCfg:    cfg,
 		cfgIdx:    0,
 		fltrS:     fltrs,
-		dir:       "/tmp/ers/out/",
+		dir:       filePath,
 		rdrEvents: make(chan *erEvent, 1),
 		rdrError:  make(chan error, 1),
 		rdrExit:   make(chan struct{}),
@@ -540,7 +540,7 @@ func TestFileCSVProcessEventError(t *testing.T) {
 	}
 	eR.conReqs <- struct{}{}
 	errExpect := "open /tmp/TestFileCSVProcessEvent/file1.csv: no such file or directory"
-	if err := eR.processFile(filePath, fname); err == nil || err.Error() != errExpect {
+	if err := eR.processFile(fname); err == nil || err.Error() != errExpect {
 		t.Errorf("Expected %v but received %v", errExpect, err)
 	}
 }
@@ -565,7 +565,7 @@ func TestFileCSVProcessEventError2(t *testing.T) {
 		cgrCfg:    cfg,
 		cfgIdx:    0,
 		fltrS:     fltrs,
-		dir:       "/tmp/ers/out/",
+		dir:       filePath,
 		rdrEvents: make(chan *erEvent, 1),
 		rdrError:  make(chan error, 1),
 		rdrExit:   make(chan struct{}),
@@ -578,7 +578,7 @@ func TestFileCSVProcessEventError2(t *testing.T) {
 	}
 
 	errExpect := "unsupported type: <>"
-	if err := eR.processFile(filePath, fname); err == nil || err.Error() != errExpect {
+	if err := eR.processFile(fname); err == nil || err.Error() != errExpect {
 		t.Errorf("Expected %v but received %v", errExpect, err)
 	}
 	if err := os.RemoveAll(filePath); err != nil {
@@ -609,7 +609,7 @@ func TestFileCSVProcessEventError3(t *testing.T) {
 		cgrCfg:    cfg,
 		cfgIdx:    0,
 		fltrS:     fltrs,
-		dir:       "/tmp/ers/out/",
+		dir:       filePath,
 		rdrEvents: make(chan *erEvent, 1),
 		rdrError:  make(chan error, 1),
 		rdrExit:   make(chan struct{}),
@@ -620,14 +620,14 @@ func TestFileCSVProcessEventError3(t *testing.T) {
 	//
 	eR.Config().Filters = []string{"Filter1"}
 	errExpect := "NOT_FOUND:Filter1"
-	if err := eR.processFile(filePath, fname); err == nil || err.Error() != errExpect {
+	if err := eR.processFile(fname); err == nil || err.Error() != errExpect {
 		t.Errorf("Expected %v but received %v", errExpect, err)
 	}
 
 	//
 	eR.Config().Filters = []string{"*exists:~*req..Account:"}
 	errExpect = "Invalid fieldPath [ Account]"
-	if err := eR.processFile(filePath, fname); err == nil || err.Error() != errExpect {
+	if err := eR.processFile(fname); err == nil || err.Error() != errExpect {
 		t.Errorf("Expected %v but received %v", errExpect, err)
 	}
 	if err := os.RemoveAll(filePath); err != nil {
