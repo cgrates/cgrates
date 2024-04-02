@@ -283,7 +283,7 @@ func TestFileFWVProcessEvent(t *testing.T) {
 		cgrCfg:    cfg,
 		cfgIdx:    0,
 		fltrS:     fltrs,
-		dir:       "/tmp/fwvErs/out",
+		dir:       filePath,
 		rdrEvents: make(chan *erEvent, 1),
 		rdrError:  make(chan error, 1),
 		rdrExit:   make(chan struct{}),
@@ -304,7 +304,7 @@ func TestFileFWVProcessEvent(t *testing.T) {
 		},
 	}
 	eR.Config().Fields[0].ComputePath()
-	if err := eR.processFile(filePath, fname); err == nil || err.Error() != errExpect {
+	if err := eR.processFile(fname); err == nil || err.Error() != errExpect {
 		t.Errorf("Expected %v but received %v", errExpect, err)
 	}
 	if err := os.RemoveAll(filePath); err != nil {

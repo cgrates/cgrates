@@ -455,7 +455,7 @@ cgrates.org,NewRes1
 	}
 
 	//loader file is empty (loaderType will be empty)
-	if err := ldr.processFile("unusedValue", utils.ResourcesCsv); err != nil {
+	if err := ldr.processFile(utils.ResourcesCsv); err != nil {
 		t.Error(err)
 	}
 
@@ -482,7 +482,7 @@ cgrates.org,NewRes1
 	}
 
 	//successfully processed the file
-	if err := ldr.processFile("unusedValue", utils.ResourcesCsv); err != nil {
+	if err := ldr.processFile(utils.ResourcesCsv); err != nil {
 		t.Error(err)
 	}
 
@@ -509,7 +509,7 @@ cgrates.org,NewRes1
 
 	//cannot move file when tpOutDir is empty
 	ldr.tpOutDir = utils.EmptyString
-	if err := ldr.processFile("unusedValue", utils.ResourcesCsv); err != nil {
+	if err := ldr.processFile(utils.ResourcesCsv); err != nil {
 		t.Error(err)
 	}
 
@@ -569,7 +569,7 @@ cgrates.org,NewRes1
 		},
 	}
 
-	if err := ldr.processFile("unusedValue", "inexistent.csv"); err != nil {
+	if err := ldr.processFile("inexistent.csv"); err != nil {
 		t.Error(err)
 	}
 
@@ -615,7 +615,7 @@ cgrates.org,NewRes1
 
 	//unable to lock the folder, because lockFileName is missing
 	expected := "open /tmp/test/.cgr.lck: no such file or directory"
-	if err := ldr.processFile("unusedValue", utils.ResourcesCsv); err == nil || err.Error() != expected {
+	if err := ldr.processFile(utils.ResourcesCsv); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 
@@ -655,7 +655,7 @@ cgrates.org,NewRes1
 
 	//unable to lock the folder, because lockFileName is missing
 	expected := "open /tmp/testProcessFileUnableToOpen/resources: no such file or directory"
-	if err := ldr.processFile("unusedValue", `resources`); err == nil || err.Error() != expected {
+	if err := ldr.processFile(`resources`); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 
@@ -721,7 +721,7 @@ cgrates.org,NewRes1
 	file.Close()
 
 	expected := "rename /tmp/testProcessFileLockFolder/Resources.csv INEXISTING_FILE/Resources.csv: no such file or directory"
-	if err := ldr.processFile("unusedValue", utils.ResourcesCsv); err == nil || err.Error() != expected {
+	if err := ldr.processFile(utils.ResourcesCsv); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 
