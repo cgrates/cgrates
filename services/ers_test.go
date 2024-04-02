@@ -22,6 +22,7 @@ import (
 	"sync"
 	"testing"
 
+	"github.com/cgrates/cgrates/cores"
 	"github.com/cgrates/cgrates/ers"
 
 	"github.com/cgrates/cgrates/config"
@@ -37,7 +38,8 @@ func TestEventReaderSCoverage(t *testing.T) {
 	filterSChan <- nil
 	shdChan := utils.NewSyncedChan()
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
-	srv := NewEventReaderService(cfg, filterSChan, shdChan, nil, srvDep)
+	server := cores.NewServer(nil)
+	srv := NewEventReaderService(cfg, filterSChan, shdChan, nil, server, nil, nil, srvDep)
 
 	if srv.IsRunning() {
 		t.Errorf("Expected service to be down")

@@ -20,9 +20,12 @@ package services
 
 import (
 	"fmt"
+	"strings"
 	"sync"
 
+	"github.com/cgrates/birpc"
 	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/cores"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/ers"
 	"github.com/cgrates/cgrates/servmanager"
@@ -30,15 +33,25 @@ import (
 )
 
 // NewEventReaderService returns the EventReader Service
-func NewEventReaderService(cfg *config.CGRConfig, filterSChan chan *engine.FilterS,
-	shdChan *utils.SyncedChan, connMgr *engine.ConnManager,
-	srvDep map[string]*sync.WaitGroup) servmanager.Service {
+func NewEventReaderService(
+	cfg *config.CGRConfig,
+	filterSChan chan *engine.FilterS,
+	shdChan *utils.SyncedChan,
+	connMgr *engine.ConnManager,
+	server *cores.Server,
+	intConn chan birpc.ClientConnector,
+	anz *AnalyzerService,
+	srvDep map[string]*sync.WaitGroup,
+) servmanager.Service {
 	return &EventReaderService{
 		rldChan:     make(chan struct{}, 1),
 		cfg:         cfg,
 		filterSChan: filterSChan,
 		shdChan:     shdChan,
 		connMgr:     connMgr,
+		server:      server,
+		intConn:     intConn,
+		anz:         anz,
 		srvDep:      srvDep,
 	}
 }
@@ -54,6 +67,9 @@ type EventReaderService struct {
 	rldChan  chan struct{}
 	stopChan chan struct{}
 	connMgr  *engine.ConnManager
+	server   *cores.Server
+	intConn  chan birpc.ClientConnector
+	anz      *AnalyzerService
 	srvDep   map[string]*sync.WaitGroup
 }
 
@@ -77,6 +93,21 @@ func (erS *EventReaderService) Start() (err error) {
 	// build the service
 	erS.ers = ers.NewERService(erS.cfg, filterS, erS.connMgr)
 	go erS.listenAndServe(erS.ers, erS.stopChan, erS.rldChan)
+
+	// Register ERs methods whose names start with "V1" under the "ErSv1" object name.
+	srv, err := birpc.NewServiceWithMethodsRename(erS.ers, utils.ErS, true, func(oldFn string) (newFn string) {
+		return strings.TrimPrefix(oldFn, "V1")
+	})
+	if err != nil {
+		return err
+	}
+	engine.RegisterPingMethod(srv.Methods)
+
+	if !erS.cfg.DispatcherSCfg().Enabled {
+		erS.server.RpcRegister(srv)
+	}
+
+	erS.intConn <- erS.anz.GetInternalCodec(srv, utils.ERs)
 	return
 }
 

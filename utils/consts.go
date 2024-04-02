@@ -999,6 +999,7 @@ const (
 	ConfigS     = "ConfigS"
 	DispatcherS = "DispatcherS"
 	EeS         = "EeS"
+	ErS         = "ErS"
 	FilterS     = "FilterS"
 	GuardianS   = "GuardianS"
 	LoaderS     = "LoaderS"
@@ -1798,6 +1799,13 @@ const (
 	EeSv1             = "EeSv1"
 	EeSv1Ping         = "EeSv1.Ping"
 	EeSv1ProcessEvent = "EeSv1.ProcessEvent"
+)
+
+// ERs
+const (
+	ErSv1          = "ErSv1"
+	ErSv1Ping      = "ErSv1.Ping"
+	ErSv1RunReader = "ErSv1.RunReader"
 )
 
 // cgr_ variables
