@@ -354,7 +354,7 @@ func TestERsListenAndServeCfgRldChan5(t *testing.T) {
 		cgrCfg:    cfg,
 		cfgIdx:    0,
 		fltrS:     nil,
-		rdrDir:    "",
+		dir:       "",
 		rdrEvents: nil,
 		rdrError:  nil,
 		rdrExit:   nil,
