@@ -20,10 +20,10 @@ package services
 
 import (
 	"fmt"
-	"strings"
 	"sync"
 
 	"github.com/cgrates/birpc"
+	v1 "github.com/cgrates/cgrates/apier/v1"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/cores"
 	"github.com/cgrates/cgrates/engine"
@@ -94,15 +94,11 @@ func (erS *EventReaderService) Start() (err error) {
 	erS.ers = ers.NewERService(erS.cfg, filterS, erS.connMgr)
 	go erS.listenAndServe(erS.ers, erS.stopChan, erS.rldChan)
 
-	// Register ERs methods whose names start with "V1" under the "ErSv1" object name.
-	srv, err := birpc.NewServiceWithMethodsRename(erS.ers, utils.ErS, true, func(oldFn string) (newFn string) {
-		return strings.TrimPrefix(oldFn, "V1")
-	})
+	// Register ERsV1 methods.
+	srv, err := birpc.NewService(v1.NewErSv1(erS.ers), "", false)
 	if err != nil {
 		return err
 	}
-	engine.RegisterPingMethod(srv.Methods)
-
 	if !erS.cfg.DispatcherSCfg().Enabled {
 		erS.server.RpcRegister(srv)
 	}
