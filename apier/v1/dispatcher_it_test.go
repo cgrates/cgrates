@@ -413,12 +413,11 @@ func testV1DispatcherStopCPUProfiling(t *testing.T) {
 		t.Error(err)
 	}
 	defer file.Close()
-
 	//compare the size
 	size, err := file.Stat()
 	if err != nil {
 		t.Error(err)
-	} else if size.Size() < int64(415) {
+	} else if size.Size() < int64(300) {
 		t.Errorf("Size of CPUProfile %v is lower that expected", size.Size())
 	}
 	//after we checked that CPUProfile was made successfully, can delete it

@@ -156,7 +156,7 @@ func TestHttpBytesPoster(t *testing.T) {
 		RPC:   &config.RPCOpts{},
 	})
 	time.Sleep(5 * time.Millisecond)
-	fs, err := filepath.Glob("/tmp/test2*")
+	fs, err := filepath.Glob("/tmp/EEs|*")
 	if err != nil {
 		t.Fatal(err)
 	} else if len(fs) == 0 {

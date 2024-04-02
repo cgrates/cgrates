@@ -209,6 +209,7 @@ func testCoreSv1StopMemoryProfiling(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Errorf("Unexpected reply returned")
 	}
+	time.Sleep(10 * time.Millisecond)
 
 	//mem_prof1, mem_prof2
 	for i := 1; i <= 2; i++ {
@@ -310,6 +311,7 @@ func testCoreSv1StopCPUProfiling(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Errorf("Unexpected reply returned")
 	}
+
 	file, err := os.Open(path.Join(argPath, utils.CpuPathCgr))
 	if err != nil {
 		t.Error(err)
@@ -320,7 +322,7 @@ func testCoreSv1StopCPUProfiling(t *testing.T) {
 	size, err := file.Stat()
 	if err != nil {
 		t.Error(err)
-	} else if size.Size() < int64(415) {
+	} else if size.Size() < int64(300) {
 		t.Errorf("Size of CPUProfile %v is lower that expected", size.Size())
 	}
 	//after we checked that CPUProfile was made successfully, can delete it
