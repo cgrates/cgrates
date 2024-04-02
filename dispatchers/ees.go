@@ -45,7 +45,7 @@ func (dS *DispatcherService) EeSv1Ping(ctx *context.Context, args *utils.CGREven
 			return
 		}
 	}
-	return dS.Dispatch(&utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaCore, utils.EeSv1Ping, args, reply)
+	return dS.Dispatch(&utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaEEs, utils.EeSv1Ping, args, reply)
 }
 
 func (dS *DispatcherService) EeSv1ProcessEvent(ctx *context.Context, args *engine.CGREventWithEeIDs, reply *map[string]map[string]any) (err error) {
@@ -67,5 +67,5 @@ func (dS *DispatcherService) EeSv1ProcessEvent(ctx *context.Context, args *engin
 			return
 		}
 	}
-	return dS.Dispatch(&utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaCore, utils.EeSv1ProcessEvent, args, reply)
+	return dS.Dispatch(&utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaEEs, utils.EeSv1ProcessEvent, args, reply)
 }
