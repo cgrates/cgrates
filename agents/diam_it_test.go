@@ -24,6 +24,7 @@ package agents
 import (
 	"flag"
 	"fmt"
+	"os"
 	"os/exec"
 	"path"
 	"strings"
@@ -33,7 +34,6 @@ import (
 
 	"github.com/cgrates/birpc"
 	"github.com/cgrates/birpc/context"
-	v1 "github.com/cgrates/cgrates/apier/v1"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -1469,39 +1469,27 @@ func testDiamItEmulateTerminate(t *testing.T) {
 	if diamConfigDIR == "dispatchers/diamagent" {
 		t.SkipNow()
 	}
-	var result string
-	//add the second charger
-	chargerProfile := &v1.ChargerWithAPIOpts{
-		ChargerProfile: &engine.ChargerProfile{
-			Tenant:       "cgrates.com",
-			ID:           "CustomCharger",
-			RunID:        "CustomCharger",
-			AttributeIDs: []string{"*constant:*req.Category:custom_charger"},
-			Weight:       20,
-		},
+	//add a default charger
+	tpDirPath := t.TempDir()
+	filePath := path.Join(tpDirPath, utils.ChargersCsv)
+	err := os.WriteFile(filePath,
+		[]byte(`cgrates.com,CustomCharger,,,CustomCharger,*constant:*req.Category:custom_charger,20
+cgrates.com,Default,,,*default,*none,20`),
+		0644)
+	if err != nil {
+		t.Errorf("could not write to file %s: %v",
+			filePath, err)
+	}
+	var reply string
+	args := &utils.AttrLoadTpFromFolder{FolderPath: tpDirPath}
+	err = apierRpc.Call(context.Background(),
+		utils.APIerSv1LoadTariffPlanFromFolder,
+		args, &reply)
+	if err != nil {
+		t.Errorf("%s call failed for path %s: %v",
+			utils.APIerSv1LoadTariffPlanFromFolder, tpDirPath, err)
 	}
 
-	if err := apierRpc.Call(context.Background(), utils.APIerSv1SetChargerProfile, chargerProfile, &result); err != nil {
-		t.Error(err)
-	} else if result != utils.OK {
-		t.Error("Unexpected reply returned", result)
-	}
-	//add the second charger
-	chargerProfile2 := &v1.ChargerWithAPIOpts{
-		ChargerProfile: &engine.ChargerProfile{
-			Tenant:       "cgrates.com",
-			ID:           "Default",
-			RunID:        "*default",
-			AttributeIDs: []string{"*none"},
-			Weight:       20,
-		},
-	}
-
-	if err := apierRpc.Call(context.Background(), utils.APIerSv1SetChargerProfile, chargerProfile2, &result); err != nil {
-		t.Error(err)
-	} else if result != utils.OK {
-		t.Error("Unexpected reply returned", result)
-	}
 	//set the account
 	attrSetBalance := utils.AttrSetBalance{
 		Tenant:      "cgrates.com",
@@ -1513,7 +1501,6 @@ func testDiamItEmulateTerminate(t *testing.T) {
 			utils.Categories: "custom_charger",
 		},
 	}
-	var reply string
 	if err := apierRpc.Call(context.Background(), utils.APIerSv2SetBalance, attrSetBalance, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {

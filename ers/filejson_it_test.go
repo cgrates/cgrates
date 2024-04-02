@@ -33,8 +33,6 @@ import (
 	"github.com/cgrates/birpc/context"
 
 	"github.com/cgrates/birpc"
-	v1 "github.com/cgrates/cgrates/apier/v1"
-	v2 "github.com/cgrates/cgrates/apier/v2"
 
 	"github.com/cgrates/cgrates/engine"
 
@@ -133,30 +131,30 @@ func testJSONRpcConn(t *testing.T) {
 }
 
 func testJSONAddData(t *testing.T) {
-	var reply string
 	//add a charger
-	chargerProfile := &v1.ChargerWithAPIOpts{
-		ChargerProfile: &engine.ChargerProfile{
-			Tenant: "cgrates.org",
-			ID:     "Default",
-			ActivationInterval: &utils.ActivationInterval{
-				ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
-			},
-			RunID:        utils.MetaDefault,
-			AttributeIDs: []string{"*none"},
-			Weight:       20,
-		},
-		APIOpts: map[string]any{
-			utils.CacheOpt: utils.MetaReload,
-		},
+	tpDirPath := t.TempDir()
+	filePath := path.Join(tpDirPath, utils.ChargersCsv)
+	err := os.WriteFile(filePath,
+		[]byte("cgrates.org,Default,,2014-07-14T14:35:00Z,*default,*none,20"),
+		0644)
+	if err != nil {
+		t.Errorf("could not write to file %s: %v",
+			filePath, err)
 	}
-	if err := jsonRPC.Call(context.Background(), utils.APIerSv1SetChargerProfile, chargerProfile, &reply); err != nil {
-		t.Error(err)
-	} else if reply != utils.OK {
-		t.Error("Unexpected reply returned", reply)
+	var reply string
+	args := &utils.AttrLoadTpFromFolder{FolderPath: tpDirPath}
+	err = jsonRPC.Call(context.Background(),
+		utils.APIerSv1LoadTariffPlanFromFolder,
+		args, &reply)
+	if err != nil {
+		t.Errorf("%s call failed for path %s: %v",
+			utils.APIerSv1LoadTariffPlanFromFolder, tpDirPath, err)
 	}
 
-	attrSetAcnt := v2.AttrSetAccount{
+	attrSetAcnt := struct {
+		Tenant  string
+		Account string
+	}{
 		Tenant:  "cgrates.org",
 		Account: "voiceAccount",
 	}
