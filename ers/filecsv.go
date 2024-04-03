@@ -44,7 +44,7 @@ func NewCSVFileER(cfg *config.CGRConfig, cfgIdx int,
 		cgrCfg:        cfg,
 		cfgIdx:        cfgIdx,
 		fltrS:         fltrS,
-		dir:           srcPath,
+		sourceDir:     srcPath,
 		rdrEvents:     rdrEvents,
 		partialEvents: partialEvents,
 		rdrError:      rdrErr,
@@ -62,13 +62,12 @@ type CSVFileER struct {
 	cgrCfg        *config.CGRConfig
 	cfgIdx        int // index of config instance within ERsCfg.Readers
 	fltrS         *engine.FilterS
-	dir           string
+	sourceDir     string        // path to the directory monitored by the reader for new events
 	rdrEvents     chan *erEvent // channel to dispatch the events created to
 	partialEvents chan *erEvent // channel to dispatch the partial events created to
 	rdrError      chan error
 	rdrExit       chan struct{}
 	conReqs       chan struct{} // limit number of opened files
-
 }
 
 func (rdr *CSVFileER) Config() *config.EventReaderCfg {
@@ -84,11 +83,11 @@ func (rdr *CSVFileER) serveDefault() {
 			tm.Stop()
 			utils.Logger.Info(
 				fmt.Sprintf("<%s> stop monitoring path <%s>",
-					utils.ERs, rdr.dir))
+					utils.ERs, rdr.sourceDir))
 			return
 		case <-tm.C:
 		}
-		processReaderDir(rdr.dir, utils.CSVSuffix, rdr.processFile)
+		processReaderDir(rdr.sourceDir, utils.CSVSuffix, rdr.processFile)
 		tm.Reset(rdr.Config().RunDelay)
 	}
 }
@@ -98,7 +97,7 @@ func (rdr *CSVFileER) Serve() (err error) {
 	case time.Duration(0): // 0 disables the automatic read, maybe done per API
 		return
 	case time.Duration(-1):
-		return utils.WatchDir(rdr.dir, rdr.processFile,
+		return utils.WatchDir(rdr.sourceDir, rdr.processFile,
 			utils.ERs, rdr.rdrExit)
 	default:
 		go rdr.serveDefault()
@@ -112,7 +111,7 @@ func (rdr *CSVFileER) processFile(fName string) (err error) {
 		processFile := <-rdr.conReqs // Queue here for maxOpenFiles
 		defer func() { rdr.conReqs <- processFile }()
 	}
-	absPath := path.Join(rdr.dir, fName)
+	absPath := path.Join(rdr.sourceDir, fName)
 	utils.Logger.Info(
 		fmt.Sprintf("<%s> parsing <%s>", utils.ERs, absPath))
 	var file *os.File

@@ -43,7 +43,6 @@ func (eeSv1 *ErSv1) Ping(ctx *context.Context, ign *utils.CGREvent, reply *strin
 //
 // Note: This API is not safe to call concurrently for the same reader. Ensure the current files finish being
 // processed before calling again.
-func (eeSv1 *ErSv1) RunReader(ctx *context.Context, args utils.StringWithAPIOpts,
-	reply *string) error {
-	return eeSv1.erS.V1RunReader(ctx, args, reply)
+func (eeSv1 *ErSv1) RunReader(ctx *context.Context, params ers.V1RunReaderParams, reply *string) error {
+	return eeSv1.erS.V1RunReader(ctx, params, reply)
 }
