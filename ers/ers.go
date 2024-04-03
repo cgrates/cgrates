@@ -81,15 +81,23 @@ type ERService struct {
 	partialCache *ltcache.Cache
 }
 
+// V1RunReaderParams contains required parameters for an ErSv1.RunReader request.
+type V1RunReaderParams struct {
+	Tenant   string
+	ID       string // unique identifier of the request
+	ReaderID string
+	APIOpts  map[string]any
+}
+
 // V1RunReader processes files in the configured directory for the given reader. This function handles files
 // based on the reader's type and configuration. Only available for readers that are not processing files
 // automatically (RunDelay should equal 0).
 //
 // Note: This API is not safe to call concurrently for the same reader. Ensure the current files finish being
 // processed before calling again.
-func (erS *ERService) V1RunReader(ctx *context.Context, rdrID utils.StringWithAPIOpts, reply *string) error {
-	rdrCfg := erS.cfg.ERsCfg().ReaderCfg(rdrID.Arg)
-	er, has := erS.rdrs[rdrID.Arg]
+func (erS *ERService) V1RunReader(ctx *context.Context, params V1RunReaderParams, reply *string) error {
+	rdrCfg := erS.cfg.ERsCfg().ReaderCfg(params.ReaderID)
+	er, has := erS.rdrs[params.ReaderID]
 	if !has || rdrCfg == nil {
 		return utils.ErrNotFound
 	}
@@ -98,13 +106,13 @@ func (erS *ERService) V1RunReader(ctx *context.Context, rdrID utils.StringWithAP
 	}
 	switch rdr := er.(type) {
 	case *CSVFileER:
-		processReaderDir(rdr.dir, utils.CSVSuffix, rdr.processFile)
+		processReaderDir(rdr.sourceDir, utils.CSVSuffix, rdr.processFile)
 	case *XMLFileER:
-		processReaderDir(rdr.dir, utils.XMLSuffix, rdr.processFile)
+		processReaderDir(rdr.sourceDir, utils.XMLSuffix, rdr.processFile)
 	case *FWVFileER:
-		processReaderDir(rdr.dir, utils.FWVSuffix, rdr.processFile)
+		processReaderDir(rdr.sourceDir, utils.FWVSuffix, rdr.processFile)
 	case *JSONFileER:
-		processReaderDir(rdr.dir, utils.JSNSuffix, rdr.processFile)
+		processReaderDir(rdr.sourceDir, utils.JSNSuffix, rdr.processFile)
 	default:
 		return errors.New("reader type does not yet support manual processing")
 	}
