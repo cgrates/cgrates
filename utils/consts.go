@@ -413,6 +413,7 @@ const (
 	MetaUCH                  = "*uch"
 	MetaGuardian             = "*guardians"
 	MetaEEs                  = "*ees"
+	MetaERs                  = "*ers"
 	MetaContinue             = "*continue"
 	Migrator                 = "migrator"
 	UnsupportedMigrationTask = "unsupported migration task"
