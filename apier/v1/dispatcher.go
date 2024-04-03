@@ -26,6 +26,7 @@ import (
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/dispatchers"
 	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/ers"
 	"github.com/cgrates/cgrates/sessions"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/ltcache"
@@ -970,7 +971,7 @@ func (dS *DispatcherCoreSv1) Panic(ctx *context.Context, args *utils.PanicMessag
 	return dS.dS.CoreSv1Panic(ctx, args, reply)
 }
 
-// DispatcherCoreSv1 exports RPC from CoreSv1
+// DispatcherEeSv1 exports RPC from EeSv1.
 type DispatcherEeSv1 struct {
 	dS *dispatchers.DispatcherService
 }
@@ -985,6 +986,23 @@ func (dS *DispatcherEeSv1) Ping(ctx *context.Context, args *utils.CGREvent, repl
 
 func (dS *DispatcherEeSv1) ProcessEvent(ctx *context.Context, args *engine.CGREventWithEeIDs, reply *map[string]map[string]any) error {
 	return dS.dS.EeSv1ProcessEvent(ctx, args, reply)
+}
+
+// DispatcherErSv1 exports RPC from ErSv1.
+type DispatcherErSv1 struct {
+	dS *dispatchers.DispatcherService
+}
+
+func NewDispatcherErSv1(dps *dispatchers.DispatcherService) *DispatcherErSv1 {
+	return &DispatcherErSv1{dS: dps}
+}
+
+func (dS *DispatcherErSv1) Ping(ctx *context.Context, cgrEv *utils.CGREvent, reply *string) error {
+	return dS.dS.ErSv1Ping(ctx, cgrEv, reply)
+}
+
+func (dS *DispatcherErSv1) ProcessEvent(ctx *context.Context, params ers.V1RunReaderParams, reply *string) error {
+	return dS.dS.ErSv1RunReader(ctx, params, reply)
 }
 
 type DispatcherReplicatorSv1 struct {

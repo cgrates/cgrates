@@ -201,6 +201,13 @@ func newDispatcherServiceMap(val *dispatchers.DispatcherService) (engine.IntServ
 	}
 	srvMap[srv.Name] = srv
 
+	srv, err = birpc.NewService(v1.NewDispatcherErSv1(val),
+		utils.ErSv1, true)
+	if err != nil {
+		return nil, err
+	}
+	srvMap[srv.Name] = srv
+
 	srv, err = birpc.NewService(v1.NewDispatcherGuardianSv1(val),
 		utils.GuardianSv1, true)
 	if err != nil {
