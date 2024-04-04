@@ -61,7 +61,7 @@ var (
 
 // Test start here
 func TestExportCDRs(t *testing.T) {
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 		eeSConfigDIR = "ees_internal"
 	case utils.MetaMySQL:
@@ -91,7 +91,7 @@ func testEEsPrepareFolder(t *testing.T) {
 
 func testEEsInitCfg(t *testing.T) {
 	var err error
-	eeSCfgPath = path.Join(*dataDir, "conf", "samples", eeSConfigDIR)
+	eeSCfgPath = path.Join(*utils.DataDir, "conf", "samples", eeSConfigDIR)
 	eeSCfg, err = config.NewCGRConfigFromPath(eeSCfgPath)
 	if err != nil {
 		t.Fatal(err)
@@ -113,7 +113,7 @@ func testEEsResetStorDb(t *testing.T) {
 
 // Start CGR Engine
 func testEEsStartEngine(t *testing.T) {
-	if _, err := engine.StopStartEngine(eeSCfgPath, *waitRater); err != nil {
+	if _, err := engine.StopStartEngine(eeSCfgPath, *utils.WaitRater); err != nil {
 		t.Fatal(err)
 	}
 }

@@ -1,3 +1,5 @@
+//go:build integration || flaky || offline || kafka || call || race || performance
+
 /*
 Real-time Online/Offline Charging System (OCS) for Telecom & ISP environments
 Copyright (C) ITsysCOM GmbH
@@ -16,24 +18,15 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 
-package v2
+package utils
 
 import (
-	"errors"
-
-	"github.com/cgrates/birpc"
-	"github.com/cgrates/birpc/jsonrpc"
-	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/utils"
+	"flag"
 )
 
-func newRPCClient(cfg *config.ListenCfg) (c *birpc.Client, err error) {
-	switch *utils.Encoding {
-	case utils.MetaJSON:
-		return jsonrpc.Dial(utils.TCP, cfg.RPCJSONListen)
-	case utils.MetaGOB:
-		return birpc.Dial(utils.TCP, cfg.RPCGOBListen)
-	default:
-		return nil, errors.New("UNSUPPORTED_RPC")
-	}
-}
+var (
+	DataDir   = flag.String("data_dir", "/usr/share/cgrates", "Path to the CGR data directory.")
+	WaitRater = flag.Int("wait_rater", 100, "Time (in ms) to wait for rater initialization.")
+	Encoding  = flag.String("rpc", MetaJSON, "Encoding type for RPC communication (e.g., JSON).")
+	DBType    = flag.String("dbtype", MetaInternal, "Type of database (Internal/Mongo/MySQL/Postgres).")
+)

@@ -73,7 +73,7 @@ func TestS3Export(t *testing.T) {
 
 func testS3LoadConfig(t *testing.T) {
 	var err error
-	s3CfgPath = path.Join(*dataDir, "conf", "samples", s3ConfDir)
+	s3CfgPath = path.Join(*utils.DataDir, "conf", "samples", s3ConfDir)
 	if s3Cfg, err = config.NewCGRConfigFromPath(s3CfgPath); err != nil {
 		t.Error(err)
 	}
@@ -98,7 +98,7 @@ func testS3ResetStorDb(t *testing.T) {
 }
 
 func testS3StartEngine(t *testing.T) {
-	if _, err := engine.StopStartEngine(s3CfgPath, *waitRater); err != nil {
+	if _, err := engine.StopStartEngine(s3CfgPath, *utils.WaitRater); err != nil {
 		t.Fatal(err)
 	}
 }

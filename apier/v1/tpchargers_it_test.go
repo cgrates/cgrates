@@ -62,7 +62,7 @@ var sTestsTPChrgs = []func(t *testing.T){
 
 // Test start here
 func TestTPChrgsIT(t *testing.T) {
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 		tpChrgsConfigDIR = "tutinternal"
 	case utils.MetaMySQL:
@@ -81,7 +81,7 @@ func TestTPChrgsIT(t *testing.T) {
 
 func testTPChrgsInitCfg(t *testing.T) {
 	var err error
-	tpChrgsCfgPath = path.Join(*dataDir, "conf", "samples", tpChrgsConfigDIR)
+	tpChrgsCfgPath = path.Join(*utils.DataDir, "conf", "samples", tpChrgsConfigDIR)
 	tpChrgsCfg, err = config.NewCGRConfigFromPath(tpChrgsCfgPath)
 	if err != nil {
 		t.Error(err)

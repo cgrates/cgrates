@@ -61,7 +61,7 @@ var sTestsTPResources = []func(t *testing.T){
 
 // Test start here
 func TestTPResIT(t *testing.T) {
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 		tpResConfigDIR = "tutinternal"
 	case utils.MetaMySQL:
@@ -80,7 +80,7 @@ func TestTPResIT(t *testing.T) {
 
 func testTPResInitCfg(t *testing.T) {
 	var err error
-	tpResCfgPath = path.Join(*dataDir, "conf", "samples", tpResConfigDIR)
+	tpResCfgPath = path.Join(*utils.DataDir, "conf", "samples", tpResConfigDIR)
 	tpResCfg, err = config.NewCGRConfigFromPath(tpResCfgPath)
 	if err != nil {
 		t.Error(err)

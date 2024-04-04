@@ -62,7 +62,7 @@ var (
 // this tests may fail because of apiban limit( 5 requests per 2 minutes for an APIKey)
 // if needed add more APIKeys
 func TestPrecacheIT(t *testing.T) {
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 		t.SkipNow()
 	case utils.MetaMySQL:
@@ -84,7 +84,7 @@ func TestPrecacheIT(t *testing.T) {
 
 func testPrecacheInitCfg(t *testing.T) {
 	var err error
-	precacheCfgPath = path.Join(*dataDir, "conf", "samples", "precache", precacheConfigDIR)
+	precacheCfgPath = path.Join(*utils.DataDir, "conf", "samples", "precache", precacheConfigDIR)
 	precacheCfg, err = config.NewCGRConfigFromPath(precacheCfgPath)
 	if err != nil {
 		t.Error(err)
@@ -98,7 +98,7 @@ func testPrecacheResetDataDB(t *testing.T) {
 }
 
 func testPrecacheStartEngine(t *testing.T) {
-	if _, err := engine.StopStartEngine(precacheCfgPath, *waitRater); err != nil {
+	if _, err := engine.StopStartEngine(precacheCfgPath, *utils.WaitRater); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -138,7 +138,7 @@ func testPrecacheGetCacheStatsBeforeLoad(t *testing.T) {
 
 func testPrecacheFromFolder(t *testing.T) {
 	var reply string
-	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "precache")}
+	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*utils.DataDir, "tariffplans", "precache")}
 	if err := precacheRPC.Call(context.Background(), utils.APIerSv1LoadTariffPlanFromFolder, attrs, &reply); err != nil {
 		t.Error(err)
 	}
@@ -146,7 +146,7 @@ func testPrecacheFromFolder(t *testing.T) {
 }
 
 func testPrecacheRestartEngine(t *testing.T) {
-	if _, err := engine.StopStartEngine(precacheCfgPath, *waitRater); err != nil {
+	if _, err := engine.StopStartEngine(precacheCfgPath, *utils.WaitRater); err != nil {
 		t.Fatal(err)
 	}
 	var err error
@@ -240,7 +240,7 @@ func testPrecacheGetCacheStatsAfterRestart(t *testing.T) {
 }
 
 func testPrecacheKillEngine(t *testing.T) {
-	if err := engine.KillEngine(*waitRater); err != nil {
+	if err := engine.KillEngine(*utils.WaitRater); err != nil {
 		t.Error(err)
 	}
 }

@@ -56,7 +56,7 @@ var (
 )
 
 func TestSesNoneReqTypeItSessions(t *testing.T) {
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 		sesNoneReqTypeCfgDir = "tutinternal"
 	case utils.MetaMySQL:
@@ -74,7 +74,7 @@ func TestSesNoneReqTypeItSessions(t *testing.T) {
 }
 
 func testSesNoneReqTypeItLoadConfig(t *testing.T) {
-	sesNoneReqTypeCfgPath = path.Join(*dataDir, "conf", "samples", sesNoneReqTypeCfgDir)
+	sesNoneReqTypeCfgPath = path.Join(*utils.DataDir, "conf", "samples", sesNoneReqTypeCfgDir)
 	if sesNoneReqTypeCfg, err = config.NewCGRConfigFromPath(sesNoneReqTypeCfgPath); err != nil {
 		t.Error(err)
 	}
@@ -93,7 +93,7 @@ func testSesNoneReqTypeItResetStorDb(t *testing.T) {
 }
 
 func testSesNoneReqTypeItStartEngine(t *testing.T) {
-	if _, err := engine.StopStartEngine(sesNoneReqTypeCfgPath, *waitRater); err != nil {
+	if _, err := engine.StopStartEngine(sesNoneReqTypeCfgPath, *utils.WaitRater); err != nil {
 		t.Fatal(err)
 	}
 }

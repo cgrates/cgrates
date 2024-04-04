@@ -35,7 +35,7 @@ import (
 )
 
 func TestFilterHTTP(t *testing.T) {
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 	case utils.MetaMySQL, utils.MetaMongo, utils.MetaPostgres:
 		t.SkipNow()
@@ -171,7 +171,7 @@ cgrates.org,ATTR_DEST,*any,FLTR_DST_1002;FLTR_DEST,,,*req.Supplier,*constant,Sup
 		ConfigJSON: content,
 		TpFiles:    tpFiles,
 	}
-	client, _, shutdown, err := testEnv.Setup(t, *waitRater)
+	client, _, shutdown, err := testEnv.Setup(t, *utils.WaitRater)
 	if err != nil {
 		t.Fatal(err)
 	}

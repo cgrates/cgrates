@@ -62,7 +62,7 @@ var sTestsTPAccPlans = []func(t *testing.T){
 
 // Test start here
 func TestTPAccPlansIT(t *testing.T) {
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 		tpAccPlansConfigDIR = "tutinternal"
 	case utils.MetaMySQL:
@@ -81,7 +81,7 @@ func TestTPAccPlansIT(t *testing.T) {
 
 func testTPAccPlansInitCfg(t *testing.T) {
 	var err error
-	tpAccPlansCfgPath = path.Join(*dataDir, "conf", "samples", tpAccPlansConfigDIR)
+	tpAccPlansCfgPath = path.Join(*utils.DataDir, "conf", "samples", tpAccPlansConfigDIR)
 	tpAccPlansCfg, err = config.NewCGRConfigFromPath(tpAccPlansCfgPath)
 	if err != nil {
 		t.Error(err)

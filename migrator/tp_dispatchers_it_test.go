@@ -58,12 +58,12 @@ func TestTpDispMove(t *testing.T) {
 
 func testTpDispITConnect(t *testing.T) {
 	var err error
-	tpDispPathIn = path.Join(*dataDir, "conf", "samples", "tutmongo")
+	tpDispPathIn = path.Join(*utils.DataDir, "conf", "samples", "tutmongo")
 	tpDispCfgIn, err = config.NewCGRConfigFromPath(tpDispPathIn)
 	if err != nil {
 		t.Fatal(err)
 	}
-	tpDispPathOut = path.Join(*dataDir, "conf", "samples", "tutmysql")
+	tpDispPathOut = path.Join(*utils.DataDir, "conf", "samples", "tutmysql")
 	tpDispCfgOut, err = config.NewCGRConfigFromPath(tpDispPathOut)
 	if err != nil {
 		t.Fatal(err)

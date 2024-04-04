@@ -82,7 +82,7 @@ var (
 
 // Test start here
 func TestFIdxCaV1IT(t *testing.T) {
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 		t.SkipNow()
 	case utils.MetaMySQL:
@@ -101,7 +101,7 @@ func TestFIdxCaV1IT(t *testing.T) {
 
 func testV1FIdxCaLoadConfig(t *testing.T) {
 	var err error
-	tSv1CfgPath = path.Join(*dataDir, "conf", "samples", tSv1ConfDIR)
+	tSv1CfgPath = path.Join(*utils.DataDir, "conf", "samples", tSv1ConfDIR)
 	if tSv1Cfg, err = config.NewCGRConfigFromPath(tSv1CfgPath); err != nil {
 		t.Error(err)
 	}
@@ -121,7 +121,7 @@ func testV1FIdxCaResetStorDb(t *testing.T) {
 }
 
 func testV1FIdxCaStartEngine(t *testing.T) {
-	if _, err := engine.StopStartEngine(tSv1CfgPath, *waitRater); err != nil {
+	if _, err := engine.StopStartEngine(tSv1CfgPath, *utils.WaitRater); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -136,7 +136,7 @@ func testV1FIdxCaRpcConn(t *testing.T) {
 
 func testV1FIdxCaFromFolder(t *testing.T) {
 	var reply string
-	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "oldtutorial")}
+	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*utils.DataDir, "tariffplans", "oldtutorial")}
 	if err := tFIdxCaRpc.Call(context.Background(), utils.APIerSv1LoadTariffPlanFromFolder, attrs, &reply); err != nil {
 		t.Error(err)
 	}

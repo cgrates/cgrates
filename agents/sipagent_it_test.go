@@ -60,7 +60,7 @@ var (
 // Test start here
 func TestSAit(t *testing.T) {
 	// engine.KillEngine(0)
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 		saonfigDIR = "sipagent_internal"
 	case utils.MetaMySQL:
@@ -78,7 +78,7 @@ func TestSAit(t *testing.T) {
 }
 
 func testSAitInitCfg(t *testing.T) {
-	saCfgPath = path.Join(*dataDir, "conf", "samples", saonfigDIR)
+	saCfgPath = path.Join(*utils.DataDir, "conf", "samples", saonfigDIR)
 	// Init config first
 	var err error
 	saCfg, err = config.NewCGRConfigFromPath(saCfgPath)
@@ -106,7 +106,7 @@ func testSAitResetStorDb(t *testing.T) {
 
 // Start CGR Engine
 func testSAitStartEngine(t *testing.T) {
-	if _, err := engine.StartEngine(saCfgPath, *waitRater); err != nil {
+	if _, err := engine.StartEngine(saCfgPath, *utils.WaitRater); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -125,12 +125,12 @@ func testSAitApierRpcConn(t *testing.T) {
 
 // Load the tariff plan, creating accounts and their balances
 func testSAitTPFromFolder(t *testing.T) {
-	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "tut_sip_redirect")}
+	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*utils.DataDir, "tariffplans", "tut_sip_redirect")}
 	var loadInst utils.LoadInstance
 	if err := saRPC.Call(context.Background(), utils.APIerSv2LoadTariffPlanFromFolder, attrs, &loadInst); err != nil {
 		t.Error(err)
 	}
-	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // Give time for scheduler to execute topups
+	time.Sleep(time.Duration(*utils.WaitRater) * time.Millisecond) // Give time for scheduler to execute topups
 }
 
 func testSAitStopCgrEngine(t *testing.T) {

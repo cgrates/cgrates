@@ -65,7 +65,7 @@ var (
 )
 
 func TestSessionSITtests(t *testing.T) {
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 		sessionsConfDIR = "sessions_internal"
 	case utils.MetaMySQL:
@@ -94,7 +94,7 @@ func (*smock2) DisconnectSession(ctx *context.Context,
 
 func testSessionSv1ItInitCfg(t *testing.T) {
 	var err error
-	sSv1CfgPath2 = path.Join(*dataDir, "conf", "samples", sessionsConfDIR)
+	sSv1CfgPath2 = path.Join(*utils.DataDir, "conf", "samples", sessionsConfDIR)
 	// Init config first
 	sSv1Cfg2, err = config.NewCGRConfigFromPath(sSv1CfgPath2)
 	if err != nil {
@@ -143,7 +143,7 @@ func testSessionSv1ItRpcConn(t *testing.T) {
 // Load the tariff plan, creating accounts and their balances
 func testSessionSv1ItTPFromFolder(t *testing.T) {
 	attrs := &utils.AttrLoadTpFromFolder{
-		FolderPath: path.Join(*dataDir, "tariffplans", "testit")}
+		FolderPath: path.Join(*utils.DataDir, "tariffplans", "testit")}
 	var loadInst utils.LoadInstance
 	if err := sSApierRpc2.Call(context.Background(), utils.APIerSv2LoadTariffPlanFromFolder, attrs, &loadInst); err != nil {
 		t.Error(err)

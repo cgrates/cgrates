@@ -38,10 +38,10 @@ func TestGetAccountCost(t *testing.T) {
 	testEnv := TestEnvironment{
 		Name: "TestGetAccountCost",
 		// Encoding:   *encoding,
-		ConfigPath: path.Join(*dataDir, "conf", "samples", "rerate_cdrs_mysql"),
-		TpPath:     path.Join(*dataDir, "tariffplans", "reratecdrs"),
+		ConfigPath: path.Join(*utils.DataDir, "conf", "samples", "rerate_cdrs_mysql"),
+		TpPath:     path.Join(*utils.DataDir, "tariffplans", "reratecdrs"),
 	}
-	client, _, shutdown, err := testEnv.Setup(t, *waitRater)
+	client, _, shutdown, err := testEnv.Setup(t, *utils.WaitRater)
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -40,7 +40,7 @@ import (
 )
 
 func TestNatsConcurrentReaders(t *testing.T) {
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 	case utils.MetaMySQL, utils.MetaMongo, utils.MetaPostgres:
 		t.SkipNow()
@@ -48,7 +48,7 @@ func TestNatsConcurrentReaders(t *testing.T) {
 		t.Fatal("unsupported dbtype value")
 	}
 
-	cfgPath := path.Join(*dataDir, "conf", "samples", "ers_nats")
+	cfgPath := path.Join(*utils.DataDir, "conf", "samples", "ers_nats")
 	cfg, err := config.NewCGRConfigFromPath(cfgPath)
 	if err != nil {
 		t.Fatal("could not init cfg", err.Error())
@@ -181,7 +181,7 @@ var natsCfg string = `{
 }`
 
 func TestNatsNormalTT(t *testing.T) {
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 	case utils.MetaMySQL, utils.MetaMongo, utils.MetaPostgres:
 		t.SkipNow()
@@ -315,12 +315,12 @@ resolver_preload: {
 				t.Fatal(err)
 			}
 
-			if _, err = engine.StartEngine(cfgPath, *waitRater); err != nil {
+			if _, err = engine.StartEngine(cfgPath, *utils.WaitRater); err != nil {
 				t.Fatal(err)
 			}
 
 			t.Cleanup(func() {
-				engine.KillEngine(*waitRater)
+				engine.KillEngine(*utils.WaitRater)
 				nc.Close()
 			})
 
@@ -356,7 +356,7 @@ resolver_preload: {
 }
 
 func TestNatsJetStreamTT(t *testing.T) {
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 	case utils.MetaMySQL, utils.MetaMongo, utils.MetaPostgres:
 		t.SkipNow()
@@ -516,10 +516,10 @@ system_account:AAFIBB6C56ROU5XRVJLJYR3BTGGYK3HJGHEHQV7L7QZMTT3ZRBLHBS7F
 			}
 			defer js.DeleteStream(context.Background(), "stream")
 
-			if _, err = engine.StartEngine(cfgPath, *waitRater); err != nil {
+			if _, err = engine.StartEngine(cfgPath, *utils.WaitRater); err != nil {
 				t.Fatal(err)
 			}
-			defer engine.KillEngine(*waitRater)
+			defer engine.KillEngine(*utils.WaitRater)
 
 			client, err := newRPCClient(cfg.ListenCfg())
 			if err != nil {

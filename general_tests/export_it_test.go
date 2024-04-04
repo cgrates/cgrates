@@ -67,7 +67,7 @@ var (
 )
 
 func TestExport(t *testing.T) {
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 		expCfgDir = "tutinternal"
 	case utils.MetaMySQL:
@@ -86,7 +86,7 @@ func TestExport(t *testing.T) {
 }
 
 func testExpLoadConfig(t *testing.T) {
-	expCfgPath = path.Join(*dataDir, "conf", "samples", expCfgDir)
+	expCfgPath = path.Join(*utils.DataDir, "conf", "samples", expCfgDir)
 	if expCfg, err = config.NewCGRConfigFromPath(expCfgPath); err != nil {
 		t.Error(err)
 	}
@@ -105,7 +105,7 @@ func testExpResetStorDb(t *testing.T) {
 }
 
 func testExpStartEngine(t *testing.T) {
-	if _, err := engine.StopStartEngine(expCfgPath, *waitRater); err != nil {
+	if _, err := engine.StopStartEngine(expCfgPath, *utils.WaitRater); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -120,7 +120,7 @@ func testExpRPCConn(t *testing.T) {
 
 func testExpLoadTPFromFolder(t *testing.T) {
 	var reply string
-	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "testit")}
+	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*utils.DataDir, "tariffplans", "testit")}
 	if err := expRpc.Call(context.Background(), utils.APIerSv1LoadTariffPlanFromFolder, attrs, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
@@ -174,7 +174,7 @@ func testExpVerifyAttributes(t *testing.T) {
 		t.Fatal(err)
 	}
 	reply.Compile()
-	if *encoding == utils.MetaGOB {
+	if *utils.Encoding == utils.MetaGOB {
 		for _, v := range exp.Attributes {
 			v.FilterIDs = nil
 		}
@@ -248,7 +248,7 @@ func testExpVerifyResources(t *testing.T) {
 		Weight:       10,
 		ThresholdIDs: []string{},
 	}
-	if *encoding == utils.MetaGOB {
+	if *utils.Encoding == utils.MetaGOB {
 		rPrf.ThresholdIDs = nil
 	}
 	var reply *engine.ResourceProfile
@@ -353,7 +353,7 @@ func testExpVerifyRoutes(t *testing.T) {
 		&utils.TenantID{Tenant: "cgrates.org", ID: "ROUTE_ACNT_1001"}, &reply); err != nil {
 		t.Fatal(err)
 	}
-	if *encoding == utils.MetaGOB {
+	if *utils.Encoding == utils.MetaGOB {
 		splPrf.SortingParameters = nil
 		splPrf2.SortingParameters = nil
 	}

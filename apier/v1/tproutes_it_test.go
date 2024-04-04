@@ -63,7 +63,7 @@ var sTestsTPRoute = []func(t *testing.T){
 
 // Test start here
 func TestTPRouteIT(t *testing.T) {
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 		tpRouteConfigDIR = "tutinternal"
 	case utils.MetaMySQL:
@@ -82,7 +82,7 @@ func TestTPRouteIT(t *testing.T) {
 
 func testTPRouteInitCfg(t *testing.T) {
 	var err error
-	tpRouteCfgPath = path.Join(*dataDir, "conf", "samples", tpRouteConfigDIR)
+	tpRouteCfgPath = path.Join(*utils.DataDir, "conf", "samples", tpRouteConfigDIR)
 	tpRouteCfg, err = config.NewCGRConfigFromPath(tpRouteCfgPath)
 	if err != nil {
 		t.Error(err)

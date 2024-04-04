@@ -45,7 +45,7 @@ var sTestsDspCpp = []func(t *testing.T){
 // Test start here
 func TestDspChargerST(t *testing.T) {
 	var config1, config2, config3 string
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 		t.SkipNow()
 	case utils.MetaMySQL:
@@ -63,7 +63,7 @@ func TestDspChargerST(t *testing.T) {
 	}
 
 	dispDIR := "dispatchers"
-	if *encoding == utils.MetaGOB {
+	if *utils.Encoding == utils.MetaGOB {
 		dispDIR += "_gob"
 	}
 	testDsp(t, sTestsDspCpp, "TestDspChargerS", config1, config2, config3, "tutorial", "oldtutorial", dispDIR)
@@ -125,7 +125,7 @@ func testDspCppGetChtgFailover(t *testing.T) {
 			Weight:       0,
 		},
 	}
-	if *encoding == utils.MetaGOB {
+	if *utils.Encoding == utils.MetaGOB {
 		(*eChargers)[0].FilterIDs = nil // empty slice are nil in gob
 	}
 	var reply *engine.ChargerProfiles
@@ -147,7 +147,7 @@ func testDspCppGetChtgFailover(t *testing.T) {
 			Weight:       0,
 		},
 	)
-	if *encoding == utils.MetaGOB {
+	if *utils.Encoding == utils.MetaGOB {
 		(*eChargers)[1].FilterIDs = nil // empty slice are nil in gob
 	}
 	if err := dispEngine.RPC.Call(context.Background(), utils.ChargerSv1GetChargersForEvent,
@@ -231,7 +231,7 @@ func testDspCppTestAuthKey2(t *testing.T) {
 			Weight:       0,
 		},
 	}
-	if *encoding == utils.MetaGOB {
+	if *utils.Encoding == utils.MetaGOB {
 		(*eChargers)[0].FilterIDs = nil // empty slice are nil in gob
 		(*eChargers)[1].FilterIDs = nil // empty slice are nil in gob
 	}
@@ -270,7 +270,7 @@ func testDspCppGetChtgRoundRobin(t *testing.T) {
 			Weight:       0,
 		},
 	}
-	if *encoding == utils.MetaGOB {
+	if *utils.Encoding == utils.MetaGOB {
 		(*eChargers)[0].FilterIDs = nil // empty slice are nil in gob
 	}
 	var reply *engine.ChargerProfiles
@@ -292,7 +292,7 @@ func testDspCppGetChtgRoundRobin(t *testing.T) {
 			Weight:       0,
 		},
 	)
-	if *encoding == utils.MetaGOB {
+	if *utils.Encoding == utils.MetaGOB {
 		(*eChargers)[1].FilterIDs = nil // empty slice are nil in gob
 	}
 	if err := dispEngine.RPC.Call(context.Background(), utils.ChargerSv1GetChargersForEvent,

@@ -61,7 +61,7 @@ var sTestsTPDispatchers = []func(t *testing.T){
 
 // Test start here
 func TestTPDispatcherIT(t *testing.T) {
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 		tpDispatcherConfigDIR = "tutinternal"
 	case utils.MetaMySQL:
@@ -80,7 +80,7 @@ func TestTPDispatcherIT(t *testing.T) {
 
 func testTPDispatcherInitCfg(t *testing.T) {
 	var err error
-	tpDispatcherCfgPath = path.Join(*dataDir, "conf", "samples", tpDispatcherConfigDIR)
+	tpDispatcherCfgPath = path.Join(*utils.DataDir, "conf", "samples", tpDispatcherConfigDIR)
 	tpDispatcherCfg, err = config.NewCGRConfigFromPath(tpDispatcherCfgPath)
 	if err != nil {
 		t.Error(err)

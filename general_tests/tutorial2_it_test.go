@@ -56,7 +56,7 @@ var sTutTests = []func(t *testing.T){
 
 // Test start here
 func TestTutorial2(t *testing.T) {
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 		tutCfgDir = "tutinternal"
 	case utils.MetaMySQL:
@@ -68,7 +68,7 @@ func TestTutorial2(t *testing.T) {
 	default:
 		t.Fatal("Unknown Database type")
 	}
-	if *encoding == utils.MetaGOB {
+	if *utils.Encoding == utils.MetaGOB {
 		tutCfgDir += "_gob"
 	}
 
@@ -79,7 +79,7 @@ func TestTutorial2(t *testing.T) {
 
 func testTutLoadConfig(t *testing.T) {
 	var err error
-	tutCfgPath = path.Join(*dataDir, "conf", "samples", tutCfgDir)
+	tutCfgPath = path.Join(*utils.DataDir, "conf", "samples", tutCfgDir)
 	if tutCfg, err = config.NewCGRConfigFromPath(tutCfgPath); err != nil {
 		t.Error(err)
 	}
@@ -117,7 +117,7 @@ func testTutRpcConn(t *testing.T) {
 func testTutFromFolder(t *testing.T) {
 	var reply string
 	attrs := &utils.AttrLoadTpFromFolder{
-		FolderPath: path.Join(*dataDir, "tariffplans", "tutorial2")}
+		FolderPath: path.Join(*utils.DataDir, "tariffplans", "tutorial2")}
 	if err := tutRpc.Call(context.Background(), utils.APIerSv1LoadTariffPlanFromFolder,
 		attrs, &reply); err != nil {
 		t.Error(err)

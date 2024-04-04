@@ -61,7 +61,7 @@ var sTestsTPSharedGroups = []func(t *testing.T){
 
 // Test start here
 func TestTPSharedGroupsIT(t *testing.T) {
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 		tpSharedGroupConfigDIR = "tutinternal"
 	case utils.MetaMySQL:
@@ -80,7 +80,7 @@ func TestTPSharedGroupsIT(t *testing.T) {
 
 func testTPSharedGroupsInitCfg(t *testing.T) {
 	var err error
-	tpSharedGroupCfgPath = path.Join(*dataDir, "conf", "samples", tpSharedGroupConfigDIR)
+	tpSharedGroupCfgPath = path.Join(*utils.DataDir, "conf", "samples", tpSharedGroupConfigDIR)
 	tpSharedGroupCfg, err = config.NewCGRConfigFromPath(tpSharedGroupCfgPath)
 	if err != nil {
 		t.Error(err)

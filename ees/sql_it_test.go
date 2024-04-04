@@ -119,7 +119,7 @@ func testSqlEeCreateTable(t *testing.T) {
 
 func testSqlEeLoadConfig(t *testing.T) {
 	var err error
-	sqlEeCfgPath = path.Join(*dataDir, "conf", "samples", sqlEeConfigDir)
+	sqlEeCfgPath = path.Join(*utils.DataDir, "conf", "samples", sqlEeConfigDir)
 	if sqlEeCfg, err = config.NewCGRConfigFromPath(sqlEeCfgPath); err != nil {
 		t.Error(err)
 	}
@@ -132,7 +132,7 @@ func testSqlEeResetDataDB(t *testing.T) {
 }
 
 func testSqlEeStartEngine(t *testing.T) {
-	if _, err := engine.StopStartEngine(sqlEeCfgPath, *waitRater); err != nil {
+	if _, err := engine.StopStartEngine(sqlEeCfgPath, *utils.WaitRater); err != nil {
 		t.Fatal(err)
 	}
 }

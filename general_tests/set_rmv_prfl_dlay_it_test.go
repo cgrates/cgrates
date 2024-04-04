@@ -35,7 +35,7 @@ import (
 
 func TestSetRemoveProfilesWithCachingDelay(t *testing.T) {
 	var cfgDir string
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 		t.SkipNow()
 	case utils.MetaMySQL:
@@ -50,10 +50,10 @@ func TestSetRemoveProfilesWithCachingDelay(t *testing.T) {
 	testEnv := TestEnvironment{
 		Name: "TestSetRemoveProfilesWithCachingDelay",
 		// Encoding:   *encoding,
-		ConfigPath: path.Join(*dataDir, "conf", "samples", cfgDir),
-		TpPath:     path.Join(*dataDir, "tariffplans", "tutorial"),
+		ConfigPath: path.Join(*utils.DataDir, "conf", "samples", cfgDir),
+		TpPath:     path.Join(*utils.DataDir, "tariffplans", "tutorial"),
 	}
-	client, _, shutdown, err := testEnv.Setup(t, *waitRater)
+	client, _, shutdown, err := testEnv.Setup(t, *utils.WaitRater)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -61,7 +61,7 @@ func TestSetRemoveProfilesWithCachingDelay(t *testing.T) {
 
 	t.Run("RemoveTPFromFolder", func(t *testing.T) {
 		var reply string
-		attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "tutorial")}
+		attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*utils.DataDir, "tariffplans", "tutorial")}
 		startTime := time.Now()
 		if err := client.Call(context.Background(), utils.APIerSv1RemoveTPFromFolder, attrs, &reply); err != nil {
 			t.Error(err)
@@ -410,7 +410,7 @@ func TestSetRemoveProfilesWithCachingDelay(t *testing.T) {
 
 	t.Run("V2LoadTariffPlanFromFolder", func(t *testing.T) {
 		attrs := &utils.AttrLoadTpFromFolder{
-			FolderPath: path.Join(*dataDir, "tariffplans", "tutorial"),
+			FolderPath: path.Join(*utils.DataDir, "tariffplans", "tutorial"),
 		}
 
 		exp := utils.LoadInstance{}

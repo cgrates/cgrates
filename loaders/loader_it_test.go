@@ -94,7 +94,7 @@ var (
 
 // Test start here
 func TestLoaderIT(t *testing.T) {
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 		loaderCfgDIR = "tutinternal"
 	case utils.MetaMySQL:
@@ -114,7 +114,7 @@ func TestLoaderIT(t *testing.T) {
 
 func testLoaderInitCfg(t *testing.T) {
 	var err error
-	loaderCfgPath = path.Join(*dataDir, "conf", "samples", "loaders", loaderCfgDIR)
+	loaderCfgPath = path.Join(*utils.DataDir, "conf", "samples", "loaders", loaderCfgDIR)
 	loaderCfg, err = config.NewCGRConfigFromPath(loaderCfgPath)
 	if err != nil {
 		t.Fatal(err)
@@ -209,7 +209,7 @@ func testLoaderCheckAttributes(t *testing.T) {
 		Blocker: true,
 		Weight:  20,
 	}
-	if *encoding == utils.MetaGOB { // gob threats empty slices as nil values
+	if *utils.Encoding == utils.MetaGOB { // gob threats empty slices as nil values
 		eAttrPrf.Attributes[1].FilterIDs = nil
 	}
 	var reply *engine.AttributeProfile
@@ -387,7 +387,7 @@ func testLoaderCheckForCustomSep(t *testing.T) {
 			},
 		},
 	}
-	if *encoding == utils.MetaGOB { // gob threats empty slices as nil values
+	if *utils.Encoding == utils.MetaGOB { // gob threats empty slices as nil values
 		eAttrPrf.Attributes[0].FilterIDs = nil
 	}
 	var reply *engine.AttributeProfile

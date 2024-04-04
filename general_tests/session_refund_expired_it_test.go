@@ -78,7 +78,7 @@ var (
 )
 
 func TestSesExpIt(t *testing.T) {
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 		sesExpCfgDIR = "sessions_internal"
 	case utils.MetaMySQL:
@@ -97,7 +97,7 @@ func TestSesExpIt(t *testing.T) {
 
 // test for 0 balance with sesExpsion terminate with 1s usage
 func testSesExpItLoadConfig(t *testing.T) {
-	sesExpCfgPath = path.Join(*dataDir, "conf", "samples", sesExpCfgDIR)
+	sesExpCfgPath = path.Join(*utils.DataDir, "conf", "samples", sesExpCfgDIR)
 	if sesExpCfg, err = config.NewCGRConfigFromPath(sesExpCfgPath); err != nil {
 		t.Error(err)
 	}
@@ -116,7 +116,7 @@ func testSesExpItResetStorDb(t *testing.T) {
 }
 
 func testSesExpItStartEngine(t *testing.T) {
-	if _, err := engine.StopStartEngine(sesExpCfgPath, *waitRater); err != nil {
+	if _, err := engine.StopStartEngine(sesExpCfgPath, *utils.WaitRater); err != nil {
 		t.Fatal(err)
 	}
 }

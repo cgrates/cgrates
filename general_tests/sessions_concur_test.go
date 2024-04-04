@@ -80,7 +80,7 @@ package general_tests
 // }
 
 // func testSCncrInitConfig(t *testing.T) {
-// 	sCncrCfgPath = path.Join(*dataDir, "conf", "samples", sCncrCfgDIR)
+// 	sCncrCfgPath = path.Join(*utils.DataDir, "conf", "samples", sCncrCfgDIR)
 // 	if sCncrCfg, err = config.NewCGRConfigFromPath(sCncrCfgPath); err != nil {
 // 		t.Fatal(err)
 // 	}
@@ -100,7 +100,7 @@ package general_tests
 // }
 
 // func testSCncrStartEngine(t *testing.T) {
-// 	if _, err := engine.StopStartEngine(sCncrCfgPath, *waitRater); err != nil {
+// 	if _, err := engine.StopStartEngine(sCncrCfgPath, *utils.WaitRater); err != nil {
 // 		t.Fatal(err)
 // 	}
 // }
@@ -115,7 +115,7 @@ package general_tests
 // }
 
 // func testSCncrKillEngine(t *testing.T) {
-// 	if err := engine.KillEngine(*waitRater); err != nil {
+// 	if err := engine.KillEngine(*utils.WaitRater); err != nil {
 // 		t.Error(err)
 // 	}
 // }
@@ -124,7 +124,7 @@ package general_tests
 // 	var loadInst string
 // 	if err := sCncrRPC.Call(context.Background(), utils.APIerSv1LoadTariffPlanFromFolder,
 // 		&utils.AttrLoadTpFromFolder{FolderPath: path.Join(
-// 			*dataDir, "tariffplans", "tp1cnt")}, &loadInst); err != nil {
+// 			*utils.DataDir, "tariffplans", "tp1cnt")}, &loadInst); err != nil {
 // 		t.Error(err)
 // 	}
 // 	attrPrfl := &v2.AttributeWithAPIOpts{

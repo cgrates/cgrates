@@ -174,7 +174,7 @@ var (
 )
 
 func TestApierIT(t *testing.T) {
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 		t.SkipNow() // need tests redesign
 	case utils.MetaMySQL:
@@ -194,7 +194,7 @@ func TestApierIT(t *testing.T) {
 
 func testApierLoadConfig(t *testing.T) {
 	var err error
-	cfgPath = path.Join(*dataDir, "conf", "samples", APIerSv1ConfigDIR) // no need for a new config with *gob transport in this case
+	cfgPath = path.Join(*utils.DataDir, "conf", "samples", APIerSv1ConfigDIR) // no need for a new config with *gob transport in this case
 	if cfg, err = config.NewCGRConfigFromPath(cfgPath); err != nil {
 		t.Error(err)
 	}
@@ -226,7 +226,7 @@ func testApierInitStorDb(t *testing.T) {
 
 // Start engine
 func testApierStartEngine(t *testing.T) {
-	if _, err := engine.StopStartEngine(cfgPath, *waitRater); err != nil {
+	if _, err := engine.StopStartEngine(cfgPath, *utils.WaitRater); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -1633,7 +1633,7 @@ func testApierLoadTariffPlanFromFolder(t *testing.T) {
 		t.Error(err)
 	}
 	// Simple test that command is executed without errors
-	attrs = &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "testtp")}
+	attrs = &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*utils.DataDir, "tariffplans", "testtp")}
 	startTime := time.Now()
 	if err := rater.Call(context.Background(), utils.APIerSv1LoadTariffPlanFromFolder, attrs, &reply); err != nil {
 		t.Error("Got error on APIerSv1.LoadTariffPlanFromFolder: ", err.Error())
@@ -1822,7 +1822,7 @@ func testApierCdrServer(t *testing.T) {
 			t.Error(err.Error())
 		}
 	}
-	time.Sleep(time.Duration(*waitRater) * time.Millisecond)
+	time.Sleep(time.Duration(*utils.WaitRater) * time.Millisecond)
 }
 
 func testApierITGetCdrs(t *testing.T) {
@@ -1920,7 +1920,7 @@ func testApierGetCallCostLog(t *testing.T) {
 		Rates:          engine.ChargedRates{},
 		Timings:        engine.ChargedTimings{},
 	}
-	if *encoding == utils.MetaGOB {
+	if *utils.Encoding == utils.MetaGOB {
 		expected.Usage = nil // 0 value are encoded as nil in gob
 		expected.Cost = nil
 	}

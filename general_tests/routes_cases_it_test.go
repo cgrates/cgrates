@@ -80,7 +80,7 @@ var (
 
 // Test start here
 func TestRoutesCaseV1IT(t *testing.T) {
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 		rtsCaseSv1ConfDIR = "tutinternal"
 	case utils.MetaMySQL:
@@ -99,7 +99,7 @@ func TestRoutesCaseV1IT(t *testing.T) {
 
 func testV1RtsCaseLoadConfig(t *testing.T) {
 	var err error
-	rtsCaseSv1CfgPath = path.Join(*dataDir, "conf", "samples", rtsCaseSv1ConfDIR)
+	rtsCaseSv1CfgPath = path.Join(*utils.DataDir, "conf", "samples", rtsCaseSv1ConfDIR)
 	if rtsCaseSv1Cfg, err = config.NewCGRConfigFromPath(rtsCaseSv1CfgPath); err != nil {
 		t.Error(err)
 	}
@@ -119,7 +119,7 @@ func testV1RtsCaseResetStorDb(t *testing.T) {
 }
 
 func testV1RtsCaseStartEngine(t *testing.T) {
-	if _, err := engine.StopStartEngine(rtsCaseSv1CfgPath, *waitRater); err != nil {
+	if _, err := engine.StopStartEngine(rtsCaseSv1CfgPath, *utils.WaitRater); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -134,7 +134,7 @@ func testV1RtsCaseRpcConn(t *testing.T) {
 
 func testV1RtsCaseFromFolder(t *testing.T) {
 	var reply string
-	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "tutroutes")}
+	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*utils.DataDir, "tariffplans", "tutroutes")}
 	if err := rtsCaseSv1Rpc.Call(context.Background(), utils.APIerSv1LoadTariffPlanFromFolder, attrs, &reply); err != nil {
 		t.Error(err)
 	}

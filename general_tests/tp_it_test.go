@@ -65,7 +65,7 @@ var (
 )
 
 func TestTp(t *testing.T) {
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 		tpCfgDIR = "tutinternal"
 	case utils.MetaMySQL:
@@ -82,7 +82,7 @@ func TestTp(t *testing.T) {
 	}
 }
 func testTpInitCfg(t *testing.T) {
-	tpCfgPath = path.Join(*dataDir, "conf", "samples", tpCfgDIR)
+	tpCfgPath = path.Join(*utils.DataDir, "conf", "samples", tpCfgDIR)
 	// Init config first
 	var err error
 	tpCfg, err = config.NewCGRConfigFromPath(tpCfgPath)
@@ -123,11 +123,11 @@ func testTpRpcConn(t *testing.T) {
 
 // Load the tariff plan, creating accounts and their balances
 func testTpLoadTariffPlanFromFolder(t *testing.T) {
-	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "testtp")}
+	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*utils.DataDir, "tariffplans", "testtp")}
 	if err := tpRPC.Call(context.Background(), utils.APIerSv2LoadTariffPlanFromFolder, attrs, &tpLoadInst); err != nil {
 		t.Error(err)
 	}
-	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // Give time for scheduler to execute topups
+	time.Sleep(time.Duration(*utils.WaitRater) * time.Millisecond) // Give time for scheduler to execute topups
 }
 
 func testTpBalanceCounter(t *testing.T) {

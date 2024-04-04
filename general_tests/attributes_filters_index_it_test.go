@@ -57,7 +57,7 @@ var (
 )
 
 func TestAttributeFilterSIT(t *testing.T) {
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaMySQL:
 		alsPrfFltrConfigDIR = "attributes_mysql"
 	case utils.MetaMongo:
@@ -74,12 +74,12 @@ func TestAttributeFilterSIT(t *testing.T) {
 
 func testAttributeFltrSInitCfg(t *testing.T) {
 	var err error
-	attrFltrCfgPath = path.Join(*dataDir, "conf", "samples", alsPrfFltrConfigDIR)
+	attrFltrCfgPath = path.Join(*utils.DataDir, "conf", "samples", alsPrfFltrConfigDIR)
 	attrFltrCfg, err = config.NewCGRConfigFromPath(attrFltrCfgPath)
 	if err != nil {
 		t.Error(err)
 	}
-	attrFltrCfg.DataFolderPath = *dataDir // Share DataFolderPath through config towards StoreDb for Flush()
+	attrFltrCfg.DataFolderPath = *utils.DataDir // Share DataFolderPath through config towards StoreDb for Flush()
 }
 
 func testAttributeFltrSInitDataDb(t *testing.T) {
@@ -97,7 +97,7 @@ func testAttributeFltrSResetStorDb(t *testing.T) {
 
 // Start CGR Engine
 func testAttributeFltrSStartEngine(t *testing.T) {
-	if _, err := engine.StopStartEngine(attrFltrCfgPath, *waitRater); err != nil {
+	if _, err := engine.StopStartEngine(attrFltrCfgPath, *utils.WaitRater); err != nil {
 		t.Fatal(err)
 	}
 }

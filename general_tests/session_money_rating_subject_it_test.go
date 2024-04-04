@@ -75,7 +75,7 @@ var (
 )
 
 func TestSesMRSItMoney(t *testing.T) {
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 		sesMRSCfgDIR = "sessions_internal"
 	case utils.MetaMySQL:
@@ -94,7 +94,7 @@ func TestSesMRSItMoney(t *testing.T) {
 
 // test for 0 balance with sesMRSsion terminate with 1s usage
 func testSesMRSItLoadConfig(t *testing.T) {
-	sesMRSCfgPath = path.Join(*dataDir, "conf", "samples", sesMRSCfgDIR)
+	sesMRSCfgPath = path.Join(*utils.DataDir, "conf", "samples", sesMRSCfgDIR)
 	if sesMRSCfg, err = config.NewCGRConfigFromPath(sesMRSCfgPath); err != nil {
 		t.Error(err)
 	}
@@ -113,7 +113,7 @@ func testSesMRSItResetStorDb(t *testing.T) {
 }
 
 func testSesMRSItStartEngine(t *testing.T) {
-	if _, err := engine.StopStartEngine(sesMRSCfgPath, *waitRater); err != nil {
+	if _, err := engine.StopStartEngine(sesMRSCfgPath, *utils.WaitRater); err != nil {
 		t.Fatal(err)
 	}
 }

@@ -49,12 +49,12 @@ var sTestsRtPlIT = []func(t *testing.T){
 
 func TestRatingPlanITMove1(t *testing.T) {
 	var err error
-	rtplPathIn = path.Join(*dataDir, "conf", "samples", "tutmongo")
+	rtplPathIn = path.Join(*utils.DataDir, "conf", "samples", "tutmongo")
 	rtplCfgIn, err = config.NewCGRConfigFromPath(rtplPathIn)
 	if err != nil {
 		t.Fatal(err)
 	}
-	rtplPathOut = path.Join(*dataDir, "conf", "samples", "tutmysql")
+	rtplPathOut = path.Join(*utils.DataDir, "conf", "samples", "tutmysql")
 	rtplCfgOut, err = config.NewCGRConfigFromPath(rtplPathOut)
 	if err != nil {
 		t.Fatal(err)
@@ -68,12 +68,12 @@ func TestRatingPlanITMove1(t *testing.T) {
 
 func TestRatingPlanITMove2(t *testing.T) {
 	var err error
-	rtplPathIn = path.Join(*dataDir, "conf", "samples", "tutmysql")
+	rtplPathIn = path.Join(*utils.DataDir, "conf", "samples", "tutmysql")
 	rtplCfgIn, err = config.NewCGRConfigFromPath(rtplPathIn)
 	if err != nil {
 		t.Fatal(err)
 	}
-	rtplPathOut = path.Join(*dataDir, "conf", "samples", "tutmongo")
+	rtplPathOut = path.Join(*utils.DataDir, "conf", "samples", "tutmongo")
 	rtplCfgOut, err = config.NewCGRConfigFromPath(rtplPathOut)
 	if err != nil {
 		t.Fatal(err)
@@ -87,12 +87,12 @@ func TestRatingPlanITMove2(t *testing.T) {
 
 func TestRatingPlanITMoveEncoding(t *testing.T) {
 	var err error
-	rtplPathIn = path.Join(*dataDir, "conf", "samples", "tutmongo")
+	rtplPathIn = path.Join(*utils.DataDir, "conf", "samples", "tutmongo")
 	rtplCfgIn, err = config.NewCGRConfigFromPath(rtplPathIn)
 	if err != nil {
 		t.Fatal(err)
 	}
-	rtplPathOut = path.Join(*dataDir, "conf", "samples", "tutmongojson")
+	rtplPathOut = path.Join(*utils.DataDir, "conf", "samples", "tutmongojson")
 	rtplCfgOut, err = config.NewCGRConfigFromPath(rtplPathOut)
 	if err != nil {
 		t.Fatal(err)
@@ -106,12 +106,12 @@ func TestRatingPlanITMoveEncoding(t *testing.T) {
 
 func TestRatingPlanITMoveEncoding2(t *testing.T) {
 	var err error
-	rtplPathIn = path.Join(*dataDir, "conf", "samples", "tutmysql")
+	rtplPathIn = path.Join(*utils.DataDir, "conf", "samples", "tutmysql")
 	rtplCfgIn, err = config.NewCGRConfigFromPath(rtplPathIn)
 	if err != nil {
 		t.Fatal(err)
 	}
-	rtplPathOut = path.Join(*dataDir, "conf", "samples", "tutmysqljson")
+	rtplPathOut = path.Join(*utils.DataDir, "conf", "samples", "tutmysqljson")
 	rtplCfgOut, err = config.NewCGRConfigFromPath(rtplPathOut)
 	if err != nil {
 		t.Fatal(err)

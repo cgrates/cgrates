@@ -56,7 +56,7 @@ var (
 )
 
 func TestAttrWDcIT(t *testing.T) {
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 		attrWDcConfDIR = "tutinternal"
 	case utils.MetaMySQL:
@@ -76,7 +76,7 @@ func TestAttrWDcIT(t *testing.T) {
 
 func testAttrWDcInitCfg(t *testing.T) {
 	var err error
-	attrWDcCfgPath = path.Join(*dataDir, "conf", "samples", attrWDcConfDIR)
+	attrWDcCfgPath = path.Join(*utils.DataDir, "conf", "samples", attrWDcConfDIR)
 	attrWDcCfg, err = config.NewCGRConfigFromPath(attrWDcCfgPath)
 	if err != nil {
 		t.Error(err)
@@ -96,7 +96,7 @@ func testAttrWDcResetStorDb(t *testing.T) {
 }
 
 func testAttrWDcStartEngine(t *testing.T) {
-	if _, err := engine.StopStartEngine(attrWDcCfgPath, *waitRater); err != nil {
+	if _, err := engine.StopStartEngine(attrWDcCfgPath, *utils.WaitRater); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -111,7 +111,7 @@ func testAttrWDcRPCConn(t *testing.T) {
 
 func testAttrWDcLoadFromFolder(t *testing.T) {
 	var reply string
-	attrs := utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "dataconverters")}
+	attrs := utils.AttrLoadTpFromFolder{FolderPath: path.Join(*utils.DataDir, "tariffplans", "dataconverters")}
 	if err := attrWDcRpc.Call(context.Background(), utils.APIerSv1LoadTariffPlanFromFolder, attrs, &reply); err != nil {
 		t.Error(err)
 	}

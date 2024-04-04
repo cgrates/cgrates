@@ -22,7 +22,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package migrator
 
 import (
-	"flag"
 	"log"
 	"path"
 	"reflect"
@@ -42,7 +41,6 @@ var (
 	accCfgOut   *config.CGRConfig
 	accMigrator *Migrator
 	accAction   string
-	dataDir     = flag.String("data_dir", "/usr/share/cgrates", "CGR data dir path here")
 	dbPath      = func(dbType string) string {
 		return strings.Trim(dbType, "*")
 	}
@@ -56,12 +54,12 @@ var (
 
 func TestAccountMigrateITRedis(t *testing.T) {
 	var err error
-	accPathIn = path.Join(*dataDir, "conf", "samples", "tutmysql")
+	accPathIn = path.Join(*utils.DataDir, "conf", "samples", "tutmysql")
 	accCfgIn, err = config.NewCGRConfigFromPath(accPathIn)
 	if err != nil {
 		t.Fatal(err)
 	}
-	accPathOut = path.Join(*dataDir, "conf", "samples", "tutmysql")
+	accPathOut = path.Join(*utils.DataDir, "conf", "samples", "tutmysql")
 	accCfgOut, err = config.NewCGRConfigFromPath(accPathOut)
 	if err != nil {
 		t.Fatal(err)
@@ -75,12 +73,12 @@ func TestAccountMigrateITRedis(t *testing.T) {
 
 func TestAccountMigrateITMongo(t *testing.T) {
 	var err error
-	accPathIn = path.Join(*dataDir, "conf", "samples", "tutmongo")
+	accPathIn = path.Join(*utils.DataDir, "conf", "samples", "tutmongo")
 	accCfgIn, err = config.NewCGRConfigFromPath(accPathIn)
 	if err != nil {
 		t.Fatal(err)
 	}
-	accPathOut = path.Join(*dataDir, "conf", "samples", "tutmongo")
+	accPathOut = path.Join(*utils.DataDir, "conf", "samples", "tutmongo")
 	accCfgOut, err = config.NewCGRConfigFromPath(accPathOut)
 	if err != nil {
 		t.Fatal(err)
@@ -94,12 +92,12 @@ func TestAccountMigrateITMongo(t *testing.T) {
 
 func TestAccountITMove(t *testing.T) {
 	var err error
-	accPathIn = path.Join(*dataDir, "conf", "samples", "tutmongo")
+	accPathIn = path.Join(*utils.DataDir, "conf", "samples", "tutmongo")
 	accCfgIn, err = config.NewCGRConfigFromPath(accPathIn)
 	if err != nil {
 		t.Fatal(err)
 	}
-	accPathOut = path.Join(*dataDir, "conf", "samples", "tutmysql")
+	accPathOut = path.Join(*utils.DataDir, "conf", "samples", "tutmysql")
 	accCfgOut, err = config.NewCGRConfigFromPath(accPathOut)
 	if err != nil {
 		t.Fatal(err)
@@ -113,12 +111,12 @@ func TestAccountITMove(t *testing.T) {
 
 func TestAccountITMigrateMongo2Redis(t *testing.T) {
 	var err error
-	accPathIn = path.Join(*dataDir, "conf", "samples", "tutmongo")
+	accPathIn = path.Join(*utils.DataDir, "conf", "samples", "tutmongo")
 	accCfgIn, err = config.NewCGRConfigFromPath(accPathIn)
 	if err != nil {
 		t.Fatal(err)
 	}
-	accPathOut = path.Join(*dataDir, "conf", "samples", "tutmysql")
+	accPathOut = path.Join(*utils.DataDir, "conf", "samples", "tutmysql")
 	accCfgOut, err = config.NewCGRConfigFromPath(accPathOut)
 	if err != nil {
 		t.Fatal(err)
@@ -132,12 +130,12 @@ func TestAccountITMigrateMongo2Redis(t *testing.T) {
 
 func TestAccountITMoveEncoding(t *testing.T) {
 	var err error
-	accPathIn = path.Join(*dataDir, "conf", "samples", "tutmongo")
+	accPathIn = path.Join(*utils.DataDir, "conf", "samples", "tutmongo")
 	accCfgIn, err = config.NewCGRConfigFromPath(accPathIn)
 	if err != nil {
 		t.Fatal(err)
 	}
-	accPathOut = path.Join(*dataDir, "conf", "samples", "tutmongojson")
+	accPathOut = path.Join(*utils.DataDir, "conf", "samples", "tutmongojson")
 	accCfgOut, err = config.NewCGRConfigFromPath(accPathOut)
 	if err != nil {
 		t.Fatal(err)
@@ -151,12 +149,12 @@ func TestAccountITMoveEncoding(t *testing.T) {
 
 func TestAccountITMoveEncoding2(t *testing.T) {
 	var err error
-	accPathIn = path.Join(*dataDir, "conf", "samples", "tutmysql")
+	accPathIn = path.Join(*utils.DataDir, "conf", "samples", "tutmysql")
 	accCfgIn, err = config.NewCGRConfigFromPath(accPathIn)
 	if err != nil {
 		t.Fatal(err)
 	}
-	accPathOut = path.Join(*dataDir, "conf", "samples", "tutmysqljson")
+	accPathOut = path.Join(*utils.DataDir, "conf", "samples", "tutmysqljson")
 	accCfgOut, err = config.NewCGRConfigFromPath(accPathOut)
 	if err != nil {
 		t.Fatal(err)

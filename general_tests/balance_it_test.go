@@ -44,7 +44,7 @@ import (
 //  4. Verify that the account's *sms balance is the same as it was in step 2 and that the *monetary balance has not been touched
 //     at all.
 func TestBalanceBlocker(t *testing.T) {
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 	case utils.MetaMySQL, utils.MetaMongo, utils.MetaPostgres:
 		t.SkipNow()
@@ -110,7 +110,7 @@ cgrates.org,sms,1001,2014-01-14T00:00:00Z,RP_ANY,`,
 		ConfigJSON: content,
 		TpFiles:    tpFiles,
 	}
-	client, _, shutdown, err := testEnv.Setup(t, *waitRater)
+	client, _, shutdown, err := testEnv.Setup(t, *utils.WaitRater)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -274,7 +274,7 @@ cgrates.org,sms,1001,2014-01-14T00:00:00Z,RP_ANY,`,
 //     voiceFactor is 2) and then also check if it applies correctly for refund (similar
 //     to step 4).
 func TestBalanceFactor(t *testing.T) {
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 	case utils.MetaMySQL, utils.MetaMongo, utils.MetaPostgres:
 		t.SkipNow()
@@ -359,7 +359,7 @@ cgrates.org,call,1001,2014-01-14T00:00:00Z,RP_VOICE,`,
 		ConfigJSON: content,
 		TpFiles:    tpFiles,
 	}
-	client, _, shutdown, err := testEnv.Setup(t, *waitRater)
+	client, _, shutdown, err := testEnv.Setup(t, *utils.WaitRater)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -733,7 +733,7 @@ cgrates.org,call,1001,2014-01-14T00:00:00Z,RP_VOICE,`,
 //  2. Set 3 action bundles with "*topup_reset", "*remove_balance" and "*remove_expired" actions, each coupled with a "*cdrlog" action.
 //  3. Retrieve the CDRs and check whether the their fields are set correctly.
 func TestBalanceCDRLog(t *testing.T) {
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 	case utils.MetaMySQL, utils.MetaMongo, utils.MetaPostgres:
 		t.SkipNow()
@@ -795,7 +795,7 @@ ACT_TOPUP_SMS,*topup_reset,,,balance_sms,*sms,,*any,,,*unlimited,,1000,10,false,
 		ConfigJSON: content,
 		TpFiles:    tpFiles,
 	}
-	client, _, shutdown, err := testEnv.Setup(t, *waitRater)
+	client, _, shutdown, err := testEnv.Setup(t, *utils.WaitRater)
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -103,7 +103,7 @@ var (
 )
 
 func TestSectChange(t *testing.T) {
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 		testSectCfgDir = "reload_sect_internal"
 	case utils.MetaMySQL:
@@ -121,7 +121,7 @@ func TestSectChange(t *testing.T) {
 }
 
 func testSectLoadConfig(t *testing.T) {
-	testSectCfgPath = path.Join(*dataDir, "conf", "samples", testSectCfgDir)
+	testSectCfgPath = path.Join(*utils.DataDir, "conf", "samples", testSectCfgDir)
 	if testSectCfg, err = config.NewCGRConfigFromPath(testSectCfgPath); err != nil {
 		t.Error(err)
 	}
@@ -143,7 +143,7 @@ func testSectStartEngine(t *testing.T) {
 	if err := os.MkdirAll("/var/spool/cgrates/analyzers", 0755); err != nil {
 		t.Error(err)
 	}
-	if _, err := engine.StopStartEngine(testSectCfgPath, *waitRater); err != nil {
+	if _, err := engine.StopStartEngine(testSectCfgPath, *utils.WaitRater); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -1133,7 +1133,7 @@ func testSectConfigSReloadLoaders(t *testing.T) {
 	var reply string
 	if err := testSectRPC.Call(context.Background(), utils.ConfigSv1ReloadConfig, &config.ReloadArgs{
 		Tenant:  "cgrates.org",
-		Path:    path.Join(*dataDir, "conf", "samples", "tutinternal"),
+		Path:    path.Join(*utils.DataDir, "conf", "samples", "tutinternal"),
 		Section: config.LoaderJson,
 	}, &reply); err != nil {
 		t.Error(err)
@@ -1498,7 +1498,7 @@ func testSectStopCgrEngine(t *testing.T) {
 	if err := os.RemoveAll("/var/spool/cgrates/analyzers"); err != nil {
 		t.Error(err)
 	}
-	if err := engine.KillEngine(*waitRater); err != nil {
+	if err := engine.KillEngine(*utils.WaitRater); err != nil {
 		t.Error(err)
 	}
 }

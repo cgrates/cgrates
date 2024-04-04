@@ -55,7 +55,7 @@ var (
 )
 
 func TestTutSMG(t *testing.T) {
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 		t.SkipNow()
 	case utils.MetaMySQL:
@@ -74,7 +74,7 @@ func TestTutSMG(t *testing.T) {
 }
 
 func testTutSMGInitCfg(t *testing.T) {
-	tutSMGCfgPath = path.Join(*dataDir, "conf", "samples", tutSMGCfgDIR)
+	tutSMGCfgPath = path.Join(*utils.DataDir, "conf", "samples", tutSMGCfgDIR)
 	// Init config first
 	var err error
 	tutSMGCfg, err = config.NewCGRConfigFromPath(tutSMGCfgPath)
@@ -99,7 +99,7 @@ func testTutSMGResetStorDb(t *testing.T) {
 
 // Start CGR Engine
 func testTutSMGStartEngine(t *testing.T) {
-	if _, err := engine.StopStartEngine(tutSMGCfgPath, *waitRater); err != nil {
+	if _, err := engine.StopStartEngine(tutSMGCfgPath, *utils.WaitRater); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -115,11 +115,11 @@ func testTutSMGRpcConn(t *testing.T) {
 
 // Load the tariff plan, creating accounts and their balances
 func testTutSMGLoadTariffPlanFromFolder(t *testing.T) {
-	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "oldtutorial")}
+	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*utils.DataDir, "tariffplans", "oldtutorial")}
 	if err := tutSMGRpc.Call(context.Background(), utils.APIerSv2LoadTariffPlanFromFolder, attrs, &smgLoadInst); err != nil {
 		t.Error(err)
 	}
-	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // Give time for scheduler to execute topups
+	time.Sleep(time.Duration(*utils.WaitRater) * time.Millisecond) // Give time for scheduler to execute topups
 }
 
 // Check loaded stats

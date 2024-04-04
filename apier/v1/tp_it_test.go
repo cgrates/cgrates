@@ -55,7 +55,7 @@ var (
 
 // Test start here
 func TestTPIT(t *testing.T) {
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 		tpConfigDIR = "tutinternal"
 	case utils.MetaMySQL:
@@ -75,7 +75,7 @@ func TestTPIT(t *testing.T) {
 
 func testTPInitCfg(t *testing.T) {
 	var err error
-	tpCfgPath = path.Join(*dataDir, "conf", "samples", tpConfigDIR)
+	tpCfgPath = path.Join(*utils.DataDir, "conf", "samples", tpConfigDIR)
 	tpCfg, err = config.NewCGRConfigFromPath(tpCfgPath)
 	if err != nil {
 		t.Error(err)
@@ -91,7 +91,7 @@ func testTPResetStorDb(t *testing.T) {
 
 // Start CGR Engine
 func testTPStartEngine(t *testing.T) {
-	if _, err := engine.StopStartEngine(tpCfgPath, *waitRater); err != nil {
+	if _, err := engine.StopStartEngine(tpCfgPath, *utils.WaitRater); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -109,7 +109,7 @@ func testTPImportTPFromFolderPath(t *testing.T) {
 	var reply string
 	if err := tpRPC.Call(context.Background(), utils.APIerSv1ImportTariffPlanFromFolder,
 		utils.AttrImportTPFromFolder{TPid: "TEST_TPID2",
-			FolderPath: path.Join(*dataDir, "tariffplans", "tutorial")}, &reply); err != nil {
+			FolderPath: path.Join(*utils.DataDir, "tariffplans", "tutorial")}, &reply); err != nil {
 		t.Error("Got error on APIerSv1.ImportTarrifPlanFromFolder: ", err.Error())
 	} else if reply != utils.OK {
 		t.Error("Calling APIerSv1.ImportTarrifPlanFromFolder got reply: ", reply)
@@ -154,7 +154,7 @@ func testTPExportTPToFolderWithError(t *testing.T) {
 }
 
 func testTPKillEngine(t *testing.T) {
-	if err := engine.KillEngine(*waitRater); err != nil {
+	if err := engine.KillEngine(*utils.WaitRater); err != nil {
 		t.Error(err)
 	}
 }

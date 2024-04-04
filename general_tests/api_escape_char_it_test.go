@@ -60,7 +60,7 @@ func TestEscapeCharacters(t *testing.T) {
 		// Encoding:   *encoding,
 		ConfigJSON: content,
 	}
-	client, _, shutdown, err := testEnv.Setup(t, *waitRater)
+	client, _, shutdown, err := testEnv.Setup(t, *utils.WaitRater)
 	if err != nil {
 		t.Fatal(err)
 	}

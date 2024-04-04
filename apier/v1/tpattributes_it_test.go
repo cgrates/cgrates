@@ -63,7 +63,7 @@ var sTestsTPAlsPrf = []func(t *testing.T){
 
 // Test start here
 func TestTPAlsPrfIT(t *testing.T) {
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 		tpAlsPrfConfigDIR = "tutinternal"
 	case utils.MetaMySQL:
@@ -82,7 +82,7 @@ func TestTPAlsPrfIT(t *testing.T) {
 
 func testTPAlsPrfInitCfg(t *testing.T) {
 	var err error
-	tpAlsPrfCfgPath = path.Join(*dataDir, "conf", "samples", tpAlsPrfConfigDIR)
+	tpAlsPrfCfgPath = path.Join(*utils.DataDir, "conf", "samples", tpAlsPrfConfigDIR)
 	tpAlsPrfCfg, err = config.NewCGRConfigFromPath(tpAlsPrfCfgPath)
 	if err != nil {
 		t.Error(err)

@@ -23,7 +23,6 @@ package main
 
 import (
 	"bytes"
-	"flag"
 	"fmt"
 	"net"
 	"net/rpc"
@@ -40,16 +39,9 @@ import (
 	"github.com/cgrates/rpcclient"
 )
 
-var (
-	dataDir   = flag.String("data_dir", "/usr/share/cgrates", "CGR data dir path here")
-	dbType    = flag.String("dbtype", utils.MetaInternal, "The type of DataBase (Internal/Mongo/mySql)")
-	encoding  = flag.String("rpc", utils.MetaJSON, "what encoding whould be used for rpc comunication")
-	waitRater = flag.Int("wait_rater", 100, "Number of miliseconds to wait for rater to start and cache")
-)
-
 func TestLoadConfig(t *testing.T) {
 	// DataDb
-	*cfgPath = path.Join(*dataDir, "conf", "samples", "tutmongo")
+	*cfgPath = path.Join(*utils.DataDir, "conf", "samples", "tutmongo")
 	*dataDBType = utils.MetaRedis
 	*dataDBHost = "localhost"
 	*dataDBPort = "2012"
@@ -249,7 +241,7 @@ var (
 )
 
 func TestLoadIt(t *testing.T) {
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 		t.SkipNow()
 	case utils.MetaMySQL:
@@ -268,7 +260,7 @@ func TestLoadIt(t *testing.T) {
 
 func testLoadItLoadConfig(t *testing.T) {
 	var err error
-	ldrItCfgPath = path.Join(*dataDir, "conf", "samples", ldrItCfgDir)
+	ldrItCfgPath = path.Join(*utils.DataDir, "conf", "samples", ldrItCfgDir)
 	if ldrItCfg, err = config.NewCGRConfigFromPath(ldrItCfgPath); err != nil {
 		t.Error(err)
 	}
@@ -287,7 +279,7 @@ func testLoadItResetStorDb(t *testing.T) {
 }
 
 func testLoadItStartLoader(t *testing.T) {
-	cmd := exec.Command("cgr-loader", "-config_path="+ldrItCfgPath, "-path="+path.Join(*dataDir, "tariffplans", "tutorial"), "-caches_address=", "-scheduler_address=")
+	cmd := exec.Command("cgr-loader", "-config_path="+ldrItCfgPath, "-path="+path.Join(*utils.DataDir, "tariffplans", "tutorial"), "-caches_address=", "-scheduler_address=")
 	output := bytes.NewBuffer(nil)
 	outerr := bytes.NewBuffer(nil)
 	cmd.Stdout = output
@@ -335,7 +327,7 @@ func testLoadItCheckAttributes(t *testing.T) {
 }
 
 func testLoadItStartLoaderRemove(t *testing.T) {
-	cmd := exec.Command("cgr-loader", "-config_path="+ldrItCfgPath, "-path="+path.Join(*dataDir, "tariffplans", "tutorial"), "-caches_address=", "-scheduler_address=", "-remove")
+	cmd := exec.Command("cgr-loader", "-config_path="+ldrItCfgPath, "-path="+path.Join(*utils.DataDir, "tariffplans", "tutorial"), "-caches_address=", "-scheduler_address=", "-remove")
 	output := bytes.NewBuffer(nil)
 	outerr := bytes.NewBuffer(nil)
 	cmd.Stdout = output
@@ -355,7 +347,7 @@ func testLoadItCheckAttributes2(t *testing.T) {
 }
 
 func testLoadItStartLoaderToStorDB(t *testing.T) {
-	cmd := exec.Command("cgr-loader", "-config_path="+ldrItCfgPath, "-path="+path.Join(*dataDir, "tariffplans", "tutorial"), "-caches_address=", "-scheduler_address=", "-to_stordb", "-tpid=TPID")
+	cmd := exec.Command("cgr-loader", "-config_path="+ldrItCfgPath, "-path="+path.Join(*utils.DataDir, "tariffplans", "tutorial"), "-caches_address=", "-scheduler_address=", "-to_stordb", "-tpid=TPID")
 	output := bytes.NewBuffer(nil)
 	outerr := bytes.NewBuffer(nil)
 	cmd.Stdout = output
@@ -383,7 +375,7 @@ func testLoadItStartLoaderFromStorDB(t *testing.T) {
 }
 
 func testLoadItStartLoaderWithTenant(t *testing.T) {
-	cmd := exec.Command("cgr-loader", "-config_path="+ldrItCfgPath, "-path="+path.Join(*dataDir, "tariffplans", "tutorial"), fmt.Sprintf("-caches_address=%s", address), "-scheduler_address=", `-tenant="tenant.com"`, "-verbose")
+	cmd := exec.Command("cgr-loader", "-config_path="+ldrItCfgPath, "-path="+path.Join(*utils.DataDir, "tariffplans", "tutorial"), fmt.Sprintf("-caches_address=%s", address), "-scheduler_address=", `-tenant="tenant.com"`, "-verbose")
 	output := bytes.NewBuffer(nil)
 	cmd.Stdout = output
 	if err := cmd.Run(); err != nil {
@@ -439,7 +431,7 @@ func testLoadItCheckTenantFlag(t *testing.T) {
 }
 
 func testLoadItStartLoaderFlushStorDB(t *testing.T) {
-	cmd := exec.Command("cgr-loader", "-config_path="+ldrItCfgPath, "-path="+path.Join(*dataDir, "tariffplans", "dispatchers"), "-caches_address=", "-scheduler_address=", "-to_stordb", "-flush_stordb", "-tpid=TPID")
+	cmd := exec.Command("cgr-loader", "-config_path="+ldrItCfgPath, "-path="+path.Join(*utils.DataDir, "tariffplans", "dispatchers"), "-caches_address=", "-scheduler_address=", "-to_stordb", "-flush_stordb", "-tpid=TPID")
 	output := bytes.NewBuffer(nil)
 	outerr := bytes.NewBuffer(nil)
 	cmd.Stdout = output
@@ -453,7 +445,7 @@ func testLoadItStartLoaderFlushStorDB(t *testing.T) {
 }
 
 func testLoadItStartLoaderWithDelayWConf(t *testing.T) {
-	cmd := exec.Command("cgr-loader", "-config_path="+path.Join(*dataDir, "conf", "samples", "apier_mysql"), "-path="+path.Join(*dataDir, "tariffplans", "tutorial"), "-caches_address=", "-scheduler_address=", "-to_stordb", "-flush_stordb", "-tpid=TPID")
+	cmd := exec.Command("cgr-loader", "-config_path="+path.Join(*utils.DataDir, "conf", "samples", "apier_mysql"), "-path="+path.Join(*utils.DataDir, "tariffplans", "tutorial"), "-caches_address=", "-scheduler_address=", "-to_stordb", "-flush_stordb", "-tpid=TPID")
 	output := bytes.NewBuffer(nil)
 	outerr := bytes.NewBuffer(nil)
 	cmd.Stdout = output
@@ -467,7 +459,7 @@ func testLoadItStartLoaderWithDelayWConf(t *testing.T) {
 }
 
 func testLoadItStartLoaderWithDelayWFlag(t *testing.T) {
-	cmd := exec.Command("cgr-loader", "-path="+path.Join(*dataDir, "tariffplans", "tutorial"), "-caches_address=", "-scheduler_address=", "-to_stordb", "-flush_stordb", "-tpid=TPID", "-caching_delay=5s")
+	cmd := exec.Command("cgr-loader", "-path="+path.Join(*utils.DataDir, "tariffplans", "tutorial"), "-caches_address=", "-scheduler_address=", "-to_stordb", "-flush_stordb", "-tpid=TPID", "-caching_delay=5s")
 	output := bytes.NewBuffer(nil)
 	outerr := bytes.NewBuffer(nil)
 	cmd.Stdout = output

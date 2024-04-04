@@ -50,7 +50,7 @@ var (
 func startRPC() {
 	var err error
 	sBenchCfg, err = config.NewCGRConfigFromPath(
-		path.Join(*dataDir, "conf", "samples", "tutmongo"))
+		path.Join(*utils.DataDir, "conf", "samples", "tutmongo"))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -67,7 +67,7 @@ func loadTP() {
 		log.Fatal(err)
 	}
 	attrs := &utils.AttrLoadTpFromFolder{
-		FolderPath: path.Join(*dataDir, "tariffplans", "tutorial")}
+		FolderPath: path.Join(*utils.DataDir, "tariffplans", "tutorial")}
 	var tpLoadInst utils.LoadInstance
 	if err := sBenchRPC.Call(context.Background(), utils.APIerSv2LoadTariffPlanFromFolder,
 		attrs, &tpLoadInst); err != nil {
@@ -195,7 +195,7 @@ func BenchmarkEncodingJSON(b *testing.B) {
 	}
 	var err error
 	sBenchCfg, err = config.NewCGRConfigFromPath(
-		path.Join(*dataDir, "conf", "samples", "tutmongo"))
+		path.Join(*utils.DataDir, "conf", "samples", "tutmongo"))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -217,7 +217,7 @@ func BenchmarkEncodingGOB(b *testing.B) {
 	}
 	var err error
 	sBenchCfg, err = config.NewCGRConfigFromPath(
-		path.Join(*dataDir, "conf", "samples", "tutmongo"))
+		path.Join(*utils.DataDir, "conf", "samples", "tutmongo"))
 	if err != nil {
 		log.Fatal(err)
 	}

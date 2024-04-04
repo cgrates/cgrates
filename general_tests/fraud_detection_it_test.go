@@ -64,7 +64,7 @@ var (
 )
 
 func TestFraudIT(t *testing.T) {
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 		fraudConfDIR = "fraud_internal"
 	case utils.MetaMySQL:
@@ -96,7 +96,7 @@ func testFraudRemoveFolders(t *testing.T) {
 
 func testFraudLoadConfig(t *testing.T) {
 	var err error
-	fraudCfgPath = path.Join(*dataDir, "conf", "samples", fraudConfDIR)
+	fraudCfgPath = path.Join(*utils.DataDir, "conf", "samples", fraudConfDIR)
 	if fraudCfg, err = config.NewCGRConfigFromPath(fraudCfgPath); err != nil {
 		t.Error(err)
 	}

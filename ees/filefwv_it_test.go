@@ -66,7 +66,7 @@ func TestFwvExport(t *testing.T) {
 
 func testFwvLoadConfig(t *testing.T) {
 	var err error
-	fwvCfgPath = path.Join(*dataDir, "conf", "samples", fwvConfigDir)
+	fwvCfgPath = path.Join(*utils.DataDir, "conf", "samples", fwvConfigDir)
 	if fwvCfg, err = config.NewCGRConfigFromPath(fwvCfgPath); err != nil {
 		t.Error(err)
 	}
@@ -85,7 +85,7 @@ func testFwvResetStorDb(t *testing.T) {
 }
 
 func testFwvStartEngine(t *testing.T) {
-	if _, err := engine.StopStartEngine(fwvCfgPath, *waitRater); err != nil {
+	if _, err := engine.StopStartEngine(fwvCfgPath, *utils.WaitRater); err != nil {
 		t.Fatal(err)
 	}
 }

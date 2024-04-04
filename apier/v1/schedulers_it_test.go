@@ -57,7 +57,7 @@ var sTestsSchedFiltered = []func(t *testing.T){
 
 // TestSchedWithoutFilters will execute action for all accounts
 func TestSchedWithoutFilters(t *testing.T) {
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 		schedConfDIR = "tutinternal"
 	case utils.MetaMySQL:
@@ -77,7 +77,7 @@ func TestSchedWithoutFilters(t *testing.T) {
 
 // TestSchedWithFiltersSingleAccount will execute actions only for account 1001
 func TestSchedWithFiltersSingleAccount(t *testing.T) {
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 		schedConfDIR = "filtered_scheduler_internal"
 	case utils.MetaMySQL:
@@ -96,7 +96,7 @@ func TestSchedWithFiltersSingleAccount(t *testing.T) {
 
 // TestSchedWithFilters2 will execute actions for accounts 1002 and 1003 ( 1001 will be skiped )
 func TestSchedWithFilters2(t *testing.T) {
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 		schedConfDIR = "filtered_scheduler2_internal"
 	case utils.MetaMySQL:
@@ -115,7 +115,7 @@ func TestSchedWithFilters2(t *testing.T) {
 
 func testSchedLoadConfig(t *testing.T) {
 	var err error
-	schedCfgPath = path.Join(*dataDir, "conf", "samples", schedConfDIR)
+	schedCfgPath = path.Join(*utils.DataDir, "conf", "samples", schedConfDIR)
 	if schedCfg, err = config.NewCGRConfigFromPath(schedCfgPath); err != nil {
 		t.Error(err)
 	}
@@ -134,7 +134,7 @@ func testSchedResetStorDb(t *testing.T) {
 }
 
 func testSchedStartEngine(t *testing.T) {
-	if _, err := engine.StopStartEngine(schedCfgPath, *waitRater); err != nil {
+	if _, err := engine.StopStartEngine(schedCfgPath, *utils.WaitRater); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -149,7 +149,7 @@ func testSchedRpcConn(t *testing.T) {
 
 func testSchedFromFolder(t *testing.T) {
 	var reply string
-	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "tutorial")}
+	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*utils.DataDir, "tariffplans", "tutorial")}
 	if err := schedRpc.Call(context.Background(), utils.APIerSv1LoadTariffPlanFromFolder, attrs, &reply); err != nil {
 		t.Error(err)
 	}
@@ -328,7 +328,7 @@ func testSchedExecuteAction(t *testing.T) {
 }
 
 func testSchedStopEngine(t *testing.T) {
-	if err := engine.KillEngine(*waitRater); err != nil {
+	if err := engine.KillEngine(*utils.WaitRater); err != nil {
 		t.Error(err)
 	}
 }

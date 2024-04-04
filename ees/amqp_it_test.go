@@ -67,7 +67,7 @@ func TestAMQPExport(t *testing.T) {
 
 func testAMQPLoadConfig(t *testing.T) {
 	var err error
-	amqpCfgPath = path.Join(*dataDir, "conf", "samples", amqpConfDir)
+	amqpCfgPath = path.Join(*utils.DataDir, "conf", "samples", amqpConfDir)
 	if amqpCfg, err = config.NewCGRConfigFromPath(amqpCfgPath); err != nil {
 		t.Error(err)
 	}
@@ -91,7 +91,7 @@ func testAMQPResetStorDb(t *testing.T) {
 }
 
 func testAMQPStartEngine(t *testing.T) {
-	if _, err := engine.StopStartEngine(amqpCfgPath, *waitRater); err != nil {
+	if _, err := engine.StopStartEngine(amqpCfgPath, *utils.WaitRater); err != nil {
 		t.Fatal(err)
 	}
 }

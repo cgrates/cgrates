@@ -61,7 +61,7 @@ var sTestsTPTiming = []func(t *testing.T){
 
 // Test start here
 func TestTPTimingIT(t *testing.T) {
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 		tpTimingConfigDIR = "tutinternal"
 	case utils.MetaMySQL:
@@ -80,7 +80,7 @@ func TestTPTimingIT(t *testing.T) {
 
 func testTPTimingsInitCfg(t *testing.T) {
 	var err error
-	tpTimingCfgPath = path.Join(*dataDir, "conf", "samples", tpTimingConfigDIR)
+	tpTimingCfgPath = path.Join(*utils.DataDir, "conf", "samples", tpTimingConfigDIR)
 	tpTimingCfg, err = config.NewCGRConfigFromPath(tpTimingCfgPath)
 	if err != nil {
 		t.Error(err)

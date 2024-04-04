@@ -60,7 +60,7 @@ var (
 )
 
 func TestSesPauseItSessions(t *testing.T) {
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 		sesPauseCfgDir = "tutinternal"
 	case utils.MetaMySQL:
@@ -78,7 +78,7 @@ func TestSesPauseItSessions(t *testing.T) {
 }
 
 func testSesPauseItLoadConfig(t *testing.T) {
-	sesPauseCfgPath = path.Join(*dataDir, "conf", "samples", sesPauseCfgDir)
+	sesPauseCfgPath = path.Join(*utils.DataDir, "conf", "samples", sesPauseCfgDir)
 	if sesPauseCfg, err = config.NewCGRConfigFromPath(sesPauseCfgPath); err != nil {
 		t.Error(err)
 	}
@@ -97,7 +97,7 @@ func testSesPauseItResetStorDb(t *testing.T) {
 }
 
 func testSesPauseItStartEngine(t *testing.T) {
-	if _, err := engine.StopStartEngine(sesPauseCfgPath, *waitRater); err != nil {
+	if _, err := engine.StopStartEngine(sesPauseCfgPath, *utils.WaitRater); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -112,7 +112,7 @@ func testSesPauseItRPCConn(t *testing.T) {
 
 func testSesPauseItLoadFromFolder(t *testing.T) {
 	var reply string
-	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "tutorial")}
+	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*utils.DataDir, "tariffplans", "tutorial")}
 	if err := sesPauseRPC.Call(context.Background(), utils.APIerSv1LoadTariffPlanFromFolder, attrs, &reply); err != nil {
 		t.Error(err)
 	}

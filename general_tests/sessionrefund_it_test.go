@@ -59,7 +59,7 @@ var (
 )
 
 func TestSrIt(t *testing.T) {
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 		srCfgDIR = "tutinternal"
 	case utils.MetaMySQL:
@@ -77,7 +77,7 @@ func TestSrIt(t *testing.T) {
 }
 
 func testSrItLoadConfig(t *testing.T) {
-	srCfgPath = path.Join(*dataDir, "conf", "samples", srCfgDIR)
+	srCfgPath = path.Join(*utils.DataDir, "conf", "samples", srCfgDIR)
 	if srCfg, err = config.NewCGRConfigFromPath(srCfgPath); err != nil {
 		t.Error(err)
 	}
@@ -96,7 +96,7 @@ func testSrItResetStorDb(t *testing.T) {
 }
 
 func testSrItStartEngine(t *testing.T) {
-	if _, err := engine.StopStartEngine(srCfgPath, *waitRater); err != nil {
+	if _, err := engine.StopStartEngine(srCfgPath, *utils.WaitRater); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -111,7 +111,7 @@ func testSrItRPCConn(t *testing.T) {
 
 func testSrItLoadFromFolder(t *testing.T) {
 	var reply string
-	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "oldtutorial")}
+	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*utils.DataDir, "tariffplans", "oldtutorial")}
 	if err := srrpc.Call(context.Background(), utils.APIerSv1LoadTariffPlanFromFolder, attrs, &reply); err != nil {
 		t.Error(err)
 	}

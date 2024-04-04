@@ -114,7 +114,7 @@ func TestDispatcherOpts(t *testing.T) {
 func testDispatcherCgr1InitCfg(t *testing.T) {
 	cfg1ConfigDIR = "dispatcher_opts_host1"
 	var err error
-	cfg1CfgPath = path.Join(*dataDir, "conf", "samples", cfg1ConfigDIR)
+	cfg1CfgPath = path.Join(*utils.DataDir, "conf", "samples", cfg1ConfigDIR)
 	cfg1Cfg, err = config.NewCGRConfigFromPath(cfg1CfgPath)
 	if err != nil {
 		t.Error(err)
@@ -129,7 +129,7 @@ func testDispatcherCgr1InitDataDb(t *testing.T) {
 
 // Start CGR Engine woth Dispatcher enabled
 func testDispatcherCgr1StartEngine(t *testing.T) {
-	if _, err := engine.StartEngine(cfg1CfgPath, *waitRater); err != nil {
+	if _, err := engine.StartEngine(cfg1CfgPath, *utils.WaitRater); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -145,7 +145,7 @@ func testDispatcherCgr1RPCConn(t *testing.T) {
 func testDispatcherCgr2InitCfg(t *testing.T) {
 	cfg2ConfigDIR = "dispatcher_opts_host2" //changed with the cfg with dispatcher on
 	var err error
-	cfg2CfgPath = path.Join(*dataDir, "conf", "samples", cfg2ConfigDIR)
+	cfg2CfgPath = path.Join(*utils.DataDir, "conf", "samples", cfg2ConfigDIR)
 	cfg2OptsCfg, err = config.NewCGRConfigFromPath(cfg2CfgPath)
 	if err != nil {
 		t.Error(err)
@@ -154,7 +154,7 @@ func testDispatcherCgr2InitCfg(t *testing.T) {
 
 // Start CGR Engine woth Dispatcher enabled
 func testDispatcherCgr2StartEngine(t *testing.T) {
-	if _, err := engine.StartEngine(cfg2CfgPath, *waitRater); err != nil {
+	if _, err := engine.StartEngine(cfg2CfgPath, *utils.WaitRater); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -267,7 +267,7 @@ func testDispatcherGetItemBothEnginesFirstAttempt(t *testing.T) {
 func testDispatcherSetterInitCfg(t *testing.T) {
 	setterConfigDIR = "dispatcher_opts_setter"
 	var err error
-	setterCfgPath = path.Join(*dataDir, "conf", "samples", setterConfigDIR)
+	setterCfgPath = path.Join(*utils.DataDir, "conf", "samples", setterConfigDIR)
 	setterCfg, err = config.NewCGRConfigFromPath(setterCfgPath)
 	if err != nil {
 		t.Error(err)
@@ -275,7 +275,7 @@ func testDispatcherSetterInitCfg(t *testing.T) {
 }
 
 func testDispatcherSetterStartEngine(t *testing.T) {
-	if _, err := engine.StartEngine(setterCfgPath, *waitRater); err != nil {
+	if _, err := engine.StartEngine(setterCfgPath, *utils.WaitRater); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -818,13 +818,13 @@ func testDispatcherCheckCacheAfterSetDispatcherDSP2(t *testing.T) {
 }
 
 func testDispatcherCgr1StopEngine(t *testing.T) {
-	if err := engine.KillEngine(*waitRater); err != nil {
+	if err := engine.KillEngine(*utils.WaitRater); err != nil {
 		t.Error(err)
 	}
 }
 
 func testDispatcherCgr2StopEngine(t *testing.T) {
-	if err := engine.KillEngine(*waitRater); err != nil {
+	if err := engine.KillEngine(*utils.WaitRater); err != nil {
 		t.Error(err)
 	}
 }

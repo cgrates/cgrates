@@ -66,7 +66,7 @@ func TestTutorialMongoAtlas(t *testing.T) {
 }
 
 func TestTutorial(t *testing.T) {
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 		tutorialConfDIR = "tutinternal"
 	case utils.MetaMySQL:
@@ -85,7 +85,7 @@ func TestTutorial(t *testing.T) {
 
 func testTutorialLoadConfig(t *testing.T) {
 	var err error
-	tutorialCfgPath = path.Join(*dataDir, "conf", "samples", tutorialConfDIR)
+	tutorialCfgPath = path.Join(*utils.DataDir, "conf", "samples", tutorialConfDIR)
 	if tutorialCfg, err = config.NewCGRConfigFromPath(tutorialCfgPath); err != nil {
 		t.Error(err)
 	}
@@ -122,7 +122,7 @@ func testTutorialRpcConn(t *testing.T) {
 
 func testTutorialFromFolder(t *testing.T) {
 	var reply string
-	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "tutorial")}
+	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*utils.DataDir, "tariffplans", "tutorial")}
 	if err := tutorialRpc.Call(context.Background(), utils.APIerSv1LoadTariffPlanFromFolder, attrs, &reply); err != nil {
 		t.Error(err)
 	}

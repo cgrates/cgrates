@@ -57,7 +57,7 @@ var (
 
 // Tests starting here
 func TestCDRsPostFailoverIT(t *testing.T) {
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 		cdrsPostFailConfDIR = "cdrsv_failover_internal"
 	case utils.MetaMySQL:
@@ -77,7 +77,7 @@ func TestCDRsPostFailoverIT(t *testing.T) {
 
 func testCDRsPostFailoverInitConfig(t *testing.T) {
 	var err error
-	cdrsPostFailCfgPath = path.Join(*dataDir, "conf", "samples", cdrsPostFailConfDIR)
+	cdrsPostFailCfgPath = path.Join(*utils.DataDir, "conf", "samples", cdrsPostFailConfDIR)
 	if cdrsPostFailCfg, err = config.NewCGRConfigFromPath(cdrsPostFailCfgPath); err != nil {
 		t.Fatal("Got config error: ", err.Error())
 	}
@@ -103,7 +103,7 @@ func testCDRsPostFailoverInitCdrDb(t *testing.T) {
 }
 
 func testCDRsPostFailoverStartEngine(t *testing.T) {
-	if _, err := engine.StopStartEngine(cdrsPostFailCfgPath, *waitRater); err != nil {
+	if _, err := engine.StopStartEngine(cdrsPostFailCfgPath, *utils.WaitRater); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -120,10 +120,10 @@ func testCDRsPostFailoverLoadTariffPlanFromFolder(t *testing.T) {
 	var loadInst utils.LoadInstance
 	if err := cdrsPostFailRpc.Call(context.Background(), utils.APIerSv2LoadTariffPlanFromFolder,
 		&utils.AttrLoadTpFromFolder{FolderPath: path.Join(
-			*dataDir, "tariffplans", "testit")}, &loadInst); err != nil {
+			*utils.DataDir, "tariffplans", "testit")}, &loadInst); err != nil {
 		t.Error(err)
 	}
-	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // Give time for scheduler to execute topups
+	time.Sleep(time.Duration(*utils.WaitRater) * time.Millisecond) // Give time for scheduler to execute topups
 	var resp string
 	if err := cdrsPostFailRpc.Call(context.Background(), utils.APIerSv1RemoveChargerProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "SupplierCharges"}, &resp); err != nil {
@@ -216,7 +216,7 @@ func testCDRsPostFailoverKillEngine(t *testing.T) {
 	if err = os.RemoveAll(cdrsPostFailCfg.GeneralCfg().FailedPostsDir); err != nil {
 		t.Error(err)
 	}
-	if err := engine.KillEngine(*waitRater); err != nil {
+	if err := engine.KillEngine(*utils.WaitRater); err != nil {
 		t.Error(err)
 	}
 }

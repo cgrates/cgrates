@@ -47,7 +47,7 @@ import (
 //   - attaches the rating profile via changing the event subject using an attribute profile
 //   - sets up needed filters in order to select the correct pricing for the situation.
 func TestSharedSubject(t *testing.T) {
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 	case utils.MetaMySQL, utils.MetaMongo, utils.MetaPostgres:
 		t.SkipNow()
@@ -127,7 +127,7 @@ cgrates.org,call,Subject2,2014-01-14T00:00:00Z,RP_Subject2,`,
 		ConfigJSON: content,
 		TpFiles:    tpFiles,
 	}
-	client, _, shutdown, err := testEnv.Setup(t, *waitRater)
+	client, _, shutdown, err := testEnv.Setup(t, *utils.WaitRater)
 	if err != nil {
 		t.Fatal(err)
 	}

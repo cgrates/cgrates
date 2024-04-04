@@ -69,7 +69,7 @@ var (
 
 // Test start here
 func TestConfigSIT(t *testing.T) {
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 		configConfigDIR = "tutinternal"
 	case utils.MetaMySQL:
@@ -88,7 +88,7 @@ func TestConfigSIT(t *testing.T) {
 
 func testConfigSInitCfg(t *testing.T) {
 	var err error
-	configCfgPath = path.Join(*dataDir, "conf", "samples", configConfigDIR)
+	configCfgPath = path.Join(*utils.DataDir, "conf", "samples", configConfigDIR)
 	configCfg, err = config.NewCGRConfigFromPath(configCfgPath)
 	if err != nil {
 		t.Error(err)
@@ -110,7 +110,7 @@ func testConfigSResetStorDb(t *testing.T) {
 
 // Start CGR Engine
 func testConfigSStartEngine(t *testing.T) {
-	if _, err := engine.StopStartEngine(configCfgPath, *waitRater); err != nil {
+	if _, err := engine.StopStartEngine(configCfgPath, *utils.WaitRater); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -182,7 +182,7 @@ func testConfigSSetConfigSessionS(t *testing.T) {
 			utils.MetaSMS:   "1",
 		},
 	}
-	if *encoding == utils.MetaGOB {
+	if *utils.Encoding == utils.MetaGOB {
 		var empty []string
 		exp = map[string]any{
 			"enabled":               true,
@@ -275,7 +275,7 @@ func testConfigSv1GetJSONSectionWithoutTenant(t *testing.T) {
 			utils.MetaSMS:   "1",
 		},
 	}
-	if *encoding == utils.MetaGOB {
+	if *utils.Encoding == utils.MetaGOB {
 		var empty []string
 		exp = map[string]any{
 			"enabled":                    true,
@@ -329,7 +329,7 @@ func testConfigSv1GetJSONSectionWithoutTenant(t *testing.T) {
 }
 
 func testConfigSSetConfigEEsDryRun(t *testing.T) {
-	if *encoding == utils.MetaGOB {
+	if *utils.Encoding == utils.MetaGOB {
 		t.SkipNow()
 	}
 	var reply string
@@ -357,7 +357,7 @@ func testConfigSSetConfigEEsDryRun(t *testing.T) {
 }
 
 func testConfigSSetConfigEEs(t *testing.T) {
-	if *encoding == utils.MetaGOB {
+	if *utils.Encoding == utils.MetaGOB {
 		t.SkipNow()
 	}
 	var reply string
@@ -421,12 +421,12 @@ func testConfigSKillEngine(t *testing.T) {
 
 func testConfigStartEngineWithConfigs(t *testing.T) {
 	var err error
-	configCfgPath = path.Join(*dataDir, "conf", "samples", "configs_active")
+	configCfgPath = path.Join(*utils.DataDir, "conf", "samples", "configs_active")
 	configCfg, err = config.NewCGRConfigFromPath(configCfgPath)
 	if err != nil {
 		t.Error(err)
 	}
-	if _, err := engine.StopStartEngine(configCfgPath, *waitRater); err != nil {
+	if _, err := engine.StopStartEngine(configCfgPath, *utils.WaitRater); err != nil {
 		t.Fatal(err)
 	}
 	configRPC, err = newRPCClient(configCfg.ListenCfg()) // We connect over JSON so we can also troubleshoot if needed
@@ -526,7 +526,7 @@ func testConfigSReloadConfigCoreSDryRun(t *testing.T) {
 	var reply string
 	if err := configRPC.Call(context.Background(), utils.ConfigSv1ReloadConfig, &config.ReloadArgs{
 		Tenant:  "cgrates.org",
-		Path:    path.Join(*dataDir, "conf", "samples", "caps_busy"),
+		Path:    path.Join(*utils.DataDir, "conf", "samples", "caps_busy"),
 		Section: config.CoreSCfgJson,
 		DryRun:  true,
 	}, &reply); err != nil {
@@ -551,7 +551,7 @@ func testConfigSReloadConfigCoreS(t *testing.T) {
 	var reply string
 	if err := configRPC.Call(context.Background(), utils.ConfigSv1ReloadConfig, &config.ReloadArgs{
 		Tenant:  "cgrates.org",
-		Path:    path.Join(*dataDir, "conf", "samples", "caps_busy"),
+		Path:    path.Join(*utils.DataDir, "conf", "samples", "caps_busy"),
 		Section: config.CoreSCfgJson,
 	}, &reply); err != nil {
 		t.Error(err)
@@ -572,12 +572,12 @@ func testConfigSReloadConfigCoreS(t *testing.T) {
 
 func testConfigSStartEngineCAPSAllocated(t *testing.T) {
 	var err error
-	configCfgPath = path.Join(*dataDir, "conf", "samples", "caps_peak")
+	configCfgPath = path.Join(*utils.DataDir, "conf", "samples", "caps_peak")
 	configCfg, err = config.NewCGRConfigFromPath(configCfgPath)
 	if err != nil {
 		t.Error(err)
 	}
-	if _, err := engine.StopStartEngine(configCfgPath, *waitRater); err != nil {
+	if _, err := engine.StopStartEngine(configCfgPath, *utils.WaitRater); err != nil {
 		t.Fatal(err)
 	}
 	configRPC, err = newRPCClient(configCfg.ListenCfg()) // We connect over JSON so we can also troubleshoot if needed
@@ -601,7 +601,7 @@ func testConfigSCAPSPeak(t *testing.T) {
 	var reply string
 	if err := configRPC.Call(context.Background(), utils.ConfigSv1ReloadConfig, &config.ReloadArgs{
 		Tenant:  "cgrates.org",
-		Path:    path.Join(*dataDir, "conf", "samples", "caps_peak"),
+		Path:    path.Join(*utils.DataDir, "conf", "samples", "caps_peak"),
 		Section: config.CoreSCfgJson,
 	}, &reply); err != nil {
 		t.Error(err)

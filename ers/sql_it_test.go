@@ -77,7 +77,7 @@ var (
 )
 
 func TestSQL(t *testing.T) {
-	// sqlCfgPath = path.Join(*dataDir, "conf", "samples", "ers_reload", "disabled")
+	// sqlCfgPath = path.Join(*utils.DataDir, "conf", "samples", "ers_reload", "disabled")
 	for _, test := range sqlTests {
 		t.Run("TestSQL", test)
 	}
@@ -358,7 +358,7 @@ func TestSQLReaderServeBadTypeErr(t *testing.T) {
 }
 
 func TestSQL2(t *testing.T) {
-	// sqlCfgPath = path.Join(*dataDir, "conf", "samples", "ers_reload", "disabled")
+	// sqlCfgPath = path.Join(*utils.DataDir, "conf", "samples", "ers_reload", "disabled")
 	for _, test := range sqlTests2 {
 		t.Run("TestSQL", test)
 	}

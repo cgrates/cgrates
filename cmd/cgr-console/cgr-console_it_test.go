@@ -25,7 +25,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
-	"flag"
 	"fmt"
 	"os"
 	"os/exec"
@@ -47,13 +46,7 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-var (
-	dataDir   = flag.String("data_dir", "/usr/share/cgrates", "CGR data dir path here")
-	dbType    = flag.String("dbtype", utils.MetaInternal, "The type of DataBase (Internal/Mongo/mySql)")
-	waitRater = flag.Int("wait_rater", 100, "Number of milliseconds to wait for rater to start and cache")
-	encoding  = flag.String("rpc", utils.MetaJSON, "what encoding whould be uused for rpc comunication")
-	cnslRPC   *birpc.Client
-)
+var cnslRPC *birpc.Client
 
 var (
 	cnslItCfgPath string
@@ -218,7 +211,7 @@ var (
 )
 
 func TestConsoleItTests(t *testing.T) {
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 		t.SkipNow()
 	case utils.MetaMySQL:
@@ -236,7 +229,7 @@ func TestConsoleItTests(t *testing.T) {
 }
 
 func TestConsoleItDispatchersTests(t *testing.T) {
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 		t.SkipNow()
 	case utils.MetaMySQL:
@@ -254,7 +247,7 @@ func TestConsoleItDispatchersTests(t *testing.T) {
 }
 
 func TestConsoleItLoadersTests(t *testing.T) {
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 		t.SkipNow()
 	case utils.MetaMySQL:
@@ -273,7 +266,7 @@ func TestConsoleItLoadersTests(t *testing.T) {
 
 func testConsoleItLoadConfig(t *testing.T) {
 	var err error
-	cnslItCfgPath = path.Join(*dataDir, "conf", "samples", cnslItDirPath)
+	cnslItCfgPath = path.Join(*utils.DataDir, "conf", "samples", cnslItDirPath)
 	if cnslItCfg, err = config.NewCGRConfigFromPath(cnslItCfgPath); err != nil {
 		t.Fatal(err)
 	}
@@ -290,7 +283,7 @@ func testConsoleItLoadersLoadConfig(t *testing.T) {
 	}
 
 	var err error
-	cnslItCfgPath = path.Join(*dataDir, "conf", "samples", cnslItDirPath)
+	cnslItCfgPath = path.Join(*utils.DataDir, "conf", "samples", cnslItDirPath)
 	if cnslItCfg, err = config.NewCGRConfigFromPath(cnslItCfgPath); err != nil {
 		t.Fatal(err)
 	}
@@ -309,13 +302,13 @@ func testConsoleItInitStorDB(t *testing.T) {
 }
 
 func testConsoleItStartEngine(t *testing.T) {
-	if _, err := engine.StartEngine(cnslItCfgPath, *waitRater); err != nil {
+	if _, err := engine.StartEngine(cnslItCfgPath, *utils.WaitRater); err != nil {
 		t.Fatal(err)
 	}
 }
 
 func newRPCClient(cfg *config.ListenCfg) (c *birpc.Client, err error) {
-	switch *encoding {
+	switch *utils.Encoding {
 	case utils.MetaJSON:
 		return jsonrpc.Dial(utils.TCP, cfg.RPCJSONListen)
 	case utils.MetaGOB:
@@ -342,13 +335,13 @@ func testConsoleItLoadersStartEngine(t *testing.T) {
 	if err := os.MkdirAll(fldPathOut, 0777); err != nil {
 		t.Error(err)
 	}
-	if _, err := engine.StartEngine(cnslItCfgPath, *waitRater); err != nil {
+	if _, err := engine.StartEngine(cnslItCfgPath, *utils.WaitRater); err != nil {
 		t.Fatal(err)
 	}
 }
 
 func testConsoleItLoadTP(t *testing.T) {
-	cmd := exec.Command("cgr-loader", "-config_path="+cnslItCfgPath, "-path="+path.Join(*dataDir, "tariffplans", "tutorial"))
+	cmd := exec.Command("cgr-loader", "-config_path="+cnslItCfgPath, "-path="+path.Join(*utils.DataDir, "tariffplans", "tutorial"))
 	output := bytes.NewBuffer(nil)
 	cmd.Stdout = output
 	if err := cmd.Run(); err != nil {
@@ -359,7 +352,7 @@ func testConsoleItLoadTP(t *testing.T) {
 }
 
 func testConsoleItDispatchersLoadTP(t *testing.T) {
-	cmd := exec.Command("cgr-loader", "-config_path="+cnslItCfgPath, "-path="+path.Join(*dataDir, "tariffplans", "dispatchers"), `-caches_address=`, `-scheduler_address=`)
+	cmd := exec.Command("cgr-loader", "-config_path="+cnslItCfgPath, "-path="+path.Join(*utils.DataDir, "tariffplans", "dispatchers"), `-caches_address=`, `-scheduler_address=`)
 	output := bytes.NewBuffer(nil)
 	cmd.Stdout = output
 	cmd.Stderr = output
@@ -4578,7 +4571,7 @@ func testConsoleItAccountTriggersSet(t *testing.T) {
 }
 
 func testConsoleItAccountActionPlanGet(t *testing.T) {
-	cmd := exec.Command("cgr-loader", "-config_path="+cnslItCfgPath, "-path="+path.Join(*dataDir, "tariffplans", "tutorial2"))
+	cmd := exec.Command("cgr-loader", "-config_path="+cnslItCfgPath, "-path="+path.Join(*utils.DataDir, "tariffplans", "tutorial2"))
 	output := bytes.NewBuffer(nil)
 	cmd.Stdout = output
 	if err := cmd.Run(); err != nil {
@@ -4644,7 +4637,7 @@ func testConsoleItAccountActionPlanGet(t *testing.T) {
 	if !reflect.DeepEqual(rcv, expected) {
 		t.Fatalf("Expected %v \n but received \n %v", utils.ToJSON(expected), utils.ToJSON(rcv))
 	}
-	cmd = exec.Command("cgr-loader", "-config_path="+cnslItCfgPath, "-path="+path.Join(*dataDir, "tariffplans", "tutorial"))
+	cmd = exec.Command("cgr-loader", "-config_path="+cnslItCfgPath, "-path="+path.Join(*utils.DataDir, "tariffplans", "tutorial"))
 	output = bytes.NewBuffer(nil)
 	cmd.Stdout = output
 	if err := cmd.Run(); err != nil {
@@ -4980,7 +4973,7 @@ func testConsoleItCostDetails(t *testing.T) {
 }
 
 func testConsoleItKillEngine(t *testing.T) {
-	if err := engine.KillEngine(*waitRater); err != nil {
+	if err := engine.KillEngine(*utils.WaitRater); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -4994,7 +4987,7 @@ func testConsoleItLoadersKillEngine(t *testing.T) {
 	if err := os.Remove(fldPathOut); err != nil {
 		t.Error(err)
 	}
-	if err := engine.KillEngine(*waitRater); err != nil {
+	if err := engine.KillEngine(*utils.WaitRater); err != nil {
 		t.Fatal(err)
 	}
 }

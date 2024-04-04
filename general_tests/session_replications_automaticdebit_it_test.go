@@ -57,7 +57,7 @@ var (
 )
 
 func TestSessionSRpl(t *testing.T) {
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 		t.SkipNow()
 	case utils.MetaMySQL:
@@ -73,7 +73,7 @@ func TestSessionSRpl(t *testing.T) {
 	}
 
 	for _, stest := range sTestsSession {
-		t.Run(*dbType, stest)
+		t.Run(*utils.DBType, stest)
 	}
 }
 
@@ -111,11 +111,11 @@ func testSessionSRplAddVoiceBalance(t *testing.T) {
 
 // Init Config
 func testSessionSRplInitCfg(t *testing.T) {
-	smgRplcMasterCfgPath = path.Join(*dataDir, "conf", "samples", "sessions_replication", smgRplcMasterCfgDIR)
+	smgRplcMasterCfgPath = path.Join(*utils.DataDir, "conf", "samples", "sessions_replication", smgRplcMasterCfgDIR)
 	if smgRplcMasterCfg, err = config.NewCGRConfigFromPath(smgRplcMasterCfgPath); err != nil {
 		t.Fatal(err)
 	}
-	smgRplcSlaveCfgPath = path.Join(*dataDir, "conf", "samples", "sessions_replication", smgRplcSlaveCfgDIR)
+	smgRplcSlaveCfgPath = path.Join(*utils.DataDir, "conf", "samples", "sessions_replication", smgRplcSlaveCfgDIR)
 	if smgRplcSlaveCfg, err = config.NewCGRConfigFromPath(smgRplcSlaveCfgPath); err != nil {
 		t.Fatal(err)
 	}
@@ -133,10 +133,10 @@ func testSessionSRplResetDB(t *testing.T) {
 
 // Start CGR Engine
 func testSessionSRplStartEngine(t *testing.T) {
-	if _, err = engine.StopStartEngine(smgRplcSlaveCfgPath, *waitRater); err != nil {
+	if _, err = engine.StopStartEngine(smgRplcSlaveCfgPath, *utils.WaitRater); err != nil {
 		t.Fatal(err)
 	}
-	if masterEngine, err = engine.StartEngine(smgRplcMasterCfgPath, *waitRater); err != nil {
+	if masterEngine, err = engine.StartEngine(smgRplcMasterCfgPath, *utils.WaitRater); err != nil {
 		t.Fatal(err)
 	}
 
@@ -154,12 +154,12 @@ func testSessionSRplApierRpcConn(t *testing.T) {
 
 // Load the tariff plan, creating accounts and their balances
 func testSessionSRplTPFromFolder(t *testing.T) {
-	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "oldtutorial")}
+	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*utils.DataDir, "tariffplans", "oldtutorial")}
 	var loadInst utils.LoadInstance
 	if err := smgRplcMstrRPC.Call(context.Background(), utils.APIerSv2LoadTariffPlanFromFolder, attrs, &loadInst); err != nil {
 		t.Error(err)
 	}
-	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // Give time for scheduler to execute topups
+	time.Sleep(time.Duration(*utils.WaitRater) * time.Millisecond) // Give time for scheduler to execute topups
 }
 
 func testSessionSRplInitiate(t *testing.T) {
@@ -378,7 +378,7 @@ func testSessionSRplTerminate(t *testing.T) {
 	if err := smgRplcSlvRPC.Call(context.Background(), utils.SessionSv1TerminateSession, args, &reply); err != nil {
 		t.Error(err)
 	}
-	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // Wait for the sessions to be populated
+	time.Sleep(time.Duration(*utils.WaitRater) * time.Millisecond) // Wait for the sessions to be populated
 	var aSessions []*sessions.ExternalSession
 
 	//check if the session was terminated on slave

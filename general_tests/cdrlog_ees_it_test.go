@@ -32,7 +32,7 @@ import (
 )
 
 func TestCdrLogEes(t *testing.T) {
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 	case utils.MetaMySQL, utils.MetaMongo, utils.MetaPostgres:
 		t.SkipNow()
@@ -186,7 +186,7 @@ func TestCdrLogEes(t *testing.T) {
 		ConfigJSON: content,
 		TpFiles:    map[string]string{},
 	}
-	client, _, shutdown, err := testEnv.Setup(t, *waitRater)
+	client, _, shutdown, err := testEnv.Setup(t, *utils.WaitRater)
 	if err != nil {
 		t.Fatal(err)
 	}

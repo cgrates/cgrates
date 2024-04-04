@@ -67,7 +67,7 @@ var (
 
 // Test start here
 func TestRouteSV1IT(t *testing.T) {
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 		splSv1ConfDIR = "tutinternal"
 	case utils.MetaMySQL:
@@ -86,7 +86,7 @@ func TestRouteSV1IT(t *testing.T) {
 
 func testV1SplSLoadConfig(t *testing.T) {
 	var err error
-	splSv1CfgPath = path.Join(*dataDir, "conf", "samples", splSv1ConfDIR)
+	splSv1CfgPath = path.Join(*utils.DataDir, "conf", "samples", splSv1ConfDIR)
 	if splSv1Cfg, err = config.NewCGRConfigFromPath(splSv1CfgPath); err != nil {
 		t.Error(err)
 	}
@@ -106,7 +106,7 @@ func testV1SplSResetStorDb(t *testing.T) {
 }
 
 func testV1SplSStartEngine(t *testing.T) {
-	if _, err := engine.StopStartEngine(splSv1CfgPath, *waitRater); err != nil {
+	if _, err := engine.StopStartEngine(splSv1CfgPath, *utils.WaitRater); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -121,7 +121,7 @@ func testV1SplSRpcConn(t *testing.T) {
 
 func testV1SplSFromFolder(t *testing.T) {
 	var reply string
-	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "testit")}
+	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*utils.DataDir, "tariffplans", "testit")}
 	if err := splSv1Rpc.Call(context.Background(), utils.APIerSv1LoadTariffPlanFromFolder, attrs, &reply); err != nil {
 		t.Error(err)
 	}

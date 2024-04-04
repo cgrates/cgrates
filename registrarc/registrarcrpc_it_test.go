@@ -64,7 +64,7 @@ var (
 )
 
 func TestRPCHosts(t *testing.T) {
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaMySQL:
 		rpcDir = "registrarc_rpc_mysql"
 		rpcsDir = "registrars_rpc_mysql"
@@ -82,8 +82,8 @@ func TestRPCHosts(t *testing.T) {
 }
 
 func testRPCInitCfg(t *testing.T) {
-	rpcCfgPath = path.Join(*dataDir, "conf", "samples", "registrarc", rpcDir)
-	rpcsCfgPath = path.Join(*dataDir, "conf", "samples", "registrarc", rpcsDir)
+	rpcCfgPath = path.Join(*utils.DataDir, "conf", "samples", "registrarc", rpcDir)
+	rpcsCfgPath = path.Join(*utils.DataDir, "conf", "samples", "registrarc", rpcsDir)
 	var err error
 	if rpcsCfg, err = config.NewCGRConfigFromPath(rpcsCfgPath); err != nil {
 		t.Error(err)
@@ -101,7 +101,7 @@ func testRPCInitDB(t *testing.T) {
 
 func testRPCStartEngine(t *testing.T) {
 	var err error
-	if _, err = engine.StopStartEngine(rpcsCfgPath, *waitRater); err != nil {
+	if _, err = engine.StopStartEngine(rpcsCfgPath, *utils.WaitRater); err != nil {
 		t.Fatal(err)
 	}
 	rpcsRPC, err = newRPCClient(rpcsCfg.ListenCfg())
@@ -112,7 +112,7 @@ func testRPCStartEngine(t *testing.T) {
 
 func testRPCLoadData(t *testing.T) {
 	var reply string
-	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "testit")}
+	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*utils.DataDir, "tariffplans", "testit")}
 	if err := rpcsRPC.Call(context.Background(), utils.APIerSv1LoadTariffPlanFromFolder, attrs, &reply); err != nil {
 		t.Error(err)
 	}
@@ -136,7 +136,7 @@ func testRPCChargerSNoAttr(t *testing.T) {
 
 func testRPCStartRegc(t *testing.T) {
 	var err error
-	if rpcCMD, err = engine.StartEngine(rpcCfgPath, *waitRater); err != nil {
+	if rpcCMD, err = engine.StartEngine(rpcCfgPath, *utils.WaitRater); err != nil {
 		t.Fatal(err)
 	}
 	time.Sleep(time.Second)
@@ -222,7 +222,7 @@ func testRPCStopEngines(t *testing.T) {
 }
 
 func testRPCStopRegs(t *testing.T) {
-	if err := engine.KillEngine(*waitRater); err != nil {
+	if err := engine.KillEngine(*utils.WaitRater); err != nil {
 		t.Error(err)
 	}
 }

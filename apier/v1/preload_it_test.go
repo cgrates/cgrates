@@ -81,7 +81,7 @@ func testCreateDirs(t *testing.T) {
 
 func testPreloadITInitConfig(t *testing.T) {
 	var err error
-	preloadCfgPath = path.Join(*dataDir, "conf", "samples", "loaders", preloadCfgDIR)
+	preloadCfgPath = path.Join(*utils.DataDir, "conf", "samples", "loaders", preloadCfgDIR)
 	if preloadCfg, err = config.NewCGRConfigFromPath(preloadCfgPath); err != nil {
 		t.Fatal("Got config error: ", err.Error())
 	}
@@ -173,7 +173,7 @@ func testCleanupFiles(t *testing.T) {
 }
 
 func testPreloadITKillEngine(t *testing.T) {
-	if err := engine.KillEngine(*waitRater); err != nil {
+	if err := engine.KillEngine(*utils.WaitRater); err != nil {
 		t.Error(err)
 	}
 }

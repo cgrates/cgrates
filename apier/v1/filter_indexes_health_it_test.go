@@ -72,7 +72,7 @@ var (
 // Test start here
 func TestFIdxHealthIT(t *testing.T) {
 	tSv1InternalRestart = false
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 		tSv1ConfDIR = "tutinternal"
 	case utils.MetaMySQL:
@@ -90,7 +90,7 @@ func TestFIdxHealthIT(t *testing.T) {
 }
 
 func testV1FIdxHLoadConfig(t *testing.T) {
-	tSv1CfgPath = path.Join(*dataDir, "conf", "samples", tSv1ConfDIR)
+	tSv1CfgPath = path.Join(*utils.DataDir, "conf", "samples", tSv1ConfDIR)
 	var err error
 	if tSv1Cfg, err = config.NewCGRConfigFromPath(tSv1CfgPath); err != nil {
 		t.Error(err)
@@ -98,7 +98,7 @@ func testV1FIdxHLoadConfig(t *testing.T) {
 }
 
 func testV1FIdxHdxInitDataDb(t *testing.T) {
-	if *dbType == utils.MetaInternal && tSv1InternalRestart {
+	if *utils.DBType == utils.MetaInternal && tSv1InternalRestart {
 		testV1FIdxStopEngine(t)
 		testV1FIdxHStartEngine(t)
 		testV1FIdxHRpcConn(t)
@@ -118,7 +118,7 @@ func testV1FIdxHResetStorDb(t *testing.T) {
 }
 
 func testV1FIdxHStartEngine(t *testing.T) {
-	if _, err := engine.StopStartEngine(tSv1CfgPath, *waitRater); err != nil {
+	if _, err := engine.StopStartEngine(tSv1CfgPath, *utils.WaitRater); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -140,7 +140,7 @@ func testV1FIdxHLoadFromFolderTutorial2(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Error("Reply: ", reply)
 	}
-	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "tutorial2")}
+	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*utils.DataDir, "tariffplans", "tutorial2")}
 	if err := tFIdxHRpc.Call(context.Background(), utils.APIerSv1LoadTariffPlanFromFolder, attrs, &reply); err != nil {
 		t.Error(err)
 	}
@@ -190,7 +190,7 @@ func testV1FIdxHLoadFromFolderTutorial(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Error("Reply: ", reply)
 	}
-	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "tutorial")}
+	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*utils.DataDir, "tariffplans", "tutorial")}
 	if err := tFIdxHRpc.Call(context.Background(), utils.APIerSv1LoadTariffPlanFromFolder, attrs, &reply); err != nil {
 		t.Error(err)
 	}
@@ -761,7 +761,7 @@ func testV1FIdxGetAttributesIndexesHealth(t *testing.T) {
 
 func testV1FIdxHLoadFromFolderDispatchers(t *testing.T) {
 	var reply string
-	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "dispatchers")}
+	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*utils.DataDir, "tariffplans", "dispatchers")}
 	if err := tFIdxHRpc.Call(context.Background(), utils.APIerSv1LoadTariffPlanFromFolder, attrs, &reply); err != nil {
 		t.Error(err)
 	}

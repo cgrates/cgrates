@@ -62,7 +62,7 @@ var (
 
 // Test start here
 func TestAccountsIT(t *testing.T) {
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 		accConfigDIR = "tutinternal"
 	case utils.MetaMySQL:
@@ -82,12 +82,12 @@ func TestAccountsIT(t *testing.T) {
 
 func testAccountsInitCfg(t *testing.T) {
 	var err error
-	accCfgPath = path.Join(*dataDir, "conf", "samples", accConfigDIR)
+	accCfgPath = path.Join(*utils.DataDir, "conf", "samples", accConfigDIR)
 	accCfg, err = config.NewCGRConfigFromPath(accCfgPath)
 	if err != nil {
 		t.Error(err)
 	}
-	accCfg.DataFolderPath = *dataDir // Share DataFolderPath through config towards StoreDb for Flush()
+	accCfg.DataFolderPath = *utils.DataDir // Share DataFolderPath through config towards StoreDb for Flush()
 	config.SetCgrConfig(accCfg)
 }
 
@@ -106,7 +106,7 @@ func testAccountsResetStorDb(t *testing.T) {
 
 // Start CGR Engine
 func testAccountsStartEngine(t *testing.T) {
-	if _, err := engine.StopStartEngine(accCfgPath, *waitRater); err != nil {
+	if _, err := engine.StopStartEngine(accCfgPath, *utils.WaitRater); err != nil {
 		t.Fatal(err)
 	}
 }

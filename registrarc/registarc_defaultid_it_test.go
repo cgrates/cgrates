@@ -39,7 +39,7 @@ var (
 )
 
 func TestDspNodeHosts(t *testing.T) {
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaMySQL:
 		node1Dir = "registrarc_node_id"
 		dspNodeDir = "registrars_node_id"
@@ -54,8 +54,8 @@ func TestDspNodeHosts(t *testing.T) {
 }
 
 func testDsphNodeInitCfg(t *testing.T) {
-	dspNodeCfgPath = path.Join(*dataDir, "conf", "samples", "registrarc", dspNodeDir)
-	node1CfgPath = path.Join(*dataDir, "conf", "samples", "registrarc", node1Dir)
+	dspNodeCfgPath = path.Join(*utils.DataDir, "conf", "samples", "registrarc", dspNodeDir)
+	node1CfgPath = path.Join(*utils.DataDir, "conf", "samples", "registrarc", node1Dir)
 	var err error
 	if dspNodeCfg, err = config.NewCGRConfigFromPath(dspNodeCfgPath); err != nil {
 		t.Error(err)
@@ -73,7 +73,7 @@ func testDsphNodeInitDB(t *testing.T) {
 
 func testDsphNodeStartEngine(t *testing.T) {
 	var err error
-	if dspNodeCmd, err = engine.StopStartEngine(dspNodeCfgPath, *waitRater); err != nil {
+	if dspNodeCmd, err = engine.StopStartEngine(dspNodeCfgPath, *utils.WaitRater); err != nil {
 		t.Fatal(err)
 	}
 	dspNodeRPC, err = newRPCClient(dspNodeCfg.ListenCfg()) // We connect over JSON so we can also troubleshoot if needed
@@ -83,7 +83,7 @@ func testDsphNodeStartEngine(t *testing.T) {
 }
 
 func testDsphNodeLoadData(t *testing.T) {
-	loader := exec.Command("cgr-loader", "-config_path", dspNodeCfgPath, "-path", path.Join(*dataDir, "tariffplans", "registrarc2"), "-caches_address=")
+	loader := exec.Command("cgr-loader", "-config_path", dspNodeCfgPath, "-path", path.Join(*utils.DataDir, "tariffplans", "registrarc2"), "-caches_address=")
 	output := bytes.NewBuffer(nil)
 	outerr := bytes.NewBuffer(nil)
 	loader.Stdout = output
@@ -115,7 +115,7 @@ func testDsphNodeBeforeDsphStart(t *testing.T) {
 
 func testDsphNodeStartAll(t *testing.T) {
 	var err error
-	if node1Cmd, err = engine.StartEngine(node1CfgPath, *waitRater); err != nil {
+	if node1Cmd, err = engine.StartEngine(node1CfgPath, *utils.WaitRater); err != nil {
 		t.Fatal(err)
 	}
 	if nodeID, err := testDsphNodeGetNodeID(); err != nil {
@@ -137,7 +137,7 @@ func testDsphNodeStopEngines(t *testing.T) {
 }
 
 func testDsphNodeStopDispatcher(t *testing.T) {
-	if err := engine.KillEngine(*waitRater); err != nil {
+	if err := engine.KillEngine(*utils.WaitRater); err != nil {
 		t.Error(err)
 	}
 }

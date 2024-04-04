@@ -64,11 +64,11 @@ func TestCacheSv1ReplicateIT(t *testing.T) {
 
 func testCacheSReplicateLoadConfig(t *testing.T) {
 	var err error
-	engine1CfgPath = path.Join(*dataDir, "conf", "samples", "replication_cache", "engine1")
+	engine1CfgPath = path.Join(*utils.DataDir, "conf", "samples", "replication_cache", "engine1")
 	if engine1Cfg, err = config.NewCGRConfigFromPath(engine1CfgPath); err != nil {
 		t.Error(err)
 	}
-	engine2CfgPath = path.Join(*dataDir, "conf", "samples", "replication_cache", "engine2")
+	engine2CfgPath = path.Join(*utils.DataDir, "conf", "samples", "replication_cache", "engine2")
 	if engine2Cfg, err = config.NewCGRConfigFromPath(engine2CfgPath); err != nil {
 		t.Error(err)
 	}
@@ -95,10 +95,10 @@ func testCacheSReplicateInitStorDb(t *testing.T) {
 
 // Start engine
 func testCacheSReplicateStartEngine(t *testing.T) {
-	if _, err := engine.StopStartEngine(engine1CfgPath, *waitRater); err != nil {
+	if _, err := engine.StopStartEngine(engine1CfgPath, *utils.WaitRater); err != nil {
 		t.Fatal(err)
 	}
-	if _, err := engine.StartEngine(engine2CfgPath, *waitRater); err != nil {
+	if _, err := engine.StartEngine(engine2CfgPath, *utils.WaitRater); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -117,11 +117,11 @@ func testCacheSReplicateRpcConn(t *testing.T) {
 
 func testCacheSReplicateLoadTariffPlanFromFolder(t *testing.T) {
 	var reply string
-	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "testit")}
+	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*utils.DataDir, "tariffplans", "testit")}
 	if err := engine2RPC.Call(context.Background(), utils.APIerSv1LoadTariffPlanFromFolder, attrs, &reply); err != nil {
 		t.Error(err)
 	}
-	time.Sleep(time.Duration(*waitRater) * time.Millisecond)
+	time.Sleep(time.Duration(*utils.WaitRater) * time.Millisecond)
 }
 
 func testCacheSReplicateProcessAttributes(t *testing.T) {

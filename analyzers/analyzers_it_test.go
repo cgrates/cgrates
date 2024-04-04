@@ -23,7 +23,6 @@ package analyzers
 
 import (
 	"errors"
-	"flag"
 	"os"
 	"path"
 	"reflect"
@@ -62,14 +61,8 @@ var (
 	}
 )
 
-var (
-	dataDir   = flag.String("data_dir", "/usr/share/cgrates", "CGR data dir path here")
-	waitRater = flag.Int("wait_rater", 500, "Number of miliseconds to wait for rater to start and cache")
-	encoding  = flag.String("rpc", utils.MetaJSON, "what encoding whould be uused for rpc comunication")
-)
-
 func newRPCClient(cfg *config.ListenCfg) (c *birpc.Client, err error) {
-	switch *encoding {
+	switch *utils.Encoding {
 	case utils.MetaJSON:
 		return jsonrpc.Dial(utils.TCP, cfg.RPCJSONListen)
 	case utils.MetaGOB:
@@ -94,7 +87,7 @@ func testAnalyzerSInitCfg(t *testing.T) {
 	if err = os.MkdirAll("/tmp/analyzers/", 0700); err != nil {
 		t.Fatal(err)
 	}
-	anzCfgPath = path.Join(*dataDir, "conf", "samples", "analyzers")
+	anzCfgPath = path.Join(*utils.DataDir, "conf", "samples", "analyzers")
 	anzCfg, err = config.NewCGRConfigFromPath(anzCfgPath)
 	if err != nil {
 		t.Error(err)
@@ -116,7 +109,7 @@ func testAnalyzerSResetStorDb(t *testing.T) {
 
 // Start CGR Engine
 func testAnalyzerSStartEngine(t *testing.T) {
-	if _, err := engine.StopStartEngine(anzCfgPath, *waitRater); err != nil {
+	if _, err := engine.StopStartEngine(anzCfgPath, *utils.WaitRater); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -139,7 +132,7 @@ func testAnalyzerSRPCConn(t *testing.T) {
 
 func testAnalyzerSLoadTarrifPlans(t *testing.T) {
 	var reply string
-	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "tutorial")}
+	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*utils.DataDir, "tariffplans", "tutorial")}
 	if err := anzRPC.Call(context.Background(), utils.APIerSv1LoadTariffPlanFromFolder, attrs, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {

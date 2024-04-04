@@ -73,7 +73,7 @@ var (
 )
 
 func testSSv1ItInitCfgDir(t *testing.T) {
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 		sessionsConfDIR = "sessions_internal"
 	case utils.MetaMySQL:
@@ -104,7 +104,7 @@ func (*smock) GetActiveSessionIDs(ctx *context.Context,
 }
 
 func TestSSv1ItWithPrepaid(t *testing.T) {
-	if *dbType == utils.MetaPostgres {
+	if *utils.DBType == utils.MetaPostgres {
 		t.SkipNow()
 	}
 	sSV1RequestType = utils.MetaPrepaid
@@ -114,7 +114,7 @@ func TestSSv1ItWithPrepaid(t *testing.T) {
 }
 
 func TestSSv1ItWithPostPaid(t *testing.T) {
-	if *dbType == utils.MetaPostgres {
+	if *utils.DBType == utils.MetaPostgres {
 		t.SkipNow()
 	}
 	sSV1RequestType = utils.MetaPostpaid
@@ -124,7 +124,7 @@ func TestSSv1ItWithPostPaid(t *testing.T) {
 }
 
 func TestSSv1ItWithRated(t *testing.T) {
-	if *dbType == utils.MetaPostgres {
+	if *utils.DBType == utils.MetaPostgres {
 		t.SkipNow()
 	}
 	sSV1RequestType = utils.MetaRated
@@ -134,7 +134,7 @@ func TestSSv1ItWithRated(t *testing.T) {
 }
 
 func TestSSv1ItWithPseudoPrepaid(t *testing.T) {
-	if *dbType == utils.MetaPostgres {
+	if *utils.DBType == utils.MetaPostgres {
 		t.SkipNow()
 	}
 	sSV1RequestType = utils.MetaPseudoPrepaid
@@ -193,7 +193,7 @@ func testSSv1ItPing(t *testing.T) {
 // Load the tariff plan, creating accounts and their balances
 func testSSv1ItTPFromFolder(t *testing.T) {
 	attrs := &utils.AttrLoadTpFromFolder{
-		FolderPath: path.Join(*dataDir, "tariffplans", "testit")}
+		FolderPath: path.Join(*utils.DataDir, "tariffplans", "testit")}
 	var loadInst utils.LoadInstance
 	if err := sSApierRpc.Call(context.Background(), utils.APIerSv2LoadTariffPlanFromFolder,
 		attrs, &loadInst); err != nil {

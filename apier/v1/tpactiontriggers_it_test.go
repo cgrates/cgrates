@@ -62,7 +62,7 @@ var sTestsTPActionTriggers = []func(t *testing.T){
 
 // Test start here
 func TestTPActionTriggersIT(t *testing.T) {
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 		tpActionTriggerConfigDIR = "tutinternal"
 	case utils.MetaMySQL:
@@ -81,7 +81,7 @@ func TestTPActionTriggersIT(t *testing.T) {
 
 func testTPActionTriggersInitCfg(t *testing.T) {
 	var err error
-	tpActionTriggerCfgPath = path.Join(*dataDir, "conf", "samples", tpActionTriggerConfigDIR)
+	tpActionTriggerCfgPath = path.Join(*utils.DataDir, "conf", "samples", tpActionTriggerConfigDIR)
 	tpActionTriggerCfg, err = config.NewCGRConfigFromPath(tpActionTriggerCfgPath)
 	if err != nil {
 		t.Error(err)
