@@ -1,158 +1,14 @@
 {
 	"info": {
-		"_postman_id": "6c14f6e6-1cee-4721-8117-787d4b75d298",
+		"_postman_id": "78c61076-c63b-46d9-b844-7fba4a0dc8cf",
 		"name": "CGRates",
-		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "31913370"
 	},
 	"item": [
 		{
 			"name": "Offline TP (Tariff Plan)",
 			"item": [
-				{
-					"name": "TP Timing",
-					"item": [
-						{
-							"name": "APIerSv1.SetTPTiming",
-							"request": {
-								"auth": {
-									"type": "noauth"
-								},
-								"method": "POST",
-								"header": [
-									{
-										"key": "Content-Type",
-										"value": "application/json"
-									}
-								],
-								"body": {
-									"mode": "raw",
-									"raw": "{\n    \"id\": 3,\n    \"method\": \"APIerSv1.SetTPTiming\",\n    \"params\": [\n        {\n            \"TPid\": \"TP_TIMING_TEST\",\n            \"ID\": \"TP_TIMINGID\",\n            \"TimingId\": \"TP_TIMING_ID\",\n            \"MonthDays\": \"*any\",\n            \"Months\": \"*any\",\n            \"Time\": \"00:00:00\",\n            \"WeekDays\": \"*any\",\n            \"Years\": \"*any\"\n        }\n    ]\n}"
-								},
-								"url": {
-									"raw": "{{base_url}}/jsonrpc",
-									"host": [
-										"{{base_url}}"
-									],
-									"path": [
-										"jsonrpc"
-									]
-								}
-							},
-							"response": []
-						},
-						{
-							"name": "APIerSv1.GetTPTiming",
-							"request": {
-								"auth": {
-									"type": "noauth"
-								},
-								"method": "POST",
-								"header": [
-									{
-										"key": "Content-Type",
-										"value": "application/json"
-									}
-								],
-								"body": {
-									"mode": "raw",
-									"raw": "{\n    \"id\": 5,\n    \"method\": \"APIerSv1.GetTPTiming\",\n    \"params\": [\n        {\n            \"TPid\": \"TP_TIMING_TEST\",\n            \"ID\": \"TP_TIMINGID\",\n            \"TimingId\": \"TP_TIMING_ID\"\n        }\n    ]\n}"
-								},
-								"url": {
-									"raw": "{{base_url}}/jsonrpc",
-									"host": [
-										"{{base_url}}"
-									],
-									"path": [
-										"jsonrpc"
-									]
-								}
-							},
-							"response": []
-						},
-						{
-							"name": "APIerSv1.GetTPTimingIds",
-							"request": {
-								"auth": {
-									"type": "noauth"
-								},
-								"method": "POST",
-								"header": [
-									{
-										"key": "Content-Type",
-										"value": "application/json"
-									}
-								],
-								"body": {
-									"mode": "raw",
-									"raw": "{\n    \"id\": 1,\n    \"method\": \"APIerSv1.GetTPTimingIds\",\n    \"params\": [\n        {\n            \"TPid\": \"Tim_always\"\n        }\n    ]\n}"
-								},
-								"url": {
-									"raw": "{{base_url}}/jsonrpc",
-									"host": [
-										"{{base_url}}"
-									],
-									"path": [
-										"jsonrpc"
-									]
-								}
-							},
-							"response": []
-						},
-						{
-							"name": "Remove TP Timing",
-							"request": {
-								"auth": {
-									"type": "noauth"
-								},
-								"method": "POST",
-								"header": [
-									{
-										"key": "Content-Type",
-										"value": "application/json"
-									}
-								],
-								"body": {
-									"mode": "raw",
-									"raw": "{\n    \"id\": 1,\n    \"method\": \"APIerSv1.RemoveTPTiming\",\n    \"params\": [\n        {\n            \"TPid\": \"TEST_SQL\"\n        }\n    ]\n}"
-								},
-								"url": {
-									"raw": "{{base_url}}/jsonrpc",
-									"host": [
-										"{{base_url}}"
-									],
-									"path": [
-										"jsonrpc"
-									]
-								}
-							},
-							"response": []
-						}
-					],
-					"event": [
-						{
-							"listen": "prerequest",
-							"script": {
-								"id": "ca5a193b-eb51-4062-9136-f817a36bcfed",
-								"type": "text/javascript",
-								"exec": [
-									""
-								]
-							}
-						},
-						{
-							"listen": "test",
-							"script": {
-								"id": "0555884a-5b75-42cd-ab61-fda1154101ae",
-								"type": "text/javascript",
-								"exec": [
-									""
-								]
-							}
-						}
-					],
-					"protocolProfileBehavior": {},
-					"_postman_isSubFolder": true
-				},
 				{
 					"name": "APIerSv1.GetTPIds",
 					"request": {
@@ -210,13 +66,38 @@
 						}
 					},
 					"response": []
+				},
+				{
+					"name": "APIerSv2.LoadTariffPlanFromFolder",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"method\": \"APIerSv2.LoadTariffPlanFromFolder\",\n    \"params\": [\n        {\n            \"FolderPath\": \"\",\n            \"DryRun\": false,\n            \"Validate\": true,\n            \"APIOpts\": {},\n            \"Caching\": null\n        }\n    ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/jsonrpc",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"jsonrpc"
+							]
+						}
+					},
+					"response": []
 				}
 			],
 			"event": [
 				{
 					"listen": "prerequest",
 					"script": {
-						"id": "ca5a193b-eb51-4062-9136-f817a36bcfed",
 						"type": "text/javascript",
 						"exec": [
 							""
@@ -226,15 +107,13 @@
 				{
 					"listen": "test",
 					"script": {
-						"id": "0555884a-5b75-42cd-ab61-fda1154101ae",
 						"type": "text/javascript",
 						"exec": [
 							""
 						]
 					}
 				}
-			],
-			"protocolProfileBehavior": {}
+			]
 		},
 		{
 			"name": "Cache",
@@ -529,8 +408,7 @@
 					},
 					"response": []
 				}
-			],
-			"protocolProfileBehavior": {}
+			]
 		},
 		{
 			"name": "Attributes",
@@ -553,7 +431,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n    \"method\": \"AttributeSv1.ProcessEvent\",\n    \"params\": [\n        {\n            \"AttributeIDs\": null,\n            \"Context\": \"*sessions\",\n            \"ProcessRuns\": null,\n            \"Tenant\": \"cgrates.org\",\n            \"ID\": \"91db806d-47b5-4346-b74e-bf699f2dd4d6\",\n            \"Time\": null,\n            \"Event\": {\n                \"Account\": \"+30xxxxxxxxx\",\n                \"Category\": \"call\",\n                \"Destination\": \"+30xxxxxxxxxx\",\n                \"OriginHost\": \"10.156.0.13\",\n                \"OriginID\": \"313536313130323331313531373435-11zx3su0dxng_user_860952\",\n                \"RequestType\": \"*prepaid\",\n                \"SetupTime\": \"1561102312\",\n                \"Source\": \"OpenSIPS-01\",\n                \"Tenant\": \"cgrates.org\",\n                \"User-Agent\": \"snomD120/10.1.33.33\",\n                \"User-Agent-IP\": \"1.1.1.1\"\n            }\n        }\n    ],\n    \"id\": 244886\n}"
+									"raw": "{\n    \"method\": \"AttributeSv1.ProcessEvent\",\n    \"params\": [\n        {\n            \"Tenant\": \"cgrates.org\",\n            \"ID\": \"91db806d-47b5-4346-b74e-bf699f2dd4d6\",\n            \"Time\": null,\n            \"Event\": {\n                \"Account\": \"+30xxxxxxxxx\",\n                \"Category\": \"call\",\n                \"Destination\": \"+30xxxxxxxxxx\",\n                \"OriginHost\": \"10.156.0.13\",\n                \"OriginID\": \"313536313130323331313531373435-11zx3su0dxng_user_860952\",\n                \"RequestType\": \"*prepaid\",\n                \"SetupTime\": \"1561102312\",\n                \"Source\": \"OpenSIPS-01\",\n                \"Tenant\": \"cgrates.org\",\n                \"User-Agent\": \"snomD120/10.1.33.33\",\n                \"User-Agent-IP\": \"1.1.1.1\"\n            },\n            \"APIOpts\": {\n                \"*attrProfileIDs\": [],\n                \"*context\": \"*sessions\"\n            }\n        }\n    ],\n    \"id\": 244886\n}"
 								},
 								"url": {
 									"raw": "{{base_url}}/jsonrpc",
@@ -582,7 +460,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n    \"method\": \"AttributeSv1.ProcessEvent\",\n    \"params\": [\n        {\n            \"AttributeIDs\": null,\n            \"Context\": \"*sessions\",\n            \"ProcessRuns\": null,\n            \"Tenant\": \"another_tenant\",\n            \"ID\": \"417c5580-e06b-4bfb-bdc7-37357ed6f004\",\n            \"Time\": null,\n            \"Event\": {\n                \"Account\": \"+30xxxxxxxxxx\"\n            }\n        }\n    ],\n    \"id\": 244887\n}"
+									"raw": "{\n    \"method\": \"AttributeSv1.ProcessEvent\",\n    \"params\": [\n        {\n            \"Tenant\": \"another_tenant\",\n            \"ID\": \"417c5580-e06b-4bfb-bdc7-37357ed6f004\",\n            \"Time\": null,\n            \"Event\": {\n                \"Account\": \"+30xxxxxxxxxx\"\n            },\n            \"APIOpts\": {\n                \"*attrProfileIDs\": null,\n                \"*context\": \"*sessions\"\n            }\n        }\n    ],\n    \"id\": 244887\n}"
 								},
 								"url": {
 									"raw": "{{base_url}}/jsonrpc",
@@ -611,7 +489,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n    \"method\": \"AttributeSv1.ProcessEvent\",\n    \"params\": [\n        {\n            \"AttributeIDs\": null,\n            \"Context\": \"*sessions\",\n            \"ProcessRuns\": null,\n            \"Tenant\": \"cgrates.org\",\n            \"ID\": \"b8610dba-6b5b-4a03-b5ad-097193fd3909\",\n            \"Time\": null,\n            \"Event\": {\n                \"Account\": \"+30xxxxxxxxx\",\n                \"AnswerTime\": \"1561102316\",\n                \"Category\": \"call\",\n                \"Destination\": \"302107001398\",\n                \"DialogEntry\": 3530,\n                \"DialogID\": 1041695533,\n                \"OriginHost\": \"10.156.0.13\",\n                \"OriginID\": \"313536313130323331313531373435-11zx3su0dxng_user_860952\",\n                \"RequestType\": \"*prepaid\",\n                \"SetupTime\": \"1561102312\",\n                \"Source\": \"OpenSIPS-01\",\n                \"Tenant\": \"cgrates.org\",\n                \"User-Agent\": \"snomD120/10.1.33.33\",\n                \"User-Agent-IP\": \"1.1.1.1\"\n            }\n        }\n    ],\n    \"id\": 244888\n}"
+									"raw": "{\n    \"method\": \"AttributeSv1.ProcessEvent\",\n    \"params\": [\n        {\n            \"Tenant\": \"cgrates.org\",\n            \"ID\": \"b8610dba-6b5b-4a03-b5ad-097193fd3909\",\n            \"Time\": null,\n            \"Event\": {\n                \"Account\": \"+30xxxxxxxxx\",\n                \"AnswerTime\": \"1561102316\",\n                \"Category\": \"call\",\n                \"Destination\": \"302107001398\",\n                \"DialogEntry\": 3530,\n                \"DialogID\": 1041695533,\n                \"OriginHost\": \"10.156.0.13\",\n                \"OriginID\": \"313536313130323331313531373435-11zx3su0dxng_user_860952\",\n                \"RequestType\": \"*prepaid\",\n                \"SetupTime\": \"1561102312\",\n                \"Source\": \"OpenSIPS-01\",\n                \"Tenant\": \"cgrates.org\",\n                \"User-Agent\": \"snomD120/10.1.33.33\",\n                \"User-Agent-IP\": \"1.1.1.1\"\n            },\n            \"APIOpts\": {\n                \"*attrProfileIDs\": null,\n                \"*context\": \"*sessions\"\n            }\n        }\n    ],\n    \"id\": 244888\n}"
 								},
 								"url": {
 									"raw": "{{base_url}}/jsonrpc",
@@ -640,18 +518,39 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n    \"method\": \"AttributeSv1.ProcessEvent\",\n    \"params\": [\n        {\n            \"Event\": {\n                \"Destination\": \"*\"\n            },\n            \"Context\": \"simpleauth\",\n            \"Tenant\": \"cgrates.org\",\n            \"ID\": \"ATTR_1001_SIMPLEAUTH\"\n        }\n    ],\n    \"id\": 0\n}"
+									"raw": "{\n    \"method\": \"AttributeSv1.ProcessEvent\",\n    \"params\": [\n        {\n            \"Context\": \"simpleauth\",\n            \"Tenant\": \"cgrates.org\",\n            \"ID\": \"ATTR_1001_SIMPLEAUTH\",\n              \"Event\": {\n                \"Destination\": \"*\"\n            },\n            \"APIOpts\": {\n                \"*context\": \"simpleauth\"\n            }\n        }\n    ],\n    \"id\": 0\n}"
 								},
 								"url": {
-									"raw": "http://sip1.de.cgrates.org:2080/jsonrpc",
-									"protocol": "http",
+									"raw": "{{base_url}}/jsonrpc",
 									"host": [
-										"sip1",
-										"de",
-										"cgrates",
-										"org"
+										"{{base_url}}"
 									],
-									"port": "2080",
+									"path": [
+										"jsonrpc"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "AttributeSv1.GetAttributeForEvent",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"method\": \"AttributeSv1.GetAttributeForEvent\",\n    \"params\": [\n        {\n            \"Tenant\": \"cgrates.org\",\n            \"ID\": \"91db806d-47b5-4346-b74e-bf699f2dd4d6\",\n            \"Time\": null,\n            \"Event\": {\n                \"Account\": \"+30xxxxxxxxx\",\n                \"Category\": \"call\",\n                \"Destination\": \"+30xxxxxxxxxx\",\n                \"OriginHost\": \"10.156.0.13\",\n                \"OriginID\": \"313536313130323331313531373435-11zx3su0dxng_user_860952\",\n                \"RequestType\": \"*prepaid\",\n                \"SetupTime\": \"1561102312\",\n                \"Source\": \"OpenSIPS-01\",\n                \"Tenant\": \"cgrates.org\",\n                \"User-Agent\": \"snomD120/10.1.33.33\",\n                \"User-Agent-IP\": \"1.1.1.1\"\n            },\n            \"APIOpts\": {\n                \"*attrProfileIDs\": [],\n                \"*context\": \"*sessions\"\n            }\n        }\n    ],\n    \"id\": 244886\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/jsonrpc",
+									"host": [
+										"{{base_url}}"
+									],
 									"path": [
 										"jsonrpc"
 									]
@@ -659,9 +558,7 @@
 							},
 							"response": []
 						}
-					],
-					"protocolProfileBehavior": {},
-					"_postman_isSubFolder": true
+					]
 				},
 				{
 					"name": "APIerSv1.SetAttributeProfile +30xxxxxxxxx",
@@ -678,17 +575,13 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"method\": \"APIerSv1.SetAttributeProfile\",\n    \"params\": [\n        {\n            \"Tenant\": \"cgrates.org\",\n            \"ID\": \"+30xxxxxxxxx\",\n            \"Contexts\": [\n                \"*sessions\"\n            ],\n            \"FilterIDs\": [\n                \"*string:~*req.Account:+30xxxxxxxxx\"\n            ],\n            \"ActivationInterval\": null,\n            \"Attributes\": [\n                {\n                    \"FilterIDs\": null,\n                    \"Path\": \"*req.SipUserName\",\n                    \"Type\": \"*constant\",\n                    \"Value\": [\n                        {\n                            \"Rules\": \"+30xxxxxxxxx\",\n                            \"AllFiltersMatch\": true\n                        }\n                    ]\n                },\n                {\n                    \"FilterIDs\": null,\n                    \"Path\": \"*req.SipPassword\",\n                    \"Type\": \"*constant\",\n                    \"Value\": [\n                        {\n                            \"Rules\": \"xe3r3xJp@o1D*yeV\",\n                            \"AllFiltersMatch\": true\n                        }\n                    ]\n                },\n                {\n                    \"FilterIDs\": null,\n                    \"Path\": \"*req.Region\",\n                    \"Type\": \"*constant\",\n                    \"Value\": [\n                        {\n                            \"Rules\": \"Europe\",\n                            \"AllFiltersMatch\": true\n                        }\n                    ]\n                },\n                {\n                    \"FilterIDs\": null,\n                    \"Path\": \"*req.Country\",\n                    \"Type\": \"*constant\",\n                    \"Value\": [\n                        {\n                            \"Rules\": \"Greece\",\n                            \"AllFiltersMatch\": true\n                        }\n                    ]\n                },\n                {\n                    \"FilterIDs\": null,\n                    \"Path\": \"*req.RequestType\",\n                    \"Type\": \"*constant\",\n                    \"Value\": [\n                        {\n                            \"Rules\": \"*prepaid\",\n                            \"AllFiltersMatch\": true\n                        }\n                    ]\n                },\n                {\n                    \"FilterIDs\": null,\n                    \"Path\": \"*req.MaxSessions\",\n                    \"Type\": \"*constant\",\n                    \"Value\": [\n                        {\n                            \"Rules\": \"1\",\n                            \"AllFiltersMatch\": true\n                        }\n                    ]\n                },\n                {\n                    \"FilterIDs\": null,\n                    \"Path\": \"*req.Max_Incoming_Sessions\",\n                    \"Type\": \"*constant\",\n                    \"Value\": [\n                        {\n                            \"Rules\": \"1\",\n                            \"AllFiltersMatch\": true\n                        }\n                    ]\n                },\n                {\n                    \"FilterIDs\": null,\n                    \"Path\": \"*req.Max_Outgoing_Sessions\",\n                    \"Type\": \"*constant\",\n                    \"Value\": [\n                        {\n                            \"Rules\": \"1\",\n                            \"AllFiltersMatch\": true\n                        }\n                    ]\n                },\n                {\n                    \"FilterIDs\": null,\n                    \"Path\": \"*req.MaxSessionTime\",\n                    \"Type\": \"*constant\",\n                    \"Value\": [\n                        {\n                            \"Rules\": \"3600\",\n                            \"AllFiltersMatch\": true\n                        }\n                    ]\n                },\n                {\n                    \"FilterIDs\": null,\n                    \"Path\": \"*req.MaxCallsPerSecond\",\n                    \"Type\": \"*constant\",\n                    \"Value\": [\n                        {\n                            \"Rules\": \"1\",\n                            \"AllFiltersMatch\": true\n                        }\n                    ]\n                },\n                {\n                    \"FilterIDs\": null,\n                    \"Path\": \"*req.Authorize_wrong_password_limit\",\n                    \"Type\": \"*constant\",\n                    \"Value\": [\n                        {\n                            \"Rules\": \"20\",\n                            \"AllFiltersMatch\": true\n                        }\n                    ]\n                },\n                {\n                    \"FilterIDs\": null,\n                    \"Path\": \"*req.Authorize_no_such_user_limit\",\n                    \"Type\": \"*constant\",\n                    \"Value\": [\n                        {\n                            \"Rules\": \"20\",\n                            \"AllFiltersMatch\": true\n                        }\n                    ]\n                },\n                {\n                    \"FilterIDs\": null,\n                    \"Path\": \"*req.Block_Incoming_Calls\",\n                    \"Type\": \"*constant\",\n                    \"Value\": [\n                        {\n                            \"Rules\": \"0\",\n                            \"AllFiltersMatch\": true\n                        }\n                    ]\n                },\n                {\n                    \"FilterIDs\": null,\n                    \"Path\": \"*req.Hide_CLI\",\n                    \"Type\": \"*constant\",\n                    \"Value\": [\n                        {\n                            \"Rules\": \"0\",\n                            \"AllFiltersMatch\": true\n                        }\n                    ]\n                },\n                {\n                    \"FilterIDs\": null,\n                    \"Path\": \"*req.Forwarding_Service\",\n                    \"Type\": \"*constant\",\n                    \"Value\": [\n                        {\n                            \"Rules\": \"0\",\n                            \"AllFiltersMatch\": true\n                        }\n                    ]\n                },\n                {\n                    \"FilterIDs\": null,\n                    \"Path\": \"*req.Voicemail_Service\",\n                    \"Type\": \"*constant\",\n                    \"Value\": [\n                        {\n                            \"Rules\": \"0\",\n                            \"AllFiltersMatch\": true\n                        }\n                    ]\n                },\n                {\n                    \"FilterIDs\": null,\n                    \"Path\": \"*req.ResourceAllocation\",\n                    \"Type\": \"*contant\",\n                    \"Value\": [\n                        {\n                            \"Rules\": \"ResGroup1\",\n                            \"AllFiltersMatch\": true\n                        }\n                    ]\n                }\n            ],\n            \"Blocker\": false,\n            \"Weight\": 10\n        }\n    ],\n    \"id\": 2\n}"
+							"raw": "{\n    \"method\": \"APIerSv1.SetAttributeProfile\",\n    \"params\": [\n        {\n            \"Tenant\": \"cgrates.org\",\n            \"ID\": \"+30xxxxxxxxx\",\n            \"Contexts\": [\n                \"*sessions\"\n            ],\n            \"FilterIDs\": [\n                \"*string:~*req.Account:+30xxxxxxxxx\"\n            ],\n            \"ActivationInterval\": null,\n            \"Attributes\": [\n                {\n                    \"FilterIDs\": null,\n                    \"Path\": \"*req.SipUserName\",\n                    \"Type\": \"*constant\",\n                    \"Value\": [\n                        {\n                            \"Rules\": \"+30xxxxxxxxx\"\n                        }\n                    ]\n                },\n                {\n                    \"FilterIDs\": null,\n                    \"Path\": \"*req.SipPassword\",\n                    \"Type\": \"*constant\",\n                    \"Value\": [\n                        {\n                            \"Rules\": \"xe3r3xJp@o1D*yeV\"\n                        }\n                    ]\n                },\n                {\n                    \"FilterIDs\": null,\n                    \"Path\": \"*req.Region\",\n                    \"Type\": \"*constant\",\n                    \"Value\": [\n                        {\n                            \"Rules\": \"Europe\"\n                        }\n                    ]\n                },\n                {\n                    \"FilterIDs\": null,\n                    \"Path\": \"*req.Country\",\n                    \"Type\": \"*constant\",\n                    \"Value\": [\n                        {\n                            \"Rules\": \"Greece\"\n                        }\n                    ]\n                },\n                {\n                    \"FilterIDs\": null,\n                    \"Path\": \"*req.RequestType\",\n                    \"Type\": \"*constant\",\n                    \"Value\": [\n                        {\n                            \"Rules\": \"*prepaid\"\n                        }\n                    ]\n                },\n                {\n                    \"FilterIDs\": null,\n                    \"Path\": \"*req.MaxSessions\",\n                    \"Type\": \"*constant\",\n                    \"Value\": [\n                        {\n                            \"Rules\": \"1\"\n                        }\n                    ]\n                },\n                {\n                    \"FilterIDs\": null,\n                    \"Path\": \"*req.Max_Incoming_Sessions\",\n                    \"Type\": \"*constant\",\n                    \"Value\": [\n                        {\n                            \"Rules\": \"1\"\n                        }\n                    ]\n                },\n                {\n                    \"FilterIDs\": null,\n                    \"Path\": \"*req.Max_Outgoing_Sessions\",\n                    \"Type\": \"*constant\",\n                    \"Value\": [\n                        {\n                            \"Rules\": \"1\"\n                        }\n                    ]\n                },\n                {\n                    \"FilterIDs\": null,\n                    \"Path\": \"*req.MaxSessionTime\",\n                    \"Type\": \"*constant\",\n                    \"Value\": [\n                        {\n                            \"Rules\": \"3600\"\n                        }\n                    ]\n                },\n                {\n                    \"FilterIDs\": null,\n                    \"Path\": \"*req.MaxCallsPerSecond\",\n                    \"Type\": \"*constant\",\n                    \"Value\": [\n                        {\n                            \"Rules\": \"1\"\n                        }\n                    ]\n                },\n                {\n                    \"FilterIDs\": null,\n                    \"Path\": \"*req.Authorize_wrong_password_limit\",\n                    \"Type\": \"*constant\",\n                    \"Value\": [\n                        {\n                            \"Rules\": \"20\"\n                        }\n                    ]\n                },\n                {\n                    \"FilterIDs\": null,\n                    \"Path\": \"*req.Authorize_no_such_user_limit\",\n                    \"Type\": \"*constant\",\n                    \"Value\": [\n                        {\n                            \"Rules\": \"20\"\n                        }\n                    ]\n                },\n                {\n                    \"FilterIDs\": null,\n                    \"Path\": \"*req.Block_Incoming_Calls\",\n                    \"Type\": \"*constant\",\n                    \"Value\": [\n                        {\n                            \"Rules\": \"0\"\n                        }\n                    ]\n                },\n                {\n                    \"FilterIDs\": null,\n                    \"Path\": \"*req.Hide_CLI\",\n                    \"Type\": \"*constant\",\n                    \"Value\": [\n                        {\n                            \"Rules\": \"0\"\n                        }\n                        ]\n                    },\n                    {\n                        \"FilterIDs\": null,\n                        \"Path\": \"*req.Forwarding_Service\",\n                        \"Type\": \"*constant\",\n                        \"Value\": [\n                            {\n                                \"Rules\": \"0\"\n                            }\n                        ]\n                    },\n                    {\n                        \"FilterIDs\": null,\n                        \"Path\": \"*req.Voicemail_Service\",\n                        \"Type\": \"*constant\",\n                        \"Value\": [\n                            {\n                                \"Rules\": \"0\"\n                            }\n                        ]\n                    },\n                    {\n                        \"FilterIDs\": null,\n                        \"Path\": \"*req.ResourceAllocation\",\n                        \"Type\": \"*constant\",\n                        \"Value\": [\n                            {\n                                \"Rules\": \"ResGroup1\"\n                            }\n                        ]\n                    }\n                ],\n                \"Blocker\": false,\n                \"Weight\": 10\n            }\n        ],\n        \"id\": 2\n    }"
 						},
 						"url": {
-							"raw": "http://cgrates1.cgrates.org:2080/jsonrpc",
-							"protocol": "http",
+							"raw": "{{base_url}}/jsonrpc",
 							"host": [
-								"cgrates1",
-								"cgrates",
-								"org"
+								"{{base_url}}"
 							],
-							"port": "2080",
 							"path": [
 								"jsonrpc"
 							]
@@ -740,7 +633,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"id\": \"0\",\n    \"method\": \"APIerSv1.RemoveAttributeProfile\",\n    \"params\": [\n        {\n            \"Tenant\": \"cgrates.org\",\n            \"ID\": \"+30xxxxxxxxxx\"\n        }\n    ]\n}"
+							"raw": "{\n    \"id\": \"0\",\n    \"method\": \"APIerSv1.RemoveAttributeProfile\",\n    \"params\": [\n        {\n            \"Tenant\": \"cgrates.org\",\n            \"ID\": \"+30xxxxxxxxx\"\n        }\n    ]\n}"
 						},
 						"url": {
 							"raw": "{{base_url}}/jsonrpc",
@@ -798,7 +691,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"method\": \"APIerSv1.SetAttributeProfile\",\n    \"params\": [\n        {\n            \"Tenant\": \"cgrates.org\",\n            \"ID\": \"ATTR_SPL_TESTSUPPLIER1_In\",\n            \"Contexts\": [\n                \"*chargers\"\n            ],\n            \"FilterIDs\": [],\n            \"ActivationInterval\": null,\n            \"Attributes\": [\n                {\n                    \"FilterIDs\": null,\n                    \"Path\": \"*req.Subject\",\n                    \"Type\": \"*constant\",\n                    \"Value\": [\n                        {\n                            \"Rules\": \"TESTSUPPLIER1-IN\",\n                            \"AllFiltersMatch\": true\n                        }\n                    ]\n                }\n            ],\n            \"Blocker\": false,\n            \"Weight\": 10\n        }\n    ],\n    \"id\": 2\n}"
+							"raw": "{\n    \"method\": \"APIerSv1.SetAttributeProfile\",\n    \"params\": [\n        {\n            \"Tenant\": \"cgrates.org\",\n            \"ID\": \"ATTR_SPL_TESTSUPPLIER1_In\",\n            \"Contexts\": [\n                \"*chargers\"\n            ],\n            \"FilterIDs\": [],\n            \"ActivationInterval\": null,\n            \"Attributes\": [\n                {\n                    \"FilterIDs\": null,\n                    \"Path\": \"*req.Subject\",\n                    \"Type\": \"*constant\",\n                    \"Value\": [\n                        {\n                            \"Rules\": \"TESTSUPPLIER1-IN\"\n                        }\n                    ]\n                }\n            ],\n            \"Blocker\": false,\n            \"Weight\": 10\n        }\n    ],\n    \"id\": 2\n}"
 						},
 						"url": {
 							"raw": "{{base_url}}/jsonrpc",
@@ -827,7 +720,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"method\": \"APIerSv1.SetAttributeProfile\",\n    \"params\": [\n        {\n            \"Tenant\": \"cgrates.org\",\n            \"ID\": \"ATTR_SPL_TESTSUPPLIER1_Out\",\n            \"Contexts\": [\n                \"*chargers\"\n            ],\n            \"FilterIDs\": [],\n            \"ActivationInterval\": null,\n            \"Attributes\": [\n                {\n                    \"FilterIDs\": null,\n                    \"Path\": \"*req.Subject\",\n                    \"Type\": \"*constant\",\n                    \"Value\": [\n                        {\n                            \"Rules\": \"TESTSUPPLIER1-OUT\",\n                            \"AllFiltersMatch\": true\n                        }\n                    ]\n                }\n            ],\n            \"Blocker\": false,\n            \"Weight\": 10\n        }\n    ],\n    \"id\": 2\n}"
+							"raw": "{\n    \"method\": \"APIerSv1.SetAttributeProfile\",\n    \"params\": [\n        {\n            \"Tenant\": \"cgrates.org\",\n            \"ID\": \"ATTR_SPL_TESTSUPPLIER1_Out\",\n            \"Contexts\": [\n                \"*chargers\"\n            ],\n            \"FilterIDs\": [],\n            \"ActivationInterval\": null,\n            \"Attributes\": [\n                {\n                    \"FilterIDs\": null,\n                    \"Path\": \"*req.Subject\",\n                    \"Type\": \"*constant\",\n                    \"Value\": [\n                        {\n                            \"Rules\": \"TESTSUPPLIER1-OUT\"\n                        }\n                    ]\n                }\n            ],\n            \"Blocker\": false,\n            \"Weight\": 10\n        }\n    ],\n    \"id\": 2\n}"
 						},
 						"url": {
 							"raw": "{{base_url}}/jsonrpc",
@@ -856,7 +749,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"method\": \"APIerSv1.SetAttributeProfile\",\n    \"params\": [\n        {\n            \"Tenant\": \"cgrates.org\",\n            \"ID\": \"ATTR_CATEGORY_CALL_IN\",\n            \"Contexts\": [\n                \"*chargers\"\n            ],\n            \"FilterIDs\": [],\n            \"ActivationInterval\": null,\n            \"Attributes\": [\n                {\n                    \"FilterIDs\": null,\n                    \"Path\": \"*req.Category\",\n                    \"Type\": \"*constant\",\n                    \"Value\": [\n                        {\n                            \"Rules\": \"call-in\",\n                            \"AllFiltersMatch\": true\n                        }\n                    ]\n                }\n            ],\n            \"Blocker\": false,\n            \"Weight\": 10\n        }\n    ],\n    \"id\": 2\n}"
+							"raw": "{\n    \"method\": \"APIerSv1.SetAttributeProfile\",\n    \"params\": [\n        {\n            \"Tenant\": \"cgrates.org\",\n            \"ID\": \"ATTR_CATEGORY_CALL_IN\",\n            \"Contexts\": [\n                \"*chargers\"\n            ],\n            \"FilterIDs\": [],\n            \"ActivationInterval\": null,\n            \"Attributes\": [\n                {\n                    \"FilterIDs\": null,\n                    \"Path\": \"*req.Category\",\n                    \"Type\": \"*constant\",\n                    \"Value\": [\n                        {\n                            \"Rules\": \"call-in\"\n                        }\n                    ]\n                }\n            ],\n            \"Blocker\": false,\n            \"Weight\": 10\n        }\n    ],\n    \"id\": 2\n}"
 						},
 						"url": {
 							"raw": "{{base_url}}/jsonrpc",
@@ -885,7 +778,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"method\": \"APIerSv1.SetAttributeProfile\",\n    \"params\": [\n        {\n            \"Tenant\": \"cgrates.org\",\n            \"ID\": \"ATTR_CATEGORY_CALL_OUT\",\n            \"Contexts\": [\n                \"*chargers\"\n            ],\n            \"FilterIDs\": [],\n            \"ActivationInterval\": null,\n            \"Attributes\": [\n                {\n                    \"FilterIDs\": null,\n                    \"Path\": \"*req.Category\",\n                    \"Type\": \"*constant\",\n                    \"Value\": [\n                        {\n                            \"Rules\": \"call-out\",\n                            \"AllFiltersMatch\": true\n                        }\n                    ]\n                }\n            ],\n            \"Blocker\": false,\n            \"Weight\": 10\n        }\n    ],\n    \"id\": 2\n}"
+							"raw": "{\n    \"method\": \"APIerSv1.SetAttributeProfile\",\n    \"params\": [\n        {\n            \"Tenant\": \"cgrates.org\",\n            \"ID\": \"ATTR_CATEGORY_CALL_OUT\",\n            \"Contexts\": [\n                \"*chargers\"\n            ],\n            \"FilterIDs\": [],\n            \"ActivationInterval\": null,\n            \"Attributes\": [\n                {\n                    \"FilterIDs\": null,\n                    \"Path\": \"*req.Category\",\n                    \"Type\": \"*constant\",\n                    \"Value\": [\n                        {\n                            \"Rules\": \"call-out\"\n                        }\n                    ]\n                }\n            ],\n            \"Blocker\": false,\n            \"Weight\": 10\n        }\n    ],\n    \"id\": 2\n}"
 						},
 						"url": {
 							"raw": "{{base_url}}/jsonrpc",
@@ -899,8 +792,7 @@
 					},
 					"response": []
 				}
-			],
-			"protocolProfileBehavior": {}
+			]
 		},
 		{
 			"name": "ActionPlan",
@@ -952,7 +844,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n    \"method\": \"APIerSv1.SetTPActionPlan\",\n    \"params\": [\n        {\n            \"TPid\": \"CGR_API_TESTS\",\n            \"ID\": \"always\",\n            \"ActionPlan\": [\n                {\n                    \"ActionsId\": \"fafsafa\",\n                    \"TimingId\": \"*any\",\n                    \"Weight\": 10\n                }\n            ]\n        }\n    ]\n}"
+									"raw": "{\n    \"method\": \"APIerSv1.SetTPActionPlan\",\n    \"params\": [\n        {\n            \"TPid\": \"CGR_API_TESTS\",\n            \"ID\": \"AP_PACKAGE_10\",\n            \"ActionPlan\": [\n                {\n                    \"ActionsId\": \"*log\",\n                    \"TimingId\": \"*any\",\n                    \"Weight\": 10\n                }\n            ]\n        }\n    ]\n}"
 								},
 								"url": {
 									"raw": "{{base_url}}/jsonrpc",
@@ -1024,38 +916,148 @@
 							},
 							"response": []
 						}
-					],
-					"protocolProfileBehavior": {},
-					"_postman_isSubFolder": true
+					]
 				},
 				{
-					"name": "APIerSv1.GetAccountActionPlan",
-					"request": {
-						"auth": {
-							"type": "noauth"
+					"name": "TP Timing",
+					"item": [
+						{
+							"name": "APIerSv1.SetTPTiming",
+							"request": {
+								"auth": {
+									"type": "noauth"
+								},
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"id\": 3,\n    \"method\": \"APIerSv1.SetTPTiming\",\n    \"params\": [\n        {\n            \"TPid\": \"TP_TIMING_TEST\",\n            \"ID\": \"TP_TIMINGID\",\n            \"TimingId\": \"TP_TIMING_ID\",\n            \"MonthDays\": \"*any\",\n            \"Months\": \"*any\",\n            \"Time\": \"00:00:00\",\n            \"WeekDays\": \"*any\",\n            \"Years\": \"*any\"\n        }\n    ]\n}"
+								},
+								"url": {
+									"raw": "{{base_url}}/jsonrpc",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"jsonrpc"
+									]
+								}
+							},
+							"response": []
 						},
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"method\": \"APIerSv1.GetAccountActionPlan\",\n    \"params\": [\n        {\n            \"Tenant\": \"cgrates.org\",\n            \"Account\": \"+30xxxxxxxxxx\"\n        }\n    ]\n}"
+						{
+							"name": "APIerSv1.GetTPTiming",
+							"request": {
+								"auth": {
+									"type": "noauth"
+								},
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"id\": 5,\n    \"method\": \"APIerSv1.GetTPTiming\",\n    \"params\": [\n        {\n            \"TPid\": \"TP_TIMING_TEST\",\n            \"ID\": \"TP_TIMINGID\",\n            \"TimingId\": \"TP_TIMING_ID\"\n        }\n    ]\n}"
+								},
+								"url": {
+									"raw": "{{base_url}}/jsonrpc",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"jsonrpc"
+									]
+								}
+							},
+							"response": []
 						},
-						"url": {
-							"raw": "{{base_url}}/jsonrpc",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"jsonrpc"
-							]
+						{
+							"name": "APIerSv1.GetTPTimingIds",
+							"request": {
+								"auth": {
+									"type": "noauth"
+								},
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"id\": 1,\n    \"method\": \"APIerSv1.GetTPTimingIds\",\n    \"params\": [\n        {\n            \"TPid\": \"TP_TIMING_TEST\"\n        }\n    ]\n}"
+								},
+								"url": {
+									"raw": "{{base_url}}/jsonrpc",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"jsonrpc"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Remove TP Timing",
+							"request": {
+								"auth": {
+									"type": "noauth"
+								},
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"id\": 1,\n    \"method\": \"APIerSv1.RemoveTPTiming\",\n    \"params\": [\n        {\n            \"TPid\": \"TEST_SQL\"\n        }\n    ]\n}"
+								},
+								"url": {
+									"raw": "{{base_url}}/jsonrpc",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"jsonrpc"
+									]
+								}
+							},
+							"response": []
 						}
-					},
-					"response": []
+					],
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									""
+								]
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									""
+								]
+							}
+						}
+					]
 				},
 				{
 					"name": "APIerSv1.GetActionPlan",
@@ -1073,6 +1075,35 @@
 						"body": {
 							"mode": "raw",
 							"raw": "{\n    \"method\": \"APIerSv1.GetActionPlan\",\n    \"params\": [\n        {\n            \"Id\": \"AP_PACKAGE_10\"\n        }\n    ]\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/jsonrpc",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"jsonrpc"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "APIerSv1.SetActionPlan",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"method\": \"APIerSv1.SetActionPlan\",\n    \"params\": [\n        {\n            \"Id\": \"AP_PACKAGE_10\",\n            \"ActionPlan\": [\n                {\n                    \"ActionsId\": \"test1\",\n                    \"TimingID\": \"\",\n                    \"MonthDays\": \"*any\",\n                    \"Years\": \"*any\",\n                    \"WeekDays\": \"*any\",\n                    \"Time\": \"*asap\",\n                    \"Weight\": 10,\n                    \"Months\": \"*any\"\n                }\n            ],\n            \"Overwrite\": true,\n            \"ReloadScheduler\": true\n        }\n    ]\n}"
 						},
 						"url": {
 							"raw": "{{base_url}}/jsonrpc",
@@ -1123,21 +1154,18 @@
 					"response": []
 				},
 				{
-					"name": "APIerSv1.RemoveActionTiming (Remove ActionPlan From Account)",
+					"name": "APIerSv1.RemoveActionPlan",
 					"request": {
-						"auth": {
-							"type": "noauth"
-						},
 						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
+						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"method\": \"APIerSv1.RemoveActionTiming\",\n    \"params\": [\n        {\n            \"ActionPlanId\": \"AP_VOICE_PACKAGE_200\",\n            \"ActionTimingId\": \"\",\n            \"Tenant\": \"sip.TEST_SUPPLIER_NAME.gr\",\n            \"Account\": \"+30xxxxxxxxx\",\n            \"ReloadScheduler\": true\n        }\n    ]\n}"
+							"raw": "{\n    \"method\": \"APIerSv1.RemoveActionPlan\",\n    \"params\": [\n        {\n            \"ID\":\"AP_PACKAGE_10\"\n        }\n    ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
 						},
 						"url": {
 							"raw": "{{base_url}}/jsonrpc",
@@ -1151,12 +1179,42 @@
 					},
 					"response": []
 				}
-			],
-			"protocolProfileBehavior": {}
+			]
 		},
 		{
 			"name": "Accounts",
 			"item": [
+				{
+					"name": "TP",
+					"item": [
+						{
+							"name": "APIerSv1.LoadAccountActions",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"method\": \"APIerSv1.LoadAccountActions\",\n    \"params\": [\n        {\n            \"TPid\": \"CGR_API_TESTS\",\n            \"ID\": \"AP_PACKAGE_10\",\n            \"LoadId\": \"CGR_API_TESTS\",\n            \"Tenant\": \"cgrates.org\",\n            \"Account\": \"+30xxxxxxxxx\",\n            \"ActionPlanId\": \"\",\n            \"ActionTriggersId\": \"\",\n            \"AllowNegative\": true,\n            \"Disabled\": false\n        }\n    ]\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/jsonrpc",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"jsonrpc"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
 				{
 					"name": "APIerSv2.GetAccounts",
 					"request": {
@@ -1187,7 +1245,7 @@
 					"response": []
 				},
 				{
-					"name": "APIerSv2.SetAccount",
+					"name": "APIerSv1.SetAccount",
 					"request": {
 						"auth": {
 							"type": "noauth"
@@ -1201,7 +1259,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"method\": \"APIerSv2.SetAccount\",\n    \"params\": [\n        {\n            \"Tenant\": \"cgrates.org\",\n            \"Account\": \"+30xxxxxxxxx\",\n            \"ActionPlanIDs\": [\n                \"ACP_+30xxxxxxxxx_TOPUP_PKG_1000_GR\"\n            ],\n            \"ActionPlansOverwrite\": true,\n            \"AllowNegative\": false,\n            \"Disabled\": false,\n            \"ReloadScheduler\": true\n        }\n    ]\n}"
+							"raw": "{\n    \"method\": \"APIerSv1.SetAccount\",\n    \"params\": [\n        {\n            \"Tenant\": \"cgrates.org\",\n            \"Account\": \"+30xxxxxxxxx\",\n            \"ActionPlanID\":\"AP_PACKAGE_10\",\n            \"ActionTriggerID\": \"\",\n            \"ExtraOptions\": null,\n            \"ReloadScheduler\": true\n        }\n    ]\n}"
 						},
 						"url": {
 							"raw": "{{base_url}}/jsonrpc",
@@ -1259,7 +1317,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"method\": \"APIerSv1.RemoveAccount\",\n    \"params\": [\n        {\n            \"Tenant\": \"cgrates.org\",\n            \"Account\": \"1003\",\n            \"ReloadScheduler\": true\n        }\n    ]\n}"
+							"raw": "{\n    \"method\": \"APIerSv1.RemoveAccount\",\n    \"params\": [\n        {\n            \"Tenant\": \"cgrates.org\",\n            \"Account\": \"+30xxxxxxxxx\",\n            \"ReloadScheduler\": true\n        }\n    ]\n}"
 						},
 						"url": {
 							"raw": "{{base_url}}/jsonrpc",
@@ -1274,7 +1332,7 @@
 					"response": []
 				},
 				{
-					"name": "APIerSv1.SetAccount",
+					"name": "APIerSv1.GetAccountsCount",
 					"request": {
 						"auth": {
 							"type": "noauth"
@@ -1288,7 +1346,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"method\": \"APIerSv1.SetAccount\",\n    \"params\": [\n        {\n            \"Tenant\": \"cgrates.org\",\n            \"Account\": \"+30xxxxxxxxx\",\n            \"ActionPlanId\": \"ACP_+30xxxxxxxxx_TOPUP_PKG_1000_GR\",\n            \"AllowNegative\": false,\n            \"Disabled\": false,\n            \"ReloadScheduler\": true\n        }\n    ]\n}"
+							"raw": "{\n    \"method\": \"APIerSv1.GetAccountsCount\",\n    \"params\": [\n        {\n            \"Tenant\": \"cgrates.org\"\n        }\n    ]\n}"
 						},
 						"url": {
 							"raw": "{{base_url}}/jsonrpc",
@@ -1303,7 +1361,7 @@
 					"response": []
 				},
 				{
-					"name": "APIerSv1.GetAccount",
+					"name": "APIerSv1.GetAccountActionPlan",
 					"request": {
 						"auth": {
 							"type": "noauth"
@@ -1317,7 +1375,59 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"method\": \"APIerSv1.GetAccount\",\n    \"params\": [\n        {\n            \"Tenant\": \"cgrates.org\",\n            \"Account\": \"+30xxxxxxxxx\"\n        }\n    ]\n}"
+							"raw": "{\n    \"method\": \"APIerSv1.GetAccountActionPlan\",\n    \"params\": [\n        {\n            \"Tenant\": \"cgrates.org\",\n            \"Account\": \"+30xxxxxxxxx\"\n        }\n    ]\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/jsonrpc",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"jsonrpc"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "APIerSv1.GetAccountActionTriggers",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"method\": \"APIerSv1.GetAccountActionTriggers\",\n    \"params\": [\n        {\n            \"Tenant\": \"cgrates.org\",\n            \"Account\": \"+30xxxxxxxxx\"\n        }\n    ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/jsonrpc",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"jsonrpc"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "APIerSv1.AddTriggeredAction",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"method\": \"APIerSv1.AddTriggeredAction\",\n    \"params\": [\n        {\n            \"Tenant\": \"cgrates.org\",\n            \"Account\": \"+30xxxxxxxxx\",\n            \"BalanceType\": \"*monetary\",\n            \"ThresholdType\": \"*min_balance\",\n            \"ThresholdValue\": 10,\n            \"BalanceDestinationIds\": \"*any\",\n            \"Weight\": 10,\n            \"ActionsId\":  \"test1\"\n        }\n    ],\n    \"id\": 0\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
 						},
 						"url": {
 							"raw": "{{base_url}}/jsonrpc",
@@ -1359,136 +1469,41 @@
 						}
 					},
 					"response": []
+				},
+				{
+					"name": "APIerSv1.RemoveActionTiming (Remove ActionPlan From Account)",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"method\": \"APIerSv1.RemoveActionTiming\",\n    \"params\": [\n        {\n            \"ActionPlanId\": \"AP_PACKAGE_10\",\n            \"ActionTimingId\": \"\",\n            \"Tenant\": \"cgrates.org\",\n            \"Account\": \"+30xxxxxxxxx\",\n            \"ReloadScheduler\": true\n        }\n    ]\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/jsonrpc",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"jsonrpc"
+							]
+						}
+					},
+					"response": []
 				}
-			],
-			"protocolProfileBehavior": {}
+			]
 		},
 		{
 			"name": "Balances",
 			"item": [
-				{
-					"name": "Sessions",
-					"item": [
-						{
-							"name": "Responder.Debit",
-							"request": {
-								"auth": {
-									"type": "noauth"
-								},
-								"method": "POST",
-								"header": [
-									{
-										"key": "Content-Type",
-										"value": "application/json"
-									}
-								],
-								"body": {
-									"mode": "raw",
-									"raw": "{\n    \"method\": \"Responder.Debit\",\n    \"params\": [{\n            \"Direction\": \"*out\",\n            \"Category\": \"\",\n            \"Tenant\": \"cgrates.org\",\n            \"Subject\": \"\",\n            \"Account\": \"+30xxxxxxxxxx\",\n            \"Destination\": \"\",\n            \"TimeStart\": \"0001-01-01T00:00:00Z\",\n            \"TimeEnd\": \"0001-01-01T00:00:00Z\",\n            \"LoopIndex\": 0,\n            \"DurationIndex\": 0,\n            \"FallbackSubject\": \"\",\n            \"RatingInfos\": null,\n            \"Increments\": null,\n            \"ToR\": \"\",\n            \"ExtraFields\": null,\n            \"MaxRate\": 0,\n            \"MaxRateUnit\": 0,\n            \"MaxCostSoFar\": 0,\n            \"CgrID\": \"\",\n            \"RunID\": \"\",\n            \"ForceDuration\": false,\n            \"PerformRounding\": false,\n            \"DryRun\": false,\n            \"DenyNegativeAccount\": false\n    }],\n    \"id\": 16\n}\n"
-								},
-								"url": {
-									"raw": "{{base_url}}/jsonrpc",
-									"host": [
-										"{{base_url}}"
-									],
-									"path": [
-										"jsonrpc"
-									]
-								}
-							},
-							"response": []
-						},
-						{
-							"name": "Responder.MaxDebit",
-							"request": {
-								"auth": {
-									"type": "noauth"
-								},
-								"method": "POST",
-								"header": [
-									{
-										"key": "Content-Type",
-										"value": "application/json"
-									}
-								],
-								"body": {
-									"mode": "raw",
-									"raw": "{\n  \"method\": \"Responder.MaxDebit\",\n  \"params\": [\n    {\n      \"Category\": \"call\",\n      \"Tenant\": \"cgrates.org\",\n      \"Subject\": \"+30xxxxxxxxx\",\n      \"Account\": \"+30xxxxxxxxx\",\n      \"Destination\": \"+30xxxxxxxxxx\",\n      \"TimeStart\": \"2019-06-20T14:08:42Z\",\n      \"TimeEnd\": \"2019-06-20T14:08:52Z\",\n      \"LoopIndex\": 0,\n      \"DurationIndex\": 10000000000,\n      \"FallbackSubject\": \"\",\n      \"RatingInfos\": null,\n      \"Increments\": null,\n      \"ToR\": \"\",\n      \"ExtraFields\": null,\n      \"MaxRate\": 0,\n      \"MaxRateUnit\": 0,\n      \"MaxCostSoFar\": 0,\n      \"CgrID\": \"f10b93ecdb35da33e539cc5274ff4c228d25617c\",\n      \"RunID\": \"*default\",\n      \"ForceDuration\": false,\n      \"PerformRounding\": false,\n      \"DryRun\": false,\n      \"DenyNegativeAccount\": false\n    }\n  ],\n  \"id\": 220\n}\n"
-								},
-								"url": {
-									"raw": "{{base_url}}/jsonrpc",
-									"host": [
-										"{{base_url}}"
-									],
-									"path": [
-										"jsonrpc"
-									]
-								}
-							},
-							"response": []
-						},
-						{
-							"name": "Responder.GetMaxSessionTime",
-							"request": {
-								"auth": {
-									"type": "noauth"
-								},
-								"method": "POST",
-								"header": [
-									{
-										"key": "Content-Type",
-										"value": "application/json"
-									}
-								],
-								"body": {
-									"mode": "raw",
-									"raw": "{\n  \"method\": \"Responder.GetMaxSessionTime\",\n  \"params\": [\n    {\n      \"Category\": \"call\",\n      \"Tenant\": \"cgrates.org\",\n      \"Subject\": \"+30xxxxxxxxx\",\n      \"Account\": \"+30xxxxxxxxx\",\n      \"Destination\": \"+30xxxxxxxxxx\",\n      \"TimeStart\": \"2019-06-20T14:36:32Z\",\n      \"TimeEnd\": \"2019-06-20T17:36:32Z\",\n      \"LoopIndex\": 0,\n      \"DurationIndex\": 0,\n      \"FallbackSubject\": \"\",\n      \"RatingInfos\": null,\n      \"Increments\": null,\n      \"ToR\": \"\",\n      \"ExtraFields\": {\n        \"Authorize_no_such_user_limit\": \"20\",\n        \"Authorize_wrong_password_limit\": \"20\",\n        \"Block_Incoming_Calls\": \"0\",\n        \"Country\": \"Greece\",\n        \"Forwarding_Service\": \"0\",\n        \"Hide_CLI\": \"0\",\n        \"MaxCallsPerSecond\": \"1\",\n        \"MaxSessionTime\": \"3600\",\n        \"MaxSessions\": \"5\",\n        \"Max_Incoming_Sessions\": \"5\",\n        \"Max_Outgoing_Sessions\": \"5\",\n        \"Region\": \"Europe\",\n        \"SipPassword\": \"|!xB8H7]}ych&XMY\",\n        \"SipUserName\": \"+30xxxxxxxxx\",\n        \"User-Agent\": \"snomD120/10.1.33.33\",\n        \"User-Agent-IP\": \"1.1.1.1\",\n        \"Voicemail_Service\": \"0\"\n      },\n      \"MaxRate\": 0,\n      \"MaxRateUnit\": 0,\n      \"MaxCostSoFar\": 0,\n      \"CgrID\": \"b6a38f4df90c810cfd86445a490994e1357c7d9c\",\n      \"RunID\": \"*default\",\n      \"ForceDuration\": false,\n      \"PerformRounding\": false,\n      \"DryRun\": false,\n      \"DenyNegativeAccount\": false\n    }\n  ],\n  \"id\": 235\n}\n"
-								},
-								"url": {
-									"raw": "{{base_url}}/jsonrpc",
-									"host": [
-										"{{base_url}}"
-									],
-									"path": [
-										"jsonrpc"
-									]
-								}
-							},
-							"response": []
-						},
-						{
-							"name": "ResourceSv1.AuthorizeResources",
-							"request": {
-								"auth": {
-									"type": "noauth"
-								},
-								"method": "POST",
-								"header": [
-									{
-										"key": "Content-Type",
-										"value": "application/json"
-									}
-								],
-								"body": {
-									"mode": "raw",
-									"raw": "{\n  \"method\": \"ResourceSv1.AuthorizeResources\",\n  \"params\": [\n    {\n      \"Tenant\": \"cgrates.org\",\n      \"ID\": \"114a0d61-fbe8-41dc-a6f2-8f0c081c0c58\",\n      \"Time\": null,\n      \"Event\": {\n        \"Account\": \"+30xxxxxxxxx\",\n        \"Authorize_no_such_user_limit\": \"20\",\n        \"Authorize_wrong_password_limit\": \"20\",\n        \"Block_Incoming_Calls\": \"0\",\n        \"CGRID\": \"b6a38f4df90c810cfd86445a490994e1357c7d9c\",\n        \"Category\": \"call\",\n        \"Country\": \"Greece\",\n        \"Destination\": \"+30xxxxxxxxxx\",\n        \"Forwarding_Service\": \"0\",\n        \"Hide_CLI\": \"0\",\n        \"MaxCallsPerSecond\": \"1\",\n        \"MaxSessionTime\": \"3600\",\n        \"MaxSessions\": \"5\",\n        \"Max_Incoming_Sessions\": \"5\",\n        \"Max_Outgoing_Sessions\": \"5\",\n        \"OriginID\": \"313536313034313339303536343939-j1rxhvkxpv7i_user_183964\",\n        \"Region\": \"Europe\",\n        \"RequestType\": \"*prepaid\",\n        \"SetupTime\": \"1561041392\",\n        \"SipPassword\": \"|!xB8H7]}ych&XMY\",\n        \"SipUserName\": \"+30xxxxxxxxx\",\n        \"Tenant\": \"cgrates.org\",\n        \"Usage\": 10800000000000,\n        \"User-Agent\": \"snomD120/10.1.33.33\",\n        \"User-Agent-IP\": \"1.1.1.1\",\n        \"Voicemail_Service\": \"0\"\n      },\n      \"UsageID\": \"313536313034313339303536343939-j1rxhvkxpv7i_user_183964\",\n      \"UsageTTL\": null,\n      \"Units\": 1\n    }\n  ],\n  \"id\": 3\n}"
-								},
-								"url": {
-									"raw": "{{base_url}}/jsonrpc",
-									"host": [
-										"{{base_url}}"
-									],
-									"path": [
-										"jsonrpc"
-									]
-								}
-							},
-							"response": []
-						}
-					],
-					"protocolProfileBehavior": {},
-					"_postman_isSubFolder": true
-				},
 				{
 					"name": "APIerSv2.GetAccount (Get Account Balances)",
 					"request": {
@@ -1520,6 +1535,20 @@
 				},
 				{
 					"name": "APIerSv1.AddBalance *monetary",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
 					"request": {
 						"auth": {
 							"type": "noauth"
@@ -1533,7 +1562,12 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"method\": \"APIerSv1.AddBalance\",\r\n    \"params\": [{\r\n            \"Tenant\": \"cgrates.org\",\r\n            \"Account\": \"test\",\r\n            \"BalanceType\": \"*monetary\",\r\n            \"BalanceUUID\": \"883a8cb2-659b-4353-a939-7d90565e3332\",\r\n            \"BalanceID\": \"WALLET100\",\r\n            \"Directions\": null,\r\n            \"Value\": 100,\r\n            \"ExpiryTime\": \"*unlimited\",\r\n            \"RatingSubject\": null,\r\n            \"Categories\": null,\r\n            \"DestinationIds\": \"test;test1\",\r\n            \"TimingIds\": \"*any\",\r\n            \"Weight\": 10,\r\n            \"SharedGroups\": null,\r\n            \"Overwrite\": true,\r\n            \"Blocker\": false,\r\n            \"Disabled\": false,\r\n            \"Cdrlog\" : true\r\n    }\r\n    \r\n    ],\r\n    \"id\": 6\r\n}"
+							"raw": "{\r\n    \"method\": \"APIerSv1.AddBalance\",\r\n    \"params\": [\r\n        {\r\n            \"Tenant\": \"cgrates.org\",\r\n            \"Account\": \"+30xxxxxxxxx\",\r\n            \"BalanceType\": \"*monetary\",\r\n            \"Value\": 100,\r\n            \"Balance\": {\r\n                //\"UUID\":\"75ebbc57-352f-4d58-b2a5-15ea162c479f\",\r\n                \"ID\": \"WALLET100\",\r\n                \"ExpiryTime\": \"*unlimited\",\r\n                \"RatingSubject\": null,\r\n                \"Categories\": null,\r\n                \"DestinationIDs\": \"*any\",\r\n                \"TimingIDs\": null,\r\n                \"Weight\": 10,\r\n                \"SharedGroups\": null,\r\n                \"Blocker\": false,\r\n                \"Disabled\": false\r\n            },\r\n            \"ActionExtraData\": {},\r\n            \"Overwrite\": false,\r\n            \"Cdrlog\": true\r\n        }\r\n    ],\r\n    \"id\": 6\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
 						},
 						"url": {
 							"raw": "{{base_url}}/jsonrpc",
@@ -1562,36 +1596,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"method\": \"APIerSv1.AddBalance\",\r\n    \"params\": [{\r\n            \"Tenant\": \"cgrates.org\",\r\n            \"Account\": \"+30xxxxxxxxx\",\r\n            \"BalanceType\": \"*voice1\",\r\n            \"BalanceUUID\": \"883a8cb2-659b-4353-a939-7d90565e3331\",\r\n            \"BalanceID\": \"BalanceID1\",\r\n            \"Directions\": null,\r\n            \"Value\": 100,\r\n            \"ExpiryTime\": \"*unlimited\",\r\n            \"RatingSubject\": null,\r\n            \"Categories\": null,\r\n            \"DestinationIds\": \"*any\",\r\n            \"TimingIds\": \"*any\",\r\n            \"Weight\": 10,\r\n            \"SharedGroups\": null,\r\n            \"Overwrite\": true,\r\n            \"Blocker\": false,\r\n            \"Disabled\": false,\r\n            \"Cdrlog\" : true\r\n    }\r\n   \r\n    ],\r\n    \"id\": 6\r\n}"
-						},
-						"url": {
-							"raw": "{{base_url}}/jsonrpc",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"jsonrpc"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "APIerSv1.AddBalance both test Copy",
-					"request": {
-						"auth": {
-							"type": "noauth"
-						},
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\r\n    \"method\": \"APIerSv1.AddBalance\",\r\n    \"params\": [\r\n    \t {\r\n            \"Tenant\": \"cgrates.org\",\r\n            \"Account\": \"+30xxxxxxxxx\",\r\n            \"BalanceType\": \"*voice\",\r\n            \"BalanceUUID\": \"e11ae605-9ca1-402d-930c-581893e54f33\",\r\n            \"BalanceID\": null,\r\n            \"Directions\": \"*out\",\r\n            \"Value\": 30000000000000,\r\n            \"ExpiryTime\": \"*unlimited\",\r\n            \"RatingSubject\": null,\r\n            \"Categories\": null,\r\n            \"DestinationIds\": \"DST_+30xxxxxxxxxx\",\r\n            \"TimingIds\": \"*any\",\r\n            \"Weight\": 20,\r\n            \"SharedGroups\": null,\r\n            \"Overwrite\": true,\r\n            \"Blocker\": false,\r\n            \"Disabled\": false,\r\n            \"Cdrlog\" : true\r\n    }\r\n    ],\r\n    \"id\": 6\r\n}"
+							"raw": "{\r\n    \"method\": \"APIerSv1.AddBalance\",\r\n    \"params\": [\r\n        {\r\n            \"Tenant\": \"cgrates.org\",\r\n            \"Account\": \"+30xxxxxxxxx\",\r\n            \"BalanceType\": \"*voice\",\r\n            \"Value\": 100,\r\n            \"Balance\": {\r\n               // \"UUID\": \"883a8cb2-659b-4353-a939-7d90565e3331\",\r\n                \"ID\": \"BalanceID1\",\r\n                \"ExpiryTime\": \"*unlimited\",\r\n                \"RatingSubject\": null,\r\n                \"Categories\": null,\r\n                \"DestinationIDs\":\"*any\",\r\n                \"TimingIDs\": null,\r\n                \"Weight\": 10,\r\n                \"Blocker\": false,\r\n                \"Disabled\": false,\r\n                \"SharedGroups\": null\r\n            },\r\n            \"Overwrite\": true,\r\n            \"ActionExtraData\": null,\r\n            \"Cdrlog\": true\r\n        }\r\n    ],\r\n    \"id\": 6\r\n}"
 						},
 						"url": {
 							"raw": "{{base_url}}/jsonrpc",
@@ -1620,7 +1625,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"method\": \"APIerSv1.SetBalance\",\r\n    \"params\": [{\r\n            \"Tenant\": \"cgrates.org\",\r\n            \"Account\": \"+30xxxxxxxxx\",\r\n            \"BalanceType\": \"*monetary\",\r\n            \"BalanceUUID\": null,\r\n            \"BalanceID\": \"balance1\",\r\n            \"Directions\": null,\r\n            \"Value\": 100,\r\n            \"ExpiryTime\": null,\r\n            \"RatingSubject\": null,\r\n            \"Categories\": null,\r\n            \"DestinationIds\": null,\r\n            \"TimingIds\": null,\r\n            \"Weight\": null,\r\n            \"SharedGroups\": null,\r\n            \"Blocker\": null,\r\n            \"Disabled\": null\r\n    }],\r\n    \"id\": 6\r\n}"
+							"raw": "{\r\n    \"method\": \"APIerSv1.SetBalance\",\r\n    \"params\": [\r\n        {\r\n            \"Tenant\": \"cgrates.org\",\r\n            \"Account\": \"+30xxxxxxxxx\",\r\n            \"BalanceType\": \"*monetary\",\r\n            \"Value\": 20,\r\n            \"Balance\": {\r\n                \"UUID\": \"443a3e61-a7cb-4558-9337-7cd338ec4f6e\",\r\n                \"ID\": \"WALLET100\",\r\n                \"ExpiryTime\": \"*unlimited\",\r\n                \"Blocker\": false,\r\n                \"Weight\": 10\r\n            },\r\n            \"ActionExtraData\": null,\r\n            \"Cdrlog\": true\r\n        }\r\n    ],\r\n    \"id\": 6\r\n}"
 						},
 						"url": {
 							"raw": "{{base_url}}/jsonrpc",
@@ -1649,7 +1654,36 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"method\": \"APIerSv1.SetBalance\",\r\n    \"params\": [{\r\n            \"Tenant\": \"cgrates.org\",\r\n            \"Account\": \"+30xxxxxxxxx\",\r\n            \"BalanceType\": \"*voice\",\r\n            \"BalanceUUID\": \"5a2fb811-1694-46bf-8066-6065a849ecf8\",\r\n            \"BalanceID\": \"\",\r\n            \"Directions\": \"*out\",\r\n            \"Value\": 1000000,\r\n            \"ExpiryTime\": null,\r\n            \"RatingSubject\": null,\r\n            \"Categories\": null,\r\n            \"DestinationIds\": \"DST_+30xxxxxxxxxx\",\r\n            \"TimingIds\": null,\r\n            \"Weight\": 10,\r\n            \"SharedGroups\": null,\r\n            \"Blocker\": null,\r\n            \"Disabled\": null\r\n    }],\r\n    \"id\": 6\r\n}\r\n\r\n\r\n\r\n\r\n\r\n\r\n                    "
+							"raw": "{\r\n    \"method\": \"APIerSv1.SetBalance\",\r\n    \"params\": [\r\n        {\r\n            \"Tenant\": \"cgrates.org\",\r\n            \"Account\": \"+30xxxxxxxxx\",\r\n            \"BalanceType\": \"*voice\",\r\n            \"Value\": 1000000,\r\n            \"Balance\": {\r\n                \"UUID\": \"e8851469-f203-47d3-99c1-da30eb868e7a\",\r\n                \"ID\": \"BalanceID1\",\r\n                \"DestinationIds\": \"*any\",\r\n                \"Weight\": 10\r\n            },\r\n            \"ActionExtraData\": null,\r\n            \"Cdrlog\": true\r\n        }\r\n    ],\r\n    \"id\": 6\r\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/jsonrpc",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"jsonrpc"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "APIerSv1.SetBalances",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"method\": \"APIerSv1.SetBalances\",\r\n    \"params\": [\r\n        {\r\n            \"Tenant\": \"cgrates.org\",\r\n            \"Account\": \"+30xxxxxxxxx\",\r\n            \"Balances\": [\r\n                {\r\n                    \"BalanceType\": \"*voice\",\r\n                    \"Value\": 1000000,\r\n                    \"Balance\": {\r\n                        \"UUID\": \"07660bb4-bba3-4244-9c2d-36d2220fad60\",\r\n                        \"ID\": \"BalanceID1\",\r\n                        \"Weight\": 10\r\n                    },\r\n                    \"Cdrlog\": true\r\n                },\r\n                {\r\n                    \"Tenant\": \"cgrates.org\",\r\n                    \"Account\": \"+30xxxxxxxxx\",\r\n                    \"BalanceType\": \"*monetary\",\r\n                    \"Value\": 20,\r\n                    \"Balance\": {\r\n                        \"UUID\": \"d595f777-3f23-4143-bd8a-28f65e07cc61\",\r\n                        \"ID\": \"WALLET100\",\r\n                        \"ExpiryTime\": \"*unlimited\",\r\n                        \"Weight\": 10\r\n                    },\r\n                    \"Cdrlog\": true\r\n                }\r\n            ]\r\n        }\r\n    ],\r\n    \"id\": 6\r\n}"
 						},
 						"url": {
 							"raw": "{{base_url}}/jsonrpc",
@@ -1678,36 +1712,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"method\": \"APIerSv1.DebitBalance\",\n    \"params\": [{\n            \"Tenant\": \"cgrates.org\",\n            \"Account\": \"+30xxxxxxxxx\",\n            \"BalanceUuid\": \"e9c0a7f4-8904-481d-8b2d-a08d9a2b311c\",\n            \"BalanceId\": \"23456\",\n            \"BalanceType\": \"*monetary\",\n            \"Directions\": null,\n            \"Value\": 8,\n            \"ExpiryTime\": null,\n            \"RatingSubject\": null,\n            \"Categories\": null,\n            \"DestinationIds\": null,\n            \"TimingIds\": null,\n            \"Weight\": null,\n            \"SharedGroups\": null,\n            \"Overwrite\": false,\n            \"Blocker\": null,\n            \"Disabled\": null,\n            \"Cdrlog\": null,\n        \t\"ExtraData\": null\n        \t\t\n    }],\n    \"id\": 5\n}"
-						},
-						"url": {
-							"raw": "{{base_url}}/jsonrpc",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"jsonrpc"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "APIerSv1.SetBalance *Voice Incoming Calls",
-					"request": {
-						"auth": {
-							"type": "noauth"
-						},
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"method\": \"APIerSv1.SetBalance\",\n    \"params\": [{\n            \"Tenant\": \"cgrates.org\",\n            \"Account\": \"+30xxxxxxxxxx\",\n            \"BalanceType\": \"*voice\",\n            \"BalanceUUID\": null,\n            \"BalanceID\": \"9d867c57-31b4-407d-afc7-fb4dc359ae4\",\n            \"Directions\": \"*out\",\n            \"Value\": 600,\n            \"ExpiryTime\": null,\n            \"RatingSubject\": null,\n            \"Categories\": null,\n            \"DestinationIds\": null,\n            \"TimingIds\": null,\n            \"Weight\": null,\n            \"SharedGroups\": null,\n            \"Blocker\": null,\n            \"Disabled\": null\n    }],\n    \"id\": 28\n}\n"
+							"raw": "{\n    \"method\": \"APIerSv1.DebitBalance\",\n    \"params\": [\n        {\n            \"Tenant\": \"cgrates.org\",\n            \"Account\": \"+30xxxxxxxxx\",\n            \"BalanceType\": \"*monetary\",\n            \"Value\": 8,\n            \"Balance\": {\n                //\"UUID\": \"e9c0a7f4-8904-481d-8b2d-a08d9a2b311c\",\n                \"ID\":  \"WALLET100\",\n                \"ExpiryTime\": \"*unlimited\",\n                \"RatingSubject\": null,\n                \"Categories\": null,\n                \"DestinationIds\": null,\n                \"TimingIds\": null,\n                \"Weight\": 10,\n                \"SharedGroups\": null,\n                \"Blocker\": false,\n                \"Disabled\": false,\n                \"ExtraData\": null\n            },\n            \"ActionExtraData\":null,\n            \"Overwrite\":false,\n            \"Cdrlog\": true\n        }\n    ],\n    \"id\": 5\n}"
 						},
 						"url": {
 							"raw": "{{base_url}}/jsonrpc",
@@ -1736,7 +1741,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"method\": \"APIerSv1.RemoveBalances\",\r\n    \"params\": [{\r\n            \"Tenant\": \"cgrates.org\",\r\n            \"Account\": \"test\",\r\n            \"BalanceType\": \"*monetary\",\r\n            \"BalanceUUID\": \"914e1dc3-2e44-458d-9fb6-6365bdd9da3d\",\r\n            \"BalanceID\": \"WALLET100\",\r\n            \"Directions\": null,\r\n            \"Value\": 100,\r\n            \"ExpiryTime\": \"*unlimited\",\r\n            \"RatingSubject\": null,\r\n            \"Categories\": null,\r\n            \"DestinationIds\": \"test;test1\",\r\n            \"TimingIds\": \"*any\",\r\n            \"Weight\": 10,\r\n            \"SharedGroups\": null,\r\n            \"Blocker\": false,\r\n            \"Disabled\": false\r\n    }],\r\n    \"id\": 6\r\n}\r\n\r\n"
+							"raw": "{\r\n    \"method\": \"APIerSv1.RemoveBalances\",\r\n    \"params\": [{\r\n            \"Tenant\": \"cgrates.org\",\r\n            \"Account\": \"+30xxxxxxxxx\",\r\n            \"BalanceType\": \"*monetary\",\r\n            \"Balance\":{\r\n            //\"UUID\": \"914e1dc3-2e44-458d-9fb6-6365bdd9da3d\",\r\n            \"ID\": \"WALLET100\"\r\n            },\r\n            \"ActionExtraData\": null,\r\n            \"Cdrlog\": true\r\n    }],\r\n    \"id\": 6\r\n}\r\n\r\n"
 						},
 						"url": {
 							"raw": "{{base_url}}/jsonrpc",
@@ -1765,7 +1770,36 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"method\": \"APIerSv1.RemoveBalances\",\r\n    \"params\": [{\r\n            \"Tenant\": \"cgrates.org\",\r\n            \"Account\": \"+30xxxxxxxxx\",\r\n            \"BalanceType\": \"*voice\",\r\n            \"BalanceUUID\": null,\r\n            \"BalanceID\": null,\r\n            \"Directions\": null,\r\n            \"Value\": null,\r\n            \"ExpiryTime\": null,\r\n            \"RatingSubject\": null,\r\n            \"Categories\": null,\r\n            \"DestinationIds\": null,\r\n            \"TimingIds\": null,\r\n            \"Weight\": null,\r\n            \"SharedGroups\": null,\r\n            \"Blocker\": null,\r\n            \"Disabled\": null\r\n    }],\r\n    \"id\": 6\r\n}\r\n\r\n"
+							"raw": "{\r\n    \"method\": \"APIerSv1.RemoveBalances\",\r\n    \"params\": [\r\n        {\r\n            \"Tenant\": \"cgrates.org\",\r\n            \"Account\": \"+30xxxxxxxxx\",\r\n            \"BalanceType\": \"*voice\",\r\n            \"Balance\": {\r\n                //\"UUID\": \"914e1dc3-2e44-458d-9fb6-6365bdd9da3d\",\r\n                \"ID\": \"BalanceID1\"\r\n            },\r\n            \"ActionExtraData\": null,\r\n            \"Cdrlog\": true\r\n        }\r\n    ],\r\n    \"id\": 6\r\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/jsonrpc",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"jsonrpc"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "APIerSv1.TransferBalance",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"method\": \"APIerSv1.TransferBalance\",\r\n    \"params\": [\r\n        {\r\n            \"Tenant\": \"cgrates.org\",\r\n            \"SourceAccountID\": \"+30xxxxxxxxx\",\r\n            \"SourceBalanceID\": \"WALLET100\",\r\n            \"DestinationAccountID\": \"+30xxxxxxxxx2\",\r\n            \"DestinationBalanceID\": \"TF_BAL\",\r\n            \"Units\": 15,\r\n            \"Cdrlog\": true,\r\n            \"APIOpts\": null\r\n        }\r\n    ],\r\n    \"id\": 6\r\n}"
 						},
 						"url": {
 							"raw": "{{base_url}}/jsonrpc",
@@ -1779,8 +1813,7 @@
 					},
 					"response": []
 				}
-			],
-			"protocolProfileBehavior": {}
+			]
 		},
 		{
 			"name": "CDRs",
@@ -2162,8 +2195,7 @@
 					},
 					"response": []
 				}
-			],
-			"protocolProfileBehavior": {}
+			]
 		},
 		{
 			"name": "Destinations",
@@ -2358,9 +2390,7 @@
 							},
 							"response": []
 						}
-					],
-					"protocolProfileBehavior": {},
-					"_postman_isSubFolder": true
+					]
 				},
 				{
 					"name": "TP DestinationRates (NEW)",
@@ -2544,7 +2574,6 @@
 						{
 							"listen": "prerequest",
 							"script": {
-								"id": "ca5a193b-eb51-4062-9136-f817a36bcfed",
 								"type": "text/javascript",
 								"exec": [
 									""
@@ -2554,16 +2583,13 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "0555884a-5b75-42cd-ab61-fda1154101ae",
 								"type": "text/javascript",
 								"exec": [
 									""
 								]
 							}
 						}
-					],
-					"protocolProfileBehavior": {},
-					"_postman_isSubFolder": true
+					]
 				},
 				{
 					"name": "TP Rate (NEW)",
@@ -2680,9 +2706,7 @@
 							},
 							"response": []
 						}
-					],
-					"protocolProfileBehavior": {},
-					"_postman_isSubFolder": true
+					]
 				},
 				{
 					"name": "APIerSv1.SetDestination",
@@ -2728,7 +2752,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"id\": 6,\n    \"method\": \"APIerSv1.GetDestination\",\n    \"params\": [\n        \"FS_USERS3\"\n    ]\n}"
+							"raw": "{\n    \"id\": 6,\n    \"method\": \"APIerSv1.GetDestination\",\n    \"params\": [\n        \"test\"\n    ]\n}"
 						},
 						"url": {
 							"raw": "{{base_url}}/jsonrpc",
@@ -2757,7 +2781,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"id\": 6,\n    \"method\": \"APIerSv2.GetDestination\",\n    \"params\": {\n        \"DestinationIDs\": \"GR_LANDLINE\"\n    }\n}"
+							"raw": "{\n    \"id\": 6,\n    \"method\": \"APIerSv2.GetDestinations\",\n    \"params\": [\n     {   \"DestinationIDs\": [\"GR_LANDLINE\"]}\n    ]\n}"
 						},
 						"url": {
 							"raw": "{{base_url}}/jsonrpc",
@@ -2916,8 +2940,7 @@
 					},
 					"response": []
 				}
-			],
-			"protocolProfileBehavior": {}
+			]
 		},
 		{
 			"name": "RatingPlan",
@@ -3037,9 +3060,7 @@
 							},
 							"response": []
 						}
-					],
-					"protocolProfileBehavior": {},
-					"_postman_isSubFolder": true
+					]
 				},
 				{
 					"name": "APIerSv1.LoadRatingPlan",
@@ -3085,7 +3106,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"id\": \"0\",\n    \"method\": \"APIerSv1.GetRatingPlan\",\n    \"params\": [\n        \"RatingPlan_CLI_VL_INTERNAL_INBOUND_CALLS_GR_MOBILE\"\n    ]\n}"
+							"raw": "{\n    \"id\": \"0\",\n    \"method\": \"APIerSv1.GetRatingPlan\",\n    \"params\": [\n        \"TP_RP_RETAIL_GR_LANDLINE_2019_01\"\n    ]\n}"
 						},
 						"url": {
 							"raw": "{{base_url}}/jsonrpc",
@@ -3099,8 +3120,7 @@
 					},
 					"response": []
 				}
-			],
-			"protocolProfileBehavior": {}
+			]
 		},
 		{
 			"name": "RatingProfile",
@@ -3276,9 +3296,7 @@
 							},
 							"response": []
 						}
-					],
-					"protocolProfileBehavior": {},
-					"_postman_isSubFolder": true
+					]
 				},
 				{
 					"name": "APIerSv1.GetRatingProfile",
@@ -3490,8 +3508,7 @@
 					},
 					"response": []
 				}
-			],
-			"protocolProfileBehavior": {}
+			]
 		},
 		{
 			"name": "Filters",
@@ -3931,8 +3948,7 @@
 					},
 					"response": []
 				}
-			],
-			"protocolProfileBehavior": {}
+			]
 		},
 		{
 			"name": "ResourceProfile",
@@ -4089,8 +4105,7 @@
 					},
 					"response": []
 				}
-			],
-			"protocolProfileBehavior": {}
+			]
 		},
 		{
 			"name": "Resource",
@@ -4185,9 +4200,7 @@
 							},
 							"response": []
 						}
-					],
-					"protocolProfileBehavior": {},
-					"_postman_isSubFolder": true
+					]
 				},
 				{
 					"name": "APIerSv1.SetResourceProfile",
@@ -4333,9 +4346,37 @@
 						}
 					},
 					"response": []
+				},
+				{
+					"name": "ResourceSv1.AuthorizeResources",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"method\": \"ResourceSv1.AuthorizeResources\",\n  \"params\": [\n    {\n      \"Tenant\": \"cgrates.org\",\n      \"ID\": \"114a0d61-fbe8-41dc-a6f2-8f0c081c0c58\",\n      \"Time\": null,\n      \"Event\": {\n        \"Account\": \"+30xxxxxxxxx\",\n        \"Authorize_no_such_user_limit\": \"20\",\n        \"Authorize_wrong_password_limit\": \"20\",\n        \"Block_Incoming_Calls\": \"0\",\n        \"CGRID\": \"b6a38f4df90c810cfd86445a490994e1357c7d9c\",\n        \"Category\": \"call\",\n        \"Country\": \"Greece\",\n        \"Destination\": \"+30xxxxxxxxxx\",\n        \"Forwarding_Service\": \"0\",\n        \"Hide_CLI\": \"0\",\n        \"MaxCallsPerSecond\": \"1\",\n        \"MaxSessionTime\": \"3600\",\n        \"MaxSessions\": \"5\",\n        \"Max_Incoming_Sessions\": \"5\",\n        \"Max_Outgoing_Sessions\": \"5\",\n        \"OriginID\": \"313536313034313339303536343939-j1rxhvkxpv7i_user_183964\",\n        \"Region\": \"Europe\",\n        \"RequestType\": \"*prepaid\",\n        \"SetupTime\": \"1561041392\",\n        \"SipPassword\": \"|!xB8H7]}ych&XMY\",\n        \"SipUserName\": \"+30xxxxxxxxx\",\n        \"Tenant\": \"cgrates.org\",\n        \"Usage\": 10800000000000,\n        \"User-Agent\": \"snomD120/10.1.33.33\",\n        \"User-Agent-IP\": \"1.1.1.1\",\n        \"Voicemail_Service\": \"0\"\n      },\n      \"UsageID\": \"313536313034313339303536343939-j1rxhvkxpv7i_user_183964\",\n      \"UsageTTL\": null,\n      \"Units\": 1\n    }\n  ],\n  \"id\": 3\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/jsonrpc",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"jsonrpc"
+							]
+						}
+					},
+					"response": []
 				}
-			],
-			"protocolProfileBehavior": {}
+			]
 		},
 		{
 			"name": "Stats",
@@ -4601,521 +4642,7 @@
 					},
 					"response": []
 				}
-			],
-			"protocolProfileBehavior": {}
-		},
-		{
-			"name": "Suppliers",
-			"item": [
-				{
-					"name": "TP Suppliers",
-					"item": [
-						{
-							"name": "APIerSv1.SetTPSupplierProfile",
-							"request": {
-								"auth": {
-									"type": "noauth"
-								},
-								"method": "POST",
-								"header": [
-									{
-										"key": "Content-Type",
-										"value": "application/json"
-									}
-								],
-								"body": {
-									"mode": "raw",
-									"raw": "{\n    \"method\": \"APIerSv1.SetTPSupplierProfile\",\n    \"params\": [\n        {\n            \"TPid\": \"TP_SPL_OTE_2\",\n            \"Tenant\": \"cgrates.org\",\n            \"ID\": \"SPL_OTE_2\",\n            \"FilterIDs\": [],\n            \"ActivationInterval\": {\n                \"ActivationTime\": \"2014-07-14T14:25:00Z\",\n                \"ExpiryTime\": \"0001-01-01T00:00:00Z\"\n            },\n            \"Sorting\": \"*weight\",\n            \"SortingParameters\": [\n                \"\"\n            ],\n            \"Suppliers\": [\n                {\n                    \"ID\": \"SUPPLIER_ID_TEST1\",\n                    \"FilterIDs\": [],\n                    \"AccountIDs\": [\n                        \"+30xxxxxxxxxx\",\n                        \"+30xxxxxxxxx\"\n                    ],\n                    \"RatingPlanIDs\": [\n                        \"RP_TWT\"\n                    ],\n                    \"ResourceIDs\": [\n                        \"RSPROF_+30xxxxxxxxxx\"\n                    ],\n                    \"StatIDs\": [\n                        \"\"\n                    ],\n                    \"Weight\": 10,\n                    \"Blocker\": false,\n                    \"SupplierParameters\": \"\"\n                }\n            ],\n            \"Weight\": 10\n        }\n    ]\n}"
-								},
-								"url": {
-									"raw": "{{base_url}}/jsonrpc",
-									"host": [
-										"{{base_url}}"
-									],
-									"path": [
-										"jsonrpc"
-									]
-								}
-							},
-							"response": []
-						},
-						{
-							"name": "APIerSv1.GetTPSupplierProfile",
-							"request": {
-								"auth": {
-									"type": "noauth"
-								},
-								"method": "POST",
-								"header": [
-									{
-										"key": "Content-Type",
-										"value": "application/json"
-									}
-								],
-								"body": {
-									"mode": "raw",
-									"raw": "{\n    \"method\": \"APIerSv1.GetTPSupplierProfile\",\n    \"params\": [\n        {\n            \"TPid\": \"TP_SPL_OTE_2\",\n            \"Tenant\": \"cgrates.org\",\n            \"ID\": \"SPL_OTE_2\",\n            \"Weight\": 10\n        }\n    ]\n}"
-								},
-								"url": {
-									"raw": "{{base_url}}/jsonrpc",
-									"host": [
-										"{{base_url}}"
-									],
-									"path": [
-										"jsonrpc"
-									]
-								}
-							},
-							"response": []
-						},
-						{
-							"name": "APIerSv1.GetTPSupplierProfileIDs",
-							"request": {
-								"auth": {
-									"type": "noauth"
-								},
-								"method": "POST",
-								"header": [
-									{
-										"key": "Content-Type",
-										"value": "application/json"
-									}
-								],
-								"body": {
-									"mode": "raw",
-									"raw": "{\n    \"method\": \"APIerSv1.GetTPSupplierProfileIDs\",\n    \"params\": [\n        {\n            \"Tenant\": \"cgrates.org\",\n            \"TPid\": \"TP_SPL_OTE_2\"\n        }\n    ],\n    \"id\": 12\n}"
-								},
-								"url": {
-									"raw": "{{base_url}}/jsonrpc",
-									"host": [
-										"{{base_url}}"
-									],
-									"path": [
-										"jsonrpc"
-									]
-								}
-							},
-							"response": []
-						},
-						{
-							"name": "APIerSv1.RemoveTPSupplierProfile",
-							"request": {
-								"auth": {
-									"type": "noauth"
-								},
-								"method": "POST",
-								"header": [
-									{
-										"key": "Content-Type",
-										"value": "application/json"
-									}
-								],
-								"body": {
-									"mode": "raw",
-									"raw": "{\n    \"method\": \"APIerSv1.RemoveTPSupplierProfile\",\n    \"params\": [\n        {\n            \"TPid\": \"TP_SPL_OTE_2\",\n            \"Tenant\": \"cgrates.org\",\n            \"ID\": \"SPL_OTE_2\",\n            \"Weight\": 10\n        }\n    ]\n}"
-								},
-								"url": {
-									"raw": "{{base_url}}/jsonrpc",
-									"host": [
-										"{{base_url}}"
-									],
-									"path": [
-										"jsonrpc"
-									]
-								}
-							},
-							"response": []
-						}
-					],
-					"protocolProfileBehavior": {},
-					"_postman_isSubFolder": true
-				},
-				{
-					"name": "APIerSv1.SetSupplierProfile *weight",
-					"request": {
-						"auth": {
-							"type": "noauth"
-						},
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"method\": \"APIerSv1.SetSupplierProfile\",\n    \"params\": [\n        {\n            \"Tenant\": \"cgrates.org\",\n            \"ID\": \"SPL_TEST_1_WEIGHT\",\n            \"FilterIDs\": null,\n            \"ActivationInterval\": {\n                \"ActivationTime\": \"2014-07-14T14:25:00Z\",\n                \"ExpiryTime\": \"0001-01-01T00:00:00Z\"\n            },\n            \"Sorting\": \"*weight\",\n            \"SortingParameters\": [\n                \"\"\n            ],\n            \"Suppliers\": [\n                {\n                    \"ID\": \"SUPPLIER_ID_TEST1\",\n                    \"FilterIDs\": [],\n                    \"AccountIDs\": [\n                        \"+30xxxxxxxxxx\",\n                        \"+30xxxxxxxxx\"\n                    ],\n                    \"RatingPlanIDs\": [\n                        \"RP_TWT\"\n                    ],\n                    \"ResourceIDs\": [\n                        \"RSPROF_+30xxxxxxxxxx\"\n                    ],\n                    \"StatIDs\": [\n                        \"STATS_+30xxxxxxxxxx\"\n                    ],\n                    \"Weight\": 10,\n                    \"Blocker\": false,\n                    \"SupplierParameters\": \"SUPPLIER_PARAM_1\"\n                }\n            ],\n            \"Weight\": 10\n        }\n    ]\n}"
-						},
-						"url": {
-							"raw": "{{base_url}}/jsonrpc",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"jsonrpc"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "APIerSv1.SetSupplierProfile least cost",
-					"request": {
-						"auth": {
-							"type": "noauth"
-						},
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"method\": \"APIerSv1.SetSupplierProfile\",\n    \"params\": [\n        {\n            \"Tenant\": \"cgrates.org\",\n            \"ID\": \"SPL_TEST_1_LEAST_COST\",\n            \"FilterIDs\": null,\n            \"ActivationInterval\": {\n                \"ActivationTime\": \"2014-07-14T14:25:00Z\",\n                \"ExpiryTime\": \"0001-01-01T00:00:00Z\"\n            },\n            \"Sorting\": \"*lc\",\n            \"SortingParameters\": [\n                \"\"\n            ],\n            \"Suppliers\": [\n                {\n                    \"ID\": \"SUPPLIER_ID_TEST1\",\n                    \"FilterIDs\": [],\n                    \"AccountIDs\": [\n                        \"+30xxxxxxxxxx\",\n                        \"+30xxxxxxxxx\"\n                    ],\n                    \"RatingPlanIDs\": [\n                        \"RP_1002_LOW\"\n                    ],\n                    \"ResourceIDs\": [\n                        \"RSPROF_+30xxxxxxxxxx\"\n                    ],\n                    \"StatIDs\": [\n                        \"STATS_+30xxxxxxxxxx\"\n                    ],\n                    \"Weight\": 10,\n                    \"Blocker\": false,\n                    \"SupplierParameters\": \"SUPPLIER_PARAM_1\"\n                }\n            ],\n            \"Weight\": 10\n        }\n    ]\n}"
-						},
-						"url": {
-							"raw": "{{base_url}}/jsonrpc",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"jsonrpc"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "APIerSv1.SetSupplierProfile high cost",
-					"request": {
-						"auth": {
-							"type": "noauth"
-						},
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"method\": \"APIerSv1.SetSupplierProfile\",\n    \"params\": [\n        {\n            \"Tenant\": \"cgrates.org\",\n            \"ID\": \"SPL_TEST_1_HIGH_COST\",\n            \"FilterIDs\": null,\n            \"ActivationInterval\": {\n                \"ActivationTime\": \"2014-07-14T14:25:00Z\",\n                \"ExpiryTime\": \"0001-01-01T00:00:00Z\"\n            },\n            \"Sorting\": \"*hc\",\n            \"SortingParameters\": [\n                \"\"\n            ],\n            \"Suppliers\": [\n                {\n                    \"ID\": \"SUPPLIER_ID_TEST1\",\n                    \"FilterIDs\": [],\n                    \"AccountIDs\": [\n                        \"+30xxxxxxxxxx\",\n                        \"+30xxxxxxxxx\"\n                    ],\n                    \"RatingPlanIDs\": [\n                        \"RP_1002_LOW\"\n                    ],\n                    \"ResourceIDs\": [\n                        \"RSPROF_+30xxxxxxxxxx\"\n                    ],\n                    \"StatIDs\": [\n                        \"STATS_+30xxxxxxxxxx\"\n                    ],\n                    \"Weight\": 10,\n                    \"Blocker\": false,\n                    \"SupplierParameters\": \"SUPPLIER_PARAM_1\"\n                }\n            ],\n            \"Weight\": 10\n        }\n    ]\n}"
-						},
-						"url": {
-							"raw": "{{base_url}}/jsonrpc",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"jsonrpc"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "APIerSv1.SetSupplierProfile *weight SPL_GR_WEIGHT_1",
-					"request": {
-						"auth": {
-							"type": "noauth"
-						},
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"method\": \"APIerSv1.SetSupplierProfile\",\n    \"params\": [\n        {\n            \"Tenant\": \"cgrates.org\",\n            \"ID\": \"SPL_GR_WEIGHT_1\",\n            \"FilterIDs\": [\n                \"FLTR_NOT_INTERNAL\"\n            ],\n            \"ActivationInterval\": {\n                \"ActivationTime\": \"2014-07-14T14:25:00Z\",\n                \"ExpiryTime\": \"0001-01-01T00:00:00Z\"\n            },\n            \"Sorting\": \"*weight\",\n            \"SortingParameters\": [\n                \"\"\n            ],\n            \"Suppliers\": [\n                {\n                    \"ID\": \"SPL_ID_01\",\n                    \"FilterIDs\": [],\n                    \"AccountIDs\": null,\n                    \"RatingPlanIDs\": [\n                        \"TP_RP_SPL_TESTSUPPLIER1_DST_ID_RT_GR_LANDLINE_2019_01\"\n                    ],\n                    \"ResourceIDs\": null,\n                    \"StatIDs\": null,\n                    \"Weight\": 10,\n                    \"Blocker\": false,\n                    \"SupplierParameters\": \"SPL_PARAM_X\"\n                },\n                {\n                    \"ID\": \"SPL_ID_02\",\n                    \"FilterIDs\": [],\n                    \"AccountIDs\": null,\n                    \"RatingPlanIDs\": [],\n                    \"ResourceIDs\": null,\n                    \"StatIDs\": null,\n                    \"Weight\": 20,\n                    \"Blocker\": false,\n                    \"SupplierParameters\": \"SPL_PARAM_X\"\n                }\n            ],\n            \"Weight\": 10\n        }\n    ]\n}"
-						},
-						"url": {
-							"raw": "{{base_url}}/jsonrpc",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"jsonrpc"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "APIerSv1.SetSupplierProfile SPL_TESTSUPPLIER1_GR",
-					"request": {
-						"auth": {
-							"type": "noauth"
-						},
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"method\": \"APIerSv1.SetSupplierProfile\",\n    \"params\": [\n        {\n            \"Tenant\": \"cgrates.org\",\n            \"ID\": \"SPL_GR_WEIGHT_1\",\n            \"FilterIDs\": [\n                \"FLTR_NOT_INTERNAL\"\n            ],\n            \"ActivationInterval\": {\n                \"ActivationTime\": \"2014-07-14T14:25:00Z\",\n                \"ExpiryTime\": \"0001-01-01T00:00:00Z\"\n            },\n            \"Sorting\": \"*qos\",\n            \"SortingParameters\": [\n                \"*tcd\"\n            ],\n            \"Suppliers\": [\n                {\n                    \"ID\": \"SPL_ID_01\",\n                    \"FilterIDs\": [],\n                    \"AccountIDs\": null,\n                    \"RatingPlanIDs\": [\n                        \"TP_RP_SPL_TESTSUPPLIER1_DST_ID_RT_GR_LANDLINE_2019_01\"\n                    ],\n                    \"ResourceIDs\": null,\n                    \"StatIDs\": null,\n                    \"Weight\": 10,\n                    \"Blocker\": false,\n                    \"SupplierParameters\": \"SPL_PARAM_X\"\n                },\n                {\n                    \"ID\": \"SPL_ID_02\",\n                    \"FilterIDs\": [],\n                    \"AccountIDs\": null,\n                    \"RatingPlanIDs\": [\n                        \"TP_RP_SPL_TESTSUPPLIER1_DST_ID_RT_GR_LANDLINE_2019_01\"\n                    ],\n                    \"ResourceIDs\": null,\n                    \"StatIDs\": null,\n                    \"Weight\": 10,\n                    \"Blocker\": false,\n                    \"SupplierParameters\": \"SPL_PARAM_X\"\n                }\n            ],\n            \"Weight\": 10\n        }\n    ]\n}"
-						},
-						"url": {
-							"raw": "{{base_url}}/jsonrpc",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"jsonrpc"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "APIerSv1.SetSupplierProfile *weight SPL_VL_INTERNAL",
-					"request": {
-						"auth": {
-							"type": "noauth"
-						},
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"method\": \"APIerSv1.SetSupplierProfile\",\n    \"params\": [\n        {\n            \"Tenant\": \"cgrates.org\",\n            \"ID\": \"SPL_VL_INTERNAL\",\n            \"FilterIDs\": null,\n            \"ActivationInterval\": {\n                \"ActivationTime\": \"2014-07-14T14:25:00Z\",\n                \"ExpiryTime\": \"0001-01-01T00:00:00Z\"\n            },\n            \"Sorting\": \"*weight\",\n            \"SortingParameters\": [\n                \"\"\n            ],\n            \"Suppliers\": [\n                {\n                    \"ID\": \"SPL_VL_INTERNAL_IN\",\n                    \"FilterIDs\": [\n                        \"*string:~*req.Subject:INTERNAL-IN\",\n                        \"*string:~*req.Category:call-in\"\n                    ],\n                    \"AccountIDs\": [\n                        \"\"\n                    ],\n                    \"RatingPlanIDs\": [\n                        \"TP_RP_SPL_TEST_SUPPLIER_NAME_INTERNAL_DST_ID_RT_GR_LANDLINE_2019_01\"\n                    ],\n                    \"ResourceIDs\": null,\n                    \"StatIDs\": null,\n                    \"Weight\": 10,\n                    \"Blocker\": false,\n                    \"SupplierParameters\": \"999\"\n                },\n                {\n                    \"ID\": \"SPL_VL_INTERNAL_OUT\",\n                    \"FilterIDs\": [\n                        \"*string:~*req.Subject:INTERNAL-OUT\",\n                        \"*string:~*req.Category:call-out\"\n                    ],\n                    \"AccountIDs\": null,\n                    \"RatingPlanIDs\": [\n                        \"TP_RP_SPL_TEST_SUPPLIER_NAME_INTERNAL_DST_ID_RT_GR_LANDLINE_2019_01\"\n                    ],\n                    \"ResourceIDs\": null,\n                    \"StatIDs\": null,\n                    \"Weight\": 10,\n                    \"Blocker\": false,\n                    \"SupplierParameters\": \"999\"\n                }\n            ],\n            \"Weight\": 10\n        }\n    ]\n}"
-						},
-						"url": {
-							"raw": "{{base_url}}/jsonrpc",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"jsonrpc"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "APIerSv1.SetSupplierProfile *qos",
-					"request": {
-						"auth": {
-							"type": "noauth"
-						},
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"method\": \"APIerSv1.SetSupplierProfile\",\n    \"params\": [\n        {\n            \"Tenant\": \"cgrates.org\",\n            \"ID\": \"SPL_OTE_1_QOS\",\n            \"FilterIDs\": null,\n            \"ActivationInterval\": {\n                \"ActivationTime\": \"2014-07-14T14:25:00Z\",\n                \"ExpiryTime\": \"0001-01-01T00:00:00Z\"\n            },\n            \"Sorting\": \"*qos\",\n            \"SortingParameters\": [\n                \"*tcc\",\n                \"*tcd\",\n                \"*asr\",\n                \"*acc\"\n            ],\n            \"Suppliers\": [\n                {\n                    \"ID\": \"SUPPLIER_ID_TEST1\",\n                    \"FilterIDs\": [],\n                    \"AccountIDs\": [\n                        \"+30xxxxxxxxxx\",\n                        \"+30xxxxxxxxx\"\n                    ],\n                    \"RatingPlanIDs\": [\n                        \"RP_TWT\"\n                    ],\n                    \"ResourceIDs\": [\n                        \"RSPROF_+30xxxxxxxxxx\"\n                    ],\n                    \"StatIDs\": [\n                        \"STATS_+30xxxxxxxxxx\"\n                    ],\n                    \"Weight\": 10,\n                    \"Blocker\": false,\n                    \"SupplierParameters\": \"SUPPLIER_PARAM_1\"\n                }\n            ],\n            \"Weight\": 10\n        }\n    ]\n}"
-						},
-						"url": {
-							"raw": "{{base_url}}/jsonrpc",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"jsonrpc"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "APIerSv1.GetSupplierProfile",
-					"request": {
-						"auth": {
-							"type": "noauth"
-						},
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"method\": \"APIerSv1.GetSupplierProfile\",\n    \"params\": [\n        {\n            \"Tenant\": \"cgrates.org\",\n            \"ID\": \"SPL_GR_WEIGHT_1\"\n        }\n    ]\n}"
-						},
-						"url": {
-							"raw": "{{base_url}}/jsonrpc",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"jsonrpc"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "APIerSv1.GetSupplierProfile SPL_VL_INTERNAL",
-					"request": {
-						"auth": {
-							"type": "noauth"
-						},
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"method\": \"APIerSv1.GetSupplierProfile\",\n    \"params\": [\n        {\n            \"Tenant\": \"cgrates.org\",\n            \"ID\": \"SPL_VL_INTERNAL\"\n        }\n    ]\n}"
-						},
-						"url": {
-							"raw": "{{base_url}}/jsonrpc",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"jsonrpc"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "APIerSv1.RemoveSupplierProfile",
-					"request": {
-						"auth": {
-							"type": "noauth"
-						},
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"method\": \"APIerSv1.RemoveSupplierProfile\",\n    \"params\": [\n        {\n            \"Tenant\": \"cgrates.org\",\n            \"ID\": \"SPL_VL_INTERNAL\"\n        }\n    ]\n}"
-						},
-						"url": {
-							"raw": "{{base_url}}/jsonrpc",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"jsonrpc"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "APIerSv1.GetSupplierProfileIDs",
-					"request": {
-						"auth": {
-							"type": "noauth"
-						},
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"method\": \"APIerSv1.GetSupplierProfileIDs\",\n    \"params\": [\n        {\n            \"Tenant\": \"cgrates.org\"\n        }\n    ],\n    \"id\": 12\n}"
-						},
-						"url": {
-							"raw": "{{base_url}}/jsonrpc",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"jsonrpc"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "SupplierSv1.GetSuppliers",
-					"request": {
-						"auth": {
-							"type": "noauth"
-						},
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"name": "Content-Type",
-								"value": "application/json",
-								"type": "text"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"method\": \"SupplierSv1.GetSuppliers\",\n    \"params\": [\n        {\n            \"IgnoreErrors\": false,\n            \"MaxCost\": \"\",\n            \"Tenant\": \"cgrates.org\",\n            \"ID\": \"187e5f2c-6cd4-4796-a435-9ac37399b9b5\",\n            \"Time\": null,\n            \"Event\": {\n                \"Account\": \"+30xxxxxxxxx\",\n                \"Authorize_no_such_user_limit\": \"20\",\n                \"Authorize_wrong_password_limit\": \"20\",\n                \"Block_Incoming_Calls\": \"0\",\n                \"CGRID\": \"5401e8710ac20f53b04d176766a6aaf05a6832ac\",\n                \"Category\": \"call-out\",\n                \"Country\": \"Greece\",\n                \"Destination\": \"+30xxxxxxxxxx\",\n                \"Forwarding_Service\": \"0\",\n                \"Hide_CLI\": \"0\",\n                \"ID\": \"CHECK_USER_BALANCE_OUT\",\n                \"MaxCallsPerSecond\": \"1\",\n                \"MaxSessionTime\": \"3600\",\n                \"MaxSessions\": \"1\",\n                \"Max_Incoming_Sessions\": \"1\",\n                \"Max_Outgoing_Sessions\": \"1\",\n                \"OriginHost\": \"10.156.0.13\",\n                \"OriginID\": \"Customer_3135363430353432393438313132-2imxdoamy79xcgrates.org210096\",\n                \"Region\": \"Europe\",\n                \"RequestType\": \"*prepaid\",\n                \"ResourceAllocation\": \"ResGroup1\",\n                \"SetupTime\": \"1564054295\",\n                \"SipPassword\": \"Xu4fUxO<O570SU&O\",\n                \"SipUserName\": \"+30xxxxxxxxx\",\n                \"Source\": \"OpenSIPS-01\",\n                \"Subject\": \"INTERNAL-OUT\",\n                \"Usage\": 10800000000000,\n                \"User-Agent\": \"snomD120/10.1.33.33\",\n                \"User-Agent-IP\": \"84.254.47.110\",\n                \"Voicemail_Service\": \"0\"\n            },\n            \"Limit\": null,\n            \"Offset\": null\n        }\n    ],\n    \"id\": 80\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "{{base_url}}/jsonrpc",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"jsonrpc"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "SupplierSv1.GetSuppliers - INTERNAL-IN",
-					"request": {
-						"auth": {
-							"type": "noauth"
-						},
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"method\": \"SupplierSv1.GetSuppliers\",\n    \"params\": [\n        {\n            \"IgnoreErrors\": false,\n            \"MaxCost\": \"\",\n            \"Tenant\": \"cgrates.org\",\n            \"ID\": \"869285e7-20bb-4e8e-9a7b-0494571bc42e\",\n            \"Time\": null,\n            \"Event\": {\n                \"Account\": \"+30xxxxxxxxxx\",\n                \"CGRID\": \"ff20124937668825b012ee6857376ccc79d459c6\",\n                \"Category\": \"call-in\",\n                \"Destination\": \"+30xxxxxxxxx\",\n                \"OriginHost\": \"10.156.0.13\",\n                \"OriginID\": \"B2B.339.2997821.1561998075_user_888418\",\n                \"RequestType\": \"*prepaid\",\n                \"SetupTime\": \"1561998075\",\n                \"Source\": \"OpenSIPS-01\",\n                \"Subject\": \"INTERNAL-IN\",\n                \"Usage\": 10800000000000\n            },\n            \"Limit\": null,\n            \"Offset\": null\n        }\n    ],\n    \"id\": 136\n}"
-						},
-						"url": {
-							"raw": "{{base_url}}/jsonrpc",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"jsonrpc"
-							]
-						}
-					},
-					"response": []
-				}
-			],
-			"protocolProfileBehavior": {}
+			]
 		},
 		{
 			"name": "Actions",
@@ -5200,7 +4727,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"method\": \"APIerSv1.RemoveActions\",\n    \"params\": [\n        {\n            \"ActionIDs\": [\n                \"ACT_10050\",\n                \"ACT_100500\"\n            ]\n        }\n    ]\n}"
+							"raw": "{\n    \"method\": \"APIerSv1.RemoveActions\",\n    \"params\": [\n        {\n            \"ActionIDs\": [\n                \"ACT_TOPUP_RST_10\",\n                \"test1\"\n            ]\n        }\n    ]\n}"
 						},
 						"url": {
 							"raw": "{{base_url}}/jsonrpc",
@@ -5271,86 +4798,15 @@
 						}
 					},
 					"response": []
-				}
-			],
-			"protocolProfileBehavior": {}
-		},
-		{
-			"name": "ActionPlans",
-			"item": [
-				{
-					"name": "APIerSv1.SetActionPlan",
-					"request": {
-						"auth": {
-							"type": "noauth"
-						},
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"method\": \"APIerSv1.SetActionPlan\",\n    \"params\": [\n        {\n            \"Id\": \"ACP_10050\",\n            \"ReloadScheduler\": true,\n            \"ActionPlan\": [\n                {\n                    \"MonthDays\": \"*any\",\n                    \"Years\": \"*any\",\n                    \"WeekDays\": \"*any\",\n                    \"Time\": \"*asap\",\n                    \"ActionsId\": \"ACT_10050\",\n                    \"Weight\": 10,\n                    \"Months\": \"*any\"\n                }\n            ],\n            \"Overwrite\": true\n        }\n    ]\n}"
-						},
-						"url": {
-							"raw": "{{base_url}}/jsonrpc",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"jsonrpc"
-							]
-						}
-					},
-					"response": []
 				},
 				{
-					"name": "APIerSv1.RemoveActionPlan",
-					"request": {
-						"auth": {
-							"type": "noauth"
-						},
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"method\": \"APIerSv1.RemoveActionPlan\",\n    \"params\": [\n        {\n            \"ID\": \"ACP_10050\"\n        }\n    ]\n}"
-						},
-						"url": {
-							"raw": "{{base_url}}/jsonrpc",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"jsonrpc"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "APIerSv1.GetActionPlanIDs",
+					"name": "APIerSv1.ExecuteAction  (top up the balances)",
 					"request": {
 						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"name": "Content-Type",
-								"value": "application/json",
-								"type": "text"
-							}
-						],
+						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"method\": \"APIerSv1.GetActionPlanIDs\",\n    \"params\": [\n        {\n            \"Tenant\": \"cgrates.org\",\n            \"Limit\": null,\n            \"Offset\": null\n        }\n    ],\n    \"id\": 10\n}",
+							"raw": "{\n    \"method\": \"APIerSv1.ExecuteAction\",\n    \"params\": [\n        {\n            \"Tenant\": \"cgrates.org\",\n            \"Account\": \"+30xxxxxxxxx\",\n            \"ActionsId\": \"ACT_TOPUP_RST_10\"\n        }\n    ]\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -5369,8 +4825,7 @@
 					},
 					"response": []
 				}
-			],
-			"protocolProfileBehavior": {}
+			]
 		},
 		{
 			"name": "Thresholds",
@@ -5578,8 +5033,7 @@
 					},
 					"response": []
 				}
-			],
-			"protocolProfileBehavior": {}
+			]
 		},
 		{
 			"name": "Chargers",
@@ -5599,7 +5053,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"method\": \"APIerSv1.GetChargerProfile\",\n    \"params\": [\n        {\n            \"Tenant\": \"cgrates.org\",\n            \"ID\": \"SPL_TEST_SUPPLIER_NAME_In\"\n        }\n    ]\n}"
+							"raw": "{\n    \"method\": \"APIerSv1.GetChargerProfile\",\n    \"params\": [\n        {\n            \"Tenant\": \"cgrates.org\",\n            \"ID\": \"SupplierCharges\"\n        }\n    ]\n}"
 						},
 						"url": {
 							"raw": "{{base_url}}/jsonrpc",
@@ -5657,7 +5111,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"method\": \"APIerSv1.SetChargerProfile\",\n    \"params\": [\n        {\n            \"Tenant\": \"cgrates.org\",\n            \"ID\": \"CustomerCharges\",\n            \"FilterIDs\": null,\n            \"ActivationInterval\": null,\n            \"RunID\": \"CustomerCharges\",\n            \"AttributeIDs\": [\n                \"*none\"\n            ],\n            \"Weight\": 0\n        }\n    ]\n}"
+							"raw": "{\n    \"method\": \"APIerSv1.SetChargerProfile\",\n    \"params\": [\n        {\n            \"Tenant\": \"cgrates.org\",\n            \"ID\": \"CustomerCharges\",\n            \"FilterIDs\": null,\n            \"ActivationInterval\": null,\n            \"RunID\": \"CustomerCharges\",\n            \"AttributeIDs\": [\n                \"*none\"\n            ],\n            \"Weight\": 0,\n            \"APIOpts\": {}\n        }\n    ]\n}"
 						},
 						"url": {
 							"raw": "{{base_url}}/jsonrpc",
@@ -5686,7 +5140,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"method\": \"APIerSv1.SetChargerProfile\",\n    \"params\": [\n        {\n            \"Tenant\": \"cgrates.org\",\n            \"ID\": \"SPL_TESTSUPPLIER1_In\",\n            \"FilterIDs\": [],\n            \"ActivationInterval\": null,\n            \"RunID\": \"SPL_TESTSUPPLIER1_In\",\n            \"AttributeIDs\": [\n                \"ATTR_SPL_TESTSUPPLIER1_In\"\n            ],\n            \"Weight\": 0\n        }\n    ]\n}"
+							"raw": "{\n    \"method\": \"APIerSv1.SetChargerProfile\",\n    \"params\": [\n        {\n            \"Tenant\": \"cgrates.org\",\n            \"ID\": \"SPL_TESTSUPPLIER1_In\",\n            \"FilterIDs\": [],\n            \"ActivationInterval\": null,\n            \"RunID\": \"SPL_TESTSUPPLIER1_In\",\n            \"AttributeIDs\": [\n                \"ATTR_SPL_TESTSUPPLIER1_In\"\n            ],\n            \"Weight\": 0,\n             \"APIOpts\": {}\n        }\n    ]\n}"
 						},
 						"url": {
 							"raw": "{{base_url}}/jsonrpc",
@@ -5717,7 +5171,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"method\": \"APIerSv1.SetChargerProfile\",\n    \"params\": [\n        {\n            \"Tenant\": \"cgrates.org\",\n            \"ID\": \"SPL_TESTSUPPLIER1_Out\",\n            \"FilterIDs\": [\n                \"FLTR_NOT_INTERNAL\"\n            ],\n            \"ActivationInterval\": null,\n            \"RunID\": \"SPL_TESTSUPPLIER1_Out\",\n            \"AttributeIDs\": [\n                \"ATTR_SPL_TESTSUPPLIER1_Out\"\n            ],\n            \"Weight\": 0\n        }\n    ]\n}",
+							"raw": "{\n    \"method\": \"APIerSv1.SetChargerProfile\",\n    \"params\": [\n        {\n            \"Tenant\": \"cgrates.org\",\n            \"ID\": \"SPL_TESTSUPPLIER1_Out\",\n            \"FilterIDs\": [\n                \"FLTR_NOT_INTERNAL\"\n            ],\n            \"ActivationInterval\": null,\n            \"RunID\": \"SPL_TESTSUPPLIER1_Out\",\n            \"AttributeIDs\": [\n                \"ATTR_SPL_TESTSUPPLIER1_Out\"\n            ],\n            \"Weight\": 0,\n        \"APIOpts\": {}\n        }\n    ]\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -5822,9 +5276,37 @@
 						}
 					},
 					"response": []
+				},
+				{
+					"name": "ChargerSv1.GetChargersForEvent",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"method\": \"ChargerSv1.GetChargersForEvent\",\n    \"params\": [\n        {\n            \"Tenant\": \"cgrates.org\",\n            \"ID\": \"85bf4e1\",\n            \"Time\": null,\n            \"Event\": {\n                \"Account\": \"+30xxxxxxxxx\",\n                \"Authorize_no_such_user_limit\": \"20\",\n                \"Authorize_wrong_password_limit\": \"20\",\n                \"Block_Incoming_Calls\": \"0\",\n                \"CGRID\": \"3a6bb7df0f9c31959b447c865dc3d9ea74b559d8\",\n                \"Category\": \"call\",\n                \"Country\": \"Greece\",\n                \"Destination\": \"+30xxxxxxxxxx\",\n                \"Forwarding_Service\": \"0\",\n                \"Hide_CLI\": \"0\",\n                \"MaxCallsPerSecond\": \"1\",\n                \"MaxSessionTime\": \"3600\",\n                \"MaxSessions\": \"5\",\n                \"Max_Incoming_Sessions\": \"5\",\n                \"Max_Outgoing_Sessions\": \"5\",\n                \"OriginHost\": \"10.156.0.13\",\n                \"OriginID\": \"313536313130323331313531373435-11zx3su0dxng_user_860952\",\n                \"Region\": \"Europe\",\n                \"RequestType\": \"*prepaid\",\n                \"SetupTime\": \"1561102312\",\n                \"SipPassword\": \"|!xB8H7]}ych&XMY\",\n                \"SipUserName\": \"+30xxxxxxxxx\",\n                \"Source\": \"OpenSIPS-01\",\n                \"Tenant\": \"cgrates.org\",\n                \"Usage\": 10800000000000,\n                \"User-Agent\": \"snomD120/10.1.33.33\",\n                \"User-Agent-IP\": \"1.1.1.1\",\n                \"Voicemail_Service\": \"0\"\n            }\n        }\n    ],\n    \"id\": 286\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/jsonrpc",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"jsonrpc"
+							]
+						}
+					},
+					"response": []
 				}
-			],
-			"protocolProfileBehavior": {}
+			]
 		},
 		{
 			"name": "RaLs",
@@ -5889,9 +5371,95 @@
 						}
 					},
 					"response": []
+				},
+				{
+					"name": "Responder.Debit",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"method\": \"Responder.Debit\",\n    \"params\": [{\n            \"Direction\": \"*out\",\n            \"Category\": \"\",\n            \"Tenant\": \"cgrates.org\",\n            \"Subject\": \"\",\n            \"Account\": \"+30xxxxxxxxxx\",\n            \"Destination\": \"\",\n            \"TimeStart\": \"0001-01-01T00:00:00Z\",\n            \"TimeEnd\": \"0001-01-01T00:00:00Z\",\n            \"LoopIndex\": 0,\n            \"DurationIndex\": 0,\n            \"FallbackSubject\": \"\",\n            \"RatingInfos\": null,\n            \"Increments\": null,\n            \"ToR\": \"\",\n            \"ExtraFields\": null,\n            \"MaxRate\": 0,\n            \"MaxRateUnit\": 0,\n            \"MaxCostSoFar\": 0,\n            \"CgrID\": \"\",\n            \"RunID\": \"\",\n            \"ForceDuration\": false,\n            \"PerformRounding\": false,\n            \"DryRun\": false,\n            \"DenyNegativeAccount\": false\n    }],\n    \"id\": 16\n}\n"
+						},
+						"url": {
+							"raw": "{{base_url}}/jsonrpc",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"jsonrpc"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Responder.MaxDebit",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"method\": \"Responder.MaxDebit\",\n  \"params\": [\n    {\n      \"Category\": \"call\",\n      \"Tenant\": \"cgrates.org\",\n      \"Subject\": \"+30xxxxxxxxx\",\n      \"Account\": \"+30xxxxxxxxx\",\n      \"Destination\": \"+30xxxxxxxxxx\",\n      \"TimeStart\": \"2019-06-20T14:08:42Z\",\n      \"TimeEnd\": \"2019-06-20T14:08:52Z\",\n      \"LoopIndex\": 0,\n      \"DurationIndex\": 10000000000,\n      \"FallbackSubject\": \"\",\n      \"RatingInfos\": null,\n      \"Increments\": null,\n      \"ToR\": \"\",\n      \"ExtraFields\": null,\n      \"MaxRate\": 0,\n      \"MaxRateUnit\": 0,\n      \"MaxCostSoFar\": 0,\n      \"CgrID\": \"f10b93ecdb35da33e539cc5274ff4c228d25617c\",\n      \"RunID\": \"*default\",\n      \"ForceDuration\": false,\n      \"PerformRounding\": false,\n      \"DryRun\": false,\n      \"DenyNegativeAccount\": false\n    }\n  ],\n  \"id\": 220\n}\n"
+						},
+						"url": {
+							"raw": "{{base_url}}/jsonrpc",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"jsonrpc"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Responder.GetMaxSessionTime",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"method\": \"Responder.GetMaxSessionTime\",\n  \"params\": [\n    {\n      \"Category\": \"call\",\n      \"Tenant\": \"cgrates.org\",\n      \"Subject\": \"+30xxxxxxxxx\",\n      \"Account\": \"+30xxxxxxxxx\",\n      \"Destination\": \"+30xxxxxxxxxx\",\n      \"TimeStart\": \"2019-06-20T14:36:32Z\",\n      \"TimeEnd\": \"2019-06-20T17:36:32Z\",\n      \"LoopIndex\": 0,\n      \"DurationIndex\": 0,\n      \"FallbackSubject\": \"\",\n      \"RatingInfos\": null,\n      \"Increments\": null,\n      \"ToR\": \"\",\n      \"ExtraFields\": {\n        \"Authorize_no_such_user_limit\": \"20\",\n        \"Authorize_wrong_password_limit\": \"20\",\n        \"Block_Incoming_Calls\": \"0\",\n        \"Country\": \"Greece\",\n        \"Forwarding_Service\": \"0\",\n        \"Hide_CLI\": \"0\",\n        \"MaxCallsPerSecond\": \"1\",\n        \"MaxSessionTime\": \"3600\",\n        \"MaxSessions\": \"5\",\n        \"Max_Incoming_Sessions\": \"5\",\n        \"Max_Outgoing_Sessions\": \"5\",\n        \"Region\": \"Europe\",\n        \"SipPassword\": \"|!xB8H7]}ych&XMY\",\n        \"SipUserName\": \"+30xxxxxxxxx\",\n        \"User-Agent\": \"snomD120/10.1.33.33\",\n        \"User-Agent-IP\": \"1.1.1.1\",\n        \"Voicemail_Service\": \"0\"\n      },\n      \"MaxRate\": 0,\n      \"MaxRateUnit\": 0,\n      \"MaxCostSoFar\": 0,\n      \"CgrID\": \"b6a38f4df90c810cfd86445a490994e1357c7d9c\",\n      \"RunID\": \"*default\",\n      \"ForceDuration\": false,\n      \"PerformRounding\": false,\n      \"DryRun\": false,\n      \"DenyNegativeAccount\": false\n    }\n  ],\n  \"id\": 235\n}\n"
+						},
+						"url": {
+							"raw": "{{base_url}}/jsonrpc",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"jsonrpc"
+							]
+						}
+					},
+					"response": []
 				}
-			],
-			"protocolProfileBehavior": {}
+			]
 		},
 		{
 			"name": "Responder",
@@ -5983,8 +5551,7 @@
 					},
 					"response": []
 				}
-			],
-			"protocolProfileBehavior": {}
+			]
 		},
 		{
 			"name": "SessionSv1",
@@ -6055,6 +5622,32 @@
 					"response": []
 				},
 				{
+					"name": "SessionSv1.TerminateSession",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"method\": \"SessionSv1.TerminateSession\",\n    \"params\": [\n        {\n            \"TerminateSession\": true,\n            \"ForceDuration\": false,\n            \"ReleaseResources\": true,\n            \"ProcessThresholds\": true,\n            \"ProcessStats\": true,\n            \"ThresholdIDs\": null,\n            \"StatIDs\": null,\n            \"Tenant\": \"cgrates.org\",\n            \"ID\": \"8c8dc27\",\n            \"Time\": \"2024-02-07T13:01:51.388+01:00\",\n            \"Event\": {\n                \"Account\": \"1001\",\n                \"AnswerTime\": \"2024-02-07T13:01:53.668+0100\",\n                \"Destination\": \"1002\",\n                \"DisconnectCause\": \"Normal Clearing\",\n                \"EventName\": \"SMA_SESSION_TERMINATE\",\n                \"OriginHost\": \"127.0.0.1\",\n                \"OriginID\": \"1707307311.6\",\n                \"RequestType\": \"*prepaid\",\n                \"SetupTime\": \"2024-02-07T13:01:51.385+0100\",\n                \"Source\": \"AsteriskAgent\",\n                \"Usage\": \"6.056s\",\n                \"cgr_flags\": \"*accounts+*attributes+*resources+*stats+*routes+*thresholds\",\n                \"cgr_routes\": \"supplier1\"\n            },\n            \"APIOpts\": {}\n        }\n    ],\n    \"id\": 3\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/jsonrpc",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"jsonrpc"
+							]
+						}
+					},
+					"response": []
+				},
+				{
 					"name": "SessionSv1.AuthorizeEventWithDigest",
 					"request": {
 						"auth": {
@@ -6089,9 +5682,164 @@
 						}
 					},
 					"response": []
+				},
+				{
+					"name": "SessionSv1.ProcessCDR",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"method\": \"SessionSv1.ProcessCDR\",\n    \"params\": [\n        {\n            \"Tenant\": \"cgrates.org\",\n            \"ID\": \"8c8dc27\",\n            \"Time\": \"2024-02-07T13:01:51.388+01:00\",\n            \"Event\": {\n                \"Account\": \"1001\",\n                \"AnswerTime\": \"2024-02-07T13:01:53.668+0100\",\n                \"Destination\": \"1002\",\n                \"DisconnectCause\": \"Normal Clearing\",\n                \"EventName\": \"SMA_SESSION_TERMINATE\",\n                \"OriginHost\": \"127.0.0.1\",\n                \"OriginID\": \"1707307311.6\",\n                \"RequestType\": \"*prepaid\",\n                \"SetupTime\": \"2024-02-07T13:01:51.385+0100\",\n                \"Source\": \"AsteriskAgent\",\n                \"Usage\": \"6.056s\",\n                \"cgr_flags\": \"*accounts+*attributes+*resources+*stats+*routes+*thresholds\",\n                \"cgr_routes\": \"supplier1\"\n            },\n            \"APIOpts\": {}\n        }\n    ],\n    \"id\": 4\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/jsonrpc",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"jsonrpc"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Responder.GetMaxSessionTime",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"method\": \"Responder.GetMaxSessionTime\",\n    \"params\": [\n        {\n            \"Category\": \"call\",\n            \"Tenant\": \"cgrates.org\",\n            \"Subject\": \"1001\",\n            \"Account\": \"1001\",\n            \"Destination\": \"1002\",\n            \"TimeStart\": \"2024-02-07T13:01:51.385+01:00\",\n            \"TimeEnd\": \"2024-02-07T16:01:51.385+01:00\",\n            \"LoopIndex\": 0,\n            \"DurationIndex\": 0,\n            \"FallbackSubject\": \"\",\n            \"RatingInfos\": null,\n            \"Increments\": null,\n            \"ToR\": \"\",\n            \"ExtraFields\": {\n                \"EventName\": \"SMA_AUTHORIZATION\",\n                \"LCRProfile\": \"premium_cli\",\n                \"Password\": \"CGRateS.org\",\n                \"PaypalAccount\": \"cgrates@paypal.com\",\n                \"cgr_flags\": \"*accounts+*attributes+*resources+*stats+*routes+*thresholds\",\n                \"cgr_routes\": \"supplier1\"\n            },\n            \"MaxRate\": 0,\n            \"MaxRateUnit\": 0,\n            \"MaxCostSoFar\": 0,\n            \"CgrID\": \"319f8dd9acfb9045b08eaa5258bf001036308015\",\n            \"RunID\": \"*default\",\n            \"ForceDuration\": false,\n            \"PerformRounding\": false,\n            \"DenyNegativeAccount\": false,\n            \"DryRun\": false,\n            \"APIOpts\": {\n                \"*attrProfileIDs\": null,\n                \"*subsys\": \"*sessions\"\n            }\n        }\n    ],\n    \"id\": 2\n}\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/jsonrpc",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"jsonrpc"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "SessionSv1.AuthorizeEventWithDigest",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"method\": \"SessionSv1.AuthorizeEventWithDigest\",\n    \"id\": 382402798,\n    \"params\": [\n        {\n            \"ProcessStatQueues\": true,\n            \"ProcessThresholds\": true,\n            \"ReleaseResources\": true,\n            \"AllocateResources\": true,\n            \"AuthorizeResources\": true,\n            \"GetRoutes\": true,\n            \"GetAttributes\": true,\n            \"GetMaxUsage\": true,\n            \"Event\": {\n                \"Source\": \"OpenSIPS\",\n                \"OriginHost\": \"127.0.0.1\",\n                \"RequestType\": \"*prepaid\",\n                \"OriginID\": \"11db8905e6afa6b2dde26fb24ef7e460@0:0:0:0:0:0:0:0\",\n                \"Account\": \"1001\",\n                \"SetupTime\": \"1707912492\",\n                \"Destination\": \"1002\"\n            }\n        }\n    ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/jsonrpc",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"jsonrpc"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "SessionSv1.GetActiveSessionIDs",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"method\": \"SessionSv1.GetActiveSessionIDs\",\n    \"params\": [\n        \"\"\n    ],\n    \"id\": 1\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/jsonrpc",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"jsonrpc"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "SessionSv1.InitiateSession",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"method\": \"SessionSv1.InitiateSession\",\n    \"params\": [\n        {\n            \"GetAttributes\": true,\n            \"AllocateResources\": true,\n            \"InitSession\": true,\n            \"ForceDuration\": false,\n            \"ProcessThresholds\": true,\n            \"ProcessStats\": true,\n            \"AttributeIDs\": null,\n            \"ThresholdIDs\": null,\n            \"StatIDs\": null,\n            \"Tenant\": \"cgrates.org\",\n            \"ID\": \"8c8dc27\",\n            \"Time\": \"2024-02-07T13:01:51.388+01:00\",\n            \"Event\": {\n                \"Account\": \"1001\",\n                \"AnswerTime\": \"2024-02-07T13:01:53.668+0100\",\n                \"Destination\": \"1002\",\n                \"EventName\": \"SMA_SESSION_START\",\n                \"OriginHost\": \"127.0.0.1\",\n                \"OriginID\": \"1707307311.6\",\n                \"RequestType\": \"*prepaid\",\n                \"SetupTime\": \"2024-02-07T13:01:51.385+0100\",\n                \"Source\": \"AsteriskAgent\",\n                \"cgr_flags\": \"*accounts+*attributes+*resources+*stats+*routes+*thresholds\",\n                \"cgr_routes\": \"supplier1\"\n            },\n            \"APIOpts\": {}\n        }\n    ],\n    \"id\": 2\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/jsonrpc",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"jsonrpc"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "SessionSv1.AuthorizeEvent",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"method\": \"SessionSv1.AuthorizeEvent\",\n    \"params\": [\n        {\n            \"GetAttributes\": true,\n            \"AuthorizeResources\": true,\n            \"GetMaxUsage\": true,\n            \"ForceDuration\": false,\n            \"ProcessThresholds\": true,\n            \"ProcessStats\": true,\n            \"GetRoutes\": true,\n            \"RoutesMaxCost\": \"\",\n            \"RoutesIgnoreErrors\": false,\n            \"AttributeIDs\": null,\n            \"ThresholdIDs\": null,\n            \"StatIDs\": null,\n            \"Tenant\": \"cgrates.org\",\n            \"ID\": \"8c8dc27\",\n            \"Time\": \"2024-02-07T13:01:51.388+01:00\",\n            \"Event\": {\n                \"Account\": \"1001\",\n                \"Destination\": \"1002\",\n                \"EventName\": \"SMA_AUTHORIZATION\",\n                \"OriginHost\": \"127.0.0.1\",\n                \"OriginID\": \"1707307311.6\",\n                \"RequestType\": \"*prepaid\",\n                \"SetupTime\": \"2024-02-07T13:01:51.385+0100\",\n                \"Source\": \"AsteriskAgent\",\n                \"cgr_flags\": \"*accounts+*attributes+*resources+*stats+*routes+*thresholds\",\n                \"cgr_routes\": \"supplier1\"\n            },\n            \"APIOpts\": {},\n            \"Limit\": null,\n            \"Offset\": null\n        }\n    ],\n    \"id\": 1\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/jsonrpc",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"jsonrpc"
+							]
+						}
+					},
+					"response": []
 				}
-			],
-			"protocolProfileBehavior": {}
+			]
 		},
 		{
 			"name": "GetCost",
@@ -6154,8 +5902,7 @@
 					},
 					"response": []
 				}
-			],
-			"protocolProfileBehavior": {}
+			]
 		},
 		{
 			"name": "Procedures",
@@ -6313,9 +6060,7 @@
 											},
 											"response": []
 										}
-									],
-									"protocolProfileBehavior": {},
-									"_postman_isSubFolder": true
+									]
 								},
 								{
 									"name": "Add 500 FREE Minutes GR_LANDLINE - No Expiry - Per Minute",
@@ -6407,9 +6152,7 @@
 											},
 											"response": []
 										}
-									],
-									"protocolProfileBehavior": {},
-									"_postman_isSubFolder": true
+									]
 								},
 								{
 									"name": "Add 500 FREE Minutes GR_LANDLINE - for X Days",
@@ -6501,9 +6244,7 @@
 											},
 											"response": []
 										}
-									],
-									"protocolProfileBehavior": {},
-									"_postman_isSubFolder": true
+									]
 								},
 								{
 									"name": "Add 500 Minutes GR ALL to Account - No Expiration",
@@ -6631,13 +6372,9 @@
 											},
 											"response": []
 										}
-									],
-									"protocolProfileBehavior": {},
-									"_postman_isSubFolder": true
+									]
 								}
-							],
-							"protocolProfileBehavior": {},
-							"_postman_isSubFolder": true
+							]
 						},
 						{
 							"name": "Add X Voice minutes - template",
@@ -6758,13 +6495,9 @@
 									},
 									"response": []
 								}
-							],
-							"protocolProfileBehavior": {},
-							"_postman_isSubFolder": true
+							]
 						}
-					],
-					"protocolProfileBehavior": {},
-					"_postman_isSubFolder": true
+					]
 				},
 				{
 					"name": "2 - Rating Plans",
@@ -6948,9 +6681,7 @@
 									},
 									"response": []
 								}
-							],
-							"protocolProfileBehavior": {},
-							"_postman_isSubFolder": true
+							]
 						},
 						{
 							"name": "Inbound Call Billing example",
@@ -7188,13 +6919,9 @@
 									},
 									"response": []
 								}
-							],
-							"protocolProfileBehavior": {},
-							"_postman_isSubFolder": true
+							]
 						}
-					],
-					"protocolProfileBehavior": {},
-					"_postman_isSubFolder": true
+					]
 				},
 				{
 					"name": "3 - Chargers",
@@ -7286,9 +7013,7 @@
 							},
 							"response": []
 						}
-					],
-					"protocolProfileBehavior": {},
-					"_postman_isSubFolder": true
+					]
 				},
 				{
 					"name": "4 - Suppliers",
@@ -7356,7 +7081,6 @@
 						{
 							"listen": "prerequest",
 							"script": {
-								"id": "dd795b4c-6a50-4183-9c98-2f8da677c59a",
 								"type": "text/javascript",
 								"exec": [
 									""
@@ -7366,16 +7090,13 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "7a0c94dc-64e5-4c64-b963-80122da67f59",
 								"type": "text/javascript",
 								"exec": [
 									""
 								]
 							}
 						}
-					],
-					"protocolProfileBehavior": {},
-					"_postman_isSubFolder": true
+					]
 				},
 				{
 					"name": "5 - Actions",
@@ -7414,7 +7135,6 @@
 						{
 							"listen": "prerequest",
 							"script": {
-								"id": "07012ce6-d017-4dd4-b25e-94549407fb59",
 								"type": "text/javascript",
 								"exec": [
 									""
@@ -7424,26 +7144,208 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "0ae5d526-4f88-4aab-b029-fbf623c3a46a",
 								"type": "text/javascript",
 								"exec": [
 									""
 								]
 							}
 						}
-					],
-					"protocolProfileBehavior": {},
-					"_postman_isSubFolder": true
+					]
 				}
-			],
-			"protocolProfileBehavior": {}
+			]
+		},
+		{
+			"name": "Routes",
+			"item": [
+				{
+					"name": "APIerSv1.GetRouteProfile",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"method\": \"APIerSv1.GetRouteProfile\",\n    \"params\": [\n       {\n        \"Tenant\":\"cgrates.org\",\n        \"ID\":\"ROUTE_ACNT_1001\"\n       }\n    ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/jsonrpc",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"jsonrpc"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "APIerSv1.RemoveRouteProfile",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"method\": \"APIerSv1.RemoveRouteProfile\",\n    \"params\": [\n       {\n        \"Tenant\":\"cgrates.org\",\n        \"ID\":\"ROUTE_ACNT_1001\"\n       }\n    ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/jsonrpc",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"jsonrpc"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "APIerSv1.GetRouteProfileIDs",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"method\": \"APIerSv1.GetRouteProfileIDs\",\n    \"params\": [\n       {\n        \"Tenant\":\"cgrates.org\",\n        \"ID\":\"ROUTE_ACNT_1001\"\n        //\"Limit\": 5,\n        //\"Offset\":10\n       }\n    ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/jsonrpc",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"jsonrpc"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "APIerSv1.SetRouteProfile",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"method\": \"APIerSv1.SetRouteProfile\",\n    \"params\": [\n        {\n            \"Tenant\": \"cgrates.org\",\n            \"ID\": \"ROUTE_ACNT_1001\",\n            \"FilterIDs\": [\n                \"*string:~*req.Account:1001\"\n            ],\n            \"ActivationInterval\": {\n                \"ActivationTime\": \"2023-07-14T14:25:00Z\"\n            },\n            \"Sorting\": \"*weight\",\n            \"SortingParameters\": [\n                \"\"\n            ],\n            \"Routes\": [\n                {\n                    \"ID\": \"route1\",\n                    \"FilterIDs\": [\n                    ],\n                    \"AccountIDs\": [\n                        \"\"\n                    ],\n                    \"RatingPlanIDs\": [\n                        //\"RP_1002_LOW\"\n                    ],\n                    \"ResourceIDs\": null,\n                    \"StatIDs\": [\n                       // \"Stats2\"\n                    ],\n                    \"Weight\": 10,\n                    \"Blocker\": false,\n                    \"RouteParameters\": \"999\"\n                }\n            ],\n            \"Weight\": 0\n        }\n    ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/jsonrpc",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"jsonrpc"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "RouteSv1.GetRoutes",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"method\": \"RouteSv1.GetRoutes\",\n    \"params\": [\n        {\n            \"Tenant\": \"cgrates.org\",\n            \"ID\": \"testV1RouteGetRoutesByWeight\",\n            \"Event\": {\n                \"Account\": \"1001\",\n                \"Subject\": \"1001\",\n                \"Destination\": \"1002\",\n                \"SetupTime\": \"1563444271\",\n                \"Usage\": \"1m20s\"\n            }\n        }\n    ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/jsonrpc",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"jsonrpc"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "RouteSv1.GetRoutesList",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"method\": \"RouteSv1.GetRoutesList\",\n    \"params\": [\n        {\n            \"Tenant\": \"cgrates.org\",\n            \"ID\": \"testV1RouteGetRoutesByWeight\",\n            \"Event\": {\n                \"Account\": \"1001\",\n                \"Subject\": \"1001\",\n                \"Destination\": \"1002\",\n                \"SetupTime\": \"1563444271\",\n                \"Usage\": \"1m20s\"\n            }\n        }\n    ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/jsonrpc",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"jsonrpc"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "RouteSv1.GetRouteProfilesForEvent",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"method\": \"RouteSv1.GetRouteProfilesForEvent\",\n    \"params\": [\n        {\n            \"Tenant\": \"cgrates.org\",\n            \"ID\": \"testV1RouteGetRoutesByWeight\",\n            \"Event\": {\n                \"Account\": \"1001\",\n                \"Subject\": \"1001\",\n                \"Destination\": \"1002\",\n                \"SetupTime\": \"1563444271\",\n                \"Usage\": \"1m20s\"\n            }\n        }\n    ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/jsonrpc",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"jsonrpc"
+							]
+						}
+					},
+					"response": []
+				}
+			]
 		}
 	],
 	"event": [
 		{
 			"listen": "prerequest",
 			"script": {
-				"id": "51f0c130-824c-41bd-9f64-830654472d7a",
 				"type": "text/javascript",
 				"exec": [
 					""
@@ -7453,7 +7355,6 @@
 		{
 			"listen": "test",
 			"script": {
-				"id": "be9ec10e-c444-4700-ac8d-02c8a85fa61a",
 				"type": "text/javascript",
 				"exec": [
 					""
@@ -7463,12 +7364,10 @@
 	],
 	"variable": [
 		{
-			"id": "df3ddb82-8634-4405-844d-9b7d2b89fb7e",
 			"key": "base_url",
 			"value": "https://cgrates1.cgrates.org:2280",
 			"type": "string",
 			"disabled": true
 		}
-	],
-	"protocolProfileBehavior": {}
+	]
 }
