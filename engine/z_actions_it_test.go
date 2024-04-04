@@ -28,7 +28,6 @@ import (
 	"reflect"
 	"slices"
 	"strconv"
-	"strings"
 	"testing"
 	"time"
 
@@ -62,9 +61,6 @@ var (
 		testActionsitresetAccountCDR,
 		testActionsitremoteSetAccount,
 		testActionsitStopCgrEngine,
-	}
-	dbPath = func(dbType string) string {
-		return strings.Trim(dbType, "*")
 	}
 )
 
