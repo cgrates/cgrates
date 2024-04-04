@@ -88,6 +88,7 @@ func TestEventReaderSReload(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Fatalf("Expecting OK ,received %s", reply)
 	}
+	time.Sleep(10 * time.Millisecond)
 	runtime.Gosched()
 	if !erS.IsRunning() {
 		t.Fatalf("Expected service to be running")
