@@ -38,7 +38,7 @@ import (
 // 	4. Check the balances; the source balance should now have 6 units while the destination balance should have 14.
 
 func TestTransferBalance(t *testing.T) {
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 	case utils.MetaMySQL, utils.MetaMongo, utils.MetaPostgres:
 		t.SkipNow()
@@ -91,7 +91,7 @@ ACT_TRANSFER,*transfer_balance,"{""DestinationAccountID"":""cgrates.org:ACC_DEST
 		ConfigJSON: content,
 		TpFiles:    tpFiles,
 	}
-	client, _, shutdown, err := testEnv.Setup(t, *waitRater)
+	client, _, shutdown, err := testEnv.Setup(t, *utils.WaitRater)
 	if err != nil {
 		t.Fatal(err)
 	}

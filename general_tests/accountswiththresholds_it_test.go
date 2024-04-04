@@ -61,7 +61,7 @@ var (
 
 // Test starts here
 func TestAccWThdIT(t *testing.T) {
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 		accWThdConfDIR = "tutinternal"
 	case utils.MetaMySQL:
@@ -81,7 +81,7 @@ func TestAccWThdIT(t *testing.T) {
 
 func testAccWThdLoadConfig(t *testing.T) {
 	var err error
-	accWThdCfgPath = path.Join(*dataDir, "conf", "samples", accWThdConfDIR)
+	accWThdCfgPath = path.Join(*utils.DataDir, "conf", "samples", accWThdConfDIR)
 	if accWThdCfg, err = config.NewCGRConfigFromPath(accWThdCfgPath); err != nil {
 		t.Error(err)
 	}

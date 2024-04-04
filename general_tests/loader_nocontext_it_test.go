@@ -66,7 +66,7 @@ var (
 )
 
 func TestLoaderNoContextIT(t *testing.T) {
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 		ldrCtxConfDIR = "tutinternal"
 	case utils.MetaMySQL:
@@ -86,7 +86,7 @@ func TestLoaderNoContextIT(t *testing.T) {
 
 func testLoaderNoContextLoadConfig(t *testing.T) {
 	var err error
-	ldrCtxCfgPath = path.Join(*dataDir, "conf", "samples", ldrCtxConfDIR)
+	ldrCtxCfgPath = path.Join(*utils.DataDir, "conf", "samples", ldrCtxConfDIR)
 	if ldrCtxCfg, err = config.NewCGRConfigFromPath(ldrCtxCfgPath); err != nil {
 		t.Error(err)
 	}

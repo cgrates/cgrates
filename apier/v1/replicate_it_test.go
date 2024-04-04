@@ -64,7 +64,7 @@ var (
 
 func TestInternalReplicateIT(t *testing.T) {
 	internalCfgDirPath = "internal"
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 		t.SkipNow()
 	case utils.MetaMySQL:
@@ -78,31 +78,31 @@ func TestInternalReplicateIT(t *testing.T) {
 	default:
 		t.Fatal("Unknown Database type")
 	}
-	if *encoding == utils.MetaGOB {
+	if *utils.Encoding == utils.MetaGOB {
 		internalCfgDirPath += "_gob"
 	}
 	for _, stest := range sTestsInternalReplicateIT {
-		t.Run(*dbType, stest)
+		t.Run(*utils.DBType, stest)
 	}
 }
 
 func testInternalReplicateITInitCfg(t *testing.T) {
 	var err error
-	internalCfgPath = path.Join(*dataDir, "conf", "samples", "replication", internalCfgDirPath)
+	internalCfgPath = path.Join(*utils.DataDir, "conf", "samples", "replication", internalCfgDirPath)
 	internalCfg, err = config.NewCGRConfigFromPath(internalCfgPath)
 	if err != nil {
 		t.Error(err)
 	}
 
 	// prepare config for engine1
-	engineOneCfgPath = path.Join(*dataDir, "conf", "samples", "replication", engineOneCfgDirPath)
+	engineOneCfgPath = path.Join(*utils.DataDir, "conf", "samples", "replication", engineOneCfgDirPath)
 	engineOneCfg, err = config.NewCGRConfigFromPath(engineOneCfgPath)
 	if err != nil {
 		t.Error(err)
 	}
 
 	// prepare config for engine2
-	engineTwoCfgPath = path.Join(*dataDir, "conf", "samples", "replication", engineTwoCfgDirPath)
+	engineTwoCfgPath = path.Join(*utils.DataDir, "conf", "samples", "replication", engineTwoCfgDirPath)
 	engineTwoCfg, err = config.NewCGRConfigFromPath(engineTwoCfgPath)
 	if err != nil {
 		t.Error(err)
@@ -148,7 +148,7 @@ func testInternalReplicateITRPCConn(t *testing.T) {
 
 func testInternalReplicateLoadDataInInternalEngine(t *testing.T) {
 	var reply string
-	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "tutorial")}
+	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*utils.DataDir, "tariffplans", "tutorial")}
 	if err := internalRPC.Call(context.Background(), utils.APIerSv1LoadTariffPlanFromFolder, attrs, &reply); err != nil {
 		t.Error(err)
 	}
@@ -1060,7 +1060,7 @@ func testInternalReplicateITThresholdProfile(t *testing.T) {
 }
 
 func testInternalReplicateITSetAccount(t *testing.T) {
-	if *encoding == utils.MetaGOB {
+	if *utils.Encoding == utils.MetaGOB {
 		t.SkipNow() // skip this function because
 		// APIerSv1GetAccount returns the old format of Account
 		// and it can not register that interface because is duplicate

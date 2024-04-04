@@ -119,7 +119,7 @@ var (
 // Test start here
 func TestFIdxV1IT(t *testing.T) {
 	tSv1InternalRestart = false
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 		tSv1ConfDIR = "tutinternal"
 	case utils.MetaMySQL:
@@ -137,7 +137,7 @@ func TestFIdxV1IT(t *testing.T) {
 }
 
 func testV1FIdxLoadConfig(t *testing.T) {
-	tSv1CfgPath = path.Join(*dataDir, "conf", "samples", tSv1ConfDIR)
+	tSv1CfgPath = path.Join(*utils.DataDir, "conf", "samples", tSv1ConfDIR)
 	var err error
 	if tSv1Cfg, err = config.NewCGRConfigFromPath(tSv1CfgPath); err != nil {
 		t.Error(err)
@@ -145,7 +145,7 @@ func testV1FIdxLoadConfig(t *testing.T) {
 }
 
 func testV1FIdxdxInitDataDb(t *testing.T) {
-	if *dbType == utils.MetaInternal && tSv1InternalRestart {
+	if *utils.DBType == utils.MetaInternal && tSv1InternalRestart {
 		testV1FIdxHStopEngine(t)
 		testV1FIdxStartEngine(t)
 		testV1FIdxRpcConn(t)
@@ -172,7 +172,7 @@ func testV1FIdxResetStorDb(t *testing.T) {
 }
 
 func testV1FIdxStartEngine(t *testing.T) {
-	if _, err := engine.StopStartEngine(tSv1CfgPath, *waitRater); err != nil {
+	if _, err := engine.StopStartEngine(tSv1CfgPath, *utils.WaitRater); err != nil {
 		t.Fatal(err)
 	}
 }

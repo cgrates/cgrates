@@ -102,7 +102,7 @@ BYE|3111f3c9|49ca4c42|a58ebaae40d08d6757d8424fb09c4c54@0:0:0:0:0:0:0:0|200|OK|14
 )
 
 func TestFlatstoreFile(t *testing.T) {
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 		flatstoreCfgDIR = "ers_internal"
 	case utils.MetaMySQL:
@@ -121,7 +121,7 @@ func TestFlatstoreFile(t *testing.T) {
 
 func testFlatstoreITInitConfig(t *testing.T) {
 	var err error
-	flatstoreCfgPath = path.Join(*dataDir, "conf", "samples", flatstoreCfgDIR)
+	flatstoreCfgPath = path.Join(*utils.DataDir, "conf", "samples", flatstoreCfgDIR)
 	if flatstoreCfg, err = config.NewCGRConfigFromPath(flatstoreCfgPath); err != nil {
 		t.Fatal("Got config error: ", err.Error())
 	}
@@ -142,7 +142,7 @@ func testFlatstoreITResetDataDb(t *testing.T) {
 }
 
 func testFlatstoreITStartEngine(t *testing.T) {
-	if _, err := engine.StopStartEngine(flatstoreCfgPath, *waitRater); err != nil {
+	if _, err := engine.StopStartEngine(flatstoreCfgPath, *utils.WaitRater); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -327,7 +327,7 @@ func testFlatstoreITAnalyseCDRs3(t *testing.T) {
 }
 
 func testFlatstoreITKillEngine(t *testing.T) {
-	if err := engine.KillEngine(*waitRater); err != nil {
+	if err := engine.KillEngine(*utils.WaitRater); err != nil {
 		t.Error(err)
 	}
 }

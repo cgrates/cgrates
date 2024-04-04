@@ -58,12 +58,12 @@ func TestTpActTrgMove(t *testing.T) {
 
 func testTpActTrgITConnect(t *testing.T) {
 	var err error
-	tpActTrgPathIn = path.Join(*dataDir, "conf", "samples", "tutmongo")
+	tpActTrgPathIn = path.Join(*utils.DataDir, "conf", "samples", "tutmongo")
 	tpActTrgCfgIn, err = config.NewCGRConfigFromPath(tpActTrgPathIn)
 	if err != nil {
 		t.Fatal(err)
 	}
-	tpActTrgPathOut = path.Join(*dataDir, "conf", "samples", "tutmysql")
+	tpActTrgPathOut = path.Join(*utils.DataDir, "conf", "samples", "tutmysql")
 	tpActTrgCfgOut, err = config.NewCGRConfigFromPath(tpActTrgPathOut)
 	if err != nil {
 		t.Fatal(err)

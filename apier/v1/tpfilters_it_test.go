@@ -63,7 +63,7 @@ var sTestsTPFilters = []func(t *testing.T){
 
 // Test start here
 func TestTPFilterITMySql(t *testing.T) {
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 		tpFilterConfigDIR = "tutinternal"
 	case utils.MetaMySQL:
@@ -82,7 +82,7 @@ func TestTPFilterITMySql(t *testing.T) {
 
 func testTPFilterInitCfg(t *testing.T) {
 	var err error
-	tpFilterCfgPath = path.Join(*dataDir, "conf", "samples", tpFilterConfigDIR)
+	tpFilterCfgPath = path.Join(*utils.DataDir, "conf", "samples", tpFilterConfigDIR)
 	tpFilterCfg, err = config.NewCGRConfigFromPath(tpFilterCfgPath)
 	if err != nil {
 		t.Error(err)

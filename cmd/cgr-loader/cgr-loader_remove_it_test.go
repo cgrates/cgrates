@@ -72,7 +72,7 @@ var (
 )
 
 func TestCGRLoaderRemove(t *testing.T) {
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 		t.SkipNow()
 	case utils.MetaMongo:
@@ -91,7 +91,7 @@ func TestCGRLoaderRemove(t *testing.T) {
 
 func testCgrLdrInitCfg(t *testing.T) {
 	var err error
-	cgrLdrCfgPath = path.Join(*dataDir, "conf", "samples", cgrLdrCfgDir)
+	cgrLdrCfgPath = path.Join(*utils.DataDir, "conf", "samples", cgrLdrCfgDir)
 	cgrLdrCfg, err = config.NewCGRConfigFromPath(cgrLdrCfgPath)
 	if err != nil {
 		t.Error(err)
@@ -111,7 +111,7 @@ func testCgrLdrInitStorDB(t *testing.T) {
 }
 
 func testCgrLdrStartEngine(t *testing.T) {
-	if _, err := engine.StartEngine(cgrLdrCfgPath, *waitRater); err != nil {
+	if _, err := engine.StartEngine(cgrLdrCfgPath, *utils.WaitRater); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -209,7 +209,7 @@ func testCgrLdrGetSubsystemsNotLoadedLoad(t *testing.T) {
 
 func testCgrLdrLoadData(t *testing.T) {
 	// *cacheSAddress = "127.0.0.1:2012"
-	cmd := exec.Command("cgr-loader", "-config_path="+cgrLdrCfgPath, "-path="+path.Join(*dataDir, "tariffplans", "testit"))
+	cmd := exec.Command("cgr-loader", "-config_path="+cgrLdrCfgPath, "-path="+path.Join(*utils.DataDir, "tariffplans", "testit"))
 	output := bytes.NewBuffer(nil)
 	outerr := bytes.NewBuffer(nil)
 	cmd.Stdout = output
@@ -483,7 +483,7 @@ func testCgrLdrGetChargerProfileAfterLoad(t *testing.T) {
 
 func testCgrLdrRemoveData(t *testing.T) {
 	// *cacheSAddress = "127.0.0.1:2012"
-	cmd := exec.Command("cgr-loader", "-config_path="+cgrLdrCfgPath, "-path="+path.Join(*dataDir, "tariffplans", "testit"), "-remove")
+	cmd := exec.Command("cgr-loader", "-config_path="+cgrLdrCfgPath, "-path="+path.Join(*utils.DataDir, "tariffplans", "testit"), "-remove")
 	output := bytes.NewBuffer(nil)
 	outerr := bytes.NewBuffer(nil)
 	cmd.Stdout = output
@@ -504,7 +504,7 @@ func testCgrLdrKillEngine(t *testing.T) {
 }
 
 func newRPCClient(cfg *config.ListenCfg) (c *birpc.Client, err error) {
-	switch *encoding {
+	switch *utils.Encoding {
 	case utils.MetaJSON:
 		return jsonrpc.Dial(utils.TCP, cfg.RPCJSONListen)
 	case utils.MetaGOB:

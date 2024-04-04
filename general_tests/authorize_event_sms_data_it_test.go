@@ -32,7 +32,7 @@ import (
 
 func TestSSv1AuthorizeEventSMS(t *testing.T) {
 	var cfgDir string
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 		cfgDir = "sessions_internal"
 	case utils.MetaMySQL:
@@ -46,10 +46,10 @@ func TestSSv1AuthorizeEventSMS(t *testing.T) {
 	}
 	testEnv := TestEnvironment{
 		Name:       "TestSSv1AuthorizeEventSMS",
-		ConfigPath: path.Join(*dataDir, "conf", "samples", cfgDir),
-		TpPath:     path.Join(*dataDir, "tariffplans", "testit"),
+		ConfigPath: path.Join(*utils.DataDir, "conf", "samples", cfgDir),
+		TpPath:     path.Join(*utils.DataDir, "tariffplans", "testit"),
 	}
-	client, _, shutdown, err := testEnv.Setup(t, *waitRater)
+	client, _, shutdown, err := testEnv.Setup(t, *utils.WaitRater)
 	if err != nil {
 		t.Fatal(err)
 	}

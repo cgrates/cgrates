@@ -59,7 +59,7 @@ var (
 )
 
 func TestA1It(t *testing.T) {
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 		a1ConfigDir = "tutinternal"
 	case utils.MetaMySQL:
@@ -78,7 +78,7 @@ func TestA1It(t *testing.T) {
 }
 
 func testA1itLoadConfig(t *testing.T) {
-	a1CfgPath = path.Join(*dataDir, "conf", "samples", a1ConfigDir)
+	a1CfgPath = path.Join(*utils.DataDir, "conf", "samples", a1ConfigDir)
 	if a1Cfg, err = config.NewCGRConfigFromPath(a1CfgPath); err != nil {
 		t.Error(err)
 	}
@@ -97,7 +97,7 @@ func testA1itResetStorDb(t *testing.T) {
 }
 
 func testA1itStartEngine(t *testing.T) {
-	if _, err := engine.StopStartEngine(a1CfgPath, *waitRater); err != nil {
+	if _, err := engine.StopStartEngine(a1CfgPath, *utils.WaitRater); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -112,7 +112,7 @@ func testA1itRPCConn(t *testing.T) {
 
 func testA1itLoadTPFromFolder(t *testing.T) {
 	var reply string
-	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "test", "a1")}
+	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*utils.DataDir, "tariffplans", "test", "a1")}
 	if err := a1rpc.Call(context.Background(), utils.APIerSv1LoadTariffPlanFromFolder, attrs, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {

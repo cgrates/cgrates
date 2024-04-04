@@ -56,7 +56,7 @@ var (
 )
 
 func TestSesCdrsTntChange(t *testing.T) {
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 		sesTntChngCfgDir = "tutinternal"
 	case utils.MetaMySQL:
@@ -74,7 +74,7 @@ func TestSesCdrsTntChange(t *testing.T) {
 }
 
 func testSesTntChngCdrsLoadConfig(t *testing.T) {
-	sesTntChngCfgPath = path.Join(*dataDir, "conf", "samples", sesTntChngCfgDir)
+	sesTntChngCfgPath = path.Join(*utils.DataDir, "conf", "samples", sesTntChngCfgDir)
 	if sesTntChngCfg, err = config.NewCGRConfigFromPath(sesTntChngCfgPath); err != nil {
 		t.Error(err)
 	}
@@ -93,7 +93,7 @@ func testSesTntChngCdrsResetStorDb(t *testing.T) {
 }
 
 func testSesTntChngCdrsStartEngine(t *testing.T) {
-	if _, err := engine.StopStartEngine(sesTntChngCfgPath, *waitRater); err != nil {
+	if _, err := engine.StopStartEngine(sesTntChngCfgPath, *utils.WaitRater); err != nil {
 		t.Fatal(err)
 	}
 }

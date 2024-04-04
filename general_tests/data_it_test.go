@@ -63,7 +63,7 @@ var (
 
 // Test start here
 func TestDataIT(t *testing.T) {
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 		dataConfDIR = "tutinternal"
 	case utils.MetaMySQL:
@@ -82,7 +82,7 @@ func TestDataIT(t *testing.T) {
 
 func testV1DataLoadConfig(t *testing.T) {
 	var err error
-	dataCfgPath = path.Join(*dataDir, "conf", "samples", dataConfDIR)
+	dataCfgPath = path.Join(*utils.DataDir, "conf", "samples", dataConfDIR)
 	if dataCfg, err = config.NewCGRConfigFromPath(dataCfgPath); err != nil {
 		t.Error(err)
 	}
@@ -126,7 +126,7 @@ func testV1DataGetAccountBeforeSet(t *testing.T) {
 
 func testV1DataLoadTarrifPlans(t *testing.T) {
 	var reply string
-	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "testData")}
+	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*utils.DataDir, "tariffplans", "testData")}
 	if err := dataRpc.Call(context.Background(), utils.APIerSv1LoadTariffPlanFromFolder, attrs, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {

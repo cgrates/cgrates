@@ -86,7 +86,7 @@ func TestKafkaSSL(t *testing.T) {
 
 func testKafkaSSLLoadConfig(t *testing.T) {
 	var err error
-	kafkaSSLCfgPath = path.Join(*dataDir, "conf", "samples", kafkaSSLConfigDir)
+	kafkaSSLCfgPath = path.Join(*utils.DataDir, "conf", "samples", kafkaSSLConfigDir)
 	if kafkaSSLCfg, err = config.NewCGRConfigFromPath(kafkaSSLCfgPath); err != nil {
 		t.Error(err)
 	}
@@ -99,7 +99,7 @@ func testKafkaSSLResetDataDB(t *testing.T) {
 }
 
 func testKafkaSSLStartEngine(t *testing.T) {
-	if _, err := engine.StopStartEngine(kafkaSSLCfgPath, *waitRater); err != nil {
+	if _, err := engine.StopStartEngine(kafkaSSLCfgPath, *utils.WaitRater); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -174,7 +174,7 @@ func testKafkaSSLVerifyProcessedExport(t *testing.T) {
 }
 
 func testKafkaSSLStopEngine(t *testing.T) {
-	if err := engine.KillEngine(*waitRater); err != nil {
+	if err := engine.KillEngine(*utils.WaitRater); err != nil {
 		t.Error(err)
 	}
 }

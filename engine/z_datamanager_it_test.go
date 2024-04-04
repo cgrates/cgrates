@@ -46,7 +46,7 @@ func TestDMitinitDB(t *testing.T) {
 	var dataDB DataDB
 	var err error
 
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 		t.SkipNow()
 	case utils.MetaMySQL:
@@ -58,7 +58,7 @@ func TestDMitinitDB(t *testing.T) {
 			t.Fatal("Could not connect to Redis", err.Error())
 		}
 	case utils.MetaMongo:
-		cdrsMongoCfgPath := path.Join(*dataDir, "conf", "samples", "tutmongo")
+		cdrsMongoCfgPath := path.Join(*utils.DataDir, "conf", "samples", "tutmongo")
 		mgoITCfg, err := config.NewCGRConfigFromPath(cdrsMongoCfgPath)
 		if err != nil {
 			t.Fatal(err)
@@ -79,7 +79,7 @@ func TestDMitinitDB(t *testing.T) {
 	dm2 = NewDataManager(dataDB, config.CgrConfig().CacheCfg(), nil)
 
 	for _, stest := range sTestsDMit {
-		t.Run(*dbType, stest)
+		t.Run(*utils.DBType, stest)
 	}
 }
 

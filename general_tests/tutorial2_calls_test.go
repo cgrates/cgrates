@@ -96,7 +96,7 @@ package general_tests
 // 		t.Error("Invalid option")
 // 	}
 
-// 	tutorial2CallsCfg.DataFolderPath = *dataDir // Share DataFolderPath through config towards StoreDb for Flush()
+// 	tutorial2CallsCfg.DataFolderPath = *utils.DataDir // Share DataFolderPath through config towards StoreDb for Flush()
 // 	config.SetCgrConfig(tutorial2CallsCfg)
 // }
 
@@ -129,7 +129,7 @@ package general_tests
 
 // // Start CGR Engine
 // func testTutorial2CallStartEngine(t *testing.T) {
-// 	engine.KillProcName("cgr-engine", *waitRater)
+// 	engine.KillProcName("cgr-engine", *utils.WaitRater)
 // 	switch tutorial2OptConf {
 // 	case utils.Freeswitch:
 // 		if err := engine.CallScript(path.Join(*tutorial2FSConfig, "cgrates", "etc", "init.d", "cgrates"), "start", 100); err != nil {
@@ -165,11 +165,11 @@ package general_tests
 // // Load the tariff plan, creating accounts and their balances
 // func testTutorial2CallLoadTariffPlanFromFolder(t *testing.T) {
 // 	var reply string
-// 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "tutorial")}
+// 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*utils.DataDir, "tariffplans", "tutorial")}
 // 	if err := tutorial2CallsRpc.Call(context.Background(),utils.APIerSv1LoadTariffPlanFromFolder, attrs, &reply); err != nil {
 // 		t.Error(err)
 // 	}
-// 	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // Give time for scheduler to execute topups
+// 	time.Sleep(time.Duration(*utils.WaitRater) * time.Millisecond) // Give time for scheduler to execute topups
 // }
 
 // // Make sure account was debited properly
@@ -269,7 +269,7 @@ package general_tests
 // 			Username: "1002", Password: "CGRateS.org", Realm: "*", Registrar: "sip:127.0.0.1:5080"},
 // 	}
 // 	if tutorial2CallsPjSuaListener, err = engine.StartPjsuaListener(
-// 		acnts, 5070, time.Duration(*waitRater)*time.Millisecond); err != nil {
+// 		acnts, 5070, time.Duration(*utils.WaitRater)*time.Millisecond); err != nil {
 // 		t.Fatal(err)
 // 	}
 // 	time.Sleep(3 * time.Second)

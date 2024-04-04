@@ -54,7 +54,7 @@ var (
 )
 
 func TestERsReload(t *testing.T) {
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 		ersReloadConfigDIR = "disabled_internal"
 	case utils.MetaMySQL:
@@ -74,7 +74,7 @@ func TestERsReload(t *testing.T) {
 
 func testReloadITInitConfig(t *testing.T) {
 	var err error
-	reloadCfgPath = path.Join(*dataDir, "conf", "samples", "ers_reload", ersReloadConfigDIR)
+	reloadCfgPath = path.Join(*utils.DataDir, "conf", "samples", "ers_reload", ersReloadConfigDIR)
 	if reloadCfg, err = config.NewCGRConfigFromPath(reloadCfgPath); err != nil {
 		t.Fatal("Got config error: ", err.Error())
 	}
@@ -107,7 +107,7 @@ func testReloadITCreateCdrDirs(t *testing.T) {
 }
 
 func testReloadITStartEngine(t *testing.T) {
-	if _, err := engine.StopStartEngine(reloadCfgPath, *waitRater); err != nil {
+	if _, err := engine.StopStartEngine(reloadCfgPath, *utils.WaitRater); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -132,7 +132,7 @@ func testReloadVerifyDisabledReaders(t *testing.T) {
 func testReloadReloadConfigFromPath(t *testing.T) {
 	var reply string
 	if err := reloadRPC.Call(context.Background(), utils.ConfigSv1ReloadConfig, &config.ReloadArgs{
-		Path:    path.Join(*dataDir, "conf", "samples", "ers_reload", "first_reload"),
+		Path:    path.Join(*utils.DataDir, "conf", "samples", "ers_reload", "first_reload"),
 		Section: config.ERsJson,
 	}, &reply); err != nil {
 		t.Error(err)
@@ -163,7 +163,7 @@ func testReloadVerifyFirstReload(t *testing.T) {
 }
 
 func testReloadITKillEngine(t *testing.T) {
-	if err := engine.KillEngine(*waitRater); err != nil {
+	if err := engine.KillEngine(*utils.WaitRater); err != nil {
 		t.Error(err)
 	}
 }

@@ -98,7 +98,7 @@ var (
 )
 
 func TestSesRndIt(t *testing.T) {
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 		sesRndCfgDIR = "sessions_internal"
 	case utils.MetaMySQL:
@@ -153,7 +153,7 @@ func testSesRndItPreparePrepaidDOWN(t *testing.T) {
 
 // test for 0 balance with sesRndsion terminate with 1s usage
 func testSesRndItLoadConfig(t *testing.T) {
-	sesRndCfgPath = path.Join(*dataDir, "conf", "samples", sesRndCfgDIR)
+	sesRndCfgPath = path.Join(*utils.DataDir, "conf", "samples", sesRndCfgDIR)
 	if sesRndCfg, err = config.NewCGRConfigFromPath(sesRndCfgPath); err != nil {
 		t.Error(err)
 	}
@@ -172,7 +172,7 @@ func testSesRndItResetStorDb(t *testing.T) {
 }
 
 func testSesRndItStartEngine(t *testing.T) {
-	if _, err := engine.StopStartEngine(sesRndCfgPath, *waitRater); err != nil {
+	if _, err := engine.StopStartEngine(sesRndCfgPath, *utils.WaitRater); err != nil {
 		t.Fatal(err)
 	}
 }

@@ -73,7 +73,7 @@ var (
 )
 
 func TestRerateExpIT(t *testing.T) {
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 		ng1ConfDIR = "rerate_exp_engine1_internal"
 		ng2ConfDIR = "rerate_exp_engine2_internal"
@@ -96,11 +96,11 @@ func TestRerateExpIT(t *testing.T) {
 
 func testRerateExpLoadConfig(t *testing.T) {
 	var err error
-	ng1CfgPath = path.Join(*dataDir, "conf", "samples", "rerate_exp_multiple_engines", ng1ConfDIR)
+	ng1CfgPath = path.Join(*utils.DataDir, "conf", "samples", "rerate_exp_multiple_engines", ng1ConfDIR)
 	if ng1Cfg, err = config.NewCGRConfigFromPath(ng1CfgPath); err != nil {
 		t.Error(err)
 	}
-	ng2CfgPath = path.Join(*dataDir, "conf", "samples", "rerate_exp_multiple_engines", ng2ConfDIR)
+	ng2CfgPath = path.Join(*utils.DataDir, "conf", "samples", "rerate_exp_multiple_engines", ng2ConfDIR)
 	if ng2Cfg, err = config.NewCGRConfigFromPath(ng2CfgPath); err != nil {
 		t.Error(err)
 	}
@@ -148,7 +148,7 @@ func testRerateExpRPCConn(t *testing.T) {
 
 func testRerateExpLoadTP(t *testing.T) {
 	var reply string
-	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "reratecdrs")}
+	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*utils.DataDir, "tariffplans", "reratecdrs")}
 	if err := ng1RPC.Call(context.Background(), utils.APIerSv1LoadTariffPlanFromFolder, attrs, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {

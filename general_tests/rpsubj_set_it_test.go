@@ -30,7 +30,7 @@ import (
 )
 
 func TestRatingSubjectSet(t *testing.T) {
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 	case utils.MetaMySQL, utils.MetaMongo, utils.MetaPostgres:
 		t.SkipNow()
@@ -91,7 +91,7 @@ cgrates.org,data,RPF_DATA,2022-01-14T00:00:00Z,RP_DATA,`,
 		ConfigJSON: content,
 		TpFiles:    tpFiles,
 	}
-	client, _, shutdown, err := testEnv.Setup(t, *waitRater)
+	client, _, shutdown, err := testEnv.Setup(t, *utils.WaitRater)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -157,7 +157,7 @@ cgrates.org,data,RPF_DATA,2022-01-14T00:00:00Z,RP_DATA,`,
 }
 
 func TestRatingSubjectSetDefault(t *testing.T) {
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 	case utils.MetaMySQL, utils.MetaMongo, utils.MetaPostgres:
 		t.SkipNow()
@@ -225,7 +225,7 @@ cgrates.org,data,1001,2022-01-14T00:00:00Z,RP_DATA,`,
 		ConfigJSON: content,
 		TpFiles:    tpFiles,
 	}
-	client, _, shutdown, err := testEnv.Setup(t, *waitRater)
+	client, _, shutdown, err := testEnv.Setup(t, *utils.WaitRater)
 	if err != nil {
 		t.Fatal(err)
 	}

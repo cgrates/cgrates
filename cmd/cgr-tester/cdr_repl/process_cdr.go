@@ -32,15 +32,13 @@ import (
 	"github.com/cgrates/rpcclient"
 )
 
-var dataDir = flag.String("data_dir", "/usr/share/cgrates", "CGR data dir path here")
-
 func main() {
 	flag.Parse()
 	var err error
 	var cdrsMasterRpc *rpcclient.RPCClient
 	var cdrsMasterCfgPath string
 	var cdrsMasterCfg *config.CGRConfig
-	cdrsMasterCfgPath = path.Join(*dataDir, "conf", "samples", "cdrsreplicationmaster")
+	cdrsMasterCfgPath = path.Join(*utils.DataDir, "conf", "samples", "cdrsreplicationmaster")
 	if cdrsMasterCfg, err = config.NewCGRConfigFromPath(cdrsMasterCfgPath); err != nil {
 		log.Fatal("Got config error: ", err.Error())
 	}

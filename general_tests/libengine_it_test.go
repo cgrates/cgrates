@@ -49,7 +49,7 @@ var (
 )
 
 func TestLibEngineIT(t *testing.T) {
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 		libengConfigDIR = "tutinternal"
 	case utils.MetaMySQL:
@@ -68,7 +68,7 @@ func TestLibEngineIT(t *testing.T) {
 }
 
 func testLibengITInitCfg(t *testing.T) {
-	libengCfgPath = path.Join(*dataDir, "conf", "samples", libengConfigDIR)
+	libengCfgPath = path.Join(*utils.DataDir, "conf", "samples", libengConfigDIR)
 	var err error
 	libengCfg, err = config.NewCGRConfigFromPath(libengCfgPath)
 	if err != nil {
@@ -89,7 +89,7 @@ func testLibengITInitStorDb(t *testing.T) {
 }
 
 func testLibengITStartEngine(t *testing.T) {
-	if _, err := engine.StopStartEngine(libengCfgPath, *waitRater); err != nil {
+	if _, err := engine.StopStartEngine(libengCfgPath, *utils.WaitRater); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -129,7 +129,7 @@ func testLibengITRPCConnection(t *testing.T) {
 }
 
 func testLibengITStopEngine(t *testing.T) {
-	if err := engine.KillEngine(*waitRater); err != nil {
+	if err := engine.KillEngine(*utils.WaitRater); err != nil {
 		t.Error(err)
 	}
 }

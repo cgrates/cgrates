@@ -64,7 +64,7 @@ The test steps are as follows:
 */
 
 func TestFallbackDepth(t *testing.T) {
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 	case utils.MetaMySQL, utils.MetaMongo, utils.MetaPostgres:
 		t.SkipNow()
@@ -139,7 +139,7 @@ cgrates.org,call,FallbackSubject4,2014-01-01T00:00:00Z,RP_ANY,`,
 		TpFiles:    tpFiles,
 		LogBuffer:  buf,
 	}
-	client, _, shutdown, err := testEnv.Setup(t, *waitRater)
+	client, _, shutdown, err := testEnv.Setup(t, *utils.WaitRater)
 	if err != nil {
 		t.Fatal(err)
 	}

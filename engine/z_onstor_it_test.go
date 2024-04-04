@@ -86,7 +86,7 @@ var (
 
 func TestOnStorIT(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 		onStor = NewDataManager(NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items),
 			config.CgrConfig().CacheCfg(), nil)
@@ -101,7 +101,7 @@ func TestOnStorIT(t *testing.T) {
 		onStorCfg = cfg.DataDbCfg().Name
 		onStor = NewDataManager(rdsITdb, config.CgrConfig().CacheCfg(), nil)
 	case utils.MetaMongo:
-		cdrsMongoCfgPath := path.Join(*dataDir, "conf", "samples", "cdrsv2mongo")
+		cdrsMongoCfgPath := path.Join(*utils.DataDir, "conf", "samples", "cdrsv2mongo")
 		mgoITCfg, err := config.NewCGRConfigFromPath(cdrsMongoCfgPath)
 		if err != nil {
 			t.Fatal(err)
@@ -122,7 +122,7 @@ func TestOnStorIT(t *testing.T) {
 	}
 
 	for _, stest := range sTestsOnStorIT {
-		t.Run(*dbType, stest)
+		t.Run(*utils.DBType, stest)
 	}
 }
 

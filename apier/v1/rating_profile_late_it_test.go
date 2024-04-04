@@ -54,7 +54,7 @@ var (
 // Test start here
 func TestRPLateIT2(t *testing.T) {
 	// no need for a new config with *gob transport in this case
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 		rpLateConfigDIR = "processcdrs_late_internal"
 	case utils.MetaMySQL:
@@ -73,7 +73,7 @@ func TestRPLateIT2(t *testing.T) {
 
 func testRpLateInitCfg(t *testing.T) {
 	var err error
-	rpLateCfGPath = path.Join(*dataDir, "conf", "samples", rpLateConfigDIR)
+	rpLateCfGPath = path.Join(*utils.DataDir, "conf", "samples", rpLateConfigDIR)
 	rpLateCfg, err = config.NewCGRConfigFromPath(rpLateCfGPath)
 	if err != nil {
 		t.Error(err)
@@ -95,7 +95,7 @@ func testRpLateResetStorDb(t *testing.T) {
 
 // Start CGR Engine
 func testRpLateStartEngine(t *testing.T) {
-	if _, err := engine.StopStartEngine(rpLateCfGPath, *waitRater); err != nil {
+	if _, err := engine.StopStartEngine(rpLateCfGPath, *utils.WaitRater); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -111,7 +111,7 @@ func testRpLateRPCConn(t *testing.T) {
 
 func testRpLateLoadFromFolder(t *testing.T) {
 	var reply string
-	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "tutorial")}
+	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*utils.DataDir, "tariffplans", "tutorial")}
 	if err := rpLateRPC.Call(context.Background(), utils.APIerSv1LoadTariffPlanFromFolder, attrs, &reply); err != nil {
 		t.Error(err)
 	}
@@ -161,7 +161,7 @@ func testRpLateCDRProcessEvent(t *testing.T) {
 }
 
 func testRpLateKillEngine(t *testing.T) {
-	if err := engine.KillEngine(*waitRater); err != nil {
+	if err := engine.KillEngine(*utils.WaitRater); err != nil {
 		t.Error(err)
 	}
 }

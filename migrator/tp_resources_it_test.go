@@ -59,12 +59,12 @@ func TestTpResMove(t *testing.T) {
 
 func testTpResITConnect(t *testing.T) {
 	var err error
-	tpResPathIn = path.Join(*dataDir, "conf", "samples", "tutmongo")
+	tpResPathIn = path.Join(*utils.DataDir, "conf", "samples", "tutmongo")
 	tpResCfgIn, err = config.NewCGRConfigFromPath(tpResPathIn)
 	if err != nil {
 		t.Fatal(err)
 	}
-	tpResPathOut = path.Join(*dataDir, "conf", "samples", "tutmysql")
+	tpResPathOut = path.Join(*utils.DataDir, "conf", "samples", "tutmysql")
 	tpResCfgOut, err = config.NewCGRConfigFromPath(tpResPathOut)
 	if err != nil {
 		t.Fatal(err)

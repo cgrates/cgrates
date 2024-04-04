@@ -71,7 +71,7 @@ func TestKafkaExport(t *testing.T) {
 
 func testKafkaLoadConfig(t *testing.T) {
 	var err error
-	kafkaCfgPath = path.Join(*dataDir, "conf", "samples", kafkaConfigDir)
+	kafkaCfgPath = path.Join(*utils.DataDir, "conf", "samples", kafkaConfigDir)
 	if kafkaCfg, err = config.NewCGRConfigFromPath(kafkaCfgPath); err != nil {
 		t.Error(err)
 	}
@@ -90,7 +90,7 @@ func testKafkaResetStorDB(t *testing.T) {
 }
 
 func testKafkaStartEngine(t *testing.T) {
-	if _, err := engine.StopStartEngine(kafkaCfgPath, *waitRater); err != nil {
+	if _, err := engine.StopStartEngine(kafkaCfgPath, *utils.WaitRater); err != nil {
 		t.Fatal(err)
 	}
 }

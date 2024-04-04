@@ -89,7 +89,7 @@ var (
 
 func TestITCoreSv1(t *testing.T) {
 	argPath = "/tmp"
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 		coreV1ConfDIR = "tutinternal"
 	case utils.MetaMySQL:
@@ -105,7 +105,7 @@ func TestITCoreSv1(t *testing.T) {
 }
 
 func testCoreSv1LoadCofig(t *testing.T) {
-	coreV1CfgPath = path.Join(*dataDir, "conf", "samples", coreV1ConfDIR)
+	coreV1CfgPath = path.Join(*utils.DataDir, "conf", "samples", coreV1ConfDIR)
 	var err error
 	if coreV1Cfg, err = config.NewCGRConfigFromPath(coreV1CfgPath); err != nil {
 		t.Error(err)
@@ -165,7 +165,7 @@ func testCoreSv1StartCPUProfilingErrorAlreadyStarted(t *testing.T) {
 }
 
 func testCoreSv1StartEngine(t *testing.T) {
-	if _, err := engine.StartEngine(coreV1CfgPath, *waitRater); err != nil {
+	if _, err := engine.StartEngine(coreV1CfgPath, *utils.WaitRater); err != nil {
 		t.Error(err)
 	}
 }
@@ -347,7 +347,7 @@ func testCoreSv1StartMemoryProfiling(t *testing.T) {
 }
 
 func testCoreSv1KillEngine(t *testing.T) {
-	if err := engine.KillEngine(*waitRater); err != nil {
+	if err := engine.KillEngine(*utils.WaitRater); err != nil {
 		t.Error(err)
 	}
 }

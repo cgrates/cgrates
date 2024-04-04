@@ -47,20 +47,20 @@ var sTestsDCIT = []func(t *testing.T){
 }
 
 func TestDerivedChargersVMigrateITRedis(t *testing.T) {
-	inPath = path.Join(*dataDir, "conf", "samples", "tutmysql")
-	outPath = path.Join(*dataDir, "conf", "samples", "tutmysql")
+	inPath = path.Join(*utils.DataDir, "conf", "samples", "tutmysql")
+	outPath = path.Join(*utils.DataDir, "conf", "samples", "tutmysql")
 	testStartDC("TestDerivedChargersVMigrateITRedis", t)
 }
 
 func TestDerivedChargersVMigrateITMongo(t *testing.T) {
-	inPath = path.Join(*dataDir, "conf", "samples", "tutmongo")
-	outPath = path.Join(*dataDir, "conf", "samples", "tutmongo")
+	inPath = path.Join(*utils.DataDir, "conf", "samples", "tutmongo")
+	outPath = path.Join(*utils.DataDir, "conf", "samples", "tutmongo")
 	testStartDC("TestDerivedChargersVMigrateITMongo", t)
 }
 
 func TestDerivedChargersVITMigrateMongo2Redis(t *testing.T) {
-	inPath = path.Join(*dataDir, "conf", "samples", "tutmongo")
-	outPath = path.Join(*dataDir, "conf", "samples", "tutmysql")
+	inPath = path.Join(*utils.DataDir, "conf", "samples", "tutmongo")
+	outPath = path.Join(*utils.DataDir, "conf", "samples", "tutmysql")
 	testStartDC("TestDerivedChargersVITMigrateMongo2Redis", t)
 }
 

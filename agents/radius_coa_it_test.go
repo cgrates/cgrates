@@ -59,7 +59,7 @@ client will then verify that the packet was populated correctly.
 session created previously and verify the request packet fields.
 */
 func TestRadiusCoADisconnect(t *testing.T) {
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 	case utils.MetaMySQL, utils.MetaMongo, utils.MetaPostgres:
 		t.SkipNow()
@@ -68,7 +68,7 @@ func TestRadiusCoADisconnect(t *testing.T) {
 	}
 
 	// Set up test environment.
-	cfgPath := path.Join(*dataDir, "conf", "samples", "radius_coa_disconnect")
+	cfgPath := path.Join(*utils.DataDir, "conf", "samples", "radius_coa_disconnect")
 	raDiscCfg, err := config.NewCGRConfigFromPath(cfgPath)
 	if err != nil {
 		t.Fatal(err)
@@ -79,7 +79,7 @@ func TestRadiusCoADisconnect(t *testing.T) {
 	if err := engine.InitStorDb(raDiscCfg); err != nil {
 		t.Fatal(err)
 	}
-	if _, err := engine.StartEngine(cfgPath, *waitRater); err != nil {
+	if _, err := engine.StartEngine(cfgPath, *utils.WaitRater); err != nil {
 		t.Fatal(err)
 	}
 	defer engine.KillEngine(100)
@@ -87,12 +87,12 @@ func TestRadiusCoADisconnect(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "oldtutorial")}
+	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*utils.DataDir, "tariffplans", "oldtutorial")}
 	var loadInst utils.LoadInstance
 	if err := raDiscRPC.Call(context.Background(), utils.APIerSv2LoadTariffPlanFromFolder, attrs, &loadInst); err != nil {
 		t.Error(err)
 	}
-	time.Sleep(time.Duration(*waitRater) * time.Millisecond)
+	time.Sleep(time.Duration(*utils.WaitRater) * time.Millisecond)
 
 	var reply string
 

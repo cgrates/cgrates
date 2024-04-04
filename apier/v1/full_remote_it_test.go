@@ -67,26 +67,26 @@ func TestFullRemoteIT(t *testing.T) {
 	fullRemEngineOneCfgDirPath = "remote"
 
 	for _, stest := range sTestsFullRemoteIT {
-		t.Run(*dbType, stest)
+		t.Run(*utils.DBType, stest)
 	}
 }
 
 func testFullRemoteITInitCfg(t *testing.T) {
 	var err error
-	fullRemInternalCfgPath = path.Join(*dataDir, "conf", "samples", "full_remote", fullRemInternalCfgDirPath)
+	fullRemInternalCfgPath = path.Join(*utils.DataDir, "conf", "samples", "full_remote", fullRemInternalCfgDirPath)
 	fullRemInternalCfg, err = config.NewCGRConfigFromPath(fullRemInternalCfgPath)
 	if err != nil {
 		t.Error(err)
 	}
 
 	// prepare config for engine1
-	fullRemEngineOneCfgPath = path.Join(*dataDir, "conf", "samples",
+	fullRemEngineOneCfgPath = path.Join(*utils.DataDir, "conf", "samples",
 		"full_remote", fullRemEngineOneCfgDirPath)
 	fullRemEngineOneCfg, err = config.NewCGRConfigFromPath(fullRemEngineOneCfgPath)
 	if err != nil {
 		t.Error(err)
 	}
-	fullRemEngineOneCfg.DataFolderPath = *dataDir // Share DataFolderPath through config towards StoreDb for Flush()
+	fullRemEngineOneCfg.DataFolderPath = *utils.DataDir // Share DataFolderPath through config towards StoreDb for Flush()
 
 }
 

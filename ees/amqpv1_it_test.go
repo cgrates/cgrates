@@ -68,7 +68,7 @@ func TestAMQPv1Export(t *testing.T) {
 
 func testAMQPv1LoadConfig(t *testing.T) {
 	var err error
-	amqpv1CfgPath = path.Join(*dataDir, "conf", "samples", amqpv1ConfDir)
+	amqpv1CfgPath = path.Join(*utils.DataDir, "conf", "samples", amqpv1ConfDir)
 	if amqpv1Cfg, err = config.NewCGRConfigFromPath(amqpv1CfgPath); err != nil {
 		t.Error(err)
 	}
@@ -97,7 +97,7 @@ func testAMQPv1ResetStorDB(t *testing.T) {
 }
 
 func testAMQPv1StartEngine(t *testing.T) {
-	if _, err := engine.StopStartEngine(amqpv1CfgPath, *waitRater); err != nil {
+	if _, err := engine.StopStartEngine(amqpv1CfgPath, *utils.WaitRater); err != nil {
 		t.Fatal(err)
 	}
 }

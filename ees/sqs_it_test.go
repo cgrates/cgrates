@@ -73,7 +73,7 @@ func TestSQSExport(t *testing.T) {
 
 func testSQSLoadConfig(t *testing.T) {
 	var err error
-	sqsCfgPath = path.Join(*dataDir, "conf", "samples", sqsConfDir)
+	sqsCfgPath = path.Join(*utils.DataDir, "conf", "samples", sqsConfDir)
 	if sqsCfg, err = config.NewCGRConfigFromPath(sqsCfgPath); err != nil {
 		t.Error(err)
 	}
@@ -98,7 +98,7 @@ func testSQSResetStorDb(t *testing.T) {
 }
 
 func testSQSStartEngine(t *testing.T) {
-	if _, err := engine.StopStartEngine(sqsCfgPath, *waitRater); err != nil {
+	if _, err := engine.StopStartEngine(sqsCfgPath, *utils.WaitRater); err != nil {
 		t.Fatal(err)
 	}
 }

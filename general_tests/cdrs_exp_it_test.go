@@ -1,5 +1,4 @@
 //go:build integration
-// +build integration
 
 /*
 Real-time Online/Offline Charging System (OCS) for Telecom & ISP environments
@@ -114,7 +113,7 @@ var (
 )
 
 func TestCDRsExp(t *testing.T) {
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 		cdrsExpCfgDir = "cdrsexport_internal"
 	case utils.MetaMySQL:
@@ -134,7 +133,7 @@ func TestCDRsExp(t *testing.T) {
 
 func testCDRsExpInitConfig(t *testing.T) {
 	var err error
-	cdrsExpCfgPath = path.Join(*dataDir, "conf", "samples", cdrsExpCfgDir)
+	cdrsExpCfgPath = path.Join(*utils.DataDir, "conf", "samples", cdrsExpCfgDir)
 	if cdrsExpCfg, err = config.NewCGRConfigFromPath(cdrsExpCfgPath); err != nil {
 		t.Fatal(err)
 	}
@@ -209,7 +208,7 @@ func testCDRsExpPrepareAMQP(t *testing.T) {
 
 func testCDRsExpStartEngine(t *testing.T) {
 	runtime.Gosched()
-	if _, err := engine.StopStartEngine(cdrsExpCfgPath, *waitRater); err != nil {
+	if _, err := engine.StopStartEngine(cdrsExpCfgPath, *utils.WaitRater); err != nil {
 		t.Fatal(err)
 	}
 }

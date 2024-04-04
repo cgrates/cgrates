@@ -38,7 +38,7 @@ import (
 var (
 	loadersIDBIdxCfgDir                        string
 	loadersIDBIdxCfgPath                       string
-	loadersIDBIdxCfgPathInternal               = path.Join(*dataDir, "conf", "samples", "loaders_indexes_internal_db")
+	loadersIDBIdxCfgPathInternal               = path.Join(*utils.DataDir, "conf", "samples", "loaders_indexes_internal_db")
 	loadersIDBIdxCfg, loadersIDBIdxCfgInternal *config.CGRConfig
 	loadersIDBIdxRPC, loadersIDBIdxRPCInternal *birpc.Client
 
@@ -55,7 +55,7 @@ var (
 )
 
 func TestLoadersIDBIdxIt(t *testing.T) {
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 		loadersIDBIdxCfgDir = "tutinternal"
 	case utils.MetaMySQL:
@@ -73,7 +73,7 @@ func TestLoadersIDBIdxIt(t *testing.T) {
 }
 
 func testLoadersIDBIdxItLoadConfig(t *testing.T) {
-	loadersIDBIdxCfgPath = path.Join(*dataDir, "conf", "samples", loadersIDBIdxCfgDir)
+	loadersIDBIdxCfgPath = path.Join(*utils.DataDir, "conf", "samples", loadersIDBIdxCfgDir)
 	if loadersIDBIdxCfg, err = config.NewCGRConfigFromPath(loadersIDBIdxCfgPath); err != nil {
 		t.Error(err)
 	}
@@ -92,10 +92,10 @@ func testLoadersIDBIdxItDB(t *testing.T) {
 }
 
 func testLoadersIDBIdxItStartEngines(t *testing.T) {
-	if _, err := engine.StopStartEngine(loadersIDBIdxCfgPath, *waitRater); err != nil {
+	if _, err := engine.StopStartEngine(loadersIDBIdxCfgPath, *utils.WaitRater); err != nil {
 		t.Fatal(err)
 	}
-	if _, err := engine.StartEngine(loadersIDBIdxCfgPathInternal, *waitRater); err != nil {
+	if _, err := engine.StartEngine(loadersIDBIdxCfgPathInternal, *utils.WaitRater); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -113,7 +113,7 @@ func testLoadersIDBIdxItRPCConn(t *testing.T) {
 func testLoadersIDBIdxItLoad(t *testing.T) {
 	var loadInst utils.LoadInstance
 	if err := loadersIDBIdxRPCInternal.Call(context.Background(), utils.APIerSv2LoadTariffPlanFromFolder,
-		&utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "tutorial")},
+		&utils.AttrLoadTpFromFolder{FolderPath: path.Join(*utils.DataDir, "tariffplans", "tutorial")},
 		&loadInst); err != nil {
 		t.Error(err)
 	}

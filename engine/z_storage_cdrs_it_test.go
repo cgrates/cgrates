@@ -35,7 +35,7 @@ import (
 
 func TestITCDRs(t *testing.T) {
 	var cdrsConfigDIR string
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 		cdrsConfigDIR = "internal"
 	case utils.MetaMySQL:
@@ -48,7 +48,7 @@ func TestITCDRs(t *testing.T) {
 		t.Fatal("Unknown Database type")
 	}
 
-	cfg, err := config.NewCGRConfigFromPath(path.Join(*dataDir, "conf", "samples", "storage", cdrsConfigDIR))
+	cfg, err := config.NewCGRConfigFromPath(path.Join(*utils.DataDir, "conf", "samples", "storage", cdrsConfigDIR))
 	if err != nil {
 		t.Error(err)
 	}
@@ -457,7 +457,7 @@ func testGetCDRs(cfg *config.CGRConfig) error {
 		if err := cdrStorage.SetCDR(cdr, false); err != nil {
 			return fmt.Errorf("testGetCDRs #4 CDR: %+v, err: %v", cdr, err)
 		}
-		if *dbType == utils.MetaMySQL || *dbType == utils.MetaPostgres {
+		if *utils.DBType == utils.MetaMySQL || *utils.DBType == utils.MetaPostgres {
 			cdr.OrderID = int64(i + 1)
 		}
 	}
@@ -828,7 +828,7 @@ func testGetCDRs(cfg *config.CGRConfig) error {
 		for i, cdr := range CDRs {
 			cdr.SetupTime = cdr.SetupTime.UTC()
 			cdr.AnswerTime = cdr.AnswerTime.UTC()
-			if *dbType == utils.MetaMongo {
+			if *utils.DBType == utils.MetaMongo {
 				cdrs[i].OrderID = cdr.OrderID
 			}
 		}
@@ -843,7 +843,7 @@ func testGetCDRs(cfg *config.CGRConfig) error {
 		for i, cdr := range CDRs {
 			cdr.SetupTime = cdr.SetupTime.UTC()
 			cdr.AnswerTime = cdr.AnswerTime.UTC()
-			if *dbType == utils.MetaMongo {
+			if *utils.DBType == utils.MetaMongo {
 				cdrs[i].OrderID = cdr.OrderID
 			}
 		}
@@ -858,7 +858,7 @@ func testGetCDRs(cfg *config.CGRConfig) error {
 		for i, cdr := range CDRs {
 			cdr.SetupTime = cdr.SetupTime.UTC()
 			cdr.AnswerTime = cdr.AnswerTime.UTC()
-			if *dbType == utils.MetaMongo {
+			if *utils.DBType == utils.MetaMongo {
 				cdrs[i+2].OrderID = cdr.OrderID
 			}
 		}

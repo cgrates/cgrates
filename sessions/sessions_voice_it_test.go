@@ -60,7 +60,7 @@ var (
 )
 
 func TestSessionsVoice(t *testing.T) {
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 		voiceCfgDIR = "sessions_internal"
 	case utils.MetaMySQL:
@@ -78,7 +78,7 @@ func TestSessionsVoice(t *testing.T) {
 }
 
 func testSessionsVoiceInitCfg(t *testing.T) {
-	voiceCfgPath = path.Join(*dataDir, "conf", "samples", voiceCfgDIR)
+	voiceCfgPath = path.Join(*utils.DataDir, "conf", "samples", voiceCfgDIR)
 	// Init config first
 	var err error
 	voiceCfg, err = config.NewCGRConfigFromPath(voiceCfgPath)
@@ -103,7 +103,7 @@ func testSessionsVoiceResetStorDb(t *testing.T) {
 
 // Start CGR Engine
 func testSessionsVoiceStartEngine(t *testing.T) {
-	if _, err := engine.StopStartEngine(voiceCfgPath, *waitRater); err != nil {
+	if _, err := engine.StopStartEngine(voiceCfgPath, *utils.WaitRater); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -119,12 +119,12 @@ func testSessionsVoiceApierRpcConn(t *testing.T) {
 
 // Load the tariff plan, creating accounts and their balances
 func testSessionsVoiceTPFromFolder(t *testing.T) {
-	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "oldtutorial")}
+	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*utils.DataDir, "tariffplans", "oldtutorial")}
 	var loadInst utils.LoadInstance
 	if err := sessionsRPC.Call(context.Background(), utils.APIerSv2LoadTariffPlanFromFolder, attrs, &loadInst); err != nil {
 		t.Error(err)
 	}
-	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // Give time for scheduler to execute topups
+	time.Sleep(time.Duration(*utils.WaitRater) * time.Millisecond) // Give time for scheduler to execute topups
 }
 
 func testSessionsVoiceMonetaryRefund(t *testing.T) {

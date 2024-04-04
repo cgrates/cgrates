@@ -65,7 +65,7 @@ var (
 )
 
 func TestDspHosts(t *testing.T) {
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaMySQL:
 		allDir = "all_mysql"
 		all2Dir = "all2_mysql"
@@ -85,9 +85,9 @@ func TestDspHosts(t *testing.T) {
 }
 
 func testDsphInitCfg(t *testing.T) {
-	dspCfgPath = path.Join(*dataDir, "conf", "samples", "registrarc", dspDir)
-	allCfgPath = path.Join(*dataDir, "conf", "samples", "registrarc", allDir)
-	all2CfgPath = path.Join(*dataDir, "conf", "samples", "registrarc", all2Dir)
+	dspCfgPath = path.Join(*utils.DataDir, "conf", "samples", "registrarc", dspDir)
+	allCfgPath = path.Join(*utils.DataDir, "conf", "samples", "registrarc", allDir)
+	all2CfgPath = path.Join(*utils.DataDir, "conf", "samples", "registrarc", all2Dir)
 	var err error
 	if dspCfg, err = config.NewCGRConfigFromPath(dspCfgPath); err != nil {
 		t.Error(err)
@@ -105,7 +105,7 @@ func testDsphInitDB(t *testing.T) {
 
 func testDsphStartEngine(t *testing.T) {
 	var err error
-	if dspCmd, err = engine.StopStartEngine(dspCfgPath, *waitRater); err != nil {
+	if dspCmd, err = engine.StopStartEngine(dspCfgPath, *utils.WaitRater); err != nil {
 		t.Fatal(err)
 	}
 	dspRPC, err = newRPCClient(dspCfg.ListenCfg()) // We connect over JSON so we can also troubleshoot if needed
@@ -115,7 +115,7 @@ func testDsphStartEngine(t *testing.T) {
 }
 
 func testDsphLoadData(t *testing.T) {
-	loader := exec.Command("cgr-loader", "-config_path", dspCfgPath, "-path", path.Join(*dataDir, "tariffplans", "registrarc"), "-caches_address=")
+	loader := exec.Command("cgr-loader", "-config_path", dspCfgPath, "-path", path.Join(*utils.DataDir, "tariffplans", "registrarc"), "-caches_address=")
 	output := bytes.NewBuffer(nil)
 	outerr := bytes.NewBuffer(nil)
 	loader.Stdout = output
@@ -147,7 +147,7 @@ func testDsphBeforeDsphStart(t *testing.T) {
 
 func testDsphStartAll2(t *testing.T) {
 	var err error
-	if all2Cmd, err = engine.StartEngine(all2CfgPath, *waitRater); err != nil {
+	if all2Cmd, err = engine.StartEngine(all2CfgPath, *utils.WaitRater); err != nil {
 		t.Fatal(err)
 	}
 	if nodeID, err := testDsphGetNodeID(); err != nil {
@@ -159,7 +159,7 @@ func testDsphStartAll2(t *testing.T) {
 
 func testDsphStartAll(t *testing.T) {
 	var err error
-	if allCmd, err = engine.StartEngine(allCfgPath, *waitRater); err != nil {
+	if allCmd, err = engine.StartEngine(allCfgPath, *utils.WaitRater); err != nil {
 		t.Fatal(err)
 	}
 	if nodeID, err := testDsphGetNodeID(); err != nil {
@@ -183,7 +183,7 @@ func testDsphStopEngines(t *testing.T) {
 }
 
 func testDsphStopDispatcher(t *testing.T) {
-	if err := engine.KillEngine(*waitRater); err != nil {
+	if err := engine.KillEngine(*utils.WaitRater); err != nil {
 		t.Error(err)
 	}
 }

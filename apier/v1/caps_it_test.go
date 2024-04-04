@@ -81,7 +81,7 @@ func TestCapsQueueJSON(t *testing.T) {
 
 func testCapsInitCfg(t *testing.T) {
 	var err error
-	capsCfgPath = path.Join(*dataDir, "conf", "samples", capsConfigDIR)
+	capsCfgPath = path.Join(*utils.DataDir, "conf", "samples", capsConfigDIR)
 	capsCfg, err = config.NewCGRConfigFromPath(capsCfgPath)
 	if err != nil {
 		t.Error(err)
@@ -90,7 +90,7 @@ func testCapsInitCfg(t *testing.T) {
 
 // Start CGR Engine
 func testCapsStartEngine(t *testing.T) {
-	if _, err := engine.StopStartEngine(capsCfgPath, *waitRater); err != nil {
+	if _, err := engine.StopStartEngine(capsCfgPath, *utils.WaitRater); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -295,11 +295,11 @@ func benchmarkInit(b *testing.B, cfgDir string) {
 	capsOnce.Do(func() {
 		capsLastCfgDir = cfgDir
 		var err error
-		capsCfgPath = path.Join(*dataDir, "conf", "samples", cfgDir)
+		capsCfgPath = path.Join(*utils.DataDir, "conf", "samples", cfgDir)
 		if capsCfg, err = config.NewCGRConfigFromPath(capsCfgPath); err != nil {
 			b.Fatal(err)
 		}
-		if _, err := engine.StopStartEngine(capsCfgPath, *waitRater); err != nil {
+		if _, err := engine.StopStartEngine(capsCfgPath, *utils.WaitRater); err != nil {
 			b.Fatal(err)
 		}
 		if capsRPC, err = newRPCClient(capsCfg.ListenCfg()); err != nil {

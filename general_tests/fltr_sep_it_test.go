@@ -56,7 +56,7 @@ var (
 
 // Test start here
 func TestFltrSepIT(t *testing.T) {
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 		fltrSepConfDIR = "tutinternal"
 	case utils.MetaMySQL:
@@ -76,7 +76,7 @@ func TestFltrSepIT(t *testing.T) {
 
 func testFltrSepLoadConfig(t *testing.T) {
 	var err error
-	fltrSepCfgPath = path.Join(*dataDir, "conf", "samples", fltrSepConfDIR)
+	fltrSepCfgPath = path.Join(*utils.DataDir, "conf", "samples", fltrSepConfDIR)
 	if fltrSepCfg, err = config.NewCGRConfigFromPath(fltrSepCfgPath); err != nil {
 		t.Error(err)
 	}
@@ -111,7 +111,7 @@ func testFltrSepRpcConn(t *testing.T) {
 
 func testFltrSepLoadTarrifPlans(t *testing.T) {
 	var reply string
-	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "fltr_sep")}
+	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*utils.DataDir, "tariffplans", "fltr_sep")}
 	if err := fltrSepRPC.Call(context.Background(), utils.APIerSv1LoadTariffPlanFromFolder, attrs, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {

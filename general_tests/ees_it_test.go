@@ -41,7 +41,7 @@ import (
 //  3. Send an event with CGRID and RequestType *rated in a request to EeSv1.ProcessEvent.
 //  4. Verify that first export has RequestType *prepaid, while the second one has *rated.
 func TestEEsExportEventChanges(t *testing.T) {
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 	case utils.MetaMySQL, utils.MetaMongo, utils.MetaPostgres:
 		t.SkipNow()
@@ -123,7 +123,7 @@ func TestEEsExportEventChanges(t *testing.T) {
 		Name:       "TestEEsExportEventChanges",
 		ConfigJSON: content,
 	}
-	client, _, shutdown, err := testEnv.Setup(t, *waitRater)
+	client, _, shutdown, err := testEnv.Setup(t, *utils.WaitRater)
 	if err != nil {
 		t.Fatal(err)
 	}

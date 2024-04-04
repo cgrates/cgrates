@@ -65,7 +65,7 @@ var (
 
 // Test start here
 func TestFilterIT(t *testing.T) {
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 		filterConfigDIR = "tutinternal"
 	case utils.MetaMySQL:
@@ -84,7 +84,7 @@ func TestFilterIT(t *testing.T) {
 
 func testFilterInitCfg(t *testing.T) {
 	var err error
-	filterCfgPath = path.Join(*dataDir, "conf", "samples", filterConfigDIR)
+	filterCfgPath = path.Join(*utils.DataDir, "conf", "samples", filterConfigDIR)
 	filterCfg, err = config.NewCGRConfigFromPath(filterCfgPath)
 	if err != nil {
 		t.Error(err)
@@ -100,7 +100,7 @@ func testFilterResetDataDB(t *testing.T) {
 
 // Start CGR Engine
 func testFilterStartEngine(t *testing.T) {
-	if _, err := engine.StopStartEngine(filterCfgPath, *waitRater); err != nil {
+	if _, err := engine.StopStartEngine(filterCfgPath, *utils.WaitRater); err != nil {
 		t.Fatal(err)
 	}
 }

@@ -75,7 +75,7 @@ var (
 )
 
 func TestJSONReadFile(t *testing.T) {
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 		jsonCfgDIR = "ers_internal"
 	case utils.MetaMySQL:
@@ -95,7 +95,7 @@ func TestJSONReadFile(t *testing.T) {
 
 func testJSONInitConfig(t *testing.T) {
 	var err error
-	jsonCfgPath = path.Join(*dataDir, "conf", "samples", jsonCfgDIR)
+	jsonCfgPath = path.Join(*utils.DataDir, "conf", "samples", jsonCfgDIR)
 	if jsonCfg, err = config.NewCGRConfigFromPath(jsonCfgPath); err != nil {
 		t.Fatal("Got config error: ", err.Error())
 	}
@@ -116,7 +116,7 @@ func testJSONResetDataDb(t *testing.T) {
 }
 
 func testJSONStartEngine(t *testing.T) {
-	if _, err := engine.StopStartEngine(jsonCfgPath, *waitRater); err != nil {
+	if _, err := engine.StopStartEngine(jsonCfgPath, *utils.WaitRater); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -225,7 +225,7 @@ func testJSONVerify(t *testing.T) {
 }
 
 func testJSONKillEngine(t *testing.T) {
-	if err := engine.KillEngine(*waitRater); err != nil {
+	if err := engine.KillEngine(*utils.WaitRater); err != nil {
 		t.Error(err)
 	}
 }

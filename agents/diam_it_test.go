@@ -87,7 +87,7 @@ var (
 
 // Test start here
 func TestDiamItTcp(t *testing.T) {
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 		diamConfigDIR = "diamagent_internal"
 	case utils.MetaMySQL:
@@ -105,14 +105,14 @@ func TestDiamItTcp(t *testing.T) {
 }
 
 func TestDiamItDispatcher(t *testing.T) {
-	if *encoding == utils.MetaGOB {
+	if *utils.Encoding == utils.MetaGOB {
 		t.SkipNow()
 		return
 	}
 	testDiamItResetAllDB(t)
 	isDispatcherActive = true
-	engine.StartEngine(path.Join(*dataDir, "conf", "samples", "dispatchers", "all"), 200)
-	engine.StartEngine(path.Join(*dataDir, "conf", "samples", "dispatchers", "all2"), 200)
+	engine.StartEngine(path.Join(*utils.DataDir, "conf", "samples", "dispatchers", "all"), 200)
+	engine.StartEngine(path.Join(*utils.DataDir, "conf", "samples", "dispatchers", "all2"), 200)
 	diamConfigDIR = "dispatchers/diamagent"
 	for _, stest := range sTestsDiam {
 		t.Run(diamConfigDIR, stest)
@@ -121,7 +121,7 @@ func TestDiamItDispatcher(t *testing.T) {
 }
 
 func TestDiamItSctp(t *testing.T) {
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 		diamConfigDIR = "diamsctpagent_internal"
 	case utils.MetaMySQL:
@@ -139,7 +139,7 @@ func TestDiamItSctp(t *testing.T) {
 }
 
 func TestDiamItBiRPC(t *testing.T) {
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 		diamConfigDIR = "diamagent_internal_%sbirpc"
 	case utils.MetaMySQL:
@@ -151,14 +151,14 @@ func TestDiamItBiRPC(t *testing.T) {
 	default:
 		t.Fatal("Unknown Database type")
 	}
-	diamConfigDIR = fmt.Sprintf(diamConfigDIR, strings.TrimPrefix(*encoding, utils.Meta))
+	diamConfigDIR = fmt.Sprintf(diamConfigDIR, strings.TrimPrefix(*utils.Encoding, utils.Meta))
 	for _, stest := range sTestsDiam {
 		t.Run(diamConfigDIR, stest)
 	}
 }
 
 func TestDiamItMaxConn(t *testing.T) {
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 		diamConfigDIR = "diamagentmaxconn_internal"
 	case utils.MetaMySQL:
@@ -178,7 +178,7 @@ func TestDiamItMaxConn(t *testing.T) {
 }
 
 func TestDiamItSessionDisconnect(t *testing.T) {
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 		diamConfigDIR = "diamagent_internal"
 	case utils.MetaMySQL:
@@ -199,14 +199,14 @@ func TestDiamItSessionDisconnect(t *testing.T) {
 }
 
 func testDiamItInitCfg(t *testing.T) {
-	daCfgPath = path.Join(*dataDir, "conf", "samples", diamConfigDIR)
+	daCfgPath = path.Join(*utils.DataDir, "conf", "samples", diamConfigDIR)
 	// Init config first
 	var err error
 	daCfg, err = config.NewCGRConfigFromPath(daCfgPath)
 	if err != nil {
 		t.Fatal(err)
 	}
-	daCfg.DataFolderPath = *dataDir // Share DataFolderPath through config towards StoreDb for Flush()
+	daCfg.DataFolderPath = *utils.DataDir // Share DataFolderPath through config towards StoreDb for Flush()
 	rplyTimeout, _ = utils.ParseDurationWithSecs(*replyTimeout)
 	if isDispatcherActive {
 		daCfg.ListenCfg().RPCJSONListen = ":6012"
@@ -214,7 +214,7 @@ func testDiamItInitCfg(t *testing.T) {
 }
 
 func testDiamItResetAllDB(t *testing.T) {
-	cfgPath1 := path.Join(*dataDir, "conf", "samples", "dispatchers", "all")
+	cfgPath1 := path.Join(*utils.DataDir, "conf", "samples", "dispatchers", "all")
 	allCfg, err := config.NewCGRConfigFromPath(cfgPath1)
 	if err != nil {
 		t.Fatal(err)
@@ -226,7 +226,7 @@ func testDiamItResetAllDB(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	cfgPath2 := path.Join(*dataDir, "conf", "samples", "dispatchers", "all2")
+	cfgPath2 := path.Join(*utils.DataDir, "conf", "samples", "dispatchers", "all2")
 	allCfg2, err := config.NewCGRConfigFromPath(cfgPath2)
 	if err != nil {
 		t.Fatal(err)
@@ -281,7 +281,7 @@ func testDiamItApierRpcConn(t *testing.T) {
 
 // Load the tariff plan, creating accounts and their balances
 func testDiamItTPFromFolder(t *testing.T) {
-	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "tutorial")}
+	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*utils.DataDir, "tariffplans", "tutorial")}
 	var loadInst utils.LoadInstance
 	if err := apierRpc.Call(context.Background(), utils.APIerSv2LoadTariffPlanFromFolder, attrs, &loadInst); err != nil {
 		t.Error(err)
@@ -299,7 +299,7 @@ func testDiamItTPLoadData(t *testing.T) {
 		if err != nil {
 			t.Error(err)
 		}
-		loader := exec.Command(loaderPath, "-config_path", daCfgPath, "-path", path.Join(*dataDir, "tariffplans", "dispatchers"))
+		loader := exec.Command(loaderPath, "-config_path", daCfgPath, "-path", path.Join(*utils.DataDir, "tariffplans", "dispatchers"))
 
 		if err := loader.Start(); err != nil {
 			t.Error(err)
@@ -927,7 +927,7 @@ func testDiamItCCRTerminate(t *testing.T) {
 	} else if val != eVal {
 		t.Errorf("expecting: %s, received: <%s>", eVal, val)
 	}
-	time.Sleep(time.Duration(*waitRater) * time.Millisecond)
+	time.Sleep(time.Duration(*utils.WaitRater) * time.Millisecond)
 	var cdrs []*engine.CDR
 	args := utils.RPCCDRsFilterWithAPIOpts{RPCCDRsFilter: &utils.RPCCDRsFilter{RunIDs: []string{utils.MetaRaw}}}
 	if err := apierRpc.Call(context.Background(), utils.CDRsV1GetCDRs, &args, &cdrs); err != nil {

@@ -95,7 +95,7 @@ func testRerateCDRsERsDeleteFolders(t *testing.T) {
 
 func testRerateCDRsERsLoadConfig(t *testing.T) {
 	var err error
-	rrErsCdrsCfgPath = path.Join(*dataDir, "conf", "samples", "ers_rerate")
+	rrErsCdrsCfgPath = path.Join(*utils.DataDir, "conf", "samples", "ers_rerate")
 	if rrErsCdrsCfg, err = config.NewCGRConfigFromPath(rrErsCdrsCfgPath); err != nil {
 		t.Error(err)
 	}
@@ -130,7 +130,7 @@ func testRerateCDRsERsRPCConn(t *testing.T) {
 
 func testRerateCDRsERsLoadTP(t *testing.T) {
 	var reply string
-	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "reratecdrs")}
+	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*utils.DataDir, "tariffplans", "reratecdrs")}
 	if err := rrErsCdrsRPC.Call(context.Background(), utils.APIerSv1LoadTariffPlanFromFolder, attrs, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {

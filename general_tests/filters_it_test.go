@@ -69,7 +69,7 @@ var (
 
 // Test start here
 func TestFltrIT(t *testing.T) {
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 		fltrConfDIR = "filters_internal"
 	case utils.MetaMySQL:
@@ -89,9 +89,9 @@ func TestFltrIT(t *testing.T) {
 
 func testV1FltrLoadConfig(t *testing.T) {
 	var err error
-	fltrCfgPath = path.Join(*dataDir, "conf", "samples", fltrConfDIR)
-	if *encoding == utils.MetaGOB {
-		cdrsCfgPath = path.Join(*dataDir, "conf", "samples", fltrConfDIR+"_gob")
+	fltrCfgPath = path.Join(*utils.DataDir, "conf", "samples", fltrConfDIR)
+	if *utils.Encoding == utils.MetaGOB {
+		cdrsCfgPath = path.Join(*utils.DataDir, "conf", "samples", fltrConfDIR+"_gob")
 	}
 	if fltrCfg, err = config.NewCGRConfigFromPath(fltrCfgPath); err != nil {
 		t.Error(err)
@@ -100,7 +100,7 @@ func testV1FltrLoadConfig(t *testing.T) {
 }
 
 func testV1FltrInitDataDb(t *testing.T) {
-	if *dbType == utils.MetaInternal && fltrInternalRestart {
+	if *utils.DBType == utils.MetaInternal && fltrInternalRestart {
 		testV1FltrStopEngine(t)
 		testV1FltrStartEngine(t)
 		testV1FltrRpcConn(t)
@@ -134,7 +134,7 @@ func testV1FltrRpcConn(t *testing.T) {
 
 func testV1FltrLoadTarrifPlans(t *testing.T) {
 	var reply string
-	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "testit")}
+	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*utils.DataDir, "tariffplans", "testit")}
 	if err := fltrRpc.Call(context.Background(), utils.APIerSv1LoadTariffPlanFromFolder, attrs, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {

@@ -74,13 +74,13 @@ var sTestsStorDBit = []func(t *testing.T){
 
 func TestStorDBit(t *testing.T) {
 	//var stestName string
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 		storDBCfg = config.NewDefaultCGRConfig()
 		config.SetCgrConfig(storDBCfg)
 		storDB = NewInternalDB(nil, nil, false, storDBCfg.DataDbCfg().Items)
 	case utils.MetaMySQL:
-		if storDBCfg, err = config.NewCGRConfigFromPath(path.Join(*dataDir, "conf", "samples", "storage", "mysql")); err != nil {
+		if storDBCfg, err = config.NewCGRConfigFromPath(path.Join(*utils.DataDir, "conf", "samples", "storage", "mysql")); err != nil {
 			t.Fatal(err)
 		}
 		if storDB, err = NewMySQLStorage(storDBCfg.StorDbCfg().Host,
@@ -91,7 +91,7 @@ func TestStorDBit(t *testing.T) {
 		}
 		storDB.(*SQLStorage).db.Config.Logger = logger.Default.LogMode(logger.Silent)
 	case utils.MetaMongo:
-		if storDBCfg, err = config.NewCGRConfigFromPath(path.Join(*dataDir, "conf", "samples", "storage", "mongo")); err != nil {
+		if storDBCfg, err = config.NewCGRConfigFromPath(path.Join(*utils.DataDir, "conf", "samples", "storage", "mongo")); err != nil {
 			t.Fatal(err)
 		}
 		if storDB, err = NewMongoStorage("mongodb", storDBCfg.StorDbCfg().Host,
@@ -102,7 +102,7 @@ func TestStorDBit(t *testing.T) {
 			t.Fatal(err)
 		}
 	case utils.MetaPostgres:
-		if storDBCfg, err = config.NewCGRConfigFromPath(path.Join(*dataDir, "conf", "samples", "storage", "postgres")); err != nil {
+		if storDBCfg, err = config.NewCGRConfigFromPath(path.Join(*utils.DataDir, "conf", "samples", "storage", "postgres")); err != nil {
 			t.Fatal(err)
 		}
 		if storDB, err = NewPostgresStorage(storDBCfg.StorDbCfg().Host,

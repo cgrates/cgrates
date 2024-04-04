@@ -53,7 +53,7 @@ var (
 // This test is valid only for internal
 // to test the ttl for cdrs
 func TestCdrsIntIT(t *testing.T) {
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 		cdrsIntCfgDIR = "internal_ttl_internal"
 	case utils.MetaMySQL:
@@ -72,7 +72,7 @@ func TestCdrsIntIT(t *testing.T) {
 
 func testCdrsIntInitCfg(t *testing.T) {
 	var err error
-	cdrsIntCfgPath = path.Join(*dataDir, "conf", "samples", cdrsIntCfgDIR)
+	cdrsIntCfgPath = path.Join(*utils.DataDir, "conf", "samples", cdrsIntCfgDIR)
 	cdrsIntCfg, err = config.NewCGRConfigFromPath(cdrsIntCfgPath)
 	if err != nil {
 		t.Error(err)
@@ -80,7 +80,7 @@ func testCdrsIntInitCfg(t *testing.T) {
 }
 
 func testCdrsIntStartEngine(t *testing.T) {
-	if _, err := engine.StopStartEngine(cdrsIntCfgPath, *waitRater); err != nil {
+	if _, err := engine.StopStartEngine(cdrsIntCfgPath, *utils.WaitRater); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -133,7 +133,7 @@ func testCdrsIntTestTTL(t *testing.T) {
 }
 
 func testCdrsIntStopEngine(t *testing.T) {
-	if err := engine.KillEngine(*waitRater); err != nil {
+	if err := engine.KillEngine(*utils.WaitRater); err != nil {
 		t.Error(err)
 	}
 }

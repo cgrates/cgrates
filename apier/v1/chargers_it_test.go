@@ -108,7 +108,7 @@ var (
 // Test start here
 func TestChargerSIT(t *testing.T) {
 	sTestsChargerCache := sTestsCharger
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 		chargerConfigDIR = "tutinternal"
 		sTestsChargerCache = sTestsChargerCache[:len(sTestsChargerCache)-10]
@@ -128,7 +128,7 @@ func TestChargerSIT(t *testing.T) {
 
 func testChargerSInitCfg(t *testing.T) {
 	var err error
-	chargerCfgPath = path.Join(*dataDir, "conf", "samples", chargerConfigDIR)
+	chargerCfgPath = path.Join(*utils.DataDir, "conf", "samples", chargerConfigDIR)
 	chargerCfg, err = config.NewCGRConfigFromPath(chargerCfgPath)
 	if err != nil {
 		t.Error(err)
@@ -150,7 +150,7 @@ func testChargerSResetStorDb(t *testing.T) {
 
 // Start CGR Engine
 func testChargerSStartEngine(t *testing.T) {
-	if _, err := engine.StopStartEngine(chargerCfgPath, *waitRater); err != nil {
+	if _, err := engine.StopStartEngine(chargerCfgPath, *utils.WaitRater); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -549,7 +549,7 @@ func testChargerSProcessWithNotFoundAttribute(t *testing.T) {
 			},
 		},
 	}
-	if *encoding == utils.MetaGOB {
+	if *utils.Encoding == utils.MetaGOB {
 		processedEv[0].AttributeSProfiles = nil
 	}
 	var rply []*engine.ChrgSProcessEventReply

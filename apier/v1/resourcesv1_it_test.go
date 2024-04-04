@@ -108,7 +108,7 @@ var (
 
 // Test start here
 func TestRsV1IT(t *testing.T) {
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 		rlsV1ConfDIR = "tutinternal"
 		sTestsRLSV1 = sTestsRLSV1[:len(sTestsRLSV1)-24]
@@ -128,7 +128,7 @@ func TestRsV1IT(t *testing.T) {
 
 func testV1RsLoadConfig(t *testing.T) {
 	var err error
-	rlsV1CfgPath = path.Join(*dataDir, "conf", "samples", rlsV1ConfDIR)
+	rlsV1CfgPath = path.Join(*utils.DataDir, "conf", "samples", rlsV1ConfDIR)
 	if rlsV1Cfg, err = config.NewCGRConfigFromPath(rlsV1CfgPath); err != nil {
 		t.Error(err)
 	}
@@ -148,7 +148,7 @@ func testV1RsResetStorDb(t *testing.T) {
 }
 
 func testV1RsStartEngine(t *testing.T) {
-	if _, err := engine.StopStartEngine(rlsV1CfgPath, *waitRater); err != nil {
+	if _, err := engine.StopStartEngine(rlsV1CfgPath, *utils.WaitRater); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -235,7 +235,7 @@ func testV1RsCacheResourceWithConfig(t *testing.T) {
 
 func testV1RsFromFolder(t *testing.T) {
 	var reply string
-	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "oldtutorial")}
+	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*utils.DataDir, "tariffplans", "oldtutorial")}
 	if err := rlsV1Rpc.Call(context.Background(), utils.APIerSv1LoadTariffPlanFromFolder, attrs, &reply); err != nil {
 		t.Error(err)
 	}
@@ -734,7 +734,7 @@ func testV1RsDBStore(t *testing.T) {
 			}
 		}
 	}
-	if _, err := engine.StopStartEngine(rlsV1CfgPath, *waitRater); err != nil {
+	if _, err := engine.StopStartEngine(rlsV1CfgPath, *utils.WaitRater); err != nil {
 		t.Fatal(err)
 	}
 	var err error
@@ -1007,7 +1007,7 @@ func testV1RsAllocateUnlimited(t *testing.T) {
 }
 
 func testV1RsStopEngine(t *testing.T) {
-	if err := engine.KillEngine(*waitRater); err != nil {
+	if err := engine.KillEngine(*utils.WaitRater); err != nil {
 		t.Error(err)
 	}
 }

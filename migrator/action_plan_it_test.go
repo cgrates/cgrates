@@ -49,12 +49,12 @@ var sTestsActPlnIT = []func(t *testing.T){
 
 func TestActionPlanITRedis(t *testing.T) {
 	var err error
-	actPlnPathIn = path.Join(*dataDir, "conf", "samples", "tutmysql")
+	actPlnPathIn = path.Join(*utils.DataDir, "conf", "samples", "tutmysql")
 	actPlnCfgIn, err = config.NewCGRConfigFromPath(actPlnPathIn)
 	if err != nil {
 		t.Fatal(err)
 	}
-	actPlnPathOut = path.Join(*dataDir, "conf", "samples", "tutmysql")
+	actPlnPathOut = path.Join(*utils.DataDir, "conf", "samples", "tutmysql")
 	actPlnCfgOut, err = config.NewCGRConfigFromPath(actPlnPathOut)
 	if err != nil {
 		t.Fatal(err)
@@ -68,12 +68,12 @@ func TestActionPlanITRedis(t *testing.T) {
 
 func TestActionPlanITMongo(t *testing.T) {
 	var err error
-	actPlnPathIn = path.Join(*dataDir, "conf", "samples", "tutmongo")
+	actPlnPathIn = path.Join(*utils.DataDir, "conf", "samples", "tutmongo")
 	actPlnCfgIn, err = config.NewCGRConfigFromPath(actPlnPathIn)
 	if err != nil {
 		t.Fatal(err)
 	}
-	actPlnPathOut = path.Join(*dataDir, "conf", "samples", "tutmongo")
+	actPlnPathOut = path.Join(*utils.DataDir, "conf", "samples", "tutmongo")
 	actPlnCfgOut, err = config.NewCGRConfigFromPath(actPlnPathOut)
 	if err != nil {
 		t.Fatal(err)
@@ -87,12 +87,12 @@ func TestActionPlanITMongo(t *testing.T) {
 
 func TestActionPlanITMove(t *testing.T) {
 	var err error
-	actPlnPathIn = path.Join(*dataDir, "conf", "samples", "tutmongo")
+	actPlnPathIn = path.Join(*utils.DataDir, "conf", "samples", "tutmongo")
 	actPlnCfgIn, err = config.NewCGRConfigFromPath(actPlnPathIn)
 	if err != nil {
 		t.Fatal(err)
 	}
-	actPlnPathOut = path.Join(*dataDir, "conf", "samples", "tutmysql")
+	actPlnPathOut = path.Join(*utils.DataDir, "conf", "samples", "tutmysql")
 	actPlnCfgOut, err = config.NewCGRConfigFromPath(actPlnPathOut)
 	if err != nil {
 		t.Fatal(err)
@@ -106,12 +106,12 @@ func TestActionPlanITMove(t *testing.T) {
 
 func TestActionPlanITMigrateMongo2Redis(t *testing.T) {
 	var err error
-	actPlnPathIn = path.Join(*dataDir, "conf", "samples", "tutmongo")
+	actPlnPathIn = path.Join(*utils.DataDir, "conf", "samples", "tutmongo")
 	actPlnCfgIn, err = config.NewCGRConfigFromPath(actPlnPathIn)
 	if err != nil {
 		t.Fatal(err)
 	}
-	actPlnPathOut = path.Join(*dataDir, "conf", "samples", "tutmysql")
+	actPlnPathOut = path.Join(*utils.DataDir, "conf", "samples", "tutmysql")
 	actPlnCfgOut, err = config.NewCGRConfigFromPath(actPlnPathOut)
 	if err != nil {
 		t.Fatal(err)
@@ -125,12 +125,12 @@ func TestActionPlanITMigrateMongo2Redis(t *testing.T) {
 
 func TestActionPlanITMoveEncoding(t *testing.T) {
 	var err error
-	actPlnPathIn = path.Join(*dataDir, "conf", "samples", "tutmongo")
+	actPlnPathIn = path.Join(*utils.DataDir, "conf", "samples", "tutmongo")
 	actPlnCfgIn, err = config.NewCGRConfigFromPath(actPlnPathIn)
 	if err != nil {
 		t.Fatal(err)
 	}
-	actPlnPathOut = path.Join(*dataDir, "conf", "samples", "tutmongojson")
+	actPlnPathOut = path.Join(*utils.DataDir, "conf", "samples", "tutmongojson")
 	actPlnCfgOut, err = config.NewCGRConfigFromPath(actPlnPathOut)
 	if err != nil {
 		t.Fatal(err)
@@ -144,12 +144,12 @@ func TestActionPlanITMoveEncoding(t *testing.T) {
 
 func TestActionPlanITMoveEncoding2(t *testing.T) {
 	var err error
-	actPlnPathIn = path.Join(*dataDir, "conf", "samples", "tutmysql")
+	actPlnPathIn = path.Join(*utils.DataDir, "conf", "samples", "tutmysql")
 	actPlnCfgIn, err = config.NewCGRConfigFromPath(actPlnPathIn)
 	if err != nil {
 		t.Fatal(err)
 	}
-	actPlnPathOut = path.Join(*dataDir, "conf", "samples", "tutmysqljson")
+	actPlnPathOut = path.Join(*utils.DataDir, "conf", "samples", "tutmysqljson")
 	actPlnCfgOut, err = config.NewCGRConfigFromPath(actPlnPathOut)
 	if err != nil {
 		t.Fatal(err)

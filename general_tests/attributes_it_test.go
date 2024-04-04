@@ -62,7 +62,7 @@ var (
 )
 
 func TestAttributeSIT(t *testing.T) {
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 		alsPrfConfigDIR = "tutinternal"
 	case utils.MetaMySQL:
@@ -81,12 +81,12 @@ func TestAttributeSIT(t *testing.T) {
 
 func testAttributeSInitCfg(t *testing.T) {
 	var err error
-	attrCfgPath = path.Join(*dataDir, "conf", "samples", alsPrfConfigDIR)
+	attrCfgPath = path.Join(*utils.DataDir, "conf", "samples", alsPrfConfigDIR)
 	attrCfg, err = config.NewCGRConfigFromPath(attrCfgPath)
 	if err != nil {
 		t.Error(err)
 	}
-	attrCfg.DataFolderPath = *dataDir // Share DataFolderPath through config towards StoreDb for Flush()
+	attrCfg.DataFolderPath = *utils.DataDir // Share DataFolderPath through config towards StoreDb for Flush()
 }
 
 func testAttributeSInitDataDb(t *testing.T) {
@@ -104,7 +104,7 @@ func testAttributeSResetStorDb(t *testing.T) {
 
 // Start CGR Engine
 func testAttributeSStartEngine(t *testing.T) {
-	if _, err := engine.StopStartEngine(attrCfgPath, *waitRater); err != nil {
+	if _, err := engine.StopStartEngine(attrCfgPath, *utils.WaitRater); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -120,7 +120,7 @@ func testAttributeSRPCConn(t *testing.T) {
 
 func testAttributeSLoadFromFolder(t *testing.T) {
 	var reply string
-	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "testit")}
+	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*utils.DataDir, "tariffplans", "testit")}
 	if err := attrRPC.Call(context.Background(), utils.APIerSv1LoadTariffPlanFromFolder, attrs, &reply); err != nil {
 		t.Error(err)
 	}
@@ -1058,7 +1058,7 @@ func testAttributeSStopEngine(t *testing.T) {
 }
 
 func TestAttributesDestinationFilters(t *testing.T) {
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 	case utils.MetaMySQL, utils.MetaMongo, utils.MetaPostgres:
 		t.SkipNow()
@@ -1122,7 +1122,7 @@ cgrates.org,FLTR_DESTINATION_MATCH,*destinations,~*req.Destination,DST_10,`,
 		ConfigJSON: content,
 		TpFiles:    tpFiles,
 	}
-	client, _, shutdown, err := testEnv.Setup(t, *waitRater)
+	client, _, shutdown, err := testEnv.Setup(t, *utils.WaitRater)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -1265,7 +1265,7 @@ cgrates.org,FLTR_DESTINATION_MATCH,*destinations,~*req.Destination,DST_10,`,
 }
 
 func TestAttributesArith(t *testing.T) {
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 	case utils.MetaMySQL, utils.MetaMongo, utils.MetaPostgres:
 		t.SkipNow()
@@ -1313,7 +1313,7 @@ cgrates.org,ATTR_ARITH,,,,,*req.MultiplyBetweenVariables,*multiply,~*req.Elem1;~
 		ConfigJSON: content,
 		TpFiles:    tpFiles,
 	}
-	client, _, shutdown, err := testEnv.Setup(t, *waitRater)
+	client, _, shutdown, err := testEnv.Setup(t, *utils.WaitRater)
 	if err != nil {
 		t.Fatal(err)
 	}

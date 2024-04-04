@@ -98,7 +98,7 @@ var (
 // Test start here
 func TestRouteSV1IT(t *testing.T) {
 	sTestsRouteCacheSV1 := sTestsRouteSV1
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 		routeSv1ConfDIR = "tutinternal"
 		sTestsRouteCacheSV1 = sTestsRouteCacheSV1[:len(sTestsRouteCacheSV1)-10]
@@ -118,7 +118,7 @@ func TestRouteSV1IT(t *testing.T) {
 
 func testV1RouteLoadConfig(t *testing.T) {
 	var err error
-	routeSv1CfgPath = path.Join(*dataDir, "conf", "samples", routeSv1ConfDIR)
+	routeSv1CfgPath = path.Join(*utils.DataDir, "conf", "samples", routeSv1ConfDIR)
 	if routeSv1Cfg, err = config.NewCGRConfigFromPath(routeSv1CfgPath); err != nil {
 		t.Error(err)
 	}
@@ -145,7 +145,7 @@ func testV1RouteResetStorDb(t *testing.T) {
 }
 
 func testV1RouteStartEngine(t *testing.T) {
-	if _, err := engine.StopStartEngine(routeSv1CfgPath, *waitRater); err != nil {
+	if _, err := engine.StopStartEngine(routeSv1CfgPath, *utils.WaitRater); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -171,7 +171,7 @@ func testV1RouteGetBeforeDataLoad(t *testing.T) {
 
 func testV1RouteFromFolder(t *testing.T) {
 	var reply string
-	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "testit")}
+	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*utils.DataDir, "tariffplans", "testit")}
 	if err := routeSv1Rpc.Call(context.Background(), utils.APIerSv1LoadTariffPlanFromFolder, attrs, &reply); err != nil {
 		t.Error(err)
 	}
@@ -1052,7 +1052,7 @@ func testV1RouteGetRouteForEvent(t *testing.T) {
 		},
 		Weight: 50,
 	}
-	if *encoding == utils.MetaGOB { // in gob emtpty slice is encoded as nil
+	if *utils.Encoding == utils.MetaGOB { // in gob emtpty slice is encoded as nil
 		expected.SortingParameters = nil
 	}
 	var supProf []*engine.RouteProfile
@@ -1376,7 +1376,7 @@ func testV1RouteAccountWithRatingPlan(t *testing.T) {
 			},
 		},
 	}}
-	if *encoding == utils.MetaGOB {
+	if *utils.Encoding == utils.MetaGOB {
 		(*eSpls)[0].Routes = []*engine.SortedRoute{
 			{
 				RouteID: "RouteWithAccAndRP",
@@ -1445,7 +1445,7 @@ func testV1RouteAccountWithRatingPlan(t *testing.T) {
 			},
 		},
 	}}
-	if *encoding == utils.MetaGOB {
+	if *utils.Encoding == utils.MetaGOB {
 		(*eSpls)[0].Routes = []*engine.SortedRoute{
 			{
 				RouteID: "RouteWithAccAndRP",
@@ -1515,7 +1515,7 @@ func testV1RouteAccountWithRatingPlan(t *testing.T) {
 			},
 		},
 	}}
-	if *encoding == utils.MetaGOB {
+	if *utils.Encoding == utils.MetaGOB {
 		(*eSpls)[0].Routes = []*engine.SortedRoute{
 			{
 				RouteID: "RouteWithRP",

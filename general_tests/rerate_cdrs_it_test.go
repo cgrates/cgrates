@@ -34,7 +34,7 @@ import (
 
 func TestRerateCDRs(t *testing.T) {
 	var cfgDir string
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 		cfgDir = "rerate_cdrs_internal"
 	case utils.MetaMySQL:
@@ -49,10 +49,10 @@ func TestRerateCDRs(t *testing.T) {
 	testEnv := TestEnvironment{
 		Name: "TestRerateCDRs",
 		// Encoding:   *encoding,
-		ConfigPath: path.Join(*dataDir, "conf", "samples", cfgDir),
-		TpPath:     path.Join(*dataDir, "tariffplans", "reratecdrs"),
+		ConfigPath: path.Join(*utils.DataDir, "conf", "samples", cfgDir),
+		TpPath:     path.Join(*utils.DataDir, "tariffplans", "reratecdrs"),
 	}
-	client, _, shutdown, err := testEnv.Setup(t, *waitRater)
+	client, _, shutdown, err := testEnv.Setup(t, *utils.WaitRater)
 	if err != nil {
 		t.Fatal(err)
 	}

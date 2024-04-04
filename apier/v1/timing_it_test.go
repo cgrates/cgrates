@@ -57,7 +57,7 @@ var (
 // Tests start here
 func TestTimingIT(t *testing.T) {
 	timingTests := sTestsTiming
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 		timConfigDIR = "tutinternal"
 	case utils.MetaMySQL:
@@ -76,7 +76,7 @@ func TestTimingIT(t *testing.T) {
 
 func testTimingInitCfg(t *testing.T) {
 	var err error
-	timCfgPath = path.Join(*dataDir, "conf", "samples", timConfigDIR)
+	timCfgPath = path.Join(*utils.DataDir, "conf", "samples", timConfigDIR)
 	timCfg, err = config.NewCGRConfigFromPath(timCfgPath)
 	if err != nil {
 		t.Error(err)
@@ -98,7 +98,7 @@ func testTimingResetStorDb(t *testing.T) {
 
 // Start CGR Engine
 func testTimingStartEngine(t *testing.T) {
-	if _, err := engine.StopStartEngine(timCfgPath, *waitRater); err != nil {
+	if _, err := engine.StopStartEngine(timCfgPath, *utils.WaitRater); err != nil {
 		t.Fatal(err)
 	}
 }

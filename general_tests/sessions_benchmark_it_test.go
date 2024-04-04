@@ -57,7 +57,7 @@ var (
 )
 
 func TestSesPIt(t *testing.T) {
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 		sesPCfgDir = "tutinternal"
 	case utils.MetaMySQL:
@@ -75,7 +75,7 @@ func TestSesPIt(t *testing.T) {
 }
 
 func testSesPItLoadConfig(t *testing.T) {
-	sesPCfgPath = path.Join(*dataDir, "conf", "samples", sesPCfgDir)
+	sesPCfgPath = path.Join(*utils.DataDir, "conf", "samples", sesPCfgDir)
 	if sesPCfg, err = config.NewCGRConfigFromPath(sesPCfgPath); err != nil {
 		t.Error(err)
 	}
@@ -94,7 +94,7 @@ func testSesPItResetStorDB(t *testing.T) {
 }
 
 func testSesPItStartEngine(t *testing.T) {
-	if _, err := engine.StopStartEngine(sesPCfgPath, *waitRater); err != nil {
+	if _, err := engine.StopStartEngine(sesPCfgPath, *utils.WaitRater); err != nil {
 		t.Fatal(err)
 	}
 }

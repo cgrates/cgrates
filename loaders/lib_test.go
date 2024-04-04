@@ -21,7 +21,6 @@ package loaders
 import (
 	"encoding/csv"
 	"errors"
-	"flag"
 	"io"
 	"strings"
 	"testing"
@@ -36,19 +35,12 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-var (
-	waitRater = flag.Int("wait_rater", 200, "Number of miliseconds to wait for rater to start and cache")
-	dataDir   = flag.String("data_dir", "/usr/share/cgrates", "CGR data dir path here")
-	encoding  = flag.String("rpc", utils.MetaJSON, "what encoding whould be used for rpc comunication")
-	dbType    = flag.String("dbtype", utils.MetaInternal, "The type of DataBase (Internal/Mongo/mySql)")
-)
-
 var loaderPaths = []string{"/tmp/In", "/tmp/Out", "/tmp/LoaderIn", "/tmp/SubpathWithoutMove",
 	"/tmp/SubpathLoaderWithMove", "/tmp/SubpathOut", "/tmp/templateLoaderIn", "/tmp/templateLoaderOut",
 	"/tmp/customSepLoaderIn", "/tmp/customSepLoaderOut"}
 
 func newRPCClient(cfg *config.ListenCfg) (c *birpc.Client, err error) {
-	switch *encoding {
+	switch *utils.Encoding {
 	case utils.MetaJSON:
 		return jsonrpc.Dial(utils.TCP, cfg.RPCJSONListen)
 	case utils.MetaGOB:

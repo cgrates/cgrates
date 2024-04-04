@@ -55,7 +55,7 @@ var (
 
 // Tests starts here
 func TestSessionsBiRPC(t *testing.T) {
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 		sessionsBiRPCCfgDIR = "smg_automatic_debits_internal"
 	case utils.MetaMySQL:
@@ -82,7 +82,7 @@ func (*smock) DisconnectSession(ctx *context.Context,
 }
 
 func testSessionsBiRPCInitCfg(t *testing.T) {
-	sessionsBiRPCCfgPath = path.Join(*dataDir, "conf", "samples", sessionsBiRPCCfgDIR)
+	sessionsBiRPCCfgPath = path.Join(*utils.DataDir, "conf", "samples", sessionsBiRPCCfgDIR)
 	// Init config first
 	sessionsBiRPCCfg, err = config.NewCGRConfigFromPath(sessionsBiRPCCfgPath)
 	if err != nil {
@@ -106,7 +106,7 @@ func testSessionsBiRPCResetStorDb(t *testing.T) {
 
 // Start CGR Engine
 func testSessionsBiRPCStartEngine(t *testing.T) {
-	if _, err := engine.StopStartEngine(sessionsBiRPCCfgPath, *waitRater); err != nil {
+	if _, err := engine.StopStartEngine(sessionsBiRPCCfgPath, *utils.WaitRater); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -134,12 +134,12 @@ func testSessionsBiRPCApierRpcConn(t *testing.T) {
 
 // Load the tariff plan, creating accounts and their balances
 func testSessionsBiRPCTPFromFolder(t *testing.T) {
-	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "oldtutorial")}
+	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*utils.DataDir, "tariffplans", "oldtutorial")}
 	var loadInst utils.LoadInstance
 	if err := sessionsRPC.Call(context.Background(), utils.APIerSv2LoadTariffPlanFromFolder, attrs, &loadInst); err != nil {
 		t.Error(err)
 	}
-	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // Give time for scheduler to execute topups
+	time.Sleep(time.Duration(*utils.WaitRater) * time.Millisecond) // Give time for scheduler to execute topups
 }
 
 func testSessionsBiRPCSessionAutomaticDisconnects(t *testing.T) {
@@ -390,7 +390,7 @@ func testSessionsBiRPCStopCgrEngine(t *testing.T) {
 	if err := sessionsBiRPC.Close(); err != nil { // Close the connection so we don't get EOF warnings from client
 		t.Error(err)
 	}
-	if err := engine.KillEngine(*waitRater); err != nil {
+	if err := engine.KillEngine(*utils.WaitRater); err != nil {
 		t.Error(err)
 	}
 }

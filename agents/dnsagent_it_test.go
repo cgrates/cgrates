@@ -75,7 +75,7 @@ var (
 )
 
 func TestDNSitSimple(t *testing.T) {
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 		dnsCfgDIR = "dnsagent_internal"
 	case utils.MetaMySQL:
@@ -95,7 +95,7 @@ func TestDNSitSimple(t *testing.T) {
 // Init config
 func testDNSitInitCfg(t *testing.T) {
 	var err error
-	dnsCfgPath = path.Join(*dataDir, "conf", "samples", dnsCfgDIR)
+	dnsCfgPath = path.Join(*utils.DataDir, "conf", "samples", dnsCfgDIR)
 	dnsCfg, err = config.NewCGRConfigFromPath(dnsCfgPath)
 	if err != nil {
 		t.Error(err)
@@ -114,7 +114,7 @@ func testDNSitResetDB(t *testing.T) {
 
 // Start CGR Engine
 func testDNSitStartEngine(t *testing.T) {
-	if _, err := engine.StopStartEngine(dnsCfgPath, *waitRater); err != nil {
+	if _, err := engine.StopStartEngine(dnsCfgPath, *utils.WaitRater); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -130,13 +130,13 @@ func testDNSitApierRpcConn(t *testing.T) {
 
 // Load the tariff plan, creating accounts and their balances
 func testDNSitTPFromFolder(t *testing.T) {
-	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "dnsagent")}
+	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*utils.DataDir, "tariffplans", "dnsagent")}
 	var loadInst utils.LoadInstance
 	if err := dnsRPC.Call(context.Background(), utils.APIerSv2LoadTariffPlanFromFolder,
 		attrs, &loadInst); err != nil {
 		t.Error(err)
 	}
-	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // Give time for scheduler to execute topups
+	time.Sleep(time.Duration(*utils.WaitRater) * time.Millisecond) // Give time for scheduler to execute topups
 }
 
 // Connect DNS client to server
@@ -1501,7 +1501,7 @@ func testDNSitClntNAPTROptsWithAttributes(t *testing.T) {
 }
 
 func testDNSitStopEngine(t *testing.T) {
-	if err := engine.KillEngine(*waitRater); err != nil {
+	if err := engine.KillEngine(*utils.WaitRater); err != nil {
 		t.Error(err)
 	}
 }

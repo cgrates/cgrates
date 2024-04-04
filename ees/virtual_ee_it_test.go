@@ -68,7 +68,7 @@ func TestVirtualExport(t *testing.T) {
 
 func testVirtLoadConfig(t *testing.T) {
 	var err error
-	virtCfgPath = path.Join(*dataDir, "conf", "samples", virtConfigDir)
+	virtCfgPath = path.Join(*utils.DataDir, "conf", "samples", virtConfigDir)
 	if virtCfg, err = config.NewCGRConfigFromPath(virtCfgPath); err != nil {
 		t.Error(err)
 	}
@@ -87,7 +87,7 @@ func testVirtResetStorDb(t *testing.T) {
 }
 
 func testVirtStartEngine(t *testing.T) {
-	if _, err := engine.StopStartEngine(virtCfgPath, *waitRater); err != nil {
+	if _, err := engine.StopStartEngine(virtCfgPath, *utils.WaitRater); err != nil {
 		t.Fatal(err)
 	}
 }

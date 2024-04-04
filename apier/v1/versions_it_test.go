@@ -55,7 +55,7 @@ var (
 
 // Test start here
 func TestVrsIT(t *testing.T) {
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 		// vrsConfigDIR = "tutinternal"
 		// vrsStorageType = utils.INTERNAL
@@ -87,12 +87,12 @@ func TestVrsIT(t *testing.T) {
 
 func testVrsInitCfg(t *testing.T) {
 	var err error
-	vrsCfgPath = path.Join(*dataDir, "conf", "samples", vrsConfigDIR)
+	vrsCfgPath = path.Join(*utils.DataDir, "conf", "samples", vrsConfigDIR)
 	vrsCfg, err = config.NewCGRConfigFromPath(vrsCfgPath)
 	if err != nil {
 		t.Error(err)
 	}
-	vrsCfg.DataFolderPath = *dataDir // Share DataFolderPath through config towards StoreDb for Flush()
+	vrsCfg.DataFolderPath = *utils.DataDir // Share DataFolderPath through config towards StoreDb for Flush()
 	vrsDelay = 1000
 }
 

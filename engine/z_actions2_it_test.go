@@ -55,7 +55,7 @@ var sTestsActions = []func(t *testing.T){
 }
 
 func TestActionsITRemoveSMCost(t *testing.T) {
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 		t.SkipNow()
 	case utils.MetaMySQL:
@@ -67,7 +67,7 @@ func TestActionsITRemoveSMCost(t *testing.T) {
 	default:
 		t.Fatal("Unknown Database type")
 	}
-	if *encoding == utils.MetaGOB {
+	if *utils.Encoding == utils.MetaGOB {
 		actsCfgDir += "_gob"
 	}
 
@@ -78,7 +78,7 @@ func TestActionsITRemoveSMCost(t *testing.T) {
 
 func testActionsInitCfg(t *testing.T) {
 	var err error
-	actsCfgPath = path.Join(*dataDir, "conf", "samples", actsCfgDir)
+	actsCfgPath = path.Join(*utils.DataDir, "conf", "samples", actsCfgDir)
 	actsCfg, err = config.NewCGRConfigFromPath(actsCfgPath)
 	if err != nil {
 		t.Error(err)
@@ -86,7 +86,7 @@ func testActionsInitCfg(t *testing.T) {
 }
 
 func testActionsInitCdrsStore(t *testing.T) {
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 		actsCdrStore = NewInternalDB(nil, nil, true, actsCfg.DataDbCfg().Items)
 	case utils.MetaMySQL:
@@ -126,7 +126,7 @@ func testActionsResetStorDb(t *testing.T) {
 
 // Start CGR Engine
 func testActionsStartEngine(t *testing.T) {
-	if _, err := StopStartEngine(actsCfgPath, *waitRater); err != nil {
+	if _, err := StopStartEngine(actsCfgPath, *utils.WaitRater); err != nil {
 		t.Fatal(err)
 	}
 }

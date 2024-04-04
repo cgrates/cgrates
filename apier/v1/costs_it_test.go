@@ -53,7 +53,7 @@ var (
 
 // Test start here
 func TestCostIT(t *testing.T) {
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 		costConfigDIR = "tutinternal"
 	case utils.MetaMySQL:
@@ -72,7 +72,7 @@ func TestCostIT(t *testing.T) {
 
 func testCostInitCfg(t *testing.T) {
 	var err error
-	costCfgPath = path.Join(*dataDir, "conf", "samples", costConfigDIR)
+	costCfgPath = path.Join(*utils.DataDir, "conf", "samples", costConfigDIR)
 	costCfg, err = config.NewCGRConfigFromPath(costCfgPath)
 	if err != nil {
 		t.Error(err)
@@ -94,7 +94,7 @@ func testCostResetStorDb(t *testing.T) {
 
 // Start CGR Engine
 func testCostStartEngine(t *testing.T) {
-	if _, err := engine.StopStartEngine(costCfgPath, *waitRater); err != nil {
+	if _, err := engine.StopStartEngine(costCfgPath, *utils.WaitRater); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -110,7 +110,7 @@ func testCostRPCConn(t *testing.T) {
 
 func testCostLoadFromFolder(t *testing.T) {
 	var reply string
-	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "tutorial")}
+	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*utils.DataDir, "tariffplans", "tutorial")}
 	if err := costRPC.Call(context.Background(), utils.APIerSv1LoadTariffPlanFromFolder, attrs, &reply); err != nil {
 		t.Error(err)
 	}
@@ -129,7 +129,7 @@ func testCostGetCost(t *testing.T) {
 }
 
 func testCostKillEngine(t *testing.T) {
-	if err := engine.KillEngine(*waitRater); err != nil {
+	if err := engine.KillEngine(*utils.WaitRater); err != nil {
 		t.Error(err)
 	}
 }

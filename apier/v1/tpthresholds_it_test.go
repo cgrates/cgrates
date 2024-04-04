@@ -62,7 +62,7 @@ var sTestsTPThreshold = []func(t *testing.T){
 
 // Test start here
 func TestTPThresholdIT(t *testing.T) {
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 		tpThresholdConfigDIR = "tutinternal"
 	case utils.MetaMySQL:
@@ -81,7 +81,7 @@ func TestTPThresholdIT(t *testing.T) {
 
 func testTPThreholdInitCfg(t *testing.T) {
 	var err error
-	tpThresholdCfgPath = path.Join(*dataDir, "conf", "samples", tpThresholdConfigDIR)
+	tpThresholdCfgPath = path.Join(*utils.DataDir, "conf", "samples", tpThresholdConfigDIR)
 	tpThresholdCfg, err = config.NewCGRConfigFromPath(tpThresholdCfgPath)
 	if err != nil {
 		t.Error(err)

@@ -44,7 +44,7 @@ import (
 )
 
 func BenchmarkRPCCalls(b *testing.B) {
-	benchCfgPath := path.Join(*dataDir, "conf", "samples", "sessions_internal")
+	benchCfgPath := path.Join(*utils.DataDir, "conf", "samples", "sessions_internal")
 	benchCfg, err := config.NewCGRConfigFromPath(benchCfgPath)
 	if err != nil {
 		b.Fatal(err)
