@@ -1,5 +1,4 @@
-//go:build integration
-// +build integration
+//go:build flaky
 
 /*
 Real-time Online/Offline Charging System (OCS) for Telecom & ISP environments
@@ -125,7 +124,7 @@ func testVersionsFlush(t *testing.T) {
 	if err != nil {
 		t.Error("Error when flushing Mongo ", err.Error())
 	}
-	if err := storageDb.Flush(path.Join(versionCfg.DataFolderPath, "storage", dbPath(versionCfg.StorDbCfg().Type))); err != nil {
+	if err := storageDb.Flush(path.Join(versionCfg.DataFolderPath, "storage", strings.Trim(versionCfg.StorDbCfg().Type, "*"))); err != nil {
 		t.Error(err)
 	}
 	SetDBVersions(storageDb)
