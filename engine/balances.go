@@ -851,7 +851,7 @@ func (bl *BalanceSummary) FieldAsInterface(fldPath []string) (val any, err error
 	}
 }
 
-// debitUnits will debit units for call descriptor.
+// debit will debit units for call descriptor.
 // returns the amount debited within cc
 func (b *Balance) debit(cd *CallDescriptor, ub *Account, moneyBalances Balances,
 	count, dryRun, debitConnectFee, isUnitBal bool, fltrS *FilterS) (cc *CallCost, err error) {

@@ -25,6 +25,7 @@ import (
 	"time"
 
 	"github.com/cgrates/birpc/context"
+	v1 "github.com/cgrates/cgrates/apier/v1"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/sessions"
 	"github.com/cgrates/cgrates/utils"
@@ -267,8 +268,10 @@ cgrates.org,sms,1001,2014-01-14T00:00:00Z,RP_ANY,`,
 //     unit were subtracted from the *monetary balance.
 //  4. Try to refund the debit made in the previous step to check whether factor is taken
 //     into consideration for refunds as well.
-//  5. Do the above steps also for SessionSv1.ProcessCDR with a different usage.
-//  6. Initiate a prepaid session (usage 10s), update it twice (usages 5s and 2s), terminate,
+//  5. Do the above steps also for SessionSv1.ProcessCDR with a different usage and a different
+//     factor (that we overwrite through the APIerSv1.SetBalance API).
+//  6. Set a *voice balance with 100s. Initiate a prepaid session (usage 10s), update it twice
+//     (usages 5s and 2s), terminate,
 //     and process CDR.
 //  7. Check to see if balance_voice was debitted 34s ((10s+5s+2s) * voiceFactor, where
 //     voiceFactor is 2) and then also check if it applies correctly for refund (similar
@@ -306,7 +309,8 @@ func TestBalanceFactor(t *testing.T) {
 },
 
 "schedulers": {
-	"enabled": true
+	"enabled": true,
+	"cdrs_conns": ["*internal"]
 },
 
 "apiers": {
@@ -334,7 +338,6 @@ cgrates.org,1001,PACKAGE_1001,,,`,
 PACKAGE_1001,ACT_TOPUP,*asap,10`,
 		utils.ActionsCsv: `#ActionsId[0],Action[1],ExtraParameters[2],Filter[3],BalanceId[4],BalanceType[5],Categories[6],DestinationIds[7],RatingSubject[8],SharedGroup[9],ExpiryTime[10],TimingIds[11],Units[12],BalanceWeight[13],BalanceBlocker[14],BalanceDisabled[15],Weight[16]
 ACT_TOPUP,*topup_reset,"{""smsFactor"":4}",,balance_sms,*sms,,,,,*unlimited,,10,20,false,false,20
-ACT_TOPUP,*topup_reset,"{""voiceFactor"":2}",,balance_voice,*voice,call,,,,*unlimited,,100s,20,false,false,20
 ACT_TOPUP,*topup_reset,,,balance_monetary,*monetary,,*any,,,*unlimited,,5,10,false,false,20`,
 		utils.ChargersCsv: `#Id,ActionsId,TimingId,Weight
 #Tenant,ID,FilterIDs,ActivationInterval,RunID,AttributeIDs,Weight
@@ -373,23 +376,18 @@ cgrates.org,call,1001,2014-01-14T00:00:00Z,RP_VOICE,`,
 		if err := client.Call(context.Background(), utils.APIerSv2GetAccount, attrs, &acnt); err != nil {
 			t.Fatal(err)
 		}
-		if len(acnt.BalanceMap) != 3 ||
+		if len(acnt.BalanceMap) != 2 ||
 			len(acnt.BalanceMap[utils.MetaMonetary]) != 1 ||
-			len(acnt.BalanceMap[utils.MetaSMS]) != 1 ||
-			len(acnt.BalanceMap[utils.MetaVoice]) != 1 {
-			t.Fatalf("expected account to have one balance of type *monetary, one of type *sms and one of type *voice, received %v", acnt)
+			len(acnt.BalanceMap[utils.MetaSMS]) != 1 {
+			t.Fatalf("expected account to have one balance of type *monetary and one of type *sms received %v", acnt)
 		}
 		smsBalance := acnt.BalanceMap[utils.MetaSMS][0]
 		if smsBalance.ID != "balance_sms" || smsBalance.Value != 10 {
-			t.Fatalf("received account with unexpected *sms balance: %v", smsBalance)
+			t.Fatalf("*sms balance value: want %v, got %v", 10, smsBalance)
 		}
 		monetaryBalance := acnt.BalanceMap[utils.MetaMonetary][0]
 		if monetaryBalance.ID != "balance_monetary" || monetaryBalance.Value != 5 {
-			t.Fatalf("received account with unexpected *monetary balance: %v", monetaryBalance)
-		}
-		voiceBalance := acnt.BalanceMap[utils.MetaVoice][0]
-		if voiceBalance.ID != "balance_voice" || voiceBalance.Value != float64(100*time.Second) {
-			t.Fatalf("received account with unexpected *voice balance: %v", voiceBalance)
+			t.Fatalf("*monetary balance value: want %v, got %v", 5, monetaryBalance)
 		}
 	})
 
@@ -431,19 +429,23 @@ cgrates.org,call,1001,2014-01-14T00:00:00Z,RP_VOICE,`,
 		if len(cdrs) != 1 {
 			t.Fatalf("expected to receive only one CDR: %v", utils.ToJSON(cdrs))
 		}
-		smsBalanceValue, err := cdrs[0].CostDetails.FieldAsInterface([]string{"AccountSummary", "BalanceSummaries[0]", "Value"})
+		smsBalanceValue, err := cdrs[0].CostDetails.FieldAsInterface([]string{
+			"AccountSummary", "BalanceSummaries", "balance_sms", "Value",
+		})
 		if err != nil {
 			t.Fatalf("could not retrieve *sms balance current value: %v", err)
 		}
 		if smsBalanceValue != 2. {
-			t.Errorf("unexpected balance value: expected %v, received %v", 2., smsBalanceValue)
+			t.Errorf("*sms balance value: want %v, got %v", 2, smsBalanceValue)
 		}
-		monetaryBalanceValue, err := cdrs[0].CostDetails.FieldAsInterface([]string{"AccountSummary", "BalanceSummaries[2]", "Value"})
+		monetaryBalanceValue, err := cdrs[0].CostDetails.FieldAsInterface([]string{
+			"AccountSummary", "BalanceSummaries", "balance_monetary", "Value",
+		})
 		if err != nil {
 			t.Fatalf("could not retrieve *sms balance current value: %v", err)
 		}
 		if monetaryBalanceValue != 3. {
-			t.Errorf("unexpected balance value: expected %v, received %v", 3., monetaryBalanceValue)
+			t.Errorf("monetary balance value: want %v, got %v", 3, monetaryBalanceValue)
 		}
 
 		// Attempt refund to check if factor also applies when refunding increments.
@@ -472,18 +474,78 @@ cgrates.org,call,1001,2014-01-14T00:00:00Z,RP_VOICE,`,
 		}
 		smsBalance := acnt.BalanceMap[utils.MetaSMS][0]
 		if smsBalance.ID != "balance_sms" || smsBalance.Value != 10 {
-			t.Fatalf("received account with unexpected *sms balance: %v", smsBalance)
+			t.Errorf("*sms balance: want %v, got %v", 10, smsBalance)
 		}
 		monetaryBalance := acnt.BalanceMap[utils.MetaMonetary][0]
 		if monetaryBalance.ID != "balance_monetary" || monetaryBalance.Value != 5 {
-			t.Fatalf("received account with unexpected *monetary balance: %v", monetaryBalance)
+			t.Errorf("*monetary balance: want %v, got %v", 5, monetaryBalance)
 		}
-		smsBalanceFactor, err := cdrs[0].CostDetails.FieldAsInterface([]string{"AccountSummary", "BalanceSummaries[0]", "Factors", "smsFactor"})
+		smsBalanceFactor, err := cdrs[0].CostDetails.FieldAsInterface([]string{
+			"AccountSummary", "BalanceSummaries", "balance_sms", "Factors", "smsFactor",
+		})
 		if err != nil {
 			t.Fatalf("could not retrieve *sms balance factor: %v", err)
 		}
 		if smsBalanceFactor != 4. {
-			t.Errorf("unexpected balance factor: expected %v, received %v", 4., smsBalanceValue)
+			t.Errorf("balance factor: want %v, got %v", 4, smsBalanceValue)
+		}
+	})
+
+	t.Run("AlterBalanceFactorThroughAPI", func(t *testing.T) {
+		// Decrease the smsFactor from balance_sms from 4 to 3.
+		var replySetBalance string
+		if err := client.Call(context.Background(), utils.APIerSv1SetBalance,
+			&utils.AttrSetBalance{
+				Tenant:      "cgrates.org",
+				Account:     "1001",
+				BalanceType: utils.MetaSMS,
+				// Value:       100_000_000_000, // 100s
+				// Value: 20,
+				Balance: map[string]any{
+					utils.ID: "balance_sms",
+					utils.Factors: map[string]float64{
+						"smsFactor": 3,
+					},
+				},
+				ActionExtraData: &map[string]any{
+					"BalanceID":  "~*acnt.BalanceID",
+					"NewFactors": "~*acnt.Factors",
+				},
+				Cdrlog: true,
+			}, &replySetBalance); err != nil {
+			t.Error(err)
+		}
+
+		var cdrs []*engine.CDR
+		if err := client.Call(context.Background(), utils.CDRsV1GetCDRs, &utils.RPCCDRsFilterWithAPIOpts{
+			RPCCDRsFilter: &utils.RPCCDRsFilter{
+				RunIDs: []string{"*set_balance"},
+			}}, &cdrs); err != nil {
+			t.Fatal(err)
+		}
+		if len(cdrs) != 1 ||
+			cdrs[0].Cost != 0 ||
+			cdrs[0].ExtraFields[utils.BalanceID] != "balance_sms" ||
+			cdrs[0].ExtraFields["NewFactors"] != "{\"smsFactor\":3}" ||
+			cdrs[0].RunID != utils.MetaSetBalance ||
+			cdrs[0].Source != utils.CDRLog ||
+			cdrs[0].ToR != utils.MetaSMS {
+			t.Errorf("unexpected cdr received: %v", utils.ToJSON(cdrs))
+		}
+
+		var acnt engine.Account
+		if err := client.Call(context.Background(), utils.APIerSv2GetAccount,
+			&utils.AttrGetAccount{
+				Tenant:  "cgrates.org",
+				Account: "1001",
+			}, &acnt); err != nil {
+			t.Error(err)
+		}
+		updatedSMSBalance := acnt.BalanceMap[utils.MetaSMS][0]
+		if updatedSMSBalance.ID != "balance_sms" ||
+			updatedSMSBalance.Value != 10 ||
+			updatedSMSBalance.Factors["smsFactor"] != 3 {
+			t.Fatalf("updated balance_sms: want Value 10 and smsFactor 3, got %v", updatedSMSBalance)
 		}
 	})
 
@@ -522,23 +584,47 @@ cgrates.org,call,1001,2014-01-14T00:00:00Z,RP_VOICE,`,
 		if len(cdrs) != 1 {
 			t.Fatalf("expected to receive only one CDR: %v", utils.ToJSON(cdrs))
 		}
-		smsBalanceValue, err := cdrs[0].CostDetails.FieldAsInterface([]string{"AccountSummary", "BalanceSummaries[0]", "Value"})
+		smsBalanceValue, err := cdrs[0].CostDetails.FieldAsInterface([]string{"AccountSummary", "BalanceSummaries", "balance_sms", "Value"})
 		if err != nil {
 			t.Fatalf("could not retrieve *sms balance current value: %v", err)
 		}
-		if smsBalanceValue != 2. {
-			t.Errorf("unexpected balance value: expected %v, received %v", 2., smsBalanceValue)
+		if smsBalanceValue != 1. {
+			t.Errorf("balance value: want %v, got %v", 1., smsBalanceValue)
 		}
-		monetaryBalanceValue, err := cdrs[0].CostDetails.FieldAsInterface([]string{"AccountSummary", "BalanceSummaries[2]", "Value"})
+		monetaryBalanceValue, err := cdrs[0].CostDetails.FieldAsInterface([]string{"AccountSummary", "BalanceSummaries", "balance_monetary", "Value"})
 		if err != nil {
 			t.Fatalf("could not retrieve *sms balance current value: %v", err)
 		}
-		if monetaryBalanceValue != 1. {
-			t.Errorf("unexpected balance value: expected %v, received %v", 1., monetaryBalanceValue)
+		if monetaryBalanceValue != 2. {
+			t.Errorf("balance value: want %v, got %v", 2., monetaryBalanceValue)
 		}
 	})
 
 	t.Run("PrepaidSession", func(t *testing.T) {
+		/*
+			Add balance via API. Should be equivalent to the following Actions.csv entry:
+			ACT_TOPUP,*topup_reset,"{""voiceFactor"":2}",,balance_voice,*voice,call,,,,*unlimited,,100s,20,false,false,20
+		*/
+		var replyAddBalance string
+		if err := client.Call(context.Background(), utils.APIerSv1AddBalance,
+			&v1.AttrAddBalance{
+				Tenant:      "cgrates.org",
+				Account:     "1001",
+				BalanceType: utils.MetaVoice,
+				Value:       100_000_000_000, // 100s
+				Balance: map[string]any{
+					utils.ID:         "balance_voice",
+					utils.Categories: "call",
+					utils.ExpiryTime: utils.MetaUnlimited,
+					utils.Weight:     20,
+					utils.Factors: map[string]float64{
+						"voiceFactor": 2,
+					},
+				},
+				Overwrite: true,
+			}, &replyAddBalance); err != nil {
+			t.Error(err)
+		}
 		var replyInit sessions.V1InitSessionReply
 		if err := client.Call(context.Background(), utils.SessionSv1InitiateSession,
 			&sessions.V1InitSessionArgs{
@@ -688,12 +774,12 @@ cgrates.org,call,1001,2014-01-14T00:00:00Z,RP_VOICE,`,
 		if len(cdrs) != 1 {
 			t.Fatalf("expected to receive only one CDR: %v", utils.ToJSON(cdrs))
 		}
-		voiceBalanceValue, err := cdrs[0].CostDetails.FieldAsInterface([]string{"AccountSummary", "BalanceSummaries[1]", "Value"})
+		voiceBalanceValue, err := cdrs[0].CostDetails.FieldAsInterface([]string{"AccountSummary", "BalanceSummaries", "balance_voice", "Value"})
 		if err != nil {
 			t.Fatalf("could not retrieve *voice balance current value: %v", err)
 		}
 		if voiceBalanceValue != float64(66*time.Second) {
-			t.Errorf("unexpected balance value: expected %v, received %v", float64(66*time.Second), voiceBalanceValue)
+			t.Errorf("*voice balance value: want %v, got %v", float64(66*time.Second), voiceBalanceValue)
 		}
 
 		// Attempt refund to check if factor also applies when refunding increments.
@@ -720,7 +806,7 @@ cgrates.org,call,1001,2014-01-14T00:00:00Z,RP_VOICE,`,
 		}
 		voiceBalance := acnt.BalanceMap[utils.MetaVoice][0]
 		if voiceBalance.ID != "balance_voice" || voiceBalance.Value != float64(100*time.Second) {
-			t.Fatalf("received account with unexpected *voice balance: %v", voiceBalance)
+			t.Fatalf("*voice balance value: want %v, got %v", 100_000_000_000, voiceBalance)
 		}
 	})
 }
@@ -761,7 +847,7 @@ func TestBalanceCDRLog(t *testing.T) {
 
 "schedulers": {
 	"enabled": true,
-	"cdrs_conns": ["*localhost"]
+	"cdrs_conns": ["*internal"]
 },
 
 "apiers": {
