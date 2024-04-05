@@ -22,6 +22,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package agents
 
 import (
+	"errors"
 	"flag"
 	"fmt"
 	"os"
@@ -34,6 +35,7 @@ import (
 
 	"github.com/cgrates/birpc"
 	"github.com/cgrates/birpc/context"
+	"github.com/cgrates/birpc/jsonrpc"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -1604,5 +1606,16 @@ cgrates.com,Default,,,*default,*none,20`),
 		t.Error(err)
 	} else if acnt.BalanceMap[utils.MetaVoice].GetTotalValue() != float64(time.Hour) {
 		t.Errorf("Expected: %f, received: %f", float64(time.Hour), acnt.BalanceMap[utils.MetaVoice].GetTotalValue())
+	}
+}
+
+func newRPCClient(cfg *config.ListenCfg) (c *birpc.Client, err error) {
+	switch *utils.Encoding {
+	case utils.MetaJSON:
+		return jsonrpc.Dial(utils.TCP, cfg.RPCJSONListen)
+	case utils.MetaGOB:
+		return birpc.Dial(utils.TCP, cfg.RPCGOBListen)
+	default:
+		return nil, errors.New("UNSUPPORTED_RPC")
 	}
 }

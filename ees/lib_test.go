@@ -19,28 +19,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package ees
 
 import (
-	"errors"
 	"os"
 	"testing"
 
-	"github.com/cgrates/birpc"
-	"github.com/cgrates/birpc/jsonrpc"
 	"github.com/cgrates/cgrates/engine"
-
-	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/utils"
 )
-
-func newRPCClient(cfg *config.ListenCfg) (c *birpc.Client, err error) {
-	switch *utils.Encoding {
-	case utils.MetaJSON:
-		return jsonrpc.Dial(utils.TCP, cfg.RPCJSONListen)
-	case utils.MetaGOB:
-		return birpc.Dial(utils.TCP, cfg.RPCGOBListen)
-	default:
-		return nil, errors.New("UNSUPPORTED_RPC")
-	}
-}
 
 var exportPath = []string{"/tmp/testCSV", "/tmp/testComposedCSV", "/tmp/testFWV", "/tmp/testCSVMasked",
 	"/tmp/testCSVfromVirt", "/tmp/testCSVExpTemp"}

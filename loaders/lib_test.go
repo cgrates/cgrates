@@ -20,14 +20,12 @@ package loaders
 
 import (
 	"encoding/csv"
-	"errors"
 	"io"
 	"strings"
 	"testing"
 
 	"github.com/cgrates/birpc"
 	"github.com/cgrates/birpc/context"
-	"github.com/cgrates/birpc/jsonrpc"
 	"github.com/cgrates/rpcclient"
 
 	"github.com/cgrates/cgrates/config"
@@ -38,17 +36,6 @@ import (
 var loaderPaths = []string{"/tmp/In", "/tmp/Out", "/tmp/LoaderIn", "/tmp/SubpathWithoutMove",
 	"/tmp/SubpathLoaderWithMove", "/tmp/SubpathOut", "/tmp/templateLoaderIn", "/tmp/templateLoaderOut",
 	"/tmp/customSepLoaderIn", "/tmp/customSepLoaderOut"}
-
-func newRPCClient(cfg *config.ListenCfg) (c *birpc.Client, err error) {
-	switch *utils.Encoding {
-	case utils.MetaJSON:
-		return jsonrpc.Dial(utils.TCP, cfg.RPCJSONListen)
-	case utils.MetaGOB:
-		return birpc.Dial(utils.TCP, cfg.RPCGOBListen)
-	default:
-		return nil, errors.New("UNSUPPORTED_RPC")
-	}
-}
 
 type testMockCacheConn struct {
 	calls map[string]func(arg any, rply any) error

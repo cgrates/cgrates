@@ -22,13 +22,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package v2
 
 import (
+	"errors"
 	"path"
 	"reflect"
 	"testing"
 
-	"github.com/cgrates/birpc/context"
-
 	"github.com/cgrates/birpc"
+	"github.com/cgrates/birpc/context"
+	"github.com/cgrates/birpc/jsonrpc"
 	v1 "github.com/cgrates/cgrates/apier/v1"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
@@ -274,5 +275,16 @@ func testAccountsGetActionPlan2(t *testing.T) {
 func testAccountsKillEngine(t *testing.T) {
 	if err := engine.KillEngine(100); err != nil {
 		t.Error(err)
+	}
+}
+
+func newRPCClient(cfg *config.ListenCfg) (c *birpc.Client, err error) {
+	switch *utils.Encoding {
+	case utils.MetaJSON:
+		return jsonrpc.Dial(utils.TCP, cfg.RPCJSONListen)
+	case utils.MetaGOB:
+		return birpc.Dial(utils.TCP, cfg.RPCGOBListen)
+	default:
+		return nil, errors.New("UNSUPPORTED_RPC")
 	}
 }
