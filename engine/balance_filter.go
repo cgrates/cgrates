@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"encoding/json"
 	"fmt"
 	"math"
 	"reflect"
@@ -47,8 +48,8 @@ type BalanceFilter struct {
 }
 
 // NewBalanceFilter creates a new BalanceFilter based on given filter
-func NewBalanceFilter(filter map[string]any, defaultTimezone string) (bf *BalanceFilter, err error) {
-	bf = new(BalanceFilter)
+func NewBalanceFilter(filter map[string]any, defaultTimezone string) (*BalanceFilter, error) {
+	bf := new(BalanceFilter)
 	if id, has := filter[utils.ID]; has {
 		bf.ID = utils.StringPointer(utils.IfaceAsString(id))
 	}
@@ -59,23 +60,23 @@ func NewBalanceFilter(filter map[string]any, defaultTimezone string) (bf *Balanc
 	// 	bf.Type = utils.StringPointer(utils.IfaceAsString(ty))
 	// }
 	if val, has := filter[utils.Value]; has {
-		var value float64
-		if value, err = utils.IfaceAsTFloat64(val); err != nil {
-			return
+		value, err := utils.IfaceAsTFloat64(val)
+		if err != nil {
+			return nil, err
 		}
 		bf.Value = &utils.ValueFormula{Static: math.Abs(value)}
 	}
 	if exp, has := filter[utils.ExpiryTime]; has {
-		var expTime time.Time
-		if expTime, err = utils.IfaceAsTime(exp, defaultTimezone); err != nil {
-			return
+		expTime, err := utils.IfaceAsTime(exp, defaultTimezone)
+		if err != nil {
+			return nil, err
 		}
 		bf.ExpirationDate = utils.TimePointer(expTime)
 	}
 	if weight, has := filter[utils.Weight]; has {
-		var value float64
-		if value, err = utils.IfaceAsFloat64(weight); err != nil {
-			return
+		value, err := utils.IfaceAsFloat64(weight)
+		if err != nil {
+			return nil, err
 		}
 		bf.Weight = utils.Float64Pointer(value)
 	}
@@ -95,20 +96,39 @@ func NewBalanceFilter(filter map[string]any, defaultTimezone string) (bf *Balanc
 		bf.TimingIDs = utils.StringMapPointer(utils.ParseStringMap(utils.IfaceAsString(tim)))
 	}
 	if dis, has := filter[utils.Disabled]; has {
-		var value bool
-		if value, err = utils.IfaceAsBool(dis); err != nil {
-			return
+		value, err := utils.IfaceAsBool(dis)
+		if err != nil {
+			return nil, err
 		}
 		bf.Disabled = utils.BoolPointer(value)
 	}
 	if blk, has := filter[utils.Blocker]; has {
-		var value bool
-		if value, err = utils.IfaceAsBool(blk); err != nil {
-			return
+		value, err := utils.IfaceAsBool(blk)
+		if err != nil {
+			return nil, err
 		}
 		bf.Blocker = utils.BoolPointer(value)
 	}
-	return
+	if facVal, has := filter[utils.Factors]; has {
+		var err error
+		var facBytes []byte
+
+		switch v := facVal.(type) {
+		case string:
+			facBytes = []byte(v)
+		default:
+			facBytes, err = json.Marshal(v)
+			if err != nil {
+				return nil, err
+			}
+		}
+		var vf ValueFactors
+		if err := json.Unmarshal(facBytes, &vf); err != nil {
+			return nil, err
+		}
+		bf.Factors = &vf
+	}
+	return bf, nil
 }
 
 func (bp *BalanceFilter) CreateBalance() *Balance {
@@ -125,7 +145,7 @@ func (bp *BalanceFilter) CreateBalance() *Balance {
 		Timings:        bp.Timings,
 		TimingIDs:      bp.GetTimingIDs(),
 		Disabled:       bp.GetDisabled(),
-		Factors:        bp.GetFactor(),
+		Factors:        bp.GetFactors(),
 		Blocker:        bp.GetBlocker(),
 	}
 	return b.Clone()
@@ -187,8 +207,11 @@ func (bf *BalanceFilter) Clone() *BalanceFilter {
 		*result.Disabled = *bf.Disabled
 	}
 	if bf.Factors != nil {
-		result.Factors = new(ValueFactors)
-		*result.Factors = *bf.Factors
+		cln := make(ValueFactors, len(*bf.Factors))
+		for key, value := range *bf.Factors {
+			cln[key] = value
+		}
+		result.Factors = &cln
 	}
 	if bf.Blocker != nil {
 		result.Blocker = new(bool)
@@ -359,9 +382,9 @@ func (bp *BalanceFilter) GetExpirationDate() time.Time {
 	return *bp.ExpirationDate
 }
 
-func (bp *BalanceFilter) GetFactor() ValueFactors {
+func (bp *BalanceFilter) GetFactors() ValueFactors {
 	if bp == nil || bp.Factors == nil {
-		return ValueFactors{}
+		return nil
 	}
 	return *bp.Factors
 }
@@ -407,6 +430,9 @@ func (bf *BalanceFilter) ModifyBalance(b *Balance) {
 	}
 	if bf.Weight != nil {
 		b.Weight = *bf.Weight
+	}
+	if bf.Factors != nil {
+		b.Factors = *bf.Factors
 	}
 	if bf.Blocker != nil {
 		b.Blocker = *bf.Blocker

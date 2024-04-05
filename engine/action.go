@@ -1145,6 +1145,8 @@ func (cdrP *cdrLogProvider) FieldAsInterface(fldPath []string) (data any, err er
 				data = cdrP.action.Balance.Categories.String()
 			case utils.SharedGroups:
 				data = cdrP.action.Balance.SharedGroups.String()
+			case utils.Factors:
+				data = cdrP.action.Balance.Factors.String()
 			}
 		case utils.MetaAct:
 			switch fldPath[1] {
