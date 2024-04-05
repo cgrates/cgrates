@@ -22,6 +22,7 @@ package loaders
 
 import (
 	"encoding/csv"
+	"errors"
 	"io"
 	"os"
 	"path"
@@ -33,6 +34,7 @@ import (
 
 	"github.com/cgrates/birpc"
 	"github.com/cgrates/birpc/context"
+	"github.com/cgrates/birpc/jsonrpc"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -151,7 +153,14 @@ func testLoaderStartEngine(t *testing.T) {
 // Connect rpc client to rater
 func testLoaderRPCConn(t *testing.T) {
 	var err error
-	loaderRPC, err = newRPCClient(loaderCfg.ListenCfg()) // We connect over JSON so we can also troubleshoot if needed
+	switch *utils.Encoding {
+	case utils.MetaJSON:
+		loaderRPC, err = jsonrpc.Dial(utils.TCP, loaderCfg.ListenCfg().RPCJSONListen)
+	case utils.MetaGOB:
+		loaderRPC, err = birpc.Dial(utils.TCP, loaderCfg.ListenCfg().RPCGOBListen)
+	default:
+		loaderRPC, err = nil, errors.New("UNSUPPORTED_RPC")
+	}
 	if err != nil {
 		t.Fatal(err)
 	}
