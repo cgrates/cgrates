@@ -1180,6 +1180,15 @@ const CGRATES_CFG_JSON = `
 },
 
 
+"janus_agent": {
+	"enabled": false,											// enables the Janus agent: <true|false>
+	"url": "/janus",
+	"sessions_conns": ["*internal"],
+	"request_processors": [										// request processors to be applied to Janus messages
+	],
+},
+
+
 "templates": {
 	"*err": [
 		{"tag": "SessionId", "path": "*rep.Session-Id", "type": "*variable",

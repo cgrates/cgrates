@@ -174,6 +174,7 @@ func newCGRConfig(config []byte) (cfg *CGRConfig, err error) {
 	cfg.eesCfg = new(EEsCfg)
 	cfg.eesCfg.Cache = make(map[string]*CacheParamCfg)
 	cfg.sipAgentCfg = new(SIPAgentCfg)
+	cfg.janusAgentCfg = new(JanusAgentCfg)
 	cfg.configSCfg = new(ConfigSCfg)
 	cfg.apiBanCfg = new(APIBanCfg)
 	cfg.sentryPeerCfg = new(SentryPeerCfg)
@@ -325,6 +326,7 @@ type CGRConfig struct {
 	ersCfg           *ERsCfg           // EventReader config
 	eesCfg           *EEsCfg           // EventExporter config
 	sipAgentCfg      *SIPAgentCfg      // SIPAgent config
+	janusAgentCfg    *JanusAgentCfg    // JanusAgent config
 	configSCfg       *ConfigSCfg       // ConfigS config
 	apiBanCfg        *APIBanCfg        // APIBan config
 	sentryPeerCfg    *SentryPeerCfg    //SentryPeer config
@@ -1078,11 +1080,18 @@ func (cfg *CGRConfig) EEsNoLksCfg() *EEsCfg {
 	return cfg.eesCfg
 }
 
-// SIPAgentCfg reads the Apier configuration
+// SIPAgentCfg reads the SIPAgent configuration
 func (cfg *CGRConfig) SIPAgentCfg() *SIPAgentCfg {
 	cfg.lks[SIPAgentJson].Lock()
 	defer cfg.lks[SIPAgentJson].Unlock()
 	return cfg.sipAgentCfg
+}
+
+// JanusAgentCfg reads the JanusAgent configuration
+func (cfg *CGRConfig) JanusAgentCfg() *JanusAgentCfg {
+	cfg.lks[JanusAgentJson].Lock()
+	defer cfg.lks[JanusAgentJson].Unlock()
+	return cfg.janusAgentCfg
 }
 
 // RPCConns reads the RPCConns configuration

@@ -645,6 +645,7 @@ func main() {
 		services.NewEventReaderService(cfg, filterSChan,
 			shdChan, connManager, server, internalERsChan, anz, srvDep),
 		services.NewSIPAgent(cfg, filterSChan, shdChan, connManager, srvDep),
+		services.NewJanusAgent(cfg, filterSChan, server, connManager, srvDep),
 	)
 	srvManager.StartServices()
 	// Start FilterS

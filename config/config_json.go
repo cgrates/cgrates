@@ -61,6 +61,7 @@ const (
 	EEsJson            = "ees"
 	RPCConnsJsonName   = "rpc_conns"
 	SIPAgentJson       = "sip_agent"
+	JanusAgentJson     = "janus_agent"
 	TemplatesJson      = "templates"
 	ConfigSJson        = "configs"
 	APIBanCfgJson      = "apiban"

@@ -1978,6 +1978,7 @@ const (
 	AsteriskAgent   = "AsteriskAgent"
 	HTTPAgent       = "HTTPAgent"
 	SIPAgent        = "SIPAgent"
+	JanusAgent      = "JanusAgent"
 )
 
 // Google_API

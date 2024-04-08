@@ -19,6 +19,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package agents
 
 import (
+	"net/http"
+
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 )
@@ -41,4 +43,55 @@ type JanusAgent struct {
 	filterS       *engine.FilterS
 	reqProcessors []*config.RequestProcessor
 	sessionConns  []string
+}
+
+// ServeHTTP implements http.Handler interface
+func (ja *JanusAgent) ServeHTTP(w http.ResponseWriter, req *http.Request) {
+	/*dcdr, err := newHADataProvider(ha.reqPayload, req) // dcdr will provide information from request
+	if err != nil {
+		utils.Logger.Warning(
+			fmt.Sprintf("<%s> error creating decoder: %s",
+				utils.HTTPAgent, err.Error()))
+		return
+	}
+	cgrRplyNM := &utils.DataNode{Type: utils.NMMapType, Map: make(map[string]*utils.DataNode)}
+	rplyNM := utils.NewOrderedNavigableMap()
+	opts := utils.MapStorage{}
+	reqVars := &utils.DataNode{Type: utils.NMMapType, Map: map[string]*utils.DataNode{utils.RemoteHost: utils.NewLeafNode(req.RemoteAddr)}}
+	for _, reqProcessor := range ha.reqProcessors {
+		agReq := NewAgentRequest(dcdr, reqVars, cgrRplyNM, rplyNM,
+			opts, reqProcessor.Tenant, ha.dfltTenant,
+			utils.FirstNonEmpty(reqProcessor.Timezone,
+				config.CgrConfig().GeneralCfg().DefaultTimezone),
+			ha.filterS, nil)
+		lclProcessed, err := processRequest(context.TODO(), reqProcessor, agReq,
+			utils.HTTPAgent, ha.connMgr, ha.sessionConns,
+			agReq.filterS)
+		if err != nil {
+			utils.Logger.Warning(
+				fmt.Sprintf("<%s> error: %s processing request: %s",
+					utils.HTTPAgent, err.Error(), utils.ToJSON(agReq)))
+			return // FixMe with returning some error on HTTP level
+		}
+		if !lclProcessed {
+			continue
+		}
+		if lclProcessed && !reqProcessor.Flags.GetBool(utils.MetaContinue) {
+			break
+		}
+	}
+	encdr, err := newHAReplyEncoder(ha.rplyPayload, w)
+	if err != nil {
+		utils.Logger.Warning(
+			fmt.Sprintf("<%s> error creating reply encoder: %s",
+				utils.HTTPAgent, err.Error()))
+		return
+	}
+	if err = encdr.Encode(rplyNM); err != nil {
+		utils.Logger.Warning(
+			fmt.Sprintf("<%s> error: %s encoding out %s",
+				utils.HTTPAgent, err.Error(), utils.ToJSON(rplyNM)))
+		return
+	}
+	*/
 }
