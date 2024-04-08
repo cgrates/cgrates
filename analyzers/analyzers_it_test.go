@@ -243,9 +243,9 @@ func testAnalyzerSV1BirPCSession(t *testing.T) {
 		err.Error() != utils.ErrPartiallyExecuted.Error() {
 		t.Fatal(err)
 	}
-	time.Sleep(10 * time.Second)
+	time.Sleep(10 * time.Millisecond)
 	var result []map[string]any
-	if err := anzRPC.Call(context.Background(), utils.AnalyzerSv1StringQuery, &QueryArgs{HeaderFilters: `+RequestEncoding:\*birpc_json +RequestMethod:"SessionSv1.DisconnectPeer"`}, &result); err != nil {
+	if err := anzRPC.Call(context.Background(), utils.AnalyzerSv1StringQuery, &QueryArgs{HeaderFilters: `+RequestEncoding:\*birpc_json +RequestMethod:"AgentV1.DisconnectPeer"`}, &result); err != nil {
 		t.Error(err)
 	} else if len(result) != 1 {
 		t.Errorf("Unexpected result: %s", utils.ToJSON(result))
