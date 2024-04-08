@@ -68,7 +68,7 @@ func TestBalanceBlocker(t *testing.T) {
 },
 
 "rals": {
-	"enabled": true,
+	"enabled": true
 },
 
 "cdrs": {
@@ -300,7 +300,7 @@ func TestBalanceFactor(t *testing.T) {
 },
 
 "rals": {
-	"enabled": true,
+	"enabled": true
 },
 
 "cdrs": {
@@ -842,7 +842,7 @@ func TestBalanceCDRLog(t *testing.T) {
 },
 
 "cdrs": {
-	"enabled": true,
+	"enabled": true
 },
 
 "schedulers": {

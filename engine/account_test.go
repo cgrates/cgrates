@@ -29,8 +29,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/cgrates/birpc"
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -3017,68 +3015,6 @@ func TestAcountSetBalanceAction(t *testing.T) {
 	}
 	if err = acc.setBalanceAction(nil, fltrs); err == nil || err.Error() != "nil action" {
 		t.Error(err)
-	}
-}
-
-func TestDebitCreditBalance(t *testing.T) {
-	cfg := config.NewDefaultCGRConfig()
-	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
-	dm := NewDataManager(db, cfg.CacheCfg(), nil)
-	fltrs := NewFilterS(cfg, nil, dm)
-	tmpConn := connMgr
-	utils.Logger.SetLogLevel(4)
-	utils.Logger.SetSyslog(nil)
-	buf := new(bytes.Buffer)
-	log.SetOutput(buf)
-	defer func() {
-		utils.Logger.SetLogLevel(0)
-		log.SetOutput(os.Stderr)
-		connMgr = tmpConn
-		config.SetCgrConfig(config.NewDefaultCGRConfig())
-	}()
-	cfg.RalsCfg().ThresholdSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds)}
-	clientConn := make(chan birpc.ClientConnector, 1)
-	clientConn <- &ccMock{
-		calls: map[string]func(ctx *context.Context, args any, reply any) error{
-			utils.ThresholdSv1ProcessEvent: func(ctx *context.Context, args, reply any) error {
-				rpl := &[]string{"id"}
-				*reply.(*[]string) = *rpl
-				return errors.New("Can't process Event")
-			},
-		},
-	}
-	connMgr := NewConnManager(cfg, map[string]chan birpc.ClientConnector{
-		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds): clientConn,
-	})
-	cd := &CallDescriptor{
-		Tenant:        "cgrates.org",
-		Category:      "call",
-		TimeStart:     time.Date(2015, 9, 24, 10, 48, 0, 0, time.UTC),
-		TimeEnd:       time.Date(2015, 9, 24, 10, 58, 1, 0, time.UTC),
-		Destination:   "4444",
-		Subject:       "dy",
-		Account:       "dy",
-		ToR:           utils.MetaVoice,
-		DurationIndex: 600,
-	}
-	acc := &Account{
-		ID: "vdf:broker",
-		BalanceMap: map[string]Balances{
-			utils.MetaVoice: {
-				&Balance{Value: 20 * float64(time.Second),
-					DestinationIDs: utils.NewStringMap("NAT"),
-					Weight:         10, RatingSubject: "rif"},
-				&Balance{Value: 100 * float64(time.Second),
-					DestinationIDs: utils.NewStringMap("RET"), Weight: 20},
-			}},
-	}
-	config.SetCgrConfig(cfg)
-	SetConnManager(connMgr)
-	expLog := `processing balance event`
-	if _, err := acc.debitCreditBalance(cd, true, true, true, fltrs); err != nil {
-		t.Error(err)
-	} else if rcvLog := buf.String(); !strings.Contains(rcvLog, expLog) {
-		t.Errorf("Logger %v,doesn't contain %v", utils.ToJSON(rcvLog), utils.ToJSON(expLog))
 	}
 }
 

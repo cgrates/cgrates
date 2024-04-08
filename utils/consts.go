@@ -513,7 +513,6 @@ const (
 	BalanceFactorID       = "BalanceFactorID"
 	Units                 = "Units"
 	AccountUpdate         = "AccountUpdate"
-	BalanceUpdate         = "BalanceUpdate"
 	StatUpdate            = "StatUpdate"
 	ResourceUpdate        = "ResourceUpdate"
 	CDR                   = "CDR"
