@@ -7,9 +7,9 @@ cgrates.org,FLTR_ACNT_1007,*string,~*req.Account,1007,2014-07-29T15:00:00Z
 cgrates.org,FLTR_ACNT_dan,*string,~*req.Account,dan,2014-07-29T15:00:00Z
 cgrates.org,FLTR_DST_DE,*destinations,~*req.Destination,DST_DE_MOBILE,2014-07-29T15:00:00Z
 cgrates.org,FLTR_DST_NL,*destinations,~*req.Destination,DST_NL,2014-07-29T15:00:00Z
-cgrates.org,FLTR_ACNT_BALANCE_1,*string,~*req.Account,1001;1002,2014-07-29T15:00:00Z
-cgrates.org,FLTR_ACNT_BALANCE_1,*string,~*req.EventType,BalanceUpdate,
-cgrates.org,FLTR_ACNT_BALANCE_1,*gte,~*req.Units,10.0,
+cgrates.org,FLTR_ACNT_BALANCE_1,*string,~*req.ID,1001;1002,2014-07-29T15:00:00Z
+cgrates.org,FLTR_ACNT_BALANCE_1,*string,~*opts.*eventType,AccountUpdate,
+cgrates.org,FLTR_ACNT_BALANCE_1,*gte,~*asm.BalanceSummaries.*default.Value,10.0,
 cgrates.org,FLTR_ACNT_EXPIRED,*string,~*req.Account,1001;1002,2014-07-29T15:00:00Z
 cgrates.org,FLTR_ACNT_EXPIRED,*gte,~*req.ExpiryTime,*now,
 cgrates.org,FLTR_STATS_1,*string,~*req.Account,1002,

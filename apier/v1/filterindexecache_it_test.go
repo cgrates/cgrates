@@ -149,11 +149,10 @@ func testV1FIdxCaProcessEventWithNotFound(t *testing.T) {
 		Tenant: "cgrates.org",
 		ID:     "event1",
 		Event: map[string]any{
-			utils.EventType:    utils.BalanceUpdate,
-			utils.AccountField: "1001",
+			utils.ID: "1001",
 		},
 		APIOpts: map[string]any{
-			utils.MetaEventType: utils.BalanceUpdate,
+			utils.MetaEventType: utils.AccountUpdate,
 		},
 	}
 	var thIDs []string
@@ -169,14 +168,19 @@ func testV1FIdxCaSetThresholdProfile(t *testing.T) {
 			ID:     "TestFilter",
 			Rules: []*engine.FilterRule{
 				{
-					Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.AccountField,
+					Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.ID,
 					Type:    utils.MetaString,
 					Values:  []string{"1001"},
 				},
 				{
-					Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.EventType,
+					Element: utils.DynamicDataPrefix + utils.MetaOpts + utils.NestingSep + utils.MetaEventType,
 					Type:    utils.MetaString,
-					Values:  []string{utils.BalanceUpdate},
+					Values:  []string{utils.AccountUpdate},
+				},
+				{
+					Element: "~*asm.BalanceSummaries.*default.Value",
+					Type:    utils.MetaGreaterThan,
+					Values:  []string{"8"},
 				},
 			},
 			ActivationInterval: &utils.ActivationInterval{
@@ -217,11 +221,16 @@ func testV1FIdxCaSetThresholdProfile(t *testing.T) {
 		Tenant: "cgrates.org",
 		ID:     "event1",
 		Event: map[string]any{
-			utils.EventType:    utils.BalanceUpdate,
-			utils.AccountField: "1001",
+			utils.ID: "1001",
+			utils.BalanceSummaries: engine.BalanceSummaries{
+				{
+					ID:    utils.MetaDefault,
+					Value: 9,
+				},
+			},
 		},
 		APIOpts: map[string]any{
-			utils.MetaEventType:            utils.BalanceUpdate,
+			utils.MetaEventType:            utils.AccountUpdate,
 			utils.OptsThresholdsProfileIDs: []string{"TEST_PROFILE1"},
 		},
 	}
@@ -242,13 +251,18 @@ func testV1FIdxCaGetThresholdFromTP(t *testing.T) {
 		Tenant: "cgrates.org",
 		ID:     "event1",
 		Event: map[string]any{
-			utils.EventType:    utils.BalanceUpdate,
-			utils.AccountField: "1001",
-			utils.BalanceID:    utils.MetaDefault,
-			utils.Units:        12.3,
+			utils.BalanceSummaries: engine.BalanceSummaries{
+				{
+					ID:    utils.MetaDefault,
+					Type:  utils.MetaMonetary,
+					Value: 12.3,
+				},
+			},
+			utils.ID:     "1001",
+			utils.Tenant: "cgrates.org",
 		},
 		APIOpts: map[string]any{
-			utils.MetaEventType:            utils.BalanceUpdate,
+			utils.MetaEventType:            utils.AccountUpdate,
 			utils.OptsThresholdsProfileIDs: []string{"THD_ACNT_BALANCE_1"},
 		},
 	}
@@ -271,14 +285,19 @@ func testV1FIdxCaUpdateThresholdProfile(t *testing.T) {
 			ID:     "TestFilter2",
 			Rules: []*engine.FilterRule{
 				{
-					Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.AccountField,
+					Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.ID,
 					Type:    utils.MetaString,
 					Values:  []string{"1002"},
 				},
 				{
-					Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.EventType,
+					Element: utils.DynamicDataPrefix + utils.MetaOpts + utils.NestingSep + utils.MetaEventType,
 					Type:    utils.MetaString,
 					Values:  []string{utils.AccountUpdate},
+				},
+				{
+					Element: "~*asm.BalanceSummaries.*default.Value",
+					Type:    utils.MetaGreaterThan,
+					Values:  []string{"8"},
 				},
 			},
 			ActivationInterval: &utils.ActivationInterval{
@@ -316,8 +335,13 @@ func testV1FIdxCaUpdateThresholdProfile(t *testing.T) {
 		Tenant: "cgrates.org",
 		ID:     "event1",
 		Event: map[string]any{
-			utils.EventType:    utils.AccountUpdate,
-			utils.AccountField: "1001",
+			utils.ID: "1001",
+			utils.BalanceSummaries: engine.BalanceSummaries{
+				{
+					ID:    utils.MetaDefault,
+					Value: 9,
+				},
+			},
 		},
 		APIOpts: map[string]any{
 			utils.MetaEventType: utils.AccountUpdate,
@@ -335,8 +359,13 @@ func testV1FIdxCaUpdateThresholdProfile(t *testing.T) {
 		Tenant: "cgrates.org",
 		ID:     "event1",
 		Event: map[string]any{
-			utils.EventType:    utils.AccountUpdate,
-			utils.AccountField: "1002",
+			utils.ID: "1002",
+			utils.BalanceSummaries: engine.BalanceSummaries{
+				{
+					ID:    utils.MetaDefault,
+					Value: 9,
+				},
+			},
 		},
 		APIOpts: map[string]any{
 			utils.MetaEventType: utils.AccountUpdate,
@@ -359,14 +388,14 @@ func testV1FIdxCaUpdateThresholdProfileFromTP(t *testing.T) {
 			ID:     "TestFilter3",
 			Rules: []*engine.FilterRule{
 				{
-					Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.AccountField,
+					Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.ID,
 					Type:    utils.MetaString,
 					Values:  []string{"1003"},
 				},
 				{
-					Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.EventType,
+					Element: utils.DynamicDataPrefix + utils.MetaOpts + utils.NestingSep + utils.MetaEventType,
 					Type:    utils.MetaString,
-					Values:  []string{utils.BalanceUpdate},
+					Values:  []string{utils.AccountUpdate},
 				},
 			},
 			ActivationInterval: &utils.ActivationInterval{
@@ -403,11 +432,10 @@ func testV1FIdxCaUpdateThresholdProfileFromTP(t *testing.T) {
 		Tenant: "cgrates.org",
 		ID:     "event1",
 		Event: map[string]any{
-			utils.AccountField: "1002",
-			utils.EventType:    utils.BalanceUpdate,
+			utils.ID: "1002",
 		},
 		APIOpts: map[string]any{
-			utils.MetaEventType: utils.BalanceUpdate,
+			utils.MetaEventType: utils.AccountUpdate,
 		},
 	}
 	var thIDs []string
@@ -420,11 +448,10 @@ func testV1FIdxCaUpdateThresholdProfileFromTP(t *testing.T) {
 		Tenant: "cgrates.org",
 		ID:     "event3",
 		Event: map[string]any{
-			utils.AccountField: "1003",
-			utils.EventType:    utils.BalanceUpdate,
+			utils.ID: "1003",
 		},
 		APIOpts: map[string]any{
-			utils.MetaEventType: utils.BalanceUpdate,
+			utils.MetaEventType: utils.AccountUpdate,
 		},
 	}
 	eIDs := []string{"THD_ACNT_BALANCE_1"}
@@ -442,8 +469,13 @@ func testV1FIdxCaRemoveThresholdProfile(t *testing.T) {
 		Tenant: "cgrates.org",
 		ID:     "event8",
 		Event: map[string]any{
-			utils.AccountField: "1002",
-			utils.EventType:    utils.AccountUpdate,
+			utils.ID: "1002",
+			utils.BalanceSummaries: engine.BalanceSummaries{
+				{
+					ID:    utils.MetaDefault,
+					Value: 9,
+				},
+			},
 		},
 		APIOpts: map[string]any{
 			utils.MetaEventType: utils.AccountUpdate,
@@ -461,11 +493,10 @@ func testV1FIdxCaRemoveThresholdProfile(t *testing.T) {
 		Tenant: "cgrates.org",
 		ID:     "event9",
 		Event: map[string]any{
-			utils.AccountField: "1003",
-			utils.EventType:    utils.BalanceUpdate,
+			utils.ID: "1003",
 		},
 		APIOpts: map[string]any{
-			utils.MetaEventType: utils.BalanceUpdate,
+			utils.MetaEventType: utils.AccountUpdate,
 		},
 	}
 	eIDs = []string{"THD_ACNT_BALANCE_1"}
@@ -518,8 +549,7 @@ func testV1FIdxCaGetStatQueuesWithNotFound(t *testing.T) {
 		Tenant: "cgrates.org",
 		ID:     "event1",
 		Event: map[string]any{
-			utils.EventType:    utils.AccountUpdate,
-			utils.AccountField: "1001",
+			utils.ID: "1001",
 		},
 		APIOpts: map[string]any{
 			utils.MetaEventType: utils.AccountUpdate,
@@ -545,14 +575,19 @@ func testV1FIdxCaSetStatQueueProfile(t *testing.T) {
 			ID:     "FLTR_1",
 			Rules: []*engine.FilterRule{
 				{
-					Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.AccountField,
+					Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.ID,
 					Type:    utils.MetaString,
 					Values:  []string{"1001"},
 				},
 				{
-					Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.EventType,
+					Element: utils.DynamicDataPrefix + utils.MetaOpts + utils.NestingSep + utils.MetaEventType,
 					Type:    utils.MetaString,
 					Values:  []string{utils.AccountUpdate},
+				},
+				{
+					Element: "~*asm.BalanceSummaries.*default.Value",
+					Type:    utils.MetaGreaterThan,
+					Values:  []string{"8"},
 				},
 			},
 			ActivationInterval: &utils.ActivationInterval{
@@ -599,9 +634,14 @@ func testV1FIdxCaSetStatQueueProfile(t *testing.T) {
 		Tenant: "cgrates.org",
 		ID:     "event1",
 		Event: map[string]any{
-			utils.EventType:    utils.AccountUpdate,
-			utils.AccountField: "1001",
-			"Val":              10,
+			utils.ID: "1001",
+			utils.BalanceSummaries: engine.BalanceSummaries{
+				{
+					ID:    utils.MetaDefault,
+					Value: 10,
+				},
+			},
+			"Val": 10,
 		},
 		APIOpts: map[string]any{
 			utils.MetaEventType: utils.AccountUpdate,
@@ -618,16 +658,33 @@ func testV1FIdxCaSetStatQueueProfile(t *testing.T) {
 }
 
 func testV1FIdxCaGetStatQueuesFromTP(t *testing.T) {
+
+	// Overwrite Stats1 profile to filter for ID instead of AccountField.
+	var result string
+	var tmpSQ engine.StatQueueProfile
+	if err := tFIdxCaRpc.Call(context.Background(), utils.APIerSv1GetStatQueueProfile,
+		&utils.TenantID{Tenant: "cgrates.org", ID: "Stats1"}, &tmpSQ); err != nil {
+		t.Error(err)
+	}
+	tmpSQ.FilterIDs = []string{"*string:~*req.ID:1001|1002"}
+	tmpSQ.ActivationInterval = &utils.ActivationInterval{ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC)}
+	if err := tFIdxCaRpc.Call(context.Background(), utils.APIerSv1SetStatQueueProfile,
+		&engine.StatQueueProfileWithAPIOpts{StatQueueProfile: &tmpSQ}, &result); err != nil {
+		t.Error(err)
+	} else if result != utils.OK {
+		t.Error("Unexpected reply returned", result)
+	}
+
 	var reply []string
 	expected := []string{"Stats1"}
 	ev2 := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "event2",
 		Event: map[string]any{
-			utils.AccountField: "1002",
-			utils.AnswerTime:   time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			utils.Usage:        45 * time.Second,
-			utils.Cost:         12.1,
+			utils.ID:         "1002",
+			utils.AnswerTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			utils.Usage:      45 * time.Second,
+			utils.Cost:       12.1,
 		},
 	}
 	if err := tFIdxCaRpc.Call(context.Background(), utils.StatSv1ProcessEvent, ev2, &reply); err != nil {
@@ -639,10 +696,10 @@ func testV1FIdxCaGetStatQueuesFromTP(t *testing.T) {
 		Tenant: "cgrates.org",
 		ID:     "event3",
 		Event: map[string]any{
-			utils.AccountField: "1002",
-			utils.AnswerTime:   time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			utils.Usage:        45 * time.Second,
-			utils.Cost:         12.1,
+			utils.ID:         "1002",
+			utils.AnswerTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			utils.Usage:      45 * time.Second,
+			utils.Cost:       12.1,
 		},
 	}
 	if err := tFIdxCaRpc.Call(context.Background(), utils.StatSv1ProcessEvent, &ev3, &reply); err != nil {
@@ -655,11 +712,10 @@ func testV1FIdxCaGetStatQueuesFromTP(t *testing.T) {
 		Tenant: "cgrates.org",
 		ID:     "event1",
 		Event: map[string]any{
-			utils.EventType:    utils.AccountUpdate,
-			utils.AccountField: "1001",
-			utils.AnswerTime:   time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			utils.Usage:        45 * time.Second,
-			utils.Cost:         12.1,
+			utils.ID:         "1001",
+			utils.AnswerTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			utils.Usage:      45 * time.Second,
+			utils.Cost:       12.1,
 		},
 		APIOpts: map[string]any{
 			utils.MetaEventType: utils.AccountUpdate,
@@ -674,11 +730,10 @@ func testV1FIdxCaGetStatQueuesFromTP(t *testing.T) {
 		Tenant: "cgrates.org",
 		ID:     "event1",
 		Event: map[string]any{
-			utils.EventType:    utils.AccountUpdate,
-			utils.AccountField: "1001",
-			utils.AnswerTime:   time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			utils.Usage:        45 * time.Second,
-			utils.Cost:         12.1,
+			utils.ID:         "1001",
+			utils.AnswerTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			utils.Usage:      45 * time.Second,
+			utils.Cost:       12.1,
 		},
 		APIOpts: map[string]any{
 			utils.MetaEventType: utils.AccountUpdate,
@@ -698,14 +753,19 @@ func testV1FIdxCaUpdateStatQueueProfile(t *testing.T) {
 			ID:     "FLTR_2",
 			Rules: []*engine.FilterRule{
 				{
-					Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.AccountField,
+					Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.ID,
 					Type:    utils.MetaString,
 					Values:  []string{"1003"},
 				},
 				{
-					Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.EventType,
+					Element: utils.DynamicDataPrefix + utils.MetaOpts + utils.NestingSep + utils.MetaEventType,
 					Type:    utils.MetaString,
-					Values:  []string{utils.BalanceUpdate},
+					Values:  []string{utils.AccountUpdate},
+				},
+				{
+					Element: "~*asm.BalanceSummaries.*default.Value",
+					Type:    utils.MetaGreaterThan,
+					Values:  []string{"8"},
 				},
 			},
 			ActivationInterval: &utils.ActivationInterval{
@@ -752,12 +812,17 @@ func testV1FIdxCaUpdateStatQueueProfile(t *testing.T) {
 		Tenant: "cgrates.org",
 		ID:     "event1",
 		Event: map[string]any{
-			utils.EventType:    utils.BalanceUpdate,
-			utils.AccountField: "1003",
-			"Val":              10,
+			utils.ID: "1003",
+			utils.BalanceSummaries: engine.BalanceSummaries{
+				{
+					ID:    utils.MetaDefault,
+					Value: 10,
+				},
+			},
+			"Val": 10,
 		},
 		APIOpts: map[string]any{
-			utils.MetaEventType: utils.BalanceUpdate,
+			utils.MetaEventType: utils.AccountUpdate,
 		},
 	}
 	if err := tFIdxCaRpc.Call(context.Background(), utils.StatSv1ProcessEvent, tEv, &reply); err != nil {
@@ -774,12 +839,12 @@ func testV1FIdxCaUpdateStatQueueProfileFromTP(t *testing.T) {
 			ID:     "FLTR_3",
 			Rules: []*engine.FilterRule{
 				{
-					Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.AccountField,
+					Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.ID,
 					Type:    utils.MetaString,
 					Values:  []string{"1003"},
 				},
 				{
-					Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.EventType,
+					Element: utils.DynamicDataPrefix + utils.MetaOpts + utils.NestingSep + utils.MetaEventType,
 					Type:    utils.MetaString,
 					Values:  []string{utils.AccountUpdate},
 				},
@@ -812,11 +877,10 @@ func testV1FIdxCaUpdateStatQueueProfileFromTP(t *testing.T) {
 		Tenant: "cgrates.org",
 		ID:     "event1",
 		Event: map[string]any{
-			utils.EventType:    utils.AccountUpdate,
-			utils.AccountField: "1003",
-			utils.AnswerTime:   time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			utils.Usage:        45 * time.Second,
-			utils.Cost:         12.1,
+			utils.ID:         "1003",
+			utils.AnswerTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			utils.Usage:      45 * time.Second,
+			utils.Cost:       12.1,
 		},
 		APIOpts: map[string]any{
 			utils.MetaEventType: utils.AccountUpdate,
@@ -839,12 +903,17 @@ func testV1FIdxCaRemoveStatQueueProfile(t *testing.T) {
 		Tenant: "cgrates.org",
 		ID:     "event1",
 		Event: map[string]any{
-			utils.EventType:    utils.BalanceUpdate,
-			utils.AccountField: "1003",
-			"Val":              10,
+			utils.ID: "1003",
+			utils.BalanceSummaries: engine.BalanceSummaries{
+				{
+					ID:    utils.MetaDefault,
+					Value: 10,
+				},
+			},
+			"Val": 10,
 		},
 		APIOpts: map[string]any{
-			utils.MetaEventType: utils.BalanceUpdate,
+			utils.MetaEventType: utils.AccountUpdate,
 		},
 	}
 	if err := tFIdxCaRpc.Call(context.Background(), utils.StatSv1ProcessEvent, tEv, &reply); err != nil {
@@ -857,11 +926,10 @@ func testV1FIdxCaRemoveStatQueueProfile(t *testing.T) {
 		Tenant: "cgrates.org",
 		ID:     "event1",
 		Event: map[string]any{
-			utils.EventType:    utils.AccountUpdate,
-			utils.AccountField: "1003",
-			utils.AnswerTime:   time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			utils.Usage:        45 * time.Second,
-			utils.Cost:         12.1,
+			utils.ID:         "1003",
+			utils.AnswerTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			utils.Usage:      45 * time.Second,
+			utils.Cost:       12.1,
 		},
 		APIOpts: map[string]any{
 			utils.MetaEventType: utils.AccountUpdate,

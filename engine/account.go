@@ -554,34 +554,6 @@ func (acc *Account) debitCreditBalance(cd *CallDescriptor, count bool, dryRun bo
 				}
 			}
 		}
-
-		// in case of going to negative we send the default balance to thresholdS to be processed
-		if len(config.CgrConfig().RalsCfg().ThresholdSConns) != 0 {
-			defaultBalance := acc.GetDefaultMoneyBalance()
-			acntTnt := utils.NewTenantID(acc.ID)
-			thEv := &utils.CGREvent{
-				Tenant: acntTnt.Tenant,
-				ID:     utils.GenUUID(),
-				Event: map[string]any{
-					utils.EventType:    utils.BalanceUpdate,
-					utils.EventSource:  utils.AccountService,
-					utils.AccountField: acntTnt.ID,
-					utils.BalanceID:    defaultBalance.ID,
-					utils.Units:        defaultBalance.Value,
-				},
-				APIOpts: map[string]any{
-					utils.MetaEventType: utils.BalanceUpdate,
-				},
-			}
-			var tIDs []string
-			if err := connMgr.Call(context.TODO(), config.CgrConfig().RalsCfg().ThresholdSConns,
-				utils.ThresholdSv1ProcessEvent, thEv, &tIDs); err != nil &&
-				err.Error() != utils.ErrNotFound.Error() {
-				utils.Logger.Warning(
-					fmt.Sprintf("<AccountS> error: <%s> processing balance event <%+v> with ThresholdS.",
-						err.Error(), utils.ToJSON(thEv)))
-			}
-		}
 	}
 
 COMMIT:

@@ -43,7 +43,7 @@ var (
 	tSv1ConfDIR string //run tests for specific configuration
 
 	tEvs = []*utils.CGREvent{
-		{ // hitting THD_ACNT_BALANCE_1
+		{ // will not match any threshold profile
 			Tenant: "cgrates.org",
 			ID:     "event1",
 			Event: map[string]any{
@@ -60,14 +60,20 @@ var (
 			Tenant: "cgrates.org",
 			ID:     "event2",
 			Event: map[string]any{
-				utils.EventType:    utils.BalanceUpdate,
-				utils.AccountField: "1002",
-				utils.BalanceID:    utils.MetaDefault,
-				utils.Units:        12.3,
-				utils.ExpiryTime:   time.Date(2009, 11, 10, 23, 00, 0, 0, time.UTC),
+				utils.AllowNegative: false,
+				utils.BalanceSummaries: engine.BalanceSummaries{
+					{
+						ID:    utils.MetaDefault,
+						Type:  utils.MetaMonetary,
+						Value: 12.3,
+					},
+				},
+				utils.ID:       "1001",
+				utils.Tenant:   "cgrates.org",
+				utils.Disabled: false,
 			},
 			APIOpts: map[string]any{
-				utils.MetaEventType: utils.BalanceUpdate,
+				utils.MetaEventType: utils.AccountUpdate,
 			},
 		},
 		{ // hitting THD_STATS_1
