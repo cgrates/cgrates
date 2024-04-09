@@ -29,6 +29,35 @@ type JanusConn struct {
 	Type    string // Connection type
 }
 
+func (jc *JanusConn) loadFromJSONCfg(jsnCfg *JanusConnJsonCfg) (err error) {
+	if jsnCfg == nil {
+		return
+	}
+
+	if jsnCfg.Address != nil {
+		jc.Address = *jsnCfg.Address
+	}
+
+	if jsnCfg.Type != nil {
+		jc.Type = *jsnCfg.Type
+	}
+	return
+}
+
+func (jc *JanusConn) AsMapInterface() map[string]any {
+	return map[string]any{
+		utils.AddressCfg: jc.Address,
+		utils.TypeCfg:    jc.Type,
+	}
+}
+
+func (jc *JanusConn) Clone() *JanusConn {
+	return &JanusConn{
+		Address: jc.Address,
+		Type:    jc.Type,
+	}
+}
+
 // JanusAgentCfg the config for an Janus Agent
 type JanusAgentCfg struct {
 	Enabled           bool
@@ -59,6 +88,17 @@ func (jaCfg *JanusAgentCfg) loadFromJSONCfg(jsnCfg *JanusAgentJsonCfg, separator
 			if connID == utils.MetaInternal || connID == rpcclient.BiRPCInternal {
 				jaCfg.SessionSConns[idx] = utils.ConcatenatedKey(connID, utils.MetaSessionS)
 			}
+		}
+	}
+
+	if jsnCfg.Janus_conns != nil {
+		jaCfg.JanusConns = make([]*JanusConn, len(*jsnCfg.Janus_conns))
+		for idx, janConnJsn := range *jsnCfg.Janus_conns {
+			jc := new(JanusConn)
+			if err = jc.loadFromJSONCfg(janConnJsn); err != nil {
+				return
+			}
+			jaCfg.JanusConns[idx] = jc
 		}
 	}
 
@@ -107,6 +147,14 @@ func (jaCfg *JanusAgentCfg) AsMapInterface(separator string) (initialMP map[stri
 		initialMP[utils.SessionSConnsCfg] = sessionConns
 	}
 
+	if jaCfg.JanusConns != nil {
+		janConns := make([]map[string]any, len(jaCfg.JanusConns))
+		for i, jc := range jaCfg.JanusConns {
+			janConns[i] = jc.AsMapInterface()
+		}
+		initialMP[utils.JanusConnsCfg] = janConns
+	}
+
 	requestProcessors := make([]map[string]any, len(jaCfg.RequestProcessors))
 	for i, item := range jaCfg.RequestProcessors {
 		requestProcessors[i] = item.AsMapInterface(separator)
@@ -125,6 +173,13 @@ func (jaCfg *JanusAgentCfg) Clone() *JanusAgentCfg {
 	if jaCfg.SessionSConns != nil {
 		cln.SessionSConns = make([]string, len(jaCfg.SessionSConns))
 		copy(cln.SessionSConns, jaCfg.SessionSConns)
+	}
+
+	if jaCfg.JanusConns != nil {
+		cln.JanusConns = make([]*JanusConn, len(jaCfg.JanusConns))
+		for i, jc := range jaCfg.JanusConns {
+			cln.JanusConns[i] = jc.Clone()
+		}
 	}
 
 	if jaCfg.RequestProcessors != nil {

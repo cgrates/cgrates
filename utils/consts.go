@@ -2259,6 +2259,7 @@ const (
 	TemplatesCfg          = "templates"
 	RequestProcessorsCfg  = "request_processors"
 
+	JanusConnsCfg = "janus_conns"
 	// RequestProcessor
 	RequestFieldsCfg = "request_fields"
 	ReplyFieldsCfg   = "reply_fields"
