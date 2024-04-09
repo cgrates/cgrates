@@ -251,7 +251,6 @@ func testSesPItBenchmark(t *testing.T) {
 	if err := sesPRPC.Call(context.Background(), utils.CoreSv1Status, nil, &statusRpl); err != nil {
 		t.Error(err)
 	}
-	fmt.Println(statusRpl)
 }
 
 func testSesPItStopCgrEngine(t *testing.T) {

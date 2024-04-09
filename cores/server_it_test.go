@@ -145,8 +145,7 @@ func testServeJSON(t *testing.T) {
 	buff := new(bytes.Buffer)
 	log.SetOutput(buff)
 
-	go server.ServeJSON(":88845", shdChan)
-	runtime.Gosched()
+	server.ServeJSON(":88845", shdChan)
 
 	expected := "listen tcp: address 88845: invalid port"
 	if rcv := buff.String(); !strings.Contains(rcv, expected) {
@@ -167,15 +166,12 @@ func testServeJSONFail(t *testing.T) {
 	l := &mockListener{
 		p1: p1,
 	}
-	go server.accept(l, utils.JSONCaps, newCapsJSONCodec, shdChan)
-	runtime.Gosched()
+	server.accept(l, utils.JSONCaps, newCapsJSONCodec, shdChan)
 	_, ok := <-shdChan.Done()
 	if ok {
 		t.Errorf("Expected to be close")
 	}
 	p2.Close()
-	runtime.Gosched()
-
 	shdChan.CloseOnce()
 	server.StopBiRPC()
 }
@@ -186,10 +182,7 @@ func testServeJSONFailRpcEnabled(t *testing.T) {
 	server.RpcRegister(new(mockRegister))
 	shdChan := utils.NewSyncedChan()
 	server.rpcEnabled = false
-
-	go server.serveCodec(":9999", utils.JSONCaps, newCapsJSONCodec, shdChan)
-	runtime.Gosched()
-
+	server.serveCodec(":9999", utils.JSONCaps, newCapsJSONCodec, shdChan)
 	shdChan.CloseOnce()
 	server.StopBiRPC()
 }
@@ -201,7 +194,6 @@ func testServeGOB(t *testing.T) {
 	shdChan := utils.NewSyncedChan()
 
 	go server.ServeGOB(":27697", shdChan)
-	runtime.Gosched()
 
 	shdChan.CloseOnce()
 	server.StopBiRPC()
