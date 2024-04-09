@@ -875,6 +875,13 @@ type SIPAgentJsonCfg struct {
 	Request_processors   *[]*ReqProcessorJsnCfg
 }
 
+type JanusAgentJsonCfg struct {
+	Enabled           *bool                  `json:"enabled"`
+	Url               *string                `json:"url"`
+	Sessions_conns    *[]string              `json:"sessions_conns"`
+	RequestProcessors *[]*ReqProcessorJsnCfg `json:"request_processors"`
+}
+
 type ConfigSCfgJson struct {
 	Enabled  *bool
 	Url      *string

@@ -368,7 +368,7 @@ func (cfg *CGRConfig) loadFromJSONCfg(jsnCfg *CgrJsonCfg) (err error) {
 		cfg.loadMailerCfg, cfg.loadSureTaxCfg, cfg.loadDispatcherSCfg,
 		cfg.loadLoaderCgrCfg, cfg.loadMigratorCgrCfg, cfg.loadTLSCgrCfg,
 		cfg.loadAnalyzerCgrCfg, cfg.loadApierCfg, cfg.loadErsCfg, cfg.loadEesCfg,
-		cfg.loadSIPAgentCfg, cfg.loadRegistrarCCfg,
+		cfg.loadSIPAgentCfg, cfg.loadRegistrarCCfg, cfg.loadJanusAgentCfg,
 		cfg.loadConfigSCfg, cfg.loadAPIBanCgrCfg, cfg.loadSentryPeerCgrCfg, cfg.loadCoreSCfg} {
 		if err = loadFunc(jsnCfg); err != nil {
 			return
@@ -799,6 +799,14 @@ func (cfg *CGRConfig) loadSIPAgentCfg(jsnCfg *CgrJsonCfg) (err error) {
 		return
 	}
 	return cfg.sipAgentCfg.loadFromJSONCfg(jsnSIPAgentCfg, cfg.generalCfg.RSRSep)
+}
+
+func (cfg *CGRConfig) loadJanusAgentCfg(jsnCfg *CgrJsonCfg) (err error) {
+	var jsnJanusAgentCfg *JanusAgentJsonCfg
+	if jsnJanusAgentCfg, err = jsnCfg.JanusAgentCfgJson(); err != nil {
+		return
+	}
+	return cfg.janusAgentCfg.loadFromJSONCfg(jsnJanusAgentCfg, cfg.generalCfg.RSRSep)
 }
 
 // loadTemplateSCfg loads the Template section of the configuration
@@ -1241,6 +1249,7 @@ func (cfg *CGRConfig) getLoadFunctions() map[string]func(*CgrJsonCfg) error {
 		ApierS:             cfg.loadApierCfg,
 		RPCConnsJsonName:   cfg.loadRPCConns,
 		SIPAgentJson:       cfg.loadSIPAgentCfg,
+		JanusAgentJson:     cfg.loadJanusAgentCfg,
 		TemplatesJson:      cfg.loadTemplateSCfg,
 		ConfigSJson:        cfg.loadConfigSCfg,
 		APIBanCfgJson:      cfg.loadAPIBanCgrCfg,
@@ -1481,6 +1490,8 @@ func (cfg *CGRConfig) reloadSections(sections ...string) {
 			cfg.rldChans[THRESHOLDS_JSON] <- struct{}{}
 		case RouteSJson:
 			cfg.rldChans[RouteSJson] <- struct{}{}
+		case JanusAgentJson:
+			cfg.rldChans[JanusAgentJson] <- struct{}{}
 		case LoaderJson:
 			cfg.rldChans[LoaderJson] <- struct{}{}
 		case DispatcherSJson:
@@ -1823,6 +1834,8 @@ func (cfg *CGRConfig) V1GetConfigAsJSON(ctx *context.Context, args *SectionWithA
 		mp = cfg.RadiusAgentCfg().AsMapInterface(cfg.GeneralCfg().RSRSep)
 	case DNSAgentJson:
 		mp = cfg.DNSAgentCfg().AsMapInterface(cfg.GeneralCfg().RSRSep)
+	case JanusAgentJson:
+		mp = cfg.JanusAgentCfg().AsMapInterface(cfg.GeneralCfg().RSRSep)
 	case ATTRIBUTE_JSN:
 		mp = cfg.AttributeSCfg().AsMapInterface()
 	case ChargerSCfgJson:
@@ -1944,6 +1957,7 @@ func (cfg *CGRConfig) Clone() (cln *CGRConfig) {
 		cdrsCfg:          cfg.cdrsCfg.Clone(),
 		sessionSCfg:      cfg.sessionSCfg.Clone(),
 		fsAgentCfg:       cfg.fsAgentCfg.Clone(),
+		janusAgentCfg:    cfg.janusAgentCfg.Clone(),
 		kamAgentCfg:      cfg.kamAgentCfg.Clone(),
 		asteriskAgentCfg: cfg.asteriskAgentCfg.Clone(),
 		diameterAgentCfg: cfg.diameterAgentCfg.Clone(),
