@@ -879,7 +879,13 @@ type JanusAgentJsonCfg struct {
 	Enabled           *bool                  `json:"enabled"`
 	Url               *string                `json:"url"`
 	Sessions_conns    *[]string              `json:"sessions_conns"`
+	Janus_conns       *[]*JanusConnJsonCfg   `json:"janus_conns"`
 	RequestProcessors *[]*ReqProcessorJsnCfg `json:"request_processors"`
+}
+
+type JanusConnJsonCfg struct {
+	Address *string `json:"address"`
+	Type    *string `json:"type"`
 }
 
 type ConfigSCfgJson struct {
