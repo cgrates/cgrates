@@ -73,7 +73,7 @@ var (
 	sortedCfgSections = []string{GENERAL_JSN, RPCConnsJsonName, DATADB_JSN, STORDB_JSN, LISTEN_JSN, TlsCfgJson, HTTP_JSN, SCHEDULER_JSN,
 		CACHE_JSN, FilterSjsn, RALS_JSN, CDRS_JSN, ERsJson, SessionSJson, AsteriskAgentJSN, FreeSWITCHAgentJSN,
 		KamailioAgentJSN, DA_JSN, RA_JSN, HttpAgentJson, DNSAgentJson, ATTRIBUTE_JSN, ChargerSCfgJson, RESOURCES_JSON, STATS_JSON,
-		THRESHOLDS_JSON, RouteSJson, LoaderJson, MAILER_JSN, SURETAX_JSON, CgrLoaderCfgJson, CgrMigratorCfgJson, DispatcherSJson,
+		THRESHOLDS_JSON, RouteSJson, LoaderJson, MAILER_JSN, SURETAX_JSON, CgrLoaderCfgJson, CgrMigratorCfgJson, DispatcherSJson, JanusAgentJson,
 		AnalyzerCfgJson, ApierS, EEsJson, SIPAgentJson, RegistrarCJson, TemplatesJson, ConfigSJson, APIBanCfgJson, SentryPeerCfgJson, CoreSCfgJson}
 )
 
@@ -523,6 +523,18 @@ func (jsnCfg CgrJsonCfg) SIPAgentJsonCfg() (*SIPAgentJsonCfg, error) {
 		return nil, err
 	}
 	return sipAgnt, nil
+}
+
+func (jsnCfg CgrJsonCfg) JanusAgentCfgJson() (*JanusAgentJsonCfg, error) {
+	raw, haskey := jsnCfg[JanusAgentJson]
+	if !haskey {
+		return nil, nil
+	}
+	cfg := new(JanusAgentJsonCfg)
+	if err := json.Unmarshal(*raw, cfg); err != nil {
+		return nil, err
+	}
+	return cfg, nil
 }
 
 func (jsnCfg CgrJsonCfg) TemplateSJsonCfg() (map[string][]*FcTemplateJsonCfg, error) {
