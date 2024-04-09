@@ -549,7 +549,7 @@ func testV1FIdxCaGetStatQueuesWithNotFound(t *testing.T) {
 		Tenant: "cgrates.org",
 		ID:     "event1",
 		Event: map[string]any{
-			utils.ID: "1001",
+			utils.AccountField: "1001",
 		},
 		APIOpts: map[string]any{
 			utils.MetaEventType: utils.AccountUpdate,
@@ -575,7 +575,7 @@ func testV1FIdxCaSetStatQueueProfile(t *testing.T) {
 			ID:     "FLTR_1",
 			Rules: []*engine.FilterRule{
 				{
-					Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.ID,
+					Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.AccountField,
 					Type:    utils.MetaString,
 					Values:  []string{"1001"},
 				},
@@ -583,11 +583,6 @@ func testV1FIdxCaSetStatQueueProfile(t *testing.T) {
 					Element: utils.DynamicDataPrefix + utils.MetaOpts + utils.NestingSep + utils.MetaEventType,
 					Type:    utils.MetaString,
 					Values:  []string{utils.AccountUpdate},
-				},
-				{
-					Element: "~*asm.BalanceSummaries.*default.Value",
-					Type:    utils.MetaGreaterThan,
-					Values:  []string{"8"},
 				},
 			},
 			ActivationInterval: &utils.ActivationInterval{
@@ -634,14 +629,8 @@ func testV1FIdxCaSetStatQueueProfile(t *testing.T) {
 		Tenant: "cgrates.org",
 		ID:     "event1",
 		Event: map[string]any{
-			utils.ID: "1001",
-			utils.BalanceSummaries: engine.BalanceSummaries{
-				{
-					ID:    utils.MetaDefault,
-					Value: 10,
-				},
-			},
-			"Val": 10,
+			utils.AccountField: "1001",
+			"Val":              10,
 		},
 		APIOpts: map[string]any{
 			utils.MetaEventType: utils.AccountUpdate,
@@ -658,33 +647,16 @@ func testV1FIdxCaSetStatQueueProfile(t *testing.T) {
 }
 
 func testV1FIdxCaGetStatQueuesFromTP(t *testing.T) {
-
-	// Overwrite Stats1 profile to filter for ID instead of AccountField.
-	var result string
-	var tmpSQ engine.StatQueueProfile
-	if err := tFIdxCaRpc.Call(context.Background(), utils.APIerSv1GetStatQueueProfile,
-		&utils.TenantID{Tenant: "cgrates.org", ID: "Stats1"}, &tmpSQ); err != nil {
-		t.Error(err)
-	}
-	tmpSQ.FilterIDs = []string{"*string:~*req.ID:1001|1002"}
-	tmpSQ.ActivationInterval = &utils.ActivationInterval{ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC)}
-	if err := tFIdxCaRpc.Call(context.Background(), utils.APIerSv1SetStatQueueProfile,
-		&engine.StatQueueProfileWithAPIOpts{StatQueueProfile: &tmpSQ}, &result); err != nil {
-		t.Error(err)
-	} else if result != utils.OK {
-		t.Error("Unexpected reply returned", result)
-	}
-
 	var reply []string
 	expected := []string{"Stats1"}
 	ev2 := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "event2",
 		Event: map[string]any{
-			utils.ID:         "1002",
-			utils.AnswerTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			utils.Usage:      45 * time.Second,
-			utils.Cost:       12.1,
+			utils.AccountField: "1002",
+			utils.AnswerTime:   time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			utils.Usage:        45 * time.Second,
+			utils.Cost:         12.1,
 		},
 	}
 	if err := tFIdxCaRpc.Call(context.Background(), utils.StatSv1ProcessEvent, ev2, &reply); err != nil {
@@ -696,10 +668,10 @@ func testV1FIdxCaGetStatQueuesFromTP(t *testing.T) {
 		Tenant: "cgrates.org",
 		ID:     "event3",
 		Event: map[string]any{
-			utils.ID:         "1002",
-			utils.AnswerTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			utils.Usage:      45 * time.Second,
-			utils.Cost:       12.1,
+			utils.AccountField: "1002",
+			utils.AnswerTime:   time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			utils.Usage:        45 * time.Second,
+			utils.Cost:         12.1,
 		},
 	}
 	if err := tFIdxCaRpc.Call(context.Background(), utils.StatSv1ProcessEvent, &ev3, &reply); err != nil {
@@ -712,10 +684,10 @@ func testV1FIdxCaGetStatQueuesFromTP(t *testing.T) {
 		Tenant: "cgrates.org",
 		ID:     "event1",
 		Event: map[string]any{
-			utils.ID:         "1001",
-			utils.AnswerTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			utils.Usage:      45 * time.Second,
-			utils.Cost:       12.1,
+			utils.AccountField: "1001",
+			utils.AnswerTime:   time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			utils.Usage:        45 * time.Second,
+			utils.Cost:         12.1,
 		},
 		APIOpts: map[string]any{
 			utils.MetaEventType: utils.AccountUpdate,
@@ -730,10 +702,10 @@ func testV1FIdxCaGetStatQueuesFromTP(t *testing.T) {
 		Tenant: "cgrates.org",
 		ID:     "event1",
 		Event: map[string]any{
-			utils.ID:         "1001",
-			utils.AnswerTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			utils.Usage:      45 * time.Second,
-			utils.Cost:       12.1,
+			utils.AccountField: "1001",
+			utils.AnswerTime:   time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			utils.Usage:        45 * time.Second,
+			utils.Cost:         12.1,
 		},
 		APIOpts: map[string]any{
 			utils.MetaEventType: utils.AccountUpdate,
@@ -839,7 +811,7 @@ func testV1FIdxCaUpdateStatQueueProfileFromTP(t *testing.T) {
 			ID:     "FLTR_3",
 			Rules: []*engine.FilterRule{
 				{
-					Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.ID,
+					Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.AccountField,
 					Type:    utils.MetaString,
 					Values:  []string{"1003"},
 				},
@@ -877,10 +849,10 @@ func testV1FIdxCaUpdateStatQueueProfileFromTP(t *testing.T) {
 		Tenant: "cgrates.org",
 		ID:     "event1",
 		Event: map[string]any{
-			utils.ID:         "1003",
-			utils.AnswerTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			utils.Usage:      45 * time.Second,
-			utils.Cost:       12.1,
+			utils.AccountField: "1003",
+			utils.AnswerTime:   time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			utils.Usage:        45 * time.Second,
+			utils.Cost:         12.1,
 		},
 		APIOpts: map[string]any{
 			utils.MetaEventType: utils.AccountUpdate,
@@ -926,10 +898,10 @@ func testV1FIdxCaRemoveStatQueueProfile(t *testing.T) {
 		Tenant: "cgrates.org",
 		ID:     "event1",
 		Event: map[string]any{
-			utils.ID:         "1003",
-			utils.AnswerTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			utils.Usage:      45 * time.Second,
-			utils.Cost:       12.1,
+			utils.AccountField: "1003",
+			utils.AnswerTime:   time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			utils.Usage:        45 * time.Second,
+			utils.Cost:         12.1,
 		},
 		APIOpts: map[string]any{
 			utils.MetaEventType: utils.AccountUpdate,

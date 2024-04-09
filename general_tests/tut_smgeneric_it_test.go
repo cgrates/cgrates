@@ -158,7 +158,7 @@ func testTutSMGCacheStats(t *testing.T) {
 	expectedStats[utils.CacheChargerProfiles].Items = 1
 	expectedStats[utils.CacheRPCConnections].Items = 2
 	expectedStats[utils.CacheTimings].Items = 14
-	expectedStats[utils.CacheThresholdFilterIndexes].Items = 10
+	expectedStats[utils.CacheThresholdFilterIndexes].Items = 12
 	expectedStats[utils.CacheThresholdFilterIndexes].Groups = 1
 	expectedStats[utils.CacheStatFilterIndexes].Items = 2
 	expectedStats[utils.CacheStatFilterIndexes].Groups = 1

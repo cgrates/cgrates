@@ -211,7 +211,7 @@ func testPrecacheGetCacheStatsAfterRestart(t *testing.T) {
 		},
 		utils.CacheRouteProfiles: {Items: 3},
 		utils.CacheThresholdFilterIndexes: {
-			Items:  10,
+			Items:  12,
 			Groups: 1,
 		},
 		utils.CacheThresholdProfiles:    {Items: 7},
