@@ -23,11 +23,18 @@ import (
 	"github.com/cgrates/rpcclient"
 )
 
+// JanusConn represents one connection to Janus server
+type JanusConn struct {
+	Address string // Address to reach Janus
+	Type    string // Connection type
+}
+
 // JanusAgentCfg the config for an Janus Agent
 type JanusAgentCfg struct {
 	Enabled           bool
 	URL               string
 	SessionSConns     []string
+	JanusConns        []*JanusConn // connections towards Janus
 	RequestProcessors []*RequestProcessor
 }
 

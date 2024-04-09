@@ -1184,6 +1184,9 @@ const CGRATES_CFG_JSON = `
 	"enabled": false,											// enables the Janus agent: <true|false>
 	"url": "/janus",
 	"sessions_conns": ["*internal"],
+	"janus_conns":[						// instantiate connections to multiple Asterisk servers
+		{"address": "127.0.0.1:8088", "type": "*ws"}
+	],
 	"request_processors": [										// request processors to be applied to Janus messages
 	],
 },
