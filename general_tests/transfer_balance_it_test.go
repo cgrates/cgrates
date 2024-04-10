@@ -23,6 +23,7 @@ package general_tests
 import (
 	"sort"
 	"testing"
+	"time"
 
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/engine"
@@ -99,6 +100,7 @@ ACT_TRANSFER,*transfer_balance,"{""DestinationAccountID"":""cgrates.org:ACC_DEST
 	defer shutdown()
 
 	t.Run("CheckInitialBalances", func(t *testing.T) {
+		time.Sleep(10 * time.Millisecond) // wait for tps to be loaded
 		var acnts []*engine.Account
 		if err := client.Call(context.Background(), utils.APIerSv2GetAccounts,
 			&utils.AttrGetAccounts{
