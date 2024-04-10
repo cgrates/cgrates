@@ -504,6 +504,7 @@ const (
 	RatingFilter                = "RatingFilter"
 	Accounting                  = "Accounting"
 	Rating                      = "Rating"
+	ExtraCharge                 = "ExtraCharge"
 	Charges                     = "Charges"
 	CompressFactor              = "CompressFactor"
 	Increments                  = "Increments"

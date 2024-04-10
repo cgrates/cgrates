@@ -1032,7 +1032,7 @@ func (ec *EventCost) getChargesForPath(fldPath []string, chr *ChargingInterval) 
 	if fldPath[1] == utils.Accounting {
 		return ec.getAcountingForPath(fldPath[2:], ec.Accounting[incr.AccountingID])
 	}
-	return incr.FieldAsInterface(fldPath)
+	return incr.FieldAsInterface(fldPath[1:])
 }
 
 func (ec *EventCost) getRatingForPath(fldPath []string, rating *RatingUnit) (val any, err error) {
@@ -1046,9 +1046,13 @@ func (ec *EventCost) getRatingForPath(fldPath []string, rating *RatingUnit) (val
 	switch fldPath[0] {
 	default:
 		opath, indx := utils.GetPathIndex(fldPath[0])
+
+		// Break the switch and leave the validation to
+		// the RatingUnit's FieldAsInterface method.
 		if opath != utils.Rates {
-			return nil, fmt.Errorf("unsupported field prefix: <%s>", opath)
+			break
 		}
+
 		rts, has := ec.Rates[rating.RatesID]
 		if !has || rts == nil {
 			return nil, utils.ErrNotFound
@@ -1102,7 +1106,8 @@ func (ec *EventCost) getAcountingForPath(fldPath []string, bc *BalanceCharge) (v
 		return bc, nil
 	}
 
-	if fldPath[0] == utils.Balance {
+	switch fldPath[0] {
+	case utils.Balance:
 		bl := ec.AccountSummary.BalanceSummaries.BalanceSummaryWithUUD(bc.BalanceUUID)
 		if bl == nil {
 			return nil, utils.ErrNotFound
@@ -1111,7 +1116,10 @@ func (ec *EventCost) getAcountingForPath(fldPath []string, bc *BalanceCharge) (v
 			return bl, nil
 		}
 		return bl.FieldAsInterface(fldPath[1:])
-
+	case utils.Rating:
+		return ec.getRatingForPath(fldPath[1:], ec.Rating[bc.RatingID])
+	case utils.ExtraCharge:
+		return ec.getAcountingForPath(fldPath[1:], ec.Accounting[bc.ExtraChargeID])
 	}
 	return bc.FieldAsInterface(fldPath)
 }
