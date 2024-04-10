@@ -31,6 +31,7 @@ import (
 	"time"
 
 	"github.com/cgrates/birpc/context"
+	"github.com/cgrates/birpc/jsonrpc"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -323,7 +324,7 @@ resolver_preload: {
 				nc.Close()
 			})
 
-			client, err := newRPCClient(cfg.ListenCfg())
+			client, err := jsonrpc.Dial(utils.TCP, cfg.ListenCfg().RPCJSONListen)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -520,7 +521,7 @@ system_account:AAFIBB6C56ROU5XRVJLJYR3BTGGYK3HJGHEHQV7L7QZMTT3ZRBLHBS7F
 			}
 			defer engine.KillEngine(*utils.WaitRater)
 
-			client, err := newRPCClient(cfg.ListenCfg())
+			client, err := jsonrpc.Dial(utils.TCP, cfg.ListenCfg().RPCJSONListen)
 			if err != nil {
 				t.Fatal(err)
 			}
