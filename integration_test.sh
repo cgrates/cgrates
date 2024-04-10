@@ -46,8 +46,11 @@ for test in "${single_run_packages[@]}"; do
 done
 
 # Check the results and exit with an appropriate code
-pass=1
+pass=0
 for val in "${results[@]}"; do
-   (( pass=pass||val))
+   if [ "$val" -ne 0 ]; then
+       pass=1
+       break
+   fi
 done
 exit $pass
