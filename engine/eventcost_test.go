@@ -106,16 +106,19 @@ var testEC = &EventCost{
 		BalanceSummaries: []*BalanceSummary{
 			{
 				UUID:  "8c54a9e9-d610-4c82-bcb5-a315b9a65010",
+				ID:    "BALANCE_1",
 				Type:  utils.MONETARY,
 				Value: 50,
 			},
 			{
 				UUID:  "7a54a9e9-d610-4c82-bcb5-a315b9a65010",
+				ID:    "BALANCE_2",
 				Type:  utils.MONETARY,
 				Value: 25,
 			},
 			{
 				UUID:  "4b8b53d7-c1a1-4159-b845-4623a00a0165",
+				ID:    "BALANCE_3",
 				Type:  utils.VOICE,
 				Value: 200,
 			},
@@ -130,6 +133,7 @@ var testEC = &EventCost{
 			TimingID:         "7f324ab",
 			RatesID:          "4910ecf",
 			RatingFiltersID:  "43e77dc",
+			MaxCostStrategy:  utils.MAX_COST_DISCONNECT,
 		},
 		"c1a5ab9": &RatingUnit{
 			ConnectFee:       0.1,
@@ -138,6 +142,7 @@ var testEC = &EventCost{
 			TimingID:         "7f324ab",
 			RatesID:          "ec1a177",
 			RatingFiltersID:  "43e77dc",
+			MaxCostStrategy:  utils.MAX_COST_DISCONNECT,
 		},
 	},
 	Accounting: Accounting{
@@ -2380,6 +2385,7 @@ func TestECSyncKeys(t *testing.T) {
 				TimingID:         "2f324ab",
 				RatesID:          "2c1a177",
 				RatingFiltersID:  "23e77dc",
+				MaxCostStrategy:  utils.MAX_COST_DISCONNECT,
 			},
 		},
 		Accounting: Accounting{
@@ -2504,17 +2510,22 @@ func TestECSyncKeys(t *testing.T) {
 			BalanceSummaries: []*BalanceSummary{
 				{
 					UUID:     "8c54a9e9-d610-4c82-bcb5-a315b9a65010",
+					ID:       "BALANCE_1",
 					Type:     utils.MONETARY,
 					Value:    50,
-					Disabled: false},
+					Disabled: false,
+				},
 				{
 					UUID:     "7a54a9e9-d610-4c82-bcb5-a315b9a65010",
+					ID:       "BALANCE_2",
 					Type:     utils.MONETARY,
 					Value:    25,
-					Disabled: false},
+					Disabled: false,
+				},
 				{
 					UUID:     "4b8b53d7-c1a1-4159-b845-4623a00a0165",
-					Type:     "*voice",
+					ID:       "BALANCE_3",
+					Type:     utils.VOICE,
 					Value:    200,
 					Disabled: false,
 				},
@@ -2529,6 +2540,7 @@ func TestECSyncKeys(t *testing.T) {
 				TimingID:         "2f324ab",
 				RatesID:          "4910ecf",
 				RatingFiltersID:  "23e77dc",
+				MaxCostStrategy:  utils.MAX_COST_DISCONNECT,
 			},
 			"21a5ab9": &RatingUnit{
 				ConnectFee:       0.1,
@@ -2537,6 +2549,7 @@ func TestECSyncKeys(t *testing.T) {
 				TimingID:         "2f324ab",
 				RatesID:          "2c1a177",
 				RatingFiltersID:  "23e77dc",
+				MaxCostStrategy:  utils.MAX_COST_DISCONNECT,
 			},
 		},
 		Accounting: Accounting{
@@ -3051,6 +3064,247 @@ func TestECAsDataProvider2(t *testing.T) {
 	}
 }
 
+func TestECAsDataProviderTT(t *testing.T) {
+	ecDP := testEC
+	testDPs := []struct {
+		name   string
+		fields []string
+		exp    any
+	}{
+		{
+			name:   "StartTime",
+			fields: []string{"Charges[0]", "Rating", "Timing", "StartTime"},
+			exp:    "00:00:00",
+		},
+		{
+			name:   "RateIncrement",
+			fields: []string{"Charges[0]", "Rating", "Rates[0]", "RateIncrement"},
+			exp:    "1m0s",
+		},
+		{
+			name:   "DestinationID",
+			fields: []string{"Charges[0]", "Rating", "RatingFilter", "DestinationID"},
+			exp:    "GERMANY",
+		},
+		{
+			name:   "Units",
+			fields: []string{"Charges[0]", "Increments[0]", "Accounting", "Units"},
+			exp:    "0.1",
+		},
+		{
+			name:   "Subject",
+			fields: []string{"Charges[0]", "Rating", "RatingFilter", "Subject"},
+			exp:    "*out:cgrates.org:call:*any",
+		},
+		{
+			name:   "Value",
+			fields: []string{"Charges[2]", "Increments[2]", "Accounting", "Balance", "Value"},
+			exp:    "200",
+		},
+		{
+			name:   "Type",
+			fields: []string{"Charges[1]", "Increments[0]", "Accounting", "Balance", "Type"},
+			exp:    "*monetary",
+		},
+		{
+			name:   "UUID",
+			fields: []string{"Charges[0]", "Increments[3]", "Accounting", "Balance", "UUID"},
+			exp:    "4b8b53d7-c1a1-4159-b845-4623a00a0165",
+		},
+		{
+			name:   "ID",
+			fields: []string{"Charges[0]", "Increments[3]", "Accounting", "Balance", "ID"},
+			exp:    "BALANCE_3",
+		},
+		{
+			name:   "Disabled",
+			fields: []string{"Charges[0]", "Increments[3]", "Accounting", "Balance", "Disabled"},
+			exp:    "false",
+		},
+		{
+			name:   "IncrementCost",
+			fields: []string{"Charges[0]", "Increments[2]", "Cost"},
+			exp:    "0.01",
+		},
+		{
+			name:   "DestinationPrefix",
+			fields: []string{"Charges[2]", "Rating", "RatingFilter", "DestinationPrefix"},
+			exp:    "+49",
+		},
+		{
+			name:   "RatingPlanID",
+			fields: []string{"Charges[2]", "Rating", "RatingFilter", "RatingPlanID"},
+			exp:    "RPL_RETAIL1",
+		},
+		{
+			name:   "AccountID",
+			fields: []string{"Charges[0]", "Increments[3]", "Accounting", "AccountID"},
+			exp:    "cgrates.org:dan",
+		},
+		{
+			name:   "RateValue",
+			fields: []string{"Charges[1]", "Rating", "Rates[0]", "Value"},
+			exp:    "0.01",
+		},
+		{
+			name:   "RateUnit",
+			fields: []string{"Charges[2]", "Rating", "Rates[0]", "RateUnit"},
+			exp:    "1s",
+		},
+		{
+			name:   "ExtraCharge",
+			fields: []string{"Charges[0]", "Increments[1]", "Accounting", "ExtraChargeID"},
+			exp:    "*none",
+		},
+		{
+			name:   "AccountSummary",
+			fields: []string{"AccountSummary", "BalanceSummaries[1]", "Value"},
+			exp:    "25",
+		},
+		{
+			name:   "RoundingMethod",
+			fields: []string{"AccountSummary", "AllowNegative"},
+			exp:    "false",
+		},
+		{
+			name:   "CompressFactor",
+			fields: []string{"Charges[0]", "CompressFactor"},
+			exp:    "1",
+		},
+		{
+			name:   "ConnectFee through Accounting",
+			fields: []string{"Charges[0]", "Increments[3]", "Accounting", "Rating", "ConnectFee"},
+			exp:    "0",
+		},
+		{
+			name:   "RoundingMethod through Accounting",
+			fields: []string{"Charges[0]", "Increments[3]", "Accounting", "Rating", "RoundingMethod"},
+			exp:    utils.ROUNDING_UP,
+		},
+		{
+			name:   "RoundingDecimals through Accounting",
+			fields: []string{"Charges[0]", "Increments[3]", "Accounting", "Rating", "RoundingDecimals"},
+			exp:    "5",
+		},
+		{
+			name:   "MaxCost through Accounting",
+			fields: []string{"Charges[0]", "Increments[3]", "Accounting", "Rating", "MaxCost"},
+			exp:    "0",
+		},
+		{
+			name:   "MaxCostStrategy through Accounting",
+			fields: []string{"Charges[0]", "Increments[3]", "Accounting", "Rating", "MaxCostStrategy"},
+			exp:    utils.MAX_COST_DISCONNECT,
+		},
+		{
+			name:   "TimingID through Accounting",
+			fields: []string{"Charges[0]", "Increments[3]", "Accounting", "Rating", "TimingID"},
+			exp:    "7f324ab",
+		},
+		{
+			name:   "RatesID through Accounting",
+			fields: []string{"Charges[0]", "Increments[3]", "Accounting", "Rating", "RatesID"},
+			exp:    "4910ecf",
+		},
+		{
+			name:   "RatingFiltersID through Accounting",
+			fields: []string{"Charges[0]", "Increments[3]", "Accounting", "Rating", "RatingFiltersID"},
+			exp:    "43e77dc",
+		},
+		{
+			name:   "ConnectFee",
+			fields: []string{"Charges[0]", "Rating", "ConnectFee"},
+			exp:    "0.1",
+		},
+		{
+			name:   "RoundingMethod",
+			fields: []string{"Charges[0]", "Rating", "RoundingMethod"},
+			exp:    utils.ROUNDING_UP,
+		},
+		{
+			name:   "RoundingDecimals",
+			fields: []string{"Charges[0]", "Rating", "RoundingDecimals"},
+			exp:    "5",
+		},
+		{
+			name:   "MaxCost",
+			fields: []string{"Charges[0]", "Rating", "MaxCost"},
+			exp:    "0",
+		},
+		{
+			name:   "MaxCostStrategy",
+			fields: []string{"Charges[0]", "Rating", "MaxCostStrategy"},
+			exp:    utils.MAX_COST_DISCONNECT,
+		},
+		{
+			name:   "TimingID",
+			fields: []string{"Charges[0]", "Rating", "TimingID"},
+			exp:    "7f324ab",
+		},
+		{
+			name:   "RatesID",
+			fields: []string{"Charges[0]", "Rating", "RatesID"},
+			exp:    "ec1a177",
+		},
+		{
+			name:   "RatingFiltersID",
+			fields: []string{"Charges[0]", "Rating", "RatingFiltersID"},
+			exp:    "43e77dc",
+		},
+		{
+			name:   "DestinationID through Accounting",
+			fields: []string{"Charges[0]", "Increments[3]", "Accounting", "Rating", "RatingFilter", "DestinationID"},
+			exp:    "GERMANY",
+		},
+		{
+			name:   "Value through ExtraCharge",
+			fields: []string{"Charges[0]", "Increments[3]", "Accounting", "ExtraCharge", "Balance", "Value"},
+			exp:    "50",
+		},
+		{
+			name:   "Type through ExtraCharge",
+			fields: []string{"Charges[0]", "Increments[3]", "Accounting", "ExtraCharge", "Balance", "Type"},
+			exp:    utils.MONETARY,
+		},
+		{
+			name:   "UUID through ExtraCharge",
+			fields: []string{"Charges[0]", "Increments[3]", "Accounting", "ExtraCharge", "Balance", "UUID"},
+			exp:    "8c54a9e9-d610-4c82-bcb5-a315b9a65010",
+		},
+		{
+			name:   "ID through ExtraCharge",
+			fields: []string{"Charges[0]", "Increments[3]", "Accounting", "ExtraCharge", "Balance", "ID"},
+			exp:    "BALANCE_1",
+		},
+		{
+			name:   "Disabled through ExtraCharge",
+			fields: []string{"Charges[0]", "Increments[3]", "Accounting", "ExtraCharge", "Balance", "Disabled"},
+			exp:    "false",
+		},
+		{
+			name:   "AccountID through ExtraCharge",
+			fields: []string{"Charges[0]", "Increments[3]", "Accounting", "ExtraCharge", "AccountID"},
+			exp:    "cgrates.org:dan",
+		},
+		{
+			name:   "Units through ExtraCharge",
+			fields: []string{"Charges[0]", "Increments[3]", "Accounting", "ExtraCharge", "Units"},
+			exp:    "0.005",
+		},
+	}
+
+	for _, testDp := range testDPs {
+
+		t.Run(testDp.name, func(t *testing.T) {
+			if val, err := ecDP.FieldAsString(testDp.fields); err != nil {
+				t.Error(err)
+			} else if testDp.exp != val {
+				t.Errorf("Expecting: <%s> \nreceived: <%s>", testDp.exp, val)
+			}
+		})
+	}
+}
+
 func TestECFieldAsInterfaceNilEventCost(t *testing.T) {
 	dft, _ := config.NewDefaultCGRConfig()
 	cdr, err := NewMapEvent(map[string]any{}).AsCDR(dft, "cgrates.org", "UTC")
@@ -3342,7 +3596,7 @@ func TestEventCostgetChargesForPath(t *testing.T) {
 			name: "extrafield in increments",
 			fl:   []string{"Increments[0]", "CompressFactor"},
 			chr:  &chr,
-			exp:  nil,
+			exp:  1,
 			err:  "NOT_FOUND",
 		},
 	}
@@ -3353,7 +3607,7 @@ func TestEventCostgetChargesForPath(t *testing.T) {
 
 			if err != nil {
 				if err.Error() != tt.err {
-					t.Error(err)
+					t.Errorf("error: want %v, got %v", tt.err, err)
 				}
 			}
 
@@ -3417,7 +3671,7 @@ func TestEventCostgetRatingForPath(t *testing.T) {
 			fldPath: []string{"test[0]"},
 			rating:  &r,
 			exp:     nil,
-			err:     "unsupported field prefix: <test>",
+			err:     "unsupported field prefix: <test[0]>",
 		},
 		{
 			name:    "rating not found in event cost",
@@ -3514,7 +3768,7 @@ func TestEventCostgetRatingForPath(t *testing.T) {
 
 			if err != nil {
 				if err.Error() != tt.err {
-					t.Error(err)
+					t.Errorf("error: want %v, got %v", tt.err, err)
 				}
 			}
 
