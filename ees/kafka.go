@@ -76,9 +76,12 @@ func (pstr *KafkaEE) Connect() (_ error) {
 	defer pstr.Unlock()
 	if pstr.writer == nil {
 		pstr.writer = &kafka.Writer{
-			Addr:        kafka.TCP(pstr.Cfg().ExportPath),
-			Topic:       pstr.topic,
-			MaxAttempts: pstr.Cfg().Attempts,
+			Addr:  kafka.TCP(pstr.Cfg().ExportPath),
+			Topic: pstr.topic,
+
+			// Leave it to the ExportWithAttempts function
+			// to handle the connect attempts.
+			MaxAttempts: 1,
 		}
 	}
 	if pstr.tls {
