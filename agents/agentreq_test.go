@@ -2130,7 +2130,7 @@ func TestAgReqSetFieldsInCacheWithTimeOut(t *testing.T) {
 	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	filterS := engine.NewFilterS(cfg, nil, dm)
 
-	cfg.CacheCfg().Partitions[utils.CacheUCH].TTL = time.Second
+	cfg.CacheCfg().Partitions[utils.CacheUCH].TTL = 5 * time.Millisecond
 	engine.Cache = engine.NewCacheS(cfg, dm, nil)
 	agReq := NewAgentRequest(nil, nil, nil, nil, nil, nil, "cgrates.org", "", filterS, nil)
 	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.AccountField, PathSlice: []string{utils.AccountField}}, utils.NewLeafNode("1001"))
@@ -2166,7 +2166,7 @@ func TestAgReqSetFieldsInCacheWithTimeOut(t *testing.T) {
 		t.Error(err)
 	}
 	// give enough time to Cache to remove ttl the *uch
-	time.Sleep(2 * time.Second)
+	time.Sleep(6 * time.Millisecond)
 	if _, err := agReq.FieldAsInterface([]string{utils.MetaUCH, utils.Tenant}); err == nil || err != utils.ErrNotFound {
 		t.Error(err)
 	}
