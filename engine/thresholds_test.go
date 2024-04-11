@@ -1735,22 +1735,16 @@ func TestThresholdMatchingThresholdForEventLocks5(t *testing.T) {
 func TestThresholdsRunBackupStoreIntervalLessThanZero(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.ThresholdSCfg().StoreInterval = -1
-	data := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
-	dm := NewDataManager(data, cfg.CacheCfg(), nil)
-	filterS := NewFilterS(cfg, nil, dm)
 	tS := &ThresholdService{
-		dm:          dm,
-		storedTdIDs: make(utils.StringSet),
 		cgrcfg:      cfg,
-		filterS:     filterS,
 		loopStopped: make(chan struct{}, 1),
-		stopBackup:  make(chan struct{}),
 	}
 
 	tS.runBackup()
-
-	if len(tS.loopStopped) != 1 {
-		t.Errorf("expected loopStopped field to have only one element, received: <%+v>", len(tS.loopStopped))
+	select {
+	case <-tS.loopStopped:
+	case <-time.After(time.Second):
+		t.Error("timed out waiting for loop to stop")
 	}
 }
 
@@ -1759,14 +1753,12 @@ func TestThresholdsRunBackupStop(t *testing.T) {
 	cfg.ThresholdSCfg().StoreInterval = 5 * time.Millisecond
 	data := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
-	filterS := NewFilterS(cfg, nil, dm)
 	tS := &ThresholdService{
 		dm: dm,
 		storedTdIDs: utils.StringSet{
 			"Th1": struct{}{},
 		},
 		cgrcfg:      cfg,
-		filterS:     filterS,
 		loopStopped: make(chan struct{}, 1),
 		stopBackup:  make(chan struct{}),
 	}
@@ -1786,33 +1778,30 @@ func TestThresholdsRunBackupStop(t *testing.T) {
 		ID:     "Th1",
 	}
 
-	go func() {
-		time.Sleep(9 * time.Millisecond)
-		close(tS.stopBackup)
-	}()
+	// Backup loop checks for the state of the stopBackup
+	// channel after storing the threshold. Channel can be
+	// safely closed beforehand.
+	close(tS.stopBackup)
 	tS.runBackup()
 
 	if rcv, err := tS.dm.GetThreshold("cgrates.org", "Th1", true, false,
 		utils.NonTransactional); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rcv, exp) {
-		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ToJSON(exp), utils.ToJSON(rcv))
+		t.Errorf("threshold: want %+v, got %+v", exp, rcv)
 	}
 
-	if len(tS.loopStopped) != 1 {
-		t.Errorf("expected loopStopped field to have only one element, received: <%+v>", len(tS.loopStopped))
+	select {
+	case <-tS.loopStopped:
+	case <-time.After(time.Second):
+		t.Error("timed out waiting for loop to stop")
 	}
 }
 
 func TestThresholdsReload(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.ThresholdSCfg().StoreInterval = 5 * time.Millisecond
-	data := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
-	dm := NewDataManager(data, cfg.CacheCfg(), nil)
-	filterS := NewFilterS(cfg, nil, dm)
 	tS := &ThresholdService{
-		dm:          dm,
-		filterS:     filterS,
 		stopBackup:  make(chan struct{}),
 		loopStopped: make(chan struct{}, 1),
 		cgrcfg:      cfg,
@@ -1820,27 +1809,26 @@ func TestThresholdsReload(t *testing.T) {
 	tS.loopStopped <- struct{}{}
 	tS.Reload()
 	close(tS.stopBackup)
+	select {
+	case <-tS.loopStopped:
+	case <-time.After(time.Second):
+		t.Error("timed out waiting for loop to stop")
+	}
 }
 
 func TestThresholdsStartLoop(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.ThresholdSCfg().StoreInterval = -1
-	data := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
-	dm := NewDataManager(data, cfg.CacheCfg(), nil)
-	filterS := NewFilterS(cfg, nil, dm)
 	tS := &ThresholdService{
-		dm:          dm,
-		filterS:     filterS,
-		stopBackup:  make(chan struct{}),
 		loopStopped: make(chan struct{}, 1),
 		cgrcfg:      cfg,
 	}
 
 	tS.StartLoop()
-	time.Sleep(10 * time.Millisecond)
-
-	if len(tS.loopStopped) != 1 {
-		t.Errorf("expected loopStopped field to have only one element, received: <%+v>", len(tS.loopStopped))
+	select {
+	case <-tS.loopStopped:
+	case <-time.After(time.Second):
+		t.Error("timed out waiting for loop to stop")
 	}
 }
 

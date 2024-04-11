@@ -27,21 +27,13 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-var (
-	apierAcnts            *APIerSv1
-	apierAcntsAcntStorage *engine.InternalDB
-)
-
-func init() {
+func TestAccountsSetGet(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	apierAcntsAcntStorage = engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
-	apierAcnts = &APIerSv1{
-		DataManager: engine.NewDataManager(apierAcntsAcntStorage, config.CgrConfig().CacheCfg(), nil),
+	db := engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	apierSv1 := &APIerSv1{
+		DataManager: engine.NewDataManager(db, config.CgrConfig().CacheCfg(), nil),
 		Config:      cfg,
 	}
-}
-
-func TestSetAccounts(t *testing.T) {
 	cgrTenant := "cgrates.org"
 	iscTenant := "itsyscom.com"
 	b10 := &engine.Balance{Value: 10, Weight: 10}
@@ -56,53 +48,38 @@ func TestSetAccounts(t *testing.T) {
 	iscAcnt2 := &engine.Account{ID: utils.ConcatenatedKey(iscTenant, "account2"),
 		BalanceMap: map[string]engine.Balances{utils.MetaMonetary + utils.MetaOut: {b10}}}
 	for _, account := range []*engine.Account{cgrAcnt1, cgrAcnt2, cgrAcnt3, iscAcnt1, iscAcnt2} {
-		if err := apierAcntsAcntStorage.SetAccountDrv(account); err != nil {
+		if err := db.SetAccountDrv(account); err != nil {
 			t.Error(err)
 		}
 	}
-	//apierAcntsAcntStorage.CacheRatingPrefixes(utils.ActionPrefix)
-}
 
-/* This was a comment
-func TestGetAccountIds(t *testing.T) {
-	var accountIds []string
-	var attrs AttrGetAccountIds
-	if err := apierAcnts.GetAccountIds(attrs, &accountIds); err != nil {
-		t.Error("Unexpected error", err.Error())
-	} else if len(accountIds) != 5 {
-		t.Errorf("Accounts returned: %+v", accountIds)
-	}
-}
-*/
-
-func TestGetAccounts(t *testing.T) {
 	var accounts []any
 	var attrs utils.AttrGetAccounts
-	if err := apierAcnts.GetAccounts(context.Background(), &utils.AttrGetAccounts{Tenant: "cgrates.org"}, &accounts); err != nil {
+	if err := apierSv1.GetAccounts(context.Background(), &utils.AttrGetAccounts{Tenant: "cgrates.org"}, &accounts); err != nil {
 		t.Error("Unexpected error", err.Error())
 	} else if len(accounts) != 3 {
 		t.Errorf("Accounts returned: %+v", accounts)
 	}
 	attrs = utils.AttrGetAccounts{Tenant: "itsyscom.com"}
-	if err := apierAcnts.GetAccounts(context.Background(), &attrs, &accounts); err != nil {
+	if err := apierSv1.GetAccounts(context.Background(), &attrs, &accounts); err != nil {
 		t.Error("Unexpected error", err.Error())
 	} else if len(accounts) != 2 {
 		t.Errorf("Accounts returned: %+v", accounts)
 	}
 	attrs = utils.AttrGetAccounts{Tenant: "cgrates.org", AccountIDs: []string{"account1"}}
-	if err := apierAcnts.GetAccounts(context.Background(), &attrs, &accounts); err != nil {
+	if err := apierSv1.GetAccounts(context.Background(), &attrs, &accounts); err != nil {
 		t.Error("Unexpected error", err.Error())
 	} else if len(accounts) != 1 {
 		t.Errorf("Accounts returned: %+v", accounts)
 	}
 	attrs = utils.AttrGetAccounts{Tenant: "itsyscom.com", AccountIDs: []string{"INVALID"}}
-	if err := apierAcnts.GetAccounts(context.Background(), &attrs, &accounts); err != nil {
+	if err := apierSv1.GetAccounts(context.Background(), &attrs, &accounts); err != nil {
 		t.Error("Unexpected error", err.Error())
 	} else if len(accounts) != 0 {
 		t.Errorf("Accounts returned: %+v", accounts)
 	}
 	attrs = utils.AttrGetAccounts{Tenant: "INVALID"}
-	if err := apierAcnts.GetAccounts(context.Background(), &attrs, &accounts); err != nil {
+	if err := apierSv1.GetAccounts(context.Background(), &attrs, &accounts); err != nil {
 		t.Error("Unexpected error", err.Error())
 	} else if len(accounts) != 0 {
 		t.Errorf("Accounts returned: %+v", accounts)

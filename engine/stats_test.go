@@ -995,12 +995,7 @@ func TestStatQueueMatchingStatQueuesForEventLocks4(t *testing.T) {
 func TestStatQueueReload(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.StatSCfg().StoreInterval = 5 * time.Millisecond
-	data := NewInternalDB(nil, nil, true, config.CgrConfig().DataDbCfg().Items)
-	dm := NewDataManager(data, cfg.CacheCfg(), nil)
-	filterS := NewFilterS(cfg, nil, dm)
 	sS := &StatService{
-		dm:          dm,
-		filterS:     filterS,
 		stopBackup:  make(chan struct{}),
 		loopStopped: make(chan struct{}, 1),
 		cgrcfg:      cfg,
@@ -1008,27 +1003,26 @@ func TestStatQueueReload(t *testing.T) {
 	sS.loopStopped <- struct{}{}
 	sS.Reload()
 	close(sS.stopBackup)
+	select {
+	case <-sS.loopStopped:
+	case <-time.After(time.Second):
+		t.Error("timed out waiting for loop to stop")
+	}
 }
 
 func TestStatQueueStartLoop(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.StatSCfg().StoreInterval = -1
-	data := NewInternalDB(nil, nil, true, config.CgrConfig().DataDbCfg().Items)
-	dm := NewDataManager(data, cfg.CacheCfg(), nil)
-	filterS := NewFilterS(cfg, nil, dm)
 	sS := &StatService{
-		dm:          dm,
-		filterS:     filterS,
-		stopBackup:  make(chan struct{}),
 		loopStopped: make(chan struct{}, 1),
 		cgrcfg:      cfg,
 	}
 
 	sS.StartLoop()
-	time.Sleep(10 * time.Millisecond)
-
-	if len(sS.loopStopped) != 1 {
-		t.Errorf("expected loopStopped field to have only one element, received: <%+v>", len(sS.loopStopped))
+	select {
+	case <-sS.loopStopped:
+	case <-time.After(time.Second):
+		t.Error("timed out waiting for loop to stop")
 	}
 }
 

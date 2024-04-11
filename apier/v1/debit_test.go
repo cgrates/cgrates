@@ -28,60 +28,39 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-var (
-	apierDebit        *APIerSv1
-	apierDebitStorage *engine.InternalDB
-	responder         *engine.Responder
-	dm                *engine.DataManager
-)
-
-func init() {
-	cfg := config.NewDefaultCGRConfig()
-	config.SetCgrConfig(cfg)
-	apierDebitStorage = engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
-
-	responder := &engine.Responder{MaxComputedUsage: cfg.RalsCfg().MaxComputedUsage}
-	dm = engine.NewDataManager(apierDebitStorage, config.CgrConfig().CacheCfg(), nil)
-	engine.SetDataStorage(dm)
-	apierDebit = &APIerSv1{
-		DataManager: dm,
-		Config:      cfg,
-		Responder:   responder,
-	}
-}
-
-func TestDebitUsageWithOptionsSetConfig(t *testing.T) {
-	cfg := config.NewDefaultCGRConfig()
-	config.SetCgrConfig(cfg)
-	apierDebitStorage = engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
-	responder := &engine.Responder{MaxComputedUsage: cfg.RalsCfg().MaxComputedUsage}
-	dm = engine.NewDataManager(apierDebitStorage, cfg.CacheCfg(), nil)
-	engine.SetDataStorage(dm)
-	apierDebit = &APIerSv1{
-		DataManager: dm,
-		Config:      cfg,
-		Responder:   responder,
-	}
-}
-
 func TestDebitUsageWithOptions(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	dataDB := engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := engine.NewDataManager(dataDB, cfg.CacheCfg(), nil)
+	engine.SetDataStorage(dm)
+	apierDebit := &APIerSv1{
+		DataManager: dm,
+		Config:      cfg,
+		Responder: &engine.Responder{
+			MaxComputedUsage: cfg.RalsCfg().MaxComputedUsage,
+		},
+	}
+
 	cgrTenant := "cgrates.org"
-	b10 := &engine.Balance{Value: 10, Weight: 10}
 	cgrAcnt1 := &engine.Account{
 		ID: utils.ConcatenatedKey(cgrTenant, "account1"),
 		BalanceMap: map[string]engine.Balances{
-			utils.MetaMonetary: {b10},
+			utils.MetaMonetary: {
+				{
+					Value:  10,
+					Weight: 10,
+				},
+			},
 		},
 	}
-	if err := apierDebitStorage.SetAccountDrv(cgrAcnt1); err != nil {
+	if err := dataDB.SetAccountDrv(cgrAcnt1); err != nil {
 		t.Error(err)
 	}
-
 	dstDe := &engine.Destination{Id: "*any", Prefixes: []string{"*any"}}
-	if err := apierDebitStorage.SetDestinationDrv(dstDe, utils.NonTransactional); err != nil {
+	if err := dataDB.SetDestinationDrv(dstDe, utils.NonTransactional); err != nil {
 		t.Error(err)
 	}
-	if err := apierDebitStorage.SetReverseDestinationDrv(dstDe.Id, dstDe.Prefixes, utils.NonTransactional); err != nil {
+	if err := dataDB.SetReverseDestinationDrv(dstDe.Id, dstDe.Prefixes, utils.NonTransactional); err != nil {
 		t.Error(err)
 	}
 	rp1 := &engine.RatingPlan{
@@ -156,7 +135,7 @@ func TestDebitUsageWithOptions(t *testing.T) {
 	}
 
 	// Reload the account and verify that the usage of $1 was removed from the monetary balance
-	resolvedAccount, err := apierDebitStorage.GetAccountDrv(cgrAcnt1.ID)
+	resolvedAccount, err := dataDB.GetAccountDrv(cgrAcnt1.ID)
 	if err != nil {
 		t.Error(err)
 	}

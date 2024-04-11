@@ -72,6 +72,7 @@ func TestFiltersSetFilterReloadCache(t *testing.T) {
 	cM := engine.NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches): rpcInternal,
 	})
+	cM.Reload()
 	apierSv1 := &APIerSv1{
 		Config:      cfg,
 		DataManager: dm,
@@ -263,6 +264,7 @@ func TestFiltersSetFilterClearCache(t *testing.T) {
 	cM := engine.NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches): rpcInternal,
 	})
+	cM.Reload()
 	apierSv1 := &APIerSv1{
 		Config:      cfg,
 		DataManager: dm,
