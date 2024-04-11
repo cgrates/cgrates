@@ -22,7 +22,7 @@ require (
 	github.com/cgrates/birpc v1.3.1-0.20211117095917-5b0ff29f3084
 	github.com/cgrates/fsock v0.0.0-20240322171959-35309017b3e0
 	github.com/cgrates/kamevapi v0.0.0-20240307160311-26273f03eedf
-	github.com/cgrates/ltcache v0.0.0-20210405185848-da943e80c1ab
+	github.com/cgrates/ltcache v0.0.0-20240411152156-e673692056db
 	github.com/cgrates/radigo v0.0.0-20240123163129-491c899df727
 	github.com/cgrates/rpcclient v0.0.0-20230605090759-8bb5188b73e5
 	github.com/cgrates/sipingo v1.0.1-0.20200514112313-699ebc1cdb8e
