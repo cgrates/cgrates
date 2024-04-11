@@ -99,6 +99,7 @@ cgrates.org,data,RPF_DATA,2022-01-14T00:00:00Z,RP_DATA,`,
 	defer shutdown()
 
 	t.Run("CheckInitialBalance", func(t *testing.T) {
+		time.Sleep(10 * time.Millisecond) // wait for tps to be loaded
 		var acnt engine.Account
 		attrs := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1001"}
 		if err := client.Call(context.Background(), utils.APIerSv2GetAccount, attrs, &acnt); err != nil {
