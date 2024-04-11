@@ -86,7 +86,7 @@ func TestNewServerCodec(t *testing.T) {
 	if err = codec.Close(); err != nil {
 		t.Fatal(err)
 	}
-	time.Sleep(200 * time.Millisecond)
+	time.Sleep(10 * time.Millisecond)
 	runtime.Gosched()
 	if cnt, err := anz.db.DocCount(); err != nil {
 		t.Fatal(err)
@@ -150,7 +150,7 @@ func TestNewBiRPCCodec(t *testing.T) {
 	if err = codec.Close(); err != nil {
 		t.Fatal(err)
 	}
-	time.Sleep(200 * time.Millisecond)
+	time.Sleep(15 * time.Millisecond)
 	runtime.Gosched()
 	if cnt, err := anz.db.DocCount(); err != nil {
 		t.Fatal(err)
@@ -212,7 +212,7 @@ func TestNewBiRPCCodec2(t *testing.T) {
 	if err = codec.Close(); err != nil {
 		t.Fatal(err)
 	}
-	time.Sleep(200 * time.Millisecond)
+	time.Sleep(15 * time.Millisecond)
 	runtime.Gosched()
 	if cnt, err := anz.db.DocCount(); err != nil {
 		t.Fatal(err)

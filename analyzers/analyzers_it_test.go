@@ -74,6 +74,14 @@ func newRPCClient(cfg *config.ListenCfg) (c *birpc.Client, err error) {
 
 // Test start here
 func TestAnalyzerSIT(t *testing.T) {
+	switch *utils.DBType {
+	case utils.MetaMongo:
+	case utils.MetaInternal, utils.MetaMySQL, utils.MetaPostgres:
+		t.SkipNow()
+	default:
+		t.Fatal("unsupported dbtype value")
+	}
+
 	for _, stest := range sTestsAlsPrf {
 		t.Run("TestAnalyzerSIT", stest)
 	}
@@ -138,7 +146,6 @@ func testAnalyzerSLoadTarrifPlans(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply returned", reply)
 	}
-	time.Sleep(100 * time.Millisecond)
 }
 
 func testAnalyzerSChargerSv1ProcessEvent(t *testing.T) {

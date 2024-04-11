@@ -1691,7 +1691,6 @@ func TestTPReaderLoadAccountActionsFilteredErr(t *testing.T) {
 	cfg.DataDbCfg().Items = map[string]*config.ItemOpt{
 		utils.CacheTBLTPAccountActions: {
 			Limit:  3,
-			TTL:    3,
 			Remote: true,
 		},
 	}

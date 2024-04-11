@@ -5917,22 +5917,16 @@ func TestResourcesLockUnlockResources(t *testing.T) {
 func TestResourcesRunBackupStoreIntervalLessThanZero(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.ResourceSCfg().StoreInterval = -1
-	data := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
-	dm := NewDataManager(data, cfg.CacheCfg(), nil)
-	filterS := NewFilterS(cfg, nil, dm)
 	rS := &ResourceService{
-		dm:              dm,
-		storedResources: make(utils.StringSet),
-		cgrcfg:          cfg,
-		filterS:         filterS,
-		loopStopped:     make(chan struct{}, 1),
-		stopBackup:      make(chan struct{}),
+		cgrcfg:      cfg,
+		loopStopped: make(chan struct{}, 1),
 	}
 
 	rS.runBackup()
-
-	if len(rS.loopStopped) != 1 {
-		t.Errorf("expected loopStopped field to have only one element, received: <%+v>", len(rS.loopStopped))
+	select {
+	case <-rS.loopStopped:
+	case <-time.After(time.Second):
+		t.Error("timed out waiting for loop to stop")
 	}
 }
 
@@ -5941,14 +5935,12 @@ func TestResourcesRunBackupStop(t *testing.T) {
 	cfg.ResourceSCfg().StoreInterval = 5 * time.Millisecond
 	data := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
-	filterS := NewFilterS(cfg, nil, dm)
 	rS := &ResourceService{
 		dm: dm,
 		storedResources: utils.StringSet{
 			"Res1": struct{}{},
 		},
 		cgrcfg:      cfg,
-		filterS:     filterS,
 		loopStopped: make(chan struct{}, 1),
 		stopBackup:  make(chan struct{}),
 	}
@@ -5968,33 +5960,29 @@ func TestResourcesRunBackupStop(t *testing.T) {
 		ID:     "Res1",
 	}
 
-	go func() {
-		time.Sleep(9 * time.Millisecond)
-		close(rS.stopBackup)
-		// rS.stopBackup <- struct{}{}
-	}()
+	// Backup loop checks for the state of the stopBackup
+	// channel after storing the resource. Channel can be
+	// safely closed beforehand.
+	close(rS.stopBackup)
 	rS.runBackup()
 
 	if rcv, err := rS.dm.GetResource("cgrates.org", "Res1", true, false, utils.NonTransactional); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rcv, exp) {
-		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ToJSON(exp), utils.ToJSON(rcv))
+		t.Errorf("resouce: want %+v, got %+v", exp, rcv)
 	}
 
-	if len(rS.loopStopped) != 1 {
-		t.Errorf("expected loopStopped field to have only one element, received: <%+v>", len(rS.loopStopped))
+	select {
+	case <-rS.loopStopped:
+	case <-time.After(time.Second):
+		t.Error("timed out waiting for loop to stop")
 	}
 }
 
 func TestResourcesReload(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.ResourceSCfg().StoreInterval = 5 * time.Millisecond
-	data := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
-	dm := NewDataManager(data, cfg.CacheCfg(), nil)
-	filterS := NewFilterS(cfg, nil, dm)
 	rS := &ResourceService{
-		dm:          dm,
-		filterS:     filterS,
 		stopBackup:  make(chan struct{}),
 		loopStopped: make(chan struct{}, 1),
 		cgrcfg:      cfg,
@@ -6002,27 +5990,26 @@ func TestResourcesReload(t *testing.T) {
 	rS.loopStopped <- struct{}{}
 	rS.Reload()
 	close(rS.stopBackup)
+	select {
+	case <-rS.loopStopped:
+	case <-time.After(time.Second):
+		t.Error("timed out waiting for loop to stop")
+	}
 }
 
 func TestResourcesStartLoop(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.ResourceSCfg().StoreInterval = -1
-	data := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
-	dm := NewDataManager(data, cfg.CacheCfg(), nil)
-	filterS := NewFilterS(cfg, nil, dm)
 	rS := &ResourceService{
-		dm:          dm,
-		filterS:     filterS,
-		stopBackup:  make(chan struct{}),
-		loopStopped: make(chan struct{}, 1),
+		loopStopped: make(chan struct{}),
 		cgrcfg:      cfg,
 	}
 
 	rS.StartLoop()
-	time.Sleep(10 * time.Millisecond)
-
-	if len(rS.loopStopped) != 1 {
-		t.Errorf("expected loopStopped field to have only one element, received: <%+v>", len(rS.loopStopped))
+	select {
+	case <-rS.loopStopped:
+	case <-time.After(time.Second):
+		t.Error("timed out waiting for loop to stop")
 	}
 }
 
