@@ -5935,30 +5935,23 @@ func TestResourcesRunBackupStop(t *testing.T) {
 	cfg.ResourceSCfg().StoreInterval = 5 * time.Millisecond
 	data := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
+	tnt := "cgrates.org"
+	resID := "Res1"
 	rS := &ResourceService{
 		dm: dm,
 		storedResources: utils.StringSet{
-			"Res1": struct{}{},
+			resID: struct{}{},
 		},
 		cgrcfg:      cfg,
 		loopStopped: make(chan struct{}, 1),
 		stopBackup:  make(chan struct{}),
 	}
-
 	value := &Resource{
 		dirty:  utils.BoolPointer(true),
-		Tenant: "cgrates.org",
-		ID:     "Res1",
+		Tenant: tnt,
+		ID:     resID,
 	}
-
-	Cache.SetWithoutReplicate(utils.CacheResources, "Res1", value, nil, true,
-		utils.NonTransactional)
-
-	exp := &Resource{
-		dirty:  utils.BoolPointer(false),
-		Tenant: "cgrates.org",
-		ID:     "Res1",
-	}
+	Cache.SetWithoutReplicate(utils.CacheResources, resID, value, nil, true, "")
 
 	// Backup loop checks for the state of the stopBackup
 	// channel after storing the resource. Channel can be
@@ -5966,10 +5959,15 @@ func TestResourcesRunBackupStop(t *testing.T) {
 	close(rS.stopBackup)
 	rS.runBackup()
 
-	if rcv, err := rS.dm.GetResource("cgrates.org", "Res1", true, false, utils.NonTransactional); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(rcv, exp) {
-		t.Errorf("resouce: want %+v, got %+v", exp, rcv)
+	want := &Resource{
+		dirty:  utils.BoolPointer(false),
+		Tenant: tnt,
+		ID:     resID,
+	}
+	if got, err := rS.dm.GetResource(tnt, resID, true, false, ""); err != nil {
+		t.Errorf("dm.GetResource(%q,%q): got unexpected err=%v", tnt, resID, err)
+	} else if !reflect.DeepEqual(got, want) {
+		t.Errorf("dm.GetResource(%q,%q) = %v, want %v", tnt, resID, got, want)
 	}
 
 	select {

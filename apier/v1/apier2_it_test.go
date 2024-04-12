@@ -404,40 +404,39 @@ func testAPIerSetActionPlanDfltTime(t *testing.T) {
 	} else if reply1 != utils.OK {
 		t.Errorf("Calling APIerSv1.SetActionPlan received: %s", reply1)
 	}
-	var rply []*scheduler.ScheduledAction
 	refTime := time.Now()
+	var rply []*scheduler.ScheduledAction
 	if err := apierRPC.Call(context.Background(), utils.APIerSv1GetScheduledActions,
 		scheduler.ArgsGetScheduledActions{}, &rply); err != nil {
 		t.Fatal(err)
 	}
-
 	for _, schedAct := range rply {
+		got := schedAct.NextRunTime
 		switch schedAct.ActionPlanID {
 		case "AP_WEEKLY":
-			t1 := refTime.AddDate(0, 0, 7)
-			if schedAct.NextRunTime.Before(t1.Add(-time.Second)) ||
-				schedAct.NextRunTime.After(t1.Add(2*time.Second)) {
-				t.Errorf("Expected the nextRuntime to be after 1 week,but received: <%+v>", utils.ToJSON(schedAct))
+			want := refTime.AddDate(0, 0, 7) // +1 week
+			if diff := want.Sub(got); diff < 0 || diff > 2*time.Second {
+				t.Errorf("%s scheduled date = %v, want %v (diff %v, margin 2s)",
+					schedAct.ActionPlanID, got.Format(time.StampMilli), want.Format(time.StampMilli), diff)
 			}
 		case "AP_DAILY":
-			t1 := refTime.AddDate(0, 0, 1)
-			if schedAct.NextRunTime.Before(t1.Add(-time.Second)) ||
-				schedAct.NextRunTime.After(t1.Add(2*time.Second)) {
-				t.Errorf("Expected the nextRuntime to be after 1 day,but received: <%+v>", utils.ToJSON(schedAct))
+			want := refTime.AddDate(0, 0, 1) // +1 day
+			if diff := want.Sub(got); diff < 0 || diff > 2*time.Second {
+				t.Errorf("%s scheduled date = %v, want %v (diff %v, margin 2s)",
+					schedAct.ActionPlanID, got.Format(time.StampMilli), want.Format(time.StampMilli), diff)
 			}
 		case "AP_HOURLY":
-			if schedAct.NextRunTime.Before(refTime.Add(59*time.Minute+59*time.Second)) ||
-				schedAct.NextRunTime.After(refTime.Add(time.Hour+2*time.Second)) {
-				t.Errorf("Expected the nextRuntime to be after 1 hour,but received: <%+v>", utils.ToJSON(schedAct))
+			want := refTime.Add(time.Hour) // +1h
+			if diff := want.Sub(got); diff < 0 || diff > 2*time.Second {
+				t.Errorf("%s scheduled date = %v, want %v (diff %v, margin 2s)",
+					schedAct.ActionPlanID, got.Format(time.StampMilli), want.Format(time.StampMilli), diff)
 			}
 		case "AP_MONTHLY":
-			// *monthly needs to mach exactly the day
-			expected := refTime.AddDate(0, 1, 0)
-			expected = time.Date(expected.Year(), expected.Month(), refTime.Day(), refTime.Hour(),
-				refTime.Minute(), refTime.Second(), 0, schedAct.NextRunTime.Location())
-			if schedAct.NextRunTime.Before(expected.Add(-time.Second)) ||
-				schedAct.NextRunTime.After(expected.Add(2*time.Second)) {
-				t.Errorf("Expected the nextRuntime to be after 1 month,but received: <%+v>", utils.ToJSON(schedAct))
+			// *monthly needs to match exactly the day
+			want := refTime.AddDate(0, 1, 0) // +1 month
+			if diff := want.Sub(got); diff < 0 || diff > 2*time.Second {
+				t.Errorf("%s scheduled date = %v, want %v (diff %v, margin 2s)",
+					schedAct.ActionPlanID, got.Format(time.StampMilli), want.Format(time.StampMilli), diff)
 			}
 		}
 	}

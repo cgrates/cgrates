@@ -3491,7 +3491,7 @@ func TestStoreLoadedDataDispatcherHosts(t *testing.T) {
 func TestStoreLoadedDataWithDelay(t *testing.T) {
 	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
-	cfg.GeneralCfg().CachingDelay = 1 * time.Second
+	cfg.GeneralCfg().CachingDelay = 5 * time.Millisecond
 	argExpect := &utils.AttrReloadCacheWithAPIOpts{
 		APIOpts:           nil,
 		Tenant:            "",
@@ -3530,13 +3530,13 @@ func TestStoreLoadedDataWithDelay(t *testing.T) {
 			},
 		},
 	}
-	startTime := time.Now()
+	tStart := time.Now()
 	if err := ldr.storeLoadedData(utils.MetaDispatcherHosts, lds, utils.MetaReload); err != nil {
 		t.Error(err)
 	}
-	elapsedTime := time.Since(startTime)
-	expectedDuration := 1 * time.Second
-	if elapsedTime < expectedDuration || elapsedTime >= 2*time.Second {
-		t.Errorf("Expected elapsed time of at least %v, but got %v", expectedDuration, elapsedTime)
+	got := time.Since(tStart)
+	want := cfg.GeneralCfg().CachingDelay
+	if diff := got - want; diff < 0 || diff > 4*time.Millisecond {
+		t.Errorf("storeLoadedData duration = %v, want at least %v (diff %v, margin 4ms)", got, want, diff)
 	}
 }

@@ -1026,6 +1026,53 @@ func TestStatQueueStartLoop(t *testing.T) {
 	}
 }
 
+func TestStatQueueRunBackupStop(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfg.StatSCfg().StoreInterval = 5 * time.Millisecond
+	data := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := NewDataManager(data, cfg.CacheCfg(), nil)
+	tnt := "cgrates.org"
+	sqID := "testSQ"
+	sqS := &StatService{
+		dm: dm,
+		storedStatQueues: utils.StringSet{
+			sqID: struct{}{},
+		},
+		cgrcfg:      cfg,
+		loopStopped: make(chan struct{}, 1),
+		stopBackup:  make(chan struct{}),
+	}
+	value := &StatQueue{
+		dirty:  utils.BoolPointer(true),
+		Tenant: tnt,
+		ID:     sqID,
+	}
+	Cache.SetWithoutReplicate(utils.CacheStatQueues, sqID, value, nil, true, "")
+
+	// Backup loop checks for the state of the stopBackup
+	// channel after storing the stat queue. Channel can be
+	// safely closed beforehand.
+	close(sqS.stopBackup)
+	sqS.runBackup()
+
+	want := &StatQueue{
+		dirty:  utils.BoolPointer(false),
+		Tenant: tnt,
+		ID:     sqID,
+	}
+	if got, err := sqS.dm.GetStatQueue(tnt, sqID, true, false, utils.NonTransactional); err != nil {
+		t.Errorf("dm.GetStatQueue(%q,%q): got unexpected err=%v", tnt, sqID, err)
+	} else if !reflect.DeepEqual(got, want) {
+		t.Errorf("dm.GetStatQueue(%q,%q) = %v, want %v", tnt, sqID, got, want)
+	}
+
+	select {
+	case <-sqS.loopStopped:
+	case <-time.After(time.Second):
+		t.Error("timed out waiting for loop to stop")
+	}
+}
+
 func TestStatQueueShutdown(t *testing.T) {
 	utils.Logger.SetLogLevel(6)
 	utils.Logger.SetSyslog(nil)
