@@ -283,49 +283,35 @@ func TestCacheSV1GetItem(t *testing.T) {
 }
 
 func TestCacheSV1GetItemExpiryTime(t *testing.T) {
-	tmp := Cache
-
-	defer func() {
-		Cache = tmp
-		config.SetCgrConfig(config.NewDefaultCGRConfig())
-	}()
-	Cache.Clear(nil)
-	args := &utils.ArgsGetCacheItemWithAPIOpts{
-		ArgsGetCacheItem: utils.ArgsGetCacheItem{
-			CacheID: "cacheID",
-			ItemID:  "itemID",
-		},
-	}
+	cacheID := "testCache"
+	itemID := "testItem"
 	tscache := ltcache.NewTransCache(
 		map[string]*ltcache.CacheConfig{
-			"cacheID": {
-				MaxItems:  3,
-				TTL:       time.Minute * 30,
-				StaticTTL: false,
-				OnEvicted: func(itmID string, value any) {
-
-				},
+			cacheID: {
+				MaxItems: -1,
+				TTL:      30 * time.Minute,
 			},
 		})
-	tscache.Set("cacheID", "itemID", "value", []string{}, true, "tId")
-
-	cfg := config.NewDefaultCGRConfig()
-	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
-	dm := NewDataManager(db, cfg.CacheCfg(), nil)
 	chS := &CacheS{
-		cfg:    cfg,
-		dm:     dm,
 		tCache: tscache,
 	}
-	reply := now
-	loc, _ := time.LoadLocation("EST")
-	exp := now.Add(30 * time.Minute).In(loc).Minute()
-	if err := chS.V1GetItemExpiryTime(context.Background(), args, &reply); err != nil {
-		t.Error(err)
-	} else if reply.Minute() != exp {
-		t.Errorf("expected %+v,received %+v", exp, reply)
-	}
+	chS.tCache.Set(cacheID, itemID, "value", []string{}, true, "")
+	want := time.Now().Add(30 * time.Minute)
 
+	var got time.Time
+	if err := chS.V1GetItemExpiryTime(context.Background(),
+		&utils.ArgsGetCacheItemWithAPIOpts{
+			ArgsGetCacheItem: utils.ArgsGetCacheItem{
+				CacheID: cacheID,
+				ItemID:  itemID,
+			},
+		}, &got); err != nil {
+		t.Fatalf("V1GetItemExpiryTime(%q,%q): got unexpected err=%v", cacheID, itemID, err)
+	}
+	if diff := want.Sub(got); diff < 0 || diff > time.Millisecond {
+		t.Errorf("V1GetItemExpiryTime(%q,%q) = %v, want %v (diff %v, margin 1ms)",
+			cacheID, itemID, got.Format(time.StampMicro), want.Format(time.StampMicro), diff)
+	}
 }
 
 func TestCacheSV1RemoveItem(t *testing.T) {

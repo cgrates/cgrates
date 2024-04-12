@@ -28,16 +28,18 @@ import (
 )
 
 func delayHandler() error {
-	time.Sleep(100 * time.Millisecond)
+	time.Sleep(10 * time.Millisecond)
 	return nil
 }
 
-// Forks 3 groups of workers and makes sure that the time for execution is the one we expect for all 15 goroutines (with 100ms )
+// TestGuardianMultipleKeys forks 3 groups of workers across 3 keys and ensures that the
+// total execution time aligns with expectations for all 15 goroutines (guarding a handler
+// with 10ms duration for its entire duration).
 func TestGuardianMultipleKeys(t *testing.T) {
-	tStart := time.Now()
 	maxIter := 5
 	sg := new(sync.WaitGroup)
 	keys := []string{"test1", "test2", "test3"}
+	tStart := time.Now()
 	for i := 0; i < maxIter; i++ {
 		for _, key := range keys {
 			sg.Add(1)
@@ -48,44 +50,49 @@ func TestGuardianMultipleKeys(t *testing.T) {
 		}
 	}
 	sg.Wait()
-	mustExecDur := time.Duration(maxIter*100) * time.Millisecond
-	if execTime := time.Since(tStart); execTime < mustExecDur ||
-		execTime > mustExecDur+100*time.Millisecond {
-		t.Errorf("Execution took: %v", execTime)
+	execTime := time.Since(tStart)
+	want := 10 * time.Millisecond * time.Duration(maxIter)
+	if diff := execTime - want; diff < 0 || diff > 5*time.Millisecond {
+		t.Errorf("total Guard duration for %d iterations over %d keys=%v: got %v want %v (diff %v, margin 5ms)",
+			maxIter, len(keys), keys, execTime, want, diff)
 	}
 	Guardian.lkMux.Lock()
 	for _, key := range keys {
 		if _, hasKey := Guardian.locks[key]; hasKey {
-			t.Errorf("Possible memleak for key: %s", key)
+			t.Errorf("Guardian.locks[%q]: key should not exist (possible memleak)", key)
 		}
 	}
 	Guardian.lkMux.Unlock()
 }
 
+// TestGuardianTimeout forks 3 groups of workers across 3 keys and ensures that the
+// total execution time aligns with expectations for all 15 goroutines (guarding a handler
+// with 10ms duration for half of its entire duration, 5ms).
 func TestGuardianTimeout(t *testing.T) {
-	tStart := time.Now()
 	maxIter := 5
 	sg := new(sync.WaitGroup)
 	keys := []string{"test1", "test2", "test3"}
+	tStart := time.Now()
 	for i := 0; i < maxIter; i++ {
 		for _, key := range keys {
 			sg.Add(1)
 			go func(key string) {
-				Guardian.Guard(delayHandler, 10*time.Millisecond, key)
+				Guardian.Guard(delayHandler, 5*time.Millisecond, key)
 				sg.Done()
 			}(key)
 		}
 	}
 	sg.Wait()
-	mustExecDur := time.Duration(maxIter*10) * time.Millisecond
-	if execTime := time.Since(tStart); execTime < mustExecDur ||
-		execTime > mustExecDur+100*time.Millisecond {
-		t.Errorf("Execution took: %v", execTime)
+	execTime := time.Since(tStart)
+	want := 5 * time.Millisecond * time.Duration(maxIter)
+	if diff := execTime - want; diff < 0 || diff > 5*time.Millisecond {
+		t.Errorf("total Guard duration for %d iterations over %d keys=%v: got %v want %v (diff %v, margin 5ms)",
+			maxIter, len(keys), keys, execTime, want, diff)
 	}
 	Guardian.lkMux.Lock()
 	for _, key := range keys {
 		if _, hasKey := Guardian.locks[key]; hasKey {
-			t.Error("Possible memleak")
+			t.Errorf("Guardian.locks[%q]: key should not exist (possible memleak)", key)
 		}
 	}
 	Guardian.lkMux.Unlock()
@@ -328,7 +335,7 @@ func TestGuardianGuardUnguardIDs(t *testing.T) {
 	//for coverage purposes
 	refID := utils.EmptyString
 	lkIDs := []string{"test1", "test2", "test3"}
-	Guardian.GuardIDs(refID, time.Second, lkIDs...)
+	Guardian.GuardIDs(refID, 10*time.Millisecond, lkIDs...)
 	Guardian.UnguardIDs(refID)
 	if refID != utils.EmptyString {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", utils.EmptyString, refID)
@@ -337,7 +344,7 @@ func TestGuardianGuardUnguardIDs(t *testing.T) {
 
 func TestGuardianGuardUnguardIDsCase2(t *testing.T) {
 	//for coverage purposes
-	lkIDs := []string{"test1", "test2", "test3"}
+	lkIDs := []string{"test4", "test5", "test6"}
 	err := Guardian.Guard(func() error {
 		return utils.ErrNotFound
 	}, 10*time.Millisecond, lkIDs...)

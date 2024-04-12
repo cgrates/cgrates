@@ -213,16 +213,26 @@ func TestSetSTerminatorAutomaticTermination(t *testing.T) {
 	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
 	sessions := NewSessionS(cfg, dm, nil)
 
+	sessionTTL := 3 * time.Millisecond
 	opts := engine.MapEvent{
-		utils.OptsSessionsTTL:          "1s",
+		utils.OptsSessionsTTL:          sessionTTL.String(),
 		utils.OptsSessionsTTLLastUsage: "0s",
 	}
 
+	tStart := time.Now()
 	sessions.setSTerminator(ss, opts)
+	ss.lk.RLock()
+	done := ss.sTerminator.endChan
+	ss.lk.RUnlock()
 	select {
-	case <-time.After(3 * time.Second):
-		t.Fatal("timeout")
-	case <-ss.sTerminator.endChan:
+	case <-time.After(5 * time.Millisecond):
+		t.Fatal("timeout waiting for terminator loop to end")
+	case <-done:
+		loopDur := time.Since(tStart)
+		want := 3 * time.Millisecond
+		if diff := loopDur - want; diff < 0 || diff > time.Millisecond {
+			t.Errorf("sTerminator loop duration = %v, want at least %v (diff %v, margin 1ms)", loopDur, want, diff)
+		}
 	}
 }
 

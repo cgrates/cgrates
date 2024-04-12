@@ -1753,30 +1753,23 @@ func TestThresholdsRunBackupStop(t *testing.T) {
 	cfg.ThresholdSCfg().StoreInterval = 5 * time.Millisecond
 	data := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
+	tnt := "cgrates.org"
+	thID := "Th1"
 	tS := &ThresholdService{
 		dm: dm,
 		storedTdIDs: utils.StringSet{
-			"Th1": struct{}{},
+			thID: struct{}{},
 		},
 		cgrcfg:      cfg,
 		loopStopped: make(chan struct{}, 1),
 		stopBackup:  make(chan struct{}),
 	}
-
 	value := &Threshold{
 		dirty:  utils.BoolPointer(true),
-		Tenant: "cgrates.org",
-		ID:     "Th1",
+		Tenant: tnt,
+		ID:     thID,
 	}
-
-	Cache.SetWithoutReplicate(utils.CacheThresholds, "Th1", value, nil, true,
-		utils.NonTransactional)
-
-	exp := &Threshold{
-		dirty:  utils.BoolPointer(false),
-		Tenant: "cgrates.org",
-		ID:     "Th1",
-	}
+	Cache.SetWithoutReplicate(utils.CacheThresholds, thID, value, nil, true, "")
 
 	// Backup loop checks for the state of the stopBackup
 	// channel after storing the threshold. Channel can be
@@ -1784,11 +1777,15 @@ func TestThresholdsRunBackupStop(t *testing.T) {
 	close(tS.stopBackup)
 	tS.runBackup()
 
-	if rcv, err := tS.dm.GetThreshold("cgrates.org", "Th1", true, false,
-		utils.NonTransactional); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(rcv, exp) {
-		t.Errorf("threshold: want %+v, got %+v", exp, rcv)
+	want := &Threshold{
+		dirty:  utils.BoolPointer(false),
+		Tenant: tnt,
+		ID:     thID,
+	}
+	if got, err := tS.dm.GetThreshold(tnt, thID, true, false, utils.NonTransactional); err != nil {
+		t.Errorf("dm.GetThreshold(%q,%q): got unexpected err=%v", tnt, thID, err)
+	} else if !reflect.DeepEqual(got, want) {
+		t.Errorf("dm.GetThreshold(%q,%q) = %v, want %v", tnt, thID, got, want)
 	}
 
 	select {
