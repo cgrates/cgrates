@@ -26,7 +26,6 @@ require (
 	github.com/cgrates/radigo v0.0.0-20240123163129-491c899df727
 	github.com/cgrates/rpcclient v0.0.0-20230605090759-8bb5188b73e5
 	github.com/cgrates/sipingo v1.0.1-0.20200514112313-699ebc1cdb8e
-	github.com/cgrates/ugocodec v0.0.0-20201023092048-df93d0123f60
 	github.com/creack/pty v1.1.20
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/elastic/elastic-transport-go/v8 v8.3.0
@@ -44,6 +43,7 @@ require (
 	github.com/peterh/liner v1.2.2
 	github.com/rabbitmq/amqp091-go v1.9.0
 	github.com/segmentio/kafka-go v0.4.44
+	github.com/ugorji/go/codec v1.2.12
 	go.mongodb.org/mongo-driver v1.12.1
 	golang.org/x/crypto v0.19.0
 	golang.org/x/net v0.21.0

@@ -209,7 +209,7 @@ func (asr *StatASR) Marshal(ms Marshaler) (marshaled []byte, err error) {
 
 // LoadMarshaled is part of StatMetric interface
 func (asr *StatASR) LoadMarshaled(ms Marshaler, marshaled []byte) (err error) {
-	return ms.Unmarshal(marshaled, asr)
+	return ms.Unmarshal(marshaled, &asr)
 }
 
 // GetFilterIDs is part of StatMetric interface
@@ -363,7 +363,7 @@ func (acd *StatACD) Marshal(ms Marshaler) (marshaled []byte, err error) {
 	return ms.Marshal(acd)
 }
 func (acd *StatACD) LoadMarshaled(ms Marshaler, marshaled []byte) (err error) {
-	return ms.Unmarshal(marshaled, acd)
+	return ms.Unmarshal(marshaled, &acd)
 }
 
 // GetFilterIDs is part of StatMetric interface
@@ -519,7 +519,7 @@ func (tcd *StatTCD) Marshal(ms Marshaler) (marshaled []byte, err error) {
 }
 
 func (tcd *StatTCD) LoadMarshaled(ms Marshaler, marshaled []byte) (err error) {
-	return ms.Unmarshal(marshaled, tcd)
+	return ms.Unmarshal(marshaled, &tcd)
 }
 
 // GetFilterIDs is part of StatMetric interface
@@ -670,7 +670,7 @@ func (acc *StatACC) Marshal(ms Marshaler) (marshaled []byte, err error) {
 }
 
 func (acc *StatACC) LoadMarshaled(ms Marshaler, marshaled []byte) (err error) {
-	return ms.Unmarshal(marshaled, acc)
+	return ms.Unmarshal(marshaled, &acc)
 }
 
 // GetFilterIDs is part of StatMetric interface
@@ -823,7 +823,7 @@ func (tcc *StatTCC) Marshal(ms Marshaler) (marshaled []byte, err error) {
 }
 
 func (tcc *StatTCC) LoadMarshaled(ms Marshaler, marshaled []byte) (err error) {
-	return ms.Unmarshal(marshaled, tcc)
+	return ms.Unmarshal(marshaled, &tcc)
 }
 
 // GetFilterIDs is part of StatMetric interface
@@ -976,7 +976,7 @@ func (pdd *StatPDD) Marshal(ms Marshaler) (marshaled []byte, err error) {
 	return ms.Marshal(pdd)
 }
 func (pdd *StatPDD) LoadMarshaled(ms Marshaler, marshaled []byte) (err error) {
-	return ms.Unmarshal(marshaled, pdd)
+	return ms.Unmarshal(marshaled, &pdd)
 }
 
 // GetFilterIDs is part of StatMetric interface
@@ -1141,7 +1141,7 @@ func (ddc *StatDDC) Marshal(ms Marshaler) (marshaled []byte, err error) {
 }
 
 func (ddc *StatDDC) LoadMarshaled(ms Marshaler, marshaled []byte) (err error) {
-	return ms.Unmarshal(marshaled, ddc)
+	return ms.Unmarshal(marshaled, &ddc)
 }
 
 // GetFilterIDs is part of StatMetric interface
@@ -1290,7 +1290,7 @@ func (sum *StatSum) Marshal(ms Marshaler) (marshaled []byte, err error) {
 }
 
 func (sum *StatSum) LoadMarshaled(ms Marshaler, marshaled []byte) (err error) {
-	return ms.Unmarshal(marshaled, sum)
+	return ms.Unmarshal(marshaled, &sum)
 }
 
 // GetFilterIDs is part of StatMetric interface
@@ -1444,7 +1444,7 @@ func (avg *StatAverage) Marshal(ms Marshaler) (marshaled []byte, err error) {
 }
 
 func (avg *StatAverage) LoadMarshaled(ms Marshaler, marshaled []byte) (err error) {
-	return ms.Unmarshal(marshaled, avg)
+	return ms.Unmarshal(marshaled, &avg)
 }
 
 // GetFilterIDs is part of StatMetric interface
@@ -1612,7 +1612,7 @@ func (dst *StatDistinct) Marshal(ms Marshaler) (marshaled []byte, err error) {
 }
 
 func (dst *StatDistinct) LoadMarshaled(ms Marshaler, marshaled []byte) (err error) {
-	return ms.Unmarshal(marshaled, dst)
+	return ms.Unmarshal(marshaled, &dst)
 }
 
 // GetFilterIDs is part of StatMetric interface

@@ -26,7 +26,7 @@ import (
 	"reflect"
 
 	"github.com/cgrates/cgrates/utils"
-	"github.com/cgrates/ugocodec/codec"
+	"github.com/ugorji/go/codec"
 	"go.mongodb.org/mongo-driver/bson"
 )
 
@@ -259,11 +259,11 @@ type CodecMsgpackMarshaler struct {
 }
 
 func NewCodecMsgpackMarshaler() *CodecMsgpackMarshaler {
-	cmm := &CodecMsgpackMarshaler{new(codec.MsgpackHandle)}
-	mh := cmm.mh
+	mh := new(codec.MsgpackHandle)
 	mh.MapType = reflect.TypeOf(map[string]any(nil))
 	mh.RawToString = true
-	return cmm
+	mh.TimeNotBuiltin = true
+	return &CodecMsgpackMarshaler{mh}
 }
 
 func (cmm *CodecMsgpackMarshaler) Marshal(v any) (b []byte, err error) {
@@ -274,7 +274,7 @@ func (cmm *CodecMsgpackMarshaler) Marshal(v any) (b []byte, err error) {
 
 func (cmm *CodecMsgpackMarshaler) Unmarshal(data []byte, v any) error {
 	dec := codec.NewDecoderBytes(data, cmm.mh)
-	return dec.Decode(&v)
+	return dec.Decode(v)
 }
 
 type BincMarshaler struct {
@@ -293,7 +293,7 @@ func (bm *BincMarshaler) Marshal(v any) (b []byte, err error) {
 
 func (bm *BincMarshaler) Unmarshal(data []byte, v any) error {
 	dec := codec.NewDecoderBytes(data, bm.bh)
-	return dec.Decode(&v)
+	return dec.Decode(v)
 }
 
 type GOBMarshaler struct{}
