@@ -36,6 +36,7 @@ type StorDBOpts struct {
 	PgSSLMode          string
 	MySQLLocation      string
 	MySQLDSNParams     map[string]string
+	PgSchema           string
 }
 
 // StorDbCfg StroreDb config
@@ -86,6 +87,9 @@ func (dbOpts *StorDBOpts) loadFromJSONCfg(jsnCfg *DBOptsJson) (err error) {
 	}
 	if jsnCfg.MySQLLocation != nil {
 		dbOpts.MySQLLocation = *jsnCfg.MySQLLocation
+	}
+	if jsnCfg.PgSchema != nil {
+		dbOpts.PgSchema = *jsnCfg.PgSchema
 	}
 	return
 }
@@ -170,6 +174,7 @@ func (dbOpts *StorDBOpts) Clone() *StorDBOpts {
 		MongoConnScheme:    dbOpts.MongoConnScheme,
 		PgSSLMode:          dbOpts.PgSSLMode,
 		MySQLLocation:      dbOpts.MySQLLocation,
+		PgSchema:           dbOpts.PgSchema,
 	}
 }
 
@@ -219,6 +224,7 @@ func (dbcfg *StorDbCfg) AsMapInterface() (mp map[string]any) {
 		utils.MongoConnSchemeCfg:   dbcfg.Opts.MongoConnScheme,
 		utils.PgSSLModeCfg:         dbcfg.Opts.PgSSLMode,
 		utils.MysqlLocation:        dbcfg.Opts.MySQLLocation,
+		utils.PgSchema:             dbcfg.Opts.PgSchema,
 	}
 	mp = map[string]any{
 		utils.DataDbTypeCfg:          dbcfg.Type,

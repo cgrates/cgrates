@@ -122,6 +122,7 @@ type DBOptsJson struct {
 	MySQLDSNParams          map[string]string `json:"mysqlDSNParams"`
 	PgSSLMode               *string           `json:"pgSSLMode"`
 	MySQLLocation           *string           `json:"mysqlLocation"`
+	PgSchema                *string           `json:"pgSchema"`
 }
 
 // Database config

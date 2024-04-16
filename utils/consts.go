@@ -2046,6 +2046,7 @@ const (
 	Tenants                = "tenants"
 	MysqlLocation          = "mysqlLocation"
 	SSLMode                = "sslMode"
+	PgSchema               = "pgSchema"
 )
 
 // DataDbCfg

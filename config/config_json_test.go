@@ -564,6 +564,7 @@ func TestDfStorDBJsonCfg(t *testing.T) {
 			MySQLDSNParams:     make(map[string]string),
 			PgSSLMode:          utils.StringPointer(utils.PostgresSSLModeDisable),
 			MySQLLocation:      utils.StringPointer("Local"),
+			PgSchema:           utils.StringPointer(""),
 		},
 		Items: &map[string]*ItemOptJson{
 			utils.CacheTBLTPTimings: {

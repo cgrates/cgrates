@@ -172,6 +172,7 @@ const CGRATES_CFG_JSON = `
 		"mongoConnScheme": "mongodb",		// scheme for MongoDB connection <mongodb|mongodb+srv>
 		"pgSSLMode": "disable",		 		// pgSSLMode in case of *postgres
 		"mysqlLocation": "Local",			// the location the time from mysql is retrieved
+		"pgSchema":"",                      //*postgres schema to use
 	},
 	"items":{
 		"*session_costs": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false}, 
