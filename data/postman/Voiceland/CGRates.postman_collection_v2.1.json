@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "f9981fc9-2e45-4da3-bda0-c2cbb0b0fe5e",
+		"_postman_id": "60525052-383d-449a-bc03-daf982cc3945",
 		"name": "CGRates",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
 		"_exporter_id": "31913370"
@@ -53,7 +53,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"id\": 6,\n    \"method\": \"APIerSv1.LoadTariffPlanFromStorDb\",\n    \"params\": [\n        {\n            \"TPid\": \"CGR_API_TESTS\"\n        }\n    ]\n}"
+							"raw": "{\n    \"id\": 6,\n    \"method\": \"APIerSv1.LoadTariffPlanFromStorDb\",\n    \"params\": [\n        {\n            \"TPid\": \"CGR_API_TESTS\",\n            \"DryRun\": false,\n            \"Validate\": true\n        }\n    ]\n}"
 						},
 						"url": {
 							"raw": "{{base_url}}/jsonrpc",
@@ -75,6 +75,32 @@
 						"body": {
 							"mode": "raw",
 							"raw": "{\n    \"method\": \"APIerSv2.LoadTariffPlanFromFolder\",\n    \"params\": [\n        {\n            \"FolderPath\": \"\",\n            \"DryRun\": false,\n            \"Validate\": true,\n            \"APIOpts\": {},\n            \"Caching\": null\n        }\n    ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/jsonrpc",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"jsonrpc"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "APIerSv1.ImportTariffPlanFromFolder",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"method\": \"APIerSv1.ImportTariffPlanFromFolder\",\n    \"params\": [\n        {\n            \"FolderPath\": \"\",\n            \"TPid\": \"CGR_API_TESTS\",\n            \"RunId\": \"\"\n        }\n    ]\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -133,7 +159,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"method\": \"CacheSv1.GetCacheStats\",\n  \"params\": [],\n  \"id\": 1\n}"
+							"raw": "{\n    \"method\": \"CacheSv1.GetCacheStats\",\n    \"params\": [\n        {\n            \"Tenant\": \"cgrates.org\",\n            \"CacheIDs\": []\n        }\n    ],\n    \"id\": 1\n}"
 						},
 						"url": {
 							"raw": "{{base_url}}/jsonrpc",
@@ -873,7 +899,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n    \"method\": \"APIerSv1.GetTPActionPlan\",\n    \"params\": [\n        {\n            \"TPid\": \"CGR_API_TESTS\",\n            \"ID\": \"always\"\n        }\n    ]\n}"
+									"raw": "{\n    \"method\": \"APIerSv1.GetTPActionPlan\",\n    \"params\": [\n        {\n            \"TPid\": \"CGR_API_TESTS\",\n            \"ID\": \"AP_PACKAGE_10\"\n        }\n    ]\n}"
 								},
 								"url": {
 									"raw": "{{base_url}}/jsonrpc",
@@ -936,7 +962,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n    \"id\": 3,\n    \"method\": \"APIerSv1.SetTPTiming\",\n    \"params\": [\n        {\n            \"TPid\": \"TP_TIMING_TEST\",\n            \"ID\": \"TP_TIMINGID\",\n            \"TimingId\": \"TP_TIMING_ID\",\n            \"MonthDays\": \"*any\",\n            \"Months\": \"*any\",\n            \"Time\": \"00:00:00\",\n            \"WeekDays\": \"*any\",\n            \"Years\": \"*any\"\n        }\n    ]\n}"
+									"raw": "{\n    \"id\": 3,\n    \"method\": \"APIerSv1.SetTPTiming\",\n    \"params\": [\n        {\n            \"TPid\": \"CGR_API_TESTS\",\n            \"ID\": \"TP_TIMINGID\",\n            \"TimingId\": \"TP_TIMING_ID\",\n            \"MonthDays\": \"*any\",\n            \"Months\": \"*any\",\n            \"Time\": \"00:00:00\",\n            \"WeekDays\": \"*any\",\n            \"Years\": \"*any\"\n        }\n    ]\n}"
 								},
 								"url": {
 									"raw": "{{base_url}}/jsonrpc",
@@ -965,7 +991,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n    \"id\": 5,\n    \"method\": \"APIerSv1.GetTPTiming\",\n    \"params\": [\n        {\n            \"TPid\": \"TP_TIMING_TEST\",\n            \"ID\": \"TP_TIMINGID\",\n            \"TimingId\": \"TP_TIMING_ID\"\n        }\n    ]\n}"
+									"raw": "{\n    \"id\": 5,\n    \"method\": \"APIerSv1.GetTPTiming\",\n    \"params\": [\n        {\n            \"TPid\": \"CGR_API_TESTS\",\n            \"ID\": \"TP_TIMINGID\",\n            \"TimingId\": \"TP_TIMING_ID\"\n        }\n    ]\n}"
 								},
 								"url": {
 									"raw": "{{base_url}}/jsonrpc",
@@ -994,7 +1020,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n    \"id\": 1,\n    \"method\": \"APIerSv1.GetTPTimingIds\",\n    \"params\": [\n        {\n            \"TPid\": \"TP_TIMING_TEST\"\n        }\n    ]\n}"
+									"raw": "{\n    \"id\": 1,\n    \"method\": \"APIerSv1.GetTPTimingIds\",\n    \"params\": [\n        {\n            \"TPid\": \"CGR_API_TESTS\"\n        }\n    ]\n}"
 								},
 								"url": {
 									"raw": "{{base_url}}/jsonrpc",
@@ -1023,7 +1049,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n    \"id\": 1,\n    \"method\": \"APIerSv1.RemoveTPTiming\",\n    \"params\": [\n        {\n            \"TPid\": \"TEST_SQL\"\n        }\n    ]\n}"
+									"raw": "{\n    \"id\": 1,\n    \"method\": \"APIerSv1.RemoveTPTiming\",\n    \"params\": [\n        {\n            \"TPid\": \"CGR_API_TESTS\",\n            \"ID\": \"TP_TIMINGID\"\n        }\n    ]\n}"
 								},
 								"url": {
 									"raw": "{{base_url}}/jsonrpc",
@@ -1194,7 +1220,7 @@
 								"header": [],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n    \"method\": \"APIerSv1.LoadAccountActions\",\n    \"params\": [\n        {\n            \"TPid\": \"CGR_API_TESTS\",\n            \"ID\": \"AP_PACKAGE_10\",\n            \"LoadId\": \"CGR_API_TESTS\",\n            \"Tenant\": \"cgrates.org\",\n            \"Account\": \"+30xxxxxxxxx\",\n            \"ActionPlanId\": \"\",\n            \"ActionTriggersId\": \"\",\n            \"AllowNegative\": true,\n            \"Disabled\": false\n        }\n    ]\n}",
+									"raw": "{\n    \"method\": \"APIerSv1.LoadAccountActions\",\n    \"params\": [\n        {\n            \"TPid\": \"CGR_API_TESTS\",\n            \"LoadId\": \"CGR_API_TESTS\",\n            \"Tenant\": \"cgrates.org\",\n            \"Account\": \"+30xxxxxxxxx\",\n            \"ActionPlanId\": \"AP_PACKAGE_10\",\n            \"ActionTriggersId\": \"\",\n            \"AllowNegative\": true,\n            \"Disabled\": false\n        }\n    ]\n}",
 									"options": {
 										"raw": {
 											"language": "json"
@@ -2400,17 +2426,13 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n    \"id\": 6,\n    \"method\": \"APIerSv2.SetTPDestination\",\n    \"params\": [\n        {\n            \"TPid\": \"CGR_API_TESTS\",\n            \"ID\": \"TP_DST_RETAIL_GR_LANDLINE_2019_01\",\n            \"DestinationId\": \"TP_DST_RETAIL_GR_LANDLINE_2019_01\",\n            \"Prefixes\": [\n                \"302\"\n            ]\n        }\n    ]\n}"
+									"raw": "{\n    \"id\": 6,\n    \"method\": \"APIerSv2.SetTPDestination\",\n    \"params\": [\n        {\n            \"TPid\": \"CGR_API_TESTS\",\n            \"ID\": \"TP_DST_RETAIL_GR_LANDLINE_2019_01\",\n            \"Prefixes\": [\n                \"302\"\n            ]\n        }\n    ]\n}"
 								},
 								"url": {
-									"raw": "http://cgrates1.cgrates.org:2080/jsonrpc",
-									"protocol": "http",
+									"raw": "{{base_url}}/jsonrpc",
 									"host": [
-										"cgrates1",
-										"cgrates",
-										"org"
+										"{{base_url}}"
 									],
-									"port": "2080",
 									"path": [
 										"jsonrpc"
 									]
@@ -2433,7 +2455,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n \"id\": 6,\n \"method\": \"APIerSv1.SetTPDestination\",\n \"params\": [\n     {\n     \t\"TPid\": \"CGR_API_TESTS1\",\n     \t\"ID\":\"90\",\n         \"DestinationId\": \"FS_USERS1\",\n         \"Prefixes\": [\n             \"10\",\"200\"\n         ],\n         \n     }\n ]\n}"
+									"raw": "{\n    \"id\": 6,\n    \"method\": \"APIerSv1.SetTPDestination\",\n    \"params\": [\n        {\n            \"TPid\": \"CGR_API_TESTS1\",\n            \"ID\": \"90\",\n            \"Prefixes\": [\n                \"10\",\n                \"200\"\n            ],\n        }\n    ]\n}"
 								},
 								"url": {
 									"raw": "http://sip1.de.cgrates.org:2080/jsonrpc",
@@ -2538,39 +2560,6 @@
 								}
 							},
 							"response": []
-						},
-						{
-							"name": "APIerSv2.RemoveTPDestination",
-							"request": {
-								"auth": {
-									"type": "noauth"
-								},
-								"method": "POST",
-								"header": [
-									{
-										"key": "Content-Type",
-										"value": "application/json"
-									}
-								],
-								"body": {
-									"mode": "raw",
-									"raw": "{\n    \"id\": 6,\n    \"method\": \"APIerSv2.SetTPDestination\",\n    \"params\": [\n        {\n            \"TPid\": \"CGR_API_TESTS\",\n            \"ID\": \"TP_DST_RETAIL_GR_LANDLINE_2019_01\",\n            \"DestinationId\": \"TP_DST_RETAIL_GR_LANDLINE_2019_01\",\n            \"Prefixes\": [\n                \"302\"\n            ]\n        }\n    ]\n}"
-								},
-								"url": {
-									"raw": "http://cgrates1.cgrates.org:2080/jsonrpc",
-									"protocol": "http",
-									"host": [
-										"cgrates1",
-										"cgrates",
-										"org"
-									],
-									"port": "2080",
-									"path": [
-										"jsonrpc"
-									]
-								}
-							},
-							"response": []
 						}
 					]
 				},
@@ -2650,7 +2639,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n    \"method\": \"APIerSv1.SetTPDestinationRate\",\n    \"params\": [\n        {\n            \"TPid\": \"CGR_API_TESTS\",\n            \"ID\": \"TP_DST_RT_RETAIL_GR_LANDLINE_2019_01\",\n            \"DestinationRates\": [\n                {\n                    \"DestinationId\": \"TP_DST_RETAIL_GR_LANDLINE_2019_01\",\n                    \"RateId\": \"TP_RATEID_DST_RETAIL_GR_LANDLINE_2019_01\",\n                    \"RoundingMethod\": \"*up\",\n                    \"RoundingDecimals\": 4,\n                    \"MaxCost\": 0,\n                    \"MaxCostStrategy\": \"\"\n                }\n            ]\n        }\n    ]\n}"
+									"raw": "{\n    \"method\": \"APIerSv1.SetTPDestinationRate\",\n    \"params\": [\n        {\n            \"TPid\": \"CGR_API_TESTS\",\n            \"ID\": \"TP_DST_RT_RETAIL_GR_LANDLINE_2019_01\",\n            \"DestinationRates\": [\n                {\n                    \"DestinationId\": \"TP_DST_RETAIL_GR_LANDLINE_2019_01\",\n                    \"RateId\": \"TP_RATE_DST_RETAIL_GR_LANDLINE_2019_01\",\n                    \"RoundingMethod\": \"*up\",\n                    \"RoundingDecimals\": 4,\n                    \"MaxCost\": 0,\n                    \"MaxCostStrategy\": \"\"\n                }\n            ]\n        }\n    ]\n}"
 								},
 								"url": {
 									"raw": "{{base_url}}/jsonrpc",
@@ -2708,7 +2697,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n    \"id\": 1,\n    \"method\": \"APIerSv1.GetTPDestinationRate\",\n    \"params\": [\n        {\n            \"TPid\": \"TPID_VL_INTERNAL_INBOUND_CALLS\",\n            \"ID\": \"TP_DSTRATE_CLI_VL_INTERNAL_INBOUND_CALLS_GR_MOBILE\"\n        }\n    ]\n}"
+									"raw": "{\n    \"id\": 1,\n    \"method\": \"APIerSv1.GetTPDestinationRate\",\n    \"params\": [\n        {\n             \"TPid\": \"CGR_API_TESTS\",\n            \"ID\": \"TP_DST_RT_RETAIL_GR_LANDLINE_2019_01\"\n        }\n    ]\n}"
 								},
 								"url": {
 									"raw": "{{base_url}}/jsonrpc",
@@ -2737,7 +2726,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n    \"id\": 1,\n    \"method\": \"APIerSv1.GetTPDestinationRateIds\",\n    \"params\": [\n        {\n            \"TPid\": \"TP_VL_RP_2019_01_IN\"\n        }\n    ]\n}"
+									"raw": "{\n    \"id\": 1,\n    \"method\": \"APIerSv1.GetTPDestinationRateIds\",\n    \"params\": [\n        {\n            \"TPid\": \"CGR_API_TESTS\"\n        }\n    ]\n}"
 								},
 								"url": {
 									"raw": "{{base_url}}/jsonrpc",
@@ -2818,7 +2807,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n    \"id\": 1,\n    \"method\": \"APIerSv1.GetTPRate\",\n    \"params\": [\n        {\n            \"TPid\": \"CGR_API_TESTS\",\n            \"ID\": \"SPL_TESTSUPPLIER1_DST_RATEID_GR_LANDLINE_2019_01\"\n        }\n    ]\n}"
+									"raw": "{\n    \"id\": 1,\n    \"method\": \"APIerSv1.GetTPRate\",\n    \"params\": [\n        {\n            \"TPid\": \"CGR_API_TESTS\",\n            \"ID\": \"TP_RATE_DST_RETAIL_GR_LANDLINE_2019_01\"\n        }\n    ]\n}"
 								},
 								"url": {
 									"raw": "{{base_url}}/jsonrpc",
@@ -2874,7 +2863,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n    \"method\": \"APIerSv1.RemoveTPRate\",\n    \"params\": [\n        {\n            \"TPid\": \"CGR_API_TESTS\",\n            \"ID\": \"SPL_TESTSUPPLIER1_DST_GR_LANDLINE_2019_01\"\n        }\n    ]\n}"
+									"raw": "{\n    \"method\": \"APIerSv1.RemoveTPRate\",\n    \"params\": [\n        {\n            \"TPid\": \"CGR_API_TESTS\",\n            \"ID\": \"TP_RATE_DST_RETAIL_GR_LANDLINE_2019_01\"\n        }\n    ]\n}"
 								},
 								"url": {
 									"raw": "{{base_url}}/jsonrpc",
@@ -2963,7 +2952,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"id\": 6,\n    \"method\": \"APIerSv2.GetDestinations\",\n    \"params\": [\n     {   \"DestinationIDs\": [\"GR_LANDLINE\"]}\n    ]\n}"
+							"raw": "{\n    \"id\": 6,\n    \"method\": \"APIerSv2.GetDestinations\",\n    \"params\": [\n     {   \"DestinationIDs\": [\"test\"]}\n    ]\n}"
 						},
 						"url": {
 							"raw": "{{base_url}}/jsonrpc",
@@ -3021,7 +3010,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"id\": 6,\n    \"method\": \"APIerSv2.GetDestinations\",\n    \"params\": [\n        {\n            \"DestinationIDs\": [\n                \"FS_USERS3\",\n                \"test\"\n            ]\n        }\n    ]\n}"
+							"raw": "{\n    \"id\": 6,\n    \"method\": \"APIerSv2.GetDestinations\",\n    \"params\": [\n        {\n            \"DestinationIDs\": [\n                \"test\"\n            ]\n        }\n    ]\n}"
 						},
 						"url": {
 							"raw": "{{base_url}}/jsonrpc",
@@ -3050,7 +3039,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"id\": 6,\n    \"method\": \"APIerSv1.RemoveDestination\",\n    \"params\": [\n        {\n            \"DestinationIDs\": [\n                \"test\"\n            ]\n        }\n    ]\n}"
+							"raw": "{\n    \"id\": 6,\n    \"method\": \"APIerSv1.RemoveDestination\",\n    \"params\": [\n        {\n            \"DestinationIDs\": [\n                \"test\"\n            ],\n            \"Prefixes\": []\n        }\n    ]\n}"
 						},
 						"url": {
 							"raw": "{{base_url}}/jsonrpc",
@@ -3187,6 +3176,34 @@
 							"response": []
 						},
 						{
+							"name": "APIerSv1.GetTPRatingPlan Copy",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"name": "Content-Type",
+										"type": "text",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"id\": 1,\n    \"method\": \"APIerSv1.GetTPRatingPlan\",\n    \"params\": [\n        {\n          \"TPid\": \"CGR_API_TESTS\",\n            \"ID\": \"TP_RP_RETAIL_GR_LANDLINE_2019_01\"\n        }\n    ]\n}"
+								},
+								"url": {
+									"raw": "{{base_url}}/jsonrpc",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"jsonrpc"
+									]
+								}
+							},
+							"response": []
+						},
+						{
 							"name": "APIerSv1.GetTPRatingPlanIds",
 							"request": {
 								"method": "POST",
@@ -3228,7 +3245,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n    \"method\": \"APIerSv1.RemoveTPRatingPlan\",\n    \"params\": [\n        {\n            \"TPid\": \"TP_VL_RP_2019_01_IN\",\n            \"ID\": \"RatingPlan_CLI_VL_RP_2019_01_INBOUND_CALLS_GR_MOBILE\"\n        }\n    ]\n}"
+									"raw": "{\n    \"method\": \"APIerSv1.RemoveTPRatingPlan\",\n    \"params\": [\n        {\n          \"TPid\": \"CGR_API_TESTS\",\n            \"ID\": \"TP_RP_RETAIL_GR_LANDLINE_2019_01\"\n        }\n    ]\n}"
 								},
 								"url": {
 									"raw": "{{base_url}}/jsonrpc",
@@ -3324,7 +3341,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n    \"id\": 3,\n    \"method\": \"APIerSv1.SetTPRatingProfile\",\n    \"params\": [\n        {\n            \"TPid\": \"TP_RPR_teffsdfsd\",\n            \"LoadId\": \"test\",\n            \"Tenant\": \"test\",\n            \"Category\": \"test\",\n            \"Subject\": \"test\",\n            \"RatingPlanActivations\": [\n                {\n                    \"ActivationTime\": \"test\",\n                    \"RatingPlanId\": \"test\",\n                    \"FallbackSubjects\": \"test\"\n                }\n            ]\n        }\n    ]\n}"
+									"raw": "{\n    \"id\": 3,\n    \"method\": \"APIerSv1.SetTPRatingProfile\",\n    \"params\": [\n        {\n            \"TPid\": \"CGR_API_TESTS\",\n            \"LoadId\": \"LoadId\",\n            \"Tenant\": \"cgrates.org\",\n            \"Category\": \"call\",\n            \"Subject\": \"+30xxxxxxxxx\",\n            \"RatingPlanActivations\": [\n                {\n                    \"ActivationTime\": \"\",\n                    \"RatingPlanId\": \"TP_RP_RETAIL_GR_LANDLINE_2019_01\",\n                    \"FallbackSubjects\": \"\"\n                }\n            ]\n        }\n    ]\n}"
 								},
 								"url": {
 									"raw": "{{base_url}}/jsonrpc",
@@ -3352,7 +3369,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n    \"id\": 1,\n    \"method\": \"APIerSv1.GetTPRatingProfile\",\n    \"params\": [\n        {\n            \"TPid\": \"test\",\n            \"RatingProfileId\": \"test\"\n        }\n    ]\n}"
+									"raw": "{\n    \"id\": 1,\n    \"method\": \"APIerSv1.GetTPRatingProfile\",\n    \"params\": [\n        {\n            \"TPid\": \"CGR_API_TESTS\",\n            \"RatingProfileId\": \"LoadId:cgrates.org:call:+30xxxxxxxxx\"\n        }\n    ]\n}"
 								},
 								"url": {
 									"raw": "{{base_url}}/jsonrpc",
@@ -3408,7 +3425,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n    \"id\": 1,\n    \"method\": \"APIerSv1.GetTPRatingProfileLoadIds\",\n    \"params\": [\n        {\n            \"TPid\": \"test\",\n            \"Tenant\": \"test\",\n            \"Category\": \"test\",\n            \"Subject\": \"test\"\n        }\n    ]\n}"
+									"raw": "{\n    \"id\": 1,\n    \"method\": \"APIerSv1.GetTPRatingProfileLoadIds\",\n    \"params\": [\n        {\n            \"TPid\": \"CGR_API_TESTS\",\n            \"Tenant\": \"cgrates.org\",\n            \"Category\": \"call\",\n            \"Subject\": \"+30xxxxxxxxx\"\n        }\n    ]\n}"
 								},
 								"url": {
 									"raw": "{{base_url}}/jsonrpc",
@@ -3436,7 +3453,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n    \"id\": 3,\n    \"method\": \"APIerSv1.GetTPRatingProfilesByLoadId\",\n    \"params\": [\n        {\n            \"TPid\": \"test\",\n            \"LoadId\": \"test\"\n        }\n    ]\n}"
+									"raw": "{\n    \"id\": 3,\n    \"method\": \"APIerSv1.GetTPRatingProfilesByLoadID\",\n    \"params\": [\n        {\n            \"TPid\": \"CGR_API_TESTS\",\n            \"LoadId\": \"LoadId\"\n        }\n    ]\n}"
 								},
 								"url": {
 									"raw": "{{base_url}}/jsonrpc",
@@ -3464,7 +3481,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n    \"method\": \"APIerSv1.RemoveTPRatingProfile\",\n    \"params\": [\n        {\n            \"RatingProfileId\": \"test\",\n            \"TPid\": \"test\"\n        }\n    ]\n}"
+									"raw": "{\n    \"method\": \"APIerSv1.RemoveTPRatingProfile\",\n    \"params\": [\n        {\n            \"TPid\": \"CGR_API_TESTS\",\n            \"RatingProfileId\": \"LoadId:cgrates.org:call:+30xxxxxxxxx\"\n        }\n    ]\n}"
 								},
 								"url": {
 									"raw": "{{base_url}}/jsonrpc",
@@ -3495,7 +3512,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"method\": \"APIerSv1.GetRatingProfile\",\n    \"params\": [\n        {\n            \"Tenant\": \"cgrates.org\",\n            \"Category\": \"call-out\",\n            \"Subject\": \"*any\"\n        }\n    ]\n}"
+							"raw": "{\n    \"method\": \"APIerSv1.GetRatingProfile\",\n    \"params\": [\n        {\n            \"Tenant\": \"cgrates.org\",\n            \"Category\": \"call\",\n            \"Subject\": \"+30xxxxxxxxx\"\n        }\n    ]\n}"
 						},
 						"url": {
 							"raw": "{{base_url}}/jsonrpc",
@@ -3553,7 +3570,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"method\": \"APIerSv1.RemoveRatingProfile\",\n    \"params\": [\n        {\n            \"Tenant\": \"cgrates.org\",\n            \"Category\": \"call-out\",\n            \"Subject\": \"+30xxxxxxxxxx\"\n        }\n    ]\n}"
+							"raw": "{\n    \"method\": \"APIerSv1.RemoveRatingProfile\",\n    \"params\": [\n        {\n            \"Tenant\": \"cgrates.org\",\n            \"Category\": \"call\",\n            \"Subject\": \"+30xxxxxxxxx\"\n        }\n    ]\n}"
 						},
 						"url": {
 							"raw": "{{base_url}}/jsonrpc",
@@ -3582,72 +3599,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"method\": \"APIerSv1.SetRatingProfile\",\n    \"params\": [\n        {\n            \"Tenant\": \"cgrates.org\",\n            \"Category\": \"call\",\n            \"Subject\": \"+30xxxxxxxxx\",\n            \"Overwrite\": true,\n            \"RatingPlanActivations\": [\n                {\n                    \"ActivationTime\": \"2014-01-14T00:00:00Z\",\n                    \"RatingPlanId\": \"TP_RP_SPL_TESTSUPPLIER1_DST_ID_RT_GR_LANDLINE_2019_01\",\n                    \"FallbackKeys\": \"\"\n                }\n            ]\n        }\n    ]\n}"
-						},
-						"url": {
-							"raw": "{{base_url}}/jsonrpc",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"jsonrpc"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "APIerSv1.GetRatingProfile - +30xxxxxxxxx",
-					"request": {
-						"auth": {
-							"type": "noauth"
-						},
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"method\": \"APIerSv1.GetRatingProfile\",\n    \"params\": [\n        {\n            \"Tenant\": \"cgrates.org\",\n            \"Category\": \"call-out\",\n            \"Subject\": \"+30xxxxxxxxx\"\n        }\n    ]\n}"
-						},
-						"url": {
-							"raw": "{{base_url}}/jsonrpc",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"jsonrpc"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "APIerSv1.SetRatingProfile - +30xxxxxxxxx",
-					"request": {
-						"auth": {
-							"type": "noauth"
-						},
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"name": "Content-Type",
-								"value": "application/json",
-								"type": "text"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"method\": \"APIerSv1.SetRatingProfile\",\n    \"params\": [\n        {\n            \"Tenant\": \"cgrates.org\",\n            \"Category\": \"call-out\",\n            \"Subject\": \"+30xxxxxxxxx\",\n            \"Overwrite\": true,\n            \"RatingPlanActivations\": [\n                {\n                    \"ActivationTime\": \"2014-01-14T00:00:00Z\",\n                    \"RatingPlanId\": \"TP_RP_SPL_TESTSUPPLIER1_DST_ID_RT_GR_LANDLINE_2019_01\",\n                    \"FallbackKeys\": \"\"\n                }\n            ]\n        }\n    ]\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
+							"raw": "{\n    \"method\": \"APIerSv1.SetRatingProfile\",\n    \"params\": [\n        {\n            \"Tenant\": \"cgrates.org\",\n            \"Category\": \"call\",\n            \"Subject\": \"+30xxxxxxxxx\",\n            \"Overwrite\": true,\n            \"RatingPlanActivations\": [\n                {\n                    \"ActivationTime\": \"2024-01-14T00:00:00Z\",\n                    \"RatingPlanId\": \"TP_RP_RETAIL_GR_LANDLINE_2019_01\",\n                    \"FallbackKeys\": \"\"\n                }\n            ]\n        }\n    ]\n}"
 						},
 						"url": {
 							"raw": "{{base_url}}/jsonrpc",
@@ -3676,7 +3628,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"id\": 6,\n    \"method\": \"APIerSv1.LoadRatingProfile\",\n    \"params\": [\n        {\n            \"TPid\": \"CGR_API_TESTS\",\n            \"LoadId\": \"\",\n            \"Tenant\": \"\",\n            \"Category\": \"\",\n            \"Subject\": \"\",\n            \"RatingPlanActivations\": {\n                \"ActivationTime\": \"2014-07-14T14:25:00Z\",\n                \"RatingPlanId\": \"\",\n                \"FallbackSubjects\": \"\"\n            }\n        }\n    ]\n}"
+							"raw": "{\n    \"id\": 6,\n    \"method\": \"APIerSv1.LoadRatingProfile\",\n    \"params\": [\n        {\n            \"TPid\": \"CGR_API_TESTS\",\n            \"LoadId\": \"LoadId\",\n            \"Tenant\": \"cgrates.org\",\n            \"Category\": \"call\",\n            \"Subject\": \"+30xxxxxxxxx\",\n            \"RatingPlanActivations\": [\n                {\n                    \"ActivationTime\": \"\",\n                    \"RatingPlanId\": \"TP_RP_RETAIL_GR_LANDLINE_2019_01\",\n                    \"FallbackSubjects\": \"\"\n                }\n            ]\n        }\n    ]\n}"
 						},
 						"url": {
 							"raw": "{{base_url}}/jsonrpc",
