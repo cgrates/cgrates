@@ -247,6 +247,7 @@ func TestStorDbCfgAsMapInterface(t *testing.T) {
 			utils.MongoConnSchemeCfg:    "mongodb+srv",
 			utils.PgSSLModeCfg:          "disable",
 			utils.MysqlLocation:         "UTC",
+			utils.PgSchema:              "",
 		},
 		utils.ItemsCfg: map[string]any{
 			utils.SessionCostsTBL: map[string]any{utils.RemoteCfg: false, utils.ReplicateCfg: false},
