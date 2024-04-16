@@ -28,11 +28,19 @@
         url: "https://pgp.mongodb.com/server-{{ mongodb_version }}.asc"
         keyring: "/usr/share/keyrings/mongodb-server-{{ mongodb_version }}.gpg"
 
-    - name: Add MongoDB repository
+    - name: Add MongoDB repository for Debian
       become: yes
       apt_repository:
-        repo: "deb [ signed-by=/usr/share/keyrings/mongodb-server-{{ mongodb_version }}.gpg] http://repo.mongodb.org/apt/debian bullseye/mongodb-org/{{ mongodb_version }} main"
+        repo: "deb [ signed-by=/usr/share/keyrings/mongodb-server-{{ mongodb_version }}.gpg ] http://repo.mongodb.org/apt/debian {{ ansible_distribution_release }}/mongodb-org/{{ mongodb_version }} main"
         filename: "{{ mongodb_package_name }}-{{ mongodb_version }}"
+      when: ansible_distribution == 'Debian'
+
+    - name: Add MongoDB repository for Ubuntu
+      become: yes
+      apt_repository:
+        repo: "deb [ arch=amd64,arm64 signed-by=/usr/share/keyrings/mongodb-server-{{ mongodb_version }}.gpg ] https://repo.mongodb.org/apt/ubuntu {{ ansible_distribution_release }}/mongodb-org/{{ mongodb_version }} multiverse"
+        filename: "{{ mongodb_package_name }}-{{ mongodb_version }}"
+      when: ansible_distribution == 'Ubuntu'
 
     - name: Install MongoDB packages
       become: yes
