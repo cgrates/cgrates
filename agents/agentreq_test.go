@@ -28,6 +28,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -2166,12 +2167,42 @@ func TestAgReqSetFieldsInCacheWithTimeOut(t *testing.T) {
 		t.Error(err)
 	}
 	// give enough time to Cache to remove ttl the *uch
-	time.Sleep(6 * time.Millisecond)
-	if _, err := agReq.FieldAsInterface([]string{utils.MetaUCH, utils.Tenant}); err == nil || err != utils.ErrNotFound {
-		t.Error(err)
+	time.Sleep(7 * time.Millisecond)
+	if _, err := agReq.FieldAsInterface([]string{utils.MetaUCH, utils.Tenant}); err != utils.ErrNotFound {
+		t.Errorf("agReq.FieldAsInterface([]string{%q,%q}):got err=%v, want %v",
+			utils.MetaUCH, utils.Tenant, err, utils.ErrNotFound)
+
+		// Check item expiry time just in case.
+		var expiryTime time.Time
+		if err := engine.Cache.V1GetItemExpiryTime(context.Background(),
+			&utils.ArgsGetCacheItemWithAPIOpts{
+				ArgsGetCacheItem: utils.ArgsGetCacheItem{
+					CacheID: utils.MetaUCH,
+					ItemID:  utils.Tenant,
+				},
+			}, &expiryTime); err != nil {
+			t.Logf("V1GetItemExpiryTime(%q,%q): got unexpected err=%v, item probably expired in the meantime",
+				utils.MetaUCH, utils.Tenant, err)
+		}
+		t.Logf("item supposed to expire at %v, current time: %v", expiryTime, time.Now())
 	}
-	if _, err := agReq.FieldAsInterface([]string{utils.MetaUCH, utils.AccountField}); err == nil || err != utils.ErrNotFound {
-		t.Error(err)
+	if _, err := agReq.FieldAsInterface([]string{utils.MetaUCH, utils.AccountField}); err != utils.ErrNotFound {
+		t.Errorf("agReq.FieldAsInterface([]string{%q,%q}):got err=%v, want %v",
+			utils.MetaUCH, utils.AccountField, err, utils.ErrNotFound)
+
+		// Check item expiry time just in case.
+		var expiryTime time.Time
+		if err := engine.Cache.V1GetItemExpiryTime(context.Background(),
+			&utils.ArgsGetCacheItemWithAPIOpts{
+				ArgsGetCacheItem: utils.ArgsGetCacheItem{
+					CacheID: utils.MetaUCH,
+					ItemID:  utils.AccountField,
+				},
+			}, &expiryTime); err != nil {
+			t.Logf("V1GetItemExpiryTime(%q,%q): got unexpected err=%v, item probably expired in the meantime",
+				utils.MetaUCH, utils.Tenant, err)
+		}
+		t.Logf("item supposed to expire at %v, current time: %v", expiryTime, time.Now())
 	}
 }
 
