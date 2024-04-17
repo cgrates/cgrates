@@ -2398,13 +2398,14 @@ func (tpr *TpReader) addDefaultTimings() {
 		StartTime: utils.MetaASAP,
 		EndTime:   "",
 	}
+	currentTime := time.Now()
 	tpr.timings[utils.MetaEveryMinute] = &utils.TPTiming{
 		ID:        utils.MetaEveryMinute,
 		Years:     utils.Years{},
 		Months:    utils.Months{},
 		MonthDays: utils.MonthDays{},
 		WeekDays:  utils.WeekDays{},
-		StartTime: utils.ConcatenatedKey(utils.Meta, utils.Meta, strconv.Itoa(time.Now().Second())),
+		StartTime: utils.ConcatenatedKey(utils.Meta, utils.Meta, strconv.Itoa(currentTime.Second())),
 		EndTime:   "",
 	}
 	tpr.timings[utils.MetaHourly] = &utils.TPTiming{
@@ -2413,17 +2414,17 @@ func (tpr *TpReader) addDefaultTimings() {
 		Months:    utils.Months{},
 		MonthDays: utils.MonthDays{},
 		WeekDays:  utils.WeekDays{},
-		StartTime: utils.ConcatenatedKey(utils.Meta, strconv.Itoa(time.Now().Minute()), strconv.Itoa(time.Now().Second())),
+		StartTime: utils.ConcatenatedKey(utils.Meta, strconv.Itoa(currentTime.Minute()), strconv.Itoa(currentTime.Second())),
 		EndTime:   "",
 	}
-	startTime := time.Now().Format("15:04:05")
+	fmtTime := currentTime.Format("15:04:05")
 	tpr.timings[utils.MetaDaily] = &utils.TPTiming{
 		ID:        utils.MetaDaily,
 		Years:     utils.Years{},
 		Months:    utils.Months{},
 		MonthDays: utils.MonthDays{},
 		WeekDays:  utils.WeekDays{},
-		StartTime: startTime,
+		StartTime: fmtTime,
 		EndTime:   "",
 	}
 	tpr.timings[utils.MetaWeekly] = &utils.TPTiming{
@@ -2431,26 +2432,26 @@ func (tpr *TpReader) addDefaultTimings() {
 		Years:     utils.Years{},
 		Months:    utils.Months{},
 		MonthDays: utils.MonthDays{},
-		WeekDays:  utils.WeekDays{time.Now().Weekday()},
-		StartTime: startTime,
+		WeekDays:  utils.WeekDays{currentTime.Weekday()},
+		StartTime: fmtTime,
 		EndTime:   "",
 	}
 	tpr.timings[utils.MetaMonthly] = &utils.TPTiming{
 		ID:        utils.MetaMonthly,
 		Years:     utils.Years{},
 		Months:    utils.Months{},
-		MonthDays: utils.MonthDays{time.Now().Day()},
+		MonthDays: utils.MonthDays{currentTime.Day()},
 		WeekDays:  utils.WeekDays{},
-		StartTime: startTime,
+		StartTime: fmtTime,
 		EndTime:   "",
 	}
 	tpr.timings[utils.MetaMonthlyEstimated] = &utils.TPTiming{
 		ID:        utils.MetaMonthlyEstimated,
 		Years:     utils.Years{},
 		Months:    utils.Months{},
-		MonthDays: utils.MonthDays{time.Now().Day()},
+		MonthDays: utils.MonthDays{currentTime.Day()},
 		WeekDays:  utils.WeekDays{},
-		StartTime: startTime,
+		StartTime: fmtTime,
 		EndTime:   "",
 	}
 	tpr.timings[utils.MetaMonthEnd] = &utils.TPTiming{
@@ -2459,16 +2460,16 @@ func (tpr *TpReader) addDefaultTimings() {
 		Months:    utils.Months{},
 		MonthDays: utils.MonthDays{-1},
 		WeekDays:  utils.WeekDays{},
-		StartTime: startTime,
+		StartTime: fmtTime,
 		EndTime:   "",
 	}
 	tpr.timings[utils.MetaYearly] = &utils.TPTiming{
 		ID:        utils.MetaYearly,
 		Years:     utils.Years{},
-		Months:    utils.Months{time.Now().Month()},
-		MonthDays: utils.MonthDays{time.Now().Day()},
+		Months:    utils.Months{currentTime.Month()},
+		MonthDays: utils.MonthDays{currentTime.Day()},
 		WeekDays:  utils.WeekDays{},
-		StartTime: startTime,
+		StartTime: fmtTime,
 		EndTime:   "",
 	}
 
