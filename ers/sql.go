@@ -59,9 +59,6 @@ func NewSQLEventReader(cfg *config.CGRConfig, cfgIdx int,
 	}
 	if concReq := rdr.Config().ConcurrentReqs; concReq != -1 {
 		rdr.cap = make(chan struct{}, concReq)
-		for i := 0; i < concReq; i++ {
-			rdr.cap <- struct{}{}
-		}
 	}
 	if err = rdr.setURL(rdr.Config().SourcePath, rdr.Config().Opts); err != nil {
 		return nil, err
@@ -155,7 +152,7 @@ func (rdr *SQLEventReader) readLoop(db *gorm.DB, sqlDB io.Closer) {
 				return
 			}
 			if rdr.Config().ConcurrentReqs != -1 {
-				<-rdr.cap // do not try to read if the limit is reached
+				rdr.cap <- struct{}{}
 			}
 			columns := make([]any, len(colNames))
 			columnPointers := make([]any, len(colNames))
@@ -203,7 +200,7 @@ func (rdr *SQLEventReader) readLoop(db *gorm.DB, sqlDB io.Closer) {
 							utils.ERs, utils.ToJSON(msg), err.Error()))
 				}
 				if rdr.Config().ConcurrentReqs != -1 {
-					rdr.cap <- struct{}{}
+					<-rdr.cap
 				}
 			}(msg)
 		}

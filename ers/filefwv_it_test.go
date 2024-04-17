@@ -291,7 +291,6 @@ func TestFileFWVProcessEvent(t *testing.T) {
 		rdrExit:   make(chan struct{}),
 		conReqs:   make(chan struct{}, 1),
 	}
-	eR.conReqs <- struct{}{}
 	fname := "file1.fwv"
 	errExpect := "unsupported field prefix: <> when set fields"
 	eR.Config().Fields = []*config.FCTemplate{

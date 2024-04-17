@@ -50,9 +50,6 @@ func NewNatsER(cfg *config.CGRConfig, cfgIdx int,
 	}
 	if concReq := rdr.Config().ConcurrentReqs; concReq != -1 {
 		rdr.cap = make(chan struct{}, concReq)
-		for i := 0; i < concReq; i++ {
-			rdr.cap <- struct{}{}
-		}
 	}
 	if err := rdr.processOpts(); err != nil {
 		return nil, err
@@ -102,7 +99,7 @@ func (rdr *NatsER) Serve() error {
 		// If the rdr.cap channel buffer is empty, block until a resource is available. Otherwise
 		// allocate one resource and start processing the message.
 		if rdr.Config().ConcurrentReqs != -1 {
-			<-rdr.cap
+			rdr.cap <- struct{}{}
 		}
 		go func() {
 			handlerErr := rdr.processMessage(msgData)
@@ -114,7 +111,7 @@ func (rdr *NatsER) Serve() error {
 
 			// Release the resource back to rdr.cap channel.
 			if rdr.Config().ConcurrentReqs != -1 {
-				rdr.cap <- struct{}{}
+				<-rdr.cap
 			}
 
 		}()

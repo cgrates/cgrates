@@ -355,14 +355,9 @@ func TestNewXMLFileER(t *testing.T) {
 		rdrExit:   nil,
 		conReqs:   make(chan struct{}, 1),
 	}
-	var value struct{}
-	expEr.conReqs <- value
+
 	eR, err := NewXMLFileER(cfg, 0, nil, nil, nil, fltrs, nil)
-	expConReq := make(chan struct{}, 1)
-	expConReq <- struct{}{}
-	if <-expConReq != <-eR.(*XMLFileER).conReqs {
-		t.Errorf("Expected %v but received %v", <-expConReq, <-eR.(*XMLFileER).conReqs)
-	}
+
 	expEr.conReqs = nil
 	eR.(*XMLFileER).conReqs = nil
 	if err != nil {
@@ -422,7 +417,6 @@ func TestFileXMLProcessEvent(t *testing.T) {
 
 	eR.Config().Fields[0].ComputePath()
 
-	eR.conReqs <- struct{}{}
 	fileName := "file1.xml"
 	if err := eR.processFile(fileName); err != nil {
 		t.Error(err)
@@ -464,7 +458,6 @@ func TestFileXMLProcessEventError1(t *testing.T) {
 		rdrExit:   make(chan struct{}),
 		conReqs:   make(chan struct{}, 1),
 	}
-	eR.conReqs <- struct{}{}
 	errExpect := "open /tmp/TestFileXMLProcessEvent/file1.xml: no such file or directory"
 	if err := eR.processFile(fname); err == nil || err.Error() != errExpect {
 		t.Errorf("Expected %v but received %v", errExpect, err)
@@ -510,7 +503,7 @@ func TestFileXMLProcessEVentError2(t *testing.T) {
 		rdrExit:   make(chan struct{}),
 		conReqs:   make(chan struct{}, 1),
 	}
-	eR.conReqs <- struct{}{}
+
 	eR.Config().Tenant = config.RSRParsers{
 		{
 			Rules: "test",
@@ -560,7 +553,6 @@ func TestFileXMLProcessEventParseError(t *testing.T) {
 		rdrExit:   make(chan struct{}),
 		conReqs:   make(chan struct{}, 1),
 	}
-	eR.conReqs <- struct{}{}
 
 	fileName := "file1.xml"
 	errExpect := "XML syntax error on line 2: unexpected EOF"

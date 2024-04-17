@@ -49,11 +49,9 @@ func NewCSVFileER(cfg *config.CGRConfig, cfgIdx int,
 		partialEvents: partialEvents,
 		rdrError:      rdrErr,
 		rdrExit:       rdrExit,
-		conReqs:       make(chan struct{}, cfg.ERsCfg().Readers[cfgIdx].ConcurrentReqs)}
-	var processFile struct{}
-	for i := 0; i < cfg.ERsCfg().Readers[cfgIdx].ConcurrentReqs; i++ {
-		csvEr.conReqs <- processFile // Empty initiate so we do not need to wait later when we pop
+		conReqs:       make(chan struct{}, cfg.ERsCfg().Readers[cfgIdx].ConcurrentReqs),
 	}
+
 	return csvEr, nil
 }
 
@@ -113,8 +111,8 @@ func (rdr *CSVFileER) Serve() (err error) {
 // processFile is called for each file in a directory and dispatches erEvents from it
 func (rdr *CSVFileER) processFile(fName string) (err error) {
 	if cap(rdr.conReqs) != 0 { // 0 goes for no limit
-		processFile := <-rdr.conReqs // Queue here for maxOpenFiles
-		defer func() { rdr.conReqs <- processFile }()
+		rdr.conReqs <- struct{}{} // Queue here for maxOpenFiles
+		defer func() { <-rdr.conReqs }()
 	}
 	absPath := path.Join(rdr.sourceDir, fName)
 	utils.Logger.Info(
