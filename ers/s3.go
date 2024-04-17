@@ -50,9 +50,6 @@ func NewS3ER(cfg *config.CGRConfig, cfgIdx int,
 	}
 	if concReq := rdr.Config().ConcurrentReqs; concReq != -1 {
 		rdr.cap = make(chan struct{}, concReq)
-		for i := 0; i < concReq; i++ {
-			rdr.cap <- struct{}{}
-		}
 	}
 	rdr.parseOpts(rdr.Config().Opts)
 	return rdr, nil
@@ -201,8 +198,8 @@ func (rdr *S3ER) isClosed() bool {
 
 func (rdr *S3ER) readMsg(scv s3Client, key string) (err error) {
 	if rdr.Config().ConcurrentReqs != -1 {
-		<-rdr.cap // do not try to read if the limit is reached
-		defer func() { rdr.cap <- struct{}{} }()
+		rdr.cap <- struct{}{} // do not try to read if the limit is reached
+		defer func() { <-rdr.cap }()
 	}
 	if rdr.isClosed() {
 		return

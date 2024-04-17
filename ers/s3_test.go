@@ -440,7 +440,7 @@ func TestS3ERReadMsgError1(t *testing.T) {
 		GetObjectF:          getObject,
 		DeleteObjectF:       deleteObject,
 	}
-	rdr.cap <- struct{}{}
+
 	errExp := "NOT_FOUND:ToR"
 	if err := rdr.readMsg(scv, "AWSKey"); err == nil || err.Error() != errExp {
 		t.Errorf("Expected %v but received %v", errExp, err)
@@ -466,7 +466,7 @@ func TestS3ERReadMsgError2(t *testing.T) {
 	}
 	rdr.Config().ConcurrentReqs = 1
 	scv := &s3ClientMock{}
-	rdr.cap <- struct{}{}
+
 	rdr.rdrExit <- struct{}{}
 	if err := rdr.readMsg(scv, "AWSKey"); err != nil {
 		t.Error(err)

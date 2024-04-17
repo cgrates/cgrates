@@ -418,7 +418,6 @@ func TestFileCSVProcessEvent(t *testing.T) {
 		},
 		APIOpts: map[string]any{},
 	}
-	eR.conReqs <- struct{}{}
 
 	eR.Config().Fields = []*config.FCTemplate{
 		{
@@ -538,7 +537,6 @@ func TestFileCSVProcessEventError(t *testing.T) {
 		rdrExit:   make(chan struct{}),
 		conReqs:   make(chan struct{}, 1),
 	}
-	eR.conReqs <- struct{}{}
 	errExpect := "open /tmp/TestFileCSVProcessEvent/file1.csv: no such file or directory"
 	if err := eR.processFile(fname); err == nil || err.Error() != errExpect {
 		t.Errorf("Expected %v but received %v", errExpect, err)
@@ -571,7 +569,6 @@ func TestFileCSVProcessEventError2(t *testing.T) {
 		rdrExit:   make(chan struct{}),
 		conReqs:   make(chan struct{}, 1),
 	}
-	eR.conReqs <- struct{}{}
 
 	eR.Config().Fields = []*config.FCTemplate{
 		{},
@@ -615,7 +612,6 @@ func TestFileCSVProcessEventError3(t *testing.T) {
 		rdrExit:   make(chan struct{}),
 		conReqs:   make(chan struct{}, 1),
 	}
-	eR.conReqs <- struct{}{}
 
 	//
 	eR.Config().Filters = []string{"Filter1"}

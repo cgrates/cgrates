@@ -362,7 +362,6 @@ func TestFileJSONProcessEvent(t *testing.T) {
 		APIOpts: map[string]any{},
 	}
 	// expEvent := &utils.CGREvent{}
-	eR.conReqs <- struct{}{}
 	fname := "file1.json"
 	if err := eR.processFile(fname); err != nil {
 		t.Error(err)
@@ -397,7 +396,6 @@ func TestFileJSONProcessEventReadError(t *testing.T) {
 		rdrExit:   make(chan struct{}),
 		conReqs:   make(chan struct{}, 1),
 	}
-	eR.conReqs <- struct{}{}
 	errExpect := "open /tmp/TestFileJSONProcessEvent/file2.json: no such file or directory"
 	if err := eR.processFile(fname); err == nil || err.Error() != errExpect {
 		t.Errorf("Expected %v but received %v", errExpect, err)
@@ -445,7 +443,6 @@ func TestFileJSONProcessEventError2(t *testing.T) {
 		rdrExit:   make(chan struct{}),
 		conReqs:   make(chan struct{}, 1),
 	}
-	eR.conReqs <- struct{}{}
 
 	eR.Config().Fields = []*config.FCTemplate{
 		{},
@@ -504,7 +501,6 @@ func TestFileJSONProcessEventError3(t *testing.T) {
 		rdrExit:   make(chan struct{}),
 		conReqs:   make(chan struct{}, 1),
 	}
-	eR.conReqs <- struct{}{}
 	fname := "file1.json"
 
 	//
