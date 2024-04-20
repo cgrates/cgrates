@@ -25,26 +25,38 @@ import (
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
+	janus "github.com/cgrates/janusgo"
 )
 
 // NewJanusAgent will construct a JanusAgent
-func NewJanusAgent(connMgr *engine.ConnManager,
-	sessionConns []string, filterS *engine.FilterS,
-	reqProcessors []*config.RequestProcessor) *JanusAgent {
+func NewJanusAgent(cgrCfg *config.CGRConfig,
+	connMgr *engine.ConnManager,
+	filterS *engine.FilterS) *JanusAgent {
 	return &JanusAgent{
-		connMgr:       connMgr,
-		filterS:       filterS,
-		reqProcessors: reqProcessors,
-		sessionConns:  sessionConns,
+		cgrCfg:  cgrCfg,
+		connMgr: connMgr,
+		filterS: filterS,
 	}
 }
 
 // JanusAgent is a gateway between HTTP and Janus Server over Websocket
 type JanusAgent struct {
-	connMgr       *engine.ConnManager
-	filterS       *engine.FilterS
-	reqProcessors []*config.RequestProcessor
-	sessionConns  []string
+	cgrCfg  *config.CGRConfig
+	connMgr *engine.ConnManager
+	filterS *engine.FilterS
+	jnsConn *janus.Gateway
+}
+
+// Connect will create the connection to the Janus Server
+func (ja *JanusAgent) Connect() (err error) {
+	ja.jnsConn, err = janus.Connect(
+		fmt.Sprintf("ws://%s", ja.cgrCfg.JanusAgentCfg().JanusConns[0].Address))
+	return
+}
+
+// Shutdown will close the connection to the Janus Server
+func (ja *JanusAgent) Shutdown() error {
+	return ja.jnsConn.Close()
 }
 
 // ServeHTTP implements http.Handler interface

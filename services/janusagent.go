@@ -49,6 +49,7 @@ type JanusAgent struct {
 	cfg         *config.CGRConfig
 	filterSChan chan *engine.FilterS
 	server      *cores.Server
+	jA          *agents.JanusAgent
 
 	// we can realy stop the JanusAgent so keep a flag
 	// if we registerd the jandlers
@@ -59,20 +60,22 @@ type JanusAgent struct {
 
 // Start should jandle the sercive start
 func (ja *JanusAgent) Start() (err error) {
-	if ja.IsRunning() {
-		return utils.ErrServiceAlreadyRunning
-	}
-
 	filterS := <-ja.filterSChan
 	ja.filterSChan <- filterS
 
 	ja.Lock()
+	if ja.started {
+		ja.Unlock()
+		return utils.ErrServiceAlreadyRunning
+	}
+	ja.jA = agents.NewJanusAgent(ja.cfg, ja.connMgr, filterS)
+	if err = ja.jA.Connect(); err != nil {
+		return
+	}
+	ja.server.RegisterHttpHandler(ja.cfg.JanusAgentCfg().URL, ja.jA)
 	ja.started = true
-	utils.Logger.Info(fmt.Sprintf("<%s> successfully started.", utils.JanusAgent))
-	ja.server.RegisterHttpHandler(ja.cfg.JanusAgentCfg().URL,
-		agents.NewJanusAgent(ja.connMgr, ja.cfg.JanusAgentCfg().SessionSConns, filterS,
-			ja.cfg.JanusAgentCfg().RequestProcessors))
 	ja.Unlock()
+	utils.Logger.Info(fmt.Sprintf("<%s> successfully started.", utils.JanusAgent))
 	return
 }
 
@@ -84,6 +87,7 @@ func (ja *JanusAgent) Reload() (err error) {
 // Shutdown stops the service
 func (ja *JanusAgent) Shutdown() (err error) {
 	ja.Lock()
+	err = ja.jA.Shutdown()
 	ja.started = false
 	ja.Unlock()
 	return // no shutdown for the momment

@@ -369,7 +369,7 @@ const CGRATES_CFG_JSON = `
 	"enabled": false,											// starts the EventReader service: <true|false>
 	"sessions_conns": ["*internal"],							// RPC Connections IDs
 	"ees_conns": [],											// connection for routing processed and invalid messages through EEs
-	"concurrent_events":1,										// number of events to generate concurrently on CGRateS side 
+	"concurrent_events": 1,										// number of events to generate concurrently on CGRateS side 
 	"partial_cache_ttl": "1s",									// the duration to cache partial records when not pairing	
 	"readers": [
 		{
@@ -395,7 +395,7 @@ const CGRATES_CFG_JSON = `
 				// "partialcsvFieldSeparator": ","				// separator used when dumping the fields
 				
 				// FileCSV 
-				"csvRowLength": 0,								// Number of fields from csv file
+				"csvRowLength": 0,								// Number of fields from csv file, -1 to disable checking, 0 to inherit the lenght of first record
 				"csvFieldSeparator": ",",						// separator used when reading the fields
 				"csvHeaderDefineChar": ":", 					// the starting character for header definition used in case of CSV files
 				// "csvLazyQuotes": false,						// if a quote may appear in an unquoted field and a non-doubled quote may appear in a quoted field
