@@ -21,6 +21,7 @@ require (
 	github.com/cgrates/baningo v0.0.0-20210413080722-004ffd5e429f
 	github.com/cgrates/birpc v1.3.1-0.20211117095917-5b0ff29f3084
 	github.com/cgrates/fsock v0.0.0-20240322171959-35309017b3e0
+	github.com/cgrates/janusgo v0.0.0-20240411150649-85fbf3213b5e
 	github.com/cgrates/kamevapi v0.0.0-20240307160311-26273f03eedf
 	github.com/cgrates/ltcache v0.0.0-20240411152156-e673692056db
 	github.com/cgrates/radigo v0.0.0-20240123163129-491c899df727
@@ -80,7 +81,6 @@ require (
 	github.com/blevesearch/zapx/v15 v15.3.13 // indirect
 	github.com/blevesearch/zapx/v16 v16.0.12 // indirect
 	github.com/cenkalti/hub v1.0.1 // indirect
-	github.com/cgrates/janusgo v0.0.0-20240411150649-85fbf3213b5e // indirect
 	github.com/couchbase/ghistogram v0.1.0 // indirect
 	github.com/couchbase/moss v0.2.0 // indirect
 	github.com/felixge/httpsnoop v1.0.4 // indirect
