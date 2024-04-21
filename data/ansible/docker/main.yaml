@@ -57,7 +57,7 @@
       register: nginxConfig
 
     - name: Configure NGINX server
-      include: nginx.yaml
+      include_tasks: nginx.yaml
       when: nginxConfig.stdout_lines|length < 1 or users_filename|length > 0
 
     - name: Enable and start nginx
@@ -68,7 +68,7 @@
         enabled: yes
       
     - name: Configure docker 
-      include: docker.yaml
+      import_tasks: docker.yaml
 
 ###########################################################################################################################
 ###########################################################################################################################

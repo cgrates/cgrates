@@ -37,9 +37,6 @@
     enabled: yes
     masked: no
 
-- name: Install Docker Module for Python
-  shell: "pip3 install docker"
-
 - name: Creates directory
   become: yes
   file:
