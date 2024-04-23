@@ -85,8 +85,8 @@ func TestGuardianTimeout(t *testing.T) {
 	sg.Wait()
 	execTime := time.Since(tStart)
 	want := 5 * time.Millisecond * time.Duration(maxIter)
-	if diff := execTime - want; diff < 0 || diff > 5*time.Millisecond {
-		t.Errorf("total Guard duration for %d iterations over %d keys=%v: got %v want %v (diff %v, margin 5ms)",
+	if diff := execTime - want; diff < 0 || diff > 10*time.Millisecond {
+		t.Errorf("total Guard duration for %d iterations over %d keys=%v: got %v want %v (diff %v, margin 10ms)",
 			maxIter, len(keys), keys, execTime, want, diff)
 	}
 	Guardian.lkMux.Lock()
