@@ -1,6 +1,6 @@
 module github.com/cgrates/cgrates
 
-go 1.22
+go 1.22.1
 
 // replace github.com/cgrates/radigo => ../radigo
 
@@ -21,7 +21,7 @@ require (
 	github.com/cgrates/baningo v0.0.0-20210413080722-004ffd5e429f
 	github.com/cgrates/birpc v1.3.1-0.20211117095917-5b0ff29f3084
 	github.com/cgrates/fsock v0.0.0-20240322171959-35309017b3e0
-	github.com/cgrates/janusgo v0.0.0-20240411150649-85fbf3213b5e
+	github.com/cgrates/janusgo v0.0.0-20240425092925-a3b9aa99e793
 	github.com/cgrates/kamevapi v0.0.0-20240307160311-26273f03eedf
 	github.com/cgrates/ltcache v0.0.0-20240411152156-e673692056db
 	github.com/cgrates/radigo v0.0.0-20240123163129-491c899df727
@@ -94,7 +94,6 @@ require (
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/googleapis/enterprise-certificate-proxy v0.3.2 // indirect
 	github.com/googleapis/gax-go/v2 v2.12.2 // indirect
-	github.com/gorilla/websocket v1.5.1 // indirect
 	github.com/ishidawataru/sctp v0.0.0-20190922091402-408ec287e38c // indirect
 	github.com/jackc/pgpassfile v1.0.0 // indirect
 	github.com/jackc/pgservicefile v0.0.0-20221227161230-091c0ba34f0a // indirect
@@ -110,7 +109,6 @@ require (
 	github.com/nats-io/nkeys v0.4.5 // indirect
 	github.com/nats-io/nuid v1.0.1 // indirect
 	github.com/pierrec/lz4/v4 v4.1.15 // indirect
-	github.com/rs/xid v1.5.0 // indirect
 	github.com/xdg-go/pbkdf2 v1.0.0 // indirect
 	github.com/xdg-go/scram v1.1.2 // indirect
 	github.com/xdg-go/stringprep v1.0.4 // indirect
@@ -130,4 +128,5 @@ require (
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20240304161311-37d4d3c04a78 // indirect
 	google.golang.org/grpc v1.62.1 // indirect
 	google.golang.org/protobuf v1.33.0 // indirect
+	nhooyr.io/websocket v1.8.11 // indirect
 )
