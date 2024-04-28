@@ -19,13 +19,23 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package agents
 
 import (
+	"context"
+	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"net/http"
+	"regexp"
+	"strconv"
+	"time"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
-	"github.com/cgrates/cgrates/utils"
 	janus "github.com/cgrates/janusgo"
+)
+
+var (
+	janSessionPath      = regexp.MustCompile(`^\/janus/\d+?$`)
+	janPluginHandlePath = regexp.MustCompile(`^\/janus/.*/.*`)
 )
 
 // NewJanusAgent will construct a JanusAgent
@@ -60,55 +70,209 @@ func (ja *JanusAgent) Shutdown() error {
 }
 
 // ServeHTTP implements http.Handler interface
-func (ja *JanusAgent) ServeHTTP(w http.ResponseWriter, req *http.Request) {
-	dcdr, err := newJanusHTTPjsonDP(req) // dcdr will provide information from request
+func (ja *JanusAgent) CORSOptions(w http.ResponseWriter, req *http.Request) {
+	janusAccessControlHeaders(w, req)
+}
+
+// CreateSession will create a new session within janusgo
+func (ja *JanusAgent) CreateSession(w http.ResponseWriter, req *http.Request) {
+	janusAccessControlHeaders(w, req)
+	var msg janus.BaseMsg
+	if err := json.NewDecoder(req.Body).Decode(&msg); err != nil {
+		http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
+		return
+	}
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+
+	resp, err := ja.jnsConn.CreateSession(ctx, msg)
 	if err != nil {
-		utils.Logger.Warning(
-			fmt.Sprintf("<%s> error creating decoder: %s",
-				utils.HTTPAgent, err.Error()))
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	json.NewEncoder(w).Encode(&resp)
+}
+
+// SessioNKeepalive sends keepalive once OPTIONS are coming for the session from HTTP
+func (ja *JanusAgent) SessioNKeepalive(w http.ResponseWriter, r *http.Request) {
+	janusAccessControlHeaders(w, r)
+	sessionID, err := strconv.ParseUint(r.PathValue("sessionID"), 10, 64)
+	if err != nil {
+		http.Error(w, "Invalid session ID", http.StatusBadRequest)
+		return
+	}
+	ja.jnsConn.RLock()
+	session, has := ja.jnsConn.Sessions[sessionID]
+	ja.jnsConn.RUnlock()
+	if !has {
+		http.Error(w, "Session not found", http.StatusNotFound)
+		return
+	}
+	msg := janus.BaseMsg{
+		Session: session.ID,
+		Type:    "keepalive",
+	}
+	var resp any
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+
+	resp, err = session.KeepAlive(ctx, msg)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+
+	}
+	json.NewEncoder(w).Encode(resp)
+}
+
+// PollSession will create a long-poll request to be notified about events and incoming messages from session
+func (ja *JanusAgent) PollSession(w http.ResponseWriter, req *http.Request) {
+	janusAccessControlHeaders(w, req)
+	sessionID, err := strconv.ParseUint(req.PathValue("sessionID"), 10, 64)
+	if err != nil {
+		http.Error(w, "Invalid session ID", http.StatusBadRequest)
+		return
+	}
+	ja.jnsConn.RLock()
+	session, has := ja.jnsConn.Sessions[sessionID]
+	ja.jnsConn.RUnlock()
+	if !has {
+		http.Error(w, "Session not found", http.StatusNotFound)
+		return
+	}
+	maxEvs, err := strconv.Atoi(req.URL.Query().Get("maxev"))
+	if err != nil {
+		http.Error(w, fmt.Sprintf("Invalid maxev, err: %s", err.Error()),
+			http.StatusBadRequest)
+		return
+	}
+	msg := janus.BaseMsg{
+		Session: session.ID,
+		Type:    "keepalive",
+	}
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+	events, err := session.LongPoll(ctx, maxEvs, msg)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+	json.NewEncoder(w).Encode(events)
+}
+
+// AttachPlugin will attach a plugin to a session
+func (ja *JanusAgent) AttachPlugin(w http.ResponseWriter, r *http.Request) {
+	janusAccessControlHeaders(w, r)
+	sessionID, err := strconv.ParseUint(r.PathValue("sessionID"), 10, 64)
+	if err != nil {
+		http.Error(w, "Invalid session ID", http.StatusBadRequest)
+		return
+	}
+	ja.jnsConn.RLock()
+	session, has := ja.jnsConn.Sessions[sessionID]
+	ja.jnsConn.RUnlock()
+	if !has {
+		http.Error(w, "Session not found", http.StatusNotFound)
+		return
+	}
+	var msg janus.BaseMsg
+	if err := json.NewDecoder(r.Body).Decode(&msg); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-	utils.Logger.Debug(dcdr.String())
-	/*
-		cgrRplyNM := &utils.DataNode{Type: utils.NMMapType, Map: make(map[string]*utils.DataNode)}
-		rplyNM := utils.NewOrderedNavigableMap()
-		opts := utils.MapStorage{}
-		reqVars := &utils.DataNode{Type: utils.NMMapType, Map: map[string]*utils.DataNode{utils.RemoteHost: utils.NewLeafNode(req.RemoteAddr)}}
-		for _, reqProcessor := range ha.reqProcessors {
-			agReq := NewAgentRequest(dcdr, reqVars, cgrRplyNM, rplyNM,
-				opts, reqProcessor.Tenant, ha.dfltTenant,
-				utils.FirstNonEmpty(reqProcessor.Timezone,
-					config.CgrConfig().GeneralCfg().DefaultTimezone),
-				ha.filterS, nil)
-			lclProcessed, err := processRequest(context.TODO(), reqProcessor, agReq,
-				utils.HTTPAgent, ha.connMgr, ha.sessionConns,
-				agReq.filterS)
-			if err != nil {
-				utils.Logger.Warning(
-					fmt.Sprintf("<%s> error: %s processing request: %s",
-						utils.HTTPAgent, err.Error(), utils.ToJSON(agReq)))
-				return // FixMe with returning some error on HTTP level
-			}
-			if !lclProcessed {
-				continue
-			}
-			if lclProcessed && !reqProcessor.Flags.GetBool(utils.MetaContinue) {
-				break
-			}
+	msg.Session = session.ID
+
+	var resp any
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+	if msg.Type == "destroy" {
+		resp, err = session.DestroySession(ctx, msg)
+	} else {
+		resp, err = session.AttachSession(ctx, msg)
+	}
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+
+	}
+	json.NewEncoder(w).Encode(resp)
+}
+
+// HandlePlugin will handle requests towards a plugin
+func (ja *JanusAgent) HandlePlugin(w http.ResponseWriter, r *http.Request) {
+	janusAccessControlHeaders(w, r)
+	sessionID, err := strconv.ParseUint(r.PathValue("sessionID"), 10, 64)
+	if err != nil {
+		http.Error(w, "Invalid session ID", http.StatusBadRequest)
+		return
+	}
+	ja.jnsConn.RLock()
+	session, has := ja.jnsConn.Sessions[sessionID]
+	ja.jnsConn.RUnlock()
+	if !has {
+		http.Error(w, "Session not found", http.StatusNotFound)
+		return
+	}
+	handleID, err := strconv.ParseUint(r.PathValue("handleID"), 10, 64)
+	if err != nil {
+		http.Error(w, "Invalid handle ID", http.StatusBadRequest)
+		return
+	}
+	handle, has := session.Handles[handleID]
+	if !has {
+		if !has {
+			http.Error(w, "Handle not found", http.StatusNotFound)
+			return
 		}
-		encdr, err := newHAReplyEncoder(ha.rplyPayload, w)
+	}
+	rBody, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		http.Error(w, "Cannot read body", http.StatusBadRequest)
+		return
+	}
+	var msg janus.BaseMsg
+	if err := json.Unmarshal(rBody, &msg); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	var resp any
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+
+	// handle message, depending on it's type
+	switch msg.Type {
+	case "message":
+		var hMsg janus.HandlerMessageJsep
+		if err := json.Unmarshal(rBody, &hMsg); err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+		hMsg.Session = session.ID
+		hMsg.BaseMsg.Handle = handle.ID
+		hMsg.Handle = handle.ID
+		resp, err = handle.Message(ctx, hMsg)
+	case "trickle":
+		var hMsg janus.TrickleOne
+		if err := json.Unmarshal(rBody, &hMsg); err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+		hMsg.Session = session.ID
+		hMsg.Handle = handle.ID
+		hMsg.HandleR = handle.ID
+		resp, err = handle.Trickle(ctx, hMsg)
+	default:
 		if err != nil {
-			utils.Logger.Warning(
-				fmt.Sprintf("<%s> error creating reply encoder: %s",
-					utils.HTTPAgent, err.Error()))
+			http.Error(w, "Invalid message type", http.StatusBadRequest)
 			return
 		}
-		if err = encdr.Encode(rplyNM); err != nil {
-			utils.Logger.Warning(
-				fmt.Sprintf("<%s> error: %s encoding out %s",
-					utils.HTTPAgent, err.Error(), utils.ToJSON(rplyNM)))
-			return
-		}
-	*/
+
+	}
+
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+
+	}
+	json.NewEncoder(w).Encode(resp)
 }
