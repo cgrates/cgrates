@@ -75,7 +75,7 @@ func (ja *JanusAgent) Start() (err error) {
 
 	ja.server.RegisterHttpFunc("POST "+ja.cfg.JanusAgentCfg().URL, ja.jA.CreateSession)
 	ja.server.RegisterHttpFunc("OPTIONS "+ja.cfg.JanusAgentCfg().URL, ja.jA.CORSOptions)
-	ja.server.RegisterHttpFunc(fmt.Sprintf("OPTIONS %s/{sessionID}", ja.cfg.JanusAgentCfg().URL), ja.jA.SessioNKeepalive)
+	ja.server.RegisterHttpFunc(fmt.Sprintf("OPTIONS %s/{sessionID}", ja.cfg.JanusAgentCfg().URL), ja.jA.SessionKeepalive)
 	ja.server.RegisterHttpFunc(fmt.Sprintf("OPTIONS %s/{sessionID}/", ja.cfg.JanusAgentCfg().URL), ja.jA.CORSOptions)
 	ja.server.RegisterHttpFunc(fmt.Sprintf("GET %s/{sessionID}", ja.cfg.JanusAgentCfg().URL), ja.jA.PollSession)
 	ja.server.RegisterHttpFunc(fmt.Sprintf("POST %s/{sessionID}", ja.cfg.JanusAgentCfg().URL), ja.jA.AttachPlugin)

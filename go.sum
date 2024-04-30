@@ -70,6 +70,8 @@ github.com/cgrates/fsock v0.0.0-20240322171959-35309017b3e0 h1:rnSM0tG6Cl8GXjyBQ
 github.com/cgrates/fsock v0.0.0-20240322171959-35309017b3e0/go.mod h1:bKByLko2HF33K+PbiiToAgevrrbr96C+7Pp3HGS6oag=
 github.com/cgrates/janusgo v0.0.0-20240428171703-4a62a727d30d h1:/+5MxHHJPGA/WR1OaH3174hM2yKVqgNWh5U3zUpeH2k=
 github.com/cgrates/janusgo v0.0.0-20240428171703-4a62a727d30d/go.mod h1:XBQDDjrIn+RCS4PDApYjTWwdp51NbqYfUGAYtzSB5ag=
+github.com/cgrates/janusgo v0.0.0-20240430092034-1c3db3c74595 h1:f84+l8198ey/rM8oyYvBTFiUOf9fvQgAAGtMu6tUpLI=
+github.com/cgrates/janusgo v0.0.0-20240430092034-1c3db3c74595/go.mod h1:XBQDDjrIn+RCS4PDApYjTWwdp51NbqYfUGAYtzSB5ag=
 github.com/cgrates/kamevapi v0.0.0-20240307160311-26273f03eedf h1:GbMJzvtwdX1OCEmsqSts/cRCIcIMvo8AYtC2dQExWlg=
 github.com/cgrates/kamevapi v0.0.0-20240307160311-26273f03eedf/go.mod h1:oEq/JbubkOD2pXHvDy4r7519NkxriONisrnVpkCaNJw=
 github.com/cgrates/ltcache v0.0.0-20240411152156-e673692056db h1:JRgzMS5kJ1WxaveoZ1YG/FowUDxFQXD3GjCHR7rH0Gk=
