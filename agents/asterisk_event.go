@@ -201,6 +201,31 @@ func (smaEv *SMAsteriskEvent) ExtraParameters() (extraParams map[string]string) 
 	return
 }
 
+// Will populate CGREvent with required fields restored from the channel variables
+func (smaEv *SMAsteriskEvent) RestoreAndUpdateFields(cgrEv *utils.CGREvent) error {
+	resCGREv := *cgrEv
+	// make sure the channel contains the channelvars field to be recovered
+	channvars, has := smaEv.ariEv["channel"].(map[string]any)["channelvars"].(map[string]any)
+	if !has {
+		return fmt.Errorf("channelvars not found in event <%+v>", smaEv.ariEv["channel"].(map[string]any))
+	}
+
+	// "+" characters are converted to " " white space characters when put in channel variables, cgr_flags dont contain white spaces so we can convert them back to "+" without a problem
+	cgrFlags := strings.ReplaceAll(channvars[utils.CGRFlags].(string), " ", "+")
+	resCGREv.Event[utils.CGRFlags] = cgrFlags
+	resCGREv.Event[utils.RequestType] = channvars[utils.CGRReqType].(string)
+	resCGREv.Event[utils.AnswerTime] = channvars["CDR(answer)"].(string)
+	resCGREv.Event[utils.Usage] = channvars["CDR(billsec)"].(string) + "s"
+	resCGREv.Event[utils.EventName] = SMASessionTerminate
+	resCGREv.Event[utils.DisconnectCause] = smaEv.DisconnectCause()
+
+	for k, v := range smaEv.opts {
+		resCGREv.APIOpts[k] = v
+	}
+	*cgrEv = resCGREv
+	return nil
+}
+
 func (smaEv *SMAsteriskEvent) UpdateCGREvent(cgrEv *utils.CGREvent) error {
 	resCGREv := *cgrEv
 	switch smaEv.EventType() {

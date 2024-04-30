@@ -106,6 +106,9 @@ func (sma *AsteriskAgent) ListenAndServe(stopChan <-chan struct{}) (err error) {
 	}
 	utils.Logger.Info(fmt.Sprintf("<%s> successfully connected to Asterisk at: <%s>",
 		utils.AsteriskAgent, sma.cgrCfg.AsteriskAgentCfg().AsteriskConns[sma.astConnIdx].Address))
+	// make a call asterisk -> sessions_conns to create an active client needed for syncSessions when restoring sessions, since prior clients are lost when engine shuts down
+	var reply string
+	sma.connMgr.Call(sma.ctx, sma.cgrCfg.AsteriskAgentCfg().SessionSConns, utils.SessionSv1Ping, &utils.CGREvent{}, &reply)
 	for {
 		select {
 		case <-stopChan:
@@ -230,6 +233,15 @@ func (sma *AsteriskAgent) handleStasisStart(ev *SMAsteriskEvent) {
 			}
 		}
 	}
+	// set cached fields as variables to the channel,
+	// to be retrieved if engine shuts down while session is active
+	for key, val := range ev.cachedFields {
+		if key == utils.CGRReqType || key == utils.CGRFlags || key == utils.CGRRoutes {
+			if !sma.setChannelVar(ev.ChannelID(), key, val) {
+				return
+			}
+		}
+	}
 	// Exit channel from stasis
 	if _, err := sma.astConn.Call(
 		aringo.HTTP_POST,
@@ -293,18 +305,50 @@ func (sma *AsteriskAgent) handleChannelDestroyed(ev *SMAsteriskEvent) {
 	sma.evCacheMux.RLock()
 	cgrEvDisp, hasIt := sma.eventsCache[chID]
 	sma.evCacheMux.RUnlock()
-	if !hasIt { // Not handled by us
-		return
+	if !hasIt {
+		var reply []*sessions.ExternalSession
+		if err := sma.connMgr.Call(sma.ctx, sma.cgrCfg.AsteriskAgentCfg().SessionSConns, utils.SessionSv1GetActiveSessions, &utils.SessionFilter{}, &reply); err != nil && err.Error() != utils.ErrNotFound.Error() {
+			utils.Logger.Warning(fmt.Sprintf("<AsteriskAgent> Error getting active sessions: <%v>", err))
+			return
+		}
+		var hasChID bool             // return if ChannelID is not found as OriginID in active sessions
+		for _, sess := range reply { // make sure the asterisk session has a correlating active cgrates session
+			if sess.OriginID == chID {
+				// convert received event to CGREvent
+				var err error
+				cgrEvDisp, err = ev.AsCGREvent(sma.cgrCfg.GeneralCfg().DefaultTimezone)
+				if err != nil {
+					utils.Logger.Warning(fmt.Sprintf("<AsteriskAgent> Error converting Asterisk event to CGREvent: <%v>", err))
+					return
+				}
+				// Populate event with needed fields recovered from channel variables
+				sma.evCacheMux.Lock()
+				err = ev.RestoreAndUpdateFields(cgrEvDisp)
+				sma.evCacheMux.Unlock()
+				if err != nil {
+					utils.Logger.Warning(
+						fmt.Sprintf("<%s> error: %s when attempting to destroy session for channelID: %s",
+							utils.AsteriskAgent, err.Error(), chID))
+					return
+				}
+				hasChID = true
+			}
+		}
+		if !hasChID { // Not handled by us
+			return
+		}
 	}
-	sma.evCacheMux.Lock()
-	delete(sma.eventsCache, chID)       // delete the event from cache as we do not need to keep it here forever
-	err := ev.UpdateCGREvent(cgrEvDisp) // Updates the event directly in the cache
-	sma.evCacheMux.Unlock()
-	if err != nil {
-		utils.Logger.Warning(
-			fmt.Sprintf("<%s> error: %s when attempting to destroy session for channelID: %s",
-				utils.AsteriskAgent, err.Error(), chID))
-		return
+	if hasIt {
+		sma.evCacheMux.Lock()
+		delete(sma.eventsCache, chID)       // delete the event from cache as we do not need to keep it here forever
+		err := ev.UpdateCGREvent(cgrEvDisp) // Updates the event directly in the cache
+		sma.evCacheMux.Unlock()
+		if err != nil {
+			utils.Logger.Warning(
+				fmt.Sprintf("<%s> error: %s when attempting to destroy session for channelID: %s",
+					utils.AsteriskAgent, err.Error(), chID))
+			return
+		}
 	}
 	// populate terminate session args
 	tsArgs := ev.V1TerminateSessionArgs(*cgrEvDisp)
@@ -313,7 +357,6 @@ func (sma *AsteriskAgent) handleChannelDestroyed(ev *SMAsteriskEvent) {
 			utils.AsteriskAgent, chID))
 		return
 	}
-
 	var reply string
 	if err := sma.connMgr.Call(sma.ctx, sma.cgrCfg.AsteriskAgentCfg().SessionSConns,
 		utils.SessionSv1TerminateSession,
@@ -329,7 +372,6 @@ func (sma *AsteriskAgent) handleChannelDestroyed(ev *SMAsteriskEvent) {
 				utils.AsteriskAgent, err.Error(), chID))
 		}
 	}
-
 }
 
 // Call implements birpc.ClientConnector interface
