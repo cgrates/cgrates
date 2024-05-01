@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<diameter>
+	<application id="3" type="acct" name="Base Accounting">
+		<avp name="Sip-Method" code="204" must="-" may="M" must-not="V" may-encrypt="N">
+			<data type="Enumerated">
+				<item code="0" name="Undefined" />
+				<item code="1" name="Invite" />
+				<item code="2" name="Cancel" />
+				<item code="8" name="Bye" />
+				<item code="16" name="Info" />
+				<item code="32" name="Options" />
+				<item code="64" name="Update" />
+				<item code="128" name="Register" />
+				<item code="256" name="Message" />
+				<item code="512" name="Subscribe" />
+				<item code="1024" name="Notify" />
+				<item code="4096" name="Refer" />
+				<item code="8192" name="Other" />
+			</data>
+		</avp>
+		<avp name="Sip-Response-Code" code="205" must="-" may="M" must-not="V" may-encrypt="N">
+			<data type="Unsigned32" />
+		</avp>
+		<avp name="Sip-From-Tag" code="206" must="-" may="M" must-not="V" may-encrypt="N">
+			<data type="UTF8String" />
+		</avp>
+		<avp name="Sip-To-Tag" code="207" must="-" may="M" must-not="V" may-encrypt="N">
+			<data type="UTF8String" />
+		</avp>
+		<avp name="Sip-Uri-User" code="208" must="-" may="M" must-not="V" may-encrypt="N">
+			<data type="UTF8String" />
+		</avp>
+		<avp name="Sip-Uri-Host" code="209" must="-" may="M" must-not="V" may-encrypt="N">
+			<data type="UTF8String" />
+		</avp>
+		<avp name="Sip-Group" code="211" must="-" may="M" must-not="V" may-encrypt="N">
+			<data type="UTF8String" />
+		</avp>
+		<avp name="Sip-Rpid" code="213" must="-" may="M" must-not="V" may-encrypt="N">
+			<data type="UTF8String" />
+		</avp>
+		<avp name="SIP-AVP" code="225" must="-" may="M" must-not="V" may-encrypt="N">
+			<data type="UTF8String" />
+		</avp>
+		<avp name="Sip-Call-Duration" code="227" must="-" may="M" must-not="V" may-encrypt="N">
+			<data type="Unsigned32" />
+		</avp>
+		<avp name="Sip-Call-Setuptime" code="228" must="-" may="M" must-not="V" may-encrypt="N">
+			<data type="Unsigned32" />
+		</avp>
+		<avp name="Sip-Call-Created" code="229" must="-" may="M" must-not="V" may-encrypt="N">
+			<data type="Unsigned32" />
+		</avp>
+		<avp name="Sip-Call-MSDuration" code="230" must="-" may="M" must-not="V" may-encrypt="N">
+			<data type="Unsigned32" />
+		</avp>
+		<avp name="Transaction-Id" code="231" must="-" may="M" must-not="V" may-encrypt="N">
+			<data type="UTF8String" />
+		</avp>
+
+		<avp name="Acct-Status-Type" code="40" must="-" may="M" must-not="V" may-encrypt="N">
+			<data type="Enumerated">
+				<item code="1" name="Start" />
+				<item code="2" name="Stop" />
+				<item code="3" name="Interim-Update" />
+				<item code="3" name="Alive" />
+				<item code="7" name="Accounting-On" />
+				<item code="8" name="Accounting-Off" />
+				<item code="15" name="Failed" />
+			</data>
+		</avp>
+		<avp name="Service-Type" code="6" must="-" may="M" must-not="V" may-encrypt="N">
+			<data type="Enumerated">
+				<item code="10" name="Call-Check" />
+				<item code="12" name="Group-Check" />
+				<item code="15" name="Sip-Session" />
+				<item code="21" name="Sip-Verify-Destination" />
+				<item code="22" name="Sip-Verify-Source" />
+				<item code="30" name="SIP-Caller-AVPs" />
+				<item code="31" name="SIP-Callee-AVPs" />
+			</data>
+		</avp>
+		<avp name="Cisco-AVPair" code="231" must="-" may="M" must-not="V" may-encrypt="N" vendor-id="9">
+			<data type="UTF8String" />
+		</avp>
+	</application>
+	<application id="6" type="auth" name="Session Initiation Protocol (SIP) Application">
+		<avp name="Digest-Response" code="103" must="-" may="M" must-not="V" may-encrypt="N">
+			<data type="UTF8String" />
+		</avp>
+		<avp name="Digest-Realm" code="104" must="-" may="M" must-not="V" may-encrypt="N">
+			<data type="UTF8String" />
+		</avp>
+		<avp name="Digest-Nonce" code="105" must="-" may="M" must-not="V" may-encrypt="N">
+			<data type="UTF8String" />
+		</avp>
+		<avp name="Digest-Response-Auth" code="106" must="-" may="M" must-not="V" may-encrypt="N">
+			<data type="UTF8String" />
+		</avp>
+		<avp name="Digest-Nextnonce" code="107" must="-" may="M" must-not="V" may-encrypt="N">
+			<data type="UTF8String" />
+		</avp>
+		<avp name="Digest-Method" code="108" must="-" may="M" must-not="V" may-encrypt="N">
+			<data type="UTF8String" />
+		</avp>
+		<avp name="Digest-URI" code="109" must="-" may="M" must-not="V" may-encrypt="N">
+			<data type="UTF8String" />
+		</avp>
+		<avp name="Digest-QoP" code="110" must="-" may="M" must-not="V" may-encrypt="N">
+			<data type="UTF8String" />
+		</avp>
+		<avp name="Digest-Algorithm" code="111" must="-" may="M" must-not="V" may-encrypt="N">
+			<data type="UTF8String" />
+		</avp>
+		<avp name="Digest-Entity-Body-Hash" code="112" must="-" may="M" must-not="V" may-encrypt="N">
+			<data type="UTF8String" />
+		</avp>
+		<avp name="Digest-Digest-CNonce" code="113" must="-" may="M" must-not="V" may-encrypt="N">
+			<data type="UTF8String" />
+		</avp>
+		<avp name="Digest-Nonce-Count" code="114" must="-" may="M" must-not="V" may-encrypt="N">
+			<data type="UTF8String" />
+		</avp>
+		<avp name="Digest-Username" code="115" must="-" may="M" must-not="V" may-encrypt="N">
+			<data type="UTF8String" />
+		</avp>
+		<avp name="Digest-Opaque" code="116" must="-" may="M" must-not="V" may-encrypt="N">
+			<data type="UTF8String" />
+		</avp>
+		<avp name="Digest-Auth-Param" code="117" must="-" may="M" must-not="V" may-encrypt="N">
+			<data type="UTF8String" />
+		</avp>
+		<avp name="Digest-AKA-Auts" code="118" must="-" may="M" must-not="V" may-encrypt="N">
+			<data type="UTF8String" />
+		</avp>
+		<avp name="Digest-Domain" code="119" must="-" may="M" must-not="V" may-encrypt="N">
+			<data type="UTF8String" />
+		</avp>
+		<avp name="Digest-Stale" code="120" must="-" may="M" must-not="V" may-encrypt="N">
+			<data type="UTF8String" />
+		</avp>
+		<avp name="Digest-HA1" code="121" must="-" may="M" must-not="V" may-encrypt="N">
+			<data type="UTF8String" />
+		</avp>
+	</application>
+</diameter>
