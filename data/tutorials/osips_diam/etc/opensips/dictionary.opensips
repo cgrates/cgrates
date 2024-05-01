@@ -1,0 +1,94 @@
+APPLICATION 4 Charging Control
+
+ATTRIBUTE Result-Code               268     unsigned32
+ATTRIBUTE Value-Digits              447     integer64
+ATTRIBUTE Exponent                  429     integer32
+ATTRIBUTE Unit-Value                445     grouped
+{
+    Value-Digits | REQUIRED | 1
+    Exponent | REQUIRED | 1
+}
+ATTRIBUTE Currency-Code             425     unsigned32
+ATTRIBUTE CC-Money                  413     grouped
+{
+    Unit-Value | REQUIRED | 1
+    Currency-Code | REQUIRED | 1
+}
+ATTRIBUTE CC-Request-Number         415     unsigned32
+ATTRIBUTE CC-Request-Type           416     unsigned32
+ATTRIBUTE CC-Time                   420     unsigned32
+ATTRIBUTE Granted-Service-Unit      431     grouped
+{
+    CC-Time | OPTIONAL | 1
+    CC-Money | OPTIONAL | 1
+}
+ATTRIBUTE Requested-Service-Unit    437     grouped
+{
+    CC-Time | OPTIONAL | 1
+    CC-Money | OPTIONAL | 1
+}
+ATTRIBUTE Subscription-Id-Type      450     unsigned32  
+ATTRIBUTE Subscription-Id-Data      444     string
+ATTRIBUTE Subscription-Id           443     grouped
+{
+    Subscription-Id-Type | REQUIRED | 1
+    Subscription-Id-Data | REQUIRED | 1
+}
+ATTRIBUTE Used-Service-Unit         446     grouped
+{
+    CC-Time | OPTIONAL | 1
+    CC-Money | OPTIONAL | 1
+}
+ATTRIBUTE Service-Context-Id        461     string
+
+VENDOR 10415 TGPP
+ATTRIBUTE Calling-Party-Address     831     string      10415
+ATTRIBUTE Called-Party-Address      832     string      10415
+ATTRIBUTE SIP-Request-Timestamp     2301    unsigned32  10415           
+ATTRIBUTE SIP-Response-Timestamp    834     string      10415          
+ATTRIBUTE Time-Stamps               833     grouped     10415
+{
+    SIP-Request-Timestamp | OPTIONAL | 1
+    SIP-Response-Timestamp | OPTIONAL | 1
+}
+ATTRIBUTE IMS-Information           876     grouped     10415
+{
+    Calling-Party-Address | OPTIONAL | 1
+    Called-Party-Address | OPTIONAL | 1
+    Time-Stamps | OPTIONAL | 1
+}
+ATTRIBUTE Service-Information       873     grouped     10415
+{
+    IMS-Information | OPTIONAL | 1
+}
+
+REQUEST 272 Credit-Control-Request
+{
+	Session-Id | REQUIRED | 1
+    Origin-Host | REQUIRED | 1
+    Origin-Realm | REQUIRED | 1
+    Destination-Realm | REQUIRED | 1
+    Auth-Application-Id | REQUIRED | 1
+    Service-Context-Id | REQUIRED | 1
+    CC-Request-Type | REQUIRED | 1
+    CC-Request-Number | REQUIRED | 1
+    Event-Timestamp | OPTIONAL | 1
+    User-Name | OPTIONAL | 1
+    Subscription-Id | OPTIONAL | 1
+    Requested-Service-Unit | OPTIONAL | 1
+    Used-Service-Unit | OPTIONAL | 1
+    Service-Information | OPTIONAL | 1
+    Termination-Cause | OPTIONAL | 1
+}
+
+ANSWER 272 Credit-Control-Answer
+{
+    Result-Code | OPTIONAL | 1
+	Session-Id | OPTIONAL | 1
+    Origin-Host | OPTIONAL | 1
+    Origin-Realm | OPTIONAL | 1
+    CC-Request-Type | OPTIONAL | 1
+    CC-Request-Number | OPTIONAL | 1
+    Granted-Service-Unit | OPTIONAL | 1
+    Route-Record | OPTIONAL | 1
+}

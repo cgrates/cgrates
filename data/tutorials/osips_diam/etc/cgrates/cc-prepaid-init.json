@@ -1,0 +1,126 @@
+{
+
+"diameter_agent": {
+    "request_processors": [
+        {
+            "id": "SessionInit",
+            "filters": [
+                "*string:~*vars.*cmd:CCR",
+                "*string:~*req.CC-Request-Type:2",
+                "*prefix:~*req.Service-Context-Id:voice"
+            ],
+            "flags": ["*initiate", "*accounts", "*log"],
+            "request_fields":[
+                {
+                    "tag": "ToR",
+                    "path": "*cgreq.ToR",
+                    "type": "*constant",
+                    "value": "*voice"
+                },
+                {
+                    "tag": "OriginID",
+                    "path": "*cgreq.OriginID",
+                    "type": "*variable", 
+                    "value": "~*req.Session-Id",
+                    "mandatory": true
+                },
+                {
+                    "tag": "OriginHost",
+                    "path": "*cgreq.OriginHost",
+                    "type": "*variable",
+                    "value": "~*req.Origin-Host", 
+                    "mandatory": true
+                },
+                {
+                    "tag": "RequestType",
+                    "path": "*cgreq.RequestType",
+                    "type": "*constant",
+                    "value": "*prepaid",
+                    "mandatory": true
+                },
+                {
+                    "tag": "Account",
+                    "path": "*cgreq.Account",
+                    "type": "*variable",
+                    "value": "~*req.Service-Information.IMS-Information.Calling-Party-Address",
+                    "mandatory": true
+                },
+                {
+                    "tag": "Destination",
+                    "path": "*cgreq.Destination",
+                    "type": "*variable", 
+                    "value": "~*req.Service-Information.IMS-Information.Called-Party-Address",
+                    "mandatory": true
+                },
+                {
+                    "tag": "AnswerTime",
+                    "path": "*cgreq.AnswerTime",
+                    "type": "*variable", 
+                    "value": "~*req.Event-Timestamp",
+                    "mandatory": true
+                },
+                {
+                    "tag": "SubscriberID",
+                    "path": "*cgreq.SubscriberId",
+                    "type": "*variable", 
+                    "value": "~*req.Subscription-Id.Subscription-Id-Data",
+                    "mandatory": true
+                }
+            ],
+            "reply_fields":[
+                {
+                    "tag": "Session-Id",
+                    "path": "*rep.Session-Id",
+                    "type": "*variable",
+                    "value": "~*req.Session-Id"
+                },
+                {
+                    "tag": "Origin-Host",
+                    "path": "*rep.Origin-Host",
+                    "type": "*variable",
+                    "value": "~*req.Origin-Host"
+                },
+                {
+                    "tag": "Origin-Realm",
+                    "path": "*rep.Origin-Realm",
+                    "type": "*variable",
+                    "value": "~*req.Origin-Realm"
+                },
+                {
+                    "tag": "Auth-Application-Id",
+                    "path": "*rep.Auth-Application-Id",
+                    "type": "*variable",
+                    "value": "~*req.Auth-Application-Id"
+                },
+                {
+                    "tag": "CC-Request-Type",
+                    "path": "*rep.CC-Request-Type",
+                    "type": "*variable",
+                    "value": "~*req.CC-Request-Type"
+                },
+                {
+                    "tag": "CC-Request-Number",
+                    "path": "*rep.CC-Request-Number",
+                    "type": "*variable",
+                    "value": "~*req.CC-Request-Number"
+                },
+                {
+                    "tag": "ResultCode",
+                    "filters": ["*notempty:~*cgrep.Error:"], 
+                    "path": "*rep.Result-Code",
+                    "type": "*constant",
+                    "value": "5030",
+                    "blocker": true
+                },
+                {
+                    "tag": "ResultCode",
+                    "path": "*rep.Result-Code",
+                    "type": "*constant",
+                    "value": "2001"
+                }
+            ]
+        }
+    ]
+}
+
+}

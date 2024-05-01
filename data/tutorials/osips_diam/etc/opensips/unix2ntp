@@ -1,0 +1,10 @@
+#!/bin/bash
+
+# To be used inside opensips.cfg to convert unix time
+# to 32bit before sending it inside a diameter request 
+# payload as Event-Timestamp.
+
+read unix_time
+ntp_offset=2208988800
+ntp_time=$((unix_time + ntp_offset))
+printf "%08x" "$ntp_time" | xxd -r -p

@@ -1,0 +1,75 @@
+{
+
+"general": {
+    "log_level": 7
+},
+
+"listen": {
+    "rpc_json": ":2012",
+    "rpc_gob": ":2013",
+    "http": ":2080"
+},
+
+
+"stor_db": {
+    "db_password": "CGRateS.org"
+},
+
+"schedulers": {
+    "enabled": true
+},
+
+"rals": {
+    "enabled": true
+},
+
+"cdrs": {
+    "enabled": true,
+    "chargers_conns": ["*localhost"],
+    "rals_conns": ["*localhost"],
+    "sessions_cost_retries": 5
+},
+
+"chargers": {
+    "enabled": true,
+    "attributes_conns": ["*localhost"]
+},
+
+"sessions": {
+    "enabled": true,
+    "listen_bijson": "127.0.0.1:2014",
+    "chargers_conns": ["*localhost"],
+    "rals_conns": ["*localhost"],
+    "cdrs_conns": ["*localhost"],
+    "attributes_conns": ["*localhost"],
+    "debit_interval": "5s"
+},
+
+"attributes": {
+    "enabled": true,
+    "string_indexed_fields": ["*req.Account"]	
+},
+
+"apiers": {
+    "enabled": true,
+    "scheduler_conns": ["*localhost"]
+}, 
+
+"diameter_agent": {
+	"enabled": true,										
+	"listen": "192.168.122.42:3868",								
+	"listen_net": "tcp",									
+	"dictionaries_path": "/usr/share/cgrates/diameter/dict/",
+	"sessions_conns": ["*bijson_localhost"],
+	"origin_host": "server.diameter.test",
+	"origin_realm": "diameter.test",							
+	"vendor_id": 0,											
+	"product_name": "CGRateS",								
+	"concurrent_requests": -1,
+	"synced_conn_requests": false,							
+	"asr_template": "*asr",
+	"rar_template": "*rar",
+	"forced_disconnect": "*asr"
+}
+
+}
