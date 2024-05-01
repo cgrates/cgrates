@@ -1,0 +1,154 @@
+{
+
+"diameter_agent": {
+    "request_processors": [
+        {
+            "id": "AccountingStart",
+            "filters": ["*eq:~*req.Accounting-Record-Type:1"],
+            "flags": ["*initiate", "*accounts", "*log"],
+            "request_fields":[
+                {"tag": "Category", "path": "*cgreq.Category", "type": "*constant", "value": "call"},
+                {"tag": "RequestType", "path": "*cgreq.RequestType", "type": "*constant",
+                "value": "*prepaid", "mandatory": true},
+                {"tag": "OriginID", "path": "*cgreq.OriginID", "type": "*composed",
+                "value": "~*req.Session-Id", "mandatory": true},
+                {"tag": "OriginHost", "path": "*cgreq.OriginHost", "type": "*variable",
+                "value": "~*req.Origin-Host", "mandatory": true},
+                {"tag": "Account", "path": "*cgreq.Account", "type": "*variable",
+                "value": "~*req.User-Name", "mandatory": true},
+                {"tag": "Subject", "path": "*cgreq.Subject", "type": "*variable",
+                "value": "~*req.User-Name", "mandatory": true},
+                {"tag": "Destination", "path": "*cgreq.Destination", "type": "*variable",
+                "value": "~*req.SIP-AVP", "mandatory": true},
+                {"tag": "SetupTime", "path": "*cgreq.SetupTime", "type": "*variable",
+                "value": "~*req.Sip-Call-Setuptime", "mandatory": true},
+                {"tag": "AnswerTime", "path": "*cgreq.AnswerTime", "type": "*variable",
+                "value": "~*req.Sip-Call-Created", "mandatory": true},
+                {"tag": "RemoteAddr" , "path": "*cgreq.RemoteAddr", "type": "*variable",
+                "value": "~*vars.RemoteHost:s/(.*):\\d+/${1}/"}
+            ],
+            "reply_fields":[
+                {
+                    "tag": "Session-Id",
+                    "path": "*rep.Session-Id",
+                    "type": "*variable",
+                    "value": "~*req.Session-Id"
+                },
+                {
+                    "tag": "Origin-Host",
+                    "path": "*rep.Origin-Host",
+                    "type": "*variable",
+                    "value": "~*req.Origin-Host"
+                },
+                {
+                    "tag": "Origin-Realm",
+                    "path": "*rep.Origin-Realm",
+                    "type": "*variable",
+                    "value": "~*req.Origin-Realm"
+                },
+                {
+                    "tag": "Accounting-Record-Type",
+                    "path": "*rep.Accounting-Record-Type",
+                    "type": "*variable",
+                    "value": "~*req.Accounting-Record-Type"
+                },
+                {
+                    "tag": "Accounting-Record-Number",
+                    "path": "*rep.Accounting-Record-Number",
+                    "type": "*variable",
+                    "value": "~*req.Accounting-Record-Number"
+                },
+                {
+                    "tag": "ResultCode",
+                    "filters": ["*notempty:~*cgrep.Error:"], 
+                    "path": "*rep.Result-Code",
+                    "type": "*constant",
+                    "value": "5030",
+                    "blocker": true
+                },
+                {
+                    "tag": "ResultCode",
+                    "path": "*rep.Result-Code",
+                    "type": "*constant",
+                    "value": "2001"
+                }
+            ]
+        },
+        {
+            "id": "AccountingStop",
+            "filters": ["*string:~*eq.Accounting-Record-Type:4"],
+            "flags": ["*terminate", "*accounts", "*cdrs", "*log"],
+            "request_fields":[
+                {"tag": "Category", "path": "*cgreq.Category", "type": "*constant", "value": "call"},
+                {"tag": "RequestType", "path": "*cgreq.RequestType", "type": "*constant",
+                "value": "*prepaid", "mandatory": true},
+                {"tag": "OriginID", "path": "*cgreq.OriginID", "type": "*variable",
+                "value": "~*req.Session-Id", "mandatory": true},
+                {"tag": "OriginHost", "path": "*cgreq.OriginHost", "type": "*variable",
+                "value": "~*req.Origin-Host", "mandatory": true},
+                {"tag": "Account", "path": "*cgreq.Account", "type": "*variable",
+                "value": "~*req.User-Name", "mandatory": true},
+                {"tag": "Subject", "path": "*cgreq.Subject", "type": "*variable",
+                "value": "~*req.User-Name", "mandatory": true},
+                {"tag": "Destination", "path": "*cgreq.Destination", "type": "*variable",
+                "value": "~*req.Sip-To-Tag", "mandatory": true},
+                {"tag": "SetupTime", "path": "*cgreq.SetupTime", "type": "*variable",
+                "value": "~*req.Sip-Call-Setuptime", "mandatory": true},
+                {"tag": "AnswerTime", "path": "*cgreq.AnswerTime", "type": "*variable",
+                "value": "~*req.Sip-Call-Created", "mandatory": true},
+                {"tag": "Usage", "path": "*cgreq.Usage", "type": "*variable",
+                "value": "~*req.Sip-Call-Duration", "mandatory": true},
+                {"tag": "RemoteAddr" , "path": "*cgreq.RemoteAddr", "type": "*variable",
+                "value": "~*vars.RemoteHost:s/(.*):\\d+/${1}/"}
+            ],
+            "reply_fields":[
+                {
+                    "tag": "Session-Id",
+                    "path": "*rep.Session-Id",
+                    "type": "*variable",
+                    "value": "~*req.Session-Id"
+                },
+                {
+                    "tag": "Origin-Host",
+                    "path": "*rep.Origin-Host",
+                    "type": "*variable",
+                    "value": "~*req.Origin-Host"
+                },
+                {
+                    "tag": "Origin-Realm",
+                    "path": "*rep.Origin-Realm",
+                    "type": "*variable",
+                    "value": "~*req.Origin-Realm"
+                },
+                {
+                    "tag": "Accounting-Record-Type",
+                    "path": "*rep.Accounting-Record-Type",
+                    "type": "*variable",
+                    "value": "~*req.Accounting-Record-Type"
+                },
+                {
+                    "tag": "Accounting-Record-Number",
+                    "path": "*rep.Accounting-Record-Number",
+                    "type": "*variable",
+                    "value": "~*req.Accounting-Record-Number"
+                },
+                {
+                    "tag": "ResultCode",
+                    "filters": ["*notempty:~*cgrep.Error:"], 
+                    "path": "*rep.Result-Code",
+                    "type": "*constant",
+                    "value": "5030",
+                    "blocker": true
+                },
+                {
+                    "tag": "ResultCode",
+                    "path": "*rep.Result-Code",
+                    "type": "*constant",
+                    "value": "2001"
+                }
+            ]
+        }
+    ]
+}
+
+}
