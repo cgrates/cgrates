@@ -1,0 +1,82 @@
+---
+- name: Add DNS entries to /etc/hosts
+  become: true
+  ansible.builtin.lineinfile:
+    path: /etc/hosts
+    line: '{{ item.ip }} {{ item.hostname }}'
+    regexp: '^.*{{ item.hostname }}.*$'
+    state: present
+  loop: '{{ fd_dns_entries }}'
+
+- name: Check if freeDiameter is installed and get version
+  ansible.builtin.shell:
+    cmd: freeDiameterd --v | grep 'freeDiameter, version' | awk '{print $3}'
+  register: installed_fd_version
+  ignore_errors: true
+  changed_when: false
+
+- name: Install dependencies
+  become: true
+  apt:
+    name: '{{ freediameter_dependencies }}'
+    state: present
+    update_cache: yes
+  when: installed_fd_version.stdout != freediameter_version
+
+- name: Install freeDiameter
+  become: true
+  apt:
+    name: freediameter
+    state: present
+    update_cache: yes
+  when: installed_fd_version.stdout != freediameter_version
+
+- name: Ensure the TLS certificates directory exists
+  become: true
+  ansible.builtin.file:
+    path: '{{ fd_tls_cert_path }}'
+    state: directory
+    owner: root
+    group: root
+    mode: '0755'
+  when: installed_fd_version.stdout != freediameter_version and fd_tls_cert_path != ""
+
+- name: Clone freeDiameter specific directory for TLS setup
+  ansible.builtin.git:
+    repo: 'https://github.com/freeDiameter/freeDiameter.git'
+    dest: '/tmp/freeDiameter'
+    depth: 1
+  when: installed_fd_version.stdout != freediameter_version and fd_tls_cert_path != ""
+
+- name: Generate TLS certificates
+  ansible.builtin.shell:
+    chdir: '/tmp/freeDiameter/contrib/PKI/ca_script2'
+    cmd: |
+      make init topca=my_diameter_ca
+      make newcert name="*.diameter.test" ca=my_diameter_ca
+  when: installed_fd_version.stdout != freediameter_version and fd_tls_cert_path != ""
+
+- name: Move TLS certificates to the specified directory
+  become: true
+  ansible.builtin.copy:
+    src: '/tmp/freeDiameter/contrib/PKI/ca_script2/ca_data/my_diameter_ca/clients/*.diameter.test/'
+    dest: '{{ fd_tls_cert_path }}/'
+    owner: root
+    group: root
+    remote_src: yes
+    mode: '0755'
+  when: installed_fd_version.stdout != freediameter_version and fd_tls_cert_path != ""
+
+- name: Template freeDiameter configuration file
+  become: true
+  ansible.builtin.template:
+    src: 'freeDiameter.conf.j2'
+    dest: '{{ fd_cfg_path }}/{{ fd_cfg_filename }}' 
+  when: fd_tls_cert_path != ""
+
+- name: Clean up freeDiameter clone
+  become: true
+  ansible.builtin.file:
+    path: '/tmp/freeDiameter'
+    state: absent
+  when: fd_tls_cert_path != ""
