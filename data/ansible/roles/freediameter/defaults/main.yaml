@@ -1,0 +1,16 @@
+---
+freediameter_version: '1.2.1' # only used to make role idempotent
+fd_cfg_path: '/etc/freeDiameter'
+fd_cfg_filename: 'freeDiameter.conf'
+fd_tls_cert_path: '{{ fd_cfg_path }}/tls' # leave empty to not generate certs
+fd_realm: 'diameter.test'
+fd_client_identity: 'client.{{ fd_realm }}'
+fd_server_identity: 'server.{{ fd_realm }}'
+fd_dns_entries: [] # add entries to /etc/hosts
+  # - ip: 192.168.122.1
+  #   hostname: client.diameter.test
+  # - ip: 192.168.122.1
+  #   hostname: server.diameter.test
+freediameter_dependencies:
+  - git
+  - make

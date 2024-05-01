@@ -1,0 +1,13 @@
+Identity = "{{ fd_client_identity }}";
+Realm = "{{ fd_realm }}";
+Port = 3866;
+SecPort = 3867;
+No_SCTP;
+
+TLS_Cred = "{{ fd_tls_cert_path }}/cert.pem",
+"{{ fd_tls_cert_path }}/privkey.pem";
+TLS_CA = "{{ fd_tls_cert_path }}/certchain.pem";
+
+ConnectPeer = "{{ fd_server_identity }}" {
+  No_TLS;
+};
