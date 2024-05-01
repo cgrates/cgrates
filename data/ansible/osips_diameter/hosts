@@ -1,0 +1,5 @@
+# Ansible Inventory File
+
+[all]
+example_host ansible_host=192.168.122.42 ansible_port=50026 ansible_user=example_user user=example_user
+
