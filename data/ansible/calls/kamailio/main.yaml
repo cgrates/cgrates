@@ -1,18 +1,12 @@
 ---
 - hosts: all
-  tasks:
-    - name: Install Kamailio
-      import_role:
-        name: ../../roles/kamailio
+  roles:
+    - ../../roles/kamailio
 
-    - name: Install Go
-      import_role:
-        name: ../../roles/go
+    - ../../roles/go
 
-    - name: Install and configure CGRateS
-      import_role:
-        name: ../../roles/cgrates
+    - ../../roles/cgrates
 
-    - name: Install PJSUA
-      import_role:
-        name: ../../roles/pjsua
+    - role: ../../roles/pjsua
+      vars:
+        pjsua_version: '2.9'
