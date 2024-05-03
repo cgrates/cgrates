@@ -79,6 +79,8 @@ func (t *Threshold) ProcessEvent(args *ArgsProcessEvent, dm *DataManager) (err e
 	if t.tPrfl.MaxHits != -1 && t.Hits > t.tPrfl.MaxHits {
 		return
 	}
+
+	t.Snooze = time.Now().Add(t.tPrfl.MinSleep)
 	acnt, _ := args.FieldAsString(utils.Account)
 	var acntID string
 	if acnt != "" {
@@ -327,7 +329,7 @@ func (tS *ThresholdService) processEvent(args *ArgsProcessEvent) (thresholdsIDs 
 			}
 			continue
 		}
-		t.Snooze = time.Now().Add(t.tPrfl.MinSleep)
+
 		// recurrent threshold
 		if tS.cgrcfg.ThresholdSCfg().StoreInterval == -1 {
 			*t.dirty = true
