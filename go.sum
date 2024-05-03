@@ -72,6 +72,8 @@ github.com/cgrates/janusgo v0.0.0-20240428171703-4a62a727d30d h1:/+5MxHHJPGA/WR1
 github.com/cgrates/janusgo v0.0.0-20240428171703-4a62a727d30d/go.mod h1:XBQDDjrIn+RCS4PDApYjTWwdp51NbqYfUGAYtzSB5ag=
 github.com/cgrates/janusgo v0.0.0-20240430092034-1c3db3c74595 h1:f84+l8198ey/rM8oyYvBTFiUOf9fvQgAAGtMu6tUpLI=
 github.com/cgrates/janusgo v0.0.0-20240430092034-1c3db3c74595/go.mod h1:XBQDDjrIn+RCS4PDApYjTWwdp51NbqYfUGAYtzSB5ag=
+github.com/cgrates/janusgo v0.0.0-20240503152118-188a408d7e73 h1:7AYhvpegrSkY9tLGCQsZgNl8yTjL5CaQOTr3/kYlPek=
+github.com/cgrates/janusgo v0.0.0-20240503152118-188a408d7e73/go.mod h1:XBQDDjrIn+RCS4PDApYjTWwdp51NbqYfUGAYtzSB5ag=
 github.com/cgrates/kamevapi v0.0.0-20240307160311-26273f03eedf h1:GbMJzvtwdX1OCEmsqSts/cRCIcIMvo8AYtC2dQExWlg=
 github.com/cgrates/kamevapi v0.0.0-20240307160311-26273f03eedf/go.mod h1:oEq/JbubkOD2pXHvDy4r7519NkxriONisrnVpkCaNJw=
 github.com/cgrates/ltcache v0.0.0-20240411152156-e673692056db h1:JRgzMS5kJ1WxaveoZ1YG/FowUDxFQXD3GjCHR7rH0Gk=
