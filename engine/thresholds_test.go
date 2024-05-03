@@ -952,3 +952,36 @@ func TestThresholdsV1GetThresholdsForEvent(t *testing.T) {
 		}
 	}
 }
+
+func TestThresholdSnoozeSleep(t *testing.T) {
+
+	th := &Threshold{
+		Tenant: "cgrates.org",
+		ID:     "th_counter",
+		tPrfl: &ThresholdProfile{
+			MaxHits:  -1,
+			MinHits:  1,
+			Blocker:  true,
+			Weight:   30,
+			MinSleep: 3 * time.Second,
+			Async:    true,
+		},
+	}
+
+	cfg, _ := config.NewDefaultCGRConfig()
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+	var snoozeTime time.Time
+	for i, arg := range argsGetThresholds {
+		th.ProcessEvent(arg, dm)
+		if i > 0 {
+			if !th.Snooze.Equal(snoozeTime) {
+				t.Error("expecte snooze to not change during sleep time")
+			}
+		} else {
+			snoozeTime = th.Snooze
+		}
+
+	}
+
+}
