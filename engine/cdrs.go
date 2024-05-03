@@ -843,7 +843,7 @@ func (cdrS *CDRServer) V1ProcessEvent(ctx *context.Context, arg *ArgV1ProcessEve
 	if flgs.Has(utils.MetaChargers) {
 		chrgS = flgs.GetBool(utils.MetaChargers)
 	}
-	var ralS bool // activate single rating for the CDR
+	ralS := len(cdrS.cgrCfg.CdrsCfg().RaterConns) != 0
 	if v, has := arg.APIOpts[utils.OptsRALs]; has {
 		if ralS, err = utils.IfaceAsBool(v); err != nil {
 			return
@@ -933,7 +933,7 @@ func (cdrS *CDRServer) V2ProcessEvent(ctx *context.Context, arg *ArgV1ProcessEve
 	if flgs.Has(utils.MetaChargers) {
 		chrgS = flgs.GetBool(utils.MetaChargers)
 	}
-	var ralS bool // activate single rating for the CDR
+	ralS := len(cdrS.cgrCfg.CdrsCfg().RaterConns) != 0
 	if flgs.Has(utils.MetaRALs) {
 		ralS = flgs.GetBool(utils.MetaRALs)
 	}
