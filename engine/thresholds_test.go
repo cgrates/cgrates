@@ -2358,3 +2358,37 @@ func TestThresholdsStoreThresholdCacheSetErr(t *testing.T) {
 
 	utils.Logger.SetLogLevel(0)
 }
+
+func TestThresholdSnoozeSleep(t *testing.T) {
+
+	th := &Threshold{
+		Tenant: "cgrates.org",
+		ID:     "th_counter",
+		tPrfl: &ThresholdProfile{
+			MaxHits:  -1,
+			MinHits:  1,
+			Blocker:  true,
+			Weight:   30,
+			MinSleep: 3 * time.Second,
+			Async:    true,
+		},
+	}
+
+	cfg := config.NewDefaultCGRConfig()
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+	fs := NewFilterS(cfg, nil, dm)
+	var snoozeTime time.Time
+	for i, arg := range testThresholdArgs {
+		th.ProcessEvent(arg, dm, fs)
+		if i > 0 {
+			if !th.Snooze.Equal(snoozeTime) {
+				t.Error("expecte snooze to not change during sleep time")
+			}
+		} else {
+			snoozeTime = th.Snooze
+		}
+
+	}
+
+}
