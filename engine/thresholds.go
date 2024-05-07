@@ -172,14 +172,18 @@ func processEventWithThreshold(ctx *context.Context, connMgr *ConnManager, actio
 
 	var reply string
 	if !t.tPrfl.Async {
-		return connMgr.Call(ctx, actionsConns, utils.ActionSv1ExecuteActions, args, &reply)
-	}
-	go func() {
-		if errExec := connMgr.Call(context.Background(), actionsConns, utils.ActionSv1ExecuteActions,
-			args, &reply); errExec != nil {
-			utils.Logger.Warning(fmt.Sprintf("<ThresholdS> failed executing actions for threshold: %s, error: %s", t.TenantID(), errExec.Error()))
+		if err = connMgr.Call(ctx, actionsConns, utils.ActionSv1ExecuteActions, args, &reply); err != nil {
+			return
 		}
-	}()
+	} else {
+		go func() {
+			if errExec := connMgr.Call(context.Background(), actionsConns, utils.ActionSv1ExecuteActions,
+				args, &reply); errExec != nil {
+				utils.Logger.Warning(fmt.Sprintf("<ThresholdS> failed executing actions for threshold: %s, error: %s", t.TenantID(), errExec.Error()))
+			}
+		}()
+	}
+	t.Snooze = time.Now().Add(t.tPrfl.MinSleep)
 	return
 }
 
@@ -465,7 +469,7 @@ func (tS *ThresholdS) processEvent(ctx *context.Context, tnt string, args *utils
 			}
 			continue
 		}
-		t.Snooze = time.Now().Add(t.tPrfl.MinSleep)
+
 		// recurrent threshold
 		*t.dirty = true // mark it to be saved
 		if tS.cfg.ThresholdSCfg().StoreInterval == -1 {
