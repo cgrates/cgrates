@@ -185,6 +185,7 @@ func (t *Threshold) ProcessEvent(args *utils.CGREvent, dm *DataManager, fltrS *F
 			err = utils.ErrPartiallyExecuted
 		}
 	}
+	t.Snooze = time.Now().Add(t.tPrfl.MinSleep)
 	return
 }
 
@@ -464,7 +465,6 @@ func (tS *ThresholdService) processEvent(tnt string, args *utils.CGREvent) (thre
 			}
 			continue
 		}
-		t.Snooze = time.Now().Add(t.tPrfl.MinSleep)
 		// recurrent threshold
 		*t.dirty = true // mark it to be saved
 		if tS.cgrcfg.ThresholdSCfg().StoreInterval == -1 {
