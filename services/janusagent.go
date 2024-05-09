@@ -68,7 +68,10 @@ func (ja *JanusAgent) Start() (err error) {
 		ja.Unlock()
 		return utils.ErrServiceAlreadyRunning
 	}
-	ja.jA = agents.NewJanusAgent(ja.cfg, ja.connMgr, filterS)
+	ja.jA, err = agents.NewJanusAgent(ja.cfg, ja.connMgr, filterS)
+	if err != nil {
+		return
+	}
 	if err = ja.jA.Connect(); err != nil {
 		return
 	}

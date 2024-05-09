@@ -885,8 +885,10 @@ type JanusAgentJsonCfg struct {
 }
 
 type JanusConnJsonCfg struct {
-	Address *string `json:"address"`
-	Type    *string `json:"type"`
+	Address       *string `json:"address"`
+	Type          *string `json:"type"`
+	AdminAddress  *string `json:"admin_address"`
+	AdminPassword *string `json:"admin_password"`
 }
 
 type ConfigSCfgJson struct {

@@ -53,6 +53,7 @@
 	"cdrs_conns": ["*localhost"],
 	"rals_conns": ["*localhost"],
 	"chargers_conns": ["*internal"],
+        "channel_sync_interval": "15s"
 },
 
 
@@ -60,14 +61,17 @@
 	"enabled": true,
 	"scheduler_conns": ["*internal"],
 },
-"janus_agent":{
-"enabled":true,
-"url":"/janus",
-"janus_conns":[
-	{
-"address":"localhost:8188"
-	}
-]
+
+
+"janus_agent": {
+	"enabled": true,
+	"url": "/janus",
+	"sessions_conns": ["*bijson_localhost"],
+	"janus_conns": [{
+		"address": "localhost:8188",
+		"admin_address": "localhost:7188",
+		"admin_password": "janusoverlord"
+	}]
 }
 
 }

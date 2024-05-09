@@ -19,38 +19,41 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package agents
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
-	"regexp"
 	"strconv"
 	"strings"
 	"time"
 
-	bicontext "github.com/cgrates/birpc/context"
+	"github.com/cgrates/birpc"
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/sessions"
 	"github.com/cgrates/cgrates/utils"
 	janus "github.com/cgrates/janusgo"
-)
-
-var (
-	janSessionPath      = regexp.MustCompile(`^\/janus/\d+?$`)
-	janPluginHandlePath = regexp.MustCompile(`^\/janus/.*/.*`)
+	"nhooyr.io/websocket"
 )
 
 // NewJanusAgent will construct a JanusAgent
 func NewJanusAgent(cgrCfg *config.CGRConfig,
 	connMgr *engine.ConnManager,
-	filterS *engine.FilterS) *JanusAgent {
-	return &JanusAgent{
+	filterS *engine.FilterS) (*JanusAgent, error) {
+	jsa := &JanusAgent{
 		cgrCfg:  cgrCfg,
 		connMgr: connMgr,
 		filterS: filterS,
 	}
+	srv, err := birpc.NewServiceWithMethodsRename(jsa, utils.AgentV1, true, func(oldFn string) (newFn string) {
+		return strings.TrimPrefix(oldFn, "V1")
+	})
+	if err != nil {
+		return nil, err
+	}
+	jsa.ctx = context.WithClient(context.TODO(), srv)
+	return jsa, nil
 }
 
 // JanusAgent is a gateway between HTTP and Janus Server over Websocket
@@ -59,12 +62,23 @@ type JanusAgent struct {
 	connMgr *engine.ConnManager
 	filterS *engine.FilterS
 	jnsConn *janus.Gateway
+	adminWs *websocket.Conn
+	ctx     *context.Context
 }
 
 // Connect will create the connection to the Janus Server
 func (ja *JanusAgent) Connect() (err error) {
 	ja.jnsConn, err = janus.Connect(
 		fmt.Sprintf("ws://%s", ja.cgrCfg.JanusAgentCfg().JanusConns[0].Address))
+
+	if err != nil {
+		return
+	}
+
+	ja.adminWs, _, err = websocket.Dial(context.Background(), fmt.Sprintf("ws://%s", ja.cgrCfg.JanusAgentCfg().JanusConns[0].AdminAddress), &websocket.DialOptions{
+		Subprotocols: []string{utils.JanusAdminSubProto},
+	})
+
 	return
 }
 
@@ -90,6 +104,7 @@ func (ja *JanusAgent) CreateSession(w http.ResponseWriter, req *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 
@@ -115,7 +130,7 @@ func (ja *JanusAgent) authSession(origIP string) (err error) {
 			},
 		}}
 	rply := new(sessions.V1AuthorizeReply)
-	err = ja.connMgr.Call(bicontext.Background(), ja.cgrCfg.JanusAgentCfg().SessionSConns,
+	err = ja.connMgr.Call(ja.ctx, ja.cgrCfg.JanusAgentCfg().SessionSConns,
 		utils.SessionSv1AuthorizeEvent,
 		authArgs, rply)
 	return
@@ -140,7 +155,7 @@ func (ja *JanusAgent) acntStartSession(s *janus.Session) (err error) {
 		ForceDuration: true,
 	}
 	rply := new(sessions.V1InitSessionReply)
-	err = ja.connMgr.Call(bicontext.Background(), ja.cgrCfg.JanusAgentCfg().SessionSConns,
+	err = ja.connMgr.Call(ja.ctx, ja.cgrCfg.JanusAgentCfg().SessionSConns,
 		utils.SessionSv1InitiateSession,
 		initArgs, rply)
 	return
@@ -165,7 +180,7 @@ func (ja *JanusAgent) acntStopSession(s *janus.Session) (err error) {
 		ForceDuration: true,
 	}
 	var rply string
-	err = ja.connMgr.Call(bicontext.Background(), ja.cgrCfg.JanusAgentCfg().SessionSConns,
+	err = ja.connMgr.Call(ja.ctx, ja.cgrCfg.JanusAgentCfg().SessionSConns,
 		utils.SessionSv1TerminateSession,
 		terminateArgs, &rply)
 	return
@@ -186,7 +201,7 @@ func (ja *JanusAgent) cdrSession(s *janus.Session) (err error) {
 		},
 	}
 	var rply string
-	err = ja.connMgr.Call(bicontext.Background(), ja.cgrCfg.JanusAgentCfg().SessionSConns,
+	err = ja.connMgr.Call(ja.ctx, ja.cgrCfg.JanusAgentCfg().SessionSConns,
 		utils.SessionSv1ProcessCDR,
 		cgrEv, &rply)
 	return
@@ -403,4 +418,58 @@ func (ja *JanusAgent) HandlePlugin(w http.ResponseWriter, r *http.Request) {
 
 	}
 	json.NewEncoder(w).Encode(resp)
+}
+
+func (ja *JanusAgent) V1GetActiveSessionIDs(ctx *context.Context, ignParam string,
+	sessionIDs *[]*sessions.SessionID) error {
+	var sIDs []*sessions.SessionID
+	msg := struct {
+		janus.BaseMsg
+		AdminSecret string `json:"admin_secret"`
+	}{
+		BaseMsg: janus.BaseMsg{
+			Type: "list_sessions",
+			ID:   utils.GenUUID(),
+		},
+		AdminSecret: ja.cgrCfg.JanusAgentCfg().JanusConns[0].AdminPassword,
+	}
+	byteMsg, err := json.Marshal(msg)
+	if err != nil {
+		return err
+	}
+	if err = ja.adminWs.Write(context.Background(), websocket.MessageText, byteMsg); err != nil {
+		return err
+	}
+	_, rpl, err := ja.adminWs.Read(context.Background())
+	if err != nil {
+		return err
+	}
+	var sucessMsg struct {
+		janus.SuccessMsg
+		Sessions []uint64 `json:"sessions"`
+	}
+
+	if err = json.Unmarshal(rpl, &sucessMsg); err != nil {
+		return err
+	}
+	for _, sId := range sucessMsg.Sessions {
+		sess, has := ja.jnsConn.Sessions[sId]
+		if !has {
+			continue
+		}
+		sIDs = append(sIDs, &sessions.SessionID{
+			OriginHost: sess.Data[utils.OriginHost].(string),
+			OriginID:   sess.Data[utils.OriginID].(string),
+		})
+	}
+	if len(sIDs) == 0 {
+		return utils.ErrNoActiveSession
+	}
+	*sessionIDs = sIDs
+	return nil
+}
+
+func (ja *JanusAgent) V1DisconnectSession(ctx *context.Context, cgrEv utils.CGREvent, reply *string) (err error) {
+	*reply = utils.OK
+	return nil
 }
