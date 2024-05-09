@@ -698,8 +698,9 @@ const (
 	IdxCombination           = "]["
 
 	// *vars consts in agents
-	MetaAppID     = "*appid"
-	MetaSessionID = "*sessionID" // used to retrieve RADIUS Access-Reqest packets of active sessions
+	MetaAppID          = "*appid"
+	MetaSessionID      = "*sessionID" // used to retrieve RADIUS Access-Reqest packets of active sessions
+	JanusAdminSubProto = "janus-admin-protocol"
 
 	RemoteHost              = "RemoteHost"
 	Local                   = "local"
@@ -2229,6 +2230,8 @@ const (
 	Password         = "password"
 	AliasCfg         = "alias"
 	AccountSConnsCfg = "accounts_conns"
+	AdminAddressCfg  = "admin_address"
+	AdminPasswordCfg = "admin_password"
 
 	// KamAgentCfg
 	EvapiConnsCfg = "evapi_conns"

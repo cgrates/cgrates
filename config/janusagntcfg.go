@@ -25,36 +25,46 @@ import (
 
 // JanusConn represents one connection to Janus server
 type JanusConn struct {
-	Address string // Address to reach Janus
-	Type    string // Connection type
+	Address       string // Address to reach Janus
+	Type          string // Connection type
+	AdminAddress  string
+	AdminPassword string
 }
 
 func (jc *JanusConn) loadFromJSONCfg(jsnCfg *JanusConnJsonCfg) (err error) {
 	if jsnCfg == nil {
 		return
 	}
-
 	if jsnCfg.Address != nil {
 		jc.Address = *jsnCfg.Address
 	}
-
 	if jsnCfg.Type != nil {
 		jc.Type = *jsnCfg.Type
+	}
+	if jsnCfg.AdminAddress != nil {
+		jc.AdminAddress = *jsnCfg.AdminAddress
+	}
+	if jsnCfg.AdminPassword != nil {
+		jc.AdminPassword = *jsnCfg.AdminPassword
 	}
 	return
 }
 
 func (jc *JanusConn) AsMapInterface() map[string]any {
 	return map[string]any{
-		utils.AddressCfg: jc.Address,
-		utils.TypeCfg:    jc.Type,
+		utils.AddressCfg:       jc.Address,
+		utils.TypeCfg:          jc.Type,
+		utils.AdminAddressCfg:  jc.AdminAddress,
+		utils.AdminPasswordCfg: jc.AdminPassword,
 	}
 }
 
 func (jc *JanusConn) Clone() *JanusConn {
 	return &JanusConn{
-		Address: jc.Address,
-		Type:    jc.Type,
+		Address:       jc.Address,
+		Type:          jc.Type,
+		AdminAddress:  jc.AdminAddress,
+		AdminPassword: jc.AdminPassword,
 	}
 }
 
