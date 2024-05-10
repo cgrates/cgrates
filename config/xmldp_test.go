@@ -517,3 +517,12 @@ func TestFieldAsInterfaceInvalidSyntax1(t *testing.T) {
 		t.Errorf("Expected %+q, received %+q", expected, err)
 	}
 }
+
+func TestElementTextErr(t *testing.T) {
+	_, err := ElementText(&xmlquery.Node{}, utils.EmptyString)
+	exp := "expr expression is nil"
+	if err.Error() != exp {
+		t.Errorf("Expected %v, received %v", exp, err)
+	}
+
+}
