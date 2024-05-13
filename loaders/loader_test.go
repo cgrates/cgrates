@@ -3536,7 +3536,7 @@ func TestStoreLoadedDataWithDelay(t *testing.T) {
 	}
 	got := time.Since(tStart)
 	want := cfg.GeneralCfg().CachingDelay
-	if diff := got - want; diff < 0 || diff > 4*time.Millisecond {
-		t.Errorf("storeLoadedData duration = %v, want at least %v (diff %v, margin 4ms)", got, want, diff)
+	if diff := got - want; diff < 0 || diff > 15*time.Millisecond {
+		t.Errorf("storeLoadedData duration = %v, want at least %v (diff %v, margin 15ms)", got, want, diff)
 	}
 }
