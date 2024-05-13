@@ -18,13 +18,34 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package config
 
-import "testing"
+import (
+	"reflect"
+	"testing"
+
+	"github.com/cgrates/cgrates/utils"
+)
 
 func TestLoadFromJSONCfgNil(t *testing.T) {
 	var jc JanusConn
 	err := jc.loadFromJSONCfg(nil)
 	if err != nil {
 		t.Errorf("Expected %v, received %v", nil, err)
+	}
+
+}
+
+func TestJanusConnAsMapInterface(t *testing.T) {
+	js := &JanusConn{
+		Address: "127.001",
+		Type:    "ws",
+	}
+	exp := map[string]any{
+		utils.AddressCfg: "127.001",
+		utils.TypeCfg:    "ws",
+	}
+	val := js.AsMapInterface()
+	if !reflect.DeepEqual(val, exp) {
+		t.Errorf("expected %+v received %+v", exp, val)
 	}
 
 }

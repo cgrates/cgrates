@@ -59,6 +59,15 @@ func TestRadiusAgentCfgloadFromJsonCfgCase1(t *testing.T) {
 				},
 			},
 		},
+		ClientDaAddresses: map[string]DAClientOptsJson{
+
+			"fsfdsz": {
+				Transport: utils.StringPointer("http"),
+				Host:      utils.StringPointer("localhost"),
+				Port:      utils.IntPointer(6768),
+				Flags:     []string{"*sessions", "*routes"},
+			},
+		},
 	}
 	expected := &RadiusAgentCfg{
 		Enabled: true,
@@ -74,6 +83,17 @@ func TestRadiusAgentCfgloadFromJsonCfgCase1(t *testing.T) {
 		SessionSConns:      []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS)},
 		DMRTemplate:        "*dmr",
 		CoATemplate:        "*coa",
+		ClientDaAddresses: map[string]DAClientOpts{
+			"fsfdsz": {
+				Transport: "http",
+				Host:      "localhost",
+				Port:      6768,
+				Flags: utils.FlagsWithParams{
+					utils.MetaSessionS: utils.FlagParams{},
+					utils.MetaRoutes:   utils.FlagParams{},
+				},
+			},
+		},
 		RequestProcessors: []*RequestProcessor{
 			{
 				ID:            "OutboundAUTHDryRun",
@@ -311,5 +331,32 @@ func TestRadiusAgentCfgClone(t *testing.T) {
 	if !reflect.DeepEqual(ban.ClientDictionaries[utils.MetaDefault],
 		[]string{"/usr/share/cgrates/radius/dict/"}) {
 		t.Errorf("Expected clone to not modify the cloned")
+	}
+}
+
+func TestAsMapInterface01(t *testing.T) {
+
+	expectedMap := map[string]any{
+		utils.TransportCfg: "http",
+		utils.HostCfg:      "localhost",
+		utils.PortCfg:      6768,
+		utils.FlagsCfg: []string{utils.MetaSessionS,
+			utils.MetaRoutes},
+	}
+
+	opts := &DAClientOpts{
+		Transport: "http",
+		Host:      "localhost",
+		Port:      6768,
+		Flags: utils.FlagsWithParams{
+			utils.MetaSessionS: utils.FlagParams{},
+			utils.MetaRoutes:   utils.FlagParams{},
+		},
+	}
+
+	actualMap := opts.AsMapInterface()
+
+	if !reflect.DeepEqual(expectedMap, actualMap) {
+		t.Errorf("Expected map: %v, Actual map: %v", expectedMap, actualMap)
 	}
 }
