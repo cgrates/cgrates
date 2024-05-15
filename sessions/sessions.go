@@ -404,7 +404,7 @@ func (sS *SessionS) forceSTerminate(s *Session, extraUsage time.Duration, tUsage
 		}
 	}
 	sS.replicateSessions(s.CGRID, false, sS.cgrCfg.SessionSCfg().ReplicationConns)
-	if clntConn := sS.biJClnt(s.ClientConnID); clntConn != nil {
+	if clnt := sS.biJClnt(s.ClientConnID); clnt != nil {
 		go func() {
 			// Merge parameter event with the session event. Losing the EventStart OriginID
 			// could create unwanted behaviour.
@@ -416,20 +416,45 @@ func (sS *SessionS) forceSTerminate(s *Session, extraUsage time.Duration, tUsage
 					event[key] = val
 				}
 			}
-			disconnectArgs := utils.CGREvent{
-				ID:      utils.GenUUID(),
-				Time:    utils.TimePointer(time.Now()),
-				APIOpts: apiOpts,
-				Event:   event,
+
+			// Determine the service method based on the client's protocol version.
+			var servMethod string
+			switch clnt.proto {
+			case 0: // ensure compatibility with OpenSIPS 2.3
+				servMethod = "SMGClientV1.DisconnectSession"
+			case 1.0: // ensure compatibility with OpenSIPS 3.x versions
+				servMethod = "SessionSv1.DisconnectSession"
+			case 2.0:
+				servMethod = utils.AgentV1DisconnectSession
 			}
+
+			// Prepare args based on the client's protocol version.
+			var dscErr error
 			var rply string
-			if err := clntConn.conn.Call(context.TODO(),
-				utils.AgentV1DisconnectSession, disconnectArgs, &rply); err != nil {
-				if err != utils.ErrNotImplemented {
-					utils.Logger.Warning(fmt.Sprintf(
-						"<%s> remotely disconnecting session with id <%s> failed: %v",
-						utils.SessionS, s.CGRID, err))
+			switch {
+			case clnt.proto < 2.0:
+				rsn := utils.IfaceAsString(event[utils.DisconnectCause])
+				dscArgs := struct {
+					EventStart map[string]any
+					Reason     string
+				}{
+					EventStart: s.EventStart,
+					Reason:     rsn,
 				}
+				dscErr = clnt.conn.Call(context.TODO(), servMethod, dscArgs, &rply)
+			default:
+				dscArgs := utils.CGREvent{
+					ID:      utils.GenUUID(),
+					Time:    utils.TimePointer(time.Now()),
+					APIOpts: apiOpts,
+					Event:   event,
+				}
+				dscErr = clnt.conn.Call(context.TODO(), servMethod, dscArgs, &rply)
+			}
+			if dscErr != nil && dscErr != utils.ErrNotImplemented {
+				utils.Logger.Warning(fmt.Sprintf(
+					"<%s> remotely disconnecting session with id <%s> failed: %v",
+					utils.SessionS, s.CGRID, dscErr))
 			}
 		}()
 	}
@@ -777,34 +802,52 @@ func (sS *SessionS) roundCost(s *Session, sRunIdx int) (err error) {
 	return
 }
 
-// disconnectSession will send disconnect from SessionS to clients
-// not thread safe, it considers that the session is already stopped by this time
-func (sS *SessionS) disconnectSession(s *Session, rsn string) (err error) {
-	clnt := sS.biJClnt(s.ClientConnID)
+// disconnectSession sends a disconnect request to the client associated with the given session.
+// Note: This function is not thread-safe and assumes the session is already stopped.
+func (s *SessionS) disconnectSession(sess *Session, rsn string) (err error) {
+	clnt := s.biJClnt(sess.ClientConnID)
 	if clnt == nil {
 		return fmt.Errorf("calling %s requires bidirectional JSON connection, connID: <%s>",
-			utils.AgentV1DisconnectSession, s.ClientConnID)
+			utils.AgentV1DisconnectSession, sess.ClientConnID)
 	}
-	s.EventStart[utils.Usage] = s.totalUsage() // Set the usage to total one debitted
-	servMethod := utils.AgentV1DisconnectSession
-	if clnt.proto == 0 { // compatibility with OpenSIPS 2.3
+	sess.EventStart[utils.Usage] = sess.totalUsage() // Set the usage to total one debitted
+
+	// Determine the service method based on the client's protocol version.
+	var servMethod string
+	switch clnt.proto {
+	case 0: // compatibility with OpenSIPS 2.3
 		servMethod = "SMGClientV1.DisconnectSession"
+	case 1.0: // compatibility with OpenSIPS 3.x versions
+		servMethod = "SessionSv1.DisconnectSession"
+	case 2.0:
+		servMethod = utils.AgentV1DisconnectSession
 	}
-	disconnectArgs := utils.CGREvent{
-		ID:    utils.GenUUID(),
-		Time:  utils.TimePointer(time.Now()),
-		Event: s.EventStart,
-	}
-	disconnectArgs.Event[utils.DisconnectCause] = rsn
+
+	// Prepare args based on the client's protocol version.
 	var rply string
-	if err = clnt.conn.Call(context.TODO(), servMethod,
-		disconnectArgs, &rply); err != nil {
-		if err != utils.ErrNotImplemented {
-			return err
+	switch {
+	case clnt.proto < 2.0:
+		dscArgs := struct {
+			EventStart map[string]any
+			Reason     string
+		}{
+			EventStart: sess.EventStart,
+			Reason:     rsn,
 		}
-		err = nil
+		err = clnt.conn.Call(context.TODO(), servMethod, dscArgs, &rply)
+	case clnt.proto == 2.0:
+		dscArgs := utils.CGREvent{
+			ID:    utils.GenUUID(),
+			Time:  utils.TimePointer(time.Now()),
+			Event: sess.EventStart,
+		}
+		dscArgs.Event[utils.DisconnectCause] = rsn
+		err = clnt.conn.Call(context.TODO(), servMethod, dscArgs, &rply)
 	}
-	return
+	if err != nil && err != utils.ErrNotImplemented {
+		return err
+	}
+	return nil
 }
 
 // warnSession will send warning from SessionS to clients
@@ -1396,20 +1439,27 @@ func (sS *SessionS) syncSessions() {
 
 	for _, clnt := range sS.biJClients() {
 		wg.Add(1)
-		go func(c *biJClient) { // query all connections at once
-			var queriedSessionIDs []*SessionID
-			if err := c.conn.Call(context.TODO(), utils.AgentV1GetActiveSessionIDs,
-				utils.EmptyString, &queriedSessionIDs); err != nil &&
-				err.Error() != utils.ErrNoActiveSession.Error() {
-				utils.Logger.Warning(
-					fmt.Sprintf("<%s> error <%s> querying session ids", utils.SessionS, err.Error()))
-
+		go func() {
+			// query all connections at once
+			servMethod := utils.AgentV1GetActiveSessionIDs
+			if clnt.proto < 2.0 {
+				// ensure compatibility with OpenSIPS
+				servMethod = "SessionSv1.GetActiveSessionIDs"
 			}
+
+			var queriedSessionIDs []*SessionID
+			if err := clnt.conn.Call(context.TODO(), servMethod, utils.EmptyString,
+				&queriedSessionIDs); err != nil &&
+				err.Error() != utils.ErrNoActiveSession.Error() {
+				utils.Logger.Warning(fmt.Sprintf(
+					"<%s> error <%v> querying session ids", utils.SessionS, err))
+			}
+
 			for _, sessionID := range queriedSessionIDs {
 				queriedCGRIDs.Set(sessionID.CGRID(), struct{}{})
 			}
 			wg.Done()
-		}(clnt)
+		}()
 	}
 
 	wg.Wait() // wait for all clients to finish in one way or another
