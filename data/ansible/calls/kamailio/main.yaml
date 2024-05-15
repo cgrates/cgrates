@@ -2,11 +2,15 @@
 - hosts: all
   roles:
     - ../../roles/kamailio
-
     - ../../roles/go
-
-    - ../../roles/cgrates
-
+    - role: ../../roles/cgrates
+      vars:
+        cgrates_dbs:
+          - mysql
+        cgrates_dependencies:
+          - git
+          - redis-server
+          - mariadb-server
     - role: ../../roles/pjsua
       vars:
         pjsua_version: '2.9'
