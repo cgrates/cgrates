@@ -1,0 +1,28 @@
+---
+- hosts: all
+  roles:
+    - ../../roles/go
+    - role: ../../roles/cgrates
+      vars:
+        cgrates_dbs:
+          - mysql
+        cgrates_dependencies:
+          - git
+          - redis-server
+          - mariadb-server
+    - role: ../../roles/opensips
+      vars:
+        opensips_cfg_path: /usr/share/cgrates/tutorial_tests/osips/opensips/etc/opensips/opensips.cfg
+    - role: ../../roles/pjsua
+      vars:
+        pjsua_version: '2.9'
+
+  post_tasks:
+    - name: Update USER and GROUP inside cgrates init.d script
+      ansible.builtin.lineinfile:
+        path: /usr/share/cgrates/tutorial_tests/osips/cgrates/etc/init.d/cgrates
+        regexp: '^{{ item.key }}='
+        line: '{{ item.key }}={{ ansible_user_id }}'
+      loop:
+        - { key: 'USER' }
+        - { key: 'GROUP' }

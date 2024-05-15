@@ -54,7 +54,7 @@
   become: true
   ansible.builtin.copy:
     src: '{{ opensips_cfg_path }}'
-    dest: '/etc/opensips/opensips.cfg'
+    dest: /etc/opensips/opensips.cfg
     owner: root
     group: root
     remote_src: yes
