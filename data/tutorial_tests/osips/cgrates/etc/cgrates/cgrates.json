@@ -58,6 +58,7 @@
 	"thresholds_conns": ["*internal"],
 	"debit_interval": "5s",
 	"channel_sync_interval":"7s",
+	"client_protocol": 1.0
 },
 
 
