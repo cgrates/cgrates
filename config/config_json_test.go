@@ -838,7 +838,7 @@ func TestSmgJsonCfg(t *testing.T) {
 		Store_session_costs:        utils.BoolPointer(false),
 		Session_ttl:                utils.StringPointer("0s"),
 		Session_indexes:            &[]string{},
-		Client_protocol:            utils.Float64Pointer(1.0),
+		Client_protocol:            utils.Float64Pointer(2.0),
 		Channel_sync_interval:      utils.StringPointer("0"),
 		Stale_chan_max_extra_usage: utils.StringPointer("0"),
 		Terminate_attempts:         utils.IntPointer(5),
