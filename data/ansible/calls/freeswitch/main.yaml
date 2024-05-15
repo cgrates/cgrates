@@ -12,6 +12,13 @@
     - name: Install and config CGRateS
       ansible.builtin.import_role:
         name: ../../roles/cgrates
+      vars:
+        cgrates_dbs:
+          - mysql
+        cgrates_dependencies:
+          - git
+          - redis-server
+          - mariadb-server
 
     - name: Unzip FreeSWITCH config
       become: yes
@@ -35,13 +42,13 @@
       become: yes
       shell: 'sudo rm -rf *'
       args:
-        chdir: '/etc/freeswitch'
+        chdir: /etc/freeswitch
 
     - name: Copy our custom config for FreeSWITCH in /etc/freeswitch
       become: yes
       shell: 'sudo cp -r {{ cgrates_dir }}/data/tutorial_tests/fs_evsock/freeswitch/etc/freeswitch/* /etc/freeswitch'
       args:
-        chdir: '/etc/freeswitch'
+        chdir: /etc/freeswitch
 
     - name: Configure PJSUA
       ansible.builtin.import_role:

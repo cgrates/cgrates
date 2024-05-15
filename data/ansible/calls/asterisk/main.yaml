@@ -2,9 +2,16 @@
 - name: Set up environment in order to run call tests for Asterisk
   hosts: all
   roles:
-    - ../../roles/go
-    - ../../roles/cgrates
     - ../../roles/asterisk
+    - ../../roles/go
+    - role: ../../roles/cgrates
+      vars:
+        cgrates_dbs:
+          - mysql
+        cgrates_dependencies:
+          - git
+          - redis-server
+          - mariadb-server
     - role: ../../roles/pjsua
       vars:
         pjsua_version: '2.9'
