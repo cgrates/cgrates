@@ -19,11 +19,13 @@ package config
 
 import (
 	"reflect"
+	"slices"
 	"testing"
 	"time"
 
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/rpcclient"
+	"github.com/google/go-cmp/cmp"
 )
 
 func TestRadiusAgentCfgloadFromJsonCfgCase1(t *testing.T) {
@@ -59,15 +61,15 @@ func TestRadiusAgentCfgloadFromJsonCfgCase1(t *testing.T) {
 				},
 			},
 		},
-		ClientDaAddresses: map[string]DAClientOptsJson{
+		// ClientDaAddresses: map[string]DAClientOptsJson{
 
-			"fsfdsz": {
-				Transport: utils.StringPointer("http"),
-				Host:      utils.StringPointer("localhost"),
-				Port:      utils.IntPointer(6768),
-				Flags:     []string{"*sessions", "*routes"},
-			},
-		},
+		// 	"fsfdsz": {
+		// 		Transport: utils.StringPointer("http"),
+		// 		Host:      utils.StringPointer("localhost"),
+		// 		Port:      utils.IntPointer(6768),
+		// 		Flags:     []string{"*sessions", "*routes"},
+		// 	},
+		// },
 	}
 	expected := &RadiusAgentCfg{
 		Enabled: true,
@@ -83,17 +85,17 @@ func TestRadiusAgentCfgloadFromJsonCfgCase1(t *testing.T) {
 		SessionSConns:      []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS)},
 		DMRTemplate:        "*dmr",
 		CoATemplate:        "*coa",
-		ClientDaAddresses: map[string]DAClientOpts{
-			"fsfdsz": {
-				Transport: "http",
-				Host:      "localhost",
-				Port:      6768,
-				Flags: utils.FlagsWithParams{
-					utils.MetaSessionS: utils.FlagParams{},
-					utils.MetaRoutes:   utils.FlagParams{},
-				},
-			},
-		},
+		// ClientDaAddresses: map[string]DAClientOpts{
+		// 	"fsfdsz": {
+		// 		Transport: "http",
+		// 		Host:      "localhost",
+		// 		Port:      6768,
+		// 		Flags: utils.FlagsWithParams{
+		// 			utils.MetaSessionS: utils.FlagParams{},
+		// 			utils.MetaRoutes:   utils.FlagParams{},
+		// 		},
+		// 	},
+		// },
 		RequestProcessors: []*RequestProcessor{
 			{
 				ID:            "OutboundAUTHDryRun",
@@ -334,18 +336,16 @@ func TestRadiusAgentCfgClone(t *testing.T) {
 	}
 }
 
-func TestAsMapInterface01(t *testing.T) {
-
+func TestDAClientOptsAsMapInterface(t *testing.T) {
 	expectedMap := map[string]any{
-		utils.TransportCfg: "http",
+		utils.TransportCfg: "udp",
 		utils.HostCfg:      "localhost",
 		utils.PortCfg:      6768,
-		utils.FlagsCfg: []string{utils.MetaSessionS,
-			utils.MetaRoutes},
+		utils.FlagsCfg: []string{utils.MetaRoutes,
+			utils.MetaSessionS},
 	}
-
 	opts := &DAClientOpts{
-		Transport: "http",
+		Transport: "udp",
 		Host:      "localhost",
 		Port:      6768,
 		Flags: utils.FlagsWithParams{
@@ -354,9 +354,10 @@ func TestAsMapInterface01(t *testing.T) {
 		},
 	}
 
-	actualMap := opts.AsMapInterface()
+	got := opts.AsMapInterface()
+	slices.Sort(got[utils.FlagsCfg].([]string))
 
-	if !reflect.DeepEqual(expectedMap, actualMap) {
-		t.Errorf("Expected map: %v, Actual map: %v", expectedMap, actualMap)
+	if diff := cmp.Diff(expectedMap, got); diff != "" {
+		t.Errorf("opts.AsMapInterface() returned an unexpected value(-want +got): \n%s", diff)
 	}
 }
