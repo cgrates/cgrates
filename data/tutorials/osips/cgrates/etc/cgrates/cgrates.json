@@ -57,6 +57,7 @@
 	"thresholds_conns": ["*localhost"],
 	"debit_interval": "10s",
 	"channel_sync_interval":"30s",
+	"client_protocol": 1.0
 },
 
 
