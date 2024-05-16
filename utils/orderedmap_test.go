@@ -21,6 +21,8 @@ import (
 	"crypto/rand"
 	"reflect"
 	"testing"
+
+	"github.com/google/go-cmp/cmp"
 )
 
 func TestOrderedMapSetGetDelete(t *testing.T) {
@@ -92,6 +94,71 @@ func TestOrderedMapKeysValues(t *testing.T) {
 	if !reflect.DeepEqual(values, expectedValues) {
 		t.Errorf("Values do not match expected values: expected %v, received %v", expectedValues, values)
 	}
+}
+
+func TestOrderedMapMap(t *testing.T) {
+
+	// Initialize a new OrderedMap
+	nm := NewOrderedMap[string, []string]()
+
+	// Set multiple key-value pairs
+	nm.Set("key1", []string{"value1", "value21"})
+	nm.Set("key2", []string{"value2", "value22"})
+	nm.Set("key3", []string{"value3", "value23"})
+
+	// Return a deep copy of the ordered map's key-value pairs.
+	val := nm.Map()
+	expected := map[string][]string{
+		"key1": {"value1", "value21"},
+		"key2": {"value2", "value22"},
+		"key3": {"value3", "value23"}}
+
+	// Compare the enerated map
+	if diff := cmp.Diff(expected, val); diff != "" {
+		t.Errorf("OrderedMap.Map() returned an unexpected value(-want +got): \n%s", diff)
+	}
+}
+
+func TestOrderMapGetByIndex(t *testing.T) {
+	testcases := []struct {
+		index    int
+		value    string
+		key      string
+		received bool
+	}{
+		{
+
+			index:    0,
+			value:    "value1",
+			key:      "key1",
+			received: true,
+		},
+
+		{
+
+			index:    1,
+			received: false,
+		},
+	}
+	nom := NewOrderedMap[string, string]()
+	nom.Set("key1", "value1")
+
+	for _, tc := range testcases {
+		key, val, has := nom.GetByIndex(tc.index)
+		if tc.received != has {
+			t.Errorf("index is out of bounds")
+			return
+		}
+		if key != tc.key {
+			t.Errorf(" expected key %v, received %v", tc.key, key)
+		}
+
+		if val != tc.value {
+			t.Errorf(" expected value %v, received %v", tc.value, val)
+		}
+
+	}
+
 }
 
 // Benchmark that emphasizes the difference in performance for simple values between
