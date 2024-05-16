@@ -196,6 +196,7 @@ func testSharedClientLockCDRsProcessEvent(t *testing.T) {
 		},
 	}
 	var reply string
+	var err error
 	err = clntLockRPC.Call(utils.CDRsV1ProcessEvent, argsEv, &reply)
 	if err == nil || err.Error() != utils.ErrPartiallyExecuted.Error() {
 		t.Errorf("expected: <%v>, \nreceived: <%v>",

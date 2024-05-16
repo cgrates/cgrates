@@ -21,7 +21,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package v1
 
 import (
+	"errors"
 	"net/rpc"
+	"net/rpc/jsonrpc"
 	"path"
 	"reflect"
 	"testing"
@@ -68,7 +70,7 @@ var (
 )
 
 func TestAccITWithRemove(t *testing.T) {
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 		accTestsConfig = "tutinternal"
 	case utils.MetaMySQL:
@@ -80,7 +82,7 @@ func TestAccITWithRemove(t *testing.T) {
 	default:
 		t.Fatal("Unknown Database type")
 	}
-	accCfgPath = path.Join(*dataDir, "conf", "samples", accTestsConfig)
+	accCfgPath = path.Join(*utils.DataDir, "conf", "samples", accTestsConfig)
 
 	for _, stest := range accTests {
 		t.Run(accTestsConfig, stest)
@@ -88,7 +90,7 @@ func TestAccITWithRemove(t *testing.T) {
 }
 
 func TestAccITWithoutRemove(t *testing.T) {
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 		accTestsConfig = "acc_balance_keep_internal"
 	case utils.MetaMySQL:
@@ -98,12 +100,12 @@ func TestAccITWithoutRemove(t *testing.T) {
 	case utils.MetaPostgres:
 		t.SkipNow()
 	default:
-		t.Fatalf("Unknown Database type <%s>", *dbType)
+		t.Fatalf("Unknown Database type <%s>", *utils.DBType)
 	}
-	if *encoding == utils.MetaGOB {
+	if *utils.Encoding == utils.MetaGOB {
 		accTestsConfig += "_gob"
 	}
-	accCfgPath = path.Join(*dataDir, "conf", "samples", accTestsConfig)
+	accCfgPath = path.Join(*utils.DataDir, "conf", "samples", accTestsConfig)
 
 	accExist = true
 	for _, stest := range accTests {
@@ -131,7 +133,7 @@ func testAccITResetStorDb(t *testing.T) {
 }
 
 func testAccITStartEngine(t *testing.T) {
-	if _, err := engine.StopStartEngine(accCfgPath, *waitRater); err != nil {
+	if _, err := engine.StopStartEngine(accCfgPath, *utils.WaitRater); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -741,5 +743,16 @@ func testAccITAddBalanceWithValueInMap(t *testing.T) {
 			}
 			break
 		}
+	}
+}
+
+func newRPCClient(cfg *config.ListenCfg) (c *rpc.Client, err error) {
+	switch *utils.Encoding {
+	case utils.MetaJSON:
+		return jsonrpc.Dial(utils.TCP, cfg.RPCJSONListen)
+	case utils.MetaGOB:
+		return rpc.Dial(utils.TCP, cfg.RPCGOBListen)
+	default:
+		return nil, errors.New("UNSUPPORTED_RPC")
 	}
 }

@@ -63,7 +63,7 @@ var sTestsTPFilters = []func(t *testing.T){
 
 // Test start here
 func TestTPFilterITMySql(t *testing.T) {
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 		tpFilterConfigDIR = "tutinternal"
 	case utils.MetaMySQL:

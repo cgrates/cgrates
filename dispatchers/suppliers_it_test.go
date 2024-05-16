@@ -46,7 +46,7 @@ var sTestsDspSup = []func(t *testing.T){
 // Test start here
 func TestDspSupplierS(t *testing.T) {
 	var config1, config2, config3 string
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 		t.SkipNow()
 	case utils.MetaMySQL:
@@ -64,7 +64,7 @@ func TestDspSupplierS(t *testing.T) {
 	}
 
 	dispDIR := "dispatchers"
-	if *encoding == utils.MetaGOB {
+	if *utils.Encoding == utils.MetaGOB {
 		dispDIR += "_gob"
 	}
 	testDsp(t, sTestsDspSup, "TestDspSupplierS", config1, config2, config3, "tutorial", "oldtutorial", dispDIR)
@@ -410,7 +410,7 @@ func testDspSupGetSupplierForEvent(t *testing.T) {
 		},
 		Weight: 10,
 	}
-	if *encoding == utils.MetaGOB {
+	if *utils.Encoding == utils.MetaGOB {
 		expected.SortingParameters = nil // empty slices are nil in gob
 	}
 	var supProf []*engine.SupplierProfile

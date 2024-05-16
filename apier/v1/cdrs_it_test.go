@@ -61,7 +61,7 @@ var (
 )
 
 func TestCDRsIT(t *testing.T) {
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 		cdrsConfDIR = "cdrsv1internal"
 	case utils.MetaMySQL:
@@ -81,7 +81,7 @@ func TestCDRsIT(t *testing.T) {
 
 func testV1CDRsInitConfig(t *testing.T) {
 	var err error
-	cdrsCfgPath = path.Join(*dataDir, "conf", "samples", cdrsConfDIR)
+	cdrsCfgPath = path.Join(*utils.DataDir, "conf", "samples", cdrsConfDIR)
 	if cdrsCfg, err = config.NewCGRConfigFromPath(cdrsCfgPath); err != nil {
 		t.Fatal("Got config error: ", err.Error())
 	}
@@ -101,7 +101,7 @@ func testV1CDRsInitCdrDb(t *testing.T) {
 }
 
 func testV1CDRsStartEngine(t *testing.T) {
-	if _, err := engine.StopStartEngine(cdrsCfgPath, *waitRater); err != nil {
+	if _, err := engine.StopStartEngine(cdrsCfgPath, *utils.WaitRater); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -119,10 +119,10 @@ func testV1CDRsLoadTariffPlanFromFolder(t *testing.T) {
 	var loadInst string
 	if err := cdrsRpc.Call(utils.APIerSv1LoadTariffPlanFromFolder,
 		&utils.AttrLoadTpFromFolder{FolderPath: path.Join(
-			*dataDir, "tariffplans", "testit")}, &loadInst); err != nil {
+			*utils.DataDir, "tariffplans", "testit")}, &loadInst); err != nil {
 		t.Error(err)
 	}
-	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // Give time for scheduler to execute topups
+	time.Sleep(time.Duration(*utils.WaitRater) * time.Millisecond) // Give time for scheduler to execute topups
 }
 
 func testV1CDRsProcessEventWithRefund(t *testing.T) {
@@ -534,10 +534,10 @@ func testV1CDRsLoadTariffPlanFromFolderSMS(t *testing.T) {
 	var loadInst string
 	if err := cdrsRpc.Call(utils.APIerSv1LoadTariffPlanFromFolder,
 		&utils.AttrLoadTpFromFolder{FolderPath: path.Join(
-			*dataDir, "tariffplans", "tutorial")}, &loadInst); err != nil {
+			*utils.DataDir, "tariffplans", "tutorial")}, &loadInst); err != nil {
 		t.Error(err)
 	}
-	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // Give time for scheduler to execute topups
+	time.Sleep(time.Duration(*utils.WaitRater) * time.Millisecond) // Give time for scheduler to execute topups
 }
 
 func testV1CDRsAddBalanceForSMS(t *testing.T) {
@@ -623,7 +623,7 @@ func testV1CDRsAddBalanceForSMS(t *testing.T) {
 }
 
 func testV1CDRsKillEngine(t *testing.T) {
-	if err := engine.KillEngine(*waitRater); err != nil {
+	if err := engine.KillEngine(*utils.WaitRater); err != nil {
 		t.Error(err)
 	}
 }

@@ -59,12 +59,12 @@ func TestTpSplMove(t *testing.T) {
 
 func testTpSplITConnect(t *testing.T) {
 	var err error
-	tpSplPathIn = path.Join(*dataDir, "conf", "samples", "tutmongo")
+	tpSplPathIn = path.Join(*utils.DataDir, "conf", "samples", "tutmongo")
 	tpSplCfgIn, err = config.NewCGRConfigFromPath(tpSplPathIn)
 	if err != nil {
 		t.Fatal(err)
 	}
-	tpSplPathOut = path.Join(*dataDir, "conf", "samples", "tutmysql")
+	tpSplPathOut = path.Join(*utils.DataDir, "conf", "samples", "tutmysql")
 	tpSplCfgOut, err = config.NewCGRConfigFromPath(tpSplPathOut)
 	if err != nil {
 		t.Fatal(err)

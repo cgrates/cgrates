@@ -72,7 +72,7 @@ var (
 )
 
 func TestPartReadFile(t *testing.T) {
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 		partCfgDIR = "ers_internal"
 	case utils.MetaMySQL:
@@ -91,7 +91,7 @@ func TestPartReadFile(t *testing.T) {
 
 func testPartITInitConfig(t *testing.T) {
 	var err error
-	partCfgPath = path.Join(*dataDir, "conf", "samples", partCfgDIR)
+	partCfgPath = path.Join(*utils.DataDir, "conf", "samples", partCfgDIR)
 	if partCfg, err = config.NewCGRConfigFromPath(partCfgPath); err != nil {
 		t.Fatal("Got config error: ", err.Error())
 	}
@@ -112,7 +112,7 @@ func testPartITResetDataDb(t *testing.T) {
 }
 
 func testPartITStartEngine(t *testing.T) {
-	if _, err := engine.StopStartEngine(partCfgPath, *waitRater); err != nil {
+	if _, err := engine.StopStartEngine(partCfgPath, *utils.WaitRater); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -221,7 +221,7 @@ func testPartITAnalyseCDRs(t *testing.T) {
 }
 
 func testPartITKillEngine(t *testing.T) {
-	if err := engine.KillEngine(*waitRater); err != nil {
+	if err := engine.KillEngine(*utils.WaitRater); err != nil {
 		t.Error(err)
 	}
 }

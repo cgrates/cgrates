@@ -88,7 +88,7 @@ func testS3ResetStorDb(t *testing.T) {
 }
 
 func testS3StartEngine(t *testing.T) {
-	if _, err := engine.StopStartEngine(s3CfgPath, *waitRater); err != nil {
+	if _, err := engine.StopStartEngine(s3CfgPath, *utils.WaitRater); err != nil {
 		t.Fatal(err)
 	}
 }

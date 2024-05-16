@@ -68,7 +68,7 @@ var (
 )
 
 func TestCDRsITPE(t *testing.T) {
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 		pecdrsConfDIR = "cdrsv1processevent"
 	case utils.MetaMySQL:
@@ -87,7 +87,7 @@ func TestCDRsITPE(t *testing.T) {
 
 func testV1CDRsInitConfig(t *testing.T) {
 	var err error
-	pecdrsCfgPath = path.Join(*dataDir, "conf", "samples", pecdrsConfDIR)
+	pecdrsCfgPath = path.Join(*utils.DataDir, "conf", "samples", pecdrsConfDIR)
 	if pecdrsCfg, err = config.NewCGRConfigFromPath(pecdrsCfgPath); err != nil {
 		t.Fatal("Got config error: ", err.Error())
 	}
@@ -115,7 +115,7 @@ func testV1CDRsStartEngine(t *testing.T) {
 		t.Error(err)
 	}
 
-	if _, err := engine.StopStartEngine(pecdrsCfgPath, *waitRater); err != nil {
+	if _, err := engine.StopStartEngine(pecdrsCfgPath, *utils.WaitRater); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -659,7 +659,7 @@ func testV1CDRsProcessEventExportCheck(t *testing.T) {
 	}
 }
 func testV1CDRsKillEngine(t *testing.T) {
-	if err := engine.KillEngine(*waitRater); err != nil {
+	if err := engine.KillEngine(*utils.WaitRater); err != nil {
 		t.Error(err)
 	}
 }

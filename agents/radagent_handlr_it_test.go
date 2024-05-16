@@ -218,7 +218,7 @@ func testRAHitResetStorDb(t *testing.T) {
 
 // Start CGR Engine
 func testRAHitStartEngine(t *testing.T) {
-	if _, err := engine.StartEngine(raHCfgPath, *waitRater); err != nil {
+	if _, err := engine.StartEngine(raHCfgPath, *utils.WaitRater); err != nil {
 		t.Fatal(err)
 	}
 }

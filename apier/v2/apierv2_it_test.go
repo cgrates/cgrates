@@ -62,7 +62,7 @@ var (
 )
 
 func TestV2IT(t *testing.T) {
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 		t.Skip()
 	case utils.MetaMySQL:
@@ -81,7 +81,7 @@ func TestV2IT(t *testing.T) {
 }
 
 func testAPIerSv2itLoadConfig(t *testing.T) {
-	apierCfgPath = path.Join(*dataDir, "conf", "samples", APIerSv2ConfDIR)
+	apierCfgPath = path.Join(*utils.DataDir, "conf", "samples", APIerSv2ConfDIR)
 	if apierCfg, err = config.NewCGRConfigFromPath(apierCfgPath); err != nil {
 		t.Error(err)
 	}

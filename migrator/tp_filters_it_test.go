@@ -58,12 +58,12 @@ func TestTpFltrMove(t *testing.T) {
 
 func testTpFltrITConnect(t *testing.T) {
 	var err error
-	tpFltrPathIn = path.Join(*dataDir, "conf", "samples", "tutmongo")
+	tpFltrPathIn = path.Join(*utils.DataDir, "conf", "samples", "tutmongo")
 	tpFltrCfgIn, err = config.NewCGRConfigFromPath(tpFltrPathIn)
 	if err != nil {
 		t.Fatal(err)
 	}
-	tpFltrPathOut = path.Join(*dataDir, "conf", "samples", "tutmysql")
+	tpFltrPathOut = path.Join(*utils.DataDir, "conf", "samples", "tutmysql")
 	tpFltrCfgOut, err = config.NewCGRConfigFromPath(tpFltrPathOut)
 	if err != nil {
 		t.Fatal(err)

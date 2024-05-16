@@ -57,7 +57,7 @@ var (
 
 // Tests starting here
 func TestCDRsOfflineIT(t *testing.T) {
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 		cdrsOfflineConfDIR = "cdrsv2internal"
 	case utils.MetaMySQL:
@@ -76,7 +76,7 @@ func TestCDRsOfflineIT(t *testing.T) {
 
 func testV2CDRsOfflineInitConfig(t *testing.T) {
 	var err error
-	cdrsOfflineCfgPath = path.Join(*dataDir, "conf", "samples", cdrsOfflineConfDIR)
+	cdrsOfflineCfgPath = path.Join(*utils.DataDir, "conf", "samples", cdrsOfflineConfDIR)
 	if cdrsOfflineCfg, err = config.NewCGRConfigFromPath(cdrsOfflineCfgPath); err != nil {
 		t.Fatal("Got config error: ", err.Error())
 	}
@@ -96,7 +96,7 @@ func testV2CDRsOfflineInitCdrDb(t *testing.T) {
 }
 
 func testV2CDRsOfflineStartEngine(t *testing.T) {
-	if _, err := engine.StopStartEngine(cdrsOfflineCfgPath, *waitRater); err != nil {
+	if _, err := engine.StopStartEngine(cdrsOfflineCfgPath, *utils.WaitRater); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -113,10 +113,10 @@ func testV2CDRsOfflineLoadData(t *testing.T) {
 	var loadInst utils.LoadInstance
 	if err := cdrsOfflineRpc.Call(utils.APIerSv2LoadTariffPlanFromFolder,
 		&utils.AttrLoadTpFromFolder{FolderPath: path.Join(
-			*dataDir, "tariffplans", "testit")}, &loadInst); err != nil {
+			*utils.DataDir, "tariffplans", "testit")}, &loadInst); err != nil {
 		t.Error(err)
 	}
-	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // Give time for scheduler to execute topups
+	time.Sleep(time.Duration(*utils.WaitRater) * time.Millisecond) // Give time for scheduler to execute topups
 }
 
 func testV2CDRsOfflineBalanceUpdate(t *testing.T) {
@@ -390,7 +390,7 @@ func testV2CDRsBalancesWithSameWeight(t *testing.T) {
 }
 
 func testV2CDRsOfflineKillEngine(t *testing.T) {
-	if err := engine.KillEngine(*waitRater); err != nil {
+	if err := engine.KillEngine(*utils.WaitRater); err != nil {
 		t.Error(err)
 	}
 }

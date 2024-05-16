@@ -75,7 +75,7 @@ var sTestRPCITLcl = []func(t *testing.T){
 }
 
 func TestRPCITLcl(t *testing.T) {
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 		rpcITCfgDIR1 = "multiral1_internal"
 		rpcITCfgDIR2 = "multiral2_internal"
@@ -91,13 +91,14 @@ func TestRPCITLcl(t *testing.T) {
 		t.Fatal("Unknown Database type")
 	}
 	for _, stest := range sTestRPCITLcl {
-		t.Run(*dbType, stest)
+		t.Run(*utils.DBType, stest)
 	}
 }
 
 func testRPCITLclInitCfg(t *testing.T) {
-	rpcITCfgPath1 = path.Join(*dataDir, "conf", "samples", rpcITCfgDIR1)
-	rpcITCfgPath2 = path.Join(*dataDir, "conf", "samples", rpcITCfgDIR2)
+	rpcITCfgPath1 = path.Join(*utils.DataDir, "conf", "samples", rpcITCfgDIR1)
+	rpcITCfgPath2 = path.Join(*utils.DataDir, "conf", "samples", rpcITCfgDIR2)
+	var err error
 	rpcITCfg1, err = config.NewCGRConfigFromPath(rpcITCfgPath1)
 	if err != nil {
 		t.Error(err)
@@ -112,7 +113,8 @@ func testRPCITLclInitCfg(t *testing.T) {
 }
 
 func testRPCITLclStartSecondEngine(t *testing.T) {
-	if ral2, err = engine.StopStartEngine(rpcITCfgPath2, *waitRater); err != nil {
+	var err error
+	if ral2, err = engine.StopStartEngine(rpcITCfgPath2, *utils.WaitRater); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -120,6 +122,7 @@ func testRPCITLclStartSecondEngine(t *testing.T) {
 // Connect rpc client to rater
 func testRPCITLclRpcConnPoolFirst(t *testing.T) {
 	rpcPoolFirst = rpcclient.NewRPCPool(rpcclient.PoolFirst, 0)
+	var err error
 	rpcRAL1, err = rpcclient.NewRPCClient(context.Background(), utils.TCP, rpcITCfg1.ListenCfg().RPCJSONListen, false, "", "", "", 3, 1,
 		0, utils.FibDuration, time.Second, time.Duration(2*time.Second), rpcclient.JSONrpc, nil, false, nil)
 	if err == nil {
@@ -151,7 +154,8 @@ func testRPCITLclStatusSecondEngine(t *testing.T) {
 
 // Start first engine
 func testRPCITLclStartFirstEngine(t *testing.T) {
-	if ral1, err = engine.StartEngine(rpcITCfgPath1, *waitRater); err != nil {
+	var err error
+	if ral1, err = engine.StartEngine(rpcITCfgPath1, *utils.WaitRater); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -178,7 +182,7 @@ func testRPCITLclStatusFirstFailover(t *testing.T) {
 	if err := ral1.Process.Kill(); err != nil { // Kill the first RAL
 		t.Error(err)
 	}
-	time.Sleep(time.Duration(*waitRater) * time.Millisecond)
+	time.Sleep(time.Duration(*utils.WaitRater) * time.Millisecond)
 	var status map[string]any
 	if err := rpcPoolFirst.Call(context.Background(), utils.CoreSv1Status, utils.TenantWithArgDispatcher{}, &status); err != nil {
 		t.Error(err)
@@ -195,7 +199,8 @@ func testRPCITLclStatusFirstFailover(t *testing.T) {
 }
 
 func testRPCITLclStatusFirstFailback(t *testing.T) {
-	if ral1, err = engine.StartEngine(rpcITCfgPath1, *waitRater); err != nil {
+	var err error
+	if ral1, err = engine.StartEngine(rpcITCfgPath1, *utils.WaitRater); err != nil {
 		t.Fatal(err)
 	}
 	var status map[string]any
@@ -253,7 +258,7 @@ func testRPCITLclBcastStatusNoRals1(t *testing.T) {
 	if err := ral1.Process.Kill(); err != nil { // Kill the first RAL
 		t.Error(err)
 	}
-	time.Sleep(time.Duration(*waitRater) * time.Millisecond)
+	time.Sleep(time.Duration(*utils.WaitRater) * time.Millisecond)
 	var status map[string]any
 	if err := rpcPoolBroadcast.Call(context.Background(), utils.CoreSv1Status, utils.TenantWithArgDispatcher{}, &status); err != nil {
 		t.Error(err)
@@ -271,7 +276,7 @@ func testRPCITLclBcastStatusBcastNoRals(t *testing.T) {
 	if err := ral2.Process.Kill(); err != nil { // Kill the first RAL
 		t.Error(err)
 	}
-	time.Sleep(time.Duration(*waitRater) * time.Millisecond)
+	time.Sleep(time.Duration(*utils.WaitRater) * time.Millisecond)
 	var status map[string]any
 	if err := rpcPoolBroadcast.Call(context.Background(), utils.CoreSv1Status, utils.TenantWithArgDispatcher{}, &status); err == nil {
 		t.Error("Should get error")
@@ -279,7 +284,8 @@ func testRPCITLclBcastStatusBcastNoRals(t *testing.T) {
 }
 
 func testRPCITLclBcastStatusRALs2Up(t *testing.T) {
-	if ral2, err = engine.StartEngine(rpcITCfgPath2, *waitRater); err != nil {
+	var err error
+	if ral2, err = engine.StartEngine(rpcITCfgPath2, *utils.WaitRater); err != nil {
 		t.Fatal(err)
 	}
 	var status map[string]any
@@ -296,7 +302,8 @@ func testRPCITLclBcastStatusRALs2Up(t *testing.T) {
 }
 
 func testRPCITLclStatusBcastRALs1Up(t *testing.T) {
-	if ral1, err = engine.StartEngine(rpcITCfgPath1, *waitRater); err != nil {
+	var err error
+	if ral1, err = engine.StartEngine(rpcITCfgPath1, *utils.WaitRater); err != nil {
 		t.Fatal(err)
 	}
 	var status map[string]any
@@ -321,7 +328,7 @@ func TestRPCITStatusBcastCmd(t *testing.T) {
 		t.Errorf("Received unexpected stats: %+v", stats)
 	}
 	var loadInst utils.LoadInstance
-	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(**dataDir, "tariffplans", "oldtutorial")}
+	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(**utils.DataDir, "tariffplans", "oldtutorial")}
 	if err := rpcRAL1.Call(utils.APIerSv2LoadTariffPlanFromFolder, attrs, &loadInst); err != nil {
 		t.Error(err)
 	} else if loadInst.RatingLoadID == "" || loadInst.AccountingLoadID == "" {

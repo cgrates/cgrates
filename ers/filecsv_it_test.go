@@ -80,7 +80,7 @@ accid23;*rated;cgrates.org;1001;086517174963;2013-02-03 19:54:00;26;val_extra3;"
 
 func TestCsvReadFile(t *testing.T) {
 
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 		csvCfgDIR = "ers_internal"
 	case utils.MetaMySQL:
@@ -100,7 +100,7 @@ func TestCsvReadFile(t *testing.T) {
 
 func testCsvITInitConfig(t *testing.T) {
 	var err error
-	csvCfgPath = path.Join(*dataDir, "conf", "samples", csvCfgDIR)
+	csvCfgPath = path.Join(*utils.DataDir, "conf", "samples", csvCfgDIR)
 	if csvCfg, err = config.NewCGRConfigFromPath(csvCfgPath); err != nil {
 		t.Fatal("Got config error: ", err.Error())
 	}
@@ -121,7 +121,7 @@ func testCsvITResetDataDb(t *testing.T) {
 }
 
 func testCsvITStartEngine(t *testing.T) {
-	if _, err := engine.StopStartEngine(csvCfgPath, *waitRater); err != nil {
+	if _, err := engine.StopStartEngine(csvCfgPath, *utils.WaitRater); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -137,7 +137,7 @@ func testCsvITRpcConn(t *testing.T) {
 
 func testCsvITLoadTPFromFolder(t *testing.T) {
 	attrs := &utils.AttrLoadTpFromFolder{
-		FolderPath: path.Join(*dataDir, "tariffplans", "testit")}
+		FolderPath: path.Join(*utils.DataDir, "tariffplans", "testit")}
 	var loadInst utils.LoadInstance
 	if err := csvRPC.Call(utils.APIerSv2LoadTariffPlanFromFolder,
 		attrs, &loadInst); err != nil {
@@ -331,7 +331,7 @@ func testCsvITProcessedFiles(t *testing.T) {
 }
 
 func testCsvITKillEngine(t *testing.T) {
-	if err := engine.KillEngine(*waitRater); err != nil {
+	if err := engine.KillEngine(*utils.WaitRater); err != nil {
 		t.Error(err)
 	}
 }

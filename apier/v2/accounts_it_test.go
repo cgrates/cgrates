@@ -22,7 +22,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package v2
 
 import (
+	"errors"
 	"net/rpc"
+	"net/rpc/jsonrpc"
 	"path"
 	"reflect"
 	"testing"
@@ -60,7 +62,7 @@ var (
 
 // Test start here
 func TestAccountsIT(t *testing.T) {
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 		accConfigDIR = "tutinternal"
 	case utils.MetaMySQL:
@@ -80,12 +82,12 @@ func TestAccountsIT(t *testing.T) {
 
 func testAccountsInitCfg(t *testing.T) {
 	var err error
-	accCfgPath = path.Join(*dataDir, "conf", "samples", accConfigDIR)
+	accCfgPath = path.Join(*utils.DataDir, "conf", "samples", accConfigDIR)
 	accCfg, err = config.NewCGRConfigFromPath(accCfgPath)
 	if err != nil {
 		t.Error(err)
 	}
-	accCfg.DataFolderPath = *dataDir // Share DataFolderPath through config towards StoreDb for Flush()
+	accCfg.DataFolderPath = *utils.DataDir // Share DataFolderPath through config towards StoreDb for Flush()
 	config.SetCgrConfig(accCfg)
 }
 
@@ -104,7 +106,7 @@ func testAccountsResetStorDb(t *testing.T) {
 
 // Start CGR Engine
 func testAccountsStartEngine(t *testing.T) {
-	if _, err := engine.StopStartEngine(accCfgPath, *waitRater); err != nil {
+	if _, err := engine.StopStartEngine(accCfgPath, *utils.WaitRater); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -272,5 +274,16 @@ func testAccountsGetActionPlan2(t *testing.T) {
 func testAccountsKillEngine(t *testing.T) {
 	if err := engine.KillEngine(100); err != nil {
 		t.Error(err)
+	}
+}
+
+func newRPCClient(cfg *config.ListenCfg) (c *rpc.Client, err error) {
+	switch *utils.Encoding {
+	case utils.MetaJSON:
+		return jsonrpc.Dial(utils.TCP, cfg.RPCJSONListen)
+	case utils.MetaGOB:
+		return rpc.Dial(utils.TCP, cfg.RPCGOBListen)
+	default:
+		return nil, errors.New("UNSUPPORTED_RPC")
 	}
 }

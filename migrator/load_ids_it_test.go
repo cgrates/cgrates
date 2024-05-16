@@ -44,18 +44,18 @@ var sTestsLoadIdsIT = []func(t *testing.T){
 }
 
 func TestLoadIDsMigrateITRedis(t *testing.T) {
-	inPath := path.Join(*dataDir, "conf", "samples", "tutmysql")
+	inPath := path.Join(*utils.DataDir, "conf", "samples", "tutmysql")
 	testLoadIdsStart("TestLoadIDsMigrateITRedis", inPath, inPath, t)
 }
 
 func TestLoadIDsMigrateITMongo(t *testing.T) {
-	inPath := path.Join(*dataDir, "conf", "samples", "tutmongo")
+	inPath := path.Join(*utils.DataDir, "conf", "samples", "tutmongo")
 	testLoadIdsStart("TestLoadIDsMigrateITMongo", inPath, inPath, t)
 }
 
 func TestLoadIDsITMigrateMongo2Redis(t *testing.T) {
-	inPath := path.Join(*dataDir, "conf", "samples", "tutmongo")
-	outPath := path.Join(*dataDir, "conf", "samples", "tutmysql")
+	inPath := path.Join(*utils.DataDir, "conf", "samples", "tutmongo")
+	outPath := path.Join(*utils.DataDir, "conf", "samples", "tutmysql")
 	testLoadIdsStart("TestLoadIDsITMigrateMongo2Redis", inPath, outPath, t)
 }
 

@@ -82,7 +82,7 @@ var (
 
 func TestInternalRemoteIT(t *testing.T) {
 	internalCfgDirPath = "internal"
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 		t.SkipNow()
 	case utils.MetaMySQL:
@@ -96,41 +96,41 @@ func TestInternalRemoteIT(t *testing.T) {
 	default:
 		t.Fatal("Unknown Database type")
 	}
-	if *encoding == utils.MetaGOB {
+	if *utils.Encoding == utils.MetaGOB {
 		internalCfgDirPath += "_gob"
 	}
 	for _, stest := range sTestsInternalRemoteIT {
-		t.Run(*dbType, stest)
+		t.Run(*utils.DBType, stest)
 	}
 }
 
 func testInternalRemoteITInitCfg(t *testing.T) {
 	var err error
-	internalCfgPath = path.Join(*dataDir, "conf", "samples", "remote_replication", internalCfgDirPath)
+	internalCfgPath = path.Join(*utils.DataDir, "conf", "samples", "remote_replication", internalCfgDirPath)
 	internalCfg, err = config.NewCGRConfigFromPath(internalCfgPath)
 	if err != nil {
 		t.Error(err)
 	}
-	internalCfg.DataFolderPath = *dataDir // Share DataFolderPath through config towards StoreDb for Flush()
+	internalCfg.DataFolderPath = *utils.DataDir // Share DataFolderPath through config towards StoreDb for Flush()
 	config.SetCgrConfig(internalCfg)
 
 	// prepare config for engine1
-	engineOneCfgPath = path.Join(*dataDir, "conf", "samples",
+	engineOneCfgPath = path.Join(*utils.DataDir, "conf", "samples",
 		"remote_replication", engineOneCfgDirPath)
 	engineOneCfg, err = config.NewCGRConfigFromPath(engineOneCfgPath)
 	if err != nil {
 		t.Error(err)
 	}
-	engineOneCfg.DataFolderPath = *dataDir // Share DataFolderPath through config towards StoreDb for Flush()
+	engineOneCfg.DataFolderPath = *utils.DataDir // Share DataFolderPath through config towards StoreDb for Flush()
 
 	// prepare config for engine2
-	engineTwoCfgPath = path.Join(*dataDir, "conf", "samples",
+	engineTwoCfgPath = path.Join(*utils.DataDir, "conf", "samples",
 		"remote_replication", engineTwoCfgDirPath)
 	engineTwoCfg, err = config.NewCGRConfigFromPath(engineTwoCfgPath)
 	if err != nil {
 		t.Error(err)
 	}
-	engineTwoCfg.DataFolderPath = *dataDir // Share DataFolderPath through config towards StoreDb for Flush()
+	engineTwoCfg.DataFolderPath = *utils.DataDir // Share DataFolderPath through config towards StoreDb for Flush()
 
 }
 
@@ -178,7 +178,7 @@ func testInternalRemoteITRPCConn(t *testing.T) {
 
 func testInternalRemoteLoadDataInEngineTwo(t *testing.T) {
 	var reply string
-	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "tutorial")}
+	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*utils.DataDir, "tariffplans", "tutorial")}
 	if err := engineTwoRPC.Call(utils.APIerSv1LoadTariffPlanFromFolder, attrs, &reply); err != nil {
 		t.Error(err)
 	}
@@ -255,7 +255,7 @@ func testInternalRemoteITGetAttribute(t *testing.T) {
 		utils.TenantIDWithArgDispatcher{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ATTR_1001_SIMPLEAUTH"}}, &reply); err != nil {
 		t.Fatal(err)
 	}
-	if *encoding == utils.MetaGOB { // in gob emtpty slice is encoded as nil
+	if *utils.Encoding == utils.MetaGOB { // in gob emtpty slice is encoded as nil
 		alsPrf.AttributeProfile.Attributes[0].FilterIDs = nil
 	}
 	reply.Compile()
@@ -445,7 +445,7 @@ func testInternalRemoteITGetSupplier(t *testing.T) {
 		},
 		Weight: 20,
 	}
-	if *encoding == utils.MetaGOB { // in gob emtpty slice is encoded as nil
+	if *utils.Encoding == utils.MetaGOB { // in gob emtpty slice is encoded as nil
 		splPrf.SortingParameters = nil
 		splPrf2.SortingParameters = nil
 	}

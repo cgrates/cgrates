@@ -67,7 +67,7 @@ var sTests = []func(t *testing.T){
 }
 
 func TestFilterIndexerIT(t *testing.T) {
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 		dataManager = NewDataManager(NewInternalDB(nil, nil, true, config.CgrConfig().DataDbCfg().Items),
 			config.CgrConfig().CacheCfg(), nil)
@@ -83,7 +83,7 @@ func TestFilterIndexerIT(t *testing.T) {
 		cfgDBName = cfg.DataDbCfg().DataDbName
 		dataManager = NewDataManager(redisDB, config.CgrConfig().CacheCfg(), nil)
 	case utils.MetaMongo:
-		cdrsMongoCfgPath := path.Join(*dataDir, "conf", "samples", "tutmongo")
+		cdrsMongoCfgPath := path.Join(*utils.DataDir, "conf", "samples", "tutmongo")
 		mgoITCfg, err := config.NewCGRConfigFromPath(cdrsMongoCfgPath)
 		if err != nil {
 			t.Fatal(err)
@@ -103,7 +103,7 @@ func TestFilterIndexerIT(t *testing.T) {
 		t.Fatal("Unknown Database type")
 	}
 	for _, stest := range sTests {
-		t.Run(*dbType, stest)
+		t.Run(*utils.DBType, stest)
 	}
 }
 

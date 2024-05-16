@@ -57,7 +57,7 @@ var (
 )
 
 func TestXMLReadFile(t *testing.T) {
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 		xmlCfgDIR = "ers_internal"
 	case utils.MetaMySQL:
@@ -76,7 +76,7 @@ func TestXMLReadFile(t *testing.T) {
 
 func testXMLITInitConfig(t *testing.T) {
 	var err error
-	xmlCfgPath = path.Join(*dataDir, "conf", "samples", xmlCfgDIR)
+	xmlCfgPath = path.Join(*utils.DataDir, "conf", "samples", xmlCfgDIR)
 	if xmlCfg, err = config.NewCGRConfigFromPath(xmlCfgPath); err != nil {
 		t.Fatal("Got config error: ", err.Error())
 	}
@@ -97,7 +97,7 @@ func testXMLITResetDataDb(t *testing.T) {
 }
 
 func testXMLITStartEngine(t *testing.T) {
-	if _, err := engine.StopStartEngine(xmlCfgPath, *waitRater); err != nil {
+	if _, err := engine.StopStartEngine(xmlCfgPath, *utils.WaitRater); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -113,7 +113,7 @@ func testXMLITRpcConn(t *testing.T) {
 
 func testXMLITLoadTPFromFolder(t *testing.T) {
 	attrs := &utils.AttrLoadTpFromFolder{
-		FolderPath: path.Join(*dataDir, "tariffplans", "testit")}
+		FolderPath: path.Join(*utils.DataDir, "tariffplans", "testit")}
 	var loadInst utils.LoadInstance
 	if err := xmlRPC.Call(utils.APIerSv2LoadTariffPlanFromFolder,
 		attrs, &loadInst); err != nil {
@@ -327,7 +327,7 @@ func testXMLITEmptyRootPathCaseCheckCDRs(t *testing.T) {
 }
 
 func testXMLITKillEngine(t *testing.T) {
-	if err := engine.KillEngine(*waitRater); err != nil {
+	if err := engine.KillEngine(*utils.WaitRater); err != nil {
 		t.Error(err)
 	}
 }

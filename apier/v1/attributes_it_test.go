@@ -90,7 +90,7 @@ var (
 // Test start here
 func TestAttributeSIT(t *testing.T) {
 	attrsTests := sTestsAlsPrf
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 		attrsTests = sTestsAlsPrf[:29]
 		alsPrfConfigDIR = "tutinternal"
@@ -134,7 +134,7 @@ func testAttributeSResetStorDb(t *testing.T) {
 
 // Start CGR Engine
 func testAttributeSStartEngine(t *testing.T) {
-	if _, err := engine.StopStartEngine(alsPrfCfgPath, *waitRater); err != nil {
+	if _, err := engine.StopStartEngine(alsPrfCfgPath, *utils.WaitRater); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -159,7 +159,7 @@ func testAttributeSGetAlsPrfBeforeSet(t *testing.T) {
 
 func testAttributeSLoadFromFolder(t *testing.T) {
 	var reply string
-	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "oldtutorial")}
+	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*utils.DataDir, "tariffplans", "oldtutorial")}
 	if err := attrSRPC.Call(utils.APIerSv1LoadTariffPlanFromFolder, attrs, &reply); err != nil {
 		t.Error(err)
 	}

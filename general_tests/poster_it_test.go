@@ -59,7 +59,7 @@ var (
 )
 
 func TestPosterIT(t *testing.T) {
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 		pstrConfigDIR = "actions_internal"
 	case utils.MetaMySQL:
@@ -71,7 +71,7 @@ func TestPosterIT(t *testing.T) {
 	default:
 		t.Fatal("Unknown Database type")
 	}
-	if *encoding == utils.MetaGOB {
+	if *utils.Encoding == utils.MetaGOB {
 		pstrConfigDIR += "_gob"
 	}
 
@@ -81,7 +81,7 @@ func TestPosterIT(t *testing.T) {
 }
 
 func testPosterITInitCfg(t *testing.T) {
-	pstrCfgPath = path.Join(*dataDir, "conf", "samples", pstrConfigDIR)
+	pstrCfgPath = path.Join(*utils.DataDir, "conf", "samples", pstrConfigDIR)
 	var err error
 	pstrCfg, err = config.NewCGRConfigFromPath(pstrCfgPath)
 	if err != nil {
@@ -99,7 +99,7 @@ func testPosterITInitCdrDb(t *testing.T) {
 }
 
 func testPosterITStartEngine(t *testing.T) {
-	if _, err := engine.StopStartEngine(pstrCfgPath, *waitRater); err != nil {
+	if _, err := engine.StopStartEngine(pstrCfgPath, *utils.WaitRater); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -334,7 +334,7 @@ func testPosterITKafka(t *testing.T) {
 }
 
 func testPosterITStopCgrEngine(t *testing.T) {
-	if err := engine.KillEngine(*waitRater); err != nil {
+	if err := engine.KillEngine(*utils.WaitRater); err != nil {
 		t.Error(err)
 	}
 }

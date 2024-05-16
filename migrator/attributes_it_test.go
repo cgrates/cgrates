@@ -58,7 +58,7 @@ var sTestsAttrIT = []func(t *testing.T){
 
 func TestAttributeITRedis(t *testing.T) {
 	var err error
-	attrPathIn = path.Join(*dataDir, "conf", "samples", "tutmysql")
+	attrPathIn = path.Join(*utils.DataDir, "conf", "samples", "tutmysql")
 	attrCfgIn, err = config.NewCGRConfigFromPath(attrPathIn)
 	if err != nil {
 		t.Fatal(err)
@@ -76,7 +76,7 @@ func TestAttributeITRedis(t *testing.T) {
 
 func TestAttributeITMongo(t *testing.T) {
 	var err error
-	attrPathIn = path.Join(*dataDir, "conf", "samples", "tutmongo")
+	attrPathIn = path.Join(*utils.DataDir, "conf", "samples", "tutmongo")
 	attrCfgIn, err = config.NewCGRConfigFromPath(attrPathIn)
 	if err != nil {
 		t.Fatal(err)
@@ -94,12 +94,12 @@ func TestAttributeITMongo(t *testing.T) {
 
 func TestAttributeITMove1(t *testing.T) {
 	var err error
-	attrPathIn = path.Join(*dataDir, "conf", "samples", "tutmongo")
+	attrPathIn = path.Join(*utils.DataDir, "conf", "samples", "tutmongo")
 	attrCfgIn, err = config.NewCGRConfigFromPath(attrPathIn)
 	if err != nil {
 		t.Fatal(err)
 	}
-	attrPathOut = path.Join(*dataDir, "conf", "samples", "tutmysql")
+	attrPathOut = path.Join(*utils.DataDir, "conf", "samples", "tutmysql")
 	attrCfgOut, err = config.NewCGRConfigFromPath(attrPathOut)
 	if err != nil {
 		t.Fatal(err)
@@ -113,12 +113,12 @@ func TestAttributeITMove1(t *testing.T) {
 
 func TestAttributeITMigrateMongo2Redis(t *testing.T) {
 	var err error
-	attrPathIn = path.Join(*dataDir, "conf", "samples", "tutmongo")
+	attrPathIn = path.Join(*utils.DataDir, "conf", "samples", "tutmongo")
 	attrCfgIn, err = config.NewCGRConfigFromPath(attrPathIn)
 	if err != nil {
 		t.Fatal(err)
 	}
-	attrPathOut = path.Join(*dataDir, "conf", "samples", "tutmysql")
+	attrPathOut = path.Join(*utils.DataDir, "conf", "samples", "tutmysql")
 	attrCfgOut, err = config.NewCGRConfigFromPath(attrPathOut)
 	if err != nil {
 		t.Fatal(err)
@@ -132,12 +132,12 @@ func TestAttributeITMigrateMongo2Redis(t *testing.T) {
 
 func TestAttributeITMove2(t *testing.T) {
 	var err error
-	attrPathIn = path.Join(*dataDir, "conf", "samples", "tutmysql")
+	attrPathIn = path.Join(*utils.DataDir, "conf", "samples", "tutmysql")
 	attrCfgIn, err = config.NewCGRConfigFromPath(attrPathIn)
 	if err != nil {
 		t.Fatal(err)
 	}
-	attrPathOut = path.Join(*dataDir, "conf", "samples", "tutmongo")
+	attrPathOut = path.Join(*utils.DataDir, "conf", "samples", "tutmongo")
 	attrCfgOut, err = config.NewCGRConfigFromPath(attrPathOut)
 	if err != nil {
 		t.Fatal(err)
@@ -151,12 +151,12 @@ func TestAttributeITMove2(t *testing.T) {
 
 func TestAttributeITMoveEncoding(t *testing.T) {
 	var err error
-	attrPathIn = path.Join(*dataDir, "conf", "samples", "tutmongo")
+	attrPathIn = path.Join(*utils.DataDir, "conf", "samples", "tutmongo")
 	attrCfgIn, err = config.NewCGRConfigFromPath(attrPathIn)
 	if err != nil {
 		t.Fatal(err)
 	}
-	attrPathOut = path.Join(*dataDir, "conf", "samples", "tutmongojson")
+	attrPathOut = path.Join(*utils.DataDir, "conf", "samples", "tutmongojson")
 	attrCfgOut, err = config.NewCGRConfigFromPath(attrPathOut)
 	if err != nil {
 		t.Fatal(err)
@@ -170,12 +170,12 @@ func TestAttributeITMoveEncoding(t *testing.T) {
 
 func TestAttributeITMoveEncoding2(t *testing.T) {
 	var err error
-	attrPathIn = path.Join(*dataDir, "conf", "samples", "tutmysql")
+	attrPathIn = path.Join(*utils.DataDir, "conf", "samples", "tutmysql")
 	attrCfgIn, err = config.NewCGRConfigFromPath(attrPathIn)
 	if err != nil {
 		t.Fatal(err)
 	}
-	attrPathOut = path.Join(*dataDir, "conf", "samples", "tutmysqljson")
+	attrPathOut = path.Join(*utils.DataDir, "conf", "samples", "tutmysqljson")
 	attrCfgOut, err = config.NewCGRConfigFromPath(attrPathOut)
 	if err != nil {
 		t.Fatal(err)

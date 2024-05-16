@@ -49,7 +49,7 @@ var sTestsShrGrpIT = []func(t *testing.T){
 
 func TestSharedGroupITRedis(t *testing.T) {
 	var err error
-	shrGrpPathIn = path.Join(*dataDir, "conf", "samples", "tutmysql")
+	shrGrpPathIn = path.Join(*utils.DataDir, "conf", "samples", "tutmysql")
 	shrGrpCfgIn, err = config.NewCGRConfigFromPath(shrGrpPathIn)
 	if err != nil {
 		t.Fatal(err)
@@ -67,7 +67,7 @@ func TestSharedGroupITRedis(t *testing.T) {
 
 func TestSharedGroupITMongo(t *testing.T) {
 	var err error
-	shrGrpPathIn = path.Join(*dataDir, "conf", "samples", "tutmongo")
+	shrGrpPathIn = path.Join(*utils.DataDir, "conf", "samples", "tutmongo")
 	shrGrpCfgIn, err = config.NewCGRConfigFromPath(shrGrpPathIn)
 	if err != nil {
 		t.Fatal(err)
@@ -85,12 +85,12 @@ func TestSharedGroupITMongo(t *testing.T) {
 
 func TestSharedGroupITMove(t *testing.T) {
 	var err error
-	shrGrpPathIn = path.Join(*dataDir, "conf", "samples", "tutmongo")
+	shrGrpPathIn = path.Join(*utils.DataDir, "conf", "samples", "tutmongo")
 	shrGrpCfgIn, err = config.NewCGRConfigFromPath(shrGrpPathIn)
 	if err != nil {
 		t.Fatal(err)
 	}
-	shrGrpPathOut = path.Join(*dataDir, "conf", "samples", "tutmysql")
+	shrGrpPathOut = path.Join(*utils.DataDir, "conf", "samples", "tutmysql")
 	shrGrpCfgOut, err = config.NewCGRConfigFromPath(shrGrpPathOut)
 	if err != nil {
 		t.Fatal(err)
@@ -104,12 +104,12 @@ func TestSharedGroupITMove(t *testing.T) {
 
 func TestSharedGroupITMoveEncoding(t *testing.T) {
 	var err error
-	shrGrpPathIn = path.Join(*dataDir, "conf", "samples", "tutmongo")
+	shrGrpPathIn = path.Join(*utils.DataDir, "conf", "samples", "tutmongo")
 	shrGrpCfgIn, err = config.NewCGRConfigFromPath(shrGrpPathIn)
 	if err != nil {
 		t.Fatal(err)
 	}
-	shrGrpPathOut = path.Join(*dataDir, "conf", "samples", "tutmongojson")
+	shrGrpPathOut = path.Join(*utils.DataDir, "conf", "samples", "tutmongojson")
 	shrGrpCfgOut, err = config.NewCGRConfigFromPath(shrGrpPathOut)
 	if err != nil {
 		t.Fatal(err)
@@ -123,12 +123,12 @@ func TestSharedGroupITMoveEncoding(t *testing.T) {
 
 func TestSharedGroupITMoveEncoding2(t *testing.T) {
 	var err error
-	shrGrpPathIn = path.Join(*dataDir, "conf", "samples", "tutmysql")
+	shrGrpPathIn = path.Join(*utils.DataDir, "conf", "samples", "tutmysql")
 	shrGrpCfgIn, err = config.NewCGRConfigFromPath(shrGrpPathIn)
 	if err != nil {
 		t.Fatal(err)
 	}
-	shrGrpPathOut = path.Join(*dataDir, "conf", "samples", "tutmysqljson")
+	shrGrpPathOut = path.Join(*utils.DataDir, "conf", "samples", "tutmysqljson")
 	shrGrpCfgOut, err = config.NewCGRConfigFromPath(shrGrpPathOut)
 	if err != nil {
 		t.Fatal(err)

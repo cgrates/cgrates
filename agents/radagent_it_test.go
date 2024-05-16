@@ -62,7 +62,7 @@ var (
 // Test start here
 func TestRAit(t *testing.T) {
 	engine.KillEngine(0)
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 		raonfigDIR = "radagent_internal"
 	case utils.MetaMySQL:
@@ -74,7 +74,7 @@ func TestRAit(t *testing.T) {
 	default:
 		t.Fatal("Unknown Database type")
 	}
-	if *encoding == utils.MetaGOB {
+	if *utils.Encoding == utils.MetaGOB {
 		raonfigDIR += "_gob"
 	}
 	for _, stest := range sTestsRadius {
@@ -83,13 +83,13 @@ func TestRAit(t *testing.T) {
 }
 
 func TestRAitDispatcher(t *testing.T) {
-	if *encoding == utils.MetaGOB {
+	if *utils.Encoding == utils.MetaGOB {
 		t.SkipNow()
 		return
 	}
 	isDispatcherActive = true
-	engine.StartEngine(path.Join(*dataDir, "conf", "samples", "dispatchers", "all"), 200)
-	engine.StartEngine(path.Join(*dataDir, "conf", "samples", "dispatchers", "all2"), 200)
+	engine.StartEngine(path.Join(*utils.DataDir, "conf", "samples", "dispatchers", "all"), 200)
+	engine.StartEngine(path.Join(*utils.DataDir, "conf", "samples", "dispatchers", "all2"), 200)
 	raonfigDIR = "dispatchers/radagent"
 	testRadiusitResetAllDB(t)
 	for _, stest := range sTestsRadius {
@@ -100,14 +100,14 @@ func TestRAitDispatcher(t *testing.T) {
 }
 
 func testRAitInitCfg(t *testing.T) {
-	raCfgPath = path.Join(*dataDir, "conf", "samples", raonfigDIR)
+	raCfgPath = path.Join(*utils.DataDir, "conf", "samples", raonfigDIR)
 	// Init config first
 	var err error
 	raCfg, err = config.NewCGRConfigFromPath(raCfgPath)
 	if err != nil {
 		t.Error(err)
 	}
-	raCfg.DataFolderPath = *dataDir // Share DataFolderPath through config towards StoreDb for Flush()
+	raCfg.DataFolderPath = *utils.DataDir // Share DataFolderPath through config towards StoreDb for Flush()
 	config.SetCgrConfig(raCfg)
 	if isDispatcherActive {
 		raCfg.ListenCfg().RPCJSONListen = ":6012"
@@ -115,7 +115,7 @@ func testRAitInitCfg(t *testing.T) {
 }
 
 func testRadiusitResetAllDB(t *testing.T) {
-	cfgPath1 := path.Join(*dataDir, "conf", "samples", "dispatchers", "all")
+	cfgPath1 := path.Join(*utils.DataDir, "conf", "samples", "dispatchers", "all")
 	allCfg, err := config.NewCGRConfigFromPath(cfgPath1)
 	if err != nil {
 		t.Fatal(err)
@@ -144,7 +144,7 @@ func testRAitResetStorDb(t *testing.T) {
 
 // Start CGR Engine
 func testRAitStartEngine(t *testing.T) {
-	if _, err := engine.StartEngine(raCfgPath, *waitRater); err != nil {
+	if _, err := engine.StartEngine(raCfgPath, *utils.WaitRater); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -160,7 +160,7 @@ func testRAitApierRpcConn(t *testing.T) {
 
 // Load the tariff plan, creating accounts and their balances
 func testRAitTPFromFolder(t *testing.T) {
-	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "oldtutorial")}
+	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*utils.DataDir, "tariffplans", "oldtutorial")}
 	var loadInst utils.LoadInstance
 	if err := raRPC.Call(utils.APIerSv2LoadTariffPlanFromFolder, attrs, &loadInst); err != nil {
 		t.Error(err)
@@ -168,7 +168,7 @@ func testRAitTPFromFolder(t *testing.T) {
 	if isDispatcherActive {
 		testRadiusitTPLoadData(t)
 	}
-	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // Give time for scheduler to execute topups
+	time.Sleep(time.Duration(*utils.WaitRater) * time.Millisecond) // Give time for scheduler to execute topups
 }
 
 func testRadiusitTPLoadData(t *testing.T) {
@@ -178,7 +178,7 @@ func testRadiusitTPLoadData(t *testing.T) {
 		if err != nil {
 			t.Error(err)
 		}
-		loader := exec.Command(loaderPath, "-config_path", raCfgPath, "-path", path.Join(*dataDir, "tariffplans", "dispatchers"))
+		loader := exec.Command(loaderPath, "-config_path", raCfgPath, "-path", path.Join(*utils.DataDir, "tariffplans", "dispatchers"))
 
 		if err := loader.Start(); err != nil {
 			t.Error(err)

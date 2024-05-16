@@ -20,7 +20,6 @@ package dispatchers
 
 import (
 	"errors"
-	"flag"
 	"net/rpc"
 	"net/rpc/jsonrpc"
 	"os/exec"
@@ -39,15 +38,9 @@ var (
 	allEngine  *testDispatcher
 	allEngine2 *testDispatcher
 )
-var (
-	waitRater = flag.Int("wait_rater", 100, "Number of miliseconds to wait for rater to start and cache")
-	dataDir   = flag.String("data_dir", "/usr/share/cgrates", "CGR data dir path here")
-	encoding  = flag.String("rpc", utils.MetaJSON, "what encoding whould be used for rpc comunication")
-	dbType    = flag.String("dbtype", utils.MetaInternal, "The type of DataBase (Internal/Mongo/mySql)")
-)
 
 func newRPCClient(cfg *config.ListenCfg) (c *rpc.Client, err error) {
-	switch *encoding {
+	switch *utils.Encoding {
 	case utils.MetaJSON:
 		return jsonrpc.Dial(utils.TCP, cfg.RPCJSONListen)
 	case utils.MetaGOB:

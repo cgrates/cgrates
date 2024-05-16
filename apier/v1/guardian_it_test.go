@@ -36,7 +36,7 @@ import (
 func TestGuardianSIT(t *testing.T) {
 	var err error
 	var guardianConfigDIR string
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 		guardianConfigDIR = "tutinternal"
 	case utils.MetaMySQL:
@@ -48,12 +48,12 @@ func TestGuardianSIT(t *testing.T) {
 	default:
 		t.Fatal("Unknown Database type")
 	}
-	guardianCfgPath := path.Join(*dataDir, "conf", "samples", guardianConfigDIR)
+	guardianCfgPath := path.Join(*utils.DataDir, "conf", "samples", guardianConfigDIR)
 	guardianCfg, err := config.NewCGRConfigFromPath(guardianCfgPath)
 	if err != nil {
 		t.Error(err)
 	}
-	guardianCfg.DataFolderPath = *dataDir
+	guardianCfg.DataFolderPath = *utils.DataDir
 	config.SetCgrConfig(guardianCfg)
 
 	if err = engine.InitDataDb(guardianCfg); err != nil {
@@ -65,7 +65,7 @@ func TestGuardianSIT(t *testing.T) {
 	}
 
 	// start engine
-	if _, err = engine.StopStartEngine(guardianCfgPath, *waitRater); err != nil {
+	if _, err = engine.StopStartEngine(guardianCfgPath, *utils.WaitRater); err != nil {
 		t.Fatal(err)
 	}
 

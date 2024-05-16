@@ -63,7 +63,7 @@ var sTestsTPAlsPrf = []func(t *testing.T){
 
 // Test start here
 func TestTPAlsPrfIT(t *testing.T) {
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 		tpAlsPrfConfigDIR = "tutinternal"
 	case utils.MetaMySQL:

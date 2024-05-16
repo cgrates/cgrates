@@ -55,7 +55,7 @@ var (
 //Test start here
 
 func TestDspDspv1(t *testing.T) {
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 		t.SkipNow()
 	case utils.MetaMySQL:
@@ -67,7 +67,7 @@ func TestDspDspv1(t *testing.T) {
 	default:
 		t.Fatal("Unknown Database type")
 	}
-	if *encoding == utils.MetaGOB {
+	if *utils.Encoding == utils.MetaGOB {
 		dispatcherConfigDIR += "_gob"
 	}
 	for _, stest := range sTestsDspDspv1 {
@@ -77,7 +77,7 @@ func TestDspDspv1(t *testing.T) {
 
 func testDspITLoadConfig(t *testing.T) {
 	var err error
-	dspCfgPath = path.Join(*dataDir, "conf", "samples", "dispatchers", dispatcherConfigDIR)
+	dspCfgPath = path.Join(*utils.DataDir, "conf", "samples", "dispatchers", dispatcherConfigDIR)
 	if dspCfg, err = config.NewCGRConfigFromPath(dspCfgPath); err != nil {
 		t.Error(err)
 	}
@@ -96,7 +96,7 @@ func testDspITResetStorDb(t *testing.T) {
 }
 
 func testDspITStartEngine(t *testing.T) {
-	if _, err := engine.StopStartEngine(dspCfgPath, *waitRater); err != nil {
+	if _, err := engine.StopStartEngine(dspCfgPath, *utils.WaitRater); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -116,7 +116,7 @@ func testDspITLoadData(t *testing.T) {
 		if err != nil {
 			t.Error(err)
 		}
-		loader := exec.Command(loaderPath, "-config_path", dspCfgPath, "-path", path.Join(*dataDir, "tariffplans", "dispatchers"))
+		loader := exec.Command(loaderPath, "-config_path", dspCfgPath, "-path", path.Join(*utils.DataDir, "tariffplans", "dispatchers"))
 
 		if err := loader.Start(); err != nil {
 			t.Error(err)
@@ -167,7 +167,7 @@ func testDspDspv1GetProfileForEvent(t *testing.T) {
 			},
 		},
 	}
-	if *encoding == utils.MetaGOB { // in gob emtpty slice is encoded as nil
+	if *utils.Encoding == utils.MetaGOB { // in gob emtpty slice is encoded as nil
 		expected.Hosts[0].FilterIDs = nil
 		expected.Hosts[1].FilterIDs = nil
 	}

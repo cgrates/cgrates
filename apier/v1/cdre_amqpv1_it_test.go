@@ -93,7 +93,7 @@ func testAMQPv1ResetStorDb(t *testing.T) {
 }
 
 func testAMQPv1StartEngine(t *testing.T) {
-	if _, err := engine.StopStartEngine(amqpv1CfgPath, *waitRater); err != nil {
+	if _, err := engine.StopStartEngine(amqpv1CfgPath, *utils.WaitRater); err != nil {
 		t.Fatal(err)
 	}
 }

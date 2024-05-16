@@ -62,7 +62,7 @@ var sTestsStorDBit = []func(t *testing.T){
 
 func TestStorDBit(t *testing.T) {
 	//var stestName string
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 		if cfg, err = config.NewDefaultCGRConfig(); err != nil {
 			t.Error(err)
@@ -70,7 +70,7 @@ func TestStorDBit(t *testing.T) {
 		config.SetCgrConfig(cfg)
 		storDB = NewInternalDB(nil, nil, false, cfg.StorDbCfg().Items)
 	case utils.MetaMySQL:
-		if cfg, err = config.NewCGRConfigFromPath(path.Join(*dataDir, "conf", "samples", "storage", "mysql")); err != nil {
+		if cfg, err = config.NewCGRConfigFromPath(path.Join(*utils.DataDir, "conf", "samples", "storage", "mysql")); err != nil {
 			t.Fatal(err)
 		}
 		if storDB, err = NewMySQLStorage(cfg.StorDbCfg().Host,
@@ -81,7 +81,7 @@ func TestStorDBit(t *testing.T) {
 			t.Fatal(err)
 		}
 	case utils.MetaMongo:
-		if cfg, err = config.NewCGRConfigFromPath(path.Join(*dataDir, "conf", "samples", "storage", "mongo")); err != nil {
+		if cfg, err = config.NewCGRConfigFromPath(path.Join(*utils.DataDir, "conf", "samples", "storage", "mongo")); err != nil {
 			t.Fatal(err)
 		}
 		if storDB, err = NewMongoStorage(cfg.StorDbCfg().Host,
@@ -92,7 +92,7 @@ func TestStorDBit(t *testing.T) {
 			t.Fatal(err)
 		}
 	case utils.MetaPostgres:
-		if cfg, err = config.NewCGRConfigFromPath(path.Join(*dataDir, "conf", "samples", "storage", "postgres")); err != nil {
+		if cfg, err = config.NewCGRConfigFromPath(path.Join(*utils.DataDir, "conf", "samples", "storage", "postgres")); err != nil {
 			t.Fatal(err)
 		}
 		if storDB, err = NewPostgresStorage(cfg.StorDbCfg().Host,
@@ -111,7 +111,7 @@ func TestStorDBit(t *testing.T) {
 		split := strings.Split(stestFullName, ".")
 		stestName := split[len(split)-1]
 		// Fixme: Implement mongo needed versions methods
-		if (*dbType == utils.MetaMongo || *dbType == utils.MetaInternal) && stestName != "testStorDBitCRUDVersions" {
+		if (*utils.DBType == utils.MetaMongo || *utils.DBType == utils.MetaInternal) && stestName != "testStorDBitCRUDVersions" {
 			stestName := split[len(split)-1]
 			t.Run(stestName, stest)
 		}

@@ -55,7 +55,7 @@ var (
 
 // Test start here
 func TestTPIT(t *testing.T) {
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 		tpConfigDIR = "tutinternal"
 	case utils.MetaMySQL:
@@ -93,7 +93,7 @@ func testTPResetStorDb(t *testing.T) {
 
 // Start CGR Engine
 func testTPStartEngine(t *testing.T) {
-	if _, err := engine.StopStartEngine(tpCfgPath, *waitRater); err != nil {
+	if _, err := engine.StopStartEngine(tpCfgPath, *utils.WaitRater); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -158,7 +158,7 @@ func testTPExportTPToFolderWithError(t *testing.T) {
 }
 
 func testTPKillEngine(t *testing.T) {
-	if err := engine.KillEngine(*waitRater); err != nil {
+	if err := engine.KillEngine(*utils.WaitRater); err != nil {
 		t.Error(err)
 	}
 }

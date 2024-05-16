@@ -47,7 +47,7 @@ var sTestsTutorials2 = []func(t *testing.T){
 }
 
 func TestDestinationCombines(t *testing.T) {
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 		tutorialConfDIR = "tutinternal"
 	case utils.MetaMySQL:
@@ -67,7 +67,7 @@ func TestDestinationCombines(t *testing.T) {
 
 func testDestinationLoadConfig(t *testing.T) {
 	var err error
-	tutorialCfgPath = path.Join(*dataDir, "conf", "samples", tutorialConfDIR)
+	tutorialCfgPath = path.Join(*utils.DataDir, "conf", "samples", tutorialConfDIR)
 	if tutorialCfg, err = config.NewCGRConfigFromPath(tutorialCfgPath); err != nil {
 		t.Error(err)
 	}
@@ -100,7 +100,7 @@ func testDestinationRpcConn(t *testing.T) {
 
 func testDestinationFromFolder(t *testing.T) {
 	var reply string
-	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "tp_destination_with_any")}
+	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*utils.DataDir, "tariffplans", "tp_destination_with_any")}
 	if err := tutorialRpc.Call(utils.APIerSv1LoadTariffPlanFromFolder, attrs, &reply); err != nil {
 		t.Error(err)
 	}

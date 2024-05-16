@@ -60,7 +60,7 @@ var (
 
 // Test start here
 func TestFilterIT(t *testing.T) {
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 		filterConfigDIR = "tutinternal"
 	case utils.MetaMySQL:
@@ -97,7 +97,7 @@ func testFilterResetDataDB(t *testing.T) {
 
 // Start CGR Engine
 func testFilterStartEngine(t *testing.T) {
-	if _, err := engine.StopStartEngine(filterCfgPath, *waitRater); err != nil {
+	if _, err := engine.StopStartEngine(filterCfgPath, *utils.WaitRater); err != nil {
 		t.Fatal(err)
 	}
 }

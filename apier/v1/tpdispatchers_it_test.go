@@ -61,7 +61,7 @@ var sTestsTPDispatchers = []func(t *testing.T){
 
 // Test start here
 func TestTPDispatcherIT(t *testing.T) {
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 		tpDispatcherConfigDIR = "tutinternal"
 	case utils.MetaMySQL:

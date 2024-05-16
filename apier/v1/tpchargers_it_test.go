@@ -62,7 +62,7 @@ var sTestsTPChrgs = []func(t *testing.T){
 
 // Test start here
 func TestTPChrgsIT(t *testing.T) {
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 		tpChrgsConfigDIR = "tutinternal"
 	case utils.MetaMySQL:

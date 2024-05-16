@@ -59,7 +59,7 @@ var (
 
 // Test start here
 func TestCDRExport(t *testing.T) {
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 		cdreConfigDIR = "cdrewithfilter_internal"
 	case utils.MetaMySQL:
@@ -113,7 +113,7 @@ func testCDReResetStorDb(t *testing.T) {
 
 // Start CGR Engine
 func testCDReStartEngine(t *testing.T) {
-	if _, err := engine.StopStartEngine(cdreCfgPath, *waitRater); err != nil {
+	if _, err := engine.StopStartEngine(cdreCfgPath, *utils.WaitRater); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -241,7 +241,7 @@ func testCDReExportCDRs2(t *testing.T) {
 
 func testCDReFromFolder(t *testing.T) {
 	var reply string
-	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "tutorial")}
+	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*utils.DataDir, "tariffplans", "tutorial")}
 	if err := cdreRPC.Call(utils.APIerSv1LoadTariffPlanFromFolder, attrs, &reply); err != nil {
 		t.Error(err)
 	}
