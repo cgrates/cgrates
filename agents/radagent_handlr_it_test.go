@@ -22,9 +22,11 @@ package agents
 
 import (
 	"crypto/rand"
+	"errors"
 	"fmt"
 	"math/big"
 	"net/rpc"
+	"net/rpc/jsonrpc"
 	"os"
 	"path"
 	"path/filepath"
@@ -177,8 +179,7 @@ func testRAHitInitCfg(t *testing.T) {
 		}
 		`
 
-	var folderNameSuffix *big.Int
-	folderNameSuffix, err = rand.Int(rand.Reader, big.NewInt(10000))
+	folderNameSuffix, err := rand.Int(rand.Reader, big.NewInt(10000))
 	if err != nil {
 		t.Fatalf("could not generate random number for folder name suffix, err: %s", err.Error())
 	}
@@ -225,7 +226,14 @@ func testRAHitStartEngine(t *testing.T) {
 // Connect rpc client to rater
 func testRAHitApierRpcConn(t *testing.T) {
 	var err error
-	raHRPC, err = newRPCClient(raHCfg.ListenCfg()) // We connect over JSON so we can also troubleshoot if needed
+	switch *utils.Encoding {
+	case utils.MetaJSON:
+		raHRPC, err = jsonrpc.Dial(utils.TCP, raHCfg.ListenCfg().RPCJSONListen)
+	case utils.MetaGOB:
+		raHRPC, err = rpc.Dial(utils.TCP, raHCfg.ListenCfg().RPCGOBListen)
+	default:
+		err = errors.New("UNSUPPORTED_RPC")
+	}
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -271,6 +279,7 @@ cgrates.org,ATTR_RAD,*any,*string:~*req.RadUserName:10011;*prefix:~*req.RadPassw
 }
 
 func testRAHitEmptyValueHandling(t *testing.T) {
+	var err error
 	if raHAuthClnt, err = radigo.NewClient("udp", "127.0.0.1:1812", "CGRateS.org", dictRad, 1, nil); err != nil {
 		t.Fatal(err)
 	}
