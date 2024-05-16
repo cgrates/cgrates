@@ -427,7 +427,7 @@ func testV1CDRsRefundCDR(t *testing.T) {
 	balanceUuid := acnt.BalanceMap[utils.MetaMonetary][0].Uuid
 
 	argsEv := &engine.ArgV1ProcessEvent{
-		Flags: []string{utils.MetaRefund},
+		Flags: []string{utils.MetaRefund, utils.ConcatenatedKey(utils.MetaRALs, "false")},
 		CGREvent: utils.CGREvent{
 			Tenant: "cgrates.org",
 			Event: map[string]any{

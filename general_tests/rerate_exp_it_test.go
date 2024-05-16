@@ -362,6 +362,7 @@ func testRerateExpGetAccountAfterProcessEvent2(t *testing.T) {
 
 func testRerateExpProcessEventCDR3(t *testing.T) {
 	argsEv := &engine.ArgV1ProcessEvent{
+		Flags: []string{"*rals:false"},
 		CGREvent: utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "event3",

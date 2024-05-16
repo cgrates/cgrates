@@ -305,7 +305,7 @@ func testV2CDRsGetCdrs2(t *testing.T) {
 // Disable Attributes and Charger process
 func testV2CDRsProcessCDR3(t *testing.T) {
 	args := &engine.ArgV1ProcessEvent{
-		Flags: []string{"*attributes:false", "*chargers:false"},
+		Flags: []string{"*attributes:false", "*chargers:false", "*rals:false"},
 		CGREvent: utils.CGREvent{
 			Tenant: "cgrates.org",
 			Event: map[string]any{

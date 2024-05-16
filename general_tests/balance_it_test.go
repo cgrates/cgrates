@@ -459,7 +459,7 @@ cgrates.org,call,1001,2014-01-14T00:00:00Z,RP_VOICE,`,
 		var replyProcessEvent string
 		if err := client.Call(context.Background(), utils.CDRsV1ProcessEvent,
 			&engine.ArgV1ProcessEvent{
-				Flags:    []string{utils.MetaRefund, "*store:false"},
+				Flags:    []string{utils.MetaRefund, "*store:false", "*rals:false"},
 				CGREvent: *cdrs[0].AsCGREvent(),
 			}, &replyProcessEvent); err != nil {
 			t.Fatal(err)
@@ -791,7 +791,7 @@ cgrates.org,call,1001,2014-01-14T00:00:00Z,RP_VOICE,`,
 		var replyProcessEvent string
 		if err := client.Call(context.Background(), utils.CDRsV1ProcessEvent,
 			&engine.ArgV1ProcessEvent{
-				Flags:    []string{utils.MetaRefund, "*store:false"},
+				Flags:    []string{utils.MetaRefund, "*store:false", "*rals:false"},
 				CGREvent: *cdrs[0].AsCGREvent(),
 			}, &replyProcessEvent); err != nil {
 			t.Fatal(err)
