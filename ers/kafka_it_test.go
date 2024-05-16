@@ -37,9 +37,9 @@ import (
 )
 
 var (
-	rdrEvents chan *erEvent
-	rdrErr    chan error
-	rdrExit   chan struct{}
+	kfkEvents chan *erEvent
+	kfkErr    chan error
+	kfkExit   chan struct{}
 	kfk       EventReader
 )
 
@@ -99,12 +99,12 @@ func TestKafkaER(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	rdrEvents = make(chan *erEvent, 1)
-	rdrErr = make(chan error, 1)
-	rdrExit = make(chan struct{}, 1)
+	kfkEvents = make(chan *erEvent, 1)
+	kfkErr = make(chan error, 1)
+	kfkExit = make(chan struct{}, 1)
 
-	if kfk, err = NewKafkaER(cfg, 1, rdrEvents,
-		rdrErr, new(engine.FilterS), rdrExit); err != nil {
+	if kfk, err = NewKafkaER(cfg, 1, kfkEvents,
+		kfkErr, new(engine.FilterS), kfkExit); err != nil {
 		t.Fatal(err)
 	}
 	kfk.Serve()
@@ -131,9 +131,9 @@ func TestKafkaER(t *testing.T) {
 	}(randomCGRID)
 
 	select {
-	case err = <-rdrErr:
+	case err = <-kfkErr:
 		t.Error(err)
-	case ev := <-rdrEvents:
+	case ev := <-kfkEvents:
 		if ev.rdrCfg.ID != "kafka" {
 			t.Errorf("Expected 'kakfa' received `%s`", ev.rdrCfg.ID)
 		}
@@ -151,7 +151,7 @@ func TestKafkaER(t *testing.T) {
 	case <-time.After(10 * time.Second):
 		t.Fatal("Timeout")
 	}
-	rdrExit <- struct{}{}
+	kfkExit <- struct{}{}
 
 	// Delete kafka topic
 
