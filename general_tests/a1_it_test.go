@@ -22,10 +22,8 @@ package general_tests
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	"net/rpc"
-	"net/rpc/jsonrpc"
 	"path"
 	"sync"
 	"testing"
@@ -410,16 +408,5 @@ func testA1itConcurrentAPs(t *testing.T) {
 func testA1itStopCgrEngine(t *testing.T) {
 	if err := engine.KillEngine(100); err != nil {
 		t.Error(err)
-	}
-}
-
-func newRPCClient(cfg *config.ListenCfg) (c *rpc.Client, err error) {
-	switch *utils.Encoding {
-	case utils.MetaJSON:
-		return jsonrpc.Dial(utils.TCP, cfg.RPCJSONListen)
-	case utils.MetaGOB:
-		return rpc.Dial(utils.TCP, cfg.RPCGOBListen)
-	default:
-		return nil, errors.New("UNSUPPORTED_RPC")
 	}
 }

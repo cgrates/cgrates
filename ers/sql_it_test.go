@@ -168,20 +168,26 @@ func testSQLInitDB(t *testing.T) {
 	tx.Commit()
 }
 
+var (
+	sqlEvents chan *erEvent
+	sqlErr    chan error
+	sqlExit   chan struct{}
+)
+
 func testSQLReader(t *testing.T) {
-	rdrEvents = make(chan *erEvent, 1)
-	rdrErr = make(chan error, 1)
-	rdrExit = make(chan struct{}, 1)
-	sqlER, err := NewEventReader(sqlCfg, 1, rdrEvents, rdrErr, new(engine.FilterS), rdrExit)
+	sqlEvents = make(chan *erEvent, 1)
+	sqlErr = make(chan error, 1)
+	sqlExit = make(chan struct{}, 1)
+	sqlER, err := NewEventReader(sqlCfg, 1, sqlEvents, sqlErr, new(engine.FilterS), sqlExit)
 	if err != nil {
 		t.Fatal(err)
 	}
 	sqlER.Serve()
 
 	select {
-	case err = <-rdrErr:
+	case err = <-sqlErr:
 		t.Error(err)
-	case ev := <-rdrEvents:
+	case ev := <-sqlEvents:
 		if ev.rdrCfg.ID != "mysql" {
 			t.Errorf("Expected 'mysql' received `%s`", ev.rdrCfg.ID)
 		}
@@ -230,9 +236,9 @@ func testSQLEmptyTable(t *testing.T) {
 
 func testSQLReader2(t *testing.T) {
 	select {
-	case err := <-rdrErr:
+	case err := <-sqlErr:
 		t.Error(err)
-	case ev := <-rdrEvents:
+	case ev := <-sqlEvents:
 		if ev.rdrCfg.ID != "mysql" {
 			t.Errorf("Expected 'mysql' received `%s`", ev.rdrCfg.ID)
 		}
@@ -282,7 +288,7 @@ func testSQLPoster(t *testing.T) {
 }
 
 func testSQLStop(t *testing.T) {
-	rdrExit <- struct{}{}
+	sqlExit <- struct{}{}
 	db = db.DropTable("cdrs2")
 	if err := db.Close(); err != nil {
 		t.Error(err)
