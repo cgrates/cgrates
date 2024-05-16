@@ -48,6 +48,11 @@ jobs:
         run: |
           ansible-playbook data/ansible/integration_tests/main.yaml -i localhost, -c local -e "ansible_user=$(whoami) cgrates_dir=$GITHUB_WORKSPACE clone_repository=false install_go=false"
 
+      - name: Run flaky tests
+        continue-on-error: true 
+        run: |
+          sudo env "PATH=$PATH" ./flaky_test.sh
+
       - name: Run integration tests
         run: |
           sudo env "PATH=$PATH" ./integration_test.sh
