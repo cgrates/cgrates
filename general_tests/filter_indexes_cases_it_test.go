@@ -199,7 +199,7 @@ var (
 
 // Test start here
 func TestFilterIndexesCasesIT(t *testing.T) {
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 		fIdxCasesCfgDir = "filter_indexes_cases_internal"
 	case utils.MetaMySQL:
@@ -217,7 +217,7 @@ func TestFilterIndexesCasesIT(t *testing.T) {
 }
 
 func testFilterIndexesCasesITLoadConfig(t *testing.T) {
-	fIdxCasesCfgPath = path.Join(*dataDir, "conf", "samples", fIdxCasesCfgDir)
+	fIdxCasesCfgPath = path.Join(*utils.DataDir, "conf", "samples", fIdxCasesCfgDir)
 	var err error
 	if fIdxCasesCfg, err = config.NewCGRConfigFromPath(fIdxCasesCfgPath); err != nil {
 		t.Error(err)
@@ -237,7 +237,7 @@ func testFilterIndexesCasesResetStorDb(t *testing.T) {
 }
 
 func testFilterIndexesCasesStartEngine(t *testing.T) {
-	if _, err := engine.StopStartEngine(fIdxCasesCfgPath, *waitRater); err != nil {
+	if _, err := engine.StopStartEngine(fIdxCasesCfgPath, *utils.WaitRater); err != nil {
 		t.Fatal(err)
 	}
 }

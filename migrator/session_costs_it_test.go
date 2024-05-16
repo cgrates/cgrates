@@ -49,8 +49,8 @@ var sTestssCostIT = []func(t *testing.T){
 
 func TestSessionCostITMongo(t *testing.T) {
 	var err error
-	sCostPathIn = path.Join(*dataDir, "conf", "samples", "tutmongo")
-	sCostPathOut = path.Join(*dataDir, "conf", "samples", "tutmongojson")
+	sCostPathIn = path.Join(*utils.DataDir, "conf", "samples", "tutmongo")
+	sCostPathOut = path.Join(*utils.DataDir, "conf", "samples", "tutmongojson")
 	sCostCfgIn, err = config.NewCGRConfigFromPath(sCostPathIn)
 	if err != nil {
 		t.Error(err)
@@ -67,7 +67,7 @@ func TestSessionCostITMongo(t *testing.T) {
 
 func TestSessionCostITMySql(t *testing.T) {
 	var err error
-	sCostPathIn = path.Join(*dataDir, "conf", "samples", "tutmysql")
+	sCostPathIn = path.Join(*utils.DataDir, "conf", "samples", "tutmysql")
 	sCostCfgIn, err = config.NewCGRConfigFromPath(sCostPathIn)
 	if err != nil {
 		t.Error(err)

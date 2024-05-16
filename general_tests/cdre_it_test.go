@@ -54,7 +54,7 @@ var (
 )
 
 func TestCDREIT(t *testing.T) {
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 		cdreConfigDIR = "tutinternal_new"
 	case utils.MetaMySQL:
@@ -74,12 +74,12 @@ func TestCDREIT(t *testing.T) {
 
 func testCDREInitCfg(t *testing.T) {
 	var err error
-	cdreCfgPath = path.Join(*dataDir, "conf", "samples", cdreConfigDIR)
+	cdreCfgPath = path.Join(*utils.DataDir, "conf", "samples", cdreConfigDIR)
 	cdreCfg, err = config.NewCGRConfigFromPath(cdreCfgPath)
 	if err != nil {
 		t.Error(err)
 	}
-	cdreCfg.DataFolderPath = *dataDir
+	cdreCfg.DataFolderPath = *utils.DataDir
 }
 
 func testCDREInitDataDb(t *testing.T) {
@@ -95,7 +95,7 @@ func testCDREResetStorDb(t *testing.T) {
 }
 
 func testCDREStartEngine(t *testing.T) {
-	if _, err := engine.StopStartEngine(cdreCfgPath, *waitRater); err != nil {
+	if _, err := engine.StopStartEngine(cdreCfgPath, *utils.WaitRater); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -185,7 +185,7 @@ func testCDREExport(t *testing.T) {
 }
 
 func testCDREStopEngine(t *testing.T) {
-	if err := engine.KillEngine(*waitRater); err != nil {
+	if err := engine.KillEngine(*utils.WaitRater); err != nil {
 		t.Error(err)
 	}
 }

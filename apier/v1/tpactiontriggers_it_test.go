@@ -62,7 +62,7 @@ var sTestsTPActionTriggers = []func(t *testing.T){
 
 // Test start here
 func TestTPActionTriggersIT(t *testing.T) {
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 		tpActionTriggerConfigDIR = "tutinternal"
 	case utils.MetaMySQL:

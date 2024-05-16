@@ -90,7 +90,7 @@ func testSQSResetStorDb(t *testing.T) {
 }
 
 func testSQSStartEngine(t *testing.T) {
-	if _, err := engine.StopStartEngine(sqsCfgPath, *waitRater); err != nil {
+	if _, err := engine.StopStartEngine(sqsCfgPath, *utils.WaitRater); err != nil {
 		t.Fatal(err)
 	}
 }

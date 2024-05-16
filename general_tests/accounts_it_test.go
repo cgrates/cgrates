@@ -63,7 +63,7 @@ var (
 
 // Test start here
 func TestAccIT(t *testing.T) {
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 		accConfDIR = "tutinternal"
 	case utils.MetaMySQL:
@@ -83,7 +83,7 @@ func TestAccIT(t *testing.T) {
 
 func testV1AccLoadConfig(t *testing.T) {
 	var err error
-	accCfgPath = path.Join(*dataDir, "conf", "samples", accConfDIR)
+	accCfgPath = path.Join(*utils.DataDir, "conf", "samples", accConfDIR)
 	if accCfg, err = config.NewCGRConfigFromPath(accCfgPath); err != nil {
 		t.Error(err)
 	}
@@ -127,7 +127,7 @@ func testV1AccGetAccountBeforeSet(t *testing.T) {
 
 func testV1AccLoadTarrifPlans(t *testing.T) {
 	var reply string
-	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "testit")}
+	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*utils.DataDir, "tariffplans", "testit")}
 	if err := accRpc.Call(utils.APIerSv1LoadTariffPlanFromFolder, attrs, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {

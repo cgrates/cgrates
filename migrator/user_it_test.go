@@ -46,18 +46,18 @@ var sTestsUsrIT = []func(t *testing.T){
 }
 
 func TestUserMigrateITRedis(t *testing.T) {
-	inPath := path.Join(*dataDir, "conf", "samples", "tutmysql")
+	inPath := path.Join(*utils.DataDir, "conf", "samples", "tutmysql")
 	testUsrStart("TestUserMigrateITRedis", inPath, inPath, t)
 }
 
 func TestUserMigrateITMongo(t *testing.T) {
-	inPath := path.Join(*dataDir, "conf", "samples", "tutmongo")
+	inPath := path.Join(*utils.DataDir, "conf", "samples", "tutmongo")
 	testUsrStart("TestUserMigrateITMongo", inPath, inPath, t)
 }
 
 func TestUserITMigrateMongo2Redis(t *testing.T) {
-	inPath := path.Join(*dataDir, "conf", "samples", "tutmongo")
-	outPath := path.Join(*dataDir, "conf", "samples", "tutmysql")
+	inPath := path.Join(*utils.DataDir, "conf", "samples", "tutmongo")
+	outPath := path.Join(*utils.DataDir, "conf", "samples", "tutmysql")
 	testUsrStart("TestUserITMigrateMongo2Redis", inPath, outPath, t)
 }
 

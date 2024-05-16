@@ -327,7 +327,7 @@ func TestResourceAllocateResource(t *testing.T) {
 
 // TestRSCacheSetGet assurace the presence of private params in cached resource
 func TestRSCacheSetGet(t *testing.T) {
-	if *dbType == utils.MetaInternal {
+	if *utils.DBType == utils.MetaInternal {
 		t.SkipNow()
 	}
 	r := &Resource{
@@ -735,7 +735,7 @@ func TestResourceIDs(t *testing.T) {
 }
 
 func TestResourceCaching(t *testing.T) {
-	if *dbType == utils.MetaInternal {
+	if *utils.DBType == utils.MetaInternal {
 		t.SkipNow()
 	}
 	//clear the cache

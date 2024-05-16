@@ -59,12 +59,12 @@ func TestTpTresMove(t *testing.T) {
 
 func testTpTresITConnect(t *testing.T) {
 	var err error
-	tpTresPathIn = path.Join(*dataDir, "conf", "samples", "tutmongo")
+	tpTresPathIn = path.Join(*utils.DataDir, "conf", "samples", "tutmongo")
 	tpTresCfgIn, err = config.NewCGRConfigFromPath(tpTresPathIn)
 	if err != nil {
 		t.Fatal(err)
 	}
-	tpTresPathOut = path.Join(*dataDir, "conf", "samples", "tutmysql")
+	tpTresPathOut = path.Join(*utils.DataDir, "conf", "samples", "tutmysql")
 	tpTresCfgOut, err = config.NewCGRConfigFromPath(tpTresPathOut)
 	if err != nil {
 		t.Fatal(err)

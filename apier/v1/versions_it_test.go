@@ -55,7 +55,7 @@ var (
 
 // Test start here
 func TestVrsIT(t *testing.T) {
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 		// vrsConfigDIR = "tutinternal"
 		// vrsStorageType = utils.INTERNAL

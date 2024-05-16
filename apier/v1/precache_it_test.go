@@ -56,7 +56,7 @@ var (
 )
 
 func TestPrecacheIT(t *testing.T) {
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 		t.SkipNow()
 	case utils.MetaMySQL:
@@ -91,7 +91,7 @@ func testPrecacheResetDataDB(t *testing.T) {
 }
 
 func testPrecacheStartEngine(t *testing.T) {
-	if _, err := engine.StopStartEngine(precacheCfgPath, *waitRater); err != nil {
+	if _, err := engine.StopStartEngine(precacheCfgPath, *utils.WaitRater); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -131,7 +131,7 @@ func testPrecacheGetCacheStatsBeforeLoad(t *testing.T) {
 
 func testPrecacheFromFolder(t *testing.T) {
 	var reply string
-	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "precache")}
+	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*utils.DataDir, "tariffplans", "precache")}
 	if err := precacheRPC.Call(utils.APIerSv1LoadTariffPlanFromFolder, attrs, &reply); err != nil {
 		t.Error(err)
 	}
@@ -139,7 +139,7 @@ func testPrecacheFromFolder(t *testing.T) {
 }
 
 func testPrecacheRestartEngine(t *testing.T) {
-	if _, err := engine.StopStartEngine(precacheCfgPath, *waitRater); err != nil {
+	if _, err := engine.StopStartEngine(precacheCfgPath, *utils.WaitRater); err != nil {
 		t.Fatal(err)
 	}
 	var err error
@@ -324,7 +324,7 @@ func testPrecacheGetCacheStatsAfterRestart(t *testing.T) {
 }
 
 func testPrecacheKillEngine(t *testing.T) {
-	if err := engine.KillEngine(*waitRater); err != nil {
+	if err := engine.KillEngine(*utils.WaitRater); err != nil {
 		t.Error(err)
 	}
 }

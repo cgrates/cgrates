@@ -64,7 +64,7 @@ var (
 
 // Test start here
 func TestCacheSv1IT(t *testing.T) {
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 		t.SkipNow()
 	case utils.MetaMySQL:
@@ -83,7 +83,7 @@ func TestCacheSv1IT(t *testing.T) {
 
 func testCacheSLoadConfig(t *testing.T) {
 	var err error
-	chcCfgPath = path.Join(*dataDir, "conf", "samples", "precache", cacheConfigDIR)
+	chcCfgPath = path.Join(*utils.DataDir, "conf", "samples", "precache", cacheConfigDIR)
 	if chcCfg, err = config.NewCGRConfigFromPath(chcCfgPath); err != nil {
 		t.Error(err)
 	}
@@ -104,7 +104,7 @@ func testCacheSInitStorDb(t *testing.T) {
 
 // Start engine
 func testCacheSStartEngine(t *testing.T) {
-	if _, err := engine.StopStartEngine(chcCfgPath, *waitRater); err != nil {
+	if _, err := engine.StopStartEngine(chcCfgPath, *utils.WaitRater); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -119,11 +119,11 @@ func testCacheSRpcConn(t *testing.T) {
 
 func testCacheSLoadTariffPlanFromFolder(t *testing.T) {
 	var reply string
-	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "testtp")}
+	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*utils.DataDir, "tariffplans", "testtp")}
 	if err := chcRPC.Call(utils.APIerSv1LoadTariffPlanFromFolder, attrs, &reply); err != nil {
 		t.Error(err)
 	}
-	time.Sleep(time.Duration(*waitRater) * time.Millisecond)
+	time.Sleep(time.Duration(*utils.WaitRater) * time.Millisecond)
 }
 
 func testCacheSAfterLoadFromFolder(t *testing.T) {

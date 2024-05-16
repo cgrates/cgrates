@@ -200,7 +200,7 @@ var (
 
 // Test start here
 func TestTSV1IT(t *testing.T) {
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 		tSv1ConfDIR = "tutinternal"
 	case utils.MetaMySQL:
@@ -220,7 +220,7 @@ func TestTSV1IT(t *testing.T) {
 
 func testV1TSLoadConfig(t *testing.T) {
 	var err error
-	tSv1CfgPath = path.Join(*dataDir, "conf", "samples", tSv1ConfDIR)
+	tSv1CfgPath = path.Join(*utils.DataDir, "conf", "samples", tSv1ConfDIR)
 	if tSv1Cfg, err = config.NewCGRConfigFromPath(tSv1CfgPath); err != nil {
 		t.Error(err)
 	}
@@ -240,7 +240,7 @@ func testV1TSResetStorDb(t *testing.T) {
 }
 
 func testV1TSStartEngine(t *testing.T) {
-	if _, err := engine.StopStartEngine(tSv1CfgPath, *waitRater); err != nil {
+	if _, err := engine.StopStartEngine(tSv1CfgPath, *utils.WaitRater); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -255,7 +255,7 @@ func testV1TSRpcConn(t *testing.T) {
 
 func testV1TSFromFolder(t *testing.T) {
 	var reply string
-	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "oldtutorial")}
+	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*utils.DataDir, "tariffplans", "oldtutorial")}
 	if err := tSv1Rpc.Call(utils.APIerSv1LoadTariffPlanFromFolder, attrs, &reply); err != nil {
 		t.Error(err)
 	}
@@ -361,7 +361,7 @@ func testV1TSGetThresholdsAfterRestart(t *testing.T) {
 		t.SkipNow()
 	}
 	time.Sleep(time.Second)
-	if _, err := engine.StopStartEngine(tSv1CfgPath, *waitRater); err != nil {
+	if _, err := engine.StopStartEngine(tSv1CfgPath, *utils.WaitRater); err != nil {
 		t.Fatal(err)
 	}
 	var err error
@@ -559,7 +559,7 @@ func testV1TSMaxHits(t *testing.T) {
 }
 
 func testV1TSStopEngine(t *testing.T) {
-	if err := engine.KillEngine(*waitRater); err != nil {
+	if err := engine.KillEngine(*utils.WaitRater); err != nil {
 		t.Error(err)
 	}
 }

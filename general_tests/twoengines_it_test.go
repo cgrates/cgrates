@@ -65,12 +65,13 @@ func TestTwoEngines(t *testing.T) {
 }
 
 func testTwoEnginesInitConfig(t *testing.T) {
-	engineOneCfgPath = path.Join(*dataDir, "conf", "samples", "twoengines", "engine1")
+	engineOneCfgPath = path.Join(*utils.DataDir, "conf", "samples", "twoengines", "engine1")
+	var err error
 	if engineOneCfg, err = config.NewCGRConfigFromPath(engineOneCfgPath); err != nil {
 		t.Fatal(err)
 	}
 	config.SetCgrConfig(engineOneCfg)
-	engineTwoCfgPath = path.Join(*dataDir, "conf", "samples", "twoengines", "engine2")
+	engineTwoCfgPath = path.Join(*utils.DataDir, "conf", "samples", "twoengines", "engine2")
 	if engineTwoCfg, err = config.NewCGRConfigFromPath(engineTwoCfgPath); err != nil {
 		t.Fatal(err)
 	}
@@ -87,10 +88,10 @@ func testTwoEnginesInitStorDB(t *testing.T) {
 	}
 }
 func testTwoEnginesStartEngine(t *testing.T) {
-	if _, err := engine.StopStartEngine(engineOneCfgPath, *waitRater); err != nil {
+	if _, err := engine.StopStartEngine(engineOneCfgPath, *utils.WaitRater); err != nil {
 		t.Fatal(err)
 	}
-	if _, err := engine.StartEngine(engineTwoCfgPath, *waitRater); err != nil {
+	if _, err := engine.StartEngine(engineTwoCfgPath, *utils.WaitRater); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -268,7 +269,7 @@ func testTwoEnginesUpdateThreshold(t *testing.T) {
 }
 
 func testTwoEnginesKillEngines(t *testing.T) {
-	if err := engine.KillEngine(*waitRater); err != nil {
+	if err := engine.KillEngine(*utils.WaitRater); err != nil {
 		t.Error(err)
 	}
 }

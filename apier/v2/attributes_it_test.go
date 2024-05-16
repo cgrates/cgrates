@@ -55,7 +55,7 @@ var (
 
 // Test start here
 func TestAttributeSIT(t *testing.T) {
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 		alsPrfConfigDIR = "tutinternal"
 	case utils.MetaMySQL:
@@ -75,12 +75,12 @@ func TestAttributeSIT(t *testing.T) {
 
 func testAttributeSInitCfg(t *testing.T) {
 	var err error
-	alsPrfCfgPath = path.Join(*dataDir, "conf", "samples", alsPrfConfigDIR)
+	alsPrfCfgPath = path.Join(*utils.DataDir, "conf", "samples", alsPrfConfigDIR)
 	alsPrfCfg, err = config.NewCGRConfigFromPath(alsPrfCfgPath)
 	if err != nil {
 		t.Error(err)
 	}
-	alsPrfCfg.DataFolderPath = *dataDir // Share DataFolderPath through config towards StoreDb for Flush()
+	alsPrfCfg.DataFolderPath = *utils.DataDir // Share DataFolderPath through config towards StoreDb for Flush()
 	config.SetCgrConfig(alsPrfCfg)
 }
 
@@ -99,7 +99,7 @@ func testAttributeSResetStorDb(t *testing.T) {
 
 // Start CGR Engine
 func testAttributeSStartEngine(t *testing.T) {
-	if _, err := engine.StopStartEngine(alsPrfCfgPath, *waitRater); err != nil {
+	if _, err := engine.StopStartEngine(alsPrfCfgPath, *utils.WaitRater); err != nil {
 		t.Fatal(err)
 	}
 }

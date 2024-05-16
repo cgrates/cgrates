@@ -36,11 +36,11 @@ import (
 )
 
 var (
-	node1ConfigPath     = path.Join(*dataDir, "redis_sentinel", "node1.conf")
-	node2ConfigPath     = path.Join(*dataDir, "redis_sentinel", "node2.conf")
-	sentinel1ConfigPath = path.Join(*dataDir, "redis_sentinel", "sentinel1.conf")
-	sentinel2ConfigPath = path.Join(*dataDir, "redis_sentinel", "sentinel2.conf")
-	engineConfigPath    = path.Join(*dataDir, "conf", "samples", "tutsentinel")
+	node1ConfigPath     = path.Join(*utils.DataDir, "redis_sentinel", "node1.conf")
+	node2ConfigPath     = path.Join(*utils.DataDir, "redis_sentinel", "node2.conf")
+	sentinel1ConfigPath = path.Join(*utils.DataDir, "redis_sentinel", "sentinel1.conf")
+	sentinel2ConfigPath = path.Join(*utils.DataDir, "redis_sentinel", "sentinel2.conf")
+	engineConfigPath    = path.Join(*utils.DataDir, "conf", "samples", "tutsentinel")
 	sentinelConfig      *config.CGRConfig
 	sentinelRPC         *rpc.Client
 	node1Exec, node2Exec,
@@ -66,7 +66,7 @@ var (
 // Sentinel1 will be started at port 16381 and will watch Node1
 // Sentinel2 will be started at port 16382 and will watch Node1
 func TestRedisSentinel(t *testing.T) {
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 		t.SkipNow()
 	case utils.MetaMySQL:
@@ -110,7 +110,7 @@ func testRedisSentinelInitConfig(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	sentinelConfig.DataFolderPath = *dataDir // Share DataFolderPath through config towards StoreDb for Flush()
+	sentinelConfig.DataFolderPath = *utils.DataDir // Share DataFolderPath through config towards StoreDb for Flush()
 	config.SetCgrConfig(sentinelConfig)
 }
 

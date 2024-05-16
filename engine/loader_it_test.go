@@ -58,7 +58,7 @@ var (
 )
 
 func TestLoaderIT(t *testing.T) {
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 		t.SkipNow()
 	case utils.MetaMySQL:
@@ -77,7 +77,7 @@ func TestLoaderIT(t *testing.T) {
 }
 
 func testLoaderITInitConfig(t *testing.T) {
-	loaderCfgPath = path.Join(*dataDir, "conf", "samples", loaderConfigDIR)
+	loaderCfgPath = path.Join(*utils.DataDir, "conf", "samples", loaderConfigDIR)
 	lCfg, err = config.NewCGRConfigFromPath(loaderCfgPath)
 	if err != nil {
 		t.Error(err)
@@ -119,10 +119,10 @@ func testLoaderITInitStoreDB(t *testing.T) {
 	storDb = db
 	// Creating the table serves also as reset since there is a drop prior to create
 	dbdir := "mysql"
-	if *dbType == utils.MetaPostgres {
+	if *utils.DBType == utils.MetaPostgres {
 		dbdir = "postgres"
 	}
-	if err := db.Flush(path.Join(*dataDir, "storage", dbdir)); err != nil {
+	if err := db.Flush(path.Join(*utils.DataDir, "storage", dbdir)); err != nil {
 		t.Error("Error on db creation: ", err.Error())
 		return // No point in going further
 	}
@@ -132,12 +132,12 @@ func testLoaderITInitStoreDB(t *testing.T) {
 func testLoaderITRemoveLoad(t *testing.T) {
 	var err error
 	/*for fn, v := range FileValidators {
-		if err = ValidateCSVData(path.Join(*dataDir, "tariffplans", *tpCsvScenario, fn), v.Rule); err != nil {
+		if err = ValidateCSVData(path.Join(*utils.DataDir, "tariffplans", *tpCsvScenario, fn), v.Rule); err != nil {
 			t.Error("Failed validating data: ", err.Error())
 		}
 	}*/
 	loader, err = NewTpReader(dataDbCsv.DataDB(), NewFileCSVStorage(utils.CSV_SEP,
-		path.Join(*dataDir, "tariffplans", *tpCsvScenario), false), "", "", []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)}, nil)
+		path.Join(*utils.DataDir, "tariffplans", *tpCsvScenario), false), "", "", []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)}, nil)
 	if err != nil {
 		t.Error(err)
 	}
@@ -210,11 +210,11 @@ func testLoaderITRemoveLoad(t *testing.T) {
 func testLoaderITLoadFromCSV(t *testing.T) {
 	var err error
 	/*for fn, v := range FileValidators {
-		if err = ValidateCSVData(path.Join(*dataDir, "tariffplans", *tpCsvScenario, fn), v.Rule); err != nil {
+		if err = ValidateCSVData(path.Join(*utils.DataDir, "tariffplans", *tpCsvScenario, fn), v.Rule); err != nil {
 			t.Error("Failed validating data: ", err.Error())
 		}
 	}*/
-	loader, err = NewTpReader(dataDbCsv.DataDB(), NewFileCSVStorage(utils.CSV_SEP, path.Join(*dataDir, "tariffplans", *tpCsvScenario), false), "", "", []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)}, nil)
+	loader, err = NewTpReader(dataDbCsv.DataDB(), NewFileCSVStorage(utils.CSV_SEP, path.Join(*utils.DataDir, "tariffplans", *tpCsvScenario), false), "", "", []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)}, nil)
 	if err != nil {
 		t.Error(err)
 	}
@@ -501,7 +501,7 @@ func testLoaderITImportToStorDb(t *testing.T) {
 	csvImporter := TPCSVImporter{
 		TPid:     utils.TEST_SQL,
 		StorDb:   storDb,
-		DirPath:  path.Join(*dataDir, "tariffplans", *tpCsvScenario),
+		DirPath:  path.Join(*utils.DataDir, "tariffplans", *tpCsvScenario),
 		Sep:      utils.CSV_SEP,
 		Verbose:  false,
 		ImportId: utils.TEST_SQL}

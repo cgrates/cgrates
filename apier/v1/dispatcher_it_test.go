@@ -68,7 +68,7 @@ var (
 
 // Test start here
 func TestDispatcherSIT(t *testing.T) {
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 		dispatcherConfigDIR = "tutinternal"
 	case utils.MetaMySQL:
@@ -88,12 +88,12 @@ func TestDispatcherSIT(t *testing.T) {
 
 func testDispatcherSInitCfg(t *testing.T) {
 	var err error
-	dispatcherCfgPath = path.Join(*dataDir, "conf", "samples", dispatcherConfigDIR)
+	dispatcherCfgPath = path.Join(*utils.DataDir, "conf", "samples", dispatcherConfigDIR)
 	dispatcherCfg, err = config.NewCGRConfigFromPath(dispatcherCfgPath)
 	if err != nil {
 		t.Error(err)
 	}
-	dispatcherCfg.DataFolderPath = *dataDir
+	dispatcherCfg.DataFolderPath = *utils.DataDir
 }
 
 func testDispatcherSInitDataDb(t *testing.T) {
@@ -111,7 +111,7 @@ func testDispatcherSResetStorDb(t *testing.T) {
 
 // Start CGR Engine
 func testDispatcherSStartEngine(t *testing.T) {
-	if _, err := engine.StopStartEngine(dispatcherCfgPath, *waitRater); err != nil {
+	if _, err := engine.StopStartEngine(dispatcherCfgPath, *utils.WaitRater); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -362,7 +362,7 @@ func testDispatcherSRemDispatcherHost(t *testing.T) {
 }
 
 func testDispatcherSKillEngine(t *testing.T) {
-	if err := engine.KillEngine(*waitRater); err != nil {
+	if err := engine.KillEngine(*utils.WaitRater); err != nil {
 		t.Error(err)
 	}
 }

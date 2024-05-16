@@ -59,7 +59,7 @@ var (
 // Test start here
 func TestDspCDRsIT(t *testing.T) {
 	var config1, config2, config3 string
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 		t.SkipNow()
 	case utils.MetaMySQL:
@@ -77,17 +77,17 @@ func TestDspCDRsIT(t *testing.T) {
 	}
 
 	dispDIR := "dispatchers"
-	if *encoding == utils.MetaGOB {
+	if *utils.Encoding == utils.MetaGOB {
 		dispDIR += "_gob"
 	}
 	testDsp(t, sTestsDspCDRs, "TestDspCDRs", config1, config2, config3, "tutorial", "oldtutorial", dispDIR)
 }
 
 func TestDspCDRsITMySQLWithoutAuth(t *testing.T) {
-	if *dbType != utils.MetaMySQL {
+	if *utils.DBType != utils.MetaMySQL {
 		t.SkipNow()
 	}
-	if *encoding == utils.MetaGOB {
+	if *utils.Encoding == utils.MetaGOB {
 		testDsp(t, sTestsDspCDRsWithoutAuth, "TestDspCDRsWithoutAuth", "all_mysql", "all2_mysql", "dispatchers_no_attributes", "tutorial", "oldtutorial", "dispatchers_gob")
 	} else {
 		testDsp(t, sTestsDspCDRsWithoutAuth, "TestDspCDRsWithoutAuth", "all_mysql", "all2_mysql", "dispatchers_no_attributes", "tutorial", "oldtutorial", "dispatchers")

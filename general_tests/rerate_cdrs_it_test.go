@@ -74,7 +74,7 @@ var (
 
 // Test start here
 func TestRerateCDRs(t *testing.T) {
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 		rrCdrsConfDIR = "rerate_cdrs_internal"
 	case utils.MetaMySQL:
@@ -94,7 +94,7 @@ func TestRerateCDRs(t *testing.T) {
 
 func testRerateCDRsLoadConfig(t *testing.T) {
 	var err error
-	rrCdrsCfgPath = path.Join(*dataDir, "conf", "samples", rrCdrsConfDIR)
+	rrCdrsCfgPath = path.Join(*utils.DataDir, "conf", "samples", rrCdrsConfDIR)
 	if rrCdrsCfg, err = config.NewCGRConfigFromPath(rrCdrsCfgPath); err != nil {
 		t.Error(err)
 	}

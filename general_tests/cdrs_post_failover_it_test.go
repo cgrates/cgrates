@@ -55,7 +55,7 @@ var (
 
 // Tests starting here
 func TestCDRsPostFailoverIT(t *testing.T) {
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 		cdrsPostFailConfDIR = "cdrsv_failover_internal"
 	case utils.MetaMySQL:
@@ -75,7 +75,7 @@ func TestCDRsPostFailoverIT(t *testing.T) {
 
 func testCDRsPostFailoverInitConfig(t *testing.T) {
 	var err error
-	cdrsPostFailCfgPath = path.Join(*dataDir, "conf", "samples", cdrsPostFailConfDIR)
+	cdrsPostFailCfgPath = path.Join(*utils.DataDir, "conf", "samples", cdrsPostFailConfDIR)
 	if cdrsPostFailCfg, err = config.NewCGRConfigFromPath(cdrsPostFailCfgPath); err != nil {
 		t.Fatal("Got config error: ", err.Error())
 	}
@@ -104,13 +104,14 @@ func testCDRsPostFailoverStartEngine(t *testing.T) {
 		t.Error(err)
 	}
 
-	if _, err := engine.StopStartEngine(cdrsPostFailCfgPath, *waitRater); err != nil {
+	if _, err := engine.StopStartEngine(cdrsPostFailCfgPath, *utils.WaitRater); err != nil {
 		t.Fatal(err)
 	}
 }
 
 // Connect rpc client to rater
 func testCDRsPostFailoverRpcConn(t *testing.T) {
+	var err error
 	cdrsPostFailRpc, err = newRPCClient(cdrsPostFailCfg.ListenCfg()) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
 		t.Fatal("Could not connect to rater: ", err.Error())
@@ -121,10 +122,10 @@ func testCDRsPostFailoverLoadTariffPlanFromFolder(t *testing.T) {
 	var loadInst utils.LoadInstance
 	if err := cdrsPostFailRpc.Call(utils.APIerSv2LoadTariffPlanFromFolder,
 		&utils.AttrLoadTpFromFolder{FolderPath: path.Join(
-			*dataDir, "tariffplans", "testit")}, &loadInst); err != nil {
+			*utils.DataDir, "tariffplans", "testit")}, &loadInst); err != nil {
 		t.Error(err)
 	}
-	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // Give time for scheduler to execute topups
+	time.Sleep(time.Duration(*utils.WaitRater) * time.Millisecond) // Give time for scheduler to execute topups
 	var resp string
 	if err := cdrsPostFailRpc.Call(utils.APIerSv1RemoveChargerProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "SupplierCharges"}, &resp); err != nil {
@@ -214,7 +215,7 @@ func testCDRsPostFailoverToFile(t *testing.T) {
 }
 
 func testCDRsPostFailoverKillEngine(t *testing.T) {
-	if err := engine.KillEngine(*waitRater); err != nil {
+	if err := engine.KillEngine(*utils.WaitRater); err != nil {
 		t.Error(err)
 	}
 }

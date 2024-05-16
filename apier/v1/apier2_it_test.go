@@ -72,7 +72,7 @@ var (
 // Test start here
 func TestApierIT2(t *testing.T) {
 	// no need for a new config with *gob transport in this case
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 		APIerSv2ConfigDIR = "tutinternal"
 		sTestsAPIer = sTestsAPIer[:len(sTestsAPIer)-6]
@@ -117,14 +117,14 @@ func testAPIerResetStorDb(t *testing.T) {
 // Start CGR Engine
 func testAPIerStartEngineSleep(t *testing.T) {
 	time.Sleep(500 * time.Millisecond)
-	if _, err := engine.StopStartEngine(apierCfgPath, *waitRater); err != nil {
+	if _, err := engine.StopStartEngine(apierCfgPath, *utils.WaitRater); err != nil {
 		t.Fatal(err)
 	}
 }
 
 // Start CGR Engine
 func testAPIerStartEngine(t *testing.T) {
-	if _, err := engine.StopStartEngine(apierCfgPath, *waitRater); err != nil {
+	if _, err := engine.StopStartEngine(apierCfgPath, *utils.WaitRater); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -140,7 +140,7 @@ func testAPIerRPCConn(t *testing.T) {
 
 func testAPIerLoadFromFolder(t *testing.T) {
 	var reply string
-	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "tutorial")}
+	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*utils.DataDir, "tariffplans", "tutorial")}
 	if err := apierRPC.Call(utils.APIerSv1LoadTariffPlanFromFolder, attrs, &reply); err != nil {
 		t.Error(err)
 	}
@@ -176,7 +176,7 @@ func testAPIerVerifyAttributesAfterLoad(t *testing.T) {
 			Weight: 20.0,
 		},
 	}
-	if *encoding == utils.MetaGOB {
+	if *utils.Encoding == utils.MetaGOB {
 		eAttrPrf.Attributes[0].FilterIDs = nil // in gob emtpty slice is encoded as nil
 	}
 	eAttrPrf.Compile()
@@ -200,7 +200,7 @@ func testAPIerVerifyAttributesAfterLoad(t *testing.T) {
 
 func testAPIerRemoveTPFromFolder(t *testing.T) {
 	var reply string
-	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "tutorial")}
+	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*utils.DataDir, "tariffplans", "tutorial")}
 	if err := apierRPC.Call(utils.APIerSv1RemoveTPFromFolder, attrs, &reply); err != nil {
 		t.Error(err)
 	}
@@ -335,7 +335,7 @@ func testAPIerGetRatingPlanIDs(t *testing.T) {
 }
 
 func testApierSetAndRemoveRatingProfileAnySubject(t *testing.T) {
-	loader := exec.Command("cgr-loader", "-config_path", apierCfgPath, "-path", path.Join(*dataDir, "tariffplans", "tutorial"))
+	loader := exec.Command("cgr-loader", "-config_path", apierCfgPath, "-path", path.Join(*utils.DataDir, "tariffplans", "tutorial"))
 	if err := loader.Run(); err != nil {
 		t.Error(err)
 	}
@@ -394,7 +394,7 @@ func testApierSetAndRemoveRatingProfileAnySubject(t *testing.T) {
 }
 
 func testAPIerKillEngine(t *testing.T) {
-	if err := engine.KillEngine(*waitRater); err != nil {
+	if err := engine.KillEngine(*utils.WaitRater); err != nil {
 		t.Error(err)
 	}
 }

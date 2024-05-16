@@ -66,7 +66,7 @@ var (
 )
 
 func TestHAit(t *testing.T) {
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 		haCfgDIR = "httpagent_internal"
 	case utils.MetaMySQL:
@@ -78,7 +78,7 @@ func TestHAit(t *testing.T) {
 	default:
 		t.Fatal("Unknown Database type")
 	}
-	if *encoding == utils.MetaGOB {
+	if *utils.Encoding == utils.MetaGOB {
 		haCfgDIR += "_gob"
 	}
 	//Run the tests without Tls
@@ -90,7 +90,7 @@ func TestHAit(t *testing.T) {
 }
 
 func TestHAitTls(t *testing.T) {
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 		haCfgDIR = "httpagenttls_internal"
 	case utils.MetaMySQL:
@@ -102,7 +102,7 @@ func TestHAitTls(t *testing.T) {
 	default:
 		t.Fatal("Unknown Database type")
 	}
-	if *encoding == utils.MetaGOB {
+	if *utils.Encoding == utils.MetaGOB {
 		haCfgDIR += "_gob"
 	}
 	//Run the tests with Tls
@@ -115,12 +115,12 @@ func TestHAitTls(t *testing.T) {
 // Init config first
 func testHAitInitCfg(t *testing.T) {
 	var err error
-	haCfgPath = path.Join(*dataDir, "conf", "samples", haCfgDIR)
+	haCfgPath = path.Join(*utils.DataDir, "conf", "samples", haCfgDIR)
 	haCfg, err = config.NewCGRConfigFromPath(haCfgPath)
 	if err != nil {
 		t.Error(err)
 	}
-	haCfg.DataFolderPath = *dataDir // Share DataFolderPath through config towards StoreDb for Flush()
+	haCfg.DataFolderPath = *utils.DataDir // Share DataFolderPath through config towards StoreDb for Flush()
 	config.SetCgrConfig(haCfg)
 }
 
@@ -167,7 +167,7 @@ func testHAitResetDB(t *testing.T) {
 
 // Start CGR Engine
 func testHAitStartEngine(t *testing.T) {
-	if _, err := engine.StopStartEngine(haCfgPath, *waitRater); err != nil {
+	if _, err := engine.StopStartEngine(haCfgPath, *utils.WaitRater); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -183,12 +183,12 @@ func testHAitApierRpcConn(t *testing.T) {
 
 // Load the tariff plan, creating accounts and their balances
 func testHAitTPFromFolder(t *testing.T) {
-	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "oldtutorial")}
+	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*utils.DataDir, "tariffplans", "oldtutorial")}
 	var loadInst utils.LoadInstance
 	if err := haRPC.Call(utils.APIerSv2LoadTariffPlanFromFolder, attrs, &loadInst); err != nil {
 		t.Error(err)
 	}
-	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // Give time for scheduler to execute topups
+	time.Sleep(time.Duration(*utils.WaitRater) * time.Millisecond) // Give time for scheduler to execute topups
 }
 
 func testHAitAuthDryRun(t *testing.T) {
@@ -376,7 +376,7 @@ Item1.1=Val1
 }
 
 func testHAitStopEngine(t *testing.T) {
-	if err := engine.KillEngine(*waitRater); err != nil {
+	if err := engine.KillEngine(*utils.WaitRater); err != nil {
 		t.Error(err)
 	}
 }

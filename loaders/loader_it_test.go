@@ -21,7 +21,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package loaders
 
 import (
+	"errors"
 	"net/rpc"
+	"net/rpc/jsonrpc"
 	"os"
 	"path"
 	"reflect"
@@ -57,7 +59,7 @@ var (
 
 // Test start here
 func TestLoaderIT(t *testing.T) {
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 		loaderCfgDIR = "tutinternal"
 	case utils.MetaMySQL:
@@ -78,12 +80,12 @@ func TestLoaderIT(t *testing.T) {
 
 func testLoaderInitCfg(t *testing.T) {
 	var err error
-	loaderCfgPath = path.Join(*dataDir, "conf", "samples", "loaders", loaderCfgDIR)
+	loaderCfgPath = path.Join(*utils.DataDir, "conf", "samples", "loaders", loaderCfgDIR)
 	loaderCfg, err = config.NewCGRConfigFromPath(loaderCfgPath)
 	if err != nil {
 		t.Fatal(err)
 	}
-	loaderCfg.DataFolderPath = *dataDir // Share DataFolderPath through config towards StoreDb for Flush()
+	loaderCfg.DataFolderPath = *utils.DataDir // Share DataFolderPath through config towards StoreDb for Flush()
 	config.SetCgrConfig(loaderCfg)
 }
 
@@ -176,7 +178,7 @@ func testLoaderCheckAttributes(t *testing.T) {
 		Blocker: true,
 		Weight:  20,
 	}
-	if *encoding == utils.MetaGOB { // gob threats empty slices as nil values
+	if *utils.Encoding == utils.MetaGOB { // gob threats empty slices as nil values
 		eAttrPrf.Attributes[1].FilterIDs = nil
 	}
 	var reply *engine.AttributeProfile
@@ -198,5 +200,16 @@ func testLoaderCheckAttributes(t *testing.T) {
 func testLoaderKillEngine(t *testing.T) {
 	if err := engine.KillEngine(100); err != nil {
 		t.Error(err)
+	}
+}
+
+func newRPCClient(cfg *config.ListenCfg) (c *rpc.Client, err error) {
+	switch *utils.Encoding {
+	case utils.MetaJSON:
+		return jsonrpc.Dial(utils.TCP, cfg.RPCJSONListen)
+	case utils.MetaGOB:
+		return rpc.Dial(utils.TCP, cfg.RPCGOBListen)
+	default:
+		return nil, errors.New("UNSUPPORTED_RPC")
 	}
 }

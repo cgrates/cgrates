@@ -50,36 +50,36 @@ var sTestsFltrIT = []func(t *testing.T){
 }
 
 func TestFiltersMigrateITRedis(t *testing.T) {
-	inPath := path.Join(*dataDir, "conf", "samples", "tutmysql")
+	inPath := path.Join(*utils.DataDir, "conf", "samples", "tutmysql")
 	testFltrStart("TestFiltersMigrateITRedis", inPath, inPath, utils.Migrate, t)
 }
 
 func TestFiltersMigrateITMongo(t *testing.T) {
-	inPath := path.Join(*dataDir, "conf", "samples", "tutmongo")
+	inPath := path.Join(*utils.DataDir, "conf", "samples", "tutmongo")
 	testFltrStart("TestFiltersMigrateITMongo", inPath, inPath, utils.Migrate, t)
 }
 
 func TestFiltersITMove(t *testing.T) {
-	inPath := path.Join(*dataDir, "conf", "samples", "tutmongo")
-	outPath := path.Join(*dataDir, "conf", "samples", "tutmysql")
+	inPath := path.Join(*utils.DataDir, "conf", "samples", "tutmongo")
+	outPath := path.Join(*utils.DataDir, "conf", "samples", "tutmysql")
 	testFltrStart("TestFiltersITMove", inPath, outPath, utils.Move, t)
 }
 
 func TestFiltersITMigrateMongo2Redis(t *testing.T) {
-	inPath := path.Join(*dataDir, "conf", "samples", "tutmongo")
-	outPath := path.Join(*dataDir, "conf", "samples", "tutmysql")
+	inPath := path.Join(*utils.DataDir, "conf", "samples", "tutmongo")
+	outPath := path.Join(*utils.DataDir, "conf", "samples", "tutmysql")
 	testFltrStart("TestFiltersITMigrateMongo2Redis", inPath, outPath, utils.Migrate, t)
 }
 
 func TestFiltersITMoveEncoding(t *testing.T) {
-	inPath := path.Join(*dataDir, "conf", "samples", "tutmongo")
-	outPath := path.Join(*dataDir, "conf", "samples", "tutmongojson")
+	inPath := path.Join(*utils.DataDir, "conf", "samples", "tutmongo")
+	outPath := path.Join(*utils.DataDir, "conf", "samples", "tutmongojson")
 	testFltrStart("TestFiltersITMoveEncoding", inPath, outPath, utils.Move, t)
 }
 
 func TestFiltersITMoveEncoding2(t *testing.T) {
-	inPath := path.Join(*dataDir, "conf", "samples", "tutmysql")
-	outPath := path.Join(*dataDir, "conf", "samples", "tutmysqljson")
+	inPath := path.Join(*utils.DataDir, "conf", "samples", "tutmysql")
+	outPath := path.Join(*utils.DataDir, "conf", "samples", "tutmysqljson")
 	testFltrStart("TestFiltersITMoveEncoding2", inPath, outPath, utils.Move, t)
 }
 

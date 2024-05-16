@@ -61,7 +61,7 @@ var sTestsTPSharedGroups = []func(t *testing.T){
 
 // Test start here
 func TestTPSharedGroupsIT(t *testing.T) {
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 		tpSharedGroupConfigDIR = "tutinternal"
 	case utils.MetaMySQL:

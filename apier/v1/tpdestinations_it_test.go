@@ -61,7 +61,7 @@ var sTestsTPDestinations = []func(t *testing.T){
 
 // Test start here
 func TestTPDestinationsIT(t *testing.T) {
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 		tpDestinationConfigDIR = "tutinternal"
 	case utils.MetaMySQL:

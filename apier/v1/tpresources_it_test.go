@@ -61,7 +61,7 @@ var sTestsTPResources = []func(t *testing.T){
 
 // Test start here
 func TestTPResIT(t *testing.T) {
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 		tpResConfigDIR = "tutinternal"
 	case utils.MetaMySQL:

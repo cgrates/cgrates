@@ -59,7 +59,7 @@ var (
 
 func TestTPit(t *testing.T) {
 
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 		configDIR = "tutinternal"
 	case utils.MetaMySQL:
@@ -78,7 +78,7 @@ func TestTPit(t *testing.T) {
 }
 
 func testTPitLoadConfig(t *testing.T) {
-	tpCfgPath = path.Join(*dataDir, "conf", "samples", configDIR)
+	tpCfgPath = path.Join(*utils.DataDir, "conf", "samples", configDIR)
 	if tpCfg, err = config.NewCGRConfigFromPath(tpCfgPath); err != nil {
 		t.Error(err)
 	}
@@ -86,7 +86,7 @@ func testTPitLoadConfig(t *testing.T) {
 	case "tutmongo": // Mongo needs more time to reset db, need to investigate
 		delay = 4000
 	default:
-		delay = *waitRater
+		delay = *utils.WaitRater
 	}
 }
 

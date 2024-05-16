@@ -54,7 +54,7 @@ var sTestSessionSv1ProcessEvent = []func(t *testing.T){
 }
 
 func TestSSv1ItProcessEventWithPrepaid(t *testing.T) {
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 		sessionsConfDIR = "sessions_internal"
 	case utils.MetaMySQL:
@@ -74,7 +74,7 @@ func TestSSv1ItProcessEventWithPrepaid(t *testing.T) {
 }
 
 func TestSSv1ItProcessEventWithPostPaid(t *testing.T) {
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 		sessionsConfDIR = "sessions_internal"
 	case utils.MetaMySQL:
@@ -95,7 +95,7 @@ func TestSSv1ItProcessEventWithPostPaid(t *testing.T) {
 }
 
 func TestSSv1ItProcessEventWithRated(t *testing.T) {
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 		sessionsConfDIR = "sessions_internal"
 	case utils.MetaMySQL:
@@ -116,7 +116,7 @@ func TestSSv1ItProcessEventWithRated(t *testing.T) {
 }
 
 func TestSSv1ItProcessEventWithPseudoPrepaid(t *testing.T) {
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 		sessionsConfDIR = "sessions_internal"
 	case utils.MetaMySQL:
@@ -137,13 +137,13 @@ func TestSSv1ItProcessEventWithPseudoPrepaid(t *testing.T) {
 
 func testSSv1ItInitCfg(t *testing.T) {
 	var err error
-	sSv1CfgPath = path.Join(*dataDir, "conf", "samples", sessionsConfDIR)
+	sSv1CfgPath = path.Join(*utils.DataDir, "conf", "samples", sessionsConfDIR)
 	// Init config first
 	sSv1Cfg, err = config.NewCGRConfigFromPath(sSv1CfgPath)
 	if err != nil {
 		t.Error(err)
 	}
-	sSv1Cfg.DataFolderPath = *dataDir // Share DataFolderPath through config towards StoreDb for Flush()
+	sSv1Cfg.DataFolderPath = *utils.DataDir // Share DataFolderPath through config towards StoreDb for Flush()
 	config.SetCgrConfig(sSv1Cfg)
 }
 

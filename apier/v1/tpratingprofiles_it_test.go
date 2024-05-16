@@ -65,7 +65,7 @@ var sTestsTPRatingProfiles = []func(t *testing.T){
 
 // Test start here
 func TestTPRatingProfilesIT(t *testing.T) {
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 		tpRatingProfileConfigDIR = "tutinternal"
 	case utils.MetaMySQL:

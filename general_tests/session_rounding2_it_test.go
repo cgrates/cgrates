@@ -67,7 +67,7 @@ var (
 )
 
 func TestSesRnd2IT(t *testing.T) {
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 		sesRnd2CfgDIR = "sessions_internal"
 	case utils.MetaMySQL:
@@ -85,7 +85,8 @@ func TestSesRnd2IT(t *testing.T) {
 }
 
 func testSesRnd2LoadConfig(t *testing.T) {
-	sesRnd2CfgPath = path.Join(*dataDir, "conf", "samples", sesRnd2CfgDIR)
+	sesRnd2CfgPath = path.Join(*utils.DataDir, "conf", "samples", sesRnd2CfgDIR)
+	var err error
 	if sesRnd2Cfg, err = config.NewCGRConfigFromPath(sesRnd2CfgPath); err != nil {
 		t.Error(err)
 	}
@@ -104,7 +105,7 @@ func testSesRnd2ResetStorDb(t *testing.T) {
 }
 
 func testSesRnd2StartEngine(t *testing.T) {
-	if _, err := engine.StopStartEngine(sesRnd2CfgPath, *waitRater); err != nil {
+	if _, err := engine.StopStartEngine(sesRnd2CfgPath, *utils.WaitRater); err != nil {
 		t.Fatal(err)
 	}
 }

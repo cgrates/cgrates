@@ -24,7 +24,6 @@ package general_tests
 import (
 	"flag"
 	"net/rpc"
-	"net/rpc/jsonrpc"
 	"reflect"
 	"testing"
 	"time"
@@ -92,7 +91,7 @@ func testSTIResetStorDb(t *testing.T) {
 
 // Start CGR Engine
 func testSTIStartEngine(t *testing.T) {
-	if _, err := engine.StopStartEngine(*configDir, *waitRater); err != nil {
+	if _, err := engine.StopStartEngine(*configDir, *utils.WaitRater); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -114,7 +113,7 @@ func testSTILoadTariffPlanFromFolder(t *testing.T) {
 	} else if stiLoadInst.RatingLoadID == "" || stiLoadInst.AccountingLoadID == "" {
 		t.Error("Empty loadId received, loadInstance: ", stiLoadInst)
 	}
-	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // Give time for scheduler to execute topups
+	time.Sleep(time.Duration(*utils.WaitRater) * time.Millisecond) // Give time for scheduler to execute topups
 }
 
 // Check loaded stats

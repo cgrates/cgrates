@@ -54,7 +54,7 @@ var (
 )
 
 func TestSesMFDIt(t *testing.T) {
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 		sesMFDCfgDir = "sessions_internal"
 	case utils.MetaMySQL:
@@ -72,7 +72,8 @@ func TestSesMFDIt(t *testing.T) {
 }
 
 func testSesMFDItLoadConfig(t *testing.T) {
-	sesMFDCfgPath = path.Join(*dataDir, "conf", "samples", sesMFDCfgDir)
+	sesMFDCfgPath = path.Join(*utils.DataDir, "conf", "samples", sesMFDCfgDir)
+	var err error
 	if sesMFDCfg, err = config.NewCGRConfigFromPath(sesMFDCfgPath); err != nil {
 		t.Error(err)
 	}
@@ -91,7 +92,7 @@ func testSesMFDItResetStorDb(t *testing.T) {
 }
 
 func testSesMFDItStartEngine(t *testing.T) {
-	if _, err := engine.StopStartEngine(sesMFDCfgPath, *waitRater); err != nil {
+	if _, err := engine.StopStartEngine(sesMFDCfgPath, *utils.WaitRater); err != nil {
 		t.Fatal(err)
 	}
 }

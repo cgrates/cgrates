@@ -51,7 +51,7 @@ var (
 
 // Test start here
 func TestConfigSIT(t *testing.T) {
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 		configConfigDIR = "tutinternal"
 	case utils.MetaMySQL:
@@ -70,12 +70,12 @@ func TestConfigSIT(t *testing.T) {
 
 func testConfigSInitCfg(t *testing.T) {
 	var err error
-	configCfgPath = path.Join(*dataDir, "conf", "samples", configConfigDIR)
+	configCfgPath = path.Join(*utils.DataDir, "conf", "samples", configConfigDIR)
 	configCfg, err = config.NewCGRConfigFromPath(configCfgPath)
 	if err != nil {
 		t.Error(err)
 	}
-	configCfg.DataFolderPath = *dataDir
+	configCfg.DataFolderPath = *utils.DataDir
 	config.SetCgrConfig(configCfg)
 }
 
@@ -94,7 +94,7 @@ func testConfigSResetStorDb(t *testing.T) {
 
 // Start CGR Engine
 func testConfigSStartEngine(t *testing.T) {
-	if _, err := engine.StopStartEngine(configCfgPath, *waitRater); err != nil {
+	if _, err := engine.StopStartEngine(configCfgPath, *utils.WaitRater); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -159,7 +159,7 @@ func testConfigSReloadConfigFromJSONSessionS(t *testing.T) {
 			utils.SMS:      1.,
 		},
 	}
-	if *encoding == utils.MetaGOB {
+	if *utils.Encoding == utils.MetaGOB {
 		var empty []any
 		exp["ThreshSConns"] = empty
 		exp["StatSConns"] = empty

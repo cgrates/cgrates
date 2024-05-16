@@ -101,7 +101,7 @@ package general_tests
 // )
 
 // func TestSectChange(t *testing.T) {
-// 	switch *dbType {
+// 	switch *utils.DBType {
 // 	case utils.MetaInternal:
 // 		testSectCfgDir = "reload_sect_internal"
 // 	case utils.MetaMySQL:
@@ -119,7 +119,7 @@ package general_tests
 // }
 
 // func testSectLoadConfig(t *testing.T) {
-// 	testSectCfgPath = path.Join(*dataDir, "conf", "samples", testSectCfgDir)
+// 	testSectCfgPath = path.Join(*utils.DataDir, "conf", "samples", testSectCfgDir)
 // 	if testSectCfg, err = config.NewCGRConfigFromPath(testSectCfgPath); err != nil {
 // 		t.Error(err)
 // 	}
@@ -138,7 +138,7 @@ package general_tests
 // }
 
 // func testSectStartEngine(t *testing.T) {
-// 	if _, err := engine.StopStartEngine(testSectCfgPath, *waitRater); err != nil {
+// 	if _, err := engine.StopStartEngine(testSectCfgPath, *utils.WaitRater); err != nil {
 // 		t.Fatal(err)
 // 	}
 // }
@@ -1156,7 +1156,7 @@ package general_tests
 // 	var reply string
 // 	if err := testSectRPC.Call(utils.ConfigSv1ReloadConfig, &config.ReloadArgs{
 // 		Tenant:  "cgrates.org",
-// 		Path:    path.Join(*dataDir, "conf", "samples", "tutinternal"),
+// 		Path:    path.Join(*utils.DataDir, "conf", "samples", "tutinternal"),
 // 		Section: config.LoaderJson,
 // 	}, &reply); err != nil {
 // 		t.Error(err)

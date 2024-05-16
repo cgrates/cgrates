@@ -90,7 +90,7 @@ func testKafkaResetStorDb(t *testing.T) {
 }
 
 func testKafkaStartEngine(t *testing.T) {
-	if _, err := engine.StopStartEngine(kafkaCfgPath, *waitRater); err != nil {
+	if _, err := engine.StopStartEngine(kafkaCfgPath, *utils.WaitRater); err != nil {
 		t.Fatal(err)
 	}
 }

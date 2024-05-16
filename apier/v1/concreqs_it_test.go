@@ -78,7 +78,7 @@ func TestConcReqsQueueJSON(t *testing.T) {
 
 func TestConcReqsBusyGOB(t *testing.T) {
 	concReqsConfigDIR = "conc_reqs_busy"
-	encoding = utils.StringPointer(utils.MetaGOB)
+	utils.Encoding = utils.StringPointer(utils.MetaGOB)
 	for _, stest := range sTestsConcReqs {
 		t.Run(concReqsConfigDIR, stest)
 	}
@@ -86,7 +86,7 @@ func TestConcReqsBusyGOB(t *testing.T) {
 
 func TestConcReqsQueueGOB(t *testing.T) {
 	concReqsConfigDIR = "conc_reqs_queue"
-	encoding = utils.StringPointer(utils.MetaGOB)
+	utils.Encoding = utils.StringPointer(utils.MetaGOB)
 	for _, stest := range sTestsConcReqs {
 		t.Run(concReqsConfigDIR, stest)
 	}
@@ -94,18 +94,18 @@ func TestConcReqsQueueGOB(t *testing.T) {
 
 func testConcReqsInitCfg(t *testing.T) {
 	var err error
-	concReqsCfgPath = path.Join(*dataDir, "conf", "samples", concReqsConfigDIR)
+	concReqsCfgPath = path.Join(*utils.DataDir, "conf", "samples", concReqsConfigDIR)
 	concReqsCfg, err = config.NewCGRConfigFromPath(concReqsCfgPath)
 	if err != nil {
 		t.Error(err)
 	}
-	concReqsCfg.DataFolderPath = *dataDir
+	concReqsCfg.DataFolderPath = *utils.DataDir
 	config.SetCgrConfig(concReqsCfg)
 }
 
 // Start CGR Engine
 func testConcReqsStartEngine(t *testing.T) {
-	if _, err := engine.StopStartEngine(concReqsCfgPath, *waitRater); err != nil {
+	if _, err := engine.StopStartEngine(concReqsCfgPath, *utils.WaitRater); err != nil {
 		t.Fatal(err)
 	}
 }
