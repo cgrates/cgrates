@@ -227,7 +227,7 @@ func (cdrS *CDRServer) rateCDR(cdr *CDRWithAPIOpts) ([]*CDR, error) {
 				cdr.CGRID, utils.MetaSessionS, cdr.RunID, cdr.OriginID, cdr.OriginHost))
 	}
 	if cdr.CostDetails != nil {
-		if cdr.Usage == cdr.CostDetails.GetUsage() { // Costs were previously calculated, make sure they cover the full usage
+		if cdr.Usage <= cdr.CostDetails.GetUsage() { // Costs were previously calculated, make sure they cover the full usage
 			cdr.Cost = cdr.CostDetails.GetCost()
 			cdr.CostDetails.Compute()
 			return []*CDR{cdr.CDR}, nil
