@@ -1861,3 +1861,26 @@ func TestErsCfgloadFromJSONCfg(t *testing.T) {
 		}
 	}
 }
+
+func TestERsCfg_ReaderCfg(t *testing.T) {
+	// test data
+	readerID := "reader1"
+	notFoundID := "reader2"
+	readers := []*EventReaderCfg{
+		{ID: readerID},
+		{ID: "readerX"},
+	}
+	ersCfg := &ERsCfg{Readers: readers}
+
+	// finding an existing reader by ID
+	reader := ersCfg.ReaderCfg(readerID)
+	if reader == nil {
+		t.Errorf("Expected to find reader with ID '%s', but got nil", readerID)
+	}
+
+	// not finding a reader with a non-existent ID
+	reader = ersCfg.ReaderCfg(notFoundID)
+	if reader != nil {
+		t.Errorf("Expected not to find reader with ID '%s', but got a reader", notFoundID)
+	}
+}
