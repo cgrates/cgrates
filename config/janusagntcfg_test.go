@@ -40,8 +40,10 @@ func TestJanusConnAsMapInterface(t *testing.T) {
 		Type:    "ws",
 	}
 	exp := map[string]any{
-		utils.AddressCfg: "127.001",
-		utils.TypeCfg:    "ws",
+		utils.AddressCfg:       "127.001",
+		utils.TypeCfg:          "ws",
+		utils.AdminAddressCfg:  "",
+		utils.AdminPasswordCfg: "",
 	}
 	val := js.AsMapInterface()
 	if !reflect.DeepEqual(val, exp) {
