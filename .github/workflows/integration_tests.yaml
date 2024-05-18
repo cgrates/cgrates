@@ -34,7 +34,7 @@ jobs:
         with:
           go-version: "1.22.x"
 
-      - name: Setup Python
+      - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.x"
@@ -47,6 +47,9 @@ jobs:
       - name: Run Ansible Playbook
         run: |
           ansible-playbook data/ansible/integration_tests/main.yaml -i localhost, -c local -e "ansible_user=$(whoami) cgrates_dir=$GITHUB_WORKSPACE clone_repository=false install_go=false"
+
+      # - name: Set up tmate session for debugging
+      #   uses: mxschmitt/action-tmate@v3
 
       - name: Run flaky tests
         continue-on-error: true 
