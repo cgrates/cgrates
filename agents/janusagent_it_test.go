@@ -44,6 +44,7 @@ var (
 	janCfgPath  string
 	janCfgDIR   string
 	janCfg      *config.CGRConfig
+	janBin      string
 	janRPC      *birpc.Client
 	sTestsJanus = []func(t *testing.T){
 		testJanitInitCfg,
@@ -65,6 +66,10 @@ func TestJanusit(t *testing.T) {
 		t.SkipNow()
 	default:
 		t.Fatal("Unknown Database type")
+	}
+	janBin, err = exec.LookPath("/opt/janus/bin/janus")
+	if err != nil || janBin == "" {
+		t.SkipNow()
 	}
 	for _, stests := range sTestsJanus {
 		t.Run(janCfgDIR, stests)
@@ -104,10 +109,6 @@ func testJanitApierRpcConn(t *testing.T) {
 }
 
 func testJanCmd(t *testing.T) {
-	janBin, err := exec.LookPath("/opt/janus/bin/janus")
-	if err != nil || janBin == "" {
-		t.SkipNow()
-	}
 	cmd := exec.Command(janBin)
 	if err := cmd.Start(); err != nil {
 		t.Fatal(err)
