@@ -700,6 +700,7 @@ func testV1TSUpdateSnooze(t *testing.T) {
 			FilterIDs: []string{"*string:~*req.CustomEv:SnoozeEv"},
 			MinSleep:  10 * time.Minute,
 			Weight:    100,
+			MaxHits:   -1,
 		},
 	}
 	//set
