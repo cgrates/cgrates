@@ -336,6 +336,30 @@ func TestRadiusAgentCfgClone(t *testing.T) {
 	}
 }
 
+func TestClone(t *testing.T) {
+
+	baseOpts := &DAClientOpts{
+
+		Transport: "udp",
+		Host:      "localhost",
+		Port:      6768,
+		Flags: utils.FlagsWithParams{
+			utils.MetaSessionS: utils.FlagParams{},
+			utils.MetaRoutes:   utils.FlagParams{},
+		},
+	}
+
+	clonedOpts := baseOpts.Clone()
+
+	if clonedOpts.Transport != baseOpts.Transport || clonedOpts.Host != baseOpts.Host || clonedOpts.Port != baseOpts.Port || clonedOpts.Flags == nil {
+		t.Errorf("Clone failed. Expected all fields copied")
+	}
+
+	if !reflect.DeepEqual(baseOpts.Flags, clonedOpts.Flags) {
+		t.Errorf("Flags might not be deep copied.")
+	}
+}
+
 func TestDAClientOptsAsMapInterface(t *testing.T) {
 	expectedMap := map[string]any{
 		utils.TransportCfg: "udp",
