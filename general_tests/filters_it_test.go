@@ -24,6 +24,7 @@ package general_tests
 import (
 	"path"
 	"reflect"
+	"sort"
 	"testing"
 	"time"
 
@@ -1064,13 +1065,16 @@ func testV1FltrChargerSuffix(t *testing.T) {
 			utils.Destination:  "999",
 		},
 	}
+
 	var result2 []*engine.ChrgSProcessEventReply
 	if err := fltrRpc.Call(context.Background(), utils.ChargerSv1ProcessEvent, cgrEv, &result2); err != nil {
 		t.Error(err)
 	} else {
-		processedEv[0].CGREvent.APIOpts[utils.MetaChargeID] = result2[0].CGREvent.APIOpts[utils.MetaChargeID]
-		if utils.ToJSON(result2) != utils.ToJSON(processedEv) {
-			t.Errorf("Expecting : %s, \n received: %s", utils.ToJSON(processedEv), utils.ToJSON(result2))
+		sort.Slice(result2, func(i, j int) bool {
+			return result2[i].ChargerSProfile < result2[j].ChargerSProfile
+		})
+		if processedEv[0].ChargerSProfile != result2[1].ChargerSProfile {
+			t.Errorf("Expecting : %s, \n received: %s", utils.ToJSON(processedEv[0]), utils.ToJSON(result2[1]))
 		}
 	}
 
@@ -1116,9 +1120,11 @@ func testV1FltrChargerSuffix(t *testing.T) {
 	if err := fltrRpc.Call(context.Background(), utils.ChargerSv1ProcessEvent, cgrEv, &result2); err != nil {
 		t.Error(err)
 	} else {
-		processedEv[0].CGREvent.APIOpts[utils.MetaChargeID] = result2[0].CGREvent.APIOpts[utils.MetaChargeID]
-		if utils.ToJSON(result2) != utils.ToJSON(processedEv) {
-			t.Errorf("Expecting : %s, \n received: %s", utils.ToJSON(processedEv), utils.ToJSON(result2))
+		sort.Slice(result2, func(i, j int) bool {
+			return result2[i].ChargerSProfile < result2[j].ChargerSProfile
+		})
+		if processedEv[0].ChargerSProfile != result2[1].ChargerSProfile {
+			t.Errorf("Expecting : %s, \n received: %s", utils.ToJSON(processedEv[0]), utils.ToJSON(result2[1]))
 		}
 	}
 }

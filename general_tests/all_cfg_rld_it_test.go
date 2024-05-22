@@ -199,7 +199,7 @@ func testConfigSReload(t *testing.T) {
 		t.Errorf("\nExpected %+v ,\n received: %+v", utils.ToIJSON(cfgStr), utils.ToIJSON(rpl8))
 	}
 
-	cfgStr = "{\"cdrs\":{\"accounts_conns\":[],\"actions_conns\":[],\"attributes_conns\":[],\"chargers_conns\":[\"*internal\"],\"ees_conns\":[],\"enabled\":true,\"extra_fields\":[],\"online_cdr_exports\":null,\"opts\":{\"*accounts\":[],\"*attributes\":[],\"*chargers\":[],\"*ees\":[],\"*rates\":[],\"*stats\":[],\"*thresholds\":[]},\"rates_conns\":[],\"session_cost_retries\":5,\"stats_conns\":[],\"store_cdrs\":true,\"thresholds_conns\":[]}}"
+	cfgStr = "{\"cdrs\":{\"accounts_conns\":[],\"actions_conns\":[],\"attributes_conns\":[],\"chargers_conns\":[\"*internal\"],\"ees_conns\":[],\"enabled\":true,\"extra_fields\":[],\"online_cdr_exports\":null,\"opts\":{\"*accounts\":[],\"*attributes\":[],\"*chargers\":[],\"*ees\":[],\"*rates\":[],\"*refund\":[],\"*rerate\":[],\"*stats\":[],\"*store\":[],\"*thresholds\":[]},\"rates_conns\":[],\"session_cost_retries\":5,\"stats_conns\":[],\"thresholds_conns\":[]}}"
 	var rpl10 string
 	if err := testRPC.Call(context.Background(), utils.ConfigSv1GetConfigAsJSON, &config.SectionWithAPIOpts{
 		Tenant:   "cgrates.org",
