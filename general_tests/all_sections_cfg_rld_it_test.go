@@ -142,7 +142,7 @@ func testSectConfigSReloadGeneral(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Errorf("Expected OK received: %+v", reply)
 	}
-	cfgStr := "{\"general\":{\"connect_attempts\":5,\"connect_timeout\":\"1s\",\"dbdata_encoding\":\"*msgpack\",\"decimal_max_scale\":0,\"decimal_min_scale\":0,\"decimal_precision\":0,\"decimal_rounding_mode\":\"*toNearestEven\",\"default_caching\":\"*reload\",\"default_category\":\"call\",\"default_request_type\":\"*rated\",\"default_tenant\":\"cgrates.org\",\"default_timezone\":\"Local\",\"digest_equal\":\":\",\"digest_separator\":\",\",\"locking_timeout\":\"0\",\"max_parallel_conns\":100,\"max_reconnect_interval\":\"0\",\"node_id\":\"98ead14\",\"opts\":{\"*exporterIDs\":[]},\"reconnects\":-1,\"reply_timeout\":\"50s\",\"rounding_decimals\":5,\"rsr_separator\":\";\",\"tpexport_dir\":\"/var/spool/cgrates/tpe\"}}"
+	cfgStr := "{\"general\":{\"caching_delay\":\"0\",\"connect_attempts\":5,\"connect_timeout\":\"1s\",\"dbdata_encoding\":\"*msgpack\",\"decimal_max_scale\":0,\"decimal_min_scale\":0,\"decimal_precision\":0,\"decimal_rounding_mode\":\"*toNearestEven\",\"default_caching\":\"*reload\",\"default_category\":\"call\",\"default_request_type\":\"*rated\",\"default_tenant\":\"cgrates.org\",\"default_timezone\":\"Local\",\"digest_equal\":\":\",\"digest_separator\":\",\",\"locking_timeout\":\"0\",\"max_parallel_conns\":100,\"max_reconnect_interval\":\"0\",\"node_id\":\"98ead14\",\"opts\":{\"*exporterIDs\":[]},\"reconnects\":-1,\"reply_timeout\":\"50s\",\"rounding_decimals\":5,\"rsr_separator\":\";\",\"tpexport_dir\":\"/var/spool/cgrates/tpe\"}}"
 	var rpl string
 	if err := testSectRPC.Call(context.Background(), utils.ConfigSv1GetConfigAsJSON, &config.SectionWithAPIOpts{
 		Tenant:   "cgrates.org",
@@ -374,7 +374,7 @@ func testSectConfigSReloadCDRS(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Errorf("Expected OK received: %+v", reply)
 	}
-	cfgStr := "{\"cdrs\":{\"accounts_conns\":[],\"actions_conns\":[],\"attributes_conns\":[],\"chargers_conns\":[\"*internal\"],\"ees_conns\":[],\"enabled\":true,\"extra_fields\":[],\"online_cdr_exports\":null,\"opts\":{\"*accounts\":[],\"*attributes\":[],\"*chargers\":[],\"*ees\":[],\"*rates\":[],\"*stats\":[],\"*thresholds\":[]},\"rates_conns\":[],\"session_cost_retries\":5,\"stats_conns\":[],\"store_cdrs\":true,\"thresholds_conns\":[]}}"
+	cfgStr := "{\"cdrs\":{\"accounts_conns\":[],\"actions_conns\":[],\"attributes_conns\":[],\"chargers_conns\":[\"*internal\"],\"ees_conns\":[],\"enabled\":true,\"extra_fields\":[],\"online_cdr_exports\":null,\"opts\":{\"*accounts\":[],\"*attributes\":[],\"*chargers\":[],\"*ees\":[],\"*rates\":[],\"*refund\":[],\"*rerate\":[],\"*stats\":[],\"*store\":[],\"*thresholds\":[]},\"rates_conns\":[],\"session_cost_retries\":5,\"stats_conns\":[],\"thresholds_conns\":[]}}"
 	var rpl string
 	if err := testSectRPC.Call(context.Background(), utils.ConfigSv1GetConfigAsJSON, &config.SectionWithAPIOpts{
 		Tenant:   "cgrates.org",
