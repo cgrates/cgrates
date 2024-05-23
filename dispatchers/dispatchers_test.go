@@ -1755,3 +1755,25 @@ func TestDispatchersdispatcherProfileForEventAnySStrueBothFound(t *testing.T) {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", dsp1, rcv)
 	}
 }
+
+func TestDispatcherServiceDispatcherProfilesForEventBoolOptsErr(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	rpcCl := map[string]chan birpc.ClientConnector{}
+	dataDB := engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	connMng := engine.NewConnManager(cfg, rpcCl)
+	dm := engine.NewDataManager(dataDB, nil, connMng)
+	fltrs := engine.NewFilterS(cfg, connMng, dm)
+	dss := NewDispatcherService(dm, cfg, fltrs, connMng)
+
+	ev := &utils.CGREvent{
+		APIOpts: map[string]any{
+			utils.MetaDispatchers: []byte{},
+		},
+	}
+	expected := "cannot convert field: [] to bool"
+	_, err := dss.dispatcherProfilesForEvent("cgrates.org", ev, utils.MapStorage{}, "test substring")
+	if err.Error() != expected {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, err)
+	}
+
+}

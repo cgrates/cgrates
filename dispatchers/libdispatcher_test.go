@@ -22,6 +22,7 @@ import (
 	"net/rpc"
 	"reflect"
 	"testing"
+	"time"
 
 	"github.com/cgrates/birpc"
 	"github.com/cgrates/birpc/context"
@@ -29,6 +30,7 @@ import (
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/rpcclient"
+	"github.com/google/go-cmp/cmp"
 )
 
 func TestLoadMetricsGetHosts(t *testing.T) {
@@ -1001,5 +1003,25 @@ func TestLibDispatcherDispatchFilterError(t *testing.T) {
 	}
 	if err := dsp.Dispatch(dm, flts, nil, "cgrates.org", "", &DispatcherRoute{}, "", "", ""); err == nil || err.Error() != expErrMsg {
 		t.Errorf("Expected error: %s received: %v", expErrMsg, err)
+	}
+}
+
+func TestLibDispatcherNewInternalHost(t *testing.T) {
+	tnt := "cgrates.org"
+	want := &engine.DispatcherHost{
+		Tenant: tnt,
+		RemoteHost: &config.RemoteHost{
+			ID:              utils.MetaInternal,
+			Address:         utils.MetaInternal,
+			ConnectAttempts: 1,
+			Reconnects:      1,
+			ConnectTimeout:  time.Second,
+			ReplyTimeout:    time.Second,
+		},
+	}
+
+	got := newInternalHost(tnt)
+	if diff := cmp.Diff(want, got, cmp.AllowUnexported(engine.DispatcherHost{})); diff != "" {
+		t.Errorf("newInternalHost(%q) returned an unexpected value(-want +got): \n%s", tnt, diff)
 	}
 }
