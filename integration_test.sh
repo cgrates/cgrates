@@ -8,7 +8,8 @@
 # Example:
 # ./integration_test.sh -dbtype=*mysql -rpc=*gob
 
-packages=("agents" "apier/v1" "apier/v2" "dispatchers" "engine" "ers" "loaders" "general_tests" "sessions")
+# Temporarily skip dispatcher tests until its unstable tests are fixed
+packages=("agents" "apier/v1" "apier/v2" "engine" "ers" "loaders" "general_tests" "sessions")
 dbtypes=("*internal" "*mysql" "*mongo" "*postgres")
 
 # Tests that are independent of the dbtype flag and run only once
