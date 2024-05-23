@@ -336,27 +336,21 @@ func TestRadiusAgentCfgClone(t *testing.T) {
 	}
 }
 
-func TestClone(t *testing.T) {
-
-	baseOpts := &DAClientOpts{
-
+func TestDAClientOptsClone(t *testing.T) {
+	originalOpts := &DAClientOpts{
 		Transport: "udp",
 		Host:      "localhost",
 		Port:      6768,
 		Flags: utils.FlagsWithParams{
-			utils.MetaSessionS: utils.FlagParams{},
 			utils.MetaRoutes:   utils.FlagParams{},
+			utils.MetaSessionS: utils.FlagParams{},
 		},
 	}
 
-	clonedOpts := baseOpts.Clone()
+	got := originalOpts.Clone()
 
-	if clonedOpts.Transport != baseOpts.Transport || clonedOpts.Host != baseOpts.Host || clonedOpts.Port != baseOpts.Port || clonedOpts.Flags == nil {
-		t.Errorf("Clone failed. Expected all fields copied")
-	}
-
-	if !reflect.DeepEqual(baseOpts.Flags, clonedOpts.Flags) {
-		t.Errorf("Flags might not be deep copied.")
+	if diff := cmp.Diff(originalOpts, got); diff != "" {
+		t.Errorf("Clone() returned an unexpected value(-want +got): \n%s", diff)
 	}
 }
 

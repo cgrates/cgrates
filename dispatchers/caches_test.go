@@ -24,7 +24,6 @@ import (
 
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/ltcache"
 )
@@ -482,81 +481,60 @@ func TestDspCacheSv1ReplicateSetNil(t *testing.T) {
 	}
 }
 
-func TestDspCacheSv1GetItemWithRemote(t *testing.T) {
-	cfg := config.NewDefaultCGRConfig()
-	db := engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
-	dm := engine.NewDataManager(db, cfg.CacheCfg(), nil)
-	dsp := NewDispatcherService(dm, cfg, engine.NewFilterS(cfg, nil, dm), nil)
-	args := &utils.ArgsGetCacheItemWithAPIOpts{
-		Tenant: "cgrates.org",
-		ArgsGetCacheItem: utils.ArgsGetCacheItem{
-			CacheID: utils.CacheChargerProfiles,
-			ItemID:  "cgrates.org:DISP1 ",
-		},
-		APIOpts: map[string]any{
-			"Opt": "Disp",
-		},
+func TestDspCacheSv1GetItemWithRemoteError(t *testing.T) {
+	cgrCfg := config.NewDefaultCGRConfig()
+	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
+	cgrCfg.DispatcherSCfg().AttributeSConns = []string{"test"}
+	CGREvent := &utils.ArgsGetCacheItemWithAPIOpts{
+		Tenant: "tenant",
 	}
-
-	if err := dm.SetDispatcherProfile(&engine.DispatcherProfile{
-		Tenant:     "cgrates.org",
-		ID:         "DSP_Test1",
-		FilterIDs:  []string{"*string:~*opts.Opt:Disp"},
-		Strategy:   utils.MetaRoundRobin,
-		Subsystems: []string{utils.MetaAny},
-		Hosts: engine.DispatcherHostProfiles{
-			&engine.DispatcherHostProfile{
-				ID:        "ALL2",
-				FilterIDs: []string{},
-				Weight:    20,
-				Params:    make(map[string]any),
-			},
-		},
-		Weight: 20,
-	}, true); err != nil {
-		t.Error(err)
-	}
-	var reply any
-	if err := dsp.CacheSv1GetItemWithRemote(context.Background(), args, &reply); err == nil {
-		t.Error(err)
+	var reply *any
+	err := dspSrv.CacheSv1GetItemWithRemote(context.Background(), CGREvent, reply)
+	expected := "MANDATORY_IE_MISSING: [ApiKey]"
+	if err == nil || err.Error() != expected {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, err)
 	}
 }
 
-func TestDspCacheSv1GetItem(t *testing.T) {
-	cfg := config.NewDefaultCGRConfig()
-	dm := engine.NewDataManager(engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items), cfg.CacheCfg(), nil)
-	dsp := NewDispatcherService(dm, cfg, engine.NewFilterS(cfg, nil, dm), nil)
-	args := &utils.ArgsGetCacheItemWithAPIOpts{
-		Tenant: "cgrates.org",
-		ArgsGetCacheItem: utils.ArgsGetCacheItem{
-			CacheID: utils.CacheChargerProfiles,
-			ItemID:  "cgrates.org:DISP1 ",
-		},
-		APIOpts: map[string]any{
-			"Opt": "Disp",
-		},
+func TestDspCacheSv1GetItemWithRemoteSetNil(t *testing.T) {
+	cgrCfg := config.NewDefaultCGRConfig()
+	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
+	CGREvent := &utils.ArgsGetCacheItemWithAPIOpts{
+		Tenant: "tenant",
 	}
-	if err := dm.SetDispatcherProfile(&engine.DispatcherProfile{
-		Tenant:     "cgrates.org",
-		ID:         "DSP_Test1",
-		FilterIDs:  []string{"*string:~*opts.Opt:Disp"},
-		Strategy:   utils.MetaRoundRobin,
-		Subsystems: []string{utils.MetaAny},
-		Hosts: engine.DispatcherHostProfiles{
-			&engine.DispatcherHostProfile{
-				ID:        "ALL2",
-				FilterIDs: []string{},
-				Weight:    20,
-				Params:    make(map[string]any),
-			},
-		},
-		Weight: 20,
-	}, true); err != nil {
-		t.Error(err)
+	var reply *any
+	err := dspSrv.CacheSv1GetItemWithRemote(context.Background(), CGREvent, reply)
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
+	if err == nil || err.Error() != expected {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, err)
 	}
-	var reply any
-	if err := dsp.CacheSv1GetItem(context.Background(), args, &reply); err == nil {
-		t.Error(err)
-	}
+}
 
+func TestDspCacheSv1GetItemError(t *testing.T) {
+	cgrCfg := config.NewDefaultCGRConfig()
+	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
+	cgrCfg.DispatcherSCfg().AttributeSConns = []string{"test"}
+	CGREvent := &utils.ArgsGetCacheItemWithAPIOpts{
+		Tenant: "tenant",
+	}
+	var reply *any
+	err := dspSrv.CacheSv1GetItem(context.Background(), CGREvent, reply)
+	expected := "MANDATORY_IE_MISSING: [ApiKey]"
+	if err == nil || err.Error() != expected {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, err)
+	}
+}
+
+func TestDspCacheSv1GetItemSetNil(t *testing.T) {
+	cgrCfg := config.NewDefaultCGRConfig()
+	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
+	CGREvent := &utils.ArgsGetCacheItemWithAPIOpts{
+		Tenant: "tenant",
+	}
+	var reply *any
+	err := dspSrv.CacheSv1GetItem(context.Background(), CGREvent, reply)
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
+	if err == nil || err.Error() != expected {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, err)
+	}
 }

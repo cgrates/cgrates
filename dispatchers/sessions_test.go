@@ -725,3 +725,36 @@ func TestDspSessionSv1STIRIdentityErrorNil(t *testing.T) {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}
 }
+
+func TestDspSessionSv1AlterSessionsNil(t *testing.T) {
+	cgrCfg := config.NewDefaultCGRConfig()
+	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
+	args := utils.SessionFilterWithEvent{
+		SessionFilter: &utils.SessionFilter{
+			Tenant: "tenant",
+		},
+	}
+	var reply *string
+	err := dspSrv.SessionSv1AlterSessions(context.Background(), args, reply)
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
+	if err == nil || err.Error() != expected {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, err)
+	}
+}
+
+func TestDspSessionSv1AlterSessionsErrorNil(t *testing.T) {
+	cgrCfg := config.NewDefaultCGRConfig()
+	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
+	cgrCfg.DispatcherSCfg().AttributeSConns = []string{"test"}
+	args := utils.SessionFilterWithEvent{
+		SessionFilter: &utils.SessionFilter{
+			Tenant: "tenant",
+		},
+	}
+	var reply *string
+	err := dspSrv.SessionSv1AlterSessions(context.Background(), args, reply)
+	expected := "MANDATORY_IE_MISSING: [ApiKey]"
+	if err == nil || err.Error() != expected {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, err)
+	}
+}
