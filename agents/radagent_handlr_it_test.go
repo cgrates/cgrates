@@ -159,10 +159,8 @@ func testRAHitInitCfg(t *testing.T) {
 				"reply_fields":[
 				  {"tag": "Code", "path": "*rep.*radReplyCode", "filters": ["*notempty:~*cgrep.Error:"],
 					"type": "*constant", "value": "AccessReject"},
-				//   {"tag": "ReplyMessage", "path": "*rep.Reply-Message","filters": ["*notempty:~*cgrep.Error:"],
-				// 	"type": "*composed", "value": "~*cgrep.Error"},
-				  {"tag": "ReplyMessage", "path": "*rep.Reply-Message",
-					"type": "*composed", "value": "~*cgrep.Attributes.RadReplyMessage"},
+			      {"tag": "ReplyMessage", "path": "*rep.Reply-Message","filters": ["*notempty:~*cgrep.Error:"],
+			 	   "type": "*composed", "value": "~*cgrep.Error"},
 				],
 			  },
 			],
@@ -263,7 +261,6 @@ func testRAHitTPFromFolder(t *testing.T) {
 	if err := writeFile(utils.AttributesCsv, `
 #Tenant,ID,Contexts,FilterIDs,ActivationInterval,AttributeFilterIDs,Path,Type,Value,Blocker,Weight
 cgrates.org,ATTR_RAD,*any,*string:~*req.RadUserName:10011;*prefix:~*req.RadPassword:CGRateSPassword3,,,,,,false,10
-#cgrates.org,ATTR_RAD,,,,,*req.RadReplyMessage,*constant,Access Accept,,
 `); err != nil {
 		t.Fatal(err)
 	}

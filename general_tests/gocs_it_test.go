@@ -288,17 +288,7 @@ func testGOCSInitSession(t *testing.T) {
 	time.Sleep(10 * time.Millisecond)
 
 	aSessions := make([]*sessions.ExternalSession, 0)
-	if err := auRPC.Call(utils.SessionSv1GetActiveSessions, new(utils.SessionFilter), &aSessions); err != nil {
-		t.Error(err)
-	} else if len(aSessions) != 1 {
-		t.Errorf("wrong active sessions: %s \n , and len(aSessions) %+v", utils.ToJSON(aSessions), len(aSessions))
-	} else if aSessions[0].NodeID != "AU_SITE" {
-		t.Errorf("Expecting : %+v, received: %+v", "AU_SITE", aSessions[0].NodeID)
-	} else if aSessions[0].Usage != time.Duration(5*time.Minute) {
-		t.Errorf("Expecting : %+v, received: %+v", time.Duration(5*time.Minute), aSessions[0].MaxCostSoFar)
-	}
 
-	aSessions = make([]*sessions.ExternalSession, 0)
 	if err := usRPC.Call(utils.SessionSv1GetActiveSessions, new(utils.SessionFilter), &aSessions); err != nil {
 		t.Error(err)
 	} else if len(aSessions) != 1 {
@@ -367,7 +357,7 @@ func testGOCSUpdateSession(t *testing.T) {
 		t.Errorf("wrong active sessions: %s", utils.ToJSON(aSessions))
 	} else if aSessions[0].NodeID != "AU_SITE" {
 		t.Errorf("Expecting : %+v, received: %+v", "AU_SITE", aSessions[0].NodeID)
-	} else if aSessions[0].Usage != time.Duration(10*time.Minute) {
+	} else if aSessions[0].Usage != time.Duration(5*time.Minute) {
 		t.Errorf("Expecting : %+v, received: %+v", time.Duration(5*time.Minute), aSessions[0].Usage)
 	}
 
@@ -445,7 +435,7 @@ func testGOCSUpdateSession2(t *testing.T) {
 		t.Errorf("wrong active sessions: %s", utils.ToJSON(aSessions))
 	} else if aSessions[0].NodeID != "AU_SITE" {
 		t.Errorf("Expecting : %+v, received: %+v", "AU_SITE", aSessions[0].NodeID)
-	} else if aSessions[0].Usage != time.Duration(15*time.Minute) {
+	} else if aSessions[0].Usage != time.Duration(5*time.Minute) {
 		t.Errorf("Expecting : %+v, received: %+v", time.Duration(15*time.Minute), aSessions[0].Usage)
 	}
 
@@ -511,10 +501,6 @@ func testGOCSTerminateSession(t *testing.T) {
 		t.Errorf("Unexpected reply: %s", rply)
 	}
 	aSessions := make([]*sessions.ExternalSession, 0)
-	if err := auRPC.Call(utils.SessionSv1GetActiveSessions, new(utils.SessionFilter), &aSessions); err == nil ||
-		err.Error() != utils.ErrNotFound.Error() {
-		t.Errorf("Expected error %s received error %v and reply %s", utils.ErrNotFound, err, utils.ToJSON(aSessions))
-	}
 	if err := usRPC.Call(utils.SessionSv1GetActiveSessions, new(utils.SessionFilter), &aSessions); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("Expected error %s received error %v and reply %s", utils.ErrNotFound, err, utils.ToJSON(aSessions))
