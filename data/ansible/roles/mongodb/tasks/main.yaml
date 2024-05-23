@@ -1,6 +1,6 @@
 ---
 - name: Determine the version of MongoDB
-  become: yes
+  become: true
   command: mongod --version
   register: mongodb_version_check
   changed_when: false
@@ -12,40 +12,48 @@
 
 - name: Set fact for MongoDB installation required
   set_fact:
-    mongodb_installation_required: "{{ mongodb_current_version != mongodb_version }}"
+    mongodb_installation_required: '{{ mongodb_current_version != mongodb_version }}'
 
 - block:
     - name: Install dependencies
-      become: yes
+      become: true
       apt:
-        name: "{{ mongodb_dependencies }}"
+        name: '{{ mongodb_dependencies }}'
         state: present
         update_cache: yes
 
     - name: Import the MongoDB public GPG Key
-      become: yes
+      become: true
       apt_key:
-        url: "https://pgp.mongodb.com/server-{{ mongodb_version }}.asc"
-        keyring: "/usr/share/keyrings/mongodb-server-{{ mongodb_version }}.gpg"
+        url: 'https://pgp.mongodb.com/server-{{ mongodb_version }}.asc'
+        keyring: '/usr/share/keyrings/mongodb-server-{{ mongodb_version }}.gpg'
 
-    - name: Add MongoDB repository
-      become: yes
+    - name: Add MongoDB repository for Debian
+      become: true
       apt_repository:
-        repo: "deb [ signed-by=/usr/share/keyrings/mongodb-server-{{ mongodb_version }}.gpg] http://repo.mongodb.org/apt/debian bullseye/mongodb-org/{{ mongodb_version }} main"
-        filename: "{{ mongodb_package_name }}-{{ mongodb_version }}"
+        repo: 'deb [ signed-by=/usr/share/keyrings/mongodb-server-{{ mongodb_version }}.gpg ] http://repo.mongodb.org/apt/debian {{ ansible_distribution_release }}/mongodb-org/{{ mongodb_version }} main'
+        filename: '{{ mongodb_package_name }}-{{ mongodb_version }}'
+      when: ansible_distribution == 'Debian'
+
+    - name: Add MongoDB repository for Ubuntu
+      become: true
+      apt_repository:
+        repo: 'deb [ arch=amd64,arm64 signed-by=/usr/share/keyrings/mongodb-server-{{ mongodb_version }}.gpg ] https://repo.mongodb.org/apt/ubuntu {{ ansible_distribution_release }}/mongodb-org/{{ mongodb_version }} multiverse'
+        filename: '{{ mongodb_package_name }}-{{ mongodb_version }}'
+      when: ansible_distribution == 'Ubuntu'
 
     - name: Install MongoDB packages
-      become: yes
+      become: true
       apt:
-        name: "{{ mongodb_package_name }}"
+        name: '{{ mongodb_package_name }}'
         state: present
         update_cache: yes
 
     - name: Start and enable MongoDB service
-      become: yes
+      become: true
       ansible.builtin.systemd:
-        name: "{{ mongodb_service_name }}"
-        state: "{{ mongodb_service_state }}"
-        enabled: "{{ mongodb_service_enabled }}"
+        name: '{{ mongodb_service_name }}'
+        state: '{{ mongodb_service_state }}'
+        enabled: '{{ mongodb_service_enabled }}'
 
   when: mongodb_installation_required

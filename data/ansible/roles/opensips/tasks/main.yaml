@@ -1,0 +1,89 @@
+---
+- name: Install dependencies
+  become: true
+  apt:
+    name: '{{ opensips_dependencies }}'
+    state: present
+    update_cache: yes
+
+- name: Import OpenSIPS GPG key
+  become: true
+  ansible.builtin.get_url:
+    url: https://apt.opensips.org/opensips-org.gpg
+    dest: /usr/share/keyrings/opensips-org.gpg
+    mode: '0644'
+
+- name: Configure OpenSIPS APT repository
+  become: true
+  ansible.builtin.copy:
+    content: "deb [signed-by=/usr/share/keyrings/opensips-org.gpg] https://apt.opensips.org {{ ansible_distribution_release }} {{ opensips_version }}-{{ opensips_release_type }}\n"
+    dest: /etc/apt/sources.list.d/opensips.list
+    owner: root
+    group: root
+    mode: '0644'
+
+- name: Configure OpenSIPS CLI APT repository
+  become: true
+  ansible.builtin.copy:
+    content: "deb [signed-by=/usr/share/keyrings/opensips-org.gpg] https://apt.opensips.org {{ ansible_distribution_release }} cli-nightly\n"
+    dest: /etc/apt/sources.list.d/opensips-cli.list
+    owner: root
+    group: root
+    mode: '0644'
+
+- name: Update APT cache
+  become: true
+  ansible.builtin.apt:
+    update_cache: yes
+
+- name: Install OpenSIPS and OpenSIPS CLI
+  become: true
+  ansible.builtin.apt:
+    name:
+      - opensips
+      - opensips-cli
+    state: present
+
+- name: Install additional OpenSIPS modules
+  become: true
+  ansible.builtin.apt:
+    name: '{{ opensips_modules }}'
+    state: present
+
+- name: Replace default OpenSIPS configuration if custom path provided
+  become: true
+  ansible.builtin.copy:
+    src: '{{ opensips_cfg_path }}'
+    dest: /etc/opensips/opensips.cfg
+    owner: root
+    group: root
+    remote_src: yes
+    mode: '0644'
+  when: opensips_cfg_path != ""
+
+- name: Copy OpenSIPS dictionary file from specified path (if any)
+  become: true
+  ansible.builtin.copy:
+    src: '{{ opensips_dict_path }}'
+    dest: '/etc/opensips/dictionary.opensips'
+    owner: root
+    group: root
+    remote_src: yes
+    mode: '0644'
+  when: opensips_dict_path != ""
+
+- name: Replace lines in OpenSIPS config with specified rules
+  become: true
+  ansible.builtin.lineinfile:
+    path: /etc/opensips/opensips.cfg
+    regexp: '{{ item.before }}'
+    line: '{{ item.after }}'
+    backrefs: true
+  loop: '{{ opensips_cfg_replacements }}'
+
+- name: Ensure OpenSIPS service is in the desired state
+  become: true
+  ansible.builtin.systemd:
+    name: opensips
+    enabled: '{{ opensips_service_enabled }}'
+    state: '{{ opensips_service_state }}'
