@@ -26,6 +26,7 @@ import (
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/sessions"
 	"github.com/cgrates/cgrates/utils"
+	"github.com/google/go-cmp/cmp"
 )
 
 var kamEv = KamEvent{KamTRIndex: "29223", KamTRLabel: "698469260",
@@ -502,5 +503,33 @@ func TestKamEvAsKamProcessEventReply(t *testing.T) {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, rcv) {
 		t.Errorf("Expecting: %+v, received: %+v", expected, rcv)
+	}
+}
+
+func TestAgentsNewKamSessionDisconnect(t *testing.T) {
+	hEntry := "entry123"
+	hID := "id123"
+	reason := "test reason"
+	got := NewKamSessionDisconnect(hEntry, hID, reason)
+	want := &KamSessionDisconnect{
+		Event:     CGR_SESSION_DISCONNECT,
+		HashEntry: hEntry,
+		HashId:    hID,
+		Reason:    reason,
+	}
+	if diff := cmp.Diff(got, want); diff != "" {
+		t.Errorf("NewKamSessionDisconnect() mismatch (-got +want):\n%s", diff)
+	}
+}
+
+func TestAgentsKamEvent_String(t *testing.T) {
+	ke := KamEvent{
+		"EventName": "TestEvent",
+		"Data":      "TestData",
+	}
+	got := ke.String()
+	want := `{"Data":"TestData","EventName":"TestEvent"}`
+	if got != want {
+		t.Errorf("KamEvent.String() = %v, want %v", got, want)
 	}
 }

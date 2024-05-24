@@ -384,3 +384,29 @@ func TestDspResponderGetCostOnRatingPlans(t *testing.T) {
 // 		t.Error(err)
 // 	}
 // }
+
+func TestDspResponderGetMaxSessionTimeOnAccountsNil(t *testing.T) {
+	cgrCfg := config.NewDefaultCGRConfig()
+	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
+	cgrCfg.DispatcherSCfg().AttributeSConns = []string{"test"}
+	CGREvent := &utils.GetMaxSessionTimeOnAccountsArgs{}
+
+	var reply *map[string]any
+	err := dspSrv.ResponderGetMaxSessionTimeOnAccounts(context.Background(), CGREvent, reply)
+	expected := "MANDATORY_IE_MISSING: [ApiKey]"
+	if err == nil || err.Error() != expected {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, err)
+	}
+}
+
+func TestDspResponderGetMaxSessionTimeOnAccountsErrorNil(t *testing.T) {
+	cgrCfg := config.NewDefaultCGRConfig()
+	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
+	CGREvent := &utils.GetMaxSessionTimeOnAccountsArgs{}
+	var reply *map[string]any
+	err := dspSrv.ResponderGetMaxSessionTimeOnAccounts(context.Background(), CGREvent, reply)
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
+	if err == nil || err.Error() != expected {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, err)
+	}
+}

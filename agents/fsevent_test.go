@@ -27,6 +27,7 @@ import (
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/sessions"
 	"github.com/cgrates/cgrates/utils"
+	"github.com/google/go-cmp/cmp"
 )
 
 var hangupEv string = `Event-Name: CHANNEL_HANGUP_COMPLETE
@@ -1114,5 +1115,26 @@ func TestFsEvV1TerminateSessionArgs(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", expected.CGREvent.Event, rcv.CGREvent.Event)
 	} else if !reflect.DeepEqual(expected.TerminateSession, rcv.TerminateSession) {
 		t.Errorf("Expecting: %+v, received: %+v", expected.TerminateSession, rcv.TerminateSession)
+	}
+}
+
+func TestAgentsFSEventGetSessionIds(t *testing.T) {
+	uuid := "test-uuid"
+	fsev := FSEvent{UUID: uuid}
+	got := fsev.GetSessionIds()
+	want := []string{uuid}
+	if diff := cmp.Diff(got, want); diff != "" {
+		t.Errorf("GetSessionIds() returned incorrect result (-got +want):\n%s", diff)
+	}
+}
+
+func TestAgentsFSEventString(t *testing.T) {
+	fsev := &FSEvent{
+		"key1": "value1",
+	}
+	got := fsev.String()
+	want := "key1 = value1\n=============================================================="
+	if got != want {
+		t.Errorf("fsev.String() = %q, want %q", got, want)
 	}
 }
