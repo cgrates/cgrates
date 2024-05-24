@@ -226,3 +226,30 @@ func TestModelsAsMapStringInterface(t *testing.T) {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}
 }
+
+func TestEngineSharedGroupMdlTableName(t *testing.T) {
+	testStruct := SharedGroupMdl{}
+	exp := utils.TBLTPSharedGroups
+	result := testStruct.TableName()
+	if !reflect.DeepEqual(exp, result) {
+		t.Errorf("\nExpected: <%+v>\nReceived: <%+v>", exp, result)
+	}
+}
+
+func TestEngineResourceMdlTableName(t *testing.T) {
+	testStruct := ResourceMdl{}
+	exp := utils.TBLTPResources
+	result := testStruct.TableName()
+	if !reflect.DeepEqual(exp, result) {
+		t.Errorf("\nExpected: <%+v>\nReceived: <%+v>", exp, result)
+	}
+}
+
+func TestEngineStatMdlTableName(t *testing.T) {
+	testStruct := StatMdl{}
+	exp := utils.TBLTPStats
+	result := testStruct.TableName()
+	if !reflect.DeepEqual(exp, result) {
+		t.Errorf("\nExpected: <%+v>\nReceived: <%+v>", exp, result)
+	}
+}

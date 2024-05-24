@@ -26,6 +26,7 @@ import (
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
+	"github.com/google/go-cmp/cmp"
 )
 
 func TestConvertExternalToProfile(t *testing.T) {
@@ -242,5 +243,23 @@ func TestLibAttributesTenantIDMetaPrefix(t *testing.T) {
 	exp := "*default"
 	if rcv := ap.TenantIDInline(); rcv != exp {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", exp, rcv)
+	}
+}
+
+func TestEngineAttributeProfilesSort(t *testing.T) {
+
+	unsorted := AttributeProfiles{
+		{Weight: 10},
+		{Weight: 2},
+		{Weight: 15},
+	}
+	expected := AttributeProfiles{
+		{Weight: 15},
+		{Weight: 10},
+		{Weight: 2},
+	}
+	unsorted.Sort()
+	if !cmp.Equal(unsorted, expected) {
+		t.Errorf("Sort failed. Expected %v, got %v", expected, unsorted)
 	}
 }
