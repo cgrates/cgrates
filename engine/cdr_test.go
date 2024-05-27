@@ -18,6 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"encoding/json"
 	"reflect"
 	"strconv"
 	"testing"
@@ -880,5 +881,37 @@ func TestCDRAddDefaults(t *testing.T) {
 	cdr.AddDefaults(cfg)
 	if !reflect.DeepEqual(cdr, eCDR) {
 		t.Errorf("Expecting: %+v, received: %+v", eCDR, cdr)
+	}
+}
+
+func TestEngineCDRString(t *testing.T) {
+	TestCDR := CDR{
+		CGRID:       "grid1",
+		RunID:       "runid123",
+		OrderID:     12345,
+		OriginHost:  "10.1.1.1",
+		Source:      "testsrouce",
+		OriginID:    "origin123",
+		ToR:         "tortest",
+		RequestType: "prepaid",
+		Tenant:      "cgrates.org",
+		Category:    "rating",
+		Account:     "testaccount",
+		Subject:     "user",
+		Destination: "+1234567890",
+		SetupTime:   time.Now(),
+		AnswerTime:  time.Now().Add(time.Minute * 5),
+		Usage:       time.Minute * 3,
+		ExtraFields: map[string]string{"key1": "value1"},
+		ExtraInfo:   "some additional information",
+		Partial:     false,
+		PreRated:    false,
+		CostSource:  "rating_engine",
+		Cost:        1.50,
+	}
+	want, _ := json.Marshal(TestCDR)
+	got := TestCDR.String()
+	if string(got) != string(want) {
+		t.Errorf("Expected CDR.String() to return %s, got %s", want, got)
 	}
 }

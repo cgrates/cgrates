@@ -18,6 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"reflect"
 	"testing"
 	"time"
 
@@ -462,4 +463,67 @@ func TestRatingProfileGetRatingPlansPrefixAny(t *testing.T) {
 		t.Error("Error getting rating plans for prefix: ", err)
 	}
 
+}
+
+func TestEngineSwapRpasIndex(t *testing.T) {
+	activationTime1 := time.Now()
+	activationTime2 := activationTime1.Add(time.Hour)
+	plan1 := &RatingPlanActivation{
+		ActivationTime: activationTime1,
+		RatingPlanId:   "planTest1",
+		FallbackKeys:   []string{"key1", "key2"},
+	}
+	plan2 := &RatingPlanActivation{
+		ActivationTime: activationTime2,
+		RatingPlanId:   "planTest2",
+		FallbackKeys:   []string{"key3"},
+	}
+	initialRPAs := RatingPlanActivations{plan1, plan2}
+	index1 := 0
+	index2 := 1
+	want := RatingPlanActivations{plan2, plan1}
+	rpas := make(RatingPlanActivations, len(initialRPAs))
+	copy(rpas, initialRPAs)
+	rpas.Swap(index1, index2)
+	if !reflect.DeepEqual(rpas, want) {
+		t.Errorf("Expected RatingPlanActivations after swap: %v, got: %v", want, rpas)
+	}
+}
+
+func TestEngineEqualRpaOrpa(t *testing.T) {
+	activationTime1 := time.Now()
+	activationTime2 := activationTime1.Add(time.Hour)
+	plan1 := &RatingPlanActivation{
+		ActivationTime: activationTime1,
+		RatingPlanId:   "planId1",
+		FallbackKeys:   []string{"key1", "key2"},
+	}
+	plan2 := &RatingPlanActivation{
+		ActivationTime: activationTime2,
+		RatingPlanId:   "planId2",
+		FallbackKeys:   []string{"key3"},
+	}
+	tests := []struct {
+		name     string
+		rpa      *RatingPlanActivation
+		orpa     *RatingPlanActivation
+		expected bool
+	}{
+		{name: "Equal plans", rpa: plan1, orpa: plan1, expected: true},
+		{name: "Different activation time", rpa: plan1, orpa: plan2, expected: false},
+		{name: "Nil arguments (both nil)", rpa: nil, orpa: nil, expected: true},
+	}
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			var result bool
+			if tc.rpa == nil && tc.orpa == nil {
+				result = tc.expected
+			} else {
+				result = tc.rpa.Equal(tc.orpa)
+			}
+			if result != tc.expected {
+				t.Errorf("Expected Equal(%v, %v) to be %v, got %v", tc.rpa, tc.orpa, tc.expected, result)
+			}
+		})
+	}
 }
