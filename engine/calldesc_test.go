@@ -19,6 +19,7 @@ package engine
 
 import (
 	"bytes"
+	"encoding/json"
 	"errors"
 	"log"
 	"os"
@@ -2731,5 +2732,39 @@ func TestCallDescGetRatingPlansForPrefix(t *testing.T) {
 	SetDataStorage(dm)
 	if _, err = cd.getRatingPlansForPrefix(cd.GetKey(cd.Subject), 1); err != nil {
 		t.Error(err)
+	}
+}
+
+func TestEngineCallDescriptorString(t *testing.T) {
+	TestCallDescriptor := &CallDescriptor{
+		Category:            "call",
+		Tenant:              "cgrates.org",
+		Subject:             "user",
+		Account:             "testAccount",
+		Destination:         "local",
+		TimeStart:           time.Date(2022, time.January, 7, 16, 60, 0, 0, time.UTC),
+		TimeEnd:             time.Date(2022, time.January, 7, 16, 60, 0, 0, time.UTC),
+		LoopIndex:           1.0,
+		DurationIndex:       time.Minute * 3,
+		FallbackSubject:     "testfallbacksubject",
+		ToR:                 utils.MetaVoice,
+		ExtraFields:         map[string]string{"key1": "value1"},
+		MaxRate:             10.0,
+		MaxRateUnit:         time.Minute,
+		MaxCostSoFar:        0.5,
+		CgrID:               "grid1",
+		RunID:               "runID123",
+		ForceDuration:       false,
+		PerformRounding:     true,
+		DenyNegativeAccount: true,
+		DryRun:              false,
+	}
+	want, err := json.Marshal(TestCallDescriptor)
+	if err != nil {
+		t.Errorf("Error marshalling CallDescriptor to JSON: %v", err)
+	}
+	got := TestCallDescriptor.String()
+	if got != string(want) {
+		t.Errorf("Expected CallDescriptor.String() to return %s, got %s", want, got)
 	}
 }

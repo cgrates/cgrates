@@ -18,6 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"encoding/json"
 	"reflect"
 	"testing"
 
@@ -948,4 +949,32 @@ func TestUnitCounterFilterFieldAsString(t *testing.T) {
 		t.Error(err)
 	}
 
+}
+
+func TestEngineCounterFilterString(t *testing.T) {
+	testFilter := CounterFilter{
+		Value: 12.5,
+	}
+	want, err := json.Marshal(testFilter)
+	if err != nil {
+		t.Errorf("Error marshalling CounterFilter to JSON: %v", err)
+	}
+	got := testFilter.String()
+	if got != string(want) {
+		t.Errorf("Expected JSON: %s, got: %s", want, got)
+	}
+}
+
+func TestEngineUnitCounterString(t *testing.T) {
+	testCounter := UnitCounter{
+		CounterType: "event",
+	}
+	want, err := json.Marshal(testCounter)
+	if err != nil {
+		t.Errorf("Error marshalling UnitCounter to JSON: %v", err)
+	}
+	got := testCounter.String()
+	if got != string(want) {
+		t.Errorf("Expected JSON: %s, got: %s", want, got)
+	}
 }

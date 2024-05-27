@@ -253,3 +253,12 @@ func TestEngineStatMdlTableName(t *testing.T) {
 		t.Errorf("\nExpected: <%+v>\nReceived: <%+v>", exp, result)
 	}
 }
+
+func TestEngineThresholdMdlTableName(t *testing.T) {
+	testStruct := ThresholdMdl{}
+	exp := utils.TBLTPThresholds
+	result := testStruct.TableName()
+	if !reflect.DeepEqual(exp, result) {
+		t.Errorf("\nExpected: <%+v>\nReceived: <%+v>", exp, result)
+	}
+}

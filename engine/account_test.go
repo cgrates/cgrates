@@ -3324,3 +3324,21 @@ func TestAccEnableAccountAction(t *testing.T) {
 		})
 	}
 }
+
+func TestEngineToStringJSON(t *testing.T) {
+	acc := &Account{
+		ID:                "acc_123",
+		AllowNegative:     false,
+		Disabled:          true,
+		UpdateTime:        time.Now(),
+		executingTriggers: false,
+	}
+	want, err := json.Marshal(acc)
+	if err != nil {
+		t.Errorf("Error marshalling Account to JSON: %v", err)
+	}
+	got := acc.String()
+	if got != string(want) {
+		t.Errorf("Expected JSON: %s, got: %s", want, got)
+	}
+}
