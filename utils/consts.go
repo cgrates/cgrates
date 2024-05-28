@@ -1014,6 +1014,7 @@ const (
 	RouteS      = "RouteS"
 	SessionS    = "SessionS"
 	StatService = "StatS"
+	SaRS        = "SaRS"
 	ThresholdS  = "ThresholdS"
 )
 

@@ -822,6 +822,10 @@ const CGRATES_CFG_JSON = `
 	},
 },
 
+"sars":{									// SaRS config
+	"enabled": false,						// starts SaRS service: <true|false>.
+	"stats_conns": [],						// connections to StatS ,empty to disable stats functionality: <""|*internal|$rpc_conns_id>
+},
 
 "thresholds": {								// ThresholdS
 	"enabled": false,						// starts ThresholdS service: <true|false>.

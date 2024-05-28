@@ -664,6 +664,11 @@ type StatServJsonCfg struct {
 	Opts                     *StatsOptsJson
 }
 
+type SarsJsonCfg struct {
+	Enabled     *bool
+	Stats_conns *[]string
+}
+
 type ThresholdsOptsJson struct {
 	ProfileIDs           *[]string `json:"*profileIDs"`
 	ProfileIgnoreFilters *bool     `json:"*profileIgnoreFilters"`

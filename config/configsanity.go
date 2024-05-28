@@ -628,6 +628,17 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 			}
 		}
 	}
+	//SarS checks
+	if cfg.sarsCfg.Enabled {
+		for _, connID := range cfg.sarsCfg.StatSConns {
+			if strings.HasPrefix(connID, utils.MetaInternal) && !cfg.statsCfg.Enabled {
+				return fmt.Errorf("<%s> not enabled but requested by <%s> component", utils.StatS, utils.SaRS)
+			}
+			if _, has := cfg.rpcConns[connID]; !has && !strings.HasPrefix(connID, utils.MetaInternal) {
+				return fmt.Errorf("<%s> connection with id: <%s> not defined", utils.SaRS, connID)
+			}
+		}
+	}
 	// RouteS checks
 	if cfg.routeSCfg.Enabled {
 		for _, connID := range cfg.routeSCfg.AttributeSConns {
