@@ -957,7 +957,7 @@ func TestEngineCounterFilterString(t *testing.T) {
 	}
 	want, err := json.Marshal(testFilter)
 	if err != nil {
-		t.Errorf("Error marshalling CounterFilter to JSON: %v", err)
+		t.Error(err)
 	}
 	got := testFilter.String()
 	if got != string(want) {
@@ -971,7 +971,7 @@ func TestEngineUnitCounterString(t *testing.T) {
 	}
 	want, err := json.Marshal(testCounter)
 	if err != nil {
-		t.Errorf("Error marshalling UnitCounter to JSON: %v", err)
+		t.Error(err)
 	}
 	got := testCounter.String()
 	if got != string(want) {

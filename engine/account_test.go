@@ -3335,10 +3335,91 @@ func TestEngineToStringJSON(t *testing.T) {
 	}
 	want, err := json.Marshal(acc)
 	if err != nil {
-		t.Errorf("Error marshalling Account to JSON: %v", err)
+		t.Error(err)
 	}
 	got := acc.String()
 	if got != string(want) {
-		t.Errorf("Expected JSON: %s, got: %s", want, got)
+		t.Errorf("acc.String()=%s, want%s", got, want)
+	}
+}
+
+func TestEngineGetID(t *testing.T) {
+	tests := []struct {
+		name  string
+		accID string
+		want  string
+	}{
+		{
+			name:  "Valid ID format",
+			accID: "prefix" + utils.ConcatenatedKeySep + "suffix",
+			want:  "suffix",
+		},
+		{
+			name:  "Invalid ID format (missing separator)",
+			accID: "invalidID",
+			want:  "",
+		},
+		{
+			name:  "Invalid ID format (too many parts)",
+			accID: "prefix" + utils.ConcatenatedKeySep + "suffix" + utils.ConcatenatedKeySep + "extra",
+			want:  "",
+		},
+		{
+			name:  "Empty ID",
+			accID: "",
+			want:  "",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			acc := &Account{ID: tt.accID}
+			got := acc.GetID()
+			if got != tt.want {
+				t.Errorf("Expected ID: %s, Got: %s", tt.want, got)
+			}
+		})
+	}
+}
+
+func TestEngineNewAccountSummaryFromJSON(t *testing.T) {
+	tests := []struct {
+		name    string
+		jsonStr string
+		want    *AccountSummary
+	}{
+		{
+			name:    "Valid JSON",
+			jsonStr: `{"tenant": "cgrates.org", "id": "1234", "balanceSummaries": [], "allowNegative": false, "disabled": true}`,
+			want: &AccountSummary{
+				Tenant:           "cgrates.org",
+				ID:               "1234",
+				BalanceSummaries: BalanceSummaries{},
+				AllowNegative:    false,
+				Disabled:         true,
+			},
+		},
+		{
+			name:    "Empty JSON",
+			jsonStr: "",
+			want:    nil,
+		},
+		{
+			name:    "Null JSON",
+			jsonStr: "null",
+			want:    nil,
+		},
+		{
+			name:    "Invalid JSON",
+			jsonStr: "{invalid: json}",
+			want:    nil,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, _ := NewAccountSummaryFromJSON(tt.jsonStr)
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("NewAccountSummaryFromJSON(%q) got = %v, want %v", tt.jsonStr, got, tt.want)
+			}
+		})
 	}
 }
