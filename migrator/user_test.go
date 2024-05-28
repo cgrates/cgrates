@@ -213,3 +213,68 @@ func TestUserProfile2attributeProfile(t *testing.T) {
 		}
 	}
 }
+
+func TestMigratorGetId(t *testing.T) {
+	testTenant := "cgrates.org"
+	testUserName := "testUser"
+	expectedID := utils.ConcatenatedKey(testTenant, testUserName)
+	userProfile := &v1UserProfile{
+		Tenant:   testTenant,
+		UserName: testUserName,
+		Masked:   true,
+		Profile:  map[string]string{"key1": "value1"},
+		Weight:   3.14,
+	}
+	actualID := userProfile.GetId()
+	if actualID != expectedID {
+		t.Errorf("Expected GetId() to return %s, got %s", expectedID, actualID)
+	}
+	expectedProfile := map[string]string{"key1": "value1"}
+	if !reflect.DeepEqual(userProfile.Profile, expectedProfile) {
+		t.Errorf("Expected Profile to remain unchanged, got %#v", userProfile.Profile)
+	}
+	if userProfile.Masked != true {
+		t.Errorf("Expected Masked flag to remain true")
+	}
+	if userProfile.Weight != 3.14 {
+		t.Errorf("Expected Weight to remain unchanged")
+	}
+}
+
+func TestMigratorSetId(t *testing.T) {
+	testTenant := "cgrates"
+	sampleUserName := "usertest123"
+	validID := utils.ConcatenatedKey(testTenant, sampleUserName)
+	invalidID := testTenant + sampleUserName
+	var testCases = []struct {
+		name    string
+		id      string
+		want    string
+		wantErr error
+	}{
+		{
+			name:    "Valid ID format",
+			id:      validID,
+			want:    testTenant,
+			wantErr: nil,
+		},
+		{
+			name:    "Invalid ID format",
+			id:      invalidID,
+			want:    "",
+			wantErr: utils.ErrInvalidKey,
+		},
+	}
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			userProfile := &v1UserProfile{}
+			err := userProfile.SetId(tc.id)
+			if err != tc.wantErr {
+				t.Errorf("Expected error: %v, got: %v", tc.wantErr, err)
+			}
+			if userProfile.Tenant != tc.want {
+				t.Errorf("Expected Tenant to be %s, got %s", tc.want, userProfile.Tenant)
+			}
+		})
+	}
+}
