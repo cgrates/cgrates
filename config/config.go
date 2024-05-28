@@ -154,6 +154,7 @@ func newCGRConfig(config []byte) (cfg *CGRConfig, err error) {
 	cfg.chargerSCfg = new(ChargerSCfg)
 	cfg.resourceSCfg = &ResourceSConfig{Opts: &ResourcesOpts{}}
 	cfg.statsCfg = &StatSCfg{Opts: &StatsOpts{}}
+	cfg.sarsCfg = new(SarSCfg)
 	cfg.thresholdSCfg = &ThresholdSCfg{Opts: &ThresholdsOpts{}}
 	cfg.routeSCfg = &RouteSCfg{Opts: &RoutesOpts{}}
 	cfg.sureTaxCfg = new(SureTaxCfg)
@@ -313,6 +314,7 @@ type CGRConfig struct {
 	chargerSCfg      *ChargerSCfg      // ChargerS config
 	resourceSCfg     *ResourceSConfig  // ResourceS config
 	statsCfg         *StatSCfg         // StatS config
+	sarsCfg          *SarSCfg          //SarS config
 	thresholdSCfg    *ThresholdSCfg    // ThresholdS config
 	routeSCfg        *RouteSCfg        // RouteS config
 	sureTaxCfg       *SureTaxCfg       // SureTax config
@@ -363,7 +365,7 @@ func (cfg *CGRConfig) loadFromJSONCfg(jsnCfg *CgrJsonCfg) (err error) {
 		cfg.loadFreeswitchAgentCfg, cfg.loadKamAgentCfg,
 		cfg.loadAsteriskAgentCfg, cfg.loadDiameterAgentCfg, cfg.loadRadiusAgentCfg,
 		cfg.loadDNSAgentCfg, cfg.loadHTTPAgentCfg, cfg.loadAttributeSCfg,
-		cfg.loadChargerSCfg, cfg.loadResourceSCfg, cfg.loadStatSCfg,
+		cfg.loadChargerSCfg, cfg.loadResourceSCfg, cfg.loadStatSCfg, cfg.loadSarSCfg,
 		cfg.loadThresholdSCfg, cfg.loadRouteSCfg, cfg.loadLoaderSCfg,
 		cfg.loadMailerCfg, cfg.loadSureTaxCfg, cfg.loadDispatcherSCfg,
 		cfg.loadLoaderCgrCfg, cfg.loadMigratorCgrCfg, cfg.loadTLSCgrCfg,
@@ -633,6 +635,15 @@ func (cfg *CGRConfig) loadStatSCfg(jsnCfg *CgrJsonCfg) (err error) {
 	return cfg.statsCfg.loadFromJSONCfg(jsnStatSCfg)
 }
 
+// loadSarSCfg loads the SarS section of the configuration
+func (cfg *CGRConfig) loadSarSCfg(jsnCfg *CgrJsonCfg) (err error) {
+	var jsnSarSCfg *SarsJsonCfg
+	if jsnSarSCfg, err = jsnCfg.SarsJsonCfg(); err != nil {
+		return
+	}
+	return cfg.sarsCfg.loadFromJSONCfg(jsnSarSCfg)
+}
+
 // loadThresholdSCfg loads the ThresholdS section of the configuration
 func (cfg *CGRConfig) loadThresholdSCfg(jsnCfg *CgrJsonCfg) (err error) {
 	var jsnThresholdSCfg *ThresholdSJsonCfg
@@ -885,6 +896,13 @@ func (cfg *CGRConfig) StatSCfg() *StatSCfg { // not done
 	cfg.lks[STATS_JSON].Lock()
 	defer cfg.lks[STATS_JSON].Unlock()
 	return cfg.statsCfg
+}
+
+// SarSCfg returns the config for SarS
+func (cfg *CGRConfig) SarSCfg() *SarSCfg {
+	cfg.lks[SARS_JSON].Lock()
+	defer cfg.lks[SARS_JSON].Unlock()
+	return cfg.sarsCfg
 }
 
 // ThresholdSCfg returns the config for ThresholdS
@@ -1236,6 +1254,7 @@ func (cfg *CGRConfig) getLoadFunctions() map[string]func(*CgrJsonCfg) error {
 		ChargerSCfgJson:    cfg.loadChargerSCfg,
 		RESOURCES_JSON:     cfg.loadResourceSCfg,
 		STATS_JSON:         cfg.loadStatSCfg,
+		SARS_JSON:          cfg.loadSarSCfg,
 		THRESHOLDS_JSON:    cfg.loadThresholdSCfg,
 		RouteSJson:         cfg.loadRouteSCfg,
 		LoaderJson:         cfg.loadLoaderSCfg,
@@ -1486,6 +1505,8 @@ func (cfg *CGRConfig) reloadSections(sections ...string) {
 			cfg.rldChans[RESOURCES_JSON] <- struct{}{}
 		case STATS_JSON:
 			cfg.rldChans[STATS_JSON] <- struct{}{}
+		case SARS_JSON:
+			cfg.rldChans[SARS_JSON] <- struct{}{}
 		case THRESHOLDS_JSON:
 			cfg.rldChans[THRESHOLDS_JSON] <- struct{}{}
 		case RouteSJson:
@@ -1538,6 +1559,7 @@ func (cfg *CGRConfig) AsMapInterface(separator string) (mp map[string]any) {
 		ChargerSCfgJson:    cfg.chargerSCfg.AsMapInterface(),
 		RESOURCES_JSON:     cfg.resourceSCfg.AsMapInterface(),
 		STATS_JSON:         cfg.statsCfg.AsMapInterface(),
+		SARS_JSON:          cfg.sarsCfg.AsMapInterface(),
 		THRESHOLDS_JSON:    cfg.thresholdSCfg.AsMapInterface(),
 		RouteSJson:         cfg.routeSCfg.AsMapInterface(),
 		SURETAX_JSON:       cfg.sureTaxCfg.AsMapInterface(separator),
@@ -1676,6 +1698,8 @@ func (cfg *CGRConfig) V1GetConfig(ctx *context.Context, args *SectionWithAPIOpts
 		mp = cfg.ResourceSCfg().AsMapInterface()
 	case STATS_JSON:
 		mp = cfg.StatSCfg().AsMapInterface()
+	case SARS_JSON:
+		mp = cfg.SarSCfg().AsMapInterface()
 	case THRESHOLDS_JSON:
 		mp = cfg.ThresholdSCfg().AsMapInterface()
 	case RouteSJson:
@@ -1844,6 +1868,8 @@ func (cfg *CGRConfig) V1GetConfigAsJSON(ctx *context.Context, args *SectionWithA
 		mp = cfg.ResourceSCfg().AsMapInterface()
 	case STATS_JSON:
 		mp = cfg.StatSCfg().AsMapInterface()
+	case SARS_JSON:
+		mp = cfg.SarSCfg().AsMapInterface()
 	case THRESHOLDS_JSON:
 		mp = cfg.ThresholdSCfg().AsMapInterface()
 	case RouteSJson:
@@ -1967,6 +1993,7 @@ func (cfg *CGRConfig) Clone() (cln *CGRConfig) {
 		chargerSCfg:      cfg.chargerSCfg.Clone(),
 		resourceSCfg:     cfg.resourceSCfg.Clone(),
 		statsCfg:         cfg.statsCfg.Clone(),
+		sarsCfg:          cfg.sarsCfg.Clone(),
 		thresholdSCfg:    cfg.thresholdSCfg.Clone(),
 		routeSCfg:        cfg.routeSCfg.Clone(),
 		sureTaxCfg:       cfg.sureTaxCfg.Clone(),
