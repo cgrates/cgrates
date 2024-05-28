@@ -558,8 +558,23 @@ func (iDB *InternalDB) RemTpData(table, tpid string, args map[string]string) (er
 	}
 	key := tpid
 	if args != nil {
-		for _, val := range args {
-			key += utils.CONCATENATED_KEY_SEP + val
+		switch table {
+		case utils.TBLTPAccountActions:
+			key += utils.CONCATENATED_KEY_SEP + args["loadid"] +
+				utils.CONCATENATED_KEY_SEP + args["tenant"] +
+				utils.CONCATENATED_KEY_SEP + args["account"]
+		case utils.TBLTPRateProfiles:
+			key += utils.CONCATENATED_KEY_SEP + args["loadid"] +
+				utils.CONCATENATED_KEY_SEP + args["tenant"] +
+				utils.CONCATENATED_KEY_SEP + args["category"] +
+				utils.CONCATENATED_KEY_SEP + args["subject"]
+		default:
+			if tag, has := args["tag"]; has {
+				key += utils.CONCATENATED_KEY_SEP + tag
+			} else if id, has := args["id"]; has {
+				key += utils.CONCATENATED_KEY_SEP + args["tenant"] +
+					utils.CONCATENATED_KEY_SEP + id
+			}
 		}
 	}
 	ids := iDB.db.GetItemIDs(table, key)
