@@ -18,12 +18,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
-	"reflect"
 	"testing"
 	"time"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
+	"github.com/google/go-cmp/cmp"
 )
 
 func TestGetRatingProfileForPrefix(t *testing.T) {
@@ -479,14 +479,13 @@ func TestEngineSwapRpasIndex(t *testing.T) {
 		FallbackKeys:   []string{"key3"},
 	}
 	initialRPAs := RatingPlanActivations{plan1, plan2}
-	index1 := 0
-	index2 := 1
 	want := RatingPlanActivations{plan2, plan1}
 	rpas := make(RatingPlanActivations, len(initialRPAs))
 	copy(rpas, initialRPAs)
-	rpas.Swap(index1, index2)
-	if !reflect.DeepEqual(rpas, want) {
-		t.Errorf("Expected RatingPlanActivations after swap: %v, got: %v", want, rpas)
+	rpas.Swap(0, 1)
+	diff := cmp.Diff(rpas, want)
+	if diff != "" {
+		t.Errorf("Expected RatingPlanActivations after swap to be equal to want: (-got, +want)\n%s", diff)
 	}
 }
 
