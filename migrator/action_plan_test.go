@@ -51,3 +51,11 @@ func TestV1ActionPlanAsActionPlan(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", ap.ActionTimings[0].Weight, newap.ActionTimings[0].Weight)
 	}
 }
+
+func TestMigratorIsASAPreturn(t *testing.T) {
+	actionPlan := &v1ActionPlan{}
+
+	if actual := actionPlan.IsASAP(); actual {
+		t.Errorf("Expected IsASAP to return false but got true")
+	}
+}
