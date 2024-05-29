@@ -262,3 +262,75 @@ func TestEngineThresholdMdlTableName(t *testing.T) {
 		t.Errorf("\nExpected: <%+v>\nReceived: <%+v>", exp, result)
 	}
 }
+
+func TestEngineTableNameTPfilters(t *testing.T) {
+	want := "tp_filters"
+	got := FilterMdl{}.TableName()
+	if got != want {
+		t.Errorf("Expected TableName(): %s, got: %s", want, got)
+	}
+}
+
+func TestEngineTableNameCdrs(t *testing.T) {
+	want := "cdrs"
+	got := CDRsql{}.TableName()
+	if got != want {
+		t.Errorf("Expected TableName(): %s, got: %s", want, got)
+	}
+}
+
+func TestEngineTableNameSessionCosts(t *testing.T) {
+	want := "session_costs"
+	got := SessionCostsSQL{}.TableName()
+	if got != want {
+		t.Errorf("Expected TableName(): %s, got: %s", want, got)
+	}
+}
+
+func TestEngineTableNameTBLVersions(t *testing.T) {
+	expected := "versions"
+	got := TBLVersion{}.TableName()
+	if got != expected {
+		t.Errorf("Expected TableName(): %s, got: %s", expected, got)
+	}
+}
+
+func TestEngineTableNameTbltpRoutes(t *testing.T) {
+	want := "tp_routes"
+	got := RouteMdl{}.TableName()
+	if got != want {
+		t.Errorf("Expected TableName(): %s, got: %s", want, got)
+	}
+}
+
+func TestEngineTableNameTPAttributeMdl(t *testing.T) {
+	want := "tp_attributes"
+	got := AttributeMdl{}.TableName()
+	if got != want {
+		t.Errorf("Expected TableName(): %s, got: %s", want, got)
+	}
+}
+
+func TestEngineTableNameChargerMdl(t *testing.T) {
+	want := "tp_chargers"
+	got := ChargerMdl{}.TableName()
+	if got != want {
+		t.Errorf("Expected TableName(): %s, got: %s", want, got)
+	}
+}
+
+func TestEngineTableNameDispatcherProfileMdl(t *testing.T) {
+	want := "tp_dispatcher_profiles"
+	got := DispatcherProfileMdl{}.TableName()
+	if got != want {
+		t.Errorf("Expected TableName(): %s, got: %s", want, got)
+	}
+}
+
+func TestEngineTableNameDispatcherHostMdl(t *testing.T) {
+	want := "tp_dispatcher_hosts"
+	got := DispatcherHostMdl{}.TableName()
+	if got != want {
+		t.Errorf("Expected TableName(): %s, got: %s", got, got)
+	}
+}

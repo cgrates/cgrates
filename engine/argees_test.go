@@ -128,3 +128,16 @@ func TestArgEEsUnmarshalJSON(t *testing.T) {
 		}
 	})
 }
+
+func TestEngineCGREventWithEeIDsSetCloneable(t *testing.T) {
+	attr := &CGREventWithEeIDs{
+		CGREvent: &utils.CGREvent{}}
+	attr.SetCloneable(true)
+	if !attr.clnb {
+		t.Error("Expected attribute.clnb to be true after calling SetCloneable(true)")
+	}
+	attr.SetCloneable(false)
+	if attr.clnb {
+		t.Error("Expected attribute.clnb to be false after calling SetCloneable(false)")
+	}
+}

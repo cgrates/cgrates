@@ -379,3 +379,58 @@ func TestATExecute22(t *testing.T) {
 		t.Error(err)
 	}
 }
+
+func TestEngineActionTriggerEquals(t *testing.T) {
+	at1 := &ActionTrigger{
+		ID:                "trigger1",
+		UniqueID:          "unique1",
+		ThresholdType:     "threshold1",
+		ThresholdValue:    10.0,
+		Recurrent:         true,
+		MinSleep:          time.Minute,
+		ExpirationDate:    time.Now().AddDate(0, 0, 1),
+		ActivationDate:    time.Now(),
+		Weight:            1.0,
+		ActionsID:         "action1",
+		MinQueuedItems:    5,
+		Executed:          false,
+		LastExecutionTime: time.Now(),
+	}
+
+	at2 := &ActionTrigger{
+		ID:                "trigger1",
+		UniqueID:          "unique1",
+		ThresholdType:     "threshold1",
+		ThresholdValue:    10.0,
+		Recurrent:         true,
+		MinSleep:          time.Minute,
+		ExpirationDate:    time.Now().AddDate(0, 0, 1),
+		ActivationDate:    time.Now(),
+		Weight:            1.0,
+		ActionsID:         "action1",
+		MinQueuedItems:    5,
+		Executed:          false,
+		LastExecutionTime: time.Now(),
+	}
+	at3 := &ActionTrigger{
+		ID:                "trigger2",
+		UniqueID:          "unique2",
+		ThresholdType:     "threshold2",
+		ThresholdValue:    20.0,
+		Recurrent:         false,
+		MinSleep:          time.Minute,
+		ExpirationDate:    time.Now().AddDate(0, 0, 1),
+		ActivationDate:    time.Now(),
+		Weight:            2.0,
+		ActionsID:         "action2",
+		MinQueuedItems:    10,
+		Executed:          false,
+		LastExecutionTime: time.Now(),
+	}
+	if !at1.Equals(at2) {
+		t.Errorf("Expected %v to equal %v, but it didn't.", at1, at2)
+	}
+	if at1.Equals(at3) {
+		t.Errorf("Expected %v not to equal %v, but it did.", at1, at3)
+	}
+}

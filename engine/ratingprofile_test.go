@@ -526,3 +526,27 @@ func TestEngineEqualRpaOrpa(t *testing.T) {
 		})
 	}
 }
+
+func TestEngineSwapIndexRis(t *testing.T) {
+	ris := RatingInfos{
+		&RatingInfo{MatchedSubject: "Cgrates1"},
+		&RatingInfo{MatchedSubject: "Cgrates2"},
+		&RatingInfo{MatchedSubject: "Cgrates3"},
+	}
+	i, j := 0, 2
+	ris.Swap(i, j)
+	if ris[i].MatchedSubject != "Cgrates3" || ris[j].MatchedSubject != "Cgrates1" {
+		t.Errorf("Swap did not swap elements correctly")
+	}
+}
+
+func TestEngineLessRis(t *testing.T) {
+	ris := RatingInfos{
+		&RatingInfo{ActivationTime: time.Now()},
+		&RatingInfo{ActivationTime: time.Now().Add(time.Hour)},
+		&RatingInfo{ActivationTime: time.Now().Add(-time.Hour)},
+	}
+	if ris.Less(0, 2) {
+		t.Errorf("Expected first element not to be less than the third one")
+	}
+}
