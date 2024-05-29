@@ -18,9 +18,9 @@
 - name: Download Go.
   become: true
   get_url:
-    url: "{{ go_download_url }}"
+    url: '{{ go_download_url }}'
     dest: /usr/local/src/{{ go_tarball }}
-    checksum: "sha256:{{ go_checksum }}"
+    checksum: 'sha256:{{ go_checksum }}'
   when:
     - install_go | bool
     - (go_version_result is failed or go_version not in go_version_result.stdout)

@@ -9,7 +9,7 @@
 - name: Create cgrates directory
   ansible.builtin.file:
     state: directory
-    mode: 'u=rwx,go=rx'
+    mode: u=rwx,go=rx
     owner: '{{ ansible_user }}'
     dest: '{{ cgrates_dir }}'
   when: clone_repository | bool
@@ -37,18 +37,18 @@
     state: link
   become: true
   loop:
-    - { src: '{{ cgrates_dir }}/data', dest: '/usr/share/cgrates' }
-    - { src: '{{ golang_gopath }}/bin/cgr-engine', dest: '/usr/bin/cgr-engine' }
-    - { src: '{{ golang_gopath }}/bin/cgr-loader', dest: '/usr/bin/cgr-loader' }
+    - { src: '{{ cgrates_dir }}/data', dest: /usr/share/cgrates }
+    - { src: '{{ golang_gopath }}/bin/cgr-engine', dest: /usr/bin/cgr-engine }
+    - { src: '{{ golang_gopath }}/bin/cgr-loader', dest: /usr/bin/cgr-loader }
     - {
         src: '{{ golang_gopath }}/bin/cgr-migrator',
-        dest: '/usr/bin/cgr-migrator',
+        dest: /usr/bin/cgr-migrator,
       }
     - {
         src: '{{ golang_gopath }}/bin/cgr-console',
-        dest: '/usr/bin/cgr-console',
+        dest: /usr/bin/cgr-console,
       }
-    - { src: '{{ golang_gopath }}/bin/cgr-tester', dest: '/usr/bin/cgr-tester' }
+    - { src: '{{ golang_gopath }}/bin/cgr-tester', dest: /usr/bin/cgr-tester }
 
 - name: Run post install scripts
   become: true
@@ -57,11 +57,11 @@
     chdir: '{{ cgrates_dir }}/data/storage/{{ item.db }}'
   when: item.db in cgrates_dbs
   loop:
-    - { db: 'mysql', cmd: 'sh setup_ers_db.sh root CGRateS.org localhost' }
-    - { db: 'mysql', cmd: 'sh setup_cgr_db.sh root CGRateS.org localhost' }
-    - { db: 'postgres', cmd: 'sh create_db_with_users.sh' }
-    - { db: 'postgres', cmd: 'sh create_ers_db.sh' }
-    - { db: 'mongo', cmd: 'sh setup_cgr_db.sh' }
+    - { db: mysql, cmd: sh setup_ers_db.sh root CGRateS.org localhost }
+    - { db: mysql, cmd: sh setup_cgr_db.sh root CGRateS.org localhost }
+    - { db: postgres, cmd: sh create_db_with_users.sh }
+    - { db: postgres, cmd: sh create_ers_db.sh }
+    - { db: mongo, cmd: sh setup_cgr_db.sh }
 
 - name: Set versions
   ansible.builtin.command:
