@@ -101,6 +101,7 @@ func (d *testDispatcher) stopEngine(t *testing.T) {
 	if err := exec.Command("kill", "-9", pid).Run(); err != nil {
 		t.Fatalf("Error at stop engine:%v\n", err)
 	}
+	time.Sleep(200 * time.Millisecond)
 	// // if err := d.cmd.Process.Kill(); err != nil {
 	// // 	t.Fatalf("Error at stop engine:%v\n", err)
 	// }
