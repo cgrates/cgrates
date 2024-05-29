@@ -24,6 +24,7 @@ package dispatchers
 import (
 	"fmt"
 	"testing"
+	"time"
 
 	"github.com/cgrates/cgrates/utils"
 )
@@ -159,6 +160,7 @@ func testDspResponderShutdown(t *testing.T) {
 	} else if reply != "Done!" {
 		t.Errorf("Received: %s", utils.ToJSON(reply))
 	}
+	time.Sleep(200 * time.Millisecond)
 	if err := dispEngine.RPC.Call(utils.CoreSv1Status, &ev, &statusReply); err != nil {
 		t.Error(err)
 	} else if statusReply[utils.NodeID] != "ALL2" {
