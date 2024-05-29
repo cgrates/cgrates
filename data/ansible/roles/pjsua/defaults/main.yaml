@@ -1,9 +1,9 @@
 ---
-pjsua_version: '2.14.1'
+pjsua_version: 2.14.1
 pjsua_url: 'https://github.com/pjsip/pjproject/archive/refs/tags/{{ pjsua_version }}.tar.gz'
-pjsua_tmp_install_dir: '/tmp'
+pjsua_tmp_install_dir: /tmp
 pjsua_post_install_cleanup: true
-pjsua_bin_path: '/usr/local/bin'
+pjsua_bin_path: /usr/local/bin
 pjsua_dependencies:
   - libasound2-dev
   - libssl-dev
