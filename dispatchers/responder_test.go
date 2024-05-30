@@ -410,3 +410,32 @@ func TestDspResponderGetMaxSessionTimeOnAccountsErrorNil(t *testing.T) {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, err)
 	}
 }
+
+func TestDspResponderGetCostOnRatingPlansNil(t *testing.T) {
+	cgrCfg := config.NewDefaultCGRConfig()
+	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
+	cgrCfg.DispatcherSCfg().AttributeSConns = []string{"test"}
+	CGREvent := &utils.GetCostOnRatingPlansArgs{
+		Tenant: "tenant",
+	}
+	var reply *map[string]any
+	result := dspSrv.ResponderGetCostOnRatingPlans(context.Background(), CGREvent, reply)
+	expected := "MANDATORY_IE_MISSING: [ApiKey]"
+	if result == nil || result.Error() != expected {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
+	}
+}
+
+func TestDspResponderGetCostOnRatingPlansErrorNil(t *testing.T) {
+	cgrCfg := config.NewDefaultCGRConfig()
+	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
+	CGREvent := &utils.GetCostOnRatingPlansArgs{
+		Tenant: "tenant",
+	}
+	var reply *map[string]any
+	result := dspSrv.ResponderGetCostOnRatingPlans(context.Background(), CGREvent, reply)
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
+	if result == nil || result.Error() != expected {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
+	}
+}
