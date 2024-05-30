@@ -526,3 +526,60 @@ func TestGetMinutesForCredi(t *testing.T) {
 		t.Errorf("expected %v,received %v", utils.ToJSON(expLog), utils.ToJSON(rcvLog))
 	}
 }
+
+func TestBalancesStringValFactors(t *testing.T) {
+	factors := ValueFactors{
+		"factor1": 10.5,
+		"factor2": 20.3,
+	}
+	jsonString := factors.String()
+	if jsonString == "" {
+		t.Errorf("String(): expected non-empty JSON string, got empty")
+	}
+}
+
+func TestBalancesHasDestination(t *testing.T) {
+	balance := &Balance{
+		DestinationIDs: utils.StringMap{
+			"destination1": true,
+			"destination2": false,
+		},
+	}
+	hasDest := balance.HasDestination()
+	expected := true
+	if hasDest != expected {
+		t.Errorf("HasDestination(): expected %t, got %t", expected, hasDest)
+	}
+	balanceEmpty := &Balance{
+		DestinationIDs: utils.StringMap{},
+	}
+	hasDestEmpty := balanceEmpty.HasDestination()
+	expectedEmpty := false
+	if hasDestEmpty != expectedEmpty {
+		t.Errorf("HasDestination(): expected %t, got %t for empty DestinationIDs map", expectedEmpty, hasDestEmpty)
+	}
+}
+
+func TestBalancesMatchDestination(t *testing.T) {
+	balanceWithDestinations := &Balance{
+		DestinationIDs: utils.StringMap{
+			"destination1": true,
+			"destination2": false,
+		},
+	}
+	if !balanceWithDestinations.MatchDestination("destination1") {
+		t.Errorf("MatchDestination(destination1): expected true, got false")
+	}
+	if balanceWithDestinations.MatchDestination("destination2") {
+		t.Errorf("MatchDestination(destination2): expected false, got true")
+	}
+	if balanceWithDestinations.MatchDestination("nonexistent") {
+		t.Errorf("MatchDestination(nonexistent): expected false, got true")
+	}
+	balanceNoDestinations := &Balance{
+		DestinationIDs: utils.StringMap{},
+	}
+	if !balanceNoDestinations.MatchDestination("anydestination") {
+		t.Errorf("MatchDestination(anydestination): expected true, got false for empty DestinationIDs map")
+	}
+}
