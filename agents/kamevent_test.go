@@ -18,6 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package agents
 
 import (
+	"encoding/json"
 	"reflect"
 	"testing"
 	"time"
@@ -531,5 +532,100 @@ func TestAgentsKamEvent_String(t *testing.T) {
 	want := `{"Data":"TestData","EventName":"TestEvent"}`
 	if got != want {
 		t.Errorf("KamEvent.String() = %v, want %v", got, want)
+	}
+}
+
+func TestKameventKamSessionDisconnect(t *testing.T) {
+	ksd := KamSessionDisconnect{
+		Event:     "disconnect",
+		HashEntry: "123",
+		HashId:    "2012",
+		Reason:    "timeout",
+	}
+	want := `{"Event":"disconnect","HashEntry":"123","HashId":"2012","Reason":"timeout"}`
+	got := ksd.String()
+	if got != want {
+		t.Errorf("String()  Want: %s, Got: %s", want, got)
+	}
+}
+
+func TestKameventNewKamDlgReply(t *testing.T) {
+	kamEvData := []byte(`{"Event":"dialog","Jsonrpl_body":{"Id":1,"Jsonrpc":"2.0","Result":[{"call-id":"123456","Caller":{"Tag":"tag123"},"variables":[{"cgrOriginID":"id123","cgrOriginHost":"host123"}]}]}}`)
+	expected := KamDlgReply{
+		Event: "dialog",
+		Jsonrpl_body: &kamJsonDlgBody{
+			Id:      1,
+			Jsonrpc: "2.0",
+			Result: []*kamDlgInfo{
+				{
+					CallId: "123456",
+					Caller: &kamCallerDlg{
+						Tag: "tag123",
+					},
+					Variables: []struct {
+						CgrOriginID   string `json:"cgrOriginID,omitempty"`
+						CgrOriginHost string `json:"cgrOriginHost,omitempty"`
+					}{
+						{
+							CgrOriginID:   "id123",
+							CgrOriginHost: "host123",
+						},
+					},
+				},
+			},
+		},
+	}
+	result, err := NewKamDlgReply(kamEvData)
+	if err != nil {
+		t.Errorf("Unexpected error: %v", err)
+		return
+	}
+	expectedJSON, _ := json.Marshal(expected)
+	resultJSON, _ := json.Marshal(result)
+	if string(expectedJSON) != string(resultJSON) {
+		t.Errorf("NewKamDlgReply() returned unexpected result. Expected: %s, Got: %s", expectedJSON, resultJSON)
+	}
+	invalidData := []byte("{invalid json")
+	_, err = NewKamDlgReply(invalidData)
+	if err == nil {
+		t.Errorf("Expected error when unmarshaling invalid data. Got nil error")
+	}
+}
+
+func TestKameventStringKdr(t *testing.T) {
+	event := "dialog"
+	jsonBody := &kamJsonDlgBody{
+		Id:      1,
+		Jsonrpc: "2.0",
+		Result: []*kamDlgInfo{
+			{
+				CallId: "123456",
+				Caller: &kamCallerDlg{
+					Tag: "tag123",
+				},
+				Variables: []struct {
+					CgrOriginID   string `json:"cgrOriginID,omitempty"`
+					CgrOriginHost string `json:"cgrOriginHost,omitempty"`
+				}{
+					{
+						CgrOriginID:   "id123",
+						CgrOriginHost: "host123",
+					},
+				},
+			},
+		},
+	}
+	reply := KamDlgReply{
+		Event:        event,
+		Jsonrpl_body: jsonBody,
+	}
+	expectedJSON, err := json.Marshal(reply)
+	if err != nil {
+		t.Errorf("Unexpected error marshalling KamDlgReply: %v", err)
+		return
+	}
+	result := reply.String()
+	if result != string(expectedJSON) {
+		t.Errorf("KamDlgReply.String() returned unexpected result. Expected: %s, Got: %s", string(expectedJSON), result)
 	}
 }
