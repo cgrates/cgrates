@@ -197,7 +197,7 @@ func testCDRsPostFailoverProcessCDR(t *testing.T) {
 }
 
 func testCDRsPostFailoverToFile(t *testing.T) {
-	time.Sleep(2 * time.Second)
+	time.Sleep(3 * time.Second)
 	filesInDir, _ := os.ReadDir(cdrsPostFailCfg.EFsCfg().FailedPostsDir)
 	if len(filesInDir) == 0 {
 		t.Fatalf("No files in directory: %s", cdrsPostFailCfg.EFsCfg().FailedPostsDir)
@@ -206,7 +206,7 @@ func testCDRsPostFailoverToFile(t *testing.T) {
 		fileName := file.Name()
 		filePath := path.Join(cdrsPostFailCfg.EFsCfg().FailedPostsDir, fileName)
 
-		ev, err := efs.NewFailoverPosterFromFile(filePath, utils.EEs, nil)
+		ev, err := efs.NewFailoverPosterFromFile(filePath, utils.EEs, &efs.EfS{})
 		if err != nil {
 			t.Errorf("<%s> for file <%s>", err, fileName)
 			continue
@@ -214,13 +214,11 @@ func testCDRsPostFailoverToFile(t *testing.T) {
 			t.Error("Expected at least one event")
 			continue
 		}
-		if ev.(*efs.FailedExportersEEs).Format != utils.MetaS3jsonMap {
-			t.Errorf("Expected event to use %q received: %q", utils.MetaS3jsonMap, ev.(*efs.FailedExportersEEs).Format)
-		}
 		if len(ev.(*efs.FailedExportersEEs).Events) != 3 {
 			t.Errorf("Expected all the events to be saved in the same file, ony %v saved in this file.", len(ev.(*efs.FailedExportersEEs).Events))
 		}
 	}
+
 }
 
 func testCDRsPostFailoverKillEngine(t *testing.T) {

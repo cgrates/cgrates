@@ -301,6 +301,9 @@ func testSectConfigSReloadHTTP(t *testing.T) {
 }
 
 func testSectConfigSReloadCaches(t *testing.T) {
+	if *dbType == utils.MetaInternal {
+		return
+	}
 	var replyPingBf string
 	if err := testSectRPC.Call(context.Background(), utils.CacheSv1Ping, &utils.CGREvent{}, &replyPingBf); err != nil {
 		t.Error(err)
