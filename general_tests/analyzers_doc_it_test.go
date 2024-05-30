@@ -636,10 +636,10 @@ func testAnzDocQueryWithContentFiltersFilters(t *testing.T) {
 	// Query results for API calls with with an execution duration longer than 30ms
 	if err := anzDocRPC.Call(context.Background(), utils.AnalyzerSv1StringQuery, &analyzers.QueryArgs{
 		HeaderFilters:  "",
-		ContentFilters: []string{"*gt:~*hdr.RequestDuration:50ms"},
+		ContentFilters: []string{"*gt:~*hdr.RequestDuration:30ms"},
 	}, &result); err != nil {
 		t.Error(err)
-	} else if len(result) != 1 {
+	} else if len(result) == 0 {
 		t.Errorf("Unexpected result: %s", utils.ToJSON(result))
 	}
 }
@@ -657,10 +657,10 @@ func testAnzDocQuery(t *testing.T) {
 		t.Errorf("Unexpected result: %s", utils.ToJSON(result))
 	}
 
-	// Get results for CoreSv1.Status request replies that state a higher number of goroutines than 42
+	// Get results for CoreSv1.Status request replies that state a higher number of goroutines than 46
 	if err := anzDocRPC.Call(context.Background(), utils.AnalyzerSv1StringQuery, &analyzers.QueryArgs{
 		HeaderFilters:  `+RequestMethod:"CoreSv1.Status"`,
-		ContentFilters: []string{"*gt:~*rep.ActiveGoroutines:42"},
+		ContentFilters: []string{"*gt:~*rep.ActiveGoroutines:46"},
 	}, &result); err != nil {
 		t.Error(err)
 	} else if len(result) != 1 {

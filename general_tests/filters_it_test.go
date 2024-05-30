@@ -994,7 +994,12 @@ func testV1FltrChargerSuffix(t *testing.T) {
 			AttributeIDs: []string{"*constant:*req.Subject:intraState"},
 			Weights: utils.DynamicWeights{
 				{
-					Weight: 20,
+					Weight: 100,
+				},
+			},
+			Blockers: utils.DynamicBlockers{
+				{
+					Blocker: true,
 				},
 			},
 		},
@@ -1015,7 +1020,12 @@ func testV1FltrChargerSuffix(t *testing.T) {
 			AttributeIDs: []string{"*constant:*req.Subject:interState"},
 			Weights: utils.DynamicWeights{
 				{
-					Weight: 20,
+					Weight: 100,
+				},
+			},
+			Blockers: utils.DynamicBlockers{
+				{
+					Blocker: true,
 				},
 			},
 		},
@@ -1073,8 +1083,8 @@ func testV1FltrChargerSuffix(t *testing.T) {
 		sort.Slice(result2, func(i, j int) bool {
 			return result2[i].ChargerSProfile < result2[j].ChargerSProfile
 		})
-		if processedEv[0].ChargerSProfile != result2[1].ChargerSProfile {
-			t.Errorf("Expecting : %s, \n received: %s", utils.ToJSON(processedEv[0]), utils.ToJSON(result2[1]))
+		if !reflect.DeepEqual(result2[0].AlteredFields, processedEv[0].AlteredFields) {
+			t.Errorf("Expecting : %s, \n received: %s", utils.ToJSON(processedEv[0]), utils.ToJSON(result2))
 		}
 	}
 
@@ -1123,8 +1133,8 @@ func testV1FltrChargerSuffix(t *testing.T) {
 		sort.Slice(result2, func(i, j int) bool {
 			return result2[i].ChargerSProfile < result2[j].ChargerSProfile
 		})
-		if processedEv[0].ChargerSProfile != result2[1].ChargerSProfile {
-			t.Errorf("Expecting : %s, \n received: %s", utils.ToJSON(processedEv[0]), utils.ToJSON(result2[1]))
+		if !reflect.DeepEqual(result2[0].AlteredFields, processedEv[0].AlteredFields) {
+			t.Errorf("Expecting : %s, \n received: %s", utils.ToJSON(processedEv[0]), utils.ToJSON(result2[0]))
 		}
 	}
 }

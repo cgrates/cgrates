@@ -381,6 +381,7 @@ func testSessVolDiscProcessCDRCustomer(t *testing.T) {
 		APIOpts: map[string]any{
 			utils.StartTime: time.Date(2020, time.January, 7, 16, 60, 0, 0, time.UTC),
 			utils.MetaUsage: 15 * time.Minute,
+			utils.MetaStore: false,
 		},
 	}
 

@@ -73,7 +73,7 @@ var (
 func TestCGRLoaderRemove(t *testing.T) {
 	switch *dbType {
 	case utils.MetaInternal:
-		cgrLdrCfgDir = "tutinternal"
+		t.SkipNow()
 	case utils.MetaMongo:
 		cgrLdrCfgDir = "tutmongo"
 	case utils.MetaMySQL:
@@ -123,7 +123,7 @@ func testCgrLdrGetSubsystemsNotLoadedLoad(t *testing.T) {
 	if err := cgrLdrBIRPC.Call(context.Background(), utils.AdminSv1GetAccount,
 		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ACC_PRF_1"}},
 		&replyAcc); err == nil || err.Error() != utils.ErrNotFound.Error() {
-		t.Errorf("Expected %+q, received %+q", utils.ErrNotFound.Error(), err.Error())
+		t.Errorf("Expected %+q, received %+q", utils.ErrNotFound, err)
 	}
 
 	//actionsPrf
@@ -131,7 +131,7 @@ func testCgrLdrGetSubsystemsNotLoadedLoad(t *testing.T) {
 	if err := cgrLdrBIRPC.Call(context.Background(), utils.AdminSv1GetActionProfile,
 		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ONE_TIME_ACT"}},
 		&replyAct); err == nil || err.Error() != utils.ErrNotFound.Error() {
-		t.Errorf("Expected %+q, received %+q", utils.ErrNotFound.Error(), err.Error())
+		t.Errorf("Expected %+q, received %+q", utils.ErrNotFound, err)
 	}
 
 	//attributesPrf

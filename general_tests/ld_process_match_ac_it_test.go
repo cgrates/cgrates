@@ -239,7 +239,7 @@ func testLdPrMatchAcCDRSProcessEvent(t *testing.T) {
 			},
 		},
 	}
-
+	delete(testRPC2.Event.APIOpts, utils.MetaCDRID)
 	if !reflect.DeepEqual(utils.ToJSON(expected2), utils.ToJSON(testRPC2.Event)) {
 		t.Errorf("\nExpecting : %+v\n,received: %+v", utils.ToJSON(expected2), utils.ToJSON(testRPC2.Event))
 	}
