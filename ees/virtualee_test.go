@@ -50,3 +50,32 @@ func TestVirtualEeExportEvent(t *testing.T) {
 	}
 	vEe.Close()
 }
+
+func TestVirtualEeConnect(t *testing.T) {
+	vEe := &VirtualEE{}
+	err := vEe.Connect()
+	if err != nil {
+		t.Errorf("Connect() returned an error: %v, expected nil", err)
+	}
+}
+
+func TestVirtualEE_PrepareMap(t *testing.T) {
+	vEe := &VirtualEE{}
+	event := "test event"
+	cgrEv := &utils.CGREvent{
+		Tenant: "event",
+	}
+
+	// Test case when PrepareMap is called
+	result, err := vEe.PrepareMap(cgrEv)
+
+	// Check that the returned error is nil
+	if err != nil {
+		t.Errorf("PrepareMap() returned an error: %v, expected nil", err)
+	}
+
+	// Check that the returned result is the expected event
+	if result != event {
+		t.Errorf("PrepareMap() returned %v, expected %v", result, event)
+	}
+}
