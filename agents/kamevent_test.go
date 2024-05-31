@@ -629,3 +629,27 @@ func TestKameventStringKdr(t *testing.T) {
 		t.Errorf("KamDlgReply.String() returned unexpected result. Expected: %s, Got: %s", string(expectedJSON), result)
 	}
 }
+
+func TestKamEventKamReplyString(t *testing.T) {
+	krply := &KamReply{
+		Event:              "test_event",
+		TransactionIndex:   "123",
+		TransactionLabel:   "testLabel",
+		Attributes:         "testAttributes",
+		ResourceAllocation: "testaAllocation",
+		MaxUsage:           10,
+		Routes:             "testRoute",
+		Thresholds:         "testThreshold",
+		StatQueues:         "testQueue",
+		Error:              "testError",
+	}
+	result := krply.String()
+	var unmarshalledResult map[string]interface{}
+	err := json.Unmarshal([]byte(result), &unmarshalledResult)
+	if err != nil {
+		t.Errorf("String() method does not return a valid JSON string: %v", err)
+	}
+	if unmarshalledResult["Event"] != krply.Event {
+		t.Errorf("Event mismatch. Expected: %s, Got: %v", krply.Event, unmarshalledResult["Event"])
+	}
+}
