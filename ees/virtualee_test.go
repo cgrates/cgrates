@@ -24,6 +24,7 @@ import (
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
+	"github.com/google/go-cmp/cmp"
 )
 
 func TestVirtualEeGetMetrics(t *testing.T) {
@@ -55,27 +56,26 @@ func TestVirtualEeConnect(t *testing.T) {
 	vEe := &VirtualEE{}
 	err := vEe.Connect()
 	if err != nil {
-		t.Errorf("Connect() returned an error: %v, expected nil", err)
+		t.Errorf("Connect() err = %v, want nil", err)
 	}
 }
 
-func TestVirtualEE_PrepareMap(t *testing.T) {
+func TestVirtualEePrepareMap(t *testing.T) {
 	vEe := &VirtualEE{}
-	event := "test event"
 	cgrEv := &utils.CGREvent{
 		Tenant: "event",
+		Event: map[string]any{
+			"Key": "value",
+		},
 	}
-
-	// Test case when PrepareMap is called
-	result, err := vEe.PrepareMap(cgrEv)
-
-	// Check that the returned error is nil
+	want := map[string]any{
+		"Key": "value",
+	}
+	got, err := vEe.PrepareMap(cgrEv)
 	if err != nil {
 		t.Errorf("PrepareMap() returned an error: %v, expected nil", err)
 	}
-
-	// Check that the returned result is the expected event
-	if result != event {
-		t.Errorf("PrepareMap() returned %v, expected %v", result, event)
+	if diff := cmp.Diff(want, got); diff != "" {
+		t.Errorf("PrepareMap() returned an unexpected value(-want +got): \n%s", diff)
 	}
 }
