@@ -1118,7 +1118,7 @@ func TestFsEvV1TerminateSessionArgs(t *testing.T) {
 	}
 }
 
-func TestAgentsFSEventGetSessionIds(t *testing.T) {
+func TestFSEventGetSessionIds(t *testing.T) {
 	uuid := "test-uuid"
 	fsev := FSEvent{UUID: uuid}
 	got := fsev.GetSessionIds()
@@ -1128,7 +1128,7 @@ func TestAgentsFSEventGetSessionIds(t *testing.T) {
 	}
 }
 
-func TestAgentsFSEventString(t *testing.T) {
+func TestFSEventString(t *testing.T) {
 	fsev := &FSEvent{
 		"key1": "value1",
 	}
@@ -1137,4 +1137,160 @@ func TestAgentsFSEventString(t *testing.T) {
 	if got != want {
 		t.Errorf("fsev.String() = %q, want %q", got, want)
 	}
+}
+
+func TestFSEventGetCallDestNr(t *testing.T) {
+	fsev := FSEvent{
+		"UserNumber": "123456789",
+		"UserName":   "testName",
+	}
+	fieldName := "UserName"
+	callDestNr := fsev.GetCallDestNr(fieldName)
+	expectedCallDestNr := "testName"
+	if callDestNr != expectedCallDestNr {
+		t.Errorf("Expected call destination number: %v, got: %v", expectedCallDestNr, callDestNr)
+	}
+}
+
+func TestFSEventGetCallDestNrStaticValue(t *testing.T) {
+	fsev := FSEvent{}
+	fieldName := utils.StaticValuePrefix + "static_number"
+	callDestNr := fsev.GetCallDestNr(fieldName)
+	expectedCallDestNr := "static_number"
+	if callDestNr != expectedCallDestNr {
+		t.Errorf("Expected call destination number: %v, got: %v", expectedCallDestNr, callDestNr)
+	}
+}
+
+func TestFSEventGetEndTime(t *testing.T) {
+	fsev := FSEvent{
+		END_TIME: "2024-05-31T12:00:00Z",
+	}
+	fieldName := "END_TIME"
+	timezone := "UTC"
+	actualTime, err := fsev.GetEndTime(fieldName, timezone)
+	if err != nil {
+		t.Errorf("Unexpected error: %v", err)
+	}
+	expectedTime := time.Date(2024, time.May, 31, 12, 0, 0, 0, time.UTC)
+	if !actualTime.Equal(expectedTime) {
+		t.Errorf("Expected time: %v, got: %v", expectedTime, actualTime)
+	}
+}
+
+func TestFSEventGetOriginatorIP(t *testing.T) {
+	tests := []struct {
+		name      string
+		fsev      FSEvent
+		fieldName string
+		want      string
+	}{
+		{
+			name:      "Static value",
+			fsev:      FSEvent{},
+			fieldName: utils.StaticValuePrefix + "192.168.0.1",
+			want:      "192.168.0.1",
+		},
+		{
+			name: "Field name present",
+			fsev: FSEvent{
+				"custom_ip_field": "10.0.0.1",
+			},
+			fieldName: "custom_ip_field",
+			want:      "10.0.0.1",
+		},
+		{
+			name: "Origin host present",
+			fsev: FSEvent{
+				VarCGROriginHost: "172.16.0.1",
+			},
+			fieldName: "non_existent_field",
+			want:      "172.16.0.1",
+		},
+		{
+			name: "IPv4 present",
+			fsev: FSEvent{
+				FS_IPv4: "192.168.1.1",
+			},
+			fieldName: "non_existent_field",
+			want:      "192.168.1.1",
+		},
+		{
+			name:      "No relevant field present",
+			fsev:      FSEvent{},
+			fieldName: "non_existent_field",
+			want:      "",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			gotResult := tt.fsev.GetOriginatorIP(tt.fieldName)
+			if gotResult != tt.want {
+				t.Errorf("GetOriginatorIP() = %v, want %v", gotResult, tt.want)
+			}
+		})
+	}
+}
+
+func TestFSEventGetDisconnectCause(t *testing.T) {
+	event := FSEvent{
+		"VAR_CGR_DISCONNECT_CAUSE": "Network Error",
+		"HANGUP_CAUSE":             "Call Ended",
+	}
+	tests := []struct {
+		name      string
+		fieldName string
+		want      string
+	}{
+		{name: "Static Value Prefix", fieldName: utils.StaticValuePrefix + "MyReason", want: "MyReason"},
+		{name: "VAR_CGR_DISCONNECT_CAUSE Present", fieldName: "VAR_CGR_DISCONNECT_CAUSE", want: "Network Error"},
+		{name: "HANGUP_CAUSE Present", fieldName: "HANGUP_CAUSE", want: "Call Ended"},
+		{name: "No Matching Field", fieldName: "NonExistingField", want: ""},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			got := event.GetDisconnectCause(tc.fieldName)
+			if got != tc.want {
+				t.Errorf("Test: %s - Got: %s, Want: %s", tc.name, got, tc.want)
+			}
+		})
+	}
+}
+
+func TestFSEventGetRoute(t *testing.T) {
+	event := FSEvent{
+		"VAR_CGR_ROUTE": "Sales Team",
+	}
+	tests := []struct {
+		name      string
+		fieldName string
+		want      string
+	}{
+		{"Static Value Prefix", utils.StaticValuePrefix + "MyRoute", "MyRoute"},
+		{"VAR_CGR_ROUTE Present", "VAR_CGR_ROUTE", "Sales Team"},
+	}
+	noMatchCase := struct {
+		name      string
+		fieldName string
+		want      string
+	}{
+		name:      "No Matching Field",
+		fieldName: "NonExistingField",
+		want:      "",
+	}
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			got := event.GetRoute(tc.fieldName)
+			if got != tc.want {
+				t.Errorf("Test: %s - Got: %s, Want: %s", tc.name, got, tc.want)
+			}
+		})
+	}
+	t.Run(noMatchCase.name, func(t *testing.T) {
+		got := event.GetRoute(noMatchCase.fieldName)
+		if got != noMatchCase.want {
+			t.Errorf("Test: %s - Got: %s, Want: %s", noMatchCase.want, got, noMatchCase.want)
+		}
+	})
 }
