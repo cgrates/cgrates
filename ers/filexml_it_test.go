@@ -21,11 +21,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package ers
 
 import (
+	"bytes"
 	"fmt"
 	"net/rpc"
 	"os"
 	"path"
 	"reflect"
+	"strings"
 	"testing"
 	"time"
 
@@ -593,11 +595,18 @@ func TestFileXMLProcessEVentError3(t *testing.T) {
 			Mandatory: true,
 		},
 	}
+	tmpLogger := utils.Logger
+	defer func() {
+		utils.Logger = tmpLogger
+	}()
+	var buf bytes.Buffer
+	utils.Logger = utils.NewStdLoggerWithWriter(&buf, "", 7)
 
 	eR.Config().Fields[0].ComputePath()
 	errExpect := "Empty source value for fieldID: <OriginID>"
-	if err := eR.processFile(filePath, fname); err == nil || err.Error() != errExpect {
-		t.Errorf("Expected %v but received %v", errExpect, err)
+	eR.processFile(filePath, fname)
+	if !strings.Contains(buf.String(), errExpect) {
+		t.Errorf("Expected to contain %s", errExpect)
 	}
 	if err := os.RemoveAll(filePath); err != nil {
 		t.Error(err)

@@ -49,6 +49,7 @@ var (
 	expRpc     *birpc.Client
 
 	sTestsExp = []func(t *testing.T){
+		testExpCreateFiles,
 		testExpLoadConfig,
 		testExpFlushDBs,
 		testExpStartEngine,
@@ -91,6 +92,16 @@ func TestExport(t *testing.T) {
 
 	for _, stest := range sTestsExp {
 		t.Run(expCfgDir, stest)
+	}
+}
+func testExpCreateFiles(t *testing.T) {
+	for _, dir := range eeSBlockerFiles {
+		if err := os.RemoveAll("/tmp/archivesTP"); err != nil {
+			t.Fatal("Error removing folder: ", dir, err)
+		}
+		if err := os.MkdirAll("/tmp/archivesTP", os.ModePerm); err != nil {
+			t.Fatal("Error creating folder: ", dir, err)
+		}
 	}
 }
 

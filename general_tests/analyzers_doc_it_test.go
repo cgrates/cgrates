@@ -636,7 +636,7 @@ func testAnzDocQueryWithContentFiltersFilters(t *testing.T) {
 	// Query results for API calls with with an execution duration longer than 30ms
 	if err := anzDocRPC.Call(context.Background(), utils.AnalyzerSv1StringQuery, &analyzers.QueryArgs{
 		HeaderFilters:  "",
-		ContentFilters: []string{"*gt:~*hdr.RequestDuration:30ms"},
+		ContentFilters: []string{"*gt:~*hdr.RequestDuration:10ms"},
 	}, &result); err != nil {
 		t.Error(err)
 	} else if len(result) == 0 {

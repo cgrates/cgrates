@@ -550,12 +550,12 @@ func testdoubleRemoveDispatcherProfile(t *testing.T) {
 	}
 	if err := doubleRemoveRPC.Call(context.Background(), utils.AdminSv1RemoveDispatcherProfile,
 		&utils.TenantID{Tenant: doubleRemoveTenant, ID: "DSP_PRF"}, &result); err == nil ||
-		err.Error() != utils.ErrDSPProfileNotFound.Error() {
+		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
 	if err := doubleRemoveRPC.Call(context.Background(), utils.AdminSv1RemoveDispatcherProfile,
 		&utils.TenantID{Tenant: doubleRemoveTenant, ID: "DSP_PRF"}, &result); err == nil ||
-		err.Error() != utils.ErrDSPProfileNotFound.Error() {
+		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
 	// check
