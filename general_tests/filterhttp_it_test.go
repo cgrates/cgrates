@@ -171,12 +171,7 @@ cgrates.org,ATTR_DEST,*any,FLTR_DST_1002;FLTR_DEST,,,*req.Supplier,*constant,Sup
 		ConfigJSON: content,
 		TpFiles:    tpFiles,
 	}
-	client, _, shutdown, err := testEnv.Setup(t, *utils.WaitRater)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	defer shutdown()
+	client, _ := testEnv.Setup(t, *utils.WaitRater)
 
 	t.Run("FilterHTTPFullEvent", func(t *testing.T) {
 

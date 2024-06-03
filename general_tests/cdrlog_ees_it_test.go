@@ -186,12 +186,7 @@ func TestCdrLogEes(t *testing.T) {
 		ConfigJSON: content,
 		TpFiles:    map[string]string{},
 	}
-	client, _, shutdown, err := testEnv.Setup(t, *utils.WaitRater)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	defer shutdown()
+	client, _ := testEnv.Setup(t, *utils.WaitRater)
 
 	t.Run("AddBalanceCdrLog", func(t *testing.T) {
 		var reply string

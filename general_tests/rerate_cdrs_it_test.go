@@ -52,11 +52,7 @@ func TestRerateCDRs(t *testing.T) {
 		ConfigPath: path.Join(*utils.DataDir, "conf", "samples", cfgDir),
 		TpPath:     path.Join(*utils.DataDir, "tariffplans", "reratecdrs"),
 	}
-	client, _, shutdown, err := testEnv.Setup(t, *utils.WaitRater)
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer shutdown()
+	client, _ := testEnv.Setup(t, *utils.WaitRater)
 
 	CGRID := utils.GenUUID()
 

@@ -41,11 +41,7 @@ func TestGetAccountCost(t *testing.T) {
 		ConfigPath: path.Join(*utils.DataDir, "conf", "samples", "rerate_cdrs_mysql"),
 		TpPath:     path.Join(*utils.DataDir, "tariffplans", "reratecdrs"),
 	}
-	client, _, shutdown, err := testEnv.Setup(t, *utils.WaitRater)
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer shutdown()
+	client, _ := testEnv.Setup(t, *utils.WaitRater)
 
 	CGRID := utils.GenUUID()
 
