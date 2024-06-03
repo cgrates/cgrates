@@ -22,7 +22,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package dispatchers
 
 import (
-	"errors"
 	"reflect"
 	"testing"
 
@@ -344,7 +343,7 @@ func testDspRplDispatcherProfile(t *testing.T) {
 	allEngine.stopEngine(t)
 
 	// Get DispatcherProfile
-	if err := dispEngine.RPC.Call(utils.ReplicatorSv1GetDispatcherProfile, argsDispatcherProfile, &reply); err == nil || !errors.Is(err, utils.ErrDSPProfileNotFound) {
+	if err := dispEngine.RPC.Call(utils.ReplicatorSv1GetDispatcherProfile, argsDispatcherProfile, &reply); err == nil || err.Error() != utils.ErrDSPProfileNotFound.Error() {
 		t.Errorf("Expecting: %+v, received: %+v, ", utils.ErrDSPProfileNotFound, err)
 	}
 
@@ -359,7 +358,7 @@ func testDspRplDispatcherProfile(t *testing.T) {
 	}
 
 	// Get DispatcherProfile
-	if err := dispEngine.RPC.Call(utils.ReplicatorSv1GetDispatcherProfile, argsDispatcherProfile, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
+	if err := dispEngine.RPC.Call(utils.ReplicatorSv1GetDispatcherProfile, argsDispatcherProfile, &reply); err == nil || err.Error() != utils.ErrDSPProfileNotFound.Error() {
 		t.Errorf("Expecting: %+v, received: %+v, ", utils.ErrDSPProfileNotFound, err)
 	}
 }
@@ -405,7 +404,7 @@ func testDspRplDispatcherHost(t *testing.T) {
 	allEngine.stopEngine(t)
 
 	// Get DispatcherHost
-	if err := dispEngine.RPC.Call(utils.ReplicatorSv1GetDispatcherHost, argsDispatcherHost, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
+	if err := dispEngine.RPC.Call(utils.ReplicatorSv1GetDispatcherHost, argsDispatcherHost, &reply); err == nil || err.Error() != utils.ErrDSPHostNotFound.Error() {
 		t.Errorf("Expecting: %+v, received: %+v, ", utils.ErrDSPHostNotFound, err)
 	}
 
@@ -420,7 +419,7 @@ func testDspRplDispatcherHost(t *testing.T) {
 	}
 
 	// Get DispatcherHost
-	if err := dispEngine.RPC.Call(utils.ReplicatorSv1GetDispatcherHost, argsDispatcherHost, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
+	if err := dispEngine.RPC.Call(utils.ReplicatorSv1GetDispatcherHost, argsDispatcherHost, &reply); err == nil || err.Error() != utils.ErrDSPHostNotFound.Error() {
 		t.Errorf("Expecting: %+v, received: %+v, ", utils.ErrDSPHostNotFound, err)
 	}
 }
