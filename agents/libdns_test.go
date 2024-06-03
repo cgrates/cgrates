@@ -209,3 +209,36 @@ func TestUpdateDNSMsgFromNM(t *testing.T) {
 	}
 
 }
+
+func TestLibdnsNewDnsReply(t *testing.T) {
+	req := new(dns.Msg)
+	req.SetQuestion("cgrates.org", dns.TypeA)
+	rply := newDnsReply(req)
+	if len(rply.Question) != len(req.Question) {
+		t.Errorf("Expected %d questions, got %d", len(req.Question), len(rply.Question))
+	}
+	for i, q := range rply.Question {
+		if q.Name != req.Question[i].Name {
+			t.Errorf("Expected question name %s, got %s", req.Question[i].Name, q.Name)
+		}
+		if q.Qtype != req.Question[i].Qtype {
+			t.Errorf("Expected question type %d, got %d", req.Question[i].Qtype, q.Qtype)
+		}
+		if q.Qclass != req.Question[i].Qclass {
+			t.Errorf("Expected question class %d, got %d", req.Question[i].Qclass, q.Qclass)
+		}
+	}
+	rplyOpts := rply.IsEdns0()
+	if rplyOpts == nil {
+		rply.Extra = append(rply.Extra, &dns.OPT{
+			Hdr: dns.RR_Header{Name: ".", Rrtype: dns.TypeOPT},
+			Option: []dns.EDNS0{
+				&dns.EDNS0_NSID{Code: dns.EDNS0NSID, Nsid: "test"},
+			},
+		})
+	} else {
+		if rplyOpts.UDPSize() != 4096 {
+			t.Errorf("Expected EDNS0 UDP size 4096, got %d", rplyOpts.UDPSize())
+		}
+	}
+}

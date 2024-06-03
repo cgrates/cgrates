@@ -22,6 +22,8 @@ import (
 	"bufio"
 	"bytes"
 	"net/http"
+	"net/http/httptest"
+	"net/http/httputil"
 	"strings"
 	"testing"
 )
@@ -188,5 +190,19 @@ func TestHttpXmlDPFieldAsInterface2(t *testing.T) {
 		t.Error(err)
 	} else if data != "0.0225" {
 		t.Errorf("expecting: 0.0225, received: <%s>", data)
+	}
+}
+
+func TestStringReq(t *testing.T) {
+	req := httptest.NewRequest("GET", "http://102.304.01", nil)
+	req.Header.Add("Content-Type", "application/json")
+	dp := &httpUrlDP{req: req}
+	expected, err := httputil.DumpRequest(req, true)
+	if err != nil {
+		t.Fatalf("Error dumping request: %v", err)
+	}
+	result := dp.String()
+	if result != string(expected) {
+		t.Errorf("String method returned unexpected result:\nExpected: %s\nGot: %s", string(expected), result)
 	}
 }
