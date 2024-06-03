@@ -21,9 +21,7 @@ package general_tests
 
 import (
 	"errors"
-	"fmt"
 	"io"
-	"math/rand"
 	"os"
 	"os/exec"
 	"path"
@@ -68,105 +66,70 @@ type TestEnvironment struct {
 
 // Setup initializes the testing environment using the provided configuration. It loads the configuration
 // from a specified path or creates a new one if the path is not provided. The method starts the engine,
-// establishes an RPC client connection, and loads CSV data if provided. It returns an RPC client, the
-// configuration, a shutdown function, and any error encountered.
-func (env TestEnvironment) Setup(t *testing.T, engineDelay int,
-) (client *birpc.Client, cfg *config.CGRConfig, shutdownFunc context.CancelFunc, err error) {
+// establishes an RPC client connection, and loads CSV data if provided. It returns an RPC client and the
+// configuration.
+func (env TestEnvironment) Setup(t *testing.T, engineDelay int) (*birpc.Client, *config.CGRConfig) {
+	t.Helper()
 
+	var cfg *config.CGRConfig
 	switch {
 	case env.ConfigPath != "":
+		var err error
 		cfg, err = config.NewCGRConfigFromPath(env.ConfigPath)
+		if err != nil {
+			t.Fatalf("failed to init config from path %s: %v", env.ConfigPath, err)
+		}
 	default:
-		var clean func()
-		cfg, env.ConfigPath, clean, err = initCfg(env.ConfigJSON)
-		defer clean() // it is safe to defer clean func before error check
+		cfg, env.ConfigPath = initCfg(t, env.ConfigJSON)
 	}
 
+	flushDBs(t, cfg, true, true)
+	startEngine(t, cfg, env.ConfigPath, engineDelay, env.LogBuffer)
+
+	client, err := newRPCClient(cfg.ListenCfg())
 	if err != nil {
-		return nil, nil, nil, fmt.Errorf("failed to initialize config: %w", err)
-	}
-
-	if err = flushDBs(cfg, true, true); err != nil {
-		return nil, nil, nil, err
-	}
-
-	exec.Command("pkill", "cgr-engine").Run()
-	time.Sleep(time.Duration(engineDelay) * time.Millisecond)
-
-	cancel, err := startEngine(cfg, env.ConfigPath, engineDelay, env.LogBuffer)
-	if err != nil {
-		return nil, nil, nil, err
-	}
-
-	client, err = newRPCClient(cfg.ListenCfg())
-	if err != nil {
-		cancel()
-		return nil, nil, nil, fmt.Errorf("could not connect to cgr-engine: %w", err)
+		t.Fatalf("could not connect to cgr-engine: %v", err)
 	}
 
 	var customTpPath string
 	if len(env.TpFiles) != 0 {
-		customTpPath = fmt.Sprintf("/tmp/testTPs/%s", env.Name)
+		customTpPath = t.TempDir()
 	}
+	loadCSVs(t, client, env.TpPath, customTpPath, env.TpFiles)
 
-	if err := loadCSVs(client, env.TpPath, customTpPath, env.TpFiles); err != nil {
-		cancel()
-		return nil, nil, nil, fmt.Errorf("failed to load csvs: %w", err)
-	}
-
-	return client, cfg, cancel, nil
+	return client, cfg
 }
 
-// initCfg creates a new CGRConfig from the provided configuration content string. It generates a
-// temporary directory and file path, writes the content to the configuration file, and returns the
-// created CGRConfig, the file path, a cleanup function, and any error encountered.
-func initCfg(cfgContent string) (cfg *config.CGRConfig, cfgPath string, cleanFunc func(), err error) {
+// initCfg creates a new CGRConfig from the provided configuration content string.
+// It generates a temporary directory and file path, writes the content to the configuration
+// file, and returns the created CGRConfig and the configuration directory path.
+func initCfg(t *testing.T, cfgContent string) (cfg *config.CGRConfig, cfgPath string) {
+	t.Helper()
 	if cfgContent == utils.EmptyString {
-		return nil, "", func() {}, errors.New("content should not be empty")
+		t.Fatal("ConfigJSON is required but empty")
 	}
-	cfgPath = fmt.Sprintf("/tmp/config%d", rand.Int63n(10000))
-	err = os.MkdirAll(cfgPath, 0755)
-	if err != nil {
-		return nil, "", func() {}, err
-	}
-	removeFunc := func() {
-		os.RemoveAll(cfgPath)
-	}
+	cfgPath = t.TempDir()
 	filePath := filepath.Join(cfgPath, "cgrates.json")
-	err = os.WriteFile(filePath, []byte(cfgContent), 0644)
-	if err != nil {
-		return nil, "", removeFunc, err
+	if err := os.WriteFile(filePath, []byte(cfgContent), 0644); err != nil {
+		t.Fatal(err)
 	}
-	cfg, err = config.NewCGRConfigFromPath(cfgPath)
+	cfg, err := config.NewCGRConfigFromPath(cfgPath)
 	if err != nil {
-		return nil, "", removeFunc, err
+		t.Fatalf("failed to init config from path %s: %v", cfgPath, err)
 	}
-
-	return cfg, cfgPath, removeFunc, nil
+	return cfg, cfgPath
 }
 
-// loadCSVs loads tariff plan data from CSV files into the service. It handles directory creation and file writing for custom
-// paths, and loads data from the specified paths using the provided RPC client. Returns an error if any step fails.
-func loadCSVs(client *birpc.Client, tpPath, customTpPath string, csvFiles map[string]string) (err error) {
+// loadCSVs loads tariff plan data from CSV files into the service. It handles directory creation and file
+// writing for custom paths, and loads data from the specified paths using the provided RPC client.
+func loadCSVs(t *testing.T, client *birpc.Client, tpPath, customTpPath string, csvFiles map[string]string) {
+	t.Helper()
 	paths := make([]string, 0, 2)
 	if customTpPath != "" {
-		err = os.MkdirAll(customTpPath, 0755)
-		if err != nil {
-			return fmt.Errorf("could not create folder %s: %w", customTpPath, err)
-		}
-		defer func() {
-			rmErr := os.RemoveAll(customTpPath)
-			if rmErr != nil {
-				err = errors.Join(
-					err,
-					fmt.Errorf("could not remove folder %s: %w", customTpPath, rmErr))
-			}
-		}()
 		for fileName, content := range csvFiles {
 			filePath := path.Join(customTpPath, fileName)
-			err = os.WriteFile(filePath, []byte(content), 0644)
-			if err != nil {
-				return fmt.Errorf("could not write to file %s: %w", filePath, err)
+			if err := os.WriteFile(filePath, []byte(content), 0644); err != nil {
+				t.Fatalf("could not write to file %s: %v", filePath, err)
 			}
 		}
 		paths = append(paths, customTpPath)
@@ -179,61 +142,62 @@ func loadCSVs(client *birpc.Client, tpPath, customTpPath string, csvFiles map[st
 	var reply string
 	for _, path := range paths {
 		args := &utils.AttrLoadTpFromFolder{FolderPath: path}
-		err = client.Call(context.Background(),
-			utils.APIerSv1LoadTariffPlanFromFolder,
-			args, &reply)
+		err := client.Call(context.Background(), utils.APIerSv1LoadTariffPlanFromFolder, args, &reply)
 		if err != nil {
-			return fmt.Errorf("%s call failed for path %s: %w", utils.APIerSv1LoadTariffPlanFromFolder, path, err)
+			t.Fatalf("%s call failed for path %s: %v", utils.APIerSv1LoadTariffPlanFromFolder, path, err)
 		}
 	}
-	return nil
 }
 
 // flushDBs resets the databases specified in the configuration if the corresponding flags are true.
-// Returns an error if flushing either of the databases fails.
-func flushDBs(cfg *config.CGRConfig, flushDataDB, flushStorDB bool) error {
+func flushDBs(t *testing.T, cfg *config.CGRConfig, flushDataDB, flushStorDB bool) {
+	t.Helper()
 	if flushDataDB {
 		if err := engine.InitDataDb(cfg); err != nil {
-			return fmt.Errorf("failed to flush %s dataDB: %w", cfg.DataDbCfg().Type, err)
+			t.Fatalf("failed to flush %s dataDB: %v", cfg.DataDbCfg().Type, err)
 		}
 	}
 	if flushStorDB {
 		if err := engine.InitStorDb(cfg); err != nil {
-			return fmt.Errorf("failed to flush %s storDB: %w", cfg.StorDbCfg().Type, err)
+			t.Fatalf("failed to flush %s storDB: %v", cfg.StorDbCfg().Type, err)
 		}
 	}
-	return nil
 }
 
-// startEngine starts the CGR engine process with the provided configuration. It writes engine logs to the provided logBuffer
-// (if any) and waits for the engine to be ready. Returns a cancel function to stop the engine and any error encountered.
-func startEngine(cfg *config.CGRConfig, cfgPath string, waitEngine int, logBuffer io.Writer) (context.CancelFunc, error) {
-	enginePath, err := exec.LookPath("cgr-engine")
+// startEngine starts the CGR engine process with the provided configuration. It writes engine logs to the
+// provided logBuffer (if any) and waits for the engine to be ready.
+func startEngine(t *testing.T, cfg *config.CGRConfig, cfgPath string, waitEngine int, logBuffer io.Writer) {
+	t.Helper()
+	binPath, err := exec.LookPath("cgr-engine")
 	if err != nil {
-		return nil, err
+		t.Fatal("could not find cgr-engine executable")
 	}
-	cancel := func() {
-		exec.Command("pkill", "cgr-engine").Run()
-	}
-	engine := exec.Command(enginePath, "-config_path", cfgPath)
+	engine := exec.Command(
+		binPath,
+		"-config_path", cfgPath,
+		"-logger", utils.MetaStdLog,
+	)
 	if logBuffer != nil {
 		engine.Stdout = logBuffer
 		engine.Stderr = logBuffer
 	}
 	if err := engine.Start(); err != nil {
-		return nil, err
+		t.Fatalf("cgr-engine command failed: %v", err)
 	}
+	t.Cleanup(func() {
+		if err := engine.Process.Kill(); err != nil {
+			t.Logf("failed to kill cgr-engine process (%d): %v", engine.Process.Pid, err)
+		}
+	})
 	fib := utils.FibDuration(time.Millisecond, 0)
-	for i := 0; i < 20; i++ {
+	for i := 0; i < 16; i++ {
 		time.Sleep(fib())
-		_, err = jsonrpc.Dial(utils.TCP, cfg.ListenCfg().RPCJSONListen)
-		if err == nil {
+		if _, err := jsonrpc.Dial(utils.TCP, cfg.ListenCfg().RPCJSONListen); err == nil {
 			break
 		}
 	}
 	if err != nil {
-		return nil, fmt.Errorf("starting cgr-engine on port %s failed: %w", cfg.ListenCfg().RPCJSONListen, err)
+		t.Fatalf("starting cgr-engine on port %s failed: %v", cfg.ListenCfg().RPCJSONListen, err)
 	}
 	time.Sleep(time.Duration(waitEngine) * time.Millisecond)
-	return cancel, nil
 }

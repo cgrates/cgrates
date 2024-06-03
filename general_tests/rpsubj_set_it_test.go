@@ -91,12 +91,7 @@ cgrates.org,data,RPF_DATA,2022-01-14T00:00:00Z,RP_DATA,`,
 		ConfigJSON: content,
 		TpFiles:    tpFiles,
 	}
-	client, _, shutdown, err := testEnv.Setup(t, *utils.WaitRater)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	defer shutdown()
+	client, _ := testEnv.Setup(t, *utils.WaitRater)
 
 	t.Run("CheckInitialBalance", func(t *testing.T) {
 		time.Sleep(10 * time.Millisecond) // wait for tps to be loaded
@@ -226,12 +221,7 @@ cgrates.org,data,1001,2022-01-14T00:00:00Z,RP_DATA,`,
 		ConfigJSON: content,
 		TpFiles:    tpFiles,
 	}
-	client, _, shutdown, err := testEnv.Setup(t, *utils.WaitRater)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	defer shutdown()
+	client, _ := testEnv.Setup(t, *utils.WaitRater)
 
 	t.Run("CheckInitialBalance", func(t *testing.T) {
 		time.Sleep(10 * time.Millisecond) // wait for tps to be loaded

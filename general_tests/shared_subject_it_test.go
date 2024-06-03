@@ -127,11 +127,7 @@ cgrates.org,call,Subject2,2014-01-14T00:00:00Z,RP_Subject2,`,
 		ConfigJSON: content,
 		TpFiles:    tpFiles,
 	}
-	client, _, shutdown, err := testEnv.Setup(t, *utils.WaitRater)
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer shutdown()
+	client, _ := testEnv.Setup(t, *utils.WaitRater)
 
 	t.Run("Cost1001->1002", func(t *testing.T) {
 		var reply []*utils.EventWithFlags

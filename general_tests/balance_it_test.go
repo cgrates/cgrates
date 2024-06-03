@@ -111,12 +111,7 @@ cgrates.org,sms,1001,2014-01-14T00:00:00Z,RP_ANY,`,
 		ConfigJSON: content,
 		TpFiles:    tpFiles,
 	}
-	client, _, shutdown, err := testEnv.Setup(t, *utils.WaitRater)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	defer shutdown()
+	client, _ := testEnv.Setup(t, *utils.WaitRater)
 
 	t.Run("CheckInitialBalance", func(t *testing.T) {
 		time.Sleep(10 * time.Millisecond) // wait for tps to be loaded
@@ -362,12 +357,7 @@ cgrates.org,call,1001,2014-01-14T00:00:00Z,RP_VOICE,`,
 		ConfigJSON: content,
 		TpFiles:    tpFiles,
 	}
-	client, _, shutdown, err := testEnv.Setup(t, *utils.WaitRater)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	defer shutdown()
+	client, _ := testEnv.Setup(t, *utils.WaitRater)
 
 	t.Run("CheckInitialBalance", func(t *testing.T) {
 		time.Sleep(10 * time.Millisecond) // wait for tps to be loaded
@@ -881,12 +871,7 @@ ACT_TOPUP_SMS,*topup_reset,,,balance_sms,*sms,,*any,,,*unlimited,,1000,10,false,
 		ConfigJSON: content,
 		TpFiles:    tpFiles,
 	}
-	client, _, shutdown, err := testEnv.Setup(t, *utils.WaitRater)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	defer shutdown()
+	client, _ := testEnv.Setup(t, *utils.WaitRater)
 
 	t.Run("CheckInitialBalances", func(t *testing.T) {
 		time.Sleep(10 * time.Millisecond) // wait for tps to be loaded

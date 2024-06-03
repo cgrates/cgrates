@@ -60,11 +60,7 @@ func TestEscapeCharacters(t *testing.T) {
 		// Encoding:   *encoding,
 		ConfigJSON: content,
 	}
-	client, _, shutdown, err := testEnv.Setup(t, *utils.WaitRater)
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer shutdown()
+	client, _ := testEnv.Setup(t, *utils.WaitRater)
 
 	/*
 		When escape sequences are written manually, like \u0000 in the csv file, they are not interpreted as

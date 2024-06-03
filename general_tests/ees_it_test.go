@@ -21,7 +21,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package general_tests
 
 import (
-	"os"
 	"testing"
 	"time"
 
@@ -78,10 +77,8 @@ func TestEEsExportEventChanges(t *testing.T) {
 		{
 			"id": "exporter1",
 			"type": "*virt",
-			"export_path": "/tmp/exports",
 			"flags": ["*attributes"],
 			"attempts": 1,
-			"field_separator": ",",
 			"synchronous": true,
 			"fields":[
 				{"tag": "CGRID", "path": "*uch.CGRID1", "type": "*variable", "value": "~*req.CGRID"},
@@ -96,10 +93,8 @@ func TestEEsExportEventChanges(t *testing.T) {
 		{
 			"id": "exporter2",
 			"type": "*virt",
-			"export_path": "/tmp/exports",
 			"flags": [],
 			"attempts": 1,
-			"field_separator": ",",
 			"synchronous": true,
 			"fields":[
 				{"tag": "CGRID", "path": "*uch.CGRID2", "type": "*variable", "value": "~*req.CGRID"},
@@ -112,23 +107,11 @@ func TestEEsExportEventChanges(t *testing.T) {
 
 }`
 
-	exportPath := "/tmp/exports"
-	err = os.MkdirAll(exportPath, 0755)
-	if err != nil {
-		t.Fatalf("could not create folder %s: %v", exportPath, err)
-	}
-	defer os.RemoveAll(exportPath)
-
 	testEnv := TestEnvironment{
 		Name:       "TestEEsExportEventChanges",
 		ConfigJSON: content,
 	}
-	client, _, shutdown, err := testEnv.Setup(t, *utils.WaitRater)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	defer shutdown()
+	client, _ := testEnv.Setup(t, *utils.WaitRater)
 
 	t.Run("SetAttributeProfile", func(t *testing.T) {
 		attrPrf := &engine.AttributeProfileWithAPIOpts{
