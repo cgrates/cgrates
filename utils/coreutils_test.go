@@ -29,6 +29,7 @@ import (
 	"golang.org/x/crypto/bcrypt"
 
 	"github.com/cgrates/rpcclient"
+	"github.com/google/go-cmp/cmp"
 )
 
 func TestGetStartTime(t *testing.T) {
@@ -1818,5 +1819,38 @@ func TestCoreUtilsFibDurationSeqNrOverflow(t *testing.T) {
 	fib = FibDuration(time.Second, 6)
 	if rcv := fib(); rcv != 6 {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", math.MaxInt, rcv)
+	}
+}
+
+func TestCoreUtilsMapStringSlicePointer(t *testing.T) {
+	tests := []struct {
+		name     string
+		input    map[string][]string
+		expected *map[string][]string
+	}{
+		{
+			name:     "Empty map",
+			input:    map[string][]string{},
+			expected: &map[string][]string{},
+		},
+		{
+			name: "Non-empty map",
+			input: map[string][]string{
+				"key1": {"value1", "value2"},
+				"key2": {"value3"},
+			},
+			expected: &map[string][]string{
+				"key1": {"value1", "value2"},
+				"key2": {"value3"},
+			},
+		},
+	}
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			result := MapStringSlicePointer(test.input)
+			if diff := cmp.Diff(result, test.expected); diff != "" {
+				t.Errorf("Test case %q failed: (-got +want)\n%s", test.name, diff)
+			}
+		})
 	}
 }
