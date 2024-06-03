@@ -3423,3 +3423,26 @@ func TestEngineNewAccountSummaryFromJSON(t *testing.T) {
 		})
 	}
 }
+
+func TestAccountSummaryString(t *testing.T) {
+	account := &AccountSummary{
+		Tenant:        "cgrates.org",
+		ID:            "2012",
+		AllowNegative: true,
+		Disabled:      false,
+		BalanceSummaries: BalanceSummaries{
+			&BalanceSummary{
+				Factors: ValueFactors{
+					"factor1": 1.0,
+					"factor2": 2.0,
+				},
+			},
+		},
+	}
+	result := account.String()
+	var parsedResult map[string]interface{}
+	err := json.Unmarshal([]byte(result), &parsedResult)
+	if err != nil {
+		t.Errorf("Error unmarshalling result: %v", err)
+	}
+}

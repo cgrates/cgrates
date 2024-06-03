@@ -536,3 +536,85 @@ func TestBalanceFilterModifyBalance(t *testing.T) {
 	}
 
 }
+
+func TestBalanceFilterSetValue(t *testing.T) {
+	t.Run("when Value is nil", func(t *testing.T) {
+		bp := &BalanceFilter{}
+		bp.SetValue(42.0)
+		if bp.Value == nil {
+			t.Fatalf("expected Value to be non-nil")
+		}
+		if bp.Value.Static != 42.0 {
+			t.Errorf("expected Static to be 42.0, got %f", bp.Value.Static)
+		}
+	})
+	t.Run("when Value is not nil", func(t *testing.T) {
+		initialFormula := &utils.ValueFormula{Static: 10.0}
+		bp := &BalanceFilter{Value: initialFormula}
+		bp.SetValue(42.0)
+		if bp.Value == nil {
+			t.Fatalf("expected Value to be non-nil")
+		}
+		if bp.Value.Static != 42.0 {
+			t.Errorf("expected Static to be 42.0, got %f", bp.Value.Static)
+		}
+	})
+}
+
+func TestBalanceFilterGetTimingIDs(t *testing.T) {
+	t.Run("when BalanceFilter is nil", func(t *testing.T) {
+		var bp *BalanceFilter
+		result := bp.GetTimingIDs()
+		if len(result) != 0 {
+			t.Errorf("expected empty StringMap, got %v", result)
+		}
+	})
+	t.Run("when TimingIDs is nil", func(t *testing.T) {
+		bp := &BalanceFilter{}
+		result := bp.GetTimingIDs()
+		if len(result) != 0 {
+			t.Errorf("expected empty StringMap, got %v", result)
+		}
+	})
+	t.Run("when TimingIDs is not nil", func(t *testing.T) {
+		timingIDs := utils.StringMap{"key1": false}
+		bp := &BalanceFilter{TimingIDs: &timingIDs}
+		result := bp.GetTimingIDs()
+		if len(result) != 1 || result["key1"] != false {
+			t.Errorf("expected StringMap with key1=value1, got %v", result)
+		}
+	})
+}
+
+func TestBalanceFilterGetFactors(t *testing.T) {
+	t.Run("when BalanceFilter is nil", func(t *testing.T) {
+		var bp *BalanceFilter
+		result := bp.GetFactors()
+		if result != nil {
+			t.Errorf("expected nil, got %v", result)
+		}
+	})
+	t.Run("when Factors is nil", func(t *testing.T) {
+		bp := &BalanceFilter{}
+		result := bp.GetFactors()
+		if result != nil {
+			t.Errorf("expected nil, got %v", result)
+		}
+	})
+	t.Run("when Factors is not nil", func(t *testing.T) {
+		expectedFactors := ValueFactors{"key1": 42.0, "key2": 10.5}
+		bp := &BalanceFilter{Factors: &expectedFactors}
+		result := bp.GetFactors()
+		if result == nil {
+			t.Fatalf("expected non-nil, got nil")
+		}
+		if len(result) != len(expectedFactors) {
+			t.Errorf("expected ValueFactors length %d, got %d", len(expectedFactors), len(result))
+		}
+		for k, v := range expectedFactors {
+			if result[k] != v {
+				t.Errorf("expected ValueFactors[%s]=%f, got %f", k, v, result[k])
+			}
+		}
+	})
+}
