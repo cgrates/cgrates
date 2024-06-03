@@ -1260,7 +1260,7 @@ func TestFSEventGetDisconnectCause(t *testing.T) {
 
 func TestFSEventGetRoute(t *testing.T) {
 	event := FSEvent{
-		"VAR_CGR_ROUTE": "Sales Team",
+		"FSEvent1": "FSEvent12",
 	}
 	tests := []struct {
 		name      string
@@ -1268,7 +1268,7 @@ func TestFSEventGetRoute(t *testing.T) {
 		want      string
 	}{
 		{"Static Value Prefix", utils.StaticValuePrefix + "MyRoute", "MyRoute"},
-		{"VAR_CGR_ROUTE Present", "VAR_CGR_ROUTE", "Sales Team"},
+		{"VAR_CGR_ROUTE Present", "FSEvent1", "FSEvent12"},
 	}
 	noMatchCase := struct {
 		name      string
@@ -1290,7 +1290,51 @@ func TestFSEventGetRoute(t *testing.T) {
 	t.Run(noMatchCase.name, func(t *testing.T) {
 		got := event.GetRoute(noMatchCase.fieldName)
 		if got != noMatchCase.want {
-			t.Errorf("Test: %s - Got: %s, Want: %s", noMatchCase.want, got, noMatchCase.want)
+			t.Errorf("For test: %s - Got: %s, Want: %s", noMatchCase.want, got, noMatchCase.want)
 		}
 	})
+}
+
+func TestFSEventGetOptions(t *testing.T) {
+	tests := []struct {
+		name   string
+		fsev   FSEvent
+		expect map[string]any
+	}{
+		{
+			name:   "No_options",
+			fsev:   FSEvent{},
+			expect: map[string]any{},
+		},
+		{
+			name: "Valid_options",
+			fsev: FSEvent{
+				VarCGROpts: "key1=value1,key2=value2",
+			},
+			expect: map[string]any{},
+		},
+		{
+			name: "Invalid_options_-_Missing_separator",
+			fsev: FSEvent{
+				VarCGROpts: "key1=value1,key2value2",
+			},
+			expect: map[string]any{},
+		},
+		{
+			name: "Invalid_options_-_Multiple_separators",
+			fsev: FSEvent{
+				VarCGROpts: "key1=value1,value2=value3=value4",
+			},
+			expect: map[string]any{},
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			result := test.fsev.GetOptions()
+			if !reflect.DeepEqual(result, test.expect) {
+				t.Errorf("expected %v, got %v", test.expect, result)
+			}
+		})
+	}
 }
