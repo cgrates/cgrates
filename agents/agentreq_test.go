@@ -36,6 +36,7 @@ import (
 	"github.com/fiorix/go-diameter/v4/diam"
 	"github.com/fiorix/go-diameter/v4/diam/avp"
 	"github.com/fiorix/go-diameter/v4/diam/datatype"
+	"github.com/google/go-cmp/cmp"
 )
 
 func TestAgReqSetFields(t *testing.T) {
@@ -2870,3 +2871,26 @@ func TestAgentRequestRemove(t *testing.T) {
 // 		}
 // 	}
 // }
+
+func TestAgentRequestString(t *testing.T) {
+	sampleRequest := &AgentRequest{
+		Request:    nil,
+		Vars:       nil,
+		CGRRequest: nil,
+		CGRReply:   nil,
+		Reply:      nil,
+		Tenant:     "cgrates.org",
+		Timezone:   "UTC",
+		filterS:    nil,
+		diamreq:    nil,
+		tmp:        nil,
+		Opts:       utils.MapStorage{},
+		ExtraDP:    map[string]utils.DataProvider{},
+	}
+
+	output := sampleRequest.String()
+	expected := utils.ToIJSON(sampleRequest)
+	if diff := cmp.Diff(expected, output); diff != "" {
+		t.Errorf("String() returned unexpected value: diff (-expected +got):\n%s", diff)
+	}
+}
