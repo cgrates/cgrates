@@ -2361,3 +2361,25 @@ func TestV1RateCDRsSuccesful(t *testing.T) {
 		t.Error("Expected reply to be ok")
 	}
 }
+
+func TestCdrsSetCloneable(t *testing.T) {
+	tests := []struct {
+		input    bool
+		expected bool
+	}{
+		{input: true, expected: true},
+		{input: false, expected: false},
+	}
+	for _, tt := range tests {
+		attr := &ArgV1ProcessEvents{
+			Flags:     []string{},
+			CGREvents: []*utils.CGREvent{},
+			APIOpts:   make(map[string]any),
+			clnb:      !tt.input,
+		}
+		attr.SetCloneable(tt.input)
+		if attr.clnb != tt.expected {
+			t.Errorf("SetCloneable(%v) = %v; expected %v", tt.input, attr.clnb, tt.expected)
+		}
+	}
+}
