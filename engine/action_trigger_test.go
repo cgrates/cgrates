@@ -20,6 +20,7 @@ package engine
 
 import (
 	"bytes"
+	"encoding/json"
 	"fmt"
 	"log"
 	"os"
@@ -432,5 +433,29 @@ func TestEngineActionTriggerEquals(t *testing.T) {
 	}
 	if at1.Equals(at3) {
 		t.Errorf("Expected %v not to equal %v, but it did.", at1, at3)
+	}
+}
+
+func TestStringToJson(t *testing.T) {
+	at := &ActionTrigger{
+		ID:                "321",
+		UniqueID:          "122",
+		ThresholdType:     "*min_event_counter",
+		ThresholdValue:    10.0,
+		Recurrent:         true,
+		MinSleep:          5 * time.Second,
+		ExpirationDate:    time.Now().AddDate(0, 0, 7),
+		ActivationDate:    time.Now(),
+		Balance:           nil,
+		Weight:            0.5,
+		ActionsID:         "123",
+		MinQueuedItems:    100,
+		Executed:          false,
+		LastExecutionTime: time.Now().Add(-time.Hour),
+	}
+	result := at.String()
+	expected, _ := json.Marshal(at)
+	if result != string(expected) {
+		t.Errorf("String method returned unexpected result, got: %s, want: %s", result, string(expected))
 	}
 }

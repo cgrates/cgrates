@@ -2768,3 +2768,56 @@ func TestEngineCallDescriptorString(t *testing.T) {
 		t.Errorf("Expected CallDescriptor.String() to return %s, got %s", want, got)
 	}
 }
+
+func TestCallDescriptorClone(t *testing.T) {
+	originalCD := &CallDescriptor{
+		Category:            "call",
+		Tenant:              "cgrates.org",
+		Subject:             "user",
+		Account:             "testAccount",
+		Destination:         "local",
+		TimeStart:           time.Date(2022, time.January, 7, 16, 60, 0, 0, time.UTC),
+		TimeEnd:             time.Date(2022, time.January, 7, 16, 60, 0, 0, time.UTC),
+		LoopIndex:           1,
+		DurationIndex:       time.Minute * 3,
+		FallbackSubject:     "testfallbacksubject",
+		ToR:                 utils.MetaVoice,
+		ExtraFields:         map[string]string{"key1": "value1"},
+		MaxRate:             10.0,
+		MaxRateUnit:         time.Minute,
+		MaxCostSoFar:        0.5,
+		CgrID:               "grid1",
+		RunID:               "runID123",
+		ForceDuration:       false,
+		PerformRounding:     true,
+		DenyNegativeAccount: true,
+		DryRun:              false,
+	}
+	clonedCD := originalCD.Clone()
+	if originalCD == clonedCD {
+		t.Errorf("Expected cloned CallDescriptor to be a new instance, got pointer to original")
+	}
+}
+
+func TestCallDescriptorgetgetRatingPlansForPrefix(t *testing.T) {
+	Cache.Clear(nil)
+	cd := CallDescriptor{
+		Category:      "sms",
+		Tenant:        "cgrates.org",
+		Subject:       "testAccITAddBalanceWithDestinations",
+		Account:       "testAccITAddBalanceWithDestinations",
+		Destination:   "1003",
+		DurationIndex: 0,
+	}
+	// Default FallbackDepth is 3
+	got, err := cd.getRatingPlansForPrefix("testkey", 4)
+
+	if err != utils.ErrMaxRecursionDepth {
+		t.Errorf("getRatingPlansForPrefix() expected %v, got %v, ", utils.ErrMaxRecursionDepth, err)
+
+	} else if got != 4 {
+		t.Errorf("getRatingPlansForPrefix() expected %v, got %v, ", 4, got)
+	}
+
+	Cache.Clear(nil)
+}
