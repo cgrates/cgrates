@@ -81,7 +81,7 @@ func TestWriteToFile(t *testing.T) {
 	exportEvent = &ExportEvents{
 		Events: []any{"something1", "something2"},
 		Path:   "path",
-		Format: "test",
+		Type:   "test",
 	}
 	filePath = "/tmp/engine/libcdre_test/writeToFile2.txt"
 	if err := exportEvent.WriteToFile(filePath); err != nil {

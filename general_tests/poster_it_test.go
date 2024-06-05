@@ -136,7 +136,7 @@ func testPosterReadFolder(format string) (expEv *ees.ExportEvents, err error) {
 		if err != nil {
 			return
 		}
-		if expEv.Format == format {
+		if expEv.Type == format {
 			return
 		}
 	}

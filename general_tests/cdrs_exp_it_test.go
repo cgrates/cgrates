@@ -376,7 +376,7 @@ func testCDRsExpFileFailover(t *testing.T) {
 			t.Error("Expected at least one event")
 			continue
 		}
-		rcvFormats.Add(ev.Format)
+		rcvFormats.Add(ev.Type)
 		if err := checkContent(ev, []any{[]byte(utils.ToJSON(cdrsExpEvExp))}); err != nil {
 			t.Errorf("For file <%s> and event <%s> received %s", filePath, utils.ToJSON(ev), err)
 		}

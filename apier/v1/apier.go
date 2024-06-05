@@ -22,8 +22,10 @@ import (
 	"encoding/csv"
 	"errors"
 	"fmt"
+	"io/fs"
 	"os"
 	"path"
+	"path/filepath"
 	"slices"
 	"strconv"
 	"strings"
@@ -1416,57 +1418,62 @@ func (apierSv1 *APIerSv1) RemoveActions(ctx *context.Context, attr *AttrRemoveAc
 	return nil
 }
 
-type ArgsReplyFailedPosts struct {
-	FailedRequestsInDir  *string  // if defined it will be our source of requests to be replayed
-	FailedRequestsOutDir *string  // if defined it will become our destination for files failing to be replayed, *none to be discarded
-	Modules              []string // list of modules for which replay the requests, nil for all
+// ReplayFailedPostsParams contains parameters for replaying failed posts.
+type ReplayFailedPostsParams struct {
+	SourcePath string   // path for events to be replayed
+	FailedPath string   // path for events that failed to replay, *none to discard, defaults to SourceDir if empty
+	Modules    []string // list of modules to replay requests for, nil for all
 }
 
 // ReplayFailedPosts will repost failed requests found in the FailedRequestsInDir
-func (apierSv1 *APIerSv1) ReplayFailedPosts(ctx *context.Context, args *ArgsReplyFailedPosts, reply *string) (err error) {
-	failedReqsInDir := apierSv1.Config.GeneralCfg().FailedPostsDir
-	if args.FailedRequestsInDir != nil && *args.FailedRequestsInDir != "" {
-		failedReqsInDir = *args.FailedRequestsInDir
+func (apierSv1 *APIerSv1) ReplayFailedPosts(ctx *context.Context, args ReplayFailedPostsParams, reply *string) error {
+
+	// Set default directories if not provided.
+	if args.SourcePath == "" {
+		args.SourcePath = apierSv1.Config.GeneralCfg().FailedPostsDir
 	}
-	failedReqsOutDir := failedReqsInDir
-	if args.FailedRequestsOutDir != nil && *args.FailedRequestsOutDir != "" {
-		failedReqsOutDir = *args.FailedRequestsOutDir
+	if args.FailedPath == "" {
+		args.FailedPath = args.SourcePath
 	}
-	filesInDir, _ := os.ReadDir(failedReqsInDir)
-	if len(filesInDir) == 0 {
-		return utils.ErrNotFound
-	}
-	for _, file := range filesInDir { // First file in directory is the one we need, harder to find it's name out of config
-		if len(args.Modules) != 0 {
-			var allowedModule bool
-			for _, mod := range args.Modules {
-				if strings.HasPrefix(file.Name(), mod) {
-					allowedModule = true
-					break
-				}
-			}
-			if !allowedModule {
-				continue // this file is not to be processed due to Modules ACL
-			}
-		}
-		filePath := path.Join(failedReqsInDir, file.Name())
-		expEv, err := ees.NewExportEventsFromFile(filePath)
+
+	if err := filepath.WalkDir(args.SourcePath, func(path string, d fs.DirEntry, err error) error {
 		if err != nil {
-			return utils.NewErrServerError(err)
+			utils.Logger.Warning(fmt.Sprintf("<ReplayFailedPosts> failed to access path %s: %v", path, err))
+			return nil // skip paths that cause an error
+		}
+		if d.IsDir() {
+			return nil // skip directories
 		}
 
+		// Skip files not belonging to the specified modules.
+		if len(args.Modules) != 0 && !slices.ContainsFunc(args.Modules, func(mod string) bool {
+			return strings.HasPrefix(d.Name(), mod)
+		}) {
+			utils.Logger.Info(fmt.Sprintf("<ReplayFailedPosts> skipping file %s: not found within specified modules", d.Name()))
+			return nil
+		}
+
+		expEv, err := ees.NewExportEventsFromFile(path)
+		if err != nil {
+			return fmt.Errorf("failed to init ExportEvents from %s: %v", path, err)
+		}
+
+		// Determine the failover path.
 		failoverPath := utils.MetaNone
-		if failedReqsOutDir != utils.MetaNone {
-			failoverPath = path.Join(failedReqsOutDir, file.Name())
+		if args.FailedPath != utils.MetaNone {
+			failoverPath = filepath.Join(args.FailedPath, d.Name())
 		}
 
 		failedPosts, err := expEv.ReplayFailedPosts(apierSv1.Config.GeneralCfg().PosterAttempts)
-		if err != nil && failedReqsOutDir != utils.MetaNone { // Got error from HTTPPoster could be that content was not written, we need to write it ourselves
+		if err != nil && failoverPath != utils.MetaNone {
+			// Write the events that failed to be replayed to the failover directory
 			if err = failedPosts.WriteToFile(failoverPath); err != nil {
-				return utils.NewErrServerError(err)
+				return fmt.Errorf("failed to write the events that failed to be replayed to %s: %v", path, err)
 			}
 		}
-
+		return nil
+	}); err != nil {
+		return utils.NewErrServerError(err)
 	}
 	*reply = utils.OK
 	return nil
