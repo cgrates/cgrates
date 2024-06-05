@@ -107,8 +107,10 @@ func NewDataConverter(params string) (conv DataConverter, err error) {
 		return new(e164DomainConverter), nil
 	case params == E164Converter:
 		return new(e164Converter), nil
-	case params == UrlDecConverter:
-		return new(UrlDecodeConverter), nil
+	case params == URLDecConverter:
+		return new(URLDecodeConverter), nil
+	case params == URLEncConverter:
+		return new(URLEncodeConverter), nil
 	case strings.HasPrefix(params, MetaLibPhoneNumber):
 		if len(params) == len(MetaLibPhoneNumber) {
 			return NewPhoneNumberConverter(EmptyString)
@@ -756,14 +758,32 @@ func (sc StripConverter) Convert(in any) (any, error) {
 	}
 }
 
-// UrlDecodeConverter converts an URL with encoded special characters back to original string.
-type UrlDecodeConverter struct{}
+// URLDecodeConverter converts an URL with encoded special characters back to original string.
+type URLDecodeConverter struct{}
 
-func (UrlDecodeConverter) Convert(in any) (any, error) {
+func (URLDecodeConverter) Convert(in any) (any, error) {
 	urlStr := IfaceAsString(in)
 	query, err := url.QueryUnescape(urlStr)
 	if err != nil {
 		return nil, err
 	}
 	return query, nil
+}
+
+// URLEncodeConverter converts a string with special characters to a valid URL format.
+type URLEncodeConverter struct{}
+
+func (URLEncodeConverter) Convert(in any) (any, error) {
+	urlStr := IfaceAsString(in)
+	parsedURL, err := url.Parse(urlStr)
+	if err != nil {
+		return nil, err
+	}
+	if parsedURL.Host == EmptyString {
+		return url.QueryEscape(parsedURL.Path), nil
+	}
+	if len(parsedURL.Query()) != 0 {
+		parsedURL.RawQuery = parsedURL.Query().Encode()
+	}
+	return parsedURL.String(), nil
 }
