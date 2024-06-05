@@ -25,6 +25,7 @@ import (
 	"fmt"
 	"math/rand"
 	"net"
+	"net/url"
 	"strconv"
 	"strings"
 	"time"
@@ -106,6 +107,8 @@ func NewDataConverter(params string) (conv DataConverter, err error) {
 		return new(e164DomainConverter), nil
 	case params == E164Converter:
 		return new(e164Converter), nil
+	case params == UrlDecConverter:
+		return new(UrlDecodeConverter), nil
 	case strings.HasPrefix(params, MetaLibPhoneNumber):
 		if len(params) == len(MetaLibPhoneNumber) {
 			return NewPhoneNumberConverter(EmptyString)
@@ -751,4 +754,16 @@ func (sc StripConverter) Convert(in any) (any, error) {
 	default:
 		return EmptyString, errors.New("strip converter: invalid side parameter")
 	}
+}
+
+// UrlDecodeConverter converts an URL with encoded special characters back to original string.
+type UrlDecodeConverter struct{}
+
+func (UrlDecodeConverter) Convert(in any) (any, error) {
+	urlStr := IfaceAsString(in)
+	query, err := url.QueryUnescape(urlStr)
+	if err != nil {
+		return nil, err
+	}
+	return query, nil
 }

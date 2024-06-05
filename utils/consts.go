@@ -724,6 +724,7 @@ const (
 	MetaSIPURIUser          = "*sipuri_user"
 	E164DomainConverter     = "*e164Domain"
 	E164Converter           = "*e164"
+	UrlDecConverter         = "*urldecode"
 	MetaReload              = "*reload"
 	MetaLoad                = "*load"
 	MetaFloat64             = "*float64"
