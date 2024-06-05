@@ -62,7 +62,7 @@ func TestAddFldPost(t *testing.T) {
 	}
 	eOut := &ExportEvents{
 		Path:   "path1",
-		Format: "format1",
+		Type:   "format1",
 		Events: []any{"1"},
 		Opts: &config.EventExporterOpts{
 			AMQP:  &config.AMQPOpts{},
@@ -110,7 +110,7 @@ func TestAddFldPost(t *testing.T) {
 	}
 	eOut = &ExportEvents{
 		Path:   "path1",
-		Format: "format1",
+		Type:   "format1",
 		Events: []any{"1", "2"},
 		Opts: &config.EventExporterOpts{
 			AMQP:  &config.AMQPOpts{},
@@ -138,7 +138,7 @@ func TestAddFldPost(t *testing.T) {
 	}
 	eOut = &ExportEvents{
 		Path:   "path2",
-		Format: "format2",
+		Type:   "format2",
 		Events: []any{"3"},
 		Opts: &config.EventExporterOpts{
 			Els:   &config.ElsOpts{},

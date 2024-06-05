@@ -474,8 +474,8 @@ func testCDRsOnExpFileFailover(t *testing.T) {
 			t.Error("Expected at least one event")
 			continue
 		}
-		if ev.Format != utils.MetaHTTPPost {
-			t.Errorf("Expected %s to be only failed exporter,received <%s>", utils.MetaHTTPPost, ev.Format)
+		if ev.Type != utils.MetaHTTPPost {
+			t.Errorf("Expected %s to be only failed exporter,received <%s>", utils.MetaHTTPPost, ev.Type)
 		}
 		if err := checkContent(ev, httpContent); err != nil {
 			t.Errorf("For file <%s> and event <%s> received %s", filePath, utils.ToJSON(ev), err)

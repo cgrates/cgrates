@@ -203,8 +203,8 @@ func testCDRsPostFailoverToFile(t *testing.T) {
 			t.Error("Expected at least one event")
 			continue
 		}
-		if ev.Format != utils.MetaS3jsonMap {
-			t.Errorf("Expected event to use %q received: %q", utils.MetaS3jsonMap, ev.Format)
+		if ev.Type != utils.MetaS3jsonMap {
+			t.Errorf("Expected event to use %q received: %q", utils.MetaS3jsonMap, ev.Type)
 		}
 		if len(ev.Events) != 3 {
 			t.Errorf("Expected all the events to be saved in the same file, ony %v saved in this file.", len(ev.Events))

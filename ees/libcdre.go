@@ -96,7 +96,7 @@ func AddFailedPost(failedPostsDir, expPath, format string, ev any, opts *config.
 	if failedPost == nil {
 		failedPost = &ExportEvents{
 			Path:           expPath,
-			Format:         format,
+			Type:           format,
 			Opts:           opts,
 			failedPostsDir: failedPostsDir,
 		}
@@ -129,7 +129,7 @@ type ExportEvents struct {
 	lk             sync.RWMutex
 	Path           string
 	Opts           *config.EventExporterOpts
-	Format         string
+	Type           string
 	Events         []any
 	failedPostsDir string
 }
@@ -162,21 +162,20 @@ func (expEv *ExportEvents) AddEvent(ev any) {
 
 // ReplayFailedPosts tryies to post cdrs again
 func (expEv *ExportEvents) ReplayFailedPosts(attempts int) (failedEvents *ExportEvents, err error) {
-	failedEvents = &ExportEvents{
-		Path:   expEv.Path,
-		Opts:   expEv.Opts,
-		Format: expEv.Format,
-	}
-
-	eeCfg := config.NewEventExporterCfg("ReplayFailedPosts", expEv.Format, expEv.Path, utils.MetaNone,
+	eeCfg := config.NewEventExporterCfg("ReplayFailedPosts", expEv.Type, expEv.Path, utils.MetaNone,
 		attempts, expEv.Opts)
 	var ee EventExporter
 	if ee, err = NewEventExporter(eeCfg, config.CgrConfig(), nil, nil); err != nil {
 		return
 	}
 	keyFunc := func() string { return utils.EmptyString }
-	if expEv.Format == utils.MetaKafkajsonMap || expEv.Format == utils.MetaS3jsonMap {
+	if expEv.Type == utils.MetaKafkajsonMap || expEv.Type == utils.MetaS3jsonMap {
 		keyFunc = utils.UUIDSha1Prefix
+	}
+	failedEvents = &ExportEvents{
+		Path: expEv.Path,
+		Opts: expEv.Opts,
+		Type: expEv.Type,
 	}
 	for _, ev := range expEv.Events {
 		if err = ExportWithAttempts(ee, ev, keyFunc()); err != nil {
@@ -184,10 +183,13 @@ func (expEv *ExportEvents) ReplayFailedPosts(attempts int) (failedEvents *Export
 		}
 	}
 	ee.Close()
-	if len(failedEvents.Events) > 0 {
-		err = utils.ErrPartiallyExecuted
-	} else {
-		failedEvents = nil
+
+	switch len(failedEvents.Events) {
+	case 0: // none failed to be replayed
+		return nil, nil
+	case len(expEv.Events): // all failed, return last encountered error
+		return failedEvents, err
+	default:
+		return failedEvents, utils.ErrPartiallyExecuted
 	}
-	return
 }
