@@ -31,6 +31,7 @@ import (
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
+	"github.com/google/go-cmp/cmp"
 )
 
 func TestActionTriggerClone(t *testing.T) {
@@ -457,5 +458,79 @@ func TestStringToJson(t *testing.T) {
 	expected, _ := json.Marshal(at)
 	if result != string(expected) {
 		t.Errorf("String method returned unexpected result, got: %s, want: %s", result, string(expected))
+	}
+}
+
+func TestUpdateInitialValue(t *testing.T) {
+	tests := []struct {
+		name     string
+		as       *AccountSummary
+		old      *AccountSummary
+		expected *AccountSummary
+	}{
+		{
+			name: "old is nil",
+			as: &AccountSummary{
+				BalanceSummaries: BalanceSummaries{
+					{UUID: "1", Initial: 10, Value: 20},
+				},
+			},
+			old: nil,
+			expected: &AccountSummary{
+				BalanceSummaries: BalanceSummaries{
+					{UUID: "1", Initial: 10, Value: 20},
+				},
+			},
+		},
+		{
+			name: "update initial values",
+			as: &AccountSummary{
+				BalanceSummaries: BalanceSummaries{
+					{UUID: "1", Initial: 10, Value: 20},
+					{UUID: "2", Initial: 15, Value: 25},
+				},
+			},
+			old: &AccountSummary{
+				BalanceSummaries: BalanceSummaries{
+					{UUID: "1", Initial: 5, Value: 10},
+					{UUID: "3", Initial: 20, Value: 30},
+				},
+			},
+			expected: &AccountSummary{
+				BalanceSummaries: BalanceSummaries{
+					{UUID: "1", Initial: 5, Value: 20},
+					{UUID: "2", Initial: 15, Value: 25},
+					{UUID: "3", Initial: 0, Value: 0},
+				},
+			},
+		},
+		{
+			name: "no matching UUIDs",
+			as: &AccountSummary{
+				BalanceSummaries: BalanceSummaries{
+					{UUID: "4", Initial: 10, Value: 20},
+				},
+			},
+			old: &AccountSummary{
+				BalanceSummaries: BalanceSummaries{
+					{UUID: "5", Initial: 5, Value: 10},
+				},
+			},
+			expected: &AccountSummary{
+				BalanceSummaries: BalanceSummaries{
+					{UUID: "4", Initial: 10, Value: 20},
+					{UUID: "5", Initial: 0, Value: 0},
+				},
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			tt.as.UpdateInitialValue(tt.old)
+			if diff := cmp.Diff(tt.as, tt.expected); diff != "" {
+				t.Errorf("UpdateInitialValue() mismatch (-want +got):\n%s", diff)
+			}
+		})
 	}
 }
