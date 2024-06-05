@@ -2811,13 +2811,10 @@ func TestCallDescriptorgetgetRatingPlansForPrefix(t *testing.T) {
 	}
 	// Default FallbackDepth is 3
 	got, err := cd.getRatingPlansForPrefix("testkey", 4)
-
 	if err != utils.ErrMaxRecursionDepth {
 		t.Errorf("getRatingPlansForPrefix() expected %v, got %v, ", utils.ErrMaxRecursionDepth, err)
-
 	} else if got != 4 {
 		t.Errorf("getRatingPlansForPrefix() expected %v, got %v, ", 4, got)
 	}
-
 	Cache.Clear(nil)
 }
