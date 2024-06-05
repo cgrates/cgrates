@@ -141,3 +141,27 @@ func TestRadiusDPFieldAsString(t *testing.T) {
 		t.Errorf("Expecting: flopsy, received: <%s>", data)
 	}
 }
+
+func TestLibradRadiusDPString(t *testing.T) {
+
+	tests := []struct {
+		name string
+		req  *radigo.Packet
+		want string
+	}{
+		{
+			name: "NilRequest",
+			req:  nil,
+			want: "null",
+		},
+	}
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			r := &radiusDP{req: tc.req}
+			got := r.String()
+			if got != tc.want {
+				t.Errorf("Got: %s, Expected: %s", got, tc.want)
+			}
+		})
+	}
+}

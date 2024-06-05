@@ -33,7 +33,7 @@ import (
 	"github.com/fiorix/go-diameter/v4/diam/datatype"
 )
 
-func TestDPFieldAsInterface(t *testing.T) {
+func TestLibDiamDPFieldAsInterface(t *testing.T) {
 	m := diam.NewRequest(diam.CreditControl, 4, nil)
 	m.NewAVP("Session-Id", avp.Mbit, 0, datatype.UTF8String("simuhuawei;1449573472;00002"))
 	m.NewAVP(avp.RequestedServiceUnit, avp.Mbit, 0, &diam.GroupedAVP{
@@ -111,7 +111,7 @@ func TestDPFieldAsInterface(t *testing.T) {
 	}
 }
 
-func TestMessageSetAVPsWithPath(t *testing.T) {
+func TestLibDiamMessageSetAVPsWithPath(t *testing.T) {
 	eMessage := diam.NewRequest(diam.CreditControl, 4, nil)
 	eMessage.NewAVP("Session-Id", avp.Mbit, 0,
 		datatype.UTF8String("simuhuawei;1449573472;00001"))
@@ -184,7 +184,7 @@ func TestMessageSetAVPsWithPath(t *testing.T) {
 	}
 }
 
-func TestMessageSetAVPsWithPath2(t *testing.T) {
+func TestLibDiamMessageSetAVPsWithPath2(t *testing.T) {
 	eMessage := diam.NewRequest(diam.CreditControl, 4, nil)
 	eMessage.NewAVP("Multiple-Services-Credit-Control", avp.Mbit, 0, &diam.GroupedAVP{
 		AVP: []*diam.AVP{
@@ -211,7 +211,7 @@ func TestMessageSetAVPsWithPath2(t *testing.T) {
 	}
 }
 
-func TestMessageSetAVPsWithPath3(t *testing.T) {
+func TestLibDiamMessageSetAVPsWithPath3(t *testing.T) {
 	eMessage := diam.NewRequest(diam.CreditControl, 4, nil)
 	eMessage.NewAVP("Multiple-Services-Credit-Control", avp.Mbit, 0, &diam.GroupedAVP{
 		AVP: []*diam.AVP{
@@ -256,7 +256,7 @@ func TestMessageSetAVPsWithPath3(t *testing.T) {
 	}
 }
 
-func TestMessageSetAVPsWithPath4(t *testing.T) {
+func TestLibDiamMessageSetAVPsWithPath4(t *testing.T) {
 	eMessage := diam.NewRequest(diam.CreditControl, 4, nil)
 	eMessage.NewAVP("Multiple-Services-Credit-Control", avp.Mbit, 0, &diam.GroupedAVP{
 		AVP: []*diam.AVP{
@@ -300,7 +300,7 @@ func TestMessageSetAVPsWithPath4(t *testing.T) {
 	}
 }
 
-func TestMessageSetAVPsWithPath5(t *testing.T) {
+func TestLibDiamMessageSetAVPsWithPath5(t *testing.T) {
 	eMessage := diam.NewRequest(diam.CreditControl, 4, nil)
 	eMessage.NewAVP("Multiple-Services-Credit-Control", avp.Mbit, 0, &diam.GroupedAVP{
 		AVP: []*diam.AVP{
@@ -377,7 +377,7 @@ func TestMessageSetAVPsWithPath6(t *testing.T) {
 }
 */
 
-func TestDisectDiamListen(t *testing.T) {
+func TestLibDiamDisectDiamListen(t *testing.T) {
 	expIPs := []net.IP{net.ParseIP("192.168.56.203"), net.ParseIP("192.168.57.203")}
 	rvc := disectDiamListen("192.168.56.203/192.168.57.203:3869")
 	if !reflect.DeepEqual(expIPs, rvc) {
@@ -396,7 +396,7 @@ func TestDisectDiamListen(t *testing.T) {
 
 }
 
-func TestUpdateDiamMsgFromNavMap1(t *testing.T) {
+func TestLibDiamUpdateDiamMsgFromNavMap1(t *testing.T) {
 	eMessage := diam.NewRequest(diam.CreditControl, 4, nil)
 	eMessage.NewAVP("Multiple-Services-Credit-Control", avp.Mbit, 0, &diam.GroupedAVP{
 		AVP: []*diam.AVP{
@@ -464,7 +464,7 @@ func TestUpdateDiamMsgFromNavMap1(t *testing.T) {
 	}
 }
 
-func TestUpdateDiamMsgFromNavMap2(t *testing.T) {
+func TestLibDiamUpdateDiamMsgFromNavMap2(t *testing.T) {
 	eMessage := diam.NewRequest(diam.CreditControl, 4, nil)
 	eMessage.NewAVP("Multiple-Services-Credit-Control", avp.Mbit, 0, &diam.GroupedAVP{
 		AVP: []*diam.AVP{
@@ -558,7 +558,7 @@ func TestUpdateDiamMsgFromNavMap2(t *testing.T) {
 	}
 }
 
-func TestUpdateDiamMsgFromNavMap3(t *testing.T) {
+func TestLibDiamUpdateDiamMsgFromNavMap3(t *testing.T) {
 	eMessage := diam.NewRequest(diam.CreditControl, 4, nil)
 	eMessage.NewAVP("Multiple-Services-Credit-Control", avp.Mbit, 0, &diam.GroupedAVP{
 		AVP: []*diam.AVP{
@@ -629,7 +629,7 @@ func TestUpdateDiamMsgFromNavMap3(t *testing.T) {
 	}
 }
 
-func TestUpdateDiamMsgFromNavMap4(t *testing.T) {
+func TestLibDiamUpdateDiamMsgFromNavMap4(t *testing.T) {
 	eMessage := diam.NewRequest(diam.CreditControl, 4, nil)
 	eMessage.NewAVP("Multiple-Services-Credit-Control", avp.Mbit, 0, &diam.GroupedAVP{
 		AVP: []*diam.AVP{
@@ -741,7 +741,7 @@ func TestUpdateDiamMsgFromNavMap4(t *testing.T) {
 	}
 }
 
-func TestDiamAVPAsIface(t *testing.T) {
+func TestLibDiamAVPAsIface(t *testing.T) {
 	args := diam.NewAVP(435, avp.Mbit, 0, datatype.Address("127.0.0.1"))
 	var exp any = net.IP([]byte("127.0.0.1"))
 	if rply, err := diamAVPAsIface(args); err != nil {
@@ -889,7 +889,7 @@ func TestDiamAVPAsIface(t *testing.T) {
 	}
 }
 
-func TestNewDiamDataType(t *testing.T) {
+func TestLibDiamNewDiamDataType(t *testing.T) {
 	argType := datatype.AddressType
 	argVal := "127.0.0.1"
 	var exp datatype.Type = datatype.Address(net.ParseIP("127.0.0.1"))
@@ -1092,7 +1092,7 @@ func TestNewDiamDataType(t *testing.T) {
 	}
 }
 
-func TestDiamAvpGroupIface(t *testing.T) {
+func TestLibDiamAvpGroupIface(t *testing.T) {
 	avps := diam.NewRequest(diam.CreditControl, 4, nil)
 	avps.NewAVP("Multiple-Services-Credit-Control", avp.Mbit, 0, &diam.GroupedAVP{
 		AVP: []*diam.AVP{
@@ -1134,7 +1134,7 @@ func TestDiamAvpGroupIface(t *testing.T) {
 	}
 }
 
-func TestFilterWithDiameterDP(t *testing.T) {
+func TestLibDiamFilterWithDiameterDP(t *testing.T) {
 	avps := diam.NewRequest(diam.CreditControl, 4, nil)
 	avps.NewAVP("Multiple-Services-Credit-Control", avp.Mbit, 0, &diam.GroupedAVP{
 		AVP: []*diam.AVP{
@@ -1177,5 +1177,32 @@ func TestFilterWithDiameterDP(t *testing.T) {
 		t.Error(err)
 	} else if !pass {
 		t.Errorf("Exptected true, received: %+v", pass)
+	}
+}
+
+func TestLibDiamHeaderLen(t *testing.T) {
+	tests := []struct {
+		name    string
+		avp     *diam.AVP
+		wantLen int
+	}{
+		{
+			name:    "len equals",
+			avp:     &diam.AVP{Flags: avp.Vbit},
+			wantLen: 12,
+		},
+		{
+			name:    "len not set",
+			avp:     &diam.AVP{},
+			wantLen: 8,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			gotLen := headerLen(tt.avp)
+			if gotLen != tt.wantLen {
+				t.Errorf("headerLen() returned %d, want %d", gotLen, tt.wantLen)
+			}
+		})
 	}
 }

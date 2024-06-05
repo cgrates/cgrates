@@ -136,7 +136,7 @@ func TestAgReqSetFields(t *testing.T) {
 	}
 }
 
-func TestAgentRequestSetFields(t *testing.T) {
+func TestAgReqSetFieldsComp(t *testing.T) {
 	req := map[string]any{
 		utils.AccountField: 1009,
 		utils.Tenant:       "cgrates.org",
@@ -2449,7 +2449,7 @@ func BenchmarkAgReqSetField(b *testing.B) {
 	}
 }
 
-func TestNeedsMaxUsage(t *testing.T) {
+func TestAgReqNeedsMaxUsage(t *testing.T) {
 	if needsMaxUsage(nil) {
 		t.Error("Expected empty flag to not need maxUsage")
 	}
@@ -2494,7 +2494,7 @@ func TestAgReqSetFieldsFromCfg(t *testing.T) {
 
 }
 
-func TestFieldAsInterface(t *testing.T) {
+func TestAgReqFieldsAsInterface(t *testing.T) {
 	fldPath := []string{utils.MetaOpts, utils.AccountField}
 	ar := &AgentRequest{
 		Request:    nil,
@@ -2524,7 +2524,7 @@ func TestFieldAsInterface(t *testing.T) {
 	}
 }
 
-func TestAgentRequestParseFieldDateTimeDaily(t *testing.T) {
+func TestAgReqParseFieldDateTimeDaily(t *testing.T) {
 	tntTpl := config.NewRSRParsersMustCompile("*daily", utils.InfieldSep)
 	AgentReq := NewAgentRequest(utils.MapStorage{}, nil, nil, nil, nil, tntTpl, "", "", nil, nil)
 	fctTemp := &config.FCTemplate{
@@ -2553,7 +2553,7 @@ func TestAgentRequestParseFieldDateTimeDaily(t *testing.T) {
 	}
 }
 
-func TestAgentRequestParseFieldDateTimeTimeZone(t *testing.T) {
+func TestAgReqParseFieldDateTimeTimeZone(t *testing.T) {
 	tntTpl := config.NewRSRParsersMustCompile("*daily", utils.InfieldSep)
 	AgentReq := NewAgentRequest(utils.MapStorage{}, nil, nil, nil, nil, tntTpl, "", "", nil, nil)
 	fctTemp := &config.FCTemplate{Type: utils.MetaDateTime,
@@ -2581,7 +2581,7 @@ func TestAgentRequestParseFieldDateTimeTimeZone(t *testing.T) {
 	}
 }
 
-func TestAgentRequestParseFieldDateTimeMonthly(t *testing.T) {
+func TestAgReqParseFieldDateTimeMonthly(t *testing.T) {
 	tntTpl := config.NewRSRParsersMustCompile("*monthly", utils.InfieldSep)
 	AgentReq := NewAgentRequest(utils.MapStorage{}, nil, nil, nil, nil, tntTpl, "", "", nil, nil)
 	fctTemp := &config.FCTemplate{Type: utils.MetaDateTime,
@@ -2609,7 +2609,7 @@ func TestAgentRequestParseFieldDateTimeMonthly(t *testing.T) {
 	}
 }
 
-func TestAgentRequestParseFieldDateTimeMonthlyEstimated(t *testing.T) {
+func TestAgReqParseFieldDateTimeMonthlyEstimated(t *testing.T) {
 	tntTpl := config.NewRSRParsersMustCompile("*monthly_estimated", utils.InfieldSep)
 	AgentReq := NewAgentRequest(utils.MapStorage{}, nil, nil, nil, nil, tntTpl, "", "", nil, nil)
 	fctTemp := &config.FCTemplate{Type: utils.MetaDateTime,
@@ -2637,7 +2637,7 @@ func TestAgentRequestParseFieldDateTimeMonthlyEstimated(t *testing.T) {
 	}
 }
 
-func TestAgentRequestParseFieldDateTimeYearly(t *testing.T) {
+func TestAgReqParseFieldDateTimeYearly(t *testing.T) {
 	tntTpl := config.NewRSRParsersMustCompile("*yearly", utils.InfieldSep)
 	AgentReq := NewAgentRequest(utils.MapStorage{}, nil, nil, nil, nil, tntTpl, "", "", nil, nil)
 	fctTemp := &config.FCTemplate{Type: utils.MetaDateTime,
@@ -2665,7 +2665,7 @@ func TestAgentRequestParseFieldDateTimeYearly(t *testing.T) {
 	}
 }
 
-func TestAgentRequestParseFieldDateTimeMetaUnlimited(t *testing.T) {
+func TestAgReqParseFieldDateTimeMetaUnlimited(t *testing.T) {
 	tntTpl := config.NewRSRParsersMustCompile(utils.MetaUnlimited, utils.InfieldSep)
 	AgentReq := NewAgentRequest(utils.MapStorage{}, nil, nil, nil, nil, tntTpl, "", "", nil, nil)
 	fctTemp := &config.FCTemplate{Type: utils.MetaDateTime,
@@ -2693,7 +2693,7 @@ func TestAgentRequestParseFieldDateTimeMetaUnlimited(t *testing.T) {
 	}
 }
 
-func TestAgentRequestParseFieldDateTimeEmpty(t *testing.T) {
+func TestAgReqParseFieldDateTimeEmpty(t *testing.T) {
 	tntTpl := config.NewRSRParsersMustCompile("", utils.InfieldSep)
 	AgentReq := NewAgentRequest(utils.MapStorage{}, nil, nil, nil, nil, tntTpl, "", "", nil, nil)
 	fctTemp := &config.FCTemplate{Type: utils.MetaDateTime,
@@ -2721,7 +2721,7 @@ func TestAgentRequestParseFieldDateTimeEmpty(t *testing.T) {
 	}
 }
 
-func TestAgentRequestParseFieldDateTimeMonthEnd(t *testing.T) {
+func TestAgReqParseFieldDateTimeMonthEnd(t *testing.T) {
 	tntTpl := config.NewRSRParsersMustCompile("*month_endTest", utils.InfieldSep)
 	AgentReq := NewAgentRequest(utils.MapStorage{}, nil, nil, nil, nil, tntTpl, "", "", nil, nil)
 	fctTemp := &config.FCTemplate{Type: utils.MetaDateTime,
@@ -2749,7 +2749,7 @@ func TestAgentRequestParseFieldDateTimeMonthEnd(t *testing.T) {
 	}
 }
 
-func TestAgentRequestParseFieldDateTimeError(t *testing.T) {
+func TestAgReqParseFieldDateTimeError(t *testing.T) {
 	tntTpl := config.NewRSRParsersMustCompile("*month_endTest", utils.InfieldSep)
 	AgentReq := NewAgentRequest(utils.MapStorage{}, nil, nil, nil, nil, tntTpl, "", "", nil, nil)
 	fctTemp := &config.FCTemplate{Type: utils.MetaDateTime,
@@ -2765,7 +2765,7 @@ func TestAgentRequestParseFieldDateTimeError(t *testing.T) {
 	}
 }
 
-func TestAgentRequestParseFieldDateTimeError2(t *testing.T) {
+func TestAgReqParseFieldDateTimeError2(t *testing.T) {
 	prsr, err := config.NewRSRParsersFromSlice([]string{"2.", "~*req.CGRID<~*opts.Converter>"})
 	if err != nil {
 		t.Fatal(err)
@@ -2784,7 +2784,7 @@ func TestAgentRequestParseFieldDateTimeError2(t *testing.T) {
 	}
 }
 
-func TestAgentRequestRemoveAll(t *testing.T) {
+func TestAgReqRemoveAll(t *testing.T) {
 	tntTpl := config.NewRSRParsersMustCompile("", utils.InfieldSep)
 	AgentReq := NewAgentRequest(utils.MapStorage{}, nil, nil, nil, nil, tntTpl, "", "", nil, nil)
 
@@ -2814,7 +2814,7 @@ func TestAgentRequestRemoveAll(t *testing.T) {
 	}
 }
 
-func TestAgentRequestRemove(t *testing.T) {
+func TestAgReqRemove(t *testing.T) {
 	tntTpl := config.NewRSRParsersMustCompile("", utils.InfieldSep)
 	AgentReq := NewAgentRequest(utils.MapStorage{}, nil, nil, nil, utils.MapStorage{utils.AccountField: "Field1"}, tntTpl, "", "", nil, nil)
 	testCases := []struct {
@@ -2872,7 +2872,7 @@ func TestAgentRequestRemove(t *testing.T) {
 // 	}
 // }
 
-func TestAgentRequestString(t *testing.T) {
+func TestAgReqString(t *testing.T) {
 	sampleRequest := &AgentRequest{
 		Request:    nil,
 		Vars:       nil,
