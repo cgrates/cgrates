@@ -1643,3 +1643,52 @@ func TestStripConverter(t *testing.T) {
 		})
 	}
 }
+
+func TestURlConverter(t *testing.T) {
+	tests := []struct {
+		name     string
+		input    string
+		expected string
+		isError  bool
+	}{
+		{
+			name:     "Decode string with escaped $ character",
+			input:    "123%24123",
+			expected: "123$123",
+			isError:  false,
+		},
+		{
+			name:     "Wrong escaped character",
+			input:    "a%2Fdestination%user%26password%2Cid",
+			expected: "invalid URL escape \"%us\"",
+			isError:  true,
+		},
+		{
+			name:     "Decode string with multiple escaped characters",
+			input:    "query=%40special%23characters%24",
+			expected: "query=@special#characters$",
+			isError:  false,
+		},
+	}
+	conv, err := NewDataConverter(UrlDecConverter)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			rcv, err := conv.Convert(tt.input)
+			if (err != nil) != tt.isError {
+				t.Errorf("Convert() error =%v,expected err %v", err, tt.isError)
+			}
+			if tt.isError {
+				if err.Error() != tt.expected {
+					t.Errorf("expected error message: %s, received: %s", tt.expected, err.Error())
+				}
+				return
+			}
+			if rcv != tt.expected {
+				t.Errorf("expected: %q, received: %q", tt.expected, rcv)
+			}
+		})
+	}
+}
