@@ -1644,7 +1644,7 @@ func TestStripConverter(t *testing.T) {
 	}
 }
 
-func TestURlConverter(t *testing.T) {
+func TestURLDecodeConverter(t *testing.T) {
 	tests := []struct {
 		name     string
 		input    string
@@ -1669,8 +1669,14 @@ func TestURlConverter(t *testing.T) {
 			expected: "query=@special#characters$",
 			isError:  false,
 		},
+		{
+			name:     "Decode url with escaped chars",
+			input:    "https://www.example.com/search?q=hello%20world&query=%40special%23characters%24&path=%2Fa%20b%2Fc%3Fd%3D1%26e%3D2&data=%E6%97%A5%E6%9C%AC%E8%AA%9E",
+			expected: "https://www.example.com/search?q=hello world&query=@special#characters$&path=/a b/c?d=1&e=2&data=日本語",
+			isError:  false,
+		},
 	}
-	conv, err := NewDataConverter(UrlDecConverter)
+	conv, err := NewDataConverter(URLDecConverter)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -1688,6 +1694,34 @@ func TestURlConverter(t *testing.T) {
 			}
 			if rcv != tt.expected {
 				t.Errorf("expected: %q, received: %q", tt.expected, rcv)
+			}
+		})
+	}
+}
+
+func TestURLEncodeConverter(t *testing.T) {
+	tests := []struct {
+		name     string
+		input    string
+		expected string
+	}{
+		{name: "Encode a string with special character", input: "123$123", expected: "123%24123"},
+		{name: "Encode special characters in path,query and fragment", input: "https://www.example.com/search日?data=日本語&path=/a b/c?d=1&e=2&q=hello world&query=@special#日本characters$", expected: "https://www.example.com/search%E6%97%A5?data=%E6%97%A5%E6%9C%AC%E8%AA%9E&e=2&path=%2Fa+b%2Fc%3Fd%3D1&q=hello+world&query=%40special#%E6%97%A5%E6%9C%ACcharacters$"},
+		{name: "Encode a string with multiple special character", input: "foo☺@$'()*,baz;?&=#+!", expected: "foo%E2%98%BA%40%24%27%28%29%2A%2Cbaz%3B"},
+	}
+	conv, err := NewDataConverter(URLEncConverter)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			rcv, err := conv.Convert(tt.input)
+			if err != nil {
+				t.Error(err)
+				return
+			}
+			if tt.expected != rcv {
+				t.Errorf("expected %q,received %q", tt.expected, rcv)
 			}
 		})
 	}
