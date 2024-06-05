@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"errors"
 	"strings"
 
 	"github.com/cgrates/cgrates/config"
@@ -232,35 +233,35 @@ func UpdateFilterIndexes(dm *DataManager, tnt string, oldFltr *Filter, newFltr *
 	return nil
 }
 
-// removeFilterIndexesForFilter removes the itemID for the index keys
-// used to remove the old indexes when a filter is updated
+// removeFilterIndexesForFilter removes itemIDs from the specified filter index keys.
+// Used to update the index map when a filter is modified.
 func removeFilterIndexesForFilter(dm *DataManager, idxItmType, cacheItmType, tnt string,
-	removeIndexKeys []string, itemIDs utils.StringMap) (err error) {
+	removeIndexKeys []string, itemIDs utils.StringMap) error {
 	refID := guardian.Guardian.GuardIDs(utils.EmptyString,
 		config.CgrConfig().GeneralCfg().LockingTimeout, idxItmType+tnt)
 	defer guardian.Guardian.UnguardIDs(refID)
-	for _, idxKey := range removeIndexKeys { // delete old filters indexes for this item
-		var remIndx map[string]utils.StringMap
-		if remIndx, err = dm.GetFilterIndexes(idxItmType, tnt,
-			utils.EmptyString, nil); err != nil {
-			if err != utils.ErrNotFound {
-				return
-			}
-			err = nil
-			continue
-		}
-		for idx := range itemIDs {
-			delete(remIndx[idxKey], idx)
-		}
 
-		fltrIndexer := NewFilterIndexer(dm, utils.CacheInstanceToPrefix[cacheItmType], tnt)
-		fltrIndexer.indexes = remIndx
+	// Retrieve current filter fltrIdx.
+	fltrIdx, err := dm.GetFilterIndexes(idxItmType, tnt,
+		utils.EmptyString, nil)
+	if err != nil {
+		if errors.Is(err, utils.ErrNotFound) {
+			return nil // nothing to remove
+		}
+		return err
+	}
 
-		if err = fltrIndexer.StoreIndexes(true, utils.NonTransactional); err != nil {
-			return
+	// Remove itemIDs from the specified index keys.
+	for _, idxKey := range removeIndexKeys {
+		for itemID := range itemIDs {
+			delete(fltrIdx[idxKey], itemID)
 		}
 	}
-	return
+
+	// Store the updated indexes.
+	fltrIndexer := NewFilterIndexer(dm, utils.CacheInstanceToPrefix[cacheItmType], tnt)
+	fltrIndexer.indexes = fltrIdx
+	return fltrIndexer.StoreIndexes(true, utils.NonTransactional)
 }
 
 // addReverseFilterIndexForFilter will add a reference for the filter in reverse filter indexes
