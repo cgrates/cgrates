@@ -1,5 +1,5 @@
 ---
-nats_version: 2.10.1
+nats_version: 2.10.16
 nats_install_dir: /opt/nats
 nats_user: nats
 nats_group: nats
