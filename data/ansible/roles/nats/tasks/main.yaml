@@ -1,57 +1,57 @@
 ---
 - name: Create user and group for NATS
-  become: yes
+  become: true
   block:
     - group:
-        name: "{{ nats_group }}"
+        name: '{{ nats_group }}'
         state: present
     - user:
-        name: "{{ nats_user }}"
-        group: "{{ nats_group }}"
+        name: '{{ nats_user }}'
+        group: '{{ nats_group }}'
         system: yes
         state: present
 
 - name: Download NATS server
   get_url:
-    url: "https://github.com/nats-io/nats-server/releases/download/v{{ nats_version }}/nats-server-v{{ nats_version }}-linux-amd64.tar.gz"
-    dest: "/tmp/nats-server-v{{ nats_version }}-linux-amd64.tar.gz"
-    mode: "0755"
+    url: 'https://github.com/nats-io/nats-server/releases/download/v{{ nats_version }}/nats-server-v{{ nats_version }}-linux-amd64.tar.gz'
+    dest: '/tmp/nats-server-v{{ nats_version }}-linux-amd64.tar.gz'
+    mode: '0755'
 
 - name: Create NATS install directory
-  become: yes
+  become: true
   file:
-    path: "{{ nats_install_dir }}"
+    path: '{{ nats_install_dir }}'
     state: directory
 
 - name: Extract NATS server archive
-  become: yes
+  become: true
   unarchive:
-    src: "/tmp/nats-server-v{{ nats_version }}-linux-amd64.tar.gz"
-    dest: "{{ nats_install_dir }}"
+    src: '/tmp/nats-server-v{{ nats_version }}-linux-amd64.tar.gz'
+    dest: '{{ nats_install_dir }}'
     remote_src: yes
 
 - name: Create systemd service file for NATS
-  become: yes
+  become: true
   template:
     src: nats.service.j2
     dest: /etc/systemd/system/nats.service
 
 - name: Reload systemd daemon
-  become: yes
+  become: true
   systemd:
     daemon_reload: yes
 
 - name: Set NATS service state
-  become: yes
+  become: true
   systemd:
     name: nats
-    enabled: "{{ service_enabled }}"
-    state: "{{ service_state }}"
+    enabled: '{{ service_enabled }}'
+    state: '{{ service_state }}'
 
 - name: Create a symlink in /usr/local/bin
-  become: yes
+  become: true
   file:
-    src: "{{ nats_install_dir }}/nats-server-v{{ nats_version }}-linux-amd64/nats-server"
+    src: '{{ nats_install_dir }}/nats-server-v{{ nats_version }}-linux-amd64/nats-server'
     dest: /usr/local/bin/nats-server
     state: link
-  when: "add_nats_to_path|bool"
+  when: 'add_nats_to_path|bool'
