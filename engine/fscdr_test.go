@@ -548,3 +548,78 @@ func TestFSCdrNewFSCdr(t *testing.T) {
 		t.Error(rcv)
 	}
 }
+
+func TestFsCdrExtraFieldsAliases(t *testing.T) {
+	tests := []struct {
+		name       string
+		eFieldsCfg string
+		expected   map[string]string
+	}{
+		{
+			name: "extra_fields_aliases",
+			eFieldsCfg: `{
+			"cdrs": {
+			"extra_fields":["~sip_user_agent:s/([A-Za-z]*).+/$1/","cgr_notify"],
+			"extra_fields_aliases":{"sip_user_agent":"sip_ua","cgr_notify":"reply_notify"},
+		 	 },}`,
+			expected: map[string]string{
+				"sip_ua":       "Jitsi",
+				"reply_notify": "AUTH_OK",
+			},
+		},
+		{
+			name: "extra_fields",
+			eFieldsCfg: `{
+				"cdrs": {
+				"extra_fields": ["read_codec","call_timeout","~sip_user_agent:s/([A-Za-z]*).+/$1/"],
+				}}`,
+			expected: map[string]string{
+				"read_codec":     "PCMU",
+				"call_timeout":   "30",
+				"sip_user_agent": "Jitsi",
+			},
+		},
+		{
+			name: "extra_fields_aliases without a value",
+			eFieldsCfg: `{
+				"cdrs": {
+				"extra_fields": ["hangup_cause","read_codec","call_timeout"],
+				"extra_fields_aliases": {"read_codec":"","call_timeout":"timeout"},
+				}}`,
+			expected: map[string]string{
+				"read_codec":   "PCMU",
+				"hangup_cause": "NORMAL_CLEARING",
+				"timeout":      "30",
+			},
+		},
+		{
+			name: "alias key not defined in extra_fields",
+			eFieldsCfg: `{
+				"cdrs": {
+				"extra_fields": ["sip_contact_user"],
+				"extra_fields_aliases": {"sip_contact_user":"user","sip_received_ip":"rec_ip"},
+				}}`,
+			expected: map[string]string{
+				"user": "1001",
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			fsCdrCfg, err := config.NewCGRConfigFromJsonStringWithDefaults(tt.eFieldsCfg)
+			if err != nil {
+				t.Error("Could not parse the config", err)
+			}
+			fsCdr, err := NewFSCdr(body, fsCdrCfg)
+			if err != nil {
+				t.Error("Could not parse cdr", err.Error())
+			}
+			extraFields := fsCdr.getExtraFields()
+			if !reflect.DeepEqual(tt.expected, extraFields) {
+				t.Errorf("expected %+v,\nreceived %+v", tt.expected, extraFields)
+			}
+		})
+	}
+
+}

@@ -25,16 +25,17 @@ import (
 )
 
 type CdrsCfg struct {
-	Enabled          bool              // Enable CDR Server service
-	ExtraFields      []*utils.RSRField // Extra fields to store in CDRs
-	StoreCdrs        bool              // store cdrs in storDb
-	SMCostRetries    int
-	ChargerSConns    []string
-	RaterConns       []string
-	AttributeSConns  []string
-	ThresholdSConns  []string
-	StatSConns       []string
-	OnlineCDRExports []string // list of CDRE templates to use for real-time CDR exports
+	Enabled            bool              // Enable CDR Server service
+	ExtraFields        []*utils.RSRField // Extra fields to store in CDRs
+	ExtraFieldsAliases map[string]string
+	StoreCdrs          bool // store cdrs in storDb
+	SMCostRetries      int
+	ChargerSConns      []string
+	RaterConns         []string
+	AttributeSConns    []string
+	ThresholdSConns    []string
+	StatSConns         []string
+	OnlineCDRExports   []string // list of CDRE templates to use for real-time CDR exports
 }
 
 // loadFromJsonCfg loads Cdrs config from JsonCfg
@@ -48,6 +49,12 @@ func (cdrscfg *CdrsCfg) loadFromJsonCfg(jsnCdrsCfg *CdrsJsonCfg) (err error) {
 	if jsnCdrsCfg.Extra_fields != nil {
 		if cdrscfg.ExtraFields, err = utils.ParseRSRFieldsFromSlice(*jsnCdrsCfg.Extra_fields); err != nil {
 			return err
+		}
+	}
+	if jsnCdrsCfg.Extra_fields_aliases != nil {
+		cdrscfg.ExtraFieldsAliases = make(map[string]string)
+		for key, val := range *jsnCdrsCfg.Extra_fields_aliases {
+			cdrscfg.ExtraFieldsAliases[key] = val
 		}
 	}
 	if jsnCdrsCfg.Store_cdrs != nil {
@@ -125,6 +132,12 @@ func (cdrscfg *CdrsCfg) AsMapInterface() map[string]any {
 	for i, item := range cdrscfg.ExtraFields {
 		extraFields[i] = item.Rules
 	}
+
+	extraFieldsAliases := make(map[string]string)
+	for key, val := range cdrscfg.ExtraFieldsAliases {
+		extraFieldsAliases[key] = val
+	}
+
 	onlineCDRExports := make([]string, len(cdrscfg.OnlineCDRExports))
 	for i, item := range cdrscfg.OnlineCDRExports {
 		onlineCDRExports[i] = item
@@ -182,6 +195,7 @@ func (cdrscfg *CdrsCfg) AsMapInterface() map[string]any {
 	return map[string]any{
 		utils.EnabledCfg:          cdrscfg.Enabled,
 		utils.ExtraFieldsCfg:      extraFields,
+		utils.ExtraFieldAliases:   extraFieldsAliases,
 		utils.StoreCdrsCfg:        cdrscfg.StoreCdrs,
 		utils.SMCostRetriesCfg:    cdrscfg.SMCostRetries,
 		utils.ChargerSConnsCfg:    chargerSConns,

@@ -141,6 +141,7 @@ type SchedulerJsonCfg struct {
 type CdrsJsonCfg struct {
 	Enabled              *bool
 	Extra_fields         *[]string
+	Extra_fields_aliases *map[string]string
 	Store_cdrs           *bool
 	Session_cost_retries *int
 	Chargers_conns       *[]string
