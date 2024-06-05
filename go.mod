@@ -21,6 +21,7 @@ require (
 	github.com/fiorix/go-diameter v3.0.3-0.20190716165154-f4823472d0e0+incompatible
 	github.com/fsnotify/fsnotify v1.6.0
 	github.com/go-sql-driver/mysql v1.7.1
+	github.com/google/go-cmp v0.6.0
 	github.com/gorhill/cronexpr v0.0.0-20180427100037-88b0669f7d75
 	github.com/jinzhu/gorm v1.9.16
 	github.com/lib/pq v1.10.9
