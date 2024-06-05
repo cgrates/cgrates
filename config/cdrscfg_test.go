@@ -113,6 +113,7 @@ func TestCdrsCfgAsMapInterface(t *testing.T) {
 	eMap := map[string]any{
 		"enabled":              false,
 		"extra_fields":         []string{},
+		"extra_fields_aliases": map[string]string{},
 		"store_cdrs":           true,
 		"session_cost_retries": 5,
 		"chargers_conns":       []string{"*localhost"},
@@ -150,6 +151,7 @@ func TestCdrsCfgAsMapInterface(t *testing.T) {
 	eMap = map[string]any{
 		"enabled":              true,
 		"extra_fields":         []string{"PayPalAccount", "LCRProfile", "ResourceID"},
+		"extra_fields_aliases": map[string]string{},
 		"store_cdrs":           true,
 		"session_cost_retries": 9,
 		"chargers_conns":       []string{"*internal"},
@@ -245,6 +247,7 @@ func TestCdrsCfgAsMapInterface2(t *testing.T) {
 		utils.ThresholdSConnsCfg:  slc,
 		utils.StatSConnsCfg:       slc,
 		utils.OnlineCDRExportsCfg: slc,
+		utils.ExtraFieldAliases:   map[string]string{},
 	}
 
 	rcv := cdrscfg.AsMapInterface()
