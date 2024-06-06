@@ -26,6 +26,7 @@ import (
 	"time"
 
 	"github.com/cgrates/cgrates/utils"
+	"github.com/google/go-cmp/cmp"
 )
 
 func TestBalanceSortPrecision(t *testing.T) {
@@ -582,4 +583,51 @@ func TestBalancesMatchDestination(t *testing.T) {
 	if !balanceNoDestinations.MatchDestination("anydestination") {
 		t.Errorf("MatchDestination(anydestination): expected true, got false for empty DestinationIDs map")
 	}
+}
+
+func TestBalancesSetInitialValue(t *testing.T) {
+	t.Run("OldNotNull", func(t *testing.T) {
+		as := &AccountSummary{
+			BalanceSummaries: BalanceSummaries{
+				{UUID: "1", Value: 100, Initial: 0},
+				{UUID: "2", Value: 200, Initial: 0},
+			},
+		}
+		old := &AccountSummary{
+			BalanceSummaries: BalanceSummaries{
+				{UUID: "1", Value: 50, Initial: 0},
+				{UUID: "3", Value: 300, Initial: 0},
+			},
+		}
+		as.SetInitialValue(old)
+		expected := &AccountSummary{
+			BalanceSummaries: BalanceSummaries{
+				{UUID: "1", Value: 100, Initial: 50},
+				{UUID: "2", Value: 200, Initial: 0},
+				{UUID: "3", Value: 0, Initial: 0},
+			},
+		}
+		if diff := cmp.Diff(as, expected); diff != "" {
+			t.Errorf("Unexpected result (-got +want):\n%s", diff)
+		}
+	})
+	t.Run("OldNull", func(t *testing.T) {
+		as := &AccountSummary{
+			BalanceSummaries: BalanceSummaries{
+				{UUID: "1", Value: 100, Initial: 0},
+				{UUID: "2", Value: 200, Initial: 0},
+			},
+		}
+		as.SetInitialValue(nil)
+		expected := &AccountSummary{
+			BalanceSummaries: BalanceSummaries{
+				{UUID: "1", Value: 100, Initial: 0},
+				{UUID: "2", Value: 200, Initial: 0},
+			},
+		}
+
+		if diff := cmp.Diff(as, expected); diff != "" {
+			t.Errorf("Unexpected result (-got +want):\n%s", diff)
+		}
+	})
 }
