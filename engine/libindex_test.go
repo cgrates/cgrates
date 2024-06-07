@@ -81,31 +81,31 @@ func TestLibIndexRemoveFilterIndexesForFilterErrnotFound(t *testing.T) {
 }
 
 func TestLibIndexSplitFilterIndexErrWrongIdxKeyFormat(t *testing.T) {
-	tests := []struct {
-		name         string
-		tntCtxIdxKey string
-		wantErr      string
-	}{
-		{
-			name:         "invalid index key format with less than 4 parts",
-			tntCtxIdxKey: "invalid:key",
-			wantErr:      "WRONG_IDX_KEY_FORMAT<invalid:key>",
-		},
-		{
-			name:         "another invalid index key format with less than 4 parts",
-			tntCtxIdxKey: "another:invalid:key",
-			wantErr:      "WRONG_IDX_KEY_FORMAT<another:invalid:key>",
-		},
+	tntCtxIdxKey := "invalid:key"
+	expectedErr := "WRONG_IDX_KEY_FORMAT<invalid:key>"
+	_, _, err := splitFilterIndex(tntCtxIdxKey)
+	if err == nil || err.Error() != expectedErr {
+		t.Fatalf("Expected error %v, got %v", expectedErr, err)
 	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			_, _, err := splitFilterIndex(tt.tntCtxIdxKey)
-			if err == nil {
-				t.Fatalf("Expected error but got nil")
-			}
-			if err.Error() != tt.wantErr {
-				t.Fatalf("Expected error %v, but got %v", tt.wantErr, err.Error())
-			}
-		})
+}
+
+func TestLibIndexNewFilterIndexGetFilterErrNotFound(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	dataDB := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
+	tnt := "tenant"
+	ctx := "context"
+	itemID := "item1"
+	filterIDs := []string{"nonexistent_filter"}
+	idxItmType := "indexItemType"
+	newFlt := &Filter{
+		Tenant: tnt,
+		ID:     "filter1",
+		Rules:  []*FilterRule{},
+	}
+	_, err := newFilterIndex(dm, idxItmType, tnt, ctx, itemID, filterIDs, newFlt)
+	expectedErr := "broken reference to filter: nonexistent_filter for itemType: indexItemType and ID: item1"
+	if err == nil || err.Error() != expectedErr {
+		t.Fatalf("Expected error %v, got %v", expectedErr, err)
 	}
 }

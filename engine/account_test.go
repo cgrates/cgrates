@@ -31,6 +31,7 @@ import (
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
+	"github.com/google/go-cmp/cmp"
 )
 
 var (
@@ -3444,5 +3445,104 @@ func TestAccountSummaryString(t *testing.T) {
 	err := json.Unmarshal([]byte(result), &parsedResult)
 	if err != nil {
 		t.Errorf("Error unmarshalling result: %v", err)
+	}
+}
+
+func TestAccountProcessAccountSummaryField(t *testing.T) {
+	type args struct {
+		fldPath    []string
+		accSummary any
+		event      map[string]any
+	}
+	tests := []struct {
+		name    string
+		args    args
+		want    any
+		wantErr bool
+	}{
+		{
+			name: "Direct access for *AccountSummary (Tenant)",
+			args: args{
+				fldPath:    []string{"Tenant"},
+				accSummary: &AccountSummary{Tenant: "test_tenant", ID: "id1"},
+				event:      make(map[string]any),
+			},
+			want:    "test_tenant",
+			wantErr: false,
+		},
+		{
+			name: "Unmarshal with ValueFactors field (expecting error on missing factor)",
+			args: args{
+				fldPath:    []string{"BalanceSummaries", "0", "Factors", "factor1"},
+				accSummary: `{"BalanceSummaries": [{"UUID": "summary1", "Factors": {"factor1": 0.2}}]}`,
+				event:      make(map[string]any),
+			},
+			want:    nil,
+			wantErr: true,
+		},
+		{
+			name: "Error on missing ValueFactors field",
+			args: args{
+				fldPath:    []string{"BalanceSummaries", "0", "Factors", "missing_factor"},
+				accSummary: `{"BalanceSummaries": [{"UUID": "summary1"}]}`,
+				event:      make(map[string]any),
+			},
+			want:    nil,
+			wantErr: true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := processAccountSummaryField(tt.args.fldPath, tt.args.accSummary, tt.args.event)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("processAccountSummaryField error = %v, wantErr = %v", err, tt.wantErr)
+				return
+			}
+			if diff := cmp.Diff(tt.want, got); diff != "" && !tt.wantErr {
+				t.Errorf("processAccountSummaryField mismatch (-want +got):\n%s", diff)
+			}
+		})
+	}
+}
+
+func TestProcessAccountSummaryFieldNonStringAccSummary(t *testing.T) {
+	type args struct {
+		fldPath    []string
+		accSummary any
+		event      map[string]any
+	}
+
+	tests := []struct {
+		name    string
+		args    args
+		wantErr bool
+	}{
+		{
+			name: "Error on non-string accSummary (marshal)",
+			args: args{
+				fldPath:    []string{"Tenant"},
+				accSummary: map[string]string{"Name": "Test Account"},
+				event:      make(map[string]any),
+			},
+			wantErr: true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			_, err := processAccountSummaryField(tt.args.fldPath, tt.args.accSummary, tt.args.event)
+			if (err == nil) != tt.wantErr {
+				t.Errorf("processAccountSummaryField error = %v, wantErr = %v", err, tt.wantErr)
+				return
+			}
+		})
+	}
+}
+
+func TestAccountFieldAsInterfaceNilAccount(t *testing.T) {
+	var acc *Account
+	fldPath := []string{"ID"}
+	_, err := acc.FieldAsInterface(fldPath)
+	if err != utils.ErrNotFound {
+		t.Errorf("Expected error %v, got %v", utils.ErrNotFound, err)
 	}
 }
