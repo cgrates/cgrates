@@ -101,7 +101,7 @@ func (acts *ActionService) Start(ctx *context.Context, _ context.CancelFunc) (er
 	go acts.acts.ListenAndServe(acts.stopChan, acts.rldChan)
 
 	utils.Logger.Info(fmt.Sprintf("<%s> starting <%s> subsystem", utils.CoreS, utils.ActionS))
-	srv, err := engine.NewService2(acts.acts, utils.ActionSv1, utils.V1Prfx)
+	srv, err := engine.NewServiceWithPing(acts.acts, utils.ActionSv1, utils.V1Prfx)
 	if err != nil {
 		return
 	}

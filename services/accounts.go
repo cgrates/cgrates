@@ -103,7 +103,7 @@ func (acts *AccountService) Start(ctx *context.Context, _ context.CancelFunc) (e
 
 	utils.Logger.Info(fmt.Sprintf("<%s> starting <%s> subsystem", utils.CoreS, utils.AccountS))
 
-	srv, err := engine.NewService2(acts.acts, utils.AccountSv1, utils.V1Prfx)
+	srv, err := engine.NewServiceWithPing(acts.acts, utils.AccountSv1, utils.V1Prfx)
 	if err != nil {
 		return err
 	}

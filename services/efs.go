@@ -69,7 +69,7 @@ func (efServ *ExportFailoverService) Start(ctx *context.Context, _ context.Cance
 	efServ.efS = efs.NewEfs(efServ.cfg, efServ.connMgr)
 	utils.Logger.Info(fmt.Sprintf("<%s> starting <%s> subsystem", utils.CoreS, utils.EFs))
 	efServ.stopChan = make(chan struct{})
-	efServ.srv, _ = engine.NewService2(efServ.efS, utils.EfSv1, utils.V1Prfx)
+	efServ.srv, _ = engine.NewServiceWithPing(efServ.efS, utils.EfSv1, utils.V1Prfx)
 	efServ.server.RpcRegister(efServ.srv)
 	efServ.Unlock()
 	return
