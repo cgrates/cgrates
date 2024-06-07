@@ -100,7 +100,7 @@ func (cdrSrv *CDRService) Start(ctx *context.Context, _ context.CancelFunc) (err
 	go cdrSrv.cdrS.ListenAndServe(cdrSrv.stopChan)
 	runtime.Gosched()
 	utils.Logger.Info("Registering CDRS RPC service.")
-	srv, err := engine.NewService2(cdrSrv.cdrS, utils.CDRsV1, utils.V1Prfx)
+	srv, err := engine.NewServiceWithPing(cdrSrv.cdrS, utils.CDRsV1, utils.V1Prfx)
 	if err != nil {
 		return err
 	}

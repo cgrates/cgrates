@@ -148,7 +148,7 @@ func (s RPCClientSet) Call(ctx *context.Context, method string, args any, reply 
 func NewService(val any) (_ IntService, err error) {
 	return NewServiceWithName(val, utils.EmptyString, false)
 }
-func NewService2(val any, name, prefix string) (*birpc.Service, error) {
+func NewServiceWithPing(val any, name, prefix string) (*birpc.Service, error) {
 	srv, err := birpc.NewServiceWithMethodsRename(val, name, true, func(funcName string) string {
 		return strings.TrimPrefix(funcName, prefix)
 	})

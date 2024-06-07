@@ -134,7 +134,7 @@ func (rs *RateService) Start(ctx *context.Context, _ context.CancelFunc) (err er
 	rs.stopChan = make(chan struct{})
 	go rs.rateS.ListenAndServe(rs.stopChan, rs.rldChan)
 
-	srv, err := engine.NewService2(rs.rateS, utils.RateSv1, utils.V1Prfx)
+	srv, err := engine.NewServiceWithPing(rs.rateS, utils.RateSv1, utils.V1Prfx)
 	if err != nil {
 		return err
 	}
