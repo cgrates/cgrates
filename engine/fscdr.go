@@ -77,21 +77,20 @@ func (fsCdr FSCdr) getCGRID() string {
 
 func (fsCdr FSCdr) getExtraFields() map[string]string {
 	extraFields := make(map[string]string, len(fsCdr.cgrCfg.CdrsCfg().ExtraFields))
-	extraFieldsAliases := fsCdr.cgrCfg.CdrsCfg().ExtraFieldsAliases
 	for _, field := range fsCdr.cgrCfg.CdrsCfg().ExtraFields {
-		origFieldVal, foundInVars := fsCdr.vars[field.Id]
+		fldName := field.Id
+		origFieldVal, foundInVars := fsCdr.vars[fldName]
 		if strings.HasPrefix(field.Id, utils.STATIC_VALUE_PREFIX) { // Support for static values injected in the CDRS. it will show up as {^value:value}
 			foundInVars = true
 		}
 		if !foundInVars {
-			origFieldVal = fsCdr.searchExtraField(field.Id, fsCdr.body)
+			origFieldVal = fsCdr.searchExtraField(fldName, fsCdr.body)
 		}
 		if parsed, err := field.Parse(origFieldVal); err == nil {
-			if alias, has := extraFieldsAliases[field.Id]; has && alias != utils.EmptyString {
-				extraFields[alias] = parsed
-				continue
+			if alias, has := fsCdr.cgrCfg.CdrsCfg().ExtraFieldsAliases[fldName]; has && alias != utils.EmptyString {
+				fldName = alias
 			}
-			extraFields[field.Id] = parsed
+			extraFields[fldName] = parsed
 		}
 	}
 	return extraFields
