@@ -349,7 +349,7 @@ func TestEEsReplayFailedPosts(t *testing.T) {
 
 "general": {
 	"log_level": 7,
-	"failed_posts_ttl": "3ms",
+	"failed_posts_ttl": "1ms",
 	"poster_attempts": 1
 },
 
@@ -474,11 +474,9 @@ func TestEEsReplayFailedPosts(t *testing.T) {
 		}
 
 		time.Sleep(5 * time.Millisecond)
-		replayFailedDir := t.TempDir()
 		var replayReply string
 		if err := client.Call(context.Background(), utils.APIerSv1ReplayFailedPosts, v1.ReplayFailedPostsParams{
 			SourcePath: failedDir,
-			FailedPath: replayFailedDir,
 			Modules:    []string{"test", "EEs"},
 		}, &replayReply); err != nil {
 			t.Errorf("APIerSv1.ReplayFailedPosts returned unexpected err: %v", err)
@@ -504,8 +502,7 @@ func TestEEsReplayFailedPosts(t *testing.T) {
 		}
 
 		if err := client.Call(context.Background(), utils.APIerSv1ReplayFailedPosts, v1.ReplayFailedPostsParams{
-			SourcePath: replayFailedDir,
-			FailedPath: utils.MetaNone,
+			SourcePath: failedDir,
 			Modules:    []string{"test", "EEs"},
 		}, &replayReply); err != nil {
 			t.Errorf("APIerSv1.ReplayFailedPosts returned unexpected err: %v", err)
