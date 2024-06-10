@@ -442,6 +442,9 @@ func (cdrS *CDRServer) eeSProcessEvent(cgrEv *CGREventWithEeIDs) (err error) {
 // in case of partially executed, both error and evs will be returned
 func (cdrS *CDRServer) processEvents(evs []*utils.CGREvent,
 	chrgS, attrS, refund, ralS, store, reRate, export, thdS, stS bool) (outEvs []*utils.EventWithFlags, err error) {
+	if refund {
+		ralS = false
+	}
 	if reRate {
 		refund = true
 	}
