@@ -10,9 +10,6 @@ package-contains-documentation-outside-usr-share-doc [usr/share/cgrates/*]
 # Only systemd is supported
 package-supports-alternative-init-but-no-init.d-script [lib/systemd/system/cgrates.service]
 
-# No good alternative
-recursive-privilege-change "chown -R" [postinst:*]
-
 # Sources for dependencies are included as-is
 spelling-error-in-binary *
 
