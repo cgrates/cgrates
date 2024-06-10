@@ -24,6 +24,7 @@ import (
 	"testing"
 
 	"github.com/cgrates/cgrates/utils"
+	"github.com/google/go-cmp/cmp"
 )
 
 func TestVersionCompare(t *testing.T) {
@@ -307,5 +308,29 @@ func TestVersionCheckVersionsCompareNonNilMsg(t *testing.T) {
 
 	if err == nil || !strings.Contains(err.Error(), experr) {
 		t.Errorf("expected error to be of type: <Migration needed: please backup cgr data and run : ..., \n received: <%+v>", err)
+	}
+}
+
+func TestVersionCurrentAllDBVersions(t *testing.T) {
+	expectedDataVersions := CurrentDataDBVersions()
+	expectedStorVersions := CurrentStorDBVersions()
+	allVersions := CurrentAllDBVersions()
+	for key, value := range expectedDataVersions {
+		if allVersions[key] != value {
+			t.Errorf("Data version mismatch for key %s. Expected: %d, Got: %d", key, value, allVersions[key])
+		}
+	}
+	for key, value := range expectedStorVersions {
+		if allVersions[key] != value {
+			t.Errorf("Storage version mismatch for key %s. Expected: %d, Got: %d", key, value, allVersions[key])
+		}
+	}
+}
+
+func TestVersionCurrentDBVersionsInternal(t *testing.T) {
+	internalVersions := CurrentDBVersions(utils.MetaInternal, true)
+	expectedInternalVersions := CurrentAllDBVersions()
+	if !cmp.Equal(internalVersions, expectedInternalVersions) {
+		t.Errorf("Internal: Versions mismatch")
 	}
 }
