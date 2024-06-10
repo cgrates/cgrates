@@ -631,3 +631,38 @@ func TestBalancesSetInitialValue(t *testing.T) {
 		}
 	})
 }
+
+func TestBalancesValueFactorsGetValue(t *testing.T) {
+	testCases := []struct {
+		factors  ValueFactors
+		category string
+		expected float64
+	}{
+		{
+			factors:  nil,
+			category: "category1",
+			expected: 1.0,
+		},
+		{
+			factors:  ValueFactors{"category2": 2.0, "category3": 3.0},
+			category: "category1",
+			expected: 1.0,
+		},
+		{
+			factors:  ValueFactors{"category1": 1.5, "category2": 2.0, "category3": 3.0},
+			category: "category1",
+			expected: 1.5,
+		},
+		{
+			factors:  ValueFactors{"category1": 0.0, "category2": 2.0, "category3": 3.0},
+			category: "category1",
+			expected: 0.0,
+		},
+	}
+	for _, tc := range testCases {
+		result := tc.factors.GetValue(tc.category)
+		if result != tc.expected {
+			t.Errorf("Test failed for category '%s': expected %.2f, got %.2f", tc.category, tc.expected, result)
+		}
+	}
+}
