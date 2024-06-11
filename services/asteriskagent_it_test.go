@@ -33,6 +33,7 @@ import (
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/servmanager"
 	"github.com/cgrates/cgrates/utils"
+	"github.com/cgrates/rpcclient"
 )
 
 func TestAsteriskAgentReload(t *testing.T) {
@@ -59,14 +60,17 @@ func TestAsteriskAgentReload(t *testing.T) {
 	cacheSChan <- cacheSrv
 
 	server := cores.NewServer(nil)
-	srvMngr := servmanager.NewServiceManager(cfg, shdChan, shdWg, nil)
+	internalSessionSChan := make(chan birpc.ClientConnector, 1)
+	cm := engine.NewConnManager(cfg, map[string]chan context.ClientConnector{
+		utils.ConcatenatedKey(rpcclient.BiRPCInternal, utils.MetaSessionS): internalSessionSChan,
+	})
+	srvMngr := servmanager.NewServiceManager(cfg, shdChan, shdWg, cm)
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
-	db := NewDataDBService(cfg, nil, srvDep)
+	db := NewDataDBService(cfg, cm, srvDep)
 	anz := NewAnalyzerService(cfg, server, filterSChan, shdChan, make(chan birpc.ClientConnector, 1), srvDep)
 	sS := NewSessionService(cfg, db, server, make(chan birpc.ClientConnector, 1),
-		shdChan, nil, anz, srvDep)
-	astService := NewAsteriskAgent(cfg, shdChan, nil, srvDep)
-	engine.NewConnManager(cfg, nil)
+		shdChan, cm, anz, srvDep)
+	astService := NewAsteriskAgent(cfg, shdChan, cm, srvDep)
 	srvMngr.AddServices(astService, sS,
 		NewLoaderService(cfg, db, filterSChan, server, make(chan birpc.ClientConnector, 1), nil, anz, srvDep), db)
 	if err := srvMngr.StartServices(); err != nil {
@@ -129,14 +133,17 @@ func TestAsteriskAgentReload2(t *testing.T) {
 	cacheSChan <- cacheSrv
 
 	server := cores.NewServer(nil)
-	srvMngr := servmanager.NewServiceManager(cfg, shdChan, shdWg, nil)
+	internalSessionSChan := make(chan birpc.ClientConnector, 1)
+	cm := engine.NewConnManager(cfg, map[string]chan context.ClientConnector{
+		utils.ConcatenatedKey(rpcclient.BiRPCInternal, utils.MetaSessionS): internalSessionSChan,
+	})
+	srvMngr := servmanager.NewServiceManager(cfg, shdChan, shdWg, cm)
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
-	db := NewDataDBService(cfg, nil, srvDep)
+	db := NewDataDBService(cfg, cm, srvDep)
 	anz := NewAnalyzerService(cfg, server, filterSChan, shdChan, make(chan birpc.ClientConnector, 1), srvDep)
 	sS := NewSessionService(cfg, db, server, make(chan birpc.ClientConnector, 1),
-		shdChan, nil, anz, srvDep)
-	astSrv := NewAsteriskAgent(cfg, shdChan, nil, srvDep)
-	engine.NewConnManager(cfg, nil)
+		shdChan, cm, anz, srvDep)
+	astSrv := NewAsteriskAgent(cfg, shdChan, cm, srvDep)
 	srvMngr.AddServices(astSrv, sS,
 		NewLoaderService(cfg, db, filterSChan, server, make(chan birpc.ClientConnector, 1), nil, anz, srvDep), db)
 	if err := srvMngr.StartServices(); err != nil {

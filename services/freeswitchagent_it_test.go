@@ -34,6 +34,7 @@ import (
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/servmanager"
 	"github.com/cgrates/cgrates/utils"
+	"github.com/cgrates/rpcclient"
 )
 
 func TestFreeSwitchAgentReload(t *testing.T) {
@@ -60,16 +61,19 @@ func TestFreeSwitchAgentReload(t *testing.T) {
 	cacheSChan <- cacheSrv
 
 	server := cores.NewServer(nil)
-	srvMngr := servmanager.NewServiceManager(cfg, shdChan, shdWg, nil)
+	internalSessionSChan := make(chan birpc.ClientConnector, 1)
+	cm := engine.NewConnManager(cfg, map[string]chan context.ClientConnector{
+		utils.ConcatenatedKey(rpcclient.BiRPCInternal, utils.MetaSessionS): internalSessionSChan,
+	})
+	srvMngr := servmanager.NewServiceManager(cfg, shdChan, shdWg, cm)
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
-	db := NewDataDBService(cfg, nil, srvDep)
+	db := NewDataDBService(cfg, cm, srvDep)
 	anz := NewAnalyzerService(cfg, server, filterSChan, shdChan, make(chan birpc.ClientConnector, 1), srvDep)
 	sS := NewSessionService(cfg, db, server, make(chan birpc.ClientConnector, 1),
-		shdChan, nil, anz, srvDep)
-	srv := NewFreeswitchAgent(cfg, shdChan, nil, srvDep)
-	engine.NewConnManager(cfg, nil)
+		shdChan, cm, anz, srvDep)
+	srv := NewFreeswitchAgent(cfg, shdChan, cm, srvDep)
 	srvMngr.AddServices(srv, sS,
-		NewLoaderService(cfg, db, filterSChan, server, make(chan birpc.ClientConnector, 1), nil, anz, srvDep), db)
+		NewLoaderService(cfg, db, filterSChan, server, make(chan birpc.ClientConnector, 1), cm, anz, srvDep), db)
 	if err := srvMngr.StartServices(); err != nil {
 		t.Fatal(err)
 	}
@@ -110,7 +114,11 @@ func TestFreeSwitchAgentReload2(t *testing.T) {
 	cacheSChan := make(chan birpc.ClientConnector, 1)
 	cacheSChan <- cacheSrv
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
-	srv := NewFreeswitchAgent(cfg, shdChan, nil, srvDep)
+	internalSessionSChan := make(chan birpc.ClientConnector, 1)
+	cm := engine.NewConnManager(cfg, map[string]chan context.ClientConnector{
+		utils.ConcatenatedKey(rpcclient.BiRPCInternal, utils.MetaSessionS): internalSessionSChan,
+	})
+	srv := NewFreeswitchAgent(cfg, shdChan, cm, srvDep)
 
 	if srv.IsRunning() {
 		t.Fatalf("Expected service to be down")
@@ -146,7 +154,11 @@ func TestFreeSwitchAgentReload3(t *testing.T) {
 	cacheSChan := make(chan birpc.ClientConnector, 1)
 	cacheSChan <- cacheSrv
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
-	srv := NewFreeswitchAgent(cfg, shdChan, nil, srvDep)
+	internalSessionSChan := make(chan birpc.ClientConnector, 1)
+	cm := engine.NewConnManager(cfg, map[string]chan context.ClientConnector{
+		utils.ConcatenatedKey(rpcclient.BiRPCInternal, utils.MetaSessionS): internalSessionSChan,
+	})
+	srv := NewFreeswitchAgent(cfg, shdChan, cm, srvDep)
 
 	if srv.IsRunning() {
 		t.Fatalf("Expected service to be down")
@@ -181,7 +193,11 @@ func TestFreeSwitchAgentReload4(t *testing.T) {
 	cacheSChan := make(chan birpc.ClientConnector, 1)
 	cacheSChan <- cacheSrv
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
-	srv := NewFreeswitchAgent(cfg, shdChan, nil, srvDep)
+	internalSessionSChan := make(chan birpc.ClientConnector, 1)
+	cm := engine.NewConnManager(cfg, map[string]chan context.ClientConnector{
+		utils.ConcatenatedKey(rpcclient.BiRPCInternal, utils.MetaSessionS): internalSessionSChan,
+	})
+	srv := NewFreeswitchAgent(cfg, shdChan, cm, srvDep)
 	if srv.IsRunning() {
 		t.Fatalf("Expected service to be down")
 	}
@@ -228,7 +244,11 @@ func TestFreeSwitchAgentReload5(t *testing.T) {
 	cacheSChan := make(chan birpc.ClientConnector, 1)
 	cacheSChan <- cacheSrv
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
-	srv := NewFreeswitchAgent(cfg, shdChan, nil, srvDep)
+	internalSessionSChan := make(chan birpc.ClientConnector, 1)
+	cm := engine.NewConnManager(cfg, map[string]chan context.ClientConnector{
+		utils.ConcatenatedKey(rpcclient.BiRPCInternal, utils.MetaSessionS): internalSessionSChan,
+	})
+	srv := NewFreeswitchAgent(cfg, shdChan, cm, srvDep)
 	if srv.IsRunning() {
 		t.Fatalf("Expected service to be down")
 	}
@@ -248,7 +268,9 @@ func TestFreeSwitchAgentReload6(t *testing.T) {
 	filterSChan := make(chan *engine.FilterS, 1)
 	filterSChan <- nil
 	shdChan := utils.NewSyncedChan()
-	chS := engine.NewCacheS(cfg, nil, nil)
+	db := engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := engine.NewDataManager(db, cfg.CacheCfg(), nil)
+	chS := engine.NewCacheS(cfg, dm, nil)
 	cacheSrv, err := engine.NewService(chS)
 	if err != nil {
 		t.Fatal(err)
@@ -256,7 +278,11 @@ func TestFreeSwitchAgentReload6(t *testing.T) {
 	cacheSChan := make(chan birpc.ClientConnector, 1)
 	cacheSChan <- cacheSrv
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
-	srv := NewFreeswitchAgent(cfg, shdChan, nil, srvDep)
+	internalSessionSChan := make(chan birpc.ClientConnector, 1)
+	cm := engine.NewConnManager(cfg, map[string]chan context.ClientConnector{
+		utils.ConcatenatedKey(rpcclient.BiRPCInternal, utils.MetaSessionS): internalSessionSChan,
+	})
+	srv := NewFreeswitchAgent(cfg, shdChan, cm, srvDep)
 	if srv.IsRunning() {
 		t.Fatalf("Expected service to be down")
 	}
@@ -279,7 +305,7 @@ func TestFreeSwitchAgentReload6(t *testing.T) {
 			},
 		},
 	}
-	srv.(*FreeswitchAgent).fS, err = agents.NewFSsessions(agentCfg, "", nil)
+	srv.(*FreeswitchAgent).fS, err = agents.NewFSsessions(agentCfg, "", cm)
 	if err != nil {
 		t.Fatal(err)
 	}

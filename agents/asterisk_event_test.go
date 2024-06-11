@@ -21,6 +21,7 @@ import (
 	"encoding/json"
 	"reflect"
 	"testing"
+	"time"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/sessions"
@@ -526,4 +527,139 @@ func TestSMAsteriskEventUpdateCGREvent(t *testing.T) {
 		}
 
 	}
+}
+
+func TestRestoreAndUpdateFieldsOk(t *testing.T) {
+	ariEv := map[string]any{
+		"application": "cgrates_auth",
+		"asterisk_id": "08:00:27:18:d8:cf",
+		"cause":       "16",
+		"cause_txt":   "Normal Clearing",
+		"channel": map[string]any{
+			"accountcode": "",
+			"caller": map[string]any{
+				"name":   "1001",
+				"number": "1001",
+			},
+			"channelvars": map[string]any{
+				"CDR(answer)":  "2024-05-03 08:53:06",
+				"CDR(billsec)": "4",
+				"cgr_flags":    "*accounts *attributes *resources *stats *routes *thresholds cgr_reqtype:*prepaid",
+				"cgr_reqtype":  "*prepaid",
+			},
+			"connected": map[string]any{
+				"name":   "",
+				"number": "1002",
+			},
+			"creationtime": "2024-05-03T08:53:05.234+0200",
+			"dialplan": map[string]any{
+				"app_data": "",
+				"app_name": "",
+				"context":  "internal",
+				"exten":    "1002",
+				"priority": "9",
+			},
+			"id":          "1714719185.3",
+			"language":    "en",
+			"name":        "PJSIP/1001-00000002",
+			"protocol_id": "cb1bb28866dd7d52b42484e5b38765ec@0:0:0:0:0:0:0:0",
+			"state":       "Up",
+		},
+		"timestamp": "2024-05-03T08:53:11.511+0200",
+		"type":      "ChannelDestroyed",
+	}
+	smaEv := NewSMAsteriskEvent(ariEv, "127.0.0.1", utils.EmptyString)
+	cgrEv := utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "ea36649",
+		Event: map[string]any{
+			utils.AccountField: "1001",
+			utils.Destination:  "1002",
+			utils.EventName:    "SMA_SESSION_TERMINATE",
+			utils.OriginHost:   "127.0.0.1",
+			utils.OriginID:     "1714734552.6",
+			utils.RequestType:  utils.MetaRated,
+			utils.SetupTime:    time.Date(2013, 12, 30, 15, 01, 31, 0, time.UTC),
+			utils.Source:       utils.AsteriskAgent,
+		},
+	}
+	exp := utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "ea36649",
+		Event: map[string]any{
+			utils.AccountField:    "1001",
+			utils.AnswerTime:      "2024-05-03 08:53:06",
+			utils.Destination:     "1002",
+			utils.DisconnectCause: "Normal Clearing",
+			utils.EventName:       "SMA_SESSION_TERMINATE",
+			utils.OriginHost:      "127.0.0.1",
+			utils.OriginID:        "1714734552.6",
+			utils.RequestType:     utils.MetaPrepaid,
+			utils.SetupTime:       time.Date(2013, 12, 30, 15, 01, 31, 0, time.UTC),
+			utils.Source:          utils.AsteriskAgent,
+			utils.Usage:           "4s",
+			utils.CGRFlags:        "*accounts+*attributes+*resources+*stats+*routes+*thresholds+cgr_reqtype:*prepaid",
+		},
+	}
+	if err := smaEv.RestoreAndUpdateFields(&cgrEv); err != nil {
+		t.Error(err)
+	} else if utils.ToJSON(cgrEv) != utils.ToJSON(exp) {
+		t.Errorf("Expected <%v>, \nreceived <%v>", utils.ToJSON(exp), utils.ToJSON(cgrEv))
+	}
+
+}
+
+func TestRestoreAndUpdateFieldsFail(t *testing.T) {
+	ariEv := map[string]any{
+		"application": "cgrates_auth",
+		"asterisk_id": "08:00:27:18:d8:cf",
+		"cause":       "16",
+		"cause_txt":   "Normal Clearing",
+		"channel": map[string]any{
+			"accountcode": "",
+			"caller": map[string]any{
+				"name":   "1001",
+				"number": "1001",
+			},
+			"connected": map[string]any{
+				"name":   "",
+				"number": "1002",
+			},
+			"creationtime": "2024-05-03T08:53:05.234+0200",
+			"dialplan": map[string]any{
+				"app_data": "",
+				"app_name": "",
+				"context":  "internal",
+				"exten":    "1002",
+				"priority": "9",
+			},
+			"id":          "1714719185.3",
+			"language":    "en",
+			"name":        "PJSIP/1001-00000002",
+			"protocol_id": "cb1bb28866dd7d52b42484e5b38765ec@0:0:0:0:0:0:0:0",
+			"state":       "Up",
+		},
+		"timestamp": "2024-05-03T08:53:11.511+0200",
+		"type":      "ChannelDestroyed",
+	}
+	smaEv := NewSMAsteriskEvent(ariEv, "127.0.0.1", utils.EmptyString)
+	cgrEv := utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "ea36649",
+		Event: map[string]any{
+			utils.AccountField: "1001",
+			utils.Destination:  "1002",
+			utils.EventName:    "SMA_SESSION_TERMINATE",
+			utils.OriginHost:   "127.0.0.1",
+			utils.OriginID:     "1714734552.6",
+			utils.RequestType:  utils.MetaRated,
+			utils.SetupTime:    time.Date(2013, 12, 30, 15, 01, 31, 0, time.UTC),
+			utils.Source:       utils.AsteriskAgent,
+		},
+	}
+	expErr := "channelvars not found in event <map[accountcode: caller:map[name:1001 number:1001] connected:map[name: number:1002] creationtime:2024-05-03T08:53:05.234+0200 dialplan:map[app_data: app_name: context:internal exten:1002 priority:9] id:1714719185.3 language:en name:PJSIP/1001-00000002 protocol_id:cb1bb28866dd7d52b42484e5b38765ec@0:0:0:0:0:0:0:0 state:Up]>"
+	if err := smaEv.RestoreAndUpdateFields(&cgrEv); err.Error() != expErr {
+		t.Errorf("Expected error <%v>, \nreceived <%+v>", expErr, err)
+	}
+
 }
