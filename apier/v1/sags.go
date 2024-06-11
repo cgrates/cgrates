@@ -23,13 +23,13 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-func NewSarSv1() *SarSv1 {
-	return &SarSv1{}
+func NewSagSv1() *SagSv1 {
+	return &SagSv1{}
 }
 
-type SarSv1 struct{}
+type SagSv1 struct{}
 
-func (sa *SarSv1) Ping(ctx *context.Context, ign *utils.CGREvent, reply *string) error {
+func (sa *SagSv1) Ping(ctx *context.Context, ign *utils.CGREvent, reply *string) error {
 	*reply = utils.Pong
 	return nil
 }

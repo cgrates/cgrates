@@ -398,6 +398,7 @@ const (
 	MetaRefund               = "*refund"
 	MetaStats                = "*stats"
 	MetaSars                 = "*sars"
+	MetaSags                 = "*sags"
 	MetaResponder            = "*responder"
 	MetaCore                 = "*core"
 	MetaServiceManager       = "*servicemanager"
@@ -1016,6 +1017,7 @@ const (
 	SessionS    = "SessionS"
 	StatService = "StatS"
 	SarS        = "SarS"
+	SagS        = "SagS"
 	ThresholdS  = "ThresholdS"
 )
 
@@ -1163,6 +1165,7 @@ const (
 	ThresholdSv1       = "ThresholdSv1"
 	StatSv1            = "StatSv1"
 	SarSv1             = "SarSv1"
+	SagSv1             = "SagSv1"
 	ResourceSv1        = "ResourceSv1"
 	RouteSv1           = "RouteSv1"
 	AttributeSv1       = "AttributeSv1"

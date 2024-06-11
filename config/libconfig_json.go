@@ -665,6 +665,12 @@ type StatServJsonCfg struct {
 }
 
 type SarsJsonCfg struct {
+	Enabled          *bool
+	Stats_conns      *[]string
+	Thresholds_conns *[]string
+}
+
+type SagsJsonCfg struct {
 	Enabled     *bool
 	Stats_conns *[]string
 }
