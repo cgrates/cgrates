@@ -1545,11 +1545,12 @@ func TestTransitSState(t *testing.T) {
 			CGRID: "TEST_CGRID",
 		},
 	}
-	expected := &Session{
-		CGRID: "TEST_CGRID",
-	}
 
 	rcv = sessions.getActivateSession("test")
+	expected := &Session{
+		CGRID:     "TEST_CGRID",
+		UpdatedAt: rcv.UpdatedAt,
+	}
 	if !reflect.DeepEqual(rcv, expected) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(rcv))
 	}
@@ -1579,6 +1580,7 @@ func TestRelocateSession(t *testing.T) {
 			},
 		},
 	}
+	rcv := sessions.relocateSession("111", "222", "127.0.0.1")
 	expected := &Session{
 		CGRID: "dfa2adaa5ab49349777c1ab3bcf3455df0259880",
 		EventStart: map[string]any{
@@ -1593,10 +1595,9 @@ func TestRelocateSession(t *testing.T) {
 				},
 			},
 		},
+		UpdatedAt: rcv.UpdatedAt,
 	}
-	if rcv := sessions.relocateSession("111", "222", "127.0.0.1"); rcv == nil {
-		t.Errorf("Expected to not be nil")
-	} else if !reflect.DeepEqual(rcv, expected) {
+	if !reflect.DeepEqual(rcv, expected) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(rcv))
 	}
 
@@ -1604,7 +1605,7 @@ func TestRelocateSession(t *testing.T) {
 		"0d0fe8779b54c88f121e26c5d83abee5935127e5": nil,
 	}
 
-	rcv := sessions.relocateSession("111", "222", utils.EmptyString)
+	rcv = sessions.relocateSession("111", "222", utils.EmptyString)
 	if rcv != nil {
 		t.Errorf("Expected to be nil")
 	}
@@ -1629,12 +1630,12 @@ func TestGetRelocateSession(t *testing.T) {
 		},
 	}
 
+	rcv = sessions.getRelocateSession("test", utils.EmptyString, "222", "127.0.0.1")
 	expected := &Session{
-		CGRID: "TEST_CGRID",
+		CGRID:     "TEST_CGRID",
+		UpdatedAt: rcv.UpdatedAt,
 	}
-	if rcv = sessions.getRelocateSession("test", utils.EmptyString, "222", "127.0.0.1"); rcv == nil {
-		t.Errorf("Expected to be nil")
-	} else if !reflect.DeepEqual(rcv, expected) {
+	if !reflect.DeepEqual(rcv, expected) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(rcv))
 	}
 }

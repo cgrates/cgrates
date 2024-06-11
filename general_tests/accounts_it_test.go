@@ -287,7 +287,7 @@ func testV1AccSendToThreshold(t *testing.T) {
 	}
 
 	// give time to threshold to made the change
-	time.Sleep(10 * time.Millisecond)
+	time.Sleep(100 * time.Millisecond)
 	//verify the account
 	var acnt *engine.Account
 	attrAcc := &utils.AttrGetAccount{

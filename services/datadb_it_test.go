@@ -130,6 +130,7 @@ func TestDataDBReload(t *testing.T) {
 			utils.MetaChargerProfiles:     {Limit: -1},
 			utils.MetaDispatcherProfiles:  {Limit: -1},
 			utils.MetaLoadIDs:             {Limit: -1},
+			utils.MetaSessionsBackup:      {Limit: -1},
 			utils.CacheVersions:           {Limit: -1},
 
 			utils.CacheResourceFilterIndexes:   {Limit: -1},

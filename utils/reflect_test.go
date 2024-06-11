@@ -2009,3 +2009,22 @@ func TestReflectDifference(t *testing.T) {
 		t.Error(rcv)
 	}
 }
+
+func TestMapIfaceTimeAsString(t *testing.T) {
+	someTime := time.Date(2009, 11, 17, 20, 34, 58, 651387237, time.UTC)
+	mapAny := make(map[string]any)
+	mapAny["someTime"] = someTime
+	mapAny["timeDuration"] = 5 * time.Second
+	mapAny["simpleKey"] = "simpleValue"
+
+	MapIfaceTimeAsString(mapAny)
+	if mapAny["someTime"] != "2009-11-17T20:34:58Z" {
+		t.Errorf("Expected <%q>, received <%v>", "2009-11-17T20:34:58Z", mapAny["someTime"])
+	}
+	if mapAny["timeDuration"] != 5*time.Second {
+		t.Errorf("Expected <%q>, received <%v>", 5*time.Second, mapAny["timeDuration"])
+	}
+	if mapAny["simpleKey"] != "simpleValue" {
+		t.Errorf("Expected <%q>, received <%v>", "simpleValue", mapAny["simpleKey"])
+	}
+}

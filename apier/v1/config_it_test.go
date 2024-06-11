@@ -165,6 +165,7 @@ func testConfigSSetConfigSessionS(t *testing.T) {
 		"scheduler_conns":            []any{},
 		"thresholds_conns":           []any{},
 		"stats_conns":                []any{},
+		utils.BackupIntervalCfg:      "0",
 		"min_dur_low_balance":        "0",
 		"stir": map[string]any{
 			"allowed_attest":      []any{utils.MetaAny},
@@ -232,7 +233,7 @@ func testConfigSSetConfigSessionS(t *testing.T) {
 	}, &rpl); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(exp, rpl) {
-		t.Errorf("Expected %+v , received: %+v ", utils.ToJSON(exp), utils.ToJSON(rpl))
+		t.Errorf("Expected %+v , \nreceived: %+v ", utils.ToJSON(exp), utils.ToJSON(rpl))
 	}
 }
 
@@ -259,6 +260,7 @@ func testConfigSv1GetJSONSectionWithoutTenant(t *testing.T) {
 		"session_ttl":                "0",
 		"stale_chan_max_extra_usage": "0",
 		"store_session_costs":        false,
+		utils.BackupIntervalCfg:      "0",
 		"min_dur_low_balance":        "0",
 		"alterable_fields":           []any{},
 		"stir": map[string]any{

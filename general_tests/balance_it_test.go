@@ -317,7 +317,8 @@ func TestBalanceFactor(t *testing.T) {
 	"enabled": true,
 	"cdrs_conns": ["*internal"],
 	"chargers_conns": ["*internal"],
-	"rals_conns": ["*internal"]
+	"rals_conns": ["*internal"],
+	"backup_interval": "-1"
 },
 
 "chargers": {
