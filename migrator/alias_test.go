@@ -316,3 +316,43 @@ func TestAlias2AtttributeProfile(t *testing.T) {
 		}
 	}
 }
+
+func TestV1AliasSetId(t *testing.T) {
+	t.Run("valid id with 6 parts", func(t *testing.T) {
+		alias := &v1Alias{}
+		id := "dir:tenant:cat:acc:subj:ctx"
+
+		err := alias.SetId(id)
+		if err != nil {
+			t.Fatalf("expected no error, got %v", err)
+		}
+		if alias.Direction != "dir" || alias.Tenant != "tenant" || alias.Category != "cat" ||
+			alias.Account != "acc" || alias.Subject != "subj" || alias.Context != "ctx" {
+			t.Fatalf("fields not set correctly, got %+v", alias)
+		}
+	})
+	t.Run("invalid id with fewer than 6 parts", func(t *testing.T) {
+		alias := &v1Alias{}
+		id := "dir:tenant:cat:acc:subj"
+
+		err := alias.SetId(id)
+		if err == nil {
+			t.Fatal("expected error, got nil")
+		}
+		if err != utils.ErrInvalidKey {
+			t.Fatalf("expected %v, got %v", utils.ErrInvalidKey, err)
+		}
+	})
+	t.Run("invalid id with more than 6 parts", func(t *testing.T) {
+		alias := &v1Alias{}
+		id := "dir:tenant:cat:acc:subj:ctx:extra"
+
+		err := alias.SetId(id)
+		if err == nil {
+			t.Fatal("expected error, got nil")
+		}
+		if err != utils.ErrInvalidKey {
+			t.Fatalf("expected %v, got %v", utils.ErrInvalidKey, err)
+		}
+	})
+}
