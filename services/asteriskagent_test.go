@@ -84,3 +84,38 @@ func TestAsteriskAgentCoverage(t *testing.T) {
 		t.Errorf("Expected service to be down")
 	}
 }
+
+func TestAsteriskReload(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfg.SessionSCfg().Enabled = true
+	cfg.SessionSCfg().ListenBijson = ""
+	filterSChan := make(chan *engine.FilterS, 1)
+	filterSChan <- nil
+	shdChan := utils.NewSyncedChan()
+	chS := engine.NewCacheS(cfg, nil, nil)
+	cacheSrv, err := engine.NewService(chS)
+	if err != nil {
+		t.Error(err)
+	}
+	cacheSChan := make(chan birpc.ClientConnector, 1)
+	cacheSChan <- cacheSrv
+	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
+	astSrv := NewAsteriskAgent(cfg, shdChan, nil, srvDep)
+	if astSrv == nil {
+		t.Errorf("\nExpecting <nil>,\n Received <%+v>", utils.ToJSON(astSrv))
+	}
+	srv2 := &AsteriskAgent{
+		RWMutex:  sync.RWMutex{},
+		cfg:      cfg,
+		shdChan:  shdChan,
+		stopChan: nil,
+		smas:     nil,
+		connMgr:  nil,
+		srvDep:   srvDep,
+	}
+	srv2.stopChan = make(chan struct{}, 1)
+	err3 := srv2.Reload()
+	if err3 != nil {
+		t.Errorf("\nExpecting <nil>,\n Received <%+v>", err3)
+	}
+}
