@@ -21,8 +21,9 @@ package config
 import "github.com/cgrates/cgrates/utils"
 
 type SarSCfg struct {
-	Enabled    bool
-	StatSConns []string
+	Enabled         bool
+	StatSConns      []string
+	ThresholdSConns []string
 }
 
 func (sa *SarSCfg) loadFromJSONCfg(jsnCfg *SarsJsonCfg) (err error) {
@@ -40,7 +41,15 @@ func (sa *SarSCfg) loadFromJSONCfg(jsnCfg *SarsJsonCfg) (err error) {
 				sa.StatSConns[idx] = utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats)
 			}
 		}
-
+	}
+	if jsnCfg.Thresholds_conns != nil {
+		sa.ThresholdSConns = make([]string, len(*jsnCfg.Thresholds_conns))
+		for idx, conn := range *jsnCfg.Thresholds_conns {
+			sa.ThresholdSConns[idx] = conn
+			if conn == utils.MetaInternal {
+				sa.ThresholdSConns[idx] = utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds)
+			}
+		}
 	}
 	return
 }
@@ -59,6 +68,16 @@ func (sa *SarSCfg) AsMapInterface() (initialMP map[string]any) {
 		}
 		initialMP[utils.StatSConnsCfg] = statSConns
 	}
+	if sa.ThresholdSConns != nil {
+		thresholdSConns := make([]string, len(sa.ThresholdSConns))
+		for i, item := range sa.ThresholdSConns {
+			thresholdSConns[i] = item
+			if item == utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds) {
+				thresholdSConns[i] = utils.MetaInternal
+			}
+		}
+		initialMP[utils.ThresholdSConnsCfg] = thresholdSConns
+	}
 	return
 }
 
@@ -69,6 +88,10 @@ func (sa *SarSCfg) Clone() (cln *SarSCfg) {
 	if sa.StatSConns != nil {
 		cln.StatSConns = make([]string, len(sa.StatSConns))
 		copy(cln.StatSConns, sa.StatSConns)
+	}
+	if sa.ThresholdSConns != nil {
+		cln.ThresholdSConns = make([]string, len(sa.ThresholdSConns))
+		copy(cln.ThresholdSConns, sa.ThresholdSConns)
 	}
 	return
 }

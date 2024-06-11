@@ -31,14 +31,14 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-// NewSarsService returns the SaRS Service
-func NewSarService(cfg *config.CGRConfig, dm *DataDBService,
+// NewSagsService returns the SaRS Service
+func NewSagService(cfg *config.CGRConfig, dm *DataDBService,
 	cacheS *engine.CacheS, filterSChan chan *engine.FilterS,
-	server *cores.Server, internalStatSChan chan birpc.ClientConnector,
+	server *cores.Server, internalSagSChan chan birpc.ClientConnector,
 	connMgr *engine.ConnManager, anz *AnalyzerService,
 	srvDep map[string]*sync.WaitGroup) servmanager.Service {
-	return &SarService{
-		connChan:    internalStatSChan,
+	return &SagService{
+		connChan:    internalSagSChan,
 		cfg:         cfg,
 		dm:          dm,
 		cacheS:      cacheS,
@@ -50,7 +50,7 @@ func NewSarService(cfg *config.CGRConfig, dm *DataDBService,
 	}
 }
 
-type SarService struct {
+type SagService struct {
 	sync.RWMutex
 	cfg         *config.CGRConfig
 	dm          *DataDBService
@@ -64,61 +64,61 @@ type SarService struct {
 }
 
 // Start should handle the sercive start
-func (sa *SarService) Start() error {
-	if sa.IsRunning() {
+func (sag *SagService) Start() error {
+	if sag.IsRunning() {
 		return utils.ErrServiceAlreadyRunning
 	}
-	sa.srvDep[utils.DataDB].Add(1)
-	<-sa.cacheS.GetPrecacheChannel(utils.CacheStatFilterIndexes)
+	sag.srvDep[utils.DataDB].Add(1)
+	<-sag.cacheS.GetPrecacheChannel(utils.CacheStatFilterIndexes)
 
-	filterS := <-sa.filterSChan
-	sa.filterSChan <- filterS
-	dbchan := sa.dm.GetDMChan()
+	filterS := <-sag.filterSChan
+	sag.filterSChan <- filterS
+	dbchan := sag.dm.GetDMChan()
 	datadb := <-dbchan
 	dbchan <- datadb
 
 	utils.Logger.Info(fmt.Sprintf("<%s> starting <%s> subsystem",
-		utils.CoreS, utils.SarS))
-	srv, err := engine.NewService(v1.NewSarSv1())
+		utils.CoreS, utils.SagS))
+	srv, err := engine.NewService(v1.NewSagSv1())
 	if err != nil {
 		return err
 	}
-	if !sa.cfg.DispatcherSCfg().Enabled {
+	if !sag.cfg.DispatcherSCfg().Enabled {
 		for _, s := range srv {
-			sa.server.RpcRegister(s)
+			sag.server.RpcRegister(s)
 		}
 	}
-	sa.connChan <- sa.anz.GetInternalCodec(srv, utils.StatS)
+	sag.connChan <- sag.anz.GetInternalCodec(srv, utils.StatS)
 	return nil
 }
 
 // Reload handles the change of config
-func (sa *SarService) Reload() (err error) {
+func (sag *SagService) Reload() (err error) {
 	return
 }
 
 // Shutdown stops the service
-func (sa *SarService) Shutdown() (err error) {
-	defer sa.srvDep[utils.DataDB].Done()
-	sa.Lock()
-	defer sa.Unlock()
-	<-sa.connChan
+func (sag *SagService) Shutdown() (err error) {
+	defer sag.srvDep[utils.DataDB].Done()
+	sag.Lock()
+	defer sag.Unlock()
+	<-sag.connChan
 	return
 }
 
 // IsRunning returns if the service is running
-func (sa *SarService) IsRunning() bool {
-	sa.RLock()
-	defer sa.RUnlock()
+func (sag *SagService) IsRunning() bool {
+	sag.RLock()
+	defer sag.RUnlock()
 	return false
 }
 
 // ServiceName returns the service name
-func (sa *SarService) ServiceName() string {
-	return utils.SarS
+func (sag *SagService) ServiceName() string {
+	return utils.SagS
 }
 
 // ShouldRun returns if the service should be running
-func (sa *SarService) ShouldRun() bool {
-	return sa.cfg.SarSCfg().Enabled
+func (sag *SagService) ShouldRun() bool {
+	return sag.cfg.SagSCfg().Enabled
 }
