@@ -343,6 +343,17 @@ func IfaceAsBool(itm any) (b bool, err error) {
 	return
 }
 
+// MapIfaceTimeAsString converts time.Time type fields in a map[string]any to RFC3339 time format string. Used before msgpack marshaling since time.Time variables put inside interfaces arent encoded/decoded into a readable string or time.Time type
+func MapIfaceTimeAsString(me map[string]any) {
+	for k, v := range me {
+		if timeStr, ok := v.(time.Time); ok {
+			v = timeStr.Format(time.RFC3339)
+			me[k] = v
+		}
+	}
+
+}
+
 func IfaceAsString(fld any) (out string) {
 	switch value := fld.(type) {
 	case nil:

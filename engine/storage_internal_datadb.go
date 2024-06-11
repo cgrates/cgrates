@@ -854,3 +854,38 @@ func (iDB *InternalDB) RemoveIndexesDrv(idxItmType, tntCtx, idxKey string) (err 
 	iDB.db.Remove(idxItmType, utils.ConcatenatedKey(tntCtx, idxKey), true, utils.NonTransactional)
 	return
 }
+
+// Will backup active sessions in DataDB
+func (iDB *InternalDB) SetBackupSessionsDrv(storedSessions []*StoredSession, nodeID string,
+	tnt string) error {
+	for _, sess := range storedSessions {
+		iDB.db.Set(utils.CacheSessionsBackup, sess.CGRID, sess,
+			[]string{utils.ConcatenatedKey(tnt, nodeID)}, true, utils.NonTransactional)
+	}
+	return nil
+}
+
+// Will restore sessions that were active from dataDB backup
+func (iDB *InternalDB) GetSessionsBackupDrv(nodeID, tnt string) ([]*StoredSession, error) {
+	var storedSessions []*StoredSession
+	for _, sessIface := range iDB.db.GetGroupItems(utils.CacheSessionsBackup, utils.ConcatenatedKey(tnt,
+		nodeID)) {
+		sess := sessIface.(*StoredSession)
+		storedSessions = append(storedSessions, sess)
+	}
+	if len(storedSessions) == 0 {
+		return nil, utils.ErrNoBackupFound
+	}
+	return storedSessions, nil
+}
+
+// Will remove one or all sessions from dataDB backup
+func (iDB *InternalDB) RemoveSessionsBackupDrv(nodeID, tnt, cgrid string) error {
+	if cgrid == utils.EmptyString {
+		iDB.db.RemoveGroup(utils.CacheSessionsBackup, utils.ConcatenatedKey(tnt,
+			nodeID), true, utils.NonTransactional)
+		return nil
+	}
+	iDB.db.Remove(utils.CacheSessionsBackup, cgrid, true, utils.NonTransactional)
+	return nil
+}

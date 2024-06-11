@@ -81,6 +81,7 @@ var (
 	ErrMaxIterationsReached             = errors.New("maximum iterations reached")
 	ErrNegative                         = errors.New("NEGATIVE")
 	ErrCastFailed                       = errors.New("CAST_FAILED")
+	ErrNoBackupFound                    = errors.New("NO_BACKUP_FOUND")
 
 	ErrMap = map[string]error{
 		ErrNoMoreData.Error():                       ErrNoMoreData,

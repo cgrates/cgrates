@@ -3263,3 +3263,70 @@ func (dm *DataManager) checkFilters(tenant string, ids []string) (err error) {
 	}
 	return
 }
+
+// GetSessionsBackup gets sessions from dataDB backup
+func (dm *DataManager) GetSessionsBackup(nodeID, tenant string) ([]*StoredSession, error) {
+	if dm == nil {
+		return nil, utils.ErrNoDatabaseConn
+	}
+	return dm.dataDB.GetSessionsBackupDrv(nodeID, tenant)
+}
+
+type SetBackupSessionsArgs struct {
+	StoredSessions []*StoredSession // all active sessions ready for backup
+	NodeID         string           // used as part of filter of DataDB query
+	Tenant         string           // used as part of filter of DataDB query
+}
+
+// SetBackupSessions stores the active sessions in dataDB
+func (dm *DataManager) SetBackupSessions(nodeID, tenant string,
+	storedSessions []*StoredSession) (err error) {
+	if dm == nil {
+		return utils.ErrNoDatabaseConn
+	}
+	if err = dm.dataDB.SetBackupSessionsDrv(storedSessions, nodeID, tenant); err != nil {
+		return
+	}
+
+	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaSessionsBackup]; itm.Replicate {
+		err = replicate(dm.connMgr, config.CgrConfig().DataDbCfg().RplConns,
+			config.CgrConfig().DataDbCfg().RplFiltered,
+			utils.SessionsBackupPrefix, utils.ConcatenatedKey(tenant, nodeID),
+			utils.ReplicatorSv1SetBackupSessions,
+			&SetBackupSessionsArgs{
+				StoredSessions: storedSessions,
+				NodeID:         nodeID,
+				Tenant:         tenant,
+			})
+	}
+	return
+}
+
+type RemoveSessionBackupArgs struct {
+	Tenant string // used as part of filter of DataDB query
+	NodeID string // used as part of filter of DataDB query
+	CGRID  string // used as part of filter of DataDB query
+}
+
+// RemoveSessionsBackup remove one or all sessions from dataDB backup
+func (dm *DataManager) RemoveSessionsBackup(nodeID, tenant, cgrid string) (err error) {
+	if dm == nil {
+		return utils.ErrNoDatabaseConn
+	}
+	if err = dm.dataDB.RemoveSessionsBackupDrv(nodeID, tenant, cgrid); err != nil {
+		return
+	}
+
+	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaSessionsBackup]; itm.Replicate {
+		err = replicate(dm.connMgr, config.CgrConfig().DataDbCfg().RplConns,
+			config.CgrConfig().DataDbCfg().RplFiltered,
+			utils.SessionsBackupPrefix, utils.ConcatenatedKey(tenant, nodeID),
+			utils.ReplicatorSv1RemoveSessionBackup,
+			&RemoveSessionBackupArgs{
+				CGRID:  cgrid,
+				NodeID: nodeID,
+				Tenant: tenant,
+			})
+	}
+	return
+}

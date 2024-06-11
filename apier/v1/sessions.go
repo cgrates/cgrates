@@ -171,3 +171,8 @@ func (ssv1 *SessionSv1) CapsError(ctx *context.Context, args any, reply *string)
 func (ssv1 *SessionSv1) RegisterInternalBiJSONConn(ctx *context.Context, args string, rply *string) (err error) {
 	return ssv1.sS.BiRPCv1RegisterInternalBiJSONConn(ctx, args, rply)
 }
+
+// BackupActiveSessions stores all active sessions in dataDB and replies with the amount of sessions it stored
+func (ssv1 *SessionSv1) BackupActiveSessions(ctx *context.Context, args string, rply *int) (err error) {
+	return ssv1.sS.BiRPCv1BackupActiveSessions(ctx, args, rply)
+}

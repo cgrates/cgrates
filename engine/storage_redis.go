@@ -66,6 +66,7 @@ const (
 	redis_HGET     = "HGET"
 	redis_RENAME   = "RENAME"
 	redis_HMSET    = "HMSET"
+	redis_HSET     = "HSET"
 
 	redisLoadError = "Redis is loading the dataset in memory"
 	RedisLimit     = 524287 // https://github.com/StackExchange/StackExchange.Redis/issues/201#issuecomment-98639005
@@ -1245,4 +1246,61 @@ func (rs *RedisStorage) RemoveIndexesDrv(idxItmType, tntCtx, idxKey string) (err
 		return rs.Cmd(nil, redis_DEL, utils.CacheInstanceToPrefix[idxItmType]+tntCtx)
 	}
 	return rs.Cmd(nil, redis_HDEL, utils.CacheInstanceToPrefix[idxItmType]+tntCtx, idxKey)
+}
+
+// Converts time.Time values inside EventStart and SRuns Events, to string type values. Used before marshaling StoredSessions with msgpack
+func StoredSessionEvTimeAsStr(sess *StoredSession) {
+	utils.MapIfaceTimeAsString(sess.EventStart)
+	for i := range sess.SRuns {
+		utils.MapIfaceTimeAsString(sess.SRuns[i].Event)
+	}
+}
+
+// Will backup active sessions in DataDB
+func (rs *RedisStorage) SetBackupSessionsDrv(storedSessions []*StoredSession, nodeID string,
+	tnt string) (err error) {
+	mp := make(map[string]string)
+	for _, sess := range storedSessions {
+		StoredSessionEvTimeAsStr(sess)
+		var sessByte []byte
+		if sessByte, err = rs.ms.Marshal(sess); err != nil {
+			return
+		}
+		mp[sess.CGRID] = string(sessByte)
+		if len(mp) == RedisLimit {
+			if err = rs.FlatCmd(nil, redis_HMSET, utils.SessionsBackupPrefix+utils.ConcatenatedKey(tnt,
+				nodeID), mp); err != nil {
+				return
+			}
+			mp = make(map[string]string)
+		}
+	}
+	return rs.FlatCmd(nil, redis_HMSET, utils.SessionsBackupPrefix+utils.ConcatenatedKey(tnt, nodeID), mp)
+}
+
+// Will restore sessions that were active from dataDB backup
+func (rs *RedisStorage) GetSessionsBackupDrv(nodeID, tnt string) (r []*StoredSession, err error) {
+	mp := make(map[string]string)
+	if err = rs.Cmd(&mp, redis_HGETALL, utils.SessionsBackupPrefix+utils.ConcatenatedKey(tnt,
+		nodeID)); err != nil {
+		return
+	} else if len(mp) == 0 {
+		return nil, utils.ErrNoBackupFound
+	}
+	for _, v := range mp {
+		var ss *StoredSession
+		if err = rs.ms.Unmarshal([]byte(v), &ss); err != nil {
+			return
+		}
+		r = append(r, ss)
+	}
+	return
+}
+
+// Will remove one or all sessions from dataDB backup
+func (rs *RedisStorage) RemoveSessionsBackupDrv(nodeID, tnt, cgrid string) error {
+	if cgrid == utils.EmptyString {
+		return rs.Cmd(nil, redis_DEL, utils.SessionsBackupPrefix+utils.ConcatenatedKey(tnt, nodeID))
+	}
+	return rs.Cmd(nil, redis_HDEL, utils.SessionsBackupPrefix+utils.ConcatenatedKey(tnt, nodeID), cgrid)
 }

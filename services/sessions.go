@@ -75,9 +75,9 @@ func (smg *SessionService) Start() error {
 	if smg.IsRunning() {
 		return utils.ErrServiceAlreadyRunning
 	}
-
+	smg.srvDep[utils.DataDB].Add(1) // DataDB will wait for session service to close before closing
 	var datadb *engine.DataManager
-	if smg.dm.IsRunning() {
+	if smg.dm.ShouldRun() {
 		dbchan := smg.dm.GetDMChan()
 		datadb = <-dbchan
 		dbchan <- datadb
@@ -86,9 +86,17 @@ func (smg *SessionService) Start() error {
 	defer smg.Unlock()
 
 	smg.sm = sessions.NewSessionS(smg.cfg, datadb, smg.connMgr)
-	//start sync session in a separate gorutine
 	smg.stopChan = make(chan struct{})
-	go smg.sm.ListenAndServe(smg.stopChan)
+
+	// Restore previuos sessions backup and start backup looping
+	if smg.cfg.SessionSCfg().BackupInterval != 0 {
+		if err := smg.sm.RestoreAndBackupSessions(smg.stopChan); err != nil {
+			return err
+		}
+	}
+
+	//start sync session in a separate gorutine
+	go smg.sm.SyncSessions(smg.stopChan)
 	// Pass internal connection
 	srv, err := engine.NewServiceWithName(v1.NewSessionSv1(smg.sm), "", false)
 	if err != nil {
@@ -143,6 +151,7 @@ func (smg *SessionService) Reload() (err error) {
 
 // Shutdown stops the service
 func (smg *SessionService) Shutdown() (err error) {
+	defer smg.srvDep[utils.DataDB].Done() // signal DataDB when session service finishes shutting down
 	smg.Lock()
 	defer smg.Unlock()
 	close(smg.stopChan)
