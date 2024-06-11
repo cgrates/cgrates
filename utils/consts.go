@@ -397,6 +397,7 @@ const (
 	MetaRerate               = "*rerate"
 	MetaRefund               = "*refund"
 	MetaStats                = "*stats"
+	MetaSars                 = "*sars"
 	MetaResponder            = "*responder"
 	MetaCore                 = "*core"
 	MetaServiceManager       = "*servicemanager"
@@ -1014,7 +1015,7 @@ const (
 	RouteS      = "RouteS"
 	SessionS    = "SessionS"
 	StatService = "StatS"
-	SaRS        = "SaRS"
+	SarS        = "SarS"
 	ThresholdS  = "ThresholdS"
 )
 
@@ -1161,6 +1162,7 @@ const (
 	MetaDefaultRatio   = "*default_ratio"
 	ThresholdSv1       = "ThresholdSv1"
 	StatSv1            = "StatSv1"
+	SarSv1             = "SarSv1"
 	ResourceSv1        = "ResourceSv1"
 	RouteSv1           = "RouteSv1"
 	AttributeSv1       = "AttributeSv1"
