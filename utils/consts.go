@@ -303,6 +303,7 @@ const (
 	ThresholdProfilePrefix    = "thp_"
 	StatQueuePrefix           = "stq_"
 	LoadIDPrefix              = "lid_"
+	SessionsBackupPrefix      = "sbk_"
 	LoadInstKey               = "load_history"
 	CreateCDRsTablesSQL       = "create_cdrs_tables.sql"
 	CreateTariffPlanTablesSQL = "create_tariffplan_tables.sql"
@@ -972,6 +973,7 @@ const (
 	MetaThresholds          = "*thresholds"
 	MetaRoutes              = "*routes"
 	MetaAttributes          = "*attributes"
+	MetaSessionsBackup      = "*sessions_backup"
 	MetaLoadIDs             = "*load_ids"
 	MetaNodeID              = "*node_id"
 )
@@ -1280,6 +1282,8 @@ const (
 	ReplicatorSv1SetDispatcherProfile    = "ReplicatorSv1.SetDispatcherProfile"
 	ReplicatorSv1SetDispatcherHost       = "ReplicatorSv1.SetDispatcherHost"
 	ReplicatorSv1SetLoadIDs              = "ReplicatorSv1.SetLoadIDs"
+	ReplicatorSv1SetBackupSessions       = "ReplicatorSv1.SetBackupSessions"
+	ReplicatorSv1RemoveSessionBackup     = "ReplicatorSv1.RemoveSessionBackup"
 	ReplicatorSv1RemoveThreshold         = "ReplicatorSv1.RemoveThreshold"
 	ReplicatorSv1RemoveDestination       = "ReplicatorSv1.RemoveDestination"
 	ReplicatorSv1RemoveAccount           = "ReplicatorSv1.RemoveAccount"
@@ -1683,6 +1687,7 @@ const (
 	SessionSv1STIRIdentity               = "SessionSv1.STIRIdentity"
 	SessionSv1Sleep                      = "SessionSv1.Sleep"
 	SessionSv1CapsError                  = "SessionSv1.CapsError"
+	SessionSv1BackupActiveSessions       = "SessionSv1.BackupActiveSessions"
 )
 
 // Agent APIs
@@ -1938,6 +1943,7 @@ const (
 	CacheAccounts                = "*accounts"
 	CacheVersions                = "*versions"
 	CacheCapsEvents              = "*caps_events"
+	CacheSessionsBackup          = "*sessions_backup"
 	CacheReplicationHosts        = "*replication_hosts"
 
 	// storDB
@@ -2210,6 +2216,7 @@ const (
 	MinDurLowBalanceCfg       = "min_dur_low_balance"
 	DefaultUsageCfg           = "default_usage"
 	STIRCfg                   = "stir"
+	BackupIntervalCfg         = "backup_interval"
 
 	AllowedAtestCfg       = "allowed_attest"
 	PayloadMaxdurationCfg = "payload_maxduration"

@@ -706,6 +706,24 @@ func (rplSv1 *ReplicatorSv1) SetIndexes(ctx *context.Context, args *utils.SetInd
 	return
 }
 
+// SetBackupSessions is the replication method coresponding to the dataDB driver method
+func (rplSv1 *ReplicatorSv1) SetBackupSessions(ctx *context.Context, args *engine.SetBackupSessionsArgs, reply *string) (err error) {
+	if err = rplSv1.dm.DataDB().SetBackupSessionsDrv(args.StoredSessions, args.NodeID, args.Tenant); err != nil {
+		return
+	}
+	*reply = utils.OK
+	return
+}
+
+// RemoveSessionBackup is the replication method coresponding to the dataDB driver method
+func (rplSv1 *ReplicatorSv1) RemoveSessionBackup(ctx *context.Context, args *engine.RemoveSessionBackupArgs, reply *string) (err error) {
+	if err = rplSv1.dm.DataDB().RemoveSessionsBackupDrv(args.NodeID, args.Tenant, args.CGRID); err != nil {
+		return
+	}
+	*reply = utils.OK
+	return
+}
+
 // RemoveThreshold is the replication method coresponding to the dataDb driver method
 func (rplSv1 *ReplicatorSv1) RemoveThreshold(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *string) (err error) {
 	if err = rplSv1.dm.DataDB().RemoveThresholdDrv(args.Tenant, args.ID); err != nil {

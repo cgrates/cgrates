@@ -986,6 +986,9 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 		if cfg.thresholdSCfg.Enabled && cfg.thresholdSCfg.StoreInterval != -1 {
 			return fmt.Errorf("<%s> the StoreInterval field needs to be -1 when DataBD is *internal, received : %d", utils.ThresholdS, cfg.thresholdSCfg.StoreInterval)
 		}
+		// if cfg.sessionSCfg.Enabled && cfg.sessionSCfg.BackupInterval != -1 {
+		// 	return fmt.Errorf("<%s> the BackupInterval field needs to be -1 when DataBD is *internal, received : %d", utils.SessionS, cfg.sessionSCfg.BackupInterval)
+		// }
 	}
 	for item, val := range cfg.dataDbCfg.Items {
 		if val.Remote && len(cfg.dataDbCfg.RmtConns) == 0 {

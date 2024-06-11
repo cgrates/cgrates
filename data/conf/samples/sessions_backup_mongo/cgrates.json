@@ -1,0 +1,61 @@
+{
+    // Real-time Online/Offline Charging System (OCS) for Telecom & ISP environments
+    // Copyright (C) ITsysCOM GmbH
+
+    "general": {
+        "log_level": 7,
+        "node_id":"BackupSessionsNode",
+    },
+
+    "data_db": {
+        "db_type": "mongo",
+        "db_name": "10",
+        "db_port": 27017,
+    },
+    
+    
+    "stor_db": {
+        "db_type": "mongo",
+        "db_name": "cgrates",
+        "db_port": 27017,
+        "db_password": "",
+    },
+
+    "schedulers": {
+        "enabled": true,
+    },
+
+    "rals": {
+        "enabled": true,
+    },
+
+    "cdrs": {
+        "enabled": true,
+    },
+
+    "chargers": {
+        "enabled": true,
+        "attributes_conns": ["*internal"],
+    },
+
+    "sessions": {
+        "enabled": true,
+        "rals_conns": ["*internal"],
+        "cdrs_conns": ["*internal"],
+        "chargers_conns": ["*internal"],
+        "default_usage":{
+            "*voice":"4s"
+        },
+        "backup_interval": "-1",
+    },
+
+    "attributes": {
+        "enabled": true,
+    },
+
+    "apiers": {
+        "enabled": true,
+        "scheduler_conns": ["*internal"],
+    }
+}
+    

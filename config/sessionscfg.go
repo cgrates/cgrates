@@ -132,6 +132,7 @@ type SessionSCfg struct {
 	SchedulerConns         []string
 	STIRCfg                *STIRcfg
 	DefaultUsage           map[string]time.Duration
+	BackupInterval         time.Duration
 }
 
 func (scfg *SessionSCfg) loadFromJSONCfg(jsnCfg *SessionSJsonCfg) (err error) {
@@ -321,6 +322,11 @@ func (scfg *SessionSCfg) loadFromJSONCfg(jsnCfg *SessionSJsonCfg) (err error) {
 			}
 		}
 	}
+	if jsnCfg.Backup_interval != nil {
+		if scfg.BackupInterval, err = utils.ParseDurationWithNanosecs(*jsnCfg.Backup_interval); err != nil {
+			return err
+		}
+	}
 	return scfg.STIRCfg.loadFromJSONCfg(jsnCfg.Stir)
 }
 
@@ -357,6 +363,7 @@ func (scfg *SessionSCfg) AsMapInterface() (initialMP map[string]any) {
 		utils.StaleChanMaxExtraUsageCfg: "0",
 		utils.DebitIntervalCfg:          "0",
 		utils.SessionTTLCfg:             "0",
+		utils.BackupIntervalCfg:         "0",
 		utils.DefaultUsageCfg:           maxComputed,
 	}
 	if scfg.DebitInterval != 0 {
@@ -476,6 +483,10 @@ func (scfg *SessionSCfg) AsMapInterface() (initialMP map[string]any) {
 		}
 		initialMP[utils.SchedulerConnsCfg] = schedulerConns
 	}
+
+	if scfg.BackupInterval != 0 {
+		initialMP[utils.BackupIntervalCfg] = scfg.BackupInterval.String()
+	}
 	return
 }
 
@@ -487,6 +498,7 @@ func (scfg SessionSCfg) Clone() (cln *SessionSCfg) {
 		DebitInterval:          scfg.DebitInterval,
 		StoreSCosts:            scfg.StoreSCosts,
 		SessionTTL:             scfg.SessionTTL,
+		BackupInterval:         scfg.BackupInterval,
 		ClientProtocol:         scfg.ClientProtocol,
 		ChannelSyncInterval:    scfg.ChannelSyncInterval,
 		StaleChanMaxExtraUsage: scfg.StaleChanMaxExtraUsage,

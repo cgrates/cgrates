@@ -79,6 +79,7 @@ type Session struct {
 	Chargeable    bool            // used in case of pausing debit
 	SRuns         []*SRun         // forked based on ChargerS
 	OptsStart     engine.MapEvent
+	UpdatedAt     time.Time // time when session was changed
 
 	debitStop   chan struct{}
 	sTerminator *sTerminator // automatic timeout for the session
@@ -130,6 +131,64 @@ func (s *Session) Clone() (cln *Session) {
 	}
 	s.RUnlock()
 	return
+}
+
+// asStoredSession converts a Session to a StoredSession to be stored later in DataDB
+func (s *Session) asStoredSession() *engine.StoredSession {
+	storedSRuns := make([]*engine.StoredSRun, len(s.SRuns))
+	for i, sRun := range s.SRuns {
+		storedSRuns[i] = &engine.StoredSRun{
+			Event:         sRun.Event,
+			CD:            sRun.CD,
+			EventCost:     sRun.EventCost,
+			ExtraDuration: sRun.ExtraDuration,
+			LastUsage:     sRun.LastUsage,
+			TotalUsage:    sRun.TotalUsage,
+			NextAutoDebit: sRun.NextAutoDebit,
+		}
+	}
+
+	return &engine.StoredSession{
+		CGRID:         s.CGRID,
+		Tenant:        s.Tenant,
+		ResourceID:    s.ResourceID,
+		ClientConnID:  s.ClientConnID,
+		EventStart:    s.EventStart,
+		DebitInterval: s.DebitInterval,
+		Chargeable:    s.Chargeable,
+		SRuns:         storedSRuns,
+		OptsStart:     s.OptsStart,
+		UpdatedAt:     s.UpdatedAt,
+	}
+}
+
+// newSessionFromStoredSession converts a StoredSession to a Session to be restored and activated later on
+func newSessionFromStoredSession(s *engine.StoredSession) *Session {
+	storedSRuns := make([]*SRun, len(s.SRuns))
+	for i, sRun := range s.SRuns {
+		storedSRuns[i] = &SRun{
+			Event:         sRun.Event,
+			CD:            sRun.CD,
+			EventCost:     sRun.EventCost,
+			ExtraDuration: sRun.ExtraDuration,
+			LastUsage:     sRun.LastUsage,
+			TotalUsage:    sRun.TotalUsage,
+			NextAutoDebit: sRun.NextAutoDebit,
+		}
+	}
+
+	return &Session{
+		CGRID:         s.CGRID,
+		Tenant:        s.Tenant,
+		ResourceID:    s.ResourceID,
+		ClientConnID:  s.ClientConnID,
+		EventStart:    s.EventStart,
+		DebitInterval: s.DebitInterval,
+		Chargeable:    s.Chargeable,
+		SRuns:         storedSRuns,
+		OptsStart:     s.OptsStart,
+		UpdatedAt:     s.UpdatedAt,
+	}
 }
 
 // AsExternalSessions returns the session as a list of ExternalSession using all SRuns (thread safe)

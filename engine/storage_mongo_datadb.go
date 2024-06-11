@@ -75,6 +75,7 @@ const (
 	ColDpp  = "dispatcher_profiles"
 	ColDph  = "dispatcher_hosts"
 	ColLID  = "load_ids"
+	ColBkup = "sessions_backup"
 )
 
 var (
@@ -1955,4 +1956,19 @@ func (ms *MongoStorage) RemoveIndexesDrv(idxItmType, tntCtx, idxKey string) erro
 		})
 		return err
 	})
+}
+
+// Will backup active sessions in DataDB
+func (ms *MongoStorage) SetBackupSessionsDrv(storedSessions []*StoredSession, nodeID, tnt string) error {
+	return utils.ErrNotImplemented
+}
+
+// Will restore sessions that were active from dataDB backup
+func (ms *MongoStorage) GetSessionsBackupDrv(nodeID, tnt string) ([]*StoredSession, error) {
+	return nil, utils.ErrNotImplemented
+}
+
+// Will remove one or all sessions from dataDB Backup
+func (ms *MongoStorage) RemoveSessionsBackupDrv(nodeID, tnt, cgrid string) error {
+	return utils.ErrNotImplemented
 }
