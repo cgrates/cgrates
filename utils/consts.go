@@ -2810,7 +2810,7 @@ const (
 	SepCgr         = " "
 	//Cgr engine
 	CgrEngine            = "cgr-engine"
-	CheckCfgCgr          = "check_config"
+	PrintCfgCgr          = "print_config"
 	PidCgr               = "pid"
 	HttpPrfPthCgr        = "httprof_path"
 	CpuProfDirCgr        = "cpuprof_dir"

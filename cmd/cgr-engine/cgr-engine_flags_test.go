@@ -39,10 +39,10 @@ func TestCgrEngineFlags(t *testing.T) {
 		t.Errorf("Expected true, received %+v", *version)
 	}
 
-	if err := cgrEngineFlags.Parse([]string{"-check_config", "true"}); err != nil {
+	if err := cgrEngineFlags.Parse([]string{"-print_config", "true"}); err != nil {
 		t.Fatal(err)
-	} else if *checkConfig != true {
-		t.Errorf("Expected true, received %+v", *checkConfig)
+	} else if *printConfig != true {
+		t.Errorf("Expected true, received %+v", *printConfig)
 	}
 
 	if err := cgrEngineFlags.Parse([]string{"-pid", "usr/share/cgrates/cgrates.json"}); err != nil {

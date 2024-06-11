@@ -53,7 +53,7 @@ var (
 	cgrEngineFlags    = flag.NewFlagSet(utils.CgrEngine, flag.ContinueOnError)
 	cfgPath           = cgrEngineFlags.String(utils.CfgPathCgr, utils.ConfigPath, "Configuration directory path.")
 	version           = cgrEngineFlags.Bool(utils.VersionCgr, false, "Prints the application version.")
-	checkConfig       = cgrEngineFlags.Bool(utils.CheckCfgCgr, false, "Verify the config without starting the engine")
+	printConfig       = cgrEngineFlags.Bool(utils.PrintCfgCgr, false, "Print the configuration object in JSON format")
 	pidFile           = cgrEngineFlags.String(utils.PidCgr, utils.EmptyString, "Write pid file")
 	httpPprofPath     = cgrEngineFlags.String(utils.HttpPrfPthCgr, utils.EmptyString, "http address used for program profiling")
 	cpuProfDir        = cgrEngineFlags.String(utils.CpuProfDirCgr, utils.EmptyString, "write cpu profile to files")
@@ -414,12 +414,6 @@ func main() {
 		log.Fatalf("Could not parse config: <%s>", err.Error())
 		return
 	}
-	if *checkConfig {
-		if err := cfg.CheckConfigSanity(); err != nil {
-			log.Fatalf("<%s> error received: <%s>, exiting!", utils.InitS, err.Error())
-		}
-		return
-	}
 
 	if *nodeID != utils.EmptyString {
 		cfg.GeneralCfg().NodeID = *nodeID
@@ -438,6 +432,11 @@ func main() {
 		lgLevel = *logLevel
 	}
 	utils.Logger.SetLogLevel(lgLevel)
+
+	if *printConfig {
+		cfgJSON := utils.ToIJSON(cfg.AsMapInterface(cfg.GeneralCfg().RSRSep))
+		utils.Logger.Info(fmt.Sprintf("Configuration loaded from %s:\n%s", *cfgPath, cfgJSON))
+	}
 
 	// init the concurrentRequests
 	caps := engine.NewCaps(cfg.CoreSCfg().Caps, cfg.CoreSCfg().CapsStrategy)
