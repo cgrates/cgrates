@@ -632,10 +632,10 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 	if cfg.sarsCfg.Enabled {
 		for _, connID := range cfg.sarsCfg.StatSConns {
 			if strings.HasPrefix(connID, utils.MetaInternal) && !cfg.statsCfg.Enabled {
-				return fmt.Errorf("<%s> not enabled but requested by <%s> component", utils.StatS, utils.SaRS)
+				return fmt.Errorf("<%s> not enabled but requested by <%s> component", utils.StatS, utils.SarS)
 			}
 			if _, has := cfg.rpcConns[connID]; !has && !strings.HasPrefix(connID, utils.MetaInternal) {
-				return fmt.Errorf("<%s> connection with id: <%s> not defined", utils.SaRS, connID)
+				return fmt.Errorf("<%s> connection with id: <%s> not defined", utils.SarS, connID)
 			}
 		}
 	}

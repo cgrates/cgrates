@@ -27,10 +27,30 @@ import (
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/cores"
 	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/servmanager"
 	"github.com/cgrates/cgrates/utils"
 )
 
-type SaRService struct {
+// NewSarsService returns the SaRS Service
+func NewSarService(cfg *config.CGRConfig, dm *DataDBService,
+	cacheS *engine.CacheS, filterSChan chan *engine.FilterS,
+	server *cores.Server, internalStatSChan chan birpc.ClientConnector,
+	connMgr *engine.ConnManager, anz *AnalyzerService,
+	srvDep map[string]*sync.WaitGroup) servmanager.Service {
+	return &SarService{
+		connChan:    internalStatSChan,
+		cfg:         cfg,
+		dm:          dm,
+		cacheS:      cacheS,
+		filterSChan: filterSChan,
+		server:      server,
+		connMgr:     connMgr,
+		anz:         anz,
+		srvDep:      srvDep,
+	}
+}
+
+type SarService struct {
 	sync.RWMutex
 	cfg         *config.CGRConfig
 	dm          *DataDBService
@@ -38,14 +58,13 @@ type SaRService struct {
 	filterSChan chan *engine.FilterS
 	server      *cores.Server
 	connMgr     *engine.ConnManager
-
-	connChan chan birpc.ClientConnector
-	anz      *AnalyzerService
-	srvDep   map[string]*sync.WaitGroup
+	connChan    chan birpc.ClientConnector
+	anz         *AnalyzerService
+	srvDep      map[string]*sync.WaitGroup
 }
 
 // Start should handle the sercive start
-func (sa *SaRService) Start() error {
+func (sa *SarService) Start() error {
 	if sa.IsRunning() {
 		return utils.ErrServiceAlreadyRunning
 	}
@@ -59,7 +78,7 @@ func (sa *SaRService) Start() error {
 	dbchan <- datadb
 
 	utils.Logger.Info(fmt.Sprintf("<%s> starting <%s> subsystem",
-		utils.CoreS, utils.SaRS))
+		utils.CoreS, utils.SarS))
 	srv, err := engine.NewService(v1.NewSArSv1())
 	if err != nil {
 		return err
@@ -74,12 +93,12 @@ func (sa *SaRService) Start() error {
 }
 
 // Reload handles the change of config
-func (sa *SaRService) Reload() (err error) {
+func (sa *SarService) Reload() (err error) {
 	return
 }
 
 // Shutdown stops the service
-func (sa *SaRService) Shutdown() (err error) {
+func (sa *SarService) Shutdown() (err error) {
 	defer sa.srvDep[utils.DataDB].Done()
 	sa.Lock()
 	defer sa.Unlock()
@@ -88,18 +107,18 @@ func (sa *SaRService) Shutdown() (err error) {
 }
 
 // IsRunning returns if the service is running
-func (sa *SaRService) IsRunning() bool {
+func (sa *SarService) IsRunning() bool {
 	sa.RLock()
 	defer sa.RUnlock()
 	return false
 }
 
 // ServiceName returns the service name
-func (sa *SaRService) ServiceName() string {
-	return utils.SaRS
+func (sa *SarService) ServiceName() string {
+	return utils.SarS
 }
 
 // ShouldRun returns if the service should be running
-func (sa *SaRService) ShouldRun() bool {
+func (sa *SarService) ShouldRun() bool {
 	return sa.cfg.SarSCfg().Enabled
 }

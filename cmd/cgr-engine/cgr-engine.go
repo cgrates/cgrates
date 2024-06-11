@@ -150,7 +150,7 @@ func initConfigSv1(internalConfigChan chan birpc.ClientConnector,
 }
 
 func startRPC(server *cores.Server, internalRaterChan,
-	internalCdrSChan, internalRsChan, internalStatSChan,
+	internalCdrSChan, internalRsChan, internalStatSChan, internalSarSChan,
 	internalAttrSChan, internalChargerSChan, internalThdSChan, internalSuplSChan,
 	internalSMGChan, internalAnalyzerSChan, internalDispatcherSChan,
 	internalLoaderSChan, internalRALsv1Chan, internalCacheSChan,
@@ -182,6 +182,8 @@ func startRPC(server *cores.Server, internalRaterChan,
 			internalLoaderSChan <- loaderS
 		case ralS := <-internalRALsv1Chan:
 			internalRALsv1Chan <- ralS
+		case sarS := <-internalSarSChan:
+			internalSarSChan <- sarS
 		case chS := <-internalCacheSChan: // added in order to start the RPC before precaching is done
 			internalCacheSChan <- chS
 		case eeS := <-internalEEsChan:
@@ -455,6 +457,7 @@ func main() {
 	internalChargerSChan := make(chan birpc.ClientConnector, 1)
 	internalThresholdSChan := make(chan birpc.ClientConnector, 1)
 	internalStatSChan := make(chan birpc.ClientConnector, 1)
+	internalSarSChan := make(chan birpc.ClientConnector, 1)
 	internalResourceSChan := make(chan birpc.ClientConnector, 1)
 	internalRouteSChan := make(chan birpc.ClientConnector, 1)
 	internalSchedulerSChan := make(chan birpc.ClientConnector, 1)
@@ -483,6 +486,7 @@ func main() {
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS):       internalSessionSChan,
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats):          internalStatSChan,
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRoutes):         internalRouteSChan,
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSars):           internalSarSChan,
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds):     internalThresholdSChan,
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaServiceManager): internalServeManagerChan,
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaConfig):         internalConfigChan,
@@ -524,6 +528,7 @@ func main() {
 		utils.SessionS:        new(sync.WaitGroup),
 		utils.SIPAgent:        new(sync.WaitGroup),
 		utils.StatS:           new(sync.WaitGroup),
+		utils.SarS:            new(sync.WaitGroup),
 		utils.StorDB:          new(sync.WaitGroup),
 		utils.ThresholdS:      new(sync.WaitGroup),
 		utils.AccountS:        new(sync.WaitGroup),
@@ -605,6 +610,8 @@ func main() {
 	tS := services.NewThresholdService(cfg, dmService, cacheS, filterSChan, server, internalThresholdSChan, anz, srvDep)
 	stS := services.NewStatService(cfg, dmService, cacheS, filterSChan, server,
 		internalStatSChan, connManager, anz, srvDep)
+	srS := services.NewSarService(cfg, dmService, cacheS, filterSChan, server,
+		internalSarSChan, connManager, anz, srvDep)
 	reS := services.NewResourceService(cfg, dmService, cacheS, filterSChan, server,
 		internalResourceSChan, connManager, anz, srvDep)
 	routeS := services.NewRouteService(cfg, dmService, cacheS, filterSChan, server,
@@ -630,7 +637,7 @@ func main() {
 	ldrs := services.NewLoaderService(cfg, dmService, filterSChan, server,
 		internalLoaderSChan, connManager, anz, srvDep)
 
-	srvManager.AddServices(gvService, attrS, chrS, tS, stS, reS, routeS, schS, rals,
+	srvManager.AddServices(gvService, attrS, chrS, tS, stS, srS, reS, routeS, schS, rals,
 		apiSv1, apiSv2, cdrS, smg, coreS,
 		services.NewDNSAgent(cfg, filterSChan, shdChan, connManager, srvDep),
 		services.NewFreeswitchAgent(cfg, shdChan, connManager, srvDep),
@@ -674,6 +681,7 @@ func main() {
 	engine.IntRPC.AddInternalRPCClient(utils.SchedulerSv1, internalSchedulerSChan)
 	engine.IntRPC.AddInternalRPCClient(utils.SessionSv1, internalSessionSChan)
 	engine.IntRPC.AddInternalRPCClient(utils.StatSv1, internalStatSChan)
+	engine.IntRPC.AddInternalRPCClient(utils.SarSv1, internalSarSChan)
 	engine.IntRPC.AddInternalRPCClient(utils.RouteSv1, internalRouteSChan)
 	engine.IntRPC.AddInternalRPCClient(utils.ThresholdSv1, internalThresholdSChan)
 	engine.IntRPC.AddInternalRPCClient(utils.ServiceManagerV1, internalServeManagerChan)
@@ -695,7 +703,7 @@ func main() {
 
 	// Serve rpc connections
 	go startRPC(server, internalResponderChan, internalCDRServerChan,
-		internalResourceSChan, internalStatSChan,
+		internalResourceSChan, internalStatSChan, internalSarSChan,
 		internalAttributeSChan, internalChargerSChan, internalThresholdSChan,
 		internalRouteSChan, internalSessionSChan, internalAnalyzerSChan,
 		internalDispatcherSChan, internalLoaderSChan, internalRALsChan,
