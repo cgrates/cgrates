@@ -986,11 +986,13 @@ func (sS *SessionS) indexSession(s *Session, pSessions bool) {
 	defer idxMux.Unlock()
 	for fieldName := range sS.cgrCfg.SessionSCfg().SessionIndexes {
 		for _, sr := range s.SRuns {
-			fieldVal, err := sr.Event.GetString(fieldName) // the only error from GetString is ErrNotFound
+			splitFieldName := utils.SplitPath(fieldName, utils.NestingSep[0], -1)
+			fieldName := splitFieldName[len(splitFieldName)-1] // take only the last field name from the slice
+			fieldVal, err := sr.Event.GetString(fieldName)     // the only error from GetString is ErrNotFound
 			if err != nil {
 				fieldVal = utils.NotAvailable
 			}
-			if fieldVal == "" {
+			if fieldVal == utils.EmptyString {
 				fieldVal = utils.MetaEmpty
 			}
 			if _, hasFieldName := ssIndx[fieldName]; !hasFieldName { // Init it here

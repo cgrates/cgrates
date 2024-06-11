@@ -135,10 +135,11 @@ func TestBiRPCv1RegisterInternalBiJSONConn(t *testing.T) {
 func TestSessionSIndexAndUnindexSessions(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.SessionSCfg().SessionIndexes = utils.StringSet{
-		"Tenant":  {},
-		"Account": {},
-		"Extra3":  {},
-		"Extra4":  {},
+		"Tenant":      {},
+		"Account":     {},
+		"Extra3":      {},
+		"Extra4":      {},
+		"*req.Extra6": {},
 	}
 	sS := NewSessionS(cfg, nil, nil)
 	sEv := engine.NewMapEvent(map[string]any{
@@ -162,6 +163,7 @@ func TestSessionSIndexAndUnindexSessions(t *testing.T) {
 		"Extra1":              "Value1",
 		"Extra2":              5,
 		"Extra3":              "",
+		"Extra6":              "value6",
 	})
 	// Index first session
 	session := &Session{
@@ -204,6 +206,11 @@ func TestSessionSIndexAndUnindexSessions(t *testing.T) {
 				cgrID: {utils.MetaDefault: {}},
 			},
 		},
+		"Extra6": {
+			"value6": map[string]utils.StringSet{
+				cgrID: {utils.MetaDefault: {}},
+			},
+		},
 	}
 	if !reflect.DeepEqual(eIndexes, sS.aSessionsIdx) {
 		t.Errorf("Expecting: %s, received: %s",
@@ -216,6 +223,7 @@ func TestSessionSIndexAndUnindexSessions(t *testing.T) {
 			&riFieldNameVal{fieldName: "Extra3", fieldValue: utils.MetaEmpty},
 			&riFieldNameVal{fieldName: "Extra4", fieldValue: utils.NotAvailable},
 			&riFieldNameVal{fieldName: "OriginID", fieldValue: "12345"},
+			&riFieldNameVal{fieldName: "Extra6", fieldValue: "value6"},
 		},
 	}
 	if len(eRIdxes) != len(sS.aSessionsRIdx) ||
@@ -231,6 +239,7 @@ func TestSessionSIndexAndUnindexSessions(t *testing.T) {
 		utils.Tenant:       "itsyscom.com",
 		"Extra3":           "",
 		"Extra4":           "info2",
+		"Extra6":           "val6",
 	})
 	cgrID2 := GetSetCGRID(sSEv2)
 	session2 := &Session{
@@ -252,6 +261,7 @@ func TestSessionSIndexAndUnindexSessions(t *testing.T) {
 		utils.OriginID:     "12347",
 		utils.AccountField: "account2",
 		"Extra5":           "info5",
+		"Extra6":           "value6",
 	})
 	cgrID3 := GetSetCGRID(sSEv3)
 	session3 := &Session{
@@ -315,9 +325,18 @@ func TestSessionSIndexAndUnindexSessions(t *testing.T) {
 				cgrID2: {utils.MetaDefault: {}},
 			},
 		},
+		"Extra6": {
+			"value6": map[string]utils.StringSet{
+				cgrID:  {utils.MetaDefault: {}},
+				cgrID3: {utils.MetaDefault: {}},
+			},
+			"val6": map[string]utils.StringSet{
+				cgrID2: {utils.MetaDefault: {}},
+			},
+		},
 	}
 	if !reflect.DeepEqual(eIndexes, sS.aSessionsIdx) {
-		t.Errorf("Expecting: %+v, received: %+v", eIndexes, sS.aSessionsIdx)
+		t.Errorf("Expecting: %+v, \nreceived: %+v", eIndexes, sS.aSessionsIdx)
 	}
 	eRIdxes = map[string][]*riFieldNameVal{
 		cgrID: {
@@ -326,6 +345,7 @@ func TestSessionSIndexAndUnindexSessions(t *testing.T) {
 			&riFieldNameVal{fieldName: "Extra3", fieldValue: utils.MetaEmpty},
 			&riFieldNameVal{fieldName: "Extra4", fieldValue: utils.NotAvailable},
 			&riFieldNameVal{fieldName: "OriginID", fieldValue: "12345"},
+			&riFieldNameVal{fieldName: "Extra6", fieldValue: "value6"},
 		},
 		cgrID2: {
 			&riFieldNameVal{fieldName: "Tenant", fieldValue: "itsyscom.com"},
@@ -333,6 +353,7 @@ func TestSessionSIndexAndUnindexSessions(t *testing.T) {
 			&riFieldNameVal{fieldName: "Extra3", fieldValue: utils.MetaEmpty},
 			&riFieldNameVal{fieldName: "Extra4", fieldValue: "info2"},
 			&riFieldNameVal{fieldName: "OriginID", fieldValue: "12346"},
+			&riFieldNameVal{fieldName: "Extra6", fieldValue: "val6"},
 		},
 		cgrID3: {
 			&riFieldNameVal{fieldName: "Tenant", fieldValue: "cgrates.org"},
@@ -340,6 +361,7 @@ func TestSessionSIndexAndUnindexSessions(t *testing.T) {
 			&riFieldNameVal{fieldName: "Extra3", fieldValue: utils.NotAvailable},
 			&riFieldNameVal{fieldName: "Extra4", fieldValue: utils.NotAvailable},
 			&riFieldNameVal{fieldName: "OriginID", fieldValue: "12347"},
+			&riFieldNameVal{fieldName: "Extra6", fieldValue: "value6"},
 		},
 	}
 	if len(eRIdxes) != len(sS.aSessionsRIdx) ||
@@ -388,6 +410,14 @@ func TestSessionSIndexAndUnindexSessions(t *testing.T) {
 				cgrID3: {utils.MetaDefault: {}},
 			},
 		},
+		"Extra6": {
+			"val6": map[string]utils.StringSet{
+				cgrID2: {utils.MetaDefault: {}},
+			},
+			"value6": map[string]utils.StringSet{
+				cgrID3: {utils.MetaDefault: {}},
+			},
+		},
 	}
 	if !reflect.DeepEqual(eIndexes, sS.aSessionsIdx) {
 		t.Errorf("Expecting: %+v, received: %+v", eIndexes, sS.aSessionsIdx)
@@ -399,6 +429,7 @@ func TestSessionSIndexAndUnindexSessions(t *testing.T) {
 			&riFieldNameVal{fieldName: "Extra3", fieldValue: utils.MetaEmpty},
 			&riFieldNameVal{fieldName: "Extra4", fieldValue: "info2"},
 			&riFieldNameVal{fieldName: "OriginID", fieldValue: "12346"},
+			&riFieldNameVal{fieldName: "Extra6", fieldValue: "val6"},
 		},
 		cgrID3: {
 			&riFieldNameVal{fieldName: "Tenant", fieldValue: "cgrates.org"},
@@ -406,6 +437,7 @@ func TestSessionSIndexAndUnindexSessions(t *testing.T) {
 			&riFieldNameVal{fieldName: "Extra3", fieldValue: utils.NotAvailable},
 			&riFieldNameVal{fieldName: "Extra4", fieldValue: utils.NotAvailable},
 			&riFieldNameVal{fieldName: "OriginID", fieldValue: "12347"},
+			&riFieldNameVal{fieldName: "Extra6", fieldValue: "value6"},
 		},
 	}
 	if len(eRIdxes) != len(sS.aSessionsRIdx) ||
@@ -439,6 +471,11 @@ func TestSessionSIndexAndUnindexSessions(t *testing.T) {
 				cgrID2: {utils.MetaDefault: {}},
 			},
 		},
+		"Extra6": {
+			"val6": map[string]utils.StringSet{
+				cgrID2: {utils.MetaDefault: {}},
+			},
+		},
 	}
 	if !reflect.DeepEqual(eIndexes, sS.aSessionsIdx) {
 		t.Errorf("Expecting: %+v, received: %+v", eIndexes, sS.aSessionsIdx)
@@ -450,6 +487,7 @@ func TestSessionSIndexAndUnindexSessions(t *testing.T) {
 			&riFieldNameVal{fieldName: "Extra3", fieldValue: utils.MetaEmpty},
 			&riFieldNameVal{fieldName: "Extra4", fieldValue: "info2"},
 			&riFieldNameVal{fieldName: "OriginID", fieldValue: "12346"},
+			&riFieldNameVal{fieldName: "Extra6", fieldValue: "val6"},
 		},
 	}
 	if len(eRIdxes) != len(sS.aSessionsRIdx) ||
