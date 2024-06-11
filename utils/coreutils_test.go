@@ -1854,3 +1854,33 @@ func TestCoreUtilsMapStringSlicePointer(t *testing.T) {
 		})
 	}
 }
+
+func TestCoreutilsParseHierarchyPath(t *testing.T) {
+	tests := []struct {
+		path     string
+		sep      string
+		expected HierarchyPath
+	}{
+		{
+			path:     "",
+			sep:      "/",
+			expected: nil,
+		},
+		{
+			path:     "parent/child/grandchild",
+			sep:      "",
+			expected: HierarchyPath{"parent", "child", "grandchild"},
+		},
+		{
+			path:     "root-section-subsection",
+			sep:      "-",
+			expected: HierarchyPath{"root", "section", "subsection"},
+		},
+	}
+	for _, test := range tests {
+		result := ParseHierarchyPath(test.path, test.sep)
+		if !reflect.DeepEqual(result, test.expected) {
+			t.Errorf("For path: %s and sep: %s, expected: %v, but got: %v", test.path, test.sep, test.expected, result)
+		}
+	}
+}
