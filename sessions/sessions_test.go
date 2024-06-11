@@ -1938,21 +1938,23 @@ func (*testRPCClientConnection) Call(string, any, any) error { return nil }
 func TestNewSessionS(t *testing.T) {
 	cgrCGF := config.NewDefaultCGRConfig()
 
-	eOut := &SessionS{
-		cgrCfg:        cgrCGF,
-		dm:            nil,
-		biJClnts:      make(map[birpc.ClientConnector]string),
-		biJIDs:        make(map[string]*biJClient),
-		aSessions:     make(map[string]*Session),
-		aSessionsIdx:  make(map[string]map[string]map[string]utils.StringSet),
-		aSessionsRIdx: make(map[string][]*riFieldNameVal),
-		pSessions:     make(map[string]*Session),
-		pSessionsIdx:  make(map[string]map[string]map[string]utils.StringSet),
-		pSessionsRIdx: make(map[string][]*riFieldNameVal),
-	}
 	sS := NewSessionS(cgrCGF, nil, nil)
+	eOut := &SessionS{
+		cgrCfg:         cgrCGF,
+		dm:             nil,
+		biJClnts:       make(map[birpc.ClientConnector]string),
+		biJIDs:         make(map[string]*biJClient),
+		aSessions:      make(map[string]*Session),
+		aSessionsIdx:   make(map[string]map[string]map[string]utils.StringSet),
+		aSessionsRIdx:  make(map[string][]*riFieldNameVal),
+		pSessions:      make(map[string]*Session),
+		pSessionsIdx:   make(map[string]map[string]map[string]utils.StringSet),
+		pSessionsRIdx:  make(map[string][]*riFieldNameVal),
+		markedSsCGRIDs: make(utils.StringSet),
+		removeSsCGRIDs: make(utils.StringSet),
+	}
 	if !reflect.DeepEqual(sS, eOut) {
-		t.Errorf("Expected %s , received: %s", utils.ToJSON(sS), utils.ToJSON(eOut))
+		t.Errorf("Expected <%+v> , \nreceived: <%+v>", sS, eOut)
 	}
 }
 
@@ -2663,6 +2665,7 @@ func TestInitSession(t *testing.T) {
 		},
 		DebitInterval: 0,
 		Chargeable:    true,
+		UpdatedAt:     s.UpdatedAt,
 	}
 	s.SRuns = nil
 	if !reflect.DeepEqual(exp, s) {

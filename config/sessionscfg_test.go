@@ -369,6 +369,7 @@ func TestSessionSCfgAsMapInterfaceCase1(t *testing.T) {
 		utils.TerminateAttemptsCfg:      5,
 		utils.MinDurLowBalanceCfg:       "0",
 		utils.AlterableFieldsCfg:        []string{},
+		utils.BackupIntervalCfg:         "0",
 		utils.STIRCfg: map[string]any{
 			utils.AllowedAtestCfg:       []string{"*any"},
 			utils.PayloadMaxdurationCfg: "-1",
@@ -444,6 +445,7 @@ func TestSessionSCfgAsMapInterfaceCase2(t *testing.T) {
 		utils.StaleChanMaxExtraUsageCfg: "0",
 		utils.TerminateAttemptsCfg:      10,
 		utils.AlterableFieldsCfg:        []string{},
+		utils.BackupIntervalCfg:         "0",
 		utils.STIRCfg: map[string]any{
 			utils.AllowedAtestCfg:       []string{"any1", "any2"},
 			utils.PayloadMaxdurationCfg: "1s",
