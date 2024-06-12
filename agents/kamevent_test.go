@@ -653,3 +653,35 @@ func TestKamEventKamReplyString(t *testing.T) {
 		t.Errorf("Event mismatch. Expected: %s, Got: %v", krply.Event, unmarshalledResult["Event"])
 	}
 }
+
+func TestKamEventProcessMessageEmptyReply(t *testing.T) {
+	kev := KamEvent{
+		"KamReplyRoute": "CGR_PROCESS_MESSAGE",
+	}
+	kar := kev.AsKamProcessMessageEmptyReply()
+	if kar.Event != "CGR_PROCESS_MESSAGE" {
+		t.Errorf("expected event name 'CGR_PROCESS_MESSAGE', got %s", kar.Event)
+	}
+
+}
+
+func TestAsKamProcessCDRReply(t *testing.T) {
+	kev := KamEvent{
+		"KamReplyRoute": "CGR_PROCESS_CDR",
+		"KamTRIndex":    "123",
+		"KamTRLabel":    "456",
+	}
+	cgrEvWithArgDisp := &utils.CGREvent{}
+	rply := "reply"
+	var rplyErr error
+	kar, err := kev.AsKamProcessCDRReply(cgrEvWithArgDisp, &rply, rplyErr)
+	if kar.Event != "CGR_PROCESS_CDR" {
+		t.Errorf("expected event name 'CGR_PROCESS_CDR', got %s", kar.Event)
+	}
+	if kar.Error != "" {
+		t.Errorf("unexpected error: %s", kar.Error)
+	}
+	if err != nil {
+		t.Errorf("unexpected error: %v", err)
+	}
+}

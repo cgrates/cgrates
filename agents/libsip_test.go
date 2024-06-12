@@ -60,3 +60,14 @@ func TestUpdateSIPMsgFromNavMap(t *testing.T) {
 		t.Errorf("Expected: %s , received: %s", expected, m)
 	}
 }
+
+func TestLibsipBareSipErr(t *testing.T) {
+	m := sipingo.Message{
+		"requestHeader": "test-header",
+	}
+	errMsg := "test-header"
+	updatedMsg := bareSipErr(m, errMsg)
+	if updatedMsg["requestHeader"] != errMsg {
+		t.Errorf("expected error message %s, got %s", errMsg, updatedMsg["requestHeader"])
+	}
+}
