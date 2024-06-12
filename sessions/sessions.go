@@ -55,7 +55,7 @@ func NewSessionS(cgrCfg *config.CGRConfig,
 		pSessions:      make(map[string]*Session),
 		pSessionsIdx:   make(map[string]map[string]map[string]utils.StringSet),
 		pSessionsRIdx:  make(map[string][]*riFieldNameVal),
-		markedSsCGRIDs: make(utils.StringSet),
+		bkpSessionIDs:  make(utils.StringSet),
 		removeSsCGRIDs: make(utils.StringSet),
 	}
 }
@@ -90,8 +90,8 @@ type SessionS struct {
 	pSessionsIdx  map[string]map[string]map[string]utils.StringSet // map[fieldName]map[fieldValue][cgrID]utils.StringSet[runID]sID
 	pSessionsRIdx map[string][]*riFieldNameVal                     // reverse indexes for passive sessions, used on remove
 
-	markedSsCGRIDs    utils.StringSet // keep a record of session cgrids to be stored in dataDB backup
-	markedSsCGRIDsMux sync.RWMutex    // prevent concurrency when adding/deleting CGRIDs from map
+	bkpSessionIDs     utils.StringSet // keep a record of session cgrids to be stored in dataDB backup
+	bkpSessionIDsMux  sync.RWMutex    // prevent concurrency when adding/deleting CGRIDs from map
 	removeSsCGRIDs    utils.StringSet // keep a record of session cgrids to be removed from dataDB backup
 	removeSsCGRIDsMux sync.RWMutex    // prevent concurrency when adding/deleting CGRIDs from map
 	storeSessMux      sync.RWMutex    // protects storeSessions
@@ -667,9 +667,9 @@ func (sS *SessionS) debitLoopSession(s *Session, sRunIdx int,
 		s.UpdatedAt = time.Now()
 		s.Unlock()
 		if sS.cgrCfg.SessionSCfg().BackupInterval > 0 {
-			sS.markedSsCGRIDsMux.Lock()
-			sS.markedSsCGRIDs.Add(s.CGRID)
-			sS.markedSsCGRIDsMux.Unlock()
+			sS.bkpSessionIDsMux.Lock()
+			sS.bkpSessionIDs.Add(s.CGRID)
+			sS.bkpSessionIDsMux.Unlock()
 		}
 		select {
 		case <-debitStop:
@@ -738,9 +738,9 @@ func (sS *SessionS) refundSession(s *Session, sRunIdx int, rUsage time.Duration)
 	}
 	s.UpdatedAt = time.Now()
 	if sS.cgrCfg.SessionSCfg().BackupInterval > 0 {
-		sS.markedSsCGRIDsMux.Lock()
-		sS.markedSsCGRIDs.Add(s.CGRID)
-		sS.markedSsCGRIDsMux.Unlock()
+		sS.bkpSessionIDsMux.Lock()
+		sS.bkpSessionIDs.Add(s.CGRID)
+		sS.bkpSessionIDsMux.Unlock()
 	}
 	return
 }
@@ -954,9 +954,9 @@ func (sS *SessionS) unregisterSession(cgrID string, passive bool) bool {
 		sMp = sS.pSessions
 	}
 	if !passive && sS.cgrCfg.SessionSCfg().BackupInterval > 0 {
-		sS.markedSsCGRIDsMux.Lock()
-		delete(sS.markedSsCGRIDs, cgrID) // in case not yet in backup, dont needlessly store session
-		sS.markedSsCGRIDsMux.Unlock()
+		sS.bkpSessionIDsMux.Lock()
+		delete(sS.bkpSessionIDs, cgrID) // in case not yet in backup, dont needlessly store session
+		sS.bkpSessionIDsMux.Unlock()
 		sS.removeSsCGRIDsMux.Lock()
 		sS.removeSsCGRIDs.Add(cgrID)
 		sS.removeSsCGRIDsMux.Unlock()
@@ -1412,9 +1412,9 @@ func (sS *SessionS) getActivateSession(cgrID string) (s *Session) {
 	}
 	s = sS.transitSState(cgrID, false)
 	if len(ss) != 0 && sS.cgrCfg.SessionSCfg().BackupInterval > 0 {
-		sS.markedSsCGRIDsMux.Lock()
-		sS.markedSsCGRIDs.Add(s.CGRID)
-		sS.markedSsCGRIDsMux.Unlock()
+		sS.bkpSessionIDsMux.Lock()
+		sS.bkpSessionIDs.Add(s.CGRID)
+		sS.bkpSessionIDsMux.Unlock()
 	}
 	return
 }
@@ -1443,9 +1443,9 @@ func (sS *SessionS) relocateSession(initOriginID, originID, originHost string) (
 	s.Unlock()
 	sS.registerSession(s, false)
 	if sS.cgrCfg.SessionSCfg().BackupInterval > 0 {
-		sS.markedSsCGRIDsMux.Lock()
-		sS.markedSsCGRIDs.Add(s.CGRID)
-		sS.markedSsCGRIDsMux.Unlock()
+		sS.bkpSessionIDsMux.Lock()
+		sS.bkpSessionIDs.Add(s.CGRID)
+		sS.bkpSessionIDsMux.Unlock()
 	}
 	sS.replicateSessions(initCGRID, false, sS.cgrCfg.SessionSCfg().ReplicationConns)
 	return
@@ -1777,9 +1777,9 @@ func (sS *SessionS) endSession(s *Session, tUsage, lastUsage *time.Duration,
 		return errCh
 	}
 	if sS.cgrCfg.SessionSCfg().BackupInterval > 0 {
-		sS.markedSsCGRIDsMux.Lock()
-		delete(sS.markedSsCGRIDs, s.CGRID) // in case not yet in backup, dont needlessly store session
-		sS.markedSsCGRIDsMux.Unlock()
+		sS.bkpSessionIDsMux.Lock()
+		delete(sS.bkpSessionIDs, s.CGRID) // in case not yet in backup, dont needlessly store session
+		sS.bkpSessionIDsMux.Unlock()
 		sS.removeSsCGRIDsMux.Lock()
 		sS.removeSsCGRIDs.Add(s.CGRID)
 		sS.removeSsCGRIDsMux.Unlock()
@@ -2451,9 +2451,9 @@ func (sS *SessionS) BiRPCv1InitiateSession(ctx *context.Context,
 				return utils.NewErrRALs(err)
 			}
 			if sS.cgrCfg.SessionSCfg().BackupInterval > 0 {
-				sS.markedSsCGRIDsMux.Lock()
-				sS.markedSsCGRIDs.Add(s.CGRID)
-				sS.markedSsCGRIDsMux.Unlock()
+				sS.bkpSessionIDsMux.Lock()
+				sS.bkpSessionIDs.Add(s.CGRID)
+				sS.bkpSessionIDsMux.Unlock()
 			}
 
 			var maxUsage time.Duration
@@ -2673,9 +2673,9 @@ func (sS *SessionS) BiRPCv1UpdateSession(ctx *context.Context,
 			return utils.NewErrRALs(err)
 		}
 		if sS.cgrCfg.SessionSCfg().BackupInterval > 0 {
-			sS.markedSsCGRIDsMux.Lock()
-			sS.markedSsCGRIDs.Add(s.CGRID)
-			sS.markedSsCGRIDsMux.Unlock()
+			sS.bkpSessionIDsMux.Lock()
+			sS.bkpSessionIDs.Add(s.CGRID)
+			sS.bkpSessionIDsMux.Unlock()
 		}
 		var maxUsage time.Duration
 		var maxUsageSet bool // so we know if we have set the 0 on purpose
@@ -3618,9 +3618,9 @@ func (sS *SessionS) BiRPCv1ProcessEvent(ctx *context.Context,
 					return utils.NewErrRALs(err)
 				}
 				if sS.cgrCfg.SessionSCfg().BackupInterval > 0 {
-					sS.markedSsCGRIDsMux.Lock()
-					sS.markedSsCGRIDs.Add(s.CGRID)
-					sS.markedSsCGRIDsMux.Unlock()
+					sS.bkpSessionIDsMux.Lock()
+					sS.bkpSessionIDs.Add(s.CGRID)
+					sS.bkpSessionIDsMux.Unlock()
 				}
 				rply.MaxUsage = getDerivedMaxUsage(sRunsMaxUsage, ralsOpts.Has(utils.MetaDerivedReply))
 				//check for update session
@@ -3645,9 +3645,9 @@ func (sS *SessionS) BiRPCv1ProcessEvent(ctx *context.Context,
 					return utils.NewErrRALs(err)
 				}
 				if sS.cgrCfg.SessionSCfg().BackupInterval > 0 {
-					sS.markedSsCGRIDsMux.Lock()
-					sS.markedSsCGRIDs.Add(s.CGRID)
-					sS.markedSsCGRIDsMux.Unlock()
+					sS.bkpSessionIDsMux.Lock()
+					sS.bkpSessionIDs.Add(s.CGRID)
+					sS.bkpSessionIDsMux.Unlock()
 				}
 				rply.MaxUsage = getDerivedMaxUsage(sRunsMaxUsage, ralsOpts.Has(utils.MetaDerivedReply))
 				// check for terminate session
@@ -3877,9 +3877,9 @@ func (sS *SessionS) BiRPCv1ActivateSessions(ctx *context.Context,
 			err = utils.ErrPartiallyExecuted
 		} else {
 			if sS.cgrCfg.SessionSCfg().BackupInterval > 0 {
-				sS.markedSsCGRIDsMux.Lock()
-				sS.markedSsCGRIDs.Add(sID)
-				sS.markedSsCGRIDsMux.Unlock()
+				sS.bkpSessionIDsMux.Lock()
+				sS.bkpSessionIDs.Add(sID)
+				sS.bkpSessionIDsMux.Unlock()
 			}
 		}
 	}
@@ -4357,28 +4357,32 @@ func (sS *SessionS) runBackup(stopChan chan struct{}) {
 
 // storeSessionsMarked stores only marked active sessions for backup in DataDB, and removes inactive sessions from it
 func (sS *SessionS) storeSessionsMarked() (err error) {
-	sS.markedSsCGRIDsMux.Lock()
+	sS.bkpSessionIDsMux.Lock()
 	var storedSessions []*engine.StoredSession // hold the converted active marked sessions
-	for cgrID := range sS.markedSsCGRIDs {
+	for cgrID := range sS.bkpSessionIDs {
 		activeSess := sS.getSessions(cgrID, false)
 		if len(activeSess) == 0 {
 			utils.Logger.Warning("<SessionS> Couldn't backup session with CGRID <" + cgrID + ">. Session is not active")
-			delete(sS.markedSsCGRIDs, cgrID) // remove inactive session cgrids from the map
+			delete(sS.bkpSessionIDs, cgrID) // remove inactive session cgrids from the map
 			continue
 		}
+		activeSess[0].lk.RLock()
 		storedSessions = append(storedSessions, activeSess[0].asStoredSession())
+		activeSess[0].lk.RUnlock()
 	}
 	if len(storedSessions) != 0 {
 		if err := sS.dm.SetBackupSessions(sS.cgrCfg.GeneralCfg().NodeID,
 			sS.cgrCfg.GeneralCfg().DefaultTenant, storedSessions); err != nil {
+			sS.bkpSessionIDsMux.Unlock()
 			return err
 		}
 	}
 	for _, sess := range storedSessions {
-		delete(sS.markedSsCGRIDs, sess.CGRID)
+		delete(sS.bkpSessionIDs, sess.CGRID)
 	}
-	sS.markedSsCGRIDsMux.Unlock()
+	sS.bkpSessionIDsMux.Unlock()
 	sS.removeSsCGRIDsMux.Lock()
+	defer sS.removeSsCGRIDsMux.Unlock()
 	for cgrID := range sS.removeSsCGRIDs {
 		if err := sS.dm.RemoveSessionsBackup(sS.cgrCfg.GeneralCfg().NodeID,
 			sS.cgrCfg.GeneralCfg().DefaultTenant, cgrID); err != nil {
@@ -4386,7 +4390,6 @@ func (sS *SessionS) storeSessionsMarked() (err error) {
 		}
 		delete(sS.removeSsCGRIDs, cgrID)
 	}
-	sS.removeSsCGRIDsMux.Unlock()
 	return nil
 }
 
@@ -4405,7 +4408,9 @@ func (sS *SessionS) storeSessions() (sessStored int, err error) {
 	}
 	var storedSessions []*engine.StoredSession
 	for _, sess := range activeSess {
+		activeSess[0].lk.RLock()
 		storedSessions = append(storedSessions, sess.asStoredSession())
+		activeSess[0].lk.RUnlock()
 	}
 	if err := sS.dm.SetBackupSessions(sS.cgrCfg.GeneralCfg().NodeID,
 		sS.cgrCfg.GeneralCfg().DefaultTenant, storedSessions); err != nil {

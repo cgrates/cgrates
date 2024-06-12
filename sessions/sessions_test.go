@@ -1950,7 +1950,7 @@ func TestNewSessionS(t *testing.T) {
 		pSessions:      make(map[string]*Session),
 		pSessionsIdx:   make(map[string]map[string]map[string]utils.StringSet),
 		pSessionsRIdx:  make(map[string][]*riFieldNameVal),
-		markedSsCGRIDs: make(utils.StringSet),
+		bkpSessionIDs:  make(utils.StringSet),
 		removeSsCGRIDs: make(utils.StringSet),
 	}
 	if !reflect.DeepEqual(sS, eOut) {

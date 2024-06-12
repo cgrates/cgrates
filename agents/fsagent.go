@@ -303,7 +303,9 @@ func (fsa *FSsessions) Connect() error {
 	connErr := make(chan error)
 	var reply string
 	// make a call fs -> sessions_conns to create an active client needed for syncSessions when restoring sessions, since prior clients are lost when engine shuts down
-	fsa.connMgr.Call(fsa.ctx, fsa.cfg.SessionSConns, utils.SessionSv1Ping, &utils.CGREvent{}, &reply)
+	if err := fsa.connMgr.Call(fsa.ctx, fsa.cfg.SessionSConns, utils.SessionSv1Ping, &utils.CGREvent{}, &reply); err != nil {
+		return err
+	}
 	for connIdx, connCfg := range fsa.cfg.EventSocketConns {
 		fSock, err := fsock.NewFSock(
 			connCfg.Address, connCfg.Password,

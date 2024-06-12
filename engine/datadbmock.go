@@ -483,7 +483,7 @@ func (dbM *DataDBMock) RemoveRatingProfileDrv(string) error {
 	return utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) SetBackupSessionsDrv(storedSessions []*StoredSession, nodeID string, tnt string) error {
+func (dbM *DataDBMock) SetBackupSessionsDrv(nodeID string, tnt string, storedSessions []*StoredSession) error {
 	return utils.ErrNotImplemented
 }
 

@@ -3273,9 +3273,9 @@ func (dm *DataManager) GetSessionsBackup(nodeID, tenant string) ([]*StoredSessio
 }
 
 type SetBackupSessionsArgs struct {
-	StoredSessions []*StoredSession // all active sessions ready for backup
 	NodeID         string           // used as part of filter of DataDB query
 	Tenant         string           // used as part of filter of DataDB query
+	StoredSessions []*StoredSession // all active sessions ready for backup
 }
 
 // SetBackupSessions stores the active sessions in dataDB
@@ -3284,7 +3284,7 @@ func (dm *DataManager) SetBackupSessions(nodeID, tenant string,
 	if dm == nil {
 		return utils.ErrNoDatabaseConn
 	}
-	if err = dm.dataDB.SetBackupSessionsDrv(storedSessions, nodeID, tenant); err != nil {
+	if err = dm.dataDB.SetBackupSessionsDrv(nodeID, tenant, storedSessions); err != nil {
 		return
 	}
 

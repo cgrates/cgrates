@@ -708,7 +708,7 @@ func (rplSv1 *ReplicatorSv1) SetIndexes(ctx *context.Context, args *utils.SetInd
 
 // SetBackupSessions is the replication method coresponding to the dataDB driver method
 func (rplSv1 *ReplicatorSv1) SetBackupSessions(ctx *context.Context, args *engine.SetBackupSessionsArgs, reply *string) (err error) {
-	if err = rplSv1.dm.DataDB().SetBackupSessionsDrv(args.StoredSessions, args.NodeID, args.Tenant); err != nil {
+	if err = rplSv1.dm.DataDB().SetBackupSessionsDrv(args.NodeID, args.Tenant, args.StoredSessions); err != nil {
 		return
 	}
 	*reply = utils.OK

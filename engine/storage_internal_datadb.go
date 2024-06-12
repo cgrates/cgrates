@@ -856,8 +856,8 @@ func (iDB *InternalDB) RemoveIndexesDrv(idxItmType, tntCtx, idxKey string) (err 
 }
 
 // Will backup active sessions in DataDB
-func (iDB *InternalDB) SetBackupSessionsDrv(storedSessions []*StoredSession, nodeID string,
-	tnt string) error {
+func (iDB *InternalDB) SetBackupSessionsDrv(nodeID string,
+	tnt string, storedSessions []*StoredSession) error {
 	for _, sess := range storedSessions {
 		iDB.db.Set(utils.CacheSessionsBackup, sess.CGRID, sess,
 			[]string{utils.ConcatenatedKey(tnt, nodeID)}, true, utils.NonTransactional)

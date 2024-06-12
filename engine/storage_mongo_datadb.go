@@ -1959,7 +1959,7 @@ func (ms *MongoStorage) RemoveIndexesDrv(idxItmType, tntCtx, idxKey string) erro
 }
 
 // Will backup active sessions in DataDB
-func (ms *MongoStorage) SetBackupSessionsDrv(storedSessions []*StoredSession, nodeID, tnt string) error {
+func (ms *MongoStorage) SetBackupSessionsDrv(nodeID, tnt string, storedSessions []*StoredSession) error {
 	return utils.ErrNotImplemented
 }
 
