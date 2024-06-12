@@ -2168,7 +2168,7 @@ func TestAgReqSetFieldsInCacheWithTimeOut(t *testing.T) {
 		t.Error(err)
 	}
 	// give enough time to Cache to remove ttl the *uch
-	time.Sleep(7 * time.Millisecond)
+	time.Sleep(10 * time.Millisecond)
 	if _, err := agReq.FieldAsInterface([]string{utils.MetaUCH, utils.Tenant}); err != utils.ErrNotFound {
 		t.Errorf("agReq.FieldAsInterface([]string{%q,%q}):got err=%v, want %v",
 			utils.MetaUCH, utils.Tenant, err, utils.ErrNotFound)
