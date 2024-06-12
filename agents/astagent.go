@@ -108,7 +108,9 @@ func (sma *AsteriskAgent) ListenAndServe(stopChan <-chan struct{}) (err error) {
 		utils.AsteriskAgent, sma.cgrCfg.AsteriskAgentCfg().AsteriskConns[sma.astConnIdx].Address))
 	// make a call asterisk -> sessions_conns to create an active client needed for syncSessions when restoring sessions, since prior clients are lost when engine shuts down
 	var reply string
-	sma.connMgr.Call(sma.ctx, sma.cgrCfg.AsteriskAgentCfg().SessionSConns, utils.SessionSv1Ping, &utils.CGREvent{}, &reply)
+	if err := sma.connMgr.Call(sma.ctx, sma.cgrCfg.AsteriskAgentCfg().SessionSConns, utils.SessionSv1Ping, &utils.CGREvent{}, &reply); err != nil {
+		return err
+	}
 	for {
 		select {
 		case <-stopChan:

@@ -1248,20 +1248,16 @@ func (rs *RedisStorage) RemoveIndexesDrv(idxItmType, tntCtx, idxKey string) (err
 	return rs.Cmd(nil, redis_HDEL, utils.CacheInstanceToPrefix[idxItmType]+tntCtx, idxKey)
 }
 
-// Converts time.Time values inside EventStart and SRuns Events, to string type values. Used before marshaling StoredSessions with msgpack
-func StoredSessionEvTimeAsStr(sess *StoredSession) {
-	utils.MapIfaceTimeAsString(sess.EventStart)
-	for i := range sess.SRuns {
-		utils.MapIfaceTimeAsString(sess.SRuns[i].Event)
-	}
-}
-
 // Will backup active sessions in DataDB
-func (rs *RedisStorage) SetBackupSessionsDrv(storedSessions []*StoredSession, nodeID string,
-	tnt string) (err error) {
+func (rs *RedisStorage) SetBackupSessionsDrv(nodeID string,
+	tnt string, storedSessions []*StoredSession) (err error) {
 	mp := make(map[string]string)
 	for _, sess := range storedSessions {
-		StoredSessionEvTimeAsStr(sess)
+		// Convert time.Time values inside EventStart and SRuns Events, to string type values
+		utils.MapIfaceTimeAsString(sess.EventStart)
+		for i := range sess.SRuns {
+			utils.MapIfaceTimeAsString(sess.SRuns[i].Event)
+		}
 		var sessByte []byte
 		if sessByte, err = rs.ms.Marshal(sess); err != nil {
 			return

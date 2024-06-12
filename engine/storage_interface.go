@@ -128,7 +128,7 @@ type DataDB interface {
 	GetDispatcherHostDrv(string, string) (*DispatcherHost, error)
 	SetDispatcherHostDrv(*DispatcherHost) error
 	RemoveDispatcherHostDrv(string, string) error
-	SetBackupSessionsDrv(sessions []*StoredSession, nodeID string, tenant string) error
+	SetBackupSessionsDrv(nodeID string, tenant string, sessions []*StoredSession) error
 	GetSessionsBackupDrv(nodeID string, tenant string) ([]*StoredSession, error)
 	RemoveSessionsBackupDrv(nodeID, tenant, cgrid string) error
 }

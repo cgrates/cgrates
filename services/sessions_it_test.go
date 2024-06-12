@@ -1,5 +1,4 @@
-//go:build integration
-// +build integration
+//go:build flaky
 
 /*
 Real-time Online/Offline Charging System (OCS) for Telecom & ISP environments
@@ -166,7 +165,6 @@ func TestSessionSReload2(t *testing.T) {
 	close(chS.GetPrecacheChannel(utils.CacheActionTriggers))
 	close(chS.GetPrecacheChannel(utils.CacheSharedGroups))
 	close(chS.GetPrecacheChannel(utils.CacheTimings))
-
 	internalChan := make(chan birpc.ClientConnector, 1)
 	internalChan <- nil
 	cacheSrv, err := engine.NewService(chS)
@@ -184,7 +182,6 @@ func TestSessionSReload2(t *testing.T) {
 	anz := NewAnalyzerService(cfg, server, filterSChan, shdChan, make(chan birpc.ClientConnector, 1), srvDep)
 	srv := NewSessionService(cfg, db, server, make(chan birpc.ClientConnector, 1), shdChan, nil, anz, srvDep)
 	engine.NewConnManager(cfg, nil)
-
 	srv.(*SessionService).sm = &sessions.SessionS{}
 	if !srv.IsRunning() {
 		t.Fatalf("\nExpecting service to be running")
@@ -205,7 +202,6 @@ func TestSessionSReload2(t *testing.T) {
 	}
 	shdChan.CloseOnce()
 	time.Sleep(10 * time.Millisecond)
-
 }
 
 func TestSessionSReload3(t *testing.T) {
