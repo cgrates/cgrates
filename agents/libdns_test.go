@@ -242,3 +242,49 @@ func TestLibdnsNewDnsReply(t *testing.T) {
 		}
 	}
 }
+
+func TestLibdnsUpdateDnsRRHeader(t *testing.T) {
+	type testCase struct {
+		name  string
+		v     *dns.RR_Header
+		path  []string
+		value interface{}
+		err   error
+	}
+	testCases := []testCase{
+		{
+			name:  "Update Name",
+			v:     &dns.RR_Header{},
+			path:  []string{utils.DNSName},
+			value: "cgrates.org",
+		},
+		{
+			name:  "Update Rrtype (valid)",
+			v:     &dns.RR_Header{},
+			path:  []string{utils.DNSRrtype},
+			value: 1,
+		},
+		{
+			name:  "Wrong path",
+			v:     &dns.RR_Header{},
+			path:  []string{"invalid"},
+			value: "cgrates.org",
+			err:   utils.ErrWrongPath,
+		},
+		{
+			name:  "Empty path",
+			v:     &dns.RR_Header{},
+			path:  []string{},
+			value: "cgrates.org",
+			err:   utils.ErrWrongPath,
+		},
+	}
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			err := updateDnsRRHeader(tc.v, tc.path, tc.value)
+			if err != tc.err {
+				t.Errorf("Expected error %v, got %v", tc.err, err)
+			}
+		})
+	}
+}
