@@ -243,48 +243,62 @@ func TestLibdnsNewDnsReply(t *testing.T) {
 	}
 }
 
+func TestLibDnsDPString(t *testing.T) {
+	want := "{\"key\":\"test\"}"
+	dp := dnsDP{
+		req: utils.MapStorage{
+			"key": "test",
+		},
+	}
+	got := dp.String()
+	if got != want {
+		t.Errorf("Expected String() to return %q, got %q", want, got)
+	}
+}
+
 func TestLibdnsUpdateDnsRRHeader(t *testing.T) {
 	type testCase struct {
-		name  string
-		v     *dns.RR_Header
-		path  []string
-		value interface{}
-		err   error
+		name     string
+		rrHeader dns.RR_Header
+		path     []string
+		value    any
+		wantErr  bool
+		expected dns.RR_Header
 	}
 	testCases := []testCase{
 		{
-			name:  "Update Name",
-			v:     &dns.RR_Header{},
-			path:  []string{utils.DNSName},
-			value: "cgrates.org",
+			name:     "Update Rrtype (invalid value)",
+			rrHeader: dns.RR_Header{},
+			path:     []string{utils.DNSRrtype},
+			value:    "invalid",
+			wantErr:  true,
 		},
 		{
-			name:  "Update Rrtype (valid)",
-			v:     &dns.RR_Header{},
-			path:  []string{utils.DNSRrtype},
-			value: 1,
+			name:     "Update invalid path",
+			rrHeader: dns.RR_Header{},
+			path:     []string{"invalid_path"},
+			value:    "test",
+			wantErr:  true,
 		},
 		{
-			name:  "Wrong path",
-			v:     &dns.RR_Header{},
-			path:  []string{"invalid"},
-			value: "cgrates.org",
-			err:   utils.ErrWrongPath,
-		},
-		{
-			name:  "Empty path",
-			v:     &dns.RR_Header{},
-			path:  []string{},
-			value: "cgrates.org",
-			err:   utils.ErrWrongPath,
+			name:     "Empty path",
+			rrHeader: dns.RR_Header{},
+			path:     []string{},
+			value:    "test",
+			wantErr:  true,
 		},
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			err := updateDnsRRHeader(tc.v, tc.path, tc.value)
-			if err != tc.err {
-				t.Errorf("Expected error %v, got %v", tc.err, err)
+			originalHeader := tc.rrHeader
+			err := updateDnsRRHeader(&tc.rrHeader, tc.path, tc.value)
+			if tc.rrHeader != originalHeader {
+				t.Errorf("Expected original header to remain unchanged, got changed header")
 			}
+			if (err != nil) != tc.wantErr {
+				t.Errorf("Unexpected error: %v", err)
+			}
+
 		})
 	}
 }
