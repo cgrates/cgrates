@@ -101,6 +101,9 @@ type DataDB interface {
 	GetStatQueueDrv(tenant, id string) (sq *StatQueue, err error)
 	SetStatQueueDrv(ssq *StoredStatQueue, sq *StatQueue) (err error)
 	RemStatQueueDrv(tenant, id string) (err error)
+	SetSagProfileDrv(sq *SagProfile) (err error)
+	GetSagProfileDrv(tenant string, id string) (sq *SagProfile, err error)
+	RemSagProfileDrv(tenant string, id string) (err error)
 	GetThresholdProfileDrv(tenant string, ID string) (tp *ThresholdProfile, err error)
 	SetThresholdProfileDrv(tp *ThresholdProfile) (err error)
 	RemThresholdProfileDrv(tenant, id string) (err error)
@@ -173,6 +176,7 @@ type LoadReader interface {
 	GetTPAccountActions(*utils.TPAccountActions) ([]*utils.TPAccountActions, error)
 	GetTPResources(string, string, string) ([]*utils.TPResourceProfile, error)
 	GetTPStats(string, string, string) ([]*utils.TPStatProfile, error)
+	GetTPSags(string, string, string) ([]*utils.TPSagsProfile, error)
 	GetTPThresholds(string, string, string) ([]*utils.TPThresholdProfile, error)
 	GetTPFilters(string, string, string) ([]*utils.TPFilterProfile, error)
 	GetTPRoutes(string, string, string) ([]*utils.TPRouteProfile, error)
@@ -197,6 +201,7 @@ type LoadWriter interface {
 	SetTPAccountActions([]*utils.TPAccountActions) error
 	SetTPResources([]*utils.TPResourceProfile) error
 	SetTPStats([]*utils.TPStatProfile) error
+	SetTPSags([]*utils.TPSagsProfile) error
 	SetTPThresholds([]*utils.TPThresholdProfile) error
 	SetTPFilters([]*utils.TPFilterProfile) error
 	SetTPRoutes([]*utils.TPRouteProfile) error

@@ -290,6 +290,27 @@ CREATE INDEX tp_stats_idx ON tp_stats (tpid);
 CREATE INDEX tp_stats_unique ON tp_stats  ("tpid","tenant", "id", "filter_ids","metric_ids");
 
 --
+-- Table structure for table `tp_sags`
+--
+
+DROP TABLE IF EXISTS tp_sags;
+CREATE TABLE tp_sags(
+  "pk"  SERIAL PRIMARY KEY,
+  "tpid" varchar(64) NOT NULL,
+  "tenant" varchar(64) NOT NULL,
+  "id" varchar(64) NOT NULL,
+  "query_interval" varchar(64) NOT NULL,
+  "stat_ids" varchar(64) NOT NULL,
+  "metric_ids" varchar(64) NOT NULL,
+  "sorting" varchar(32) NOT NULL,
+  "sorting_parameters" varchar(64) NOT NULL,
+  "threshold_ids" varchar(64) NOT NULL,
+  "created_at" TIMESTAMP WITH TIME ZONE
+);
+CREATE INDEX tp_sags_idx ON tp_sags (tpid);
+CREATE INDEX tp_sags_unique ON tp_sags  ("tpid","tenant", "id");
+
+--
 -- Table structure for table `tp_threshold_cfgs`
 --
 

@@ -294,6 +294,29 @@ CREATE TABLE tp_stats (
   UNIQUE KEY `unique_tp_stats` (`tpid`,  `tenant`, `id`, `filter_ids`,`metric_ids`)
 );
 
+
+--
+-- Table structure for tabls `tp_sags`
+--
+
+DROP TABLE IF EXISTS tp_sags;
+CREATE TABLE tp_sags(
+ `pk` int(11) NOT NULL AUTO_INCREMENT,
+ `tpid` varchar(64) NOT NULL,
+ `tenant` varchar(64) NOT NULL,
+ `id` varchar(64) NOT NULL,
+ `query_interval` varchar(64) NOT NULL,
+ `stat_ids` varchar(64) NOT NULL,
+ `metric_ids` varchar(64) NOT NULL,
+ `sorting` varchar(32) NOT NULL,
+ `sorting_parameters` varchar(64) NOT NULL,
+ `threshold_ids` varchar(64) NOT NULL,
+ `created_at` TIMESTAMP,
+  PRIMARY KEY (`pk`),
+  KEY `tpid`  (`tpid`),
+  UNIQUE KEY `unique_tp_sags` (`tpid`,`tenant`,`id`)
+  );
+
 --
 -- Table structure for table `tp_threshold_cfgs`
 --

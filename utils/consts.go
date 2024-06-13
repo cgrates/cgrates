@@ -135,6 +135,7 @@ var (
 		TBLTPAccountActions:   CacheTBLTPAccountActions,
 		TBLTPResources:        CacheTBLTPResources,
 		TBLTPStats:            CacheTBLTPStats,
+		TBLTPSags:             CacheTBLTPSags,
 		TBLTPThresholds:       CacheTBLTPThresholds,
 		TBLTPFilters:          CacheTBLTPFilters,
 		SessionCostsTBL:       CacheSessionCostsTBL,
@@ -302,6 +303,7 @@ const (
 	DispatcherHostPrefix      = "dph_"
 	ThresholdProfilePrefix    = "thp_"
 	StatQueuePrefix           = "stq_"
+	SagsProfilePrefix         = "sgp_"
 	LoadIDPrefix              = "lid_"
 	SessionsBackupPrefix      = "sbk_"
 	LoadInstKey               = "load_history"
@@ -458,6 +460,7 @@ const (
 	AccountActions           = "AccountActions"
 	Resources                = "Resources"
 	Stats                    = "Stats"
+	Sars                     = "Sars"
 	Filters                  = "Filters"
 	DispatcherProfiles       = "DispatcherProfiles"
 	DispatcherHosts          = "DispatcherHosts"
@@ -502,6 +505,7 @@ const (
 	ResourceID            = "ResourceID"
 	TotalUsage            = "TotalUsage"
 	StatID                = "StatID"
+	StatIDs               = "StatIDs"
 	BalanceType           = "BalanceType"
 	BalanceID             = "BalanceID"
 	BalanceDestinationIds = "BalanceDestinationIds"
@@ -1142,6 +1146,7 @@ const (
 	TpRoutes             = "TpRoutes"
 	TpAttributes         = "TpAttributes"
 	TpStats              = "TpStats"
+	TpSags               = "TpSags"
 	TpSharedGroups       = "TpSharedGroups"
 	TpRatingProfiles     = "TpRatingProfiles"
 	TpResources          = "TpResources"
@@ -1420,6 +1425,9 @@ const (
 	APIerSv1SetTPStat                         = "APIerSv1.SetTPStat"
 	APIerSv1GetTPStat                         = "APIerSv1.GetTPStat"
 	APIerSv1RemoveTPStat                      = "APIerSv1.RemoveTPStat"
+	APIerSv1SetTPSag                          = "APIerSv1.SetTPSag"
+	APIerSv1GetTPSag                          = "APIerSv1.GetTPSag"
+	APIerSv1RemoveTPSag                       = "APIerSv1.RemoveTPSag"
 	APIerSv1GetTPDestinationRate              = "APIerSv1.GetTPDestinationRate"
 	APIerSv1SetTPRouteProfile                 = "APIerSv1.SetTPRouteProfile"
 	APIerSv1GetTPRouteProfile                 = "APIerSv1.GetTPRouteProfile"
@@ -1641,6 +1649,15 @@ const (
 	APIerSv1GetStatQueueProfileIDs = "APIerSv1.GetStatQueueProfileIDs"
 )
 
+// SagS APIs
+const (
+	APIerSv1SetSagProfile    = "APIerSv1.SetSagProfile"
+	APIerSv1RemoveSagProfile = "APIerSv1.RemoveSagProfile"
+	APIerSv1GetSagProfile    = "APIerSv1.GetSagProfile"
+	APIerSv1GetSagProfileIDs = "APIerSv1.GetSagProfileIDs"
+	SagSv1Ping               = "SagSv1.Ping"
+)
+
 // ResourceS APIs
 const (
 	ResourceSv1AuthorizeResources    = "ResourceSv1.AuthorizeResources"
@@ -1854,6 +1871,7 @@ const (
 	AccountActionsCsv     = "AccountActions.csv"
 	ResourcesCsv          = "Resources.csv"
 	StatsCsv              = "Stats.csv"
+	SagsCsv               = "Sags.csv"
 	ThresholdsCsv         = "Thresholds.csv"
 	FiltersCsv            = "Filters.csv"
 	RoutesCsv             = "Routes.csv"
@@ -1878,6 +1896,7 @@ const (
 	TBLTPAccountActions   = "tp_account_actions"
 	TBLTPResources        = "tp_resources"
 	TBLTPStats            = "tp_stats"
+	TBLTPSags             = "tp_sags"
 	TBLTPThresholds       = "tp_thresholds"
 	TBLTPFilters          = "tp_filters"
 	SessionCostsTBL       = "session_costs"
@@ -1908,6 +1927,7 @@ const (
 	CacheEventResources          = "*event_resources"
 	CacheStatQueueProfiles       = "*statqueue_profiles"
 	CacheStatQueues              = "*statqueues"
+	CacheSagsProfiles            = "*sags_profiles"
 	CacheThresholdProfiles       = "*threshold_profiles"
 	CacheThresholds              = "*thresholds"
 	CacheFilters                 = "*filters"
@@ -1960,6 +1980,7 @@ const (
 	CacheTBLTPAccountActions   = "*tp_account_actions"
 	CacheTBLTPResources        = "*tp_resources"
 	CacheTBLTPStats            = "*tp_stats"
+	CacheTBLTPSags             = "*tp_sags"
 	CacheTBLTPThresholds       = "*tp_thresholds"
 	CacheTBLTPFilters          = "*tp_filters"
 	CacheSessionCostsTBL       = "*session_costs"

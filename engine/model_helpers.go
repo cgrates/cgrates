@@ -1460,6 +1460,188 @@ func StatQueueProfileToAPI(st *StatQueueProfile) (tpST *utils.TPStatProfile) {
 	return
 }
 
+type SagsMdls []*SagsMdl
+
+func (tps SagsMdls) CSVHeader() (result []string) {
+	return []string{"#" + utils.Tenant, utils.ID, utils.StatIDs,
+		utils.MetricIDs, utils.Sorting, utils.SortingParameters,
+		utils.ThresholdIDs}
+}
+
+func (models SagsMdls) AsTPSags() (result []*utils.TPSagsProfile) {
+	thresholdMap := make(map[string]utils.StringSet)
+	metricsMap := make(map[string]utils.StringSet)
+	sortingParameterMap := make(map[string]utils.StringSet)
+	statsMap := make(map[string]utils.StringSet)
+	msg := make(map[string]*utils.TPSagsProfile)
+	for _, model := range models {
+		key := &utils.TenantID{Tenant: model.Tenant, ID: model.ID}
+		sg, found := msg[key.TenantID()]
+		if !found {
+			sg = &utils.TPSagsProfile{
+				Tenant:        model.Tenant,
+				TPid:          model.Tpid,
+				ID:            model.ID,
+				QueryInterval: model.QueryInterval,
+				Sorting:       model.Sorting,
+			}
+		}
+		if model.QueryInterval != utils.EmptyString {
+			sg.QueryInterval = model.QueryInterval
+		}
+		if model.Sorting != utils.EmptyString {
+			sg.QueryInterval = model.QueryInterval
+		}
+		if model.StatIDs != utils.EmptyString {
+			if _, has := statsMap[key.TenantID()]; !has {
+				statsMap[key.TenantID()] = make(utils.StringSet)
+			}
+			statsMap[key.TenantID()].AddSlice(strings.Split(model.StatIDs, utils.InfieldSep))
+		}
+		if model.ThresholdIDs != utils.EmptyString {
+			if _, has := thresholdMap[key.TenantID()]; !has {
+				thresholdMap[key.TenantID()] = make(utils.StringSet)
+			}
+			thresholdMap[key.TenantID()].AddSlice(strings.Split(model.ThresholdIDs, utils.InfieldSep))
+		}
+		if model.SortingParameters != utils.EmptyString {
+			if _, has := sortingParameterMap[key.TenantID()]; !has {
+				sortingParameterMap[key.TenantID()] = make(utils.StringSet)
+			}
+			sortingParameterMap[key.TenantID()].AddSlice(strings.Split(model.SortingParameters, utils.InfieldSep))
+		}
+		if model.MetricIDs != utils.EmptyString {
+			if _, has := metricsMap[key.TenantID()]; !has {
+				metricsMap[key.TenantID()] = make(utils.StringSet)
+			}
+			metricsMap[key.TenantID()].AddSlice(strings.Split(model.MetricIDs, utils.InfieldSep))
+		}
+		msg[key.TenantID()] = sg
+	}
+	result = make([]*utils.TPSagsProfile, len(msg))
+	i := 0
+	for tntID, sg := range msg {
+		result[i] = sg
+		result[i].StatIDs = statsMap[tntID].AsSlice()
+		result[i].MetricIDs = metricsMap[tntID].AsSlice()
+		result[i].SortingParameters = sortingParameterMap[tntID].AsSlice()
+		result[i].ThresholdIDs = thresholdMap[tntID].AsOrderedSlice()
+		i++
+	}
+	return
+}
+
+func APItoModelSag(tpSG *utils.TPSagsProfile) (mdls SagsMdls) {
+	if tpSG == nil {
+		return
+	}
+	if len(tpSG.StatIDs) == 0 {
+		mdl := &SagsMdl{
+			Tpid:          tpSG.TPid,
+			Tenant:        tpSG.Tenant,
+			ID:            tpSG.ID,
+			QueryInterval: tpSG.QueryInterval,
+			Sorting:       tpSG.Sorting,
+		}
+
+		for i, val := range tpSG.ThresholdIDs {
+			if i != 0 {
+				mdl.ThresholdIDs += utils.InfieldSep
+			}
+			mdl.ThresholdIDs += val
+		}
+		for i, metric := range tpSG.MetricIDs {
+			if i != 0 {
+				mdl.MetricIDs += utils.InfieldSep
+			}
+			mdl.MetricIDs += metric
+		}
+		for i, sorting := range tpSG.SortingParameters {
+			if i != 0 {
+				mdl.SortingParameters += utils.InfieldSep
+			}
+			mdl.SortingParameters += sorting
+		}
+
+		mdls = append(mdls, mdl)
+	}
+	for i, stat := range tpSG.StatIDs {
+		mdl := &SagsMdl{
+			Tpid:   tpSG.TPid,
+			Tenant: tpSG.Tenant,
+			ID:     tpSG.ID,
+		}
+		if i == 0 {
+			mdl.QueryInterval = tpSG.QueryInterval
+			mdl.Sorting = tpSG.Sorting
+			for i, val := range tpSG.ThresholdIDs {
+				if i != 0 {
+					mdl.ThresholdIDs += utils.InfieldSep
+				}
+				mdl.ThresholdIDs += val
+			}
+			for i, metric := range tpSG.MetricIDs {
+				if i != 0 {
+					mdl.MetricIDs += utils.InfieldSep
+				}
+				mdl.MetricIDs += metric
+			}
+			for i, sorting := range tpSG.SortingParameters {
+				if i != 0 {
+					mdl.SortingParameters += utils.InfieldSep
+				}
+				mdl.SortingParameters += sorting
+			}
+		}
+		mdl.StatIDs = stat
+		mdls = append(mdls, mdl)
+	}
+	return
+}
+
+func APItoSags(tpSG *utils.TPSagsProfile) (sg *SagProfile, err error) {
+	sg = &SagProfile{
+		Tenant:            tpSG.Tenant,
+		ID:                tpSG.ID,
+		StatIDs:           make([]string, len(tpSG.StatIDs)),
+		MetricIDs:         make([]string, len(tpSG.MetricIDs)),
+		Sorting:           tpSG.Sorting,
+		SortingParameters: make([]string, len(tpSG.SortingParameters)),
+		ThresholdIDs:      make([]string, len(tpSG.ThresholdIDs)),
+	}
+
+	if tpSG.QueryInterval != utils.EmptyString {
+		if sg.QueryInterval, err = utils.ParseDurationWithNanosecs(tpSG.QueryInterval); err != nil {
+			return nil, err
+		}
+	}
+
+	copy(sg.StatIDs, tpSG.StatIDs)
+	copy(sg.ThresholdIDs, tpSG.ThresholdIDs)
+	copy(sg.MetricIDs, tpSG.MetricIDs)
+
+	return sg, nil
+}
+
+func SagProfileToAPI(sg *SagProfile) (tpSG *utils.TPSagsProfile) {
+	tpSG = &utils.TPSagsProfile{
+		Tenant:            sg.Tenant,
+		ID:                sg.ID,
+		StatIDs:           make([]string, len(sg.StatIDs)),
+		MetricIDs:         make([]string, len(sg.MetricIDs)),
+		SortingParameters: make([]string, len(sg.SortingParameters)),
+		ThresholdIDs:      make([]string, len(sg.ThresholdIDs)),
+	}
+	if sg.QueryInterval != time.Duration(0) {
+		tpSG.QueryInterval = sg.QueryInterval.String()
+	}
+	copy(tpSG.StatIDs, sg.StatIDs)
+	copy(tpSG.ThresholdIDs, sg.ThresholdIDs)
+	copy(tpSG.MetricIDs, sg.MetricIDs)
+	copy(tpSG.SortingParameters, sg.SortingParameters)
+	return
+}
+
 type ThresholdMdls []*ThresholdMdl
 
 // CSVHeader return the header for csv fields as a slice of string

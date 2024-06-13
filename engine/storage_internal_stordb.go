@@ -403,6 +403,28 @@ func (iDB *InternalDB) GetTPStats(tpid, tenant, id string) (stats []*utils.TPSta
 	return
 }
 
+func (iDB *InternalDB) GetTPSags(tpid string, tenant string, id string) (sags []*utils.TPSagsProfile, err error) {
+	key := tpid
+	if tenant != utils.EmptyString {
+		key += utils.ConcatenatedKeySep + tenant
+	}
+	if id != utils.EmptyString {
+		key += utils.ConcatenatedKeySep + id
+	}
+	ids := iDB.db.GetItemIDs(utils.CacheTBLTPSags, key)
+	for _, id := range ids {
+		x, ok := iDB.db.Get(utils.CacheTBLTPSags, id)
+		if !ok || x == nil {
+			return nil, utils.ErrNotFound
+		}
+		sags = append(sags, x.(*utils.TPSagsProfile))
+	}
+	if len(sags) == 0 {
+		return nil, utils.ErrNotFound
+	}
+	return
+}
+
 func (iDB *InternalDB) GetTPThresholds(tpid, tenant, id string) (ths []*utils.TPThresholdProfile, err error) {
 	key := tpid
 	if tenant != utils.EmptyString {
@@ -734,6 +756,15 @@ func (iDB *InternalDB) SetTPStats(stats []*utils.TPStatProfile) (err error) {
 	for _, stat := range stats {
 		iDB.db.Set(utils.CacheTBLTPStats, utils.ConcatenatedKey(stat.TPid, stat.Tenant, stat.ID), stat, nil,
 			cacheCommit(utils.NonTransactional), utils.NonTransactional)
+	}
+	return
+}
+func (iDB *InternalDB) SetTPSags(sags []*utils.TPSagsProfile) (err error) {
+	if len(sags) == 0 {
+		return nil
+	}
+	for _, sag := range sags {
+		iDB.db.Set(utils.CacheTBLTPSags, utils.ConcatenatedKey(sag.TPid, sag.Tenant, sag.ID), sag, nil, cacheCommit(utils.NonTransactional), utils.NonTransactional)
 	}
 	return
 }

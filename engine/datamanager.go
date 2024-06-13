@@ -1282,6 +1282,28 @@ func (dm *DataManager) RemoveStatQueueProfile(tenant, id string, withIndex bool)
 	return dm.RemoveStatQueue(tenant, id)
 }
 
+func (dm *DataManager) GetSagProfile(tenant, id string, cacheRead, cacheWrite bool, transactionID string) (s *SagProfile, err error) {
+	if dm == nil {
+		err = utils.ErrNoDatabaseConn
+		return
+	}
+	return dm.DataDB().GetSagProfileDrv(tenant, id)
+}
+
+func (dm *DataManager) SetSagProfile(sgp *SagProfile) (err error) {
+	if dm == nil {
+		return utils.ErrNoDatabaseConn
+	}
+	return dm.DataDB().SetSagProfileDrv(sgp)
+}
+
+func (dm *DataManager) RemoveSagProfile(tenant, id string) (err error) {
+	if dm == nil {
+		return utils.ErrNoDatabaseConn
+	}
+	return dm.DataDB().RemSagProfileDrv(tenant, id)
+}
+
 func (dm *DataManager) GetTiming(id string, skipCache bool,
 	transactionID string) (t *utils.TPTiming, err error) {
 	if !skipCache {

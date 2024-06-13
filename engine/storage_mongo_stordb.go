@@ -439,6 +439,37 @@ func (ms *MongoStorage) GetTPStats(tpid, tenant, id string) ([]*utils.TPStatProf
 	})
 	return results, err
 }
+func (ms *MongoStorage) GetTPSags(tpid string, tenant string, id string) ([]*utils.TPSagsProfile, error) {
+	filter := bson.M{
+		"tpid": tpid,
+	}
+	if id != "" {
+		filter["id"] = id
+	}
+	if tenant != "" {
+		filter["tenant"] = tenant
+	}
+	var results []*utils.TPSagsProfile
+	err := ms.query(func(sctx mongo.SessionContext) error {
+		cur, err := ms.getCol(utils.TBLTPSags).Find(sctx, filter)
+		if err != nil {
+			return err
+		}
+		for cur.Next(sctx) {
+			var el utils.TPSagsProfile
+			err := cur.Decode(&el)
+			if err != nil {
+				return err
+			}
+			results = append(results, &el)
+		}
+		if len(results) == 0 {
+			return utils.ErrNotFound
+		}
+		return cur.Close(sctx)
+	})
+	return results, err
+}
 
 func (ms *MongoStorage) GetTPActions(tpid, id string) ([]*utils.TPActions, error) {
 	filter := bson.M{"tpid": tpid}
@@ -1209,6 +1240,22 @@ func (ms *MongoStorage) SetTPStats(tpSTs []*utils.TPStatProfile) (err error) {
 				bson.M{"$set": tp},
 				options.Update().SetUpsert(true),
 			)
+			if err != nil {
+				return err
+			}
+		}
+		return nil
+	})
+}
+
+func (ms *MongoStorage) SetTPSags(tpSags []*utils.TPSagsProfile) (err error) {
+	if len(tpSags) == 0 {
+		return
+	}
+	return ms.query(func(sctx mongo.SessionContext) (err error) {
+		for _, tp := range tpSags {
+			_, err := ms.getCol(utils.TBLTPSags).UpdateOne(sctx, bson.M{"tpid": tp.TPid, "id": tp.ID},
+				bson.M{"$set": tp}, options.Update().SetUpsert(true))
 			if err != nil {
 				return err
 			}

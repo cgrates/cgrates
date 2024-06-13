@@ -408,6 +408,33 @@ func (ldr *Loader) storeLoadedData(loaderType string,
 				cacheArgs[utils.CacheStatQueues] = ids
 			}
 		}
+	case utils.MetaSags:
+		for _, lDataSet := range lds {
+			stsModels := make(engine.SagsMdls, len(lDataSet))
+			for i, ld := range lDataSet {
+				stsModels[i] = new(engine.SagsMdl)
+				if err = utils.UpdateStructWithIfaceMap(stsModels[i], ld); err != nil {
+					return
+				}
+			}
+			for _, tpSgs := range stsModels.AsTPSags() {
+				sgsPrf, err := engine.APItoSags(tpSgs)
+				if err != nil {
+					return err
+				}
+				if ldr.dryRun {
+					utils.Logger.Info(
+						fmt.Sprintf("<%s-%s> DRY_RUN: StatsQueueProfile: %s",
+							utils.LoaderS, ldr.ldrID, utils.ToJSON(sgsPrf)))
+					continue
+				}
+				// get IDs so we can reload in cache
+				ids = append(ids, sgsPrf.TenantID())
+				if err := ldr.dm.SetSagProfile(sgsPrf); err != nil {
+					return err
+				}
+			}
+		}
 	case utils.MetaThresholds:
 		cacheIDs = []string{utils.CacheThresholdFilterIndexes}
 		for _, lDataSet := range lds {

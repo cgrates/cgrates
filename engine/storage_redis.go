@@ -929,6 +929,29 @@ func (rs *RedisStorage) RemStatQueueDrv(tenant, id string) (err error) {
 	return rs.Cmd(nil, redis_DEL, utils.StatQueuePrefix+utils.ConcatenatedKey(tenant, id))
 }
 
+func (rs *RedisStorage) SetSagProfileDrv(sg *SagProfile) (err error) {
+	var result []byte
+	if result, err = rs.ms.Marshal(sg); err != nil {
+		return
+	}
+	return rs.Cmd(nil, redis_SET, utils.SagsProfilePrefix+utils.ConcatenatedKey(sg.Tenant, sg.ID), string(result))
+}
+
+func (rs *RedisStorage) GetSagProfileDrv(tenant string, id string) (sg *SagProfile, err error) {
+	var values []byte
+	if err = rs.Cmd(&values, redis_GET, utils.SagsProfilePrefix+utils.ConcatenatedKey(tenant, id)); err != nil {
+		return
+	} else if len(values) == 0 {
+		err = utils.ErrNotFound
+		return
+	}
+	err = rs.ms.Unmarshal(values, &sg)
+	return
+}
+func (rs *RedisStorage) RemSagProfileDrv(tenant string, id string) (err error) {
+	return rs.Cmd(nil, redis_DEL, utils.SagsProfilePrefix+utils.ConcatenatedKey(tenant, id))
+}
+
 // GetThresholdProfileDrv retrieves a ThresholdProfile from dataDB
 func (rs *RedisStorage) GetThresholdProfileDrv(tenant, ID string) (tp *ThresholdProfile, err error) {
 	var values []byte
