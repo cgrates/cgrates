@@ -65,6 +65,7 @@ const (
 	ColRes  = "resources"
 	ColSqs  = "statqueues"
 	ColSqp  = "statqueue_profiles"
+	ColSgp  = "sag_profiles"
 	ColTps  = "threshold_profiles"
 	ColThs  = "thresholds"
 	ColFlt  = "filters"
@@ -300,14 +301,14 @@ func (ms *MongoStorage) ensureIndexesForCol(col string) error { // exported for 
 	switch col {
 	case ColAct, ColApl, ColAAp, ColAtr, ColRpl, ColDst, ColRds, ColLht, ColIndx:
 		err = ms.enusureIndex(col, true, "key")
-	case ColRsP, ColRes, ColSqs, ColSqp, ColTps, ColThs, ColRts, ColAttr, ColFlt, ColCpp, ColDpp, ColDph:
+	case ColRsP, ColRes, ColSqs, ColSgp, ColSqp, ColTps, ColThs, ColRts, ColAttr, ColFlt, ColCpp, ColDpp, ColDph:
 		err = ms.enusureIndex(col, true, "tenant", "id")
 	case ColRpf, ColShg, ColAcc:
 		err = ms.enusureIndex(col, true, "id")
 		// StorDB
 	case utils.TBLTPTimings, utils.TBLTPDestinations,
 		utils.TBLTPDestinationRates, utils.TBLTPRatingPlans,
-		utils.TBLTPSharedGroups, utils.TBLTPActions,
+		utils.TBLTPSharedGroups, utils.TBLTPActions, utils.TBLTPSags,
 		utils.TBLTPActionPlans, utils.TBLTPActionTriggers,
 		utils.TBLTPStats, utils.TBLTPResources, utils.TBLTPDispatchers,
 		utils.TBLTPDispatcherHosts, utils.TBLTPChargers,
@@ -346,13 +347,13 @@ func (ms *MongoStorage) EnsureIndexes(cols ...string) error {
 			cols = []string{
 				ColAct, ColApl, ColAAp, ColAtr, ColRpl, ColDst, ColRds, ColLht, ColIndx,
 				ColRsP, ColRes, ColSqs, ColSqp, ColTps, ColThs, ColRts, ColAttr, ColFlt, ColCpp,
-				ColDpp, ColRpf, ColShg, ColAcc,
+				ColDpp, ColRpf, ColShg, ColAcc, ColSgp,
 			}
 		} else {
 			cols = []string{
 				utils.TBLTPTimings, utils.TBLTPDestinations, utils.TBLTPDestinationRates,
 				utils.TBLTPRatingPlans, utils.TBLTPSharedGroups, utils.TBLTPActions, utils.TBLTPActionPlans,
-				utils.TBLTPActionTriggers, utils.TBLTPStats, utils.TBLTPResources, utils.TBLTPRatingProfiles,
+				utils.TBLTPActionTriggers, utils.TBLTPSags, utils.TBLTPStats, utils.TBLTPResources, utils.TBLTPRatingProfiles,
 				utils.CDRsTBL, utils.SessionCostsTBL,
 			}
 		}
@@ -433,6 +434,8 @@ func (ms *MongoStorage) RemoveKeysForPrefix(prefix string) error {
 		colName = ColTps
 	case utils.StatQueueProfilePrefix:
 		colName = ColSqp
+	case utils.SagsProfilePrefix:
+		colName = ColSgp
 	case utils.ThresholdPrefix:
 		colName = ColThs
 	case utils.FilterPrefix:
@@ -598,6 +601,8 @@ func (ms *MongoStorage) GetKeysForPrefix(prefix string) (keys []string, err erro
 			keys, qryErr = ms.getAllKeysMatchingTenantID(sctx, ColRes, utils.ResourcesPrefix, subject, tntID)
 		case utils.StatQueuePrefix:
 			keys, qryErr = ms.getAllKeysMatchingTenantID(sctx, ColSqs, utils.StatQueuePrefix, subject, tntID)
+		case utils.SagsProfilePrefix:
+			keys, qryErr = ms.getAllKeysMatchingTenantID(sctx, ColSgp, utils.SagsProfilePrefix, subject, tntID)
 		case utils.StatQueueProfilePrefix:
 			keys, qryErr = ms.getAllKeysMatchingTenantID(sctx, ColSqp, utils.StatQueueProfilePrefix, subject, tntID)
 		case utils.AccountActionPlansPrefix:
@@ -669,6 +674,8 @@ func (ms *MongoStorage) HasDataDrv(category, subject, tenant string) (has bool, 
 		case utils.StatQueuePrefix:
 			count, err = ms.getCol(ColSqs).CountDocuments(sctx, bson.M{"tenant": tenant, "id": subject})
 		case utils.StatQueueProfilePrefix:
+			count, err = ms.getCol(ColSqp).CountDocuments(sctx, bson.M{"tenant": tenant, "id": subject})
+		case utils.SagsProfilePrefix:
 			count, err = ms.getCol(ColSqp).CountDocuments(sctx, bson.M{"tenant": tenant, "id": subject})
 		case utils.ThresholdPrefix:
 			count, err = ms.getCol(ColThs).CountDocuments(sctx, bson.M{"tenant": tenant, "id": subject})
@@ -1514,6 +1521,39 @@ func (ms *MongoStorage) RemStatQueueDrv(tenant, id string) error {
 		}
 		return err
 	})
+}
+
+func (ms *MongoStorage) GetSagProfileDrv(tenant, id string) (*SagProfile, error) {
+	sgProfile := new(SagProfile)
+	err := ms.query(func(sctx mongo.SessionContext) error {
+		sr := ms.getCol(ColSgp).FindOne(sctx, bson.M{"tenant": tenant, "id": id})
+		decodeErr := sr.Decode(sgProfile)
+		if errors.Is(decodeErr, mongo.ErrNoDocuments) {
+			return utils.ErrNotFound
+		}
+		return decodeErr
+	})
+	return sgProfile, err
+}
+
+func (ms *MongoStorage) SetSagProfileDrv(sgp *SagProfile) (err error) {
+	return ms.query(func(sctx mongo.SessionContext) error {
+		_, err := ms.getCol(ColSgp).UpdateOne(sctx, bson.M{"tenant": sgp.Tenant, "id": sgp.ID},
+			bson.M{"$set": sgp},
+			options.Update().SetUpsert(true))
+		return err
+	})
+}
+
+func (ms *MongoStorage) RemSagProfileDrv(tenant, id string) (err error) {
+	return ms.query(func(sctx mongo.SessionContext) error {
+		dr, err := ms.getCol(ColSgp).DeleteOne(sctx, bson.M{"tenant": tenant, "id": id})
+		if dr.DeletedCount == 0 {
+			return utils.ErrNotFound
+		}
+		return err
+	})
+
 }
 
 // GetThresholdProfileDrv retrieves a ThresholdProfile from dataDB

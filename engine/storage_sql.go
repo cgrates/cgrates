@@ -124,7 +124,7 @@ func (sqls *SQLStorage) GetTpIds(colName string) ([]string, error) {
 	qryStr := fmt.Sprintf(" (SELECT tpid FROM %s)", colName)
 	if colName == "" {
 		qryStr = fmt.Sprintf(
-			"(SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s)",
+			"(SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s)",
 			utils.TBLTPTimings,
 			utils.TBLTPDestinations,
 			utils.TBLTPRates,
@@ -137,6 +137,7 @@ func (sqls *SQLStorage) GetTpIds(colName string) ([]string, error) {
 			utils.TBLTPAccountActions,
 			utils.TBLTPResources,
 			utils.TBLTPStats,
+			utils.TBLTPSags,
 			utils.TBLTPThresholds,
 			utils.TBLTPFilters,
 			utils.TBLTPActionPlans,
@@ -238,7 +239,7 @@ func (sqls *SQLStorage) RemTpData(table, tpid string, args map[string]string) er
 	if len(table) == 0 { // Remove tpid out of all tables
 		for _, tblName := range []string{utils.TBLTPTimings, utils.TBLTPDestinations, utils.TBLTPRates,
 			utils.TBLTPDestinationRates, utils.TBLTPRatingPlans, utils.TBLTPRatingProfiles,
-			utils.TBLTPSharedGroups, utils.TBLTPActions, utils.TBLTPActionTriggers,
+			utils.TBLTPSharedGroups, utils.TBLTPActions, utils.TBLTPActionTriggers, utils.TBLTPSags,
 			utils.TBLTPAccountActions, utils.TBLTPResources, utils.TBLTPStats, utils.TBLTPThresholds,
 			utils.TBLTPFilters, utils.TBLTPActionPlans, utils.TBLTPRoutes, utils.TBLTPAttributes,
 			utils.TBLTPChargers, utils.TBLTPDispatchers, utils.TBLTPDispatcherHosts} {
@@ -567,6 +568,27 @@ func (sqls *SQLStorage) SetTPStats(sts []*utils.TPStatProfile) error {
 		}
 		for _, mst := range APItoModelStats(stq) {
 			if err := tx.Create(&mst).Error; err != nil {
+				tx.Rollback()
+				return err
+			}
+		}
+	}
+	tx.Commit()
+	return nil
+}
+
+func (sqls *SQLStorage) SetTPSags(sgs []*utils.TPSagsProfile) error {
+	if len(sgs) == 0 {
+		return nil
+	}
+	tx := sqls.db.Begin()
+	for _, sg := range sgs {
+		if err := tx.Where(&SagsMdl{Tpid: sg.TPid, ID: sg.ID}).Delete(SagsMdl{}).Error; err != nil {
+			tx.Rollback()
+			return err
+		}
+		for _, msg := range APItoModelSag(sg) {
+			if err := tx.Create(&msg).Error; err != nil {
 				tx.Rollback()
 				return err
 			}
@@ -1416,6 +1438,25 @@ func (sqls *SQLStorage) GetTPStats(tpid, tenant, id string) ([]*utils.TPStatProf
 		return asts, utils.ErrNotFound
 	}
 	return asts, nil
+}
+
+func (sqls *SQLStorage) GetTPSags(tpid string, tenant string, id string) ([]*utils.TPSagsProfile, error) {
+	var sgs SagsMdls
+	q := sqls.db.Where("tpid = ?", tpid)
+	if len(id) != 0 {
+		q = q.Where("id = ?", id)
+	}
+	if len(tenant) != 0 {
+		q = q.Where("tenant = ?", tenant)
+	}
+	if err := q.Find(&sgs).Error; err != nil {
+		return nil, err
+	}
+	asgs := sgs.AsTPSags()
+	if len(asgs) == 0 {
+		return asgs, utils.ErrNotFound
+	}
+	return asgs, nil
 }
 
 func (sqls *SQLStorage) GetTPThresholds(tpid, tenant, id string) ([]*utils.TPThresholdProfile, error) {

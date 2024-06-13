@@ -593,6 +593,22 @@ func (iDB *InternalDB) RemStatQueueDrv(tenant, id string) (err error) {
 	return
 }
 
+func (iDB *InternalDB) SetSagProfileDrv(sgp *SagProfile) (err error) {
+	iDB.db.Set(utils.CacheSagsProfiles, sgp.TenantID(), sgp, nil, true, utils.NonTransactional)
+	return nil
+}
+func (iDB *InternalDB) RemSagProfileDrv(tenant, id string) (err error) {
+	iDB.db.Remove(utils.CacheSagsProfiles, utils.ConcatenatedKey(tenant, id), true, utils.NonTransactional)
+	return nil
+}
+func (iDB *InternalDB) GetSagProfileDrv(tenant, id string) (sg *SagProfile, err error) {
+	x, ok := iDB.db.Get(utils.CacheSagsProfiles, utils.ConcatenatedKey(tenant, id))
+	if !ok || x == nil {
+		return nil, utils.ErrNotFound
+	}
+	return x.(*SagProfile), nil
+}
+
 func (iDB *InternalDB) GetThresholdProfileDrv(tenant, id string) (tp *ThresholdProfile, err error) {
 	x, ok := iDB.db.Get(utils.CacheThresholdProfiles, utils.ConcatenatedKey(tenant, id))
 	if !ok || x == nil {

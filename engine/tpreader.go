@@ -49,6 +49,7 @@ type TpReader struct {
 	sharedGroups       map[string]*SharedGroup
 	resProfiles        map[utils.TenantID]*utils.TPResourceProfile
 	sqProfiles         map[utils.TenantID]*utils.TPStatProfile
+	sgProfiles         map[utils.TenantID]*utils.TPSagsProfile
 	thProfiles         map[utils.TenantID]*utils.TPThresholdProfile
 	filters            map[utils.TenantID]*utils.TPFilterProfile
 	routeProfiles      map[utils.TenantID]*utils.TPRouteProfile
@@ -95,6 +96,7 @@ func (tpr *TpReader) Init() {
 	tpr.accountActions = make(map[string]*Account)
 	tpr.resProfiles = make(map[utils.TenantID]*utils.TPResourceProfile)
 	tpr.sqProfiles = make(map[utils.TenantID]*utils.TPStatProfile)
+	tpr.sgProfiles = make(map[utils.TenantID]*utils.TPSagsProfile)
 	tpr.thProfiles = make(map[utils.TenantID]*utils.TPThresholdProfile)
 	tpr.routeProfiles = make(map[utils.TenantID]*utils.TPRouteProfile)
 	tpr.attributeProfiles = make(map[utils.TenantID]*utils.TPAttributeProfile)
@@ -1134,6 +1136,23 @@ func (tpr *TpReader) LoadStats() error {
 	return tpr.LoadStatsFiltered("")
 }
 
+func (tpr *TpReader) LoadSagsFiltered(tag string) error {
+	tps, err := tpr.lr.GetTPSags(tpr.tpid, "", tag)
+	if err != nil {
+		return err
+	}
+	mapSgs := make(map[utils.TenantID]*utils.TPSagsProfile)
+	for _, sg := range tps {
+		mapSgs[utils.TenantID{Tenant: sg.Tenant, ID: sg.ID}] = sg
+	}
+	tpr.sgProfiles = mapSgs
+	return nil
+}
+
+func (tpr *TpReader) LoadSags() error {
+	return tpr.LoadSagsFiltered("")
+}
+
 func (tpr *TpReader) LoadThresholdsFiltered(tag string) (err error) {
 	tps, err := tpr.lr.GetTPThresholds(tpr.tpid, "", tag)
 	if err != nil {
@@ -1315,6 +1334,9 @@ func (tpr *TpReader) LoadAll() (err error) {
 		return
 	}
 	if err = tpr.LoadStats(); err != nil && err.Error() != utils.NotFoundCaps {
+		return
+	}
+	if err = tpr.LoadSags(); err != nil && err.Error() != utils.NotFoundCaps {
 		return
 	}
 	if err = tpr.LoadThresholds(); err != nil && err.Error() != utils.NotFoundCaps {
@@ -1569,6 +1591,25 @@ func (tpr *TpReader) WriteToDatabase(verbose, disableReverse bool) (err error) {
 		}
 	}
 	if len(tpr.sqProfiles) != 0 {
+		loadIDs[utils.CacheStatQueues] = loadID
+		loadIDs[utils.CacheStatQueueProfiles] = loadID
+	}
+	if verbose {
+		log.Print("SagProfiles:")
+	}
+	for _, tpSG := range tpr.sgProfiles {
+		var sg *SagProfile
+		if sg, err = APItoSags(tpSG); err != nil {
+			return
+		}
+		if err = tpr.dm.SetSagProfile(sg); err != nil {
+			return
+		}
+		if verbose {
+			log.Print("\t", sg.TenantID())
+		}
+	}
+	if len(tpr.sgProfiles) != 0 {
 		loadIDs[utils.CacheStatQueues] = loadID
 		loadIDs[utils.CacheStatQueueProfiles] = loadID
 	}
@@ -2046,6 +2087,17 @@ func (tpr *TpReader) RemoveFromDatabase(verbose, disableReverse bool) (err error
 		}
 		if verbose {
 			log.Print("\t", utils.ConcatenatedKey(tpST.Tenant, tpST.ID))
+		}
+	}
+	if verbose {
+		log.Printf("SagProfiles:")
+	}
+	for _, tpSgs := range tpr.sgProfiles {
+		if err = tpr.dm.RemoveSagProfile(tpSgs.Tenant, tpSgs.ID); err != nil {
+			return
+		}
+		if verbose {
+			log.Print("\t", utils.ConcatenatedKey(tpSgs.Tenant, tpSgs.ID))
 		}
 	}
 	if verbose {

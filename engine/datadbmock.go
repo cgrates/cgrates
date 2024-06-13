@@ -38,6 +38,10 @@ type DataDBMock struct {
 	GetStatQueueProfileDrvF   func(tenant, id string) (sq *StatQueueProfile, err error)
 	SetStatQueueProfileDrvF   func(sq *StatQueueProfile) (err error)
 	RemStatQueueProfileDrvF   func(tenant, id string) (err error)
+	SetSagProfileDrvF         func(sq *SagProfile) (err error)
+	GetSagProfileDrvF         func(tenant string, id string) (sq *SagProfile, err error)
+	RemSagProfileDrvF         func(tenant string, id string) (err error)
+	GetSagsProfileDrvF        func(tenant, id string) (sg *SagProfile, err error)
 	GetActionPlanDrvF         func(key string) (ap *ActionPlan, err error)
 	SetActionPlanDrvF         func(key string, ap *ActionPlan) (err error)
 	RemoveActionPlanDrvF      func(key string) (err error)
@@ -326,6 +330,27 @@ func (dbM *DataDBMock) SetStatQueueProfileDrv(sq *StatQueueProfile) (err error) 
 func (dbM *DataDBMock) RemStatQueueProfileDrv(tenant, id string) (err error) {
 	if dbM.RemStatQueueProfileDrvF != nil {
 		return dbM.RemStatQueueProfileDrvF(tenant, id)
+	}
+	return utils.ErrNotImplemented
+}
+
+func (dbM *DataDBMock) GetSagProfileDrv(tenant, id string) (sg *SagProfile, err error) {
+	if dbM.GetStatQueueProfileDrvF != nil {
+		return dbM.GetSagProfileDrvF(tenant, id)
+	}
+	return nil, utils.ErrNotImplemented
+}
+
+func (dbM *DataDBMock) SetSagProfileDrv(sg *SagProfile) (err error) {
+	if dbM.SetSagProfileDrvF(sg) != nil {
+		return dbM.SetSagProfileDrvF(sg)
+	}
+	return utils.ErrNotImplemented
+}
+
+func (dbM *DataDBMock) RemSagProfileDrv(tenant string, id string) (err error) {
+	if dbM.RemSagProfileDrvF != nil {
+		return dbM.RemSagProfileDrvF(tenant, id)
 	}
 	return utils.ErrNotImplemented
 }
