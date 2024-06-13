@@ -152,9 +152,9 @@ func RegisterActionFunc(action string, f actionTypeFunc) {
 
 // transferBalanceAction transfers units between accounts' balances.
 // It ensures both source and destination balances are of the same type and non-expired.
-// Destination account and balance IDs are obtained from Action's ExtraParameters.
-// ExtraParameters should be a JSON string containing keys 'DestAccountID' and 'DestBalanceID',
-// which identify the destination account and balance for the transfer.
+// Destination account and balance IDs, and optionally a reference value, are obtained from Action's ExtraParameters.
+// If a reference value is specified, the transfer ensures the destination balance reaches this value.
+// If the destination account is different from the source, it is locked during the transfer.
 func transferBalanceAction(srcAcc *Account, act *Action, _ Actions, fltrS *FilterS, _ any, _ time.Time, _ ActionConnCfg) error {
 	if srcAcc == nil {
 		return errors.New("source account is nil")
@@ -174,50 +174,76 @@ func transferBalanceAction(srcAcc *Account, act *Action, _ Actions, fltrS *Filte
 		return errors.New("source balance not found or expired")
 	}
 
-	transferUnits := act.Balance.GetValue()
-	if transferUnits == 0 {
-		return errors.New("balance value is missing or 0")
-	}
-	if srcBalance.ID != utils.MetaDefault && transferUnits > srcBalance.Value {
-		return utils.ErrInsufficientCredit
-	}
-
-	accDestInfo := struct {
-		DestinationAccountID string
-		DestinationBalanceID string
+	destInfo := struct {
+		AccID  string   `json:"DestinationAccountID"`
+		BalID  string   `json:"DestinationBalanceID"`
+		RefVal *float64 `json:"DestinationReferenceValue"`
 	}{}
-	if err := json.Unmarshal([]byte(act.ExtraParameters), &accDestInfo); err != nil {
+	if err := json.Unmarshal([]byte(act.ExtraParameters), &destInfo); err != nil {
 		return err
 	}
 
+	// Lock the destination account if different from source, otherwise
+	// pass without lock key and timeout.
+	diffAcnts := srcAcc.ID != destInfo.AccID
+	var lockTimeout time.Duration
+	lockKeys := make([]string, 0, 1)
+	if diffAcnts {
+		lockTimeout = config.CgrConfig().GeneralCfg().LockingTimeout
+		lockKeys = append(lockKeys, utils.AccountPrefix+destInfo.AccID)
+	}
+
 	// This guard is meant to lock the destination account as we are making changes
-	// to it. It was not needed for the source account due to it being locked from
-	// outside this function.
+	// to it. It is needed for the source account due to it being locked from outside
+	// this function.
 	guardErr := guardian.Guardian.Guard(func() error {
-		destAcc, err := dm.GetAccount(accDestInfo.DestinationAccountID)
-		if err != nil {
-			return fmt.Errorf("retrieving destination account failed: %w", err)
+
+		var destAcc *Account
+		switch diffAcnts {
+		case true:
+			var err error
+			if destAcc, err = dm.GetAccount(destInfo.AccID); err != nil {
+				return fmt.Errorf("retrieving destination account failed: %w", err)
+			}
+		case false:
+			destAcc = srcAcc
 		}
 
 		if destAcc.BalanceMap == nil {
 			destAcc.BalanceMap = make(map[string]Balances)
 		}
 
-		// We look for the destination balance only through balances of the same
-		// type as the source balance.
-		destBalance := destAcc.GetBalanceWithID(srcBalanceType, accDestInfo.DestinationBalanceID)
+		// Look for the destination balance only through balances of the same type as the source balance.
+		destBalance := destAcc.GetBalanceWithID(srcBalanceType, destInfo.BalID)
 		if destBalance != nil && destBalance.IsExpiredAt(time.Now()) {
 			return errors.New("destination balance expired")
 		}
 
 		if destBalance == nil {
-			// Destination Balance was not found. It will be
-			// created and added to the balance map.
+			// Destination Balance was not found. Create it and add it to the balance map.
 			destBalance = &Balance{
-				ID:   accDestInfo.DestinationBalanceID,
+				ID:   destInfo.BalID,
 				Uuid: utils.GenUUID(),
 			}
 			destAcc.BalanceMap[srcBalanceType] = append(destAcc.BalanceMap[srcBalanceType], destBalance)
+		}
+
+		// If DestinationReferenceValue is specified adjust transferUnits to make the
+		// destination balance match the DestinationReferenceValue.
+		transferUnits := act.Balance.GetValue()
+		if destInfo.RefVal != nil {
+			transferUnits = *destInfo.RefVal - destBalance.Value
+		}
+		if transferUnits == 0 {
+			return errors.New("transfer amount is missing or 0")
+		}
+		if srcBalance.ID != utils.MetaDefault && transferUnits > srcBalance.Value {
+			return fmt.Errorf("insufficient credits in source balance %q (account %q) for transfer of %.2f units",
+				srcBalance.ID, srcAcc.ID, transferUnits)
+		}
+		if destBalance.ID != utils.MetaDefault && -transferUnits > destBalance.Value {
+			return fmt.Errorf("insufficient credits in destination balance %q (account %q) for transfer of %.2f units",
+				destBalance.ID, destAcc.ID, transferUnits)
 		}
 
 		srcBalance.SubtractValue(transferUnits)
@@ -225,15 +251,15 @@ func transferBalanceAction(srcAcc *Account, act *Action, _ Actions, fltrS *Filte
 		destBalance.AddValue(transferUnits)
 		destBalance.dirty = true
 
-		destAcc.InitCounters()
-		destAcc.ExecuteActionTriggers(act, fltrS)
-
-		if err := dm.SetAccount(destAcc); err != nil {
-			return fmt.Errorf("updating destination account failed: %w", err)
+		if diffAcnts {
+			destAcc.InitCounters()
+			destAcc.ExecuteActionTriggers(act, fltrS)
+			if err := dm.SetAccount(destAcc); err != nil {
+				return fmt.Errorf("updating destination account failed: %w", err)
+			}
 		}
 		return nil
-	}, config.CgrConfig().GeneralCfg().LockingTimeout,
-		utils.AccountPrefix+accDestInfo.DestinationAccountID)
+	}, lockTimeout, lockKeys...)
 	if guardErr != nil {
 		return guardErr
 	}
@@ -401,18 +427,40 @@ func cdrLogAction(acc *Account, a *Action, acs Actions, _ *FilterS, extraData an
 			}
 			continue
 		case utils.MetaTransferBalance:
-			cdr.Cost = action.Balance.GetValue()
 			cdr.Account = utils.SplitConcatenatedKey(acc.ID)[1] // Extract ID from TenantID.
-			accDestInfo := struct {
-				DestinationAccountID string
-				DestinationBalanceID string
+			destInfo := struct {
+				AccID  string   `json:"DestinationAccountID"`
+				BalID  string   `json:"DestinationBalanceID"`
+				RefVal *float64 `json:"DestinationReferenceValue"`
 			}{}
-			if err := json.Unmarshal([]byte(action.ExtraParameters), &accDestInfo); err != nil {
+			if err := json.Unmarshal([]byte(action.ExtraParameters), &destInfo); err != nil {
 				return err
 			}
-			cdr.Destination = utils.SplitConcatenatedKey(accDestInfo.DestinationAccountID)[1] // Extract ID from TenantID.
+
+			transferUnits := action.Balance.GetValue()
+			if destInfo.RefVal != nil {
+				tmpDestVal := 0.0
+				_, srcBalanceType := acc.FindBalanceByID(*action.Balance.ID)
+				destAcc := acc
+				if acc.ID != destInfo.AccID {
+					destAcc, err = dm.GetAccount(destInfo.AccID)
+					if err != nil {
+						return fmt.Errorf("retrieving destination account failed: %w", err)
+					}
+				}
+				if destAcc.BalanceMap != nil {
+					destBalance := destAcc.GetBalanceWithID(srcBalanceType, destInfo.BalID)
+					if destBalance != nil {
+						tmpDestVal = destBalance.Value
+					}
+				}
+				transferUnits = *destInfo.RefVal - tmpDestVal
+			}
+			cdr.Cost = transferUnits
+			cdr.Destination = utils.SplitConcatenatedKey(destInfo.AccID)[1] // Extract ID from TenantID.
 			cdr.ExtraFields[utils.SourceBalanceID] = *action.Balance.ID
-			cdr.ExtraFields[utils.DestinationBalanceID] = accDestInfo.DestinationBalanceID
+			cdr.ExtraFields[utils.DestinationBalanceID] = destInfo.BalID
+			cdr.ExtraFields[utils.DestinationAccountID] = destInfo.AccID
 		}
 
 		cdrs = append(cdrs, cdr)

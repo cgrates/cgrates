@@ -21,6 +21,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package general_tests
 
 import (
+	"fmt"
 	"sort"
 	"testing"
 	"time"
@@ -302,5 +303,183 @@ ACT_TRANSFER,*transfer_balance,"{""DestinationAccountID"":""cgrates.org:ACC_DEST
 		if cdrs[2].Cost != 4 {
 			t.Errorf("cost expected to be %v, received %v", 2, cdrs[2].Cost)
 		}
+	})
+}
+
+func TestATExportAndTransfer(t *testing.T) {
+	switch *utils.DBType {
+	case utils.MetaInternal:
+	case utils.MetaMySQL, utils.MetaMongo, utils.MetaPostgres:
+		t.SkipNow()
+	default:
+		t.Fatal("unsupported dbtype value")
+	}
+
+	content := `{
+
+"general": {
+	"log_level": 7,
+	"reply_timeout": "30s"
+},
+
+"data_db": {								
+	"db_type": "*internal"
+},
+
+"stor_db": {
+	"db_type": "*internal"
+},
+
+"cdrs": {
+	"enabled": true,
+	"rals_conns": ["*localhost"]
+},
+
+"rals": {
+	"enabled": true
+},
+
+"schedulers": {
+	"enabled": true,
+	"cdrs_conns": ["*internal"]
+},
+
+"apiers": {
+	"enabled": true,
+	"scheduler_conns": ["*internal"],
+	"ees_conns": ["*localhost"]
+},
+
+"ees": {
+	"enabled": true,
+	"exporters": [
+		{
+			"id": "test_exporter",
+			"type": "*virt",
+			"flags": ["*log"],
+			"attempts": 1,
+			"synchronous": true
+		}
+	]
+}
+
+}`
+
+	tpFiles := map[string]string{
+		utils.AccountActionsCsv: `#Tenant,Account,ActionPlanId,ActionTriggersId,AllowNegative,Disabled
+cgrates.org,1001,PACKAGE_1001,EMPTY_BALANCE_TRIGGER,,`,
+		utils.ActionPlansCsv: `#Id,ActionsId,TimingId,Weight
+PACKAGE_1001,ACT_TOPUP_INITIAL,*asap,
+#PACKAGE_1001,ACT_TOPUP_BUFFER,*asap,
+#PACKAGE_1001,ACT_TOPUP_TRANSFER,*monthly,`,
+		utils.ActionsCsv: `#ActionsId[0],Action[1],ExtraParameters[2],Filter[3],BalanceId[4],BalanceType[5],Categories[6],DestinationIds[7],RatingSubject[8],SharedGroup[9],ExpiryTime[10],TimingIds[11],Units[12],BalanceWeight[13],BalanceBlocker[14],BalanceDisabled[15],Weight[16]
+ACT_TOPUP_INITIAL,*topup_reset,,,main,*data,,,,,*unlimited,,11000,10,,,20
+ACT_TOPUP_INITIAL,*transfer_balance,"{""DestinationAccountID"":""cgrates.org:1001"",""DestinationBalanceID"":""buffer"",""DestinationReferenceValue"":10000}",,main,,,,,,,,,,,,10
+ACT_TOPUP_INITIAL,*cdrlog,"{""ToR"":""*data""}",,,,,,,,,,,,,,0
+ACT_EXPORT,*export,test_exporter,,,,,,,,,,,,,,
+ACT_TOPUP_TRANSFER,*topup,,,main,*data,,,,,,,5000,,,,30
+ACT_TOPUP_TRANSFER,*transfer_balance,"{""DestinationAccountID"":""cgrates.org:1001"",""DestinationBalanceID"":""buffer"",""DestinationReferenceValue"":10000}",,main,,,,,,,,,,,,20
+ACT_TOPUP_TRANSFER,*cdrlog,"{""ToR"":""*data""}",,,,,,,,,,,,,,10
+ACT_TOPUP_TRANSFER,*reset_triggers,,,,,,,,,,,,,,,0`,
+		utils.ActionTriggersCsv: `#Tag[0],UniqueId[1],ThresholdType[2],ThresholdValue[3],Recurrent[4],MinSleep[5],ExpiryTime[6],ActivationTime[7],BalanceTag[8],BalanceType[9],BalanceCategories[10],BalanceDestinationIds[11],BalanceRatingSubject[12],BalanceSharedGroup[13],BalanceExpiryTime[14],BalanceTimingIds[15],BalanceWeight[16],BalanceBlocker[17],BalanceDisabled[18],ActionsId[19],Weight[20]
+EMPTY_BALANCE_TRIGGER,,*min_balance,9999,false,0,,,buffer,*data,,,,,,,,,,ACT_EXPORT,
+#EMPTY_BALANCE_TRIGGER,,*min_balance,0,false,0,,,buffer,*data,,,,,,,,,,ACT_EXPORT,`,
+	}
+
+	testEnv := TestEnvironment{
+		ConfigJSON: content,
+		TpFiles:    tpFiles,
+		// LogBuffer:  &bytes.Buffer{},
+	}
+	// defer fmt.Println(testEnv.LogBuffer)
+	client, _ := testEnv.Setup(t, 0)
+
+	t.Run("ProcessCDRs", func(t *testing.T) {
+		i := 0
+		processCDRs := func(t *testing.T, count int, amount int) {
+			// fmt.Println("===========ProcessCDRs===========")
+			t.Helper()
+			var reply string
+			for range count {
+				i++
+				if err := client.Call(context.Background(), utils.CDRsV1ProcessEvent,
+					&engine.ArgV1ProcessEvent{
+						Flags: []string{utils.MetaRALs},
+						CGREvent: utils.CGREvent{
+							Tenant: "cgrates.org",
+							ID:     fmt.Sprintf("event%d", i),
+							Event: map[string]any{
+								utils.RunID:        "*default",
+								utils.Tenant:       "cgrates.org",
+								utils.Category:     "data",
+								utils.ToR:          utils.MetaData,
+								utils.OriginID:     fmt.Sprintf("processCDR%d", i),
+								utils.OriginHost:   "127.0.0.1",
+								utils.RequestType:  utils.MetaPostpaid,
+								utils.AccountField: "1001",
+								utils.Destination:  "1002",
+								utils.SetupTime:    time.Date(2021, time.February, 2, 16, 14, 50, 0, time.UTC),
+								utils.AnswerTime:   time.Date(2021, time.February, 2, 16, 15, 0, 0, time.UTC),
+								utils.Usage:        amount,
+							},
+						},
+					}, &reply); err != nil {
+					t.Errorf("CDRsV1ProcessEvent(%d) err: %v", i, err)
+				}
+			}
+		}
+
+		checkAccountAndCDRs := func(t *testing.T) {
+			// fmt.Println("===========CheckAcc===========")
+			t.Helper()
+			var acnts []*engine.Account
+			err := client.Call(context.Background(), utils.APIerSv2GetAccounts,
+				&utils.AttrGetAccounts{
+					Tenant: "cgrates.org",
+				}, &acnts)
+			t.Logf("APIerSv2GetAccounts err: %v", err)
+			var cdrs []*engine.CDR
+			err = client.Call(context.Background(), utils.CDRsV1GetCDRs, &utils.RPCCDRsFilterWithAPIOpts{
+				RPCCDRsFilter: &utils.RPCCDRsFilter{
+					RunIDs: []string{utils.MetaTopUp, utils.MetaTransferBalance},
+				}}, &cdrs)
+			t.Logf("CDRsV1GetCDRs err: %v", err)
+
+			// fmt.Println(utils.ToJSON(acnts[0].BalanceMap["*data"]))
+			// fmt.Println(utils.ToJSON(cdrs))
+		}
+
+		executeAction := func(t *testing.T, id string) {
+			var reply string
+			attrsEA := &utils.AttrExecuteAction{Tenant: "cgrates.org", Account: "1001", ActionsId: id}
+			if err := client.Call(context.Background(), utils.APIerSv1ExecuteAction, attrsEA, &reply); err != nil {
+				t.Errorf("APIerSv1ExecuteAction err: %v", err)
+			}
+		}
+
+		time.Sleep(100 * time.Millisecond)
+		checkAccountAndCDRs(t)                 // main 1000 buffer 10000 total 11000
+		processCDRs(t, 2, 600)                 // -1200 + export
+		checkAccountAndCDRs(t)                 // main 0 buffer 9800 total 9800
+		executeAction(t, "ACT_TOPUP_TRANSFER") // +5000
+		checkAccountAndCDRs(t)                 // main 4800 buffer 10000 total 14800
+		processCDRs(t, 8, 600)                 // -4800 (no export)
+		checkAccountAndCDRs(t)                 // main 0 buffer 10000 total 10000
+		processCDRs(t, 1, 600)                 // -600 + export
+		checkAccountAndCDRs(t)                 // main 0 buffer 9400 total 9400
+
+		var reply string
+		if err := client.Call(context.Background(), utils.APIerSv1TransferBalance, utils.AttrTransferBalance{
+			Tenant:                    "cgrates.org",
+			SourceAccountID:           "1001",
+			SourceBalanceID:           "main",
+			DestinationAccountID:      "1001",
+			DestinationBalanceID:      "buffer",
+			DestinationReferenceValue: utils.Float64Pointer(5000),
+			Cdrlog:                    true,
+		}, &reply); err != nil {
+			t.Error(err)
+		}
+		checkAccountAndCDRs(t) // main 4400 buffer 5000 total 9400
 	})
 }

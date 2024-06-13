@@ -714,7 +714,7 @@ func (apierSv1 *APIerSv1) RemoveBalances(ctx *context.Context, attr *utils.AttrS
 }
 
 // TransferBalance initiates a balance transfer between accounts, immediately executing the configured actions.
-func (apierSv1 *APIerSv1) TransferBalance(ctx *context.Context, attr utils.AttrTransferBalance, reply *string) (err error) {
+func (apierSv1 *APIerSv1) TransferBalance(ctx *context.Context, attr utils.AttrTransferBalance, reply *string) error {
 
 	// Check for missing mandatory fields in the request attributes.
 	if missing := utils.MissingStructFields(&attr, []string{
@@ -729,12 +729,18 @@ func (apierSv1 *APIerSv1) TransferBalance(ctx *context.Context, attr utils.AttrT
 		attr.Tenant = apierSv1.Config.GeneralCfg().DefaultTenant
 	}
 
-	// Marshal extra parameters including the destination account and balance ID.
-	var extraParams []byte
-	extraParams, err = json.Marshal(map[string]string{
-		utils.DestinationAccountID: attr.Tenant + ":" + attr.DestinationAccountID,
-		utils.DestinationBalanceID: attr.DestinationBalanceID,
-	})
+	// Marshal extra parameters including the destination account, balance ID,
+	// and optional reference value.
+	tmp := struct {
+		DestinationAccountID      string
+		DestinationBalanceID      string
+		DestinationReferenceValue *float64
+	}{
+		DestinationAccountID:      attr.Tenant + ":" + attr.DestinationAccountID,
+		DestinationBalanceID:      attr.DestinationBalanceID,
+		DestinationReferenceValue: attr.DestinationReferenceValue,
+	}
+	extraParams, err := json.Marshal(tmp)
 	if err != nil {
 		return utils.NewErrServerError(err)
 	}
