@@ -1339,60 +1339,7 @@ func TestFSEventGetOptions(t *testing.T) {
 	}
 }
 
-<<<<<<< Updated upstream
-func TestFseventGetADC(t *testing.T) {
-	type testCase struct {
-		name      string
-		fsev      FSEvent
-		fieldName string
-		expect    time.Duration
-		err       error
-	}
-	testCases := []testCase{
-		{
-			name:      "ACD from Var-CGR-ACD with seconds",
-			fsev:      FSEvent{"Var-CGR-ACD": "1640"},
-			fieldName: "ACD",
-			expect:    0 * time.Second,
-		},
-		{
-			name:      "ACD from Var-CGR-ACD with empty string",
-			fsev:      FSEvent{"Var-CGR-ACD": ""},
-			fieldName: "ACD",
-			expect:    0,
-			err:       nil,
-		},
-		{
-			name:      "Static value prefixed field",
-			fsev:      FSEvent{"static_value": "30s"},
-			fieldName: "static_value",
-			expect:    30 * time.Second,
-		},
-		{
-			name:      "Non-existent field",
-			fsev:      FSEvent{},
-			fieldName: "non_existent",
-			expect:    0,
-			err:       nil,
-		},
-	}
-	for _, tc := range testCases {
-		t.Run(tc.name, func(t *testing.T) {
-			got, err := tc.fsev.GetADC(tc.fieldName)
 
-			if tc.err != nil {
-				if err == nil {
-					t.Errorf("Expected error: %v, got none", tc.err)
-				}
-			} else {
-				if err != nil {
-					t.Errorf("Unexpected error: %v", err)
-				}
-			}
-
-			if got != tc.expect {
-				t.Errorf("Expected duration: %v, got: %v", tc.expect, got)
-=======
 func TestFseventMissingParameter(t *testing.T) {
 	testCases := []struct {
 		name string
@@ -1503,7 +1450,6 @@ func TestFseventMissingParameter(t *testing.T) {
 			got := fsev.MissingParameter("")
 			if got != tt.want {
 				t.Errorf("expected %v, got %v", tt.want, got)
->>>>>>> Stashed changes
 			}
 		})
 	}
