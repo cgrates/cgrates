@@ -1339,7 +1339,6 @@ func TestFSEventGetOptions(t *testing.T) {
 	}
 }
 
-
 func TestFseventMissingParameter(t *testing.T) {
 	testCases := []struct {
 		name string
