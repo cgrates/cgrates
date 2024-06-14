@@ -1339,6 +1339,7 @@ func TestFSEventGetOptions(t *testing.T) {
 	}
 }
 
+<<<<<<< Updated upstream
 func TestFseventGetADC(t *testing.T) {
 	type testCase struct {
 		name      string
@@ -1391,6 +1392,118 @@ func TestFseventGetADC(t *testing.T) {
 
 			if got != tc.expect {
 				t.Errorf("Expected duration: %v, got: %v", tc.expect, got)
+=======
+func TestFseventMissingParameter(t *testing.T) {
+	testCases := []struct {
+		name string
+		fsev map[string]string
+		want string
+	}{
+		{
+			name: "missing_account",
+			fsev: map[string]string{
+				SUBJECT:      "subject value",
+				DESTINATION:  "destination value",
+				CATEGORY:     "category value",
+				UUID:         "uuid value",
+				CSTMID:       "tenant value",
+				CALL_DEST_NR: "callDestNr value",
+			},
+			want: utils.AccountField,
+		},
+		{
+			name: "missing_subject",
+			fsev: map[string]string{
+				ACCOUNT:      "account value",
+				DESTINATION:  "destination value",
+				CATEGORY:     "category value",
+				UUID:         "uuid value",
+				CSTMID:       "tenant value",
+				CALL_DEST_NR: "callDestNr value",
+			},
+			want: "",
+		},
+		{
+			name: "missing_destination",
+			fsev: map[string]string{
+				ACCOUNT:      "account value",
+				SUBJECT:      "subject value",
+				CATEGORY:     "category value",
+				UUID:         "uuid value",
+				CSTMID:       "tenant value",
+				CALL_DEST_NR: "callDestNr value",
+			},
+			want: "",
+		},
+		{
+			name: "missing_category",
+			fsev: map[string]string{
+				ACCOUNT:      "account value",
+				SUBJECT:      "subject value",
+				DESTINATION:  "destination value",
+				UUID:         "uuid value",
+				CSTMID:       "tenant value",
+				CALL_DEST_NR: "callDestNr value",
+			},
+			want: "",
+		},
+		{
+			name: "missing_uuid",
+			fsev: map[string]string{
+				ACCOUNT:      "account value",
+				SUBJECT:      "subject value",
+				DESTINATION:  "destination value",
+				CATEGORY:     "category value",
+				CSTMID:       "tenant value",
+				CALL_DEST_NR: "callDestNr value",
+			},
+			want: utils.OriginID,
+		},
+		{
+			name: "missing_tenant",
+			fsev: map[string]string{
+				ACCOUNT:      "account value",
+				SUBJECT:      "subject value",
+				DESTINATION:  "destination value",
+				CATEGORY:     "category value",
+				UUID:         "uuid value",
+				CALL_DEST_NR: "callDestNr value",
+			},
+			want: "",
+		},
+		{
+			name: "missing_callDestNr",
+			fsev: map[string]string{
+				ACCOUNT:     "account value",
+				SUBJECT:     "subject value",
+				DESTINATION: "destination value",
+				CATEGORY:    "category value",
+				UUID:        "uuid value",
+				CSTMID:      "tenant value",
+			},
+			want: CALL_DEST_NR,
+		},
+		{
+			name: "all_present",
+			fsev: map[string]string{
+				ACCOUNT:      "account value",
+				SUBJECT:      "subject value",
+				DESTINATION:  "destination value",
+				CATEGORY:     "category value",
+				UUID:         "uuid value",
+				CSTMID:       "tenant value",
+				CALL_DEST_NR: "callDestNr value",
+			},
+			want: "",
+		},
+	}
+	for _, tt := range testCases {
+		t.Run(tt.name, func(t *testing.T) {
+			fsev := FSEvent(tt.fsev)
+			got := fsev.MissingParameter("")
+			if got != tt.want {
+				t.Errorf("expected %v, got %v", tt.want, got)
+>>>>>>> Stashed changes
 			}
 		})
 	}

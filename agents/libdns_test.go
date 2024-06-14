@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package agents
 
 import (
+	"net"
 	"strings"
 	"testing"
 
@@ -301,4 +302,90 @@ func TestLibdnsUpdateDnsRRHeader(t *testing.T) {
 
 		})
 	}
+}
+
+func TestCreateDnsOption(t *testing.T) {
+	tests := []struct {
+		name     string
+		field    string
+		value    any
+		wantErr  bool
+		wantType dns.EDNS0
+	}{
+		{name: "valid_nsid", field: utils.DNSNsid, value: "1234", wantType: &dns.EDNS0_NSID{Nsid: "1234"}},
+		{name: "valid_family", field: utils.DNSFamily, value: 16, wantType: &dns.EDNS0_SUBNET{Family: 16}},
+		{name: "invalid_family_type", field: utils.DNSFamily, value: "invalid", wantErr: true},
+		{name: "valid_source_netmask", field: utils.DNSSourceNetmask, value: 24, wantType: &dns.EDNS0_SUBNET{SourceNetmask: 24}},
+		{name: "valid_address", field: utils.Address, value: "1.2.3.4", wantType: &dns.EDNS0_SUBNET{Address: net.ParseIP("1.2.3.4")}},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			gotOption, gotErr := createDnsOption(tt.field, tt.value)
+			if (gotErr != nil) != tt.wantErr {
+				t.Errorf("createDnsOption() error = %v, wantErr = %v", gotErr, tt.wantErr)
+				return
+			}
+			if tt.wantErr {
+				return
+			}
+			if gotOption == nil {
+				t.Errorf("createDnsOption() returned nil option")
+				return
+			}
+			switch gotOption := gotOption.(type) {
+			case *dns.EDNS0_NSID:
+			case *dns.EDNS0_SUBNET:
+			default:
+				t.Errorf("Unexpected option type returned from createDnsOption: %T", gotOption)
+			}
+		})
+	}
+}
+
+func equalDNSQuestionsTest(q1, q2 []dns.Question) bool {
+	if len(q1) != len(q2) {
+		return false
+	}
+	for i := range q1 {
+		if q1[i] != q2[i] {
+			return false
+		}
+	}
+	return true
+}
+
+func TestLibdnsUpdateDnsQuestions(t *testing.T) {
+	testQ := dns.Question{Name: "cgrates.org", Qtype: dns.TypeA, Qclass: dns.ClassINET}
+	tests := []struct {
+		name      string
+		q         []dns.Question
+		path      []string
+		value     any
+		newBranch bool
+		wantErr   bool
+		wantQ     []dns.Question
+	}{
+		{
+			"update_name_existing",
+			[]dns.Question{testQ},
+			[]string{utils.DNSName},
+			"cgrates.org",
+			false,
+			false,
+			[]dns.Question{{Name: "cgrates.org", Qtype: dns.TypeA, Qclass: dns.ClassINET}},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			gotQ, err := updateDnsQuestions(tt.q, tt.path, tt.value, tt.newBranch)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("updateDnsQuestions() error = %v, wantErr = %v", err, tt.wantErr)
+				return
+			}
+			if !equalDNSQuestionsTest(gotQ, tt.wantQ) {
+				t.Errorf("updateDnsQuestions() gotQ = %v, wantQ = %v", gotQ, tt.wantQ)
+			}
+		})
+	}
+
 }

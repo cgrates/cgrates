@@ -21,11 +21,14 @@ package agents
 import (
 	"bufio"
 	"bytes"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"net/http/httputil"
 	"strings"
 	"testing"
+
+	"github.com/cgrates/cgrates/utils"
 )
 
 func TestHttpUrlDPFieldAsInterface(t *testing.T) {
@@ -204,5 +207,50 @@ func TestStringReq(t *testing.T) {
 	result := dp.String()
 	if result != string(expected) {
 		t.Errorf("String method returned unexpected result:\nExpected: %s\nGot: %s", string(expected), result)
+	}
+}
+
+func TestLibhttpagentNewHAReplyEncoder(t *testing.T) {
+	tests := []struct {
+		name     string
+		encType  string
+		wantType string
+		wantErr  bool
+	}{
+		{
+			name:     "unsupported_type",
+			encType:  "invalid",
+			wantType: "",
+			wantErr:  true,
+		},
+		{
+			name:     "xml_encoder",
+			encType:  utils.MetaXml,
+			wantType: "*agents.haXMLEncoder",
+			wantErr:  false,
+		},
+		{
+			name:     "text_plain_encoder",
+			encType:  utils.MetaTextPlain,
+			wantType: "*agents.haTextPlainEncoder",
+			wantErr:  false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			w := http.ResponseWriter(nil)
+			gotRE, err := newHAReplyEncoder(tt.encType, w)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("newHAReplyEncoder error = %v, wantErr = %v", err, tt.wantErr)
+				return
+			}
+			if tt.wantErr {
+				return
+			}
+			gotType := fmt.Sprintf("%T", gotRE)
+			if gotType != tt.wantType {
+				t.Errorf("newHAReplyEncoder encoder type = %v, want %v", gotType, tt.wantType)
+			}
+		})
 	}
 }
