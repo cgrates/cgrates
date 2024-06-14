@@ -2894,3 +2894,25 @@ func TestAgReqString(t *testing.T) {
 		t.Errorf("String() returned unexpected value: diff (-expected +got):\n%s", diff)
 	}
 }
+
+func TestCacheRadiusPacket(t *testing.T) {
+	testPacket := &radigo.Packet{}
+	testAddress := "test.address"
+	testCfg := &config.RadiusAgentCfg{
+		ClientDaAddresses: map[string]config.DAClientOpts{
+			"allowed.address": {},
+		},
+	}
+	t.Run("Success", func(t *testing.T) {
+		err := cacheRadiusPacket(testPacket, testAddress, testCfg, nil)
+		if err != nil {
+			t.Errorf("Unexpected error: %v", err)
+		}
+	})
+	t.Run("Address does not match client", func(t *testing.T) {
+		err := cacheRadiusPacket(testPacket, "not.allowed", testCfg, nil)
+		if err != nil {
+			t.Errorf("Unexpected error: %v", err)
+		}
+	})
+}
