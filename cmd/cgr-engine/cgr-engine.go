@@ -433,7 +433,7 @@ func main() {
 
 	if *printConfig {
 		cfgJSON := utils.ToIJSON(cfg.AsMapInterface(cfg.GeneralCfg().RSRSep))
-		utils.Logger.Info(fmt.Sprintf("Configuration loaded from %s:\n%s", *cfgPath, cfgJSON))
+		utils.Logger.Info(fmt.Sprintf("Configuration loaded from %q:\n%s", *cfgPath, cfgJSON))
 	}
 
 	// init the concurrentRequests
