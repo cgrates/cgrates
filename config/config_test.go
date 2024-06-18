@@ -5960,3 +5960,103 @@ func TestConfignewCGRConfigFromPathWithoutEnv(t *testing.T) {
 		t.Error(rcv)
 	}
 }
+
+func TestCgrCfgJSONDefaultSagSCfg(t *testing.T) {
+	want := &SagSCfg{
+		Enabled:    false,
+		StatSConns: []string{},
+	}
+	got := cgrCfg.SagSCfg()
+	if reflect.DeepEqual(got, want) {
+		t.Errorf("received: %+v, expecting: %+v", got, want)
+	}
+}
+
+func TestCgrCfgJSONDefaultSarSCfg(t *testing.T) {
+	want := &SarSCfg{
+		Enabled:         false,
+		StatSConns:      []string{},
+		ThresholdSConns: []string{},
+	}
+	got := cgrCfg.SarSCfg()
+	if reflect.DeepEqual(got, want) {
+		t.Errorf("received: %+v, expecting: %+v", got, want)
+	}
+}
+
+func TestCgrCfgJSONDefaultJanusAgentCfg(t *testing.T) {
+	want := &JanusAgentCfg{
+		Enabled:           false,
+		SessionSConns:     []string{},
+		JanusConns:        []*JanusConn{},
+		RequestProcessors: []*RequestProcessor{},
+	}
+	got := cgrCfg.JanusAgentCfg()
+	if reflect.DeepEqual(got, want) {
+		t.Errorf("received: %+v, expecting: %+v", got, want)
+	}
+}
+
+func TestV1GetConfigAsJSONJanusAgentJson(t *testing.T) {
+	var reply string
+	expected := `{"janus_agent":{"enabled":false,"janus_conns":[{"address":"127.0.0.1:8088","admin_address":"localhost:7188","admin_password":"","type":"*ws"}],"request_processors":[],"sessions_conns":["*internal"],"url":"/janus"}}`
+	cfgCgr := NewDefaultCGRConfig()
+	if err := cfgCgr.V1GetConfigAsJSON(context.Background(), &SectionWithAPIOpts{Section: JanusAgentJson}, &reply); err != nil {
+		t.Error(err)
+	} else if expected != reply {
+		t.Errorf("Expected %+v \n, received %+v", expected, reply)
+	}
+}
+
+func TestV1GetConfigAsJsonSARS_JSON(t *testing.T) {
+	var reply string
+	expected := `{"sars":{"enabled":false,"stats_conns":[]}}`
+	cfgCgr := NewDefaultCGRConfig()
+	if err := cfgCgr.V1GetConfigAsJSON(context.Background(), &SectionWithAPIOpts{Section: SARS_JSON}, &reply); err != nil {
+		t.Error(err)
+	} else if expected != reply {
+		t.Errorf("Expected %+v \n, received %+v", expected, reply)
+	}
+}
+
+func TestV1GetConfigAsJsonSAGS_JSON(t *testing.T) {
+	var reply string
+	expected := `{"sags":{"enabled":false}}`
+	cfgCgr := NewDefaultCGRConfig()
+	if err := cfgCgr.V1GetConfigAsJSON(context.Background(), &SectionWithAPIOpts{Section: SAGS_JSON}, &reply); err != nil {
+		t.Error(err)
+	} else if expected != reply {
+		t.Errorf("Expected %+v \n, received %+v", expected, reply)
+	}
+}
+
+func TestV1GetConfigSARS_JSON(t *testing.T) {
+	var reply map[string]any
+	expected := map[string]any{
+		SARS_JSON: map[string]any{
+			utils.EnabledCfg:    false,
+			utils.StatSConnsCfg: []string{},
+		},
+	}
+	cfgCgr := NewDefaultCGRConfig()
+	if err := cfgCgr.V1GetConfig(context.Background(), &SectionWithAPIOpts{Section: SARS_JSON}, &reply); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(reply, expected) {
+		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(reply))
+	}
+}
+
+func TestV1GetConfigSAGS_JSON(t *testing.T) {
+	var reply map[string]any
+	expected := map[string]any{
+		SAGS_JSON: map[string]any{
+			utils.EnabledCfg: false,
+		},
+	}
+	cfgCgr := NewDefaultCGRConfig()
+	if err := cfgCgr.V1GetConfig(context.Background(), &SectionWithAPIOpts{Section: SAGS_JSON}, &reply); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(reply, expected) {
+		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(reply))
+	}
+}
