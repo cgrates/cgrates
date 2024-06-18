@@ -343,7 +343,11 @@ func StartEngine(cfgPath string, waitEngine int) (*exec.Cmd, error) {
 	if err != nil {
 		return nil, err
 	}
-	engine := exec.Command(enginePath, "-config_path", cfgPath)
+
+	f, _ := os.Create("/tmp/LOGS")
+	engine := exec.Command(enginePath, "-config_path", cfgPath, "-logger=*stdout")
+	engine.Stderr = f
+	engine.Stdout = f
 	if err := engine.Start(); err != nil {
 		return nil, err
 	}

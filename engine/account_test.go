@@ -1265,7 +1265,7 @@ func TestAccountExecuteTriggeredDayWeek(t *testing.T) {
 	// we can reset them
 	resetCountersAction(ub, &Action{
 		Balance: &BalanceFilter{Type: utils.StringPointer(utils.MetaMonetary),
-			ID: utils.StringPointer("day_trigger")}}, nil, nil, nil, time.Now(), ActionConnCfg{})
+			ID: utils.StringPointer("day_trigger")}}, nil, nil, nil, SharedActionsData{}, ActionConnCfg{})
 	if ub.UnitCounters[utils.MetaMonetary][0].Counters[0].Value != 0 ||
 		ub.UnitCounters[utils.MetaMonetary][0].Counters[1].Value != 1 {
 		t.Error("Error reseting both counters",
