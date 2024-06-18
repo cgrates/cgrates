@@ -89,3 +89,13 @@ func TestHandleChannelDestroyedFail(t *testing.T) {
 		t.Errorf("Expected ev to not change, received <%v>", utils.ToJSON(ev))
 	}
 }
+
+func TestAstAgentV1WarnDisconnect(t *testing.T) {
+	tAsteriskAgent := &AsteriskAgent{}
+	tMap := map[string]any{}
+	tString := ""
+	err := tAsteriskAgent.V1WarnDisconnect(nil, tMap, &tString)
+	if err != utils.ErrNotImplemented {
+		t.Errorf("Expected error: %v, got: %v", utils.ErrNotImplemented, err)
+	}
+}
