@@ -26,6 +26,8 @@ import (
 	"time"
 
 	"github.com/cgrates/cgrates/utils"
+	"github.com/google/go-cmp/cmp"
+	"github.com/google/go-cmp/cmp/cmpopts"
 )
 
 var (
@@ -40,7 +42,7 @@ func init() {
 		DestinationsCSVContent, TimingsCSVContent, RatesCSVContent, DestinationRatesCSVContent,
 		RatingPlansCSVContent, RatingProfilesCSVContent, SharedGroupsCSVContent,
 		ActionsCSVContent, ActionPlansCSVContent, ActionTriggersCSVContent, AccountActionsCSVContent,
-		ResourcesCSVContent, StatsCSVContent, SarsCSVContent, ThresholdsCSVContent, FiltersCSVContent,
+		ResourcesCSVContent, StatsCSVContent, SagsCSVContent, ThresholdsCSVContent, FiltersCSVContent,
 		RoutesCSVContent, AttributesCSVContent, ChargersCSVContent, DispatcherCSVContent,
 		DispatcherHostCSVContent), testTPID, "", nil, nil, false)
 	if err != nil {
@@ -87,6 +89,9 @@ func init() {
 	}
 	if err := csvr.LoadStats(); err != nil {
 		log.Print("error in LoadStats:", err)
+	}
+	if err := csvr.LoadSags(); err != nil {
+		log.Print("error in LoadSags:", err)
 	}
 	if err := csvr.LoadThresholds(); err != nil {
 		log.Print("error in LoadThresholds:", err)
@@ -1071,6 +1076,29 @@ func TestLoadStatQueueProfiles(t *testing.T) {
 				utils.ToJSON(eStats[stKey].Metrics),
 				utils.ToJSON(csvr.sqProfiles[stKey].Metrics))
 		}
+	}
+}
+
+func TestLoadSagsProfiles(t *testing.T) {
+	eSags := map[utils.TenantID]*utils.TPSagsProfile{
+		{Tenant: "cgrates.org", ID: "SAGS1"}: {
+			TPid:          testTPID,
+			Tenant:        "cgrates.org",
+			ID:            "SAGS1",
+			QueryInterval: "15m",
+			StatIDs:       []string{"Stats2", "Stats3", "Stats4"},
+			MetricIDs:     []string{"Metric1", "Metric3"},
+			Sorting:       "*asc",
+			ThresholdIDs:  []string{"THD1", "THD2"},
+		},
+	}
+	sgkey := utils.TenantID{Tenant: "cgrates.org", ID: "SAGS1"}
+	if len(eSags) != len(csvr.sgProfiles) {
+		t.Errorf("Failed to load SagProfiles: %+v", csvr.sgProfiles)
+	} else if diff := cmp.Diff(eSags[sgkey], csvr.sgProfiles[sgkey], cmpopts.SortSlices(func(a, b string) bool {
+		return a < b
+	})); diff != "" {
+		t.Errorf("Wrong TPSagsProfiles (-expected +got):\n%s", diff)
 	}
 }
 
