@@ -216,9 +216,8 @@ func (at *ActionTiming) Execute(fltrS *FilterS, originService string) (err error
 			}
 			transactionFailed := false
 			removeAccountActionFound := false
-			accClone := acc.Clone() // *cdrlog action requires the original account
-			referenceTime := time.Now()
-			for _, act := range acts {
+			sharedData := NewSharedActionsData(acts)
+			for i, act := range acts {
 				// check action filter
 				if len(act.Filters) > 0 {
 					if pass, err := fltrS.Pass(utils.NewTenantID(accID).Tenant, act.Filters,
@@ -250,11 +249,8 @@ func (at *ActionTiming) Execute(fltrS *FilterS, originService string) (err error
 					transactionFailed = true
 					break
 				}
-				tmpAcc := acc
-				if act.ActionType == utils.CDRLog {
-					tmpAcc = accClone
-				}
-				if err := actionFunction(tmpAcc, act, acts, fltrS, at.ExtraData, referenceTime,
+				sharedData.idx = i // set the current action index in shared data
+				if err := actionFunction(acc, act, acts, fltrS, at.ExtraData, sharedData,
 					newActionConnCfg(originService, act.ActionType, config.CgrConfig())); err != nil {
 					utils.Logger.Err(
 						fmt.Sprintf("Error executing action %s: %v!",
@@ -276,7 +272,6 @@ func (at *ActionTiming) Execute(fltrS *FilterS, originService string) (err error
 	//reset the error in case that the account is not found
 	err = nil
 	if len(at.accountIDs) == 0 { // action timing executing without accounts
-		referenceTime := time.Now()
 		for _, act := range acts {
 			if expDate, parseErr := utils.ParseTimeDetectLayout(act.ExpirationString,
 				config.CgrConfig().GeneralCfg().DefaultTimezone); (act.Balance == nil || act.Balance.EmptyExpirationDate()) &&
@@ -295,7 +290,7 @@ func (at *ActionTiming) Execute(fltrS *FilterS, originService string) (err error
 				partialyExecuted = true
 				break
 			}
-			if err := actionFunction(nil, act, acts, fltrS, at.ExtraData, referenceTime,
+			if err := actionFunction(nil, act, acts, fltrS, at.ExtraData, SharedActionsData{},
 				newActionConnCfg(originService, act.ActionType, config.CgrConfig())); err != nil {
 				utils.Logger.Err(
 					fmt.Sprintf("Error executing accountless action %s: %v!",

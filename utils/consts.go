@@ -333,6 +333,8 @@ const (
 	NotAvailable              = "N/A"
 	Call                      = "call"
 	ExtraFields               = "ExtraFields"
+	SourceBalanceSummary      = "SourceBalanceSummary"
+	DestinationBalanceSummary = "DestinationBalanceSummary"
 	MetaSureTax               = "*sure_tax"
 	MetaDynamic               = "*dynamic"
 	MetaCounterEvent          = "*event"

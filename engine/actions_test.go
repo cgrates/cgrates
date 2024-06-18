@@ -835,7 +835,7 @@ func TestActionResetTriggres(t *testing.T) {
 			},
 		},
 	}
-	resetTriggersAction(ub, nil, nil, nil, nil, time.Now(), ActionConnCfg{})
+	resetTriggersAction(ub, nil, nil, nil, nil, SharedActionsData{}, ActionConnCfg{})
 	if ub.ActionTriggers[0].Executed == true || ub.ActionTriggers[1].Executed == true {
 		t.Error("Reset triggers action failed!")
 	}
@@ -864,7 +864,7 @@ func TestActionResetTriggresExecutesThem(t *testing.T) {
 			},
 		},
 	}
-	resetTriggersAction(ub, nil, nil, nil, nil, time.Now(), ActionConnCfg{})
+	resetTriggersAction(ub, nil, nil, nil, nil, SharedActionsData{}, ActionConnCfg{})
 	if ub.ActionTriggers[0].Executed == true || ub.BalanceMap[utils.MetaMonetary][0].GetValue() == 12 {
 		t.Error("Reset triggers action failed!")
 	}
@@ -903,7 +903,7 @@ func TestActionResetTriggresActionFilter(t *testing.T) {
 				ActionsID:      "TEST_ACTIONS",
 				Executed:       true}},
 	}
-	resetTriggersAction(ub, &Action{Balance: &BalanceFilter{Type: utils.StringPointer(utils.MetaSMS)}}, nil, nil, nil, time.Now(), ActionConnCfg{})
+	resetTriggersAction(ub, &Action{Balance: &BalanceFilter{Type: utils.StringPointer(utils.MetaSMS)}}, nil, nil, nil, SharedActionsData{}, ActionConnCfg{})
 	if ub.ActionTriggers[0].Executed == false || ub.ActionTriggers[1].Executed == false {
 		t.Error("Reset triggers action failed!")
 	}
@@ -942,7 +942,7 @@ func TestActionResetTriggresActionFilter2(t *testing.T) {
 				ActionsID:      "TEST_ACTIONS",
 				Executed:       true}},
 	}
-	resetTriggersAction(ub, &Action{}, nil, nil, nil, time.Now(), ActionConnCfg{})
+	resetTriggersAction(ub, &Action{}, nil, nil, nil, SharedActionsData{}, ActionConnCfg{})
 	if ub.ActionTriggers[0].Executed != false && ub.ActionTriggers[1].Executed != false {
 		t.Error("Reset triggers action failed!")
 	}
@@ -964,7 +964,7 @@ func TestActionSetPostpaid(t *testing.T) {
 			&ActionTrigger{Balance: &BalanceFilter{Type: utils.StringPointer(utils.MetaMonetary)},
 				ThresholdValue: 2, ActionsID: "TEST_ACTIONS", Executed: true}},
 	}
-	allowNegativeAction(ub, nil, nil, nil, nil, time.Now(), ActionConnCfg{})
+	allowNegativeAction(ub, nil, nil, nil, nil, SharedActionsData{}, ActionConnCfg{})
 	if !ub.AllowNegative {
 		t.Error("Set postpaid action failed!")
 	}
@@ -987,7 +987,7 @@ func TestActionSetPrepaid(t *testing.T) {
 			&ActionTrigger{Balance: &BalanceFilter{Type: utils.StringPointer(utils.MetaMonetary)},
 				ThresholdValue: 2, ActionsID: "TEST_ACTIONS", Executed: true}},
 	}
-	denyNegativeAction(ub, nil, nil, nil, nil, time.Now(), ActionConnCfg{})
+	denyNegativeAction(ub, nil, nil, nil, nil, SharedActionsData{}, ActionConnCfg{})
 	if ub.AllowNegative {
 		t.Error("Set prepaid action failed!")
 	}
@@ -1010,7 +1010,7 @@ func TestActionResetPrepaid(t *testing.T) {
 			&ActionTrigger{Balance: &BalanceFilter{Type: utils.StringPointer(utils.MetaSMS)},
 				ThresholdValue: 2, ActionsID: "TEST_ACTIONS", Executed: true}},
 	}
-	resetAccountAction(ub, nil, nil, nil, nil, time.Now(), ActionConnCfg{})
+	resetAccountAction(ub, nil, nil, nil, nil, SharedActionsData{}, ActionConnCfg{})
 	if !ub.AllowNegative ||
 		ub.BalanceMap[utils.MetaMonetary].GetTotalValue() != 0 ||
 		len(ub.UnitCounters) != 0 ||
@@ -1037,7 +1037,7 @@ func TestActionResetPostpaid(t *testing.T) {
 			&ActionTrigger{Balance: &BalanceFilter{Type: utils.StringPointer(utils.MetaSMS)},
 				ThresholdValue: 2, ActionsID: "TEST_ACTIONS", Executed: true}},
 	}
-	resetAccountAction(ub, nil, nil, nil, nil, time.Now(), ActionConnCfg{})
+	resetAccountAction(ub, nil, nil, nil, nil, SharedActionsData{}, ActionConnCfg{})
 	if ub.BalanceMap[utils.MetaMonetary].GetTotalValue() != 0 ||
 		len(ub.UnitCounters) != 0 ||
 		ub.BalanceMap[utils.MetaVoice][0].GetValue() != 0 ||
@@ -1066,7 +1066,7 @@ func TestActionTopupResetCredit(t *testing.T) {
 	}
 	a := &Action{Balance: &BalanceFilter{Type: utils.StringPointer(utils.MetaMonetary),
 		Value: &utils.ValueFormula{Static: 10}}}
-	topupResetAction(ub, a, nil, nil, nil, time.Now(), ActionConnCfg{})
+	topupResetAction(ub, a, nil, nil, nil, SharedActionsData{}, ActionConnCfg{})
 	if ub.AllowNegative ||
 		ub.BalanceMap[utils.MetaMonetary].GetTotalValue() != 10 ||
 		len(ub.UnitCounters) != 0 || // InitCounters finds no counters
@@ -1088,7 +1088,7 @@ func TestActionTopupValueFactors(t *testing.T) {
 		},
 		ExtraParameters: `{"*monetary":2}`,
 	}
-	topupResetAction(ub, a, nil, nil, nil, time.Now(), ActionConnCfg{})
+	topupResetAction(ub, a, nil, nil, nil, SharedActionsData{}, ActionConnCfg{})
 	if len(ub.BalanceMap) != 1 ||
 		ub.BalanceMap[utils.MetaMonetary][0].Factors[utils.MetaMonetary] != 2.0 {
 		t.Errorf("Topup reset action failed to set Factors: %+v",
@@ -1110,7 +1110,7 @@ func TestActionTopupResetCreditId(t *testing.T) {
 		Type:  utils.StringPointer(utils.MetaMonetary),
 		ID:    utils.StringPointer("TEST_B"),
 		Value: &utils.ValueFormula{Static: 10}}}
-	topupResetAction(ub, a, nil, nil, nil, time.Now(), ActionConnCfg{})
+	topupResetAction(ub, a, nil, nil, nil, SharedActionsData{}, ActionConnCfg{})
 	if ub.AllowNegative ||
 		ub.BalanceMap[utils.MetaMonetary].GetTotalValue() != 110 ||
 		len(ub.BalanceMap[utils.MetaMonetary]) != 2 {
@@ -1132,7 +1132,7 @@ func TestActionTopupResetCreditNoId(t *testing.T) {
 	a := &Action{Balance: &BalanceFilter{
 		Type:  utils.StringPointer(utils.MetaMonetary),
 		Value: &utils.ValueFormula{Static: 10}}}
-	topupResetAction(ub, a, nil, nil, nil, time.Now(), ActionConnCfg{})
+	topupResetAction(ub, a, nil, nil, nil, SharedActionsData{}, ActionConnCfg{})
 	if ub.AllowNegative ||
 		ub.BalanceMap[utils.MetaMonetary].GetTotalValue() != 20 ||
 		len(ub.BalanceMap[utils.MetaMonetary]) != 2 {
@@ -1162,7 +1162,7 @@ func TestActionTopupResetMinutes(t *testing.T) {
 		Balance: &BalanceFilter{Type: utils.StringPointer(utils.MetaVoice),
 			Value: &utils.ValueFormula{Static: 5}, Weight: utils.Float64Pointer(20),
 			DestinationIDs: utils.StringMapPointer(utils.NewStringMap("NAT"))}}
-	topupResetAction(ub, a, nil, nil, nil, time.Now(), ActionConnCfg{})
+	topupResetAction(ub, a, nil, nil, nil, SharedActionsData{}, ActionConnCfg{})
 	if ub.AllowNegative ||
 		ub.BalanceMap[utils.MetaVoice].GetTotalValue() != 5 ||
 		ub.BalanceMap[utils.MetaMonetary].GetTotalValue() != 100 ||
@@ -1197,7 +1197,7 @@ func TestActionTopupCredit(t *testing.T) {
 	a := &Action{Balance: &BalanceFilter{
 		Type:  utils.StringPointer(utils.MetaMonetary),
 		Value: &utils.ValueFormula{Static: 10}}}
-	topupAction(ub, a, nil, nil, nil, time.Now(), ActionConnCfg{})
+	topupAction(ub, a, nil, nil, nil, SharedActionsData{}, ActionConnCfg{})
 	if ub.AllowNegative ||
 		ub.BalanceMap[utils.MetaMonetary].GetTotalValue() != 110 ||
 		len(ub.UnitCounters) != 0 ||
@@ -1230,7 +1230,7 @@ func TestActionTopupMinutes(t *testing.T) {
 	a := &Action{Balance: &BalanceFilter{Type: utils.StringPointer(utils.MetaVoice),
 		Value: &utils.ValueFormula{Static: 5}, Weight: utils.Float64Pointer(20),
 		DestinationIDs: utils.StringMapPointer(utils.NewStringMap("NAT"))}}
-	topupAction(ub, a, nil, nil, nil, time.Now(), ActionConnCfg{})
+	topupAction(ub, a, nil, nil, nil, SharedActionsData{}, ActionConnCfg{})
 	if ub.AllowNegative ||
 		ub.BalanceMap[utils.MetaVoice].GetTotalValue() != 15 ||
 		ub.BalanceMap[utils.MetaMonetary].GetTotalValue() != 100 ||
@@ -1261,7 +1261,7 @@ func TestActionDebitCredit(t *testing.T) {
 	a := &Action{Balance: &BalanceFilter{
 		Type:  utils.StringPointer(utils.MetaMonetary),
 		Value: &utils.ValueFormula{Static: 10}}}
-	debitAction(ub, a, nil, nil, nil, time.Now(), ActionConnCfg{})
+	debitAction(ub, a, nil, nil, nil, SharedActionsData{}, ActionConnCfg{})
 	if ub.AllowNegative ||
 		ub.BalanceMap[utils.MetaMonetary].GetTotalValue() != 90 ||
 		len(ub.UnitCounters) != 0 ||
@@ -1294,7 +1294,7 @@ func TestActionDebitMinutes(t *testing.T) {
 		Value:          &utils.ValueFormula{Static: 5},
 		Weight:         utils.Float64Pointer(20),
 		DestinationIDs: utils.StringMapPointer(utils.NewStringMap("NAT"))}}
-	debitAction(ub, a, nil, nil, nil, time.Now(), ActionConnCfg{})
+	debitAction(ub, a, nil, nil, nil, SharedActionsData{}, ActionConnCfg{})
 	if ub.AllowNegative ||
 		ub.BalanceMap[utils.MetaVoice][0].GetValue() != 5 ||
 		ub.BalanceMap[utils.MetaMonetary].GetTotalValue() != 100 ||
@@ -1323,7 +1323,7 @@ func TestActionResetAllCounters(t *testing.T) {
 				ActionsID: "TEST_ACTIONS", Executed: true}},
 	}
 	ub.InitCounters()
-	resetCountersAction(ub, nil, nil, nil, nil, time.Now(), ActionConnCfg{})
+	resetCountersAction(ub, nil, nil, nil, nil, SharedActionsData{}, ActionConnCfg{})
 	if !ub.AllowNegative ||
 		ub.BalanceMap[utils.MetaMonetary].GetTotalValue() != 100 ||
 		len(ub.UnitCounters) != 1 ||
@@ -1359,7 +1359,7 @@ func TestActionResetCounterOnlyDefault(t *testing.T) {
 	}
 	a := &Action{Balance: &BalanceFilter{Type: utils.StringPointer(utils.MetaMonetary)}}
 	ub.InitCounters()
-	resetCountersAction(ub, a, nil, nil, nil, time.Now(), ActionConnCfg{})
+	resetCountersAction(ub, a, nil, nil, nil, SharedActionsData{}, ActionConnCfg{})
 	if !ub.AllowNegative ||
 		ub.BalanceMap[utils.MetaMonetary].GetTotalValue() != 100 ||
 		len(ub.UnitCounters) != 1 ||
@@ -1400,7 +1400,7 @@ func TestActionResetCounterCredit(t *testing.T) {
 				ThresholdValue: 2, ActionsID: "TEST_ACTIONS", Executed: true}},
 	}
 	a := &Action{Balance: &BalanceFilter{Type: utils.StringPointer(utils.MetaMonetary)}}
-	resetCountersAction(ub, a, nil, nil, nil, time.Now(), ActionConnCfg{})
+	resetCountersAction(ub, a, nil, nil, nil, SharedActionsData{}, ActionConnCfg{})
 	if !ub.AllowNegative ||
 		ub.BalanceMap[utils.MetaMonetary].GetTotalValue() != 100 ||
 		len(ub.UnitCounters) != 2 ||
@@ -2472,7 +2472,7 @@ func TestCgrRpcAction(t *testing.T) {
 	"Async" :false,
 	"Params": {"Name":"n", "Surname":"s", "Age":10.2}}`,
 	}
-	if err := cgrRPCAction(nil, a, nil, nil, nil, time.Now(), ActionConnCfg{}); err != nil {
+	if err := cgrRPCAction(nil, a, nil, nil, nil, SharedActionsData{}, ActionConnCfg{}); err != nil {
 		t.Error("error executing cgr action: ", err)
 	}
 	if trpcp.status != utils.OK {
@@ -2493,7 +2493,7 @@ func TestCgrRpcAction(t *testing.T) {
 	"Async" :false,
 	"Params": {"Name":"n", "Surname":"s", "Age":10.2}}`,
 	}
-	if err := cgrRPCAction(nil, a, nil, nil, nil, time.Now(), ActionConnCfg{}); err == nil {
+	if err := cgrRPCAction(nil, a, nil, nil, nil, SharedActionsData{}, ActionConnCfg{}); err == nil {
 		t.Error("error executing cgr action: ", err)
 	}
 }
@@ -2689,7 +2689,7 @@ func TestCdrLogAction(t *testing.T) {
 			balanceValue: 10,
 		},
 	}
-	if err := cdrLogAction(acc, a, acs, nil, extraData, time.Now(), ActionConnCfg{}); err != nil {
+	if err := cdrLogAction(acc, a, acs, nil, extraData, SharedActionsData{}, ActionConnCfg{}); err != nil {
 		t.Fatal(err)
 	}
 	if mock.args == nil {
@@ -2734,7 +2734,7 @@ func TestCdrLogAction(t *testing.T) {
 
 func TestRemoteSetAccountAction(t *testing.T) {
 	expError := `Post "127.1.0.11//": unsupported protocol scheme ""`
-	if err = remoteSetAccount(nil, &Action{ExtraParameters: "127.1.0.11//"}, nil, nil, nil, time.Now(), ActionConnCfg{}); err == nil ||
+	if err = remoteSetAccount(nil, &Action{ExtraParameters: "127.1.0.11//"}, nil, nil, nil, SharedActionsData{}, ActionConnCfg{}); err == nil ||
 		err.Error() != expError {
 		t.Fatalf("Expected error: %s, received: %v", expError, err)
 	}
@@ -2747,7 +2747,7 @@ func TestRemoteSetAccountAction(t *testing.T) {
 				},
 			},
 		}},
-	}, &Action{ExtraParameters: "127.1.0.11//"}, nil, nil, nil, time.Now(), ActionConnCfg{}); err == nil ||
+	}, &Action{ExtraParameters: "127.1.0.11//"}, nil, nil, nil, SharedActionsData{}, ActionConnCfg{}); err == nil ||
 		err.Error() != expError {
 		t.Fatalf("Expected error: %s, received: %v", expError, err)
 	}
@@ -2755,7 +2755,7 @@ func TestRemoteSetAccountAction(t *testing.T) {
 	ts := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) { rw.Write([]byte("5")) }))
 	acc := &Account{ID: "1001"}
 	expError = `json: cannot unmarshal number into Go value of type engine.Account`
-	if err = remoteSetAccount(acc, &Action{ExtraParameters: ts.URL}, nil, nil, nil, time.Now(), ActionConnCfg{}); err == nil ||
+	if err = remoteSetAccount(acc, &Action{ExtraParameters: ts.URL}, nil, nil, nil, SharedActionsData{}, ActionConnCfg{}); err == nil ||
 		err.Error() != expError {
 		t.Fatalf("Expected error: %s, received: %v", expError, err)
 	}
@@ -2789,7 +2789,7 @@ func TestRemoteSetAccountAction(t *testing.T) {
 		}
 		rw.Write([]byte(utils.ToJSON(exp)))
 	}))
-	if err = remoteSetAccount(acc, &Action{ExtraParameters: ts.URL}, nil, nil, nil, time.Now(), ActionConnCfg{}); err != nil {
+	if err = remoteSetAccount(acc, &Action{ExtraParameters: ts.URL}, nil, nil, nil, SharedActionsData{}, ActionConnCfg{}); err != nil {
 		t.Fatal(err)
 	} else if !reflect.DeepEqual(exp, acc) {
 		t.Errorf("Expected: %s,received: %s", utils.ToJSON(exp), utils.ToJSON(acc))
@@ -2865,13 +2865,13 @@ func TestResetAccountCDR(t *testing.T) {
 			balanceValue: 10,
 		},
 	}
-	if err := resetAccountCDR(nil, a, acs, fltrs, extraData, time.Now(), ActionConnCfg{}); err == nil || err.Error() != "nil account" {
+	if err := resetAccountCDR(nil, a, acs, fltrs, extraData, SharedActionsData{}, ActionConnCfg{}); err == nil || err.Error() != "nil account" {
 		t.Errorf("expected <nil account> ,received <%+v>", err)
-	} else if err = resetAccountCDR(acc, a, acs, fltrs, extraData, time.Now(), ActionConnCfg{}); err == nil || err != utils.ErrNotFound {
+	} else if err = resetAccountCDR(acc, a, acs, fltrs, extraData, SharedActionsData{}, ActionConnCfg{}); err == nil || err != utils.ErrNotFound {
 		t.Error(err)
 	}
 	SetCdrStorage(nil)
-	if err := resetAccountCDR(acc, a, acs, fltrs, extraData, time.Now(), ActionConnCfg{}); err == nil || err.Error() != fmt.Sprintf("nil cdrStorage for %s action", utils.ToJSON(a)) {
+	if err := resetAccountCDR(acc, a, acs, fltrs, extraData, SharedActionsData{}, ActionConnCfg{}); err == nil || err.Error() != fmt.Sprintf("nil cdrStorage for %s action", utils.ToJSON(a)) {
 		t.Error(err)
 	}
 
@@ -2897,7 +2897,7 @@ func TestSetRecurrentAction(t *testing.T) {
 	ac := &Action{
 		Id: "acTrigger",
 	}
-	if err = setRecurrentAction(ub, ac, nil, nil, nil, time.Now(), ActionConnCfg{}); err != nil {
+	if err = setRecurrentAction(ub, ac, nil, nil, nil, SharedActionsData{}, ActionConnCfg{}); err != nil {
 		t.Error(err)
 	}
 }
@@ -3024,7 +3024,7 @@ func TestActionSetDDestinations(t *testing.T) {
 	}
 	SetDataStorage(dm)
 
-	if err := setddestinations(ub, a, acs, nil, nil, time.Now(), ActionConnCfg{}); err != nil {
+	if err := setddestinations(ub, a, acs, nil, nil, SharedActionsData{}, ActionConnCfg{}); err != nil {
 		t.Error(err)
 	}
 
@@ -3126,7 +3126,7 @@ func TestActionPublishAccount(t *testing.T) {
 	}
 	expLog := ` with ThresholdS`
 	expLog2 := `with StatS.`
-	if err := publishAccount(ub, a, acs, nil, nil, time.Now(), ActionConnCfg{}); err != nil {
+	if err := publishAccount(ub, a, acs, nil, nil, SharedActionsData{}, ActionConnCfg{}); err != nil {
 		t.Errorf("received %v", err)
 	} else if rcvLog := buf.String(); !strings.Contains(rcvLog, expLog) {
 		t.Errorf("Logger %v doesn't contain %v", rcvLog, expLog)
@@ -3223,13 +3223,13 @@ func TestExportAction(t *testing.T) {
 		Event:   map[string]any{},
 		APIOpts: map[string]any{},
 	}
-	if err := export(ub, a, acs, nil, nil, time.Now(), ActionConnCfg{}); err != nil {
+	if err := export(ub, a, acs, nil, nil, SharedActionsData{}, ActionConnCfg{}); err != nil {
 		t.Errorf("received %v", err)
-	} else if err = export(nil, a, acs, nil, extraData, time.Now(), ActionConnCfg{}); err != nil {
+	} else if err = export(nil, a, acs, nil, extraData, SharedActionsData{}, ActionConnCfg{}); err != nil {
 		t.Errorf("received %v", err)
-	} else if err = export(nil, a, acs, nil, "test", time.Now(), ActionConnCfg{}); err != nil {
+	} else if err = export(nil, a, acs, nil, "test", SharedActionsData{}, ActionConnCfg{}); err != nil {
 		t.Error(err)
-	} else if err = export(nil, a, acs, nil, nil, time.Now(), ActionConnCfg{}); err != nil {
+	} else if err = export(nil, a, acs, nil, nil, SharedActionsData{}, ActionConnCfg{}); err != nil {
 		t.Error(err)
 	}
 }
@@ -3257,7 +3257,7 @@ func TestResetStatQueue(t *testing.T) {
 		ExtraParameters: "cgrates.org:id",
 	}
 	acs := Actions{}
-	if err := resetStatQueue(ub, a, acs, nil, nil, time.Now(), ActionConnCfg{}); err == nil {
+	if err := resetStatQueue(ub, a, acs, nil, nil, SharedActionsData{}, ActionConnCfg{}); err == nil {
 		t.Errorf("received <%+v>", err)
 	}
 
@@ -3288,7 +3288,7 @@ func TestResetTreshold(t *testing.T) {
 		ExtraParameters: "cgrates.org:id",
 	}
 	acs := Actions{}
-	if err := resetThreshold(ub, a, acs, nil, nil, time.Now(), ActionConnCfg{}); err == nil {
+	if err := resetThreshold(ub, a, acs, nil, nil, SharedActionsData{}, ActionConnCfg{}); err == nil {
 		t.Errorf("received <%+v>", err)
 	}
 
@@ -3298,33 +3298,33 @@ func TestEnableDisableAccountAction(t *testing.T) {
 
 	var acc *Account
 	expErr := "nil account"
-	if err := enableAccountAction(acc, nil, nil, nil, nil, time.Now(), ActionConnCfg{}); err == nil || err.Error() != expErr {
+	if err := enableAccountAction(acc, nil, nil, nil, nil, SharedActionsData{}, ActionConnCfg{}); err == nil || err.Error() != expErr {
 		t.Errorf("expected %+v ,received %v", expErr, err)
-	} else if err = disableAccountAction(acc, nil, nil, nil, nil, time.Now(), ActionConnCfg{}); err == nil || err.Error() != expErr {
+	} else if err = disableAccountAction(acc, nil, nil, nil, nil, SharedActionsData{}, ActionConnCfg{}); err == nil || err.Error() != expErr {
 		t.Errorf("expected %+v ,received %v", expErr, err)
 	} else if err = genericDebit(acc, nil, true, nil); err == nil || err.Error() != expErr {
 		t.Errorf("expected %+v ,received %v", expErr, err)
-	} else if err = resetCountersAction(acc, nil, nil, nil, nil, time.Now(), ActionConnCfg{}); err == nil || err.Error() != expErr {
+	} else if err = resetCountersAction(acc, nil, nil, nil, nil, SharedActionsData{}, ActionConnCfg{}); err == nil || err.Error() != expErr {
 		t.Errorf("expected %+v ,received %v", expErr, err)
-	} else if err = debitAction(acc, nil, nil, nil, nil, time.Now(), ActionConnCfg{}); err == nil || err.Error() != expErr {
+	} else if err = debitAction(acc, nil, nil, nil, nil, SharedActionsData{}, ActionConnCfg{}); err == nil || err.Error() != expErr {
 		t.Errorf("expected %+v ,received %v", expErr, err)
-	} else if err = debitResetAction(acc, nil, nil, nil, nil, time.Now(), ActionConnCfg{}); err == nil || err.Error() != expErr {
+	} else if err = debitResetAction(acc, nil, nil, nil, nil, SharedActionsData{}, ActionConnCfg{}); err == nil || err.Error() != expErr {
 		t.Errorf("expected %+v ,received %v", expErr, err)
-	} else if err = topupAction(acc, nil, nil, nil, nil, time.Now(), ActionConnCfg{}); err == nil || err.Error() != expErr {
+	} else if err = topupAction(acc, nil, nil, nil, nil, SharedActionsData{}, ActionConnCfg{}); err == nil || err.Error() != expErr {
 		t.Errorf("expected %+v ,received %v", expErr, err)
-	} else if err = topupResetAction(acc, nil, nil, nil, nil, time.Now(), ActionConnCfg{}); err == nil || err.Error() != expErr {
+	} else if err = topupResetAction(acc, nil, nil, nil, nil, SharedActionsData{}, ActionConnCfg{}); err == nil || err.Error() != expErr {
 		t.Errorf("expected %+v ,received %v", expErr, err)
-	} else if err = resetAccountAction(acc, nil, nil, nil, nil, time.Now(), ActionConnCfg{}); err == nil || err.Error() != expErr {
+	} else if err = resetAccountAction(acc, nil, nil, nil, nil, SharedActionsData{}, ActionConnCfg{}); err == nil || err.Error() != expErr {
 		t.Errorf("expected %+v ,received %v", expErr, err)
-	} else if err = denyNegativeAction(acc, nil, nil, nil, nil, time.Now(), ActionConnCfg{}); err == nil || err.Error() != expErr {
+	} else if err = denyNegativeAction(acc, nil, nil, nil, nil, SharedActionsData{}, ActionConnCfg{}); err == nil || err.Error() != expErr {
 		t.Errorf("expected %+v ,received %v", expErr, err)
-	} else if err = allowNegativeAction(acc, nil, nil, nil, nil, time.Now(), ActionConnCfg{}); err == nil || err.Error() != expErr {
+	} else if err = allowNegativeAction(acc, nil, nil, nil, nil, SharedActionsData{}, ActionConnCfg{}); err == nil || err.Error() != expErr {
 		t.Errorf("expected %+v ,received %v", expErr, err)
-	} else if err = unsetRecurrentAction(acc, nil, nil, nil, nil, time.Now(), ActionConnCfg{}); err == nil || err.Error() != expErr {
+	} else if err = unsetRecurrentAction(acc, nil, nil, nil, nil, SharedActionsData{}, ActionConnCfg{}); err == nil || err.Error() != expErr {
 		t.Errorf("expected %+v ,received %v", expErr, err)
-	} else if err = setRecurrentAction(acc, nil, nil, nil, nil, time.Now(), ActionConnCfg{}); err == nil || err.Error() != expErr {
+	} else if err = setRecurrentAction(acc, nil, nil, nil, nil, SharedActionsData{}, ActionConnCfg{}); err == nil || err.Error() != expErr {
 		t.Errorf("expected %+v ,received %v", expErr, err)
-	} else if err = resetTriggersAction(acc, nil, nil, nil, nil, time.Now(), ActionConnCfg{}); err == nil || err.Error() != expErr {
+	} else if err = resetTriggersAction(acc, nil, nil, nil, nil, SharedActionsData{}, ActionConnCfg{}); err == nil || err.Error() != expErr {
 		t.Errorf("expected %+v ,received %v", expErr, err)
 	}
 }
@@ -3422,7 +3422,7 @@ func TestResetAccountCDRSuccesful(t *testing.T) {
 			balanceValue: 10,
 		},
 	}
-	if err = resetAccountCDR(acc, a, acs, fltrs, extraData, time.Now(), ActionConnCfg{}); err != nil {
+	if err = resetAccountCDR(acc, a, acs, fltrs, extraData, SharedActionsData{}, ActionConnCfg{}); err != nil {
 		t.Error(err)
 	}
 
@@ -3462,7 +3462,7 @@ func TestRemoveSessionCost(t *testing.T) {
 
 	expLog := `for filter`
 	expLog2 := `in action:`
-	if err := removeSessionCosts(nil, action, nil, nil, nil, time.Now(), ActionConnCfg{}); err == nil || err != utils.ErrNotFound {
+	if err := removeSessionCosts(nil, action, nil, nil, nil, SharedActionsData{}, ActionConnCfg{}); err == nil || err != utils.ErrNotFound {
 		t.Error(err)
 	} else if rcvLog := buf.String(); !strings.Contains(rcvLog, expLog) {
 		t.Errorf("expected %v,received %v", expLog, rcvLog)
@@ -3494,9 +3494,9 @@ func TestLogAction(t *testing.T) {
 		"field1": "value",
 		"field2": "second",
 	}
-	if err := logAction(acc, nil, nil, nil, nil, time.Now(), ActionConnCfg{}); err != nil {
+	if err := logAction(acc, nil, nil, nil, nil, SharedActionsData{}, ActionConnCfg{}); err != nil {
 		t.Error(err)
-	} else if err = logAction(nil, nil, nil, nil, extraData, time.Now(), ActionConnCfg{}); err != nil {
+	} else if err = logAction(nil, nil, nil, nil, extraData, SharedActionsData{}, ActionConnCfg{}); err != nil {
 		t.Error(err)
 	}
 
@@ -3683,7 +3683,7 @@ func TestRemoveAccountAcc(t *testing.T) {
 		Event:   map[string]any{},
 		APIOpts: map[string]any{},
 	}
-	if err := removeAccountAction(nil, a, acs, nil, extraData, time.Now(), ActionConnCfg{}); err != nil {
+	if err := removeAccountAction(nil, a, acs, nil, extraData, SharedActionsData{}, ActionConnCfg{}); err != nil {
 		t.Error(err)
 	}
 }
@@ -3782,12 +3782,12 @@ func TestRemoveAccountActionErr(t *testing.T) {
 	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
 	dm := NewDataManager(db, cfg.CacheCfg(), connMgr)
 	SetDataStorage(nil)
-	if err := removeAccountAction(ub, a, acs, nil, extraData, time.Now(), ActionConnCfg{}); err == nil || err != utils.ErrInvalidKey {
+	if err := removeAccountAction(ub, a, acs, nil, extraData, SharedActionsData{}, ActionConnCfg{}); err == nil || err != utils.ErrInvalidKey {
 		t.Error(err)
 	}
 	ub.ID = "cgrates.org:exp"
 	expLog := `[ERROR] Could not remove account Id: cgrates.org:exp: NO_DATABASE_CONNECTION`
-	if err := removeAccountAction(ub, a, acs, nil, extraData, time.Now(), ActionConnCfg{}); err == nil {
+	if err := removeAccountAction(ub, a, acs, nil, extraData, SharedActionsData{}, ActionConnCfg{}); err == nil {
 		t.Error(err)
 	} else if rcvLog := buf.String(); !strings.Contains(rcvLog, expLog) {
 		t.Errorf("expected log <%+v> to be included in: <%+v>",
@@ -3803,7 +3803,7 @@ func TestRemoveAccountActionErr(t *testing.T) {
 	buf2 := new(bytes.Buffer)
 	setLogger(buf2)
 	expLog = `Could not get action plans`
-	if err := removeAccountAction(ub, a, acs, nil, extraData, time.Now(), ActionConnCfg{}); err == nil {
+	if err := removeAccountAction(ub, a, acs, nil, extraData, SharedActionsData{}, ActionConnCfg{}); err == nil {
 		t.Error(err)
 	} else if rcvLog := buf2.String(); !strings.Contains(rcvLog, expLog) {
 		t.Errorf("Logger %v doesn't contain %v", rcvLog, expLog)
@@ -3813,7 +3813,7 @@ func TestRemoveAccountActionErr(t *testing.T) {
 	setLogger(buf3)
 	expLog = `Could not retrieve action plan:`
 	dm.SetAccountActionPlans(ub.ID, []string{"acc1"}, true)
-	if err := removeAccountAction(ub, a, acs, nil, extraData, time.Now(), ActionConnCfg{}); err == nil {
+	if err := removeAccountAction(ub, a, acs, nil, extraData, SharedActionsData{}, ActionConnCfg{}); err == nil {
 		t.Error(err)
 	} else if rcvLog := buf3.String(); !strings.Contains(rcvLog, expLog) {
 		t.Errorf("Logger %v doesn't contain %v", rcvLog, expLog)
@@ -3849,7 +3849,7 @@ func TestRemoveExpiredErrs(t *testing.T) {
 			Blocker:        utils.BoolPointer(false),
 		},
 	}
-	if err := removeExpired(acc, action, nil, nil, nil, time.Now(), ActionConnCfg{}); err == nil || err.Error() != fmt.Sprintf("nil account for %s action", utils.ToJSON(action)) {
+	if err := removeExpired(acc, action, nil, nil, nil, SharedActionsData{}, ActionConnCfg{}); err == nil || err.Error() != fmt.Sprintf("nil account for %s action", utils.ToJSON(action)) {
 		t.Error(err)
 	}
 	acc = &Account{
@@ -3857,7 +3857,7 @@ func TestRemoveExpiredErrs(t *testing.T) {
 		BalanceMap: map[string]Balances{},
 		Disabled:   true,
 	}
-	if err = removeExpired(acc, action, nil, nil, nil, time.Now(), ActionConnCfg{}); err == nil || err != utils.ErrNotFound {
+	if err = removeExpired(acc, action, nil, nil, nil, SharedActionsData{}, ActionConnCfg{}); err == nil || err != utils.ErrNotFound {
 		t.Error(err)
 	}
 	acc.BalanceMap = map[string]Balances{
@@ -3882,7 +3882,7 @@ func TestRemoveExpiredErrs(t *testing.T) {
 			},
 		},
 	}
-	if err := removeExpired(acc, action, nil, nil, nil, time.Now(), ActionConnCfg{}); err == nil || err != utils.ErrNotFound {
+	if err := removeExpired(acc, action, nil, nil, nil, SharedActionsData{}, ActionConnCfg{}); err == nil || err != utils.ErrNotFound {
 		t.Error(err)
 	}
 }
@@ -3911,14 +3911,14 @@ func TestTransferMonetaryDefaultAction(t *testing.T) {
 		},
 	}
 	expLog := `*transfer_monetary_default called without account`
-	if err := transferMonetaryDefaultAction(nil, a, acs, nil, "data", time.Now(), ActionConnCfg{}); err == nil || err != utils.ErrAccountNotFound {
+	if err := transferMonetaryDefaultAction(nil, a, acs, nil, "data", SharedActionsData{}, ActionConnCfg{}); err == nil || err != utils.ErrAccountNotFound {
 		t.Errorf("expected <%v>,received <%v>", utils.ErrAccountNotFound, err)
 	} else if rcvLog := buf.String(); !strings.Contains(rcvLog, expLog) {
 		t.Errorf("expected log <%+v> to be included in: <%+v>",
 			expLog, rcvLog)
 	}
 	ub := &Account{}
-	if err := transferMonetaryDefaultAction(ub, a, acs, nil, "data", time.Now(), ActionConnCfg{}); err == nil || err != utils.ErrNotFound {
+	if err := transferMonetaryDefaultAction(ub, a, acs, nil, "data", SharedActionsData{}, ActionConnCfg{}); err == nil || err != utils.ErrNotFound {
 		t.Errorf("expected <%v>,received <%v>", utils.ErrNotFound, err)
 	}
 }
@@ -3944,10 +3944,10 @@ func TestRemoveBalanceActionErr(t *testing.T) {
 			Value:          &utils.ValueFormula{Static: 10},
 		},
 	}
-	if err := removeBalanceAction(nil, acs, nil, nil, nil, time.Now(), ActionConnCfg{}); err == nil {
+	if err := removeBalanceAction(nil, acs, nil, nil, nil, SharedActionsData{}, ActionConnCfg{}); err == nil {
 		t.Error(err)
 	}
-	if err := removeBalanceAction(acc, acs, nil, nil, nil, time.Now(), ActionConnCfg{}); err == nil || err != utils.ErrNotFound {
+	if err := removeBalanceAction(acc, acs, nil, nil, nil, SharedActionsData{}, ActionConnCfg{}); err == nil || err != utils.ErrNotFound {
 		t.Error(err)
 	}
 }
@@ -3980,7 +3980,7 @@ func TestDebitResetAction(t *testing.T) {
 			Blocker:        utils.BoolPointer(false),
 		},
 	}
-	if err := debitResetAction(ub, a, nil, nil, nil, time.Now(), ActionConnCfg{}); err != nil {
+	if err := debitResetAction(ub, a, nil, nil, nil, SharedActionsData{}, ActionConnCfg{}); err != nil {
 		t.Error(err)
 	}
 }
@@ -4087,7 +4087,7 @@ func TestSetDestinationsErr(t *testing.T) {
 	config.SetCgrConfig(cfg)
 	SetConnManager(connMgr)
 	SetDataStorage(dm)
-	if err := setddestinations(ub, a, acs, nil, nil, time.Now(), ActionConnCfg{}); err == nil || err != utils.ErrNotFound {
+	if err := setddestinations(ub, a, acs, nil, nil, SharedActionsData{}, ActionConnCfg{}); err == nil || err != utils.ErrNotFound {
 		t.Error(err)
 	}
 	ub = &Account{
@@ -4098,7 +4098,7 @@ func TestSetDestinationsErr(t *testing.T) {
 			},
 		},
 	}
-	if err := setddestinations(ub, a, acs, nil, nil, time.Now(), ActionConnCfg{}); err == nil || err != utils.ErrNotFound {
+	if err := setddestinations(ub, a, acs, nil, nil, SharedActionsData{}, ActionConnCfg{}); err == nil || err != utils.ErrNotFound {
 		t.Error(err)
 	}
 }
@@ -4188,7 +4188,7 @@ func TestRemoveAccountActionLogg(t *testing.T) {
 	}
 	SetDataStorage(dm)
 	config.SetCgrConfig(cfg)
-	if err := removeAccountAction(ub, a, acs, nil, nil, time.Now(), ActionConnCfg{}); err != nil {
+	if err := removeAccountAction(ub, a, acs, nil, nil, SharedActionsData{}, ActionConnCfg{}); err != nil {
 		t.Error(err)
 	}
 
@@ -4759,7 +4759,7 @@ func TestActionsTransferBalance(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			srcAcc = tc.srcAcc
 			destAcc = tc.destAcc
-			err := transferBalanceAction(srcAcc, tc.act, nil, nil, nil, time.Now(), ActionConnCfg{})
+			err := transferBalanceAction(srcAcc, tc.act, nil, nil, nil, SharedActionsData{}, ActionConnCfg{})
 			if tc.expectedErr != "" {
 				if err == nil || err.Error() != tc.expectedErr {
 					t.Errorf("expected error %v, received %v", tc.expectedErr, err)
@@ -4840,7 +4840,7 @@ func TestActionsAlterAndDisconnectSessions(t *testing.T) {
 				disconnectSessionsRequest = ""
 			})
 			err := alterSessionsAction(nil, action, nil, nil, nil,
-				time.Now(), ActionConnCfg{
+				SharedActionsData{}, ActionConnCfg{
 					ConnIDs: tc.connIDs,
 				})
 			if tc.expectedErr != "" {
@@ -4853,7 +4853,7 @@ func TestActionsAlterAndDisconnectSessions(t *testing.T) {
 				t.Errorf("expected: %v\nreceived: %v", tc.expectedRequest, alterSessionsRequest)
 			}
 			err = forceDisconnectSessionsAction(nil, action, nil, nil, nil,
-				time.Now(), ActionConnCfg{
+				SharedActionsData{}, ActionConnCfg{
 					ConnIDs: tc.connIDs,
 				})
 			if tc.expectedErr != "" {

@@ -22,6 +22,7 @@ package general_tests
 
 import (
 	"sort"
+	"strings"
 	"testing"
 	"time"
 
@@ -48,6 +49,10 @@ func TestTransferBalance(t *testing.T) {
 	}
 
 	content := `{
+
+"general": {
+	"log_level": 7
+},
 
 "data_db": {								
 	"db_type": "*internal"
@@ -83,15 +88,17 @@ PACKAGE_ACC_DEST,ACT_TOPUP_DEST,*asap,10`,
 		utils.ActionsCsv: `#ActionsId[0],Action[1],ExtraParameters[2],Filter[3],BalanceId[4],BalanceType[5],Categories[6],DestinationIds[7],RatingSubject[8],SharedGroup[9],ExpiryTime[10],TimingIds[11],Units[12],BalanceWeight[13],BalanceBlocker[14],BalanceDisabled[15],Weight[16]
 ACT_TOPUP_SRC,*topup_reset,,,balance_src,*monetary,,*any,,,*unlimited,,10,20,false,false,20
 ACT_TOPUP_DEST,*topup_reset,,,balance_dest,*monetary,,*any,,,*unlimited,,10,10,false,false,10
-ACT_TRANSFER,*cdrlog,,,,,,,,,,,,,,,
-ACT_TRANSFER,*transfer_balance,"{""DestinationAccountID"":""cgrates.org:ACC_DEST"",""DestinationBalanceID"":""balance_dest""}",,balance_src,,,,,,*unlimited,,4,,,,`,
+ACT_TRANSFER,*transfer_balance,"{""DestinationAccountID"":""cgrates.org:ACC_DEST"",""DestinationBalanceID"":""balance_dest""}",,balance_src,,,,,,*unlimited,,4,,,,
+ACT_TRANSFER,*cdrlog,,,,,,,,,,,,,,,`,
 	}
 
 	testEnv := TestEnvironment{
 		Name:       "TestTransferBalance",
 		ConfigJSON: content,
 		TpFiles:    tpFiles,
+		// LogBuffer:  &bytes.Buffer{},
 	}
+	// defer fmt.Println(testEnv.LogBuffer)
 	client, _ := testEnv.Setup(t, *utils.WaitRater)
 
 	t.Run("CheckInitialBalances", func(t *testing.T) {
@@ -263,16 +270,15 @@ ACT_TRANSFER,*transfer_balance,"{""DestinationAccountID"":""cgrates.org:ACC_DEST
 		}
 
 		if len(cdrs) != 3 {
-			t.Errorf("expected to receive 2 cdrs: %v", utils.ToJSON(cdrs))
+			t.Errorf("expected to receive 3 cdrs: %v", utils.ToJSON(cdrs))
 		}
-
 		if cdrs[0].Account != "ACC_SRC" ||
 			cdrs[0].Destination != "ACC_DEST" ||
 			cdrs[0].RunID != utils.MetaTransferBalance ||
 			cdrs[0].Source != utils.CDRLog ||
 			cdrs[0].ToR != utils.MetaVoice ||
-			cdrs[0].ExtraFields["DestinationBalanceID"] != "balance_dest" ||
-			cdrs[0].ExtraFields["SourceBalanceID"] != "balance_src" {
+			!strings.Contains(cdrs[0].ExtraFields[utils.DestinationBalanceSummary], "ID\":\"balance_dest\",\"Type\":\"*monetary\",\"Initial\":14,\"Value\":16,\"Weight\":10,\"Disabled\":false") ||
+			!strings.Contains(cdrs[0].ExtraFields[utils.SourceBalanceSummary], "\"ID\":\"balance_src\",\"Type\":\"*monetary\",\"Initial\":6,\"Value\":4,\"Weight\":20,\"Disabled\":false") {
 			t.Errorf("unexpected cdr received: %v", utils.ToJSON(cdrs[0]))
 		}
 		if cdrs[0].Cost != 2 {
@@ -283,8 +289,8 @@ ACT_TRANSFER,*transfer_balance,"{""DestinationAccountID"":""cgrates.org:ACC_DEST
 			cdrs[1].RunID != utils.MetaTransferBalance ||
 			cdrs[1].Source != utils.CDRLog ||
 			cdrs[1].ToR != utils.MetaVoice ||
-			cdrs[1].ExtraFields["DestinationBalanceID"] != "nonexistent_balance" ||
-			cdrs[1].ExtraFields["SourceBalanceID"] != "balance_src" {
+			!strings.Contains(cdrs[1].ExtraFields[utils.DestinationBalanceSummary], "\"ID\":\"nonexistent_balance\",\"Type\":\"*monetary\",\"Initial\":0,\"Value\":3,\"Disabled\":false") ||
+			!strings.Contains(cdrs[1].ExtraFields[utils.SourceBalanceSummary], "\"ID\":\"balance_src\",\"Type\":\"*monetary\",\"Initial\":4,\"Value\":1,\"Weight\":20,\"Disabled\":false") {
 			t.Errorf("unexpected cdr received: %v", utils.ToJSON(cdrs[1]))
 		}
 		if cdrs[1].Cost != 3 {
@@ -295,8 +301,8 @@ ACT_TRANSFER,*transfer_balance,"{""DestinationAccountID"":""cgrates.org:ACC_DEST
 			cdrs[2].RunID != utils.MetaTransferBalance ||
 			cdrs[2].Source != utils.CDRLog ||
 			cdrs[2].ToR != utils.MetaVoice ||
-			cdrs[2].ExtraFields["DestinationBalanceID"] != "balance_dest" ||
-			cdrs[2].ExtraFields["SourceBalanceID"] != "balance_src" {
+			!strings.Contains(cdrs[2].ExtraFields[utils.DestinationBalanceSummary], "\"ID\":\"balance_dest\",\"Type\":\"*monetary\",\"Initial\":10,\"Value\":14,\"Weight\":10,\"Disabled\":false") ||
+			!strings.Contains(cdrs[2].ExtraFields[utils.SourceBalanceSummary], "\"ID\":\"balance_src\",\"Type\":\"*monetary\",\"Initial\":10,\"Value\":6,\"Weight\":20,\"Disabled\":false") {
 			t.Errorf("unexpected cdr received: %v", utils.ToJSON(cdrs[2]))
 		}
 		if cdrs[2].Cost != 4 {

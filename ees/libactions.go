@@ -22,7 +22,6 @@ import (
 	"encoding/gob"
 	"encoding/json"
 	"net/http"
-	"time"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
@@ -49,7 +48,7 @@ func getOneData(ub *engine.Account, extraData any) ([]byte, error) {
 }
 
 func callURL(ub *engine.Account, a *engine.Action, _ engine.Actions, _ *engine.FilterS, extraData any,
-	_ time.Time, _ engine.ActionConnCfg) error {
+	_ engine.SharedActionsData, _ engine.ActionConnCfg) error {
 	body, err := getOneData(ub, extraData)
 	if err != nil {
 		return err
@@ -69,7 +68,7 @@ func callURL(ub *engine.Account, a *engine.Action, _ engine.Actions, _ *engine.F
 
 // Does not block for posts, no error reports
 func callURLAsync(ub *engine.Account, a *engine.Action, _ engine.Actions, _ *engine.FilterS, extraData any,
-	_ time.Time, _ engine.ActionConnCfg) error {
+	_ engine.SharedActionsData, _ engine.ActionConnCfg) error {
 	body, err := getOneData(ub, extraData)
 	if err != nil {
 		return err
@@ -85,7 +84,7 @@ func callURLAsync(ub *engine.Account, a *engine.Action, _ engine.Actions, _ *eng
 }
 
 func postEvent(_ *engine.Account, a *engine.Action, _ engine.Actions, _ *engine.FilterS, extraData any,
-	_ time.Time, _ engine.ActionConnCfg) error {
+	_ engine.SharedActionsData, _ engine.ActionConnCfg) error {
 	body, err := json.Marshal(extraData)
 	if err != nil {
 		return err
