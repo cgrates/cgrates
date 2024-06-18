@@ -68,9 +68,8 @@ func (at *ActionTrigger) Execute(acc *Account, fltrS *FilterS) (err error) {
 	at.Executed = true
 	transactionFailed := false
 	removeAccountActionFound := false
-	accClone := acc.Clone() // *cdrlog action requires the original account
-	referenceTime := time.Now()
-	for _, act := range acts {
+	sharedData := NewSharedActionsData(acts)
+	for i, act := range acts {
 		// check action filter
 		if len(act.Filters) > 0 {
 			if pass, err := fltrS.Pass(utils.NewTenantID(act.Id).Tenant, act.Filters,
@@ -99,12 +98,8 @@ func (at *ActionTrigger) Execute(acc *Account, fltrS *FilterS) (err error) {
 			transactionFailed = false
 			break
 		}
-		//go utils.Logger.Info(fmt.Sprintf("Executing %v, %v: %v", ub, sq, a))
-		tmpAcc := acc
-		if act.ActionType == utils.CDRLog {
-			tmpAcc = accClone
-		}
-		if err := actionFunction(tmpAcc, act, acts, fltrS, nil, referenceTime,
+		sharedData.idx = i // set the current action index in shared data
+		if err := actionFunction(acc, act, acts, fltrS, nil, sharedData,
 			newActionConnCfg(utils.RALs, act.ActionType, config.CgrConfig())); err != nil {
 			utils.Logger.Err(
 				fmt.Sprintf("Error executing action %s: %v!",
