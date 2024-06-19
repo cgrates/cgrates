@@ -20,6 +20,7 @@ package agents
 import (
 	"bytes"
 	"reflect"
+	"strings"
 	"testing"
 	"time"
 
@@ -1508,5 +1509,44 @@ func TestFseventMissingParameter(t *testing.T) {
 				t.Errorf("expected %v, got %v", tt.want, got)
 			}
 		})
+	}
+}
+
+func TestFseventGetPdd(t *testing.T) {
+	fsev := FSEvent{
+		PDD_MEDIA_MS:   "500",
+		PDD_NOMEDIA_MS: "700",
+	}
+	duration, err := fsev.GetPdd(utils.MetaDefault)
+	if err != nil {
+		t.Errorf("Test case 1: expected no error, got %v", err)
+	}
+	expectedDuration := 500 * time.Millisecond
+	if duration != expectedDuration {
+		t.Errorf("Test case 1: expected duration %v, got %v", expectedDuration, duration)
+	}
+
+	duration, err = fsev.GetPdd(utils.StaticValuePrefix + "1000ms")
+	if err != nil {
+		t.Errorf("Test case 2: expected no error, got %v", err)
+	}
+	expectedDuration = 1000 * time.Millisecond
+	if duration != expectedDuration {
+		t.Errorf("Test case 2: expected duration %v, got %v", expectedDuration, duration)
+	}
+	fsev["invalidFieldName"] = "invalid"
+	_, err = fsev.GetPdd("invalidFieldName")
+	if err == nil {
+		t.Errorf("Test case 4: expected error, got nil")
+	} else if !strings.Contains(err.Error(), "invalid duration") {
+		t.Errorf("Test case 4: expected error message to contain 'invalid duration', got %v", err)
+	}
+	duration, err = fsev.GetPdd("")
+	if err != nil {
+		t.Errorf("Test case 5: expected no error, got %v", err)
+	}
+	expectedDuration = 0
+	if duration != expectedDuration {
+		t.Errorf("Test case 5: expected duration %v, got %v", expectedDuration, duration)
 	}
 }
