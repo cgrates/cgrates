@@ -20,6 +20,8 @@ package agents
 
 import (
 	"net"
+	"os"
+	"path/filepath"
 	"reflect"
 	"strings"
 	"testing"
@@ -1244,4 +1246,165 @@ func TestLibdiamDiamErr(t *testing.T) {
 		t.Error("Expected a non-nil diam.Message, got nil")
 	}
 
+}
+
+func TestLibDiamAVPAsString(t *testing.T) {
+	testCases := []struct {
+		name      string
+		dAVP      *diam.AVP
+		expected  string
+		expectErr bool
+	}{
+		{
+			name:     "IPv4 Address AVP",
+			dAVP:     &diam.AVP{Data: datatype.Address(net.IPv4(192, 168, 0, 1))},
+			expected: "192.168.0.1",
+		},
+		{
+			name:     "Diameter Identity AVP",
+			dAVP:     &diam.AVP{Data: datatype.DiameterIdentity("cgrates.com")},
+			expected: "cgrates.com",
+		},
+		{
+			name:     "Time AVP",
+			dAVP:     &diam.AVP{Data: datatype.Time(time.Now())},
+			expected: time.Now().Format(time.RFC3339),
+		},
+		{
+			name:      "Nil AVP",
+			dAVP:      nil,
+			expectErr: true,
+		},
+	}
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			result, err := diamAVPAsString(tc.dAVP)
+			if tc.expectErr {
+				if err == nil {
+					t.Error("Expected an error, but got nil")
+				}
+				return
+			}
+			if err != nil {
+				t.Errorf("Unexpected error: %v", err)
+				return
+			}
+			if result != tc.expected {
+				t.Errorf("Expected %q, got %q", tc.expected, result)
+			}
+		})
+	}
+}
+
+func TestLibDiamUpdateAVPLength(t *testing.T) {
+
+	testCases := []struct {
+		name     string
+		avps     []*diam.AVP
+		expected int
+	}{
+		{
+			name: "Single AVP without GroupedAVP",
+			avps: []*diam.AVP{
+				{Length: 10},
+				{Length: 20},
+				{Length: 15},
+			},
+			expected: 45,
+		},
+		{
+			name:     "Empty AVP slice",
+			avps:     []*diam.AVP{},
+			expected: 0,
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+
+			result := updateAVPLength(tc.avps)
+
+			if result != tc.expected {
+				t.Errorf("Expected length %d, got %d", tc.expected, result)
+			}
+		})
+	}
+}
+
+func TestLibDiamUpdateAVPLengthWithGroupedAVP(t *testing.T) {
+	groupedAVP := &diam.AVP{Length: 10}
+	avps := []*diam.AVP{
+		{Length: 10},
+		{
+			Data: &diam.GroupedAVP{
+				AVP: []*diam.AVP{
+					groupedAVP,
+					{Length: 0},
+				},
+			},
+		},
+		{Length: 15},
+	}
+	expected := 10 + headerLen(avps[1]) + groupedAVP.Length + avps[2].Length
+	result := updateAVPLength(avps)
+	if result != expected {
+		t.Errorf("Expected length %d, got %d", expected, result)
+	}
+}
+
+func TestLibDiamDiameterDPString(t *testing.T) {
+	msg := &diam.Message{
+		Header: &diam.Header{
+			Version:       1,
+			MessageLength: 20,
+			CommandFlags:  2,
+			CommandCode:   272,
+			ApplicationID: 0,
+			HopByHopID:    12345,
+			EndToEndID:    67890,
+		},
+	}
+	dp := &diameterDP{
+		m: msg,
+	}
+	result := dp.String()
+	expected := msg.String()
+	if result != expected {
+		t.Errorf("Expected %q, but got %q", expected, result)
+	}
+}
+
+func TestLibDiamLoadDictionaries(t *testing.T) {
+	tempDir := t.TempDir()
+	dictsDir := filepath.Join(tempDir, "dicts")
+	err := os.Mkdir(dictsDir, os.ModePerm)
+	if err != nil {
+		t.Fatalf("Failed to create temporary directory: %v", err)
+	}
+	testCases := []struct {
+		name             string
+		dictsDir         string
+		expectedErrorMsg string
+	}{
+		{
+			name:     "Valid Directory",
+			dictsDir: dictsDir,
+		},
+		{
+			name:             "Invalid Directory",
+			dictsDir:         filepath.Join(tempDir, "nonexistent", "directory"),
+			expectedErrorMsg: "Invalid dictionaries folder",
+		},
+	}
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			err := loadDictionaries(tc.dictsDir, "testComponent")
+			if tc.expectedErrorMsg == "" && err != nil {
+				t.Errorf("Unexpected error: %v", err)
+			}
+			if tc.expectedErrorMsg != "" && !strings.Contains(err.Error(), tc.expectedErrorMsg) {
+				t.Errorf("Expected error containing %q, got: %v", tc.expectedErrorMsg, err)
+			}
+		})
+	}
 }
