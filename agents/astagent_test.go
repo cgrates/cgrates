@@ -99,3 +99,23 @@ func TestAstAgentV1WarnDisconnect(t *testing.T) {
 		t.Errorf("Expected error: %v, got: %v", utils.ErrNotImplemented, err)
 	}
 }
+
+func TestAsteriskAgentV1DisconnectPeer(t *testing.T) {
+	tAsteriskAgent := &AsteriskAgent{}
+	tDPRArgs := &utils.DPRArgs{}
+	tString := ""
+	err := tAsteriskAgent.V1DisconnectPeer(nil, tDPRArgs, &tString)
+	if err != utils.ErrNotImplemented {
+		t.Errorf("Expected error: %v, got: %v", utils.ErrNotImplemented, err)
+	}
+}
+
+func TestAsteriskAgentV1AlterSession(t *testing.T) {
+	tAsteriskAgent := &AsteriskAgent{}
+	tCGREvent := utils.CGREvent{}
+	tString := ""
+	err := tAsteriskAgent.V1AlterSession(nil, tCGREvent, &tString)
+	if err != utils.ErrNotImplemented {
+		t.Errorf("Expected error: %v, got: %v", utils.ErrNotImplemented, err)
+	}
+}
