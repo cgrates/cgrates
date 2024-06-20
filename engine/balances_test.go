@@ -19,6 +19,7 @@ package engine
 
 import (
 	"bytes"
+	"encoding/json"
 	"log"
 	"os"
 	"strings"
@@ -664,5 +665,115 @@ func TestBalancesValueFactorsGetValue(t *testing.T) {
 		if result != tc.expected {
 			t.Errorf("Test failed for category '%s': expected %.2f, got %.2f", tc.category, tc.expected, result)
 		}
+	}
+}
+func TestBalancesStringJson(t *testing.T) {
+	balances := Balances{
+		&Balance{
+			Uuid:           "uuid123",
+			ID:             "balance123",
+			Value:          100.0,
+			ExpirationDate: time.Date(2024, time.December, 31, 23, 59, 59, 0, time.UTC),
+			Weight:         1.5,
+			DestinationIDs: utils.StringMap{},
+			RatingSubject:  "ratingSub",
+			Categories:     utils.StringMap{},
+			SharedGroups:   utils.StringMap{},
+			Timings:        []*RITiming{},
+			TimingIDs:      utils.StringMap{},
+			Disabled:       false,
+			Blocker:        true,
+			precision:      2,
+			account:        nil,
+			dirty:          false,
+		},
+	}
+
+	result := balances.String()
+	if result == "" {
+		t.Error("Expected non-empty JSON string, but got empty string")
+	}
+}
+
+func TestBalanceFieldAsString(t *testing.T) {
+	balance := &Balance{
+		Uuid: "uuid123",
+	}
+	val, err := balance.FieldAsString([]string{"Uuid"})
+	if err != nil {
+		t.Errorf("Unexpected error for field 'Uuid': %v", err)
+	}
+	expected := balance.Uuid
+	if val != expected {
+		t.Errorf("Expected value '%s' for field 'Uuid', but got '%s'", expected, val)
+	}
+	_, err = balance.FieldAsString([]string{"InvalidField"})
+	if err == nil {
+		t.Error("Expected error for invalid field path, but got nil")
+	}
+}
+
+func TestBalancesString(t *testing.T) {
+	balance := &Balance{
+		Uuid: "123e4567-e89b-12d3-a456-426614174000",
+	}
+	jsonStr := balance.String()
+	var data map[string]interface{}
+	err := json.Unmarshal([]byte(jsonStr), &data)
+	if err != nil {
+		t.Errorf("Error unmarshalling JSON string: %v", err)
+	}
+	expectedUuid := balance.Uuid
+	if uuid, ok := data["Uuid"].(string); !ok || uuid != expectedUuid {
+		t.Errorf("Expected Uuid '%s' in JSON, but got '%v'", expectedUuid, data["Uuid"])
+	}
+}
+func TestBalancesHasBalanceReturn(t *testing.T) {
+	balances := Balances{
+		{ID: "1"},
+		{ID: "2"},
+		{ID: "3"},
+	}
+	existingBalance := &Balance{ID: "2"}
+	if !balances.HasBalance(existingBalance) {
+		t.Errorf("Expected balance with ID '%s' to exist, but it does not", existingBalance.ID)
+	}
+	nonExistingBalance := &Balance{ID: "4"}
+	if balances.HasBalance(nonExistingBalance) {
+		t.Errorf("Expected balance with ID '%s' to not exist, but it does", nonExistingBalance.ID)
+	}
+}
+
+func TestBalancesEqual(t *testing.T) {
+	balances1 := Balances{
+		{ID: "1"},
+		{ID: "2"},
+		{ID: "3"},
+	}
+	balances2 := Balances{
+		{ID: "1"},
+		{ID: "2"},
+		{ID: "3"},
+	}
+	if !balances1.Equal(balances1) {
+		t.Errorf("Expected balances1 to equal itself, but it does not")
+	}
+	if !balances1.Equal(balances2) {
+		t.Errorf("Expected balances1 to equal balances2, but they are not equal")
+	}
+	balances3 := Balances{
+		{ID: "1"},
+		{ID: "2"},
+	}
+	if balances1.Equal(balances3) {
+		t.Errorf("Expected balances1 to not equal balances3, but they are equal")
+	}
+	balances4 := Balances{
+		{ID: "1"},
+		{ID: "2"},
+		{ID: "4"},
+	}
+	if balances1.Equal(balances4) {
+		t.Errorf("Expected balances1 to not equal balances4, but they are equal")
 	}
 }
