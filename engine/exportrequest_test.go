@@ -667,3 +667,11 @@ func TestExportRequestSetFields2(t *testing.T) {
 		t.Error(err)
 	}
 }
+
+func TestExportRequestString(t *testing.T) {
+	eeR := &ExportRequest{}
+	jsonStr := eeR.String()
+	if jsonStr == "" {
+		t.Errorf("Expected non-empty JSON string, but got empty")
+	}
+}

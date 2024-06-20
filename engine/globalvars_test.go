@@ -18,6 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"net/http"
 	"testing"
 )
 
@@ -46,4 +47,12 @@ func TestSetDataStorage(t *testing.T) {
 		t.Error("Expected the dm to be nil", dm)
 	}
 	dm = tmp
+}
+
+func TestGlobalvarsGetHTTPPstrTransport(t *testing.T) {
+	httpPstrTransport = &http.Transport{}
+	transport := GetHTTPPstrTransport()
+	if transport == nil {
+		t.Error("Expected transport to be initialized, but got nil")
+	}
 }

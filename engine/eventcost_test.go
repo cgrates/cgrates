@@ -18,12 +18,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"errors"
 	"fmt"
 	"reflect"
 	"testing"
 	"time"
 
 	"github.com/cgrates/cgrates/config"
+
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -4840,5 +4842,137 @@ func TestECfieldAsInterfaceNilECCost(t *testing.T) {
 
 	if rcv != nil {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", nil, rcv)
+	}
+}
+
+func TestEventCostSet(t *testing.T) {
+	ec := &EventCost{}
+	testCases := []struct {
+		name    string
+		fldPath []string
+		val     interface{}
+		wantErr error
+	}{
+		{
+			name:    "cgrates",
+			fldPath: []string{"field1"},
+			val:     "value1",
+			wantErr: utils.ErrNotImplemented,
+		},
+		{
+			name:    "cgrates2",
+			fldPath: []string{"field2", "subfield"},
+			val:     123,
+			wantErr: utils.ErrNotImplemented,
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+
+			err := ec.Set(tc.fldPath, tc.val)
+
+			if err != tc.wantErr {
+				t.Errorf("Set() error = %v, wantErr %v", err, tc.wantErr)
+			}
+		})
+	}
+}
+
+func TestEventCostRemove(t *testing.T) {
+	ec := &EventCost{}
+	testCases := []struct {
+		name    string
+		fldPath []string
+		wantErr error
+	}{
+		{
+			name:    "cgrates",
+			fldPath: []string{"field1"},
+			wantErr: utils.ErrNotImplemented,
+		},
+		{
+			name:    "cgrates2",
+			fldPath: []string{"field2", "subfield"},
+			wantErr: utils.ErrNotImplemented,
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+
+			err := ec.Remove(tc.fldPath)
+
+			if err != tc.wantErr {
+				t.Errorf("Remove() error = %v, wantErr %v", err, tc.wantErr)
+			}
+		})
+	}
+}
+
+func TestEventCostGetKeys(t *testing.T) {
+	ec := &EventCost{}
+	testCases := []struct {
+		name         string
+		nested       bool
+		nestedLimit  int
+		prefix       string
+		expectedKeys []string
+	}{
+		{
+			name:         "cgrates",
+			nested:       true,
+			nestedLimit:  3,
+			prefix:       "prefix",
+			expectedKeys: nil,
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+
+			keys := ec.GetKeys(tc.nested, tc.nestedLimit, tc.prefix)
+
+			if !reflect.DeepEqual(keys, tc.expectedKeys) {
+				t.Errorf("GetKeys() returned %+v, expected %+v", keys, tc.expectedKeys)
+			}
+		})
+	}
+}
+
+func TestEvenCostProcessEventCostField(t *testing.T) {
+
+	testCases := []struct {
+		name          string
+		fldPath       []string
+		cd            interface{}
+		event         map[string]interface{}
+		expectedValue interface{}
+		expectedErr   error
+	}{
+		{
+			name:          "cgrates",
+			fldPath:       []string{"field1"},
+			cd:            nil,
+			event:         make(map[string]interface{}),
+			expectedValue: nil,
+			expectedErr:   errors.New("unsupported field prefix: <field1>"),
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+
+			val, err := processEventCostField(tc.fldPath, tc.cd, tc.event)
+
+			if !reflect.DeepEqual(val, tc.expectedValue) {
+				t.Errorf("ProcessEventCostField() returned %+v, expected %+v", val, tc.expectedValue)
+			}
+
+			if (err == nil && tc.expectedErr != nil) || (err != nil && tc.expectedErr == nil) || (err != nil && tc.expectedErr != nil && err.Error() != tc.expectedErr.Error()) {
+				t.Errorf("ProcessEventCostField() error = %v, expected error = %v", err, tc.expectedErr)
+			}
+
+		})
 	}
 }
