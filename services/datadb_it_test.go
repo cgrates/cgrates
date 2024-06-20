@@ -121,6 +121,7 @@ func TestDataDBReload(t *testing.T) {
 			utils.MetaStatQueues:          {Limit: -1},
 			utils.MetaResources:           {Limit: -1},
 			utils.MetaStatQueueProfiles:   {Limit: -1},
+			utils.MetaSagProfiles:         {Limit: -1},
 			utils.MetaThresholds:          {Limit: -1},
 			utils.MetaThresholdProfiles:   {Limit: -1},
 			utils.MetaFilters:             {Limit: -1},

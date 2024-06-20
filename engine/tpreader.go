@@ -1610,8 +1610,7 @@ func (tpr *TpReader) WriteToDatabase(verbose, disableReverse bool) (err error) {
 		}
 	}
 	if len(tpr.sgProfiles) != 0 {
-		loadIDs[utils.CacheStatQueues] = loadID
-		loadIDs[utils.CacheStatQueueProfiles] = loadID
+		loadIDs[utils.CacheSagProfiles] = loadID
 	}
 	if verbose {
 		log.Print("ThresholdProfiles:")
@@ -1913,6 +1912,14 @@ func (tpr *TpReader) GetLoadedIds(categ string) ([]string, error) {
 		keys := make([]string, len(tpr.sqProfiles))
 		i := 0
 		for k := range tpr.sqProfiles {
+			keys[i] = k.TenantID()
+			i++
+		}
+		return keys, nil
+	case utils.SagsProfilePrefix:
+		keys := make([]string, len(tpr.sgProfiles))
+		i := 0
+		for k := range tpr.sgProfiles {
 			keys[i] = k.TenantID()
 			i++
 		}
@@ -2248,6 +2255,9 @@ func (tpr *TpReader) RemoveFromDatabase(verbose, disableReverse bool) (err error
 		loadIDs[utils.CacheStatQueueProfiles] = loadID
 		loadIDs[utils.CacheStatQueues] = loadID
 	}
+	if len(tpr.sgProfiles) != 0 {
+		loadIDs[utils.CacheSagProfiles] = loadID
+	}
 	if len(tpr.thProfiles) != 0 {
 		loadIDs[utils.CacheThresholdProfiles] = loadID
 		loadIDs[utils.CacheThresholds] = loadID
@@ -2293,6 +2303,7 @@ func (tpr *TpReader) ReloadCache(caching string, verbose bool, opts map[string]a
 	rspIDs, _ := tpr.GetLoadedIds(utils.ResourceProfilesPrefix)
 	aatIDs, _ := tpr.GetLoadedIds(utils.ActionTriggerPrefix)
 	stqpIDs, _ := tpr.GetLoadedIds(utils.StatQueueProfilePrefix)
+	sgIDS, _ := tpr.GetLoadedIds(utils.SagsProfilePrefix)
 	trspfIDs, _ := tpr.GetLoadedIds(utils.ThresholdProfilePrefix)
 	flrIDs, _ := tpr.GetLoadedIds(utils.FilterPrefix)
 	routeIDs, _ := tpr.GetLoadedIds(utils.RouteProfilePrefix)
@@ -2318,6 +2329,7 @@ func (tpr *TpReader) ReloadCache(caching string, verbose bool, opts map[string]a
 		utils.CacheActionTriggers:      aatIDs,
 		utils.CacheStatQueues:          stqpIDs,
 		utils.CacheStatQueueProfiles:   stqpIDs,
+		utils.CacheSagProfiles:         sgIDS,
 		utils.CacheThresholds:          trspfIDs,
 		utils.CacheThresholdProfiles:   trspfIDs,
 		utils.CacheFilters:             flrIDs,

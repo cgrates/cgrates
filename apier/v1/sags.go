@@ -19,6 +19,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package v1
 
 import (
+	"time"
+
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -72,14 +74,22 @@ func (apierSv1 *APIerSv1) GetSagProfileIDs(ctx *context.Context, args *utils.Pag
 	return
 }
 
-func (apierSv1 *APIerSv1) SetSagProfile(ctx *context.Context, args *engine.SagProfileWithAPIOpts, reply *string) error {
-	if missing := utils.MissingStructFields(args.SagProfile, []string{utils.ID}); len(missing) != 0 {
+func (apierSv1 *APIerSv1) SetSagProfile(ctx *context.Context, arg *engine.SagProfileWithAPIOpts, reply *string) error {
+	if missing := utils.MissingStructFields(arg.SagProfile, []string{utils.ID}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if args.Tenant == utils.EmptyString {
-		args.Tenant = apierSv1.Config.GeneralCfg().DefaultTenant
+	if arg.Tenant == utils.EmptyString {
+		arg.Tenant = apierSv1.Config.GeneralCfg().DefaultTenant
 	}
-	if err := apierSv1.DataManager.SetSagProfile(args.SagProfile); err != nil {
+	if err := apierSv1.DataManager.SetSagProfile(arg.SagProfile); err != nil {
+		return utils.APIErrorHandler(err)
+	}
+	if err := apierSv1.CallCache(utils.IfaceAsString(arg.APIOpts[utils.CacheOpt]), arg.Tenant, utils.CacheSagProfiles,
+		arg.TenantID(), utils.EmptyString, nil, nil, arg.APIOpts); err != nil {
+		return utils.APIErrorHandler(err)
+	}
+	loadID := time.Now().UnixNano()
+	if err := apierSv1.DataManager.SetLoadIDs(map[string]int64{utils.CacheSagProfiles: loadID}); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	*reply = utils.OK
@@ -95,6 +105,16 @@ func (apierSv1 *APIerSv1) RemoveSagProfile(ctx *context.Context, args *utils.Ten
 		tnt = apierSv1.Config.GeneralCfg().DefaultTenant
 	}
 	if err := apierSv1.DataManager.RemoveSagProfile(tnt, args.ID); err != nil {
+		return utils.APIErrorHandler(err)
+	}
+
+	if err := apierSv1.CallCache(utils.IfaceAsString(args.APIOpts[utils.CacheOpt]), tnt, utils.CacheSagProfiles,
+		utils.ConcatenatedKey(tnt, args.ID), utils.EmptyString, nil, nil, args.APIOpts); err != nil {
+		return utils.APIErrorHandler(err)
+	}
+
+	loadID := time.Now().UnixNano()
+	if err := apierSv1.DataManager.SetLoadIDs(map[string]int64{utils.CacheSagProfiles: loadID}); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	*reply = utils.OK

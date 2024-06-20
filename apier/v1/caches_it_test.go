@@ -133,7 +133,7 @@ func testCacheSAfterLoadFromFolder(t *testing.T) {
 	expStats := engine.GetDefaultEmptyCacheStats()
 	expStats[utils.CacheActions].Items = 5
 	expStats[utils.CacheDestinations].Items = 3
-	expStats[utils.CacheLoadIDs].Items = 18
+	expStats[utils.CacheLoadIDs].Items = 19
 	expStats[utils.CacheRPCConnections].Items = 2
 	if err := chcRPC.Call(context.Background(), utils.CacheSv1GetCacheStats, &utils.AttrCacheIDsWithAPIOpts{}, &rcvStats); err != nil {
 		t.Error("Got error on CacheSv1.GetCacheStats: ", err.Error())
@@ -163,7 +163,7 @@ func testCacheSAfterLoadFromFolder(t *testing.T) {
 	expStats[utils.CacheRouteProfiles].Items = 2
 	expStats[utils.CacheThresholdProfiles].Items = 1
 	expStats[utils.CacheThresholds].Items = 1
-	expStats[utils.CacheLoadIDs].Items = 31
+	expStats[utils.CacheLoadIDs].Items = 32
 	expStats[utils.CacheTimings].Items = 12
 	expStats[utils.CacheThresholdFilterIndexes].Items = 5
 	expStats[utils.CacheThresholdFilterIndexes].Groups = 1
@@ -177,6 +177,7 @@ func testCacheSAfterLoadFromFolder(t *testing.T) {
 	expStats[utils.CacheAttributeFilterIndexes].Groups = 1
 	expStats[utils.CacheReverseFilterIndexes].Items = 10
 	expStats[utils.CacheReverseFilterIndexes].Groups = 7
+	expStats[utils.CacheSagProfiles].Items = 1
 
 	if err := chcRPC.Call(context.Background(), utils.CacheSv1GetCacheStats, &utils.AttrCacheIDsWithAPIOpts{}, &rcvStats); err != nil {
 		t.Error(err)
@@ -231,7 +232,7 @@ func testCacheSReload(t *testing.T) {
 	expStats[utils.CacheRouteProfiles].Items = 2
 	expStats[utils.CacheThresholdProfiles].Items = 1
 	expStats[utils.CacheThresholds].Items = 1
-	expStats[utils.CacheLoadIDs].Items = 31
+	expStats[utils.CacheLoadIDs].Items = 32
 	expStats[utils.CacheTimings].Items = 12
 	expStats[utils.CacheThresholdFilterIndexes].Items = 5
 	expStats[utils.CacheThresholdFilterIndexes].Groups = 1
@@ -245,6 +246,7 @@ func testCacheSReload(t *testing.T) {
 	expStats[utils.CacheAttributeFilterIndexes].Groups = 1
 	expStats[utils.CacheReverseFilterIndexes].Items = 10
 	expStats[utils.CacheReverseFilterIndexes].Groups = 7
+	expStats[utils.CacheSagProfiles].Items = 1
 
 	if err := chcRPC.Call(context.Background(), utils.CacheSv1GetCacheStats, &utils.AttrCacheIDsWithAPIOpts{}, &rcvStats); err != nil {
 		t.Error(err)

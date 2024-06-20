@@ -69,6 +69,8 @@ func (sag *SagService) Start() error {
 		return utils.ErrServiceAlreadyRunning
 	}
 	sag.srvDep[utils.DataDB].Add(1)
+	<-sag.cacheS.GetPrecacheChannel(utils.CacheStatQueueProfiles)
+	<-sag.cacheS.GetPrecacheChannel(utils.CacheStatQueues)
 	<-sag.cacheS.GetPrecacheChannel(utils.CacheStatFilterIndexes)
 
 	filterS := <-sag.filterSChan

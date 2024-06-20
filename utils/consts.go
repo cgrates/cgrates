@@ -38,7 +38,7 @@ var (
 
 	DataDBPartitions = NewStringSet([]string{CacheDestinations, CacheReverseDestinations, CacheRatingPlans,
 		CacheRatingProfiles, CacheDispatcherProfiles, CacheDispatcherHosts, CacheChargerProfiles, CacheActions, CacheActionTriggers, CacheSharedGroups, CacheTimings,
-		CacheResourceProfiles, CacheResources, CacheEventResources, CacheStatQueueProfiles, CacheStatQueues,
+		CacheResourceProfiles, CacheResources, CacheEventResources, CacheStatQueueProfiles, CacheSagProfiles, CacheStatQueues,
 		CacheThresholdProfiles, CacheThresholds, CacheFilters, CacheRouteProfiles, CacheAttributeProfiles,
 		CacheResourceFilterIndexes, CacheStatFilterIndexes, CacheThresholdFilterIndexes, CacheRouteFilterIndexes,
 		CacheAttributeFilterIndexes, CacheChargerFilterIndexes, CacheDispatcherFilterIndexes, CacheLoadIDs,
@@ -47,7 +47,7 @@ var (
 	StorDBPartitions = NewStringSet([]string{CacheTBLTPTimings, CacheTBLTPDestinations, CacheTBLTPRates, CacheTBLTPDestinationRates,
 		CacheTBLTPRatingPlans, CacheTBLTPRatingProfiles, CacheTBLTPSharedGroups, CacheTBLTPActions,
 		CacheTBLTPActionPlans, CacheTBLTPActionTriggers, CacheTBLTPAccountActions, CacheTBLTPResources,
-		CacheTBLTPStats, CacheTBLTPThresholds, CacheTBLTPFilters, CacheSessionCostsTBL, CacheCDRsTBL,
+		CacheTBLTPStats, CacheTBLTPThresholds, CacheTBLTPSags, CacheTBLTPFilters, CacheSessionCostsTBL, CacheCDRsTBL,
 		CacheTBLTPRoutes, CacheTBLTPAttributes, CacheTBLTPChargers, CacheTBLTPDispatchers,
 		CacheTBLTPDispatcherHosts, CacheVersions})
 
@@ -69,6 +69,7 @@ var (
 		CacheTimings:                 TimingsPrefix,
 		CacheStatQueueProfiles:       StatQueueProfilePrefix,
 		CacheStatQueues:              StatQueuePrefix,
+		CacheSagProfiles:             SagsProfilePrefix,
 		CacheThresholdProfiles:       ThresholdProfilePrefix,
 		CacheThresholds:              ThresholdPrefix,
 		CacheFilters:                 FilterPrefix,
@@ -968,6 +969,7 @@ const (
 	MetaResourceProfile     = "*resource_profiles"
 	MetaStatQueueProfiles   = "*statqueue_profiles"
 	MetaStatQueues          = "*statqueues"
+	MetaSagProfiles         = "*sag_profiles"
 	MetaThresholdProfiles   = "*threshold_profiles"
 	MetaRouteProfiles       = "*route_profiles"
 	MetaAttributeProfiles   = "*attribute_profiles"
@@ -1246,6 +1248,7 @@ const (
 	ReplicatorSv1GetThreshold            = "ReplicatorSv1.GetThreshold"
 	ReplicatorSv1GetThresholdProfile     = "ReplicatorSv1.GetThresholdProfile"
 	ReplicatorSv1GetStatQueueProfile     = "ReplicatorSv1.GetStatQueueProfile"
+	ReplicatorSv1GetSagProfile           = "ReplicatorSv1.GetSagProfile"
 	ReplicatorSv1GetTiming               = "ReplicatorSv1.GetTiming"
 	ReplicatorSv1GetResource             = "ReplicatorSv1.GetResource"
 	ReplicatorSv1GetResourceProfile      = "ReplicatorSv1.GetResourceProfile"
@@ -1271,6 +1274,7 @@ const (
 	ReplicatorSv1SetStatQueue            = "ReplicatorSv1.SetStatQueue"
 	ReplicatorSv1SetFilter               = "ReplicatorSv1.SetFilter"
 	ReplicatorSv1SetStatQueueProfile     = "ReplicatorSv1.SetStatQueueProfile"
+	ReplicatorSv1SetSagProfile           = "ReplicatorSv1.SetSagProfile"
 	ReplicatorSv1SetTiming               = "ReplicatorSv1.SetTiming"
 	ReplicatorSv1SetResource             = "ReplicatorSv1.SetResource"
 	ReplicatorSv1SetResourceProfile      = "ReplicatorSv1.SetResourceProfile"
@@ -1296,6 +1300,7 @@ const (
 	ReplicatorSv1RemoveFilter            = "ReplicatorSv1.RemoveFilter"
 	ReplicatorSv1RemoveThresholdProfile  = "ReplicatorSv1.RemoveThresholdProfile"
 	ReplicatorSv1RemoveStatQueueProfile  = "ReplicatorSv1.RemoveStatQueueProfile"
+	ReplicatorSv1RemoveSagProfile        = "ReplicatorSv1.RemoveSagProfile"
 	ReplicatorSv1RemoveTiming            = "ReplicatorSv1.RemoveTiming"
 	ReplicatorSv1RemoveResource          = "ReplicatorSv1.RemoveResource"
 	ReplicatorSv1RemoveResourceProfile   = "ReplicatorSv1.RemoveResourceProfile"
@@ -1927,7 +1932,7 @@ const (
 	CacheEventResources          = "*event_resources"
 	CacheStatQueueProfiles       = "*statqueue_profiles"
 	CacheStatQueues              = "*statqueues"
-	CacheSagsProfiles            = "*sags_profiles"
+	CacheSagProfiles             = "*sag_profiles"
 	CacheThresholdProfiles       = "*threshold_profiles"
 	CacheThresholds              = "*thresholds"
 	CacheFilters                 = "*filters"
@@ -1942,6 +1947,7 @@ const (
 	CacheResourceFilterIndexes   = "*resource_filter_indexes"
 	CacheStatFilterIndexes       = "*stat_filter_indexes"
 	CacheThresholdFilterIndexes  = "*threshold_filter_indexes"
+	CacheSagFilterIndexes        = "sag_filter_indexes"
 	CacheRouteFilterIndexes      = "*route_filter_indexes"
 	CacheAttributeFilterIndexes  = "*attribute_filter_indexes"
 	CacheChargerFilterIndexes    = "*charger_filter_indexes"

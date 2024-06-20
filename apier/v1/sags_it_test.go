@@ -53,6 +53,17 @@ var (
 		testSagSUpdateSagProfile,
 		testSagSRemSagProfile,
 		testSagSKillEngine,
+		//cache test
+		testSagSInitCfg,
+		testSagSInitDataDb,
+		testSagSResetStorDb,
+		testSagSStartEngine,
+		testSagSRPCConn,
+		testSagSCacheTestGetNotFound,
+		testSagSCacheTestSet,
+		testSagSCacheReload,
+		testSagSCacheTestGetFound,
+		testSagSKillEngine,
 	}
 )
 
@@ -210,5 +221,52 @@ func testSagSRemSagProfile(t *testing.T) {
 func testSagSKillEngine(t *testing.T) {
 	if err := engine.KillEngine(*utils.WaitRater); err != nil {
 		t.Error(err)
+	}
+}
+
+func testSagSCacheTestGetNotFound(t *testing.T) {
+	var reply *engine.SagProfile
+	if err := sagRPC.Call(context.Background(), utils.APIerSv1GetSagProfile,
+		&utils.TenantID{Tenant: "cgrates.org", ID: "SAGS_CACHE"}, &reply); err == nil ||
+		err.Error() != utils.ErrNotFound.Error() {
+		t.Fatal(err)
+	}
+}
+
+func testSagSCacheTestGetFound(t *testing.T) {
+	var reply *engine.SagProfile
+	if err := sagRPC.Call(context.Background(), utils.APIerSv1GetSagProfile,
+		&utils.TenantID{Tenant: "cgrates.org", ID: "SAGS_CACHE"}, &reply); err != nil {
+		t.Fatal(err)
+	}
+}
+
+func testSagSCacheTestSet(t *testing.T) {
+	sagProfile = &engine.SagProfileWithAPIOpts{
+		SagProfile: &engine.SagProfile{
+			Tenant: "cgrates.org",
+			ID:     "SAGS_CACHE",
+		},
+		APIOpts: map[string]any{
+			utils.CacheOpt: utils.MetaNone,
+		},
+	}
+	var reply string
+	if err := sagRPC.Call(context.Background(), utils.APIerSv1SetSagProfile, sagProfile, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply returned", reply)
+	}
+}
+
+func testSagSCacheReload(t *testing.T) {
+	cache := &utils.AttrReloadCacheWithAPIOpts{
+		SagProfileIDs: []string{"cgrates.org:SAGS_CACHE"},
+	}
+	var reply string
+	if err := sagRPC.Call(context.Background(), utils.CacheSv1ReloadCache, cache, &reply); err != nil {
+		t.Error("Got error on CacheSv1.ReloadCache: ", err.Error())
+	} else if reply != utils.OK {
+		t.Error("Calling CacheSv1.ReloadCache got reply: ", reply)
 	}
 }

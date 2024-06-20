@@ -744,6 +744,24 @@ func (ldr *Loader) removeLoadedData(loaderType string, lds map[string][]LoaderDa
 				cacheArgs[utils.CacheStatQueues] = ids
 			}
 		}
+	case utils.MetaSags:
+		cacheIDs = []string{utils.CacheSagFilterIndexes}
+		for tntID := range lds {
+			if ldr.dryRun {
+				utils.Logger.Info(
+					fmt.Sprintf("<%s-%s> DRY_RUN: StatsQueueProfileID: %s",
+						utils.LoaderS, ldr.ldrID, tntID))
+			} else {
+				tntIDStruct := utils.NewTenantID(tntID)
+				// get IDs so we can reload in cache
+				ids = append(ids, tntID)
+				if err := ldr.dm.RemoveSagProfile(tntIDStruct.Tenant,
+					tntIDStruct.ID); err != nil {
+					return err
+				}
+				cacheArgs[utils.CacheSagProfiles] = ids
+			}
+		}
 	case utils.MetaThresholds:
 		cacheIDs = []string{utils.CacheThresholdFilterIndexes}
 		for tntID := range lds {

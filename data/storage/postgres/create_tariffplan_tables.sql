@@ -308,7 +308,7 @@ CREATE TABLE tp_sags(
   "created_at" TIMESTAMP WITH TIME ZONE
 );
 CREATE INDEX tp_sags_idx ON tp_sags (tpid);
-CREATE INDEX tp_sags_unique ON tp_sags  ("tpid","tenant", "id");
+CREATE INDEX tp_sags_unique ON tp_sags  ("tpid","tenant", "id","stat_ids");
 
 --
 -- Table structure for table `tp_threshold_cfgs`
