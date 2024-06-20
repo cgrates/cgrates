@@ -949,6 +949,7 @@ func TestTPReaderReloadCache(t *testing.T) {
 		StatsQueueIDs:         []string{"cgrates.org:statProfilesID"},
 		ThresholdIDs:          []string{"cgrates.org:thresholdProfilesID"},
 		AccountActionPlanIDs:  []string{"AccountActionPlansID"},
+		SagProfileIDs:         []string{"cgrates.org:sagProfilesID"},
 		ReverseDestinationIDs: []string{},
 	}
 	rpcInternal := make(chan birpc.ClientConnector, 1)
@@ -1024,6 +1025,9 @@ func TestTPReaderReloadCache(t *testing.T) {
 		},
 		acntActionPlans: map[string][]string{
 			"AccountActionPlansID": {},
+		},
+		sgProfiles: map[utils.TenantID]*utils.TPSagsProfile{
+			{Tenant: "cgrates.org", ID: "sagProfilesID"}: {},
 		},
 		dm: NewDataManager(NewInternalDB(nil, nil, false, cfg.DataDbCfg().Items), config.CgrConfig().CacheCfg(), connMgr),
 	}

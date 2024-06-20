@@ -136,6 +136,17 @@ func (rplSv1 *ReplicatorSv1) GetStatQueueProfile(ctx *context.Context, tntID *ut
 	return nil
 }
 
+// GetSagProfile is the remote method coresponding to the dataDb driver method
+func (rplSv1 *ReplicatorSv1) GetSagProfile(ctx *context.Context, tntID *utils.TenantIDWithAPIOpts, reply *engine.SagProfile) error {
+	engine.UpdateReplicationFilters(utils.SagsProfilePrefix, tntID.TenantID.TenantID(), utils.IfaceAsString(tntID.APIOpts[utils.RemoteHostOpt]))
+	rcv, err := rplSv1.dm.DataDB().GetSagProfileDrv(tntID.Tenant, tntID.ID)
+	if err != nil {
+		return err
+	}
+	*reply = *rcv
+	return nil
+}
+
 // GetTiming is the remote method coresponding to the dataDb driver method
 func (rplSv1 *ReplicatorSv1) GetTiming(ctx *context.Context, id *utils.StringWithAPIOpts, reply *utils.TPTiming) error {
 	engine.UpdateReplicationFilters(utils.TimingsPrefix, id.Arg, utils.IfaceAsString(id.APIOpts[utils.RemoteHostOpt]))
@@ -415,6 +426,19 @@ func (rplSv1 *ReplicatorSv1) SetStatQueueProfile(ctx *context.Context, sq *engin
 	}
 	if err = rplSv1.v1.CallCache(utils.IfaceAsString(sq.APIOpts[utils.CacheOpt]),
 		sq.Tenant, utils.CacheStatQueueProfiles, sq.TenantID(), utils.EmptyString, &sq.FilterIDs, nil, sq.APIOpts); err != nil {
+		return
+	}
+	*reply = utils.OK
+	return
+}
+
+// SetSagQueueProfile is the replication method coresponding to the dataDb driver method
+func (rplSv1 *ReplicatorSv1) SetSagProfile(ctx *context.Context, sg *engine.SagProfileWithAPIOpts, reply *string) (err error) {
+	if err = rplSv1.dm.DataDB().SetSagProfileDrv(sg.SagProfile); err != nil {
+		return
+	}
+	if err = rplSv1.v1.CallCache(utils.IfaceAsString(sg.APIOpts[utils.CacheOpt]),
+		sg.Tenant, utils.CacheSagProfiles, sg.TenantID(), utils.EmptyString, nil, nil, sg.APIOpts); err != nil {
 		return
 	}
 	*reply = utils.OK
@@ -816,6 +840,20 @@ func (rplSv1 *ReplicatorSv1) RemoveStatQueueProfile(ctx *context.Context, args *
 	}
 	if err = rplSv1.v1.CallCache(utils.IfaceAsString(args.APIOpts[utils.CacheOpt]),
 		args.Tenant, utils.CacheStatQueueProfiles, args.TenantID.TenantID(), utils.EmptyString, nil, nil, args.APIOpts); err != nil {
+		return
+	}
+	*reply = utils.OK
+	return
+}
+
+// RemoveSagProfile is the replication method coresponding to the dataDb driver method
+func (rplSv1 *ReplicatorSv1) RemoveSagProfile(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *string) (err error) {
+	if err = rplSv1.dm.DataDB().RemSagProfileDrv(args.Tenant, args.ID); err != nil {
+		return
+	}
+
+	if err = rplSv1.v1.CallCache(utils.IfaceAsString(args.APIOpts[utils.CacheOpt]),
+		args.Tenant, utils.CacheSagProfiles, args.TenantID.TenantID(), utils.EmptyString, nil, nil, args.APIOpts); err != nil {
 		return
 	}
 	*reply = utils.OK

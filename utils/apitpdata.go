@@ -1308,6 +1308,7 @@ func NewAttrReloadCacheWithOpts() *AttrReloadCacheWithAPIOpts {
 		ResourceIDs:              []string{MetaAny},
 		StatsQueueIDs:            []string{MetaAny},
 		StatsQueueProfileIDs:     []string{MetaAny},
+		SagProfileIDs:            []string{MetaAny},
 		ThresholdIDs:             []string{MetaAny},
 		ThresholdProfileIDs:      []string{MetaAny},
 		FilterIDs:                []string{MetaAny},
@@ -1347,6 +1348,7 @@ func NewAttrReloadCacheWithOptsFromMap(arg map[string][]string, tnt string, opts
 		ResourceIDs:           arg[CacheResources],
 		StatsQueueIDs:         arg[CacheStatQueues],
 		StatsQueueProfileIDs:  arg[CacheStatQueueProfiles],
+		SagProfileIDs:         arg[CacheSagProfiles],
 		ThresholdIDs:          arg[CacheThresholds],
 		ThresholdProfileIDs:   arg[CacheThresholdProfiles],
 		FilterIDs:             arg[CacheFilters],
@@ -1385,6 +1387,7 @@ type AttrReloadCacheWithAPIOpts struct {
 	ResourceIDs              []string       `json:",omitempty"`
 	StatsQueueIDs            []string       `json:",omitempty"`
 	StatsQueueProfileIDs     []string       `json:",omitempty"`
+	SagProfileIDs            []string       `json:",omitempty"`
 	ThresholdIDs             []string       `json:",omitempty"`
 	ThresholdProfileIDs      []string       `json:",omitempty"`
 	FilterIDs                []string       `json:",omitempty"`
@@ -1422,6 +1425,7 @@ func (a *AttrReloadCacheWithAPIOpts) Map() map[string][]string {
 		CacheStatQueueProfiles:   a.StatsQueueProfileIDs,
 		CacheThresholds:          a.ThresholdIDs,
 		CacheThresholdProfiles:   a.ThresholdProfileIDs,
+		CacheSagProfiles:         a.SagProfileIDs,
 		CacheFilters:             a.FilterIDs,
 		CacheRouteProfiles:       a.RouteProfileIDs,
 		CacheAttributeProfiles:   a.AttributeProfileIDs,

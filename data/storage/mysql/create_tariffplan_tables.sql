@@ -314,7 +314,7 @@ CREATE TABLE tp_sags(
  `created_at` TIMESTAMP,
   PRIMARY KEY (`pk`),
   KEY `tpid`  (`tpid`),
-  UNIQUE KEY `unique_tp_sags` (`tpid`,`tenant`,`id`)
+  UNIQUE KEY `unique_tp_sags` (`tpid`,`tenant`,`id`,`stat_ids`)
   );
 
 --
