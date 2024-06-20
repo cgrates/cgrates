@@ -297,76 +297,6 @@ func TestRateStrigyfy(t *testing.T) {
 	}
 }
 
-func TestRateIntervalCronAll(t *testing.T) {
-	rit := &RITiming{
-		Years:     utils.Years{2012},
-		Months:    utils.Months{time.February},
-		MonthDays: utils.MonthDays{1},
-		WeekDays:  []time.Weekday{time.Sunday},
-		StartTime: "14:30:00",
-	}
-	expected := "0 30 14 1 2 0 2012"
-	cron := rit.CronString()
-	if cron != expected {
-		t.Errorf("Expected %s was %s", expected, cron)
-	}
-}
-
-func TestRateIntervalCronMultiple(t *testing.T) {
-	rit := &RITiming{
-		Years:     utils.Years{2012, 2014},
-		Months:    utils.Months{time.February, time.January},
-		MonthDays: utils.MonthDays{15, 16},
-		WeekDays:  []time.Weekday{time.Sunday, time.Monday},
-		StartTime: "14:30:00",
-	}
-	expected := "0 30 14 15,16 2,1 0,1 2012,2014"
-	cron := rit.CronString()
-
-	if cron != expected {
-		t.Errorf("Expected %s was %s", expected, cron)
-	}
-}
-
-func TestRateIntervalCronStar(t *testing.T) {
-	rit := &RITiming{
-		StartTime: "*:30:00",
-	}
-	expected := "0 30 * * * * *"
-	cron := rit.CronString()
-
-	if cron != expected {
-		t.Errorf("Expected %s was %s", expected, cron)
-	}
-}
-
-func TestRateIntervalCronEmpty(t *testing.T) {
-	rit := &RITiming{}
-	expected := "* * * * * * *"
-	cron := rit.CronString()
-
-	if cron != expected {
-		t.Errorf("Expected %s was %s", expected, cron)
-	}
-}
-
-func TestRITimingCronEveryX(t *testing.T) {
-	rit := &RITiming{
-		StartTime: utils.MetaEveryMinute,
-	}
-	eCronStr := "0 * * * * * *"
-	if cronStr := rit.CronString(); cronStr != eCronStr {
-		t.Errorf("Expecting: <%s>, received: <%s>", eCronStr, cronStr)
-	}
-	rit = &RITiming{
-		StartTime: utils.MetaHourly,
-	}
-	eCronStr = "0 0 * * * * *"
-	if cronStr := rit.CronString(); cronStr != eCronStr {
-		t.Errorf("Expecting: <%s>, received: <%s>", eCronStr, cronStr)
-	}
-}
-
 func TestRateIntervalCost(t *testing.T) {
 	ri := &RateInterval{
 		Rating: &RIRate{
@@ -444,6 +374,133 @@ func TestRateGroupsEquals(t *testing.T) {
 	}
 	if rg1.Equals(rg2) {
 		t.Error("equals")
+	}
+}
+
+func TestRateInterval_CronStringTT(t *testing.T) {
+	testCases := []struct {
+		name     string
+		ri       *RITiming
+		wantCron string
+	}{
+		{
+			name: "SingleYearMonthMonthDayWeekDay",
+			ri: &RITiming{
+				Years:     utils.Years{2012},
+				Months:    utils.Months{time.February},
+				MonthDays: utils.MonthDays{1},
+				WeekDays:  []time.Weekday{time.Sunday},
+				StartTime: "14:30:00",
+			},
+			wantCron: "0 30 14 1 2 0 2012",
+		},
+		{
+			name: "MultipleYearsMonthsMonthsDaysWeekDays",
+			ri: &RITiming{
+				Years:     utils.Years{2012, 2014},
+				Months:    utils.Months{time.February, time.January},
+				MonthDays: utils.MonthDays{15, 16},
+				WeekDays:  []time.Weekday{time.Sunday, time.Monday},
+				StartTime: "14:30:00",
+			},
+			wantCron: "0 30 14 15,16 2,1 0,1 2012,2014",
+		},
+		{
+			name: "WildcardStartTime",
+			ri: &RITiming{
+				StartTime: "*:30:00",
+			},
+			wantCron: "0 30 * * * * *",
+		},
+		{
+			name:     "AllFieldsEmpty",
+			ri:       &RITiming{},
+			wantCron: "* * * * * * *",
+		},
+		{
+			name: "EveryMinute",
+			ri: &RITiming{
+				StartTime: utils.MetaEveryMinute,
+			},
+			wantCron: "0 * * * * * *",
+		},
+		{
+			name: "Hourly",
+			ri: &RITiming{
+				StartTime: utils.MetaHourly,
+			},
+			wantCron: "0 0 * * * * *",
+		},
+		{
+			name: "SingleDigit0Hour",
+			ri: &RITiming{
+				StartTime: "0:49:25",
+			},
+			wantCron: "25 49 0 * * * *",
+		},
+		{
+			name: "SingleDigit0Minute",
+			ri: &RITiming{
+				StartTime: "*:0:49",
+			},
+			wantCron: "49 0 * * * * *",
+		},
+		{
+			name: "SingleDigit0Second",
+			ri: &RITiming{
+				StartTime: "*:49:0",
+			},
+			wantCron: "0 49 * * * * *",
+		},
+		{
+			name: "DoubleDigit0Hour",
+			ri: &RITiming{
+				StartTime: "00:49:25",
+			},
+			wantCron: "25 49 0 * * * *",
+		},
+		{
+			name: "DoubleDigit0Minute",
+			ri: &RITiming{
+				StartTime: "*:00:49",
+			},
+			wantCron: "49 0 * * * * *",
+		},
+		{
+			name: "DoubleDigit0Second",
+			ri: &RITiming{
+				StartTime: "*:49:00",
+			},
+			wantCron: "0 49 * * * * *",
+		},
+		{
+			name: "InvalidStartTimeFormat",
+			ri: &RITiming{
+				StartTime: "223000",
+			},
+			wantCron: "* * * * * * *",
+		},
+		{
+			name: "PatternWithZeros",
+			ri: &RITiming{
+				Years:     utils.Years{2020},
+				Months:    utils.Months{1},
+				MonthDays: utils.MonthDays{0},
+				WeekDays:  []time.Weekday{time.Monday},
+				StartTime: "00:00:00",
+			},
+			wantCron: "0 0 0 0 1 1 2020",
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+			got := tc.ri.CronString()
+			if got != tc.wantCron {
+				t.Errorf("RITiming=%s\nCronString()=%q, want %q", utils.ToJSON(tc.ri), got, tc.wantCron)
+			}
+		})
 	}
 }
 
@@ -536,18 +593,6 @@ func TestRIRateClone(t *testing.T) {
 	rit.Rates[0].GroupIntervalStart = time.Duration(7)
 	if cloned.Rates[0].GroupIntervalStart != time.Duration(10) {
 		t.Errorf("\nExpecting: 10,\n received: %+v", cloned.Rates[0].GroupIntervalStart)
-	}
-}
-
-func TestRateIntervalCronString(t *testing.T) {
-	rit := &RITiming{
-		StartTime: "test",
-	}
-
-	rcv := rit.CronString()
-
-	if rcv != "* * * * * * *" {
-		t.Error(rcv)
 	}
 }
 
