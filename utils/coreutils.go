@@ -668,21 +668,41 @@ func GetCGRVersion() (vers string, err error) {
 	if GitCommitDate == "" || GitCommitHash == "" {
 		return vers, nil
 	}
-	var commitHash string
-	var commitDate time.Time
 	var matched bool
-	commitDate, err = time.Parse("2006-01-02T15:04:05-07:00", strings.TrimSpace(GitCommitDate))
+
+	/*
+		Git v2.45 relevant release note:
+		 * The output format for dates "iso-strict" has been tweaked to show
+		   a time in the Zulu timezone with "Z" suffix, instead of "+00:00".
+	*/
+
+	// Parse the Git commit date, which might be in different formats depending on the Git version
+	trimmedCommitDate := strings.TrimSpace(GitCommitDate)
+	commitDate, err := time.Parse("2006-01-02T15:04:05Z", trimmedCommitDate)
 	if err != nil {
-		return vers, fmt.Errorf("Building version - error: <%s> compiling commit date", err.Error())
+		// Failed to parse iso-strict date format for git version 2.45+. Try to parse with the previous format.
+		var fallbackErr error
+		commitDate, fallbackErr = time.Parse("2006-01-02T15:04:05-07:00", trimmedCommitDate)
+		if fallbackErr != nil {
+			// Both parsing attempts failed, group the errors together.
+			err = fmt.Errorf(
+				"failed to parse date:\ngit2.45+ iso-strict format: %w\nprevious iso-strict format: %w",
+				err, fallbackErr)
+		} else {
+			err = nil // successfully parsed with fallback format
+		}
+	}
+	if err != nil {
+		return vers, fmt.Errorf("version build error: %w", err)
 	}
 	matched, err = regexp.MatchString("^[0-9a-f]{12,}$", GitCommitHash)
 	if err != nil {
-		return vers, fmt.Errorf("Building version - error: <%s> compiling commit hash", err.Error())
+		return vers, fmt.Errorf("version build error: commit hash compilation failed: %v", err)
 	} else if !matched {
-		return vers, fmt.Errorf("Building version - error: <%s> compiling commit hash", "Regex not matched")
+		return vers, fmt.Errorf("version build error: commit hash does not match expected format")
 	}
-	commitHash = GitCommitHash
-	//CGRateS@v0.11.0~dev-20200110075344-7572e7b11e00
+	commitHash := GitCommitHash
+	//CGRateS@v0.10.1~dev-20200110075344-7572e7b11e00
 	return fmt.Sprintf("%s@%s-%s-%s", CGRateS, Version, commitDate.UTC().Format("20060102150405"), commitHash[:12]), nil
 }
 
