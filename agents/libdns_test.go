@@ -23,7 +23,12 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/cgrates/birpc/context"
+	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/sessions"
 	"github.com/cgrates/cgrates/utils"
+	"github.com/cgrates/kamevapi"
 	"github.com/miekg/dns"
 )
 
@@ -386,6 +391,93 @@ func TestLibdnsUpdateDnsQuestions(t *testing.T) {
 				t.Errorf("updateDnsQuestions() gotQ = %v, wantQ = %v", gotQ, tt.wantQ)
 			}
 		})
+	}
+
+}
+
+func TestKamailioAgentCall(t *testing.T) {
+	cfg := &config.KamAgentCfg{}
+	connMgr := &engine.ConnManager{}
+	conns := []*kamevapi.KamEvapi{}
+	activeSessionIDs := make(chan []*sessions.SessionID)
+	ctx := &context.Context{}
+	ka := &KamailioAgent{
+		cfg:              cfg,
+		connMgr:          connMgr,
+		timezone:         "UTC",
+		conns:            conns,
+		activeSessionIDs: activeSessionIDs,
+		ctx:              ctx,
+	}
+	args := struct {
+		Message string
+	}{
+		Message: "message",
+	}
+	var reply string
+	err := ka.Call("UNSUPPORTED_SERVICE_METHOD", args, &reply)
+	if err == nil {
+		t.Errorf("UNSUPPORTED_SERVICE_METHOD %v", err)
+	}
+	expectedReply := ""
+	if reply != expectedReply {
+		t.Errorf("Expected reply %q, got %q", expectedReply, reply)
+	}
+}
+
+func TestLibDnsUpdateDnsOption(t *testing.T) {
+
+	ednsOptions := []dns.EDNS0{
+		&dns.EDNS0_NSID{},
+		&dns.EDNS0_SUBNET{},
+		&dns.EDNS0_COOKIE{},
+		&dns.EDNS0_UL{},
+		&dns.EDNS0_LLQ{},
+		&dns.EDNS0_DAU{},
+		&dns.EDNS0_DHU{},
+		&dns.EDNS0_N3U{},
+		&dns.EDNS0_EXPIRE{},
+		&dns.EDNS0_TCP_KEEPALIVE{},
+		&dns.EDNS0_PADDING{},
+		&dns.EDNS0_EDE{},
+		&dns.EDNS0_ESU{},
+		&dns.EDNS0_LOCAL{},
+	}
+	path := []string{"0", utils.DNSNsid}
+	value := "test-nsid"
+	newBranch := false
+	updatedOptions, err := updateDnsOption(ednsOptions, path, value, newBranch)
+	if err != nil {
+		t.Errorf("Update EDNS0_NSID's NSID field returned unexpected error: %v", err)
+	}
+	if nsidOption, ok := updatedOptions[0].(*dns.EDNS0_NSID); ok {
+		if nsidOption.Nsid != value {
+			t.Errorf("Expected NSID %s, got %s", value, nsidOption.Nsid)
+		}
+	} else {
+		t.Errorf("Expected EDNS0_NSID option, got %T", updatedOptions[0])
+	}
+	path = []string{"1", utils.DNSFamily}
+	valueInt := 1
+	newBranch = true
+	updatedOptions, err = updateDnsOption(ednsOptions, path, valueInt, newBranch)
+	if err != nil {
+		t.Errorf("Update EDNS0_SUBNET's Family field returned unexpected error: %v", err)
+	}
+	if subnetOption, ok := updatedOptions[1].(*dns.EDNS0_SUBNET); ok {
+		if subnetOption.Family != uint16(valueInt) {
+			t.Errorf("Expected Family %d, got %d", valueInt, subnetOption.Family)
+		}
+	} else {
+		t.Errorf("Expected EDNS0_SUBNET option, got %T", updatedOptions[1])
+	}
+	path = []string{"0", utils.DNSNsid, "extra"}
+	value = "value"
+	newBranch = false
+	_, err = updateDnsOption(ednsOptions, path, value, newBranch)
+	expectedErrMsg := "WRONG_PATH"
+	if err == nil || err.Error() != expectedErrMsg {
+		t.Errorf("Expected error '%s', got '%v'", expectedErrMsg, err)
 	}
 
 }

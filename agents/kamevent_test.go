@@ -665,7 +665,7 @@ func TestKamEventProcessMessageEmptyReply(t *testing.T) {
 
 }
 
-func TestAsKamProcessCDRReply(t *testing.T) {
+func TestKamEventProcessCDRReply(t *testing.T) {
 	kev := KamEvent{
 		"KamReplyRoute": "CGR_PROCESS_CDR",
 		"KamTRIndex":    "123",
@@ -683,5 +683,22 @@ func TestAsKamProcessCDRReply(t *testing.T) {
 	}
 	if err != nil {
 		t.Errorf("unexpected error: %v", err)
+	}
+}
+
+func TestKamEventV1ProcessCDRArgs(t *testing.T) {
+	kev := KamEvent{
+		"KamReplyRoute": "CGR_PROCESS_CDR",
+		"KamTRIndex":    "123",
+		"KamTRLabel":    "456",
+	}
+	args := kev.V1ProcessCDRArgs()
+	if args != nil {
+		t.Errorf("Expected non-nil CGREvent, got nil")
+	}
+	kev = KamEvent{}
+	args = kev.V1ProcessCDRArgs()
+	if args != nil {
+		t.Errorf("Expected nil CGREvent for error case, got %+v", args)
 	}
 }

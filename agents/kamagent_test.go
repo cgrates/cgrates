@@ -20,9 +20,68 @@ package agents
 import (
 	"testing"
 
+	"github.com/cgrates/birpc/context"
+	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/sessions"
+	"github.com/cgrates/cgrates/utils"
 )
 
 func TestKAsSessionSClientIface(t *testing.T) {
 	_ = sessions.BiRPCClient(new(KamailioAgent))
+}
+
+func TestKamailioAgentV1WarnDisconnect(t *testing.T) {
+	agent := KamailioAgent{}
+	ctx := context.Background()
+	args := make(map[string]any)
+	var reply string
+	err := agent.V1WarnDisconnect(ctx, args, &reply)
+	if err != utils.ErrNotImplemented {
+		t.Errorf("Expected ErrNotImplemented, got %v", err)
+	}
+}
+
+func TestKamailioAgentV1DisconnectPeer(t *testing.T) {
+	agent := KamailioAgent{}
+	ctx := context.Background()
+	dprArgs := &utils.DPRArgs{}
+	var reply string
+
+	err := agent.V1DisconnectPeer(ctx, dprArgs, &reply)
+	if err != utils.ErrNotImplemented {
+		t.Errorf("Expected ErrNotImplemented, got %v", err)
+	}
+}
+
+func TestKamailioAgentV1AlterSession(t *testing.T) {
+	agent := KamailioAgent{}
+	ctx := context.Background()
+	cgrEvent := utils.CGREvent{}
+	var reply string
+	err := agent.V1AlterSession(ctx, cgrEvent, &reply)
+	if err != utils.ErrNotImplemented {
+		t.Errorf("Expected ErrNotImplemented, got %v", err)
+	}
+}
+
+func TestKamailioAgentReload(t *testing.T) {
+	cfg := config.KamAgentCfg{
+		EvapiConns: []*config.KamConnCfg{
+			{},
+			{},
+			{},
+		},
+	}
+	ka := &KamailioAgent{
+		cfg: &cfg,
+	}
+	ka.Reload()
+	if len(ka.conns) != len(cfg.EvapiConns) {
+		t.Errorf("Expected conns length %d, but got %d", len(cfg.EvapiConns), len(ka.conns))
+	}
+	for i, conn := range ka.conns {
+		if conn != nil {
+			t.Errorf("Expected ka.conns[%d] to be nil, but got  value", i)
+		}
+	}
 }

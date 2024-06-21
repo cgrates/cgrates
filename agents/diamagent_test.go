@@ -29,6 +29,7 @@ import (
 	"github.com/cgrates/cgrates/sessions"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/rpcclient"
+	"github.com/fiorix/go-diameter/v4/diam"
 )
 
 func TestDAsSessionSClientIface(t *testing.T) {
@@ -532,4 +533,60 @@ func TestProcessRequest(t *testing.T) {
 		t.Errorf("Expected the reply to have one value received: %s", rply.String())
 	}
 
+}
+
+func TestDiamAgentV1WarnDisconnect(t *testing.T) {
+	agent := &DiameterAgent{}
+	err := agent.V1WarnDisconnect(nil, nil, nil)
+	if err != utils.ErrNotImplemented {
+		t.Errorf("Expected ErrNotImplemented, got: %v", err)
+	}
+}
+
+func TestDiamAgentV1GetActiveSessionIDs(t *testing.T) {
+	agent := &DiameterAgent{}
+	err := agent.V1GetActiveSessionIDs(nil, "someParameter", nil)
+	if err != utils.ErrNotImplemented {
+		t.Errorf("Expected ErrNotImplemented, got: %v", err)
+	}
+}
+
+func TestV1DisconnectPeer(t *testing.T) {
+	agent := &DiameterAgent{
+		dpa:   make(map[string]chan *diam.Message),
+		peers: make(map[string]diam.Conn),
+	}
+	err := agent.V1DisconnectPeer(nil, nil, nil)
+	if err != utils.ErrMandatoryIeMissing {
+		t.Errorf("Expected ErrMandatoryIeMissing, got: %v", err)
+	}
+	args := &utils.DPRArgs{
+		DisconnectCause: 5,
+	}
+	err = agent.V1DisconnectPeer(nil, args, nil)
+	if err.Error() != "WRONG_DISCONNECT_CAUSE" {
+		t.Errorf("Expected WRONG_DISCONNECT_CAUSE error, got: %v", err)
+	}
+	args.DisconnectCause = 1
+	err = agent.V1DisconnectPeer(nil, args, nil)
+	if err != utils.ErrNotFound {
+		t.Errorf("Expected ErrNotFound, got: %v", err)
+	}
+}
+
+func TestDiamanAgentCall(t *testing.T) {
+	agent := &DiameterAgent{}
+	ctx := context.Background()
+	serviceMethod := "serviceTest"
+	args := struct{ TestArg string }{"TestValue"}
+	var reply struct{ TestReply string }
+
+	err := agent.Call(ctx, serviceMethod, args, &reply)
+	if err == nil {
+		t.Errorf("Unexpected error: %v", err)
+	}
+	expectedReply := ""
+	if reply.TestReply != expectedReply {
+		t.Errorf("Expected reply %s, got %s", expectedReply, reply.TestReply)
+	}
 }

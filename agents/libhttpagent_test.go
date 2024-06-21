@@ -28,6 +28,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/antchfx/xmlquery"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -252,5 +253,52 @@ func TestLibhttpagentNewHAReplyEncoder(t *testing.T) {
 				t.Errorf("newHAReplyEncoder encoder type = %v, want %v", gotType, tt.wantType)
 			}
 		})
+	}
+}
+
+func TestLibHttpAgentPagentNewHADataProvider(t *testing.T) {
+	req, err := http.NewRequest("GET", "http://cgrates.org", nil)
+	if err != nil {
+		t.Fatalf("Failed to create request: %v", err)
+	}
+
+	t.Run("unsupported decoder type <unsupported>", func(t *testing.T) {
+		reqPayload := "unsupported"
+		_, err := newHADataProvider(reqPayload, req)
+		if err == nil {
+			t.Errorf("Expected error, got nil")
+		}
+		expectedErr := "unsupported decoder type <unsupported>"
+		if err.Error() != expectedErr {
+			t.Errorf("Expected error '%s', got '%v'", expectedErr, err)
+		}
+	})
+
+	t.Run("MetaUrl decoder type", func(t *testing.T) {
+		reqPayload := utils.MetaUrl
+		dp, err := newHADataProvider(reqPayload, req)
+		if err != nil {
+			t.Errorf("Expected nil error, got %v", err)
+		}
+		if dp == nil {
+			t.Errorf("Expected non-nil DataProvider")
+		}
+	})
+
+}
+
+func TestLibHttpAgentHTTPXmlDPString(t *testing.T) {
+
+	hU := &httpXmlDP{
+		xmlDoc: &xmlquery.Node{
+			Data: "dataProvided",
+		},
+	}
+
+	expected := ""
+	result := hU.String()
+
+	if result != expected {
+		t.Errorf("Expected XML: %s, got: %s", expected, result)
 	}
 }

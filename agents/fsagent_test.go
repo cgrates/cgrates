@@ -20,9 +20,52 @@ package agents
 import (
 	"testing"
 
+	"github.com/cgrates/birpc/context"
+
+	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/sessions"
+	"github.com/cgrates/cgrates/utils"
 )
 
 func TestFAsSessionSClientIface(t *testing.T) {
 	_ = sessions.BiRPCClient(new(FSsessions))
+}
+
+func TestFsAgentV1DisconnectPeer(t *testing.T) {
+	ctx := context.Background()
+	args := &utils.DPRArgs{}
+	fss := &FSsessions{}
+	err := fss.V1DisconnectPeer(ctx, args, nil)
+	if err != utils.ErrNotImplemented {
+		t.Errorf("Expected error: %v, got: %v", utils.ErrNotImplemented, err)
+	}
+}
+
+func TestFsAgentV1AlterSession(t *testing.T) {
+	ctx := context.Background()
+	cgrEv := utils.CGREvent{}
+	fss := &FSsessions{}
+	err := fss.V1AlterSession(ctx, cgrEv, nil)
+	if err != utils.ErrNotImplemented {
+		t.Errorf("Expected error: %v, got: %v", utils.ErrNotImplemented, err)
+	}
+}
+
+func TestFsAgentCreateHandlers(t *testing.T) {
+	cfg := &config.FsAgentCfg{
+		SubscribePark: true,
+	}
+	fs := &FSsessions{
+		cfg: cfg,
+	}
+	handlers := fs.createHandlers()
+	if _, ok := handlers["CHANNEL_ANSWER"]; !ok {
+		t.Error("Expected CHANNEL_ANSWER handler, but not found")
+	}
+	if _, ok := handlers["CHANNEL_HANGUP_COMPLETE"]; !ok {
+		t.Error("Expected CHANNEL_HANGUP_COMPLETE handler, but not found")
+	}
+	if _, ok := handlers["CHANNEL_PARK"]; !ok {
+		t.Error("Expected CHANNEL_PARK handler, but not found")
+	}
 }
