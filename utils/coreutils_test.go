@@ -1304,35 +1304,83 @@ func TestLess(t *testing.T) {
 }
 
 func TestGetCGRVersion(t *testing.T) {
-	GitCommitDate = "2016-12-30T19:48:09+01:00"
-	GitCommitHash = "73014daa0c1d7edcb532d5fe600b8a20d588cdf8"
-	expVers := "CGRateS@" + Version
-	eVers := expVers + "-20161230184809-73014daa0c1d"
-	if vers, err := GetCGRVersion(); err != nil {
-		t.Error(err)
-	} else if vers != eVers {
-		t.Errorf("Expecting: <%s>, received: <%s>", eVers, vers)
+	tests := []struct {
+		name     string
+		date     string
+		hash     string
+		want     string
+		wantErr  string
+		parseErr bool
+	}{
+		{
+			name: "successful version build (git2.45+ date format)",
+			date: "2016-12-30T19:48:09Z",
+			hash: "73014daa0c1d7edcb532d5fe600b8a20d588cdf8",
+			want: "CGRateS@" + Version + "-20161230194809-73014daa0c1d",
+		},
+		{
+			name: "successful version build (previous date format)",
+			date: "2016-12-30T19:48:09+01:00",
+			hash: "73014daa0c1d7edcb532d5fe600b8a20d588cdf8",
+			want: "CGRateS@" + Version + "-20161230184809-73014daa0c1d",
+		},
+		{
+			name: "unknown verb %cI (git version is too old)",
+			date: "%cI",
+			hash: "73014daa0c1d7edcb532d5fe600b8a20d588cdf8",
+			want: "CGRateS@v0.11.0~dev-00010101000000-73014daa0c1d",
+		},
+		{
+			name: "successful version build (default)",
+			date: "",
+			hash: "",
+			want: "CGRateS@" + Version,
+		},
+		{
+			name:     "wrong date format",
+			date:     "wrong format",
+			hash:     "73014daa0c1d7edcb532d5fe600b8a20d588cdf8",
+			parseErr: true,
+		},
+		{
+			name:     "wrong hash",
+			date:     "2016-12-30T19:48:09+01:00",
+			hash:     "73014DAA0C1D7EDCB532D5FE600B8A20D588CDF8",
+			want:     "CGRateS@" + Version + "-20161230184809-73014daa0c1d",
+			wantErr:  "version build error: commit hash does not match expected format",
+			parseErr: false,
+		},
 	}
-	GitCommitDate = ""
-	GitCommitHash = ""
-	if vers, err := GetCGRVersion(); err != nil {
-		t.Error(err)
-	} else if vers != expVers {
-		t.Errorf("Expecting: <%s>, received: <%s>", expVers, vers)
-	}
-	// GitCommitDate = "wrong format"
-	// GitCommitHash = "73014daa0c1d7edcb532d5fe600b8a20d588cdf8"
-	// if vers, err := GetCGRVersion(); err == nil || err.Error() != `Building version - error: <parsing time "wrong format" as "2006-01-02T15:04:05-07:00": cannot parse "wrong format" as "2006"> compiling commit date` {
-	// 	t.Error(err)
-	// } else if vers != expVers {
-	// 	t.Errorf("Expecting: <%s>, received: <%s>", expVers, vers)
-	// }
-	GitCommitDate = "2016-12-30T19:48:09+01:00"
-	GitCommitHash = "73014DAA0C1D7EDCB532D5FE600B8A20D588CDF8"
-	if vers, err := GetCGRVersion(); err == nil || err.Error() != `Building version - error: <Regex not matched> compiling commit hash` {
-		t.Error(err)
-	} else if vers != expVers {
-		t.Errorf("Expecting: <%s>, received: <%s>", expVers, vers)
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			GitCommitDate = test.date
+			GitCommitHash = test.hash
+			got, err := GetCGRVersion()
+			switch {
+			case test.parseErr:
+				var parseError *time.ParseError
+				if !errors.As(err, &parseError) {
+					t.Fatalf("\nCommitDate: %q\nCommitHash: %q\nGetCGRVersion() err %q, want error of type *time.ParseError",
+						test.date, test.hash, err)
+				}
+			case err != nil:
+				if test.wantErr == "" {
+					t.Fatalf("\nCommitDate: %q\nCommitHash: %q\nGetCGRVersion() err %s, want nil",
+						test.date, test.hash, err)
+				}
+				if err.Error() != test.wantErr {
+					t.Fatalf("\nCommitDate: %q\nCommitHash: %q\nGetCGRVersion() err %q, want %q",
+						test.date, test.hash, err, test.wantErr)
+				}
+			case test.wantErr != "":
+				t.Fatalf("\nCommitDate: %q\nCommitHash: %q\nGetCGRVersion() err nil, want %q",
+					test.date, test.hash, test.wantErr)
+			case got != test.want:
+				t.Errorf("\nCommitDate: %q\nCommitHash: %q\nGetCGRVersion() = %q, want %q",
+					test.date, test.hash, got, test.want)
+			}
+		})
 	}
 }
 
