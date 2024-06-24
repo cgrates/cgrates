@@ -98,8 +98,6 @@ func TestSessionsBkup(t *testing.T) {
 	case utils.MetaMySQL:
 		sBkupCfgDIR = "sessions_backup_mysql"
 	case utils.MetaMongo:
-		// mongo is unfinished
-		t.Skip()
 		sBkupCfgDIR = "sessions_backup_mongo"
 	case utils.MetaPostgres:
 		sBkupCfgDIR = "sessions_backup_postgres"

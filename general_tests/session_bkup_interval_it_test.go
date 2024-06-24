@@ -73,8 +73,6 @@ func TestSessionsBkupIntrvl(t *testing.T) {
 	case utils.MetaMySQL:
 		sBkupCfgDIR = "sessions_backup_interval_mysql"
 	case utils.MetaMongo:
-		// mongo is unfinished
-		t.Skip()
 		sBkupCfgDIR = "sessions_backup_interval_mongo"
 	case utils.MetaPostgres:
 		sBkupCfgDIR = "sessions_backup_interval_postgres"
@@ -240,7 +238,7 @@ func testSessionSBkupIntrvlGetBackedupSessions1(t *testing.T) {
 			sBkupCfg.DataDbCfg().Port, sBkupCfg.DataDbCfg().Name,
 			sBkupCfg.DataDbCfg().User, sBkupCfg.DataDbCfg().Password,
 			sBkupCfg.GeneralCfg().DBDataEncoding,
-			utils.StorDB, nil, 10*time.Second)
+			utils.DataDB, nil, 10*time.Second)
 		if err != nil {
 			t.Fatal(err)
 		}
