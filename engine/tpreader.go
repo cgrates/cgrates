@@ -49,6 +49,7 @@ type TpReader struct {
 	sharedGroups       map[string]*SharedGroup
 	resProfiles        map[utils.TenantID]*utils.TPResourceProfile
 	sqProfiles         map[utils.TenantID]*utils.TPStatProfile
+	srProfiles         map[utils.TenantID]*utils.TPSarsProfile
 	sgProfiles         map[utils.TenantID]*utils.TPSagsProfile
 	thProfiles         map[utils.TenantID]*utils.TPThresholdProfile
 	filters            map[utils.TenantID]*utils.TPFilterProfile
@@ -1136,6 +1137,23 @@ func (tpr *TpReader) LoadStats() error {
 	return tpr.LoadStatsFiltered("")
 }
 
+func (tpr *TpReader) LoadSarsFiltered(tag string) error {
+	tps, err := tpr.lr.GetTPSars(tpr.tpid, "", tag)
+	if err != nil {
+		return err
+	}
+	mapSrs := make(map[utils.TenantID]*utils.TPSarsProfile)
+	for _, sr := range tps {
+		mapSrs[utils.TenantID{Tenant: sr.Tenant, ID: sr.ID}] = sr
+	}
+	tpr.srProfiles = mapSrs
+	return nil
+}
+
+func (tpr *TpReader) LoadSars() error {
+	return tpr.LoadSarsFiltered("")
+}
+
 func (tpr *TpReader) LoadSagsFiltered(tag string) error {
 	tps, err := tpr.lr.GetTPSags(tpr.tpid, "", tag)
 	if err != nil {
@@ -1334,6 +1352,9 @@ func (tpr *TpReader) LoadAll() (err error) {
 		return
 	}
 	if err = tpr.LoadStats(); err != nil && err.Error() != utils.NotFoundCaps {
+		return
+	}
+	if err = tpr.LoadSars(); err != nil && err.Error() != utils.NotFoundCaps {
 		return
 	}
 	if err = tpr.LoadSags(); err != nil && err.Error() != utils.NotFoundCaps {
@@ -1593,6 +1614,21 @@ func (tpr *TpReader) WriteToDatabase(verbose, disableReverse bool) (err error) {
 	if len(tpr.sqProfiles) != 0 {
 		loadIDs[utils.CacheStatQueues] = loadID
 		loadIDs[utils.CacheStatQueueProfiles] = loadID
+	}
+	if verbose {
+		log.Print("SarProfiles")
+	}
+	for _, tpSR := range tpr.srProfiles {
+		var sr *SarProfile
+		if sr, err = APItoSars(tpSR); err != nil {
+			return
+		}
+		if err = tpr.dm.SetSarProfile(sr); err != nil {
+			return
+		}
+		if verbose {
+			log.Print("\t", sr.TenantID())
+		}
 	}
 	if verbose {
 		log.Print("SagProfiles:")

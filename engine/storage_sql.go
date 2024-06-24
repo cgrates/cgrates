@@ -598,6 +598,27 @@ func (sqls *SQLStorage) SetTPSags(sgs []*utils.TPSagsProfile) error {
 	return nil
 }
 
+func (sqls *SQLStorage) SetTPSars(srs []*utils.TPSarsProfile) error {
+	if len(srs) == 0 {
+		return nil
+	}
+	tx := sqls.db.Begin()
+	for _, sg := range srs {
+		if err := tx.Where(&SarsMdl{Tpid: sg.TPid, ID: sg.ID}).Delete(SarsMdl{}).Error; err != nil {
+			tx.Rollback()
+			return err
+		}
+		for _, msg := range APItoModelSars(sg) {
+			if err := tx.Create(&msg).Error; err != nil {
+				tx.Rollback()
+				return err
+			}
+		}
+	}
+	tx.Commit()
+	return nil
+}
+
 func (sqls *SQLStorage) SetTPThresholds(ths []*utils.TPThresholdProfile) error {
 	if len(ths) == 0 {
 		return nil
@@ -1438,6 +1459,25 @@ func (sqls *SQLStorage) GetTPStats(tpid, tenant, id string) ([]*utils.TPStatProf
 		return asts, utils.ErrNotFound
 	}
 	return asts, nil
+}
+
+func (sqls *SQLStorage) GetTPSars(tpid, tenant, id string) ([]*utils.TPSarsProfile, error) {
+	var srs SarsMdls
+	q := sqls.db.Where("tpid = ?", tpid)
+	if len(id) != 0 {
+		q = q.Where("id = ?", id)
+	}
+	if len(tenant) != 0 {
+		q = q.Where("tenant = ?", tenant)
+	}
+	if err := q.Find(&srs).Error; err != nil {
+		return nil, err
+	}
+	asrs := srs.AsTPSars()
+	if len(asrs) == 0 {
+		return asrs, utils.ErrNotFound
+	}
+	return asrs, nil
 }
 
 func (sqls *SQLStorage) GetTPSags(tpid string, tenant string, id string) ([]*utils.TPSagsProfile, error) {

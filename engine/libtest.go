@@ -246,6 +246,10 @@ cgrates.org,TestStats2,,,,,2,*sum#~*req.Cost;*average#~*req.Cost,,true,true,20,
 #Tenant[0],Id[1],QueryInterval[2],StatIDs[2],MetricIDs[3],Sorting[4],SortingParameters[5],ThresholdIDs[6]
 cgrates.org,SAGS1,15m,Stats2;Stats3;Stats4,Metric1;Metric3,*asc,,THD1;THD2
 `
+	SarsCSVContent = `
+#Tenant[0],Id[1],QueryInterval[2],StatID[3],QueueLength[4],TTL[5],PurgeFilterIDs[6],Trend[7],ThresholdIDs[7]
+cgrates.org,SARS1,5m,Stats2,-1,-1,,*average,TD1;THD2
+`
 	ThresholdsCSVContent = `
 #Tenant[0],Id[1],FilterIDs[2],ActivationInterval[3],MaxHits[4],MinHits[5],MinSleep[6],Blocker[7],Weight[8],ActionIDs[9],Async[10]
 cgrates.org,Threshold1,*string:~*req.Account:1001;*string:~*req.RunID:*default,2014-07-29T15:00:00Z,12,10,1s,true,10,THRESH1,true

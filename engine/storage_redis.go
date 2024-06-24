@@ -939,6 +939,29 @@ func (rs *RedisStorage) RemStatQueueDrv(tenant, id string) (err error) {
 	return rs.Cmd(nil, redis_DEL, utils.StatQueuePrefix+utils.ConcatenatedKey(tenant, id))
 }
 
+func (rs *RedisStorage) SetSarProfileDrv(sg *SarProfile) (err error) {
+	var result []byte
+	if result, err = rs.ms.Marshal(sg); err != nil {
+		return
+	}
+	return rs.Cmd(nil, redis_SET, utils.SarsProfilePrefix+utils.ConcatenatedKey(sg.Tenant, sg.ID), string(result))
+}
+
+func (rs *RedisStorage) GetSarProfileDrv(tenant string, id string) (sg *SarProfile, err error) {
+	var values []byte
+	if err = rs.Cmd(&values, redis_GET, utils.SarsProfilePrefix+utils.ConcatenatedKey(tenant, id)); err != nil {
+		return
+	} else if len(values) == 0 {
+		err = utils.ErrNotFound
+		return
+	}
+	err = rs.ms.Unmarshal(values, &sg)
+	return
+}
+func (rs *RedisStorage) RemSarProfileDrv(tenant string, id string) (err error) {
+	return rs.Cmd(nil, redis_DEL, utils.SarsProfilePrefix+utils.ConcatenatedKey(tenant, id))
+}
+
 func (rs *RedisStorage) SetSagProfileDrv(sg *SagProfile) (err error) {
 	var result []byte
 	if result, err = rs.ms.Marshal(sg); err != nil {

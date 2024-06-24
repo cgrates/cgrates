@@ -147,6 +147,17 @@ func (rplSv1 *ReplicatorSv1) GetSagProfile(ctx *context.Context, tntID *utils.Te
 	return nil
 }
 
+// GetSarProfile is the remote method coresponding to the dataDb driver method
+func (rplSv1 *ReplicatorSv1) GetSarProfile(ctx *context.Context, tntID *utils.TenantIDWithAPIOpts, reply *engine.SarProfile) error {
+	engine.UpdateReplicationFilters(utils.SarsProfilePrefix, tntID.TenantID.TenantID(), utils.IfaceAsString(tntID.APIOpts[utils.RemoteHostOpt]))
+	rcv, err := rplSv1.dm.DataDB().GetSarProfileDrv(tntID.Tenant, tntID.ID)
+	if err != nil {
+		return err
+	}
+	*reply = *rcv
+	return nil
+}
+
 // GetTiming is the remote method coresponding to the dataDb driver method
 func (rplSv1 *ReplicatorSv1) GetTiming(ctx *context.Context, id *utils.StringWithAPIOpts, reply *utils.TPTiming) error {
 	engine.UpdateReplicationFilters(utils.TimingsPrefix, id.Arg, utils.IfaceAsString(id.APIOpts[utils.RemoteHostOpt]))
@@ -439,6 +450,15 @@ func (rplSv1 *ReplicatorSv1) SetSagProfile(ctx *context.Context, sg *engine.SagP
 	}
 	if err = rplSv1.v1.CallCache(utils.IfaceAsString(sg.APIOpts[utils.CacheOpt]),
 		sg.Tenant, utils.CacheSagProfiles, sg.TenantID(), utils.EmptyString, nil, nil, sg.APIOpts); err != nil {
+		return
+	}
+	*reply = utils.OK
+	return
+}
+
+// SetSarProfile is the replication method coresponding to the dataDb driver method
+func (rplSv1 *ReplicatorSv1) SetSarProfile(ctx *context.Context, sg *engine.SarProfileWithAPIOpts, reply *string) (err error) {
+	if err = rplSv1.dm.DataDB().SetSarProfileDrv(sg.SarProfile); err != nil {
 		return
 	}
 	*reply = utils.OK
@@ -856,6 +876,16 @@ func (rplSv1 *ReplicatorSv1) RemoveSagProfile(ctx *context.Context, args *utils.
 		args.Tenant, utils.CacheSagProfiles, args.TenantID.TenantID(), utils.EmptyString, nil, nil, args.APIOpts); err != nil {
 		return
 	}
+	*reply = utils.OK
+	return
+}
+
+// RemoveSarProfile is the replication method coresponding to the dataDb driver method
+func (rplSv1 *ReplicatorSv1) RemoveSarProfile(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *string) (err error) {
+	if err = rplSv1.dm.DataDB().RemSarProfileDrv(args.Tenant, args.ID); err != nil {
+		return
+	}
+
 	*reply = utils.OK
 	return
 }

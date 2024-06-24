@@ -408,7 +408,35 @@ func (ldr *Loader) storeLoadedData(loaderType string,
 				cacheArgs[utils.CacheStatQueues] = ids
 			}
 		}
+	case utils.MetaSars:
+		for _, lDataSet := range lds {
+			srsModels := make(engine.SarsMdls, len(lDataSet))
+			for i, ld := range lDataSet {
+				srsModels[i] = new(engine.SarsMdl)
+				if err = utils.UpdateStructWithIfaceMap(srsModels[i], ld); err != nil {
+					return
+				}
+			}
+			for _, tpSrs := range srsModels.AsTPSars() {
+				srsPrf, err := engine.APItoSars(tpSrs)
+				if err != nil {
+					return err
+				}
+				if ldr.dryRun {
+					utils.Logger.Info(
+						fmt.Sprintf("<%s-%s> DRY_RUN: SarsProfile: %s",
+							utils.LoaderS, ldr.ldrID, utils.ToJSON(srsPrf)))
+					continue
+				}
+
+				ids = append(ids, srsPrf.TenantID())
+				if err := ldr.dm.SetSarProfile(srsPrf); err != nil {
+					return err
+				}
+			}
+		}
 	case utils.MetaSags:
+		cacheIDs = []string{utils.CacheSagFilterIndexes}
 		for _, lDataSet := range lds {
 			stsModels := make(engine.SagsMdls, len(lDataSet))
 			for i, ld := range lDataSet {
@@ -433,6 +461,7 @@ func (ldr *Loader) storeLoadedData(loaderType string,
 				if err := ldr.dm.SetSagProfile(sgsPrf); err != nil {
 					return err
 				}
+				cacheArgs[utils.CacheSagFilterIndexes] = ids
 			}
 		}
 	case utils.MetaThresholds:

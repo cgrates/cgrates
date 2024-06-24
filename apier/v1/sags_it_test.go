@@ -158,7 +158,7 @@ func testSagSSetSagProfile(t *testing.T) {
 			Sorting:       "*asc",
 			ThresholdIDs:  []string{"THD1", "THD2"}},
 	}
-	if err := sagRPC.Call(context.Background(), utils.APIerSv1GetStatQueueProfile,
+	if err := sagRPC.Call(context.Background(), utils.APIerSv1GetSagProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "Sag1"}, &reply); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Fatal(err)
