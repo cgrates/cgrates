@@ -26,6 +26,7 @@ import (
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
+	elasticsearch "github.com/elastic/go-elasticsearch/v8"
 )
 
 func TestGetMetrics(t *testing.T) {
@@ -346,4 +347,49 @@ func TestElasticExportEvent4(t *testing.T) {
 	if err := eEe.ExportEvent([]byte{}, ""); err == nil || err.Error() != errExpect {
 		t.Errorf("Expected %q but got %q", errExpect, err)
 	}
+}
+
+func TestElasticClose(t *testing.T) {
+	elasticEE := &ElasticEE{
+		eClnt: &elasticsearch.Client{},
+	}
+	err := elasticEE.Close()
+	if elasticEE.eClnt != nil {
+		t.Errorf("expected eClnt to be nil, got %v", elasticEE.eClnt)
+	}
+	if err != nil {
+		t.Errorf("expected no error, got %v", err)
+	}
+}
+
+func TestElasticConnect(t *testing.T) {
+	t.Run("ClientAlreadyExists", func(t *testing.T) {
+
+		elasticEE := &ElasticEE{
+			eClnt: &elasticsearch.Client{},
+		}
+
+		err := elasticEE.Connect()
+
+		if err != nil {
+			t.Errorf("expected no error, got %v", err)
+		}
+		if elasticEE.eClnt == nil {
+			t.Error("expected existing client to remain initialized")
+		}
+	})
+
+	t.Run("ClientDoesNotExist", func(t *testing.T) {
+
+		elasticEE := &ElasticEE{}
+
+		err := elasticEE.Connect()
+
+		if err != nil {
+			t.Errorf("expected no error, got %v", err)
+		}
+		if elasticEE.eClnt == nil {
+			t.Error("expected client to be initialized")
+		}
+	})
 }
