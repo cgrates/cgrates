@@ -1615,11 +1615,9 @@ func APItoSags(tpSG *utils.TPSagsProfile) (sg *SagProfile, err error) {
 			return nil, err
 		}
 	}
-
 	copy(sg.StatIDs, tpSG.StatIDs)
 	copy(sg.ThresholdIDs, tpSG.ThresholdIDs)
 	copy(sg.MetricIDs, tpSG.MetricIDs)
-
 	return sg, nil
 }
 
@@ -1639,6 +1637,165 @@ func SagProfileToAPI(sg *SagProfile) (tpSG *utils.TPSagsProfile) {
 	copy(tpSG.ThresholdIDs, sg.ThresholdIDs)
 	copy(tpSG.MetricIDs, sg.MetricIDs)
 	copy(tpSG.SortingParameters, sg.SortingParameters)
+	return
+}
+
+type SarsMdls []*SarsMdl
+
+func (tps SarsMdls) CSVHeader() (result []string) {
+	return []string{"#" + utils.Tenant, utils.ID, utils.QueryInterval, utils.StatID,
+		utils.TTL, utils.PurgeFilterIDs, utils.Trend, utils.ThresholdIDs}
+}
+
+func (models SarsMdls) AsTPSars() (result []*utils.TPSarsProfile) {
+	thresholdsMap := make(map[string]utils.StringSet)
+	purgeFiltersIDsMap := make(map[string]utils.StringSet)
+	msr := make(map[string]*utils.TPSarsProfile)
+	for _, model := range models {
+		key := &utils.TenantID{Tenant: model.Tenant, ID: model.ID}
+		sr, found := msr[key.TenantID()]
+		if !found {
+			sr = &utils.TPSarsProfile{
+				Tenant:        model.Tenant,
+				TPid:          model.Tpid,
+				ID:            model.ID,
+				QueryInterval: model.QueryInterval,
+				StatID:        model.StatID,
+				Trend:         model.Trend,
+				TTL:           model.TTL,
+				QueueLength:   model.QueueLength,
+			}
+		}
+		if model.QueryInterval != utils.EmptyString {
+			sr.QueryInterval = model.QueryInterval
+		}
+		if model.StatID != utils.EmptyString {
+			sr.StatID = model.StatID
+		}
+		if model.Trend != utils.EmptyString {
+			sr.Trend = model.Trend
+		}
+		if model.TTL != utils.EmptyString {
+			sr.TTL = model.TTL
+		}
+		if model.QueueLength != 0 {
+			sr.QueueLength = model.QueueLength
+		}
+		if model.PurgeFilterIDs != utils.EmptyString {
+			if _, has := purgeFiltersIDsMap[key.TenantID()]; !has {
+				purgeFiltersIDsMap[key.TenantID()] = make(utils.StringSet)
+			}
+			purgeFiltersIDsMap[key.TenantID()].AddSlice(strings.Split(model.PurgeFilterIDs, utils.InfieldSep))
+		}
+		if model.ThresholdIDs != utils.EmptyString {
+			if _, has := thresholdsMap[key.TenantID()]; !has {
+				thresholdsMap[key.TenantID()] = make(utils.StringSet)
+			}
+			thresholdsMap[key.TenantID()].AddSlice(strings.Split(model.ThresholdIDs, utils.InfieldSep))
+		}
+		msr[key.TenantID()] = sr
+	}
+	result = make([]*utils.TPSarsProfile, len(msr))
+	i := 0
+	for tntId, sr := range msr {
+		result[i] = sr
+		result[i].PurgeFilterIDs = purgeFiltersIDsMap[tntId].AsSlice()
+		result[i].ThresholdIDs = thresholdsMap[tntId].AsSlice()
+		i++
+	}
+	return
+}
+
+func APItoModelSars(tpSR *utils.TPSarsProfile) (mdls SarsMdls) {
+	if tpSR == nil {
+		return
+	}
+	if len(tpSR.PurgeFilterIDs) == 0 {
+		mdl := &SarsMdl{
+			Tpid:          tpSR.TPid,
+			Tenant:        tpSR.Tenant,
+			ID:            tpSR.ID,
+			QueryInterval: tpSR.QueryInterval,
+			StatID:        tpSR.StatID,
+			QueueLength:   tpSR.QueueLength,
+			Trend:         tpSR.Trend,
+		}
+		for i, threshold := range tpSR.ThresholdIDs {
+			if i != 0 {
+				mdl.ThresholdIDs += utils.InfieldSep
+			}
+			mdl.ThresholdIDs += threshold
+		}
+		mdls = append(mdls, mdl)
+	}
+	for i, filterID := range tpSR.PurgeFilterIDs {
+		mdl := &SarsMdl{
+			Tpid:   tpSR.TPid,
+			Tenant: tpSR.Tenant,
+			ID:     tpSR.ID,
+		}
+		if i == 0 {
+			mdl.QueueLength = tpSR.QueueLength
+			mdl.QueryInterval = tpSR.QueryInterval
+			mdl.StatID = tpSR.StatID
+			mdl.TTL = tpSR.TTL
+			mdl.Trend = tpSR.Trend
+			for i, threshold := range tpSR.ThresholdIDs {
+				if i != 0 {
+					mdl.ThresholdIDs += utils.InfieldSep
+				}
+				mdl.ThresholdIDs += threshold
+			}
+		}
+		mdl.PurgeFilterIDs = filterID
+		mdls = append(mdls, mdl)
+	}
+	return
+}
+
+func APItoSars(tpSR *utils.TPSarsProfile) (sr *SarProfile, err error) {
+	sr = &SarProfile{
+		Tenant:         tpSR.Tenant,
+		ID:             tpSR.ID,
+		StatID:         tpSR.StatID,
+		QueueLength:    tpSR.QueueLength,
+		Trend:          tpSR.Trend,
+		PurgeFilterIDs: make([]string, len(tpSR.PurgeFilterIDs)),
+		ThresholdIDs:   make([]string, len(tpSR.ThresholdIDs)),
+	}
+	if tpSR.TTL != utils.EmptyString {
+		if sr.TTL, err = utils.ParseDurationWithNanosecs(tpSR.TTL); err != nil {
+			return
+		}
+	}
+	if tpSR.QueryInterval != utils.EmptyString {
+		if sr.QueryInterval, err = utils.ParseDurationWithNanosecs(tpSR.QueryInterval); err != nil {
+			return
+		}
+	}
+	copy(sr.ThresholdIDs, tpSR.ThresholdIDs)
+	copy(sr.PurgeFilterIDs, tpSR.PurgeFilterIDs)
+	return
+}
+
+func SarProfileToAPI(sr *SarProfile) (tpSR *utils.TPSarsProfile) {
+	tpSR = &utils.TPSarsProfile{
+		Tenant:         sr.Tenant,
+		ID:             sr.ID,
+		PurgeFilterIDs: make([]string, len(sr.PurgeFilterIDs)),
+		ThresholdIDs:   make([]string, len(sr.ThresholdIDs)),
+		StatID:         sr.StatID,
+		QueueLength:    sr.QueueLength,
+		Trend:          sr.Trend,
+	}
+	if sr.TTL != time.Duration(0) {
+		tpSR.TTL = sr.TTL.String()
+	}
+	if sr.QueryInterval != time.Duration(0) {
+		tpSR.QueryInterval = sr.QueryInterval.String()
+	}
+	copy(tpSR.ThresholdIDs, sr.ThresholdIDs)
+	copy(tpSR.PurgeFilterIDs, sr.PurgeFilterIDs)
 	return
 }
 

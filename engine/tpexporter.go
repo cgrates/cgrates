@@ -279,6 +279,20 @@ func (tpExp *TPExporter) Run() error {
 		}
 	}
 
+	storDataSars, err := tpExp.storDb.GetTPSars(tpExp.tpID, "", "")
+	if err != nil && err.Error() != utils.ErrNotFound.Error() {
+		utils.Logger.Warning(fmt.Sprintf("<%s> error: %s,when getting %s from stordb for export", utils.ApierS, err, utils.TpSars))
+	}
+	if len(storDataSars) != 0 {
+		toExportMap[utils.SarsCsv] = make([]any, len(storDataSars))
+		for _, sd := range storDataSars {
+			sModels := APItoModelSars(sd)
+			for _, sdModel := range sModels {
+				toExportMap[utils.SarsCsv] = append(toExportMap[utils.SarsCsv], sdModel)
+			}
+		}
+	}
+
 	storDataSags, err := tpExp.storDb.GetTPSags(tpExp.tpID, "", "")
 	if err != nil && err.Error() != utils.ErrNotFound.Error() {
 		utils.Logger.Warning(fmt.Sprintf("<%s> error: %s,when getting %s from stordb for export", utils.ApierS, err, utils.TpSags))

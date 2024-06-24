@@ -64,6 +64,7 @@ const (
 	ColTmg  = "timings"
 	ColRes  = "resources"
 	ColSqs  = "statqueues"
+	ColSrs  = "sar_profiles"
 	ColSqp  = "statqueue_profiles"
 	ColSgp  = "sag_profiles"
 	ColTps  = "threshold_profiles"
@@ -301,7 +302,7 @@ func (ms *MongoStorage) ensureIndexesForCol(col string) error { // exported for 
 	switch col {
 	case ColAct, ColApl, ColAAp, ColAtr, ColRpl, ColDst, ColRds, ColLht, ColIndx:
 		err = ms.enusureIndex(col, true, "key")
-	case ColRsP, ColRes, ColSqs, ColSgp, ColSqp, ColTps, ColThs, ColRts, ColAttr, ColFlt, ColCpp, ColDpp, ColDph:
+	case ColRsP, ColRes, ColSqs, ColSgp, ColSrs, ColSqp, ColTps, ColThs, ColRts, ColAttr, ColFlt, ColCpp, ColDpp, ColDph:
 		err = ms.enusureIndex(col, true, "tenant", "id")
 	case ColRpf, ColShg, ColAcc:
 		err = ms.enusureIndex(col, true, "id")
@@ -347,7 +348,7 @@ func (ms *MongoStorage) EnsureIndexes(cols ...string) error {
 			cols = []string{
 				ColAct, ColApl, ColAAp, ColAtr, ColRpl, ColDst, ColRds, ColLht, ColIndx,
 				ColRsP, ColRes, ColSqs, ColSqp, ColTps, ColThs, ColRts, ColAttr, ColFlt, ColCpp,
-				ColDpp, ColRpf, ColShg, ColAcc, ColSgp,
+				ColDpp, ColRpf, ColShg, ColAcc, ColSgp, ColSrs,
 			}
 		} else {
 			cols = []string{
@@ -436,6 +437,8 @@ func (ms *MongoStorage) RemoveKeysForPrefix(prefix string) error {
 		colName = ColSqp
 	case utils.SagsProfilePrefix:
 		colName = ColSgp
+	case utils.SarsProfilePrefix:
+		colName = ColSrs
 	case utils.ThresholdPrefix:
 		colName = ColThs
 	case utils.FilterPrefix:
@@ -603,6 +606,8 @@ func (ms *MongoStorage) GetKeysForPrefix(prefix string) (keys []string, err erro
 			keys, qryErr = ms.getAllKeysMatchingTenantID(sctx, ColSqs, utils.StatQueuePrefix, subject, tntID)
 		case utils.SagsProfilePrefix:
 			keys, qryErr = ms.getAllKeysMatchingTenantID(sctx, ColSgp, utils.SagsProfilePrefix, subject, tntID)
+		case utils.SarsProfilePrefix:
+			keys, qryErr = ms.getAllKeysMatchingTenantID(sctx, ColSrs, utils.SarsProfilePrefix, subject, tntID)
 		case utils.StatQueueProfilePrefix:
 			keys, qryErr = ms.getAllKeysMatchingTenantID(sctx, ColSqp, utils.StatQueueProfilePrefix, subject, tntID)
 		case utils.AccountActionPlansPrefix:
@@ -1548,6 +1553,39 @@ func (ms *MongoStorage) SetSagProfileDrv(sgp *SagProfile) (err error) {
 func (ms *MongoStorage) RemSagProfileDrv(tenant, id string) (err error) {
 	return ms.query(func(sctx mongo.SessionContext) error {
 		dr, err := ms.getCol(ColSgp).DeleteOne(sctx, bson.M{"tenant": tenant, "id": id})
+		if dr.DeletedCount == 0 {
+			return utils.ErrNotFound
+		}
+		return err
+	})
+
+}
+
+func (ms *MongoStorage) GetSarProfileDrv(tenant, id string) (*SarProfile, error) {
+	srProfile := new(SarProfile)
+	err := ms.query(func(sctx mongo.SessionContext) error {
+		sr := ms.getCol(ColSrs).FindOne(sctx, bson.M{"tenant": tenant, "id": id})
+		decodeErr := sr.Decode(srProfile)
+		if errors.Is(decodeErr, mongo.ErrNoDocuments) {
+			return utils.ErrNotFound
+		}
+		return decodeErr
+	})
+	return srProfile, err
+}
+
+func (ms *MongoStorage) SetSarProfileDrv(srp *SarProfile) (err error) {
+	return ms.query(func(sctx mongo.SessionContext) error {
+		_, err := ms.getCol(ColSrs).UpdateOne(sctx, bson.M{"tenant": srp.Tenant, "id": srp.ID},
+			bson.M{"$set": srp},
+			options.Update().SetUpsert(true))
+		return err
+	})
+}
+
+func (ms *MongoStorage) RemSarProfileDrv(tenant, id string) (err error) {
+	return ms.query(func(sctx mongo.SessionContext) error {
+		dr, err := ms.getCol(ColSrs).DeleteOne(sctx, bson.M{"tenant": tenant, "id": id})
 		if dr.DeletedCount == 0 {
 			return utils.ErrNotFound
 		}

@@ -1286,6 +1286,70 @@ func (dm *DataManager) RemoveStatQueueProfile(tenant, id string, withIndex bool)
 	return dm.RemoveStatQueue(tenant, id)
 }
 
+func (dm *DataManager) GetSarProfile(tenant, id string) (srp *SarProfile, err error) {
+	if dm == nil {
+		err = utils.ErrNoDatabaseConn
+		return
+	}
+	srp, err = dm.dataDB.GetSarProfileDrv(tenant, id)
+	if err != nil {
+		if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaSarProfiles]; err == utils.ErrNotFound && itm.Remote {
+			if err = dm.connMgr.Call(context.TODO(), config.CgrConfig().DataDbCfg().RmtConns,
+				utils.ReplicatorSv1GetSarProfile,
+				&utils.TenantIDWithAPIOpts{
+					TenantID: &utils.TenantID{Tenant: tenant, ID: id},
+					APIOpts: utils.GenerateDBItemOpts(itm.APIKey, itm.RouteID, utils.EmptyString,
+						utils.FirstNonEmpty(config.CgrConfig().DataDbCfg().RmtConnID,
+							config.CgrConfig().GeneralCfg().NodeID)),
+				}, &srp); err == nil {
+				err = dm.dataDB.SetSarProfileDrv(srp)
+			}
+		}
+	}
+	return
+}
+
+func (dm *DataManager) SetSarProfile(srp *SarProfile) (err error) {
+	if err = dm.DataDB().SetSarProfileDrv(srp); err != nil {
+		return
+	}
+	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaSarProfiles]; itm.Replicate {
+		err = replicate(dm.connMgr, config.CgrConfig().DataDbCfg().RplConns,
+			config.CgrConfig().DataDbCfg().RplFiltered,
+			utils.SarsProfilePrefix, srp.TenantID(),
+			utils.ReplicatorSv1SetSarProfile,
+			&SarProfileWithAPIOpts{
+				SarProfile: srp,
+				APIOpts: utils.GenerateDBItemOpts(itm.APIKey, itm.RouteID,
+					config.CgrConfig().DataDbCfg().RplCache, utils.EmptyString)})
+	}
+	return
+}
+
+func (dm *DataManager) RemoveSarProfile(tenant, id string) (err error) {
+	oldSgs, err := dm.GetSarProfile(tenant, id)
+	if err != nil && err != utils.ErrNotFound {
+		return err
+	}
+	if err = dm.DataDB().RemSarProfileDrv(tenant, id); err != nil {
+		return
+	}
+	if oldSgs == nil {
+		return utils.ErrNotFound
+	}
+	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaSarProfiles]; itm.Replicate {
+		replicate(dm.connMgr, config.CgrConfig().DataDbCfg().RplConns,
+			config.CgrConfig().DataDbCfg().RplFiltered,
+			utils.SarsProfilePrefix, utils.ConcatenatedKey(tenant, id), // this are used to get the host IDs from cache
+			utils.ReplicatorSv1RemoveSarProfile,
+			&utils.TenantIDWithAPIOpts{
+				TenantID: &utils.TenantID{Tenant: tenant, ID: id},
+				APIOpts: utils.GenerateDBItemOpts(itm.APIKey, itm.RouteID,
+					config.CgrConfig().DataDbCfg().RplCache, utils.EmptyString)})
+	}
+	return
+}
+
 func (dm *DataManager) GetSagProfile(tenant, id string, cacheRead, cacheWrite bool, transactionID string) (sgp *SagProfile, err error) {
 	tntID := utils.ConcatenatedKey(tenant, id)
 	if cacheRead {
@@ -1372,7 +1436,7 @@ func (dm *DataManager) RemoveSagProfile(tenant, id string) (err error) {
 	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaSagProfiles]; itm.Replicate {
 		replicate(dm.connMgr, config.CgrConfig().DataDbCfg().RplConns,
 			config.CgrConfig().DataDbCfg().RplFiltered,
-			utils.ChargerProfilePrefix, utils.ConcatenatedKey(tenant, id), // this are used to get the host IDs from cache
+			utils.SagsProfilePrefix, utils.ConcatenatedKey(tenant, id), // this are used to get the host IDs from cache
 			utils.ReplicatorSv1RemoveSagProfile,
 			&utils.TenantIDWithAPIOpts{
 				TenantID: &utils.TenantID{Tenant: tenant, ID: id},

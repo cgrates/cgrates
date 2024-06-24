@@ -301,6 +301,25 @@ func (SagsMdl) TableName() string {
 	return utils.TBLTPSags
 }
 
+type SarsMdl struct {
+	PK             uint `gorm:"primary_key"`
+	Tpid           string
+	Tenant         string `index:"0" re:".*"`
+	ID             string `index:"1" re:".*"`
+	QueryInterval  string `index:"2" re:".*"`
+	StatID         string `index:"3" re:".*"`
+	QueueLength    int    `index:"4" re:".*"`
+	TTL            string `index:"5" re:".*"`
+	PurgeFilterIDs string `index:"6" re:".*"`
+	Trend          string `index:"7" re:".*"`
+	ThresholdIDs   string `index:"8" re:".*"`
+	CreatedAt      time.Time
+}
+
+func (SarsMdl) TableName() string {
+	return utils.TBLTPSars
+}
+
 type ThresholdMdl struct {
 	PK                 uint `gorm:"primary_key"`
 	Tpid               string
