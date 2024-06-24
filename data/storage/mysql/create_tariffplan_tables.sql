@@ -318,6 +318,30 @@ CREATE TABLE tp_sags(
   );
 
 --
+-- Table structure for tabls `tp_sars`
+--
+
+DROP TABLE IF EXISTS tp_sars;
+CREATE TABLE tp_sars(
+ `pk` int(11) NOT NULL AUTO_INCREMENT,
+ `tpid` varchar(64) NOT NULL,
+ `tenant` varchar(64) NOT NULL,
+ `id` varchar(64) NOT NULL,
+ `query_interval` varchar(64) NOT NULL,
+ `stat_id` varchar(64) NOT NULL,
+ `queue_length` int(11) NOT NULL,
+ `ttl` varchar(32) NOT NULL,
+ `purge_filter_ids` varchar(64) NOT NULL,
+ `trend` varchar(64) NOT NULL,
+ `threshold_ids` varchar(64) NOT NULL,
+ `created_at` TIMESTAMP,
+  PRIMARY KEY (`pk`),
+  KEY `tpid`  (`tpid`),
+  UNIQUE KEY `unique_tp_sars` (`tpid`,`tenant`,`id`,`stat_id`)
+  );
+
+
+--
 -- Table structure for table `tp_threshold_cfgs`
 --
 

@@ -1000,6 +1000,20 @@ type TPSagsProfile struct {
 	ThresholdIDs      []string
 }
 
+// TPSarProfile is used in APIs to manage remotely offline SarProfile
+type TPSarsProfile struct {
+	TPid           string
+	Tenant         string
+	ID             string
+	QueryInterval  string
+	StatID         string
+	QueueLength    int
+	TTL            string
+	PurgeFilterIDs []string
+	Trend          string
+	ThresholdIDs   []string
+}
+
 // TPThresholdProfile is used in APIs to manage remotely offline ThresholdProfile
 type TPThresholdProfile struct {
 	TPid               string
