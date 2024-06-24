@@ -1682,3 +1682,24 @@ func TestRouteSortDispatcher(t *testing.T) {
 		t.Error(err)
 	}
 }
+
+func TestLibRouteIDs(t *testing.T) {
+	route1 := &SortedRoute{RouteID: "route1"}
+	route2 := &SortedRoute{RouteID: "route2"}
+	route3 := &SortedRoute{RouteID: "route3"}
+	sortedRoutes := &SortedRoutes{
+		ProfileID: "profile1",
+		Sorting:   "testsorting",
+		Routes:    []*SortedRoute{route1, route2, route3},
+	}
+	expectedRouteIDs := []string{"route1", "route2", "route3"}
+	actualRouteIDs := sortedRoutes.RouteIDs()
+	if len(actualRouteIDs) != len(expectedRouteIDs) {
+		t.Errorf("Expected %d route IDs, got %d", len(expectedRouteIDs), len(actualRouteIDs))
+	}
+	for i, expectedID := range expectedRouteIDs {
+		if actualRouteIDs[i] != expectedID {
+			t.Errorf("Expected route ID at index %d to be %s, got %s", i, expectedID, actualRouteIDs[i])
+		}
+	}
+}

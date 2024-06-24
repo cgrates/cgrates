@@ -777,3 +777,110 @@ func TestBalancesEqual(t *testing.T) {
 		t.Errorf("Expected balances1 to not equal balances4, but they are equal")
 	}
 }
+
+func TestBalancesFieldAsString(t *testing.T) {
+	bc := Balances{
+		&Balance{
+			Uuid:           "uuid123",
+			ID:             "balance123",
+			Value:          100.0,
+			ExpirationDate: time.Date(2024, time.December, 31, 23, 59, 59, 0, time.UTC),
+			Weight:         1.5,
+			DestinationIDs: utils.StringMap{},
+			RatingSubject:  "ratingSub",
+			Categories:     utils.StringMap{},
+			SharedGroups:   utils.StringMap{},
+			Timings:        []*RITiming{},
+			TimingIDs:      utils.StringMap{},
+			Disabled:       false,
+			Blocker:        true,
+			precision:      2,
+			account:        nil,
+			dirty:          false,
+		},
+	}
+
+	t.Run("empty field path", func(t *testing.T) {
+		val, err := bc.FieldAsString([]string{})
+		if err == nil {
+			t.Error("expected error, got nil")
+		}
+		if val != "" {
+			t.Errorf("expected empty string, got '%v'", val)
+		}
+	})
+
+	t.Run("invalid field path", func(t *testing.T) {
+		val, err := bc.FieldAsString([]string{"invalid"})
+		if err == nil {
+			t.Error("expected error, got nil")
+		}
+		if val != "" {
+			t.Errorf("expected empty string, got '%v'", val)
+		}
+	})
+
+	t.Run("valid field path for non-existing ID", func(t *testing.T) {
+		val, err := bc.FieldAsString([]string{"2", "ID"})
+		if err == nil {
+			t.Error("expected error, got nil")
+		}
+		if val != "" {
+			t.Errorf("expected empty string, got '%v'", val)
+		}
+	})
+}
+
+func TestBalancesIsActiveAt(t *testing.T) {
+	testTime := time.Now()
+
+	t.Run("balance is disabled", func(t *testing.T) {
+		balance := &Balance{
+			Disabled: true,
+		}
+		if balance.IsActiveAt(testTime) {
+			t.Errorf("expected false, got true")
+		}
+	})
+
+}
+
+func TestBalancesFieldAsInterfaceIndexPath(t *testing.T) {
+
+	bc := Balances{
+		&Balance{
+			Uuid:           "uuid123",
+			ID:             "balance123",
+			Value:          100.0,
+			ExpirationDate: time.Date(2024, time.December, 31, 23, 59, 59, 0, time.UTC),
+			Weight:         1.5,
+			DestinationIDs: utils.StringMap{},
+			RatingSubject:  "ratingSub",
+			Categories:     utils.StringMap{},
+			SharedGroups:   utils.StringMap{},
+			Timings:        []*RITiming{},
+			TimingIDs:      utils.StringMap{},
+			Disabled:       false,
+			Blocker:        true,
+			precision:      2,
+			account:        nil,
+			dirty:          false,
+		},
+	}
+
+	t.Run("test index path in FieldAsInterface", func(t *testing.T) {
+
+		idx := "0"
+		val, err := bc.FieldAsInterface([]string{idx})
+
+		if err != nil {
+			t.Errorf("expected no error, got %v", err)
+		}
+
+		expected := bc[0]
+		if val != expected {
+			t.Errorf("expected '%v', got '%v'", expected, val)
+		}
+	})
+
+}

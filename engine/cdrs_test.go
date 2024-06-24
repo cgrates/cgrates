@@ -22,6 +22,8 @@ import (
 	"bytes"
 	"fmt"
 	"log"
+	"net/http"
+	"net/url"
 	"os"
 	"reflect"
 	"strings"
@@ -2381,5 +2383,136 @@ func TestCdrsSetCloneable(t *testing.T) {
 		if attr.clnb != tt.expected {
 			t.Errorf("SetCloneable(%v) = %v; expected %v", tt.input, attr.clnb, tt.expected)
 		}
+	}
+}
+
+func TestCdrsSetCloneableEvent(t *testing.T) {
+	arg := &ArgV1ProcessEvent{}
+	arg.SetCloneable(true)
+	if !arg.clnb {
+		t.Errorf("expected clnb to be true, got false")
+	}
+	arg.SetCloneable(false)
+
+	if arg.clnb {
+		t.Errorf("expected clnb to be false, got true")
+	}
+}
+
+func TestCdrsRPCClone(t *testing.T) {
+
+	arg := &ArgV1ProcessEvent{}
+
+	cloned1, err1 := arg.RPCClone()
+
+	if err1 != nil {
+		t.Errorf("unexpected error: %v", err1)
+	}
+	if cloned1 != arg {
+		t.Errorf("expected cloned object to be identical, got different objects")
+	}
+	arg.SetCloneable(true)
+	cloned2, err2 := arg.RPCClone()
+	if err2 != nil {
+		t.Errorf("unexpected error: %v", err2)
+	}
+	if cloned2 == arg {
+		t.Errorf("expected cloned object to be different, got identical objects")
+	}
+}
+
+func TestCdrsRPCCloneArgs(t *testing.T) {
+	arg := &ArgV1ProcessEvents{}
+
+	cloned1, err1 := arg.RPCClone()
+	if err1 != nil {
+		t.Errorf("unexpected error: %v", err1)
+	}
+	if cloned1 != arg {
+		t.Errorf("expected cloned object to be same, got different")
+	}
+	arg.SetCloneable(true)
+	cloned2, err2 := arg.RPCClone()
+	if err2 != nil {
+		t.Errorf("unexpected error: %v", err2)
+	}
+	if cloned2 == arg {
+		t.Errorf("expected cloned object to be different, got same")
+	}
+}
+
+func TestNewMapEventFromReqForm(t *testing.T) {
+	form := url.Values{}
+	form.Add("key1", "value1")
+	form.Add("key2", "value2")
+
+	req, err := http.NewRequest("POST", "http://cgrates.com", nil)
+	if err != nil {
+		t.Fatalf("failed to create request: %v", err)
+	}
+	req.Form = form
+	mp, err := newMapEventFromReqForm(req)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	expectedRemoteAddr := req.RemoteAddr
+	if mp[utils.Source] != expectedRemoteAddr {
+		t.Errorf("expected mp[%q] to be %q, got %q", utils.Source, expectedRemoteAddr, mp[utils.Source])
+	}
+	if mp["key1"] != "value1" {
+		t.Errorf("expected mp[%q] to be %q, got %q", "key1", "value1", mp["key1"])
+	}
+	if mp["key2"] != "value2" {
+		t.Errorf("expected mp[%q] to be %q, got %q", "key2", "value2", mp["key2"])
+	}
+}
+
+func TestCDRSV1ProcessEvents(t *testing.T) {
+
+	ctx := context.Background()
+	cfg := config.NewDefaultCGRConfig()
+	cdrS := &CDRServer{
+		cgrCfg: cfg,
+	}
+	arg := &ArgV1ProcessEvents{
+		Flags:     []string{},
+		CGREvents: []*utils.CGREvent{},
+		APIOpts:   make(map[string]any),
+	}
+	expectedReply := utils.OK
+	var reply string
+	err := cdrS.V1ProcessEvents(ctx, arg, &reply)
+
+	if err != nil {
+		t.Errorf("Expected no error, got %v", err)
+	}
+	if reply != expectedReply {
+		t.Errorf("Expected reply %q, got %q", expectedReply, reply)
+	}
+}
+
+func TestCDRSCallValidServiceMethod(t *testing.T) {
+	cdrS := &CDRServer{}
+
+	args := struct{}{}
+	reply := new(struct{})
+
+	err := cdrS.Call(nil, "CDRServer.testMethod", args, reply)
+
+	if err == nil {
+		t.Errorf("UNSUPPORTED_SERVICE_METHOD, got %v", err)
+	}
+}
+
+func TestCDRSCallInvalidServiceMethod(t *testing.T) {
+	cdrS := &CDRServer{}
+
+	args := struct{}{}
+	reply := new(struct{})
+
+	err := cdrS.Call(nil, "CDRServer.InvalidMethod", args, reply)
+
+	if err != rpcclient.ErrUnsupporteServiceMethod {
+		t.Errorf("Expected error %v, got %v", rpcclient.ErrUnsupporteServiceMethod, err)
 	}
 }
