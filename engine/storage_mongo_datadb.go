@@ -2036,17 +2036,116 @@ func (ms *MongoStorage) RemoveIndexesDrv(idxItmType, tntCtx, idxKey string) erro
 	})
 }
 
+// used to "mold" the structure so that it appears in the first level of the mongo document and to make the conversion from mongo back to cgrates simpler
+type mongoStoredSession struct {
+	NodeID        string
+	CGRID         string
+	Tenant        string
+	ResourceID    string
+	ClientConnID  string
+	EventStart    MapEvent
+	DebitInterval time.Duration
+	Chargeable    bool
+	SRuns         []*StoredSRun
+	OptsStart     MapEvent
+	UpdatedAt     time.Time
+}
+
 // Will backup active sessions in DataDB
 func (ms *MongoStorage) SetBackupSessionsDrv(nodeID, tnt string, storedSessions []*StoredSession) error {
-	return utils.ErrNotImplemented
+	return ms.query(func(sctx mongo.SessionContext) error {
+		for i := 0; i < len(storedSessions); i += 1000 {
+			end := i + 1000
+			if end > len(storedSessions) {
+				end = len(storedSessions)
+			}
+			// split sessions into batches of 1001 sessons
+			batch := storedSessions[i:end] //  if sessions < 1001, puts all sessions in 1 batch
+			var models []mongo.WriteModel
+			for _, sess := range batch {
+				doc := bson.M{"$set": mongoStoredSession{
+					NodeID:        nodeID,
+					CGRID:         sess.CGRID,
+					Tenant:        sess.Tenant,
+					ResourceID:    sess.ResourceID,
+					ClientConnID:  sess.ClientConnID,
+					EventStart:    sess.EventStart,
+					DebitInterval: sess.DebitInterval,
+					Chargeable:    sess.Chargeable,
+					SRuns:         sess.SRuns,
+					OptsStart:     sess.OptsStart,
+					UpdatedAt:     sess.UpdatedAt,
+				}}
+				model := mongo.NewUpdateOneModel().SetUpdate(doc).SetUpsert(true).SetFilter(bson.M{"nodeid": nodeID, "cgrid": sess.CGRID})
+				models = append(models, model)
+			}
+			if len(models) != 0 {
+				_, err := ms.getCol(ColBkup).BulkWrite(sctx, models)
+				if err != nil {
+					return err
+				}
+			}
+		}
+		return nil
+	})
 }
 
 // Will restore sessions that were active from dataDB backup
 func (ms *MongoStorage) GetSessionsBackupDrv(nodeID, tnt string) ([]*StoredSession, error) {
-	return nil, utils.ErrNotImplemented
+	var storeSessions []*StoredSession
+	if err := ms.query(func(sctx mongo.SessionContext) (qryErr error) {
+		cur, qryErr := ms.getCol(ColBkup).Find(sctx, bson.M{"nodeid": nodeID})
+		if qryErr != nil {
+			return qryErr
+		}
+		defer func() {
+			closeErr := cur.Close(sctx)
+			if closeErr != nil && qryErr == nil {
+				qryErr = closeErr
+			}
+		}()
+		for cur.Next(sctx) {
+			var result mongoStoredSession
+			qryErr := cur.Decode(&result)
+			if errors.Is(qryErr, mongo.ErrNoDocuments) {
+				return utils.ErrNoBackupFound
+			} else if qryErr != nil {
+				return qryErr
+			}
+			oneStSession := &StoredSession{
+				CGRID:         result.CGRID,
+				Tenant:        result.Tenant,
+				ResourceID:    result.ResourceID,
+				ClientConnID:  result.ClientConnID,
+				EventStart:    result.EventStart,
+				DebitInterval: result.DebitInterval,
+				Chargeable:    result.Chargeable,
+				SRuns:         result.SRuns,
+				OptsStart:     result.OptsStart,
+				UpdatedAt:     result.UpdatedAt,
+			}
+			storeSessions = append(storeSessions, oneStSession)
+		}
+		if len(storeSessions) == 0 {
+			return utils.ErrNoBackupFound
+		}
+		return
+	}); err != nil {
+		return nil, err
+	}
+	return storeSessions, nil
 }
 
 // Will remove one or all sessions from dataDB Backup
 func (ms *MongoStorage) RemoveSessionsBackupDrv(nodeID, tnt, cgrid string) error {
-	return utils.ErrNotImplemented
+	if cgrid == utils.EmptyString {
+		return ms.query(func(sctx mongo.SessionContext) error {
+			_, err := ms.getCol(ColBkup).DeleteMany(sctx, bson.M{"nodeid": nodeID})
+			return err
+		})
+	}
+	return ms.query(func(sctx mongo.SessionContext) error {
+		_, err := ms.getCol(ColBkup).DeleteOne(sctx, bson.M{"nodeid": nodeID, "cgrid": cgrid})
+		return err
+	})
 }
