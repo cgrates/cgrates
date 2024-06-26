@@ -481,3 +481,91 @@ func TestLibDnsUpdateDnsOption(t *testing.T) {
 	}
 
 }
+
+func TestLibDnsUpdateDnsSRVAnswer(t *testing.T) {
+	tests := []struct {
+		name    string
+		path    []string
+		value   interface{}
+		expect  func(v *dns.SRV) bool
+		wantErr bool
+	}{
+		{
+			name:  "update Priority",
+			path:  []string{utils.DNSPriority},
+			value: int64(10),
+			expect: func(v *dns.SRV) bool {
+				return v.Priority == 10
+			},
+			wantErr: false,
+		},
+		{
+			name:  "update Weight",
+			path:  []string{utils.Weight},
+			value: int64(20),
+			expect: func(v *dns.SRV) bool {
+				return v.Weight == 20
+			},
+			wantErr: false,
+		},
+		{
+			name:  "update Port",
+			path:  []string{utils.DNSPort},
+			value: int64(2012),
+			expect: func(v *dns.SRV) bool {
+				return v.Port == 2012
+			},
+			wantErr: false,
+		},
+		{
+			name:  "update Target",
+			path:  []string{utils.DNSTarget},
+			value: "cgrates.com",
+			expect: func(v *dns.SRV) bool {
+				return v.Target == "cgrates.com"
+			},
+			wantErr: false,
+		},
+		{
+			name:    "invalid path length",
+			path:    []string{},
+			value:   int64(10),
+			expect:  nil,
+			wantErr: true,
+		},
+		{
+			name:    "invalid path value",
+			path:    []string{"invalid"},
+			value:   int64(10),
+			expect:  nil,
+			wantErr: true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			srv := &dns.SRV{}
+			err := updateDnsSRVAnswer(srv, tt.path, tt.value)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("updateDnsSRVAnswer() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if tt.expect != nil && !tt.expect(srv) {
+				t.Errorf("updateDnsSRVAnswer() unexpected result for %v", srv)
+			}
+		})
+	}
+}
+
+func TestLibDnsUpdateDnsSRVAnswerDNSHdr(t *testing.T) {
+	srv := &dns.SRV{}
+
+	err := updateDnsSRVAnswer(srv, []string{utils.DNSHdr, utils.DNSName}, "cgrates.com.")
+	if err != nil {
+		t.Errorf("unexpected error: %v", err)
+	}
+
+	if srv.Hdr.Name != "cgrates.com." {
+		t.Errorf("expected Name to be 'cgrates.com.', got %s", srv.Hdr.Name)
+	}
+}
