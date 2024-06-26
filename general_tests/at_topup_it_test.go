@@ -57,7 +57,7 @@ func TestATExportAndTopup(t *testing.T) {
 
 "cdrs": {
 	"enabled": true,
-	"rals_conns": ["*localhost"]
+	"rals_conns": ["*internal"]
 },
 
 "rals": {
@@ -66,13 +66,13 @@ func TestATExportAndTopup(t *testing.T) {
 
 "schedulers": {
 	"enabled": true,
-	"cdrs_conns": ["*localhost"]
+	"cdrs_conns": ["*internal"]
 },
 
 "apiers": {
 	"enabled": true,
-	"scheduler_conns": ["*localhost"],
-	"ees_conns": ["*localhost"]
+	"scheduler_conns": ["*internal"],
+	"ees_conns": ["*internal"]
 },
 
 "ees": {
@@ -95,19 +95,21 @@ func TestATExportAndTopup(t *testing.T) {
 
 	tpFiles := map[string]string{
 		utils.AccountActionsCsv: `#Tenant,Account,ActionPlanId,ActionTriggersId,AllowNegative,Disabled
-cgrates.org,1001,PACKAGE_1001,TRIGGER_USAGE_1GB,,`,
+cgrates.org,1001,PACKAGE_1001,TRIGGER_1001,,`,
 		utils.ActionPlansCsv: `#Id,ActionsId,TimingId,Weight
 PACKAGE_1001,ACT_TOPUP_INITIAL,*asap,`,
 		utils.ActionsCsv: `#ActionsId[0],Action[1],ExtraParameters[2],Filter[3],BalanceId[4],BalanceType[5],Categories[6],DestinationIds[7],RatingSubject[8],SharedGroup[9],ExpiryTime[10],TimingIds[11],Units[12],BalanceWeight[13],BalanceBlocker[14],BalanceDisabled[15],Weight[16]
-ACT_TOPUP_INITIAL,*topup,,,main,*data,,,,,*unlimited,,10240,0,,,
-ACT_TOPUP_INITIAL,*topup,,,main,*data,,,,,,,10240,0,,,
+ACT_TOPUP_INITIAL,*topup_reset,,,main,*data,,,,,+150ms,,10240,0,,,10
+ACT_TOPUP_INITIAL,*topup,,,main,*data,,,,,,,10240,0,,,0
 ACT_TOPUP_10GB,*topup,,,main,*data,,,,,,,10240,0,,,
 ACT_USAGE_1GB,*export,test_exporter,,,,,,,,,,,,,,30
 ACT_USAGE_1GB,*topup,,,main,*data,,,,,,,1024,,,,20
 ACT_USAGE_1GB,*cdrlog,"{""ToR"":""*data""}",,,,,,,,,,,,,,10
-ACT_USAGE_1GB,*reset_triggers,,,,,,,,,,,,,,,0`,
+ACT_USAGE_1GB,*reset_triggers,,,,,,,,,,,,,,,0
+ACT_RESET_TRIGGERS,*reset_triggers,,,,,,,,,,,,,,,`,
 		utils.ActionTriggersCsv: `#Tag[0],UniqueId[1],ThresholdType[2],ThresholdValue[3],Recurrent[4],MinSleep[5],ExpiryTime[6],ActivationTime[7],BalanceTag[8],BalanceType[9],BalanceCategories[10],BalanceDestinationIds[11],BalanceRatingSubject[12],BalanceSharedGroup[13],BalanceExpiryTime[14],BalanceTimingIds[15],BalanceWeight[16],BalanceBlocker[17],BalanceDisabled[18],ActionsId[19],Weight[20]
-TRIGGER_USAGE_1GB,,*min_balance,0,false,0,,,main,*data,,,,,,,,,,ACT_USAGE_1GB,`,
+TRIGGER_1001,,*min_balance,0,false,0,,,main,*data,,,,,,,,,,ACT_USAGE_1GB,
+TRIGGER_1001,,*balance_expired,,true,0,,,main,*data,,,,,,,,,,ACT_TOPUP_INITIAL,`,
 	}
 
 	testEnv := TestEnvironment{
@@ -148,7 +150,7 @@ TRIGGER_USAGE_1GB,,*min_balance,0,false,0,,,main,*data,,,,,,,,,,ACT_USAGE_1GB,`,
 		}
 	}
 
-	checkAccountAndCDRs := func(t *testing.T, wantBalVal float64, triggerCount int) {
+	checkAccountAndCDRs := func(t *testing.T, wantBalVal float64, triggerCount int) time.Time {
 		t.Helper()
 		var acnts []*engine.Account
 		if err := client.Call(context.Background(), utils.APIerSv2GetAccounts,
@@ -166,6 +168,8 @@ TRIGGER_USAGE_1GB,,*min_balance,0,false,0,,,main,*data,,,,,,,,,,ACT_USAGE_1GB,`,
 		} else if got.Value != wantBalVal {
 			t.Errorf("acnts[0].FindBalanceByID(%q) returned balance with value %v, want %v", balanceID, got.Value, wantBalVal)
 		}
+		expiryTime := got.ExpirationDate
+
 		var cdrs []*engine.CDR
 		if err := client.Call(context.Background(), utils.CDRsV1GetCDRs, &utils.RPCCDRsFilterWithAPIOpts{
 			RPCCDRsFilter: &utils.RPCCDRsFilter{
@@ -193,6 +197,7 @@ TRIGGER_USAGE_1GB,,*min_balance,0,false,0,,,main,*data,,,,,,,,,,ACT_USAGE_1GB,`,
 				t.Errorf("CacheSv1GetItem *uch.ExportCount=%v, want %v", count, triggerCount)
 			}
 		}
+		return expiryTime
 	}
 
 	executeAction := func(t *testing.T, id string) {
@@ -205,14 +210,19 @@ TRIGGER_USAGE_1GB,,*min_balance,0,false,0,,,main,*data,,,,,,,,,,ACT_USAGE_1GB,`,
 
 	t.Run("ProcessCDRs", func(t *testing.T) {
 		time.Sleep(10 * time.Millisecond)
-		checkAccountAndCDRs(t, 20480, 0)   // 20GB balance
-		processCDRs(t, 1, 200)             // -200MB debit, triggered *topup+*export 0 times
-		checkAccountAndCDRs(t, 20280, 0)   // 20GB-200MB actual_balance
-		processCDRs(t, 1, 20280)           // (20GB-200MB)-(20GB-200MB) debit, triggered *topup+*export 1 time
-		checkAccountAndCDRs(t, 1024, 1)    // 1GB actual_balance
-		executeAction(t, "ACT_TOPUP_10GB") // +10GB topup
-		checkAccountAndCDRs(t, 11264, 1)   // 11GB actual_balance
-		processCDRs(t, 1, 16384)           // -16GB debit, triggered *topup+*export 6 times
-		checkAccountAndCDRs(t, 1024, 7)    // 1GB actual_balance
+		expiryTime := checkAccountAndCDRs(t, 20480, 0) // 20GB balance
+		processCDRs(t, 1, 200)                         // -200MB debit, triggered *topup+*export 0 times
+		checkAccountAndCDRs(t, 20280, 0)               // 20GB-200MB actual_balance
+		processCDRs(t, 1, 20280)                       // (20GB-200MB)-(20GB-200MB) debit, triggered *topup+*export 1 time
+		checkAccountAndCDRs(t, 1024, 1)                // 1GB actual_balance
+		executeAction(t, "ACT_TOPUP_10GB")             // +10GB topup
+		checkAccountAndCDRs(t, 11264, 1)               // 11GB actual_balance
+		processCDRs(t, 1, 16384)                       // -16GB debit, triggered *topup+*export 6 times
+		checkAccountAndCDRs(t, 1024, 7)                // 1GB actual_balance
+		executeAction(t, "ACT_RESET_TRIGGERS")         // execute action triggers, expect nothing to happen since the balance is not expired yet
+		checkAccountAndCDRs(t, 1024, 7)                // 1GB actual_balance (unchanged)
+		time.Sleep(expiryTime.Sub(time.Now()))         // wait for the balance to expire
+		executeAction(t, "ACT_RESET_TRIGGERS")         // execute action triggers, balance has expired and will be reset
+		checkAccountAndCDRs(t, 20480, 7)               // 20GB balance
 	})
 }
