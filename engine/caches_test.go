@@ -1032,3 +1032,39 @@ func TestCacheSBeginTransaction(t *testing.T) {
 	}
 
 }
+
+func TestCachesV1ReLoadCache(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	tmpDm := dm
+	defer func() {
+		dm = tmpDm
+	}()
+	attr := &utils.AttrReloadCacheWithAPIOpts{
+		Tenant:                  "cgrates.org",
+		FilterIDs:               []string{"cgrates.org:FLTR_ID"},
+		AttributeFilterIndexIDs: []string{"cgrates.org:*any:*string:*req.Account:1001", "cgrates.org:*any:*string:*req.Account:1002"},
+	}
+	chS := NewCacheS(cfg, dm, nil)
+	var reply string
+	if err := chS.V1ReloadCache(context.Background(), attr, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Errorf("reply should  be %v", utils.OK)
+	}
+
+}
+
+func TestCachesCall(t *testing.T) {
+	chS := CacheS{}
+
+	ctx := context.Background()
+	serviceMethod := "Method"
+	args := "Args"
+	reply := "Reply"
+
+	err := chS.Call(ctx, serviceMethod, args, reply)
+
+	if err == nil {
+		t.Errorf("Call returned an unexpected error: %v", err)
+	}
+}
