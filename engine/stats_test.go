@@ -31,6 +31,7 @@ import (
 	"github.com/cgrates/birpc"
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
+
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -3371,6 +3372,29 @@ func TestStatQueueProcessEventErr(t *testing.T) {
 	args.APIOpts[utils.OptsStatsProfileIgnoreFilters] = "test"
 	if _, err := sS.processEvent(args.Tenant, args); err == nil {
 		t.Error(err)
+	}
+
+}
+
+func TestStatServiceCall(t *testing.T) {
+
+	tDM := &DataManager{}
+	tConnMgr := &ConnManager{}
+	tFilterS := &FilterS{}
+	tCGRConfig := &config.CGRConfig{}
+	statService := &StatService{
+		dm:      tDM,
+		connMgr: tConnMgr,
+		filterS: tFilterS,
+		cgrcfg:  tCGRConfig,
+	}
+	ctx := context.Background()
+	serviceMethod := ""
+	args := ""
+	reply := ""
+	err := statService.Call(ctx, serviceMethod, args, &reply)
+	if err == nil {
+		t.Errorf("Call method returned error: %v", err)
 	}
 
 }
