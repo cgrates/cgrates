@@ -302,3 +302,45 @@ func TestLibHttpAgentHTTPXmlDPString(t *testing.T) {
 		t.Errorf("Expected XML: %s, got: %s", expected, result)
 	}
 }
+
+func TestLibHttpAgentEncode(t *testing.T) {
+	recorder := httptest.NewRecorder()
+	encoder := &haXMLEncoder{w: recorder}
+	nm := utils.NewOrderedNavigableMap()
+	err := encoder.Encode(nm)
+	if err != nil {
+		t.Fatalf("Unexpected error during encoding: %v", err)
+	}
+	if recorder.Code != http.StatusOK {
+		t.Errorf("Expected status code %d but got %d", http.StatusOK, recorder.Code)
+	}
+	expectedXML := ""
+	actualXML := recorder.Body.String()
+	if actualXML != expectedXML {
+		t.Errorf("Expected XML:\n%s\n\nBut got:\n%s", expectedXML, actualXML)
+	}
+}
+
+func TestLibHttpAgentTextPlainEncoderEncode(t *testing.T) {
+
+	recorder := httptest.NewRecorder()
+
+	encoder := &haTextPlainEncoder{w: recorder}
+
+	nm := utils.NewOrderedNavigableMap()
+
+	err := encoder.Encode(nm)
+	if err != nil {
+		t.Fatalf("Unexpected error during encoding: %v", err)
+	}
+
+	if recorder.Code != http.StatusOK {
+		t.Errorf("Expected status code %d but got %d", http.StatusOK, recorder.Code)
+	}
+
+	expectedOutput := ""
+	actualOutput := recorder.Body.String()
+	if actualOutput != expectedOutput {
+		t.Errorf("Expected output:\n%s\n\nBut got:\n%s", expectedOutput, actualOutput)
+	}
+}

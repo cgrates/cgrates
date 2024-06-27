@@ -632,7 +632,7 @@ func TestKameventStringKdr(t *testing.T) {
 
 func TestKamEventKamReplyString(t *testing.T) {
 	krply := &KamReply{
-		Event:              "test_event",
+		Event:              "testEvent",
 		TransactionIndex:   "123",
 		TransactionLabel:   "testLabel",
 		Attributes:         "testAttributes",
@@ -700,5 +700,168 @@ func TestKamEventV1ProcessCDRArgs(t *testing.T) {
 	args = kev.V1ProcessCDRArgs()
 	if args != nil {
 		t.Errorf("Expected nil CGREvent for error case, got %+v", args)
+	}
+}
+
+func TestKamEventMissingParameter(t *testing.T) {
+
+	tests := []struct {
+		name     string
+		kev      KamEvent
+		expected bool
+	}{
+		{
+			name: "CGR_AUTH_REQUEST with missing parameters",
+			kev: KamEvent{
+				EVENT:      CGR_AUTH_REQUEST,
+				KamTRIndex: "",
+				KamTRLabel: "",
+			},
+			expected: true,
+		},
+		{
+			name: "CGR_CALL_START with missing parameters",
+			kev: KamEvent{
+				EVENT:        CGR_CALL_START,
+				KamHashEntry: "",
+				KamHashID:    "",
+			},
+			expected: true,
+		},
+		{
+			name: "CGR_PROCESS_MESSAGE with required parameters present",
+			kev: KamEvent{
+				EVENT:      CGR_PROCESS_MESSAGE,
+				KamTRIndex: "index",
+				KamTRLabel: "label",
+			},
+			expected: false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := tt.kev.MissingParameter()
+			if result != tt.expected {
+				t.Errorf("Expected MissingParameter() to be %v, but got %v", tt.expected, result)
+			}
+		})
+	}
+}
+
+func TestKamEventUnmarshalError(t *testing.T) {
+	validJSON := []byte(`{"key1": "value1", "key2": "value2"}`)
+	iJSON := []byte(`{"key1": "value1", "key2": "value2"`)
+
+	t.Run("Valid JSON", func(t *testing.T) {
+		_, err := NewKamEvent(validJSON, "alias", "address")
+		if err != nil {
+			t.Errorf("Expected no error for valid JSON, but got: %v", err)
+		}
+
+	})
+
+	t.Run("Invalid JSON", func(t *testing.T) {
+		_, err := NewKamEvent(iJSON, "alias", "address")
+		if err == nil {
+			t.Error("Expected error for invalid JSON, but got none")
+		}
+
+	})
+}
+
+func TestKamEventProcessMessageEmptyReplyY(t *testing.T) {
+
+	kevWithReplyRoute := KamEvent{
+		KamReplyRoute: "Route",
+		KamTRIndex:    "index1",
+		KamTRLabel:    "label1",
+	}
+	replyWithRoute := kevWithReplyRoute.AsKamProcessMessageEmptyReply()
+	if replyWithRoute.Event == "EventName" {
+		t.Errorf("Route, but got %s", replyWithRoute.Event)
+	}
+
+	kevWithoutReplyRoute := KamEvent{
+		KamTRIndex: "index2",
+		KamTRLabel: "label2",
+	}
+	replyWithoutRoute := kevWithoutReplyRoute.AsKamProcessMessageEmptyReply()
+	if replyWithoutRoute.Event != CGR_PROCESS_MESSAGE {
+		t.Errorf("Expected Event to be '%s', but got %s", CGR_PROCESS_MESSAGE, replyWithoutRoute.Event)
+	}
+}
+
+func TestAsKamProcessCDRReply(t *testing.T) {
+	cgrEv := &utils.CGREvent{}
+
+	kevWithReplyRoute := KamEvent{
+		KamReplyRoute: "EventName",
+		KamTRIndex:    "index1",
+		KamTRLabel:    "label1",
+	}
+	replyWithRoute, _ := kevWithReplyRoute.AsKamProcessCDRReply(cgrEv, nil, nil)
+	if replyWithRoute.Event != "EventName" {
+		t.Errorf("Expected Event to be 'EventName', but got %s", replyWithRoute.Event)
+	}
+
+	kevWithoutReplyRoute := KamEvent{
+		KamTRIndex: "index2",
+		KamTRLabel: "label2",
+	}
+	replyWithoutRoute, _ := kevWithoutReplyRoute.AsKamProcessCDRReply(cgrEv, nil, nil)
+	if replyWithoutRoute.Event != CGR_PROCESS_CDR {
+		t.Errorf("Expected Event to be '%s', but got %s", CGR_PROCESS_CDR, replyWithoutRoute.Event)
+	}
+}
+
+func TestAsKamProcessMessageReplyProcessStats(t *testing.T) {
+	kev := KamEvent{
+		KamTRIndex: "index1",
+		KamTRLabel: "label1",
+	}
+
+	procEvArgs := &sessions.V1ProcessMessageArgs{
+		ProcessStats: true,
+	}
+
+	tStatQueueIDs := []string{"queue1", "queue2", "queue3"}
+
+	procEvReply := &sessions.V1ProcessMessageReply{
+		StatQueueIDs: &tStatQueueIDs,
+	}
+	reply, _ := kev.AsKamProcessMessageReply(procEvArgs, procEvReply, nil)
+	if reply.Event != CGR_PROCESS_MESSAGE {
+		t.Errorf("Expected Event to be '%s', but got '%s'", CGR_PROCESS_MESSAGE, reply.Event)
+	}
+	if reply.TransactionIndex != "index1" {
+		t.Errorf("Expected TransactionIndex to be 'index1', but got '%s'", reply.TransactionIndex)
+	}
+	if reply.TransactionLabel != "label1" {
+		t.Errorf("Expected TransactionLabel to be 'label1', but got '%s'", reply.TransactionLabel)
+	}
+}
+
+func TestKamEventProcessMessageReplyProcessThresholds(t *testing.T) {
+	kev := KamEvent{
+		KamTRIndex: "index1",
+		KamTRLabel: "label1",
+	}
+	procEvArgs := &sessions.V1ProcessMessageArgs{
+		ProcessThresholds: true,
+	}
+	tThresholdIDs := []string{"threshold1", "threshold2", "threshold3"}
+	procEvReply := &sessions.V1ProcessMessageReply{
+		ThresholdIDs: &tThresholdIDs,
+	}
+	reply, _ := kev.AsKamProcessMessageReply(procEvArgs, procEvReply, nil)
+	if reply.Event != CGR_PROCESS_MESSAGE {
+		t.Errorf("Expected Event to be '%s', but got '%s'", CGR_PROCESS_MESSAGE, reply.Event)
+	}
+	if reply.TransactionIndex != "index1" {
+		t.Errorf("Expected TransactionIndex to be 'index1', but got '%s'", reply.TransactionIndex)
+	}
+	if reply.TransactionLabel != "label1" {
+		t.Errorf("Expected TransactionLabel to be 'label1', but got '%s'", reply.TransactionLabel)
 	}
 }
