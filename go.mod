@@ -1,6 +1,6 @@
 module github.com/cgrates/cgrates
 
-go 1.22
+go 1.22.4
 
 // replace github.com/cgrates/radigo => /home/dan/go/src/github.com/cgrates/radigo
 // replace github.com/cgrates/rpcclient => ../rpcclient
@@ -16,7 +16,7 @@ require (
 	github.com/cgrates/kamevapi v0.0.0-20220525160402-5b8036487a6c
 	github.com/cgrates/ltcache v0.0.0-20210405185848-da943e80c1ab
 	github.com/cgrates/radigo v0.0.0-20210902121842-ea2f9a730627
-	github.com/cgrates/rpcclient v0.0.0-20230605090759-8bb5188b73e5
+	github.com/cgrates/rpcclient v0.0.0-20240628101047-cb29aae6b006
 	github.com/creack/pty v1.1.18
 	github.com/fiorix/go-diameter v3.0.3-0.20190716165154-f4823472d0e0+incompatible
 	github.com/fsnotify/fsnotify v1.6.0
@@ -43,7 +43,7 @@ require (
 	cloud.google.com/go/compute v1.23.1 // indirect
 	cloud.google.com/go/compute/metadata v0.2.3 // indirect
 	github.com/antchfx/xpath v1.2.4 // indirect
-	github.com/cenkalti/hub v1.0.1 // indirect
+	github.com/cenkalti/hub v1.0.2 // indirect
 	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
 	github.com/golang/protobuf v1.5.3 // indirect
 	github.com/golang/snappy v0.0.4 // indirect

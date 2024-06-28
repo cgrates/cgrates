@@ -191,7 +191,7 @@ func (cM *ConnManager) CallWithConnIDs(connIDs []string, subsHostIDs utils.Strin
 		if conn, err = cM.getConnWithConfig(connID, newCfg, nil, nil, false); err != nil {
 			continue
 		}
-		if err = conn.Call(context.TODO(), method, arg, reply); !rpcclient.IsNetworkError(err) {
+		if err = conn.Call(context.TODO(), method, arg, reply); !rpcclient.IsConnectionErr(err) && !rpcclient.IsServiceErr(err) {
 			return
 		}
 	}
