@@ -1,8 +1,6 @@
 module github.com/cgrates/cgrates
 
-go 1.22
-
-toolchain go1.22.0
+go 1.22.4
 
 // replace github.com/cgrates/radigo => ../radigo
 
@@ -21,7 +19,7 @@ require (
 	github.com/cgrates/kamevapi v0.0.0-20240307160311-26273f03eedf
 	github.com/cgrates/ltcache v0.0.0-20210405185848-da943e80c1ab
 	github.com/cgrates/radigo v0.0.0-20210902121842-ea2f9a730627
-	github.com/cgrates/rpcclient v0.0.0-20220922181803-b3ddc74ad65a
+	github.com/cgrates/rpcclient v0.0.0-20240628101047-cb29aae6b006
 	github.com/cgrates/sipingo v1.0.1-0.20200514112313-699ebc1cdb8e
 	github.com/creack/pty v1.1.20
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
@@ -74,7 +72,7 @@ require (
 	github.com/blevesearch/zap/v13 v13.0.6 // indirect
 	github.com/blevesearch/zap/v14 v14.0.5 // indirect
 	github.com/blevesearch/zap/v15 v15.0.3 // indirect
-	github.com/cenkalti/hub v1.0.1 // indirect
+	github.com/cenkalti/hub v1.0.2 // indirect
 	github.com/cespare/xxhash/v2 v2.2.0 // indirect
 	github.com/couchbase/ghistogram v0.1.0 // indirect
 	github.com/couchbase/moss v0.1.0 // indirect

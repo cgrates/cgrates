@@ -225,7 +225,7 @@ func (dS *DispatcherService) Dispatch(ctx *context.Context, ev *utils.CGREvent, 
 					}
 					if err = d.Dispatch(dS.dm, dS.fltrS, dS.cfg,
 						ctx, dS.connMgr.GetDispInternalChan(), evNm, tnt, utils.EmptyString, dR,
-						serviceMethod, args, reply); !rpcclient.IsNetworkError(err) {
+						serviceMethod, args, reply); !rpcclient.IsConnectionErr(err) && !rpcclient.IsServiceErr(err) {
 						return // dispatch success or specific error coming from upstream
 					}
 				}
@@ -262,7 +262,7 @@ func (dS *DispatcherService) Dispatch(ctx *context.Context, ev *utils.CGREvent, 
 					Tenant:    dPrfl.Tenant,
 					ProfileID: dPrfl.ID,
 				},
-				serviceMethod, args, reply); !rpcclient.IsNetworkError(err) {
+				serviceMethod, args, reply); !rpcclient.IsConnectionErr(err) && !rpcclient.IsServiceErr(err) {
 				return
 			}
 		}
