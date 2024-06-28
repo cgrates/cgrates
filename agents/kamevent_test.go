@@ -19,7 +19,9 @@ package agents
 
 import (
 	"encoding/json"
+	"errors"
 	"reflect"
+	"strings"
 	"testing"
 	"time"
 
@@ -794,7 +796,6 @@ func TestKamEventProcessMessageEmptyReplyY(t *testing.T) {
 
 func TestAsKamProcessCDRReply(t *testing.T) {
 	cgrEv := &utils.CGREvent{}
-
 	kevWithReplyRoute := KamEvent{
 		KamReplyRoute: "EventName",
 		KamTRIndex:    "index1",
@@ -804,7 +805,6 @@ func TestAsKamProcessCDRReply(t *testing.T) {
 	if replyWithRoute.Event != "EventName" {
 		t.Errorf("Expected Event to be 'EventName', but got %s", replyWithRoute.Event)
 	}
-
 	kevWithoutReplyRoute := KamEvent{
 		KamTRIndex: "index2",
 		KamTRLabel: "label2",
@@ -820,13 +820,10 @@ func TestAsKamProcessMessageReplyProcessStats(t *testing.T) {
 		KamTRIndex: "index1",
 		KamTRLabel: "label1",
 	}
-
 	procEvArgs := &sessions.V1ProcessMessageArgs{
 		ProcessStats: true,
 	}
-
 	tStatQueueIDs := []string{"queue1", "queue2", "queue3"}
-
 	procEvReply := &sessions.V1ProcessMessageReply{
 		StatQueueIDs: &tStatQueueIDs,
 	}
@@ -863,5 +860,166 @@ func TestKamEventProcessMessageReplyProcessThresholds(t *testing.T) {
 	}
 	if reply.TransactionLabel != "label1" {
 		t.Errorf("Expected TransactionLabel to be 'label1', but got '%s'", reply.TransactionLabel)
+	}
+}
+
+func TestKamEventProcessCDRReplyError(t *testing.T) {
+	kev := KamEvent{
+		KamTRIndex: "index",
+		KamTRLabel: "label",
+	}
+	cgrEvWithArgDisp := &utils.CGREvent{}
+	rply := ""
+	rplyErr := errors.New("test error")
+	kar, err := kev.AsKamProcessCDRReply(cgrEvWithArgDisp, &rply, rplyErr)
+	if err != nil {
+		t.Errorf("expected no error, got %v", err)
+	}
+	if kar == nil {
+		t.Fatalf("expected kar to be non-nil")
+	}
+	if kar.TransactionIndex != "index" {
+		t.Errorf("expected TransactionIndex to be 'index', got %v", kar.TransactionIndex)
+	}
+	if kar.TransactionLabel != "label" {
+		t.Errorf("expected TransactionLabel to be 'label', got %v", kar.TransactionLabel)
+	}
+	if kar.Event != CGR_PROCESS_CDR {
+		t.Errorf("expected Event to be %v, got %v", CGR_PROCESS_CDR, kar.Event)
+	}
+	if kar.Error != "test error" {
+		t.Errorf("expected Error to be 'test error', got %v", kar.Error)
+	}
+}
+
+func TestAsKamProcessMessageReplyError(t *testing.T) {
+	kev := KamEvent{
+		KamTRIndex: "index",
+		KamTRLabel: "label",
+	}
+	procEvArgs := &sessions.V1ProcessMessageArgs{}
+	procEvReply := &sessions.V1ProcessMessageReply{}
+	rplyErr := errors.New("error")
+	kar, err := kev.AsKamProcessMessageReply(procEvArgs, procEvReply, rplyErr)
+	if err != nil {
+		t.Errorf("expected no error, got %v", err)
+	}
+	if kar == nil {
+		t.Fatalf("expected kar to be non-nil")
+	}
+	if kar.Error != "error" {
+		t.Errorf("expected Error to be 'error', got %v", kar.Error)
+	}
+}
+
+func TestV1ProcessCDRArgsError(t *testing.T) {
+	kev := KamEvent{}
+	args := kev.V1ProcessCDRArgs()
+	if args != nil {
+		t.Errorf("expected args to be nil when AsCGREvent returns an error, got %v", args)
+	}
+}
+
+func TestKamEventAuthReplyProcessStats(t *testing.T) {
+	kev := KamEvent{
+		KamTRIndex: "index",
+		KamTRLabel: "label",
+	}
+	authArgs := &sessions.V1AuthorizeArgs{
+		ProcessStats: true,
+	}
+	statQueueIDs := []string{"stat1", "stat2"}
+	authReply := &sessions.V1AuthorizeReply{
+		StatQueueIDs: &statQueueIDs,
+	}
+	rplyErr := error(nil)
+	kar, err := kev.AsKamAuthReply(authArgs, authReply, rplyErr)
+	if err != nil {
+		t.Errorf("expected no error, got %v", err)
+	}
+	if kar == nil {
+		t.Fatalf("expected kar to be non-nil")
+	}
+	expectedStatQueues := strings.Join(statQueueIDs, utils.FieldsSep)
+	if kar.StatQueues != expectedStatQueues {
+		t.Errorf("expected StatQueues to be '%v', got '%v'", expectedStatQueues, kar.StatQueues)
+	}
+}
+
+func TestKamEventAsKamAuthReplyProcessThresholds(t *testing.T) {
+	kev := KamEvent{
+		KamTRIndex: "index",
+		KamTRLabel: "label",
+	}
+	authArgs := &sessions.V1AuthorizeArgs{
+		ProcessThresholds: true,
+	}
+	thresholdIDs := []string{"threshold1", "threshold2"}
+	authReply := &sessions.V1AuthorizeReply{
+		ThresholdIDs: &thresholdIDs,
+	}
+	rplyErr := error(nil)
+	kar, err := kev.AsKamAuthReply(authArgs, authReply, rplyErr)
+
+	if err != nil {
+		t.Errorf("expected no error, got %v", err)
+	}
+	if kar == nil {
+		t.Fatalf("expected kar to be non-nil")
+	}
+	expectedThresholds := strings.Join(thresholdIDs, utils.FieldsSep)
+	if kar.Thresholds != expectedThresholds {
+		t.Errorf("expected Thresholds to be '%v', got '%v'", expectedThresholds, kar.Thresholds)
+	}
+}
+
+func TestKamEventAsKamAuthReplyAuthorizeResources(t *testing.T) {
+	kev := KamEvent{
+		KamTRIndex: "index",
+		KamTRLabel: "label",
+	}
+	authArgs := &sessions.V1AuthorizeArgs{
+		AuthorizeResources: true,
+	}
+	resourceAllocation := "resource_allocation_value"
+	authReply := &sessions.V1AuthorizeReply{
+		ResourceAllocation: &resourceAllocation,
+	}
+	rplyErr := error(nil)
+	kar, err := kev.AsKamAuthReply(authArgs, authReply, rplyErr)
+	if err != nil {
+		t.Errorf("expected no error, got %v", err)
+	}
+	if kar == nil {
+		t.Fatalf("expected kar to be non-nil")
+	}
+	if kar.ResourceAllocation != resourceAllocation {
+		t.Errorf("expected ResourceAllocation to be '%v', got '%v'", resourceAllocation, kar.ResourceAllocation)
+	}
+}
+
+func TestKamEventV1InitSessionArgsNoCGRFlags(t *testing.T) {
+	kev := KamEvent{}
+	args := kev.V1InitSessionArgs()
+	if args == nil {
+		t.Fatalf("expected args to be non-nil")
+	}
+	if !args.InitSession {
+		t.Error("expected InitSession to be true")
+	}
+}
+
+func TestKamEventAsMapStringInterfaceUsageKey(t *testing.T) {
+	kev := KamEvent{
+		"Usage": "123",
+		"Key":   "value",
+	}
+	expected := map[string]any{
+		"Usage": "123s",
+		"Key":   "value",
+	}
+	result := kev.AsMapStringInterface()
+	if reflect.DeepEqual(result, expected) {
+		t.Errorf("expected %v, got %v", expected, result)
 	}
 }
