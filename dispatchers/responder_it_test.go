@@ -195,7 +195,7 @@ func testDspResponderBroadcast(t *testing.T) {
 	time.Sleep(10 * time.Millisecond)
 	pingReply = ""
 	if err := dispEngine.RPC.Call(context.Background(), utils.ResponderPing, pingEv, &pingReply); err == nil ||
-		!rpcclient.IsNetworkError(err) {
+		!rpcclient.IsConnectionErr(err) && !rpcclient.IsServiceErr(err) {
 		t.Errorf("Expected error: %s received error: %v	 and reply %q", utils.ErrPartiallyExecuted.Error(), err, pingReply)
 	}
 	allEngine.startEngine(t)
