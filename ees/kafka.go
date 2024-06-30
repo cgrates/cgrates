@@ -21,10 +21,8 @@ import (
 	"context"
 	"crypto/tls"
 	"crypto/x509"
-	"net"
+	"errors"
 	"os"
-	"sync"
-	"time"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
@@ -32,115 +30,100 @@ import (
 )
 
 // NewKafkaEE creates a kafka poster
-func NewKafkaEE(cfg *config.EventExporterCfg, dc *utils.SafeMapStorage) *KafkaEE {
-	kfkPstr := &KafkaEE{
-		cfg:   cfg,
-		dc:    dc,
-		topic: utils.DefaultQueueID,
-		reqs:  newConcReq(cfg.ConcurrentRequests),
+func NewKafkaEE(cfg *config.EventExporterCfg, dc *utils.SafeMapStorage) (*KafkaEE, error) {
+	pstr := &KafkaEE{
+		cfg:  cfg,
+		dc:   dc,
+		reqs: newConcReq(cfg.ConcurrentRequests),
 	}
-	if cfg.Opts.Kafka.Topic != nil {
-		kfkPstr.topic = *cfg.Opts.Kafka.Topic
-	}
-	if cfg.Opts.Kafka.TLS != nil && *cfg.Opts.Kafka.TLS {
-		kfkPstr.tls = true
-	}
-	if cfg.Opts.Kafka.CAPath != nil {
-		kfkPstr.caPath = *cfg.Opts.Kafka.CAPath
-	}
-	if cfg.Opts.Kafka.SkipTLSVerify != nil && *cfg.Opts.Kafka.SkipTLSVerify {
-		kfkPstr.skipTLSVerify = true
-	}
-	return kfkPstr
-}
 
-// KafkaEE is a kafka poster
-type KafkaEE struct {
-	topic         string // identifier of the CDR queue where we publish
-	tls           bool   // if true, it will attempt to authenticate the server
-	caPath        string // path to CA pem file
-	skipTLSVerify bool   // if true, it skips certificate verification
-	writer        *kafka.Writer
-
-	cfg          *config.EventExporterCfg
-	dc           *utils.SafeMapStorage
-	reqs         *concReq
-	sync.RWMutex // protect connection
-	bytePreparing
-}
-
-func (pstr *KafkaEE) Cfg() *config.EventExporterCfg { return pstr.cfg }
-
-func (pstr *KafkaEE) Connect() (_ error) {
-	pstr.Lock()
-	defer pstr.Unlock()
-	if pstr.writer == nil {
-		pstr.writer = &kafka.Writer{
-			Addr:  kafka.TCP(pstr.Cfg().ExportPath),
-			Topic: pstr.topic,
-
-			// Leave it to the ExportWithAttempts function
-			// to handle the connect attempts.
-			MaxAttempts: 1,
-		}
+	opts := cfg.Opts.Kafka
+	topic := utils.DefaultQueueID
+	if opts.Topic != nil {
+		topic = *opts.Topic
 	}
-	if pstr.tls {
+
+	// Configure TLS if enabled.
+	var tlsCfg *tls.Config
+	if opts.TLS != nil && *opts.TLS {
 		rootCAs, err := x509.SystemCertPool()
 		if err != nil {
-			return
+			return nil, err
 		}
 		if rootCAs == nil {
 			rootCAs = x509.NewCertPool()
 		}
-		if pstr.caPath != "" {
-			ca, err := os.ReadFile(pstr.caPath)
+
+		// Load additional CA certificates if a path is provided.
+		if opts.CAPath != nil && *opts.CAPath != "" {
+			ca, err := os.ReadFile(*opts.CAPath)
 			if err != nil {
-				return
+				return nil, err
 			}
 			if !rootCAs.AppendCertsFromPEM(ca) {
-				return
+				return nil, errors.New("failed to append certificates from PEM file")
 			}
 		}
-		pstr.writer.Transport = &kafka.Transport{
-			Dial: (&net.Dialer{
-				Timeout:   3 * time.Second,
-				DualStack: true,
-			}).DialContext,
-			TLS: &tls.Config{
-				RootCAs:            rootCAs,
-				InsecureSkipVerify: pstr.skipTLSVerify,
-			},
+
+		tlsCfg = &tls.Config{
+			RootCAs:            rootCAs,
+			InsecureSkipVerify: opts.SkipTLSVerify != nil && *opts.SkipTLSVerify,
 		}
 	}
 
-	return
+	pstr.writer = &kafka.Writer{
+		Addr:  kafka.TCP(pstr.Cfg().ExportPath),
+		Topic: topic,
+
+		// Leave it to the ExportWithAttempts function
+		// to handle the connect attempts.
+		MaxAttempts: 1,
+
+		// To handle both TLS and non-TLS connections consistently in the Close() function,
+		// we always specify Transport, even if empty. This allows us to call
+		// CloseIdleConnections on our Transport instance, avoiding the need to differentiate
+		// between TLS and non-TLS connections.
+		Transport: &kafka.Transport{
+			TLS: tlsCfg,
+		},
+	}
+
+	return pstr, nil
 }
 
-func (pstr *KafkaEE) ExportEvent(content any, key string) (err error) {
-	pstr.reqs.get()
-	pstr.RLock()
-	if pstr.writer == nil {
-		pstr.RUnlock()
-		pstr.reqs.done()
-		return utils.ErrDisconnected
-	}
-	err = pstr.writer.WriteMessages(context.Background(), kafka.Message{
+// KafkaEE is a kafka poster
+type KafkaEE struct {
+	writer *kafka.Writer
+	cfg    *config.EventExporterCfg
+	dc     *utils.SafeMapStorage
+	reqs   *concReq
+	bytePreparing
+}
+
+func (k *KafkaEE) Cfg() *config.EventExporterCfg { return k.cfg }
+
+func (k *KafkaEE) Connect() error { return nil }
+
+func (k *KafkaEE) ExportEvent(content any, key string) (err error) {
+	k.reqs.get()
+	defer k.reqs.done()
+	return k.writer.WriteMessages(context.Background(), kafka.Message{
 		Key:   []byte(key),
 		Value: content.([]byte),
 	})
-	pstr.RUnlock()
-	pstr.reqs.done()
-	return
 }
 
-func (pstr *KafkaEE) Close() (err error) {
-	pstr.Lock()
-	if pstr.writer != nil {
-		err = pstr.writer.Close()
-		pstr.writer = nil
+func (k *KafkaEE) Close() error {
+
+	// Manually close idle connections to prevent them from running indefinitely
+	// after the Kafka writer is purged. Without this, goroutines will accumulate
+	// over time with each new Kafka writer.
+	tsp, ok := k.writer.Transport.(*kafka.Transport)
+	if ok {
+		tsp.CloseIdleConnections()
 	}
-	pstr.Unlock()
-	return
+
+	return k.writer.Close()
 }
 
-func (pstr *KafkaEE) GetMetrics() *utils.SafeMapStorage { return pstr.dc }
+func (k *KafkaEE) GetMetrics() *utils.SafeMapStorage { return k.dc }
