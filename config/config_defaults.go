@@ -541,7 +541,8 @@ const CGRATES_CFG_JSON = `
 				
 				
 				// Kafka
-				// "kafkaTopic": "cgrates",						// the topic from where the events are exported
+				// "kafkaTopic": "cgrates_cdrs",				// the topic from where the events are exported
+				// "kafkaBatchSize": 100,						// limit on how many messages will be buffered before being sent
 				// "kafkaTLS": false,							// if true, it will try to authenticate the server
 				// "kafkaCAPath": "", 							// path to certificate authority pem
 				// "kafkaSkipTLSVerify: false, 					// if true it will skip certificate verification
