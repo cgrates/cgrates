@@ -243,6 +243,7 @@ type RPCOpts struct {
 
 type KafkaOpts struct {
 	Topic         *string
+	BatchSize     *int
 	TLS           *bool
 	CAPath        *string
 	SkipTLSVerify *bool
@@ -385,6 +386,9 @@ func (elsOpts *ElsOpts) loadFromJSONCfg(jsnCfg *EventExporterOptsJson) (err erro
 func (kafkaOpts *KafkaOpts) loadFromJSONCfg(jsnCfg *EventExporterOptsJson) (err error) {
 	if jsnCfg.KafkaTopic != nil {
 		kafkaOpts.Topic = jsnCfg.KafkaTopic
+	}
+	if jsnCfg.KafkaBatchSize != nil {
+		kafkaOpts.BatchSize = jsnCfg.KafkaBatchSize
 	}
 	if jsnCfg.KafkaTLS != nil {
 		kafkaOpts.TLS = jsnCfg.KafkaTLS
@@ -727,6 +731,10 @@ func (kafkaOpts *KafkaOpts) Clone() *KafkaOpts {
 		cln.Topic = new(string)
 		*cln.Topic = *kafkaOpts.Topic
 	}
+	if kafkaOpts.BatchSize != nil {
+		cln.BatchSize = new(int)
+		*cln.BatchSize = *kafkaOpts.BatchSize
+	}
 	if kafkaOpts.TLS != nil {
 		cln.TLS = new(bool)
 		*cln.TLS = *kafkaOpts.TLS
@@ -1057,6 +1065,9 @@ func (eeC *EventExporterCfg) AsMapInterface(separator string) (initialMP map[str
 	if kafkaOpts := eeC.Opts.Kafka; kafkaOpts != nil {
 		if kafkaOpts.Topic != nil {
 			opts[utils.KafkaTopic] = *kafkaOpts.Topic
+		}
+		if kafkaOpts.BatchSize != nil {
+			opts[utils.KafkaBatchSize] = *kafkaOpts.BatchSize
 		}
 		if kafkaOpts.TLS != nil {
 			opts[utils.KafkaTLS] = *kafkaOpts.TLS

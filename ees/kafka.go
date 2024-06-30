@@ -88,6 +88,10 @@ func NewKafkaEE(cfg *config.EventExporterCfg, dc *utils.SafeMapStorage) (*KafkaE
 		},
 	}
 
+	if opts.BatchSize != nil {
+		pstr.writer.BatchSize = *opts.BatchSize
+	}
+
 	return pstr, nil
 }
 
