@@ -1,4 +1,4 @@
-//go:build integration || flaky
+//go:build integration || flaky || kafka
 
 /*
 Real-time Online/Offline Charging System (OCS) for Telecom & ISP environments
