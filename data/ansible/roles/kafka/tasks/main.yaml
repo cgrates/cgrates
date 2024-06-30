@@ -1,24 +1,24 @@
 ---
 - name: Install Java
-  become: yes
+  become: true
   apt:
     name: default-jdk
     state: present
     update_cache: yes
 
 - name: Create kafka group
-  become: yes
+  become: true
   group:
-    name: "{{ kafka_group }}"
+    name: '{{ kafka_group }}'
     state: present
     system: yes
   when: kafka_create_user_group | bool
 
 - name: Create kafka user
-  become: yes
+  become: true
   user:
-    name: "{{ kafka_user }}"
-    group: "{{ kafka_group }}"
+    name: '{{ kafka_user }}'
+    group: '{{ kafka_group }}'
     state: present
     createhome: no
     system: yes
@@ -26,85 +26,85 @@
 
 - name: Check if Kafka has already been downloaded and unpacked
   stat:
-    path: "{{ kafka_dir }}_{{ kafka_scala_version }}-{{ kafka_version }}"
+    path: '{{ kafka_dir }}_{{ kafka_scala_version }}-{{ kafka_version }}'
   register: dir
 
 - name: Download Apache Kafka
   get_url:
-    url: "{{ kafka_download_base_url }}/{{ kafka_version }}/kafka_{{ kafka_scala_version }}-{{ kafka_version }}.tgz"
+    url: '{{ kafka_download_base_url }}/{{ kafka_version }}/kafka_{{ kafka_scala_version }}-{{ kafka_version }}.tgz'
     dest: /tmp
-    validate_certs: "{{ kafka_download_validate_certs }}"
+    validate_certs: '{{ kafka_download_validate_certs }}'
   when: not dir.stat.exists
 
 - name: Unpack Apache Kafka
-  become: yes
+  become: true
   unarchive:
     src: /tmp/kafka_{{ kafka_scala_version }}-{{ kafka_version }}.tgz
-    dest: "{{ kafka_root_dir }}"
+    dest: '{{ kafka_root_dir }}'
     remote_src: yes
-    group: "{{ kafka_group }}"
-    owner: "{{ kafka_user }}"
+    group: '{{ kafka_group }}'
+    owner: '{{ kafka_user }}'
   when: not dir.stat.exists
 
 - name: Create symlink to kafka installation directory
-  become: yes
+  become: true
   file:
-    src: "{{ kafka_root_dir }}/kafka_{{ kafka_scala_version }}-{{ kafka_version }}"
-    dest: "{{ kafka_dir }}"
+    src: '{{ kafka_root_dir }}/kafka_{{ kafka_scala_version }}-{{ kafka_version }}'
+    dest: '{{ kafka_dir }}'
     state: link
-    group: "{{ kafka_group }}"
-    owner: "{{ kafka_user }}"
+    group: '{{ kafka_group }}'
+    owner: '{{ kafka_user }}'
 
 - name: Create directory for kafka data log files
-  become: yes
+  become: true
   file:
-    path: "{{ item }}"
+    path: '{{ item }}'
     state: directory
-    group: "{{ kafka_group }}"
-    owner: "{{ kafka_user }}"
+    group: '{{ kafka_group }}'
+    owner: '{{ kafka_user }}'
     mode: 0755
   with_items: "{{ kafka_data_log_dirs.split(',') }}"
 
 - name: Template configuration file to kraft server.properties
-  become: yes
+  become: true
   template:
     src: server.properties.j2
-    dest: "{{ kafka_dir }}/config/kraft/server.properties"
-    group: "{{ kafka_group }}"
-    owner: "{{ kafka_user }}"
+    dest: '{{ kafka_dir }}/config/kraft/server.properties'
+    group: '{{ kafka_group }}'
+    owner: '{{ kafka_user }}'
     mode: 0644
   notify:
     - Restart Kafka
 
 - name: Check if kraft logs dir has been initialized
-  shell: "{{ kafka_dir }}/bin/kafka-storage.sh info -c {{ kafka_dir }}/config/kraft/server.properties"
+  shell: '{{ kafka_dir }}/bin/kafka-storage.sh info -c {{ kafka_dir }}/config/kraft/server.properties'
   register: storage_info
-  ignore_errors: yes
+  ignore_errors: true
 
 - name: Generate a random UUID for KAFKA_CLUSTER_ID if necessary
-  command: "{{ kafka_dir }}/bin/kafka-storage.sh random-uuid"
+  command: '{{ kafka_dir }}/bin/kafka-storage.sh random-uuid'
   register: kafka_cluster_id
   changed_when: false
   when: '"is not formatted" in storage_info.stdout'
 
 - name: Init kraft logs dir
-  become: yes
-  shell: "{{ kafka_dir }}/bin/kafka-storage.sh format -t {{ kafka_cluster_id.stdout }} -c {{ kafka_dir }}/config/kraft/server.properties"
+  become: true
+  shell: '{{ kafka_dir }}/bin/kafka-storage.sh format -t {{ kafka_cluster_id.stdout }} -c {{ kafka_dir }}/config/kraft/server.properties'
   when: '"is not formatted" in storage_info.stdout'
 
 - name: Template kafka systemd service
-  become: yes
+  become: true
   template:
     src: kafka.service.j2
-    dest: "{{ kafka_unit_path }}"
-    group: "{{ kafka_group }}"
-    owner: "{{ kafka_user }}"
+    dest: '{{ kafka_unit_path }}'
+    group: '{{ kafka_group }}'
+    owner: '{{ kafka_user }}'
     mode: 0644
   notify:
     - Restart Kafka
 
 - name: Install and start the kafka service
-  become: yes
+  become: true
   service:
     name: kafka
     state: started
