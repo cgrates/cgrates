@@ -218,7 +218,15 @@ func (eeS *EventExporterS) V1ProcessEvent(ctx *context.Context, cgrEv *engine.CG
 				return
 			}
 			if hasCache {
-				eeCache.Set(eeCfg.ID, ee, nil)
+				eeS.eesMux.Lock()
+				if _, has := eeCache.Get(eeCfg.ID); !has {
+					eeCache.Set(eeCfg.ID, ee, nil)
+				} else {
+					// Another exporter instance with the same ID has been cached in
+					// the meantime. Mark this instance to be closed after the export.
+					hasCache = false
+				}
+				eeS.eesMux.Unlock()
 			}
 		}
 
