@@ -23,6 +23,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"net/http/httptest"
 	"net/url"
 	"os"
 	"reflect"
@@ -2514,5 +2515,16 @@ func TestCDRSCallInvalidServiceMethod(t *testing.T) {
 
 	if err != rpcclient.ErrUnsupporteServiceMethod {
 		t.Errorf("Expected error %v, got %v", rpcclient.ErrUnsupporteServiceMethod, err)
+	}
+}
+
+func TestNewMapEventFromReqForm_ParseForm(t *testing.T) {
+	formData := url.Values{}
+	formData.Add("key", "value")
+	req := httptest.NewRequest("POST", "/", strings.NewReader(formData.Encode()))
+	req.Header.Add("Content-Type", "application/x-www-cgrates-urlencoded")
+	_, err := newMapEventFromReqForm(req)
+	if err != nil {
+		t.Fatalf("Expected no error, got %v", err)
 	}
 }
