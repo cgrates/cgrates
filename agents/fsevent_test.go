@@ -1550,3 +1550,18 @@ func TestFseventGetPdd(t *testing.T) {
 		t.Errorf("Test case 5: expected duration %v, got %v", expectedDuration, duration)
 	}
 }
+
+func TestFseventParseEventValueDisconnectCause(t *testing.T) {
+	FSEv := FSEvent{}
+	fsev := FSEvent(FSEv)
+	rsrFld := &config.RSRParser{}
+	attrName := utils.DisconnectCause
+	parsed, err := fsev.ParseEventValue(attrName, rsrFld, "UTC")
+	if err != nil {
+		t.Errorf("Unexpected error: %v", err)
+	}
+	expectedParsed := "Parsed Disconnect Cause"
+	if parsed == expectedParsed {
+		t.Errorf("Expected parsed value %v, but got: %v", expectedParsed, parsed)
+	}
+}

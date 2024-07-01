@@ -165,3 +165,15 @@ func TestLibradRadiusDPString(t *testing.T) {
 		})
 	}
 }
+
+func TestLibradFieldAsInterfaceWithInvalidPathLength(t *testing.T) {
+	pk := &radiusDP{}
+	fldPath := []string{"attribute1", "attribute2"}
+	data, err := pk.FieldAsInterface(fldPath)
+	if err != utils.ErrNotFound {
+		t.Errorf("Expected ErrNotFound error, got: %v", err)
+	}
+	if data != nil {
+		t.Errorf("Expected nil data, got: %v", data)
+	}
+}
