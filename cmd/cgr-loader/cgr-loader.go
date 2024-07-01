@@ -41,7 +41,8 @@ var (
 	dfltCfg        = config.CgrConfig()
 	cfgPath        = cgrLoaderFlags.String(utils.CfgPathCgr, utils.EmptyString,
 		"Configuration directory path.")
-	dataDBType = cgrLoaderFlags.String(utils.DataDBTypeCgr, dfltCfg.DataDbCfg().Type,
+	printConfig = cgrLoaderFlags.Bool(utils.PrintCfgCgr, false, "Print the configuration object in JSON format")
+	dataDBType  = cgrLoaderFlags.String(utils.DataDBTypeCgr, dfltCfg.DataDbCfg().Type,
 		"The type of the DataDB database <*redis|*mongo>")
 	dataDBHost = cgrLoaderFlags.String(utils.DataDBHostCgr, dfltCfg.DataDbCfg().Host,
 		"The DataDb host to connect to.")
@@ -402,7 +403,10 @@ func main() {
 	if *dryRun { // We were just asked to parse the data, not saving it
 		return
 	}
-
+	if *printConfig {
+		cfgJSON := utils.ToIJSON(ldrCfg.AsMapInterface(ldrCfg.GeneralCfg().RSRSep))
+		log.Printf("Configuration loaded from %q:\n%s", *cfgPath, cfgJSON)
+	}
 	if *remove {
 		if err = tpReader.RemoveFromDatabase(*verbose, *disableReverse); err != nil {
 			log.Fatal("Could not delete from database: ", err)
