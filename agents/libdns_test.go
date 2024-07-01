@@ -569,3 +569,220 @@ func TestLibDnsUpdateDnsSRVAnswerDNSHdr(t *testing.T) {
 		t.Errorf("expected Name to be 'cgrates.com.', got %s", srv.Hdr.Name)
 	}
 }
+
+func TestLibDnsUpdateDnsRRHeaderDNSClass(t *testing.T) {
+	rrHeader := new(dns.RR_Header)
+	path := []string{utils.DNSClass}
+	value := int64(1)
+	err := updateDnsRRHeader(rrHeader, path, value)
+	if err != nil {
+		t.Errorf("Unexpected error: %v", err)
+	}
+	expectedClass := uint16(1)
+	if rrHeader.Class != expectedClass {
+		t.Errorf("Expected rrHeader.Class to be %d, got %d", expectedClass, rrHeader.Class)
+	}
+}
+
+func TestLibDnsUpdateDnsRRHeaderDNSRdlength(t *testing.T) {
+	rrHeader := new(dns.RR_Header)
+	path := []string{utils.DNSRdlength}
+	value := int64(256)
+	err := updateDnsRRHeader(rrHeader, path, value)
+	if err != nil {
+		t.Errorf("Unexpected error: %v", err)
+	}
+	expectedRdlength := uint16(256)
+	if rrHeader.Rdlength != expectedRdlength {
+		t.Errorf("Expected rrHeader.Rdlength to be %d, got %d", expectedRdlength, rrHeader.Rdlength)
+	}
+}
+
+func TestLibDnsUpdateDnsRRHeaderDNSTtl(t *testing.T) {
+	rrHeader := new(dns.RR_Header)
+	path := []string{utils.DNSTtl}
+	value := int64(3600)
+	err := updateDnsRRHeader(rrHeader, path, value)
+	if err != nil {
+		t.Errorf("Unexpected error: %v", err)
+	}
+	expectedTtl := uint32(3600)
+	if rrHeader.Ttl != expectedTtl {
+		t.Errorf("Expected rrHeader.Ttl to be %d, got %d", expectedTtl, rrHeader.Ttl)
+	}
+}
+
+func TestLibDnsUpdateDnsNAPTRAnswerDefaultCase(t *testing.T) {
+	naptr := new(dns.NAPTR)
+	path := []string{"unsupported_path"}
+	value := "value"
+	err := updateDnsNAPTRAnswer(naptr, path, value)
+	if err != utils.ErrWrongPath {
+		t.Errorf("Expected error: %v, got: %v", utils.ErrWrongPath, err)
+	}
+}
+
+func TestLibDnsUpdateDnsNAPTRAnswerReplacementCase(t *testing.T) {
+	naptr := new(dns.NAPTR)
+	path := []string{utils.Replacement}
+	value := "value"
+	err := updateDnsNAPTRAnswer(naptr, path, value)
+	if err != nil {
+		t.Errorf("Unexpected error: %v", err)
+	}
+	if naptr.Replacement != value {
+		t.Errorf("Expected v.Replacement to be %q, got %q", value, naptr.Replacement)
+	}
+}
+
+func TestLibDnsUpdateDnsNAPTRAnswerRegexpCase(t *testing.T) {
+	naptr := new(dns.NAPTR)
+	path := []string{utils.Regexp}
+	value := "value"
+	err := updateDnsNAPTRAnswer(naptr, path, value)
+	if err != nil {
+		t.Errorf("Unexpected error: %v", err)
+	}
+	if naptr.Regexp != value {
+		t.Errorf("Expected v.Regexp to be %q, got %q", value, naptr.Regexp)
+	}
+}
+
+func TestLibDnsUpdateDnsNAPTRAnswerServiceCase(t *testing.T) {
+	naptr := new(dns.NAPTR)
+	path := []string{utils.Service}
+	value := "value"
+	err := updateDnsNAPTRAnswer(naptr, path, value)
+	if err != nil {
+		t.Errorf("Unexpected error: %v", err)
+	}
+	if naptr.Service != value {
+		t.Errorf("Expected v.Service to be %q, got %q", value, naptr.Service)
+	}
+}
+
+func TestLibDnsUpdateDnsNAPTRAnswerFlagsCase(t *testing.T) {
+	var naptr dns.NAPTR
+	path := []string{utils.Flags}
+	value := "example_flags_value"
+	err := updateDnsNAPTRAnswer(&naptr, path, value)
+	if err != nil {
+		t.Errorf("Unexpected error: %v", err)
+	}
+	if naptr.Flags != value {
+		t.Errorf("Expected v.Flags to be %q, got %q", value, naptr.Flags)
+	}
+}
+
+func TestLibDnsUpdateDnsNAPTRAnswerPreferenceCase(t *testing.T) {
+	var naptr dns.NAPTR
+	path := []string{utils.Preference}
+	value := int64(100)
+	err := updateDnsNAPTRAnswer(&naptr, path, value)
+	if err != nil {
+		t.Errorf("Unexpected error: %v", err)
+	}
+	if naptr.Preference != uint16(value) {
+		t.Errorf("Expected v.Preference to be %d, got %d", value, naptr.Preference)
+	}
+}
+
+func TestLibDnsUpdateDnsNAPTRAnswerOrderCase(t *testing.T) {
+	var naptr dns.NAPTR
+	path := []string{utils.Order}
+	value := int64(50)
+	err := updateDnsNAPTRAnswer(&naptr, path, value)
+	if err != nil {
+		t.Errorf("Unexpected error: %v", err)
+	}
+	if naptr.Order != uint16(value) {
+		t.Errorf("Expected v.Order to be %d, got %d", value, naptr.Order)
+	}
+}
+
+func TestLibDnsUpdateDnsNAPTRAnswerHdrCase(t *testing.T) {
+	var naptr dns.NAPTR
+	path := []string{utils.DNSHdr, "path"}
+	value := "hdr_value"
+	err := updateDnsNAPTRAnswer(&naptr, path, value)
+	if err == nil {
+		t.Errorf("Unexpected error: %v", err)
+	}
+}
+
+func TestLibDnsUpdateDnsNAPTRAnswerWrongPath(t *testing.T) {
+	var naptr dns.NAPTR
+	testCases := []struct {
+		path  []string
+		value any
+	}{
+		{[]string{}, "value"},
+		{[]string{"invalid_path"}, "value"},
+		{[]string{utils.DNSHdr}, "value"},
+		{[]string{utils.DNSHdr, "subpath1", "subpath2"}, "value"},
+	}
+	for _, tc := range testCases {
+		err := updateDnsNAPTRAnswer(&naptr, tc.path, tc.value)
+		if err != utils.ErrWrongPath {
+			t.Errorf("Expected error %v for path %v, got %v", utils.ErrWrongPath, tc.path, err)
+		}
+	}
+}
+
+func TestLibDnsNewDNSAnswerSRV(t *testing.T) {
+	qType := dns.TypeSRV
+	qName := "cgrates.com"
+	a, err := newDNSAnswer(qType, qName)
+	if err != nil {
+		t.Fatalf("Unexpected error: %v", err)
+	}
+	srv, ok := a.(*dns.SRV)
+	if !ok {
+		t.Errorf("Expected a DNS SRV record, got %T", a)
+	}
+	if srv.Hdr.Name != qName || srv.Hdr.Rrtype != qType {
+		t.Errorf("Unexpected header values. Expected Name: %s, Rrtype: %d, got Name: %s, Rrtype: %d",
+			qName, qType, srv.Hdr.Name, srv.Hdr.Rrtype)
+	}
+}
+
+func TestLibDnsUpdateDnsAnswerSRVCase(t *testing.T) {
+	q := make([]dns.RR, 0)
+	qType := dns.TypeSRV
+	qName := "cgrates.com"
+	path := []string{"home_path"}
+	value := "value"
+	srv := &dns.SRV{
+		Hdr:    dns.RR_Header{Name: qName, Rrtype: qType, Class: dns.ClassINET, Ttl: 60},
+		Target: "cgrates.com",
+		Port:   8080,
+	}
+	q = append(q, srv)
+	_, err := updateDnsAnswer(q, qType, qName, path, value, true)
+	if err == nil {
+		t.Errorf("Unexpected error: %v", err)
+	}
+	if srv.Target == value {
+		t.Errorf("cgrates.com")
+	}
+}
+
+func TestLibDnsUpdateDnsAnswerACase(t *testing.T) {
+	q := make([]dns.RR, 0)
+	qType := dns.TypeA
+	qName := "cgrates.com"
+	path := []string{"home_path"}
+	value := "192.168.1.1"
+	a := &dns.A{
+		Hdr: dns.RR_Header{Name: qName, Rrtype: qType, Class: dns.ClassINET, Ttl: 60},
+		A:   net.ParseIP(value),
+	}
+	q = append(q, a)
+	_, err := updateDnsAnswer(q, qType, qName, path, value, true)
+	if err == nil {
+		t.Errorf("Unexpected error: %v", err)
+	}
+	if a.A.String() != value {
+		t.Errorf("Expected a.A to be %q, got %q", value, a.A.String())
+	}
+}
