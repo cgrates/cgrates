@@ -49,6 +49,10 @@ func TestTransferBalance(t *testing.T) {
 
 	content := `{
 
+"general": {
+	"log_level": 7
+},
+
 "data_db": {								
 	"db_type": "*internal"
 },
@@ -83,15 +87,17 @@ PACKAGE_ACC_DEST,ACT_TOPUP_DEST,*asap,10`,
 		utils.ActionsCsv: `#ActionsId[0],Action[1],ExtraParameters[2],Filter[3],BalanceId[4],BalanceType[5],Categories[6],DestinationIds[7],RatingSubject[8],SharedGroup[9],ExpiryTime[10],TimingIds[11],Units[12],BalanceWeight[13],BalanceBlocker[14],BalanceDisabled[15],Weight[16]
 ACT_TOPUP_SRC,*topup_reset,,,balance_src,*monetary,,*any,,,*unlimited,,10,20,false,false,20
 ACT_TOPUP_DEST,*topup_reset,,,balance_dest,*monetary,,*any,,,*unlimited,,10,10,false,false,10
-ACT_TRANSFER,*cdrlog,,,,,,,,,,,,,,,
-ACT_TRANSFER,*transfer_balance,"{""DestinationAccountID"":""cgrates.org:ACC_DEST"",""DestinationBalanceID"":""balance_dest""}",,balance_src,,,,,,*unlimited,,4,,,,`,
+ACT_TRANSFER,*transfer_balance,"{""DestinationAccountID"":""cgrates.org:ACC_DEST"",""DestinationBalanceID"":""balance_dest""}",,balance_src,,,,,,*unlimited,,4,,,,
+ACT_TRANSFER,*cdrlog,,,,,,,,,,,,,,,`,
 	}
 
 	testEnv := TestEnvironment{
 		Name:       "TestTransferBalance",
 		ConfigJSON: content,
 		TpFiles:    tpFiles,
+		// LogBuffer:  &bytes.Buffer{},
 	}
+	// defer fmt.Println(testEnv.LogBuffer)
 	client, _ := testEnv.Setup(t, *utils.WaitRater)
 
 	t.Run("CheckInitialBalances", func(t *testing.T) {
