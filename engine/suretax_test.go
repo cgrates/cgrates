@@ -184,3 +184,17 @@ func TestSuretaxSureTaxProcessCdrPostErr(t *testing.T) {
 		t.Errorf("\nExpected: %q, \nReceived: %q", experr, err)
 	}
 }
+func TestFieldAsInterfaceEmptyPath(t *testing.T) {
+
+	tDP := &dynamicDP{}
+
+	val, err := tDP.FieldAsInterface([]string{})
+
+	if err != utils.ErrNotFound {
+		t.Errorf("Expected error utils.ErrNotFound, but got: %v", err)
+	}
+
+	if val != nil {
+		t.Errorf("Expected nil value, but got: %v", val)
+	}
+}
