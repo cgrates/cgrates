@@ -78,6 +78,7 @@ var (
 		utils.FilterIndexPrfx:          {},
 		utils.MetaAPIBan:               {}, // not realy a prefix as this is not stored in DB
 		utils.MetaNotSentryPeer:        {},
+		utils.TrendsProfilePrefix:      {},
 	}
 )
 
@@ -1286,62 +1287,62 @@ func (dm *DataManager) RemoveStatQueueProfile(tenant, id string, withIndex bool)
 	return dm.RemoveStatQueue(tenant, id)
 }
 
-func (dm *DataManager) GetSarProfile(tenant, id string) (srp *SarProfile, err error) {
+func (dm *DataManager) GetTrendProfile(tenant, id string) (srp *TrendProfile, err error) {
 	if dm == nil {
 		err = utils.ErrNoDatabaseConn
 		return
 	}
-	srp, err = dm.dataDB.GetSarProfileDrv(tenant, id)
+	srp, err = dm.dataDB.GetTrendProfileDrv(tenant, id)
 	if err != nil {
-		if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaSarProfiles]; err == utils.ErrNotFound && itm.Remote {
+		if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaTrendProfiles]; err == utils.ErrNotFound && itm.Remote {
 			if err = dm.connMgr.Call(context.TODO(), config.CgrConfig().DataDbCfg().RmtConns,
-				utils.ReplicatorSv1GetSarProfile,
+				utils.ReplicatorSv1GetTrendProfile,
 				&utils.TenantIDWithAPIOpts{
 					TenantID: &utils.TenantID{Tenant: tenant, ID: id},
 					APIOpts: utils.GenerateDBItemOpts(itm.APIKey, itm.RouteID, utils.EmptyString,
 						utils.FirstNonEmpty(config.CgrConfig().DataDbCfg().RmtConnID,
 							config.CgrConfig().GeneralCfg().NodeID)),
 				}, &srp); err == nil {
-				err = dm.dataDB.SetSarProfileDrv(srp)
+				err = dm.dataDB.SetTrendProfileDrv(srp)
 			}
 		}
 	}
 	return
 }
 
-func (dm *DataManager) SetSarProfile(srp *SarProfile) (err error) {
-	if err = dm.DataDB().SetSarProfileDrv(srp); err != nil {
+func (dm *DataManager) SetTrendProfile(srp *TrendProfile) (err error) {
+	if err = dm.DataDB().SetTrendProfileDrv(srp); err != nil {
 		return
 	}
-	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaSarProfiles]; itm.Replicate {
+	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaTrendProfiles]; itm.Replicate {
 		err = replicate(dm.connMgr, config.CgrConfig().DataDbCfg().RplConns,
 			config.CgrConfig().DataDbCfg().RplFiltered,
-			utils.SarsProfilePrefix, srp.TenantID(),
-			utils.ReplicatorSv1SetSarProfile,
-			&SarProfileWithAPIOpts{
-				SarProfile: srp,
+			utils.TrendsProfilePrefix, srp.TenantID(),
+			utils.ReplicatorSv1SetTrendProfile,
+			&TrendProfileWithAPIOpts{
+				TrendProfile: srp,
 				APIOpts: utils.GenerateDBItemOpts(itm.APIKey, itm.RouteID,
 					config.CgrConfig().DataDbCfg().RplCache, utils.EmptyString)})
 	}
 	return
 }
 
-func (dm *DataManager) RemoveSarProfile(tenant, id string) (err error) {
-	oldSgs, err := dm.GetSarProfile(tenant, id)
+func (dm *DataManager) RemoveTrendProfile(tenant, id string) (err error) {
+	oldSgs, err := dm.GetTrendProfile(tenant, id)
 	if err != nil && err != utils.ErrNotFound {
 		return err
 	}
-	if err = dm.DataDB().RemSarProfileDrv(tenant, id); err != nil {
+	if err = dm.DataDB().RemTrendProfileDrv(tenant, id); err != nil {
 		return
 	}
 	if oldSgs == nil {
 		return utils.ErrNotFound
 	}
-	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaSarProfiles]; itm.Replicate {
+	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaSagProfiles]; itm.Replicate {
 		replicate(dm.connMgr, config.CgrConfig().DataDbCfg().RplConns,
 			config.CgrConfig().DataDbCfg().RplFiltered,
-			utils.SarsProfilePrefix, utils.ConcatenatedKey(tenant, id), // this are used to get the host IDs from cache
-			utils.ReplicatorSv1RemoveSarProfile,
+			utils.TrendsProfilePrefix, utils.ConcatenatedKey(tenant, id), // this are used to get the host IDs from cache
+			utils.ReplicatorSv1RemoveTrendProfile,
 			&utils.TenantIDWithAPIOpts{
 				TenantID: &utils.TenantID{Tenant: tenant, ID: id},
 				APIOpts: utils.GenerateDBItemOpts(itm.APIKey, itm.RouteID,

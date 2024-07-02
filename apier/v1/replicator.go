@@ -147,10 +147,10 @@ func (rplSv1 *ReplicatorSv1) GetSagProfile(ctx *context.Context, tntID *utils.Te
 	return nil
 }
 
-// GetSarProfile is the remote method coresponding to the dataDb driver method
-func (rplSv1 *ReplicatorSv1) GetSarProfile(ctx *context.Context, tntID *utils.TenantIDWithAPIOpts, reply *engine.SarProfile) error {
-	engine.UpdateReplicationFilters(utils.SarsProfilePrefix, tntID.TenantID.TenantID(), utils.IfaceAsString(tntID.APIOpts[utils.RemoteHostOpt]))
-	rcv, err := rplSv1.dm.DataDB().GetSarProfileDrv(tntID.Tenant, tntID.ID)
+// GetTrendProfile is the remote method coresponding to the dataDb driver method
+func (rplSv1 *ReplicatorSv1) GetTrendProfile(ctx *context.Context, tntID *utils.TenantIDWithAPIOpts, reply *engine.TrendProfile) error {
+	engine.UpdateReplicationFilters(utils.TrendsProfilePrefix, tntID.TenantID.TenantID(), utils.IfaceAsString(tntID.APIOpts[utils.RemoteHostOpt]))
+	rcv, err := rplSv1.dm.DataDB().GetTrendProfileDrv(tntID.Tenant, tntID.ID)
 	if err != nil {
 		return err
 	}
@@ -456,9 +456,9 @@ func (rplSv1 *ReplicatorSv1) SetSagProfile(ctx *context.Context, sg *engine.SagP
 	return
 }
 
-// SetSarProfile is the replication method coresponding to the dataDb driver method
-func (rplSv1 *ReplicatorSv1) SetSarProfile(ctx *context.Context, sg *engine.SarProfileWithAPIOpts, reply *string) (err error) {
-	if err = rplSv1.dm.DataDB().SetSarProfileDrv(sg.SarProfile); err != nil {
+// SetTrendProfile is the replication method coresponding to the dataDb driver method
+func (rplSv1 *ReplicatorSv1) SetTrendProfile(ctx *context.Context, sg *engine.TrendProfileWithAPIOpts, reply *string) (err error) {
+	if err = rplSv1.dm.DataDB().SetTrendProfileDrv(sg.TrendProfile); err != nil {
 		return
 	}
 	*reply = utils.OK
@@ -880,9 +880,9 @@ func (rplSv1 *ReplicatorSv1) RemoveSagProfile(ctx *context.Context, args *utils.
 	return
 }
 
-// RemoveSarProfile is the replication method coresponding to the dataDb driver method
-func (rplSv1 *ReplicatorSv1) RemoveSarProfile(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *string) (err error) {
-	if err = rplSv1.dm.DataDB().RemSarProfileDrv(args.Tenant, args.ID); err != nil {
+// RemoveTrendProfile is the replication method coresponding to the dataDb driver method
+func (rplSv1 *ReplicatorSv1) RemoveTrendProfile(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *string) (err error) {
+	if err = rplSv1.dm.DataDB().RemTrendProfileDrv(args.Tenant, args.ID); err != nil {
 		return
 	}
 

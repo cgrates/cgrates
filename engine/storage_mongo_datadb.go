@@ -64,7 +64,7 @@ const (
 	ColTmg  = "timings"
 	ColRes  = "resources"
 	ColSqs  = "statqueues"
-	ColSrs  = "sar_profiles"
+	ColTrs  = "trend_profiles"
 	ColSqp  = "statqueue_profiles"
 	ColSgp  = "sag_profiles"
 	ColTps  = "threshold_profiles"
@@ -302,7 +302,7 @@ func (ms *MongoStorage) ensureIndexesForCol(col string) error { // exported for 
 	switch col {
 	case ColAct, ColApl, ColAAp, ColAtr, ColRpl, ColDst, ColRds, ColLht, ColIndx:
 		err = ms.enusureIndex(col, true, "key")
-	case ColRsP, ColRes, ColSqs, ColSgp, ColSrs, ColSqp, ColTps, ColThs, ColRts, ColAttr, ColFlt, ColCpp, ColDpp, ColDph:
+	case ColRsP, ColRes, ColSqs, ColSgp, ColTrs, ColSqp, ColTps, ColThs, ColRts, ColAttr, ColFlt, ColCpp, ColDpp, ColDph:
 		err = ms.enusureIndex(col, true, "tenant", "id")
 	case ColRpf, ColShg, ColAcc:
 		err = ms.enusureIndex(col, true, "id")
@@ -348,7 +348,7 @@ func (ms *MongoStorage) EnsureIndexes(cols ...string) error {
 			cols = []string{
 				ColAct, ColApl, ColAAp, ColAtr, ColRpl, ColDst, ColRds, ColLht, ColIndx,
 				ColRsP, ColRes, ColSqs, ColSqp, ColTps, ColThs, ColRts, ColAttr, ColFlt, ColCpp,
-				ColDpp, ColRpf, ColShg, ColAcc, ColSgp, ColSrs,
+				ColDpp, ColRpf, ColShg, ColAcc, ColSgp, ColTrs,
 			}
 		} else {
 			cols = []string{
@@ -437,8 +437,8 @@ func (ms *MongoStorage) RemoveKeysForPrefix(prefix string) error {
 		colName = ColSqp
 	case utils.SagsProfilePrefix:
 		colName = ColSgp
-	case utils.SarsProfilePrefix:
-		colName = ColSrs
+	case utils.TrendsProfilePrefix:
+		colName = ColTrs
 	case utils.ThresholdPrefix:
 		colName = ColThs
 	case utils.FilterPrefix:
@@ -606,8 +606,8 @@ func (ms *MongoStorage) GetKeysForPrefix(prefix string) (keys []string, err erro
 			keys, qryErr = ms.getAllKeysMatchingTenantID(sctx, ColSqs, utils.StatQueuePrefix, subject, tntID)
 		case utils.SagsProfilePrefix:
 			keys, qryErr = ms.getAllKeysMatchingTenantID(sctx, ColSgp, utils.SagsProfilePrefix, subject, tntID)
-		case utils.SarsProfilePrefix:
-			keys, qryErr = ms.getAllKeysMatchingTenantID(sctx, ColSrs, utils.SarsProfilePrefix, subject, tntID)
+		case utils.TrendsProfilePrefix:
+			keys, qryErr = ms.getAllKeysMatchingTenantID(sctx, ColTrs, utils.TrendsProfilePrefix, subject, tntID)
 		case utils.StatQueueProfilePrefix:
 			keys, qryErr = ms.getAllKeysMatchingTenantID(sctx, ColSqp, utils.StatQueueProfilePrefix, subject, tntID)
 		case utils.AccountActionPlansPrefix:
@@ -1561,10 +1561,10 @@ func (ms *MongoStorage) RemSagProfileDrv(tenant, id string) (err error) {
 
 }
 
-func (ms *MongoStorage) GetSarProfileDrv(tenant, id string) (*SarProfile, error) {
-	srProfile := new(SarProfile)
+func (ms *MongoStorage) GetTrendProfileDrv(tenant, id string) (*TrendProfile, error) {
+	srProfile := new(TrendProfile)
 	err := ms.query(func(sctx mongo.SessionContext) error {
-		sr := ms.getCol(ColSrs).FindOne(sctx, bson.M{"tenant": tenant, "id": id})
+		sr := ms.getCol(ColTrs).FindOne(sctx, bson.M{"tenant": tenant, "id": id})
 		decodeErr := sr.Decode(srProfile)
 		if errors.Is(decodeErr, mongo.ErrNoDocuments) {
 			return utils.ErrNotFound
@@ -1574,18 +1574,18 @@ func (ms *MongoStorage) GetSarProfileDrv(tenant, id string) (*SarProfile, error)
 	return srProfile, err
 }
 
-func (ms *MongoStorage) SetSarProfileDrv(srp *SarProfile) (err error) {
+func (ms *MongoStorage) SetTrendProfileDrv(srp *TrendProfile) (err error) {
 	return ms.query(func(sctx mongo.SessionContext) error {
-		_, err := ms.getCol(ColSrs).UpdateOne(sctx, bson.M{"tenant": srp.Tenant, "id": srp.ID},
+		_, err := ms.getCol(ColTrs).UpdateOne(sctx, bson.M{"tenant": srp.Tenant, "id": srp.ID},
 			bson.M{"$set": srp},
 			options.Update().SetUpsert(true))
 		return err
 	})
 }
 
-func (ms *MongoStorage) RemSarProfileDrv(tenant, id string) (err error) {
+func (ms *MongoStorage) RemTrendProfileDrv(tenant, id string) (err error) {
 	return ms.query(func(sctx mongo.SessionContext) error {
-		dr, err := ms.getCol(ColSrs).DeleteOne(sctx, bson.M{"tenant": tenant, "id": id})
+		dr, err := ms.getCol(ColTrs).DeleteOne(sctx, bson.M{"tenant": tenant, "id": id})
 		if dr.DeletedCount == 0 {
 			return utils.ErrNotFound
 		}

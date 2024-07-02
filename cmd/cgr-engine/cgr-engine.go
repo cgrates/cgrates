@@ -454,7 +454,7 @@ func main() {
 	internalChargerSChan := make(chan birpc.ClientConnector, 1)
 	internalThresholdSChan := make(chan birpc.ClientConnector, 1)
 	internalStatSChan := make(chan birpc.ClientConnector, 1)
-	internalSarSChan := make(chan birpc.ClientConnector, 1)
+	internalTrendSChan := make(chan birpc.ClientConnector, 1)
 	internalSagSChan := make(chan birpc.ClientConnector, 1)
 	internalResourceSChan := make(chan birpc.ClientConnector, 1)
 	internalRouteSChan := make(chan birpc.ClientConnector, 1)
@@ -484,7 +484,7 @@ func main() {
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS):       internalSessionSChan,
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats):          internalStatSChan,
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRoutes):         internalRouteSChan,
-		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSars):           internalSarSChan,
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaTrends):         internalTrendSChan,
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSags):           internalSagSChan,
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds):     internalThresholdSChan,
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaServiceManager): internalServeManagerChan,
@@ -527,7 +527,7 @@ func main() {
 		utils.SessionS:        new(sync.WaitGroup),
 		utils.SIPAgent:        new(sync.WaitGroup),
 		utils.StatS:           new(sync.WaitGroup),
-		utils.SarS:            new(sync.WaitGroup),
+		utils.TrendS:          new(sync.WaitGroup),
 		utils.SagS:            new(sync.WaitGroup),
 		utils.StorDB:          new(sync.WaitGroup),
 		utils.ThresholdS:      new(sync.WaitGroup),
@@ -610,8 +610,8 @@ func main() {
 	tS := services.NewThresholdService(cfg, dmService, cacheS, filterSChan, server, internalThresholdSChan, anz, srvDep)
 	stS := services.NewStatService(cfg, dmService, cacheS, filterSChan, server,
 		internalStatSChan, connManager, anz, srvDep)
-	srS := services.NewSarService(cfg, dmService, cacheS, filterSChan, server,
-		internalSarSChan, connManager, anz, srvDep)
+	srS := services.NewTrendService(cfg, dmService, cacheS, filterSChan, server,
+		internalTrendSChan, connManager, anz, srvDep)
 	sgS := services.NewSagService(cfg, dmService, cacheS, filterSChan, server,
 		internalSagSChan, connManager, anz, srvDep)
 	reS := services.NewResourceService(cfg, dmService, cacheS, filterSChan, server,

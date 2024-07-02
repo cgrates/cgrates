@@ -49,7 +49,7 @@ type TpReader struct {
 	sharedGroups       map[string]*SharedGroup
 	resProfiles        map[utils.TenantID]*utils.TPResourceProfile
 	sqProfiles         map[utils.TenantID]*utils.TPStatProfile
-	srProfiles         map[utils.TenantID]*utils.TPSarsProfile
+	trProfiles         map[utils.TenantID]*utils.TPTrendsProfile
 	sgProfiles         map[utils.TenantID]*utils.TPSagsProfile
 	thProfiles         map[utils.TenantID]*utils.TPThresholdProfile
 	filters            map[utils.TenantID]*utils.TPFilterProfile
@@ -1137,21 +1137,21 @@ func (tpr *TpReader) LoadStats() error {
 	return tpr.LoadStatsFiltered("")
 }
 
-func (tpr *TpReader) LoadSarsFiltered(tag string) error {
-	tps, err := tpr.lr.GetTPSars(tpr.tpid, "", tag)
+func (tpr *TpReader) LoadTrendsFiltered(tag string) error {
+	tps, err := tpr.lr.GetTPTrends(tpr.tpid, "", tag)
 	if err != nil {
 		return err
 	}
-	mapSrs := make(map[utils.TenantID]*utils.TPSarsProfile)
+	mapSrs := make(map[utils.TenantID]*utils.TPTrendsProfile)
 	for _, sr := range tps {
 		mapSrs[utils.TenantID{Tenant: sr.Tenant, ID: sr.ID}] = sr
 	}
-	tpr.srProfiles = mapSrs
+	tpr.trProfiles = mapSrs
 	return nil
 }
 
-func (tpr *TpReader) LoadSars() error {
-	return tpr.LoadSarsFiltered("")
+func (tpr *TpReader) LoadTrends() error {
+	return tpr.LoadTrendsFiltered("")
 }
 
 func (tpr *TpReader) LoadSagsFiltered(tag string) error {
@@ -1354,7 +1354,7 @@ func (tpr *TpReader) LoadAll() (err error) {
 	if err = tpr.LoadStats(); err != nil && err.Error() != utils.NotFoundCaps {
 		return
 	}
-	if err = tpr.LoadSars(); err != nil && err.Error() != utils.NotFoundCaps {
+	if err = tpr.LoadTrends(); err != nil && err.Error() != utils.NotFoundCaps {
 		return
 	}
 	if err = tpr.LoadSags(); err != nil && err.Error() != utils.NotFoundCaps {
@@ -1616,18 +1616,18 @@ func (tpr *TpReader) WriteToDatabase(verbose, disableReverse bool) (err error) {
 		loadIDs[utils.CacheStatQueueProfiles] = loadID
 	}
 	if verbose {
-		log.Print("SarProfiles")
+		log.Print("TrendProfiles")
 	}
-	for _, tpSR := range tpr.srProfiles {
-		var sr *SarProfile
-		if sr, err = APItoSars(tpSR); err != nil {
+	for _, tpTR := range tpr.trProfiles {
+		var tr *TrendProfile
+		if tr, err = APItoTrends(tpTR); err != nil {
 			return
 		}
-		if err = tpr.dm.SetSarProfile(sr); err != nil {
+		if err = tpr.dm.SetTrendProfile(tr); err != nil {
 			return
 		}
 		if verbose {
-			log.Print("\t", sr.TenantID())
+			log.Print("\t", tr.TenantID())
 		}
 	}
 	if verbose {

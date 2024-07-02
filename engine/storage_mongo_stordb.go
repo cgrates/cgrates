@@ -440,7 +440,7 @@ func (ms *MongoStorage) GetTPStats(tpid, tenant, id string) ([]*utils.TPStatProf
 	return results, err
 }
 
-func (ms *MongoStorage) GetTPSars(tpid string, tenant string, id string) ([]*utils.TPSarsProfile, error) {
+func (ms *MongoStorage) GetTPTrends(tpid string, tenant string, id string) ([]*utils.TPTrendsProfile, error) {
 	filter := bson.M{
 		"tpid": tpid,
 	}
@@ -450,14 +450,14 @@ func (ms *MongoStorage) GetTPSars(tpid string, tenant string, id string) ([]*uti
 	if tenant != "" {
 		filter["tenant"] = tenant
 	}
-	var results []*utils.TPSarsProfile
+	var results []*utils.TPTrendsProfile
 	err := ms.query(func(sctx mongo.SessionContext) error {
-		cur, err := ms.getCol(utils.TBLTPSars).Find(sctx, filter)
+		cur, err := ms.getCol(utils.TBLTPTrends).Find(sctx, filter)
 		if err != nil {
 			return err
 		}
 		for cur.Next(sctx) {
-			var el utils.TPSarsProfile
+			var el utils.TPTrendsProfile
 			err := cur.Decode(&el)
 			if err != nil {
 				return err
@@ -1281,13 +1281,13 @@ func (ms *MongoStorage) SetTPStats(tpSTs []*utils.TPStatProfile) (err error) {
 	})
 }
 
-func (ms *MongoStorage) SetTPSars(tpSars []*utils.TPSarsProfile) (err error) {
-	if len(tpSars) == 0 {
+func (ms *MongoStorage) SetTPTrends(tpTrends []*utils.TPTrendsProfile) (err error) {
+	if len(tpTrends) == 0 {
 		return
 	}
 	return ms.query(func(sctx mongo.SessionContext) (err error) {
-		for _, tp := range tpSars {
-			_, err := ms.getCol(utils.TBLTPSars).UpdateOne(sctx, bson.M{"tpid": tp.TPid, "id": tp.ID},
+		for _, tp := range tpTrends {
+			_, err := ms.getCol(utils.TBLTPTrends).UpdateOne(sctx, bson.M{"tpid": tp.TPid, "id": tp.ID},
 				bson.M{"$set": tp}, options.Update().SetUpsert(true))
 			if err != nil {
 				return err

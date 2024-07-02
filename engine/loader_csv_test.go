@@ -42,7 +42,7 @@ func init() {
 		DestinationsCSVContent, TimingsCSVContent, RatesCSVContent, DestinationRatesCSVContent,
 		RatingPlansCSVContent, RatingProfilesCSVContent, SharedGroupsCSVContent,
 		ActionsCSVContent, ActionPlansCSVContent, ActionTriggersCSVContent, AccountActionsCSVContent,
-		ResourcesCSVContent, StatsCSVContent, SarsCSVContent, SagsCSVContent, ThresholdsCSVContent, FiltersCSVContent,
+		ResourcesCSVContent, StatsCSVContent, TrendsCSVContent, SagsCSVContent, ThresholdsCSVContent, FiltersCSVContent,
 		RoutesCSVContent, AttributesCSVContent, ChargersCSVContent, DispatcherCSVContent,
 		DispatcherHostCSVContent), testTPID, "", nil, nil, false)
 	if err != nil {

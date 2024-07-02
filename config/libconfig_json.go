@@ -668,7 +668,7 @@ type StatServJsonCfg struct {
 	Opts                     *StatsOptsJson
 }
 
-type SarsJsonCfg struct {
+type TrendsJsonCfg struct {
 	Enabled          *bool
 	Stats_conns      *[]string
 	Thresholds_conns *[]string

@@ -24,7 +24,7 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-type SarProfile struct {
+type TrendProfile struct {
 	Tenant         string
 	ID             string
 	QueryInterval  time.Duration
@@ -36,11 +36,11 @@ type SarProfile struct {
 	ThresholdIDs   []string
 }
 
-type SarProfileWithAPIOpts struct {
-	*SarProfile
+type TrendProfileWithAPIOpts struct {
+	*TrendProfile
 	APIOpts map[string]any
 }
 
-func (srp *SarProfile) TenantID() string {
+func (srp *TrendProfile) TenantID() string {
 	return utils.ConcatenatedKey(srp.Tenant, srp.ID)
 }

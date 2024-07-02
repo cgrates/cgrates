@@ -31,7 +31,7 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-// NewSagsService returns the SaRS Service
+// NewSagsService returns the SagS Service
 func NewSagService(cfg *config.CGRConfig, dm *DataDBService,
 	cacheS *engine.CacheS, filterSChan chan *engine.FilterS,
 	server *cores.Server, internalSagSChan chan birpc.ClientConnector,

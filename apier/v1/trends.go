@@ -24,18 +24,8 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-func NewSarSv1() *SarSv1 {
-	return &SarSv1{}
-}
-
-type SarSv1 struct{}
-
-func (sa *SarSv1) Ping(ctx *context.Context, ign *utils.CGREvent, reply *string) error {
-	*reply = utils.Pong
-	return nil
-}
-
-func (apierSv1 *APIerSv1) GetSarProfile(ctx *context.Context, arg *utils.TenantID, reply *engine.SarProfile) (err error) {
+// GetTrendProfile returns a Trend profile
+func (apierSv1 *APIerSv1) GetTrendProfile(ctx *context.Context, arg *utils.TenantID, reply *engine.TrendProfile) (err error) {
 	if missing := utils.MissingStructFields(arg, []string{utils.ID}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -43,7 +33,7 @@ func (apierSv1 *APIerSv1) GetSarProfile(ctx *context.Context, arg *utils.TenantI
 	if tnt == utils.EmptyString {
 		tnt = apierSv1.Config.GeneralCfg().DefaultTenant
 	}
-	sg, err := apierSv1.DataManager.GetSarProfile(tnt, arg.ID)
+	sg, err := apierSv1.DataManager.GetTrendProfile(tnt, arg.ID)
 	if err != nil {
 		return utils.APIErrorHandler(err)
 	}
@@ -51,12 +41,13 @@ func (apierSv1 *APIerSv1) GetSarProfile(ctx *context.Context, arg *utils.TenantI
 	return
 }
 
-func (apierSv1 *APIerSv1) GetSarProfileIDs(ctx *context.Context, args *utils.PaginatorWithTenant, sgPrfIDs *[]string) (err error) {
+// GetTrendProfileIDs returns list of trendProfile IDs registered for a tenant
+func (apierSv1 *APIerSv1) GetTrendProfileIDs(ctx *context.Context, args *utils.PaginatorWithTenant, trPrfIDs *[]string) (err error) {
 	tnt := args.Tenant
 	if tnt == utils.EmptyString {
 		tnt = apierSv1.Config.GeneralCfg().DefaultTenant
 	}
-	prfx := utils.SarsProfilePrefix + tnt + utils.ConcatenatedKeySep
+	prfx := utils.TrendsProfilePrefix + tnt + utils.ConcatenatedKeySep
 	keys, err := apierSv1.DataManager.DataDB().GetKeysForPrefix(prfx)
 	if err != nil {
 		return err
@@ -64,29 +55,31 @@ func (apierSv1 *APIerSv1) GetSarProfileIDs(ctx *context.Context, args *utils.Pag
 	if len(keys) == 0 {
 		return utils.ErrNotFound
 	}
-	sgIDs := make([]string, len(keys))
+	trIDs := make([]string, len(keys))
 	for i, key := range keys {
-		sgIDs[i] = key[len(prfx):]
+		trIDs[i] = key[len(prfx):]
 	}
-	*sgPrfIDs = args.PaginateStringSlice(sgIDs)
+	*trPrfIDs = args.PaginateStringSlice(trIDs)
 	return
 }
 
-func (apierSv1 *APIerSv1) SetSarProfile(ctx *context.Context, arg *engine.SarProfileWithAPIOpts, reply *string) error {
-	if missing := utils.MissingStructFields(arg.SarProfile, []string{utils.ID}); len(missing) != 0 {
+// SetTrendProfile alters/creates a TrendProfile
+func (apierSv1 *APIerSv1) SetTrendProfile(ctx *context.Context, arg *engine.TrendProfileWithAPIOpts, reply *string) error {
+	if missing := utils.MissingStructFields(arg.TrendProfile, []string{utils.ID}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	if arg.Tenant == utils.EmptyString {
 		arg.Tenant = apierSv1.Config.GeneralCfg().DefaultTenant
 	}
-	if err := apierSv1.DataManager.SetSarProfile(arg.SarProfile); err != nil {
+	if err := apierSv1.DataManager.SetTrendProfile(arg.TrendProfile); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	*reply = utils.OK
 	return nil
 }
 
-func (apierSv1 *APIerSv1) RemoveSarProfile(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *string) error {
+// RemoveTrendProfile remove a specific trend configuration
+func (apierSv1 *APIerSv1) RemoveTrendProfile(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *string) error {
 	if missing := utils.MissingStructFields(args, []string{utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -94,9 +87,21 @@ func (apierSv1 *APIerSv1) RemoveSarProfile(ctx *context.Context, args *utils.Ten
 	if tnt == utils.EmptyString {
 		tnt = apierSv1.Config.GeneralCfg().DefaultTenant
 	}
-	if err := apierSv1.DataManager.RemoveSagProfile(tnt, args.ID); err != nil {
+	if err := apierSv1.DataManager.RemoveTrendProfile(tnt, args.ID); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	*reply = utils.OK
+	return nil
+}
+
+// NewTrendSv1 initializes TrendSV1
+func NewTrendSv1() *TrendSv1 {
+	return &TrendSv1{}
+}
+
+type TrendSv1 struct{}
+
+func (sa *TrendSv1) Ping(ctx *context.Context, ign *utils.CGREvent, reply *string) error {
+	*reply = utils.Pong
 	return nil
 }

@@ -628,14 +628,14 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 			}
 		}
 	}
-	//SarS checks
-	if cfg.sarsCfg.Enabled {
-		for _, connID := range cfg.sarsCfg.StatSConns {
+	//TrendS checks
+	if cfg.trendsCfg.Enabled {
+		for _, connID := range cfg.trendsCfg.StatSConns {
 			if strings.HasPrefix(connID, utils.MetaInternal) && !cfg.statsCfg.Enabled {
-				return fmt.Errorf("<%s> not enabled but requested by <%s> component", utils.StatS, utils.SarS)
+				return fmt.Errorf("<%s> not enabled but requested by <%s> component", utils.StatS, utils.TrendS)
 			}
 			if _, has := cfg.rpcConns[connID]; !has && !strings.HasPrefix(connID, utils.MetaInternal) {
-				return fmt.Errorf("<%s> connection with id: <%s> not defined", utils.SarS, connID)
+				return fmt.Errorf("<%s> connection with id: <%s> not defined", utils.TrendS, connID)
 			}
 		}
 	}

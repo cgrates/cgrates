@@ -318,11 +318,11 @@ CREATE TABLE tp_sags(
   );
 
 --
--- Table structure for tabls `tp_sars`
+-- Table structure for tabls `tp_trends`
 --
 
-DROP TABLE IF EXISTS tp_sars;
-CREATE TABLE tp_sars(
+DROP TABLE IF EXISTS tp_trends;
+CREATE TABLE tp_trends(
  `pk` int(11) NOT NULL AUTO_INCREMENT,
  `tpid` varchar(64) NOT NULL,
  `tenant` varchar(64) NOT NULL,
@@ -337,7 +337,7 @@ CREATE TABLE tp_sars(
  `created_at` TIMESTAMP,
   PRIMARY KEY (`pk`),
   KEY `tpid`  (`tpid`),
-  UNIQUE KEY `unique_tp_sars` (`tpid`,`tenant`,`id`,`stat_id`)
+  UNIQUE KEY `unique_tp_trends` (`tpid`,`tenant`,`id`,`stat_id`)
   );
 
 

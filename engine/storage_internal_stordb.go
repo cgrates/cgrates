@@ -403,7 +403,7 @@ func (iDB *InternalDB) GetTPStats(tpid, tenant, id string) (stats []*utils.TPSta
 	return
 }
 
-func (iDB *InternalDB) GetTPSars(tpid string, tenant string, id string) (sars []*utils.TPSarsProfile, err error) {
+func (iDB *InternalDB) GetTPTrends(tpid string, tenant string, id string) (trends []*utils.TPTrendsProfile, err error) {
 	key := tpid
 	if tenant != utils.EmptyString {
 		key += utils.ConcatenatedKeySep + tenant
@@ -411,15 +411,15 @@ func (iDB *InternalDB) GetTPSars(tpid string, tenant string, id string) (sars []
 	if id != utils.EmptyString {
 		key += utils.ConcatenatedKeySep + id
 	}
-	ids := iDB.db.GetItemIDs(utils.CacheTBLTPSars, key)
+	ids := iDB.db.GetItemIDs(utils.CacheTBLTPTrends, key)
 	for _, id := range ids {
-		x, ok := iDB.db.Get(utils.CacheTBLTPSars, id)
+		x, ok := iDB.db.Get(utils.CacheTBLTPTrends, id)
 		if !ok || x == nil {
 			return nil, utils.ErrNotFound
 		}
-		sars = append(sars, x.(*utils.TPSarsProfile))
+		trends = append(trends, x.(*utils.TPTrendsProfile))
 	}
-	if len(sars) == 0 {
+	if len(trends) == 0 {
 		return nil, utils.ErrNotFound
 	}
 	return
@@ -790,12 +790,12 @@ func (iDB *InternalDB) SetTPSags(sags []*utils.TPSagsProfile) (err error) {
 	}
 	return
 }
-func (iDB *InternalDB) SetTPSars(sars []*utils.TPSarsProfile) (err error) {
-	if len(sars) == 0 {
+func (iDB *InternalDB) SetTPTrends(trends []*utils.TPTrendsProfile) (err error) {
+	if len(trends) == 0 {
 		return nil
 	}
-	for _, sar := range sars {
-		iDB.db.Set(utils.CacheTBLTPSars, utils.ConcatenatedKey(sar.TPid, sar.Tenant, sar.ID), sar, nil, cacheCommit(utils.NonTransactional), utils.NonTransactional)
+	for _, trend := range trends {
+		iDB.db.Set(utils.CacheTBLTPTrends, utils.ConcatenatedKey(trend.TPid, trend.Tenant, trend.ID), trend, nil, cacheCommit(utils.NonTransactional), utils.NonTransactional)
 	}
 	return
 }

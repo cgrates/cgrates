@@ -31,13 +31,13 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-// NewSarsService returns the SaRS Service
-func NewSarService(cfg *config.CGRConfig, dm *DataDBService,
+// NewTrendsService returns the TrendS Service
+func NewTrendService(cfg *config.CGRConfig, dm *DataDBService,
 	cacheS *engine.CacheS, filterSChan chan *engine.FilterS,
 	server *cores.Server, internalStatSChan chan birpc.ClientConnector,
 	connMgr *engine.ConnManager, anz *AnalyzerService,
 	srvDep map[string]*sync.WaitGroup) servmanager.Service {
-	return &SarService{
+	return &TrendService{
 		connChan:    internalStatSChan,
 		cfg:         cfg,
 		dm:          dm,
@@ -50,7 +50,7 @@ func NewSarService(cfg *config.CGRConfig, dm *DataDBService,
 	}
 }
 
-type SarService struct {
+type TrendService struct {
 	sync.RWMutex
 	cfg         *config.CGRConfig
 	dm          *DataDBService
@@ -64,7 +64,7 @@ type SarService struct {
 }
 
 // Start should handle the sercive start
-func (sa *SarService) Start() error {
+func (sa *TrendService) Start() error {
 	if sa.IsRunning() {
 		return utils.ErrServiceAlreadyRunning
 	}
@@ -78,8 +78,8 @@ func (sa *SarService) Start() error {
 	dbchan <- datadb
 
 	utils.Logger.Info(fmt.Sprintf("<%s> starting <%s> subsystem",
-		utils.CoreS, utils.SarS))
-	srv, err := engine.NewService(v1.NewSarSv1())
+		utils.CoreS, utils.TrendS))
+	srv, err := engine.NewService(v1.NewTrendSv1())
 	if err != nil {
 		return err
 	}
@@ -93,12 +93,12 @@ func (sa *SarService) Start() error {
 }
 
 // Reload handles the change of config
-func (sa *SarService) Reload() (err error) {
+func (sa *TrendService) Reload() (err error) {
 	return
 }
 
 // Shutdown stops the service
-func (sa *SarService) Shutdown() (err error) {
+func (sa *TrendService) Shutdown() (err error) {
 	defer sa.srvDep[utils.DataDB].Done()
 	sa.Lock()
 	defer sa.Unlock()
@@ -107,18 +107,18 @@ func (sa *SarService) Shutdown() (err error) {
 }
 
 // IsRunning returns if the service is running
-func (sa *SarService) IsRunning() bool {
+func (sa *TrendService) IsRunning() bool {
 	sa.RLock()
 	defer sa.RUnlock()
 	return false
 }
 
 // ServiceName returns the service name
-func (sa *SarService) ServiceName() string {
-	return utils.SarS
+func (sa *TrendService) ServiceName() string {
+	return utils.TrendS
 }
 
 // ShouldRun returns if the service should be running
-func (sa *SarService) ShouldRun() bool {
-	return sa.cfg.SarSCfg().Enabled
+func (sa *TrendService) ShouldRun() bool {
+	return sa.cfg.TrendSCfg().Enabled
 }

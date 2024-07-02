@@ -592,22 +592,22 @@ func (iDB *InternalDB) RemStatQueueDrv(tenant, id string) (err error) {
 		true, utils.NonTransactional)
 	return
 }
-func (iDB *InternalDB) SetSarProfileDrv(srp *SarProfile) (err error) {
-	iDB.db.Set(utils.CacheSarProfiles, srp.TenantID(), srp, nil, true, utils.NonTransactional)
+func (iDB *InternalDB) SetTrendProfileDrv(srp *TrendProfile) (err error) {
+	iDB.db.Set(utils.CacheTrendProfiles, srp.TenantID(), srp, nil, true, utils.NonTransactional)
 	return nil
 }
 
-func (iDB *InternalDB) RemSarProfileDrv(tenant, id string) (err error) {
-	iDB.db.Remove(utils.CacheSarProfiles, utils.ConcatenatedKey(tenant, id), true, utils.NonTransactional)
+func (iDB *InternalDB) RemTrendProfileDrv(tenant, id string) (err error) {
+	iDB.db.Remove(utils.CacheTrendProfiles, utils.ConcatenatedKey(tenant, id), true, utils.NonTransactional)
 	return nil
 }
 
-func (iDB *InternalDB) GetSarProfileDrv(tenant, id string) (sg *SarProfile, err error) {
-	x, ok := iDB.db.Get(utils.CacheSarProfiles, utils.ConcatenatedKey(tenant, id))
+func (iDB *InternalDB) GetTrendProfileDrv(tenant, id string) (sg *TrendProfile, err error) {
+	x, ok := iDB.db.Get(utils.CacheTrendProfiles, utils.ConcatenatedKey(tenant, id))
 	if !ok || x == nil {
 		return nil, utils.ErrNotFound
 	}
-	return x.(*SarProfile), nil
+	return x.(*TrendProfile), nil
 }
 
 func (iDB *InternalDB) SetSagProfileDrv(sgp *SagProfile) (err error) {

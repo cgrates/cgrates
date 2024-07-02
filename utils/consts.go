@@ -70,6 +70,7 @@ var (
 		CacheStatQueueProfiles:       StatQueueProfilePrefix,
 		CacheStatQueues:              StatQueuePrefix,
 		CacheSagProfiles:             SagsProfilePrefix,
+		CacheTrendProfiles:           TrendsProfilePrefix,
 		CacheThresholdProfiles:       ThresholdProfilePrefix,
 		CacheThresholds:              ThresholdPrefix,
 		CacheFilters:                 FilterPrefix,
@@ -136,7 +137,7 @@ var (
 		TBLTPAccountActions:   CacheTBLTPAccountActions,
 		TBLTPResources:        CacheTBLTPResources,
 		TBLTPStats:            CacheTBLTPStats,
-		TBLTPSars:             CacheTBLTPSars,
+		TBLTPTrends:           CacheTBLTPTrends,
 		TBLTPSags:             CacheTBLTPSags,
 		TBLTPThresholds:       CacheTBLTPThresholds,
 		TBLTPFilters:          CacheTBLTPFilters,
@@ -306,7 +307,7 @@ const (
 	ThresholdProfilePrefix    = "thp_"
 	StatQueuePrefix           = "stq_"
 	SagsProfilePrefix         = "sgp_"
-	SarsProfilePrefix         = "srp_"
+	TrendsProfilePrefix       = "trp_"
 	LoadIDPrefix              = "lid_"
 	SessionsBackupPrefix      = "sbk_"
 	LoadInstKey               = "load_history"
@@ -403,7 +404,7 @@ const (
 	MetaRerate               = "*rerate"
 	MetaRefund               = "*refund"
 	MetaStats                = "*stats"
-	MetaSars                 = "*sars"
+	MetaTrends               = "*trends"
 	MetaSags                 = "*sags"
 	MetaResponder            = "*responder"
 	MetaCore                 = "*core"
@@ -463,7 +464,7 @@ const (
 	AccountActions           = "AccountActions"
 	Resources                = "Resources"
 	Stats                    = "Stats"
-	Sars                     = "Sars"
+	Trends                   = "Trends"
 	Filters                  = "Filters"
 	DispatcherProfiles       = "DispatcherProfiles"
 	DispatcherHosts          = "DispatcherHosts"
@@ -975,7 +976,7 @@ const (
 	MetaStatQueueProfiles   = "*statqueue_profiles"
 	MetaStatQueues          = "*statqueues"
 	MetaSagProfiles         = "*sag_profiles"
-	MetaSarProfiles         = "*sar_profiles"
+	MetaTrendProfiles       = "*trend_profiles"
 	MetaThresholdProfiles   = "*threshold_profiles"
 	MetaRouteProfiles       = "*route_profiles"
 	MetaAttributeProfiles   = "*attribute_profiles"
@@ -1030,7 +1031,7 @@ const (
 	RouteS      = "RouteS"
 	SessionS    = "SessionS"
 	StatService = "StatS"
-	SarS        = "SarS"
+	TrendS      = "TrendS"
 	SagS        = "SagS"
 	ThresholdS  = "ThresholdS"
 )
@@ -1154,7 +1155,7 @@ const (
 	TpRoutes             = "TpRoutes"
 	TpAttributes         = "TpAttributes"
 	TpStats              = "TpStats"
-	TpSars               = "TpSars"
+	TpTrends             = "TpTrends"
 	TpSags               = "TpSags"
 	TpSharedGroups       = "TpSharedGroups"
 	TpRatingProfiles     = "TpRatingProfiles"
@@ -1180,7 +1181,7 @@ const (
 	MetaDefaultRatio   = "*default_ratio"
 	ThresholdSv1       = "ThresholdSv1"
 	StatSv1            = "StatSv1"
-	SarSv1             = "SarSv1"
+	TrendSv1           = "TrendSv1"
 	SagSv1             = "SagSv1"
 	ResourceSv1        = "ResourceSv1"
 	RouteSv1           = "RouteSv1"
@@ -1256,7 +1257,7 @@ const (
 	ReplicatorSv1GetThresholdProfile     = "ReplicatorSv1.GetThresholdProfile"
 	ReplicatorSv1GetStatQueueProfile     = "ReplicatorSv1.GetStatQueueProfile"
 	ReplicatorSv1GetSagProfile           = "ReplicatorSv1.GetSagProfile"
-	ReplicatorSv1GetSarProfile           = "ReplicatorSv1.GetSarProfile"
+	ReplicatorSv1GetTrendProfile         = "ReplicatorSv1.GetTrendProfile"
 	ReplicatorSv1GetTiming               = "ReplicatorSv1.GetTiming"
 	ReplicatorSv1GetResource             = "ReplicatorSv1.GetResource"
 	ReplicatorSv1GetResourceProfile      = "ReplicatorSv1.GetResourceProfile"
@@ -1283,7 +1284,7 @@ const (
 	ReplicatorSv1SetFilter               = "ReplicatorSv1.SetFilter"
 	ReplicatorSv1SetStatQueueProfile     = "ReplicatorSv1.SetStatQueueProfile"
 	ReplicatorSv1SetSagProfile           = "ReplicatorSv1.SetSagProfile"
-	ReplicatorSv1SetSarProfile           = "ReplicatorSv1.SetSarProfile"
+	ReplicatorSv1SetTrendProfile         = "ReplicatorSv1.SetTrendProfile"
 	ReplicatorSv1SetTiming               = "ReplicatorSv1.SetTiming"
 	ReplicatorSv1SetResource             = "ReplicatorSv1.SetResource"
 	ReplicatorSv1SetResourceProfile      = "ReplicatorSv1.SetResourceProfile"
@@ -1310,7 +1311,7 @@ const (
 	ReplicatorSv1RemoveThresholdProfile  = "ReplicatorSv1.RemoveThresholdProfile"
 	ReplicatorSv1RemoveStatQueueProfile  = "ReplicatorSv1.RemoveStatQueueProfile"
 	ReplicatorSv1RemoveSagProfile        = "ReplicatorSv1.RemoveSagProfile"
-	ReplicatorSv1RemoveSarProfile        = "ReplicatorSv1.RemoveSarProfile"
+	ReplicatorSv1RemoveTrendProfile      = "ReplicatorSv1.RemoveTrendProfile"
 	ReplicatorSv1RemoveTiming            = "ReplicatorSv1.RemoveTiming"
 	ReplicatorSv1RemoveResource          = "ReplicatorSv1.RemoveResource"
 	ReplicatorSv1RemoveResourceProfile   = "ReplicatorSv1.RemoveResourceProfile"
@@ -1443,9 +1444,9 @@ const (
 	APIerSv1SetTPSag                          = "APIerSv1.SetTPSag"
 	APIerSv1GetTPSag                          = "APIerSv1.GetTPSag"
 	APIerSv1RemoveTPSag                       = "APIerSv1.RemoveTPSag"
-	APIerSv1SetTPSar                          = "APIerSv1.SetTPSar"
-	APIerSv1GetTPSar                          = "APIerSv1.GetTPSar"
-	APIerSv1RemoveTPSar                       = "APIerSv1.RemoveTPSar"
+	APIerSv1SetTPTrend                        = "APIerSv1.SetTPTrend"
+	APIerSv1GetTPTrend                        = "APIerSv1.GetTPTrend"
+	APIerSv1RemoveTPTrend                     = "APIerSv1.RemoveTPTrend"
 	APIerSv1GetTPDestinationRate              = "APIerSv1.GetTPDestinationRate"
 	APIerSv1SetTPRouteProfile                 = "APIerSv1.SetTPRouteProfile"
 	APIerSv1GetTPRouteProfile                 = "APIerSv1.GetTPRouteProfile"
@@ -1667,13 +1668,13 @@ const (
 	APIerSv1GetStatQueueProfileIDs = "APIerSv1.GetStatQueueProfileIDs"
 )
 
-// SarS APIs
+// TrendS APIs
 const (
-	APIerSv1SetSarProfile    = "APIerSv1.SetSagProfile"
-	APIerSv1RemoveSarProfile = "APIerSv1.RemoveSagProfile"
-	APIerSv1GetSarProfile    = "APIerSv1.GetSagProfile"
-	APIerSv1GetSarProfileIDs = "APIerSv1.GetSagProfileIDs"
-	SarSv1Ping               = "SagSv1.Ping"
+	APIerSv1SetTrendProfile    = "APIerSv1.SetTrendProfile"
+	APIerSv1RemoveTrendProfile = "APIerSv1.RemoveTrendProfile"
+	APIerSv1GetTrendProfile    = "APIerSv1.GetTrendProfile"
+	APIerSv1GetTrendProfileIDs = "APIerSv1.GetTrendProfileIDs"
+	TrendSv1Ping               = "TrendSv1.Ping"
 )
 
 // SagS APIs
@@ -1898,7 +1899,7 @@ const (
 	AccountActionsCsv     = "AccountActions.csv"
 	ResourcesCsv          = "Resources.csv"
 	StatsCsv              = "Stats.csv"
-	SarsCsv               = "Sars.csv"
+	TrendsCsv             = "Trends.csv"
 	SagsCsv               = "Sags.csv"
 	ThresholdsCsv         = "Thresholds.csv"
 	FiltersCsv            = "Filters.csv"
@@ -1925,7 +1926,7 @@ const (
 	TBLTPResources        = "tp_resources"
 	TBLTPStats            = "tp_stats"
 	TBLTPSags             = "tp_sags"
-	TBLTPSars             = "tp_sars"
+	TBLTPTrends           = "tp_trends"
 	TBLTPThresholds       = "tp_thresholds"
 	TBLTPFilters          = "tp_filters"
 	SessionCostsTBL       = "session_costs"
@@ -1957,7 +1958,7 @@ const (
 	CacheStatQueueProfiles       = "*statqueue_profiles"
 	CacheStatQueues              = "*statqueues"
 	CacheSagProfiles             = "*sag_profiles"
-	CacheSarProfiles             = "*sar_profiles"
+	CacheTrendProfiles           = "*trend_profiles"
 	CacheThresholdProfiles       = "*threshold_profiles"
 	CacheThresholds              = "*thresholds"
 	CacheFilters                 = "*filters"
@@ -2011,7 +2012,7 @@ const (
 	CacheTBLTPAccountActions   = "*tp_account_actions"
 	CacheTBLTPResources        = "*tp_resources"
 	CacheTBLTPStats            = "*tp_stats"
-	CacheTBLTPSars             = "*tp_sars"
+	CacheTBLTPTrends           = "*tp_trends"
 	CacheTBLTPSags             = "*tp_sags"
 	CacheTBLTPThresholds       = "*tp_thresholds"
 	CacheTBLTPFilters          = "*tp_filters"

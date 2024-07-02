@@ -1640,22 +1640,22 @@ func SagProfileToAPI(sg *SagProfile) (tpSG *utils.TPSagsProfile) {
 	return
 }
 
-type SarsMdls []*SarsMdl
+type TrendsMdls []*TrendsMdl
 
-func (tps SarsMdls) CSVHeader() (result []string) {
+func (tps TrendsMdls) CSVHeader() (result []string) {
 	return []string{"#" + utils.Tenant, utils.ID, utils.QueryInterval, utils.StatID,
 		utils.TTL, utils.PurgeFilterIDs, utils.Trend, utils.ThresholdIDs}
 }
 
-func (models SarsMdls) AsTPSars() (result []*utils.TPSarsProfile) {
+func (models TrendsMdls) AsTPTrends() (result []*utils.TPTrendsProfile) {
 	thresholdsMap := make(map[string]utils.StringSet)
 	purgeFiltersIDsMap := make(map[string]utils.StringSet)
-	msr := make(map[string]*utils.TPSarsProfile)
+	msr := make(map[string]*utils.TPTrendsProfile)
 	for _, model := range models {
 		key := &utils.TenantID{Tenant: model.Tenant, ID: model.ID}
 		sr, found := msr[key.TenantID()]
 		if !found {
-			sr = &utils.TPSarsProfile{
+			sr = &utils.TPTrendsProfile{
 				Tenant:        model.Tenant,
 				TPid:          model.Tpid,
 				ID:            model.ID,
@@ -1695,7 +1695,7 @@ func (models SarsMdls) AsTPSars() (result []*utils.TPSarsProfile) {
 		}
 		msr[key.TenantID()] = sr
 	}
-	result = make([]*utils.TPSarsProfile, len(msr))
+	result = make([]*utils.TPTrendsProfile, len(msr))
 	i := 0
 	for tntId, sr := range msr {
 		result[i] = sr
@@ -1706,12 +1706,12 @@ func (models SarsMdls) AsTPSars() (result []*utils.TPSarsProfile) {
 	return
 }
 
-func APItoModelSars(tpSR *utils.TPSarsProfile) (mdls SarsMdls) {
+func APItoModelTrends(tpSR *utils.TPTrendsProfile) (mdls TrendsMdls) {
 	if tpSR == nil {
 		return
 	}
 	if len(tpSR.PurgeFilterIDs) == 0 {
-		mdl := &SarsMdl{
+		mdl := &TrendsMdl{
 			Tpid:          tpSR.TPid,
 			Tenant:        tpSR.Tenant,
 			ID:            tpSR.ID,
@@ -1729,7 +1729,7 @@ func APItoModelSars(tpSR *utils.TPSarsProfile) (mdls SarsMdls) {
 		mdls = append(mdls, mdl)
 	}
 	for i, filterID := range tpSR.PurgeFilterIDs {
-		mdl := &SarsMdl{
+		mdl := &TrendsMdl{
 			Tpid:   tpSR.TPid,
 			Tenant: tpSR.Tenant,
 			ID:     tpSR.ID,
@@ -1753,8 +1753,8 @@ func APItoModelSars(tpSR *utils.TPSarsProfile) (mdls SarsMdls) {
 	return
 }
 
-func APItoSars(tpSR *utils.TPSarsProfile) (sr *SarProfile, err error) {
-	sr = &SarProfile{
+func APItoTrends(tpSR *utils.TPTrendsProfile) (sr *TrendProfile, err error) {
+	sr = &TrendProfile{
 		Tenant:         tpSR.Tenant,
 		ID:             tpSR.ID,
 		StatID:         tpSR.StatID,
@@ -1778,8 +1778,8 @@ func APItoSars(tpSR *utils.TPSarsProfile) (sr *SarProfile, err error) {
 	return
 }
 
-func SarProfileToAPI(sr *SarProfile) (tpSR *utils.TPSarsProfile) {
-	tpSR = &utils.TPSarsProfile{
+func TrendProfileToAPI(sr *TrendProfile) (tpSR *utils.TPTrendsProfile) {
+	tpSR = &utils.TPTrendsProfile{
 		Tenant:         sr.Tenant,
 		ID:             sr.ID,
 		PurgeFilterIDs: make([]string, len(sr.PurgeFilterIDs)),
