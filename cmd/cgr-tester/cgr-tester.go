@@ -69,6 +69,8 @@ var (
 		"The sync interval for the redis cluster")
 	dbRedisClusterDownDelay = cgrTesterFlags.Duration("redisClusterOndownDelay", cgrConfig.DataDbCfg().Opts.RedisClusterOndownDelay,
 		"The delay before executing the commands if the redis cluster is in the CLUSTERDOWN state")
+	dbRedisPoolPipelineWindow = cgrTesterFlags.Duration("redisPoolPipelineWindow", cgrConfig.DataDbCfg().Opts.RedisPoolPipelineWindow,
+		"Duration after which internal pipelines are flushed. Zero disables implicit pipelining.")
 	dbQueryTimeout = cgrTesterFlags.Duration("mongoQueryTimeout", cgrConfig.DataDbCfg().Opts.MongoQueryTimeout,
 		"The timeout for queries")
 	dbRedisConnectTimeout = cgrTesterFlags.Duration(utils.RedisConnectTimeoutCfg, cgrConfig.DataDbCfg().Opts.RedisConnectTimeout,
@@ -288,6 +290,9 @@ func main() {
 	}
 	if *dbRedisClusterDownDelay != cgrConfig.DataDbCfg().Opts.RedisClusterOndownDelay {
 		tstCfg.DataDbCfg().Opts.RedisClusterOndownDelay = *dbRedisClusterDownDelay
+	}
+	if *dbRedisPoolPipelineWindow != cgrConfig.DataDbCfg().Opts.RedisPoolPipelineWindow {
+		tstCfg.DataDbCfg().Opts.RedisPoolPipelineWindow = *dbRedisPoolPipelineWindow
 	}
 	if *dbRedisConnectTimeout != cgrConfig.DataDbCfg().Opts.RedisConnectTimeout {
 		tstCfg.DataDbCfg().Opts.RedisConnectTimeout = *dbRedisConnectTimeout
