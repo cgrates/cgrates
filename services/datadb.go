@@ -171,6 +171,7 @@ func (db *DataDBService) needsConnectionReload() bool {
 			db.oldDBCfg.Opts.RedisCluster != db.cfg.DataDbCfg().Opts.RedisCluster ||
 			db.oldDBCfg.Opts.RedisClusterSync != db.cfg.DataDbCfg().Opts.RedisClusterSync ||
 			db.oldDBCfg.Opts.RedisClusterOndownDelay != db.cfg.DataDbCfg().Opts.RedisClusterOndownDelay ||
+			db.oldDBCfg.Opts.RedisPoolPipelineWindow != db.cfg.DataDbCfg().Opts.RedisPoolPipelineWindow ||
 			db.oldDBCfg.Opts.RedisConnectTimeout != db.cfg.DataDbCfg().Opts.RedisConnectTimeout ||
 			db.oldDBCfg.Opts.RedisReadTimeout != db.cfg.DataDbCfg().Opts.RedisReadTimeout ||
 			db.oldDBCfg.Opts.RedisWriteTimeout != db.cfg.DataDbCfg().Opts.RedisWriteTimeout)

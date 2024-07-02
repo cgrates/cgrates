@@ -107,6 +107,7 @@ type DBOptsJson struct {
 	RedisCluster            *bool             `json:"redisCluster"`
 	RedisClusterSync        *string           `json:"redisClusterSync"`
 	RedisClusterOndownDelay *string           `json:"redisClusterOndownDelay"`
+	RedisPoolPipelineWindow *string           `json:"redisPoolPipelineWindow"`
 	RedisConnectTimeout     *string           `json:"redisConnectTimeout"`
 	RedisReadTimeout        *string           `json:"redisReadTimeout"`
 	RedisWriteTimeout       *string           `json:"redisWriteTimeout"`

@@ -68,6 +68,8 @@ var (
 		"The sync interval for the redis cluster")
 	dbRedisClusterDownDelay = cgrLoaderFlags.Duration(utils.RedisClusterOnDownDelayCfg, dfltCfg.DataDbCfg().Opts.RedisClusterOndownDelay,
 		"The delay before executing the commands if the redis cluster is in the CLUSTERDOWN state")
+	dbRedisPoolPipelineWindow = cgrLoaderFlags.Duration(utils.RedisPoolPipelineWindowCfg, dfltCfg.DataDbCfg().Opts.RedisPoolPipelineWindow,
+		"Duration after which internal pipelines are flushed. Zero disables implicit pipelining.")
 	dbRedisConnectTimeout = cgrLoaderFlags.Duration(utils.RedisConnectTimeoutCfg, dfltCfg.DataDbCfg().Opts.RedisConnectTimeout,
 		"The amount of wait time until timeout for a connection attempt")
 	dbRedisReadTimeout = cgrLoaderFlags.Duration(utils.RedisReadTimeoutCfg, dfltCfg.DataDbCfg().Opts.RedisReadTimeout,
@@ -179,6 +181,9 @@ func loadConfig() (ldrCfg *config.CGRConfig) {
 	}
 	if *dbRedisClusterDownDelay != dfltCfg.DataDbCfg().Opts.RedisClusterOndownDelay {
 		ldrCfg.DataDbCfg().Opts.RedisClusterOndownDelay = *dbRedisClusterDownDelay
+	}
+	if *dbRedisPoolPipelineWindow != dfltCfg.DataDbCfg().Opts.RedisPoolPipelineWindow {
+		ldrCfg.DataDbCfg().Opts.RedisPoolPipelineWindow = *dbRedisPoolPipelineWindow
 	}
 	if *dbRedisConnectTimeout != dfltCfg.DataDbCfg().Opts.RedisConnectTimeout {
 		ldrCfg.DataDbCfg().Opts.RedisConnectTimeout = *dbRedisConnectTimeout

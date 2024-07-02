@@ -119,6 +119,7 @@ func (mg *MigratorCgrCfg) AsMapInterface() (initialMP map[string]any) {
 		utils.RedisClusterCfg:            mg.OutDataDBOpts.RedisCluster,
 		utils.RedisClusterSyncCfg:        mg.OutDataDBOpts.RedisClusterSync.String(),
 		utils.RedisClusterOnDownDelayCfg: mg.OutDataDBOpts.RedisClusterOndownDelay.String(),
+		utils.RedisPoolPipelineWindowCfg: mg.OutDataDBOpts.RedisPoolPipelineWindow.String(),
 		utils.RedisConnectTimeoutCfg:     mg.OutDataDBOpts.RedisConnectTimeout.String(),
 		utils.RedisReadTimeoutCfg:        mg.OutDataDBOpts.RedisReadTimeout.String(),
 		utils.RedisWriteTimeoutCfg:       mg.OutDataDBOpts.RedisWriteTimeout.String(),
