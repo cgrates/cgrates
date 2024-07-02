@@ -81,6 +81,11 @@ func (self *KamailioAgent) Connect() (err error) {
 		kamProcessMessageRegex: {self.onCgrProcessMessage},
 		kamProcessCDRRegex:     {self.onCgrProcessCDR},
 	}
+	var reply string
+	// make a call kamailio_agent -> sessions_conns to create an active client needed for syncSessions when restoring sessions, since prior clients are lost when engine shuts down
+	if err := self.connMgr.Call(self.ctx, self.cfg.SessionSConns, utils.SessionSv1Ping, &utils.CGREvent{}, &reply); err != nil {
+		return err
+	}
 	errChan := make(chan error)
 	for connIdx, connCfg := range self.cfg.EvapiConns {
 		if self.conns[connIdx], err = kamevapi.NewKamEvapi(connCfg.Address, connIdx, connCfg.Reconnects, connCfg.MaxReconnectInterval,
