@@ -2661,6 +2661,7 @@ const (
 	SepCgr         = " "
 	//Cgr engine
 	CgrEngine            = "cgr-engine"
+	PrintCfgCgr          = "print_config"
 	CheckCfgCgr          = "check_config"
 	PidCgr               = "pid"
 	HttpPrfPthCgr        = "httprof_path"
