@@ -68,18 +68,12 @@ func TestSessionSBkupRplc(t *testing.T) {
 	case utils.MetaInternal:
 		t.SkipNow()
 	case utils.MetaMySQL:
-		// mongo is unfinished
-		t.SkipNow()
 		sBRplcEng1CfgDIR = "sbkupreplcengine1_mysql"
 		sBRplcEng2CfgDIR = "sbkupreplcengine2_mongo"
 	case utils.MetaMongo:
-		// mongo is unfinished
-		t.SkipNow()
 		sBRplcEng1CfgDIR = "sbkupreplcengine1_mongo"
 		sBRplcEng2CfgDIR = "sbkupreplcengine2_mysql"
 	case utils.MetaPostgres:
-		// mongo is unfinished
-		t.SkipNow()
 		sBRplcEng1CfgDIR = "sbkupreplcengine1_postgres"
 		sBRplcEng2CfgDIR = "sbkupreplcengine2_mongo"
 	default:
