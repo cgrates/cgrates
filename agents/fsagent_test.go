@@ -22,12 +22,11 @@ import (
 	"time"
 
 	"github.com/cgrates/birpc/context"
-	"github.com/cgrates/fsock"
-
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/sessions"
 	"github.com/cgrates/cgrates/utils"
+	"github.com/cgrates/fsock"
 )
 
 func TestFAsSessionSClientIface(t *testing.T) {
@@ -261,5 +260,158 @@ func TestFsAgentNewFSsessions(t *testing.T) {
 	if fsa.ctx == nil {
 		t.Error("Expected fsa.ctx to be initialized, got nil")
 	}
+}
 
+func TestFSsessionsV1DisconnectPeer(t *testing.T) {
+	fsSessions := &FSsessions{
+
+		connMgr: &engine.ConnManager{},
+	}
+	ctx := context.Background()
+	args := &utils.DPRArgs{}
+	reply := ""
+	err := fsSessions.V1DisconnectPeer(ctx, args, &reply)
+	if err != utils.ErrNotImplemented {
+		t.Errorf("Expected error %v, got %v", utils.ErrNotImplemented, err)
+	}
+}
+
+func TestFSsessionsV1AlterSession(t *testing.T) {
+	fsSessions := &FSsessions{
+
+		connMgr: &engine.ConnManager{},
+	}
+	ctx := context.Background()
+	event := utils.CGREvent{}
+	reply := ""
+	err := fsSessions.V1AlterSession(ctx, event, &reply)
+	if err != utils.ErrNotImplemented {
+		t.Errorf("Expected error %v, got %v", utils.ErrNotImplemented, err)
+	}
+}
+
+func TestNewFSsessions(t *testing.T) {
+	fsAgentConfig := &config.FsAgentCfg{}
+	timezone := "UTC"
+	connMgr := &engine.ConnManager{}
+	fsSessions, err := NewFSsessions(fsAgentConfig, timezone, connMgr)
+	if err != nil {
+		t.Fatalf("Expected no error, got %v", err)
+	}
+	if fsSessions == nil {
+		t.Fatalf("Expected fsSessions to be non-nil")
+	}
+	if fsSessions.cfg != fsAgentConfig {
+		t.Errorf("Expected cfg to be %v, got %v", fsAgentConfig, fsSessions.cfg)
+	}
+	if len(fsSessions.conns) != len(fsAgentConfig.EventSocketConns) {
+		t.Errorf("Expected conns length %d, got %d", len(fsAgentConfig.EventSocketConns), len(fsSessions.conns))
+	}
+	if len(fsSessions.senderPools) != len(fsAgentConfig.EventSocketConns) {
+		t.Errorf("Expected senderPools length %d, got %d", len(fsAgentConfig.EventSocketConns), len(fsSessions.senderPools))
+	}
+	if fsSessions.timezone != timezone {
+		t.Errorf("Expected timezone to be %s, got %s", timezone, fsSessions.timezone)
+	}
+	if fsSessions.connMgr != connMgr {
+		t.Errorf("Expected connMgr to be %v, got %v", connMgr, fsSessions.connMgr)
+	}
+	if fsSessions.ctx == nil {
+		t.Error("Expected ctx to be non-nil")
+	}
+}
+
+func TestFSsessionsCreateHandlers(t *testing.T) {
+	tests := []struct {
+		name             string
+		subscribePark    bool
+		expectedHandlers []string
+	}{
+		{
+			name:             "Without SubscribePark",
+			subscribePark:    false,
+			expectedHandlers: []string{"CHANNEL_ANSWER", "CHANNEL_HANGUP_COMPLETE"},
+		},
+		{
+			name:             "With SubscribePark",
+			subscribePark:    true,
+			expectedHandlers: []string{"CHANNEL_ANSWER", "CHANNEL_HANGUP_COMPLETE", "CHANNEL_PARK"},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+
+			fsSessions := &FSsessions{
+				cfg: &config.FsAgentCfg{
+					SubscribePark: tt.subscribePark,
+				},
+			}
+			handlers := fsSessions.createHandlers()
+			for _, expectedHandler := range tt.expectedHandlers {
+				if _, exists := handlers[expectedHandler]; !exists {
+					t.Errorf("Expected handler %s to be present, but it was not", expectedHandler)
+				}
+			}
+			for handler := range handlers {
+				found := false
+				for _, expectedHandler := range tt.expectedHandlers {
+					if handler == expectedHandler {
+						found = true
+						break
+					}
+				}
+				if !found {
+					t.Errorf("Unexpected handler %s found", handler)
+				}
+			}
+		})
+	}
+}
+func TestFSsessionsReload(t *testing.T) {
+	eventSocketConns := []string{"conn1", "conn2", "conn3"}
+	cfg := &config.FsAgentCfg{}
+
+	fsa := &FSsessions{
+		cfg:         cfg,
+		conns:       make([]*fsock.FSock, 1),
+		senderPools: make([]*fsock.FSockPool, 1),
+	}
+
+	fsa.Reload()
+
+	if len(fsa.conns) == len(eventSocketConns) {
+		t.Errorf("Expected conns length %d, got %d", len(eventSocketConns), len(fsa.conns))
+	}
+
+	if len(fsa.senderPools) == len(eventSocketConns) {
+		t.Errorf("Expected senderPools length %d, got %d", len(eventSocketConns), len(fsa.senderPools))
+	}
+
+	for i, conn := range fsa.conns {
+		if conn != nil {
+			t.Errorf("Expected conns[%d] to be nil, got %v", i, conn)
+		}
+	}
+	for i, pool := range fsa.senderPools {
+		if pool != nil {
+			t.Errorf("Expected senderPools[%d] to be nil, got %v", i, pool)
+		}
+	}
+}
+
+func TestFSsessionsV1WarnDisconnect(t *testing.T) {
+	cfg := &config.FsAgentCfg{}
+	fsa := FSsessions{
+		cfg: cfg,
+	}
+	ctx := context.Background()
+	args := map[string]any{}
+	var reply string
+	err := fsa.V1WarnDisconnect(ctx, args, &reply)
+	if err != nil {
+		t.Errorf("Expected no error, but got: %v", err)
+	}
+	if reply != utils.OK {
+		t.Errorf("Expected reply: %s, but got: %s", utils.OK, reply)
+	}
 }

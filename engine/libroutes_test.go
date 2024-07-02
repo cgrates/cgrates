@@ -1703,3 +1703,46 @@ func TestLibRouteIDs(t *testing.T) {
 		}
 	}
 }
+
+func TestRouteIDs(t *testing.T) {
+	tests := []struct {
+		name     string
+		sRoutes  SortedRoutes
+		expected []string
+	}{
+		{
+			name: "Multiple routes",
+			sRoutes: SortedRoutes{
+				Routes: []*SortedRoute{
+					{RouteID: "route1"},
+					{RouteID: "route2"},
+					{RouteID: "route3"},
+				},
+			},
+			expected: []string{"route1", "route2", "route3"},
+		},
+		{
+			name: "Single route",
+			sRoutes: SortedRoutes{
+				Routes: []*SortedRoute{
+					{RouteID: "singleRoute"},
+				},
+			},
+			expected: []string{"singleRoute"},
+		},
+		{
+			name:     "No routes",
+			sRoutes:  SortedRoutes{},
+			expected: []string{},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			actual := tt.sRoutes.RouteIDs()
+			if !reflect.DeepEqual(actual, tt.expected) {
+				t.Errorf("Expected: %v, got: %v", tt.expected, actual)
+			}
+		})
+
+	}
+}

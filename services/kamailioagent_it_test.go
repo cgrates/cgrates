@@ -30,6 +30,7 @@ import (
 	"github.com/cgrates/birpc"
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/agents"
+	"github.com/cgrates/rpcclient"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/cores"
@@ -48,6 +49,11 @@ func TestKamailioAgentReload(t *testing.T) {
 	filterSChan := make(chan *engine.FilterS, 1)
 	filterSChan <- nil
 	shdChan := utils.NewSyncedChan()
+	defer func() {
+
+		shdChan.CloseOnce()
+		time.Sleep(10 * time.Millisecond)
+	}()
 	shdWg := new(sync.WaitGroup)
 	chS := engine.NewCacheS(cfg, nil, nil)
 	cacheSrv, err := engine.NewService(chS)
@@ -58,16 +64,20 @@ func TestKamailioAgentReload(t *testing.T) {
 	cacheSChan <- cacheSrv
 
 	server := cores.NewServer(nil)
-	srvMngr := servmanager.NewServiceManager(cfg, shdChan, shdWg, nil)
+	internalSessionSChan := make(chan birpc.ClientConnector, 1)
+	cm := engine.NewConnManager(cfg, map[string]chan context.ClientConnector{
+		utils.ConcatenatedKey(rpcclient.BiRPCInternal, utils.MetaSessionS): internalSessionSChan,
+	})
+	srvMngr := servmanager.NewServiceManager(cfg, shdChan, shdWg, cm)
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
-	db := NewDataDBService(cfg, nil, false, srvDep)
+
+	db := NewDataDBService(cfg, cm, false, srvDep)
 	anz := NewAnalyzerService(cfg, server, filterSChan, shdChan, make(chan birpc.ClientConnector, 1), srvDep)
 	sS := NewSessionService(cfg, db, server, make(chan birpc.ClientConnector, 1),
-		shdChan, nil, anz, srvDep)
-	srv := NewKamailioAgent(cfg, shdChan, nil, srvDep)
-	engine.NewConnManager(cfg, nil)
+		shdChan, cm, anz, srvDep)
+	srv := NewKamailioAgent(cfg, shdChan, cm, srvDep)
 	srvMngr.AddServices(srv, sS,
-		NewLoaderService(cfg, db, filterSChan, server, make(chan birpc.ClientConnector, 1), nil, anz, srvDep), db)
+		NewLoaderService(cfg, db, filterSChan, server, make(chan birpc.ClientConnector, 1), cm, anz, srvDep), db)
 	if err := srvMngr.StartServices(); err != nil {
 		t.Fatal(err)
 	}
@@ -90,13 +100,13 @@ func TestKamailioAgentReload(t *testing.T) {
 	time.Sleep(10 * time.Millisecond)
 	kaCfg := &config.KamAgentCfg{
 		Enabled:       true,
-		SessionSConns: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS)},
+		SessionSConns: []string{utils.ConcatenatedKey("*birpc_internal", utils.MetaSessionS)},
 		CreateCdr:     true,
 		EvapiConns:    []*config.KamConnCfg{{Address: "127.0.0.1:8448", Reconnects: 10, Alias: "randomAlias"}},
 		Timezone:      "Local",
 	}
 
-	srv.(*KamailioAgent).kam, err = agents.NewKamailioAgent(kaCfg, nil, "")
+	srv.(*KamailioAgent).kam, err = agents.NewKamailioAgent(kaCfg, cm, "")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -106,9 +116,6 @@ func TestKamailioAgentReload(t *testing.T) {
 	}
 	time.Sleep(10 * time.Millisecond) //need to switch to gorutine
 	// the engine should be stopped as we could not connect to kamailio
-
-	shdChan.CloseOnce()
-	time.Sleep(10 * time.Millisecond)
 }
 
 func TestKamailioAgentReload2(t *testing.T) {
