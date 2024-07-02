@@ -311,6 +311,28 @@ CREATE INDEX tp_sags_idx ON tp_sags (tpid);
 CREATE INDEX tp_sags_unique ON tp_sags  ("tpid","tenant", "id","stat_ids");
 
 --
+-- Table structure for tabls `tp_sars`
+--
+
+DROP TABLE IF EXISTS tp_sars;
+CREATE TABLE tp_sars(
+ "pk" SERIAL PRIMARY KEY,
+ "tpid" varchar(64) NOT NULL,
+ "tenant" varchar(64) NOT NULL,
+ "id" varchar(64) NOT NULL,
+ "query_interval" varchar(64) NOT NULL,
+ "stat_id" varchar(64) NOT NULL,
+ "queue_length" INTEGER NOT NULL,
+ "ttl" varchar(32) NOT NULL,
+ "purge_filter_ids" varchar(64) NOT NULL,
+ "trend" varchar(32) NOT NULL,
+ "threshold_ids" varchar(64) NOT NULL,
+ "created_at" TIMESTAMP
+);
+  CREATE INDEX tp_sars_idx ON tp_sars(tpid);
+  CREATE INDEX tp_sars_unique ON  tp_sars("tpid","tenant","id","stat_id");
+
+--
 -- Table structure for table `tp_threshold_cfgs`
 --
 
