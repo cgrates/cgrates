@@ -29,7 +29,11 @@ func TestCGRLoaderFlags(t *testing.T) {
 	} else if *cfgPath != "/etc/cgrates" {
 		t.Errorf("Expected /etc/cgrates, received %+v", *cfgPath)
 	}
-
+	if err := cgrLoaderFlags.Parse([]string{"-print_config", "true"}); err != nil {
+		t.Fatal(err)
+	} else if *printConfig != true {
+		t.Errorf("Expected true, received %+v", *printConfig)
+	}
 	if err := cgrLoaderFlags.Parse([]string{"-datadb_type", "*redis"}); err != nil {
 		t.Error(err)
 	} else if *dataDBType != "*redis" {
