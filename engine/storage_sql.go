@@ -598,17 +598,17 @@ func (sqls *SQLStorage) SetTPSags(sgs []*utils.TPSagsProfile) error {
 	return nil
 }
 
-func (sqls *SQLStorage) SetTPSars(srs []*utils.TPSarsProfile) error {
+func (sqls *SQLStorage) SetTPTrends(srs []*utils.TPTrendsProfile) error {
 	if len(srs) == 0 {
 		return nil
 	}
 	tx := sqls.db.Begin()
 	for _, sg := range srs {
-		if err := tx.Where(&SarsMdl{Tpid: sg.TPid, ID: sg.ID}).Delete(SarsMdl{}).Error; err != nil {
+		if err := tx.Where(&TrendsMdl{Tpid: sg.TPid, ID: sg.ID}).Delete(TrendsMdl{}).Error; err != nil {
 			tx.Rollback()
 			return err
 		}
-		for _, msg := range APItoModelSars(sg) {
+		for _, msg := range APItoModelTrends(sg) {
 			if err := tx.Create(&msg).Error; err != nil {
 				tx.Rollback()
 				return err
@@ -1461,8 +1461,8 @@ func (sqls *SQLStorage) GetTPStats(tpid, tenant, id string) ([]*utils.TPStatProf
 	return asts, nil
 }
 
-func (sqls *SQLStorage) GetTPSars(tpid, tenant, id string) ([]*utils.TPSarsProfile, error) {
-	var srs SarsMdls
+func (sqls *SQLStorage) GetTPTrends(tpid, tenant, id string) ([]*utils.TPTrendsProfile, error) {
+	var srs TrendsMdls
 	q := sqls.db.Where("tpid = ?", tpid)
 	if len(id) != 0 {
 		q = q.Where("id = ?", id)
@@ -1473,7 +1473,7 @@ func (sqls *SQLStorage) GetTPSars(tpid, tenant, id string) ([]*utils.TPSarsProfi
 	if err := q.Find(&srs).Error; err != nil {
 		return nil, err
 	}
-	asrs := srs.AsTPSars()
+	asrs := srs.AsTPTrends()
 	if len(asrs) == 0 {
 		return asrs, utils.ErrNotFound
 	}

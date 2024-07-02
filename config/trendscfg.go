@@ -20,13 +20,13 @@ package config
 
 import "github.com/cgrates/cgrates/utils"
 
-type SarSCfg struct {
+type TrendSCfg struct {
 	Enabled         bool
 	StatSConns      []string
 	ThresholdSConns []string
 }
 
-func (sa *SarSCfg) loadFromJSONCfg(jsnCfg *SarsJsonCfg) (err error) {
+func (sa *TrendSCfg) loadFromJSONCfg(jsnCfg *TrendsJsonCfg) (err error) {
 	if jsnCfg == nil {
 		return
 	}
@@ -54,7 +54,7 @@ func (sa *SarSCfg) loadFromJSONCfg(jsnCfg *SarsJsonCfg) (err error) {
 	return
 }
 
-func (sa *SarSCfg) AsMapInterface() (initialMP map[string]any) {
+func (sa *TrendSCfg) AsMapInterface() (initialMP map[string]any) {
 	initialMP = map[string]any{
 		utils.EnabledCfg: sa.Enabled,
 	}
@@ -81,8 +81,8 @@ func (sa *SarSCfg) AsMapInterface() (initialMP map[string]any) {
 	return
 }
 
-func (sa *SarSCfg) Clone() (cln *SarSCfg) {
-	cln = &SarSCfg{
+func (sa *TrendSCfg) Clone() (cln *TrendSCfg) {
+	cln = &TrendSCfg{
 		Enabled: sa.Enabled,
 	}
 	if sa.StatSConns != nil {

@@ -987,7 +987,7 @@ type TPStatProfile struct {
 	ThresholdIDs       []string
 }
 
-// TPSarProfile is used in APIs to manage remotely offline SarProfile
+// TPSagProfile is used in APIs to manage remotely offline SagProfile
 type TPSagsProfile struct {
 	TPid              string
 	Tenant            string
@@ -1000,8 +1000,8 @@ type TPSagsProfile struct {
 	ThresholdIDs      []string
 }
 
-// TPSarProfile is used in APIs to manage remotely offline SarProfile
-type TPSarsProfile struct {
+// TPTrendProfile is used in APIs to manage remotely offline TrendProfile
+type TPTrendsProfile struct {
 	TPid           string
 	Tenant         string
 	ID             string
@@ -1349,30 +1349,29 @@ func NewAttrReloadCacheWithOptsFromMap(arg map[string][]string, tnt string, opts
 		Tenant:  tnt,
 		APIOpts: opts,
 
-		DestinationIDs:        arg[CacheDestinations],
-		ReverseDestinationIDs: arg[CacheReverseDestinations],
-		RatingPlanIDs:         arg[CacheRatingPlans],
-		RatingProfileIDs:      arg[CacheRatingProfiles],
-		ActionIDs:             arg[CacheActions],
-		ActionPlanIDs:         arg[CacheActionPlans],
-		AccountActionPlanIDs:  arg[CacheAccountActionPlans],
-		ActionTriggerIDs:      arg[CacheActionTriggers],
-		SharedGroupIDs:        arg[CacheSharedGroups],
-		ResourceProfileIDs:    arg[CacheResourceProfiles],
-		ResourceIDs:           arg[CacheResources],
-		StatsQueueIDs:         arg[CacheStatQueues],
-		StatsQueueProfileIDs:  arg[CacheStatQueueProfiles],
-		SagProfileIDs:         arg[CacheSagProfiles],
-		ThresholdIDs:          arg[CacheThresholds],
-		ThresholdProfileIDs:   arg[CacheThresholdProfiles],
-		FilterIDs:             arg[CacheFilters],
-		RouteProfileIDs:       arg[CacheRouteProfiles],
-		AttributeProfileIDs:   arg[CacheAttributeProfiles],
-		ChargerProfileIDs:     arg[CacheChargerProfiles],
-		DispatcherProfileIDs:  arg[CacheDispatcherProfiles],
-		DispatcherHostIDs:     arg[CacheDispatcherHosts],
-		Dispatchers:           arg[CacheDispatchers],
-
+		DestinationIDs:           arg[CacheDestinations],
+		ReverseDestinationIDs:    arg[CacheReverseDestinations],
+		RatingPlanIDs:            arg[CacheRatingPlans],
+		RatingProfileIDs:         arg[CacheRatingProfiles],
+		ActionIDs:                arg[CacheActions],
+		ActionPlanIDs:            arg[CacheActionPlans],
+		AccountActionPlanIDs:     arg[CacheAccountActionPlans],
+		ActionTriggerIDs:         arg[CacheActionTriggers],
+		SharedGroupIDs:           arg[CacheSharedGroups],
+		ResourceProfileIDs:       arg[CacheResourceProfiles],
+		ResourceIDs:              arg[CacheResources],
+		StatsQueueIDs:            arg[CacheStatQueues],
+		StatsQueueProfileIDs:     arg[CacheStatQueueProfiles],
+		SagProfileIDs:            arg[CacheSagProfiles],
+		ThresholdIDs:             arg[CacheThresholds],
+		ThresholdProfileIDs:      arg[CacheThresholdProfiles],
+		FilterIDs:                arg[CacheFilters],
+		RouteProfileIDs:          arg[CacheRouteProfiles],
+		AttributeProfileIDs:      arg[CacheAttributeProfiles],
+		ChargerProfileIDs:        arg[CacheChargerProfiles],
+		DispatcherProfileIDs:     arg[CacheDispatcherProfiles],
+		DispatcherHostIDs:        arg[CacheDispatcherHosts],
+		Dispatchers:              arg[CacheDispatchers],
 		TimingIDs:                arg[CacheTimings],
 		AttributeFilterIndexIDs:  arg[CacheAttributeFilterIndexes],
 		ResourceFilterIndexIDs:   arg[CacheResourceFilterIndexes],
@@ -1424,30 +1423,29 @@ type AttrReloadCacheWithAPIOpts struct {
 
 func (a *AttrReloadCacheWithAPIOpts) Map() map[string][]string {
 	return map[string][]string{
-		CacheDestinations:        a.DestinationIDs,
-		CacheReverseDestinations: a.ReverseDestinationIDs,
-		CacheRatingPlans:         a.RatingPlanIDs,
-		CacheRatingProfiles:      a.RatingProfileIDs,
-		CacheActions:             a.ActionIDs,
-		CacheActionPlans:         a.ActionPlanIDs,
-		CacheAccountActionPlans:  a.AccountActionPlanIDs,
-		CacheActionTriggers:      a.ActionTriggerIDs,
-		CacheSharedGroups:        a.SharedGroupIDs,
-		CacheResourceProfiles:    a.ResourceProfileIDs,
-		CacheResources:           a.ResourceIDs,
-		CacheStatQueues:          a.StatsQueueIDs,
-		CacheStatQueueProfiles:   a.StatsQueueProfileIDs,
-		CacheThresholds:          a.ThresholdIDs,
-		CacheThresholdProfiles:   a.ThresholdProfileIDs,
-		CacheSagProfiles:         a.SagProfileIDs,
-		CacheFilters:             a.FilterIDs,
-		CacheRouteProfiles:       a.RouteProfileIDs,
-		CacheAttributeProfiles:   a.AttributeProfileIDs,
-		CacheChargerProfiles:     a.ChargerProfileIDs,
-		CacheDispatcherProfiles:  a.DispatcherProfileIDs,
-		CacheDispatcherHosts:     a.DispatcherHostIDs,
-		CacheDispatchers:         a.Dispatchers,
-
+		CacheDestinations:            a.DestinationIDs,
+		CacheReverseDestinations:     a.ReverseDestinationIDs,
+		CacheRatingPlans:             a.RatingPlanIDs,
+		CacheRatingProfiles:          a.RatingProfileIDs,
+		CacheActions:                 a.ActionIDs,
+		CacheActionPlans:             a.ActionPlanIDs,
+		CacheAccountActionPlans:      a.AccountActionPlanIDs,
+		CacheActionTriggers:          a.ActionTriggerIDs,
+		CacheSharedGroups:            a.SharedGroupIDs,
+		CacheResourceProfiles:        a.ResourceProfileIDs,
+		CacheResources:               a.ResourceIDs,
+		CacheStatQueues:              a.StatsQueueIDs,
+		CacheStatQueueProfiles:       a.StatsQueueProfileIDs,
+		CacheThresholds:              a.ThresholdIDs,
+		CacheThresholdProfiles:       a.ThresholdProfileIDs,
+		CacheSagProfiles:             a.SagProfileIDs,
+		CacheFilters:                 a.FilterIDs,
+		CacheRouteProfiles:           a.RouteProfileIDs,
+		CacheAttributeProfiles:       a.AttributeProfileIDs,
+		CacheChargerProfiles:         a.ChargerProfileIDs,
+		CacheDispatcherProfiles:      a.DispatcherProfileIDs,
+		CacheDispatcherHosts:         a.DispatcherHostIDs,
+		CacheDispatchers:             a.Dispatchers,
 		CacheTimings:                 a.TimingIDs,
 		CacheAttributeFilterIndexes:  a.AttributeFilterIndexIDs,
 		CacheResourceFilterIndexes:   a.ResourceFilterIndexIDs,

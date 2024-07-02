@@ -23,7 +23,7 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-// SetTPSags creates a new stat within a tariff plan
+// SetTPSags creates a new stataggregator within a tariff plan
 func (apierSv1 *APIerSv1) SetTPSag(ctx *context.Context, sag *utils.TPSagsProfile, reply *string) error {
 	if missing := utils.MissingStructFields(sag, []string{utils.TPid, utils.ID}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
@@ -38,7 +38,7 @@ func (apierSv1 *APIerSv1) SetTPSag(ctx *context.Context, sag *utils.TPSagsProfil
 	return nil
 }
 
-// GetTPSag queries specific Stat on Tariff plan
+// GetTPSag queries specific Sag on Tariff plan
 func (apierSv1 *APIerSv1) GetTPSag(ctx *context.Context, sag *utils.TPTntID, reply *utils.TPSagsProfile) error {
 	if missing := utils.MissingStructFields(sag, []string{utils.TPid, utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
@@ -63,7 +63,7 @@ type AttrGetTPSagIds struct {
 	utils.PaginatorWithSearch
 }
 
-// GetTPSagIDs queries Stat identities on specific tariff plan.
+// GetTPSagIDs queries Sag identities on specific tariff plan.
 func (apierSv1 *APIerSv1) GetTPSagIDs(ctx *context.Context, attrs *AttrGetTPSagIds, reply *[]string) error {
 	if missing := utils.MissingStructFields(&attrs, []string{utils.TPid}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
@@ -83,7 +83,7 @@ func (apierSv1 *APIerSv1) GetTPSagIDs(ctx *context.Context, attrs *AttrGetTPSagI
 	return nil
 }
 
-// RemoveTPStat removes specific Stat on Tariff plan
+// RemoveTPSag removes specific Sag on Tariff plan
 func (apierSv1 *APIerSv1) RemoveTPSag(ctx *context.Context, sag *utils.TPTntID, reply *string) error {
 	if missing := utils.MissingStructFields(sag, []string{utils.TPid, utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)

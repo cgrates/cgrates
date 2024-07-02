@@ -58,7 +58,7 @@ type CSVStorage struct {
 	accountactionsFn         []string
 	resProfilesFn            []string
 	statsFn                  []string
-	sarsFn                   []string
+	trendsFn                 []string
 	sagsFn                   []string
 	thresholdsFn             []string
 	filterFn                 []string
@@ -74,7 +74,7 @@ func NewCSVStorage(sep rune,
 	destinationsFn, timingsFn, ratesFn, destinationratesFn,
 	destinationratetimingsFn, ratingprofilesFn, sharedgroupsFn,
 	actionsFn, actiontimingsFn, actiontriggersFn, accountactionsFn,
-	resProfilesFn, statsFn, sarsFn, sagsFn, thresholdsFn, filterFn, routeProfilesFn,
+	resProfilesFn, statsFn, trendsFn, sagsFn, thresholdsFn, filterFn, routeProfilesFn,
 	attributeProfilesFn, chargerProfilesFn, dispatcherProfilesFn, dispatcherHostsFn []string) *CSVStorage {
 	return &CSVStorage{
 		sep:                      sep,
@@ -92,7 +92,7 @@ func NewCSVStorage(sep rune,
 		accountactionsFn:         accountactionsFn,
 		resProfilesFn:            resProfilesFn,
 		statsFn:                  statsFn,
-		sarsFn:                   sarsFn,
+		trendsFn:                 trendsFn,
 		sagsFn:                   sagsFn,
 		thresholdsFn:             thresholdsFn,
 		filterFn:                 filterFn,
@@ -123,7 +123,7 @@ func NewFileCSVStorage(sep rune, dataPath string) (*CSVStorage, error) {
 	accountActionsPaths := appendName(allFoldersPath, utils.AccountActionsCsv)
 	resourcesPaths := appendName(allFoldersPath, utils.ResourcesCsv)
 	statsPaths := appendName(allFoldersPath, utils.StatsCsv)
-	sarsPaths := appendName(allFoldersPath, utils.SarsCsv)
+	trendsPaths := appendName(allFoldersPath, utils.TrendsCsv)
 	sagsPaths := appendName(allFoldersPath, utils.SagsCsv)
 	thresholdsPaths := appendName(allFoldersPath, utils.ThresholdsCsv)
 	filtersPaths := appendName(allFoldersPath, utils.FiltersCsv)
@@ -146,7 +146,7 @@ func NewFileCSVStorage(sep rune, dataPath string) (*CSVStorage, error) {
 		accountActionsPaths,
 		resourcesPaths,
 		statsPaths,
-		sarsPaths,
+		trendsPaths,
 		sagsPaths,
 		thresholdsPaths,
 		filtersPaths,
@@ -163,13 +163,13 @@ func NewStringCSVStorage(sep rune,
 	destinationsFn, timingsFn, ratesFn, destinationratesFn,
 	destinationratetimingsFn, ratingprofilesFn, sharedgroupsFn,
 	actionsFn, actiontimingsFn, actiontriggersFn, accountactionsFn,
-	resProfilesFn, statsFn, sarsFn, sagsFn, thresholdsFn, filterFn, routeProfilesFn,
+	resProfilesFn, statsFn, trendsFn, sagsFn, thresholdsFn, filterFn, routeProfilesFn,
 	attributeProfilesFn, chargerProfilesFn, dispatcherProfilesFn, dispatcherHostsFn string) *CSVStorage {
 	c := NewCSVStorage(sep, []string{destinationsFn}, []string{timingsFn},
 		[]string{ratesFn}, []string{destinationratesFn}, []string{destinationratetimingsFn},
 		[]string{ratingprofilesFn}, []string{sharedgroupsFn}, []string{actionsFn},
 		[]string{actiontimingsFn}, []string{actiontriggersFn}, []string{accountactionsFn},
-		[]string{resProfilesFn}, []string{statsFn}, []string{sarsFn}, []string{sagsFn}, []string{thresholdsFn}, []string{filterFn},
+		[]string{resProfilesFn}, []string{statsFn}, []string{trendsFn}, []string{sagsFn}, []string{thresholdsFn}, []string{filterFn},
 		[]string{routeProfilesFn}, []string{attributeProfilesFn}, []string{chargerProfilesFn},
 		[]string{dispatcherProfilesFn}, []string{dispatcherHostsFn})
 	c.generator = NewCsvString
@@ -206,8 +206,8 @@ func NewGoogleCSVStorage(sep rune, spreadsheetID string) (*CSVStorage, error) {
 		getIfExist(utils.AccountActions),
 		getIfExist(utils.Resources),
 		getIfExist(utils.Stats),
-		getIfExist(utils.SarS),
-		getIfExist(utils.Sars),
+		getIfExist(utils.Trends),
+		getIfExist(utils.Trends),
 		getIfExist(utils.Thresholds),
 		getIfExist(utils.Filters),
 		getIfExist(utils.Routes),
@@ -240,7 +240,7 @@ func NewURLCSVStorage(sep rune, dataPath string) *CSVStorage {
 	var accountActionsPaths []string
 	var resourcesPaths []string
 	var statsPaths []string
-	var sarsPaths []string
+	var trendsPaths []string
 	var sagsPaths []string
 	var thresholdsPaths []string
 	var filtersPaths []string
@@ -265,7 +265,7 @@ func NewURLCSVStorage(sep rune, dataPath string) *CSVStorage {
 			accountActionsPaths = append(accountActionsPaths, joinURL(baseURL, utils.AccountActionsCsv))
 			resourcesPaths = append(resourcesPaths, joinURL(baseURL, utils.ResourcesCsv))
 			statsPaths = append(statsPaths, joinURL(baseURL, utils.StatsCsv))
-			sarsPaths = append(sarsPaths, joinURL(baseURL, utils.SarsCsv))
+			trendsPaths = append(trendsPaths, joinURL(baseURL, utils.TrendsCsv))
 			sagsPaths = append(sagsPaths, joinURL(baseURL, utils.SagsCsv))
 			thresholdsPaths = append(thresholdsPaths, joinURL(baseURL, utils.ThresholdsCsv))
 			filtersPaths = append(filtersPaths, joinURL(baseURL, utils.FiltersCsv))
@@ -303,8 +303,8 @@ func NewURLCSVStorage(sep rune, dataPath string) *CSVStorage {
 			resourcesPaths = append(resourcesPaths, baseURL)
 		case strings.HasSuffix(baseURL, utils.StatsCsv):
 			statsPaths = append(statsPaths, baseURL)
-		case strings.HasSuffix(baseURL, utils.SarsCsv):
-			sarsPaths = append(sarsPaths, baseURL)
+		case strings.HasSuffix(baseURL, utils.TrendsCsv):
+			trendsPaths = append(trendsPaths, baseURL)
 		case strings.HasSuffix(baseURL, utils.SagsCsv):
 			sagsPaths = append(sagsPaths, baseURL)
 		case strings.HasSuffix(baseURL, utils.ThresholdsCsv):
@@ -338,7 +338,7 @@ func NewURLCSVStorage(sep rune, dataPath string) *CSVStorage {
 		accountActionsPaths,
 		resourcesPaths,
 		statsPaths,
-		sarsPaths,
+		trendsPaths,
 		sagsPaths,
 		thresholdsPaths,
 		filtersPaths,
@@ -577,16 +577,16 @@ func (csvs *CSVStorage) GetTPStats(tpid, tenant, id string) ([]*utils.TPStatProf
 	return tpStats.AsTPStats(), nil
 }
 
-func (csvs *CSVStorage) GetTPSars(tpid, tenant, id string) ([]*utils.TPSarsProfile, error) {
-	var tpSars SarsMdls
-	if err := csvs.proccesData(SarsMdl{}, csvs.sarsFn, func(tp any) {
-		tPsars := tp.(SarsMdl)
-		tPsars.Tpid = tpid
-		tpSars = append(tpSars, &tPsars)
+func (csvs *CSVStorage) GetTPTrends(tpid, tenant, id string) ([]*utils.TPTrendsProfile, error) {
+	var tpTrends TrendsMdls
+	if err := csvs.proccesData(TrendsMdl{}, csvs.trendsFn, func(tp any) {
+		tPTrends := tp.(TrendsMdl)
+		tPTrends.Tpid = tpid
+		tpTrends = append(tpTrends, &tPTrends)
 	}); err != nil {
 		return nil, err
 	}
-	return tpSars.AsTPSars(), nil
+	return tpTrends.AsTPTrends(), nil
 }
 
 func (csvs *CSVStorage) GetTPSags(tpid, tenant, id string) ([]*utils.TPSagsProfile, error) {

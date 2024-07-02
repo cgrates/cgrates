@@ -408,29 +408,29 @@ func (ldr *Loader) storeLoadedData(loaderType string,
 				cacheArgs[utils.CacheStatQueues] = ids
 			}
 		}
-	case utils.MetaSars:
+	case utils.MetaTrends:
 		for _, lDataSet := range lds {
-			srsModels := make(engine.SarsMdls, len(lDataSet))
+			trsModels := make(engine.TrendsMdls, len(lDataSet))
 			for i, ld := range lDataSet {
-				srsModels[i] = new(engine.SarsMdl)
-				if err = utils.UpdateStructWithIfaceMap(srsModels[i], ld); err != nil {
+				trsModels[i] = new(engine.TrendsMdl)
+				if err = utils.UpdateStructWithIfaceMap(trsModels[i], ld); err != nil {
 					return
 				}
 			}
-			for _, tpSrs := range srsModels.AsTPSars() {
-				srsPrf, err := engine.APItoSars(tpSrs)
+			for _, tpTrs := range trsModels.AsTPTrends() {
+				trsPrf, err := engine.APItoTrends(tpTrs)
 				if err != nil {
 					return err
 				}
 				if ldr.dryRun {
 					utils.Logger.Info(
-						fmt.Sprintf("<%s-%s> DRY_RUN: SarsProfile: %s",
-							utils.LoaderS, ldr.ldrID, utils.ToJSON(srsPrf)))
+						fmt.Sprintf("<%s-%s> DRY_RUN: TrendProfile: %s",
+							utils.LoaderS, ldr.ldrID, utils.ToJSON(trsPrf)))
 					continue
 				}
 
-				ids = append(ids, srsPrf.TenantID())
-				if err := ldr.dm.SetSarProfile(srsPrf); err != nil {
+				ids = append(ids, trsPrf.TenantID())
+				if err := ldr.dm.SetTrendProfile(trsPrf); err != nil {
 					return err
 				}
 			}

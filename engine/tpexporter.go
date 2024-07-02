@@ -279,16 +279,16 @@ func (tpExp *TPExporter) Run() error {
 		}
 	}
 
-	storDataSars, err := tpExp.storDb.GetTPSars(tpExp.tpID, "", "")
+	storDataTrends, err := tpExp.storDb.GetTPTrends(tpExp.tpID, "", "")
 	if err != nil && err.Error() != utils.ErrNotFound.Error() {
-		utils.Logger.Warning(fmt.Sprintf("<%s> error: %s,when getting %s from stordb for export", utils.ApierS, err, utils.TpSars))
+		utils.Logger.Warning(fmt.Sprintf("<%s> error: %s,when getting %s from stordb for export", utils.ApierS, err, utils.TpTrends))
 	}
-	if len(storDataSars) != 0 {
-		toExportMap[utils.SarsCsv] = make([]any, len(storDataSars))
-		for _, sd := range storDataSars {
-			sModels := APItoModelSars(sd)
+	if len(storDataTrends) != 0 {
+		toExportMap[utils.TrendsCsv] = make([]any, len(storDataTrends))
+		for _, sd := range storDataTrends {
+			sModels := APItoModelTrends(sd)
 			for _, sdModel := range sModels {
-				toExportMap[utils.SarsCsv] = append(toExportMap[utils.SarsCsv], sdModel)
+				toExportMap[utils.TrendsCsv] = append(toExportMap[utils.TrendsCsv], sdModel)
 			}
 		}
 	}

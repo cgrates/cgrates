@@ -41,9 +41,9 @@ type DataDBMock struct {
 	SetSagProfileDrvF         func(sq *SagProfile) (err error)
 	GetSagProfileDrvF         func(tenant string, id string) (sq *SagProfile, err error)
 	RemSagProfileDrvF         func(tenant string, id string) (err error)
-	SetSarProfileDrvF         func(sq *SarProfile) (err error)
-	GetSarProfileDrvF         func(tenant string, id string) (sq *SarProfile, err error)
-	RemSarProfileDrvF         func(tenant string, id string) (err error)
+	SetTrendProfileDrvF       func(sq *TrendProfile) (err error)
+	GetTrendProfileDrvF       func(tenant string, id string) (sq *TrendProfile, err error)
+	RemTrendProfileDrvF       func(tenant string, id string) (err error)
 	GetSagsProfileDrvF        func(tenant, id string) (sg *SagProfile, err error)
 	GetActionPlanDrvF         func(key string) (ap *ActionPlan, err error)
 	SetActionPlanDrvF         func(key string, ap *ActionPlan) (err error)
@@ -357,23 +357,23 @@ func (dbM *DataDBMock) RemSagProfileDrv(tenant string, id string) (err error) {
 	}
 	return utils.ErrNotImplemented
 }
-func (dbM *DataDBMock) GetSarProfileDrv(tenant, id string) (sg *SarProfile, err error) {
+func (dbM *DataDBMock) GetTrendProfileDrv(tenant, id string) (sg *TrendProfile, err error) {
 	if dbM.GetStatQueueProfileDrvF != nil {
-		return dbM.GetSarProfileDrvF(tenant, id)
+		return dbM.GetTrendProfileDrvF(tenant, id)
 	}
 	return nil, utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) SetSarProfileDrv(sar *SarProfile) (err error) {
-	if dbM.SetSarProfileDrvF(sar) != nil {
-		return dbM.SetSarProfileDrvF(sar)
+func (dbM *DataDBMock) SetTrendProfileDrv(trend *TrendProfile) (err error) {
+	if dbM.SetTrendProfileDrvF(trend) != nil {
+		return dbM.SetTrendProfileDrvF(trend)
 	}
 	return utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) RemSarProfileDrv(tenant string, id string) (err error) {
-	if dbM.RemSarProfileDrvF != nil {
-		return dbM.RemSarProfileDrvF(tenant, id)
+func (dbM *DataDBMock) RemTrendProfileDrv(tenant string, id string) (err error) {
+	if dbM.RemTrendProfileDrvF != nil {
+		return dbM.RemTrendProfileDrvF(tenant, id)
 	}
 	return utils.ErrNotImplemented
 }

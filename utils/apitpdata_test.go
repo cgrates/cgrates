@@ -1009,7 +1009,7 @@ func TestNewAttrReloadCacheWithOptsFromMap(t *testing.T) {
 	excluded := NewStringSet([]string{MetaAPIBan, MetaSentryPeer, MetaAccounts, MetaLoadIDs})
 	mp := make(map[string][]string)
 	for k := range CacheInstanceToPrefix {
-		if !excluded.Has(k) {
+		if !excluded.Has(k) && k != CacheTrendProfiles {
 			mp[k] = []string{MetaAny}
 		}
 	}

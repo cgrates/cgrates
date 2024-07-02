@@ -44,7 +44,7 @@ const (
 	RESOURCES_JSON     = "resources"
 	STATS_JSON         = "stats"
 	THRESHOLDS_JSON    = "thresholds"
-	SARS_JSON          = "sars"
+	TRENDS_JSON        = "trends"
 	SAGS_JSON          = "sags"
 	RouteSJson         = "routes"
 	LoaderJson         = "loaders"
@@ -74,7 +74,7 @@ const (
 var (
 	sortedCfgSections = []string{GENERAL_JSN, RPCConnsJsonName, DATADB_JSN, STORDB_JSN, LISTEN_JSN, TlsCfgJson, HTTP_JSN, SCHEDULER_JSN,
 		CACHE_JSN, FilterSjsn, RALS_JSN, CDRS_JSN, ERsJson, SessionSJson, AsteriskAgentJSN, FreeSWITCHAgentJSN, KamailioAgentJSN,
-		DA_JSN, RA_JSN, HttpAgentJson, DNSAgentJson, ATTRIBUTE_JSN, ChargerSCfgJson, RESOURCES_JSON, STATS_JSON, SARS_JSON, SAGS_JSON,
+		DA_JSN, RA_JSN, HttpAgentJson, DNSAgentJson, ATTRIBUTE_JSN, ChargerSCfgJson, RESOURCES_JSON, STATS_JSON, TRENDS_JSON, SAGS_JSON,
 		THRESHOLDS_JSON, RouteSJson, LoaderJson, MAILER_JSN, SURETAX_JSON, CgrLoaderCfgJson, CgrMigratorCfgJson, DispatcherSJson, JanusAgentJson,
 		AnalyzerCfgJson, ApierS, EEsJson, SIPAgentJson, RegistrarCJson, TemplatesJson, ConfigSJson, APIBanCfgJson, SentryPeerCfgJson, CoreSCfgJson}
 )
@@ -371,12 +371,12 @@ func (jsnCfg CgrJsonCfg) StatSJsonCfg() (*StatServJsonCfg, error) {
 	return cfg, nil
 }
 
-func (jsnCfg CgrJsonCfg) SarsJsonCfg() (*SarsJsonCfg, error) {
-	rawCfg, hasKey := jsnCfg[SARS_JSON]
+func (jsnCfg CgrJsonCfg) TrendsJsonCfg() (*TrendsJsonCfg, error) {
+	rawCfg, hasKey := jsnCfg[TRENDS_JSON]
 	if !hasKey {
 		return nil, nil
 	}
-	cfg := new(SarsJsonCfg)
+	cfg := new(TrendsJsonCfg)
 	if err := json.Unmarshal(*rawCfg, cfg); err != nil {
 		return nil, err
 	}

@@ -301,7 +301,7 @@ func (SagsMdl) TableName() string {
 	return utils.TBLTPSags
 }
 
-type SarsMdl struct {
+type TrendsMdl struct {
 	PK             uint `gorm:"primary_key"`
 	Tpid           string
 	Tenant         string `index:"0" re:".*"`
@@ -316,8 +316,8 @@ type SarsMdl struct {
 	CreatedAt      time.Time
 }
 
-func (SarsMdl) TableName() string {
-	return utils.TBLTPSars
+func (TrendsMdl) TableName() string {
+	return utils.TBLTPTrends
 }
 
 type ThresholdMdl struct {

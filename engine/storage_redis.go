@@ -939,17 +939,17 @@ func (rs *RedisStorage) RemStatQueueDrv(tenant, id string) (err error) {
 	return rs.Cmd(nil, redis_DEL, utils.StatQueuePrefix+utils.ConcatenatedKey(tenant, id))
 }
 
-func (rs *RedisStorage) SetSarProfileDrv(sg *SarProfile) (err error) {
+func (rs *RedisStorage) SetTrendProfileDrv(sg *TrendProfile) (err error) {
 	var result []byte
 	if result, err = rs.ms.Marshal(sg); err != nil {
 		return
 	}
-	return rs.Cmd(nil, redis_SET, utils.SarsProfilePrefix+utils.ConcatenatedKey(sg.Tenant, sg.ID), string(result))
+	return rs.Cmd(nil, redis_SET, utils.TrendsProfilePrefix+utils.ConcatenatedKey(sg.Tenant, sg.ID), string(result))
 }
 
-func (rs *RedisStorage) GetSarProfileDrv(tenant string, id string) (sg *SarProfile, err error) {
+func (rs *RedisStorage) GetTrendProfileDrv(tenant string, id string) (sg *TrendProfile, err error) {
 	var values []byte
-	if err = rs.Cmd(&values, redis_GET, utils.SarsProfilePrefix+utils.ConcatenatedKey(tenant, id)); err != nil {
+	if err = rs.Cmd(&values, redis_GET, utils.TrendsProfilePrefix+utils.ConcatenatedKey(tenant, id)); err != nil {
 		return
 	} else if len(values) == 0 {
 		err = utils.ErrNotFound
@@ -958,8 +958,8 @@ func (rs *RedisStorage) GetSarProfileDrv(tenant string, id string) (sg *SarProfi
 	err = rs.ms.Unmarshal(values, &sg)
 	return
 }
-func (rs *RedisStorage) RemSarProfileDrv(tenant string, id string) (err error) {
-	return rs.Cmd(nil, redis_DEL, utils.SarsProfilePrefix+utils.ConcatenatedKey(tenant, id))
+func (rs *RedisStorage) RemTrendProfileDrv(tenant string, id string) (err error) {
+	return rs.Cmd(nil, redis_DEL, utils.TrendsProfilePrefix+utils.ConcatenatedKey(tenant, id))
 }
 
 func (rs *RedisStorage) SetSagProfileDrv(sg *SagProfile) (err error) {
