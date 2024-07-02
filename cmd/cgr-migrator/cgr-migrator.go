@@ -42,8 +42,8 @@ var (
 	dfltCfg    = config.NewDefaultCGRConfig()
 	cfgPath    = cgrMigratorFlags.String(utils.CfgPathCgr, utils.EmptyString,
 		"Configuration directory path.")
-
-	exec = cgrMigratorFlags.String(utils.ExecCgr, utils.EmptyString, "fire up automatic migration "+
+	printConfig = cgrMigratorFlags.Bool(utils.PrintCfgCgr, false, "Print the configuration object in JSON format")
+	exec        = cgrMigratorFlags.String(utils.ExecCgr, utils.EmptyString, "fire up automatic migration "+
 		"<*set_versions|*cost_details|*accounts|*actions|*action_triggers|*action_plans|*shared_groups|*filters|*datadb>")
 	version = cgrMigratorFlags.Bool(utils.VersionCgr, false, "prints the application version")
 
@@ -280,6 +280,10 @@ func main() {
 		mgrCfg.DataDbCfg().Password, mgrCfg.GeneralCfg().DBDataEncoding,
 		mgrCfg.CacheCfg(), mgrCfg.DataDbCfg().Opts, mgrCfg.DataDbCfg().Items); err != nil {
 		log.Fatal(err)
+	}
+	if *printConfig {
+		cfgJSON := utils.ToIJSON(mgrCfg.AsMapInterface(mgrCfg.GeneralCfg().RSRSep))
+		log.Printf("Configuration loaded from %q:\n%s", *cfgPath, cfgJSON)
 	}
 
 	if sameDataDB {
