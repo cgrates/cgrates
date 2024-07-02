@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package agents
 
 import (
+	"fmt"
 	"net"
 	"strings"
 	"testing"
@@ -784,5 +785,238 @@ func TestLibDnsUpdateDnsAnswerACase(t *testing.T) {
 	}
 	if a.A.String() != value {
 		t.Errorf("Expected a.A to be %q, got %q", value, a.A.String())
+	}
+}
+
+func TestLibDnsCreateDnsOptionDefaultCase(t *testing.T) {
+	invalidField := "InvalidField"
+	value := "Value"
+	_, err := createDnsOption(invalidField, value)
+	expectedError := fmt.Sprintf("can not create option from field <%q>", invalidField)
+	if err == nil {
+		t.Errorf("expected error, got nil")
+	} else if err.Error() != expectedError {
+		t.Errorf("expected error message %q, got %q", expectedError, err.Error())
+	}
+}
+
+func TestLibDnsCreateDnsOption_DNSUri(t *testing.T) {
+	field := utils.DNSUri
+	value := "http://cgrates.org"
+	option, err := createDnsOption(field, value)
+	if err != nil {
+		t.Errorf("expected no error, got %v", err)
+	}
+	esuOption, ok := option.(*dns.EDNS0_ESU)
+	if !ok {
+		t.Errorf("expected option to be of type *dns.EDNS0_ESU, got %T", option)
+	}
+	if esuOption.Uri != value {
+		t.Errorf("expected Uri to be %q, got %q", value, esuOption.Uri)
+	}
+}
+
+func TestLibDnsCreateDnsOptionDNSExtraText(t *testing.T) {
+	field := utils.DNSExtraText
+	value := "ExtraText"
+	option, err := createDnsOption(field, value)
+	if err != nil {
+		t.Errorf("expected no error, got %v", err)
+	}
+	edeOption, ok := option.(*dns.EDNS0_EDE)
+	if !ok {
+		t.Errorf("expected option to be of type *dns.EDNS0_EDE, got %T", option)
+	}
+	if edeOption.ExtraText != value {
+		t.Errorf("expected ExtraText to be %q, got %q", value, edeOption.ExtraText)
+	}
+}
+
+func TestLibDnsCreateDnsOptionDNSInfoCode(t *testing.T) {
+	field := utils.DNSInfoCode
+	value := int64(1234)
+	option, err := createDnsOption(field, value)
+	if err != nil {
+		t.Errorf("expected no error, got %v", err)
+	}
+	edeOption, ok := option.(*dns.EDNS0_EDE)
+	if !ok {
+		t.Errorf("expected option to be of type *dns.EDNS0_EDE, got %T", option)
+	}
+	if edeOption.InfoCode != uint16(value) {
+		t.Errorf("expected InfoCode to be %d, got %d", value, edeOption.InfoCode)
+	}
+}
+
+func TestLibDnsCreateDnsOptionDNSInfoCodeWithError(t *testing.T) {
+	field := utils.DNSInfoCode
+	value := "invalid_value"
+	option, err := createDnsOption(field, value)
+	if err == nil {
+		t.Errorf("expected error, got nil")
+	}
+	if option != nil {
+		t.Errorf("expected nil option, got %v", option)
+	}
+}
+
+func TestLibDnsCreateDnsOptionDNSPadding(t *testing.T) {
+	field := utils.DNSPadding
+	value := "PaddingText"
+	option, err := createDnsOption(field, value)
+	if err != nil {
+		t.Errorf("expected no error, got %v", err)
+	}
+	paddingOption, ok := option.(*dns.EDNS0_PADDING)
+	if !ok {
+		t.Errorf("expected option to be of type *dns.EDNS0_PADDING, got %T", option)
+	}
+	expectedPadding := []byte(value)
+	if string(paddingOption.Padding) != string(expectedPadding) {
+		t.Errorf("expected Padding to be %q, got %q", expectedPadding, paddingOption.Padding)
+	}
+}
+
+func TestLibDnsCreateDnsOptionDNSTimeout(t *testing.T) {
+	field := utils.DNSTimeout
+	value := int64(300)
+	option, err := createDnsOption(field, value)
+	if err != nil {
+		t.Errorf("expected no error, got %v", err)
+	}
+	tcpKeepaliveOption, ok := option.(*dns.EDNS0_TCP_KEEPALIVE)
+	if !ok {
+		t.Errorf("expected option to be of type *dns.EDNS0_TCP_KEEPALIVE, got %T", option)
+	}
+	expectedTimeout := uint16(value)
+	if tcpKeepaliveOption.Timeout != expectedTimeout {
+		t.Errorf("expected Timeout to be %d, got %d", expectedTimeout, tcpKeepaliveOption.Timeout)
+	}
+}
+
+func TestLibDnsCreateDnsOptionDNSTimeoutWithError(t *testing.T) {
+	field := utils.DNSTimeout
+	value := "invalid_value"
+	option, err := createDnsOption(field, value)
+	if err == nil {
+		t.Errorf("expected error, got nil")
+	}
+	if option != nil {
+		t.Errorf("expected nil option, got %v", option)
+	}
+}
+
+func TestLibDnsCreateDnsOptionLength(t *testing.T) {
+	field := utils.Length
+	value := int64(1500)
+	option, err := createDnsOption(field, value)
+	if err != nil {
+		t.Errorf("expected no error, got %v", err)
+	}
+	tcpKeepaliveOption, ok := option.(*dns.EDNS0_TCP_KEEPALIVE)
+	if !ok {
+		t.Errorf("expected option to be of type *dns.EDNS0_TCP_KEEPALIVE, got %T", option)
+	}
+	expectedLength := uint16(value)
+	if tcpKeepaliveOption.Length != expectedLength {
+		t.Errorf("expected Length to be %d, got %d", expectedLength, tcpKeepaliveOption.Length)
+	}
+}
+
+func TestLibDnsCreateDnsOptionLengthWithError(t *testing.T) {
+	field := utils.Length
+	value := "invalid_value"
+	option, err := createDnsOption(field, value)
+	if err == nil {
+		t.Errorf("expected error, got nil")
+	}
+	if option != nil {
+		t.Errorf("expected nil option, got %v", option)
+	}
+}
+
+func TestLibDnsCreateDnsOptionDNSExpireWithError(t *testing.T) {
+	field := utils.DNSExpire
+	value := "invalid_value"
+	option, err := createDnsOption(field, value)
+	if err == nil {
+		t.Errorf("expected error, got nil")
+	}
+	if option != nil {
+		t.Errorf("expected nil option, got %v", option)
+	}
+}
+
+func TestLibDnsUpdateDnsQuestionsDefaultCase(t *testing.T) {
+	q := []dns.Question{
+		{Name: "cgrates.org.", Qtype: dns.TypeA, Qclass: dns.ClassINET},
+	}
+	path := []string{"unsupportedField"}
+	value := "Value"
+	newBranch := false
+	_, err := updateDnsQuestions(q, path, value, newBranch)
+	if err == nil {
+		t.Errorf("Expected error, got nil")
+	}
+	if err != utils.ErrWrongPath {
+		t.Errorf("Expected error %v, got %v", utils.ErrWrongPath, err)
+	}
+}
+
+func TestUpdateDnsQuestionsDNSQclass(t *testing.T) {
+	q := []dns.Question{
+		{Name: "cgrates.org.", Qtype: dns.TypeA, Qclass: dns.ClassINET},
+	}
+	path := []string{"0", utils.DNSQclass}
+	value := int64(5)
+	newBranch := false
+	updatedQ, err := updateDnsQuestions(q, path, value, newBranch)
+	if err != nil {
+		t.Errorf("Expected no error, got %v", err)
+	}
+	if len(updatedQ) == 0 || updatedQ[0].Qclass != 5 {
+		t.Errorf("Expected Qclass to be updated to 5, got %v", updatedQ[0].Qclass)
+	}
+}
+
+func TestLibDnsUpdateDnsQuestionsDNSQclassError(t *testing.T) {
+	q := []dns.Question{
+		{Name: "cgrates.org.", Qtype: dns.TypeA, Qclass: dns.ClassINET},
+	}
+	path := []string{"0", utils.DNSQclass}
+	value := "invalidValue"
+	newBranch := false
+	_, err := updateDnsQuestions(q, path, value, newBranch)
+	if err == nil {
+		t.Errorf("Expected error, got nil")
+	}
+}
+
+func TestLibDnsUpdateDnsQuestionsDNSQtype(t *testing.T) {
+	q := []dns.Question{
+		{Name: "cgrates.org.", Qtype: dns.TypeA, Qclass: dns.ClassINET},
+	}
+	path := []string{"0", utils.DNSQtype}
+	value := int64(15)
+	newBranch := false
+	updatedQ, err := updateDnsQuestions(q, path, value, newBranch)
+	if err != nil {
+		t.Errorf("Expected no error, got %v", err)
+	}
+	if len(updatedQ) == 0 || updatedQ[0].Qtype != 15 {
+		t.Errorf("Expected Qtype to be updated to 15, got %v", updatedQ[0].Qtype)
+	}
+}
+
+func TestLibDnsUpdateDnsQuestionsDNSQtypeError(t *testing.T) {
+	q := []dns.Question{
+		{Name: "cgrates.org.", Qtype: dns.TypeA, Qclass: dns.ClassINET},
+	}
+	path := []string{"0", utils.DNSQtype}
+	value := "invalidValue"
+	newBranch := false
+	_, err := updateDnsQuestions(q, path, value, newBranch)
+	if err == nil {
+		t.Errorf("Expected error, got nil")
 	}
 }
