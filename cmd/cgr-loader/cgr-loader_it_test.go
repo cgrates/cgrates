@@ -63,6 +63,7 @@ func TestLoadConfig(t *testing.T) {
 			RedisCluster:            false,
 			RedisClusterSync:        5 * time.Second,
 			RedisClusterOndownDelay: 0,
+			RedisPoolPipelineWindow: 150 * time.Microsecond,
 			RedisConnectTimeout:     5 * time.Second,
 			MongoQueryTimeout:       10 * time.Second,
 			MongoConnScheme:         "mongodb",

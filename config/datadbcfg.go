@@ -34,6 +34,7 @@ type DataDBOpts struct {
 	RedisCluster            bool
 	RedisClusterSync        time.Duration
 	RedisClusterOndownDelay time.Duration
+	RedisPoolPipelineWindow time.Duration
 	RedisConnectTimeout     time.Duration
 	RedisReadTimeout        time.Duration
 	RedisWriteTimeout       time.Duration
@@ -85,6 +86,11 @@ func (dbOpts *DataDBOpts) loadFromJSONCfg(jsnCfg *DBOptsJson) (err error) {
 	}
 	if jsnCfg.RedisClusterOndownDelay != nil {
 		if dbOpts.RedisClusterOndownDelay, err = utils.ParseDurationWithNanosecs(*jsnCfg.RedisClusterOndownDelay); err != nil {
+			return
+		}
+	}
+	if jsnCfg.RedisPoolPipelineWindow != nil {
+		if dbOpts.RedisPoolPipelineWindow, err = utils.ParseDurationWithNanosecs(*jsnCfg.RedisPoolPipelineWindow); err != nil {
 			return
 		}
 	}
@@ -212,15 +218,16 @@ func (dbOpts *DataDBOpts) Clone() *DataDBOpts {
 		RedisCluster:            dbOpts.RedisCluster,
 		RedisClusterSync:        dbOpts.RedisClusterSync,
 		RedisClusterOndownDelay: dbOpts.RedisClusterOndownDelay,
+		RedisPoolPipelineWindow: dbOpts.RedisPoolPipelineWindow,
 		RedisConnectTimeout:     dbOpts.RedisConnectTimeout,
 		RedisReadTimeout:        dbOpts.RedisReadTimeout,
 		RedisWriteTimeout:       dbOpts.RedisWriteTimeout,
-		MongoQueryTimeout:       dbOpts.MongoQueryTimeout,
-		MongoConnScheme:         dbOpts.MongoConnScheme,
 		RedisTLS:                dbOpts.RedisTLS,
 		RedisClientCertificate:  dbOpts.RedisClientCertificate,
 		RedisClientKey:          dbOpts.RedisClientKey,
 		RedisCACertificate:      dbOpts.RedisCACertificate,
+		MongoQueryTimeout:       dbOpts.MongoQueryTimeout,
+		MongoConnScheme:         dbOpts.MongoConnScheme,
 	}
 }
 
@@ -262,6 +269,7 @@ func (dbcfg *DataDbCfg) AsMapInterface() (mp map[string]any) {
 		utils.RedisClusterCfg:            dbcfg.Opts.RedisCluster,
 		utils.RedisClusterSyncCfg:        dbcfg.Opts.RedisClusterSync.String(),
 		utils.RedisClusterOnDownDelayCfg: dbcfg.Opts.RedisClusterOndownDelay.String(),
+		utils.RedisPoolPipelineWindowCfg: dbcfg.Opts.RedisPoolPipelineWindow.String(),
 		utils.RedisConnectTimeoutCfg:     dbcfg.Opts.RedisConnectTimeout.String(),
 		utils.RedisReadTimeoutCfg:        dbcfg.Opts.RedisReadTimeout.String(),
 		utils.RedisWriteTimeoutCfg:       dbcfg.Opts.RedisWriteTimeout.String(),
