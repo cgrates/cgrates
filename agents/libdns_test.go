@@ -1020,3 +1020,268 @@ func TestLibDnsUpdateDnsQuestionsDNSQtypeError(t *testing.T) {
 		t.Errorf("Expected error, got nil")
 	}
 }
+
+func TestLibDnsCreateDnsOptionDNSN3U(t *testing.T) {
+	t.Run("Normal case", func(t *testing.T) {
+		field := utils.DNSN3U
+		value := "1"
+		option, err := createDnsOption(field, value)
+		if err != nil {
+			t.Fatalf("Expected no error, got %v", err)
+		}
+		edns0N3U, ok := option.(*dns.EDNS0_N3U)
+		if !ok {
+			t.Fatalf("Expected type *dns.EDNS0_N3U, got %T", option)
+		}
+		expectedAlgCode := []uint8(value)
+		if string(edns0N3U.AlgCode) != string(expectedAlgCode) {
+			t.Errorf("Expected AlgCode to be %v, got %v", expectedAlgCode, edns0N3U.AlgCode)
+		}
+	})
+	t.Run("Error case", func(t *testing.T) {
+		field := utils.DNSN3U
+		value := 12345
+		_, err := createDnsOption(field, value)
+		if err != nil {
+			t.Fatalf("Expected error, got nil")
+		}
+	})
+}
+
+func TestLibDnsCreateDnsOptionT(t *testing.T) {
+	t.Run("DNSN3U Normal case", func(t *testing.T) {
+		field := utils.DNSN3U
+		value := "1"
+		option, err := createDnsOption(field, value)
+		if err != nil {
+			t.Fatalf("Expected no error, got %v", err)
+		}
+		edns0N3U, ok := option.(*dns.EDNS0_N3U)
+		if !ok {
+			t.Fatalf("Expected type *dns.EDNS0_N3U, got %T", option)
+		}
+		expectedAlgCode := []uint8(value)
+		if string(edns0N3U.AlgCode) != string(expectedAlgCode) {
+			t.Errorf("Expected AlgCode to be %v, got %v", expectedAlgCode, edns0N3U.AlgCode)
+		}
+	})
+	t.Run("DNSN3U Error case", func(t *testing.T) {
+		field := utils.DNSN3U
+		value := 1
+
+		_, err := createDnsOption(field, value)
+		if err != nil {
+			t.Fatalf("Expected error, got nil")
+		}
+	})
+	t.Run("DNSDHU Normal case", func(t *testing.T) {
+		field := utils.DNSDHU
+		value := "1"
+		option, err := createDnsOption(field, value)
+		if err != nil {
+			t.Fatalf("Expected no error, got %v", err)
+		}
+		edns0DHU, ok := option.(*dns.EDNS0_DHU)
+		if !ok {
+			t.Fatalf("Expected type *dns.EDNS0_DHU, got %T", option)
+		}
+		expectedAlgCode := []uint8(value)
+		if string(edns0DHU.AlgCode) != string(expectedAlgCode) {
+			t.Errorf("Expected AlgCode to be %v, got %v", expectedAlgCode, edns0DHU.AlgCode)
+		}
+	})
+	t.Run("DNSDHU Error case", func(t *testing.T) {
+		field := utils.DNSDHU
+		value := 1
+		_, err := createDnsOption(field, value)
+		if err != nil {
+			t.Fatalf("Expected error, got nil")
+		}
+	})
+}
+
+func TestLibDnsCreateDnsOptionTab(t *testing.T) {
+	testCases := []struct {
+		field string
+		value any
+		want  dns.EDNS0
+	}{
+		{utils.DNSN3U, "12345", &dns.EDNS0_N3U{AlgCode: []uint8("12345")}},
+		{utils.DNSDHU, "12345", &dns.EDNS0_DHU{AlgCode: []uint8("12345")}},
+		{utils.DNSDAU, "12345", &dns.EDNS0_DAU{AlgCode: []uint8("12345")}},
+	}
+	for _, tc := range testCases {
+		got, err := createDnsOption(tc.field, tc.value)
+		if err != nil {
+			t.Errorf("createDnsOption(%q, %v) returned error: %v", tc.field, tc.value, err)
+			continue
+		}
+		if got.String() != tc.want.String() {
+			t.Errorf("createDnsOption(%q, %v) = %v, want %v", tc.field, tc.value, got, tc.want)
+		}
+	}
+}
+
+func TestLibDnsCreateDnsOption(t *testing.T) {
+	testCases := []struct {
+		field string
+		value any
+		want  dns.EDNS0
+	}{
+		{utils.DNSLease, int64(3600), &dns.EDNS0_UL{Lease: uint32(3600)}},
+		{utils.DNSKeyLease, int64(3600), &dns.EDNS0_UL{KeyLease: uint32(3600)}},
+		{utils.VersionName, int64(1), &dns.EDNS0_LLQ{Version: uint16(1)}},
+		{utils.DNSOpcode, int64(2), &dns.EDNS0_LLQ{Opcode: uint16(2)}},
+		{utils.Error, int64(3), &dns.EDNS0_LLQ{Error: uint16(3)}},
+		{utils.DNSId, int64(12345), &dns.EDNS0_LLQ{Id: uint64(12345)}},
+		{utils.DNSLeaseLife, int64(3600), &dns.EDNS0_LLQ{LeaseLife: uint32(3600)}},
+	}
+
+	for _, tc := range testCases {
+		got, err := createDnsOption(tc.field, tc.value)
+		if err != nil {
+			t.Errorf("createDnsOption(%q, %v) returned error: %v", tc.field, tc.value, err)
+			continue
+		}
+		if got.String() != tc.want.String() {
+			t.Errorf("createDnsOption(%q, %v) = %v, want %v", tc.field, tc.value, got, tc.want)
+		}
+	}
+}
+
+func TestLibDnsCreateDnsOptionError(t *testing.T) {
+	testCases := []struct {
+		field string
+		value any
+	}{
+		{utils.DNSLease, "test"},
+		{utils.DNSKeyLease, "test"},
+		{utils.VersionName, "test"},
+		{utils.DNSOpcode, "test"},
+		{utils.Error, "test"},
+		{utils.DNSId, "test"},
+		{utils.DNSLeaseLife, "test"},
+	}
+
+	for _, tc := range testCases {
+		_, err := createDnsOption(tc.field, tc.value)
+		if err == nil {
+			t.Errorf("createDnsOption(%q, %v) expected error, got nil", tc.field, tc.value)
+		}
+	}
+}
+
+func TestLibDnsCreateDnsOptionDNSCookie(t *testing.T) {
+	field := utils.DNSCookie
+	value := "test_cookie_value"
+	option, err := createDnsOption(field, value)
+	if err != nil {
+		t.Errorf("Expected no error, got %v", err)
+	}
+	edns0Cookie, ok := option.(*dns.EDNS0_COOKIE)
+	if !ok {
+		t.Errorf("Expected type *dns.EDNS0_COOKIE, got %T", option)
+	}
+	expectedCookie := value
+	if edns0Cookie.Cookie != expectedCookie {
+		t.Errorf("Expected Cookie to be %q, got %q", expectedCookie, edns0Cookie.Cookie)
+	}
+}
+
+func TestLibDnsCreateDnsOptionDNSSourceScope(t *testing.T) {
+	field := utils.DNSSourceScope
+	value := int64(64)
+	option, err := createDnsOption(field, value)
+	if err != nil {
+		t.Errorf("Expected no error, got %v", err)
+	}
+	edns0Subnet, ok := option.(*dns.EDNS0_SUBNET)
+	if !ok {
+		t.Errorf("Expected type *dns.EDNS0_SUBNET, got %T", option)
+	}
+	expectedSourceScope := uint8(value)
+	if edns0Subnet.SourceScope != expectedSourceScope {
+		t.Errorf("Expected SourceScope to be %d, got %d", expectedSourceScope, edns0Subnet.SourceScope)
+	}
+}
+
+func TestLibDnsUpdateDnsOption_EDNS0_LOCAL(t *testing.T) {
+	q := []dns.EDNS0{&dns.EDNS0_LOCAL{Data: []byte("existing data")}}
+	path := []string{"0", utils.DNSData}
+	value := "new data"
+	_, err := updateDnsOption(q, path, value, false)
+	if err != nil {
+		t.Errorf("Expected no error, got %v", err)
+	}
+	edns0Local, ok := q[0].(*dns.EDNS0_LOCAL)
+	if !ok {
+		t.Errorf("Expected type *dns.EDNS0_LOCAL, got %T", q[0])
+	}
+	expectedData := []byte(value)
+	if string(edns0Local.Data) != string(expectedData) {
+		t.Errorf("Expected Data to be %v, got %v", expectedData, edns0Local.Data)
+	}
+}
+
+func TestLibDnsUpdateDnsOption_EDNS0_LOCAL_WrongPath(t *testing.T) {
+	q := []dns.EDNS0{&dns.EDNS0_LOCAL{Data: []byte("existing data")}}
+	path := []string{"0", "wrongField"}
+	value := "new data"
+	_, err := updateDnsOption(q, path, value, false)
+	if err == nil {
+		t.Errorf("Expected error, got nil")
+	}
+	expectedError := utils.ErrWrongPath
+	if err != expectedError {
+		t.Errorf("Expected error %v, got %v", expectedError, err)
+	}
+}
+
+func TestLibDnsUpdateDnsOption_EDNS0_ESU_WrongPath(t *testing.T) {
+	q := []dns.EDNS0{&dns.EDNS0_ESU{Uri: "existing-uri"}}
+	path := []string{"0", "wrongField"}
+	value := "new-uri"
+	_, err := updateDnsOption(q, path, value, false)
+	if err == nil {
+		t.Errorf("Expected error, got nil")
+	}
+	expectedError := utils.ErrWrongPath
+	if err != expectedError {
+		t.Errorf("Expected error %v, got %v", expectedError, err)
+	}
+}
+
+func TestLibDnsUpdateDnsOptio_EDNS0_EDE_InfoCode(t *testing.T) {
+	q := []dns.EDNS0{&dns.EDNS0_EDE{InfoCode: 0}}
+	path := []string{"0", utils.DNSInfoCode}
+	value := int64(123)
+	updatedQ, err := updateDnsOption(q, path, value, false)
+	if err != nil {
+		t.Errorf("Expected no error, got %v", err)
+	}
+	edns0EDE, ok := updatedQ[0].(*dns.EDNS0_EDE)
+	if !ok {
+		t.Errorf("Expected type *dns.EDNS0_EDE, got %T", updatedQ[0])
+	}
+	expectedInfoCode := uint16(value)
+	if edns0EDE.InfoCode != expectedInfoCode {
+		t.Errorf("Expected InfoCode to be %v, got %v", expectedInfoCode, edns0EDE.InfoCode)
+	}
+}
+
+func TestLibDnsUpdateDnsOptionEDNS0EDE_ExtraText(t *testing.T) {
+	q := []dns.EDNS0{&dns.EDNS0_EDE{ExtraText: ""}}
+	path := []string{"0", utils.DNSExtraText}
+	value := "extra text"
+	updatedQ, err := updateDnsOption(q, path, value, false)
+	if err != nil {
+		t.Errorf("Expected no error, got %v", err)
+	}
+	edns0EDE, ok := updatedQ[0].(*dns.EDNS0_EDE)
+	if !ok {
+		t.Errorf("Expected type *dns.EDNS0_EDE, got %T", updatedQ[0])
+	}
+	if edns0EDE.ExtraText != value {
+		t.Errorf("Expected ExtraText to be %q, got %q", value, edns0EDE.ExtraText)
+	}
+}
