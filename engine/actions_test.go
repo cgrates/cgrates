@@ -4868,3 +4868,35 @@ func TestActionsAlterAndDisconnectSessions(t *testing.T) {
 		})
 	}
 }
+
+func TestActionsStringMethod(t *testing.T) {
+	cdrProvider := &cdrLogProvider{}
+	expectedJSON := "{}"
+	jsonStr := cdrProvider.String()
+	if jsonStr != expectedJSON {
+		t.Errorf("String() method result does not match expected JSON. Got: %s, Expected: %s", jsonStr, expectedJSON)
+	}
+}
+
+func TestActionsClone(t *testing.T) {
+	actions := Actions{}
+	cloned, err := actions.Clone()
+	if err != nil {
+		t.Errorf("Expected no error, got %v", err)
+	}
+	if len(cloned.(Actions)) != len(actions) {
+		t.Errorf("Expected cloned Actions length %d, got %d", len(actions), len(cloned.(Actions)))
+	}
+	for i := range actions {
+		if !reflect.DeepEqual(actions[i], cloned.(Actions)[i]) {
+			t.Errorf("Expected cloned Action[%d] to match original, got %+v", i, cloned.(Actions)[i])
+		}
+	}
+	cloned, err = (Actions)(nil).Clone()
+	if err != nil {
+		t.Errorf("Expected no error when apl is nil, got %v", err)
+	}
+	if cloned != nil {
+		t.Errorf("Expected cloned result to be nil when apl is nil, got %+v", cloned)
+	}
+}

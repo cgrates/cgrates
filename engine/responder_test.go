@@ -1430,3 +1430,17 @@ func TestResponderGetCostOnRatingPlans(t *testing.T) {
 		t.Errorf("expected %v, got %v", exp, reply)
 	}
 }
+
+func TestResponderPingResponder(t *testing.T) {
+	responder := &Responder{}
+	ctx := context.Background()
+	var event *utils.CGREvent = nil
+	var reply string
+	err := responder.Ping(ctx, event, &reply)
+	if reply != utils.Pong {
+		t.Errorf("Expected reply to be '%s', got '%s'", utils.Pong, reply)
+	}
+	if err != nil {
+		t.Errorf("Expected error to be nil, got %v", err)
+	}
+}
