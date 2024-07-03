@@ -20,6 +20,7 @@ package engine
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"log"
 	"os"
 	"strings"
@@ -883,4 +884,82 @@ func TestBalancesFieldAsInterfaceIndexPath(t *testing.T) {
 		}
 	})
 
+}
+
+func TestBalanceSummaryFieldAsInterfaceUnsupportedField(t *testing.T) {
+	balanceSummary := &BalanceSummary{}
+	fldPath := []string{"unsupportedField"}
+	expectedError := fmt.Sprintf("unsupported field prefix: <%s>", fldPath[0])
+	_, err := balanceSummary.FieldAsInterface(fldPath)
+	if err == nil {
+		t.Fatalf("Expected an error but got nil")
+	}
+	if err.Error() != expectedError {
+		t.Errorf("Expected error: %s, but got: %s", expectedError, err.Error())
+	}
+}
+
+func TestBalancesSummaryFieldAsInterface(t *testing.T) {
+	var balanceSummary *BalanceSummary
+	fldPath := []string{"Filed"}
+	_, err := balanceSummary.FieldAsInterface(fldPath)
+	if err != utils.ErrNotFound {
+		t.Fatalf("Expected utils.ErrNotFound but got: %v", err)
+	}
+	balanceSummary = &BalanceSummary{}
+	fldPath = []string{}
+	_, err = balanceSummary.FieldAsInterface(fldPath)
+	if err != utils.ErrNotFound {
+		t.Fatalf("Expected utils.ErrNotFound but got: %v", err)
+	}
+	fldPath = []string{"unsupportedField"}
+	expectedError := fmt.Sprintf("unsupported field prefix: <%s>", fldPath[0])
+	_, err = balanceSummary.FieldAsInterface(fldPath)
+	if err == nil {
+		t.Fatalf("Expected an error but got nil")
+	}
+	if err.Error() != expectedError {
+		t.Errorf("Expected error: %s, but got: %s", expectedError, err.Error())
+	}
+}
+
+func TestBalancesHardMatchFilterNilFilter(t *testing.T) {
+	balance := &Balance{}
+	var balanceFilter *BalanceFilter = nil
+	result := balance.HardMatchFilter(balanceFilter, false)
+	if result != true {
+		t.Errorf("Expected true when balanceFilter is nil, but got %v", result)
+	}
+}
+
+func TestBalancesHardMatchFilter(t *testing.T) {
+	t.Run("NilFilter", func(t *testing.T) {
+		balance := &Balance{}
+		var balanceFilter *BalanceFilter = nil
+
+		result := balance.HardMatchFilter(balanceFilter, false)
+		if result != true {
+			t.Errorf("Expected true when balanceFilter is nil, but got %v", result)
+		}
+	})
+	t.Run("UuidMatch", func(t *testing.T) {
+		expectedUuid := "1"
+		balance := &Balance{Uuid: expectedUuid}
+		balanceFilter := &BalanceFilter{Uuid: &expectedUuid}
+
+		result := balance.HardMatchFilter(balanceFilter, false)
+		if result != true {
+			t.Errorf("Expected true when Uuid matches, but got %v", result)
+		}
+	})
+	t.Run("UuidNoMatch", func(t *testing.T) {
+		balance := &Balance{Uuid: "1"}
+		nonMatchingUuid := "2"
+		balanceFilter := &BalanceFilter{Uuid: &nonMatchingUuid}
+
+		result := balance.HardMatchFilter(balanceFilter, false)
+		if result != false {
+			t.Errorf("Expected false when Uuid doesn't match, but got %v", result)
+		}
+	})
 }
