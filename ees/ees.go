@@ -38,17 +38,18 @@ func onCacheEvicted(_ string, value any) {
 	ee.Close()
 }
 
-// NewEventExporterS instantiates the EventExporterS
+// NewEventExporterS initializes a new EventExporterS.
 func NewEventExporterS(cfg *config.CGRConfig, filterS *engine.FilterS,
-	connMgr *engine.ConnManager) (eeS *EventExporterS) {
-	eeS = &EventExporterS{
+	connMgr *engine.ConnManager) (*EventExporterS, error) {
+	eeS := &EventExporterS{
 		cfg:     cfg,
 		filterS: filterS,
 		connMgr: connMgr,
-		eesChs:  make(map[string]*ltcache.Cache),
 	}
-	eeS.setupCache(cfg.EEsNoLksCfg().Cache)
-	return
+	if err := eeS.SetupExporterCache(); err != nil {
+		return nil, fmt.Errorf("failed to set up exporter cache: %v", err)
+	}
+	return eeS, nil
 }
 
 // EventExporterS is managing the EventExporters
@@ -57,29 +58,8 @@ type EventExporterS struct {
 	filterS *engine.FilterS
 	connMgr *engine.ConnManager
 
-	eesChs map[string]*ltcache.Cache // map[eeType]*ltcache.Cache
-	eesMux sync.RWMutex              // protects the eesChs
-}
-
-// ListenAndServe keeps the service alive
-func (eeS *EventExporterS) ListenAndServe(stopChan, cfgRld chan struct{}) {
-	for {
-		select {
-		case <-stopChan: // global exit
-			return
-		case rld := <-cfgRld: // configuration was reloaded, destroy the cache
-			cfgRld <- rld
-			utils.Logger.Info(fmt.Sprintf("<%s> reloading configuration internals.",
-				utils.EEs))
-			eeS.setupCache(eeS.cfg.EEsCfg().Cache)
-		}
-	}
-}
-
-// Shutdown is called to shutdown the service
-func (eeS *EventExporterS) Shutdown() {
-	utils.Logger.Info(fmt.Sprintf("<%s> shutdown <%s>", utils.CoreS, utils.EEs))
-	eeS.setupCache(nil) // cleanup exporters
+	exporterCache map[string]*ltcache.Cache // map[eeType]*ltcache.Cache
+	mu            sync.RWMutex              // protects exporterCache
 }
 
 // Call implements birpc.ClientConnector interface for internal RPC
@@ -87,21 +67,44 @@ func (eeS *EventExporterS) Call(ctx *context.Context, serviceMethod string, args
 	return utils.RPCCall(eeS, serviceMethod, args, reply)
 }
 
-// setupCache deals with cleanup and initialization of the cache of EventExporters
-func (eeS *EventExporterS) setupCache(chCfgs map[string]*config.CacheParamCfg) {
-	eeS.eesMux.Lock()
-	for chID, ch := range eeS.eesChs { // cleanup
+// ClearExporterCache clears the cache of EventExporters.
+func (eeS *EventExporterS) ClearExporterCache() {
+	eeS.mu.Lock()
+	defer eeS.mu.Unlock()
+	for chID, ch := range eeS.exporterCache {
 		ch.Clear()
-		delete(eeS.eesChs, chID)
+		delete(eeS.exporterCache, chID)
 	}
-	for chID, chCfg := range chCfgs { // init
-		if chCfg.Limit == 0 { // cache is disabled, will not create
-			continue
+}
+
+// SetupExporterCache initializes the cache for EventExporters.
+func (eeS *EventExporterS) SetupExporterCache() error {
+	expCache := make(map[string]*ltcache.Cache)
+	eesCfg := eeS.cfg.EEsNoLksCfg()
+
+	// Initialize cache.
+	for chID, chCfg := range eesCfg.Cache {
+		if chCfg.Limit == 0 {
+			continue // skip if caching is disabled
 		}
-		eeS.eesChs[chID] = ltcache.NewCache(chCfg.Limit,
-			chCfg.TTL, chCfg.StaticTTL, onCacheEvicted)
+
+		expCache[chID] = ltcache.NewCache(chCfg.Limit, chCfg.TTL, chCfg.StaticTTL, onCacheEvicted)
+
+		// Precache exporters if required.
+		if chCfg.Precache {
+			for _, expCfg := range eesCfg.Exporters {
+				if expCfg.Type == chID {
+					ee, err := NewEventExporter(expCfg, eeS.cfg, eeS.filterS, eeS.connMgr)
+					if err != nil {
+						return fmt.Errorf("precache: failed to init EventExporter %q: %v", expCfg.ID, err)
+					}
+					expCache[chID].Set(expCfg.ID, ee, nil)
+				}
+			}
+		}
 	}
-	eeS.eesMux.Unlock()
+	eeS.exporterCache = expCache
+	return nil
 }
 
 func (eeS *EventExporterS) attrSProcessEvent(cgrEv *utils.CGREvent, attrIDs []string, ctx string) (*utils.CGREvent, error) {
@@ -167,7 +170,7 @@ func (eeS *EventExporterS) V1ProcessEvent(ctx *context.Context, cgrEv *engine.CG
 	var metricMapLock sync.RWMutex
 	metricsMap := make(map[string]utils.MapStorage)
 	_, hasVerbose := cgrEv.APIOpts[utils.OptsEEsVerbose]
-	for cfgIdx, eeCfg := range eeS.cfg.EEsNoLksCfg().Exporters {
+	for _, eeCfg := range eeS.cfg.EEsNoLksCfg().Exporters {
 		if eeCfg.Type == utils.MetaNone || // ignore *none type exporter
 			(lenExpIDs != 0 && !expIDs.Has(eeCfg.ID)) {
 			continue
@@ -201,9 +204,9 @@ func (eeS *EventExporterS) V1ProcessEvent(ctx *context.Context, cgrEv *engine.CG
 			}
 		}
 
-		eeS.eesMux.RLock()
-		eeCache, hasCache := eeS.eesChs[eeCfg.Type]
-		eeS.eesMux.RUnlock()
+		eeS.mu.RLock()
+		eeCache, hasCache := eeS.exporterCache[eeCfg.Type]
+		eeS.mu.RUnlock()
 		var isCached bool
 		var ee EventExporter
 		if hasCache {
@@ -214,11 +217,11 @@ func (eeS *EventExporterS) V1ProcessEvent(ctx *context.Context, cgrEv *engine.CG
 		}
 
 		if !isCached {
-			if ee, err = NewEventExporter(eeS.cfg.EEsCfg().Exporters[cfgIdx], eeS.cfg, eeS.filterS, eeS.connMgr); err != nil {
+			if ee, err = NewEventExporter(eeCfg, eeS.cfg, eeS.filterS, eeS.connMgr); err != nil {
 				return
 			}
 			if hasCache {
-				eeS.eesMux.Lock()
+				eeS.mu.Lock()
 				if _, has := eeCache.Get(eeCfg.ID); !has {
 					eeCache.Set(eeCfg.ID, ee, nil)
 				} else {
@@ -226,7 +229,7 @@ func (eeS *EventExporterS) V1ProcessEvent(ctx *context.Context, cgrEv *engine.CG
 					// the meantime. Mark this instance to be closed after the export.
 					hasCache = false
 				}
-				eeS.eesMux.Unlock()
+				eeS.mu.Unlock()
 			}
 		}
 

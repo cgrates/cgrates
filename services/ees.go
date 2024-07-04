@@ -33,16 +33,14 @@ import (
 
 // NewEventExporterService constructs EventExporterService
 func NewEventExporterService(cfg *config.CGRConfig, filterSChan chan *engine.FilterS,
-	connMgr *engine.ConnManager, server *cores.Server,
-	intConnChan chan birpc.ClientConnector, anz *AnalyzerService,
-	srvDep map[string]*sync.WaitGroup) servmanager.Service {
+	connMgr *engine.ConnManager, server *cores.Server, intConnChan chan birpc.ClientConnector,
+	anz *AnalyzerService, srvDep map[string]*sync.WaitGroup) servmanager.Service {
 	return &EventExporterService{
 		cfg:         cfg,
 		filterSChan: filterSChan,
 		connMgr:     connMgr,
 		server:      server,
 		intConnChan: intConnChan,
-		rldChan:     make(chan struct{}),
 		anz:         anz,
 		srvDep:      srvDep,
 	}
@@ -50,15 +48,13 @@ func NewEventExporterService(cfg *config.CGRConfig, filterSChan chan *engine.Fil
 
 // EventExporterService is the service structure for EventExporterS
 type EventExporterService struct {
-	sync.RWMutex
+	mu sync.RWMutex
 
 	cfg         *config.CGRConfig
 	filterSChan chan *engine.FilterS
 	connMgr     *engine.ConnManager
 	server      *cores.Server
 	intConnChan chan birpc.ClientConnector
-	rldChan     chan struct{}
-	stopChan    chan struct{}
 
 	eeS    *ees.EventExporterS
 	anz    *AnalyzerService
@@ -77,26 +73,28 @@ func (es *EventExporterService) ShouldRun() (should bool) {
 
 // IsRunning returns if the service is running
 func (es *EventExporterService) IsRunning() bool {
-	es.RLock()
-	defer es.RUnlock()
+	es.mu.RLock()
+	defer es.mu.RUnlock()
 	return es.eeS != nil
 }
 
 // Reload handles the change of config
-func (es *EventExporterService) Reload() (err error) {
-	es.rldChan <- struct{}{}
-	return // for the momment nothing to reload
+func (es *EventExporterService) Reload() error {
+	es.mu.Lock()
+	defer es.mu.Unlock()
+	es.eeS.ClearExporterCache()
+	return es.eeS.SetupExporterCache()
 }
 
 // Shutdown stops the service
-func (es *EventExporterService) Shutdown() (err error) {
-	es.Lock()
-	defer es.Unlock()
-	close(es.stopChan)
-	es.eeS.Shutdown()
+func (es *EventExporterService) Shutdown() error {
+	es.mu.Lock()
+	defer es.mu.Unlock()
+	utils.Logger.Info(fmt.Sprintf("<%s> shutdown <%s>", utils.CoreS, utils.EEs))
+	es.eeS.ClearExporterCache()
 	es.eeS = nil
 	<-es.intConnChan
-	return
+	return nil
 }
 
 // Start should handle the service start
@@ -110,12 +108,14 @@ func (es *EventExporterService) Start() error {
 
 	utils.Logger.Info(fmt.Sprintf("<%s> starting <%s> subsystem", utils.CoreS, utils.EEs))
 
-	es.Lock()
-	defer es.Unlock()
+	es.mu.Lock()
+	defer es.mu.Unlock()
 
-	es.eeS = ees.NewEventExporterS(es.cfg, fltrS, es.connMgr)
-	es.stopChan = make(chan struct{})
-	go es.eeS.ListenAndServe(es.stopChan, es.rldChan)
+	var err error
+	es.eeS, err = ees.NewEventExporterS(es.cfg, fltrS, es.connMgr)
+	if err != nil {
+		return err
+	}
 
 	srv, err := engine.NewServiceWithName(es.eeS, utils.EeS, true)
 	if err != nil {
