@@ -21,6 +21,7 @@ package agents
 import (
 	"fmt"
 	"net"
+	"reflect"
 	"strings"
 	"testing"
 
@@ -1205,7 +1206,7 @@ func TestLibDnsCreateDnsOptionDNSSourceScope(t *testing.T) {
 	}
 }
 
-func TestLibDnsUpdateDnsOption_EDNS0_LOCAL(t *testing.T) {
+func TestLibDnsUpdateDnsOptionEDNS0LOCAL(t *testing.T) {
 	q := []dns.EDNS0{&dns.EDNS0_LOCAL{Data: []byte("existing data")}}
 	path := []string{"0", utils.DNSData}
 	value := "new data"
@@ -1223,7 +1224,7 @@ func TestLibDnsUpdateDnsOption_EDNS0_LOCAL(t *testing.T) {
 	}
 }
 
-func TestLibDnsUpdateDnsOption_EDNS0_LOCAL_WrongPath(t *testing.T) {
+func TestLibDnsUpdateDnsOptionEDNS0LOCALWrongPath(t *testing.T) {
 	q := []dns.EDNS0{&dns.EDNS0_LOCAL{Data: []byte("existing data")}}
 	path := []string{"0", "wrongField"}
 	value := "new data"
@@ -1237,7 +1238,7 @@ func TestLibDnsUpdateDnsOption_EDNS0_LOCAL_WrongPath(t *testing.T) {
 	}
 }
 
-func TestLibDnsUpdateDnsOption_EDNS0_ESU_WrongPath(t *testing.T) {
+func TestLibDnsUpdateDnsOptionEDNS0ESUWrongPath(t *testing.T) {
 	q := []dns.EDNS0{&dns.EDNS0_ESU{Uri: "existing-uri"}}
 	path := []string{"0", "wrongField"}
 	value := "new-uri"
@@ -1251,7 +1252,7 @@ func TestLibDnsUpdateDnsOption_EDNS0_ESU_WrongPath(t *testing.T) {
 	}
 }
 
-func TestLibDnsUpdateDnsOptio_EDNS0_EDE_InfoCode(t *testing.T) {
+func TestLibDnsUpdateDnsOptioEDNS0EDEInfoCode(t *testing.T) {
 	q := []dns.EDNS0{&dns.EDNS0_EDE{InfoCode: 0}}
 	path := []string{"0", utils.DNSInfoCode}
 	value := int64(123)
@@ -1269,7 +1270,7 @@ func TestLibDnsUpdateDnsOptio_EDNS0_EDE_InfoCode(t *testing.T) {
 	}
 }
 
-func TestLibDnsUpdateDnsOptionEDNS0EDE_ExtraText(t *testing.T) {
+func TestLibDnsUpdateDnsOptionEDNS0EDEExtraText(t *testing.T) {
 	q := []dns.EDNS0{&dns.EDNS0_EDE{ExtraText: ""}}
 	path := []string{"0", utils.DNSExtraText}
 	value := "extra text"
@@ -1283,5 +1284,341 @@ func TestLibDnsUpdateDnsOptionEDNS0EDE_ExtraText(t *testing.T) {
 	}
 	if edns0EDE.ExtraText != value {
 		t.Errorf("Expected ExtraText to be %q, got %q", value, edns0EDE.ExtraText)
+	}
+}
+
+func TestLibDnsUpdateDnsOptionPadding(t *testing.T) {
+	paddingOption := &dns.EDNS0_PADDING{}
+	edns0 := []dns.EDNS0{paddingOption}
+	path := []string{"0", utils.DNSPadding}
+	value := "PaddingValue"
+	newBranch := false
+	updatedEdns0, err := updateDnsOption(edns0, path, value, newBranch)
+	if err != nil {
+		t.Errorf("unexpected error: %v", err)
+		return
+	}
+	if len(updatedEdns0) == 0 {
+		t.Errorf("no EDNS0 options returned")
+		return
+	}
+	paddingOpt, ok := updatedEdns0[0].(*dns.EDNS0_PADDING)
+	if !ok {
+		t.Errorf("expected type *dns.EDNS0_PADDING, got %T", updatedEdns0[0])
+		return
+	}
+	expectedPadding := []byte("PaddingValue")
+	if string(paddingOpt.Padding) != string(expectedPadding) {
+		t.Errorf("expected Padding %v, got %v", expectedPadding, paddingOpt.Padding)
+	}
+}
+
+func TestLibDnsUpdateDnsOptionTCPKeepAlive(t *testing.T) {
+	keepAliveOption := &dns.EDNS0_TCP_KEEPALIVE{}
+	edns0 := []dns.EDNS0{keepAliveOption}
+	path := []string{"0", utils.Length}
+	value := int64(300)
+	newBranch := false
+	updatedEdns0, err := updateDnsOption(edns0, path, value, newBranch)
+	if err != nil {
+		t.Errorf("unexpected error: %v", err)
+		return
+	}
+	if len(updatedEdns0) == 0 {
+		t.Errorf("no EDNS0 options returned")
+		return
+	}
+	keepAliveOpt, ok := updatedEdns0[0].(*dns.EDNS0_TCP_KEEPALIVE)
+	if !ok {
+		t.Errorf("expected type *dns.EDNS0_TCP_KEEPALIVE, got %T", updatedEdns0[0])
+		return
+	}
+	expectedLength := uint16(300)
+	if keepAliveOpt.Length != expectedLength {
+		t.Errorf("expected Length %v, got %v", expectedLength, keepAliveOpt.Length)
+	}
+	keepAliveOption = &dns.EDNS0_TCP_KEEPALIVE{}
+	edns0 = []dns.EDNS0{keepAliveOption}
+	path = []string{"0", utils.DNSTimeout}
+	value = int64(100)
+	newBranch = false
+	updatedEdns0, err = updateDnsOption(edns0, path, value, newBranch)
+	if err != nil {
+		t.Errorf("unexpected error: %v", err)
+		return
+	}
+	if len(updatedEdns0) == 0 {
+		t.Errorf("no EDNS0 options returned")
+		return
+	}
+	keepAliveOpt, ok = updatedEdns0[0].(*dns.EDNS0_TCP_KEEPALIVE)
+	if !ok {
+		t.Errorf("expected type *dns.EDNS0_TCP_KEEPALIVE, got %T", updatedEdns0[0])
+		return
+	}
+	expectedTimeout := uint16(100)
+	if keepAliveOpt.Timeout != expectedTimeout {
+		t.Errorf("expected Timeout %v, got %v", expectedTimeout, keepAliveOpt.Timeout)
+	}
+}
+
+func TestLibDnsUpdateDnsOptionExpire(t *testing.T) {
+	expireOption := &dns.EDNS0_EXPIRE{}
+	edns0 := []dns.EDNS0{expireOption}
+	path := []string{"0", utils.DNSExpire}
+	value := int64(3600)
+	newBranch := false
+	updatedEdns0, err := updateDnsOption(edns0, path, value, newBranch)
+	if err != nil {
+		t.Errorf("unexpected error: %v", err)
+		return
+	}
+	if len(updatedEdns0) == 0 {
+		t.Errorf("no EDNS0 options returned")
+		return
+	}
+	expireOpt, ok := updatedEdns0[0].(*dns.EDNS0_EXPIRE)
+	if !ok {
+		t.Errorf("expected type *dns.EDNS0_EXPIRE, got %T", updatedEdns0[0])
+		return
+	}
+	expectedExpire := uint32(3600)
+	if expireOpt.Expire != expectedExpire {
+		t.Errorf("expected Expire %v, got %v", expectedExpire, expireOpt.Expire)
+	}
+}
+
+func TestLibDnsUpdateDnsOptions(t *testing.T) {
+	tests := []struct {
+		name            string
+		path            []string
+		value           any
+		newBranch       bool
+		expectedAlgCode []uint8
+		expectedError   error
+	}{
+		{
+			name:            "Update EDNS0_N3U successfully",
+			path:            []string{"0", utils.DNSN3U},
+			value:           "value",
+			newBranch:       false,
+			expectedAlgCode: []uint8("value"),
+			expectedError:   nil,
+		},
+		{
+			name:            "Error case - wrong field",
+			path:            []string{"0", "wrong_field"},
+			value:           "value",
+			newBranch:       false,
+			expectedAlgCode: nil,
+			expectedError:   utils.ErrWrongPath,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			tEDNS0_N3U := &dns.EDNS0_N3U{
+				AlgCode: []uint8{},
+			}
+			q := []dns.EDNS0{
+				tEDNS0_N3U,
+			}
+			updatedQ, err := updateDnsOption(q, tt.path, tt.value, tt.newBranch)
+			if err != tt.expectedError {
+				t.Fatalf("updateDnsOption failed: expected error %v, got %v", tt.expectedError, err)
+			}
+			if err == utils.ErrWrongPath {
+				return
+			}
+			if !reflect.DeepEqual(tEDNS0_N3U.AlgCode, tt.expectedAlgCode) {
+				t.Errorf("updateDnsOption did not update EDNS0_N3U correctly. Expected AlgCode %v, got %v", tt.expectedAlgCode, tEDNS0_N3U.AlgCode)
+			}
+			expectedLength := 1
+			if len(updatedQ) != expectedLength {
+				t.Errorf("updateDnsOption did not return the expected number of elements. Expected %d, got %d", expectedLength, len(updatedQ))
+			}
+		})
+	}
+}
+
+func TestLibDnsUpdateDnsOptionEDNS0DHU(t *testing.T) {
+	tEDNS0_DHU := &dns.EDNS0_DHU{
+		AlgCode: []uint8{},
+	}
+	q := []dns.EDNS0{
+		tEDNS0_DHU,
+	}
+	path := []string{"0", utils.DNSDHU}
+	value := "value"
+	newBranch := false
+	updatedQ, err := updateDnsOption(q, path, value, newBranch)
+	if err != nil {
+		t.Fatalf("updateDnsOption failed: %v", err)
+	}
+	expectedAlgCode := []uint8("value")
+	if !reflect.DeepEqual(tEDNS0_DHU.AlgCode, expectedAlgCode) {
+		t.Errorf("updateDnsOption did not update EDNS0_DHU correctly. Expected AlgCode %v, got %v", expectedAlgCode, tEDNS0_DHU.AlgCode)
+	}
+
+	expectedLength := 1
+	if len(updatedQ) != expectedLength {
+		t.Errorf("updateDnsOption did not return the expected number of elements. Expected %d, got %d", expectedLength, len(updatedQ))
+	}
+	invalidPath := []string{"0", "wrong_field"}
+	_, err = updateDnsOption(q, invalidPath, value, newBranch)
+	if err == nil {
+		t.Fatal("Expected error but got none")
+	}
+	if err != utils.ErrWrongPath {
+		t.Errorf("Expected error %v but got %v", utils.ErrWrongPath, err)
+	}
+}
+
+func TestLibDnsUpdateDnsOptionEDNS0DAU(t *testing.T) {
+	tEDNS0_DAU := &dns.EDNS0_DAU{
+		AlgCode: []uint8{},
+	}
+	q := []dns.EDNS0{
+		tEDNS0_DAU,
+	}
+	path := []string{"0", utils.DNSDAU}
+	value := "value"
+	newBranch := false
+	updatedQ, err := updateDnsOption(q, path, value, newBranch)
+	if err != nil {
+		t.Fatalf("updateDnsOption failed: %v", err)
+	}
+	expectedAlgCode := []uint8("value")
+	if !reflect.DeepEqual(tEDNS0_DAU.AlgCode, expectedAlgCode) {
+		t.Errorf("updateDnsOption did not update EDNS0_DAU correctly. Expected AlgCode %v, got %v", expectedAlgCode, tEDNS0_DAU.AlgCode)
+	}
+	expectedLength := 1
+	if len(updatedQ) != expectedLength {
+		t.Errorf("updateDnsOption did not return the expected number of elements. Expected %d, got %d", expectedLength, len(updatedQ))
+	}
+	invalidPath := []string{"0", "wrong_field"}
+	_, err = updateDnsOption(q, invalidPath, value, newBranch)
+	if err == nil {
+		t.Fatal("Expected error but got none")
+	}
+	if err != utils.ErrWrongPath {
+		t.Errorf("Expected error %v but got %v", utils.ErrWrongPath, err)
+	}
+}
+
+func TestLibDnsUpdateDnsOptionEDNS0LLQ(t *testing.T) {
+	tEDNS0_LLQ := &dns.EDNS0_LLQ{
+		Version:   0,
+		Opcode:    0,
+		Error:     0,
+		Id:        0,
+		LeaseLife: 0,
+	}
+	q := []dns.EDNS0{
+		tEDNS0_LLQ,
+	}
+	path := []string{"0"}
+	value := int64(123)
+	newBranch := false
+	testCases := []struct {
+		field          string
+		expectedUpdate interface{}
+	}{
+		{utils.VersionName, uint16(123)},
+		{utils.DNSOpcode, uint16(123)},
+		{utils.Error, uint16(123)},
+		{utils.DNSId, uint64(123)},
+		{utils.DNSLeaseLife, uint32(123)},
+	}
+	for _, tc := range testCases {
+		updatedQ, err := updateDnsOption(q, append(path, tc.field), value, newBranch)
+		if err != nil {
+			t.Fatalf("updateDnsOption failed for field %s: %v", tc.field, err)
+		}
+		switch tc.field {
+		case utils.VersionName:
+			if tEDNS0_LLQ.Version != tc.expectedUpdate.(uint16) {
+				t.Errorf("updateDnsOption did not update Version correctly. Expected %v, got %v", tc.expectedUpdate, tEDNS0_LLQ.Version)
+			}
+		case utils.DNSOpcode:
+			if tEDNS0_LLQ.Opcode != tc.expectedUpdate.(uint16) {
+				t.Errorf("updateDnsOption did not update Opcode correctly. Expected %v, got %v", tc.expectedUpdate, tEDNS0_LLQ.Opcode)
+			}
+		case utils.Error:
+			if tEDNS0_LLQ.Error != tc.expectedUpdate.(uint16) {
+				t.Errorf("updateDnsOption did not update Error correctly. Expected %v, got %v", tc.expectedUpdate, tEDNS0_LLQ.Error)
+			}
+		case utils.DNSId:
+			if tEDNS0_LLQ.Id != tc.expectedUpdate.(uint64) {
+				t.Errorf("updateDnsOption did not update Id correctly. Expected %v, got %v", tc.expectedUpdate, tEDNS0_LLQ.Id)
+			}
+		case utils.DNSLeaseLife:
+			if tEDNS0_LLQ.LeaseLife != tc.expectedUpdate.(uint32) {
+				t.Errorf("updateDnsOption did not update LeaseLife correctly. Expected %v, got %v", tc.expectedUpdate, tEDNS0_LLQ.LeaseLife)
+			}
+		default:
+			t.Fatalf("Unexpected field: %s", tc.field)
+		}
+		expectedLength := 1
+		if len(updatedQ) != expectedLength {
+			t.Errorf("updateDnsOption did not return the expected number of elements. Expected %d, got %d", expectedLength, len(updatedQ))
+		}
+	}
+	invalidPath := []string{"0", "wrong_field"}
+	_, err := updateDnsOption(q, invalidPath, value, newBranch)
+	if err == nil {
+		t.Fatal("Expected error but got none")
+	}
+	if err != utils.ErrWrongPath {
+		t.Errorf("Expected error %v but got %v", utils.ErrWrongPath, err)
+	}
+}
+
+func TestLibDnsUpdateDnsOptionEDNS0UL(t *testing.T) {
+	tEDNS0_UL := &dns.EDNS0_UL{
+		Lease:    0,
+		KeyLease: 0,
+	}
+	q := []dns.EDNS0{
+		tEDNS0_UL,
+	}
+	path := []string{"0"}
+	value := int64(123)
+	newBranch := false
+	testCases := []struct {
+		field          string
+		expectedUpdate interface{}
+	}{
+		{utils.DNSLease, uint32(123)},
+		{utils.DNSKeyLease, uint32(123)},
+	}
+	for _, tc := range testCases {
+		updatedQ, err := updateDnsOption(q, append(path, tc.field), value, newBranch)
+		if err != nil {
+			t.Fatalf("updateDnsOption failed for field %s: %v", tc.field, err)
+		}
+		switch tc.field {
+		case utils.DNSLease:
+			if tEDNS0_UL.Lease != tc.expectedUpdate.(uint32) {
+				t.Errorf("updateDnsOption did not update Lease correctly. Expected %v, got %v", tc.expectedUpdate, tEDNS0_UL.Lease)
+			}
+		case utils.DNSKeyLease:
+			if tEDNS0_UL.KeyLease != tc.expectedUpdate.(uint32) {
+				t.Errorf("updateDnsOption did not update KeyLease correctly. Expected %v, got %v", tc.expectedUpdate, tEDNS0_UL.KeyLease)
+			}
+		default:
+			t.Fatalf("Unexpected field: %s", tc.field)
+		}
+		expectedLength := 1
+		if len(updatedQ) != expectedLength {
+			t.Errorf("updateDnsOption did not return the expected number of elements. Expected %d, got %d", expectedLength, len(updatedQ))
+		}
+	}
+	invalidPath := []string{"0", "wrong_field"}
+	_, err := updateDnsOption(q, invalidPath, value, newBranch)
+	if err == nil {
+		t.Fatal("Expected error but got none")
+	}
+	if err != utils.ErrWrongPath {
+		t.Errorf("Expected error %v but got %v", utils.ErrWrongPath, err)
 	}
 }
