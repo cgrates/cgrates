@@ -107,16 +107,17 @@ type DBOptsJson struct {
 	RedisCluster            *bool             `json:"redisCluster"`
 	RedisClusterSync        *string           `json:"redisClusterSync"`
 	RedisClusterOndownDelay *string           `json:"redisClusterOndownDelay"`
-	RedisPoolPipelineWindow *string           `json:"redisPoolPipelineWindow"`
 	RedisConnectTimeout     *string           `json:"redisConnectTimeout"`
 	RedisReadTimeout        *string           `json:"redisReadTimeout"`
 	RedisWriteTimeout       *string           `json:"redisWriteTimeout"`
-	MongoQueryTimeout       *string           `json:"mongoQueryTimeout"`
-	MongoConnScheme         *string           `json:"mongoConnScheme"`
+	RedisPoolPipelineWindow *string           `json:"redisPoolPipelineWindow"`
+	RedisPoolPipelineLimit  *int              `json:"redisPoolPipelineLimit"`
 	RedisTLS                *bool             `json:"redisTLS"`
 	RedisClientCertificate  *string           `json:"redisClientCertificate"`
 	RedisClientKey          *string           `json:"redisClientKey"`
 	RedisCACertificate      *string           `json:"redisCACertificate"`
+	MongoQueryTimeout       *string           `json:"mongoQueryTimeout"`
+	MongoConnScheme         *string           `json:"mongoConnScheme"`
 	SQLMaxOpenConns         *int              `json:"sqlMaxOpenConns"`
 	SQLMaxIdleConns         *int              `json:"sqlMaxIdleConns"`
 	SQLConnMaxLifetime      *string           `json:"sqlConnMaxLifetime"`

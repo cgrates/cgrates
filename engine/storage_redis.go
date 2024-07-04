@@ -74,7 +74,8 @@ const (
 
 func NewRedisStorage(address string, db int, user, pass, mrshlerStr string,
 	maxConns, attempts int, sentinelName string, isCluster bool, clusterSync,
-	clusterOnDownDelay, pipelineWindow, connTimeout, readTimeout, writeTimeout time.Duration,
+	clusterOnDownDelay, connTimeout, readTimeout, writeTimeout,
+	pipelineWindow time.Duration, pipelineLimit int,
 	tlsConn bool, tlsClientCert, tlsClientKey, tlsCACert string) (_ *RedisStorage, err error) {
 	var ms Marshaler
 	if ms, err = NewMarshaler(mrshlerStr); err != nil {
@@ -127,7 +128,8 @@ func NewRedisStorage(address string, db int, user, pass, mrshlerStr string,
 
 	var client radix.Client
 	if client, err = newRedisClient(address, sentinelName,
-		isCluster, clusterSync, clusterOnDownDelay, pipelineWindow,
+		isCluster, clusterSync, clusterOnDownDelay,
+		pipelineWindow, pipelineLimit,
 		maxConns, attempts, dialOpts); err != nil {
 		return
 	}
@@ -150,7 +152,10 @@ func redisDial(network, addr string, attempts int, opts ...radix.DialOpt) (conn 
 }
 
 func newRedisClient(address, sentinelName string, isCluster bool,
-	clusterSync, clusterOnDownDelay, pipelineWindow time.Duration, maxConns, attempts int, dialOpts []radix.DialOpt) (radix.Client, error) {
+	clusterSync, clusterOnDownDelay, pipelineWindow time.Duration,
+	pipelineLimit, maxConns, attempts int, dialOpts []radix.DialOpt,
+) (radix.Client, error) {
+
 	dialFunc := func(network, addr string) (radix.Conn, error) {
 		return redisDial(network, addr, attempts, dialOpts...)
 	}
@@ -160,7 +165,7 @@ func newRedisClient(address, sentinelName string, isCluster bool,
 
 	// Configure common pool options.
 	poolOpts := make([]radix.PoolOpt, 0, 2)
-	poolOpts = append(poolOpts, radix.PoolPipelineWindow(pipelineWindow, 0))
+	poolOpts = append(poolOpts, radix.PoolPipelineWindow(pipelineWindow, pipelineLimit))
 
 	switch {
 	case isCluster:

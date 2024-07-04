@@ -71,14 +71,16 @@ var (
 		"The delay before executing the commands if the redis cluster is in the CLUSTERDOWN state")
 	dbRedisPoolPipelineWindow = cgrTesterFlags.Duration("redisPoolPipelineWindow", cgrConfig.DataDbCfg().Opts.RedisPoolPipelineWindow,
 		"Duration after which internal pipelines are flushed. Zero disables implicit pipelining.")
-	dbQueryTimeout = cgrTesterFlags.Duration("mongoQueryTimeout", cgrConfig.DataDbCfg().Opts.MongoQueryTimeout,
-		"The timeout for queries")
+	dbRedisPoolPipelineLimit = cgrTesterFlags.Int(utils.RedisPoolPipelineLimitCfg, cgrConfig.DataDbCfg().Opts.RedisPoolPipelineLimit,
+		"Maximum number of commands that can be pipelined before flushing. Zero means no limit.")
 	dbRedisConnectTimeout = cgrTesterFlags.Duration(utils.RedisConnectTimeoutCfg, cgrConfig.DataDbCfg().Opts.RedisConnectTimeout,
 		"The amount of wait time until timeout for a connection attempt")
 	dbRedisReadTimeout = cgrTesterFlags.Duration(utils.RedisReadTimeoutCfg, cgrConfig.DataDbCfg().Opts.RedisReadTimeout,
 		"The amount of wait time until timeout for reading operations")
 	dbRedisWriteTimeout = cgrTesterFlags.Duration(utils.RedisWriteTimeoutCfg, cgrConfig.DataDbCfg().Opts.RedisWriteTimeout,
 		"The amount of wait time until timeout for writing operations")
+	dbQueryTimeout = cgrTesterFlags.Duration("mongoQueryTimeout", cgrConfig.DataDbCfg().Opts.MongoQueryTimeout,
+		"The timeout for queries")
 	dbMongoConnScheme = cgrTesterFlags.String(utils.MongoConnSchemeCfg, cgrConfig.DataDbCfg().Opts.MongoConnScheme,
 		"Scheme for MongoDB connection <mongodb|mongodb+srv>")
 	raterAddress   = cgrTesterFlags.String("rater_address", "", "Rater address for remote tests. Empty for internal rater.")
@@ -291,9 +293,6 @@ func main() {
 	if *dbRedisClusterDownDelay != cgrConfig.DataDbCfg().Opts.RedisClusterOndownDelay {
 		tstCfg.DataDbCfg().Opts.RedisClusterOndownDelay = *dbRedisClusterDownDelay
 	}
-	if *dbRedisPoolPipelineWindow != cgrConfig.DataDbCfg().Opts.RedisPoolPipelineWindow {
-		tstCfg.DataDbCfg().Opts.RedisPoolPipelineWindow = *dbRedisPoolPipelineWindow
-	}
 	if *dbRedisConnectTimeout != cgrConfig.DataDbCfg().Opts.RedisConnectTimeout {
 		tstCfg.DataDbCfg().Opts.RedisConnectTimeout = *dbRedisConnectTimeout
 	}
@@ -302,6 +301,12 @@ func main() {
 	}
 	if *dbRedisWriteTimeout != cgrConfig.DataDbCfg().Opts.RedisWriteTimeout {
 		tstCfg.DataDbCfg().Opts.RedisWriteTimeout = *dbRedisWriteTimeout
+	}
+	if *dbRedisPoolPipelineWindow != cgrConfig.DataDbCfg().Opts.RedisPoolPipelineWindow {
+		tstCfg.DataDbCfg().Opts.RedisPoolPipelineWindow = *dbRedisPoolPipelineWindow
+	}
+	if *dbRedisPoolPipelineLimit != cgrConfig.DataDbCfg().Opts.RedisPoolPipelineLimit {
+		tstCfg.DataDbCfg().Opts.RedisPoolPipelineLimit = *dbRedisPoolPipelineLimit
 	}
 	if *dbQueryTimeout != cgrConfig.DataDbCfg().Opts.MongoQueryTimeout {
 		tstCfg.DataDbCfg().Opts.MongoQueryTimeout = *dbQueryTimeout
