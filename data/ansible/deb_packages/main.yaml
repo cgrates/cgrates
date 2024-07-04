@@ -42,10 +42,10 @@
       apt: name={{ dependencies }} state=present
 
     - name: Configure reprepro
-      include: reprepro.yaml
+      import_tasks: reprepro.yaml
 
     - name: Generate GPG Key
-      include: gpg.yaml
+      import_tasks: gpg.yaml
 
     - name: Check if NGINX needs to be configured
       become: true
@@ -54,7 +54,7 @@
       register: nginxConfig
 
     - name: Configure NGINX server
-      include: nginx.yaml
+      include_tasks: nginx.yaml
       when: nginxConfig.stdout_lines|length < 1
 
     - name: Enable and start nginx
