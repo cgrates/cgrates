@@ -22,6 +22,7 @@ import (
 	"fmt"
 	"net"
 	"strconv"
+	"sync"
 	"testing"
 	"time"
 
@@ -64,6 +65,9 @@ func TestKafkaSSL(t *testing.T) {
 
 "ees": {
     "enabled": true,
+	// "cache": {
+	// 	"*kafka_json_map": {"limit": -1, "ttl": "5s", "precache": false},
+	// },
     "exporters": [
         {
             "id": "kafka_ssl",								
@@ -135,32 +139,52 @@ func TestKafkaSSL(t *testing.T) {
 	// export event to cgrates-cdrs topic, then the reader will consume it and
 	// export it to the 'processed' topic
 	t.Run("export kafka event", func(t *testing.T) {
+		n := 1
+		var wg sync.WaitGroup
+		wg.Add(n)
+
 		var reply map[string]map[string]interface{}
-		if err := client.Call(context.Background(), utils.EeSv1ProcessEvent,
-			&engine.CGREventWithEeIDs{
-				EeIDs: []string{"kafka_ssl"},
-				CGREvent: &utils.CGREvent{
-					Tenant: "cgrates.org",
-					ID:     "KafkaEvent",
-					Event: map[string]interface{}{
-						utils.ToR:          utils.MetaVoice,
-						utils.OriginID:     "abcdef",
-						utils.OriginHost:   "192.168.1.1",
-						utils.RequestType:  utils.MetaRated,
-						utils.Tenant:       "cgrates.org",
-						utils.Category:     "call",
-						utils.AccountField: "1001",
-						utils.Subject:      "1001",
-						utils.Destination:  "1002",
-						utils.SetupTime:    time.Unix(1383813745, 0).UTC(),
-						utils.AnswerTime:   time.Unix(1383813748, 0).UTC(),
-						utils.Usage:        10 * time.Second,
-						utils.RunID:        utils.MetaDefault,
-						utils.Cost:         1.01,
-					},
-				},
-			}, &reply); err != nil {
-			t.Error(err)
+		for range n {
+			go func() {
+				defer wg.Done()
+				if err := client.Call(context.Background(), utils.EeSv1ProcessEvent,
+					&engine.CGREventWithEeIDs{
+						EeIDs: []string{"kafka_ssl"},
+						CGREvent: &utils.CGREvent{
+							Tenant: "cgrates.org",
+							ID:     "KafkaEvent",
+							Event: map[string]interface{}{
+								utils.ToR:          utils.MetaVoice,
+								utils.OriginID:     "abcdef",
+								utils.OriginHost:   "192.168.1.1",
+								utils.RequestType:  utils.MetaRated,
+								utils.Tenant:       "cgrates.org",
+								utils.Category:     "call",
+								utils.AccountField: "1001",
+								utils.Subject:      "1001",
+								utils.Destination:  "1002",
+								utils.SetupTime:    time.Unix(1383813745, 0).UTC(),
+								utils.AnswerTime:   time.Unix(1383813748, 0).UTC(),
+								utils.Usage:        10 * time.Second,
+								utils.RunID:        utils.MetaDefault,
+								utils.Cost:         1.01,
+							},
+						},
+					}, &reply); err != nil {
+					t.Error(err)
+				}
+			}()
+		}
+		done := make(chan struct{})
+		go func() {
+			wg.Wait()
+			close(done)
+		}()
+
+		select {
+		case <-done:
+		case <-time.After(2 * time.Second):
+			t.Errorf("timed out waiting for %s replies", utils.EeSv1ProcessEvent)
 		}
 	})
 
