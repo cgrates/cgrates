@@ -20,7 +20,6 @@ package engine
 import (
 	"bytes"
 	"encoding/json"
-	"errors"
 	"log"
 	"os"
 	"reflect"
@@ -270,10 +269,18 @@ func TestDebitCreditBlocker(t *testing.T) {
 	}
 	rifsBalance := &Account{ID: "other",
 		BalanceMap: map[string]Balances{utils.MetaMonetary: {b1, b2}}}
-	_, err := rifsBalance.debitCreditBalance(cd, false, true, true, nil)
-	if !errors.Is(err, utils.ErrInsufficientCreditBalanceBlocker) {
-		t.Fatalf("expected %v, received %v", utils.ErrInsufficientCreditBalanceBlocker, err)
+	expCC := &CallCost{
+		Category:         "0",
+		Destination:      "0723045326",
+		ToR:              "*voice",
+		deductConnectFee: true,
 	}
+	if cc, err := rifsBalance.debitCreditBalance(cd, false, true, true, nil); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expCC, cc) {
+		t.Errorf("expected <%+v>, \nreceived <%+v>", expCC, cc)
+	}
+
 	if rifsBalance.BalanceMap[utils.MetaMonetary][0].GetValue() != 0.1152 ||
 		rifsBalance.BalanceMap[utils.MetaMonetary][1].GetValue() != 1.5 {
 		t.Error("should not have touched the balances: ",

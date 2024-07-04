@@ -21,6 +21,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package general_tests
 
 import (
+	"reflect"
+	"strconv"
 	"testing"
 	"time"
 
@@ -218,8 +220,21 @@ cgrates.org,sms,1001,2014-01-14T00:00:00Z,RP_ANY,`,
 		if len(cdrs) != 1 {
 			t.Fatalf("expected to receive only one CDR: %v", utils.ToJSON(cdrs))
 		}
-		if cdrs[0].ExtraInfo != utils.ErrInsufficientCreditBalanceBlocker.Error() {
-			t.Errorf("Unexpected ExtraInfo field value: %v", cdrs[0].ExtraInfo)
+		for _, cdr := range cdrs {
+			if cdr.Usage != 3 {
+				t.Errorf("expected <%+v>, \nreceived <%+v>", 3, cdr.Usage)
+			} else if *cdr.CostDetails.Usage != 2*time.Nanosecond {
+				t.Errorf("expected <%+v>, \nreceived <%+v>", 2*time.Nanosecond, cdr.CostDetails.Usage)
+			} else if cdr.CostDetails.Charges[0].Increments[0].Usage != 1*time.Nanosecond {
+				t.Errorf("expected <%+v>, \nreceived <%+v>", 1*time.Nanosecond, cdr.CostDetails.Charges[0].Increments[0].Usage)
+			} else if cdr.CostDetails.AccountSummary.BalanceSummaries[0].ID != "balance_sms" {
+				t.Errorf("expected <%+v>, \nreceived <%+v>", "balance_sms", cdr.CostDetails.AccountSummary.BalanceSummaries[0].ID)
+			} else if cdr.CostDetails.AccountSummary.BalanceSummaries[0].Initial != 2 {
+				t.Errorf("expected <%+v>, \nreceived <%+v>", 2, cdr.CostDetails.AccountSummary.BalanceSummaries[0].Initial)
+			} else if cdr.CostDetails.AccountSummary.BalanceSummaries[0].Value != 0 {
+				t.Errorf("expected <%+v>, \nreceived <%+v>", 0, cdr.CostDetails.AccountSummary.BalanceSummaries[0].Value)
+			}
+
 		}
 	})
 
@@ -236,7 +251,7 @@ cgrates.org,sms,1001,2014-01-14T00:00:00Z,RP_ANY,`,
 			t.Fatalf("expected account to have one balance of type *monetary and one of type *sms, received %v", acnt)
 		}
 		smsBalance := acnt.BalanceMap[utils.MetaSMS][0]
-		if smsBalance.ID != "balance_sms" || smsBalance.Value != 2 || !smsBalance.Blocker {
+		if smsBalance.ID != "balance_sms" || smsBalance.Value != 0 || !smsBalance.Blocker {
 			t.Fatalf("received account with unexpected *sms balance: %v", smsBalance)
 		}
 		monetaryBalance := acnt.BalanceMap[utils.MetaMonetary][0]
@@ -318,7 +333,6 @@ func TestBalanceFactor(t *testing.T) {
 	"cdrs_conns": ["*internal"],
 	"chargers_conns": ["*internal"],
 	"rals_conns": ["*internal"],
-	"backup_interval": "-1"
 },
 
 "chargers": {
@@ -1184,6 +1198,301 @@ ACT_TOPUP_SMS,*topup_reset,,,balance_sms,*sms,,*any,,,*unlimited,,1000,10,false,
 			cdrs[1].Source != utils.CDRLog ||
 			cdrs[1].ToR != utils.MetaSMS {
 			t.Errorf("unexpected cdrs received: %v", utils.ToJSON(cdrs))
+		}
+	})
+}
+
+func TestBalanceBlockerInIncrements(t *testing.T) {
+	switch *utils.DBType {
+	case utils.MetaInternal:
+	case utils.MetaMySQL, utils.MetaMongo, utils.MetaPostgres:
+		t.SkipNow()
+	default:
+		t.Fatal("unsupported dbtype value")
+	}
+
+	content := `{
+
+	"general": {
+		"log_level": 7,
+	},
+	
+	"data_db": {								
+		"db_type": "*internal"
+	},
+	
+	"stor_db": {
+		"db_type": "*internal"
+	},
+	
+	"rals": {
+		"enabled": true,
+		"sessions_conns": ["*internal"],
+	},
+	
+	"cdrs": {
+		"enabled": true,
+		"rals_conns": ["*internal"]
+	},
+
+	"chargers":{
+		"enabled": true,
+	},
+
+	"sessions":{
+		"enabled": true,
+		"chargers_conns": ["*internal"],
+		"rals_conns":  ["*internal"],
+		"cdrs_conns":  ["*internal"],
+	},
+	
+	"schedulers": {
+		"enabled": true
+	},
+	
+	"apiers": {
+		"enabled": true,
+		"scheduler_conns": ["*internal"]
+	}
+	
+	}`
+
+	tpFiles := map[string]string{
+		utils.AccountActionsCsv: `#Tenant,Account,ActionPlanId,ActionTriggersId,AllowNegative,Disabled,`,
+		utils.ActionPlansCsv:    `#Id,ActionsId,TimingId,Weight`,
+		utils.ActionsCsv:        `#ActionsId[0],Action[1],ExtraParameters[2],Filter[3],BalanceId[4],BalanceType[5],Categories[6],DestinationIds[7],RatingSubject[8],SharedGroup[9],ExpiryTime[10],TimingIds[11],Units[12],BalanceWeight[13],BalanceBlocker[14],BalanceDisabled[15],Weight[16]`,
+		utils.ChargersCsv: `#Tenant,ID,FilterIDs,ActivationInterval,RunID,AttributeIDs,Weight
+cgrates.org,DEFAULT,,,DEFAULT,*none,20`,
+		utils.DestinationRatesCsv: `#Id,DestinationId,RatesTag,RoundingMethod,RoundingDecimals,MaxCost,MaxCostStrategy
+DR_MONETARY,*any,RT_MONETARY,*up,20,0,`,
+		utils.RatesCsv: `#Id,ConnectFee,Rate,RateUnit,RateIncrement,GroupIntervalStart
+RT_MONETARY,0,1,1,1,0`,
+		utils.RatingPlansCsv: `#Id,DestinationRatesId,TimingTag,Weight
+RP_MONETARY,DR_MONETARY,*any,10`,
+		utils.RatingProfilesCsv: `#Tenant,Category,Subject,ActivationTime,RatingPlanId,RatesFallbackSubject`,
+	}
+
+	testEnv := TestEnvironment{
+		Name:       "TestBalanceFactor",
+		ConfigJSON: content,
+		TpFiles:    tpFiles,
+	}
+	client, _ := testEnv.Setup(t, *utils.WaitRater)
+	t.Run("SetAccount", func(t *testing.T) {
+		time.Sleep(10 * time.Millisecond) // wait for tps to be loaded
+		var reply string
+		if err := client.Call(context.Background(), utils.APIerSv2SetAccount,
+			&utils.AttrSetAccount{Tenant: "cgrates.org", Account: "10_unit_acc"}, &reply); err != nil {
+			t.Error(err)
+		} else if reply != utils.OK {
+			t.Error("Unexpected reply returned", reply)
+		}
+
+		var acnt engine.Account
+		attrs := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "10_unit_acc"}
+		if err := client.Call(context.Background(), utils.APIerSv2GetAccount, attrs, &acnt); err != nil {
+			t.Fatal(err)
+		}
+		expAcnt := &engine.Account{
+			ID: "cgrates.org:10_unit_acc",
+		}
+		if !reflect.DeepEqual(utils.ToJSON(expAcnt), utils.ToJSON(acnt)) {
+			t.Errorf("expected <%+v>, \nreceived <%+v>", utils.ToJSON(expAcnt), utils.ToJSON(acnt))
+		}
+	})
+
+	t.Run("SetBalance", func(t *testing.T) {
+		var replySetBalance string
+		if err := client.Call(context.Background(), utils.APIerSv1SetBalance,
+			&utils.AttrSetBalance{
+				Tenant:      "cgrates.org",
+				Account:     "10_unit_acc",
+				BalanceType: utils.MetaMonetary,
+				Balance: map[string]any{
+					utils.ID:      "10_unit_bal",
+					utils.Value:   10,
+					utils.Blocker: true,
+				},
+			}, &replySetBalance); err != nil {
+			t.Error(err)
+		}
+		if err := client.Call(context.Background(), utils.APIerSv1SetBalance,
+			&utils.AttrSetBalance{
+				Tenant:      "cgrates.org",
+				Account:     "10_unit_acc",
+				BalanceType: utils.MetaMonetary,
+				Balance: map[string]any{
+					utils.ID:    "other_bal",
+					utils.Value: 999999,
+				},
+			}, &replySetBalance); err != nil {
+			t.Error(err)
+		}
+		var acnt engine.Account
+		attrs := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "10_unit_acc"}
+		if err := client.Call(context.Background(), utils.APIerSv2GetAccount, attrs, &acnt); err != nil {
+			t.Fatal(err)
+		}
+		expAcnt := &engine.Account{
+			ID: "cgrates.org:10_unit_acc",
+			BalanceMap: map[string]engine.Balances{
+				utils.MetaMonetary: {
+					{
+						Uuid:    acnt.BalanceMap[utils.MetaMonetary][0].Uuid,
+						ID:      "10_unit_bal",
+						Value:   10,
+						Blocker: true,
+					},
+					{
+						Uuid:  acnt.BalanceMap[utils.MetaMonetary][1].Uuid,
+						ID:    "other_bal",
+						Value: 999999,
+					},
+				},
+			},
+		}
+		if !reflect.DeepEqual(utils.ToJSON(expAcnt), utils.ToJSON(acnt)) {
+			t.Errorf("expected <%+v>, \nreceived <%+v>", utils.ToJSON(expAcnt), utils.ToJSON(acnt))
+		}
+	})
+
+	t.Run("DebitIncrements", func(t *testing.T) {
+		args := &sessions.V1AuthorizeArgs{
+			GetMaxUsage: true,
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "TestSSv1ItAuth",
+				Event: map[string]any{
+					utils.Tenant:       "cgrates.org",
+					utils.ToR:          utils.MetaMonetary,
+					utils.RequestType:  utils.MetaPrepaid,
+					utils.OriginID:     "TestSSv1It1",
+					utils.AccountField: "10_unit_acc",
+					utils.AnswerTime:   utils.MetaNow,
+					utils.Usage:        12,
+				},
+			},
+		}
+		var rply sessions.V1AuthorizeReply
+		if err := client.Call(context.Background(), utils.SessionSv1AuthorizeEvent, args, &rply); err != nil {
+			t.Error(err)
+		}
+		if rply.MaxUsage == nil || *rply.MaxUsage != 10 {
+			t.Errorf("Unexpected MaxUsage: %v", rply.MaxUsage)
+		}
+
+		for i := 0; i < 3; i++ {
+			iStr := strconv.Itoa(i)
+			var replyUpdate sessions.V1UpdateSessionReply
+			if err := client.Call(context.Background(), utils.SessionSv1UpdateSession,
+				&sessions.V1UpdateSessionArgs{
+					UpdateSession: true,
+					CGREvent: &utils.CGREvent{
+						Tenant: "cgrates.org",
+						ID:     "SessionSv1UpdateSession" + iStr,
+						Event: map[string]any{
+							utils.Tenant:       "cgrates.org",
+							utils.ToR:          utils.MetaMonetary,
+							utils.RequestType:  utils.MetaPrepaid,
+							utils.OriginID:     "TestSSv1Update" + iStr,
+							utils.AccountField: "10_unit_acc",
+							utils.Usage:        3,
+						},
+					},
+				}, &replyUpdate); err != nil {
+				t.Error(err)
+			}
+		}
+		var acnt engine.Account
+		attrs := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "10_unit_acc"}
+		if err := client.Call(context.Background(), utils.APIerSv2GetAccount, attrs, &acnt); err != nil {
+			t.Fatal(err)
+		}
+		expAcnt := &engine.Account{
+			ID: "cgrates.org:10_unit_acc",
+			BalanceMap: map[string]engine.Balances{
+				utils.MetaMonetary: {
+					{
+						Uuid:    acnt.BalanceMap[utils.MetaMonetary][0].Uuid,
+						ID:      "10_unit_bal",
+						Value:   1,
+						Blocker: true,
+					},
+					{
+						Uuid:  acnt.BalanceMap[utils.MetaMonetary][1].Uuid,
+						ID:    "other_bal",
+						Value: 999999,
+					},
+				},
+			},
+		}
+		if !reflect.DeepEqual(utils.ToJSON(expAcnt), utils.ToJSON(acnt)) {
+			t.Errorf("expected <%+v>, \nreceived <%+v>", utils.ToJSON(expAcnt), utils.ToJSON(acnt))
+		}
+
+		var replyProcessCDR string
+		if err := client.Call(context.Background(), utils.SessionSv1ProcessCDR,
+			&utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "testSesRnd2PrepaidProcessCDR",
+				Event: map[string]any{
+					utils.OriginID:     "TestSSv1ProcessCDR",
+					utils.Tenant:       "cgrates.org",
+					utils.ToR:          utils.MetaMonetary,
+					utils.RequestType:  utils.MetaPrepaid,
+					utils.AccountField: "10_unit_acc",
+					utils.Usage:        3,
+				},
+			}, &replyProcessCDR); err != nil {
+			t.Error(err)
+		}
+
+		var cdrs []*engine.CDR
+		if err := client.Call(context.Background(), utils.CDRsV1GetCDRs, &utils.RPCCDRsFilterWithAPIOpts{
+			RPCCDRsFilter: &utils.RPCCDRsFilter{
+				OriginIDs: []string{"TestSSv1ProcessCDR"},
+			}}, &cdrs); err != nil {
+			t.Fatal(err)
+		}
+		for _, cdr := range cdrs {
+			if cdr.Usage != 3 {
+				t.Errorf("expected <%+v>, \nreceived <%+v>", 3, cdr.Usage)
+			} else if *cdr.CostDetails.Usage != 1*time.Nanosecond {
+				t.Errorf("expected <%+v>, \nreceived <%+v>", 1*time.Nanosecond, cdr.CostDetails.Usage)
+			} else if cdr.CostDetails.Charges[0].Increments[0].Usage != 1*time.Nanosecond {
+				t.Errorf("expected <%+v>, \nreceived <%+v>", 1*time.Nanosecond, cdr.CostDetails.Charges[0].Increments[0].Usage)
+			} else if cdr.CostDetails.AccountSummary.BalanceSummaries[0].ID != "10_unit_bal" {
+				t.Errorf("expected <%+v>, \nreceived <%+v>", "10_unit_bal", cdr.CostDetails.AccountSummary.BalanceSummaries[0].ID)
+			} else if cdr.CostDetails.AccountSummary.BalanceSummaries[0].Initial != 1 {
+				t.Errorf("expected <%+v>, \nreceived <%+v>", 1, cdr.CostDetails.AccountSummary.BalanceSummaries[0].Initial)
+			} else if cdr.CostDetails.AccountSummary.BalanceSummaries[0].Value != 0 {
+				t.Errorf("expected <%+v>, \nreceived <%+v>", 0, cdr.CostDetails.AccountSummary.BalanceSummaries[0].Value)
+			}
+
+		}
+		if err := client.Call(context.Background(), utils.APIerSv2GetAccount, attrs, &acnt); err != nil {
+			t.Error(err)
+		}
+		expAcnt = &engine.Account{
+			ID: "cgrates.org:10_unit_acc",
+			BalanceMap: map[string]engine.Balances{
+				utils.MetaMonetary: {
+					{
+						Uuid:    acnt.BalanceMap[utils.MetaMonetary][0].Uuid,
+						ID:      "10_unit_bal",
+						Value:   0,
+						Blocker: true,
+					},
+					{
+						Uuid:  acnt.BalanceMap[utils.MetaMonetary][1].Uuid,
+						ID:    "other_bal",
+						Value: 999999,
+					},
+				},
+			},
+		}
+		if !reflect.DeepEqual(utils.ToJSON(expAcnt), utils.ToJSON(acnt)) {
+			t.Errorf("expected <%+v>, \nreceived <%+v>", utils.ToJSON(expAcnt), utils.ToJSON(acnt))
 		}
 	})
 }
