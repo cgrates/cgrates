@@ -29,7 +29,7 @@
   shell: 'printf "expire\n{{ gpg_expire }}\nsave\n" | gpg --batch --command-fd 0 --status-fd=2 --edit-key {{ gpg_realname }}'
   when: gpgkeys.stdout_lines|length > 0 and gpgExpKeys.stdout_lines|length > 0
 
-- include: gpg-gen-key.yaml
+- include_tasks: gpg-gen-key.yaml
   when: gpgkeys.stdout_lines|length < 1
 
 - name: get user armored public key
