@@ -35,7 +35,7 @@ func TestIndexesRedis(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	db, err := engine.NewRedisStorage(cfg.DataDbCfg().Host+":"+cfg.DataDbCfg().Port, 10, cfg.DataDbCfg().User,
 		cfg.DataDbCfg().Password, cfg.GeneralCfg().DBDataEncoding, 10, 20,
-		utils.EmptyString, false, 0, 0, 150*time.Microsecond, 0, 0, 0, false, utils.EmptyString, utils.EmptyString, utils.EmptyString)
+		utils.EmptyString, false, 0, 0, 0, 0, 0, 150*time.Microsecond, 0, false, utils.EmptyString, utils.EmptyString, utils.EmptyString)
 	if err != nil {
 		t.Fatal(err)
 	}

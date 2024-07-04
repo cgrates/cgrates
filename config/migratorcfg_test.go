@@ -154,6 +154,7 @@ func TestMigratorCgrCfgAsMapInterface(t *testing.T) {
 			utils.RedisClusterSyncCfg:        "2s",
 			utils.RedisClusterOnDownDelayCfg: "1ns",
 			utils.RedisPoolPipelineWindowCfg: "150µs",
+			utils.RedisPoolPipelineLimitCfg:  0,
 			utils.RedisConnectTimeoutCfg:     "0s",
 			utils.RedisReadTimeoutCfg:        "3s",
 			utils.RedisWriteTimeoutCfg:       "3s",
@@ -177,6 +178,8 @@ func TestMigratorCgrCfgAsMapInterface1(t *testing.T) {
 			"out_datadb_opts": {
 				"redisSentinel": "out_datadb_redis_sentinel",
 				"redisConnectTimeout": "5s",
+				"redisPoolPipelineWindow": "1ms",
+				"redisPoolPipelineLimit": 3
 			},
 		},
 	}`
@@ -214,7 +217,8 @@ func TestMigratorCgrCfgAsMapInterface1(t *testing.T) {
 			utils.RedisClusterCfg:            false,
 			utils.RedisClusterSyncCfg:        "5s",
 			utils.RedisClusterOnDownDelayCfg: "0s",
-			utils.RedisPoolPipelineWindowCfg: "150µs",
+			utils.RedisPoolPipelineWindowCfg: "1ms",
+			utils.RedisPoolPipelineLimitCfg:  3,
 			utils.RedisConnectTimeoutCfg:     "5s",
 			utils.RedisReadTimeoutCfg:        "0s",
 			utils.RedisWriteTimeoutCfg:       "0s",
@@ -270,6 +274,7 @@ func TestMigratorCgrCfgAsMapInterface2(t *testing.T) {
 			utils.RedisClusterSyncCfg:        "5s",
 			utils.RedisClusterOnDownDelayCfg: "0s",
 			utils.RedisPoolPipelineWindowCfg: "150µs",
+			utils.RedisPoolPipelineLimitCfg:  0,
 			utils.RedisConnectTimeoutCfg:     "0s",
 			utils.RedisReadTimeoutCfg:        "0s",
 			utils.RedisWriteTimeoutCfg:       "0s",

@@ -68,22 +68,24 @@ var (
 		"The sync interval for the redis cluster")
 	dbRedisClusterDownDelay = cgrLoaderFlags.Duration(utils.RedisClusterOnDownDelayCfg, dfltCfg.DataDbCfg().Opts.RedisClusterOndownDelay,
 		"The delay before executing the commands if the redis cluster is in the CLUSTERDOWN state")
-	dbRedisPoolPipelineWindow = cgrLoaderFlags.Duration(utils.RedisPoolPipelineWindowCfg, dfltCfg.DataDbCfg().Opts.RedisPoolPipelineWindow,
-		"Duration after which internal pipelines are flushed. Zero disables implicit pipelining.")
 	dbRedisConnectTimeout = cgrLoaderFlags.Duration(utils.RedisConnectTimeoutCfg, dfltCfg.DataDbCfg().Opts.RedisConnectTimeout,
 		"The amount of wait time until timeout for a connection attempt")
 	dbRedisReadTimeout = cgrLoaderFlags.Duration(utils.RedisReadTimeoutCfg, dfltCfg.DataDbCfg().Opts.RedisReadTimeout,
 		"The amount of wait time until timeout for reading operations")
 	dbRedisWriteTimeout = cgrLoaderFlags.Duration(utils.RedisWriteTimeoutCfg, dfltCfg.DataDbCfg().Opts.RedisWriteTimeout,
 		"The amount of wait time until timeout for writing operations")
-	dbQueryTimeout = cgrLoaderFlags.Duration(utils.MongoQueryTimeoutCfg, dfltCfg.DataDbCfg().Opts.MongoQueryTimeout,
-		"The timeout for queries")
-	dbMongoConnScheme = cgrLoaderFlags.String(utils.MongoConnSchemeCfg, dfltCfg.DataDbCfg().Opts.MongoConnScheme,
-		"Scheme for MongoDB connection <mongodb|mongodb+srv>")
+	dbRedisPoolPipelineWindow = cgrLoaderFlags.Duration(utils.RedisPoolPipelineWindowCfg, dfltCfg.DataDbCfg().Opts.RedisPoolPipelineWindow,
+		"Duration after which internal pipelines are flushed. Zero disables implicit pipelining.")
+	dbRedisPoolPipelineLimit = cgrLoaderFlags.Int(utils.RedisPoolPipelineLimitCfg, dfltCfg.DataDbCfg().Opts.RedisPoolPipelineLimit,
+		"Maximum number of commands that can be pipelined before flushing. Zero means no limit.")
 	dbRedisTls               = cgrLoaderFlags.Bool(utils.RedisTLS, false, "Enable TLS when connecting to Redis")
 	dbRedisClientCertificate = cgrLoaderFlags.String(utils.RedisClientCertificate, utils.EmptyString, "Path to the client certificate")
 	dbRedisClientKey         = cgrLoaderFlags.String(utils.RedisClientKey, utils.EmptyString, "Path to the client key")
 	dbRedisCACertificate     = cgrLoaderFlags.String(utils.RedisCACertificate, utils.EmptyString, "Path to the CA certificate")
+	dbQueryTimeout           = cgrLoaderFlags.Duration(utils.MongoQueryTimeoutCfg, dfltCfg.DataDbCfg().Opts.MongoQueryTimeout,
+		"The timeout for queries")
+	dbMongoConnScheme = cgrLoaderFlags.String(utils.MongoConnSchemeCfg, dfltCfg.DataDbCfg().Opts.MongoConnScheme,
+		"Scheme for MongoDB connection <mongodb|mongodb+srv>")
 
 	storDBType = cgrLoaderFlags.String(utils.StorDBTypeCgr, dfltCfg.StorDbCfg().Type,
 		"The type of the storDb database <*mysql|*postgres|*mongo>")
@@ -182,9 +184,6 @@ func loadConfig() (ldrCfg *config.CGRConfig) {
 	if *dbRedisClusterDownDelay != dfltCfg.DataDbCfg().Opts.RedisClusterOndownDelay {
 		ldrCfg.DataDbCfg().Opts.RedisClusterOndownDelay = *dbRedisClusterDownDelay
 	}
-	if *dbRedisPoolPipelineWindow != dfltCfg.DataDbCfg().Opts.RedisPoolPipelineWindow {
-		ldrCfg.DataDbCfg().Opts.RedisPoolPipelineWindow = *dbRedisPoolPipelineWindow
-	}
 	if *dbRedisConnectTimeout != dfltCfg.DataDbCfg().Opts.RedisConnectTimeout {
 		ldrCfg.DataDbCfg().Opts.RedisConnectTimeout = *dbRedisConnectTimeout
 	}
@@ -194,11 +193,11 @@ func loadConfig() (ldrCfg *config.CGRConfig) {
 	if *dbRedisWriteTimeout != dfltCfg.DataDbCfg().Opts.RedisWriteTimeout {
 		ldrCfg.DataDbCfg().Opts.RedisWriteTimeout = *dbRedisWriteTimeout
 	}
-	if *dbQueryTimeout != dfltCfg.DataDbCfg().Opts.MongoQueryTimeout {
-		ldrCfg.DataDbCfg().Opts.MongoQueryTimeout = *dbQueryTimeout
+	if *dbRedisPoolPipelineWindow != dfltCfg.DataDbCfg().Opts.RedisPoolPipelineWindow {
+		ldrCfg.DataDbCfg().Opts.RedisPoolPipelineWindow = *dbRedisPoolPipelineWindow
 	}
-	if *dbMongoConnScheme != dfltCfg.DataDbCfg().Opts.MongoConnScheme {
-		ldrCfg.DataDbCfg().Opts.MongoConnScheme = *dbMongoConnScheme
+	if *dbRedisPoolPipelineLimit != dfltCfg.DataDbCfg().Opts.RedisPoolPipelineLimit {
+		ldrCfg.DataDbCfg().Opts.RedisPoolPipelineLimit = *dbRedisPoolPipelineLimit
 	}
 	if *dbRedisTls != dfltCfg.DataDbCfg().Opts.RedisTLS {
 		ldrCfg.DataDbCfg().Opts.RedisTLS = *dbRedisTls
@@ -211,6 +210,12 @@ func loadConfig() (ldrCfg *config.CGRConfig) {
 	}
 	if *dbRedisCACertificate != dfltCfg.DataDbCfg().Opts.RedisCACertificate {
 		ldrCfg.DataDbCfg().Opts.RedisCACertificate = *dbRedisCACertificate
+	}
+	if *dbQueryTimeout != dfltCfg.DataDbCfg().Opts.MongoQueryTimeout {
+		ldrCfg.DataDbCfg().Opts.MongoQueryTimeout = *dbQueryTimeout
+	}
+	if *dbMongoConnScheme != dfltCfg.DataDbCfg().Opts.MongoConnScheme {
+		ldrCfg.DataDbCfg().Opts.MongoConnScheme = *dbMongoConnScheme
 	}
 	if *dbDataEncoding != dfltCfg.GeneralCfg().DBDataEncoding {
 		ldrCfg.GeneralCfg().DBDataEncoding = *dbDataEncoding

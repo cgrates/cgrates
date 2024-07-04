@@ -445,7 +445,7 @@ func testSessionSBkupGetBackedupSessions(t *testing.T) {
 		dataDB, err = engine.NewRedisStorage(
 			fmt.Sprintf("%s:%s", sBkupCfg.DataDbCfg().Host, sBkupCfg.DataDbCfg().Port),
 			10, sBkupCfg.DataDbCfg().User, sBkupCfg.DataDbCfg().Password, sBkupCfg.GeneralCfg().DBDataEncoding,
-			10, 20, "", false, 5*time.Second, 0, 150*time.Microsecond, 0, 0, 0, false, utils.EmptyString, utils.EmptyString, utils.EmptyString)
+			10, 20, "", false, 5*time.Second, 0, 0, 0, 0, 150*time.Microsecond, 0, false, utils.EmptyString, utils.EmptyString, utils.EmptyString)
 		if err != nil {
 			t.Fatal("Could not connect to Redis", err.Error())
 		}

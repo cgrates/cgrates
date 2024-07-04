@@ -2106,6 +2106,7 @@ const (
 	RedisClusterSyncCfg        = "redisClusterSync"
 	RedisClusterOnDownDelayCfg = "redisClusterOndownDelay"
 	RedisPoolPipelineWindowCfg = "redisPoolPipelineWindow"
+	RedisPoolPipelineLimitCfg  = "redisPoolPipelineLimit"
 	RedisConnectTimeoutCfg     = "redisConnectTimeout"
 	RedisReadTimeoutCfg        = "redisReadTimeout"
 	RedisWriteTimeoutCfg       = "redisWriteTimeout"

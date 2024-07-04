@@ -34,16 +34,17 @@ type DataDBOpts struct {
 	RedisCluster            bool
 	RedisClusterSync        time.Duration
 	RedisClusterOndownDelay time.Duration
-	RedisPoolPipelineWindow time.Duration
 	RedisConnectTimeout     time.Duration
 	RedisReadTimeout        time.Duration
 	RedisWriteTimeout       time.Duration
-	MongoQueryTimeout       time.Duration
-	MongoConnScheme         string
+	RedisPoolPipelineWindow time.Duration
+	RedisPoolPipelineLimit  int
 	RedisTLS                bool
 	RedisClientCertificate  string
 	RedisClientKey          string
 	RedisCACertificate      string
+	MongoQueryTimeout       time.Duration
+	MongoConnScheme         string
 }
 
 // DataDbCfg Database config
@@ -89,11 +90,6 @@ func (dbOpts *DataDBOpts) loadFromJSONCfg(jsnCfg *DBOptsJson) (err error) {
 			return
 		}
 	}
-	if jsnCfg.RedisPoolPipelineWindow != nil {
-		if dbOpts.RedisPoolPipelineWindow, err = utils.ParseDurationWithNanosecs(*jsnCfg.RedisPoolPipelineWindow); err != nil {
-			return
-		}
-	}
 	if jsnCfg.RedisConnectTimeout != nil {
 		if dbOpts.RedisConnectTimeout, err = utils.ParseDurationWithNanosecs(*jsnCfg.RedisConnectTimeout); err != nil {
 			return
@@ -109,13 +105,13 @@ func (dbOpts *DataDBOpts) loadFromJSONCfg(jsnCfg *DBOptsJson) (err error) {
 			return
 		}
 	}
-	if jsnCfg.MongoQueryTimeout != nil {
-		if dbOpts.MongoQueryTimeout, err = utils.ParseDurationWithNanosecs(*jsnCfg.MongoQueryTimeout); err != nil {
+	if jsnCfg.RedisPoolPipelineWindow != nil {
+		if dbOpts.RedisPoolPipelineWindow, err = utils.ParseDurationWithNanosecs(*jsnCfg.RedisPoolPipelineWindow); err != nil {
 			return
 		}
 	}
-	if jsnCfg.MongoConnScheme != nil {
-		dbOpts.MongoConnScheme = *jsnCfg.MongoConnScheme
+	if jsnCfg.RedisPoolPipelineLimit != nil {
+		dbOpts.RedisPoolPipelineLimit = *jsnCfg.RedisPoolPipelineLimit
 	}
 	if jsnCfg.RedisTLS != nil {
 		dbOpts.RedisTLS = *jsnCfg.RedisTLS
@@ -128,6 +124,14 @@ func (dbOpts *DataDBOpts) loadFromJSONCfg(jsnCfg *DBOptsJson) (err error) {
 	}
 	if jsnCfg.RedisCACertificate != nil {
 		dbOpts.RedisCACertificate = *jsnCfg.RedisCACertificate
+	}
+	if jsnCfg.MongoQueryTimeout != nil {
+		if dbOpts.MongoQueryTimeout, err = utils.ParseDurationWithNanosecs(*jsnCfg.MongoQueryTimeout); err != nil {
+			return
+		}
+	}
+	if jsnCfg.MongoConnScheme != nil {
+		dbOpts.MongoConnScheme = *jsnCfg.MongoConnScheme
 	}
 	return
 }
@@ -218,10 +222,11 @@ func (dbOpts *DataDBOpts) Clone() *DataDBOpts {
 		RedisCluster:            dbOpts.RedisCluster,
 		RedisClusterSync:        dbOpts.RedisClusterSync,
 		RedisClusterOndownDelay: dbOpts.RedisClusterOndownDelay,
-		RedisPoolPipelineWindow: dbOpts.RedisPoolPipelineWindow,
 		RedisConnectTimeout:     dbOpts.RedisConnectTimeout,
 		RedisReadTimeout:        dbOpts.RedisReadTimeout,
 		RedisWriteTimeout:       dbOpts.RedisWriteTimeout,
+		RedisPoolPipelineWindow: dbOpts.RedisPoolPipelineWindow,
+		RedisPoolPipelineLimit:  dbOpts.RedisPoolPipelineLimit,
 		RedisTLS:                dbOpts.RedisTLS,
 		RedisClientCertificate:  dbOpts.RedisClientCertificate,
 		RedisClientKey:          dbOpts.RedisClientKey,
@@ -269,16 +274,17 @@ func (dbcfg *DataDbCfg) AsMapInterface() (mp map[string]any) {
 		utils.RedisClusterCfg:            dbcfg.Opts.RedisCluster,
 		utils.RedisClusterSyncCfg:        dbcfg.Opts.RedisClusterSync.String(),
 		utils.RedisClusterOnDownDelayCfg: dbcfg.Opts.RedisClusterOndownDelay.String(),
-		utils.RedisPoolPipelineWindowCfg: dbcfg.Opts.RedisPoolPipelineWindow.String(),
 		utils.RedisConnectTimeoutCfg:     dbcfg.Opts.RedisConnectTimeout.String(),
 		utils.RedisReadTimeoutCfg:        dbcfg.Opts.RedisReadTimeout.String(),
 		utils.RedisWriteTimeoutCfg:       dbcfg.Opts.RedisWriteTimeout.String(),
-		utils.MongoQueryTimeoutCfg:       dbcfg.Opts.MongoQueryTimeout.String(),
-		utils.MongoConnSchemeCfg:         dbcfg.Opts.MongoConnScheme,
+		utils.RedisPoolPipelineWindowCfg: dbcfg.Opts.RedisPoolPipelineWindow.String(),
+		utils.RedisPoolPipelineLimitCfg:  dbcfg.Opts.RedisPoolPipelineLimit,
 		utils.RedisTLS:                   dbcfg.Opts.RedisTLS,
 		utils.RedisClientCertificate:     dbcfg.Opts.RedisClientCertificate,
 		utils.RedisClientKey:             dbcfg.Opts.RedisClientKey,
 		utils.RedisCACertificate:         dbcfg.Opts.RedisCACertificate,
+		utils.MongoQueryTimeoutCfg:       dbcfg.Opts.MongoQueryTimeout.String(),
+		utils.MongoConnSchemeCfg:         dbcfg.Opts.MongoConnScheme,
 	}
 	mp = map[string]any{
 		utils.DataDbTypeCfg:          dbcfg.Type,
