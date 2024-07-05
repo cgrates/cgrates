@@ -408,9 +408,6 @@ func (cdrS *CDRServer) exportCDRs(cdrs []*CDR) (err error) {
 // processEvents processes a CGREvent based on arguments
 func (cdrS *CDRServer) processEvents(evs []*utils.CGREventWithArgDispatcher,
 	chrgS, attrS, refund, ralS, store, reRate, export, thdS, stS bool) (err error) {
-	if reRate {
-		refund = true
-	}
 	if attrS {
 		for _, ev := range evs {
 			if err = cdrS.attrSProcessEvent(ev); err != nil {
@@ -490,6 +487,9 @@ func (cdrS *CDRServer) processEvents(evs []*utils.CGREventWithArgDispatcher,
 						cgrEv.Event[utils.CostDetails] = prevCDRs[0].CostDetails
 					}
 				}
+			} else if reRate {
+				// Force rerate by removing CostDetails to avoid marking as already rated.
+				delete(cgrEv.Event, utils.CostDetails)
 			}
 			if cdrs[i], err = NewMapEvent(cgrEv.Event).AsCDR(cdrS.cgrCfg,
 				cgrEv.Tenant, cdrS.cgrCfg.GeneralCfg().DefaultTimezone); err != nil {
@@ -749,14 +749,15 @@ func (cdrS *CDRServer) V1ProcessEvent(arg *ArgV1ProcessEvent, reply *string) (er
 	if flgs.HasKey(utils.MetaRALs) {
 		ralS = flgs.GetBool(utils.MetaRALs)
 	}
-	var reRate bool
+
+	var reRate, refund bool
 	if flgs.HasKey(utils.MetaRerate) {
 		reRate = flgs.GetBool(utils.MetaRerate)
 		if reRate {
 			ralS = true
+			refund = true
 		}
 	}
-	var refund bool
 	if flgs.HasKey(utils.MetaRefund) {
 		refund = flgs.GetBool(utils.MetaRefund)
 	}
@@ -923,11 +924,16 @@ func (cdrS *CDRServer) V1RateCDRs(arg *ArgRateCDRs, reply *string) (err error) {
 	if flgs.HasKey(utils.MetaAttributes) {
 		attrS = flgs.GetBool(utils.MetaAttributes)
 	}
-	var reRate bool
+	var reRate, refund bool
 	if flgs.HasKey(utils.MetaRerate) {
 		reRate = flgs.GetBool(utils.MetaRerate)
+		if reRate {
+			refund = true
+		}
 	}
-
+	if flgs.HasKey(utils.MetaRefund) {
+		refund = flgs.GetBool(utils.MetaRefund)
+	}
 	if chrgS && len(cdrS.cgrCfg.CdrsCfg().ChargerSConns) == 0 {
 		return utils.NewErrNotConnected(utils.ChargerS)
 	}
@@ -942,7 +948,7 @@ func (cdrS *CDRServer) V1RateCDRs(arg *ArgRateCDRs, reply *string) (err error) {
 			ArgDispatcher: arg.ArgDispatcher,
 		}
 	}
-	if err = cdrS.processEvents(cgrEvs, chrgS, attrS, false,
+	if err = cdrS.processEvents(cgrEvs, chrgS, attrS, refund,
 		true, store, reRate, export, thdS, statS); err != nil {
 		return utils.NewErrServerError(err)
 	}
