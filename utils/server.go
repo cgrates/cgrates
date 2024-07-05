@@ -54,7 +54,21 @@ func NewServer() (s *Server) {
 	s.httpMux = http.NewServeMux()
 	s.httpsMux = http.NewServeMux()
 	s.stopbiRPCServer = make(chan struct{}, 1)
+
+	// Register the mock GoRPC service to handle Cancel requests
+	// and avoid "can't find service" errors due to the mismatch
+	// between the client and server.
+	rpc.RegisterName("_goRPC_", &mockGoRPC{})
 	return s
+}
+
+type mockGoRPC struct{}
+
+// Cancel is a mock implementation that does nothing and returns nil.
+// It is used to handle context cancellation requests sent by the client,
+// which are not supported by the standard net/rpc server.
+func (*mockGoRPC) Cancel(_ any, _ *bool) error {
+	return nil
 }
 
 type Server struct {
