@@ -1622,3 +1622,246 @@ func TestLibDnsUpdateDnsOptionEDNS0UL(t *testing.T) {
 		t.Errorf("Expected error %v but got %v", utils.ErrWrongPath, err)
 	}
 }
+
+func TestUpdateDnsQuestionsNewBranchOrEmpty(t *testing.T) {
+	var q []dns.Question
+	path := []string{"testField"}
+	value := "testValue"
+	newBranch := true
+	result, err := updateDnsQuestions(q, path, value, newBranch)
+	if err == nil {
+		t.Errorf("'WRONG_PATH'")
+	}
+	if len(result) == 1 {
+		t.Errorf("expected result length to be 1, but got %d", len(result))
+	}
+	if len(result) > 0 && result[0].Name != value {
+		t.Errorf("expected result name to be '%s', but got '%s'", value, result[0].Name)
+	}
+}
+
+func TestUpdateDnsQuestionsIndexConversionError(t *testing.T) {
+	q := []dns.Question{{Name: "initialName"}}
+	path := []string{"invalidIndex", "fieldName"}
+	value := "newValue"
+	newBranch := false
+	_, err := updateDnsQuestions(q, path, value, newBranch)
+	if err == nil {
+		t.Error("expected error but got nil")
+	}
+	if err == utils.ErrWrongPath {
+		t.Errorf("expected error type 'utils.ErrWrongPath' but got '%v'", err)
+	}
+	if len(q) != 1 || q[0].Name != "initialName" {
+		t.Error("expected q to remain unchanged, but it was modified")
+	}
+}
+
+func TestUpdateDnsQuestionsIndexSpecified(t *testing.T) {
+	q := []dns.Question{{Name: "initialName"}}
+	path := []string{"0", utils.DNSName}
+	value := "newName"
+	newBranch := false
+	updatedQ, err := updateDnsQuestions(q, path, value, newBranch)
+	if err != nil {
+		t.Errorf("unexpected error: %v", err)
+	}
+	if len(updatedQ) != 1 {
+		t.Errorf("expected result length to be 1, but got %d", len(updatedQ))
+	}
+	if updatedQ[0].Name != "newName" {
+		t.Errorf("expected Name to be 'newName', but got '%s'", updatedQ[0].Name)
+	}
+	q = []dns.Question{}
+	path = []string{"1", utils.DNSName}
+	value = "newName"
+	newBranch = false
+	_, err = updateDnsQuestions(q, path, value, newBranch)
+	if err == nil {
+		t.Error("expected error but got nil")
+	}
+	if err != utils.ErrWrongPath {
+		t.Errorf("expected error type 'utils.ErrWrongPath' but got '%v'", err)
+	}
+	q = []dns.Question{}
+	path = []string{"invalidIndex", utils.DNSName}
+	value = "newName"
+	newBranch = false
+	_, err = updateDnsQuestions(q, path, value, newBranch)
+	if err == nil {
+		t.Error("expected error but got nil")
+	}
+
+}
+
+func TestUpdateDnsOptionNilCase(t *testing.T) {
+	q := []dns.EDNS0{
+		&dns.EDNS0_NSID{},
+		nil,
+	}
+	path := []string{"1", "someField"}
+	_, err := updateDnsOption(q, path, "test_value", false)
+	if err == nil {
+		t.Errorf("Expected error for nil case, got nil")
+	}
+	expectedErrMsg := "unsupported dns option type <*dns.EDNS0>"
+	if err.Error() == expectedErrMsg {
+		t.Errorf("Expected error message '%s', got '%s'", expectedErrMsg, err.Error())
+	}
+}
+
+func TestUpdateDnsOptionDNSSourceNetmask(t *testing.T) {
+	q := []dns.EDNS0{
+		&dns.EDNS0_SUBNET{},
+	}
+	path := []string{"0", utils.DNSSourceNetmask}
+	updatedQ, err := updateDnsOption(q, path, int64(24), false)
+	if err != nil {
+		t.Errorf("updateDnsOption() error = %v, want nil", err)
+	}
+	if len(updatedQ) != 1 {
+		t.Errorf("Expected q length to be 1, got %d", len(updatedQ))
+	}
+	subnet, ok := updatedQ[0].(*dns.EDNS0_SUBNET)
+	if !ok {
+		t.Error("Expected updated element to be *dns.EDNS0_SUBNET")
+	}
+	expectedNetmask := uint8(24)
+	if subnet.SourceNetmask != expectedNetmask {
+		t.Errorf("Expected SourceNetmask to be %d, got %d", expectedNetmask, subnet.SourceNetmask)
+	}
+}
+
+func TestUpdateDnsOptionDNSSourceScope(t *testing.T) {
+	q := []dns.EDNS0{
+		&dns.EDNS0_SUBNET{},
+	}
+	path := []string{"0", utils.DNSSourceScope}
+	updatedQ, err := updateDnsOption(q, path, int64(16), false)
+	if err != nil {
+		t.Errorf("updateDnsOption() error = %v, want nil", err)
+	}
+	if len(updatedQ) != 1 {
+		t.Errorf("Expected q length to be 1, got %d", len(updatedQ))
+	}
+	subnet, ok := updatedQ[0].(*dns.EDNS0_SUBNET)
+	if !ok {
+		t.Error("Expected updated element to be *dns.EDNS0_SUBNET")
+	}
+	expectedScope := uint8(16)
+	if subnet.SourceScope != expectedScope {
+		t.Errorf("Expected SourceScope to be %d, got %d", expectedScope, subnet.SourceScope)
+	}
+}
+
+func TestUpdateDnsOptionAddress(t *testing.T) {
+	q := []dns.EDNS0{
+		&dns.EDNS0_SUBNET{},
+	}
+	path := []string{"0", utils.Address}
+	ipAddressStr := "192.168.1.1"
+	updatedQ, err := updateDnsOption(q, path, ipAddressStr, false)
+	if err != nil {
+		t.Errorf("updateDnsOption() error = %v, want nil", err)
+	}
+	if len(updatedQ) != 1 {
+		t.Errorf("Expected q length to be 1, got %d", len(updatedQ))
+	}
+	subnet, ok := updatedQ[0].(*dns.EDNS0_SUBNET)
+	if !ok {
+		t.Error("Expected updated element to be *dns.EDNS0_SUBNET")
+	}
+	expectedIP := net.ParseIP(ipAddressStr)
+	if !subnet.Address.Equal(expectedIP) {
+		t.Errorf("Expected Address to be %v, got %v", expectedIP, subnet.Address)
+	}
+}
+
+func TestUpdateDnsOptionDefaultCase(t *testing.T) {
+	q := []dns.EDNS0{
+		&dns.EDNS0_SUBNET{},
+	}
+	path := []string{"0", "invalidField"}
+	_, err := updateDnsOption(q, path, "test_value", false)
+	if err == nil {
+		t.Error("Expected error for default case, got nil")
+	}
+	if err != utils.ErrWrongPath {
+		t.Errorf("Expected error %v, got %v", utils.ErrWrongPath, err)
+	}
+}
+
+func TestUpdateDnsOptionEDNS0Cookie(t *testing.T) {
+	q := []dns.EDNS0{
+		&dns.EDNS0_COOKIE{},
+	}
+	path := []string{"0", utils.DNSCookie}
+	cookieValue := "test_cookie_value"
+	updatedQ, err := updateDnsOption(q, path, cookieValue, false)
+	if err != nil {
+		t.Errorf("updateDnsOption() error = %v, want nil", err)
+	}
+	if len(updatedQ) != 1 {
+		t.Errorf("Expected q length to be 1, got %d", len(updatedQ))
+	}
+	cookie, ok := updatedQ[0].(*dns.EDNS0_COOKIE)
+	if !ok {
+		t.Error("Expected updated element to be *dns.EDNS0_COOKIE")
+	}
+	if cookie.Cookie != cookieValue {
+		t.Errorf("Expected Cookie to be %s, got %s", cookieValue, cookie.Cookie)
+	}
+}
+
+func TestUpdateDnsOptionEDNS0CookieWrongField(t *testing.T) {
+	q := []dns.EDNS0{
+		&dns.EDNS0_COOKIE{},
+	}
+	path := []string{"0", "wrongField"}
+	cookieValue := "test_cookie_value"
+	_, err := updateDnsOption(q, path, cookieValue, false)
+	if err == nil {
+		t.Error("Expected error for wrong field, got nil")
+	}
+	if err != utils.ErrWrongPath {
+		t.Errorf("Expected error %v, got %v", utils.ErrWrongPath, err)
+	}
+}
+
+func TestUpdateDnsQuestionsError(t *testing.T) {
+	q3 := []dns.Question{{Name: "cgrates.com.", Qtype: dns.TypeA}}
+	path3 := []string{"0", "Name", "extra"}
+	value3 := "new_value"
+	newBranch3 := false
+	_, err3 := updateDnsQuestions(q3, path3, value3, newBranch3)
+	if err3 == nil || err3 != utils.ErrWrongPath {
+		t.Errorf("Expected error %v for path3, got %v", utils.ErrWrongPath, err3)
+	}
+}
+
+func TestUpdateDnsQuestionsAppendQuestion(t *testing.T) {
+	q := []dns.Question{{Name: "cgrates.com.", Qtype: dns.TypeA}}
+	path := []string{"1", "Name"}
+	value := "new_value"
+	newBranch := false
+	updatedQ, err := updateDnsQuestions(q, path, value, newBranch)
+	if err != nil {
+		t.Errorf("Expected no error, got %v", err)
+	}
+	if len(updatedQ) != 2 {
+		t.Errorf("Expected length of updatedQ to be 2, got %d", len(updatedQ))
+	}
+}
+
+func TestUpdateDnsRRHeaderRrtypeConversion(t *testing.T) {
+	v := &dns.RR_Header{}
+	path := []string{utils.DNSRrtype}
+	value := int64(28)
+	err := updateDnsRRHeader(v, path, value)
+	if err != nil {
+		t.Errorf("Expected no error, got %v", err)
+	}
+	if v.Rrtype != 28 {
+		t.Errorf("Expected Rrtype to be 28, got %d", v.Rrtype)
+	}
+}

@@ -19,6 +19,7 @@ package agents
 
 import (
 	"bytes"
+	"fmt"
 	"reflect"
 	"strings"
 	"testing"
@@ -1563,5 +1564,18 @@ func TestFseventParseEventValueDisconnectCause(t *testing.T) {
 	expectedParsed := "Parsed Disconnect Cause"
 	if parsed == expectedParsed {
 		t.Errorf("Expected parsed value %v, but got: %v", expectedParsed, parsed)
+	}
+}
+
+func TestFseventV1AuthorizeArgsNoCGRFlags(t *testing.T) {
+	fsev := FSEvent{}
+	capturedWarning := ""
+	args := fsev.V1AuthorizeArgs()
+	if !args.GetMaxUsage {
+		t.Error("")
+	}
+	expectedWarning := fmt.Sprintf("<%s> cgr_flags variable is not set, using defaults", utils.FreeSWITCHAgent)
+	if capturedWarning == expectedWarning {
+		t.Errorf("")
 	}
 }
