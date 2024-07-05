@@ -314,8 +314,5 @@ func (gm *GOBMarshaler) Unmarshal(data []byte, v any) error {
 
 // Decide the value of cacheCommit parameter based on transactionID
 func cacheCommit(transactionID string) bool {
-	if transactionID == utils.NonTransactional {
-		return true
-	}
-	return false
+	return transactionID == utils.NonTransactional
 }
