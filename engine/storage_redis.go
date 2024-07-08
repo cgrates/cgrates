@@ -962,17 +962,17 @@ func (rs *RedisStorage) RemTrendProfileDrv(tenant string, id string) (err error)
 	return rs.Cmd(nil, redis_DEL, utils.TrendsProfilePrefix+utils.ConcatenatedKey(tenant, id))
 }
 
-func (rs *RedisStorage) SetSagProfileDrv(sg *SagProfile) (err error) {
+func (rs *RedisStorage) SetRankingProfileDrv(sg *RankingProfile) (err error) {
 	var result []byte
 	if result, err = rs.ms.Marshal(sg); err != nil {
 		return
 	}
-	return rs.Cmd(nil, redis_SET, utils.SagsProfilePrefix+utils.ConcatenatedKey(sg.Tenant, sg.ID), string(result))
+	return rs.Cmd(nil, redis_SET, utils.RankingsProfilePrefix+utils.ConcatenatedKey(sg.Tenant, sg.ID), string(result))
 }
 
-func (rs *RedisStorage) GetSagProfileDrv(tenant string, id string) (sg *SagProfile, err error) {
+func (rs *RedisStorage) GetRankingProfileDrv(tenant string, id string) (sg *RankingProfile, err error) {
 	var values []byte
-	if err = rs.Cmd(&values, redis_GET, utils.SagsProfilePrefix+utils.ConcatenatedKey(tenant, id)); err != nil {
+	if err = rs.Cmd(&values, redis_GET, utils.RankingsProfilePrefix+utils.ConcatenatedKey(tenant, id)); err != nil {
 		return
 	} else if len(values) == 0 {
 		err = utils.ErrNotFound
@@ -981,8 +981,8 @@ func (rs *RedisStorage) GetSagProfileDrv(tenant string, id string) (sg *SagProfi
 	err = rs.ms.Unmarshal(values, &sg)
 	return
 }
-func (rs *RedisStorage) RemSagProfileDrv(tenant string, id string) (err error) {
-	return rs.Cmd(nil, redis_DEL, utils.SagsProfilePrefix+utils.ConcatenatedKey(tenant, id))
+func (rs *RedisStorage) RemRankingProfileDrv(tenant string, id string) (err error) {
+	return rs.Cmd(nil, redis_DEL, utils.RankingsProfilePrefix+utils.ConcatenatedKey(tenant, id))
 }
 
 // GetThresholdProfileDrv retrieves a ThresholdProfile from dataDB

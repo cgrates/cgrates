@@ -42,7 +42,7 @@ func init() {
 		DestinationsCSVContent, TimingsCSVContent, RatesCSVContent, DestinationRatesCSVContent,
 		RatingPlansCSVContent, RatingProfilesCSVContent, SharedGroupsCSVContent,
 		ActionsCSVContent, ActionPlansCSVContent, ActionTriggersCSVContent, AccountActionsCSVContent,
-		ResourcesCSVContent, StatsCSVContent, TrendsCSVContent, SagsCSVContent, ThresholdsCSVContent, FiltersCSVContent,
+		ResourcesCSVContent, StatsCSVContent, TrendsCSVContent, RankingsCSVContent, ThresholdsCSVContent, FiltersCSVContent,
 		RoutesCSVContent, AttributesCSVContent, ChargersCSVContent, DispatcherCSVContent,
 		DispatcherHostCSVContent), testTPID, "", nil, nil, false)
 	if err != nil {
@@ -90,8 +90,8 @@ func init() {
 	if err := csvr.LoadStats(); err != nil {
 		log.Print("error in LoadStats:", err)
 	}
-	if err := csvr.LoadSags(); err != nil {
-		log.Print("error in LoadSags:", err)
+	if err := csvr.LoadRankings(); err != nil {
+		log.Print("error in LoadRankings:", err)
 	}
 	if err := csvr.LoadThresholds(); err != nil {
 		log.Print("error in LoadThresholds:", err)
@@ -1079,12 +1079,12 @@ func TestLoadStatQueueProfiles(t *testing.T) {
 	}
 }
 
-func TestLoadSagsProfiles(t *testing.T) {
-	eSags := map[utils.TenantID]*utils.TPSagsProfile{
-		{Tenant: "cgrates.org", ID: "SAGS1"}: {
+func TestLoadRankingProfiles(t *testing.T) {
+	eRankings := map[utils.TenantID]*utils.TPRankingProfile{
+		{Tenant: "cgrates.org", ID: "Ranking1"}: {
 			TPid:          testTPID,
 			Tenant:        "cgrates.org",
-			ID:            "SAGS1",
+			ID:            "Ranking1",
 			QueryInterval: "15m",
 			StatIDs:       []string{"Stats2", "Stats3", "Stats4"},
 			MetricIDs:     []string{"Metric1", "Metric3"},
@@ -1092,13 +1092,13 @@ func TestLoadSagsProfiles(t *testing.T) {
 			ThresholdIDs:  []string{"THD1", "THD2"},
 		},
 	}
-	sgkey := utils.TenantID{Tenant: "cgrates.org", ID: "SAGS1"}
-	if len(eSags) != len(csvr.sgProfiles) {
-		t.Errorf("Failed to load SagProfiles: %+v", csvr.sgProfiles)
-	} else if diff := cmp.Diff(eSags[sgkey], csvr.sgProfiles[sgkey], cmpopts.SortSlices(func(a, b string) bool {
+	rgkey := utils.TenantID{Tenant: "cgrates.org", ID: "RANKING1"}
+	if len(eRankings) != len(csvr.rgProfiles) {
+		t.Errorf("Failed to load RankingProfiles: %+v", csvr.rgProfiles)
+	} else if diff := cmp.Diff(eRankings[rgkey], csvr.rgProfiles[rgkey], cmpopts.SortSlices(func(a, b string) bool {
 		return a < b
 	})); diff != "" {
-		t.Errorf("Wrong TPSagsProfiles (-expected +got):\n%s", diff)
+		t.Errorf("Wrong TPRankingProfiles (-expected +got):\n%s", diff)
 	}
 }
 

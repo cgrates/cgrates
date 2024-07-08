@@ -455,7 +455,7 @@ func main() {
 	internalThresholdSChan := make(chan birpc.ClientConnector, 1)
 	internalStatSChan := make(chan birpc.ClientConnector, 1)
 	internalTrendSChan := make(chan birpc.ClientConnector, 1)
-	internalSagSChan := make(chan birpc.ClientConnector, 1)
+	internalRankingSChan := make(chan birpc.ClientConnector, 1)
 	internalResourceSChan := make(chan birpc.ClientConnector, 1)
 	internalRouteSChan := make(chan birpc.ClientConnector, 1)
 	internalSchedulerSChan := make(chan birpc.ClientConnector, 1)
@@ -485,7 +485,7 @@ func main() {
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats):          internalStatSChan,
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRoutes):         internalRouteSChan,
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaTrends):         internalTrendSChan,
-		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSags):           internalSagSChan,
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRankings):       internalRankingSChan,
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds):     internalThresholdSChan,
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaServiceManager): internalServeManagerChan,
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaConfig):         internalConfigChan,
@@ -528,7 +528,7 @@ func main() {
 		utils.SIPAgent:        new(sync.WaitGroup),
 		utils.StatS:           new(sync.WaitGroup),
 		utils.TrendS:          new(sync.WaitGroup),
-		utils.SagS:            new(sync.WaitGroup),
+		utils.RankingS:        new(sync.WaitGroup),
 		utils.StorDB:          new(sync.WaitGroup),
 		utils.ThresholdS:      new(sync.WaitGroup),
 		utils.AccountS:        new(sync.WaitGroup),
@@ -612,8 +612,8 @@ func main() {
 		internalStatSChan, connManager, anz, srvDep)
 	srS := services.NewTrendService(cfg, dmService, cacheS, filterSChan, server,
 		internalTrendSChan, connManager, anz, srvDep)
-	sgS := services.NewSagService(cfg, dmService, cacheS, filterSChan, server,
-		internalSagSChan, connManager, anz, srvDep)
+	sgS := services.NewRankingService(cfg, dmService, cacheS, filterSChan, server,
+		internalRankingSChan, connManager, anz, srvDep)
 	reS := services.NewResourceService(cfg, dmService, cacheS, filterSChan, server,
 		internalResourceSChan, connManager, anz, srvDep)
 	routeS := services.NewRouteService(cfg, dmService, cacheS, filterSChan, server,

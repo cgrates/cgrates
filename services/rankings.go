@@ -31,14 +31,14 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-// NewSagsService returns the SagS Service
-func NewSagService(cfg *config.CGRConfig, dm *DataDBService,
+// NewRankingService returns the RankingS Service
+func NewRankingService(cfg *config.CGRConfig, dm *DataDBService,
 	cacheS *engine.CacheS, filterSChan chan *engine.FilterS,
-	server *cores.Server, internalSagSChan chan birpc.ClientConnector,
+	server *cores.Server, internalRankingSChan chan birpc.ClientConnector,
 	connMgr *engine.ConnManager, anz *AnalyzerService,
 	srvDep map[string]*sync.WaitGroup) servmanager.Service {
-	return &SagService{
-		connChan:    internalSagSChan,
+	return &RankingService{
+		connChan:    internalRankingSChan,
 		cfg:         cfg,
 		dm:          dm,
 		cacheS:      cacheS,
@@ -50,7 +50,7 @@ func NewSagService(cfg *config.CGRConfig, dm *DataDBService,
 	}
 }
 
-type SagService struct {
+type RankingService struct {
 	sync.RWMutex
 	cfg         *config.CGRConfig
 	dm          *DataDBService
@@ -64,7 +64,7 @@ type SagService struct {
 }
 
 // Start should handle the sercive start
-func (sag *SagService) Start() error {
+func (sag *RankingService) Start() error {
 	if sag.IsRunning() {
 		return utils.ErrServiceAlreadyRunning
 	}
@@ -80,8 +80,8 @@ func (sag *SagService) Start() error {
 	dbchan <- datadb
 
 	utils.Logger.Info(fmt.Sprintf("<%s> starting <%s> subsystem",
-		utils.CoreS, utils.SagS))
-	srv, err := engine.NewService(v1.NewSagSv1())
+		utils.CoreS, utils.RankingS))
+	srv, err := engine.NewService(v1.NewRankingSv1())
 	if err != nil {
 		return err
 	}
@@ -95,12 +95,12 @@ func (sag *SagService) Start() error {
 }
 
 // Reload handles the change of config
-func (sag *SagService) Reload() (err error) {
+func (sag *RankingService) Reload() (err error) {
 	return
 }
 
 // Shutdown stops the service
-func (sag *SagService) Shutdown() (err error) {
+func (sag *RankingService) Shutdown() (err error) {
 	defer sag.srvDep[utils.DataDB].Done()
 	sag.Lock()
 	defer sag.Unlock()
@@ -109,18 +109,18 @@ func (sag *SagService) Shutdown() (err error) {
 }
 
 // IsRunning returns if the service is running
-func (sag *SagService) IsRunning() bool {
+func (sag *RankingService) IsRunning() bool {
 	sag.RLock()
 	defer sag.RUnlock()
 	return false
 }
 
 // ServiceName returns the service name
-func (sag *SagService) ServiceName() string {
-	return utils.SagS
+func (sag *RankingService) ServiceName() string {
+	return utils.RankingS
 }
 
 // ShouldRun returns if the service should be running
-func (sag *SagService) ShouldRun() bool {
-	return sag.cfg.SagSCfg().Enabled
+func (sag *RankingService) ShouldRun() bool {
+	return sag.cfg.RankingSCfg().Enabled
 }

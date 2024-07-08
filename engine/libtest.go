@@ -242,13 +242,13 @@ cgrates.org,TestStats,,,,,2,*sum#~*req.Usage,,true,true,20,
 cgrates.org,TestStats2,FLTR_1,2014-07-29T15:00:00Z,100,1s,2,*sum#~*req.Value;*sum#~*req.Usage;*average#~*req.Value;*average#~*req.Usage,,true,true,20,Th
 cgrates.org,TestStats2,,,,,2,*sum#~*req.Cost;*average#~*req.Cost,,true,true,20,
 `
-	SagsCSVContent = `
+	RankingsCSVContent = `
 #Tenant[0],Id[1],QueryInterval[2],StatIDs[2],MetricIDs[3],Sorting[4],SortingParameters[5],ThresholdIDs[6]
-cgrates.org,SAGS1,15m,Stats2;Stats3;Stats4,Metric1;Metric3,*asc,,THD1;THD2
+cgrates.org,Ranking1,15m,Stats2;Stats3;Stats4,Metric1;Metric3,*asc,,THD1;THD2
 `
 	TrendsCSVContent = `
 #Tenant[0],Id[1],QueryInterval[2],StatID[3],QueueLength[4],TTL[5],PurgeFilterIDs[6],Trend[7],ThresholdIDs[7]
-cgrates.org,TRENDS1,5m,Stats2,-1,-1,,*average,TD1;THD2
+cgrates.org,TREND1,5m,Stats2,-1,-1,,*average,TD1;THD2
 `
 	ThresholdsCSVContent = `
 #Tenant[0],Id[1],FilterIDs[2],ActivationInterval[3],MaxHits[4],MinHits[5],MinSleep[6],Blocker[7],Weight[8],ActionIDs[9],Async[10]
@@ -529,7 +529,7 @@ func GetDefaultEmptyCacheStats() map[string]*ltcache.CacheStats {
 		utils.CacheStatFilterIndexes:       {},
 		utils.CacheStatQueueProfiles:       {},
 		utils.CacheStatQueues:              {},
-		utils.CacheSagProfiles:             {},
+		utils.CacheRankingProfiles:         {},
 		utils.CacheSTIR:                    {},
 		utils.CacheRouteFilterIndexes:      {},
 		utils.CacheRouteProfiles:           {},

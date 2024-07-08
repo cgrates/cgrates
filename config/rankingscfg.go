@@ -19,12 +19,12 @@ package config
 
 import "github.com/cgrates/cgrates/utils"
 
-type SagSCfg struct {
+type RankingSCfg struct {
 	Enabled    bool
 	StatSConns []string
 }
 
-func (sgsCfg *SagSCfg) loadFromJSONCfg(jsnCfg *SagsJsonCfg) (err error) {
+func (sgsCfg *RankingSCfg) loadFromJSONCfg(jsnCfg *RankingsJsonCfg) (err error) {
 	if jsnCfg == nil {
 		return
 	}
@@ -43,7 +43,7 @@ func (sgsCfg *SagSCfg) loadFromJSONCfg(jsnCfg *SagsJsonCfg) (err error) {
 	return
 }
 
-func (sgsCfg *SagSCfg) AsMapInterface() (initialMP map[string]any) {
+func (sgsCfg *RankingSCfg) AsMapInterface() (initialMP map[string]any) {
 	initialMP = map[string]any{
 		utils.EnabledCfg: sgsCfg.Enabled,
 	}
@@ -60,8 +60,8 @@ func (sgsCfg *SagSCfg) AsMapInterface() (initialMP map[string]any) {
 	return
 }
 
-func (sgscfg *SagSCfg) Clone() (cln *SagSCfg) {
-	cln = &SagSCfg{
+func (sgscfg *RankingSCfg) Clone() (cln *RankingSCfg) {
+	cln = &RankingSCfg{
 		Enabled: sgscfg.Enabled,
 	}
 	if sgscfg.StatSConns != nil {

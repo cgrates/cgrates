@@ -422,12 +422,12 @@ func testLoaderITWriteToDatabase(t *testing.T) {
 			t.Errorf("Expecting: %v, received: %v", sts, rcv)
 		}
 	}
-	for tenantid, sg := range loader.sgProfiles {
-		rcv, err := loader.dm.GetSagProfile(tenantid.Tenant, tenantid.ID, false, false, utils.NonTransactional)
+	for tenantid, sg := range loader.rgProfiles {
+		rcv, err := loader.dm.GetRankingProfile(tenantid.Tenant, tenantid.ID, false, false, utils.NonTransactional)
 		if err != nil {
-			t.Errorf("Failed GetSagsProfile, tenant: %s, id: %s,  error: %s ", tenantid.Tenant, tenantid.ID, err.Error())
+			t.Errorf("Failed GetRankingProfile, tenant: %s, id: %s,  error: %s ", tenantid.Tenant, tenantid.ID, err.Error())
 		}
-		sgs, err := APItoSags(sg)
+		sgs, err := APItoRanking(sg)
 		if !reflect.DeepEqual(sgs, rcv) {
 			t.Errorf("Expecting: %v, received: %v", sgs, rcv)
 		}

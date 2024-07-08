@@ -129,7 +129,7 @@ func TestCacheJsonCfg(t *testing.T) {
 			utils.CacheStatQueueProfiles: {Limit: utils.IntPointer(-1),
 				Ttl: utils.StringPointer(""), Static_ttl: utils.BoolPointer(false),
 				Precache: utils.BoolPointer(false), Remote: utils.BoolPointer(false), Replicate: utils.BoolPointer(false)},
-			utils.CacheSagProfiles: {Limit: utils.IntPointer(-1),
+			utils.CacheRankingProfiles: {Limit: utils.IntPointer(-1),
 				Ttl: utils.StringPointer(""), Static_ttl: utils.BoolPointer(false),
 				Precache: utils.BoolPointer(false), Remote: utils.BoolPointer(false), Replicate: utils.BoolPointer(false)},
 			utils.CacheStatQueues: {Limit: utils.IntPointer(-1),
@@ -410,7 +410,7 @@ func TestDfDataDbJsonCfg(t *testing.T) {
 				Ttl:        utils.StringPointer(utils.EmptyString),
 				Static_ttl: utils.BoolPointer(false),
 			},
-			utils.MetaSagProfiles: {
+			utils.MetaRankingProfiles: {
 				Replicate:  utils.BoolPointer(false),
 				Remote:     utils.BoolPointer(false),
 				Limit:      utils.IntPointer(-1),
@@ -684,7 +684,7 @@ func TestDfStorDBJsonCfg(t *testing.T) {
 				Ttl:        utils.StringPointer(utils.EmptyString),
 				Static_ttl: utils.BoolPointer(false),
 			},
-			utils.CacheTBLTPSags: {
+			utils.CacheTBLTPRankings: {
 				Replicate:  utils.BoolPointer(false),
 				Remote:     utils.BoolPointer(false),
 				Limit:      utils.IntPointer(-1),

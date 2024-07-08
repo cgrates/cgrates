@@ -57,8 +57,8 @@ func init() {
 	gob.Register(new(StatQueueProfileWithAPIOpts))
 	gob.Register(new(StoredStatQueue))
 	gob.Register(new(StatQueueProfileWithAPIOpts))
-	// SagS
-	gob.Register(new(SagProfile))
+	// RankingS
+	gob.Register(new(RankingProfile))
 	// RouteS
 	gob.Register(new(RouteProfile))
 	gob.Register(new(RouteProfileWithAPIOpts))

@@ -1585,7 +1585,7 @@ func (apierSv1 *APIerSv1) ExportToFolder(ctx *context.Context, arg *utils.ArgExp
 	if len(arg.Items) == 0 {
 		arg.Items = []string{utils.MetaAttributes, utils.MetaChargers, utils.MetaDispatchers,
 			utils.MetaDispatcherHosts, utils.MetaFilters, utils.MetaResources, utils.MetaStats,
-			utils.MetaRoutes, utils.MetaThresholds, utils.MetaSags, utils.MetaTrends}
+			utils.MetaRoutes, utils.MetaThresholds, utils.MetaRankings, utils.MetaTrends}
 	}
 	if _, err := os.Stat(arg.Path); os.IsNotExist(err) {
 		os.Mkdir(arg.Path, os.ModeDir)
@@ -1856,8 +1856,8 @@ func (apierSv1 *APIerSv1) ExportToFolder(ctx *context.Context, arg *utils.ArgExp
 				}
 			}
 			csvWriter.Flush()
-		case utils.MetaSags:
-			prfx := utils.SagsProfilePrefix
+		case utils.MetaRankings:
+			prfx := utils.RankingsProfilePrefix
 			keys, err := apierSv1.DataManager.DataDB().GetKeysForPrefix(prfx)
 			if err != nil {
 				return err
@@ -1865,7 +1865,7 @@ func (apierSv1 *APIerSv1) ExportToFolder(ctx *context.Context, arg *utils.ArgExp
 			if len(keys) == 0 {
 				continue
 			}
-			f, err := os.Create(path.Join(arg.Path, utils.SagsCsv))
+			f, err := os.Create(path.Join(arg.Path, utils.RankingsCsv))
 			if err != nil {
 				return err
 			}
@@ -1873,16 +1873,16 @@ func (apierSv1 *APIerSv1) ExportToFolder(ctx *context.Context, arg *utils.ArgExp
 
 			csvWriter := csv.NewWriter(f)
 			csvWriter.Comma = utils.CSVSep
-			if err := csvWriter.Write(engine.SagsMdls{}.CSVHeader()); err != nil {
+			if err := csvWriter.Write(engine.RankingsMdls{}.CSVHeader()); err != nil {
 				return err
 			}
 			for _, key := range keys {
 				tntID := strings.SplitN(key[len(prfx):], utils.InInFieldSep, 2)
-				sgsPrf, err := apierSv1.DataManager.GetSagProfile(tntID[0], tntID[1], true, false, utils.NonTransactional)
+				rgsPrf, err := apierSv1.DataManager.GetRankingProfile(tntID[0], tntID[1], true, false, utils.NonTransactional)
 				if err != nil {
 					return err
 				}
-				mdl := engine.APItoModelSag(engine.SagProfileToAPI(sgsPrf))
+				mdl := engine.APItoModelTPRanking(engine.RankingProfileToAPI(rgsPrf))
 				record, err := engine.CsvDump(mdl)
 				if err != nil {
 					return err

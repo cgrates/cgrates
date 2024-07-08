@@ -1460,25 +1460,25 @@ func StatQueueProfileToAPI(st *StatQueueProfile) (tpST *utils.TPStatProfile) {
 	return
 }
 
-type SagsMdls []*SagsMdl
+type RankingsMdls []*RankingsMdl
 
-func (tps SagsMdls) CSVHeader() (result []string) {
+func (tps RankingsMdls) CSVHeader() (result []string) {
 	return []string{"#" + utils.Tenant, utils.ID, utils.StatIDs,
 		utils.MetricIDs, utils.Sorting, utils.SortingParameters,
 		utils.ThresholdIDs}
 }
 
-func (models SagsMdls) AsTPSags() (result []*utils.TPSagsProfile) {
+func (models RankingsMdls) AsTPRanking() (result []*utils.TPRankingProfile) {
 	thresholdMap := make(map[string]utils.StringSet)
 	metricsMap := make(map[string]utils.StringSet)
 	sortingParameterMap := make(map[string]utils.StringSet)
 	statsMap := make(map[string]utils.StringSet)
-	msg := make(map[string]*utils.TPSagsProfile)
+	msg := make(map[string]*utils.TPRankingProfile)
 	for _, model := range models {
 		key := &utils.TenantID{Tenant: model.Tenant, ID: model.ID}
 		sg, found := msg[key.TenantID()]
 		if !found {
-			sg = &utils.TPSagsProfile{
+			sg = &utils.TPRankingProfile{
 				Tenant:        model.Tenant,
 				TPid:          model.Tpid,
 				ID:            model.ID,
@@ -1518,7 +1518,7 @@ func (models SagsMdls) AsTPSags() (result []*utils.TPSagsProfile) {
 		}
 		msg[key.TenantID()] = sg
 	}
-	result = make([]*utils.TPSagsProfile, len(msg))
+	result = make([]*utils.TPRankingProfile, len(msg))
 	i := 0
 	for tntID, sg := range msg {
 		result[i] = sg
@@ -1531,12 +1531,12 @@ func (models SagsMdls) AsTPSags() (result []*utils.TPSagsProfile) {
 	return
 }
 
-func APItoModelSag(tpSG *utils.TPSagsProfile) (mdls SagsMdls) {
+func APItoModelTPRanking(tpSG *utils.TPRankingProfile) (mdls RankingsMdls) {
 	if tpSG == nil {
 		return
 	}
 	if len(tpSG.StatIDs) == 0 {
-		mdl := &SagsMdl{
+		mdl := &RankingsMdl{
 			Tpid:          tpSG.TPid,
 			Tenant:        tpSG.Tenant,
 			ID:            tpSG.ID,
@@ -1566,7 +1566,7 @@ func APItoModelSag(tpSG *utils.TPSagsProfile) (mdls SagsMdls) {
 		mdls = append(mdls, mdl)
 	}
 	for i, stat := range tpSG.StatIDs {
-		mdl := &SagsMdl{
+		mdl := &RankingsMdl{
 			Tpid:   tpSG.TPid,
 			Tenant: tpSG.Tenant,
 			ID:     tpSG.ID,
@@ -1599,8 +1599,8 @@ func APItoModelSag(tpSG *utils.TPSagsProfile) (mdls SagsMdls) {
 	return
 }
 
-func APItoSags(tpSG *utils.TPSagsProfile) (sg *SagProfile, err error) {
-	sg = &SagProfile{
+func APItoRanking(tpSG *utils.TPRankingProfile) (sg *RankingProfile, err error) {
+	sg = &RankingProfile{
 		Tenant:            tpSG.Tenant,
 		ID:                tpSG.ID,
 		StatIDs:           make([]string, len(tpSG.StatIDs)),
@@ -1621,8 +1621,8 @@ func APItoSags(tpSG *utils.TPSagsProfile) (sg *SagProfile, err error) {
 	return sg, nil
 }
 
-func SagProfileToAPI(sg *SagProfile) (tpSG *utils.TPSagsProfile) {
-	tpSG = &utils.TPSagsProfile{
+func RankingProfileToAPI(sg *RankingProfile) (tpSG *utils.TPRankingProfile) {
+	tpSG = &utils.TPRankingProfile{
 		Tenant:            sg.Tenant,
 		ID:                sg.ID,
 		StatIDs:           make([]string, len(sg.StatIDs)),

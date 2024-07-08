@@ -101,9 +101,9 @@ type DataDB interface {
 	GetStatQueueDrv(tenant, id string) (sq *StatQueue, err error)
 	SetStatQueueDrv(ssq *StoredStatQueue, sq *StatQueue) (err error)
 	RemStatQueueDrv(tenant, id string) (err error)
-	SetSagProfileDrv(sq *SagProfile) (err error)
-	GetSagProfileDrv(tenant string, id string) (sq *SagProfile, err error)
-	RemSagProfileDrv(tenant string, id string) (err error)
+	SetRankingProfileDrv(sq *RankingProfile) (err error)
+	GetRankingProfileDrv(tenant string, id string) (sq *RankingProfile, err error)
+	RemRankingProfileDrv(tenant string, id string) (err error)
 	SetTrendProfileDrv(sq *TrendProfile) (err error)
 	GetTrendProfileDrv(tenant string, id string) (sq *TrendProfile, err error)
 	RemTrendProfileDrv(tenant string, id string) (err error)
@@ -180,7 +180,7 @@ type LoadReader interface {
 	GetTPResources(string, string, string) ([]*utils.TPResourceProfile, error)
 	GetTPStats(string, string, string) ([]*utils.TPStatProfile, error)
 	GetTPTrends(string, string, string) ([]*utils.TPTrendsProfile, error)
-	GetTPSags(string, string, string) ([]*utils.TPSagsProfile, error)
+	GetTPRankings(string, string, string) ([]*utils.TPRankingProfile, error)
 	GetTPThresholds(string, string, string) ([]*utils.TPThresholdProfile, error)
 	GetTPFilters(string, string, string) ([]*utils.TPFilterProfile, error)
 	GetTPRoutes(string, string, string) ([]*utils.TPRouteProfile, error)
@@ -206,7 +206,7 @@ type LoadWriter interface {
 	SetTPResources([]*utils.TPResourceProfile) error
 	SetTPStats([]*utils.TPStatProfile) error
 	SetTPTrends([]*utils.TPTrendsProfile) error
-	SetTPSags([]*utils.TPSagsProfile) error
+	SetTPRankings([]*utils.TPRankingProfile) error
 	SetTPThresholds([]*utils.TPThresholdProfile) error
 	SetTPFilters([]*utils.TPFilterProfile) error
 	SetTPRoutes([]*utils.TPRouteProfile) error

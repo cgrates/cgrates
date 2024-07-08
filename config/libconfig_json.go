@@ -674,7 +674,7 @@ type TrendsJsonCfg struct {
 	Thresholds_conns *[]string
 }
 
-type SagsJsonCfg struct {
+type RankingsJsonCfg struct {
 	Enabled     *bool
 	Stats_conns *[]string
 }

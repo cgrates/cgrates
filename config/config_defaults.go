@@ -114,7 +114,7 @@ const CGRATES_CFG_JSON = `
 		"*resource_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false}, 
 		"*resources": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false}, 
 		"*statqueue_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
-		"*sag_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false}, 
+		"*ranking_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false}, 
 		"*trend_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false}, 
 		"*statqueues": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false}, 
 		"*threshold_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false}, 
@@ -195,7 +195,7 @@ const CGRATES_CFG_JSON = `
 		"*tp_account_actions": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false}, 
 		"*tp_resources": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false}, 
 		"*tp_stats": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
-		"*tp_sags": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false}, 
+		"*tp_rankings": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false}, 
 		"*tp_trends": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},  
 		"*tp_thresholds": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false}, 
 		"*tp_filters": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
@@ -285,7 +285,7 @@ const CGRATES_CFG_JSON = `
 		"*resources": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "remote":false, "replicate": false},				// control resources caching
 		"*event_resources": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false},							// matching resources to events
 		"*statqueue_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "remote":false, "replicate": false},	// statqueue profiles
-		"*sag_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "remote":false, "replicate": false},			// stataggregator profiles
+		"*ranking_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "remote":false, "replicate": false},			// stataggregator profiles
 		"*statqueues": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "remote":false, "replicate": false},			// statqueues with metrics
 		"*threshold_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "remote":false, "replicate": false},	// control threshold profiles caching
 		"*thresholds": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "remote":false, "replicate": false},			// control thresholds caching

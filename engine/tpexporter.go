@@ -293,16 +293,16 @@ func (tpExp *TPExporter) Run() error {
 		}
 	}
 
-	storDataSags, err := tpExp.storDb.GetTPSags(tpExp.tpID, "", "")
+	storDataRankings, err := tpExp.storDb.GetTPRankings(tpExp.tpID, "", "")
 	if err != nil && err.Error() != utils.ErrNotFound.Error() {
-		utils.Logger.Warning(fmt.Sprintf("<%s> error: %s,when getting %s from stordb for export", utils.ApierS, err, utils.TpSags))
+		utils.Logger.Warning(fmt.Sprintf("<%s> error: %s,when getting %s from stordb for export", utils.ApierS, err, utils.TpRankings))
 	}
-	if len(storDataSags) != 0 {
-		toExportMap[utils.SagsCsv] = make([]any, 0, len(storDataSags))
-		for _, sd := range storDataSags {
-			sdModels := APItoModelSag(sd)
+	if len(storDataRankings) != 0 {
+		toExportMap[utils.RankingsCsv] = make([]any, 0, len(storDataRankings))
+		for _, sd := range storDataRankings {
+			sdModels := APItoModelTPRanking(sd)
 			for _, sdModel := range sdModels {
-				toExportMap[utils.SagsCsv] = append(toExportMap[utils.SagsCsv], sdModel)
+				toExportMap[utils.RankingsCsv] = append(toExportMap[utils.RankingsCsv], sdModel)
 			}
 		}
 	}

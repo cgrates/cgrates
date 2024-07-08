@@ -197,8 +197,8 @@ func (srvMngr *ServiceManager) handleReload() {
 			go srvMngr.reloadService(utils.StatS)
 		case <-srvMngr.GetConfig().GetReloadChan(config.TRENDS_JSON):
 			go srvMngr.reloadService(utils.TrendS)
-		case <-srvMngr.GetConfig().GetReloadChan(config.SAGS_JSON):
-			go srvMngr.reloadService(utils.SagS)
+		case <-srvMngr.GetConfig().GetReloadChan(config.RANKINGS_JSON):
+			go srvMngr.reloadService(utils.RankingS)
 		case <-srvMngr.GetConfig().GetReloadChan(config.RESOURCES_JSON):
 			go srvMngr.reloadService(utils.ResourceS)
 		case <-srvMngr.GetConfig().GetReloadChan(config.RouteSJson):

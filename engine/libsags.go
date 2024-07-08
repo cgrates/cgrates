@@ -24,12 +24,12 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-type SagProfileWithAPIOpts struct {
-	*SagProfile
+type RankingProfileWithAPIOpts struct {
+	*RankingProfile
 	APIOpts map[string]any
 }
 
-type SagProfile struct {
+type RankingProfile struct {
 	Tenant            string
 	ID                string
 	QueryInterval     time.Duration
@@ -40,6 +40,6 @@ type SagProfile struct {
 	ThresholdIDs      []string
 }
 
-func (sgp *SagProfile) TenantID() string {
+func (sgp *RankingProfile) TenantID() string {
 	return utils.ConcatenatedKey(sgp.Tenant, sgp.ID)
 }
