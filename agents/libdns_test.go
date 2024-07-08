@@ -1865,3 +1865,53 @@ func TestUpdateDnsRRHeaderRrtypeConversion(t *testing.T) {
 		t.Errorf("Expected Rrtype to be 28, got %d", v.Rrtype)
 	}
 }
+
+func TestLibDnsUpdateDnsAnswerARecord(t *testing.T) {
+	q := []dns.RR{
+
+		&dns.A{},
+	}
+	qType := dns.TypeA
+	qName := "cgrates.com"
+	path1 := []string{utils.DNSHdr, utils.DNSName}
+	value1 := "new.cgrates.com"
+	_, err1 := updateDnsAnswer(q, qType, qName, path1, value1, false)
+	if err1 != nil {
+		t.Errorf("Unexpected error for valid path: %v", err1)
+	}
+	updatedHeader := q[0].(*dns.A).Hdr
+	if updatedHeader.Name != value1 {
+		t.Errorf("Expected DNS header name to be %s, got %s", value1, updatedHeader.Name)
+	}
+	path2 := []string{utils.DNSA}
+	value2 := "192.168.2.1"
+	_, err2 := updateDnsAnswer(q, qType, qName, path2, value2, false)
+	if err2 != nil {
+		t.Errorf("Unexpected error for valid path: %v", err2)
+	}
+	updatedIP := q[0].(*dns.A).A.String()
+	if updatedIP != value2 {
+		t.Errorf("Expected IP address to be %s, got %s", value2, updatedIP)
+	}
+	path3 := []string{"invalid_path"}
+	_, err3 := updateDnsAnswer(q, qType, qName, path3, value1, false)
+	if err3 == nil {
+		t.Errorf("Expected error for invalid path, got nil")
+	}
+
+}
+
+func TestLibDnsUpdateDnsOptionCase1(t *testing.T) {
+	var q []dns.EDNS0
+	path := []string{}
+	value := "value"
+	newBranch := true
+	updatedQ, err := updateDnsOption(q, path, value, newBranch)
+	if err == nil {
+		t.Errorf("Unexpected error for valid path: %v", err)
+	}
+	if len(updatedQ) == 1 {
+		t.Errorf("Expected updatedQ length to be 1, got %d", len(updatedQ))
+	}
+
+}

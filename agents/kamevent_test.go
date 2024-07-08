@@ -1023,3 +1023,12 @@ func TestKamEventAsMapStringInterfaceUsageKey(t *testing.T) {
 		t.Errorf("expected %v, got %v", expected, result)
 	}
 }
+
+func TestKamEventMissingParameterUnsupportedEvent(t *testing.T) {
+	kev := KamEvent{
+		EVENT: "unsupported_event",
+	}
+	if result := kev.MissingParameter(); !result {
+		t.Errorf("Expected true for unsupported event, got false")
+	}
+}

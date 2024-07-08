@@ -1579,3 +1579,11 @@ func TestFseventV1AuthorizeArgsNoCGRFlags(t *testing.T) {
 		t.Errorf("")
 	}
 }
+
+func TestFseventV1TerminateSessionArgs(t *testing.T) {
+	fsev := FSEvent{}
+	args := fsev.V1TerminateSessionArgs()
+	if !args.TerminateSession {
+		t.Errorf("Expected TerminateSession to be true, got false")
+	}
+}
