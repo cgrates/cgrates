@@ -4900,3 +4900,11 @@ func TestActionsClone(t *testing.T) {
 		t.Errorf("Expected cloned result to be nil when apl is nil, got %+v", cloned)
 	}
 }
+
+func TestActionsNewActionConnCfgThresholdSNonSessionAction(t *testing.T) {
+	Config := &config.CGRConfig{}
+	act := newActionConnCfg(utils.ThresholdS, "someOtherAction", Config)
+	if len(act.ConnIDs) != 0 {
+		t.Errorf("Expected ConnIDs length 0, got %d", len(act.ConnIDs))
+	}
+}
