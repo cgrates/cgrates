@@ -610,22 +610,22 @@ func (iDB *InternalDB) GetTrendProfileDrv(tenant, id string) (sg *TrendProfile, 
 	return x.(*TrendProfile), nil
 }
 
-func (iDB *InternalDB) SetSagProfileDrv(sgp *SagProfile) (err error) {
-	iDB.db.Set(utils.CacheSagProfiles, sgp.TenantID(), sgp, nil, true, utils.NonTransactional)
+func (iDB *InternalDB) SetRankingProfileDrv(sgp *RankingProfile) (err error) {
+	iDB.db.Set(utils.CacheRankingProfiles, sgp.TenantID(), sgp, nil, true, utils.NonTransactional)
 	return nil
 }
 
-func (iDB *InternalDB) RemSagProfileDrv(tenant, id string) (err error) {
-	iDB.db.Remove(utils.CacheSagProfiles, utils.ConcatenatedKey(tenant, id), true, utils.NonTransactional)
+func (iDB *InternalDB) RemRankingProfileDrv(tenant, id string) (err error) {
+	iDB.db.Remove(utils.CacheRankingProfiles, utils.ConcatenatedKey(tenant, id), true, utils.NonTransactional)
 	return nil
 }
 
-func (iDB *InternalDB) GetSagProfileDrv(tenant, id string) (sg *SagProfile, err error) {
-	x, ok := iDB.db.Get(utils.CacheSagProfiles, utils.ConcatenatedKey(tenant, id))
+func (iDB *InternalDB) GetRankingProfileDrv(tenant, id string) (sg *RankingProfile, err error) {
+	x, ok := iDB.db.Get(utils.CacheRankingProfiles, utils.ConcatenatedKey(tenant, id))
 	if !ok || x == nil {
 		return nil, utils.ErrNotFound
 	}
-	return x.(*SagProfile), nil
+	return x.(*RankingProfile), nil
 }
 
 func (iDB *InternalDB) GetThresholdProfileDrv(tenant, id string) (tp *ThresholdProfile, err error) {

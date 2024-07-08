@@ -296,11 +296,11 @@ CREATE TABLE tp_stats (
 
 
 --
--- Table structure for tabls `tp_sags`
+-- Table structure for tabls `tp_rankings`
 --
 
-DROP TABLE IF EXISTS tp_sags;
-CREATE TABLE tp_sags(
+DROP TABLE IF EXISTS tp_rankings;
+CREATE TABLE tp_rankings(
  `pk` int(11) NOT NULL AUTO_INCREMENT,
  `tpid` varchar(64) NOT NULL,
  `tenant` varchar(64) NOT NULL,
@@ -314,7 +314,7 @@ CREATE TABLE tp_sags(
  `created_at` TIMESTAMP,
   PRIMARY KEY (`pk`),
   KEY `tpid`  (`tpid`),
-  UNIQUE KEY `unique_tp_sags` (`tpid`,`tenant`,`id`,`stat_ids`)
+  UNIQUE KEY `unique_tp_rankings` (`tpid`,`tenant`,`id`,`stat_ids`)
   );
 
 --

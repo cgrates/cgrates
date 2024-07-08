@@ -997,7 +997,7 @@ func TestNewAttrReloadCacheWithOpts(t *testing.T) {
 		ChargerFilterIndexIDs:    []string{MetaAny},
 		DispatcherFilterIndexIDs: []string{MetaAny},
 		FilterIndexIDs:           []string{MetaAny},
-		SagProfileIDs:            []string{MetaAny},
+		RankingProfileIDs:        []string{MetaAny},
 	}
 	eMap := NewAttrReloadCacheWithOpts()
 	if !reflect.DeepEqual(eMap, newAttrReloadCache) {

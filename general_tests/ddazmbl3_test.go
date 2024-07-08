@@ -57,7 +57,7 @@ cgrates.org,call,discounted_minutes,2013-01-06T00:00:00Z,RP_UK_Mobile_BIG5_PKG,`
 	resLimits := ``
 	stats := ``
 	trends := ``
-	sags := ``
+	rankings := ``
 	thresholds := ``
 	filters := ``
 	suppliers := ``
@@ -65,7 +65,7 @@ cgrates.org,call,discounted_minutes,2013-01-06T00:00:00Z,RP_UK_Mobile_BIG5_PKG,`
 	chargerProfiles := ``
 	csvr, err := engine.NewTpReader(dataDB3.DataDB(), engine.NewStringCSVStorage(utils.CSVSep, destinations, timings, rates,
 		destinationRates, ratingPlans, ratingProfiles, sharedGroups, actions, actionPlans, actionTriggers,
-		accountActions, resLimits, stats, trends, sags,
+		accountActions, resLimits, stats, trends, rankings,
 		thresholds, filters, suppliers, attrProfiles, chargerProfiles, ``, ""), "", "", nil, nil, false)
 	if err != nil {
 		t.Error(err)

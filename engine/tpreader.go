@@ -50,7 +50,7 @@ type TpReader struct {
 	resProfiles        map[utils.TenantID]*utils.TPResourceProfile
 	sqProfiles         map[utils.TenantID]*utils.TPStatProfile
 	trProfiles         map[utils.TenantID]*utils.TPTrendsProfile
-	sgProfiles         map[utils.TenantID]*utils.TPSagsProfile
+	rgProfiles         map[utils.TenantID]*utils.TPRankingProfile
 	thProfiles         map[utils.TenantID]*utils.TPThresholdProfile
 	filters            map[utils.TenantID]*utils.TPFilterProfile
 	routeProfiles      map[utils.TenantID]*utils.TPRouteProfile
@@ -97,7 +97,7 @@ func (tpr *TpReader) Init() {
 	tpr.accountActions = make(map[string]*Account)
 	tpr.resProfiles = make(map[utils.TenantID]*utils.TPResourceProfile)
 	tpr.sqProfiles = make(map[utils.TenantID]*utils.TPStatProfile)
-	tpr.sgProfiles = make(map[utils.TenantID]*utils.TPSagsProfile)
+	tpr.rgProfiles = make(map[utils.TenantID]*utils.TPRankingProfile)
 	tpr.thProfiles = make(map[utils.TenantID]*utils.TPThresholdProfile)
 	tpr.routeProfiles = make(map[utils.TenantID]*utils.TPRouteProfile)
 	tpr.attributeProfiles = make(map[utils.TenantID]*utils.TPAttributeProfile)
@@ -1154,21 +1154,21 @@ func (tpr *TpReader) LoadTrends() error {
 	return tpr.LoadTrendsFiltered("")
 }
 
-func (tpr *TpReader) LoadSagsFiltered(tag string) error {
-	tps, err := tpr.lr.GetTPSags(tpr.tpid, "", tag)
+func (tpr *TpReader) LoadRankingsFiltered(tag string) error {
+	tps, err := tpr.lr.GetTPRankings(tpr.tpid, "", tag)
 	if err != nil {
 		return err
 	}
-	mapSgs := make(map[utils.TenantID]*utils.TPSagsProfile)
+	mapSgs := make(map[utils.TenantID]*utils.TPRankingProfile)
 	for _, sg := range tps {
 		mapSgs[utils.TenantID{Tenant: sg.Tenant, ID: sg.ID}] = sg
 	}
-	tpr.sgProfiles = mapSgs
+	tpr.rgProfiles = mapSgs
 	return nil
 }
 
-func (tpr *TpReader) LoadSags() error {
-	return tpr.LoadSagsFiltered("")
+func (tpr *TpReader) LoadRankings() error {
+	return tpr.LoadRankingsFiltered("")
 }
 
 func (tpr *TpReader) LoadThresholdsFiltered(tag string) (err error) {
@@ -1357,7 +1357,7 @@ func (tpr *TpReader) LoadAll() (err error) {
 	if err = tpr.LoadTrends(); err != nil && err.Error() != utils.NotFoundCaps {
 		return
 	}
-	if err = tpr.LoadSags(); err != nil && err.Error() != utils.NotFoundCaps {
+	if err = tpr.LoadRankings(); err != nil && err.Error() != utils.NotFoundCaps {
 		return
 	}
 	if err = tpr.LoadThresholds(); err != nil && err.Error() != utils.NotFoundCaps {
@@ -1631,22 +1631,22 @@ func (tpr *TpReader) WriteToDatabase(verbose, disableReverse bool) (err error) {
 		}
 	}
 	if verbose {
-		log.Print("SagProfiles:")
+		log.Print("RankingProfiles:")
 	}
-	for _, tpSG := range tpr.sgProfiles {
-		var sg *SagProfile
-		if sg, err = APItoSags(tpSG); err != nil {
+	for _, tpSG := range tpr.rgProfiles {
+		var sg *RankingProfile
+		if sg, err = APItoRanking(tpSG); err != nil {
 			return
 		}
-		if err = tpr.dm.SetSagProfile(sg); err != nil {
+		if err = tpr.dm.SetRankingProfile(sg); err != nil {
 			return
 		}
 		if verbose {
 			log.Print("\t", sg.TenantID())
 		}
 	}
-	if len(tpr.sgProfiles) != 0 {
-		loadIDs[utils.CacheSagProfiles] = loadID
+	if len(tpr.rgProfiles) != 0 {
+		loadIDs[utils.CacheRankingProfiles] = loadID
 	}
 	if verbose {
 		log.Print("ThresholdProfiles:")
@@ -1952,10 +1952,10 @@ func (tpr *TpReader) GetLoadedIds(categ string) ([]string, error) {
 			i++
 		}
 		return keys, nil
-	case utils.SagsProfilePrefix:
-		keys := make([]string, len(tpr.sgProfiles))
+	case utils.RankingsProfilePrefix:
+		keys := make([]string, len(tpr.rgProfiles))
 		i := 0
-		for k := range tpr.sgProfiles {
+		for k := range tpr.rgProfiles {
 			keys[i] = k.TenantID()
 			i++
 		}
@@ -2133,10 +2133,10 @@ func (tpr *TpReader) RemoveFromDatabase(verbose, disableReverse bool) (err error
 		}
 	}
 	if verbose {
-		log.Printf("SagProfiles:")
+		log.Printf("RankingProfiles:")
 	}
-	for _, tpSgs := range tpr.sgProfiles {
-		if err = tpr.dm.RemoveSagProfile(tpSgs.Tenant, tpSgs.ID); err != nil {
+	for _, tpSgs := range tpr.rgProfiles {
+		if err = tpr.dm.RemoveRankingProfile(tpSgs.Tenant, tpSgs.ID); err != nil {
 			return
 		}
 		if verbose {
@@ -2291,8 +2291,8 @@ func (tpr *TpReader) RemoveFromDatabase(verbose, disableReverse bool) (err error
 		loadIDs[utils.CacheStatQueueProfiles] = loadID
 		loadIDs[utils.CacheStatQueues] = loadID
 	}
-	if len(tpr.sgProfiles) != 0 {
-		loadIDs[utils.CacheSagProfiles] = loadID
+	if len(tpr.rgProfiles) != 0 {
+		loadIDs[utils.CacheRankingProfiles] = loadID
 	}
 	if len(tpr.thProfiles) != 0 {
 		loadIDs[utils.CacheThresholdProfiles] = loadID
@@ -2339,7 +2339,7 @@ func (tpr *TpReader) ReloadCache(caching string, verbose bool, opts map[string]a
 	rspIDs, _ := tpr.GetLoadedIds(utils.ResourceProfilesPrefix)
 	aatIDs, _ := tpr.GetLoadedIds(utils.ActionTriggerPrefix)
 	stqpIDs, _ := tpr.GetLoadedIds(utils.StatQueueProfilePrefix)
-	sgIDS, _ := tpr.GetLoadedIds(utils.SagsProfilePrefix)
+	sgIDS, _ := tpr.GetLoadedIds(utils.RankingsProfilePrefix)
 	trspfIDs, _ := tpr.GetLoadedIds(utils.ThresholdProfilePrefix)
 	flrIDs, _ := tpr.GetLoadedIds(utils.FilterPrefix)
 	routeIDs, _ := tpr.GetLoadedIds(utils.RouteProfilePrefix)
@@ -2365,7 +2365,7 @@ func (tpr *TpReader) ReloadCache(caching string, verbose bool, opts map[string]a
 		utils.CacheActionTriggers:      aatIDs,
 		utils.CacheStatQueues:          stqpIDs,
 		utils.CacheStatQueueProfiles:   stqpIDs,
-		utils.CacheSagProfiles:         sgIDS,
+		utils.CacheRankingProfiles:     sgIDS,
 		utils.CacheThresholds:          trspfIDs,
 		utils.CacheThresholdProfiles:   trspfIDs,
 		utils.CacheFilters:             flrIDs,

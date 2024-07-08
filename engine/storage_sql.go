@@ -137,7 +137,7 @@ func (sqls *SQLStorage) GetTpIds(colName string) ([]string, error) {
 			utils.TBLTPAccountActions,
 			utils.TBLTPResources,
 			utils.TBLTPStats,
-			utils.TBLTPSags,
+			utils.TBLTPRankings,
 			utils.TBLTPThresholds,
 			utils.TBLTPFilters,
 			utils.TBLTPActionPlans,
@@ -239,7 +239,7 @@ func (sqls *SQLStorage) RemTpData(table, tpid string, args map[string]string) er
 	if len(table) == 0 { // Remove tpid out of all tables
 		for _, tblName := range []string{utils.TBLTPTimings, utils.TBLTPDestinations, utils.TBLTPRates,
 			utils.TBLTPDestinationRates, utils.TBLTPRatingPlans, utils.TBLTPRatingProfiles,
-			utils.TBLTPSharedGroups, utils.TBLTPActions, utils.TBLTPActionTriggers, utils.TBLTPSags,
+			utils.TBLTPSharedGroups, utils.TBLTPActions, utils.TBLTPActionTriggers, utils.TBLTPRankings,
 			utils.TBLTPAccountActions, utils.TBLTPResources, utils.TBLTPStats, utils.TBLTPThresholds,
 			utils.TBLTPFilters, utils.TBLTPActionPlans, utils.TBLTPRoutes, utils.TBLTPAttributes,
 			utils.TBLTPChargers, utils.TBLTPDispatchers, utils.TBLTPDispatcherHosts} {
@@ -577,17 +577,17 @@ func (sqls *SQLStorage) SetTPStats(sts []*utils.TPStatProfile) error {
 	return nil
 }
 
-func (sqls *SQLStorage) SetTPSags(sgs []*utils.TPSagsProfile) error {
-	if len(sgs) == 0 {
+func (sqls *SQLStorage) SetTPRankings(rgs []*utils.TPRankingProfile) error {
+	if len(rgs) == 0 {
 		return nil
 	}
 	tx := sqls.db.Begin()
-	for _, sg := range sgs {
-		if err := tx.Where(&SagsMdl{Tpid: sg.TPid, ID: sg.ID}).Delete(SagsMdl{}).Error; err != nil {
+	for _, sg := range rgs {
+		if err := tx.Where(&RankingsMdl{Tpid: sg.TPid, ID: sg.ID}).Delete(RankingsMdl{}).Error; err != nil {
 			tx.Rollback()
 			return err
 		}
-		for _, msg := range APItoModelSag(sg) {
+		for _, msg := range APItoModelTPRanking(sg) {
 			if err := tx.Create(&msg).Error; err != nil {
 				tx.Rollback()
 				return err
@@ -1480,8 +1480,8 @@ func (sqls *SQLStorage) GetTPTrends(tpid, tenant, id string) ([]*utils.TPTrendsP
 	return asrs, nil
 }
 
-func (sqls *SQLStorage) GetTPSags(tpid string, tenant string, id string) ([]*utils.TPSagsProfile, error) {
-	var sgs SagsMdls
+func (sqls *SQLStorage) GetTPRankings(tpid string, tenant string, id string) ([]*utils.TPRankingProfile, error) {
+	var sgs RankingsMdls
 	q := sqls.db.Where("tpid = ?", tpid)
 	if len(id) != 0 {
 		q = q.Where("id = ?", id)
@@ -1492,7 +1492,7 @@ func (sqls *SQLStorage) GetTPSags(tpid string, tenant string, id string) ([]*uti
 	if err := q.Find(&sgs).Error; err != nil {
 		return nil, err
 	}
-	asgs := sgs.AsTPSags()
+	asgs := sgs.AsTPRanking()
 	if len(asgs) == 0 {
 		return asgs, utils.ErrNotFound
 	}

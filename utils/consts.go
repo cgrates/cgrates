@@ -38,7 +38,7 @@ var (
 
 	DataDBPartitions = NewStringSet([]string{CacheDestinations, CacheReverseDestinations, CacheRatingPlans,
 		CacheRatingProfiles, CacheDispatcherProfiles, CacheDispatcherHosts, CacheChargerProfiles, CacheActions, CacheActionTriggers, CacheSharedGroups, CacheTimings,
-		CacheResourceProfiles, CacheResources, CacheEventResources, CacheStatQueueProfiles, CacheSagProfiles, CacheStatQueues,
+		CacheResourceProfiles, CacheResources, CacheEventResources, CacheStatQueueProfiles, CacheRankingProfiles, CacheStatQueues,
 		CacheThresholdProfiles, CacheThresholds, CacheFilters, CacheRouteProfiles, CacheAttributeProfiles,
 		CacheResourceFilterIndexes, CacheStatFilterIndexes, CacheThresholdFilterIndexes, CacheRouteFilterIndexes,
 		CacheAttributeFilterIndexes, CacheChargerFilterIndexes, CacheDispatcherFilterIndexes, CacheLoadIDs,
@@ -47,7 +47,7 @@ var (
 	StorDBPartitions = NewStringSet([]string{CacheTBLTPTimings, CacheTBLTPDestinations, CacheTBLTPRates, CacheTBLTPDestinationRates,
 		CacheTBLTPRatingPlans, CacheTBLTPRatingProfiles, CacheTBLTPSharedGroups, CacheTBLTPActions,
 		CacheTBLTPActionPlans, CacheTBLTPActionTriggers, CacheTBLTPAccountActions, CacheTBLTPResources,
-		CacheTBLTPStats, CacheTBLTPThresholds, CacheTBLTPSags, CacheTBLTPFilters, CacheSessionCostsTBL, CacheCDRsTBL,
+		CacheTBLTPStats, CacheTBLTPThresholds, CacheTBLTPRankings, CacheTBLTPFilters, CacheSessionCostsTBL, CacheCDRsTBL,
 		CacheTBLTPRoutes, CacheTBLTPAttributes, CacheTBLTPChargers, CacheTBLTPDispatchers,
 		CacheTBLTPDispatcherHosts, CacheVersions})
 
@@ -69,7 +69,7 @@ var (
 		CacheTimings:                 TimingsPrefix,
 		CacheStatQueueProfiles:       StatQueueProfilePrefix,
 		CacheStatQueues:              StatQueuePrefix,
-		CacheSagProfiles:             SagsProfilePrefix,
+		CacheRankingProfiles:         RankingsProfilePrefix,
 		CacheTrendProfiles:           TrendsProfilePrefix,
 		CacheThresholdProfiles:       ThresholdProfilePrefix,
 		CacheThresholds:              ThresholdPrefix,
@@ -138,7 +138,7 @@ var (
 		TBLTPResources:        CacheTBLTPResources,
 		TBLTPStats:            CacheTBLTPStats,
 		TBLTPTrends:           CacheTBLTPTrends,
-		TBLTPSags:             CacheTBLTPSags,
+		TBLTPRankings:         CacheTBLTPRankings,
 		TBLTPThresholds:       CacheTBLTPThresholds,
 		TBLTPFilters:          CacheTBLTPFilters,
 		SessionCostsTBL:       CacheSessionCostsTBL,
@@ -306,7 +306,7 @@ const (
 	DispatcherHostPrefix      = "dph_"
 	ThresholdProfilePrefix    = "thp_"
 	StatQueuePrefix           = "stq_"
-	SagsProfilePrefix         = "sgp_"
+	RankingsProfilePrefix     = "rgp_"
 	TrendsProfilePrefix       = "trp_"
 	LoadIDPrefix              = "lid_"
 	SessionsBackupPrefix      = "sbk_"
@@ -405,7 +405,7 @@ const (
 	MetaRefund               = "*refund"
 	MetaStats                = "*stats"
 	MetaTrends               = "*trends"
-	MetaSags                 = "*sags"
+	MetaRankings             = "*rankings"
 	MetaResponder            = "*responder"
 	MetaCore                 = "*core"
 	MetaServiceManager       = "*servicemanager"
@@ -975,7 +975,7 @@ const (
 	MetaResourceProfile     = "*resource_profiles"
 	MetaStatQueueProfiles   = "*statqueue_profiles"
 	MetaStatQueues          = "*statqueues"
-	MetaSagProfiles         = "*sag_profiles"
+	MetaRankingProfiles     = "*ranking_profiles"
 	MetaTrendProfiles       = "*trend_profiles"
 	MetaThresholdProfiles   = "*threshold_profiles"
 	MetaRouteProfiles       = "*route_profiles"
@@ -1032,7 +1032,7 @@ const (
 	SessionS    = "SessionS"
 	StatService = "StatS"
 	TrendS      = "TrendS"
-	SagS        = "SagS"
+	RankingS    = "RankingS"
 	ThresholdS  = "ThresholdS"
 )
 
@@ -1156,7 +1156,7 @@ const (
 	TpAttributes         = "TpAttributes"
 	TpStats              = "TpStats"
 	TpTrends             = "TpTrends"
-	TpSags               = "TpSags"
+	TpRankings           = "TpRankings"
 	TpSharedGroups       = "TpSharedGroups"
 	TpRatingProfiles     = "TpRatingProfiles"
 	TpResources          = "TpResources"
@@ -1182,7 +1182,7 @@ const (
 	ThresholdSv1       = "ThresholdSv1"
 	StatSv1            = "StatSv1"
 	TrendSv1           = "TrendSv1"
-	SagSv1             = "SagSv1"
+	RankingSv1         = "RankingSv1"
 	ResourceSv1        = "ResourceSv1"
 	RouteSv1           = "RouteSv1"
 	AttributeSv1       = "AttributeSv1"
@@ -1310,7 +1310,7 @@ const (
 	ReplicatorSv1RemoveFilter            = "ReplicatorSv1.RemoveFilter"
 	ReplicatorSv1RemoveThresholdProfile  = "ReplicatorSv1.RemoveThresholdProfile"
 	ReplicatorSv1RemoveStatQueueProfile  = "ReplicatorSv1.RemoveStatQueueProfile"
-	ReplicatorSv1RemoveSagProfile        = "ReplicatorSv1.RemoveSagProfile"
+	ReplicatorSv1RemoveRankingProfile    = "ReplicatorSv1.RemoveRankingProfile"
 	ReplicatorSv1RemoveTrendProfile      = "ReplicatorSv1.RemoveTrendProfile"
 	ReplicatorSv1RemoveTiming            = "ReplicatorSv1.RemoveTiming"
 	ReplicatorSv1RemoveResource          = "ReplicatorSv1.RemoveResource"
@@ -1441,9 +1441,9 @@ const (
 	APIerSv1SetTPStat                         = "APIerSv1.SetTPStat"
 	APIerSv1GetTPStat                         = "APIerSv1.GetTPStat"
 	APIerSv1RemoveTPStat                      = "APIerSv1.RemoveTPStat"
-	APIerSv1SetTPSag                          = "APIerSv1.SetTPSag"
-	APIerSv1GetTPSag                          = "APIerSv1.GetTPSag"
-	APIerSv1RemoveTPSag                       = "APIerSv1.RemoveTPSag"
+	APIerSv1SetTPRanking                      = "APIerSv1.SetTPRanking"
+	APIerSv1GetTPRanking                      = "APIerSv1.GetTPRanking"
+	APIerSv1RemoveTPRanking                   = "APIerSv1.RemoveTPRanking"
 	APIerSv1SetTPTrend                        = "APIerSv1.SetTPTrend"
 	APIerSv1GetTPTrend                        = "APIerSv1.GetTPTrend"
 	APIerSv1RemoveTPTrend                     = "APIerSv1.RemoveTPTrend"
@@ -1677,13 +1677,13 @@ const (
 	TrendSv1Ping               = "TrendSv1.Ping"
 )
 
-// SagS APIs
+// RankingS APIs
 const (
-	APIerSv1SetSagProfile    = "APIerSv1.SetSagProfile"
-	APIerSv1RemoveSagProfile = "APIerSv1.RemoveSagProfile"
-	APIerSv1GetSagProfile    = "APIerSv1.GetSagProfile"
-	APIerSv1GetSagProfileIDs = "APIerSv1.GetSagProfileIDs"
-	SagSv1Ping               = "SagSv1.Ping"
+	APIerSv1SetRankingProfile    = "APIerSv1.SetRankingProfile"
+	APIerSv1RemoveRankingProfile = "APIerSv1.RemoveRankingProfile"
+	APIerSv1GetRankingProfile    = "APIerSv1.GetRankingProfile"
+	APIerSv1GetRankingProfileIDs = "APIerSv1.GetRankingProfileIDs"
+	RankingSv1Ping               = "RankingSv1.Ping"
 )
 
 // ResourceS APIs
@@ -1900,7 +1900,7 @@ const (
 	ResourcesCsv          = "Resources.csv"
 	StatsCsv              = "Stats.csv"
 	TrendsCsv             = "Trends.csv"
-	SagsCsv               = "Sags.csv"
+	RankingsCsv           = "Rankings.csv"
 	ThresholdsCsv         = "Thresholds.csv"
 	FiltersCsv            = "Filters.csv"
 	RoutesCsv             = "Routes.csv"
@@ -1925,7 +1925,7 @@ const (
 	TBLTPAccountActions   = "tp_account_actions"
 	TBLTPResources        = "tp_resources"
 	TBLTPStats            = "tp_stats"
-	TBLTPSags             = "tp_sags"
+	TBLTPRankings         = "tp_rankings"
 	TBLTPTrends           = "tp_trends"
 	TBLTPThresholds       = "tp_thresholds"
 	TBLTPFilters          = "tp_filters"
@@ -1957,7 +1957,7 @@ const (
 	CacheEventResources          = "*event_resources"
 	CacheStatQueueProfiles       = "*statqueue_profiles"
 	CacheStatQueues              = "*statqueues"
-	CacheSagProfiles             = "*sag_profiles"
+	CacheRankingProfiles         = "*ranking_profiles"
 	CacheTrendProfiles           = "*trend_profiles"
 	CacheThresholdProfiles       = "*threshold_profiles"
 	CacheThresholds              = "*thresholds"
@@ -1973,7 +1973,7 @@ const (
 	CacheResourceFilterIndexes   = "*resource_filter_indexes"
 	CacheStatFilterIndexes       = "*stat_filter_indexes"
 	CacheThresholdFilterIndexes  = "*threshold_filter_indexes"
-	CacheSagFilterIndexes        = "sag_filter_indexes"
+	CacheRankingFilterIndexes    = "ranking_filter_indexes"
 	CacheRouteFilterIndexes      = "*route_filter_indexes"
 	CacheAttributeFilterIndexes  = "*attribute_filter_indexes"
 	CacheChargerFilterIndexes    = "*charger_filter_indexes"
@@ -2013,7 +2013,7 @@ const (
 	CacheTBLTPResources        = "*tp_resources"
 	CacheTBLTPStats            = "*tp_stats"
 	CacheTBLTPTrends           = "*tp_trends"
-	CacheTBLTPSags             = "*tp_sags"
+	CacheTBLTPRankings         = "*tp_rankings"
 	CacheTBLTPThresholds       = "*tp_thresholds"
 	CacheTBLTPFilters          = "*tp_filters"
 	CacheSessionCostsTBL       = "*session_costs"

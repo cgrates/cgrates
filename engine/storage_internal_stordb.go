@@ -425,7 +425,7 @@ func (iDB *InternalDB) GetTPTrends(tpid string, tenant string, id string) (trend
 	return
 }
 
-func (iDB *InternalDB) GetTPSags(tpid string, tenant string, id string) (sags []*utils.TPSagsProfile, err error) {
+func (iDB *InternalDB) GetTPRankings(tpid string, tenant string, id string) (rankings []*utils.TPRankingProfile, err error) {
 	key := tpid
 	if tenant != utils.EmptyString {
 		key += utils.ConcatenatedKeySep + tenant
@@ -433,15 +433,15 @@ func (iDB *InternalDB) GetTPSags(tpid string, tenant string, id string) (sags []
 	if id != utils.EmptyString {
 		key += utils.ConcatenatedKeySep + id
 	}
-	ids := iDB.db.GetItemIDs(utils.CacheTBLTPSags, key)
+	ids := iDB.db.GetItemIDs(utils.CacheTBLTPRankings, key)
 	for _, id := range ids {
-		x, ok := iDB.db.Get(utils.CacheTBLTPSags, id)
+		x, ok := iDB.db.Get(utils.CacheTBLTPRankings, id)
 		if !ok || x == nil {
 			return nil, utils.ErrNotFound
 		}
-		sags = append(sags, x.(*utils.TPSagsProfile))
+		rankings = append(rankings, x.(*utils.TPRankingProfile))
 	}
-	if len(sags) == 0 {
+	if len(rankings) == 0 {
 		return nil, utils.ErrNotFound
 	}
 	return
@@ -781,12 +781,12 @@ func (iDB *InternalDB) SetTPStats(stats []*utils.TPStatProfile) (err error) {
 	}
 	return
 }
-func (iDB *InternalDB) SetTPSags(sags []*utils.TPSagsProfile) (err error) {
-	if len(sags) == 0 {
+func (iDB *InternalDB) SetTPRankings(rankings []*utils.TPRankingProfile) (err error) {
+	if len(rankings) == 0 {
 		return nil
 	}
-	for _, sag := range sags {
-		iDB.db.Set(utils.CacheTBLTPSags, utils.ConcatenatedKey(sag.TPid, sag.Tenant, sag.ID), sag, nil, cacheCommit(utils.NonTransactional), utils.NonTransactional)
+	for _, ranking := range rankings {
+		iDB.db.Set(utils.CacheTBLTPRankings, utils.ConcatenatedKey(ranking.TPid, ranking.Tenant, ranking.ID), ranking, nil, cacheCommit(utils.NonTransactional), utils.NonTransactional)
 	}
 	return
 }

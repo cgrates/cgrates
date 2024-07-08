@@ -435,33 +435,33 @@ func (ldr *Loader) storeLoadedData(loaderType string,
 				}
 			}
 		}
-	case utils.MetaSags:
-		cacheIDs = []string{utils.CacheSagFilterIndexes}
+	case utils.MetaRankings:
+		cacheIDs = []string{utils.CacheRankingFilterIndexes}
 		for _, lDataSet := range lds {
-			stsModels := make(engine.SagsMdls, len(lDataSet))
+			stsModels := make(engine.RankingsMdls, len(lDataSet))
 			for i, ld := range lDataSet {
-				stsModels[i] = new(engine.SagsMdl)
+				stsModels[i] = new(engine.RankingsMdl)
 				if err = utils.UpdateStructWithIfaceMap(stsModels[i], ld); err != nil {
 					return
 				}
 			}
-			for _, tpSgs := range stsModels.AsTPSags() {
-				sgsPrf, err := engine.APItoSags(tpSgs)
+			for _, tpSgs := range stsModels.AsTPRanking() {
+				sgsPrf, err := engine.APItoRanking(tpSgs)
 				if err != nil {
 					return err
 				}
 				if ldr.dryRun {
 					utils.Logger.Info(
-						fmt.Sprintf("<%s-%s> DRY_RUN: StatsQueueProfile: %s",
+						fmt.Sprintf("<%s-%s> DRY_RUN: RankingProfile: %s",
 							utils.LoaderS, ldr.ldrID, utils.ToJSON(sgsPrf)))
 					continue
 				}
 				// get IDs so we can reload in cache
 				ids = append(ids, sgsPrf.TenantID())
-				if err := ldr.dm.SetSagProfile(sgsPrf); err != nil {
+				if err := ldr.dm.SetRankingProfile(sgsPrf); err != nil {
 					return err
 				}
-				cacheArgs[utils.CacheSagFilterIndexes] = ids
+				cacheArgs[utils.CacheRankingFilterIndexes] = ids
 			}
 		}
 	case utils.MetaThresholds:
@@ -773,22 +773,22 @@ func (ldr *Loader) removeLoadedData(loaderType string, lds map[string][]LoaderDa
 				cacheArgs[utils.CacheStatQueues] = ids
 			}
 		}
-	case utils.MetaSags:
-		cacheIDs = []string{utils.CacheSagFilterIndexes}
+	case utils.MetaRankings:
+		cacheIDs = []string{utils.CacheRankingFilterIndexes}
 		for tntID := range lds {
 			if ldr.dryRun {
 				utils.Logger.Info(
-					fmt.Sprintf("<%s-%s> DRY_RUN: StatsQueueProfileID: %s",
+					fmt.Sprintf("<%s-%s> DRY_RUN: RankingProfileID: %s",
 						utils.LoaderS, ldr.ldrID, tntID))
 			} else {
 				tntIDStruct := utils.NewTenantID(tntID)
 				// get IDs so we can reload in cache
 				ids = append(ids, tntID)
-				if err := ldr.dm.RemoveSagProfile(tntIDStruct.Tenant,
+				if err := ldr.dm.RemoveRankingProfile(tntIDStruct.Tenant,
 					tntIDStruct.ID); err != nil {
 					return err
 				}
-				cacheArgs[utils.CacheSagProfiles] = ids
+				cacheArgs[utils.CacheRankingProfiles] = ids
 			}
 		}
 	case utils.MetaThresholds:

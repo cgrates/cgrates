@@ -54,7 +54,7 @@ var fileHandlers = map[string]func(*TPCSVImporter, string) error{
 	utils.ResourcesCsv:          (*TPCSVImporter).importResources,
 	utils.StatsCsv:              (*TPCSVImporter).importStats,
 	utils.TrendsCsv:             (*TPCSVImporter).importTrends,
-	utils.SagsCsv:               (*TPCSVImporter).importSags,
+	utils.RankingsCsv:           (*TPCSVImporter).importRankings,
 	utils.ThresholdsCsv:         (*TPCSVImporter).importThresholds,
 	utils.FiltersCsv:            (*TPCSVImporter).importFilters,
 	utils.RoutesCsv:             (*TPCSVImporter).importRoutes,
@@ -298,15 +298,15 @@ func (tpImp *TPCSVImporter) importTrends(fn string) error {
 	return tpImp.StorDb.SetTPTrends(srs)
 }
 
-func (tpImp *TPCSVImporter) importSags(fn string) error {
+func (tpImp *TPCSVImporter) importRankings(fn string) error {
 	if tpImp.Verbose {
 		log.Printf("Processing file: <%s>", fn)
 	}
-	sgs, err := tpImp.csvr.GetTPSags(tpImp.TPid, "", "")
+	sgs, err := tpImp.csvr.GetTPRankings(tpImp.TPid, "", "")
 	if err != nil {
 		return err
 	}
-	return tpImp.StorDb.SetTPSags(sgs)
+	return tpImp.StorDb.SetTPRankings(sgs)
 }
 
 func (tpImp *TPCSVImporter) importThresholds(fn string) error {

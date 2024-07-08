@@ -27,8 +27,8 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-// GetSagProfile returns a StatAggregator profile
-func (apierSv1 *APIerSv1) GetSagProfile(ctx *context.Context, arg *utils.TenantID, reply *engine.SagProfile) (err error) {
+// GetRankingProfile returns a Ranking profile
+func (apierSv1 *APIerSv1) GetRankingProfile(ctx *context.Context, arg *utils.TenantID, reply *engine.RankingProfile) (err error) {
 	if missing := utils.MissingStructFields(arg, []string{utils.ID}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -36,7 +36,7 @@ func (apierSv1 *APIerSv1) GetSagProfile(ctx *context.Context, arg *utils.TenantI
 	if tnt == utils.EmptyString {
 		tnt = apierSv1.Config.GeneralCfg().DefaultTenant
 	}
-	sg, err := apierSv1.DataManager.GetSagProfile(tnt, arg.ID, true, true, utils.NonTransactional)
+	sg, err := apierSv1.DataManager.GetRankingProfile(tnt, arg.ID, true, true, utils.NonTransactional)
 	if err != nil {
 		return utils.APIErrorHandler(err)
 	}
@@ -44,13 +44,13 @@ func (apierSv1 *APIerSv1) GetSagProfile(ctx *context.Context, arg *utils.TenantI
 	return
 }
 
-// GetSagProfileIDs returns list of sagProfile IDs registered for a tenant
-func (apierSv1 *APIerSv1) GetSagProfileIDs(ctx *context.Context, args *utils.PaginatorWithTenant, sgPrfIDs *[]string) (err error) {
+// GetRankingProfileIDs returns list of rankingProfile IDs registered for a tenant
+func (apierSv1 *APIerSv1) GetRankingProfileIDs(ctx *context.Context, args *utils.PaginatorWithTenant, sgPrfIDs *[]string) (err error) {
 	tnt := args.Tenant
 	if tnt == utils.EmptyString {
 		tnt = apierSv1.Config.GeneralCfg().DefaultTenant
 	}
-	prfx := utils.SagsProfilePrefix + tnt + utils.ConcatenatedKeySep
+	prfx := utils.RankingsProfilePrefix + tnt + utils.ConcatenatedKeySep
 	keys, err := apierSv1.DataManager.DataDB().GetKeysForPrefix(prfx)
 	if err != nil {
 		return err
@@ -66,20 +66,20 @@ func (apierSv1 *APIerSv1) GetSagProfileIDs(ctx *context.Context, args *utils.Pag
 	return
 }
 
-// SetSagProfile alters/creates a SagProfile
-func (apierSv1 *APIerSv1) SetSagProfile(ctx *context.Context, arg *engine.SagProfileWithAPIOpts, reply *string) error {
-	if missing := utils.MissingStructFields(arg.SagProfile, []string{utils.ID}); len(missing) != 0 {
+// SetRankingProfile alters/creates a RankingProfile
+func (apierSv1 *APIerSv1) SetRankingProfile(ctx *context.Context, arg *engine.RankingProfileWithAPIOpts, reply *string) error {
+	if missing := utils.MissingStructFields(arg.RankingProfile, []string{utils.ID}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	if arg.Tenant == utils.EmptyString {
 		arg.Tenant = apierSv1.Config.GeneralCfg().DefaultTenant
 	}
-	if err := apierSv1.DataManager.SetSagProfile(arg.SagProfile); err != nil {
+	if err := apierSv1.DataManager.SetRankingProfile(arg.RankingProfile); err != nil {
 		return utils.APIErrorHandler(err)
 	}
-	//generate a loadID for CacheSagProfiles and store it in database
+	//generate a loadID for CacheRankingProfiles and store it in database
 	loadID := time.Now().UnixNano()
-	if err := apierSv1.DataManager.SetLoadIDs(map[string]int64{utils.CacheSagProfiles: loadID}); err != nil {
+	if err := apierSv1.DataManager.SetLoadIDs(map[string]int64{utils.CacheRankingProfiles: loadID}); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	// delay if needed before cache call
@@ -87,8 +87,8 @@ func (apierSv1 *APIerSv1) SetSagProfile(ctx *context.Context, arg *engine.SagPro
 		utils.Logger.Info(fmt.Sprintf("<SetStatQueueProfile> Delaying cache call for %v", apierSv1.Config.GeneralCfg().CachingDelay))
 		time.Sleep(apierSv1.Config.GeneralCfg().CachingDelay)
 	}
-	//handle caching for SagProfile
-	if err := apierSv1.CallCache(utils.IfaceAsString(arg.APIOpts[utils.CacheOpt]), arg.Tenant, utils.CacheSagProfiles,
+	//handle caching for RankingProfile
+	if err := apierSv1.CallCache(utils.IfaceAsString(arg.APIOpts[utils.CacheOpt]), arg.Tenant, utils.CacheRankingProfiles,
 		arg.TenantID(), utils.EmptyString, nil, nil, arg.APIOpts); err != nil {
 		return utils.APIErrorHandler(err)
 	}
@@ -96,8 +96,8 @@ func (apierSv1 *APIerSv1) SetSagProfile(ctx *context.Context, arg *engine.SagPro
 	return nil
 }
 
-// RemoveSagProfile remove a specific sag configuration
-func (apierSv1 *APIerSv1) RemoveSagProfile(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *string) error {
+// RemoveRankingProfile remove a specific ranking configuration
+func (apierSv1 *APIerSv1) RemoveRankingProfile(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *string) error {
 	if missing := utils.MissingStructFields(args, []string{utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -105,36 +105,36 @@ func (apierSv1 *APIerSv1) RemoveSagProfile(ctx *context.Context, args *utils.Ten
 	if tnt == utils.EmptyString {
 		tnt = apierSv1.Config.GeneralCfg().DefaultTenant
 	}
-	if err := apierSv1.DataManager.RemoveSagProfile(tnt, args.ID); err != nil {
+	if err := apierSv1.DataManager.RemoveRankingProfile(tnt, args.ID); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	// delay if needed before cache call
 	if apierSv1.Config.GeneralCfg().CachingDelay != 0 {
-		utils.Logger.Info(fmt.Sprintf("<RemoveSagProfile> Delaying cache call for %v", apierSv1.Config.GeneralCfg().CachingDelay))
+		utils.Logger.Info(fmt.Sprintf("<RemoveRankingProfile> Delaying cache call for %v", apierSv1.Config.GeneralCfg().CachingDelay))
 		time.Sleep(apierSv1.Config.GeneralCfg().CachingDelay)
 	}
-	//handle caching for SagProfile
-	if err := apierSv1.CallCache(utils.IfaceAsString(args.APIOpts[utils.CacheOpt]), tnt, utils.CacheSagProfiles,
+	//handle caching for RankingProfile
+	if err := apierSv1.CallCache(utils.IfaceAsString(args.APIOpts[utils.CacheOpt]), tnt, utils.CacheRankingProfiles,
 		utils.ConcatenatedKey(tnt, args.ID), utils.EmptyString, nil, nil, args.APIOpts); err != nil {
 		return utils.APIErrorHandler(err)
 	}
-	//generate a loadID for CacheSagProfiles and store it in database
+	//generate a loadID for CacheRankingProfiles and store it in database
 	loadID := time.Now().UnixNano()
-	if err := apierSv1.DataManager.SetLoadIDs(map[string]int64{utils.CacheSagProfiles: loadID}); err != nil {
+	if err := apierSv1.DataManager.SetLoadIDs(map[string]int64{utils.CacheRankingProfiles: loadID}); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	*reply = utils.OK
 	return nil
 }
 
-// NewSagSv1 initializes SagSV1
-func NewSagSv1() *SagSv1 {
-	return &SagSv1{}
+// NewRankingSv1 initializes RankingSV1
+func NewRankingSv1() *RankingSv1 {
+	return &RankingSv1{}
 }
 
-type SagSv1 struct{}
+type RankingSv1 struct{}
 
-func (sa *SagSv1) Ping(ctx *context.Context, ign *utils.CGREvent, reply *string) error {
+func (sa *RankingSv1) Ping(ctx *context.Context, ign *utils.CGREvent, reply *string) error {
 	*reply = utils.Pong
 	return nil
 }

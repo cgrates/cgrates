@@ -38,13 +38,12 @@ type DataDBMock struct {
 	GetStatQueueProfileDrvF   func(tenant, id string) (sq *StatQueueProfile, err error)
 	SetStatQueueProfileDrvF   func(sq *StatQueueProfile) (err error)
 	RemStatQueueProfileDrvF   func(tenant, id string) (err error)
-	SetSagProfileDrvF         func(sq *SagProfile) (err error)
-	GetSagProfileDrvF         func(tenant string, id string) (sq *SagProfile, err error)
-	RemSagProfileDrvF         func(tenant string, id string) (err error)
+	SetRankingProfileDrvF     func(sq *RankingProfile) (err error)
+	GetRankingProfileDrvF     func(tenant string, id string) (sq *RankingProfile, err error)
+	RemRankingProfileDrvF     func(tenant string, id string) (err error)
 	SetTrendProfileDrvF       func(sq *TrendProfile) (err error)
 	GetTrendProfileDrvF       func(tenant string, id string) (sq *TrendProfile, err error)
 	RemTrendProfileDrvF       func(tenant string, id string) (err error)
-	GetSagsProfileDrvF        func(tenant, id string) (sg *SagProfile, err error)
 	GetActionPlanDrvF         func(key string) (ap *ActionPlan, err error)
 	SetActionPlanDrvF         func(key string, ap *ActionPlan) (err error)
 	RemoveActionPlanDrvF      func(key string) (err error)
@@ -337,23 +336,23 @@ func (dbM *DataDBMock) RemStatQueueProfileDrv(tenant, id string) (err error) {
 	return utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) GetSagProfileDrv(tenant, id string) (sg *SagProfile, err error) {
+func (dbM *DataDBMock) GetRankingProfileDrv(tenant, id string) (sg *RankingProfile, err error) {
 	if dbM.GetStatQueueProfileDrvF != nil {
-		return dbM.GetSagProfileDrvF(tenant, id)
+		return dbM.GetRankingProfileDrvF(tenant, id)
 	}
 	return nil, utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) SetSagProfileDrv(sg *SagProfile) (err error) {
-	if dbM.SetSagProfileDrvF(sg) != nil {
-		return dbM.SetSagProfileDrvF(sg)
+func (dbM *DataDBMock) SetRankingProfileDrv(sg *RankingProfile) (err error) {
+	if dbM.SetRankingProfileDrvF(sg) != nil {
+		return dbM.SetRankingProfileDrvF(sg)
 	}
 	return utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) RemSagProfileDrv(tenant string, id string) (err error) {
-	if dbM.RemSagProfileDrvF != nil {
-		return dbM.RemSagProfileDrvF(tenant, id)
+func (dbM *DataDBMock) RemRankingProfileDrv(tenant string, id string) (err error) {
+	if dbM.RemRankingProfileDrvF != nil {
+		return dbM.RemRankingProfileDrvF(tenant, id)
 	}
 	return utils.ErrNotImplemented
 }

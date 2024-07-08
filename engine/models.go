@@ -283,7 +283,7 @@ func (StatMdl) TableName() string {
 	return utils.TBLTPStats
 }
 
-type SagsMdl struct {
+type RankingsMdl struct {
 	PK                uint `gorm:"primary_key"`
 	Tpid              string
 	Tenant            string `index:"0" re:".*"`
@@ -297,8 +297,8 @@ type SagsMdl struct {
 	CreatedAt         time.Time
 }
 
-func (SagsMdl) TableName() string {
-	return utils.TBLTPSags
+func (RankingsMdl) TableName() string {
+	return utils.TBLTPRankings
 }
 
 type TrendsMdl struct {

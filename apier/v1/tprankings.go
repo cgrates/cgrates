@@ -23,30 +23,30 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-// SetTPSags creates a new stataggregator within a tariff plan
-func (apierSv1 *APIerSv1) SetTPSag(ctx *context.Context, sag *utils.TPSagsProfile, reply *string) error {
+// SetTPRankings creates a new ranking within a tariff plan
+func (apierSv1 *APIerSv1) SetTPRanking(ctx *context.Context, sag *utils.TPRankingProfile, reply *string) error {
 	if missing := utils.MissingStructFields(sag, []string{utils.TPid, utils.ID}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	if sag.Tenant == utils.EmptyString {
 		sag.Tenant = apierSv1.Config.GeneralCfg().DefaultTenant
 	}
-	if err := apierSv1.StorDb.SetTPSags([]*utils.TPSagsProfile{sag}); err != nil {
+	if err := apierSv1.StorDb.SetTPRankings([]*utils.TPRankingProfile{sag}); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	*reply = utils.OK
 	return nil
 }
 
-// GetTPSag queries specific Sag on Tariff plan
-func (apierSv1 *APIerSv1) GetTPSag(ctx *context.Context, sag *utils.TPTntID, reply *utils.TPSagsProfile) error {
-	if missing := utils.MissingStructFields(sag, []string{utils.TPid, utils.ID}); len(missing) != 0 { //Params missing
+// GetTPRanking queries specific Ranking on Tariff plan
+func (apierSv1 *APIerSv1) GetTPRanking(ctx *context.Context, ranking *utils.TPTntID, reply *utils.TPRankingProfile) error {
+	if missing := utils.MissingStructFields(ranking, []string{utils.TPid, utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if sag.Tenant == utils.EmptyString {
-		sag.Tenant = apierSv1.Config.GeneralCfg().DefaultTenant
+	if ranking.Tenant == utils.EmptyString {
+		ranking.Tenant = apierSv1.Config.GeneralCfg().DefaultTenant
 	}
-	sgs, err := apierSv1.StorDb.GetTPSags(sag.TPid, sag.Tenant, sag.ID)
+	sgs, err := apierSv1.StorDb.GetTPRankings(ranking.TPid, ranking.Tenant, ranking.ID)
 	if err != nil {
 		if err.Error() != utils.ErrNotFound.Error() {
 			err = utils.NewErrServerError(err)
@@ -57,21 +57,21 @@ func (apierSv1 *APIerSv1) GetTPSag(ctx *context.Context, sag *utils.TPTntID, rep
 	return nil
 }
 
-type AttrGetTPSagIds struct {
+type AttrGetTPRankingIds struct {
 	TPid   string // Tariff plan id
 	Tenant string
 	utils.PaginatorWithSearch
 }
 
-// GetTPSagIDs queries Sag identities on specific tariff plan.
-func (apierSv1 *APIerSv1) GetTPSagIDs(ctx *context.Context, attrs *AttrGetTPSagIds, reply *[]string) error {
+// GetTPRankingIDs queries Ranking identities on specific tariff plan.
+func (apierSv1 *APIerSv1) GetTPRankingIDs(ctx *context.Context, attrs *AttrGetTPRankingIds, reply *[]string) error {
 	if missing := utils.MissingStructFields(&attrs, []string{utils.TPid}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	if attrs.Tenant == utils.EmptyString {
 		attrs.Tenant = apierSv1.Config.GeneralCfg().DefaultTenant
 	}
-	ids, err := apierSv1.StorDb.GetTpTableIds(attrs.TPid, utils.TBLTPSags,
+	ids, err := apierSv1.StorDb.GetTpTableIds(attrs.TPid, utils.TBLTPRankings,
 		utils.TPDistinctIds{utils.TenantCfg, utils.IDCfg}, nil, &attrs.PaginatorWithSearch)
 	if err != nil {
 		if err.Error() != utils.ErrNotFound.Error() {
@@ -83,15 +83,15 @@ func (apierSv1 *APIerSv1) GetTPSagIDs(ctx *context.Context, attrs *AttrGetTPSagI
 	return nil
 }
 
-// RemoveTPSag removes specific Sag on Tariff plan
-func (apierSv1 *APIerSv1) RemoveTPSag(ctx *context.Context, sag *utils.TPTntID, reply *string) error {
+// RemoveTPRanking removes specific Ranking on Tariff plan
+func (apierSv1 *APIerSv1) RemoveTPRanking(ctx *context.Context, sag *utils.TPTntID, reply *string) error {
 	if missing := utils.MissingStructFields(sag, []string{utils.TPid, utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	if sag.Tenant == utils.EmptyString {
 		sag.Tenant = apierSv1.Config.GeneralCfg().DefaultTenant
 	}
-	if err := apierSv1.StorDb.RemTpData(utils.TBLTPSags, sag.TPid,
+	if err := apierSv1.StorDb.RemTpData(utils.TBLTPRankings, sag.TPid,
 		map[string]string{utils.TenantCfg: sag.Tenant, utils.IDCfg: sag.ID}); err != nil {
 		return utils.NewErrServerError(err)
 	}

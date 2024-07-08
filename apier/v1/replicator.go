@@ -136,10 +136,10 @@ func (rplSv1 *ReplicatorSv1) GetStatQueueProfile(ctx *context.Context, tntID *ut
 	return nil
 }
 
-// GetSagProfile is the remote method coresponding to the dataDb driver method
-func (rplSv1 *ReplicatorSv1) GetSagProfile(ctx *context.Context, tntID *utils.TenantIDWithAPIOpts, reply *engine.SagProfile) error {
-	engine.UpdateReplicationFilters(utils.SagsProfilePrefix, tntID.TenantID.TenantID(), utils.IfaceAsString(tntID.APIOpts[utils.RemoteHostOpt]))
-	rcv, err := rplSv1.dm.DataDB().GetSagProfileDrv(tntID.Tenant, tntID.ID)
+// GetRankingProfile is the remote method coresponding to the dataDb driver method
+func (rplSv1 *ReplicatorSv1) GetRankingProfile(ctx *context.Context, tntID *utils.TenantIDWithAPIOpts, reply *engine.RankingProfile) error {
+	engine.UpdateReplicationFilters(utils.RankingsProfilePrefix, tntID.TenantID.TenantID(), utils.IfaceAsString(tntID.APIOpts[utils.RemoteHostOpt]))
+	rcv, err := rplSv1.dm.DataDB().GetRankingProfileDrv(tntID.Tenant, tntID.ID)
 	if err != nil {
 		return err
 	}
@@ -443,13 +443,13 @@ func (rplSv1 *ReplicatorSv1) SetStatQueueProfile(ctx *context.Context, sq *engin
 	return
 }
 
-// SetSagQueueProfile is the replication method coresponding to the dataDb driver method
-func (rplSv1 *ReplicatorSv1) SetSagProfile(ctx *context.Context, sg *engine.SagProfileWithAPIOpts, reply *string) (err error) {
-	if err = rplSv1.dm.DataDB().SetSagProfileDrv(sg.SagProfile); err != nil {
+// SetRankingQueueProfile is the replication method coresponding to the dataDb driver method
+func (rplSv1 *ReplicatorSv1) SetRankingProfile(ctx *context.Context, sg *engine.RankingProfileWithAPIOpts, reply *string) (err error) {
+	if err = rplSv1.dm.DataDB().SetRankingProfileDrv(sg.RankingProfile); err != nil {
 		return
 	}
 	if err = rplSv1.v1.CallCache(utils.IfaceAsString(sg.APIOpts[utils.CacheOpt]),
-		sg.Tenant, utils.CacheSagProfiles, sg.TenantID(), utils.EmptyString, nil, nil, sg.APIOpts); err != nil {
+		sg.Tenant, utils.CacheRankingProfiles, sg.TenantID(), utils.EmptyString, nil, nil, sg.APIOpts); err != nil {
 		return
 	}
 	*reply = utils.OK
@@ -866,14 +866,14 @@ func (rplSv1 *ReplicatorSv1) RemoveStatQueueProfile(ctx *context.Context, args *
 	return
 }
 
-// RemoveSagProfile is the replication method coresponding to the dataDb driver method
-func (rplSv1 *ReplicatorSv1) RemoveSagProfile(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *string) (err error) {
-	if err = rplSv1.dm.DataDB().RemSagProfileDrv(args.Tenant, args.ID); err != nil {
+// RemoveRankingProfile is the replication method coresponding to the dataDb driver method
+func (rplSv1 *ReplicatorSv1) RemoveRankingProfile(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *string) (err error) {
+	if err = rplSv1.dm.DataDB().RemRankingProfileDrv(args.Tenant, args.ID); err != nil {
 		return
 	}
 
 	if err = rplSv1.v1.CallCache(utils.IfaceAsString(args.APIOpts[utils.CacheOpt]),
-		args.Tenant, utils.CacheSagProfiles, args.TenantID.TenantID(), utils.EmptyString, nil, nil, args.APIOpts); err != nil {
+		args.Tenant, utils.CacheRankingProfiles, args.TenantID.TenantID(), utils.EmptyString, nil, nil, args.APIOpts); err != nil {
 		return
 	}
 	*reply = utils.OK

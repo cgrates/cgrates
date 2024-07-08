@@ -60,7 +60,7 @@ var (
 		utils.StatQueueProfilePrefix:   {},
 		utils.ThresholdPrefix:          {},
 		utils.ThresholdProfilePrefix:   {},
-		utils.SagsProfilePrefix:        {},
+		utils.RankingsProfilePrefix:    {},
 		utils.FilterPrefix:             {},
 		utils.RouteProfilePrefix:       {},
 		utils.AttributeProfilePrefix:   {},
@@ -189,9 +189,9 @@ func (dm *DataManager) CacheDataFromDB(prfx string, ids []string, mustBeCached b
 			lkID := guardian.Guardian.GuardIDs("", config.CgrConfig().GeneralCfg().LockingTimeout, statQueueLockKey(tntID.Tenant, tntID.ID))
 			_, err = dm.GetStatQueue(tntID.Tenant, tntID.ID, false, true, utils.NonTransactional)
 			guardian.Guardian.UnguardIDs(lkID)
-		case utils.SagsProfilePrefix:
+		case utils.RankingsProfilePrefix:
 			tntID := utils.NewTenantID(dataID)
-			_, err = dm.GetSagProfile(tntID.Tenant, tntID.ID, false, true, utils.NonTransactional)
+			_, err = dm.GetRankingProfile(tntID.Tenant, tntID.ID, false, true, utils.NonTransactional)
 		case utils.TimingsPrefix:
 			_, err = dm.GetTiming(dataID, true, utils.NonTransactional)
 		case utils.ThresholdProfilePrefix:
@@ -1338,7 +1338,7 @@ func (dm *DataManager) RemoveTrendProfile(tenant, id string) (err error) {
 	if oldSgs == nil {
 		return utils.ErrNotFound
 	}
-	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaSagProfiles]; itm.Replicate {
+	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaRankingProfiles]; itm.Replicate {
 		replicate(dm.connMgr, config.CgrConfig().DataDbCfg().RplConns,
 			config.CgrConfig().DataDbCfg().RplFiltered,
 			utils.TrendsProfilePrefix, utils.ConcatenatedKey(tenant, id), // this are used to get the host IDs from cache
@@ -1351,23 +1351,23 @@ func (dm *DataManager) RemoveTrendProfile(tenant, id string) (err error) {
 	return
 }
 
-func (dm *DataManager) GetSagProfile(tenant, id string, cacheRead, cacheWrite bool, transactionID string) (sgp *SagProfile, err error) {
+func (dm *DataManager) GetRankingProfile(tenant, id string, cacheRead, cacheWrite bool, transactionID string) (rgp *RankingProfile, err error) {
 	tntID := utils.ConcatenatedKey(tenant, id)
 	if cacheRead {
-		if x, ok := Cache.Get(utils.CacheSagProfiles, tntID); ok {
+		if x, ok := Cache.Get(utils.CacheRankingProfiles, tntID); ok {
 			if x == nil {
 				return nil, utils.ErrNotFound
 			}
-			return x.(*SagProfile), nil
+			return x.(*RankingProfile), nil
 		}
 	}
 	if dm == nil {
 		err = utils.ErrNoDatabaseConn
 		return
 	}
-	sgp, err = dm.dataDB.GetSagProfileDrv(tenant, id)
+	rgp, err = dm.dataDB.GetRankingProfileDrv(tenant, id)
 	if err != nil {
-		if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaSagProfiles]; err == utils.ErrNotFound && itm.Remote {
+		if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaRankingProfiles]; err == utils.ErrNotFound && itm.Remote {
 			if err = dm.connMgr.Call(context.TODO(), config.CgrConfig().DataDbCfg().RmtConns,
 				utils.ReplicatorSv1GetSagProfile,
 				&utils.TenantIDWithAPIOpts{
@@ -1375,24 +1375,23 @@ func (dm *DataManager) GetSagProfile(tenant, id string, cacheRead, cacheWrite bo
 					APIOpts: utils.GenerateDBItemOpts(itm.APIKey, itm.RouteID, utils.EmptyString,
 						utils.FirstNonEmpty(config.CgrConfig().DataDbCfg().RmtConnID,
 							config.CgrConfig().GeneralCfg().NodeID)),
-				}, &sgp); err == nil {
-				err = dm.dataDB.SetSagProfileDrv(sgp)
+				}, &rgp); err == nil {
+				err = dm.dataDB.SetRankingProfileDrv(rgp)
 			}
 		}
 		if err != nil {
 			err = utils.CastRPCErr(err)
 			if err == utils.ErrNotFound && cacheWrite {
-				if errCh := Cache.Set(utils.CacheSagProfiles, tntID, nil, nil,
+				if errCh := Cache.Set(utils.CacheRankingProfiles, tntID, nil, nil,
 					cacheCommit(transactionID), transactionID); errCh != nil {
 					return nil, errCh
 				}
 			}
 			return nil, err
-
 		}
 	}
 	if cacheWrite {
-		if errCh := Cache.Set(utils.CacheSagProfiles, tntID, sgp, nil,
+		if errCh := Cache.Set(utils.CacheRankingProfiles, tntID, rgp, nil,
 			cacheCommit(transactionID), transactionID); errCh != nil {
 			return nil, errCh
 		}
@@ -1400,45 +1399,45 @@ func (dm *DataManager) GetSagProfile(tenant, id string, cacheRead, cacheWrite bo
 	return
 }
 
-func (dm *DataManager) SetSagProfile(sgp *SagProfile) (err error) {
+func (dm *DataManager) SetRankingProfile(sgp *RankingProfile) (err error) {
 	if dm == nil {
 		return utils.ErrNoDatabaseConn
 	}
-	if err = dm.DataDB().SetSagProfileDrv(sgp); err != nil {
+	if err = dm.DataDB().SetRankingProfileDrv(sgp); err != nil {
 		return
 	}
-	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaSagProfiles]; itm.Replicate {
+	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaRankingProfiles]; itm.Replicate {
 		err = replicate(dm.connMgr, config.CgrConfig().DataDbCfg().RplConns,
 			config.CgrConfig().DataDbCfg().RplFiltered,
-			utils.SagsProfilePrefix, sgp.TenantID(),
+			utils.RankingsProfilePrefix, sgp.TenantID(),
 			utils.ReplicatorSv1SetSagProfile,
-			&SagProfileWithAPIOpts{
-				SagProfile: sgp,
+			&RankingProfileWithAPIOpts{
+				RankingProfile: sgp,
 				APIOpts: utils.GenerateDBItemOpts(itm.APIKey, itm.RouteID,
 					config.CgrConfig().DataDbCfg().RplCache, utils.EmptyString)})
 	}
 	return
 }
 
-func (dm *DataManager) RemoveSagProfile(tenant, id string) (err error) {
+func (dm *DataManager) RemoveRankingProfile(tenant, id string) (err error) {
 	if dm == nil {
 		return utils.ErrNoDatabaseConn
 	}
-	oldSgs, err := dm.GetSagProfile(tenant, id, true, false, utils.NonTransactional)
+	oldSgs, err := dm.GetRankingProfile(tenant, id, true, false, utils.NonTransactional)
 	if err != nil && err != utils.ErrNotFound {
 		return err
 	}
-	if err = dm.DataDB().RemSagProfileDrv(tenant, id); err != nil {
+	if err = dm.DataDB().RemRankingProfileDrv(tenant, id); err != nil {
 		return
 	}
 	if oldSgs == nil {
 		return utils.ErrNotFound
 	}
-	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaSagProfiles]; itm.Replicate {
+	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaRankingProfiles]; itm.Replicate {
 		replicate(dm.connMgr, config.CgrConfig().DataDbCfg().RplConns,
 			config.CgrConfig().DataDbCfg().RplFiltered,
-			utils.SagsProfilePrefix, utils.ConcatenatedKey(tenant, id), // this are used to get the host IDs from cache
-			utils.ReplicatorSv1RemoveSagProfile,
+			utils.RankingsProfilePrefix, utils.ConcatenatedKey(tenant, id), // this are used to get the host IDs from cache
+			utils.ReplicatorSv1RemoveRankingProfile,
 			&utils.TenantIDWithAPIOpts{
 				TenantID: &utils.TenantID{Tenant: tenant, ID: id},
 				APIOpts: utils.GenerateDBItemOpts(itm.APIKey, itm.RouteID,

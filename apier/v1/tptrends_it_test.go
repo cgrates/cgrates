@@ -113,7 +113,7 @@ func testTPTrendsRpcConn(t *testing.T) {
 
 func testTPTrendsGetTPTrendBeforeSet(t *testing.T) {
 	var reply *utils.TPTrendsProfile
-	if err := tpTrendRPC.Call(context.Background(), utils.APIerSv1GetTPSag,
+	if err := tpTrendRPC.Call(context.Background(), utils.APIerSv1GetTPRanking,
 		&utils.TPTntID{TPid: "TPS1", Tenant: "cgrates.org", ID: "Trend1"},
 		&reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)

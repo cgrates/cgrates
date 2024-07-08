@@ -66,7 +66,7 @@ const (
 	ColSqs  = "statqueues"
 	ColTrs  = "trend_profiles"
 	ColSqp  = "statqueue_profiles"
-	ColSgp  = "sag_profiles"
+	ColRgp  = "ranking_profiles"
 	ColTps  = "threshold_profiles"
 	ColThs  = "thresholds"
 	ColFlt  = "filters"
@@ -302,14 +302,14 @@ func (ms *MongoStorage) ensureIndexesForCol(col string) error { // exported for 
 	switch col {
 	case ColAct, ColApl, ColAAp, ColAtr, ColRpl, ColDst, ColRds, ColLht, ColIndx:
 		err = ms.enusureIndex(col, true, "key")
-	case ColRsP, ColRes, ColSqs, ColSgp, ColTrs, ColSqp, ColTps, ColThs, ColRts, ColAttr, ColFlt, ColCpp, ColDpp, ColDph:
+	case ColRsP, ColRes, ColSqs, ColRgp, ColTrs, ColSqp, ColTps, ColThs, ColRts, ColAttr, ColFlt, ColCpp, ColDpp, ColDph:
 		err = ms.enusureIndex(col, true, "tenant", "id")
 	case ColRpf, ColShg, ColAcc:
 		err = ms.enusureIndex(col, true, "id")
 		// StorDB
 	case utils.TBLTPTimings, utils.TBLTPDestinations,
 		utils.TBLTPDestinationRates, utils.TBLTPRatingPlans,
-		utils.TBLTPSharedGroups, utils.TBLTPActions, utils.TBLTPSags,
+		utils.TBLTPSharedGroups, utils.TBLTPActions, utils.TBLTPRankings,
 		utils.TBLTPActionPlans, utils.TBLTPActionTriggers,
 		utils.TBLTPStats, utils.TBLTPResources, utils.TBLTPDispatchers,
 		utils.TBLTPDispatcherHosts, utils.TBLTPChargers,
@@ -348,13 +348,13 @@ func (ms *MongoStorage) EnsureIndexes(cols ...string) error {
 			cols = []string{
 				ColAct, ColApl, ColAAp, ColAtr, ColRpl, ColDst, ColRds, ColLht, ColIndx,
 				ColRsP, ColRes, ColSqs, ColSqp, ColTps, ColThs, ColRts, ColAttr, ColFlt, ColCpp,
-				ColDpp, ColRpf, ColShg, ColAcc, ColSgp, ColTrs,
+				ColDpp, ColRpf, ColShg, ColAcc, ColRgp, ColTrs,
 			}
 		} else {
 			cols = []string{
 				utils.TBLTPTimings, utils.TBLTPDestinations, utils.TBLTPDestinationRates,
 				utils.TBLTPRatingPlans, utils.TBLTPSharedGroups, utils.TBLTPActions, utils.TBLTPActionPlans,
-				utils.TBLTPActionTriggers, utils.TBLTPSags, utils.TBLTPStats, utils.TBLTPResources, utils.TBLTPRatingProfiles,
+				utils.TBLTPActionTriggers, utils.TBLTPRankings, utils.TBLTPStats, utils.TBLTPResources, utils.TBLTPRatingProfiles,
 				utils.CDRsTBL, utils.SessionCostsTBL,
 			}
 		}
@@ -435,8 +435,8 @@ func (ms *MongoStorage) RemoveKeysForPrefix(prefix string) error {
 		colName = ColTps
 	case utils.StatQueueProfilePrefix:
 		colName = ColSqp
-	case utils.SagsProfilePrefix:
-		colName = ColSgp
+	case utils.RankingsProfilePrefix:
+		colName = ColRgp
 	case utils.TrendsProfilePrefix:
 		colName = ColTrs
 	case utils.ThresholdPrefix:
@@ -604,8 +604,8 @@ func (ms *MongoStorage) GetKeysForPrefix(prefix string) (keys []string, err erro
 			keys, qryErr = ms.getAllKeysMatchingTenantID(sctx, ColRes, utils.ResourcesPrefix, subject, tntID)
 		case utils.StatQueuePrefix:
 			keys, qryErr = ms.getAllKeysMatchingTenantID(sctx, ColSqs, utils.StatQueuePrefix, subject, tntID)
-		case utils.SagsProfilePrefix:
-			keys, qryErr = ms.getAllKeysMatchingTenantID(sctx, ColSgp, utils.SagsProfilePrefix, subject, tntID)
+		case utils.RankingsProfilePrefix:
+			keys, qryErr = ms.getAllKeysMatchingTenantID(sctx, ColRgp, utils.RankingsProfilePrefix, subject, tntID)
 		case utils.TrendsProfilePrefix:
 			keys, qryErr = ms.getAllKeysMatchingTenantID(sctx, ColTrs, utils.TrendsProfilePrefix, subject, tntID)
 		case utils.StatQueueProfilePrefix:
@@ -680,7 +680,7 @@ func (ms *MongoStorage) HasDataDrv(category, subject, tenant string) (has bool, 
 			count, err = ms.getCol(ColSqs).CountDocuments(sctx, bson.M{"tenant": tenant, "id": subject})
 		case utils.StatQueueProfilePrefix:
 			count, err = ms.getCol(ColSqp).CountDocuments(sctx, bson.M{"tenant": tenant, "id": subject})
-		case utils.SagsProfilePrefix:
+		case utils.RankingsProfilePrefix:
 			count, err = ms.getCol(ColSqp).CountDocuments(sctx, bson.M{"tenant": tenant, "id": subject})
 		case utils.ThresholdPrefix:
 			count, err = ms.getCol(ColThs).CountDocuments(sctx, bson.M{"tenant": tenant, "id": subject})
@@ -1528,31 +1528,31 @@ func (ms *MongoStorage) RemStatQueueDrv(tenant, id string) error {
 	})
 }
 
-func (ms *MongoStorage) GetSagProfileDrv(tenant, id string) (*SagProfile, error) {
-	sgProfile := new(SagProfile)
+func (ms *MongoStorage) GetRankingProfileDrv(tenant, id string) (*RankingProfile, error) {
+	rgProfile := new(RankingProfile)
 	err := ms.query(func(sctx mongo.SessionContext) error {
-		sr := ms.getCol(ColSgp).FindOne(sctx, bson.M{"tenant": tenant, "id": id})
-		decodeErr := sr.Decode(sgProfile)
+		sr := ms.getCol(ColRgp).FindOne(sctx, bson.M{"tenant": tenant, "id": id})
+		decodeErr := sr.Decode(rgProfile)
 		if errors.Is(decodeErr, mongo.ErrNoDocuments) {
 			return utils.ErrNotFound
 		}
 		return decodeErr
 	})
-	return sgProfile, err
+	return rgProfile, err
 }
 
-func (ms *MongoStorage) SetSagProfileDrv(sgp *SagProfile) (err error) {
+func (ms *MongoStorage) SetRankingProfileDrv(sgp *RankingProfile) (err error) {
 	return ms.query(func(sctx mongo.SessionContext) error {
-		_, err := ms.getCol(ColSgp).UpdateOne(sctx, bson.M{"tenant": sgp.Tenant, "id": sgp.ID},
+		_, err := ms.getCol(ColRgp).UpdateOne(sctx, bson.M{"tenant": sgp.Tenant, "id": sgp.ID},
 			bson.M{"$set": sgp},
 			options.Update().SetUpsert(true))
 		return err
 	})
 }
 
-func (ms *MongoStorage) RemSagProfileDrv(tenant, id string) (err error) {
+func (ms *MongoStorage) RemRankingProfileDrv(tenant, id string) (err error) {
 	return ms.query(func(sctx mongo.SessionContext) error {
-		dr, err := ms.getCol(ColSgp).DeleteOne(sctx, bson.M{"tenant": tenant, "id": id})
+		dr, err := ms.getCol(ColRgp).DeleteOne(sctx, bson.M{"tenant": tenant, "id": id})
 		if dr.DeletedCount == 0 {
 			return utils.ErrNotFound
 		}

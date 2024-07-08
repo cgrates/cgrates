@@ -217,7 +217,7 @@ func testDspChcPrecacheStatus(t *testing.T) {
 		utils.MetaAPIBan:                   utils.MetaReady,
 		utils.CacheRadiusPackets:           utils.MetaReady,
 		utils.CacheReplicationHosts:        utils.MetaReady,
-		utils.CacheSagProfiles:             utils.MetaReady,
+		utils.CacheRankingProfiles:         utils.MetaReady,
 	}
 
 	if err := dispEngine.RPC.Call(context.Background(), utils.CacheSv1PrecacheStatus, utils.AttrCacheIDsWithAPIOpts{
