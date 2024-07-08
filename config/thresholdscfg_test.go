@@ -157,3 +157,162 @@ func TestThresholdSCfgClone(t *testing.T) {
 		t.Errorf("Expected clone to not modify the cloned")
 	}
 }
+
+func TestThresholdSCfgLoadFromJSONCfgSessionsConns(t *testing.T) {
+	tests := []struct {
+		name           string
+		input          *ThresholdSJsonCfg
+		expectedOutput []string
+	}{
+		{
+			name: "Empty Sessions_conns",
+			input: &ThresholdSJsonCfg{
+				Sessions_conns: []string{},
+			},
+			expectedOutput: []string{},
+		},
+		{
+			name: "Non-empty Sessions_conns without MetaInternal",
+			input: &ThresholdSJsonCfg{
+				Sessions_conns: []string{"conn1", "conn2"},
+			},
+			expectedOutput: []string{"conn1", "conn2"},
+		},
+		{
+			name: "Non-empty Sessions_conns with MetaInternal",
+			input: &ThresholdSJsonCfg{
+				Sessions_conns: []string{"conn1", utils.MetaInternal},
+			},
+			expectedOutput: []string{"conn1", utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS)},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			var cfg ThresholdSCfg
+			err := cfg.loadFromJSONCfg(tt.input)
+			if err != nil {
+				t.Fatalf("Unexpected error: %v", err)
+			}
+			if len(cfg.SessionSConns) != len(tt.expectedOutput) {
+				t.Fatalf("Expected %v, got %v", tt.expectedOutput, cfg.SessionSConns)
+			}
+			for i, conn := range cfg.SessionSConns {
+				if conn != tt.expectedOutput[i] {
+					t.Errorf("Expected %s at index %d, got %s", tt.expectedOutput[i], i, conn)
+				}
+			}
+		})
+	}
+}
+
+func TestThresholdSCfgAsMapInterfaceSessionSConns(t *testing.T) {
+	tests := []struct {
+		name           string
+		cfg            ThresholdSCfg
+		expectedOutput map[string]any
+	}{
+		{
+			name: "SessionSConns is nil",
+			cfg: ThresholdSCfg{
+				Enabled:             true,
+				IndexedSelects:      true,
+				StoreInterval:       0,
+				NestedFields:        true,
+				SessionSConns:       nil,
+				StringIndexedFields: nil,
+				PrefixIndexedFields: nil,
+				SuffixIndexedFields: nil,
+				Opts:                &ThresholdsOpts{},
+			},
+			expectedOutput: map[string]any{
+				"EnabledCfg":        true,
+				"IndexedSelectsCfg": 10,
+				"NestedFieldsCfg":   "nested",
+				"StoreIntervalCfg":  "EmptyString",
+				"OptsCfg": map[string]any{
+					"MetaProfileIDs":              nil,
+					"MetaProfileIgnoreFiltersCfg": nil,
+				},
+			},
+		},
+		{
+			name: "SessionSConns has values",
+			cfg: ThresholdSCfg{
+				Enabled:             true,
+				IndexedSelects:      true,
+				StoreInterval:       0,
+				NestedFields:        true,
+				SessionSConns:       []string{"conn1", "conn2", "MetaInternal"},
+				StringIndexedFields: nil,
+				PrefixIndexedFields: nil,
+				SuffixIndexedFields: nil,
+				Opts:                &ThresholdsOpts{},
+			},
+			expectedOutput: map[string]any{
+				"EnabledCfg":        true,
+				"IndexedSelectsCfg": 10,
+				"NestedFieldsCfg":   "nested",
+				"StoreIntervalCfg":  "EmptyString",
+				"OptsCfg": map[string]any{
+					"ProfileIDs":              nil,
+					"ProfileIgnoreFiltersCfg": nil,
+				},
+				"SessionSConnsCfg": []string{"conn1", "conn2", "MetaInternal"},
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			output := tt.cfg.AsMapInterface()
+
+			if reflect.DeepEqual(output, tt.expectedOutput) {
+				t.Errorf("Expected %v, got %v", tt.expectedOutput, output)
+			}
+		})
+	}
+}
+
+func TestThresholdSCfgCloneSessionSConns(t *testing.T) {
+	tests := []struct {
+		name           string
+		original       *ThresholdSCfg
+		expectedCloned []string
+	}{
+		{
+			name: "SessionSConns is nil",
+			original: &ThresholdSCfg{
+				SessionSConns: nil,
+				Opts:          &ThresholdsOpts{},
+			},
+			expectedCloned: nil,
+		},
+		{
+			name: "SessionSConns has values",
+			original: &ThresholdSCfg{
+				SessionSConns: []string{"conn1", "conn2"},
+				Opts:          &ThresholdsOpts{},
+			},
+			expectedCloned: []string{"conn1", "conn2"},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			cloned := tt.original.Clone()
+
+			if tt.expectedCloned == nil {
+				if cloned.SessionSConns != nil {
+					t.Errorf("Expected nil, got %v", cloned.SessionSConns)
+				}
+			} else {
+				if len(cloned.SessionSConns) != len(tt.expectedCloned) {
+					t.Errorf("Expected %v, got %v", tt.expectedCloned, cloned.SessionSConns)
+				}
+				for i := range cloned.SessionSConns {
+					if cloned.SessionSConns[i] != tt.expectedCloned[i] {
+						t.Errorf("Expected %v, got %v", tt.expectedCloned, cloned.SessionSConns)
+					}
+				}
+			}
+		})
+	}
+}
