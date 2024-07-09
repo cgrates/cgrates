@@ -983,7 +983,18 @@ func TestCdrprocessEventsErrLog(t *testing.T) {
 				utils.Usage:        123 * time.Minute},
 		}}
 	expLog := `with AttributeS`
-	if _, err := cdrs.processEvents(evs, true, true, true, true, true, true, true, true, true); err == nil || err != utils.ErrPartiallyExecuted {
+	if _, err := cdrs.processEvents(evs,
+		cdrProcessingArgs{
+			attrS:  true,
+			chrgS:  true,
+			refund: true,
+			ralS:   true,
+			store:  true,
+			reRate: true,
+			export: true,
+			thdS:   true,
+			stS:    true,
+		}); err == nil || err != utils.ErrPartiallyExecuted {
 		t.Error(err)
 	} else if rcvLog := buf.String(); !strings.Contains(rcvLog, expLog) {
 		t.Errorf("expected %v,received %v", expLog, rcvLog)
@@ -992,7 +1003,18 @@ func TestCdrprocessEventsErrLog(t *testing.T) {
 	buf2 := new(bytes.Buffer)
 	setlog(buf2)
 	expLog = `with ChargerS`
-	if _, err := cdrs.processEvents(evs, true, false, true, true, true, true, true, true, true); err == nil || err != utils.ErrPartiallyExecuted {
+	if _, err := cdrs.processEvents(evs,
+		cdrProcessingArgs{
+			attrS:  false,
+			chrgS:  true,
+			refund: true,
+			ralS:   true,
+			store:  true,
+			reRate: true,
+			export: true,
+			thdS:   true,
+			stS:    true,
+		}); err == nil || err != utils.ErrPartiallyExecuted {
 		t.Error(err)
 	} else if rcvLog := buf2.String(); !strings.Contains(rcvLog, expLog) {
 		t.Errorf("expected %v,received %v", expLog, rcvLog)
@@ -1002,7 +1024,18 @@ func TestCdrprocessEventsErrLog(t *testing.T) {
 	setlog(buf3)
 	Cache.Set(utils.CacheCDRIDs, utils.ConcatenatedKey("test1", utils.MetaDefault), "val", []string{}, true, utils.NonTransactional)
 	expLog = `with CacheS`
-	if _, err = cdrs.processEvents(evs, false, false, false, true, true, false, true, true, true); err == nil || err != utils.ErrExists {
+	if _, err = cdrs.processEvents(evs,
+		cdrProcessingArgs{
+			attrS:  false,
+			chrgS:  false,
+			refund: false,
+			ralS:   true,
+			store:  true,
+			reRate: false,
+			export: true,
+			thdS:   true,
+			stS:    true,
+		}); err == nil || err != utils.ErrExists {
 		t.Error(err)
 	} else if rcvLog := buf3.String(); !strings.Contains(rcvLog, expLog) {
 		t.Errorf("expected %v,received %v", expLog, rcvLog)
@@ -1012,7 +1045,18 @@ func TestCdrprocessEventsErrLog(t *testing.T) {
 	setlog(buf4)
 	evs[0].Event[utils.AnswerTime] = "time"
 	expLog = `could not retrieve previously`
-	if _, err = cdrs.processEvents(evs, false, false, true, true, true, false, true, true, true); err == nil || err != utils.ErrPartiallyExecuted {
+	if _, err = cdrs.processEvents(evs,
+		cdrProcessingArgs{
+			attrS:  false,
+			chrgS:  false,
+			refund: true,
+			ralS:   true,
+			store:  true,
+			reRate: false,
+			export: true,
+			thdS:   true,
+			stS:    true,
+		}); err == nil || err != utils.ErrPartiallyExecuted {
 		t.Error(err)
 	} else if rcvLog := buf4.String(); !strings.Contains(rcvLog, expLog) {
 		t.Errorf("expected %v,received %v", expLog, rcvLog)
@@ -1022,7 +1066,18 @@ func TestCdrprocessEventsErrLog(t *testing.T) {
 	setlog(buf5)
 	evs[0].Event[utils.AnswerTime] = time.Date(2019, 11, 27, 12, 21, 26, 0, time.UTC)
 	expLog = `refunding CDR`
-	if _, err = cdrs.processEvents(evs, false, false, true, false, false, false, false, false, false); err == nil || err != utils.ErrPartiallyExecuted {
+	if _, err = cdrs.processEvents(evs,
+		cdrProcessingArgs{
+			attrS:  false,
+			chrgS:  false,
+			refund: true,
+			ralS:   false,
+			store:  false,
+			reRate: false,
+			export: false,
+			thdS:   false,
+			stS:    false,
+		}); err == nil || err != utils.ErrPartiallyExecuted {
 		t.Error(err)
 	} else if rcvLog := buf5.String(); strings.Contains(rcvLog, expLog) {
 		t.Errorf("expected %v,received %v", expLog, rcvLog)
@@ -1033,7 +1088,18 @@ func TestCdrprocessEventsErrLog(t *testing.T) {
 	removelog()
 	setlog(buf6)
 	expLog = `refunding CDR`
-	if _, err = cdrs.processEvents(evs, false, false, true, false, true, false, false, false, false); err == nil || err != utils.ErrPartiallyExecuted {
+	if _, err = cdrs.processEvents(evs,
+		cdrProcessingArgs{
+			attrS:  false,
+			chrgS:  false,
+			refund: true,
+			ralS:   false,
+			store:  true,
+			reRate: false,
+			export: false,
+			thdS:   false,
+			stS:    false,
+		}); err == nil || err != utils.ErrPartiallyExecuted {
 		t.Error(err)
 	} else if rcvLog := buf6.String(); strings.Contains(rcvLog, expLog) {
 		t.Errorf("expected %v,received %v", expLog, rcvLog)
@@ -1042,7 +1108,18 @@ func TestCdrprocessEventsErrLog(t *testing.T) {
 	removelog()
 	setlog(buf7)
 	expLog = `exporting cdr`
-	if _, err = cdrs.processEvents(evs, false, false, true, false, false, true, true, false, false); err == nil || err != utils.ErrPartiallyExecuted {
+	if _, err = cdrs.processEvents(evs,
+		cdrProcessingArgs{
+			attrS:  false,
+			chrgS:  false,
+			refund: true,
+			ralS:   false,
+			store:  false,
+			reRate: true,
+			export: true,
+			thdS:   false,
+			stS:    false,
+		}); err == nil || err != utils.ErrPartiallyExecuted {
 		t.Error(err)
 	} else if rcvLog := buf7.String(); strings.Contains(rcvLog, expLog) {
 		t.Errorf("expected %v,received %v", expLog, rcvLog)
@@ -1051,7 +1128,18 @@ func TestCdrprocessEventsErrLog(t *testing.T) {
 	removelog()
 	setlog(buf8)
 	expLog = `processing event`
-	if _, err = cdrs.processEvents(evs, false, false, true, false, false, true, false, true, false); err == nil || err != utils.ErrPartiallyExecuted {
+	if _, err = cdrs.processEvents(evs,
+		cdrProcessingArgs{
+			attrS:  false,
+			chrgS:  false,
+			refund: true,
+			ralS:   false,
+			store:  false,
+			reRate: true,
+			export: false,
+			thdS:   true,
+			stS:    false,
+		}); err == nil || err != utils.ErrPartiallyExecuted {
 		t.Error(err)
 	} else if rcvLog := buf8.String(); strings.Contains(rcvLog, expLog) {
 		t.Errorf("expected %v,received %v", expLog, rcvLog)
@@ -1060,7 +1148,18 @@ func TestCdrprocessEventsErrLog(t *testing.T) {
 	removelog()
 	setlog(buf9)
 	expLog = `processing event`
-	if _, err = cdrs.processEvents(evs, false, false, true, false, false, true, false, false, true); err == nil || err != utils.ErrPartiallyExecuted {
+	if _, err = cdrs.processEvents(evs,
+		cdrProcessingArgs{
+			attrS:  false,
+			chrgS:  false,
+			refund: true,
+			ralS:   false,
+			store:  false,
+			reRate: true,
+			export: false,
+			thdS:   false,
+			stS:    true,
+		}); err == nil || err != utils.ErrPartiallyExecuted {
 		t.Error(err)
 	} else if rcvLog := buf9.String(); strings.Contains(rcvLog, expLog) {
 		t.Errorf("expected %v,received %v", expLog, rcvLog)
