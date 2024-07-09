@@ -3540,3 +3540,95 @@ func TestStoreLoadedDataWithDelay(t *testing.T) {
 		t.Errorf("storeLoadedData duration = %v, want at least %v (diff %v, margin 15ms)", got, want, diff)
 	}
 }
+
+func TestLoaderLoaderallFilesPresent(t *testing.T) {
+	tests := []struct {
+		name     string
+		ldrType  string
+		rdrs     map[string]map[string]*openedCSVFile
+		expected bool
+	}{
+		{
+			name:    "All files present",
+			ldrType: "type1",
+			rdrs: map[string]map[string]*openedCSVFile{
+				"type1": {"file1": &openedCSVFile{}, "file2": &openedCSVFile{}, "file3": &openedCSVFile{}},
+			},
+			expected: true,
+		},
+		{
+			name:    "Some files nil",
+			ldrType: "type1",
+			rdrs: map[string]map[string]*openedCSVFile{
+				"type1": {"file1": &openedCSVFile{}, "file2": nil, "file3": &openedCSVFile{}},
+			},
+			expected: false,
+		},
+		{
+			name:     "No files for type",
+			ldrType:  "type1",
+			rdrs:     map[string]map[string]*openedCSVFile{},
+			expected: true,
+		},
+		{
+			name:    "Type not present",
+			ldrType: "type2",
+			rdrs: map[string]map[string]*openedCSVFile{
+				"type1": {"file1": &openedCSVFile{}, "file2": &openedCSVFile{}, "file3": &openedCSVFile{}},
+			},
+			expected: true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			ldr := &Loader{rdrs: tt.rdrs}
+			result := ldr.allFilesPresent(tt.ldrType)
+			reflect.DeepEqual(tt.expected, result)
+		})
+	}
+}
+
+func TestLoadergetLdrType(t *testing.T) {
+	tests := []struct {
+		name     string
+		fName    string
+		rdrs     map[string]map[string]*openedCSVFile
+		expected string
+	}{
+		{
+			name:  "File name exists in one loader type",
+			fName: "file1",
+			rdrs: map[string]map[string]*openedCSVFile{
+				"type1": {"file1": &openedCSVFile{}, "file2": &openedCSVFile{}},
+				"type2": {"file3": &openedCSVFile{}, "file4": &openedCSVFile{}},
+			},
+			expected: "type1",
+		},
+		{
+			name:  "File name does not exist in any loader type",
+			fName: "file5",
+			rdrs: map[string]map[string]*openedCSVFile{
+				"type1": {"file1": &openedCSVFile{}, "file2": &openedCSVFile{}},
+				"type2": {"file3": &openedCSVFile{}, "file4": &openedCSVFile{}},
+			},
+			expected: "",
+		},
+		{
+			name:  "Multiple loader types, file name present in one",
+			fName: "file4",
+			rdrs: map[string]map[string]*openedCSVFile{
+				"type1": {"file1": &openedCSVFile{}, "file2": &openedCSVFile{}},
+				"type2": {"file3": &openedCSVFile{}, "file4": &openedCSVFile{}},
+				"type3": {"file5": &openedCSVFile{}},
+			},
+			expected: "type2",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			ldr := &Loader{rdrs: tt.rdrs}
+			result := ldr.getLdrType(tt.fName)
+			reflect.DeepEqual(tt.expected, result)
+		})
+	}
+}

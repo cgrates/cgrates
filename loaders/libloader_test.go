@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package loaders
 
 import (
+	"fmt"
 	"reflect"
 	"testing"
 
@@ -385,5 +386,52 @@ func TestLoadersFieldAsInterfaceError(t *testing.T) {
 	expected = "filter rule <[*file() File1.csv]> needs to end in )"
 	if _, err := csvProv.FieldAsInterface([]string{"*file()", "File1.csv"}); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+q", expected, err)
+	}
+}
+
+func TestLibLoaderGetRateIDs(t *testing.T) {
+	cases := []struct {
+		input       LoaderData
+		expectedIDs []string
+		expectedErr error
+	}{
+		{
+			input:       LoaderData{utils.RateIDs: "id1,id2,id3"},
+			expectedIDs: []string{"id1,id2,id3"},
+			expectedErr: nil,
+		},
+		{
+			input:       LoaderData{utils.RateIDs: ""},
+			expectedIDs: []string{},
+			expectedErr: nil,
+		},
+		{
+			input:       LoaderData{},
+			expectedIDs: nil,
+			expectedErr: fmt.Errorf("cannot find RateIDs in <map[]>"),
+		},
+	}
+	for _, c := range cases {
+		ids, err := c.input.GetRateIDs()
+		if c.expectedErr != nil {
+			if err == nil || err.Error() != c.expectedErr.Error() {
+				t.Errorf("Expected error: %v, got: %v", c.expectedErr, err)
+			}
+		} else {
+			if err != nil {
+				t.Errorf("Expected no error, got: %v", err)
+			}
+		}
+		if !reflect.DeepEqual(ids, c.expectedIDs) {
+			t.Errorf("Expected IDs: %v, got: %v", c.expectedIDs, ids)
+		}
+	}
+}
+
+func TestLibLoaderFieldAsStringErrorHandling(t *testing.T) {
+	cP := &csvProvider{}
+	_, err := cP.FieldAsString([]string{"invalid", "path"})
+	if err == nil {
+		t.Error("Expected an error, but got nil")
 	}
 }
