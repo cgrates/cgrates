@@ -18,6 +18,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package agents
 
 import (
+	"encoding/json"
+	"fmt"
 	"reflect"
 	"testing"
 	"time"
@@ -501,5 +503,326 @@ func TestKamEvAsKamProcessEventReply(t *testing.T) {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, rcv) {
 		t.Errorf("Expecting: %+v, received: %+v", expected, rcv)
+	}
+}
+
+func TestKamEventNewKamSessionDisconnect(t *testing.T) {
+	hEntry := "hEntry"
+	hID := "hID"
+	reason := "reason"
+	disconnectEvent := NewKamSessionDisconnect(hEntry, hID, reason)
+	if disconnectEvent.Event != CGR_SESSION_DISCONNECT {
+		t.Errorf("Expected Event to be %q, got %q", CGR_SESSION_DISCONNECT, disconnectEvent.Event)
+	}
+	if disconnectEvent.HashEntry != hEntry {
+		t.Errorf("Expected HashEntry to be %q, got %q", hEntry, disconnectEvent.HashEntry)
+	}
+	if disconnectEvent.HashId != hID {
+		t.Errorf("Expected HashId to be %q, got %q", hID, disconnectEvent.HashId)
+	}
+	if disconnectEvent.Reason != reason {
+		t.Errorf("Expected Reason to be %q, got %q", reason, disconnectEvent.Reason)
+	}
+}
+
+func TestKamEventSessionDisconnectString(t *testing.T) {
+	disconnectEvent := &KamSessionDisconnect{
+		Event:     CGR_SESSION_DISCONNECT,
+		HashEntry: "hEntry",
+		HashId:    "hID",
+		Reason:    "reason",
+	}
+	expectedJSON, err := json.Marshal(disconnectEvent)
+	if err != nil {
+		t.Fatalf("Failed to marshal KamSessionDisconnect to JSON: %v", err)
+	}
+	result := disconnectEvent.String()
+	if result != string(expectedJSON) {
+		t.Errorf("Expected String method to return %q, got %q", string(expectedJSON), result)
+	}
+}
+
+func TestKamEventNewKamEventUnmarshalError(t *testing.T) {
+	invalidData := []byte(`{"field1": "value1", "field2": "value2"`)
+	_, err := NewKamEvent(invalidData, "alias", "address")
+	if err == nil {
+		t.Error("Expected an error but got nil")
+	}
+
+}
+
+func TestKamEventMissingParameterDefaultCase(t *testing.T) {
+	kev := KamEvent{
+		EVENT: "unsupportedEvent",
+	}
+	result := kev.MissingParameter()
+	if !result {
+		t.Errorf("Expected MissingParameter() to return true for unsupported event, got false")
+	}
+}
+
+func TestKamEventMissingParameterCgrProcessCDR(t *testing.T) {
+	kev := KamEvent{
+		EVENT:          CGR_PROCESS_CDR,
+		KamTRIndex:     "1",
+		KamTRLabel:     "Label",
+		utils.OriginID: "origin1",
+	}
+	result := kev.MissingParameter()
+	if result {
+		t.Errorf("Expected MissingParameter() to return false for CGR_PROCESS_CDR with valid parameters, got true")
+	}
+	delete(kev, KamTRIndex)
+	result = kev.MissingParameter()
+	if !result {
+		t.Errorf("Expected MissingParameter() to return true for CGR_PROCESS_CDR with missing KamTRIndex, got false")
+	}
+	kev = KamEvent{
+		EVENT:          CGR_PROCESS_CDR,
+		KamTRIndex:     "1",
+		utils.OriginID: "origin1",
+	}
+	result = kev.MissingParameter()
+	if !result {
+		t.Errorf("Expected MissingParameter() to return true for CGR_PROCESS_CDR with missing KamTRLabel, got false")
+	}
+	kev = KamEvent{
+		EVENT:      CGR_PROCESS_CDR,
+		KamTRIndex: "1",
+		KamTRLabel: "Label",
+	}
+	result = kev.MissingParameter()
+	if !result {
+		t.Errorf("Expected MissingParameter() to return true for CGR_PROCESS_CDR with missing OriginID, got false")
+	}
+}
+
+func TestKamEventMissingParameterCgrProcessMessage(t *testing.T) {
+	kev := KamEvent{
+		EVENT:             CGR_PROCESS_MESSAGE,
+		KamTRIndex:        "1",
+		KamTRLabel:        "Label",
+		utils.CGRFlags:    "flags",
+		utils.OriginID:    "origin1",
+		utils.AnswerTime:  "2024-07-15T12:00:00Z",
+		utils.Account:     "user1",
+		utils.Destination: "destination",
+	}
+	result := kev.MissingParameter()
+	if result {
+		t.Errorf("Expected MissingParameter() to return false for CGR_PROCESS_MESSAGE with valid parameters, got true")
+	}
+	delete(kev, KamTRIndex)
+	result = kev.MissingParameter()
+	if !result {
+		t.Errorf("Expected MissingParameter() to return true for CGR_PROCESS_MESSAGE with missing KamTRIndex, got false")
+	}
+	kev = KamEvent{
+		EVENT:             CGR_PROCESS_MESSAGE,
+		KamTRIndex:        "1",
+		utils.CGRFlags:    "flags",
+		utils.OriginID:    "origin1",
+		utils.AnswerTime:  "2024-07-15T12:00:00Z",
+		utils.Account:     "user1",
+		utils.Destination: "destination",
+	}
+	delete(kev, KamTRLabel)
+	result = kev.MissingParameter()
+	if !result {
+		t.Errorf("Expected MissingParameter() to return true for CGR_PROCESS_MESSAGE with missing KamTRLabel, got false")
+	}
+	kev = KamEvent{
+		EVENT:             CGR_PROCESS_MESSAGE,
+		KamTRIndex:        "1",
+		KamTRLabel:        "Label",
+		utils.OriginID:    "origin1",
+		utils.AnswerTime:  "2024-07-15T12:00:00Z",
+		utils.Account:     "user1",
+		utils.Destination: "destination",
+	}
+	result = kev.MissingParameter()
+	if result {
+		t.Errorf("false")
+	}
+}
+
+func TestKamEventMissingParameterCgrCallStart(t *testing.T) {
+	kev := KamEvent{
+		EVENT:             CGR_CALL_START,
+		KamHashEntry:      "hashEntry1",
+		KamHashID:         "hashID1",
+		utils.OriginID:    "origin1",
+		utils.AnswerTime:  "2024-07-15T12:00:00Z",
+		utils.Account:     "user1",
+		utils.Destination: "destination",
+	}
+	result := kev.MissingParameter()
+	if result {
+		t.Errorf("Expected MissingParameter() to return false for CGR_CALL_START with valid parameters, got true")
+	}
+	delete(kev, KamHashEntry)
+	result = kev.MissingParameter()
+	if !result {
+		t.Errorf("Expected MissingParameter() to return true for CGR_CALL_START with missing KamHashEntry, got false")
+	}
+	kev = KamEvent{
+		EVENT:             CGR_CALL_START,
+		KamHashEntry:      "hashEntry1",
+		utils.OriginID:    "origin1",
+		utils.AnswerTime:  "2024-07-15T12:00:00Z",
+		utils.Account:     "user1",
+		utils.Destination: "destination",
+	}
+	delete(kev, KamHashID)
+	result = kev.MissingParameter()
+	if !result {
+		t.Errorf("Expected MissingParameter() to return true for CGR_CALL_START with missing KamHashID, got false")
+	}
+	kev = KamEvent{
+		EVENT:             CGR_CALL_START,
+		KamHashEntry:      "hashEntry1",
+		KamHashID:         "hashID1",
+		utils.AnswerTime:  "2024-07-15T12:00:00Z",
+		utils.Account:     "user1",
+		utils.Destination: "destination",
+	}
+	result = kev.MissingParameter()
+	if !result {
+		t.Errorf("Expected MissingParameter() to return true for CGR_CALL_START without setting utils.OriginID, got false")
+	}
+}
+
+func TestKamEventMissingParameterCgrAuthRequest(t *testing.T) {
+	kev := KamEvent{
+		EVENT:      CGR_AUTH_REQUEST,
+		KamTRIndex: "index1",
+		KamTRLabel: "label1",
+	}
+	result := kev.MissingParameter()
+	if result {
+		t.Errorf("Expected MissingParameter() to return false for CGR_AUTH_REQUEST with valid parameters, got true")
+	}
+	delete(kev, KamTRIndex)
+	result = kev.MissingParameter()
+	if !result {
+		t.Errorf("Expected MissingParameter() to return true for CGR_AUTH_REQUEST with missing KamTRIndex, got false")
+	}
+	kev = KamEvent{
+		EVENT:      CGR_AUTH_REQUEST,
+		KamTRIndex: "index1",
+	}
+	delete(kev, KamTRLabel)
+	result = kev.MissingParameter()
+	if !result {
+		t.Errorf("Expected MissingParameter() to return true for CGR_AUTH_REQUEST with missing KamTRLabel, got false")
+	}
+}
+
+func TestKamEventString(t *testing.T) {
+	kev := KamEvent{
+		"event":      "CGR_CALL_START",
+		"KamTRIndex": "1",
+		"KamTRLabel": "Label",
+	}
+	expectedJSON := `{"KamTRIndex":"1","KamTRLabel":"Label","event":"CGR_CALL_START"}`
+	result := kev.String()
+	if result != expectedJSON {
+		t.Errorf("String() method did not produce expected JSON. Expected: %s, Got: %s", expectedJSON, result)
+	}
+	emptyKev := KamEvent{}
+	emptyJSON := emptyKev.String()
+	if emptyJSON != "{}" {
+		t.Errorf("String() method did not produce expected empty JSON. Expected: {}, Got: %s", emptyJSON)
+	}
+	var unmarshaled KamEvent
+	err := json.Unmarshal([]byte(result), &unmarshaled)
+	if err != nil {
+		t.Errorf("Error unmarshalling JSON: %v", err)
+	}
+	if !reflect.DeepEqual(kev, unmarshaled) {
+		t.Errorf("Unmarshaled KamEvent does not match original. Expected: %v, Got: %v", kev, unmarshaled)
+	}
+}
+
+func TestKamEventAsKamProcessCDRReply(t *testing.T) {
+	kev := KamEvent{
+		EVENT:         CGR_PROCESS_CDR,
+		KamTRIndex:    "1",
+		KamTRLabel:    "label1",
+		KamReplyRoute: CGR_PROCESS_CDR,
+	}
+	var rply string
+	var rplyErr error
+	kar, err := kev.AsKamProcessCDRReply(nil, &rply, rplyErr)
+	if err != nil {
+		t.Fatalf("Unexpected error: %v", err)
+	}
+	if kar == nil {
+		t.Fatalf("Expected non-nil KamReply, got nil")
+	}
+	if kar.Event != CGR_PROCESS_CDR {
+		t.Errorf("Unexpected Event name in KamReply: expected %s, got %s", CGR_PROCESS_CDR, kar.Event)
+	}
+	if kar.TransactionIndex != "1" {
+		t.Errorf("Unexpected TransactionIndex in KamReply: expected %s, got %s", "1", kar.TransactionIndex)
+	}
+	if kar.TransactionLabel != "label1" {
+		t.Errorf("Unexpected TransactionLabel in KamReply: expected %s, got %s", "label1", kar.TransactionLabel)
+	}
+	rplyErr = fmt.Errorf("reply error")
+	kar, err = kev.AsKamProcessCDRReply(nil, &rply, rplyErr)
+	if err != nil {
+		t.Fatalf("Unexpected error: %v", err)
+	}
+	if kar == nil {
+		t.Fatalf("Expected non-nil KamReply, got nil")
+	}
+	if kar.Error != "reply error" {
+		t.Errorf("Unexpected Error field in KamReply: expected %s, got %s", "reply error", kar.Error)
+	}
+}
+
+func TestKamEventAsKamProcessMessageEmptyReply(t *testing.T) {
+	kev := KamEvent{
+		EVENT:         CGR_PROCESS_MESSAGE,
+		KamTRIndex:    "1",
+		KamTRLabel:    "label",
+		KamReplyRoute: CGR_PROCESS_MESSAGE,
+	}
+	kar := kev.AsKamProcessMessageEmptyReply()
+	if kar == nil {
+		t.Fatalf("Expected non-nil KamReply, got nil")
+	}
+	if kar.Event != CGR_PROCESS_MESSAGE {
+		t.Errorf("Unexpected Event name in KamReply: expected %s, got %s", CGR_PROCESS_MESSAGE, kar.Event)
+	}
+	if kar.TransactionIndex != "1" {
+		t.Errorf("Unexpected TransactionIndex in KamReply: expected %s, got %s", "54321", kar.TransactionIndex)
+	}
+	if kar.TransactionLabel != "label" {
+		t.Errorf("Unexpected TransactionLabel in KamReply: expected %s, got %s", "label321", kar.TransactionLabel)
+	}
+}
+
+func TestKamEventKamReplyString(t *testing.T) {
+	reply := KamReply{
+		Event:            CGR_PROCESS_CDR,
+		TransactionIndex: "1",
+		TransactionLabel: "label",
+	}
+	replyStr := reply.String()
+	var parsedReply map[string]interface{}
+	err := json.Unmarshal([]byte(replyStr), &parsedReply)
+	if err != nil {
+		t.Fatalf("Error unmarshalling KamReply string: %v", err)
+	}
+	if parsedReply["Event"] != CGR_PROCESS_CDR {
+		t.Errorf("Unexpected Event in parsed KamReply: expected %s, got %v", CGR_PROCESS_CDR, parsedReply["Event"])
+	}
+	if parsedReply["TransactionIndex"] != "1" {
+		t.Errorf("Unexpected TransactionIndex in parsed KamReply: expected %s, got %v", "1", parsedReply["TransactionIndex"])
+	}
+	if parsedReply["TransactionLabel"] != "label" {
+		t.Errorf("Unexpected TransactionLabel in parsed KamReply: expected %s, got %v", "label", parsedReply["TransactionLabel"])
 	}
 }
