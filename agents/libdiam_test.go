@@ -1176,3 +1176,16 @@ func TestFilterWithDiameterDP(t *testing.T) {
 		t.Errorf("Exptected true, received: %+v", pass)
 	}
 }
+
+func TestLibDiamBareErr(t *testing.T) {
+	header := &diam.Header{
+		CommandFlags: 0,
+	}
+	message := &diam.Message{
+		Header: header,
+	}
+	result := diamBareErr(message, 500)
+	if result.Header.CommandFlags != diam.ErrorFlag {
+		t.Errorf("Expected CommandFlags to be set to ErrorFlag, got %v", result.Header.CommandFlags)
+	}
+}
