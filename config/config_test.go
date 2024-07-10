@@ -32,8 +32,6 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-var cfg *CGRConfig
-
 func TestNewDefaultConfigError(t *testing.T) {
 	if _, err := newCGRConfig([]byte(CGRATES_CFG_JSON)); err != nil {
 		t.Error(err)
@@ -61,7 +59,7 @@ func TestNewCgrConfigFromBytesDecodeError(t *testing.T) {
 }
 
 func TestCgrCfgConfigSharing(t *testing.T) {
-	cfg = NewDefaultCGRConfig()
+	cfg := NewDefaultCGRConfig()
 	SetCgrConfig(cfg)
 	cfgReturn := CgrConfig()
 	if !reflect.DeepEqual(cfgReturn, cfg) {
@@ -5533,7 +5531,7 @@ func TestLoadConfigFromReaderError(t *testing.T) {
 	cgrCfg := NewDefaultCGRConfig()
 	if err == nil || err.Error() != expectedErrFile {
 		t.Errorf("Expected %+v, receivewd %+v", expectedErrFile, err)
-	} else if err := cgrCfg.loadConfigFromReader(file, []func(*CgrJsonCfg) error{cfg.loadFromJSONCfg}, true); err == nil || err.Error() != expectedErr {
+	} else if err := cgrCfg.loadConfigFromReader(file, []func(*CgrJsonCfg) error{cgrCfg.loadFromJSONCfg}, true); err == nil || err.Error() != expectedErr {
 		t.Errorf("Expected %+v, received %+v", expectedErr, err)
 	}
 }
@@ -5547,7 +5545,7 @@ func TestLoadConfigFromReaderLoadFunctionsError(t *testing.T) {
 	expected := `json: cannot unmarshal number into Go struct field DbJsonCfg.Db_type of type string`
 	cgrCfg := NewDefaultCGRConfig()
 	if err := cgrCfg.loadConfigFromReader(strings.NewReader(cfgJSONStr),
-		[]func(jsonCfg *CgrJsonCfg) error{cfg.loadDataDBCfg},
+		[]func(jsonCfg *CgrJsonCfg) error{cgrCfg.loadDataDBCfg},
 		true); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
