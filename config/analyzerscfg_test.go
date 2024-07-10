@@ -37,7 +37,7 @@ func TestAnalyzerSCfgloadFromJsonCfg(t *testing.T) {
 		TTL:             24 * time.Hour,
 	}
 	jsnCfg := NewDefaultCGRConfig()
-	if err = jsnCfg.analyzerSCfg.loadFromJSONCfg(jsonCfg); err != nil {
+	if err := jsnCfg.analyzerSCfg.loadFromJSONCfg(jsonCfg); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(jsnCfg.analyzerSCfg, expected) {
 		t.Errorf("Expected %+v \n, received %+v", expected, jsnCfg.analyzerSCfg)
@@ -89,14 +89,14 @@ func TestAnalyzerSCfgloadFromJsonCfgErr(t *testing.T) {
 		Cleanup_interval: utils.StringPointer("24ha"),
 	}
 	jsnCfg := NewDefaultCGRConfig()
-	if err = jsnCfg.analyzerSCfg.loadFromJSONCfg(jsonCfg); err == nil {
+	if err := jsnCfg.analyzerSCfg.loadFromJSONCfg(jsonCfg); err == nil {
 		t.Errorf("Expected error received nil")
 	}
 	jsonCfg = &AnalyzerSJsonCfg{
 		Ttl: utils.StringPointer("24ha"),
 	}
 	jsnCfg = NewDefaultCGRConfig()
-	if err = jsnCfg.analyzerSCfg.loadFromJSONCfg(jsonCfg); err == nil {
+	if err := jsnCfg.analyzerSCfg.loadFromJSONCfg(jsonCfg); err == nil {
 		t.Errorf("Expected error received nil")
 	}
 }

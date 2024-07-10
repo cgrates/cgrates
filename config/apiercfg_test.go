@@ -40,7 +40,7 @@ func TestApierCfgloadFromJsonCfg(t *testing.T) {
 		EEsConns:        []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEEs), "*conn1"},
 	}
 	jsnCfg := NewDefaultCGRConfig()
-	if err = jsnCfg.apier.loadFromJSONCfg(jsonCfg); err != nil {
+	if err := jsnCfg.apier.loadFromJSONCfg(jsonCfg); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, jsnCfg.apier) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(jsnCfg.apier))

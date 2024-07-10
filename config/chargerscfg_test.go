@@ -44,7 +44,7 @@ func TestChargerSCfgloadFromJsonCfg(t *testing.T) {
 		NestedFields:        true,
 	}
 	jsncfg := NewDefaultCGRConfig()
-	if err = jsncfg.chargerSCfg.loadFromJSONCfg(jsonCfg); err != nil {
+	if err := jsncfg.chargerSCfg.loadFromJSONCfg(jsonCfg); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, jsncfg.chargerSCfg) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(jsncfg.chargerSCfg))

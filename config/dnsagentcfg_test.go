@@ -76,7 +76,7 @@ func TestDNSAgentCfgloadFromJsonCfg(t *testing.T) {
 		v.ComputePath()
 	}
 	jsonCfg := NewDefaultCGRConfig()
-	if err = jsonCfg.dnsAgentCfg.loadFromJSONCfg(jsnCfg, jsonCfg.generalCfg.RSRSep); err != nil {
+	if err := jsonCfg.dnsAgentCfg.loadFromJSONCfg(jsnCfg, jsonCfg.generalCfg.RSRSep); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(jsonCfg.dnsAgentCfg, expected) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(jsonCfg.dnsAgentCfg))
@@ -107,7 +107,7 @@ func TestRequestProcessorloadFromJsonCfg(t *testing.T) {
 		Filters: []string{"filter1", "filter2"},
 		Flags:   utils.FlagsWithParams{"flag1": {}, "flag2": {}},
 	}
-	if err = dareq.loadFromJSONCfg(json, utils.InfieldSep); err != nil {
+	if err := dareq.loadFromJSONCfg(json, utils.InfieldSep); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, dareq) {
 		t.Errorf("Expected: %+v , received: %+v", utils.ToJSON(expected), utils.ToJSON(dareq))

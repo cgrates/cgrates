@@ -36,7 +36,7 @@ func TestFilterSCfgloadFromJsonCfg(t *testing.T) {
 		ApierSConns:    []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaApier), "*conn1"},
 	}
 	jsnCfg := NewDefaultCGRConfig()
-	if err = jsnCfg.filterSCfg.loadFromJSONCfg(cfgJSONS); err != nil {
+	if err := jsnCfg.filterSCfg.loadFromJSONCfg(cfgJSONS); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, jsnCfg.filterSCfg) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(jsnCfg.filterSCfg))
