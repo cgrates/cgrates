@@ -89,7 +89,7 @@ func TestStoreDbCfgloadFromJsonCfgCase1(t *testing.T) {
 		},
 	}
 	jsonCfg := NewDefaultCGRConfig()
-	if err = jsonCfg.storDbCfg.loadFromJSONCfg(cfgJSON); err != nil {
+	if err := jsonCfg.storDbCfg.loadFromJSONCfg(cfgJSON); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected.Items[utils.MetaSessionsCosts], jsonCfg.storDbCfg.Items[utils.MetaSessionsCosts]) {
 		t.Errorf("Expected %+v \n, recevied %+v", utils.ToJSON(expected.Items[utils.MetaSessionsCosts]),
@@ -110,7 +110,7 @@ func TestStoreDbCfgloadFromJsonCfgCase2(t *testing.T) {
 	}
 	expected := "Replication connection ID needs to be different than *internal"
 	jsonCfg := NewDefaultCGRConfig()
-	if err = jsonCfg.storDbCfg.loadFromJSONCfg(storDbJSON); err == nil || err.Error() != expected {
+	if err := jsonCfg.storDbCfg.loadFromJSONCfg(storDbJSON); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", storDbJSON, expected)
 	}
 }
@@ -121,7 +121,7 @@ func TestStoreDbCfgloadFromJsonCfgCase3(t *testing.T) {
 	}
 	expected := "Remote connection ID needs to be different than *internal"
 	jsonCfg := NewDefaultCGRConfig()
-	if err = jsonCfg.storDbCfg.loadFromJSONCfg(storDbJSON); err == nil || err.Error() != expected {
+	if err := jsonCfg.storDbCfg.loadFromJSONCfg(storDbJSON); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", storDbJSON, expected)
 	}
 }

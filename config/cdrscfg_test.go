@@ -53,7 +53,7 @@ func TestCdrsCfgloadFromJsonCfg(t *testing.T) {
 		ExtraFields:      RSRParsers{},
 	}
 	jsnCfg := NewDefaultCGRConfig()
-	if err = jsnCfg.cdrsCfg.loadFromJSONCfg(jsonCfg); err != nil {
+	if err := jsnCfg.cdrsCfg.loadFromJSONCfg(jsonCfg); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, jsnCfg.cdrsCfg) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(jsnCfg.cdrsCfg))
@@ -66,7 +66,7 @@ func TestExtraFieldsinloadFromJsonCfg(t *testing.T) {
 	}
 	expectedErrMessage := "emtpy RSRParser in rule: <>"
 	jsonCfg := NewDefaultCGRConfig()
-	if err = jsonCfg.cdrsCfg.loadFromJSONCfg(cfgJSON); err == nil || err.Error() != expectedErrMessage {
+	if err := jsonCfg.cdrsCfg.loadFromJSONCfg(cfgJSON); err == nil || err.Error() != expectedErrMessage {
 		t.Errorf("Expected %+v, received %+v", expectedErrMessage, err)
 	}
 }

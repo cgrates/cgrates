@@ -33,10 +33,9 @@ import (
 )
 
 var cfg *CGRConfig
-var err error
 
 func TestNewDefaultConfigError(t *testing.T) {
-	if _, err = newCGRConfig([]byte(CGRATES_CFG_JSON)); err != nil {
+	if _, err := newCGRConfig([]byte(CGRATES_CFG_JSON)); err != nil {
 		t.Error(err)
 	}
 }
@@ -83,9 +82,6 @@ func TestCgrCfgLoadWithDefaults(t *testing.T) {
 
 }`
 	eCgrCfg := NewDefaultCGRConfig()
-	if err != nil {
-		t.Error(err)
-	}
 	eCgrCfg.fsAgentCfg.Enabled = true
 	eCgrCfg.fsAgentCfg.EventSocketConns = []*FsConnCfg{
 		{Address: "1.2.3.4:8021", Password: "ClueCon", Reconnects: 3, ReplyTimeout: 3 * time.Second, Alias: "123"},
@@ -1015,9 +1011,6 @@ func TestLoadRPCConnsError(t *testing.T) {
 }`
 	expected := "json: cannot unmarshal string into Go struct field RPCConnsJson.PoolSize of type int"
 	cgrCfg := NewDefaultCGRConfig()
-	if err != nil {
-		t.Error(err)
-	}
 	if cgrJSONCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)
 	} else if err := cgrCfg.loadRPCConns(cgrJSONCfg); err == nil || err.Error() != expected {
@@ -1038,9 +1031,6 @@ func TestLoadGeneralCfgError(t *testing.T) {
 }`
 	expected := "json: cannot unmarshal array into Go struct field GeneralJsonCfg.Node_id of type string"
 	cgrConfig := NewDefaultCGRConfig()
-	if err != nil {
-		t.Error(err)
-	}
 	if cgrCfgJSON, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)
 	} else if err := cgrConfig.loadGeneralCfg(cgrCfgJSON); err == nil || err.Error() != expected {
@@ -1056,9 +1046,6 @@ func TestLoadCacheCfgError(t *testing.T) {
 }`
 	expected := "json: cannot unmarshal number into Go struct field CacheJsonCfg.Replication_conns of type []string"
 	cgrConfig := NewDefaultCGRConfig()
-	if err != nil {
-		t.Error(err)
-	}
 	if cgrCfgJSON, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)
 	} else if err := cgrConfig.loadCacheCfg(cgrCfgJSON); err == nil || err.Error() != expected {
@@ -1074,9 +1061,6 @@ func TestLoadListenCfgError(t *testing.T) {
 }`
 	expected := "json: cannot unmarshal number into Go struct field ListenJsonCfg.Http_tls of type string"
 	cgrConfig := NewDefaultCGRConfig()
-	if err != nil {
-		t.Error(err)
-	}
 	if cgrCfgJSON, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)
 	} else if err := cgrConfig.loadListenCfg(cgrCfgJSON); err == nil || err.Error() != expected {
@@ -1092,9 +1076,6 @@ func TestLoadHTTPCfgError(t *testing.T) {
 }`
 	expected := "json: cannot unmarshal string into Go struct field HTTPJsonCfg.Auth_users of type map[string]string"
 	cgrConfig := NewDefaultCGRConfig()
-	if err != nil {
-		t.Error(err)
-	}
 	if cgrCfgJSON, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)
 	} else if err := cgrConfig.loadHTTPCfg(cgrCfgJSON); err == nil || err.Error() != expected {
@@ -1110,9 +1091,6 @@ func TestLoadDataDBCfgErrorCase1(t *testing.T) {
 }`
 	expected := "json: cannot unmarshal number into Go struct field DbJsonCfg.Db_host of type string"
 	cgrConfig := NewDefaultCGRConfig()
-	if err != nil {
-		t.Error(err)
-	}
 	if cgrCfgJSON, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)
 	} else if err := cgrConfig.loadDataDBCfg(cgrCfgJSON); err == nil || err.Error() != expected {
@@ -1128,9 +1106,6 @@ func TestLoadDataDBCfgErrorCase2(t *testing.T) {
 }`
 	expected := "Remote connection ID needs to be different than *internal"
 	cgrConfig := NewDefaultCGRConfig()
-	if err != nil {
-		t.Error(err)
-	}
 	if cgrCfgJSON, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)
 	} else {
@@ -1150,9 +1125,6 @@ func TestLoadStorDbCfgError(t *testing.T) {
 }`
 	expected := "json: cannot unmarshal string into Go struct field DbJsonCfg.Db_port of type int"
 	cgrConfig := NewDefaultCGRConfig()
-	if err != nil {
-		t.Error(err)
-	}
 	if cgrCfgJSON, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)
 	} else if err := cgrConfig.loadStorDBCfg(cgrCfgJSON); err == nil || err.Error() != expected {
@@ -1168,9 +1140,6 @@ func TestLoadFilterSCfgError(t *testing.T) {
 }`
 	expected := "json: cannot unmarshal string into Go struct field FilterSJsonCfg.Stats_conns of type []string"
 	cgrConfig := NewDefaultCGRConfig()
-	if err != nil {
-		t.Error(err)
-	}
 	if cgrCfgJSON, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)
 	} else if err := cgrConfig.loadFilterSCfg(cgrCfgJSON); err == nil || err.Error() != expected {
@@ -1186,9 +1155,6 @@ func TestLoadRalSCfgError(t *testing.T) {
 }`
 	expected := "json: cannot unmarshal string into Go struct field RalsJsonCfg.Stats_conns of type []string"
 	cgrConfig := NewDefaultCGRConfig()
-	if err != nil {
-		t.Error(err)
-	}
 	if cgrCfgJSON, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)
 	} else if err := cgrConfig.loadRalSCfg(cgrCfgJSON); err == nil || err.Error() != expected {
@@ -1204,9 +1170,6 @@ func TestLoadSchedulerCfgError(t *testing.T) {
 }`
 	expected := "json: cannot unmarshal string into Go struct field SchedulerJsonCfg.Filters of type []string"
 	cgrConfig := NewDefaultCGRConfig()
-	if err != nil {
-		t.Error(err)
-	}
 	if cgrCfgJSON, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)
 	} else if err := cgrConfig.loadSchedulerCfg(cgrCfgJSON); err == nil || err.Error() != expected {
@@ -1222,9 +1185,6 @@ func TestLoadCdrsCfgError(t *testing.T) {
 }`
 	expected := "json: cannot unmarshal string into Go struct field CdrsJsonCfg.Ees_conns of type []string"
 	cgrConfig := NewDefaultCGRConfig()
-	if err != nil {
-		t.Error(err)
-	}
 	if cgrCfgJSON, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)
 	} else if err := cgrConfig.loadCdrsCfg(cgrCfgJSON); err == nil || err.Error() != expected {
@@ -1240,9 +1200,6 @@ func TestLoadSessionSCfgError(t *testing.T) {
 }`
 	expected := "json: cannot unmarshal number into Go struct field SessionSJsonCfg.Session_ttl_usage of type string"
 	cgrConfig := NewDefaultCGRConfig()
-	if err != nil {
-		t.Error(err)
-	}
 	if cgrCfgJSON, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)
 	} else if err := cgrConfig.loadSessionSCfg(cgrCfgJSON); err == nil || err.Error() != expected {
@@ -1258,9 +1215,6 @@ func TestLoadFreeswitchAgentCfgError(t *testing.T) {
 }`
 	expected := "json: cannot unmarshal string into Go struct field FreeswitchAgentJsonCfg.sessions_conns of type []string"
 	cgrConfig := NewDefaultCGRConfig()
-	if err != nil {
-		t.Error(err)
-	}
 	if cgrCfgJSON, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)
 	} else if err := cgrConfig.loadFreeswitchAgentCfg(cgrCfgJSON); err == nil || err.Error() != expected {
@@ -1276,9 +1230,6 @@ func TestLoadKamAgentCfgError(t *testing.T) {
 	}`
 	expected := "json: cannot unmarshal number into Go struct field KamAgentJsonCfg.Timezone of type string"
 	cgrConfig := NewDefaultCGRConfig()
-	if err != nil {
-		t.Error(err)
-	}
 	if cgrCfgJSON, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)
 	} else if err := cgrConfig.loadKamAgentCfg(cgrCfgJSON); err == nil || err.Error() != expected {
@@ -1294,9 +1245,6 @@ func TestLoadAsteriskAgentCfgError(t *testing.T) {
 }`
 	expected := "json: cannot unmarshal string into Go struct field AsteriskAgentJsonCfg.Sessions_conns of type []string"
 	cgrConfig := NewDefaultCGRConfig()
-	if err != nil {
-		t.Error(err)
-	}
 	if cgrCfgJSON, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)
 	} else if err := cgrConfig.loadAsteriskAgentCfg(cgrCfgJSON); err == nil || err.Error() != expected {
@@ -1316,9 +1264,6 @@ func TestLoadDiameterAgentCfgError(t *testing.T) {
 }`
 	expected := "json: cannot unmarshal number into Go struct field ReqProcessorJsnCfg.Request_processors.ID of type string"
 	cgrConfig := NewDefaultCGRConfig()
-	if err != nil {
-		t.Error(err)
-	}
 	if cgrCfgJSON, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)
 	} else if err := cgrConfig.loadDiameterAgentCfg(cgrCfgJSON); err == nil || err.Error() != expected {
@@ -1338,9 +1283,6 @@ func TestLoadRadiusAgentCfgError(t *testing.T) {
 }`
 	expected := "json: cannot unmarshal number into Go struct field RadiListenerJsnCfg.listeners.Auth_Address of type string"
 	cgrConfig := NewDefaultCGRConfig()
-	if err != nil {
-		t.Error(err)
-	}
 	if cgrCfgJSON, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)
 	} else if err := cgrConfig.loadRadiusAgentCfg(cgrCfgJSON); err == nil || err.Error() != expected {
@@ -1360,9 +1302,6 @@ func TestLoadDNSAgentCfgError(t *testing.T) {
 	}`
 	expected := "json: cannot unmarshal number into Go struct field DnsListenerJsnCfg.Listeners.Address of type string"
 	cgrConfig := NewDefaultCGRConfig()
-	if err != nil {
-		t.Error(err)
-	}
 	if cgrCfgJSON, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)
 	} else if err := cgrConfig.loadDNSAgentCfg(cgrCfgJSON); err == nil || err.Error() != expected {
@@ -1380,9 +1319,6 @@ func TestLoadHttpAgentCfgError(t *testing.T) {
 }`
 	expected := "json: cannot unmarshal array into Go struct field HttpAgentJsonCfg.Id of type string"
 	cgrConfig := NewDefaultCGRConfig()
-	if err != nil {
-		t.Error(err)
-	}
 	if cgrCfgJSON, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)
 	} else if err := cgrConfig.loadHTTPAgentCfg(cgrCfgJSON); err == nil || err.Error() != expected {
@@ -1400,9 +1336,6 @@ func TestLoadAttributeSCfgError(t *testing.T) {
 }`
 	expected := "json: cannot unmarshal string into Go struct field AttributesOptsJson.Opts.*processRuns of type int"
 	cgrConfig := NewDefaultCGRConfig()
-	if err != nil {
-		t.Error(err)
-	}
 	if cgrCfgJSON, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)
 	} else if err := cgrConfig.loadAttributeSCfg(cgrCfgJSON); err == nil || err.Error() != expected {
@@ -1418,9 +1351,6 @@ func TestLoadChargerSCfgError(t *testing.T) {
 }`
 	expected := "json: cannot unmarshal string into Go struct field ChargerSJsonCfg.Prefix_indexed_fields of type []string"
 	cgrConfig := NewDefaultCGRConfig()
-	if err != nil {
-		t.Error(err)
-	}
 	if cgrCfgJSON, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)
 	} else if err := cgrConfig.loadChargerSCfg(cgrCfgJSON); err == nil || err.Error() != expected {
@@ -1436,9 +1366,6 @@ func TestLoadResourceSCfgError(t *testing.T) {
 	}`
 	expected := "json: cannot unmarshal string into Go struct field ResourceSJsonCfg.String_indexed_fields of type []string"
 	cgrConfig := NewDefaultCGRConfig()
-	if err != nil {
-		t.Error(err)
-	}
 	if cgrCfgJSON, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)
 	} else if err := cgrConfig.loadResourceSCfg(cgrCfgJSON); err == nil || err.Error() != expected {
@@ -1454,9 +1381,6 @@ func TestLoadStatSCfgError(t *testing.T) {
 }`
 	expected := "json: cannot unmarshal string into Go struct field StatServJsonCfg.String_indexed_fields of type []string"
 	cgrConfig := NewDefaultCGRConfig()
-	if err != nil {
-		t.Error(err)
-	}
 	if cgrCfgJSON, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)
 	} else if err := cgrConfig.loadStatSCfg(cgrCfgJSON); err == nil || err.Error() != expected {
@@ -1472,9 +1396,6 @@ func TestLoadThresholdSCfgError(t *testing.T) {
 }`
 	expected := "json: cannot unmarshal number into Go struct field ThresholdSJsonCfg.Store_interval of type string"
 	cgrConfig := NewDefaultCGRConfig()
-	if err != nil {
-		t.Error(err)
-	}
 	if cgrCfgJSON, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)
 	} else if err := cgrConfig.loadThresholdSCfg(cgrCfgJSON); err == nil || err.Error() != expected {
@@ -1492,9 +1413,6 @@ func TestLoadLoaderSCfgError(t *testing.T) {
 }`
 	expected := "json: cannot unmarshal number into Go struct field LoaderJsonCfg.Run_delay of type string"
 	cgrConfig := NewDefaultCGRConfig()
-	if err != nil {
-		t.Error(err)
-	}
 	if cgrCfgJSON, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)
 	} else if err := cgrConfig.loadLoaderSCfg(cgrCfgJSON); err == nil || err.Error() != expected {
@@ -1510,9 +1428,6 @@ func TestLoadRouteSCfgError(t *testing.T) {
 	}`
 	expected := "json: cannot unmarshal string into Go struct field RouteSJsonCfg.String_indexed_fields of type []string"
 	cgrConfig := NewDefaultCGRConfig()
-	if err != nil {
-		t.Error(err)
-	}
 	if cgrCfgJSON, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)
 	} else if err := cgrConfig.loadRouteSCfg(cgrCfgJSON); err == nil || err.Error() != expected {
@@ -1528,9 +1443,6 @@ func TestLoadMailerCfgError(t *testing.T) {
 }`
 	expected := "json: cannot unmarshal number into Go struct field MailerJsonCfg.Server of type string"
 	cgrConfig := NewDefaultCGRConfig()
-	if err != nil {
-		t.Error(err)
-	}
 	if cgrCfgJSON, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)
 	} else if err := cgrConfig.loadMailerCfg(cgrCfgJSON); err == nil || err.Error() != expected {
@@ -1546,9 +1458,6 @@ func TestLoadSureTaxCfgError(t *testing.T) {
 }`
 	expected := "json: cannot unmarshal number into Go struct field SureTaxJsonCfg.Sales_type_code of type string"
 	cgrConfig := NewDefaultCGRConfig()
-	if err != nil {
-		t.Error(err)
-	}
 	if cgrCfgJSON, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)
 	} else if err := cgrConfig.loadSureTaxCfg(cgrCfgJSON); err == nil || err.Error() != expected {
@@ -1564,9 +1473,6 @@ func TestLoadDispatcherSCfgError(t *testing.T) {
 }`
 	expected := "json: cannot unmarshal string into Go struct field DispatcherSJsonCfg.Attributes_conns of type []string"
 	cgrConfig := NewDefaultCGRConfig()
-	if err != nil {
-		t.Error(err)
-	}
 	if cgrCfgJSON, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)
 	} else if err := cgrConfig.loadDispatcherSCfg(cgrCfgJSON); err == nil || err.Error() != expected {
@@ -1584,9 +1490,6 @@ func TestLoadDispatcherHCfgError(t *testing.T) {
 }`
 	expected := "json: cannot unmarshal number into Go struct field RegistrarCJsonCfg.Dispatchers.Refresh_interval of type string"
 	cgrConfig := NewDefaultCGRConfig()
-	if err != nil {
-		t.Error(err)
-	}
 	if cgrCfgJSON, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)
 	} else if err := cgrConfig.loadRegistrarCCfg(cgrCfgJSON); err == nil || err.Error() != expected {
@@ -1602,9 +1505,6 @@ func TestLoadLoaderCgrCfgError(t *testing.T) {
 }`
 	expected := "json: cannot unmarshal string into Go struct field LoaderCfgJson.Caches_conns of type []string"
 	cgrConfig := NewDefaultCGRConfig()
-	if err != nil {
-		t.Error(err)
-	}
 	if cgrCfgJSON, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)
 	} else if err := cgrConfig.loadLoaderCgrCfg(cgrCfgJSON); err == nil || err.Error() != expected {
@@ -1620,9 +1520,6 @@ func TestLoadMigratorCgrCfgError(t *testing.T) {
 }`
 	expected := "json: cannot unmarshal string into Go struct field MigratorCfgJson.Users_filters of type []string"
 	cgrConfig := NewDefaultCGRConfig()
-	if err != nil {
-		t.Error(err)
-	}
 	if cgrCfgJSON, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)
 	} else if err := cgrConfig.loadMigratorCgrCfg(cgrCfgJSON); err == nil || err.Error() != expected {
@@ -1638,9 +1535,6 @@ func TestLoadTlsCgrCfgError(t *testing.T) {
 }`
 	expected := "json: cannot unmarshal string into Go struct field TlsJsonCfg.Server_policy of type int"
 	cgrConfig := NewDefaultCGRConfig()
-	if err != nil {
-		t.Error(err)
-	}
 	if cgrCfgJSON, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)
 	} else if err := cgrConfig.loadTLSCgrCfg(cgrCfgJSON); err == nil || err.Error() != expected {
@@ -1657,9 +1551,6 @@ func TestLoadAnalyzerCgrCfgError(t *testing.T) {
 }`
 	expected := "json: cannot unmarshal number into Go struct field AnalyzerSJsonCfg.Enabled of type bool"
 	cgrConfig := NewDefaultCGRConfig()
-	if err != nil {
-		t.Error(err)
-	}
 	if cgrCfgJSON, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)
 	} else if err := cgrConfig.loadAnalyzerCgrCfg(cgrCfgJSON); err == nil || err.Error() != expected {
@@ -1675,9 +1566,6 @@ func TestLoadAPIBanCgrCfgError(t *testing.T) {
 }`
 	expected := "json: cannot unmarshal string into Go struct field APIBanJsonCfg.Enabled of type bool"
 	cgrConfig := NewDefaultCGRConfig()
-	if err != nil {
-		t.Error(err)
-	}
 	if cgrCfgJSON, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)
 	} else if err := cgrConfig.loadAPIBanCgrCfg(cgrCfgJSON); err == nil || err.Error() != expected {
@@ -1693,9 +1581,6 @@ func TestLoadApierCfgError(t *testing.T) {
 }`
 	expected := "json: cannot unmarshal string into Go struct field ApierJsonCfg.Scheduler_conns of type []string"
 	cgrConfig := NewDefaultCGRConfig()
-	if err != nil {
-		t.Error(err)
-	}
 	if cgrCfgJSON, err := NewCgrJsonCfgFromBytes([]byte(myJSONStr)); err != nil {
 		t.Error(err)
 	} else if err := cgrConfig.loadApierCfg(cgrCfgJSON); err == nil || err.Error() != expected {
@@ -1711,9 +1596,6 @@ func TestLoadErsCfgError(t *testing.T) {
 }`
 	expected := "json: cannot unmarshal string into Go struct field ERsJsonCfg.Sessions_conns of type []string"
 	cgrConfig := NewDefaultCGRConfig()
-	if err != nil {
-		t.Error(err)
-	}
 	if cgrCfgJSON, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)
 	} else if err := cgrConfig.loadErsCfg(cgrCfgJSON); err == nil || err.Error() != expected {
@@ -1729,9 +1611,6 @@ func TestLoadEesCfgError(t *testing.T) {
     }`
 	expected := "json: cannot unmarshal string into Go struct field EEsJsonCfg.Attributes_conns of type []string"
 	cgrConfig := NewDefaultCGRConfig()
-	if err != nil {
-		t.Error(err)
-	}
 	if cgrCfgJSON, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)
 	} else if err := cgrConfig.loadEesCfg(cgrCfgJSON); err == nil || err.Error() != expected {
@@ -1747,9 +1626,6 @@ func TestLoadCoreSCfgError(t *testing.T) {
     }`
 	expected := "json: cannot unmarshal string into Go struct field CoreSJsonCfg.Caps of type int"
 	cgrConfig := NewDefaultCGRConfig()
-	if err != nil {
-		t.Error(err)
-	}
 	if cgrCfgJSON, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)
 	} else if err := cgrConfig.loadCoreSCfg(cgrCfgJSON); err == nil || err.Error() != expected {
@@ -1769,9 +1645,6 @@ func TestLoadSIPAgentCfgError(t *testing.T) {
 }`
 	expected := "json: cannot unmarshal number into Go struct field ReqProcessorJsnCfg.Request_processors.ID of type string"
 	cgrConfig := NewDefaultCGRConfig()
-	if err != nil {
-		t.Error(err)
-	}
 	if cgrCfgJSON, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)
 	} else if err := cgrConfig.loadSIPAgentCfg(cgrCfgJSON); err == nil || err.Error() != expected {
@@ -1791,9 +1664,6 @@ func TestLoadTemplateSCfgError(t *testing.T) {
 }`
 	expected := "json: cannot unmarshal number into Go struct field FcTemplateJsonCfg.Tag of type string"
 	cgrConfig := NewDefaultCGRConfig()
-	if err != nil {
-		t.Error(err)
-	}
 	if cgrCfgJSON, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)
 	} else if err := cgrConfig.loadTemplateSCfg(cgrCfgJSON); err == nil || err.Error() != expected {
@@ -1825,9 +1695,6 @@ func TestLoadConfigsCfgError(t *testing.T) {
 }`
 	expected := "json: cannot unmarshal number into Go struct field ConfigSCfgJson.Url of type string"
 	cgrConfig := NewDefaultCGRConfig()
-	if err != nil {
-		t.Error(err)
-	}
 	if cgrCfgJSON, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)
 	} else if err := cgrConfig.loadConfigSCfg(cgrCfgJSON); err == nil || err.Error() != expected {
@@ -1897,9 +1764,6 @@ func TestDiameterAgentConfig(t *testing.T) {
 		RequestProcessors: nil,
 	}
 	cgrConfig := NewDefaultCGRConfig()
-	if err != nil {
-		t.Error(err)
-	}
 	newConfig := cgrConfig.DiameterAgentCfg()
 	if !reflect.DeepEqual(expected, newConfig) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(newConfig))
@@ -1924,9 +1788,6 @@ func TestRadiusAgentConfig(t *testing.T) {
 		RequestProcessors:  nil,
 	}
 	cgrConfig := NewDefaultCGRConfig()
-	if err != nil {
-		t.Error(err)
-	}
 	newConfig := cgrConfig.RadiusAgentCfg()
 	if !reflect.DeepEqual(expected, newConfig) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(newConfig))
@@ -1947,9 +1808,6 @@ func TestDNSAgentConfig(t *testing.T) {
 		RequestProcessors: nil,
 	}
 	cgrConfig := NewDefaultCGRConfig()
-	if err != nil {
-		t.Error(err)
-	}
 	newConfig := cgrConfig.DNSAgentCfg()
 	if !reflect.DeepEqual(expected, newConfig) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(newConfig))
@@ -1973,9 +1831,6 @@ func TestAttributeSConfig(t *testing.T) {
 		},
 	}
 	cgrConfig := NewDefaultCGRConfig()
-	if err != nil {
-		t.Error(err)
-	}
 	newConfig := cgrConfig.AttributeSCfg()
 	if !reflect.DeepEqual(expected, newConfig) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(newConfig))
@@ -1992,9 +1847,6 @@ func TestChargersConfig(t *testing.T) {
 		NestedFields:        false,
 	}
 	cgrConfig := NewDefaultCGRConfig()
-	if err != nil {
-		t.Error(err)
-	}
 	newConfig := cgrConfig.ChargerSCfg()
 	if !reflect.DeepEqual(expected, newConfig) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(newConfig))
@@ -2016,9 +1868,6 @@ func TestResourceSConfig(t *testing.T) {
 		},
 	}
 	cgrConfig := NewDefaultCGRConfig()
-	if err != nil {
-		t.Error(err)
-	}
 	newConfig := cgrConfig.ResourceSCfg()
 	if !reflect.DeepEqual(expected, newConfig) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(newConfig))
@@ -2040,9 +1889,6 @@ func TestStatSConfig(t *testing.T) {
 		},
 	}
 	cgrConfig := NewDefaultCGRConfig()
-	if err != nil {
-		t.Error(err)
-	}
 	newConfig := cgrConfig.StatSCfg()
 	if !reflect.DeepEqual(expected, newConfig) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(newConfig))
@@ -2062,9 +1908,6 @@ func TestThresholdSConfig(t *testing.T) {
 		},
 	}
 	cgrConfig := NewDefaultCGRConfig()
-	if err != nil {
-		t.Error(err)
-	}
 	newConfig := cgrConfig.ThresholdSCfg()
 	if !reflect.DeepEqual(expected, newConfig) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(newConfig))
@@ -2090,9 +1933,6 @@ func TestRouteSConfig(t *testing.T) {
 		},
 	}
 	cgrConfig := NewDefaultCGRConfig()
-	if err != nil {
-		t.Error(err)
-	}
 	newConfig := cgrConfig.RouteSCfg()
 	if !reflect.DeepEqual(expected, newConfig) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(newConfig))
@@ -2137,9 +1977,6 @@ func TestSessionSConfig(t *testing.T) {
 		},
 	}
 	cgrConfig := NewDefaultCGRConfig()
-	if err != nil {
-		t.Error(err)
-	}
 	newConfig := cgrConfig.SessionSCfg()
 	if !reflect.DeepEqual(expected, newConfig) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(newConfig))
@@ -2169,9 +2006,6 @@ func TestFsAgentConfig(t *testing.T) {
 		},
 	}
 	cgrConfig := NewDefaultCGRConfig()
-	if err != nil {
-		t.Error(err)
-	}
 	newConfig := cgrConfig.FsAgentCfg()
 	if !reflect.DeepEqual(expected, newConfig) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(newConfig))
@@ -2187,9 +2021,6 @@ func TestKamAgentConfig(t *testing.T) {
 		Timezone:      "",
 	}
 	cgrConfig := NewDefaultCGRConfig()
-	if err != nil {
-		t.Error(err)
-	}
 	newConfig := cgrConfig.KamAgentCfg()
 	if !reflect.DeepEqual(expected, newConfig) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(newConfig))
@@ -2211,9 +2042,6 @@ func TestAsteriskAgentConfig(t *testing.T) {
 		}},
 	}
 	cgrConfig := NewDefaultCGRConfig()
-	if err != nil {
-		t.Error(err)
-	}
 	newConfig := cgrConfig.AsteriskAgentCfg()
 	if !reflect.DeepEqual(expected, newConfig) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(newConfig))
@@ -2227,9 +2055,6 @@ func TestFilterSConfig(t *testing.T) {
 		ApierSConns:    []string{},
 	}
 	cgrConfig := NewDefaultCGRConfig()
-	if err != nil {
-		t.Error(err)
-	}
 	newConfig := cgrConfig.FilterSCfg()
 	if !reflect.DeepEqual(expected, newConfig) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(newConfig))
@@ -2252,9 +2077,6 @@ func TestLoaderConfig(t *testing.T) {
 		},
 	}
 	cgrConfig := NewDefaultCGRConfig()
-	if err != nil {
-		t.Error(err)
-	}
 	newConfig := cgrConfig.LoaderCfg()
 	newConfig[0].Data = nil
 	if !reflect.DeepEqual(expected, newConfig) {
@@ -2273,9 +2095,6 @@ func TestDispatcherSConfig(t *testing.T) {
 		AnySubsystem:        true,
 	}
 	cgrConfig := NewDefaultCGRConfig()
-	if err != nil {
-		t.Error(err)
-	}
 	newConfig := cgrConfig.DispatcherSCfg()
 	if !reflect.DeepEqual(expected, newConfig) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(newConfig))
@@ -2292,9 +2111,6 @@ func TestSchedulerConfig(t *testing.T) {
 		DynaprepaidActionPlans: []string{},
 	}
 	cgrConfig := NewDefaultCGRConfig()
-	if err != nil {
-		t.Error(err)
-	}
 	newConfig := cgrConfig.SchedulerCfg()
 	if !reflect.DeepEqual(expected, newConfig) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(newConfig))
@@ -2310,9 +2126,6 @@ func TestAnalyzerConfig(t *testing.T) {
 		TTL:             24 * time.Hour,
 	}
 	cgrConfig := NewDefaultCGRConfig()
-	if err != nil {
-		t.Error(err)
-	}
 	newConfig := cgrConfig.AnalyzerSCfg()
 	if !reflect.DeepEqual(expected, newConfig) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(newConfig))
@@ -2328,9 +2141,6 @@ func TestApierConfig(t *testing.T) {
 		EEsConns:        []string{},
 	}
 	cgrConfig := NewDefaultCGRConfig()
-	if err != nil {
-		t.Error(err)
-	}
 	newConfig := cgrConfig.ApierCfg()
 	if !reflect.DeepEqual(expected, newConfig) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(newConfig))
@@ -2383,9 +2193,6 @@ func TestERSConfig(t *testing.T) {
 		PartialCacheTTL: time.Second,
 	}
 	cgrConfig := NewDefaultCGRConfig()
-	if err != nil {
-		t.Error(err)
-	}
 	newConfig := cgrConfig.ERsCfg()
 	newConfig.Readers[0].Fields = nil
 	if !reflect.DeepEqual(expected, newConfig) {
@@ -2432,9 +2239,6 @@ func TestEEsNoLksConfig(t *testing.T) {
 		},
 	}
 	cgrConfig := NewDefaultCGRConfig()
-	if err != nil {
-		t.Error(err)
-	}
 	newConfig := cgrConfig.EEsNoLksCfg()
 	if !reflect.DeepEqual(expected, newConfig) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(newConfig))
@@ -2452,9 +2256,6 @@ func TestSIPAgentConfig(t *testing.T) {
 		RequestProcessors:   nil,
 	}
 	cgrConfig := NewDefaultCGRConfig()
-	if err != nil {
-		t.Error(err)
-	}
 	newConfig := cgrConfig.SIPAgentCfg()
 	if !reflect.DeepEqual(expected, newConfig) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(newConfig))
@@ -2506,9 +2307,6 @@ func TestRPCConnsConfig(t *testing.T) {
 		},
 	}
 	cgrConfig := NewDefaultCGRConfig()
-	if err != nil {
-		t.Error(err)
-	}
 	newConfig := cgrConfig.RPCConns()
 	if !reflect.DeepEqual(expected, newConfig) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(newConfig))
@@ -2566,9 +2364,6 @@ func TestTemplatesConfig(t *testing.T) {
 		}
 	}
 	cgrConfig := NewDefaultCGRConfig()
-	if err != nil {
-		t.Error(err)
-	}
 	newConfig := cgrConfig.TemplatesCfg()
 	newConfig["*cca"] = nil
 	newConfig["*asr"] = nil
@@ -2588,9 +2383,6 @@ func TestConfigsConfig(t *testing.T) {
 		RootDir: "/var/spool/cgrates/configs",
 	}
 	cgrConfig := NewDefaultCGRConfig()
-	if err != nil {
-		t.Error(err)
-	}
 	newConfig := cgrConfig.ConfigSCfg()
 	if !reflect.DeepEqual(expected, newConfig) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(newConfig))
@@ -2602,9 +2394,6 @@ func TestAPIBanConfig(t *testing.T) {
 		Keys: []string{},
 	}
 	cgrConfig := NewDefaultCGRConfig()
-	if err != nil {
-		t.Error(err)
-	}
 	newConfig := cgrConfig.APIBanCfg()
 	if !reflect.DeepEqual(expected, newConfig) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(newConfig))
@@ -2613,27 +2402,18 @@ func TestAPIBanConfig(t *testing.T) {
 
 func TestRLockSections(t *testing.T) {
 	cgrCfg := NewDefaultCGRConfig()
-	if err != nil {
-		t.Error(err)
-	}
 	cgrCfg.rLockSections()
 	cgrCfg.rUnlockSections()
 }
 
 func TestLockSections(t *testing.T) {
 	cgrCfg := NewDefaultCGRConfig()
-	if err != nil {
-		t.Error(err)
-	}
 	cgrCfg.lockSections()
 	cgrCfg.unlockSections()
 }
 
 func TestRLockAndRUnlock(t *testing.T) {
 	cgrCfg := NewDefaultCGRConfig()
-	if err != nil {
-		t.Error(err)
-	}
 	cgrCfg.RLocks("attributes", "ees", "general")
 	cgrCfg.RUnlocks("attributes", "ees", "general")
 }
@@ -3459,9 +3239,6 @@ func TestCgrCfgJSONDefaultApierCfg(t *testing.T) {
 func TestCgrCfgV1GetConfigAllConfig(t *testing.T) {
 	var rcv map[string]any
 	cgrCfg := NewDefaultCGRConfig()
-	if err != nil {
-		t.Error(err)
-	}
 	expected := cgrCfg.AsMapInterface(cgrCfg.GeneralCfg().RSRSep)
 	if err := cgrCfg.V1GetConfig(context.Background(), &SectionWithAPIOpts{Section: utils.EmptyString}, &rcv); err != nil {
 		t.Fatal(err)
@@ -4685,7 +4462,7 @@ func TestV1GetConfigSectionConfigs(t *testing.T) {
 
 	var result string
 	cfgCgr2 := NewDefaultCGRConfig()
-	if err = cfgCgr2.V1SetConfig(context.Background(), &SetConfigArgs{Config: reply, DryRun: true}, &result); err != nil {
+	if err := cfgCgr2.V1SetConfig(context.Background(), &SetConfigArgs{Config: reply, DryRun: true}, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Errorf("Unexpected result")
@@ -4694,7 +4471,7 @@ func TestV1GetConfigSectionConfigs(t *testing.T) {
 	}
 
 	cfgCgr2 = NewDefaultCGRConfig()
-	if err = cfgCgr2.V1SetConfig(context.Background(), &SetConfigArgs{Config: reply}, &result); err != nil {
+	if err := cfgCgr2.V1SetConfig(context.Background(), &SetConfigArgs{Config: reply}, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Errorf("Unexpected result")
@@ -5310,7 +5087,7 @@ func TestV1GetConfigAsJSONCoreS(t *testing.T) {
 	for _, section := range sortedCfgSections {
 		cfgCgr2.rldChans[section] = make(chan struct{}, 1)
 	}
-	if err = cfgCgr2.V1SetConfigFromJSON(context.Background(), &SetConfigFromJSONArgs{Config: reply, DryRun: true}, &result); err != nil {
+	if err := cfgCgr2.V1SetConfigFromJSON(context.Background(), &SetConfigFromJSONArgs{Config: reply, DryRun: true}, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Errorf("Unexpected result")
@@ -5320,7 +5097,7 @@ func TestV1GetConfigAsJSONCoreS(t *testing.T) {
 	for _, section := range sortedCfgSections {
 		cfgCgr2.rldChans[section] = make(chan struct{}, 1)
 	}
-	if err = cfgCgr2.V1SetConfigFromJSON(context.Background(), &SetConfigFromJSONArgs{Config: reply}, &result); err != nil {
+	if err := cfgCgr2.V1SetConfigFromJSON(context.Background(), &SetConfigFromJSONArgs{Config: reply}, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Errorf("Unexpected result")
@@ -5343,7 +5120,7 @@ func TestV1GetConfigAsJSONCheckConfigSanity(t *testing.T) {
 		cfgCgr2.rldChans[section] = make(chan struct{}, 1)
 	}
 
-	if err = cfgCgr2.V1SetConfigFromJSON(context.Background(), &SetConfigFromJSONArgs{Config: args}, &result); err == nil || err.Error() != expected {
+	if err := cfgCgr2.V1SetConfigFromJSON(context.Background(), &SetConfigFromJSONArgs{Config: args}, &result); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 }
@@ -5787,7 +5564,7 @@ func TestCallOnCGRConfig(t *testing.T) {
 func TestLoadCfgFromJSONWithLocksInvalidSeciton(t *testing.T) {
 	expected := "Invalid section: <invalidSection>"
 	cfg := NewDefaultCGRConfig()
-	if err = cfg.loadCfgWithLocks("/random/path", "invalidSection"); err == nil || err.Error() != expected {
+	if err := cfg.loadCfgWithLocks("/random/path", "invalidSection"); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 }
@@ -5946,7 +5723,7 @@ func TestCGRConfigGetDP(t *testing.T) {
 	exp := utils.MapStorage(cfg.AsMapInterface(cfg.generalCfg.RSRSep))
 	dp := cfg.GetDataProvider()
 	if !reflect.DeepEqual(dp, exp) {
-		t.Errorf("Expected %+v, received %+v", exp, err)
+		t.Errorf("Expected %+v, received %+v", exp, dp)
 	}
 }
 

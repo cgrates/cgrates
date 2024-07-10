@@ -79,9 +79,9 @@ func TestDataDbCfgloadFromJsonCfg(t *testing.T) {
 		},
 	}
 	jsnCfg := NewDefaultCGRConfig()
-	if err = jsnCfg.dataDbCfg.loadFromJSONCfg(nil); err != nil {
+	if err := jsnCfg.dataDbCfg.loadFromJSONCfg(nil); err != nil {
 		t.Error(err)
-	} else if err = jsnCfg.dataDbCfg.loadFromJSONCfg(jsonCfg); err != nil {
+	} else if err := jsnCfg.dataDbCfg.loadFromJSONCfg(jsonCfg); err != nil {
 		t.Error(err)
 	} else {
 		if !reflect.DeepEqual(expected.Items[utils.MetaAccounts], jsnCfg.dataDbCfg.Items[utils.MetaAccounts]) {
@@ -148,7 +148,7 @@ func TestConnsloadFromJsonCfg(t *testing.T) {
 	}
 	expectedErrRmt := "Remote connection ID needs to be different than *internal"
 	jsnCfg := NewDefaultCGRConfig()
-	if err = jsnCfg.dataDbCfg.loadFromJSONCfg(jsonCfg); err == nil || err.Error() != expectedErrRmt {
+	if err := jsnCfg.dataDbCfg.loadFromJSONCfg(jsonCfg); err == nil || err.Error() != expectedErrRmt {
 		t.Errorf("Expected %+v, received %+v", expectedErrRmt, err)
 	}
 
@@ -157,7 +157,7 @@ func TestConnsloadFromJsonCfg(t *testing.T) {
 	}
 	expectedErrRpl := "Replication connection ID needs to be different than *internal"
 	jsnCfg = NewDefaultCGRConfig()
-	if err = jsnCfg.dataDbCfg.loadFromJSONCfg(jsonCfg); err == nil || err.Error() != expectedErrRpl {
+	if err := jsnCfg.dataDbCfg.loadFromJSONCfg(jsonCfg); err == nil || err.Error() != expectedErrRpl {
 		t.Errorf("Expected %+v, received %+v", expectedErrRpl, err)
 	}
 }
@@ -600,7 +600,7 @@ func TestCloneDataDB(t *testing.T) {
 		},
 	}
 	jsnCfg := NewDefaultCGRConfig()
-	if err = jsnCfg.dataDbCfg.loadFromJSONCfg(jsonCfg); err != nil {
+	if err := jsnCfg.dataDbCfg.loadFromJSONCfg(jsonCfg); err != nil {
 		t.Error(err)
 	} else {
 		rcv := jsnCfg.dataDbCfg.Clone()

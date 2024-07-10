@@ -64,13 +64,13 @@ func TestCoreSloadFromJsonCfg(t *testing.T) {
 	coresJSONCfg := &CoreSJsonCfg{
 		Caps_stats_interval: utils.StringPointer("1ss"),
 	}
-	if err = alS.loadFromJSONCfg(coresJSONCfg); err == nil || err.Error() != expErr {
+	if err := alS.loadFromJSONCfg(coresJSONCfg); err == nil || err.Error() != expErr {
 		t.Errorf("Expected error: %s,received: %v", expErr, err)
 	}
 	coresJSONCfg = &CoreSJsonCfg{
 		Shutdown_timeout: utils.StringPointer("1ss"),
 	}
-	if err = alS.loadFromJSONCfg(coresJSONCfg); err == nil || err.Error() != expErr {
+	if err := alS.loadFromJSONCfg(coresJSONCfg); err == nil || err.Error() != expErr {
 		t.Errorf("Expected error: %s,received: %v", expErr, err)
 	}
 }

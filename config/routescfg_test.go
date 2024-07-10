@@ -67,14 +67,14 @@ func TestRouteSCfgloadFromJsonCfg(t *testing.T) {
 		},
 	}
 	jsonCfg := NewDefaultCGRConfig()
-	if err = jsonCfg.routeSCfg.loadFromJSONCfg(cfgJSON); err != nil {
+	if err := jsonCfg.routeSCfg.loadFromJSONCfg(cfgJSON); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, jsonCfg.routeSCfg) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(jsonCfg.routeSCfg))
 	}
 	jsonCfg.routeSCfg.Opts.loadFromJSONCfg(nil)
-	if reflect.DeepEqual(nil, jsonCfg.routeSCfg.Opts) {
-		t.Error(err)
+	if jsonCfg.routeSCfg.Opts == nil {
+		t.Error("expecting jsonCfg.routeSCfg.Opts to be different from nil")
 	}
 }
 

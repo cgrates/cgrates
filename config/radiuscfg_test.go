@@ -121,7 +121,7 @@ func TestRadiusAgentCfgloadFromJsonCfgCase1(t *testing.T) {
 		r.ComputePath()
 	}
 	cfg := NewDefaultCGRConfig()
-	if err = cfg.radiusAgentCfg.loadFromJSONCfg(cfgJSON, cfg.generalCfg.RSRSep); err != nil {
+	if err := cfg.radiusAgentCfg.loadFromJSONCfg(cfgJSON, cfg.generalCfg.RSRSep); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, cfg.radiusAgentCfg) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(cfg.radiusAgentCfg))
@@ -154,7 +154,7 @@ func TestRadiusAgentCfgloadFromJsonCfgCase2(t *testing.T) {
 	}
 	if jsonCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
-	} else if err = jsonCfg.radiusAgentCfg.loadFromJSONCfg(cfgJSON, jsonCfg.generalCfg.RSRSep); err != nil {
+	} else if err := jsonCfg.radiusAgentCfg.loadFromJSONCfg(cfgJSON, jsonCfg.generalCfg.RSRSep); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(jsonCfg.radiusAgentCfg.RequestProcessors[0].ID, expected.RequestProcessors[0].ID) {
 		t.Errorf("Expected %+v, received %+v", utils.ToJSON(jsonCfg.radiusAgentCfg.RequestProcessors[0].ID),
@@ -172,7 +172,7 @@ func TestRadiusAgentCfgloadFromJsonCfgCase3(t *testing.T) {
 	}
 	expected := "invalid converter terminator in rule: <a{*>"
 	jsonCfg := NewDefaultCGRConfig()
-	if err = jsonCfg.radiusAgentCfg.loadFromJSONCfg(cfgJSON, jsonCfg.generalCfg.RSRSep); err == nil || err.Error() != expected {
+	if err := jsonCfg.radiusAgentCfg.loadFromJSONCfg(cfgJSON, jsonCfg.generalCfg.RSRSep); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 }

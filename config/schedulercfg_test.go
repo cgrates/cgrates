@@ -42,7 +42,7 @@ func TestSchedulerCfgloadFromJsonCfg(t *testing.T) {
 		DynaprepaidActionPlans: []string{"randomPlan"},
 	}
 	jsonCfg := NewDefaultCGRConfig()
-	if err = jsonCfg.schedulerCfg.loadFromJSONCfg(cfgJSONS); err != nil {
+	if err := jsonCfg.schedulerCfg.loadFromJSONCfg(cfgJSONS); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, jsonCfg.schedulerCfg) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(jsonCfg.schedulerCfg))

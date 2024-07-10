@@ -70,7 +70,7 @@ func TestHTTPCfgloadFromJsonCfg(t *testing.T) {
 		},
 	}
 	cfgJsn := NewDefaultCGRConfig()
-	if err = cfgJsn.httpCfg.loadFromJSONCfg(cfgJSONStr); err != nil {
+	if err := cfgJsn.httpCfg.loadFromJSONCfg(cfgJSONStr); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected.AsMapInterface(), cfgJsn.httpCfg.AsMapInterface()) {
 		t.Errorf("Expected %+v \n, received %+v", expected.AsMapInterface(), cfgJsn.httpCfg.AsMapInterface())

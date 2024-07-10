@@ -68,7 +68,7 @@ func TestRalsCfgFromJsonCfgCase1(t *testing.T) {
 		},
 	}
 	cfg := NewDefaultCGRConfig()
-	if err = cfg.ralsCfg.loadFromJSONCfg(cfgJSON); err != nil {
+	if err := cfg.ralsCfg.loadFromJSONCfg(cfgJSON); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, cfg.ralsCfg) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(cfg.ralsCfg))
@@ -83,7 +83,7 @@ func TestRalsCfgFromJsonCfgCase2(t *testing.T) {
 	}
 	expected := "time: unknown unit \"hh\" in duration \"189hh\""
 	jsonCfg := NewDefaultCGRConfig()
-	if err = jsonCfg.ralsCfg.loadFromJSONCfg(cfgJSON); err == nil || err.Error() != expected {
+	if err := jsonCfg.ralsCfg.loadFromJSONCfg(cfgJSON); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 }
