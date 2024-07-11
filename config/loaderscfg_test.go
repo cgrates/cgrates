@@ -329,3 +329,17 @@ func TestLoaderSCfgAsMapInterface(t *testing.T) {
 		t.Errorf("\nexpeting: %s\n received: %s\n", utils.ToJSON(exp), utils.ToJSON(rcv))
 	}
 }
+
+func TestLoadersCfgNewDfltLoaderDataTypeConfig(t *testing.T) {
+	dfltLoaderDataTypeConfig = nil
+	result := NewDfltLoaderDataTypeConfig()
+	if reflect.TypeOf(result) != reflect.TypeOf(&LoaderDataType{}) {
+		t.Errorf("Expected type *LoaderDataType, got %T", result)
+	}
+	tData := &LoaderDataType{}
+	dfltLoaderDataTypeConfig = tData
+	result = NewDfltLoaderDataTypeConfig()
+	if !reflect.DeepEqual(result, tData) {
+		t.Errorf("Expected %+v, got %+v", tData, result)
+	}
+}

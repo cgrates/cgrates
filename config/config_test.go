@@ -2838,3 +2838,25 @@ func TestConfigAsMapInterface(t *testing.T) {
 		t.Errorf("expected %v, received %v", exp, rcv)
 	}
 }
+
+func TestConfigGetLoadFunctionsT(t *testing.T) {
+	cfg := &CGRConfig{}
+	funcMap := cfg.getLoadFunctions()
+	expectedKeys := []string{
+		GENERAL_JSN, DATADB_JSN, STORDB_JSN, LISTEN_JSN, TlsCfgJson, HTTP_JSN, SCHEDULER_JSN,
+		CACHE_JSN, FilterSjsn, RALS_JSN, CDRS_JSN, CDRE_JSN, ERsJson, SessionSJson,
+		AsteriskAgentJSN, FreeSWITCHAgentJSN, KamailioAgentJSN, DA_JSN, RA_JSN, HttpAgentJson,
+		DNSAgentJson, ATTRIBUTE_JSN, ChargerSCfgJson, RESOURCES_JSON, STATS_JSON, THRESHOLDS_JSON,
+		SupplierSJson, LoaderJson, MAILER_JSN, SURETAX_JSON, CgrLoaderCfgJson, CgrMigratorCfgJson,
+		DispatcherSJson, AnalyzerCfgJson, ApierS, RPCConnsJsonName,
+	}
+	if len(funcMap) != len(expectedKeys) {
+		t.Errorf("Unexpected number of functions in the map. Expected: %d, Got: %d", len(expectedKeys), len(funcMap))
+	}
+	for _, key := range expectedKeys {
+		if _, ok := funcMap[key]; !ok {
+			t.Errorf("Function for key %s not found in the map", key)
+		}
+	}
+
+}
