@@ -241,6 +241,7 @@ func (cgr *CGREngine) InitServices(httpPrfPath string, cpuPrfFl io.Closer, memPr
 		NewDNSAgent(cgr.cfg, cgr.iFilterSCh, cgr.cM, cgr.srvDep),
 		NewFreeswitchAgent(cgr.cfg, cgr.cM, cgr.srvDep),
 		NewKamailioAgent(cgr.cfg, cgr.cM, cgr.srvDep),
+		NewJanusAgent(cgr.cfg, cgr.iFilterSCh, cgr.server, cgr.cM, cgr.srvDep),
 		NewAsteriskAgent(cgr.cfg, cgr.cM, cgr.srvDep),                         // partial reload
 		NewRadiusAgent(cgr.cfg, cgr.iFilterSCh, cgr.cM, cgr.srvDep),           // partial reload
 		NewDiameterAgent(cgr.cfg, cgr.iFilterSCh, cgr.cM, cgr.srvDep),         // partial reload

@@ -44,6 +44,7 @@ const (
 	HTTPAgentJSON       = "http_agent"
 	AttributeSJSON      = "attributes"
 	ResourceSJSON       = "resources"
+	JanusAgentJSON      = "janus_agent"
 	StatSJSON           = "stats"
 	ThresholdSJSON      = "thresholds"
 	TPeSJSON            = "tpes"
@@ -187,6 +188,7 @@ func newSections(cfg *CGRConfig) Sections {
 		cfg.kamAgentCfg,
 		cfg.diameterAgentCfg,
 		cfg.radiusAgentCfg,
+		cfg.janusAgentCfg,
 		&cfg.httpAgentCfg,
 		cfg.dnsAgentCfg,
 		cfg.sipAgentCfg,

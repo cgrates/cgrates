@@ -184,7 +184,8 @@ func newCGRConfig(config []byte) (cfg *CGRConfig, err error) {
 			ClientDictionaries: make(map[string]string),
 			ClientSecrets:      make(map[string]string),
 		},
-		dnsAgentCfg: new(DNSAgentCfg),
+		dnsAgentCfg:   new(DNSAgentCfg),
+		janusAgentCfg: new(JanusAgentCfg),
 		attributeSCfg: &AttributeSCfg{Opts: &AttributesOpts{
 			ProfileIDs:           []*utils.DynamicStringSliceOpt{},
 			ProcessRuns:          []*utils.DynamicIntOpt{},
@@ -350,6 +351,7 @@ type CGRConfig struct {
 	diameterAgentCfg *DiameterAgentCfg // DiameterAgent config
 	radiusAgentCfg   *RadiusAgentCfg   // RadiusAgent config
 	dnsAgentCfg      *DNSAgentCfg      // DNSAgent config
+	janusAgentCfg    *JanusAgentCfg    // JanusAgent config
 	attributeSCfg    *AttributeSCfg    // AttributeS config
 	chargerSCfg      *ChargerSCfg      // ChargerS config
 	resourceSCfg     *ResourceSConfig  // ResourceS config
@@ -522,6 +524,13 @@ func (cfg *CGRConfig) HTTPAgentCfg() HTTPAgentCfgs {
 	cfg.lks[HTTPAgentJSON].Lock()
 	defer cfg.lks[HTTPAgentJSON].Unlock()
 	return cfg.httpAgentCfg
+}
+
+// JanusAgentCfg returns the config for JanusAgent
+func (cfg *CGRConfig) JanusAgentCfg() *JanusAgentCfg {
+	cfg.lks[HTTPAgentJSON].Lock()
+	defer cfg.lks[HTTPAgentJSON].Unlock()
+	return cfg.janusAgentCfg
 }
 
 // FilterSCfg returns the config for FilterS
@@ -1026,6 +1035,7 @@ func (cfg *CGRConfig) Clone() (cln *CGRConfig) {
 		sessionSCfg:      cfg.sessionSCfg.Clone(),
 		fsAgentCfg:       cfg.fsAgentCfg.Clone(),
 		kamAgentCfg:      cfg.kamAgentCfg.Clone(),
+		janusAgentCfg:    cfg.janusAgentCfg.Clone(),
 		asteriskAgentCfg: cfg.asteriskAgentCfg.Clone(),
 		diameterAgentCfg: cfg.diameterAgentCfg.Clone(),
 		radiusAgentCfg:   cfg.radiusAgentCfg.Clone(),
