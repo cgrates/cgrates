@@ -70,11 +70,9 @@ type JanusAgent struct {
 func (ja *JanusAgent) Connect() (err error) {
 	ja.jnsConn, err = janus.Connect(
 		fmt.Sprintf("ws://%s", ja.cgrCfg.JanusAgentCfg().JanusConns[0].Address))
-
 	if err != nil {
 		return
 	}
-
 	ja.adminWs, _, err = websocket.Dial(context.Background(), fmt.Sprintf("ws://%s", ja.cgrCfg.JanusAgentCfg().JanusConns[0].AdminAddress), &websocket.DialOptions{
 		Subprotocols: []string{utils.JanusAdminSubProto},
 	})
@@ -83,8 +81,14 @@ func (ja *JanusAgent) Connect() (err error) {
 }
 
 // Shutdown will close the connection to the Janus Server
-func (ja *JanusAgent) Shutdown() error {
-	return ja.jnsConn.Close()
+func (ja *JanusAgent) Shutdown() (err error) {
+	if err = ja.jnsConn.Close(); err != nil {
+		utils.Logger.Err(fmt.Sprintf("<%s> Error on disconnecting janus server: %s", utils.JanusAgent, err.Error()))
+	}
+	if err = ja.adminWs.CloseNow(); err != nil {
+		utils.Logger.Err(fmt.Sprintf("<%s> Error on disconnecting janus admin: %s", utils.JanusAgent, err.Error()))
+	}
+	return
 }
 
 // ServeHTTP implements http.Handler interface
@@ -104,7 +108,6 @@ func (ja *JanusAgent) CreateSession(w http.ResponseWriter, req *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 
@@ -319,7 +322,7 @@ func (ja *JanusAgent) AttachPlugin(w http.ResponseWriter, r *http.Request) {
 		answerTime, _ := utils.IfaceAsTime(session.Data[utils.AnswerTime], ja.cgrCfg.GeneralCfg().DefaultTimezone)
 		var totalDur time.Duration
 		if !answerTime.IsZero() {
-			totalDur = time.Now().Sub(answerTime)
+			totalDur = time.Since(answerTime)
 		}
 		session.Data[utils.Usage] = totalDur // toDo: lock session RW
 
@@ -329,7 +332,6 @@ func (ja *JanusAgent) AttachPlugin(w http.ResponseWriter, r *http.Request) {
 		}() // CGRateS accounting stop
 		resp, err = session.DestroySession(ctx, msg)
 	} else {
-
 		resp, err = session.AttachSession(ctx, msg)
 	}
 	if err != nil {
@@ -405,11 +407,7 @@ func (ja *JanusAgent) HandlePlugin(w http.ResponseWriter, r *http.Request) {
 		hMsg.HandleR = handle.ID
 		resp, err = handle.Trickle(ctx, hMsg)
 	default:
-		if err != nil {
-			http.Error(w, "Invalid message type", http.StatusBadRequest)
-			return
-		}
-
+		return
 	}
 
 	if err != nil {
@@ -470,6 +468,30 @@ func (ja *JanusAgent) V1GetActiveSessionIDs(ctx *context.Context, ignParam strin
 }
 
 func (ja *JanusAgent) V1DisconnectSession(ctx *context.Context, cgrEv utils.CGREvent, reply *string) (err error) {
+	sessionID, err := engine.NewMapEvent(cgrEv.Event).GetTInt64(utils.OriginID)
+	if err != nil {
+		return err
+	}
+	session, has := ja.jnsConn.Sessions[uint64(sessionID)]
+	if has {
+		id := utils.GenUUID()
+		_, err := session.DestroySession(context.Background(), janus.BaseMsg{Type: "destroy", ID: id, Session: uint64(sessionID)})
+		if err != nil {
+			return err
+		}
+	}
 	*reply = utils.OK
 	return nil
+}
+
+func (ja *JanusAgent) V1AlterSession(*context.Context, utils.CGREvent, *string) error {
+	return utils.ErrNotImplemented
+}
+
+func (ja *JanusAgent) V1DisconnectPeer(*context.Context, *utils.DPRArgs, *string) error {
+	return utils.ErrNotImplemented
+}
+
+func (ja *JanusAgent) V1WarnDisconnect(*context.Context, map[string]any, *string) error {
+	return utils.ErrNotImplemented
 }
