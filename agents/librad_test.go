@@ -192,3 +192,21 @@ func TestRadiusDPFieldAsString(t *testing.T) {
 		t.Errorf("Expecting: flopsy, received: <%s>", data)
 	}
 }
+
+func TestRadFieldOutValMetaFiller(t *testing.T) {
+	pkt := &radigo.Packet{}
+	agReq := &AgentRequest{}
+	cfgFld := &config.FCTemplate{}
+	outVal, err := radFieldOutVal(pkt, agReq, cfgFld)
+	expectedOutVal := "value"
+	expectedPadding := utils.MetaRight
+	if outVal == expectedOutVal {
+		t.Errorf("radFieldOutVal() returned unexpected outVal. Expected: %s, Got: %s", expectedOutVal, outVal)
+	}
+	if cfgFld.Padding == expectedPadding {
+		t.Errorf("radFieldOutVal() did not set expected padding value. Expected: %s, Got: %s", expectedPadding, cfgFld.Padding)
+	}
+	if err == nil {
+		t.Errorf("radFieldOutVal() returned unexpected error: %v", err)
+	}
+}

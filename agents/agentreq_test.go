@@ -1845,3 +1845,46 @@ func TestAgReqParseFieldMetaSIPCIDInvalidArgs(t *testing.T) {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", experr, err)
 	}
 }
+
+func TestAgentReqNeedsMaxUsage(t *testing.T) {
+	tests := []struct {
+		name      string
+		ralsFlags []string
+		expected  bool
+	}{
+		{"No flags", []string{}, false},
+		{"No matching flags", []string{"flag1", "flag2"}, false},
+		{"Contains MetaAuthorize", []string{"flag1", utils.MetaAuthorize, "flag2"}, true},
+		{"Contains MetaInitiate", []string{utils.MetaInitiate}, true},
+		{"Contains MetaUpdate", []string{"flag1", "flag2", utils.MetaUpdate}, true},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := needsMaxUsage(tt.ralsFlags); got != tt.expected {
+				t.Errorf("needsMaxUsage() = %v, expected %v", got, tt.expected)
+			}
+		})
+	}
+}
+
+func TestAgentReqFieldAsInterfaceDefaultCase(t *testing.T) {
+	ar := &AgentRequest{}
+	fldPath := []string{"unsupported"}
+	_, err := ar.FieldAsInterface(fldPath)
+	expectedErr := fmt.Sprintf("unsupported field prefix: <%s>", fldPath[0])
+	if err == nil || err.Error() != expectedErr {
+		t.Errorf("Expected error %v, but got %v", expectedErr, err)
+	}
+}
+
+func TestAgentReqFieldDefaultCase(t *testing.T) {
+	ar := &AgentRequest{}
+	_, err := ar.Field(utils.PathItems{{Field: "unsupported"}})
+	if err == nil || err.Error() != "unsupported field prefix: <unsupported>" {
+		t.Errorf("expected error 'unsupported field prefix: <unsupported>', got %v", err)
+	}
+	val, err := ar.Field(utils.PathItems{{Field: "MetaDiamreq"}, {Field: "valid"}})
+	if err == nil {
+		t.Errorf("expected 'result', got %v, err: %v", val, err)
+	}
+}
