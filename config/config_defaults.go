@@ -1724,6 +1724,18 @@ const CGRATES_CFG_JSON = `
 	],
 },
 
+"janus_agent": {
+	"enabled": false,                         // enables the Janus agent: <true|false>
+	"url": "/janus",
+	"sessions_conns": ["*internal"],
+	"janus_conns": [{                         // instantiate connections to multiple Janus Servers
+		"address": "127.0.0.1:8088",          // janus API address 
+		"type": "*ws",                        // type of the transport to interact via janus API
+		"admin_address": "localhost:7188",    // janus admin address used to retrive more information for sessions and handles
+		"admin_password": "",                 // secret to pass restriction to communicate to the endpoint
+	}],
+	"request_processors": [],                 // request processors to be applied to Janus messages
+},
 
 "templates": {
 	"*err": [

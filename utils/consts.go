@@ -272,6 +272,7 @@ const (
 	MetaPassword              = "*password"
 	MetaFiller                = "*filler"
 	MetaHTTPPost              = "*httpPost"
+	JanusAdminSubProto        = "janus-admin-protocol"
 	MetaHTTPjsonCDR           = "*http_json_cdr"
 	MetaHTTPjsonMap           = "*httpJSONMap"
 	MetaAMQPjsonCDR           = "*amqp_json_cdr"
@@ -1747,6 +1748,7 @@ const (
 	AsteriskAgent   = "AsteriskAgent"
 	HTTPAgent       = "HTTPAgent"
 	SIPAgent        = "SIPAgent"
+	JanusAgent      = "JanusAgent"
 )
 
 // Google_API
@@ -2029,6 +2031,11 @@ const (
 	ListenAcctCfg         = "listen_acct"
 	ClientSecretsCfg      = "client_secrets"
 	ClientDictionariesCfg = "client_dictionaries"
+
+	// JanusAgentCfg
+	JanusConnsCfg    = "janus_conns"
+	AdminAddressCfg  = "admin_address"
+	AdminPasswordCfg = "admin_password"
 
 	// AttributeSCfg
 	IndexedSelectsCfg  = "indexed_selects"

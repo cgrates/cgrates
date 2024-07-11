@@ -464,6 +464,12 @@ func storeDiffSection(ctx *context.Context, section string, db ConfigDB, v1, v2 
 			return
 		}
 		return db.SetSection(ctx, section, diffHttpAgentsJsonCfg(jsn, v1.HTTPAgentCfg(), v2.HTTPAgentCfg(), v2.GeneralCfg().RSRSep))
+	case JanusAgentJSON:
+		jsn := new(JanusAgentJsonCfg)
+		if err = db.GetSection(ctx, section, jsn); err != nil {
+			return
+		}
+		return db.SetSection(ctx, section, diffJanusAgentSJsonCfg(jsn, v1.JanusAgentCfg(), v2.JanusAgentCfg(), v2.GeneralCfg().RSRSep))
 	case DNSAgentJSON:
 		jsn := new(DNSAgentJsonCfg)
 		if err = db.GetSection(ctx, section, jsn); err != nil {
