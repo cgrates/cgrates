@@ -40,7 +40,7 @@ func TestDispatcherSCoverage(t *testing.T) {
 	filterSChan <- nil
 	server := cores.NewServer(nil)
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
-	db := NewDataDBService(cfg, nil, srvDep)
+	db := NewDataDBService(cfg, nil, false, srvDep)
 	anz := NewAnalyzerService(cfg, server, filterSChan, shdChan, make(chan birpc.ClientConnector, 1), srvDep)
 	srv := NewDispatcherService(cfg, db, chS, filterSChan, server,
 		make(chan birpc.ClientConnector, 1), nil, anz, srvDep)

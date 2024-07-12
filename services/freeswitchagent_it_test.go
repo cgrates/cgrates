@@ -67,7 +67,7 @@ func TestFreeSwitchAgentReload(t *testing.T) {
 	})
 	srvMngr := servmanager.NewServiceManager(cfg, shdChan, shdWg, cm)
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
-	db := NewDataDBService(cfg, cm, srvDep)
+	db := NewDataDBService(cfg, cm, false, srvDep)
 	anz := NewAnalyzerService(cfg, server, filterSChan, shdChan, make(chan birpc.ClientConnector, 1), srvDep)
 	sS := NewSessionService(cfg, db, server, make(chan birpc.ClientConnector, 1),
 		shdChan, cm, anz, srvDep)
