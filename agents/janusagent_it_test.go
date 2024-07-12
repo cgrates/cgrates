@@ -29,6 +29,8 @@ import (
 	"os/exec"
 	"path"
 	"reflect"
+	"strconv"
+	"strings"
 	"testing"
 	"time"
 
@@ -36,8 +38,12 @@ import (
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/sessions"
 	"github.com/cgrates/cgrates/utils"
 	janus "github.com/cgrates/janusgo"
+	"github.com/google/go-cmp/cmp"
+	"github.com/google/go-cmp/cmp/cmpopts"
+	"nhooyr.io/websocket"
 )
 
 var (
@@ -259,6 +265,66 @@ func testJanitAgent(t *testing.T) {
 		t.Errorf("expected <%+v>,got <%+v instead", expEvent, eventMsg)
 	}
 	close(done)
+
+	initArgs := &sessions.V1InitSessionArgs{
+		GetAttributes: true,
+		InitSession:   true,
+		CGREvent: &utils.CGREvent{
+			Tenant: janCfg.GeneralCfg().DefaultTenant,
+			ID:     utils.Sha1(),
+			Time:   utils.TimePointer(time.Now()),
+			Event: map[string]any{
+				utils.AccountField: strings.Split("192.168.56.1", ":")[0],
+				utils.OriginHost:   strings.Split("localhost", ":")[0],
+				utils.OriginID:     strconv.Itoa(int(sessionMsg.Data.ID)),
+				utils.Destination:  "testecho",
+				utils.AnswerTime:   time.Now(),
+			},
+		},
+		ForceDuration: true,
+	}
+	expSess := &sessions.V1InitSessionReply{
+		MaxUsage: utils.DurationPointer(3 * time.Hour),
+	}
+	rply := new(sessions.V1InitSessionReply)
+	if err = janRPC.Call(context.Background(), utils.SessionSv1InitiateSession, initArgs, rply); err != nil {
+		t.Error(err)
+	} else if diff := cmp.Diff(expSess, rply, cmpopts.IgnoreUnexported(sessions.V1InitSessionReply{})); diff != "" {
+		t.Errorf("%s returned unexpected reply (-expected +want)\n%s ", utils.SessionSv1InitiateSession, diff)
+	}
+
+	var replyActSess []*sessions.ExternalSession
+	if err := janRPC.Call(context.Background(), utils.SessionSv1GetActiveSessions, utils.SessionFilter{}, &replyActSess); err != nil {
+		t.Error(err)
+	} else if len(replyActSess) != 2 {
+		t.Errorf("expected 2 active sessions ,got %d ", len(replyActSess))
+	}
+
+	conn, _, err := websocket.Dial(context.Background(), fmt.Sprintf("ws://%s", janCfg.JanusAgentCfg().JanusConns[0].Address), &websocket.DialOptions{
+		Subprotocols: []string{"janus-protocol"},
+	})
+	if err != nil {
+		t.Error(err)
+	}
+	defer conn.CloseNow()
+	msg = janus.BaseMsg{Type: "destroy", ID: id, Session: sessionMsg.Data.ID}
+
+	data, err := json.Marshal(msg)
+	if err != nil {
+		return
+	}
+
+	if err := conn.Write(context.Background(), websocket.MessageText, data); err != nil {
+		t.Error(err)
+	}
+
+	var reply string
+	if err = janRPC.Call(context.Background(), utils.SessionSv1SyncSessions, &utils.TenantWithAPIOpts{Tenant: "cgrates.org"}, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Errorf("expected reply %q,received %q", utils.OK, reply)
+	}
+
 }
 
 func sendReq(isPost bool, url string, msg any) (body []byte, err error) {
