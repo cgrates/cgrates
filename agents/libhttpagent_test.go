@@ -22,8 +22,11 @@ import (
 	"bufio"
 	"bytes"
 	"net/http"
+	"net/http/httptest"
 	"strings"
 	"testing"
+
+	"github.com/cgrates/cgrates/utils"
 	//"github.com/cgrates/cgrates/utils"
 )
 
@@ -189,5 +192,41 @@ func TestHttpXmlDPFieldAsInterface2(t *testing.T) {
 		t.Error(err)
 	} else if data != "0.0225" {
 		t.Errorf("expecting: 0.0225, received: <%s>", data)
+	}
+}
+
+func TestStringMethod(t *testing.T) {
+	req, err := http.NewRequest("GET", "http://cgrates.com", nil)
+	if err != nil {
+		t.Fatalf("Failed to create request: %v", err)
+	}
+	hU := &httpUrlDP{
+		req: req,
+	}
+	str := hU.String()
+	expectedPrefix := "GET / HTTP/1.1\r\nHost: cgrates.com\r\n"
+	if str[:len(expectedPrefix)] != expectedPrefix {
+		t.Errorf("Expected request string to start with '%s', got '%s'", expectedPrefix, str)
+	}
+}
+
+func TestNewHATextPlainEncoder(t *testing.T) {
+	w := httptest.NewRecorder()
+	_, err := newHATextPlainEncoder(w)
+	if err != nil {
+		t.Fatalf("Unexpected error creating encoder: %v", err)
+	}
+
+}
+
+func TestRemoteHost(t *testing.T) {
+	addr := "192.168.1.1:2012"
+	hU := &httpXmlDP{
+		addr: addr,
+	}
+	remoteAddr := hU.RemoteHost()
+	expectedAddr := utils.NewNetAddr("TCP", addr)
+	if remoteAddr.String() != expectedAddr.String() {
+		t.Errorf("Expected RemoteHost to return %v, but got %v", expectedAddr, remoteAddr)
 	}
 }

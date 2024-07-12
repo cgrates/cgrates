@@ -826,3 +826,89 @@ func TestKamEventKamReplyString(t *testing.T) {
 		t.Errorf("Unexpected TransactionLabel in parsed KamReply: expected %s, got %v", "label", parsedReply["TransactionLabel"])
 	}
 }
+
+func TestKamDlgReplyString(t *testing.T) {
+	kdr := &KamDlgReply{}
+	expectedJSON := `{"Event":"","Jsonrpl_body":null}`
+	result := kdr.String()
+	if result != expectedJSON {
+		t.Errorf("Expected %s, but got %s", expectedJSON, result)
+	}
+}
+
+func TestNewKamDlgReply(t *testing.T) {
+	validJSON := []byte(`{"Field1":"test","Field2":123}`)
+	expectedReply := KamDlgReply{}
+	rpl, err := NewKamDlgReply(validJSON)
+	if err != nil {
+		t.Errorf("Expected no error, but got %v", err)
+	}
+	if rpl != expectedReply {
+		t.Errorf("Expected %+v, but got %+v", expectedReply, rpl)
+	}
+	invalidJSON := []byte(`{"Field1":"test","Field2":}`)
+	_, err = NewKamDlgReply(invalidJSON)
+	if err == nil {
+		t.Errorf("Expected an error, but got nil")
+	}
+	emptyJSON := []byte(`{}`)
+	expectedEmptyReply := KamDlgReply{}
+	rpl, err = NewKamDlgReply(emptyJSON)
+	if err != nil {
+		t.Errorf("Expected no error, but got %v", err)
+	}
+
+	if rpl != expectedEmptyReply {
+		t.Errorf("Expected %+v, but got %+v", expectedEmptyReply, rpl)
+	}
+}
+
+func TestAsKamAuthReplyProcessStats(t *testing.T) {
+	kamEvData := KamEvent{}
+	authArgs := &sessions.V1AuthorizeArgs{
+		ProcessStats: true,
+	}
+	statQueueIDs := []string{"queue1", "queue2", "queue3"}
+	authReply := &sessions.V1AuthorizeReply{
+		StatQueueIDs: &statQueueIDs,
+	}
+	kar, err := kamEvData.AsKamAuthReply(authArgs, authReply, nil)
+	if err != nil {
+		t.Errorf("Expected no error, but got %v", err)
+	}
+	expectedStatQueues := "queue1,queue2,queue3"
+	if kar.StatQueues != expectedStatQueues {
+		t.Errorf("Expected StatQueues to be %s, but got %s", expectedStatQueues, kar.StatQueues)
+	}
+}
+
+func TestAsKamAuthReplyProcessThresholds(t *testing.T) {
+	kamEvData := KamEvent{
+		KamTRIndex: "index123",
+		KamTRLabel: "label123",
+	}
+	authArgs := &sessions.V1AuthorizeArgs{
+		ProcessThresholds: true,
+	}
+	thresholdIDs := []string{"threshold1", "threshold2", "threshold3"}
+	authReply := &sessions.V1AuthorizeReply{
+		ThresholdIDs: &thresholdIDs,
+	}
+	kar, err := kamEvData.AsKamAuthReply(authArgs, authReply, nil)
+	if err != nil {
+		t.Errorf("Expected no error, but got %v", err)
+	}
+	expectedThresholds := "threshold1,threshold2,threshold3"
+	if kar.Thresholds != expectedThresholds {
+		t.Errorf("Expected Thresholds to be %s, but got %s", expectedThresholds, kar.Thresholds)
+	}
+}
+
+func TestV1AuthorizeArgsParseFlags(t *testing.T) {
+	kev := make(KamEvent)
+	args := kev.V1AuthorizeArgs()
+	if !args.GetMaxUsage {
+		t.Error("Expected GetMaxUsage to be true when CGRFlags is not present")
+	}
+
+}
