@@ -1189,3 +1189,19 @@ func TestLibDiamBareErr(t *testing.T) {
 		t.Errorf("Expected CommandFlags to be set to ErrorFlag, got %v", result.Header.CommandFlags)
 	}
 }
+
+func TestHeaderLenDiam(t *testing.T) {
+	a := &diam.AVP{
+		Flags: avp.Vbit,
+	}
+	result := headerLen(a)
+	if result != 12 {
+		t.Errorf("Expected headerLen to return 12 for Vbit set, got: %d", result)
+	}
+	a.Flags = 0
+	result = headerLen(a)
+	if result != 8 {
+		t.Errorf("Expected headerLen to return 8 for Vbit not set, got: %d", result)
+	}
+
+}

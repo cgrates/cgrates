@@ -535,3 +535,16 @@ func TestProcessRequest(t *testing.T) {
 	}
 
 }
+
+func TestV1GetActiveSessionIDs(t *testing.T) {
+	da := &DiameterAgent{}
+	ignParam := "ignore"
+	var sessionIDs []*sessions.SessionID
+	err := da.V1GetActiveSessionIDs(ignParam, &sessionIDs)
+	if err != utils.ErrNotImplemented {
+		t.Errorf("Expected ErrNotImplemented, but got: %v", err)
+	}
+	if len(sessionIDs) != 0 {
+		t.Errorf("Expected sessionIDs slice to be empty, but got %d items", len(sessionIDs))
+	}
+}
