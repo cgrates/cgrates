@@ -62,7 +62,7 @@ func TestDNSAgentStartReloadShut(t *testing.T) {
 	shdWg := new(sync.WaitGroup)
 	srvMngr := servmanager.NewServiceManager(cfg, shdChan, shdWg, nil)
 	engine.NewConnManager(cfg, nil)
-	db := NewDataDBService(cfg, nil, srvDep)
+	db := NewDataDBService(cfg, nil, false, srvDep)
 	server := cores.NewServer(nil)
 	anz := NewAnalyzerService(cfg, server, filterSChan, shdChan, make(chan birpc.ClientConnector, 1), srvDep)
 	sS := NewSessionService(cfg, db, server, make(chan birpc.ClientConnector, 1),
@@ -118,7 +118,7 @@ func TestDNSAgentReloadFirst(t *testing.T) {
 	server := cores.NewServer(nil)
 	srvMngr := servmanager.NewServiceManager(cfg, shdChan, shdWg, nil)
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
-	db := NewDataDBService(cfg, nil, srvDep)
+	db := NewDataDBService(cfg, nil, false, srvDep)
 	anz := NewAnalyzerService(cfg, server, filterSChan, shdChan, make(chan birpc.ClientConnector, 1), srvDep)
 	sS := NewSessionService(cfg, db, server, make(chan birpc.ClientConnector, 1),
 		shdChan, nil, anz, srvDep)

@@ -61,31 +61,32 @@ func init() {
 // Versions will keep trac of various item versions
 type Versions map[string]int64 // map[item]versionNr
 
-// CheckVersions returns error if the db needs migration
+// CheckVersions returns an error if the db needs migration.
 func CheckVersions(storage Storage) error {
-	// get current db version
+
+	// Retrieve the current DB versions.
 	storType := storage.GetStorageType()
 	isDataDB := isDataDB(storage)
+	currentVersions := CurrentDBVersions(storType, isDataDB)
 
-	x := CurrentDBVersions(storType, isDataDB)
-	dbVersion, err := storage.GetVersions("")
+	dbVersions, err := storage.GetVersions("")
 	if err == utils.ErrNotFound {
 		empty, err := storage.IsDBEmpty()
 		if err != nil {
 			return err
 		}
 		if !empty {
-			return fmt.Errorf("No versions defined: please backup cgrates data and run : <cgr-migrator -exec=*set_versions>")
+			return fmt.Errorf("No versions defined: please backup cgrates data and run: <cgr-migrator -exec=*set_versions>")
 		}
-		// no data, safe to write version
+		// No data, safe to set the versions.
 		return OverwriteDBVersions(storage)
 	} else if err != nil {
 		return err
 	}
-	// comparing versions
-	message := dbVersion.Compare(x, storType, isDataDB)
+	// Compare db versions with current versions.
+	message := dbVersions.Compare(currentVersions, storType, isDataDB)
 	if message != "" {
-		return fmt.Errorf("Migration needed: please backup cgr data and run : <%s>", message)
+		return fmt.Errorf("Migration needed: please backup cgr data and run: <%s>", message)
 	}
 	return nil
 }

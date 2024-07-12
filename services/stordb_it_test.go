@@ -48,9 +48,9 @@ func TestStorDBReload(t *testing.T) {
 	server := cores.NewServer(nil)
 	srvMngr := servmanager.NewServiceManager(cfg, shdChan, shdWg, nil)
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
-	db := NewDataDBService(cfg, nil, srvDep)
+	db := NewDataDBService(cfg, nil, false, srvDep)
 	cfg.StorDbCfg().Password = "CGRateS.org"
-	stordb := NewStorDBService(cfg, srvDep)
+	stordb := NewStorDBService(cfg, false, srvDep)
 	anz := NewAnalyzerService(cfg, server, filterSChan, shdChan, make(chan birpc.ClientConnector, 1), srvDep)
 	chrS := NewChargerService(cfg, db, chS, filterSChan, server, make(chan birpc.ClientConnector, 1), nil, anz, srvDep)
 	schS := NewSchedulerService(cfg, db, chS, filterSChan, server, make(chan birpc.ClientConnector, 1), nil, anz, srvDep)
@@ -214,7 +214,7 @@ func TestStorDBReloadVersion1(t *testing.T) {
 	shdChan := utils.NewSyncedChan()
 	cfg.ChargerSCfg().Enabled = true
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
-	stordb := NewStorDBService(cfg, srvDep)
+	stordb := NewStorDBService(cfg, false, srvDep)
 	stordb.oldDBCfg = cfg.StorDbCfg().Clone()
 	if err := engine.InitStorDb(cfg); err != nil {
 		t.Fatal(err)
@@ -297,7 +297,7 @@ func TestStorDBReloadVersion2(t *testing.T) {
 	cfg.ChargerSCfg().Enabled = true
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
 	cfg.StorDbCfg().Password = "CGRateS.org"
-	stordb := NewStorDBService(cfg, srvDep)
+	stordb := NewStorDBService(cfg, false, srvDep)
 	stordb.oldDBCfg = cfg.StorDbCfg().Clone()
 	if err := engine.InitStorDb(cfg); err != nil {
 		t.Fatal(err)
@@ -375,7 +375,7 @@ func TestStorDBReloadVersion3(t *testing.T) {
 	cfg.ChargerSCfg().Enabled = true
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
 	cfg.StorDbCfg().Password = "CGRateS.org"
-	stordb := NewStorDBService(cfg, srvDep)
+	stordb := NewStorDBService(cfg, false, srvDep)
 	stordb.oldDBCfg = cfg.StorDbCfg().Clone()
 	stordb.db = nil
 	err = stordb.Reload()
@@ -408,7 +408,7 @@ func TestStorDBReloadNewStorDBConnError(t *testing.T) {
 	cfg.ChargerSCfg().Enabled = true
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
 	cfg.StorDbCfg().Password = "CGRateS.org"
-	stordb := NewStorDBService(cfg, srvDep)
+	stordb := NewStorDBService(cfg, false, srvDep)
 	stordb.oldDBCfg = &config.StorDbCfg{
 		Type:     utils.MetaInternal,
 		Host:     "test_host",
@@ -435,7 +435,7 @@ func TestStorDBReloadStartDBError(t *testing.T) {
 	cfg.ChargerSCfg().Enabled = true
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
 	cfg.StorDbCfg().Password = "CGRateS.org"
-	stordb := NewStorDBService(cfg, srvDep)
+	stordb := NewStorDBService(cfg, false, srvDep)
 	cfg.StorDbCfg().Type = "badType"
 	err := stordb.Start()
 	expected := "unknown db 'badType' valid options are [*mysql, *mongo, *postgres, *internal]"

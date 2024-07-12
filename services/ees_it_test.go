@@ -58,7 +58,7 @@ func TestEventExporterSReload(t *testing.T) {
 	server := cores.NewServer(nil)
 	srvMngr := servmanager.NewServiceManager(cfg, shdChan, shdWg, nil)
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
-	db := NewDataDBService(cfg, nil, srvDep)
+	db := NewDataDBService(cfg, nil, false, srvDep)
 	chS := engine.NewCacheS(cfg, nil, nil)
 	close(chS.GetPrecacheChannel(utils.CacheAttributeProfiles))
 	close(chS.GetPrecacheChannel(utils.CacheAttributeFilterIndexes))

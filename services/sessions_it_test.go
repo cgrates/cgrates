@@ -101,7 +101,7 @@ func TestSessionSReload1(t *testing.T) {
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers): clientConect,
 	})
 	anz := NewAnalyzerService(cfg, server, filterSChan, shdChan, make(chan birpc.ClientConnector, 1), srvDep)
-	dmService := NewDataDBService(cfg, conMng, srvDep)
+	dmService := NewDataDBService(cfg, conMng, false, srvDep)
 	if err := dmService.Start(); err != nil {
 		t.Fatal(err)
 	}
@@ -177,7 +177,7 @@ func TestSessionSReload2(t *testing.T) {
 	server := cores.NewServer(nil)
 
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
-	db := NewDataDBService(cfg, nil, srvDep)
+	db := NewDataDBService(cfg, nil, false, srvDep)
 	cfg.StorDbCfg().Type = utils.MetaInternal
 	anz := NewAnalyzerService(cfg, server, filterSChan, shdChan, make(chan birpc.ClientConnector, 1), srvDep)
 	srv := NewSessionService(cfg, db, server, make(chan birpc.ClientConnector, 1), shdChan, nil, anz, srvDep)
@@ -241,7 +241,7 @@ func TestSessionSReload3(t *testing.T) {
 	server := cores.NewServer(nil)
 
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
-	db := NewDataDBService(cfg, nil, srvDep)
+	db := NewDataDBService(cfg, nil, false, srvDep)
 	cfg.StorDbCfg().Type = utils.MetaInternal
 	anz := NewAnalyzerService(cfg, server, filterSChan, shdChan, make(chan birpc.ClientConnector, 1), srvDep)
 	srv := NewSessionService(cfg, db, server, make(chan birpc.ClientConnector, 1), shdChan, nil, anz, srvDep)

@@ -151,13 +151,13 @@ func testVersion(t *testing.T) {
 		currentVersion = allVersions
 		testVersion = allVersions
 		testVersion[utils.Accounts] = 1
-		test = "Migration needed: please backup cgr data and run : <cgr-migrator -exec=*accounts>"
+		test = "Migration needed: please backup cgr data and run: <cgr-migrator -exec=*accounts>"
 	case utils.MetaMongo, utils.MetaRedis:
 		currentVersion = dataDbVersions
 		testVersion = dataDbVersions
 		testVersion[utils.Accounts] = 1
 
-		test = "Migration needed: please backup cgr data and run : <cgr-migrator -exec=*accounts>"
+		test = "Migration needed: please backup cgr data and run: <cgr-migrator -exec=*accounts>"
 	}
 
 	//dataDB
@@ -193,12 +193,12 @@ func testVersion(t *testing.T) {
 		currentVersion = allVersions
 		testVersion = allVersions
 		testVersion[utils.Accounts] = 1
-		test = "Migration needed: please backup cgr data and run : <cgr-migrator -exec=*accounts>"
+		test = "Migration needed: please backup cgr data and run: <cgr-migrator -exec=*accounts>"
 	case utils.MetaMongo, utils.MetaPostgres, utils.MetaMySQL:
 		currentVersion = storDbVersions
 		testVersion = allVersions
 		testVersion[utils.CostDetails] = 1
-		test = "Migration needed: please backup cgr data and run : <cgr-migrator -exec=*cost_details>"
+		test = "Migration needed: please backup cgr data and run: <cgr-migrator -exec=*cost_details>"
 	}
 	//storageDb
 
@@ -274,7 +274,7 @@ func testUpdateVersionsAccounts(t *testing.T) {
 		t.Log(output.String())
 		t.Fatalf("expected: %s, \nreceived: %s", "exit status 1", err)
 	}
-	errExpect := "Migration needed: please backup cgr data and run : <cgr-migrator -exec=*accounts>"
+	errExpect := "Migration needed: please backup cgr data and run: <cgr-migrator -exec=*accounts>"
 	if !strings.Contains(output.String(), errExpect) {
 		t.Errorf("expected %s \nto contain: %s", output.String(), errExpect)
 	}
@@ -295,7 +295,7 @@ func testUpdateVersionsActionPlans(t *testing.T) {
 		t.Log(output.String())
 		t.Fatalf("expected: %s, \nreceived: %s", "exit status 1", err)
 	}
-	errExpect := "Migration needed: please backup cgr data and run : <cgr-migrator -exec=*action_plans>"
+	errExpect := "Migration needed: please backup cgr data and run: <cgr-migrator -exec=*action_plans>"
 	if !strings.Contains(output.String(), errExpect) {
 		t.Errorf("expected %s \nto contain: %s", output.String(), errExpect)
 	}
@@ -316,7 +316,7 @@ func testUpdateVersionsActionTriggers(t *testing.T) {
 		t.Log(output.String())
 		t.Fatalf("expected: %s, \nreceived: %s", "exit status 1", err)
 	}
-	errExpect := "Migration needed: please backup cgr data and run : <cgr-migrator -exec=*action_triggers>"
+	errExpect := "Migration needed: please backup cgr data and run: <cgr-migrator -exec=*action_triggers>"
 	if !strings.Contains(output.String(), errExpect) {
 		t.Errorf("expected %s \nto contain: %s", output.String(), errExpect)
 	}
@@ -337,7 +337,7 @@ func testUpdateVersionsActions(t *testing.T) {
 		t.Log(output.String())
 		t.Fatalf("expected: %s, \nreceived: %s", "exit status 1", err)
 	}
-	errExpect := "Migration needed: please backup cgr data and run : <cgr-migrator -exec=*actions>"
+	errExpect := "Migration needed: please backup cgr data and run: <cgr-migrator -exec=*actions>"
 	if !strings.Contains(output.String(), errExpect) {
 		t.Errorf("expected %s \nto contain: %s", output.String(), errExpect)
 	}
@@ -358,7 +358,7 @@ func testUpdateVersionsChargers(t *testing.T) {
 		t.Log(output.String())
 		t.Fatalf("expected: %s, \nreceived: %s", "exit status 1", err)
 	}
-	errExpect := "Migration needed: please backup cgr data and run : <cgr-migrator -exec=*chargers>"
+	errExpect := "Migration needed: please backup cgr data and run: <cgr-migrator -exec=*chargers>"
 	if !strings.Contains(output.String(), errExpect) {
 		t.Errorf("expected %s \nto contain: %s", output.String(), errExpect)
 	}
@@ -398,7 +398,7 @@ func testUpdateVersionsAttributes(t *testing.T) {
 		t.Log(output.String())
 		t.Fatalf("expected: %s, \nreceived: %s", "exit status 1", err)
 	}
-	errExpect := "Migration needed: please backup cgr data and run : <cgr-migrator -exec=*attributes>"
+	errExpect := "Migration needed: please backup cgr data and run: <cgr-migrator -exec=*attributes>"
 	if !strings.Contains(output.String(), errExpect) {
 		t.Errorf("expected %s \nto contain: %s", output.String(), errExpect)
 	}
@@ -419,7 +419,7 @@ func testUpdateVersionsDispatchers(t *testing.T) {
 		t.Log(output.String())
 		t.Fatalf("expected: %s, \nreceived: %s", "exit status 1", err)
 	}
-	errExpect := "Migration needed: please backup cgr data and run : <cgr-migrator -exec=*dispatchers>"
+	errExpect := "Migration needed: please backup cgr data and run: <cgr-migrator -exec=*dispatchers>"
 	if !strings.Contains(output.String(), errExpect) {
 		t.Errorf("expected %s \nto contain: %s", output.String(), errExpect)
 	}
@@ -460,7 +460,7 @@ func testUpdateVersionsRQF(t *testing.T) {
 		t.Log(output.String())
 		t.Fatalf("expected: %s, \nreceived: %s", "exit status 1", err)
 	}
-	errExpect := "Migration needed: please backup cgr data and run : <cgr-migrator -exec=*filters>"
+	errExpect := "Migration needed: please backup cgr data and run: <cgr-migrator -exec=*filters>"
 	if !strings.Contains(output.String(), errExpect) {
 		t.Errorf("expected %s \nto contain: %s", output.String(), errExpect)
 	}
@@ -561,7 +561,7 @@ func testUpdateVersionsRoutes(t *testing.T) {
 		t.Log(output.String())
 		t.Fatalf("expected: %s, \nreceived: %s", "exit status 1", err)
 	}
-	errExpect := "Migration needed: please backup cgr data and run : <cgr-migrator -exec=*routes>"
+	errExpect := "Migration needed: please backup cgr data and run: <cgr-migrator -exec=*routes>"
 	if !strings.Contains(output.String(), errExpect) {
 		t.Errorf("expected %s \nto contain: %s", output.String(), errExpect)
 	}
@@ -582,7 +582,7 @@ func testUpdateVersionsSharedGroups(t *testing.T) {
 		t.Log(output.String())
 		t.Fatalf("expected: %s, \nreceived: %s", "exit status 1", err)
 	}
-	errExpect := "Migration needed: please backup cgr data and run : <cgr-migrator -exec=*shared_groups>"
+	errExpect := "Migration needed: please backup cgr data and run: <cgr-migrator -exec=*shared_groups>"
 	if !strings.Contains(output.String(), errExpect) {
 		t.Errorf("expected %s \nto contain: %s", output.String(), errExpect)
 	}
@@ -603,7 +603,7 @@ func testUpdateVersionsStats(t *testing.T) {
 		t.Log(output.String())
 		t.Fatalf("expected: %s, \nreceived: %s", "exit status 1", err)
 	}
-	errExpect := "Migration needed: please backup cgr data and run : <cgr-migrator -exec=*stats>"
+	errExpect := "Migration needed: please backup cgr data and run: <cgr-migrator -exec=*stats>"
 	if !strings.Contains(output.String(), errExpect) {
 		t.Errorf("expected %s \nto contain: %s", output.String(), errExpect)
 	}
@@ -644,7 +644,7 @@ func testUpdateVersionsThresholds(t *testing.T) {
 		t.Log(output.String())
 		t.Fatalf("expected: %s, \nreceived: %s", "exit status 1", err)
 	}
-	errExpect := "Migration needed: please backup cgr data and run : <cgr-migrator -exec=*thresholds>"
+	errExpect := "Migration needed: please backup cgr data and run: <cgr-migrator -exec=*thresholds>"
 	if !strings.Contains(output.String(), errExpect) {
 		t.Errorf("expected %s \nto contain: %s", output.String(), errExpect)
 	}
@@ -686,7 +686,7 @@ func testUpdateVersionsCostDetails(t *testing.T) {
 		t.Log(output.String())
 		t.Fatalf("expected: %s, \nreceived: %s", "exit status 1", err)
 	}
-	errExpect := "Migration needed: please backup cgr data and run : <cgr-migrator -exec=*cost_details>"
+	errExpect := "Migration needed: please backup cgr data and run: <cgr-migrator -exec=*cost_details>"
 	if !strings.Contains(output.String(), errExpect) {
 		t.Errorf("expected %s \nto contain: %s", output.String(), errExpect)
 	}
@@ -707,7 +707,7 @@ func testUpdateVersionsSessionSCosts(t *testing.T) {
 		t.Log(output.String())
 		t.Fatalf("expected: %s, \nreceived: %s", "exit status 1", err)
 	}
-	errExpect := "Migration needed: please backup cgr data and run : <cgr-migrator -exec=*sessions_costs>"
+	errExpect := "Migration needed: please backup cgr data and run: <cgr-migrator -exec=*sessions_costs>"
 	if !strings.Contains(output.String(), errExpect) {
 		t.Errorf("expected %s \nto contain: %s", output.String(), errExpect)
 	}
@@ -728,7 +728,7 @@ func testUpdateVersionsCDRs(t *testing.T) {
 		t.Log(output.String())
 		t.Fatalf("expected: %s, \nreceived: %s", "exit status 1", err)
 	}
-	errExpect := "Migration needed: please backup cgr data and run : <cgr-migrator -exec=*cdrs>"
+	errExpect := "Migration needed: please backup cgr data and run: <cgr-migrator -exec=*cdrs>"
 	if !strings.Contains(output.String(), errExpect) {
 		t.Errorf("expected %s \nto contain: %s", output.String(), errExpect)
 	}

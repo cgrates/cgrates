@@ -28,13 +28,14 @@ import (
 )
 
 // NewDataDBService returns the DataDB Service
-func NewDataDBService(cfg *config.CGRConfig, connMgr *engine.ConnManager,
+func NewDataDBService(cfg *config.CGRConfig, connMgr *engine.ConnManager, setVersions bool,
 	srvDep map[string]*sync.WaitGroup) *DataDBService {
 	return &DataDBService{
-		cfg:     cfg,
-		dbchan:  make(chan *engine.DataManager, 1),
-		connMgr: connMgr,
-		srvDep:  srvDep,
+		cfg:         cfg,
+		dbchan:      make(chan *engine.DataManager, 1),
+		connMgr:     connMgr,
+		setVersions: setVersions,
+		srvDep:      srvDep,
 	}
 }
 
@@ -45,12 +46,14 @@ type DataDBService struct {
 	oldDBCfg *config.DataDbCfg
 	connMgr  *engine.ConnManager
 
-	dm     *engine.DataManager
-	dbchan chan *engine.DataManager
+	dm          *engine.DataManager
+	dbchan      chan *engine.DataManager
+	setVersions bool
+
 	srvDep map[string]*sync.WaitGroup
 }
 
-// Start should handle the sercive start
+// Start handles the service start.
 func (db *DataDBService) Start() (err error) {
 	if db.IsRunning() {
 		return utils.ErrServiceAlreadyRunning
@@ -58,24 +61,31 @@ func (db *DataDBService) Start() (err error) {
 	db.Lock()
 	defer db.Unlock()
 	db.oldDBCfg = db.cfg.DataDbCfg().Clone()
-	d, err := engine.NewDataDBConn(db.cfg.DataDbCfg().Type,
+	dbConn, err := engine.NewDataDBConn(db.cfg.DataDbCfg().Type,
 		db.cfg.DataDbCfg().Host, db.cfg.DataDbCfg().Port,
 		db.cfg.DataDbCfg().Name, db.cfg.DataDbCfg().User,
 		db.cfg.DataDbCfg().Password, db.cfg.GeneralCfg().DBDataEncoding,
 		db.cfg.DataDbCfg().Opts, db.cfg.DataDbCfg().Items)
-	if db.mandatoryDB() && err != nil { // Cannot configure getter database, show stopper
+	if db.mandatoryDB() && err != nil { // cannot configure mandatory database
 		utils.Logger.Crit(fmt.Sprintf("Could not configure dataDb: %s exiting!", err))
 		return
 	} else if db.cfg.SessionSCfg().Enabled && err != nil {
 		utils.Logger.Warning(fmt.Sprintf("Could not configure dataDb: %s. Some SessionS APIs will not work", err))
-		err = nil // reset the error in case of only SessionS active
+		err = nil // reset the error only if SessionS is enabled
 		return
 	}
-	db.dm = engine.NewDataManager(d, db.cfg.CacheCfg(), db.connMgr)
+	db.dm = engine.NewDataManager(dbConn, db.cfg.CacheCfg(), db.connMgr)
 	engine.SetDataStorage(db.dm)
-	if err = engine.CheckVersions(db.dm.DataDB()); err != nil {
+
+	if db.setVersions {
+		err = engine.OverwriteDBVersions(dbConn)
+	} else {
+		err = engine.CheckVersions(db.dm.DataDB())
+	}
+	if err != nil {
 		return err
 	}
+
 	db.dbchan <- db.dm
 	return
 }

@@ -51,7 +51,7 @@ func TestSessionSCoverage(t *testing.T) {
 	cacheSChan <- cacheSrv
 	server := cores.NewServer(nil)
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
-	db := NewDataDBService(cfg, nil, srvDep)
+	db := NewDataDBService(cfg, nil, false, srvDep)
 	cfg.StorDbCfg().Type = utils.MetaInternal
 	anz := NewAnalyzerService(cfg, server, filterSChan, shdChan, make(chan birpc.ClientConnector, 1), srvDep)
 	srv := NewSessionService(cfg, db, server, make(chan birpc.ClientConnector, 1), shdChan, nil, anz, srvDep)

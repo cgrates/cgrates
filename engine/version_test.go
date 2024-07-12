@@ -277,7 +277,7 @@ func TestVersionCheckVersionsGetVersionsErrNotFoundNonEmptyDB(t *testing.T) {
 		testcase: "GetVersions ErrNotFound",
 	}
 
-	experr := "No versions defined: please backup cgrates data and run : <cgr-migrator -exec=*set_versions>"
+	experr := "No versions defined: please backup cgrates data and run: <cgr-migrator -exec=*set_versions>"
 	err := CheckVersions(storage)
 
 	if err == nil || err.Error() != experr {
@@ -303,11 +303,11 @@ func TestVersionCheckVersionsCompareNonNilMsg(t *testing.T) {
 		testcase: "Compare returns non-nil message",
 	}
 
-	experr := "Migration needed: please backup cgr data and run :"
+	experr := "Migration needed: please backup cgr data and run:"
 	err := CheckVersions(storage)
 
 	if err == nil || !strings.Contains(err.Error(), experr) {
-		t.Errorf("expected error to be of type: <Migration needed: please backup cgr data and run : ..., \n received: <%+v>", err)
+		t.Errorf("expected error to be of type: <Migration needed: please backup cgr data and run: ..., \n received: <%+v>", err)
 	}
 }
 

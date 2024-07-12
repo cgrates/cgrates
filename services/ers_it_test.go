@@ -65,7 +65,7 @@ func TestEventReaderSReload(t *testing.T) {
 	srvMngr := servmanager.NewServiceManager(cfg, shdChan, shdWg, nil)
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
 	anz := NewAnalyzerService(cfg, server, filterSChan, shdChan, make(chan birpc.ClientConnector, 1), srvDep)
-	db := NewDataDBService(cfg, nil, srvDep)
+	db := NewDataDBService(cfg, nil, false, srvDep)
 	sS := NewSessionService(cfg, db, server, make(chan birpc.ClientConnector, 1), shdChan, nil, anz, srvDep)
 	intERsConn := make(chan birpc.ClientConnector, 1)
 	erS := NewEventReaderService(cfg, filterSChan, shdChan, nil, server, intERsConn, anz, srvDep)

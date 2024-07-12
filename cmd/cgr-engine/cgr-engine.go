@@ -66,6 +66,7 @@ var (
 	nodeID            = cgrEngineFlags.String(utils.NodeIDCfg, utils.EmptyString, "The node ID of the engine")
 	logLevel          = cgrEngineFlags.Int(utils.LogLevelCfg, -1, "Log level (0-emergency to 7-debug)")
 	preload           = cgrEngineFlags.String(utils.PreloadCgr, utils.EmptyString, "LoaderIDs used to load the data before the engine starts")
+	setVersions       = cgrEngineFlags.Bool("set_versions", false, "Overwrite database versions (equivalent to cgr-migrator -exec=*set_versions)")
 
 	cfg *config.CGRConfig
 )
@@ -538,7 +539,7 @@ func main() {
 	if err = gvService.Start(); err != nil {
 		log.Fatalf("<%s> error received: <%s>, exiting!", utils.InitS, err.Error())
 	}
-	dmService := services.NewDataDBService(cfg, connManager, srvDep)
+	dmService := services.NewDataDBService(cfg, connManager, *setVersions, srvDep)
 	if dmService.ShouldRun() { // Some services can run without db, ie:  ERs
 		shdWg.Add(1)
 		if err = dmService.Start(); err != nil {
@@ -546,7 +547,7 @@ func main() {
 		}
 	}
 
-	storDBService := services.NewStorDBService(cfg, srvDep)
+	storDBService := services.NewStorDBService(cfg, *setVersions, srvDep)
 	if storDBService.ShouldRun() { // Some services can run without db, ie:  ERs
 		shdWg.Add(1)
 		if err = storDBService.Start(); err != nil {

@@ -40,9 +40,9 @@ func TestCdrsCoverage(t *testing.T) {
 	cfg.ChargerSCfg().Enabled = true
 	server := cores.NewServer(nil)
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
-	db := NewDataDBService(cfg, nil, srvDep)
+	db := NewDataDBService(cfg, nil, false, srvDep)
 	cfg.StorDbCfg().Type = utils.MetaInternal
-	stordb := NewStorDBService(cfg, srvDep)
+	stordb := NewStorDBService(cfg, false, srvDep)
 	anz := NewAnalyzerService(cfg, server, filterSChan, shdChan, make(chan birpc.ClientConnector, 1), srvDep)
 	cdrsRPC := make(chan birpc.ClientConnector, 1)
 	cdrS := NewCDRServer(cfg, db, stordb, filterSChan, server,
