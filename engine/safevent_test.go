@@ -805,3 +805,10 @@ func TestSafEventGetDurationOrDefault(t *testing.T) {
 	}
 
 }
+
+func TestSafeEventAsCGREvent(t *testing.T) {
+	se := &SafEvent{}
+	tenant := "cgrates"
+	_ = se.AsCGREvent(tenant)
+}
+
