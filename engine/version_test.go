@@ -263,14 +263,9 @@ func TestSetRoundingDecimals(t *testing.T) {
 }
 
 func TestSetRpSubjectPrefixMatching(t *testing.T) {
-	// Arrange (initial state)
 	initial := rpSubjectPrefixMatching
-
-	// Act (call with true and false)
 	SetRpSubjectPrefixMatching(true)
 	SetRpSubjectPrefixMatching(false)
-
-	// Assert (no change in value)
 	if rpSubjectPrefixMatching != initial {
 		t.Errorf("Expected rpSubjectPrefixMatching to remain unchanged, got modified")
 	}
@@ -290,4 +285,3 @@ func TestCallDescriptor_AddRatingInfo(t *testing.T) {
 		t.Errorf("Added RatingInfo objects don't match expectations")
 	}
 }
-
