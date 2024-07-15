@@ -481,3 +481,26 @@ func TestStructUpdateStructWithIfaceMap(t *testing.T) {
 		})
 	}
 }
+
+func TestToMapMapStringInterface(t *testing.T) {
+
+	type TestStruct struct {
+		Field1 string
+		Field2 int
+		Field3 bool
+	}
+	input := TestStruct{
+		Field1: "value1",
+		Field2: 42,
+		Field3: true,
+	}
+	expected := map[string]any{
+		"Field1": "value1",
+		"Field2": 42,
+		"Field3": true,
+	}
+	output := ToMapMapStringInterface(input)
+	if !reflect.DeepEqual(output, expected) {
+		t.Errorf("expected %v, got %v", expected, output)
+	}
+}
