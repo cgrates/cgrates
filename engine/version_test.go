@@ -240,3 +240,39 @@ func TestVersionCompare2(t *testing.T) {
 		t.Error(rcv)
 	}
 }
+
+func TestSetRoundingDecimals(t *testing.T) {
+	initialRoundingDecimals := globalRoundingDecimals
+	testCases := []struct {
+		name        string
+		roundingDec int
+		expected    int
+	}{
+		{name: "Positive rounding decimals", roundingDec: 2., expected: 2},
+		{name: "Zero rounding decimals", roundingDec: 0, expected: 0},
+	}
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			SetRoundingDecimals(tc.roundingDec)
+			if globalRoundingDecimals != tc.expected {
+				t.Errorf("Expected rounding decimals to be %d, got %d", tc.expected, globalRoundingDecimals)
+			}
+			globalRoundingDecimals = initialRoundingDecimals
+		})
+	}
+}
+
+func TestCallDescriptor_AddRatingInfo(t *testing.T) {
+	initialRatingInfos := []*RatingInfo{}
+	cd := &CallDescriptor{RatingInfos: initialRatingInfos}
+	ratingInfo1 := &RatingInfo{}
+	ratingInfo2 := &RatingInfo{}
+	cd.AddRatingInfo(ratingInfo1, ratingInfo2)
+	expectedLength := len(initialRatingInfos) + 2
+	if len(cd.RatingInfos) != expectedLength {
+		t.Errorf("Expected RatingInfos length to be %d, got %d", expectedLength, len(cd.RatingInfos))
+	}
+	if cd.RatingInfos[0] != ratingInfo1 || cd.RatingInfos[1] != ratingInfo2 {
+		t.Errorf("Added RatingInfo objects don't match expectations")
+	}
+}
