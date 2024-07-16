@@ -1068,3 +1068,36 @@ func TestFsEvV1TerminateSessionArgs(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", expected.TerminateSession, rcv.TerminateSession)
 	}
 }
+
+func TestFSEventString(t *testing.T) {
+	fsev := &FSEvent{
+		"key1": "value1",
+	}
+	got := fsev.String()
+	want := "key1 = value1\n=============================================================="
+	if got != want {
+		t.Errorf("fsev.String() = %q, want %q", got, want)
+	}
+}
+
+func TestFSEventGetOriginatorIP(t *testing.T) {
+	fsev := FSEvent{}
+	staticFieldName := utils.STATIC_VALUE_PREFIX + "staticip"
+	expectedStaticResult := "staticip"
+	staticResult := fsev.GetOriginatorIP(staticFieldName)
+	if staticResult != expectedStaticResult {
+		t.Errorf("For static value prefix, expected: %s, got: %s", expectedStaticResult, staticResult)
+	}
+	fieldName := "fieldName1"
+	expectedResult := "value1"
+	result := fsev.GetOriginatorIP(fieldName)
+	if result == expectedResult {
+		t.Errorf("For field name %s, expected: %s, got: %s", fieldName, expectedResult, result)
+	}
+	emptyFieldName := "nonExistentField"
+	expectedNonEmptyResult := "originhostvalue"
+	nonEmptyResult := fsev.GetOriginatorIP(emptyFieldName)
+	if nonEmptyResult == expectedNonEmptyResult {
+		t.Errorf("For non-empty check, expected: %s, got: %s", expectedNonEmptyResult, nonEmptyResult)
+	}
+}

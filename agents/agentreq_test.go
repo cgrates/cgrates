@@ -1888,3 +1888,72 @@ func TestAgentReqFieldDefaultCase(t *testing.T) {
 		t.Errorf("expected 'result', got %v, err: %v", val, err)
 	}
 }
+
+func TestAgentRequestString(t *testing.T) {
+	ar := &AgentRequest{}
+	expected := `{
+         "Request": null,
+         "Vars": null,
+         "CGRRequest": null,
+         "CGRReply": null,
+         "Reply": null,
+         "Tenant": "",
+         "Timezone": "",
+         "Header": null,
+         "Trailer": null
+        }`
+	result := ar.String()
+	if result == expected {
+		t.Errorf("Expected %v, got %v", expected, result)
+	}
+}
+
+func TestAgentRequestRemoveAll(t *testing.T) {
+	ar := &AgentRequest{
+		Vars:       utils.NavigableMap2{},
+		CGRRequest: &utils.OrderedNavigableMap{},
+		CGRReply:   &utils.NavigableMap2{},
+		Reply:      &utils.OrderedNavigableMap{},
+		diamreq:    &utils.OrderedNavigableMap{},
+	}
+	if err := ar.RemoveAll(utils.MetaVars); err != nil {
+		t.Errorf("Unexpected error removing MetaVars: %v", err)
+	}
+	if len(ar.Vars) != 0 {
+		t.Errorf("Expected Vars to be empty after RemoveAll, got: %v", ar.Vars)
+	}
+	if err := ar.RemoveAll(utils.MetaCgreq); err != nil {
+		t.Errorf("Unexpected error removing MetaCgreq: %v", err)
+	}
+	if err := ar.RemoveAll(utils.MetaCgrep); err != nil {
+		t.Errorf("Unexpected error removing MetaCgrep: %v", err)
+	}
+	if ar.CGRReply == nil {
+		t.Errorf("{}")
+	}
+	if err := ar.RemoveAll(utils.MetaRep); err != nil {
+		t.Errorf("Unexpected error removing MetaRep: %v", err)
+	}
+	if err := ar.RemoveAll(utils.MetaDiamreq); err != nil {
+		t.Errorf("Unexpected error removing MetaDiamreq: %v", err)
+	}
+
+}
+
+func TestAgentRequestRemoveAllDefaultCase(t *testing.T) {
+	ar := &AgentRequest{
+		Vars:       utils.NavigableMap2{},
+		CGRRequest: &utils.OrderedNavigableMap{},
+		CGRReply:   &utils.NavigableMap2{},
+		Reply:      &utils.OrderedNavigableMap{},
+		diamreq:    &utils.OrderedNavigableMap{},
+	}
+	unsupportedPrefix := "unsupportedPrefix"
+	err := ar.RemoveAll(unsupportedPrefix)
+	expectedErr := fmt.Errorf("unsupported field prefix: <%s> when set fields", unsupportedPrefix)
+	if err == nil {
+		t.Errorf("Expected error for unsupported prefix <%s>, got nil", unsupportedPrefix)
+	} else if err.Error() != expectedErr.Error() {
+		t.Errorf("Expected error message <%s>, got <%s>", expectedErr.Error(), err.Error())
+	}
+}
