@@ -2881,7 +2881,7 @@ const (
 	CgrEngine            = "cgr-engine"
 	PrintCfgCgr          = "print_config"
 	PidCgr               = "pid"
-	HttpPrfPthCgr        = "httprof_path"
+	HttpPprofCgr         = "http_pprof"
 	CpuProfDirCgr        = "cpuprof_dir"
 	MemProfDirCgr        = "memprof_dir"
 	MemProfIntervalCgr   = "memprof_interval"
