@@ -140,6 +140,13 @@ func TestCgrEngineFlags(t *testing.T) {
 			defaultVal: "",
 			want:       "TestPreloadID",
 		},
+		{
+			name:       "setVersions",
+			flags:      []string{"-set_versions"},
+			flagVar:    setVersions,
+			defaultVal: false,
+			want:       true,
+		},
 	}
 
 	for _, tt := range tests {

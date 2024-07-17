@@ -2889,6 +2889,7 @@ const (
 	ScheduledShutdownCgr = "scheduled_shutdown"
 	SingleCpuCgr         = "singlecpu"
 	PreloadCgr           = "preload"
+	SetVersionsCgr       = "set_versions"
 	MemProfFileCgr       = "mem_final.prof"
 	CpuPathCgr           = "cpu.prof"
 	//Cgr loader
