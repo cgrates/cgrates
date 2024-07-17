@@ -330,6 +330,9 @@ func exportEventWithExporter(exp EventExporter, ev *utils.CGREvent, oneTime bool
 			filterS, map[string]*utils.OrderedNavigableMap{
 				utils.MetaExp: expNM,
 			}).SetFields(exp.Cfg().ContentFields())
+		if err != nil {
+			return fmt.Errorf("failed to populate ExportRequest fields: %v", err)
+		}
 		if eEv, err = exp.PrepareOrderMap(expNM); err != nil {
 			return
 		}
