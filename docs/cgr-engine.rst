@@ -9,40 +9,41 @@ Customisable through the use of *json* :ref:`JSON configuration <configuration>`
 
 Able to read the configuration from either a local directory  of *.json* files with an unlimited number of subfolders (ordered alphabetically) or a list of http paths (separated by ";").
 
+
 ::
 
  $ cgr-engine -help
  Usage of cgr-engine:
-  -check_config
-    	Verify the config without starting the engine
   -config_path string
-    	Configuration directory path. (default "/etc/cgrates/")
+        Configuration directory path (default "/etc/cgrates/")
   -cpuprof_dir string
-    	write cpu profile to files
-  -httprof_path string
-    	http address used for program profiling
+        Directory for CPU profiles
+  -http_pprof
+        Enable HTTP pprof profiling
   -log_level int
-    	Log level (0-emergency to 7-debug) (default -1)
+        Log level (0=emergency to 7=debug) (default -1)
   -logger string
-    	logger <*syslog|*stdout>
+        Logger type <*syslog|*stdout>
   -memprof_dir string
-    	write memory profile to file
+        Directory for memory profiles
   -memprof_interval duration
-    	Time between memory profile saves (default 5s)
+        Interval between memory profile saves (default 5s)
   -memprof_nrfiles int
-    	Number of memory profile to write (default 1)
+        Number of memory profiles to keep (most recent) (default 1)
   -node_id string
-    	The node ID of the engine
+        Node ID of the engine
   -pid string
-    	Write pid file
+        Path to write the PID file
   -preload string
-    	LoaderIDs used to load the data before the engine starts
-  -scheduled_shutdown string
-    	shutdown the engine after this duration
+        Loader IDs used to load data before engine starts
+  -print_config
+        Print configuration object in JSON format
+  -scheduled_shutdown duration
+        Shutdown the engine after the specified duration
   -singlecpu
-    	Run on single CPU core
+        Run on a single CPU core
   -version
-    	Prints the application version.
+        Print application version and exit
 
 
 

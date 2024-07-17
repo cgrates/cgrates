@@ -99,7 +99,7 @@ func TestRegisterProfiler(t *testing.T) {
 	caps := engine.NewCaps(0, utils.MetaBusy)
 	rcv := NewServer(caps)
 
-	rcv.RegisterProfiler("/test_prefix")
+	rcv.RegisterProfiler()
 
 	rcv.StopBiRPC()
 }
