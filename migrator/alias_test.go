@@ -316,3 +316,62 @@ func TestAlias2AtttributeProfile(t *testing.T) {
 		}
 	}
 }
+
+func TestAliasV1AliasSetId(t *testing.T) {
+	tests := []struct {
+		input          string
+		expectedValues v1Alias
+		expectError    bool
+	}{
+		{
+			input: "dir:cgrates.org:category:1001:subject:context",
+			expectedValues: v1Alias{
+				Direction: "dir",
+				Tenant:    "cgrates.org",
+				Category:  "category",
+				Account:   "1001",
+				Subject:   "subject",
+				Context:   "context",
+			},
+			expectError: false,
+		},
+		{
+			input:       "invalidKeyFormat",
+			expectError: true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.input, func(t *testing.T) {
+			alias := &v1Alias{}
+			err := alias.SetId(tt.input)
+
+			if tt.expectError {
+				if err == nil {
+					t.Errorf("Expected error but got none")
+				}
+				return
+			}
+			if err != nil {
+				t.Errorf("Expected no error but got %v", err)
+			}
+			if alias.Direction != tt.expectedValues.Direction {
+				t.Errorf("SetId() Direction = %v, want %v", alias.Direction, tt.expectedValues.Direction)
+			}
+			if alias.Tenant != tt.expectedValues.Tenant {
+				t.Errorf("SetId() Tenant = %v, want %v", alias.Tenant, tt.expectedValues.Tenant)
+			}
+			if alias.Category != tt.expectedValues.Category {
+				t.Errorf("SetId() Category = %v, want %v", alias.Category, tt.expectedValues.Category)
+			}
+			if alias.Account != tt.expectedValues.Account {
+				t.Errorf("SetId() Account = %v, want %v", alias.Account, tt.expectedValues.Account)
+			}
+			if alias.Subject != tt.expectedValues.Subject {
+				t.Errorf("SetId() Subject = %v, want %v", alias.Subject, tt.expectedValues.Subject)
+			}
+			if alias.Context != tt.expectedValues.Context {
+				t.Errorf("SetId() Context = %v, want %v", alias.Context, tt.expectedValues.Context)
+			}
+		})
+	}
+}

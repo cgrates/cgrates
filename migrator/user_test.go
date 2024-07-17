@@ -213,3 +213,46 @@ func TestUserProfile2attributeProfile(t *testing.T) {
 		}
 	}
 }
+
+func TestUserV1UserProfileGetId(t *testing.T) {
+	profile := &v1UserProfile{
+		Tenant:   "cgrates.org",
+		UserName: "1001",
+	}
+	expected := "cgrates.org:1001"
+	actual := profile.GetId()
+	if actual != expected {
+		t.Errorf("GetId() = %v, want %v", actual, expected)
+	}
+}
+
+func TestUserV1UserProfileSetId(t *testing.T) {
+	tests := []struct {
+		input            string
+		expectedTenant   string
+		expectedUserName string
+		expectError      bool
+	}{
+		{"cgrates.org:1001", "cgrates.org", "1001", false},
+		{"invalidKeyFormat", "", "", true},
+	}
+	for _, tt := range tests {
+		profile := &v1UserProfile{}
+		err := profile.SetId(tt.input)
+		if tt.expectError {
+			if err == nil {
+				t.Errorf("SetId(%q) expected error but got none", tt.input)
+			}
+			continue
+		}
+		if err != nil {
+			t.Errorf("SetId(%q) unexpected error: %v", tt.input, err)
+		}
+		if profile.Tenant != tt.expectedTenant {
+			t.Errorf("SetId(%q) Tenant = %v, want %v", tt.input, profile.Tenant, tt.expectedTenant)
+		}
+		if profile.UserName != tt.expectedUserName {
+			t.Errorf("SetId(%q) UserName = %v, want %v", tt.input, profile.UserName, tt.expectedUserName)
+		}
+	}
+}
