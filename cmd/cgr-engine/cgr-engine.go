@@ -50,22 +50,22 @@ import (
 )
 
 var (
-	cgrEngineFlags    = flag.NewFlagSet(utils.CgrEngine, flag.ContinueOnError)
-	cfgPath           = cgrEngineFlags.String(utils.CfgPathCgr, utils.ConfigPath, "Configuration directory path.")
-	version           = cgrEngineFlags.Bool(utils.VersionCgr, false, "Prints the application version.")
-	printConfig       = cgrEngineFlags.Bool(utils.PrintCfgCgr, false, "Print the configuration object in JSON format")
-	pidFile           = cgrEngineFlags.String(utils.PidCgr, utils.EmptyString, "Write pid file")
-	httpPprofPath     = cgrEngineFlags.String(utils.HttpPrfPthCgr, utils.EmptyString, "http address used for program profiling")
-	cpuProfDir        = cgrEngineFlags.String(utils.CpuProfDirCgr, utils.EmptyString, "write cpu profile to files")
-	memProfDir        = cgrEngineFlags.String(utils.MemProfDirCgr, utils.EmptyString, "write memory profile to file")
-	memProfInterval   = cgrEngineFlags.Duration(utils.MemProfIntervalCgr, 5*time.Second, "Time between memory profile saves")
-	memProfNrFiles    = cgrEngineFlags.Int(utils.MemProfNrFilesCgr, 1, "Number of memory profile to write")
-	scheduledShutdown = cgrEngineFlags.String(utils.ScheduledShutdownCgr, utils.EmptyString, "shutdown the engine after this duration")
-	singlecpu         = cgrEngineFlags.Bool(utils.SingleCpuCgr, false, "Run on single CPU core")
-	syslogger         = cgrEngineFlags.String(utils.LoggerCfg, utils.EmptyString, "logger <*syslog|*stdout>")
-	nodeID            = cgrEngineFlags.String(utils.NodeIDCfg, utils.EmptyString, "The node ID of the engine")
-	logLevel          = cgrEngineFlags.Int(utils.LogLevelCfg, -1, "Log level (0-emergency to 7-debug)")
-	preload           = cgrEngineFlags.String(utils.PreloadCgr, utils.EmptyString, "LoaderIDs used to load the data before the engine starts")
+	cgrEngineFlags    = flag.NewFlagSet(utils.CgrEngine, flag.ExitOnError)
+	cfgPath           = cgrEngineFlags.String(utils.CfgPathCgr, utils.ConfigPath, "Configuration directory path")
+	version           = cgrEngineFlags.Bool(utils.VersionCgr, false, "Print application version and exit")
+	printConfig       = cgrEngineFlags.Bool(utils.PrintCfgCgr, false, "Print configuration object in JSON format")
+	pidFile           = cgrEngineFlags.String(utils.PidCgr, utils.EmptyString, "Path to write the PID file")
+	httpPprof         = cgrEngineFlags.Bool(utils.HttpPprofCgr, false, "Enable HTTP pprof profiling")
+	cpuProfDir        = cgrEngineFlags.String(utils.CpuProfDirCgr, utils.EmptyString, "Directory for CPU profiles")
+	memProfDir        = cgrEngineFlags.String(utils.MemProfDirCgr, utils.EmptyString, "Directory for memory profiles")
+	memProfInterval   = cgrEngineFlags.Duration(utils.MemProfIntervalCgr, 5*time.Second, "Interval between memory profile saves")
+	memProfNrFiles    = cgrEngineFlags.Int(utils.MemProfNrFilesCgr, 1, "Number of memory profiles to keep (most recent)")
+	scheduledShutdown = cgrEngineFlags.Duration(utils.ScheduledShutdownCgr, 0, "Shutdown the engine after the specified duration")
+	singleCPU         = cgrEngineFlags.Bool(utils.SingleCpuCgr, false, "Run on a single CPU core")
+	syslogger         = cgrEngineFlags.String(utils.LoggerCfg, utils.EmptyString, "Logger type <*syslog|*stdout>")
+	nodeID            = cgrEngineFlags.String(utils.NodeIDCfg, utils.EmptyString, "Node ID of the engine")
+	logLevel          = cgrEngineFlags.Int(utils.LogLevelCfg, -1, "Log level (0=emergency to 7=debug)")
+	preload           = cgrEngineFlags.String(utils.PreloadCgr, utils.EmptyString, "Loader IDs used to load data before engine starts")
 	setVersions       = cgrEngineFlags.Bool("set_versions", false, "Overwrite database versions (equivalent to cgr-migrator -exec=*set_versions)")
 
 	cfg *config.CGRConfig
@@ -330,9 +330,7 @@ func runPreload(loader *services.LoaderService, internalLoaderSChan chan birpc.C
 }
 
 func main() {
-	if err := cgrEngineFlags.Parse(os.Args[1:]); err != nil {
-		log.Fatalf("<%s> error received: <%s>, exiting!", utils.InitS, err.Error())
-	}
+	cgrEngineFlags.Parse(os.Args[1:])
 	vers, err := utils.GetCGRVersion()
 	if err != nil {
 		log.Fatalf("<%s> error received: <%s>, exiting!", utils.InitS, err.Error())
@@ -345,7 +343,7 @@ func main() {
 	if *pidFile != utils.EmptyString {
 		writePid()
 	}
-	if *singlecpu {
+	if *singleCPU {
 		runtime.GOMAXPROCS(1) // Having multiple cpus may slow down computing due to CPU management, to be reviewed in future Go releases
 	}
 
@@ -389,14 +387,10 @@ func main() {
 		}()
 	}
 
-	if *scheduledShutdown != utils.EmptyString {
-		shutdownDur, err := utils.ParseDurationWithNanosecs(*scheduledShutdown)
-		if err != nil {
-			log.Fatalf("<%s> error received: <%s>, exiting!", utils.InitS, err.Error())
-		}
+	if *scheduledShutdown != 0 {
 		shdWg.Add(1)
 		go func() { // Schedule shutdown
-			tm := time.NewTimer(shutdownDur)
+			tm := time.NewTimer(*scheduledShutdown)
 			select {
 			case <-tm.C:
 				shdChan.CloseOnce()
@@ -563,8 +557,9 @@ func main() {
 	if cfg.ConfigSCfg().Enabled {
 		server.RegisterHttpFunc(cfg.ConfigSCfg().URL, config.HandlerConfigS)
 	}
-	if *httpPprofPath != utils.EmptyString {
-		server.RegisterProfiler(*httpPprofPath)
+	if *httpPprof {
+		server.RegisterProfiler()
+		utils.Logger.Info("<HTTP> registered profiling endpoints at '/debug/pprof/'")
 	}
 
 	// Define internal connections via channels
