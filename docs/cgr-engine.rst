@@ -40,6 +40,8 @@ Able to read the configuration from either a local directory  of *.json* files w
         Print configuration object in JSON format
   -scheduled_shutdown duration
         Shutdown the engine after the specified duration
+  -set_versions
+        Overwrite database versions (equivalent to cgr-migrator -exec=*set_versions)
   -singlecpu
         Run on a single CPU core
   -version

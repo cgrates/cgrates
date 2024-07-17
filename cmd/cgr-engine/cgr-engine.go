@@ -66,7 +66,7 @@ var (
 	nodeID            = cgrEngineFlags.String(utils.NodeIDCfg, utils.EmptyString, "Node ID of the engine")
 	logLevel          = cgrEngineFlags.Int(utils.LogLevelCfg, -1, "Log level (0=emergency to 7=debug)")
 	preload           = cgrEngineFlags.String(utils.PreloadCgr, utils.EmptyString, "Loader IDs used to load data before engine starts")
-	setVersions       = cgrEngineFlags.Bool("set_versions", false, "Overwrite database versions (equivalent to cgr-migrator -exec=*set_versions)")
+	setVersions       = cgrEngineFlags.Bool(utils.SetVersionsCgr, false, "Overwrite database versions (equivalent to cgr-migrator -exec=*set_versions)")
 
 	cfg *config.CGRConfig
 )
