@@ -1101,3 +1101,137 @@ func TestFSEventGetOriginatorIP(t *testing.T) {
 		t.Errorf("For non-empty check, expected: %s, got: %s", expectedNonEmptyResult, nonEmptyResult)
 	}
 }
+
+func TestGetSessionIds(t *testing.T) {
+	expectedUUID := ""
+	FSEvent := FSEvent{}
+	result := FSEvent.GetSessionIds()
+	expected := []string{expectedUUID}
+	if len(result) != len(expected) {
+		t.Errorf("expected length %d, got %d", len(expected), len(result))
+	}
+	for i, v := range result {
+		if v != expected[i] {
+			t.Errorf("expected value at index %d to be '%s', got '%s'", i, expected[i], v)
+		}
+	}
+
+}
+
+func TestGetEndTime(t *testing.T) {
+	fsev := FSEvent{
+		"END_TIME": "0001-01-01 00:00:00 +0000 UTC",
+	}
+	timezone := "UTC"
+	result, err := fsev.GetEndTime("END_TIME", timezone)
+	if err != nil {
+		t.Errorf("error parsing time: %v", err)
+	}
+	expectedTime := time.Date(0001, 01, 01, 00, 00, 00, 0000, time.UTC)
+	if !result.Equal(expectedTime) {
+		t.Errorf("expected '%v', got '%v'", expectedTime, result)
+	}
+}
+func TestFseventMissingParameter(t *testing.T) {
+	testCases := []struct {
+		name string
+		fsev map[string]string
+		want string
+	}{
+
+		{
+			name: "missing_subject",
+			fsev: map[string]string{
+				ACCOUNT:      "account",
+				DESTINATION:  "destination",
+				CATEGORY:     "category",
+				UUID:         "uuid",
+				CSTMID:       "tenant",
+				CALL_DEST_NR: "callDestNr",
+			},
+			want: "",
+		},
+		{
+			name: "missing_destination",
+			fsev: map[string]string{
+				ACCOUNT:      "account",
+				SUBJECT:      "subject",
+				CATEGORY:     "category",
+				UUID:         "uuid",
+				CSTMID:       "tenant",
+				CALL_DEST_NR: "callDestNr",
+			},
+			want: "",
+		},
+		{
+			name: "missing_category",
+			fsev: map[string]string{
+				ACCOUNT:      "account",
+				SUBJECT:      "subject",
+				DESTINATION:  "destination",
+				UUID:         "uuid",
+				CSTMID:       "tenant",
+				CALL_DEST_NR: "callDestNr",
+			},
+			want: "",
+		},
+		{
+			name: "missing_uuid",
+			fsev: map[string]string{
+				ACCOUNT:      "account",
+				SUBJECT:      "subject",
+				DESTINATION:  "destination",
+				CATEGORY:     "category",
+				CSTMID:       "tenant",
+				CALL_DEST_NR: "callDestNr",
+			},
+			want: utils.OriginID,
+		},
+		{
+			name: "missing_tenant",
+			fsev: map[string]string{
+				ACCOUNT:      "account",
+				SUBJECT:      "subject",
+				DESTINATION:  "destination",
+				CATEGORY:     "category",
+				UUID:         "uuid",
+				CALL_DEST_NR: "callDestNr",
+			},
+			want: "",
+		},
+		{
+			name: "missing_callDestNr",
+			fsev: map[string]string{
+				ACCOUNT:     "account",
+				SUBJECT:     "subject",
+				DESTINATION: "destination",
+				CATEGORY:    "category",
+				UUID:        "uuid",
+				CSTMID:      "tenant",
+			},
+			want: CALL_DEST_NR,
+		},
+		{
+			name: "all_present",
+			fsev: map[string]string{
+				ACCOUNT:      "account",
+				SUBJECT:      "subject",
+				DESTINATION:  "destination",
+				CATEGORY:     "category",
+				UUID:         "uuid",
+				CSTMID:       "tenant",
+				CALL_DEST_NR: "callDestNr",
+			},
+			want: "",
+		},
+	}
+	for _, tt := range testCases {
+		t.Run(tt.name, func(t *testing.T) {
+			fsev := FSEvent(tt.fsev)
+			got := fsev.MissingParameter("")
+			if got != tt.want {
+				t.Errorf("expected %v, got %v", tt.want, got)
+			}
+		})
+	}
+}
