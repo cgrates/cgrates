@@ -145,6 +145,8 @@ const CGRATES_CFG_JSON = `
 		"*resource_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false},
 		"*stat_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false},
 		"*threshold_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false},
+		"*ranking_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false}, 
+		"*trend_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false}, 
 		"*route_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false},
 		"*attribute_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false},
 		"*charger_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false},
@@ -270,6 +272,7 @@ const CGRATES_CFG_JSON = `
 		"*threshold_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false}, 				// control threshold filter indexes caching
 		"*route_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false}, 					// control route filter indexes caching
 		"*attribute_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false}, 				// control attribute filter indexes caching
+		"*ranking_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "remote":false, "replicate": false},	 	// control ranking profile caching
 		"*charger_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false}, 					// control charger filter indexes caching
 		"*dispatcher_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false}, 				// control dispatcher filter indexes caching
 		"*rate_profile_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false}, 			// control rate profile filter indexes caching
@@ -1189,6 +1192,17 @@ const CGRATES_CFG_JSON = `
 	},								
 },
 
+
+"trends":{									// TrendS config
+	"enabled": false,						// starts TrendS service: <true|false>.
+	"stats_conns": [],						// connections to StatS ,empty to disable stats functionality: <""|*internal|$rpc_conns_id>
+	"thresholds_conns": [],					// connections to ThresholdS ,empty to disable stats functionality: <""|*internal|$rpc_conns_id>
+},
+
+"rankings":{								// RankingS config
+	"enabled": false,						// starts RankingS service: <true|false>.
+	"stats_conns": [],						// connections to StatS ,empty to disable stats functionality: <""|*internal|$rpc_conns_id>
+},
 
 "routes": {									// RouteS config
 	"enabled": false,						// starts RouteS service: <true|false>.

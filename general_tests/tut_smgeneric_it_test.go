@@ -161,7 +161,7 @@ func testTutSMGCacheStats(t *testing.T) {
 	expectedStats[utils.CacheRouteProfiles].Items = 12
 	expectedStats[utils.CacheAttributeProfiles].Items = 8
 	expectedStats[utils.MetaDefault].Items = 0
-	expectedStats[utils.CacheLoadIDs].Items = 28
+	expectedStats[utils.CacheLoadIDs].Items = 29
 	expectedStats[utils.CacheChargerProfiles].Items = 3
 	expectedStats[utils.CacheRPCConnections].Items = 1
 	expectedStats[utils.CacheThresholdFilterIndexes].Items = 1
@@ -174,6 +174,8 @@ func testTutSMGCacheStats(t *testing.T) {
 	expectedStats[utils.CacheResourceFilterIndexes].Groups = 1
 	expectedStats[utils.CacheChargerFilterIndexes].Items = 1
 	expectedStats[utils.CacheChargerFilterIndexes].Groups = 1
+	expectedStats[utils.CacheRankingProfiles].Items = 0
+	expectedStats[utils.CacheRankingProfiles].Groups = 0
 	expectedStats[utils.CacheAttributeFilterIndexes].Items = 10
 	expectedStats[utils.CacheAttributeFilterIndexes].Groups = 1
 	expectedStats[utils.CacheReverseFilterIndexes].Items = 19

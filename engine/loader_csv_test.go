@@ -38,7 +38,7 @@ var csvr *TpReader
 func init() {
 	var err error
 	csvr, err = NewTpReader(NewInternalDB(nil, nil, config.CgrConfig().DataDbCfg().Items), NewStringCSVStorage(utils.CSVSep,
-		ResourcesCSVContent, StatsCSVContent, ThresholdsCSVContent, FiltersCSVContent,
+		ResourcesCSVContent, StatsCSVContent, RankingsCSVContent, TrendsCSVContent, ThresholdsCSVContent, FiltersCSVContent,
 		RoutesCSVContent, AttributesCSVContent, ChargersCSVContent, DispatcherCSVContent,
 		DispatcherHostCSVContent, RateProfileCSVContent, ActionProfileCSVContent, AccountCSVContent), testTPID, "", nil, nil, false)
 	if err != nil {

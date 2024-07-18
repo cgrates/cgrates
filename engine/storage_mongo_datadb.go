@@ -63,6 +63,8 @@ const (
 	ColSqp  = "statqueue_profiles"
 	ColTps  = "threshold_profiles"
 	ColThs  = "thresholds"
+	ColTrs  = "trend_profiles"
+	ColRgp  = "ranking_profiles"
 	ColFlt  = "filters"
 	ColRts  = "route_profiles"
 	ColAttr = "attribute_profiles"
@@ -297,7 +299,7 @@ func (ms *MongoStorage) ensureIndexesForCol(col string) error { // exported for 
 	switch col {
 	case ColAct, ColApl, ColAAp, ColAtr, ColRpl, ColDst, ColRds, ColLht, ColIndx:
 		err = ms.ensureIndex(col, true, "key")
-	case ColRsP, ColRes, ColSqs, ColSqp, ColTps, ColThs, ColRts, ColAttr, ColFlt, ColCpp, ColDpp, ColDph, ColRpp, ColApp, ColAnp:
+	case ColRsP, ColRes, ColSqs, ColRgp, ColTrs, ColSqp, ColTps, ColThs, ColRts, ColAttr, ColFlt, ColCpp, ColDpp, ColDph, ColRpp, ColApp, ColAnp:
 		err = ms.ensureIndex(col, true, "tenant", "id")
 	case ColRpf, ColShg, ColAcc:
 		err = ms.ensureIndex(col, true, "id")
@@ -468,6 +470,10 @@ func (ms *MongoStorage) GetKeysForPrefix(ctx *context.Context, prefix string) (k
 			keys, qryErr = ms.getAllKeysMatchingTenantID(sctx, ColThs, utils.ThresholdPrefix, tntID)
 		case utils.ThresholdProfilePrefix:
 			keys, qryErr = ms.getAllKeysMatchingTenantID(sctx, ColTps, utils.ThresholdProfilePrefix, tntID)
+		case utils.RankingProfilePrefix:
+			keys, qryErr = ms.getAllKeysMatchingTenantID(sctx, ColRgp, utils.RankingProfilePrefix, tntID)
+		case utils.TrendProfilePrefix:
+			keys, qryErr = ms.getAllKeysMatchingTenantID(sctx, ColTrs, utils.TrendProfilePrefix, tntID)
 		case utils.RouteProfilePrefix:
 			keys, qryErr = ms.getAllKeysMatchingTenantID(sctx, ColRts, utils.RouteProfilePrefix, tntID)
 		case utils.AttributeProfilePrefix:
@@ -733,6 +739,72 @@ func (ms *MongoStorage) RemoveResourceDrv(ctx *context.Context, tenant, id strin
 		}
 		return err
 	})
+}
+
+func (ms *MongoStorage) GetRankingProfileDrv(ctx *context.Context, tenant, id string) (*RankingProfile, error) {
+	rgProfile := new(RankingProfile)
+	err := ms.query(ctx, func(sctx mongo.SessionContext) error {
+		sr := ms.getCol(ColRgp).FindOne(sctx, bson.M{"tenant": tenant, "id": id})
+		decodeErr := sr.Decode(rgProfile)
+		if errors.Is(decodeErr, mongo.ErrNoDocuments) {
+			return utils.ErrNotFound
+		}
+		return decodeErr
+	})
+	return rgProfile, err
+}
+
+func (ms *MongoStorage) SetRankingProfileDrv(ctx *context.Context, sgp *RankingProfile) (err error) {
+	return ms.query(ctx, func(sctx mongo.SessionContext) error {
+		_, err := ms.getCol(ColRgp).UpdateOne(sctx, bson.M{"tenant": sgp.Tenant, "id": sgp.ID},
+			bson.M{"$set": sgp},
+			options.Update().SetUpsert(true))
+		return err
+	})
+}
+
+func (ms *MongoStorage) RemRankingProfileDrv(ctx *context.Context, tenant, id string) (err error) {
+	return ms.query(ctx, func(sctx mongo.SessionContext) error {
+		dr, err := ms.getCol(ColRgp).DeleteOne(sctx, bson.M{"tenant": tenant, "id": id})
+		if dr.DeletedCount == 0 {
+			return utils.ErrNotFound
+		}
+		return err
+	})
+
+}
+
+func (ms *MongoStorage) GetTrendProfileDrv(ctx *context.Context, tenant, id string) (*TrendProfile, error) {
+	srProfile := new(TrendProfile)
+	err := ms.query(ctx, func(sctx mongo.SessionContext) error {
+		sr := ms.getCol(ColTrs).FindOne(sctx, bson.M{"tenant": tenant, "id": id})
+		decodeErr := sr.Decode(srProfile)
+		if errors.Is(decodeErr, mongo.ErrNoDocuments) {
+			return utils.ErrNotFound
+		}
+		return decodeErr
+	})
+	return srProfile, err
+}
+
+func (ms *MongoStorage) SetTrendProfileDrv(ctx *context.Context, srp *TrendProfile) (err error) {
+	return ms.query(ctx, func(sctx mongo.SessionContext) error {
+		_, err := ms.getCol(ColTrs).UpdateOne(sctx, bson.M{"tenant": srp.Tenant, "id": srp.ID},
+			bson.M{"$set": srp},
+			options.Update().SetUpsert(true))
+		return err
+	})
+}
+
+func (ms *MongoStorage) RemTrendProfileDrv(ctx *context.Context, tenant, id string) (err error) {
+	return ms.query(ctx, func(sctx mongo.SessionContext) error {
+		dr, err := ms.getCol(ColTrs).DeleteOne(sctx, bson.M{"tenant": tenant, "id": id})
+		if dr.DeletedCount == 0 {
+			return utils.ErrNotFound
+		}
+		return err
+	})
+
 }
 
 // GetStatQueueProfileDrv retrieves a StatQueueProfile from dataDB

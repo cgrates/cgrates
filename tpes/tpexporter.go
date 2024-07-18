@@ -80,6 +80,10 @@ func newTPExporter(expType string, dm *engine.DataManager) (tpE tpExporter, err 
 		return newTPAccounts(dm), nil
 	case utils.MetaStats:
 		return newTPStats(dm), nil
+	case utils.MetaRankings:
+		return newTPRankings(dm), nil
+	case utils.MetaTrends:
+		return newTPTrends(dm), nil
 	case utils.MetaActions:
 		return newTPActions(dm), nil
 	case utils.MetaThresholds:

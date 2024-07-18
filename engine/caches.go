@@ -373,7 +373,7 @@ func (chS *CacheS) V1PrecacheStatus(_ *context.Context, args *utils.AttrCacheIDs
 	}
 	pCacheStatus := make(map[string]string)
 	for _, cacheID := range args.CacheIDs {
-		if _, has := chS.pcItems[cacheID]; !has {
+		if _, has := chS.pcItems[cacheID]; !has && cacheID != utils.CacheTrendProfiles {
 			return fmt.Errorf("unknown cacheID: %s", cacheID)
 		}
 		select {

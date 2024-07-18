@@ -506,6 +506,18 @@ func storeDiffSection(ctx *context.Context, section string, db ConfigDB, v1, v2 
 			return
 		}
 		return db.SetSection(ctx, section, diffThresholdSJsonCfg(jsn, v1.ThresholdSCfg(), v2.ThresholdSCfg()))
+	case TrendSJSON:
+		jsn := new(TrendSJsonCfg)
+		if err = db.GetSection(ctx, section, jsn); err != nil {
+			return
+		}
+		return db.SetSection(ctx, section, diffTrendsJsonCfg(jsn, v1.TrendSCfg(), v2.TrendSCfg()))
+	case RankingSJSON:
+		jsn := new(RankingSJsonCfg)
+		if err = db.GetSection(ctx, section, jsn); err != nil {
+			return
+		}
+		return db.SetSection(ctx, section, diffRankingsJsonCfg(jsn, v1.RankingSCfg(), v2.RankingSCfg()))
 	case RouteSJSON:
 		jsn := new(RouteSJsonCfg)
 		if err = db.GetSection(ctx, section, jsn); err != nil {

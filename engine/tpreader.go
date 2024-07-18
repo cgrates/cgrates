@@ -36,6 +36,8 @@ type TpReader struct {
 	lr                 LoadReader
 	resProfiles        map[utils.TenantID]*utils.TPResourceProfile
 	sqProfiles         map[utils.TenantID]*utils.TPStatProfile
+	trProfiles         map[utils.TenantID]*utils.TPTrendsProfile
+	rgProfiles         map[utils.TenantID]*utils.TPRankingProfile
 	thProfiles         map[utils.TenantID]*utils.TPThresholdProfile
 	filters            map[utils.TenantID]*utils.TPFilterProfile
 	routeProfiles      map[utils.TenantID]*utils.TPRouteProfile
@@ -71,7 +73,9 @@ func NewTpReader(db DataDB, lr LoadReader, tpid, timezone string,
 func (tpr *TpReader) Init() {
 	tpr.resProfiles = make(map[utils.TenantID]*utils.TPResourceProfile)
 	tpr.sqProfiles = make(map[utils.TenantID]*utils.TPStatProfile)
+	tpr.rgProfiles = make(map[utils.TenantID]*utils.TPRankingProfile)
 	tpr.thProfiles = make(map[utils.TenantID]*utils.TPThresholdProfile)
+	tpr.trProfiles = make(map[utils.TenantID]*utils.TPTrendsProfile)
 	tpr.routeProfiles = make(map[utils.TenantID]*utils.TPRouteProfile)
 	tpr.attributeProfiles = make(map[utils.TenantID]*utils.TPAttributeProfile)
 	tpr.chargerProfiles = make(map[utils.TenantID]*utils.TPChargerProfile)
@@ -121,6 +125,40 @@ func (tpr *TpReader) LoadStatsFiltered(tag string) (err error) {
 
 func (tpr *TpReader) LoadStats() error {
 	return tpr.LoadStatsFiltered("")
+}
+
+func (tpr *TpReader) LoadRankingsFiltered(tag string) error {
+	tps, err := tpr.lr.GetTPRankings(tpr.tpid, "", tag)
+	if err != nil {
+		return err
+	}
+	mapSgs := make(map[utils.TenantID]*utils.TPRankingProfile)
+	for _, sg := range tps {
+		mapSgs[utils.TenantID{Tenant: sg.Tenant, ID: sg.ID}] = sg
+	}
+	tpr.rgProfiles = mapSgs
+	return nil
+}
+
+func (tpr *TpReader) LoadRankings() error {
+	return tpr.LoadRankingsFiltered("")
+}
+
+func (tpr *TpReader) LoadTrendsFiltered(tag string) error {
+	tps, err := tpr.lr.GetTPTrends(tpr.tpid, "", tag)
+	if err != nil {
+		return err
+	}
+	mapSrs := make(map[utils.TenantID]*utils.TPTrendsProfile)
+	for _, sr := range tps {
+		mapSrs[utils.TenantID{Tenant: sr.Tenant, ID: sr.ID}] = sr
+	}
+	tpr.trProfiles = mapSrs
+	return nil
+}
+
+func (tpr *TpReader) LoadTrends() error {
+	return tpr.LoadTrendsFiltered("")
 }
 
 func (tpr *TpReader) LoadThresholdsFiltered(tag string) (err error) {

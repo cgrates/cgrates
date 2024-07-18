@@ -87,6 +87,10 @@ func getTariffPlansKeys(ctx *context.Context, dm *engine.DataManager, tnt, expTy
 		prfx = utils.StatQueueProfilePrefix + tnt + utils.ConcatenatedKeySep
 	case utils.MetaThresholds:
 		prfx = utils.ThresholdProfilePrefix + tnt + utils.ConcatenatedKeySep
+	case utils.MetaRankings:
+		prfx = utils.RankingProfilePrefix + tnt + utils.ConcatenatedKeySep
+	case utils.MetaTrends:
+		prfx = utils.TrendProfilePrefix + tnt + utils.ConcatenatedKeySep
 	case utils.MetaDispatchers:
 		prfx = utils.DispatcherProfilePrefix + tnt + utils.ConcatenatedKeySep
 	case utils.MetaDispatcherHosts:

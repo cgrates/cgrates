@@ -198,6 +198,8 @@ func newCGRConfig(config []byte) (cfg *CGRConfig, err error) {
 			UsageTTL: []*utils.DynamicDurationOpt{},
 			Units:    []*utils.DynamicFloat64Opt{},
 		}},
+		trendSCfg:   new(TrendSCfg),
+		rankingSCfg: new(RankingSCfg),
 		statsCfg: &StatSCfg{Opts: &StatsOpts{
 			ProfileIDs:           []*utils.DynamicStringSliceOpt{},
 			ProfileIgnoreFilters: []*utils.DynamicBoolOpt{},
@@ -358,6 +360,8 @@ type CGRConfig struct {
 	statsCfg         *StatSCfg         // StatS config
 	thresholdSCfg    *ThresholdSCfg    // ThresholdS config
 	routeSCfg        *RouteSCfg        // RouteS config
+	trendSCfg        *TrendSCfg        // TrendS config
+	rankingSCfg      *RankingSCfg      // RankingS config
 	sureTaxCfg       *SureTaxCfg       // SureTax config
 	dispatcherSCfg   *DispatcherSCfg   // DispatcherS config
 	registrarCCfg    *RegistrarCCfgs   // RegistrarC config
@@ -489,6 +493,20 @@ func (cfg *CGRConfig) RouteSCfg() *RouteSCfg {
 	cfg.lks[RouteSJSON].Lock()
 	defer cfg.lks[RouteSJSON].Unlock()
 	return cfg.routeSCfg
+}
+
+// TrendSCfg returns the config for TrendS
+func (cfg *CGRConfig) TrendSCfg() *TrendSCfg {
+	cfg.lks[TrendSJSON].Lock()
+	defer cfg.lks[TrendSJSON].Unlock()
+	return cfg.trendSCfg
+}
+
+// RankingSCfg returns the config for RankingS
+func (cfg *CGRConfig) RankingSCfg() *RankingSCfg {
+	cfg.lks[RankingSJSON].Lock()
+	defer cfg.lks[RankingSJSON].Unlock()
+	return cfg.rankingSCfg
 }
 
 // SessionSCfg returns the config for SessionS
@@ -1045,6 +1063,8 @@ func (cfg *CGRConfig) Clone() (cln *CGRConfig) {
 		resourceSCfg:     cfg.resourceSCfg.Clone(),
 		statsCfg:         cfg.statsCfg.Clone(),
 		thresholdSCfg:    cfg.thresholdSCfg.Clone(),
+		trendSCfg:        cfg.trendSCfg.Clone(),
+		rankingSCfg:      cfg.rankingSCfg.Clone(),
 		routeSCfg:        cfg.routeSCfg.Clone(),
 		sureTaxCfg:       cfg.sureTaxCfg.Clone(),
 		dispatcherSCfg:   cfg.dispatcherSCfg.Clone(),

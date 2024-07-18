@@ -99,7 +99,14 @@ cgrates.org,TestStats,,;20,;true,,,2,true,,*sum#~*req.Usage,,
 cgrates.org,TestStats2,FLTR_1,;20,;true,100,1s,2,true,Th,*sum#~*req.Value;*sum#~*req.Usage;*average#~*req.Value;*average#~*req.Usage,,
 cgrates.org,TestStats2,,;20,;true,,,2,true,,*sum#~*req.Cost;*average#~*req.Cost,,
 `
-
+	RankingsCSVContent = `
+#Tenant[0],Id[1],QueryInterval[2],StatIDs[2],MetricIDs[3],Sorting[4],SortingParameters[5],ThresholdIDs[6]
+cgrates.org,Ranking1,15m,Stats2;Stats3;Stats4,Metric1;Metric3,*asc,,THD1;THD2
+`
+	TrendsCSVContent = `
+#Tenant[0],Id[1],QueryInterval[2],StatID[3],QueueLength[4],TTL[5],PurgeFilterIDs[6],Trend[7],ThresholdIDs[7]
+cgrates.org,TREND1,5m,Stats2,-1,-1,,*average,TD1;THD2
+`
 	ThresholdsCSVContent = `
 #Tenant[0],Id[1],FilterIDs[2],Weights[3],MaxHits[4],MinHits[5],MinSleep[6],Blocker[7],ActionProfileIDs[8],Async[9]
 cgrates.org,Threshold1,*string:~*req.Account:1001;*string:~*req.RunID:*default,;10,12,10,1s,true,THRESH1,true
@@ -403,6 +410,7 @@ func GetDefaultEmptyCacheStats() map[string]*ltcache.CacheStats {
 		utils.CacheStatQueueProfiles:           {},
 		utils.CacheStatQueues:                  {},
 		utils.CacheSTIR:                        {},
+		utils.CacheRankingProfiles:             {},
 		utils.CacheRouteFilterIndexes:          {},
 		utils.CacheRouteProfiles:               {},
 		utils.CacheThresholdFilterIndexes:      {},

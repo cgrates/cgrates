@@ -140,6 +140,7 @@ func TestNewAttrReloadCacheWithOpts(t *testing.T) {
 		AccountIDs:                   []string{MetaAny},
 		ActionProfilesFilterIndexIDs: []string{MetaAny},
 		AccountsFilterIndexIDs:       []string{MetaAny},
+		RankingProfileIDs:            []string{MetaAny},
 	}
 	eMap := NewAttrReloadCacheWithOpts()
 	if !reflect.DeepEqual(eMap, newAttrReloadCache) {
@@ -245,7 +246,7 @@ func TestActivationIntervalEquals(t *testing.T) {
 }
 
 func TestNewAttrReloadCacheWithOptsFromMap(t *testing.T) {
-	excluded := NewStringSet([]string{MetaAPIBan, MetaLoadIDs})
+	excluded := NewStringSet([]string{MetaAPIBan, MetaLoadIDs, MetaTrendProfiles})
 	mp := make(map[string][]string)
 	for k := range CacheInstanceToPrefix {
 		if !excluded.Has(k) {

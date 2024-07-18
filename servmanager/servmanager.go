@@ -259,6 +259,12 @@ func toggleService(serviceID string, status bool, srvMngr *ServiceManager) (err 
 	case utils.RateS:
 		srvMngr.cfg.RateSCfg().Enabled = status
 		srvMngr.cfg.GetReloadChan() <- serviceID
+	case utils.TrendS:
+		srvMngr.cfg.TrendSCfg().Enabled = status
+		srvMngr.cfg.GetReloadChan() <- serviceID
+	case utils.RankingS:
+		srvMngr.cfg.RankingSCfg().Enabled = status
+		srvMngr.cfg.GetReloadChan() <- serviceID
 	case utils.ResourceS:
 		srvMngr.cfg.ResourceSCfg().Enabled = status
 		srvMngr.cfg.GetReloadChan() <- serviceID

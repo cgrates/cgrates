@@ -64,6 +64,12 @@ type DataDB interface {
 	GetThresholdDrv(*context.Context, string, string) (*Threshold, error)
 	SetThresholdDrv(*context.Context, *Threshold) error
 	RemoveThresholdDrv(*context.Context, string, string) error
+	SetRankingProfileDrv(ctx *context.Context, rp *RankingProfile) (err error)
+	GetRankingProfileDrv(ctx *context.Context, tenant string, id string) (sq *RankingProfile, err error)
+	RemRankingProfileDrv(ctx *context.Context, tenant string, id string) (err error)
+	SetTrendProfileDrv(ctx *context.Context, sq *TrendProfile) (err error)
+	GetTrendProfileDrv(ctx *context.Context, tenant string, id string) (sq *TrendProfile, err error)
+	RemTrendProfileDrv(ctx *context.Context, tenant string, id string) (err error)
 	GetFilterDrv(ctx *context.Context, tnt string, id string) (*Filter, error)
 	SetFilterDrv(ctx *context.Context, f *Filter) error
 	RemoveFilterDrv(ctx *context.Context, tnt string, id string) error
@@ -126,6 +132,8 @@ type LoadReader interface {
 		map[string]string, *utils.PaginatorWithSearch) ([]string, error)
 	GetTPResources(string, string, string) ([]*utils.TPResourceProfile, error)
 	GetTPStats(string, string, string) ([]*utils.TPStatProfile, error)
+	GetTPRankings(tpid, tenant, id string) ([]*utils.TPRankingProfile, error)
+	GetTPTrends(tpid, tenant, id string) ([]*utils.TPTrendsProfile, error)
 	GetTPThresholds(string, string, string) ([]*utils.TPThresholdProfile, error)
 	GetTPFilters(string, string, string) ([]*utils.TPFilterProfile, error)
 	GetTPRoutes(string, string, string) ([]*utils.TPRouteProfile, error)
