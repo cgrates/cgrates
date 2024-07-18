@@ -256,3 +256,28 @@ func TestDerivedChargers2Charger(t *testing.T) {
 		}
 	}
 }
+
+func TestKADcGetMapKeys(t *testing.T) {
+	m := utils.StringMap{}
+	expectedKeys := []string{}
+	keys := dcGetMapKeys(m)
+	if len(keys) != len(expectedKeys) {
+		t.Errorf("Expected empty slice, got %d elements", len(keys))
+	}
+	for i, v := range keys {
+		if v != expectedKeys[i] {
+			t.Errorf("Expected key at index %d to be %s, got %s", i, expectedKeys[i], v)
+		}
+	}
+	m = utils.StringMap{
+		"key1": true,
+		"key2": true,
+		"key3": true,
+	}
+	expectedKeys = []string{"key1", "key2", "key3"}
+	keys = dcGetMapKeys(m)
+	if len(keys) != len(expectedKeys) {
+		t.Errorf("Expected slice with length %d, got %d elements", len(expectedKeys), len(keys))
+	}
+
+}
