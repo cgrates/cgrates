@@ -80,6 +80,7 @@ func NewCGREngine(cfg *config.CGRConfig, cM *engine.ConnManager, shdWg *sync.Wai
 			utils.SessionS:        new(sync.WaitGroup),
 			utils.SIPAgent:        new(sync.WaitGroup),
 			utils.StatS:           new(sync.WaitGroup),
+			utils.TrendS:          new(sync.WaitGroup),
 			utils.StorDB:          new(sync.WaitGroup),
 			utils.ThresholdS:      new(sync.WaitGroup),
 			utils.TPeS:            new(sync.WaitGroup),
@@ -156,6 +157,8 @@ func (cgr *CGREngine) InitServices(httpPrfPath string, cpuPrfFl io.Closer, memPr
 	iChargerSCh := make(chan birpc.ClientConnector, 1)
 	iThresholdSCh := make(chan birpc.ClientConnector, 1)
 	iStatSCh := make(chan birpc.ClientConnector, 1)
+	iTrendSCh := make(chan birpc.ClientConnector, 1)
+	iRankingSCh := make(chan birpc.ClientConnector, 1)
 	iResourceSCh := make(chan birpc.ClientConnector, 1)
 	iRouteSCh := make(chan birpc.ClientConnector, 1)
 	iAdminSCh := make(chan birpc.ClientConnector, 1)
@@ -232,6 +235,10 @@ func (cgr *CGREngine) InitServices(httpPrfPath string, cpuPrfFl io.Closer, memPr
 			iRouteSCh, cgr.cM, cgr.anzS, cgr.srvDep),
 		NewResourceService(cgr.cfg, cgr.dmS, cgr.cacheS, cgr.iFilterSCh, cgr.server,
 			iResourceSCh, cgr.cM, cgr.anzS, cgr.srvDep),
+		NewTrendService(cgr.cfg, cgr.dmS, cgr.cacheS, cgr.iFilterSCh, cgr.server,
+			iTrendSCh, cgr.cM, cgr.anzS, cgr.srvDep),
+		NewRankingService(cgr.cfg, cgr.dmS, cgr.cacheS, cgr.iFilterSCh, cgr.server,
+			iRankingSCh, cgr.cM, cgr.anzS, cgr.srvDep),
 		NewThresholdService(cgr.cfg, cgr.dmS, cgr.cacheS, cgr.iFilterSCh,
 			cgr.cM, cgr.server, iThresholdSCh, cgr.anzS, cgr.srvDep),
 		NewStatService(cgr.cfg, cgr.dmS, cgr.cacheS, cgr.iFilterSCh, cgr.server,

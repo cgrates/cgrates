@@ -256,6 +256,24 @@ func (iDB *InternalDB) RemStatQueueProfileDrv(_ *context.Context, tenant, id str
 	return
 }
 
+func (iDB *InternalDB) GetRankingProfileDrv(_ *context.Context, tenant, id string) (sg *RankingProfile, err error) {
+	x, ok := iDB.db.Get(utils.CacheRankingProfiles, utils.ConcatenatedKey(tenant, id))
+	if !ok || x == nil {
+		return nil, utils.ErrNotFound
+	}
+	return x.(*RankingProfile), nil
+}
+
+func (iDB *InternalDB) SetRankingProfileDrv(_ *context.Context, sgp *RankingProfile) (err error) {
+	iDB.db.Set(utils.CacheRankingProfiles, sgp.TenantID(), sgp, nil, true, utils.NonTransactional)
+	return nil
+}
+
+func (iDB *InternalDB) RemRankingProfileDrv(_ *context.Context, tenant, id string) (err error) {
+	iDB.db.Remove(utils.CacheRankingProfiles, utils.ConcatenatedKey(tenant, id), true, utils.NonTransactional)
+	return nil
+}
+
 func (iDB *InternalDB) GetStatQueueDrv(_ *context.Context, tenant, id string) (sq *StatQueue, err error) {
 	x, ok := iDB.db.Get(utils.CacheStatQueues, utils.ConcatenatedKey(tenant, id))
 	if !ok || x == nil {
@@ -286,6 +304,24 @@ func (iDB *InternalDB) GetThresholdProfileDrv(_ *context.Context, tenant, id str
 		return nil, utils.ErrNotFound
 	}
 	return x.(*ThresholdProfile), nil
+}
+
+func (iDB *InternalDB) SetTrendProfileDrv(_ *context.Context, srp *TrendProfile) (err error) {
+	iDB.db.Set(utils.CacheTrendProfiles, srp.TenantID(), srp, nil, true, utils.NonTransactional)
+	return nil
+}
+
+func (iDB *InternalDB) RemTrendProfileDrv(_ *context.Context, tenant, id string) (err error) {
+	iDB.db.Remove(utils.CacheTrendProfiles, utils.ConcatenatedKey(tenant, id), true, utils.NonTransactional)
+	return nil
+}
+
+func (iDB *InternalDB) GetTrendProfileDrv(_ *context.Context, tenant, id string) (sg *TrendProfile, err error) {
+	x, ok := iDB.db.Get(utils.CacheTrendProfiles, utils.ConcatenatedKey(tenant, id))
+	if !ok || x == nil {
+		return nil, utils.ErrNotFound
+	}
+	return x.(*TrendProfile), nil
 }
 
 func (iDB *InternalDB) SetThresholdProfileDrv(_ *context.Context, tp *ThresholdProfile) (err error) {

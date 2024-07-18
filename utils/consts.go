@@ -38,8 +38,8 @@ var (
 
 	DataDBPartitions = NewStringSet([]string{
 		CacheResourceProfiles, CacheResources, CacheEventResources, CacheStatQueueProfiles, CacheStatQueues,
-		CacheThresholdProfiles, CacheThresholds, CacheFilters, CacheRouteProfiles, CacheAttributeProfiles,
-		CacheChargerProfiles, CacheActionProfiles, CacheDispatcherProfiles, CacheDispatcherHosts,
+		CacheThresholdProfiles, CacheThresholds, CacheFilters, CacheRouteProfiles, CacheAttributeProfiles, CacheTrendProfiles,
+		CacheChargerProfiles, CacheActionProfiles, CacheDispatcherProfiles, CacheDispatcherHosts, CacheRankingProfiles,
 		CacheResourceFilterIndexes, CacheStatFilterIndexes, CacheThresholdFilterIndexes, CacheRouteFilterIndexes,
 		CacheAttributeFilterIndexes, CacheChargerFilterIndexes, CacheDispatcherFilterIndexes, CacheLoadIDs,
 		CacheRateProfiles, CacheRateProfilesFilterIndexes, CacheRateFilterIndexes,
@@ -58,6 +58,8 @@ var (
 		CacheThresholds:                  ThresholdPrefix,
 		CacheFilters:                     FilterPrefix,
 		CacheRouteProfiles:               RouteProfilePrefix,
+		CacheRankingProfiles:             RankingProfilePrefix,
+		CacheTrendProfiles:               TrendProfilePrefix,
 		CacheAttributeProfiles:           AttributeProfilePrefix,
 		CacheChargerProfiles:             ChargerProfilePrefix,
 		CacheDispatcherProfiles:          DispatcherProfilePrefix,
@@ -263,6 +265,8 @@ const (
 	DispatcherHostPrefix      = "dph_"
 	ThresholdProfilePrefix    = "thp_"
 	StatQueuePrefix           = "stq_"
+	RankingProfilePrefix      = "rgp_"
+	TrendProfilePrefix        = "trp_"
 	LoadIDPrefix              = "lid_"
 	LoadInstKey               = "load_history"
 	CreateCDRsTablesSQL       = "create_cdrs_tables.sql"
@@ -359,6 +363,8 @@ const (
 	MetaRerate               = "*rerate"
 	MetaRefund               = "*refund"
 	MetaStats                = "*stats"
+	MetaTrends               = "*trends"
+	MetaRankings             = "*rankings"
 	MetaCore                 = "*core"
 	MetaServiceManager       = "*servicemanager"
 	MetaChargers             = "*chargers"
@@ -412,6 +418,8 @@ const (
 	AccountActions       = "AccountActions"
 	Resources            = "Resources"
 	Stats                = "Stats"
+	Rankings             = "Rankings"
+	Trends               = "Trends"
 	Filters              = "Filters"
 	DispatcherProfiles   = "DispatcherProfiles"
 	DispatcherHosts      = "DispatcherHosts"
@@ -581,7 +589,10 @@ const (
 	AttributeFilterIDs       = "AttributeFilterIDs"
 	AttributeBlockers        = "AttributeBlockers"
 	QueueLength              = "QueueLength"
+	QueryInterval            = "QueryInterval"
 	TTL                      = "TTL"
+	PurgeFilterIDs           = "PurgeFilterIDs"
+	Trend                    = "Trend"
 	MinItems                 = "MinItems"
 	MetricIDs                = "MetricIDs"
 	MetricFilterIDs          = "MetricFilterIDs"
@@ -900,6 +911,8 @@ const (
 	MetaResourceProfile    = "*resource_profiles"
 	MetaStatQueueProfiles  = "*statqueue_profiles"
 	MetaStatQueues         = "*statqueues"
+	MetaRankingProfiles    = "*ranking_profiles"
+	MetaTrendProfiles      = "*trend_profiles"
 	MetaThresholdProfiles  = "*threshold_profiles"
 	MetaRouteProfiles      = "*route_profiles"
 	MetaAttributeProfiles  = "*attribute_profiles"
@@ -940,6 +953,8 @@ const (
 	StatService     = "StatS"
 	FilterS         = "FilterS"
 	ThresholdS      = "ThresholdS"
+	TrendS          = "TrendS"
+	RankingS        = "RankingS"
 	DispatcherS     = "DispatcherS"
 	RegistrarC      = "RegistrarC"
 	LoaderS         = "LoaderS"
@@ -1054,6 +1069,8 @@ const (
 	MetaRatio          = "*ratio"
 	MetaDefaultRatio   = "*default_ratio"
 	ThresholdSv1       = "ThresholdSv1"
+	TrendSv1           = "TrendSv1"
+	RankingSv1         = "RankingSv1"
 	StatSv1            = "StatSv1"
 	ResourceSv1        = "ResourceSv1"
 	RouteSv1           = "RouteSv1"
@@ -1125,6 +1142,8 @@ const (
 	ReplicatorSv1GetThreshold         = "ReplicatorSv1.GetThreshold"
 	ReplicatorSv1GetThresholdProfile  = "ReplicatorSv1.GetThresholdProfile"
 	ReplicatorSv1GetStatQueueProfile  = "ReplicatorSv1.GetStatQueueProfile"
+	ReplicatorSv1GetRankingProfile    = "ReplicatorSv1.GetRankingProfile"
+	ReplicatorSv1GetTrendProfile      = "ReplicatorSv1.GetTrendProfile"
 	ReplicatorSv1GetResource          = "ReplicatorSv1.GetResource"
 	ReplicatorSv1GetResourceProfile   = "ReplicatorSv1.GetResourceProfile"
 	ReplicatorSv1GetRouteProfile      = "ReplicatorSv1.GetRouteProfile"
@@ -1141,6 +1160,8 @@ const (
 	ReplicatorSv1SetStatQueue         = "ReplicatorSv1.SetStatQueue"
 	ReplicatorSv1SetFilter            = "ReplicatorSv1.SetFilter"
 	ReplicatorSv1SetStatQueueProfile  = "ReplicatorSv1.SetStatQueueProfile"
+	ReplicatorSv1SetRankingProfile    = "ReplicatorSv1.SetRankingProfile"
+	ReplicatorSv1SetTrendProfile      = "ReplicatorSv1.SetTrendProfile"
 	ReplicatorSv1SetResource          = "ReplicatorSv1.SetResource"
 	ReplicatorSv1SetResourceProfile   = "ReplicatorSv1.SetResourceProfile"
 	ReplicatorSv1SetRouteProfile      = "ReplicatorSv1.SetRouteProfile"
@@ -1158,6 +1179,8 @@ const (
 	ReplicatorSv1RemoveFilter            = "ReplicatorSv1.RemoveFilter"
 	ReplicatorSv1RemoveThresholdProfile  = "ReplicatorSv1.RemoveThresholdProfile"
 	ReplicatorSv1RemoveStatQueueProfile  = "ReplicatorSv1.RemoveStatQueueProfile"
+	ReplicatorSv1RemoveRankingProfile    = "ReplicatorSv1.RemoveRankingProfile"
+	ReplicatorSv1RemoveTrendProfile      = "ReplicatorSv1.RemoveTrendProfile"
 	ReplicatorSv1RemoveResource          = "ReplicatorSv1.RemoveResource"
 	ReplicatorSv1RemoveResourceProfile   = "ReplicatorSv1.RemoveResourceProfile"
 	ReplicatorSv1RemoveRouteProfile      = "ReplicatorSv1.RemoveRouteProfile"
@@ -1441,6 +1464,26 @@ const (
 	AdminSv1GetStatQueueProfilesCount = "AdminSv1.GetStatQueueProfilesCount"
 )
 
+// RankingS APIs
+const (
+	AdminSv1GetRankingProfile       = "AdminSv1.GetRankingProfile"
+	AdminSv1RemoveRankingProfile    = "AdminSv1.RemoveRankingProfile"
+	AdminSv1SetRankingProfile       = "AdminSv1.SetRankingProfile"
+	AdminSv1GetRankingProfiles      = "AdminSv1.GetRankingProfiles"
+	AdminSv1GetRankingProfileIDs    = "AdminSv1.GetRankingProfileIDs"
+	AdminSv1GetRankingProfilesCount = "AdminSv1.GetRankingProfilesCount"
+)
+
+// TrendS APIs
+const (
+	AdminSv1GetTrendProfile       = "AdminSv1.GetTrendProfile"
+	AdminSv1RemoveTrendProfile    = "AdminSv1.RemoveTrendProfile"
+	AdminSv1SetTrendProfile       = "AdminSv1.SetTrendProfile"
+	AdminSv1GetTrendProfiles      = "AdminSv1.GetTrendProfiles"
+	AdminSv1GetTrendProfileIDs    = "AdminSv1.GetTrendProfileIDs"
+	AdminSv1GetTrendProfilesCount = "AdminSv1.GetTrendProfilesCount"
+)
+
 // ResourceS APIs
 const (
 	ResourceSv1AuthorizeResources    = "ResourceSv1.AuthorizeResources"
@@ -1638,6 +1681,8 @@ const (
 const (
 	ResourcesCsv          = "Resources.csv"
 	StatsCsv              = "Stats.csv"
+	RankingsCsv           = "Rankings.csv"
+	TrendsCsv             = "Trends.csv"
 	ThresholdsCsv         = "Thresholds.csv"
 	FiltersCsv            = "Filters.csv"
 	RoutesCsv             = "Routes.csv"
@@ -1654,6 +1699,8 @@ const (
 const (
 	TBLTPResources       = "tp_resources"
 	TBLTPStats           = "tp_stats"
+	TBLTPRankings        = "tp_rankings"
+	TBLTPTrends          = "tp_trends"
 	TBLTPThresholds      = "tp_thresholds"
 	TBLTPFilters         = "tp_filters"
 	SessionCostsTBL      = "session_costs"
@@ -1678,6 +1725,8 @@ const (
 	CacheEventResources              = "*event_resources"
 	CacheStatQueueProfiles           = "*statqueue_profiles"
 	CacheStatQueues                  = "*statqueues"
+	CacheRankingProfiles             = "*ranking_profiles"
+	CacheTrendProfiles               = "*trend_profiles"
 	CacheThresholdProfiles           = "*threshold_profiles"
 	CacheThresholds                  = "*thresholds"
 	CacheFilters                     = "*filters"

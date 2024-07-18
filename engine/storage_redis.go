@@ -521,6 +521,52 @@ func (rs *RedisStorage) RemStatQueueDrv(ctx *context.Context, tenant, id string)
 	return rs.Cmd(nil, redisDEL, utils.StatQueuePrefix+utils.ConcatenatedKey(tenant, id))
 }
 
+func (rs *RedisStorage) SetTrendProfileDrv(ctx *context.Context, sg *TrendProfile) (err error) {
+	var result []byte
+	if result, err = rs.ms.Marshal(sg); err != nil {
+		return
+	}
+	return rs.Cmd(nil, redisSET, utils.TrendProfilePrefix+utils.ConcatenatedKey(sg.Tenant, sg.ID), string(result))
+}
+
+func (rs *RedisStorage) GetTrendProfileDrv(ctx *context.Context, tenant string, id string) (sg *TrendProfile, err error) {
+	var values []byte
+	if err = rs.Cmd(&values, redisGET, utils.TrendProfilePrefix+utils.ConcatenatedKey(tenant, id)); err != nil {
+		return
+	} else if len(values) == 0 {
+		err = utils.ErrNotFound
+		return
+	}
+	err = rs.ms.Unmarshal(values, &sg)
+	return
+}
+func (rs *RedisStorage) RemTrendProfileDrv(ctx *context.Context, tenant string, id string) (err error) {
+	return rs.Cmd(nil, redisDEL, utils.TrendProfilePrefix+utils.ConcatenatedKey(tenant, id))
+}
+
+func (rs *RedisStorage) SetRankingProfileDrv(ctx *context.Context, sg *RankingProfile) (err error) {
+	var result []byte
+	if result, err = rs.ms.Marshal(sg); err != nil {
+		return
+	}
+	return rs.Cmd(nil, redisSET, utils.RankingProfilePrefix+utils.ConcatenatedKey(sg.Tenant, sg.ID), string(result))
+}
+
+func (rs *RedisStorage) GetRankingProfileDrv(ctx *context.Context, tenant string, id string) (sg *RankingProfile, err error) {
+	var values []byte
+	if err = rs.Cmd(&values, redisGET, utils.RankingProfilePrefix+utils.ConcatenatedKey(tenant, id)); err != nil {
+		return
+	} else if len(values) == 0 {
+		err = utils.ErrNotFound
+		return
+	}
+	err = rs.ms.Unmarshal(values, &sg)
+	return
+}
+func (rs *RedisStorage) RemRankingProfileDrv(ctx *context.Context, tenant string, id string) (err error) {
+	return rs.Cmd(nil, redisDEL, utils.RankingProfilePrefix+utils.ConcatenatedKey(tenant, id))
+}
+
 // GetThresholdProfileDrv retrieves a ThresholdProfile from dataDB
 func (rs *RedisStorage) GetThresholdProfileDrv(ctx *context.Context, tenant, ID string) (tp *ThresholdProfile, err error) {
 	var values []byte

@@ -45,6 +45,7 @@ var (
 		utils.ActionPlanIndexes:             {},
 		utils.FilterIndexPrfx:               {},
 		utils.AccountFilterIndexPrfx:        {},
+		utils.RankingProfilePrefix:          {},
 	}
 	cachePrefixMap = utils.StringSet{
 		utils.ResourceProfilesPrefix:        {},
@@ -53,6 +54,7 @@ var (
 		utils.StatQueueProfilePrefix:        {},
 		utils.ThresholdPrefix:               {},
 		utils.ThresholdProfilePrefix:        {},
+		utils.RankingProfilePrefix:          {},
 		utils.FilterPrefix:                  {},
 		utils.RouteProfilePrefix:            {},
 		utils.AttributeProfilePrefix:        {},
@@ -173,6 +175,11 @@ func (dm *DataManager) CacheDataFromDB(ctx *context.Context, prfx string, ids []
 			tntID := utils.NewTenantID(dataID)
 			lkID := guardian.Guardian.GuardIDs("", config.CgrConfig().GeneralCfg().LockingTimeout, thresholdProfileLockKey(tntID.Tenant, tntID.ID))
 			_, err = dm.GetThresholdProfile(ctx, tntID.Tenant, tntID.ID, false, true, utils.NonTransactional)
+			guardian.Guardian.UnguardIDs(lkID)
+		case utils.RankingProfilePrefix:
+			tntID := utils.NewTenantID(dataID)
+			lkID := guardian.Guardian.GuardIDs("", config.CgrConfig().GeneralCfg().LockingTimeout, rankingProfileLockKey(tntID.Tenant, tntID.ID))
+			_, err = dm.GetRankingProfile(ctx, tntID.Tenant, tntID.ID, false, true, utils.NonTransactional)
 			guardian.Guardian.UnguardIDs(lkID)
 		case utils.ThresholdPrefix:
 			tntID := utils.NewTenantID(dataID)
@@ -950,6 +957,165 @@ func (dm *DataManager) RemoveStatQueueProfile(ctx *context.Context, tenant, id s
 					config.CgrConfig().DataDbCfg().RplCache, utils.EmptyString)})
 	}
 	return dm.RemoveStatQueue(ctx, tenant, id)
+}
+
+func (dm *DataManager) GetTrendProfile(ctx *context.Context, tenant, id string) (trp *TrendProfile, err error) {
+	if dm == nil {
+		err = utils.ErrNoDatabaseConn
+		return
+	}
+	trp, err = dm.dataDB.GetTrendProfileDrv(ctx, tenant, id)
+	if err != nil {
+		if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaTrendProfiles]; err == utils.ErrNotFound && itm.Remote {
+			if err = dm.connMgr.Call(context.TODO(), config.CgrConfig().DataDbCfg().RmtConns,
+				utils.ReplicatorSv1GetTrendProfile,
+				&utils.TenantIDWithAPIOpts{
+					TenantID: &utils.TenantID{Tenant: tenant, ID: id},
+					APIOpts: utils.GenerateDBItemOpts(itm.APIKey, itm.RouteID, utils.EmptyString,
+						utils.FirstNonEmpty(config.CgrConfig().DataDbCfg().RmtConnID,
+							config.CgrConfig().GeneralCfg().NodeID)),
+				}, &trp); err == nil {
+				err = dm.dataDB.SetTrendProfileDrv(ctx, trp)
+			}
+		}
+	}
+	return
+}
+
+func (dm *DataManager) SetTrendProfile(ctx *context.Context, trp *TrendProfile) (err error) {
+	if err = dm.DataDB().SetTrendProfileDrv(ctx, trp); err != nil {
+		return
+	}
+	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaTrendProfiles]; itm.Replicate {
+		err = replicate(context.Background(), dm.connMgr, config.CgrConfig().DataDbCfg().RplConns,
+			config.CgrConfig().DataDbCfg().RplFiltered,
+			utils.TrendProfilePrefix, trp.TenantID(),
+			utils.ReplicatorSv1SetTrendProfile,
+			&TrendProfileWithAPIOpts{
+				TrendProfile: trp,
+				APIOpts: utils.GenerateDBItemOpts(itm.APIKey, itm.RouteID,
+					config.CgrConfig().DataDbCfg().RplCache, utils.EmptyString)})
+	}
+	return
+}
+
+func (dm *DataManager) RemoveTrendProfile(ctx *context.Context, tenant, id string) (err error) {
+	oldSgs, err := dm.GetTrendProfile(ctx, tenant, id)
+	if err != nil && err != utils.ErrNotFound {
+		return err
+	}
+	if err = dm.DataDB().RemTrendProfileDrv(ctx, tenant, id); err != nil {
+		return
+	}
+	if oldSgs == nil {
+		return utils.ErrNotFound
+	}
+	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaRankingProfiles]; itm.Replicate {
+		replicate(context.Background(), dm.connMgr, config.CgrConfig().DataDbCfg().RplConns,
+			config.CgrConfig().DataDbCfg().RplFiltered,
+			utils.TrendProfilePrefix, utils.ConcatenatedKey(tenant, id), // this are used to get the host IDs from cache
+			utils.ReplicatorSv1RemoveTrendProfile,
+			&utils.TenantIDWithAPIOpts{
+				TenantID: &utils.TenantID{Tenant: tenant, ID: id},
+				APIOpts: utils.GenerateDBItemOpts(itm.APIKey, itm.RouteID,
+					config.CgrConfig().DataDbCfg().RplCache, utils.EmptyString)})
+	}
+	return
+}
+
+func (dm *DataManager) GetRankingProfile(ctx *context.Context, tenant, id string, cacheRead, cacheWrite bool, transactionID string) (rgp *RankingProfile, err error) {
+	tntID := utils.ConcatenatedKey(tenant, id)
+	if cacheRead {
+		if x, ok := Cache.Get(utils.CacheRankingProfiles, tntID); ok {
+			if x == nil {
+				return nil, utils.ErrNotFound
+			}
+			return x.(*RankingProfile), nil
+		}
+	}
+	if dm == nil {
+		err = utils.ErrNoDatabaseConn
+		return
+	}
+	rgp, err = dm.dataDB.GetRankingProfileDrv(ctx, tenant, id)
+	if err != nil {
+		if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaRankingProfiles]; err == utils.ErrNotFound && itm.Remote {
+			if err = dm.connMgr.Call(context.TODO(), config.CgrConfig().DataDbCfg().RmtConns,
+				utils.ReplicatorSv1GetRankingProfile,
+				&utils.TenantIDWithAPIOpts{
+					TenantID: &utils.TenantID{Tenant: tenant, ID: id},
+					APIOpts: utils.GenerateDBItemOpts(itm.APIKey, itm.RouteID, utils.EmptyString,
+						utils.FirstNonEmpty(config.CgrConfig().DataDbCfg().RmtConnID,
+							config.CgrConfig().GeneralCfg().NodeID)),
+				}, &rgp); err == nil {
+				err = dm.dataDB.SetRankingProfileDrv(ctx, rgp)
+			}
+		}
+		if err != nil {
+			err = utils.CastRPCErr(err)
+			if err == utils.ErrNotFound && cacheWrite {
+				if errCh := Cache.Set(context.Background(), utils.CacheRankingProfiles, tntID, nil, nil,
+					cacheCommit(transactionID), transactionID); errCh != nil {
+					return nil, errCh
+				}
+			}
+			return nil, err
+		}
+	}
+	if cacheWrite {
+		if errCh := Cache.Set(context.Background(), utils.CacheRankingProfiles, tntID, rgp, nil,
+			cacheCommit(transactionID), transactionID); errCh != nil {
+			return nil, errCh
+		}
+	}
+	return
+}
+
+func (dm *DataManager) SetRankingProfile(ctx *context.Context, sgp *RankingProfile) (err error) {
+	if dm == nil {
+		return utils.ErrNoDatabaseConn
+	}
+	if err = dm.DataDB().SetRankingProfileDrv(ctx, sgp); err != nil {
+		return
+	}
+	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaRankingProfiles]; itm.Replicate {
+		err = replicate(context.Background(), dm.connMgr, config.CgrConfig().DataDbCfg().RplConns,
+			config.CgrConfig().DataDbCfg().RplFiltered,
+			utils.RankingProfilePrefix, sgp.TenantID(),
+			utils.ReplicatorSv1SetRankingProfile,
+			&RankingProfileWithAPIOpts{
+				RankingProfile: sgp,
+				APIOpts: utils.GenerateDBItemOpts(itm.APIKey, itm.RouteID,
+					config.CgrConfig().DataDbCfg().RplCache, utils.EmptyString)})
+	}
+	return
+}
+
+func (dm *DataManager) RemoveRankingProfile(ctx *context.Context, tenant, id string) (err error) {
+	if dm == nil {
+		return utils.ErrNoDatabaseConn
+	}
+	oldSgs, err := dm.GetRankingProfile(ctx, tenant, id, true, false, utils.NonTransactional)
+	if err != nil && err != utils.ErrNotFound {
+		return err
+	}
+	if err = dm.DataDB().RemRankingProfileDrv(ctx, tenant, id); err != nil {
+		return
+	}
+	if oldSgs == nil {
+		return utils.ErrNotFound
+	}
+	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaRankingProfiles]; itm.Replicate {
+		replicate(context.Background(), dm.connMgr, config.CgrConfig().DataDbCfg().RplConns,
+			config.CgrConfig().DataDbCfg().RplFiltered,
+			utils.RankingProfilePrefix, utils.ConcatenatedKey(tenant, id), // this are used to get the host IDs from cache
+			utils.ReplicatorSv1RemoveRankingProfile,
+			&utils.TenantIDWithAPIOpts{
+				TenantID: &utils.TenantID{Tenant: tenant, ID: id},
+				APIOpts: utils.GenerateDBItemOpts(itm.APIKey, itm.RouteID,
+					config.CgrConfig().DataDbCfg().RplCache, utils.EmptyString)})
+	}
+	return
 }
 
 func (dm *DataManager) GetResource(ctx *context.Context, tenant, id string, cacheRead, cacheWrite bool,

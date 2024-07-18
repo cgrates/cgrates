@@ -48,6 +48,12 @@ type DataDBMock struct {
 	RemoveResourceProfileDrvF   func(ctx *context.Context, tnt, id string) error
 	RemoveResourceDrvF          func(ctx *context.Context, tnt, id string) error
 	SetResourceDrvF             func(ctx *context.Context, r *Resource) error
+	SetTrendProfileDrvF         func(ctx *context.Context, tr *TrendProfile) (err error)
+	GetTrendProfileDrvF         func(ctx *context.Context, tenant string, id string) (sq *TrendProfile, err error)
+	RemTrendProfileDrvF         func(ctx *context.Context, tenant string, id string) (err error)
+	SetRankingProfileDrvF       func(ctx *context.Context, sq *RankingProfile) (err error)
+	GetRankingProfileDrvF       func(ctx *context.Context, tenant string, id string) (sq *RankingProfile, err error)
+	RemRankingProfileDrvF       func(ctx *context.Context, tenant string, id string) (err error)
 	GetStatQueueProfileDrvF     func(ctx *context.Context, tenant, id string) (sq *StatQueueProfile, err error)
 	SetStatQueueProfileDrvF     func(ctx *context.Context, sq *StatQueueProfile) (err error)
 	RemStatQueueProfileDrvF     func(ctx *context.Context, tenant, id string) (err error)
@@ -225,6 +231,46 @@ func (dbM *DataDBMock) SetStatQueueDrv(ctx *context.Context, ssq *StoredStatQueu
 func (dbM *DataDBMock) RemStatQueueDrv(ctx *context.Context, tenant, id string) (err error) {
 	if dbM.RemStatQueueDrvF != nil {
 		return dbM.RemStatQueueDrvF(ctx, tenant, id)
+	}
+	return utils.ErrNotImplemented
+}
+func (dbM *DataDBMock) GetRankingProfileDrv(ctx *context.Context, tenant, id string) (sg *RankingProfile, err error) {
+	if dbM.GetStatQueueProfileDrvF != nil {
+		return dbM.GetRankingProfileDrvF(ctx, tenant, id)
+	}
+	return nil, utils.ErrNotImplemented
+}
+
+func (dbM *DataDBMock) SetRankingProfileDrv(ctx *context.Context, rg *RankingProfile) (err error) {
+	if dbM.SetRankingProfileDrvF(ctx, rg) != nil {
+		return dbM.SetRankingProfileDrvF(ctx, rg)
+	}
+	return utils.ErrNotImplemented
+}
+
+func (dbM *DataDBMock) RemRankingProfileDrv(ctx *context.Context, tenant string, id string) (err error) {
+	if dbM.RemRankingProfileDrvF != nil {
+		return dbM.RemRankingProfileDrvF(ctx, tenant, id)
+	}
+	return utils.ErrNotImplemented
+}
+func (dbM *DataDBMock) GetTrendProfileDrv(ctx *context.Context, tenant, id string) (sg *TrendProfile, err error) {
+	if dbM.GetStatQueueProfileDrvF != nil {
+		return dbM.GetTrendProfileDrvF(ctx, tenant, id)
+	}
+	return nil, utils.ErrNotImplemented
+}
+
+func (dbM *DataDBMock) SetTrendProfileDrv(ctx *context.Context, trend *TrendProfile) (err error) {
+	if dbM.SetTrendProfileDrvF(ctx, trend) != nil {
+		return dbM.SetTrendProfileDrvF(ctx, trend)
+	}
+	return utils.ErrNotImplemented
+}
+
+func (dbM *DataDBMock) RemTrendProfileDrv(ctx *context.Context, tenant string, id string) (err error) {
+	if dbM.RemTrendProfileDrvF != nil {
+		return dbM.RemTrendProfileDrvF(ctx, tenant, id)
 	}
 	return utils.ErrNotImplemented
 }

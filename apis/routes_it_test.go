@@ -81,52 +81,52 @@ var (
 func TestRoutesIT(t *testing.T) {
 	switch *dbType {
 	case utils.MetaInternal:
-		roConfigDIR = "routes_internal"
+		raConfigDIR = "routes_internal"
 	case utils.MetaMongo:
-		roConfigDIR = "routes_mongo"
+		raConfigDIR = "routes_mongo"
 	case utils.MetaMySQL:
-		roConfigDIR = "routes_mysql"
+		raConfigDIR = "routes_mysql"
 	case utils.MetaPostgres:
 		t.SkipNow()
 	default:
 		t.Fatal("Unknown Database type")
 	}
-	for _, stest := range sTestsRo {
-		t.Run(roConfigDIR, stest)
+	for _, stest := range sTestsRa {
+		t.Run(raConfigDIR, stest)
 	}
 }
 
 func testRouteSInitCfg(t *testing.T) {
 	var err error
-	roCfgPath = path.Join(*dataDir, "conf", "samples", roConfigDIR)
-	roCfg, err = config.NewCGRConfigFromPath(context.Background(), roCfgPath)
+	raCfgPath = path.Join(*dataDir, "conf", "samples", raConfigDIR)
+	raCfg, err = config.NewCGRConfigFromPath(context.Background(), raCfgPath)
 	if err != nil {
 		t.Error(err)
 	}
 }
 
 func testRouteSInitDataDB(t *testing.T) {
-	if err := engine.InitDataDB(roCfg); err != nil {
+	if err := engine.InitDataDB(raCfg); err != nil {
 		t.Fatal(err)
 	}
 }
 
 func testRouteSResetStorDB(t *testing.T) {
-	if err := engine.InitStorDB(roCfg); err != nil {
+	if err := engine.InitStorDB(raCfg); err != nil {
 		t.Fatal(err)
 	}
 }
 
 // Start CGR Engine
 func testRoutesStartEngine(t *testing.T) {
-	if _, err := engine.StopStartEngine(roCfgPath, *waitRater); err != nil {
+	if _, err := engine.StopStartEngine(raCfgPath, *waitRater); err != nil {
 		t.Fatal(err)
 	}
 }
 
 func testRoutesRPCConn(t *testing.T) {
 	var err error
-	roRPC, err = newRPCClient(roCfg.ListenCfg()) // We connect over JSON so we can also troubleshoot if needed
+	raRPC, err = newRPCClient(raCfg.ListenCfg()) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -134,7 +134,7 @@ func testRoutesRPCConn(t *testing.T) {
 
 func testRoutesGetRouteProfileBeforeSet(t *testing.T) {
 	var replyRouteProfile engine.RouteProfile
-	if err := roRPC.Call(context.Background(), utils.AdminSv1GetRouteProfile,
+	if err := raRPC.Call(context.Background(), utils.AdminSv1GetRouteProfile,
 		&utils.TenantIDWithAPIOpts{
 			TenantID: &utils.TenantID{
 				Tenant: "cgrates.org",
@@ -146,7 +146,7 @@ func testRoutesGetRouteProfileBeforeSet(t *testing.T) {
 
 func testRoutesGetRouteProfilesBeforeSet(t *testing.T) {
 	var replyRouteProfiles *[]*engine.RouteProfile
-	if err := roRPC.Call(context.Background(), utils.AdminSv1GetRouteProfiles,
+	if err := raRPC.Call(context.Background(), utils.AdminSv1GetRouteProfiles,
 		&utils.ArgsItemIDs{
 			Tenant: "cgrates.org",
 		}, &replyRouteProfiles); err == nil || err.Error() != utils.ErrNotFound.Error() {
@@ -156,7 +156,7 @@ func testRoutesGetRouteProfilesBeforeSet(t *testing.T) {
 
 func testRoutesGetRouteProfileIDsBeforeSet(t *testing.T) {
 	var replyRouteProfileIDs []string
-	if err := roRPC.Call(context.Background(), utils.AdminSv1GetRouteProfileIDs,
+	if err := raRPC.Call(context.Background(), utils.AdminSv1GetRouteProfileIDs,
 		&utils.ArgsItemIDs{
 			Tenant: "cgrates.org",
 		}, &replyRouteProfileIDs); err == nil || err.Error() != utils.ErrNotFound.Error() {
@@ -166,7 +166,7 @@ func testRoutesGetRouteProfileIDsBeforeSet(t *testing.T) {
 
 func testRoutesGetRouteProfileCountBeforeSet(t *testing.T) {
 	var replyCount int
-	if err := roRPC.Call(context.Background(), utils.AdminSv1GetRouteProfilesCount,
+	if err := raRPC.Call(context.Background(), utils.AdminSv1GetRouteProfilesCount,
 		&utils.ArgsItemIDs{
 			Tenant: "cgrates.org",
 		}, &replyCount); err == nil || err.Error() != utils.ErrNotFound.Error() {
@@ -287,7 +287,7 @@ func testRoutesSetRouteProfiles(t *testing.T) {
 
 	var reply string
 	for _, routeProfile := range routeProfiles {
-		if err := roRPC.Call(context.Background(), utils.AdminSv1SetRouteProfile,
+		if err := raRPC.Call(context.Background(), utils.AdminSv1SetRouteProfile,
 			routeProfile, &reply); err != nil {
 			t.Error(err)
 		} else if reply != utils.OK {
@@ -320,7 +320,7 @@ func testRoutesGetRouteProfileAfterSet(t *testing.T) {
 		},
 	}
 	var replyRouteProfile engine.RouteProfile
-	if err := roRPC.Call(context.Background(), utils.AdminSv1GetRouteProfile,
+	if err := raRPC.Call(context.Background(), utils.AdminSv1GetRouteProfile,
 		&utils.TenantIDWithAPIOpts{
 			TenantID: &utils.TenantID{
 				Tenant: "cgrates.org",
@@ -336,7 +336,7 @@ func testRoutesGetRouteProfileAfterSet(t *testing.T) {
 func testRoutesGetRouteProfileIDsAfterSet(t *testing.T) {
 	expectedIDs := []string{"TestA_ROUTE1", "TestA_ROUTE2", "TestA_ROUTE3", "TestB_ROUTE1", "TestB_ROUTE2"}
 	var replyRouteProfileIDs []string
-	if err := roRPC.Call(context.Background(), utils.AdminSv1GetRouteProfileIDs,
+	if err := raRPC.Call(context.Background(), utils.AdminSv1GetRouteProfileIDs,
 		&utils.ArgsItemIDs{
 			Tenant: "cgrates.org",
 		}, &replyRouteProfileIDs); err != nil {
@@ -349,7 +349,7 @@ func testRoutesGetRouteProfileIDsAfterSet(t *testing.T) {
 	}
 
 	expectedIDs = []string{"TestA_ROUTE1", "TestA_ROUTE2", "TestA_ROUTE3"}
-	if err := roRPC.Call(context.Background(), utils.AdminSv1GetRouteProfileIDs,
+	if err := raRPC.Call(context.Background(), utils.AdminSv1GetRouteProfileIDs,
 		&utils.ArgsItemIDs{
 			Tenant:      "cgrates.org",
 			ItemsPrefix: "TestA",
@@ -363,7 +363,7 @@ func testRoutesGetRouteProfileIDsAfterSet(t *testing.T) {
 	}
 
 	expectedIDs = []string{"TestB_ROUTE1", "TestB_ROUTE2"}
-	if err := roRPC.Call(context.Background(), utils.AdminSv1GetRouteProfileIDs,
+	if err := raRPC.Call(context.Background(), utils.AdminSv1GetRouteProfileIDs,
 		&utils.ArgsItemIDs{
 			Tenant:      "cgrates.org",
 			ItemsPrefix: "TestB",
@@ -379,7 +379,7 @@ func testRoutesGetRouteProfileIDsAfterSet(t *testing.T) {
 
 func testRoutesGetRouteProfileCountAfterSet(t *testing.T) {
 	var replyCount int
-	if err := roRPC.Call(context.Background(), utils.AdminSv1GetRouteProfilesCount,
+	if err := raRPC.Call(context.Background(), utils.AdminSv1GetRouteProfilesCount,
 		&utils.ArgsItemIDs{
 			Tenant: "cgrates.org",
 		}, &replyCount); err != nil {
@@ -388,7 +388,7 @@ func testRoutesGetRouteProfileCountAfterSet(t *testing.T) {
 		t.Errorf("expected <%+v>, \nreceived: <%+v>", 0, replyCount)
 	}
 
-	if err := roRPC.Call(context.Background(), utils.AdminSv1GetRouteProfilesCount,
+	if err := raRPC.Call(context.Background(), utils.AdminSv1GetRouteProfilesCount,
 		&utils.ArgsItemIDs{
 			Tenant:      "cgrates.org",
 			ItemsPrefix: "TestA",
@@ -398,7 +398,7 @@ func testRoutesGetRouteProfileCountAfterSet(t *testing.T) {
 		t.Errorf("expected <%+v>, \nreceived: <%+v>", 0, replyCount)
 	}
 
-	if err := roRPC.Call(context.Background(), utils.AdminSv1GetRouteProfilesCount,
+	if err := raRPC.Call(context.Background(), utils.AdminSv1GetRouteProfilesCount,
 		&utils.ArgsItemIDs{
 			Tenant:      "cgrates.org",
 			ItemsPrefix: "TestB",
@@ -508,7 +508,7 @@ func testRoutesGetRouteProfilesAfterSet(t *testing.T) {
 		},
 	}
 	var replyRouteProfiles []*engine.RouteProfile
-	if err := roRPC.Call(context.Background(), utils.AdminSv1GetRouteProfiles,
+	if err := raRPC.Call(context.Background(), utils.AdminSv1GetRouteProfiles,
 		&utils.ArgsItemIDs{
 			Tenant: "cgrates.org",
 		}, &replyRouteProfiles); err != nil {
@@ -526,7 +526,7 @@ func testRoutesGetRouteProfilesAfterSet(t *testing.T) {
 
 func testRoutesRemoveRouteProfile(t *testing.T) {
 	var reply string
-	if err := roRPC.Call(context.Background(), utils.AdminSv1RemoveRouteProfile,
+	if err := raRPC.Call(context.Background(), utils.AdminSv1RemoveRouteProfile,
 		&utils.TenantIDWithAPIOpts{
 			TenantID: &utils.TenantID{
 				Tenant: "cgrates.org",
@@ -540,7 +540,7 @@ func testRoutesRemoveRouteProfile(t *testing.T) {
 
 func testRoutesGetRouteProfileAfterRemove(t *testing.T) {
 	var replyRouteProfile engine.RouteProfile
-	if err := roRPC.Call(context.Background(), utils.AdminSv1GetRouteProfile,
+	if err := raRPC.Call(context.Background(), utils.AdminSv1GetRouteProfile,
 		&utils.TenantIDWithAPIOpts{
 			TenantID: &utils.TenantID{
 				Tenant: "cgrates.org",
@@ -553,7 +553,7 @@ func testRoutesGetRouteProfileAfterRemove(t *testing.T) {
 func testRoutesGetRouteProfileIDsAfterRemove(t *testing.T) {
 	expectedIDs := []string{"TestA_ROUTE1", "TestA_ROUTE3", "TestB_ROUTE1", "TestB_ROUTE2"}
 	var replyRouteProfileIDs []string
-	if err := roRPC.Call(context.Background(), utils.AdminSv1GetRouteProfileIDs,
+	if err := raRPC.Call(context.Background(), utils.AdminSv1GetRouteProfileIDs,
 		&utils.ArgsItemIDs{
 			Tenant: "cgrates.org",
 		}, &replyRouteProfileIDs); err != nil {
@@ -566,7 +566,7 @@ func testRoutesGetRouteProfileIDsAfterRemove(t *testing.T) {
 	}
 
 	expectedIDs = []string{"TestA_ROUTE1", "TestA_ROUTE3"}
-	if err := roRPC.Call(context.Background(), utils.AdminSv1GetRouteProfileIDs,
+	if err := raRPC.Call(context.Background(), utils.AdminSv1GetRouteProfileIDs,
 		&utils.ArgsItemIDs{
 			Tenant:      "cgrates.org",
 			ItemsPrefix: "TestA",
@@ -580,7 +580,7 @@ func testRoutesGetRouteProfileIDsAfterRemove(t *testing.T) {
 	}
 
 	expectedIDs = []string{"TestB_ROUTE1", "TestB_ROUTE2"}
-	if err := roRPC.Call(context.Background(), utils.AdminSv1GetRouteProfileIDs,
+	if err := raRPC.Call(context.Background(), utils.AdminSv1GetRouteProfileIDs,
 		&utils.ArgsItemIDs{
 			Tenant:      "cgrates.org",
 			ItemsPrefix: "TestB",
@@ -596,7 +596,7 @@ func testRoutesGetRouteProfileIDsAfterRemove(t *testing.T) {
 
 func testRoutesGetRouteProfileCountAfterRemove(t *testing.T) {
 	var replyCount int
-	if err := roRPC.Call(context.Background(), utils.AdminSv1GetRouteProfilesCount,
+	if err := raRPC.Call(context.Background(), utils.AdminSv1GetRouteProfilesCount,
 		&utils.ArgsItemIDs{
 			Tenant: "cgrates.org",
 		}, &replyCount); err != nil {
@@ -605,7 +605,7 @@ func testRoutesGetRouteProfileCountAfterRemove(t *testing.T) {
 		t.Errorf("expected <%+v>, \nreceived: <%+v>", 0, replyCount)
 	}
 
-	if err := roRPC.Call(context.Background(), utils.AdminSv1GetRouteProfilesCount,
+	if err := raRPC.Call(context.Background(), utils.AdminSv1GetRouteProfilesCount,
 		&utils.ArgsItemIDs{
 			Tenant:      "cgrates.org",
 			ItemsPrefix: "TestA",
@@ -615,7 +615,7 @@ func testRoutesGetRouteProfileCountAfterRemove(t *testing.T) {
 		t.Errorf("expected <%+v>, \nreceived: <%+v>", 0, replyCount)
 	}
 
-	if err := roRPC.Call(context.Background(), utils.AdminSv1GetRouteProfilesCount,
+	if err := raRPC.Call(context.Background(), utils.AdminSv1GetRouteProfilesCount,
 		&utils.ArgsItemIDs{
 			Tenant:      "cgrates.org",
 			ItemsPrefix: "TestB",
@@ -703,7 +703,7 @@ func testRoutesGetRouteProfilesAfterRemove(t *testing.T) {
 		},
 	}
 	var replyRouteProfiles []*engine.RouteProfile
-	if err := roRPC.Call(context.Background(), utils.AdminSv1GetRouteProfiles,
+	if err := raRPC.Call(context.Background(), utils.AdminSv1GetRouteProfiles,
 		&utils.ArgsItemIDs{
 			Tenant: "cgrates.org",
 		}, &replyRouteProfiles); err != nil {
@@ -725,7 +725,7 @@ func testRoutesBlockerRemoveRouteProfiles(t *testing.T) {
 	}
 	expected := []string{"TestA_ROUTE1", "TestA_ROUTE3", "TestB_ROUTE1", "TestB_ROUTE2"}
 	var routeProfileIDs []string
-	if err := roRPC.Call(context.Background(), utils.AdminSv1GetRouteProfileIDs, args, &routeProfileIDs); err != nil {
+	if err := raRPC.Call(context.Background(), utils.AdminSv1GetRouteProfileIDs, args, &routeProfileIDs); err != nil {
 		t.Fatal(err)
 	} else {
 		sort.Strings(routeProfileIDs)
@@ -741,11 +741,11 @@ func testRoutesBlockerRemoveRouteProfiles(t *testing.T) {
 				ID:     routeProfileID,
 			},
 		}
-		if err := roRPC.Call(context.Background(), utils.AdminSv1RemoveRouteProfile, argsRem, &reply); err != nil {
+		if err := raRPC.Call(context.Background(), utils.AdminSv1RemoveRouteProfile, argsRem, &reply); err != nil {
 			t.Fatal(err)
 		}
 	}
-	if err := roRPC.Call(context.Background(), utils.AdminSv1GetRouteProfileIDs, args, &routeProfileIDs); err == nil ||
+	if err := raRPC.Call(context.Background(), utils.AdminSv1GetRouteProfileIDs, args, &routeProfileIDs); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ErrNotFound, err)
 	}
@@ -843,7 +843,7 @@ func testRoutesBlockerSetRouteProfiles(t *testing.T) {
 
 	var reply string
 	for _, routeProfile := range routeProfiles {
-		if err := roRPC.Call(context.Background(), utils.AdminSv1SetRouteProfile,
+		if err := raRPC.Call(context.Background(), utils.AdminSv1SetRouteProfile,
 			routeProfile, &reply); err != nil {
 			t.Error(err)
 		} else if reply != utils.OK {
@@ -925,7 +925,7 @@ func testRoutesBlockerGetRouteProfilesForEvent(t *testing.T) {
 		},
 	}
 	var reply []*engine.RouteProfile
-	if err := roRPC.Call(context.Background(), utils.RouteSv1GetRouteProfilesForEvent, args, &reply); err != nil {
+	if err := raRPC.Call(context.Background(), utils.RouteSv1GetRouteProfilesForEvent, args, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(reply, expected) {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ToJSON(expected), utils.ToJSON(reply))
@@ -993,7 +993,7 @@ func testRoutesBlockerSetRouteProfile(t *testing.T) {
 	}
 
 	var reply string
-	if err := roRPC.Call(context.Background(), utils.AdminSv1SetRouteProfile,
+	if err := raRPC.Call(context.Background(), utils.AdminSv1SetRouteProfile,
 		routeProfile, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
@@ -1042,7 +1042,7 @@ func testRoutesBlockerGetRoutes(t *testing.T) {
 	}
 
 	var reply engine.SortedRoutesList
-	if err := roRPC.Call(context.Background(), utils.RouteSv1GetRoutes, args, &reply); err != nil {
+	if err := raRPC.Call(context.Background(), utils.RouteSv1GetRoutes, args, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(reply, expected) {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ToJSON(expected), utils.ToJSON(reply))

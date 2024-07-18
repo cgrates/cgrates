@@ -250,6 +250,33 @@ type TPStatProfile struct {
 	Metrics      []*MetricWithFilters
 }
 
+// TPRankingProfile is used in APIs to manage remotely offline RankingProfile
+type TPRankingProfile struct {
+	TPid              string
+	Tenant            string
+	ID                string
+	QueryInterval     string
+	StatIDs           []string
+	MetricIDs         []string
+	Sorting           string
+	SortingParameters []string
+	ThresholdIDs      []string
+}
+
+// TPTrendProfile is used in APIs to manage remotely offline TrendProfile
+type TPTrendsProfile struct {
+	TPid           string
+	Tenant         string
+	ID             string
+	QueryInterval  string
+	StatID         string
+	QueueLength    int
+	TTL            string
+	PurgeFilterIDs []string
+	Trend          string
+	ThresholdIDs   []string
+}
+
 // TPThresholdProfile is used in APIs to manage remotely offline ThresholdProfile
 type TPThresholdProfile struct {
 	TPid             string
@@ -431,6 +458,7 @@ func NewAttrReloadCacheWithOpts() *AttrReloadCacheWithAPIOpts {
 		RateProfileIDs:       []string{MetaAny},
 		ActionProfileIDs:     []string{MetaAny},
 		AccountIDs:           []string{MetaAny},
+		RankingProfileIDs:    []string{MetaAny},
 
 		AttributeFilterIndexIDs:      []string{MetaAny},
 		ResourceFilterIndexIDs:       []string{MetaAny},
@@ -458,6 +486,7 @@ func NewAttrReloadCacheWithOptsFromMap(arg map[string][]string, tnt string, opts
 		StatsQueueIDs:                arg[CacheStatQueues],
 		ThresholdProfileIDs:          arg[CacheThresholdProfiles],
 		ThresholdIDs:                 arg[CacheThresholds],
+		RankingProfileIDs:            arg[CacheRankingProfiles],
 		FilterIDs:                    arg[CacheFilters],
 		RouteProfileIDs:              arg[CacheRouteProfiles],
 		AttributeProfileIDs:          arg[CacheAttributeProfiles],
@@ -493,6 +522,7 @@ type AttrReloadCacheWithAPIOpts struct {
 	StatsQueueProfileIDs []string `json:",omitempty"`
 	ThresholdIDs         []string `json:",omitempty"`
 	ThresholdProfileIDs  []string `json:",omitempty"`
+	RankingProfileIDs    []string `json:",omitempty"`
 	FilterIDs            []string `json:",omitempty"`
 	RouteProfileIDs      []string `json:",omitempty"`
 	AttributeProfileIDs  []string `json:",omitempty"`
@@ -530,6 +560,7 @@ func (a *AttrReloadCacheWithAPIOpts) Map() map[string][]string {
 		CacheRouteProfiles:               a.RouteProfileIDs,
 		CacheAttributeProfiles:           a.AttributeProfileIDs,
 		CacheChargerProfiles:             a.ChargerProfileIDs,
+		CacheRankingProfiles:             a.RankingProfileIDs,
 		CacheDispatcherProfiles:          a.DispatcherProfileIDs,
 		CacheDispatcherHosts:             a.DispatcherHostIDs,
 		CacheDispatchers:                 a.Dispatchers,

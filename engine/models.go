@@ -70,6 +70,43 @@ func (StatMdl) TableName() string {
 	return utils.TBLTPStats
 }
 
+type RankingMdl struct {
+	PK                uint `gorm:"primary_key"`
+	Tpid              string
+	Tenant            string `index:"0" re:".*"`
+	ID                string `index:"1" re:".*"`
+	QueryInterval     string `index:"2" re:".*"`
+	StatIDs           string `index:"3" re:".*"`
+	MetricIDs         string `index:"4" re:".*"`
+	Sorting           string `index:"5" re:".*"`
+	SortingParameters string `index:"6" re:".*"`
+	ThresholdIDs      string `index:"7" re:".*"`
+	CreatedAt         time.Time
+}
+
+func (RankingMdl) TableName() string {
+	return utils.TBLTPRankings
+}
+
+type TrendMdl struct {
+	PK             uint `gorm:"primary_key"`
+	Tpid           string
+	Tenant         string `index:"0" re:".*"`
+	ID             string `index:"1" re:".*"`
+	QueryInterval  string `index:"2" re:".*"`
+	StatID         string `index:"3" re:".*"`
+	QueueLength    int    `index:"4" re:".*"`
+	TTL            string `index:"5" re:".*"`
+	PurgeFilterIDs string `index:"6" re:".*"`
+	Trend          string `index:"7" re:".*"`
+	ThresholdIDs   string `index:"8" re:".*"`
+	CreatedAt      time.Time
+}
+
+func (TrendMdl) TableName() string {
+	return utils.TBLTPTrends
+}
+
 type ThresholdMdl struct {
 	PK               uint `gorm:"primary_key"`
 	Tpid             string

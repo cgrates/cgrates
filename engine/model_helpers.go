@@ -522,6 +522,345 @@ func StatQueueProfileToAPI(st *StatQueueProfile) (tpST *utils.TPStatProfile) {
 	return
 }
 
+type RankingMdls []*RankingMdl
+
+func (tps RankingMdls) CSVHeader() (result []string) {
+	return []string{"#" + utils.Tenant, utils.ID, utils.StatIDs,
+		utils.MetricIDs, utils.Sorting, utils.SortingParameters,
+		utils.ThresholdIDs}
+}
+
+func (models RankingMdls) AsTPRanking() (result []*utils.TPRankingProfile) {
+	thresholdMap := make(map[string]utils.StringSet)
+	metricsMap := make(map[string]utils.StringSet)
+	sortingParameterMap := make(map[string]utils.StringSet)
+	statsMap := make(map[string]utils.StringSet)
+	msg := make(map[string]*utils.TPRankingProfile)
+	for _, model := range models {
+		key := &utils.TenantID{Tenant: model.Tenant, ID: model.ID}
+		sg, found := msg[key.TenantID()]
+		if !found {
+			sg = &utils.TPRankingProfile{
+				Tenant:        model.Tenant,
+				TPid:          model.Tpid,
+				ID:            model.ID,
+				QueryInterval: model.QueryInterval,
+				Sorting:       model.Sorting,
+			}
+		}
+		if model.QueryInterval != utils.EmptyString {
+			sg.QueryInterval = model.QueryInterval
+		}
+		if model.Sorting != utils.EmptyString {
+			sg.QueryInterval = model.QueryInterval
+		}
+		if model.StatIDs != utils.EmptyString {
+			if _, has := statsMap[key.TenantID()]; !has {
+				statsMap[key.TenantID()] = make(utils.StringSet)
+			}
+			statsMap[key.TenantID()].AddSlice(strings.Split(model.StatIDs, utils.InfieldSep))
+		}
+		if model.ThresholdIDs != utils.EmptyString {
+			if _, has := thresholdMap[key.TenantID()]; !has {
+				thresholdMap[key.TenantID()] = make(utils.StringSet)
+			}
+			thresholdMap[key.TenantID()].AddSlice(strings.Split(model.ThresholdIDs, utils.InfieldSep))
+		}
+		if model.SortingParameters != utils.EmptyString {
+			if _, has := sortingParameterMap[key.TenantID()]; !has {
+				sortingParameterMap[key.TenantID()] = make(utils.StringSet)
+			}
+			sortingParameterMap[key.TenantID()].AddSlice(strings.Split(model.SortingParameters, utils.InfieldSep))
+		}
+		if model.MetricIDs != utils.EmptyString {
+			if _, has := metricsMap[key.TenantID()]; !has {
+				metricsMap[key.TenantID()] = make(utils.StringSet)
+			}
+			metricsMap[key.TenantID()].AddSlice(strings.Split(model.MetricIDs, utils.InfieldSep))
+		}
+		msg[key.TenantID()] = sg
+	}
+	result = make([]*utils.TPRankingProfile, len(msg))
+	i := 0
+	for tntID, sg := range msg {
+		result[i] = sg
+		result[i].StatIDs = statsMap[tntID].AsSlice()
+		result[i].MetricIDs = metricsMap[tntID].AsSlice()
+		result[i].SortingParameters = sortingParameterMap[tntID].AsSlice()
+		result[i].ThresholdIDs = thresholdMap[tntID].AsOrderedSlice()
+		i++
+	}
+	return
+}
+
+func APItoModelTPRanking(tpSG *utils.TPRankingProfile) (mdls RankingMdls) {
+	if tpSG == nil {
+		return
+	}
+	if len(tpSG.StatIDs) == 0 {
+		mdl := &RankingMdl{
+			Tpid:          tpSG.TPid,
+			Tenant:        tpSG.Tenant,
+			ID:            tpSG.ID,
+			QueryInterval: tpSG.QueryInterval,
+			Sorting:       tpSG.Sorting,
+		}
+
+		for i, val := range tpSG.ThresholdIDs {
+			if i != 0 {
+				mdl.ThresholdIDs += utils.InfieldSep
+			}
+			mdl.ThresholdIDs += val
+		}
+		for i, metric := range tpSG.MetricIDs {
+			if i != 0 {
+				mdl.MetricIDs += utils.InfieldSep
+			}
+			mdl.MetricIDs += metric
+		}
+		for i, sorting := range tpSG.SortingParameters {
+			if i != 0 {
+				mdl.SortingParameters += utils.InfieldSep
+			}
+			mdl.SortingParameters += sorting
+		}
+
+		mdls = append(mdls, mdl)
+	}
+	for i, stat := range tpSG.StatIDs {
+		mdl := &RankingMdl{
+			Tpid:   tpSG.TPid,
+			Tenant: tpSG.Tenant,
+			ID:     tpSG.ID,
+		}
+		if i == 0 {
+			mdl.QueryInterval = tpSG.QueryInterval
+			mdl.Sorting = tpSG.Sorting
+			for i, val := range tpSG.ThresholdIDs {
+				if i != 0 {
+					mdl.ThresholdIDs += utils.InfieldSep
+				}
+				mdl.ThresholdIDs += val
+			}
+			for i, metric := range tpSG.MetricIDs {
+				if i != 0 {
+					mdl.MetricIDs += utils.InfieldSep
+				}
+				mdl.MetricIDs += metric
+			}
+			for i, sorting := range tpSG.SortingParameters {
+				if i != 0 {
+					mdl.SortingParameters += utils.InfieldSep
+				}
+				mdl.SortingParameters += sorting
+			}
+		}
+		mdl.StatIDs = stat
+		mdls = append(mdls, mdl)
+	}
+	return
+}
+
+func APItoRanking(tpSG *utils.TPRankingProfile) (sg *RankingProfile, err error) {
+	sg = &RankingProfile{
+		Tenant:            tpSG.Tenant,
+		ID:                tpSG.ID,
+		StatIDs:           make([]string, len(tpSG.StatIDs)),
+		MetricIDs:         make([]string, len(tpSG.MetricIDs)),
+		Sorting:           tpSG.Sorting,
+		SortingParameters: make([]string, len(tpSG.SortingParameters)),
+		ThresholdIDs:      make([]string, len(tpSG.ThresholdIDs)),
+	}
+
+	if tpSG.QueryInterval != utils.EmptyString {
+		if sg.QueryInterval, err = utils.ParseDurationWithNanosecs(tpSG.QueryInterval); err != nil {
+			return nil, err
+		}
+	}
+	copy(sg.StatIDs, tpSG.StatIDs)
+	copy(sg.ThresholdIDs, tpSG.ThresholdIDs)
+	copy(sg.MetricIDs, tpSG.MetricIDs)
+	return sg, nil
+}
+
+func RankingProfileToAPI(sg *RankingProfile) (tpSG *utils.TPRankingProfile) {
+	tpSG = &utils.TPRankingProfile{
+		Tenant:            sg.Tenant,
+		ID:                sg.ID,
+		StatIDs:           make([]string, len(sg.StatIDs)),
+		MetricIDs:         make([]string, len(sg.MetricIDs)),
+		SortingParameters: make([]string, len(sg.SortingParameters)),
+		ThresholdIDs:      make([]string, len(sg.ThresholdIDs)),
+	}
+	if sg.QueryInterval != time.Duration(0) {
+		tpSG.QueryInterval = sg.QueryInterval.String()
+	}
+	copy(tpSG.StatIDs, sg.StatIDs)
+	copy(tpSG.ThresholdIDs, sg.ThresholdIDs)
+	copy(tpSG.MetricIDs, sg.MetricIDs)
+	copy(tpSG.SortingParameters, sg.SortingParameters)
+	return
+}
+
+type TrendMdls []*TrendMdl
+
+func (tps TrendMdls) CSVHeader() (result []string) {
+	return []string{"#" + utils.Tenant, utils.ID, utils.QueryInterval, utils.StatID,
+		utils.TTL, utils.PurgeFilterIDs, utils.Trend, utils.ThresholdIDs}
+}
+
+func (models TrendMdls) AsTPTrends() (result []*utils.TPTrendsProfile) {
+	thresholdsMap := make(map[string]utils.StringSet)
+	purgeFiltersIDsMap := make(map[string]utils.StringSet)
+	msr := make(map[string]*utils.TPTrendsProfile)
+	for _, model := range models {
+		key := &utils.TenantID{Tenant: model.Tenant, ID: model.ID}
+		sr, found := msr[key.TenantID()]
+		if !found {
+			sr = &utils.TPTrendsProfile{
+				Tenant:        model.Tenant,
+				TPid:          model.Tpid,
+				ID:            model.ID,
+				QueryInterval: model.QueryInterval,
+				StatID:        model.StatID,
+				Trend:         model.Trend,
+				TTL:           model.TTL,
+				QueueLength:   model.QueueLength,
+			}
+		}
+		if model.QueryInterval != utils.EmptyString {
+			sr.QueryInterval = model.QueryInterval
+		}
+		if model.StatID != utils.EmptyString {
+			sr.StatID = model.StatID
+		}
+		if model.Trend != utils.EmptyString {
+			sr.Trend = model.Trend
+		}
+		if model.TTL != utils.EmptyString {
+			sr.TTL = model.TTL
+		}
+		if model.QueueLength != 0 {
+			sr.QueueLength = model.QueueLength
+		}
+		if model.PurgeFilterIDs != utils.EmptyString {
+			if _, has := purgeFiltersIDsMap[key.TenantID()]; !has {
+				purgeFiltersIDsMap[key.TenantID()] = make(utils.StringSet)
+			}
+			purgeFiltersIDsMap[key.TenantID()].AddSlice(strings.Split(model.PurgeFilterIDs, utils.InfieldSep))
+		}
+		if model.ThresholdIDs != utils.EmptyString {
+			if _, has := thresholdsMap[key.TenantID()]; !has {
+				thresholdsMap[key.TenantID()] = make(utils.StringSet)
+			}
+			thresholdsMap[key.TenantID()].AddSlice(strings.Split(model.ThresholdIDs, utils.InfieldSep))
+		}
+		msr[key.TenantID()] = sr
+	}
+	result = make([]*utils.TPTrendsProfile, len(msr))
+	i := 0
+	for tntId, sr := range msr {
+		result[i] = sr
+		result[i].PurgeFilterIDs = purgeFiltersIDsMap[tntId].AsSlice()
+		result[i].ThresholdIDs = thresholdsMap[tntId].AsSlice()
+		i++
+	}
+	return
+}
+
+func APItoModelTrends(tpSR *utils.TPTrendsProfile) (mdls TrendMdls) {
+	if tpSR == nil {
+		return
+	}
+	if len(tpSR.PurgeFilterIDs) == 0 {
+		mdl := &TrendMdl{
+			Tpid:          tpSR.TPid,
+			Tenant:        tpSR.Tenant,
+			ID:            tpSR.ID,
+			QueryInterval: tpSR.QueryInterval,
+			StatID:        tpSR.StatID,
+			QueueLength:   tpSR.QueueLength,
+			Trend:         tpSR.Trend,
+		}
+		for i, threshold := range tpSR.ThresholdIDs {
+			if i != 0 {
+				mdl.ThresholdIDs += utils.InfieldSep
+			}
+			mdl.ThresholdIDs += threshold
+		}
+		mdls = append(mdls, mdl)
+	}
+	for i, filterID := range tpSR.PurgeFilterIDs {
+		mdl := &TrendMdl{
+			Tpid:   tpSR.TPid,
+			Tenant: tpSR.Tenant,
+			ID:     tpSR.ID,
+		}
+		if i == 0 {
+			mdl.QueueLength = tpSR.QueueLength
+			mdl.QueryInterval = tpSR.QueryInterval
+			mdl.StatID = tpSR.StatID
+			mdl.TTL = tpSR.TTL
+			mdl.Trend = tpSR.Trend
+			for i, threshold := range tpSR.ThresholdIDs {
+				if i != 0 {
+					mdl.ThresholdIDs += utils.InfieldSep
+				}
+				mdl.ThresholdIDs += threshold
+			}
+		}
+		mdl.PurgeFilterIDs = filterID
+		mdls = append(mdls, mdl)
+	}
+	return
+}
+
+func APItoTrends(tpSR *utils.TPTrendsProfile) (sr *TrendProfile, err error) {
+	sr = &TrendProfile{
+		Tenant:         tpSR.Tenant,
+		ID:             tpSR.ID,
+		StatID:         tpSR.StatID,
+		QueueLength:    tpSR.QueueLength,
+		Trend:          tpSR.Trend,
+		PurgeFilterIDs: make([]string, len(tpSR.PurgeFilterIDs)),
+		ThresholdIDs:   make([]string, len(tpSR.ThresholdIDs)),
+	}
+	if tpSR.TTL != utils.EmptyString {
+		if sr.TTL, err = utils.ParseDurationWithNanosecs(tpSR.TTL); err != nil {
+			return
+		}
+	}
+	if tpSR.QueryInterval != utils.EmptyString {
+		if sr.QueryInterval, err = utils.ParseDurationWithNanosecs(tpSR.QueryInterval); err != nil {
+			return
+		}
+	}
+	copy(sr.ThresholdIDs, tpSR.ThresholdIDs)
+	copy(sr.PurgeFilterIDs, tpSR.PurgeFilterIDs)
+	return
+}
+
+func TrendProfileToAPI(sr *TrendProfile) (tpSR *utils.TPTrendsProfile) {
+	tpSR = &utils.TPTrendsProfile{
+		Tenant:         sr.Tenant,
+		ID:             sr.ID,
+		PurgeFilterIDs: make([]string, len(sr.PurgeFilterIDs)),
+		ThresholdIDs:   make([]string, len(sr.ThresholdIDs)),
+		StatID:         sr.StatID,
+		QueueLength:    sr.QueueLength,
+		Trend:          sr.Trend,
+	}
+	if sr.TTL != time.Duration(0) {
+		tpSR.TTL = sr.TTL.String()
+	}
+	if sr.QueryInterval != time.Duration(0) {
+		tpSR.QueryInterval = sr.QueryInterval.String()
+	}
+	copy(tpSR.ThresholdIDs, sr.ThresholdIDs)
+	copy(tpSR.PurgeFilterIDs, sr.PurgeFilterIDs)
+	return
+}
+
 type ThresholdMdls []*ThresholdMdl
 
 // CSVHeader return the header for csv fields as a slice of string

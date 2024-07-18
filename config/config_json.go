@@ -47,6 +47,8 @@ const (
 	JanusAgentJSON      = "janus_agent"
 	StatSJSON           = "stats"
 	ThresholdSJSON      = "thresholds"
+	TrendSJSON          = "trends"
+	RankingSJSON        = "rankings"
 	TPeSJSON            = "tpes"
 	EFsJSON             = "efs"
 	RouteSJSON          = "routes"
@@ -82,6 +84,8 @@ var (
 		AttributeSJSON:      utils.AttributeS,
 		ChargerSJSON:        utils.ChargerS,
 		ThresholdSJSON:      utils.ThresholdS,
+		TrendSJSON:          utils.TrendS,
+		RankingSJSON:        utils.RankingS,
 		StatSJSON:           utils.StatS,
 		ResourceSJSON:       utils.ResourceS,
 		RouteSJSON:          utils.RouteS,
@@ -173,6 +177,8 @@ func newSections(cfg *CGRConfig) Sections {
 		cfg.resourceSCfg,
 		cfg.statsCfg,
 		cfg.thresholdSCfg,
+		cfg.rankingSCfg,
+		cfg.trendSCfg,
 		cfg.routeSCfg,
 		cfg.rateSCfg,
 		cfg.accountSCfg,
