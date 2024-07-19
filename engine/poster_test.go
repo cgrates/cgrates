@@ -66,3 +66,52 @@ func TestKafkaParseURL(t *testing.T) {
 		t.Errorf("Expected: %s ,received: %s", utils.ToJSON(exp), utils.ToJSON(kfk))
 	}
 }
+
+func TestParseURL(t *testing.T) {
+	tests := []struct {
+		input       string
+		expectedURL string
+		expectedQID string
+		expectError bool
+	}{
+		{
+			input:       "http://cgrates.com/path?queue_id=myQueue",
+			expectedURL: "http://cgrates.com/path",
+			expectedQID: "myQueue",
+			expectError: false,
+		},
+		{
+			input:       "http://cgrates.com/path",
+			expectedURL: "http://cgrates.com/path",
+			expectedQID: defaultQueueID,
+			expectError: false,
+		},
+		{
+			input:       ":/invalid-url",
+			expectedURL: "",
+			expectedQID: "",
+			expectError: true,
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.input, func(t *testing.T) {
+			url, qid, err := parseURL(test.input)
+			if test.expectError {
+				if err == nil {
+					t.Fatalf("Expected error, got nil")
+				}
+			} else {
+				if err != nil {
+					t.Fatalf("Expected no error, got %v", err)
+				}
+				if url != test.expectedURL {
+					t.Fatalf("Expected URL to be %v, got %v", test.expectedURL, url)
+				}
+				if qid != test.expectedQID {
+					t.Fatalf("Expected qID to be %v, got %v", test.expectedQID, qid)
+				}
+			}
+		})
+	}
+}
