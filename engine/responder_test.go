@@ -1282,3 +1282,31 @@ func TestResponderGetMaxSessionTimeOnAccounts(t *testing.T) {
 	}
 	//
 }
+
+func TestResponderPing(t *testing.T) {
+	var r Responder
+	var reply string
+	err := r.Ping(nil, &reply)
+	if err != nil {
+		t.Fatalf("Expected no error, got %v", err)
+	}
+	if reply != utils.Pong {
+		t.Fatalf("Expected reply to be %s, got %s", utils.Pong, reply)
+	}
+}
+
+func TestResponderSetMaxComputedUsage(t *testing.T) {
+	r := &Responder{
+		MaxComputedUsage: make(map[string]time.Duration),
+	}
+	newMaxComputedUsage := map[string]time.Duration{
+		"user1": 5 * time.Hour,
+		"user2": 3 * time.Hour,
+	}
+	r.SetMaxComputedUsage(newMaxComputedUsage)
+	r.maxComputedUsageMutex.RLock()
+	defer r.maxComputedUsageMutex.RUnlock()
+	if !reflect.DeepEqual(r.MaxComputedUsage, newMaxComputedUsage) {
+		t.Fatalf("Expected MaxComputedUsage to be %v, got %v", newMaxComputedUsage, r.MaxComputedUsage)
+	}
+}
