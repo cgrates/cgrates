@@ -60,9 +60,11 @@ type CoreService struct {
 	stopMemPrf chan struct{}
 	shdChan    *utils.SyncedChan
 	fileMEM    string
-	fileCPU    io.Closer
-	fileMx     sync.Mutex
-	caps       *engine.Caps
+
+	fileMux sync.Mutex
+	fileCPU io.Closer
+
+	caps *engine.Caps
 }
 
 // Shutdown is called to shutdown the service
@@ -82,13 +84,21 @@ func (cS *CoreService) StopChanMemProf() {
 	}
 }
 
-func StartCPUProfiling(path string) (file io.WriteCloser, err error) {
-	file, err = os.Create(path)
+// StartCPUProfiling creates a file and passes it to pprof.StartCPUProfile. It returns the file
+// as an io.Closer to be able to close it later when stopping the CPU profiling.
+func StartCPUProfiling(path string) (io.Closer, error) {
+	f, err := os.Create(path)
 	if err != nil {
 		return nil, fmt.Errorf("could not create CPU profile: %v", err)
 	}
-	err = pprof.StartCPUProfile(file)
-	return
+	if err := pprof.StartCPUProfile(f); err != nil {
+		if err := f.Close(); err != nil {
+			utils.Logger.Warning(fmt.Sprintf(
+				"<%s> could not close file %q: %v", utils.CoreS, f.Name(), err))
+		}
+		return nil, fmt.Errorf("could not start CPU profile: %v", err)
+	}
+	return f, nil
 }
 
 func MemProfFile(memProfPath string) bool {
@@ -153,31 +163,32 @@ func (cS *CoreService) V1Status(_ *context.Context, _ *utils.TenantWithAPIOpts, 
 	return
 }
 
-// StartCPUProfiling is used to start CPUProfiling in the given path
-func (cS *CoreService) StartCPUProfiling(argPath string) (err error) {
-	cS.fileMx.Lock()
-	defer cS.fileMx.Unlock()
-	if cS.fileCPU != nil {
-		return fmt.Errorf("CPU profiling already started")
+// StartCPUProfiling starts CPU profiling and saves the profile to the specified path.
+func (cS *CoreService) StartCPUProfiling(path string) (err error) {
+	if path == utils.EmptyString {
+		return utils.NewErrMandatoryIeMissing("DirPath")
 	}
-	if argPath == utils.EmptyString {
-		return utils.NewErrMandatoryIeMissing("Path")
-	}
-	cS.fileCPU, err = StartCPUProfiling(argPath)
+	cS.fileMux.Lock()
+	defer cS.fileMux.Unlock()
+	cS.fileCPU, err = StartCPUProfiling(path)
 	return
 }
 
-// StopCPUProfiling is used to stop CPUProfiling in the given path
-func (cS *CoreService) StopCPUProfiling() (err error) {
-	cS.fileMx.Lock()
-	defer cS.fileMx.Unlock()
-	if cS.fileCPU != nil {
-		pprof.StopCPUProfile()
-		err = cS.fileCPU.Close()
-		cS.fileCPU = nil
-		return
+// StopCPUProfiling stops CPU profiling and closes the profile file.
+func (cS *CoreService) StopCPUProfiling() error {
+	cS.fileMux.Lock()
+	defer cS.fileMux.Unlock()
+	pprof.StopCPUProfile()
+	if cS.fileCPU == nil {
+		return errors.New("CPU profiling has not been started")
 	}
-	return fmt.Errorf(" cannot stop because CPUProfiling is not active")
+	if err := cS.fileCPU.Close(); err != nil {
+		if errors.Is(err, os.ErrClosed) {
+			return errors.New("CPU profiling has already been stopped")
+		}
+		return fmt.Errorf("could not close profile file: %v", err)
+	}
+	return nil
 }
 
 // StartMemoryProfiling is used to start MemoryProfiling in the given path
