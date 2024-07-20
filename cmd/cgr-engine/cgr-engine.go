@@ -26,6 +26,7 @@ import (
 	"os"
 	"os/signal"
 	"path"
+	"path/filepath"
 	"runtime"
 	"runtime/pprof"
 	"strconv"
@@ -368,21 +369,24 @@ func main() {
 		}()
 	}
 
-	var cpuProfileFile io.Closer
+	var cpuProf io.Closer
 	if *cpuProfDir != utils.EmptyString {
-		cpuPath := path.Join(*cpuProfDir, utils.CpuPathCgr)
-		cpuProfileFile, err = cores.StartCPUProfiling(cpuPath)
+		cpuPath := filepath.Join(*cpuProfDir, utils.CpuPathCgr)
+		cpuProf, err = cores.StartCPUProfiling(cpuPath)
 		if err != nil {
-			log.Fatalf("<%s> error received: <%s>, exiting!", utils.InitS, err.Error())
+			log.Fatal(err)
 		}
 		defer func() {
 			if cS != nil {
-				cS.StopCPUProfiling()
+				// Use CoreService's StopCPUProfiling method if it has been initialized.
+				if err := cS.StopCPUProfiling(); err != nil {
+					log.Print(err)
+				}
 				return
 			}
-			if cpuProfileFile != nil {
-				pprof.StopCPUProfile()
-				cpuProfileFile.Close()
+			pprof.StopCPUProfile()
+			if err := cpuProf.Close(); err != nil {
+				log.Printf("could not close file %q: %v", cpuProf.(*os.File).Name(), err)
 			}
 		}()
 	}
@@ -576,7 +580,7 @@ func main() {
 
 	// init CoreSv1
 
-	coreS := services.NewCoreService(cfg, caps, server, internalCoreSv1Chan, anz, cpuProfileFile, memPrfDirForCores, shdWg, stopMemProf, shdChan, srvDep)
+	coreS := services.NewCoreService(cfg, caps, server, internalCoreSv1Chan, anz, cpuProf, *memProfDir, shdWg, stopMemProf, shdChan, srvDep)
 	shdWg.Add(1)
 	if err := coreS.Start(); err != nil {
 		log.Fatalf("<%s> error received: <%s>, exiting!", utils.InitS, err.Error())
