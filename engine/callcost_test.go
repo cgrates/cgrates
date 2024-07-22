@@ -327,3 +327,15 @@ func TestCallCostUpdateRatedUsage(t *testing.T) {
 		t.Error(rcv)
 	}
 }
+
+func TestCallCostSetRpSubjectPrefixMatching(t *testing.T) {
+	SetRpSubjectPrefixMatching(true)
+	if rpSubjectPrefixMatching != true {
+		t.Errorf("Expected rpSubjectPrefixMatching to be true, but got %v", rpSubjectPrefixMatching)
+		SetRpSubjectPrefixMatching(false)
+		if rpSubjectPrefixMatching != false {
+			t.Errorf("Expected rpSubjectPrefixMatching to be false, but got %v", rpSubjectPrefixMatching)
+
+		}
+	}
+}

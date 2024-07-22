@@ -1637,3 +1637,55 @@ func TestCDRCloneNil(t *testing.T) {
 		t.Error(rcv)
 	}
 }
+
+func TestTotalExportedCdrs(t *testing.T) {
+	cdre := &CDRExporter{
+		numberOfRecords: 42,
+	}
+	result := cdre.TotalExportedCdrs()
+	if result != 42 {
+		t.Errorf("TotalExportedCdrs() = %d; want 42", result)
+	}
+}
+
+func TestPositiveExports(t *testing.T) {
+	cdre := &CDRExporter{
+		positiveExports: []string{"export1", "export2", "export3"},
+	}
+	result := cdre.PositiveExports()
+	expected := []string{"export1", "export2", "export3"}
+	if len(result) != len(expected) {
+		t.Errorf("PositiveExports() has different length; got %d, want %d", len(result), len(expected))
+	}
+	for i, v := range expected {
+		if result[i] != v {
+			t.Errorf("PositiveExports() = %v; want %v", result, expected)
+			break
+		}
+	}
+}
+
+func TestNegativeExports(t *testing.T) {
+	cdre := &CDRExporter{
+		negativeExports: map[string]string{
+			"cgrid1": "error   1",
+			"cgrid2": "error   2",
+			"cgrid3": "error   3",
+		},
+	}
+	result := cdre.NegativeExports()
+	expected := map[string]string{
+		"cgrid1": "error   1",
+		"cgrid2": "error   2",
+		"cgrid3": "error   3",
+	}
+	if len(result) != len(expected) {
+		t.Errorf("NegativeExports() has different length; got %d, want %d", len(result), len(expected))
+	}
+	for key, value := range expected {
+		if resultValue, exists := result[key]; !exists || resultValue != value {
+			t.Errorf("NegativeExports() = %v; want %v", result, expected)
+			break
+		}
+	}
+}
