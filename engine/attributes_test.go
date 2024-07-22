@@ -2217,3 +2217,11 @@ func TestAttrSGetAttributeForEventErrs(t *testing.T) {
 		})
 	}
 }
+
+func TestLibEngineShutdown(t *testing.T) {
+	service := &AttributeService{}
+	err := service.Shutdown()
+	if err != nil {
+		t.Errorf("Expected no error, but got %v", err)
+	}
+}
