@@ -24,6 +24,7 @@ import (
 
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/cores"
 	"github.com/cgrates/cgrates/dispatchers"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/ers"
@@ -959,12 +960,12 @@ func (dS *DispatcherCoreSv1) StopCPUProfiling(ctx *context.Context, args *utils.
 	return dS.dS.CoreSv1StopCPUProfiling(ctx, args, reply)
 }
 
-func (dS *DispatcherCoreSv1) StartMemoryProfiling(ctx *context.Context, args *utils.MemoryPrf, reply *string) error {
-	return dS.dS.CoreSv1StartMemoryProfiling(ctx, args, reply)
+func (dS *DispatcherCoreSv1) StartMemoryProfiling(ctx *context.Context, params cores.MemoryProfilingParams, reply *string) error {
+	return dS.dS.CoreSv1StartMemoryProfiling(ctx, params, reply)
 }
 
-func (dS *DispatcherCoreSv1) StopMemoryProfiling(ctx *context.Context, args *utils.TenantWithAPIOpts, reply *string) error {
-	return dS.dS.CoreSv1StopMemoryProfiling(ctx, args, reply)
+func (dS *DispatcherCoreSv1) StopMemoryProfiling(ctx *context.Context, params utils.TenantWithAPIOpts, reply *string) error {
+	return dS.dS.CoreSv1StopMemoryProfiling(ctx, params, reply)
 }
 
 func (dS *DispatcherCoreSv1) Panic(ctx *context.Context, args *utils.PanicMessageArgs, reply *string) error {

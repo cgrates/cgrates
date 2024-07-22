@@ -25,7 +25,6 @@ import (
 	"log"
 	"os"
 	"os/signal"
-	"path"
 	"path/filepath"
 	"runtime"
 	"runtime/pprof"
@@ -59,8 +58,8 @@ var (
 	httpPprof         = cgrEngineFlags.Bool(utils.HttpPprofCgr, false, "Enable HTTP pprof profiling")
 	cpuProfDir        = cgrEngineFlags.String(utils.CpuProfDirCgr, utils.EmptyString, "Directory for CPU profiles")
 	memProfDir        = cgrEngineFlags.String(utils.MemProfDirCgr, utils.EmptyString, "Directory for memory profiles")
-	memProfInterval   = cgrEngineFlags.Duration(utils.MemProfIntervalCgr, 5*time.Second, "Interval between memory profile saves")
-	memProfNrFiles    = cgrEngineFlags.Int(utils.MemProfNrFilesCgr, 1, "Number of memory profiles to keep (most recent)")
+	memProfInterval   = cgrEngineFlags.Duration(utils.MemProfIntervalCgr, 15*time.Second, "Interval between memory profile saves")
+	memProfMaxFiles   = cgrEngineFlags.Int(utils.MemProfMaxFilesCgr, 1, "Number of memory profiles to keep (most recent)")
 	scheduledShutdown = cgrEngineFlags.Duration(utils.ScheduledShutdownCgr, 0, "Shutdown the engine after the specified duration")
 	singleCPU         = cgrEngineFlags.Bool(utils.SingleCpuCgr, false, "Run on a single CPU core")
 	syslogger         = cgrEngineFlags.String(utils.LoggerCfg, utils.EmptyString, "Logger type <*syslog|*stdout>")
@@ -355,20 +354,6 @@ func main() {
 	go singnalHandler(shdWg, shdChan)
 
 	var cS *cores.CoreService
-	var stopMemProf chan struct{}
-	var memPrfDirForCores string
-	if *memProfDir != utils.EmptyString {
-		shdWg.Add(1)
-		stopMemProf = make(chan struct{})
-		memPrfDirForCores = *memProfDir
-		go cores.MemProfiling(*memProfDir, *memProfInterval, *memProfNrFiles, shdWg, stopMemProf, shdChan)
-		defer func() {
-			if cS == nil {
-				close(stopMemProf)
-			}
-		}()
-	}
-
 	var cpuProf io.Closer
 	if *cpuProfDir != utils.EmptyString {
 		cpuPath := filepath.Join(*cpuProfDir, utils.CpuPathCgr)
@@ -409,7 +394,6 @@ func main() {
 	cfg, err = config.NewCGRConfigFromPath(*cfgPath)
 	if err != nil {
 		log.Fatalf("Could not parse config: <%s>", err.Error())
-		return
 	}
 
 	if *nodeID != utils.EmptyString {
@@ -422,7 +406,6 @@ func main() {
 	if utils.Logger, err = utils.Newlogger(utils.FirstNonEmpty(*syslogger,
 		cfg.GeneralCfg().Logger), cfg.GeneralCfg().NodeID); err != nil {
 		log.Fatalf("Could not initialize syslog connection, err: <%s>", err.Error())
-		return
 	}
 	lgLevel := cfg.GeneralCfg().LogLevel
 	if *logLevel != -1 { // Modify the log level if provided by command arguments
@@ -580,7 +563,7 @@ func main() {
 
 	// init CoreSv1
 
-	coreS := services.NewCoreService(cfg, caps, server, internalCoreSv1Chan, anz, cpuProf, *memProfDir, shdWg, stopMemProf, shdChan, srvDep)
+	coreS := services.NewCoreService(cfg, caps, server, internalCoreSv1Chan, anz, cpuProf, shdWg, shdChan, srvDep)
 	shdWg.Add(1)
 	if err := coreS.Start(); err != nil {
 		log.Fatalf("<%s> error received: <%s>, exiting!", utils.InitS, err.Error())
@@ -710,6 +693,18 @@ func main() {
 		internalDispatcherSChan, internalLoaderSChan, internalRALsChan,
 		internalCacheSChan, internalEEsChan, internalERsChan, shdChan)
 
+	if *memProfDir != utils.EmptyString {
+		if err := cS.StartMemoryProfiling(cores.MemoryProfilingParams{
+			DirPath:  *memProfDir,
+			Interval: *memProfInterval,
+			MaxFiles: *memProfMaxFiles,
+		}); err != nil {
+			utils.Logger.Err(fmt.Sprintf("<%s> %v", utils.CoreS, err))
+			return
+		}
+		defer cS.StopMemoryProfiling() // safe to ignore error (irrelevant)
+	}
+
 	<-shdChan.Done()
 	shtdDone := make(chan struct{})
 	go func() {
@@ -723,9 +718,6 @@ func main() {
 			utils.ServiceManager))
 	}
 
-	if *memProfDir != utils.EmptyString { // write last memory profiling
-		cores.MemProfFile(path.Join(*memProfDir, utils.MemProfFileCgr))
-	}
 	if *pidFile != utils.EmptyString {
 		if err := os.Remove(*pidFile); err != nil {
 			utils.Logger.Warning("Could not remove pid file: " + err.Error())
