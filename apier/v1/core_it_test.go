@@ -32,6 +32,7 @@ import (
 	"github.com/cgrates/birpc"
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/birpc/jsonrpc"
+	"github.com/cgrates/cgrates/cores"
 	"github.com/cgrates/cgrates/engine"
 
 	"github.com/cgrates/cgrates/utils"
@@ -181,7 +182,7 @@ func testCoreSv1StopMemProfilingBeforeStart(t *testing.T) {
 
 func testCoreSv1StartEngineByExecWIthMemProfiling(t *testing.T) {
 	engine := exec.Command("cgr-engine", "-config_path", coreV1CfgPath,
-		"-memprof_dir", argPath, "-memprof_interval", "100ms", "-memprof_nrfiles", "2")
+		"-memprof_dir", argPath, "-memprof_interval", "100ms", "-memprof_maxfiles", "2")
 	if err := engine.Start(); err != nil {
 		t.Error(err)
 	}
@@ -235,7 +236,7 @@ func testCoreSv1StopMemoryProfiling(t *testing.T) {
 
 func testCoreSv1CheckFinalMemProfiling(t *testing.T) {
 	// as the engine was killed, mem_final.prof was created and we must check it
-	file, err := os.Open(path.Join(argPath, fmt.Sprintf(utils.MemProfFileCgr)))
+	file, err := os.Open(path.Join(argPath, fmt.Sprintf(utils.MemProfFinalFile)))
 	if err != nil {
 		t.Error(err)
 	}
@@ -249,17 +250,17 @@ func testCoreSv1CheckFinalMemProfiling(t *testing.T) {
 		t.Errorf("Size of MemoryProfile %v is lower that expected", size.Size())
 	}
 	//after we checked that CPUProfile was made successfully, can delete it
-	if err := os.Remove(path.Join(argPath, fmt.Sprintf(utils.MemProfFileCgr))); err != nil {
+	if err := os.Remove(path.Join(argPath, fmt.Sprintf(utils.MemProfFinalFile))); err != nil {
 		t.Error(err)
 	}
 }
 
 func testCoreSv1StartMemProfilingErrorAlreadyStarted(t *testing.T) {
 	var reply string
-	args := &utils.MemoryPrf{
+	args := &cores.MemoryProfilingParams{
 		DirPath:  argPath,
 		Interval: 100 * time.Millisecond,
-		NrFiles:  2,
+		MaxFiles: 2,
 	}
 	expErr := "Memory Profiling already started"
 	if err := coreV1Rpc.Call(context.Background(), utils.CoreSv1StartMemoryProfiling,
@@ -333,10 +334,10 @@ func testCoreSv1StopCPUProfiling(t *testing.T) {
 
 func testCoreSv1StartMemoryProfiling(t *testing.T) {
 	var reply string
-	args := &utils.MemoryPrf{
+	args := cores.MemoryProfilingParams{
 		DirPath:  argPath,
 		Interval: 100 * time.Millisecond,
-		NrFiles:  2,
+		MaxFiles: 2,
 	}
 	if err := coreV1Rpc.Call(context.Background(), utils.CoreSv1StartMemoryProfiling,
 		args, &reply); err != nil {

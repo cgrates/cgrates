@@ -27,8 +27,8 @@ Able to read the configuration from either a local directory  of *.json* files w
   -memprof_dir string
         Directory for memory profiles
   -memprof_interval duration
-        Interval between memory profile saves (default 5s)
-  -memprof_nrfiles int
+        Interval between memory profile saves (default 15s)
+  -memprof_maxfiles int
         Number of memory profiles to keep (most recent) (default 1)
   -node_id string
         Node ID of the engine
@@ -46,7 +46,6 @@ Able to read the configuration from either a local directory  of *.json* files w
         Run on a single CPU core
   -version
         Print application version and exit
-
 
 
 .. hint:: $ cgr-engine -config_path=/etc/cgrates

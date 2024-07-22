@@ -39,18 +39,15 @@ func TestNewCoreService(t *testing.T) {
 	sts := engine.NewCapsStats(cfgDflt.CoreSCfg().CapsStatsInterval, caps, stopchan)
 	shdWg := new(sync.WaitGroup)
 	shdChan := utils.NewSyncedChan()
-	stopMemPrf := make(chan struct{})
 	expected := &CoreService{
-		fileMEM:    "/tmp",
-		shdWg:      shdWg,
-		shdChan:    shdChan,
-		stopMemPrf: stopMemPrf,
-		cfg:        cfgDflt,
-		CapsStats:  sts,
-		caps:       caps,
+		shdWg:     shdWg,
+		shdChan:   shdChan,
+		cfg:       cfgDflt,
+		CapsStats: sts,
+		caps:      caps,
 	}
 
-	rcv := NewCoreService(cfgDflt, caps, nil, "/tmp", stopchan, shdWg, stopMemPrf, shdChan)
+	rcv := NewCoreService(cfgDflt, caps, nil, stopchan, shdWg, shdChan)
 	if !reflect.DeepEqual(expected, rcv) {
 		t.Errorf("Expected %+v, received %+v", expected, rcv)
 	}
@@ -65,7 +62,7 @@ func TestCoreServiceStatus(t *testing.T) {
 	caps := engine.NewCaps(1, utils.MetaBusy)
 	stopChan := make(chan struct{}, 1)
 
-	cores := NewCoreService(cfgDflt, caps, nil, "/tmp", stopChan, nil, nil, nil)
+	cores := NewCoreService(cfgDflt, caps, nil, stopChan, nil, nil)
 	args := &utils.TenantWithAPIOpts{
 		Tenant:  "cgrates.org",
 		APIOpts: map[string]any{},

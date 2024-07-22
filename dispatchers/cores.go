@@ -22,6 +22,7 @@ import (
 	"time"
 
 	"github.com/cgrates/birpc/context"
+	"github.com/cgrates/cgrates/cores"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -102,23 +103,29 @@ func (dS *DispatcherService) CoreSv1StartCPUProfiling(ctx *context.Context, args
 	}
 	return dS.Dispatch(&utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaCore, utils.CoreSv1StartCPUProfiling, args, reply)
 }
-func (dS *DispatcherService) CoreSv1StartMemoryProfiling(ctx *context.Context, args *utils.MemoryPrf, reply *string) (err error) {
-	tnt := dS.cfg.GeneralCfg().DefaultTenant
-	if args != nil && len(args.Tenant) != 0 {
-		tnt = args.Tenant
+func (dS *DispatcherService) CoreSv1StartMemoryProfiling(ctx *context.Context, params cores.MemoryProfilingParams, reply *string) (err error) {
+	if params.Tenant == utils.EmptyString {
+		params.Tenant = dS.cfg.GeneralCfg().DefaultTenant
 	}
 	ev := make(map[string]any)
-	opts := make(map[string]any)
-	if args != nil {
-		opts = args.APIOpts
+	if params.APIOpts == nil {
+		params.APIOpts = make(map[string]any)
 	}
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(utils.CoreSv1StartMemoryProfiling, tnt,
-			utils.IfaceAsString(opts[utils.OptsAPIKey]), utils.TimePointer(time.Now())); err != nil {
+		if err = dS.authorize(utils.CoreSv1StartMemoryProfiling, params.Tenant,
+			utils.IfaceAsString(params.APIOpts[utils.OptsAPIKey]),
+			utils.TimePointer(time.Now())); err != nil {
 			return
 		}
 	}
-	return dS.Dispatch(&utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaCore, utils.CoreSv1StartMemoryProfiling, args, reply)
+	return dS.Dispatch(
+		&utils.CGREvent{
+			Tenant:  params.Tenant,
+			Event:   ev,
+			APIOpts: params.APIOpts,
+		}, utils.MetaCore,
+		utils.CoreSv1StartMemoryProfiling, params, reply,
+	)
 }
 func (dS *DispatcherService) CoreSv1Status(ctx *context.Context, args *utils.TenantWithAPIOpts, reply *map[string]any) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
@@ -156,21 +163,26 @@ func (dS *DispatcherService) CoreSv1StopCPUProfiling(ctx *context.Context, args 
 	}
 	return dS.Dispatch(&utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaCore, utils.CoreSv1StopCPUProfiling, args, reply)
 }
-func (dS *DispatcherService) CoreSv1StopMemoryProfiling(ctx *context.Context, args *utils.TenantWithAPIOpts, reply *string) (err error) {
-	tnt := dS.cfg.GeneralCfg().DefaultTenant
-	if args != nil && len(args.Tenant) != 0 {
-		tnt = args.Tenant
+func (dS *DispatcherService) CoreSv1StopMemoryProfiling(ctx *context.Context, params utils.TenantWithAPIOpts, reply *string) (err error) {
+	if params.Tenant == utils.EmptyString {
+		params.Tenant = dS.cfg.GeneralCfg().DefaultTenant
 	}
 	ev := make(map[string]any)
-	opts := make(map[string]any)
-	if args != nil {
-		opts = args.APIOpts
+	if params.APIOpts == nil {
+		params.APIOpts = make(map[string]any)
 	}
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(utils.CoreSv1StopMemoryProfiling,
-			tnt, utils.IfaceAsString(opts[utils.OptsAPIKey]), utils.TimePointer(time.Now())); err != nil {
+			params.Tenant, utils.IfaceAsString(params.APIOpts[utils.OptsAPIKey]), utils.TimePointer(time.Now())); err != nil {
 			return
 		}
 	}
-	return dS.Dispatch(&utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaCore, utils.CoreSv1StopMemoryProfiling, args, reply)
+	return dS.Dispatch(
+		&utils.CGREvent{
+			Tenant:  params.Tenant,
+			Event:   ev,
+			APIOpts: params.APIOpts,
+		}, utils.MetaCore,
+		utils.CoreSv1StopMemoryProfiling, params, reply,
+	)
 }
