@@ -44,7 +44,7 @@ func (cS *CoreSv1) Status(ctx *context.Context, arg *utils.TenantWithAPIOpts, re
 }
 
 // Ping used to determinate if component is active
-func (cS *CoreSv1) Ping(ctx *context.Context, ign *utils.CGREvent, reply *string) error {
+func (cS *CoreSv1) Ping(ctx *context.Context, _ *utils.CGREvent, reply *string) error {
 	*reply = utils.Pong
 	return nil
 }
@@ -65,15 +65,14 @@ func (cS *CoreSv1) StopCPUProfiling(ctx *context.Context, args *utils.TenantWith
 	return cS.cS.V1StopCPUProfiling(ctx, args, reply)
 }
 
-// StartMemoryProfiling is used to start MemoryProfiling in the given path
-func (cS *CoreSv1) StartMemoryProfiling(ctx *context.Context, args *utils.MemoryPrf, reply *string) error {
-	return cS.cS.V1StartMemoryProfiling(ctx, args, reply)
+// StartMemoryProfiling starts memory profiling in the specified directory.
+func (cS *CoreSv1) StartMemoryProfiling(ctx *context.Context, params cores.MemoryProfilingParams, reply *string) error {
+	return cS.cS.V1StartMemoryProfiling(ctx, params, reply)
 }
 
-// StopMemoryProfiling is used to stop MemoryProfiling. The file should be written on the path
-// where the MemoryProfiling already started
-func (cS *CoreSv1) StopMemoryProfiling(ctx *context.Context, args *utils.TenantWithAPIOpts, reply *string) error {
-	return cS.cS.V1StopMemoryProfiling(ctx, args, reply)
+// StopMemoryProfiling stops memory profiling and writes the final profile.
+func (cS *CoreSv1) StopMemoryProfiling(ctx *context.Context, params utils.TenantWithAPIOpts, reply *string) error {
+	return cS.cS.V1StopMemoryProfiling(ctx, params, reply)
 
 }
 
