@@ -38,6 +38,7 @@ import (
 	"github.com/cgrates/cgrates/analyzers"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"golang.org/x/net/websocket"
 )
 
@@ -200,8 +201,8 @@ func (s *Server) RegisterProfiler() {
 	registerProfiler(s.httpsMux)
 }
 
-func (s *Server) ServeHTTP(addr string, jsonRPCURL string, wsRPCURL string,
-	useBasicAuth bool, userList map[string]string, shdChan *utils.SyncedChan) {
+func (s *Server) ServeHTTP(addr, jsonRPCURL, wsRPCURL, promURL string, useBasicAuth bool,
+	userList map[string]string, shdChan *utils.SyncedChan) {
 	s.RLock()
 	enabled := s.rpcEnabled
 	s.RUnlock()
@@ -230,6 +231,18 @@ func (s *Server) ServeHTTP(addr string, jsonRPCURL string, wsRPCURL string,
 			s.httpMux.HandleFunc(wsRPCURL, use(wsHandler.ServeHTTP, basicAuth(userList)))
 		} else {
 			s.httpMux.Handle(wsRPCURL, wsHandler)
+		}
+	}
+	if promURL != "" {
+		s.Lock()
+		s.httpEnabled = true
+		s.Unlock()
+		utils.Logger.Info("<HTTP> enabling handler for Prometheus connections")
+		promHandler := promhttp.Handler()
+		if useBasicAuth {
+			s.httpMux.HandleFunc(promURL, use(promHandler.ServeHTTP, basicAuth(userList)))
+		} else {
+			s.httpMux.Handle(promURL, promHandler)
 		}
 	}
 	if !s.httpEnabled {

@@ -30,6 +30,7 @@ import (
 type HTTPCfg struct {
 	HTTPJsonRPCURL        string            // JSON RPC relative URL ("" to disable)
 	RegistrarSURL         string            // registrar service relative URL
+	PrometheusURL         string            // endpoint for prometheus metrics ("" to disable)
 	HTTPWSURL             string            // WebSocket relative URL ("" to disable)
 	HTTPFreeswitchCDRsURL string            // Freeswitch CDRS relative URL ("" to disable)
 	HTTPCDRsURL           string            // CDRS relative URL ("" to disable)
@@ -122,6 +123,9 @@ func (httpcfg *HTTPCfg) loadFromJSONCfg(jsnHTTPCfg *HTTPJsonCfg) (err error) {
 	if jsnHTTPCfg.Registrars_url != nil {
 		httpcfg.RegistrarSURL = *jsnHTTPCfg.Registrars_url
 	}
+	if jsnHTTPCfg.PrometheusURL != nil {
+		httpcfg.PrometheusURL = *jsnHTTPCfg.PrometheusURL
+	}
 	if jsnHTTPCfg.Ws_url != nil {
 		httpcfg.HTTPWSURL = *jsnHTTPCfg.Ws_url
 	}
@@ -170,6 +174,7 @@ func (httpcfg *HTTPCfg) AsMapInterface() map[string]any {
 	return map[string]any{
 		utils.HTTPJsonRPCURLCfg:        httpcfg.HTTPJsonRPCURL,
 		utils.RegistrarSURLCfg:         httpcfg.RegistrarSURL,
+		utils.PrometheusURLCfg:         httpcfg.PrometheusURL,
 		utils.HTTPWSURLCfg:             httpcfg.HTTPWSURL,
 		utils.HTTPFreeswitchCDRsURLCfg: httpcfg.HTTPFreeswitchCDRsURL,
 		utils.HTTPCDRsURLCfg:           httpcfg.HTTPCDRsURL,
@@ -189,6 +194,7 @@ func (httpcfg HTTPCfg) Clone() (cln *HTTPCfg) {
 	cln = &HTTPCfg{
 		HTTPJsonRPCURL:        httpcfg.HTTPJsonRPCURL,
 		RegistrarSURL:         httpcfg.RegistrarSURL,
+		PrometheusURL:         httpcfg.PrometheusURL,
 		HTTPWSURL:             httpcfg.HTTPWSURL,
 		HTTPFreeswitchCDRsURL: httpcfg.HTTPFreeswitchCDRsURL,
 		HTTPCDRsURL:           httpcfg.HTTPCDRsURL,

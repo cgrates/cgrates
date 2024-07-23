@@ -230,17 +230,19 @@ const CGRATES_CFG_JSON = `
 },
 
 
-"http": {													// HTTP server configuration
-	"json_rpc_url": "/jsonrpc",								// JSON RPC relative URL ("" to disable)
-	"registrars_url": "/registrar",							// registrar service relative URL
-	"ws_url": "/ws",										// WebSockets relative URL ("" to disable)
-	"freeswitch_cdrs_url": "/freeswitch_json",				// Freeswitch CDRS relative URL ("" to disable)
-	"http_cdrs": "/cdr_http",								// CDRS relative URL ("" to disable)
-	"use_basic_auth": false,								// use basic authentication
-	"auth_users": {},										// basic authentication usernames and base64-encoded passwords (eg: { "username1": "cGFzc3dvcmQ=", "username2": "cGFzc3dvcmQy "})
+"http": {							// HTTP server configuration
+	"json_rpc_url": "/jsonrpc",				// JSON RPC relative URL ("" to disable)
+	"registrars_url": "/registrar",				// registrar service relative URL
+	"prometheus_url": "/prometheus",			// endpoint for prometheus metrics
+	"ws_url": "/ws",					// WebSockets relative URL ("" to disable)
+	"freeswitch_cdrs_url": "/freeswitch_json",		// Freeswitch CDRS relative URL ("" to disable)
+	"http_cdrs": "/cdr_http",				// CDRS relative URL ("" to disable)
+	"use_basic_auth": false,				// use basic authentication
+	"auth_users": {},					// basic authentication usernames and base64-encoded passwords (eg: { "username1": "cGFzc3dvcmQ=", "username2": "cGFzc3dvcmQy "})
 	"client_opts":{
-		"skipTlsVerify": false, 							// if enabled Http Client will accept any TLS certificate
-		// the options to configure the http.Transport
+		"skipTlsVerify": false, 			// if enabled Http Client will accept any TLS certificate
+
+		// configuration options for http.Transport
 		"tlsHandshakeTimeout": "10s",
 		"disableKeepAlives": false,
 		"disableCompression": false,
@@ -251,7 +253,8 @@ const CGRATES_CFG_JSON = `
 		"responseHeaderTimeout": "0",
 		"expectContinueTimeout": "0",
 		"forceAttemptHttp2": true,
-		// the optins to configure the net.Dialer
+
+		// configuration options for net.Dialer
 		"dialTimeout": "30s",
 		"dialFallbackDelay": "300ms",
 		"dialKeepAlive": "30s",

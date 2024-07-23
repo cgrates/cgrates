@@ -82,6 +82,7 @@ type HTTPClientOptsJson struct {
 type HTTPJsonCfg struct {
 	Json_rpc_url        *string
 	Registrars_url      *string
+	PrometheusURL       *string `json:"prometheus_url"`
 	Ws_url              *string
 	Freeswitch_cdrs_url *string
 	Http_Cdrs           *string
