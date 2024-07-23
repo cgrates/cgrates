@@ -31,6 +31,7 @@ import (
 func TestHTTPCfgloadFromJsonCfg(t *testing.T) {
 	cfgJSONStr := &HTTPJsonCfg{
 		Json_rpc_url:        utils.StringPointer("/jsonrpc"),
+		PrometheusURL:       utils.StringPointer("/prometheus"),
 		Ws_url:              utils.StringPointer("/ws"),
 		Registrars_url:      utils.StringPointer("/randomUrl"),
 		Freeswitch_cdrs_url: utils.StringPointer("/freeswitch_json"),
@@ -40,6 +41,7 @@ func TestHTTPCfgloadFromJsonCfg(t *testing.T) {
 	}
 	expected := &HTTPCfg{
 		HTTPJsonRPCURL:        "/jsonrpc",
+		PrometheusURL:         "/prometheus",
 		HTTPWSURL:             "/ws",
 		RegistrarSURL:         "/randomUrl",
 		HTTPFreeswitchCDRsURL: "/freeswitch_json",
@@ -85,6 +87,7 @@ func TestHTTPCfgAsMapInterface(t *testing.T) {
 	eMap := map[string]any{
 		utils.HTTPJsonRPCURLCfg:        "/jsonrpc",
 		utils.RegistrarSURLCfg:         "/registrar",
+		utils.PrometheusURLCfg:         "/prometheus",
 		utils.HTTPWSURLCfg:             "/ws",
 		utils.HTTPFreeswitchCDRsURLCfg: "/freeswitch_json",
 		utils.HTTPCDRsURLCfg:           "/cdr_http",
@@ -117,15 +120,17 @@ func TestHTTPCfgAsMapInterface(t *testing.T) {
 func TestHTTPCfgAsMapInterface1(t *testing.T) {
 	cfgJSONStr := `{
 	"http": {
-       "json_rpc_url": "/rpc",					
-	   "ws_url": "",	
-	   "use_basic_auth": true,					
-	   "auth_users": {"user1": "authenticated", "user2": "authenticated"},
-     },
+		"json_rpc_url": "/rpc",					
+		"ws_url": "",	
+		"prometheus_url": "/metrics",	
+		"use_basic_auth": true,					
+		"auth_users": {"user1": "authenticated", "user2": "authenticated"},
+	},
 }`
 	eMap := map[string]any{
 		utils.HTTPJsonRPCURLCfg:        "/rpc",
 		utils.RegistrarSURLCfg:         "/registrar",
+		utils.PrometheusURLCfg:         "/metrics",
 		utils.HTTPWSURLCfg:             "",
 		utils.HTTPFreeswitchCDRsURLCfg: "/freeswitch_json",
 		utils.HTTPCDRsURLCfg:           "/cdr_http",
@@ -161,6 +166,7 @@ func TestHTTPCfgAsMapInterface1(t *testing.T) {
 func TestHTTPCfgClone(t *testing.T) {
 	ban := &HTTPCfg{
 		HTTPJsonRPCURL:        "/jsonrpc",
+		PrometheusURL:         "/prometheus",
 		HTTPWSURL:             "/ws",
 		RegistrarSURL:         "/randomUrl",
 		HTTPFreeswitchCDRsURL: "/freeswitch_json",
