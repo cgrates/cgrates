@@ -22,6 +22,7 @@ import (
 
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/sessions"
 	"github.com/cgrates/kamevapi"
 )
@@ -78,4 +79,31 @@ func TestKAShutdown(t *testing.T) {
 		t.Errorf("Shutdown returned an error: %v", err)
 	}
 
+}
+
+func TestNewKamailioAgent(t *testing.T) {
+	kaCfg := &config.KamAgentCfg{}
+	connMgr := &engine.ConnManager{}
+	timezone := "UTC"
+	ka := NewKamailioAgent(kaCfg, connMgr, timezone)
+
+	if ka.cfg != kaCfg {
+		t.Errorf("Expected cfg = %v, got %v", kaCfg, ka.cfg)
+	}
+
+	if ka.connMgr != connMgr {
+		t.Errorf("Expected connMgr = %v, got %v", connMgr, ka.connMgr)
+	}
+
+	if ka.timezone != timezone {
+		t.Errorf("Expected timezone = %v, got %v", timezone, ka.timezone)
+	}
+
+	if len(ka.conns) != len(kaCfg.EvapiConns) {
+		t.Errorf("Expected conns length = %d, got %d", len(kaCfg.EvapiConns), len(ka.conns))
+	}
+
+	if ka.activeSessionIDs == nil {
+		t.Errorf("Expected activeSessionIDs to be initialized, got nil")
+	}
 }
