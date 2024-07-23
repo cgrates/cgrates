@@ -20,6 +20,8 @@ package agents
 
 import (
 	"net"
+	"os"
+	"path/filepath"
 	"reflect"
 	"strings"
 	"testing"
@@ -1204,4 +1206,22 @@ func TestHeaderLenDiam(t *testing.T) {
 		t.Errorf("Expected headerLen to return 8 for Vbit not set, got: %d", result)
 	}
 
+}
+func TestLoadDictionaries(t *testing.T) {
+	tempDir, err := os.MkdirTemp("", "testdicts")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer os.RemoveAll(tempDir)
+	xmlFilePath := filepath.Join(tempDir, "test.xml")
+	xmlContent := `<diameter>`
+	err = os.WriteFile(xmlFilePath, []byte(xmlContent), 0644)
+	if err != nil {
+		t.Fatal(err)
+	}
+	componentID := "testComponent"
+	err = loadDictionaries(tempDir, componentID)
+	if err == nil {
+		t.Errorf("loadDictionaries() error = %v, wantErr %v", err, false)
+	}
 }
