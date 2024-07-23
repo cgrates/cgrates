@@ -269,3 +269,88 @@ func TestDataUpdateFromCSVMultiFiles(t *testing.T) {
 		t.Errorf("expecting: %+v, received: %+v", eLData, lData)
 	}
 }
+
+func TestTenantIDStruct(t *testing.T) {
+	tests := []struct {
+		name     string
+		input    LoaderData
+		expected utils.TenantID
+	}{
+		{
+			name: "Valid Data",
+			input: LoaderData{
+				utils.Tenant: "cgrates.org",
+				utils.ID:     "id1",
+			},
+			expected: utils.TenantID{
+				Tenant: "cgrates.org",
+				ID:     "id1",
+			},
+		},
+		{
+			name: "Empty Data",
+			input: LoaderData{
+				utils.Tenant: "",
+				utils.ID:     "",
+			},
+			expected: utils.TenantID{
+				Tenant: "",
+				ID:     "",
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := tt.input.TenantIDStruct()
+			if !reflect.DeepEqual(result, tt.expected) {
+				t.Errorf("TenantIDStruct() = %v, want %v", result, tt.expected)
+			}
+		})
+	}
+}
+
+func TestCsvProviderString(t *testing.T) {
+	tests := []struct {
+		name     string
+		provider csvProvider
+		expected string
+	}{
+		{
+			name: "Non-empty csvProvider",
+			provider: csvProvider{
+				req:      []string{"req1", "req2"},
+				fileName: "test.csv",
+				cache:    utils.MapStorage{"key1": "value1"},
+			},
+			expected: `{"req":["req1","req2"],"fileName":"test.csv","cache":{"key1":"value1"}}`,
+		},
+		{
+			name: "Empty csvProvider",
+			provider: csvProvider{
+				req:      []string{},
+				fileName: "",
+				cache:    utils.MapStorage{},
+			},
+			expected: `{"req":[],"fileName":"","cache":{}}`,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := tt.provider.String()
+			if result == tt.expected {
+				t.Errorf("csvProvider.String() = %v, want %v", result, tt.expected)
+			}
+		})
+	}
+}
+
+func TestCsvProviderRemoteHost(t *testing.T) {
+	expectedAddr := utils.LocalAddr()
+	cP := &csvProvider{}
+	result := cP.RemoteHost()
+	if !reflect.DeepEqual(result, expectedAddr) {
+		t.Errorf("csvProvider.RemoteHost() = %v, want %v", result, expectedAddr)
+	}
+}
