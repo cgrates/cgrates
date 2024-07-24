@@ -1235,3 +1235,21 @@ func TestFseventMissingParameter(t *testing.T) {
 		})
 	}
 }
+
+func TestV1TerminateSessionArgsErrorHandling(t *testing.T) {
+	tFSEvent := FSEvent{}
+	args := tFSEvent.V1TerminateSessionArgs()
+	if args == nil {
+		t.Errorf("Expected nil args due to error, got: %v", args)
+	}
+}
+
+func TestV1InitSessionArgsMissingVarCGRFlags(t *testing.T) {
+	tFSEvent := FSEvent{}
+	args := tFSEvent.V1InitSessionArgs()
+	if args == nil {
+		t.Errorf("Expected non-nil args, got nil")
+	} else if !args.InitSession {
+		t.Errorf("Expected InitSession to be true, got false")
+	}
+}
