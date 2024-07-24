@@ -21,7 +21,6 @@ package cores
 import (
 	"errors"
 	"fmt"
-	"io"
 	"os"
 	"path"
 	"path/filepath"
@@ -36,7 +35,7 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-func NewCoreService(cfg *config.CGRConfig, caps *engine.Caps, fileCPU io.Closer, stopChan chan struct{},
+func NewCoreService(cfg *config.CGRConfig, caps *engine.Caps, fileCPU *os.File, stopChan chan struct{},
 	shdWg *sync.WaitGroup, shdChan *utils.SyncedChan) *CoreService {
 	var st *engine.CapsStats
 	if caps.IsLimited() && cfg.CoreSCfg().CapsStatsInterval != 0 {
@@ -63,7 +62,7 @@ type CoreService struct {
 	stopMemProf  chan struct{} // signal end of memory profiling
 
 	fileCPUMux sync.Mutex
-	fileCPU    io.Closer
+	fileCPU    *os.File
 
 	caps *engine.Caps
 }
@@ -76,27 +75,38 @@ func (cS *CoreService) Shutdown() {
 }
 
 // StartCPUProfiling starts CPU profiling and saves the profile to the specified path.
-func (cS *CoreService) StartCPUProfiling(path string) (err error) {
+func (cS *CoreService) StartCPUProfiling(path string) error {
 	if path == utils.EmptyString {
 		return utils.NewErrMandatoryIeMissing("DirPath")
 	}
 	cS.fileCPUMux.Lock()
 	defer cS.fileCPUMux.Unlock()
-	cS.fileCPU, err = StartCPUProfiling(path)
-	return
+
+	if cS.fileCPU != nil {
+		// Check if the profiling is already active by calling Stat() on the file handle.
+		// If Stat() returns nil, it means profiling is already active.
+		if _, err := cS.fileCPU.Stat(); err == nil {
+			return errors.New("start CPU profiling: already started")
+		}
+	}
+	file, err := StartCPUProfiling(path)
+	if err != nil {
+		return err
+	}
+	cS.fileCPU = file
+	return nil
 }
 
 // StartCPUProfiling creates a file and passes it to pprof.StartCPUProfile. It returns the file
-// as an io.Closer to be able to close it later when stopping the CPU profiling.
-func StartCPUProfiling(path string) (io.Closer, error) {
+// to be able to verify the status of profiling and close it after profiling is stopped.
+func StartCPUProfiling(path string) (*os.File, error) {
 	f, err := os.Create(path)
 	if err != nil {
 		return nil, fmt.Errorf("could not create CPU profile: %v", err)
 	}
 	if err := pprof.StartCPUProfile(f); err != nil {
 		if err := f.Close(); err != nil {
-			utils.Logger.Warning(fmt.Sprintf(
-				"<%s> could not close file %q: %v", utils.CoreS, f.Name(), err))
+			utils.Logger.Warning(fmt.Sprintf("<%s> %v", utils.CoreS, err))
 		}
 		return nil, fmt.Errorf("could not start CPU profile: %v", err)
 	}

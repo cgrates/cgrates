@@ -20,7 +20,7 @@ package services
 
 import (
 	"fmt"
-	"io"
+	"os"
 	"sync"
 
 	"github.com/cgrates/birpc"
@@ -33,7 +33,7 @@ import (
 // NewCoreService returns the Core Service
 func NewCoreService(cfg *config.CGRConfig, caps *engine.Caps, server *cores.Server,
 	internalCoreSChan chan birpc.ClientConnector, anz *AnalyzerService,
-	fileCpu io.Closer, shdWg *sync.WaitGroup, shdChan *utils.SyncedChan,
+	fileCPU *os.File, shdWg *sync.WaitGroup, shdChan *utils.SyncedChan,
 	srvDep map[string]*sync.WaitGroup) *CoreService {
 	return &CoreService{
 		shdChan:  shdChan,
@@ -41,7 +41,7 @@ func NewCoreService(cfg *config.CGRConfig, caps *engine.Caps, server *cores.Serv
 		connChan: internalCoreSChan,
 		cfg:      cfg,
 		caps:     caps,
-		fileCpu:  fileCpu,
+		fileCPU:  fileCPU,
 		server:   server,
 		anz:      anz,
 		srvDep:   srvDep,
@@ -57,7 +57,7 @@ type CoreService struct {
 	stopChan chan struct{}
 	shdWg    *sync.WaitGroup
 	shdChan  *utils.SyncedChan
-	fileCpu  io.Closer
+	fileCPU  *os.File
 	cS       *cores.CoreService
 	connChan chan birpc.ClientConnector
 	anz      *AnalyzerService
@@ -74,7 +74,7 @@ func (cS *CoreService) Start() error {
 	defer cS.Unlock()
 	utils.Logger.Info(fmt.Sprintf("<%s> starting <%s> subsystem", utils.CoreS, utils.CoreS))
 	cS.stopChan = make(chan struct{})
-	cS.cS = cores.NewCoreService(cS.cfg, cS.caps, cS.fileCpu, cS.stopChan, cS.shdWg, cS.shdChan)
+	cS.cS = cores.NewCoreService(cS.cfg, cS.caps, cS.fileCPU, cS.stopChan, cS.shdWg, cS.shdChan)
 	srv, err := engine.NewServiceWithName(cS.cS, utils.CoreS, true)
 	if err != nil {
 		return err

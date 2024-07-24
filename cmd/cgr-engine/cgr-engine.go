@@ -21,7 +21,6 @@ package main
 import (
 	"flag"
 	"fmt"
-	"io"
 	"log"
 	"os"
 	"os/signal"
@@ -354,7 +353,7 @@ func main() {
 	go singnalHandler(shdWg, shdChan)
 
 	var cS *cores.CoreService
-	var cpuProf io.Closer
+	var cpuProf *os.File
 	if *cpuProfDir != utils.EmptyString {
 		cpuPath := filepath.Join(*cpuProfDir, utils.CpuPathCgr)
 		cpuProf, err = cores.StartCPUProfiling(cpuPath)
@@ -371,7 +370,7 @@ func main() {
 			}
 			pprof.StopCPUProfile()
 			if err := cpuProf.Close(); err != nil {
-				log.Printf("could not close file %q: %v", cpuProf.(*os.File).Name(), err)
+				log.Print(err)
 			}
 		}()
 	}
