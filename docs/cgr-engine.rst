@@ -30,6 +30,8 @@ Able to read the configuration from either a local directory  of *.json* files w
         Interval between memory profile saves (default 15s)
   -memprof_maxfiles int
         Number of memory profiles to keep (most recent) (default 1)
+  -memprof_timestamp
+        Add timestamp to memory profile files
   -node_id string
         Node ID of the engine
   -pid string

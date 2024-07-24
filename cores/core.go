@@ -136,7 +136,14 @@ type MemoryProfilingParams struct {
 	DirPath  string        // directory path where memory profiles will be saved
 	Interval time.Duration // duration between consecutive memory profile captures
 	MaxFiles int           // maximum number of profile files to retain
-	APIOpts  map[string]any
+
+	// UseTimestamp determines if the filename includes a timestamp.
+	// The format is 'mem_20060102150405[_<microseconds>].prof'.
+	// Microseconds are included if the interval is less than one second to avoid duplicate names.
+	// If false, filenames follow an incremental format: 'mem_<n>.prof'.
+	UseTimestamp bool
+
+	APIOpts map[string]any
 }
 
 // StartMemoryProfiling starts memory profiling in the specified directory.
@@ -171,16 +178,38 @@ func (cS *CoreService) StartMemoryProfiling(params MemoryProfilingParams) error 
 	return nil
 }
 
+// newMemProfNameFunc returns a closure that generates memory profile filenames.
+func newMemProfNameFunc(interval time.Duration, useTimestamp bool) func() string {
+	if !useTimestamp {
+		i := 0
+		return func() string {
+			i++
+			return fmt.Sprintf("mem_%d.prof", i)
+		}
+	}
+	if interval < time.Second {
+		return func() string {
+			now := time.Now()
+			return fmt.Sprintf("mem_%s_%d.prof", now.Format("20060102150405"), now.Nanosecond()/1e3)
+		}
+	}
+
+	return func() string {
+		return fmt.Sprintf("mem_%s.prof", time.Now().Format("20060102150405"))
+	}
+}
+
 // profileMemory runs the memory profiling loop, writing profiles to files at the specified interval.
 func (cS *CoreService) profileMemory(params MemoryProfilingParams) {
 	defer cS.shdWg.Done()
+	fileName := newMemProfNameFunc(params.Interval, params.UseTimestamp)
 	ticker := time.NewTicker(params.Interval)
 	defer ticker.Stop()
 	files := make([]string, 0, params.MaxFiles)
 	for {
 		select {
 		case <-ticker.C:
-			path := filepath.Join(params.DirPath, fmt.Sprintf("mem_%s.prof", time.Now().Format("20060102150405"))) // mem20060102150405.prof
+			path := filepath.Join(params.DirPath, fileName())
 			if err := writeHeapProfile(path); err != nil {
 				utils.Logger.Err(fmt.Sprintf("<%s> %v", utils.CoreS, err))
 				cS.StopMemoryProfiling()

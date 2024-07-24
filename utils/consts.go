@@ -2886,6 +2886,7 @@ const (
 	MemProfDirCgr        = "memprof_dir"
 	MemProfIntervalCgr   = "memprof_interval"
 	MemProfMaxFilesCgr   = "memprof_maxfiles"
+	MemProfTimestampCgr  = "memprof_timestamp"
 	ScheduledShutdownCgr = "scheduled_shutdown"
 	SingleCpuCgr         = "singlecpu"
 	PreloadCgr           = "preload"
