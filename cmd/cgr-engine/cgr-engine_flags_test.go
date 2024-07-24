@@ -99,6 +99,13 @@ func TestCgrEngineFlags(t *testing.T) {
 			want:       3,
 		},
 		{
+			name:       "memProfTimestamp",
+			flags:      []string{"-memprof_timestamp"},
+			flagVar:    memProfTimestamp,
+			defaultVal: false,
+			want:       true,
+		},
+		{
 			name:       "scheduledShutdown",
 			flags:      []string{"-scheduled_shutdown", "1h"},
 			flagVar:    scheduledShutdown,

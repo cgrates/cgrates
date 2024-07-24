@@ -59,6 +59,7 @@ var (
 	memProfDir        = cgrEngineFlags.String(utils.MemProfDirCgr, utils.EmptyString, "Directory for memory profiles")
 	memProfInterval   = cgrEngineFlags.Duration(utils.MemProfIntervalCgr, 15*time.Second, "Interval between memory profile saves")
 	memProfMaxFiles   = cgrEngineFlags.Int(utils.MemProfMaxFilesCgr, 1, "Number of memory profiles to keep (most recent)")
+	memProfTimestamp  = cgrEngineFlags.Bool(utils.MemProfTimestampCgr, false, "Add timestamp to memory profile files")
 	scheduledShutdown = cgrEngineFlags.Duration(utils.ScheduledShutdownCgr, 0, "Shutdown the engine after the specified duration")
 	singleCPU         = cgrEngineFlags.Bool(utils.SingleCpuCgr, false, "Run on a single CPU core")
 	syslogger         = cgrEngineFlags.String(utils.LoggerCfg, utils.EmptyString, "Logger type <*syslog|*stdout>")
@@ -694,9 +695,10 @@ func main() {
 
 	if *memProfDir != utils.EmptyString {
 		if err := cS.StartMemoryProfiling(cores.MemoryProfilingParams{
-			DirPath:  *memProfDir,
-			Interval: *memProfInterval,
-			MaxFiles: *memProfMaxFiles,
+			DirPath:      *memProfDir,
+			Interval:     *memProfInterval,
+			MaxFiles:     *memProfMaxFiles,
+			UseTimestamp: *memProfTimestamp,
 		}); err != nil {
 			utils.Logger.Err(fmt.Sprintf("<%s> %v", utils.CoreS, err))
 			return
