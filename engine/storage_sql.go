@@ -1481,7 +1481,7 @@ func (sqls *SQLStorage) GetTPTrends(tpid, tenant, id string) ([]*utils.TPTrendsP
 }
 
 func (sqls *SQLStorage) GetTPRankings(tpid string, tenant string, id string) ([]*utils.TPRankingProfile, error) {
-	var sgs RankingsMdls
+	var rgs RankingsMdls
 	q := sqls.db.Where("tpid = ?", tpid)
 	if len(id) != 0 {
 		q = q.Where("id = ?", id)
@@ -1489,10 +1489,10 @@ func (sqls *SQLStorage) GetTPRankings(tpid string, tenant string, id string) ([]
 	if len(tenant) != 0 {
 		q = q.Where("tenant = ?", tenant)
 	}
-	if err := q.Find(&sgs).Error; err != nil {
+	if err := q.Find(&rgs).Error; err != nil {
 		return nil, err
 	}
-	asgs := sgs.AsTPRanking()
+	asgs := rgs.AsTPRanking()
 	if len(asgs) == 0 {
 		return asgs, utils.ErrNotFound
 	}

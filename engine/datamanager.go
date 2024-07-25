@@ -1328,14 +1328,14 @@ func (dm *DataManager) SetTrendProfile(srp *TrendProfile) (err error) {
 }
 
 func (dm *DataManager) RemoveTrendProfile(tenant, id string) (err error) {
-	oldSgs, err := dm.GetTrendProfile(tenant, id)
+	oldTrs, err := dm.GetTrendProfile(tenant, id)
 	if err != nil && err != utils.ErrNotFound {
 		return err
 	}
 	if err = dm.DataDB().RemTrendProfileDrv(tenant, id); err != nil {
 		return
 	}
-	if oldSgs == nil {
+	if oldTrs == nil {
 		return utils.ErrNotFound
 	}
 	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaRankingProfiles]; itm.Replicate {
@@ -1369,7 +1369,7 @@ func (dm *DataManager) GetRankingProfile(tenant, id string, cacheRead, cacheWrit
 	if err != nil {
 		if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaRankingProfiles]; err == utils.ErrNotFound && itm.Remote {
 			if err = dm.connMgr.Call(context.TODO(), config.CgrConfig().DataDbCfg().RmtConns,
-				utils.ReplicatorSv1GetSagProfile,
+				utils.ReplicatorSv1GetRankingProfile,
 				&utils.TenantIDWithAPIOpts{
 					TenantID: &utils.TenantID{Tenant: tenant, ID: id},
 					APIOpts: utils.GenerateDBItemOpts(itm.APIKey, itm.RouteID, utils.EmptyString,
@@ -1410,7 +1410,7 @@ func (dm *DataManager) SetRankingProfile(sgp *RankingProfile) (err error) {
 		err = replicate(dm.connMgr, config.CgrConfig().DataDbCfg().RplConns,
 			config.CgrConfig().DataDbCfg().RplFiltered,
 			utils.RankingsProfilePrefix, sgp.TenantID(),
-			utils.ReplicatorSv1SetSagProfile,
+			utils.ReplicatorSv1SetRankingProfile,
 			&RankingProfileWithAPIOpts{
 				RankingProfile: sgp,
 				APIOpts: utils.GenerateDBItemOpts(itm.APIKey, itm.RouteID,

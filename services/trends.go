@@ -64,16 +64,16 @@ type TrendService struct {
 }
 
 // Start should handle the sercive start
-func (sa *TrendService) Start() error {
-	if sa.IsRunning() {
+func (tr *TrendService) Start() error {
+	if tr.IsRunning() {
 		return utils.ErrServiceAlreadyRunning
 	}
-	sa.srvDep[utils.DataDB].Add(1)
-	<-sa.cacheS.GetPrecacheChannel(utils.CacheStatFilterIndexes)
+	tr.srvDep[utils.DataDB].Add(1)
+	<-tr.cacheS.GetPrecacheChannel(utils.CacheTrendProfiles)
 
-	filterS := <-sa.filterSChan
-	sa.filterSChan <- filterS
-	dbchan := sa.dm.GetDMChan()
+	filterS := <-tr.filterSChan
+	tr.filterSChan <- filterS
+	dbchan := tr.dm.GetDMChan()
 	datadb := <-dbchan
 	dbchan <- datadb
 
@@ -83,42 +83,42 @@ func (sa *TrendService) Start() error {
 	if err != nil {
 		return err
 	}
-	if !sa.cfg.DispatcherSCfg().Enabled {
+	if !tr.cfg.DispatcherSCfg().Enabled {
 		for _, s := range srv {
-			sa.server.RpcRegister(s)
+			tr.server.RpcRegister(s)
 		}
 	}
-	sa.connChan <- sa.anz.GetInternalCodec(srv, utils.StatS)
+	tr.connChan <- tr.anz.GetInternalCodec(srv, utils.StatS)
 	return nil
 }
 
 // Reload handles the change of config
-func (sa *TrendService) Reload() (err error) {
+func (tr *TrendService) Reload() (err error) {
 	return
 }
 
 // Shutdown stops the service
-func (sa *TrendService) Shutdown() (err error) {
-	defer sa.srvDep[utils.DataDB].Done()
-	sa.Lock()
-	defer sa.Unlock()
-	<-sa.connChan
+func (tr *TrendService) Shutdown() (err error) {
+	defer tr.srvDep[utils.DataDB].Done()
+	tr.Lock()
+	defer tr.Unlock()
+	<-tr.connChan
 	return
 }
 
 // IsRunning returns if the service is running
-func (sa *TrendService) IsRunning() bool {
-	sa.RLock()
-	defer sa.RUnlock()
+func (tr *TrendService) IsRunning() bool {
+	tr.RLock()
+	defer tr.RUnlock()
 	return false
 }
 
 // ServiceName returns the service name
-func (sa *TrendService) ServiceName() string {
+func (tr *TrendService) ServiceName() string {
 	return utils.TrendS
 }
 
 // ShouldRun returns if the service should be running
-func (sa *TrendService) ShouldRun() bool {
-	return sa.cfg.TrendSCfg().Enabled
+func (tr *TrendService) ShouldRun() bool {
+	return tr.cfg.TrendSCfg().Enabled
 }
