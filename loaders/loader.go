@@ -438,27 +438,27 @@ func (ldr *Loader) storeLoadedData(loaderType string,
 	case utils.MetaRankings:
 		cacheIDs = []string{utils.CacheRankingFilterIndexes}
 		for _, lDataSet := range lds {
-			stsModels := make(engine.RankingsMdls, len(lDataSet))
+			rnkModels := make(engine.RankingsMdls, len(lDataSet))
 			for i, ld := range lDataSet {
-				stsModels[i] = new(engine.RankingsMdl)
-				if err = utils.UpdateStructWithIfaceMap(stsModels[i], ld); err != nil {
+				rnkModels[i] = new(engine.RankingsMdl)
+				if err = utils.UpdateStructWithIfaceMap(rnkModels[i], ld); err != nil {
 					return
 				}
 			}
-			for _, tpSgs := range stsModels.AsTPRanking() {
-				sgsPrf, err := engine.APItoRanking(tpSgs)
+			for _, tpRgs := range rnkModels.AsTPRanking() {
+				rgsPrf, err := engine.APItoRanking(tpRgs)
 				if err != nil {
 					return err
 				}
 				if ldr.dryRun {
 					utils.Logger.Info(
 						fmt.Sprintf("<%s-%s> DRY_RUN: RankingProfile: %s",
-							utils.LoaderS, ldr.ldrID, utils.ToJSON(sgsPrf)))
+							utils.LoaderS, ldr.ldrID, utils.ToJSON(rgsPrf)))
 					continue
 				}
 				// get IDs so we can reload in cache
-				ids = append(ids, sgsPrf.TenantID())
-				if err := ldr.dm.SetRankingProfile(sgsPrf); err != nil {
+				ids = append(ids, rgsPrf.TenantID())
+				if err := ldr.dm.SetRankingProfile(rgsPrf); err != nil {
 					return err
 				}
 				cacheArgs[utils.CacheRankingFilterIndexes] = ids

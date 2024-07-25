@@ -64,18 +64,17 @@ type RankingService struct {
 }
 
 // Start should handle the sercive start
-func (sag *RankingService) Start() error {
-	if sag.IsRunning() {
+func (rg *RankingService) Start() error {
+	if rg.IsRunning() {
 		return utils.ErrServiceAlreadyRunning
 	}
-	sag.srvDep[utils.DataDB].Add(1)
-	<-sag.cacheS.GetPrecacheChannel(utils.CacheStatQueueProfiles)
-	<-sag.cacheS.GetPrecacheChannel(utils.CacheStatQueues)
-	<-sag.cacheS.GetPrecacheChannel(utils.CacheStatFilterIndexes)
+	rg.srvDep[utils.DataDB].Add(1)
+	<-rg.cacheS.GetPrecacheChannel(utils.CacheRankingProfiles)
+	<-rg.cacheS.GetPrecacheChannel(utils.CacheRankingFilterIndexes)
 
-	filterS := <-sag.filterSChan
-	sag.filterSChan <- filterS
-	dbchan := sag.dm.GetDMChan()
+	filterS := <-rg.filterSChan
+	rg.filterSChan <- filterS
+	dbchan := rg.dm.GetDMChan()
 	datadb := <-dbchan
 	dbchan <- datadb
 
@@ -85,42 +84,42 @@ func (sag *RankingService) Start() error {
 	if err != nil {
 		return err
 	}
-	if !sag.cfg.DispatcherSCfg().Enabled {
+	if !rg.cfg.DispatcherSCfg().Enabled {
 		for _, s := range srv {
-			sag.server.RpcRegister(s)
+			rg.server.RpcRegister(s)
 		}
 	}
-	sag.connChan <- sag.anz.GetInternalCodec(srv, utils.StatS)
+	rg.connChan <- rg.anz.GetInternalCodec(srv, utils.StatS)
 	return nil
 }
 
 // Reload handles the change of config
-func (sag *RankingService) Reload() (err error) {
+func (rg *RankingService) Reload() (err error) {
 	return
 }
 
 // Shutdown stops the service
-func (sag *RankingService) Shutdown() (err error) {
-	defer sag.srvDep[utils.DataDB].Done()
-	sag.Lock()
-	defer sag.Unlock()
-	<-sag.connChan
+func (rg *RankingService) Shutdown() (err error) {
+	defer rg.srvDep[utils.DataDB].Done()
+	rg.Lock()
+	defer rg.Unlock()
+	<-rg.connChan
 	return
 }
 
 // IsRunning returns if the service is running
-func (sag *RankingService) IsRunning() bool {
-	sag.RLock()
-	defer sag.RUnlock()
+func (rg *RankingService) IsRunning() bool {
+	rg.RLock()
+	defer rg.RUnlock()
 	return false
 }
 
 // ServiceName returns the service name
-func (sag *RankingService) ServiceName() string {
+func (rg *RankingService) ServiceName() string {
 	return utils.RankingS
 }
 
 // ShouldRun returns if the service should be running
-func (sag *RankingService) ShouldRun() bool {
-	return sag.cfg.RankingSCfg().Enabled
+func (rg *RankingService) ShouldRun() bool {
+	return rg.cfg.RankingSCfg().Enabled
 }

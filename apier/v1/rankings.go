@@ -84,7 +84,7 @@ func (apierSv1 *APIerSv1) SetRankingProfile(ctx *context.Context, arg *engine.Ra
 	}
 	// delay if needed before cache call
 	if apierSv1.Config.GeneralCfg().CachingDelay != 0 {
-		utils.Logger.Info(fmt.Sprintf("<SetStatQueueProfile> Delaying cache call for %v", apierSv1.Config.GeneralCfg().CachingDelay))
+		utils.Logger.Info(fmt.Sprintf("<SetRankingProfile> Delaying cache call for %v", apierSv1.Config.GeneralCfg().CachingDelay))
 		time.Sleep(apierSv1.Config.GeneralCfg().CachingDelay)
 	}
 	//handle caching for RankingProfile

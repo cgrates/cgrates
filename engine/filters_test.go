@@ -2759,3 +2759,65 @@ func TestHttpInlineFilter(t *testing.T) {
 		t.Error("should had passed")
 	}
 }
+
+func TestFilterStats(t *testing.T) {
+	tmpConn := connMgr
+	defer func() {
+		connMgr = tmpConn
+	}()
+	clientConn := make(chan context.ClientConnector, 1)
+	clientConn <- &ccMock{
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.StatSv1GetQueueFloatMetrics: func(ctx *context.Context, args, reply any) error {
+				*reply.(*map[string]float64) = map[string]float64{
+					"*sum#~*req.Usage": 45,
+					utils.MetaTCD:      1,
+					utils.MetaAverage + utils.HashtagSep + utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Usage: 15,
+					utils.MetaACC: 22.2,
+				}
+				return nil
+			},
+		},
+	}
+	connMgr = NewConnManager(config.NewDefaultCGRConfig(), map[string]chan context.ClientConnector{
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats): clientConn,
+	})
+	testCases := []struct {
+		name     string
+		infilter string
+		experr   error
+		expPass  bool
+	}{
+		{"ComposedStatMetric", "*gte:~*stats.SQ_1002.*sum#~*req.Usage:20", nil, false},
+		{"TCDStatMetric", "*lte:~*stats.SQ_1.*tcd:5", nil, true},
+		{"AverageStatMetric", "*gt:~*stats.SQ_2.*average#~req.Usage:12", nil, false},
+		{"AverageCallCostStatMetric", "*eq:~*stats.SQ_3.*acc:22.2", nil, true},
+	}
+	initDP := utils.MapStorage{}
+	dp := newDynamicDP(nil, []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats)}, nil, "cgrates.org", initDP)
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			fl, err := NewFilterFromInline("cgrates.org", tc.infilter)
+			if err != nil {
+				t.Fatal(err)
+			}
+			pass, err := fl.Rules[0].Pass(dp)
+			if tc.experr != nil {
+				if err == nil {
+					t.Fatalf("Expected to receive error ,got nil")
+				}
+				if err != tc.experr {
+					t.Errorf("Expected error %q,got %q instead\n", tc.experr, err)
+				}
+				return
+			}
+			if err != nil {
+				t.Errorf("Expected no error,got %q instead\n", err)
+			}
+			if pass != tc.expPass {
+				t.Error("Exected filter rule to pass")
+			}
+		})
+	}
+}
