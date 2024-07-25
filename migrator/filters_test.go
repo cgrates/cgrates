@@ -21,6 +21,7 @@ package migrator
 import (
 	"reflect"
 	"testing"
+	"time"
 
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -280,4 +281,50 @@ func TestFiltersInlineV2Migrate(t *testing.T) {
 		}
 	}
 
+}
+
+func TestMigrateFilterV3(t *testing.T) {
+	v1F := &v1Filter{
+		Tenant: "cgrates.org",
+		ID:     "filter1",
+		Rules: []*v1FilterRule{
+			{Type: "type1", FieldName: "field1", Values: []string{"value1", "value2"}},
+			{Type: "type2", FieldName: "field2", Values: []string{"value3"}},
+		},
+		ActivationInterval: &utils.ActivationInterval{
+			ActivationTime: time.Now(),
+			ExpiryTime:     time.Now().Add(24 * time.Hour),
+		},
+	}
+	fltr := migrateFilterV3(v1F)
+	if fltr.Tenant != v1F.Tenant {
+		t.Errorf("expected Tenant %v, got %v", v1F.Tenant, fltr.Tenant)
+	}
+	if fltr.ID != v1F.ID {
+		t.Errorf("expected ID %v, got %v", v1F.ID, fltr.ID)
+	}
+	if len(fltr.Rules) != len(v1F.Rules) {
+		t.Errorf("expected %v rules, got %v", len(v1F.Rules), len(fltr.Rules))
+	} else {
+		for i, rule := range v1F.Rules {
+			if fltr.Rules[i].Type != rule.Type {
+				t.Errorf("for rule %d, expected Type %v, got %v", i, rule.Type, fltr.Rules[i].Type)
+			}
+			if fltr.Rules[i].Element != rule.FieldName {
+				t.Errorf("for rule %d, expected FieldName %v, got %v", i, rule.FieldName, fltr.Rules[i].Element)
+			}
+			if len(fltr.Rules[i].Values) != len(rule.Values) {
+				t.Errorf("for rule %d, expected %v values, got %v", i, len(rule.Values), len(fltr.Rules[i].Values))
+			} else {
+				for j, value := range rule.Values {
+					if fltr.Rules[i].Values[j] != value {
+						t.Errorf("for rule %d, expected value %v, got %v", i, value, fltr.Rules[i].Values[j])
+					}
+				}
+			}
+		}
+	}
+	if fltr.ActivationInterval != nil && (fltr.ActivationInterval.ActivationTime != v1F.ActivationInterval.ActivationTime || fltr.ActivationInterval.ExpiryTime != v1F.ActivationInterval.ExpiryTime) {
+		t.Errorf("expected ActivationInterval %+v, got %+v", v1F.ActivationInterval, fltr.ActivationInterval)
+	}
 }

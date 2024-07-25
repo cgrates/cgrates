@@ -121,3 +121,68 @@ func TestV1AccountAsAccount(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", testAccount.BalanceMap["*data"][0], newAcc.BalanceMap["*data"][0])
 	}
 }
+func TestV2toV3Account(t *testing.T) {
+	v2Acc := &v2Account{
+		ID: "account1",
+		BalanceMap: map[string]engine.Balances{
+			"balance1": {
+				{},
+			},
+		},
+		UnitCounters: engine.UnitCounters{
+			"counter1": {
+				&engine.UnitCounter{
+					Counters: []*engine.CounterFilter{
+						{
+							Value:  100.0,
+							Filter: &engine.BalanceFilter{},
+						},
+					},
+				},
+			},
+		},
+		ActionTriggers: engine.ActionTriggers{},
+		AllowNegative:  false,
+		Disabled:       false,
+	}
+	v3Acc := v2Acc.V2toV3Account()
+	if v3Acc.ID != v2Acc.ID {
+		t.Errorf("expected ID %s, got %s", v2Acc.ID, v3Acc.ID)
+	}
+	for key, v2Balances := range v2Acc.BalanceMap {
+		v3Balances, exists := v3Acc.BalanceMap[key]
+		if !exists {
+			t.Errorf("balance map key %s not found in v3 account", key)
+			continue
+		}
+		if len(v3Balances) != len(v2Balances) {
+			t.Errorf("expected %d balances for key %s, got %d", len(v2Balances), key, len(v3Balances))
+			continue
+		}
+		for i, v2Bal := range v2Balances {
+			v3Bal := v3Balances[i]
+			if v3Bal.ID != v2Bal.ID || v3Bal.Value != v2Bal.Value {
+				t.Errorf("expected balance %+v, got %+v", v2Bal, v3Bal)
+			}
+		}
+	}
+
+	for key, v2UnitCounters := range v2Acc.UnitCounters {
+		v3UnitCounters, exists := v3Acc.UnitCounters[key]
+		if !exists {
+			t.Errorf("unit counters key %s not found in v3 account", key)
+			continue
+		}
+		if len(v3UnitCounters) != len(v2UnitCounters) {
+			t.Errorf("expected %d unit counters for key %s, got %d", len(v2UnitCounters), key, len(v3UnitCounters))
+			continue
+		}
+		for i, v2Uc := range v2UnitCounters {
+			v3Uc := v3UnitCounters[i]
+			if len(v3Uc.Counters) != len(v2Uc.Counters) {
+				t.Errorf("expected %d counters for unit counter %d, got %d", len(v2Uc.Counters), i, len(v3Uc.Counters))
+			}
+		}
+	}
+
+}
