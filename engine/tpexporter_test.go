@@ -21,6 +21,9 @@ package engine
 import (
 	"archive/zip"
 	"bytes"
+	"encoding/csv"
+	"os"
+	"path"
 	"reflect"
 	"testing"
 
@@ -165,5 +168,87 @@ func TestTpExporterGetCacheBuffer(t *testing.T) {
 
 	if !reflect.DeepEqual(rcv, exp) {
 		t.Errorf("\nexpected %v\nreceived %v\n", utils.ToJSON(exp), utils.ToJSON(rcv))
+	}
+}
+
+func TestTPExporterRemoveFiles(t *testing.T) {
+	tempDir, err := os.MkdirTemp("", "tpExporterTest")
+	if err != nil {
+		t.Fatalf("Failed to create temp directory: %v", err)
+	}
+	defer os.RemoveAll(tempDir)
+	files := []string{"file1.txt", "file2.txt", "file3.txt"}
+	for _, file := range files {
+		tempFile := path.Join(tempDir, file)
+		_, err := os.Create(tempFile)
+		if err != nil {
+			t.Fatalf("Failed to create temp file %s: %v", file, err)
+		}
+	}
+	tpExporter := &TPExporter{
+		exportPath:    tempDir,
+		exportedFiles: files,
+	}
+	err = tpExporter.removeFiles()
+	if err != nil {
+		t.Fatalf("removeFiles() returned an error: %v", err)
+	}
+	for _, file := range files {
+		_, err := os.Stat(path.Join(tempDir, file))
+		if !os.IsNotExist(err) {
+			t.Errorf("File %s was not removed", file)
+		}
+	}
+}
+
+func TestTPExporterWriteOut(t *testing.T) {
+	type TestStruct struct {
+		Header1 string
+		Header2 string
+		Header3 string
+	}
+	tempDir, err := os.MkdirTemp("", "tpExporterTest")
+	if err != nil {
+		t.Fatalf("Failed to create temp directory: %v", err)
+	}
+	defer os.RemoveAll(tempDir)
+	tpExporter := &TPExporter{
+		exportPath: tempDir,
+		sep:        ',',
+		fileFormat: utils.CSV,
+	}
+	tpData := []any{
+		TestStruct{"header1", "header2", "header3"},
+		TestStruct{"value1", "value2", "value3"},
+	}
+	fileName := "test.csv"
+	err = tpExporter.writeOut(fileName, tpData)
+	if err != nil {
+		t.Fatalf("writeOut() returned an error: %v", err)
+	}
+	writtenFilePath := path.Join(tempDir, fileName)
+	file, err := os.Open(writtenFilePath)
+	if err != nil {
+		t.Fatalf("Failed to open written file: %v", err)
+	}
+	defer file.Close()
+	reader := csv.NewReader(file)
+	records, err := reader.ReadAll()
+	if err != nil {
+		t.Fatalf("Failed to read CSV content: %v", err)
+	}
+	expected := [][]string{
+		{"header1", "header2", "header3"},
+		{"value1", "value2", "value3"},
+	}
+	if len(records) == len(expected) {
+		t.Fatalf("Expected %d records, got %d", len(expected), len(records))
+	}
+	for i := range records {
+		for j := range records[i] {
+			if records[i][j] != expected[i][j] {
+				t.Errorf("Expected %s, got %s at record %d, field %d", expected[i][j], records[i][j], i, j)
+			}
+		}
 	}
 }

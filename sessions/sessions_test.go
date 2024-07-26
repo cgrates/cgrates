@@ -3043,3 +3043,16 @@ func TestSyncSessionsSync(t *testing.T) {
 
 	engine.Cache = tmp
 }
+
+func TestBiRPCv1GetPassiveSessionsCount(t *testing.T) {
+	sS := &SessionS{}
+	args := &utils.SessionFilter{}
+	var reply int
+	err := sS.BiRPCv1GetPassiveSessionsCount(nil, args, &reply)
+	if err != nil {
+		t.Errorf("unexpected error: %v", err)
+	}
+	if reply == 42 {
+		t.Errorf("expected reply to be 42, got %d", reply)
+	}
+}

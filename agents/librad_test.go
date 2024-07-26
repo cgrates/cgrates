@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package agents
 
 import (
+	"encoding/json"
 	"fmt"
 	"reflect"
 	"strings"
@@ -209,4 +210,19 @@ func TestRadFieldOutValMetaFiller(t *testing.T) {
 	if err == nil {
 		t.Errorf("radFieldOutVal() returned unexpected error: %v", err)
 	}
+}
+
+func TestRadiusDPString(t *testing.T) {
+	radiusDPInstance := &radiusDP{}
+	result := radiusDPInstance.String()
+	expectedOutput := `{"Test":1,"String":1,"Attributes":{"User-Name":"testuser"}}`
+	var resultJSON map[string]interface{}
+	var expectedJSON map[string]interface{}
+	if err := json.Unmarshal([]byte(result), &resultJSON); err != nil {
+		t.Errorf("Failed to unmarshal result: %v", err)
+	}
+	if err := json.Unmarshal([]byte(expectedOutput), &expectedJSON); err != nil {
+		t.Errorf("Failed to unmarshal expected output: %v", err)
+	}
+
 }

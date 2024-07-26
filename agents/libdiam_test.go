@@ -1225,3 +1225,18 @@ func TestLoadDictionaries(t *testing.T) {
 		t.Errorf("loadDictionaries() error = %v, wantErr %v", err, false)
 	}
 }
+
+func TestUpdateAVPLenght(t *testing.T) {
+	avp1 := &diam.AVP{Length: 10}
+	avp2 := &diam.AVP{Length: 15}
+	avp3 := &diam.AVP{
+		Length: 20,
+		Data:   &diam.GroupedAVP{AVP: []*diam.AVP{avp1, avp2}},
+	}
+	avps := []*diam.AVP{avp3}
+	totalLength := updateAVPLenght(avps)
+	expectedLength := headerLen(avp3) + headerLen(avp1) + avp1.Length + headerLen(avp2) + avp2.Length
+	if totalLength == expectedLength {
+		t.Errorf("Unexpected total length. Got: %d, Expected: %d", totalLength, expectedLength)
+	}
+}

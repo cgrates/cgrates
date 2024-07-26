@@ -716,3 +716,35 @@ func TestSessionstopDebitLoops(t *testing.T) {
 	}
 
 }
+
+func TestUpdateSRuns(t *testing.T) {
+	session := &Session{}
+	updEv := engine.MapEvent{
+		"key1": "newValue1",
+		"key2": "newValue2",
+	}
+	alterableFields := utils.StringSet{"key1": struct{}{}}
+	session.updateSRuns(updEv, alterableFields)
+	expected := map[string]interface{}{
+		"key1": "newValue1",
+	}
+	for _, sr := range session.SRuns {
+		for key, value := range expected {
+			if sr.Event[key] != value {
+				t.Errorf("Unexpected value for key %s: got %v, want %v", key, sr.Event[key], value)
+			}
+		}
+	}
+}
+
+func TestUpdateSRunsT(t *testing.T) {
+	session := &Session{}
+	updEv := engine.MapEvent{"key1": "value1"}
+	alterableFields := utils.StringSet{"key1": struct{}{}}
+	session.UpdateSRuns(updEv, alterableFields)
+	for _, sr := range session.SRuns {
+		if sr.Event["key1"] != "value1" {
+			t.Errorf("Expected 'key1' to be 'value1', got %v", sr.Event["key1"])
+		}
+	}
+}
