@@ -1,0 +1,20 @@
+[Unit]
+Description=Grafana instance
+Documentation=http://docs.grafana.org
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+User={{ grafana_user }}
+Group={{ grafana_user }}
+Type=simple
+ExecStart={{ grafana_install_dir }}/bin/grafana server \
+    --config={{ grafana_config_dir }}/grafana.ini \
+    --homepath={{ grafana_install_dir }} \
+    cfg:default.paths.data={{ grafana_data_dir }} \
+    cfg:default.paths.logs={{ grafana_logs_dir }}
+
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

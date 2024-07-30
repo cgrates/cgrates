@@ -1,0 +1,91 @@
+---
+- name: Create grafana user
+  become: true
+  ansible.builtin.user:
+    name: '{{ grafana_user }}'
+    state: present
+    system: true
+    createhome: false
+
+- name: Check current Grafana version
+  ansible.builtin.command: "{{ grafana_install_dir }}/bin/grafana --version"
+  register: grafana_current_version
+  ignore_errors: true
+  changed_when: false
+
+- name: Remove existing Grafana installation if version differs
+  become: true
+  ansible.builtin.file:
+    path: "{{ grafana_install_dir }}"
+    state: absent
+  when: grafana_current_version.rc == 0 and grafana_version not in grafana_current_version.stdout
+
+- name: Create grafana directories
+  become: true
+  ansible.builtin.file:
+    path: '{{ item }}'
+    state: directory
+    owner: '{{ grafana_user }}'
+    group: '{{ grafana_user }}'
+    mode: '0755'
+  loop:
+    - '{{ grafana_install_dir }}'
+    - '{{ grafana_data_dir }}'
+    - '{{ grafana_logs_dir }}'
+    - '{{ grafana_config_dir }}'
+
+- name: Download and extract grafana
+  become: true
+  ansible.builtin.unarchive:
+    src: 'https://dl.grafana.com/oss/release/grafana-{{ grafana_version }}.linux-amd64.tar.gz'
+    dest: '{{ grafana_install_dir }}'
+    remote_src: true
+    owner: '{{ grafana_user }}'
+    group: '{{ grafana_user }}'
+    extra_opts: [--strip-components=1]
+  notify: Restart grafana
+  when: grafana_current_version.rc != 0 or grafana_version not in grafana_current_version.stdout
+
+- name: Handle grafana configuration file
+  block:
+    - name: Copy grafana configuration file if a direct path
+      become: true
+      ansible.builtin.copy:
+        src: '{{ grafana_config_file }}'
+        dest: '{{ grafana_config_dir }}/grafana.ini'
+        owner: '{{ grafana_user }}'
+        group: '{{ grafana_user }}'
+        mode: '0644'
+        remote_src: true
+      notify: Restart grafana
+      when: grafana_config_file is defined and '/' in grafana_config_file
+
+    - name: Render grafana configuration template
+      become: true
+      ansible.builtin.template:
+        src: '{{ grafana_config_file }}'
+        dest: '{{ grafana_config_dir }}/grafana.ini'
+        owner: '{{ grafana_user }}'
+        group: '{{ grafana_user }}'
+        mode: '0644'
+      notify: Restart grafana
+      when: grafana_config_file is defined and '/' not in grafana_config_file
+
+  when: grafana_config_file is defined and grafana_config_file != ''
+
+- name: Create grafana systemd service file
+  become: true
+  ansible.builtin.template:
+    src: grafana.service.j2
+    dest: /etc/systemd/system/grafana.service
+    mode: '0644'
+  notify: Restart grafana
+
+- name: Ensure grafana service is in desired state
+  become: true
+  ansible.builtin.systemd_service:
+    name: grafana
+    state: '{{ grafana_service_state }}'
+    enabled: '{{ grafana_service_enabled }}'
+    daemon_reload: true
+  when: grafana_service_state == 'stopped' or not grafana_service_enabled
