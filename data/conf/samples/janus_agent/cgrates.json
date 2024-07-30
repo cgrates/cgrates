@@ -51,7 +51,7 @@
 	"attributes_conns": ["*localhost"],
 	"cdrs_conns": ["*localhost"],
 	"rals_conns": ["*localhost"],
-	"chargers_conns": ["*internal"],
+      "chargers_conns": ["*internal"],
         "channel_sync_interval": "15s"
 },
 

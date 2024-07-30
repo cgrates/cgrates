@@ -20,3 +20,4 @@ Following *Agents* are implemented within CGRateS:
    fsagent
    kamagent
    ers
+   janusagent
