@@ -121,3 +121,35 @@ func TestV1AccountAsAccount(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", testAccount.BalanceMap["*data"][0], newAcc.BalanceMap["*data"][0])
 	}
 }
+
+func TestV2toV3Account(t *testing.T) {
+	v2Acc := v2Account{
+		ID:            "test-account",
+		AllowNegative: true,
+		Disabled:      false,
+	}
+	result := v2Acc.V2toV3Account()
+	if result.ID != v2Acc.ID {
+		t.Errorf("expected ID %v, got %v", v2Acc.ID, result.ID)
+	}
+	if result.AllowNegative != v2Acc.AllowNegative {
+		t.Errorf("expected AllowNegative %v, got %v", v2Acc.AllowNegative, result.AllowNegative)
+	}
+	if result.Disabled != v2Acc.Disabled {
+		t.Errorf("expected Disabled %v, got %v", v2Acc.Disabled, result.Disabled)
+	}
+	if len(result.BalanceMap) != len(v2Acc.BalanceMap) {
+		t.Errorf("expected %d balances, got %d", len(v2Acc.BalanceMap), len(result.BalanceMap))
+	}
+	if resultBalance, ok := result.BalanceMap["balance1"]; ok {
+		if len(resultBalance) != 1 {
+			t.Errorf("expected 1 balance in balance1, got %d", len(resultBalance))
+		}
+		if resultBalance[0].ID != v2Acc.BalanceMap["balance1"][0].ID {
+			t.Errorf("expected Balance ID %v, got %v", v2Acc.BalanceMap["balance1"][0].ID, resultBalance[0].ID)
+		}
+		if resultBalance[0].Value != v2Acc.BalanceMap["balance1"][0].Value {
+			t.Errorf("expected Balance Value %v, got %v", v2Acc.BalanceMap["balance1"][0].Value, resultBalance[0].Value)
+		}
+	}
+}
