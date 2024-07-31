@@ -256,3 +256,22 @@ func TestDerivedChargers2Charger(t *testing.T) {
 		}
 	}
 }
+func TestMigrateFilterV3(t *testing.T) {
+	v1flt := &v1Filter{
+		Tenant:             "cgrates.org",
+		ID:                 "test-id",
+		Rules:              []*v1FilterRule{{Type: "type1", FieldName: "field1", Values: []string{"value1"}}},
+		ActivationInterval: nil,
+	}
+	result := migrateFilterV3(v1flt)
+
+	if result.Tenant != v1flt.Tenant {
+		t.Errorf("expected Tenant %v, got %v", v1flt.Tenant, result.Tenant)
+	}
+	if result.ID != v1flt.ID {
+		t.Errorf("expected ID %v, got %v", v1flt.ID, result.ID)
+	}
+	if len(result.Rules) != len(v1flt.Rules) {
+		t.Errorf("expected %d rules, got %d", len(v1flt.Rules), len(result.Rules))
+	}
+}

@@ -104,3 +104,61 @@ func TestV2ActionTriggerAsThreshold(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", filter, fltr)
 	}
 }
+func TestV2toV3Threshold(t *testing.T) {
+
+	v2T := v2Threshold{
+		Tenant:             "test-tenant",
+		ID:                 "test-id",
+		FilterIDs:          []string{"filter1", "filter2"},
+		ActivationInterval: &utils.ActivationInterval{},
+		Recurrent:          true,
+		MinHits:            5,
+		MinSleep:           10 * time.Second,
+		Blocker:            true,
+		Weight:             2.5,
+		ActionIDs:          []string{"action1", "action2"},
+		Async:              true,
+	}
+
+	result := v2T.V2toV3Threshold()
+
+	if result.Tenant != v2T.Tenant {
+		t.Errorf("expected Tenant %v, got %v", v2T.Tenant, result.Tenant)
+	}
+	if result.ID != v2T.ID {
+		t.Errorf("expected ID %v, got %v", v2T.ID, result.ID)
+	}
+	if result.FilterIDs[0] != v2T.FilterIDs[0] || result.FilterIDs[1] != v2T.FilterIDs[1] {
+		t.Errorf("expected FilterIDs %v, got %v", v2T.FilterIDs, result.FilterIDs)
+	}
+	if result.ActivationInterval != v2T.ActivationInterval {
+		t.Errorf("expected ActivationInterval %v, got %v", v2T.ActivationInterval, result.ActivationInterval)
+	}
+	if result.MinHits != v2T.MinHits {
+		t.Errorf("expected MinHits %v, got %v", v2T.MinHits, result.MinHits)
+	}
+	if result.MinSleep != v2T.MinSleep {
+		t.Errorf("expected MinSleep %v, got %v", v2T.MinSleep, result.MinSleep)
+	}
+	if result.Blocker != v2T.Blocker {
+		t.Errorf("expected Blocker %v, got %v", v2T.Blocker, result.Blocker)
+	}
+	if result.Weight != v2T.Weight {
+		t.Errorf("expected Weight %v, got %v", v2T.Weight, result.Weight)
+	}
+	if result.ActionIDs[0] != v2T.ActionIDs[0] || result.ActionIDs[1] != v2T.ActionIDs[1] {
+		t.Errorf("expected ActionIDs %v, got %v", v2T.ActionIDs, result.ActionIDs)
+	}
+	if result.Async != v2T.Async {
+		t.Errorf("expected Async %v, got %v", v2T.Async, result.Async)
+	}
+	if result.MaxHits != -1 {
+		t.Errorf("expected MaxHits %v, got %v", -1, result.MaxHits)
+	}
+
+	v2T.Recurrent = false
+	result = v2T.V2toV3Threshold()
+	if result.MaxHits != 1 {
+		t.Errorf("expected MaxHits %v, got %v", 1, result.MaxHits)
+	}
+}

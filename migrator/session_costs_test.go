@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package migrator
 
 import (
+	"encoding/json"
 	"reflect"
 	"testing"
 	"time"
@@ -91,5 +92,90 @@ func TestV2toV3Cost(t *testing.T) {
 	rply.CostDetails = sv3.CostDetails
 	if !reflect.DeepEqual(sv3, rply) {
 		t.Errorf("Expected: %s ,received: %s", utils.ToJSON(sv3), utils.ToJSON(rply))
+	}
+}
+
+func TestAsSessionsCostSql(t *testing.T) {
+
+	costDetails := &engine.CallCost{Cost: 100.0}
+	v2Cost := &v2SessionsCost{
+		CGRID:       "test-cgrid",
+		RunID:       "test-runid",
+		OriginHost:  "test-originhost",
+		OriginID:    "test-originid",
+		CostSource:  "test-costsource",
+		CostDetails: costDetails,
+		Usage:       5 * time.Second,
+	}
+
+	result := v2Cost.AsSessionsCostSql()
+
+	if result.Cgrid != v2Cost.CGRID {
+		t.Errorf("expected Cgrid %v, got %v", v2Cost.CGRID, result.Cgrid)
+	}
+	if result.RunID != v2Cost.RunID {
+		t.Errorf("expected RunID %v, got %v", v2Cost.RunID, result.RunID)
+	}
+	if result.OriginHost != v2Cost.OriginHost {
+		t.Errorf("expected OriginHost %v, got %v", v2Cost.OriginHost, result.OriginHost)
+	}
+	if result.OriginID != v2Cost.OriginID {
+		t.Errorf("expected OriginID %v, got %v", v2Cost.OriginID, result.OriginID)
+	}
+	if result.CostSource != v2Cost.CostSource {
+		t.Errorf("expected CostSource %v, got %v", v2Cost.CostSource, result.CostSource)
+	}
+	expectedCostDetails := utils.ToJSON(v2Cost.CostDetails)
+	if result.CostDetails != expectedCostDetails {
+		t.Errorf("expected CostDetails %v, got %v", expectedCostDetails, result.CostDetails)
+	}
+	if result.Usage != v2Cost.Usage.Nanoseconds() {
+		t.Errorf("expected Usage %v, got %v", v2Cost.Usage.Nanoseconds(), result.Usage)
+	}
+
+}
+
+func TestNewV2SessionsCostFromSessionsCostSql(t *testing.T) {
+
+	costDetails := &engine.CallCost{Cost: 100.0}
+	costDetailsJson, _ := json.Marshal(costDetails)
+	smSql := &engine.SessionCostsSQL{
+		Cgrid:       "test-cgrid",
+		RunID:       "test-runid",
+		OriginHost:  "test-originhost",
+		OriginID:    "test-originid",
+		CostSource:  "test-costsource",
+		CostDetails: string(costDetailsJson),
+		Usage:       int64(5 * time.Second),
+		CreatedAt:   time.Now(),
+	}
+
+	result, err := NewV2SessionsCostFromSessionsCostSql(smSql)
+
+	if err != nil {
+		t.Fatalf("expected no error, got %v", err)
+	}
+	if result.CGRID != smSql.Cgrid {
+		t.Errorf("expected CGRID %v, got %v", smSql.Cgrid, result.CGRID)
+	}
+	if result.RunID != smSql.RunID {
+		t.Errorf("expected RunID %v, got %v", smSql.RunID, result.RunID)
+	}
+	if result.OriginHost != smSql.OriginHost {
+		t.Errorf("expected OriginHost %v, got %v", smSql.OriginHost, result.OriginHost)
+	}
+	if result.OriginID != smSql.OriginID {
+		t.Errorf("expected OriginID %v, got %v", smSql.OriginID, result.OriginID)
+	}
+	if result.CostSource != smSql.CostSource {
+		t.Errorf("expected CostSource %v, got %v", smSql.CostSource, result.CostSource)
+	}
+	if result.Usage != time.Duration(smSql.Usage) {
+		t.Errorf("expected Usage %v, got %v", time.Duration(smSql.Usage), result.Usage)
+	}
+	if result.CostDetails == nil {
+		t.Fatalf("expected CostDetails not nil, got nil")
+	} else if result.CostDetails.Cost != costDetails.Cost {
+		t.Errorf("expected Cost %v, got %v", costDetails.Cost, result.CostDetails.Cost)
 	}
 }
