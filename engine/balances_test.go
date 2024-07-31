@@ -668,6 +668,7 @@ func TestBalancesValueFactorsGetValue(t *testing.T) {
 		}
 	}
 }
+
 func TestBalancesStringJson(t *testing.T) {
 	balances := Balances{
 		&Balance{
@@ -962,4 +963,116 @@ func TestBalancesHardMatchFilter(t *testing.T) {
 			t.Errorf("Expected false when Uuid doesn't match, but got %v", result)
 		}
 	})
+}
+
+func TestFieldAsStringCases(t *testing.T) {
+	tests := []struct {
+		name     string
+		balance  Balance
+		fldPath  []string
+		expected string
+		wantErr  bool
+	}{
+		{
+			name:     "ID field",
+			balance:  Balance{ID: "test-id", Value: 10.5},
+			fldPath:  []string{"ID"},
+			expected: "test-id",
+			wantErr:  false,
+		},
+		{
+			name:     "Value field",
+			balance:  Balance{ID: "test-id", Value: 10.5},
+			fldPath:  []string{"Value"},
+			expected: "10.5",
+			wantErr:  false,
+		},
+		{
+			name:     "Non-existent field",
+			balance:  Balance{ID: "test-id", Value: 10.5},
+			fldPath:  []string{"NonExistent"},
+			expected: "",
+			wantErr:  true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := tt.balance.FieldAsString(tt.fldPath)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("FieldAsString() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if got != tt.expected {
+				t.Errorf("FieldAsString() = %v, want %v", got, tt.expected)
+			}
+		})
+	}
+}
+
+func TestString(t *testing.T) {
+	tests := []struct {
+		name     string
+		balance  Balance
+		expected string
+	}{
+		{
+			name: "Default case",
+			balance: Balance{
+				ID:    "test-id",
+				Value: 10.5,
+			},
+			expected: `{"Uuid":"","ID":"test-id","Value":10.5,"ExpirationDate":"0001-01-01T00:00:00Z","Weight":0,"DestinationIDs":null,"RatingSubject":"","Categories":null,"SharedGroups":null,"Timings":null,"TimingIDs":null,"Disabled":false,"Factors":null,"Blocker":false}`,
+		},
+		{
+			name:     "Zero value case",
+			balance:  Balance{},
+			expected: `{"Uuid":"","ID":"","Value":0,"ExpirationDate":"0001-01-01T00:00:00Z","Weight":0,"DestinationIDs":null,"RatingSubject":"","Categories":null,"SharedGroups":null,"Timings":null,"TimingIDs":null,"Disabled":false,"Factors":null,"Blocker":false}`,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := tt.balance.String()
+			if got != tt.expected {
+				t.Errorf("String() = %v, want %v", got, tt.expected)
+			}
+		})
+	}
+}
+
+func TestFieldAsStringCase(t *testing.T) {
+	tests := []struct {
+		name     string
+		balances Balances
+		fldPath  []string
+		expected string
+		wantErr  bool
+	}{
+		{
+			name:     "Invalid field path",
+			balances: Balances{{ID: "test-id", Value: 10.5}},
+			fldPath:  []string{"NonExistentField"},
+			expected: "",
+			wantErr:  true,
+		},
+		{
+			name:     "Empty field path",
+			balances: Balances{{ID: "test-id", Value: 10.5}},
+			fldPath:  []string{},
+			expected: "",
+			wantErr:  true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := tt.balances.FieldAsString(tt.fldPath)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("FieldAsString() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if got != tt.expected {
+				t.Errorf("FieldAsString() = %v, want %v", got, tt.expected)
+			}
+		})
+	}
 }
