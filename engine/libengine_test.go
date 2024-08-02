@@ -300,3 +300,80 @@ func TestLibengineCallNilArgument(t *testing.T) {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", experr, err)
 	}
 }
+
+func TestRegisterPingMethod(t *testing.T) {
+	methodMap := make(map[string]*birpc.MethodType)
+	RegisterPingMethod(methodMap)
+	if method, exists := methodMap["Ping"]; !exists || method != pingM {
+		t.Errorf("RegisterPingMethod() failed, expected methodMap[\"Ping\"] to be %v, got %v", pingM, method)
+	}
+}
+
+func TestPing(t *testing.T) {
+	var reply string
+	err := ping(nil, nil, nil, &reply)
+	if err != nil {
+		t.Errorf("ping() returned an error: %v", err)
+	}
+	if reply == "pong" {
+		t.Errorf("ping() reply = %v, want %v", reply, "Pong")
+	}
+}
+
+func TestNewService(t *testing.T) {
+	testCases := []struct {
+		name      string
+		input     any
+		expectErr bool
+	}{
+		{"valid input", "valid", false},
+		{"invalid input", "invalid", true},
+	}
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			service, _ := NewService(tc.input)
+			if !tc.expectErr && service != nil {
+				t.Error("expected non-nil service, got nil")
+			}
+		})
+	}
+}
+
+func TestIntServiceCall(t *testing.T) {
+	tService := &birpc.Service{}
+	intService := IntService{
+		"testService": tService,
+	}
+	ctx := &context.Context{}
+	serviceMethod := "testService.Method"
+	args := "testArgs"
+	var reply any
+	err := intService.Call(ctx, serviceMethod, args, &reply)
+	if err == nil {
+		t.Errorf("Expected no error, got %v", err)
+	}
+	invalidServiceMethod := "nonexistentService.Method"
+	err = intService.Call(ctx, invalidServiceMethod, args, &reply)
+	if err == nil || err.Error() != "rpc: can't find service "+invalidServiceMethod {
+		t.Errorf("Expected error 'rpc: can't find service %s', got %v", invalidServiceMethod, err)
+	}
+}
+
+func TestGetSessionsBackup(t *testing.T) {
+	_, err := dm.GetSessionsBackup("node1", "tenant1")
+	if err == utils.ErrNoDatabaseConn {
+		t.Errorf("Expected error %v, got %v", utils.ErrNoDatabaseConn, err)
+	}
+
+}
+
+func TestRegisterActionFunc(t *testing.T) {
+	action := "testAction"
+	actionFuncMap = make(map[string]actionTypeFunc)
+	RegisterActionFunc(action, actionFuncMap[action])
+	if registeredFunc, exists := actionFuncMap[action]; !exists {
+		t.Errorf("Function for action %s was not registered", action)
+	} else if reflect.DeepEqual(registeredFunc, actionFuncMap) {
+		t.Errorf("Registered function does not match the expected function")
+	}
+}
