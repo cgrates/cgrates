@@ -19,9 +19,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package cores
 
 import (
+	"bytes"
 	"io"
 	"log"
 	"net/http"
+	"net/http/httptest"
 	"os"
 	"reflect"
 	"testing"
@@ -102,4 +104,38 @@ func TestRegisterProfiler(t *testing.T) {
 	rcv.RegisterProfiler()
 
 	rcv.StopBiRPC()
+}
+
+func TestHandleRequestCORSHeaders(t *testing.T) {
+	caps := engine.NewCaps(0, utils.MetaBusy)
+	rcv := NewServer(caps)
+
+	rcv.rpcEnabled = true
+
+	req, err := http.NewRequest(http.MethodPost, "http://127.0.0.1:2080/jsonrpc",
+		bytes.NewBuffer([]byte("1")))
+	if err != nil {
+		t.Fatal(err)
+	}
+	req.Header.Set("Origin", "http://origin.com")
+
+	w := httptest.NewRecorder()
+
+	rcv.handleRequest(w, req)
+
+	if origin := req.Header.Get("Origin"); origin != "" {
+		if got := w.Header().Get("Access-Control-Allow-Origin"); got != origin {
+			t.Errorf("Expected <%v>, got <%v>", "http://origin.com", got)
+		}
+	}
+
+	expectedMethods := "POST, GET, OPTIONS, PUT, DELETE"
+	if got := w.Header().Get("Access-Control-Allow-Methods"); got != expectedMethods {
+		t.Errorf("Expected <%v>; got <%v>", expectedMethods, got)
+	}
+
+	expectedHeaders := "Accept, Accept-Language, Content-Type"
+	if got := w.Header().Get("Access-Control-Allow-Headers"); got != expectedHeaders {
+		t.Errorf("Expected <%v>; got <%v>", expectedHeaders, got)
+	}
 }

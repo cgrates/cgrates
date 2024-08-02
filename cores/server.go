@@ -176,6 +176,11 @@ func (s *Server) ServeGOB(addr string, shdChan *utils.SyncedChan) {
 func (s *Server) handleRequest(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 	w.Header().Set("Content-Type", "application/json")
+	if origin := r.Header.Get("Origin"); origin != "" {
+		w.Header().Set("Access-Control-Allow-Origin", origin)
+		w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
+		w.Header().Set("Access-Control-Allow-Headers", "Accept, Accept-Language, Content-Type")
+	}
 	rmtIP, _ := utils.GetRemoteIP(r)
 	rmtAddr, _ := net.ResolveIPAddr(utils.EmptyString, rmtIP)
 	res := newRPCRequest(s.rpcSrv, r.Body, rmtAddr, s.caps, s.anz).Call()
