@@ -21,6 +21,8 @@ package loaders
 import (
 	"encoding/csv"
 	"io"
+	"os"
+	"path"
 	"reflect"
 	"sort"
 	"strings"
@@ -3630,5 +3632,85 @@ func TestLoadergetLdrType(t *testing.T) {
 			result := ldr.getLdrType(tt.fName)
 			reflect.DeepEqual(tt.expected, result)
 		})
+	}
+}
+
+func TestLoaderIsFolderLocked(t *testing.T) {
+	tests := []struct {
+		name           string
+		lockFilepath   string
+		expectedLocked bool
+		expectedErr    error
+	}{
+		{
+			name:           "No lock file path",
+			lockFilepath:   "",
+			expectedLocked: false,
+			expectedErr:    nil,
+		},
+		{
+			name:           "Lock file does not exist",
+			lockFilepath:   "nonexistent/path/to/lockfile",
+			expectedLocked: false,
+			expectedErr:    nil,
+		},
+		{
+			name:           "Error checking lock file",
+			lockFilepath:   "invalid/file/path",
+			expectedLocked: false,
+			expectedErr:    os.ErrInvalid,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			ldr := &Loader{lockFilepath: tt.lockFilepath}
+			locked, _ := ldr.isFolderLocked()
+			if locked != tt.expectedLocked {
+				t.Errorf("expected locked: %v, got: %v", tt.expectedLocked, locked)
+			}
+
+		})
+	}
+}
+
+func TestProcessFiles(t *testing.T) {
+	tempDir := t.TempDir()
+	tempFileName := path.Join(tempDir, "testfile.csv")
+	fileContent := "header1,header2\nvalue1,value2\n"
+	if err := os.WriteFile(tempFileName, []byte(fileContent), 0644); err != nil {
+		t.Fatalf("Failed to create temp CSV file: %v", err)
+	}
+	ldr := &Loader{
+		tpInDir:  tempDir,
+		fieldSep: ",",
+		rdrs: map[string]map[string]*openedCSVFile{
+			"testLoader": {
+				"testfile.csv": &openedCSVFile{},
+			},
+		},
+	}
+	if err := ldr.processFiles("testLoader", "cacheOption", "storeOption"); err != nil {
+		t.Errorf("processFiles returned an error: %v", err)
+	}
+	if _, ok := ldr.rdrs["testLoader"]["testfile.csv"]; !ok {
+		t.Error("File was not added to ldr.rdrs")
+	}
+}
+
+func TestProcessFile(t *testing.T) {
+	tempDir := t.TempDir()
+	tempFileName := path.Join(tempDir, "testfile.csv")
+	fileContent := "header1,header2\nvalue1,value2\n"
+	err := os.WriteFile(tempFileName, []byte(fileContent), 0644)
+	if err != nil {
+		t.Fatalf("Failed to create temp CSV file: %v", err)
+	}
+	ldr := &Loader{}
+	err = ldr.processFile("testfile.csv")
+	if err != nil {
+		t.Errorf("processFile returned an error: %v", err)
+	}
+	if _, ok := ldr.rdrs["testLoader"]["testfile.csv"]; ok {
+		t.Errorf("File was not added to ldr.rdrs")
 	}
 }
