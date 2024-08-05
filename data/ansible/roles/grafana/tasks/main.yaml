@@ -31,8 +31,11 @@
   loop:
     - '{{ grafana_install_dir }}'
     - '{{ grafana_data_dir }}'
+    - '{{ grafana_dashboards_dir }}'
     - '{{ grafana_logs_dir }}'
     - '{{ grafana_config_dir }}'
+    - '{{ grafana_provisioning_dir }}/dashboards'
+    - '{{ grafana_provisioning_dir }}/datasources'
 
 - name: Download and extract grafana
   become: true
@@ -47,31 +50,56 @@
   when: grafana_current_version.rc != 0 or grafana_version not in grafana_current_version.stdout
 
 - name: Handle grafana configuration file
+  ansible.builtin.include_tasks: handle_file.yaml
+  vars:
+    file_src: '{{ grafana_config_file }}'
+    file_dest: '{{ grafana_config_dir }}/grafana.ini'
+  when: grafana_config_file is defined
+
+- name: Handle grafana dashboard config file
+  ansible.builtin.include_tasks: handle_file.yaml
+  vars:
+    file_src: '{{ grafana_dashboard_config_file }}'
+    file_dest: '{{ grafana_provisioning_dir }}/dashboards/{{ grafana_dashboard_config_file | basename | regex_replace("\.j2$", "") }}'
+  when: grafana_dashboard_config_file is defined
+
+- name: Handle grafana datasource config file
+  ansible.builtin.include_tasks: handle_file.yaml
+  vars:
+    file_src: '{{ grafana_datasource_config_file }}'
+    file_dest: '{{ grafana_provisioning_dir }}/datasources'
+  when: grafana_datasource_config_file is defined
+
+- name: Import grafana dashboards
+  become: true
   block:
-    - name: Copy grafana configuration file if a direct path
-      become: true
+    - name: Import grafana dashboards from files
       ansible.builtin.copy:
-        src: '{{ grafana_config_file }}'
-        dest: '{{ grafana_config_dir }}/grafana.ini'
+        src: '{{ item.path }}'
+        dest: '{{ grafana_dashboards_dir }}'
         owner: '{{ grafana_user }}'
         group: '{{ grafana_user }}'
         mode: '0644'
-        remote_src: true
-      notify: Restart grafana
-      when: grafana_config_file is defined and '/' in grafana_config_file
+      loop: "{{ grafana_dashboard_sources | selectattr('type', '==', 'file') | list }}"
 
-    - name: Render grafana configuration template
-      become: true
-      ansible.builtin.template:
-        src: '{{ grafana_config_file }}'
-        dest: '{{ grafana_config_dir }}/grafana.ini'
+    - name: Download grafana dashboards from URLs
+      ansible.builtin.get_url:
+        url: '{{ item.path }}'
+        dest: '{{ grafana_dashboards_dir }}/{{ item.alias }}'
         owner: '{{ grafana_user }}'
         group: '{{ grafana_user }}'
         mode: '0644'
-      notify: Restart grafana
-      when: grafana_config_file is defined and '/' not in grafana_config_file
+      loop: "{{ grafana_dashboard_sources | selectattr('type', '==', 'url') | list }}"
 
-  when: grafana_config_file is defined and grafana_config_file != ''
+    - name: Modify datasource in grafana dashboards # see https://github.com/grafana/grafana/issues/10786
+      ansible.builtin.replace:
+        path: "{{ grafana_dashboards_dir }}/{{ item.alias if item.type == 'url' else item.path | basename }}"
+        regexp: '"datasource":\s*(".*"|\{[\s\S]*?\})'
+        replace: '"datasource": null'
+      loop: "{{ grafana_dashboard_sources }}"
+      when: item.modify_datasources | default(false)
+  when: grafana_dashboard_sources is defined and grafana_dashboard_sources | length > 0
+  notify: Restart grafana
 
 - name: Create grafana systemd service file
   become: true

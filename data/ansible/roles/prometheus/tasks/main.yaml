@@ -45,32 +45,29 @@
   notify: Restart prometheus
   when: prometheus_current_version.rc != 0 or prometheus_version not in prometheus_current_version.stdout
 
-- name: Handle prometheus configuration file
+- name: Handle prometheus config file
   block:
-    - name: Copy prometheus configuration file if a direct path
+    - name: Copy file (if not .j2)
       become: true
       ansible.builtin.copy:
         src: '{{ prometheus_config_file }}'
-        dest: '{{ prometheus_config_dir }}/prometheus.yml'
+        dest: '{{ prometheus_config_dir }}/{{ prometheus_config_file | basename }}'
         owner: '{{ prometheus_user }}'
         group: '{{ prometheus_user }}'
         mode: '0644'
-        remote_src: true
-      notify: Restart prometheus
-      when: prometheus_config_file is defined and '/' in prometheus_config_file
+      when: not prometheus_config_file.endswith('.j2')
 
-    - name: Render prometheus configuration template
+    - name: Template file (if .j2)
       become: true
       ansible.builtin.template:
         src: '{{ prometheus_config_file }}'
-        dest: '{{ prometheus_config_dir }}/prometheus.yml'
+        dest: '{{ prometheus_config_dir }}/{{ prometheus_config_file | basename | splitext | first }}' # cut .j2 extension
         owner: '{{ prometheus_user }}'
         group: '{{ prometheus_user }}'
         mode: '0644'
-      notify: Restart prometheus
-      when: prometheus_config_file is defined and '/' not in prometheus_config_file
-
-  when: prometheus_config_file is defined and prometheus_config_file != ''
+      when: prometheus_config_file.endswith('.j2')
+  when: prometheus_config_file is defined
+  notify: Restart prometheus
 
 - name: Create prometheus systemd service file
   become: true

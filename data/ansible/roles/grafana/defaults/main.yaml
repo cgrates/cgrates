@@ -5,8 +5,18 @@ grafana_install_dir: /opt/grafana
 grafana_data_dir: /var/lib/grafana
 grafana_logs_dir: /var/log/grafana
 grafana_config_dir: /etc/grafana
+grafana_provisioning_dir: '{{ grafana_config_dir }}/provisioning'
+grafana_dashboards_dir: '{{ grafana_data_dir }}/dashboards'
 
 grafana_service_enabled: false
 grafana_service_state: stopped
 
-grafana_config_file: '{{ grafana_install_dir }}/conf/defaults.ini' # supports either the path to a file or a j2 template
+grafana_config_file: '{{ grafana_install_dir }}/conf/defaults.ini' # Supports either the path to a file or a template name
+# grafana_dashboard_config_file: grafana_dashboard.yaml
+# grafana_datasource_config_file: grafana_datasource.yaml
+# grafana_dashboard_sources:
+#   - type: file
+#     path: dashboard1.json
+#   - type: url
+#     path: www.example.com/dl/dashboard
+#     alias: dl_dashboard.json
