@@ -1,6 +1,51 @@
 ---
 - name: Set up monitoring for CGRateS
   hosts: all
+  vars:
+    cgrates_dependencies:
+        - wget
+        - gnupg
+  tasks:
+    - name: CGRateS install/update tasks
+      when: install_or_update_cgrates | default(false) | bool
+      block:
+        - name: Install CGRateS dependencies
+          become: true
+          ansible.builtin.apt:
+            name: "{{ cgrates_dependencies }}"
+            state: present
+            update_cache: true
+
+        - name: Download the GPG Key
+          ansible.builtin.get_url:
+            url: https://apt.cgrates.org/apt.cgrates.org.gpg.key
+            dest: /tmp/apt.cgrates.org.asc
+
+        - name: Move the GPG Key to the trusted area
+          become: true
+          ansible.builtin.copy:
+            src: /tmp/apt.cgrates.org.asc
+            dest: /etc/apt/trusted.gpg.d/apt.cgrates.org.asc
+            remote_src: true
+
+        - name: Add the CGRateS repository to the sources list
+          become: true
+          ansible.builtin.copy:
+            content: "deb http://apt.cgrates.org/debian/ master-bookworm main\n"
+            dest: /etc/apt/sources.list.d/cgrates.list
+
+        - name: Install or upgrade CGRateS
+          become: true
+          ansible.builtin.apt:
+            name: cgrates
+            state: latest
+            update_cache: true
+
+        - name: Start the CGRateS service
+          become: true
+          ansible.builtin.systemd_service:
+            name: cgrates
+            state: restarted
   roles:
     - role: ../roles/node_exporter
       vars:
@@ -8,19 +53,30 @@
 
     - role: ../roles/prometheus
       vars:
-        prometheus_config_file: prometheus.yml.j2
+        prometheus_config_file: prometheus.yml
         prometheus_service_state: started
 
     - role: ../roles/grafana
       vars:
         grafana_service_state: started
+        grafana_config_file: grafana.ini
+        grafana_datasource_config_file: grafana_datasource.yaml
+        grafana_dashboard_config_file: grafana_dashboard.yaml
+        grafana_dashboard_sources:
+          - type: url
+            path: https://grafana.com/api/dashboards/13240/revisions/2/download
+            alias: go_metrics.json
+            modify_datasources: true # see https://github.com/grafana/grafana/issues/10786
+          - type: url
+            path: https://grafana.com/api/dashboards/1860/revisions/37/download
+            alias: node_exporter.json
 
-    - ../roles/go
-    - role: ../../roles/cgrates
-      vars:
-        # To avoid tasks/dependencies we don't need.
-        cgrates_migrator_cfg_path:
-        cgrates_dbs:
-        cgrates_dependencies:
-          - git
-          - redis
+    # - ../roles/go
+    # - role: ../../roles/cgrates
+    #   vars:
+    #     # To avoid tasks/dependencies we don't need.
+    #     cgrates_migrator_cfg_path:
+    #     cgrates_dbs:
+    #     cgrates_dependencies:
+    #       - git
+    #       - redis
