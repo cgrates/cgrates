@@ -1,0 +1,15 @@
+[Unit]
+Description=Node Exporter
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+User={{ node_exporter_user }}
+Group={{ node_exporter_user }}
+Type=simple
+ExecStart={{ node_exporter_install_dir }}/node_exporter \
+    --web.listen-address={{ node_exporter_web_listen_address }}
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
