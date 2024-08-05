@@ -1,0 +1,26 @@
+---
+- name: Set up monitoring for CGRateS
+  hosts: all
+  roles:
+    - role: ../roles/node_exporter
+      vars:
+        node_exporter_service_state: started
+
+    - role: ../roles/prometheus
+      vars:
+        prometheus_config_file: prometheus.yml.j2
+        prometheus_service_state: started
+
+    - role: ../roles/grafana
+      vars:
+        grafana_service_state: started
+
+    - ../roles/go
+    - role: ../../roles/cgrates
+      vars:
+        # To avoid tasks/dependencies we don't need.
+        cgrates_migrator_cfg_path:
+        cgrates_dbs:
+        cgrates_dependencies:
+          - git
+          - redis
