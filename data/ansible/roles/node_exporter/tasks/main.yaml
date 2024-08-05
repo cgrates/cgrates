@@ -1,0 +1,58 @@
+---
+- name: Create node_exporter user
+  become: true
+  ansible.builtin.user:
+    name: '{{ node_exporter_user }}'
+    state: present
+    system: true
+    createhome: no
+
+- name: Check current node_exporter version
+  ansible.builtin.command: '{{ node_exporter_install_dir }}/node_exporter --version'
+  register: node_exporter_current_version
+  ignore_errors: true
+  changed_when: false
+
+- name: Remove existing node_exporter installation if version differs
+  become: true
+  ansible.builtin.file:
+    path: '{{ node_exporter_install_dir }}'
+    state: absent
+  when: node_exporter_current_version.rc == 0 and node_exporter_version not in node_exporter_current_version.stdout
+
+- name: Create node_exporter installation directory
+  become: true
+  ansible.builtin.file:
+    path: '{{ node_exporter_install_dir }}'
+    state: directory
+    owner: '{{ node_exporter_user }}'
+    group: '{{ node_exporter_user }}'
+    mode: '0755'
+
+- name: Download and extract node_exporter
+  become: true
+  ansible.builtin.unarchive:
+    src: 'https://github.com/prometheus/node_exporter/releases/download/v{{ node_exporter_version }}/node_exporter-{{ node_exporter_version }}.linux-amd64.tar.gz'
+    dest: '{{ node_exporter_install_dir }}'
+    remote_src: true
+    owner: '{{ node_exporter_user }}'
+    group: '{{ node_exporter_user }}'
+    extra_opts: [--strip-components=1]
+  notify: Restart node_exporter
+  when: node_exporter_current_version.rc != 0 or node_exporter_version not in node_exporter_current_version.stdout
+
+- name: Create node_exporter systemd service file
+  become: true
+  ansible.builtin.template:
+    src: node_exporter.service.j2
+    dest: /etc/systemd/system/node_exporter.service
+    mode: '0644'
+  notify: Restart node_exporter
+
+- name: Ensure node_exporter service is in desired state
+  become: true
+  ansible.builtin.systemd_service:
+    name: node_exporter
+    state: '{{ node_exporter_service_state }}'
+    enabled: '{{ node_exporter_service_enabled }}'
+  when: node_exporter_service_state == 'stopped' or node_exporter_service_enabled == false
