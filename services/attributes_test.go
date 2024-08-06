@@ -85,3 +85,11 @@ func TestAttributeSCoverage(t *testing.T) {
 		t.Errorf("Expected service to be down")
 	}
 }
+
+func TestAttributeServiceReload(t *testing.T) {
+	attrService := &AttributeService{}
+	err := attrService.Reload()
+	if err != nil {
+		t.Errorf("Expected Reload to return no error, got %v", err)
+	}
+}

@@ -111,3 +111,11 @@ func TestApiersCoverage(t *testing.T) {
 		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", nil, shutdownApi2)
 	}
 }
+
+func TestAPIerSv2ServiceReload(t *testing.T) {
+	apiService := &APIerSv2Service{}
+	err := apiService.Reload()
+	if err != nil {
+		t.Errorf("Expected Reload to return no error, got %v", err)
+	}
+}

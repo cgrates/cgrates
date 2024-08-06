@@ -87,3 +87,10 @@ func TestAnalyzerCoverage(t *testing.T) {
 	}
 
 }
+func TestAnalyzerServiceReload(t *testing.T) {
+	analyzerService := &AnalyzerService{}
+	err := analyzerService.Reload()
+	if err != nil {
+		t.Errorf("Expected Reload to return no error, got %v", err)
+	}
+}

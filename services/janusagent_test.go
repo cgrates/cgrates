@@ -61,3 +61,11 @@ func TestJanusAgentCoverage(t *testing.T) {
 		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.JanusAgent, serviceName)
 	}
 }
+
+func TestJanusAgentReload(t *testing.T) {
+	ja := &JanusAgent{}
+	err := ja.Reload()
+	if err != nil {
+		t.Errorf("Expected no error, got %v", err)
+	}
+}

@@ -86,3 +86,11 @@ func TestChargerSCoverage(t *testing.T) {
 	}
 
 }
+
+func TestChargerServiceReload(t *testing.T) {
+	chargerService := &ChargerService{}
+	err := chargerService.Reload()
+	if err != nil {
+		t.Errorf("Expected Reload to return no error, got %v", err)
+	}
+}

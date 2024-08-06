@@ -93,3 +93,11 @@ func TestCdrsCoverage(t *testing.T) {
 		t.Errorf("Expected service to be down")
 	}
 }
+
+func TestCDRServerReload(t *testing.T) {
+	cdrService := &CDRServer{}
+	err := cdrService.Reload()
+	if err != nil {
+		t.Errorf("Expected Reload to return no error, got %v", err)
+	}
+}
