@@ -187,7 +187,6 @@ func testV2CDRsProcessCDR(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply received: ", reply)
 	}
-	time.Sleep(time.Duration(150) * time.Millisecond) // Give time for CDR to be rated
 }
 
 func testV2CDRsGetCdrs(t *testing.T) {
@@ -258,7 +257,6 @@ func testV2CDRsProcessCDR2(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply received: ", reply)
 	}
-	time.Sleep(time.Duration(150) * time.Millisecond) // Give time for CDR to be rated
 }
 
 func testV2CDRsGetCdrs2(t *testing.T) {
@@ -331,7 +329,6 @@ func testV2CDRsProcessCDR3(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply received: ", reply)
 	}
-	time.Sleep(time.Duration(150) * time.Millisecond) // Give time for CDR to be rated
 }
 
 func testV2CDRsGetCdrs3(t *testing.T) {
@@ -393,7 +390,6 @@ func testV2CDRsProcessCDR4(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply received: ", reply)
 	}
-	time.Sleep(time.Duration(150) * time.Millisecond) // Give time for CDR to be rated
 }
 
 func testV2CDRsGetCdrs4(t *testing.T) {
@@ -479,6 +475,7 @@ func testV2CDRsSetStats(t *testing.T) {
 			ID:        "STS_PoccessCDR",
 			FilterIDs: []string{"*string:~*req.OriginID:testV2CDRsProcessCDR5"},
 			// QueueLength: 10,
+			TTL: -1,
 			Metrics: []*engine.MetricWithFilters{{
 				MetricID: "*sum:~*req.Usage",
 			}},
@@ -583,7 +580,6 @@ func testV2CDRsProcessCDR5(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply received: ", reply)
 	}
-	time.Sleep(time.Duration(150) * time.Millisecond) // Give time for CDR to be rated
 }
 
 func testV2CDRsGetStats1(t *testing.T) {
@@ -650,14 +646,13 @@ func testV2CDRsProcessCDR6(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply received: ", reply)
 	}
-	time.Sleep(time.Duration(150) * time.Millisecond) // Give time for CDR to be rated
 }
 
 func testV2CDRsGetStats2(t *testing.T) {
 	expectedIDs := []string{"STS_PoccessCDR"}
 	var metrics map[string]string
 	expectedMetrics := map[string]string{
-		utils.ConcatenatedKey(utils.MetaSum, utils.DynamicDataPrefix+utils.MetaReq+utils.NestingSep+utils.Usage): "60000000000",
+		utils.ConcatenatedKey(utils.MetaSum, utils.DynamicDataPrefix+utils.MetaReq+utils.NestingSep+utils.Usage): "120000000000",
 	}
 	if err := cdrsRpc.Call(utils.StatSv1GetQueueStringMetrics,
 		&utils.TenantIDWithArgDispatcher{
@@ -709,7 +704,6 @@ func testV2CDRsProcessCDR7(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply received: ", reply)
 	}
-	time.Sleep(time.Duration(150) * time.Millisecond) // Give time for CDR to be rated
 }
 
 func testV2CDRsGetCdrs7(t *testing.T) {
