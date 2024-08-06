@@ -20,7 +20,6 @@ package engine
 import (
 	"fmt"
 	"reflect"
-	"sync"
 	"testing"
 	"time"
 
@@ -933,48 +932,5 @@ func TestLibStatsAsStatQueue(t *testing.T) {
 
 	if rcv != nil {
 		t.Error(rcv)
-	}
-}
-
-func TestLibStatsLock(t *testing.T) {
-	si := []SQItem{{
-		EventID:    str,
-		ExpiryTime: &tm,
-	}}
-	msw := map[string]*StatWithCompress{"test": {
-		Stat:           fl,
-		CompressFactor: nm,
-	}}
-	st := StatASR{
-		FilterIDs: slc,
-		Answered:  fl,
-		Count:     n,
-		Events:    msw,
-		MinItems:  nm,
-	}
-	msm := map[string]StatMetric{"*asr": &st}
-
-	var rwm sync.RWMutex
-	sq := StatQueue{
-		lk:        rwm,
-		Tenant:    str,
-		ID:        str,
-		SQItems:   si,
-		SQMetrics: msm,
-		MinItems:  nm,
-	}
-
-	nExp := sq
-
-	sq.Lock()
-
-	if reflect.DeepEqual(sq, nExp) {
-		t.Error("didn't lock")
-	}
-
-	sq.Unlock()
-
-	if !reflect.DeepEqual(sq, nExp) {
-		t.Error("didn't lock")
 	}
 }

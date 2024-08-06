@@ -21,7 +21,6 @@ package engine
 import (
 	"fmt"
 	"sort"
-	"sync"
 	"time"
 
 	"github.com/cgrates/cgrates/config"
@@ -133,7 +132,6 @@ type SQItem struct {
 
 // StatQueue represents an individual stats instance
 type StatQueue struct {
-	lk        sync.RWMutex // protect the elements from within
 	Tenant    string
 	ID        string
 	SQItems   []SQItem
@@ -144,18 +142,6 @@ type StatQueue struct {
 	ttl       *time.Duration // timeToLeave, picked on each init
 }
 
-// RLock only to implement sync.RWMutex methods
-func (sq *StatQueue) RLock() { sq.lk.RLock() }
-
-// RUnlock only to implement sync.RWMutex methods
-func (sq *StatQueue) RUnlock() { sq.lk.RUnlock() }
-
-// Lock only to implement sync.RWMutex methods
-func (sq *StatQueue) Lock() { sq.lk.Lock() }
-
-// Unlock only to implement sync.RWMutex methods
-func (sq *StatQueue) Unlock() { sq.lk.Unlock() }
-
 // TenantID will compose the unique identifier for the StatQueue out of Tenant and ID
 func (sq *StatQueue) TenantID() string {
 	return utils.ConcatenatedKey(sq.Tenant, sq.ID)
@@ -163,7 +149,7 @@ func (sq *StatQueue) TenantID() string {
 
 // ProcessEvent processes a utils.CGREvent, returns true if processed
 func (sq *StatQueue) ProcessEvent(ev *utils.CGREvent, filterS *FilterS) (err error) {
-	if err = sq.remExpired(); err != nil {
+	if _, err = sq.remExpired(); err != nil {
 		return
 	}
 	if err = sq.remOnQueueLength(); err != nil {
@@ -188,7 +174,7 @@ func (sq *StatQueue) remEventWithID(evID string) (err error) {
 }
 
 // remExpired expires items in queue
-func (sq *StatQueue) remExpired() (err error) {
+func (sq *StatQueue) remExpired() (removed int, err error) {
 	var expIdx *int // index of last item to be expired
 	for i, item := range sq.SQItems {
 		if item.ExpiryTime == nil {
@@ -205,7 +191,8 @@ func (sq *StatQueue) remExpired() (err error) {
 	if expIdx == nil {
 		return
 	}
-	sq.SQItems = sq.SQItems[*expIdx+1:]
+	removed = *expIdx + 1
+	sq.SQItems = sq.SQItems[removed:]
 	return
 }
 

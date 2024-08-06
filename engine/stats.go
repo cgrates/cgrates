@@ -223,6 +223,33 @@ func (sS *StatService) matchingStatQueuesForEvent(args *StatsArgsProcessEvent) (
 	return
 }
 
+func (sS *StatService) getStatQueue(tnt, id string) (sq *StatQueue, err error) {
+	if sq, err = sS.dm.GetStatQueue(tnt, id, true, true, utils.EmptyString); err != nil {
+		return
+	}
+
+	var removed int
+	if removed, err = sq.remExpired(); err != nil || removed == 0 {
+		return
+	}
+	sS.storeStatQueue(sq)
+	return
+}
+
+// storeStatQueue will store the sq if needed
+func (sS *StatService) storeStatQueue(sq *StatQueue) {
+	if sS.cgrcfg.StatSCfg().StoreInterval != 0 && sq.dirty != nil { // don't save
+		*sq.dirty = true // mark it to be saved
+		if sS.cgrcfg.StatSCfg().StoreInterval == -1 {
+			sS.StoreStatQueue(sq)
+		} else {
+			sS.ssqMux.Lock()
+			sS.storedStatQueues[sq.TenantID()] = true
+			sS.ssqMux.Unlock()
+		}
+	}
+}
+
 // Call implements birpc.ClientConnector interface for internal RPC
 // here for cases when passing StatsService as rpccclient.RpcClientConnection
 func (ss *StatService) Call(ctx *context.Context, serviceMethod string, args any, reply any) error {
@@ -260,17 +287,7 @@ func (sS *StatService) processEvent(args *StatsArgsProcessEvent) (statQueueIDs [
 					sq.TenantID(), args.TenantID(), err.Error()))
 			withErrors = true
 		}
-		if sS.cgrcfg.StatSCfg().StoreInterval != 0 && sq.dirty != nil { // don't save
-			if sS.cgrcfg.StatSCfg().StoreInterval == -1 {
-				*sq.dirty = true
-				sS.StoreStatQueue(sq)
-			} else {
-				*sq.dirty = true // mark it to be saved
-				sS.ssqMux.Lock()
-				sS.storedStatQueues[sq.TenantID()] = true
-				sS.ssqMux.Unlock()
-			}
-		}
+		sS.storeStatQueue(sq)
 		if len(sS.cgrcfg.StatSCfg().ThresholdSConns) != 0 {
 			var thIDs []string
 			if len(sq.sqPrfl.ThresholdIDs) != 0 {
@@ -358,11 +375,11 @@ func (sS *StatService) V1GetStatQueuesForEvent(args *StatsArgsProcessEvent, repl
 
 // V1GetStatQueue returns a StatQueue object
 func (sS *StatService) V1GetStatQueue(args *utils.TenantIDWithArgDispatcher, reply *StatQueue) (err error) {
-	if sq, err := sS.dm.GetStatQueue(args.Tenant, args.ID, true, true, ""); err != nil {
+	sq, err := sS.getStatQueue(args.Tenant, args.ID)
+	if err != nil {
 		return err
-	} else {
-		*reply = *sq
 	}
+	*reply = *sq
 	return
 }
 
@@ -371,19 +388,17 @@ func (sS *StatService) V1GetQueueStringMetrics(args *utils.TenantID, reply *map[
 	if missing := utils.MissingStructFields(args, []string{utils.Tenant, utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	sq, err := sS.dm.GetStatQueue(args.Tenant, args.ID, true, true, "")
+	sq, err := sS.getStatQueue(args.Tenant, args.ID)
 	if err != nil {
 		if err != utils.ErrNotFound {
 			err = utils.NewErrServerError(err)
 		}
 		return err
 	}
-	sq.RLock()
 	metrics := make(map[string]string, len(sq.SQMetrics))
 	for metricID, metric := range sq.SQMetrics {
 		metrics[metricID] = metric.GetStringValue("")
 	}
-	sq.RUnlock()
 	*reply = metrics
 	return
 }
@@ -393,19 +408,17 @@ func (sS *StatService) V1GetQueueFloatMetrics(args *utils.TenantID, reply *map[s
 	if missing := utils.MissingStructFields(args, []string{utils.Tenant, utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	sq, err := sS.dm.GetStatQueue(args.Tenant, args.ID, true, true, "")
+	sq, err := sS.getStatQueue(args.Tenant, args.ID)
 	if err != nil {
 		if err != utils.ErrNotFound {
 			err = utils.NewErrServerError(err)
 		}
 		return err
 	}
-	sq.RLock()
 	metrics := make(map[string]float64, len(sq.SQMetrics))
 	for metricID, metric := range sq.SQMetrics {
 		metrics[metricID] = metric.GetFloat64Value()
 	}
-	sq.RUnlock()
 	*reply = metrics
 	return
 }

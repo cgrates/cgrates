@@ -70,7 +70,7 @@ var (
 		testV1STSInitDataDb,
 		testV1STSStartEngine,
 		testV1STSRpcConn,
-		testV1STSFromFolder,
+		testV1STSSetStats,
 		testV1STSGetStats,
 		testV1STSProcessEvent,
 		testV1STSGetStatsAfterRestart,
@@ -138,13 +138,54 @@ func testV1STSRpcConn(t *testing.T) {
 	}
 }
 
-func testV1STSFromFolder(t *testing.T) {
+func testV1STSSetStats(t *testing.T) {
+	// Create a StatProfile equivalent to "Stats1" from oldtutorial, in order to customize its TTL to be longer than the configured StoreInterval.
+	statConfig = &engine.StatQueueWithCache{
+		StatQueueProfile: &engine.StatQueueProfile{
+			Tenant:      "cgrates.org",
+			ID:          "Stats1",
+			FilterIDs:   []string{"*string:~*req.Account:1001;1002"},
+			QueueLength: 100,
+			TTL:         10 * time.Second,
+			Metrics: []*engine.MetricWithFilters{
+				{
+					MetricID: utils.MetaASR,
+				},
+				{
+					MetricID: utils.MetaACC,
+				},
+				{
+					MetricID: utils.MetaTCC,
+				},
+				{
+					MetricID: utils.MetaACD,
+				},
+				{
+					MetricID: utils.MetaTCD,
+				},
+				{
+					MetricID: "*sum:~*req.Usage",
+				},
+				{
+					MetricID: "*average:~*req.Usage",
+				},
+				{
+					MetricID:  utils.MetaPDD,
+					FilterIDs: []string{"*exists:~*req.PDD:"},
+				},
+			},
+			ThresholdIDs: []string{"*none"},
+			Blocker:      false,
+			Stored:       true,
+			Weight:       20,
+			MinItems:     2,
+		},
+	}
+
 	var reply string
-	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*utils.DataDir, "tariffplans", "oldtutorial")}
-	if err := stsV1Rpc.Call(utils.APIerSv1LoadTariffPlanFromFolder, attrs, &reply); err != nil {
+	if err := stsV1Rpc.Call(utils.APIerSv1SetStatQueueProfile, statConfig, &reply); err != nil {
 		t.Error(err)
 	}
-	time.Sleep(500 * time.Millisecond)
 }
 
 func testV1STSGetStats(t *testing.T) {
@@ -303,7 +344,10 @@ func testV1STSGetStatsAfterRestart(t *testing.T) {
 	if stsV1ConfDIR == "tutinternal" {
 		t.SkipNow()
 	}
+
+	// SIGKILL prevents graceful shutdown, so without waiting for StoreInterval, current stats won't be backed up.
 	time.Sleep(time.Second)
+
 	if _, err := engine.StopStartEngine(stsV1CfgPath, *utils.WaitRater); err != nil {
 		t.Fatal(err)
 	}
