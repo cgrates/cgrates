@@ -79,3 +79,11 @@ func TestSupplierSCoverage(t *testing.T) {
 		t.Errorf("Expected service to be down")
 	}
 }
+
+func TestRoutesReload(t *testing.T) {
+	routeS := &RouteService{}
+	err := routeS.Reload()
+	if err != nil {
+		t.Errorf("Expected no error, got %v", err)
+	}
+}

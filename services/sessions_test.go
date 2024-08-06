@@ -82,3 +82,11 @@ func TestSessionSCoverage(t *testing.T) {
 		t.Errorf("\nExpecting <false>,\n Received <%+v>", shouldRun)
 	}
 }
+
+func TestReload(t *testing.T) {
+	smg := &SessionService{}
+	err := smg.Reload()
+	if err != nil {
+		t.Errorf("Expected no error, got %v", err)
+	}
+}

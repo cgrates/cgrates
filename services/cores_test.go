@@ -81,3 +81,11 @@ func TestCoreSCoverage(t *testing.T) {
 	}
 
 }
+
+func TestCoreServiceReload(t *testing.T) {
+	coreService := &CoreService{}
+	err := coreService.Reload()
+	if err != nil {
+		t.Errorf("Expected Reload to return no error, got %v", err)
+	}
+}
