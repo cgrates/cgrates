@@ -222,8 +222,9 @@ func (rdr *SQLEventReader) readLoop(db *gorm.DB, sqlDB io.Closer) {
 }
 
 func (rdr *SQLEventReader) processMessage(msg map[string]any) (err error) {
+	reqVars := &utils.DataNode{Type: utils.NMMapType, Map: map[string]*utils.DataNode{utils.MetaReaderID: utils.NewLeafNode(rdr.cgrCfg.ERsCfg().Readers[rdr.cfgIdx].ID)}}
 	agReq := agents.NewAgentRequest(
-		utils.MapStorage(msg), nil,
+		utils.MapStorage(msg), reqVars,
 		nil, nil, nil, rdr.Config().Tenant,
 		rdr.cgrCfg.GeneralCfg().DefaultTenant,
 		utils.FirstNonEmpty(rdr.Config().Timezone,

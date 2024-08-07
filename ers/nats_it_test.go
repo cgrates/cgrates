@@ -172,7 +172,8 @@ var natsCfg string = `{
 				%s	
 			},
 			"fields":[											
-				{"tag": "CGRID", "type": "*variable", "value": "~*req.CGRID", "path": "*cgreq.CGRID"}
+				{"tag": "CGRID", "type": "*variable", "value": "~*req.CGRID", "path": "*cgreq.CGRID"},
+				{"tag": "readerId", "type": "*variable", "value": "~*vars.*readerID", "path": "*cgreq.ReaderID"},
 			]
 		}
 	]

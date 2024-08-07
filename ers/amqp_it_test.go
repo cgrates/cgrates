@@ -59,6 +59,7 @@ func TestAMQPER(t *testing.T) {
 			"flags": [],										// flags to influence the event processing
 			"fields":[									// import fields template, tag will match internally CDR field, in case of .csv value will be represented by index of the field value
 				{"tag": "CGRID", "type": "*composed", "value": "~*req.CGRID", "path": "*cgreq.CGRID"},
+				{"tag": "readerId", "type": "*variable", "value": "~*vars.*readerID", "path": "*cgreq.ReaderID"},
 			],
 		},
 	],
@@ -76,7 +77,6 @@ func TestAMQPER(t *testing.T) {
 	rdrEvents = make(chan *erEvent, 1)
 	rdrErr = make(chan error, 1)
 	rdrExit = make(chan struct{}, 1)
-
 	if rdr, err = NewAMQPER(cfg, 1, rdrEvents, make(chan *erEvent, 1),
 		rdrErr, new(engine.FilterS), rdrExit); err != nil {
 		t.Fatal(err)
@@ -120,7 +120,8 @@ func TestAMQPER(t *testing.T) {
 			ID:     ev.cgrEvent.ID,
 			Time:   ev.cgrEvent.Time,
 			Event: map[string]any{
-				"CGRID": randomCGRID,
+				"CGRID":    randomCGRID,
+				"ReaderID": "amqp",
 			},
 			APIOpts: map[string]any{},
 		}

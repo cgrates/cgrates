@@ -824,6 +824,7 @@ const (
 	MetaGroup               = "*group"
 	InternalRPCSet          = "InternalRPCSet"
 	MetaFileName            = "*fileName"
+	MetaReaderID            = "*readerID"
 	MetaRadauth             = "*radauth"
 	UserPassword            = "UserPassword"
 	RadauthFailed           = "RADAUTH_FAILED"

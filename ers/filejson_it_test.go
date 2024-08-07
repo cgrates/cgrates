@@ -212,6 +212,8 @@ func testJSONVerify(t *testing.T) {
 	} else {
 		if cdrs[0].Usage != 2*time.Minute {
 			t.Errorf("Unexpected usage for CDR: %d", cdrs[0].Usage)
+		} else if cdrs[0].ExtraFields["ReaderID"] != "JSONReader" {
+			t.Errorf("Expected readerID <%v>, received <%v>", "JSONReader", cdrs[0].ExtraFields["ReaderID"])
 		}
 	}
 

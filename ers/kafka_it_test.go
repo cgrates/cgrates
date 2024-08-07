@@ -91,7 +91,8 @@ func TestKafkaER(t *testing.T) {
 			"filters": [],
 			"flags": [],
 			"fields":[
-				{"tag": "CGRID", "type": "*composed", "value": "~*req.CGRID", "path": "*cgreq.CGRID"}
+				{"tag": "CGRID", "type": "*composed", "value": "~*req.CGRID", "path": "*cgreq.CGRID"},
+				{"tag": "readerId", "type": "*variable", "value": "~*vars.*readerID", "path": "*cgreq.ReaderID"},
 			]
 		}
 	]
@@ -146,7 +147,8 @@ func TestKafkaER(t *testing.T) {
 			ID:     ev.cgrEvent.ID,
 			Time:   ev.cgrEvent.Time,
 			Event: map[string]any{
-				"CGRID": randomCGRID,
+				"CGRID":    randomCGRID,
+				"ReaderID": cfg.ERsCfg().Readers[1].ID,
 			},
 			APIOpts: map[string]any{},
 		}

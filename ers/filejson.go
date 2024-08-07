@@ -137,7 +137,7 @@ func (rdr *JSONFileER) processFile(fName string) (err error) {
 	}
 
 	evsPosted := 0
-	reqVars := &utils.DataNode{Type: utils.NMMapType, Map: map[string]*utils.DataNode{utils.MetaFileName: utils.NewLeafNode(fName)}}
+	reqVars := &utils.DataNode{Type: utils.NMMapType, Map: map[string]*utils.DataNode{utils.MetaFileName: utils.NewLeafNode(fName), utils.MetaReaderID: utils.NewLeafNode(rdr.cgrCfg.ERsCfg().Readers[rdr.cfgIdx].ID)}}
 
 	agReq := agents.NewAgentRequest(
 		utils.MapStorage(data), reqVars,

@@ -110,6 +110,7 @@ func testSQLInitConfig(t *testing.T) {
 					"flags": [],										// flags to influence the event processing
 					"fields":[									// import fields template, tag will match internally CDR field, in case of .csv value will be represented by index of the field value
 						{"tag": "CGRID", "type": "*composed", "value": "~*req.cgrid", "path": "*cgreq.CGRID"},
+						{"tag": "readerId", "type": "*variable", "value": "~*vars.*readerID", "path": "*cgreq.ReaderID"},
 					],
 				},
 			],
@@ -252,7 +253,8 @@ func testSQLReader(t *testing.T) {
 			ID:     ev.cgrEvent.ID,
 			Time:   ev.cgrEvent.Time,
 			Event: map[string]any{
-				"CGRID": cdr.CGRID,
+				"CGRID":    cdr.CGRID,
+				"ReaderID": "mysql",
 			},
 			APIOpts: map[string]any{},
 		}
@@ -286,7 +288,8 @@ func testSQLReader2(t *testing.T) {
 			ID:     ev.cgrEvent.ID,
 			Time:   ev.cgrEvent.Time,
 			Event: map[string]any{
-				"CGRID": cdr.CGRID,
+				"CGRID":    cdr.CGRID,
+				"ReaderID": "mysql",
 			},
 			APIOpts: map[string]any{},
 		}

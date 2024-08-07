@@ -219,7 +219,7 @@ func TestNewAMQPReader(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(exp, rcv) {
-		t.Errorf("Expected %v but received %v", utils.ToJSON(exp), utils.ToJSON(rcv))
+		t.Errorf("Expected %+v but received %+v", exp, rcv)
 	}
 }
 
