@@ -64,6 +64,7 @@ func TestAMQPERv1(t *testing.T) {
 			"flags": [],										// flags to influence the event processing
 			"fields":[									// import fields template, tag will match internally CDR field, in case of .csv value will be represented by index of the field value
 				{"tag": "CGRID", "type": "*composed", "value": "~*req.CGRID", "path": "*cgreq.CGRID"},
+				{"tag": "readerId", "type": "*variable", "value": "~*vars.*readerID", "path": "*cgreq.ReaderID"},
 			],
 		},
 	],
@@ -125,8 +126,10 @@ func TestAMQPERv1(t *testing.T) {
 			ID:     ev.cgrEvent.ID,
 			Time:   ev.cgrEvent.Time,
 			Event: map[string]any{
-				"CGRID": randomCGRID,
+				"CGRID":    randomCGRID,
+				"ReaderID": "amqpv1",
 			},
+			APIOpts: map[string]any{},
 		}
 		if !reflect.DeepEqual(ev.cgrEvent, expected) {
 			t.Errorf("Expected %s ,received %s", utils.ToJSON(expected), utils.ToJSON(ev.cgrEvent))

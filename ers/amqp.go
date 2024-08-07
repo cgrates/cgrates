@@ -121,9 +121,10 @@ func (rdr *AMQPER) processMessage(msg []byte) error {
 	if err != nil {
 		return err
 	}
+	reqVars := &utils.DataNode{Type: utils.NMMapType, Map: map[string]*utils.DataNode{utils.MetaReaderID: utils.NewLeafNode(rdr.cgrCfg.ERsCfg().Readers[rdr.cfgIdx].ID)}}
 
 	agReq := agents.NewAgentRequest(
-		utils.MapStorage(decodedMessage), nil,
+		utils.MapStorage(decodedMessage), reqVars,
 		nil, nil, nil, rdr.Config().Tenant,
 		rdr.cgrCfg.GeneralCfg().DefaultTenant,
 		utils.FirstNonEmpty(rdr.Config().Timezone,

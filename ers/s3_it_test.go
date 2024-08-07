@@ -70,6 +70,7 @@ func TestS3ER(t *testing.T) {
 			},
 			"fields":[									// import fields template, tag will match internally CDR field, in case of .csv value will be represented by index of the field value
 				{"tag": "CGRID", "type": "*composed", "value": "~*req.CGRID", "path": "*cgreq.CGRID"},
+				{"tag": "readerId", "type": "*variable", "value": "~*vars.*readerID", "path": "*cgreq.ReaderID"},
 			],
 		},
 	],
@@ -123,8 +124,10 @@ func TestS3ER(t *testing.T) {
 			ID:     ev.cgrEvent.ID,
 			Time:   ev.cgrEvent.Time,
 			Event: map[string]any{
-				"CGRID": randomCGRID,
+				"CGRID":    randomCGRID,
+				"ReaderID": "s3",
 			},
+			APIOpts: map[string]any{},
 		}
 		if !reflect.DeepEqual(ev.cgrEvent, expected) {
 			t.Errorf("Expected %s ,received %s", utils.ToJSON(expected), utils.ToJSON(ev.cgrEvent))
