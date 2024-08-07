@@ -239,3 +239,25 @@ func TestGetNatsOptsClientCert(t *testing.T) {
 		t.Error("There was supposedly no certificate")
 	}
 }
+
+func TestNatsEECfg(t *testing.T) {
+	expectedCfg := &config.EventExporterCfg{}
+	pstr := &NatsEE{
+		cfg: expectedCfg,
+	}
+	actualCfg := pstr.Cfg()
+	if actualCfg != expectedCfg {
+		t.Errorf("Cfg() = %v, want %v", actualCfg, expectedCfg)
+	}
+}
+
+func TestNatsEEGetMetrics(t *testing.T) {
+	expectedMetrics := &utils.SafeMapStorage{}
+	pstr := &NatsEE{
+		dc: expectedMetrics,
+	}
+	actualMetrics := pstr.GetMetrics()
+	if actualMetrics != expectedMetrics {
+		t.Errorf("GetMetrics() = %v, want %v", actualMetrics, expectedMetrics)
+	}
+}
