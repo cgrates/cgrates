@@ -147,3 +147,15 @@ func TestOpenDBError3(t *testing.T) {
 	}
 	logger.Default = tmp
 }
+
+func TestPrepareMap(t *testing.T) {
+	sqlEe := &SQLEe{}
+	event := &utils.CGREvent{}
+	result, err := sqlEe.PrepareMap(event)
+	if err != nil {
+		t.Errorf("PrepareMap() returned an error: %v", err)
+	}
+	if result != nil {
+		t.Errorf("PrepareMap() returned a non-nil result: %v", result)
+	}
+}
