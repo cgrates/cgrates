@@ -2062,12 +2062,12 @@ const (
 
 // StorDB
 var (
-	PostgresSSLModeDisable    = "disable"
-	PostgressSSLModeAllow     = "allow"
-	PostgresSSLModePrefer     = "prefer"
-	PostgressSSLModeRequire   = "require"
-	PostgresSSLModeVerifyCa   = "verify-ca"
-	PostgresSSLModeVerifyFull = "verify-full"
+	PgSSLModeDisable    = "disable"
+	PgSSLModeAllow      = "allow"
+	PgSSLModePrefer     = "prefer"
+	PgSSLModeRequire    = "require"
+	PgSSLModeVerifyCA   = "verify-ca"
+	PgSSLModeVerifyFull = "verify-full"
 )
 
 // GeneralCfg
@@ -2112,12 +2112,15 @@ const (
 	MongoQueryTimeoutCfg   = "mongoQueryTimeout"
 	MongoConnSchemeCfg     = "mongoConnScheme"
 	PgSSLModeCfg           = "pgSSLMode"
+	PgSSLCertCfg           = "pgSSLCert"
+	PgSSLKeyCfg            = "pgSSLKey"
+	PgSSLPasswordCfg       = "pgSSLPassword"
+	PgSSLRootCertCfg       = "pgSSLRootCert"
+	PgSchema               = "pgSchema"
 	ItemsCfg               = "items"
 	OptsCfg                = "opts"
 	Tenants                = "tenants"
 	MysqlLocation          = "mysqlLocation"
-	SSLMode                = "sslMode"
-	PgSchema               = "pgSchema"
 )
 
 // DataDbCfg

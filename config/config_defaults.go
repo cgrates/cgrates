@@ -159,53 +159,57 @@ const CGRATES_CFG_JSON = `
 },
 
 
-"stor_db": {								// database used to store offline tariff plans and CDRs
-	"db_type": "*mysql",					// stor database type to use: <*mongo|*mysql|*postgres|*internal>
-	"db_host": "127.0.0.1",					// the host to connect to
-	"db_port": 3306,						// the port to reach the stor_db
-	"db_name": "cgrates",					// stor database name
-	"db_user": "cgrates",					// username to use when connecting to stor_db
-	"db_password": "CGRateS.org",			// password to use when connecting to stor_db
-	"string_indexed_fields": [],			// indexes on cdrs table to speed up queries, used in case of *mongo and *internal
-	"prefix_indexed_fields":[],				// prefix indexes on cdrs table to speed up queries, used in case of *internal
+"stor_db": {					// database used to store offline tariff plans and CDRs
+	"db_type": "*mysql",			// stor database type to use: <*mongo|*mysql|*postgres|*internal>
+	"db_host": "127.0.0.1",			// the host to connect to
+	"db_port": 3306,			// the port to reach the stor_db
+	"db_name": "cgrates",			// stor database name
+	"db_user": "cgrates",			// username to use when connecting to stor_db
+	"db_password": "CGRateS.org",		// password to use when connecting to stor_db
+	"string_indexed_fields": [],		// indexes on cdrs table to speed up queries, used in case of *mongo and *internal
+	"prefix_indexed_fields":[],		// prefix indexes on cdrs table to speed up queries, used in case of *internal
 	"opts": {
-		"sqlMaxOpenConns": 100,				// maximum database connections opened, not applying for mongo
-		"sqlMaxIdleConns": 10,				// maximum database connections idle, not applying for mongo
-		"sqlConnMaxLifetime": "0", 			// maximum amount of time a connection may be reused (0 for unlimited), not applying for mongo
-		"mysqlDSNParams": {},               // DSN extra paramss
-		"mongoQueryTimeout": "10s",			// timeout for query when mongo is used
-		"mongoConnScheme": "mongodb",		// scheme for MongoDB connection <mongodb|mongodb+srv>
-		"pgSSLMode": "disable",		 		// pgSSLMode in case of *postgres
-		"mysqlLocation": "Local",			// the location the time from mysql is retrieved
-		"pgSchema":"",                      //*postgres schema to use
+		"sqlMaxOpenConns": 100,		// maximum database connections opened, not applying for mongo
+		"sqlMaxIdleConns": 10,		// maximum database connections idle, not applying for mongo
+		"sqlConnMaxLifetime": "0", 	// maximum amount of time a connection may be reused (0 for unlimited), not applying for mongo
+		"mysqlDSNParams": {},           // DSN extra paramss
+		"mongoQueryTimeout": "10s",	// timeout for query when mongo is used
+		"mongoConnScheme": "mongodb",	// scheme for MongoDB connection <mongodb|mongodb+srv>
+		"mysqlLocation": "Local",	// the location the time from mysql is retrieved
+		"pgSSLMode": "disable",		// determines whether or with what priority a secure SSL TCP/IP connection will be negotiated with the server
+		"pgSSLCert": "",		// file name of the client SSL certificate, replacing the default ~/.postgresql/postgresql.crt
+		"pgSSLKey": "",			// location for the secret key used for the client certificate
+		"pgSSLPassword: "",		// specifies the password for the secret key specified in pgSSLKey
+		"pgSSLRootCert": "",		// name of a file containing SSL certificate authority (CA) certificate(s)
+		"pgSchema":""			// postgres schema to use
 	},
 	"items":{
-		"*session_costs": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false}, 
-		"*cdrs": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false}, 		
-		"*tp_timings": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false}, 					
+		"*session_costs": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
+		"*cdrs": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
+		"*tp_timings": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
 		"*tp_destinations": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
-		"*tp_rates": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false}, 
-		"*tp_destination_rates": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false}, 
-		"*tp_rating_plans": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false}, 
-		"*tp_rating_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false}, 
-		"*tp_shared_groups": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false}, 
-		"*tp_actions": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false}, 
-		"*tp_action_plans": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false}, 
-		"*tp_action_triggers": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false}, 
-		"*tp_account_actions": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false}, 
-		"*tp_resources": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false}, 
+		"*tp_rates": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
+		"*tp_destination_rates": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
+		"*tp_rating_plans": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
+		"*tp_rating_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
+		"*tp_shared_groups": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
+		"*tp_actions": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
+		"*tp_action_plans": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
+		"*tp_action_triggers": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
+		"*tp_account_actions": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
+		"*tp_resources": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
 		"*tp_stats": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
-		"*tp_rankings": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false}, 
-		"*tp_trends": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},  
-		"*tp_thresholds": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false}, 
+		"*tp_rankings": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
+		"*tp_trends": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
+		"*tp_thresholds": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
 		"*tp_filters": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
-		"*tp_routes": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false}, 
-		"*tp_attributes": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false}, 
-		"*tp_chargers": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false}, 
-		"*versions": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false}, 
-		"*tp_dispatcher_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false}, 
-		"*tp_dispatcher_hosts": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false}, 
-	},
+		"*tp_routes": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
+		"*tp_attributes": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
+		"*tp_chargers": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
+		"*versions": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
+		"*tp_dispatcher_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
+		"*tp_dispatcher_hosts": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false}
+	}
 },
 
 
