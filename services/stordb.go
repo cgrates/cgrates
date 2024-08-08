@@ -196,5 +196,9 @@ func (db *StorDBService) needsConnectionReload() bool {
 		return true
 	}
 	return db.cfg.StorDbCfg().Type == utils.MetaPostgres &&
-		db.oldDBCfg.Opts.PgSSLMode != db.cfg.StorDbCfg().Opts.PgSSLMode
+		(db.oldDBCfg.Opts.PgSSLMode != db.cfg.StorDbCfg().Opts.PgSSLMode ||
+			db.oldDBCfg.Opts.PgSSLCert != db.cfg.StorDbCfg().Opts.PgSSLCert ||
+			db.oldDBCfg.Opts.PgSSLKey != db.cfg.StorDbCfg().Opts.PgSSLKey ||
+			db.oldDBCfg.Opts.PgSSLPassword != db.cfg.StorDbCfg().Opts.PgSSLPassword ||
+			db.oldDBCfg.Opts.PgSSLRootCert != db.cfg.StorDbCfg().Opts.PgSSLRootCert)
 }

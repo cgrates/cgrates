@@ -1700,7 +1700,7 @@ func TestConfigSanityStorDB(t *testing.T) {
 			PgSSLMode: "wrongSSLMode",
 		},
 	}
-	expected := "<stor_db> unsupported sslmode for storDB"
+	expected := "<stor_db> unsupported pgSSLMode (sslmode) in storDB configuration"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}

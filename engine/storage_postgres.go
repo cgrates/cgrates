@@ -28,32 +28,48 @@ import (
 )
 
 // NewPostgresStorage returns the posgres storDB
-func NewPostgresStorage(host, port, name, user, password, sslmode, pgSchema string, maxConn, maxIdleConn int, connMaxLifetime time.Duration) (*SQLStorage, error) {
-	connectString := fmt.Sprintf("host=%s port=%s dbname=%s user=%s password=%s sslmode=%s", host, port, name, user, password, sslmode)
-	db, err := gorm.Open(postgres.Open(connectString), &gorm.Config{AllowGlobalUpdate: true})
+func NewPostgresStorage(host, port, name, user, password, pgSchema,
+	sslmode, sslcert, sslkey, sslpassword, sslrootcert string,
+	maxConn, maxIdleConn int, connMaxLifetime time.Duration) (*SQLStorage, error) {
+	connStr := fmt.Sprintf(
+		"host=%s port=%s dbname=%s user=%s password=%s sslmode=%s",
+		host, port, name, user, password, sslmode)
+	if sslcert != "" {
+		connStr = connStr + " sslcert=" + sslcert
+	}
+	if sslkey != "" {
+		connStr = connStr + " sslkey=" + sslkey
+	}
+	if sslpassword != "" {
+		connStr = connStr + " sslpassword=" + sslpassword
+	}
+	if sslrootcert != "" {
+		connStr = connStr + " sslrootcert=" + sslrootcert
+	}
+	db, err := gorm.Open(postgres.Open(connStr), &gorm.Config{AllowGlobalUpdate: true})
 	if err != nil {
 		return nil, err
 	}
-	postgressStorage := new(PostgresStorage)
-	if postgressStorage.Db, err = db.DB(); err != nil {
+	pgStor := new(PostgresStorage)
+	if pgStor.Db, err = db.DB(); err != nil {
 		return nil, err
 	}
-	if err = postgressStorage.Db.Ping(); err != nil {
+	if err = pgStor.Db.Ping(); err != nil {
 		return nil, err
 	}
 	if pgSchema != "" {
-		postgressStorage.Db.Exec(fmt.Sprintf("set search_path='%s'", pgSchema))
+		pgStor.Db.Exec(fmt.Sprintf("set search_path='%s'", pgSchema))
 	}
-	postgressStorage.Db.SetMaxIdleConns(maxIdleConn)
-	postgressStorage.Db.SetMaxOpenConns(maxConn)
-	postgressStorage.Db.SetConnMaxLifetime(connMaxLifetime)
+	pgStor.Db.SetMaxIdleConns(maxIdleConn)
+	pgStor.Db.SetMaxOpenConns(maxConn)
+	pgStor.Db.SetConnMaxLifetime(connMaxLifetime)
 	//db.LogMode(true)
-	postgressStorage.db = db
+	pgStor.db = db
 	return &SQLStorage{
-		Db:      postgressStorage.Db,
-		db:      postgressStorage.db,
-		StorDB:  postgressStorage,
-		SQLImpl: postgressStorage,
+		Db:      pgStor.Db,
+		db:      pgStor.db,
+		StorDB:  pgStor,
+		SQLImpl: pgStor,
 	}, nil
 }
 

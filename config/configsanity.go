@@ -964,10 +964,10 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 	}
 	// StorDB sanity checks
 	if cfg.storDbCfg.Type == utils.MetaPostgres {
-		if !slices.Contains([]string{utils.PostgresSSLModeDisable, utils.PostgressSSLModeAllow,
-			utils.PostgresSSLModePrefer, utils.PostgressSSLModeRequire, utils.PostgresSSLModeVerifyCa,
-			utils.PostgresSSLModeVerifyFull}, cfg.storDbCfg.Opts.PgSSLMode) {
-			return fmt.Errorf("<%s> unsupported sslmode for storDB", utils.StorDB)
+		if !slices.Contains([]string{utils.PgSSLModeDisable, utils.PgSSLModeAllow,
+			utils.PgSSLModePrefer, utils.PgSSLModeRequire, utils.PgSSLModeVerifyCA,
+			utils.PgSSLModeVerifyFull}, cfg.storDbCfg.Opts.PgSSLMode) {
+			return fmt.Errorf("<%s> unsupported pgSSLMode (sslmode) in storDB configuration", utils.StorDB)
 		}
 	}
 	// DataDB sanity checks

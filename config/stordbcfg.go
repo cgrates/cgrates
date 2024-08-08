@@ -34,16 +34,20 @@ type StorDBOpts struct {
 	MongoQueryTimeout  time.Duration
 	MongoConnScheme    string
 	PgSSLMode          string
+	PgSSLCert          string
+	PgSSLKey           string
+	PgSSLPassword      string
+	PgSSLRootCert      string
+	PgSchema           string
 	MySQLLocation      string
 	MySQLDSNParams     map[string]string
-	PgSchema           string
 }
 
 // StorDbCfg StroreDb config
 type StorDbCfg struct {
 	Type                string // Should reflect the database type used to store logs
 	Host                string // The host to connect to. Values that start with / are for UNIX domain sockets.
-	Port                string // Th e port to bind to.
+	Port                string // The port to bind to.
 	Name                string // The name of the database to connect to.
 	User                string // The user to sign in as.
 	Password            string // The user's password.
@@ -82,14 +86,16 @@ func (dbOpts *StorDBOpts) loadFromJSONCfg(jsnCfg *DBOptsJson) (err error) {
 	if jsnCfg.MongoConnScheme != nil {
 		dbOpts.MongoConnScheme = *jsnCfg.MongoConnScheme
 	}
-	if jsnCfg.PgSSLMode != nil {
-		dbOpts.PgSSLMode = *jsnCfg.PgSSLMode
+	dbOpts.PgSSLMode = jsnCfg.PgSSLMode
+	dbOpts.PgSSLCert = jsnCfg.PgSSLCert
+	dbOpts.PgSSLKey = jsnCfg.PgSSLKey
+	dbOpts.PgSSLPassword = jsnCfg.PgSSLPassword
+	dbOpts.PgSSLRootCert = jsnCfg.PgSSLRootCert
+	if jsnCfg.PgSchema != nil {
+		dbOpts.PgSchema = *jsnCfg.PgSchema
 	}
 	if jsnCfg.MySQLLocation != nil {
 		dbOpts.MySQLLocation = *jsnCfg.MySQLLocation
-	}
-	if jsnCfg.PgSchema != nil {
-		dbOpts.PgSchema = *jsnCfg.PgSchema
 	}
 	return
 }
@@ -173,8 +179,12 @@ func (dbOpts *StorDBOpts) Clone() *StorDBOpts {
 		MongoQueryTimeout:  dbOpts.MongoQueryTimeout,
 		MongoConnScheme:    dbOpts.MongoConnScheme,
 		PgSSLMode:          dbOpts.PgSSLMode,
-		MySQLLocation:      dbOpts.MySQLLocation,
+		PgSSLCert:          dbOpts.PgSSLCert,
+		PgSSLKey:           dbOpts.PgSSLKey,
+		PgSSLPassword:      dbOpts.PgSSLPassword,
+		PgSSLRootCert:      dbOpts.PgSSLRootCert,
 		PgSchema:           dbOpts.PgSchema,
+		MySQLLocation:      dbOpts.MySQLLocation,
 	}
 }
 
@@ -223,8 +233,20 @@ func (dbcfg *StorDbCfg) AsMapInterface() (mp map[string]any) {
 		utils.MongoQueryTimeoutCfg: dbcfg.Opts.MongoQueryTimeout.String(),
 		utils.MongoConnSchemeCfg:   dbcfg.Opts.MongoConnScheme,
 		utils.PgSSLModeCfg:         dbcfg.Opts.PgSSLMode,
-		utils.MysqlLocation:        dbcfg.Opts.MySQLLocation,
 		utils.PgSchema:             dbcfg.Opts.PgSchema,
+		utils.MysqlLocation:        dbcfg.Opts.MySQLLocation,
+	}
+	if dbcfg.Opts.PgSSLCert != "" {
+		opts[utils.PgSSLCertCfg] = dbcfg.Opts.PgSSLCert
+	}
+	if dbcfg.Opts.PgSSLKey != "" {
+		opts[utils.PgSSLKeyCfg] = dbcfg.Opts.PgSSLKey
+	}
+	if dbcfg.Opts.PgSSLPassword != "" {
+		opts[utils.PgSSLPasswordCfg] = dbcfg.Opts.PgSSLPassword
+	}
+	if dbcfg.Opts.PgSSLRootCert != "" {
+		opts[utils.PgSSLRootCertCfg] = dbcfg.Opts.PgSSLRootCert
 	}
 	mp = map[string]any{
 		utils.DataDbTypeCfg:          dbcfg.Type,
