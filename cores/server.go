@@ -201,7 +201,7 @@ func (s *Server) RegisterProfiler() {
 	registerProfiler(s.httpsMux)
 }
 
-func (s *Server) ServeHTTP(addr, jsonRPCURL, wsRPCURL, promURL string, useBasicAuth bool,
+func (s *Server) ServeHTTP(addr, jsonRPCURL, wsRPCURL, promURL, pprofPath string, useBasicAuth bool,
 	userList map[string]string, shdChan *utils.SyncedChan) {
 	s.RLock()
 	enabled := s.rpcEnabled
@@ -237,12 +237,34 @@ func (s *Server) ServeHTTP(addr, jsonRPCURL, wsRPCURL, promURL string, useBasicA
 		s.Lock()
 		s.httpEnabled = true
 		s.Unlock()
-		utils.Logger.Info("<HTTP> enabling handler for Prometheus connections")
+		utils.Logger.Info(fmt.Sprintf("<HTTP> prometheus metrics endpoint registered at %q", promURL))
 		promHandler := promhttp.Handler()
 		if useBasicAuth {
 			s.httpMux.HandleFunc(promURL, use(promHandler.ServeHTTP, basicAuth(userList)))
 		} else {
 			s.httpMux.Handle(promURL, promHandler)
+		}
+	}
+	if pprofPath != "" {
+		s.Lock()
+		s.httpEnabled = true
+		s.Unlock()
+		if !strings.HasSuffix(pprofPath, "/") {
+			pprofPath += "/"
+		}
+		utils.Logger.Info(fmt.Sprintf("<HTTP> profiling endpoints registered at %q", pprofPath))
+		if useBasicAuth {
+			s.httpMux.HandleFunc(pprofPath, use(pprof.Index, basicAuth(userList)))
+			s.httpMux.HandleFunc(pprofPath+"cmdline", use(pprof.Cmdline, basicAuth(userList)))
+			s.httpMux.HandleFunc(pprofPath+"profile", use(pprof.Profile, basicAuth(userList)))
+			s.httpMux.HandleFunc(pprofPath+"symbol", use(pprof.Symbol, basicAuth(userList)))
+			s.httpMux.HandleFunc(pprofPath+"trace", use(pprof.Trace, basicAuth(userList)))
+		} else {
+			s.httpMux.HandleFunc(pprofPath, pprof.Index)
+			s.httpMux.HandleFunc(pprofPath+"cmdline", pprof.Cmdline)
+			s.httpMux.HandleFunc(pprofPath+"profile", pprof.Profile)
+			s.httpMux.HandleFunc(pprofPath+"symbol", pprof.Symbol)
+			s.httpMux.HandleFunc(pprofPath+"trace", pprof.Trace)
 		}
 	}
 	if !s.httpEnabled {

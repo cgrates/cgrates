@@ -1854,6 +1854,7 @@ func TestDfHttpJsonCfg(t *testing.T) {
 		Ws_url:              utils.StringPointer("/ws"),
 		Freeswitch_cdrs_url: utils.StringPointer("/freeswitch_json"),
 		Http_Cdrs:           utils.StringPointer("/cdr_http"),
+		PprofPath:           utils.StringPointer("/debug/pprof/"),
 		Use_basic_auth:      utils.BoolPointer(false),
 		Auth_users:          utils.MapStringStringPointer(map[string]string{}),
 		Client_opts: &HTTPClientOptsJson{
