@@ -177,10 +177,11 @@ const CGRATES_CFG_JSON = `
 		"mongoConnScheme": "mongodb",	// scheme for MongoDB connection <mongodb|mongodb+srv>
 		"mysqlLocation": "Local",	// the location the time from mysql is retrieved
 		"pgSSLMode": "disable",		// determines whether or with what priority a secure SSL TCP/IP connection will be negotiated with the server
-		"pgSSLCert": "",		// file name of the client SSL certificate, replacing the default ~/.postgresql/postgresql.crt
-		"pgSSLKey": "",			// location for the secret key used for the client certificate
-		"pgSSLPassword": "",		// specifies the password for the secret key specified in pgSSLKey
-		"pgSSLRootCert": "",		// name of a file containing SSL certificate authority (CA) certificate(s)
+		//"pgSSLCert": "",		// file name of the client SSL certificate, replacing the default ~/.postgresql/postgresql.crt
+		//"pgSSLKey": "",		// location for the secret key used for the client certificate
+		//"pgSSLPassword": "",		// specifies the password for the secret key specified in pgSSLKey
+		//"pgSSLCertMode": "allow",	// determines whether a client certificate may be sent to the server, and whether the server is required to request one
+		//"pgSSLRootCert": "",		// name of a file containing SSL certificate authority (CA) certificate(s)
 		"pgSchema": ""			// postgres schema to use
 	},
 	"items":{

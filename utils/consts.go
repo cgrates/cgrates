@@ -2116,6 +2116,7 @@ const (
 	PgSSLCertCfg           = "pgSSLCert"
 	PgSSLKeyCfg            = "pgSSLKey"
 	PgSSLPasswordCfg       = "pgSSLPassword"
+	PgSSLCertModeCfg       = "pgSSLCertMode"
 	PgSSLRootCertCfg       = "pgSSLRootCert"
 	PgSchema               = "pgSchema"
 	ItemsCfg               = "items"
