@@ -588,7 +588,7 @@ func TestDfStorDBJsonCfg(t *testing.T) {
 			MongoConnScheme:    utils.StringPointer("mongodb"),
 			SQLConnMaxLifetime: utils.StringPointer("0"),
 			MySQLDSNParams:     make(map[string]string),
-			PgSSLMode:          utils.PgSSLModeDisable,
+			PgSSLMode:          utils.StringPointer(utils.PgSSLModeDisable),
 			MySQLLocation:      utils.StringPointer("Local"),
 			PgSchema:           utils.StringPointer(""),
 		},

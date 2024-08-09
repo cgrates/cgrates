@@ -54,7 +54,7 @@ func TestStoreDbCfgloadFromJsonCfgCase1(t *testing.T) {
 			MySQLDSNParams:     make(map[string]string),
 			MySQLLocation:      utils.StringPointer("UTC"),
 			MongoConnScheme:    utils.StringPointer("mongodb"),
-			PgSSLMode:          "disable",
+			PgSSLMode:          utils.StringPointer(utils.PgSSLModeDisable),
 		},
 	}
 	expected := &StorDbCfg{
