@@ -54,7 +54,6 @@ var (
 	version           = cgrEngineFlags.Bool(utils.VersionCgr, false, "Print application version and exit")
 	printConfig       = cgrEngineFlags.Bool(utils.PrintCfgCgr, false, "Print configuration object in JSON format")
 	pidFile           = cgrEngineFlags.String(utils.PidCgr, utils.EmptyString, "Path to write the PID file")
-	httpPprof         = cgrEngineFlags.Bool(utils.HttpPprofCgr, false, "Enable HTTP pprof profiling")
 	cpuProfDir        = cgrEngineFlags.String(utils.CpuProfDirCgr, utils.EmptyString, "Directory for CPU profiles")
 	memProfDir        = cgrEngineFlags.String(utils.MemProfDirCgr, utils.EmptyString, "Directory for memory profiles")
 	memProfInterval   = cgrEngineFlags.Duration(utils.MemProfIntervalCgr, 15*time.Second, "Interval between memory profile saves")
@@ -547,10 +546,6 @@ func main() {
 	}
 	if cfg.ConfigSCfg().Enabled {
 		server.RegisterHttpFunc(cfg.ConfigSCfg().URL, config.HandlerConfigS)
-	}
-	if *httpPprof {
-		server.RegisterProfiler()
-		utils.Logger.Info("<HTTP> registered profiling endpoints at '/debug/pprof/'")
 	}
 
 	// Define internal connections via channels

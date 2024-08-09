@@ -188,19 +188,6 @@ func (s *Server) handleRequest(w http.ResponseWriter, r *http.Request) {
 	io.Copy(w, res)
 }
 
-func registerProfiler(mux *http.ServeMux) {
-	mux.HandleFunc("/debug/pprof/", pprof.Index)
-	mux.HandleFunc("/debug/pprof/cmdline", pprof.Cmdline)
-	mux.HandleFunc("/debug/pprof/profile", pprof.Profile)
-	mux.HandleFunc("/debug/pprof/symbol", pprof.Symbol)
-	mux.HandleFunc("/debug/pprof/trace", pprof.Trace)
-}
-
-func (s *Server) RegisterProfiler() {
-	registerProfiler(s.httpMux)
-	registerProfiler(s.httpsMux)
-}
-
 func (s *Server) ServeHTTP(addr, jsonRPCURL, wsRPCURL, promURL, pprofPath string, useBasicAuth bool,
 	userList map[string]string, shdChan *utils.SyncedChan) {
 	s.RLock()
