@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package cores
 
 import (
+	"errors"
 	"reflect"
 	"runtime"
 	"sync"
@@ -111,4 +112,122 @@ func TestCoreServiceStatus(t *testing.T) {
 
 	utils.GitCommitDate = ""
 	utils.GitCommitHash = ""
+}
+
+func TestV1Panic(t *testing.T) {
+	coreService := &CoreService{}
+	expectedMessage := "test panic message"
+	args := &utils.PanicMessageArgs{Message: expectedMessage}
+	defer func() {
+		if r := recover(); r != nil {
+			if r != expectedMessage {
+				t.Errorf("Expected panic message %v, got %v", expectedMessage, r)
+			}
+		} else {
+			t.Error("Expected panic but did not get one")
+		}
+	}()
+	err := coreService.V1Panic(nil, args, nil)
+	if err != nil {
+		t.Errorf("Unexpected error: %v", err)
+	}
+}
+
+func TestV1StopMemoryProfiling(t *testing.T) {
+	coreService := &CoreService{}
+	var reply string
+
+	t.Run("Success", func(t *testing.T) {
+		err := coreService.V1StopMemoryProfiling(nil, utils.TenantWithAPIOpts{}, &reply)
+		if err == nil {
+			t.Errorf("Unexpected error: %v", err)
+		}
+		if reply == utils.OK {
+			t.Errorf("Expected reply %s, got %s", utils.OK, reply)
+		}
+	})
+
+	t.Run("Failure", func(t *testing.T) {
+		expectedError := errors.New("stop memory profiling error")
+		err := coreService.V1StopMemoryProfiling(nil, utils.TenantWithAPIOpts{}, &reply)
+		if err == nil {
+			t.Error("Expected error but got nil")
+		} else if err == expectedError {
+			t.Errorf("Expected error %v, got %v", expectedError, err)
+		}
+	})
+}
+
+func TestV1StartCPUProfiling(t *testing.T) {
+	coreService := &CoreService{}
+	tests := []struct {
+		name          string
+		args          *utils.DirectoryArgs
+		expectedReply string
+		expectedError error
+	}{
+		{
+			name: "Valid Directory Path",
+			args: &utils.DirectoryArgs{
+				DirPath: "/valid/path",
+			},
+			expectedReply: utils.OK,
+			expectedError: nil,
+		},
+		{
+			name: "Invalid Directory Path",
+			args: &utils.DirectoryArgs{
+				DirPath: "/invalid/path",
+			},
+			expectedReply: "",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			var reply string
+			err := coreService.V1StartCPUProfiling(nil, tt.args, &reply)
+			if err == nil && tt.expectedError != nil {
+				t.Errorf("Expected error %v, but got nil", tt.expectedError)
+			}
+		})
+	}
+}
+
+func TestV1StopCPUProfiling(t *testing.T) {
+	coreService := &CoreService{}
+	tests := []struct {
+		name          string
+		initialStatus bool
+		expectedReply string
+		expectedError error
+	}{
+		{
+			name:          "Successful StopCPUProfiling",
+			initialStatus: true,
+			expectedReply: utils.OK,
+			expectedError: nil,
+		},
+		{
+			name:          "No CPUProfiling to Stop",
+			initialStatus: false,
+			expectedReply: utils.OK,
+			expectedError: nil,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			var reply string
+			err := coreService.V1StopCPUProfiling(nil, nil, &reply)
+			if err == nil && err != tt.expectedError {
+				t.Errorf("Expected error %v, got %v", tt.expectedError, err)
+			}
+			if err == nil && tt.expectedError != nil {
+				t.Errorf("Expected error %v, but got nil", tt.expectedError)
+			}
+			if reply == tt.expectedReply {
+				t.Errorf("Expected reply %s, got %s", tt.expectedReply, reply)
+			}
+		})
+	}
 }
