@@ -85,3 +85,53 @@ func TestDispatcherSCoverage(t *testing.T) {
 		t.Errorf("Expected service to be down")
 	}
 }
+
+func TestDispatcherServiceReload(t *testing.T) {
+	dspService := &DispatcherService{}
+	err := dspService.Reload()
+	if err != nil {
+		t.Errorf("Reload() returned an error: %v", err)
+	}
+}
+
+func TestNewDispatcherServiceMap(t *testing.T) {
+	dspService := &dispatchers.DispatcherService{}
+	srvMap, err := newDispatcherServiceMap(dspService)
+	if err != nil {
+		t.Fatalf("Expected no error, but got %v", err)
+	}
+	if srvMap == nil {
+		t.Fatal("Expected non-nil map, but got nil")
+	}
+	expectedLength := 20
+	if len(srvMap) != expectedLength {
+		t.Fatalf("Expected map length %d, but got %d", expectedLength, len(srvMap))
+	}
+	expectedServiceNames := []string{
+		utils.AttributeSv1,
+		utils.CacheSv1,
+		utils.CDRsV1,
+		utils.CDRsV2,
+		utils.ChargerSv1,
+		utils.ConfigSv1,
+		utils.CoreSv1,
+		utils.DispatcherSv1,
+		utils.EeSv1,
+		utils.ErSv1,
+		utils.GuardianSv1,
+		utils.RALsV1,
+		utils.ReplicatorSv1,
+		utils.ResourceSv1,
+		utils.ThresholdSv1,
+		utils.Responder,
+		utils.RouteSv1,
+		utils.SchedulerSv1,
+		utils.SessionSv1,
+		utils.StatSv1,
+	}
+	for _, name := range expectedServiceNames {
+		if _, ok := srvMap[name]; !ok {
+			t.Errorf("Expected service %s not found in the map", name)
+		}
+	}
+}
