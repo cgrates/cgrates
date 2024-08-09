@@ -575,6 +575,8 @@ func testServeHTTPTLS(t *testing.T) {
 		cfg.TLSCfg().ServerName,
 		cfg.HTTPCfg().HTTPJsonRPCURL,
 		cfg.HTTPCfg().HTTPWSURL,
+		cfg.HTTPCfg().PrometheusURL,
+		cfg.HTTPCfg().PprofPath,
 		cfg.HTTPCfg().HTTPUseBasicAuth,
 		cfg.HTTPCfg().HTTPAuthUsers,
 		shdChan)
@@ -590,6 +592,8 @@ func testServeHTTPTLS(t *testing.T) {
 		cfg.TLSCfg().ServerName,
 		cfg.HTTPCfg().HTTPJsonRPCURL,
 		cfg.HTTPCfg().HTTPWSURL,
+		cfg.HTTPCfg().PrometheusURL,
+		cfg.HTTPCfg().PprofPath,
 		cfg.HTTPCfg().HTTPUseBasicAuth,
 		cfg.HTTPCfg().HTTPAuthUsers,
 		shdChan)
@@ -620,6 +624,8 @@ func testServeHTTPTLSWithBasicAuth(t *testing.T) {
 		cfg.TLSCfg().ServerName,
 		cfg.HTTPCfg().HTTPJsonRPCURL,
 		cfg.HTTPCfg().HTTPWSURL,
+		cfg.HTTPCfg().PrometheusURL,
+		cfg.HTTPCfg().PprofPath,
 		!cfg.HTTPCfg().HTTPUseBasicAuth,
 		cfg.HTTPCfg().HTTPAuthUsers,
 		shdChan)
@@ -649,6 +655,8 @@ func testServeHTTPTLSError(t *testing.T) {
 		cfg.TLSCfg().ServerName,
 		cfg.HTTPCfg().HTTPJsonRPCURL,
 		cfg.HTTPCfg().HTTPWSURL,
+		cfg.HTTPCfg().PrometheusURL,
+		cfg.HTTPCfg().PprofPath,
 		!cfg.HTTPCfg().HTTPUseBasicAuth,
 		cfg.HTTPCfg().HTTPAuthUsers,
 		shdChan)
@@ -676,6 +684,8 @@ func testServeHTTPTLSHttpNotEnabled(t *testing.T) {
 		"/usr/share/cgrates/tls/ca.crt",
 		cfg.TLSCfg().ServerPolicy,
 		cfg.TLSCfg().ServerName,
+		utils.EmptyString,
+		utils.EmptyString,
 		utils.EmptyString,
 		utils.EmptyString,
 		cfg.HTTPCfg().HTTPUseBasicAuth,
