@@ -37,6 +37,7 @@ type StorDBOpts struct {
 	PgSSLCert          string
 	PgSSLKey           string
 	PgSSLPassword      string
+	PgSSLCertMode      string
 	PgSSLRootCert      string
 	PgSchema           string
 	MySQLLocation      string
@@ -86,11 +87,24 @@ func (dbOpts *StorDBOpts) loadFromJSONCfg(jsnCfg *DBOptsJson) (err error) {
 	if jsnCfg.MongoConnScheme != nil {
 		dbOpts.MongoConnScheme = *jsnCfg.MongoConnScheme
 	}
-	dbOpts.PgSSLMode = jsnCfg.PgSSLMode
-	dbOpts.PgSSLCert = jsnCfg.PgSSLCert
-	dbOpts.PgSSLKey = jsnCfg.PgSSLKey
-	dbOpts.PgSSLPassword = jsnCfg.PgSSLPassword
-	dbOpts.PgSSLRootCert = jsnCfg.PgSSLRootCert
+	if jsnCfg.PgSSLMode != nil {
+		dbOpts.PgSSLMode = *jsnCfg.PgSSLMode
+	}
+	if jsnCfg.PgSSLCert != nil {
+		dbOpts.PgSSLCert = *jsnCfg.PgSSLCert
+	}
+	if jsnCfg.PgSSLKey != nil {
+		dbOpts.PgSSLKey = *jsnCfg.PgSSLKey
+	}
+	if jsnCfg.PgSSLPassword != nil {
+		dbOpts.PgSSLPassword = *jsnCfg.PgSSLPassword
+	}
+	if jsnCfg.PgSSLCertMode != nil {
+		dbOpts.PgSSLCertMode = *jsnCfg.PgSSLCertMode
+	}
+	if jsnCfg.PgSSLRootCert != nil {
+		dbOpts.PgSSLRootCert = *jsnCfg.PgSSLRootCert
+	}
 	if jsnCfg.PgSchema != nil {
 		dbOpts.PgSchema = *jsnCfg.PgSchema
 	}
@@ -182,6 +196,7 @@ func (dbOpts *StorDBOpts) Clone() *StorDBOpts {
 		PgSSLCert:          dbOpts.PgSSLCert,
 		PgSSLKey:           dbOpts.PgSSLKey,
 		PgSSLPassword:      dbOpts.PgSSLPassword,
+		PgSSLCertMode:      dbOpts.PgSSLCertMode,
 		PgSSLRootCert:      dbOpts.PgSSLRootCert,
 		PgSchema:           dbOpts.PgSchema,
 		MySQLLocation:      dbOpts.MySQLLocation,
@@ -244,6 +259,9 @@ func (dbcfg *StorDbCfg) AsMapInterface() (mp map[string]any) {
 	}
 	if dbcfg.Opts.PgSSLPassword != "" {
 		opts[utils.PgSSLPasswordCfg] = dbcfg.Opts.PgSSLPassword
+	}
+	if dbcfg.Opts.PgSSLCertMode != "" {
+		opts[utils.PgSSLCertModeCfg] = dbcfg.Opts.PgSSLCertMode
 	}
 	if dbcfg.Opts.PgSSLRootCert != "" {
 		opts[utils.PgSSLRootCertCfg] = dbcfg.Opts.PgSSLRootCert

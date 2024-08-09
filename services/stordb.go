@@ -200,5 +200,6 @@ func (db *StorDBService) needsConnectionReload() bool {
 			db.oldDBCfg.Opts.PgSSLCert != db.cfg.StorDbCfg().Opts.PgSSLCert ||
 			db.oldDBCfg.Opts.PgSSLKey != db.cfg.StorDbCfg().Opts.PgSSLKey ||
 			db.oldDBCfg.Opts.PgSSLPassword != db.cfg.StorDbCfg().Opts.PgSSLPassword ||
+			db.oldDBCfg.Opts.PgSSLCertMode != db.cfg.StorDbCfg().Opts.PgSSLCertMode ||
 			db.oldDBCfg.Opts.PgSSLRootCert != db.cfg.StorDbCfg().Opts.PgSSLRootCert)
 }

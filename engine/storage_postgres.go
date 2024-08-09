@@ -29,7 +29,7 @@ import (
 
 // NewPostgresStorage returns the posgres storDB
 func NewPostgresStorage(host, port, name, user, password, pgSchema,
-	sslmode, sslcert, sslkey, sslpassword, sslrootcert string,
+	sslmode, sslcert, sslkey, sslpassword, sslcertmode, sslrootcert string,
 	maxConn, maxIdleConn int, connMaxLifetime time.Duration) (*SQLStorage, error) {
 	connStr := fmt.Sprintf(
 		"host=%s port=%s dbname=%s user=%s password=%s sslmode=%s",
@@ -42,6 +42,9 @@ func NewPostgresStorage(host, port, name, user, password, pgSchema,
 	}
 	if sslpassword != "" {
 		connStr = connStr + " sslpassword=" + sslpassword
+	}
+	if sslcertmode != "" {
+		connStr = connStr + " sslcertmode=" + sslcertmode
 	}
 	if sslrootcert != "" {
 		connStr = connStr + " sslrootcert=" + sslrootcert

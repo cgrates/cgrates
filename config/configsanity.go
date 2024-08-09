@@ -969,6 +969,10 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 			utils.PgSSLModeVerifyFull}, cfg.storDbCfg.Opts.PgSSLMode) {
 			return fmt.Errorf("<%s> unsupported pgSSLMode (sslmode) in storDB configuration", utils.StorDB)
 		}
+		if !slices.Contains([]string{utils.PgSSLModeDisable, utils.PgSSLModeAllow, utils.PgSSLModeRequire,
+			utils.EmptyString}, cfg.storDbCfg.Opts.PgSSLCertMode) {
+			return fmt.Errorf("<%s> unsupported pgSSLCertMode (sslcertmode) in storDB configuration", utils.StorDB)
+		}
 	}
 	// DataDB sanity checks
 	if cfg.dataDbCfg.Type == utils.MetaInternal {

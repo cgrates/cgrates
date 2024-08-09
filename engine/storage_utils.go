@@ -71,7 +71,7 @@ func NewStorDBConn(dbType, host, port, name, user, pass, marshaler string,
 		db, err = NewMongoStorage(opts.MongoConnScheme, host, port, name, user, pass, marshaler, utils.StorDB, stringIndexedFields, opts.MongoQueryTimeout)
 	case utils.MetaPostgres:
 		db, err = NewPostgresStorage(host, port, name, user, pass, opts.PgSchema, opts.PgSSLMode,
-			opts.PgSSLCert, opts.PgSSLKey, opts.PgSSLPassword, opts.PgSSLRootCert,
+			opts.PgSSLCert, opts.PgSSLKey, opts.PgSSLPassword, opts.PgSSLCertMode, opts.PgSSLRootCert,
 			opts.SQLMaxOpenConns, opts.SQLMaxIdleConns, opts.SQLConnMaxLifetime)
 	case utils.MetaMySQL:
 		db, err = NewMySQLStorage(host, port, name, user, pass, opts.SQLMaxOpenConns, opts.SQLMaxIdleConns,

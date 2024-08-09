@@ -108,9 +108,10 @@ func TestStorDBit(t *testing.T) {
 		if storDB, err = NewPostgresStorage(storDBCfg.StorDbCfg().Host,
 			storDBCfg.StorDbCfg().Port, storDBCfg.StorDbCfg().Name,
 			storDBCfg.StorDbCfg().User, storDBCfg.StorDbCfg().Password,
-			storDBCfg.StorDbCfg().Opts.PgSchema, storDBCfg.StorDbCfg().Opts.PgSSLMode,
-			storDBCfg.StorDbCfg().Opts.PgSSLCert, storDBCfg.StorDbCfg().Opts.PgSSLKey,
-			storDBCfg.StorDbCfg().Opts.PgSSLPassword, storDBCfg.StorDbCfg().Opts.PgSSLRootCert,
+			storDBCfg.StorDbCfg().Opts.PgSchema,
+			storDBCfg.StorDbCfg().Opts.PgSSLMode, storDBCfg.StorDbCfg().Opts.PgSSLCert,
+			storDBCfg.StorDbCfg().Opts.PgSSLKey, storDBCfg.StorDbCfg().Opts.PgSSLPassword,
+			storDBCfg.StorDbCfg().Opts.PgSSLCertMode, storDBCfg.StorDbCfg().Opts.PgSSLRootCert,
 			100, 10, 0); err != nil {
 			t.Fatal(err)
 		}

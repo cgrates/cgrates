@@ -34,6 +34,7 @@ func TestHTTPCfgloadFromJsonCfg(t *testing.T) {
 		PrometheusURL:       utils.StringPointer("/prometheus"),
 		Ws_url:              utils.StringPointer("/ws"),
 		Registrars_url:      utils.StringPointer("/randomUrl"),
+		PprofPath:           utils.StringPointer("/pprof/test"),
 		Freeswitch_cdrs_url: utils.StringPointer("/freeswitch_json"),
 		Http_Cdrs:           utils.StringPointer("/cdr_http"),
 		Use_basic_auth:      utils.BoolPointer(false),
@@ -46,6 +47,7 @@ func TestHTTPCfgloadFromJsonCfg(t *testing.T) {
 		RegistrarSURL:         "/randomUrl",
 		HTTPFreeswitchCDRsURL: "/freeswitch_json",
 		HTTPCDRsURL:           "/cdr_http",
+		PprofPath:             "/pprof/test",
 		HTTPUseBasicAuth:      false,
 		HTTPAuthUsers:         map[string]string{},
 		ClientOpts: &http.Transport{
@@ -91,6 +93,7 @@ func TestHTTPCfgAsMapInterface(t *testing.T) {
 		utils.HTTPWSURLCfg:             "/ws",
 		utils.HTTPFreeswitchCDRsURLCfg: "/freeswitch_json",
 		utils.HTTPCDRsURLCfg:           "/cdr_http",
+		utils.PprofPathCfg:             "/debug/pprof/",
 		utils.HTTPUseBasicAuthCfg:      false,
 		utils.HTTPAuthUsersCfg:         map[string]string{},
 		utils.HTTPClientOptsCfg: map[string]any{
@@ -122,7 +125,8 @@ func TestHTTPCfgAsMapInterface1(t *testing.T) {
 	"http": {
 		"json_rpc_url": "/rpc",					
 		"ws_url": "",	
-		"prometheus_url": "/metrics",	
+		"prometheus_url": "/metrics",
+		"pprof_path": "/pprof/test",
 		"use_basic_auth": true,					
 		"auth_users": {"user1": "authenticated", "user2": "authenticated"},
 	},
@@ -131,6 +135,7 @@ func TestHTTPCfgAsMapInterface1(t *testing.T) {
 		utils.HTTPJsonRPCURLCfg:        "/rpc",
 		utils.RegistrarSURLCfg:         "/registrar",
 		utils.PrometheusURLCfg:         "/metrics",
+		utils.PprofPathCfg:             "/pprof/test",
 		utils.HTTPWSURLCfg:             "",
 		utils.HTTPFreeswitchCDRsURLCfg: "/freeswitch_json",
 		utils.HTTPCDRsURLCfg:           "/cdr_http",
@@ -171,6 +176,7 @@ func TestHTTPCfgClone(t *testing.T) {
 		RegistrarSURL:         "/randomUrl",
 		HTTPFreeswitchCDRsURL: "/freeswitch_json",
 		HTTPCDRsURL:           "/cdr_http",
+		PprofPath:             "/debug/pprof",
 		HTTPUseBasicAuth:      false,
 		HTTPAuthUsers: map[string]string{
 			"user": "pass",

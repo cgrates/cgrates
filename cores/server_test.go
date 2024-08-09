@@ -95,17 +95,6 @@ func TestRegisterHttpFunc(t *testing.T) {
 	rcv.StopBiRPC()
 }
 
-func TestRegisterProfiler(t *testing.T) {
-	cfgDflt := config.NewDefaultCGRConfig()
-	cfgDflt.CoreSCfg().CapsStatsInterval = 1
-	caps := engine.NewCaps(0, utils.MetaBusy)
-	rcv := NewServer(caps)
-
-	rcv.RegisterProfiler()
-
-	rcv.StopBiRPC()
-}
-
 func TestHandleRequestCORSHeaders(t *testing.T) {
 	caps := engine.NewCaps(0, utils.MetaBusy)
 	rcv := NewServer(caps)

@@ -34,6 +34,7 @@ type HTTPCfg struct {
 	HTTPWSURL             string            // WebSocket relative URL ("" to disable)
 	HTTPFreeswitchCDRsURL string            // Freeswitch CDRS relative URL ("" to disable)
 	HTTPCDRsURL           string            // CDRS relative URL ("" to disable)
+	PprofPath             string            // runtime profiling url path ("" to disable)
 	HTTPUseBasicAuth      bool              // Use basic auth for HTTP API
 	HTTPAuthUsers         map[string]string // Basic auth user:password map (base64 passwords)
 	ClientOpts            *http.Transport
@@ -135,6 +136,9 @@ func (httpcfg *HTTPCfg) loadFromJSONCfg(jsnHTTPCfg *HTTPJsonCfg) (err error) {
 	if jsnHTTPCfg.Http_Cdrs != nil {
 		httpcfg.HTTPCDRsURL = *jsnHTTPCfg.Http_Cdrs
 	}
+	if jsnHTTPCfg.PprofPath != nil {
+		httpcfg.PprofPath = *jsnHTTPCfg.PprofPath
+	}
 	if jsnHTTPCfg.Use_basic_auth != nil {
 		httpcfg.HTTPUseBasicAuth = *jsnHTTPCfg.Use_basic_auth
 	}
@@ -178,6 +182,7 @@ func (httpcfg *HTTPCfg) AsMapInterface() map[string]any {
 		utils.HTTPWSURLCfg:             httpcfg.HTTPWSURL,
 		utils.HTTPFreeswitchCDRsURLCfg: httpcfg.HTTPFreeswitchCDRsURL,
 		utils.HTTPCDRsURLCfg:           httpcfg.HTTPCDRsURL,
+		utils.PprofPathCfg:             httpcfg.PprofPath,
 		utils.HTTPUseBasicAuthCfg:      httpcfg.HTTPUseBasicAuth,
 		utils.HTTPAuthUsersCfg:         httpcfg.HTTPAuthUsers,
 		utils.HTTPClientOptsCfg:        clientOpts,
@@ -198,6 +203,7 @@ func (httpcfg HTTPCfg) Clone() (cln *HTTPCfg) {
 		HTTPWSURL:             httpcfg.HTTPWSURL,
 		HTTPFreeswitchCDRsURL: httpcfg.HTTPFreeswitchCDRsURL,
 		HTTPCDRsURL:           httpcfg.HTTPCDRsURL,
+		PprofPath:             httpcfg.PprofPath,
 		HTTPUseBasicAuth:      httpcfg.HTTPUseBasicAuth,
 		HTTPAuthUsers:         make(map[string]string),
 		ClientOpts:            httpcfg.ClientOpts.Clone(),

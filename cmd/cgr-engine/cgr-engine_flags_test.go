@@ -64,13 +64,6 @@ func TestCgrEngineFlags(t *testing.T) {
 			want:       "/run/cgrates/cgrates.pid",
 		},
 		{
-			name:       "httpPprof",
-			flags:      []string{"-http_pprof"},
-			flagVar:    httpPprof,
-			defaultVal: false,
-			want:       true,
-		},
-		{
 			name:       "cpuProfDir",
 			flags:      []string{"-cpuprof_dir", "/tmp/profiling"},
 			flagVar:    cpuProfDir,

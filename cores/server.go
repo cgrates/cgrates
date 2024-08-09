@@ -188,20 +188,7 @@ func (s *Server) handleRequest(w http.ResponseWriter, r *http.Request) {
 	io.Copy(w, res)
 }
 
-func registerProfiler(mux *http.ServeMux) {
-	mux.HandleFunc("/debug/pprof/", pprof.Index)
-	mux.HandleFunc("/debug/pprof/cmdline", pprof.Cmdline)
-	mux.HandleFunc("/debug/pprof/profile", pprof.Profile)
-	mux.HandleFunc("/debug/pprof/symbol", pprof.Symbol)
-	mux.HandleFunc("/debug/pprof/trace", pprof.Trace)
-}
-
-func (s *Server) RegisterProfiler() {
-	registerProfiler(s.httpMux)
-	registerProfiler(s.httpsMux)
-}
-
-func (s *Server) ServeHTTP(addr, jsonRPCURL, wsRPCURL, promURL string, useBasicAuth bool,
+func (s *Server) ServeHTTP(addr, jsonRPCURL, wsRPCURL, promURL, pprofPath string, useBasicAuth bool,
 	userList map[string]string, shdChan *utils.SyncedChan) {
 	s.RLock()
 	enabled := s.rpcEnabled
@@ -237,12 +224,34 @@ func (s *Server) ServeHTTP(addr, jsonRPCURL, wsRPCURL, promURL string, useBasicA
 		s.Lock()
 		s.httpEnabled = true
 		s.Unlock()
-		utils.Logger.Info("<HTTP> enabling handler for Prometheus connections")
+		utils.Logger.Info(fmt.Sprintf("<HTTP> prometheus metrics endpoint registered at %q", promURL))
 		promHandler := promhttp.Handler()
 		if useBasicAuth {
 			s.httpMux.HandleFunc(promURL, use(promHandler.ServeHTTP, basicAuth(userList)))
 		} else {
 			s.httpMux.Handle(promURL, promHandler)
+		}
+	}
+	if pprofPath != "" {
+		s.Lock()
+		s.httpEnabled = true
+		s.Unlock()
+		if !strings.HasSuffix(pprofPath, "/") {
+			pprofPath += "/"
+		}
+		utils.Logger.Info(fmt.Sprintf("<HTTP> profiling endpoints registered at %q", pprofPath))
+		if useBasicAuth {
+			s.httpMux.HandleFunc(pprofPath, use(pprof.Index, basicAuth(userList)))
+			s.httpMux.HandleFunc(pprofPath+"cmdline", use(pprof.Cmdline, basicAuth(userList)))
+			s.httpMux.HandleFunc(pprofPath+"profile", use(pprof.Profile, basicAuth(userList)))
+			s.httpMux.HandleFunc(pprofPath+"symbol", use(pprof.Symbol, basicAuth(userList)))
+			s.httpMux.HandleFunc(pprofPath+"trace", use(pprof.Trace, basicAuth(userList)))
+		} else {
+			s.httpMux.HandleFunc(pprofPath, pprof.Index)
+			s.httpMux.HandleFunc(pprofPath+"cmdline", pprof.Cmdline)
+			s.httpMux.HandleFunc(pprofPath+"profile", pprof.Profile)
+			s.httpMux.HandleFunc(pprofPath+"symbol", pprof.Symbol)
+			s.httpMux.HandleFunc(pprofPath+"trace", pprof.Trace)
 		}
 	}
 	if !s.httpEnabled {
@@ -443,7 +452,7 @@ func (s *Server) handleWebSocket(ws *websocket.Conn) {
 }
 
 func (s *Server) ServeHTTPTLS(addr, serverCrt, serverKey, caCert string, serverPolicy int,
-	serverName string, jsonRPCURL string, wsRPCURL string,
+	serverName, jsonRPCURL, wsRPCURL, promURL, pprofPath string,
 	useBasicAuth bool, userList map[string]string, shdChan *utils.SyncedChan) {
 	s.RLock()
 	enabled := s.rpcEnabled
@@ -472,6 +481,40 @@ func (s *Server) ServeHTTPTLS(addr, serverCrt, serverKey, caCert string, serverP
 			s.httpsMux.HandleFunc(wsRPCURL, use(wsHandler.ServeHTTP, basicAuth(userList)))
 		} else {
 			s.httpsMux.Handle(wsRPCURL, wsHandler)
+		}
+	}
+	if promURL != "" {
+		s.Lock()
+		s.httpEnabled = true
+		s.Unlock()
+		utils.Logger.Info(fmt.Sprintf("<HTTPS> prometheus metrics endpoint registered at %q", promURL))
+		promHandler := promhttp.Handler()
+		if useBasicAuth {
+			s.httpsMux.HandleFunc(promURL, use(promHandler.ServeHTTP, basicAuth(userList)))
+		} else {
+			s.httpsMux.Handle(promURL, promHandler)
+		}
+	}
+	if pprofPath != "" {
+		s.Lock()
+		s.httpEnabled = true
+		s.Unlock()
+		if !strings.HasSuffix(pprofPath, "/") {
+			pprofPath += "/"
+		}
+		utils.Logger.Info(fmt.Sprintf("<HTTPS> profiling endpoints registered at %q", pprofPath))
+		if useBasicAuth {
+			s.httpsMux.HandleFunc(pprofPath, use(pprof.Index, basicAuth(userList)))
+			s.httpsMux.HandleFunc(pprofPath+"cmdline", use(pprof.Cmdline, basicAuth(userList)))
+			s.httpsMux.HandleFunc(pprofPath+"profile", use(pprof.Profile, basicAuth(userList)))
+			s.httpsMux.HandleFunc(pprofPath+"symbol", use(pprof.Symbol, basicAuth(userList)))
+			s.httpsMux.HandleFunc(pprofPath+"trace", use(pprof.Trace, basicAuth(userList)))
+		} else {
+			s.httpsMux.HandleFunc(pprofPath, pprof.Index)
+			s.httpsMux.HandleFunc(pprofPath+"cmdline", pprof.Cmdline)
+			s.httpsMux.HandleFunc(pprofPath+"profile", pprof.Profile)
+			s.httpsMux.HandleFunc(pprofPath+"symbol", pprof.Symbol)
+			s.httpsMux.HandleFunc(pprofPath+"trace", pprof.Trace)
 		}
 	}
 	if !s.httpEnabled {

@@ -86,6 +86,7 @@ type HTTPJsonCfg struct {
 	Ws_url              *string
 	Freeswitch_cdrs_url *string
 	Http_Cdrs           *string
+	PprofPath           *string `json:"pprof_path"`
 	Use_basic_auth      *bool
 	Auth_users          *map[string]string
 	Client_opts         *HTTPClientOptsJson
@@ -123,11 +124,12 @@ type DBOptsJson struct {
 	SQLMaxIdleConns         *int              `json:"sqlMaxIdleConns"`
 	SQLConnMaxLifetime      *string           `json:"sqlConnMaxLifetime"`
 	MySQLDSNParams          map[string]string `json:"mysqlDSNParams"`
-	PgSSLMode               string            `json:"pgSSLMode"`
-	PgSSLCert               string            `json:"pgSSLCert"`
-	PgSSLKey                string            `json:"pgSSLKey"`
-	PgSSLPassword           string            `json:"pgSSLPassword"`
-	PgSSLRootCert           string            `json:"pgSSLRootCert"`
+	PgSSLMode               *string           `json:"pgSSLMode"`
+	PgSSLCert               *string           `json:"pgSSLCert"`
+	PgSSLKey                *string           `json:"pgSSLKey"`
+	PgSSLPassword           *string           `json:"pgSSLPassword"`
+	PgSSLCertMode           *string           `json:"pgSSLCertMode"`
+	PgSSLRootCert           *string           `json:"pgSSLRootCert"`
 	PgSchema                *string           `json:"pgSchema"`
 	MySQLLocation           *string           `json:"mysqlLocation"`
 }

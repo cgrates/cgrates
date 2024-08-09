@@ -18,8 +18,6 @@ Able to read the configuration from either a local directory  of *.json* files w
         Configuration directory path (default "/etc/cgrates/")
   -cpuprof_dir string
         Directory for CPU profiles
-  -http_pprof
-        Enable HTTP pprof profiling
   -log_level int
         Log level (0=emergency to 7=debug) (default -1)
   -logger string
