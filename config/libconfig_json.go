@@ -86,6 +86,7 @@ type HTTPJsonCfg struct {
 	Ws_url              *string
 	Freeswitch_cdrs_url *string
 	Http_Cdrs           *string
+	PprofPath           *string `json:"pprof_path"`
 	Use_basic_auth      *bool
 	Auth_users          *map[string]string
 	Client_opts         *HTTPClientOptsJson

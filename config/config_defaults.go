@@ -242,6 +242,7 @@ const CGRATES_CFG_JSON = `
 	"ws_url": "/ws",				// WebSockets relative URL ("" to disable)
 	"freeswitch_cdrs_url": "/freeswitch_json",	// Freeswitch CDRS relative URL ("" to disable)
 	"http_cdrs": "/cdr_http",			// CDRS relative URL ("" to disable)
+	"pprof_path": "/debug/pprof/",			// endpoint for serving runtime profiling data for pprof visualization
 	"use_basic_auth": false,			// use basic authentication
 	"auth_users": {},				// basic authentication usernames and base64-encoded passwords (eg: { "username1": "cGFzc3dvcmQ=", "username2": "cGFzc3dvcmQy "})
 	"client_opts":{

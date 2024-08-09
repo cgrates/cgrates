@@ -2193,6 +2193,7 @@ const (
 	HTTPWSURLCfg             = "ws_url"
 	HTTPFreeswitchCDRsURLCfg = "freeswitch_cdrs_url"
 	HTTPCDRsURLCfg           = "http_cdrs"
+	PprofPathCfg             = "pprof_path"
 	HTTPUseBasicAuthCfg      = "use_basic_auth"
 	HTTPAuthUsersCfg         = "auth_users"
 	HTTPClientOptsCfg        = "client_opts"

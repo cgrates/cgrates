@@ -211,6 +211,7 @@ func testServeHHTPPass(t *testing.T) {
 		cfg.HTTPCfg().HTTPJsonRPCURL,
 		cfg.HTTPCfg().HTTPWSURL,
 		cfg.HTTPCfg().PrometheusURL,
+		cfg.HTTPCfg().PprofPath,
 		cfg.HTTPCfg().HTTPUseBasicAuth,
 		cfg.HTTPCfg().HTTPAuthUsers,
 		shdChan)
@@ -233,6 +234,7 @@ func testServeHHTPPassUseBasicAuth(t *testing.T) {
 		cfg.HTTPCfg().HTTPJsonRPCURL,
 		cfg.HTTPCfg().HTTPWSURL,
 		cfg.HTTPCfg().PrometheusURL,
+		cfg.HTTPCfg().PprofPath,
 		!cfg.HTTPCfg().HTTPUseBasicAuth,
 		cfg.HTTPCfg().HTTPAuthUsers,
 		shdChan)
@@ -252,6 +254,7 @@ func testServeHHTPEnableHttp(t *testing.T) {
 
 	go server.ServeHTTP(
 		":45779",
+		utils.EmptyString,
 		utils.EmptyString,
 		utils.EmptyString,
 		utils.EmptyString,
@@ -277,6 +280,7 @@ func testServeHHTPFail(t *testing.T) {
 		cfg.HTTPCfg().HTTPJsonRPCURL,
 		cfg.HTTPCfg().HTTPWSURL,
 		cfg.HTTPCfg().PrometheusURL,
+		cfg.HTTPCfg().PprofPath,
 		cfg.HTTPCfg().HTTPUseBasicAuth,
 		cfg.HTTPCfg().HTTPAuthUsers,
 		shdChan)
@@ -302,6 +306,7 @@ func testServeHHTPFailEnableRpc(t *testing.T) {
 		cfg.HTTPCfg().HTTPJsonRPCURL,
 		cfg.HTTPCfg().HTTPWSURL,
 		cfg.HTTPCfg().PrometheusURL,
+		cfg.HTTPCfg().PprofPath,
 		cfg.HTTPCfg().HTTPUseBasicAuth,
 		cfg.HTTPCfg().HTTPAuthUsers,
 		shdChan)
