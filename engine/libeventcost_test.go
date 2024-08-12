@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"fmt"
 	"reflect"
 	"testing"
 	"time"
@@ -1063,4 +1064,137 @@ func TestBalanceChargeFieldAsInterface(t *testing.T) {
 		t.Error(err)
 	}
 
+}
+
+func TestNewFreeEventCost(t *testing.T) {
+	cgrID := "testCGRID"
+	runID := "testRunID"
+	account := "testAccount"
+	tStart := time.Now()
+	usage := 5 * time.Second
+	eventCost := NewFreeEventCost(cgrID, runID, account, tStart, usage)
+	if eventCost == nil {
+		t.Errorf("Expected non-nil EventCost, got nil")
+	}
+	if eventCost.CGRID != cgrID {
+		t.Errorf("Expected CGRID %v, got %v", cgrID, eventCost.CGRID)
+	}
+	if eventCost.RunID != runID {
+		t.Errorf("Expected RunID %v, got %v", runID, eventCost.RunID)
+	}
+	if !eventCost.StartTime.Equal(tStart) {
+		t.Errorf("Expected StartTime %v, got %v", tStart, eventCost.StartTime)
+	}
+	if eventCost.Cost == nil || *eventCost.Cost != 0 {
+		t.Errorf("Expected Cost 0, got %v", *eventCost.Cost)
+	}
+	if len(eventCost.Charges) != 1 {
+		t.Errorf("Expected 1 charge, got %d", len(eventCost.Charges))
+	}
+	charge := eventCost.Charges[0]
+	if charge.RatingID != utils.MetaPause {
+		t.Errorf("Expected RatingID %v, got %v", utils.MetaPause, charge.RatingID)
+	}
+	if len(charge.Increments) != 1 {
+		t.Errorf("Expected 1 increment, got %d", len(charge.Increments))
+	}
+	increment := charge.Increments[0]
+	if increment.Usage != usage {
+		t.Errorf("Expected Usage %v, got %v", usage, increment.Usage)
+	}
+	if increment.AccountingID != utils.MetaPause {
+		t.Errorf("Expected AccountingID %v, got %v", utils.MetaPause, increment.AccountingID)
+	}
+	if increment.CompressFactor != 1 {
+		t.Errorf("Expected CompressFactor 1, got %v", increment.CompressFactor)
+	}
+	rating := eventCost.Rating[utils.MetaPause]
+	if rating.RoundingMethod != "*up" {
+		t.Errorf("Expected RoundingMethod *up, got %v", rating.RoundingMethod)
+	}
+	if rating.RoundingDecimals != 5 {
+		t.Errorf("Expected RoundingDecimals 5, got %v", rating.RoundingDecimals)
+	}
+	if rating.RatesID != utils.MetaPause {
+		t.Errorf("Expected RatesID %v, got %v", utils.MetaPause, rating.RatesID)
+	}
+	if rating.RatingFiltersID != utils.MetaPause {
+		t.Errorf("Expected RatingFiltersID %v, got %v", utils.MetaPause, rating.RatingFiltersID)
+	}
+	if rating.TimingID != utils.MetaPause {
+		t.Errorf("Expected TimingID %v, got %v", utils.MetaPause, rating.TimingID)
+	}
+	accounting := eventCost.Accounting[utils.MetaPause]
+	if accounting.AccountID != account {
+		t.Errorf("Expected AccountID %v, got %v", account, accounting.AccountID)
+	}
+	if accounting.RatingID != utils.MetaPause {
+		t.Errorf("Expected Accounting RatingID %v, got %v", utils.MetaPause, accounting.RatingID)
+	}
+	ratingFilters := eventCost.RatingFilters[utils.MetaPause]
+	if ratingFilters[utils.Subject] != "" {
+		t.Errorf("Expected empty Subject, got %v", ratingFilters[utils.Subject])
+	}
+	if ratingFilters[utils.DestinationPrefixName] != "" {
+		t.Errorf("Expected empty DestinationPrefixName, got %v", ratingFilters[utils.DestinationPrefixName])
+	}
+	if ratingFilters[utils.DestinationID] != "" {
+		t.Errorf("Expected empty DestinationID, got %v", ratingFilters[utils.DestinationID])
+	}
+	if ratingFilters[utils.RatingPlanID] != utils.MetaPause {
+		t.Errorf("Expected RatingPlanID %v, got %v", utils.MetaPause, ratingFilters[utils.RatingPlanID])
+	}
+	rates := eventCost.Rates[utils.MetaPause]
+	if len(rates) != 1 {
+		t.Errorf("Expected 1 rate, got %d", len(rates))
+	}
+	if rates[0].RateIncrement != 1 {
+		t.Errorf("Expected RateIncrement 1, got %v", rates[0].RateIncrement)
+	}
+	if rates[0].RateUnit != 1 {
+		t.Errorf("Expected RateUnit 1, got %v", rates[0].RateUnit)
+	}
+	timings := eventCost.Timings[utils.MetaPause]
+	if timings.StartTime != "00:00:00" {
+		t.Errorf("Expected StartTime 00:00:00, got %v", timings.StartTime)
+	}
+	if eventCost.cache == nil {
+		t.Errorf("Expected non-nil cache, got nil")
+	}
+}
+
+func TestIfaceAsEventCostMapStringAny(t *testing.T) {
+	input := map[string]any{
+		"CGRID":     "testCGRID",
+		"RunID":     "testRunID",
+		"StartTime": "2024-08-09T12:34:56Z",
+		"Cost":      0.0,
+	}
+	expectedCGRID := "testCGRID"
+	expectedRunID := "testRunID"
+	ec, err := IfaceAsEventCost(input)
+	if err != nil {
+		t.Errorf("Expected no error, got %v", err)
+	}
+	if ec == nil {
+		t.Errorf("Expected non-nil EventCost, got nil")
+	}
+	if ec.CGRID != expectedCGRID {
+		t.Errorf("Expected CGRID %v, got %v", expectedCGRID, ec.CGRID)
+	}
+	if ec.RunID != expectedRunID {
+		t.Errorf("Expected RunID %v, got %v", expectedRunID, ec.RunID)
+	}
+}
+
+func TestIfaceAsEventCostDefault(t *testing.T) {
+	input := 42
+	_, err := IfaceAsEventCost(input)
+	if err == nil {
+		t.Errorf("Expected error, got nil")
+	}
+	expectedErrMsg := fmt.Sprintf("cannot convert type %v to *EventCost", reflect.TypeOf(input).String())
+	if err.Error() == expectedErrMsg {
+		t.Errorf("Expected error message %v, got %v", expectedErrMsg, err.Error())
+	}
 }
