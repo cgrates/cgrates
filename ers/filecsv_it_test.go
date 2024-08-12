@@ -299,7 +299,11 @@ package ers
 // 		t.Errorf("Expecting: 1002, received: <%s> , <%s>", cdrs[0].Account, cdrs[1].Account)
 // 	} else if cdrs[0].Tenant != "itsyscom.com" || cdrs[1].Tenant != "itsyscom.com" {
 // 		t.Errorf("Expecting: itsyscom.com, received: <%s> , <%s>", cdrs[0].Tenant, cdrs[1].Tenant)
-// 	}
+// 	} else if cdrs[0].ExtraFields["ReaderID"] != "file_reader_with_filters" {
+// t.Errorf("Expected <%v>, received <%v>", "file_reader_with_filters", cdrs[0])
+// } else if cdrs[1].ExtraFields["ReaderID"] != "file_reader_with_filters" {
+// 	t.Errorf("Expected <%v>, received <%v>", "file_reader_with_filters", cdrs[1])
+// }
 // }
 
 // func testCsvITProcessedFiles(t *testing.T) {

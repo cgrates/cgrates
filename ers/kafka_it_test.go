@@ -90,7 +90,8 @@ func TestKafkaER(t *testing.T) {
 			"filters": [],
 			"flags": [],
 			"fields":[
-				{"tag": "OriginID", "type": "*composed", "value": "~*req.OriginID", "path": "*cgreq.OriginID"}
+				{"tag": "OriginID", "type": "*composed", "value": "~*req.OriginID", "path": "*cgreq.OriginID"},
+				{"tag": "readerId", "type": "*variable", "value": "~*vars.*readerID", "path": "*cgreq.ReaderID"},
 			]
 		}
 	]
@@ -145,6 +146,7 @@ func TestKafkaER(t *testing.T) {
 			ID:     ev.cgrEvent.ID,
 			Event: map[string]any{
 				"OriginID": randomOriginID,
+				"ReaderID": cfg.ERsCfg().Readers[1].ID,
 			},
 			APIOpts: map[string]any{},
 		}

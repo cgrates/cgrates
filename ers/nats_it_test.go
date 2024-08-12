@@ -137,6 +137,7 @@ func testCheckNatsData(t *testing.T, randomOriginID, expData string, ch chan str
 			ID:     ev.cgrEvent.ID,
 			Event: map[string]any{
 				"OriginID": randomOriginID,
+				"ReaderID": "nats",
 			},
 			APIOpts: map[string]any{},
 		}
@@ -312,6 +313,7 @@ func TestNatsERJetStream(t *testing.T) {
 			"flags": [],										
 			"fields":[									
 				{"tag": "OriginID", "type": "*composed", "value": "~*req.OriginID", "path": "*cgreq.OriginID"},
+				{"tag": "readerId", "type": "*variable", "value": "~*vars.*readerID", "path": "*cgreq.ReaderID"},
 			],
 			"opts": {
 				"natsJetStream": true,
@@ -360,6 +362,7 @@ func TestNatsER(t *testing.T) {
 			"flags": [],										
 			"fields":[									
 				{"tag": "OriginID", "type": "*composed", "value": "~*req.OriginID", "path": "*cgreq.OriginID"},
+				{"tag": "readerId", "type": "*variable", "value": "~*vars.*readerID", "path": "*cgreq.ReaderID"},
 			],
 			"opts": {
 				"natsSubjectProcessed": "processed_cdrs",
@@ -408,6 +411,7 @@ func TestNatsERJetStreamUser(t *testing.T) {
 			"flags": [],										
 			"fields":[									
 				{"tag": "OriginID", "type": "*composed", "value": "~*req.OriginID", "path": "*cgreq.OriginID"},
+				{"tag": "readerId", "type": "*variable", "value": "~*vars.*readerID", "path": "*cgreq.ReaderID"},
 			],
 			"opts": {
 				"natsJetStream": true,
@@ -458,6 +462,7 @@ func TestNatsERUser(t *testing.T) {
 			"flags": [],										
 			"fields":[									
 				{"tag": "OriginID", "type": "*composed", "value": "~*req.OriginID", "path": "*cgreq.OriginID"},
+				{"tag": "readerId", "type": "*variable", "value": "~*vars.*readerID", "path": "*cgreq.ReaderID"},
 			],
 			"opts": {
 				"natsSubjectProcessed": "processed_cdrs",
@@ -505,6 +510,7 @@ func TestNatsERJetStreamToken(t *testing.T) {
 			"flags": [],										
 			"fields":[									
 				{"tag": "OriginID", "type": "*composed", "value": "~*req.OriginID", "path": "*cgreq.OriginID"},
+				{"tag": "readerId", "type": "*variable", "value": "~*vars.*readerID", "path": "*cgreq.ReaderID"},
 			],
 			"opts": {
 				"natsJetStream": true,
@@ -555,6 +561,7 @@ func TestNatsERToken(t *testing.T) {
 			"flags": [],										
 			"fields":[									
 				{"tag": "OriginID", "type": "*composed", "value": "~*req.OriginID", "path": "*cgreq.OriginID"},
+				{"tag": "readerId", "type": "*variable", "value": "~*vars.*readerID", "path": "*cgreq.ReaderID"},
 			],
 			"opts": {
 				"natsSubjectProcessed": "processed_cdrs",
@@ -617,6 +624,7 @@ func TestNatsERNkey(t *testing.T) {
 			"flags": [],										
 			"fields":[									
 				{"tag": "OriginID", "type": "*composed", "value": "~*req.OriginID", "path": "*cgreq.OriginID"},
+				{"tag": "readerId", "type": "*variable", "value": "~*vars.*readerID", "path": "*cgreq.ReaderID"},
 			],
 			"opts": {
 				"natsSubjectProcessed": "processed_cdrs",
@@ -682,6 +690,7 @@ func TestNatsERJetStreamNKey(t *testing.T) {
 			"flags": [],										
 			"fields":[									
 				{"tag": "OriginID", "type": "*composed", "value": "~*req.OriginID", "path": "*cgreq.OriginID"},
+				{"tag": "readerId", "type": "*variable", "value": "~*vars.*readerID", "path": "*cgreq.ReaderID"},
 			],
 			"opts": {
 				"natsJetStream": true,
@@ -770,6 +779,7 @@ resolver_preload: {
 			"flags": [],										
 			"fields":[									
 				{"tag": "OriginID", "type": "*composed", "value": "~*req.OriginID", "path": "*cgreq.OriginID"},
+				{"tag": "readerId", "type": "*variable", "value": "~*vars.*readerID", "path": "*cgreq.ReaderID"},
 			],
 			"opts": {
 				"natsSubjectProcessed": "processed_cdrs",
@@ -860,6 +870,7 @@ system_account:AAFIBB6C56ROU5XRVJLJYR3BTGGYK3HJGHEHQV7L7QZMTT3ZRBLHBS7F
 			"flags": [],										
 			"fields":[									
 				{"tag": "OriginID", "type": "*composed", "value": "~*req.OriginID", "path": "*cgreq.OriginID"},
+				{"tag": "readerId", "type": "*variable", "value": "~*vars.*readerID", "path": "*cgreq.ReaderID"},
 			],
 			"opts": {
 				"natsJetStream": true,

@@ -59,6 +59,7 @@ func TestAMQPER(t *testing.T) {
 			"flags": [],										// flags to influence the event processing
 			"fields":[									// import fields template, tag will match internally CDR field, in case of .csv value will be represented by index of the field value
 				{"tag": "OriginID", "type": "*composed", "value": "~*req.OriginID", "path": "*cgreq.OriginID"},
+				{"tag": "readerId", "type": "*variable", "value": "~*vars.*readerID", "path": "*cgreq.ReaderID"},
 			],
 		},
 	],
@@ -118,6 +119,7 @@ func TestAMQPER(t *testing.T) {
 			ID:     ev.cgrEvent.ID,
 			Event: map[string]any{
 				"OriginID": randomOriginID,
+				"ReaderID": "amqp",
 			},
 			APIOpts: map[string]any{},
 		}

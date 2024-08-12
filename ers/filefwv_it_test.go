@@ -186,6 +186,11 @@ func testFWVITAnalyseCDRs(t *testing.T) {
 	} else if len(reply) != 34 {
 		t.Error("Unexpected number of CDRs returned: ", len(reply))
 	}
+	for _, cdr := range reply {
+		if cdr.ExtraFields["ReaderID"] != "FWV1" {
+			t.Errorf("Expected <%v>, received <%v>", "FWV1", cdr.ExtraFields["ReaderID"])
+		}
+	}
 	if err := fwvRPC.Call(utils.APIerSv2GetCDRs, &utils.RPCCDRsFilter{OriginIDs: []string{"CDR0000010"}}, &reply); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(reply) != 1 {

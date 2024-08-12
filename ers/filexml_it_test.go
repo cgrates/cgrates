@@ -304,6 +304,11 @@ var cdrXmlBroadsoft = `<?xml version="1.0" encoding="ISO-8859-1"?>
 		} else if len(reply) != 6 {
 			t.Error("Unexpected number of CDRs returned: ", len(reply))
 		}
+		for _, cdr := range reply {
+			if cdr.ExtraFields["ReaderID"] != "XmlDryRun" {
+				t.Errorf("Expected <%v>, received <%v>", "XmlDryRun", cdr.ExtraFields["ReaderID"])
+			}
+		}
 		if err := xmlRPC.Call(utils.APIerSv2GetCDRs, &utils.RPCCDRsFilter{DestinationPrefixes: []string{"+4915117174963"}}, &reply); err != nil {
 			t.Error("Unexpected error: ", err.Error())
 		} else if len(reply) != 3 {
