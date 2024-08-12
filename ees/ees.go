@@ -316,7 +316,7 @@ func exportEventWithExporter(exp EventExporter, ev *utils.CGREvent, oneTime bool
 			utils.MetaDC:   exp.GetMetrics(),
 			utils.MetaOpts: utils.MapStorage(ev.APIOpts),
 			utils.MetaCfg:  cfg.GetDataProvider(),
-			utils.MetaVars: utils.MapStorage{utils.MetaTenant: ev.Tenant},
+			utils.MetaVars: utils.MapStorage{utils.MetaTenant: ev.Tenant, utils.MetaExporterID: ev.APIOpts[utils.MetaExporterID]},
 		}
 
 		var canCast bool

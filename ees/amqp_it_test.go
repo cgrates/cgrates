@@ -159,7 +159,7 @@ func testAMQPVerifyExport(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	expCDR := `{"Account":"1001","AnswerTime":"2013-11-07T08:42:26Z","CGRID":"dbafe9c8614c785a65aabd116dd3959c3c56f7f6","Category":"call","Cost":"1.01","Destination":"1002","OriginID":"dsafdsaf","RequestType":"*rated","RunID":"*default","SetupTime":"2013-11-07T08:42:25Z","Subject":"1001","Tenant":"cgrates.org","ToR":"*voice","Usage":"10000000000"}`
+	expCDR := `{"Account":"1001","AnswerTime":"2013-11-07T08:42:26Z","CGRID":"dbafe9c8614c785a65aabd116dd3959c3c56f7f6","Category":"call","Cost":"1.01","Destination":"1002","ExporterID":"AMQPExporter","OriginID":"dsafdsaf","RequestType":"*rated","RunID":"*default","SetupTime":"2013-11-07T08:42:25Z","Subject":"1001","Tenant":"cgrates.org","ToR":"*voice","Usage":"10000000000"}`
 	select {
 	case d := <-msgs:
 		rcvCDR := string(d.Body)
