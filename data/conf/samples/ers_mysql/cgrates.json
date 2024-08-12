@@ -168,6 +168,7 @@
 			"flags": ["*cdrs","*log"],
 			"filters":["*string:~*req.3:1002"],
 			"fields":[
+				{"tag": "ReaderId", "path": "*cgreq.ReaderID", "type": "*variable", "value": "~*vars.*readerID" },
 				{"tag": "ToR", "path": "*cgreq.ToR", "type": "*constant", "value": "*voice", "mandatory": true},
 				{"tag": "OriginID", "path": "*cgreq.OriginID", "type": "*variable", "value": "~*req.0", "mandatory": true},
 				{"tag": "RequestType", "path": "*cgreq.RequestType", "type": "*variable", "value": "~*req.1", "mandatory": true},
@@ -196,6 +197,7 @@
 				"xmlRootPath": "broadWorksCDR.cdrData"
 			},
 			"fields":[
+				{"tag": "ReaderId", "path": "*cgreq.ReaderID", "type": "*variable", "value": "*vars.*readerID"},
 				{"tag": "ToR", "path": "*cgreq.ToR", "type": "*constant", "value": "*voice", "mandatory": true},
 				{"tag": "OriginID", "path": "*cgreq.OriginID", "type": "*variable", "value": "~*req.broadWorksCDR.cdrData.basicModule.localCallId", "mandatory": true},
 				{"tag": "RequestType", "path": "*cgreq.RequestType", "type": "*constant", "value": "*rated", "mandatory": true},
@@ -241,6 +243,7 @@
 			"flags": ["*cdrs"],
 			"processed_path": "/tmp/fwvErs/out",
 			"fields": [
+				{"tag": "ReaderId", "path": "*cgreq.ReaderID", "type": "*variable", "value": "~*vars.*readerID" },
 				{"tag": "FileName", "path": "*cgreq.CdrFileName", "type": "*variable", "value": "~*hdr.95-135", "padding":"*right"},
 				{"tag": "FileSeqNr", "path": "*cgreq.FileSeqNr", "type": "*variable", "value": "~*hdr.135-141", "padding":"*zeroleft"},
 				{"tag": "AccId1", "path": "*cgreq.AccId1", "type": "*variable", "value": "~*hdr.135-141",  "padding":"*zeroleft"},
@@ -463,6 +466,7 @@
 			"flags": ["*cdrs"],
 			"processed_path": "/tmp/ErsJSON/out",
 			"fields":[
+				{"tag": "ReaderId", "path": "*cgreq.ReaderID", "type": "*variable", "value": "~*vars.*readerID" },
 				{"tag": "ToR", "path": "*cgreq.ToR", "type": "*constant", "value": "*voice", "mandatory": true},
 				{"tag": "OriginID", "path": "*cgreq.OriginID", "type": "*variable", "value": "~*req.OriginID", "mandatory": true},
 				{"tag": "RequestType", "path": "*cgreq.RequestType", "type": "*variable", "value": "~*req.RequestType", "mandatory": true},
