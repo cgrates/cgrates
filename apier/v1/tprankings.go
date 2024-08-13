@@ -24,14 +24,14 @@ import (
 )
 
 // SetTPRankings creates a new ranking within a tariff plan
-func (apierSv1 *APIerSv1) SetTPRanking(ctx *context.Context, sag *utils.TPRankingProfile, reply *string) error {
-	if missing := utils.MissingStructFields(sag, []string{utils.TPid, utils.ID}); len(missing) != 0 {
+func (apierSv1 *APIerSv1) SetTPRanking(ctx *context.Context, rng *utils.TPRankingProfile, reply *string) error {
+	if missing := utils.MissingStructFields(rng, []string{utils.TPid, utils.ID}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if sag.Tenant == utils.EmptyString {
-		sag.Tenant = apierSv1.Config.GeneralCfg().DefaultTenant
+	if rng.Tenant == utils.EmptyString {
+		rng.Tenant = apierSv1.Config.GeneralCfg().DefaultTenant
 	}
-	if err := apierSv1.StorDb.SetTPRankings([]*utils.TPRankingProfile{sag}); err != nil {
+	if err := apierSv1.StorDb.SetTPRankings([]*utils.TPRankingProfile{rng}); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	*reply = utils.OK
@@ -84,15 +84,15 @@ func (apierSv1 *APIerSv1) GetTPRankingIDs(ctx *context.Context, attrs *AttrGetTP
 }
 
 // RemoveTPRanking removes specific Ranking on Tariff plan
-func (apierSv1 *APIerSv1) RemoveTPRanking(ctx *context.Context, sag *utils.TPTntID, reply *string) error {
-	if missing := utils.MissingStructFields(sag, []string{utils.TPid, utils.ID}); len(missing) != 0 { //Params missing
+func (apierSv1 *APIerSv1) RemoveTPRanking(ctx *context.Context, rng *utils.TPTntID, reply *string) error {
+	if missing := utils.MissingStructFields(rng, []string{utils.TPid, utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if sag.Tenant == utils.EmptyString {
-		sag.Tenant = apierSv1.Config.GeneralCfg().DefaultTenant
+	if rng.Tenant == utils.EmptyString {
+		rng.Tenant = apierSv1.Config.GeneralCfg().DefaultTenant
 	}
-	if err := apierSv1.StorDb.RemTpData(utils.TBLTPRankings, sag.TPid,
-		map[string]string{utils.TenantCfg: sag.Tenant, utils.IDCfg: sag.ID}); err != nil {
+	if err := apierSv1.StorDb.RemTpData(utils.TBLTPRankings, rng.TPid,
+		map[string]string{utils.TenantCfg: rng.Tenant, utils.IDCfg: rng.ID}); err != nil {
 		return utils.NewErrServerError(err)
 	}
 	*reply = utils.OK

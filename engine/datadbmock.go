@@ -377,6 +377,18 @@ func (dbM *DataDBMock) RemTrendProfileDrv(tenant string, id string) (err error) 
 	return utils.ErrNotImplemented
 }
 
+func (dbM *DataDBMock) GetTrendDrv(tenant, id string) (*Trend, error) {
+	return nil, utils.ErrNotImplemented
+}
+
+func (dbM *DataDBMock) SetTrendDrv(*Trend) error {
+	return utils.ErrNotImplemented
+}
+
+func (dbM *DataDBMock) RemoveTrendDrv(string, string) error {
+	return utils.ErrNotImplemented
+}
+
 func (dbM *DataDBMock) GetStatQueueDrv(tenant, id string) (sq *StatQueue, err error) {
 	return nil, utils.ErrNotImplemented
 }

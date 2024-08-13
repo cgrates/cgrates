@@ -33,11 +33,11 @@ func (apierSv1 *APIerSv1) GetTrendProfile(ctx *context.Context, arg *utils.Tenan
 	if tnt == utils.EmptyString {
 		tnt = apierSv1.Config.GeneralCfg().DefaultTenant
 	}
-	sg, err := apierSv1.DataManager.GetTrendProfile(tnt, arg.ID)
+	tr, err := apierSv1.DataManager.GetTrendProfile(tnt, arg.ID, true, false, utils.NonTransactional)
 	if err != nil {
 		return utils.APIErrorHandler(err)
 	}
-	*reply = *sg
+	*reply = *tr
 	return
 }
 

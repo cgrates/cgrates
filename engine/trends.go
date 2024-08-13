@@ -44,3 +44,21 @@ type TrendProfileWithAPIOpts struct {
 func (srp *TrendProfile) TenantID() string {
 	return utils.ConcatenatedKey(srp.Tenant, srp.ID)
 }
+
+type TrendWithAPIOpts struct {
+	*Trend
+	APIOpts map[string]any
+}
+
+// Trend is the unit matched by filters
+type Trend struct {
+	Tenant      string
+	ID          string
+	Trend       string
+	QueueLength int
+	trPrfl      *TrendProfile
+}
+
+func (tr *Trend) TenantID() string {
+	return utils.ConcatenatedKey(tr.Tenant, tr.ID)
+}

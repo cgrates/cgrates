@@ -104,9 +104,12 @@ type DataDB interface {
 	SetRankingProfileDrv(sq *RankingProfile) (err error)
 	GetRankingProfileDrv(tenant string, id string) (sq *RankingProfile, err error)
 	RemRankingProfileDrv(tenant string, id string) (err error)
-	SetTrendProfileDrv(sq *TrendProfile) (err error)
+	SetTrendProfileDrv(tr *TrendProfile) (err error)
 	GetTrendProfileDrv(tenant string, id string) (sq *TrendProfile, err error)
 	RemTrendProfileDrv(tenant string, id string) (err error)
+	GetTrendDrv(string, string) (*Trend, error)
+	SetTrendDrv(*Trend) error
+	RemoveTrendDrv(string, string) error
 	GetThresholdProfileDrv(tenant string, ID string) (tp *ThresholdProfile, err error)
 	SetThresholdProfileDrv(tp *ThresholdProfile) (err error)
 	RemThresholdProfileDrv(tenant, id string) (err error)

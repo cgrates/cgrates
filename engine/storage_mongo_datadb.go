@@ -64,7 +64,8 @@ const (
 	ColTmg  = "timings"
 	ColRes  = "resources"
 	ColSqs  = "statqueues"
-	ColTrs  = "trend_profiles"
+	ColTrp  = "trend_profiles"
+	ColTrd  = "trends"
 	ColSqp  = "statqueue_profiles"
 	ColRgp  = "ranking_profiles"
 	ColTps  = "threshold_profiles"
@@ -302,7 +303,7 @@ func (ms *MongoStorage) ensureIndexesForCol(col string) error { // exported for 
 	switch col {
 	case ColAct, ColApl, ColAAp, ColAtr, ColRpl, ColDst, ColRds, ColLht, ColIndx:
 		err = ms.enusureIndex(col, true, "key")
-	case ColRsP, ColRes, ColSqs, ColRgp, ColTrs, ColSqp, ColTps, ColThs, ColRts, ColAttr, ColFlt, ColCpp, ColDpp, ColDph:
+	case ColRsP, ColRes, ColSqs, ColRgp, ColTrp, ColSqp, ColTps, ColThs, ColTrd, ColRts, ColAttr, ColFlt, ColCpp, ColDpp, ColDph:
 		err = ms.enusureIndex(col, true, "tenant", "id")
 	case ColRpf, ColShg, ColAcc:
 		err = ms.enusureIndex(col, true, "id")
@@ -348,7 +349,7 @@ func (ms *MongoStorage) EnsureIndexes(cols ...string) error {
 			cols = []string{
 				ColAct, ColApl, ColAAp, ColAtr, ColRpl, ColDst, ColRds, ColLht, ColIndx,
 				ColRsP, ColRes, ColSqs, ColSqp, ColTps, ColThs, ColRts, ColAttr, ColFlt, ColCpp,
-				ColDpp, ColRpf, ColShg, ColAcc, ColRgp, ColTrs,
+				ColDpp, ColRpf, ColShg, ColAcc, ColRgp, ColTrp, ColTrd,
 			}
 		} else {
 			cols = []string{
@@ -438,7 +439,9 @@ func (ms *MongoStorage) RemoveKeysForPrefix(prefix string) error {
 	case utils.RankingsProfilePrefix:
 		colName = ColRgp
 	case utils.TrendsProfilePrefix:
-		colName = ColTrs
+		colName = ColTrp
+	case utils.TrendPrefix:
+		colName = ColTrd
 	case utils.ThresholdPrefix:
 		colName = ColThs
 	case utils.FilterPrefix:
@@ -607,13 +610,15 @@ func (ms *MongoStorage) GetKeysForPrefix(prefix string) (keys []string, err erro
 		case utils.RankingsProfilePrefix:
 			keys, qryErr = ms.getAllKeysMatchingTenantID(sctx, ColRgp, utils.RankingsProfilePrefix, subject, tntID)
 		case utils.TrendsProfilePrefix:
-			keys, qryErr = ms.getAllKeysMatchingTenantID(sctx, ColTrs, utils.TrendsProfilePrefix, subject, tntID)
+			keys, qryErr = ms.getAllKeysMatchingTenantID(sctx, ColTrp, utils.TrendsProfilePrefix, subject, tntID)
 		case utils.StatQueueProfilePrefix:
 			keys, qryErr = ms.getAllKeysMatchingTenantID(sctx, ColSqp, utils.StatQueueProfilePrefix, subject, tntID)
 		case utils.AccountActionPlansPrefix:
 			keys, qryErr = ms.getAllKeysMatchingField(sctx, ColAAp, utils.AccountActionPlansPrefix, subject, "key")
 		case utils.TimingsPrefix:
 			keys, qryErr = ms.getAllKeysMatchingField(sctx, ColTmg, utils.TimingsPrefix, subject, "id")
+		case utils.TrendPrefix:
+			keys, qryErr = ms.getAllKeysMatchingTenantID(sctx, ColTrd, utils.TrendPrefix, subject, tntID)
 		case utils.FilterPrefix:
 			keys, qryErr = ms.getAllKeysMatchingTenantID(sctx, ColFlt, utils.FilterPrefix, subject, tntID)
 		case utils.ThresholdPrefix:
@@ -682,6 +687,10 @@ func (ms *MongoStorage) HasDataDrv(category, subject, tenant string) (has bool, 
 			count, err = ms.getCol(ColSqp).CountDocuments(sctx, bson.M{"tenant": tenant, "id": subject})
 		case utils.RankingsProfilePrefix:
 			count, err = ms.getCol(ColSqp).CountDocuments(sctx, bson.M{"tenant": tenant, "id": subject})
+		case utils.TrendPrefix:
+			count, err = ms.getCol(ColTrd).CountDocuments(sctx, bson.M{"tenant": tenant, "id": subject})
+		case utils.TrendsProfilePrefix:
+			count, err = ms.getCol(ColTrp).CountDocuments(sctx, bson.M{"tenant": tenant, "id": subject})
 		case utils.ThresholdPrefix:
 			count, err = ms.getCol(ColThs).CountDocuments(sctx, bson.M{"tenant": tenant, "id": subject})
 		case utils.ThresholdProfilePrefix:
@@ -1564,7 +1573,7 @@ func (ms *MongoStorage) RemRankingProfileDrv(tenant, id string) (err error) {
 func (ms *MongoStorage) GetTrendProfileDrv(tenant, id string) (*TrendProfile, error) {
 	srProfile := new(TrendProfile)
 	err := ms.query(func(sctx mongo.SessionContext) error {
-		sr := ms.getCol(ColTrs).FindOne(sctx, bson.M{"tenant": tenant, "id": id})
+		sr := ms.getCol(ColTrp).FindOne(sctx, bson.M{"tenant": tenant, "id": id})
 		decodeErr := sr.Decode(srProfile)
 		if errors.Is(decodeErr, mongo.ErrNoDocuments) {
 			return utils.ErrNotFound
@@ -1576,7 +1585,7 @@ func (ms *MongoStorage) GetTrendProfileDrv(tenant, id string) (*TrendProfile, er
 
 func (ms *MongoStorage) SetTrendProfileDrv(srp *TrendProfile) (err error) {
 	return ms.query(func(sctx mongo.SessionContext) error {
-		_, err := ms.getCol(ColTrs).UpdateOne(sctx, bson.M{"tenant": srp.Tenant, "id": srp.ID},
+		_, err := ms.getCol(ColTrp).UpdateOne(sctx, bson.M{"tenant": srp.Tenant, "id": srp.ID},
 			bson.M{"$set": srp},
 			options.Update().SetUpsert(true))
 		return err
@@ -1585,13 +1594,45 @@ func (ms *MongoStorage) SetTrendProfileDrv(srp *TrendProfile) (err error) {
 
 func (ms *MongoStorage) RemTrendProfileDrv(tenant, id string) (err error) {
 	return ms.query(func(sctx mongo.SessionContext) error {
-		dr, err := ms.getCol(ColTrs).DeleteOne(sctx, bson.M{"tenant": tenant, "id": id})
+		dr, err := ms.getCol(ColTrp).DeleteOne(sctx, bson.M{"tenant": tenant, "id": id})
 		if dr.DeletedCount == 0 {
 			return utils.ErrNotFound
 		}
 		return err
 	})
+}
 
+func (ms *MongoStorage) GetTrendDrv(tenant, id string) (*Trend, error) {
+	tr := new(Trend)
+	err := ms.query(func(sctx mongo.SessionContext) error {
+		sr := ms.getCol(ColTrd).FindOne(sctx, bson.M{"tenant": tenant, "id": id})
+		decodeErr := sr.Decode(tr)
+		if errors.Is(decodeErr, mongo.ErrNoDocuments) {
+			return utils.ErrNotFound
+		}
+		return decodeErr
+	})
+	return tr, err
+}
+
+func (ms *MongoStorage) SetTrendDrv(tr *Trend) error {
+	return ms.query(func(sctx mongo.SessionContext) error {
+		_, err := ms.getCol(ColTrd).UpdateOne(sctx, bson.M{"tenant": tr.Tenant, "id": tr.ID},
+			bson.M{"$set": tr},
+			options.Update().SetUpsert(true),
+		)
+		return err
+	})
+}
+
+func (ms *MongoStorage) RemoveTrendDrv(tenant, id string) error {
+	return ms.query(func(sctx mongo.SessionContext) error {
+		dr, err := ms.getCol(ColTrd).DeleteOne(sctx, bson.M{"tenant": tenant, "id": id})
+		if dr.DeletedCount == 0 {
+			return utils.ErrNotFound
+		}
+		return err
+	})
 }
 
 // GetThresholdProfileDrv retrieves a ThresholdProfile from dataDB

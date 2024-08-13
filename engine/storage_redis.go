@@ -958,8 +958,33 @@ func (rs *RedisStorage) GetTrendProfileDrv(tenant string, id string) (sg *TrendP
 	err = rs.ms.Unmarshal(values, &sg)
 	return
 }
+
 func (rs *RedisStorage) RemTrendProfileDrv(tenant string, id string) (err error) {
 	return rs.Cmd(nil, redis_DEL, utils.TrendsProfilePrefix+utils.ConcatenatedKey(tenant, id))
+}
+
+func (rs *RedisStorage) GetTrendDrv(tenant, id string) (r *Trend, err error) {
+	var values []byte
+	if err = rs.Cmd(&values, redis_GET, utils.TrendPrefix+utils.ConcatenatedKey(tenant, id)); err != nil {
+		return
+	} else if len(values) == 0 {
+		err = utils.ErrNotFound
+		return
+	}
+	err = rs.ms.Unmarshal(values, &r)
+	return
+}
+
+func (rs *RedisStorage) SetTrendDrv(r *Trend) (err error) {
+	var result []byte
+	if result, err = rs.ms.Marshal(r); err != nil {
+		return
+	}
+	return rs.Cmd(nil, redis_SET, utils.TrendPrefix+utils.ConcatenatedKey(r.Tenant, r.ID), string(result))
+}
+
+func (rs *RedisStorage) RemoveTrendDrv(tenant, id string) (err error) {
+	return rs.Cmd(nil, redis_DEL, utils.TrendPrefix+utils.ConcatenatedKey(tenant, id))
 }
 
 func (rs *RedisStorage) SetRankingProfileDrv(sg *RankingProfile) (err error) {

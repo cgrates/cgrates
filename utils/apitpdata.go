@@ -1323,6 +1323,8 @@ func NewAttrReloadCacheWithOpts() *AttrReloadCacheWithAPIOpts {
 		StatsQueueIDs:            []string{MetaAny},
 		StatsQueueProfileIDs:     []string{MetaAny},
 		RankingProfileIDs:        []string{MetaAny},
+		TrendIDs:                 []string{MetaAny},
+		TrendProfileIDs:          []string{MetaAny},
 		ThresholdIDs:             []string{MetaAny},
 		ThresholdProfileIDs:      []string{MetaAny},
 		FilterIDs:                []string{MetaAny},
@@ -1365,6 +1367,8 @@ func NewAttrReloadCacheWithOptsFromMap(arg map[string][]string, tnt string, opts
 		RankingProfileIDs:        arg[CacheRankingProfiles],
 		ThresholdIDs:             arg[CacheThresholds],
 		ThresholdProfileIDs:      arg[CacheThresholdProfiles],
+		TrendIDs:                 arg[CacheTrends],
+		TrendProfileIDs:          arg[CacheTrendProfiles],
 		FilterIDs:                arg[CacheFilters],
 		RouteProfileIDs:          arg[CacheRouteProfiles],
 		AttributeProfileIDs:      arg[CacheAttributeProfiles],
@@ -1401,6 +1405,8 @@ type AttrReloadCacheWithAPIOpts struct {
 	StatsQueueIDs            []string       `json:",omitempty"`
 	StatsQueueProfileIDs     []string       `json:",omitempty"`
 	RankingProfileIDs        []string       `json:",omitempty"`
+	TrendIDs                 []string       `json:",omitempty"`
+	TrendProfileIDs          []string       `json:",omitempty"`
 	ThresholdIDs             []string       `json:",omitempty"`
 	ThresholdProfileIDs      []string       `json:",omitempty"`
 	FilterIDs                []string       `json:",omitempty"`
@@ -1439,6 +1445,8 @@ func (a *AttrReloadCacheWithAPIOpts) Map() map[string][]string {
 		CacheThresholds:              a.ThresholdIDs,
 		CacheThresholdProfiles:       a.ThresholdProfileIDs,
 		CacheRankingProfiles:         a.RankingProfileIDs,
+		CacheTrends:                  a.TrendIDs,
+		CacheTrendProfiles:           a.TrendProfileIDs,
 		CacheFilters:                 a.FilterIDs,
 		CacheRouteProfiles:           a.RouteProfileIDs,
 		CacheAttributeProfiles:       a.AttributeProfileIDs,

@@ -147,6 +147,17 @@ func (rplSv1 *ReplicatorSv1) GetRankingProfile(ctx *context.Context, tntID *util
 	return nil
 }
 
+// GetTrend is the remote method coresponding to the dataDb driver method
+func (rplSv1 *ReplicatorSv1) GetTrend(ctx *context.Context, tntID *utils.TenantIDWithAPIOpts, reply *engine.Trend) error {
+	engine.UpdateReplicationFilters(utils.TrendPrefix, tntID.TenantID.TenantID(), utils.IfaceAsString(tntID.APIOpts[utils.RemoteHostOpt]))
+	rcv, err := rplSv1.dm.DataDB().GetTrendDrv(tntID.Tenant, tntID.ID)
+	if err != nil {
+		return err
+	}
+	*reply = *rcv
+	return nil
+}
+
 // GetTrendProfile is the remote method coresponding to the dataDb driver method
 func (rplSv1 *ReplicatorSv1) GetTrendProfile(ctx *context.Context, tntID *utils.TenantIDWithAPIOpts, reply *engine.TrendProfile) error {
 	engine.UpdateReplicationFilters(utils.TrendsProfilePrefix, tntID.TenantID.TenantID(), utils.IfaceAsString(tntID.APIOpts[utils.RemoteHostOpt]))
@@ -459,6 +470,19 @@ func (rplSv1 *ReplicatorSv1) SetRankingProfile(ctx *context.Context, sg *engine.
 // SetTrendProfile is the replication method coresponding to the dataDb driver method
 func (rplSv1 *ReplicatorSv1) SetTrendProfile(ctx *context.Context, sg *engine.TrendProfileWithAPIOpts, reply *string) (err error) {
 	if err = rplSv1.dm.DataDB().SetTrendProfileDrv(sg.TrendProfile); err != nil {
+		return
+	}
+	*reply = utils.OK
+	return
+}
+
+// SetTrend is the replication method coresponding to the dataDb driver method
+func (rplSv1 *ReplicatorSv1) SetTrend(ctx *context.Context, tr *engine.TrendWithAPIOpts, reply *string) (err error) {
+	if err = rplSv1.dm.DataDB().SetTrendDrv(tr.Trend); err != nil {
+		return
+	}
+	if err = rplSv1.v1.CallCache(utils.IfaceAsString(tr.APIOpts[utils.CacheOpt]),
+		tr.Tenant, utils.CacheTrends, tr.TenantID(), utils.EmptyString, nil, nil, tr.APIOpts); err != nil {
 		return
 	}
 	*reply = utils.OK
@@ -874,6 +898,19 @@ func (rplSv1 *ReplicatorSv1) RemoveRankingProfile(ctx *context.Context, args *ut
 
 	if err = rplSv1.v1.CallCache(utils.IfaceAsString(args.APIOpts[utils.CacheOpt]),
 		args.Tenant, utils.CacheRankingProfiles, args.TenantID.TenantID(), utils.EmptyString, nil, nil, args.APIOpts); err != nil {
+		return
+	}
+	*reply = utils.OK
+	return
+}
+
+// RemoveTrend is the replication method coresponding to the dataDb driver method
+func (rplSv1 *ReplicatorSv1) RemoveTrend(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *string) (err error) {
+	if err = rplSv1.dm.DataDB().RemoveTrendDrv(args.Tenant, args.ID); err != nil {
+		return
+	}
+	if err = rplSv1.v1.CallCache(utils.IfaceAsString(args.APIOpts[utils.CacheOpt]),
+		args.Tenant, utils.CacheTrends, args.TenantID.TenantID(), utils.EmptyString, nil, nil, args.APIOpts); err != nil {
 		return
 	}
 	*reply = utils.OK

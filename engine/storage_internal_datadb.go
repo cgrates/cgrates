@@ -610,6 +610,26 @@ func (iDB *InternalDB) GetTrendProfileDrv(tenant, id string) (sg *TrendProfile, 
 	return x.(*TrendProfile), nil
 }
 
+func (iDB *InternalDB) GetTrendDrv(tenant, id string) (th *Trend, err error) {
+	x, ok := iDB.db.Get(utils.CacheTrends, utils.ConcatenatedKey(tenant, id))
+	if !ok || x == nil {
+		return nil, utils.ErrNotFound
+	}
+	return x.(*Trend), nil
+}
+
+func (iDB *InternalDB) SetTrendDrv(tr *Trend) (err error) {
+	iDB.db.Set(utils.CacheTrends, tr.TenantID(), tr, nil,
+		true, utils.NonTransactional)
+	return
+}
+
+func (iDB *InternalDB) RemoveTrendDrv(tenant, id string) (err error) {
+	iDB.db.Remove(utils.CacheTrends, utils.ConcatenatedKey(tenant, id),
+		true, utils.NonTransactional)
+	return
+}
+
 func (iDB *InternalDB) SetRankingProfileDrv(sgp *RankingProfile) (err error) {
 	iDB.db.Set(utils.CacheRankingProfiles, sgp.TenantID(), sgp, nil, true, utils.NonTransactional)
 	return nil

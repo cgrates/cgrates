@@ -39,7 +39,7 @@ var (
 	DataDBPartitions = NewStringSet([]string{CacheDestinations, CacheReverseDestinations, CacheRatingPlans,
 		CacheRatingProfiles, CacheDispatcherProfiles, CacheDispatcherHosts, CacheChargerProfiles, CacheActions, CacheActionTriggers, CacheSharedGroups, CacheTimings,
 		CacheResourceProfiles, CacheResources, CacheEventResources, CacheStatQueueProfiles, CacheRankingProfiles, CacheStatQueues,
-		CacheThresholdProfiles, CacheThresholds, CacheFilters, CacheRouteProfiles, CacheAttributeProfiles,
+		CacheThresholdProfiles, CacheThresholds, CacheFilters, CacheRouteProfiles, CacheAttributeProfiles, CacheTrendProfiles, CacheTrends,
 		CacheResourceFilterIndexes, CacheStatFilterIndexes, CacheThresholdFilterIndexes, CacheRouteFilterIndexes,
 		CacheAttributeFilterIndexes, CacheChargerFilterIndexes, CacheDispatcherFilterIndexes, CacheLoadIDs,
 		CacheReverseFilterIndexes, CacheActionPlans, CacheAccountActionPlans, CacheAccounts, CacheVersions})
@@ -71,6 +71,7 @@ var (
 		CacheStatQueues:              StatQueuePrefix,
 		CacheRankingProfiles:         RankingsProfilePrefix,
 		CacheTrendProfiles:           TrendsProfilePrefix,
+		CacheTrends:                  TrendPrefix,
 		CacheThresholdProfiles:       ThresholdProfilePrefix,
 		CacheThresholds:              ThresholdPrefix,
 		CacheFilters:                 FilterPrefix,
@@ -293,6 +294,7 @@ const (
 	ResourcesPrefix           = "res_"
 	ResourceProfilesPrefix    = "rsp_"
 	ThresholdPrefix           = "thd_"
+	TrendPrefix               = "trd_"
 	TimingsPrefix             = "tmg_"
 	FilterPrefix              = "ftr_"
 	CDRsStatsPrefix           = "cst_"
@@ -1260,6 +1262,7 @@ const (
 	ReplicatorSv1GetThresholdProfile     = "ReplicatorSv1.GetThresholdProfile"
 	ReplicatorSv1GetStatQueueProfile     = "ReplicatorSv1.GetStatQueueProfile"
 	ReplicatorSv1GetRankingProfile       = "ReplicatorSv1.GetRankingProfile"
+	ReplicatorSv1GetTrend                = "ReplicatorSv1.GetTrend"
 	ReplicatorSv1GetTrendProfile         = "ReplicatorSv1.GetTrendProfile"
 	ReplicatorSv1GetTiming               = "ReplicatorSv1.GetTiming"
 	ReplicatorSv1GetResource             = "ReplicatorSv1.GetResource"
@@ -1287,6 +1290,7 @@ const (
 	ReplicatorSv1SetFilter               = "ReplicatorSv1.SetFilter"
 	ReplicatorSv1SetStatQueueProfile     = "ReplicatorSv1.SetStatQueueProfile"
 	ReplicatorSv1SetRankingProfile       = "ReplicatorSv1.SetRankingProfile"
+	ReplicatorSv1SetTrend                = "ReplicatorSv1.SetTrend"
 	ReplicatorSv1SetTrendProfile         = "ReplicatorSv1.SetTrendProfile"
 	ReplicatorSv1SetTiming               = "ReplicatorSv1.SetTiming"
 	ReplicatorSv1SetResource             = "ReplicatorSv1.SetResource"
@@ -1314,6 +1318,7 @@ const (
 	ReplicatorSv1RemoveThresholdProfile  = "ReplicatorSv1.RemoveThresholdProfile"
 	ReplicatorSv1RemoveStatQueueProfile  = "ReplicatorSv1.RemoveStatQueueProfile"
 	ReplicatorSv1RemoveRankingProfile    = "ReplicatorSv1.RemoveRankingProfile"
+	ReplicatorSv1RemoveTrend             = "ReplicatorSv1.RemoveTrend"
 	ReplicatorSv1RemoveTrendProfile      = "ReplicatorSv1.RemoveTrendProfile"
 	ReplicatorSv1RemoveTiming            = "ReplicatorSv1.RemoveTiming"
 	ReplicatorSv1RemoveResource          = "ReplicatorSv1.RemoveResource"
@@ -1962,6 +1967,7 @@ const (
 	CacheStatQueues              = "*statqueues"
 	CacheRankingProfiles         = "*ranking_profiles"
 	CacheTrendProfiles           = "*trend_profiles"
+	CacheTrends                  = "*trends"
 	CacheThresholdProfiles       = "*threshold_profiles"
 	CacheThresholds              = "*thresholds"
 	CacheFilters                 = "*filters"

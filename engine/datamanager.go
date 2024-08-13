@@ -79,6 +79,7 @@ var (
 		utils.MetaAPIBan:               {}, // not realy a prefix as this is not stored in DB
 		utils.MetaNotSentryPeer:        {},
 		utils.TrendsProfilePrefix:      {},
+		utils.TrendPrefix:              {},
 	}
 )
 
@@ -1287,12 +1288,113 @@ func (dm *DataManager) RemoveStatQueueProfile(tenant, id string, withIndex bool)
 	return dm.RemoveStatQueue(tenant, id)
 }
 
-func (dm *DataManager) GetTrendProfile(tenant, id string) (srp *TrendProfile, err error) {
+// GetTrend retrieves a Trend from dataDB
+func (dm *DataManager) GetTrend(tenant, id string,
+	cacheRead, cacheWrite bool, transactionID string) (tr *Trend, err error) {
+	tntID := utils.ConcatenatedKey(tenant, id)
+	if cacheRead {
+		if x, ok := Cache.Get(utils.CacheTrends, tntID); ok {
+			if x == nil {
+				return nil, utils.ErrNotFound
+			}
+			return x.(*Trend), nil
+		}
+	}
 	if dm == nil {
 		err = utils.ErrNoDatabaseConn
 		return
 	}
-	srp, err = dm.dataDB.GetTrendProfileDrv(tenant, id)
+	tr, err = dm.dataDB.GetTrendDrv(tenant, id)
+	if err != nil {
+		if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaTrends]; err == utils.ErrNotFound && itm.Remote {
+			if err = dm.connMgr.Call(context.TODO(), config.CgrConfig().DataDbCfg().RmtConns,
+				utils.ReplicatorSv1GetTrend, &utils.TenantIDWithAPIOpts{
+					TenantID: &utils.TenantID{Tenant: tenant, ID: id},
+					APIOpts: utils.GenerateDBItemOpts(itm.APIKey, itm.RouteID, utils.EmptyString,
+						utils.FirstNonEmpty(config.CgrConfig().DataDbCfg().RmtConnID,
+							config.CgrConfig().GeneralCfg().NodeID)),
+				}, &tr); err == nil {
+				err = dm.dataDB.SetTrendDrv(tr)
+			}
+		}
+		if err != nil {
+			err = utils.CastRPCErr(err)
+			if err == utils.ErrNotFound && cacheWrite {
+				if errCh := Cache.Set(utils.CacheTrends, tntID, nil, nil,
+					cacheCommit(transactionID), transactionID); errCh != nil {
+					return nil, errCh
+				}
+			}
+			return nil, err
+		}
+	}
+	if cacheWrite {
+		if errCh := Cache.Set(utils.CacheTrends, tntID, tr, nil,
+			cacheCommit(transactionID), transactionID); errCh != nil {
+			return nil, errCh
+		}
+	}
+	return
+}
+
+// SetTrend stores Trend in dataDB
+func (dm *DataManager) SetTrend(tr *Trend) (err error) {
+	if dm == nil {
+		return utils.ErrNoDatabaseConn
+	}
+	if err = dm.DataDB().SetTrendDrv(tr); err != nil {
+		return
+	}
+	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaTrends]; itm.Replicate {
+		err = replicate(dm.connMgr, config.CgrConfig().DataDbCfg().RplConns,
+			config.CgrConfig().DataDbCfg().RplFiltered,
+			utils.TrendPrefix, tr.TenantID(), // this are used to get the host IDs from cache
+			utils.ReplicatorSv1SetTrend,
+			&TrendWithAPIOpts{
+				Trend: tr,
+				APIOpts: utils.GenerateDBItemOpts(itm.APIKey, itm.RouteID,
+					config.CgrConfig().DataDbCfg().RplCache, utils.EmptyString)})
+	}
+	return
+}
+
+// RemoveTrend removes the stored Trend
+func (dm *DataManager) RemoveTrend(tenant, id string) (err error) {
+	if dm == nil {
+		return utils.ErrNoDatabaseConn
+	}
+	if err = dm.DataDB().RemoveTrendDrv(tenant, id); err != nil {
+		return
+	}
+	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaTrends]; itm.Replicate {
+		replicate(dm.connMgr, config.CgrConfig().DataDbCfg().RplConns,
+			config.CgrConfig().DataDbCfg().RplFiltered,
+			utils.TrendPrefix, utils.ConcatenatedKey(tenant, id), // this are used to get the host IDs from cache
+			utils.ReplicatorSv1RemoveTrend,
+			&utils.TenantIDWithAPIOpts{
+				TenantID: &utils.TenantID{Tenant: tenant, ID: id},
+				APIOpts: utils.GenerateDBItemOpts(itm.APIKey, itm.RouteID,
+					config.CgrConfig().DataDbCfg().RplCache, utils.EmptyString)})
+	}
+	return
+}
+
+func (dm *DataManager) GetTrendProfile(tenant, id string, cacheRead, cacheWrite bool,
+	transactionID string) (trp *TrendProfile, err error) {
+	tntID := utils.ConcatenatedKey(tenant, id)
+	if cacheRead {
+		if x, ok := Cache.Get(utils.CacheTrendProfiles, tntID); ok {
+			if x == nil {
+				return nil, utils.ErrNotFound
+			}
+			return x.(*TrendProfile), nil
+		}
+	}
+	if dm == nil {
+		err = utils.ErrNoDatabaseConn
+		return
+	}
+	trp, err = dm.dataDB.GetTrendProfileDrv(tenant, id)
 	if err != nil {
 		if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaTrendProfiles]; err == utils.ErrNotFound && itm.Remote {
 			if err = dm.connMgr.Call(context.TODO(), config.CgrConfig().DataDbCfg().RmtConns,
@@ -1302,36 +1404,79 @@ func (dm *DataManager) GetTrendProfile(tenant, id string) (srp *TrendProfile, er
 					APIOpts: utils.GenerateDBItemOpts(itm.APIKey, itm.RouteID, utils.EmptyString,
 						utils.FirstNonEmpty(config.CgrConfig().DataDbCfg().RmtConnID,
 							config.CgrConfig().GeneralCfg().NodeID)),
-				}, &srp); err == nil {
-				err = dm.dataDB.SetTrendProfileDrv(srp)
+				}, &trp); err == nil {
+				err = dm.dataDB.SetTrendProfileDrv(trp)
 			}
+		}
+		if err != nil {
+			err = utils.CastRPCErr(err)
+			if err == utils.ErrNotFound && cacheWrite {
+				if errCh := Cache.Set(utils.CacheTrendProfiles, tntID, nil, nil,
+					cacheCommit(transactionID), transactionID); errCh != nil {
+					return nil, errCh
+				}
+			}
+			return nil, err
+		}
+	}
+	if cacheWrite {
+		if errCh := Cache.Set(utils.CacheTrendProfiles, tntID, trp, nil,
+			cacheCommit(transactionID), transactionID); errCh != nil {
+			return nil, errCh
 		}
 	}
 	return
 }
 
-func (dm *DataManager) SetTrendProfile(srp *TrendProfile) (err error) {
-	if err = dm.DataDB().SetTrendProfileDrv(srp); err != nil {
-		return
+func (dm *DataManager) SetTrendProfile(trp *TrendProfile) (err error) {
+	if dm == nil {
+		return utils.ErrNoDatabaseConn
+	}
+	oldTrd, err := dm.GetTrendProfile(trp.Tenant, trp.ID, true, false, utils.NonTransactional)
+	if err != nil && err != utils.ErrNotFound {
+		return err
+	}
+	if err = dm.DataDB().SetTrendProfileDrv(trp); err != nil {
+		return err
 	}
 	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaTrendProfiles]; itm.Replicate {
 		err = replicate(dm.connMgr, config.CgrConfig().DataDbCfg().RplConns,
 			config.CgrConfig().DataDbCfg().RplFiltered,
-			utils.TrendsProfilePrefix, srp.TenantID(),
+			utils.TrendsProfilePrefix, trp.TenantID(),
 			utils.ReplicatorSv1SetTrendProfile,
 			&TrendProfileWithAPIOpts{
-				TrendProfile: srp,
+				TrendProfile: trp,
 				APIOpts: utils.GenerateDBItemOpts(itm.APIKey, itm.RouteID,
 					config.CgrConfig().DataDbCfg().RplCache, utils.EmptyString)})
+	}
+	if oldTrd == nil ||
+		oldTrd.Trend != trp.Trend ||
+		oldTrd.QueueLength != trp.QueueLength {
+		err = dm.SetTrend(&Trend{
+			Tenant: trp.Tenant,
+			ID:     trp.ID,
+			Trend:  trp.Trend,
+		})
+	} else if _, errTr := dm.GetTrend(trp.Tenant, trp.ID,
+		true, false, utils.NonTransactional); errTr == utils.ErrNotFound {
+		err = dm.SetTrend(&Trend{
+			Tenant: trp.Tenant,
+			ID:     trp.ID,
+			Trend:  trp.Trend,
+		})
 	}
 	return
 }
 
 func (dm *DataManager) RemoveTrendProfile(tenant, id string) (err error) {
-	oldTrs, err := dm.GetTrendProfile(tenant, id)
+	if dm == nil {
+		return utils.ErrNoDatabaseConn
+	}
+	oldTrs, err := dm.GetTrendProfile(tenant, id, true, false, utils.NonTransactional)
 	if err != nil && err != utils.ErrNotFound {
 		return err
 	}
+
 	if err = dm.DataDB().RemTrendProfileDrv(tenant, id); err != nil {
 		return
 	}
@@ -1348,7 +1493,7 @@ func (dm *DataManager) RemoveTrendProfile(tenant, id string) (err error) {
 				APIOpts: utils.GenerateDBItemOpts(itm.APIKey, itm.RouteID,
 					config.CgrConfig().DataDbCfg().RplCache, utils.EmptyString)})
 	}
-	return
+	return dm.RemoveTrend(tenant, id)
 }
 
 func (dm *DataManager) GetRankingProfile(tenant, id string, cacheRead, cacheWrite bool, transactionID string) (rgp *RankingProfile, err error) {
