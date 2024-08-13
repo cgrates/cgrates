@@ -33,8 +33,8 @@ github.com/cgrates/ltcache v0.0.0-20210405185848-da943e80c1ab h1:dKdAUwrij6vYwew
 github.com/cgrates/ltcache v0.0.0-20210405185848-da943e80c1ab/go.mod h1:9oSG/6gUoab/vKm/eQ3QcX6KeTR0wRw88N33iCnC/k4=
 github.com/cgrates/radigo v0.0.0-20210902121842-ea2f9a730627 h1:foxHlpQxYj15khhlpbj+EiIM/W9Gk0HP800NQ/DVPpU=
 github.com/cgrates/radigo v0.0.0-20210902121842-ea2f9a730627/go.mod h1:PizDxlLTjVQpyPU0ksWYfmM9UbYGu7q6at0nzuiZprI=
-github.com/cgrates/rpcclient v0.0.0-20240628101047-cb29aae6b006 h1:HxmDpmCesrwbi+ag/4+PDRhuSy0gpemMRQ19fAWmDTE=
-github.com/cgrates/rpcclient v0.0.0-20240628101047-cb29aae6b006/go.mod h1:WxTEIJvgI4c3eiPWW0WeAhHGd49Oi1Voe9lahotJiNo=
+github.com/cgrates/rpcclient v0.0.0-20240813140209-439c79036e27 h1:wnaRqfM3+c/fjH0gtP6jJANcKipE9LfnYr9UysYg/+o=
+github.com/cgrates/rpcclient v0.0.0-20240813140209-439c79036e27/go.mod h1:WxTEIJvgI4c3eiPWW0WeAhHGd49Oi1Voe9lahotJiNo=
 github.com/client9/misspell v0.3.4/go.mod h1:qj6jICC3Q7zFZvVWo7KLAzC3yx5G7kyvSDkc90ppPyw=
 github.com/cncf/udpa/go v0.0.0-20191209042840-269d4d468f6f/go.mod h1:M8M6+tZqaGXZJjfX53e64911xZQV5JYwmTeXPW+k8Sc=
 github.com/creack/pty v1.1.18 h1:n56/Zwd5o6whRC5PMGretI4IdRLlmBXYNjScPaBgsbY=
