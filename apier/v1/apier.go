@@ -1878,11 +1878,11 @@ func (apierSv1 *APIerSv1) ExportToFolder(ctx *context.Context, arg *utils.ArgExp
 			}
 			for _, key := range keys {
 				tntID := strings.SplitN(key[len(prfx):], utils.InInFieldSep, 2)
-				rgsPrf, err := apierSv1.DataManager.GetRankingProfile(tntID[0], tntID[1], true, false, utils.NonTransactional)
+				rnkPrf, err := apierSv1.DataManager.GetRankingProfile(tntID[0], tntID[1], true, false, utils.NonTransactional)
 				if err != nil {
 					return err
 				}
-				mdl := engine.APItoModelTPRanking(engine.RankingProfileToAPI(rgsPrf))
+				mdl := engine.APItoModelTPRanking(engine.RankingProfileToAPI(rnkPrf))
 				record, err := engine.CsvDump(mdl)
 				if err != nil {
 					return err
@@ -1896,7 +1896,7 @@ func (apierSv1 *APIerSv1) ExportToFolder(ctx *context.Context, arg *utils.ArgExp
 			if err != nil {
 				return err
 			}
-			if len(keys) == 0 {
+			if len(keys) == 0 { // if we don't find items we skip
 				continue
 			}
 			f, err := os.Create(path.Join(arg.Path, utils.TrendsCsv))
@@ -1907,16 +1907,17 @@ func (apierSv1 *APIerSv1) ExportToFolder(ctx *context.Context, arg *utils.ArgExp
 
 			csvWriter := csv.NewWriter(f)
 			csvWriter.Comma = utils.CSVSep
+			//write the header of the file
 			if err := csvWriter.Write(engine.TrendsMdls{}.CSVHeader()); err != nil {
 				return err
 			}
 			for _, key := range keys {
 				tntID := strings.SplitN(key[len(prfx):], utils.InInFieldSep, 2)
-				srsPrf, err := apierSv1.DataManager.GetTrendProfile(tntID[0], tntID[1])
+				trPrf, err := apierSv1.DataManager.GetTrendProfile(tntID[0], tntID[1], true, false, utils.NonTransactional)
 				if err != nil {
 					return err
 				}
-				mdl := engine.APItoModelTrends(engine.TrendProfileToAPI(srsPrf))
+				mdl := engine.APItoModelTrends(engine.TrendProfileToAPI(trPrf))
 				record, err := engine.CsvDump(mdl)
 				if err != nil {
 					return err
