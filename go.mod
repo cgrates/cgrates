@@ -25,7 +25,7 @@ require (
 	github.com/cgrates/kamevapi v0.0.0-20240307160311-26273f03eedf
 	github.com/cgrates/ltcache v0.0.0-20240411152156-e673692056db
 	github.com/cgrates/radigo v0.0.0-20240123163129-491c899df727
-	github.com/cgrates/rpcclient v0.0.0-20240628101047-cb29aae6b006
+	github.com/cgrates/rpcclient v0.0.0-20240813140209-439c79036e27
 	github.com/cgrates/sipingo v1.0.1-0.20200514112313-699ebc1cdb8e
 	github.com/creack/pty v1.1.20
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
