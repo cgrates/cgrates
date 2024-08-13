@@ -54,6 +54,11 @@ func (eeS *EeS) V1ProcessEvent(ctx *context.Context, cgrEv *utils.CGREventWithEe
 			continue
 		}
 
+		if cgrEv.APIOpts == nil {
+			cgrEv.APIOpts = make(map[string]any)
+		}
+		cgrEv.APIOpts[utils.MetaExporterID] = eeCfg.ID
+
 		if len(eeCfg.Filters) != 0 {
 			tnt := utils.FirstNonEmpty(cgrEv.Tenant, eeS.cfg.GeneralCfg().DefaultTenant)
 			if pass, errPass := eeS.fltrS.Pass(ctx, tnt,
@@ -184,7 +189,7 @@ func exportEventWithExporter(ctx *context.Context, exp EventExporter, connMngr *
 			utils.MetaDC:   exp.GetMetrics(),
 			utils.MetaOpts: utils.MapStorage(ev.APIOpts),
 			utils.MetaCfg:  cfg.GetDataProvider(),
-			utils.MetaVars: utils.MapStorage{utils.MetaTenant: ev.Tenant},
+			utils.MetaVars: utils.MapStorage{utils.MetaTenant: ev.Tenant, utils.MetaExporterID: ev.APIOpts[utils.MetaExporterID]},
 		}, utils.FirstNonEmpty(ev.Tenant, cfg.GeneralCfg().DefaultTenant),
 			filterS,
 			map[string]*utils.OrderedNavigableMap{utils.MetaExp: expNM}).SetFields(ctx, exp.Cfg().ContentFields())
