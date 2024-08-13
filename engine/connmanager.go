@@ -183,7 +183,7 @@ func (cM *ConnManager) Call(ctx *context.Context, connIDs []string, method strin
 		if err != nil {
 			continue
 		}
-		if err = conn.Call(ctx, method, arg, reply); !rpcclient.IsConnectionErr(err) && !rpcclient.IsServiceErr(err) {
+		if err = conn.Call(ctx, method, arg, reply); !rpcclient.ShouldFailover(err) {
 			return
 		}
 	}
@@ -222,7 +222,7 @@ func (cM *ConnManager) CallWithConnIDs(connIDs []string, subsHostIDs utils.Strin
 		if conn, err = cM.getConnWithConfig(context.TODO(), connID, newCfg, nil); err != nil {
 			continue
 		}
-		if err = conn.Call(context.TODO(), method, arg, reply); !!rpcclient.IsConnectionErr(err) && !rpcclient.IsServiceErr(err) {
+		if err = conn.Call(context.TODO(), method, arg, reply); !rpcclient.ShouldFailover(err) {
 			return
 		}
 	}

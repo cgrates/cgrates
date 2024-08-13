@@ -269,7 +269,7 @@ func (dS *DispatcherService) Dispatch(ev *utils.CGREvent, subsys string,
 						ev.APIOpts[k] = v // dispatcher loop protection opts
 					}
 					if err = d.Dispatch(dS.dm, dS.fltrS, evNm, tnt, utils.EmptyString, dR,
-						serviceMethod, args, reply); !rpcclient.IsConnectionErr(err) && !rpcclient.IsServiceErr(err) {
+						serviceMethod, args, reply); !rpcclient.ShouldFailover(err) {
 						return // dispatch success or specific error coming from upstream
 					}
 				}
@@ -303,7 +303,7 @@ func (dS *DispatcherService) Dispatch(ev *utils.CGREvent, subsys string,
 					Tenant:    dPrfl.Tenant,
 					ProfileID: dPrfl.ID,
 				},
-				serviceMethod, args, reply); !rpcclient.IsConnectionErr(err) && !rpcclient.IsServiceErr(err) {
+				serviceMethod, args, reply); !rpcclient.ShouldFailover(err) {
 				return
 			}
 		}
