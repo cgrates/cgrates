@@ -402,7 +402,7 @@ func TestTPReaderGetLoadedIdsResourceProfiles(t *testing.T) {
 	tpr := &TpReader{
 		resProfiles: map[utils.TenantID]*utils.TPResourceProfile{
 			{Tenant: "cgrates.org", ID: "ResGroup1"}: {
-				TPid:              testTPID,
+				TPid:              "tp_test",
 				Tenant:            "cgrates.org",
 				ID:                "ResGroup1",
 				FilterIDs:         []string{"*string:~*req.Account:1001", "*ai:~*req.AnswerTime:2014-07-29T15:00:00Z"},
@@ -429,7 +429,7 @@ func TestTPReaderGetLoadedIdsStatQueueProfiles(t *testing.T) {
 	tpr := &TpReader{
 		sqProfiles: map[utils.TenantID]*utils.TPStatProfile{
 			{Tenant: "cgrates.org", ID: "cgratesID"}: {
-				TPid:      testTPID,
+				TPid:      "tp_test",
 				Tenant:    "cgrates.org",
 				ID:        "ResGroup1",
 				FilterIDs: []string{"*string:~*req.Account:1001", "*ai:~*req.AnswerTime:2014-07-29T15:00:00Z"},
@@ -453,7 +453,7 @@ func TestTPReaderGetLoadedIdsThresholdProfiles(t *testing.T) {
 	tpr := &TpReader{
 		thProfiles: map[utils.TenantID]*utils.TPThresholdProfile{
 			{Tenant: "cgrates.org", ID: "cgratesID"}: {
-				TPid:      testTPID,
+				TPid:      "tp_test",
 				Tenant:    "cgrates.org",
 				ID:        "ResGroup1",
 				FilterIDs: []string{"*string:~*req.Account:1001", "*ai:~*req.AnswerTime:2014-07-29T15:00:00Z"},
@@ -479,7 +479,7 @@ func TestTPReaderGetLoadedIdsFilters(t *testing.T) {
 	tpr := &TpReader{
 		filters: map[utils.TenantID]*utils.TPFilterProfile{
 			{Tenant: "cgrates.org", ID: "cgratesID"}: {
-				TPid:   testTPID,
+				TPid:   "tp_test",
 				Tenant: "cgrates.org",
 				ID:     "ResGroup1",
 				Filters: []*utils.TPFilter{
@@ -506,7 +506,7 @@ func TestTPReaderGetLoadedIdsRouteProfiles(t *testing.T) {
 	tpr := &TpReader{
 		routeProfiles: map[utils.TenantID]*utils.TPRouteProfile{
 			{Tenant: "cgrates.org", ID: "cgratesID"}: {
-				TPid:      testTPID,
+				TPid:      "tp_test",
 				Tenant:    "cgrates.org",
 				ID:        "ResGroup1",
 				FilterIDs: []string{"*ai:~*req.AnswerTime:2014-07-29T15:00:00Z"},
@@ -527,7 +527,7 @@ func TestTPReaderGetLoadedIdsAttributeProfiles(t *testing.T) {
 	tpr := &TpReader{
 		attributeProfiles: map[utils.TenantID]*utils.TPAttributeProfile{
 			{Tenant: "cgrates.org", ID: "cgratesID"}: {
-				TPid:      testTPID,
+				TPid:      "tp_test",
 				Tenant:    "cgrates.org",
 				ID:        "ResGroup1",
 				FilterIDs: []string{"*string:~*req.Account:1001", "*ai:~*req.AnswerTime:2014-07-29T15:00:00Z", "*string:~*opts.*context:sessions"},
@@ -548,7 +548,7 @@ func TestTPReaderGetLoadedIdsChargerProfiles(t *testing.T) {
 	tpr := &TpReader{
 		chargerProfiles: map[utils.TenantID]*utils.TPChargerProfile{
 			{Tenant: "cgrates.org", ID: "cgratesID"}: {
-				TPid:      testTPID,
+				TPid:      "tp_test",
 				Tenant:    "cgrates.org",
 				ID:        "ResGroup1",
 				FilterIDs: []string{"*ai:~*req.AnswerTime:2014-07-29T15:00:00Z"},
@@ -570,7 +570,7 @@ func TestTPReaderGetLoadedIdsDispatcherProfiles(t *testing.T) {
 	tpr := &TpReader{
 		dispatcherProfiles: map[utils.TenantID]*utils.TPDispatcherProfile{
 			{Tenant: "cgrates.org", ID: "cgratesID"}: {
-				TPid:      testTPID,
+				TPid:      "tp_test",
 				Tenant:    "cgrates.org",
 				ID:        "ResGroup1",
 				FilterIDs: []string{"*ai:~*req.AnswerTime:2014-07-29T15:00:00Z"},
@@ -604,7 +604,7 @@ func TestTPReaderGetLoadedIdsDispatcherHosts(t *testing.T) {
 	tpr := &TpReader{
 		dispatcherHosts: map[utils.TenantID]*utils.TPDispatcherHost{
 			{Tenant: "cgrates.org", ID: "cgratesID"}: {
-				TPid:   testTPID,
+				TPid:   "tp_test",
 				Tenant: "cgrates.org",
 				ID:     "ResGroup1",
 			},

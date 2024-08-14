@@ -84,15 +84,33 @@ func testPreloadITCreateDirectories(t *testing.T) {
 		}
 	}
 	// writing in files the csv containing the profile for RateProfile
-	if err := os.WriteFile(path.Join("/tmp/RatesIn", utils.RatesCsv), []byte(engine.RateProfileCSVContent), 0644); err != nil {
+	if err := os.WriteFile(path.Join("/tmp/RatesIn", utils.RatesCsv), []byte(`
+#Tenant,ID,FilterIDs,Weights,MinCost,MaxCost,MaxCostStrategy,RateID,RateFilterIDs,RateActivationStart,RateWeights,RateBlocker,RateIntervalStart,RateFixedFee,RateRecurrentFee,RateUnit,RateIncrement
+cgrates.org,RP1,*string:~*req.Subject:1001,;0,0.1,0.6,*free,RT_WEEK,,"* * * * 1-5",;0,false,0s,0,0.12,1m,1m
+cgrates.org,RP1,,,,,,RT_WEEK,,,,,1m,1.234,0.06,1m,1s
+cgrates.org,RP1,,,,,,RT_WEEKEND,,"* * * * 0,6",;10,false,0s,0.089,0.06,1m,1s
+cgrates.org,RP1,,,,,,RT_CHRISTMAS,,* * 24 12 *,;30,false,0s,0.0564,0.06,1m,1s
+`), 0644); err != nil {
 		t.Fatalf("Err %v when writing in file %s", err, utils.RatesCsv)
 	}
 	// writing in files the csv containing the profile for Accounts
-	if err := os.WriteFile(path.Join("/tmp/AccountsIn", utils.AccountsCsv), []byte(engine.AccountCSVContent), 0644); err != nil {
+	if err := os.WriteFile(path.Join("/tmp/AccountsIn", utils.AccountsCsv), []byte(`
+#Tenant,ID,FilterIDs,Weights,Blockers,Opts,BalanceID,BalanceFilterIDs,BalanceWeights,BalanceBlockers,BalanceType,BalanceUnits,BalanceUnitFactors,BalanceOpts,BalanceCostIncrements,BalanceAttributeIDs,BalanceRateProfileIDs,ThresholdIDs
+cgrates.org,1001,,;20,,,MonetaryBalance,,;10,,*monetary,14,fltr1&fltr2;100;fltr3;200,,fltr1&fltr2;1.3;2.3;3.3,attr1;attr2,,*none
+cgrates.org,1001,,,,,VoiceBalance,,;10,*string:~*req.Destination:1002;true;;false,*voice,1h,,,,,,
+`), 0644); err != nil {
 		t.Fatalf("Err %v when writing in file %s", err, utils.AccountsCsv)
 	}
 	// writing in files the csv containing the profile for ActionProfile
-	if err := os.WriteFile(path.Join("/tmp/ActionsIn", utils.ActionsCsv), []byte(engine.ActionProfileCSVContent), 0644); err != nil {
+	if err := os.WriteFile(path.Join("/tmp/ActionsIn", utils.ActionsCsv), []byte(`
+#Tenant,ID,FilterIDs,Weights,Blockers,Schedule,TargetType,TargetIDs,ActionID,ActionFilterIDs,ActionTTL,ActionType,ActionOpts,ActionPath,ActionValue
+cgrates.org,ONE_TIME_ACT,,;10,,*asap,*accounts,1001;1002,TOPUP,,0s,*add_balance,,*balance.TestBalance.Value,10
+cgrates.org,ONE_TIME_ACT,,,,,,,SET_BALANCE_TEST_DATA,,0s,*set_balance,,*balance.TestDataBalance.Type,*data
+cgrates.org,ONE_TIME_ACT,,,,,,,TOPUP_TEST_DATA,,0s,*add_balance,,*balance.TestDataBalance.Value,1024
+cgrates.org,ONE_TIME_ACT,,,,,,,SET_BALANCE_TEST_VOICE,,0s,*set_balance,,*balance.TestVoiceBalance.Type,*voice
+cgrates.org,ONE_TIME_ACT,,,,,,,TOPUP_TEST_VOICE,,0s,*add_balance,,*balance.TestVoiceBalance.Value,15m15s
+cgrates.org,ONE_TIME_ACT,,,,,,,TOPUP_TEST_VOICE,,0s,*add_balance,,*balance.TestVoiceBalance2.Value,15m15s
+`), 0644); err != nil {
 		t.Fatalf("Err %v when writing in file %s", err, utils.ActionsCsv)
 	}
 }

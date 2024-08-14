@@ -44,7 +44,11 @@ var (
 	loaderCfg        *config.CGRConfig
 	loaderRPC        *birpc.Client
 	customAttributes = "12012000001\t12018209998\n12012000002\t15512580598\n12012000007\t19085199998\n12012000008\t18622784999\n12012000010\t17329440866\n12012000011\t18623689800\n12012000012\t19082050951\n12012000014\t17329440866\n12012000015\t12018209999\n12012000031\t12018209999\n12012000032\t19082050951\n12012000033\t12018209998\n12012000034\t12018209998\n"
-
+	attrCSVContent   = `
+#Tenant,ID,FilterIDs,Weights,Blockers,AttributeFilterIDs,AttributeBlockers,Path,Type,Value
+cgrates.org,ALS1,*string:~*req.Account:1001;*string:~*opts.*context:con1,;20,;true,*string:~*req.Field1:Initial,;true,*req.Field1,*variable,Sub1
+cgrates.org,ALS1,*string:~*opts.*context:con2|con3,,,,*string:~*req.Account:1002;true,*req.Field2,*variable,Sub2
+`
 	sTestsLoader = []func(t *testing.T){
 		testLoaderMakeFolders,
 		testLoaderInitCfg,
@@ -187,7 +191,7 @@ func populateData(inPath string) func(t *testing.T) {
 		if err != nil {
 			t.Fatal(inPath, err)
 		}
-		if _, err := f.WriteString(engine.AttributesCSVContent); err != nil {
+		if _, err := f.WriteString(attrCSVContent); err != nil {
 			t.Fatal(inPath, err)
 		}
 		if err = f.Sync(); err != nil {
@@ -220,8 +224,8 @@ func verifyOutput(outPath string) func(t *testing.T) {
 		time.Sleep(100 * time.Millisecond)
 		if outContent1, err := os.ReadFile(path.Join(outPath, utils.AttributesCsv)); err != nil {
 			t.Fatal(outPath, err)
-		} else if engine.AttributesCSVContent != string(outContent1) {
-			t.Errorf("<%s>Expecting: %q, received: %q", outPath, engine.AttributesCSVContent, string(outContent1))
+		} else if attrCSVContent != string(outContent1) {
+			t.Errorf("<%s>Expecting: %q, received: %q", outPath, attrCSVContent, string(outContent1))
 		}
 	}
 }

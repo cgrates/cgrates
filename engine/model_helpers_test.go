@@ -89,7 +89,7 @@ func TestTpResourcesAsTpResources(t *testing.T) {
 func TestAPItoResource(t *testing.T) {
 	tpRL := &utils.TPResourceProfile{
 		Tenant:            "cgrates.org",
-		TPid:              testTPID,
+		TPid:              "tp_test",
 		ID:                "ResGroup1",
 		FilterIDs:         []string{"FLTR_RES_GR_1", "*ai:~*req.AnswerTime:2014-07-29T15:00:00Z"},
 		Stored:            false,
@@ -155,7 +155,7 @@ func TestResourceProfileToAPI(t *testing.T) {
 func TestAPItoModelResource(t *testing.T) {
 	tpRL := &utils.TPResourceProfile{
 		Tenant:            "cgrates.org",
-		TPid:              testTPID,
+		TPid:              "tp_test",
 		ID:                "ResGroup1",
 		FilterIDs:         []string{"*ai:~*req.AnswerTime:2014-07-29T15:00:00Z"},
 		Weights:           ";10",
@@ -164,7 +164,7 @@ func TestAPItoModelResource(t *testing.T) {
 		AllocationMessage: "test",
 	}
 	expModel := &ResourceMdl{
-		Tpid:              testTPID,
+		Tpid:              "tp_test",
 		Tenant:            "cgrates.org",
 		ID:                "ResGroup1",
 		FilterIDs:         "*ai:~*req.AnswerTime:2014-07-29T15:00:00Z",
@@ -245,7 +245,7 @@ func TestTPStatsAsTPStats(t *testing.T) {
 
 func TestAPItoTPStats(t *testing.T) {
 	tps := &utils.TPStatProfile{
-		TPid:        testTPID,
+		TPid:        "tp_test",
 		ID:          "Stats1",
 		FilterIDs:   []string{"FLTR_1", "*ai:~*req.AnswerTime:2014-07-29T15:00:00Z"},
 		QueueLength: 100,
@@ -650,7 +650,7 @@ func TestAPItoModelTPThreshold5(t *testing.T) {
 
 func TestAPItoTPThreshold(t *testing.T) {
 	tps := &utils.TPThresholdProfile{
-		TPid:             testTPID,
+		TPid:             "tp_test",
 		ID:               "TH1",
 		FilterIDs:        []string{"FilterID1", "FilterID2", "*ai:~*req.AnswerTime:2014-07-29T15:00:00Z"},
 		MaxHits:          12,
@@ -989,7 +989,7 @@ func TestAPItoModelTPFilter(t *testing.T) {
 
 func TestAPItoTPFilter(t *testing.T) {
 	tps := &utils.TPFilterProfile{
-		TPid:   testTPID,
+		TPid:   "tp_test",
 		Tenant: "cgrates.org",
 		ID:     "Filter1",
 		Filters: []*utils.TPFilter{
@@ -3205,7 +3205,7 @@ func TestAPItoModelResourceCase1(t *testing.T) {
 func TestAPItoModelResourceCase2(t *testing.T) {
 	testStruct := &utils.TPResourceProfile{
 		Tenant:            "cgrates.org",
-		TPid:              testTPID,
+		TPid:              "tp_test",
 		ID:                "ResGroup1",
 		FilterIDs:         []string{"*ai:~*req.AnswerTime:2014-07-29T15:00:00Z|2015-07-29T15:00:00Z"},
 		UsageTTL:          "Test_TTL",
@@ -3217,7 +3217,7 @@ func TestAPItoModelResourceCase2(t *testing.T) {
 	expectedStruct := ResourceMdls{
 		{
 			Tenant:            "cgrates.org",
-			Tpid:              "LoaderCSVTests",
+			Tpid:              "tp_test",
 			ID:                "ResGroup1",
 			FilterIDs:         "*ai:~*req.AnswerTime:2014-07-29T15:00:00Z|2015-07-29T15:00:00Z",
 			UsageTTL:          "Test_TTL",
@@ -3236,7 +3236,7 @@ func TestAPItoModelResourceCase2(t *testing.T) {
 func TestAPItoModelResourceCase3(t *testing.T) {
 	testStruct := &utils.TPResourceProfile{
 		Tenant:            "cgrates.org",
-		TPid:              testTPID,
+		TPid:              "tp_test",
 		ID:                "ResGroup1",
 		FilterIDs:         []string{"FilterID1", "*ai:~*req.AnswerTime:2014-07-29T15:00:00Z|2015-07-29T15:00:00Z"},
 		UsageTTL:          "Test_TTL",
@@ -3248,7 +3248,7 @@ func TestAPItoModelResourceCase3(t *testing.T) {
 	expStruct := ResourceMdls{
 		{
 			Tenant:            "cgrates.org",
-			Tpid:              testTPID,
+			Tpid:              "tp_test",
 			ID:                "ResGroup1",
 			FilterIDs:         "FilterID1",
 			UsageTTL:          "Test_TTL",
@@ -3259,7 +3259,7 @@ func TestAPItoModelResourceCase3(t *testing.T) {
 		},
 		{
 			Tenant:            "cgrates.org",
-			Tpid:              testTPID,
+			Tpid:              "tp_test",
 			ID:                "ResGroup1",
 			FilterIDs:         "*ai:~*req.AnswerTime:2014-07-29T15:00:00Z|2015-07-29T15:00:00Z",
 			UsageTTL:          "",
@@ -5154,7 +5154,7 @@ func TestModelHelpersAccountToAPI(t *testing.T) {
 func TestAPItoModelResourceNoFilterIDs(t *testing.T) {
 	tpRL := &utils.TPResourceProfile{
 		Tenant:            "cgrates.org",
-		TPid:              testTPID,
+		TPid:              "tp_test",
 		ID:                "ResGroup1",
 		FilterIDs:         []string{},
 		Weights:           ";10",
@@ -5163,7 +5163,7 @@ func TestAPItoModelResourceNoFilterIDs(t *testing.T) {
 		AllocationMessage: "test",
 	}
 	expModel := &ResourceMdl{
-		Tpid:              testTPID,
+		Tpid:              "tp_test",
 		Tenant:            "cgrates.org",
 		ID:                "ResGroup1",
 		FilterIDs:         "",
@@ -5183,7 +5183,7 @@ func TestAPItoModelResourceNoFilterIDs(t *testing.T) {
 func TestAPItoResourceNewDynamicWeightsFromStringErr(t *testing.T) {
 	tpRL := &utils.TPResourceProfile{
 		Tenant:            "cgrates.org",
-		TPid:              testTPID,
+		TPid:              "tp_test",
 		ID:                "ResGroup1",
 		FilterIDs:         []string{"FLTR_RES_GR_1", "*ai:~*req.AnswerTime:2014-07-29T15:00:00Z"},
 		Stored:            false,
@@ -5203,7 +5203,7 @@ func TestAPItoResourceNewDynamicWeightsFromStringErr(t *testing.T) {
 
 func TestAPItoTPStatsNewDynamicWeightsFromStringErr(t *testing.T) {
 	tps := &utils.TPStatProfile{
-		TPid:        testTPID,
+		TPid:        "tp_test",
 		ID:          "Stats1",
 		FilterIDs:   []string{"FLTR_1", "*ai:~*req.AnswerTime:2014-07-29T15:00:00Z"},
 		QueueLength: 100,
@@ -5857,7 +5857,7 @@ func TestAPItoRouteProfileRouteNewDynamicBlockersFromStringErr(t *testing.T) {
 
 func TestAPItoTPThresholdNewDynamicWeightsFromStringErr(t *testing.T) {
 	tps := &utils.TPThresholdProfile{
-		TPid:             testTPID,
+		TPid:             "tp_test",
 		ID:               "TH1",
 		FilterIDs:        []string{"FilterID1", "FilterID2", "*ai:~*req.AnswerTime:2014-07-29T15:00:00Z"},
 		MaxHits:          12,
@@ -5917,7 +5917,7 @@ func TestAPItoModelTPThresholdNoFilters(t *testing.T) {
 
 func TestAPItoTPStatsNewDynamicBlockersFromStringErr(t *testing.T) {
 	tps := &utils.TPStatProfile{
-		TPid:        testTPID,
+		TPid:        "tp_test",
 		ID:          "Stats1",
 		FilterIDs:   []string{"FLTR_1", "*ai:~*req.AnswerTime:2014-07-29T15:00:00Z"},
 		QueueLength: 100,
@@ -5949,7 +5949,7 @@ func TestAPItoTPStatsNewDynamicBlockersFromStringErr(t *testing.T) {
 
 func TestAPItoTPStatsMetricNewDynamicBlockersFromStringErr(t *testing.T) {
 	tps := &utils.TPStatProfile{
-		TPid:        testTPID,
+		TPid:        "tp_test",
 		ID:          "Stats1",
 		FilterIDs:   []string{"FLTR_1", "*ai:~*req.AnswerTime:2014-07-29T15:00:00Z"},
 		QueueLength: 100,
