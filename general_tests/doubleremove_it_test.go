@@ -107,7 +107,7 @@ func testdoubleRemoveStartEngine(t *testing.T) {
 
 func testdoubleRemoveRpcConn(t *testing.T) {
 	var err error
-	doubleRemoveRPC, err = newRPCClient(doubleRemove.ListenCfg()) // We connect over JSON so we can also troubleshoot if needed
+	doubleRemoveRPC, err = engine.NewRPCClient(doubleRemove.ListenCfg(), *encoding) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
 		t.Fatal("Could not connect to rater: ", err.Error())
 	}

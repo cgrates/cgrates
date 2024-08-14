@@ -24,12 +24,12 @@ package ees
 import (
 	"io"
 	"net/http"
-	"net/rpc"
 	"net/url"
 	"path"
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc"
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
 
@@ -41,7 +41,7 @@ var (
 	httpPostConfigDir string
 	httpPostCfgPath   string
 	httpPostCfg       *config.CGRConfig
-	httpPostRpc       *rpc.Client
+	httpPostRpc       *birpc.Client
 	httpValues        url.Values
 
 	sTestsHTTPPost = []func(t *testing.T){
@@ -90,7 +90,7 @@ func testHTTPPostStartEngine(t *testing.T) {
 
 func testHTTPPostRPCConn(t *testing.T) {
 	var err error
-	httpPostRpc, err = newRPCClient(httpPostCfg.ListenCfg())
+	httpPostRpc, err = engine.NewRPCClient(httpPostCfg.ListenCfg(), *encoding)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -230,7 +230,7 @@ func testHTTPExportEvent(t *testing.T) {
 	}
 
 	var reply map[string]utils.MapStorage
-	if err := httpPostRpc.Call(utils.EeSv1ProcessEvent, eventVoice, &reply); err != nil {
+	if err := httpPostRpc.Call(context.Background(), utils.EeSv1ProcessEvent, eventVoice, &reply); err != nil {
 		t.Error(err)
 	}
 	time.Sleep(10 * time.Millisecond)
@@ -253,7 +253,7 @@ func testHTTPExportEvent(t *testing.T) {
 		t.Errorf("Expected %+v, received: %+v", expHeader, httpJsonHdr["Origin"])
 	}
 
-	if err := httpPostRpc.Call(utils.EeSv1ProcessEvent, eventData, &reply); err != nil {
+	if err := httpPostRpc.Call(context.Background(), utils.EeSv1ProcessEvent, eventData, &reply); err != nil {
 		t.Error(err)
 	}
 	time.Sleep(10 * time.Millisecond)
@@ -276,7 +276,7 @@ func testHTTPExportEvent(t *testing.T) {
 		t.Errorf("Expected %+v, received: %+v", expHeader, httpJsonHdr["Origin"])
 	}
 
-	if err := httpPostRpc.Call(utils.EeSv1ProcessEvent, eventSMS, &reply); err != nil {
+	if err := httpPostRpc.Call(context.Background(), utils.EeSv1ProcessEvent, eventSMS, &reply); err != nil {
 		t.Error(err)
 	}
 	time.Sleep(10 * time.Millisecond)
@@ -298,7 +298,7 @@ func testHTTPExportEvent(t *testing.T) {
 	if len(httpJsonHdr["Origin"]) == 0 || httpJsonHdr["Origin"][0] != expHeader {
 		t.Errorf("Expected %+v, received: %+v", expHeader, httpJsonHdr["Origin"])
 	}
-	if err := httpPostRpc.Call(utils.EeSv1ProcessEvent, eventSMSNoFields, &reply); err != nil {
+	if err := httpPostRpc.Call(context.Background(), utils.EeSv1ProcessEvent, eventSMSNoFields, &reply); err != nil {
 		t.Error(err)
 	}
 	time.Sleep(10 * time.Millisecond)

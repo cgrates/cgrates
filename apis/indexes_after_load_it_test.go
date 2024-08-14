@@ -102,7 +102,7 @@ func testIdxLoadStartEngine(t *testing.T) {
 
 func testIdxLoadRPCConn(t *testing.T) {
 	var err error
-	idxLoadBiRPC, err = newRPCClient(idxLoadCfg.ListenCfg()) // We connect over JSON so we can also troubleshoot if needed
+	idxLoadBiRPC, err = engine.NewRPCClient(idxLoadCfg.ListenCfg(), *encoding) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
 		t.Fatal(err)
 	}

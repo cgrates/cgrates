@@ -145,7 +145,7 @@ cgrates.org,DEFAULT_RATE,,;0,0,0,*free,RT_ALWAYS,,"* * * * *",;0,false,0s,,0.1,1
 	}
 	defer engine.KillEngine(*waitRater)
 
-	client, err := newRPCClient(cfg.ListenCfg())
+	client, err := engine.NewRPCClient(cfg.ListenCfg(), *encoding)
 	if err != nil {
 		t.Fatalf("could not establish connection to engine: %v", err)
 	}

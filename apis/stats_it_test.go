@@ -131,7 +131,7 @@ func testStatsStartEngine(t *testing.T) {
 
 func testStatsRPCConn(t *testing.T) {
 	var err error
-	sqRPC, err = newRPCClient(sqCfg.ListenCfg()) // We connect over JSON so we can also troubleshoot if needed
+	sqRPC, err = engine.NewRPCClient(sqCfg.ListenCfg(), *encoding) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
 		t.Fatal(err)
 	}

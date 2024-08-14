@@ -23,12 +23,12 @@ package ees
 
 import (
 	"net"
-	"net/rpc"
 	"path"
 	"strconv"
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc"
 	"github.com/cgrates/birpc/context"
 	kafka "github.com/segmentio/kafka-go"
 
@@ -41,7 +41,7 @@ var (
 	kafkaConfigDir string
 	kafkaCfgPath   string
 	kafkaCfg       *config.CGRConfig
-	kafkaRpc       *rpc.Client
+	kafkaRpc       *birpc.Client
 
 	sTestsKafka = []func(t *testing.T){
 		testCreateDirectory,
@@ -91,7 +91,7 @@ func testKafkaStartEngine(t *testing.T) {
 
 func testKafkaRPCConn(t *testing.T) {
 	var err error
-	kafkaRpc, err = newRPCClient(kafkaCfg.ListenCfg())
+	kafkaRpc, err = engine.NewRPCClient(kafkaCfg.ListenCfg(), *encoding)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -154,7 +154,7 @@ func testKafkaExportEvent(t *testing.T) {
 	}
 
 	var reply map[string]map[string]any
-	if err := kafkaRpc.Call(utils.EeSv1ProcessEvent, event, &reply); err != nil {
+	if err := kafkaRpc.Call(context.Background(), utils.EeSv1ProcessEvent, event, &reply); err != nil {
 		t.Error(err)
 	}
 	time.Sleep(time.Second)

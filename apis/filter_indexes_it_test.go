@@ -282,7 +282,7 @@ func testV1FIdxStartEngine(t *testing.T) {
 
 func testV1FIdxRpcConn(t *testing.T) {
 	var err error
-	tFIdxRpc, err = newRPCClient(tFltrIdxCfg.ListenCfg()) // We connect over JSON so we can also troubleshoot if needed
+	tFIdxRpc, err = engine.NewRPCClient(tFltrIdxCfg.ListenCfg(), *encoding) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
 		t.Fatal("Could not connect to rater: ", err.Error())
 	}

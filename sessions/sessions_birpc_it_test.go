@@ -115,7 +115,7 @@ package sessions
 // 		clntHandlers); err != nil {
 // 		t.Fatal(err)
 // 	}
-// 	if sessionsRPC, err = newRPCClient(sessionsBiRPCCfg.ListenCfg()); err != nil { // Connect also simple RPC so we can check accounts and such
+// 	if sessionsRPC, err = engine.NewRPCClient(sessionsBiRPCCfg.ListenCfg(), *encoding); err != nil { // Connect also simple RPC so we can check accounts and such
 // 		t.Fatal(err)
 // 	}
 // 	dummyClnt.Close() // close so we don't get EOF error when disconnecting server

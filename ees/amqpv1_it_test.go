@@ -20,12 +20,12 @@ package ees
 
 import (
 	"flag"
-	"net/rpc"
 	"path"
 	"testing"
 	"time"
 
 	amqpv1 "github.com/Azure/go-amqp"
+	"github.com/cgrates/birpc"
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
@@ -37,7 +37,7 @@ var (
 	amqpv1ConfDir  string
 	amqpv1CfgPath  string
 	amqpv1Cfg      *config.CGRConfig
-	amqpv1RPC      *rpc.Client
+	amqpv1RPC      *birpc.Client
 	amqpv1DialURL  string
 	amqpv1ConnOpts *amqpv1.ConnOptions
 
@@ -99,7 +99,7 @@ func testAMQPv1StartEngine(t *testing.T) {
 
 func testAMQPv1RPCConn(t *testing.T) {
 	var err error
-	amqpv1RPC, err = newRPCClient(amqpv1Cfg.ListenCfg())
+	amqpv1RPC, err = engine.NewRPCClient(amqpv1Cfg.ListenCfg(), *encoding)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -134,7 +134,7 @@ func testAMQPv1ExportEvent(t *testing.T) {
 	}
 
 	var reply map[string]utils.MapStorage
-	if err := amqpv1RPC.Call(utils.EeSv1ProcessEvent, ev, &reply); err != nil {
+	if err := amqpv1RPC.Call(context.Background(), utils.EeSv1ProcessEvent, ev, &reply); err != nil {
 		t.Error(err)
 	}
 	time.Sleep(2 * time.Second)

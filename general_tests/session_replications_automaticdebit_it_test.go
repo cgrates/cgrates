@@ -141,10 +141,10 @@ package general_tests
 
 // // Connect rpc client to rater
 // func testSessionSRplApierRpcConn(t *testing.T) {
-// 	if smgRplcMstrRPC, err = newRPCClient(smgRplcMasterCfg.ListenCfg()); err != nil {
+// 	if smgRplcMstrRPC, err = engine.NewRPCClient(smgRplcMasterCfg.ListenCfg(), *encoding); err != nil {
 // 		t.Fatal(err)
 // 	}
-// 	if smgRplcSlvRPC, err = newRPCClient(smgRplcSlaveCfg.ListenCfg()); err != nil {
+// 	if smgRplcSlvRPC, err = engine.NewRPCClient(smgRplcSlaveCfg.ListenCfg(), *encoding); err != nil {
 // 		t.Fatal(err)
 // 	}
 // }

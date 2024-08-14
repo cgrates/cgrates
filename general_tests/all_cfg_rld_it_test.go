@@ -90,7 +90,7 @@ func testStartEngine(t *testing.T) {
 
 func testRPCConn(t *testing.T) {
 	var err error
-	testRPC, err = newRPCClient(testCfg.ListenCfg())
+	testRPC, err = engine.NewRPCClient(testCfg.ListenCfg(), *encoding)
 	if err != nil {
 		t.Fatal(err)
 	}

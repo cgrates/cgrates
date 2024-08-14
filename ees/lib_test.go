@@ -19,16 +19,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package ees
 
 import (
-	"errors"
 	"flag"
-	"net/rpc"
-	"net/rpc/jsonrpc"
 	"os"
 	"testing"
 
 	"github.com/cgrates/cgrates/engine"
 
-	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -37,17 +33,6 @@ var (
 	waitRater = flag.Int("wait_rater", 100, "Number of milliseconds to wait for rater to start and cache")
 	encoding  = flag.String("rpc", utils.MetaJSON, "what encoding would be used for rpc communication")
 )
-
-func newRPCClient(cfg *config.ListenCfg) (c *rpc.Client, err error) {
-	switch *encoding {
-	case utils.MetaJSON:
-		return jsonrpc.Dial(utils.TCP, cfg.RPCJSONListen)
-	case utils.MetaGOB:
-		return rpc.Dial(utils.TCP, cfg.RPCGOBListen)
-	default:
-		return nil, errors.New("UNSUPPORTED_RPC")
-	}
-}
 
 var exportPath = []string{"/tmp/testCSV", "/tmp/testComposedCSV", "/tmp/testFWV", "/tmp/testCSVMasked",
 	"/tmp/testCSVfromVirt", "/tmp/testCSVExpTemp"}

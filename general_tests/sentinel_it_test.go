@@ -133,7 +133,7 @@ package general_tests
 
 // func testRedisSentinelRPCCon(t *testing.T) {
 // 	var err error
-// 	sentinelRPC, err = newRPCClient(sentinelConfig.ListenCfg()) // We connect over JSON so we can also troubleshoot if needed
+// 	sentinelRPC, err = engine.NewRPCClient(sentinelConfig.ListenCfg(), *encoding) // We connect over JSON so we can also troubleshoot if needed
 // 	if err != nil {
 // 		t.Fatal(err)
 // 	}

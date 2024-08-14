@@ -100,7 +100,7 @@ package general_tests
 
 // func testV1DataRpcConn(t *testing.T) {
 // 	var err error
-// 	dataRpc, err = newRPCClient(dataCfg.ListenCfg()) // We connect over JSON so we can also troubleshoot if needed
+// 	dataRpc, err = engine.NewRPCClient(dataCfg.ListenCfg(), *encoding) // We connect over JSON so we can also troubleshoot if needed
 // 	if err != nil {
 // 		t.Fatal("Could not connect to rater: ", err.Error())
 // 	}

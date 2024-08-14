@@ -27,6 +27,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -70,7 +71,7 @@ func TestDspChargerST(t *testing.T) {
 
 func testDspCppPingFailover(t *testing.T) {
 	var reply string
-	if err := allEngine.RPC.Call(utils.ChargerSv1Ping, new(utils.CGREvent), &reply); err != nil {
+	if err := allEngine.RPC.Call(context.Background(), utils.ChargerSv1Ping, new(utils.CGREvent), &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.Pong {
 		t.Errorf("Received: %s", reply)
@@ -82,19 +83,19 @@ func testDspCppPingFailover(t *testing.T) {
 			utils.OptsAPIKey: "chrg12345",
 		},
 	}
-	if err := dispEngine.RPC.Call(utils.ChargerSv1Ping, &ev, &reply); err != nil {
+	if err := dispEngine.RPC.Call(context.Background(), utils.ChargerSv1Ping, &ev, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.Pong {
 		t.Errorf("Received: %s", reply)
 	}
 	allEngine.stopEngine(t)
-	if err := dispEngine.RPC.Call(utils.ChargerSv1Ping, &ev, &reply); err != nil {
+	if err := dispEngine.RPC.Call(context.Background(), utils.ChargerSv1Ping, &ev, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.Pong {
 		t.Errorf("Received: %s", reply)
 	}
 	allEngine2.stopEngine(t)
-	if err := dispEngine.RPC.Call(utils.ChargerSv1Ping, &ev, &reply); err == nil {
+	if err := dispEngine.RPC.Call(context.Background(), utils.ChargerSv1Ping, &ev, &reply); err == nil {
 		t.Errorf("Expected error but received %v and reply %v\n", err, reply)
 	}
 	allEngine.startEngine(t)
@@ -132,7 +133,7 @@ func testDspCppGetChtgFailover(t *testing.T) {
 		(*eChargers)[0].FilterIDs = nil // empty slice are nil in gob
 	}
 	var reply *engine.ChargerProfiles
-	if err := dispEngine.RPC.Call(utils.ChargerSv1GetChargersForEvent,
+	if err := dispEngine.RPC.Call(context.Background(), utils.ChargerSv1GetChargersForEvent,
 		args, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eChargers, reply) {
@@ -157,7 +158,7 @@ func testDspCppGetChtgFailover(t *testing.T) {
 	if *encoding == utils.MetaGOB {
 		(*eChargers)[1].FilterIDs = nil // empty slice are nil in gob
 	}
-	if err := dispEngine.RPC.Call(utils.ChargerSv1GetChargersForEvent,
+	if err := dispEngine.RPC.Call(context.Background(), utils.ChargerSv1GetChargersForEvent,
 		args, &reply); err != nil {
 		t.Fatal(err)
 	}
@@ -173,12 +174,12 @@ func testDspCppGetChtgFailover(t *testing.T) {
 
 func testDspCppPing(t *testing.T) {
 	var reply string
-	if err := allEngine.RPC.Call(utils.ChargerSv1Ping, new(utils.CGREvent), &reply); err != nil {
+	if err := allEngine.RPC.Call(context.Background(), utils.ChargerSv1Ping, new(utils.CGREvent), &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.Pong {
 		t.Errorf("Received: %s", reply)
 	}
-	if err := dispEngine.RPC.Call(utils.ChargerSv1Ping, &utils.CGREvent{
+	if err := dispEngine.RPC.Call(context.Background(), utils.ChargerSv1Ping, &utils.CGREvent{
 		Tenant: "cgrates.org",
 		APIOpts: map[string]any{
 			utils.OptsAPIKey: "chrg12345",
@@ -202,7 +203,7 @@ func testDspCppTestAuthKey(t *testing.T) {
 		},
 	}
 	var reply *engine.ChargerProfiles
-	if err := dispEngine.RPC.Call(utils.ChargerSv1GetChargersForEvent,
+	if err := dispEngine.RPC.Call(context.Background(), utils.ChargerSv1GetChargersForEvent,
 		args, &reply); err == nil || err.Error() != utils.ErrUnauthorizedApi.Error() {
 		t.Error(err)
 	}
@@ -251,7 +252,7 @@ func testDspCppTestAuthKey2(t *testing.T) {
 		(*eChargers)[1].FilterIDs = nil // empty slice are nil in gob
 	}
 	var reply *engine.ChargerProfiles
-	if err := dispEngine.RPC.Call(utils.ChargerSv1GetChargersForEvent,
+	if err := dispEngine.RPC.Call(context.Background(), utils.ChargerSv1GetChargersForEvent,
 		args, &reply); err != nil {
 		t.Fatal(err)
 	}
@@ -294,7 +295,7 @@ func testDspCppGetChtgRoundRobin(t *testing.T) {
 	}
 	var reply *engine.ChargerProfiles
 	// To ALL2
-	if err := dispEngine.RPC.Call(utils.ChargerSv1GetChargersForEvent,
+	if err := dispEngine.RPC.Call(context.Background(), utils.ChargerSv1GetChargersForEvent,
 		args, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eChargers, reply) {
@@ -318,7 +319,7 @@ func testDspCppGetChtgRoundRobin(t *testing.T) {
 	if *encoding == utils.MetaGOB {
 		(*eChargers)[1].FilterIDs = nil // empty slice are nil in gob
 	}
-	if err := dispEngine.RPC.Call(utils.ChargerSv1GetChargersForEvent,
+	if err := dispEngine.RPC.Call(context.Background(), utils.ChargerSv1GetChargersForEvent,
 		args, &reply); err != nil {
 		t.Fatal(err)
 	}

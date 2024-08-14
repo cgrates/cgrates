@@ -94,7 +94,7 @@ package ees
 
 // func testS3RPCConn(t *testing.T) {
 // 	var err error
-// 	s3RPC, err = newRPCClient(s3Cfg.ListenCfg())
+// 	s3RPC, err = engine.NewRPCClient(s3Cfg.ListenCfg(), *encoding)
 // 	if err != nil {
 // 		t.Fatal(err)
 // 	}

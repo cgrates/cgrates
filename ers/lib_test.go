@@ -19,14 +19,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package ers
 
 import (
-	"errors"
 	"flag"
-	"net/rpc"
-	"net/rpc/jsonrpc"
 	"os"
 	"testing"
 
-	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -36,17 +32,6 @@ var (
 	encoding  = flag.String("rpc", utils.MetaJSON, "what encoding whould be uused for rpc comunication")
 	dbType    = flag.String("dbtype", utils.MetaInternal, "The type of DataBase (Internal/Mongo/mySql)")
 )
-
-func newRPCClient(cfg *config.ListenCfg) (c *rpc.Client, err error) {
-	switch *encoding {
-	case utils.MetaJSON:
-		return jsonrpc.Dial(utils.TCP, cfg.RPCJSONListen)
-	case utils.MetaGOB:
-		return rpc.Dial(utils.TCP, cfg.RPCGOBListen)
-	default:
-		return nil, errors.New("UNSUPPORTED_RPC")
-	}
-}
 
 func testCreateDirs(t *testing.T) {
 	for _, dir := range []string{"/tmp/ers/in", "/tmp/ers/out",

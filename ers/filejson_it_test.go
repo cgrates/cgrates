@@ -113,7 +113,7 @@ var (
 
 	func testJSONRpcConn(t *testing.T) {
 		var err error
-		jsonRPC, err = newRPCClient(jsonCfg.ListenCfg()) // We connect over JSON so we can also troubleshoot if needed
+		jsonRPC, err = engine.NewRPCClient(jsonCfg.ListenCfg(), *encoding) // We connect over JSON so we can also troubleshoot if needed
 		if err != nil {
 			t.Fatal("Could not connect to rater: ", err.Error())
 		}

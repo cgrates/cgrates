@@ -23,7 +23,6 @@ package main
 
 import (
 	"bytes"
-	"errors"
 	"flag"
 	"fmt"
 	"net"
@@ -49,17 +48,6 @@ var (
 	waitRater = flag.Int("wait_rater", 100, "Number of milliseconds to wait for rater to start and cache")
 	encoding  = flag.String("rpc", utils.MetaJSON, "what encoding whould be used for rpc comunication")
 )
-
-func newRPCClient(cfg *config.ListenCfg) (c *birpc.Client, err error) {
-	switch *encoding {
-	case utils.MetaJSON:
-		return jsonrpc.Dial(utils.TCP, cfg.RPCJSONListen)
-	case utils.MetaGOB:
-		return birpc.Dial(utils.TCP, cfg.RPCGOBListen)
-	default:
-		return nil, errors.New("UNSUPPORTED_RPC")
-	}
-}
 
 func TestLoadConfig(t *testing.T) {
 	// DataDb

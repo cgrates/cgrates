@@ -21,11 +21,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package ers
 
 import (
-	"net/rpc"
 	"os"
 	"path"
 	"testing"
 
+	"github.com/cgrates/birpc"
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
@@ -35,7 +35,7 @@ import (
 var (
 	reloadCfgPath      string
 	reloadCfg          *config.CGRConfig
-	reloadRPC          *rpc.Client
+	reloadRPC          *birpc.Client
 	ersReloadConfigDIR string
 
 	reloadTests = []func(t *testing.T){
@@ -106,7 +106,7 @@ func testReloadITStartEngine(t *testing.T) {
 // Connect rpc client to rater
 func testReloadITRpcConn(t *testing.T) {
 	var err error
-	reloadRPC, err = newRPCClient(reloadCfg.ListenCfg()) // We connect over JSON so we can also troubleshoot if needed
+	reloadRPC, err = engine.NewRPCClient(reloadCfg.ListenCfg(), *encoding) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
 		t.Fatal("Could not connect to rater: ", err.Error())
 	}
@@ -122,7 +122,7 @@ func testReloadVerifyDisabledReaders(t *testing.T) {
 
 func testReloadReloadConfigFromPath(t *testing.T) {
 	var reply string
-	if err := reloadRPC.Call(utils.ConfigSv1ReloadConfig, &config.ReloadArgs{
+	if err := reloadRPC.Call(context.Background(), utils.ConfigSv1ReloadConfig, &config.ReloadArgs{
 		// Path:    path.Join(*dataDir, "conf", "samples", "ers_reload", "first_reload"),
 		Section: config.ERsJSON,
 	}, &reply); err != nil {
@@ -134,7 +134,7 @@ func testReloadReloadConfigFromPath(t *testing.T) {
 
 func testReloadVerifyFirstReload(t *testing.T) {
 	var reply map[string]any
-	if err := reloadRPC.Call(utils.ConfigSv1GetConfig, &config.SectionWithAPIOpts{
+	if err := reloadRPC.Call(context.Background(), utils.ConfigSv1GetConfig, &config.SectionWithAPIOpts{
 		Sections: []string{config.ERsJSON},
 	}, &reply); err != nil {
 		t.Error(err)

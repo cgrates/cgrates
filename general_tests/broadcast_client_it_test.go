@@ -105,11 +105,11 @@ package general_tests
 
 // func testbrodcastItRPCConn(t *testing.T) {
 // 	var err error
-// 	brodcastRPC, err = newRPCClient(brodcastCfg.ListenCfg())
+// 	brodcastRPC, err = engine.NewRPCClient(brodcastCfg.ListenCfg(), *encoding)
 // 	if err != nil {
 // 		t.Fatal(err)
 // 	}
-// 	brodcastInternalRPC, err = newRPCClient(brodcastInternalCfg.ListenCfg())
+// 	brodcastInternalRPC, err = engine.NewRPCClient(brodcastInternalCfg.ListenCfg(), *encoding)
 // 	if err != nil {
 // 		t.Fatal(err)
 // 	}

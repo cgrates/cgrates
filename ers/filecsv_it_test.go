@@ -125,7 +125,7 @@ package ers
 // // Connect rpc client to rater
 // func testCsvITRpcConn(t *testing.T) {
 // 	var err error
-// 	csvRPC, err = newRPCClient(csvCfg.ListenCfg()) // We connect over JSON so we can also troubleshoot if needed
+// 	csvRPC, err = engine.NewRPCClient(csvCfg.ListenCfg(), *encoding) // We connect over JSON so we can also troubleshoot if needed
 // 	if err != nil {
 // 		t.Fatal("Could not connect to rater: ", err.Error())
 // 	}

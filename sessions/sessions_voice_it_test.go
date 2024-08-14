@@ -21,10 +21,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package sessions
 
 import (
-	"net/rpc"
 	"path"
 	"testing"
 
+	"github.com/cgrates/birpc"
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
@@ -35,7 +35,7 @@ var (
 	voiceCfgPath string
 	voiceCfgDIR  string
 	voiceCfg     *config.CGRConfig
-	sessionsRPC  *rpc.Client
+	sessionsRPC  *birpc.Client
 
 	sessionsVoiceTests = []func(t *testing.T){
 		testSessionsVoiceInitCfg,
@@ -108,7 +108,7 @@ func testSessionsVoiceStartEngine(t *testing.T) {
 // Connect rpc client to rater
 func testSessionsVoiceApierRpcConn(t *testing.T) {
 	var err error
-	sessionsRPC, err = newRPCClient(voiceCfg.ListenCfg()) // We connect over JSON so we can also troubleshoot if needed
+	sessionsRPC, err = engine.NewRPCClient(voiceCfg.ListenCfg(), *encoding) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
 		t.Fatal(err)
 	}

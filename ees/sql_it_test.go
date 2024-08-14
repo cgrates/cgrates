@@ -23,11 +23,11 @@ package ees
 
 import (
 	"fmt"
-	"net/rpc"
 	"path"
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc"
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
 
@@ -43,7 +43,7 @@ var (
 	sqlEeConfigDir string
 	sqlEeCfgPath   string
 	sqlEeCfg       *config.CGRConfig
-	sqlEeRpc       *rpc.Client
+	sqlEeRpc       *birpc.Client
 	db2            *gorm.DB
 	dbConnString   = "cgrates:CGRateS.org@tcp(127.0.0.1:3306)/%s?charset=utf8&loc=Local&parseTime=true&sql_mode='ALLOW_INVALID_DATES'"
 
@@ -140,7 +140,7 @@ func testSqlEeStartEngine(t *testing.T) {
 
 func testSqlEeRPCConn(t *testing.T) {
 	var err error
-	sqlEeRpc, err = newRPCClient(sqlEeCfg.ListenCfg())
+	sqlEeRpc, err = engine.NewRPCClient(sqlEeCfg.ListenCfg(), *encoding)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -178,7 +178,7 @@ func testSqlEeExportEventFull(t *testing.T) {
 	}
 
 	var reply map[string]utils.MapStorage
-	if err := sqlEeRpc.Call(utils.EeSv1ProcessEvent, eventVoice, &reply); err != nil {
+	if err := sqlEeRpc.Call(context.Background(), utils.EeSv1ProcessEvent, eventVoice, &reply); err != nil {
 		t.Error(err)
 	}
 	time.Sleep(10 * time.Millisecond)
@@ -216,7 +216,7 @@ func testSqlEeExportEventPartial(t *testing.T) {
 	}
 
 	var reply map[string]utils.MapStorage
-	if err := sqlEeRpc.Call(utils.EeSv1ProcessEvent, eventVoice, &reply); err != nil {
+	if err := sqlEeRpc.Call(context.Background(), utils.EeSv1ProcessEvent, eventVoice, &reply); err != nil {
 		t.Error(err)
 	}
 	time.Sleep(10 * time.Millisecond)

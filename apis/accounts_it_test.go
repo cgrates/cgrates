@@ -127,7 +127,7 @@ func testAccSStartEngine(t *testing.T) {
 
 func testAccSRPCConn(t *testing.T) {
 	var err error
-	accSRPC, err = newRPCClient(accPrfCfg.ListenCfg()) // We connect over JSON so we can also troubleshoot if needed
+	accSRPC, err = engine.NewRPCClient(accPrfCfg.ListenCfg(), *encoding) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
 		t.Fatal(err)
 	}

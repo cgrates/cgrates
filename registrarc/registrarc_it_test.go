@@ -107,7 +107,7 @@ func testDsphStartEngine(t *testing.T) {
 	if dspCmd, err = engine.StopStartEngine(dspCfgPath, *waitRater); err != nil {
 		t.Fatal(err)
 	}
-	dspRPC, err = newRPCClient(dspCfg.ListenCfg()) // We connect over JSON so we can also troubleshoot if needed
+	dspRPC, err = engine.NewRPCClient(dspCfg.ListenCfg(), *encoding) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
 		t.Fatal("Could not connect to rater: ", err.Error())
 	}

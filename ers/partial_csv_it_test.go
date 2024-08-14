@@ -111,7 +111,7 @@ package ers
 // // Connect rpc client to rater
 // func testPartITRpcConn(t *testing.T) {
 // 	var err error
-// 	partRPC, err = newRPCClient(partCfg.ListenCfg()) // We connect over JSON so we can also troubleshoot if needed
+// 	partRPC, err = engine.NewRPCClient(partCfg.ListenCfg(), *encoding) // We connect over JSON so we can also troubleshoot if needed
 // 	if err != nil {
 // 		t.Fatal("Could not connect to rater: ", err.Error())
 // 	}

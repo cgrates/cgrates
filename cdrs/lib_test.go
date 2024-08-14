@@ -26,9 +26,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/cgrates/birpc"
 	"github.com/cgrates/birpc/context"
-	"github.com/cgrates/birpc/jsonrpc"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -39,17 +37,6 @@ var (
 	encoding  = flag.String("rpc", utils.MetaJSON, "what encoding would be used for rpc communication")
 	dbType    = flag.String("dbtype", utils.MetaInternal, "The type of DataBase (Internal/Mongo/mySql)")
 )
-
-func newRPCClient(cfg *config.ListenCfg) (c *birpc.Client, err error) {
-	switch *encoding {
-	case utils.MetaJSON:
-		return jsonrpc.Dial(utils.TCP, cfg.RPCJSONListen)
-	case utils.MetaGOB:
-		return birpc.Dial(utils.TCP, cfg.RPCGOBListen)
-	default:
-		return nil, errors.New("UNSUPPORTED_RPC")
-	}
-}
 
 // initCfg creates a new CGRConfig from the provided configuration content string. It generates a
 // temporary directory and file path, writes the content to the configuration file, and returns the

@@ -104,7 +104,7 @@ func testRPCStartEngine(t *testing.T) {
 	if _, err = engine.StopStartEngine(rpcsCfgPath, *waitRater); err != nil {
 		t.Fatal(err)
 	}
-	rpcsRPC, err = newRPCClient(rpcsCfg.ListenCfg())
+	rpcsRPC, err = engine.NewRPCClient(rpcsCfg.ListenCfg(), *encoding)
 	if err != nil {
 		t.Fatal("Could not connect to rater: ", err.Error())
 	}

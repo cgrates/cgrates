@@ -21,7 +21,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package loaders
 
 import (
-	"errors"
 	"flag"
 	"os"
 	"path"
@@ -32,7 +31,6 @@ import (
 
 	"github.com/cgrates/birpc"
 	"github.com/cgrates/birpc/context"
-	"github.com/cgrates/birpc/jsonrpc"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -107,17 +105,6 @@ var loaderPaths = []string{"/tmp/In", "/tmp/Out", "/tmp/LoaderIn", "/tmp/Subpath
 	"/tmp/SubpathLoaderWithMove", "/tmp/SubpathOut", "/tmp/templateLoaderIn", "/tmp/templateLoaderOut",
 	"/tmp/customSepLoaderIn", "/tmp/customSepLoaderOut"}
 
-func newRPCClient(cfg *config.ListenCfg) (c *birpc.Client, err error) {
-	switch *encoding {
-	case utils.MetaJSON:
-		return jsonrpc.Dial(utils.TCP, cfg.RPCJSONListen)
-	case utils.MetaGOB:
-		return birpc.Dial(utils.TCP, cfg.RPCGOBListen)
-	default:
-		return nil, errors.New("UNSUPPORTED_RPC")
-	}
-}
-
 // Test start here
 func TestLoaderIT(t *testing.T) {
 	switch *dbType {
@@ -176,7 +163,7 @@ func testLoaderStartEngine(t *testing.T) {
 // Connect rpc client to rater
 func testLoaderRPCConn(t *testing.T) {
 	var err error
-	if loaderRPC, err = newRPCClient(loaderCfg.ListenCfg()); err != nil {
+	if loaderRPC, err = engine.NewRPCClient(loaderCfg.ListenCfg(), *encoding); err != nil {
 		t.Fatal(err)
 	}
 }

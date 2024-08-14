@@ -21,10 +21,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package sessions
 
 import (
-	"net/rpc"
 	"path"
 	"testing"
 
+	"github.com/cgrates/birpc"
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
@@ -35,7 +35,7 @@ var (
 	sItCfgPath string
 	sItCfgDIR  string
 	sItCfg     *config.CGRConfig
-	sItRPC     *rpc.Client
+	sItRPC     *birpc.Client
 
 	sessionsITtests = []func(t *testing.T){
 		testSessionsItInitCfg,
@@ -102,7 +102,7 @@ func testSessionsItStartEngine(t *testing.T) {
 // Connect rpc client to rater
 func testSessionsItApierRpcConn(t *testing.T) {
 	var err error
-	sItRPC, err = newRPCClient(sItCfg.ListenCfg()) // We connect over JSON so we can also troubleshoot if needed
+	sItRPC, err = engine.NewRPCClient(sItCfg.ListenCfg(), *encoding)
 	if err != nil {
 		t.Fatal(err)
 	}

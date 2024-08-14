@@ -95,7 +95,7 @@ package general_tests
 
 // func testSesRoutesItRPCConn(t *testing.T) {
 // 	var err error
-// 	sesRoutesRPC, err = newRPCClient(sesRoutesCfg.ListenCfg())
+// 	sesRoutesRPC, err = engine.NewRPCClient(sesRoutesCfg.ListenCfg(), *encoding)
 // 	if err != nil {
 // 		t.Fatal(err)
 // 	}

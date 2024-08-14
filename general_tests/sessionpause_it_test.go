@@ -97,7 +97,7 @@ package general_tests
 
 // func testSesPauseItRPCConn(t *testing.T) {
 // 	var err error
-// 	sesPauseRPC, err = newRPCClient(sesPauseCfg.ListenCfg())
+// 	sesPauseRPC, err = engine.NewRPCClient(sesPauseCfg.ListenCfg(), *encoding)
 // 	if err != nil {
 // 		t.Fatal(err)
 // 	}

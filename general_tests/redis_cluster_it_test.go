@@ -182,7 +182,7 @@ func testClsrStartEngine(t *testing.T) {
 
 func testClsrRPCConection(t *testing.T) {
 	var err error
-	clsrRPC, err = newRPCClient(clsrConfig.ListenCfg()) // We connect over JSON so we can also troubleshoot if needed
+	clsrRPC, err = engine.NewRPCClient(clsrConfig.ListenCfg(), *encoding) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
 		t.Fatal(err)
 	}

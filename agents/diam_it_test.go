@@ -259,7 +259,7 @@ package agents
 // // Connect rpc client to rater
 // func testDiamItApierRpcConn(t *testing.T) {
 // 	var err error
-// 	apierRpc, err = newRPCClient(daCfg.ListenCfg()) // We connect over JSON so we can also troubleshoot if needed
+// 	apierRpc, err = engine.NewRPCClient(daCfg.ListenCfg(), *encoding) // We connect over JSON so we can also troubleshoot if needed
 // 	if err != nil {
 // 		t.Fatal(err)
 // 	}

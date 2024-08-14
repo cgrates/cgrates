@@ -171,7 +171,7 @@ package agents
 // // Connect rpc client to rater
 // func testHAitApierRpcConn(t *testing.T) {
 // 	var err error
-// 	haRPC, err = newRPCClient(haCfg.ListenCfg()) // We connect over JSON so we can also troubleshoot if needed
+// 	haRPC, err = engine.NewRPCClient(haCfg.ListenCfg(), *encoding) // We connect over JSON so we can also troubleshoot if needed
 // 	if err != nil {
 // 		t.Fatal(err)
 // 	}

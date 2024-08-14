@@ -133,10 +133,10 @@ func testFilterUpdateStartEngine(t *testing.T) {
 // Connect rpc client to rater
 func testFilterUpdateRpcConn(t *testing.T) {
 	var err error
-	if fltrUpdateRPC1, err = newRPCClient(fltrUpdateCfg1.ListenCfg()); err != nil {
+	if fltrUpdateRPC1, err = engine.NewRPCClient(fltrUpdateCfg1.ListenCfg(), *encoding); err != nil {
 		t.Fatal(err)
 	}
-	if fltrUpdateRPC2, err = newRPCClient(fltrUpdateCfg2.ListenCfg()); err != nil {
+	if fltrUpdateRPC2, err = engine.NewRPCClient(fltrUpdateCfg2.ListenCfg(), *encoding); err != nil {
 		t.Fatal(err)
 	}
 }

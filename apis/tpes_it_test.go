@@ -125,7 +125,7 @@ func testTPeSStartEngine(t *testing.T) {
 
 func testTPeSRPCConn(t *testing.T) {
 	var err error
-	tpeSRPC, err = newRPCClient(tpesCfg.ListenCfg()) // We connect over JSON so we can also troubleshoot if needed
+	tpeSRPC, err = engine.NewRPCClient(tpesCfg.ListenCfg(), *encoding) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
 		t.Fatal(err)
 	}

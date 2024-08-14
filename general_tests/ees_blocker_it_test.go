@@ -115,7 +115,7 @@ func testEEsBlockerStartEngine(t *testing.T) {
 
 func testEEsBlockerRpcConn(t *testing.T) {
 	var err error
-	eesBlockerRPC, err = newRPCClient(eesBlockerCfg.ListenCfg())
+	eesBlockerRPC, err = engine.NewRPCClient(eesBlockerCfg.ListenCfg(), *encoding)
 	if err != nil {
 		t.Fatal("Could not connect to rater: ", err.Error())
 	}

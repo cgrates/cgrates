@@ -25,6 +25,7 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -73,7 +74,7 @@ func testDspConfigSv1GetJSONSection(t *testing.T) {
 		"listen": expected,
 	}
 	var reply map[string]any
-	if err := dispEngine.RPC.Call(utils.ConfigSv1GetConfig, &config.SectionWithAPIOpts{
+	if err := dispEngine.RPC.Call(context.Background(), utils.ConfigSv1GetConfig, &config.SectionWithAPIOpts{
 		Tenant:   "cgrates.org",
 		Sections: []string{"listen"},
 		APIOpts: map[string]any{
