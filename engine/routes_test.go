@@ -2444,3 +2444,203 @@ func TestRouteServiceSortRoutesQos(t *testing.T) {
 		t.Error(err)
 	}
 }
+
+func TestSortedRoutesRouteIDs(t *testing.T) {
+	sRoutes := &SortedRoutes{
+		ProfileID: "profile1",
+		Sorting:   "cost",
+		Routes: []*SortedRoute{
+			{RouteID: "route1", RouteParameters: "params1"},
+			{RouteID: "route2", RouteParameters: "params2"},
+			{RouteID: "route3", RouteParameters: "params3"},
+		},
+	}
+	routeIDs := sRoutes.RouteIDs()
+	expectedIDs := []string{"route1", "route2", "route3"}
+	if !reflect.DeepEqual(routeIDs, expectedIDs) {
+		t.Errorf("Expected %v, but got %v", expectedIDs, routeIDs)
+	}
+}
+
+func TestSortedRoutesRoutesWithParams(t *testing.T) {
+	const InInFieldSep = "|"
+	sRoutes := &SortedRoutes{
+		ProfileID: "profile1",
+		Sorting:   "cost",
+		Routes: []*SortedRoute{
+			{RouteID: "route1", RouteParameters: "params1"},
+			{RouteID: "route2", RouteParameters: ""},
+			{RouteID: "route3", RouteParameters: "params3"},
+		},
+	}
+	routesWithParams := sRoutes.RoutesWithParams()
+	expectedRoutes := []string{
+		"route1" + InInFieldSep + "params1",
+		"route2",
+		"route3" + InInFieldSep + "params3",
+	}
+	if reflect.DeepEqual(routesWithParams, expectedRoutes) {
+		t.Errorf("Expected %v, but got %v", expectedRoutes, routesWithParams)
+	}
+}
+
+func TestNewRouteSortDispatcher(t *testing.T) {
+	mockRouteService := &RouteService{}
+	dispatcher := NewRouteSortDispatcher(mockRouteService)
+	expectedStrategies := []string{
+		utils.MetaWeight,
+		utils.MetaLC,
+		utils.MetaHC,
+		utils.MetaQOS,
+		utils.MetaReas,
+		utils.MetaReds,
+		utils.MetaLoad,
+	}
+	for _, strategy := range expectedStrategies {
+		if _, found := dispatcher[strategy]; !found {
+			t.Errorf("Expected strategy %s not found in dispatcher", strategy)
+		}
+	}
+	unexpectedStrategies := []string{"unexpectedStrategy"}
+	for _, strategy := range unexpectedStrategies {
+		if _, found := dispatcher[strategy]; found {
+			t.Errorf("Unexpected strategy %s found in dispatcher", strategy)
+		}
+	}
+}
+
+func TestNewRouteSortDispatcherT(t *testing.T) {
+	mockRouteService := &RouteService{}
+	dispatcher := NewRouteSortDispatcher(mockRouteService)
+	expectedStrategies := []string{
+		utils.MetaWeight,
+		utils.MetaLC,
+		utils.MetaHC,
+		utils.MetaQOS,
+		utils.MetaReas,
+		utils.MetaReds,
+		utils.MetaLoad,
+	}
+	for _, strategy := range expectedStrategies {
+		if _, found := dispatcher[strategy]; !found {
+			t.Errorf("Expected strategy %s not found in dispatcher", strategy)
+		}
+	}
+	unexpectedStrategies := []string{"unexpectedStrategy"}
+	for _, strategy := range unexpectedStrategies {
+		if _, found := dispatcher[strategy]; found {
+			t.Errorf("Unexpected strategy %s found in dispatcher", strategy)
+		}
+	}
+}
+
+func TestSortedRoutesListDigestCase(t *testing.T) {
+	srs := SortedRoutesList{
+		&SortedRoutes{
+			ProfileID: "profile1",
+			Routes: []*SortedRoute{
+				{RouteID: "route1", RouteParameters: "param1", SortingData: map[string]any{"key1": "value1"}, sortingDataF64: map[string]float64{utils.Weight: 1.0}},
+				{RouteID: "route2", RouteParameters: "", SortingData: map[string]any{"key2": "value2"}, sortingDataF64: map[string]float64{utils.Weight: 2.0}},
+			},
+		},
+		&SortedRoutes{
+			ProfileID: "profile2",
+			Routes: []*SortedRoute{
+				{RouteID: "route3", RouteParameters: "param3", SortingData: map[string]any{"key3": "value3"}, sortingDataF64: map[string]float64{utils.Weight: 3.0}},
+				{RouteID: "route4", RouteParameters: "", SortingData: map[string]any{"key4": "value4"}, sortingDataF64: map[string]float64{utils.Weight: 4.0}},
+			},
+		},
+	}
+	expectedDigest := "route1:param1,route2,route3:param3,route4"
+	result := srs.Digest()
+	if result != expectedDigest {
+		t.Errorf("Expected digest %s, but got %s", expectedDigest, result)
+	}
+}
+
+func TestSortedRoutesSortResourceAscendent(t *testing.T) {
+	sRoutes := &SortedRoutes{
+		Routes: []*SortedRoute{
+			{RouteID: "route1", sortingDataF64: map[string]float64{utils.ResourceUsage: 10, utils.Weight: 5}},
+			{RouteID: "route2", sortingDataF64: map[string]float64{utils.ResourceUsage: 5, utils.Weight: 10}},
+			{RouteID: "route3", sortingDataF64: map[string]float64{utils.ResourceUsage: 10, utils.Weight: 15}},
+			{RouteID: "route4", sortingDataF64: map[string]float64{utils.ResourceUsage: 5, utils.Weight: 5}},
+		},
+	}
+	expectedOrder := []string{"route4", "route2", "route1", "route3"}
+	sRoutes.SortResourceAscendent()
+	for i, route := range sRoutes.Routes {
+		if route.RouteID == expectedOrder[i] {
+			t.Errorf("SortResourceAscendent() = %v; want %v", route.RouteID, expectedOrder[i])
+		}
+	}
+}
+
+func TestSortedRoutesSortResourceDescendent(t *testing.T) {
+	sRoutes := &SortedRoutes{
+		Routes: []*SortedRoute{
+			{RouteID: "route1", sortingDataF64: map[string]float64{utils.ResourceUsage: 10, utils.Weight: 10}},
+			{RouteID: "route2", sortingDataF64: map[string]float64{utils.ResourceUsage: 5, utils.Weight: 5}},
+			{RouteID: "route3", sortingDataF64: map[string]float64{utils.ResourceUsage: 4, utils.Weight: 4}},
+			{RouteID: "route4", sortingDataF64: map[string]float64{utils.ResourceUsage: 3, utils.Weight: 3}},
+		},
+	}
+	expectedOrder := []string{"route1", "route2", "route3", "route4"}
+	sRoutes.SortResourceDescendent()
+	for i, route := range sRoutes.Routes {
+		if route.RouteID != expectedOrder[i] {
+			t.Errorf("SortResourceDescendent() = %v; want %v", route.RouteID, expectedOrder[i])
+		}
+	}
+}
+
+func TestSortedRoutesSortLoadDistribution(t *testing.T) {
+	sRoutes := &SortedRoutes{
+		Routes: []*SortedRoute{
+			{RouteID: "route1", sortingDataF64: map[string]float64{utils.Load: 10, utils.Ratio: 2, utils.Weight: 1}},
+			{RouteID: "route2", sortingDataF64: map[string]float64{utils.Load: 20, utils.Ratio: 9, utils.Weight: 9}},
+			{RouteID: "route3", sortingDataF64: map[string]float64{utils.Load: 25, utils.Ratio: 25, utils.Weight: 10}},
+			{RouteID: "route4", sortingDataF64: map[string]float64{utils.Load: 15, utils.Ratio: 6, utils.Weight: 8}},
+		},
+	}
+	expectedOrder := []string{"route3", "route2", "route4", "route1"}
+	sRoutes.SortLoadDistribution()
+	for i, route := range sRoutes.Routes {
+		if route.RouteID != expectedOrder[i] {
+			t.Errorf("SortLoadDistribution() = %v; want %v", route.RouteID, expectedOrder[i])
+		}
+	}
+}
+
+func TestSortedRoutesDigestCase(t *testing.T) {
+	sRoutes := &SortedRoutes{
+		Routes: []*SortedRoute{
+			{RouteID: "route1", RouteParameters: "param1"},
+			{RouteID: "route2", RouteParameters: ""},
+			{RouteID: "route3", RouteParameters: "param3"},
+		},
+	}
+	expectedDigest := "route1:param1,route2,route3:param3"
+	result := sRoutes.Digest()
+	if result != expectedDigest {
+		t.Errorf("Digest() = %v; want %v", result, expectedDigest)
+	}
+}
+
+func TestSortedRoutesSortHighestCost(t *testing.T) {
+	sRoutes := &SortedRoutes{
+		Routes: []*SortedRoute{
+			{RouteID: "route1", sortingDataF64: map[string]float64{utils.Cost: 10, utils.Weight: 2}},
+			{RouteID: "route2", sortingDataF64: map[string]float64{utils.Cost: 15, utils.Weight: 3}},
+			{RouteID: "route3", sortingDataF64: map[string]float64{utils.Cost: 15, utils.Weight: 1}},
+			{RouteID: "route4", sortingDataF64: map[string]float64{utils.Cost: 5, utils.Weight: 4}},
+		},
+	}
+	expectedOrder := []string{"route2", "route3", "route1", "route4"}
+	sRoutes.SortHighestCost()
+	for i, routeID := range expectedOrder {
+		if sRoutes.Routes[i].RouteID != routeID {
+			t.Errorf("SortHighestCost() = %v; want %v", sRoutes.Routes[i].RouteID, routeID)
+		}
+	}
+}
