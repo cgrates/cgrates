@@ -38,7 +38,7 @@ var sTestsDspRPrf = []func(t *testing.T){
 // Test start here
 func TestDspRateSIT(t *testing.T) {
 	var config1, config2, config3 string
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 		t.SkipNow()
 	case utils.MetaMySQL:
@@ -56,7 +56,7 @@ func TestDspRateSIT(t *testing.T) {
 	}
 
 	dispDIR := "dispatchers"
-	if *encoding == utils.MetaGOB {
+	if *utils.Encoding == utils.MetaGOB {
 		dispDIR += "_gob"
 	}
 	testDsp(t, sTestsDspRPrf, "TestDspRateSIT", config1, config2, config3, "tutorial", "oldtutorial", dispDIR)

@@ -78,7 +78,7 @@ func TestCsvExport(t *testing.T) {
 
 func testCsvLoadConfig(t *testing.T) {
 	var err error
-	csvCfgPath = path.Join(*dataDir, "conf", "samples", csvConfigDir)
+	csvCfgPath = path.Join(*utils.DataDir, "conf", "samples", csvConfigDir)
 	if csvCfg, err = config.NewCGRConfigFromPath(context.Background(), csvCfgPath); err != nil {
 		t.Error(err)
 	}
@@ -94,14 +94,14 @@ func testCsvResetDBs(t *testing.T) {
 }
 
 func testCsvStartEngine(t *testing.T) {
-	if _, err := engine.StopStartEngine(csvCfgPath, *waitRater); err != nil {
+	if _, err := engine.StopStartEngine(csvCfgPath, *utils.WaitRater); err != nil {
 		t.Fatal(err)
 	}
 }
 
 func testCsvRPCConn(t *testing.T) {
 	var err error
-	csvRpc, err = engine.NewRPCClient(csvCfg.ListenCfg(), *encoding)
+	csvRpc, err = engine.NewRPCClient(csvCfg.ListenCfg(), *utils.Encoding)
 	if err != nil {
 		t.Fatal(err)
 	}

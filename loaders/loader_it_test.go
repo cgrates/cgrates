@@ -21,7 +21,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package loaders
 
 import (
-	"flag"
 	"os"
 	"path"
 	"reflect"
@@ -94,20 +93,13 @@ cgrates.org,ALS1,*string:~*opts.*context:con2|con3,,,,*string:~*req.Account:1002
 	}
 )
 
-var (
-	// waitRater = flag.Int("wait_rater", 200, "Number of miliseconds to wait for rater to start and cache")
-	dataDir  = flag.String("data_dir", "/usr/share/cgrates", "CGR data dir path here")
-	encoding = flag.String("rpc", utils.MetaJSON, "what encoding whould be used for rpc comunication")
-	dbType   = flag.String("dbtype", utils.MetaInternal, "The type of DataBase (Internal/Mongo/mySql)")
-)
-
 var loaderPaths = []string{"/tmp/In", "/tmp/Out", "/tmp/LoaderIn", "/tmp/SubpathWithoutMove",
 	"/tmp/SubpathLoaderWithMove", "/tmp/SubpathOut", "/tmp/templateLoaderIn", "/tmp/templateLoaderOut",
 	"/tmp/customSepLoaderIn", "/tmp/customSepLoaderOut"}
 
 // Test start here
 func TestLoaderIT(t *testing.T) {
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 		loaderCfgDIR = "tutinternal"
 	case utils.MetaMySQL:
@@ -127,7 +119,7 @@ func TestLoaderIT(t *testing.T) {
 
 func testLoaderInitCfg(t *testing.T) {
 	var err error
-	loaderCfgPath = path.Join(*dataDir, "conf", "samples", "loaders", loaderCfgDIR)
+	loaderCfgPath = path.Join(*utils.DataDir, "conf", "samples", "loaders", loaderCfgDIR)
 	if loaderCfg, err = config.NewCGRConfigFromPath(context.Background(), loaderCfgPath); err != nil {
 		t.Fatal(err)
 	}
@@ -163,7 +155,7 @@ func testLoaderStartEngine(t *testing.T) {
 // Connect rpc client to rater
 func testLoaderRPCConn(t *testing.T) {
 	var err error
-	if loaderRPC, err = engine.NewRPCClient(loaderCfg.ListenCfg(), *encoding); err != nil {
+	if loaderRPC, err = engine.NewRPCClient(loaderCfg.ListenCfg(), *utils.Encoding); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -254,7 +246,7 @@ func testLoaderCheckAttributes(t *testing.T) {
 			},
 		},
 	}
-	if *encoding == utils.MetaGOB { // gob threats empty slices as nil values
+	if *utils.Encoding == utils.MetaGOB { // gob threats empty slices as nil values
 		eAttrPrf.Attributes[1].FilterIDs = nil
 	}
 	var reply *engine.APIAttributeProfile
@@ -298,7 +290,7 @@ func testLoaderCheckForCustomSep(t *testing.T) {
 			},
 		},
 	}
-	if *encoding == utils.MetaGOB { // gob threats empty slices as nil values
+	if *utils.Encoding == utils.MetaGOB { // gob threats empty slices as nil values
 		eAttrPrf.Attributes[0].FilterIDs = nil
 	}
 	var reply *engine.APIAttributeProfile

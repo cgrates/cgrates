@@ -68,8 +68,8 @@ var (
 	clsrConfig *config.CGRConfig
 	clsrRPC    *birpc.Client
 
-	clsrNodeCfgPath   = path.Join(*dataDir, "redisCluster", "node%v.conf")
-	clsrEngineCfgPath = path.Join(*dataDir, "conf", "samples", "redisCluster")
+	clsrNodeCfgPath   = path.Join(*utils.DataDir, "redisCluster", "node%v.conf")
+	clsrEngineCfgPath = path.Join(*utils.DataDir, "conf", "samples", "redisCluster")
 	clsrNodes         = make(map[string]*exec.Cmd)
 	clsrOutput        = make(map[string]*bytes.Buffer) // in order to debug if something is not working
 	clsrNoNodes       = 6                              // this is the minimum number of nodes for a cluster with 1 replica for each master
@@ -115,7 +115,7 @@ func TestRedisCluster(t *testing.T) {
 	if !*clsrRedisFlag {
 		t.SkipNow()
 	}
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaMySQL:
 	case utils.MetaInternal,
 		utils.MetaMongo,
@@ -165,7 +165,7 @@ func testClsrInitConfig(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	clsrConfig.DataFolderPath = *dataDir // Share DataFolderPath through config towards StoreDb for Flush()
+	clsrConfig.DataFolderPath = *utils.DataDir // Share DataFolderPath through config towards StoreDb for Flush()
 }
 
 func testClsrFlushDb(t *testing.T) {
@@ -182,7 +182,7 @@ func testClsrStartEngine(t *testing.T) {
 
 func testClsrRPCConection(t *testing.T) {
 	var err error
-	clsrRPC, err = engine.NewRPCClient(clsrConfig.ListenCfg(), *encoding) // We connect over JSON so we can also troubleshoot if needed
+	clsrRPC, err = engine.NewRPCClient(clsrConfig.ListenCfg(), *utils.Encoding) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
 		t.Fatal(err)
 	}

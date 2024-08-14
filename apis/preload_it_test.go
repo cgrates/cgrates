@@ -58,13 +58,13 @@ var (
 )
 
 func TestPreloadIT(t *testing.T) {
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 		preloadCfgDir = "preload_internal"
 	case utils.MetaMySQL, utils.MetaMongo, utils.MetaPostgres:
 		t.SkipNow()
 	default:
-		t.Fatalf("Unsuported dbtype: %q", *dbType)
+		t.Fatalf("Unsuported dbtype: %q", *utils.DBType)
 	}
 	for _, test := range preloadTests {
 		t.Run("Running TestPreloadIT:", test)
@@ -117,7 +117,7 @@ cgrates.org,ONE_TIME_ACT,,,,,,,TOPUP_TEST_VOICE,,0s,*add_balance,,*balance.TestV
 
 func testPreloadITInitCfg(t *testing.T) {
 	var err error
-	preloadCfgPath = path.Join(*dataDir, "conf", "samples", preloadCfgDir)
+	preloadCfgPath = path.Join(*utils.DataDir, "conf", "samples", preloadCfgDir)
 	if preloadCFG, err = config.NewCGRConfigFromPath(context.Background(), preloadCfgPath); err != nil {
 		t.Fatal("Got config error: ", err.Error())
 	}
@@ -154,7 +154,7 @@ func testPreloadITStartEngine(t *testing.T) {
 
 func testPreloadITRPCConn(t *testing.T) {
 	var err error
-	if preloadRPC, err = engine.NewRPCClient(preloadCFG.ListenCfg(), *encoding); err != nil {
+	if preloadRPC, err = engine.NewRPCClient(preloadCFG.ListenCfg(), *utils.Encoding); err != nil {
 		t.Fatal("Could not connect to rater: ", err.Error())
 	}
 }
@@ -419,7 +419,7 @@ func testCleanupFiles(t *testing.T) {
 }
 
 func testPreloadITKillEngine(t *testing.T) {
-	if err := engine.KillEngine(*waitRater); err != nil {
+	if err := engine.KillEngine(*utils.WaitRater); err != nil {
 		t.Error(err)
 	}
 }

@@ -63,7 +63,7 @@ var (
 )
 
 func newBiRPCClient(cfg *config.ListenCfg) (c *birpc.Client, err error) {
-	switch *encoding {
+	switch *utils.Encoding {
 	case utils.MetaJSON:
 		return jsonrpc.Dial(utils.TCP, cfg.RPCJSONListen)
 	case utils.MetaGOB:
@@ -74,7 +74,7 @@ func newBiRPCClient(cfg *config.ListenCfg) (c *birpc.Client, err error) {
 }
 
 func TestSessVolDiscount(t *testing.T) {
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 		tSessVolDiscCfgDIR = "session_volume_discount_internal"
 	case utils.MetaMySQL:
@@ -93,7 +93,7 @@ func TestSessVolDiscount(t *testing.T) {
 
 // Init config firs
 func testSessVolDiscInitCfg(t *testing.T) {
-	tSessVolDiscCfgPath = path.Join(*dataDir, "conf", "samples", tSessVolDiscCfgDIR)
+	tSessVolDiscCfgPath = path.Join(*utils.DataDir, "conf", "samples", tSessVolDiscCfgDIR)
 	var err error
 	tSessVolDiscCfg, err = config.NewCGRConfigFromPath(context.Background(), tSessVolDiscCfgPath)
 	if err != nil {
@@ -113,7 +113,7 @@ func testSessVolDiscFlushDBs(t *testing.T) {
 
 // Start CGR Engine
 func testSessVolDiscStartEngine(t *testing.T) {
-	if _, err := engine.StopStartEngine(tSessVolDiscCfgPath, *waitRater); err != nil {
+	if _, err := engine.StopStartEngine(tSessVolDiscCfgPath, *utils.WaitRater); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -541,7 +541,7 @@ func testSessVolDiscAuthorizeEventSortRoutes1Min30SecAfterDebiting(t *testing.T)
 }
 
 func testSessVolDiscStopCgrEngine(t *testing.T) {
-	if err := engine.KillEngine(*waitRater); err != nil {
+	if err := engine.KillEngine(*utils.WaitRater); err != nil {
 		t.Error(err)
 	}
 }

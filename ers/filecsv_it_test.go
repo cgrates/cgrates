@@ -83,7 +83,7 @@ package ers
 // )
 
 // func TestCsvReadFile(t *testing.T) {
-// 	switch *dbType {
+// 	switch *utils.DBType {
 // 	case utils.MetaInternal:
 // 		csvCfgDIR = "ers_internal"
 // 	case utils.MetaMySQL:
@@ -103,7 +103,7 @@ package ers
 
 // func testCsvITInitConfig(t *testing.T) {
 // 	var err error
-// 	csvCfgPath = path.Join(*dataDir, "conf", "samples", csvCfgDIR)
+// 	csvCfgPath = path.Join(*utils.DataDir, "conf", "samples", csvCfgDIR)
 // 	if csvCfg, err = config.NewCGRConfigFromPath(context.Background(), csvCfgPath); err != nil {
 // 		t.Fatal("Got config error: ", err.Error())
 // 	}
@@ -117,7 +117,7 @@ package ers
 // }
 
 // func testCsvITStartEngine(t *testing.T) {
-// 	if _, err := engine.StopStartEngine(csvCfgPath, *waitRater); err != nil {
+// 	if _, err := engine.StopStartEngine(csvCfgPath, *utils.WaitRater); err != nil {
 // 		t.Fatal(err)
 // 	}
 // }
@@ -125,7 +125,7 @@ package ers
 // // Connect rpc client to rater
 // func testCsvITRpcConn(t *testing.T) {
 // 	var err error
-// 	csvRPC, err = engine.NewRPCClient(csvCfg.ListenCfg(), *encoding) // We connect over JSON so we can also troubleshoot if needed
+// 	csvRPC, err = engine.NewRPCClient(csvCfg.ListenCfg(), *utils.Encoding) // We connect over JSON so we can also troubleshoot if needed
 // 	if err != nil {
 // 		t.Fatal("Could not connect to rater: ", err.Error())
 // 	}
@@ -133,7 +133,7 @@ package ers
 
 // func testCsvITLoadTPFromFolder(t *testing.T) {
 // 	attrs := &utils.AttrLoadTpFromFolder{
-// 		FolderPath: path.Join(*dataDir, "tariffplans", "testit")}
+// 		FolderPath: path.Join(*utils.DataDir, "tariffplans", "testit")}
 // 	var loadInst utils.LoadInstance
 // 	if err := csvRPC.Call(utils.APIerSv2LoadTariffPlanFromFolder,
 // 		attrs, &loadInst); err != nil {
@@ -365,7 +365,7 @@ package ers
 // }
 
 // func testCsvITKillEngine(t *testing.T) {
-// 	if err := engine.KillEngine(*waitRater); err != nil {
+// 	if err := engine.KillEngine(*utils.WaitRater); err != nil {
 // 		t.Error(err)
 // 	}
 // }

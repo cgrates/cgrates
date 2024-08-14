@@ -78,7 +78,7 @@ var (
 )
 
 func TestTPeSIT(t *testing.T) {
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 		tpeSConfigDIR = "tpe_internal"
 	case utils.MetaMongo:
@@ -97,7 +97,7 @@ func TestTPeSIT(t *testing.T) {
 
 func testTPeSInitCfg(t *testing.T) {
 	var err error
-	tpesCfgPath = path.Join(*dataDir, "conf", "samples", tpeSConfigDIR)
+	tpesCfgPath = path.Join(*utils.DataDir, "conf", "samples", tpeSConfigDIR)
 	tpesCfg, err = config.NewCGRConfigFromPath(context.Background(), tpesCfgPath)
 	if err != nil {
 		t.Error(err)
@@ -118,14 +118,14 @@ func testTpeSResetStorDb(t *testing.T) {
 
 // Start CGR Engine
 func testTPeSStartEngine(t *testing.T) {
-	if _, err := engine.StopStartEngine(tpesCfgPath, *waitRater); err != nil {
+	if _, err := engine.StopStartEngine(tpesCfgPath, *utils.WaitRater); err != nil {
 		t.Fatal(err)
 	}
 }
 
 func testTPeSRPCConn(t *testing.T) {
 	var err error
-	tpeSRPC, err = engine.NewRPCClient(tpesCfg.ListenCfg(), *encoding) // We connect over JSON so we can also troubleshoot if needed
+	tpeSRPC, err = engine.NewRPCClient(tpesCfg.ListenCfg(), *utils.Encoding) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
 		t.Fatal(err)
 	}

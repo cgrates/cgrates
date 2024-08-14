@@ -24,7 +24,6 @@ package main
 import (
 	"bytes"
 	"encoding/json"
-	"flag"
 	"os/exec"
 	"path"
 	"reflect"
@@ -35,13 +34,6 @@ import (
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
-)
-
-var (
-	dataDir   = flag.String("data_dir", "/usr/share/cgrates", "CGR data dir path here")
-	dbType    = flag.String("dbtype", utils.MetaInternal, "The type of DataBase (Internal/Mongo/mySql)")
-	waitRater = flag.Int("wait_rater", 100, "Number of milliseconds to wait for rater to start and cache")
-	// encoding  = flag.String("rpc", utils.MetaJSON, "what encoding whould be used for rpc comunication")
 )
 
 var (
@@ -100,7 +92,7 @@ var (
 )
 
 func TestConsoleItTests(t *testing.T) {
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 		t.SkipNow()
 	case utils.MetaMySQL:
@@ -119,7 +111,7 @@ func TestConsoleItTests(t *testing.T) {
 
 func testConsoleItLoadConfig(t *testing.T) {
 	var err error
-	cnslItCfgPath = path.Join(*dataDir, "conf", "samples", cnslItDirPath)
+	cnslItCfgPath = path.Join(*utils.DataDir, "conf", "samples", cnslItDirPath)
 	if cnslItCfg, err = config.NewCGRConfigFromPath(context.Background(), cnslItCfgPath); err != nil {
 		t.Fatal(err)
 	}
@@ -132,13 +124,13 @@ func testConsoleItInitDataDB(t *testing.T) {
 }
 
 func testConsoleItStartEngine(t *testing.T) {
-	if _, err := engine.StartEngine(cnslItCfgPath, *waitRater); err != nil {
+	if _, err := engine.StartEngine(cnslItCfgPath, *utils.WaitRater); err != nil {
 		t.Fatal(err)
 	}
 }
 
 func testConsoleItLoadTP(t *testing.T) {
-	cmd := exec.Command("cgr-loader", "-config_path="+cnslItCfgPath, "-path="+path.Join(*dataDir, "tariffplans", "tutorial"))
+	cmd := exec.Command("cgr-loader", "-config_path="+cnslItCfgPath, "-path="+path.Join(*utils.DataDir, "tariffplans", "tutorial"))
 	output := bytes.NewBuffer(nil)
 	cmd.Stdout = output
 	if err := cmd.Run(); err != nil {
@@ -1420,7 +1412,7 @@ func testConsoleItPing(t *testing.T) {
 }
 
 func testConsoleItKillEngine(t *testing.T) {
-	if err := engine.KillEngine(*waitRater); err != nil {
+	if err := engine.KillEngine(*utils.WaitRater); err != nil {
 		t.Fatal(err)
 	}
 }

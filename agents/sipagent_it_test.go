@@ -60,7 +60,7 @@ package agents
 // // Test start here
 // func TestSAit(t *testing.T) {
 // 	// engine.KillEngine(0)
-// 	switch *dbType {
+// 	switch *utils.DBType {
 // 	case utils.MetaInternal:
 // 		saonfigDIR = "sipagent_internal"
 // 	case utils.MetaMySQL:
@@ -78,7 +78,7 @@ package agents
 // }
 
 // func testSAitInitCfg(t *testing.T) {
-// 	saCfgPath = path.Join(*dataDir, "conf", "samples", saonfigDIR)
+// 	saCfgPath = path.Join(*utils.DataDir, "conf", "samples", saonfigDIR)
 // 	// Init config first
 // 	var err error
 // 	saCfg, err = config.NewCGRConfigFromPath(context.Background(), saCfgPath)
@@ -99,7 +99,7 @@ package agents
 
 // // Start CGR Engine
 // func testSAitStartEngine(t *testing.T) {
-// 	if _, err := engine.StartEngine(saCfgPath, *waitRater); err != nil {
+// 	if _, err := engine.StartEngine(saCfgPath, *utils.WaitRater); err != nil {
 // 		t.Fatal(err)
 // 	}
 // }
@@ -107,7 +107,7 @@ package agents
 // // Connect rpc client to rater
 // func testSAitApierRpcConn(t *testing.T) {
 // 	var err error
-// 	saRPC, err = engine.NewRPCClient(saCfg.ListenCfg(), *encoding) // We connect over JSON so we can also troubleshoot if needed
+// 	saRPC, err = engine.NewRPCClient(saCfg.ListenCfg(), *utils.Encoding) // We connect over JSON so we can also troubleshoot if needed
 // 	if err != nil {
 // 		t.Fatal(err)
 // 	}
@@ -118,12 +118,12 @@ package agents
 
 // // Load the tariff plan, creating accounts and their balances
 // func testSAitTPFromFolder(t *testing.T) {
-// 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "tut_sip_redirect")}
+// 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*utils.DataDir, "tariffplans", "tut_sip_redirect")}
 // 	var loadInst utils.LoadInstance
 // 	if err := saRPC.Call(utils.APIerSv1LoadTariffPlanFromFolder, attrs, &loadInst); err != nil {
 // 		t.Error(err)
 // 	}
-// 	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // Give time for scheduler to execute topups
+// 	time.Sleep(time.Duration(*utils.WaitRater) * time.Millisecond) // Give time for scheduler to execute topups
 // }
 
 // func testSAitStopCgrEngine(t *testing.T) {

@@ -66,7 +66,7 @@ func TestHTTPJsonMapExport(t *testing.T) {
 
 func testHTTPJsonMapLoadConfig(t *testing.T) {
 	var err error
-	httpJSONMapCfgPath = path.Join(*dataDir, "conf", "samples", httpJSONMapConfigDir)
+	httpJSONMapCfgPath = path.Join(*utils.DataDir, "conf", "samples", httpJSONMapConfigDir)
 	if httpJSONMapCfg, err = config.NewCGRConfigFromPath(context.Background(), httpJSONMapCfgPath); err != nil {
 		t.Error(err)
 	}
@@ -82,14 +82,14 @@ func testHTTPJsonMapResetDBs(t *testing.T) {
 }
 
 func testHTTPJsonMapStartEngine(t *testing.T) {
-	if _, err := engine.StopStartEngine(httpJSONMapCfgPath, *waitRater); err != nil {
+	if _, err := engine.StopStartEngine(httpJSONMapCfgPath, *utils.WaitRater); err != nil {
 		t.Fatal(err)
 	}
 }
 
 func testHTTPJsonMapRPCConn(t *testing.T) {
 	var err error
-	httpJSONMapRpc, err = engine.NewRPCClient(httpJSONMapCfg.ListenCfg(), *encoding)
+	httpJSONMapRpc, err = engine.NewRPCClient(httpJSONMapCfg.ListenCfg(), *utils.Encoding)
 	if err != nil {
 		t.Fatal(err)
 	}

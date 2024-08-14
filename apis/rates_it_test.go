@@ -89,7 +89,7 @@ var (
 )
 
 func TestRateSIT(t *testing.T) {
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 		ratePrfConfigDIR = "rates_internal"
 	case utils.MetaMongo:
@@ -108,7 +108,7 @@ func TestRateSIT(t *testing.T) {
 
 func testRateSInitCfg(t *testing.T) {
 	var err error
-	ratePrfCfgPath = path.Join(*dataDir, "conf", "samples", ratePrfConfigDIR)
+	ratePrfCfgPath = path.Join(*utils.DataDir, "conf", "samples", ratePrfConfigDIR)
 	ratePrfCfg, err = config.NewCGRConfigFromPath(context.Background(), ratePrfCfgPath)
 	if err != nil {
 		t.Error(err)
@@ -129,14 +129,14 @@ func testRateSResetStorDb(t *testing.T) {
 
 // Start CGR Engine
 func testRateSStartEngine(t *testing.T) {
-	if _, err := engine.StopStartEngine(ratePrfCfgPath, *waitRater); err != nil {
+	if _, err := engine.StopStartEngine(ratePrfCfgPath, *utils.WaitRater); err != nil {
 		t.Fatal(err)
 	}
 }
 
 func testRateSRPCConn(t *testing.T) {
 	var err error
-	rateSRPC, err = engine.NewRPCClient(ratePrfCfg.ListenCfg(), *encoding) // We connect over JSON so we can also troubleshoot if needed
+	rateSRPC, err = engine.NewRPCClient(ratePrfCfg.ListenCfg(), *utils.Encoding) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
 		t.Fatal(err)
 	}

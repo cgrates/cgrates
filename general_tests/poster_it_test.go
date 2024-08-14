@@ -60,7 +60,7 @@ package general_tests
 // )
 
 // func TestPosterIT(t *testing.T) {
-// 	switch *dbType {
+// 	switch *utils.DBType {
 // 	case utils.MetaInternal:
 // 		pstrConfigDIR = "actions_internal"
 // 	case utils.MetaMySQL:
@@ -72,7 +72,7 @@ package general_tests
 // 	default:
 // 		t.Fatal("Unknown Database type")
 // 	}
-// 	if *encoding == utils.MetaGOB {
+// 	if *utils.Encoding == utils.MetaGOB {
 // 		pstrConfigDIR += "_gob"
 // 	}
 
@@ -82,7 +82,7 @@ package general_tests
 // }
 
 // func testPosterITInitCfg(t *testing.T) {
-// 	pstrCfgPath = path.Join(*dataDir, "conf", "samples", pstrConfigDIR)
+// 	pstrCfgPath = path.Join(*utils.DataDir, "conf", "samples", pstrConfigDIR)
 // 	var err error
 // 	pstrCfg, err = config.NewCGRConfigFromPath(pstrCfgPath)
 // 	if err != nil {
@@ -98,14 +98,14 @@ package general_tests
 // }
 
 // func testPosterITStartEngine(t *testing.T) {
-// 	if _, err := engine.StopStartEngine(pstrCfgPath, *waitRater); err != nil {
+// 	if _, err := engine.StopStartEngine(pstrCfgPath, *utils.WaitRater); err != nil {
 // 		t.Fatal(err)
 // 	}
 // }
 
 // func testPosterITRpcConn(t *testing.T) {
 // 	var err error
-// 	pstrRpc, err = engine.NewRPCClient(pstrCfg.ListenCfg(), *encoding) // We connect over JSON so we can also troubleshoot if needed
+// 	pstrRpc, err = engine.NewRPCClient(pstrCfg.ListenCfg(), *utils.Encoding) // We connect over JSON so we can also troubleshoot if needed
 // 	if err != nil {
 // 		t.Fatal(err)
 // 	}
@@ -333,7 +333,7 @@ package general_tests
 // }
 
 // func testPosterITStopCgrEngine(t *testing.T) {
-// 	if err := engine.KillEngine(*waitRater); err != nil {
+// 	if err := engine.KillEngine(*utils.WaitRater); err != nil {
 // 		t.Error(err)
 // 	}
 // }

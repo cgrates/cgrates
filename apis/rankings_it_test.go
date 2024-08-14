@@ -70,7 +70,7 @@ var (
 )
 
 func TestRankingsIT(t *testing.T) {
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 		raConfigDIR = "rankings_internal"
 	case utils.MetaMongo:
@@ -89,7 +89,7 @@ func TestRankingsIT(t *testing.T) {
 
 func testRankingSInitCfg(t *testing.T) {
 	var err error
-	raCfgPath = path.Join(*dataDir, "conf", "samples", raConfigDIR)
+	raCfgPath = path.Join(*utils.DataDir, "conf", "samples", raConfigDIR)
 	raCfg, err = config.NewCGRConfigFromPath(context.Background(), raCfgPath)
 	if err != nil {
 		t.Error(err)
@@ -110,14 +110,14 @@ func testRankingSResetStorDB(t *testing.T) {
 
 // Start CGR Engine
 func testRankingsStartEngine(t *testing.T) {
-	if _, err := engine.StopStartEngine(raCfgPath, *waitRater); err != nil {
+	if _, err := engine.StopStartEngine(raCfgPath, *utils.WaitRater); err != nil {
 		t.Fatal(err)
 	}
 }
 
 func testRankingsRPCConn(t *testing.T) {
 	var err error
-	raRPC, err = engine.NewRPCClient(raCfg.ListenCfg(), *encoding) // We connect over JSON so we can also troubleshoot if needed
+	raRPC, err = engine.NewRPCClient(raCfg.ListenCfg(), *utils.Encoding) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
 		t.Fatal(err)
 	}

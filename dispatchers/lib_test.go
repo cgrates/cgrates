@@ -1,3 +1,5 @@
+//go:build integration || flaky
+
 /*
 Real-time Online/Offline Charging System (OCS) for Telecom & ISP environments
 Copyright (C) ITsysCOM GmbH
@@ -19,7 +21,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package dispatchers
 
 import (
-	"flag"
 	"os/exec"
 	"path"
 	"strconv"
@@ -38,12 +39,6 @@ var (
 	allEngine  *testDispatcher
 	allEngine2 *testDispatcher
 )
-var (
-	waitRater = flag.Int("wait_rater", 100, "Number of miliseconds to wait for rater to start and cache")
-	dataDir   = flag.String("data_dir", "/usr/share/cgrates", "CGR data dir path here")
-	encoding  = flag.String("rpc", utils.MetaJSON, "what encoding whould be used for rpc comunication")
-	dbType    = flag.String("dbtype", utils.MetaInternal, "The type of DataBase (Internal/Mongo/mySql)")
-)
 
 type testDispatcher struct {
 	CfgPath string
@@ -60,7 +55,7 @@ func newTestEngine(t *testing.T, cfgPath string, initDataDB, initStorDB bool) (d
 	if err != nil {
 		t.Fatalf("Error at config init :%v\n", err)
 	}
-	d.Cfg.DataFolderPath = *dataDir // Share DataFolderPath through config towards StoreDb for Flush()
+	d.Cfg.DataFolderPath = *utils.DataDir // Share DataFolderPath through config towards StoreDb for Flush()
 
 	if initDataDB {
 		d.initDataDb(t)
@@ -75,11 +70,11 @@ func newTestEngine(t *testing.T, cfgPath string, initDataDB, initStorDB bool) (d
 func (d *testDispatcher) startEngine(t *testing.T) {
 	var err error
 	// if !strings.Contains(d.CfgPath, "dispatchers_mysql") {
-	if d.cmd, err = engine.StartEngine(d.CfgPath, *waitRater); err != nil {
+	if d.cmd, err = engine.StartEngine(d.CfgPath, *utils.WaitRater); err != nil {
 		t.Fatalf("Error at engine start:%v\n", err)
 	}
 	// }
-	if d.RPC, err = engine.NewRPCClient(d.Cfg.ListenCfg(), *encoding); err != nil {
+	if d.RPC, err = engine.NewRPCClient(d.Cfg.ListenCfg(), *utils.Encoding); err != nil {
 		t.Fatalf("Error at dialing rcp client:%v\n", err)
 	}
 }
@@ -140,12 +135,12 @@ func (d *testDispatcher) loadData2(t *testing.T, path string) {
 
 func testDsp(t *testing.T, tests []func(t *testing.T), testName, all, all2, disp, allTF, all2TF, attrTF string) {
 	// engine.KillEngine(0)
-	allEngine = newTestEngine(t, path.Join(*dataDir, "conf", "samples", "dispatchers", all), true, true)
-	allEngine2 = newTestEngine(t, path.Join(*dataDir, "conf", "samples", "dispatchers", all2), true, true)
-	dispEngine = newTestEngine(t, path.Join(*dataDir, "conf", "samples", "dispatchers", disp), true, true)
-	dispEngine.loadData2(t, path.Join(*dataDir, "tariffplans", attrTF))
-	allEngine.loadData2(t, path.Join(*dataDir, "tariffplans", allTF))
-	allEngine2.loadData2(t, path.Join(*dataDir, "tariffplans", all2TF))
+	allEngine = newTestEngine(t, path.Join(*utils.DataDir, "conf", "samples", "dispatchers", all), true, true)
+	allEngine2 = newTestEngine(t, path.Join(*utils.DataDir, "conf", "samples", "dispatchers", all2), true, true)
+	dispEngine = newTestEngine(t, path.Join(*utils.DataDir, "conf", "samples", "dispatchers", disp), true, true)
+	dispEngine.loadData2(t, path.Join(*utils.DataDir, "tariffplans", attrTF))
+	allEngine.loadData2(t, path.Join(*utils.DataDir, "tariffplans", allTF))
+	allEngine2.loadData2(t, path.Join(*utils.DataDir, "tariffplans", all2TF))
 	time.Sleep(200 * time.Millisecond)
 	for _, stest := range tests {
 		t.Run(testName, stest)

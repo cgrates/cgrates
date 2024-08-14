@@ -50,12 +50,12 @@ var sTestsRatePrfIT = []func(t *testing.T){
 
 func TestRatePrfITMove1(t *testing.T) {
 	var err error
-	ratePrfPathIn = path.Join(*dataDir, "conf", "samples", "tutmongo")
+	ratePrfPathIn = path.Join(*utils.DataDir, "conf", "samples", "tutmongo")
 	ratePrfCfgIn, err = config.NewCGRConfigFromPath(context.Background(), ratePrfPathIn)
 	if err != nil {
 		t.Fatal(err)
 	}
-	ratePrfPathOut = path.Join(*dataDir, "conf", "samples", "tutmysql")
+	ratePrfPathOut = path.Join(*utils.DataDir, "conf", "samples", "tutmysql")
 	ratePrfCfgOut, err = config.NewCGRConfigFromPath(context.Background(), ratePrfPathOut)
 	if err != nil {
 		t.Fatal(err)
@@ -69,12 +69,12 @@ func TestRatePrfITMove1(t *testing.T) {
 
 func TestRatePrfITMove2(t *testing.T) {
 	var err error
-	ratePrfPathIn = path.Join(*dataDir, "conf", "samples", "tutmysql")
+	ratePrfPathIn = path.Join(*utils.DataDir, "conf", "samples", "tutmysql")
 	ratePrfCfgIn, err = config.NewCGRConfigFromPath(context.Background(), ratePrfPathIn)
 	if err != nil {
 		t.Fatal(err)
 	}
-	ratePrfPathOut = path.Join(*dataDir, "conf", "samples", "tutmongo")
+	ratePrfPathOut = path.Join(*utils.DataDir, "conf", "samples", "tutmongo")
 	ratePrfCfgOut, err = config.NewCGRConfigFromPath(context.Background(), ratePrfPathOut)
 	if err != nil {
 		t.Fatal(err)
@@ -88,12 +88,12 @@ func TestRatePrfITMove2(t *testing.T) {
 
 func TestRatePrfITMoveEncoding(t *testing.T) {
 	var err error
-	ratePrfPathIn = path.Join(*dataDir, "conf", "samples", "tutmongo")
+	ratePrfPathIn = path.Join(*utils.DataDir, "conf", "samples", "tutmongo")
 	ratePrfCfgIn, err = config.NewCGRConfigFromPath(context.Background(), ratePrfPathIn)
 	if err != nil {
 		t.Fatal(err)
 	}
-	ratePrfPathOut = path.Join(*dataDir, "conf", "samples", "tutmongojson")
+	ratePrfPathOut = path.Join(*utils.DataDir, "conf", "samples", "tutmongojson")
 	ratePrfCfgOut, err = config.NewCGRConfigFromPath(context.Background(), ratePrfPathOut)
 	if err != nil {
 		t.Fatal(err)
@@ -107,12 +107,12 @@ func TestRatePrfITMoveEncoding(t *testing.T) {
 
 func TestRatePrfITMoveEncoding2(t *testing.T) {
 	var err error
-	ratePrfPathIn = path.Join(*dataDir, "conf", "samples", "tutmysql")
+	ratePrfPathIn = path.Join(*utils.DataDir, "conf", "samples", "tutmysql")
 	ratePrfCfgIn, err = config.NewCGRConfigFromPath(context.Background(), ratePrfPathIn)
 	if err != nil {
 		t.Fatal(err)
 	}
-	ratePrfPathOut = path.Join(*dataDir, "conf", "samples", "tutmysqljson")
+	ratePrfPathOut = path.Join(*utils.DataDir, "conf", "samples", "tutmysqljson")
 	ratePrfCfgOut, err = config.NewCGRConfigFromPath(context.Background(), ratePrfPathOut)
 	if err != nil {
 		t.Fatal(err)

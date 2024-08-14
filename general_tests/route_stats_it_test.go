@@ -59,7 +59,7 @@ var (
 
 // Test start here
 func TestRtStatsCaseV1IT(t *testing.T) {
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 		RtStatsSv1ConfDIR = "routes_cases_internal"
 	case utils.MetaMySQL:
@@ -78,7 +78,7 @@ func TestRtStatsCaseV1IT(t *testing.T) {
 
 func testV1RtStatsLoadConfig(t *testing.T) {
 	var err error
-	RtStatsSv1CfgPath = path.Join(*dataDir, "conf", "samples", RtStatsSv1ConfDIR)
+	RtStatsSv1CfgPath = path.Join(*utils.DataDir, "conf", "samples", RtStatsSv1ConfDIR)
 	if RtStatsSv1Cfg, err = config.NewCGRConfigFromPath(context.Background(), RtStatsSv1CfgPath); err != nil {
 		t.Error(err)
 	}
@@ -94,7 +94,7 @@ func testV1RtStatsFlushDBs(t *testing.T) {
 }
 
 func testV1RtStatsStartEngine(t *testing.T) {
-	if _, err := engine.StopStartEngine(RtStatsSv1CfgPath, *waitRater); err != nil {
+	if _, err := engine.StopStartEngine(RtStatsSv1CfgPath, *utils.WaitRater); err != nil {
 		t.Fatal(err)
 	}
 }

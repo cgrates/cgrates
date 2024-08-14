@@ -62,7 +62,7 @@ var (
 )
 
 func TestAttributeSIT(t *testing.T) {
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 		alsPrfConfigDIR = "attr_test_internal"
 	case utils.MetaMySQL:
@@ -81,12 +81,12 @@ func TestAttributeSIT(t *testing.T) {
 
 func testAttributeSInitCfg(t *testing.T) {
 	var err error
-	attrCfgPath = path.Join(*dataDir, "conf", "samples", alsPrfConfigDIR)
+	attrCfgPath = path.Join(*utils.DataDir, "conf", "samples", alsPrfConfigDIR)
 	attrCfg, err = config.NewCGRConfigFromPath(context.Background(), attrCfgPath)
 	if err != nil {
 		t.Error(err)
 	}
-	attrCfg.DataFolderPath = *dataDir // Share DataFolderPath through config towards StoreDb for Flush()
+	attrCfg.DataFolderPath = *utils.DataDir // Share DataFolderPath through config towards StoreDb for Flush()
 }
 
 func testAttributeSFlushDBs(t *testing.T) {
@@ -100,7 +100,7 @@ func testAttributeSFlushDBs(t *testing.T) {
 
 // Start CGR Engine
 func testAttributeSStartEngine(t *testing.T) {
-	if _, err := engine.StopStartEngine(attrCfgPath, *waitRater); err != nil {
+	if _, err := engine.StopStartEngine(attrCfgPath, *utils.WaitRater); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -108,7 +108,7 @@ func testAttributeSStartEngine(t *testing.T) {
 // Connect rpc client to rater
 func testAttributeSRPCConn(t *testing.T) {
 	var err error
-	attrRPC, err = engine.NewRPCClient(attrCfg.ListenCfg(), *encoding) // We connect over JSON so we can also troubleshoot if needed
+	attrRPC, err = engine.NewRPCClient(attrCfg.ListenCfg(), *utils.Encoding) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
 		t.Fatal(err)
 	}

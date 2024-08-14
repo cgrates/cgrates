@@ -76,7 +76,7 @@ var (
 )
 
 func TestDNSitSimple(t *testing.T) {
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 		dnsCfgDIR = "dnsagent_internal"
 	case utils.MetaMySQL:
@@ -96,7 +96,7 @@ func TestDNSitSimple(t *testing.T) {
 // Init config
 func testDNSitInitCfg(t *testing.T) {
 	var err error
-	dnsCfgPath = path.Join(*dataDir, "conf", "samples", dnsCfgDIR)
+	dnsCfgPath = path.Join(*utils.DataDir, "conf", "samples", dnsCfgDIR)
 	dnsCfg, err = config.NewCGRConfigFromPath(context.Background(), dnsCfgPath)
 	if err != nil {
 		t.Error(err)
@@ -113,7 +113,7 @@ func testDNSitResetDB(t *testing.T) {
 
 // Start CGR Engine
 func testDNSitStartEngine(t *testing.T) {
-	if _, err := engine.StopStartEngine(dnsCfgPath, *waitRater); err != nil {
+	if _, err := engine.StopStartEngine(dnsCfgPath, *utils.WaitRater); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -121,7 +121,7 @@ func testDNSitStartEngine(t *testing.T) {
 // Connect rpc client to rater
 func testDNSitApierRpcConn(t *testing.T) {
 	var err error
-	dnsRPC, err = engine.NewRPCClient(dnsCfg.ListenCfg(), *encoding) // We connect over JSON so we can also troubleshoot if needed
+	dnsRPC, err = engine.NewRPCClient(dnsCfg.ListenCfg(), *utils.Encoding) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -144,7 +144,7 @@ func testDNSitTPFromFolder(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply returned:", reply)
 	}
-	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // Give time for scheduler to execute topups
+	time.Sleep(time.Duration(*utils.WaitRater) * time.Millisecond) // Give time for scheduler to execute topups
 }
 
 // Connect DNS client to server
@@ -1510,7 +1510,7 @@ func testDNSitClntNAPTROptsWithAttributes(t *testing.T) {
 }
 
 func testDNSitStopEngine(t *testing.T) {
-	if err := engine.KillEngine(*waitRater); err != nil {
+	if err := engine.KillEngine(*utils.WaitRater); err != nil {
 		t.Error(err)
 	}
 }

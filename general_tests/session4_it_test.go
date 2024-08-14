@@ -54,7 +54,7 @@ package general_tests
 // )
 
 // func TestSes4ItSessions(t *testing.T) {
-// 	switch *dbType {
+// 	switch *utils.DBType {
 // 	case utils.MetaInternal:
 // 		ses4CfgDir = "sessions_internal"
 // 	case utils.MetaMySQL:
@@ -72,7 +72,7 @@ package general_tests
 // }
 
 // func testSes4ItLoadConfig(t *testing.T) {
-// 	ses4CfgPath = path.Join(*dataDir, "conf", "samples", ses4CfgDir)
+// 	ses4CfgPath = path.Join(*utils.DataDir, "conf", "samples", ses4CfgDir)
 // 	if ses4Cfg, err = config.NewCGRConfigFromPath(ses4CfgPath); err != nil {
 // 		t.Error(err)
 // 	}
@@ -85,14 +85,14 @@ package general_tests
 // }
 
 // func testSes4ItStartEngine(t *testing.T) {
-// 	if _, err := engine.StopStartEngine(ses4CfgPath, *waitRater); err != nil {
+// 	if _, err := engine.StopStartEngine(ses4CfgPath, *utils.WaitRater); err != nil {
 // 		t.Fatal(err)
 // 	}
 // }
 
 // func testSes4ItRPCConn(t *testing.T) {
 // 	var err error
-// 	ses4RPC, err = engine.NewRPCClient(ses4Cfg.ListenCfg(), *encoding)
+// 	ses4RPC, err = engine.NewRPCClient(ses4Cfg.ListenCfg(), *utils.Encoding)
 // 	if err != nil {
 // 		t.Fatal(err)
 // 	}
@@ -100,7 +100,7 @@ package general_tests
 
 // func testSes4ItLoadFromFolder(t *testing.T) {
 // 	var reply string
-// 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "testit")}
+// 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*utils.DataDir, "tariffplans", "testit")}
 // 	if err := ses4RPC.Call(utils.APIerSv1LoadTariffPlanFromFolder, attrs, &reply); err != nil {
 // 		t.Error(err)
 // 	}

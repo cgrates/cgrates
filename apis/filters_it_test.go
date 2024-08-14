@@ -74,7 +74,7 @@ var (
 )
 
 func TestFiltersIT(t *testing.T) {
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 		fltrConfigDIR = "tutinternal"
 	case utils.MetaMongo:
@@ -93,7 +93,7 @@ func TestFiltersIT(t *testing.T) {
 
 func testFiltersInitCfg(t *testing.T) {
 	var err error
-	fltrCfgPath = path.Join(*dataDir, "conf", "samples", fltrConfigDIR)
+	fltrCfgPath = path.Join(*utils.DataDir, "conf", "samples", fltrConfigDIR)
 	fltrCfg, err = config.NewCGRConfigFromPath(context.Background(), fltrCfgPath)
 	if err != nil {
 		t.Error(err)
@@ -114,14 +114,14 @@ func testFiltersResetStorDb(t *testing.T) {
 
 // Start CGR Engine
 func testFiltersStartEngine(t *testing.T) {
-	if _, err := engine.StopStartEngine(fltrCfgPath, *waitRater); err != nil {
+	if _, err := engine.StopStartEngine(fltrCfgPath, *utils.WaitRater); err != nil {
 		t.Fatal(err)
 	}
 }
 
 func testFiltersRPCConn(t *testing.T) {
 	var err error
-	fltrRPC, err = engine.NewRPCClient(fltrCfg.ListenCfg(), *encoding) // We connect over JSON so we can also troubleshoot if needed
+	fltrRPC, err = engine.NewRPCClient(fltrCfg.ListenCfg(), *utils.Encoding) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
 		t.Fatal(err)
 	}

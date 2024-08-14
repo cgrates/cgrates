@@ -90,7 +90,7 @@ func testAnzDocFlushDBs(t *testing.T) {
 }
 
 func testAnzDocStartEngine(t *testing.T) {
-	if _, err := engine.StopStartEngine(anzDocCfgPath, *waitRater); err != nil {
+	if _, err := engine.StopStartEngine(anzDocCfgPath, *utils.WaitRater); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -103,7 +103,7 @@ func testAnzDocInitCfg(t *testing.T) {
 	if err = os.MkdirAll("/tmp/analyzers/", 0700); err != nil {
 		t.Fatal(err)
 	}
-	anzDocCfgPath = path.Join(*dataDir, "conf", "samples", "analyzers_doc")
+	anzDocCfgPath = path.Join(*utils.DataDir, "conf", "samples", "analyzers_doc")
 	anzDocCfg, err = config.NewCGRConfigFromPath(context.Background(), anzDocCfgPath)
 	if err != nil {
 		t.Error(err)
@@ -112,7 +112,7 @@ func testAnzDocInitCfg(t *testing.T) {
 
 func testAnzDocRPCConn(t *testing.T) {
 	var err error
-	anzDocRPC, err = engine.NewRPCClient(anzDocCfg.ListenCfg(), *encoding)
+	anzDocRPC, err = engine.NewRPCClient(anzDocCfg.ListenCfg(), *utils.Encoding)
 	if err != nil {
 		t.Fatal(err)
 	}

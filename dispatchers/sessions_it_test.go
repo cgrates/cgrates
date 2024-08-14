@@ -62,7 +62,7 @@ import (
 
 	func TestDspSessionS(t *testing.T) {
 		var config1, config2, config3 string
-		switch *dbType {
+		switch *utils.DBType {
 		case utils.MetaInternal:
 			t.SkipNow()
 		case utils.MetaMySQL:
@@ -80,7 +80,7 @@ import (
 		}
 
 		dispDIR := "dispatchers"
-		if *encoding == utils.MetaGOB {
+		if *utils.Encoding == utils.MetaGOB {
 			dispDIR += "_gob"
 			config3 += "_gob"
 		}
@@ -406,7 +406,7 @@ import (
 				},
 			},
 		}
-		if *encoding == utils.MetaGOB { // gob maintains the variable type
+		if *utils.Encoding == utils.MetaGOB { // gob maintains the variable type
 			eAttrs.CGREvent.Event[utils.Usage] = reqUsage
 			eAttrs.CGREvent.Event[utils.SetupTime] = argsUpdate.CGREvent.Event[utils.SetupTime]
 			eAttrs.CGREvent.Event[utils.AnswerTime] = argsUpdate.CGREvent.Event[utils.AnswerTime]
@@ -481,7 +481,7 @@ import (
 			},
 		}
 		sort.Strings(eAttrs.AlteredFields)
-		if *encoding == utils.MetaGOB { // gob maintains the variable type
+		if *utils.Encoding == utils.MetaGOB { // gob maintains the variable type
 			eAttrs.CGREvent.Event[utils.Usage] = reqUsage
 			eAttrs.CGREvent.Event[utils.SetupTime] = argsUpdate.CGREvent.Event[utils.SetupTime]
 			eAttrs.CGREvent.Event[utils.AnswerTime] = argsUpdate.CGREvent.Event[utils.AnswerTime]
@@ -634,7 +634,7 @@ import (
 				},
 			},
 		}
-		if *encoding == utils.MetaGOB { // gob maintains the variable type
+		if *utils.Encoding == utils.MetaGOB { // gob maintains the variable type
 			eAttrs.CGREvent.Event[utils.Usage] = initUsage
 			eAttrs.CGREvent.Event[utils.SetupTime] = args.CGREvent.Event[utils.SetupTime]
 			eAttrs.CGREvent.Event[utils.AnswerTime] = args.CGREvent.Event[utils.AnswerTime]
@@ -712,7 +712,7 @@ import (
 				},
 			},
 		}
-		if *encoding == utils.MetaGOB { // gob maintains the variable type
+		if *utils.Encoding == utils.MetaGOB { // gob maintains the variable type
 			eAttrs.CGREvent.Event[utils.Usage] = initUsage
 			eAttrs.CGREvent.Event[utils.SetupTime] = args.CGREvent.Event[utils.SetupTime]
 			eAttrs.CGREvent.Event[utils.AnswerTime] = args.CGREvent.Event[utils.AnswerTime]
@@ -736,7 +736,7 @@ import (
 		} else if reply != utils.OK {
 			t.Error("Reply: ", reply)
 		}
-		allEngine.loadData(t, path.Join(*dataDir, "tariffplans", "testit"))
+		allEngine.loadData(t, path.Join(*utils.DataDir, "tariffplans", "testit"))
 		testDspSessionAddBalacne(t)
 		testDspSessionAuthorize(t)
 		testDspSessionInit(t)
@@ -868,7 +868,7 @@ import (
 		allEngine.startEngine(t)
 		allEngine.initDataDb(t)
 
-		allEngine.loadData(t, path.Join(*dataDir, "tariffplans", "testit"))
+		allEngine.loadData(t, path.Join(*utils.DataDir, "tariffplans", "testit"))
 		testDspSessionAddBalacne(t)
 		testDspSessionAuthorize(t)
 		testDspSessionInit(t)

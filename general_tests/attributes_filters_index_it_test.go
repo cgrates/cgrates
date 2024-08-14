@@ -57,7 +57,7 @@ var (
 )
 
 func TestAttributeFilterSIT(t *testing.T) {
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaMySQL:
 		alsPrfFltrConfigDIR = "attributesindexes_mysql"
 	case utils.MetaMongo:
@@ -74,7 +74,7 @@ func TestAttributeFilterSIT(t *testing.T) {
 
 func testAttributeFltrSInitCfg(t *testing.T) {
 	var err error
-	attrFltrCfgPath = path.Join(*dataDir, "conf", "samples", alsPrfFltrConfigDIR)
+	attrFltrCfgPath = path.Join(*utils.DataDir, "conf", "samples", alsPrfFltrConfigDIR)
 	attrFltrCfg, err = config.NewCGRConfigFromPath(context.Background(), attrFltrCfgPath)
 	if err != nil {
 		t.Error(err)
@@ -92,7 +92,7 @@ func testAttributeFltrSFlushDBs(t *testing.T) {
 
 // Start CGR Engine
 func testAttributeFltrSStartEngine(t *testing.T) {
-	if _, err := engine.StopStartEngine(attrFltrCfgPath, *waitRater); err != nil {
+	if _, err := engine.StopStartEngine(attrFltrCfgPath, *utils.WaitRater); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -100,7 +100,7 @@ func testAttributeFltrSStartEngine(t *testing.T) {
 // Connect rpc client to rater
 func testAttributeFltrSRPCConn(t *testing.T) {
 	var err error
-	attrFltrRPC, err = engine.NewRPCClient(attrFltrCfg.ListenCfg(), *encoding) // We connect over JSON so we can also troubleshoot if needed
+	attrFltrRPC, err = engine.NewRPCClient(attrFltrCfg.ListenCfg(), *utils.Encoding) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -274,7 +274,7 @@ func testAttributeRemoveFltr(t *testing.T) {
 }
 
 func testAttributeFltrSStopEngine(t *testing.T) {
-	if err := engine.KillEngine(*waitRater); err != nil {
+	if err := engine.KillEngine(*utils.WaitRater); err != nil {
 		t.Error(err)
 	}
 }

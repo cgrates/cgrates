@@ -58,7 +58,7 @@ func TestCGRLoader(t *testing.T) {
 		t.SkipNow()
 		return
 	}
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 		t.SkipNow()
 	case utils.MetaMySQL:
@@ -77,7 +77,7 @@ func TestCGRLoader(t *testing.T) {
 
 func testCGRLoaderInitConfig(t *testing.T) {
 	var err error
-	cgrloaderCfgPath = path.Join(*dataDir, "conf", "samples", cgrloaderConfDIR)
+	cgrloaderCfgPath = path.Join(*utils.DataDir, "conf", "samples", cgrloaderConfDIR)
 	if cgrloaderCfg, err = config.NewCGRConfigFromPath(context.Background(), cgrloaderCfgPath); err != nil {
 		t.Fatal("Got config error: ", err.Error())
 	}
@@ -93,14 +93,14 @@ func testCGRLoaderFlushDBs(t *testing.T) {
 }
 
 func testCGRLoaderStartEngine(t *testing.T) {
-	if _, err := engine.StopStartEngine(cgrloaderCfgPath, *waitRater); err != nil {
+	if _, err := engine.StopStartEngine(cgrloaderCfgPath, *utils.WaitRater); err != nil {
 		t.Fatal(err)
 	}
 }
 
 func testCGRLoaderRpcConn(t *testing.T) {
 	var err error
-	cgrloaderRPC, err = engine.NewRPCClient(cgrloaderCfg.ListenCfg(), *encoding)
+	cgrloaderRPC, err = engine.NewRPCClient(cgrloaderCfg.ListenCfg(), *utils.Encoding)
 	if err != nil {
 		t.Fatal("Could not connect to rater: ", err.Error())
 	}
@@ -133,7 +133,7 @@ func testCGRLoaderGetData(t *testing.T) {
 }
 
 func testCGRLoaderKillEngine(t *testing.T) {
-	if err := engine.KillEngine(*waitRater); err != nil {
+	if err := engine.KillEngine(*utils.WaitRater); err != nil {
 		t.Error(err)
 	}
 }

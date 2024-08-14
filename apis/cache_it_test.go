@@ -67,7 +67,7 @@ var (
 
 // Test start here
 func TestCacheSv1IT(t *testing.T) {
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 		t.SkipNow()
 	case utils.MetaMySQL:
@@ -86,7 +86,7 @@ func TestCacheSv1IT(t *testing.T) {
 
 func testCacheSLoadConfig(t *testing.T) {
 	var err error
-	chcCfgPath = path.Join(*dataDir, "conf", "samples", "precache", cacheConfigDIR)
+	chcCfgPath = path.Join(*utils.DataDir, "conf", "samples", "precache", cacheConfigDIR)
 	if chcCfg, err = config.NewCGRConfigFromPath(context.Background(), chcCfgPath); err != nil {
 		t.Error(err)
 	}
@@ -106,14 +106,14 @@ func testCacheSInitStorDb(t *testing.T) {
 
 // Start engine
 func testCacheSStartEngine(t *testing.T) {
-	if _, err := engine.StopStartEngine(chcCfgPath, *waitRater); err != nil {
+	if _, err := engine.StopStartEngine(chcCfgPath, *utils.WaitRater); err != nil {
 		t.Fatal(err)
 	}
 }
 
 func testCacheSRpcConn(t *testing.T) {
 	var err error
-	chcRPC, err = engine.NewRPCClient(chcCfg.ListenCfg(), *encoding) // We connect over JSON so we can also troubleshoot if needed
+	chcRPC, err = engine.NewRPCClient(chcCfg.ListenCfg(), *utils.Encoding) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
 		t.Fatal("Could not connect to RPC: ", err.Error())
 	}

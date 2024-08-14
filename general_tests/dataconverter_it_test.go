@@ -63,7 +63,7 @@ var (
 
 // Tests starting here
 func TestDataConverterIT(t *testing.T) {
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 		dcConfDIR = "dataconverter_internal"
 	case utils.MetaMySQL:
@@ -83,7 +83,7 @@ func TestDataConverterIT(t *testing.T) {
 
 func testDCInitConfig(t *testing.T) {
 	var err error
-	dcCfgPath = path.Join(*dataDir, "conf", "samples", dcConfDIR)
+	dcCfgPath = path.Join(*utils.DataDir, "conf", "samples", dcConfDIR)
 	if dcCfg, err = config.NewCGRConfigFromPath(context.Background(), dcCfgPath); err != nil {
 		t.Fatal("Got config error: ", err.Error())
 	}
@@ -99,13 +99,13 @@ func testDCFlushDBs(t *testing.T) {
 }
 
 func testDCStartEngine(t *testing.T) {
-	if _, err := engine.StopStartEngine(dcCfgPath, *waitRater); err != nil {
+	if _, err := engine.StopStartEngine(dcCfgPath, *utils.WaitRater); err != nil {
 		t.Fatal(err)
 	}
 }
 
 func testDCRpcConn(t *testing.T) {
-	dcRPC, err = engine.NewRPCClient(dcCfg.ListenCfg(), *encoding)
+	dcRPC, err = engine.NewRPCClient(dcCfg.ListenCfg(), *utils.Encoding)
 	if err != nil {
 		t.Fatal("Could not connect to rater: ", err.Error())
 	}
@@ -262,7 +262,7 @@ func testDCAttributeProcessEvent(t *testing.T) {
 }
 
 func testDCKillEngine(t *testing.T) {
-	if err := engine.KillEngine(*waitRater); err != nil {
+	if err := engine.KillEngine(*utils.WaitRater); err != nil {
 		t.Error(err)
 	}
 }

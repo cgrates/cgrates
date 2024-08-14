@@ -92,7 +92,7 @@ var (
 )
 
 func TestResourceSIT(t *testing.T) {
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 		// rsConfigDIR = "resources_internal"
 		t.SkipNow()
@@ -112,7 +112,7 @@ func TestResourceSIT(t *testing.T) {
 
 func testResourceSInitCfg(t *testing.T) {
 	var err error
-	rsCfgPath = path.Join(*dataDir, "conf", "samples", rsConfigDIR)
+	rsCfgPath = path.Join(*utils.DataDir, "conf", "samples", rsConfigDIR)
 	rsCfg, err = config.NewCGRConfigFromPath(context.Background(), rsCfgPath)
 	if err != nil {
 		t.Error(err)
@@ -133,14 +133,14 @@ func testResourceSResetStorDB(t *testing.T) {
 
 // Start CGR Engine
 func testResourceSStartEngine(t *testing.T) {
-	if _, err := engine.StopStartEngine(rsCfgPath, *waitRater); err != nil {
+	if _, err := engine.StopStartEngine(rsCfgPath, *utils.WaitRater); err != nil {
 		t.Fatal(err)
 	}
 }
 
 func testResourceSRPCConn(t *testing.T) {
 	var err error
-	rsRPC, err = engine.NewRPCClient(rsCfg.ListenCfg(), *encoding) // We connect over JSON so we can also troubleshoot if needed
+	rsRPC, err = engine.NewRPCClient(rsCfg.ListenCfg(), *utils.Encoding) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
 		t.Fatal(err)
 	}

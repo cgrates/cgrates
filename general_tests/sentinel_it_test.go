@@ -38,11 +38,11 @@ package general_tests
 // )
 
 // var (
-// 	node1ConfigPath     = path.Join(*dataDir, "redisSentinel", "node1.conf")
-// 	node2ConfigPath     = path.Join(*dataDir, "redisSentinel", "node2.conf")
-// 	sentinel1ConfigPath = path.Join(*dataDir, "redisSentinel", "sentinel1.conf")
-// 	sentinel2ConfigPath = path.Join(*dataDir, "redisSentinel", "sentinel2.conf")
-// 	engineConfigPath    = path.Join(*dataDir, "conf", "samples", "redisSentinel")
+// 	node1ConfigPath     = path.Join(*utils.DataDir, "redisSentinel", "node1.conf")
+// 	node2ConfigPath     = path.Join(*utils.DataDir, "redisSentinel", "node2.conf")
+// 	sentinel1ConfigPath = path.Join(*utils.DataDir, "redisSentinel", "sentinel1.conf")
+// 	sentinel2ConfigPath = path.Join(*utils.DataDir, "redisSentinel", "sentinel2.conf")
+// 	engineConfigPath    = path.Join(*utils.DataDir, "conf", "samples", "redisSentinel")
 // 	sentinelConfig      *config.CGRConfig
 // 	sentinelRPC         *birpc.Client
 // 	node1Exec           *exec.Cmd
@@ -74,7 +74,7 @@ package general_tests
 // 	if !*redisSentinel {
 // 		return
 // 	}
-// 	switch *dbType {
+// 	switch *utils.DBType {
 // 	case utils.MetaMySQL:
 // 	case utils.MetaInternal,
 // 		utils.MetaMongo,
@@ -133,7 +133,7 @@ package general_tests
 
 // func testRedisSentinelRPCCon(t *testing.T) {
 // 	var err error
-// 	sentinelRPC, err = engine.NewRPCClient(sentinelConfig.ListenCfg(), *encoding) // We connect over JSON so we can also troubleshoot if needed
+// 	sentinelRPC, err = engine.NewRPCClient(sentinelConfig.ListenCfg(), *utils.Encoding) // We connect over JSON so we can also troubleshoot if needed
 // 	if err != nil {
 // 		t.Fatal(err)
 // 	}

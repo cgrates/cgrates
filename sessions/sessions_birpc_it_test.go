@@ -53,7 +53,7 @@ package sessions
 
 // // Tests starts here
 // func TestSessionsBiRPC(t *testing.T) {
-// 	switch *dbType {
+// 	switch *utils.DBType {
 // 	case utils.MetaInternal:
 // 		sessionsBiRPCCfgDIR = "smg_automatic_debits_internal"
 // 	case utils.MetaMySQL:
@@ -78,7 +78,7 @@ package sessions
 // }
 
 // func testSessionsBiRPCInitCfg(t *testing.T) {
-// 	sessionsBiRPCCfgPath = path.Join(*dataDir, "conf", "samples", sessionsBiRPCCfgDIR)
+// 	sessionsBiRPCCfgPath = path.Join(*utils.DataDir, "conf", "samples", sessionsBiRPCCfgDIR)
 // 	// Init config first
 // 	sessionsBiRPCCfg, err = config.NewCGRConfigFromPath(context.Background(), sessionsBiRPCCfgPath)
 // 	if err != nil {
@@ -98,7 +98,7 @@ package sessions
 
 // // Start CGR Engine
 // func testSessionsBiRPCStartEngine(t *testing.T) {
-// 	if _, err := engine.StopStartEngine(sessionsBiRPCCfgPath, *waitRater); err != nil {
+// 	if _, err := engine.StopStartEngine(sessionsBiRPCCfgPath, *utils.WaitRater); err != nil {
 // 		t.Fatal(err)
 // 	}
 // }
@@ -115,7 +115,7 @@ package sessions
 // 		clntHandlers); err != nil {
 // 		t.Fatal(err)
 // 	}
-// 	if sessionsRPC, err = engine.NewRPCClient(sessionsBiRPCCfg.ListenCfg(), *encoding); err != nil { // Connect also simple RPC so we can check accounts and such
+// 	if sessionsRPC, err = engine.NewRPCClient(sessionsBiRPCCfg.ListenCfg(), *utils.Encoding); err != nil { // Connect also simple RPC so we can check accounts and such
 // 		t.Fatal(err)
 // 	}
 // 	dummyClnt.Close() // close so we don't get EOF error when disconnecting server
@@ -125,12 +125,12 @@ package sessions
 
 // // Load the tariff plan, creating accounts and their balances
 // func testSessionsBiRPCTPFromFolder(t *testing.T) {
-// 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "oldtutorial")}
+// 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*utils.DataDir, "tariffplans", "oldtutorial")}
 // 	var loadInst utils.LoadInstance
 // 	if err := sessionsRPC.Call(utils.APIerSv2LoadTariffPlanFromFolder, attrs, &loadInst); err != nil {
 // 		t.Error(err)
 // 	}
-// 	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // Give time for scheduler to execute topups
+// 	time.Sleep(time.Duration(*utils.WaitRater) * time.Millisecond) // Give time for scheduler to execute topups
 // }
 
 // func testSessionsBiRPCSessionAutomaticDisconnects(t *testing.T) {

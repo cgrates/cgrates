@@ -66,7 +66,7 @@ var (
 
 // Test start here
 func TestRouteSV1IT(t *testing.T) {
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 		splSv1ConfDIR = "routes_generaltests_internal"
 	case utils.MetaMySQL:
@@ -85,7 +85,7 @@ func TestRouteSV1IT(t *testing.T) {
 
 func testV1SplSLoadConfig(t *testing.T) {
 	var err error
-	splSv1CfgPath = path.Join(*dataDir, "conf", "samples", splSv1ConfDIR)
+	splSv1CfgPath = path.Join(*utils.DataDir, "conf", "samples", splSv1ConfDIR)
 	if splSv1Cfg, err = config.NewCGRConfigFromPath(context.Background(), splSv1CfgPath); err != nil {
 		t.Error(err)
 	}
@@ -101,14 +101,14 @@ func testV1SplSFlushDBs(t *testing.T) {
 }
 
 func testV1SplSStartEngine(t *testing.T) {
-	if _, err := engine.StopStartEngine(splSv1CfgPath, *waitRater); err != nil {
+	if _, err := engine.StopStartEngine(splSv1CfgPath, *utils.WaitRater); err != nil {
 		t.Fatal(err)
 	}
 }
 
 func testV1SplSRpcConn(t *testing.T) {
 	var err error
-	splSv1Rpc, err = engine.NewRPCClient(splSv1Cfg.ListenCfg(), *encoding)
+	splSv1Rpc, err = engine.NewRPCClient(splSv1Cfg.ListenCfg(), *utils.Encoding)
 	if err != nil {
 		t.Fatal("Could not connect to rater: ", err.Error())
 	}

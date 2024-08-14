@@ -59,7 +59,7 @@ var (
 )
 
 func TestRPCExpIT(t *testing.T) {
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 		ng1ConfDIR = "rpcexp_opts_engine1_internal"
 		ng2ConfDIR = "rpcexp_opts_engine2_internal"
@@ -82,11 +82,11 @@ func TestRPCExpIT(t *testing.T) {
 
 func testRPCExpLoadConfig(t *testing.T) {
 	var err error
-	ng1CfgPath = path.Join(*dataDir, "conf", "samples", "rpcexp_multiple_engines", ng1ConfDIR)
+	ng1CfgPath = path.Join(*utils.DataDir, "conf", "samples", "rpcexp_multiple_engines", ng1ConfDIR)
 	if ng1Cfg, err = config.NewCGRConfigFromPath(context.Background(), ng1CfgPath); err != nil {
 		t.Error(err)
 	}
-	ng2CfgPath = path.Join(*dataDir, "conf", "samples", "rpcexp_multiple_engines", ng2ConfDIR)
+	ng2CfgPath = path.Join(*utils.DataDir, "conf", "samples", "rpcexp_multiple_engines", ng2ConfDIR)
 	if ng2Cfg, err = config.NewCGRConfigFromPath(context.Background(), ng2CfgPath); err != nil {
 		t.Error(err)
 	}
@@ -119,11 +119,11 @@ func testRPCExpStartEngine(t *testing.T) {
 
 func testRPCExpRPCConn(t *testing.T) {
 	var err error
-	ng1RPC, err = engine.NewRPCClient(ng1Cfg.ListenCfg(), *encoding)
+	ng1RPC, err = engine.NewRPCClient(ng1Cfg.ListenCfg(), *utils.Encoding)
 	if err != nil {
 		t.Fatal("Could not connect to rater: ", err.Error())
 	}
-	ng2RPC, err = engine.NewRPCClient(ng2Cfg.ListenCfg(), *encoding)
+	ng2RPC, err = engine.NewRPCClient(ng2Cfg.ListenCfg(), *utils.Encoding)
 	if err != nil {
 		t.Fatal("Could not connect to rater: ", err.Error())
 	}

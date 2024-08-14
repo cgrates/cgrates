@@ -85,7 +85,7 @@ var (
 )
 
 func TestSectChange(t *testing.T) {
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 		testSectCfgDir = "tutinternal"
 	case utils.MetaMySQL:
@@ -103,7 +103,7 @@ func TestSectChange(t *testing.T) {
 }
 
 func testSectLoadConfig(t *testing.T) {
-	testSectCfgPath = path.Join(*dataDir, "conf", "samples", testSectCfgDir)
+	testSectCfgPath = path.Join(*utils.DataDir, "conf", "samples", testSectCfgDir)
 	if testSectCfg, err = config.NewCGRConfigFromPath(context.Background(), testSectCfgPath); err != nil {
 		t.Error(err)
 	}
@@ -119,14 +119,14 @@ func testSectResetDBs(t *testing.T) {
 }
 
 func testSectStartEngine(t *testing.T) {
-	if _, err := engine.StopStartEngine(testSectCfgPath, *waitRater); err != nil {
+	if _, err := engine.StopStartEngine(testSectCfgPath, *utils.WaitRater); err != nil {
 		t.Fatal(err)
 	}
 }
 
 func testSectRPCConn(t *testing.T) {
 	var err error
-	testSectRPC, err = engine.NewRPCClient(testSectCfg.ListenCfg(), *encoding)
+	testSectRPC, err = engine.NewRPCClient(testSectCfg.ListenCfg(), *utils.Encoding)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -301,7 +301,7 @@ func testSectConfigSReloadHTTP(t *testing.T) {
 }
 
 func testSectConfigSReloadCaches(t *testing.T) {
-	if *dbType == utils.MetaInternal {
+	if *utils.DBType == utils.MetaInternal {
 		return
 	}
 	var replyPingBf string

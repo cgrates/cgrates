@@ -38,7 +38,7 @@ import (
 var (
 	redisTLS          = flag.Bool("redisTLS", false, "Run tests with redis tls")
 	redisTLSServer    *exec.Cmd
-	redisTLSEngineCfg = path.Join(*dataDir, "conf", "samples", "redisTLS")
+	redisTLSEngineCfg = path.Join(*utils.DataDir, "conf", "samples", "redisTLS")
 	redisTLSCfg       *config.CGRConfig
 	redisTLSRPC       *birpc.Client
 
@@ -99,7 +99,7 @@ func testRedisTLSStartEngine(t *testing.T) {
 
 func testRedisTLSRPCCon(t *testing.T) {
 	var err error
-	redisTLSRPC, err = engine.NewRPCClient(redisTLSCfg.ListenCfg(), *encoding) // We connect over JSON so we can also troubleshoot if needed
+	redisTLSRPC, err = engine.NewRPCClient(redisTLSCfg.ListenCfg(), *utils.Encoding) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
 		t.Fatal(err)
 	}

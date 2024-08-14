@@ -86,7 +86,7 @@ func BenchmarkV1RtsCasesSortingRoutesLowestCost(t *testing.B) {
 
 	var err error
 	rtsCaseSv1ConfDIR = "routes_cases_mysql"
-	rtsCaseSv1CfgPath = path.Join(*dataDir, "conf", "samples", rtsCaseSv1ConfDIR)
+	rtsCaseSv1CfgPath = path.Join(*utils.DataDir, "conf", "samples", rtsCaseSv1ConfDIR)
 	if rtsCaseSv1Cfg, err = config.NewCGRConfigFromPath(context.Background(), rtsCaseSv1CfgPath); err != nil {
 		t.Error(err)
 	}
@@ -170,7 +170,7 @@ func BenchmarkV1RtsCasesSortingRoutesLowestCost(t *testing.B) {
 */
 // Test start here
 func TestRoutesCaseV1IT(t *testing.T) {
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 		rtsCaseSv1ConfDIR = "routes_cases_internal"
 	case utils.MetaMySQL:
@@ -189,7 +189,7 @@ func TestRoutesCaseV1IT(t *testing.T) {
 
 func testV1RtsCaseLoadConfig(t *testing.T) {
 	var err error
-	rtsCaseSv1CfgPath = path.Join(*dataDir, "conf", "samples", rtsCaseSv1ConfDIR)
+	rtsCaseSv1CfgPath = path.Join(*utils.DataDir, "conf", "samples", rtsCaseSv1ConfDIR)
 	if rtsCaseSv1Cfg, err = config.NewCGRConfigFromPath(context.Background(), rtsCaseSv1CfgPath); err != nil {
 		t.Error(err)
 	}
@@ -205,7 +205,7 @@ func testV1RtsCaseFlushDBs(t *testing.T) {
 }
 
 func testV1RtsCaseStartEngine(t *testing.T) {
-	if _, err := engine.StopStartEngine(rtsCaseSv1CfgPath, *waitRater); err != nil {
+	if _, err := engine.StopStartEngine(rtsCaseSv1CfgPath, *utils.WaitRater); err != nil {
 		t.Fatal(err)
 	}
 }

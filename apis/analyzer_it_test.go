@@ -61,11 +61,11 @@ var (
 )
 
 func TestAnalyzerSIT(t *testing.T) {
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal, utils.MetaMySQL, utils.MetaPostgres:
 		t.SkipNow()
 	case utils.MetaMongo:
-		anzCfgPath = path.Join(*dataDir, "conf", "samples", "analyzers")
+		anzCfgPath = path.Join(*utils.DataDir, "conf", "samples", "analyzers")
 	default:
 		t.Fatal("Unknown Database type")
 	}
@@ -103,14 +103,14 @@ func testAnalyzerSResetStorDb(t *testing.T) {
 
 // Start CGR Engine
 func testAnalyzerSStartEngine(t *testing.T) {
-	if _, err := engine.StopStartEngine(anzCfgPath, *waitRater); err != nil {
+	if _, err := engine.StopStartEngine(anzCfgPath, *utils.WaitRater); err != nil {
 		t.Fatal(err)
 	}
 }
 
 func testAnzBiSRPCConn(t *testing.T) {
 	var err error
-	anzBiRPC, err = engine.NewRPCClient(anzCfg.ListenCfg(), *encoding)
+	anzBiRPC, err = engine.NewRPCClient(anzCfg.ListenCfg(), *utils.Encoding)
 	if err != nil {
 		t.Fatal(err)
 	}

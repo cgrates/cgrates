@@ -24,7 +24,6 @@ package efs
 import (
 	"bytes"
 	"encoding/gob"
-	"flag"
 	"fmt"
 	"os"
 	"path"
@@ -40,7 +39,6 @@ import (
 )
 
 var (
-	dbType       = flag.String("dbtype", utils.MetaInternal, "The type of DataBase (Internal/Mongo/mySql)")
 	efsConfigDir string
 	efsCfgPath   string
 	efsCfg       *config.CGRConfig
@@ -88,7 +86,7 @@ func TestDecodeExportEvents(t *testing.T) {
 }
 
 func TestEfS(t *testing.T) {
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 		efsConfigDir = "efs_internal"
 	case utils.MetaMongo:

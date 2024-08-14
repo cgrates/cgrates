@@ -60,7 +60,7 @@ var (
 )
 
 func TestFWVReadFile(t *testing.T) {
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 		fwvCfgDIR = "ers_internal"
 	case utils.MetaMySQL:
@@ -80,7 +80,7 @@ func TestFWVReadFile(t *testing.T) {
 
 func testFWVITInitConfig(t *testing.T) {
 	var err error
-	fwvCfgPath = path.Join(*dataDir, "conf", "samples", fwvCfgDIR)
+	fwvCfgPath = path.Join(*utils.DataDir, "conf", "samples", fwvCfgDIR)
 	if fwvCfg, err = config.NewCGRConfigFromPath(context.Background(), fwvCfgPath); err != nil {
 		t.Fatal("Got config error: ", err.Error())
 	}
@@ -96,7 +96,7 @@ func testFWVITResetDataDb(t *testing.T) {
 }
 
 func testFWVITStartEngine(t *testing.T) {
-	if _, err := engine.StopStartEngine(fwvCfgPath, *waitRater); err != nil {
+	if _, err := engine.StopStartEngine(fwvCfgPath, *utils.WaitRater); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -104,7 +104,7 @@ func testFWVITStartEngine(t *testing.T) {
 // Connect rpc client to rater
 func testFWVITRpcConn(t *testing.T) {
 	var err error
-	fwvRPC, err = engine.NewRPCClient(fwvCfg.ListenCfg(), *encoding) // We connect over JSON so we can also troubleshoot if needed
+	fwvRPC, err = engine.NewRPCClient(fwvCfg.ListenCfg(), *utils.Encoding) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
 		t.Fatal("Could not connect to rater: ", err.Error())
 	}
@@ -199,7 +199,7 @@ func testFWVITAnalyseCDRs(t *testing.T) {
 }
 
 func testFWVITKillEngine(t *testing.T) {
-	if err := engine.KillEngine(*waitRater); err != nil {
+	if err := engine.KillEngine(*utils.WaitRater); err != nil {
 		t.Error(err)
 	}
 }

@@ -143,7 +143,7 @@ func testSharedClientLockStartEngine(t *testing.T) {
 
 func testSharedClientLockRpcConn(t *testing.T) {
 	var err error
-	clntLockRPC, err = engine.NewRPCClient(clntLockCfg.ListenCfg(), *encoding)
+	clntLockRPC, err = engine.NewRPCClient(clntLockCfg.ListenCfg(), *utils.Encoding)
 	if err != nil {
 		t.Fatal("Could not connect to engine: ", err.Error())
 	}

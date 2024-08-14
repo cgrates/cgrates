@@ -51,12 +51,12 @@ var sTestsChrgIT = []func(t *testing.T){
 
 func TestChargersITMove1(t *testing.T) {
 	var err error
-	chrgPathIn = path.Join(*dataDir, "conf", "samples", "tutmongo")
+	chrgPathIn = path.Join(*utils.DataDir, "conf", "samples", "tutmongo")
 	chrgCfgIn, err = config.NewCGRConfigFromPath(context.Background(), chrgPathIn)
 	if err != nil {
 		t.Fatal(err)
 	}
-	chrgPathOut = path.Join(*dataDir, "conf", "samples", "tutmysql")
+	chrgPathOut = path.Join(*utils.DataDir, "conf", "samples", "tutmysql")
 	chrgCfgOut, err = config.NewCGRConfigFromPath(context.Background(), chrgPathOut)
 	if err != nil {
 		t.Fatal(err)
@@ -70,12 +70,12 @@ func TestChargersITMove1(t *testing.T) {
 
 func TestChargersITMove2(t *testing.T) {
 	var err error
-	chrgPathIn = path.Join(*dataDir, "conf", "samples", "tutmysql")
+	chrgPathIn = path.Join(*utils.DataDir, "conf", "samples", "tutmysql")
 	chrgCfgIn, err = config.NewCGRConfigFromPath(context.Background(), chrgPathIn)
 	if err != nil {
 		t.Fatal(err)
 	}
-	chrgPathOut = path.Join(*dataDir, "conf", "samples", "tutmongo")
+	chrgPathOut = path.Join(*utils.DataDir, "conf", "samples", "tutmongo")
 	chrgCfgOut, err = config.NewCGRConfigFromPath(context.Background(), chrgPathOut)
 	if err != nil {
 		t.Fatal(err)
@@ -89,12 +89,12 @@ func TestChargersITMove2(t *testing.T) {
 
 func TestChargersITMoveEncoding(t *testing.T) {
 	var err error
-	chrgPathIn = path.Join(*dataDir, "conf", "samples", "tutmongo")
+	chrgPathIn = path.Join(*utils.DataDir, "conf", "samples", "tutmongo")
 	chrgCfgIn, err = config.NewCGRConfigFromPath(context.Background(), chrgPathIn)
 	if err != nil {
 		t.Fatal(err)
 	}
-	chrgPathOut = path.Join(*dataDir, "conf", "samples", "tutmongojson")
+	chrgPathOut = path.Join(*utils.DataDir, "conf", "samples", "tutmongojson")
 	chrgCfgOut, err = config.NewCGRConfigFromPath(context.Background(), chrgPathOut)
 	if err != nil {
 		t.Fatal(err)
@@ -108,12 +108,12 @@ func TestChargersITMoveEncoding(t *testing.T) {
 
 func TestChargersITMoveEncoding2(t *testing.T) {
 	var err error
-	chrgPathIn = path.Join(*dataDir, "conf", "samples", "tutmysql")
+	chrgPathIn = path.Join(*utils.DataDir, "conf", "samples", "tutmysql")
 	chrgCfgIn, err = config.NewCGRConfigFromPath(context.Background(), chrgPathIn)
 	if err != nil {
 		t.Fatal(err)
 	}
-	chrgPathOut = path.Join(*dataDir, "conf", "samples", "tutmysqljson")
+	chrgPathOut = path.Join(*utils.DataDir, "conf", "samples", "tutmysqljson")
 	chrgCfgOut, err = config.NewCGRConfigFromPath(context.Background(), chrgPathOut)
 	if err != nil {
 		t.Fatal(err)

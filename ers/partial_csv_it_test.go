@@ -70,7 +70,7 @@ package ers
 // )
 
 // func TestPartReadFile(t *testing.T) {
-// 	switch *dbType {
+// 	switch *utils.DBType {
 // 	case utils.MetaInternal:
 // 		partCfgDIR = "ers_internal"
 // 	case utils.MetaMySQL:
@@ -89,7 +89,7 @@ package ers
 
 // func testPartITInitConfig(t *testing.T) {
 // 	var err error
-// 	partCfgPath = path.Join(*dataDir, "conf", "samples", partCfgDIR)
+// 	partCfgPath = path.Join(*utils.DataDir, "conf", "samples", partCfgDIR)
 // 	if partCfg, err = config.NewCGRConfigFromPath(context.Background(), partCfgPath); err != nil {
 // 		t.Fatal("Got config error: ", err.Error())
 // 	}
@@ -103,7 +103,7 @@ package ers
 // }
 
 // func testPartITStartEngine(t *testing.T) {
-// 	if _, err := engine.StopStartEngine(partCfgPath, *waitRater); err != nil {
+// 	if _, err := engine.StopStartEngine(partCfgPath, *utils.WaitRater); err != nil {
 // 		t.Fatal(err)
 // 	}
 // }
@@ -111,7 +111,7 @@ package ers
 // // Connect rpc client to rater
 // func testPartITRpcConn(t *testing.T) {
 // 	var err error
-// 	partRPC, err = engine.NewRPCClient(partCfg.ListenCfg(), *encoding) // We connect over JSON so we can also troubleshoot if needed
+// 	partRPC, err = engine.NewRPCClient(partCfg.ListenCfg(), *utils.Encoding) // We connect over JSON so we can also troubleshoot if needed
 // 	if err != nil {
 // 		t.Fatal("Could not connect to rater: ", err.Error())
 // 	}
@@ -212,7 +212,7 @@ package ers
 // }
 
 // func testPartITKillEngine(t *testing.T) {
-// 	if err := engine.KillEngine(*waitRater); err != nil {
+// 	if err := engine.KillEngine(*utils.WaitRater); err != nil {
 // 		t.Error(err)
 // 	}
 // }

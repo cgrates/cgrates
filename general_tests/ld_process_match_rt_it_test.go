@@ -82,7 +82,7 @@ func TestLdPrMatchRtChange(t *testing.T) {
 		}
 	}()
 
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 		testLdPrMatchRtCfgDir = "ld_process_match_rt_internal"
 	case utils.MetaMySQL:
@@ -101,7 +101,7 @@ func TestLdPrMatchRtChange(t *testing.T) {
 
 func testLdPrMatchRtLoadConfig(t *testing.T) {
 	var err error
-	testLdPrMatchRtCfgPath = path.Join(*dataDir, "conf", "samples", testLdPrMatchRtCfgDir)
+	testLdPrMatchRtCfgPath = path.Join(*utils.DataDir, "conf", "samples", testLdPrMatchRtCfgDir)
 	if testLdPrMatchRtCfg, err = config.NewCGRConfigFromPath(context.Background(), testLdPrMatchRtCfgPath); err != nil {
 		t.Error(err)
 	}
@@ -117,14 +117,14 @@ func testLdPrMatchRtFlushDBs(t *testing.T) {
 }
 
 func testLdPrMatchRtStartEngine(t *testing.T) {
-	if _, err := engine.StopStartEngine(testLdPrMatchRtCfgPath, *waitRater); err != nil {
+	if _, err := engine.StopStartEngine(testLdPrMatchRtCfgPath, *utils.WaitRater); err != nil {
 		t.Fatal(err)
 	}
 }
 
 func testLdPrMatchRtRPCConn(t *testing.T) {
 	var err error
-	testLdPrMatchRtRPC, err = engine.NewRPCClient(testLdPrMatchRtCfg.ListenCfg(), *encoding)
+	testLdPrMatchRtRPC, err = engine.NewRPCClient(testLdPrMatchRtCfg.ListenCfg(), *utils.Encoding)
 	if err != nil {
 		t.Fatal(err)
 	}

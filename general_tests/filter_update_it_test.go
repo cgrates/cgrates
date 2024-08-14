@@ -75,7 +75,7 @@ var (
 )
 
 func TestFilterUpdateIT(t *testing.T) {
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 		t.SkipNow()
 	case utils.MetaMySQL:
@@ -91,18 +91,18 @@ func TestFilterUpdateIT(t *testing.T) {
 	}
 
 	for _, stest1 := range sTestsFilterUpdate {
-		t.Run(*dbType, stest1)
+		t.Run(*utils.DBType, stest1)
 	}
 }
 
 // Init Config
 func testFilterUpdateInitCfg(t *testing.T) {
 	var err error
-	fltrUpdateCfgPath1 = path.Join(*dataDir, "conf", "samples", "cache_replicate", fltrUpdateCfgDIR1)
+	fltrUpdateCfgPath1 = path.Join(*utils.DataDir, "conf", "samples", "cache_replicate", fltrUpdateCfgDIR1)
 	if fltrUpdateCfg1, err = config.NewCGRConfigFromPath(context.Background(), fltrUpdateCfgPath1); err != nil {
 		t.Fatal(err)
 	}
-	fltrUpdateCfgPath2 = path.Join(*dataDir, "conf", "samples", fltrUpdateCfgDIR2)
+	fltrUpdateCfgPath2 = path.Join(*utils.DataDir, "conf", "samples", fltrUpdateCfgDIR2)
 	if fltrUpdateCfg2, err = config.NewCGRConfigFromPath(context.Background(), fltrUpdateCfgPath2); err != nil {
 		t.Fatal(err)
 	}
@@ -121,10 +121,10 @@ func testFilterUpdateFlushDBs(t *testing.T) {
 // Start CGR Engine
 func testFilterUpdateStartEngine(t *testing.T) {
 	var err error
-	if _, err = engine.StopStartEngine(fltrUpdateCfgPath1, *waitRater); err != nil {
+	if _, err = engine.StopStartEngine(fltrUpdateCfgPath1, *utils.WaitRater); err != nil {
 		t.Fatal(err)
 	}
-	if testEng1, err = engine.StartEngine(fltrUpdateCfgPath2, *waitRater); err != nil {
+	if testEng1, err = engine.StartEngine(fltrUpdateCfgPath2, *utils.WaitRater); err != nil {
 		t.Fatal(err)
 	}
 
@@ -133,10 +133,10 @@ func testFilterUpdateStartEngine(t *testing.T) {
 // Connect rpc client to rater
 func testFilterUpdateRpcConn(t *testing.T) {
 	var err error
-	if fltrUpdateRPC1, err = engine.NewRPCClient(fltrUpdateCfg1.ListenCfg(), *encoding); err != nil {
+	if fltrUpdateRPC1, err = engine.NewRPCClient(fltrUpdateCfg1.ListenCfg(), *utils.Encoding); err != nil {
 		t.Fatal(err)
 	}
-	if fltrUpdateRPC2, err = engine.NewRPCClient(fltrUpdateCfg2.ListenCfg(), *encoding); err != nil {
+	if fltrUpdateRPC2, err = engine.NewRPCClient(fltrUpdateCfg2.ListenCfg(), *utils.Encoding); err != nil {
 		t.Fatal(err)
 	}
 }

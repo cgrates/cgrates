@@ -1,3 +1,5 @@
+//go:build integration || flaky
+
 /*
 Real-time Online/Offline Charging System (OCS) for Telecom & ISP environments
 Copyright (C) ITsysCOM GmbH
@@ -19,19 +21,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package ees
 
 import (
-	"flag"
 	"os"
 	"testing"
 
 	"github.com/cgrates/cgrates/engine"
-
-	"github.com/cgrates/cgrates/utils"
-)
-
-var (
-	dataDir   = flag.String("data_dir", "/usr/share/cgrates", "CGR data dir path here")
-	waitRater = flag.Int("wait_rater", 100, "Number of milliseconds to wait for rater to start and cache")
-	encoding  = flag.String("rpc", utils.MetaJSON, "what encoding would be used for rpc communication")
 )
 
 var exportPath = []string{"/tmp/testCSV", "/tmp/testComposedCSV", "/tmp/testFWV", "/tmp/testCSVMasked",

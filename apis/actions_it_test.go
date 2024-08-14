@@ -99,7 +99,7 @@ var (
 )
 
 func TestActionsIT(t *testing.T) {
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 		actConfigDIR = "apis_actions_internal"
 	case utils.MetaMongo:
@@ -118,7 +118,7 @@ func TestActionsIT(t *testing.T) {
 
 func testActionsInitCfg(t *testing.T) {
 	var err error
-	actCfgPath = path.Join(*dataDir, "conf", "samples", actConfigDIR)
+	actCfgPath = path.Join(*utils.DataDir, "conf", "samples", actConfigDIR)
 	actCfg, err = config.NewCGRConfigFromPath(context.Background(), actCfgPath)
 	if err != nil {
 		t.Error(err)
@@ -139,14 +139,14 @@ func testActionsResetStorDB(t *testing.T) {
 
 // Start CGR Engine
 func testActionsStartEngine(t *testing.T) {
-	if _, err := engine.StopStartEngine(actCfgPath, *waitRater); err != nil {
+	if _, err := engine.StopStartEngine(actCfgPath, *utils.WaitRater); err != nil {
 		t.Fatal(err)
 	}
 }
 
 func testActionsRPCConn(t *testing.T) {
 	var err error
-	actRPC, err = engine.NewRPCClient(actCfg.ListenCfg(), *encoding) // We connect over JSON so we can also troubleshoot if needed
+	actRPC, err = engine.NewRPCClient(actCfg.ListenCfg(), *utils.Encoding) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
 		t.Fatal(err)
 	}

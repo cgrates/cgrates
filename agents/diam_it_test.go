@@ -86,7 +86,7 @@ package agents
 
 // // Test start here
 // func TestDiamItTcp(t *testing.T) {
-// 	switch *dbType {
+// 	switch *utils.DBType {
 // 	case utils.MetaInternal:
 // 		diamConfigDIR = "diamagent_internal"
 // 	case utils.MetaMySQL:
@@ -104,14 +104,14 @@ package agents
 // }
 
 // func TestDiamItDispatcher(t *testing.T) {
-// 	if *encoding == utils.MetaGOB {
+// 	if *utils.Encoding == utils.MetaGOB {
 // 		t.SkipNow()
 // 		return
 // 	}
 // 	testDiamItResetAllDB(t)
 // 	isDispatcherActive = true
-// 	engine.StartEngine(path.Join(*dataDir, "conf", "samples", "dispatchers", "all"), 200)
-// 	engine.StartEngine(path.Join(*dataDir, "conf", "samples", "dispatchers", "all2"), 200)
+// 	engine.StartEngine(path.Join(*utils.DataDir, "conf", "samples", "dispatchers", "all"), 200)
+// 	engine.StartEngine(path.Join(*utils.DataDir, "conf", "samples", "dispatchers", "all2"), 200)
 // 	diamConfigDIR = "dispatchers/diamagent"
 // 	for _, stest := range sTestsDiam {
 // 		t.Run(diamConfigDIR, stest)
@@ -120,7 +120,7 @@ package agents
 // }
 
 // func TestDiamItSctp(t *testing.T) {
-// 	switch *dbType {
+// 	switch *utils.DBType {
 // 	case utils.MetaInternal:
 // 		diamConfigDIR = "diamsctpagent_internal"
 // 	case utils.MetaMySQL:
@@ -138,7 +138,7 @@ package agents
 // }
 
 // func TestDiamItBiRPC(t *testing.T) {
-// 	switch *dbType {
+// 	switch *utils.DBType {
 // 	case utils.MetaInternal:
 // 		diamConfigDIR = "diamagent_internal_%sbirpc"
 // 	case utils.MetaMySQL:
@@ -150,14 +150,14 @@ package agents
 // 	default:
 // 		t.Fatal("Unknown Database type")
 // 	}
-// 	diamConfigDIR = fmt.Sprintf(diamConfigDIR, strings.TrimPrefix(*encoding, utils.Meta))
+// 	diamConfigDIR = fmt.Sprintf(diamConfigDIR, strings.TrimPrefix(*utils.Encoding, utils.Meta))
 // 	for _, stest := range sTestsDiam {
 // 		t.Run(diamConfigDIR, stest)
 // 	}
 // }
 
 // func TestDiamItMaxConn(t *testing.T) {
-// 	switch *dbType {
+// 	switch *utils.DBType {
 // 	case utils.MetaInternal:
 // 		diamConfigDIR = "diamagentmaxconn_internal"
 // 	case utils.MetaMySQL:
@@ -177,7 +177,7 @@ package agents
 // }
 
 // func TestDiamItSessionDisconnect(t *testing.T) {
-// 	switch *dbType {
+// 	switch *utils.DBType {
 // 	case utils.MetaInternal:
 // 		diamConfigDIR = "diamagent_internal"
 // 	case utils.MetaMySQL:
@@ -198,7 +198,7 @@ package agents
 // }
 
 // func testDiamItInitCfg(t *testing.T) {
-// 	daCfgPath = path.Join(*dataDir, "conf", "samples", diamConfigDIR)
+// 	daCfgPath = path.Join(*utils.DataDir, "conf", "samples", diamConfigDIR)
 // 	// Init config first
 // 	var err error
 // 	daCfg, err = config.NewCGRConfigFromPath(context.Background(), daCfgPath)
@@ -212,7 +212,7 @@ package agents
 // }
 
 // func testDiamItResetAllDB(t *testing.T) {
-// 	cfgPath1 := path.Join(*dataDir, "conf", "samples", "dispatchers", "all")
+// 	cfgPath1 := path.Join(*utils.DataDir, "conf", "samples", "dispatchers", "all")
 // 	allCfg, err := config.NewCGRConfigFromPath(context.Background(), cfgPath1)
 // 	if err != nil {
 // 		t.Fatal(err)
@@ -221,7 +221,7 @@ package agents
 // 		t.Fatal(err)
 // 	}
 
-// 	cfgPath2 := path.Join(*dataDir, "conf", "samples", "dispatchers", "all2")
+// 	cfgPath2 := path.Join(*utils.DataDir, "conf", "samples", "dispatchers", "all2")
 // 	allCfg2, err := config.NewCGRConfigFromPath(context.Background(), cfgPath2)
 // 	if err != nil {
 // 		t.Fatal(err)
@@ -259,7 +259,7 @@ package agents
 // // Connect rpc client to rater
 // func testDiamItApierRpcConn(t *testing.T) {
 // 	var err error
-// 	apierRpc, err = engine.NewRPCClient(daCfg.ListenCfg(), *encoding) // We connect over JSON so we can also troubleshoot if needed
+// 	apierRpc, err = engine.NewRPCClient(daCfg.ListenCfg(), *utils.Encoding) // We connect over JSON so we can also troubleshoot if needed
 // 	if err != nil {
 // 		t.Fatal(err)
 // 	}
@@ -267,7 +267,7 @@ package agents
 
 // // Load the tariff plan, creating accounts and their balances
 // func testDiamItTPFromFolder(t *testing.T) {
-// 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "tutorial")}
+// 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*utils.DataDir, "tariffplans", "tutorial")}
 // 	var loadInst utils.LoadInstance
 // 	if err := apierRpc.Call(utils.APIerSv1LoadTariffPlanFromFolder, attrs, &loadInst); err != nil {
 // 		t.Error(err)
@@ -285,7 +285,7 @@ package agents
 // 		if err != nil {
 // 			t.Error(err)
 // 		}
-// 		loader := exec.Command(loaderPath, "-config_path", daCfgPath, "-path", path.Join(*dataDir, "tariffplans", "dispatchers"))
+// 		loader := exec.Command(loaderPath, "-config_path", daCfgPath, "-path", path.Join(*utils.DataDir, "tariffplans", "dispatchers"))
 
 // 		if err := loader.Start(); err != nil {
 // 			t.Error(err)
@@ -913,7 +913,7 @@ package agents
 // 	} else if val != eVal {
 // 		t.Errorf("expecting: %s, received: <%s>", eVal, val)
 // 	}
-// 	time.Sleep(time.Duration(*waitRater) * time.Millisecond)
+// 	time.Sleep(time.Duration(*utils.WaitRater) * time.Millisecond)
 // 	var cdrs []*engine.CDR
 // 	args := utils.RPCCDRsFilterWithAPIOpts{RPCCDRsFilter: &utils.RPCCDRsFilter{RunIDs: []string{utils.MetaRaw}}}
 // 	if err := apierRpc.Call(utils.CDRsV1GetCDRs, &args, &cdrs); err != nil {
