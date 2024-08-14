@@ -107,7 +107,7 @@ package agents
 // // Connect rpc client to rater
 // func testSAitApierRpcConn(t *testing.T) {
 // 	var err error
-// 	saRPC, err = newRPCClient(saCfg.ListenCfg()) // We connect over JSON so we can also troubleshoot if needed
+// 	saRPC, err = engine.NewRPCClient(saCfg.ListenCfg(), *encoding) // We connect over JSON so we can also troubleshoot if needed
 // 	if err != nil {
 // 		t.Fatal(err)
 // 	}

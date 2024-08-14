@@ -108,7 +108,7 @@ func testTpStartEngine(t *testing.T) {
 // Connect rpc client to rater
 func testTpRpcConn(t *testing.T) {
 	var err error
-	tpRPC, err = newRPCClient(tpCfg.ListenCfg()) // We connect over JSON so we can also troubleshoot if needed
+	tpRPC, err = engine.NewRPCClient(tpCfg.ListenCfg(), *encoding) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
 		t.Fatal(err)
 	}

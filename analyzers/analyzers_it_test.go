@@ -22,7 +22,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package analyzers
 
 import (
-	"errors"
 	"flag"
 	"os"
 	"path"
@@ -33,7 +32,6 @@ import (
 
 	"github.com/cgrates/birpc"
 	"github.com/cgrates/birpc/context"
-	"github.com/cgrates/birpc/jsonrpc"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/loaders"
@@ -69,17 +67,6 @@ var (
 	waitRater = flag.Int("wait_rater", 100, "Number of miliseconds to wait for rater to start and cache")
 	encoding  = flag.String("rpc", utils.MetaJSON, "what encoding whould be used for rpc comunication")
 )
-
-func newRPCClient(cfg *config.ListenCfg) (c *birpc.Client, err error) {
-	switch *encoding {
-	case utils.MetaJSON:
-		return jsonrpc.Dial(utils.TCP, cfg.RPCJSONListen)
-	case utils.MetaGOB:
-		return birpc.Dial(utils.TCP, cfg.RPCGOBListen)
-	default:
-		return nil, errors.New("UNSUPPORTED_RPC")
-	}
-}
 
 type smock struct{}
 
@@ -134,7 +121,7 @@ func testAnalyzerSRPCConn(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	anzRPC, err = newRPCClient(anzCfg.ListenCfg()) // We connect over JSON so we can also troubleshoot if needed
+	anzRPC, err = engine.NewRPCClient(anzCfg.ListenCfg(), *encoding) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
 		t.Fatal(err)
 	}

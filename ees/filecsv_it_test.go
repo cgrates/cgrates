@@ -25,7 +25,6 @@ import (
 	"archive/zip"
 	"bytes"
 	"encoding/csv"
-	"net/rpc"
 	"os"
 	"path"
 	"path/filepath"
@@ -34,6 +33,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc"
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
 
@@ -46,7 +46,7 @@ var (
 	csvConfigDir string
 	csvCfgPath   string
 	csvCfg       *config.CGRConfig
-	csvRpc       *rpc.Client
+	csvRpc       *birpc.Client
 
 	sTestsCsv = []func(t *testing.T){
 		testCreateDirectory,
@@ -101,7 +101,7 @@ func testCsvStartEngine(t *testing.T) {
 
 func testCsvRPCConn(t *testing.T) {
 	var err error
-	csvRpc, err = newRPCClient(csvCfg.ListenCfg())
+	csvRpc, err = engine.NewRPCClient(csvCfg.ListenCfg(), *encoding)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -190,13 +190,13 @@ func testCsvExportEvent(t *testing.T) {
 		},
 	}
 	var reply map[string]utils.MapStorage
-	if err := csvRpc.Call(utils.EeSv1ProcessEvent, eventVoice, &reply); err != nil {
+	if err := csvRpc.Call(context.Background(), utils.EeSv1ProcessEvent, eventVoice, &reply); err != nil {
 		t.Error(err)
 	}
-	if err := csvRpc.Call(utils.EeSv1ProcessEvent, eventData, &reply); err != nil {
+	if err := csvRpc.Call(context.Background(), utils.EeSv1ProcessEvent, eventData, &reply); err != nil {
 		t.Error(err)
 	}
-	if err := csvRpc.Call(utils.EeSv1ProcessEvent, eventSMS, &reply); err != nil {
+	if err := csvRpc.Call(context.Background(), utils.EeSv1ProcessEvent, eventSMS, &reply); err != nil {
 		t.Error(err)
 	}
 	time.Sleep(time.Second)
@@ -291,10 +291,10 @@ func testCsvExportComposedEvent(t *testing.T) {
 		},
 	}
 	var reply map[string]utils.MapStorage
-	if err := csvRpc.Call(utils.EeSv1ProcessEvent, eventVoice, &reply); err != nil {
+	if err := csvRpc.Call(context.Background(), utils.EeSv1ProcessEvent, eventVoice, &reply); err != nil {
 		t.Error(err)
 	}
-	if err := csvRpc.Call(utils.EeSv1ProcessEvent, eventSMS, &reply); err != nil {
+	if err := csvRpc.Call(context.Background(), utils.EeSv1ProcessEvent, eventSMS, &reply); err != nil {
 		t.Error(err)
 	}
 	time.Sleep(time.Second)
@@ -448,7 +448,7 @@ func testCsvExportBufferedEvent(t *testing.T) {
 		},
 	}
 	var reply []byte
-	if err := csvRpc.Call(utils.EeSv1ArchiveEventsInReply,
+	if err := csvRpc.Call(context.Background(), utils.EeSv1ArchiveEventsInReply,
 		eventVoice, &reply); err != nil {
 		t.Error(err)
 	}
@@ -504,7 +504,7 @@ func testCsvExportBufferedEventNoExports(t *testing.T) {
 	}
 	var reply []byte
 	expectedErr := "exporter config with ID: InexistentExport is missing"
-	if err := csvRpc.Call(utils.EeSv1ArchiveEventsInReply,
+	if err := csvRpc.Call(context.Background(), utils.EeSv1ArchiveEventsInReply,
 		eventVoice, &reply); err == nil || err.Error() != expectedErr {
 		t.Errorf("Expected %q \n received %q", utils.ToJSON(expectedErr), utils.ToJSON(err))
 	}
@@ -549,7 +549,7 @@ func testCsvExportBufferedEventNoExports(t *testing.T) {
 		},
 	}
 	expectedErr = "SERVER_ERROR: NO EXPORTS"
-	if err := csvRpc.Call(utils.EeSv1ArchiveEventsInReply,
+	if err := csvRpc.Call(context.Background(), utils.EeSv1ArchiveEventsInReply,
 		eventVoice, &reply); err == nil || err.Error() != expectedErr {
 		t.Errorf("Expected %q \n received %q", utils.ToJSON(expectedErr), utils.ToJSON(err))
 	}
@@ -646,13 +646,13 @@ func testCsvExportEventWithInflateTemplate(t *testing.T) {
 		},
 	}
 	var reply map[string]utils.MapStorage
-	if err := csvRpc.Call(utils.EeSv1ProcessEvent, eventVoice, &reply); err != nil {
+	if err := csvRpc.Call(context.Background(), utils.EeSv1ProcessEvent, eventVoice, &reply); err != nil {
 		t.Error(err)
 	}
-	if err := csvRpc.Call(utils.EeSv1ProcessEvent, eventData, &reply); err != nil {
+	if err := csvRpc.Call(context.Background(), utils.EeSv1ProcessEvent, eventData, &reply); err != nil {
 		t.Error(err)
 	}
-	if err := csvRpc.Call(utils.EeSv1ProcessEvent, eventSMS, &reply); err != nil {
+	if err := csvRpc.Call(context.Background(), utils.EeSv1ProcessEvent, eventSMS, &reply); err != nil {
 		t.Error(err)
 	}
 	time.Sleep(time.Second)
@@ -717,7 +717,7 @@ func testCsvExportNotFoundExporter(t *testing.T) {
 	}
 
 	var reply map[string]utils.MapStorage
-	if err := csvRpc.Call(utils.EeSv1ProcessEvent, eventVoice, &reply); err == nil ||
+	if err := csvRpc.Call(context.Background(), utils.EeSv1ProcessEvent, eventVoice, &reply); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}

@@ -121,7 +121,7 @@ func testThresholdsStartEngine(t *testing.T) {
 
 func testThresholdsRPCConn(t *testing.T) {
 	var err error
-	thRPC, err = newRPCClient(thCfg.ListenCfg()) // We connect over JSON so we can also troubleshoot if needed
+	thRPC, err = engine.NewRPCClient(thCfg.ListenCfg(), *encoding) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -142,7 +142,7 @@ package ers
 // // Connect rpc client to rater
 // func testFlatstoreITRpcConn(t *testing.T) {
 // 	var err error
-// 	flatstoreRPC, err = newRPCClient(flatstoreCfg.ListenCfg()) // We connect over JSON so we can also troubleshoot if needed
+// 	flatstoreRPC, err = engine.NewRPCClient(flatstoreCfg.ListenCfg(), *encoding) // We connect over JSON so we can also troubleshoot if needed
 // 	if err != nil {
 // 		t.Fatal("Could not connect to rater: ", err.Error())
 // 	}

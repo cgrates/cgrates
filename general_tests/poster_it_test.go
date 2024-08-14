@@ -105,7 +105,7 @@ package general_tests
 
 // func testPosterITRpcConn(t *testing.T) {
 // 	var err error
-// 	pstrRpc, err = newRPCClient(pstrCfg.ListenCfg()) // We connect over JSON so we can also troubleshoot if needed
+// 	pstrRpc, err = engine.NewRPCClient(pstrCfg.ListenCfg(), *encoding) // We connect over JSON so we can also troubleshoot if needed
 // 	if err != nil {
 // 		t.Fatal(err)
 // 	}

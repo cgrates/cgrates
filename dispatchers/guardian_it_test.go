@@ -26,6 +26,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/guardian"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -64,12 +65,12 @@ func TestDspGuardianST(t *testing.T) {
 
 func testDspGrdPing(t *testing.T) {
 	var reply string
-	if err := allEngine.RPC.Call(utils.GuardianSv1Ping, new(utils.CGREvent), &reply); err != nil {
+	if err := allEngine.RPC.Call(context.Background(), utils.GuardianSv1Ping, new(utils.CGREvent), &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.Pong {
 		t.Errorf("Received: %s", reply)
 	}
-	if err := dispEngine.RPC.Call(utils.GuardianSv1Ping, &utils.CGREvent{
+	if err := dispEngine.RPC.Call(context.Background(), utils.GuardianSv1Ping, &utils.CGREvent{
 		Tenant: "cgrates.org",
 
 		APIOpts: map[string]any{
@@ -90,7 +91,7 @@ func testDspGrdLock(t *testing.T) {
 		Timeout:     500 * time.Millisecond,
 	}
 	var reply string
-	if err := dispEngine.RPC.Call(utils.GuardianSv1RemoteLock, &guardian.AttrRemoteLockWithAPIOpts{
+	if err := dispEngine.RPC.Call(context.Background(), utils.GuardianSv1RemoteLock, &guardian.AttrRemoteLockWithAPIOpts{
 		AttrRemoteLock: args,
 		Tenant:         "cgrates.org",
 		APIOpts: map[string]any{
@@ -101,7 +102,7 @@ func testDspGrdLock(t *testing.T) {
 	}
 
 	var unlockReply []string
-	if err := dispEngine.RPC.Call(utils.GuardianSv1RemoteUnlock, &guardian.AttrRemoteUnlockWithAPIOpts{
+	if err := dispEngine.RPC.Call(context.Background(), utils.GuardianSv1RemoteUnlock, &guardian.AttrRemoteUnlockWithAPIOpts{
 		RefID:  reply,
 		Tenant: "cgrates.org",
 		APIOpts: map[string]any{

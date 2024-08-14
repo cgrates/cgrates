@@ -108,7 +108,7 @@ func testV1SplSStartEngine(t *testing.T) {
 
 func testV1SplSRpcConn(t *testing.T) {
 	var err error
-	splSv1Rpc, err = newRPCClient(splSv1Cfg.ListenCfg())
+	splSv1Rpc, err = engine.NewRPCClient(splSv1Cfg.ListenCfg(), *encoding)
 	if err != nil {
 		t.Fatal("Could not connect to rater: ", err.Error())
 	}

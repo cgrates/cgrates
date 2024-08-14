@@ -23,7 +23,6 @@ package ers
 import (
 	"bytes"
 	"fmt"
-	"net/rpc"
 	"os"
 	"path"
 	"reflect"
@@ -31,6 +30,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc"
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
 
@@ -42,7 +42,7 @@ var (
 	xmlCfgPath string
 	xmlCfgDIR  string
 	xmlCfg     *config.CGRConfig
-	xmlRPC     *rpc.Client
+	xmlRPC     *birpc.Client
 
 	xmlTests = []func(t *testing.T){
 		testCreateDirs,
@@ -130,7 +130,7 @@ func testXMLITStartEngine(t *testing.T) {
 // Connect rpc client to rater
 func testXMLITRpcConn(t *testing.T) {
 	var err error
-	xmlRPC, err = newRPCClient(xmlCfg.ListenCfg()) // We connect over JSON so we can also troubleshoot if needed
+	xmlRPC, err = engine.NewRPCClient(xmlCfg.ListenCfg(), *encoding) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
 		t.Fatal("Could not connect to rater: ", err.Error())
 	}

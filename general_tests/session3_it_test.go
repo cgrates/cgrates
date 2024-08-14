@@ -102,7 +102,7 @@ package general_tests
 
 // func testSes3ItRPCConn(t *testing.T) {
 // 	var err error
-// 	ses3RPC, err = newRPCClient(ses3Cfg.ListenCfg())
+// 	ses3RPC, err = engine.NewRPCClient(ses3Cfg.ListenCfg(), *encoding)
 // 	if err != nil {
 // 		t.Fatal(err)
 // 	}

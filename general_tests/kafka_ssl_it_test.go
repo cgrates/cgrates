@@ -112,7 +112,7 @@ func testKafkaSSLStartEngine(t *testing.T) {
 
 func testKafkaSSLRPCConn(t *testing.T) {
 	var err error
-	kafkaSSLRpc, err = newRPCClient(kafkaSSLCfg.ListenCfg())
+	kafkaSSLRpc, err = engine.NewRPCClient(kafkaSSLCfg.ListenCfg(), *encoding)
 	if err != nil {
 		t.Fatal(err)
 	}

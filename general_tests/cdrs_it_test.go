@@ -117,7 +117,7 @@ func testCDRsStartEngine(t *testing.T) {
 
 // Connect rpc client to rater
 func testCDRsRpcConn(t *testing.T) {
-	cdrsRpc, err = newRPCClient(cdrsCfg.ListenCfg()) // We connect over JSON so we can also troubleshoot if needed
+	cdrsRpc, err = engine.NewRPCClient(cdrsCfg.ListenCfg(), *encoding) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
 		t.Fatal("Could not connect to rater: ", err.Error())
 	}

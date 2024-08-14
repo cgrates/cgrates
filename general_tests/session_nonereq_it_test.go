@@ -92,7 +92,7 @@ package general_tests
 
 // func testSesNoneReqTypeItRPCConn(t *testing.T) {
 // 	var err error
-// 	sesNoneReqTypeRPC, err = newRPCClient(sesNoneReqTypeCfg.ListenCfg())
+// 	sesNoneReqTypeRPC, err = engine.NewRPCClient(sesNoneReqTypeCfg.ListenCfg(), *encoding)
 // 	if err != nil {
 // 		t.Fatal(err)
 // 	}

@@ -96,7 +96,7 @@ package general_tests
 
 // func testSrItRPCConn(t *testing.T) {
 // 	var err error
-// 	srrpc, err = newRPCClient(srCfg.ListenCfg())
+// 	srrpc, err = engine.NewRPCClient(srCfg.ListenCfg(), *encoding)
 // 	if err != nil {
 // 		t.Fatal(err)
 // 	}

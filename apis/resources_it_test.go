@@ -140,7 +140,7 @@ func testResourceSStartEngine(t *testing.T) {
 
 func testResourceSRPCConn(t *testing.T) {
 	var err error
-	rsRPC, err = newRPCClient(rsCfg.ListenCfg()) // We connect over JSON so we can also troubleshoot if needed
+	rsRPC, err = engine.NewRPCClient(rsCfg.ListenCfg(), *encoding) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
 		t.Fatal(err)
 	}

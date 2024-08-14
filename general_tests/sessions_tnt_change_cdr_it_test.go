@@ -92,7 +92,7 @@ package general_tests
 
 // func testSesTntChngCdrsRPCConn(t *testing.T) {
 // 	var err error
-// 	sesTntChngRPC, err = newRPCClient(sesTntChngCfg.ListenCfg())
+// 	sesTntChngRPC, err = engine.NewRPCClient(sesTntChngCfg.ListenCfg(), *encoding)
 // 	if err != nil {
 // 		t.Fatal(err)
 // 	}

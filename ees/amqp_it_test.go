@@ -22,11 +22,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package ees
 
 import (
-	"net/rpc"
 	"path"
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc"
 	"github.com/cgrates/birpc/context"
 	amqp "github.com/rabbitmq/amqp091-go"
 
@@ -39,7 +39,7 @@ var (
 	amqpConfigDir  string
 	amqpCfgPath    string
 	amqpCfg        *config.CGRConfig
-	amqpRPC        *rpc.Client
+	amqpRPC        *birpc.Client
 	amqpExportPath string
 
 	sTestsAMQP = []func(t *testing.T){
@@ -95,7 +95,7 @@ func testAMQPStartEngine(t *testing.T) {
 
 func testAMQPRPCConn(t *testing.T) {
 	var err error
-	amqpRPC, err = newRPCClient(amqpCfg.ListenCfg())
+	amqpRPC, err = engine.NewRPCClient(amqpCfg.ListenCfg(), *encoding)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -127,7 +127,7 @@ func testAMQPExportEvent(t *testing.T) {
 	}
 
 	var reply map[string]map[string]any
-	if err := amqpRPC.Call(utils.EeSv1ProcessEvent, event, &reply); err != nil {
+	if err := amqpRPC.Call(context.Background(), utils.EeSv1ProcessEvent, event, &reply); err != nil {
 		t.Error(err)
 	}
 	time.Sleep(time.Second)

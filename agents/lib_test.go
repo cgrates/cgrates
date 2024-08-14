@@ -19,12 +19,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package agents
 
 import (
-	"errors"
 	"flag"
 
-	"github.com/cgrates/birpc"
-	"github.com/cgrates/birpc/jsonrpc"
-	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -34,14 +30,3 @@ var (
 	encoding  = flag.String("rpc", utils.MetaJSON, "what encoding whould be used for rpc comunication")
 	dbType    = flag.String("dbtype", utils.MetaInternal, "The type of DataBase (Internal/Mongo/mySql)")
 )
-
-func newRPCClient(cfg *config.ListenCfg) (c *birpc.Client, err error) {
-	switch *encoding {
-	case utils.MetaJSON:
-		return jsonrpc.Dial(utils.TCP, cfg.RPCJSONListen)
-	case utils.MetaGOB:
-		return birpc.Dial(utils.TCP, cfg.RPCGOBListen)
-	default:
-		return nil, errors.New("UNSUPPORTED_RPC")
-	}
-}

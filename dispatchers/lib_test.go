@@ -19,16 +19,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package dispatchers
 
 import (
-	"errors"
 	"flag"
-	"net/rpc"
-	"net/rpc/jsonrpc"
 	"os/exec"
 	"path"
 	"strconv"
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc"
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
@@ -47,21 +45,10 @@ var (
 	dbType    = flag.String("dbtype", utils.MetaInternal, "The type of DataBase (Internal/Mongo/mySql)")
 )
 
-func newRPCClient(cfg *config.ListenCfg) (c *rpc.Client, err error) {
-	switch *encoding {
-	case utils.MetaJSON:
-		return jsonrpc.Dial(utils.TCP, cfg.RPCJSONListen)
-	case utils.MetaGOB:
-		return rpc.Dial(utils.TCP, cfg.RPCGOBListen)
-	default:
-		return nil, errors.New("UNSUPPORTED_RPC")
-	}
-}
-
 type testDispatcher struct {
 	CfgPath string
 	Cfg     *config.CGRConfig
-	RPC     *rpc.Client
+	RPC     *birpc.Client
 	cmd     *exec.Cmd
 }
 
@@ -92,7 +79,7 @@ func (d *testDispatcher) startEngine(t *testing.T) {
 		t.Fatalf("Error at engine start:%v\n", err)
 	}
 	// }
-	if d.RPC, err = newRPCClient(d.Cfg.ListenCfg()); err != nil {
+	if d.RPC, err = engine.NewRPCClient(d.Cfg.ListenCfg(), *encoding); err != nil {
 		t.Fatalf("Error at dialing rcp client:%v\n", err)
 	}
 }

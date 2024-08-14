@@ -20,9 +20,9 @@ package engine
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"io"
-	"net/rpc/jsonrpc"
 	"os"
 	"os/exec"
 	"path"
@@ -30,7 +30,9 @@ import (
 	"strings"
 	"time"
 
+	"github.com/cgrates/birpc"
 	"github.com/cgrates/birpc/context"
+	"github.com/cgrates/birpc/jsonrpc"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
@@ -302,5 +304,16 @@ func GetDefaultEmptyCacheStats() map[string]*ltcache.CacheStats {
 		utils.CacheAccounts:                    {},
 		utils.CacheAccountsFilterIndexes:       {},
 		utils.CacheReplicationHosts:            {},
+	}
+}
+
+func NewRPCClient(cfg *config.ListenCfg, encoding string) (*birpc.Client, error) {
+	switch encoding {
+	case utils.MetaJSON:
+		return jsonrpc.Dial(utils.TCP, cfg.RPCJSONListen)
+	case utils.MetaGOB:
+		return birpc.Dial(utils.TCP, cfg.RPCGOBListen)
+	default:
+		return nil, errors.New("invalid encoding")
 	}
 }

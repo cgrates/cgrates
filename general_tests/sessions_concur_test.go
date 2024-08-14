@@ -98,7 +98,7 @@ func testSCncrStartEngine(t *testing.T) {
 // Connect rpc client to rater
 func testSCncrRPCConn(t *testing.T) {
 	var err error
-	sCncrRPC, err = newRPCClient(sCncrCfg.ListenCfg()) // We connect over JSON so we can also troubleshoot if needed
+	sCncrRPC, err = engine.NewRPCClient(sCncrCfg.ListenCfg(), *encoding) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
 		t.Fatal("Could not connect to rater: ", err.Error())
 	}

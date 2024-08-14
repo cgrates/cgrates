@@ -113,10 +113,10 @@ package sessions
 // // Connect rpc client to rater
 // func testSessionSRplApierRpcConn(t *testing.T) {
 // 	var err error
-// 	if smgRplcMstrRPC, err = newRPCClient(smgRplcMasterCfg.ListenCfg()); err != nil {
+// 	if smgRplcMstrRPC, err = engine.NewRPCClient(smgRplcMasterCfg.ListenCfg(), *encoding); err != nil {
 // 		t.Fatal(err)
 // 	}
-// 	if smgRplcSlvRPC, err = newRPCClient(smgRplcSlaveCfg.ListenCfg()); err != nil {
+// 	if smgRplcSlvRPC, err = engine.NewRPCClient(smgRplcSlaveCfg.ListenCfg(), *encoding); err != nil {
 // 		t.Fatal(err)
 // 	}
 // }
@@ -349,7 +349,7 @@ package sessions
 // 	if err != nil { // Kill both and start Master
 // 		t.Fatal(err)
 // 	}
-// 	if smgRplcMstrRPC, err = newRPCClient(smgRplcMasterCfg.ListenCfg()); err != nil {
+// 	if smgRplcMstrRPC, err = engine.NewRPCClient(smgRplcMasterCfg.ListenCfg(), *encoding); err != nil {
 // 		t.Fatal(err)
 // 	}
 // 	// create two sessions
@@ -426,7 +426,7 @@ package sessions
 // 	if _, err := engine.StartEngine(smgRplcSlaveCfgPath, *waitRater); err != nil {
 // 		t.Fatal(err)
 // 	}
-// 	if smgRplcSlvRPC, err = newRPCClient(smgRplcSlaveCfg.ListenCfg()); err != nil {
+// 	if smgRplcSlvRPC, err = engine.NewRPCClient(smgRplcSlaveCfg.ListenCfg(), *encoding); err != nil {
 // 		t.Fatal(err)
 // 	}
 // 	// when we start slave after master we expect to don't have sessions
@@ -465,7 +465,7 @@ package sessions
 // 	if _, err := engine.StartEngine(smgRplcMasterCfgPath, *waitRater); err != nil {
 // 		t.Fatal(err)
 // 	}
-// 	if smgRplcMstrRPC, err = newRPCClient(smgRplcMasterCfg.ListenCfg()); err != nil {
+// 	if smgRplcMstrRPC, err = engine.NewRPCClient(smgRplcMasterCfg.ListenCfg(), *encoding); err != nil {
 // 		t.Fatal(err)
 // 	}
 // 	// Master should have no session active/passive

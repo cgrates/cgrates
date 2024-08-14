@@ -146,7 +146,7 @@ func testActionsStartEngine(t *testing.T) {
 
 func testActionsRPCConn(t *testing.T) {
 	var err error
-	actRPC, err = newRPCClient(actCfg.ListenCfg()) // We connect over JSON so we can also troubleshoot if needed
+	actRPC, err = engine.NewRPCClient(actCfg.ListenCfg(), *encoding) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
 		t.Fatal(err)
 	}

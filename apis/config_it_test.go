@@ -121,7 +121,7 @@ func testCfgStartEngine(t *testing.T) {
 
 func testCfgRPCConn(t *testing.T) {
 	var err error
-	cfgRPC, err = newRPCClient(cfgCfg.ListenCfg()) // We connect over JSON so we can also troubleshoot if needed
+	cfgRPC, err = engine.NewRPCClient(cfgCfg.ListenCfg(), *encoding) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -417,7 +417,7 @@ func testCfgStartEngineStore(t *testing.T) {
 
 func testCfgRPCConnStore(t *testing.T) {
 	var err error
-	cfgRPC, err = newRPCClient(cfgCfg.ListenCfg()) // We connect over JSON so we can also troubleshoot if needed
+	cfgRPC, err = engine.NewRPCClient(cfgCfg.ListenCfg(), *encoding) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
 		t.Fatal(err)
 	}

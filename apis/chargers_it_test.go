@@ -127,7 +127,7 @@ func testChargersStartEngine(t *testing.T) {
 
 func testChargersSRPCConn(t *testing.T) {
 	var err error
-	chargersRPC, err = newRPCClient(chargersCfg.ListenCfg()) // We connect over JSON so we can also troubleshoot if needed
+	chargersRPC, err = engine.NewRPCClient(chargersCfg.ListenCfg(), *encoding) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
 		t.Fatal(err)
 	}

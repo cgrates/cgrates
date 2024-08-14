@@ -116,7 +116,7 @@ func testTrendsStartEngine(t *testing.T) {
 
 func testTrendsRPCConn(t *testing.T) {
 	var err error
-	trRPC, err = newRPCClient(trCfg.ListenCfg()) // We connect over JSON so we can also troubleshoot if needed
+	trRPC, err = engine.NewRPCClient(trCfg.ListenCfg(), *encoding) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -124,7 +124,7 @@ func testLdPrMatchAcStartEngine(t *testing.T) {
 
 func testLdPrMatchAcRPCConn(t *testing.T) {
 	var err error
-	testLdPrMatchAcRPC, err = newRPCClient(testLdPrMatchAcCfg.ListenCfg())
+	testLdPrMatchAcRPC, err = engine.NewRPCClient(testLdPrMatchAcCfg.ListenCfg(), *encoding)
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -100,7 +100,7 @@ func testSes2ItStartEngine(t *testing.T) {
 
 func testSes2ItRPCConn(t *testing.T) {
 	var err error
-	ses2RPC, err = newRPCClient(ses2Cfg.ListenCfg())
+	ses2RPC, err = engine.NewRPCClient(ses2Cfg.ListenCfg(), *encoding)
 	if err != nil {
 		t.Fatal(err)
 	}

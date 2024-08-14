@@ -116,7 +116,7 @@ func testLdro2nRtStartEngine(t *testing.T) {
 
 func testLdro2nRtRPCConn(t *testing.T) {
 	var err error
-	if testLdro2nRtRPC, err = newRPCClient(testLdro2nRtCfg.ListenCfg()); err != nil {
+	if testLdro2nRtRPC, err = engine.NewRPCClient(testLdro2nRtCfg.ListenCfg(), *encoding); err != nil {
 		t.Fatal(err)
 	}
 }

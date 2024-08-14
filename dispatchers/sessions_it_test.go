@@ -100,7 +100,7 @@ import (
 			},
 		}
 		var reply string
-		if err := allEngine.RPC.Call(utils.APIerSv2SetBalance, attrSetBalance, &reply); err != nil {
+		if err := allEngine.RPC.Call(context.Background(), utils.APIerSv2SetBalance, attrSetBalance, &reply); err != nil {
 			t.Error(err)
 		} else if reply != utils.OK {
 			t.Errorf("Received: %s", reply)
@@ -111,18 +111,18 @@ import (
 			Account: attrSetBalance.Account,
 		}
 		eAcntVal := float64(initUsage)
-		if err := allEngine.RPC.Call(utils.APIerSv2GetAccount, attrs, &acnt); err != nil {
+		if err := allEngine.RPC.Call(context.Background(), utils.APIerSv2GetAccount, attrs, &acnt); err != nil {
 			t.Error(err)
 		} else if acnt.BalanceMap[utils.MetaVoice].GetTotalValue() != eAcntVal {
 			t.Errorf("Expecting: %v, received: %v",
 				time.Duration(eAcntVal), time.Duration(acnt.BalanceMap[utils.MetaVoice].GetTotalValue()))
 		}
-		if err := allEngine2.RPC.Call(utils.APIerSv2SetBalance, attrSetBalance, &reply); err != nil {
+		if err := allEngine2.RPC.Call(context.Background(), utils.APIerSv2SetBalance, attrSetBalance, &reply); err != nil {
 			t.Error(err)
 		} else if reply != utils.OK {
 			t.Errorf("Received: %s", reply)
 		}
-		if err := allEngine2.RPC.Call(utils.APIerSv2GetAccount, attrs, &acnt); err != nil {
+		if err := allEngine2.RPC.Call(context.Background(), utils.APIerSv2GetAccount, attrs, &acnt); err != nil {
 			t.Error(err)
 		} else if acnt.BalanceMap[utils.MetaVoice].GetTotalValue() != eAcntVal {
 			t.Errorf("Expecting: %v, received: %v",
@@ -132,12 +132,12 @@ import (
 
 	func testDspSessionPing(t *testing.T) {
 		var reply string
-		if err := allEngine.RPC.Call(utils.SessionSv1Ping, new(utils.CGREvent), &reply); err != nil {
+		if err := allEngine.RPC.Call(context.Background(), utils.SessionSv1Ping, new(utils.CGREvent), &reply); err != nil {
 			t.Error(err)
 		} else if reply != utils.Pong {
 			t.Errorf("Received: %s", reply)
 		}
-		if err := dispEngine.RPC.Call(utils.SessionSv1Ping, &utils.CGREvent{
+		if err := dispEngine.RPC.Call(context.Background(), utils.SessionSv1Ping, &utils.CGREvent{
 			Tenant: "cgrates.org",
 
 			APIOpts: map[string]any{
@@ -152,7 +152,7 @@ import (
 
 	func testDspSessionPingFailover(t *testing.T) {
 		var reply string
-		if err := allEngine.RPC.Call(utils.SessionSv1Ping, new(utils.CGREvent), &reply); err != nil {
+		if err := allEngine.RPC.Call(context.Background(), utils.SessionSv1Ping, new(utils.CGREvent), &reply); err != nil {
 			t.Error(err)
 		} else if reply != utils.Pong {
 			t.Errorf("Received: %s", reply)
@@ -164,19 +164,19 @@ import (
 				utils.OptsAPIKey: "ses12345",
 			},
 		}
-		if err := dispEngine.RPC.Call(utils.SessionSv1Ping, &ev, &reply); err != nil {
+		if err := dispEngine.RPC.Call(context.Background(), utils.SessionSv1Ping, &ev, &reply); err != nil {
 			t.Error(err)
 		} else if reply != utils.Pong {
 			t.Errorf("Received: %s", reply)
 		}
 		allEngine.stopEngine(t)
-		if err := dispEngine.RPC.Call(utils.SessionSv1Ping, &ev, &reply); err != nil {
+		if err := dispEngine.RPC.Call(context.Background(), utils.SessionSv1Ping, &ev, &reply); err != nil {
 			t.Error(err)
 		} else if reply != utils.Pong {
 			t.Errorf("Received: %s", reply)
 		}
 		allEngine2.stopEngine(t)
-		if err := dispEngine.RPC.Call(utils.SessionSv1Ping, &ev, &reply); err == nil {
+		if err := dispEngine.RPC.Call(context.Background(), utils.SessionSv1Ping, &ev, &reply); err == nil {
 			t.Errorf("Expected error but received %v and reply %v\n", err, reply)
 		}
 		allEngine.startEngine(t)
@@ -211,7 +211,7 @@ import (
 			},
 		}
 		var rply sessions.V1AuthorizeReplyWithDigest
-		if err := dispEngine.RPC.Call(utils.SessionSv1AuthorizeEventWithDigest,
+		if err := dispEngine.RPC.Call(context.Background(), utils.SessionSv1AuthorizeEventWithDigest,
 			args, &rply); err == nil || err.Error() != utils.ErrUnauthorizedApi.Error() {
 			t.Error(err)
 		}
@@ -247,7 +247,7 @@ import (
 			},
 		}
 		var rply sessions.V1AuthorizeReplyWithDigest
-		if err := dispEngine.RPC.Call(utils.SessionSv1AuthorizeEventWithDigest,
+		if err := dispEngine.RPC.Call(context.Background(), utils.SessionSv1AuthorizeEventWithDigest,
 			argsAuth, &rply); err != nil {
 			t.Error(err)
 			return
@@ -300,7 +300,7 @@ import (
 			},
 		}
 		var rply sessions.V1InitReplyWithDigest
-		if err := dispEngine.RPC.Call(utils.SessionSv1InitiateSessionWithDigest,
+		if err := dispEngine.RPC.Call(context.Background(), utils.SessionSv1InitiateSessionWithDigest,
 			argsInit, &rply); err != nil {
 			t.Fatal(err)
 		}
@@ -321,28 +321,28 @@ import (
 			Filters: []string{},
 		}
 		var reply int
-		if err := dispEngine.RPC.Call(utils.SessionSv1GetActiveSessionsCount,
+		if err := dispEngine.RPC.Call(context.Background(), utils.SessionSv1GetActiveSessionsCount,
 			&filtr, &reply); err != nil {
 			t.Fatal(err)
 		} else if reply != 3 {
 			t.Errorf("Expected 3 active sessions received %v", reply)
 		}
 		var rply []*sessions.ExternalSession
-		if err := dispEngine.RPC.Call(utils.SessionSv1GetActiveSessions,
+		if err := dispEngine.RPC.Call(context.Background(), utils.SessionSv1GetActiveSessions,
 			&filtr, &rply); err != nil {
 			t.Fatal(err)
 		} else if len(rply) != 3 {
 			t.Errorf("Unexpected number of sessions returned %v :%s", len(rply), utils.ToJSON(rply))
 		}
 
-		if err := dispEngine.RPC.Call(utils.SessionSv1GetPassiveSessionsCount,
+		if err := dispEngine.RPC.Call(context.Background(), utils.SessionSv1GetPassiveSessionsCount,
 			&filtr, &reply); err != nil {
 			t.Fatal(err)
 		} else if reply != 0 {
 			t.Errorf("Expected no pasive sessions received %v", reply)
 		}
 		rply = nil
-		if err := dispEngine.RPC.Call(utils.SessionSv1GetPassiveSessions,
+		if err := dispEngine.RPC.Call(context.Background(), utils.SessionSv1GetPassiveSessions,
 			&filtr, &rply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 			t.Fatalf("Expected %v received %v with reply %s", utils.ErrNotFound, err, utils.ToJSON(rply))
 		}
@@ -376,7 +376,7 @@ import (
 			},
 		}
 		var rply sessions.V1UpdateSessionReply
-		if err := dispEngine.RPC.Call(utils.SessionSv1UpdateSession,
+		if err := dispEngine.RPC.Call(context.Background(), utils.SessionSv1UpdateSession,
 			argsUpdate, &rply); err != nil {
 			t.Error(err)
 		}
@@ -447,7 +447,7 @@ import (
 			},
 		}
 		var rply sessions.V1UpdateSessionReply
-		if err := dispEngine.RPC.Call(utils.SessionSv1UpdateSession,
+		if err := dispEngine.RPC.Call(context.Background(), utils.SessionSv1UpdateSession,
 			argsUpdate, &rply); err != nil {
 			t.Fatal(err)
 		}
@@ -526,7 +526,7 @@ import (
 			},
 		}
 		var rply string
-		if err := dispEngine.RPC.Call(utils.SessionSv1TerminateSession,
+		if err := dispEngine.RPC.Call(context.Background(), utils.SessionSv1TerminateSession,
 			args, &rply); err != nil {
 			t.Error(err)
 		}
@@ -557,7 +557,7 @@ import (
 		}
 
 		var rply string
-		if err := dispEngine.RPC.Call(utils.SessionSv1ProcessCDR,
+		if err := dispEngine.RPC.Call(context.Background(), utils.SessionSv1ProcessCDR,
 			args, &rply); err != nil {
 			t.Fatal(err)
 		}
@@ -596,7 +596,7 @@ import (
 			},
 		}
 		var rply sessions.V1ProcessMessageReply
-		if err := dispEngine.RPC.Call(utils.SessionSv1ProcessMessage,
+		if err := dispEngine.RPC.Call(context.Background(), utils.SessionSv1ProcessMessage,
 			args, &rply); err != nil {
 			t.Fatal(err)
 		}
@@ -675,7 +675,7 @@ import (
 			},
 		}
 		var rply sessions.V1ProcessMessageReply
-		if err := dispEngine.RPC.Call(utils.SessionSv1ProcessMessage,
+		if err := dispEngine.RPC.Call(context.Background(), utils.SessionSv1ProcessMessage,
 			args, &rply); err != nil {
 			t.Fatal(err)
 		}
@@ -729,7 +729,7 @@ import (
 
 		var reply string
 		// reload cache  in order to corectly cahce the indexes
-		if err := allEngine.RPC.Call(utils.CacheSv1Clear, &utils.AttrCacheIDsWithAPIOpts{
+		if err := allEngine.RPC.Call(context.Background(), utils.CacheSv1Clear, &utils.AttrCacheIDsWithAPIOpts{
 			CacheIDs: nil,
 		}, &reply); err != nil {
 			t.Error(err)
@@ -741,7 +741,7 @@ import (
 		testDspSessionAuthorize(t)
 		testDspSessionInit(t)
 
-		if err := dispEngine.RPC.Call(utils.SessionSv1ReplicateSessions, &ArgsReplicateSessionsWithAPIOpts{
+		if err := dispEngine.RPC.Call(context.Background(), utils.SessionSv1ReplicateSessions, &ArgsReplicateSessionsWithAPIOpts{
 			APIOpts: map[string]any{
 				utils.OptsAPIKey: "ses12345",
 			},
@@ -759,7 +759,7 @@ import (
 
 		var repl int
 		time.Sleep(10 * time.Millisecond)
-		if err := allEngine2.RPC.Call(utils.SessionSv1GetPassiveSessionsCount,
+		if err := allEngine2.RPC.Call(context.Background(), utils.SessionSv1GetPassiveSessionsCount,
 			new(utils.SessionFilter), &repl); err != nil {
 			t.Fatal(err)
 		} else if repl != 3 {
@@ -779,13 +779,13 @@ import (
 			Filters: []string{},
 		}
 		time.Sleep(10 * time.Millisecond)
-		if err := dispEngine.RPC.Call(utils.SessionSv1GetPassiveSessionsCount,
+		if err := dispEngine.RPC.Call(context.Background(), utils.SessionSv1GetPassiveSessionsCount,
 			filtr, &repl); err != nil {
 			t.Fatal(err)
 		} else if repl != 0 {
 			t.Errorf("Expected no passive sessions received %v", repl)
 		}
-		if err := dispEngine.RPC.Call(utils.SessionSv1GetActiveSessionsCount,
+		if err := dispEngine.RPC.Call(context.Background(), utils.SessionSv1GetActiveSessionsCount,
 			filtr, &repl); err != nil {
 			t.Fatal(err)
 		} else if repl != 3 {
@@ -793,7 +793,7 @@ import (
 		}
 
 		var rply []*sessions.ExternalSession
-		if err := dispEngine.RPC.Call(utils.SessionSv1GetActiveSessions,
+		if err := dispEngine.RPC.Call(context.Background(), utils.SessionSv1GetActiveSessions,
 			&filtr, &rply); err != nil {
 			t.Fatal(err)
 		} else if len(rply) != 3 {
@@ -801,7 +801,7 @@ import (
 		}
 
 		var reply string
-		if err := dispEngine.RPC.Call(utils.SessionSv1SetPassiveSession, sessions.Session{
+		if err := dispEngine.RPC.Call(context.Background(), utils.SessionSv1SetPassiveSession, sessions.Session{
 			CGRID:      rply[0].CGRID,
 			Tenant:     rply[0].Tenant,
 			ResourceID: "TestSSv1It1",
@@ -850,13 +850,13 @@ import (
 			t.Errorf("Unexpected reply %s", reply)
 		}
 		time.Sleep(10 * time.Millisecond)
-		if err := dispEngine.RPC.Call(utils.SessionSv1GetPassiveSessionsCount,
+		if err := dispEngine.RPC.Call(context.Background(), utils.SessionSv1GetPassiveSessionsCount,
 			filtr, &repl); err != nil {
 			t.Fatal(err)
 		} else if repl != 1 {
 			t.Errorf("Expected 1 passive sessions received %v", repl)
 		}
-		if err := dispEngine.RPC.Call(utils.SessionSv1GetActiveSessionsCount,
+		if err := dispEngine.RPC.Call(context.Background(), utils.SessionSv1GetActiveSessionsCount,
 			filtr, &repl); err != nil {
 			t.Fatal(err)
 		} else if repl != 0 {
@@ -881,13 +881,13 @@ import (
 			Filters: []string{},
 		}
 		time.Sleep(10 * time.Millisecond)
-		if err := dispEngine.RPC.Call(utils.SessionSv1GetPassiveSessionsCount,
+		if err := dispEngine.RPC.Call(context.Background(), utils.SessionSv1GetPassiveSessionsCount,
 			filtr, &repl); err != nil {
 			t.Fatal(err)
 		} else if repl != 0 {
 			t.Errorf("Expected no passive sessions received %v", repl)
 		}
-		if err := dispEngine.RPC.Call(utils.SessionSv1GetActiveSessionsCount,
+		if err := dispEngine.RPC.Call(context.Background(), utils.SessionSv1GetActiveSessionsCount,
 			filtr, &repl); err != nil {
 			t.Fatal(err)
 		} else if repl != 3 {
@@ -895,7 +895,7 @@ import (
 		}
 
 		var rply []*sessions.ExternalSession
-		if err := dispEngine.RPC.Call(utils.SessionSv1GetActiveSessions,
+		if err := dispEngine.RPC.Call(context.Background(), utils.SessionSv1GetActiveSessions,
 			&filtr, &rply); err != nil {
 			t.Fatal(err)
 		} else if len(rply) != 3 {
@@ -903,19 +903,19 @@ import (
 		}
 
 		var reply string
-		if err := dispEngine.RPC.Call(utils.SessionSv1ForceDisconnect, &filtr, &reply); err != nil {
+		if err := dispEngine.RPC.Call(context.Background(), utils.SessionSv1ForceDisconnect, &filtr, &reply); err != nil {
 			t.Fatal(err)
 		} else if reply != utils.OK {
 			t.Errorf("Unexpected reply %s", reply)
 		}
 		time.Sleep(10 * time.Millisecond)
-		if err := dispEngine.RPC.Call(utils.SessionSv1GetPassiveSessionsCount,
+		if err := dispEngine.RPC.Call(context.Background(), utils.SessionSv1GetPassiveSessionsCount,
 			filtr, &repl); err != nil {
 			t.Fatal(err)
 		} else if repl != 0 {
 			t.Errorf("Expected 1 passive sessions received %v", repl)
 		}
-		if err := dispEngine.RPC.Call(utils.SessionSv1GetActiveSessionsCount,
+		if err := dispEngine.RPC.Call(context.Background(), utils.SessionSv1GetActiveSessionsCount,
 			filtr, &repl); err != nil {
 			t.Fatal(err)
 		} else if repl != 0 {
@@ -948,13 +948,13 @@ import (
 			},
 		}
 		var rply sessions.V1ProcessEventReply
-		if err := dispEngine.RPC.Call(utils.SessionSv1ProcessEvent,
+		if err := dispEngine.RPC.Call(context.Background(), utils.SessionSv1ProcessEvent,
 			args, &rply); err != nil {
 			t.Error(err)
 		}
 
 		var repl int
-		if err := dispEngine.RPC.Call(utils.SessionSv1GetActiveSessionsCount,
+		if err := dispEngine.RPC.Call(context.Background(), utils.SessionSv1GetActiveSessionsCount,
 			utils.SessionFilter{
 				APIOpts: map[string]any{
 					utils.OptsAPIKey: "ses12345",
@@ -993,7 +993,7 @@ func testDspSessionGetCost(t *testing.T) {
 	}
 
 	var rply sessions.V1GetCostReply
-	if err := dispEngine.RPC.Call(utils.SessionSv1GetCost,
+	if err := dispEngine.RPC.Call(context.Background(), utils.SessionSv1GetCost,
 		args, &rply); err != nil {
 		t.Error(err)
 	}
@@ -1010,7 +1010,7 @@ func testDspSessionGetCost(t *testing.T) {
 
 	func testDspSessionSTIRAuthenticate(t *testing.T) {
 		var rply string
-		if err := dispEngine.RPC.Call(utils.SessionSv1STIRAuthenticate,
+		if err := dispEngine.RPC.Call(context.Background(), utils.SessionSv1STIRAuthenticate,
 			&sessions.V1STIRAuthenticateArgs{
 				Attest:             []string{"A"},
 				PayloadMaxDuration: "-1",
@@ -1044,7 +1044,7 @@ func testDspSessionSTIRIdentity(t *testing.T) {
 		},
 	}
 	var rply string
-	if err := dispEngine.RPC.Call(utils.SessionSv1STIRIdentity,
+	if err := dispEngine.RPC.Call(context.Background(), utils.SessionSv1STIRIdentity,
 		args, &rply); err != nil {
 		t.Error(err)
 	}

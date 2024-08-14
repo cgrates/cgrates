@@ -100,7 +100,7 @@ func testAttributeFltrSStartEngine(t *testing.T) {
 // Connect rpc client to rater
 func testAttributeFltrSRPCConn(t *testing.T) {
 	var err error
-	attrFltrRPC, err = newRPCClient(attrFltrCfg.ListenCfg()) // We connect over JSON so we can also troubleshoot if needed
+	attrFltrRPC, err = engine.NewRPCClient(attrFltrCfg.ListenCfg(), *encoding) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -25,6 +25,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -63,12 +64,12 @@ func TestDspRateSIT(t *testing.T) {
 
 func testDspRPrfPing(t *testing.T) {
 	var reply string
-	if err := allEngine.RPC.Call(utils.RateSv1Ping, new(utils.CGREvent), &reply); err != nil {
+	if err := allEngine.RPC.Call(context.Background(), utils.RateSv1Ping, new(utils.CGREvent), &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.Pong {
 		t.Errorf("Received: %s", reply)
 	}
-	if err := dispEngine.RPC.Call(utils.RateSv1Ping, utils.CGREvent{
+	if err := dispEngine.RPC.Call(context.Background(), utils.RateSv1Ping, utils.CGREvent{
 		Tenant: "cgrates.org",
 		APIOpts: map[string]any{
 			utils.OptsAPIKey: "rPrf12345",
@@ -113,13 +114,13 @@ func testDspRPrfCostForEvent(t *testing.T) {
 		},
 	}
 	var reply string
-	if err := allEngine.RPC.Call(utils.AdminSv1SetRateProfile, rPrf, &reply); err != nil {
+	if err := allEngine.RPC.Call(context.Background(), utils.AdminSv1SetRateProfile, rPrf, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf("Expected OK, received %+v", reply)
 	}
 	var rply *utils.RateProfile
-	if err := allEngine.RPC.Call(utils.AdminSv1GetRateProfile, &utils.TenantID{
+	if err := allEngine.RPC.Call(context.Background(), utils.AdminSv1GetRateProfile, &utils.TenantID{
 		Tenant: "cgrates.org",
 		ID:     "DefaultRate",
 	}, &rply); err != nil {
@@ -146,7 +147,7 @@ func testDspRPrfCostForEvent(t *testing.T) {
 	}
 
 	var rpCost *utils.RateProfileCost
-	if err := dispEngine.RPC.Call(utils.RateSv1CostForEvent, &utils.CGREvent{
+	if err := dispEngine.RPC.Call(context.Background(), utils.RateSv1CostForEvent, &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "DefaultRate",
 		Event: map[string]any{
@@ -194,13 +195,13 @@ func testDspRPrfCostForEventWithoutFilters(t *testing.T) {
 		},
 	}
 	var reply string
-	if err := allEngine.RPC.Call(utils.AdminSv1SetRateProfile, rPrf, &reply); err != nil {
+	if err := allEngine.RPC.Call(context.Background(), utils.AdminSv1SetRateProfile, rPrf, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf("Expected OK, received %+v", reply)
 	}
 	var rply *utils.RateProfile
-	if err := allEngine.RPC.Call(utils.AdminSv1GetRateProfile, &utils.TenantID{
+	if err := allEngine.RPC.Call(context.Background(), utils.AdminSv1GetRateProfile, &utils.TenantID{
 		Tenant: "cgrates.org",
 		ID:     "ID_RP",
 	}, &rply); err != nil {
@@ -227,7 +228,7 @@ func testDspRPrfCostForEventWithoutFilters(t *testing.T) {
 	}
 
 	var rpCost *utils.RateProfileCost
-	if err := dispEngine.RPC.Call(utils.RateSv1CostForEvent, &utils.CGREvent{
+	if err := dispEngine.RPC.Call(context.Background(), utils.RateSv1CostForEvent, &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "EVENT_RATE",
 		Event: map[string]any{
