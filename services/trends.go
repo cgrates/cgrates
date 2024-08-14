@@ -58,37 +58,42 @@ type TrendService struct {
 	filterSChan chan *engine.FilterS
 	server      *cores.Server
 	connMgr     *engine.ConnManager
-	connChan    chan birpc.ClientConnector
-	anz         *AnalyzerService
-	srvDep      map[string]*sync.WaitGroup
+
+	trs      *engine.TrendService
+	connChan chan birpc.ClientConnector
+	anz      *AnalyzerService
+	srvDep   map[string]*sync.WaitGroup
 }
 
 // Start should handle the sercive start
-func (tr *TrendService) Start() error {
-	if tr.IsRunning() {
+func (trs *TrendService) Start() error {
+	if trs.IsRunning() {
 		return utils.ErrServiceAlreadyRunning
 	}
-	tr.srvDep[utils.DataDB].Add(1)
-	<-tr.cacheS.GetPrecacheChannel(utils.CacheTrendProfiles)
+	trs.srvDep[utils.DataDB].Add(1)
+	<-trs.cacheS.GetPrecacheChannel(utils.CacheTrendProfiles)
 
-	filterS := <-tr.filterSChan
-	tr.filterSChan <- filterS
-	dbchan := tr.dm.GetDMChan()
+	filterS := <-trs.filterSChan
+	trs.filterSChan <- filterS
+	dbchan := trs.dm.GetDMChan()
 	datadb := <-dbchan
 	dbchan <- datadb
 
 	utils.Logger.Info(fmt.Sprintf("<%s> starting <%s> subsystem",
 		utils.CoreS, utils.TrendS))
-	srv, err := engine.NewService(v1.NewTrendSv1())
+	trs.Lock()
+	defer trs.Unlock()
+	trs.trs = engine.NewTrendService(datadb, trs.cfg, filterS)
+	srv, err := engine.NewService(v1.NewTrendSv1(trs.trs))
 	if err != nil {
 		return err
 	}
-	if !tr.cfg.DispatcherSCfg().Enabled {
+	if !trs.cfg.DispatcherSCfg().Enabled {
 		for _, s := range srv {
-			tr.server.RpcRegister(s)
+			trs.server.RpcRegister(s)
 		}
 	}
-	tr.connChan <- tr.anz.GetInternalCodec(srv, utils.StatS)
+	trs.connChan <- trs.anz.GetInternalCodec(srv, utils.StatS)
 	return nil
 }
 
