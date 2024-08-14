@@ -21,6 +21,7 @@ package engine
 import (
 	"time"
 
+	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -61,4 +62,19 @@ type Trend struct {
 
 func (tr *Trend) TenantID() string {
 	return utils.ConcatenatedKey(tr.Tenant, tr.ID)
+}
+
+// NewTrendService the constructor for TrendS service
+func NewTrendService(dm *DataManager, cgrcfg *config.CGRConfig, filterS *FilterS) *TrendService {
+	return &TrendService{
+		dm:      dm,
+		cgrcfg:  cgrcfg,
+		filterS: filterS,
+	}
+}
+
+type TrendService struct {
+	dm      *DataManager
+	cgrcfg  *config.CGRConfig
+	filterS *FilterS
 }

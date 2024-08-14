@@ -95,11 +95,13 @@ func (apierSv1 *APIerSv1) RemoveTrendProfile(ctx *context.Context, args *utils.T
 }
 
 // NewTrendSv1 initializes TrendSV1
-func NewTrendSv1() *TrendSv1 {
+func NewTrendSv1(trs *engine.TrendService) *TrendSv1 {
 	return &TrendSv1{}
 }
 
-type TrendSv1 struct{}
+type TrendSv1 struct {
+	trS *engine.TrendService
+}
 
 func (sa *TrendSv1) Ping(ctx *context.Context, ign *utils.CGREvent, reply *string) error {
 	*reply = utils.Pong
