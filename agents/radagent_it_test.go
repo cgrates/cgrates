@@ -68,7 +68,7 @@ package agents
 // // Test start here
 // func TestRAit(t *testing.T) {
 // 	// engine.KillEngine(0)
-// 	switch *dbType {
+// 	switch *utils.DBType {
 // 	case utils.MetaInternal:
 // 		raonfigDIR = "radagent_internal"
 // 	case utils.MetaMySQL:
@@ -80,7 +80,7 @@ package agents
 // 	default:
 // 		t.Fatal("Unknown Database type")
 // 	}
-// 	if *encoding == utils.MetaGOB {
+// 	if *utils.Encoding == utils.MetaGOB {
 // 		raonfigDIR += "_gob"
 // 	}
 // 	for _, stest := range sTestsRadius {
@@ -89,13 +89,13 @@ package agents
 // }
 
 // func TestRAitDispatcher(t *testing.T) {
-// 	if *encoding == utils.MetaGOB {
+// 	if *utils.Encoding == utils.MetaGOB {
 // 		t.SkipNow()
 // 		return
 // 	}
 // 	isDispatcherActive = true
-// 	engine.StartEngine(path.Join(*dataDir, "conf", "samples", "dispatchers", "all"), 200)
-// 	engine.StartEngine(path.Join(*dataDir, "conf", "samples", "dispatchers", "all2"), 200)
+// 	engine.StartEngine(path.Join(*utils.DataDir, "conf", "samples", "dispatchers", "all"), 200)
+// 	engine.StartEngine(path.Join(*utils.DataDir, "conf", "samples", "dispatchers", "all2"), 200)
 // 	raonfigDIR = "dispatchers/radagent"
 // 	testRadiusitResetAllDB(t)
 // 	for _, stest := range sTestsRadius {
@@ -106,7 +106,7 @@ package agents
 // }
 
 // func testRAitInitCfg(t *testing.T) {
-// 	raCfgPath = path.Join(*dataDir, "conf", "samples", raonfigDIR)
+// 	raCfgPath = path.Join(*utils.DataDir, "conf", "samples", raonfigDIR)
 // 	// Init config first
 // 	var err error
 // 	raCfg, err = config.NewCGRConfigFromPath(context.Background(), raCfgPath)
@@ -119,7 +119,7 @@ package agents
 // }
 
 // func testRadiusitResetAllDB(t *testing.T) {
-// 	cfgPath1 := path.Join(*dataDir, "conf", "samples", "dispatchers", "all")
+// 	cfgPath1 := path.Join(*utils.DataDir, "conf", "samples", "dispatchers", "all")
 // 	allCfg, err := config.NewCGRConfigFromPath(context.Background(), cfgPath1)
 // 	if err != nil {
 // 		t.Fatal(err)
@@ -139,7 +139,7 @@ package agents
 
 // // Start CGR Engine
 // func testRAitStartEngine(t *testing.T) {
-// 	if _, err := engine.StartEngine(raCfgPath, *waitRater); err != nil {
+// 	if _, err := engine.StartEngine(raCfgPath, *utils.WaitRater); err != nil {
 // 		t.Fatal(err)
 // 	}
 // }
@@ -147,7 +147,7 @@ package agents
 // // Connect rpc client to rater
 // func testRAitApierRpcConn(t *testing.T) {
 // 	var err error
-// 	raRPC, err = engine.NewRPCClient(raCfg.ListenCfg(), *encoding) // We connect over JSON so we can also troubleshoot if needed
+// 	raRPC, err = engine.NewRPCClient(raCfg.ListenCfg(), *utils.Encoding) // We connect over JSON so we can also troubleshoot if needed
 // 	if err != nil {
 // 		t.Fatal(err)
 // 	}
@@ -155,7 +155,7 @@ package agents
 
 // // Load the tariff plan, creating accounts and their balances
 // func testRAitTPFromFolder(t *testing.T) {
-// 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "oldtutorial")}
+// 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*utils.DataDir, "tariffplans", "oldtutorial")}
 // 	var loadInst utils.LoadInstance
 // 	if err := raRPC.Call(utils.APIerSv1LoadTariffPlanFromFolder, attrs, &loadInst); err != nil {
 // 		t.Error(err)
@@ -163,7 +163,7 @@ package agents
 // 	if isDispatcherActive {
 // 		testRadiusitTPLoadData(t)
 // 	}
-// 	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // Give time for scheduler to execute topups
+// 	time.Sleep(time.Duration(*utils.WaitRater) * time.Millisecond) // Give time for scheduler to execute topups
 // }
 
 // func testRadiusitTPLoadData(t *testing.T) {
@@ -173,7 +173,7 @@ package agents
 // 		if err != nil {
 // 			t.Error(err)
 // 		}
-// 		loader := exec.Command(loaderPath, "-config_path", raCfgPath, "-path", path.Join(*dataDir, "tariffplans", "dispatchers"))
+// 		loader := exec.Command(loaderPath, "-config_path", raCfgPath, "-path", path.Join(*utils.DataDir, "tariffplans", "dispatchers"))
 
 // 		if err := loader.Start(); err != nil {
 // 			t.Error(err)

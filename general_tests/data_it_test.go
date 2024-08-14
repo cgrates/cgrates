@@ -60,7 +60,7 @@ package general_tests
 
 // // Test start here
 // func TestDataIT(t *testing.T) {
-// 	switch *dbType {
+// 	switch *utils.DBType {
 // 	case utils.MetaInternal:
 // 		dataConfDIR = "tutinternal"
 // 	case utils.MetaMySQL:
@@ -79,7 +79,7 @@ package general_tests
 
 // func testV1DataLoadConfig(t *testing.T) {
 // 	var err error
-// 	dataCfgPath = path.Join(*dataDir, "conf", "samples", dataConfDIR)
+// 	dataCfgPath = path.Join(*utils.DataDir, "conf", "samples", dataConfDIR)
 // 	if dataCfg, err = config.NewCGRConfigFromPath(dataCfgPath); err != nil {
 // 		t.Error(err)
 // 	}
@@ -100,7 +100,7 @@ package general_tests
 
 // func testV1DataRpcConn(t *testing.T) {
 // 	var err error
-// 	dataRpc, err = engine.NewRPCClient(dataCfg.ListenCfg(), *encoding) // We connect over JSON so we can also troubleshoot if needed
+// 	dataRpc, err = engine.NewRPCClient(dataCfg.ListenCfg(), *utils.Encoding) // We connect over JSON so we can also troubleshoot if needed
 // 	if err != nil {
 // 		t.Fatal("Could not connect to rater: ", err.Error())
 // 	}
@@ -117,7 +117,7 @@ package general_tests
 
 // func testV1DataLoadTarrifPlans(t *testing.T) {
 // 	var reply string
-// 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "testData")}
+// 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*utils.DataDir, "tariffplans", "testData")}
 // 	if err := dataRpc.Call(utils.APIerSv1LoadTariffPlanFromFolder, attrs, &reply); err != nil {
 // 		t.Error(err)
 // 	} else if reply != utils.OK {

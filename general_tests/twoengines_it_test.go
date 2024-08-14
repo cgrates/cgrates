@@ -66,11 +66,11 @@ func TestTwoEngines(t *testing.T) {
 }
 
 func testTwoEnginesInitConfig(t *testing.T) {
-	engineOneCfgPath = path.Join(*dataDir, "conf", "samples", "twoengines", "engine1")
+	engineOneCfgPath = path.Join(*utils.DataDir, "conf", "samples", "twoengines", "engine1")
 	if engineOneCfg, err = config.NewCGRConfigFromPath(context.Background(), engineOneCfgPath); err != nil {
 		t.Fatal(err)
 	}
-	engineTwoCfgPath = path.Join(*dataDir, "conf", "samples", "twoengines", "engine2")
+	engineTwoCfgPath = path.Join(*utils.DataDir, "conf", "samples", "twoengines", "engine2")
 	if engineTwoCfg, err = config.NewCGRConfigFromPath(context.Background(), engineTwoCfgPath); err != nil {
 		t.Fatal(err)
 	}
@@ -86,21 +86,21 @@ func testTwoEnginesFlushDBs(t *testing.T) {
 }
 
 func testTwoEnginesStartEngine(t *testing.T) {
-	if _, err := engine.StopStartEngine(engineOneCfgPath, *waitRater); err != nil {
+	if _, err := engine.StopStartEngine(engineOneCfgPath, *utils.WaitRater); err != nil {
 		t.Fatal(err)
 	}
-	if _, err := engine.StartEngine(engineTwoCfgPath, *waitRater); err != nil {
+	if _, err := engine.StartEngine(engineTwoCfgPath, *utils.WaitRater); err != nil {
 		t.Fatal(err)
 	}
 }
 
 func testTwoEnginesRPC(t *testing.T) {
 	var err error
-	engineOneRpc, err = engine.NewRPCClient(engineOneCfg.ListenCfg(), *encoding)
+	engineOneRpc, err = engine.NewRPCClient(engineOneCfg.ListenCfg(), *utils.Encoding)
 	if err != nil {
 		t.Fatal(err)
 	}
-	engineTwoRpc, err = engine.NewRPCClient(engineTwoCfg.ListenCfg(), *encoding)
+	engineTwoRpc, err = engine.NewRPCClient(engineTwoCfg.ListenCfg(), *utils.Encoding)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -279,7 +279,7 @@ func testTwoEnginesUpdateThreshold(t *testing.T) {
 }
 
 func testTwoEnginesKillEngines(t *testing.T) {
-	if err := engine.KillEngine(*waitRater); err != nil {
+	if err := engine.KillEngine(*utils.WaitRater); err != nil {
 		t.Error(err)
 	}
 }

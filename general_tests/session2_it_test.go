@@ -59,7 +59,7 @@ var (
 )
 
 func TestSes2It(t *testing.T) {
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 		ses2CfgDir = "tut_session_internal"
 	case utils.MetaMySQL:
@@ -77,7 +77,7 @@ func TestSes2It(t *testing.T) {
 }
 
 func testSes2ItLoadConfig(t *testing.T) {
-	ses2CfgPath = path.Join(*dataDir, "conf", "samples", ses2CfgDir)
+	ses2CfgPath = path.Join(*utils.DataDir, "conf", "samples", ses2CfgDir)
 	if ses2Cfg, err = config.NewCGRConfigFromPath(context.Background(), ses2CfgPath); err != nil {
 		t.Error(err)
 	}
@@ -93,14 +93,14 @@ func testSes2ItFlushDBs(t *testing.T) {
 }
 
 func testSes2ItStartEngine(t *testing.T) {
-	if _, err := engine.StopStartEngine(ses2CfgPath, *waitRater); err != nil {
+	if _, err := engine.StopStartEngine(ses2CfgPath, *utils.WaitRater); err != nil {
 		t.Fatal(err)
 	}
 }
 
 func testSes2ItRPCConn(t *testing.T) {
 	var err error
-	ses2RPC, err = engine.NewRPCClient(ses2Cfg.ListenCfg(), *encoding)
+	ses2RPC, err = engine.NewRPCClient(ses2Cfg.ListenCfg(), *utils.Encoding)
 	if err != nil {
 		t.Fatal(err)
 	}

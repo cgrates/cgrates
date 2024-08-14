@@ -67,7 +67,7 @@ var (
 
 // Test start here
 func TestFltrIT(t *testing.T) {
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 		fltrConfDIR = "filters_internal"
 	case utils.MetaMySQL:
@@ -87,9 +87,9 @@ func TestFltrIT(t *testing.T) {
 
 func testV1FltrLoadConfig(t *testing.T) {
 	var err error
-	fltrCfgPath = path.Join(*dataDir, "conf", "samples", fltrConfDIR)
-	if *encoding == utils.MetaGOB {
-		cdrsCfgPath = path.Join(*dataDir, "conf", "samples", fltrConfDIR+"_gob")
+	fltrCfgPath = path.Join(*utils.DataDir, "conf", "samples", fltrConfDIR)
+	if *utils.Encoding == utils.MetaGOB {
+		cdrsCfgPath = path.Join(*utils.DataDir, "conf", "samples", fltrConfDIR+"_gob")
 	}
 	if fltrCfg, err = config.NewCGRConfigFromPath(context.Background(), fltrCfgPath); err != nil {
 		t.Error(err)
@@ -114,7 +114,7 @@ func testV1FltrStartEngine(t *testing.T) {
 
 func testV1FltrRpcConn(t *testing.T) {
 	var err error
-	fltrRpc, err = engine.NewRPCClient(fltrCfg.ListenCfg(), *encoding) // We connect over JSON so we can also troubleshoot if needed
+	fltrRpc, err = engine.NewRPCClient(fltrCfg.ListenCfg(), *utils.Encoding) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
 		t.Fatal("Could not connect to rater: ", err.Error())
 	}

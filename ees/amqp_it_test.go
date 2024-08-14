@@ -67,7 +67,7 @@ func TestAMQPExport(t *testing.T) {
 
 func testAMQPLoadConfig(t *testing.T) {
 	var err error
-	amqpCfgPath = path.Join(*dataDir, "conf", "samples", amqpConfigDir)
+	amqpCfgPath = path.Join(*utils.DataDir, "conf", "samples", amqpConfigDir)
 	if amqpCfg, err = config.NewCGRConfigFromPath(context.Background(), amqpCfgPath); err != nil {
 		t.Error(err)
 	}
@@ -88,14 +88,14 @@ func testAMQPResetDBs(t *testing.T) {
 }
 
 func testAMQPStartEngine(t *testing.T) {
-	if _, err := engine.StopStartEngine(amqpCfgPath, *waitRater); err != nil {
+	if _, err := engine.StopStartEngine(amqpCfgPath, *utils.WaitRater); err != nil {
 		t.Fatal(err)
 	}
 }
 
 func testAMQPRPCConn(t *testing.T) {
 	var err error
-	amqpRPC, err = engine.NewRPCClient(amqpCfg.ListenCfg(), *encoding)
+	amqpRPC, err = engine.NewRPCClient(amqpCfg.ListenCfg(), *utils.Encoding)
 	if err != nil {
 		t.Fatal(err)
 	}

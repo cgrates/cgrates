@@ -67,7 +67,7 @@ func TestHTTPPostExport(t *testing.T) {
 
 func testHTTPPostLoadConfig(t *testing.T) {
 	var err error
-	httpPostCfgPath = path.Join(*dataDir, "conf", "samples", httpPostConfigDir)
+	httpPostCfgPath = path.Join(*utils.DataDir, "conf", "samples", httpPostConfigDir)
 	if httpPostCfg, err = config.NewCGRConfigFromPath(context.Background(), httpPostCfgPath); err != nil {
 		t.Error(err)
 	}
@@ -83,14 +83,14 @@ func testHTTPPostResetDBs(t *testing.T) {
 }
 
 func testHTTPPostStartEngine(t *testing.T) {
-	if _, err := engine.StopStartEngine(httpPostCfgPath, *waitRater); err != nil {
+	if _, err := engine.StopStartEngine(httpPostCfgPath, *utils.WaitRater); err != nil {
 		t.Fatal(err)
 	}
 }
 
 func testHTTPPostRPCConn(t *testing.T) {
 	var err error
-	httpPostRpc, err = engine.NewRPCClient(httpPostCfg.ListenCfg(), *encoding)
+	httpPostRpc, err = engine.NewRPCClient(httpPostCfg.ListenCfg(), *utils.Encoding)
 	if err != nil {
 		t.Fatal(err)
 	}

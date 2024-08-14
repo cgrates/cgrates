@@ -74,7 +74,7 @@ var (
 )
 
 func TestCfgSIT(t *testing.T) {
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 		t.SkipNow()
 	case utils.MetaMongo:
@@ -93,7 +93,7 @@ func TestCfgSIT(t *testing.T) {
 
 func testCfgInitCfg(t *testing.T) {
 	var err error
-	cfgPath = path.Join(*dataDir, "conf", "samples", cfgDIR)
+	cfgPath = path.Join(*utils.DataDir, "conf", "samples", cfgDIR)
 	cfgCfg, err = config.NewCGRConfigFromPath(context.Background(), cfgPath)
 	if err != nil {
 		t.Error(err)
@@ -114,14 +114,14 @@ func testCfgResetStorDb(t *testing.T) {
 
 // Start CGR Engine
 func testCfgStartEngine(t *testing.T) {
-	if _, err := engine.StopStartEngine(cfgPath, *waitRater); err != nil {
+	if _, err := engine.StopStartEngine(cfgPath, *utils.WaitRater); err != nil {
 		t.Fatal(err)
 	}
 }
 
 func testCfgRPCConn(t *testing.T) {
 	var err error
-	cfgRPC, err = engine.NewRPCClient(cfgCfg.ListenCfg(), *encoding) // We connect over JSON so we can also troubleshoot if needed
+	cfgRPC, err = engine.NewRPCClient(cfgCfg.ListenCfg(), *utils.Encoding) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -377,7 +377,7 @@ func testCfgSetJSONGetJSONConfig(t *testing.T) {
 
 func testCfgInitCfgStore(t *testing.T) {
 	var err error
-	cfgPath = path.Join(*dataDir, "conf", "samples", cfgDIR)
+	cfgPath = path.Join(*utils.DataDir, "conf", "samples", cfgDIR)
 	cfgCfg, err = config.NewCGRConfigFromPath(context.Background(), cfgPath)
 	if err != nil {
 		t.Error(err)
@@ -410,14 +410,14 @@ func testCfgResetConfigDBStore(t *testing.T) {
 
 // Start CGR Engine
 func testCfgStartEngineStore(t *testing.T) {
-	if _, err := engine.StopStartEngine(cfgPath, *waitRater); err != nil {
+	if _, err := engine.StopStartEngine(cfgPath, *utils.WaitRater); err != nil {
 		t.Fatal(err)
 	}
 }
 
 func testCfgRPCConnStore(t *testing.T) {
 	var err error
-	cfgRPC, err = engine.NewRPCClient(cfgCfg.ListenCfg(), *encoding) // We connect over JSON so we can also troubleshoot if needed
+	cfgRPC, err = engine.NewRPCClient(cfgCfg.ListenCfg(), *utils.Encoding) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
 		t.Fatal(err)
 	}

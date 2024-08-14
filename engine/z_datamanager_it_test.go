@@ -46,7 +46,7 @@ func TestDMitinitDB(t *testing.T) {
 	var dataDB DataDB
 	var err error
 
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 		t.SkipNow()
 	case utils.MetaMySQL:
@@ -65,7 +65,7 @@ func TestDMitinitDB(t *testing.T) {
 	dm2 = NewDataManager(dataDB, config.CgrConfig().CacheCfg(), nil)
 
 	for _, stest := range sTestsDMit {
-		t.Run(*dbType, stest)
+		t.Run(*utils.DBType, stest)
 	}
 }
 

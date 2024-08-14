@@ -70,7 +70,7 @@ var (
 )
 
 func TestOnStorIT(t *testing.T) {
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 		onStor = NewDataManager(NewInternalDB(nil, nil, config.CgrConfig().DataDbCfg().Items),
 			config.CgrConfig().CacheCfg(), nil)
@@ -94,7 +94,7 @@ func TestOnStorIT(t *testing.T) {
 	}
 
 	for _, stest := range sTestsOnStorIT {
-		t.Run(*dbType, stest)
+		t.Run(*utils.DBType, stest)
 	}
 }
 

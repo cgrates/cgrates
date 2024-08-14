@@ -70,15 +70,15 @@ func TestGOCSIT(t *testing.T) {
 
 // Init Config
 func testGOCSInitCfg(t *testing.T) {
-	auCfgPath = path.Join(*dataDir, "conf", "samples", "gocs", "au_site")
+	auCfgPath = path.Join(*utils.DataDir, "conf", "samples", "gocs", "au_site")
 	if auCfg, err = config.NewCGRConfigFromPath(context.Background(), auCfgPath); err != nil {
 		t.Fatal(err)
 	}
-	usCfgPath = path.Join(*dataDir, "conf", "samples", "gocs", "us_site")
+	usCfgPath = path.Join(*utils.DataDir, "conf", "samples", "gocs", "us_site")
 	if usCfg, err = config.NewCGRConfigFromPath(context.Background(), usCfgPath); err != nil {
 		t.Fatal(err)
 	}
-	dspCfgPath = path.Join(*dataDir, "conf", "samples", "gocs", "dsp_site")
+	dspCfgPath = path.Join(*utils.DataDir, "conf", "samples", "gocs", "dsp_site")
 	if dspCfg, err = config.NewCGRConfigFromPath(context.Background(), dspCfgPath); err != nil {
 		t.Fatal(err)
 	}
@@ -108,13 +108,13 @@ func testGOCSFlushDBs(t *testing.T) {
 
 // Start CGR Engine
 func testGOCSStartEngine(t *testing.T) {
-	if usEngine, err = engine.StopStartEngine(usCfgPath, *waitRater); err != nil {
+	if usEngine, err = engine.StopStartEngine(usCfgPath, *utils.WaitRater); err != nil {
 		t.Fatal(err)
 	}
-	if auEngine, err = engine.StartEngine(auCfgPath, *waitRater); err != nil {
+	if auEngine, err = engine.StartEngine(auCfgPath, *utils.WaitRater); err != nil {
 		t.Fatal(err)
 	}
-	if dspEngine, err = engine.StartEngine(dspCfgPath, *waitRater); err != nil {
+	if dspEngine, err = engine.StartEngine(dspCfgPath, *utils.WaitRater); err != nil {
 		t.Fatal(err)
 	}
 	time.Sleep(10 * time.Millisecond)
@@ -123,13 +123,13 @@ func testGOCSStartEngine(t *testing.T) {
 
 // Connect rpc client to rater
 func testGOCSApierRpcConn(t *testing.T) {
-	if auRPC, err = engine.NewRPCClient(auCfg.ListenCfg(), *encoding); err != nil {
+	if auRPC, err = engine.NewRPCClient(auCfg.ListenCfg(), *utils.Encoding); err != nil {
 		t.Fatal(err)
 	}
-	if usRPC, err = engine.NewRPCClient(usCfg.ListenCfg(), *encoding); err != nil {
+	if usRPC, err = engine.NewRPCClient(usCfg.ListenCfg(), *utils.Encoding); err != nil {
 		t.Fatal(err)
 	}
-	if dspRPC, err = engine.NewRPCClient(dspCfg.ListenCfg(), *encoding); err != nil {
+	if dspRPC, err = engine.NewRPCClient(dspCfg.ListenCfg(), *utils.Encoding); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -179,7 +179,7 @@ func testGOCSLoadData(t *testing.T) {
 		if err != nil {
 			t.Error(err)
 		}
-		loader := exec.Command(loaderPath, "-config_path", dspCfgPath, "-path", path.Join(*dataDir, "tariffplans", "gocs", "dsp_site"))
+		loader := exec.Command(loaderPath, "-config_path", dspCfgPath, "-path", path.Join(*utils.DataDir, "tariffplans", "gocs", "dsp_site"))
 
 		if err := loader.Start(); err != nil {
 			t.Error(err)
@@ -224,7 +224,7 @@ func testGOCSLoadData(t *testing.T) {
 	// else if rply := acnt.Balances[utils.MetaVoice].GetTotalValue(); rply != expectedVoice {
 	// 	t.Errorf("Expecting: %v, received: %v", expectedVoice, rply)
 	// }
-	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // Give time for scheduler to execute topups on au_site
+	time.Sleep(time.Duration(*utils.WaitRater) * time.Millisecond) // Give time for scheduler to execute topups on au_site
 }
 
 func testGOCSAuthSession(t *testing.T) {

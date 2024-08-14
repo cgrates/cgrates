@@ -80,7 +80,7 @@ var (
 )
 
 func TestChargersIT(t *testing.T) {
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 		chargersConfigDIR = "apis_chargers_internal"
 	case utils.MetaMongo:
@@ -99,7 +99,7 @@ func TestChargersIT(t *testing.T) {
 
 func testChargersInitCfg(t *testing.T) {
 	var err error
-	chargersCfgPath = path.Join(*dataDir, "conf", "samples", chargersConfigDIR)
+	chargersCfgPath = path.Join(*utils.DataDir, "conf", "samples", chargersConfigDIR)
 	chargersCfg, err = config.NewCGRConfigFromPath(context.Background(), chargersCfgPath)
 	if err != nil {
 		t.Error(err)
@@ -120,14 +120,14 @@ func testChargersResetStorDb(t *testing.T) {
 
 // Start CGR Engine
 func testChargersStartEngine(t *testing.T) {
-	if _, err := engine.StopStartEngine(chargersCfgPath, *waitRater); err != nil {
+	if _, err := engine.StopStartEngine(chargersCfgPath, *utils.WaitRater); err != nil {
 		t.Fatal(err)
 	}
 }
 
 func testChargersSRPCConn(t *testing.T) {
 	var err error
-	chargersRPC, err = engine.NewRPCClient(chargersCfg.ListenCfg(), *encoding) // We connect over JSON so we can also troubleshoot if needed
+	chargersRPC, err = engine.NewRPCClient(chargersCfg.ListenCfg(), *utils.Encoding) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
 		t.Fatal(err)
 	}

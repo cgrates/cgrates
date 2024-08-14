@@ -66,7 +66,7 @@ package general_tests
 // )
 
 // func TestCDRsITPE(t *testing.T) {
-// 	switch *dbType {
+// 	switch *utils.DBType {
 // 	case utils.MetaInternal:
 // 		pecdrsConfDIR = "cdrsv1processevent"
 // 	case utils.MetaMySQL:
@@ -85,7 +85,7 @@ package general_tests
 
 // func testV1CDRsInitConfig(t *testing.T) {
 // 	var err error
-// 	pecdrsCfgPath = path.Join(*dataDir, "conf", "samples", pecdrsConfDIR)
+// 	pecdrsCfgPath = path.Join(*utils.DataDir, "conf", "samples", pecdrsConfDIR)
 // 	if pecdrsCfg, err = config.NewCGRConfigFromPath(context.Background(), pecdrsCfgPath); err != nil {
 // 		t.Fatal("Got config error: ", err.Error())
 // 	}
@@ -98,14 +98,14 @@ package general_tests
 // }
 
 // func testV1CDRsStartEngine(t *testing.T) {
-// 	if _, err := engine.StopStartEngine(pecdrsCfgPath, *waitRater); err != nil {
+// 	if _, err := engine.StopStartEngine(pecdrsCfgPath, *utils.WaitRater); err != nil {
 // 		t.Fatal(err)
 // 	}
 // }
 
 // func testV1CDRsRpcConn(t *testing.T) {
 // 	var err error
-// 	pecdrsRpc, err = engine.NewRPCClient(pecdrsCfg.ListenCfg(), *encoding)
+// 	pecdrsRpc, err = engine.NewRPCClient(pecdrsCfg.ListenCfg(), *utils.Encoding)
 // 	if err != nil {
 // 		t.Fatal("Could not connect to rater: ", err.Error())
 // 	}
@@ -115,10 +115,10 @@ package general_tests
 // 	var loadInst string
 // 	if err := pecdrsRpc.Call(context.Background(), utils.APIerSv1LoadTariffPlanFromFolder,
 // 		&utils.AttrLoadTpFromFolder{FolderPath: path.Join(
-// 			*dataDir, "tariffplans", "testit")}, &loadInst); err != nil {
+// 			*utils.DataDir, "tariffplans", "testit")}, &loadInst); err != nil {
 // 		t.Error(err)
 // 	}
-// 	time.Sleep(time.Duration(*waitRater) * time.Millisecond)
+// 	time.Sleep(time.Duration(*utils.WaitRater) * time.Millisecond)
 // }
 
 // func testV1CDRsProcessEventAttrS(t *testing.T) {
@@ -718,7 +718,7 @@ package general_tests
 // 	}
 // 	reply[0].Event["CostDetails"] = nil
 // 	expRply[0].Event["CGRID"] = reply[0].Event["CGRID"]
-// 	if *encoding == utils.MetaGOB { // gob encoding encodes 0 values of pointers to nil
+// 	if *utils.Encoding == utils.MetaGOB { // gob encoding encodes 0 values of pointers to nil
 // 		expRply[0].Flags = nil
 // 		if utils.ToJSON(expRply) != utils.ToJSON(reply) {
 // 			t.Errorf("Expected %s, received: %s ", utils.ToJSON(expRply), utils.ToJSON(reply))
@@ -749,7 +749,7 @@ package general_tests
 // 	expRply[0].Event["Usage"] = 60000000000.
 // 	expRply[0].Event["Cost"] = 0.0102
 // 	reply[0].Event["CostDetails"] = nil
-// 	if *encoding == utils.MetaGOB { // gob encoding encodes 0 values of pointers to nil
+// 	if *utils.Encoding == utils.MetaGOB { // gob encoding encodes 0 values of pointers to nil
 // 		if utils.ToJSON(expRply) != utils.ToJSON(reply) {
 // 			t.Errorf("Expected %s, received: %s ", utils.ToJSON(expRply), utils.ToJSON(reply))
 // 		}
@@ -764,7 +764,7 @@ package general_tests
 // 		t.Error(err)
 // 	}
 // 	reply[0].Event["CostDetails"] = nil
-// 	if *encoding == utils.MetaGOB { // gob encoding encodes 0 values of pointers to nil
+// 	if *utils.Encoding == utils.MetaGOB { // gob encoding encodes 0 values of pointers to nil
 // 		if utils.ToJSON(expRply) != utils.ToJSON(reply) {
 // 			t.Errorf("Expected %s, received: %s ", utils.ToJSON(expRply), utils.ToJSON(reply))
 // 		}
@@ -776,7 +776,7 @@ package general_tests
 // }
 
 // func testV1CDRsKillEngine(t *testing.T) {
-// 	if err := engine.KillEngine(*waitRater); err != nil {
+// 	if err := engine.KillEngine(*utils.WaitRater); err != nil {
 // 		t.Error(err)
 // 	}
 // }

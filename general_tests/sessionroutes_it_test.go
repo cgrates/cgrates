@@ -57,7 +57,7 @@ package general_tests
 // )
 
 // func TestSesRoutesItSessions(t *testing.T) {
-// 	switch *dbType {
+// 	switch *utils.DBType {
 // 	case utils.MetaInternal:
 // 		sesRoutesCfgDir = "tutinternal"
 // 	case utils.MetaMySQL:
@@ -75,7 +75,7 @@ package general_tests
 // }
 
 // func testSesRoutesItLoadConfig(t *testing.T) {
-// 	sesRoutesCfgPath = path.Join(*dataDir, "conf", "samples", sesRoutesCfgDir)
+// 	sesRoutesCfgPath = path.Join(*utils.DataDir, "conf", "samples", sesRoutesCfgDir)
 // 	if sesRoutesCfg, err = config.NewCGRConfigFromPath(sesRoutesCfgPath); err != nil {
 // 		t.Error(err)
 // 	}
@@ -88,14 +88,14 @@ package general_tests
 // }
 
 // func testSesRoutesItStartEngine(t *testing.T) {
-// 	if _, err := engine.StopStartEngine(sesRoutesCfgPath, *waitRater); err != nil {
+// 	if _, err := engine.StopStartEngine(sesRoutesCfgPath, *utils.WaitRater); err != nil {
 // 		t.Fatal(err)
 // 	}
 // }
 
 // func testSesRoutesItRPCConn(t *testing.T) {
 // 	var err error
-// 	sesRoutesRPC, err = engine.NewRPCClient(sesRoutesCfg.ListenCfg(), *encoding)
+// 	sesRoutesRPC, err = engine.NewRPCClient(sesRoutesCfg.ListenCfg(), *utils.Encoding)
 // 	if err != nil {
 // 		t.Fatal(err)
 // 	}
@@ -103,7 +103,7 @@ package general_tests
 
 // func testSesRoutesItLoadFromFolder(t *testing.T) {
 // 	var reply string
-// 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "testit")}
+// 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*utils.DataDir, "tariffplans", "testit")}
 // 	if err := sesRoutesRPC.Call(utils.APIerSv1LoadTariffPlanFromFolder, attrs, &reply); err != nil {
 // 		t.Error(err)
 // 	}

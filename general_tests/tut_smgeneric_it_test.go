@@ -54,7 +54,7 @@ var (
 )
 
 func TestTutSMG(t *testing.T) {
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 		t.SkipNow()
 	case utils.MetaMySQL:
@@ -73,7 +73,7 @@ func TestTutSMG(t *testing.T) {
 }
 
 func testTutSMGInitCfg(t *testing.T) {
-	tutSMGCfgPath = path.Join(*dataDir, "conf", "samples", tutSMGCfgDIR)
+	tutSMGCfgPath = path.Join(*utils.DataDir, "conf", "samples", tutSMGCfgDIR)
 	// Init config first
 	var err error
 	tutSMGCfg, err = config.NewCGRConfigFromPath(context.Background(), tutSMGCfgPath)
@@ -94,7 +94,7 @@ func testTutSMGFlushDBs(t *testing.T) {
 
 // Start CGR Engine
 func testTutSMGStartEngine(t *testing.T) {
-	if _, err := engine.StopStartEngine(tutSMGCfgPath, *waitRater); err != nil {
+	if _, err := engine.StopStartEngine(tutSMGCfgPath, *utils.WaitRater); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -102,7 +102,7 @@ func testTutSMGStartEngine(t *testing.T) {
 // Connect rpc client to rater
 func testTutSMGRpcConn(t *testing.T) {
 	var err error
-	tutSMGRpc, err = engine.NewRPCClient(tutSMGCfg.ListenCfg(), *encoding) // We connect over JSON so we can also troubleshoot if needed
+	tutSMGRpc, err = engine.NewRPCClient(tutSMGCfg.ListenCfg(), *utils.Encoding) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
 		t.Fatal(err)
 	}

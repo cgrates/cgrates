@@ -62,7 +62,7 @@ var (
 )
 
 func TestTp(t *testing.T) {
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 		tpCfgDIR = "tp_internal"
 	case utils.MetaMySQL:
@@ -79,7 +79,7 @@ func TestTp(t *testing.T) {
 	}
 }
 func testTpInitCfg(t *testing.T) {
-	tpCfgPath = path.Join(*dataDir, "conf", "samples", tpCfgDIR)
+	tpCfgPath = path.Join(*utils.DataDir, "conf", "samples", tpCfgDIR)
 	// Init config first
 	var err error
 	tpCfg, err = config.NewCGRConfigFromPath(context.Background(), tpCfgPath)
@@ -108,7 +108,7 @@ func testTpStartEngine(t *testing.T) {
 // Connect rpc client to rater
 func testTpRpcConn(t *testing.T) {
 	var err error
-	tpRPC, err = engine.NewRPCClient(tpCfg.ListenCfg(), *encoding) // We connect over JSON so we can also troubleshoot if needed
+	tpRPC, err = engine.NewRPCClient(tpCfg.ListenCfg(), *utils.Encoding) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
 		t.Fatal(err)
 	}

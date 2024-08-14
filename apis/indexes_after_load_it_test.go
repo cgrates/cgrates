@@ -55,7 +55,7 @@ var (
 )
 
 func TestIdxCheckAfterLoad(t *testing.T) {
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 		idxLoadConfigDIR = "session_volume_discount_internal"
 	case utils.MetaMySQL:
@@ -74,7 +74,7 @@ func TestIdxCheckAfterLoad(t *testing.T) {
 
 func testIdxLoadInitCfg(t *testing.T) {
 	var err error
-	idxLoadCfgPath = path.Join(*dataDir, "conf", "samples", idxLoadConfigDIR)
+	idxLoadCfgPath = path.Join(*utils.DataDir, "conf", "samples", idxLoadConfigDIR)
 	idxLoadCfg, err = config.NewCGRConfigFromPath(context.Background(), idxLoadCfgPath)
 	if err != nil {
 		t.Error(err)
@@ -95,14 +95,14 @@ func testIdxLoadResetStorDb(t *testing.T) {
 
 // Start CGR Engine
 func testIdxLoadStartEngine(t *testing.T) {
-	if _, err := engine.StopStartEngine(idxLoadCfgPath, *waitRater); err != nil {
+	if _, err := engine.StopStartEngine(idxLoadCfgPath, *utils.WaitRater); err != nil {
 		t.Fatal(err)
 	}
 }
 
 func testIdxLoadRPCConn(t *testing.T) {
 	var err error
-	idxLoadBiRPC, err = engine.NewRPCClient(idxLoadCfg.ListenCfg(), *encoding) // We connect over JSON so we can also troubleshoot if needed
+	idxLoadBiRPC, err = engine.NewRPCClient(idxLoadCfg.ListenCfg(), *utils.Encoding) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -54,7 +54,7 @@ package general_tests
 // )
 
 // func TestSesNoneReqTypeItSessions(t *testing.T) {
-// 	switch *dbType {
+// 	switch *utils.DBType {
 // 	case utils.MetaInternal:
 // 		sesNoneReqTypeCfgDir = "tutinternal"
 // 	case utils.MetaMySQL:
@@ -72,7 +72,7 @@ package general_tests
 // }
 
 // func testSesNoneReqTypeItLoadConfig(t *testing.T) {
-// 	sesNoneReqTypeCfgPath = path.Join(*dataDir, "conf", "samples", sesNoneReqTypeCfgDir)
+// 	sesNoneReqTypeCfgPath = path.Join(*utils.DataDir, "conf", "samples", sesNoneReqTypeCfgDir)
 // 	if sesNoneReqTypeCfg, err = config.NewCGRConfigFromPath(sesNoneReqTypeCfgPath); err != nil {
 // 		t.Error(err)
 // 	}
@@ -85,14 +85,14 @@ package general_tests
 // }
 
 // func testSesNoneReqTypeItStartEngine(t *testing.T) {
-// 	if _, err := engine.StopStartEngine(sesNoneReqTypeCfgPath, *waitRater); err != nil {
+// 	if _, err := engine.StopStartEngine(sesNoneReqTypeCfgPath, *utils.WaitRater); err != nil {
 // 		t.Fatal(err)
 // 	}
 // }
 
 // func testSesNoneReqTypeItRPCConn(t *testing.T) {
 // 	var err error
-// 	sesNoneReqTypeRPC, err = engine.NewRPCClient(sesNoneReqTypeCfg.ListenCfg(), *encoding)
+// 	sesNoneReqTypeRPC, err = engine.NewRPCClient(sesNoneReqTypeCfg.ListenCfg(), *utils.Encoding)
 // 	if err != nil {
 // 		t.Fatal(err)
 // 	}

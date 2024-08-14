@@ -49,7 +49,7 @@ var (
 )
 
 func TestRldCfg(t *testing.T) {
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 		testCfgDir = "tutinternal"
 	case utils.MetaMySQL:
@@ -67,7 +67,7 @@ func TestRldCfg(t *testing.T) {
 }
 
 func testCfgLoadConfig(t *testing.T) {
-	testCfgPath = path.Join(*dataDir, "conf", "samples", testCfgDir)
+	testCfgPath = path.Join(*utils.DataDir, "conf", "samples", testCfgDir)
 	if testCfg, err = config.NewCGRConfigFromPath(context.Background(), testCfgPath); err != nil {
 		t.Error(err)
 	}
@@ -83,14 +83,14 @@ func testResetDBs(t *testing.T) {
 }
 
 func testStartEngine(t *testing.T) {
-	if _, err := engine.StopStartEngine(testCfgPath, *waitRater); err != nil {
+	if _, err := engine.StopStartEngine(testCfgPath, *utils.WaitRater); err != nil {
 		t.Fatal(err)
 	}
 }
 
 func testRPCConn(t *testing.T) {
 	var err error
-	testRPC, err = engine.NewRPCClient(testCfg.ListenCfg(), *encoding)
+	testRPC, err = engine.NewRPCClient(testCfg.ListenCfg(), *utils.Encoding)
 	if err != nil {
 		t.Fatal(err)
 	}

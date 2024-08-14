@@ -78,7 +78,7 @@ func TestElasticExport(t *testing.T) {
 
 func testElasticLoadConfig(t *testing.T) {
 	var err error
-	elasticCfgPath = path.Join(*dataDir, "conf", "samples", elasticConfigDir)
+	elasticCfgPath = path.Join(*utils.DataDir, "conf", "samples", elasticConfigDir)
 	if elasticCfg, err = config.NewCGRConfigFromPath(context.Background(), elasticCfgPath); err != nil {
 		t.Error(err)
 	}
@@ -94,14 +94,14 @@ func testElasticResetDBs(t *testing.T) {
 }
 
 func testElasticStartEngine(t *testing.T) {
-	if _, err := engine.StopStartEngine(elasticCfgPath, *waitRater); err != nil {
+	if _, err := engine.StopStartEngine(elasticCfgPath, *utils.WaitRater); err != nil {
 		t.Fatal(err)
 	}
 }
 
 func testElasticRPCConn(t *testing.T) {
 	var err error
-	elasticRpc, err = engine.NewRPCClient(elasticCfg.ListenCfg(), *encoding)
+	elasticRpc, err = engine.NewRPCClient(elasticCfg.ListenCfg(), *utils.Encoding)
 	if err != nil {
 		t.Fatal(err)
 	}

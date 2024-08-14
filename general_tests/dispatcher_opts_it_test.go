@@ -104,7 +104,7 @@ func TestDispatcherOpts(t *testing.T) {
 func testDispatcherOptsAdminInitCfg(t *testing.T) {
 	dspOptsConfigDIR = "dispatcher_opts_admin"
 	var err error
-	adminsCfgPath = path.Join(*dataDir, "conf", "samples", dspOptsConfigDIR)
+	adminsCfgPath = path.Join(*utils.DataDir, "conf", "samples", dspOptsConfigDIR)
 	adminsCfg, err = config.NewCGRConfigFromPath(context.Background(), adminsCfgPath)
 	if err != nil {
 		t.Error(err)
@@ -122,14 +122,14 @@ func testDispatcherOptsAdminFlushDBs(t *testing.T) {
 
 // Start CGR Engine woth Dispatcher enabled
 func testDispatcherOptsAdminStartEngine(t *testing.T) {
-	if _, err := engine.StartEngine(adminsCfgPath, *waitRater); err != nil {
+	if _, err := engine.StartEngine(adminsCfgPath, *utils.WaitRater); err != nil {
 		t.Fatal(err)
 	}
 }
 
 func testDispatcherOptsAdminRPCConn(t *testing.T) {
 	var err error
-	adminsRPC, err = engine.NewRPCClient(adminsCfg.ListenCfg(), *encoding) // We connect over JSON so we can also troubleshoot if needed
+	adminsRPC, err = engine.NewRPCClient(adminsCfg.ListenCfg(), *utils.Encoding) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -138,7 +138,7 @@ func testDispatcherOptsAdminRPCConn(t *testing.T) {
 func testDispatcherOptsDSPInitCfg(t *testing.T) {
 	dspOptsConfigDIR = "dispatcher_opts" //changed with the cfg with dispatcher on
 	var err error
-	dspOptsCfgPath = path.Join(*dataDir, "conf", "samples", dspOptsConfigDIR)
+	dspOptsCfgPath = path.Join(*utils.DataDir, "conf", "samples", dspOptsConfigDIR)
 	dspOptsCfg, err = config.NewCGRConfigFromPath(context.Background(), dspOptsCfgPath)
 	if err != nil {
 		t.Error(err)
@@ -147,14 +147,14 @@ func testDispatcherOptsDSPInitCfg(t *testing.T) {
 
 // Start CGR Engine woth Dispatcher enabled
 func testDispatcherOptsDSPStartEngine(t *testing.T) {
-	if _, err := engine.StartEngine(dspOptsCfgPath, *waitRater); err != nil {
+	if _, err := engine.StartEngine(dspOptsCfgPath, *utils.WaitRater); err != nil {
 		t.Fatal(err)
 	}
 }
 
 func testDispatcherOptsDSPRPCConn(t *testing.T) {
 	var err error
-	dspOptsRPC, err = engine.NewRPCClient(dspOptsCfg.ListenCfg(), *encoding) // We connect over JSON so we can also troubleshoot if needed
+	dspOptsRPC, err = engine.NewRPCClient(dspOptsCfg.ListenCfg(), *utils.Encoding) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -744,13 +744,13 @@ func testDispatcherCheckCacheAfterSetDispatcherDSP2(t *testing.T) {
 }
 
 func testDispatcherOptsDSPStopEngine(t *testing.T) {
-	if err := engine.KillEngine(*waitRater); err != nil {
+	if err := engine.KillEngine(*utils.WaitRater); err != nil {
 		t.Error(err)
 	}
 }
 
 func testDispatcherOptsAdminStopEngine(t *testing.T) {
-	if err := engine.KillEngine(*waitRater); err != nil {
+	if err := engine.KillEngine(*utils.WaitRater); err != nil {
 		t.Error(err)
 	}
 }

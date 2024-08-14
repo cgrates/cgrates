@@ -49,7 +49,7 @@ var (
 )
 
 func TestActionsit(t *testing.T) {
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 		actionsConfigDIR = "actions_internal"
 	case utils.MetaMySQL:
@@ -61,7 +61,7 @@ func TestActionsit(t *testing.T) {
 	default:
 		t.Fatal("Unknown Database type")
 	}
-	if *encoding == utils.MetaGOB {
+	if *utils.Encoding == utils.MetaGOB {
 		actionsConfigDIR += "_gob"
 	}
 
@@ -71,7 +71,7 @@ func TestActionsit(t *testing.T) {
 }
 
 func testActionsitInitCfg(t *testing.T) {
-	actsLclCfgPath = path.Join(*dataDir, "conf", "samples", actionsConfigDIR)
+	actsLclCfgPath = path.Join(*utils.DataDir, "conf", "samples", actionsConfigDIR)
 	// Init config first
 	var err error
 	actsLclCfg, err = config.NewCGRConfigFromPath(actsLclCfgPath)
@@ -84,7 +84,7 @@ func testActionsitInitCfg(t *testing.T) {
 
 // Finds cgr-engine executable and starts it with default configuration
 func testActionsitStartEngine(t *testing.T) {
-	if _, err := StopStartEngine(actsLclCfgPath, *waitRater); err != nil {
+	if _, err := StopStartEngine(actsLclCfgPath, *utils.WaitRater); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -93,7 +93,7 @@ func testActionsitStartEngine(t *testing.T) {
 func testActionsitRpcConn(t *testing.T) {
 	var err error
 	// time.Sleep(500 * time.Millisecond)
-	actsLclRpc, err = NewRPCClient(actsLclCfg.ListenCfg(), *encoding) // We connect over JSON so we can also troubleshoot if needed
+	actsLclRpc, err = NewRPCClient(actsLclCfg.ListenCfg(), *utils.Encoding) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -893,7 +893,7 @@ func testActionsitresetAccountCDR(t *testing.T) {
 }
 
 func testActionsitStopCgrEngine(t *testing.T) {
-	if err := KillEngine(*waitRater); err != nil {
+	if err := KillEngine(*utils.WaitRater); err != nil {
 		t.Error(err)
 	}
 }

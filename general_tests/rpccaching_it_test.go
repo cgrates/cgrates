@@ -71,7 +71,7 @@ var (
 
 // Test start here
 func TestRPCMethods(t *testing.T) {
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 		t.SkipNow()
 	case utils.MetaMySQL:
@@ -91,7 +91,7 @@ func TestRPCMethods(t *testing.T) {
 
 func testRPCMethodsLoadConfig(t *testing.T) {
 	var err error
-	rpcCfgPath = path.Join(*dataDir, "conf", "samples", rpcConfDIR)
+	rpcCfgPath = path.Join(*utils.DataDir, "conf", "samples", rpcConfDIR)
 	if rpcCfg, err = config.NewCGRConfigFromPath(context.Background(), rpcCfgPath); err != nil {
 		t.Error(err)
 	}
@@ -107,14 +107,14 @@ func testRPCMethodsFlushDBs(t *testing.T) {
 }
 
 func testRPCMethodsStartEngine(t *testing.T) {
-	if _, err := engine.StopStartEngine(rpcCfgPath, *waitRater); err != nil {
+	if _, err := engine.StopStartEngine(rpcCfgPath, *utils.WaitRater); err != nil {
 		t.Fatal(err)
 	}
 }
 
 func testRPCMethodsRpcConn(t *testing.T) {
 	var err error
-	rpcRpc, err = engine.NewRPCClient(rpcCfg.ListenCfg(), *encoding) // We connect over JSON so we can also troubleshoot if needed
+	rpcRpc, err = engine.NewRPCClient(rpcCfg.ListenCfg(), *utils.Encoding) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
 		t.Fatal("Could not connect to rater: ", err.Error())
 	}
@@ -859,11 +859,11 @@ func testRPCMethodsProcessEvent(t *testing.T) {
 
 // // Load the tariff plan, creating accounts and their balances
 // func testRPCMethodsLoadData(t *testing.T) {
-// 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "testtp")}
+// 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*utils.DataDir, "tariffplans", "testtp")}
 // 	if err := rpcRpc.Call(context.Background(), utils.AdminSv1LoadTariffPlanFromFolder, attrs, &tpLoadInst); err != nil {
 // 		t.Error(err)
 // 	}
-// 	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // Give time for scheduler to execute topups
+// 	time.Sleep(time.Duration(*utils.WaitRater) * time.Millisecond) // Give time for scheduler to execute topups
 // }
 
 // func testRPCMethodsResponderDebit(t *testing.T) {

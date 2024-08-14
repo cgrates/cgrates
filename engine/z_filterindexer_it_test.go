@@ -94,7 +94,7 @@ var sTests = []func(t *testing.T){
 }
 
 func TestFilterIndexerIT(t *testing.T) {
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 		dataManager = NewDataManager(NewInternalDB(nil, nil, config.CgrConfig().DataDbCfg().Items),
 			config.CgrConfig().CacheCfg(), nil)
@@ -116,7 +116,7 @@ func TestFilterIndexerIT(t *testing.T) {
 		t.Fatal("Unknown Database type")
 	}
 	for _, stest := range sTests {
-		t.Run(*dbType, stest)
+		t.Run(*utils.DBType, stest)
 	}
 }
 

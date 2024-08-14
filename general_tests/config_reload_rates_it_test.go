@@ -49,7 +49,7 @@ var (
 )
 
 func TestRateChange(t *testing.T) {
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 		testRateCfgDir = "cfg_rld_rates_internal"
 	case utils.MetaMySQL:
@@ -68,7 +68,7 @@ func TestRateChange(t *testing.T) {
 
 func testRateLoadConfig(t *testing.T) {
 	var err error
-	testRateCfgPath = path.Join(*dataDir, "conf", "samples", testRateCfgDir)
+	testRateCfgPath = path.Join(*utils.DataDir, "conf", "samples", testRateCfgDir)
 	if testRateCfg, err = config.NewCGRConfigFromPath(context.Background(), testRateCfgPath); err != nil {
 		t.Error(err)
 	}
@@ -84,7 +84,7 @@ func testRateFlushDBs(t *testing.T) {
 }
 
 func testRateStartEngine(t *testing.T) {
-	if _, err := engine.StopStartEngine(testRateCfgPath, *waitRater); err != nil {
+	if _, err := engine.StopStartEngine(testRateCfgPath, *utils.WaitRater); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -122,7 +122,7 @@ func testRateConfigSReloadRates(t *testing.T) {
 
 func testRateRPCConn(t *testing.T) {
 	var err error
-	testRateRPC, err = engine.NewRPCClient(testRateCfg.ListenCfg(), *encoding)
+	testRateRPC, err = engine.NewRPCClient(testRateCfg.ListenCfg(), *utils.Encoding)
 	if err != nil {
 		t.Fatal(err)
 	}

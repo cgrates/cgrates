@@ -50,7 +50,7 @@ func TestNatsEEJetStream(t *testing.T) {
 	defer natsServer.Shutdown()
 
 	testCreateDirectory(t)
-	cgrCfg, err := config.NewCGRConfigFromPath(context.Background(), path.Join(*dataDir, "conf", "samples", "ees"))
+	cgrCfg, err := config.NewCGRConfigFromPath(context.Background(), path.Join(*utils.DataDir, "conf", "samples", "ees"))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -144,7 +144,7 @@ func TestNatsEE(t *testing.T) {
 	natsServer.Start()
 	defer natsServer.Shutdown()
 
-	cgrCfg, err := config.NewCGRConfigFromPath(context.Background(), path.Join(*dataDir, "conf", "samples", "ees"))
+	cgrCfg, err := config.NewCGRConfigFromPath(context.Background(), path.Join(*utils.DataDir, "conf", "samples", "ees"))
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -69,7 +69,7 @@ var (
 )
 
 func TestTrendsIT(t *testing.T) {
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 		trConfigDIR = "trends_internal"
 	case utils.MetaMongo:
@@ -88,7 +88,7 @@ func TestTrendsIT(t *testing.T) {
 
 func testTrendSInitCfg(t *testing.T) {
 	var err error
-	trCfgPath = path.Join(*dataDir, "conf", "samples", trConfigDIR)
+	trCfgPath = path.Join(*utils.DataDir, "conf", "samples", trConfigDIR)
 	trCfg, err = config.NewCGRConfigFromPath(context.Background(), trCfgPath)
 	if err != nil {
 		t.Error(err)
@@ -109,14 +109,14 @@ func testTrendSResetStorDB(t *testing.T) {
 
 // Start CGR Engine
 func testTrendsStartEngine(t *testing.T) {
-	if _, err := engine.StopStartEngine(trCfgPath, *waitRater); err != nil {
+	if _, err := engine.StopStartEngine(trCfgPath, *utils.WaitRater); err != nil {
 		t.Fatal(err)
 	}
 }
 
 func testTrendsRPCConn(t *testing.T) {
 	var err error
-	trRPC, err = engine.NewRPCClient(trCfg.ListenCfg(), *encoding) // We connect over JSON so we can also troubleshoot if needed
+	trRPC, err = engine.NewRPCClient(trCfg.ListenCfg(), *utils.Encoding) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
 		t.Fatal(err)
 	}

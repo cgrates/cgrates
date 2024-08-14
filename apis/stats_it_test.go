@@ -84,7 +84,7 @@ var (
 )
 
 func TestStatsIT(t *testing.T) {
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 		sqConfigDIR = "stats_internal"
 	case utils.MetaMongo:
@@ -103,7 +103,7 @@ func TestStatsIT(t *testing.T) {
 
 func testStatsInitCfg(t *testing.T) {
 	var err error
-	sqCfgPath = path.Join(*dataDir, "conf", "samples", sqConfigDIR)
+	sqCfgPath = path.Join(*utils.DataDir, "conf", "samples", sqConfigDIR)
 	sqCfg, err = config.NewCGRConfigFromPath(context.Background(), sqCfgPath)
 	if err != nil {
 		t.Error(err)
@@ -124,14 +124,14 @@ func testStatsResetStorDB(t *testing.T) {
 
 // Start CGR Engine
 func testStatsStartEngine(t *testing.T) {
-	if _, err := engine.StopStartEngine(sqCfgPath, *waitRater); err != nil {
+	if _, err := engine.StopStartEngine(sqCfgPath, *utils.WaitRater); err != nil {
 		t.Fatal(err)
 	}
 }
 
 func testStatsRPCConn(t *testing.T) {
 	var err error
-	sqRPC, err = engine.NewRPCClient(sqCfg.ListenCfg(), *encoding) // We connect over JSON so we can also troubleshoot if needed
+	sqRPC, err = engine.NewRPCClient(sqCfg.ListenCfg(), *utils.Encoding) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
 		t.Fatal(err)
 	}

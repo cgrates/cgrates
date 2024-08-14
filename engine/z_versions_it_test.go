@@ -47,7 +47,7 @@ var (
 )
 
 func TestVersionsIT(t *testing.T) {
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 		t.SkipNow()
 	case utils.MetaMySQL:
@@ -67,7 +67,7 @@ func TestVersionsIT(t *testing.T) {
 
 func testInitConfig(t *testing.T) {
 	var err error
-	if vrsCfg, err = config.NewCGRConfigFromPath(context.Background(), path.Join(*dataDir, "conf", "samples", versionsConfigDIR)); err != nil {
+	if vrsCfg, err = config.NewCGRConfigFromPath(context.Background(), path.Join(*utils.DataDir, "conf", "samples", versionsConfigDIR)); err != nil {
 		t.Fatal(err)
 	}
 }

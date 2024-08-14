@@ -77,7 +77,7 @@ var sTestsSCncrIT = []func(t *testing.T){
 }
 
 func testSCncrInitConfig(t *testing.T) {
-	sCncrCfgPath = path.Join(*dataDir, "conf", "samples", sCncrCfgDIR)
+	sCncrCfgPath = path.Join(*utils.DataDir, "conf", "samples", sCncrCfgDIR)
 	if sCncrCfg, err = config.NewCGRConfigFromPath(sCncrCfgPath); err != nil {
 		t.Fatal(err)
 	}
@@ -90,7 +90,7 @@ func testSCncrInitDataDB(t *testing.T) {
 }
 
 func testSCncrStartEngine(t *testing.T) {
-	if _, err := engine.StopStartEngine(sCncrCfgPath, *waitRater); err != nil {
+	if _, err := engine.StopStartEngine(sCncrCfgPath, *utils.WaitRater); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -98,14 +98,14 @@ func testSCncrStartEngine(t *testing.T) {
 // Connect rpc client to rater
 func testSCncrRPCConn(t *testing.T) {
 	var err error
-	sCncrRPC, err = engine.NewRPCClient(sCncrCfg.ListenCfg(), *encoding) // We connect over JSON so we can also troubleshoot if needed
+	sCncrRPC, err = engine.NewRPCClient(sCncrCfg.ListenCfg(), *utils.Encoding) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
 		t.Fatal("Could not connect to rater: ", err.Error())
 	}
 }
 
 func testSCncrKillEngine(t *testing.T) {
-	if err := engine.KillEngine(*waitRater); err != nil {
+	if err := engine.KillEngine(*utils.WaitRater); err != nil {
 		t.Error(err)
 	}
 }
@@ -114,7 +114,7 @@ func testSCncrLoadTP(t *testing.T) {
 	var loadInst string
 	if err := sCncrRPC.Call(utils.APIerSv1LoadTariffPlanFromFolder,
 		&utils.AttrLoadTpFromFolder{FolderPath: path.Join(
-			*dataDir, "tariffplans", "tp1cnt")}, &loadInst); err != nil {
+			*utils.DataDir, "tariffplans", "tp1cnt")}, &loadInst); err != nil {
 		t.Error(err)
 	}
 	attrPrfl := &v2.AttributeWithAPIOpts{

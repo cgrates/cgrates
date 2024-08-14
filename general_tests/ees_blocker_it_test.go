@@ -54,7 +54,7 @@ var (
 
 // Test start here
 func TestEEsBlocker(t *testing.T) {
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 		eesBlockerConfDIR = "ees_blocker_internal"
 	case utils.MetaMySQL:
@@ -92,7 +92,7 @@ func testEEsBlockerDeleteFiles(t *testing.T) {
 
 func testEEsBlockerLoadConfig(t *testing.T) {
 	var err error
-	eesBlockerCfgPath = path.Join(*dataDir, "conf", "samples", eesBlockerConfDIR)
+	eesBlockerCfgPath = path.Join(*utils.DataDir, "conf", "samples", eesBlockerConfDIR)
 	if eesBlockerCfg, err = config.NewCGRConfigFromPath(context.Background(), eesBlockerCfgPath); err != nil {
 		t.Error(err)
 	}
@@ -108,14 +108,14 @@ func testEEsBlockerFlushDBs(t *testing.T) {
 }
 
 func testEEsBlockerStartEngine(t *testing.T) {
-	if _, err := engine.StopStartEngine(eesBlockerCfgPath, *waitRater); err != nil {
+	if _, err := engine.StopStartEngine(eesBlockerCfgPath, *utils.WaitRater); err != nil {
 		t.Fatal(err)
 	}
 }
 
 func testEEsBlockerRpcConn(t *testing.T) {
 	var err error
-	eesBlockerRPC, err = engine.NewRPCClient(eesBlockerCfg.ListenCfg(), *encoding)
+	eesBlockerRPC, err = engine.NewRPCClient(eesBlockerCfg.ListenCfg(), *utils.Encoding)
 	if err != nil {
 		t.Fatal("Could not connect to rater: ", err.Error())
 	}

@@ -230,7 +230,7 @@ var (
 
 // Test start here
 func TestFltrIdxV1IT(t *testing.T) {
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 		tFltrIdxConfDIR = "filter_indexes_internal"
 	case utils.MetaMySQL:
@@ -248,7 +248,7 @@ func TestFltrIdxV1IT(t *testing.T) {
 }
 
 func testV1FIdxLoadConfig(t *testing.T) {
-	tFltrIdxCfgPath = path.Join(*dataDir, "conf", "samples", tFltrIdxConfDIR)
+	tFltrIdxCfgPath = path.Join(*utils.DataDir, "conf", "samples", tFltrIdxConfDIR)
 	var err error
 	if tFltrIdxCfg, err = config.NewCGRConfigFromPath(context.Background(), tFltrIdxCfgPath); err != nil {
 		t.Error(err)
@@ -275,14 +275,14 @@ func testV1IndexClearCache(t *testing.T) {
 }
 
 func testV1FIdxStartEngine(t *testing.T) {
-	if _, err := engine.StopStartEngine(tFltrIdxCfgPath, *waitRater); err != nil {
+	if _, err := engine.StopStartEngine(tFltrIdxCfgPath, *utils.WaitRater); err != nil {
 		t.Fatal(err)
 	}
 }
 
 func testV1FIdxRpcConn(t *testing.T) {
 	var err error
-	tFIdxRpc, err = engine.NewRPCClient(tFltrIdxCfg.ListenCfg(), *encoding) // We connect over JSON so we can also troubleshoot if needed
+	tFIdxRpc, err = engine.NewRPCClient(tFltrIdxCfg.ListenCfg(), *utils.Encoding) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
 		t.Fatal("Could not connect to rater: ", err.Error())
 	}

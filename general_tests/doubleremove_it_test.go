@@ -64,7 +64,7 @@ var (
 
 // Test starts here
 func TestDoubleRemoveIT(t *testing.T) {
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 		doubleRemoveDIR = "tutinternal"
 	case utils.MetaMySQL:
@@ -84,7 +84,7 @@ func TestDoubleRemoveIT(t *testing.T) {
 
 func testdoubleRemoveLoadConfig(t *testing.T) {
 	var err error
-	doubleRemovePath = path.Join(*dataDir, "conf", "samples", doubleRemoveDIR)
+	doubleRemovePath = path.Join(*utils.DataDir, "conf", "samples", doubleRemoveDIR)
 	if doubleRemove, err = config.NewCGRConfigFromPath(context.Background(), doubleRemovePath); err != nil {
 		t.Error(err)
 	}
@@ -100,14 +100,14 @@ func testdoubleRemoveFlushDBs(t *testing.T) {
 }
 
 func testdoubleRemoveStartEngine(t *testing.T) {
-	if _, err := engine.StopStartEngine(doubleRemovePath, *waitRater); err != nil {
+	if _, err := engine.StopStartEngine(doubleRemovePath, *utils.WaitRater); err != nil {
 		t.Fatal(err)
 	}
 }
 
 func testdoubleRemoveRpcConn(t *testing.T) {
 	var err error
-	doubleRemoveRPC, err = engine.NewRPCClient(doubleRemove.ListenCfg(), *encoding) // We connect over JSON so we can also troubleshoot if needed
+	doubleRemoveRPC, err = engine.NewRPCClient(doubleRemove.ListenCfg(), *utils.Encoding) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
 		t.Fatal("Could not connect to rater: ", err.Error())
 	}

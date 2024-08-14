@@ -91,7 +91,7 @@ var (
 )
 
 func TestLoadersIT(t *testing.T) {
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 		ldrConfigDIR = "apis_loaders_internal"
 	case utils.MetaMongo:
@@ -110,7 +110,7 @@ func TestLoadersIT(t *testing.T) {
 
 func testLoadersInitCfg(t *testing.T) {
 	var err error
-	ldrCfgPath = path.Join(*dataDir, "conf", "samples", ldrConfigDIR)
+	ldrCfgPath = path.Join(*utils.DataDir, "conf", "samples", ldrConfigDIR)
 	ldrCfg, err = config.NewCGRConfigFromPath(context.Background(), ldrCfgPath)
 	if err != nil {
 		t.Error(err)
@@ -131,14 +131,14 @@ func testLoadersResetStorDB(t *testing.T) {
 
 // Start CGR Engine
 func testLoadersStartEngine(t *testing.T) {
-	if _, err := engine.StopStartEngine(ldrCfgPath, *waitRater); err != nil {
+	if _, err := engine.StopStartEngine(ldrCfgPath, *utils.WaitRater); err != nil {
 		t.Fatal(err)
 	}
 }
 
 func testLoadersRPCConn(t *testing.T) {
 	var err error
-	ldrRPC, err = engine.NewRPCClient(ldrCfg.ListenCfg(), *encoding) // We connect over JSON so we can also troubleshoot if needed
+	ldrRPC, err = engine.NewRPCClient(ldrCfg.ListenCfg(), *utils.Encoding) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
 		t.Fatal(err)
 	}

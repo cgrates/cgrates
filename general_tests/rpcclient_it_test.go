@@ -74,7 +74,7 @@ package general_tests
 // }
 
 // func TestRPCITLcl(t *testing.T) {
-// 	switch *dbType {
+// 	switch *utils.DBType {
 // 	case utils.MetaInternal:
 // 		rpcITCfgDIR1 = "multiral1_internal"
 // 		rpcITCfgDIR2 = "multiral2_internal"
@@ -90,13 +90,13 @@ package general_tests
 // 		t.Fatal("Unknown Database type")
 // 	}
 // 	for _, stest := range sTestRPCITLcl {
-// 		t.Run(*dbType, stest)
+// 		t.Run(*utils.DBType, stest)
 // 	}
 // }
 
 // func testRPCITLclInitCfg(t *testing.T) {
-// 	rpcITCfgPath1 = path.Join(*dataDir, "conf", "samples", rpcITCfgDIR1)
-// 	rpcITCfgPath2 = path.Join(*dataDir, "conf", "samples", rpcITCfgDIR2)
+// 	rpcITCfgPath1 = path.Join(*utils.DataDir, "conf", "samples", rpcITCfgDIR1)
+// 	rpcITCfgPath2 = path.Join(*utils.DataDir, "conf", "samples", rpcITCfgDIR2)
 // 	rpcITCfg1, err = config.NewCGRConfigFromPath(rpcITCfgPath1)
 // 	if err != nil {
 // 		t.Error(err)
@@ -111,7 +111,7 @@ package general_tests
 // }
 
 // func testRPCITLclStartSecondEngine(t *testing.T) {
-// 	if ral2, err = engine.StopStartEngine(rpcITCfgPath2, *waitRater); err != nil {
+// 	if ral2, err = engine.StopStartEngine(rpcITCfgPath2, *utils.WaitRater); err != nil {
 // 		t.Fatal(err)
 // 	}
 // }
@@ -150,7 +150,7 @@ package general_tests
 
 // // Start first engine
 // func testRPCITLclStartFirstEngine(t *testing.T) {
-// 	if ral1, err = engine.StartEngine(rpcITCfgPath1, *waitRater); err != nil {
+// 	if ral1, err = engine.StartEngine(rpcITCfgPath1, *utils.WaitRater); err != nil {
 // 		t.Fatal(err)
 // 	}
 // }
@@ -177,7 +177,7 @@ package general_tests
 // 	if err := ral1.Process.Kill(); err != nil { // Kill the first RAL
 // 		t.Error(err)
 // 	}
-// 	time.Sleep(time.Duration(*waitRater) * time.Millisecond)
+// 	time.Sleep(time.Duration(*utils.WaitRater) * time.Millisecond)
 // 	var status map[string]any
 // 	if err := rpcPoolFirst.Call(utils.CoreSv1Status, utils.TenantWithAPIOpts{}, &status); err != nil {
 // 		t.Error(err)
@@ -194,7 +194,7 @@ package general_tests
 // }
 
 // func testRPCITLclStatusFirstFailback(t *testing.T) {
-// 	if ral1, err = engine.StartEngine(rpcITCfgPath1, *waitRater); err != nil {
+// 	if ral1, err = engine.StartEngine(rpcITCfgPath1, *utils.WaitRater); err != nil {
 // 		t.Fatal(err)
 // 	}
 // 	var status map[string]any
@@ -252,7 +252,7 @@ package general_tests
 // 	if err := ral1.Process.Kill(); err != nil { // Kill the first RAL
 // 		t.Error(err)
 // 	}
-// 	time.Sleep(time.Duration(*waitRater) * time.Millisecond)
+// 	time.Sleep(time.Duration(*utils.WaitRater) * time.Millisecond)
 // 	var status map[string]any
 // 	if err := rpcPoolBroadcast.Call(utils.CoreSv1Status, utils.TenantWithAPIOpts{}, &status); err != nil {
 // 		t.Error(err)
@@ -270,7 +270,7 @@ package general_tests
 // 	if err := ral2.Process.Kill(); err != nil { // Kill the first RAL
 // 		t.Error(err)
 // 	}
-// 	time.Sleep(time.Duration(*waitRater) * time.Millisecond)
+// 	time.Sleep(time.Duration(*utils.WaitRater) * time.Millisecond)
 // 	var status map[string]any
 // 	if err := rpcPoolBroadcast.Call(utils.CoreSv1Status, utils.TenantWithAPIOpts{}, &status); err == nil {
 // 		t.Error("Should get error")
@@ -278,7 +278,7 @@ package general_tests
 // }
 
 // func testRPCITLclBcastStatusRALs2Up(t *testing.T) {
-// 	if ral2, err = engine.StartEngine(rpcITCfgPath2, *waitRater); err != nil {
+// 	if ral2, err = engine.StartEngine(rpcITCfgPath2, *utils.WaitRater); err != nil {
 // 		t.Fatal(err)
 // 	}
 // 	var status map[string]any
@@ -295,7 +295,7 @@ package general_tests
 // }
 
 // func testRPCITLclStatusBcastRALs1Up(t *testing.T) {
-// 	if ral1, err = engine.StartEngine(rpcITCfgPath1, *waitRater); err != nil {
+// 	if ral1, err = engine.StartEngine(rpcITCfgPath1, *utils.WaitRater); err != nil {
 // 		t.Fatal(err)
 // 	}
 // 	var status map[string]any
@@ -320,7 +320,7 @@ package general_tests
 // 		t.Errorf("Received unexpected stats: %+v", stats)
 // 	}
 // 	var loadInst utils.LoadInstance
-// 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(**dataDir, "tariffplans", "oldtutorial")}
+// 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(**utils.DataDir, "tariffplans", "oldtutorial")}
 // 	if err := rpcRAL1.Call(utils.APIerSv2LoadTariffPlanFromFolder, attrs, &loadInst); err != nil {
 // 		t.Error(err)
 // 	} else if loadInst.RatingLoadID == "" || loadInst.AccountingLoadID == "" {

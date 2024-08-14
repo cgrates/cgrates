@@ -77,7 +77,7 @@ var (
 )
 
 func TestExport(t *testing.T) {
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 		expCfgDir = "export_it_test_internal"
 	case utils.MetaMySQL:
@@ -106,7 +106,7 @@ func testExpCreateFiles(t *testing.T) {
 }
 
 func testExpLoadConfig(t *testing.T) {
-	expCfgPath = path.Join(*dataDir, "conf", "samples", expCfgDir)
+	expCfgPath = path.Join(*utils.DataDir, "conf", "samples", expCfgDir)
 	if expCfg, err = config.NewCGRConfigFromPath(context.Background(), expCfgPath); err != nil {
 		t.Error(err)
 	}
@@ -122,20 +122,20 @@ func testExpFlushDBs(t *testing.T) {
 }
 
 func testExpStartEngine(t *testing.T) {
-	if _, err := engine.StopStartEngine(expCfgPath, *waitRater); err != nil {
+	if _, err := engine.StopStartEngine(expCfgPath, *utils.WaitRater); err != nil {
 		t.Fatal(err)
 	}
 }
 
 func testExpStartEngineChangedLoderDirectory(t *testing.T) {
-	if _, err := engine.StopStartEngine(expCfgPath, *waitRater); err != nil {
+	if _, err := engine.StopStartEngine(expCfgPath, *utils.WaitRater); err != nil {
 		t.Fatal(err)
 	}
 }
 
 func testExpRPCConn(t *testing.T) {
 	var err error
-	expRpc, err = engine.NewRPCClient(expCfg.ListenCfg(), *encoding)
+	expRpc, err = engine.NewRPCClient(expCfg.ListenCfg(), *utils.Encoding)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -269,7 +269,7 @@ func testExpVerifyAttributes(t *testing.T) {
 		t.Fatal(err)
 	}
 	reply.Compile()
-	if *encoding == utils.MetaGOB {
+	if *utils.Encoding == utils.MetaGOB {
 		for _, v := range exp.Attributes {
 			v.FilterIDs = nil
 		}
@@ -344,7 +344,7 @@ func testExpVerifyResources(t *testing.T) {
 			}},
 		ThresholdIDs: []string{},
 	}
-	if *encoding == utils.MetaGOB {
+	if *utils.Encoding == utils.MetaGOB {
 		rPrf.ThresholdIDs = nil
 	}
 	var reply *engine.ResourceProfile
@@ -490,7 +490,7 @@ func testExpVerifyRoutes(t *testing.T) {
 		&utils.TenantID{Tenant: "cgrates.org", ID: "ROUTE_ACNT_1001"}, &reply); err != nil {
 		t.Fatal(err)
 	}
-	if *encoding == utils.MetaGOB {
+	if *utils.Encoding == utils.MetaGOB {
 		splPrf.SortingParameters = nil
 		splPrf2.SortingParameters = nil
 	}
@@ -547,7 +547,7 @@ func testExpVerifyRateProfiles(t *testing.T) {
 		},
 	}
 
-	if *encoding == utils.MetaGOB {
+	if *utils.Encoding == utils.MetaGOB {
 		splPrf.FilterIDs = nil
 	}
 	if err := expRpc.Call(context.Background(), utils.AdminSv1GetRateProfile, &utils.TenantIDWithAPIOpts{
@@ -634,7 +634,7 @@ func testExpVerifyActionProfiles(t *testing.T) {
 			},
 		},
 	}
-	if *encoding == utils.MetaGOB {
+	if *utils.Encoding == utils.MetaGOB {
 		actPrf.FilterIDs = nil
 		for _, act := range actPrf.Actions {
 			act.FilterIDs = nil

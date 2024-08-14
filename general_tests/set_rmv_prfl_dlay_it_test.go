@@ -32,7 +32,7 @@ import (
 
 func TestSetRemoveProfilesWithCachingDelay(t *testing.T) {
 	var cfgDir string
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 		t.SkipNow()
 	case utils.MetaMySQL:

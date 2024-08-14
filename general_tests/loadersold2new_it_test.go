@@ -59,7 +59,7 @@ var (
 
 func TestLdro2nRtChange(t *testing.T) {
 	var testLdro2nRtCfgDir string
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 		testLdro2nRtCfgDir = "loaders_old2new_internal"
 	case utils.MetaMySQL:
@@ -71,7 +71,7 @@ func TestLdro2nRtChange(t *testing.T) {
 	default:
 		t.Fatal("Unknown Database type")
 	}
-	testLdro2nRtCfgPath = path.Join(*dataDir, "conf", "samples", testLdro2nRtCfgDir)
+	testLdro2nRtCfgPath = path.Join(*utils.DataDir, "conf", "samples", testLdro2nRtCfgDir)
 	for _, testLdro2nRtTest := range testLdro2nRtTests {
 		t.Run(testLdro2nRtCfgDir, testLdro2nRtTest)
 	}
@@ -109,14 +109,14 @@ func testLdro2nRtFlushDBs(t *testing.T) {
 }
 
 func testLdro2nRtStartEngine(t *testing.T) {
-	if _, err := engine.StopStartEngine(testLdro2nRtCfgPath, *waitRater); err != nil {
+	if _, err := engine.StopStartEngine(testLdro2nRtCfgPath, *utils.WaitRater); err != nil {
 		t.Fatal(err)
 	}
 }
 
 func testLdro2nRtRPCConn(t *testing.T) {
 	var err error
-	if testLdro2nRtRPC, err = engine.NewRPCClient(testLdro2nRtCfg.ListenCfg(), *encoding); err != nil {
+	if testLdro2nRtRPC, err = engine.NewRPCClient(testLdro2nRtCfg.ListenCfg(), *utils.Encoding); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -129,12 +129,12 @@ func testLdro2nRtLoadTP(t *testing.T) {
 		"DestinationRates.csv",
 		"RatingPlans.csv",
 	} {
-		if err = copyFile(filepath.Join(*dataDir, "tariffplans", "oldtutorial2", file), filepath.Join("/tmp/In", file)); err != nil {
+		if err = copyFile(filepath.Join(*utils.DataDir, "tariffplans", "oldtutorial2", file), filepath.Join("/tmp/In", file)); err != nil {
 			t.Fatal(err)
 		}
 	}
 	time.Sleep(time.Second)
-	if err = copyFile(filepath.Join(*dataDir, "tariffplans", "oldtutorial2", "RatingProfiles.csv"), filepath.Join("/tmp/In", "RatingProfiles.csv")); err != nil {
+	if err = copyFile(filepath.Join(*utils.DataDir, "tariffplans", "oldtutorial2", "RatingProfiles.csv"), filepath.Join("/tmp/In", "RatingProfiles.csv")); err != nil {
 		t.Fatal(err)
 	}
 	time.Sleep(time.Second)

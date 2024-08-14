@@ -62,7 +62,7 @@ var (
 )
 
 func TestSessionSRplcGracefulShutdown(t *testing.T) {
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 		smgRplcCfgDIR1 = "rplcTestGracefulShutdown1_internal"
 		smgRplcCfgDIR2 = "rplcTestGracefulShutdown2_internal"
@@ -79,17 +79,17 @@ func TestSessionSRplcGracefulShutdown(t *testing.T) {
 	}
 
 	for _, stest1 := range sTestsSession1 {
-		t.Run(*dbType, stest1)
+		t.Run(*utils.DBType, stest1)
 	}
 }
 
 // Init Config
 func testSessionSRplcInitCfg(t *testing.T) {
-	smgRplcCfgPath1 = path.Join(*dataDir, "conf", "samples", "sessions_replication", smgRplcCfgDIR1)
+	smgRplcCfgPath1 = path.Join(*utils.DataDir, "conf", "samples", "sessions_replication", smgRplcCfgDIR1)
 	if smgRplCfg1, err = config.NewCGRConfigFromPath(context.Background(), smgRplcCfgPath1); err != nil {
 		t.Fatal(err)
 	}
-	smgRplcCfgPath2 = path.Join(*dataDir, "conf", "samples", "sessions_replication", smgRplcCfgDIR2)
+	smgRplcCfgPath2 = path.Join(*utils.DataDir, "conf", "samples", "sessions_replication", smgRplcCfgDIR2)
 	if smgRplCfg2, err = config.NewCGRConfigFromPath(context.Background(), smgRplcCfgPath2); err != nil {
 		t.Fatal(err)
 	}
@@ -107,10 +107,10 @@ func testSessionSRplcFlushDBs(t *testing.T) {
 
 // Start CGR Engine
 func testSessionSRplcStartEngine(t *testing.T) {
-	if _, err = engine.StopStartEngine(smgRplcCfgPath1, *waitRater); err != nil {
+	if _, err = engine.StopStartEngine(smgRplcCfgPath1, *utils.WaitRater); err != nil {
 		t.Fatal(err)
 	}
-	if testEngine1, err = engine.StartEngine(smgRplcCfgPath2, *waitRater); err != nil {
+	if testEngine1, err = engine.StartEngine(smgRplcCfgPath2, *utils.WaitRater); err != nil {
 		t.Fatal(err)
 	}
 
@@ -118,10 +118,10 @@ func testSessionSRplcStartEngine(t *testing.T) {
 
 // Connect rpc client to rater
 func testSessionSRplcApierRpcConn(t *testing.T) {
-	if smgRplcRPC1, err = engine.NewRPCClient(smgRplCfg1.ListenCfg(), *encoding); err != nil {
+	if smgRplcRPC1, err = engine.NewRPCClient(smgRplCfg1.ListenCfg(), *utils.Encoding); err != nil {
 		t.Fatal(err)
 	}
-	if smgRplcRPC2, err = engine.NewRPCClient(smgRplCfg2.ListenCfg(), *encoding); err != nil {
+	if smgRplcRPC2, err = engine.NewRPCClient(smgRplCfg2.ListenCfg(), *utils.Encoding); err != nil {
 		t.Fatal(err)
 	}
 }

@@ -62,7 +62,7 @@ var (
 
 // Test start here
 func TestAccIT(t *testing.T) {
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 		accConfDIR = "acc_generaltest_internal"
 	case utils.MetaMySQL:
@@ -82,7 +82,7 @@ func TestAccIT(t *testing.T) {
 
 func testV1AccLoadConfig(t *testing.T) {
 	var err error
-	accCfgPath = path.Join(*dataDir, "conf", "samples", accConfDIR)
+	accCfgPath = path.Join(*utils.DataDir, "conf", "samples", accConfDIR)
 	if accCfg, err = config.NewCGRConfigFromPath(context.Background(), accCfgPath); err != nil {
 		t.Error(err)
 	}
@@ -106,7 +106,7 @@ func testV1AccStartEngine(t *testing.T) {
 
 func testV1AccRpcConn(t *testing.T) {
 	var err error
-	accRpc, err = engine.NewRPCClient(accCfg.ListenCfg(), *encoding) // We connect over JSON so we can also troubleshoot if needed
+	accRpc, err = engine.NewRPCClient(accCfg.ListenCfg(), *utils.Encoding) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
 		t.Fatal("Could not connect to rater: ", err.Error())
 	}

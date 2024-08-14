@@ -71,7 +71,7 @@ var (
 
 // Tests starting here
 func TestCDRsIT(t *testing.T) {
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 		cdrsConfDIR = "cdrsv2internal"
 	case utils.MetaMySQL:
@@ -91,9 +91,9 @@ func TestCDRsIT(t *testing.T) {
 
 func testCDRsInitConfig(t *testing.T) {
 	var err error
-	cdrsCfgPath = path.Join(*dataDir, "conf", "samples", cdrsConfDIR)
-	if *encoding == utils.MetaGOB {
-		cdrsCfgPath = path.Join(*dataDir, "conf", "samples", cdrsConfDIR+"_gob")
+	cdrsCfgPath = path.Join(*utils.DataDir, "conf", "samples", cdrsConfDIR)
+	if *utils.Encoding == utils.MetaGOB {
+		cdrsCfgPath = path.Join(*utils.DataDir, "conf", "samples", cdrsConfDIR+"_gob")
 	}
 	if cdrsCfg, err = config.NewCGRConfigFromPath(context.Background(), cdrsCfgPath); err != nil {
 		t.Fatal("Got config error: ", err.Error())
@@ -110,14 +110,14 @@ func testCDRsFlushDBs(t *testing.T) {
 }
 
 func testCDRsStartEngine(t *testing.T) {
-	if _, err := engine.StopStartEngine(cdrsCfgPath, *waitRater); err != nil {
+	if _, err := engine.StopStartEngine(cdrsCfgPath, *utils.WaitRater); err != nil {
 		t.Fatal(err)
 	}
 }
 
 // Connect rpc client to rater
 func testCDRsRpcConn(t *testing.T) {
-	cdrsRpc, err = engine.NewRPCClient(cdrsCfg.ListenCfg(), *encoding) // We connect over JSON so we can also troubleshoot if needed
+	cdrsRpc, err = engine.NewRPCClient(cdrsCfg.ListenCfg(), *utils.Encoding) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
 		t.Fatal("Could not connect to rater: ", err.Error())
 	}
@@ -556,7 +556,7 @@ func testCDRsGetThreshold2(t *testing.T) {
 }
 
 func testCDRsKillEngine(t *testing.T) {
-	if err := engine.KillEngine(*waitRater); err != nil {
+	if err := engine.KillEngine(*utils.WaitRater); err != nil {
 		t.Error(err)
 	}
 }

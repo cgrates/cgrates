@@ -124,7 +124,7 @@ func testCallInitCfg(t *testing.T) {
 		t.Error("Invalid option")
 	}
 
-	tutorialCallsCfg.DataFolderPath = *dataDir // Share DataFolderPath through config towards StoreDb for Flush()
+	tutorialCallsCfg.DataFolderPath = *utils.DataDir // Share DataFolderPath through config towards StoreDb for Flush()
 	config.SetCgrConfig(tutorialCallsCfg)
 }
 
@@ -167,7 +167,7 @@ func testCallStartFS(t *testing.T) {
 
 // Start CGR Engine
 func testCallStartEngine(t *testing.T) {
-	engine.KillProcName("cgr-engine", *waitRater)
+	engine.KillProcName("cgr-engine", *utils.WaitRater)
 	switch optConf {
 	case utils.Freeswitch:
 		if err := engine.CallScript(path.Join(*fsConfig, "cgrates", "etc", "init.d", "cgrates"), "start", 100); err != nil {
@@ -230,11 +230,11 @@ func testCallRpcConn(t *testing.T) {
 // Load the tariff plan, creating accounts and their balances
 func testCallLoadTariffPlanFromFolder(t *testing.T) {
 	var reply string
-	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "tutorial")}
+	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*utils.DataDir, "tariffplans", "tutorial")}
 	if err := tutorialCallsRpc.Call(utils.APIerSv1LoadTariffPlanFromFolder, attrs, &reply); err != nil {
 		t.Error(err)
 	}
-	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // Give time for scheduler to execute topups
+	time.Sleep(time.Duration(*utils.WaitRater) * time.Millisecond) // Give time for scheduler to execute topups
 }
 
 // Make sure account was debited properly
@@ -343,7 +343,7 @@ func testCallStartPjsuaListener(t *testing.T) {
 			Username: "1003", Password: "CGRateS.org", Realm: "*", Registrar: "sip:127.0.0.1:5080"},
 	}
 	if tutorialCallsPjSuaListener, err = engine.StartPjsuaListener(
-		acnts, 5070, time.Duration(*waitRater)*time.Millisecond); err != nil {
+		acnts, 5070, time.Duration(*utils.WaitRater)*time.Millisecond); err != nil {
 		t.Fatal(err)
 	}
 	time.Sleep(3 * time.Second)

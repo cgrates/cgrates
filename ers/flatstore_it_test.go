@@ -101,7 +101,7 @@ package ers
 // )
 
 // func TestFlatstoreFile(t *testing.T) {
-// 	switch *dbType {
+// 	switch *utils.DBType {
 // 	case utils.MetaInternal:
 // 		flatstoreCfgDIR = "ers_internal"
 // 	case utils.MetaMySQL:
@@ -120,7 +120,7 @@ package ers
 
 // func testFlatstoreITInitConfig(t *testing.T) {
 // 	var err error
-// 	flatstoreCfgPath = path.Join(*dataDir, "conf", "samples", flatstoreCfgDIR)
+// 	flatstoreCfgPath = path.Join(*utils.DataDir, "conf", "samples", flatstoreCfgDIR)
 // 	if flatstoreCfg, err = config.NewCGRConfigFromPath(context.Background(), flatstoreCfgPath); err != nil {
 // 		t.Fatal("Got config error: ", err.Error())
 // 	}
@@ -134,7 +134,7 @@ package ers
 // }
 
 // func testFlatstoreITStartEngine(t *testing.T) {
-// 	if _, err := engine.StopStartEngine(flatstoreCfgPath, *waitRater); err != nil {
+// 	if _, err := engine.StopStartEngine(flatstoreCfgPath, *utils.WaitRater); err != nil {
 // 		t.Fatal(err)
 // 	}
 // }
@@ -142,7 +142,7 @@ package ers
 // // Connect rpc client to rater
 // func testFlatstoreITRpcConn(t *testing.T) {
 // 	var err error
-// 	flatstoreRPC, err = engine.NewRPCClient(flatstoreCfg.ListenCfg(), *encoding) // We connect over JSON so we can also troubleshoot if needed
+// 	flatstoreRPC, err = engine.NewRPCClient(flatstoreCfg.ListenCfg(), *utils.Encoding) // We connect over JSON so we can also troubleshoot if needed
 // 	if err != nil {
 // 		t.Fatal("Could not connect to rater: ", err.Error())
 // 	}
@@ -316,7 +316,7 @@ package ers
 // }
 
 // func testFlatstoreITKillEngine(t *testing.T) {
-// 	if err := engine.KillEngine(*waitRater); err != nil {
+// 	if err := engine.KillEngine(*utils.WaitRater); err != nil {
 // 		t.Error(err)
 // 	}
 // }

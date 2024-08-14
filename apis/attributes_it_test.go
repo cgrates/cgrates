@@ -104,7 +104,7 @@ var (
 )
 
 func TestAttributesIT(t *testing.T) {
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 		attrConfigDIR = "attributes_internal"
 	case utils.MetaMongo:
@@ -123,7 +123,7 @@ func TestAttributesIT(t *testing.T) {
 
 func testAttributesInitCfg(t *testing.T) {
 	var err error
-	attrCfgPath = path.Join(*dataDir, "conf", "samples", attrConfigDIR)
+	attrCfgPath = path.Join(*utils.DataDir, "conf", "samples", attrConfigDIR)
 	attrCfg, err = config.NewCGRConfigFromPath(context.Background(), attrCfgPath)
 	if err != nil {
 		t.Error(err)
@@ -144,14 +144,14 @@ func testAttributeSResetStorDb(t *testing.T) {
 
 // Start CGR Engine
 func testAttributesStartEngine(t *testing.T) {
-	if _, err := engine.StopStartEngine(attrCfgPath, *waitRater); err != nil {
+	if _, err := engine.StopStartEngine(attrCfgPath, *utils.WaitRater); err != nil {
 		t.Fatal(err)
 	}
 }
 
 func testAttributesRPCConn(t *testing.T) {
 	var err error
-	attrRPC, err = engine.NewRPCClient(attrCfg.ListenCfg(), *encoding) // We connect over JSON so we can also troubleshoot if needed
+	attrRPC, err = engine.NewRPCClient(attrCfg.ListenCfg(), *utils.Encoding) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -964,7 +964,7 @@ func testAttributeSGetAttributeForEvent(t *testing.T) {
 			},
 		},
 	}
-	if *encoding == utils.MetaGOB {
+	if *utils.Encoding == utils.MetaGOB {
 		eAttrPrf.Attributes[0].FilterIDs = nil
 		eAttrPrf.Attributes[1].FilterIDs = nil
 	}

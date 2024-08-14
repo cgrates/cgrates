@@ -41,7 +41,7 @@ import (
 )
 
 func TestNatsERIT(t *testing.T) {
-	cfgPath := path.Join(*dataDir, "conf", "samples", "ers_nats")
+	cfgPath := path.Join(*utils.DataDir, "conf", "samples", "ers_nats")
 	cfg, err := config.NewCGRConfigFromPath(context.Background(), cfgPath)
 	if err != nil {
 		t.Fatal("could not init cfg", err.Error())

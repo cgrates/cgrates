@@ -51,7 +51,7 @@ var (
 )
 
 func TestSeSRplPrepaid(t *testing.T) {
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaMySQL:
 		sesRplPrePaidCfgDIR = "tutmysql"
 	case utils.MetaMongo:
@@ -62,12 +62,12 @@ func TestSeSRplPrepaid(t *testing.T) {
 		t.Fatal("Unknown Database type")
 	}
 	for _, stest := range sesRplPrePaidTests {
-		t.Run(*dbType, stest)
+		t.Run(*utils.DBType, stest)
 	}
 }
 
 func testSeSRplPrepaidInitCfg(t *testing.T) {
-	sesRplPrePaidCfgPath = path.Join(*dataDir, "conf", "samples", sesRplPrePaidCfgDIR)
+	sesRplPrePaidCfgPath = path.Join(*utils.DataDir, "conf", "samples", sesRplPrePaidCfgDIR)
 	if sesRplPrePaidCfg, err = config.NewCGRConfigFromPath(sesRplPrePaidCfgPath); err != nil {
 		t.Fatal(err)
 	}
@@ -83,14 +83,14 @@ func testSeSRplPrepaidResetDB(t *testing.T) {
 
 // Start CGR Engine
 func testSeSRplPrepaidStartEngine(t *testing.T) {
-	if _, err := engine.StopStartEngine(sesRplPrePaidCfgPath, *waitRater); err != nil {
+	if _, err := engine.StopStartEngine(sesRplPrePaidCfgPath, *utils.WaitRater); err != nil {
 		t.Fatal(err)
 	}
 }
 
 // Connect rpc client to rater
 func testSeSRplPrepaidApierRpcConn(t *testing.T) {
-	if sesRplPrePaidRPC, err = engine.NewRPCClient(sesRplPrePaidCfg.ListenCfg(), *encoding); err != nil {
+	if sesRplPrePaidRPC, err = engine.NewRPCClient(sesRplPrePaidCfg.ListenCfg(), *utils.Encoding); err != nil {
 		t.Fatal(err)
 	}
 }

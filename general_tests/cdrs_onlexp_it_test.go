@@ -70,7 +70,7 @@ package general_tests
 // )
 
 // func TestCDRsOnExp(t *testing.T) {
-// 	switch *dbType {
+// 	switch *utils.DBType {
 // 	case utils.MetaInternal, utils.MetaPostgres:
 // 		t.SkipNow()
 // 	case utils.MetaMySQL:
@@ -84,17 +84,17 @@ package general_tests
 // 	}
 
 // 	for _, stest := range sTestsCDRsOnExp {
-// 		t.Run(*dbType, stest)
+// 		t.Run(*utils.DBType, stest)
 // 	}
 // }
 
 // func testCDRsOnExpInitConfig(t *testing.T) {
 // 	var err error
-// 	cdrsMasterCfgPath = path.Join(*dataDir, "conf", "samples", cdrsMasterCfgDIR)
+// 	cdrsMasterCfgPath = path.Join(*utils.DataDir, "conf", "samples", cdrsMasterCfgDIR)
 // 	if cdrsMasterCfg, err = config.NewCGRConfigFromPath(context.Background(), cdrsMasterCfgPath); err != nil {
 // 		t.Fatal("Got config error: ", err.Error())
 // 	}
-// 	cdrsSlaveCfgPath = path.Join(*dataDir, "conf", "samples", cdrsSlaveCfgDIR)
+// 	cdrsSlaveCfgPath = path.Join(*utils.DataDir, "conf", "samples", cdrsSlaveCfgDIR)
 // 	if cdrsSlaveCfg, err = config.NewCGRConfigFromPath(context.Background(), cdrsSlaveCfgPath); err != nil {
 // 		t.Fatal("Got config error: ", err.Error())
 // 	}
@@ -120,13 +120,13 @@ package general_tests
 // }
 
 // func testCDRsOnExpStartMasterEngine(t *testing.T) {
-// 	if _, err := engine.StopStartEngine(cdrsMasterCfgPath, *waitRater); err != nil {
+// 	if _, err := engine.StopStartEngine(cdrsMasterCfgPath, *utils.WaitRater); err != nil {
 // 		t.Fatal(err)
 // 	}
 // }
 
 // func testCDRsOnExpStartSlaveEngine(t *testing.T) {
-// 	if _, err := engine.StartEngine(cdrsSlaveCfgPath, *waitRater); err != nil {
+// 	if _, err := engine.StartEngine(cdrsSlaveCfgPath, *utils.WaitRater); err != nil {
 // 		t.Fatal(err)
 // 	}
 // }
@@ -239,7 +239,7 @@ package general_tests
 // 	} else if reply != utils.OK {
 // 		t.Error("Unexpected reply received: ", reply)
 // 	}
-// 	time.Sleep(time.Duration(*waitRater) * time.Millisecond)
+// 	time.Sleep(time.Duration(*utils.WaitRater) * time.Millisecond)
 // 	filesInDir, _ := os.ReadDir(cdrsMasterCfg.GeneralCfg().FailedPostsDir)
 // 	if len(filesInDir) != 0 {
 // 		t.Fatalf("Should be no files in directory: %s", cdrsMasterCfg.GeneralCfg().FailedPostsDir)
@@ -279,7 +279,7 @@ package general_tests
 // 		arg, &reply); err == nil || err.Error() != utils.ErrPartiallyExecuted.Error() {
 // 		t.Error("Unexpected error: ", err)
 // 	}
-// 	time.Sleep(time.Duration(*waitRater) * time.Millisecond)
+// 	time.Sleep(time.Duration(*utils.WaitRater) * time.Millisecond)
 // 	cdrsSlaveRpc, err := rpcclient.NewRPCClient(context.Background(), utils.TCP, "127.0.0.1:12012", false, "", "", "", 1, 1,
 // 		time.Second, 2*time.Second, rpcclient.JSONrpc, nil, false, nil)
 // 	if err != nil {
@@ -395,7 +395,7 @@ package general_tests
 // 		testEv, &reply); err == nil || err.Error() != utils.ErrPartiallyExecuted.Error() {
 // 		t.Error("Unexpected error: ", err)
 // 	}
-// 	time.Sleep(time.Duration(*waitRater) * time.Millisecond)
+// 	time.Sleep(time.Duration(*utils.WaitRater) * time.Millisecond)
 // 	if conn, err = amqp.Dial("amqp://guest:guest@localhost:5672/"); err != nil {
 // 		t.Fatal(err)
 // 	}

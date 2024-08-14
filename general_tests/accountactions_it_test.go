@@ -40,6 +40,7 @@ var (
 	accPrfCfg       *config.CGRConfig
 	accSRPC         *birpc.Client
 	accPrfConfigDIR string //run tests for specific configuration
+	err             error
 
 	sTestsAccPrf = []func(t *testing.T){
 		testAccActionsInitCfg,
@@ -60,7 +61,7 @@ var (
 
 // Test start here
 func TestAccActionsIT(t *testing.T) {
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 		accPrfConfigDIR = "tutinternal"
 	case utils.MetaMySQL:
@@ -79,7 +80,7 @@ func TestAccActionsIT(t *testing.T) {
 
 func testAccActionsInitCfg(t *testing.T) {
 	var err error
-	accPrfCfgPath = path.Join(*dataDir, "conf", "samples", accPrfConfigDIR)
+	accPrfCfgPath = path.Join(*utils.DataDir, "conf", "samples", accPrfConfigDIR)
 	if accPrfCfg, err = config.NewCGRConfigFromPath(context.Background(), accPrfCfgPath); err != nil {
 		t.Error(err)
 	}
@@ -96,7 +97,7 @@ func testAccActionsResetDBs(t *testing.T) {
 
 // Start CGR Engine
 func testAccActionsStartEngine(t *testing.T) {
-	if _, err := engine.StopStartEngine(accPrfCfgPath, *waitRater); err != nil {
+	if _, err := engine.StopStartEngine(accPrfCfgPath, *utils.WaitRater); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -104,7 +105,7 @@ func testAccActionsStartEngine(t *testing.T) {
 // Connect rpc client to rater
 func testAccActionsRPCConn(t *testing.T) {
 	var err error
-	accSRPC, err = engine.NewRPCClient(accPrfCfg.ListenCfg(), *encoding) // We connect over JSON so we can also troubleshoot if needed
+	accSRPC, err = engine.NewRPCClient(accPrfCfg.ListenCfg(), *utils.Encoding) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
 		t.Fatal(err)
 	}

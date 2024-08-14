@@ -83,7 +83,7 @@ func testSTIResetDataDb(t *testing.T) {
 
 // Start CGR Engine
 func testSTIStartEngine(t *testing.T) {
-	if _, err := engine.StopStartEngine(*configDir, *waitRater); err != nil {
+	if _, err := engine.StopStartEngine(*configDir, *utils.WaitRater); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -91,7 +91,7 @@ func testSTIStartEngine(t *testing.T) {
 // Connect rpc client to rater
 func testSTIRpcConn(t *testing.T) {
 	var err error
-	stiRpc, err = engine.NewRPCClient(stiCfg, *encoding) // We connect over JSON so we can also troubleshoot if needed
+	stiRpc, err = engine.NewRPCClient(stiCfg, *utils.Encoding) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -105,7 +105,7 @@ func testSTILoadTariffPlanFromFolder(t *testing.T) {
 	} else if stiLoadInst.RatingLoadID == "" || stiLoadInst.AccountingLoadID == "" {
 		t.Error("Empty loadId received, loadInstance: ", stiLoadInst)
 	}
-	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // Give time for scheduler to execute topups
+	time.Sleep(time.Duration(*utils.WaitRater) * time.Millisecond) // Give time for scheduler to execute topups
 }
 
 // Check loaded stats

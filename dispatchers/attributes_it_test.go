@@ -52,7 +52,7 @@ var sTestsDspAttr = []func(t *testing.T){
 // Test start here
 func TestDspAttributeS(t *testing.T) {
 	var config1, config2, config3 string
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 		t.SkipNow()
 	case utils.MetaMySQL:
@@ -70,14 +70,14 @@ func TestDspAttributeS(t *testing.T) {
 	}
 
 	dispDIR := "dispatchers"
-	if *encoding == utils.MetaGOB {
+	if *utils.Encoding == utils.MetaGOB {
 		dispDIR += "_gob"
 	}
 	testDsp(t, sTestsDspAttr, "TestDspAttributeS", config1, config2, config3, "tutorial", "oldtutorial", dispDIR)
 }
 
 func TestDspAttributeSNoConn(t *testing.T) {
-	if *dbType != utils.MetaMySQL {
+	if *utils.DBType != utils.MetaMySQL {
 		t.SkipNow()
 	}
 	testDsp(t, []func(t *testing.T){
@@ -245,7 +245,7 @@ func testDspAttrGetAttrFailover(t *testing.T) {
 			},
 		},
 	}
-	if *encoding == utils.MetaGOB {
+	if *utils.Encoding == utils.MetaGOB {
 		eAttrPrf.Attributes[0].FilterIDs = nil // empty slice are nil in gob
 	}
 
@@ -439,7 +439,7 @@ func testDspAttrTestAuthKey2(t *testing.T) {
 			},
 		},
 	}
-	if *encoding == utils.MetaGOB {
+	if *utils.Encoding == utils.MetaGOB {
 		eAttrPrf.Attributes[0].FilterIDs = nil // empty slice are nil in gob
 	}
 	var attrReply engine.APIAttributeProfile
@@ -540,7 +540,7 @@ func testDspAttrGetAttrRoundRobin(t *testing.T) {
 			},
 		},
 	}
-	if *encoding == utils.MetaGOB {
+	if *utils.Encoding == utils.MetaGOB {
 		eAttrPrf.Attributes[0].FilterIDs = nil // empty slice are nil in gob
 	}
 

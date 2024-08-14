@@ -55,7 +55,7 @@ package sessions
 // )
 
 // func TestSessionSRpl(t *testing.T) {
-// 	switch *dbType {
+// 	switch *utils.DBType {
 // 	case utils.MetaInternal:
 // 		t.SkipNow()
 // 	case utils.MetaMySQL:
@@ -69,22 +69,22 @@ package sessions
 // 	default:
 // 		t.Fatal("Unknown Database type")
 // 	}
-// 	if *encoding == utils.MetaGOB {
+// 	if *utils.Encoding == utils.MetaGOB {
 // 		smgRplcMasterCfgDIR += "_gob"
 // 		smgRplcSlaveCfgDIR += "_gob"
 // 	}
 // 	for _, stest := range SessionsRplTests {
-// 		t.Run(*dbType, stest)
+// 		t.Run(*utils.DBType, stest)
 // 	}
 // }
 
 // func testSessionSRplInitCfg(t *testing.T) {
 // 	var err error
-// 	smgRplcMasterCfgPath = path.Join(*dataDir, "conf", "samples", smgRplcMasterCfgDIR)
+// 	smgRplcMasterCfgPath = path.Join(*utils.DataDir, "conf", "samples", smgRplcMasterCfgDIR)
 // 	if smgRplcMasterCfg, err = config.NewCGRConfigFromPath(context.Background(), smgRplcMasterCfgPath); err != nil {
 // 		t.Fatal(err)
 // 	}
-// 	smgRplcSlaveCfgPath = path.Join(*dataDir, "conf", "samples", smgRplcSlaveCfgDIR)
+// 	smgRplcSlaveCfgPath = path.Join(*utils.DataDir, "conf", "samples", smgRplcSlaveCfgDIR)
 // 	if smgRplcSlaveCfg, err = config.NewCGRConfigFromPath(context.Background(), smgRplcSlaveCfgPath); err != nil {
 // 		t.Fatal(err)
 // 	}
@@ -102,10 +102,10 @@ package sessions
 
 // // Start CGR Engine
 // func testSessionSRplStartEngine(t *testing.T) {
-// 	if _, err := engine.StopStartEngine(smgRplcSlaveCfgPath, *waitRater); err != nil { // Start slave before master
+// 	if _, err := engine.StopStartEngine(smgRplcSlaveCfgPath, *utils.WaitRater); err != nil { // Start slave before master
 // 		t.Fatal(err)
 // 	}
-// 	if _, err := engine.StartEngine(smgRplcMasterCfgPath, *waitRater); err != nil {
+// 	if _, err := engine.StartEngine(smgRplcMasterCfgPath, *utils.WaitRater); err != nil {
 // 		t.Fatal(err)
 // 	}
 // }
@@ -113,10 +113,10 @@ package sessions
 // // Connect rpc client to rater
 // func testSessionSRplApierRpcConn(t *testing.T) {
 // 	var err error
-// 	if smgRplcMstrRPC, err = engine.NewRPCClient(smgRplcMasterCfg.ListenCfg(), *encoding); err != nil {
+// 	if smgRplcMstrRPC, err = engine.NewRPCClient(smgRplcMasterCfg.ListenCfg(), *utils.Encoding); err != nil {
 // 		t.Fatal(err)
 // 	}
-// 	if smgRplcSlvRPC, err = engine.NewRPCClient(smgRplcSlaveCfg.ListenCfg(), *encoding); err != nil {
+// 	if smgRplcSlvRPC, err = engine.NewRPCClient(smgRplcSlaveCfg.ListenCfg(), *utils.Encoding); err != nil {
 // 		t.Fatal(err)
 // 	}
 // }
@@ -125,12 +125,12 @@ package sessions
 
 // // Load the tariff plan, creating accounts and their balances
 // func testSessionSRplTPFromFolder(t *testing.T) {
-// 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "oldtutorial")}
+// 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*utils.DataDir, "tariffplans", "oldtutorial")}
 // 	var loadInst utils.LoadInstance
 // 	if err := smgRplcMstrRPC.Call(utils.APIerSv2LoadTariffPlanFromFolder, attrs, &loadInst); err != nil {
 // 		t.Error(err)
 // 	}
-// 	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // Give time for scheduler to execute topups
+// 	time.Sleep(time.Duration(*utils.WaitRater) * time.Millisecond) // Give time for scheduler to execute topups
 // }
 
 // func testSessionSRplInitiate(t *testing.T) {
@@ -177,7 +177,7 @@ package sessions
 // 	if initRpl.MaxUsage == nil || *initRpl.MaxUsage != usage {
 // 		t.Errorf("Expecting : %+v, received: %+v", usage, initRpl.MaxUsage)
 // 	}
-// 	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // Wait for the sessions to be populated
+// 	time.Sleep(time.Duration(*utils.WaitRater) * time.Millisecond) // Wait for the sessions to be populated
 
 // 	//check if the session was createad as active session on master
 // 	if err := smgRplcMstrRPC.Call(utils.SessionSv1GetActiveSessions,
@@ -242,7 +242,7 @@ package sessions
 // 		t.Errorf("Expecting : %+v, received: %+v", usage, updtRpl.MaxUsage)
 // 	}
 
-// 	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // Wait for the sessions to be populated
+// 	time.Sleep(time.Duration(*utils.WaitRater) * time.Millisecond) // Wait for the sessions to be populated
 // 	var aSessions []*ExternalSession
 // 	if err := smgRplcSlvRPC.Call(utils.SessionSv1GetActiveSessions,
 // 		utils.SessionFilter{
@@ -315,7 +315,7 @@ package sessions
 // 	if err := smgRplcMstrRPC.Call(utils.SessionSv1TerminateSession, args, &reply); err != nil {
 // 		t.Error(err)
 // 	}
-// 	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // Wait for the sessions to be populated
+// 	time.Sleep(time.Duration(*utils.WaitRater) * time.Millisecond) // Wait for the sessions to be populated
 // 	var aSessions []*ExternalSession
 // 	//check if the session was terminated on master
 // 	if err := smgRplcMstrRPC.Call(utils.SessionSv1GetActiveSessions,
@@ -345,11 +345,11 @@ package sessions
 // }
 
 // func testSessionSRplManualReplicate(t *testing.T) {
-// 	masterProc, err := engine.StopStartEngine(smgRplcMasterCfgPath, *waitRater)
+// 	masterProc, err := engine.StopStartEngine(smgRplcMasterCfgPath, *utils.WaitRater)
 // 	if err != nil { // Kill both and start Master
 // 		t.Fatal(err)
 // 	}
-// 	if smgRplcMstrRPC, err = engine.NewRPCClient(smgRplcMasterCfg.ListenCfg(), *encoding); err != nil {
+// 	if smgRplcMstrRPC, err = engine.NewRPCClient(smgRplcMasterCfg.ListenCfg(), *utils.Encoding); err != nil {
 // 		t.Fatal(err)
 // 	}
 // 	// create two sessions
@@ -416,17 +416,17 @@ package sessions
 // 		t.Errorf("Received usage: %v", aSessions[0].Usage)
 // 	}
 // 	// Start slave, should not have any active session at beginning
-// 	slave, err := engine.StartEngine(smgRplcSlaveCfgPath, *waitRater)
+// 	slave, err := engine.StartEngine(smgRplcSlaveCfgPath, *utils.WaitRater)
 // 	if err != nil {
 // 		t.Fatal(err)
 // 	}
 // 	if err := slave.Process.Kill(); err != nil { // restart the slave
 // 		t.Error(err)
 // 	}
-// 	if _, err := engine.StartEngine(smgRplcSlaveCfgPath, *waitRater); err != nil {
+// 	if _, err := engine.StartEngine(smgRplcSlaveCfgPath, *utils.WaitRater); err != nil {
 // 		t.Fatal(err)
 // 	}
-// 	if smgRplcSlvRPC, err = engine.NewRPCClient(smgRplcSlaveCfg.ListenCfg(), *encoding); err != nil {
+// 	if smgRplcSlvRPC, err = engine.NewRPCClient(smgRplcSlaveCfg.ListenCfg(), *utils.Encoding); err != nil {
 // 		t.Fatal(err)
 // 	}
 // 	// when we start slave after master we expect to don't have sessions
@@ -442,7 +442,7 @@ package sessions
 // 	if err := smgRplcMstrRPC.Call(utils.SessionSv1ReplicateSessions, &argsRepl, &repply); err != nil {
 // 		t.Error(err)
 // 	}
-// 	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // Wait for the sessions to be populated
+// 	time.Sleep(time.Duration(*utils.WaitRater) * time.Millisecond) // Wait for the sessions to be populated
 // 	if err := smgRplcSlvRPC.Call(utils.SessionSv1GetPassiveSessions, new(utils.SessionFilter), &aSessions); err != nil {
 // 		t.Error(err)
 // 	} else if len(aSessions) != 2 {
@@ -462,10 +462,10 @@ package sessions
 // 		t.Error(err)
 // 	}
 // 	// start master
-// 	if _, err := engine.StartEngine(smgRplcMasterCfgPath, *waitRater); err != nil {
+// 	if _, err := engine.StartEngine(smgRplcMasterCfgPath, *utils.WaitRater); err != nil {
 // 		t.Fatal(err)
 // 	}
-// 	if smgRplcMstrRPC, err = engine.NewRPCClient(smgRplcMasterCfg.ListenCfg(), *encoding); err != nil {
+// 	if smgRplcMstrRPC, err = engine.NewRPCClient(smgRplcMasterCfg.ListenCfg(), *utils.Encoding); err != nil {
 // 		t.Fatal(err)
 // 	}
 // 	// Master should have no session active/passive
@@ -483,7 +483,7 @@ package sessions
 // 	if err := smgRplcSlvRPC.Call(utils.SessionSv1ReplicateSessions, &argsRepl, &repply); err != nil {
 // 		t.Error(err)
 // 	}
-// 	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // Wait for the sessions to be populated
+// 	time.Sleep(time.Duration(*utils.WaitRater) * time.Millisecond) // Wait for the sessions to be populated
 // 	// Master should have no session active/passive
 // 	if err := smgRplcMstrRPC.Call(utils.SessionSv1GetActiveSessions, new(utils.SessionFilter), &aSessions); err == nil || err.Error() != utils.ErrNotFound.Error() {
 // 		t.Error(err, aSessions)

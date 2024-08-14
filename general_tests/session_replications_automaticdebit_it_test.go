@@ -56,7 +56,7 @@ package general_tests
 // )
 
 // func TestSessionSRpl(t *testing.T) {
-// 	switch *dbType {
+// 	switch *utils.DBType {
 // 	case utils.MetaInternal:
 // 		t.SkipNow()
 // 	case utils.MetaMySQL:
@@ -72,7 +72,7 @@ package general_tests
 // 	}
 
 // 	for _, stest := range sTestsSession {
-// 		t.Run(*dbType, stest)
+// 		t.Run(*utils.DBType, stest)
 // 	}
 // }
 
@@ -110,11 +110,11 @@ package general_tests
 
 // //Init Config
 // func testSessionSRplInitCfg(t *testing.T) {
-// 	smgRplcMasterCfgPath = path.Join(*dataDir, "conf", "samples", "sessions_replication", smgRplcMasterCfgDIR)
+// 	smgRplcMasterCfgPath = path.Join(*utils.DataDir, "conf", "samples", "sessions_replication", smgRplcMasterCfgDIR)
 // 	if smgRplcMasterCfg, err = config.NewCGRConfigFromPath(smgRplcMasterCfgPath); err != nil {
 // 		t.Fatal(err)
 // 	}
-// 	smgRplcSlaveCfgPath = path.Join(*dataDir, "conf", "samples", "sessions_replication", smgRplcSlaveCfgDIR)
+// 	smgRplcSlaveCfgPath = path.Join(*utils.DataDir, "conf", "samples", "sessions_replication", smgRplcSlaveCfgDIR)
 // 	if smgRplcSlaveCfg, err = config.NewCGRConfigFromPath(smgRplcSlaveCfgPath); err != nil {
 // 		t.Fatal(err)
 // 	}
@@ -130,10 +130,10 @@ package general_tests
 
 // // Start CGR Engine
 // func testSessionSRplStartEngine(t *testing.T) {
-// 	if _, err = engine.StopStartEngine(smgRplcSlaveCfgPath, *waitRater); err != nil {
+// 	if _, err = engine.StopStartEngine(smgRplcSlaveCfgPath, *utils.WaitRater); err != nil {
 // 		t.Fatal(err)
 // 	}
-// 	if masterEngine, err = engine.StartEngine(smgRplcMasterCfgPath, *waitRater); err != nil {
+// 	if masterEngine, err = engine.StartEngine(smgRplcMasterCfgPath, *utils.WaitRater); err != nil {
 // 		t.Fatal(err)
 // 	}
 
@@ -141,22 +141,22 @@ package general_tests
 
 // // Connect rpc client to rater
 // func testSessionSRplApierRpcConn(t *testing.T) {
-// 	if smgRplcMstrRPC, err = engine.NewRPCClient(smgRplcMasterCfg.ListenCfg(), *encoding); err != nil {
+// 	if smgRplcMstrRPC, err = engine.NewRPCClient(smgRplcMasterCfg.ListenCfg(), *utils.Encoding); err != nil {
 // 		t.Fatal(err)
 // 	}
-// 	if smgRplcSlvRPC, err = engine.NewRPCClient(smgRplcSlaveCfg.ListenCfg(), *encoding); err != nil {
+// 	if smgRplcSlvRPC, err = engine.NewRPCClient(smgRplcSlaveCfg.ListenCfg(), *utils.Encoding); err != nil {
 // 		t.Fatal(err)
 // 	}
 // }
 
 // // Load the tariff plan, creating accounts and their balances
 // func testSessionSRplTPFromFolder(t *testing.T) {
-// 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "oldtutorial")}
+// 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*utils.DataDir, "tariffplans", "oldtutorial")}
 // 	var loadInst utils.LoadInstance
 // 	if err := smgRplcMstrRPC.Call(utils.APIerSv2LoadTariffPlanFromFolder, attrs, &loadInst); err != nil {
 // 		t.Error(err)
 // 	}
-// 	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // Give time for scheduler to execute topups
+// 	time.Sleep(time.Duration(*utils.WaitRater) * time.Millisecond) // Give time for scheduler to execute topups
 // }
 
 // func testSessionSRplInitiate(t *testing.T) {
@@ -375,7 +375,7 @@ package general_tests
 // 	if err := smgRplcSlvRPC.Call(utils.SessionSv1TerminateSession, args, &reply); err != nil {
 // 		t.Error(err)
 // 	}
-// 	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // Wait for the sessions to be populated
+// 	time.Sleep(time.Duration(*utils.WaitRater) * time.Millisecond) // Wait for the sessions to be populated
 // 	var aSessions []*sessions.ExternalSession
 
 // 	//check if the session was terminated on slave

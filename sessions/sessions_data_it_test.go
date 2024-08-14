@@ -59,7 +59,7 @@ var (
 
 // Tests starts here
 func TestSessionsData(t *testing.T) {
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 		dataCfgDIR = "sessions_internal"
 	case utils.MetaMySQL:
@@ -78,7 +78,7 @@ func TestSessionsData(t *testing.T) {
 
 // Init config first
 func testSessionsDataInitCfg(t *testing.T) {
-	dataCfgPath = path.Join(*dataDir, "conf", "samples", dataCfgDIR)
+	dataCfgPath = path.Join(*utils.DataDir, "conf", "samples", dataCfgDIR)
 	var err error
 	dataCfg, err = config.NewCGRConfigFromPath(context.Background(), dataCfgPath)
 	if err != nil {
@@ -98,7 +98,7 @@ func testSessionsDataFlushDBs(t *testing.T) {
 
 // Start CGR Engine
 func testSessionsDataStartEngine(t *testing.T) {
-	if _, err := engine.StopStartEngine(dataCfgPath, *waitRater); err != nil {
+	if _, err := engine.StopStartEngine(dataCfgPath, *utils.WaitRater); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -106,7 +106,7 @@ func testSessionsDataStartEngine(t *testing.T) {
 // Connect rpc client to rater
 func testSessionsDataApierRpcConn(t *testing.T) {
 	var err error
-	sDataRPC, err = engine.NewRPCClient(dataCfg.ListenCfg(), *encoding)
+	sDataRPC, err = engine.NewRPCClient(dataCfg.ListenCfg(), *utils.Encoding)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -116,12 +116,12 @@ func testSessionsDataApierRpcConn(t *testing.T) {
 
 // Load the tariff plan, creating accounts and their balances
 func testSessionsDataTPFromFolder(t *testing.T) {
-	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "oldtutorial")}
+	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*utils.DataDir, "tariffplans", "oldtutorial")}
 	var loadInst utils.LoadInstance
 	if err := sDataRPC.Call(utils.APIerSv2LoadTariffPlanFromFolder, attrs, &loadInst); err != nil {
 		t.Error(err)
 	}
-	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // Give time for scheduler to execute topups
+	time.Sleep(time.Duration(*utils.WaitRater) * time.Millisecond) // Give time for scheduler to execute topups
 }
 
 func testSessionsDataLastUsedData(t *testing.T) {
@@ -925,7 +925,7 @@ func testSessionsDataMultipleDataNoUsage(t *testing.T) {
 	if err := sDataRPC.Call(utils.SessionSv1UpdateSession, updateArgs, &updateRpl); err != nil {
 		t.Fatal(err)
 	}
-	if *encoding != utils.MetaGOB {
+	if *utils.Encoding != utils.MetaGOB {
 		if updateRpl.MaxUsage.Nanoseconds() != usage {
 			t.Errorf("Expected: %+v, received: %+v", usage, updateRpl.MaxUsage.Nanoseconds())
 		}

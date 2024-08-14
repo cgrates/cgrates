@@ -75,7 +75,7 @@ var (
 
 // Test start here
 func TestFilteredReplication(t *testing.T) {
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaMySQL:
 		fltrRplDB = "redis"
 	case utils.MetaMongo:
@@ -93,9 +93,9 @@ func TestFilteredReplication(t *testing.T) {
 func testFltrRplInitCfg(t *testing.T) {
 	var err error
 
-	fltrRplInternalCfgPath = path.Join(*dataDir, "conf", "samples", "filtered_replication", "internal")
-	fltrRplEngine1CfgPath = path.Join(*dataDir, "conf", "samples", "filtered_replication", "engine1_"+fltrRplDB)
-	fltrRplEngine2CfgPath = path.Join(*dataDir, "conf", "samples", "filtered_replication", "engine2_"+fltrRplDB)
+	fltrRplInternalCfgPath = path.Join(*utils.DataDir, "conf", "samples", "filtered_replication", "internal")
+	fltrRplEngine1CfgPath = path.Join(*utils.DataDir, "conf", "samples", "filtered_replication", "engine1_"+fltrRplDB)
+	fltrRplEngine2CfgPath = path.Join(*utils.DataDir, "conf", "samples", "filtered_replication", "engine2_"+fltrRplDB)
 
 	if fltrRplInternalCfg, err = config.NewCGRConfigFromPath(context.Background(), fltrRplInternalCfgPath); err != nil {
 		t.Fatal(err)
@@ -124,32 +124,32 @@ func testFltrRplFlushDBs(t *testing.T) {
 }
 
 func testFltrRplStartEngine(t *testing.T) {
-	if _, err := engine.StopStartEngine(fltrRplInternalCfgPath, *waitRater); err != nil {
+	if _, err := engine.StopStartEngine(fltrRplInternalCfgPath, *utils.WaitRater); err != nil {
 		t.Fatal(err)
 	}
-	if _, err := engine.StartEngine(fltrRplEngine1CfgPath, *waitRater); err != nil {
+	if _, err := engine.StartEngine(fltrRplEngine1CfgPath, *utils.WaitRater); err != nil {
 		t.Fatal(err)
 	}
-	if _, err := engine.StartEngine(fltrRplEngine2CfgPath, *waitRater); err != nil {
+	if _, err := engine.StartEngine(fltrRplEngine2CfgPath, *utils.WaitRater); err != nil {
 		t.Fatal(err)
 	}
 }
 
 func testFltrRplRPCConn(t *testing.T) {
 	var err error
-	tmp := *encoding
+	tmp := *utils.Encoding
 	// run only under *gob encoding
-	*encoding = utils.MetaGOB
-	if fltrRplInternalRPC, err = engine.NewRPCClient(fltrRplInternalCfg.ListenCfg(), *encoding); err != nil {
+	*utils.Encoding = utils.MetaGOB
+	if fltrRplInternalRPC, err = engine.NewRPCClient(fltrRplInternalCfg.ListenCfg(), *utils.Encoding); err != nil {
 		t.Fatal(err)
 	}
-	if fltrRplEngine1RPC, err = engine.NewRPCClient(fltrRplEngine1Cfg.ListenCfg(), *encoding); err != nil {
+	if fltrRplEngine1RPC, err = engine.NewRPCClient(fltrRplEngine1Cfg.ListenCfg(), *utils.Encoding); err != nil {
 		t.Fatal(err)
 	}
-	if fltrRplEngine2RPC, err = engine.NewRPCClient(fltrRplEngine2Cfg.ListenCfg(), *encoding); err != nil {
+	if fltrRplEngine2RPC, err = engine.NewRPCClient(fltrRplEngine2Cfg.ListenCfg(), *utils.Encoding); err != nil {
 		t.Fatal(err)
 	}
-	*encoding = tmp
+	*utils.Encoding = tmp
 }
 
 func testFltrRplAttributeProfile(t *testing.T) {

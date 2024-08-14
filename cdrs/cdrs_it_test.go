@@ -115,7 +115,7 @@ cgrates.org,DEFAULT_RATE,,;0,0,0,*free,RT_ALWAYS,,"* * * * *",;0,false,0s,,0.1,1
 
 }
 `
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 	case utils.MetaMySQL, utils.MetaMongo, utils.MetaPostgres:
 		t.SkipNow()
@@ -140,12 +140,12 @@ cgrates.org,DEFAULT_RATE,,;0,0,0,*free,RT_ALWAYS,,"* * * * *",;0,false,0s,,0.1,1
 		t.Fatal(err)
 	}
 
-	if _, err := engine.StopStartEngine(cfgPath, *waitRater); err != nil {
+	if _, err := engine.StopStartEngine(cfgPath, *utils.WaitRater); err != nil {
 		t.Fatal(err)
 	}
-	defer engine.KillEngine(*waitRater)
+	defer engine.KillEngine(*utils.WaitRater)
 
-	client, err := engine.NewRPCClient(cfg.ListenCfg(), *encoding)
+	client, err := engine.NewRPCClient(cfg.ListenCfg(), *utils.Encoding)
 	if err != nil {
 		t.Fatalf("could not establish connection to engine: %v", err)
 	}

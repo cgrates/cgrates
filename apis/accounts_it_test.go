@@ -80,7 +80,7 @@ var (
 )
 
 func TestAccSIT(t *testing.T) {
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 		accPrfConfigDIR = "tutinternal"
 	case utils.MetaMongo:
@@ -99,7 +99,7 @@ func TestAccSIT(t *testing.T) {
 
 func testAccSInitCfg(t *testing.T) {
 	var err error
-	accPrfCfgPath = path.Join(*dataDir, "conf", "samples", accPrfConfigDIR)
+	accPrfCfgPath = path.Join(*utils.DataDir, "conf", "samples", accPrfConfigDIR)
 	accPrfCfg, err = config.NewCGRConfigFromPath(context.Background(), accPrfCfgPath)
 	if err != nil {
 		t.Error(err)
@@ -120,14 +120,14 @@ func testAccSResetStorDb(t *testing.T) {
 
 // Start CGR Engine
 func testAccSStartEngine(t *testing.T) {
-	if _, err := engine.StopStartEngine(accPrfCfgPath, *waitRater); err != nil {
+	if _, err := engine.StopStartEngine(accPrfCfgPath, *utils.WaitRater); err != nil {
 		t.Fatal(err)
 	}
 }
 
 func testAccSRPCConn(t *testing.T) {
 	var err error
-	accSRPC, err = engine.NewRPCClient(accPrfCfg.ListenCfg(), *encoding) // We connect over JSON so we can also troubleshoot if needed
+	accSRPC, err = engine.NewRPCClient(accPrfCfg.ListenCfg(), *utils.Encoding) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
 		t.Fatal(err)
 	}

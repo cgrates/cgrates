@@ -74,7 +74,7 @@ var (
 )
 
 func TestThresholdsIT(t *testing.T) {
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 		thConfigDIR = "thresholds_internal"
 	case utils.MetaMongo:
@@ -93,7 +93,7 @@ func TestThresholdsIT(t *testing.T) {
 
 func testThresholdsInitCfg(t *testing.T) {
 	var err error
-	thCfgPath = path.Join(*dataDir, "conf", "samples", thConfigDIR)
+	thCfgPath = path.Join(*utils.DataDir, "conf", "samples", thConfigDIR)
 	thCfg, err = config.NewCGRConfigFromPath(context.Background(), thCfgPath)
 	if err != nil {
 		t.Error(err)
@@ -114,14 +114,14 @@ func testThresholdsResetStorDB(t *testing.T) {
 
 // Start CGR Engine
 func testThresholdsStartEngine(t *testing.T) {
-	if _, err := engine.StopStartEngine(thCfgPath, *waitRater); err != nil {
+	if _, err := engine.StopStartEngine(thCfgPath, *utils.WaitRater); err != nil {
 		t.Fatal(err)
 	}
 }
 
 func testThresholdsRPCConn(t *testing.T) {
 	var err error
-	thRPC, err = engine.NewRPCClient(thCfg.ListenCfg(), *encoding) // We connect over JSON so we can also troubleshoot if needed
+	thRPC, err = engine.NewRPCClient(thCfg.ListenCfg(), *utils.Encoding) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
 		t.Fatal(err)
 	}

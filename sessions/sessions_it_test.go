@@ -55,7 +55,7 @@ var (
 )
 
 func TestSessionsIt(t *testing.T) {
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 		sItCfgDIR = "sessions_internal"
 	case utils.MetaMySQL:
@@ -74,7 +74,7 @@ func TestSessionsIt(t *testing.T) {
 
 // Init config firs
 func testSessionsItInitCfg(t *testing.T) {
-	sItCfgPath = path.Join(*dataDir, "conf", "samples", sItCfgDIR)
+	sItCfgPath = path.Join(*utils.DataDir, "conf", "samples", sItCfgDIR)
 	var err error
 	sItCfg, err = config.NewCGRConfigFromPath(context.Background(), sItCfgPath)
 	if err != nil {
@@ -94,7 +94,7 @@ func testSessionsItFlushDBs(t *testing.T) {
 
 // Start CGR Engine
 func testSessionsItStartEngine(t *testing.T) {
-	if _, err := engine.StopStartEngine(sItCfgPath, *waitRater); err != nil {
+	if _, err := engine.StopStartEngine(sItCfgPath, *utils.WaitRater); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -102,7 +102,7 @@ func testSessionsItStartEngine(t *testing.T) {
 // Connect rpc client to rater
 func testSessionsItApierRpcConn(t *testing.T) {
 	var err error
-	sItRPC, err = engine.NewRPCClient(sItCfg.ListenCfg(), *encoding)
+	sItRPC, err = engine.NewRPCClient(sItCfg.ListenCfg(), *utils.Encoding)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -112,12 +112,12 @@ func testSessionsItApierRpcConn(t *testing.T) {
 
 // Load the tariff plan, creating accounts and their balances
 func testSessionsItTPFromFolder(t *testing.T) {
-	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "tutorial")}
+	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*utils.DataDir, "tariffplans", "tutorial")}
 	var loadInst utils.LoadInstance
 	if err := sItRPC.Call(utils.APIerSv2LoadTariffPlanFromFolder, attrs, &loadInst); err != nil {
 		t.Error(err)
 	}
-	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // Give time for scheduler to execute topups
+	time.Sleep(time.Duration(*utils.WaitRater) * time.Millisecond) // Give time for scheduler to execute topups
 }
 
 func testSessionsItTerminatNonexist(t *testing.T) {
@@ -482,7 +482,7 @@ func testSessionsItEventCostCompressing(t *testing.T) {
 */
 
 func testSessionsItStopCgrEngine(t *testing.T) {
-	if err := engine.KillEngine(*waitRater); err != nil {
+	if err := engine.KillEngine(*utils.WaitRater); err != nil {
 		t.Error(err)
 	}
 }

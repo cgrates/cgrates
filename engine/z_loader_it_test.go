@@ -55,7 +55,7 @@ var (
 )
 
 func TestLoaderIT(t *testing.T) {
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 		loaderConfigDIR = "tutinternal"
 	case utils.MetaMySQL:
@@ -74,7 +74,7 @@ func TestLoaderIT(t *testing.T) {
 }
 
 func testLoaderITInitConfig(t *testing.T) {
-	loaderCfgPath = path.Join(*dataDir, "conf", "samples", loaderConfigDIR)
+	loaderCfgPath = path.Join(*utils.DataDir, "conf", "samples", loaderConfigDIR)
 	var err error
 	lCfg, err = config.NewCGRConfigFromPath(context.Background(), loaderCfgPath)
 	if err != nil {
@@ -116,12 +116,12 @@ func testLoaderITInitDataDB(t *testing.T) {
 func testLoaderITRemoveLoad(t *testing.T) {
 	var err error
 	/*for fn, v := range FileValidators {
-		if err = ValidateCSVData(path.Join(*dataDir, "tariffplans", *tpCsvScenario, fn), v.Rule); err != nil {
+		if err = ValidateCSVData(path.Join(*utils.DataDir, "tariffplans", *tpCsvScenario, fn), v.Rule); err != nil {
 			t.Error("Failed validating data: ", err.Error())
 		}
 	}*/
 	loader, err = NewTpReader(dataDbCsv.DataDB(), NewFileCSVStorage(utils.CSVSep,
-		path.Join(*dataDir, "tariffplans", *tpCsvScenario)), "", "",
+		path.Join(*utils.DataDir, "tariffplans", *tpCsvScenario)), "", "",
 		[]string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)}, nil, false)
 	if err != nil {
 		t.Error(err)
@@ -165,12 +165,12 @@ func testLoaderITRemoveLoad(t *testing.T) {
 func testLoaderITLoadFromCSV(t *testing.T) {
 	var err error
 	/*for fn, v := range FileValidators {
-		if err = ValidateCSVData(path.Join(*dataDir, "tariffplans", *tpCsvScenario, fn), v.Rule); err != nil {
+		if err = ValidateCSVData(path.Join(*utils.DataDir, "tariffplans", *tpCsvScenario, fn), v.Rule); err != nil {
 			t.Error("Failed validating data: ", err.Error())
 		}
 	}*/
 	loader, err = NewTpReader(dataDbCsv.DataDB(), NewFileCSVStorage(utils.CSVSep,
-		path.Join(*dataDir, "tariffplans", *tpCsvScenario)), "", "",
+		path.Join(*utils.DataDir, "tariffplans", *tpCsvScenario)), "", "",
 		[]string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)}, nil, false)
 	if err != nil {
 		t.Error(err)

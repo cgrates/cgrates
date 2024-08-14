@@ -61,9 +61,9 @@ package general_tests
 
 // func testTLSLoadConfig(t *testing.T) {
 // 	var err error
-// 	tlsCfgPath = path.Join(*dataDir, "conf", "samples", tlsConfDIR)
-// 	if *encoding == utils.MetaGOB {
-// 		tlsCfgPath = path.Join(*dataDir, "conf", "samples", tlsConfDIR+"_gob")
+// 	tlsCfgPath = path.Join(*utils.DataDir, "conf", "samples", tlsConfDIR)
+// 	if *utils.Encoding == utils.MetaGOB {
+// 		tlsCfgPath = path.Join(*utils.DataDir, "conf", "samples", tlsConfDIR+"_gob")
 // 	}
 // 	if tlsCfg, err = config.NewCGRConfigFromPath(tlsCfgPath); err != nil {
 // 		t.Error(err)

@@ -1,3 +1,5 @@
+//go:build integration || flaky || offline || call || aws || race || performance
+
 /*
 Real-time Online/Offline Charging System (OCS) for Telecom & ISP environments
 Copyright (C) ITsysCOM GmbH
@@ -16,17 +18,15 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 
-package sessions
+package utils
 
 import (
 	"flag"
-
-	"github.com/cgrates/cgrates/utils"
 )
 
 var (
-	dataDir   = flag.String("data_dir", "/usr/share/cgrates", "CGR data dir path here")
-	waitRater = flag.Int("wait_rater", 100, "Number of miliseconds to wait for rater to start and cache")
-	encoding  = flag.String("rpc", utils.MetaJSON, "what encoding whould be uused for rpc comunication")
-	dbType    = flag.String("dbtype", utils.MetaInternal, "The type of DataBase (Internal/Mongo/mySql)")
+	DataDir   = flag.String("data_dir", "/usr/share/cgrates", "Path to the CGR data directory.")
+	WaitRater = flag.Int("wait_rater", 100, "Time (in ms) to wait for rater initialization.")
+	Encoding  = flag.String("rpc", MetaJSON, "Encoding type for RPC communication (e.g., JSON).")
+	DBType    = flag.String("dbtype", MetaInternal, "Type of database (Internal/Mongo/MySQL/Postgres).")
 )

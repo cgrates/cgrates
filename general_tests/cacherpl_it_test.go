@@ -75,7 +75,7 @@ var (
 )
 
 func TestCacheReplications(t *testing.T) {
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 		t.SkipNow()
 	case utils.MetaMySQL:
@@ -94,7 +94,7 @@ func TestCacheReplications(t *testing.T) {
 
 //to be fixed
 // func TestCacheReplicationActiveActive(t *testing.T) {
-// 	switch *dbType {
+// 	switch *utils.DBType {
 // 	case utils.MetaInternal:
 // 		t.SkipNow()
 // 	case utils.MetaMySQL:
@@ -112,19 +112,19 @@ func TestCacheReplications(t *testing.T) {
 
 func testCacheRplInitCfg(t *testing.T) {
 	var err error
-	dspEngine1CfgPath = path.Join(*dataDir, "conf", "samples", "cache_replicate", "dispatcher_engine")
+	dspEngine1CfgPath = path.Join(*utils.DataDir, "conf", "samples", "cache_replicate", "dispatcher_engine")
 	dspEngine1Cfg, err = config.NewCGRConfigFromPath(context.Background(), dspEngine1CfgPath)
 	if err != nil {
 		t.Error(err)
 	}
 
-	dspEngine2CfgPath = path.Join(*dataDir, "conf", "samples", "cache_replicate", "dispatcher_engine2")
+	dspEngine2CfgPath = path.Join(*utils.DataDir, "conf", "samples", "cache_replicate", "dispatcher_engine2")
 	dspEngine2Cfg, err = config.NewCGRConfigFromPath(context.Background(), dspEngine2CfgPath)
 	if err != nil {
 		t.Error(err)
 	}
 
-	engine1CfgPath = path.Join(*dataDir, "conf", "samples", "cache_replicate", "engine1")
+	engine1CfgPath = path.Join(*utils.DataDir, "conf", "samples", "cache_replicate", "engine1")
 	engine1Cfg, err = config.NewCGRConfigFromPath(context.Background(), engine1CfgPath)
 	if err != nil {
 		t.Error(err)
@@ -133,19 +133,19 @@ func testCacheRplInitCfg(t *testing.T) {
 
 func testCacheRplAAInitCfg(t *testing.T) {
 	var err error
-	dspEngine1CfgPath = path.Join(*dataDir, "conf", "samples", "cache_rpl_active_active", "dispatcher_engine")
+	dspEngine1CfgPath = path.Join(*utils.DataDir, "conf", "samples", "cache_rpl_active_active", "dispatcher_engine")
 	dspEngine1Cfg, err = config.NewCGRConfigFromPath(context.Background(), dspEngine1CfgPath)
 	if err != nil {
 		t.Error(err)
 	}
 
-	dspEngine2CfgPath = path.Join(*dataDir, "conf", "samples", "cache_rpl_active_active", "dispatcher_engine2")
+	dspEngine2CfgPath = path.Join(*utils.DataDir, "conf", "samples", "cache_rpl_active_active", "dispatcher_engine2")
 	dspEngine2Cfg, err = config.NewCGRConfigFromPath(context.Background(), dspEngine2CfgPath)
 	if err != nil {
 		t.Error(err)
 	}
 
-	engine1CfgPath = path.Join(*dataDir, "conf", "samples", "cache_rpl_active_active", "engine1")
+	engine1CfgPath = path.Join(*utils.DataDir, "conf", "samples", "cache_rpl_active_active", "engine1")
 	engine1Cfg, err = config.NewCGRConfigFromPath(context.Background(), engine1CfgPath)
 	if err != nil {
 		t.Error(err)
@@ -168,28 +168,28 @@ func testCacheRplFlushDBs(t *testing.T) {
 }
 
 func testCacheRplStartEngine(t *testing.T) {
-	if _, err := engine.StopStartEngine(dspEngine1CfgPath, *waitRater); err != nil {
+	if _, err := engine.StopStartEngine(dspEngine1CfgPath, *utils.WaitRater); err != nil {
 		t.Fatal(err)
 	}
-	if _, err := engine.StartEngine(dspEngine2CfgPath, *waitRater); err != nil {
+	if _, err := engine.StartEngine(dspEngine2CfgPath, *utils.WaitRater); err != nil {
 		t.Fatal(err)
 	}
-	if _, err := engine.StartEngine(engine1CfgPath, *waitRater); err != nil {
+	if _, err := engine.StartEngine(engine1CfgPath, *utils.WaitRater); err != nil {
 		t.Fatal(err)
 	}
 }
 
 func testCacheRplRpcConn(t *testing.T) {
 	var err error
-	dspEngine1RPC, err = engine.NewRPCClient(dspEngine1Cfg.ListenCfg(), *encoding)
+	dspEngine1RPC, err = engine.NewRPCClient(dspEngine1Cfg.ListenCfg(), *utils.Encoding)
 	if err != nil {
 		t.Fatal(err)
 	}
-	dspEngine2RPC, err = engine.NewRPCClient(dspEngine2Cfg.ListenCfg(), *encoding)
+	dspEngine2RPC, err = engine.NewRPCClient(dspEngine2Cfg.ListenCfg(), *utils.Encoding)
 	if err != nil {
 		t.Fatal(err)
 	}
-	engine1RPC, err = engine.NewRPCClient(engine1Cfg.ListenCfg(), *encoding)
+	engine1RPC, err = engine.NewRPCClient(engine1Cfg.ListenCfg(), *utils.Encoding)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -203,7 +203,7 @@ func testCacheRplAddData(t *testing.T) {
 			t.Error(err)
 		}
 		loader := exec.Command(loaderPath, "-config_path", dspEngine1CfgPath, "-path",
-			path.Join(*dataDir, "tariffplans", "cache_replications", "dispatcher_engine"))
+			path.Join(*utils.DataDir, "tariffplans", "cache_replications", "dispatcher_engine"))
 
 		if err := loader.Start(); err != nil {
 			t.Error(err)
@@ -223,7 +223,7 @@ func testCacheRplAddData(t *testing.T) {
 			t.Error(err)
 		}
 		loader := exec.Command(loaderPath, "-config_path", dspEngine2CfgPath, "-path",
-			path.Join(*dataDir, "tariffplans", "cache_replications", "dispatcher_engine2"))
+			path.Join(*utils.DataDir, "tariffplans", "cache_replications", "dispatcher_engine2"))
 
 		if err := loader.Start(); err != nil {
 			t.Error(err)
@@ -265,7 +265,7 @@ func testCacheRplAAAddData(t *testing.T) {
 			t.Error(err)
 		}
 		loader := exec.Command(loaderPath, "-config_path", dspEngine1CfgPath, "-path",
-			path.Join(*dataDir, "tariffplans", "cache_rpl_active_active", "dispatcher_engine"))
+			path.Join(*utils.DataDir, "tariffplans", "cache_rpl_active_active", "dispatcher_engine"))
 
 		if err := loader.Start(); err != nil {
 			t.Error(err)
@@ -285,7 +285,7 @@ func testCacheRplAAAddData(t *testing.T) {
 			t.Error(err)
 		}
 		loader := exec.Command(loaderPath, "-config_path", dspEngine2CfgPath, "-path",
-			path.Join(*dataDir, "tariffplans", "cache_rpl_active_active", "dispatcher_engine2"))
+			path.Join(*utils.DataDir, "tariffplans", "cache_rpl_active_active", "dispatcher_engine2"))
 
 		if err := loader.Start(); err != nil {
 			t.Error(err)
@@ -643,7 +643,7 @@ func testCacheRplCheckLoadReplication(t *testing.T) {
 }
 
 func testCacheRplStopEngine(t *testing.T) {
-	if err := engine.KillEngine(*waitRater); err != nil {
+	if err := engine.KillEngine(*utils.WaitRater); err != nil {
 		t.Error(err)
 	}
 }

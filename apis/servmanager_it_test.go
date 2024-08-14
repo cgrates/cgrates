@@ -55,7 +55,7 @@ var (
 
 func TestServManagerIT(t *testing.T) {
 	t.SkipNow()
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal:
 		srvMngConfigDIR = "apis_srvmng_internal"
 	case utils.MetaMongo:
@@ -74,7 +74,7 @@ func TestServManagerIT(t *testing.T) {
 
 func testSrvMngInitCfg(t *testing.T) {
 	var err error
-	srvMngCfgPath = path.Join(*dataDir, "conf", "samples", srvMngConfigDIR)
+	srvMngCfgPath = path.Join(*utils.DataDir, "conf", "samples", srvMngConfigDIR)
 	srvMngCfg, err = config.NewCGRConfigFromPath(context.Background(), srvMngCfgPath)
 	if err != nil {
 		t.Error(err)
@@ -95,14 +95,14 @@ func testSrvMngResetStorDb(t *testing.T) {
 
 // Start CGR Engine
 func testSrvMngStartEngine(t *testing.T) {
-	if _, err := engine.StopStartEngine(srvMngCfgPath, *waitRater); err != nil {
+	if _, err := engine.StopStartEngine(srvMngCfgPath, *utils.WaitRater); err != nil {
 		t.Fatal(err)
 	}
 }
 
 func testSrvMngSRPCConn(t *testing.T) {
 	var err error
-	srvMngRPC, err = engine.NewRPCClient(srvMngCfg.ListenCfg(), *encoding) // We connect over JSON so we can also troubleshoot if needed
+	srvMngRPC, err = engine.NewRPCClient(srvMngCfg.ListenCfg(), *utils.Encoding) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
 		t.Fatal(err)
 	}

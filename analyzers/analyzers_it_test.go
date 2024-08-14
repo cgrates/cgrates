@@ -22,7 +22,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package analyzers
 
 import (
-	"flag"
 	"os"
 	"path"
 	"reflect"
@@ -62,12 +61,6 @@ var (
 	}
 )
 
-var (
-	dataDir   = flag.String("data_dir", "/usr/share/cgrates", "CGR data dir path here")
-	waitRater = flag.Int("wait_rater", 100, "Number of miliseconds to wait for rater to start and cache")
-	encoding  = flag.String("rpc", utils.MetaJSON, "what encoding whould be used for rpc comunication")
-)
-
 type smock struct{}
 
 func (*smock) DisconnectPeer(ctx *context.Context,
@@ -90,7 +83,7 @@ func testAnalyzerSInitCfg(t *testing.T) {
 	if err = os.MkdirAll("/tmp/analyzers/", 0700); err != nil {
 		t.Fatal(err)
 	}
-	anzCfgPath = path.Join(*dataDir, "conf", "samples", "analyzers")
+	anzCfgPath = path.Join(*utils.DataDir, "conf", "samples", "analyzers")
 	anzCfg, err = config.NewCGRConfigFromPath(context.Background(), anzCfgPath)
 	if err != nil {
 		t.Error(err)
@@ -108,7 +101,7 @@ func testAnalyzerSResetDbs(t *testing.T) {
 
 // Start CGR Engine
 func testAnalyzerSStartEngine(t *testing.T) {
-	if _, err := engine.StopStartEngine(anzCfgPath, *waitRater); err != nil {
+	if _, err := engine.StopStartEngine(anzCfgPath, *utils.WaitRater); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -121,7 +114,7 @@ func testAnalyzerSRPCConn(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	anzRPC, err = engine.NewRPCClient(anzCfg.ListenCfg(), *encoding) // We connect over JSON so we can also troubleshoot if needed
+	anzRPC, err = engine.NewRPCClient(anzCfg.ListenCfg(), *utils.Encoding) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
 		t.Fatal(err)
 	}

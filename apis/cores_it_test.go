@@ -91,7 +91,7 @@ var (
 
 func TestITCoreIt(t *testing.T) {
 	argPath = "/tmp"
-	switch *dbType {
+	switch *utils.DBType {
 	case utils.MetaInternal, utils.MetaMySQL, utils.MetaMongo:
 		coreSConfDIR = "core_config"
 	case utils.MetaPostgres:
@@ -103,7 +103,7 @@ func TestITCoreIt(t *testing.T) {
 }
 
 func testCoreItLoadCofig(t *testing.T) {
-	coreSCfgPath = path.Join(*dataDir, "conf", "samples", coreSConfDIR)
+	coreSCfgPath = path.Join(*utils.DataDir, "conf", "samples", coreSConfDIR)
 	var err error
 	if coreSCfg, err = config.NewCGRConfigFromPath(context.Background(), coreSCfgPath); err != nil {
 		t.Error(err)
@@ -145,7 +145,7 @@ func testCoreItStartEngineByExecWithCPUProfiling(t *testing.T) {
 
 func testCoreItRPCConn(t *testing.T) {
 	var err error
-	if coreSBiRpc, err = engine.NewRPCClient(coreSCfg.ListenCfg(), *encoding); err != nil {
+	if coreSBiRpc, err = engine.NewRPCClient(coreSCfg.ListenCfg(), *utils.Encoding); err != nil {
 		t.Error(err)
 	}
 }
@@ -163,7 +163,7 @@ func testCoreItStartCPUProfilingErrorAlreadyStarted(t *testing.T) {
 }
 
 func testCoreItStartEngine(t *testing.T) {
-	if _, err := engine.StartEngine(coreSCfgPath, *waitRater); err != nil {
+	if _, err := engine.StartEngine(coreSCfgPath, *utils.WaitRater); err != nil {
 		t.Error(err)
 	}
 }
@@ -354,7 +354,7 @@ func testCoreItStatus(t *testing.T) {
 }
 
 func testCoreItKillEngine(t *testing.T) {
-	if err := engine.KillEngine(*waitRater); err != nil {
+	if err := engine.KillEngine(*utils.WaitRater); err != nil {
 		t.Error(err)
 	}
 	time.Sleep(500 * time.Millisecond)
