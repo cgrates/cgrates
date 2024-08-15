@@ -1450,19 +1450,17 @@ func (dm *DataManager) SetTrendProfile(trp *TrendProfile) (err error) {
 					config.CgrConfig().DataDbCfg().RplCache, utils.EmptyString)})
 	}
 	if oldTrd == nil ||
-		oldTrd.Trend != trp.Trend ||
-		oldTrd.QueueLength != trp.QueueLength {
+		oldTrd.QueueLength != trp.QueueLength ||
+		oldTrd.Schedule != trp.Schedule {
 		err = dm.SetTrend(&Trend{
 			Tenant: trp.Tenant,
 			ID:     trp.ID,
-			Trend:  trp.Trend,
 		})
 	} else if _, errTr := dm.GetTrend(trp.Tenant, trp.ID,
 		true, false, utils.NonTransactional); errTr == utils.ErrNotFound {
 		err = dm.SetTrend(&Trend{
 			Tenant: trp.Tenant,
 			ID:     trp.ID,
-			Trend:  trp.Trend,
 		})
 	}
 	return

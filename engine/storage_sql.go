@@ -1462,7 +1462,7 @@ func (sqls *SQLStorage) GetTPStats(tpid, tenant, id string) ([]*utils.TPStatProf
 }
 
 func (sqls *SQLStorage) GetTPTrends(tpid, tenant, id string) ([]*utils.TPTrendsProfile, error) {
-	var srs TrendsMdls
+	var trs TrendsMdls
 	q := sqls.db.Where("tpid = ?", tpid)
 	if len(id) != 0 {
 		q = q.Where("id = ?", id)
@@ -1470,14 +1470,14 @@ func (sqls *SQLStorage) GetTPTrends(tpid, tenant, id string) ([]*utils.TPTrendsP
 	if len(tenant) != 0 {
 		q = q.Where("tenant = ?", tenant)
 	}
-	if err := q.Find(&srs).Error; err != nil {
+	if err := q.Find(&trs).Error; err != nil {
 		return nil, err
 	}
-	asrs := srs.AsTPTrends()
-	if len(asrs) == 0 {
-		return asrs, utils.ErrNotFound
+	atrs := trs.AsTPTrends()
+	if len(atrs) == 0 {
+		return atrs, utils.ErrNotFound
 	}
-	return asrs, nil
+	return atrs, nil
 }
 
 func (sqls *SQLStorage) GetTPRankings(tpid string, tenant string, id string) ([]*utils.TPRankingProfile, error) {

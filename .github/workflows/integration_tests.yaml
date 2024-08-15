@@ -59,4 +59,3 @@ jobs:
       - name: Run integration tests
         run: |
           sudo env "PATH=$PATH" ./integration_test.sh
-

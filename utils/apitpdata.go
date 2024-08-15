@@ -1000,18 +1000,25 @@ type TPRankingProfile struct {
 	ThresholdIDs      []string
 }
 
+// MetricWithSettings adds specific settings to the Metric
+type MetricWithSettings struct {
+	MetricID         string
+	TrendSwingMargin float64 // allow this margin for *neutral trend
+}
+
 // TPTrendProfile is used in APIs to manage remotely offline TrendProfile
 type TPTrendsProfile struct {
-	TPid           string
-	Tenant         string
-	ID             string
-	QueryInterval  string
-	StatID         string
-	QueueLength    int
-	TTL            string
-	PurgeFilterIDs []string
-	Trend          string
-	ThresholdIDs   []string
+	TPid         string
+	Tenant       string
+	ID           string
+	Schedule     string
+	StatID       string
+	Metrics      []MetricWithSettings
+	QueueLength  int
+	TTL          string
+	Trend        string
+	TrendType    string
+	ThresholdIDs []string
 }
 
 // TPThresholdProfile is used in APIs to manage remotely offline ThresholdProfile

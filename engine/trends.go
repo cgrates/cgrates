@@ -26,15 +26,21 @@ import (
 )
 
 type TrendProfile struct {
-	Tenant         string
-	ID             string
-	QueryInterval  time.Duration
-	StatID         string
-	QueueLength    int
-	TTL            time.Duration
-	PurgeFilterIDs []string
-	Trend          string
-	ThresholdIDs   []string
+	Tenant       string
+	ID           string
+	Schedule     string // Cron expression scheduling gathering of the metrics
+	StatID       string
+	Metrics      []MetricWithSettings
+	QueueLength  int
+	TTL          time.Duration
+	TrendType    string // *last, *average
+	ThresholdIDs []string
+}
+
+// MetricWithSettings adds specific settings to the Metric
+type MetricWithSettings struct {
+	MetricID         string
+	TrendSwingMargin float64 // allow this margin for *neutral trend
 }
 
 type TrendProfileWithAPIOpts struct {
@@ -53,11 +59,18 @@ type TrendWithAPIOpts struct {
 
 // Trend is the unit matched by filters
 type Trend struct {
-	Tenant      string
-	ID          string
-	Trend       string
-	QueueLength int
-	trPrfl      *TrendProfile
+	Tenant   string
+	ID       string
+	RunTimes []time.Time
+	Metrics  map[time.Time]map[string]MetricWithTrend
+	totals   map[string]float64 // cached sum, used for average calculations
+}
+
+// MetricWithTrend represents one read from StatS
+type MetricWithTrend struct {
+	ID    string  // Metric ID
+	Value float64 // Metric Value
+	Trend string  // *positive, *negative, *neutral
 }
 
 func (tr *Trend) TenantID() string {

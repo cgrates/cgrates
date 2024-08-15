@@ -113,7 +113,7 @@ func testTPTrendsRpcConn(t *testing.T) {
 
 func testTPTrendsGetTPTrendBeforeSet(t *testing.T) {
 	var reply *utils.TPTrendsProfile
-	if err := tpTrendRPC.Call(context.Background(), utils.APIerSv1GetTPRanking,
+	if err := tpTrendRPC.Call(context.Background(), utils.APIerSv1GetTPTrend,
 		&utils.TPTntID{TPid: "TPS1", Tenant: "cgrates.org", ID: "Trend1"},
 		&reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
@@ -122,11 +122,14 @@ func testTPTrendsGetTPTrendBeforeSet(t *testing.T) {
 
 func testTPTrendsSetTPTrend(t *testing.T) {
 	tpTrend = &utils.TPTrendsProfile{
-		Tenant:        "cgrates.org",
-		TPid:          "TPS1",
-		ID:            "Trend1",
-		QueryInterval: "1m",
-		ThresholdIDs:  []string{"ThreshValue", "ThreshValueTwo"},
+		Tenant:       "cgrates.org",
+		TPid:         "TPS1",
+		ID:           "Trend1",
+		ThresholdIDs: []string{"ThreshValue", "ThreshValueTwo"},
+		Metrics: []utils.MetricWithSettings{
+			{MetricID: "Metric"},
+		},
+		Trend: "*average",
 	}
 	sort.Strings(tpTrend.ThresholdIDs)
 	var result string
@@ -145,7 +148,7 @@ func testTPTrendsGetTPTrendAfterSet(t *testing.T) {
 	}
 	sort.Strings(respond.ThresholdIDs)
 	if !reflect.DeepEqual(tpTrend, respond) {
-		t.Errorf("Expecting: %+v, received: %+v", tpTrend, respond)
+		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(tpTrend), utils.ToJSON(respond))
 	}
 }
 
