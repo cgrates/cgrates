@@ -23,7 +23,6 @@ package v1
 import (
 	"path"
 	"testing"
-	"time"
 
 	"github.com/cgrates/birpc"
 	"github.com/cgrates/birpc/context"
@@ -114,11 +113,9 @@ func testTrendSRPCConn(t *testing.T) {
 func testTrendSLoadAdd(t *testing.T) {
 	trendProfile := &engine.TrendProfileWithAPIOpts{
 		TrendProfile: &engine.TrendProfile{
-			Tenant:        "cgrates.org",
-			ID:            "TR_AVG",
-			QueryInterval: 2 * time.Minute,
-			StatID:        "Stat1",
-			Trend:         "*average",
+			Tenant: "cgrates.org",
+			ID:     "TR_AVG",
+			StatID: "Stat1",
 		},
 	}
 
@@ -138,10 +135,9 @@ func testTrendSetTrendProfile(t *testing.T) {
 	)
 	trendProfile = &engine.TrendProfileWithAPIOpts{
 		TrendProfile: &engine.TrendProfile{
-			Tenant:        "cgrates.org",
-			ID:            "Trend1",
-			QueryInterval: time.Second * 15,
-			ThresholdIDs:  []string{"THD1", "THD2"}},
+			Tenant:       "cgrates.org",
+			ID:           "Trend1",
+			ThresholdIDs: []string{"THD1", "THD2"}},
 	}
 	if err := trendRPC.Call(context.Background(), utils.APIerSv1GetTrendProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "Trend1"}, &reply); err == nil ||

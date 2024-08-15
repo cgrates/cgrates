@@ -320,12 +320,14 @@ CREATE TABLE tp_trends(
  "tpid" varchar(64) NOT NULL,
  "tenant" varchar(64) NOT NULL,
  "id" varchar(64) NOT NULL,
- "query_interval" varchar(64) NOT NULL,
+ "schedule" varchar(64) NOT NULL,
  "stat_id" varchar(64) NOT NULL,
+ "metrics" varchar(128) NOT NULL,
+ "trend_swing_margin" decimal(8,2) NOT NULL,
  "queue_length" INTEGER NOT NULL,
  "ttl" varchar(32) NOT NULL,
- "purge_filter_ids" varchar(64) NOT NULL,
  "trend" varchar(32) NOT NULL,
+ "trend_type" varchar(64) NOT NULL,
  "threshold_ids" varchar(64) NOT NULL,
  "created_at" TIMESTAMP
 );
