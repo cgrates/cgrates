@@ -8,8 +8,7 @@
 # Example:
 # ./integration_test.sh -dbtype=*mysql -rpc=*gob
 
-# Temporarily skip dispatcher tests until its unstable tests are fixed
-packages=("agents" "apier/v1" "apier/v2" "engine" "ers" "loaders" "general_tests" "sessions")
+packages=("agents" "apier/v1" "apier/v2" "dispatchers" "engine" "ers" "loaders" "general_tests" "sessions")
 dbtypes=("*internal" "*mysql" "*mongo" "*postgres")
 
 # Tests that are independent of the dbtype flag and run only once
@@ -36,11 +35,7 @@ else
     for db in "${dbtypes[@]}"; do
         for pkg in "${packages[@]}"; do
             execute_test "$pkg" "integration" "-dbtype=$db"
-            
-            # Temporarily skip offline tests for dbtype=*internal until fixed
-            if [ "$db" != "*internal" ] && [ "$pkg" == "apier/v1" ]; then
-                execute_test "$pkg" "offline" "-dbtype=$db"
-            fi
+            [ "$pkg" == "apier/v1" ] && execute_test "$pkg" "offline" "-dbtype=$db"
         done
     done
 fi
