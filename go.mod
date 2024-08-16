@@ -16,7 +16,7 @@ require (
 	github.com/cgrates/kamevapi v0.0.0-20220525160402-5b8036487a6c
 	github.com/cgrates/ltcache v0.0.0-20210405185848-da943e80c1ab
 	github.com/cgrates/radigo v0.0.0-20210902121842-ea2f9a730627
-	github.com/cgrates/rpcclient v0.0.0-20240813140209-439c79036e27
+	github.com/cgrates/rpcclient v0.0.0-20240816141816-52dd1074499e
 	github.com/creack/pty v1.1.18
 	github.com/fiorix/go-diameter v3.0.3-0.20190716165154-f4823472d0e0+incompatible
 	github.com/fsnotify/fsnotify v1.6.0
