@@ -119,7 +119,7 @@ func (se *SafEvent) GetString(fldName string) (out string, err error) {
 	return
 }
 
-func (se SafEvent) GetTInt64(fldName string) (out int64, err error) {
+func (se *SafEvent) GetTInt64(fldName string) (out int64, err error) {
 	se.RLock()
 	out, err = se.Me.GetTInt64(fldName)
 	se.RUnlock()
