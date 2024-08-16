@@ -56,19 +56,6 @@ jobs:
         run: |
           sudo env "PATH=$PATH" ./flaky_test.sh
 
-      - name: Run unstable offline tests for *internal separately until fixed
-        continue-on-error: true
-        run: |
-          sudo env "PATH=$PATH" go test github.com/cgrates/cgrates/apier/v1 -tags=offline -dbtype=*internal
-
-      - name: Run dispatcher tests separately until its unstable tests are fixed
-        continue-on-error: true
-        run: |
-          sudo env "PATH=$PATH" go test github.com/cgrates/cgrates/dispatchers -tags=integration -dbtype=*internal
-          sudo env "PATH=$PATH" go test github.com/cgrates/cgrates/dispatchers -tags=integration -dbtype=*mysql
-          sudo env "PATH=$PATH" go test github.com/cgrates/cgrates/dispatchers -tags=integration -dbtype=*mongo
-          sudo env "PATH=$PATH" go test github.com/cgrates/cgrates/dispatchers -tags=integration -dbtype=*postgres
-
       - name: Run integration tests
         run: |
           sudo env "PATH=$PATH" ./integration_test.sh
