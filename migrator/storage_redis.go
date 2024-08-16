@@ -566,8 +566,6 @@ func (v1rs *redisMigrator) remV1Alias(key string) (err error) {
 		}
 	}
 	return
-
-	return v1rs.rds.Cmd("DEL", key).Err
 }
 
 // User methods

@@ -477,9 +477,9 @@ func TestCacheSV1ReloadCacheErrors(t *testing.T) {
 		{
 			name: "FlushAll",
 			args: args{attrs: utils.AttrReloadCacheWithArgDispatcher{
-				&utils.ArgDispatcher{},
-				utils.TenantArg{},
-				utils.AttrReloadCache{
+				ArgDispatcher: &utils.ArgDispatcher{},
+				TenantArg:     utils.TenantArg{},
+				AttrReloadCache: utils.AttrReloadCache{
 					FlushAll: true,
 				},
 			}, reply: &str},
@@ -488,10 +488,10 @@ func TestCacheSV1ReloadCacheErrors(t *testing.T) {
 		{
 			name: "Reload destination error",
 			args: args{attrs: utils.AttrReloadCacheWithArgDispatcher{
-				&utils.ArgDispatcher{},
-				utils.TenantArg{},
-				utils.AttrReloadCache{
-					utils.ArgsCache{
+				ArgDispatcher: &utils.ArgDispatcher{},
+				TenantArg:     utils.TenantArg{},
+				AttrReloadCache: utils.AttrReloadCache{
+					ArgsCache: utils.ArgsCache{
 						DestinationIDs:        slc,
 						ReverseDestinationIDs: slc,
 						RatingPlanIDs:         slc,
@@ -515,7 +515,7 @@ func TestCacheSV1ReloadCacheErrors(t *testing.T) {
 						DispatcherHostIDs:     slc,
 						DispatcherRoutesIDs:   slc,
 					},
-					false,
+					FlushAll: false,
 				},
 			}, reply: &str},
 			err: "err",
@@ -547,9 +547,9 @@ func TestCacheSV1LoadCache(t *testing.T) {
 	}
 
 	err := chS.V1LoadCache(utils.AttrReloadCacheWithArgDispatcher{
-		&utils.ArgDispatcher{},
-		utils.TenantArg{},
-		utils.AttrReloadCache{
+		ArgDispatcher: &utils.ArgDispatcher{},
+		TenantArg:     utils.TenantArg{},
+		AttrReloadCache: utils.AttrReloadCache{
 			FlushAll: true,
 		},
 	}, &str)
@@ -571,9 +571,9 @@ func TestCacheSV1FlushCacheFlushAll(t *testing.T) {
 	}
 
 	err := chS.V1FlushCache(utils.AttrReloadCacheWithArgDispatcher{
-		&utils.ArgDispatcher{},
-		utils.TenantArg{},
-		utils.AttrReloadCache{
+		ArgDispatcher: &utils.ArgDispatcher{},
+		TenantArg:     utils.TenantArg{},
+		AttrReloadCache: utils.AttrReloadCache{
 			FlushAll: true,
 		},
 	}, &str)
