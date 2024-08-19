@@ -41,6 +41,16 @@ func (apierSv1 *APIerSv1) GetTrendProfile(ctx *context.Context, arg *utils.Tenan
 	return
 }
 
+// GetTrendProfiles returns a list of Trendprofiles
+func (apierSv1 *APIerSv1) GetTrendProfiles(ctx *context.Context, arg *engine.TrendProfilesAPI, reply *[]*engine.TrendProfile) (err error) {
+	tr, err := apierSv1.DataManager.GetTrendProfiles(arg.Tenant, arg.TpIDs)
+	if err != nil {
+		return utils.APIErrorHandler(err)
+	}
+	*reply = tr
+	return
+}
+
 // GetTrendProfileIDs returns list of trendProfile IDs registered for a tenant
 func (apierSv1 *APIerSv1) GetTrendProfileIDs(ctx *context.Context, args *utils.PaginatorWithTenant, trPrfIDs *[]string) (err error) {
 	tnt := args.Tenant

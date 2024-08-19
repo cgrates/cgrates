@@ -38,6 +38,7 @@ var (
 	trendCfg       *config.CGRConfig
 	trendRPC       *birpc.Client
 	trendProfile   *engine.TrendProfileWithAPIOpts
+	trendProfile2  *engine.TrendProfileWithAPIOpts
 	trendConfigDIR string
 
 	sTestsTrend = []func(t *testing.T){
@@ -49,6 +50,7 @@ var (
 		testTrendSLoadAdd,
 		testTrendSetTrendProfile,
 		testTrendSGetTrendProfileIDs,
+		testTrendSGetTrendProfiles,
 		testTrendSUpdateTrendProfile,
 		testTrendSRemTrendProfile,
 		testTrendSKillEngine,
@@ -111,7 +113,7 @@ func testTrendSRPCConn(t *testing.T) {
 	}
 }
 func testTrendSLoadAdd(t *testing.T) {
-	trendProfile := &engine.TrendProfileWithAPIOpts{
+	trendProfile = &engine.TrendProfileWithAPIOpts{
 		TrendProfile: &engine.TrendProfile{
 			Tenant: "cgrates.org",
 			ID:     "TR_AVG",
@@ -133,25 +135,25 @@ func testTrendSetTrendProfile(t *testing.T) {
 		reply  *engine.TrendProfileWithAPIOpts
 		result string
 	)
-	trendProfile = &engine.TrendProfileWithAPIOpts{
+	trendProfile2 = &engine.TrendProfileWithAPIOpts{
 		TrendProfile: &engine.TrendProfile{
 			Tenant:       "cgrates.org",
 			ID:           "Trend1",
-			ThresholdIDs: []string{"THD1", "THD2"}},
+			ThresholdIDs: []string{"THD1"}},
 	}
 	if err := trendRPC.Call(context.Background(), utils.APIerSv1GetTrendProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "Trend1"}, &reply); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Fatal(err)
 	}
-	if err := trendRPC.Call(context.Background(), utils.APIerSv1SetTrendProfile, trendProfile, &result); err != nil {
+	if err := trendRPC.Call(context.Background(), utils.APIerSv1SetTrendProfile, trendProfile2, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Errorf("Expected: %v,Received: %v", utils.OK, result)
 	}
 	if err := trendRPC.Call(context.Background(), utils.APIerSv1GetTrendProfile, &utils.TenantID{Tenant: "cgrates.org", ID: "Trend1"}, &reply); err != nil {
 		t.Error(err)
-	} else if diff := cmp.Diff(trendProfile, reply, cmpopts.SortSlices(func(a, b string) bool { return a < b })); diff != utils.EmptyString {
+	} else if diff := cmp.Diff(trendProfile2, reply, cmpopts.SortSlices(func(a, b string) bool { return a < b })); diff != utils.EmptyString {
 		t.Errorf("Unnexpected profile (-expected +got):\n%s", diff)
 	}
 }
@@ -165,6 +167,52 @@ func testTrendSGetTrendProfileIDs(t *testing.T) {
 	}
 }
 
+func testTrendSGetTrendProfiles(t *testing.T) {
+	trendPrf := &engine.TrendProfileWithAPIOpts{
+		TrendProfile: &engine.TrendProfile{
+			Tenant:   "tenant1",
+			ID:       "Trend_Last",
+			StatID:   "Stat1",
+			Schedule: "*now",
+		}}
+	var result string
+	if err := trendRPC.Call(context.Background(), utils.APIerSv1SetTrendProfile, trendPrf, &result); err != nil {
+		t.Error(err)
+	} else if result != utils.OK {
+		t.Errorf("Expected: %v,Received: %v", utils.OK, result)
+	}
+	expRes := []*engine.TrendProfile{
+		trendPrf.TrendProfile,
+		trendProfile.TrendProfile,
+		trendProfile2.TrendProfile,
+	}
+	var tResult []*engine.TrendProfile
+	if err := trendRPC.Call(context.Background(), utils.APIerSv1GetTrendProfiles, engine.TrendProfilesAPI{}, &tResult); err != nil {
+		t.Error(err)
+	} else if diff := cmp.Diff(expRes, tResult, cmpopts.SortSlices(func(a, b *engine.TrendProfile) bool { return a.ID < b.ID })); diff != utils.EmptyString {
+		t.Errorf("Unnexpected profiles (-expected +got):\n%s", diff)
+	}
+
+	expRes = []*engine.TrendProfile{
+		trendProfile.TrendProfile,
+		trendProfile2.TrendProfile,
+	}
+	if err := trendRPC.Call(context.Background(), utils.APIerSv1GetTrendProfiles, engine.TrendProfilesAPI{Tenant: "cgrates.org"}, &tResult); err != nil {
+		t.Error(err)
+	} else if diff := cmp.Diff(expRes, tResult, cmpopts.SortSlices(func(a, b *engine.TrendProfile) bool { return a.ID < b.ID })); diff != utils.EmptyString {
+		t.Errorf("Unnexpected profiles (-expected +got):\n%s", diff)
+	}
+
+	expRes = []*engine.TrendProfile{
+		trendProfile2.TrendProfile,
+	}
+	if err := trendRPC.Call(context.Background(), utils.APIerSv1GetTrendProfiles, engine.TrendProfilesAPI{Tenant: "cgrates.org", TpIDs: []string{"Trend1"}}, &tResult); err != nil {
+		t.Error(err)
+	} else if diff := cmp.Diff(expRes, tResult, cmpopts.SortSlices(func(a, b *engine.TrendProfile) bool { return a.ID < b.ID })); diff != utils.EmptyString {
+		t.Errorf("Unnexpected profiles (-expected +got):\n%s", diff)
+	}
+}
+
 func testTrendSUpdateTrendProfile(t *testing.T) {
 	var (
 		reply  *engine.TrendProfileWithAPIOpts
@@ -175,10 +223,11 @@ func testTrendSUpdateTrendProfile(t *testing.T) {
 	}
 	if err := trendRPC.Call(context.Background(), utils.APIerSv1GetTrendProfile, &utils.TenantID{Tenant: "cgrates.org", ID: "Trend1"}, &reply); err != nil {
 		t.Error(err)
-	} else if diff := cmp.Diff(trendProfile, reply, cmpopts.SortSlices(func(a, b string) bool { return a < b })); diff != utils.EmptyString {
+	} else if diff := cmp.Diff(trendProfile2, reply, cmpopts.SortSlices(func(a, b string) bool { return a < b })); diff != utils.EmptyString {
 		t.Errorf("Unnexpected profile (-expected +got):\n%s", diff)
 	}
 }
+
 func testTrendSRemTrendProfile(t *testing.T) {
 	var (
 		resp  string
@@ -190,7 +239,6 @@ func testTrendSRemTrendProfile(t *testing.T) {
 	} else if resp != utils.OK {
 		t.Error("Unexpected reply returned", resp)
 	}
-
 	if err := trendRPC.Call(context.Background(), utils.APIerSv1GetTrendProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "Trend1"},
 		&reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
