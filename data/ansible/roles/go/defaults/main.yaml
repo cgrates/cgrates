@@ -1,8 +1,8 @@
 ---
-go_version: "1.21.0"
+go_version: "1.23.0"
 go_platform: linux
 go_arch: amd64
 go_tarball: go{{ go_version }}.{{ go_platform }}-{{ go_arch }}.tar.gz
 go_download_url: https://dl.google.com/go/{{ go_tarball }}
-go_checksum: "d0398903a16ba2232b389fb31032ddf57cac34efda306a0eebac34f0965a0742"
+go_checksum: "905a297f19ead44780548933e0ff1a1b86e8327bb459e92f9c0012569f76f5e3"
 install_go: true
