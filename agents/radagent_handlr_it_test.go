@@ -277,7 +277,7 @@ cgrates.org,ATTR_RAD,*any,*string:~*req.RadUserName:10011;*prefix:~*req.RadPassw
 
 func testRAHitEmptyValueHandling(t *testing.T) {
 	var err error
-	if raHAuthClnt, err = radigo.NewClient("udp", "127.0.0.1:1812", "CGRateS.org", dictRad, 1, nil); err != nil {
+	if raHAuthClnt, err = radigo.NewClient("udp", "127.0.0.1:1812", "CGRateS.org", dictRad, 1, nil, nil); err != nil {
 		t.Fatal(err)
 	}
 	authReq := raHAuthClnt.NewRequest(radigo.AccessRequest, 1) // emulates Kamailio packet out of radius_load_caller_avps()
