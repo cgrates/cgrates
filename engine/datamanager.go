@@ -1428,6 +1428,48 @@ func (dm *DataManager) GetTrendProfile(tenant, id string, cacheRead, cacheWrite 
 	return
 }
 
+func (dm *DataManager) GetTrendProfiles(tenant string, tpIDs []string) (tps []*TrendProfile, err error) {
+	prfx := utils.TrendsProfilePrefix
+	if tenant != utils.EmptyString {
+		prfx += tenant + utils.ConcatenatedKeySep
+	}
+	var tp *TrendProfile
+	if tenant == utils.EmptyString || len(tpIDs) == 0 {
+		var keys []string
+		keys, err = dm.dataDB.GetKeysForPrefix(prfx)
+		if err != nil {
+			return
+		}
+		if len(keys) == 0 {
+			return nil, utils.ErrNotFound
+		}
+		for _, key := range keys {
+			indx := strings.Index(key, utils.ConcatenatedKeySep)
+			if len(prfx) == len(utils.TrendsProfilePrefix) {
+				tenant = key[len(utils.TrendsProfilePrefix):indx]
+			}
+			id := key[indx+1:]
+			tp, err = dm.GetTrendProfile(tenant, id, true, false, utils.NonTransactional)
+			if err != nil {
+				return
+			}
+			tps = append(tps, tp)
+		}
+		return
+	}
+	for _, tpID := range tpIDs {
+		tp, err = dm.GetTrendProfile(tenant, tpID, true, false, utils.NonTransactional)
+		if err == utils.ErrNotFound {
+			continue
+		}
+		if err != nil {
+			return
+		}
+		tps = append(tps, tp)
+	}
+	return
+}
+
 func (dm *DataManager) SetTrendProfile(trp *TrendProfile) (err error) {
 	if dm == nil {
 		return utils.ErrNoDatabaseConn

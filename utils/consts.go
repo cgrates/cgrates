@@ -1681,6 +1681,7 @@ const (
 	APIerSv1RemoveTrendProfile = "APIerSv1.RemoveTrendProfile"
 	APIerSv1GetTrendProfile    = "APIerSv1.GetTrendProfile"
 	APIerSv1GetTrendProfileIDs = "APIerSv1.GetTrendProfileIDs"
+	APIerSv1GetTrendProfiles   = "APIerSv1.GetTrendProfiles"
 	TrendSv1Ping               = "TrendSv1.Ping"
 )
 
