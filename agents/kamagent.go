@@ -22,7 +22,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"log"
 	"regexp"
 	"strings"
 	"time"
@@ -76,9 +75,8 @@ func (self *KamailioAgent) Connect() (err error) {
 	}
 	errChan := make(chan error)
 	for connIdx, connCfg := range self.cfg.EvapiConns {
-		logger := log.New(utils.Logger, "kamevapi:", 2)
 		if self.conns[connIdx], err = kamevapi.NewKamEvapi(connCfg.Address, connIdx, connCfg.Reconnects, 0, utils.FibDuration,
-			eventHandlers, logger); err != nil {
+			eventHandlers, utils.Logger); err != nil {
 			return
 		}
 		utils.Logger.Info(fmt.Sprintf("<%s> successfully connected to Kamailio at: <%s>", utils.KamailioAgent, connCfg.Address))
