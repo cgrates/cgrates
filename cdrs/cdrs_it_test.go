@@ -66,7 +66,7 @@ cgrates.org,DEFAULT_RATE,,;0,0,0,*free,RT_ALWAYS,,"* * * * *",;0,false,0s,,0.1,1
 	cfgContent := `{
 
 "logger": {
-	"level": 7                                                 
+	"level": 7
 },
 
 "data_db": {

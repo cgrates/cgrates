@@ -1,4 +1,4 @@
-//go:build integration || flaky || offline || call || aws || race || performance
+//go:build integration || flaky || call || performance
 
 /*
 Real-time Online/Offline Charging System (OCS) for Telecom & ISP environments
