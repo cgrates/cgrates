@@ -1,184 +1,54 @@
 #!/bin/bash
-# set -e
-go clean --cache
-results=()
-./test.sh
-results+=($?)
-if [ "$#" -ne 0 ]; then
-# to run the integration tests for gob only add `-rpc=*gob` as argument to this script
-# to run for a single dbtype add `-dbtype=*mysql` as argument
-# ./integaration_tes.sh -dbtype=*mysql -rpc=*gob
-echo "go test github.com/cgrates/cgrates/apis  -tags=integration $@"
-go test github.com/cgrates/cgrates/apis -tags=integration $@
-results+=($?)
-echo "go test github.com/cgrates/cgrates/engine  -tags=integration $@"
-go test github.com/cgrates/cgrates/engine -tags=integration $@
-results+=($?)
-# echo "go test github.com/cgrates/cgrates/ers -tags=integration $@"
-# go test github.com/cgrates/cgrates/ers -tags=integration $@
-# results+=($?)
-echo "go test github.com/cgrates/cgrates/loaders -tags=integration $@"
-go test github.com/cgrates/cgrates/loaders -tags=integration $@
-results+=($?)
-echo "go test github.com/cgrates/cgrates/general_tests -tags=integration $@"
-go test github.com/cgrates/cgrates/general_tests -tags=integration $@
-results+=($?)
-# echo "go test github.com/cgrates/cgrates/agents -tags=integration $@"
-# go test github.com/cgrates/cgrates/agents -tags=integration $@
-# results+=($?)
-# echo "go test github.com/cgrates/cgrates/sessions -tags=integration $@"
-# go test github.com/cgrates/cgrates/sessions -tags=integration $@
-# results+=($?)
-echo "go test github.com/cgrates/cgrates/dispatchers -tags=integration $@"
-go test github.com/cgrates/cgrates/dispatchers -tags=integration $@
-results+=($?)
-echo "go test github.com/cgrates/cgrates/registrarc -tags=integration $@"
-go test github.com/cgrates/cgrates/registrarc -tags=integration $@
-results+=($?)
-echo "go test github.com/cgrates/cgrates/cmd/cgr-loader -tags=integration $@"
-go test github.com/cgrates/cgrates/cmd/cgr-loader -tags=integration $@
-results+=($?)
-else
-# Internal
-echo 'go test github.com/cgrates/cgrates/engine  -tags=integration -dbtype=*internal'
-go test github.com/cgrates/cgrates/engine -tags=integration -dbtype=*internal
-results+=($?)
-echo 'go test github.com/cgrates/cgrates/ers -tags=integration -dbtype=*internal'
-go test github.com/cgrates/cgrates/ers -tags=integration -dbtype=*internal
-results+=($?)
-echo 'go test github.com/cgrates/cgrates/loaders -tags=integration -dbtype=*internal'
-go test github.com/cgrates/cgrates/loaders -tags=integration -dbtype=*internal
-results+=($?)
-echo 'go test github.com/cgrates/cgrates/general_tests -tags=integration -dbtype=*internal'
-go test github.com/cgrates/cgrates/general_tests -tags=integration -dbtype=*internal
-results+=($?)
-echo 'go test github.com/cgrates/cgrates/agents -tags=integration -dbtype=*internal'
-go test github.com/cgrates/cgrates/agents -tags=integration -dbtype=*internal
-results+=($?)
-echo 'go test github.com/cgrates/cgrates/sessions -tags=integration -dbtype=*internal'
-go test github.com/cgrates/cgrates/sessions -tags=integration -dbtype=*internal
-results+=($?)
-echo 'go test github.com/cgrates/cgrates/dispatchers -tags=integration -dbtype=*internal'
-go test github.com/cgrates/cgrates/dispatchers -tags=integration -dbtype=*internal
-results+=($?)
-echo "go test github.com/cgrates/cgrates/registrarc -tags=integration -dbtype=*internal"
-go test github.com/cgrates/cgrates/registrarc -tags=integration -dbtype=*internal
-results+=($?)
-echo "go test github.com/cgrates/cgrates/cmd/cgr-loader -tags=integration -dbtype=*internal"
-go test github.com/cgrates/cgrates/cmd/cgr-loader -tags=integration -dbtype=*internal
-results+=($?)
-# SQL
-echo 'go test github.com/cgrates/cgrates/engine  -tags=integration -dbtype=*mysql'
-go test github.com/cgrates/cgrates/engine -tags=integration -dbtype=*mysql
-results+=($?)
-echo 'go test github.com/cgrates/cgrates/ers -tags=integration -dbtype=*mysql'
-go test github.com/cgrates/cgrates/ers -tags=integration -dbtype=*mysql
-results+=($?)
-echo 'go test github.com/cgrates/cgrates/loaders -tags=integration -dbtype=*mysql'
-go test github.com/cgrates/cgrates/loaders -tags=integration -dbtype=*mysql
-results+=($?)
-echo 'go test github.com/cgrates/cgrates/general_tests -tags=integration -dbtype=*mysql'
-go test github.com/cgrates/cgrates/general_tests -tags=integration -dbtype=*mysql
-results+=($?)
-echo 'go test github.com/cgrates/cgrates/agents -tags=integration -dbtype=*mysql'
-go test github.com/cgrates/cgrates/agents -tags=integration -dbtype=*mysql
-results+=($?)
-echo 'go test github.com/cgrates/cgrates/sessions -tags=integration -dbtype=*mysql'
-go test github.com/cgrates/cgrates/sessions -tags=integration -dbtype=*mysql
-results+=($?)
-echo 'go test github.com/cgrates/cgrates/dispatchers -tags=integration -dbtype=*mysql'
-go test github.com/cgrates/cgrates/dispatchers -tags=integration -dbtype=*mysql
-results+=($?)
-echo "go test github.com/cgrates/cgrates/registrarc -tags=integration -dbtype=*mysql"
-go test github.com/cgrates/cgrates/registrarc -tags=integration -dbtype=*mysql
-results+=($?)
-echo "go test github.com/cgrates/cgrates/cmd/cgr-loader -tags=integration -dbtype=*mysql"
-go test github.com/cgrates/cgrates/cmd/cgr-loader -tags=integration -dbtype=*mysql
-results+=($?)
-# Mongo
-echo 'go test github.com/cgrates/cgrates/engine  -tags=integration -dbtype=*mongo'
-go test github.com/cgrates/cgrates/engine -tags=integration -dbtype=*mongo
-results+=($?)
-echo 'go test github.com/cgrates/cgrates/ers -tags=integration -dbtype=*mongo'
-go test github.com/cgrates/cgrates/ers -tags=integration -dbtype=*mongo
-results+=($?)
-echo 'go test github.com/cgrates/cgrates/loaders -tags=integration -dbtype=*mongo'
-go test github.com/cgrates/cgrates/loaders -tags=integration -dbtype=*mongo
-results+=($?)
-echo 'go test github.com/cgrates/cgrates/general_tests -tags=integration -dbtype=*mongo'
-go test github.com/cgrates/cgrates/general_tests -tags=integration -dbtype=*mongo
-results+=($?)
-echo 'go test github.com/cgrates/cgrates/agents -tags=integration -dbtype=*mongo'
-go test github.com/cgrates/cgrates/agents -tags=integration -dbtype=*mongo
-results+=($?)
-echo 'go test github.com/cgrates/cgrates/sessions -tags=integration -dbtype=*mongo'
-go test github.com/cgrates/cgrates/sessions -tags=integration -dbtype=*mongo
-results+=($?)
-echo 'go test github.com/cgrates/cgrates/dispatchers -tags=integration -dbtype=*mongo'
-go test github.com/cgrates/cgrates/dispatchers -tags=integration -dbtype=*mongo
-results+=($?)
-echo "go test github.com/cgrates/cgrates/registrarc -tags=integration -dbtype=*mongo"
-go test github.com/cgrates/cgrates/registrarc -tags=integration -dbtype=*mongo
-results+=($?)
-echo "go test github.com/cgrates/cgrates/cmd/cgr-loader -tags=integration -dbtype=*mongo"
-go test github.com/cgrates/cgrates/cmd/cgr-loader -tags=integration -dbtype=*mongo
-results+=($?)
-# Postgres
-echo 'go test github.com/cgrates/cgrates/engine  -tags=integration -dbtype=*postgres'
-go test github.com/cgrates/cgrates/engine -tags=integration -dbtype=*postgres
-results+=($?)
-echo 'go test github.com/cgrates/cgrates/ers -tags=integration -dbtype=*postgres'
-go test github.com/cgrates/cgrates/ers -tags=integration -dbtype=*postgres
-results+=($?)
-echo 'go test github.com/cgrates/cgrates/loaders -tags=integration -dbtype=*postgres'
-go test github.com/cgrates/cgrates/loaders -tags=integration -dbtype=*postgres
-results+=($?)
-echo 'go test github.com/cgrates/cgrates/general_tests -tags=integration -dbtype=*postgres'
-go test github.com/cgrates/cgrates/general_tests -tags=integration -dbtype=*postgres
-results+=($?)
-echo 'go test github.com/cgrates/cgrates/agents -tags=integration -dbtype=*postgres'
-go test github.com/cgrates/cgrates/agents -tags=integration -dbtype=*postgres
-results+=($?)
-echo 'go test github.com/cgrates/cgrates/sessions -tags=integration -dbtype=*postgres'
-go test github.com/cgrates/cgrates/sessions -tags=integration -dbtype=*postgres
-results+=($?)
-echo 'go test github.com/cgrates/cgrates/dispatchers -tags=integration -dbtype=*postgres'
-go test github.com/cgrates/cgrates/dispatchers -tags=integration -dbtype=*postgres
-results+=($?)
-echo "go test github.com/cgrates/cgrates/registrarc -tags=integration -dbtype=*postgres"
-go test github.com/cgrates/cgrates/registrarc -tags=integration -dbtype=*postgres
-results+=($?)
-echo "go test github.com/cgrates/cgrates/cmd/cgr-loader -tags=integration -dbtype=*postgres"
-go test github.com/cgrates/cgrates/cmd/cgr-loader -tags=integration -dbtype=*postgres
-results+=($?)
 
+# This script is used to run integration tests on various packages with different tags and dbtypes.
+# Usage:
+#     - To run all the integration tests, don't add any arguments.
+#     - To run the integration tests for gob only add `-rpc=*gob` as an argument to this script.
+#     - To run for a single dbtype add `-dbtype=*mysql` as an argument.
+# Example:
+# ./integration_test.sh -dbtype=*mysql -rpc=*gob
+
+packages=("agents" "apis" "cmd/cgr-console" "cmd/cgr-loader" "dispatchers" "efs" "engine" "ers" "general_tests" "loaders" "registrarc" "sessions")
+dbtypes=("*internal" "*mysql" "*mongo" "*postgres")
+
+# Tests that are independent of the dbtype flag and run only once
+single_run_packages=("analyzers" "cdrs" "config" "cores" "ees" "utils" "migrator" "services")
+
+results=()
+
+execute_test() {
+   echo "Executing: go test github.com/cgrates/cgrates/$1 -tags=$2 $3"
+   go test "github.com/cgrates/cgrates/$1" -tags="$2" "$3"
+   results+=($?)
+}
+
+go clean --cache 
+
+# Execute tests based on passed arguments
+if [ "$#" -ne 0 ]; then
+   for pkg in "${packages[@]}"; do
+      execute_test "$pkg" "integration" "$@"
+   done
+else
+   # Execute tests for all db types if no arguments have been passed
+   for db in "${dbtypes[@]}"; do
+      for pkg in "${packages[@]}"; do
+         execute_test "$pkg" "integration" "-dbtype=$db"
+      done
+   done
 fi
 
-echo "go test github.com/cgrates/cgrates/analyzers -tags=integration"
-go test github.com/cgrates/cgrates/analyzers -tags=integration
-results+=($?)
-echo "go test github.com/cgrates/cgrates/ees -tags=integration"
-go test github.com/cgrates/cgrates/ees -tags=integration
-results+=($?)
-echo 'go test github.com/cgrates/cgrates/config -tags=integration'
-go test github.com/cgrates/cgrates/config -tags=integration
-results+=($?)
-echo 'go test github.com/cgrates/cgrates/utils -tags=integration'
-go test github.com/cgrates/cgrates/utils -tags=integration
-results+=($?)
-echo 'go test github.com/cgrates/cgrates/cores -tags=integration'
-go test github.com/cgrates/cgrates/cores -tags=integration
-results+=($?)
-# echo 'go test github.com/cgrates/cgrates/migrator -tags=integration'
-# go test github.com/cgrates/cgrates/migrator -tags=integration
-# results+=($?)
-# echo 'go test github.com/cgrates/cgrates/services -tags=integration'
-# go test github.com/cgrates/cgrates/services -tags=integration
-# results+=($?)
+# Execute the tests that run only once
+for test in "${single_run_packages[@]}"; do
+   execute_test "$test" "integration"
+done
 
-
-pass=1
-for val in ${results[@]}; do
-   (( pass=$pass||$val))
+# Check the results and exit with an appropriate code
+pass=0
+for val in "${results[@]}"; do
+   if [ "$val" -ne 0 ]; then
+       pass=1
+       break
+   fi
 done
 exit $pass
