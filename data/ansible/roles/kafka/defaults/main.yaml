@@ -1,7 +1,7 @@
 ---
 kafka_download_base_url: https://downloads.apache.org/kafka
 kafka_download_validate_certs: yes
-kafka_version: 3.7.0
+kafka_version: 3.8.0
 kafka_scala_version: 2.13
 
 # The kafka user and group to create files/dirs with and for running the kafka service
