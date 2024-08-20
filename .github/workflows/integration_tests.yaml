@@ -51,6 +51,12 @@ jobs:
       # - name: Set up tmate session for debugging
       #   uses: mxschmitt/action-tmate@v3
 
+      - name: Run migrator & services tests
+        continue-on-error: true
+        run: |
+          sudo env "PATH=$PATH" go test github.com/cgrates/cgrates/migrator -tags=integration
+          sudo env "PATH=$PATH" go test github.com/cgrates/cgrates/services -tags=integration
+
       - name: Run flaky tests
         continue-on-error: true 
         run: |

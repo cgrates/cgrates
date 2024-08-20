@@ -12,7 +12,7 @@ packages=("agents" "apis" "cmd/cgr-console" "cmd/cgr-loader" "dispatchers" "efs"
 dbtypes=("*internal" "*mysql" "*mongo" "*postgres")
 
 # Tests that are independent of the dbtype flag and run only once
-single_run_packages=("analyzers" "cdrs" "config" "cores" "ees" "utils" "migrator" "services")
+single_run_packages=("analyzers" "cdrs" "config" "cores" "ees" "utils")
 
 results=()
 
