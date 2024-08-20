@@ -122,7 +122,7 @@ func TestDDPFieldAsInterface(t *testing.T) {
 	}
 	if val, err := dDP.fieldAsInterface([]string{"LengthOfNationalDestinationCode"}); err != nil {
 		t.Error(err)
-	} else if val.(int) != 0 {
+	} else if val.(int) != 4 {
 		t.Errorf("expected %v,reveived %v", 0, val)
 	}
 	if val, err := dDP.fieldAsInterface([]string{"RawInput"}); err != nil {
@@ -189,7 +189,7 @@ func TestLibphonenumberDPString(t *testing.T) {
 			CountryCode: &pInt,
 		},
 	}
-	exp2 := "country_code:2 "
+	exp2 := "country_code:2"
 	rcv2 := LDP.String()
 	if !reflect.DeepEqual(rcv2, exp2) {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>",

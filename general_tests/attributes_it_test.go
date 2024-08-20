@@ -1031,7 +1031,7 @@ func testAttributeSProcessEventWithLibPhoneNumberFull(t *testing.T) {
 			Event: map[string]any{
 				"EventName":          "AddDestinationDetails",
 				"Destination":        "+447779330921",
-				"DestinationDetails": "{\"Carrier\":\"Orange\",\"CountryCode\":44,\"CountryCodeSource\":1,\"Extension\":\"\",\"GeoLocation\":\"United Kingdom\",\"ItalianLeadingZero\":false,\"LengthOfNationalDestinationCode\":0,\"NationalNumber\":7779330921,\"NumberOfLeadingZeros\":1,\"NumberType\":1,\"PreferredDomesticCarrierCode\":\"\",\"RawInput\":\"+447779330921\",\"Region\":\"GB\"}",
+				"DestinationDetails": "{\"Carrier\":\"Orange\",\"CountryCode\":44,\"CountryCodeSource\":1,\"Extension\":\"\",\"GeoLocation\":\"United Kingdom\",\"ItalianLeadingZero\":false,\"LengthOfNationalDestinationCode\":4,\"NationalNumber\":7779330921,\"NumberOfLeadingZeros\":1,\"NumberType\":1,\"PreferredDomesticCarrierCode\":\"\",\"RawInput\":\"+447779330921\",\"Region\":\"GB\"}",
 			},
 			APIOpts: map[string]any{
 				utils.OptsContext: utils.MetaSessionS,
