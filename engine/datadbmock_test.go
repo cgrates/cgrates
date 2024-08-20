@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"errors"
 	"testing"
 
 	"github.com/cgrates/cgrates/utils"
@@ -210,5 +211,219 @@ func TestFlush(t *testing.T) {
 	err := dbM.Flush(param)
 	if err != utils.ErrNotImplemented {
 		t.Errorf("expected error %v, but got %v", utils.ErrNotImplemented, err)
+	}
+}
+
+func TestDataDBMockRemoveResourceProfileDrv(t *testing.T) {
+	tests := []struct {
+		name                    string
+		dbM                     *DataDBMock
+		tnt                     string
+		id                      string
+		wantErr                 error
+		setupRemoveResourceFunc func(tnt, id string) error
+	}{
+		{
+			name:    "RemoveResourceProfileDrvF not set",
+			dbM:     &DataDBMock{},
+			tnt:     "tenant",
+			id:      "profile",
+			wantErr: utils.ErrNotImplemented,
+		},
+		{
+			name: "RemoveResourceProfileDrvF set - returns no error",
+			dbM:  &DataDBMock{},
+			tnt:  "tenant",
+			id:   "profile",
+			setupRemoveResourceFunc: func(tnt, id string) error {
+				if tnt == "tenant" && id == "profile" {
+					return nil
+				}
+				return errors.New("unexpected input")
+			},
+			wantErr: nil,
+		},
+		{
+			name: "RemoveResourceProfileDrvF set - returns an error",
+			dbM:  &DataDBMock{},
+			tnt:  "tenant2",
+			id:   "profile2",
+			setupRemoveResourceFunc: func(tnt, id string) error {
+				return errors.New("failed to remove resource profile")
+			},
+			wantErr: errors.New("failed to remove resource profile"),
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if tt.setupRemoveResourceFunc != nil {
+				tt.dbM.RemoveResourceProfileDrvF = tt.setupRemoveResourceFunc
+			}
+			err := tt.dbM.RemoveResourceProfileDrv(tt.tnt, tt.id)
+			if err != nil && err.Error() != tt.wantErr.Error() {
+				t.Errorf("RemoveResourceProfileDrv() error = %v, wantErr %v", err, tt.wantErr)
+			} else if err == nil && tt.wantErr != nil {
+				t.Errorf("RemoveResourceProfileDrv() expected error but got none")
+			}
+		})
+	}
+}
+
+func TestGetVersions(t *testing.T) {
+	dbM := &DataDBMock{}
+	itm := "item"
+	vrs, err := dbM.GetVersions(itm)
+	if vrs != nil {
+		t.Errorf("Expected versions to be nil, got %v", vrs)
+	}
+	if err != utils.ErrNotImplemented {
+		t.Errorf("Expected error to be ErrNotImplemented, got %v", err)
+	}
+}
+
+func TestRemoveVersions(t *testing.T) {
+	dbM := &DataDBMock{}
+	var vrs Versions = nil
+	err := dbM.RemoveVersions(vrs)
+	if err != utils.ErrNotImplemented {
+		t.Errorf("Expected error to be ErrNotImplemented, got %v", err)
+	}
+}
+
+func TestSelectDatabase(t *testing.T) {
+	dbM := &DataDBMock{}
+	dbName := "db"
+	err := dbM.SelectDatabase(dbName)
+	if err != utils.ErrNotImplemented {
+		t.Errorf("Expected error to be ErrNotImplemented, got %v", err)
+	}
+}
+
+func TestGetStorageType(t *testing.T) {
+	dbM := &DataDBMock{}
+	result := dbM.GetStorageType()
+	if result != utils.EmptyString {
+		t.Errorf("Expected result to be utils.EmptyString, got %v", result)
+	}
+}
+
+func TestIsDBEmpty(t *testing.T) {
+	dbM := &DataDBMock{}
+	resp, err := dbM.IsDBEmpty()
+	if resp != false {
+		t.Errorf("Expected resp to be false, got %v", resp)
+	}
+	if err != utils.ErrNotImplemented {
+		t.Errorf("Expected error to be ErrNotImplemented, got %v", err)
+	}
+}
+
+func TestHasDataDrv(t *testing.T) {
+	dbM := &DataDBMock{}
+	arg1 := "arg1"
+	arg2 := "arg2"
+	arg3 := "arg3"
+	result, err := dbM.HasDataDrv(arg1, arg2, arg3)
+	if result != false {
+		t.Errorf("Expected result to be false, got %v", result)
+	}
+	if err != utils.ErrNotImplemented {
+		t.Errorf("Expected error to be ErrNotImplemented, got %v", err)
+	}
+}
+
+func TestGetRatingPlanDrv(t *testing.T) {
+	dbM := &DataDBMock{}
+	arg := "plan"
+	result, err := dbM.GetRatingPlanDrv(arg)
+	if result != nil {
+		t.Errorf("Expected result to be nil, got %v", result)
+	}
+	if err != utils.ErrNotImplemented {
+		t.Errorf("Expected error to be ErrNotImplemented, got %v", err)
+	}
+}
+
+func TestSetRatingPlanDrv(t *testing.T) {
+	dbM := &DataDBMock{}
+	var plan *RatingPlan = nil
+	err := dbM.SetRatingPlanDrv(plan)
+	if err != utils.ErrNotImplemented {
+		t.Errorf("Expected error to be ErrNotImplemented, got %v", err)
+	}
+}
+
+func TestRemoveRatingPlanDrv(t *testing.T) {
+	dbM := &DataDBMock{}
+	key := "key"
+	err := dbM.RemoveRatingPlanDrv(key)
+	if err != utils.ErrNotImplemented {
+		t.Errorf("Expected error to be ErrNotImplemented, got %v", err)
+	}
+}
+
+func TestGetRatingProfileDrv(t *testing.T) {
+	dbM := &DataDBMock{}
+	key := "profile"
+	result, err := dbM.GetRatingProfileDrv(key)
+	if result != nil {
+		t.Errorf("Expected result to be nil, got %v", result)
+	}
+	if err != utils.ErrNotImplemented {
+		t.Errorf("Expected error to be ErrNotImplemented, got %v", err)
+	}
+}
+
+func TestSetRatingProfileDrv(t *testing.T) {
+	dbM := &DataDBMock{}
+	var profile *RatingProfile = nil
+	err := dbM.SetRatingProfileDrv(profile)
+	if err != utils.ErrNotImplemented {
+		t.Errorf("Expected error to be ErrNotImplemented, got %v", err)
+	}
+}
+
+func TestGetDestinationDrv(t *testing.T) {
+	dbM := &DataDBMock{}
+	param1 := "param1"
+	param2 := "param2"
+	result, err := dbM.GetDestinationDrv(param1, param2)
+	if result != nil {
+		t.Errorf("Expected result to be nil, got %v", result)
+	}
+	if err != utils.ErrNotImplemented {
+		t.Errorf("Expected error to be ErrNotImplemented, got %v", err)
+	}
+}
+
+func TestSetDestinationDrv(t *testing.T) {
+	dbM := &DataDBMock{}
+	var dest *Destination = nil
+	key := "key"
+	err := dbM.SetDestinationDrv(dest, key)
+	if err != utils.ErrNotImplemented {
+		t.Errorf("Expected error to be ErrNotImplemented, got %v", err)
+	}
+}
+
+func TestRemoveDestinationDrv(t *testing.T) {
+	dbM := &DataDBMock{}
+	param1 := "param1"
+	param2 := "param2"
+	err := dbM.RemoveDestinationDrv(param1, param2)
+	if err != utils.ErrNotImplemented {
+		t.Errorf("Expected error to be ErrNotImplemented, got %v", err)
+	}
+}
+
+func TestRemoveReverseDestinationDrv(t *testing.T) {
+	dbM := &DataDBMock{}
+	param1 := "param1"
+	param2 := "param2"
+	param3 := "param3"
+	err := dbM.RemoveReverseDestinationDrv(param1, param2, param3)
+	if err != utils.ErrNotImplemented {
+		t.Errorf("Expected error to be ErrNotImplemented, got %v", err)
 	}
 }
