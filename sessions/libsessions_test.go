@@ -23,6 +23,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 
 	"github.com/cgrates/cgrates/engine"
@@ -371,5 +372,122 @@ func TestGetDerivedMaxUsage(t *testing.T) {
 	}
 	if rply := getDerivedMaxUsage(max, false); !reflect.DeepEqual(exp, rply) {
 		t.Errorf("Expected %s received %s", utils.ToJSON(exp), utils.ToJSON(rply))
+	}
+}
+
+func TestBiRPCv1CapsError(t *testing.T) {
+	sessS := &SessionS{}
+	var ctx context.Context
+	var args any
+	var identity string
+	err := sessS.BiRPCv1CapsError(&ctx, args, &identity)
+	if err != utils.ErrMaxConcurrentRPCExceededNoCaps {
+		t.Fatalf("expected error %v, got %v", utils.ErrMaxConcurrentRPCExceededNoCaps, err)
+	}
+}
+
+func TestAsStoredSession(t *testing.T) {
+	session := &Session{
+		CGRID:         "ID",
+		Tenant:        "cgrates.org",
+		ResourceID:    "resource",
+		ClientConnID:  "ClientId",
+		DebitInterval: 5 * time.Minute,
+		Chargeable:    true,
+		SRuns: []*SRun{
+			{},
+		},
+		UpdatedAt: time.Now(),
+	}
+	storedSession := session.asStoredSession()
+	if storedSession == nil {
+		t.Fatalf("expected StoredSession, got nil")
+	}
+	if storedSession.CGRID != session.CGRID {
+		t.Errorf("expected GRID %s, got %s", session.CGRID, storedSession.CGRID)
+	}
+	if storedSession.Tenant != session.Tenant {
+		t.Errorf("expected Tenant %s, got %s", session.Tenant, storedSession.Tenant)
+	}
+	if storedSession.ResourceID != session.ResourceID {
+		t.Errorf("expected ResourceID %s, got %s", session.ResourceID, storedSession.ResourceID)
+	}
+	if storedSession.ClientConnID != session.ClientConnID {
+		t.Errorf("expected ClientConnID %s, got %s", session.ClientConnID, storedSession.ClientConnID)
+	}
+	if storedSession.DebitInterval != session.DebitInterval {
+		t.Errorf("expected DebitInterval %v, got %v", session.DebitInterval, storedSession.DebitInterval)
+	}
+	if storedSession.Chargeable != session.Chargeable {
+		t.Errorf("expected Chargeable %v, got %v", session.Chargeable, storedSession.Chargeable)
+	}
+	if len(storedSession.SRuns) != len(session.SRuns) {
+		t.Errorf("expected %d SRuns, got %d", len(session.SRuns), len(storedSession.SRuns))
+	} else if len(storedSession.SRuns) > 0 {
+		sRun := session.SRuns[0]
+		storedSRun := storedSession.SRuns[0]
+		if storedSRun.CD != sRun.CD {
+			t.Errorf("expected CD %s, got %s", sRun.CD, storedSRun.CD)
+		}
+		if storedSRun.ExtraDuration != sRun.ExtraDuration {
+			t.Errorf("expected ExtraDuration %v, got %v", sRun.ExtraDuration, storedSRun.ExtraDuration)
+		}
+		if storedSRun.TotalUsage != sRun.TotalUsage {
+			t.Errorf("expected TotalUsage %d, got %d", sRun.TotalUsage, storedSRun.TotalUsage)
+		}
+	}
+	if !storedSession.UpdatedAt.Equal(session.UpdatedAt) {
+		t.Errorf("expected UpdatedAt %v, got %v", session.UpdatedAt, storedSession.UpdatedAt)
+	}
+}
+
+func TestNewSessionFromStoredSession(t *testing.T) {
+	storedSession := &engine.StoredSession{
+		CGRID:         "ID",
+		Tenant:        "cgrates.org",
+		ResourceID:    "resource",
+		ClientConnID:  "clientID",
+		DebitInterval: 5 * time.Minute,
+		Chargeable:    true,
+	}
+	session := newSessionFromStoredSession(storedSession)
+	if session == nil {
+		t.Fatalf("expected Session, got nil")
+	}
+	if session.CGRID != storedSession.CGRID {
+		t.Errorf("expected GRID %s, got %s", storedSession.CGRID, session.CGRID)
+	}
+	if session.Tenant != storedSession.Tenant {
+		t.Errorf("expected Tenant %s, got %s", storedSession.Tenant, session.Tenant)
+	}
+	if session.ResourceID != storedSession.ResourceID {
+		t.Errorf("expected ResourceID %s, got %s", storedSession.ResourceID, session.ResourceID)
+	}
+	if session.ClientConnID != storedSession.ClientConnID {
+		t.Errorf("expected ClientConnID %s, got %s", storedSession.ClientConnID, session.ClientConnID)
+	}
+	if session.DebitInterval != storedSession.DebitInterval {
+		t.Errorf("expected DebitInterval %v, got %v", storedSession.DebitInterval, session.DebitInterval)
+	}
+	if session.Chargeable != storedSession.Chargeable {
+		t.Errorf("expected Chargeable %v, got %v", storedSession.Chargeable, session.Chargeable)
+	}
+	if len(session.SRuns) != len(storedSession.SRuns) {
+		t.Errorf("expected %d SRuns, got %d", len(storedSession.SRuns), len(session.SRuns))
+	} else if len(session.SRuns) > 0 {
+		storedSRun := storedSession.SRuns[0]
+		sRun := session.SRuns[0]
+		if sRun.CD != storedSRun.CD {
+			t.Errorf("expected CD %s, got %s", storedSRun.CD, sRun.CD)
+		}
+		if sRun.ExtraDuration != storedSRun.ExtraDuration {
+			t.Errorf("expected ExtraDuration %v, got %v", storedSRun.ExtraDuration, sRun.ExtraDuration)
+		}
+		if sRun.TotalUsage != storedSRun.TotalUsage {
+			t.Errorf("expected TotalUsage %d, got %d", storedSRun.TotalUsage, sRun.TotalUsage)
+		}
+	}
+	if !session.UpdatedAt.Equal(storedSession.UpdatedAt) {
+		t.Errorf("expected UpdatedAt %v, got %v", storedSession.UpdatedAt, session.UpdatedAt)
 	}
 }
