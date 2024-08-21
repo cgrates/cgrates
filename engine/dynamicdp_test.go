@@ -147,7 +147,7 @@ func TestLibphonenumberDPString(t *testing.T) {
 			CountryCode: &pInt,
 		},
 	}
-	exp2 := "country_code:2 "
+	exp2 := "country_code:2"
 	rcv2 := LDP.String()
 	if !reflect.DeepEqual(rcv2, exp2) {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>",
