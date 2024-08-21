@@ -12,7 +12,7 @@ require (
 	github.com/cenkalti/rpc2 v1.0.3
 	github.com/cgrates/aringo v0.0.0-20220525160735-b5990313d99e
 	github.com/cgrates/birpc v1.3.1-0.20211117095917-5b0ff29f3084
-	github.com/cgrates/fsock v0.0.0-20231222174700-7257ce894e23
+	github.com/cgrates/fsock v0.0.0-20240522220429-b6cc1d96fd2b
 	github.com/cgrates/kamevapi v0.0.0-20240307160311-26273f03eedf
 	github.com/cgrates/ltcache v0.0.0-20240411152156-e673692056db
 	github.com/cgrates/radigo v0.0.0-20240123163129-491c899df727

@@ -283,33 +283,34 @@ func (sm *FSsessions) onChannelHangupComplete(fsev FSEvent, connIdx int) {
 
 // Connects to the freeswitch mod_event_socket server and starts
 // listening for events.
-func (sm *FSsessions) Connect() error {
+func (fsa *FSsessions) Connect() error {
 	eventFilters := map[string][]string{"Call-Direction": {"inbound"}}
-	errChan := make(chan error)
-	for connIdx, connCfg := range sm.cfg.EventSocketConns {
-		fSock, err := fsock.NewFSock(connCfg.Address, connCfg.Password, connCfg.Reconnects, 0, utils.FibDuration,
-			sm.createHandlers(), eventFilters, utils.Logger, connIdx, true)
+	connErr := make(chan error)
+	for connIdx, connCfg := range fsa.cfg.EventSocketConns {
+		fSock, err := fsock.NewFSock(
+			connCfg.Address, connCfg.Password,
+			connCfg.Reconnects, 0,
+			0, utils.FibDuration,
+			fsa.createHandlers(), eventFilters,
+			utils.Logger, connIdx, true, connErr)
 		if err != nil {
 			return err
 		}
 		if !fSock.Connected() {
-			return errors.New("could not connect to FreeSWITCH")
+			return errors.New("Could not connect to FreeSWITCH")
 		}
-		sm.conns[connIdx] = fSock
+		fsa.conns[connIdx] = fSock
 		utils.Logger.Info(fmt.Sprintf("<%s> successfully connected to FreeSWITCH at: <%s>", utils.FreeSWITCHAgent, connCfg.Address))
-		go func(fsock *fsock.FSock) { // Start reading in own goroutine, return on error
-			if err := fsock.ReadEvents(); err != nil {
-				errChan <- err
-			}
-		}(fSock)
-		fsSenderPool := fsock.NewFSockPool(5, connCfg.Address, connCfg.Password, 1, sm.cfg.MaxWaitConnection, 0, utils.FibDuration,
-			make(map[string][]func(string, int)), make(map[string][]string), utils.Logger.GetSyslog(), connIdx, true)
+		fsSenderPool := fsock.NewFSockPool(5, connCfg.Address, connCfg.Password, 1, fsa.cfg.MaxWaitConnection,
+			0, 0, utils.FibDuration,
+			make(map[string][]func(string, int)), make(map[string][]string),
+			utils.Logger, connIdx, true, nil)
 		if fsSenderPool == nil {
-			return errors.New("cannot connect FreeSWITCH senders pool")
+			return errors.New("Cannot connect FreeSWITCH senders pool")
 		}
-		sm.senderPools[connIdx] = fsSenderPool
+		fsa.senderPools[connIdx] = fsSenderPool
 	}
-	err := <-errChan // Will keep the Connect locked until the first error in one of the connections
+	err := <-connErr // Will keep the Connect locked until the first error in one of the connections
 	return err
 }
 
@@ -419,13 +420,15 @@ func (fsa *FSsessions) V1GetActiveSessionIDs(ignParam string,
 				utils.FreeSWITCHAgent, err.Error(), connIdx))
 			continue
 		}
-		aChans := fsock.MapChanData(activeChanStr)
-		for _, fsAChan := range aChans {
+		for _, fsAChan := range fsock.MapChanData(activeChanStr, ",") {
 			sIDs = append(sIDs, &sessions.SessionID{
 				OriginHost: fsa.cfg.EventSocketConns[connIdx].Alias,
-				OriginID:   fsAChan["uuid"]},
-			)
+				OriginID:   fsAChan["uuid"],
+			})
 		}
+	}
+	if len(sIDs) == 0 {
+		return utils.ErrNoActiveSession
 	}
 	*sessionIDs = sIDs
 	return

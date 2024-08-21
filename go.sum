@@ -29,8 +29,8 @@ github.com/cgrates/aringo v0.0.0-20220525160735-b5990313d99e h1:jbScwE0ebeCBD9Cs
 github.com/cgrates/aringo v0.0.0-20220525160735-b5990313d99e/go.mod h1:v+wPvWvfle06wQ7WBJZGXvrF+CWA0CrReh+c3PuXaAU=
 github.com/cgrates/birpc v1.3.1-0.20211117095917-5b0ff29f3084 h1:YIEepjEOjeHaFrewWaar/JkXYiDgO7gRw/R1zWITxEw=
 github.com/cgrates/birpc v1.3.1-0.20211117095917-5b0ff29f3084/go.mod h1:z/PmNnDPqSQALedKJv5T8+eXIq6XHa9J0St1YsvAVns=
-github.com/cgrates/fsock v0.0.0-20231222174700-7257ce894e23 h1:AElRJimochzP6ghx3/sVtV0oPyqiAMwd3ovo4s5YnqM=
-github.com/cgrates/fsock v0.0.0-20231222174700-7257ce894e23/go.mod h1:5A9wag324AzIlaDd7tpPDAg26ouUO1orarAq7Vxr4As=
+github.com/cgrates/fsock v0.0.0-20240522220429-b6cc1d96fd2b h1:PQzDye+0GcgJ3cKG5NcAOjdRyX0v76ZFkolu3X70fbs=
+github.com/cgrates/fsock v0.0.0-20240522220429-b6cc1d96fd2b/go.mod h1:bKByLko2HF33K+PbiiToAgevrrbr96C+7Pp3HGS6oag=
 github.com/cgrates/kamevapi v0.0.0-20240307160311-26273f03eedf h1:GbMJzvtwdX1OCEmsqSts/cRCIcIMvo8AYtC2dQExWlg=
 github.com/cgrates/kamevapi v0.0.0-20240307160311-26273f03eedf/go.mod h1:oEq/JbubkOD2pXHvDy4r7519NkxriONisrnVpkCaNJw=
 github.com/cgrates/ltcache v0.0.0-20240411152156-e673692056db h1:JRgzMS5kJ1WxaveoZ1YG/FowUDxFQXD3GjCHR7rH0Gk=

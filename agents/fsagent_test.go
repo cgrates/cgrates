@@ -23,6 +23,7 @@ import (
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/sessions"
+	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/fsock"
 )
 
@@ -127,7 +128,7 @@ func TestFSsessionsV1GetActiveSessionIDsErrorHandling(t *testing.T) {
 	sm := &FSsessions{}
 	var sessionIDs []*sessions.SessionID
 	err := sm.V1GetActiveSessionIDs("", &sessionIDs)
-	if err != nil {
+	if err == nil || err != utils.ErrNoActiveSession {
 		t.Errorf("Unexpected error: %v", err)
 	}
 	if len(sessionIDs) != 0 {
