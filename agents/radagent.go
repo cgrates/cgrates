@@ -48,7 +48,7 @@ func NewRadiusAgent(cgrCfg *config.CGRConfig, filterS *engine.FilterS,
 		utils.Logger.Info(
 			fmt.Sprintf("<%s> loading dictionary for clientID: <%s> out of path <%s>",
 				utils.RadiusAgent, clntID, dictPath))
-		if dts[clntID], err = radigo.NewDictionaryFromFolderWithRFC2865(dictPath); err != nil {
+		if dts[clntID], err = radigo.NewDictionaryFromFoldersWithRFC2865([]string{dictPath}); err != nil {
 			return
 		}
 	}
@@ -58,11 +58,11 @@ func NewRadiusAgent(cgrCfg *config.CGRConfig, filterS *engine.FilterS,
 	ra.rsAuth = radigo.NewServer(cgrCfg.RadiusAgentCfg().ListenNet,
 		cgrCfg.RadiusAgentCfg().ListenAuth, secrets, dicts,
 		map[radigo.PacketCode]func(*radigo.Packet) (*radigo.Packet, error){
-			radigo.AccessRequest: ra.handleAuth}, nil)
+			radigo.AccessRequest: ra.handleAuth}, nil, utils.Logger)
 	ra.rsAcct = radigo.NewServer(cgrCfg.RadiusAgentCfg().ListenNet,
 		cgrCfg.RadiusAgentCfg().ListenAcct, secrets, dicts,
 		map[radigo.PacketCode]func(*radigo.Packet) (*radigo.Packet, error){
-			radigo.AccountingRequest: ra.handleAcct}, nil)
+			radigo.AccountingRequest: ra.handleAcct}, nil, utils.Logger)
 	return
 }
 

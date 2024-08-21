@@ -5773,7 +5773,7 @@ func TestOrderRatesOnIntervalsErrorConvert(t *testing.T) {
 	aRts := []*utils.Rate{rt1}
 	sTime := time.Date(2020, 12, 1, 0, 0, 0, 0, time.UTC)
 	usage := utils.NewDecimalFromFloat64(math.Inf(1))
-	expected := "<RateS> cannot convert <&{Context:{MaxScale:0 MinScale:0 Precision:0 Traps: Conditions: RoundingMode:ToNearestEven OperatingMode:GDA} unscaled:{neg:false abs:[]} compact:0 exp:0 precision:0 form:2}> increment to Int64"
+	expected := "<RateS> cannot convert <&{Context:{MaxScale:0 MinScale:0 Precision:0 Traps: Conditions: RoundingMode:ToNearestEven OperatingMode:GDA} unscaled:{neg:false abs:[]} compact:0 exp:0 precision:1 form:2}> increment to Int64"
 	_, err = orderRatesOnIntervals(aRts, wghts, sTime, usage.Big, false, 4)
 	if err == nil || err.Error() != expected {
 		t.Error(err)
