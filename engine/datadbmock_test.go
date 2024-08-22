@@ -427,3 +427,273 @@ func TestRemoveReverseDestinationDrv(t *testing.T) {
 		t.Errorf("Expected error to be ErrNotImplemented, got %v", err)
 	}
 }
+
+func TestSetThresholdProfileDrvDefaultBehavior(t *testing.T) {
+	dbM := &DataDBMock{}
+	err := dbM.SetThresholdProfileDrv(&ThresholdProfile{})
+	if err != utils.ErrNotImplemented {
+		t.Errorf("expected error %v, got %v", utils.ErrNotImplemented, err)
+	}
+}
+
+func TestSetThresholdProfileDrvCustomBehavior(t *testing.T) {
+	expectedError := errors.New("custom error")
+	dbM := &DataDBMock{
+		SetThresholdProfileDrvF: func(tp *ThresholdProfile) error {
+			return expectedError
+		},
+	}
+	err := dbM.SetThresholdProfileDrv(&ThresholdProfile{})
+	if err != expectedError {
+		t.Errorf("expected error %v, got %v", expectedError, err)
+	}
+}
+
+func TestRemThresholdProfileDrv(t *testing.T) {
+	tests := []struct {
+		name        string
+		mockFunc    func(tenant, id string) error
+		tenant      string
+		id          string
+		expectError error
+	}{
+		{
+			name:        "Default behavior",
+			mockFunc:    nil,
+			tenant:      "cgrates.org",
+			id:          "id1",
+			expectError: utils.ErrNotImplemented,
+		},
+		{
+			name: "Custom behavior",
+			mockFunc: func(tenant, id string) error {
+				if tenant == "cgrates.org" && id == "id1" {
+					return errors.New("custom error")
+				}
+				return nil
+			},
+			tenant:      "cgrates.org",
+			id:          "id1",
+			expectError: errors.New("custom error"),
+		},
+		{
+			name: "Custom behavior with different input",
+			mockFunc: func(tenant, id string) error {
+				if tenant == "tenant2" && id == "id2" {
+					return errors.New("another custom error")
+				}
+				return nil
+			},
+			tenant:      "tenant2",
+			id:          "id2",
+			expectError: errors.New("another custom error"),
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			dbM := &DataDBMock{
+				RemThresholdProfileDrvF: tt.mockFunc,
+			}
+			err := dbM.RemThresholdProfileDrv(tt.tenant, tt.id)
+			if err == nil && tt.expectError != nil {
+				t.Errorf("expected error %v, got nil", tt.expectError)
+			} else if err != nil && tt.expectError == nil {
+				t.Errorf("expected no error, got %v", err)
+			} else if err != nil && err.Error() != tt.expectError.Error() {
+				t.Errorf("expected error %v, got %v", tt.expectError, err)
+			}
+		})
+	}
+}
+
+func TestGetThresholdDrv(t *testing.T) {
+	tests := []struct {
+		name        string
+		mockFunc    func(tenant, id string) (*Threshold, error)
+		tenant      string
+		id          string
+		expectValue *Threshold
+		expectError error
+	}{
+		{
+			name:        "Default behavior",
+			mockFunc:    nil,
+			tenant:      "cgrates.org",
+			id:          "id1",
+			expectValue: nil,
+			expectError: utils.ErrNotImplemented,
+		},
+		{
+			name: "Custom behavior",
+			mockFunc: func(tenant, id string) (*Threshold, error) {
+				if tenant == "cgrates.org" && id == "id1" {
+					return &Threshold{}, nil
+				}
+				return nil, errors.New("custom error")
+			},
+			tenant:      "cgrates.org",
+			id:          "id1",
+			expectValue: &Threshold{},
+			expectError: nil,
+		},
+		{
+			name: "Custom behavior with error",
+			mockFunc: func(tenant, id string) (*Threshold, error) {
+				if tenant == "tenant2" && id == "id2" {
+					return nil, errors.New("another custom error")
+				}
+				return nil, nil
+			},
+			tenant:      "tenant2",
+			id:          "id2",
+			expectValue: nil,
+			expectError: errors.New("another custom error"),
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			dbM := &DataDBMock{
+				GetThresholdDrvF: tt.mockFunc,
+			}
+			_, err := dbM.GetThresholdDrv(tt.tenant, tt.id)
+			if err == nil && tt.expectError != nil {
+				t.Errorf("expected error %v, got nil", tt.expectError)
+			} else if err != nil && tt.expectError == nil {
+				t.Errorf("expected no error, got %v", err)
+			} else if err != nil && err.Error() != tt.expectError.Error() {
+				t.Errorf("expected error %v, got %v", tt.expectError, err)
+			}
+		})
+	}
+}
+
+func TestGetFilterDrv(t *testing.T) {
+	tests := []struct {
+		name        string
+		mockFunc    func(tnt, id string) (*Filter, error)
+		tnt         string
+		id          string
+		expectValue *Filter
+		expectError error
+	}{
+		{
+			name:        "Default behavior",
+			mockFunc:    nil,
+			tnt:         "cgrates.org",
+			id:          "id1",
+			expectValue: nil,
+			expectError: utils.ErrNotImplemented,
+		},
+		{
+			name: "Custom behavior",
+			mockFunc: func(tnt, id string) (*Filter, error) {
+				if tnt == "cgrates.org" && id == "id1" {
+					return &Filter{}, nil
+				}
+				return nil, errors.New("custom error")
+			},
+			tnt:         "cgrates.org",
+			id:          "id1",
+			expectValue: &Filter{},
+			expectError: nil,
+		},
+		{
+			name: "Custom behavior with error",
+			mockFunc: func(tnt, id string) (*Filter, error) {
+				if tnt == "tenant2" && id == "id2" {
+					return nil, errors.New("another custom error")
+				}
+				return nil, nil
+			},
+			tnt:         "tenant2",
+			id:          "id2",
+			expectValue: nil,
+			expectError: errors.New("another custom error"),
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			dbM := &DataDBMock{
+				GetFilterDrvF: tt.mockFunc,
+			}
+			_, err := dbM.GetFilterDrv(tt.tnt, tt.id)
+			if err == nil && tt.expectError != nil {
+				t.Errorf("expected error %v, got nil", tt.expectError)
+			} else if err != nil && tt.expectError == nil {
+				t.Errorf("expected no error, got %v", err)
+			} else if err != nil && err.Error() != tt.expectError.Error() {
+				t.Errorf("expected error %v, got %v", tt.expectError, err)
+			}
+		})
+	}
+}
+
+func TestSetFilterDrv(t *testing.T) {
+	dbM := &DataDBMock{}
+	filter := &Filter{}
+	err := dbM.SetFilterDrv(filter)
+	if err != utils.ErrNotImplemented {
+		t.Errorf("expected error %v, got %v", utils.ErrNotImplemented, err)
+	}
+}
+
+func TestRemoveFilterDrv(t *testing.T) {
+	dbM := &DataDBMock{}
+	tenant := "cgrates.org"
+	id := "id"
+	err := dbM.RemoveFilterDrv(tenant, id)
+	if err != utils.ErrNotImplemented {
+		t.Errorf("expected error %v, got %v", utils.ErrNotImplemented, err)
+	}
+}
+
+func TestSetRouteProfileDrv(t *testing.T) {
+	dbM := &DataDBMock{}
+	routeProfile := &RouteProfile{}
+	err := dbM.SetRouteProfileDrv(routeProfile)
+	if err != utils.ErrNotImplemented {
+		t.Errorf("expected error %v, got %v", utils.ErrNotImplemented, err)
+	}
+}
+
+func TestDataDBMockSetReverseDestinationDrv(t *testing.T) {
+	dbMock := &DataDBMock{}
+	expectedError := utils.ErrNotImplemented
+	err := dbMock.SetReverseDestinationDrv("Set", []string{"val1", "val2"}, "value")
+	if err != expectedError {
+		t.Errorf("expected error %v, but got %v", expectedError, err)
+	}
+}
+
+func TestDataDBMockGetReverseDestinationDrv(t *testing.T) {
+	dbMock := &DataDBMock{}
+	expectedError := utils.ErrNotImplemented
+	result, err := dbMock.GetReverseDestinationDrv("Reverse", "Destination")
+	if err != expectedError {
+		t.Errorf("expected error %v, but got %v", expectedError, err)
+	}
+	if result != nil {
+		t.Errorf("expected result to be nil, but got %v", result)
+	}
+}
+
+func TestDataDBMockGetActionsDrv(t *testing.T) {
+	dbMock := &DataDBMock{}
+	expectedError := utils.ErrNotImplemented
+	result, err := dbMock.GetActionsDrv("GetActions")
+	if err != expectedError {
+		t.Errorf("expected error %v, but got %v", expectedError, err)
+	}
+	if result != nil {
+		t.Errorf("expected result to be nil, but got %v", result)
+	}
+}
+
+func TestDataDBMockSetActionsDrv(t *testing.T) {
+	dbMock := &DataDBMock{}
+	expectedError := utils.ErrNotImplemented
+	err := dbMock.SetActionsDrv("Actions", Actions{})
+	if err != expectedError {
+		t.Errorf("expected error %v, but got %v", expectedError, err)
+	}
+}
