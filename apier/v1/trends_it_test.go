@@ -187,6 +187,8 @@ func testTrendSGetTrendProfiles(t *testing.T) {
 		trendProfile2.TrendProfile,
 	}
 	var tResult []*engine.TrendProfile
+
+	//get all trend profiles from every tenant when no tenant is specified
 	if err := trendRPC.Call(context.Background(), utils.APIerSv1GetTrendProfiles, engine.TrendProfilesAPI{}, &tResult); err != nil {
 		t.Error(err)
 	} else if diff := cmp.Diff(expRes, tResult, cmpopts.SortSlices(func(a, b *engine.TrendProfile) bool { return a.ID < b.ID })); diff != utils.EmptyString {
@@ -197,6 +199,8 @@ func testTrendSGetTrendProfiles(t *testing.T) {
 		trendProfile.TrendProfile,
 		trendProfile2.TrendProfile,
 	}
+
+	//get all trend profiles of a tenant when ids length is 0
 	if err := trendRPC.Call(context.Background(), utils.APIerSv1GetTrendProfiles, engine.TrendProfilesAPI{Tenant: "cgrates.org"}, &tResult); err != nil {
 		t.Error(err)
 	} else if diff := cmp.Diff(expRes, tResult, cmpopts.SortSlices(func(a, b *engine.TrendProfile) bool { return a.ID < b.ID })); diff != utils.EmptyString {
@@ -206,6 +210,8 @@ func testTrendSGetTrendProfiles(t *testing.T) {
 	expRes = []*engine.TrendProfile{
 		trendProfile2.TrendProfile,
 	}
+
+	//get trend profiles by their ids for a tenant
 	if err := trendRPC.Call(context.Background(), utils.APIerSv1GetTrendProfiles, engine.TrendProfilesAPI{Tenant: "cgrates.org", TpIDs: []string{"Trend1"}}, &tResult); err != nil {
 		t.Error(err)
 	} else if diff := cmp.Diff(expRes, tResult, cmpopts.SortSlices(func(a, b *engine.TrendProfile) bool { return a.ID < b.ID })); diff != utils.EmptyString {

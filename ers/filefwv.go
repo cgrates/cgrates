@@ -185,6 +185,7 @@ func (rdr *FWVFileER) processFile(fName string) (err error) {
 			continue
 		}
 		rowNr++ // increment the rowNr after checking if it's not the end of file
+		reqVars.Map[utils.MetaFileLineNumber] = utils.NewLeafNode(rowNr)
 		record := string(buf)
 		agReq := agents.NewAgentRequest(
 			config.NewFWVProvider(record),
