@@ -395,6 +395,7 @@
 				{"tag": "DialogId", "path": "*cgreq.DialogId", "type": "*variable", "value": "~*req.11"},
 				{"tag": "Partial", "path": "*opts.*partial", "type": "*constant", "value": "true"},
 				{"tag": "Partial", "path": "*opts.*partial", "type": "*constant", "value": "false","filters": ["*prefix:~*vars.*fileName:missed_calls"]},
+				{"tag": "LineNumber", "path": "*opts.*line", "type": "*constant", "value": "1","filters": ["*string:~*vars.*fileLineNumber:1"]},
 				{"tag": "Invite", "path": "*opts.invite", "type": "*constant", "value": "true", "filters":["*string:~*req.0:INVITE"]},
 				{"tag": "Bye", "path": "*opts.bye", "type": "*constant", "value": "true", "filters":["*string:~*req.0:BYE"]},
 				{"tag": "Order", "path": "*opts.order", "type": "*constant", "value": "0", "filters":["*string:~*req.0:INVITE"]},

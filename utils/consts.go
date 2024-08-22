@@ -825,6 +825,7 @@ const (
 	MetaGroup               = "*group"
 	InternalRPCSet          = "InternalRPCSet"
 	MetaFileName            = "*fileName"
+	MetaFileLineNumber      = "*fileLineNumber"
 	MetaReaderID            = "*readerID"
 	MetaRadauth             = "*radauth"
 	UserPassword            = "UserPassword"

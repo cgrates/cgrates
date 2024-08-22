@@ -136,6 +136,7 @@ func (rdr *CSVFileER) processFile(fName string) (err error) {
 	if rdr.Config().Opts.CSV.LazyQuotes != nil {
 		csvReader.LazyQuotes = *rdr.Config().Opts.CSV.LazyQuotes
 	}
+
 	var indxAls map[string]int
 	rowNr := 0 // This counts the rows in the file, not really number of CDRs
 	evsPosted := 0
@@ -165,7 +166,7 @@ func (rdr *CSVFileER) processFile(fName string) (err error) {
 			continue
 		}
 		rowNr++ // increment the rowNr after checking if it's not the end of file
-
+		reqVars.Map[utils.MetaFileLineNumber] = utils.NewLeafNode(rowNr)
 		agReq := agents.NewAgentRequest(
 			config.NewSliceDP(record, indxAls), reqVars,
 			nil, nil, nil, rdr.Config().Tenant,
