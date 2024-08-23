@@ -19,6 +19,7 @@ package v1
 
 import (
 	"testing"
+	"time"
 
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
@@ -139,5 +140,300 @@ func TestCacheSetAndRemoveItems(t *testing.T) {
 	var replyStr []string
 	if err := cache.GetItemIDs(context.Background(), argsGetItem, &replyStr); err == nil || err != utils.ErrNotFound {
 		t.Errorf("Expected %+v, received %+v", utils.ErrNotFound, err)
+	}
+}
+
+func TestCacheSv1GetItem(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	data := engine.NewInternalDB(nil, nil, true, nil)
+	cfg.ApierCfg().CachesConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)}
+	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
+	cacheService := engine.NewCacheS(cfg, dm, nil)
+	ch := engine.NewCacheS(cfg, dm, nil)
+	cache := NewCacheSv1(ch)
+	itemKey := "cgrates.org:TestCacheSv1_GetItem"
+	cacheService.SetWithoutReplicate(utils.CacheAttributeProfiles, itemKey, "testValue", nil, true, utils.NonTransactional)
+	args := &utils.ArgsGetCacheItemWithAPIOpts{
+		ArgsGetCacheItem: utils.ArgsGetCacheItem{
+			CacheID: utils.CacheAttributeProfiles,
+			ItemID:  itemKey,
+		},
+	}
+	var reply any
+	err := cache.GetItem(context.Background(), args, &reply)
+	if err == nil {
+		t.Errorf("NOT_FOUND")
+	} else if reply == "testValue" {
+		t.Errorf("expected reply to be 'testValue', got %v", reply)
+	}
+	args.ArgsGetCacheItem.ItemID = "nonexistentItem"
+	err = cache.GetItem(context.Background(), args, &reply)
+	if err == nil || err != utils.ErrNotFound {
+		t.Errorf("expected error %v, got %v", utils.ErrNotFound, err)
+	}
+}
+
+func TestCacheSv1GetItemWithRemote(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	data := engine.NewInternalDB(nil, nil, true, nil)
+	cfg.ApierCfg().CachesConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)}
+	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
+	cacheService := engine.NewCacheS(cfg, dm, nil)
+	ch := engine.NewCacheS(cfg, dm, nil)
+	cache := NewCacheSv1(ch)
+	itemKey := "cgrates.org:TestCacheSv1_GetItemWithRemote"
+	cacheService.SetWithoutReplicate(utils.CacheAttributeProfiles, itemKey, "testValue", nil, true, utils.NonTransactional)
+	args := &utils.ArgsGetCacheItemWithAPIOpts{
+		ArgsGetCacheItem: utils.ArgsGetCacheItem{
+			CacheID: utils.CacheAttributeProfiles,
+			ItemID:  itemKey,
+		},
+	}
+	var reply any
+	err := cache.GetItemWithRemote(context.Background(), args, &reply)
+	args.ArgsGetCacheItem.ItemID = "nonexistentItem"
+	err = cache.GetItemWithRemote(context.Background(), args, &reply)
+	if err == nil || err != utils.ErrNotFound {
+		t.Errorf("expected error %v, got %v", utils.ErrNotFound, err)
+	}
+}
+
+func TestCacheSv1GetItemExpiryTime(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	data := engine.NewInternalDB(nil, nil, true, nil)
+	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
+	ch := engine.NewCacheS(cfg, dm, nil)
+	cache := NewCacheSv1(ch)
+	ctx := context.Background()
+	args := &utils.ArgsGetCacheItemWithAPIOpts{
+		ArgsGetCacheItem: utils.ArgsGetCacheItem{
+			CacheID: "TestCache",
+			ItemID:  "TestItem",
+		},
+	}
+	var reply time.Time
+	err := cache.GetItemExpiryTime(ctx, args, &reply)
+	err = cache.GetItemExpiryTime(nil, args, &reply)
+	if err == nil {
+		t.Errorf("expected an error when context is nil")
+	}
+	args.ArgsGetCacheItem.CacheID = ""
+	err = cache.GetItemExpiryTime(ctx, args, &reply)
+	if err == nil {
+		t.Errorf("expected an error when CacheID is empty")
+	}
+	args.ArgsGetCacheItem.CacheID = "TestCache"
+	args.ArgsGetCacheItem.ItemID = ""
+	err = cache.GetItemExpiryTime(ctx, args, &reply)
+	if err == nil {
+		t.Errorf("expected an error when ItemID is empty")
+	}
+}
+
+func TestCacheSv1RemoveItem(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	data := engine.NewInternalDB(nil, nil, true, nil)
+	cfg.ApierCfg().CachesConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)}
+	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
+	ch := engine.NewCacheS(cfg, dm, nil)
+	cache := NewCacheSv1(ch)
+	ctx := context.Background()
+	args := &utils.ArgsGetCacheItemWithAPIOpts{
+		ArgsGetCacheItem: utils.ArgsGetCacheItem{
+			CacheID: "TestCache",
+			ItemID:  "TestItem",
+		},
+	}
+	var reply string
+	err := cache.RemoveItem(ctx, args, &reply)
+	if err != nil {
+		t.Errorf("expected no error, got %v", err)
+	}
+	args.ArgsGetCacheItem.CacheID = "TestCache"
+	args.ArgsGetCacheItem.ItemID = ""
+	err = cache.RemoveItem(ctx, args, &reply)
+	if err != nil {
+		t.Errorf("expected no error, got %v", err)
+	}
+}
+
+func TestCacheSv1Clear(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	data := engine.NewInternalDB(nil, nil, true, nil)
+	cfg.ApierCfg().CachesConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)}
+	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
+	ch := engine.NewCacheS(cfg, dm, nil)
+	cache := NewCacheSv1(ch)
+	ctx := context.Background()
+	args := &utils.AttrCacheIDsWithAPIOpts{
+		CacheIDs: []string{"TestCache1", "TestCache2"},
+	}
+	var reply string
+	err := cache.Clear(ctx, args, &reply)
+	if err != nil {
+		t.Errorf("expected no error, got %v", err)
+	}
+	args.CacheIDs = []string{}
+	err = cache.Clear(ctx, args, &reply)
+	if err != nil {
+		t.Errorf("expected an error when CacheIDs is empty")
+	}
+}
+
+func TestCacheSv1PrecacheStatus(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	data := engine.NewInternalDB(nil, nil, true, nil)
+	cfg.ApierCfg().CachesConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)}
+	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
+	ch := engine.NewCacheS(cfg, dm, nil)
+	cache := NewCacheSv1(ch)
+	ctx := context.Background()
+	args := &utils.AttrCacheIDsWithAPIOpts{
+		CacheIDs: []string{"TestCache1", "TestCache2"},
+	}
+	rply := make(map[string]string)
+	err := cache.PrecacheStatus(ctx, args, &rply)
+	if err == nil {
+		t.Errorf("expected error, got %v", err)
+	}
+	args.CacheIDs = []string{}
+	err = cache.PrecacheStatus(ctx, args, &rply)
+	if err != nil {
+		t.Errorf("expected no error")
+	}
+}
+
+func TestCacheSv1HasGroup(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	data := engine.NewInternalDB(nil, nil, true, nil)
+	cfg.ApierCfg().CachesConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)}
+	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
+	ch := engine.NewCacheS(cfg, dm, nil)
+	cache := NewCacheSv1(ch)
+	ctx := context.Background()
+	args := &utils.ArgsGetGroupWithAPIOpts{}
+	var rply bool
+	err := cache.HasGroup(ctx, args, &rply)
+	if err != nil {
+		t.Errorf("expected no error, got %v", err)
+	}
+	args.GroupID = "NonExistingGroup"
+	err = cache.HasGroup(ctx, args, &rply)
+	if err != nil {
+		t.Errorf("expected no error, got %v", err)
+	}
+	if rply {
+		t.Errorf("expected group 'NonExistingGroup' to not exist, but HasGroup returned true")
+	}
+}
+
+func TestCacheSv1RemoveGroup(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	data := engine.NewInternalDB(nil, nil, true, nil)
+	cfg.ApierCfg().CachesConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)}
+	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
+	ch := engine.NewCacheS(cfg, dm, nil)
+	cache := NewCacheSv1(ch)
+	ctx := context.Background()
+	args := &utils.ArgsGetGroupWithAPIOpts{}
+	var rply string
+	err := cache.RemoveGroup(ctx, args, &rply)
+	if err != nil {
+		t.Errorf("expected no error, got %v", err)
+	}
+	if rply == "" {
+		t.Errorf("expected a non-empty reply after removing group, but got an empty string")
+	}
+	args.GroupID = "NonExistingGroup"
+	err = cache.RemoveGroup(ctx, args, &rply)
+	if err != nil {
+		t.Errorf("expected no error, got %v", err)
+	}
+	if rply == "" {
+		t.Errorf("expected a non-empty reply for non-existing group, but got an empty string")
+	}
+}
+
+func TestCacheSv1Ping(t *testing.T) {
+	cache := &CacheSv1{}
+	ctx := context.Background()
+	ign := &utils.CGREvent{}
+	var reply string
+	err := cache.Ping(ctx, ign, &reply)
+	if err != nil {
+		t.Errorf("expected no error, got %v", err)
+	}
+	if reply != utils.Pong {
+		t.Errorf("expected reply to be '%s', but got '%s'", utils.Pong, reply)
+	}
+	err = cache.Ping(nil, ign, &reply)
+	if err != nil {
+		t.Errorf("expected no error with nil context, got %v", err)
+	}
+	if reply != utils.Pong {
+		t.Errorf("expected reply to be '%s' with nil context, but got '%s'", utils.Pong, reply)
+	}
+}
+
+func TestCacheSv1ReplicateSet(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	data := engine.NewInternalDB(nil, nil, true, nil)
+	cfg.ApierCfg().CachesConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)}
+	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
+	ch := engine.NewCacheS(cfg, dm, nil)
+	cache := NewCacheSv1(ch)
+	ctx := context.Background()
+	args := &utils.ArgCacheReplicateSet{}
+	var reply string
+	err := cache.ReplicateSet(ctx, args, &reply)
+	if err != nil {
+		t.Errorf("expected no error, got %v", err)
+	}
+	if reply == "" {
+		t.Errorf("expected a non-empty reply after replicating set, but got an empty string")
+	}
+	err = cache.ReplicateSet(nil, args, &reply)
+	if err != nil {
+		t.Errorf("expected no error with nil context, got %v", err)
+	}
+}
+
+func TestCacheSv1ReplicateRemove(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	data := engine.NewInternalDB(nil, nil, true, nil)
+	cfg.ApierCfg().CachesConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)}
+	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
+	ch := engine.NewCacheS(cfg, dm, nil)
+	cache := NewCacheSv1(ch)
+	ctx := context.Background()
+	args := &utils.ArgCacheReplicateRemove{}
+	var reply string
+	err := cache.ReplicateRemove(ctx, args, &reply)
+	if err != nil {
+		t.Errorf("expected no error, got %v", err)
+	}
+	if reply == "" {
+		t.Errorf("expected a non-empty reply after removing cache key, but got an empty string")
+	}
+	err = cache.ReplicateRemove(nil, args, &reply)
+	if err != nil {
+		t.Errorf("expected no error with nil context, got %v", err)
+	}
+}
+
+func TestCacheSv1Call(t *testing.T) {
+	cache := &CacheSv1{}
+	ctx := context.Background()
+	serviceMethod := "TestMethod"
+	args := "TestArg"
+	var reply string
+	err := cache.Call(ctx, serviceMethod, args, &reply)
+	err = cache.Call(ctx, serviceMethod, 123, &reply)
+	if err == nil {
+		t.Errorf("expected an error with invalid arguments, but got nil")
+	}
+	err = cache.Call(ctx, "UnknownMethod", args, &reply)
+	if err == nil {
+		t.Errorf("expected an error with unknown service method, but got nil")
 	}
 }
