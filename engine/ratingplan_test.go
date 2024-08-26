@@ -451,3 +451,16 @@ func BenchmarkRatingPlanRestore(b *testing.B) {
 		dm.GetRatingPlan(rp.Id, true, utils.NonTransactional)
 	}
 }
+
+func TestEqual(t *testing.T) {
+	rp1 := &RatingPlan{Id: "1"}
+	rp2 := &RatingPlan{Id: "1"}
+	if !rp1.Equal(rp2) {
+		t.Errorf("expected RatingPlan instances with the same Id to be equal")
+	}
+	rp1 = &RatingPlan{Id: "1"}
+	rp2 = &RatingPlan{Id: "2"}
+	if rp1.Equal(rp2) {
+		t.Errorf("expected RatingPlan instances with different Ids to be not equal")
+	}
+}
