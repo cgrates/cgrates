@@ -697,3 +697,168 @@ func TestDataDBMockSetActionsDrv(t *testing.T) {
 		t.Errorf("expected error %v, but got %v", expectedError, err)
 	}
 }
+
+func TestRemoveAttributeProfileDrvNotImplemented(t *testing.T) {
+	dbM := &DataDBMock{}
+	err := dbM.RemoveAttributeProfileDrv("Profile", "Drv")
+	if err != utils.ErrNotImplemented {
+		t.Errorf("expected error %v, but got %v", utils.ErrNotImplemented, err)
+	}
+}
+
+func TestSetAttributeProfileDrvNotImplemented(t *testing.T) {
+	dbM := &DataDBMock{}
+	Profile := &AttributeProfile{}
+	err := dbM.SetAttributeProfileDrv(Profile)
+	if err != utils.ErrNotImplemented {
+		t.Errorf("expected error %v, but got %v", utils.ErrNotImplemented, err)
+	}
+}
+
+func TestGetAttributeProfileDrvNotImplemented(t *testing.T) {
+	dbM := &DataDBMock{}
+	profile, err := dbM.GetAttributeProfileDrv("Profile", "Drv")
+	if profile != nil {
+		t.Errorf("expected profile to be nil, but got %v", profile)
+	}
+	if err != utils.ErrNotImplemented {
+		t.Errorf("expected error %v, but got %v", utils.ErrNotImplemented, err)
+	}
+}
+
+func TestGetThresholdProfileDrvNotImplemented(t *testing.T) {
+	dbM := &DataDBMock{
+		GetThresholdProfileDrvF: nil,
+	}
+	profile, err := dbM.GetThresholdProfileDrv("Tenant", "ID")
+	if profile != nil {
+		t.Errorf("expected profile to be nil, but got %v", profile)
+	}
+	if err != utils.ErrNotImplemented {
+		t.Errorf("expected error %v, but got %v", utils.ErrNotImplemented, err)
+	}
+}
+
+func TestRemStatQueueDrvNotImplemented(t *testing.T) {
+	dbM := &DataDBMock{}
+	err := dbM.RemStatQueueDrv("Tenant", "ID")
+	if err != utils.ErrNotImplemented {
+		t.Errorf("expected error %v, but got %v", utils.ErrNotImplemented, err)
+	}
+}
+
+func TestSetStatQueueDrvNotImplemented(t *testing.T) {
+	dbM := &DataDBMock{}
+	dummySSQ := &StoredStatQueue{}
+	dummySQ := &StatQueue{}
+	err := dbM.SetStatQueueDrv(dummySSQ, dummySQ)
+	if err != utils.ErrNotImplemented {
+		t.Errorf("expected error %v, but got %v", utils.ErrNotImplemented, err)
+	}
+}
+
+func TestGetStatQueueDrvNotImplemented(t *testing.T) {
+	dbM := &DataDBMock{}
+	sq, err := dbM.GetStatQueueDrv("Tenant", "ID")
+	if sq != nil {
+		t.Errorf("expected StatQueue to be nil, but got %v", sq)
+	}
+	if err != utils.ErrNotImplemented {
+		t.Errorf("expected error %v, but got %v", utils.ErrNotImplemented, err)
+	}
+}
+
+func TestRemoveTrendDrvNotImplemented(t *testing.T) {
+	dbM := &DataDBMock{}
+	err := dbM.RemoveTrendDrv("dummyTenant", "dummyID")
+	if err != utils.ErrNotImplemented {
+		t.Errorf("expected error %v, but got %v", utils.ErrNotImplemented, err)
+	}
+}
+
+func TestSetTrendDrvNotImplemented(t *testing.T) {
+	dbM := &DataDBMock{}
+	tTrend := &Trend{}
+	err := dbM.SetTrendDrv(tTrend)
+	if err != utils.ErrNotImplemented {
+		t.Errorf("expected error %v, but got %v", utils.ErrNotImplemented, err)
+	}
+}
+
+func TestGetTrendDrvNotImplemented(t *testing.T) {
+	dbM := &DataDBMock{}
+	trend, err := dbM.GetTrendDrv("Tenant", "ID")
+	if trend != nil {
+		t.Errorf("expected Trend to be nil, but got %v", trend)
+	}
+	if err != utils.ErrNotImplemented {
+		t.Errorf("expected error %v, but got %v", utils.ErrNotImplemented, err)
+	}
+}
+
+func TestRemTrendProfileDrv(t *testing.T) {
+	dbM := &DataDBMock{
+		RemTrendProfileDrvF: nil,
+	}
+	err := dbM.RemTrendProfileDrv("Tenant", "ID")
+	if err != utils.ErrNotImplemented {
+		t.Errorf("Expected error %v, but got %v", utils.ErrNotImplemented, err)
+	}
+	dbM.RemTrendProfileDrvF = func(tenant, id string) error {
+		return utils.ErrNotImplemented
+	}
+	err = dbM.RemTrendProfileDrv("Tenant", "ID")
+	if err != utils.ErrNotImplemented {
+		t.Errorf("Expected error %v, but got %v", utils.ErrNotImplemented, err)
+	}
+}
+
+func TestGetTrendProfileDrv(t *testing.T) {
+	dbM := &DataDBMock{}
+	tenant := "Tenant"
+	id := "ID"
+	dummyTrendProfile := &TrendProfile{}
+	dbM.GetTrendProfileDrvF = nil
+	sg, err := dbM.GetTrendProfileDrv(tenant, id)
+	if sg != nil {
+		t.Errorf("Expected TrendProfile to be nil, but got %v", sg)
+	}
+	if err != utils.ErrNotImplemented {
+		t.Errorf("Expected error %v, but got %v", utils.ErrNotImplemented, err)
+	}
+	dbM.GetTrendProfileDrvF = func(tenant, id string) (*TrendProfile, error) {
+		return dummyTrendProfile, nil
+	}
+	sg, err = dbM.GetTrendProfileDrv(tenant, id)
+	if err == nil {
+		t.Errorf("NOT_IMPLEMENTED")
+	}
+}
+
+func TestRemoveResourceDrv(t *testing.T) {
+	dbM := &DataDBMock{}
+	err := dbM.RemoveResourceDrv("Tenant", "ID")
+	if err != utils.ErrNotImplemented {
+		t.Errorf("expected error %v, but got %v", utils.ErrNotImplemented, err)
+	}
+}
+
+func TestSetTimingDrv(t *testing.T) {
+	dbM := &DataDBMock{}
+	dummyTiming := &utils.TPTiming{}
+	err := dbM.SetTimingDrv(dummyTiming)
+	if err != utils.ErrNotImplemented {
+		t.Errorf("expected error %v, but got %v", utils.ErrNotImplemented, err)
+	}
+}
+
+func TestGetLoadHistory(t *testing.T) {
+	dbM := &DataDBMock{}
+	instances, err := dbM.GetLoadHistory(0, false, "Param")
+	if instances != nil {
+		t.Errorf("expected instances to be nil, but got %v", instances)
+	}
+	if err != utils.ErrNotImplemented {
+		t.Errorf("expected error %v, but got %v", utils.ErrNotImplemented, err)
+	}
+}

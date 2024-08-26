@@ -334,3 +334,21 @@ func TestEngineTableNameDispatcherHostMdl(t *testing.T) {
 		t.Errorf("Expected TableName(): %s, got: %s", got, got)
 	}
 }
+
+func TestTableName(t *testing.T) {
+	expectedTableName := utils.TBLTPRankings
+	rankingsMdl := &RankingsMdl{}
+	actualTableName := rankingsMdl.TableName()
+	if actualTableName != expectedTableName {
+		t.Errorf("expected %s, but got %s", expectedTableName, actualTableName)
+	}
+}
+
+func TestTrendsTableName(t *testing.T) {
+	expectedTableName := utils.TBLTPTrends
+	trendsMdl := &TrendsMdl{}
+	actualTableName := trendsMdl.TableName()
+	if actualTableName != expectedTableName {
+		t.Errorf("expected %s, but got %s", expectedTableName, actualTableName)
+	}
+}
