@@ -1,38 +1,63 @@
 ---
+- name: Check if PJSUA is installed and get version
+  ansible.builtin.shell:
+    cmd: pjsua --version | grep 'PJ_VERSION' | awk '{print $NF}'
+  register: installed_pjsua_version
+  ignore_errors: true
+  changed_when: false
+
 - name: Install PJSUA dependencies
-  become: yes
+  become: true
   ansible.builtin.package:
     name: '{{ pjsua_dependencies }}'
     state: present
     update_cache: yes
-    cache_valid_time: 86400
+  when: installed_pjsua_version.stdout != pjsua_version
 
 - name: Download PJSUA
   ansible.builtin.get_url:
-    url: "{{ pjsua_url }}"
-    dest: "{{ tmp_dir }}/{{ pjsua_version }}.tar.gz"
+    url: '{{ pjsua_url }}'
+    dest: '{{ pjsua_tmp_install_dir }}/{{ pjsua_version }}.tar.gz'
+  when: installed_pjsua_version.stdout != pjsua_version
 
 - name: Unzip PJSUA
-  become: yes
+  become: true
   ansible.builtin.unarchive:
-    src: "{{ tmp_dir }}/{{ pjsua_version }}.tar.gz"
-    dest: "{{ tmp_dir }}"
+    src: '{{ pjsua_tmp_install_dir }}/{{ pjsua_version }}.tar.gz'
+    dest: '{{ pjsua_tmp_install_dir }}'
     remote_src: yes
+  when: installed_pjsua_version.stdout != pjsua_version
 
 - name: Install PJSUA
-  become: yes
+  become: true
   ansible.builtin.shell:
     cmd: './configure CFLAGS="$CFLAGS -fPIC" && make dep && make && make install'
-    chdir: '{{ tmp_dir }}/pjproject-{{ pjsua_version }}'
+    chdir: '{{ pjsua_tmp_install_dir }}/pjproject-{{ pjsua_version }}'
+  when: installed_pjsua_version.stdout != pjsua_version
 
-- name: Copy PJSUA into /usr/bin
-  become: yes
-  ansible.builtin.command:
-    cmd: 'cp pjsua-x86_64-unknown-linux-gnu /usr/bin/pjsua'
-    chdir: '{{ tmp_dir }}/pjproject-{{ pjsua_version }}/pjsip-apps/bin'
+- name: Copy PJSUA into configured bin path
+  become: true
+  ansible.builtin.copy:
+    src: '{{ pjsua_tmp_install_dir }}/pjproject-{{ pjsua_version }}/pjsip-apps/bin/pjsua-x86_64-unknown-linux-gnu'
+    dest: '{{ pjsua_bin_path }}/pjsua'
+    remote_src: yes
+    mode: '0755'
+  when: installed_pjsua_version.stdout != pjsua_version
 
 - name: Cleanup temporary PJSUA files
-  become: yes
+  become: true
   ansible.builtin.file:
-    path: '{{ tmp_dir }}/pjproject-{{ pjsua_version }}'
+    path: '{{ pjsua_tmp_install_dir }}/pjproject-{{ pjsua_version }}'
     state: absent
+  when: pjsua_post_install_cleanup | bool
+
+- name: Deploy pjsua helper scripts
+  become: true
+  ansible.builtin.copy:
+    src: '{{ item }}'
+    dest: '{{ pjsua_bin_path }}/{{ item }}'
+    mode: '0755'
+  loop:
+    - pjsua_call
+    - pjsua_listen
+  when: pjsua_helper_scripts | bool

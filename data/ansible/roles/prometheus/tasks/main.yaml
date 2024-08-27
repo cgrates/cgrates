@@ -1,0 +1,86 @@
+---
+- name: Create prometheus user
+  become: true
+  ansible.builtin.user:
+    name: '{{ prometheus_user }}'
+    state: present
+    system: true
+    createhome: no
+
+- name: Check current Prometheus version
+  ansible.builtin.command: "{{ prometheus_install_dir }}/prometheus --version"
+  register: prometheus_current_version
+  ignore_errors: true
+  changed_when: false
+
+- name: Remove existing Prometheus installation if version differs
+  become: true
+  ansible.builtin.file:
+    path: "{{ prometheus_install_dir }}"
+    state: absent
+  when: prometheus_current_version.rc == 0 and prometheus_version not in prometheus_current_version.stdout
+
+- name: Create prometheus data and config directories
+  become: true
+  ansible.builtin.file:
+    path: '{{ item }}'
+    state: directory
+    owner: '{{ prometheus_user }}'
+    group: '{{ prometheus_user }}'
+    mode: '0755'
+  loop:
+    - '{{ prometheus_config_dir }}'
+    - '{{ prometheus_data_dir }}'
+    - '{{ prometheus_install_dir }}'
+
+- name: Download and extract prometheus
+  become: true
+  ansible.builtin.unarchive:
+    src: 'https://github.com/prometheus/prometheus/releases/download/v{{ prometheus_version }}/prometheus-{{ prometheus_version }}.linux-amd64.tar.gz'
+    dest: '{{ prometheus_install_dir }}'
+    remote_src: true
+    owner: '{{ prometheus_user }}'
+    group: '{{ prometheus_user }}'
+    extra_opts: [--strip-components=1]
+  notify: Restart prometheus
+  when: prometheus_current_version.rc != 0 or prometheus_version not in prometheus_current_version.stdout
+
+- name: Handle prometheus config file
+  block:
+    - name: Copy file (if not .j2)
+      become: true
+      ansible.builtin.copy:
+        src: '{{ prometheus_config_file }}'
+        dest: '{{ prometheus_config_dir }}/{{ prometheus_config_file | basename }}'
+        owner: '{{ prometheus_user }}'
+        group: '{{ prometheus_user }}'
+        mode: '0644'
+      when: not prometheus_config_file.endswith('.j2')
+
+    - name: Template file (if .j2)
+      become: true
+      ansible.builtin.template:
+        src: '{{ prometheus_config_file }}'
+        dest: '{{ prometheus_config_dir }}/{{ prometheus_config_file | basename | splitext | first }}' # cut .j2 extension
+        owner: '{{ prometheus_user }}'
+        group: '{{ prometheus_user }}'
+        mode: '0644'
+      when: prometheus_config_file.endswith('.j2')
+  when: prometheus_config_file is defined
+  notify: Restart prometheus
+
+- name: Create prometheus systemd service file
+  become: true
+  ansible.builtin.template:
+    src: prometheus.service.j2
+    dest: /etc/systemd/system/prometheus.service
+    mode: '0644'
+  notify: Restart prometheus
+
+- name: Ensure prometheus service is in desired state
+  become: true
+  ansible.builtin.systemd_service:
+    name: prometheus
+    state: '{{ prometheus_service_state }}'
+    enabled: '{{ prometheus_service_enabled }}'
+  when: prometheus_service_state == 'stopped' or prometheus_service_enabled == false

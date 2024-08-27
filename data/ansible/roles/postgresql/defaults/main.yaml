@@ -1,6 +1,6 @@
 ---
-postgresql_version: "postgresql"
-postgresql_repo: "http://apt.postgresql.org/pub/repos/apt"
-postgresql_key_url: "https://www.postgresql.org/media/keys/ACCC4CF8.asc"
-postgresql_service_state: "started"
+postgresql_version: postgresql
+postgresql_repo: http://apt.postgresql.org/pub/repos/apt
+postgresql_key_url: https://www.postgresql.org/media/keys/ACCC4CF8.asc
+postgresql_service_state: started
 postgresql_service_enabled: false

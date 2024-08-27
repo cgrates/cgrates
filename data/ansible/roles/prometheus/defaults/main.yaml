@@ -1,0 +1,13 @@
+---
+prometheus_version: 2.53.1
+prometheus_user: prometheus
+prometheus_install_dir: /opt/prometheus
+prometheus_config_dir: /etc/prometheus
+prometheus_data_dir: /var/lib/prometheus
+
+prometheus_web_listen_address: 0.0.0.0:9090
+
+prometheus_service_enabled: false
+prometheus_service_state: stopped
+
+prometheus_config_file: '{{ prometheus_install_dir }}/prometheus.yml' # supports either the path to a file or a j2 template

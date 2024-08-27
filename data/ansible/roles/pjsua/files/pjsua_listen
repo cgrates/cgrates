@@ -1,0 +1,107 @@
+#!/bin/bash
+
+# Default values
+HOST=127.0.0.1
+LOCAL_PORT=$(comm -23 <(seq 32768 60999 | sort) <(ss -Htan | awk '{print $4}' | cut -d':' -f2 | sort -u) | shuf | head -n 1)
+REGISTRAR_PORT=5060
+PASSWORD="CGRateS.org"
+VERBOSE=false
+DRYRUN=false
+
+# Parse command line options
+OPTS=$(getopt -o a:H:p:r:P:vDh --long accounts:,host:,port:,registrar:,passwd:,verbose,dryrun,help -n "$(basename "$0")" -- "$@")
+if [ $? -ne 0 ]; then
+    echo "Failed to parse options." >&2
+    exit 1
+fi
+
+eval set -- "$OPTS"
+
+while true; do
+    case "$1" in
+        -a|--accounts)
+            IFS=',' read -r -a accounts <<< "$2"
+            shift 2
+            ;;
+        -H|--host)
+            HOST=$2
+            shift 2
+            ;;
+        -p|--port)
+            LOCAL_PORT="$2"
+            shift 2
+            ;;
+        -r|--registrar)
+            REGISTRAR_PORT="$2"
+            shift 2
+            ;;
+        -P|--passwd)
+            PASSWORD="$2"
+            shift 2
+            ;;
+        -v|--verbose)
+            VERBOSE=true
+            shift
+            ;;
+        -D|--dryrun)
+            DRYRUN=true
+            VERBOSE=true
+            shift
+            ;;
+        -h|--help)
+            echo "Usage: $(basename "$0") [OPTIONS]"
+            echo
+            echo "Options:"
+            echo "-a, --accounts <acc1,acc2,...>    List of accounts to register"
+            echo "-H, --host <host>                 Set the host of account"
+            echo "                                  Defaults to 127.0.0.1"
+            echo "-p, --port <port>                 Set the PJSUA listener port"
+            echo "                                  Defaults to a random one"
+            echo "-r, --registrar <port>            Set the registrar port"
+            echo "                                  Default: ${REGISTRAR_PORT}"
+            echo "-P, --passwd <password>           Set account password"
+            echo "-v, --verbose                     Print command before executing"
+            echo "-D, --dryrun                      Print command without executing"
+            echo "-h, --help                        Display this usage information"
+
+            shift
+            exit 1
+            ;;
+        --)
+            shift
+            break
+            ;;
+        *)
+            echo "Internal error!"
+            exit 1
+            ;;
+    esac
+done
+
+# Check for missing accounts
+if [ ${#accounts[@]} -eq 0 ]; then
+    echo "No accounts specified. Use -a or --accounts to specify comma-separated accounts."
+    exit 1
+fi
+
+# Start building the command
+cmd="pjsua --local-port=${LOCAL_PORT} --null-audio --auto-answer=200 --max-calls=4 --app-log-level=0"
+
+# Add accounts
+first=true
+for acc in "${accounts[@]}"; do
+    if [ "${first}" != true ]; then
+        cmd+=" --next-account"
+    fi
+    first=false
+    cmd+=" --id=sip:${acc}@${HOST} --registrar=sip:${HOST}:${REGISTRAR_PORT} --username=${acc} --password=${PASSWORD} --realm=*"
+done
+
+# Execute the command
+if [ "${VERBOSE}" = true ]; then
+    echo "Executing: ${cmd}"
+fi
+if [ "${DRYRUN}" = false ]; then
+    ${cmd}
+fi
+

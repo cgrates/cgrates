@@ -1,0 +1,119 @@
+---
+- name: Create grafana user
+  become: true
+  ansible.builtin.user:
+    name: '{{ grafana_user }}'
+    state: present
+    system: true
+    createhome: false
+
+- name: Check current Grafana version
+  ansible.builtin.command: "{{ grafana_install_dir }}/bin/grafana --version"
+  register: grafana_current_version
+  ignore_errors: true
+  changed_when: false
+
+- name: Remove existing Grafana installation if version differs
+  become: true
+  ansible.builtin.file:
+    path: "{{ grafana_install_dir }}"
+    state: absent
+  when: grafana_current_version.rc == 0 and grafana_version not in grafana_current_version.stdout
+
+- name: Create grafana directories
+  become: true
+  ansible.builtin.file:
+    path: '{{ item }}'
+    state: directory
+    owner: '{{ grafana_user }}'
+    group: '{{ grafana_user }}'
+    mode: '0755'
+  loop:
+    - '{{ grafana_install_dir }}'
+    - '{{ grafana_data_dir }}'
+    - '{{ grafana_dashboards_dir }}'
+    - '{{ grafana_logs_dir }}'
+    - '{{ grafana_config_dir }}'
+    - '{{ grafana_provisioning_dir }}/dashboards'
+    - '{{ grafana_provisioning_dir }}/datasources'
+
+- name: Download and extract grafana
+  become: true
+  ansible.builtin.unarchive:
+    src: 'https://dl.grafana.com/oss/release/grafana-{{ grafana_version }}.linux-amd64.tar.gz'
+    dest: '{{ grafana_install_dir }}'
+    remote_src: true
+    owner: '{{ grafana_user }}'
+    group: '{{ grafana_user }}'
+    extra_opts: [--strip-components=1]
+  notify: Restart grafana
+  when: grafana_current_version.rc != 0 or grafana_version not in grafana_current_version.stdout
+
+- name: Handle grafana configuration file
+  ansible.builtin.include_tasks: handle_file.yaml
+  vars:
+    file_src: '{{ grafana_config_file }}'
+    file_dest: '{{ grafana_config_dir }}/grafana.ini'
+  when: grafana_config_file is defined
+
+- name: Handle grafana dashboard config file
+  ansible.builtin.include_tasks: handle_file.yaml
+  vars:
+    file_src: '{{ grafana_dashboard_config_file }}'
+    file_dest: '{{ grafana_provisioning_dir }}/dashboards/{{ grafana_dashboard_config_file | basename | regex_replace("\.j2$", "") }}'
+  when: grafana_dashboard_config_file is defined
+
+- name: Handle grafana datasource config file
+  ansible.builtin.include_tasks: handle_file.yaml
+  vars:
+    file_src: '{{ grafana_datasource_config_file }}'
+    file_dest: '{{ grafana_provisioning_dir }}/datasources'
+  when: grafana_datasource_config_file is defined
+
+- name: Import grafana dashboards
+  become: true
+  block:
+    - name: Import grafana dashboards from files
+      ansible.builtin.copy:
+        src: '{{ item.path }}'
+        dest: '{{ grafana_dashboards_dir }}'
+        owner: '{{ grafana_user }}'
+        group: '{{ grafana_user }}'
+        mode: '0644'
+      loop: "{{ grafana_dashboard_sources | selectattr('type', '==', 'file') | list }}"
+
+    - name: Download grafana dashboards from URLs
+      ansible.builtin.get_url:
+        url: '{{ item.path }}'
+        dest: '{{ grafana_dashboards_dir }}/{{ item.alias }}'
+        owner: '{{ grafana_user }}'
+        group: '{{ grafana_user }}'
+        mode: '0644'
+      loop: "{{ grafana_dashboard_sources | selectattr('type', '==', 'url') | list }}"
+
+    - name: Modify datasource in grafana dashboards # see https://github.com/grafana/grafana/issues/10786
+      ansible.builtin.replace:
+        path: "{{ grafana_dashboards_dir }}/{{ item.alias if item.type == 'url' else item.path | basename }}"
+        regexp: '"datasource":\s*(".*"|\{[\s\S]*?\})'
+        replace: '"datasource": null'
+      loop: "{{ grafana_dashboard_sources }}"
+      when: item.modify_datasources | default(false)
+  when: grafana_dashboard_sources is defined and grafana_dashboard_sources | length > 0
+  notify: Restart grafana
+
+- name: Create grafana systemd service file
+  become: true
+  ansible.builtin.template:
+    src: grafana.service.j2
+    dest: /etc/systemd/system/grafana.service
+    mode: '0644'
+  notify: Restart grafana
+
+- name: Ensure grafana service is in desired state
+  become: true
+  ansible.builtin.systemd_service:
+    name: grafana
+    state: '{{ grafana_service_state }}'
+    enabled: '{{ grafana_service_enabled }}'
+    daemon_reload: true
+  when: grafana_service_state == 'stopped' or not grafana_service_enabled
