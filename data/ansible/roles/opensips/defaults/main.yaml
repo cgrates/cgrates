@@ -1,0 +1,18 @@
+---
+opensips_version: 3.5
+opensips_release_type: nightly # releases or nightly
+opensips_service_enabled: false
+opensips_service_state: stopped
+opensips_cfg_path: '' # path to a custom cfg file to replace the default one (do nothing if empty)
+opensips_dict_path: '' # add dict file found at specified path to /etc/opensips
+opensips_modules:
+  - opensips-cgrates-module
+  # - opensips-auth-modules
+  # - opensips-diameter-module
+  # - opensips-json-module
+  # - opensips-mysql-module
+opensips_cfg_replacements: []
+#   - { before: 'regex_pattern1', after: 'replacement1' }
+#   - { before: 'regex_pattern2', after: 'replacement2' }
+opensips_dependencies: []
+#   - mariadb-server

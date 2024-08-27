@@ -1,0 +1,58 @@
+---
+- name: Check if SIPp is installed and get version
+  ansible.builtin.shell:
+    cmd: sipp -v | grep 'SIPp v' | awk '{print $2}' | sed 's/.$//'
+  register: sipp_installed_version
+  ignore_errors: true
+  changed_when: false
+
+# - name: Debug SIPp version
+#   debug:
+#     msg: "Installed SIPp version is '{{ sipp_installed_version.stdout }}'"
+
+- name: Install dependencies for building SIPp
+  become: true
+  ansible.builtin.apt:
+    name: '{{ sipp_dependencies }}'
+    state: present
+  when: sipp_installed_version.stdout != sipp_version and ansible_os_family == "Debian"
+
+- name: Clone SIPp repository
+  ansible.builtin.git:
+    repo: https://github.com/SIPp/sipp.git
+    dest: '{{ sipp_clone_path }}/sipp'
+    version: '{{ sipp_version }}'
+  when: sipp_installed_version.stdout != sipp_version
+
+- name: Build SIPp
+  block:
+    - name: Create build directory
+      ansible.builtin.file:
+        path: '{{ sipp_clone_path }}/sipp/build'
+        state: directory
+
+    - name: Run CMake
+      ansible.builtin.command:
+        cmd: cmake .. {{ sipp_cmake_flags }}
+        chdir: '{{ sipp_clone_path }}/sipp/build'
+
+    - name: Run Make
+      ansible.builtin.command:
+        cmd: make
+        chdir: '{{ sipp_clone_path }}/sipp/build'
+  when: sipp_installed_version.stdout != sipp_version
+
+- name: Move SIPp binary to the installation path
+  become: true
+  ansible.builtin.copy:
+    src: '{{ sipp_clone_path }}/sipp/build/sipp'
+    dest: '{{ sipp_bin_path }}'
+    remote_src: yes
+    mode: '0755'
+  when: sipp_installed_version.stdout != sipp_version
+
+- name: Remove SIPp source directory
+  ansible.builtin.file:
+    path: '{{ sipp_clone_path }}/sipp'
+    state: absent
+  when: sipp_installed_version.stdout != sipp_version and sipp_remove_source

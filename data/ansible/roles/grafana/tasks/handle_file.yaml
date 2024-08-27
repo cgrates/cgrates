@@ -1,0 +1,22 @@
+---
+- name: Copy file (if not .j2)
+  become: true
+  ansible.builtin.copy:
+    src: '{{ file_src }}'
+    dest: '{{ file_dest }}'
+    owner: '{{ grafana_user }}'
+    group: '{{ grafana_user }}'
+    mode: '0644'
+  when: not file_src.endswith('.j2')
+  notify: Restart grafana
+
+- name: Template file (if .j2)
+  become: true
+  ansible.builtin.template:
+    src: '{{ file_src }}'
+    dest: '{{ file_dest }}'
+    owner: '{{ grafana_user }}'
+    group: '{{ grafana_user }}'
+    mode: '0644'
+  when: file_src.endswith('.j2')
+  notify: Restart grafana

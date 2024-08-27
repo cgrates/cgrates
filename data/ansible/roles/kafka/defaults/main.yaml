@@ -10,7 +10,7 @@ kafka_user: kafka
 kafka_group: kafka
 
 kafka_root_dir: /opt
-kafka_dir: "{{ kafka_root_dir }}/kafka"
+kafka_dir: '{{ kafka_root_dir }}/kafka'
 kafka_unit_path: /lib/systemd/system/kafka.service
 
 # Start kafka after installation

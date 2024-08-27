@@ -6,7 +6,7 @@
   changed_when: false
 
 - name: Remove current installation.
-  become: yes
+  become: true
   file:
     state: absent
     path: /usr/local/go
@@ -16,17 +16,17 @@
     - go_version not in go_version_result.stdout
 
 - name: Download Go.
-  become: yes
+  become: true
   get_url:
-    url: "{{ go_download_url }}"
+    url: '{{ go_download_url }}'
     dest: /usr/local/src/{{ go_tarball }}
-    checksum: "sha256:{{ go_checksum }}"
+    checksum: 'sha256:{{ go_checksum }}'
   when:
     - install_go | bool
     - (go_version_result is failed or go_version not in go_version_result.stdout)
 
 - name: Extract Go.
-  become: yes
+  become: true
   unarchive:
     src: /usr/local/src/{{ go_tarball }}
     dest: /usr/local
@@ -36,7 +36,7 @@
     - (go_version_result is failed or go_version not in go_version_result.stdout)
 
 - name: Add Go to to system-wide $PATH.
-  become: yes
+  become: true
   copy:
     dest: /etc/profile.d/go-path.sh
     content: |-

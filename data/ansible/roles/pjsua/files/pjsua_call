@@ -1,0 +1,107 @@
+#!/bin/bash
+
+# Default values
+HOST=127.0.0.1
+LOCAL_PORT=$(comm -23 <(seq 32768 60999 | sort) <(ss -Htan | awk '{print $4}' | cut -d':' -f2 | sort -u) | shuf | head -n 1)
+REGISTRAR_PORT=5060
+PASSWORD="CGRateS.org"
+VERBOSE=false
+DRYRUN=false
+
+# Parse command line options
+OPTS=$(getopt -o f:t:d:p:r:P:vDh --long from:,to:,dur:,port:,registrar:,passwd:,verbose,dryrun,help -n "$(basename "$0")" -- "$@")
+if [ $? -ne 0 ]; then
+    echo "Failed to parse options." >&2
+    exit 1
+fi
+
+eval set -- "$OPTS"
+
+while true; do
+    case "$1" in
+        -f|--from)
+            from="$2"
+            shift 2
+            ;;
+        -t|--to)
+            to="$2"
+            shift 2
+            ;;
+        -d|--dur)
+            duration="$2"
+            shift 2
+            ;;
+        -H|--host)
+            HOST=$2
+            shift 2
+            ;;
+        -p|--port)
+            LOCAL_PORT="$2"
+            shift 2
+            ;;
+        -r|--registrar)
+            REGISTRAR_PORT="$2"
+            shift 2
+            ;;
+        -P|--passwd)
+            PASSWORD="$2"
+            shift 2
+            ;;
+        -v|--verbose)
+            VERBOSE=true
+            shift
+            ;;
+        -D|--dryrun)
+            DRYRUN=true
+            VERBOSE=true
+            shift
+            ;;
+        -h|--help)
+            echo "Usage: $(basename "$0") [OPTIONS]"
+            echo
+            echo "Options:"
+            echo "-f, --from <caller>       ID of calling party"
+            echo "-t, --to <callee>         ID of called party"
+            echo "-d, --dur <duration>      Duration of the call"
+            echo "-H, --host <host>         Set the host of accounts"
+            echo "                          Defaults to 127.0.0.1"
+            echo "-p, --port <port>         Set the call port"
+            echo "                          Defaults to a random one"
+            echo "-r, --registrar <port>    Set the registrar port"
+            echo "                          Default: ${REGISTRAR_PORT}"
+            echo "-P, --passwd <password>   Input account password"
+            echo "-v, --verbose             Print command before executing"
+            echo "-D, --dryrun              Print command without executing"
+            echo "-h, --help                Display this usage information"
+
+            shift
+            exit 1
+            ;;
+        --)
+            shift
+            break
+            ;;
+        *)
+            echo "Internal error!"
+            exit 1
+            ;;
+    esac
+done
+
+# Check for missing options
+if [ -z "$from" ] || [ -z "$to" ] || [ -z "$duration" ]; then
+    echo "Mandatory options are missing: -f/--from, -t/--to, -d/--dur"
+    exit 1
+fi
+
+# Build the command
+cmd="pjsua --null-audio --app-log-level=0 --local-port=${LOCAL_PORT} --duration=${duration} --outbound=sip:${HOST}:${REGISTRAR_PORT}"
+cmd+=" --id=sip:${from}@${HOST} --username=${from} --password=${PASSWORD} --realm=* sip:${to}@${HOST}"
+
+# Execute the command
+if [ "${VERBOSE}" = true ]; then
+    echo "Executing: ${cmd}"
+fi
+if [ "${DRYRUN}" = false ]; then
+    ${cmd}
+fi

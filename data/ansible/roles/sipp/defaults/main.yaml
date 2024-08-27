@@ -1,0 +1,13 @@
+---
+sipp_clone_path: '{{ ansible_env.HOME }}'
+sipp_bin_path: /usr/local/bin
+sipp_cmake_flags: '' # '-DUSE_SSL=1 -DUSE_SCTP=1 -DUSE_PCAP=1 -DUSE_GSL=1'
+sipp_remove_source: true
+sipp_version: v3.7.2
+sipp_dependencies:
+  - git
+  - cmake
+  - make
+  - gcc
+  - g++
+  - libncurses-dev
