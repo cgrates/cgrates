@@ -18,6 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"encoding/json"
 	"testing"
 	"time"
 
@@ -548,5 +549,20 @@ func TestEngineLessRis(t *testing.T) {
 	}
 	if ris.Less(0, 2) {
 		t.Errorf("Expected first element not to be less than the third one")
+	}
+}
+
+func TestRatingInfosString(t *testing.T) {
+	ratingInfos := RatingInfos{
+		{MatchedSubject: "Info1", RatingPlanId: "Value1"},
+		{MatchedSubject: "Info2", RatingPlanId: "Value2"},
+	}
+	expectedJSON, err := json.MarshalIndent(ratingInfos, "", " ")
+	if err != nil {
+		t.Fatalf("Failed to marshal expected JSON: %v", err)
+	}
+	result := ratingInfos.String()
+	if result != string(expectedJSON) {
+		t.Errorf("Expected %s, but got %s", string(expectedJSON), result)
 	}
 }
