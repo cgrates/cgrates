@@ -862,3 +862,245 @@ func TestGetLoadHistory(t *testing.T) {
 		t.Errorf("expected error %v, but got %v", utils.ErrNotImplemented, err)
 	}
 }
+
+func TestRemoveActionsDrv(t *testing.T) {
+	dbMock := &DataDBMock{}
+	err := dbMock.RemoveActionsDrv("Drv")
+	if err != utils.ErrNotImplemented {
+		t.Errorf("expected error %v, got %v", utils.ErrNotImplemented, err)
+	}
+}
+
+func TestGetSharedGroupDrv(t *testing.T) {
+	dbMock := &DataDBMock{}
+	result, err := dbMock.GetSharedGroupDrv("Shared")
+	if result != nil {
+		t.Errorf("expected result to be nil, got %v", result)
+	}
+	if err != utils.ErrNotImplemented {
+		t.Errorf("expected error %v, got %v", utils.ErrNotImplemented, err)
+	}
+}
+
+func TestSetSharedGroupDrv(t *testing.T) {
+	dbMock := &DataDBMock{}
+	sharedGroup := &SharedGroup{}
+	err := dbMock.SetSharedGroupDrv(sharedGroup)
+	if err != utils.ErrNotImplemented {
+		t.Errorf("expected error %v, got %v", utils.ErrNotImplemented, err)
+	}
+}
+
+func TestRemoveSharedGroupDrv(t *testing.T) {
+	dbMock := &DataDBMock{}
+	id := "ID"
+	err := dbMock.RemoveSharedGroupDrv(id)
+	if err != utils.ErrNotImplemented {
+		t.Errorf("expected error %v, got %v", utils.ErrNotImplemented, err)
+	}
+}
+
+func TestGetActionTriggersDrv(t *testing.T) {
+	dbMock := &DataDBMock{}
+	id := "ID"
+	triggers, err := dbMock.GetActionTriggersDrv(id)
+	if triggers != nil {
+		t.Errorf("expected nil ActionTriggers, got %v", triggers)
+	}
+	if err != utils.ErrNotImplemented {
+		t.Errorf("expected error %v, got %v", utils.ErrNotImplemented, err)
+	}
+}
+
+func TestSetActionTriggersDrv(t *testing.T) {
+	dbMock := &DataDBMock{}
+	id := "ID"
+	var triggers ActionTriggers
+	err := dbMock.SetActionTriggersDrv(id, triggers)
+	if err != utils.ErrNotImplemented {
+		t.Errorf("expected error %v, got %v", utils.ErrNotImplemented, err)
+	}
+}
+
+func TestRemoveActionTriggersDrv(t *testing.T) {
+	dbMock := &DataDBMock{}
+	id := "ID"
+	err := dbMock.RemoveActionTriggersDrv(id)
+	if err != utils.ErrNotImplemented {
+		t.Errorf("expected error %v, got %v", utils.ErrNotImplemented, err)
+	}
+}
+
+func TestGetActionPlanDrv(t *testing.T) {
+	{
+		dbMock := &DataDBMock{}
+		key := "Key"
+		result, err := dbMock.GetActionPlanDrv(key)
+		if result != nil {
+			t.Errorf("expected nil result, got %v", result)
+		}
+
+		if err != utils.ErrNotImplemented {
+			t.Errorf("expected error %v, got %v", utils.ErrNotImplemented, err)
+		}
+	}
+	{
+		expectedActionPlan := &ActionPlan{}
+		customError := error(nil)
+		dbMock := &DataDBMock{
+			GetActionPlanDrvF: func(key string) (*ActionPlan, error) {
+				if key != "Key" {
+					t.Errorf("expected key 'Key', got %s", key)
+				}
+				return expectedActionPlan, customError
+			},
+		}
+		result, err := dbMock.GetActionPlanDrv("Key")
+		if result != expectedActionPlan {
+			t.Errorf("expected %v, got %v", expectedActionPlan, result)
+		}
+		if err != customError {
+			t.Errorf("expected %v, got %v", customError, err)
+		}
+	}
+}
+
+func TestSetActionPlanDrv(t *testing.T) {
+	{
+		dbMock := &DataDBMock{}
+		key := "Key"
+		actionPlan := &ActionPlan{}
+
+		err := dbMock.SetActionPlanDrv(key, actionPlan)
+
+		if err != utils.ErrNotImplemented {
+			t.Errorf("expected error %v, got %v", utils.ErrNotImplemented, err)
+		}
+	}
+
+	{
+		expectedError := error(nil)
+		dbMock := &DataDBMock{
+			SetActionPlanDrvF: func(key string, ap *ActionPlan) error {
+				if key != "Key" {
+					t.Errorf("expected key 'Key', got %s", key)
+				}
+				if ap == nil {
+					t.Error("expected non-nil ActionPlan")
+				}
+				return expectedError
+			},
+		}
+		actionPlan := &ActionPlan{}
+		err := dbMock.SetActionPlanDrv("Key", actionPlan)
+
+		if err == expectedError {
+			t.Errorf("expected error %v, got %v", expectedError, err)
+		}
+	}
+}
+
+func TestGetAllActionPlansDrv(t *testing.T) {
+	{
+		dbMock := &DataDBMock{}
+		actionPlans, err := dbMock.GetAllActionPlansDrv()
+		if actionPlans != nil {
+			t.Errorf("expected nil, got %v", actionPlans)
+		}
+		if err != utils.ErrNotImplemented {
+			t.Errorf("expected error %v, got %v", utils.ErrNotImplemented, err)
+		}
+	}
+	{
+		expectedActionPlans := map[string]*ActionPlan{}
+		expectedError := error(nil)
+		dbMock := &DataDBMock{}
+		actionPlans, err := dbMock.GetAllActionPlansDrv()
+		if len(actionPlans) != len(expectedActionPlans) {
+			t.Errorf("expected actionPlans length %d, got %d", len(expectedActionPlans), len(actionPlans))
+		}
+		for key, expectedPlan := range expectedActionPlans {
+			if plan, exists := actionPlans[key]; !exists || plan != expectedPlan {
+				t.Errorf("expected action plan for key %s to be %v, got %v", key, expectedPlan, plan)
+			}
+		}
+		if err == expectedError {
+			t.Errorf("expected error %v, got %v", expectedError, err)
+		}
+	}
+}
+
+func TestPopTask(t *testing.T) {
+	mock := &DataDBMock{}
+	task, err := mock.PopTask()
+	if task != nil {
+		t.Errorf("Expected task to be nil, got %v", task)
+	}
+	if err != utils.ErrNotImplemented {
+		t.Errorf("Expected error to be %v, got %v", utils.ErrNotImplemented, err)
+	}
+}
+
+func TestPushTask(t *testing.T) {
+	mock := &DataDBMock{}
+	task := &Task{}
+	err := mock.PushTask(task)
+	if err != utils.ErrNotImplemented {
+		t.Errorf("Expected error to be %v, got %v", utils.ErrNotImplemented, err)
+	}
+}
+
+func TestRemoveIndexesDrv(t *testing.T) {
+	mock := &DataDBMock{}
+	err := mock.RemoveIndexesDrv("Type", "Context", "Key")
+	if err != utils.ErrNotImplemented {
+		t.Errorf("Expected error to be %v, got %v", utils.ErrNotImplemented, err)
+	}
+}
+
+func TestAddLoadHistory(t *testing.T) {
+	mock := &DataDBMock{}
+	loadInstance := &utils.LoadInstance{}
+	err := mock.AddLoadHistory(loadInstance, 42, "test")
+	if err != utils.ErrNotImplemented {
+		t.Errorf("Expected error to be %v, got %v", utils.ErrNotImplemented, err)
+	}
+}
+
+func TestRemoveTimingDrv(t *testing.T) {
+	mock := &DataDBMock{}
+	err := mock.RemoveTimingDrv("Param")
+	if err != utils.ErrNotImplemented {
+		t.Errorf("Expected error to be %v, got %v", utils.ErrNotImplemented, err)
+	}
+}
+
+func TestGetTimingDrv(t *testing.T) {
+	mock := &DataDBMock{}
+	result, err := mock.GetTimingDrv("Param")
+	if result != nil {
+		t.Errorf("Expected result to be nil, got %v", result)
+	}
+	if err != utils.ErrNotImplemented {
+		t.Errorf("Expected error to be %v, got %v", utils.ErrNotImplemented, err)
+	}
+}
+
+func TestGetResourceDrv(t *testing.T) {
+	mock := &DataDBMock{}
+	result, err := mock.GetResourceDrv("Param1", "Param2")
+	if result != nil {
+		t.Errorf("Expected result to be nil, got %v", result)
+	}
+	if err != utils.ErrNotImplemented {
+		t.Errorf("Expected error to be %v, got %v", utils.ErrNotImplemented, err)
+	}
+}
+
+func TestRemAccountActionPlansDrv(t *testing.T) {
+	mock := &DataDBMock{}
+	err := mock.RemAccountActionPlansDrv("AccountID")
+	if err != utils.ErrNotImplemented {
+		t.Errorf("Expected error to be %v, got %v", utils.ErrNotImplemented, err)
+	}
+}
