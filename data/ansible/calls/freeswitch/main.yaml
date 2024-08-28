@@ -1,133 +1,57 @@
 ---
-- name: Install Python
+- name: Set up environment in order to run call tests for Freeswitch
   hosts: all
-  remote_user: '{{ user }}'
-  gather_facts: false
   tasks:
-    - name: Install Python3s
-      raw: apt -y install python3 
-      become: true
+    - name: Install freeswitch
+      ansible.builtin.import_role:
+        name: ../../roles/freeswitch
+    - name: Install Go
+      ansible.builtin.import_role:
+        name: ../../roles/go
 
-- hosts: all
-  vars:
-    ansible_python_interpreter: auto # to disable deprication warning related to the use of python2
-    ###############################################################
-    ##################### Golang Vars #############################
-    ###############################################################
-    # Go language SDK version number
-    golang_version: '1.23'
-    go_version_target: "go version go{{ golang_version }} linux/amd64"
-    # Mirror to download the Go language SDK redistributable package from
-    golang_mirror: 'https://storage.googleapis.com/golang'
-    # Base installation directory the Go language SDK distribution
-    golang_install_dir: '/usr/local/go'
-    # Directory to store files downloaded for Go language SDK installation
-    golang_download_dir: "{{ x_ansible_download_dir | default(ansible_env.HOME + '/.ansible/tmp/downloads') }}"
-    # Location for GOPATH environment variable
-    golang_gopath: "/home/{{ user }}/go"
-    # Filename of Go language SDK redistributable package
-    golang_redis_filename: 'go{{ golang_version }}.linux-amd64.tar.gz'
-    ###############################################################
-    # CGRateS location
-    cgrates_dir: "{{ golang_gopath }}/src/github.com/cgrates/cgrates"
-
-    rootUser : root
-
-    freeswitch_packages:
-      - freeswitch-meta-all
-      - freeswitch-mod-json-cdr
-
-    dependencies:
-      - build-essential
-      - git
-      - redis-server
-      - mariadb-server
-      - postgresql
-      - postgresql-contrib
-      - python-dev
-      - gcc
-      - make
-      - binutils
-      - libasound2-dev
-
-    customPath: "{{ lookup('env','PATH') }}:{{ golang_gopath }}/bin:/usr/local/go/bin:{{ ansible_env.PATH }}"
-
-  remote_user: '{{ user }}'
-  tasks:
-    ###########################################################################################################################
-    # install dependencies
-    - name: Install dependencies
-      become: yes
-      apt: name={{ dependencies }} state=present
-  
-    - name:  apt-get update && apt-get install gnupg2
-      become: yes
-      shell: 'apt-get update && apt-get install -y gnupg2 wget lsb-release'
-
-    - name:  Freeswitch add key
-      become: yes
-      shell: 'wget -O /usr/share/keyrings/freeswitch-archive-keyring.gpg https://files.freeswitch.org/repo/deb/debian-release/freeswitch-archive-keyring.gpg'
-
-    - name:  Add FreeSwitch apt repository 
-      become: yes
-      shell: 'echo "deb [signed-by=/usr/share/keyrings/freeswitch-archive-keyring.gpg trusted=yes] http://files.freeswitch.org/repo/deb/debian-release/ `lsb_release -sc` main" > /etc/apt/sources.list.d/freeswitch.list'
-
-    - name:  Add FreeSwitch apt repository 1.8
-      become: yes
-      shell: 'echo "deb-src [signed-by=/usr/share/keyrings/freeswitch-archive-keyring.gpg trusted=yes] http://files.freeswitch.org/repo/deb/debian-unstable/ `lsb_release -sc` main" >> /etc/apt/sources.list.d/freeswitch.list'
-
-    - name:  Install FreeSwitch
-      become: yes
-      shell: 'apt-get update && apt-get install -y freeswitch-meta-all'
-
-    ###########################################################################################################################
-    # Install Golang
-    - name: install unarchive dependencies (zypper)
-      become: yes
-      zypper:
-        name:
-          - gzip
-          - tar
-        state: present
-      when: ansible_pkg_mgr == 'zypper'
-
-    - name: Install golang
-      include: go.yaml
-
-    ###########################################################################################################################
-    # Install and config CGRateS
     - name: Install and config CGRateS
-      include: cgrates.yaml
+      ansible.builtin.import_role:
+        name: ../../roles/cgrates
+      vars:
+        cgrates_dbs:
+          - mysql
+        cgrates_dependencies:
+          - git
+          - redis-server
+          - mariadb-server
 
-    # Configure FreeSwitch
-    - name:  Unzip FreeSWITCH config
+    - name: Unzip FreeSWITCH config
       become: yes
       shell: 'sudo tar -xvf freeswitch_conf.tar.gz'
       args:
         chdir: '{{ cgrates_dir }}/data/tutorial_tests/fs_evsock/freeswitch/etc'
 
-    - name:  Unzip FreeSWITCH config 2
+    - name: Unzip FreeSWITCH config 2
       become: yes
       shell: 'sudo tar -xvf freeswitch_conf.tar.gz'
       args:
         chdir: '{{ cgrates_dir }}/data/tutorials/fs_evsock/freeswitch/etc'
 
-    - name:  Remove FreeSWITCH default config from /etc/freeswitch
+    - name: Update internal.xml with the correct IP
+      ansible.builtin.replace:
+        path: '{{ cgrates_dir }}/data/tutorial_tests/fs_evsock/freeswitch/etc/freeswitch/sip_profiles/internal.xml'
+        regexp: '192\.168\.56\.203'
+        replace: '{{ ansible_host }}'
+
+    - name: Remove FreeSWITCH default config from /etc/freeswitch
       become: yes
       shell: 'sudo rm -rf *'
       args:
-        chdir: '/etc/freeswitch'
+        chdir: /etc/freeswitch
 
-    - name:  Copy our custom config for FreeSWITCH in /etc/freeswitch
+    - name: Copy our custom config for FreeSWITCH in /etc/freeswitch
       become: yes
       shell: 'sudo cp -r {{ cgrates_dir }}/data/tutorial_tests/fs_evsock/freeswitch/etc/freeswitch/* /etc/freeswitch'
       args:
-        chdir: '/etc/freeswitch'
+        chdir: /etc/freeswitch
 
-    - name: Add user for CGRateS
-      become: yes
-      shell: 'sudo useradd cgrates'
-
-    # Configure PJSUA
-    - name: Config PJSUA
-      include: pjsua.yaml
+    - name: Configure PJSUA
+      ansible.builtin.import_role:
+        name: ../../roles/pjsua
+      vars:
+        pjsua_version: '2.9'

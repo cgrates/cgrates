@@ -1,87 +1,16 @@
 ---
 - hosts: all
-  vars:
-    ansible_python_interpreter: auto # to disable deprication warning related to the use of python2
-    ###############################################################
-    ##################### Golang Vars #############################
-    ###############################################################
-    # Go language SDK version number
-    golang_version: '1.23'
-    go_version_target: "go version go{{ golang_version }} linux/amd64"
-    # Mirror to download the Go language SDK redistributable package from
-    golang_mirror: 'https://storage.googleapis.com/golang'
-    # Base installation directory the Go language SDK distribution
-    golang_install_dir: '/usr/local/go'
-    # Directory to store files downloaded for Go language SDK installation
-    golang_download_dir: "{{ x_ansible_download_dir | default(ansible_env.HOME + '/.ansible/tmp/downloads') }}"
-    # Location for GOPATH environment variable
-    golang_gopath: "/home/{{ user }}/go"
-    # Filename of Go language SDK redistributable package
-    golang_redis_filename: 'go{{ golang_version }}.linux-amd64.tar.gz'
-    ###############################################################
-    # CGRateS location
-    cgrates_dir: "{{ golang_gopath }}/src/github.com/cgrates/cgrates"
-
-    rootUser : root
-
-    kamailio_package:
-      - kamailio
-      - kamailio-extra-modules
-      - kamailio-json-modules
-
-    dependencies:
-      - build-essential
-      - git
-      - wget
-      - redis-server
-      - mariadb-server
-      - postgresql
-      - postgresql-contrib
-      - python-dev
-      - gcc
-      - make
-      - binutils
-      - libasound2-dev
-
-    customPath: "{{ lookup('env','PATH') }}:{{ golang_gopath }}/bin:/usr/local/go/bin:{{ ansible_env.PATH }}"
-
-  remote_user: '{{ user }}'
-  tasks:
-###########################################################################################################################
-# install dependencies
-  - name: Install dependencies
-    become: yes
-    apt: name={{ dependencies }} state=present
-
-  # Install Kamailio
-  - name: Install Kamailio
-    become: yes
-    apt: name={{ kamailio_package }} state=latest
-
-###########################################################################################################################
-# Install Golang
-  - name: install unarchive dependencies (zypper)
-    become: yes
-    zypper:
-      name:
-        - gzip
-        - tar
-      state: present
-    when: ansible_pkg_mgr == 'zypper'
-
-  - name: Install golang
-    include: go.yaml
-
-###########################################################################################################################
-# Install and config CGRateS
-  - name: Install and config CGRateS
-    include: cgrates.yaml
-
-
-  - name: Add user for CGRateS
-    become: yes
-    shell: 'sudo useradd cgrates'
-    
-# Configure PJSUA
-  - name: Config PJSUA
-    include: pjsua.yaml
+  roles:
+    - ../../roles/kamailio
+    - ../../roles/go
+    - role: ../../roles/cgrates
+      vars:
+        cgrates_dbs:
+          - mysql
+        cgrates_dependencies:
+          - git
+          - redis-server
+          - mariadb-server
+    - role: ../../roles/pjsua
+      vars:
+        pjsua_version: '2.9'
