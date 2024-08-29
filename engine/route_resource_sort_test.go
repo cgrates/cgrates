@@ -35,8 +35,8 @@ func TestPopulateResourcesForRoutesNoResourceSConns(t *testing.T) {
 	routes := map[string]*RouteWithWeight{}
 	ev := &utils.CGREvent{
 		Tenant:  "cgrates.org",
-		Event:   map[string]interface{}{},
-		APIOpts: map[string]interface{}{},
+		Event:   map[string]any{},
+		APIOpts: map[string]any{},
 	}
 	extraOpts := &optsGetRoutes{}
 
@@ -58,8 +58,8 @@ func TestPopulateResourcesForRoutesNoResourceIDs(t *testing.T) {
 	}
 	ev := &utils.CGREvent{
 		Tenant:  "cgrates.org",
-		Event:   map[string]interface{}{},
-		APIOpts: map[string]interface{}{},
+		Event:   map[string]any{},
+		APIOpts: map[string]any{},
 	}
 	extraOpts := &optsGetRoutes{}
 
@@ -88,8 +88,8 @@ func TestPopulateResourcesForRoutesOK(t *testing.T) {
 	cc := make(chan birpc.ClientConnector, 1)
 	cc <- &ccMock{
 
-		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
-			utils.ResourceSv1GetResource: func(ctx *context.Context, args, reply interface{}) error {
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.ResourceSv1GetResource: func(ctx *context.Context, args, reply any) error {
 				rplCast, canCast := reply.(*Resource)
 				if !canCast {
 					t.Errorf("Wrong argument type : %T", reply)
@@ -116,8 +116,8 @@ func TestPopulateResourcesForRoutesOK(t *testing.T) {
 	}
 	ev := &utils.CGREvent{
 		Tenant:  "cgrates.org",
-		Event:   map[string]interface{}{},
-		APIOpts: map[string]interface{}{},
+		Event:   map[string]any{},
+		APIOpts: map[string]any{},
 	}
 	extraOpts := &optsGetRoutes{}
 
@@ -125,7 +125,7 @@ func TestPopulateResourcesForRoutesOK(t *testing.T) {
 		{
 			RouteID:         "Route1",
 			RouteParameters: "param1",
-			SortingData: map[string]interface{}{
+			SortingData: map[string]any{
 				utils.Blocker:       true,
 				utils.ResourceUsage: 0,
 				utils.Weight:        10,
@@ -156,8 +156,8 @@ func TestPopulateResourcesForRoutesCallErr(t *testing.T) {
 	cc := make(chan birpc.ClientConnector, 1)
 	cc <- &ccMock{
 
-		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
-			utils.ResourceSv1GetResource: func(ctx *context.Context, args, reply interface{}) error {
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.ResourceSv1GetResource: func(ctx *context.Context, args, reply any) error {
 				return utils.ErrNotImplemented
 			},
 		},
@@ -178,8 +178,8 @@ func TestPopulateResourcesForRoutesCallErr(t *testing.T) {
 	}
 	ev := &utils.CGREvent{
 		Tenant:  "cgrates.org",
-		Event:   map[string]interface{}{},
-		APIOpts: map[string]interface{}{},
+		Event:   map[string]any{},
+		APIOpts: map[string]any{},
 	}
 	extraOpts := &optsGetRoutes{}
 
@@ -187,7 +187,7 @@ func TestPopulateResourcesForRoutesCallErr(t *testing.T) {
 		{
 			RouteID:         "Route1",
 			RouteParameters: "param1",
-			SortingData: map[string]interface{}{
+			SortingData: map[string]any{
 				utils.Blocker:       true,
 				utils.ResourceUsage: 0,
 				utils.Weight:        10,
@@ -225,8 +225,8 @@ func TestPopulateResourcesForRoutesLazyPassErr(t *testing.T) {
 	cc := make(chan birpc.ClientConnector, 1)
 	cc <- &ccMock{
 
-		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
-			utils.ResourceSv1GetResource: func(ctx *context.Context, args, reply interface{}) error {
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.ResourceSv1GetResource: func(ctx *context.Context, args, reply any) error {
 				rplCast, canCast := reply.(*Resource)
 				if !canCast {
 					t.Errorf("Wrong argument type : %T", reply)
@@ -260,8 +260,8 @@ func TestPopulateResourcesForRoutesLazyPassErr(t *testing.T) {
 	}
 	ev := &utils.CGREvent{
 		Tenant:  "cgrates.org",
-		Event:   map[string]interface{}{},
-		APIOpts: map[string]interface{}{},
+		Event:   map[string]any{},
+		APIOpts: map[string]any{},
 	}
 	extraOpts := &optsGetRoutes{}
 

@@ -170,7 +170,7 @@ func isMongoDuplicateError(err error) bool {
 	return false
 }
 
-func (ms *MongoStorage) GetCDRs(ctx *context.Context, qryFltr []*Filter, opts map[string]interface{}) (cdrs []*utils.CDR, err error) {
+func (ms *MongoStorage) GetCDRs(ctx *context.Context, qryFltr []*Filter, opts map[string]any) (cdrs []*utils.CDR, err error) {
 	fltrs := make(bson.M)
 	for _, fltr := range qryFltr {
 		for _, rule := range fltr.Rules {

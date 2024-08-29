@@ -28,8 +28,8 @@ import (
 
 type CDR struct {
 	Tenant    string
-	Opts      map[string]interface{}
-	Event     map[string]interface{}
+	Opts      map[string]any
+	Event     map[string]any
 	CreatedAt time.Time  `json:",omitempty"`
 	UpdatedAt time.Time  `json:",omitempty"`
 	DeletedAt *time.Time `json:",omitempty"`
@@ -50,14 +50,14 @@ func (CDRSQLTable) TableName() string {
 }
 
 // JSONB type for storing maps of events and opts into gorm columns as jsob type
-type JSONB map[string]interface{}
+type JSONB map[string]any
 
 func (j JSONB) GormDataType() string {
 	return "JSONB"
 }
 
 // Scan scan value into Jsonb, implements sql.Scanner interface
-func (j *JSONB) Scan(value interface{}) (err error) {
+func (j *JSONB) Scan(value any) (err error) {
 	switch v := value.(type) {
 	case []byte:
 		return json.Unmarshal(v, &j)
@@ -105,5 +105,5 @@ type CDRFilters struct {
 	Tenant    string
 	ID        string
 	FilterIDs []string
-	APIOpts   map[string]interface{}
+	APIOpts   map[string]any
 }

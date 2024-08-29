@@ -115,7 +115,7 @@ type DataDBDriver interface {
 type StorDB interface {
 	Storage
 	SetCDR(*context.Context, *utils.CGREvent, bool) error
-	GetCDRs(*context.Context, []*Filter, map[string]interface{}) ([]*utils.CDR, error)
+	GetCDRs(*context.Context, []*Filter, map[string]any) ([]*utils.CDR, error)
 	RemoveCDRs(*context.Context, []*Filter) error
 }
 
