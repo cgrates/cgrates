@@ -127,20 +127,39 @@ func TestHttpPostSync(t *testing.T) {
 		t.Error(err)
 	}
 
-	mp := &utils.CGREvent{
+	req1, err := exp.PrepareMap(&utils.CGREvent{
 		Event: map[string]any{
 			"Account":     "1001",
 			"Destination": "1002",
 		},
-	}
-
-	vals, err := exp.PrepareMap(mp)
+	})
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	for i := 0; i < 3; i++ {
-		go exp.ExportEvent(context.Background(), vals, "")
+	req2, err := exp.PrepareMap(&utils.CGREvent{
+		Event: map[string]any{
+			"Account":     "1001",
+			"Destination": "1003",
+		},
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	req3, err := exp.PrepareMap(&utils.CGREvent{
+		Event: map[string]any{
+			"Account":     "1003",
+			"Destination": "1001",
+		},
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	requests := []any{req1, req2, req3}
+
+	for i := range 3 {
+		go exp.ExportEvent(context.Background(), requests[i], "")
 	}
 
 	select {
