@@ -102,7 +102,7 @@ func (httpPost *HTTPPostEE) PrepareMap(mp *utils.CGREvent) (any, error) {
 		urlVals.Set(k, utils.IfaceAsString(v))
 	}
 	return &HTTPPosterRequest{
-		Header: httpPost.hdr,
+		Header: httpPost.hdr.Clone(),
 		Body:   urlVals,
 	}, nil
 }
@@ -116,7 +116,7 @@ func (httpPost *HTTPPostEE) PrepareOrderMap(mp *utils.OrderedNavigableMap) (any,
 		urlVals.Set(strings.Join(path, utils.NestingSep), nmIt.String())
 	}
 	return &HTTPPosterRequest{
-		Header: httpPost.hdr,
+		Header: httpPost.hdr.Clone(),
 		Body:   urlVals,
 	}, nil
 }

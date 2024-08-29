@@ -99,7 +99,7 @@ func (httpEE *HTTPjsonMapEE) ExtraData(ev *utils.CGREvent) any { return nil }
 func (httpEE *HTTPjsonMapEE) PrepareMap(mp *utils.CGREvent) (any, error) {
 	body, err := json.Marshal(mp.Event)
 	return &HTTPPosterRequest{
-		Header: httpEE.hdr,
+		Header: httpEE.hdr.Clone(),
 		Body:   body,
 	}, err
 }
@@ -114,7 +114,7 @@ func (httpEE *HTTPjsonMapEE) PrepareOrderMap(mp *utils.OrderedNavigableMap) (any
 	}
 	body, err := json.Marshal(valMp)
 	return &HTTPPosterRequest{
-		Header: httpEE.hdr,
+		Header: httpEE.hdr.Clone(),
 		Body:   body,
 	}, err
 }
