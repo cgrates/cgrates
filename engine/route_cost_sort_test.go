@@ -477,8 +477,8 @@ func TestPopulateCostForRoutesAccountCostOverMax(t *testing.T) {
 	cc := make(chan birpc.ClientConnector, 1)
 	cc <- &ccMock{
 
-		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
-			utils.AccountSv1MaxAbstracts: func(ctx *context.Context, args, reply interface{}) error {
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.AccountSv1MaxAbstracts: func(ctx *context.Context, args, reply any) error {
 				rplCast, canCast := reply.(*utils.EventCharges)
 				if !canCast {
 					t.Errorf("Wrong argument type : %T", reply)
@@ -505,10 +505,10 @@ func TestPopulateCostForRoutesAccountCostOverMax(t *testing.T) {
 	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "TestEvent",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: 1001,
 		},
-		APIOpts: map[string]interface{}{},
+		APIOpts: map[string]any{},
 	}
 	extraOpts := &optsGetRoutes{
 		maxCost: 1,
@@ -561,8 +561,8 @@ func TestPopulateCostForRoutesAppendAccounts(t *testing.T) {
 	cc := make(chan birpc.ClientConnector, 1)
 	cc <- &ccMock{
 
-		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
-			utils.AccountSv1MaxAbstracts: func(ctx *context.Context, args, reply interface{}) error {
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.AccountSv1MaxAbstracts: func(ctx *context.Context, args, reply any) error {
 				rplCast, canCast := reply.(*utils.EventCharges)
 				if !canCast {
 					t.Errorf("Wrong argument type : %T", reply)
@@ -589,10 +589,10 @@ func TestPopulateCostForRoutesAppendAccounts(t *testing.T) {
 	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "TestEvent",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: 1001,
 		},
-		APIOpts: map[string]interface{}{},
+		APIOpts: map[string]any{},
 	}
 	extraOpts := &optsGetRoutes{}
 
@@ -600,7 +600,7 @@ func TestPopulateCostForRoutesAppendAccounts(t *testing.T) {
 		{
 			RouteID:         "local",
 			RouteParameters: "",
-			SortingData: map[string]interface{}{
+			SortingData: map[string]any{
 				utils.AccountIDs: []string{"accID1"},
 				utils.Cost:       5,
 				utils.Weight:     10,
@@ -629,8 +629,8 @@ func TestPopulateCostForRoutesRateSIgnoreErr(t *testing.T) {
 	cc := make(chan birpc.ClientConnector, 1)
 	cc <- &ccMock{
 
-		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
-			utils.RateSv1CostForEvent: func(ctx *context.Context, args, reply interface{}) error {
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.RateSv1CostForEvent: func(ctx *context.Context, args, reply any) error {
 				return utils.ErrNotImplemented
 			},
 		},
@@ -651,10 +651,10 @@ func TestPopulateCostForRoutesRateSIgnoreErr(t *testing.T) {
 	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "TestEvent",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: 1001,
 		},
-		APIOpts: map[string]interface{}{},
+		APIOpts: map[string]any{},
 	}
 	extraOpts := &optsGetRoutes{
 		ignoreErrors: true,

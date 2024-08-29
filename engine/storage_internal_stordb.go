@@ -67,7 +67,7 @@ func (iDB *InternalDB) SetCDR(_ *context.Context, cdr *utils.CGREvent, allowUpda
 	return nil
 }
 
-func (iDB *InternalDB) GetCDRs(ctx *context.Context, qryFltr []*Filter, opts map[string]interface{}) (cdrs []*utils.CDR, err error) {
+func (iDB *InternalDB) GetCDRs(ctx *context.Context, qryFltr []*Filter, opts map[string]any) (cdrs []*utils.CDR, err error) {
 	pairFltrs := make(map[string][]string)
 	notPairFltrs := make(map[string][]string)
 	notIndexed := []*FilterRule{}

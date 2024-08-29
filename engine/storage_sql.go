@@ -181,7 +181,7 @@ func (sqls *SQLStorage) SetCDR(_ *context.Context, cdr *utils.CGREvent, allowUpd
 
 // GetCDRs has ability to get the filtered CDRs, count them or simply return them
 // qryFltr.Unscoped will ignore soft deletes or delete records permanently
-func (sqls *SQLStorage) GetCDRs(ctx *context.Context, qryFltr []*Filter, opts map[string]interface{}) (cdrs []*utils.CDR, err error) {
+func (sqls *SQLStorage) GetCDRs(ctx *context.Context, qryFltr []*Filter, opts map[string]any) (cdrs []*utils.CDR, err error) {
 	q := sqls.db.Table(utils.CDRsTBL)
 	var excludedCdrQueryFilterTypes []*FilterRule
 	for _, fltr := range qryFltr {

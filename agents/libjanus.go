@@ -48,7 +48,7 @@ func newJanusHTTPjsonDP(req *http.Request) (utils.DataProvider, error) {
 // decoded data is only searched once and cached
 type janusHTTPjsonDP struct {
 	req     *http.Request
-	reqBody map[string]interface{} // unmarshal JSON body here
+	reqBody map[string]any // unmarshal JSON body here
 	cache   utils.MapStorage
 }
 
