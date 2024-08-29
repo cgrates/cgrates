@@ -21,6 +21,7 @@ package analyzers
 import (
 	"encoding/json"
 	"fmt"
+	"math"
 	"math/rand"
 	"os"
 	"path"
@@ -154,7 +155,7 @@ func (aS *AnalyzerS) V1StringQuery(ctx *context.Context, args *QueryArgs, reply 
 	} else {
 		q = bleve.NewQueryStringQuery(args.HeaderFilters)
 	}
-	s := bleve.NewSearchRequestOptions(q, utils.AbsoluteMaxInt, 0, false)
+	s := bleve.NewSearchRequestOptions(q, math.MaxInt, 0, false)
 	s.Fields = []string{utils.Meta} // return all fields
 	searchResults, err := aS.db.SearchInContext(ctx, s)
 	if err != nil {
