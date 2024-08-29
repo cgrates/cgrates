@@ -71,16 +71,18 @@ func TestERSClone(t *testing.T) {
 		SessionSConns: []string{"*internal:*sessions"},
 		Readers: []*EventReaderCfg{
 			{
-				ID:             utils.MetaDefault,
-				Type:           utils.MetaNone,
-				RunDelay:       0,
-				ConcurrentReqs: 1024,
-				SourcePath:     "/var/spool/cgrates/ers/in",
-				ProcessedPath:  "/var/spool/cgrates/ers/out",
-				Tenant:         nil,
-				Timezone:       utils.EmptyString,
-				Filters:        []string{},
-				Flags:          utils.FlagsWithParams{},
+				ID:                   utils.MetaDefault,
+				Type:                 utils.MetaNone,
+				RunDelay:             0,
+				ConcurrentReqs:       1024,
+				SourcePath:           "/var/spool/cgrates/ers/in",
+				ProcessedPath:        "/var/spool/cgrates/ers/out",
+				Tenant:               nil,
+				Timezone:             utils.EmptyString,
+				Filters:              []string{},
+				Reconnects:           -1,
+				MaxReconnectInterval: 5 * time.Minute,
+				Flags:                utils.FlagsWithParams{},
 				Fields: []*FCTemplate{
 					{Tag: utils.ToR, Path: utils.MetaCgreq + utils.NestingSep + utils.ToR, Type: utils.MetaVariable,
 						Value: NewRSRParsersMustCompile("~*req.2", utils.InfieldSep), Mandatory: true, Layout: time.RFC3339},
@@ -117,16 +119,18 @@ func TestERSClone(t *testing.T) {
 				},
 			},
 			{
-				ID:             "file_reader1",
-				Type:           "*fileCSV",
-				RunDelay:       -1,
-				ConcurrentReqs: 1024,
-				SourcePath:     "/tmp/ers/in",
-				ProcessedPath:  "/tmp/ers/out",
-				Tenant:         NewRSRParsersMustCompile("~*req.Destination1", utils.InfieldSep),
-				Timezone:       utils.EmptyString,
-				Filters:        []string{"randomFiletrs"},
-				Flags:          utils.FlagsWithParams{},
+				ID:                   "file_reader1",
+				Type:                 "*fileCSV",
+				RunDelay:             -1,
+				ConcurrentReqs:       1024,
+				SourcePath:           "/tmp/ers/in",
+				ProcessedPath:        "/tmp/ers/out",
+				Tenant:               NewRSRParsersMustCompile("~*req.Destination1", utils.InfieldSep),
+				Reconnects:           -1,
+				MaxReconnectInterval: 5 * time.Minute,
+				Timezone:             utils.EmptyString,
+				Filters:              []string{"randomFiletrs"},
+				Flags:                utils.FlagsWithParams{},
 				Fields: []*FCTemplate{
 					{Tag: utils.ToR, Path: utils.MetaCgreq + utils.NestingSep + utils.ToR, Type: utils.MetaVariable,
 						Value: NewRSRParsersMustCompile("~*req.2", utils.InfieldSep), Mandatory: true, Layout: time.RFC3339},
@@ -193,7 +197,7 @@ func TestEventReaderloadFromJsonCase1(t *testing.T) {
 	cfgJSON := &ERsJsonCfg{
 		Readers: &[]*EventReaderJsonCfg{
 			{
-				Run_delay: utils.StringPointer("1ss"),
+				RunDelay: utils.StringPointer("1ss"),
 			},
 		},
 	}
@@ -236,16 +240,18 @@ func TestERSLoadFromjsonCfg(t *testing.T) {
 		SessionSConns: []string{"conn1", "conn3"},
 		Readers: []*EventReaderCfg{
 			{
-				ID:             utils.MetaDefault,
-				Type:           utils.MetaNone,
-				RunDelay:       0,
-				ConcurrentReqs: 1024,
-				SourcePath:     "/var/spool/cgrates/ers/in",
-				ProcessedPath:  "/var/spool/cgrates/ers/out",
-				Tenant:         nil,
-				Timezone:       utils.EmptyString,
-				Filters:        []string{},
-				Flags:          utils.FlagsWithParams{},
+				ID:                   utils.MetaDefault,
+				Type:                 utils.MetaNone,
+				RunDelay:             0,
+				ConcurrentReqs:       1024,
+				SourcePath:           "/var/spool/cgrates/ers/in",
+				ProcessedPath:        "/var/spool/cgrates/ers/out",
+				Tenant:               nil,
+				Reconnects:           -1,
+				MaxReconnectInterval: 5 * time.Minute,
+				Timezone:             utils.EmptyString,
+				Filters:              []string{},
+				Flags:                utils.FlagsWithParams{},
 				Fields: []*FCTemplate{
 					{Tag: utils.ToR, Path: utils.MetaCgreq + utils.NestingSep + utils.ToR, Type: utils.MetaVariable,
 						Value: NewRSRParsersMustCompile("~*req.2", utils.InfieldSep), Mandatory: true, Layout: time.RFC3339},
@@ -282,16 +288,18 @@ func TestERSLoadFromjsonCfg(t *testing.T) {
 				},
 			},
 			{
-				ID:             "file_reader1",
-				Type:           utils.MetaFileCSV,
-				RunDelay:       -1,
-				ConcurrentReqs: 1024,
-				SourcePath:     "/tmp/ers/in",
-				ProcessedPath:  "/tmp/ers/out",
-				Tenant:         nil,
-				Timezone:       utils.EmptyString,
-				Filters:        []string{},
-				Flags:          utils.FlagsWithParams{},
+				ID:                   "file_reader1",
+				Type:                 utils.MetaFileCSV,
+				RunDelay:             -1,
+				ConcurrentReqs:       1024,
+				SourcePath:           "/tmp/ers/in",
+				ProcessedPath:        "/tmp/ers/out",
+				Tenant:               nil,
+				Timezone:             utils.EmptyString,
+				Reconnects:           -1,
+				MaxReconnectInterval: 5 * time.Minute,
+				Filters:              []string{},
+				Flags:                utils.FlagsWithParams{},
 				Fields: []*FCTemplate{
 					{Tag: utils.ToR, Path: utils.MetaCgreq + utils.NestingSep + utils.ToR, Type: utils.MetaVariable,
 						Value: NewRSRParsersMustCompile("~*req.2", utils.InfieldSep), Mandatory: true, Layout: time.RFC3339},
@@ -384,7 +392,7 @@ func TestEventReaderloadFromJsonCfgErr1(t *testing.T) {
 		},
 	}
 	jsnCfg := &EventReaderJsonCfg{
-		Partial_commit_fields: &[]*FcTemplateJsonCfg{
+		PartialCommitFields: &[]*FcTemplateJsonCfg{
 			{
 				Type:  utils.StringPointer(utils.MetaTemplate),
 				Value: utils.StringPointer("1sa{*duration}"),
@@ -403,7 +411,7 @@ func TestEventReaderloadFromJsonCfgErr2(t *testing.T) {
 		PartialCommitFields: make([]*FCTemplate, 0),
 	}
 	jsnCfg := &EventReaderJsonCfg{
-		Partial_commit_fields: &[]*FcTemplateJsonCfg{
+		PartialCommitFields: &[]*FcTemplateJsonCfg{
 			{
 				Value: utils.StringPointer("a{*"),
 			},
@@ -426,7 +434,7 @@ func TestEventReaderloadFromJsonCfgErr3(t *testing.T) {
 		},
 	}
 	jsnCfg := &EventReaderJsonCfg{
-		Partial_commit_fields: &[]*FcTemplateJsonCfg{
+		PartialCommitFields: &[]*FcTemplateJsonCfg{
 			{
 				Tag:   utils.StringPointer("tag2"),
 				Type:  utils.StringPointer(utils.MetaTemplate),
@@ -492,7 +500,7 @@ func TestERSloadFromJsonCase2(t *testing.T) {
 	cfgJSON := &ERsJsonCfg{
 		Readers: &[]*EventReaderJsonCfg{
 			{
-				Cache_dump_fields: &[]*FcTemplateJsonCfg{
+				CacheDumpFields: &[]*FcTemplateJsonCfg{
 					{
 
 						Type: utils.StringPointer(utils.MetaTemplate),
@@ -514,16 +522,16 @@ func TestERSloadFromJsonCase3(t *testing.T) {
 		Sessions_conns: &[]string{"*conn1"},
 		Readers: &[]*EventReaderJsonCfg{
 			{
-				Id:                  utils.StringPointer("file_reader1"),
-				Type:                utils.StringPointer(utils.MetaFileCSV),
-				Run_delay:           utils.StringPointer("-1"),
-				Concurrent_requests: utils.IntPointer(1024),
-				Source_path:         utils.StringPointer("/tmp/ers/in"),
-				Processed_path:      utils.StringPointer("/tmp/ers/out"),
-				Tenant:              nil,
-				Timezone:            utils.StringPointer(""),
-				Filters:             nil,
-				Flags:               &[]string{},
+				ID:                 utils.StringPointer("file_reader1"),
+				Type:               utils.StringPointer(utils.MetaFileCSV),
+				RunDelay:           utils.StringPointer("-1"),
+				ConcurrentRequests: utils.IntPointer(1024),
+				SourcePath:         utils.StringPointer("/tmp/ers/in"),
+				ProcessedPath:      utils.StringPointer("/tmp/ers/out"),
+				Tenant:             nil,
+				Timezone:           utils.StringPointer(""),
+				Filters:            nil,
+				Flags:              &[]string{},
 				Fields: &[]*FcTemplateJsonCfg{
 					{
 						Tag:    utils.StringPointer(utils.AnswerTime),
@@ -541,16 +549,18 @@ func TestERSloadFromJsonCase3(t *testing.T) {
 		SessionSConns: []string{"*conn1"},
 		Readers: []*EventReaderCfg{
 			{
-				ID:             utils.MetaDefault,
-				Type:           utils.MetaNone,
-				RunDelay:       0,
-				ConcurrentReqs: 1024,
-				SourcePath:     "/var/spool/cgrates/ers/in",
-				ProcessedPath:  "/var/spool/cgrates/ers/out",
-				Tenant:         nil,
-				Timezone:       utils.EmptyString,
-				Filters:        []string{},
-				Flags:          utils.FlagsWithParams{},
+				ID:                   utils.MetaDefault,
+				Type:                 utils.MetaNone,
+				RunDelay:             0,
+				ConcurrentReqs:       1024,
+				SourcePath:           "/var/spool/cgrates/ers/in",
+				ProcessedPath:        "/var/spool/cgrates/ers/out",
+				Tenant:               nil,
+				Timezone:             utils.EmptyString,
+				Reconnects:           -1,
+				MaxReconnectInterval: 5 * time.Minute,
+				Filters:              []string{},
+				Flags:                utils.FlagsWithParams{},
 				Fields: []*FCTemplate{
 					{Tag: utils.ToR, Path: utils.MetaCgreq + utils.NestingSep + utils.ToR, Type: utils.MetaVariable,
 						Value: NewRSRParsersMustCompile("~*req.2", utils.InfieldSep), Mandatory: true, Layout: time.RFC3339},
@@ -587,16 +597,18 @@ func TestERSloadFromJsonCase3(t *testing.T) {
 				},
 			},
 			{
-				ID:             "file_reader1",
-				Type:           utils.MetaFileCSV,
-				RunDelay:       -1,
-				ConcurrentReqs: 1024,
-				SourcePath:     "/tmp/ers/in",
-				ProcessedPath:  "/tmp/ers/out",
-				Tenant:         nil,
-				Timezone:       utils.EmptyString,
-				Filters:        []string{},
-				Flags:          utils.FlagsWithParams{},
+				ID:                   "file_reader1",
+				Type:                 utils.MetaFileCSV,
+				RunDelay:             -1,
+				ConcurrentReqs:       1024,
+				SourcePath:           "/tmp/ers/in",
+				ProcessedPath:        "/tmp/ers/out",
+				Tenant:               nil,
+				Timezone:             utils.EmptyString,
+				Filters:              []string{},
+				Reconnects:           -1,
+				MaxReconnectInterval: 5 * time.Minute,
+				Flags:                utils.FlagsWithParams{},
 				Fields: []*FCTemplate{
 					{
 						Tag:    utils.MetaOriginID,
@@ -647,18 +659,18 @@ func TestERSloadFromJsonCase4(t *testing.T) {
 		Sessions_conns: &[]string{"*conn1"},
 		Readers: &[]*EventReaderJsonCfg{
 			{
-				Id:                  utils.StringPointer("file_reader1"),
-				Type:                utils.StringPointer(utils.MetaFileCSV),
-				Run_delay:           utils.StringPointer("-1"),
-				Concurrent_requests: utils.IntPointer(1024),
-				Source_path:         utils.StringPointer("/tmp/ers/in"),
-				Processed_path:      utils.StringPointer("/tmp/ers/out"),
-				Tenant:              nil,
-				Timezone:            utils.StringPointer(""),
-				Filters:             nil,
-				Flags:               &[]string{},
-				Fields:              &[]*FcTemplateJsonCfg{},
-				Cache_dump_fields: &[]*FcTemplateJsonCfg{
+				ID:                 utils.StringPointer("file_reader1"),
+				Type:               utils.StringPointer(utils.MetaFileCSV),
+				RunDelay:           utils.StringPointer("-1"),
+				ConcurrentRequests: utils.IntPointer(1024),
+				SourcePath:         utils.StringPointer("/tmp/ers/in"),
+				ProcessedPath:      utils.StringPointer("/tmp/ers/out"),
+				Tenant:             nil,
+				Timezone:           utils.StringPointer(""),
+				Filters:            nil,
+				Flags:              &[]string{},
+				Fields:             &[]*FcTemplateJsonCfg{},
+				CacheDumpFields: &[]*FcTemplateJsonCfg{
 					{
 						Tag:   utils.StringPointer("OriginID"),
 						Path:  utils.StringPointer("*exp.OriginID"),
@@ -674,16 +686,18 @@ func TestERSloadFromJsonCase4(t *testing.T) {
 		SessionSConns: []string{"*conn1"},
 		Readers: []*EventReaderCfg{
 			{
-				ID:             utils.MetaDefault,
-				Type:           utils.MetaNone,
-				RunDelay:       0,
-				ConcurrentReqs: 1024,
-				SourcePath:     "/var/spool/cgrates/ers/in",
-				ProcessedPath:  "/var/spool/cgrates/ers/out",
-				Tenant:         nil,
-				Timezone:       utils.EmptyString,
-				Filters:        []string{},
-				Flags:          utils.FlagsWithParams{},
+				ID:                   utils.MetaDefault,
+				Type:                 utils.MetaNone,
+				RunDelay:             0,
+				ConcurrentReqs:       1024,
+				SourcePath:           "/var/spool/cgrates/ers/in",
+				ProcessedPath:        "/var/spool/cgrates/ers/out",
+				Tenant:               nil,
+				Reconnects:           -1,
+				MaxReconnectInterval: 5 * time.Minute,
+				Timezone:             utils.EmptyString,
+				Filters:              []string{},
+				Flags:                utils.FlagsWithParams{},
 				Fields: []*FCTemplate{
 					{Tag: utils.ToR, Path: utils.MetaCgreq + utils.NestingSep + utils.ToR, Type: utils.MetaVariable,
 						Value: NewRSRParsersMustCompile("~*req.2", utils.InfieldSep), Mandatory: true, Layout: time.RFC3339},
@@ -720,17 +734,19 @@ func TestERSloadFromJsonCase4(t *testing.T) {
 				},
 			},
 			{
-				ID:             "file_reader1",
-				Type:           utils.MetaFileCSV,
-				RunDelay:       -1,
-				ConcurrentReqs: 1024,
-				SourcePath:     "/tmp/ers/in",
-				ProcessedPath:  "/tmp/ers/out",
-				Tenant:         nil,
-				Timezone:       utils.EmptyString,
-				Filters:        []string{},
-				Flags:          utils.FlagsWithParams{},
-				Fields:         []*FCTemplate{},
+				ID:                   "file_reader1",
+				Type:                 utils.MetaFileCSV,
+				RunDelay:             -1,
+				ConcurrentReqs:       1024,
+				SourcePath:           "/tmp/ers/in",
+				ProcessedPath:        "/tmp/ers/out",
+				Tenant:               nil,
+				Timezone:             utils.EmptyString,
+				Filters:              []string{},
+				Flags:                utils.FlagsWithParams{},
+				Reconnects:           -1,
+				MaxReconnectInterval: 5 * time.Minute,
+				Fields:               []*FCTemplate{},
 				CacheDumpFields: []*FCTemplate{
 					{
 						Tag:   "OrderID",
@@ -781,7 +797,7 @@ func TestEventReaderCacheDumpFieldsloadFromJsonCfg(t *testing.T) {
 	cfgJSON := &ERsJsonCfg{
 		Readers: &[]*EventReaderJsonCfg{
 			{
-				Cache_dump_fields: &[]*FcTemplateJsonCfg{
+				CacheDumpFields: &[]*FcTemplateJsonCfg{
 					{
 						Value: utils.StringPointer("a{*"),
 					},
@@ -802,16 +818,18 @@ func TestEventReaderSameID(t *testing.T) {
 		SessionSConns: []string{"conn1"},
 		Readers: []*EventReaderCfg{
 			{
-				ID:             utils.MetaDefault,
-				Type:           utils.MetaNone,
-				RunDelay:       0,
-				ConcurrentReqs: 1024,
-				SourcePath:     "/var/spool/cgrates/ers/in",
-				ProcessedPath:  "/var/spool/cgrates/ers/out",
-				Tenant:         nil,
-				Timezone:       utils.EmptyString,
-				Filters:        []string{},
-				Flags:          utils.FlagsWithParams{},
+				ID:                   utils.MetaDefault,
+				Type:                 utils.MetaNone,
+				RunDelay:             0,
+				ConcurrentReqs:       1024,
+				SourcePath:           "/var/spool/cgrates/ers/in",
+				ProcessedPath:        "/var/spool/cgrates/ers/out",
+				Tenant:               nil,
+				Timezone:             utils.EmptyString,
+				Filters:              []string{},
+				Flags:                utils.FlagsWithParams{},
+				Reconnects:           -1,
+				MaxReconnectInterval: 5 * time.Minute,
 				Fields: []*FCTemplate{
 					{Tag: utils.ToR, Path: utils.MetaCgreq + utils.NestingSep + utils.ToR, Type: utils.MetaVariable,
 						Value: NewRSRParsersMustCompile("~*req.2", utils.InfieldSep), Mandatory: true, Layout: time.RFC3339},
@@ -848,16 +866,18 @@ func TestEventReaderSameID(t *testing.T) {
 				},
 			},
 			{
-				ID:             "file_reader1",
-				Type:           utils.MetaFileCSV,
-				RunDelay:       -1,
-				ConcurrentReqs: 1024,
-				SourcePath:     "/tmp/ers/in",
-				ProcessedPath:  "/tmp/ers/out",
-				Tenant:         nil,
-				Timezone:       utils.EmptyString,
-				Filters:        []string{},
-				Flags:          utils.FlagsWithParams{},
+				ID:                   "file_reader1",
+				Type:                 utils.MetaFileCSV,
+				RunDelay:             -1,
+				ConcurrentReqs:       1024,
+				SourcePath:           "/tmp/ers/in",
+				ProcessedPath:        "/tmp/ers/out",
+				Tenant:               nil,
+				Timezone:             utils.EmptyString,
+				Filters:              []string{},
+				Flags:                utils.FlagsWithParams{},
+				Reconnects:           -1,
+				MaxReconnectInterval: 5 * time.Minute,
 				Fields: []*FCTemplate{
 					{Tag: "CustomTag2", Path: "CustomPath2", Type: utils.MetaVariable,
 						Value: NewRSRParsersMustCompile("CustomValue2", utils.InfieldSep), Mandatory: true, Layout: time.RFC3339},
@@ -931,13 +951,13 @@ func TestERsCfgAsMapInterfaceCase1(t *testing.T) {
 			{
 				"id": "file_reader1",
 				"run_delay":  "-1",
-                "tenant": "~*req.Destination1",
+				"tenant": "~*req.Destination1",
 				"type": "*fileCSV",
 				"source_path": "/tmp/ers/in",
 				"processed_path": "/tmp/ers/out",
-				"cache_dump_fields": [],
-			},
-		],
+				"cache_dump_fields": []
+			}
+		]
 	}
 }`
 	eMap := map[string]any{
@@ -945,18 +965,20 @@ func TestERsCfgAsMapInterfaceCase1(t *testing.T) {
 		utils.SessionSConnsCfg: []string{"conn1", "conn3"},
 		utils.ReadersCfg: []map[string]any{
 			{
-				utils.FiltersCfg:             []string{},
-				utils.FlagsCfg:               []string{},
-				utils.IDCfg:                  "*default",
-				utils.ProcessedPathCfg:       "/var/spool/cgrates/ers/out",
-				utils.RunDelayCfg:            "0",
-				utils.SourcePathCfg:          "/var/spool/cgrates/ers/in",
-				utils.TenantCfg:              "",
-				utils.TimezoneCfg:            "",
-				utils.CacheDumpFieldsCfg:     []map[string]any{},
-				utils.PartialCommitFieldsCfg: []map[string]any{},
-				utils.ConcurrentRequestsCfg:  1024,
-				utils.TypeCfg:                "*none",
+				utils.FiltersCfg:              []string{},
+				utils.FlagsCfg:                []string{},
+				utils.IDCfg:                   "*default",
+				utils.ProcessedPathCfg:        "/var/spool/cgrates/ers/out",
+				utils.RunDelayCfg:             "0",
+				utils.SourcePathCfg:           "/var/spool/cgrates/ers/in",
+				utils.TenantCfg:               "",
+				utils.TimezoneCfg:             "",
+				utils.CacheDumpFieldsCfg:      []map[string]any{},
+				utils.PartialCommitFieldsCfg:  []map[string]any{},
+				utils.ConcurrentRequestsCfg:   1024,
+				utils.TypeCfg:                 "*none",
+				utils.ReconnectsCfg:           -1,
+				utils.MaxReconnectIntervalCfg: "5m0s",
 				utils.FieldsCfg: []map[string]any{
 					{utils.MandatoryCfg: true, utils.PathCfg: "*cgreq.ToR", utils.TagCfg: "ToR", utils.TypeCfg: "*variable", utils.ValueCfg: "~*req.2"},
 					{utils.MandatoryCfg: true, utils.PathCfg: "*cgreq.OriginID", utils.TagCfg: "OriginID", utils.TypeCfg: "*variable", utils.ValueCfg: "~*req.3"},
@@ -997,14 +1019,16 @@ func TestERsCfgAsMapInterfaceCase1(t *testing.T) {
 					{utils.MandatoryCfg: true, utils.PathCfg: "*cgreq.AnswerTime", utils.TagCfg: "AnswerTime", utils.TypeCfg: "*variable", utils.ValueCfg: "~*req.12"},
 					{utils.MandatoryCfg: true, utils.PathCfg: "*cgreq.Usage", utils.TagCfg: "Usage", utils.TypeCfg: "*variable", utils.ValueCfg: "~*req.13"},
 				},
-				utils.FiltersCfg:       []string{},
-				utils.FlagsCfg:         []string{},
-				utils.IDCfg:            "file_reader1",
-				utils.ProcessedPathCfg: "/tmp/ers/out",
-				utils.RunDelayCfg:      "-1",
-				utils.SourcePathCfg:    "/tmp/ers/in",
-				utils.TenantCfg:        "~*req.Destination1",
-				utils.TimezoneCfg:      "",
+				utils.FiltersCfg:              []string{},
+				utils.FlagsCfg:                []string{},
+				utils.IDCfg:                   "file_reader1",
+				utils.ProcessedPathCfg:        "/tmp/ers/out",
+				utils.RunDelayCfg:             "-1",
+				utils.SourcePathCfg:           "/tmp/ers/in",
+				utils.TenantCfg:               "~*req.Destination1",
+				utils.TimezoneCfg:             "",
+				utils.ReconnectsCfg:           -1,
+				utils.MaxReconnectIntervalCfg: "5m0s",
 				utils.OptsCfg: map[string]any{
 					utils.CSVFieldSepOpt:        ",",
 					utils.HeaderDefineCharOpt:   ":",
@@ -1031,17 +1055,19 @@ func TestERSCfgAsMapInterfaceCase2(t *testing.T) {
 		"sessions_conns":["conn1","conn3"],
 		"readers": [
 			{
-                "id": "file_reader1",
+				"id": "file_reader1",
 				"run_delay":  "10s",
-                "tenant": "~*req.Destination1",
+				"tenant": "~*req.Destination1",
 				"type": "*fileCSV",
-                "flags": ["randomFlag"],
-                "filters": ["randomFilter"],
+				"flags": ["randomFlag"],
+				"filters": ["randomFilter"],
 				"source_path": "/tmp/ers/in",
-                "partial_record_cache": "1s",
+				"partial_record_cache": "1s",
 				"processed_path": "/tmp/ers/out",
+				"reconnects": 10,
+				"max_reconnect_interval": "2m",
 				"cache_dump_fields": [
-                    {"tag": "ToR", "path": "*cgreq.ToR", "type": "*variable", "value": "~*req.2", "mandatory": true}                
+					{"tag": "ToR", "path": "*cgreq.ToR", "type": "*variable", "value": "~*req.2", "mandatory": true}
 				],
 				"partial_commit_fields": [{
 					"mandatory": true,
@@ -1051,10 +1077,10 @@ func TestERSCfgAsMapInterfaceCase2(t *testing.T) {
 					"value": "~*req.2"
 				}],
 				"opts":{
-					"kafkaGroupID": "test",
-				},
-			},
-		],
+					"kafkaGroupID": "test"
+				}
+			}
+		]
 	}
 }`
 	eMap := map[string]any{
@@ -1062,18 +1088,20 @@ func TestERSCfgAsMapInterfaceCase2(t *testing.T) {
 		utils.SessionSConnsCfg: []string{"conn1", "conn3"},
 		utils.ReadersCfg: []map[string]any{
 			{
-				utils.FiltersCfg:             []string{},
-				utils.FlagsCfg:               []string{},
-				utils.IDCfg:                  "*default",
-				utils.ProcessedPathCfg:       "/var/spool/cgrates/ers/out",
-				utils.RunDelayCfg:            "0",
-				utils.SourcePathCfg:          "/var/spool/cgrates/ers/in",
-				utils.TenantCfg:              "",
-				utils.TimezoneCfg:            "",
-				utils.CacheDumpFieldsCfg:     []map[string]any{},
-				utils.PartialCommitFieldsCfg: []map[string]any{},
-				utils.ConcurrentRequestsCfg:  1024,
-				utils.TypeCfg:                "*none",
+				utils.FiltersCfg:              []string{},
+				utils.FlagsCfg:                []string{},
+				utils.IDCfg:                   "*default",
+				utils.ProcessedPathCfg:        "/var/spool/cgrates/ers/out",
+				utils.RunDelayCfg:             "0",
+				utils.SourcePathCfg:           "/var/spool/cgrates/ers/in",
+				utils.TenantCfg:               "",
+				utils.TimezoneCfg:             "",
+				utils.CacheDumpFieldsCfg:      []map[string]any{},
+				utils.PartialCommitFieldsCfg:  []map[string]any{},
+				utils.ConcurrentRequestsCfg:   1024,
+				utils.MaxReconnectIntervalCfg: "5m0s",
+				utils.ReconnectsCfg:           -1,
+				utils.TypeCfg:                 "*none",
 				utils.FieldsCfg: []map[string]any{
 					{utils.MandatoryCfg: true, utils.PathCfg: "*cgreq.ToR", utils.TagCfg: "ToR", utils.TypeCfg: "*variable", utils.ValueCfg: "~*req.2"},
 					{utils.MandatoryCfg: true, utils.PathCfg: "*cgreq.OriginID", utils.TagCfg: "OriginID", utils.TypeCfg: "*variable", utils.ValueCfg: "~*req.3"},
@@ -1124,14 +1152,16 @@ func TestERSCfgAsMapInterfaceCase2(t *testing.T) {
 					{utils.MandatoryCfg: true, utils.PathCfg: "*cgreq.AnswerTime", utils.TagCfg: "AnswerTime", utils.TypeCfg: "*variable", utils.ValueCfg: "~*req.12"},
 					{utils.MandatoryCfg: true, utils.PathCfg: "*cgreq.Usage", utils.TagCfg: "Usage", utils.TypeCfg: "*variable", utils.ValueCfg: "~*req.13"},
 				},
-				utils.FiltersCfg:       []string{"randomFilter"},
-				utils.FlagsCfg:         []string{"randomFlag"},
-				utils.IDCfg:            "file_reader1",
-				utils.ProcessedPathCfg: "/tmp/ers/out",
-				utils.RunDelayCfg:      "10s",
-				utils.SourcePathCfg:    "/tmp/ers/in",
-				utils.TenantCfg:        "~*req.Destination1",
-				utils.TimezoneCfg:      "",
+				utils.FiltersCfg:              []string{"randomFilter"},
+				utils.FlagsCfg:                []string{"randomFlag"},
+				utils.IDCfg:                   "file_reader1",
+				utils.ProcessedPathCfg:        "/tmp/ers/out",
+				utils.RunDelayCfg:             "10s",
+				utils.SourcePathCfg:           "/tmp/ers/in",
+				utils.TenantCfg:               "~*req.Destination1",
+				utils.TimezoneCfg:             "",
+				utils.MaxReconnectIntervalCfg: "2m0s",
+				utils.ReconnectsCfg:           10,
 				utils.OptsCfg: map[string]any{
 					utils.KafkaGroupID:          "test",
 					utils.CSVFieldSepOpt:        ",",
@@ -1158,16 +1188,18 @@ func TestERsloadFromJsonCfg(t *testing.T) {
 		Sessions_conns: &[]string{"*conn1"},
 		Readers: &[]*EventReaderJsonCfg{
 			{
-				Id:                  utils.StringPointer("file_reader1"),
-				Type:                utils.StringPointer(utils.MetaFileCSV),
-				Run_delay:           utils.StringPointer("-1"),
-				Concurrent_requests: utils.IntPointer(1024),
-				Source_path:         utils.StringPointer("/tmp/ers/in"),
-				Processed_path:      utils.StringPointer("/tmp/ers/out"),
-				Tenant:              nil,
-				Timezone:            utils.StringPointer(""),
-				Filters:             nil,
-				Flags:               &[]string{},
+				ID:                   utils.StringPointer("file_reader1"),
+				Type:                 utils.StringPointer(utils.MetaFileCSV),
+				RunDelay:             utils.StringPointer("-1"),
+				ConcurrentRequests:   utils.IntPointer(1024),
+				SourcePath:           utils.StringPointer("/tmp/ers/in"),
+				ProcessedPath:        utils.StringPointer("/tmp/ers/out"),
+				Tenant:               nil,
+				Timezone:             utils.StringPointer(""),
+				Filters:              nil,
+				Reconnects:           utils.IntPointer(10),
+				MaxReconnectInterval: utils.StringPointer("2m"),
+				Flags:                &[]string{},
 				Fields: &[]*FcTemplateJsonCfg{
 					{
 						Tag:    utils.StringPointer(utils.MetaOriginID),
@@ -1186,16 +1218,18 @@ func TestERsloadFromJsonCfg(t *testing.T) {
 		SessionSConns: []string{"*conn1"},
 		Readers: []*EventReaderCfg{
 			{
-				ID:             utils.MetaDefault,
-				Type:           utils.MetaNone,
-				RunDelay:       0,
-				ConcurrentReqs: 1024,
-				SourcePath:     "/var/spool/cgrates/ers/in",
-				ProcessedPath:  "/var/spool/cgrates/ers/out",
-				Tenant:         nil,
-				Timezone:       utils.EmptyString,
-				Filters:        []string{},
-				Flags:          utils.FlagsWithParams{},
+				ID:                   utils.MetaDefault,
+				Type:                 utils.MetaNone,
+				RunDelay:             0,
+				ConcurrentReqs:       1024,
+				SourcePath:           "/var/spool/cgrates/ers/in",
+				ProcessedPath:        "/var/spool/cgrates/ers/out",
+				Tenant:               nil,
+				Timezone:             utils.EmptyString,
+				Filters:              []string{},
+				Flags:                utils.FlagsWithParams{},
+				Reconnects:           -1,
+				MaxReconnectInterval: 5 * time.Minute,
 				Fields: []*FCTemplate{
 					{Tag: utils.ToR, Path: utils.MetaCgreq + utils.NestingSep + utils.ToR, Type: utils.MetaVariable,
 						Value: NewRSRParsersMustCompile("~*req.2", utils.InfieldSep), Mandatory: true, Layout: time.RFC3339},
@@ -1232,16 +1266,18 @@ func TestERsloadFromJsonCfg(t *testing.T) {
 				},
 			},
 			{
-				ID:             "file_reader1",
-				Type:           utils.MetaFileCSV,
-				RunDelay:       -1,
-				ConcurrentReqs: 1024,
-				SourcePath:     "/tmp/ers/in",
-				ProcessedPath:  "/tmp/ers/out",
-				Tenant:         nil,
-				Timezone:       utils.EmptyString,
-				Filters:        []string{},
-				Flags:          utils.FlagsWithParams{},
+				ID:                   "file_reader1",
+				Type:                 utils.MetaFileCSV,
+				RunDelay:             -1,
+				ConcurrentReqs:       1024,
+				SourcePath:           "/tmp/ers/in",
+				ProcessedPath:        "/tmp/ers/out",
+				Tenant:               nil,
+				Timezone:             utils.EmptyString,
+				Filters:              []string{},
+				Flags:                utils.FlagsWithParams{},
+				Reconnects:           10,
+				MaxReconnectInterval: 2 * time.Minute,
 				Fields: []*FCTemplate{
 					{
 						Tag:    utils.MetaOriginID,
@@ -1278,7 +1314,7 @@ func TestERsloadFromJsonCfg(t *testing.T) {
 	if err := cfgCgr.ersCfg.loadFromJSONCfg(cfgJSON, cfgCgr.templates, cfgCgr.generalCfg.RSRSep); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(cfgCgr.ersCfg, expectedERsCfg) {
-		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expectedERsCfg), utils.ToJSON(cgrCfg.ersCfg))
+		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expectedERsCfg), utils.ToJSON(cfgCgr.ersCfg))
 	}
 }
 
@@ -1360,12 +1396,12 @@ func TestDiffEventReaderJsonCfg(t *testing.T) {
 	}
 
 	expected := &EventReaderJsonCfg{
-		Id:                  utils.StringPointer("ERS_ID2"),
-		Type:                utils.StringPointer("json"),
-		Run_delay:           utils.StringPointer("3s"),
-		Concurrent_requests: utils.IntPointer(1),
-		Source_path:         utils.StringPointer("/var/tmp/ers/in"),
-		Processed_path:      utils.StringPointer("/var/tmp/ers/out"),
+		ID:                 utils.StringPointer("ERS_ID2"),
+		Type:               utils.StringPointer("json"),
+		RunDelay:           utils.StringPointer("3s"),
+		ConcurrentRequests: utils.IntPointer(1),
+		SourcePath:         utils.StringPointer("/var/tmp/ers/in"),
+		ProcessedPath:      utils.StringPointer("/var/tmp/ers/out"),
 		Opts: &EventReaderOptsJson{
 			CSVRowLength: utils.IntPointer(5),
 		},
@@ -1378,12 +1414,12 @@ func TestDiffEventReaderJsonCfg(t *testing.T) {
 				Type: utils.StringPointer(utils.MetaVariable),
 			},
 		},
-		Cache_dump_fields: &[]*FcTemplateJsonCfg{
+		CacheDumpFields: &[]*FcTemplateJsonCfg{
 			{
 				Type: utils.StringPointer(utils.MetaConstant),
 			},
 		},
-		Partial_commit_fields: &[]*FcTemplateJsonCfg{
+		PartialCommitFields: &[]*FcTemplateJsonCfg{
 			{
 				Type: utils.StringPointer(utils.MetaConstant),
 			},
@@ -1405,7 +1441,7 @@ func TestDiffEventReaderJsonCfg(t *testing.T) {
 				Value: utils.StringPointer("~*req.2"),
 			},
 		},
-		Cache_dump_fields: &[]*FcTemplateJsonCfg{
+		CacheDumpFields: &[]*FcTemplateJsonCfg{
 			{
 				Tag:   utils.StringPointer("ToR2"),
 				Path:  utils.StringPointer("*cgreq.ToR2"),
@@ -1413,7 +1449,7 @@ func TestDiffEventReaderJsonCfg(t *testing.T) {
 				Value: utils.StringPointer("~*req.3"),
 			},
 		},
-		Partial_commit_fields: &[]*FcTemplateJsonCfg{
+		PartialCommitFields: &[]*FcTemplateJsonCfg{
 			{
 				Tag:   utils.StringPointer("ToR3"),
 				Path:  utils.StringPointer("*cgreq.ToR3"),
@@ -1433,7 +1469,7 @@ func TestDiffEventReaderJsonCfg(t *testing.T) {
 				Value: utils.StringPointer("~*req.2"),
 			},
 		},
-		Cache_dump_fields: &[]*FcTemplateJsonCfg{
+		CacheDumpFields: &[]*FcTemplateJsonCfg{
 			{
 				Tag:   utils.StringPointer("ToR2"),
 				Path:  utils.StringPointer("*cgreq.ToR2"),
@@ -1441,7 +1477,7 @@ func TestDiffEventReaderJsonCfg(t *testing.T) {
 				Value: utils.StringPointer("~*req.3"),
 			},
 		},
-		Partial_commit_fields: &[]*FcTemplateJsonCfg{
+		PartialCommitFields: &[]*FcTemplateJsonCfg{
 			{
 				Tag:   utils.StringPointer("ToR3"),
 				Path:  utils.StringPointer("*cgreq.ToR3"),
@@ -1459,12 +1495,12 @@ func TestDiffEventReaderJsonCfg(t *testing.T) {
 func TestGetEventReaderJsonCfg(t *testing.T) {
 	d := []*EventReaderJsonCfg{
 		{
-			Id: utils.StringPointer("ERS_ID"),
+			ID: utils.StringPointer("ERS_ID"),
 		},
 	}
 
 	expected := &EventReaderJsonCfg{
-		Id: utils.StringPointer("ERS_ID"),
+		ID: utils.StringPointer("ERS_ID"),
 	}
 
 	rcv, idx := getEventReaderJsonCfg(d, "ERS_ID")
@@ -1476,7 +1512,7 @@ func TestGetEventReaderJsonCfg(t *testing.T) {
 
 	d = []*EventReaderJsonCfg{
 		{
-			Id: nil,
+			ID: nil,
 		},
 	}
 	rcv, idx = getEventReaderJsonCfg(d, "ERS_ID")
@@ -1584,12 +1620,12 @@ func TestDiffEventReadersJsonCfg(t *testing.T) {
 
 	expected := &[]*EventReaderJsonCfg{
 		{
-			Id:                  utils.StringPointer("ERS_ID2"),
-			Type:                utils.StringPointer("json"),
-			Run_delay:           utils.StringPointer("3s"),
-			Concurrent_requests: utils.IntPointer(1),
-			Source_path:         utils.StringPointer("/var/tmp/ers/in"),
-			Processed_path:      utils.StringPointer("/var/tmp/ers/out"),
+			ID:                 utils.StringPointer("ERS_ID2"),
+			Type:               utils.StringPointer("json"),
+			RunDelay:           utils.StringPointer("3s"),
+			ConcurrentRequests: utils.IntPointer(1),
+			SourcePath:         utils.StringPointer("/var/tmp/ers/in"),
+			ProcessedPath:      utils.StringPointer("/var/tmp/ers/out"),
 			Opts: &EventReaderOptsJson{
 				CSVRowLength: utils.IntPointer(5),
 			},
@@ -1603,7 +1639,7 @@ func TestDiffEventReadersJsonCfg(t *testing.T) {
 					Layout: utils.StringPointer(""),
 				},
 			},
-			Cache_dump_fields: &[]*FcTemplateJsonCfg{
+			CacheDumpFields: &[]*FcTemplateJsonCfg{
 				{
 					Type:   utils.StringPointer("*string"),
 					Layout: utils.StringPointer(""),
@@ -1628,10 +1664,10 @@ func TestDiffEventReadersJsonCfg(t *testing.T) {
 		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected), utils.ToJSON(rcv))
 	}
 
-	(*expected)[0].Id = utils.StringPointer("ERS_ID2")
+	(*expected)[0].ID = utils.StringPointer("ERS_ID2")
 	d = &[]*EventReaderJsonCfg{
 		{
-			Id: utils.StringPointer("ERS_ID2"),
+			ID: utils.StringPointer("ERS_ID2"),
 		},
 	}
 
@@ -1673,7 +1709,7 @@ func TestDiffERsJsonCfg(t *testing.T) {
 		Sessions_conns: &[]string{"*localhost"},
 		Readers: &[]*EventReaderJsonCfg{
 			{
-				Id:   utils.StringPointer("ERS_ID2"),
+				ID:   utils.StringPointer("ERS_ID2"),
 				Opts: &EventReaderOptsJson{},
 			},
 		},
@@ -2532,17 +2568,19 @@ func TestErsCfgAsMapInterface(t *testing.T) {
 		utils.AMQPPasswordProcessedCfg: str,
 	}
 	exp := map[string]any{
-		utils.IDCfg:                 er.ID,
-		utils.TypeCfg:               er.Type,
-		utils.ConcurrentRequestsCfg: er.ConcurrentReqs,
-		utils.SourcePathCfg:         er.SourcePath,
-		utils.ProcessedPathCfg:      er.ProcessedPath,
-		utils.TenantCfg:             er.Tenant.GetRule(""),
-		utils.TimezoneCfg:           er.Timezone,
-		utils.FiltersCfg:            er.Filters,
-		utils.FlagsCfg:              []string{},
-		utils.RunDelayCfg:           "0",
-		utils.OptsCfg:               opts,
+		utils.IDCfg:                   er.ID,
+		utils.TypeCfg:                 er.Type,
+		utils.ConcurrentRequestsCfg:   er.ConcurrentReqs,
+		utils.SourcePathCfg:           er.SourcePath,
+		utils.ProcessedPathCfg:        er.ProcessedPath,
+		utils.TenantCfg:               er.Tenant.GetRule(""),
+		utils.TimezoneCfg:             er.Timezone,
+		utils.FiltersCfg:              er.Filters,
+		utils.FlagsCfg:                []string{},
+		utils.RunDelayCfg:             "0",
+		utils.ReconnectsCfg:           er.Reconnects,
+		utils.MaxReconnectIntervalCfg: "0",
+		utils.OptsCfg:                 opts,
 	}
 	rcv := er.AsMapInterface("")
 
