@@ -20,7 +20,6 @@ package engine
 
 import (
 	"fmt"
-	"math/rand"
 	"runtime"
 	"sort"
 	"sync"
@@ -31,10 +30,6 @@ import (
 	"github.com/cgrates/cgrates/guardian"
 	"github.com/cgrates/cgrates/utils"
 )
-
-func init() {
-	rand.Seed(time.Now().UnixNano())
-}
 
 // ResourceProfile represents the user configuration for the resource
 type ResourceProfile struct {

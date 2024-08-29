@@ -236,7 +236,6 @@ func (sS *SessionS) setSTerminator(ctx *context.Context, s *Session, opts engine
 		return
 	}
 	if maxDelay != 0 {
-		rand.Seed(time.Now().Unix())
 		ttl += time.Duration(
 			rand.Int63n(maxDelay.Milliseconds()) * time.Millisecond.Nanoseconds())
 	}
