@@ -20,6 +20,7 @@ package utils
 import (
 	"errors"
 	"fmt"
+	"math"
 	"reflect"
 	"sync"
 	"testing"
@@ -1585,9 +1586,13 @@ func TestCoreUtilsFibDurationSeqNrOverflow(t *testing.T) {
 		fib()
 	}
 	for i := 0; i < 100; i++ {
-		if rcv := fib(); rcv != AbsoluteMaxDuration {
-			t.Errorf("expected: <%+v>, \nreceived: <%+v>", AbsoluteMaxDuration, rcv)
+		if rcv := fib(); rcv != math.MaxInt {
+			t.Errorf("expected: <%+v>, \nreceived: <%+v>", math.MaxInt, rcv)
 		}
+	}
+	fib = FibDuration(time.Second, 6)
+	if rcv := fib(); rcv != 6 {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", math.MaxInt, rcv)
 	}
 }
 
