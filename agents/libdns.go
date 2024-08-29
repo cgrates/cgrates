@@ -597,8 +597,8 @@ func updateDnsAnswer(q []dns.RR, qType uint16, qName string, path []string, valu
 		err = updateDnsSRVAnswer(v, path, value)
 	case *dns.A:
 		if len(path) < 1 ||
-			(path[0] != utils.DNSHdr && len(path) != 1) ||
-			(path[0] == utils.DNSHdr && len(path) != 2) {
+			path[0] != utils.DNSHdr && len(path) != 1 ||
+			path[0] == utils.DNSHdr && len(path) != 2 {
 			err = utils.ErrWrongPath
 			return
 		}
@@ -647,8 +647,8 @@ func newDNSAnswer(qType uint16, qName string) (a dns.RR, err error) {
 
 func updateDnsSRVAnswer(v *dns.SRV, path []string, value any) (err error) {
 	if len(path) < 1 ||
-		(path[0] != utils.DNSHdr && len(path) != 1) ||
-		(path[0] == utils.DNSHdr && len(path) != 2) {
+		path[0] != utils.DNSHdr && len(path) != 1 ||
+		path[0] == utils.DNSHdr && len(path) != 2 {
 		err = utils.ErrWrongPath
 		return
 	}
@@ -683,8 +683,8 @@ func updateDnsSRVAnswer(v *dns.SRV, path []string, value any) (err error) {
 
 func updateDnsNAPTRAnswer(v *dns.NAPTR, path []string, value any) (err error) {
 	if len(path) < 1 ||
-		(path[0] != utils.DNSHdr && len(path) != 1) ||
-		(path[0] == utils.DNSHdr && len(path) != 2) {
+		path[0] != utils.DNSHdr && len(path) != 1 ||
+		path[0] == utils.DNSHdr && len(path) != 2 {
 		return utils.ErrWrongPath
 	}
 	switch path[0] {

@@ -1768,7 +1768,7 @@ func TestStripConverter(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			sc, err := NewDataConverter(tt.params)
-			if (err != nil) != tt.constructorErr {
+			if err != nil != tt.constructorErr {
 				t.Errorf("NewStripConverter() error = %v, constructorErr %v", err, tt.constructorErr)
 				return
 			}
@@ -1779,7 +1779,7 @@ func TestStripConverter(t *testing.T) {
 				return
 			}
 			rcv, err := sc.Convert(tt.input)
-			if (err != nil) != tt.convertErr {
+			if err != nil != tt.convertErr {
 				t.Errorf("Convert() error = %v, convertErr %v", err, tt.convertErr)
 				return
 			}

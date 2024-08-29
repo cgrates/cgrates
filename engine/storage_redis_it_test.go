@@ -55,7 +55,7 @@ func BenchmarkRedisGetKeysForPrefix(b *testing.B) {
 	var prfID string
 	for i := 0; i <= 10000; i++ {
 		if i%1000 == 0 {
-			if (i/1000)%2 == 0 {
+			if i/1000%2 == 0 {
 				prfID = "TestA:"
 			} else {
 				prfID = "TestB:"

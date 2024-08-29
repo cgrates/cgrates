@@ -407,15 +407,15 @@ func (itm *ItemOpts) Clone() *ItemOpts {
 }
 
 func (itm *ItemOpts) Equals(itm2 *ItemOpts) bool {
-	return (itm == nil && itm2 == nil) ||
-		(itm != nil && itm2 != nil &&
+	return itm == nil && itm2 == nil ||
+		itm != nil && itm2 != nil &&
 			itm.Remote == itm2.Remote &&
 			itm.Replicate == itm2.Replicate &&
 			itm.RouteID == itm2.RouteID &&
 			itm.APIKey == itm2.APIKey &&
 			itm.Limit == itm2.Limit &&
 			itm.TTL == itm2.TTL &&
-			itm.StaticTTL == itm2.StaticTTL)
+			itm.StaticTTL == itm2.StaticTTL
 }
 
 type ItemOptsJson struct {

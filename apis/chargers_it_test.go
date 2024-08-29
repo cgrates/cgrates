@@ -711,7 +711,7 @@ func testChargersGetChargerProfilesWithPrefix(t *testing.T) {
 		t.Error(err)
 	}
 	sort.Slice(reply2, func(i, j int) bool {
-		return (reply2)[i].ID < (reply2)[j].ID
+		return reply2[i].ID < reply2[j].ID
 	})
 	if !reflect.DeepEqual(reply2, expected) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(reply2))

@@ -1399,7 +1399,7 @@ func TestSessionSGetIndexedFilters(t *testing.T) {
 		"ToR": {},
 	}
 	sS = NewSessionS(cfg, engine.NewDataManager(mpStr, config.CgrConfig().CacheCfg(), nil), nil, nil)
-	expIndx = map[string][]string{(utils.ToR): {utils.MetaVoice}}
+	expIndx = map[string][]string{utils.ToR: {utils.MetaVoice}}
 	expUindx = nil
 	if rplyindx, rplyUnindx := sS.getIndexedFilters(context.Background(), "", fltrs); !reflect.DeepEqual(expIndx, rplyindx) {
 		t.Errorf("Expected %s , received: %s", utils.ToJSON(expIndx), utils.ToJSON(rplyindx))

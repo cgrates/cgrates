@@ -1013,7 +1013,7 @@ func TestErsOnEvictedNoCacheDumpFields(t *testing.T) {
 		if err != nil {
 			t.Error(err)
 		}
-		s := strings.Split(string((data)), ",")
+		s := strings.Split(string(data), ",")
 
 		compare[idx] = s
 	}

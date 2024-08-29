@@ -146,10 +146,10 @@ func (t *Threshold) isLocked() bool {
 func processEventWithThreshold(ctx *context.Context, connMgr *ConnManager, actionsConns []string, args *utils.CGREvent, t *Threshold) (err error) {
 	if t.Snooze.After(time.Now()) || // snoozed, not executing actions
 		t.Hits < t.tPrfl.MinHits || // number of hits was not met, will not execute actions
-		(t.tPrfl.MaxHits != -1 &&
-			t.Hits > t.tPrfl.MaxHits) ||
-		(len(t.tPrfl.ActionProfileIDs) == 1 &&
-			t.tPrfl.ActionProfileIDs[0] == utils.MetaNone) {
+		t.tPrfl.MaxHits != -1 &&
+			t.Hits > t.tPrfl.MaxHits ||
+		len(t.tPrfl.ActionProfileIDs) == 1 &&
+			t.tPrfl.ActionProfileIDs[0] == utils.MetaNone {
 		return
 	}
 

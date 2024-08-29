@@ -139,7 +139,7 @@ func orderRatesOnIntervals(aRts []*utils.Rate, wghts []float64, sTime time.Time,
 		for _, rIt := range allRates {
 			if rWw.has(rIt.id()) ||
 				rIt.aTime.After(tm) ||
-				(!rIt.iTime.IsZero() && !tm.Before(rIt.iTime)) {
+				!rIt.iTime.IsZero() && !tm.Before(rIt.iTime) {
 				continue
 			}
 			rWw.add(rIt)

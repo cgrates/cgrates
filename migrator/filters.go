@@ -97,7 +97,7 @@ func migrateFilterV2(fl *v1Filter) (fltr *engine.Filter) {
 			Element: rule.FieldName,
 			Values:  rule.Values,
 		}
-		if (rule.FieldName == "" && rule.Type != utils.MetaRSR) ||
+		if rule.FieldName == "" && rule.Type != utils.MetaRSR ||
 			strings.HasPrefix(rule.FieldName, utils.DynamicDataPrefix+utils.MetaReq) ||
 			strings.HasPrefix(rule.FieldName, utils.DynamicDataPrefix+utils.MetaVars) ||
 			strings.HasPrefix(rule.FieldName, utils.DynamicDataPrefix+utils.MetaCgreq) ||

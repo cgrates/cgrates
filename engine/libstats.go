@@ -407,7 +407,7 @@ func (sq *StatQueue) Compress(maxQL uint64) bool {
 			if newSQItems[j].ExpiryTime == nil {
 				return true
 			}
-			return newSQItems[i].ExpiryTime.Before(*(newSQItems[j].ExpiryTime))
+			return newSQItems[i].ExpiryTime.Before(*newSQItems[j].ExpiryTime)
 		})
 	}
 	sq.SQItems = newSQItems

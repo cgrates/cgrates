@@ -64,9 +64,9 @@ func ReadEnv(key string) (string, error) { //it shod print a warning not a error
 
 // isAlfanum check if byte is number or letter
 func isAlfanum(bit byte) bool {
-	return (bit >= 'a' && bit <= 'z') ||
-		(bit >= 'A' && bit <= 'Z') ||
-		(bit >= '0' && bit <= '9')
+	return bit >= 'a' && bit <= 'z' ||
+		bit >= 'A' && bit <= 'Z' ||
+		bit >= '0' && bit <= '9'
 }
 
 // RjReader structure that implements io.Reader to read json files ignoring C style comments and replacing *env:

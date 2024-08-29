@@ -1728,7 +1728,7 @@ func TestStatQueueProfile_Set(t *testing.T) {
 				ThresholdIDs: tt.fields.ThresholdIDs,
 				lkID:         tt.fields.lkID,
 			}
-			if err := sqp.Set(tt.args.path, tt.args.val, tt.args.newBranch, tt.args.in3); (err != nil) != tt.wantErr {
+			if err := sqp.Set(tt.args.path, tt.args.val, tt.args.newBranch, tt.args.in3); err != nil != tt.wantErr {
 				t.Errorf("StatQueueProfile.Set() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})

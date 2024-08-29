@@ -287,7 +287,7 @@ func (da *DiameterAgent) handleMessage(c diam.Conn, m *diam.Message) {
 			processed = lclProcessed
 		}
 		if err != nil ||
-			(lclProcessed && !reqProcessor.Flags.GetBool(utils.MetaContinue)) {
+			lclProcessed && !reqProcessor.Flags.GetBool(utils.MetaContinue) {
 			break
 		}
 	}

@@ -86,7 +86,7 @@ func (alS *AttributeS) attributeProfileForEvent(ctx *context.Context, tnt string
 			return nil, err
 		}
 		tntID := aPrfl.TenantIDInline()
-		(evNm[utils.MetaVars].(utils.MapStorage))[utils.MetaAttrPrfTenantID] = tntID
+		evNm[utils.MetaVars].(utils.MapStorage)[utils.MetaAttrPrfTenantID] = tntID
 		if !ignoreFilters {
 			if pass, err := alS.fltrS.Pass(ctx, tnt, aPrfl.FilterIDs,
 				evNm); err != nil {
@@ -111,7 +111,7 @@ func (alS *AttributeS) attributeProfileForEvent(ctx *context.Context, tnt string
 	if apWw == nil {
 		return nil, utils.ErrNotFound
 	}
-	(evNm[utils.MetaVars].(utils.MapStorage))[utils.MetaAttrPrfTenantID] = apWw.AttributeProfile.TenantIDInline()
+	evNm[utils.MetaVars].(utils.MapStorage)[utils.MetaAttrPrfTenantID] = apWw.AttributeProfile.TenantIDInline()
 	return apWw.AttributeProfile, nil
 }
 
@@ -278,7 +278,7 @@ func (alS *AttributeS) V1GetAttributeForEvent(ctx *context.Context, args *utils.
 		}
 		return err
 	}
-	*attrPrfl = *(NewAPIAttributeProfile(attrPrf))
+	*attrPrfl = *NewAPIAttributeProfile(attrPrf)
 	return
 }
 
@@ -323,7 +323,7 @@ func (alS *AttributeS) V1ProcessEvent(ctx *context.Context, args *utils.CGREvent
 	dynDP := newDynamicDP(ctx, alS.cfg.AttributeSCfg().ResourceSConns,
 		alS.cfg.AttributeSCfg().StatSConns, alS.cfg.AttributeSCfg().AccountSConns, args.Tenant, eNV)
 	for i := 0; i < processRuns; i++ {
-		(eNV[utils.MetaVars].(utils.MapStorage))[utils.MetaProcessRunsCfg] = i + 1
+		eNV[utils.MetaVars].(utils.MapStorage)[utils.MetaProcessRunsCfg] = i + 1
 		var evRply *AttrSProcessEventReply
 		evRply, err = alS.processEvent(ctx, tnt, args, eNV, dynDP, lastID, processedPrfNo, profileRuns)
 		if err != nil {

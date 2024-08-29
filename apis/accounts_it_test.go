@@ -252,7 +252,7 @@ func testAccGetAccIDs(t *testing.T) {
 func testAccGetAccs(t *testing.T) {
 	var reply *[]*utils.Account
 	args := &utils.ArgsItemIDs{}
-	expected := &[](*utils.Account){
+	expected := &[]*utils.Account{
 		{
 			Tenant: "cgrates.org",
 			ID:     "TEST_ACC_IT_TEST",
@@ -414,7 +414,7 @@ func testAccGetAccIDs2(t *testing.T) {
 func testAccGetAccs2(t *testing.T) {
 	var reply *[]*utils.Account
 	args := &utils.ArgsItemIDs{}
-	expected := &[](*utils.Account){
+	expected := &[]*utils.Account{
 		{
 			Tenant: "cgrates.org",
 			ID:     "TEST_ACC_IT_TEST",
@@ -530,7 +530,7 @@ func testAccRemoveAcc(t *testing.T) {
 func testAccGetAccs3(t *testing.T) {
 	var reply *[]*utils.Account
 	args := &utils.ArgsItemIDs{}
-	expected := &[](*utils.Account){
+	expected := &[]*utils.Account{
 		{
 			Tenant: "cgrates.org",
 			ID:     "TEST_ACC_IT_TEST",

@@ -46,7 +46,6 @@ func NewCSVFile(rdr io.ReadCloser, path string, sep rune, nrFlds int) *CSVFile {
 	csvRrdr.Comma = sep
 	csvRrdr.Comment = utils.CommentChar
 	csvRrdr.FieldsPerRecord = nrFlds
-	csvRrdr.TrailingComma = true
 	return &CSVFile{
 		path:   path,
 		cls:    rdr,

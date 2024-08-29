@@ -434,7 +434,7 @@ func (fltr *FilterRule) Pass(ctx *context.Context, dDP utils.DataProvider) (resu
 	if err != nil {
 		return false, err
 	}
-	return result != *(fltr.negative), nil
+	return result != *fltr.negative, nil
 }
 
 func (fltr *FilterRule) passString(dDP utils.DataProvider) (bool, error) {

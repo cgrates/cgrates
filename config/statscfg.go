@@ -102,13 +102,13 @@ func (st *StatSCfg) loadFromJSONCfg(jsnCfg *StatServJsonCfg) (err error) {
 		st.ThresholdSConns = updateInternalConns(*jsnCfg.Thresholds_conns, utils.MetaThresholds)
 	}
 	if jsnCfg.String_indexed_fields != nil {
-		st.StringIndexedFields = utils.SliceStringPointer(slices.Clone((*jsnCfg.String_indexed_fields)))
+		st.StringIndexedFields = utils.SliceStringPointer(slices.Clone(*jsnCfg.String_indexed_fields))
 	}
 	if jsnCfg.Prefix_indexed_fields != nil {
-		st.PrefixIndexedFields = utils.SliceStringPointer(slices.Clone((*jsnCfg.Prefix_indexed_fields)))
+		st.PrefixIndexedFields = utils.SliceStringPointer(slices.Clone(*jsnCfg.Prefix_indexed_fields))
 	}
 	if jsnCfg.Suffix_indexed_fields != nil {
-		st.SuffixIndexedFields = utils.SliceStringPointer(slices.Clone((*jsnCfg.Suffix_indexed_fields)))
+		st.SuffixIndexedFields = utils.SliceStringPointer(slices.Clone(*jsnCfg.Suffix_indexed_fields))
 	}
 	if jsnCfg.Exists_indexed_fields != nil {
 		st.ExistsIndexedFields = utils.SliceStringPointer(slices.Clone(*jsnCfg.Exists_indexed_fields))

@@ -527,7 +527,7 @@ func testStatsGetStatQueueProfiles1(t *testing.T) {
 		t.Error(err)
 	}
 	sort.Slice(reply, func(i int, j int) bool {
-		return (reply)[i].ID < (reply)[j].ID
+		return reply[i].ID < reply[j].ID
 	})
 	if !reflect.DeepEqual(reply, exp) {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", exp, reply)

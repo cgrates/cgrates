@@ -174,12 +174,12 @@ func prepareStatsData(t *testing.T, dm *DataManager) {
 			{
 				Type:    utils.MetaGreaterOrEqual,
 				Element: "~*req.UsageInterval",
-				Values:  []string{(time.Second).String()},
+				Values:  []string{time.Second.String()},
 			},
 			{
 				Type:    utils.MetaGreaterOrEqual,
 				Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Usage,
-				Values:  []string{(time.Second).String()},
+				Values:  []string{time.Second.String()},
 			},
 			{
 				Type:    utils.MetaGreaterOrEqual,
@@ -202,12 +202,12 @@ func prepareStatsData(t *testing.T, dm *DataManager) {
 			{
 				Type:    utils.MetaGreaterOrEqual,
 				Element: "~*req.PddInterval",
-				Values:  []string{(time.Second).String()},
+				Values:  []string{time.Second.String()},
 			},
 			{
 				Type:    utils.MetaGreaterOrEqual,
 				Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Usage,
-				Values:  []string{(time.Second).String()},
+				Values:  []string{time.Second.String()},
 			},
 			{
 				Type:    utils.MetaGreaterOrEqual,

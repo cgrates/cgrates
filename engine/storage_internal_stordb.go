@@ -75,7 +75,7 @@ func (iDB *InternalDB) GetCDRs(ctx *context.Context, qryFltr []*Filter, opts map
 		for _, rule := range fltr.Rules {
 			var elem string
 			if !slices.Contains(iDB.stringIndexedFields, strings.TrimPrefix(rule.Element, "~")) ||
-				(rule.Type != utils.MetaString && rule.Type != utils.MetaNotString) {
+				rule.Type != utils.MetaString && rule.Type != utils.MetaNotString {
 				notIndexed = append(notIndexed, rule)
 				continue
 			}
@@ -180,7 +180,7 @@ func (iDB *InternalDB) RemoveCDRs(ctx *context.Context, qryFltr []*Filter) (err 
 		for _, rule := range fltr.Rules {
 			var elem string
 			if !slices.Contains(iDB.stringIndexedFields, strings.TrimPrefix(rule.Element, "~")) ||
-				(rule.Type != utils.MetaString && rule.Type != utils.MetaNotString) {
+				rule.Type != utils.MetaString && rule.Type != utils.MetaNotString {
 				notIndexed = append(notIndexed, rule)
 				continue
 			}

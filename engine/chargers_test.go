@@ -89,7 +89,7 @@ func TestChargerSetChargerProfiles(t *testing.T) {
 			{
 				Type:    utils.MetaGreaterOrEqual,
 				Element: "~*req.UsageInterval",
-				Values:  []string{(time.Second).String()},
+				Values:  []string{time.Second.String()},
 			},
 		},
 	}
@@ -240,7 +240,7 @@ func TestChargerMatchingChargerProfilesForEvent(t *testing.T) {
 			{
 				Type:    utils.MetaGreaterOrEqual,
 				Element: "~*req.UsageInterval",
-				Values:  []string{(time.Second).String()},
+				Values:  []string{time.Second.String()},
 			},
 		},
 	}
@@ -413,7 +413,7 @@ func TestChargerProcessEvent(t *testing.T) {
 			{
 				Type:    utils.MetaGreaterOrEqual,
 				Element: "~*req.UsageInterval",
-				Values:  []string{(time.Second).String()},
+				Values:  []string{time.Second.String()},
 			},
 		},
 	}

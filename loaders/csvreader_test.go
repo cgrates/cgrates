@@ -52,7 +52,6 @@ func TestNewCSVStringReader(t *testing.T) {
 	exp.csvRdr.Comma = utils.CSVSep
 	exp.csvRdr.Comment = utils.CommentChar
 	exp.csvRdr.FieldsPerRecord = -1
-	exp.csvRdr.TrailingComma = true
 
 	if !reflect.DeepEqual(csvR, exp) {
 		t.Errorf("Expeceted: %+v, received: %+v", exp, csvR)
@@ -70,10 +69,12 @@ func TestNewCSVStringReader(t *testing.T) {
 	if err := csvR.Close(); err != nil {
 		t.Error(err)
 	}
-	if tp := (stringProvider{}).Type(); tp != utils.MetaString {
+	tp := stringProvider{}.Type()
+	if tp != utils.MetaString {
 		t.Errorf("Expeceted: %q, received: %q", utils.MetaString, tp)
 	}
-	if tp := (zipProvider{}).Type(); tp != utils.MetaZip {
+	tp = zipProvider{}.Type()
+	if tp != utils.MetaZip {
 		t.Errorf("Expeceted: %q, received: %q", utils.MetaZip, tp)
 	}
 }
@@ -127,7 +128,8 @@ func TestNewCSVURLReader(t *testing.T) {
 	if err := csvR.Close(); err != nil {
 		t.Error(err)
 	}
-	if tp := (urlProvider{}).Type(); tp != utils.MetaUrl {
+	tp := urlProvider{}.Type()
+	if tp != utils.MetaUrl {
 		t.Errorf("Expeceted: %q, received: %q", utils.MetaUrl, tp)
 	}
 }

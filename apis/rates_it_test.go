@@ -511,7 +511,7 @@ func testRateGetRateProfiles2(t *testing.T) {
 		t.Error(err)
 	}
 	sort.Slice(reply, func(i, j int) bool {
-		return (reply)[i].ID < (reply)[j].ID
+		return reply[i].ID < reply[j].ID
 	})
 	if !reflect.DeepEqual(reply, expected) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(reply))

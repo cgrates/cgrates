@@ -177,7 +177,7 @@ func (rdr *SQSER) getQueueURLWithClient(svc sqsClient) (err error) {
 		QueueName: aws.String(rdr.queueID),
 	}); err == nil {
 		rdr.queueURL = new(string)
-		*(rdr.queueURL) = *result.QueueUrl
+		*rdr.queueURL = *result.QueueUrl
 		return
 	}
 	if aerr, ok := err.(awserr.Error); ok && aerr.Code() == sqs.ErrCodeQueueDoesNotExist {

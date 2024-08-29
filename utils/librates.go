@@ -137,28 +137,26 @@ func (iR *IntervalRate) Equals(inRt *IntervalRate) (eq bool) {
 		return
 	}
 
-	return !( //((iR != nil) != (inRt != nil)) ||
-	//	(iR == nil || inRt == nil) ||
-	(iR.RecurrentFee == nil && inRt.RecurrentFee != nil) ||
-		(iR.RecurrentFee != nil && inRt.RecurrentFee == nil) ||
-		(iR.FixedFee == nil && inRt.FixedFee != nil) ||
-		(iR.FixedFee != nil && inRt.FixedFee == nil) ||
-		(iR.Increment == nil && inRt.Increment != nil) ||
-		(iR.Increment != nil && inRt.Increment == nil) ||
-		(iR.Unit == nil && inRt.Unit != nil) ||
-		(iR.Unit != nil && inRt.Unit == nil) ||
-		(iR.IntervalStart == nil && inRt.IntervalStart != nil) ||
-		(iR.IntervalStart != nil && inRt.IntervalStart == nil) ||
-		(iR.RecurrentFee != nil && inRt.RecurrentFee != nil &&
-			iR.RecurrentFee.Compare(inRt.RecurrentFee) != 0) ||
-		(iR.FixedFee != nil && inRt.FixedFee != nil &&
-			iR.FixedFee.Compare(inRt.FixedFee) != 0) ||
-		(iR.Increment != nil && inRt.Increment != nil &&
-			iR.Increment.Compare(inRt.Increment) != 0) ||
-		(iR.Unit != nil && inRt.Unit != nil &&
-			iR.Unit.Compare(inRt.Unit) != 0) ||
-		(iR.IntervalStart != nil && inRt.IntervalStart != nil &&
-			iR.IntervalStart.Compare(inRt.IntervalStart) != 0))
+	return !(iR.RecurrentFee == nil && inRt.RecurrentFee != nil ||
+		iR.RecurrentFee != nil && inRt.RecurrentFee == nil ||
+		iR.FixedFee == nil && inRt.FixedFee != nil ||
+		iR.FixedFee != nil && inRt.FixedFee == nil ||
+		iR.Increment == nil && inRt.Increment != nil ||
+		iR.Increment != nil && inRt.Increment == nil ||
+		iR.Unit == nil && inRt.Unit != nil ||
+		iR.Unit != nil && inRt.Unit == nil ||
+		iR.IntervalStart == nil && inRt.IntervalStart != nil ||
+		iR.IntervalStart != nil && inRt.IntervalStart == nil ||
+		iR.RecurrentFee != nil && inRt.RecurrentFee != nil &&
+			iR.RecurrentFee.Compare(inRt.RecurrentFee) != 0 ||
+		iR.FixedFee != nil && inRt.FixedFee != nil &&
+			iR.FixedFee.Compare(inRt.FixedFee) != 0 ||
+		iR.Increment != nil && inRt.Increment != nil &&
+			iR.Increment.Compare(inRt.Increment) != 0 ||
+		iR.Unit != nil && inRt.Unit != nil &&
+			iR.Unit.Compare(inRt.Unit) != 0 ||
+		iR.IntervalStart != nil && inRt.IntervalStart != nil &&
+			iR.IntervalStart.Compare(inRt.IntervalStart) != 0)
 }
 
 func (rt *Rate) Compile() (err error) {
@@ -320,8 +318,8 @@ func (rIl *RateSInterval) Equals(nRil *RateSInterval, rIlRef, nRilRef map[string
 	}
 	if rIl.IntervalStart == nil && nRil.IntervalStart != nil ||
 		rIl.IntervalStart != nil && nRil.IntervalStart == nil ||
-		(rIl.IntervalStart != nil && nRil.IntervalStart != nil &&
-			rIl.IntervalStart.Compare(nRil.IntervalStart) != 0) ||
+		rIl.IntervalStart != nil && nRil.IntervalStart != nil &&
+			rIl.IntervalStart.Compare(nRil.IntervalStart) != 0 ||
 		(rIl.Increments != nil && rIl.Increments == nil ||
 			rIl.Increments == nil && nRil.Increments != nil ||
 			len(rIl.Increments) != len(nRil.Increments)) ||
@@ -340,19 +338,19 @@ func (rIl *RateSInterval) Equals(nRil *RateSInterval, rIlRef, nRilRef map[string
 
 // Equals returns the equality between two RateSIncrement
 func (rI *RateSIncrement) Equals(rtIn *RateSIncrement, rIRef, rtInRef map[string]*IntervalRate) (eq bool) {
-	return !((rI.Usage == nil && rtIn.Usage != nil) ||
-		(rI.Usage != nil && rtIn.Usage == nil) ||
-		(rI.Usage != nil && rtIn.Usage != nil &&
-			rI.Usage.Compare(rtIn.Usage) != 0) ||
+	return !(rI.Usage == nil && rtIn.Usage != nil ||
+		rI.Usage != nil && rtIn.Usage == nil ||
+		rI.Usage != nil && rtIn.Usage != nil &&
+			rI.Usage.Compare(rtIn.Usage) != 0 ||
 		(rI.IncrementStart == nil && rtIn.IncrementStart != nil ||
 			rI.IncrementStart != nil && rtIn.IncrementStart == nil ||
-			(rI.IncrementStart != nil && rtIn.IncrementStart != nil &&
-				rI.IncrementStart.Compare(rtIn.IncrementStart) != 0)) ||
+			rI.IncrementStart != nil && rtIn.IncrementStart != nil &&
+				rI.IncrementStart.Compare(rtIn.IncrementStart) != 0) ||
 		rI.CompressFactor != rtIn.CompressFactor ||
 		rI.RateIntervalIndex != rtIn.RateIntervalIndex ||
-		(rIRef != nil && rtInRef != nil &&
+		rIRef != nil && rtInRef != nil &&
 			rI.RateID != EmptyString && rtIn.RateID != EmptyString &&
-			!rIRef[rI.RateID].Equals(rtInRef[rtIn.RateID])))
+			!rIRef[rI.RateID].Equals(rtInRef[rtIn.RateID]))
 }
 
 func (rI *RateSIncrement) FieldAsInterface(fldPath []string) (_ any, err error) {
@@ -417,9 +415,9 @@ func (rI *RateSIncrement) AsRateSIncrementCost() (rIc *RateSIncrementCost) {
 
 // Equals returns the equality between two RateSIntervalCost
 func (rIC *RateSIntervalCost) Equals(nRIc *RateSIntervalCost, rIlRef, nRilRef map[string]*IntervalRate) (eq bool) {
-	if (rIC.Increments != nil && nRIc.Increments == nil ||
+	if rIC.Increments != nil && nRIc.Increments == nil ||
 		rIC.Increments == nil && nRIc.Increments != nil ||
-		len(rIC.Increments) != len(nRIc.Increments)) || rIC.CompressFactor != nRIc.CompressFactor {
+		len(rIC.Increments) != len(nRIc.Increments) || rIC.CompressFactor != nRIc.CompressFactor {
 		return
 	}
 	if rIC.Increments != nil && nRIc.Increments != nil {
@@ -434,16 +432,16 @@ func (rIC *RateSIntervalCost) Equals(nRIc *RateSIntervalCost, rIlRef, nRilRef ma
 
 // Equals returns the equality between two RateSIncrementCost
 func (rIncrC *RateSIncrementCost) Equals(nRi *RateSIncrementCost, rIRef, rtInRef map[string]*IntervalRate) (eq bool) {
-	return !((rIncrC.Usage == nil && nRi.Usage != nil) ||
-		(rIncrC.Usage != nil && nRi.Usage == nil) ||
-		(rIncrC.Usage != nil && nRi.Usage != nil &&
-			rIncrC.Usage.Compare(nRi.Usage) != 0) ||
+	return !(rIncrC.Usage == nil && nRi.Usage != nil ||
+		rIncrC.Usage != nil && nRi.Usage == nil ||
+		rIncrC.Usage != nil && nRi.Usage != nil &&
+			rIncrC.Usage.Compare(nRi.Usage) != 0 ||
 		rIncrC.CompressFactor != nRi.CompressFactor ||
 		rIncrC.RateIntervalIndex != nRi.RateIntervalIndex ||
-		(rIRef == nil && rtInRef != nil) ||
-		(rIRef != nil && rtInRef == nil) ||
-		(rIRef != nil && rtInRef != nil &&
-			!rIRef[rIncrC.RateID].Equals(rtInRef[nRi.RateID])))
+		rIRef == nil && rtInRef != nil ||
+		rIRef != nil && rtInRef == nil ||
+		rIRef != nil && rtInRef != nil &&
+			!rIRef[rIncrC.RateID].Equals(rtInRef[nRi.RateID]))
 }
 
 /*
@@ -474,18 +472,18 @@ func (rpC *RateProfileCost) SynchronizeRateKeys(nRpCt *RateProfileCost) {
 // Equals returns the equality between two RateProfileCost
 func (rpC *RateProfileCost) Equals(nRpCt *RateProfileCost) (eq bool) {
 	if rpC.ID != nRpCt.ID ||
-		(rpC.Cost == nil && nRpCt.Cost != nil) ||
-		(rpC.Cost != nil && nRpCt.Cost == nil) ||
-		(rpC.Cost != nil && nRpCt.Cost != nil &&
-			rpC.Cost.Compare(nRpCt.Cost) != 0) ||
-		(rpC.MinCost == nil && nRpCt.MinCost != nil) ||
-		(rpC.MinCost != nil && nRpCt.MinCost == nil) ||
-		(rpC.MinCost != nil && nRpCt.MinCost != nil &&
-			rpC.MinCost.Compare(nRpCt.MinCost) != 0) ||
-		(rpC.MaxCost == nil && nRpCt.MaxCost != nil) ||
-		(rpC.MaxCost != nil && nRpCt.MaxCost == nil) ||
-		(rpC.MaxCost != nil && nRpCt.MaxCost != nil &&
-			rpC.MaxCost.Compare(nRpCt.MaxCost) != 0) ||
+		rpC.Cost == nil && nRpCt.Cost != nil ||
+		rpC.Cost != nil && nRpCt.Cost == nil ||
+		rpC.Cost != nil && nRpCt.Cost != nil &&
+			rpC.Cost.Compare(nRpCt.Cost) != 0 ||
+		rpC.MinCost == nil && nRpCt.MinCost != nil ||
+		rpC.MinCost != nil && nRpCt.MinCost == nil ||
+		rpC.MinCost != nil && nRpCt.MinCost != nil &&
+			rpC.MinCost.Compare(nRpCt.MinCost) != 0 ||
+		rpC.MaxCost == nil && nRpCt.MaxCost != nil ||
+		rpC.MaxCost != nil && nRpCt.MaxCost == nil ||
+		rpC.MaxCost != nil && nRpCt.MaxCost != nil &&
+			rpC.MaxCost.Compare(nRpCt.MaxCost) != 0 ||
 		rpC.MaxCostStrategy != nRpCt.MaxCostStrategy ||
 		(rpC.CostIntervals != nil && nRpCt.CostIntervals == nil ||
 			rpC.CostIntervals == nil && nRpCt.CostIntervals != nil ||

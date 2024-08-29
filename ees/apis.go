@@ -50,7 +50,7 @@ func (eeS *EeS) V1ProcessEvent(ctx *context.Context, cgrEv *utils.CGREventWithEe
 	_, hasVerbose := cgrEv.APIOpts[utils.OptsEEsVerbose]
 	for cfgIdx, eeCfg := range eeS.cfg.EEsNoLksCfg().Exporters {
 		if eeCfg.Type == utils.MetaNone || // ignore *none type exporter
-			(lenExpIDs != 0 && !expIDs.Has(eeCfg.ID)) {
+			lenExpIDs != 0 && !expIDs.Has(eeCfg.ID) {
 			continue
 		}
 

@@ -346,7 +346,7 @@ func TestAttributeAddFilters(t *testing.T) {
 			{
 				Type:    utils.MetaGreaterOrEqual,
 				Element: "~*req.UsageInterval",
-				Values:  []string{(time.Second).String()},
+				Values:  []string{time.Second.String()},
 			},
 			{
 				Type:    utils.MetaGreaterOrEqual,

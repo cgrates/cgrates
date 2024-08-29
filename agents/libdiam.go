@@ -201,7 +201,7 @@ func headerLen(a *diam.AVP) int {
 
 func updateAVPLength(avps []*diam.AVP) (l int) {
 	for _, avp := range avps {
-		if v, ok := (avp.Data).(*diam.GroupedAVP); ok {
+		if v, ok := avp.Data.(*diam.GroupedAVP); ok {
 			avp.Length = headerLen(avp) + updateAVPLength(v.AVP)
 		}
 		l += avp.Length

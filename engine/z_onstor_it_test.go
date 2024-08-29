@@ -196,7 +196,7 @@ func testOnStorITResource(t *testing.T) {
 	if rcv, err := onStor.GetResource(context.TODO(), "cgrates.org", "RL1",
 		false, false, utils.NonTransactional); err != nil {
 		t.Error(err)
-	} else if !(reflect.DeepEqual(res, rcv)) {
+	} else if !reflect.DeepEqual(res, rcv) {
 		t.Errorf("Expecting: %v, received: %v", utils.ToJSON(res), utils.ToJSON(rcv))
 	}
 	expectedT := []string{"res_cgrates.org:RL1"}
@@ -215,7 +215,7 @@ func testOnStorITResource(t *testing.T) {
 	if rcv, err := onStor.GetResource(context.TODO(), "cgrates.org", "RL1",
 		false, false, utils.NonTransactional); err != nil {
 		t.Error(err)
-	} else if !(reflect.DeepEqual(res, rcv)) {
+	} else if !reflect.DeepEqual(res, rcv) {
 		t.Errorf("Expecting: %v, received: %v", utils.ToJSON(res), utils.ToJSON(rcv))
 	}
 
@@ -533,7 +533,7 @@ func testOnStorITThreshold(t *testing.T) {
 	if rcv, err := onStor.GetThreshold(context.TODO(), "cgrates.org", "TH1",
 		false, false, utils.NonTransactional); err != nil {
 		t.Error(err)
-	} else if !(reflect.DeepEqual(th, rcv)) {
+	} else if !reflect.DeepEqual(th, rcv) {
 		t.Errorf("Expecting: %v, received: %v", utils.ToJSON(th), utils.ToJSON(rcv))
 	}
 	expectedT := []string{"thd_cgrates.org:TH1"}
@@ -552,7 +552,7 @@ func testOnStorITThreshold(t *testing.T) {
 	if rcv, err := onStor.GetThreshold(context.TODO(), "cgrates.org", "TH1",
 		false, false, utils.NonTransactional); err != nil {
 		t.Error(err)
-	} else if !(reflect.DeepEqual(th, rcv)) {
+	} else if !reflect.DeepEqual(th, rcv) {
 		t.Errorf("Expecting: %v, received: %v", utils.ToJSON(th), utils.ToJSON(rcv))
 	}
 	if err := onStor.RemoveThreshold(context.TODO(), th.Tenant, th.ID); err != nil {
@@ -591,14 +591,14 @@ func testOnStorITFilter(t *testing.T) {
 	if rcv, err := onStor.GetFilter(context.TODO(), "cgrates.org", "Filter1",
 		true, false, utils.NonTransactional); err != nil {
 		t.Error(err)
-	} else if !(reflect.DeepEqual(fp, rcv)) {
+	} else if !reflect.DeepEqual(fp, rcv) {
 		t.Errorf("Expecting: %v, received: %v", fp, rcv)
 	}
 	//get from database
 	if rcv, err := onStor.GetFilter(context.TODO(), "cgrates.org", "Filter1",
 		false, false, utils.NonTransactional); err != nil {
 		t.Error(err)
-	} else if !(reflect.DeepEqual(fp, rcv)) {
+	} else if !reflect.DeepEqual(fp, rcv) {
 		t.Errorf("Expecting: %v, received: %v", fp, rcv)
 	}
 	expectedT := []string{"ftr_cgrates.org:Filter1", "ftr_cgrates.org:TestFilter2"}
@@ -631,14 +631,14 @@ func testOnStorITFilter(t *testing.T) {
 	if rcv, err := onStor.GetFilter(context.TODO(), "cgrates.org", "Filter1",
 		true, false, utils.NonTransactional); err != nil {
 		t.Error(err)
-	} else if !(reflect.DeepEqual(fp, rcv)) {
+	} else if !reflect.DeepEqual(fp, rcv) {
 		t.Errorf("Expecting: %v, received: %v", fp, rcv)
 	}
 	//get from database
 	if rcv, err := onStor.GetFilter(context.TODO(), "cgrates.org", "Filter1",
 		false, false, utils.NonTransactional); err != nil {
 		t.Error(err)
-	} else if !(reflect.DeepEqual(fp, rcv)) {
+	} else if !reflect.DeepEqual(fp, rcv) {
 		t.Errorf("Expecting: %v, received: %v", fp, rcv)
 	}
 	if err := onStor.RemoveFilter(context.TODO(), fp.Tenant, fp.ID, true); err != nil {
@@ -688,14 +688,14 @@ func testOnStorITRouteProfile(t *testing.T) {
 	if rcv, err := onStor.GetRouteProfile(context.Background(), "cgrates.org", "SPRF_1",
 		true, false, utils.NonTransactional); err != nil {
 		t.Error(err)
-	} else if !(reflect.DeepEqual(splProfile, rcv)) {
+	} else if !reflect.DeepEqual(splProfile, rcv) {
 		t.Errorf("Expecting: %v, received: %v", splProfile, rcv)
 	}
 	//get from database
 	if rcv, err := onStor.GetRouteProfile(context.Background(), "cgrates.org", "SPRF_1",
 		false, false, utils.NonTransactional); err != nil {
 		t.Error(err)
-	} else if !(reflect.DeepEqual(splProfile, rcv)) {
+	} else if !reflect.DeepEqual(splProfile, rcv) {
 		t.Errorf("Expecting: %v, received: %v", splProfile, rcv)
 	}
 	expectedT := []string{"rpp_cgrates.org:SPRF_1"}
@@ -735,14 +735,14 @@ func testOnStorITRouteProfile(t *testing.T) {
 	if rcv, err := onStor.GetRouteProfile(context.Background(), "cgrates.org", "SPRF_1",
 		true, false, utils.NonTransactional); err != nil {
 		t.Error(err)
-	} else if !(reflect.DeepEqual(splProfile, rcv)) {
+	} else if !reflect.DeepEqual(splProfile, rcv) {
 		t.Errorf("Expecting: %v, received: %v", splProfile, rcv)
 	}
 	//get from database
 	if rcv, err := onStor.GetRouteProfile(context.Background(), "cgrates.org", "SPRF_1",
 		false, false, utils.NonTransactional); err != nil {
 		t.Error(err)
-	} else if !(reflect.DeepEqual(splProfile, rcv)) {
+	} else if !reflect.DeepEqual(splProfile, rcv) {
 		t.Errorf("Expecting: %v, received: %v", splProfile, rcv)
 	}
 	if err := onStor.RemoveRouteProfile(context.Background(), splProfile.Tenant, splProfile.ID,
@@ -789,14 +789,14 @@ func testOnStorITAttributeProfile(t *testing.T) {
 	if rcv, err := onStor.GetAttributeProfile(context.TODO(), "cgrates.org", "AttrPrf1",
 		true, false, utils.NonTransactional); err != nil {
 		t.Error(err)
-	} else if !(reflect.DeepEqual(attrProfile, rcv)) {
+	} else if !reflect.DeepEqual(attrProfile, rcv) {
 		t.Errorf("Expecting: %v, received: %v", attrProfile, rcv)
 	}
 	//get from database
 	if rcv, err := onStor.GetAttributeProfile(context.TODO(), "cgrates.org", "AttrPrf1",
 		false, false, utils.NonTransactional); err != nil {
 		t.Error(err)
-	} else if !(reflect.DeepEqual(attrProfile, rcv)) {
+	} else if !reflect.DeepEqual(attrProfile, rcv) {
 		t.Errorf("Expecting: %v, received: %v", attrProfile, rcv)
 	}
 	expectedT := []string{"alp_cgrates.org:AttrPrf1"}
@@ -814,14 +814,14 @@ func testOnStorITAttributeProfile(t *testing.T) {
 	if rcv, err := onStor.GetAttributeProfile(context.TODO(), "cgrates.org", "AttrPrf1",
 		true, false, utils.NonTransactional); err != nil {
 		t.Error(err)
-	} else if !(reflect.DeepEqual(attrProfile, rcv)) {
+	} else if !reflect.DeepEqual(attrProfile, rcv) {
 		t.Errorf("Expecting: %v, received: %v", attrProfile, rcv)
 	}
 	//get from database
 	if rcv, err := onStor.GetAttributeProfile(context.TODO(), "cgrates.org", "AttrPrf1",
 		false, false, utils.NonTransactional); err != nil {
 		t.Error(err)
-	} else if !(reflect.DeepEqual(attrProfile, rcv)) {
+	} else if !reflect.DeepEqual(attrProfile, rcv) {
 		t.Errorf("Expecting: %v, received: %v", attrProfile, rcv)
 	}
 	if err := onStor.RemoveAttributeProfile(context.TODO(), attrProfile.Tenant,
@@ -868,7 +868,7 @@ func testOnStorITTestAttributeSubstituteIface(t *testing.T) {
 	if rcv, err := onStor.GetAttributeProfile(context.TODO(), "cgrates.org", "AttrPrf1",
 		false, false, utils.NonTransactional); err != nil {
 		t.Error(err)
-	} else if !(reflect.DeepEqual(attrProfile, rcv)) {
+	} else if !reflect.DeepEqual(attrProfile, rcv) {
 		t.Errorf("Expecting: %v, received: %v", attrProfile, rcv)
 	}
 	attrProfile.Attributes = []*Attribute{
@@ -884,7 +884,7 @@ func testOnStorITTestAttributeSubstituteIface(t *testing.T) {
 	if rcv, err := onStor.GetAttributeProfile(context.TODO(), "cgrates.org", "AttrPrf1",
 		false, false, utils.NonTransactional); err != nil {
 		t.Error(err)
-	} else if !(reflect.DeepEqual(attrProfile, rcv)) {
+	} else if !reflect.DeepEqual(attrProfile, rcv) {
 		t.Errorf("Expecting: %v, received: %v", utils.ToJSON(attrProfile), utils.ToJSON(rcv))
 	}
 	attrProfile.Attributes = []*Attribute{
@@ -900,7 +900,7 @@ func testOnStorITTestAttributeSubstituteIface(t *testing.T) {
 	if rcv, err := onStor.GetAttributeProfile(context.TODO(), "cgrates.org", "AttrPrf1",
 		false, false, utils.NonTransactional); err != nil {
 		t.Error(err)
-	} else if !(reflect.DeepEqual(attrProfile, rcv)) {
+	} else if !reflect.DeepEqual(attrProfile, rcv) {
 		t.Errorf("Expecting: %v, received: %v", utils.ToJSON(attrProfile), utils.ToJSON(rcv))
 	}
 }
@@ -929,7 +929,7 @@ func testOnStorITChargerProfile(t *testing.T) {
 	if rcv, err := onStor.GetChargerProfile(context.Background(), "cgrates.org", "CPP_1",
 		false, false, utils.NonTransactional); err != nil {
 		t.Error(err)
-	} else if !(reflect.DeepEqual(cpp, rcv)) {
+	} else if !reflect.DeepEqual(cpp, rcv) {
 		t.Errorf("Expecting: %v, received: %v", cpp, rcv)
 	}
 	expectedT := []string{"cpp_cgrates.org:CPP_1"}
@@ -948,7 +948,7 @@ func testOnStorITChargerProfile(t *testing.T) {
 	if rcv, err := onStor.GetChargerProfile(context.Background(), "cgrates.org", "CPP_1",
 		false, false, utils.NonTransactional); err != nil {
 		t.Error(err)
-	} else if !(reflect.DeepEqual(cpp, rcv)) {
+	} else if !reflect.DeepEqual(cpp, rcv) {
 		t.Errorf("Expecting: %v, received: %v", cpp, rcv)
 	}
 	if err := onStor.RemoveChargerProfile(context.Background(), cpp.Tenant, cpp.ID,
@@ -982,7 +982,7 @@ func testOnStorITDispatcherProfile(t *testing.T) {
 	if rcv, err := onStor.GetDispatcherProfile(context.TODO(), "cgrates.org", "Dsp1",
 		false, false, utils.NonTransactional); err != nil {
 		t.Error(err)
-	} else if !(reflect.DeepEqual(dpp, rcv)) {
+	} else if !reflect.DeepEqual(dpp, rcv) {
 		t.Errorf("Expecting: %v, received: %v", dpp, rcv)
 	}
 	expectedT := []string{"dpp_cgrates.org:Dsp1"}
@@ -1001,7 +1001,7 @@ func testOnStorITDispatcherProfile(t *testing.T) {
 	if rcv, err := onStor.GetDispatcherProfile(context.TODO(), "cgrates.org", "Dsp1",
 		false, false, utils.NonTransactional); err != nil {
 		t.Error(err)
-	} else if !(reflect.DeepEqual(dpp, rcv)) {
+	} else if !reflect.DeepEqual(dpp, rcv) {
 		t.Errorf("Expecting: %v, received: %v", dpp, rcv)
 	}
 	if err := onStor.RemoveDispatcherProfile(context.TODO(), dpp.Tenant, dpp.ID,
@@ -1082,7 +1082,7 @@ func testOnStorITRateProfile(t *testing.T) {
 	if rcv, err := onStor.GetRateProfile(context.TODO(), "cgrates.org", "RP1",
 		false, false, utils.NonTransactional); err != nil {
 		t.Error(err)
-	} else if !(reflect.DeepEqual(rPrf, rcv)) {
+	} else if !reflect.DeepEqual(rPrf, rcv) {
 		t.Errorf("Expecting: %v, received: %v", rPrf, rcv)
 	}
 	if err := onStor.RemoveRateProfile(context.TODO(), rPrf.Tenant, rPrf.ID,

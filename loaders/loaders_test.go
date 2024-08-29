@@ -49,7 +49,7 @@ func TestNewLoaderService(t *testing.T) {
 		cache[k] = ltcache.NewCache(cfg.Limit, cfg.TTL, cfg.StaticTTL, nil)
 	}
 	ld := NewLoaderS(cfg, dm, fS, cM)
-	if exp := (&LoaderS{
+	exp := &LoaderS{
 		cfg:   cfg,
 		cache: cache,
 		ldrs: map[string]*loader{
@@ -64,7 +64,8 @@ func TestNewLoaderService(t *testing.T) {
 				Locker:     newLocker(cfg.LoaderCfg()[0].GetLockFilePath(), cfg.LoaderCfg()[0].ID),
 			},
 		},
-	}); !reflect.DeepEqual(exp, ld) {
+	}
+	if !reflect.DeepEqual(exp, ld) {
 		t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(exp), utils.ToJSON(ld))
 	}
 	if !ld.Enabled() {
@@ -162,8 +163,11 @@ func TestLoaderServiceV1Run(t *testing.T) {
 	}
 	if prf, err := dm.GetAttributeProfile(context.Background(), "cgrates.org", "ID", false, true, utils.NonTransactional); err != nil {
 		t.Fatal(err)
-	} else if v := (&engine.AttributeProfile{Tenant: "cgrates.org", ID: "ID"}); !reflect.DeepEqual(v, prf) {
-		t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(v), utils.ToJSON(prf))
+	} else {
+		v := &engine.AttributeProfile{Tenant: "cgrates.org", ID: "ID"}
+		if !reflect.DeepEqual(v, prf) {
+			t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(v), utils.ToJSON(prf))
+		}
 	}
 }
 
@@ -357,8 +361,11 @@ func TestLoaderServiceV1ImportZip(t *testing.T) {
 	}
 	if prf, err := dm.GetAttributeProfile(context.Background(), "cgrates.org", "ID", false, true, utils.NonTransactional); err != nil {
 		t.Fatal(err)
-	} else if v := (&engine.AttributeProfile{Tenant: "cgrates.org", ID: "ID"}); !reflect.DeepEqual(v, prf) {
-		t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(v), utils.ToJSON(prf))
+	} else {
+		v := &engine.AttributeProfile{Tenant: "cgrates.org", ID: "ID"}
+		if !reflect.DeepEqual(v, prf) {
+			t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(v), utils.ToJSON(prf))
+		}
 	}
 }
 
