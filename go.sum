@@ -69,8 +69,8 @@ github.com/cgrates/ltcache v0.0.0-20240411152156-e673692056db h1:JRgzMS5kJ1Wxave
 github.com/cgrates/ltcache v0.0.0-20240411152156-e673692056db/go.mod h1:jVYq943GCWxhXXxi/1NthN9ATeyFUSbwJRbN/bb+ADQ=
 github.com/cgrates/radigo v0.0.0-20240123163129-491c899df727 h1:rhYHlbfEPDNreekd1ZtUYi/NbFm5cEl8twQZ3c/0nYU=
 github.com/cgrates/radigo v0.0.0-20240123163129-491c899df727/go.mod h1:W/5LcOm9jaz0NfIFT09bxjddEai8DTSfw9poqDqtAX4=
-github.com/cgrates/rpcclient v0.0.0-20240628101047-cb29aae6b006 h1:HxmDpmCesrwbi+ag/4+PDRhuSy0gpemMRQ19fAWmDTE=
-github.com/cgrates/rpcclient v0.0.0-20240628101047-cb29aae6b006/go.mod h1:WxTEIJvgI4c3eiPWW0WeAhHGd49Oi1Voe9lahotJiNo=
+github.com/cgrates/rpcclient v0.0.0-20240816141816-52dd1074499e h1:rwvvB0F9WZNmBriZSNo6dbYy1H26yueeLBkuxQMUW0E=
+github.com/cgrates/rpcclient v0.0.0-20240816141816-52dd1074499e/go.mod h1:WxTEIJvgI4c3eiPWW0WeAhHGd49Oi1Voe9lahotJiNo=
 github.com/cgrates/sipingo v1.0.1-0.20200514112313-699ebc1cdb8e h1:izFjZB83/XRXInc+gMIssUxdbleGsGIuGCPj2u7RQo0=
 github.com/cgrates/sipingo v1.0.1-0.20200514112313-699ebc1cdb8e/go.mod h1:0f2+3dq5Iiv3VlcuY83VPJ0QzqRlzDG1Cr8okogQE3g=
 github.com/client9/misspell v0.3.4/go.mod h1:qj6jICC3Q7zFZvVWo7KLAzC3yx5G7kyvSDkc90ppPyw=

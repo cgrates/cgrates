@@ -158,7 +158,7 @@ func (cM *ConnManager) Call(ctx *context.Context, connIDs []string,
 		if conn, err = cM.getConn(ctx, connID); err != nil {
 			continue
 		}
-		if err = conn.Call(ctx, method, arg, reply); !rpcclient.IsConnectionErr(err) && !rpcclient.IsServiceErr(err) {
+		if err = conn.Call(ctx, method, arg, reply); !rpcclient.ShouldFailover(err) {
 			return
 		}
 	}
@@ -198,7 +198,7 @@ func (cM *ConnManager) CallWithConnIDs(connIDs []string, ctx *context.Context, s
 		if conn, err = cM.getConnWithConfig(ctx, connID, newCfg, nil, false); err != nil {
 			continue
 		}
-		if err = conn.Call(ctx, method, arg, reply); !rpcclient.IsConnectionErr(err) && !rpcclient.IsServiceErr(err) {
+		if err = conn.Call(ctx, method, arg, reply); !rpcclient.ShouldFailover(err) {
 			return
 		}
 	}
