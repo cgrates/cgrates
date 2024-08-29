@@ -274,17 +274,14 @@ func loadConfig() (ldrCfg *config.CGRConfig) {
 	return
 }
 
-func getLoader(cfg *config.CGRConfig) (loader engine.LoadReader, err error) {
-
+func getLoader(cfg *config.CGRConfig) (engine.LoadReader, error) {
 	if gprefix := utils.MetaGoogleAPI + utils.ConcatenatedKeySep; strings.HasPrefix(*dataPath, gprefix) { // Default load from csv files to dataDb
 		return engine.NewGoogleCSVStorage(cfg.LoaderCgrCfg().FieldSeparator, strings.TrimPrefix(*dataPath, gprefix))
 	}
 	if !utils.IsURL(*dataPath) {
-		loader = engine.NewFileCSVStorage(cfg.LoaderCgrCfg().FieldSeparator, *dataPath)
-		return
+		return engine.NewFileCSVStorage(cfg.LoaderCgrCfg().FieldSeparator, *dataPath)
 	}
-	loader = engine.NewURLCSVStorage(cfg.LoaderCgrCfg().FieldSeparator, *dataPath)
-	return
+	return engine.NewURLCSVStorage(cfg.LoaderCgrCfg().FieldSeparator, *dataPath), nil
 }
 
 func main() {

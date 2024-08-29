@@ -172,7 +172,11 @@ func StopStartEngine(cfgPath string, waitEngine int) (*exec.Cmd, error) {
 
 func LoadTariffPlanFromFolder(tpPath, timezone string, dm *DataManager, disableReverse bool,
 	cacheConns, schedConns []string) error {
-	loader, err := NewTpReader(dm.dataDB, NewFileCSVStorage(utils.CSVSep, tpPath), "",
+	csvStorage, err := NewFileCSVStorage(utils.CSVSep, tpPath)
+	if err != nil {
+		return utils.NewErrServerError(err)
+	}
+	loader, err := NewTpReader(dm.dataDB, csvStorage, "",
 		timezone, cacheConns, schedConns, false)
 	if err != nil {
 		return utils.NewErrServerError(err)
