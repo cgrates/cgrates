@@ -239,9 +239,8 @@ func (sd *singleResultDispatcher) Dispatch(dm *engine.DataManager, flts *engine.
 			}
 		}
 		if err = callDHwithID(ctx, tnt, hostID, routeID, dRh, dm,
-			cfg, iPRCCh, serviceMethod, args, reply); err == nil ||
-			err != utils.ErrDSPHostNotFound &&
-				!rpcclient.IsConnectionErr(err) && !rpcclient.IsServiceErr(err) { // successful dispatch with normal errors
+			cfg, iPRCCh, serviceMethod, args, reply); err != utils.ErrDSPHostNotFound &&
+			!rpcclient.ShouldFailover(err) { // successful dispatch with normal errors
 			return
 		}
 		if err != nil {
@@ -329,10 +328,8 @@ func (ld *loadDispatcher) Dispatch(dm *engine.DataManager, flts *engine.FilterS,
 		lM.incrementLoad(ctx, dR.HostID, ld.tntID)
 		err = callDHwithID(ctx, tnt, dR.HostID, routeID, dR, dm,
 			cfg, iPRCCh, serviceMethod, args, reply)
-		lM.decrementLoad(ctx, dR.HostID, ld.tntID) // call ended
-		if err == nil ||
-			err != utils.ErrDSPHostNotFound &&
-				!rpcclient.IsConnectionErr(err) && !rpcclient.IsServiceErr(err) { // successful dispatch with normal errors
+		lM.decrementLoad(ctx, dR.HostID, ld.tntID)                             // call ended
+		if err != utils.ErrDSPHostNotFound && !rpcclient.ShouldFailover(err) { // successful dispatch with normal errors
 			return
 		}
 		// not found or network errors will continue with standard dispatching
@@ -357,10 +354,8 @@ func (ld *loadDispatcher) Dispatch(dm *engine.DataManager, flts *engine.FilterS,
 		lM.incrementLoad(ctx, hostID, ld.tntID)
 		err = callDHwithID(ctx, tnt, hostID, routeID, dRh, dm,
 			cfg, iPRCCh, serviceMethod, args, reply)
-		lM.decrementLoad(ctx, hostID, ld.tntID) // call ended
-		if err == nil ||
-			err != utils.ErrDSPHostNotFound &&
-				!rpcclient.IsConnectionErr(err) && !rpcclient.IsServiceErr(err) { // successful dispatch with normal errors
+		lM.decrementLoad(ctx, hostID, ld.tntID)                                // call ended
+		if err != utils.ErrDSPHostNotFound && !rpcclient.ShouldFailover(err) { // successful dispatch with normal errors
 			return
 		}
 		if err != nil {
@@ -478,7 +473,7 @@ func callDH(ctx *context.Context,
 			GroupIDs: []string{utils.ConcatenatedKey(utils.CacheDispatcherProfiles, dR.Tenant, dR.ProfileID)},
 		}
 		if err = engine.Cache.SetWithReplicate(ctx, argsCache); err != nil {
-			if !rpcclient.IsConnectionErr(err) && !rpcclient.IsServiceErr(err) {
+			if !rpcclient.ShouldFailover(err) {
 				return
 			}
 			// did not dispatch properly, fail-back to standard dispatching
