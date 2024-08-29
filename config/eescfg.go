@@ -146,6 +146,14 @@ func (eeS EEsCfg) AsMapInterface(separator string) any {
 	return mp
 }
 
+func (eeS *EEsCfg) exporterIDs() []string {
+	ids := make([]string, 0, len(eeS.Exporters))
+	for _, exporter := range eeS.Exporters {
+		ids = append(ids, exporter.ID)
+	}
+	return ids
+}
+
 type EventExporterOpts struct {
 	CSVFieldSeparator           *string
 	ElsIndex                    *string

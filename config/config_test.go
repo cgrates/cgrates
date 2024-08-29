@@ -1465,7 +1465,7 @@ func TestLoadErsCfgError(t *testing.T) {
 	"sessions_conns": "*internal",
 },
 }`
-	expected := "json: cannot unmarshal string into Go struct field ERsJsonCfg.Sessions_conns of type []string"
+	expected := "json: cannot unmarshal string into Go struct field ERsJsonCfg.sessions_conns of type []string"
 	cgrConfig := NewDefaultCGRConfig()
 	if err != nil {
 		t.Error(err)

@@ -2284,6 +2284,8 @@ const (
 	SourcePathCfg          = "source_path"
 	ProcessedPathCfg       = "processed_path"
 	TenantCfg              = "tenant"
+	EEsSuccessIDsCfg       = "ees_success_ids"
+	EEsFailedIDsCfg        = "ees_failed_ids"
 	FlagsCfg               = "flags"
 	FieldsCfg              = "fields"
 	CacheDumpFieldsCfg     = "cache_dump_fields"

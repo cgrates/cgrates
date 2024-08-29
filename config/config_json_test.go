@@ -1981,8 +1981,8 @@ func TestDfEventReaderCfg(t *testing.T) {
 			Value: utils.StringPointer("~*req.13"), Mandatory: utils.BoolPointer(true)},
 	}
 	eCfg := &ERsJsonCfg{
-		Enabled:        utils.BoolPointer(false),
-		Sessions_conns: &[]string{utils.MetaInternal},
+		Enabled:       utils.BoolPointer(false),
+		SessionSConns: &[]string{utils.MetaInternal},
 		Readers: &[]*EventReaderJsonCfg{
 			{
 				ID:                   utils.StringPointer(utils.MetaDefault),
@@ -2010,7 +2010,7 @@ func TestDfEventReaderCfg(t *testing.T) {
 				},
 			},
 		},
-		Partial_cache_ttl: utils.StringPointer("1s"),
+		PartialCacheTTL: utils.StringPointer("1s"),
 	}
 	dfCgrJSONCfg, err := NewCgrJsonCfgFromBytes([]byte(CGRATES_CFG_JSON))
 	if err != nil {

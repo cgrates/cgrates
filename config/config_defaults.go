@@ -398,10 +398,11 @@ const CGRATES_CFG_JSON = `
 },
 
 
-"ers": {								// EventReaderService
-	"enabled": false,						// starts the EventReader service: <true|false>
-	"sessions_conns":["*internal"],					// RPC Connections IDs
-	"partial_cache_ttl": "1s",					// the duration to cache partial records when not pairing	
+"ers": {					// EventReaderService
+	"enabled": false,			// starts the EventReader service: <true|false>
+	"sessions_conns":["*internal"],		// RPC Connections IDs
+	// "ees_conns": [],			// connection for routing processed and invalid messages through EEs
+	"partial_cache_ttl": "1s",		// the duration to cache partial records when not pairing	
 	"readers": [
 		{
 			"id": "*default",				// identifier of the EventReader profile
@@ -412,6 +413,8 @@ const CGRATES_CFG_JSON = `
 			"processed_path": "/var/spool/cgrates/ers/out",	// move processed data here
 			"tenant": "",					// tenant used by import
 			"timezone": "",					// timezone for timestamps where not specified <""|UTC|Local|$IANA_TZ_DB>
+			// "ees_success_ids": [],			// ids of exporters used for moving the successfully processed event
+			// "ees_failed_ids": [],			// ids of exporters used for moving the unprocessed event
 			"filters": [],					// limit parsing based on the filters
 			"flags": [],					// flags to influence the event processing
 			"reconnects": -1,				// number of retries in case of connection lost
