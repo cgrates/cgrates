@@ -281,3 +281,17 @@ func TestCallCacheForFilter(t *testing.T) {
 		t.Errorf("Expected %s ,received: %s", utils.ToJSON(exp), utils.ToJSON(rpl))
 	}
 }
+
+func TestResourceSv1Ping(t *testing.T) {
+	rsv1 := &ResourceSv1{}
+	ctx := context.Background()
+	ign := &utils.CGREvent{}
+	var reply string
+	err := rsv1.Ping(ctx, ign, &reply)
+	if err != nil {
+		t.Errorf("expected no error, got %v", err)
+	}
+	if reply != utils.Pong {
+		t.Errorf("expected reply to be %v, got %v", utils.Pong, reply)
+	}
+}
