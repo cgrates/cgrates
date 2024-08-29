@@ -224,16 +224,16 @@ func (eC *EventCharges) Equals(evCh *EventCharges) (eq bool) {
 	if eC == nil && evCh == nil {
 		return true
 	}
-	if (eC == nil && evCh != nil ||
-		eC != nil && evCh == nil) ||
+	if eC == nil && evCh != nil ||
+		eC != nil && evCh == nil ||
 		(eC.Abstracts == nil && evCh.Abstracts != nil ||
 			eC.Abstracts != nil && evCh.Abstracts == nil ||
-			(eC.Abstracts != nil && evCh.Abstracts != nil &&
-				eC.Abstracts.Compare(evCh.Abstracts) != 0)) ||
+			eC.Abstracts != nil && evCh.Abstracts != nil &&
+				eC.Abstracts.Compare(evCh.Abstracts) != 0) ||
 		(eC.Concretes == nil && evCh.Concretes != nil ||
 			eC.Concretes != nil && evCh.Concretes == nil ||
-			(eC.Concretes != nil && evCh.Concretes != nil &&
-				eC.Concretes.Compare(evCh.Concretes) != 0)) ||
+			eC.Concretes != nil && evCh.Concretes != nil &&
+				eC.Concretes.Compare(evCh.Concretes) != 0) ||
 		(eC.Charges == nil && evCh.Charges != nil ||
 			eC.Charges != nil && evCh.Charges == nil ||
 			len(eC.Charges) != len(evCh.Charges)) ||
@@ -276,9 +276,9 @@ func equalsAccounting(acc1, acc2 *AccountCharge,
 	rat1, rat2 map[string]*RateSInterval,
 	rts1, rts2 map[string]*IntervalRate) (_ bool) {
 	if !acc1.equals(acc2) ||
-		(uf1 != nil && uf2 != nil &&
+		uf1 != nil && uf2 != nil &&
 			acc1.UnitFactorID != EmptyString && acc2.UnitFactorID != EmptyString &&
-			!uf1[acc1.UnitFactorID].Equals(uf2[acc2.UnitFactorID])) ||
+			!uf1[acc1.UnitFactorID].Equals(uf2[acc2.UnitFactorID]) ||
 		!rat1[acc1.RatingID].Equals(rat2[acc2.RatingID], rts1, rts2) {
 		return
 	}
@@ -402,24 +402,24 @@ func (ac *AccountCharge) equals(nAc *AccountCharge) (eq bool) {
 	if ac == nil && nAc == nil {
 		return true
 	}
-	if (ac.AttributeIDs == nil && nAc.AttributeIDs != nil ||
+	if ac.AttributeIDs == nil && nAc.AttributeIDs != nil ||
 		ac.AttributeIDs != nil && nAc.AttributeIDs == nil ||
-		len(ac.AttributeIDs) != len(nAc.AttributeIDs)) ||
+		len(ac.AttributeIDs) != len(nAc.AttributeIDs) ||
 		ac.JoinedChargeIDs == nil && nAc.JoinedChargeIDs != nil ||
 		ac.JoinedChargeIDs != nil && nAc.JoinedChargeIDs == nil ||
 		len(ac.JoinedChargeIDs) != len(nAc.JoinedChargeIDs) ||
 		(ac.AccountID != nAc.AccountID ||
 			ac.BalanceID != nAc.BalanceID) ||
-		((len(ac.UnitFactorID) == 0) != (len(nAc.UnitFactorID) == 0)) ||
-		((len(ac.RatingID) == 0) != (len(nAc.RatingID) == 0)) ||
+		len(ac.UnitFactorID) == 0 != (len(nAc.UnitFactorID) == 0) ||
+		len(ac.RatingID) == 0 != (len(nAc.RatingID) == 0) ||
 		(ac.Units == nil && nAc.Units != nil ||
 			ac.Units != nil && nAc.Units == nil ||
-			(ac.Units != nil && nAc.Units != nil &&
-				ac.Units.Compare(nAc.Units) != 0)) ||
+			ac.Units != nil && nAc.Units != nil &&
+				ac.Units.Compare(nAc.Units) != 0) ||
 		(ac.BalanceLimit == nil && nAc.BalanceLimit != nil ||
 			ac.BalanceLimit != nil && nAc.BalanceLimit == nil ||
-			(ac.BalanceLimit != nil && nAc.BalanceLimit != nil &&
-				ac.BalanceLimit.Compare(nAc.BalanceLimit) != 0)) {
+			ac.BalanceLimit != nil && nAc.BalanceLimit != nil &&
+				ac.BalanceLimit.Compare(nAc.BalanceLimit) != 0) {
 		return
 	}
 	for idx, val := range ac.AttributeIDs {

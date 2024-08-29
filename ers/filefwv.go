@@ -262,7 +262,7 @@ func (rdr *FWVFileER) setLineLen(file *os.File, hasHeader, hasTrailer bool) erro
 			i++
 			continue
 		}
-		if (hasHeader && i == 1) || (!hasHeader && i == 0) {
+		if hasHeader && i == 1 || !hasHeader && i == 0 {
 			rdr.lineLen = int64(len(readBytes))
 			i++
 			continue

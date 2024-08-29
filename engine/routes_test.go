@@ -151,7 +151,7 @@ func prepareRoutesData(t *testing.T, dm *DataManager) {
 			{
 				Type:    utils.MetaGreaterOrEqual,
 				Element: "~*req.UsageInterval",
-				Values:  []string{(time.Second).String()},
+				Values:  []string{time.Second.String()},
 			},
 			{
 				Type:    utils.MetaGreaterOrEqual,
@@ -174,7 +174,7 @@ func prepareRoutesData(t *testing.T, dm *DataManager) {
 			{
 				Type:    utils.MetaGreaterOrEqual,
 				Element: "~*req.PddInterval",
-				Values:  []string{(time.Second).String()},
+				Values:  []string{time.Second.String()},
 			},
 			{
 				Type:    utils.MetaGreaterOrEqual,
@@ -1492,7 +1492,7 @@ func TestRouteSMatchingRouteProfilesForEventGetRouteProfileErr2(t *testing.T) {
 			{
 				Type:    utils.MetaGreaterOrEqual,
 				Element: "~*req.UsageInterval",
-				Values:  []string{(time.Second).String()},
+				Values:  []string{time.Second.String()},
 			},
 			{
 				Type:    utils.MetaGreaterOrEqual,
@@ -1562,7 +1562,7 @@ func TestRouteSMatchingRouteProfilesForEventPassErr(t *testing.T) {
 			{
 				Type:    utils.MetaGreaterOrEqual,
 				Element: "~*req.UsageInterval",
-				Values:  []string{(time.Second).String()},
+				Values:  []string{time.Second.String()},
 			},
 			{
 				Type:    utils.MetaGreaterOrEqual,
@@ -1647,7 +1647,7 @@ func TestRouteSMatchingRPSForEventWeightFromDynamicsErr(t *testing.T) {
 			{
 				Type:    utils.MetaGreaterOrEqual,
 				Element: "~*req.UsageInterval",
-				Values:  []string{(time.Second).String()},
+				Values:  []string{time.Second.String()},
 			},
 			{
 				Type:    utils.MetaGreaterOrEqual,
@@ -1737,7 +1737,7 @@ func TestRouteSMatchingRPSForEventBlockerFromDynamicsErr(t *testing.T) {
 			{
 				Type:    utils.MetaGreaterOrEqual,
 				Element: "~*req.UsageInterval",
-				Values:  []string{(time.Second).String()},
+				Values:  []string{time.Second.String()},
 			},
 			{
 				Type:    utils.MetaGreaterOrEqual,
@@ -1973,7 +1973,7 @@ func TestSortedRoutesForEventsortedRoutesForProfileErr(t *testing.T) {
 			{
 				Type:    utils.MetaGreaterOrEqual,
 				Element: "~*req.UsageInterval",
-				Values:  []string{(time.Second).String()},
+				Values:  []string{time.Second.String()},
 			},
 			{
 				Type:    utils.MetaGreaterOrEqual,
@@ -2060,7 +2060,7 @@ func TestSortedRoutesForEventGetIntPointerOptsErr(t *testing.T) {
 			{
 				Type:    utils.MetaGreaterOrEqual,
 				Element: "~*req.UsageInterval",
-				Values:  []string{(time.Second).String()},
+				Values:  []string{time.Second.String()},
 			},
 			{
 				Type:    utils.MetaGreaterOrEqual,
@@ -2147,7 +2147,7 @@ func TestSortedRoutesForEventNewOptsGetRoutesErr(t *testing.T) {
 			{
 				Type:    utils.MetaGreaterOrEqual,
 				Element: "~*req.UsageInterval",
-				Values:  []string{(time.Second).String()},
+				Values:  []string{time.Second.String()},
 			},
 			{
 				Type:    utils.MetaGreaterOrEqual,
@@ -2239,7 +2239,7 @@ func TestSortedRoutesForEventExceedMaxItemsErr(t *testing.T) {
 			{
 				Type:    utils.MetaGreaterOrEqual,
 				Element: "~*req.UsageInterval",
-				Values:  []string{(time.Second).String()},
+				Values:  []string{time.Second.String()},
 			},
 			{
 				Type:    utils.MetaGreaterOrEqual,
@@ -2545,7 +2545,7 @@ func TestV1GetRouteProfilesForEventMatchingRouteProfErr(t *testing.T) {
 			{
 				Type:    utils.MetaGreaterOrEqual,
 				Element: "~*req.UsageInterval",
-				Values:  []string{(time.Second).String()},
+				Values:  []string{time.Second.String()},
 			},
 			{
 				Type:    utils.MetaGreaterOrEqual,

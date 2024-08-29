@@ -92,7 +92,7 @@ func TestUnreadByte(t *testing.T) {
 func TestEnvRawJsonconsumeComent(t *testing.T) {
 	raw := NewRjReaderFromBytes([]byte(`//comment
 a/*comment*/b`))
-	expected := (byte)('a')
+	expected := byte('a')
 	if r, err := raw.consumeComent('d'); err != nil {
 		t.Error(err)
 	} else if r {
@@ -108,7 +108,7 @@ a/*comment*/b`))
 	} else if rply != expected {
 		t.Errorf("Expected: %+v\n, received: %+v", string(expected), string(rply))
 	}
-	expected = (byte)('b')
+	expected = byte('b')
 	if r, err := raw.consumeComent('*'); err != nil {
 		t.Error(err)
 	} else if !r {
@@ -134,7 +134,7 @@ func TestEnvRawJsonReadByteWC(t *testing.T) {
 	raw := NewRjReaderFromBytes([]byte(`c/*first comment*///another comment    
 
 		cgrates`))
-	expected := (byte)('c')
+	expected := byte('c')
 	if rply, err := raw.ReadByteWC(); err != nil {
 		t.Error(err)
 	} else if rply != expected {
@@ -146,7 +146,7 @@ func TestEnvRawJsonPeekByteWC(t *testing.T) {
 	raw := NewRjReaderFromBytes([]byte(`c/*first comment*///another comment    
 
 		bgrates`))
-	expected := (byte)('c')
+	expected := byte('c')
 	if rply, err := raw.PeekByteWC(); err != nil {
 		t.Error(err)
 	} else if rply != expected {
@@ -158,7 +158,7 @@ func TestEnvRawJsonPeekByteWC(t *testing.T) {
 		t.Errorf("Expected: %+v\n, received: %+v", string(expected), string(rply))
 	}
 
-	expected = (byte)('b')
+	expected = byte('b')
 	if rply, err := raw.PeekByteWC(); err != nil {
 		t.Error(err)
 	} else if rply != expected {
@@ -187,7 +187,7 @@ func TestEnvRawJsonPeekByteWCError(t *testing.T) {
 	}
 
 	raw = NewRjReaderFromBytes([]byte(`/rand val`))
-	expectedByte := (byte)('/')
+	expectedByte := byte('/')
 	if rply, err := raw.PeekByteWC(); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expectedByte, rply) {
@@ -199,7 +199,7 @@ func TestEnvRawJsonreadFirstNonWhiteSpace(t *testing.T) {
 	raw := NewRjReaderFromBytes([]byte(`    
 
 		cgrates`))
-	expected := (byte)('c')
+	expected := byte('c')
 	if rply, err := raw.readFirstNonWhiteSpace(); err != nil {
 		t.Error(err)
 	} else if rply != expected {

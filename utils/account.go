@@ -119,7 +119,7 @@ type Balance struct {
 
 // Equals returns the equality between two Balance
 func (bL *Balance) Equals(bal *Balance) (eq bool) {
-	if (bL.ID != bal.ID || bL.Type != bal.Type) ||
+	if bL.ID != bal.ID || bL.Type != bal.Type ||
 		(bL.FilterIDs == nil && bal.FilterIDs != nil ||
 			bL.FilterIDs != nil && bal.FilterIDs == nil ||
 			len(bL.FilterIDs) != len(bal.FilterIDs)) ||
@@ -197,21 +197,21 @@ type CostIncrement struct {
 
 // Equals returns the equality between two CostIncrement
 func (cI *CostIncrement) Equals(ctIn *CostIncrement) (eq bool) {
-	if (cI.FilterIDs == nil && ctIn.FilterIDs != nil ||
+	if cI.FilterIDs == nil && ctIn.FilterIDs != nil ||
 		cI.FilterIDs != nil && ctIn.FilterIDs == nil ||
-		len(cI.FilterIDs) != len(ctIn.FilterIDs)) ||
+		len(cI.FilterIDs) != len(ctIn.FilterIDs) ||
 		(cI.Increment == nil && ctIn.Increment != nil ||
 			cI.Increment != nil && ctIn.Increment == nil ||
-			(cI.Increment != nil && ctIn.Increment != nil &&
-				cI.Increment.Compare(ctIn.Increment) != 0)) ||
+			cI.Increment != nil && ctIn.Increment != nil &&
+				cI.Increment.Compare(ctIn.Increment) != 0) ||
 		(cI.RecurrentFee == nil && ctIn.RecurrentFee != nil ||
 			cI.RecurrentFee != nil && ctIn.RecurrentFee == nil ||
-			(cI.RecurrentFee != nil && ctIn.RecurrentFee != nil &&
-				cI.RecurrentFee.Compare(ctIn.RecurrentFee) != 0)) ||
+			cI.RecurrentFee != nil && ctIn.RecurrentFee != nil &&
+				cI.RecurrentFee.Compare(ctIn.RecurrentFee) != 0) ||
 		(cI.FixedFee == nil && ctIn.FixedFee != nil ||
 			cI.FixedFee != nil && ctIn.FixedFee == nil ||
-			(cI.FixedFee != nil && ctIn.FixedFee != nil &&
-				cI.FixedFee.Compare(ctIn.FixedFee) != 0)) {
+			cI.FixedFee != nil && ctIn.FixedFee != nil &&
+				cI.FixedFee.Compare(ctIn.FixedFee) != 0) {
 		return
 	}
 	for i, val := range cI.FilterIDs {
@@ -261,13 +261,13 @@ type UnitFactor struct {
 
 // Equals compares two UnitFactors
 func (uF *UnitFactor) Equals(nUf *UnitFactor) (eq bool) {
-	if (uF.FilterIDs == nil && nUf.FilterIDs != nil ||
+	if uF.FilterIDs == nil && nUf.FilterIDs != nil ||
 		uF.FilterIDs != nil && nUf.FilterIDs == nil ||
-		len(uF.FilterIDs) != len(nUf.FilterIDs)) ||
+		len(uF.FilterIDs) != len(nUf.FilterIDs) ||
 		(uF.Factor == nil && nUf.Factor != nil ||
 			uF.Factor != nil && nUf.Factor == nil ||
-			(uF.Factor != nil && nUf.Factor != nil &&
-				uF.Factor.Compare(nUf.Factor) != 0)) {
+			uF.Factor != nil && nUf.Factor != nil &&
+				uF.Factor.Compare(nUf.Factor) != 0) {
 		return
 	}
 	for idx, val := range uF.FilterIDs {
@@ -285,8 +285,8 @@ func (aP *Account) TenantID() string {
 
 // Equals return the equality between two Accounts
 func (aC *Account) Equals(acnt *Account) (eq bool) {
-	if (aC.Tenant != acnt.Tenant ||
-		aC.ID != acnt.ID) ||
+	if aC.Tenant != acnt.Tenant ||
+		aC.ID != acnt.ID ||
 		(aC.FilterIDs == nil && acnt.FilterIDs != nil ||
 			aC.FilterIDs != nil && acnt.FilterIDs == nil ||
 			len(aC.FilterIDs) != len(acnt.FilterIDs)) ||

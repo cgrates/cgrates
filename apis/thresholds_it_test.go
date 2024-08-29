@@ -380,7 +380,7 @@ func testThresholdsGetThresholdProfiles(t *testing.T) {
 		t.Error(err)
 	} else {
 		sort.Slice(ths, func(i int, j int) bool {
-			return (ths)[i].ID < (ths)[j].ID
+			return ths[i].ID < ths[j].ID
 		})
 		if !reflect.DeepEqual(ths, exp) {
 			t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ToJSON(exp), utils.ToJSON(ths))
@@ -413,7 +413,7 @@ func testThresholdsGetThresholdProfilesWithPrefix(t *testing.T) {
 		t.Error(err)
 	} else {
 		sort.Slice(ths, func(i int, j int) bool {
-			return (ths)[i].ID < (ths)[j].ID
+			return ths[i].ID < ths[j].ID
 		})
 		if !reflect.DeepEqual(ths, exp) {
 			t.Errorf("expected: <%+v>, \nreceived: <%+v>", exp, ths)

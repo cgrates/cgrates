@@ -46,9 +46,9 @@ func valueIsEmpty(fld reflect.Value) bool {
 	if fld.Kind() == reflect.String && fld.CanSet() {
 		fld.SetString(strings.TrimSpace(fld.String()))
 	}
-	return (fld.Kind() == reflect.String && fld.String() == EmptyString) ||
-		((fld.Kind() == reflect.Slice || fld.Kind() == reflect.Map) && fld.Len() == 0) ||
-		(fld.Kind() == reflect.Int && fld.Int() == 0)
+	return fld.Kind() == reflect.String && fld.String() == EmptyString ||
+		(fld.Kind() == reflect.Slice || fld.Kind() == reflect.Map) && fld.Len() == 0 ||
+		fld.Kind() == reflect.Int && fld.Int() == 0
 }
 
 // Detects missing field values based on mandatory field names, s should be a pointer to a struct

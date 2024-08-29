@@ -961,12 +961,12 @@ func TestResourceAddResourceProfile(t *testing.T) {
 			{
 				Type:    utils.MetaGreaterOrEqual,
 				Element: "~*req.UsageInterval",
-				Values:  []string{(time.Second).String()},
+				Values:  []string{time.Second.String()},
 			},
 			{
 				Type:    utils.MetaGreaterOrEqual,
 				Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Usage,
-				Values:  []string{(time.Second).String()},
+				Values:  []string{time.Second.String()},
 			},
 			{
 				Type:    utils.MetaGreaterOrEqual,
@@ -988,12 +988,12 @@ func TestResourceAddResourceProfile(t *testing.T) {
 			{
 				Type:    utils.MetaGreaterOrEqual,
 				Element: "~*req.PddInterval",
-				Values:  []string{(time.Second).String()},
+				Values:  []string{time.Second.String()},
 			},
 			{
 				Type:    utils.MetaGreaterOrEqual,
 				Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Usage,
-				Values:  []string{(time.Second).String()},
+				Values:  []string{time.Second.String()},
 			},
 			{
 				Type:    utils.MetaGreaterOrEqual,
@@ -1118,12 +1118,12 @@ func TestResourceMatchingResourcesForEvent(t *testing.T) {
 			{
 				Type:    utils.MetaGreaterOrEqual,
 				Element: "~*req.UsageInterval",
-				Values:  []string{(time.Second).String()},
+				Values:  []string{time.Second.String()},
 			},
 			{
 				Type:    utils.MetaGreaterOrEqual,
 				Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Usage,
-				Values:  []string{(time.Second).String()},
+				Values:  []string{time.Second.String()},
 			},
 			{
 				Type:    utils.MetaGreaterOrEqual,
@@ -1145,12 +1145,12 @@ func TestResourceMatchingResourcesForEvent(t *testing.T) {
 			{
 				Type:    utils.MetaGreaterOrEqual,
 				Element: "~*req.PddInterval",
-				Values:  []string{(time.Second).String()},
+				Values:  []string{time.Second.String()},
 			},
 			{
 				Type:    utils.MetaGreaterOrEqual,
 				Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Usage,
-				Values:  []string{(time.Second).String()},
+				Values:  []string{time.Second.String()},
 			},
 			{
 				Type:    utils.MetaGreaterOrEqual,
@@ -1447,12 +1447,12 @@ func TestResourceUsageTTLCase1(t *testing.T) {
 			{
 				Type:    utils.MetaGreaterOrEqual,
 				Element: "~*req.UsageInterval",
-				Values:  []string{(time.Second).String()},
+				Values:  []string{time.Second.String()},
 			},
 			{
 				Type:    utils.MetaGreaterOrEqual,
 				Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Usage,
-				Values:  []string{(time.Second).String()},
+				Values:  []string{time.Second.String()},
 			},
 			{
 				Type:    utils.MetaGreaterOrEqual,
@@ -1474,12 +1474,12 @@ func TestResourceUsageTTLCase1(t *testing.T) {
 			{
 				Type:    utils.MetaGreaterOrEqual,
 				Element: "~*req.PddInterval",
-				Values:  []string{(time.Second).String()},
+				Values:  []string{time.Second.String()},
 			},
 			{
 				Type:    utils.MetaGreaterOrEqual,
 				Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Usage,
-				Values:  []string{(time.Second).String()},
+				Values:  []string{time.Second.String()},
 			},
 			{
 				Type:    utils.MetaGreaterOrEqual,
@@ -1650,12 +1650,12 @@ func TestResourceUsageTTLCase2(t *testing.T) {
 			{
 				Type:    utils.MetaGreaterOrEqual,
 				Element: "~*req.UsageInterval",
-				Values:  []string{(time.Second).String()},
+				Values:  []string{time.Second.String()},
 			},
 			{
 				Type:    utils.MetaGreaterOrEqual,
 				Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Usage,
-				Values:  []string{(time.Second).String()},
+				Values:  []string{time.Second.String()},
 			},
 			{
 				Type:    utils.MetaGreaterOrEqual,
@@ -1677,12 +1677,12 @@ func TestResourceUsageTTLCase2(t *testing.T) {
 			{
 				Type:    utils.MetaGreaterOrEqual,
 				Element: "~*req.PddInterval",
-				Values:  []string{(time.Second).String()},
+				Values:  []string{time.Second.String()},
 			},
 			{
 				Type:    utils.MetaGreaterOrEqual,
 				Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Usage,
-				Values:  []string{(time.Second).String()},
+				Values:  []string{time.Second.String()},
 			},
 			{
 				Type:    utils.MetaGreaterOrEqual,
@@ -1854,12 +1854,12 @@ func TestResourceUsageTTLCase3(t *testing.T) {
 			{
 				Type:    utils.MetaGreaterOrEqual,
 				Element: "~*req.UsageInterval",
-				Values:  []string{(time.Second).String()},
+				Values:  []string{time.Second.String()},
 			},
 			{
 				Type:    utils.MetaGreaterOrEqual,
 				Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Usage,
-				Values:  []string{(time.Second).String()},
+				Values:  []string{time.Second.String()},
 			},
 			{
 				Type:    utils.MetaGreaterOrEqual,
@@ -1881,12 +1881,12 @@ func TestResourceUsageTTLCase3(t *testing.T) {
 			{
 				Type:    utils.MetaGreaterOrEqual,
 				Element: "~*req.PddInterval",
-				Values:  []string{(time.Second).String()},
+				Values:  []string{time.Second.String()},
 			},
 			{
 				Type:    utils.MetaGreaterOrEqual,
 				Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Usage,
-				Values:  []string{(time.Second).String()},
+				Values:  []string{time.Second.String()},
 			},
 			{
 				Type:    utils.MetaGreaterOrEqual,
@@ -2058,12 +2058,12 @@ func TestResourceUsageTTLCase4(t *testing.T) {
 			{
 				Type:    utils.MetaGreaterOrEqual,
 				Element: "~*req.UsageInterval",
-				Values:  []string{(time.Second).String()},
+				Values:  []string{time.Second.String()},
 			},
 			{
 				Type:    utils.MetaGreaterOrEqual,
 				Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Usage,
-				Values:  []string{(time.Second).String()},
+				Values:  []string{time.Second.String()},
 			},
 			{
 				Type:    utils.MetaGreaterOrEqual,
@@ -2085,12 +2085,12 @@ func TestResourceUsageTTLCase4(t *testing.T) {
 			{
 				Type:    utils.MetaGreaterOrEqual,
 				Element: "~*req.PddInterval",
-				Values:  []string{(time.Second).String()},
+				Values:  []string{time.Second.String()},
 			},
 			{
 				Type:    utils.MetaGreaterOrEqual,
 				Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Usage,
-				Values:  []string{(time.Second).String()},
+				Values:  []string{time.Second.String()},
 			},
 			{
 				Type:    utils.MetaGreaterOrEqual,
@@ -2237,12 +2237,12 @@ func TestResourceMatchWithIndexFalse(t *testing.T) {
 			{
 				Type:    utils.MetaGreaterOrEqual,
 				Element: "~*req.UsageInterval",
-				Values:  []string{(time.Second).String()},
+				Values:  []string{time.Second.String()},
 			},
 			{
 				Type:    utils.MetaGreaterOrEqual,
 				Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Usage,
-				Values:  []string{(time.Second).String()},
+				Values:  []string{time.Second.String()},
 			},
 			{
 				Type:    utils.MetaGreaterOrEqual,
@@ -2264,12 +2264,12 @@ func TestResourceMatchWithIndexFalse(t *testing.T) {
 			{
 				Type:    utils.MetaGreaterOrEqual,
 				Element: "~*req.PddInterval",
-				Values:  []string{(time.Second).String()},
+				Values:  []string{time.Second.String()},
 			},
 			{
 				Type:    utils.MetaGreaterOrEqual,
 				Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Usage,
-				Values:  []string{(time.Second).String()},
+				Values:  []string{time.Second.String()},
 			},
 			{
 				Type:    utils.MetaGreaterOrEqual,

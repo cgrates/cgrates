@@ -461,12 +461,12 @@ func equalsRemoteHosts(v1, v2 []*RemoteHost) bool {
 }
 
 func equalsRPCConn(v1, v2 *RPCConn) bool {
-	return (v1 == nil && v2 == nil) ||
-		(v1 != nil && v2 != nil &&
+	return v1 == nil && v2 == nil ||
+		v1 != nil && v2 != nil &&
 			v1.Strategy == v2.Strategy &&
 			v1.PoolSize == v2.PoolSize &&
 			v1.ReplyTimeout == v2.ReplyTimeout &&
-			equalsRemoteHosts(v1.Conns, v2.Conns))
+			equalsRemoteHosts(v1.Conns, v2.Conns)
 }
 
 type RPCConnsJson map[string]*RPCConnJson

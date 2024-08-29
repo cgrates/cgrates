@@ -121,7 +121,7 @@ func TestAccountSCfgLoadFromJSONCfgOptsErr(t *testing.T) {
 
 	//also test for empty json config
 	jsnCfg = nil
-	if err := accOpts.loadFromJSONCfg((jsnCfg)); err != nil {
+	if err := accOpts.loadFromJSONCfg(jsnCfg); err != nil {
 		t.Error(err)
 	}
 }
@@ -206,13 +206,13 @@ func TestAccountSCfgClone(t *testing.T) {
 	if !reflect.DeepEqual(ban, rcv) {
 		t.Errorf("\nExpected: %+v\nReceived: %+v", utils.ToJSON(ban), utils.ToJSON(rcv))
 	}
-	if (rcv.AttributeSConns)[0] = utils.EmptyString; (ban.AttributeSConns)[0] != "*req.index1" {
+	if rcv.AttributeSConns[0] = utils.EmptyString; ban.AttributeSConns[0] != "*req.index1" {
 		t.Errorf("Expected clone to not modify the cloned")
 	}
-	if (rcv.RateSConns)[0] = utils.EmptyString; (ban.RateSConns)[0] != "*req.index1" {
+	if rcv.RateSConns[0] = utils.EmptyString; ban.RateSConns[0] != "*req.index1" {
 		t.Errorf("Expected clone to not modify the cloned")
 	}
-	if (rcv.ThresholdSConns)[0] = utils.EmptyString; (ban.ThresholdSConns)[0] != "*req.index1" {
+	if rcv.ThresholdSConns[0] = utils.EmptyString; ban.ThresholdSConns[0] != "*req.index1" {
 		t.Errorf("Expected clone to not modify the cloned")
 	}
 	if (*rcv.StringIndexedFields)[0] = utils.EmptyString; (*ban.StringIndexedFields)[0] != "*req.index1" {

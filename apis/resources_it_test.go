@@ -388,7 +388,7 @@ func testResourceSGetResourceProfiles(t *testing.T) {
 		t.Error(err)
 	}
 	sort.Slice(rplyRes, func(i int, j int) bool {
-		return (rplyRes)[i].ID < (rplyRes)[j].ID
+		return rplyRes[i].ID < rplyRes[j].ID
 	})
 	if !reflect.DeepEqual(rplyRes, exp) {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", exp, rplyRes)

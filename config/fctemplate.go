@@ -308,8 +308,8 @@ func (fc *FCTemplate) ComputePath() {
 }
 
 func (fc *FCTemplate) Equals(fc2 *FCTemplate) bool {
-	return (fc == nil && fc2 == nil) ||
-		(fc != nil && fc2 != nil &&
+	return fc == nil && fc2 == nil ||
+		fc != nil && fc2 != nil &&
 			fc.Tag == fc2.Tag &&
 			fc.Type == fc2.Type &&
 			fc.Path == fc2.Path &&
@@ -327,9 +327,9 @@ func (fc *FCTemplate) Equals(fc2 *FCTemplate) bool {
 			fc.CostShiftDigits == fc2.CostShiftDigits &&
 			fc.MaskDestID == fc2.MaskDestID &&
 			fc.MaskLen == fc2.MaskLen &&
-			((fc.RoundingDecimals == nil && fc2.RoundingDecimals == nil) ||
-				(fc.RoundingDecimals != nil && fc2.RoundingDecimals != nil &&
-					*fc.RoundingDecimals == *fc2.RoundingDecimals)))
+			(fc.RoundingDecimals == nil && fc2.RoundingDecimals == nil ||
+				fc.RoundingDecimals != nil && fc2.RoundingDecimals != nil &&
+					*fc.RoundingDecimals == *fc2.RoundingDecimals)
 }
 
 type FcTemplatesJsonCfg map[string][]*FcTemplateJsonCfg

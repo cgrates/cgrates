@@ -351,7 +351,7 @@ func TestLoaderProcess(t *testing.T) {
 		cache[k] = ltcache.NewCache(cfg.Limit, cfg.TTL, cfg.StaticTTL, nil)
 	}
 	ld := newLoader(cfg, cfg.LoaderCfg()[0], dm, cache, fS, cM, nil)
-	if expLd := (&loader{
+	expLd := &loader{
 		cfg:       cfg,
 		ldrCfg:    cfg.LoaderCfg()[0],
 		dm:        dm,
@@ -359,7 +359,8 @@ func TestLoaderProcess(t *testing.T) {
 		connMgr:   cM,
 		dataCache: cache,
 		Locker:    newLocker(cfg.LoaderCfg()[0].GetLockFilePath(), cfg.LoaderCfg()[0].ID),
-	}); !reflect.DeepEqual(expLd, ld) {
+	}
+	if !reflect.DeepEqual(expLd, ld) {
 		t.Errorf("Expected: %+v, received: %+v", expLd, ld)
 	}
 
@@ -449,23 +450,25 @@ func TestLoaderProcessCallCahe(t *testing.T) {
 		} else if !reflect.DeepEqual(v, prf) {
 			t.Errorf("Expected: %v, received: %v", utils.ToJSON(v), utils.ToJSON(prf))
 		}
-		if exp := (&utils.AttrReloadCacheWithAPIOpts{
+		expReload := &utils.AttrReloadCacheWithAPIOpts{
 			APIOpts: map[string]any{
 				utils.MetaCache: utils.MetaReload,
 			},
-			AttributeProfileIDs: []string{tntID}}); !reflect.DeepEqual(exp, reloadCache) {
-			t.Errorf("Expected: %v, received: %v", utils.ToJSON(exp), utils.ToJSON(reloadCache))
+			AttributeProfileIDs: []string{tntID}}
+		if !reflect.DeepEqual(expReload, reloadCache) {
+			t.Errorf("Expected: %v, received: %v", utils.ToJSON(expReload), utils.ToJSON(reloadCache))
 		}
-		if exp := (&utils.AttrCacheIDsWithAPIOpts{
+		expClear := &utils.AttrCacheIDsWithAPIOpts{
 			APIOpts: map[string]any{
 				utils.MetaCache: utils.MetaReload,
 			},
-			CacheIDs: []string{utils.CacheAttributeFilterIndexes}}); !reflect.DeepEqual(exp, clearCache) {
-			t.Errorf("Expected: %v, received: %v", utils.ToJSON(exp), utils.ToJSON(clearCache))
+			CacheIDs: []string{utils.CacheAttributeFilterIndexes}}
+		if !reflect.DeepEqual(expClear, clearCache) {
+			t.Errorf("Expected: %v, received: %v", utils.ToJSON(expClear), utils.ToJSON(clearCache))
 		}
 	}
 	{
-		v := (&engine.ResourceProfile{Tenant: "cgrates.org", ID: "ID"})
+		v := &engine.ResourceProfile{Tenant: "cgrates.org", ID: "ID"}
 		if err := ld.process(context.Background(), v, utils.MetaResources, utils.MetaStore,
 			map[string]any{utils.MetaCache: utils.MetaReload}, true, false); err != nil {
 			t.Error(err)
@@ -475,23 +478,25 @@ func TestLoaderProcessCallCahe(t *testing.T) {
 		} else if !reflect.DeepEqual(v, prf) {
 			t.Errorf("Expected: %v, received: %v", utils.ToJSON(v), utils.ToJSON(prf))
 		}
-		if exp := (&utils.AttrReloadCacheWithAPIOpts{
+		expReload := &utils.AttrReloadCacheWithAPIOpts{
 			APIOpts: map[string]any{
 				utils.MetaCache: utils.MetaReload,
 			},
-			ResourceProfileIDs: []string{tntID}, ResourceIDs: []string{tntID}}); !reflect.DeepEqual(exp, reloadCache) {
-			t.Errorf("Expected: %v, received: %v", utils.ToJSON(exp), utils.ToJSON(reloadCache))
+			ResourceProfileIDs: []string{tntID}, ResourceIDs: []string{tntID}}
+		if !reflect.DeepEqual(expReload, reloadCache) {
+			t.Errorf("Expected: %v, received: %v", utils.ToJSON(expReload), utils.ToJSON(reloadCache))
 		}
-		if exp := (&utils.AttrCacheIDsWithAPIOpts{
+		expClear := &utils.AttrCacheIDsWithAPIOpts{
 			APIOpts: map[string]any{
 				utils.MetaCache: utils.MetaReload,
 			},
-			CacheIDs: []string{utils.CacheResourceFilterIndexes}}); !reflect.DeepEqual(exp, clearCache) {
-			t.Errorf("Expected: %v, received: %v", utils.ToJSON(exp), utils.ToJSON(clearCache))
+			CacheIDs: []string{utils.CacheResourceFilterIndexes}}
+		if !reflect.DeepEqual(expClear, clearCache) {
+			t.Errorf("Expected: %v, received: %v", utils.ToJSON(expClear), utils.ToJSON(clearCache))
 		}
 	}
 	{
-		v := (&engine.StatQueueProfile{Tenant: "cgrates.org", ID: "ID"})
+		v := &engine.StatQueueProfile{Tenant: "cgrates.org", ID: "ID"}
 		if err := ld.process(context.Background(), v, utils.MetaStats, utils.MetaStore,
 			map[string]any{utils.MetaCache: utils.MetaReload}, true, false); err != nil {
 			t.Error(err)
@@ -501,24 +506,26 @@ func TestLoaderProcessCallCahe(t *testing.T) {
 		} else if !reflect.DeepEqual(v, prf) {
 			t.Errorf("Expected: %v, received: %v", utils.ToJSON(v), utils.ToJSON(prf))
 		}
-		if exp := (&utils.AttrReloadCacheWithAPIOpts{
+		expReload := &utils.AttrReloadCacheWithAPIOpts{
 			APIOpts: map[string]any{
 				utils.MetaCache: utils.MetaReload,
 			},
-			StatsQueueProfileIDs: []string{tntID}, StatsQueueIDs: []string{tntID}}); !reflect.DeepEqual(exp, reloadCache) {
-			t.Errorf("Expected: %v, received: %v", utils.ToJSON(exp), utils.ToJSON(reloadCache))
+			StatsQueueProfileIDs: []string{tntID}, StatsQueueIDs: []string{tntID}}
+		if !reflect.DeepEqual(expReload, reloadCache) {
+			t.Errorf("Expected: %v, received: %v", utils.ToJSON(expReload), utils.ToJSON(reloadCache))
 		}
-		if exp := (&utils.AttrCacheIDsWithAPIOpts{
+		expClear := &utils.AttrCacheIDsWithAPIOpts{
 			APIOpts: map[string]any{
 				utils.MetaCache: utils.MetaReload,
 			},
-			CacheIDs: []string{utils.CacheStatFilterIndexes}}); !reflect.DeepEqual(exp, clearCache) {
-			t.Errorf("Expected: %v, received: %v", utils.ToJSON(exp), utils.ToJSON(clearCache))
+			CacheIDs: []string{utils.CacheStatFilterIndexes}}
+		if !reflect.DeepEqual(expClear, clearCache) {
+			t.Errorf("Expected: %v, received: %v", utils.ToJSON(expClear), utils.ToJSON(clearCache))
 		}
 	}
 
 	{
-		v := (&engine.ThresholdProfile{Tenant: "cgrates.org", ID: "ID"})
+		v := &engine.ThresholdProfile{Tenant: "cgrates.org", ID: "ID"}
 		if err := ld.process(context.Background(), v, utils.MetaThresholds, utils.MetaStore,
 			map[string]any{utils.MetaCache: utils.MetaReload}, true, false); err != nil {
 			t.Error(err)
@@ -528,24 +535,26 @@ func TestLoaderProcessCallCahe(t *testing.T) {
 		} else if !reflect.DeepEqual(v, prf) {
 			t.Errorf("Expected: %v, received: %v", utils.ToJSON(v), utils.ToJSON(prf))
 		}
-		if exp := (&utils.AttrReloadCacheWithAPIOpts{
+		expReload := &utils.AttrReloadCacheWithAPIOpts{
 			APIOpts: map[string]any{
 				utils.MetaCache: utils.MetaReload,
 			},
-			ThresholdProfileIDs: []string{tntID}, ThresholdIDs: []string{tntID}}); !reflect.DeepEqual(exp, reloadCache) {
-			t.Errorf("Expected: %v, received: %v", utils.ToJSON(exp), utils.ToJSON(reloadCache))
+			ThresholdProfileIDs: []string{tntID}, ThresholdIDs: []string{tntID}}
+		if !reflect.DeepEqual(expReload, reloadCache) {
+			t.Errorf("Expected: %v, received: %v", utils.ToJSON(expReload), utils.ToJSON(reloadCache))
 		}
-		if exp := (&utils.AttrCacheIDsWithAPIOpts{
+		expClear := &utils.AttrCacheIDsWithAPIOpts{
 			APIOpts: map[string]any{
 				utils.MetaCache: utils.MetaReload,
 			},
-			CacheIDs: []string{utils.CacheThresholdFilterIndexes}}); !reflect.DeepEqual(exp, clearCache) {
-			t.Errorf("Expected: %v, received: %v", utils.ToJSON(exp), utils.ToJSON(clearCache))
+			CacheIDs: []string{utils.CacheThresholdFilterIndexes}}
+		if !reflect.DeepEqual(expClear, clearCache) {
+			t.Errorf("Expected: %v, received: %v", utils.ToJSON(expClear), utils.ToJSON(clearCache))
 		}
 	}
 
 	{
-		v := (&engine.RouteProfile{Tenant: "cgrates.org", ID: "ID"})
+		v := &engine.RouteProfile{Tenant: "cgrates.org", ID: "ID"}
 		if err := ld.process(context.Background(), v, utils.MetaRoutes, utils.MetaStore,
 			map[string]any{utils.MetaCache: utils.MetaReload}, true, false); err != nil {
 			t.Error(err)
@@ -555,24 +564,26 @@ func TestLoaderProcessCallCahe(t *testing.T) {
 		} else if !reflect.DeepEqual(v, prf) {
 			t.Errorf("Expected: %v, received: %v", utils.ToJSON(v), utils.ToJSON(prf))
 		}
-		if exp := (&utils.AttrReloadCacheWithAPIOpts{
+		expReload := &utils.AttrReloadCacheWithAPIOpts{
 			APIOpts: map[string]any{
 				utils.MetaCache: utils.MetaReload,
 			},
-			RouteProfileIDs: []string{tntID}}); !reflect.DeepEqual(exp, reloadCache) {
-			t.Errorf("Expected: %v, received: %v", utils.ToJSON(exp), utils.ToJSON(reloadCache))
+			RouteProfileIDs: []string{tntID}}
+		if !reflect.DeepEqual(expReload, reloadCache) {
+			t.Errorf("Expected: %v, received: %v", utils.ToJSON(expReload), utils.ToJSON(reloadCache))
 		}
-		if exp := (&utils.AttrCacheIDsWithAPIOpts{
+		expClear := &utils.AttrCacheIDsWithAPIOpts{
 			APIOpts: map[string]any{
 				utils.MetaCache: utils.MetaReload,
 			},
-			CacheIDs: []string{utils.CacheRouteFilterIndexes}}); !reflect.DeepEqual(exp, clearCache) {
-			t.Errorf("Expected: %v, received: %v", utils.ToJSON(exp), utils.ToJSON(clearCache))
+			CacheIDs: []string{utils.CacheRouteFilterIndexes}}
+		if !reflect.DeepEqual(expClear, clearCache) {
+			t.Errorf("Expected: %v, received: %v", utils.ToJSON(expClear), utils.ToJSON(clearCache))
 		}
 	}
 
 	{
-		v := (&engine.ChargerProfile{Tenant: "cgrates.org", ID: "ID"})
+		v := &engine.ChargerProfile{Tenant: "cgrates.org", ID: "ID"}
 		if err := ld.process(context.Background(), v, utils.MetaChargers, utils.MetaStore,
 			map[string]any{utils.MetaCache: utils.MetaReload}, true, false); err != nil {
 			t.Error(err)
@@ -582,24 +593,26 @@ func TestLoaderProcessCallCahe(t *testing.T) {
 		} else if !reflect.DeepEqual(v, prf) {
 			t.Errorf("Expected: %v, received: %v", utils.ToJSON(v), utils.ToJSON(prf))
 		}
-		if exp := (&utils.AttrReloadCacheWithAPIOpts{
+		expReload := &utils.AttrReloadCacheWithAPIOpts{
 			APIOpts: map[string]any{
 				utils.MetaCache: utils.MetaReload,
 			},
-			ChargerProfileIDs: []string{tntID}}); !reflect.DeepEqual(exp, reloadCache) {
-			t.Errorf("Expected: %v, received: %v", utils.ToJSON(exp), utils.ToJSON(reloadCache))
+			ChargerProfileIDs: []string{tntID}}
+		if !reflect.DeepEqual(expReload, reloadCache) {
+			t.Errorf("Expected: %v, received: %v", utils.ToJSON(expReload), utils.ToJSON(reloadCache))
 		}
-		if exp := (&utils.AttrCacheIDsWithAPIOpts{
+		expClear := &utils.AttrCacheIDsWithAPIOpts{
 			APIOpts: map[string]any{
 				utils.MetaCache: utils.MetaReload,
 			},
-			CacheIDs: []string{utils.CacheChargerFilterIndexes}}); !reflect.DeepEqual(exp, clearCache) {
-			t.Errorf("Expected: %v, received: %v", utils.ToJSON(exp), utils.ToJSON(clearCache))
+			CacheIDs: []string{utils.CacheChargerFilterIndexes}}
+		if !reflect.DeepEqual(expClear, clearCache) {
+			t.Errorf("Expected: %v, received: %v", utils.ToJSON(expClear), utils.ToJSON(clearCache))
 		}
 	}
 
 	{
-		v := (&engine.DispatcherProfile{Tenant: "cgrates.org", ID: "ID", StrategyParams: make(map[string]any)})
+		v := &engine.DispatcherProfile{Tenant: "cgrates.org", ID: "ID", StrategyParams: make(map[string]any)}
 		if err := ld.process(context.Background(), v, utils.MetaDispatchers, utils.MetaStore,
 			map[string]any{utils.MetaCache: utils.MetaReload}, true, false); err != nil {
 			t.Error(err)
@@ -609,24 +622,26 @@ func TestLoaderProcessCallCahe(t *testing.T) {
 		} else if !reflect.DeepEqual(v, prf) {
 			t.Errorf("Expected: %v, received: %v", utils.ToJSON(v), utils.ToJSON(prf))
 		}
-		if exp := (&utils.AttrReloadCacheWithAPIOpts{
+		expReload := &utils.AttrReloadCacheWithAPIOpts{
 			APIOpts: map[string]any{
 				utils.MetaCache: utils.MetaReload,
 			},
-			DispatcherProfileIDs: []string{tntID}}); !reflect.DeepEqual(exp, reloadCache) {
-			t.Errorf("Expected: %v, received: %v", utils.ToJSON(exp), utils.ToJSON(reloadCache))
+			DispatcherProfileIDs: []string{tntID}}
+		if !reflect.DeepEqual(expReload, reloadCache) {
+			t.Errorf("Expected: %v, received: %v", utils.ToJSON(expReload), utils.ToJSON(reloadCache))
 		}
-		if exp := (&utils.AttrCacheIDsWithAPIOpts{
+		expClear := &utils.AttrCacheIDsWithAPIOpts{
 			APIOpts: map[string]any{
 				utils.MetaCache: utils.MetaReload,
 			},
-			CacheIDs: []string{utils.CacheDispatcherFilterIndexes}}); !reflect.DeepEqual(exp, clearCache) {
-			t.Errorf("Expected: %v, received: %v", utils.ToJSON(exp), utils.ToJSON(clearCache))
+			CacheIDs: []string{utils.CacheDispatcherFilterIndexes}}
+		if !reflect.DeepEqual(expClear, clearCache) {
+			t.Errorf("Expected: %v, received: %v", utils.ToJSON(expClear), utils.ToJSON(clearCache))
 		}
 	}
 
 	{
-		v := (&utils.RateProfile{Tenant: "cgrates.org", ID: "ID", Rates: map[string]*utils.Rate{}, MinCost: utils.NewDecimal(0, 0), MaxCost: utils.NewDecimal(0, 0)})
+		v := &utils.RateProfile{Tenant: "cgrates.org", ID: "ID", Rates: map[string]*utils.Rate{}, MinCost: utils.NewDecimal(0, 0), MaxCost: utils.NewDecimal(0, 0)}
 		if err := ld.process(context.Background(), v, utils.MetaRateProfiles, utils.MetaStore,
 			map[string]any{utils.MetaCache: utils.MetaReload}, true, false); err != nil {
 			t.Error(err)
@@ -636,24 +651,26 @@ func TestLoaderProcessCallCahe(t *testing.T) {
 		} else if !reflect.DeepEqual(v, prf) {
 			t.Errorf("Expected: %v, received: %v", utils.ToJSON(v), utils.ToJSON(prf))
 		}
-		if exp := (&utils.AttrReloadCacheWithAPIOpts{
+		expReload := &utils.AttrReloadCacheWithAPIOpts{
 			APIOpts: map[string]any{
 				utils.MetaCache: utils.MetaReload,
 			},
-			RateProfileIDs: []string{tntID}}); !reflect.DeepEqual(exp, reloadCache) {
-			t.Errorf("Expected: %v, received: %v", utils.ToJSON(exp), utils.ToJSON(reloadCache))
+			RateProfileIDs: []string{tntID}}
+		if !reflect.DeepEqual(expReload, reloadCache) {
+			t.Errorf("Expected: %v, received: %v", utils.ToJSON(expReload), utils.ToJSON(reloadCache))
 		}
-		if exp := (&utils.AttrCacheIDsWithAPIOpts{
+		expClear := &utils.AttrCacheIDsWithAPIOpts{
 			APIOpts: map[string]any{
 				utils.MetaCache: utils.MetaReload,
 			},
-			CacheIDs: []string{utils.CacheRateProfilesFilterIndexes, utils.CacheRateFilterIndexes}}); !reflect.DeepEqual(exp, clearCache) {
-			t.Errorf("Expected: %v, received: %v", utils.ToJSON(exp), utils.ToJSON(clearCache))
+			CacheIDs: []string{utils.CacheRateProfilesFilterIndexes, utils.CacheRateFilterIndexes}}
+		if !reflect.DeepEqual(expClear, clearCache) {
+			t.Errorf("Expected: %v, received: %v", utils.ToJSON(expClear), utils.ToJSON(clearCache))
 		}
 	}
 
 	{
-		v := (&engine.ActionProfile{Tenant: "cgrates.org", ID: "ID", Targets: map[string]utils.StringSet{}})
+		v := &engine.ActionProfile{Tenant: "cgrates.org", ID: "ID", Targets: map[string]utils.StringSet{}}
 		if err := ld.process(context.Background(), v, utils.MetaActionProfiles, utils.MetaStore,
 			map[string]any{utils.MetaCache: utils.MetaReload}, true, false); err != nil {
 			t.Error(err)
@@ -663,26 +680,28 @@ func TestLoaderProcessCallCahe(t *testing.T) {
 		} else if !reflect.DeepEqual(v, prf) {
 			t.Errorf("Expected: %v, received: %v", utils.ToJSON(v), utils.ToJSON(prf))
 		}
-		if exp := (&utils.AttrReloadCacheWithAPIOpts{
+		expReload := &utils.AttrReloadCacheWithAPIOpts{
 			APIOpts: map[string]any{
 				utils.MetaCache: utils.MetaReload,
 			},
-			ActionProfileIDs: []string{tntID}}); !reflect.DeepEqual(exp, reloadCache) {
-			t.Errorf("Expected: %v, received: %v", utils.ToJSON(exp), utils.ToJSON(reloadCache))
+			ActionProfileIDs: []string{tntID}}
+		if !reflect.DeepEqual(expReload, reloadCache) {
+			t.Errorf("Expected: %v, received: %v", utils.ToJSON(expReload), utils.ToJSON(reloadCache))
 		}
-		if exp := (&utils.AttrCacheIDsWithAPIOpts{
+		expClear := &utils.AttrCacheIDsWithAPIOpts{
 			APIOpts: map[string]any{
 				utils.MetaCache: utils.MetaReload,
 			},
-			CacheIDs: []string{utils.CacheActionProfiles, utils.CacheActionProfilesFilterIndexes}}); !reflect.DeepEqual(exp, clearCache) {
-			t.Errorf("Expected: %v, received: %v", utils.ToJSON(exp), utils.ToJSON(clearCache))
+			CacheIDs: []string{utils.CacheActionProfiles, utils.CacheActionProfilesFilterIndexes}}
+		if !reflect.DeepEqual(expClear, clearCache) {
+			t.Errorf("Expected: %v, received: %v", utils.ToJSON(expClear), utils.ToJSON(clearCache))
 		}
 	}
 
 	reloadCache, clearCache = nil, nil
 
 	{
-		v := (&engine.Filter{Tenant: "cgrates.org", ID: "ID", Rules: make([]*engine.FilterRule, 0)})
+		v := &engine.Filter{Tenant: "cgrates.org", ID: "ID", Rules: make([]*engine.FilterRule, 0)}
 		if err := ld.process(context.Background(), v, utils.MetaFilters, utils.MetaStore,
 			map[string]any{utils.MetaCache: utils.MetaReload}, true, false); err != nil {
 			t.Error(err)
@@ -692,11 +711,12 @@ func TestLoaderProcessCallCahe(t *testing.T) {
 		} else if !reflect.DeepEqual(v, prf) {
 			t.Errorf("Expected: %v, received: %v", utils.ToJSON(v), utils.ToJSON(prf))
 		}
-		if exp := (&utils.AttrReloadCacheWithAPIOpts{
+		exp := &utils.AttrReloadCacheWithAPIOpts{
 			APIOpts: map[string]any{
 				utils.MetaCache: utils.MetaReload,
 			},
-			FilterIDs: []string{tntID}}); !reflect.DeepEqual(exp, reloadCache) {
+			FilterIDs: []string{tntID}}
+		if !reflect.DeepEqual(exp, reloadCache) {
 			t.Errorf("Expected: %v, received: %v", utils.ToJSON(exp), utils.ToJSON(reloadCache))
 		}
 		if !reflect.DeepEqual(nil, clearCache) {
@@ -705,7 +725,7 @@ func TestLoaderProcessCallCahe(t *testing.T) {
 	}
 
 	{
-		v := (&engine.DispatcherHost{Tenant: "cgrates.org", RemoteHost: &config.RemoteHost{ID: "ID", Address: "127.0.0.1", Transport: utils.MetaJSON}})
+		v := &engine.DispatcherHost{Tenant: "cgrates.org", RemoteHost: &config.RemoteHost{ID: "ID", Address: "127.0.0.1", Transport: utils.MetaJSON}}
 		if err := ld.process(context.Background(), v, utils.MetaDispatcherHosts, utils.MetaStore,
 			map[string]any{utils.MetaCache: utils.MetaReload}, true, false); err != nil {
 			t.Error(err)
@@ -715,11 +735,12 @@ func TestLoaderProcessCallCahe(t *testing.T) {
 		} else if !reflect.DeepEqual(v, prf) {
 			t.Errorf("Expected: %v, received: %v", utils.ToJSON(v), utils.ToJSON(prf))
 		}
-		if exp := (&utils.AttrReloadCacheWithAPIOpts{
+		exp := &utils.AttrReloadCacheWithAPIOpts{
 			APIOpts: map[string]any{
 				utils.MetaCache: utils.MetaReload,
 			},
-			DispatcherHostIDs: []string{tntID}}); !reflect.DeepEqual(exp, reloadCache) {
+			DispatcherHostIDs: []string{tntID}}
+		if !reflect.DeepEqual(exp, reloadCache) {
 			t.Errorf("Expected: %v, received: %v", utils.ToJSON(exp), utils.ToJSON(reloadCache))
 		}
 		if !reflect.DeepEqual(nil, clearCache) {
@@ -730,7 +751,7 @@ func TestLoaderProcessCallCahe(t *testing.T) {
 	reloadCache, clearCache = nil, nil
 
 	{
-		v := (&utils.Account{Tenant: "cgrates.org", ID: "ID", Balances: map[string]*utils.Balance{}, Opts: make(map[string]any)})
+		v := &utils.Account{Tenant: "cgrates.org", ID: "ID", Balances: map[string]*utils.Balance{}, Opts: make(map[string]any)}
 		if err := ld.process(context.Background(), v, utils.MetaAccounts, utils.MetaStore,
 			map[string]any{utils.MetaCache: utils.MetaReload}, true, false); err != nil {
 			t.Error(err)
@@ -740,20 +761,22 @@ func TestLoaderProcessCallCahe(t *testing.T) {
 		} else if !reflect.DeepEqual(v, prf) {
 			t.Errorf("Expected: %v, received: %v", utils.ToJSON(v), utils.ToJSON(prf))
 		}
-		if exp := (&utils.AttrReloadCacheWithAPIOpts{
+		expReload := &utils.AttrReloadCacheWithAPIOpts{
 			APIOpts: map[string]any{
 				utils.MetaCache: utils.MetaReload,
 			},
-		}); !reflect.DeepEqual(exp, reloadCache) {
-			t.Errorf("Expected: %v, received: %v", utils.ToJSON(exp), utils.ToJSON(reloadCache))
 		}
-		if exp := (&utils.AttrCacheIDsWithAPIOpts{
+		if !reflect.DeepEqual(expReload, reloadCache) {
+			t.Errorf("Expected: %v, received: %v", utils.ToJSON(expReload), utils.ToJSON(reloadCache))
+		}
+		expClear := &utils.AttrCacheIDsWithAPIOpts{
 			CacheIDs: []string{utils.CacheAccounts, utils.CacheAccountsFilterIndexes},
 			APIOpts: map[string]any{
 				utils.MetaCache: utils.MetaReload,
 			},
-		}); !reflect.DeepEqual(exp, clearCache) {
-			t.Errorf("Expected: %v, received: %v", utils.ToJSON(exp), utils.ToJSON(clearCache))
+		}
+		if !reflect.DeepEqual(expClear, clearCache) {
+			t.Errorf("Expected: %v, received: %v", utils.ToJSON(expClear), utils.ToJSON(clearCache))
 		}
 	}
 }
@@ -783,13 +806,19 @@ cgrates.org,ID2`, utils.CSVSep, -1), fc, utils.MetaAttributes, utils.MetaStore,
 	}
 	if prf, err := dm.GetAttributeProfile(context.Background(), "cgrates.org", "ID", false, true, utils.NonTransactional); err != nil {
 		t.Fatal(err)
-	} else if v := (&engine.AttributeProfile{Tenant: "cgrates.org", ID: "ID"}); !reflect.DeepEqual(v, prf) {
-		t.Errorf("Expected: %v, received: %v", utils.ToJSON(v), utils.ToJSON(prf))
+	} else {
+		v := &engine.AttributeProfile{Tenant: "cgrates.org", ID: "ID"}
+		if !reflect.DeepEqual(v, prf) {
+			t.Errorf("Expected: %v, received: %v", utils.ToJSON(v), utils.ToJSON(prf))
+		}
 	}
 	if prf, err := dm.GetAttributeProfile(context.Background(), "cgrates.org", "ID2", false, true, utils.NonTransactional); err != nil {
 		t.Fatal(err)
-	} else if v := (&engine.AttributeProfile{Tenant: "cgrates.org", ID: "ID2"}); !reflect.DeepEqual(v, prf) {
-		t.Errorf("Expected: %v, received: %v", utils.ToJSON(v), utils.ToJSON(prf))
+	} else {
+		v := &engine.AttributeProfile{Tenant: "cgrates.org", ID: "ID2"}
+		if !reflect.DeepEqual(v, prf) {
+			t.Errorf("Expected: %v, received: %v", utils.ToJSON(v), utils.ToJSON(prf))
+		}
 	}
 }
 
@@ -876,8 +905,11 @@ func TestLoaderProcessFileURL(t *testing.T) {
 	}
 	if prf, err := dm.GetAttributeProfile(context.Background(), "cgrates.org", "ID", false, true, utils.NonTransactional); err != nil {
 		t.Fatal(err)
-	} else if v := (&engine.AttributeProfile{Tenant: "cgrates.org", ID: "ID"}); !reflect.DeepEqual(v, prf) {
-		t.Errorf("Expected: %v, received: %v", utils.ToJSON(v), utils.ToJSON(prf))
+	} else {
+		v := &engine.AttributeProfile{Tenant: "cgrates.org", ID: "ID"}
+		if !reflect.DeepEqual(v, prf) {
+			t.Errorf("Expected: %v, received: %v", utils.ToJSON(v), utils.ToJSON(prf))
+		}
 	}
 
 	if err := ld.processFile(context.Background(), &config.LoaderDataType{
@@ -967,8 +999,11 @@ func TestLoaderProcessIFile(t *testing.T) {
 	}
 	if prf, err := dm.GetAttributeProfile(context.Background(), "cgrates.org", "ID", false, true, utils.NonTransactional); err != nil {
 		t.Fatal(err)
-	} else if v := (&engine.AttributeProfile{Tenant: "cgrates.org", ID: "ID"}); !reflect.DeepEqual(v, prf) {
-		t.Errorf("Expected: %v, received: %v", utils.ToJSON(v), utils.ToJSON(prf))
+	} else {
+		v := &engine.AttributeProfile{Tenant: "cgrates.org", ID: "ID"}
+		if !reflect.DeepEqual(v, prf) {
+			t.Errorf("Expected: %v, received: %v", utils.ToJSON(v), utils.ToJSON(prf))
+		}
 	}
 
 	if _, err := os.Stat(path.Join(tmpIn, utils.AttributesCsv)); err == nil {
@@ -1066,8 +1101,11 @@ func TestLoaderProcessFolder(t *testing.T) {
 
 	if prf, err := dm.GetAttributeProfile(context.Background(), "cgrates.org", "ID", false, true, utils.NonTransactional); err != nil {
 		t.Fatal(err)
-	} else if v := (&engine.AttributeProfile{Tenant: "cgrates.org", ID: "ID"}); !reflect.DeepEqual(v, prf) {
-		t.Errorf("Expected: %v, received: %v", utils.ToJSON(v), utils.ToJSON(prf))
+	} else {
+		v := &engine.AttributeProfile{Tenant: "cgrates.org", ID: "ID"}
+		if !reflect.DeepEqual(v, prf) {
+			t.Errorf("Expected: %v, received: %v", utils.ToJSON(v), utils.ToJSON(prf))
+		}
 	}
 
 	if _, err := os.Stat(path.Join(tmpIn, utils.AttributesCsv)); err == nil {

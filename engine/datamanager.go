@@ -872,7 +872,7 @@ func (dm *DataManager) SetStatQueueProfile(ctx *context.Context, sqp *StatQueueP
 		oldSts.QueueLength != sqp.QueueLength ||
 		oldSts.TTL != sqp.TTL ||
 		oldSts.MinItems != sqp.MinItems ||
-		(oldSts.Stored != sqp.Stored && oldSts.Stored) { // reset the stats queue if the profile changed this fields
+		oldSts.Stored != sqp.Stored && oldSts.Stored { // reset the stats queue if the profile changed this fields
 		guardian.Guardian.Guard(ctx, func(ctx *context.Context) (_ error) { // we change the queue so lock it
 			var sq *StatQueue
 			if sq, err = NewStatQueue(sqp.Tenant, sqp.ID, sqp.Metrics,
@@ -1301,7 +1301,7 @@ func (dm *DataManager) SetResourceProfile(ctx *context.Context, rp *ResourceProf
 	if oldRes == nil || // create the resource if it didn't exist before
 		oldRes.UsageTTL != rp.UsageTTL ||
 		oldRes.Limit != rp.Limit ||
-		(oldRes.Stored != rp.Stored && oldRes.Stored) { // reset the resource if the profile changed this fields
+		oldRes.Stored != rp.Stored && oldRes.Stored { // reset the resource if the profile changed this fields
 		err = dm.SetResource(ctx, &Resource{
 			Tenant: rp.Tenant,
 			ID:     rp.ID,

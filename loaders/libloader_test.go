@@ -152,7 +152,7 @@ func (p profileTest) Merge(v2 any) {
 	var vi map[string]any
 	json.Unmarshal([]byte(utils.ToJSON(v2)), &vi)
 	for k, v := range vi {
-		(map[string]any(p))[k] = v
+		map[string]any(p)[k] = v
 	}
 }
 func (p profileTest) TenantID() string {
@@ -292,8 +292,11 @@ func TestRecordFieldAsInterface(t *testing.T) {
 	}
 	if val, err := r.FieldAsInterface([]string{utils.MetaTmp}); err != nil {
 		t.Fatal(err)
-	} else if exp := (&utils.DataNode{Type: utils.NMMapType, Map: make(map[string]*utils.DataNode)}); !reflect.DeepEqual(val, exp) {
-		t.Errorf("Expected %+v, received %+v", exp, val)
+	} else {
+		exp := &utils.DataNode{Type: utils.NMMapType, Map: make(map[string]*utils.DataNode)}
+		if !reflect.DeepEqual(val, exp) {
+			t.Errorf("Expected %+v, received %+v", exp, val)
+		}
 	}
 	if val, err := r.FieldAsInterface([]string{utils.MetaCfg}); err != nil {
 		t.Fatal(err)

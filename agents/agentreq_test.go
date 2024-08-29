@@ -1798,9 +1798,9 @@ func TestAgReqOverwrite(t *testing.T) {
 		t.Errorf("Cannot cast to &utils.NMSlice %+v", rcv)
 	} else if len(sls) != 1 {
 		t.Errorf("expecting: %+v, \n received: %+v ", 1, len(sls))
-	} else if (sls)[0].Value.Data != "OverwrittenAccountWithComposed" {
+	} else if sls[0].Value.Data != "OverwrittenAccountWithComposed" {
 		t.Errorf("expecting: %+v, \n received: %+v ",
-			"OverwrittenAccountWithComposed", (sls)[0].Value.Data)
+			"OverwrittenAccountWithComposed", sls[0].Value.Data)
 	}
 }
 
@@ -1841,10 +1841,10 @@ func TestAgReqGroupType(t *testing.T) {
 		t.Errorf("Cannot cast to &utils.NMSlice %+v", rcv)
 	} else if len(sls) != 2 {
 		t.Errorf("expecting: %+v, \n received: %+v ", 1, len(sls))
-	} else if (sls)[0].Value.Data != "cgrates.org" {
-		t.Errorf("expecting: %+v, \n received: %+v ", "cgrates.org", (sls)[0].Value.Data)
-	} else if (sls)[1].Value.Data != "test" {
-		t.Errorf("expecting: %+v, \n received: %+v ", "test", (sls)[1].Value.Data)
+	} else if sls[0].Value.Data != "cgrates.org" {
+		t.Errorf("expecting: %+v, \n received: %+v ", "cgrates.org", sls[0].Value.Data)
+	} else if sls[1].Value.Data != "test" {
+		t.Errorf("expecting: %+v, \n received: %+v ", "test", sls[1].Value.Data)
 	}
 }
 
@@ -2333,9 +2333,9 @@ func TestAgReqRoundingDecimals(t *testing.T) {
 		t.Errorf("Cannot cast to &utils.NMSlice %+v", rcv)
 	} else if len(sls) != 1 {
 		t.Errorf("expecting: %+v, \n received: %+v ", 1, len(sls))
-	} else if (sls)[0].Value.Data != "12.126" {
+	} else if sls[0].Value.Data != "12.126" {
 		t.Errorf("expecting: %+v, \n received: %+v",
-			"12.126", (sls)[0].Value.Data)
+			"12.126", sls[0].Value.Data)
 	}
 }
 
