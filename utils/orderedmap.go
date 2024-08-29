@@ -80,3 +80,25 @@ func (om *OrderedMap[K, V]) Values() []V {
 	}
 	return vals
 }
+
+// Map returns a deep copy of the ordered map's key-value pairs.
+func (om *OrderedMap[K, V]) Map() map[K]V {
+	mp := make(map[K]V, len(om.values))
+	for key, value := range om.values {
+		mp[key] = value
+	}
+	return mp
+}
+
+// GetByIndex returns the key-value pair at the specified index within the ordered map.
+// If the index is out of bounds, the zero values for K and V are returned with a false flag.
+func (om *OrderedMap[K, V]) GetByIndex(index int) (K, V, bool) {
+	if index < 0 || index >= len(om.keys) {
+		var zeroK K
+		var zeroV V
+		return zeroK, zeroV, false
+	}
+	key := om.keys[index]
+	value := om.values[key]
+	return key, value, true
+}
