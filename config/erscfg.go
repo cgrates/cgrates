@@ -67,9 +67,9 @@ func (erS *ERsCfg) appendERsReaders(jsnReaders *[]*EventReaderJsonCfg, msgTempla
 	}
 	for _, jsnReader := range *jsnReaders {
 		var rdr *EventReaderCfg
-		if jsnReader.Id != nil {
+		if jsnReader.ID != nil {
 			for _, reader := range erS.Readers {
-				if reader.ID == *jsnReader.Id {
+				if reader.ID == *jsnReader.ID {
 					rdr = reader
 					break
 				}
@@ -203,20 +203,28 @@ type EventReaderOpts struct {
 
 // EventReaderCfg the event for the Event Reader
 type EventReaderCfg struct {
-	ID                  string
-	Type                string
-	RunDelay            time.Duration
-	ConcurrentReqs      int
-	SourcePath          string
-	ProcessedPath       string
-	Opts                *EventReaderOpts
-	Tenant              RSRParsers
-	Timezone            string
-	Filters             []string
-	Flags               utils.FlagsWithParams
-	Fields              []*FCTemplate
-	PartialCommitFields []*FCTemplate
-	CacheDumpFields     []*FCTemplate
+	ID   string
+	Type string
+
+	// RunDelay determines how the Serve method initiates the reading process.
+	// 	- A value of 0 disables automatic reading, allowing manual control, possibly through an API.
+	// 	- A value of -1 enables watching directory changes indefinitely, applicable for file-based readers.
+	// 	- Any positive duration sets a fixed time interval for automatic reading cycles.
+	RunDelay time.Duration
+
+	ConcurrentReqs       int
+	SourcePath           string
+	ProcessedPath        string
+	Tenant               RSRParsers
+	Timezone             string
+	Filters              []string
+	Flags                utils.FlagsWithParams
+	Reconnects           int
+	MaxReconnectInterval time.Duration
+	Opts                 *EventReaderOpts
+	Fields               []*FCTemplate
+	PartialCommitFields  []*FCTemplate
+	CacheDumpFields      []*FCTemplate
 }
 
 func (erOpts *EventReaderOpts) loadFromJSONCfg(jsnCfg *EventReaderOptsJson) (err error) {
@@ -452,25 +460,25 @@ func (er *EventReaderCfg) loadFromJSONCfg(jsnCfg *EventReaderJsonCfg, msgTemplat
 	if jsnCfg == nil {
 		return
 	}
-	if jsnCfg.Id != nil {
-		er.ID = *jsnCfg.Id
+	if jsnCfg.ID != nil {
+		er.ID = *jsnCfg.ID
 	}
 	if jsnCfg.Type != nil {
 		er.Type = *jsnCfg.Type
 	}
-	if jsnCfg.Run_delay != nil {
-		if er.RunDelay, err = utils.ParseDurationWithNanosecs(*jsnCfg.Run_delay); err != nil {
+	if jsnCfg.RunDelay != nil {
+		if er.RunDelay, err = utils.ParseDurationWithNanosecs(*jsnCfg.RunDelay); err != nil {
 			return
 		}
 	}
-	if jsnCfg.Concurrent_requests != nil {
-		er.ConcurrentReqs = *jsnCfg.Concurrent_requests
+	if jsnCfg.ConcurrentRequests != nil {
+		er.ConcurrentReqs = *jsnCfg.ConcurrentRequests
 	}
-	if jsnCfg.Source_path != nil {
-		er.SourcePath = *jsnCfg.Source_path
+	if jsnCfg.SourcePath != nil {
+		er.SourcePath = *jsnCfg.SourcePath
 	}
-	if jsnCfg.Processed_path != nil {
-		er.ProcessedPath = *jsnCfg.Processed_path
+	if jsnCfg.ProcessedPath != nil {
+		er.ProcessedPath = *jsnCfg.ProcessedPath
 	}
 	if jsnCfg.Tenant != nil {
 		if er.Tenant, err = NewRSRParsers(*jsnCfg.Tenant, sep); err != nil {
@@ -486,6 +494,14 @@ func (er *EventReaderCfg) loadFromJSONCfg(jsnCfg *EventReaderJsonCfg, msgTemplat
 	if jsnCfg.Flags != nil {
 		er.Flags = utils.FlagsWithParamsFromSlice(*jsnCfg.Flags)
 	}
+	if jsnCfg.Reconnects != nil {
+		er.Reconnects = *jsnCfg.Reconnects
+	}
+	if jsnCfg.MaxReconnectInterval != nil {
+		if er.MaxReconnectInterval, err = utils.ParseDurationWithNanosecs(*jsnCfg.MaxReconnectInterval); err != nil {
+			return err
+		}
+	}
 	if jsnCfg.Fields != nil {
 		if er.Fields, err = FCTemplatesFromFCTemplatesJSONCfg(*jsnCfg.Fields, sep); err != nil {
 			return err
@@ -496,8 +512,8 @@ func (er *EventReaderCfg) loadFromJSONCfg(jsnCfg *EventReaderJsonCfg, msgTemplat
 			er.Fields = tpls
 		}
 	}
-	if jsnCfg.Cache_dump_fields != nil {
-		if er.CacheDumpFields, err = FCTemplatesFromFCTemplatesJSONCfg(*jsnCfg.Cache_dump_fields, sep); err != nil {
+	if jsnCfg.CacheDumpFields != nil {
+		if er.CacheDumpFields, err = FCTemplatesFromFCTemplatesJSONCfg(*jsnCfg.CacheDumpFields, sep); err != nil {
 			return err
 		}
 		if tpls, err := InflateTemplates(er.CacheDumpFields, msgTemplates); err != nil {
@@ -506,8 +522,8 @@ func (er *EventReaderCfg) loadFromJSONCfg(jsnCfg *EventReaderJsonCfg, msgTemplat
 			er.CacheDumpFields = tpls
 		}
 	}
-	if jsnCfg.Partial_commit_fields != nil {
-		if er.PartialCommitFields, err = FCTemplatesFromFCTemplatesJSONCfg(*jsnCfg.Partial_commit_fields, sep); err != nil {
+	if jsnCfg.PartialCommitFields != nil {
+		if er.PartialCommitFields, err = FCTemplatesFromFCTemplatesJSONCfg(*jsnCfg.PartialCommitFields, sep); err != nil {
 			return err
 		}
 		if tpls, err := InflateTemplates(er.PartialCommitFields, msgTemplates); err != nil {
@@ -810,16 +826,18 @@ func (erOpts *EventReaderOpts) Clone() *EventReaderOpts {
 // Clone returns a deep copy of EventReaderCfg
 func (er EventReaderCfg) Clone() (cln *EventReaderCfg) {
 	cln = &EventReaderCfg{
-		ID:             er.ID,
-		Type:           er.Type,
-		RunDelay:       er.RunDelay,
-		ConcurrentReqs: er.ConcurrentReqs,
-		SourcePath:     er.SourcePath,
-		ProcessedPath:  er.ProcessedPath,
-		Tenant:         er.Tenant.Clone(),
-		Timezone:       er.Timezone,
-		Flags:          er.Flags.Clone(),
-		Opts:           er.Opts.Clone(),
+		ID:                   er.ID,
+		Type:                 er.Type,
+		RunDelay:             er.RunDelay,
+		ConcurrentReqs:       er.ConcurrentReqs,
+		SourcePath:           er.SourcePath,
+		ProcessedPath:        er.ProcessedPath,
+		Tenant:               er.Tenant.Clone(),
+		Timezone:             er.Timezone,
+		Flags:                er.Flags.Clone(),
+		Reconnects:           er.Reconnects,
+		MaxReconnectInterval: er.MaxReconnectInterval,
+		Opts:                 er.Opts.Clone(),
 	}
 	if er.Filters != nil {
 		cln.Filters = slices.Clone(er.Filters)
@@ -1061,19 +1079,23 @@ func (er *EventReaderCfg) AsMapInterface(separator string) (initialMP map[string
 	}
 
 	initialMP = map[string]any{
-		utils.IDCfg:                 er.ID,
-		utils.TypeCfg:               er.Type,
-		utils.ConcurrentRequestsCfg: er.ConcurrentReqs,
-		utils.SourcePathCfg:         er.SourcePath,
-		utils.ProcessedPathCfg:      er.ProcessedPath,
-		utils.TenantCfg:             er.Tenant.GetRule(separator),
-		utils.TimezoneCfg:           er.Timezone,
-		utils.FiltersCfg:            er.Filters,
-		utils.FlagsCfg:              []string{},
-		utils.RunDelayCfg:           "0",
-		utils.OptsCfg:               opts,
+		utils.IDCfg:                   er.ID,
+		utils.TypeCfg:                 er.Type,
+		utils.ConcurrentRequestsCfg:   er.ConcurrentReqs,
+		utils.SourcePathCfg:           er.SourcePath,
+		utils.ProcessedPathCfg:        er.ProcessedPath,
+		utils.TenantCfg:               er.Tenant.GetRule(separator),
+		utils.TimezoneCfg:             er.Timezone,
+		utils.FiltersCfg:              er.Filters,
+		utils.FlagsCfg:                []string{},
+		utils.RunDelayCfg:             "0",
+		utils.ReconnectsCfg:           er.Reconnects,
+		utils.MaxReconnectIntervalCfg: "0",
+		utils.OptsCfg:                 opts,
 	}
-
+	if er.MaxReconnectInterval != 0 {
+		initialMP[utils.MaxReconnectIntervalCfg] = er.MaxReconnectInterval.String()
+	}
 	if flags := er.Flags.SliceFlags(); flags != nil {
 		initialMP[utils.FlagsCfg] = flags
 	}
@@ -1183,20 +1205,22 @@ type EventReaderOptsJson struct {
 
 // EventReaderSJsonCfg is the configuration of a single EventReader
 type EventReaderJsonCfg struct {
-	Id                    *string
-	Type                  *string
-	Run_delay             *string
-	Concurrent_requests   *int
-	Source_path           *string
-	Processed_path        *string
-	Opts                  *EventReaderOptsJson
-	Tenant                *string
-	Timezone              *string
-	Filters               *[]string
-	Flags                 *[]string
-	Fields                *[]*FcTemplateJsonCfg
-	Partial_commit_fields *[]*FcTemplateJsonCfg
-	Cache_dump_fields     *[]*FcTemplateJsonCfg
+	ID                   *string               `json:"id"`
+	Type                 *string               `json:"type"`
+	RunDelay             *string               `json:"run_delay"`
+	ConcurrentRequests   *int                  `json:"concurrent_requests"`
+	SourcePath           *string               `json:"source_path"`
+	ProcessedPath        *string               `json:"processed_path"`
+	Tenant               *string               `json:"tenant"`
+	Timezone             *string               `json:"timezone"`
+	Filters              *[]string             `json:"filters"`
+	Flags                *[]string             `json:"flags"`
+	Reconnects           *int                  `json:"reconnects"`
+	MaxReconnectInterval *string               `json:"max_reconnect_interval"`
+	Opts                 *EventReaderOptsJson  `json:"opts"`
+	Fields               *[]*FcTemplateJsonCfg `json:"fields"`
+	PartialCommitFields  *[]*FcTemplateJsonCfg `json:"partial_commit_fields"`
+	CacheDumpFields      *[]*FcTemplateJsonCfg `json:"cache_dump_fields"`
 }
 
 func diffEventReaderOptsJsonCfg(d *EventReaderOptsJson, v1, v2 *EventReaderOpts) *EventReaderOptsJson {
@@ -1771,22 +1795,28 @@ func diffEventReaderJsonCfg(d *EventReaderJsonCfg, v1, v2 *EventReaderCfg, separ
 		d = new(EventReaderJsonCfg)
 	}
 	if v1.ID != v2.ID {
-		d.Id = utils.StringPointer(v2.ID)
+		d.ID = utils.StringPointer(v2.ID)
 	}
 	if v1.Type != v2.Type {
 		d.Type = utils.StringPointer(v2.Type)
 	}
 	if v1.RunDelay != v2.RunDelay {
-		d.Run_delay = utils.StringPointer(v2.RunDelay.String())
+		d.RunDelay = utils.StringPointer(v2.RunDelay.String())
 	}
 	if v1.ConcurrentReqs != v2.ConcurrentReqs {
-		d.Concurrent_requests = utils.IntPointer(v2.ConcurrentReqs)
+		d.ConcurrentRequests = utils.IntPointer(v2.ConcurrentReqs)
 	}
 	if v1.SourcePath != v2.SourcePath {
-		d.Source_path = utils.StringPointer(v2.SourcePath)
+		d.SourcePath = utils.StringPointer(v2.SourcePath)
 	}
 	if v1.ProcessedPath != v2.ProcessedPath {
-		d.Processed_path = utils.StringPointer(v2.ProcessedPath)
+		d.ProcessedPath = utils.StringPointer(v2.ProcessedPath)
+	}
+	if v1.Reconnects != v2.Reconnects {
+		d.Reconnects = utils.IntPointer(v2.ConcurrentReqs)
+	}
+	if v1.MaxReconnectInterval != v2.MaxReconnectInterval {
+		d.MaxReconnectInterval = utils.StringPointer(v2.MaxReconnectInterval.String())
 	}
 	d.Opts = diffEventReaderOptsJsonCfg(d.Opts, v1.Opts, v2.Opts)
 	tnt1 := v1.Tenant.GetRule(separator)
@@ -1815,21 +1845,21 @@ func diffEventReaderJsonCfg(d *EventReaderJsonCfg, v1, v2 *EventReaderCfg, separ
 	}
 
 	var pcf []*FcTemplateJsonCfg
-	if d.Partial_commit_fields != nil {
-		pcf = *d.Partial_commit_fields
+	if d.PartialCommitFields != nil {
+		pcf = *d.PartialCommitFields
 	}
 	pcf = diffFcTemplateJsonCfg(pcf, v1.PartialCommitFields, v2.PartialCommitFields, separator)
 	if pcf != nil {
-		d.Partial_commit_fields = &pcf
+		d.PartialCommitFields = &pcf
 	}
 
 	var cdf []*FcTemplateJsonCfg
-	if d.Cache_dump_fields != nil {
-		cdf = *d.Cache_dump_fields
+	if d.CacheDumpFields != nil {
+		cdf = *d.CacheDumpFields
 	}
 	cdf = diffFcTemplateJsonCfg(cdf, v1.CacheDumpFields, v2.CacheDumpFields, separator)
 	if cdf != nil {
-		d.Cache_dump_fields = &cdf
+		d.CacheDumpFields = &cdf
 	}
 
 	return d
@@ -1837,7 +1867,7 @@ func diffEventReaderJsonCfg(d *EventReaderJsonCfg, v1, v2 *EventReaderCfg, separ
 
 func getEventReaderJsonCfg(d []*EventReaderJsonCfg, id string) (*EventReaderJsonCfg, int) {
 	for i, v := range d {
-		if v.Id != nil && *v.Id == id {
+		if v.ID != nil && *v.ID == id {
 			return v, i
 		}
 	}

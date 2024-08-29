@@ -323,71 +323,71 @@ const CGRATES_CFG_JSON = `
 	"ees_conns": [],						// connections to EventExporter
 	"rates_conns": [],						// connections to RateS
 	"accounts_conns": [],					// connections to AccountS
-	"opts": {								//
-		// "*accounts": [						
+	"opts": {
+		// "*accounts": [
 		// 	{
 		// 		"Tenant": "*any",
 		// 		"FilterIDs": [],
 		// 		"Value": false,
 		// 	},
 		// ],
-		// "*attributes": [					
+		// "*attributes": [
 		// 	{
 		// 		"Tenant": "*any",
 		// 		"FilterIDs": [],
 		// 		"Value": false,
 		// 	},
 		// ],
-		// "*chargers": [						
+		// "*chargers": [
 		// 	{
 		// 		"Tenant": "*any",
 		// 		"FilterIDs": [],
 		// 		"Value": false,
 		// 	},
 		// ],
-		// "*ees": [							
+		// "*ees": [
 		// 	{
 		// 		"Tenant": "*any",
 		// 		"FilterIDs": [],
 		// 		"Value": false,
 		// 	},
 		// ],
-		// "*rates": [							
+		// "*rates": [
 		// 	{
 		// 		"Tenant": "*any",
 		// 		"FilterIDs": [],
 		// 		"Value": false,
 		// 	},
 		// ],
-		// "*stats": [							
+		// "*stats": [
 		// 	{
 		// 		"Tenant": "*any",
 		// 		"FilterIDs": [],
 		// 		"Value": false,
 		// 	},
 		// ],
-		// "*thresholds": [					
+		// "*thresholds": [
 		// 	{
 		// 		"Tenant": "*any",
 		// 		"FilterIDs": [],
 		// 		"Value": false,
 		// 	},
 		// ],
-		// "*refund": [					
+		// "*refund": [
 		// 	{
 		// 		"Tenant": "*any",
 		// 		"FilterIDs": [],
 		// 		"Value": false,
 		// 	},
 		// ],
-		// "*rerate": [					
+		// "*rerate": [
 		// 	{
 		// 		"Tenant": "*any",
 		// 		"FilterIDs": [],
 		// 		"Value": false,
 		// 	},
 		// ],
-		// "*store": [					
+		// "*store": [
 		// 	{
 		// 		"Tenant": "*any",
 		// 		"FilterIDs": [],
@@ -398,75 +398,82 @@ const CGRATES_CFG_JSON = `
 },
 
 
-"ers": {														// EventReaderService
-	"enabled": false,											// starts the EventReader service: <true|false>
-	"sessions_conns":["*internal"],								// RPC Connections IDs
-	"partial_cache_ttl": "1s",									// the duration to cache partial records when not pairing	
+"ers": {								// EventReaderService
+	"enabled": false,						// starts the EventReader service: <true|false>
+	"sessions_conns":["*internal"],					// RPC Connections IDs
+	"partial_cache_ttl": "1s",					// the duration to cache partial records when not pairing	
 	"readers": [
 		{
-			"id": "*default",									// identifier of the EventReader profile
-			"type": "*none",									// reader type <*fileCSV>
-			"run_delay": "0",									// sleep interval in seconds between consecutive runs, -1 to use automation via inotify or 0 to disable running all together
-			"concurrent_requests": 1024,						// maximum simultaneous requests/files to process, 0 for unlimited
-			"source_path": "/var/spool/cgrates/ers/in",			// read data from this path
-			"processed_path": "/var/spool/cgrates/ers/out",		// move processed data here
+			"id": "*default",				// identifier of the EventReader profile
+			"type": "*none",				// reader type <*fileCSV>
+			"run_delay": "0",				// sleep interval in seconds between consecutive runs, -1 to use automation via inotify or 0 to disable running all together
+			"concurrent_requests": 1024,			// maximum simultaneous requests/files to process, 0 for unlimited
+			"source_path": "/var/spool/cgrates/ers/in",	// read data from this path
+			"processed_path": "/var/spool/cgrates/ers/out",	// move processed data here
+			"tenant": "",					// tenant used by import
+			"timezone": "",					// timezone for timestamps where not specified <""|UTC|Local|$IANA_TZ_DB>
+			"filters": [],					// limit parsing based on the filters
+			"flags": [],					// flags to influence the event processing
+			"reconnects": -1,				// number of retries in case of connection lost
+			"max_reconnect_interval": "5m", 		// time to wait in between reconnect attempts
 			"opts": {
 				// Partial
-				// "partialPath": "/",							// the path were the partial events will be sent
-				"partialCacheAction": "*none",					// the action that will be executed for the partial CSVs that are not matched<*none|*post_cdr|*dump_to_file>
-				"partialOrderField": "~*req.AnswerTime",		// the field after what the events are order when merged
-				// "partialcsvFieldSeparator": ","				// separator used when dumping the fields
+				// "partialPath": "/",			// the path were the partial events will be sent
+				"partialCacheAction": "*none",		// the action that will be executed for the partial CSVs that are not matched<*none|*post_cdr|*dump_to_file>
+				"partialOrderField": "~*req.AnswerTime",// the field after what the events are order when merged
+				// "partialcsvFieldSeparator": ","	// separator used when dumping the fields
 				
 				// FileCSV 
-				"csvRowLength": 0,								// Number of fields from csv file
-				"csvFieldSeparator": ",",						// separator used when reading the fields
-				"csvHeaderDefineChar": ":", 					// the starting character for header definition used in case of CSV files
-				// "csvLazyQuotes": false,						// if a quote may appear in an unquoted field and a non-doubled quote may appear in a quoted field
+				"csvRowLength": 0,			// Number of fields from csv file
+				"csvFieldSeparator": ",",		// separator used when reading the fields
+				"csvHeaderDefineChar": ":", 		// the starting character for header definition used in case of CSV files
+				// "csvLazyQuotes": false,		// if a quote may appear in an unquoted field and a non-doubled quote may appear in a quoted field
 
 				// FileXML
-				// "xmlRootPath": "",							// path towards one event in case of XML CDRs
+				// "xmlRootPath": "",			// path towards one event in case of XML CDRs
+
 
 				// AMQP and AMQPv1
-				// "amqpQueueID": "cgrates_cdrs",				// the queue id for AMQP and AMQPv1 readers from were the events are read
-				// "amqpQueueIDProcessed": "", 					// the queue id for AMQP and AMQPv1 readers were the events are sent after they are processed
+				// "amqpQueueID": "cgrates_cdrs",	// identifier for the primary queue where messages are consumed (0.9.1/1.0)
+				// "amqpQueueIDProcessed": "", 		// the queue id for AMQP and AMQPv1 readers were the events are sent after they are processed
 
-				// "amqpUsername": "",							// amqp 1.0 exclusive, used for SASL PLAIN auth, usually represents the policy name
-				// "amqpPassword": "",							// amqp 1.0 exclusive, used for SASL PLAIN auth, populated with one of its policy's keys
+				// "amqpUsername": "",			// username for SASL PLAIN auth, exclusive to AMQP 1.0, often representing the policy name
+				// "amqpPassword": "",			// password for authentication, exclusive to AMQP 1.0
 
-				// "amqpUsernameProcessed": "",					
-				// "amqpPasswordProcessed": "",					
+				// "amqpUsernameProcessed": "",
+				// "amqpPasswordProcessed": "",
 
-				// "amqpConsumerTag": "cgrates",				// the ID of the consumer, amqp 0.9.1 exclusive	
-				// "amqpExchange": "",							// amqp 0.9.1 exclusive		
-				// "amqpExchangeType": "",						// amqp 0.9.1 exclusive	
-				// "amqpRoutingKey": "",						// amqp 0.9.1 exclusive	
+				// "amqpConsumerTag": "cgrates",	// unique tag for the consumer, useful for message tracking and consumer management (0.9.1)
+				// "amqpExchange": "",			// name of the primary exchange where messages will be published (0.9.1)
+				// "amqpExchangeType": "",		// type of the primary exchange (direct, topic, fanout, headers) (0.9.1)
+				// "amqpRoutingKey": "",		// key used for routing messages to the primary queue (0.9.1)
 
-				// "amqpExchangeProcessed": "",									
+				// "amqpExchangeProcessed": "",
 				// "amqpExchangeTypeProcessed": "",
 				// "amqpRoutingKeyProcessed": "",
 
 
 				// Kafka
-				// "kafkaTopic": "cgrates",						// the topic from were the events are read
-				// "kafkaGroupID": "cgrates",					// the group that reads the events
-				// "kafkaMaxWait": "1ms",						// the maximum amount of time to wait for new data to come
-				// "kafkaTLS": false,							// if set to true it will try to authenticate the server
+				// "kafkaTopic": "cgrates",		// the topic from were the events are read
+				// "kafkaGroupID": "cgrates",		// the group that reads the events
+				// "kafkaMaxWait": "1ms",		// the maximum amount of time to wait for new data to come
+				// "kafkaTLS": false,			// if set to true it will try to authenticate the server
 				// "kafkaCAPath": "",
 				// "kafkaSkipTLSVerify": false,
 
-				// "kafkaTopicProcessed": "",					//the topic were the events are sent after they are processed
-				// "kafkaTLSProcessed": false,					
+				// "kafkaTopicProcessed": "",		//the topic were the events are sent after they are processed
+				// "kafkaTLSProcessed": false,
 				// "kafkaCAPathProcessed": "",
 				// "kafkaSkipTLSVerifyProcessed": false,
 
 				// SQL
-				// "sqlDBName": "cgrates", 						// the name of the database from were the events are read
-				// "sqlTableName": "cdrs",						// the name of the table from were the events are read
-				// "pgSSLMode": "disable",						// the ssl mode for postgres db
+				// "sqlDBName": "cgrates", 		// the name of the database from were the events are read
+				// "sqlTableName": "cdrs",		// the name of the table from were the events are read
+				// "pgSSLMode": "disable",		// the ssl mode for postgres db
 
-				// "sqlDBNameProcessed": "", 					// the name of the database were the events are sent after they are processed
-				// "sqlTableNameProcessed": "",					// the name of the table were the events are sent after they are processed
-				// "pgSSLModeProcessed": "",					// the ssl mode for postgres db
+				// "sqlDBNameProcessed": "", 		// the name of the database were the events are sent after they are processed
+				// "sqlTableNameProcessed": "",		// the name of the table were the events are sent after they are processed
+				// "pgSSLModeProcessed": "",		// the ssl mode for postgres db
 
 				// SQS and S3
 				// "awsRegion": "",
@@ -480,43 +487,39 @@ const CGRATES_CFG_JSON = `
 				// "awsTokenProcessed": "",
 
 				// SQS
-				// "sqsQueueID": "cgrates_cdrs", 				// the queue id for SQS readers from were the events are read
+				// "sqsQueueID": "cgrates_cdrs", 	// the queue id for SQS readers from were the events are read
 
-				// "sqsQueueIDProcessed": "", 					// the queue id for SQS readers were the events are sent after they are processed
+				// "sqsQueueIDProcessed": "", 		// the queue id for SQS readers were the events are sent after they are processed
 
 				// S3
-				// "s3BucketID": "cgrates_cdrs", 					// the bucket id for S3 readers from were the events are read
-				// "s3FolderPathProcessed": "", 				// only for S3 event posting 
+				// "s3BucketID": "cgrates_cdrs", 	// the bucket id for S3 readers from were the events are read
+				// "s3FolderPathProcessed": "", 	// only for S3 event posting 
 				
-				// "s3BucketIDProcessed": "cgrates_cdrs", 		// the bucket id for S3 readers were the events are sent after they are processed
+				// "s3BucketIDProcessed": "cgrates_cdrs", // the bucket id for S3 readers were the events are sent after they are processed
 
 				// nats
-				// "natsJetStream": false,						// controls if the nats reader uses the JetStream
-				// "natsConsumerName": "cgrates",				// in case of JetStream the name of the consumer
-				// "natsStreamName": "cdrs",					// the name of the NATS JetStream stream from which the consumer will read messages
-				"natsSubject": "cgrates_cdrs",					// the subject from were the events are read
-				// "natsQueueID": "",							// the queue id the consumer listen to
-				// "natsJWTFile": "",							// the path to the JWT file( can be the chained file or the user file)
-				// "natsSeedFile": "",							// the path to the seed files( if the JWT file is mention this is used as seedFile for the JWT user mentioned above)
-				// "natsCertificateAuthority": "",				// the path to a custom certificate authority file( used by tls)
-				// "natsClientCertificate": "",					// the path to a client certificate( used by tls)
-				// "natsClientKey": "",							// the path to a client key( used by tls)
-				// "natsJetStreamMaxWait": "5s",				// the maximum amount of time to wait for a response
+				// "natsJetStream": false,			// controls if the nats reader uses the JetStream
+				// "natsConsumerName": "cgrates",		// in case of JetStream the name of the consumer
+				// "natsStreamName": "cdrs",			// the name of the NATS JetStream stream from which the consumer will read messages
+				"natsSubject": "cgrates_cdrs",			// the subject from were the events are read
+				// "natsQueueID": "",				// the queue id the consumer listen to
+				// "natsJWTFile": "",				// the path to the JWT file( can be the chained file or the user file)
+				// "natsSeedFile": "",				// the path to the seed files( if the JWT file is mention this is used as seedFile for the JWT user mentioned above)
+				// "natsCertificateAuthority": "",		// the path to a custom certificate authority file( used by tls)
+				// "natsClientCertificate": "",			// the path to a client certificate( used by tls)
+				// "natsClientKey": "",				// the path to a client key( used by tls)
+				// "natsJetStreamMaxWait": "5s",		// the maximum amount of time to wait for a response
 
-				// "natsJetStreamProcessed": false,				// controls if the nats poster uses the JetStream
-				// "natsSubjectProcessed": "cgrates_cdrs",		// the subject were the events are posted
-				// "natsJWTFileProcessed": "",					// the path to the JWT file( can be the chained file or the user file)
-				// "natsSeedFileProcessed": "",					// the path to the seed files( if the JWT file is mention this is used as seedFile for the JWT user mentioned above)
-				// "natsCertificateAuthorityProcessed": "",		// the path to a custom certificate authority file( used by tls)
-				// "natsClientCertificateProcessed": "",		// the path to a client certificate( used by tls)
-				// "natsClientKeyProcessed": "",				// the path to a client key( used by tls)
-				// "natsJetStreamMaxWaitProcessed": "5s",		// the maximum amount of time to wait for a response
+				// "natsJetStreamProcessed": false,		// controls if the nats poster uses the JetStream
+				// "natsSubjectProcessed": "cgrates_cdrs",	// the subject were the events are posted
+				// "natsJWTFileProcessed": "",			// the path to the JWT file( can be the chained file or the user file)
+				// "natsSeedFileProcessed": "",			// the path to the seed files( if the JWT file is mention this is used as seedFile for the JWT user mentioned above)
+				// "natsCertificateAuthorityProcessed": "",	// the path to a custom certificate authority file( used by tls)
+				// "natsClientCertificateProcessed": "",	// the path to a client certificate( used by tls)
+				// "natsClientKeyProcessed": "",		// the path to a client key( used by tls)
+				// "natsJetStreamMaxWaitProcessed": "5s",	// the maximum amount of time to wait for a response
 			},
-			"tenant": "",										// tenant used by import
-			"timezone": "",										// timezone for timestamps where not specified <""|UTC|Local|$IANA_TZ_DB>
-			"filters": [],										// limit parsing based on the filters
-			"flags": [],										// flags to influence the event processing
-			"fields":[											// import fields template, tag will match internally CDR field, in case of .csv value will be represented by index of the field value
+			"fields":[	// import fields template, tag will match internally CDR field, in case of .csv value will be represented by index of the field value
 				{"tag": "ToR", "path": "*cgreq.ToR", "type": "*variable", "value": "~*req.2", "mandatory": true},
 				{"tag": "OriginID", "path": "*cgreq.OriginID", "type": "*variable", "value": "~*req.3", "mandatory": true},
 				{"tag": "RequestType", "path": "*cgreq.RequestType", "type": "*variable", "value": "~*req.4", "mandatory": true},
@@ -527,12 +530,12 @@ const CGRATES_CFG_JSON = `
 				{"tag": "Destination", "path": "*cgreq.Destination", "type": "*variable", "value": "~*req.10", "mandatory": true},
 				{"tag": "SetupTime", "path": "*cgreq.SetupTime", "type": "*variable", "value": "~*req.11", "mandatory": true},
 				{"tag": "AnswerTime", "path": "*cgreq.AnswerTime", "type": "*variable", "value": "~*req.12", "mandatory": true},
-				{"tag": "Usage", "path": "*cgreq.Usage", "type": "*variable", "value": "~*req.13", "mandatory": true},
+				{"tag": "Usage", "path": "*cgreq.Usage", "type": "*variable", "value": "~*req.13", "mandatory": true}
 			],
 			"partial_commit_fields": [],
-			"cache_dump_fields": [],
-		},
-	],
+			"cache_dump_fields": []
+		}
+	]
 },
 
 "efs": {                                                    // ExportFailover service
@@ -542,128 +545,128 @@ const CGRATES_CFG_JSON = `
 	"failed_posts_ttl": "5s",								// time to wait before writing the failed posts in a single file
 },
 
-"ees": {									// EventExporterService
-	"enabled": false,						// starts the EventReader service: <true|false>
-	"attributes_conns":[],					// RPC Connections IDs
+"ees": {				// EventExporterService
+	"enabled": false,		// starts the EventReader service: <true|false>
+	"attributes_conns":[],		// RPC Connections IDs
 	"cache": {
 		"*fileCSV": {"limit": -1, "ttl": "5s", "static_ttl": false},
 	},
 	"exporters": [
 		{
-			"id": "*default",									// identifier of the EventReader profile
-			"type": "*none",									// exporter type 
-			"export_path": "/var/spool/cgrates/ees",			// path where the exported events will be placed
-			"concurrent_requests": 0,							// maximum simultaneous requests to process, 0 for unlimited
-			"opts": {
+			"id": "*default",					// identifier of the EventReader profile
+			"type": "*none",					// exporter type 
+			"export_path": "/var/spool/cgrates/ees",		// path where the exported events will be placed
+			"failed_posts_dir": "/var/spool/cgrates/failed_posts",	// directory path where we store failed requests
+			"concurrent_requests": 0,				// maximum simultaneous requests to process, 0 for unlimited
+			"timezone": "",						// timezone for timestamps where not specified <""|UTC|Local|$IANA_TZ_DB>
+			"efs_conns": ["*internal"],				// connID to efs service
+			"filters": [],						// limit parsing based on the filters
+			"flags": [],						// flags to influence the event processing
+			"attribute_ids": [],					// select Attribute profiles instead of discovering them
+			"attribute_context": "",				// context used to discover matching Attribute profiles
+			"synchronous": false,					// block processing until export has a result
+			"blocker": false,					// stops the processing of the following exporters
+			"attempts": 1,						// export attempts
+			"opts": {						// extra options for exporter
 
 				// CSV
-				// "csvFieldSeparator": ",",					// separator used when reading the fields
+				// "csvFieldSeparator": ",",		// separator used when reading the fields
 
-				
+
 				// Elasticsearch options
-				// "elsCloud":true,                             //ExportPath will be  an CLoud ID deployment
-				// "elsApiKey": "",                             // Base64-encoded token for authorization; if set, overrides username/password and service token.
-				// "elsUsername":"",                            // Username for HTTP Basic Authentication.
-			    // "elsPassword":"",                            // Password for HTTP Basic Authentication.
-				// "elsServiceToken":""                         // Service token for authorization; if set, overrides username/password.
-				// "elsCertificateFingerPrint":""               // SHA256 hex fingerprint given by Elasticsearch on first launch.
-				// "elsDiscoverNodesOnStart":false,             // Discover nodes when initializing the client. Default: false.
-				// "elsDiscoverNodesInterval":"10s",            // Discover nodes periodically. Default: disabled.
-				// "elsEnableDebugLogger":"false",              // Enable the debug logging.
-				// "elsLogger":"",                              //The logger type can either be elsJson,elsColor and elsText
-				// "elsCompressRequestBody":false,              //Enable compression on requests
-				// "elsCompressRequestBodyLevel":0,             //Default: gzip.DefaultCompression, 9:BestCompression,-2:HuffmanOnly,1:BestSpeed
-				// "elsRetryOnStatus":[],                       // List of status codes for retry. Default: 502, 503, 504.
-				// "elsMaxRetries": 0,                          // Default: 3.
-				// "elsDisableRetry": false,                    // Default: false.
-				// "elsIndex": "",								// ElsIndex               	
-				// "elsIfPrimaryTerm": 0,						// ElsIfPrimaryTerm
- 				// "elsIfSeqNo": 0,								// ElsIfSeqNo
-				// "elsOpType": "",								// ElsOpType
-				// "elsPipeline": "",							// ElsPipeline
-				// "elsRouting": "",							// ElsRouting
-				// "elsTimeout": "",							// ElsTimeout
-				// "elsVersion": 0,								// ElsVersionLow
-				// "elsVersionType": "",						// ElsVersionType
-				// "elsWaitForActiveShards": "",				// ElsWaitForActiveShards
-				
-				
+				// "elsCloud":true,                     // whether ExportPath represents a cloud ID deployment
+				// "elsApiKey": "",                     // Base64-encoded token for authorization; if set, overrides username/password and service token.
+				// "elsUsername":"",                    // Username for HTTP Basic Authentication.
+				// "elsPassword":"",			// Password for HTTP Basic Authentication.
+				// "elsServiceToken":""                 // Service token for authorization; if set, overrides username/password.
+				// "elsCertificateFingerPrint":""       // SHA256 hex fingerprint given by Elasticsearch on first launch.
+				// "elsDiscoverNodesOnStart":false,     // Discover nodes when initializing the client. Default: false.
+				// "elsDiscoverNodesInterval":"10s",    // Discover nodes periodically. Default: disabled.
+				// "elsEnableDebugLogger":"false",      // Enable the debug logging.
+				// "elsLogger":"",                      // The logger type can either be elsJson,elsColor and elsText
+				// "elsCompressRequestBody":false,      // Enable compression on requests
+				// "elsCompressRequestBodyLevel":0,     // Default: gzip.DefaultCompression, 9:BestCompression,-2:HuffmanOnly,1:BestSpeed
+				// "elsRetryOnStatus":[],               // List of status codes for retry. Default: 502, 503, 504.
+				// "elsMaxRetries": 0,                  // Default: 3.
+				// "elsDisableRetry": false,            // Default: false.
+				// "elsIndex": "",			// ElsIndex
+				// "elsIfPrimaryTerm": 0,		// ElsIfPrimaryTerm
+ 				// "elsIfSeqNo": 0,			// ElsIfSeqNo
+				// "elsOpType": "",			// ElsOpType
+				// "elsPipeline": "",			// ElsPipeline
+				// "elsRouting": "",			// ElsRouting
+				// "elsTimeout": "",			// ElsTimeout
+				// "elsVersion": 0,			// ElsVersionLow
+				// "elsVersionType": "",		// ElsVersionType
+				// "elsWaitForActiveShards": "",	// ElsWaitForActiveShards
+
+
 				// SQL
-				// "sqlMaxIdleConns": 0,						// SQLMaxIdleConns    
-				// "sqlMaxOpenConns": 0,						// SQLMaxOpenConns
-				// "sqlConnMaxLifetime": "0",					// SQLConnMaxLifetime 
-				// "mysqlDSNParams": {},                        // DSN params
+				// "sqlMaxIdleConns": 0,		// SQLMaxIdleConns    
+				// "sqlMaxOpenConns": 0,		// SQLMaxOpenConns
+				// "sqlConnMaxLifetime": "0",		// SQLConnMaxLifetime 
+				// "mysqlDSNParams": {},                // DSN params
 
 
-				// "sqlTableName":"cdrs", 						// the name of the table from where the events are exported
-				// "sqlDBName": "cgrates",						// the name of the database from where the events are exported
-				// "pgSSLMode": "disable",						// the postgresSSLMode for postgres            				
-				
-				
+				// "sqlTableName":"cdrs", 		// the name of the table from where the events are exported
+				// "sqlDBName": "cgrates",		// the name of the database from where the events are exported
+				// "pgSSLMode": "disable",		// the postgresSSLMode for postgres            				
+
+
 				// Kafka
-				// "kafkaTopic": "cgrates",						// the topic from where the events are exported
-				// "kafkaTLS": false,							// if set to true it will try to authenticate the server
-				// "kafkaCAPath": "",							// path to certificate authority pem file
-				// "kafkaSkipTLSVerify": false,					// if set to true it will skip certificate verification
-				
-				
+				// "kafkaTopic": "cgrates",		// the topic from where the events are exported
+				// "kafkaTLS": false,			// if set to true it will try to authenticate the server
+				// "kafkaCAPath": "",			// path to certificate authority pem file
+				// "kafkaSkipTLSVerify": false,		// if set to true it will skip certificate verification
+
+
 				// AMQP
-				// "amqpQueueID": "cgrates_cdrs",				// the queue id for AMQP exporters from were the events are exported
-				// "amqpRoutingKey": "",						// RoutingKey, amqp 0.9.1 exclusive
-				// "amqpExchange": "",							// Exchange, amqp 0.9.1 exclusive
-				// "amqpExchangeType": "",						// ExchangeType, amqp 0.9.1 exclusive
-				// "amqpUsername": "",							// amqp 1.0 exclusive, used for SASL PLAIN auth, usually represents the policy name
-				// "amqpPassword": "",							// amqp 1.0 exclusive, used for SASL PLAIN auth, populated with one of its policy's keys
-				
+				// "amqpQueueID": "cgrates_cdrs",	// the queue id for AMQP exporters from were the events are exported
+				// "amqpRoutingKey": "",		// RoutingKey, amqp 0.9.1 exclusive
+				// "amqpExchange": "",			// Exchange, amqp 0.9.1 exclusive
+				// "amqpExchangeType": "",		// ExchangeType, amqp 0.9.1 exclusive
+				// "amqpUsername": "",			// amqp 1.0 exclusive, used for SASL PLAIN auth, usually represents the policy name
+				// "amqpPassword": "",			// amqp 1.0 exclusive, used for SASL PLAIN auth, populated with one of its policy's keys
+
 
 				// SQS and S3
-				// "awsRegion": "",								// AWSRegion  
-				// "awsKey": "",								// AWSKey        
-				// "awsSecret": "",								// AWSSecret
-				// "awsToken": "",								// AWSToken      
+				// "awsRegion": "",			// AWSRegion
+				// "awsKey": "",			// AWSKey
+				// "awsSecret": "",			// AWSSecret
+				// "awsToken": "",			// AWSToken
 
 				//SQS
-				// "sqsQueueID": "cgrates_cdrs", 				// the queue id for SQS exporters from were the events are exported
+				// "sqsQueueID": "cgrates_cdrs", 	// the queue id for SQS exporters from were the events are exported
 
 				// S3
-				// "s3BucketID": "cgrates_cdrs", 				// the bucket id for S3 readers from where the events that are  exported
-				// "s3FolderPath": "",							// S3FolderPath 
+				// "s3BucketID": "cgrates_cdrs", 	// the bucket id for S3 readers from where the events that are  exported
+				// "s3FolderPath": "",			// S3FolderPath 
 
 				// Nats
-				// "natsJetStream": false,						// controls if the nats poster uses the JetStream
-				// "natsSubject": "cgrates_cdrs",				// the subject were the events are exported
-				// "natsJWTFile": "",							// the path to the JWT file( can be the chained file or the user file)
-				// "natsSeedFile": "",							// the path to the seed files( if the JWT file is mention this is used as seedFile for the JWT user mentioned above)
-				// "natsCertificateAuthority": "",				// the path to a custom certificate authority file( used by tls)
-				// "natsClientCertificate": "",					// the path to a client certificate( used by tls)
-				// "natsClientKey": "",							// the path to a client key( used by tls)
-				// "natsJetStreamMaxWait": "5s",				// the maximum amount of time to wait for a response
+				// "natsJetStream": false,		// controls if the nats poster uses the JetStream
+				// "natsSubject": "cgrates_cdrs",	// the subject were the events are exported
+				// "natsJWTFile": "",			// the path to the JWT file( can be the chained file or the user file)
+				// "natsSeedFile": "",			// the path to the seed files( if the JWT file is mention this is used as seedFile for the JWT user mentioned above)
+				// "natsCertificateAuthority": "",	// the path to a custom certificate authority file( used by tls)
+				// "natsClientCertificate": "",		// the path to a client certificate( used by tls)
+				// "natsClientKey": "",			// the path to a client key( used by tls)
+				// "natsJetStreamMaxWait": "5s",	// the maximum amount of time to wait for a response
 
 				//RPC
-				// "rpcCodec": "",  // for compression, encoding and decoding <internalRPC | BIRPC | JSON/HTTP/GOB>
-				// "serviceMethod": "", // the method that should be called trough RPC
-                // "keyPath": "" , // path to server key 
-				// "certPath": "", // path to client certificate
-				// "caPath": "",  // path to CA certificate
-				// "tls": false, //
-				// "connIDs": [],  // connections for connManager to this exporter
-				// "rpcConnTimeout" : "1s", // connection unsuccesfull on timeout
-				// "rpcReplyTimeout":"2s", // connection down at replies if taking longer that this value
-				// "rpcAPIOpts": {}, // opts that will be passed within APIOpts
-			},												// extra options for exporter
-			"timezone": "",										// timezone for timestamps where not specified <""|UTC|Local|$IANA_TZ_DB>
-			"filters": [],										// limit parsing based on the filters
-			"flags": [],										// flags to influence the event processing
-			"attribute_ids": [],								// select Attribute profiles instead of discovering them
-			"attribute_context": "",							// context used to discover matching Attribute profiles
-			"synchronous": false,								// block processing until export has a result
-			"blocker": false,									// stops the processing of the following exporters
-			"attempts": 1,										// export attempts
-			"fields":[],										// import fields template, tag will match internally CDR field, in case of .csv value will be represented by index of the field value
-			"efs_conns": ["*internal"],                         // connID to efs service
-			"failed_posts_dir": "/var/spool/cgrates/failed_posts",	// directory path where we store failed requests
-		},
-	],
+				// "rpcCodec": "",			// for compression, encoding and decoding <internalRPC | BIRPC | JSON/HTTP/GOB>
+				// "serviceMethod": "",			// the method that should be called trough RPC
+				// "keyPath": "" ,			// path to server key 
+				// "certPath": "",			// path to client certificate
+				// "caPath": "",			// path to CA certificate
+				// "tls": false,
+				// "connIDs": [],			// connections for connManager to this exporter
+				// "rpcConnTimeout" : "1s",		// connection unsuccesfull on timeout
+				// "rpcReplyTimeout":"2s",		// connection down at replies if taking longer that this value
+				// "rpcAPIOpts": {},			// opts that will be passed within APIOpts
+			},
+			"fields":[]					// import fields template, tag will match internally CDR field, in case of .csv value will be represented by index of the field value
+		}
+	]
 },
 
 
@@ -709,217 +712,217 @@ const CGRATES_CFG_JSON = `
 	"rates_conns": [], 						// connections to RateS
 	"accounts_conns": [],					// connections to AccountS
 	"opts": {
-		// "*accounts": [					
+		// "*accounts": [
 		// 	{
 		// 		"Tenant": "*any",
 		// 		"FilterIDs": [],
 		// 		"Value": false,
 		// 	},
 		// ],
-		// "*attributes": [					
+		// "*attributes": [
 		// 	{
 		// 		"Tenant": "*any",
 		// 		"FilterIDs": [],
 		// 		"Value": false,
 		// 	},
 		// ],
-		// "*cdrs": [						
+		// "*cdrs": [
 		// 	{
 		// 		"Tenant": "*any",
 		// 		"FilterIDs": [],
 		// 		"Value": false,
 		// 	},
 		// ],
-		// "*chargers": [						
+		// "*chargers": [
 		// 	{
 		// 		"Tenant": "*any",
 		// 		"FilterIDs": [],
 		// 		"Value": false,
 		// 	},
 		// ],
-		// "*resources": [						
+		// "*resources": [
 		// 	{
 		// 		"Tenant": "*any",
 		// 		"FilterIDs": [],
 		// 		"Value": false,
 		// 	},
 		// ],
-		// "*routes": [						
+		// "*routes": [
 		// 	{
 		// 		"Tenant": "*any",
 		// 		"FilterIDs": [],
 		// 		"Value": false,
 		// 	},
 		// ],
-		// "*stats": [							
+		// "*stats": [
 		// 	{
 		// 		"Tenant": "*any",
 		// 		"FilterIDs": [],
 		// 		"Value": false,
 		// 	},
 		// ],
-		// "*thresholds": [					
+		// "*thresholds": [
 		// 	{
 		// 		"Tenant": "*any",
 		// 		"FilterIDs": [],
 		// 		"Value": false,
 		// 	},
 		// ],
-		// "*initiate": [					
+		// "*initiate": [
 		// 	{
 		// 		"Tenant": "*any",
 		// 		"FilterIDs": [],
 		// 		"Value": false,
 		// 	},
 		// ],
-		// "*update": [					
+		// "*update": [
 		// 	{
 		// 		"Tenant": "*any",
 		// 		"FilterIDs": [],
 		// 		"Value": false,
 		// 	},
 		// ],
-		// "*terminate": [					
+		// "*terminate": [
 		// 	{
 		// 		"Tenant": "*any",
 		// 		"FilterIDs": [],
 		// 		"Value": false,
 		// 	},
 		// ],
-		// "*message": [					
+		// "*message": [
 		// 	{
 		// 		"Tenant": "*any",
 		// 		"FilterIDs": [],
 		// 		"Value": false,
 		// 	},
 		// ],
-		// "*attributesDerivedReply": [					
+		// "*attributesDerivedReply": [
 		// 	{
 		// 		"Tenant": "*any",
 		// 		"FilterIDs": [],
 		// 		"Value": false,
 		// 	},
 		// ],
-		// "*blockerError": [					
+		// "*blockerError": [
 		// 	{
 		// 		"Tenant": "*any",
 		// 		"FilterIDs": [],
 		// 		"Value": false,
 		// 	},
 		// ],
-		// "*cdrsDerivedReply": [					
+		// "*cdrsDerivedReply": [
 		// 	{
 		// 		"Tenant": "*any",
 		// 		"FilterIDs": [],
 		// 		"Value": false,
 		// 	},
 		// ],
-		// "*resourcesAuthorize": [					
+		// "*resourcesAuthorize": [
 		// 	{
 		// 		"Tenant": "*any",
 		// 		"FilterIDs": [],
 		// 		"Value": false,
 		// 	},
 		// ],
-		// "*resourcesAllocate": [					
+		// "*resourcesAllocate": [
 		// 	{
 		// 		"Tenant": "*any",
 		// 		"FilterIDs": [],
 		// 		"Value": false,
 		// 	},
 		// ],
-		// "*resourcesRelease": [					
+		// "*resourcesRelease": [
 		// 	{
 		// 		"Tenant": "*any",
 		// 		"FilterIDs": [],
 		// 		"Value": false,
 		// 	},
 		// ],
-		// "*resourcesDerivedReply": [					
+		// "*resourcesDerivedReply": [
 		// 	{
 		// 		"Tenant": "*any",
 		// 		"FilterIDs": [],
 		// 		"Value": false,
 		// 	},
 		// ],
-		// "*routesDerivedReply": [					
+		// "*routesDerivedReply": [
 		// 	{
 		// 		"Tenant": "*any",
 		// 		"FilterIDs": [],
 		// 		"Value": false,
 		// 	},
 		// ],
-		// "*statsDerivedReply": [					
+		// "*statsDerivedReply": [
 		// 	{
 		// 		"Tenant": "*any",
 		// 		"FilterIDs": [],
 		// 		"Value": false,
 		// 	},
 		// ],
-		// "*thresholdsDerivedReply": [					
+		// "*thresholdsDerivedReply": [
 		// 	{
 		// 		"Tenant": "*any",
 		// 		"FilterIDs": [],
 		// 		"Value": false,
 		// 	},
 		// ],
-		// "*maxUsage": [					
+		// "*maxUsage": [
 		// 	{
 		// 		"Tenant": "*any",
 		// 		"FilterIDs": [],
 		// 		"Value": false,
 		// 	},
 		// ],
-		// "*forceDuration": [					
+		// "*forceDuration": [
 		// 	{
 		// 		"Tenant": "*any",
 		// 		"FilterIDs": [],
 		// 		"Value": false,
 		// 	},
 		// ],
-		// "*ttl": [					
+		// "*ttl": [
 		// 	{
 		// 		"Tenant": "*any",
 		// 		"FilterIDs": [],
 		// 		"Value": "",
 		// 	},
 		// ],
-		// "*chargeable": [					
+		// "*chargeable": [
 		// 	{
 		// 		"Tenant": "*any",
 		// 		"FilterIDs": [],
 		// 		"Value": false,
 		// 	},
 		// ],
-		// "*ttlLastUsage": [					
+		// "*ttlLastUsage": [
 		// 	{
 		// 		"Tenant": "*any",
 		// 		"FilterIDs": [],
 		// 		"Value": "",
 		// 	},
 		// ],
-		// "*ttlLastUsed": [					
+		// "*ttlLastUsed": [
 		// 	{
 		// 		"Tenant": "*any",
 		// 		"FilterIDs": [],
 		// 		"Value": "",
 		// 	},
 		// ],
-		// "*debitInterval": [					
+		// "*debitInterval": [
 		// 	{
 		// 		"Tenant": "*any",
 		// 		"FilterIDs": [],
 		// 		"Value": "",
 		// 	},
 		// ],
-		// "*ttlMaxDelay": [					
+		// "*ttlMaxDelay": [
 		// 	{
 		// 		"Tenant": "*any",
 		// 		"FilterIDs": [],
 		// 		"Value": "",
 		// 	},
 		// ],
-		// "*ttlUsage": [					
+		// "*ttlUsage": [
 		// 	{
 		// 		"Tenant": "*any",
 		// 		"FilterIDs": [],
