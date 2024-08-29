@@ -1,3 +1,4 @@
+#!/bin/bash
 
 #
 # Sample db and users creation. Replace here with your own details
