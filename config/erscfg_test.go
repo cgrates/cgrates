@@ -225,7 +225,7 @@ func TestEventReaderloadFromJsonCase3(t *testing.T) {
 
 func TestEventReaderloadFromJsonCase2(t *testing.T) {
 	cfgJSON := &ERsJsonCfg{
-		Partial_cache_ttl: utils.StringPointer("1ss"),
+		PartialCacheTTL: utils.StringPointer("1ss"),
 	}
 	expected := `time: unknown unit "ss" in duration "1ss"`
 	jsonCfg := NewDefaultCGRConfig()
@@ -518,8 +518,8 @@ func TestERSloadFromJsonCase2(t *testing.T) {
 
 func TestERSloadFromJsonCase3(t *testing.T) {
 	cfgJSON := &ERsJsonCfg{
-		Enabled:        utils.BoolPointer(true),
-		Sessions_conns: &[]string{"*conn1"},
+		Enabled:       utils.BoolPointer(true),
+		SessionSConns: &[]string{"*conn1"},
 		Readers: &[]*EventReaderJsonCfg{
 			{
 				ID:                 utils.StringPointer("file_reader1"),
@@ -655,8 +655,8 @@ func TestERSloadFromJsonCase3(t *testing.T) {
 
 func TestERSloadFromJsonCase4(t *testing.T) {
 	cfgJSON := &ERsJsonCfg{
-		Enabled:        utils.BoolPointer(true),
-		Sessions_conns: &[]string{"*conn1"},
+		Enabled:       utils.BoolPointer(true),
+		SessionSConns: &[]string{"*conn1"},
 		Readers: &[]*EventReaderJsonCfg{
 			{
 				ID:                 utils.StringPointer("file_reader1"),
@@ -1061,6 +1061,9 @@ func TestERSCfgAsMapInterfaceCase2(t *testing.T) {
 				"type": "*fileCSV",
 				"flags": ["randomFlag"],
 				"filters": ["randomFilter"],
+				"ees_success_ids": ["conn1", "conn2"],
+				"ees_failed_ids": ["conn1"],
+				"filters": ["randomFilter"],
 				"source_path": "/tmp/ers/in",
 				"partial_record_cache": "1s",
 				"processed_path": "/tmp/ers/out",
@@ -1153,6 +1156,8 @@ func TestERSCfgAsMapInterfaceCase2(t *testing.T) {
 					{utils.MandatoryCfg: true, utils.PathCfg: "*cgreq.Usage", utils.TagCfg: "Usage", utils.TypeCfg: "*variable", utils.ValueCfg: "~*req.13"},
 				},
 				utils.FiltersCfg:              []string{"randomFilter"},
+				utils.EEsSuccessIDsCfg:        []string{"conn1", "conn2"},
+				utils.EEsFailedIDsCfg:         []string{"conn1"},
 				utils.FlagsCfg:                []string{"randomFlag"},
 				utils.IDCfg:                   "file_reader1",
 				utils.ProcessedPathCfg:        "/tmp/ers/out",
@@ -1184,8 +1189,8 @@ func TestERSCfgAsMapInterfaceCase2(t *testing.T) {
 
 func TestERsloadFromJsonCfg(t *testing.T) {
 	cfgJSON := &ERsJsonCfg{
-		Enabled:        utils.BoolPointer(true),
-		Sessions_conns: &[]string{"*conn1"},
+		Enabled:       utils.BoolPointer(true),
+		SessionSConns: &[]string{"*conn1"},
 		Readers: &[]*EventReaderJsonCfg{
 			{
 				ID:                   utils.StringPointer("file_reader1"),
@@ -1705,15 +1710,15 @@ func TestDiffERsJsonCfg(t *testing.T) {
 	}
 
 	expected := &ERsJsonCfg{
-		Enabled:        utils.BoolPointer(true),
-		Sessions_conns: &[]string{"*localhost"},
+		Enabled:       utils.BoolPointer(true),
+		SessionSConns: &[]string{"*localhost"},
 		Readers: &[]*EventReaderJsonCfg{
 			{
 				ID:   utils.StringPointer("ERS_ID2"),
 				Opts: &EventReaderOptsJson{},
 			},
 		},
-		Partial_cache_ttl: utils.StringPointer("12h0m0s"),
+		PartialCacheTTL: utils.StringPointer("12h0m0s"),
 	}
 
 	rcv := diffERsJsonCfg(d, v1, v2, ";")

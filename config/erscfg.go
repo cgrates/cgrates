@@ -30,6 +30,7 @@ import (
 type ERsCfg struct {
 	Enabled         bool
 	SessionSConns   []string
+	EEsConns        []string
 	Readers         []*EventReaderCfg
 	PartialCacheTTL time.Duration
 }
@@ -50,11 +51,14 @@ func (erS *ERsCfg) loadFromJSONCfg(jsnCfg *ERsJsonCfg, msgTemplates map[string][
 	if jsnCfg.Enabled != nil {
 		erS.Enabled = *jsnCfg.Enabled
 	}
-	if jsnCfg.Sessions_conns != nil {
-		erS.SessionSConns = updateInternalConns(*jsnCfg.Sessions_conns, utils.MetaSessionS)
+	if jsnCfg.SessionSConns != nil {
+		erS.SessionSConns = updateInternalConns(*jsnCfg.SessionSConns, utils.MetaSessionS)
 	}
-	if jsnCfg.Partial_cache_ttl != nil {
-		if erS.PartialCacheTTL, err = utils.ParseDurationWithNanosecs(*jsnCfg.Partial_cache_ttl); err != nil {
+	if jsnCfg.EEsConns != nil {
+		erS.EEsConns = updateInternalConns(*jsnCfg.EEsConns, utils.MetaEEs)
+	}
+	if jsnCfg.PartialCacheTTL != nil {
+		if erS.PartialCacheTTL, err = utils.ParseDurationWithNanosecs(*jsnCfg.PartialCacheTTL); err != nil {
 			return
 		}
 	}
@@ -93,12 +97,10 @@ func (erS ERsCfg) CloneSection() Section { return erS.Clone() }
 func (erS ERsCfg) Clone() (cln *ERsCfg) {
 	cln = &ERsCfg{
 		Enabled:         erS.Enabled,
-		SessionSConns:   make([]string, len(erS.SessionSConns)),
+		SessionSConns:   slices.Clone(erS.SessionSConns),
+		EEsConns:        slices.Clone(erS.EEsConns),
 		Readers:         make([]*EventReaderCfg, len(erS.Readers)),
 		PartialCacheTTL: erS.PartialCacheTTL,
-	}
-	if erS.SessionSConns != nil {
-		cln.SessionSConns = slices.Clone(erS.SessionSConns)
 	}
 	for idx, rdr := range erS.Readers {
 		cln.Readers[idx] = rdr.Clone()
@@ -117,6 +119,9 @@ func (erS ERsCfg) AsMapInterface(separator string) any {
 	}
 	if erS.SessionSConns != nil {
 		mp[utils.SessionSConnsCfg] = getInternalJSONConns(erS.SessionSConns)
+	}
+	if erS.EEsConns != nil {
+		mp[utils.EEsConnsCfg] = getInternalJSONConns(erS.EEsConns)
 	}
 	if erS.Readers != nil {
 		readers := make([]map[string]any, len(erS.Readers))
@@ -217,6 +222,8 @@ type EventReaderCfg struct {
 	ProcessedPath        string
 	Tenant               RSRParsers
 	Timezone             string
+	EEsSuccessIDs        []string
+	EEsFailedIDs         []string
 	Filters              []string
 	Flags                utils.FlagsWithParams
 	Reconnects           int
@@ -487,6 +494,14 @@ func (er *EventReaderCfg) loadFromJSONCfg(jsnCfg *EventReaderJsonCfg, msgTemplat
 	}
 	if jsnCfg.Timezone != nil {
 		er.Timezone = *jsnCfg.Timezone
+	}
+	if jsnCfg.EEsSuccessIDs != nil {
+		er.EEsSuccessIDs = make([]string, len(*jsnCfg.EEsSuccessIDs))
+		copy(er.EEsSuccessIDs, *jsnCfg.EEsSuccessIDs)
+	}
+	if jsnCfg.EEsFailedIDs != nil {
+		er.EEsFailedIDs = make([]string, len(*jsnCfg.EEsFailedIDs))
+		copy(er.EEsFailedIDs, *jsnCfg.EEsFailedIDs)
 	}
 	if jsnCfg.Filters != nil {
 		er.Filters = slices.Clone(*jsnCfg.Filters)
@@ -834,13 +849,13 @@ func (er EventReaderCfg) Clone() (cln *EventReaderCfg) {
 		ProcessedPath:        er.ProcessedPath,
 		Tenant:               er.Tenant.Clone(),
 		Timezone:             er.Timezone,
+		EEsSuccessIDs:        slices.Clone(er.EEsSuccessIDs),
+		EEsFailedIDs:         slices.Clone(er.EEsFailedIDs),
+		Filters:              slices.Clone(er.Filters),
 		Flags:                er.Flags.Clone(),
 		Reconnects:           er.Reconnects,
 		MaxReconnectInterval: er.MaxReconnectInterval,
 		Opts:                 er.Opts.Clone(),
-	}
-	if er.Filters != nil {
-		cln.Filters = slices.Clone(er.Filters)
 	}
 	if er.Fields != nil {
 		cln.Fields = make([]*FCTemplate, len(er.Fields))
@@ -1093,6 +1108,12 @@ func (er *EventReaderCfg) AsMapInterface(separator string) (initialMP map[string
 		utils.MaxReconnectIntervalCfg: "0",
 		utils.OptsCfg:                 opts,
 	}
+	if er.EEsSuccessIDs != nil {
+		initialMP[utils.EEsSuccessIDsCfg] = er.EEsSuccessIDs
+	}
+	if er.EEsFailedIDs != nil {
+		initialMP[utils.EEsFailedIDsCfg] = er.EEsFailedIDs
+	}
 	if er.MaxReconnectInterval != 0 {
 		initialMP[utils.MaxReconnectIntervalCfg] = er.MaxReconnectInterval.String()
 	}
@@ -1213,6 +1234,8 @@ type EventReaderJsonCfg struct {
 	ProcessedPath        *string               `json:"processed_path"`
 	Tenant               *string               `json:"tenant"`
 	Timezone             *string               `json:"timezone"`
+	EEsSuccessIDs        *[]string             `json:"ees_success_ids"`
+	EEsFailedIDs         *[]string             `json:"ees_failed_ids"`
 	Filters              *[]string             `json:"filters"`
 	Flags                *[]string             `json:"flags"`
 	Reconnects           *int                  `json:"reconnects"`
@@ -1827,6 +1850,12 @@ func diffEventReaderJsonCfg(d *EventReaderJsonCfg, v1, v2 *EventReaderCfg, separ
 	if v1.Timezone != v2.Timezone {
 		d.Timezone = utils.StringPointer(v2.Timezone)
 	}
+	if !slices.Equal(v1.EEsSuccessIDs, v2.EEsSuccessIDs) {
+		d.EEsSuccessIDs = &v2.EEsSuccessIDs
+	}
+	if !slices.Equal(v1.EEsFailedIDs, v2.EEsFailedIDs) {
+		d.EEsFailedIDs = &v2.EEsFailedIDs
+	}
 	if !slices.Equal(v1.Filters, v2.Filters) {
 		d.Filters = &v2.Filters
 	}
@@ -1904,10 +1933,11 @@ func diffEventReadersJsonCfg(d *[]*EventReaderJsonCfg, v1, v2 []*EventReaderCfg,
 
 // EventReaderSJsonCfg contains the configuration of EventReaderService
 type ERsJsonCfg struct {
-	Enabled           *bool
-	Sessions_conns    *[]string
-	Readers           *[]*EventReaderJsonCfg
-	Partial_cache_ttl *string
+	Enabled         *bool                  `json:"enabled"`
+	SessionSConns   *[]string              `json:"sessions_conns"`
+	EEsConns        *[]string              `json:"ees_conns"`
+	Readers         *[]*EventReaderJsonCfg `json:"readers"`
+	PartialCacheTTL *string                `json:"partial_cache_ttl"`
 }
 
 func diffERsJsonCfg(d *ERsJsonCfg, v1, v2 *ERsCfg, separator string) *ERsJsonCfg {
@@ -1918,10 +1948,13 @@ func diffERsJsonCfg(d *ERsJsonCfg, v1, v2 *ERsCfg, separator string) *ERsJsonCfg
 		d.Enabled = utils.BoolPointer(v2.Enabled)
 	}
 	if !slices.Equal(v1.SessionSConns, v2.SessionSConns) {
-		d.Sessions_conns = utils.SliceStringPointer(getInternalJSONConns(v2.SessionSConns))
+		d.SessionSConns = utils.SliceStringPointer(getInternalJSONConns(v2.SessionSConns))
+	}
+	if !slices.Equal(v1.EEsConns, v2.EEsConns) {
+		d.EEsConns = utils.SliceStringPointer(getInternalJSONConns(v2.EEsConns))
 	}
 	if v1.PartialCacheTTL != v2.PartialCacheTTL {
-		d.Partial_cache_ttl = utils.StringPointer(v2.PartialCacheTTL.String())
+		d.PartialCacheTTL = utils.StringPointer(v2.PartialCacheTTL.String())
 	}
 	d.Readers = diffEventReadersJsonCfg(d.Readers, v1.Readers, v2.Readers, separator)
 	return d
