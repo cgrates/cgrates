@@ -314,7 +314,7 @@ func TestFallbackSubjKeys(t *testing.T) {
 		t.Errorf("Expected an empty slice")
 	}
 	//check with test vars
-	eOut := []string{"*out:cgrates.org:*voice:1001", "*out:cgrates.org:*voice:1002", "*out:cgrates.org:*voice:1003"}
+	eOut := []string{"*out:cgrates.org:*voice:1001", "*out:cgrates.org:*voice:1003", "*out:cgrates.org:*voice:1002"}
 	rcv = FallbackSubjKeys("cgrates.org", MetaVoice, "1001;1003;1002")
 	if !reflect.DeepEqual(eOut, rcv) {
 		t.Errorf("Expected %+v, received %+v", eOut, rcv)

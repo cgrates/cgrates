@@ -296,25 +296,18 @@ type TPRatingActivation struct {
 	FallbackSubjects string // So we follow the api
 }
 
-// Helper to return the subject fallback keys we need in dataDb
+// FallbackSubjKeys generates keys for dataDB lookup with the format "*out:tenant:tor:subject".
 func FallbackSubjKeys(tenant, tor, fallbackSubjects string) []string {
-	var sslice sort.StringSlice
-	if len(fallbackSubjects) != 0 {
-		for _, fbs := range strings.Split(fallbackSubjects, string(FallbackSep)) {
-			newKey := ConcatenatedKey(MetaOut, tenant, tor, fbs)
-			i := sslice.Search(newKey)
-			if i < len(sslice) && sslice[i] != newKey {
-				// not found so insert it
-				sslice = append(sslice, "")
-				copy(sslice[i+1:], sslice[i:])
-				sslice[i] = newKey
-			} else if i == len(sslice) {
-				// not found and at the end
-				sslice = append(sslice, newKey)
-			} // newKey was found
-		}
+	if fallbackSubjects == "" {
+		return nil
 	}
-	return sslice
+	splitFBS := strings.Split(fallbackSubjects, string(FallbackSep))
+	s := make([]string, 0, len(splitFBS))
+	for _, subj := range splitFBS {
+		key := ConcatenatedKey(MetaOut, tenant, tor, subj)
+		s = append(s, key)
+	}
+	return s
 }
 
 type AttrSetDestination struct {
