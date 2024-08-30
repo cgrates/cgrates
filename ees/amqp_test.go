@@ -46,3 +46,25 @@ func TestCfg(t *testing.T) {
 		t.Errorf("expected cfg %v, got %v", expectedCfg, result)
 	}
 }
+
+func TestAmqpToGetMetrics(t *testing.T) {
+	expectedMetrics := &utils.SafeMapStorage{}
+	amqp := &AMQPv1EE{
+		dc: expectedMetrics,
+	}
+	result := amqp.GetMetrics()
+	if result != expectedMetrics {
+		t.Errorf("GetMetrics() = %v; want %v", result, expectedMetrics)
+	}
+}
+
+func TestCfgEvent(t *testing.T) {
+	expectedCfg := &config.EventExporterCfg{}
+	amqp := &AMQPv1EE{
+		cfg: expectedCfg,
+	}
+	result := amqp.Cfg()
+	if result != expectedCfg {
+		t.Errorf("Cfg() = %v; want %v", result, expectedCfg)
+	}
+}
