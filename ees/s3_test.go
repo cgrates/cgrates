@@ -58,3 +58,53 @@ func TestS3Cfg(t *testing.T) {
 		t.Errorf("Cfg() = %v; expected %v", actualCfg, expectedCfg)
 	}
 }
+
+func TestParseOptsAllFieldsSet(t *testing.T) {
+	bucketID := "bucket"
+	folderPath := "folder"
+	region := "region"
+	key := "id"
+	secret := "key"
+	token := "token"
+
+	opts := &config.EventExporterOpts{
+		AWS: &config.AWSOpts{
+			S3BucketID:   &bucketID,
+			S3FolderPath: &folderPath,
+			Region:       &region,
+			Key:          &key,
+			Secret:       &secret,
+			Token:        &token,
+		},
+	}
+
+	expected := S3EE{
+		bucket:     bucketID,
+		folderPath: folderPath,
+		awsRegion:  region,
+		awsID:      key,
+		awsKey:     secret,
+		awsToken:   token,
+	}
+
+	s3ee := &S3EE{}
+	s3ee.parseOpts(opts)
+	if s3ee.bucket != expected.bucket {
+		t.Errorf("Expected bucket %s, got %s", expected.bucket, s3ee.bucket)
+	}
+	if s3ee.folderPath != expected.folderPath {
+		t.Errorf("Expected folderPath %s, got %s", expected.folderPath, s3ee.folderPath)
+	}
+	if s3ee.awsRegion != expected.awsRegion {
+		t.Errorf("Expected awsRegion %s, got %s", expected.awsRegion, s3ee.awsRegion)
+	}
+	if s3ee.awsID != expected.awsID {
+		t.Errorf("Expected awsID %s, got %s", expected.awsID, s3ee.awsID)
+	}
+	if s3ee.awsKey != expected.awsKey {
+		t.Errorf("Expected awsKey %s, got %s", expected.awsKey, s3ee.awsKey)
+	}
+	if s3ee.awsToken != expected.awsToken {
+		t.Errorf("Expected awsToken %s, got %s", expected.awsToken, s3ee.awsToken)
+	}
+}
