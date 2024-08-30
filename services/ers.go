@@ -82,7 +82,7 @@ func (erS *EventReaderService) Start(ctx *context.Context, shtDwn context.Cancel
 
 func (erS *EventReaderService) listenAndServe(ers *ers.ERService, stopChan chan struct{}, rldChan chan struct{}, shtDwn context.CancelFunc) (err error) {
 	if err = ers.ListenAndServe(stopChan, rldChan); err != nil {
-		utils.Logger.Err(fmt.Sprintf("<%s> error: <%s>", utils.ERs, err.Error()))
+		utils.Logger.Err(fmt.Sprintf("<%s> error: <%v>", utils.ERs, err))
 		shtDwn()
 	}
 	return

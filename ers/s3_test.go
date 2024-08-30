@@ -30,8 +30,7 @@ import (
 
 func TestS3ERServe(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	rdr, err := NewS3ER(cfg, 0, nil, nil,
-		nil, nil, nil, nil)
+	rdr, err := NewS3ER(cfg, 0, nil, nil, nil, nil, nil)
 	if err != nil {
 		t.Error(err)
 	}
@@ -57,7 +56,6 @@ func TestS3ERServe2(t *testing.T) {
 		awsToken:  "",
 		bucket:    "cgrates_cdrs",
 		session:   nil,
-		poster:    nil,
 	}
 	if err := rdr.Serve(); err != nil {
 		t.Error(err)
@@ -80,7 +78,6 @@ func TestS3ERProcessMessage(t *testing.T) {
 		awsToken:  "",
 		bucket:    "cgrates_cdrs",
 		session:   nil,
-		poster:    nil,
 	}
 	expEvent := &utils.CGREvent{
 		Tenant: "cgrates.org",
@@ -129,7 +126,6 @@ func TestS3ERProcessMessageError1(t *testing.T) {
 		awsToken:  "",
 		bucket:    "cgrates_cdrs",
 		session:   nil,
-		poster:    nil,
 	}
 	rdr.Config().Fields = []*config.FCTemplate{
 		{},
@@ -161,7 +157,6 @@ func TestS3ERProcessMessageError2(t *testing.T) {
 		awsToken:  "",
 		bucket:    "cgrates_cdrs",
 		session:   nil,
-		poster:    nil,
 	}
 	body := []byte(`{"*originID":"testoriginID"}`)
 	rdr.Config().Filters = []string{"Filter1"}
@@ -193,7 +188,6 @@ func TestS3ERProcessMessageError3(t *testing.T) {
 		awsToken:  "",
 		bucket:    "cgrates_cdrs",
 		session:   nil,
-		poster:    nil,
 	}
 	body := []byte("invalid_format")
 	errExpect := "invalid character 'i' looking for beginning of value"
@@ -218,7 +212,6 @@ func TestS3ERParseOpts(t *testing.T) {
 		awsToken:  "",
 		bucket:    "cgrates_cdrs",
 		session:   nil,
-		poster:    nil,
 	}
 
 	opts := &config.EventReaderOpts{
@@ -238,7 +231,6 @@ func TestS3ERParseOpts(t *testing.T) {
 	}
 	rdr.Config().Opts = &config.EventReaderOpts{}
 	rdr.Config().ProcessedPath = utils.EmptyString
-	rdr.createPoster()
 }
 
 func TestS3ERIsClosed(t *testing.T) {
@@ -257,7 +249,6 @@ func TestS3ERIsClosed(t *testing.T) {
 		awsToken:  "",
 		bucket:    "cgrates_cdrs",
 		session:   nil,
-		poster:    nil,
 	}
 	if rcv := rdr.isClosed(); rcv != false {
 		t.Errorf("Expected %v but received %v", false, true)

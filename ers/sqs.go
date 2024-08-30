@@ -31,18 +31,14 @@ import (
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/agents"
 	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/ees"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
 // NewSQSER return a new sqs event reader
-func NewSQSER(cfg *config.CGRConfig, cfgIdx int,
-	rdrEvents, partialEvents chan *erEvent, rdrErr chan error,
-	fltrS *engine.FilterS, rdrExit chan struct{}, connMgr *engine.ConnManager) (er EventReader, err error) {
-
+func NewSQSER(cfg *config.CGRConfig, cfgIdx int, rdrEvents, partialEvents chan *erEvent, rdrErr chan error,
+	fltrS *engine.FilterS, rdrExit chan struct{}) (EventReader, error) {
 	rdr := &SQSER{
-		connMgr:       connMgr,
 		cgrCfg:        cfg,
 		cfgIdx:        cfgIdx,
 		fltrS:         fltrS,
@@ -64,10 +60,9 @@ func NewSQSER(cfg *config.CGRConfig, cfgIdx int,
 // SQSER implements EventReader interface for sqs message
 type SQSER struct {
 	// sync.RWMutex
-	cgrCfg  *config.CGRConfig
-	cfgIdx  int // index of config instance within ERsCfg.Readers
-	fltrS   *engine.FilterS
-	connMgr *engine.ConnManager
+	cgrCfg *config.CGRConfig
+	cfgIdx int // index of config instance within ERsCfg.Readers
+	fltrS  *engine.FilterS
 
 	rdrEvents     chan *erEvent // channel to dispatch the events created to
 	partialEvents chan *erEvent // channel to dispatch the partial events created to
@@ -82,8 +77,6 @@ type SQSER struct {
 	awsToken  string
 	queueID   string
 	session   *session.Session
-
-	poster *ees.SQSee
 }
 
 type sqsClient interface {
@@ -190,7 +183,6 @@ func (rdr *SQSER) getQueueURLWithClient(svc sqsClient) (err error) {
 			return
 		}
 	}
-	utils.Logger.Warning(fmt.Sprintf("<SQSPoster> can not get url for queue with ID=%s because err: %v", rdr.queueID, err))
 	return
 }
 
@@ -217,16 +209,6 @@ func (rdr *SQSER) readLoop(scv sqsClient) (err error) {
 	}
 
 	return
-}
-
-func (rdr *SQSER) createPoster() {
-	processedOpt := getProcessedOptions(rdr.Config().Opts)
-	if processedOpt == nil && len(rdr.Config().ProcessedPath) == 0 {
-		return
-	}
-	eeCfg := config.NewEventExporterCfg(rdr.Config().ID, "", utils.FirstNonEmpty(rdr.Config().ProcessedPath, rdr.Config().SourcePath),
-		"", rdr.cgrCfg.EEsCfg().GetDefaultExporter().Attempts, processedOpt)
-	rdr.poster = ees.NewSQSee(eeCfg, nil)
 }
 
 func (rdr *SQSER) isClosed() bool {
@@ -256,15 +238,6 @@ func (rdr *SQSER) readMsg(scv sqsClient, msg *sqs.Message) (err error) {
 	}); err != nil {
 		rdr.rdrErr <- err
 		return
-	}
-	if rdr.poster != nil { // post it
-		if err = ees.ExportWithAttempts(context.Background(), rdr.poster, body, key,
-			rdr.connMgr, rdr.cgrCfg.GeneralCfg().DefaultTenant); err != nil {
-			utils.Logger.Warning(
-				fmt.Sprintf("<%s> writing message %s error: %s",
-					utils.ERs, key, err.Error()))
-			return
-		}
 	}
 	return
 }

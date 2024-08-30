@@ -24,7 +24,6 @@ import (
 	"time"
 
 	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/ees"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -104,7 +103,7 @@ func TestKafkaERServe(t *testing.T) {
 	rdrEvents := make(chan *erEvent, 1)
 	rdrExit := make(chan struct{}, 1)
 	rdrErr := make(chan error, 1)
-	rdr, err := NewKafkaER(cfg, 0, rdrEvents, make(chan *erEvent, 1), rdrErr, fltrS, rdrExit, nil)
+	rdr, err := NewKafkaER(cfg, 0, rdrEvents, make(chan *erEvent, 1), rdrErr, fltrS, rdrExit)
 	if err != nil {
 		t.Error(err)
 	}
@@ -117,7 +116,6 @@ func TestKafkaERServe(t *testing.T) {
 	}
 	rdr.Config().Opts = &config.EventReaderOpts{}
 	rdr.Config().ProcessedPath = ""
-	rdr.(*KafkaER).createPoster()
 	close(rdrExit)
 }
 
@@ -135,11 +133,6 @@ func TestKafkaERServe2(t *testing.T) {
 		topic:     "testTopic",
 		maxWait:   time.Duration(1),
 		cap:       make(chan struct{}, 1),
-		poster: ees.NewKafkaEE(&config.EventExporterCfg{
-			ExportPath: "url",
-			Attempts:   1,
-			Opts:       &config.EventExporterOpts{},
-		}, nil),
 	}
 	rdr.rdrExit <- struct{}{}
 	rdr.Config().RunDelay = 1 * time.Millisecond

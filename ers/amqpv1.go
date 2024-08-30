@@ -27,7 +27,6 @@ import (
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/agents"
 	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/ees"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -35,9 +34,8 @@ import (
 // NewAMQPv1ER return a new amqpv1 event reader
 func NewAMQPv1ER(cfg *config.CGRConfig, cfgIdx int,
 	rdrEvents, partialEvents chan *erEvent, rdrErr chan error,
-	fltrS *engine.FilterS, rdrExit chan struct{}, connMgr *engine.ConnManager) (er EventReader, err error) {
+	fltrS *engine.FilterS, rdrExit chan struct{}) (EventReader, error) {
 	rdr := &AMQPv1ER{
-		connMgr:       connMgr,
 		cgrCfg:        cfg,
 		cfgIdx:        cfgIdx,
 		fltrS:         fltrS,
@@ -60,17 +58,15 @@ func NewAMQPv1ER(cfg *config.CGRConfig, cfgIdx int,
 			SASLType: amqpv1.SASLTypePlain(*rdr.Config().Opts.AMQPUsername, *rdr.Config().Opts.AMQPPassword),
 		}
 	}
-	rdr.createPoster()
 	return rdr, nil
 }
 
 // AMQPv1ER implements EventReader interface for amqpv1 message
 type AMQPv1ER struct {
 	// sync.RWMutex
-	cgrCfg  *config.CGRConfig
-	cfgIdx  int // index of config instance within ERsCfg.Readers
-	fltrS   *engine.FilterS
-	connMgr *engine.ConnManager
+	cgrCfg *config.CGRConfig
+	cfgIdx int // index of config instance within ERsCfg.Readers
+	fltrS  *engine.FilterS
 
 	queueID string
 
@@ -83,8 +79,6 @@ type AMQPv1ER struct {
 	conn     *amqpv1.Conn
 	connOpts *amqpv1.ConnOptions
 	ses      *amqpv1.Session
-
-	poster *ees.AMQPv1EE
 }
 
 // Config returns the curent configuration
@@ -151,14 +145,6 @@ func (rdr *AMQPv1ER) readLoop(recv *amqpv1.Receiver) (err error) {
 					fmt.Sprintf("<%s> processing message error: %s",
 						utils.ERs, err.Error()))
 			}
-			if rdr.poster != nil { // post it
-				if err := ees.ExportWithAttempts(context.Background(), rdr.poster, body, utils.EmptyString, rdr.connMgr,
-					rdr.cgrCfg.GeneralCfg().DefaultTenant); err != nil {
-					utils.Logger.Warning(
-						fmt.Sprintf("<%s> writing message error: %s",
-							utils.ERs, err.Error()))
-				}
-			}
 			if rdr.Config().ConcurrentReqs != -1 {
 				rdr.cap <- struct{}{}
 			}
@@ -200,23 +186,10 @@ func (rdr *AMQPv1ER) processMessage(msg []byte) (err error) {
 }
 
 func (rdr *AMQPv1ER) close() (err error) {
-	if rdr.poster != nil {
-		rdr.poster.Close()
-	}
 	if rdr.ses != nil {
 		if err = rdr.ses.Close(context.Background()); err != nil {
 			return
 		}
 	}
 	return rdr.conn.Close()
-}
-
-func (rdr *AMQPv1ER) createPoster() {
-	processedOpt := getProcessedOptions(rdr.Config().Opts)
-	if processedOpt == nil && len(rdr.Config().ProcessedPath) == 0 {
-		return
-	}
-	eeCfg := config.NewEventExporterCfg(rdr.Config().ID, "", utils.FirstNonEmpty(rdr.Config().ProcessedPath, rdr.Config().SourcePath),
-		"", rdr.cgrCfg.EEsCfg().GetDefaultExporter().Attempts, processedOpt)
-	rdr.poster = ees.NewAMQPv1EE(eeCfg, nil)
 }
