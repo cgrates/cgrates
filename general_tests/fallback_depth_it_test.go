@@ -23,6 +23,7 @@ package general_tests
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"strings"
 	"testing"
 	"time"
@@ -32,37 +33,8 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-/*
-TestFallbackDepth tests fallback_depth configuration.
-
-Previously, the max depth was always 3. The test ensures that the functionality works properly when
-the depth exceeds the previous hard-coded value.
-
-The test steps are as follows:
-
-1. Create 3 rating plans:
-
-	- a dummy rating plan that never matches
-	- one that matches only when destination is 1002
-	- one that matches any destination
-
-2. Define 5 subjects in the following manner:
-
-   	- a main subject that will be assigned to the event args. This subject will have a fallback
-	subject as backup
-   	- 4 fallback subjects, each having the next one as backup
-	- main subject and first 2 fallback subjects will use the dummy rating plan
-	- third fallback subject will have a rating plan defined for destination 1002
-	- fourth fallback subject will have a rating plan defined for any destination
-
-3. Configure fallback_depth to be 4.
-4. Process a CDR where the destination is 1002. This is expected to return CostDetails mentioning that
-   FallbackSubject3 was taken into consideration during rating.
-5. Process CDR where the destination is 1003. This is expected to encounter an error log saying that the
-   destination is not authorized. For it to reach the fourth fallback subject, a fallback depth of 5 would
-   be required.
-*/
-
+// TestFallbackDepth tests both the fallback_depth configuration (previously, max depth
+// was hardcoded to 3) and that fallback keys are not ordered automatically.
 func TestFallbackDepth(t *testing.T) {
 	switch *utils.DBType {
 	case utils.MetaInternal:
@@ -77,71 +49,80 @@ func TestFallbackDepth(t *testing.T) {
 	"logger": "*stdout",
 	"log_level": 3
 },
-
-"data_db": {								
+"data_db": {
 	"db_type": "*internal"
 },
-
 "stor_db": {
 	"db_type": "*internal"
 },
-
 "rals": {
 	"enabled": true,
 	"fallback_depth": 4
 },
-
 "cdrs": {
 	"enabled": true,
 	"rals_conns": ["*internal"]
 },
-
 "schedulers": {
 	"enabled": true
 },
-
 "apiers": {
 	"enabled": true,
 	"scheduler_conns": ["*internal"]
 }
-
 }`
 
 	tpFiles := map[string]string{
 		utils.DestinationRatesCsv: `#Id,DestinationId,RatesTag,RoundingMethod,RoundingDecimals,MaxCost,MaxCostStrategy
-DR_ANY,*any,RT_ANY,*up,20,0,
-DR_1002,DST_1002,RT_1002,*up,20,0,
-DUMMY_DR,DUMMY_DST,DUMMY_RT,*up,20,0,`,
+DR_MainSubj,DST_MainSubj,RT_MainSubj,*up,4,0,
+DR_FBSubj2,DST_FBSubj2,RT_FBSubj2,*up,4,0,
+DR_FBSubj1,DST_FBSubj1,RT_FBSubj1,*up,4,0,
+DR_FBSubj3,DST_FBSubj3,RT_FBSubj3,*up,4,0,
+DR_FBSubj4,DST_FBSubj4,RT_FBSubj4,*up,4,0,
+DR_DEFAULT,DST_DEFAULT,RT_DEFAULT,*up,4,0,`,
 		utils.DestinationsCsv: `#Id,Prefix
-DUMMY_DST,1234
-DST_1002,1002`,
+DST_MainSubj,1001
+DST_FBSubj2,2001
+DST_FBSubj1,3001
+DST_FBSubj3,4001
+DST_FBSubj4,5001
+DST_DEFAULT,6001`,
 		utils.RatesCsv: `#Id,ConnectFee,Rate,RateUnit,RateIncrement,GroupIntervalStart
-RT_ANY,0,1,1s,1s,0s
-RT_1002,0,1,1s,1s,0s
-DUMMY_RT,0,0.1,1s,1s,0s`,
+RT_MainSubj,0,1,1s,1s,0s
+RT_FBSubj2,0,2,1s,1s,0s
+RT_FBSubj1,0,3,1s,1s,0s
+RT_FBSubj3,0,4,1s,1s,0s
+RT_FBSubj4,0,5,1s,1s,0s
+RT_DEFAULT,0,6,1s,1s,0s`,
 		utils.RatingPlansCsv: `#Id,DestinationRatesId,TimingTag,Weight
-RP_ANY,DR_ANY,*any,10
-RP_1002,DR_1002,*any,10
-DUMMY_RP,DUMMY_DR,*any,10`,
+RP_MainSubj,DR_MainSubj,*any,
+RP_FBSubj2,DR_FBSubj2,*any,
+RP_FBSubj1,DR_FBSubj1,*any,
+RP_FBSubj3,DR_FBSubj3,*any,
+RP_FBSubj4,DR_FBSubj4,*any,
+RP_DEFAULT,DR_DEFAULT,*any,`,
 		utils.RatingProfilesCsv: `#Tenant,Category,Subject,ActivationTime,RatingPlanId,RatesFallbackSubject
-cgrates.org,call,MainSubject,2014-01-01T00:00:00Z,DUMMY_RP,FallbackSubject1
-cgrates.org,call,FallbackSubject1,2014-01-01T00:00:00Z,DUMMY_RP,FallbackSubject2
-cgrates.org,call,FallbackSubject2,2014-01-01T00:00:00Z,DUMMY_RP,FallbackSubject3
-cgrates.org,call,FallbackSubject3,2014-01-01T00:00:00Z,RP_1002,FallbackSubject4
-cgrates.org,call,FallbackSubject4,2014-01-01T00:00:00Z,RP_ANY,`,
+#Tenant,Category,Subject,ActivationTime,RatingPlanId,RatesFallbackSubject
+cgrates.org,call,MainSubj,,RP_MainSubj,FBSubj2;FBSubj1
+cgrates.org,call,FBSubj2,,RP_FBSubj2,
+cgrates.org,call,FBSubj1,,RP_FBSubj1,FBSubj3
+cgrates.org,call,FBSubj3,,RP_FBSubj3,FBSubj4
+cgrates.org,call,FBSubj4,,RP_FBSubj4,DEFAULT
+cgrates.org,call,DEFAULT,,RP_DEFAULT,`,
 	}
 
 	buf := &bytes.Buffer{}
 	testEnv := TestEnvironment{
-		Name: "TestFallbackDepth",
-		// Encoding:   *encoding,
 		ConfigJSON: content,
 		TpFiles:    tpFiles,
 		LogBuffer:  buf,
 	}
 	client, _ := testEnv.Setup(t, *utils.WaitRater)
 
-	t.Run("ProcessCdrFallbackSuccess", func(t *testing.T) {
+	cdrIdx := 0
+	processCDR := func(t *testing.T, dest string, shouldFail bool) engine.EventCost {
+		t.Helper()
+		cdrIdx++
 		var reply []*utils.EventWithFlags
 		err := client.Call(context.Background(), utils.CDRsV2ProcessEvent,
 			&engine.ArgV1ProcessEvent{
@@ -150,94 +131,112 @@ cgrates.org,call,FallbackSubject4,2014-01-01T00:00:00Z,RP_ANY,`,
 					Tenant: "cgrates.org",
 					ID:     "event1",
 					Event: map[string]any{
-						utils.RunID:        "run_1",
+						utils.RunID:        fmt.Sprintf("run_%d", cdrIdx),
 						utils.Tenant:       "cgrates.org",
 						utils.Category:     "call",
 						utils.ToR:          utils.MetaVoice,
-						utils.OriginID:     "processCDR1",
+						utils.OriginID:     fmt.Sprintf("processCDR%d", cdrIdx),
 						utils.OriginHost:   "127.0.0.1",
 						utils.RequestType:  utils.MetaRated,
 						utils.AccountField: "1001",
-						utils.Subject:      "MainSubject",
-						utils.Destination:  "1002",
+						utils.Subject:      "MainSubj",
+						utils.Destination:  dest,
 						utils.SetupTime:    time.Date(2021, time.February, 2, 16, 14, 50, 0, time.UTC),
 						utils.AnswerTime:   time.Date(2021, time.February, 2, 16, 15, 0, 0, time.UTC),
-						utils.Usage:        2 * time.Minute,
+						utils.Usage:        10 * time.Second,
 					},
 				},
 			}, &reply)
 		if err != nil {
-			t.Fatal(err)
+			t.Error(err)
+		}
+
+		if shouldFail {
+			return engine.EventCost{}
 		}
 
 		// Convert CostDetails value from map[string]any to engine.EventCost in order to be able to retrieve
 		// the RatingSubject used using FieldAsString method.
 		ecIface, has := reply[0].Event[utils.CostDetails]
 		if !has {
-			t.Fatalf("expected CGREvent to have CostDetails populated")
+			t.Errorf("expected CGREvent to have CostDetails populated")
+			return engine.EventCost{}
 		}
 		b, err := json.Marshal(ecIface)
 		if err != nil {
-			t.Fatal(err)
+			t.Error(err)
+			return engine.EventCost{}
 		}
 		var ec engine.EventCost
 		err = json.Unmarshal(b, &ec)
 		if err != nil {
-			t.Fatal(err)
+			t.Error(err)
 		}
+		return ec
+	}
 
-		expected := `*out:cgrates.org:call:FallbackSubject3`
+	checkSubjectAndCost := func(t *testing.T, ec engine.EventCost, wantCost float64, wantSubj, wantLog string) {
+		t.Helper()
+		if wantLog != "" {
+			if !strings.Contains(buf.String(), wantLog) {
+				t.Error("expected unauthorized destination log")
+			}
+			return
+		}
 		subj, err := ec.FieldAsString([]string{"Charges[0]", "Rating", "RatingFilter", "Subject"})
 		if err != nil {
-			t.Fatal(err)
+			t.Error(err)
+			return
 		}
-		if subj != expected {
-			t.Errorf("expected %s, received %s", expected, subj)
+		if subj != wantSubj {
+			t.Errorf("*req.CostDetails.Charges[0].Rating.RatingFilter.Subject = %s, want %s", subj, wantSubj)
 		}
+		if ec.Cost == nil {
+			t.Error("nil cost in EventCost")
+			return
+		}
+		rcvCost := *ec.Cost
+		if rcvCost != wantCost {
+			t.Errorf("ec.Cost = %v, want %v", rcvCost, wantCost)
+		}
+	}
 
-		rcvCost := reply[0].Event[utils.Cost]
-		if rcvCost != 120. {
-			t.Errorf("expected cost to be %v, received %v", 120., rcvCost)
-		}
-	})
+	// checkRP := func(t *testing.T, subj string) {
+	// 	var rpl engine.RatingProfile
+	// 	if err := client.Call(context.Background(), utils.APIerSv1GetRatingProfile,
+	// 		&utils.AttrGetRatingProfile{
+	// 			Tenant:   "cgrates.org",
+	// 			Category: "call",
+	// 			Subject:  subj,
+	// 		}, &rpl); err != nil {
+	// 		t.Error(err)
+	// 	}
+	// 	fmt.Printf("%s: %s\n", subj, utils.ToJSON(rpl))
+	// }
+	//
+	// checkRP(t, "MainSubj")
+	// checkRP(t, "FBSubj2")
+	// checkRP(t, "FBSubj1")
+	// checkRP(t, "FBSubj3")
+	// checkRP(t, "FBSubj4")
+	// checkRP(t, "DEFAULT")
 
-	t.Run("ProcessCdrFallbackFail", func(t *testing.T) {
-		var reply []*utils.EventWithFlags
-		err := client.Call(context.Background(), utils.CDRsV2ProcessEvent,
-			&engine.ArgV1ProcessEvent{
-				Flags: []string{utils.MetaRALs},
-				CGREvent: utils.CGREvent{
-					Tenant: "cgrates.org",
-					ID:     "event2",
-					Event: map[string]any{
-						utils.RunID:        "run_1",
-						utils.Tenant:       "cgrates.org",
-						utils.Category:     "call",
-						utils.ToR:          utils.MetaVoice,
-						utils.OriginID:     "processCDR2",
-						utils.OriginHost:   "127.0.0.1",
-						utils.RequestType:  utils.MetaRated,
-						utils.AccountField: "1001",
-						utils.Subject:      "MainSubject",
-						utils.Destination:  "1003",
-						utils.SetupTime:    time.Date(2021, time.February, 2, 16, 14, 50, 0, time.UTC),
-						utils.AnswerTime:   time.Date(2021, time.February, 2, 16, 15, 0, 0, time.UTC),
-						utils.Usage:        2 * time.Minute,
-					},
-				},
-			}, &reply)
-		if err != nil {
-			t.Fatal(err)
-		}
-		if !strings.Contains(buf.String(),
-			"Destination 1003 not authorized for account: cgrates.org:1001, subject: *out:cgrates.org:call:MainSubject") {
-			t.Fatal("expected unauthorized destination log")
-		}
+	ec := processCDR(t, "1001", false)
+	checkSubjectAndCost(t, ec, 10, "*out:cgrates.org:call:MainSubj", "")
 
-		rcvCost := reply[0].Event[utils.Cost]
-		if rcvCost != -1. {
-			t.Errorf("expected cost to be %v, received %v", -1., rcvCost)
-		}
-	})
+	// When calling 2001, we expect FBSubj2 to match.
+	// Previously, this would have failed due to ordered fallback keys:
+	// MainSubj -> FBSubj1 and FBSubj1 doesn't have FBSubj2 as fallback subject
+	ec = processCDR(t, "2001", false) // MainSubj -> FBSubj2
+	checkSubjectAndCost(t, ec, 20, "*out:cgrates.org:call:FBSubj2", "")
 
+	ec = processCDR(t, "3001", false) // MainSubj -> FBSubj2 -> FBSubj1
+	checkSubjectAndCost(t, ec, 30, "*out:cgrates.org:call:FBSubj1", "")
+	ec = processCDR(t, "4001", false) // MainSubj -> FBSubj2 -> FBSubj1 -> FBSubj3
+	checkSubjectAndCost(t, ec, 40, "*out:cgrates.org:call:FBSubj3", "")
+	ec = processCDR(t, "5001", false) // MainSubj -> FBSubj2 -> FBSubj1 -> FBSubj3 -> FBSubj4
+	checkSubjectAndCost(t, ec, 50, "*out:cgrates.org:call:FBSubj4", "")
+	processCDR(t, "6001", true) // fallback needs to be increased by 1 for this to be successful
+	checkSubjectAndCost(t, engine.EventCost{}, 0, "",
+		"Destination 6001 not authorized for account: cgrates.org:1001, subject: *out:cgrates.org:call:MainSubj")
 }

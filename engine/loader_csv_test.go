@@ -620,7 +620,7 @@ func TestLoadRatingProfiles(t *testing.T) {
 			&RatingPlanActivation{
 				ActivationTime: time.Date(2013, 10, 1, 0, 0, 0, 0, time.UTC),
 				RatingPlanId:   "TDRT",
-				FallbackKeys:   []string{"*out:test:0:danb", "*out:test:0:rif"},
+				FallbackKeys:   []string{"*out:test:0:rif", "*out:test:0:danb"},
 			}},
 	}
 	if !reflect.DeepEqual(rp, expected) {
