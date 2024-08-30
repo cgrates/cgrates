@@ -850,6 +850,10 @@ func TestBalanceCDRLog(t *testing.T) {
 	"enabled": true
 },
 
+"rals": {
+	"remove_expired": false
+},
+
 "schedulers": {
 	"enabled": true,
 	"cdrs_conns": ["*internal"]
@@ -962,7 +966,7 @@ ACT_TOPUP_SMS,*topup_reset,,,balance_sms,*sms,,*any,,,*unlimited,,1000,10,false,
 	})
 
 	t.Run("RemoveExpiredBalancesNoFilter", func(t *testing.T) {
-		expiryTime := time.Now().Add(10 * time.Millisecond)
+		expiryTime := time.Now()
 		attrSetBalance := utils.AttrSetBalances{
 			Tenant:  "cgrates.org",
 			Account: "ACC_TEST",
@@ -1037,7 +1041,6 @@ ACT_TOPUP_SMS,*topup_reset,,,balance_sms,*sms,,*any,,,*unlimited,,1000,10,false,
 		if err := client.Call(context.Background(), utils.APIerSv1SetBalances, &attrSetBalance, &reply); err != nil {
 			t.Error(err)
 		}
-		time.Sleep(10 * time.Millisecond)
 		attrsEA := &utils.AttrExecuteAction{Tenant: "cgrates.org", Account: "ACC_TEST", ActionsId: "ACT_REMOVE_EXPIRED"}
 		if err := client.Call(context.Background(), utils.APIerSv1ExecuteAction, attrsEA, &reply); err != nil {
 			t.Error(err)
@@ -1094,7 +1097,7 @@ ACT_TOPUP_SMS,*topup_reset,,,balance_sms,*sms,,*any,,,*unlimited,,1000,10,false,
 			t.Fatal(err)
 		}
 
-		expiryTime := time.Now().Add(10 * time.Millisecond)
+		expiryTime := time.Now()
 		attrSetBalance := utils.AttrSetBalances{
 			Tenant:  "cgrates.org",
 			Account: "ACC_TEST",
@@ -1169,7 +1172,6 @@ ACT_TOPUP_SMS,*topup_reset,,,balance_sms,*sms,,*any,,,*unlimited,,1000,10,false,
 		if err := client.Call(context.Background(), utils.APIerSv1SetBalances, &attrSetBalance, &reply); err != nil {
 			t.Error(err)
 		}
-		time.Sleep(10 * time.Millisecond)
 		attrsEA := &utils.AttrExecuteAction{Tenant: "cgrates.org", Account: "ACC_TEST", ActionsId: "ACT_REMOVE_EXPIRED_WITH_CATEGORY"}
 		if err := client.Call(context.Background(), utils.APIerSv1ExecuteAction, attrsEA, &reply); err != nil {
 			t.Error(err)
