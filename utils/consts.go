@@ -2523,7 +2523,6 @@ const (
 
 	// General constants for posters and readers
 	DefaultQueueID = "cgrates_cdrs"
-	ProcessedOpt   = "Processed"
 
 	// sqs and s3
 	AWSRegion = "awsRegion"
@@ -2630,42 +2629,6 @@ const (
 	RpcConnTimeout  = "rpcConnTimeout"
 	RpcReplyTimeout = "rpcReplyTimeout"
 	RPCAPIOpts      = "rpcAPIOpts"
-
-	// processed opts
-	AMQPQueueIDProcessedCfg      = "amqpQueueIDProcessed"
-	AMQPUsernameProcessedCfg     = "amqpUsernameProcessedCfg"
-	AMQPPasswordProcessedCfg     = "amqpPasswordProcessedCfg"
-	AMQPExchangeProcessedCfg     = "amqpExchangeProcessed"
-	AMQPExchangeTypeProcessedCfg = "amqpExchangeTypeProcessed"
-	AMQPRoutingKeyProcessedCfg   = "amqpRoutingKeyProcessed"
-
-	KafkaTopicProcessedCfg         = "kafkaTopicProcessed"
-	KafkaTLSProcessedCfg           = "kafkaTLSProcessed"
-	KafkaCAPathProcessedCfg        = "kafkaCAPathProcessed"
-	KafkaSkipTLSVerifyProcessedCfg = "kafkaSkipTLSVerifyProcessed"
-
-	SQLDBNameProcessedCfg    = "sqlDBNameProcessed"
-	SQLTableNameProcessedCfg = "sqlTableNameProcessed"
-	PgSSLModeProcessedCfg    = "pgSSLModeProcessed"
-
-	AWSRegionProcessedCfg = "awsRegionProcessed"
-	AWSKeyProcessedCfg    = "awsKeyProcessed"
-	AWSSecretProcessedCfg = "awsSecretProcessed"
-	AWSTokenProcessedCfg  = "awsTokenProcessed"
-
-	SQSQueueIDProcessedCfg = "sqsQueueIDProcessed"
-
-	S3FolderPathProcessedCfg = "s3FolderPathProcessed"
-	S3BucketIDProcessedCfg   = "s3BucketIDProcessed"
-
-	NATSJetStreamProcessedCfg            = "natsJetStreamProcessed"
-	NATSSubjectProcessedCfg              = "natsSubjectProcessed"
-	NATSJWTFileProcessedCfg              = "natsJWTFileProcessed"
-	NATSSeedFileProcessedCfg             = "natsSeedFileProcessed"
-	NATSCertificateAuthorityProcessedCfg = "natsCertificateAuthorityProcessed"
-	NATSClientCertificateProcessed       = "natsClientCertificateProcessed"
-	NATSClientKeyProcessedCfg            = "natsClientKeyProcessed"
-	NATSJetStreamMaxWaitProcessedCfg     = "natsJetStreamMaxWaitProcessed"
 )
 
 // Paginator options

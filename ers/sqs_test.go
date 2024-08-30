@@ -20,17 +20,13 @@ package ers
 
 import (
 	"reflect"
-	"strings"
 	"testing"
 	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/sqs"
-	"github.com/cgrates/birpc"
 	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/ees"
-	"github.com/cgrates/cgrates/efs"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -55,15 +51,13 @@ func TestNewSQSER(t *testing.T) {
 			Opts:           &config.EventReaderOpts{},
 		},
 	}
-	rdr, err := NewSQSER(cfg, 0, nil, nil,
-		nil, nil, nil, nil)
+	rdr, err := NewSQSER(cfg, 0, nil, nil, nil, nil, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
 	expected.cap = rdr.(*SQSER).cap
 	expected.session = rdr.(*SQSER).session
 
-	rdr.(*SQSER).poster = nil
 	if !reflect.DeepEqual(rdr, expected) {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, rdr)
 	}
@@ -83,8 +77,7 @@ func TestSQSERServeRunDelay0(t *testing.T) {
 			Opts:           &config.EventReaderOpts{},
 		},
 	}
-	rdr, err := NewSQSER(cfg, 0, nil, nil,
-		nil, nil, nil, nil)
+	rdr, err := NewSQSER(cfg, 0, nil, nil, nil, nil, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -109,8 +102,7 @@ func TestSQSERServe(t *testing.T) {
 			Opts:           &config.EventReaderOpts{},
 		},
 	}
-	rdr, err := NewSQSER(cfg, 0, nil, nil,
-		nil, nil, nil, nil)
+	rdr, err := NewSQSER(cfg, 0, nil, nil, nil, nil, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -137,7 +129,6 @@ func TestSQSERProcessMessage(t *testing.T) {
 		awsToken:  "",
 		queueID:   "cgrates_cdrs",
 		session:   nil,
-		poster:    nil,
 	}
 	expEvent := &utils.CGREvent{
 		Tenant: "cgrates.org",
@@ -186,7 +177,6 @@ func TestSQSERProcessMessageError1(t *testing.T) {
 		awsToken:  "",
 		queueID:   "cgrates_cdrs",
 		session:   nil,
-		poster:    nil,
 	}
 	rdr.Config().Fields = []*config.FCTemplate{
 		{},
@@ -218,7 +208,6 @@ func TestSQSERProcessMessageError2(t *testing.T) {
 		awsToken:  "",
 		queueID:   "cgrates_cdrs",
 		session:   nil,
-		poster:    nil,
 	}
 	body := []byte(`{"OriginID":"testOriginID"}`)
 	rdr.Config().Filters = []string{"Filter1"}
@@ -250,7 +239,6 @@ func TestSQSERProcessMessageError3(t *testing.T) {
 		awsToken:  "",
 		queueID:   "cgrates_cdrs",
 		session:   nil,
-		poster:    nil,
 	}
 	body := []byte("invalid_format")
 	errExpect := "invalid character 'i' looking for beginning of value"
@@ -275,7 +263,6 @@ func TestSQSERParseOpts(t *testing.T) {
 		awsToken:  "",
 		queueID:   "cgrates_cdrs",
 		session:   nil,
-		poster:    nil,
 	}
 
 	opts := &config.EventReaderOpts{
@@ -292,7 +279,6 @@ func TestSQSERParseOpts(t *testing.T) {
 	}
 	rdr.Config().Opts = &config.EventReaderOpts{}
 	rdr.Config().ProcessedPath = utils.EmptyString
-	rdr.createPoster()
 }
 
 func TestSQSERIsClosed(t *testing.T) {
@@ -311,7 +297,6 @@ func TestSQSERIsClosed(t *testing.T) {
 		awsToken:  "",
 		queueID:   "cgrates_cdrs",
 		session:   nil,
-		poster:    nil,
 	}
 	if rcv := rdr.isClosed(); rcv != false {
 		t.Errorf("Expected %v but received %v", false, true)
@@ -375,7 +360,6 @@ func TestSQSERReadMsg(t *testing.T) {
 		queueID:   "cgrates_cdrs",
 		// queueURL:  utils.StringPointer("url"),
 		session: nil,
-		poster:  nil,
 	}
 	awsCfg := aws.Config{Endpoint: aws.String(rdr.Config().SourcePath)}
 	rdr.session, _ = session.NewSessionWithOptions(
@@ -431,7 +415,6 @@ func TestSQSERReadMsgError1(t *testing.T) {
 		queueID:   "cgrates_cdrs",
 		// queueURL:  utils.StringPointer("url"),
 		session: nil,
-		poster:  nil,
 	}
 	awsCfg := aws.Config{Endpoint: aws.String(rdr.Config().SourcePath)}
 	rdr.session, _ = session.NewSessionWithOptions(
@@ -477,7 +460,6 @@ func TestSQSERReadMsgError2(t *testing.T) {
 		awsToken:  "",
 		queueID:   "cgrates_cdrs",
 		session:   nil,
-		poster:    nil,
 	}
 	awsCfg := aws.Config{Endpoint: aws.String(rdr.Config().SourcePath)}
 	rdr.session, _ = session.NewSessionWithOptions(
@@ -512,75 +494,6 @@ func TestSQSERReadMsgError2(t *testing.T) {
 	}
 }
 
-func TestSQSERReadMsgError3(t *testing.T) {
-	cfg := config.NewDefaultCGRConfig()
-	cfg.EFsCfg().Enabled = true
-	cfg.EEsCfg().Enabled = true
-	connMngr := engine.NewConnManager(cfg)
-	efSConn := make(chan birpc.ClientConnector, 1)
-	efsSrv, _ := birpc.NewServiceWithMethodsRename(efs.NewEfs(cfg, connMngr), utils.EfSv1, true, func(key string) (newKey string) { return strings.TrimPrefix(key, utils.V1Prfx) }) // update the name of the functions
-	efSConn <- efsSrv
-	connMngr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEFs), utils.EfSv1, efSConn)
-	rdr := &SQSER{
-		connMgr:   connMngr,
-		cgrCfg:    cfg,
-		cfgIdx:    0,
-		fltrS:     new(engine.FilterS),
-		rdrEvents: make(chan *erEvent, 1),
-		rdrExit:   make(chan struct{}, 1),
-		rdrErr:    make(chan error, 1),
-		cap:       nil,
-		awsRegion: "us-east-2",
-		awsID:     "AWSId",
-		awsKey:    "AWSAccessKeyId",
-		awsToken:  "",
-		queueID:   "cgrates_cdrs",
-		session:   nil,
-		poster: ees.NewSQSee(&config.EventExporterCfg{
-			ExportPath:     "url",
-			Attempts:       1,
-			FailedPostsDir: utils.MetaNone,
-			EFsConns:       []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEFs)},
-			Opts:           &config.EventExporterOpts{},
-		}, nil),
-	}
-	awsCfg := aws.Config{Endpoint: aws.String(rdr.Config().SourcePath)}
-	rdr.session, _ = session.NewSessionWithOptions(
-		session.Options{
-			Config: awsCfg,
-		},
-	)
-	rdr.Config().ConcurrentReqs = -1
-	rdr.Config().Fields = []*config.FCTemplate{
-		{
-			Tag:   "Tor",
-			Type:  utils.MetaConstant,
-			Value: config.NewRSRParsersMustCompile("*voice", utils.InfieldSep),
-			Path:  "*cgreq.ToR",
-		},
-	}
-	rdr.Config().Fields[0].ComputePath()
-	receiveMessage := func(input *sqs.ReceiveMessageInput) (*sqs.ReceiveMessageOutput, error) {
-		return nil, nil
-	}
-	deleteMessage := func(input *sqs.DeleteMessageInput) (*sqs.DeleteMessageOutput, error) {
-		return nil, nil
-	}
-	scv := &sqsClientMock{
-		ReceiveMessageF: receiveMessage,
-		DeleteMessageF:  deleteMessage,
-	}
-	msg := &sqs.Message{
-		Body:          utils.StringPointer(`{"msgBody":"BODY"}`),
-		MessageId:     utils.StringPointer(`{"msgId":"MESSAGE"}`),
-		ReceiptHandle: utils.StringPointer(`{"msgReceiptHandle":"RECEIPT_HANDLE"}`),
-	}
-	errExp := "MissingRegion: could not find region configuration"
-	if err := rdr.readMsg(scv, msg); err == nil || err.Error() != errExp {
-		t.Errorf("Expected %v but received %v", errExp, err)
-	}
-}
-
 func TestSQSERReadLoop(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	rdr := &SQSER{
@@ -598,7 +511,6 @@ func TestSQSERReadLoop(t *testing.T) {
 		queueID:   "cgrates_cdrs",
 		queueURL:  utils.StringPointer("testQueueURL"),
 		session:   nil,
-		poster:    nil,
 	}
 	rdr.cap <- struct{}{}
 	rdr.Config().ConcurrentReqs = 1
@@ -644,7 +556,6 @@ func TestSQSERReadLoop2(t *testing.T) {
 		queueID:   "cgrates_cdrs",
 		queueURL:  utils.StringPointer("testQueueURL"),
 		session:   nil,
-		poster:    nil,
 	}
 	rdr.cap <- struct{}{}
 	rdr.Config().ConcurrentReqs = 1
@@ -688,7 +599,6 @@ func TestSQSERGetQueueURL(t *testing.T) {
 		awsToken:  "",
 		queueID:   "cgrates_cdrs",
 		session:   nil,
-		poster:    nil,
 	}
 	// scv := &sqsClientMock{}
 	rdr.queueURL = utils.StringPointer("queueURL")
@@ -713,7 +623,6 @@ func TestSQSERGetQueueURLWithClient(t *testing.T) {
 		awsToken:  "",
 		queueID:   "cgrates_cdrs",
 		session:   nil,
-		poster:    nil,
 	}
 	getQueueUrl := func(input *sqs.GetQueueUrlInput) (*sqs.GetQueueUrlOutput, error) {
 		output := &sqs.GetQueueUrlOutput{
@@ -765,7 +674,6 @@ func TestSQSERGetQueueURLWithClient2(t *testing.T) {
 		awsToken:  "",
 		queueID:   "cgrates_cdrs",
 		session:   nil,
-		poster:    nil,
 	}
 	getQueueUrl := func(input *sqs.GetQueueUrlInput) (output *sqs.GetQueueUrlOutput, err error) {
 		output = &sqs.GetQueueUrlOutput{

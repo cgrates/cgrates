@@ -87,7 +87,7 @@ func TestS3ER(t *testing.T) {
 	rdrExit = make(chan struct{}, 1)
 
 	if rdr, err = NewS3ER(cfg, 1, rdrEvents, make(chan *erEvent, 1),
-		rdrErr, new(engine.FilterS), rdrExit, nil); err != nil {
+		rdrErr, new(engine.FilterS), rdrExit); err != nil {
 		t.Fatal(err)
 	}
 	s3Rdr := rdr.(*S3ER)
@@ -153,7 +153,6 @@ func TestNewS3ER(t *testing.T) {
 		awsToken:  "",
 		bucket:    "cgrates_cdrs",
 		session:   nil,
-		poster:    nil,
 	}
 	cfg.ERsCfg().Readers = []*config.EventReaderCfg{
 		{
@@ -178,8 +177,7 @@ func TestNewS3ER(t *testing.T) {
 		},
 	}
 
-	rdr, err := NewS3ER(cfg, 1, nil, nil,
-		nil, nil, nil, nil)
+	rdr, err := NewS3ER(cfg, 1, nil, nil, nil, nil, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -212,8 +210,7 @@ func TestNewS3ERCase2(t *testing.T) {
 		},
 	}
 
-	rdr, err := NewS3ER(cfg, 0, nil, nil,
-		nil, nil, nil, nil)
+	rdr, err := NewS3ER(cfg, 0, nil, nil, nil, nil, nil)
 	if err != nil {
 		t.Fatal(err)
 	}

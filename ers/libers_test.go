@@ -27,19 +27,6 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-func TestGetProcessOptions(t *testing.T) {
-	opts := &config.EventReaderOpts{
-		AWSKeyProcessed: utils.StringPointer("testKey"),
-	}
-	result := getProcessedOptions(opts)
-	expected := &config.EventExporterOpts{
-		AWSKey: utils.StringPointer("testKey"),
-	}
-	if !reflect.DeepEqual(result, expected) {
-		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
-	}
-}
-
 func TestLibErsMergePartialEvents(t *testing.T) {
 	confg := config.NewDefaultCGRConfig()
 	fltrS := engine.NewFilterS(confg, nil, nil)

@@ -30,7 +30,6 @@ import (
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/agents"
 	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/ees"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 
@@ -38,12 +37,9 @@ import (
 )
 
 // NewKafkaER return a new kafka event reader
-func NewKafkaER(cfg *config.CGRConfig, cfgIdx int,
-	rdrEvents, partialEvents chan *erEvent, rdrErr chan error,
-	fltrS *engine.FilterS, rdrExit chan struct{}, connMgr *engine.ConnManager) (er EventReader, err error) {
-
+func NewKafkaER(cfg *config.CGRConfig, cfgIdx int, rdrEvents, partialEvents chan *erEvent, rdrErr chan error,
+	fltrS *engine.FilterS, rdrExit chan struct{}) (EventReader, error) {
 	rdr := &KafkaER{
-		connMgr:       connMgr,
 		cgrCfg:        cfg,
 		cfgIdx:        cfgIdx,
 		fltrS:         fltrS,
@@ -59,20 +55,19 @@ func NewKafkaER(cfg *config.CGRConfig, cfgIdx int,
 		}
 	}
 	rdr.dialURL = rdr.Config().SourcePath
-	rdr.createPoster()
-	er = rdr
-	err = rdr.setOpts(rdr.Config().Opts)
-	return
+	if err := rdr.setOpts(rdr.Config().Opts); err != nil {
+		return nil, err
+	}
+	return rdr, nil
 
 }
 
 // KafkaER implements EventReader interface for kafka message
 type KafkaER struct {
 	// sync.RWMutex
-	cgrCfg  *config.CGRConfig
-	cfgIdx  int // index of config instance within ERsCfg.Readers
-	fltrS   *engine.FilterS
-	connMgr *engine.ConnManager
+	cgrCfg *config.CGRConfig
+	cfgIdx int // index of config instance within ERsCfg.Readers
+	fltrS  *engine.FilterS
 
 	dialURL       string
 	topic         string
@@ -87,8 +82,6 @@ type KafkaER struct {
 	rdrExit       chan struct{}
 	rdrErr        chan error
 	cap           chan struct{}
-
-	poster *ees.KafkaEE
 }
 
 // Config returns the curent configuration
@@ -143,9 +136,6 @@ func (rdr *KafkaER) Serve() (err error) {
 			utils.Logger.Info(
 				fmt.Sprintf("<%s> stop monitoring kafka path <%s>",
 					utils.ERs, rdr.dialURL))
-			if rdr.poster != nil {
-				rdr.poster.Close()
-			}
 			r.Close() // already locked in library
 			return
 		}
@@ -175,14 +165,6 @@ func (rdr *KafkaER) readLoop(r *kafka.Reader) {
 				utils.Logger.Warning(
 					fmt.Sprintf("<%s> processing message %s error: %s",
 						utils.ERs, string(msg.Key), err.Error()))
-			}
-			if rdr.poster != nil { // post it
-				if err := ees.ExportWithAttempts(context.Background(), rdr.poster, msg.Value, string(msg.Key),
-					rdr.connMgr, rdr.cgrCfg.GeneralCfg().DefaultTenant); err != nil {
-					utils.Logger.Warning(
-						fmt.Sprintf("<%s> writing message %s error: %s",
-							utils.ERs, string(msg.Key), err.Error()))
-				}
 			}
 			if rdr.Config().ConcurrentReqs != -1 {
 				rdr.cap <- struct{}{}
@@ -247,14 +229,4 @@ func (rdr *KafkaER) setOpts(opts *config.EventReaderOpts) (err error) {
 		rdr.skipTLSVerify = true
 	}
 	return
-}
-
-func (rdr *KafkaER) createPoster() {
-	processedOpt := getProcessedOptions(rdr.Config().Opts)
-	if processedOpt == nil && len(rdr.Config().ProcessedPath) == 0 {
-		return
-	}
-	eeCfg := config.NewEventExporterCfg(rdr.Config().ID, "", utils.FirstNonEmpty(rdr.Config().ProcessedPath, rdr.Config().SourcePath),
-		"", rdr.cgrCfg.EEsCfg().GetDefaultExporter().Attempts, processedOpt)
-	rdr.poster = ees.NewKafkaEE(eeCfg, nil)
 }

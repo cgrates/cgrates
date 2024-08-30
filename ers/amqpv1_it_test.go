@@ -81,7 +81,7 @@ func TestAMQPERv1(t *testing.T) {
 	rdrExit = make(chan struct{}, 1)
 
 	if rdr, err = NewAMQPv1ER(cfg, 1, rdrEvents, make(chan *erEvent, 1),
-		rdrErr, new(engine.FilterS), rdrExit, nil); err != nil {
+		rdrErr, new(engine.FilterS), rdrExit); err != nil {
 		t.Fatal(err)
 	}
 	amqpv1Rdr := rdr.(*AMQPv1ER)
@@ -142,7 +142,6 @@ func TestAmqpv1NewAMQPv1ER(t *testing.T) {
 	expected := &AMQPv1ER{
 		cgrCfg: cfg,
 		cfgIdx: cfgIdx,
-		poster: nil,
 	}
 	cfg.ERsCfg().Readers = []*config.EventReaderCfg{
 		{
@@ -157,11 +156,10 @@ func TestAmqpv1NewAMQPv1ER(t *testing.T) {
 		},
 	}
 
-	result, err := NewAMQPv1ER(cfg, cfgIdx, nil, nil, nil, nil, nil, nil)
+	result, err := NewAMQPv1ER(cfg, cfgIdx, nil, nil, nil, nil, nil)
 	if err != nil {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
 	}
-	expected.poster = result.(*AMQPv1ER).poster
 	if !reflect.DeepEqual(result, expected) {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}
@@ -173,7 +171,6 @@ func TestAmqpv1NewAMQPv1ER2(t *testing.T) {
 	expected := &AMQPv1ER{
 		cgrCfg: cfg,
 		cfgIdx: cfgIdx,
-		poster: nil,
 	}
 	cfg.ERsCfg().Readers = []*config.EventReaderCfg{
 		{
@@ -188,11 +185,10 @@ func TestAmqpv1NewAMQPv1ER2(t *testing.T) {
 		},
 	}
 
-	result, err := NewAMQPv1ER(cfg, cfgIdx, nil, nil, nil, nil, nil, nil)
+	result, err := NewAMQPv1ER(cfg, cfgIdx, nil, nil, nil, nil, nil)
 	if err != nil {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
 	}
-	expected.poster = result.(*AMQPv1ER).poster
 	expected.cap = result.(*AMQPv1ER).cap
 	if !reflect.DeepEqual(result, expected) {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)

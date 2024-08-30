@@ -79,40 +79,50 @@ type ERService struct {
 }
 
 // ListenAndServe keeps the service alive
-func (erS *ERService) ListenAndServe(stopChan, cfgRldChan chan struct{}) (err error) {
+func (erS *ERService) ListenAndServe(stopChan, cfgRldChan chan struct{}) error {
 	for cfgIdx, rdrCfg := range erS.cfg.ERsCfg().Readers {
 		if rdrCfg.Type == utils.MetaNone { // ignore *default reader
 			continue
 		}
-		if err = erS.addReader(rdrCfg.ID, cfgIdx); err != nil {
+		if err := erS.addReader(rdrCfg.ID, cfgIdx); err != nil {
 			utils.Logger.Crit(
 				fmt.Sprintf("<%s> adding reader <%s> got error: <%s>",
 					utils.ERs, rdrCfg.ID, err.Error()))
-			return
+			return err
 		}
 	}
 	for {
 		select {
-		case err = <-erS.rdrErr: // got application error
+		case err := <-erS.rdrErr: // got application error
 			erS.closeAllRdrs()
-			utils.Logger.Crit(
-				fmt.Sprintf("<%s> running reader got error: <%s>",
-					utils.ERs, err.Error()))
-			return
+			return err
 		case <-stopChan:
 			erS.closeAllRdrs()
-			return
+			return nil
 		case erEv := <-erS.rdrEvents:
-			if err := erS.processEvent(erEv.cgrEvent, erEv.rdrCfg); err != nil {
-				utils.Logger.Warning(
-					fmt.Sprintf("<%s> reading event: <%s> from reader: <%s> got error: <%s>",
-						utils.ERs, utils.ToJSON(erEv.cgrEvent), erEv.rdrCfg.ID, err.Error()))
+			err := erS.processEvent(erEv.cgrEvent, erEv.rdrCfg)
+			if err != nil {
+				utils.Logger.Warning(fmt.Sprintf(
+					"<%s> reading event: <%s> from reader: <%s> got error: <%v>",
+					utils.ERs, utils.ToJSON(erEv.cgrEvent), erEv.rdrCfg.ID, err))
 			}
+			if err = erS.exportEvent(erEv, err != nil); err != nil {
+				utils.Logger.Warning(fmt.Sprintf(
+					"<%s> exporting event: <%s> from reader: <%s> got error: <%v>",
+					utils.ERs, utils.ToJSON(erEv.cgrEvent), erEv.rdrCfg.ID, err))
+			}
+
 		case pEv := <-erS.partialEvents:
-			if err := erS.processPartialEvent(pEv.cgrEvent, pEv.rdrCfg); err != nil {
-				utils.Logger.Warning(
-					fmt.Sprintf("<%s> reading partial event: <%s> from reader: <%s> got error: <%s>",
-						utils.ERs, utils.ToJSON(pEv.cgrEvent), pEv.rdrCfg.ID, err.Error()))
+			err := erS.processPartialEvent(pEv.cgrEvent, pEv.rdrCfg)
+			if err != nil {
+				utils.Logger.Warning(fmt.Sprintf(
+					"<%s> reading partial event: <%s> from reader: <%s> got error: <%v>",
+					utils.ERs, utils.ToJSON(pEv.cgrEvent), pEv.rdrCfg.ID, err))
+			}
+			if err = erS.exportEvent(pEv, err != nil); err != nil {
+				utils.Logger.Warning(fmt.Sprintf(
+					"<%s> exporting partial event: <%s> from reader: <%s> got error: <%v>",
+					utils.ERs, utils.ToJSON(pEv.cgrEvent), pEv.rdrCfg.ID, err))
 			}
 		case <-cfgRldChan: // handle reload
 			cfgIDs := make(map[string]int)
@@ -145,13 +155,13 @@ func (erS *ERService) ListenAndServe(stopChan, cfgRldChan chan struct{}) (err er
 				if erS.cfg.ERsCfg().Readers[rdrIdx].Type == utils.MetaNone { // ignore *default reader
 					continue
 				}
-				if err = erS.addReader(id, rdrIdx); err != nil {
+				if err := erS.addReader(id, rdrIdx); err != nil {
 					utils.Logger.Crit(
 						fmt.Sprintf("<%s> adding reader <%s> got error: <%s>",
 							utils.ERs, id, err.Error()))
 					erS.closeAllRdrs()
 					erS.Unlock()
-					return
+					return err
 				}
 			}
 			erS.Unlock()
@@ -165,7 +175,7 @@ func (erS *ERService) addReader(rdrID string, cfgIdx int) (err error) {
 	var rdr EventReader
 	if rdr, err = NewEventReader(erS.cfg, cfgIdx,
 		erS.rdrEvents, erS.partialEvents, erS.rdrErr,
-		erS.filterS, erS.stopLsn[rdrID], erS.connMgr); err != nil {
+		erS.filterS, erS.stopLsn[rdrID]); err != nil {
 		return
 	}
 	erS.rdrs[rdrID] = rdr
@@ -465,4 +475,28 @@ func (erS *ERService) onEvicted(id string, value any) {
 
 	}
 
+}
+
+// exportEvent exports the given event. If the processing of the event failed,
+// it uses ees_failed_ids; otherwise, it uses ees_success_ids.
+func (erS *ERService) exportEvent(event *erEvent, processingFailed bool) error {
+	var exporterIDs []string
+	if processingFailed {
+		if len(event.rdrCfg.EEsFailedIDs) == 0 {
+			return nil
+		}
+		exporterIDs = event.rdrCfg.EEsFailedIDs
+	} else {
+		if len(event.rdrCfg.EEsSuccessIDs) == 0 {
+			return nil
+		}
+		exporterIDs = event.rdrCfg.EEsSuccessIDs
+	}
+
+	var reply map[string]map[string]any
+	return erS.connMgr.Call(context.TODO(), erS.cfg.ERsCfg().EEsConns, utils.EeSv1ProcessEvent,
+		&utils.CGREventWithEeIDs{
+			EeIDs:    exporterIDs,
+			CGREvent: event.cgrEvent,
+		}, &reply)
 }

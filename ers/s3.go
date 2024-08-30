@@ -31,7 +31,6 @@ import (
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/agents"
 	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/ees"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -39,10 +38,9 @@ import (
 // NewS3ER return a new s3 event reader
 func NewS3ER(cfg *config.CGRConfig, cfgIdx int,
 	rdrEvents, partialEvents chan *erEvent, rdrErr chan error,
-	fltrS *engine.FilterS, rdrExit chan struct{}, connMgr *engine.ConnManager) (er EventReader, err error) {
+	fltrS *engine.FilterS, rdrExit chan struct{}) (er EventReader, err error) {
 
 	rdr := &S3ER{
-		connMgr:       connMgr,
 		cgrCfg:        cfg,
 		cfgIdx:        cfgIdx,
 		fltrS:         fltrS,
@@ -64,10 +62,9 @@ func NewS3ER(cfg *config.CGRConfig, cfgIdx int,
 // S3ER implements EventReader interface for s3 message
 type S3ER struct {
 	// sync.RWMutex
-	cgrCfg  *config.CGRConfig
-	cfgIdx  int // index of config instance within ERsCfg.Readers
-	fltrS   *engine.FilterS
-	connMgr *engine.ConnManager
+	cgrCfg *config.CGRConfig
+	cfgIdx int // index of config instance within ERsCfg.Readers
+	fltrS  *engine.FilterS
 
 	rdrEvents     chan *erEvent // channel to dispatch the events created to
 	partialEvents chan *erEvent // channel to dispatch the partial events created to
@@ -81,8 +78,6 @@ type S3ER struct {
 	awsToken  string
 	bucket    string
 	session   *session.Session
-
-	poster *ees.S3EE
 }
 
 // Config returns the curent configuration
@@ -190,16 +185,6 @@ func (rdr *S3ER) readLoop() (err error) {
 	return
 }
 
-func (rdr *S3ER) createPoster() {
-	processedOpt := getProcessedOptions(rdr.Config().Opts)
-	if processedOpt == nil && len(rdr.Config().ProcessedPath) == 0 {
-		return
-	}
-	eeCfg := config.NewEventExporterCfg(rdr.Config().ID, "", utils.FirstNonEmpty(rdr.Config().ProcessedPath, rdr.Config().SourcePath),
-		"", rdr.cgrCfg.EEsCfg().GetDefaultExporter().Attempts, processedOpt)
-	rdr.poster = ees.NewS3EE(eeCfg, nil)
-}
-
 func (rdr *S3ER) isClosed() bool {
 	select {
 	case <-rdr.rdrExit:
@@ -240,16 +225,6 @@ func (rdr *S3ER) readMsg(scv *s3.S3, key string) (err error) {
 	if _, err = scv.DeleteObject(&s3.DeleteObjectInput{Bucket: &rdr.bucket, Key: &key}); err != nil {
 		rdr.rdrErr <- err
 		return
-	}
-
-	if rdr.poster != nil { // post it
-		if err = ees.ExportWithAttempts(context.Background(), rdr.poster, msg, key,
-			rdr.connMgr, rdr.cgrCfg.GeneralCfg().DefaultTenant); err != nil {
-			utils.Logger.Warning(
-				fmt.Sprintf("<%s> writing message %s error: %s",
-					utils.ERs, key, err.Error()))
-			return
-		}
 	}
 	return
 }

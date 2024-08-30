@@ -26,7 +26,6 @@ import (
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/agents"
 	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/ees"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 	amqp "github.com/rabbitmq/amqp091-go"
@@ -35,9 +34,8 @@ import (
 // NewAMQPER return a new amqp event reader
 func NewAMQPER(cfg *config.CGRConfig, cfgIdx int,
 	rdrEvents, partialEvents chan *erEvent, rdrErr chan error,
-	fltrS *engine.FilterS, rdrExit chan struct{}, connMgr *engine.ConnManager) (er EventReader, err error) {
+	fltrS *engine.FilterS, rdrExit chan struct{}) (er EventReader, err error) {
 	rdr := &AMQPER{
-		connMgr:       connMgr,
 		cgrCfg:        cfg,
 		cfgIdx:        cfgIdx,
 		fltrS:         fltrS,
@@ -54,17 +52,15 @@ func NewAMQPER(cfg *config.CGRConfig, cfgIdx int,
 	}
 	rdr.dialURL = rdr.Config().SourcePath
 	rdr.setOpts(rdr.Config().Opts)
-	rdr.createPoster()
 	return rdr, nil
 }
 
 // AMQPER implements EventReader interface for amqp message
 type AMQPER struct {
 	// sync.RWMutex
-	cgrCfg  *config.CGRConfig
-	cfgIdx  int // index of config instance within ERsCfg.Readers
-	fltrS   *engine.FilterS
-	connMgr *engine.ConnManager
+	cgrCfg *config.CGRConfig
+	cfgIdx int // index of config instance within ERsCfg.Readers
+	fltrS  *engine.FilterS
 
 	dialURL      string
 	queueID      string
@@ -81,8 +77,6 @@ type AMQPER struct {
 
 	conn    *amqp.Connection
 	channel *amqp.Channel
-
-	poster *ees.AMQPee
 }
 
 // Config returns the curent configuration
@@ -185,18 +179,6 @@ func (rdr *AMQPER) readLoop(msgChan <-chan amqp.Delivery) {
 					return
 				}
 
-				// Post the message if poster is available.
-				if rdr.poster != nil {
-					err = ees.ExportWithAttempts(context.Background(), rdr.poster, msg.Body, utils.EmptyString,
-						rdr.connMgr, rdr.cgrCfg.GeneralCfg().DefaultTenant)
-					if err != nil {
-						utils.Logger.Warning(
-							fmt.Sprintf("<%s> writing message %s error: %s",
-								utils.ERs, msg.MessageId, err.Error()))
-
-					}
-				}
-
 				err = msg.Ack(false)
 				if err != nil {
 					utils.Logger.Warning(
@@ -266,9 +248,6 @@ func (rdr *AMQPER) setOpts(opts *config.EventReaderOpts) {
 }
 
 func (rdr *AMQPER) close() (err error) {
-	if rdr.poster != nil {
-		rdr.poster.Close()
-	}
 	if rdr.channel != nil {
 		if err = rdr.channel.Cancel(rdr.tag, true); err != nil {
 			return
@@ -278,14 +257,4 @@ func (rdr *AMQPER) close() (err error) {
 		}
 	}
 	return rdr.conn.Close()
-}
-
-func (rdr *AMQPER) createPoster() {
-	processedOpt := getProcessedOptions(rdr.Config().Opts)
-	if processedOpt == nil && len(rdr.Config().ProcessedPath) == 0 {
-		return
-	}
-	eeCfg := config.NewEventExporterCfg(rdr.Config().ID, "", utils.FirstNonEmpty(rdr.Config().ProcessedPath, rdr.Config().SourcePath),
-		"", rdr.cgrCfg.EEsCfg().GetDefaultExporter().Attempts, processedOpt)
-	rdr.poster = ees.NewAMQPee(eeCfg, nil)
 }

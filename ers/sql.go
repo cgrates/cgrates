@@ -47,7 +47,7 @@ const (
 // NewSQLEventReader return a new sql event reader
 func NewSQLEventReader(cfg *config.CGRConfig, cfgIdx int,
 	rdrEvents, partialEvents chan *erEvent, rdrErr chan error,
-	fltrS *engine.FilterS, rdrExit chan struct{}) (er EventReader, err error) {
+	fltrS *engine.FilterS, rdrExit chan struct{}) (EventReader, error) {
 
 	rdr := &SQLEventReader{
 		cgrCfg:        cfg,
@@ -64,12 +64,10 @@ func NewSQLEventReader(cfg *config.CGRConfig, cfgIdx int,
 			rdr.cap <- struct{}{}
 		}
 	}
-	if err = rdr.setURL(rdr.Config().SourcePath, rdr.Config().ProcessedPath, rdr.Config().Opts); err != nil {
-		return
+	if err := rdr.setURL(rdr.Config().SourcePath, rdr.Config().Opts); err != nil {
+		return nil, err
 	}
-	er = rdr
-
-	return
+	return rdr, nil
 }
 
 // SQLEventReader implements EventReader interface for sql
@@ -82,10 +80,6 @@ type SQLEventReader struct {
 	connString string
 	connType   string
 	tableName  string
-
-	expConnString string
-	expConnType   string
-	expTableName  string
 
 	rdrEvents     chan *erEvent // channel to dispatch the events created to
 	partialEvents chan *erEvent // channel to dispatch the partial events created to
@@ -207,13 +201,6 @@ func (rdr *SQLEventReader) readLoop(db *gorm.DB, sqlDB io.Closer) {
 						fmt.Sprintf("<%s> processing message %s error: %s",
 							utils.ERs, utils.ToJSON(msg), err.Error()))
 				}
-				if rdr.Config().ProcessedPath != utils.EmptyString {
-					if err = rdr.postCDR(columns); err != nil {
-						utils.Logger.Warning(
-							fmt.Sprintf("<%s> posting message %s error: %s",
-								utils.ERs, utils.ToJSON(msg), err.Error()))
-					}
-				}
 				if rdr.Config().ConcurrentReqs != -1 {
 					rdr.cap <- struct{}{}
 				}
@@ -265,11 +252,11 @@ func (rdr *SQLEventReader) processMessage(msg map[string]any) (err error) {
 	return
 }
 
-func (rdr *SQLEventReader) setURL(inURL, outURL string, opts *config.EventReaderOpts) (err error) {
+func (rdr *SQLEventReader) setURL(inURL string, opts *config.EventReaderOpts) error {
 	inURL = strings.TrimPrefix(inURL, utils.Meta)
-	var u *url.URL
-	if u, err = url.Parse(inURL); err != nil {
-		return
+	u, err := url.Parse(inURL)
+	if err != nil {
+		return err
 	}
 	password, _ := u.User.Password()
 	rdr.connType = u.Scheme
@@ -296,97 +283,5 @@ func (rdr *SQLEventReader) setURL(inURL, outURL string, opts *config.EventReader
 	default:
 		return fmt.Errorf("unknown db_type %s", rdr.connType)
 	}
-
-	// outURL
-	processedOpt := getProcessedOptions(opts)
-	if processedOpt == nil {
-		if len(outURL) == 0 {
-			return
-		}
-		processedOpt = new(config.EventExporterOpts)
-	}
-	var outUser, outPassword, outDBname, outSSL, outHost, outPort string
-	if len(outURL) == 0 {
-		rdr.expConnType = rdr.connType
-		outUser = u.User.Username()
-		outPassword = password
-		outHost = u.Hostname()
-		outPort = u.Port()
-	} else {
-		outURL = strings.TrimPrefix(outURL, utils.Meta)
-		var oURL *url.URL
-		if oURL, err = url.Parse(outURL); err != nil {
-			return
-		}
-		rdr.expConnType = oURL.Scheme
-		outPassword, _ = oURL.User.Password()
-		outUser = oURL.User.Username()
-		outHost = oURL.Hostname()
-		outPort = oURL.Port()
-	}
-
-	outDBname = utils.SQLDefaultDBName
-	if processedOpt.SQLDBName != nil {
-		outDBname = *processedOpt.SQLDBName
-	}
-	outSSL = utils.SQLDefaultPgSSLMode
-	if processedOpt.PgSSLMode != nil {
-		outSSL = *processedOpt.PgSSLMode
-	}
-	rdr.expTableName = utils.CDRsTBL
-	if processedOpt.SQLTableName != nil {
-		rdr.expTableName = *processedOpt.SQLTableName
-	}
-
-	switch rdr.expConnType {
-	case utils.MySQL:
-		rdr.expConnString = fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8&loc=Local&parseTime=true&sql_mode='ALLOW_INVALID_DATES'",
-			outUser, outPassword, outHost, outPort, outDBname)
-	case utils.Postgres:
-		rdr.expConnString = fmt.Sprintf("host=%s port=%s dbname=%s user=%s password=%s sslmode=%s",
-			outHost, outPort, outDBname, outUser, outPassword, outSSL)
-	default:
-		return fmt.Errorf("unknown db_type %s", rdr.expConnType)
-	}
-	return
-}
-
-func (rdr *SQLEventReader) postCDR(in []any) (err error) {
-	sqlValues := make([]string, len(in))
-	for i := range in {
-		sqlValues[i] = "?"
-	}
-	sqlStatement := fmt.Sprintf("INSERT INTO %s VALUES (%s); ", rdr.expTableName, strings.Join(sqlValues, ","))
-	var dialect gorm.Dialector
-	switch rdr.expConnType {
-	case utils.MySQL:
-		dialect = mysql.Open(rdr.expConnString)
-	case utils.Postgres:
-		dialect = postgres.Open(rdr.expConnString)
-	default:
-		return fmt.Errorf("db type <%s> not supported", rdr.expConnType)
-	}
-	var db *gorm.DB
-	if db, err = gorm.Open(dialect, &gorm.Config{AllowGlobalUpdate: true}); err != nil {
-		return
-	}
-	var sqlDB *sql.DB
-	if sqlDB, err = db.DB(); err != nil {
-		return
-	}
-	defer sqlDB.Close()
-	// sqlDB.SetMaxOpenConns(10)
-	if err = sqlDB.Ping(); err != nil {
-		return
-	}
-	tx := db.Begin()
-	if err = tx.Exec(sqlStatement, in...).Error; err != nil {
-		tx.Rollback()
-		if strings.Contains(err.Error(), "1062") || strings.Contains(err.Error(), "duplicate key") { // returns 1062/pq when key is duplicated
-			return utils.ErrExists
-		}
-		return
-	}
-	tx.Commit()
-	return
+	return nil
 }
