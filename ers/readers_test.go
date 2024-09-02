@@ -207,22 +207,16 @@ func TestNewAMQPReader(t *testing.T) {
 	cfg.ERsCfg().Readers[0].Type = utils.MetaAMQPjsonMap
 	cfg.ERsCfg().Readers[0].ConcurrentReqs = -1
 	exp := &AMQPER{
-		cgrCfg:    cfg,
-		cfgIdx:    0,
-		fltrS:     fltr,
-		rdrEvents: nil,
-		rdrExit:   nil,
-		rdrErr:    nil,
+		cgrCfg: cfg,
+		fltrS:  fltr,
 	}
-	exp.dialURL = exp.Config().SourcePath
+	exp.createClient(&config.EventReaderOpts{}, nil)
 	exp.Config().ProcessedPath = ""
-	exp.setOpts(&config.EventReaderOpts{})
-	var expected EventReader = exp
 	rcv, err := NewEventReader(cfg, 0, nil, nil, nil, fltr, nil)
 	if err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(expected, rcv) {
-		t.Errorf("Expected %v but received %v", expected, rcv)
+	} else if !reflect.DeepEqual(exp, rcv) {
+		t.Errorf("expected %v, received %v", exp, rcv)
 	}
 }
 
