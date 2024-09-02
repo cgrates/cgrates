@@ -117,6 +117,7 @@ func (dbcfg ConfigDBCfg) AsMapInterface(string) any {
 		utils.RedisReadTimeoutCfg:        dbcfg.Opts.RedisReadTimeout.String(),
 		utils.RedisWriteTimeoutCfg:       dbcfg.Opts.RedisWriteTimeout.String(),
 		utils.MongoQueryTimeoutCfg:       dbcfg.Opts.MongoQueryTimeout.String(),
+		utils.MongoConnSchemeCfg:         dbcfg.Opts.MongoConnScheme,
 		utils.RedisTLSCfg:                dbcfg.Opts.RedisTLS,
 		utils.RedisClientCertificateCfg:  dbcfg.Opts.RedisClientCertificate,
 		utils.RedisClientKeyCfg:          dbcfg.Opts.RedisClientKey,

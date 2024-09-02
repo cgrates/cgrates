@@ -57,11 +57,12 @@ type DataDBOpts struct {
 	RedisConnectTimeout     time.Duration
 	RedisReadTimeout        time.Duration
 	RedisWriteTimeout       time.Duration
-	MongoQueryTimeout       time.Duration
 	RedisTLS                bool
 	RedisClientCertificate  string
 	RedisClientKey          string
 	RedisCACertificate      string
+	MongoQueryTimeout       time.Duration
+	MongoConnScheme         string
 }
 
 // DataDbCfg Database config
@@ -144,11 +145,6 @@ func (dbOpts *DataDBOpts) loadFromJSONCfg(jsnCfg *DBOptsJson) (err error) {
 			return
 		}
 	}
-	if jsnCfg.MongoQueryTimeout != nil {
-		if dbOpts.MongoQueryTimeout, err = utils.ParseDurationWithNanosecs(*jsnCfg.MongoQueryTimeout); err != nil {
-			return
-		}
-	}
 	if jsnCfg.RedisTLS != nil {
 		dbOpts.RedisTLS = *jsnCfg.RedisTLS
 	}
@@ -160,6 +156,14 @@ func (dbOpts *DataDBOpts) loadFromJSONCfg(jsnCfg *DBOptsJson) (err error) {
 	}
 	if jsnCfg.RedisCACertificate != nil {
 		dbOpts.RedisCACertificate = *jsnCfg.RedisCACertificate
+	}
+	if jsnCfg.MongoQueryTimeout != nil {
+		if dbOpts.MongoQueryTimeout, err = utils.ParseDurationWithNanosecs(*jsnCfg.MongoQueryTimeout); err != nil {
+			return
+		}
+	}
+	if jsnCfg.MongoConnScheme != nil {
+		dbOpts.MongoConnScheme = *jsnCfg.MongoConnScheme
 	}
 	return
 }
@@ -254,11 +258,12 @@ func (dbOpts *DataDBOpts) Clone() *DataDBOpts {
 		RedisConnectTimeout:     dbOpts.RedisConnectTimeout,
 		RedisReadTimeout:        dbOpts.RedisReadTimeout,
 		RedisWriteTimeout:       dbOpts.RedisWriteTimeout,
-		MongoQueryTimeout:       dbOpts.MongoQueryTimeout,
 		RedisTLS:                dbOpts.RedisTLS,
 		RedisClientCertificate:  dbOpts.RedisClientCertificate,
 		RedisClientKey:          dbOpts.RedisClientKey,
 		RedisCACertificate:      dbOpts.RedisCACertificate,
+		MongoQueryTimeout:       dbOpts.MongoQueryTimeout,
+		MongoConnScheme:         dbOpts.MongoConnScheme,
 	}
 }
 
@@ -301,11 +306,12 @@ func (dbcfg DataDbCfg) AsMapInterface(string) any {
 		utils.RedisConnectTimeoutCfg:     dbcfg.Opts.RedisConnectTimeout.String(),
 		utils.RedisReadTimeoutCfg:        dbcfg.Opts.RedisReadTimeout.String(),
 		utils.RedisWriteTimeoutCfg:       dbcfg.Opts.RedisWriteTimeout.String(),
-		utils.MongoQueryTimeoutCfg:       dbcfg.Opts.MongoQueryTimeout.String(),
 		utils.RedisTLSCfg:                dbcfg.Opts.RedisTLS,
 		utils.RedisClientCertificateCfg:  dbcfg.Opts.RedisClientCertificate,
 		utils.RedisClientKeyCfg:          dbcfg.Opts.RedisClientKey,
 		utils.RedisCACertificateCfg:      dbcfg.Opts.RedisCACertificate,
+		utils.MongoQueryTimeoutCfg:       dbcfg.Opts.MongoQueryTimeout.String(),
+		utils.MongoConnSchemeCfg:         dbcfg.Opts.MongoConnScheme,
 	}
 	mp := map[string]any{
 		utils.DataDbTypeCfg:          dbcfg.Type,
@@ -481,11 +487,12 @@ type DBOptsJson struct {
 	RedisConnectTimeout     *string           `json:"redisConnectTimeout"`
 	RedisReadTimeout        *string           `json:"redisReadTimeout"`
 	RedisWriteTimeout       *string           `json:"redisWriteTimeout"`
-	MongoQueryTimeout       *string           `json:"mongoQueryTimeout"`
 	RedisTLS                *bool             `json:"redisTLS"`
 	RedisClientCertificate  *string           `json:"redisClientCertificate"`
 	RedisClientKey          *string           `json:"redisClientKey"`
 	RedisCACertificate      *string           `json:"redisCACertificate"`
+	MongoQueryTimeout       *string           `json:"mongoQueryTimeout"`
+	MongoConnScheme         *string           `json:"mongoConnScheme"`
 	SQLMaxOpenConns         *int              `json:"sqlMaxOpenConns"`
 	SQLMaxIdleConns         *int              `json:"sqlMaxIdleConns"`
 	SQLConnMaxLifetime      *string           `json:"sqlConnMaxLifetime"`
@@ -544,9 +551,6 @@ func diffDataDBOptsJsonCfg(d *DBOptsJson, v1, v2 *DataDBOpts) *DBOptsJson {
 	if v1.RedisWriteTimeout != v2.RedisWriteTimeout {
 		d.RedisWriteTimeout = utils.StringPointer(v2.RedisWriteTimeout.String())
 	}
-	if v1.MongoQueryTimeout != v2.MongoQueryTimeout {
-		d.MongoQueryTimeout = utils.StringPointer(v2.MongoQueryTimeout.String())
-	}
 	if v1.RedisTLS != v2.RedisTLS {
 		d.RedisTLS = utils.BoolPointer(v2.RedisTLS)
 	}
@@ -558,6 +562,12 @@ func diffDataDBOptsJsonCfg(d *DBOptsJson, v1, v2 *DataDBOpts) *DBOptsJson {
 	}
 	if v1.RedisCACertificate != v2.RedisCACertificate {
 		d.RedisCACertificate = utils.StringPointer(v2.RedisCACertificate)
+	}
+	if v1.MongoQueryTimeout != v2.MongoQueryTimeout {
+		d.MongoQueryTimeout = utils.StringPointer(v2.MongoQueryTimeout.String())
+	}
+	if v1.MongoConnScheme != v2.MongoConnScheme {
+		d.MongoConnScheme = utils.StringPointer(v2.MongoConnScheme)
 	}
 	return d
 }

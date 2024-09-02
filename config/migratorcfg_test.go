@@ -53,6 +53,8 @@ func TestMigratorCgrCfgloadFromJsonCfg(t *testing.T) {
 			RedisConnectAttempts: 20,
 			RedisCluster:         true,
 			RedisClusterSync:     10 * time.Second,
+			MongoConnScheme:      "mongodb",
+			MongoQueryTimeout:    10 * time.Second,
 		},
 	}
 	cfg := NewDefaultCGRConfig()
@@ -76,9 +78,9 @@ func TestMigratorCgrCfgAsMapInterface(t *testing.T) {
 
         "users_filters":["users","filters","Account"],
         "out_datadb_opts":{	
-		   "redisCluster": true,					
-		   "redisClusterSync": "2s",					
-		   "redisClusterOndownDelay": "1",	
+		   "redisCluster": true,
+		   "redisClusterSync": "2s",
+		   "redisClusterOndownDelay": "1",
 		   "redisConnectTimeout": "5s",
 		   "redisReadTimeout": "5s",
 		   "redisWriteTimeout": "5s",
@@ -110,7 +112,8 @@ func TestMigratorCgrCfgAsMapInterface(t *testing.T) {
 			utils.RedisClientCertificateCfg:  "",
 			utils.RedisClientKeyCfg:          "",
 			utils.RedisCACertificateCfg:      "",
-			utils.MongoQueryTimeoutCfg:       "0s",
+			utils.MongoQueryTimeoutCfg:       "10s",
+			utils.MongoConnSchemeCfg:         "mongodb",
 		},
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
@@ -142,7 +145,6 @@ func TestMigratorCgrCfgAsMapInterface1(t *testing.T) {
 		utils.OutDataDBOptsCfg: map[string]any{
 			utils.RedisMaxConnsCfg:           10,
 			utils.RedisConnectAttemptsCfg:    20,
-			utils.MongoQueryTimeoutCfg:       "0s",
 			utils.RedisSentinelNameCfg:       "out_datadb_redis_sentinel",
 			utils.RedisClusterCfg:            false,
 			utils.RedisClusterSyncCfg:        "5s",
@@ -154,6 +156,8 @@ func TestMigratorCgrCfgAsMapInterface1(t *testing.T) {
 			utils.RedisClientCertificateCfg:  "",
 			utils.RedisClientKeyCfg:          "",
 			utils.RedisCACertificateCfg:      "",
+			utils.MongoQueryTimeoutCfg:       "10s",
+			utils.MongoConnSchemeCfg:         "mongodb",
 		},
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
@@ -192,7 +196,8 @@ func TestMigratorCgrCfgAsMapInterface2(t *testing.T) {
 			utils.RedisWriteTimeoutCfg:       "0s",
 			utils.RedisClientKeyCfg:          "",
 			utils.RedisCACertificateCfg:      "",
-			utils.MongoQueryTimeoutCfg:       "0s",
+			utils.MongoQueryTimeoutCfg:       "10s",
+			utils.MongoConnSchemeCfg:         "mongodb",
 		},
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {

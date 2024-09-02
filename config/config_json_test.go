@@ -291,6 +291,7 @@ func TestDfDataDbJsonCfg(t *testing.T) {
 			RedisTLS:                utils.BoolPointer(false),
 			RedisSentinel:           utils.StringPointer(utils.EmptyString),
 			MongoQueryTimeout:       utils.StringPointer("10s"),
+			MongoConnScheme:         utils.StringPointer("mongodb"),
 			RedisClusterOndownDelay: utils.StringPointer("0"),
 			RedisConnectTimeout:     utils.StringPointer("0"),
 			RedisReadTimeout:        utils.StringPointer("0"),
@@ -1877,6 +1878,8 @@ func TestDfMigratorCfg(t *testing.T) {
 			RedisCluster:            utils.BoolPointer(false),
 			RedisSentinel:           utils.StringPointer(utils.EmptyString),
 			RedisTLS:                utils.BoolPointer(false),
+			MongoQueryTimeout:       utils.StringPointer("10s"),
+			MongoConnScheme:         utils.StringPointer("mongodb"),
 		},
 	}
 	dfCgrJSONCfg, err := NewCgrJsonCfgFromBytes([]byte(CGRATES_CFG_JSON))

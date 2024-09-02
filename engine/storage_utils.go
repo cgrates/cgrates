@@ -49,7 +49,7 @@ func NewDataDBConn(dbType, host, port, name, user,
 			opts.RedisConnectTimeout, opts.RedisReadTimeout, opts.RedisWriteTimeout, opts.RedisTLS,
 			opts.RedisClientCertificate, opts.RedisClientKey, opts.RedisCACertificate)
 	case utils.MetaMongo:
-		d, err = NewMongoStorage(host, port, name, user, pass, marshaler, utils.DataDB, nil, opts.MongoQueryTimeout)
+		d, err = NewMongoStorage(opts.MongoConnScheme, host, port, name, user, pass, marshaler, utils.DataDB, nil, opts.MongoQueryTimeout)
 	case utils.MetaInternal:
 		d = NewInternalDB(nil, nil, itmsCfg)
 	default:
@@ -64,7 +64,7 @@ func NewStorDBConn(dbType, host, port, name, user, pass, marshaler string,
 	opts *config.StorDBOpts, itmsCfg map[string]*config.ItemOpts) (db StorDB, err error) {
 	switch dbType {
 	case utils.MetaMongo:
-		db, err = NewMongoStorage(host, port, name, user, pass, marshaler, utils.MetaStorDB, stringIndexedFields, opts.MongoQueryTimeout)
+		db, err = NewMongoStorage(opts.MongoConnScheme, host, port, name, user, pass, marshaler, utils.MetaStorDB, stringIndexedFields, opts.MongoQueryTimeout)
 	case utils.MetaPostgres:
 		db, err = NewPostgresStorage(host, port, name, user, pass, opts.PgSSLMode,
 			opts.SQLMaxOpenConns, opts.SQLMaxIdleConns, opts.SQLConnMaxLifetime)
@@ -81,15 +81,12 @@ func NewStorDBConn(dbType, host, port, name, user, pass, marshaler string,
 }
 
 // composeMongoURI constructs a MongoDB URI from the given parameters:
-//   - scheme: only "mongodb" for now.
+//   - scheme: "mongodb" or "mongodb+srv"
 //   - host: MongoDB server host (e.g., "localhost").
 //   - port: MongoDB server port, excluded if "0".
 //   - db: Database name, may include additional parameters (e.g., "db?retryWrites=true").
 //   - user: Username for auth, omitted if empty.
 //   - pass: Password for auth, only if username is set.
-//
-// TODO: Decide whether to replace the 'scheme' string parameter with a boolean once support
-// for "mongodb+srv" is added.
 func composeMongoURI(scheme, host, port, db, user, pass string) string {
 	uri := scheme + "://"
 	if user != "" && pass != "" {
