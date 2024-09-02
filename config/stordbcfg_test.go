@@ -47,6 +47,7 @@ func TestStoreDbCfgloadFromJsonCfgCase1(t *testing.T) {
 			SQLConnMaxLifetime: utils.StringPointer("0"),
 			MYSQLDSNParams:     make(map[string]string),
 			MySQLLocation:      utils.StringPointer("UTC"),
+			MongoConnScheme:    utils.StringPointer("mongodb+srv"),
 		},
 	}
 	expected := &StorDbCfg{
@@ -71,6 +72,7 @@ func TestStoreDbCfgloadFromJsonCfgCase1(t *testing.T) {
 			SQLMaxIdleConns:   10,
 			SQLDSNParams:      make(map[string]string),
 			MongoQueryTimeout: 10 * time.Second,
+			MongoConnScheme:   "mongodb+srv",
 			PgSSLMode:         "disable",
 			MySQLLocation:     "UTC",
 		},
@@ -233,6 +235,7 @@ func TestStorDbCfgAsMapInterface(t *testing.T) {
 				"sqlConnMaxLifetime": "0", 	
 				"mysqlDSNParams": {},		
 				"mongoQueryTimeout":"10s",
+				"mongoConnScheme":"mongodb+srv",
 				"PgSSLMode":"disable",		
 				"mysqlLocation": "UTC",			
 			},
@@ -260,6 +263,7 @@ func TestStorDbCfgAsMapInterface(t *testing.T) {
 			utils.SQLConnMaxLifetimeCfg: "0s",
 			utils.MYSQLDSNParams:        make(map[string]string),
 			utils.MongoQueryTimeoutCfg:  "10s",
+			utils.MongoConnSchemeCfg:    "mongodb+srv",
 			utils.PgSSLModeCfg:          "disable",
 			utils.MysqlLocation:         "UTC",
 		},

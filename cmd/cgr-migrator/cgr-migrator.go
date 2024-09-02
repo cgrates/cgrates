@@ -79,12 +79,14 @@ var (
 		"The amount of wait time until timeout for reading operations")
 	dbRedisWriteTimeout = cgrMigratorFlags.Duration(utils.RedisWriteTimeoutCfg, dfltCfg.DataDbCfg().Opts.RedisWriteTimeout,
 		"The amount of wait time until timeout for writing operations")
-	dbQueryTimeout = cgrMigratorFlags.Duration(utils.MongoQueryTimeoutCfg, dfltCfg.DataDbCfg().Opts.MongoQueryTimeout,
-		"The timeout for queries")
 	dbRedisTls               = cgrMigratorFlags.Bool(utils.RedisTLSCfg, false, "Enable TLS when connecting to Redis")
 	dbRedisClientCertificate = cgrMigratorFlags.String(utils.RedisClientCertificateCfg, utils.EmptyString, "Path to the client certificate")
 	dbRedisClientKey         = cgrMigratorFlags.String(utils.RedisClientKeyCfg, utils.EmptyString, "Path to the client key")
 	dbRedisCACertificate     = cgrMigratorFlags.String(utils.RedisCACertificateCfg, utils.EmptyString, "Path to the CA certificate")
+	dbQueryTimeout           = cgrMigratorFlags.Duration(utils.MongoQueryTimeoutCfg, dfltCfg.DataDbCfg().Opts.MongoQueryTimeout,
+		"The timeout for queries")
+	dbMongoConnScheme = cgrMigratorFlags.String(utils.MongoConnSchemeCfg, dfltCfg.DataDbCfg().Opts.MongoConnScheme,
+		"Scheme for MongoDB connection <mongodb|mongodb+srv>")
 
 	outDataDBType = cgrMigratorFlags.String(utils.OutDataDBTypeCfg, utils.MetaDataDB,
 		"output DataDB type <*redis|*mongo>")
@@ -192,10 +194,6 @@ func main() {
 	if *dbRedisWriteTimeout != dfltCfg.DataDbCfg().Opts.RedisWriteTimeout {
 		mgrCfg.DataDbCfg().Opts.RedisWriteTimeout = *dbRedisWriteTimeout
 	}
-	if *dbQueryTimeout != dfltCfg.DataDbCfg().Opts.MongoQueryTimeout {
-		mgrCfg.DataDbCfg().Opts.MongoQueryTimeout = *dbQueryTimeout
-	}
-
 	if *dbRedisTls != dfltCfg.DataDbCfg().Opts.RedisTLS {
 		mgrCfg.DataDbCfg().Opts.RedisTLS = *dbRedisTls
 	}
@@ -207,6 +205,12 @@ func main() {
 	}
 	if *dbRedisCACertificate != dfltCfg.DataDbCfg().Opts.RedisCACertificate {
 		mgrCfg.DataDbCfg().Opts.RedisCACertificate = *dbRedisCACertificate
+	}
+	if *dbQueryTimeout != dfltCfg.DataDbCfg().Opts.MongoQueryTimeout {
+		mgrCfg.DataDbCfg().Opts.MongoQueryTimeout = *dbQueryTimeout
+	}
+	if *dbMongoConnScheme != dfltCfg.DataDbCfg().Opts.MongoConnScheme {
+		mgrCfg.DataDbCfg().Opts.MongoConnScheme = *dbMongoConnScheme
 	}
 
 	// outDataDB

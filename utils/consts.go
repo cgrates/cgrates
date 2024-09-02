@@ -1869,6 +1869,7 @@ const (
 	ExistsIndexedFieldsCfg    = "exists_indexed_fields"
 	NotExistsIndexedFieldsCfg = "notexists_indexed_fields"
 	MongoQueryTimeoutCfg      = "mongoQueryTimeout"
+	MongoConnSchemeCfg        = "mongoConnScheme"
 	PgSSLModeCfg              = "pgSSLMode"
 	ItemsCfg                  = "items"
 	OptsCfg                   = "opts"

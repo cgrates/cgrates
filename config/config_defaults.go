@@ -111,42 +111,42 @@ const CGRATES_CFG_JSON = `
 },							// rpc connections definitions
 
 
-"data_db": {								// database used to store runtime data (eg: accounts)
-	"db_type": "*redis",					// data_db type: <*redis|*mongo>
-	"db_host": "127.0.0.1",					// data_db host address
-	"db_port": 6379, 						// data_db port to reach the database
-	"db_name": "10", 						// data_db database name to connect to
-	"db_user": "cgrates", 					// username to use when connecting to data_db
-	"db_password": "", 						// password to use when connecting to data_db
-	"remote_conns":[],						// the conns that are queried when the items are not found in local DB 
-	"remote_conn_id": "",					// the ID to be sent to remote_conns to identify the connection
-	"replication_conns":[],					// the conns the items are replicated
-	"replication_filtered": false, 			// if this is enabled the replication will be made only to the conns that received a get
-	"replication_cache": "", 				// the caching action that is executed on the replication_conns when the items are replicated 
+"data_db": {				// database used to store runtime data (eg: accounts)
+	"db_type": "*redis",		// data_db type: <*redis|*mongo>
+	"db_host": "127.0.0.1",		// data_db host address
+	"db_port": 6379, 		// data_db port to reach the database
+	"db_name": "10", 		// data_db database name to connect to
+	"db_user": "cgrates", 		// username to use when connecting to data_db
+	"db_password": "", 		// password to use when connecting to data_db
+	"remote_conns":[],		// the conns that are queried when the items are not found in local DB
+	"remote_conn_id": "",		// the ID to be sent to remote_conns to identify the connection
+	"replication_conns":[],		// the conns the items are replicated
+	"replication_filtered": false, 	// if this is enabled the replication will be made only to the conns that received a get
+	"replication_cache": "", 	// the caching action that is executed on the replication_conns when the items are replicated
 	"items":{
 		"*accounts": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
 		"*actions": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
-		"*resource_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false}, 
-		"*resources": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false}, 
-		"*statqueue_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false}, 
-		"*statqueues": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false}, 
-		"*threshold_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false}, 
-		"*thresholds": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false}, 
-		"*filters": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false}, 
-		"*route_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false}, 
-		"*attribute_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false}, 
-		"*charger_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false}, 
-		"*dispatcher_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false}, 
-		"*dispatcher_hosts": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false}, 
+		"*resource_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
+		"*resources": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
+		"*statqueue_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
+		"*statqueues": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
+		"*threshold_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
+		"*thresholds": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
+		"*filters": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
+		"*route_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
+		"*attribute_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
+		"*charger_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
+		"*dispatcher_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
+		"*dispatcher_hosts": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
 		"*rate_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
 		"*action_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
-		"*load_ids": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false}, 
-		"*versions": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false}, 
+		"*load_ids": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
+		"*versions": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
 		"*resource_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false},
 		"*stat_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false},
 		"*threshold_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false},
-		"*ranking_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false}, 
-		"*trend_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false}, 
+		"*ranking_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
+		"*trend_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
 		"*route_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false},
 		"*attribute_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false},
 		"*charger_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false},
@@ -159,53 +159,55 @@ const CGRATES_CFG_JSON = `
 
 	},
 	"opts":{
-		"redisMaxConns": 10,					// the connection pool size
-		"redisConnectAttempts": 20,				// the maximum amount of dial attempts
-		"redisSentinel": "",					// the name of sentinel when used
-		"redisCluster": false,					// if enabled the datadb will try to connect to the redis cluster
-		"redisClusterSync": "5s",				// the sync interval for the redis cluster
-		"redisClusterOndownDelay": "0",			// the delay before executing the commands if the redis cluster is in the CLUSTERDOWN state
-		"redisConnectTimeout": "0",				// the amount of wait time until timeout for a connection attempt
-		"redisReadTimeout": "0",				// the amount of wait time until timeout for reading operations
-		"redisWriteTimeout": "0",   			// the amount of wait time until timeout for writing operations
-		"mongoQueryTimeout": "10s",				// timeout for query when mongo is used
-		"redisTLS": false,						// if true it will use a tls connection and use the redisClientCertificate, redisClientKey and redisCACertificate for tls connection
-		"redisClientCertificate": "",			// path to client certificate
-		"redisClientKey": "",					// path to client key
-		"redisCACertificate": "",				// path to CA certificate (populate for self-signed certificate otherwise let it empty)
+		"redisMaxConns": 10,		// the connection pool size
+		"redisConnectAttempts": 20,	// the maximum amount of dial attempts
+		"redisSentinel": "",		// the name of sentinel when used
+		"redisCluster": false,		// if enabled the datadb will try to connect to the redis cluster
+		"redisClusterSync": "5s",	// the sync interval for the redis cluster
+		"redisClusterOndownDelay": "0",	// the delay before executing the commands if the redis cluster is in the CLUSTERDOWN state
+		"redisConnectTimeout": "0",	// the amount of wait time until timeout for a connection attempt
+		"redisReadTimeout": "0",	// the amount of wait time until timeout for reading operations
+		"redisWriteTimeout": "0",   	// the amount of wait time until timeout for writing operations
+		"redisTLS": false,		// if true it will use a tls connection and use the redisClientCertificate, redisClientKey and redisCACertificate for tls connection
+		"redisClientCertificate": "",	// path to client certificate
+		"redisClientKey": "",		// path to client key
+		"redisCACertificate": "",	// path to CA certificate (populate for self-signed certificate otherwise let it empty)
+		"mongoQueryTimeout": "10s",	// timeout for query when mongo is used
+		"mongoConnScheme": "mongodb"	// scheme for MongoDB connection <mongodb|mongodb+srv>
 	}
 },
 
-"stor_db": {								// database used to store offline tariff plans and CDRs	
-	"db_type": "*mysql",					// stor database type to use: <*mongo|*mysql|*postgres|*internal>	
-	"db_host": "127.0.0.1",					// the host to connect to	
-	"db_port": 3306,						// the port to reach the stor_db	
-	"db_name": "cgrates",					// stor database name	
-	"db_user": "cgrates",					// username to use when connecting to stor_db	
-	"db_password": "CGRateS.org",			// password to use when connecting to stor_db	
-	"string_indexed_fields": [],			// indexes on cdrs table to speed up queries, used in case of *mongo and *internal	
-	"prefix_indexed_fields": [],			// prefix indexes on cdrs table to speed up queries, used in case of *internal	
-	"opts": {	
-		"sqlMaxOpenConns": 100,				// maximum database connections opened, not applying for mongo	
-		"sqlMaxIdleConns": 10,				// maximum database connections idle, not applying for mongo	
-		"sqlConnMaxLifetime": "0", 			// maximum amount of time a connection may be reused (0 for unlimited), not applying for mongo	
-		"mysqlDSNParams":{},                // DSN params for opening db  	
-		"mongoQueryTimeout":"10s",			// timeout for query when mongo is used	
-		"pgSSLMode":"disable",				// ssl mode in case of *postgres	
-		"mysqlLocation": "Local",			// the location the time from mysql is retrived	
-	},	
-	"items":{	
-		"*cdrs": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},	
-	},	
+"stor_db": {					// database used to store offline tariff plans and CDRs
+	"db_type": "*mysql",			// stor database type to use: <*mongo|*mysql|*postgres|*internal>
+	"db_host": "127.0.0.1",			// the host to connect to
+	"db_port": 3306,			// the port to reach the stor_db
+	"db_name": "cgrates",			// stor database name
+	"db_user": "cgrates",			// username to use when connecting to stor_db
+	"db_password": "CGRateS.org",		// password to use when connecting to stor_db
+	"string_indexed_fields": [],		// indexes on cdrs table to speed up queries, used in case of *mongo and *internal
+	"prefix_indexed_fields": [],		// prefix indexes on cdrs table to speed up queries, used in case of *internal
+	"opts": {
+		"sqlMaxOpenConns": 100,		// maximum database connections opened, not applying for mongo
+		"sqlMaxIdleConns": 10,		// maximum database connections idle, not applying for mongo
+		"sqlConnMaxLifetime": "0", 	// maximum amount of time a connection may be reused (0 for unlimited), not applying for mongo
+		"mysqlDSNParams":{},		// DSN params for opening db
+		"pgSSLMode":"disable",		// ssl mode in case of *postgres
+		"mysqlLocation": "Local",	// the location the time from mysql is retrived
+		"mongoQueryTimeout":"10s",	// timeout for query when mongo is used
+		"mongoConnScheme": "mongodb"	// scheme for MongoDB connection <mongodb|mongodb+srv>
+	},
+	"items":{
+		"*cdrs": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
+	}
 },
 
 "listen": {
-	"rpc_json": "127.0.0.1:2012",			// RPC JSON listening address
-	"rpc_gob": "127.0.0.1:2013",			// RPC GOB listening address
-	"http": "127.0.0.1:2080",				// HTTP listening address
-	"rpc_json_tls" : "127.0.0.1:2022",		// RPC JSON TLS listening address
-	"rpc_gob_tls": "127.0.0.1:2023",		// RPC GOB TLS listening address
-	"http_tls": "127.0.0.1:2280",			// HTTP TLS listening address
+	"rpc_json": "127.0.0.1:2012",		// RPC JSON listening address
+	"rpc_gob": "127.0.0.1:2013",		// RPC GOB listening address
+	"http": "127.0.0.1:2080",		// HTTP listening address
+	"rpc_json_tls" : "127.0.0.1:2022",	// RPC JSON TLS listening address
+	"rpc_gob_tls": "127.0.0.1:2023",	// RPC GOB TLS listening address
+	"http_tls": "127.0.0.1:2280",		// HTTP TLS listening address
 },
 
 
@@ -1550,22 +1552,24 @@ const CGRATES_CFG_JSON = `
 	"out_datadb_name": "10",
 	"out_datadb_user": "cgrates",
 	"out_datadb_password": "",
-	"out_datadb_encoding" : "msgpack",		
+	"out_datadb_encoding" : "msgpack",
 	"users_filters":[],
 	"out_datadb_opts":{
-		"redisMaxConns": 10,				// the connection pool size
-		"redisConnectAttempts": 20,			// the maximum amount of dial attempts
-		"redisSentinel": "",					
-		"redisCluster": false,					
-		"redisClusterSync": "5s",					
+		"redisMaxConns": 10,		// the connection pool size
+		"redisConnectAttempts": 20,	// the maximum amount of dial attempts
+		"redisSentinel": "",
+		"redisCluster": false,
+		"redisClusterSync": "5s",
 		"redisClusterOndownDelay": "0",
-		"redisConnectTimeout": "0",			// the amount of wait time until timeout for a connection attempt
-		"redisReadTimeout": "0",			// the amount of wait time until timeout for reading operations
-		"redisWriteTimeout": "0",   		// the amount of wait time until timeout for writing operations
-		"redisTLS": false,					// enable TLS when connecting to Redis and use the redisClientCertificate, redisClientKey and redisCACertificate for TLS connection
-		"redisClientCertificate":"",		// path to client certificate
-		"redisClientKey":"",				// path to client key
-		"redisCACertificate":"",			// path to CA certificate (populate for self-signed certificate otherwise let it empty)
+		"redisConnectTimeout": "0",	// the amount of wait time until timeout for a connection attempt
+		"redisReadTimeout": "0",	// the amount of wait time until timeout for reading operations
+		"redisWriteTimeout": "0",   	// the amount of wait time until timeout for writing operations
+		"redisTLS": false,		// enable TLS when connecting to Redis and use the redisClientCertificate, redisClientKey and redisCACertificate for TLS connection
+		"redisClientCertificate":"",	// path to client certificate
+		"redisClientKey":"",		// path to client key
+		"redisCACertificate":"",	// path to CA certificate (populate for self-signed certificate otherwise let it empty)
+		"mongoQueryTimeout":"10s",	// timeout for query when mongo is used
+		"mongoConnScheme": "mongodb"	// scheme for MongoDB connection <mongodb|mongodb+srv>
 	},
 },
 
@@ -1912,28 +1916,29 @@ const CGRATES_CFG_JSON = `
 },
 
 
-"config_db": {								// database used to store runtime data (eg: accounts)
-	"db_type": "*internal",					// data_db type: <*redis|*mongo>
-	"db_host": "",							// data_db host address
-	"db_port": 0,	 						// data_db port to reach the database
-	"db_name": "",	 						// data_db database name to connect to
-	"db_user": "",		 					// username to use when connecting to data_db
-	"db_password": "", 						// password to use when connecting to data_db
+"config_db": {					// database used to store runtime data (eg: accounts)
+	"db_type": "*internal",			// data_db type: <*redis|*mongo>
+	"db_host": "",				// data_db host address
+	"db_port": 0,	 			// data_db port to reach the database
+	"db_name": "",	 			// data_db database name to connect to
+	"db_user": "",		 		// username to use when connecting to data_db
+	"db_password": "", 			// password to use when connecting to data_db
 	"opts":{
-		"redisMaxConns": 10,					// the connection pool size
-		"redisConnectAttempts": 20,				// the maximum amount of dial attempts
-		"redisSentinel": "",					// the name of sentinel when used
-		"redisCluster": false,					// if enabled the datadb will try to connect to the redis cluster
-		"redisClusterSync": "5s",				// the sync interval for the redis cluster
-		"redisClusterOndownDelay": "0",			// the delay before executing the commands if the redis cluster is in the CLUSTERDOWN state
-		"redisConnectTimeout": "0",				// the amount of wait time until timeout for a connection attempt
-		"redisReadTimeout": "0",				// the amount of wait time until timeout for reading operations
-		"redisWriteTimeout": "0",   			// the amount of wait time until timeout for writing operations
-		"mongoQueryTimeout":"10s",				// timeout for query when mongo is used
-		"redisTLS": false,						// if true it will use a tls connection and use the redisClientCertificate, redisClientKey and redisCACertificate for tls connection
-		"redisClientCertificate":"",			// path to client certificate
-		"redisClientKey":"",					// path to client key
-		"redisCACertificate":"",				// path to CA certificate (populate for self-signed certificate otherwise let it empty)
+		"redisMaxConns": 10,		// the connection pool size
+		"redisConnectAttempts": 20,	// the maximum amount of dial attempts
+		"redisSentinel": "",		// the name of sentinel when used
+		"redisCluster": false,		// if enabled the datadb will try to connect to the redis cluster
+		"redisClusterSync": "5s",	// the sync interval for the redis cluster
+		"redisClusterOndownDelay": "0",	// the delay before executing the commands if the redis cluster is in the CLUSTERDOWN state
+		"redisConnectTimeout": "0",	// the amount of wait time until timeout for a connection attempt
+		"redisReadTimeout": "0",	// the amount of wait time until timeout for reading operations
+		"redisWriteTimeout": "0",   	// the amount of wait time until timeout for writing operations
+		"redisTLS": false,		// if true it will use a tls connection and use the redisClientCertificate, redisClientKey and redisCACertificate for tls connection
+		"redisClientCertificate":"",	// path to client certificate
+		"redisClientKey":"",		// path to client key
+		"redisCACertificate":"",	// path to CA certificate (populate for self-signed certificate otherwise let it empty)
+		"mongoQueryTimeout":"10s",	// timeout for query when mongo is used
+		"mongoConnScheme": "mongodb"	// scheme for MongoDB connection <mongodb|mongodb+srv>
 	}
 },
 

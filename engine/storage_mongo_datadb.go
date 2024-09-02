@@ -150,7 +150,7 @@ func decimalDecoder(dc bsoncodec.DecodeContext, vr bsonrw.ValueReader, val refle
 
 // NewMongoStorage initializes a new MongoDB storage instance with provided connection parameters and settings.
 // Returns an error if the setup fails.
-func NewMongoStorage(host, port, db, user, pass, mrshlerStr string, storageType string,
+func NewMongoStorage(scheme, host, port, db, user, pass, mrshlerStr string, storageType string,
 	cdrsIndexes []string, ttl time.Duration) (*MongoStorage, error) {
 	mongoStorage := &MongoStorage{
 		ctxTTL:      ttl,
@@ -158,7 +158,7 @@ func NewMongoStorage(host, port, db, user, pass, mrshlerStr string, storageType 
 		storageType: storageType,
 		counter:     utils.NewCounter(time.Now().UnixNano(), 0),
 	}
-	uri := composeMongoURI("mongodb", host, port, db, user, pass)
+	uri := composeMongoURI(scheme, host, port, db, user, pass)
 	reg := bson.NewRegistry()
 	decimalType := reflect.TypeOf(utils.Decimal{})
 	reg.RegisterTypeEncoder(decimalType, bsoncodec.ValueEncoderFunc(decimalEncoder))

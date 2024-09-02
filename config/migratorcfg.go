@@ -100,11 +100,12 @@ func (mg MigratorCgrCfg) AsMapInterface(string) any {
 		utils.RedisConnectTimeoutCfg:     mg.OutDataDBOpts.RedisConnectTimeout.String(),
 		utils.RedisReadTimeoutCfg:        mg.OutDataDBOpts.RedisReadTimeout.String(),
 		utils.RedisWriteTimeoutCfg:       mg.OutDataDBOpts.RedisWriteTimeout.String(),
-		utils.MongoQueryTimeoutCfg:       mg.OutDataDBOpts.MongoQueryTimeout.String(),
 		utils.RedisTLSCfg:                mg.OutDataDBOpts.RedisTLS,
 		utils.RedisClientCertificateCfg:  mg.OutDataDBOpts.RedisClientCertificate,
 		utils.RedisClientKeyCfg:          mg.OutDataDBOpts.RedisClientKey,
 		utils.RedisCACertificateCfg:      mg.OutDataDBOpts.RedisCACertificate,
+		utils.MongoQueryTimeoutCfg:       mg.OutDataDBOpts.MongoQueryTimeout.String(),
+		utils.MongoConnSchemeCfg:         mg.OutDataDBOpts.MongoConnScheme,
 	}
 	return map[string]any{
 		utils.OutDataDBTypeCfg:     mg.OutDataDBType,

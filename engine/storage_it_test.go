@@ -154,7 +154,7 @@ func TestSetGetRemoveConfigSectionsDrvRedis(t *testing.T) {
 
 func TestSetGetRemoveConfigSectionsDrvMongo(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	db, err := NewMongoStorage(cfg.DataDbCfg().Host, "27017", "10", cfg.DataDbCfg().User,
+	db, err := NewMongoStorage(cfg.DataDbCfg().Opts.MongoConnScheme, cfg.DataDbCfg().Host, "27017", "10", cfg.DataDbCfg().User,
 		cfg.DataDbCfg().Password, cfg.GeneralCfg().DBDataEncoding, utils.DataDB, nil, 10*time.Second)
 	if err != nil {
 		t.Error(err)
