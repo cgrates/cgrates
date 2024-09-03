@@ -712,12 +712,15 @@ func GetCGRVersion() (vers string, err error) {
 	return fmt.Sprintf("%s@%s-%s-%s", CGRateS, Version, commitDate.UTC().Format("20060102150405"), commitHash[:12]), nil
 }
 
-func NewTenantID(tntID string) *TenantID {
-	if !strings.Contains(tntID, ConcatenatedKeySep) { // no :, ID without Tenant
-		return &TenantID{ID: tntID}
+// NewTenantID parses a string in the format of "tenant:ID" and returns
+// a TenantID struct. If the separator is not found, the entire string
+// is treated as the ID.
+func NewTenantID(input string) *TenantID {
+	tenant, id, sepFound := strings.Cut(input, ConcatenatedKeySep)
+	if !sepFound {
+		return &TenantID{ID: input}
 	}
-	tIDSplt := strings.SplitN(tntID, ConcatenatedKeySep, 2)
-	return &TenantID{Tenant: tIDSplt[0], ID: tIDSplt[1]}
+	return &TenantID{Tenant: tenant, ID: id}
 }
 
 type TenantID struct {
