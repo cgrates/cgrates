@@ -22,6 +22,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package apis
 
 import (
+	"fmt"
 	"path"
 	"reflect"
 	"slices"
@@ -2196,4 +2197,186 @@ func testAttributesKillEngine(t *testing.T) {
 	if err := engine.KillEngine(100); err != nil {
 		t.Error(err)
 	}
+}
+
+func TestAttributesArith(t *testing.T) {
+	switch *utils.DBType {
+	case utils.MetaInternal:
+	case utils.MetaMySQL, utils.MetaMongo, utils.MetaPostgres:
+		t.SkipNow()
+	default:
+		t.Fatal("unsupported dbtype value")
+	}
+
+	tpInDir := t.TempDir()
+
+	content := fmt.Sprintf(`{
+
+"general": {
+	"log_level": 7
+},
+"data_db": {
+	"db_type": "*internal"
+},
+"stor_db": {
+	"db_type": "*internal"
+},
+"attributes": {
+	"enabled": true
+},
+"admins": {
+	"enabled": true
+},
+"loaders": [
+	{
+		"id": "*default",
+		"enabled": true,
+		"run_delay": "-1",
+		"tp_in_dir": "%s",
+		"tp_out_dir": "",
+		"action": "*store",
+		"opts": {
+			"*stopOnError": true
+		}
+	}
+]
+}`, tpInDir)
+
+	tpFiles := map[string]string{
+		utils.AttributesCsv: `#Tenant,ID,FilterIDs,Weights,Blockers,AttributeFilterIDs,AttributeBlockers,Path,Type,Value
+cgrates.org,ATTR_ARITH,*string:~*req.AttrSource:csv,,,,,,,
+cgrates.org,ATTR_ARITH,,,,,,*req.3*4,*multiply,3;4
+cgrates.org,ATTR_ARITH,,,,,,*req.12/4,*divide,12;4
+cgrates.org,ATTR_ARITH,,,,,,*req.3+4,*sum,3;4
+cgrates.org,ATTR_ARITH,,,,,,*req.3-4,*difference,3;4
+cgrates.org,ATTR_ARITH,,,,,,*req.MultiplyBetweenVariables,*multiply,~*req.Elem1;~*req.Elem2`,
+	}
+
+	testEnv := engine.TestEnvironment{
+		ConfigJSON: content,
+		TpPath:     tpInDir,
+		TpFiles:    tpFiles,
+		Encoding:   *utils.Encoding,
+	}
+	client, _ := testEnv.Setup(t, context.Background(), 0)
+
+	t.Run("SetAttributesThroughAPI", func(t *testing.T) {
+		var reply string
+		attrPrf := &engine.APIAttributeProfileWithAPIOpts{
+			APIAttributeProfile: &engine.APIAttributeProfile{
+				Tenant:    "cgrates.org",
+				ID:        "ATTR_API",
+				FilterIDs: []string{"*string:~*req.AttrSource:api"},
+				Attributes: []*engine.ExternalAttribute{
+					{
+						Path:  "*req.3*4",
+						Type:  utils.MetaMultiply,
+						Value: "3;4",
+					},
+					{
+						Path:  "*req.12/4",
+						Type:  utils.MetaDivide,
+						Value: "12;4",
+					},
+					{
+						Path:  "*req.3+4",
+						Type:  utils.MetaSum,
+						Value: "3;4",
+					},
+					{
+						Path:  "*req.3-4",
+						Type:  utils.MetaDifference,
+						Value: "3;4",
+					},
+					{
+						Path:  "*req.MultiplyBetweenVariables",
+						Type:  utils.MetaMultiply,
+						Value: "~*req.Elem1;~*req.Elem2",
+					},
+				},
+			},
+		}
+		if err := client.Call(context.Background(), utils.AdminSv1SetAttributeProfile, attrPrf, &reply); err != nil {
+			t.Error(err)
+		}
+	})
+
+	t.Run("CheckFieldsAlteredByAttributeS", func(t *testing.T) {
+		ev := &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "event_test",
+			Event: map[string]any{
+				"AttrSource": "csv",
+				"Elem1":      "3",
+				"Elem2":      "4",
+			},
+		}
+		expected := engine.AttrSProcessEventReply{
+			AlteredFields: []*engine.FieldsAltered{
+				{
+					MatchedProfileID: "cgrates.org:ATTR_ARITH",
+					Fields:           []string{"*req.12/4", "*req.3*4", "*req.3+4", "*req.3-4", "*req.MultiplyBetweenVariables"},
+				},
+			},
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "event_test",
+				Event: map[string]any{
+					"AttrSource":               "csv",
+					"Elem1":                    "3",
+					"Elem2":                    "4",
+					"12/4":                     "3",
+					"3*4":                      "12",
+					"3+4":                      "7",
+					"3-4":                      "-1",
+					"MultiplyBetweenVariables": "12",
+				},
+				APIOpts: make(map[string]any),
+			},
+		}
+
+		var reply engine.AttrSProcessEventReply
+		if err := client.Call(context.Background(), utils.AttributeSv1ProcessEvent,
+			ev, &reply); err != nil {
+			t.Error(err)
+		} else {
+			sort.Strings(expected.AlteredFields[0].Fields)
+			sort.Strings(reply.AlteredFields[0].Fields)
+			if !reflect.DeepEqual(expected, reply) {
+				t.Errorf("\nexpected: %s, \nreceived: %s",
+					utils.ToJSON(expected), utils.ToJSON(reply))
+			}
+		}
+
+		ev.Event["AttrSource"] = "api"
+		expected.AlteredFields = []*engine.FieldsAltered{
+			{
+				MatchedProfileID: "cgrates.org:ATTR_API",
+				Fields:           []string{"*req.12/4", "*req.3*4", "*req.3+4", "*req.3-4", "*req.MultiplyBetweenVariables"},
+			},
+		}
+		expected.CGREvent.Event = map[string]any{
+			"AttrSource":               "api",
+			"Elem1":                    "3",
+			"Elem2":                    "4",
+			"12/4":                     "3",
+			"3*4":                      "12",
+			"3+4":                      "7",
+			"3-4":                      "-1",
+			"MultiplyBetweenVariables": "12",
+		}
+
+		reply = engine.AttrSProcessEventReply{}
+		if err := client.Call(context.Background(), utils.AttributeSv1ProcessEvent,
+			ev, &reply); err != nil {
+			t.Error(err)
+		} else {
+			sort.Strings(expected.AlteredFields[0].Fields)
+			sort.Strings(reply.AlteredFields[0].Fields)
+			if !reflect.DeepEqual(expected, reply) {
+				t.Errorf("\nexpected: %s, \nreceived: %s",
+					utils.ToJSON(expected), utils.ToJSON(reply))
+			}
+		}
+	})
 }
