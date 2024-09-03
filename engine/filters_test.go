@@ -2770,10 +2770,10 @@ func TestFilterStats(t *testing.T) {
 		calls: map[string]func(ctx *context.Context, args any, reply any) error{
 			utils.StatSv1GetQueueFloatMetrics: func(ctx *context.Context, args, reply any) error {
 				*reply.(*map[string]float64) = map[string]float64{
-					"*sum#~*req.Usage": 45,
-					utils.MetaTCD:      1,
-					utils.MetaAverage + utils.HashtagSep + utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Usage: 15,
-					utils.MetaACC: 22.2,
+					"*sum#~*req.CostDetails.Charges[0].Increments[0].Accounting.Balance.Value": 45,
+					utils.MetaTCD:          float64(20 * time.Second),
+					"*average#~*req.Usage": float64(5 * time.Second),
+					utils.MetaACC:          22.2,
 				}
 				return nil
 			},
@@ -2783,40 +2783,47 @@ func TestFilterStats(t *testing.T) {
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats): clientConn,
 	})
 	testCases := []struct {
-		name     string
-		infilter string
-		experr   error
-		expPass  bool
+		name       string
+		input      string
+		shouldPass bool
 	}{
-		{"ComposedStatMetric", "*gte:~*stats.SQ_1002.*sum#~*req.Usage:20", nil, false},
-		{"TCDStatMetric", "*lte:~*stats.SQ_1.*tcd:5", nil, true},
-		{"AverageStatMetric", "*gt:~*stats.SQ_2.*average#~req.Usage:12", nil, false},
-		{"AverageCallCostStatMetric", "*eq:~*stats.SQ_3.*acc:22.2", nil, true},
+		{
+			name:       "ComposedStatMetric",
+			input:      "*gte:~*stats.SQ_1002.*sum#~*req.CostDetails.Charges[0].Increments[0].Accounting.Balance.Value:20",
+			shouldPass: true,
+		},
+		{
+			name:       "TCDStatMetric",
+			input:      "*lte:~*stats.SQ_1.*tcd:20s",
+			shouldPass: true,
+		},
+		{
+			name:       "AverageStatMetric",
+			input:      "*gt:~*stats.SQ_2.*average#~*req.Usage:4s",
+			shouldPass: true,
+		},
+		{
+			name:       "AverageCallCostStatMetric",
+			input:      "*eq:~*stats.SQ_3.*acc:22.2",
+			shouldPass: true,
+		},
 	}
 	initDP := utils.MapStorage{}
 	dp := newDynamicDP(nil, []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats)}, nil, "cgrates.org", initDP)
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			fl, err := NewFilterFromInline("cgrates.org", tc.infilter)
+			fl, err := NewFilterFromInline("cgrates.org", tc.input)
 			if err != nil {
 				t.Fatal(err)
 			}
-			pass, err := fl.Rules[0].Pass(dp)
-			if tc.experr != nil {
-				if err == nil {
-					t.Fatalf("Expected to receive error ,got nil")
-				}
-				if err != tc.experr {
-					t.Errorf("Expected error %q,got %q instead\n", tc.experr, err)
-				}
-				return
-			}
+			rule := fl.Rules[0]
+			pass, err := rule.Pass(dp)
 			if err != nil {
-				t.Errorf("Expected no error,got %q instead\n", err)
+				t.Fatalf("rule.Pass() unexpected error: %v", err)
 			}
-			if pass != tc.expPass {
-				t.Error("Exected filter rule to pass")
+			if pass != tc.shouldPass {
+				t.Errorf("expected rule.Pass() to return %v", tc.shouldPass)
 			}
 		})
 	}
