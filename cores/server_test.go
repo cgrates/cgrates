@@ -128,3 +128,19 @@ func TestHandleRequestCORSHeaders(t *testing.T) {
 		t.Errorf("Expected <%v>; got <%v>", expectedHeaders, got)
 	}
 }
+
+func TestRpcRequestWrite(t *testing.T) {
+	var buf bytes.Buffer
+	req := &rpcRequest{rw: &buf}
+	data := []byte("data, write!")
+	n, err := req.Write(data)
+	if err != nil {
+		t.Fatalf("Unexpected error during write: %v", err)
+	}
+	if n != len(data) {
+		t.Errorf("Expected %d bytes to be written, but got %d", len(data), n)
+	}
+	if buf.String() != string(data) {
+		t.Errorf("Expected buffer to contain %q, but got %q", data, buf.String())
+	}
+}
