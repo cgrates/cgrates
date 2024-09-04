@@ -1,0 +1,17 @@
+[Unit]
+Description=Alertmanager
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+User={{ alertmanager_user }}
+Group={{ alertmanager_user }}
+Type=simple
+ExecStart={{ alertmanager_install_dir }}/alertmanager \
+    --config.file={{ alertmanager_config_dir }}/alertmanager.yml \
+    --storage.path={{ alertmanager_data_dir }} \
+    --web.listen-address={{ alertmanager_web_listen_address }}
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
