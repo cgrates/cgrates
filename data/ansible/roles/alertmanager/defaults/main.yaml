@@ -1,0 +1,13 @@
+---
+alertmanager_version: 0.27.0
+alertmanager_user: alertmanager
+alertmanager_install_dir: /opt/alertmanager
+alertmanager_config_dir: /etc/alertmanager
+alertmanager_data_dir: /var/lib/alertmanager
+
+alertmanager_web_listen_address: 0.0.0.0:9093
+
+alertmanager_service_enabled: false
+alertmanager_service_state: stopped
+
+alertmanager_config_file: '{{ alertmanager_install_dir }}/alertmanager.yml'

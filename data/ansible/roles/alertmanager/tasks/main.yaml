@@ -1,0 +1,86 @@
+---
+- name: Create alertmanager user
+  become: true
+  ansible.builtin.user:
+    name: '{{ alertmanager_user }}'
+    state: present
+    system: true
+    createhome: no
+
+- name: Check current Alertmanager version
+  ansible.builtin.command: "{{ alertmanager_install_dir }}/alertmanager --version"
+  register: alertmanager_current_version
+  ignore_errors: true
+  changed_when: false
+
+- name: Remove existing Alertmanager installation if version differs
+  become: true
+  ansible.builtin.file:
+    path: "{{ alertmanager_install_dir }}"
+    state: absent
+  when: alertmanager_current_version.rc == 0 and alertmanager_version not in alertmanager_current_version.stdout
+
+- name: Create alertmanager directories
+  become: true
+  ansible.builtin.file:
+    path: '{{ item }}'
+    state: directory
+    owner: '{{ alertmanager_user }}'
+    group: '{{ alertmanager_user }}'
+    mode: '0755'
+  loop:
+    - '{{ alertmanager_config_dir }}'
+    - '{{ alertmanager_data_dir }}'
+    - '{{ alertmanager_install_dir }}'
+
+- name: Download and extract alertmanager
+  become: true
+  ansible.builtin.unarchive:
+    src: 'https://github.com/prometheus/alertmanager/releases/download/v{{ alertmanager_version }}/alertmanager-{{ alertmanager_version }}.linux-amd64.tar.gz'
+    dest: '{{ alertmanager_install_dir }}'
+    remote_src: true
+    owner: '{{ alertmanager_user }}'
+    group: '{{ alertmanager_user }}'
+    extra_opts: [--strip-components=1]
+  notify: Restart alertmanager
+  when: alertmanager_current_version.rc != 0 or alertmanager_version not in alertmanager_current_version.stdout
+
+- name: Handle alertmanager config file
+  block:
+    - name: Copy file (if not .j2)
+      become: true
+      ansible.builtin.copy:
+        src: '{{ alertmanager_config_file }}'
+        dest: '{{ alertmanager_config_dir }}/{{ alertmanager_config_file | basename }}'
+        owner: '{{ alertmanager_user }}'
+        group: '{{ alertmanager_user }}'
+        mode: '0644'
+      when: not alertmanager_config_file.endswith('.j2')
+
+    - name: Template file (if .j2)
+      become: true
+      ansible.builtin.template:
+        src: '{{ alertmanager_config_file }}'
+        dest: '{{ alertmanager_config_dir }}/{{ alertmanager_config_file | basename | splitext | first }}'
+        owner: '{{ alertmanager_user }}'
+        group: '{{ alertmanager_user }}'
+        mode: '0644'
+      when: alertmanager_config_file.endswith('.j2')
+  when: alertmanager_config_file is defined
+  notify: Restart alertmanager
+
+- name: Create alertmanager systemd service file
+  become: true
+  ansible.builtin.template:
+    src: alertmanager.service.j2
+    dest: /etc/systemd/system/alertmanager.service
+    mode: '0644'
+  notify: Restart alertmanager
+
+- name: Ensure alertmanager service is in desired state
+  become: true
+  ansible.builtin.systemd_service:
+    name: alertmanager
+    state: '{{ alertmanager_service_state }}'
+    enabled: '{{ alertmanager_service_enabled }}'
+  when: alertmanager_service_state == 'stopped' or alertmanager_service_enabled == false
