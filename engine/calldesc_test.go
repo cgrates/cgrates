@@ -2464,11 +2464,10 @@ func TestCallDescFieldAsString(t *testing.T) {
 
 func TestCallDescString(t *testing.T) {
 	cd := CallDescriptor{}
-
-	rcv := cd.String()
-
-	if rcv != `{"Category":"","Tenant":"","Subject":"","Account":"","Destination":"","TimeStart":"0001-01-01T00:00:00Z","TimeEnd":"0001-01-01T00:00:00Z","LoopIndex":0,"DurationIndex":0,"FallbackSubject":"","RatingInfos":null,"Increments":null,"ToR":"","ExtraFields":null,"MaxRate":0,"MaxRateUnit":0,"MaxCostSoFar":0,"CgrID":"","RunID":"","ForceDuration":false,"PerformRounding":false,"DryRun":false,"DenyNegativeAccount":false}` {
-		t.Error(rcv)
+	want := `{"Category":"","Tenant":"","Subject":"","Account":"","Destination":"","TimeStart":"0001-01-01T00:00:00Z","TimeEnd":"0001-01-01T00:00:00Z","LoopIndex":0,"DurationIndex":0,"FallbackSubject":"","RatingInfos":null,"Increments":null,"ToR":"","ExtraFields":null,"MaxRate":0,"MaxRateUnit":0,"MaxCostSoFar":0,"CgrID":"","RunID":"","ForceDuration":false,"PerformRounding":false,"DenyNegativeAccount":false}`
+	got := cd.String()
+	if got != want {
+		t.Errorf("cd.String() = %s, want %s", got, want)
 	}
 }
 

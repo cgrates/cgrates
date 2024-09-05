@@ -410,7 +410,7 @@ func (acc *Account) debitCreditBalance(cd *CallDescriptor, count bool, dryRun bo
 					}
 				}
 				// check for blocker
-				if dryRun && balance.Blocker {
+				if balance.Blocker {
 					return // don't go to next balances
 				}
 			}
@@ -443,7 +443,7 @@ func (acc *Account) debitCreditBalance(cd *CallDescriptor, count bool, dryRun bo
 					}
 				}
 				// check for blocker
-				if dryRun && balance.Blocker {
+				if balance.Blocker {
 					return // don't go to next balances
 				}
 			}
