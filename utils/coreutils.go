@@ -64,7 +64,6 @@ var (
 
 func init() {
 	startCGRateSTime = time.Now()
-	math_rand.Seed(startCGRateSTime.UnixNano())
 }
 
 // GetStartTime return the Start time of engine (in UNIX format)

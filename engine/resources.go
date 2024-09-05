@@ -30,10 +30,6 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-func init() {
-	rand.Seed(time.Now().UnixNano())
-}
-
 // ResourceProfile represents the user configuration for the resource
 type ResourceProfile struct {
 	Tenant             string

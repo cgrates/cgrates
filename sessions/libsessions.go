@@ -76,7 +76,6 @@ func getSessionTTL(ev *engine.MapEvent, cfgSessionTTL time.Duration,
 	}
 	sessionTTLMaxDelay = maxDelay.Nanoseconds() / 1000000 // Milliseconds precision for randomness
 	if sessionTTLMaxDelay != 0 {
-		rand.Seed(time.Now().Unix())
 		ttl += time.Duration(rand.Int63n(sessionTTLMaxDelay) * 1000000)
 	}
 	return
