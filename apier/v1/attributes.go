@@ -168,12 +168,6 @@ type AttributeSv1 struct {
 	attrS *engine.AttributeService
 }
 
-// Call implements birpc.ClientConnector interface for internal RPC
-func (alSv1 *AttributeSv1) Call(ctx *context.Context, serviceMethod string,
-	args any, reply any) error {
-	return utils.APIerRPCCall(alSv1, serviceMethod, args, reply)
-}
-
 // GetAttributeForEvent  returns matching AttributeProfile for Event
 func (alSv1 *AttributeSv1) GetAttributeForEvent(ctx *context.Context, args *utils.CGREvent,
 	reply *engine.AttributeProfile) (err error) {
@@ -184,10 +178,4 @@ func (alSv1 *AttributeSv1) GetAttributeForEvent(ctx *context.Context, args *util
 func (alSv1 *AttributeSv1) ProcessEvent(ctx *context.Context, args *utils.CGREvent,
 	reply *engine.AttrSProcessEventReply) error {
 	return alSv1.attrS.V1ProcessEvent(ctx, args, reply)
-}
-
-// Ping return pong if the service is active
-func (alSv1 *AttributeSv1) Ping(ctx *context.Context, ign *utils.CGREvent, reply *string) error {
-	*reply = utils.Pong
-	return nil
 }

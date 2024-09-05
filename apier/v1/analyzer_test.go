@@ -21,9 +21,7 @@ package v1
 import (
 	"testing"
 
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/analyzers"
-	"github.com/cgrates/cgrates/utils"
 )
 
 func TestNewAnalyzerSv1(t *testing.T) {
@@ -34,59 +32,6 @@ func TestNewAnalyzerSv1(t *testing.T) {
 	}
 	if analyzerSv1.aS != analyzerService {
 		t.Errorf("expected AnalyzerService to be %v, got %v", analyzerService, analyzerSv1.aS)
-	}
-}
-
-func TestAnalyzerSv1Call(t *testing.T) {
-
-	aSv1 := &AnalyzerSv1{aS: &analyzers.AnalyzerService{}}
-	ctx := context.Background()
-	serviceMethod := "TestServiceMethod"
-	args := "test args"
-	var reply string
-
-	err := aSv1.Call(ctx, serviceMethod, args, &reply)
-
-	if err == nil {
-		t.Errorf("expected no error, got %v", err)
-	}
-
-	if reply == "reply" {
-		t.Errorf("expected reply 'reply', got '%v'", reply)
-	}
-}
-
-func TestAnalyzerSv1Ping(t *testing.T) { //
-
-	aSv1 := &AnalyzerSv1{}
-	ctx := context.Background()
-	var reply string
-
-	err := aSv1.Ping(ctx, nil, &reply)
-	if err != nil {
-		t.Errorf("expected no error, got %v", err)
-	}
-
-	if reply != utils.Pong {
-		t.Errorf("expected reply '%v', got '%v'", utils.Pong, reply)
-	}
-}
-
-func TestAPIerSv1Call(t *testing.T) {
-
-	apierSv1 := &APIerSv1{}
-	ctx := context.Background()
-	serviceMethod := "TestServiceMethod"
-	args := "test args"
-	var reply string
-	err := apierSv1.Call(ctx, serviceMethod, args, &reply)
-
-	if err == nil {
-		t.Errorf("expected error, got %v", err)
-	}
-
-	if reply == "test reply" {
-		t.Errorf("expected reply 'test reply', got '%v'", reply)
 	}
 }
 

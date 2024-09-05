@@ -60,7 +60,6 @@ type ChargerService struct {
 	connMgr     *engine.ConnManager
 
 	chrS     *engine.ChargerService
-	rpc      *v1.ChargerSv1
 	connChan chan birpc.ClientConnector
 	anz      *AnalyzerService
 	srvDep   map[string]*sync.WaitGroup
@@ -85,14 +84,12 @@ func (chrS *ChargerService) Start() error {
 	defer chrS.Unlock()
 	chrS.chrS = engine.NewChargerService(datadb, filterS, chrS.cfg, chrS.connMgr)
 	utils.Logger.Info(fmt.Sprintf("<%s> starting <%s> subsystem", utils.CoreS, utils.ChargerS))
-	srv, err := engine.NewServiceWithName(chrS.chrS, utils.ChargerS, true)
+	srv, err := engine.NewService(v1.NewChargerSv1(chrS.chrS))
 	if err != nil {
 		return err
 	}
 	if !chrS.cfg.DispatcherSCfg().Enabled {
-		for _, s := range srv {
-			chrS.server.RpcRegister(s)
-		}
+		chrS.server.RpcRegister(srv)
 	}
 	chrS.connChan <- chrS.anz.GetInternalCodec(srv, utils.ChargerS)
 	return nil
@@ -109,7 +106,6 @@ func (chrS *ChargerService) Shutdown() (err error) {
 	defer chrS.Unlock()
 	chrS.chrS.Shutdown()
 	chrS.chrS = nil
-	chrS.rpc = nil
 	<-chrS.connChan
 	return
 }

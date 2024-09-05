@@ -112,8 +112,3 @@ func NewTrendSv1(trs *engine.TrendService) *TrendSv1 {
 type TrendSv1 struct {
 	trS *engine.TrendService
 }
-
-func (sa *TrendSv1) Ping(ctx *context.Context, ign *utils.CGREvent, reply *string) error {
-	*reply = utils.Pong
-	return nil
-}

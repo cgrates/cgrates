@@ -325,11 +325,6 @@ func (da *DiameterAgent) handleMessage(c diam.Conn, m *diam.Message) {
 	writeOnConn(c, a)
 }
 
-// Call implements birpc.ClientConnector interface
-func (da *DiameterAgent) Call(ctx *context.Context, serviceMethod string, args any, reply any) error {
-	return utils.RPCCall(da, serviceMethod, args, reply)
-}
-
 // V1DisconnectSession is part of the sessions.BiRPClient
 func (da *DiameterAgent) V1DisconnectSession(ctx *context.Context, cgrEv utils.CGREvent, reply *string) (err error) {
 	ssID, has := cgrEv.Event[utils.OriginID]

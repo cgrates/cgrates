@@ -28,7 +28,6 @@ import (
 
 	"golang.org/x/crypto/bcrypt"
 
-	"github.com/cgrates/rpcclient"
 	"github.com/google/go-cmp/cmp"
 )
 
@@ -1449,30 +1448,6 @@ func (tRPC *TestRPC) V1Error3(args any, reply any) int {
 	return 0
 }
 
-func TestRPCCall(t *testing.T) {
-	if err := RPCCall("wrong", "test", nil, nil); err == nil || err != rpcclient.ErrUnsupporteServiceMethod {
-		t.Errorf("Expecting: %+v, received: %+v", rpcclient.ErrUnsupporteServiceMethod, err)
-	}
-	var reply string
-	if err := RPCCall(&TestRPC{}, "TestRPCV1.Copy", StringPointer("test"), &reply); err != nil {
-		t.Errorf("Expecting: <nil>, received: %+v", err)
-	}
-	if err := RPCCall(&TestRPC{}, "TestRPCV1.Error", StringPointer("test"), &reply); err == nil || err.Error() != "V1_err_test" {
-		t.Errorf("Expecting: <V1_err_test>, received: <%+v>", err)
-	}
-	if err := RPCCall(&TestRPC{}, "TestRPCV1.Unexist", StringPointer("test"), &reply); err == nil || err != rpcclient.ErrUnsupporteServiceMethod {
-		t.Errorf("Expecting: %+v, received: %+v", rpcclient.ErrUnsupporteServiceMethod, err)
-	}
-
-	if err := RPCCall(&TestRPC{}, "TestRPCV1.Error2", StringPointer("test"), &reply); err == nil || err != ErrServerError {
-		t.Errorf("Expecting: %+v, received: %+v", ErrServerError, err)
-	}
-
-	if err := RPCCall(&TestRPC{}, "TestRPCV1.Error3", StringPointer("test"), &reply); err == nil || err != ErrServerError {
-		t.Errorf("Expecting: %+v, received: %+v", ErrServerError, err)
-	}
-}
-
 type TestRPC2 struct {
 }
 
@@ -1495,30 +1470,6 @@ func (tRPC *TestRPC2) Error2(args any, reply any) (int, error) {
 
 func (tRPC *TestRPC2) Error3(args any, reply any) int {
 	return 0
-}
-
-func TestRPCAPICall(t *testing.T) {
-	if err := APIerRPCCall("wrong", "test", nil, nil); err == nil || err != rpcclient.ErrUnsupporteServiceMethod {
-		t.Errorf("Expecting: %+v, received: %+v", rpcclient.ErrUnsupporteServiceMethod, err)
-	}
-	var reply string
-	if err := APIerRPCCall(&TestRPC2{}, "TestRPC2.Copy", StringPointer("test"), &reply); err != nil {
-		t.Errorf("Expecting: <nil>, received: %+v", err)
-	}
-	if err := APIerRPCCall(&TestRPC2{}, "TestRPC2.Error", StringPointer("test"), &reply); err == nil || err.Error() != "V1_err_test" {
-		t.Errorf("Expecting: <V1_err_test>, received: <%+v>", err)
-	}
-	if err := APIerRPCCall(&TestRPC2{}, "TestRPC2.Unexist", StringPointer("test"), &reply); err == nil || err != rpcclient.ErrUnsupporteServiceMethod {
-		t.Errorf("Expecting: %+v, received: %+v", rpcclient.ErrUnsupporteServiceMethod, err)
-	}
-
-	if err := APIerRPCCall(&TestRPC2{}, "TestRPC2.Error2", StringPointer("test"), &reply); err == nil || err != ErrServerError {
-		t.Errorf("Expecting: %+v, received: %+v", ErrServerError, err)
-	}
-
-	if err := APIerRPCCall(&TestRPC2{}, "TestRPC2.Error3", StringPointer("test"), &reply); err == nil || err != ErrServerError {
-		t.Errorf("Expecting: %+v, received: %+v", ErrServerError, err)
-	}
 }
 
 func TestCounter(t *testing.T) {

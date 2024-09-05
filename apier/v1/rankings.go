@@ -133,8 +133,3 @@ func NewRankingSv1() *RankingSv1 {
 }
 
 type RankingSv1 struct{}
-
-func (sa *RankingSv1) Ping(ctx *context.Context, ign *utils.CGREvent, reply *string) error {
-	*reply = utils.Pong
-	return nil
-}

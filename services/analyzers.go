@@ -24,6 +24,7 @@ import (
 
 	"github.com/cgrates/birpc"
 	"github.com/cgrates/cgrates/analyzers"
+	v1 "github.com/cgrates/cgrates/apier/v1"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/cores"
 	"github.com/cgrates/cgrates/engine"
@@ -97,16 +98,14 @@ func (anz *AnalyzerService) start() {
 		anz.filterSChan <- fS
 		anz.anz.SetFilterS(fS)
 	}
-	srv, err := engine.NewServiceWithName(anz.anz, utils.AnalyzerS, true)
+	srv, err := engine.NewService(v1.NewAnalyzerSv1(anz.anz))
 	if err != nil {
 		utils.Logger.Err(fmt.Sprintf("<%s> failed to initialize service, error: <%s>",
 			utils.AnalyzerS, err.Error()))
 		return
 	}
 	if !anz.cfg.DispatcherSCfg().Enabled {
-		for _, s := range srv {
-			anz.server.RpcRegister(s)
-		}
+		anz.server.RpcRegister(srv)
 	}
 	anz.connChan <- srv
 }

@@ -34,11 +34,6 @@ func NewRALsV1() *RALsV1 {
 type RALsV1 struct {
 }
 
-// Call implements birpc.ClientConnector interface for internal RPC
-func (rsv1 *RALsV1) Call(ctx *context.Context, serviceMethod string, args any, reply any) error {
-	return utils.APIerRPCCall(rsv1, serviceMethod, args, reply)
-}
-
 // GetRatingPlansCost returns EventCosts matching RatingPlanIDs
 func (rsv1 *RALsV1) GetRatingPlansCost(ctx *context.Context, arg *utils.RatingPlanCostArg, reply *dispatchers.RatingPlanCost) error {
 	if missing := utils.MissingStructFields(arg, []string{utils.RatingPlanIDs,
@@ -105,10 +100,5 @@ func (rsv1 *RALsV1) GetRatingPlansCost(ctx *context.Context, arg *utils.RatingPl
 		}
 		break
 	}
-	return nil
-}
-
-func (rsv1 *RALsV1) Ping(ctx *context.Context, ign *utils.CGREvent, reply *string) error {
-	*reply = utils.Pong
 	return nil
 }

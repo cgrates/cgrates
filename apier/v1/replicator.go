@@ -41,11 +41,6 @@ type ReplicatorSv1 struct {
 	v1 *APIerSv1 // needed for CallCache only
 }
 
-// Call implements birpc.ClientConnector interface for internal RPC
-func (rplSv1 *ReplicatorSv1) Call(ctx *context.Context, serviceMethod string, args any, reply any) error {
-	return utils.APIerRPCCall(rplSv1, serviceMethod, args, reply)
-}
-
 // GetAccount is the remote method coresponding to the dataDb driver method
 func (rplSv1 *ReplicatorSv1) GetAccount(ctx *context.Context, args *utils.StringWithAPIOpts, reply *engine.Account) error {
 	engine.UpdateReplicationFilters(utils.AccountPrefix, args.Arg, utils.IfaceAsString(args.APIOpts[utils.RemoteHostOpt]))
@@ -1148,10 +1143,4 @@ func (rplSv1 *ReplicatorSv1) RemoveIndexes(ctx *context.Context, args *utils.Get
 	}
 	*reply = utils.OK
 	return
-}
-
-// Ping used to determine if the RPC is active
-func (rplSv1 *ReplicatorSv1) Ping(ctx *context.Context, ign *utils.CGREvent, reply *string) error {
-	*reply = utils.Pong
-	return nil
 }

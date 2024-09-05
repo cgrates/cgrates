@@ -21,15 +21,12 @@ package servmanager
 import (
 	"errors"
 	"fmt"
-	"reflect"
-	"strings"
 	"sync"
 
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/cgrates/rpcclient"
 )
 
 // NewServiceManager returns a service manager
@@ -53,33 +50,6 @@ type ServiceManager struct {
 	shdChan *utils.SyncedChan
 	shdWg   *sync.WaitGroup
 	connMgr *engine.ConnManager
-}
-
-// Call .
-func (srvMngr *ServiceManager) Call(ctx *context.Context, serviceMethod string, args any, reply any) error {
-	parts := strings.Split(serviceMethod, ".")
-	if len(parts) != 2 {
-		return rpcclient.ErrUnsupporteServiceMethod
-	}
-	// get method
-	method := reflect.ValueOf(srvMngr).MethodByName(parts[0][len(parts[0])-2:] + parts[1]) // Inherit the version in the method
-	if !method.IsValid() {
-		return rpcclient.ErrUnsupporteServiceMethod
-	}
-	// construct the params
-	params := []reflect.Value{reflect.ValueOf(args), reflect.ValueOf(reply)}
-	ret := method.Call(params)
-	if len(ret) != 1 {
-		return utils.ErrServerError
-	}
-	if ret[0].Interface() == nil {
-		return nil
-	}
-	err, ok := ret[0].Interface().(error)
-	if !ok {
-		return utils.ErrServerError
-	}
-	return err
 }
 
 // ArgStartService are passed to Start/StopService/Status RPC methods

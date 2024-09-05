@@ -24,6 +24,7 @@ import (
 	"flag"
 	"path"
 	"reflect"
+	"strings"
 	"testing"
 
 	"github.com/cgrates/birpc"
@@ -100,7 +101,12 @@ func testLoaderITInitDataDB(t *testing.T) {
 	connMgr = NewConnManager(lCfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches): cacheChan,
 	})
-	srv, err := NewService(NewCacheS(lCfg, NewDataManager(dataDbCsv, lCfg.CacheCfg(), connMgr), nil))
+
+	// Importing v1 package would create an import cycle; using the CacheS object instead.
+	chS := NewCacheS(lCfg, NewDataManager(dataDbCsv, lCfg.CacheCfg(), connMgr), nil)
+	srv, err := birpc.NewServiceWithMethodsRename(chS, utils.CacheSv1, true, func(oldFn string) (newFn string) {
+		return strings.TrimPrefix(oldFn, "V1")
+	})
 	if err != nil {
 		t.Fatal(err)
 	}

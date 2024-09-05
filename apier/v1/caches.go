@@ -123,12 +123,6 @@ func (chSv1 *CacheSv1) LoadCache(ctx *context.Context, args *utils.AttrReloadCac
 	return chSv1.cacheS.V1LoadCache(ctx, args, reply)
 }
 
-// Ping used to determinate if component is active
-func (chSv1 *CacheSv1) Ping(ctx *context.Context, ign *utils.CGREvent, reply *string) error {
-	*reply = utils.Pong
-	return nil
-}
-
 // ReplicateSet replicate an item
 func (chSv1 *CacheSv1) ReplicateSet(ctx *context.Context, args *utils.ArgCacheReplicateSet, reply *string) (err error) {
 	return chSv1.cacheS.V1ReplicateSet(ctx, args, reply)
@@ -137,10 +131,4 @@ func (chSv1 *CacheSv1) ReplicateSet(ctx *context.Context, args *utils.ArgCacheRe
 // ReplicateRemove remove an item
 func (chSv1 *CacheSv1) ReplicateRemove(ctx *context.Context, args *utils.ArgCacheReplicateRemove, reply *string) (err error) {
 	return chSv1.cacheS.V1ReplicateRemove(ctx, args, reply)
-}
-
-// Call implements birpc.ClientConnector interface for internal RPC
-func (chSv1 *CacheSv1) Call(ctx *context.Context, serviceMethod string,
-	args any, reply any) error {
-	return utils.APIerRPCCall(chSv1, serviceMethod, args, reply)
 }

@@ -85,9 +85,7 @@ func (resp *ResponderService) Start() error {
 		return err
 	}
 	if !resp.cfg.DispatcherSCfg().Enabled {
-		for _, s := range srv {
-			resp.server.RpcRegister(s)
-		}
+		resp.server.RpcRegister(srv)
 	}
 
 	resp.connChan <- resp.anz.GetInternalCodec(srv, utils.ResponderS) // Rater done

@@ -91,9 +91,7 @@ func (thrs *ThresholdService) Start() error {
 		return err
 	}
 	if !thrs.cfg.DispatcherSCfg().Enabled {
-		for _, s := range srv {
-			thrs.server.RpcRegister(s)
-		}
+		thrs.server.RpcRegister(srv)
 	}
 	thrs.connChan <- thrs.anz.GetInternalCodec(srv, utils.ThresholdS)
 	return nil

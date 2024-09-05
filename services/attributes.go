@@ -59,7 +59,6 @@ type AttributeService struct {
 	server      *cores.Server
 
 	attrS    *engine.AttributeService
-	rpc      *v1.AttributeSv1           // useful on restart
 	connChan chan birpc.ClientConnector // publish the internal Subsystem when available
 	anz      *AnalyzerService
 	srvDep   map[string]*sync.WaitGroup
@@ -84,15 +83,12 @@ func (attrS *AttributeService) Start() error {
 	defer attrS.Unlock()
 	attrS.attrS = engine.NewAttributeService(datadb, filterS, attrS.cfg)
 	utils.Logger.Info(fmt.Sprintf("<%s> starting <%s> subsystem", utils.CoreS, utils.AttributeS))
-	attrS.rpc = v1.NewAttributeSv1(attrS.attrS)
-	srv, err := engine.NewService(attrS.rpc)
+	srv, err := engine.NewService(v1.NewAttributeSv1(attrS.attrS))
 	if err != nil {
 		return err
 	}
 	if !attrS.cfg.DispatcherSCfg().Enabled {
-		for _, s := range srv {
-			attrS.server.RpcRegister(s)
-		}
+		attrS.server.RpcRegister(srv)
 	}
 	attrS.connChan <- attrS.anz.GetInternalCodec(srv, utils.AttributeS)
 	return nil
@@ -109,7 +105,6 @@ func (attrS *AttributeService) Shutdown() (err error) {
 	defer attrS.Unlock()
 	attrS.attrS.Shutdown()
 	attrS.attrS = nil
-	attrS.rpc = nil
 	<-attrS.connChan
 	return
 }

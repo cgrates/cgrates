@@ -320,45 +320,6 @@ func TestPing(t *testing.T) {
 	}
 }
 
-func TestNewService(t *testing.T) {
-	testCases := []struct {
-		name      string
-		input     any
-		expectErr bool
-	}{
-		{"valid input", "valid", false},
-		{"invalid input", "invalid", true},
-	}
-	for _, tc := range testCases {
-		t.Run(tc.name, func(t *testing.T) {
-			service, _ := NewService(tc.input)
-			if !tc.expectErr && service != nil {
-				t.Error("expected non-nil service, got nil")
-			}
-		})
-	}
-}
-
-func TestIntServiceCall(t *testing.T) {
-	tService := &birpc.Service{}
-	intService := IntService{
-		"testService": tService,
-	}
-	ctx := &context.Context{}
-	serviceMethod := "testService.Method"
-	args := "testArgs"
-	var reply any
-	err := intService.Call(ctx, serviceMethod, args, &reply)
-	if err == nil {
-		t.Errorf("Expected no error, got %v", err)
-	}
-	invalidServiceMethod := "nonexistentService.Method"
-	err = intService.Call(ctx, invalidServiceMethod, args, &reply)
-	if err == nil || err.Error() != "rpc: can't find service "+invalidServiceMethod {
-		t.Errorf("Expected error 'rpc: can't find service %s', got %v", invalidServiceMethod, err)
-	}
-}
-
 func TestGetSessionsBackup(t *testing.T) {
 	_, err := dm.GetSessionsBackup("node1", "tenant1")
 	if err == utils.ErrNoDatabaseConn {

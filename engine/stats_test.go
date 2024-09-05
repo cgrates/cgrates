@@ -3375,26 +3375,3 @@ func TestStatQueueProcessEventErr(t *testing.T) {
 	}
 
 }
-
-func TestStatServiceCall(t *testing.T) {
-
-	tDM := &DataManager{}
-	tConnMgr := &ConnManager{}
-	tFilterS := &FilterS{}
-	tCGRConfig := &config.CGRConfig{}
-	statService := &StatService{
-		dm:      tDM,
-		connMgr: tConnMgr,
-		filterS: tFilterS,
-		cgrcfg:  tCGRConfig,
-	}
-	ctx := context.Background()
-	serviceMethod := ""
-	args := ""
-	reply := ""
-	err := statService.Call(ctx, serviceMethod, args, &reply)
-	if err == nil {
-		t.Errorf("Call method returned error: %v", err)
-	}
-
-}

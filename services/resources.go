@@ -23,6 +23,7 @@ import (
 	"sync"
 
 	"github.com/cgrates/birpc"
+	v1 "github.com/cgrates/cgrates/apier/v1"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/cores"
 	"github.com/cgrates/cgrates/engine"
@@ -86,14 +87,12 @@ func (reS *ResourceService) Start() error {
 	reS.reS = engine.NewResourceService(datadb, reS.cfg, filterS, reS.connMgr)
 	utils.Logger.Info(fmt.Sprintf("<%s> starting <%s> subsystem", utils.CoreS, utils.ResourceS))
 	reS.reS.StartLoop()
-	srv, err := engine.NewServiceWithName(reS.reS, utils.ResourceS, true)
+	srv, err := engine.NewService(v1.NewResourceSv1(reS.reS))
 	if err != nil {
 		return err
 	}
 	if !reS.cfg.DispatcherSCfg().Enabled {
-		for _, s := range srv {
-			reS.server.RpcRegister(s)
-		}
+		reS.server.RpcRegister(srv)
 	}
 	reS.connChan <- reS.anz.GetInternalCodec(srv, utils.ResourceS)
 	return nil

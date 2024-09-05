@@ -37,11 +37,6 @@ type ThresholdSv1 struct {
 	tS *engine.ThresholdService
 }
 
-// Call implements birpc.ClientConnector interface for internal RPC
-func (tSv1 *ThresholdSv1) Call(ctx *context.Context, serviceMethod string, args any, reply any) error {
-	return utils.APIerRPCCall(tSv1, serviceMethod, args, reply)
-}
-
 // GetThresholdIDs returns list of threshold IDs registered for a tenant
 func (tSv1 *ThresholdSv1) GetThresholdIDs(ctx *context.Context, tenant *utils.TenantWithAPIOpts, tIDs *[]string) error {
 	return tSv1.tS.V1GetThresholdIDs(ctx, tenant.Tenant, tIDs)
@@ -185,11 +180,5 @@ func (apierSv1 *APIerSv1) RemoveThresholdProfile(ctx *context.Context, args *uti
 		return utils.APIErrorHandler(err)
 	}
 	*reply = utils.OK
-	return nil
-}
-
-// Ping .
-func (tSv1 *ThresholdSv1) Ping(ctx *context.Context, ign *utils.CGREvent, reply *string) error {
-	*reply = utils.Pong
 	return nil
 }

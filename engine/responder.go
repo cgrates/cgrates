@@ -20,8 +20,6 @@ package engine
 
 import (
 	"fmt"
-	"reflect"
-	"strings"
 	"sync"
 	"time"
 
@@ -390,36 +388,4 @@ func (rs *Responder) Shutdown(ctx *context.Context, arg *utils.TenantWithAPIOpts
 	defer rs.ShdChan.CloseOnce()
 	*reply = "Done!"
 	return
-}
-
-// Ping used to detreminate if component is active
-func (chSv1 *Responder) Ping(ctx *context.Context, ign *utils.CGREvent, reply *string) error {
-	*reply = utils.Pong
-	return nil
-}
-
-func (rs *Responder) Call(ctx *context.Context, serviceMethod string, args any, reply any) error {
-	parts := strings.Split(serviceMethod, ".")
-	if len(parts) != 2 {
-		return utils.ErrNotImplemented
-	}
-	// get method
-	method := reflect.ValueOf(rs).MethodByName(parts[1])
-	if !method.IsValid() {
-		return utils.ErrNotImplemented
-	}
-	// construct the params
-	params := []reflect.Value{reflect.ValueOf(args), reflect.ValueOf(reply)}
-	ret := method.Call(params)
-	if len(ret) != 1 {
-		return utils.ErrServerError
-	}
-	if ret[0].Interface() == nil {
-		return nil
-	}
-	err, ok := ret[0].Interface().(error)
-	if !ok {
-		return utils.ErrServerError
-	}
-	return err
 }

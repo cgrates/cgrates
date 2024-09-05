@@ -115,11 +115,6 @@ func (ssv1 *SessionSv1) GetPassiveSessionsCount(ctx *context.Context, args *util
 	return ssv1.sS.BiRPCv1GetPassiveSessionsCount(ctx, args, rply)
 }
 
-func (ssv1 *SessionSv1) Ping(ctx *context.Context, ign *utils.CGREvent, reply *string) error {
-	*reply = utils.Pong
-	return nil
-}
-
 func (ssv1 *SessionSv1) ReplicateSessions(ctx *context.Context, args *dispatchers.ArgsReplicateSessionsWithAPIOpts, rply *string) error {
 	return ssv1.sS.BiRPCv1ReplicateSessions(ctx, args.ArgsReplicateSessions, rply)
 }

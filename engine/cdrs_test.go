@@ -2591,32 +2591,6 @@ func TestCDRSV1ProcessEvents(t *testing.T) {
 	}
 }
 
-func TestCDRSCallValidServiceMethod(t *testing.T) {
-	cdrS := &CDRServer{}
-
-	args := struct{}{}
-	reply := new(struct{})
-
-	err := cdrS.Call(nil, "CDRServer.testMethod", args, reply)
-
-	if err == nil {
-		t.Errorf("UNSUPPORTED_SERVICE_METHOD, got %v", err)
-	}
-}
-
-func TestCDRSCallInvalidServiceMethod(t *testing.T) {
-	cdrS := &CDRServer{}
-
-	args := struct{}{}
-	reply := new(struct{})
-
-	err := cdrS.Call(nil, "CDRServer.InvalidMethod", args, reply)
-
-	if err != rpcclient.ErrUnsupporteServiceMethod {
-		t.Errorf("Expected error %v, got %v", rpcclient.ErrUnsupporteServiceMethod, err)
-	}
-}
-
 func TestNewMapEventFromReqForm_ParseForm(t *testing.T) {
 	formData := url.Values{}
 	formData.Add("key", "value")

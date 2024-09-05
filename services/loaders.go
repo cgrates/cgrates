@@ -22,6 +22,7 @@ import (
 	"sync"
 
 	"github.com/cgrates/birpc"
+	v1 "github.com/cgrates/cgrates/apier/v1"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/cores"
 	"github.com/cgrates/cgrates/engine"
@@ -88,14 +89,12 @@ func (ldrs *LoaderService) Start() error {
 	if err := ldrs.ldrs.ListenAndServe(ldrs.stopChan); err != nil {
 		return err
 	}
-	srv, err := engine.NewServiceWithName(ldrs.ldrs, utils.LoaderS, true)
+	srv, err := engine.NewService(v1.NewLoaderSv1(ldrs.ldrs))
 	if err != nil {
 		return err
 	}
 	if !ldrs.cfg.DispatcherSCfg().Enabled {
-		for _, s := range srv {
-			ldrs.server.RpcRegister(s)
-		}
+		ldrs.server.RpcRegister(srv)
 	}
 	ldrs.connChan <- ldrs.anz.GetInternalCodec(srv, utils.LoaderS)
 	return nil

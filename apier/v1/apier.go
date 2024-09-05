@@ -59,12 +59,6 @@ type APIerSv1 struct {
 	ResponderChan chan *engine.Responder
 }
 
-// Call implements birpc.ClientConnector interface for internal RPC
-func (apierSv1 *APIerSv1) Call(ctx *context.Context, serviceMethod string,
-	args any, reply any) error {
-	return utils.APIerRPCCall(apierSv1, serviceMethod, args, reply)
-}
-
 func (apierSv1 *APIerSv1) GetDestination(ctx *context.Context, dstId *string, reply *engine.Destination) error {
 	if dst, err := apierSv1.DataManager.GetDestination(*dstId, true, true, utils.NonTransactional); err != nil {
 		return utils.ErrNotFound
@@ -1571,12 +1565,6 @@ func (apierSv1 *APIerSv1) ListenAndServe(stopChan chan struct{}) {
 			apierSv1.Responder = resp
 		}
 	}
-}
-
-// Ping return pong if the service is active
-func (apierSv1 *APIerSv1) Ping(ctx *context.Context, ign *utils.CGREvent, reply *string) error {
-	*reply = utils.Pong
-	return nil
 }
 
 // ExportToFolder export specific items (or all items if items is empty) from DataDB back to CSV

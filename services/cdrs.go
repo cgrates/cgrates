@@ -99,23 +99,23 @@ func (cdrService *CDRServer) Start() error {
 	utils.Logger.Info("Registering CDRS RPC service.")
 
 	cdrsV1 := v1.NewCDRsV1(cdrService.cdrS)
-	cdrsV2 := &v2.CDRsV2{CDRsV1: *cdrsV1}
-	srv, err := engine.NewService(cdrsV1)
+	srvV1, err := engine.NewService(cdrsV1)
 	if err != nil {
 		return err
 	}
-	cdrsV2Srv, err := birpc.NewService(cdrsV2, "", false)
+	srvV2, err := engine.NewService(&v2.CDRsV2{CDRsV1: *cdrsV1})
 	if err != nil {
 		return err
 	}
-	engine.RegisterPingMethod(cdrsV2Srv.Methods)
-	srv[utils.CDRsV2] = cdrsV2Srv
 	if !cdrService.cfg.DispatcherSCfg().Enabled {
-		for _, s := range srv {
-			cdrService.server.RpcRegister(s)
-		}
+		cdrService.server.RpcRegister(srvV1)
+		cdrService.server.RpcRegister(srvV2)
 	}
-	cdrService.connChan <- cdrService.anz.GetInternalCodec(srv, utils.CDRServer) // Signal that cdrS is operational
+	intSrv := engine.IntService{
+		utils.CDRsV1: srvV1,
+		utils.CDRsV2: srvV2,
+	}
+	cdrService.connChan <- cdrService.anz.GetInternalCodec(intSrv, utils.CDRServer) // Signal that cdrS is operational
 	return nil
 }
 

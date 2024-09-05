@@ -62,11 +62,6 @@ type EventExporterS struct {
 	mu            sync.RWMutex              // protects exporterCache
 }
 
-// Call implements birpc.ClientConnector interface for internal RPC
-func (eeS *EventExporterS) Call(ctx *context.Context, serviceMethod string, args any, reply any) error {
-	return utils.RPCCall(eeS, serviceMethod, args, reply)
-}
-
 // ClearExporterCache clears the cache of EventExporters.
 func (eeS *EventExporterS) ClearExporterCache() {
 	eeS.mu.Lock()

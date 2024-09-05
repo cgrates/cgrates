@@ -127,8 +127,3 @@ func (cdrSv1 *CDRsV1) GetCDRsCount(ctx *context.Context, args *utils.RPCCDRsFilt
 func (cdrSv1 *CDRsV1) GetCDRs(ctx *context.Context, args *utils.RPCCDRsFilterWithAPIOpts, reply *[]*engine.CDR) error {
 	return cdrSv1.CDRs.V1GetCDRs(ctx, *args, reply)
 }
-
-func (cdrSv1 *CDRsV1) Ping(ctx *context.Context, ign *utils.CGREvent, reply *string) error {
-	*reply = utils.Pong
-	return nil
-}

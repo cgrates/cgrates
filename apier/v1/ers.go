@@ -21,7 +21,6 @@ package v1
 import (
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/ers"
-	"github.com/cgrates/cgrates/utils"
 )
 
 func NewErSv1(erS *ers.ERService) *ErSv1 {
@@ -30,11 +29,6 @@ func NewErSv1(erS *ers.ERService) *ErSv1 {
 
 type ErSv1 struct {
 	erS *ers.ERService
-}
-
-func (eeSv1 *ErSv1) Ping(ctx *context.Context, ign *utils.CGREvent, reply *string) error {
-	*reply = utils.Pong
-	return nil
 }
 
 // V1RunReader processes files in the configured directory for the given reader. This function handles files

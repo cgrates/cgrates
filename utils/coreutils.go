@@ -35,7 +35,6 @@ import (
 	math_rand "math/rand"
 	"os"
 	"path/filepath"
-	"reflect"
 	"regexp"
 	"slices"
 	"strconv"
@@ -43,7 +42,6 @@ import (
 	"sync"
 	"time"
 
-	"github.com/cgrates/rpcclient"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -833,59 +831,6 @@ func (tID *TenantID) TenantID() string {
 
 func (tID *TenantIDWithAPIOpts) TenantIDConcatenated() string {
 	return ConcatenatedKey(tID.Tenant, tID.ID)
-}
-
-// RPCCall is a generic method calling RPC on a struct instance
-// serviceMethod is assumed to be in the form InstanceV1.Method
-// where V1Method will become RPC method called on instance
-func RPCCall(inst any, serviceMethod string, args any, reply any) error {
-	methodSplit := strings.Split(serviceMethod, ".")
-	if len(methodSplit) != 2 {
-		return rpcclient.ErrUnsupporteServiceMethod
-	}
-	method := reflect.ValueOf(inst).MethodByName(
-		strings.ToUpper(methodSplit[0][len(methodSplit[0])-2:]) + methodSplit[1])
-	if !method.IsValid() {
-		return rpcclient.ErrUnsupporteServiceMethod
-	}
-	params := []reflect.Value{reflect.ValueOf(args), reflect.ValueOf(reply)}
-	ret := method.Call(params)
-	if len(ret) != 1 {
-		return ErrServerError
-	}
-	if ret[0].Interface() == nil {
-		return nil
-	}
-	err, ok := ret[0].Interface().(error)
-	if !ok {
-		return ErrServerError
-	}
-	return err
-}
-
-// ApierRPCCall implements generic RPCCall for APIer instances
-func APIerRPCCall(inst any, serviceMethod string, args any, reply any) error {
-	methodSplit := strings.Split(serviceMethod, ".")
-	if len(methodSplit) != 2 {
-		return rpcclient.ErrUnsupporteServiceMethod
-	}
-	method := reflect.ValueOf(inst).MethodByName(methodSplit[1])
-	if !method.IsValid() {
-		return rpcclient.ErrUnsupporteServiceMethod
-	}
-	params := []reflect.Value{reflect.ValueOf(args), reflect.ValueOf(reply)}
-	ret := method.Call(params)
-	if len(ret) != 1 {
-		return ErrServerError
-	}
-	if ret[0].Interface() == nil {
-		return nil
-	}
-	err, ok := ret[0].Interface().(error)
-	if !ok {
-		return ErrServerError
-	}
-	return err
 }
 
 // CachedRPCResponse is used to cache a RPC response

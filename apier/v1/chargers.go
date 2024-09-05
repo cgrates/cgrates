@@ -140,17 +140,6 @@ type ChargerSv1 struct {
 	cS *engine.ChargerService
 }
 
-// Call implements birpc.ClientConnector interface for internal RPC
-func (cSv1 *ChargerSv1) Call(ctx *context.Context, serviceMethod string,
-	args any, reply any) error {
-	return utils.APIerRPCCall(cSv1, serviceMethod, args, reply)
-}
-
-func (cSv1 *ChargerSv1) Ping(ctx *context.Context, ign *utils.CGREvent, reply *string) error {
-	*reply = utils.Pong
-	return nil
-}
-
 // GetChargerForEvent  returns matching ChargerProfile for Event
 func (cSv1 *ChargerSv1) GetChargersForEvent(ctx *context.Context, cgrEv *utils.CGREvent,
 	reply *engine.ChargerProfiles) error {

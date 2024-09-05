@@ -24,6 +24,7 @@ import (
 	"sync"
 
 	"github.com/cgrates/birpc"
+	v1 "github.com/cgrates/cgrates/apier/v1"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/cores"
 	"github.com/cgrates/cgrates/engine"
@@ -75,14 +76,12 @@ func (cS *CoreService) Start() error {
 	utils.Logger.Info(fmt.Sprintf("<%s> starting <%s> subsystem", utils.CoreS, utils.CoreS))
 	cS.stopChan = make(chan struct{})
 	cS.cS = cores.NewCoreService(cS.cfg, cS.caps, cS.fileCPU, cS.stopChan, cS.shdWg, cS.shdChan)
-	srv, err := engine.NewServiceWithName(cS.cS, utils.CoreS, true)
+	srv, err := engine.NewService(v1.NewCoreSv1(cS.cS))
 	if err != nil {
 		return err
 	}
 	if !cS.cfg.DispatcherSCfg().Enabled {
-		for _, s := range srv {
-			cS.server.RpcRegister(s)
-		}
+		cS.server.RpcRegister(srv)
 	}
 	cS.connChan <- cS.anz.GetInternalCodec(srv, utils.CoreS)
 	return nil

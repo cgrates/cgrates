@@ -23,6 +23,7 @@ import (
 	"sync"
 
 	"github.com/cgrates/birpc"
+	v1 "github.com/cgrates/cgrates/apier/v1"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/cores"
 	"github.com/cgrates/cgrates/engine"
@@ -85,14 +86,12 @@ func (routeS *RouteService) Start() error {
 	routeS.routeS = engine.NewRouteService(datadb, filterS, routeS.cfg, routeS.connMgr)
 
 	utils.Logger.Info(fmt.Sprintf("<%s> starting <%s> subsystem", utils.CoreS, utils.RouteS))
-	srv, err := engine.NewServiceWithName(routeS.routeS, utils.RouteS, true)
+	srv, err := engine.NewService(v1.NewRouteSv1(routeS.routeS))
 	if err != nil {
 		return err
 	}
 	if !routeS.cfg.DispatcherSCfg().Enabled {
-		for _, s := range srv {
-			routeS.server.RpcRegister(s)
-		}
+		routeS.server.RpcRegister(srv)
 	}
 	routeS.connChan <- routeS.anz.GetInternalCodec(srv, utils.RouteS)
 	return nil

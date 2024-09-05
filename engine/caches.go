@@ -309,11 +309,6 @@ func (chS *CacheS) Precache() (err error) {
 
 // APIs start here
 
-// Call gives the ability of CacheS to be passed as internal RPC
-func (chS *CacheS) Call(ctx *context.Context, serviceMethod string, args any, reply any) error {
-	return utils.RPCCall(chS, serviceMethod, args, reply)
-}
-
 func (chS *CacheS) V1GetItemIDs(ctx *context.Context, args *utils.ArgsGetCacheItemIDsWithAPIOpts,
 	reply *[]string) (err error) {
 	itmIDs := chS.tCache.GetItemIDs(args.CacheID, args.ItemIDPrefix)

@@ -19,6 +19,7 @@ package agents
 
 import (
 	"reflect"
+	"strings"
 	"testing"
 	"time"
 
@@ -449,8 +450,14 @@ func TestProcessRequest(t *testing.T) {
 		filterS: filters,
 		connMgr: connMgr,
 	}
-	ctx := context.WithClient(context.Background(), da)
-	pr, err := processRequest(ctx, reqProcessor, agReq, utils.DiameterAgent, connMgr, da.cgrCfg.DiameterAgentCfg().SessionSConns, da.filterS)
+	srv, err := birpc.NewServiceWithMethodsRename(da, utils.AgentV1, true, func(oldFn string) (newFn string) {
+		return strings.TrimPrefix(oldFn, "V1")
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	da.ctx = context.WithClient(context.TODO(), srv)
+	pr, err := processRequest(da.ctx, reqProcessor, agReq, utils.DiameterAgent, connMgr, da.cgrCfg.DiameterAgentCfg().SessionSConns, da.filterS)
 	if err != nil {
 		t.Error(err)
 	} else if !pr {
@@ -467,7 +474,7 @@ func TestProcessRequest(t *testing.T) {
 		reqProcessor.Tenant, config.CgrConfig().GeneralCfg().DefaultTenant,
 		config.CgrConfig().GeneralCfg().DefaultTimezone, filters, nil)
 
-	pr, err = processRequest(ctx, reqProcessor, agReq, utils.DiameterAgent, connMgr, da.cgrCfg.DiameterAgentCfg().SessionSConns, da.filterS)
+	pr, err = processRequest(da.ctx, reqProcessor, agReq, utils.DiameterAgent, connMgr, da.cgrCfg.DiameterAgentCfg().SessionSConns, da.filterS)
 	if err != nil {
 		t.Error(err)
 	} else if !pr {
@@ -484,7 +491,7 @@ func TestProcessRequest(t *testing.T) {
 		reqProcessor.Tenant, config.CgrConfig().GeneralCfg().DefaultTenant,
 		config.CgrConfig().GeneralCfg().DefaultTimezone, filters, nil)
 
-	pr, err = processRequest(ctx, reqProcessor, agReq, utils.DiameterAgent, connMgr, da.cgrCfg.DiameterAgentCfg().SessionSConns, da.filterS)
+	pr, err = processRequest(da.ctx, reqProcessor, agReq, utils.DiameterAgent, connMgr, da.cgrCfg.DiameterAgentCfg().SessionSConns, da.filterS)
 	if err != nil {
 		t.Error(err)
 	} else if !pr {
@@ -507,7 +514,7 @@ func TestProcessRequest(t *testing.T) {
 		reqProcessor.Tenant, config.CgrConfig().GeneralCfg().DefaultTenant,
 		config.CgrConfig().GeneralCfg().DefaultTimezone, filters, nil)
 
-	pr, err = processRequest(ctx, reqProcessor, agReq, utils.DiameterAgent, connMgr, da.cgrCfg.DiameterAgentCfg().SessionSConns, da.filterS)
+	pr, err = processRequest(da.ctx, reqProcessor, agReq, utils.DiameterAgent, connMgr, da.cgrCfg.DiameterAgentCfg().SessionSConns, da.filterS)
 	if err != nil {
 		t.Error(err)
 	} else if !pr {
@@ -524,7 +531,7 @@ func TestProcessRequest(t *testing.T) {
 		reqProcessor.Tenant, config.CgrConfig().GeneralCfg().DefaultTenant,
 		config.CgrConfig().GeneralCfg().DefaultTimezone, filters, nil)
 
-	pr, err = processRequest(ctx, reqProcessor, agReq, utils.DiameterAgent, connMgr, da.cgrCfg.DiameterAgentCfg().SessionSConns, da.filterS)
+	pr, err = processRequest(da.ctx, reqProcessor, agReq, utils.DiameterAgent, connMgr, da.cgrCfg.DiameterAgentCfg().SessionSConns, da.filterS)
 	if err != nil {
 		t.Error(err)
 	} else if !pr {
@@ -571,22 +578,5 @@ func TestV1DisconnectPeer(t *testing.T) {
 	err = agent.V1DisconnectPeer(nil, args, nil)
 	if err != utils.ErrNotFound {
 		t.Errorf("Expected ErrNotFound, got: %v", err)
-	}
-}
-
-func TestDiamanAgentCall(t *testing.T) {
-	agent := &DiameterAgent{}
-	ctx := context.Background()
-	serviceMethod := "serviceTest"
-	args := struct{ TestArg string }{"TestValue"}
-	var reply struct{ TestReply string }
-
-	err := agent.Call(ctx, serviceMethod, args, &reply)
-	if err == nil {
-		t.Errorf("Unexpected error: %v", err)
-	}
-	expectedReply := ""
-	if reply.TestReply != expectedReply {
-		t.Errorf("Expected reply %s, got %s", expectedReply, reply.TestReply)
 	}
 }

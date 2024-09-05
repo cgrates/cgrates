@@ -1053,18 +1053,3 @@ func TestCachesV1ReLoadCache(t *testing.T) {
 	}
 
 }
-
-func TestCachesCall(t *testing.T) {
-	chS := CacheS{}
-
-	ctx := context.Background()
-	serviceMethod := "Method"
-	args := "Args"
-	reply := "Reply"
-
-	err := chS.Call(ctx, serviceMethod, args, reply)
-
-	if err == nil {
-		t.Errorf("Call returned an unexpected error: %v", err)
-	}
-}

@@ -22,7 +22,6 @@ import (
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/ees"
 	"github.com/cgrates/cgrates/engine"
-	"github.com/cgrates/cgrates/utils"
 )
 
 func NewEeSv1(eeS *ees.EventExporterS) *EeSv1 {
@@ -31,11 +30,6 @@ func NewEeSv1(eeS *ees.EventExporterS) *EeSv1 {
 
 type EeSv1 struct {
 	eeS *ees.EventExporterS
-}
-
-func (eeSv1 *EeSv1) Ping(ctx *context.Context, ign *utils.CGREvent, reply *string) error {
-	*reply = utils.Pong
-	return nil
 }
 
 // ProcessEvent triggers exports on EEs side

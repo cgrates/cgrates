@@ -92,9 +92,7 @@ func (rals *RalService) Start() error {
 		return err
 	}
 	if !rals.cfg.DispatcherSCfg().Enabled {
-		for _, s := range srv {
-			rals.server.RpcRegister(s)
-		}
+		rals.server.RpcRegister(srv)
 	}
 
 	rals.connChan <- rals.anz.GetInternalCodec(srv, utils.RALService)

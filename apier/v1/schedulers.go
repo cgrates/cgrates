@@ -172,15 +172,3 @@ func (schdSv1 *SchedulerSv1) ExecuteActionPlans(ctx *context.Context, attr *util
 	*reply = utils.OK
 	return nil
 }
-
-// Ping returns Pong
-func (schdSv1 *SchedulerSv1) Ping(ctx *context.Context, ign *utils.CGREvent, reply *string) error {
-	*reply = utils.Pong
-	return nil
-}
-
-// Call implements birpc.ClientConnector interface for internal RPC
-func (schdSv1 *SchedulerSv1) Call(ctx *context.Context, serviceMethod string,
-	args any, reply any) error {
-	return utils.APIerRPCCall(schdSv1, serviceMethod, args, reply)
-}
