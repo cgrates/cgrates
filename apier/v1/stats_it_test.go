@@ -86,10 +86,6 @@ var (
 	}
 )
 
-func init() {
-	rand.Seed(time.Now().UnixNano()) // used in benchmarks
-}
-
 // Test start here
 func TestSTSV1IT(t *testing.T) {
 	switch *utils.DBType {
