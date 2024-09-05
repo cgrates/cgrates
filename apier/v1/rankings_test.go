@@ -21,24 +21,10 @@ package v1
 import (
 	"testing"
 
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
-func TestRankingSv1Ping(t *testing.T) {
-	sa := &RankingSv1{}
-	ctx := context.Background()
-	ign := &utils.CGREvent{}
-	var reply string
-	err := sa.Ping(ctx, ign, &reply)
-	if err != nil {
-		t.Errorf("expected no error, got %v", err)
-	}
-	if reply != utils.Pong {
-		t.Errorf("expected reply to be %v, got %v", utils.Pong, reply)
-	}
-}
 func TestNewRankingSv1(t *testing.T) {
 	rankingSvc := NewRankingSv1()
 	if rankingSvc == nil {
@@ -65,35 +51,4 @@ func TestRemoveRankingProfile(t *testing.T) {
 		t.Errorf("RemoveRankingProfile() returned reply = %v, want %v", reply, utils.OK)
 	}
 
-}
-
-func TestRalsPing(t *testing.T) {
-	rsv1 := &RALsV1{}
-	ctx := context.Background()
-	var ign *utils.CGREvent
-	var reply string
-	err := rsv1.Ping(ctx, ign, &reply)
-	if err != nil {
-		t.Errorf("Expected no error, got %v", err)
-	}
-	expectedReply := utils.Pong
-	if reply != expectedReply {
-		t.Errorf("Expected reply %v, got %v", expectedReply, reply)
-	}
-}
-
-func TestRalsCall(t *testing.T) {
-	rsv1 := &RALsV1{}
-	ctx := context.Background()
-	serviceMethod := "TestServiceMethod"
-	args := "TestArgs"
-	var reply string
-	err := rsv1.Call(ctx, serviceMethod, args, &reply)
-	if err == nil {
-		t.Errorf("UNSUPPORTED_SERVICE_METHOD")
-	}
-	expectedReply := "response"
-	if reply == expectedReply {
-		t.Errorf("Expected reply %v, got %v", expectedReply, reply)
-	}
 }

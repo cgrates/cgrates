@@ -139,11 +139,6 @@ type RouteSv1 struct {
 	rS *engine.RouteService
 }
 
-// Call implements birpc.ClientConnector interface for internal RPC
-func (rS *RouteSv1) Call(ctx *context.Context, serviceMethod string, args any, reply any) error {
-	return utils.APIerRPCCall(rS, serviceMethod, args, reply)
-}
-
 // GetRoutes returns sorted list of routes for Event
 func (rS *RouteSv1) GetRoutes(ctx *context.Context, args *utils.CGREvent, reply *engine.SortedRoutesList) error {
 	return rS.rS.V1GetRoutes(ctx, args, reply)
@@ -152,11 +147,6 @@ func (rS *RouteSv1) GetRoutes(ctx *context.Context, args *utils.CGREvent, reply 
 // GetRouteProfilesForEvent returns a list of route profiles that match for Event
 func (rS *RouteSv1) GetRouteProfilesForEvent(ctx *context.Context, args *utils.CGREvent, reply *[]*engine.RouteProfile) error {
 	return rS.rS.V1GetRouteProfilesForEvent(ctx, args, reply)
-}
-
-func (rS *RouteSv1) Ping(ctx *context.Context, ign *utils.CGREvent, reply *string) error {
-	*reply = utils.Pong
-	return nil
 }
 
 // GetRoutesList returns sorted list of routes for Event as a string slice

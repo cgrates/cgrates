@@ -1183,12 +1183,6 @@ func (cfg *CGRConfig) GetReloadChan(sectID string) chan struct{} {
 	return cfg.rldChans[sectID]
 }
 
-// Call implements birpc.ClientConnector interface for internal RPC
-func (cfg *CGRConfig) Call(ctx *context.Context, serviceMethod string,
-	args any, reply any) error {
-	return utils.APIerRPCCall(cfg, serviceMethod, args, reply)
-}
-
 func (cfg *CGRConfig) rLockSections() {
 	for _, lk := range cfg.lks {
 		lk.RLock()

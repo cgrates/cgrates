@@ -122,26 +122,20 @@ func (apiService *APIerSv1Service) Start() error {
 		return err
 	}
 	if !apiService.cfg.DispatcherSCfg().Enabled {
-		for _, s := range srv {
-			apiService.server.RpcRegister(s)
-		}
-		var legacySrv engine.IntService
-		legacySrv, err = engine.NewServiceWithName(apiService.api, utils.ApierV1, true)
-		if err != nil {
-			return err
-		}
+		apiService.server.RpcRegister(srv)
+
 		//backwards compatible
-		for _, s := range legacySrv {
-			apiService.server.RpcRegister(s)
-		}
-		var rplSrv engine.IntService
-		rplSrv, err = engine.NewService(v1.NewReplicatorSv1(datadb, apiService.api))
+		legacySrv, err := engine.NewServiceWithName(apiService.api, utils.ApierV1, true)
 		if err != nil {
 			return err
 		}
-		for _, s := range rplSrv {
-			apiService.server.RpcRegister(s)
+		apiService.server.RpcRegister(legacySrv)
+
+		rplSrv, err := engine.NewService(v1.NewReplicatorSv1(datadb, apiService.api))
+		if err != nil {
+			return err
 		}
+		apiService.server.RpcRegister(rplSrv)
 	}
 
 	apiService.connChan <- apiService.anz.GetInternalCodec(srv, utils.APIerSv1)

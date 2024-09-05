@@ -369,11 +369,6 @@ func (sma *AsteriskAgent) handleChannelDestroyed(ev *SMAsteriskEvent) {
 	}
 }
 
-// Call implements birpc.ClientConnector interface
-func (sma *AsteriskAgent) Call(ctx *context.Context, serviceMethod string, args any, reply any) error {
-	return utils.RPCCall(sma, serviceMethod, args, reply)
-}
-
 // V1DisconnectSession is internal method to disconnect session in asterisk
 func (sma *AsteriskAgent) V1DisconnectSession(ctx *context.Context, cgrEv utils.CGREvent, reply *string) error {
 	channelID := engine.NewMapEvent(cgrEv.Event).GetStringIgnoreErrors(utils.OriginID)

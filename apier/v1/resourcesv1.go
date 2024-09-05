@@ -36,11 +36,6 @@ type ResourceSv1 struct {
 	rls *engine.ResourceService
 }
 
-// Call implements birpc.ClientConnector interface for internal RPC
-func (rsv1 *ResourceSv1) Call(ctx *context.Context, serviceMethod string, args any, reply any) error {
-	return utils.APIerRPCCall(rsv1, serviceMethod, args, reply)
-}
-
 // GetResourcesForEvent returns Resources matching a specific event
 func (rsv1 *ResourceSv1) GetResourcesForEvent(ctx *context.Context, args *utils.CGREvent, reply *engine.Resources) error {
 	return rsv1.rls.V1GetResourcesForEvent(ctx, args, reply)
@@ -171,10 +166,5 @@ func (apierSv1 *APIerSv1) RemoveResourceProfile(ctx *context.Context, arg *utils
 		return utils.APIErrorHandler(err)
 	}
 	*reply = utils.OK
-	return nil
-}
-
-func (rsv1 *ResourceSv1) Ping(ctx *context.Context, ign *utils.CGREvent, reply *string) error {
-	*reply = utils.Pong
 	return nil
 }

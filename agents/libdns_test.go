@@ -25,12 +25,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/cgrates/birpc/context"
-	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/engine"
-	"github.com/cgrates/cgrates/sessions"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/cgrates/kamevapi"
 	"github.com/miekg/dns"
 )
 
@@ -395,36 +390,6 @@ func TestLibdnsUpdateDnsQuestions(t *testing.T) {
 		})
 	}
 
-}
-
-func TestKamailioAgentCall(t *testing.T) {
-	cfg := &config.KamAgentCfg{}
-	connMgr := &engine.ConnManager{}
-	conns := []*kamevapi.KamEvapi{}
-	activeSessionIDs := make(chan []*sessions.SessionID)
-	ctx := &context.Context{}
-	ka := &KamailioAgent{
-		cfg:              cfg,
-		connMgr:          connMgr,
-		timezone:         "UTC",
-		conns:            conns,
-		activeSessionIDs: activeSessionIDs,
-		ctx:              ctx,
-	}
-	args := struct {
-		Message string
-	}{
-		Message: "message",
-	}
-	var reply string
-	err := ka.Call("UNSUPPORTED_SERVICE_METHOD", args, &reply)
-	if err == nil {
-		t.Errorf("UNSUPPORTED_SERVICE_METHOD %v", err)
-	}
-	expectedReply := ""
-	if reply != expectedReply {
-		t.Errorf("Expected reply %q, got %q", expectedReply, reply)
-	}
 }
 
 func TestLibDnsUpdateDnsOption(t *testing.T) {

@@ -354,27 +354,6 @@ func TestCacheSv1RemoveGroup(t *testing.T) {
 	}
 }
 
-func TestCacheSv1Ping(t *testing.T) {
-	cache := &CacheSv1{}
-	ctx := context.Background()
-	ign := &utils.CGREvent{}
-	var reply string
-	err := cache.Ping(ctx, ign, &reply)
-	if err != nil {
-		t.Errorf("expected no error, got %v", err)
-	}
-	if reply != utils.Pong {
-		t.Errorf("expected reply to be '%s', but got '%s'", utils.Pong, reply)
-	}
-	err = cache.Ping(nil, ign, &reply)
-	if err != nil {
-		t.Errorf("expected no error with nil context, got %v", err)
-	}
-	if reply != utils.Pong {
-		t.Errorf("expected reply to be '%s' with nil context, but got '%s'", utils.Pong, reply)
-	}
-}
-
 func TestCacheSv1ReplicateSet(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	data := engine.NewInternalDB(nil, nil, true, nil)
@@ -418,22 +397,5 @@ func TestCacheSv1ReplicateRemove(t *testing.T) {
 	err = cache.ReplicateRemove(nil, args, &reply)
 	if err != nil {
 		t.Errorf("expected no error with nil context, got %v", err)
-	}
-}
-
-func TestCacheSv1Call(t *testing.T) {
-	cache := &CacheSv1{}
-	ctx := context.Background()
-	serviceMethod := "TestMethod"
-	args := "TestArg"
-	var reply string
-	err := cache.Call(ctx, serviceMethod, args, &reply)
-	err = cache.Call(ctx, serviceMethod, 123, &reply)
-	if err == nil {
-		t.Errorf("expected an error with invalid arguments, but got nil")
-	}
-	err = cache.Call(ctx, "UnknownMethod", args, &reply)
-	if err == nil {
-		t.Errorf("expected an error with unknown service method, but got nil")
 	}
 }

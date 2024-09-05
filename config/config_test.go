@@ -5563,14 +5563,6 @@ func TestLoadConfigFromReaderLoadFunctionsError(t *testing.T) {
 	}
 }
 
-func TestCallOnCGRConfig(t *testing.T) {
-	expected := "UNSUPPORTED_SERVICE_METHOD"
-	cgrcfg := NewDefaultCGRConfig()
-	if err := cgrcfg.Call(context.Background(), "inexistentMethod", nil, nil); err == nil || err.Error() != expected {
-		t.Errorf("Expected %+v, received %+v", expected, err)
-	}
-}
-
 func TestLoadCfgFromJSONWithLocksInvalidSeciton(t *testing.T) {
 	expected := "Invalid section: <invalidSection>"
 	cfg := NewDefaultCGRConfig()

@@ -59,7 +59,6 @@ type SchedulerService struct {
 	server    *cores.Server
 
 	schS     *scheduler.Scheduler
-	rpc      *v1.SchedulerSv1
 	connChan chan birpc.ClientConnector
 	connMgr  *engine.ConnManager
 	anz      *AnalyzerService
@@ -86,15 +85,12 @@ func (schS *SchedulerService) Start() error {
 	schS.schS = scheduler.NewScheduler(datadb, schS.cfg, fltrS)
 	go schS.schS.Loop()
 
-	schS.rpc = v1.NewSchedulerSv1(schS.cfg, datadb, fltrS)
-	srv, err := engine.NewService(schS.rpc)
+	srv, err := engine.NewService(v1.NewSchedulerSv1(schS.cfg, datadb, fltrS))
 	if err != nil {
 		return err
 	}
 	if !schS.cfg.DispatcherSCfg().Enabled {
-		for _, s := range srv {
-			schS.server.RpcRegister(s)
-		}
+		schS.server.RpcRegister(srv)
 	}
 	schS.connChan <- schS.anz.GetInternalCodec(srv, utils.SchedulerS)
 	return nil
@@ -113,7 +109,6 @@ func (schS *SchedulerService) Shutdown() (err error) {
 	schS.Lock()
 	schS.schS.Shutdown()
 	schS.schS = nil
-	schS.rpc = nil
 	<-schS.connChan
 	schS.Unlock()
 	return

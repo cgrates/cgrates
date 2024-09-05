@@ -116,11 +116,6 @@ func (self *KamailioAgent) Shutdown() (err error) {
 	return
 }
 
-// birpc.ClientConnector interface
-func (ka *KamailioAgent) Call(serviceMethod string, args any, reply any) error {
-	return utils.RPCCall(ka, serviceMethod, args, reply)
-}
-
 // onCgrAuth is called when new event of type CGR_AUTH_REQUEST is coming
 func (ka *KamailioAgent) onCgrAuth(evData []byte, connIdx int) {
 	if connIdx >= len(ka.conns) { // protection against index out of range panic

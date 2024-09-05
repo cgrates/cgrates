@@ -21,10 +21,7 @@ package v1
 import (
 	"testing"
 
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/ees"
-	"github.com/cgrates/cgrates/ers"
-	"github.com/cgrates/cgrates/utils"
 )
 
 func TestNewEeSv1(t *testing.T) {
@@ -35,39 +32,5 @@ func TestNewEeSv1(t *testing.T) {
 	}
 	if eeSv1.eeS != eeS {
 		t.Errorf("Expected eeS field to be set correctly")
-	}
-}
-
-func TestEeSv1Ping(t *testing.T) {
-	eeSv1 := &EeSv1{}
-	ctx := context.Background()
-	event := &utils.CGREvent{}
-	var reply string
-	err := eeSv1.Ping(ctx, event, &reply)
-	if err != nil {
-		t.Fatalf("Expected no error, got %v", err)
-	}
-	if reply != utils.Pong {
-		t.Errorf("Expected reply to be %s, got %s", utils.Pong, reply)
-	}
-}
-
-func TestErSv1NewErSv1AndPing(t *testing.T) {
-	mockErS := &ers.ERService{}
-	erSv1 := NewErSv1(mockErS)
-	if erSv1 == nil {
-		t.Fatalf("Expected non-nil ErSv1, got nil")
-	}
-	if erSv1.erS != mockErS {
-		t.Errorf("Expected erS field to be set correctly")
-	}
-	ctx := context.Background()
-	var reply string
-	err := erSv1.Ping(ctx, nil, &reply)
-	if err != nil {
-		t.Fatalf("Expected no error from Ping, got %v", err)
-	}
-	if reply != utils.Pong {
-		t.Errorf("Expected reply to be %s, got %s", utils.Pong, reply)
 	}
 }

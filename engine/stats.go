@@ -244,12 +244,6 @@ func (sS *StatService) matchingStatQueuesForEvent(tnt string, statsIDs []string,
 	return
 }
 
-// Call implements birpc.ClientConnector interface for internal RPC
-// here for cases when passing StatsService as rpccclient.RpcClientConnection
-func (sS *StatService) Call(ctx *context.Context, serviceMethod string, args any, reply any) error {
-	return utils.RPCCall(sS, serviceMethod, args, reply)
-}
-
 func (sS *StatService) getStatQueue(tnt, id string) (sq *StatQueue, err error) {
 	if sq, err = sS.dm.GetStatQueue(tnt, id, true, true, utils.EmptyString); err != nil {
 		return

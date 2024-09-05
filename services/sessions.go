@@ -60,7 +60,6 @@ type SessionService struct {
 	stopChan chan struct{}
 
 	sm       *sessions.SessionS
-	rpc      *v1.SMGenericV1
 	connChan chan birpc.ClientConnector
 
 	// in order to stop the bircp server if necesary
@@ -98,34 +97,25 @@ func (smg *SessionService) Start() error {
 	//start sync session in a separate gorutine
 	go smg.sm.SyncSessions(smg.stopChan)
 	// Pass internal connection
-	srv, err := engine.NewServiceWithName(v1.NewSessionSv1(smg.sm), "", false)
+	srv, err := engine.NewService(v1.NewSessionSv1(smg.sm))
 	if err != nil {
 		return err
 	}
 	smg.connChan <- smg.anz.GetInternalCodec(srv, utils.SessionS)
-	// Register RPC handler
-	smg.rpc = v1.NewSMGenericV1(smg.sm)
-
 	if !smg.cfg.DispatcherSCfg().Enabled {
-		for _, s := range srv {
-			smg.server.RpcRegister(s)
-		}
+		smg.server.RpcRegister(srv)
 
-		var legacySrv engine.IntService
-		legacySrv, err := engine.NewService(smg.rpc)
+		// maintain backwards compatibility
+		legacySrv, err := engine.NewService(v1.NewSMGenericV1(smg.sm))
 		if err != nil {
 			return err
 		}
-		for _, s := range legacySrv {
-			smg.server.RpcRegister(s)
-		}
+		smg.server.RpcRegister(legacySrv)
 	}
 	// Register BiRpc handlers
 	if smg.cfg.SessionSCfg().ListenBijson != "" {
 		smg.birpcEnabled = true
-		for n, s := range srv {
-			smg.server.BiRPCRegisterName(n, s)
-		}
+		smg.server.BiRPCRegisterName(utils.SessionSv1, srv)
 		// run this in it's own goroutine
 		go smg.start()
 	}
@@ -163,7 +153,6 @@ func (smg *SessionService) Shutdown() (err error) {
 		smg.birpcEnabled = false
 	}
 	smg.sm = nil
-	smg.rpc = nil
 	<-smg.connChan
 	return
 }

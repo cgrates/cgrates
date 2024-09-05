@@ -20,10 +20,10 @@ package console
 
 import (
 	"reflect"
-	"strings"
 	"testing"
 
 	v1 "github.com/cgrates/cgrates/apier/v1"
+	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -39,10 +39,15 @@ func TestCmdPingRoutesLow(t *testing.T) {
 	if !reflect.DeepEqual(result2, utils.RouteSv1Ping) {
 		t.Errorf("Expected <%+v>, Received <%+v>", utils.RouteSv1Ping, result2)
 	}
-	m, ok := reflect.TypeOf(new(v1.RouteSv1)).MethodByName(strings.Split(command.RpcMethod(), utils.NestingSep)[1])
+	srv, err := engine.NewService(&v1.RouteSv1{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	mType, ok := srv.Methods["Ping"]
 	if !ok {
 		t.Fatal("method not found")
 	}
+	m := mType.Method
 	if m.Type.NumIn() != 4 { // expecting 4 inputs
 		t.Fatalf("invalid number of input parameters ")
 	}
@@ -73,10 +78,15 @@ func TestCmdPingAttributesLow(t *testing.T) {
 	if !reflect.DeepEqual(result2, utils.AttributeSv1Ping) {
 		t.Errorf("Expected <%+v>, Received <%+v>", utils.AttributeSv1Ping, result2)
 	}
-	m, ok := reflect.TypeOf(new(v1.AttributeSv1)).MethodByName(strings.Split(command.RpcMethod(), utils.NestingSep)[1])
+	srv, err := engine.NewService(&v1.AttributeSv1{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	mType, ok := srv.Methods["Ping"]
 	if !ok {
 		t.Fatal("method not found")
 	}
+	m := mType.Method
 	if m.Type.NumIn() != 4 { // expecting 4 inputs
 		t.Fatalf("invalid number of input parameters ")
 	}
@@ -108,10 +118,15 @@ func TestCmdPingChargerSLow(t *testing.T) {
 	if !reflect.DeepEqual(result2, utils.ChargerSv1Ping) {
 		t.Errorf("Expected <%+v>, Received <%+v>", utils.ChargerSv1Ping, result2)
 	}
-	m, ok := reflect.TypeOf(new(v1.ChargerSv1)).MethodByName(strings.Split(command.RpcMethod(), utils.NestingSep)[1])
+	srv, err := engine.NewService(&v1.ChargerSv1{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	mType, ok := srv.Methods["Ping"]
 	if !ok {
 		t.Fatal("method not found")
 	}
+	m := mType.Method
 	if m.Type.NumIn() != 4 { // expecting 4 inputs
 		t.Fatalf("invalid number of input parameters ")
 	}
@@ -143,10 +158,15 @@ func TestCmdPingResourcesLow(t *testing.T) {
 	if !reflect.DeepEqual(result2, utils.ResourceSv1Ping) {
 		t.Errorf("Expected <%+v>, Received <%+v>", utils.ResourceSv1Ping, result2)
 	}
-	m, ok := reflect.TypeOf(new(v1.ResourceSv1)).MethodByName(strings.Split(command.RpcMethod(), utils.NestingSep)[1])
+	srv, err := engine.NewService(&v1.ResourceSv1{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	mType, ok := srv.Methods["Ping"]
 	if !ok {
 		t.Fatal("method not found")
 	}
+	m := mType.Method
 	if m.Type.NumIn() != 4 { // expecting 4 inputs
 		t.Fatalf("invalid number of input parameters ")
 	}
@@ -178,10 +198,15 @@ func TestCmdPingStatServiceLow(t *testing.T) {
 	if !reflect.DeepEqual(result2, utils.StatSv1Ping) {
 		t.Errorf("Expected <%+v>, Received <%+v>", utils.StatSv1Ping, result2)
 	}
-	m, ok := reflect.TypeOf(new(v1.StatSv1)).MethodByName(strings.Split(command.RpcMethod(), utils.NestingSep)[1])
+	srv, err := engine.NewService(&v1.StatSv1{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	mType, ok := srv.Methods["Ping"]
 	if !ok {
 		t.Fatal("method not found")
 	}
+	m := mType.Method
 	if m.Type.NumIn() != 4 { // expecting 4 inputs
 		t.Fatalf("invalid number of input parameters ")
 	}
@@ -212,10 +237,15 @@ func TestCmdPingThresholdsLow(t *testing.T) {
 	if !reflect.DeepEqual(result2, utils.ThresholdSv1Ping) {
 		t.Errorf("Expected <%+v>, Received <%+v>", utils.ThresholdSv1Ping, result2)
 	}
-	m, ok := reflect.TypeOf(new(v1.ThresholdSv1)).MethodByName(strings.Split(command.RpcMethod(), utils.NestingSep)[1])
+	srv, err := engine.NewService(&v1.ThresholdSv1{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	mType, ok := srv.Methods["Ping"]
 	if !ok {
 		t.Fatal("method not found")
 	}
+	m := mType.Method
 	if m.Type.NumIn() != 4 { // expecting 4 inputs
 		t.Fatalf("invalid number of input parameters ")
 	}
@@ -246,10 +276,15 @@ func TestCmdPingSessionsLow(t *testing.T) {
 	if !reflect.DeepEqual(result2, utils.SessionSv1Ping) {
 		t.Errorf("Expected <%+v>, Received <%+v>", utils.SessionSv1Ping, result2)
 	}
-	m, ok := reflect.TypeOf(new(v1.SessionSv1)).MethodByName(strings.Split(command.RpcMethod(), utils.NestingSep)[1])
+	srv, err := engine.NewService(&v1.SessionSv1{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	mType, ok := srv.Methods["Ping"]
 	if !ok {
 		t.Fatal("method not found")
 	}
+	m := mType.Method
 	if m.Type.NumIn() != 4 { // expecting 4 inputs
 		t.Fatalf("invalid number of input parameters ")
 	}
@@ -280,10 +315,15 @@ func TestCmdPingLoaderSLow(t *testing.T) {
 	if !reflect.DeepEqual(result2, utils.LoaderSv1Ping) {
 		t.Errorf("Expected <%+v>, Received <%+v>", utils.LoaderSv1Ping, result2)
 	}
-	m, ok := reflect.TypeOf(new(v1.LoaderSv1)).MethodByName(strings.Split(command.RpcMethod(), utils.NestingSep)[1])
+	srv, err := engine.NewService(&v1.LoaderSv1{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	mType, ok := srv.Methods["Ping"]
 	if !ok {
 		t.Fatal("method not found")
 	}
+	m := mType.Method
 	if m.Type.NumIn() != 4 { // expecting 4 inputs
 		t.Fatalf("invalid number of input parameters ")
 	}
@@ -314,10 +354,15 @@ func TestCmdPingDispatcherSLow(t *testing.T) {
 	if !reflect.DeepEqual(result2, utils.DispatcherSv1Ping) {
 		t.Errorf("Expected <%+v>, Received <%+v>", utils.DispatcherSv1Ping, result2)
 	}
-	m, ok := reflect.TypeOf(new(v1.DispatcherSv1)).MethodByName(strings.Split(command.RpcMethod(), utils.NestingSep)[1])
+	srv, err := engine.NewService(&v1.DispatcherSv1{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	mType, ok := srv.Methods["Ping"]
 	if !ok {
 		t.Fatal("method not found")
 	}
+	m := mType.Method
 	if m.Type.NumIn() != 4 { // expecting 4 inputs
 		t.Fatalf("invalid number of input parameters ")
 	}
@@ -348,10 +393,15 @@ func TestCmdPingAnalyzerSLow(t *testing.T) {
 	if !reflect.DeepEqual(result2, utils.AnalyzerSv1Ping) {
 		t.Errorf("Expected <%+v>, Received <%+v>", utils.AnalyzerSv1Ping, result2)
 	}
-	m, ok := reflect.TypeOf(new(v1.AnalyzerSv1)).MethodByName(strings.Split(command.RpcMethod(), utils.NestingSep)[1])
+	srv, err := engine.NewService(&v1.AnalyzerSv1{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	mType, ok := srv.Methods["Ping"]
 	if !ok {
 		t.Fatal("method not found")
 	}
+	m := mType.Method
 	if m.Type.NumIn() != 4 { // expecting 4 inputs
 		t.Fatalf("invalid number of input parameters ")
 	}
@@ -382,10 +432,15 @@ func TestCmdPingSchedulerSLow(t *testing.T) {
 	if !reflect.DeepEqual(result2, utils.SchedulerSv1Ping) {
 		t.Errorf("Expected <%+v>, Received <%+v>", utils.SchedulerSv1Ping, result2)
 	}
-	m, ok := reflect.TypeOf(new(v1.SchedulerSv1)).MethodByName(strings.Split(command.RpcMethod(), utils.NestingSep)[1])
+	srv, err := engine.NewService(&v1.SchedulerSv1{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	mType, ok := srv.Methods["Ping"]
 	if !ok {
 		t.Fatal("method not found")
 	}
+	m := mType.Method
 	if m.Type.NumIn() != 4 { // expecting 4 inputs
 		t.Fatalf("invalid number of input parameters ")
 	}
@@ -416,10 +471,15 @@ func TestCmdPingRALsLow(t *testing.T) {
 	if !reflect.DeepEqual(result2, utils.RALsV1Ping) {
 		t.Errorf("Expected <%+v>, Received <%+v>", utils.RALsV1Ping, result2)
 	}
-	m, ok := reflect.TypeOf(new(v1.RALsV1)).MethodByName(strings.Split(command.RpcMethod(), utils.NestingSep)[1])
+	srv, err := engine.NewService(&v1.RALsV1{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	mType, ok := srv.Methods["Ping"]
 	if !ok {
 		t.Fatal("method not found")
 	}
+	m := mType.Method
 	if m.Type.NumIn() != 4 { // expecting 4 inputs
 		t.Fatalf("invalid number of input parameters ")
 	}
@@ -450,10 +510,15 @@ func TestCmdPingReplicatorLow(t *testing.T) {
 	if !reflect.DeepEqual(result2, utils.ReplicatorSv1Ping) {
 		t.Errorf("Expected <%+v>, Received <%+v>", utils.RALsV1Ping, result2)
 	}
-	m, ok := reflect.TypeOf(new(v1.ReplicatorSv1)).MethodByName(strings.Split(command.RpcMethod(), utils.NestingSep)[1])
+	srv, err := engine.NewService(&v1.ReplicatorSv1{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	mType, ok := srv.Methods["Ping"]
 	if !ok {
 		t.Fatal("method not found")
 	}
+	m := mType.Method
 	if m.Type.NumIn() != 4 { // expecting 4 inputs
 		t.Fatalf("invalid number of input parameters ")
 	}
@@ -484,10 +549,15 @@ func TestCmdPingApierSLow(t *testing.T) {
 	if !reflect.DeepEqual(result2, utils.APIerSv1Ping) {
 		t.Errorf("Expected <%+v>, Received <%+v>", utils.APIerSv1Ping, result2)
 	}
-	m, ok := reflect.TypeOf(new(v1.APIerSv1)).MethodByName(strings.Split(command.RpcMethod(), utils.NestingSep)[1])
+	srv, err := engine.NewService(&v1.APIerSv1{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	mType, ok := srv.Methods["Ping"]
 	if !ok {
 		t.Fatal("method not found")
 	}
+	m := mType.Method
 	if m.Type.NumIn() != 4 { // expecting 4 inputs
 		t.Fatalf("invalid number of input parameters ")
 	}
@@ -518,10 +588,15 @@ func TestCmdPingEEsLow(t *testing.T) {
 	if !reflect.DeepEqual(result2, utils.EeSv1Ping) {
 		t.Errorf("Expected <%+v>, Received <%+v>", utils.EeSv1Ping, result2)
 	}
-	m, ok := reflect.TypeOf(new(v1.EeSv1)).MethodByName(strings.Split(command.RpcMethod(), utils.NestingSep)[1])
+	srv, err := engine.NewService(&v1.EeSv1{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	mType, ok := srv.Methods["Ping"]
 	if !ok {
 		t.Fatal("method not found")
 	}
+	m := mType.Method
 	if m.Type.NumIn() != 4 { // expecting 4 inputs
 		t.Fatalf("invalid number of input parameters ")
 	}

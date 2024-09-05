@@ -21,24 +21,8 @@ package v1
 import (
 	"testing"
 
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/loaders"
-	"github.com/cgrates/cgrates/utils"
 )
-
-func TestLoaderSv1Ping(t *testing.T) {
-	rsv1 := &LoaderSv1{}
-	ctx := context.Background()
-	var reply string
-	ign := &utils.CGREvent{}
-	err := rsv1.Ping(ctx, ign, &reply)
-	if err != nil {
-		t.Errorf("Expected no error, but got: %v", err)
-	}
-	if reply != utils.Pong {
-		t.Errorf("Expected reply to be '%s', but got '%s'", utils.Pong, reply)
-	}
-}
 
 func TestNewLoaderSv1(t *testing.T) {
 	mockLoaderService := &loaders.LoaderService{}
@@ -49,17 +33,4 @@ func TestNewLoaderSv1(t *testing.T) {
 	if result.ldrS != mockLoaderService {
 		t.Errorf("Expected ldrS to be %v, but got %v", mockLoaderService, result.ldrS)
 	}
-}
-
-func TestLoaderSv1Call(t *testing.T) {
-	ldrSv1 := &LoaderSv1{}
-	ctx := context.Background()
-	serviceMethod := "testMethod"
-	args := "testArgs"
-	var reply string
-	err := ldrSv1.Call(ctx, serviceMethod, args, &reply)
-	if err == nil {
-		t.Errorf("Expected error, but got: %v", err)
-	}
-
 }

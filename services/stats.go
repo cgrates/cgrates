@@ -95,9 +95,7 @@ func (sts *StatService) Start() error {
 		return err
 	}
 	if !sts.cfg.DispatcherSCfg().Enabled {
-		for _, s := range srv {
-			sts.server.RpcRegister(s)
-		}
+		sts.server.RpcRegister(srv)
 	}
 	sts.connChan <- sts.anz.GetInternalCodec(srv, utils.StatS)
 	return nil

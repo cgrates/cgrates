@@ -85,9 +85,7 @@ func (rg *RankingService) Start() error {
 		return err
 	}
 	if !rg.cfg.DispatcherSCfg().Enabled {
-		for _, s := range srv {
-			rg.server.RpcRegister(s)
-		}
+		rg.server.RpcRegister(srv)
 	}
 	rg.connChan <- rg.anz.GetInternalCodec(srv, utils.StatS)
 	return nil

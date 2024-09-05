@@ -208,18 +208,6 @@ func TestFsAgentShutdown(t *testing.T) {
 	}
 }
 
-func TestFsAgentCall(t *testing.T) {
-	ctx := context.Background()
-	serviceMethod := "Method"
-	args := "Args"
-	reply := new(interface{})
-	fsa := &FSsessions{}
-	err := fsa.Call(ctx, serviceMethod, args, reply)
-	if err == nil {
-		t.Errorf("UNSUPPORTED_SERVICE_METHOD, got %v", err)
-	}
-}
-
 func TestFsAgentNewFSsessions(t *testing.T) {
 	fsAgentConfig := &config.FsAgentCfg{
 		EventSocketConns: []*config.FsConnCfg{

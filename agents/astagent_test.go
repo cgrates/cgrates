@@ -18,7 +18,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package agents
 
 import (
-	"errors"
 	"testing"
 
 	"github.com/cgrates/birpc"
@@ -118,47 +117,5 @@ func TestAsteriskAgentV1AlterSession(t *testing.T) {
 	err := tAsteriskAgent.V1AlterSession(nil, tCGREvent, &tString)
 	if err != utils.ErrNotImplemented {
 		t.Errorf("Expected error: %v, got: %v", utils.ErrNotImplemented, err)
-	}
-}
-
-func TestAsteriskAgentCall(t *testing.T) {
-	sma := &AsteriskAgent{}
-	ctx := context.Background()
-
-	tests := []struct {
-		name          string
-		serviceMethod string
-		args          any
-		reply         any
-		expectedError error
-	}{
-		{
-			name:          "Valid service method",
-			serviceMethod: "testMethod",
-			args:          nil,
-			reply:         nil,
-			expectedError: nil,
-		},
-		{
-			name:          "Invalid service method",
-			serviceMethod: "invalidMethod",
-			args:          nil,
-			reply:         nil,
-			expectedError: errors.New("unexpected method"),
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			err := sma.Call(ctx, tt.serviceMethod, tt.args, tt.reply)
-
-			if err == nil && tt.expectedError == nil {
-				t.Errorf("expected no error, but got: %v", err)
-			} else if err == nil && tt.expectedError != nil {
-				t.Errorf("expected error: %v, but got no error", tt.expectedError)
-			} else if err == nil && tt.expectedError != nil {
-				t.Errorf("expected error: %v, but got: %v", tt.expectedError, err)
-			}
-		})
 	}
 }

@@ -22,7 +22,6 @@ import (
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/dispatchers"
 	"github.com/cgrates/cgrates/servmanager"
-	"github.com/cgrates/cgrates/utils"
 )
 
 func NewServiceManagerV1(sm *servmanager.ServiceManager) *ServiceManagerV1 {
@@ -43,16 +42,4 @@ func (servManager *ServiceManagerV1) StopService(ctx *context.Context, args *dis
 
 func (servManager *ServiceManagerV1) ServiceStatus(ctx *context.Context, args *dispatchers.ArgStartServiceWithAPIOpts, reply *string) (err error) {
 	return servManager.sm.V1ServiceStatus(ctx, args.ArgStartService, reply)
-}
-
-// Ping return pong if the service is active
-func (servManager *ServiceManagerV1) Ping(ctx *context.Context, ign *utils.CGREvent, reply *string) error {
-	*reply = utils.Pong
-	return nil
-}
-
-// Call implements birpc.ClientConnector interface for internal RPC
-func (servManager *ServiceManagerV1) Call(ctx *context.Context, serviceMethod string,
-	args any, reply any) error {
-	return utils.APIerRPCCall(servManager, serviceMethod, args, reply)
 }

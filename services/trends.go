@@ -89,9 +89,7 @@ func (trs *TrendService) Start() error {
 		return err
 	}
 	if !trs.cfg.DispatcherSCfg().Enabled {
-		for _, s := range srv {
-			trs.server.RpcRegister(s)
-		}
+		trs.server.RpcRegister(srv)
 	}
 	trs.connChan <- trs.anz.GetInternalCodec(srv, utils.StatS)
 	return nil

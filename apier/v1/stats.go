@@ -140,11 +140,6 @@ type StatSv1 struct {
 	sS *engine.StatService
 }
 
-// Call implements birpc.ClientConnector interface for internal RPC
-func (stsv1 *StatSv1) Call(ctx *context.Context, serviceMethod string, args any, reply any) error {
-	return utils.APIerRPCCall(stsv1, serviceMethod, args, reply)
-}
-
 // GetQueueIDs returns list of queueIDs registered for a tenant
 func (stsv1 *StatSv1) GetQueueIDs(ctx *context.Context, tenant *utils.TenantWithAPIOpts, qIDs *[]string) error {
 	return stsv1.sS.V1GetQueueIDs(ctx, tenant.Tenant, qIDs)
@@ -178,10 +173,4 @@ func (stsv1 *StatSv1) GetQueueFloatMetrics(ctx *context.Context, args *utils.Ten
 // ResetStatQueue resets the stat queue
 func (stsv1 *StatSv1) ResetStatQueue(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *string) error {
 	return stsv1.sS.V1ResetStatQueue(ctx, args.TenantID, reply)
-}
-
-// Ping .
-func (stsv1 *StatSv1) Ping(ctx *context.Context, ign *utils.CGREvent, reply *string) error {
-	*reply = utils.Pong
-	return nil
 }

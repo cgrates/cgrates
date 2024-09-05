@@ -73,33 +73,33 @@ func (api *APIerSv2Service) Start() error {
 	api.api = &v2.APIerSv2{
 		APIerSv1: *apiV1,
 	}
-	srv, err := engine.NewService(api.api)
+	apiV1Srv, err := engine.NewService(apiV1)
 	if err != nil {
 		return err
 	}
-	var apierV1Srv *birpc.Service
-	apierV1Srv, err = birpc.NewService(apiV1, "", false)
+	apiV2Srv, err := engine.NewService(api.api)
 	if err != nil {
 		return err
 	}
-	engine.RegisterPingMethod(apierV1Srv.Methods)
-	srv[utils.APIerSv1] = apierV1Srv
 	if !api.cfg.DispatcherSCfg().Enabled {
-		for _, s := range srv {
-			api.server.RpcRegister(s)
-		}
-		var legacySrv engine.IntService
-		legacySrv, err = engine.NewServiceWithName(api.api, utils.ApierV2, true)
+		api.server.RpcRegister(apiV2Srv)
+
+		//backwards compatible
+		legacySrv, err := engine.NewServiceWithName(api.api, utils.ApierV2, true)
 		if err != nil {
 			return err
 		}
-		//backwards compatible
-		for _, s := range legacySrv {
-			api.server.RpcRegister(s)
-		}
+		api.server.RpcRegister(legacySrv)
 	}
 
-	api.connChan <- api.anz.GetInternalCodec(srv, utils.APIerSv2)
+	// The services for both APIerSv1 and APIerSv2 must be grouped together because
+	// only APIerSv2's internal channel is considered for *internal connections.
+	intSrv := engine.IntService{
+		utils.APIerSv1: apiV1Srv,
+		utils.APIerSv2: apiV2Srv,
+	}
+
+	api.connChan <- api.anz.GetInternalCodec(intSrv, utils.APIerSv2)
 	return nil
 }
 

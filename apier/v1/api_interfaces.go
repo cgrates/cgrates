@@ -35,7 +35,6 @@ type ThresholdSv1Interface interface {
 	GetThresholdsForEvent(ctx *context.Context, args *utils.CGREvent, reply *engine.Thresholds) error
 	GetThreshold(ctx *context.Context, tntID *utils.TenantIDWithAPIOpts, t *engine.Threshold) error
 	ProcessEvent(ctx *context.Context, args *utils.CGREvent, tIDs *[]string) error
-	Ping(ctx *context.Context, ign *utils.CGREvent, reply *string) error
 }
 
 type StatSv1Interface interface {
@@ -44,7 +43,6 @@ type StatSv1Interface interface {
 	GetStatQueuesForEvent(ctx *context.Context, args *utils.CGREvent, reply *[]string) (err error)
 	GetQueueStringMetrics(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *map[string]string) (err error)
 	GetQueueFloatMetrics(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *map[string]float64) (err error)
-	Ping(ctx *context.Context, ign *utils.CGREvent, reply *string) error
 }
 
 type ResourceSv1Interface interface {
@@ -54,24 +52,20 @@ type ResourceSv1Interface interface {
 	ReleaseResources(ctx *context.Context, args *utils.CGREvent, reply *string) error
 	GetResource(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *engine.Resource) error
 	GetResourceWithConfig(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *engine.ResourceWithConfig) error
-	Ping(ctx *context.Context, ign *utils.CGREvent, reply *string) error
 }
 
 type RouteSv1Interface interface {
 	GetRoutes(ctx *context.Context, args *utils.CGREvent, reply *engine.SortedRoutesList) error
 	GetRouteProfilesForEvent(ctx *context.Context, args *utils.CGREvent, reply *[]*engine.RouteProfile) error
 	GetRoutesList(ctx *context.Context, args *utils.CGREvent, reply *[]string) error
-	Ping(ctx *context.Context, ign *utils.CGREvent, reply *string) error
 }
 
 type AttributeSv1Interface interface {
 	GetAttributeForEvent(ctx *context.Context, args *utils.CGREvent, reply *engine.AttributeProfile) (err error)
 	ProcessEvent(ctx *context.Context, args *utils.CGREvent, reply *engine.AttrSProcessEventReply) error
-	Ping(ctx *context.Context, ign *utils.CGREvent, reply *string) error
 }
 
 type ChargerSv1Interface interface {
-	Ping(ctx *context.Context, ign *utils.CGREvent, reply *string) error
 	GetChargersForEvent(ctx *context.Context, cgrEv *utils.CGREvent, reply *engine.ChargerProfiles) error
 	ProcessEvent(ctx *context.Context, args *utils.CGREvent, reply *[]*engine.ChrgSProcessEventReply) error
 }
@@ -94,7 +88,6 @@ type SessionSv1Interface interface {
 	AlterSessions(ctx *context.Context, args utils.SessionFilterWithEvent, rply *string) error
 	GetPassiveSessions(ctx *context.Context, args *utils.SessionFilter, rply *[]*sessions.ExternalSession) error
 	GetPassiveSessionsCount(ctx *context.Context, args *utils.SessionFilter, rply *int) error
-	Ping(ctx *context.Context, ign *utils.CGREvent, reply *string) error
 	ReplicateSessions(ctx *context.Context, args *dispatchers.ArgsReplicateSessionsWithAPIOpts, rply *string) error
 	SetPassiveSession(ctx *context.Context, args *sessions.Session, reply *string) error
 	ActivateSessions(ctx *context.Context, args *utils.SessionIDsWithArgsDispatcher, reply *string) error
@@ -114,7 +107,6 @@ type ResponderInterface interface {
 	GetCostOnRatingPlans(ctx *context.Context, arg *utils.GetCostOnRatingPlansArgs, reply *map[string]any) (err error)
 	GetMaxSessionTimeOnAccounts(ctx *context.Context, arg *utils.GetMaxSessionTimeOnAccountsArgs, reply *map[string]any) (err error)
 	Shutdown(ctx *context.Context, arg *utils.TenantWithAPIOpts, reply *string) (err error)
-	Ping(ctx *context.Context, ign *utils.CGREvent, reply *string) error
 }
 
 type CacheSv1Interface interface {
@@ -133,18 +125,15 @@ type CacheSv1Interface interface {
 	LoadCache(ctx *context.Context, args *utils.AttrReloadCacheWithAPIOpts, reply *string) error
 	ReplicateSet(ctx *context.Context, args *utils.ArgCacheReplicateSet, reply *string) (err error)
 	ReplicateRemove(ctx *context.Context, args *utils.ArgCacheReplicateRemove, reply *string) (err error)
-	Ping(ctx *context.Context, ign *utils.CGREvent, reply *string) error
 }
 
 type GuardianSv1Interface interface {
 	RemoteLock(ctx *context.Context, attr *dispatchers.AttrRemoteLockWithAPIOpts, reply *string) (err error)
 	RemoteUnlock(ctx *context.Context, refID *dispatchers.AttrRemoteUnlockWithAPIOpts, reply *[]string) (err error)
-	Ping(ctx *context.Context, ign *utils.CGREvent, reply *string) error
 }
 
 type SchedulerSv1Interface interface {
 	Reload(ctx *context.Context, arg *utils.CGREvent, reply *string) error
-	Ping(ctx *context.Context, ign *utils.CGREvent, reply *string) error
 	ExecuteActions(ctx *context.Context, attr *utils.AttrsExecuteActions, reply *string) error
 	ExecuteActionPlans(ctx *context.Context, attr *utils.AttrsExecuteActionPlans, reply *string) error
 }
@@ -157,19 +146,16 @@ type CDRsV1Interface interface {
 	StoreSessionCost(ctx *context.Context, attr *engine.AttrCDRSStoreSMCost, reply *string) error
 	GetCDRsCount(ctx *context.Context, args *utils.RPCCDRsFilterWithAPIOpts, reply *int64) error
 	GetCDRs(ctx *context.Context, args *utils.RPCCDRsFilterWithAPIOpts, reply *[]*engine.CDR) error
-	Ping(ctx *context.Context, ign *utils.CGREvent, reply *string) error
 }
 
 type ServiceManagerV1Interface interface {
 	StartService(ctx *context.Context, args *dispatchers.ArgStartServiceWithAPIOpts, reply *string) error
 	StopService(ctx *context.Context, args *dispatchers.ArgStartServiceWithAPIOpts, reply *string) error
 	ServiceStatus(ctx *context.Context, args *dispatchers.ArgStartServiceWithAPIOpts, reply *string) error
-	Ping(ctx *context.Context, ign *utils.CGREvent, reply *string) error
 }
 
 type RALsV1Interface interface {
 	GetRatingPlansCost(ctx *context.Context, arg *utils.RatingPlanCostArg, reply *dispatchers.RatingPlanCost) error
-	Ping(ctx *context.Context, ign *utils.CGREvent, reply *string) error
 }
 
 type ConfigSv1Interface interface {
@@ -182,12 +168,10 @@ type ConfigSv1Interface interface {
 
 type CoreSv1Interface interface {
 	Status(ctx *context.Context, arg *utils.TenantWithAPIOpts, reply *map[string]any) error
-	Ping(ctx *context.Context, ign *utils.CGREvent, reply *string) error
 	Sleep(ctx *context.Context, arg *utils.DurationArgs, reply *string) error
 }
 
 type ReplicatorSv1Interface interface {
-	Ping(ctx *context.Context, ign *utils.CGREvent, reply *string) error
 	GetAccount(ctx *context.Context, args *utils.StringWithAPIOpts, reply *engine.Account) error
 	GetDestination(ctx *context.Context, key *utils.StringWithAPIOpts, reply *engine.Destination) error
 	GetReverseDestination(ctx *context.Context, key *utils.StringWithAPIOpts, reply *[]string) error

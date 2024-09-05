@@ -39,12 +39,6 @@ type APIerSv2 struct {
 	v1.APIerSv1
 }
 
-// Call implements birpc.ClientConnector interface for internal RPC
-func (apiv2 *APIerSv2) Call(ctx *context.Context, serviceMethod string,
-	args any, reply any) error {
-	return utils.APIerRPCCall(apiv2, serviceMethod, args, reply)
-}
-
 type AttrLoadRatingProfile struct {
 	TPid            string
 	RatingProfileID string
@@ -385,11 +379,5 @@ func (apiv2 *APIerSv2) SetActions(ctx *context.Context, attrs *utils.AttrSetActi
 		return utils.APIErrorHandler(err)
 	}
 	*reply = utils.OK
-	return nil
-}
-
-// Ping return pong if the service is active
-func (apiv2 *APIerSv2) Ping(ctx *context.Context, ign *utils.CGREvent, reply *string) error {
-	*reply = utils.Pong
 	return nil
 }

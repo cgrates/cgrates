@@ -23,6 +23,7 @@ import (
 	"sync"
 
 	"github.com/cgrates/birpc"
+	v1 "github.com/cgrates/cgrates/apier/v1"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/cores"
 	"github.com/cgrates/cgrates/ees"
@@ -117,14 +118,12 @@ func (es *EventExporterService) Start() error {
 		return err
 	}
 
-	srv, err := engine.NewServiceWithName(es.eeS, utils.EeS, true)
+	srv, err := engine.NewService(v1.NewEeSv1(es.eeS))
 	if err != nil {
 		return err
 	}
 	if !es.cfg.DispatcherSCfg().Enabled {
-		for _, s := range srv {
-			es.server.RpcRegister(s)
-		}
+		es.server.RpcRegister(srv)
 	}
 	es.intConnChan <- es.anz.GetInternalCodec(srv, utils.EEs)
 	return nil

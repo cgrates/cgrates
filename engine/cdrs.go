@@ -21,16 +21,13 @@ package engine
 import (
 	"fmt"
 	"net/http"
-	"reflect"
 	"slices"
-	"strings"
 	"time"
 
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/guardian"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/cgrates/rpcclient"
 )
 
 func newMapEventFromReqForm(r *http.Request) (mp MapEvent, err error) {
@@ -744,33 +741,6 @@ func (cdrS *CDRServer) processEvents(evs []*utils.CGREvent, args cdrProcessingAr
 		}
 	}
 	return
-}
-
-// Call implements the birpc.ClientConnector interface
-func (cdrS *CDRServer) Call(ctx *context.Context, serviceMethod string, args any, reply any) error {
-	parts := strings.Split(serviceMethod, ".")
-	if len(parts) != 2 {
-		return rpcclient.ErrUnsupporteServiceMethod
-	}
-	// get method
-	method := reflect.ValueOf(cdrS).MethodByName(parts[0][len(parts[0])-2:] + parts[1]) // Inherit the version in the method
-	if !method.IsValid() {
-		return rpcclient.ErrUnsupporteServiceMethod
-	}
-	// construct the params
-	params := []reflect.Value{reflect.ValueOf(args), reflect.ValueOf(reply)}
-	ret := method.Call(params)
-	if len(ret) != 1 {
-		return utils.ErrServerError
-	}
-	if ret[0].Interface() == nil {
-		return nil
-	}
-	err, ok := ret[0].Interface().(error)
-	if !ok {
-		return utils.ErrServerError
-	}
-	return err
 }
 
 // V1ProcessCDR processes a CDR

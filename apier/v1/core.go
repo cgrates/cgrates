@@ -33,20 +33,8 @@ type CoreSv1 struct {
 	cS *cores.CoreService
 }
 
-// Call implements birpc.ClientConnector interface for internal RPC
-func (cS *CoreSv1) Call(ctx *context.Context, serviceMethod string,
-	args any, reply any) error {
-	return utils.APIerRPCCall(cS, serviceMethod, args, reply)
-}
-
 func (cS *CoreSv1) Status(ctx *context.Context, arg *utils.TenantWithAPIOpts, reply *map[string]any) error {
 	return cS.cS.V1Status(ctx, arg, reply)
-}
-
-// Ping used to determinate if component is active
-func (cS *CoreSv1) Ping(ctx *context.Context, _ *utils.CGREvent, reply *string) error {
-	*reply = utils.Pong
-	return nil
 }
 
 // Sleep is used to test the concurrent requests mechanism

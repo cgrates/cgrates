@@ -36,21 +36,6 @@ import (
 	"github.com/cgrates/rpcclient"
 )
 
-func TestCall(t *testing.T) {
-	cfg := config.NewDefaultCGRConfig()
-	newIDb := engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
-	newDM := engine.NewDataManager(newIDb, cfg.CacheCfg(), nil)
-	filterS := engine.NewFilterS(cfg, nil, newDM)
-	eeS, err := NewEventExporterS(cfg, filterS, nil)
-	if err != nil {
-		t.Fatal(err)
-	}
-	errExpect := "UNSUPPORTED_SERVICE_METHOD"
-	if err := eeS.Call(context.Background(), "test", 24532, 43643); err == nil || err.Error() != errExpect {
-		t.Errorf("Expected %q but received %q", errExpect, err)
-	}
-}
-
 type testMockEvent struct {
 	calls map[string]func(args any, reply any) error
 }

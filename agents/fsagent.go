@@ -390,11 +390,6 @@ func (fsa *FSsessions) Shutdown() (err error) {
 	return
 }
 
-// Call implements birpc.ClientConnector interface
-func (fsa *FSsessions) Call(ctx *context.Context, serviceMethod string, args any, reply any) error {
-	return utils.RPCCall(fsa, serviceMethod, args, reply)
-}
-
 // V1DisconnectSession internal method to disconnect session in FreeSWITCH
 func (fsa *FSsessions) V1DisconnectSession(ctx *context.Context, cgrEv utils.CGREvent, reply *string) (err error) {
 	ev := engine.NewMapEvent(cgrEv.Event)

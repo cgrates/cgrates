@@ -21,7 +21,6 @@ package v1
 import (
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/utils"
 )
 
 // NewConfigSv1 returns a new ConfigSv1
@@ -57,10 +56,4 @@ func (cSv1 *ConfigSv1) SetConfigFromJSON(ctx *context.Context, args *config.SetC
 // GetConfigAsJSON will retrieve from CGRConfig a section
 func (cSv1 *ConfigSv1) GetConfigAsJSON(ctx *context.Context, args *config.SectionWithAPIOpts, reply *string) (err error) {
 	return cSv1.cfg.V1GetConfigAsJSON(ctx, args, reply)
-}
-
-// Call implements birpc.ClientConnector interface for internal RPC
-func (cSv1 *ConfigSv1) Call(ctx *context.Context, serviceMethod string,
-	args any, reply any) error {
-	return utils.APIerRPCCall(cSv1, serviceMethod, args, reply)
 }

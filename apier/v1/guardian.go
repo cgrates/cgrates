@@ -22,7 +22,6 @@ import (
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/dispatchers"
 	"github.com/cgrates/cgrates/guardian"
-	"github.com/cgrates/cgrates/utils"
 )
 
 func NewGuardianSv1() *GuardianSv1 {
@@ -41,16 +40,4 @@ func (self *GuardianSv1) RemoteLock(ctx *context.Context, attr *dispatchers.Attr
 func (self *GuardianSv1) RemoteUnlock(ctx *context.Context, refID *dispatchers.AttrRemoteUnlockWithAPIOpts, reply *[]string) (err error) {
 	*reply = guardian.Guardian.UnguardIDs(refID.RefID)
 	return
-}
-
-// Ping return pong if the service is active
-func (self *GuardianSv1) Ping(ctx *context.Context, ign *utils.CGREvent, reply *string) error {
-	*reply = utils.Pong
-	return nil
-}
-
-// Call implements birpc.ClientConnector interface for internal RPC
-func (self *GuardianSv1) Call(ctx *context.Context, serviceMethod string,
-	args any, reply any) error {
-	return utils.APIerRPCCall(self, serviceMethod, args, reply)
 }

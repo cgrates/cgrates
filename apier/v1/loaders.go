@@ -21,7 +21,6 @@ package v1
 import (
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/loaders"
-	"github.com/cgrates/cgrates/utils"
 )
 
 func NewLoaderSv1(ldrS *loaders.LoaderService) *LoaderSv1 {
@@ -33,12 +32,6 @@ type LoaderSv1 struct {
 	ldrS *loaders.LoaderService
 }
 
-// Call implements birpc.ClientConnector interface for internal RPC
-func (ldrSv1 *LoaderSv1) Call(ctx *context.Context, serviceMethod string,
-	args any, reply any) error {
-	return utils.APIerRPCCall(ldrSv1, serviceMethod, args, reply)
-}
-
 func (ldrSv1 *LoaderSv1) Load(ctx *context.Context, args *loaders.ArgsProcessFolder,
 	rply *string) error {
 	return ldrSv1.ldrS.V1Load(ctx, args, rply)
@@ -47,9 +40,4 @@ func (ldrSv1 *LoaderSv1) Load(ctx *context.Context, args *loaders.ArgsProcessFol
 func (ldrSv1 *LoaderSv1) Remove(ctx *context.Context, args *loaders.ArgsProcessFolder,
 	rply *string) error {
 	return ldrSv1.ldrS.V1Remove(ctx, args, rply)
-}
-
-func (rsv1 *LoaderSv1) Ping(ctx *context.Context, ign *utils.CGREvent, reply *string) error {
-	*reply = utils.Pong
-	return nil
 }

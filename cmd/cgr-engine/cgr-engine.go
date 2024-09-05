@@ -90,14 +90,12 @@ func initCacheS(internalCacheSChan chan birpc.ClientConnector,
 		}
 	}()
 
-	srv, err := engine.NewService(chS)
+	srv, err := engine.NewService(v1.NewCacheSv1(chS))
 	if err != nil {
 		return nil, err
 	}
 	if !cfg.DispatcherSCfg().Enabled {
-		for _, s := range srv {
-			server.RpcRegister(s)
-		}
+		server.RpcRegister(srv)
 	}
 	internalCacheSChan <- anz.GetInternalCodec(srv, utils.CacheS)
 	return chS, nil
@@ -110,9 +108,7 @@ func initGuardianSv1(internalGuardianSChan chan birpc.ClientConnector, server *c
 		return err
 	}
 	if !cfg.DispatcherSCfg().Enabled {
-		for _, s := range srv {
-			server.RpcRegister(s)
-		}
+		server.RpcRegister(srv)
 	}
 	internalGuardianSChan <- anz.GetInternalCodec(srv, utils.GuardianS)
 	return nil
@@ -126,9 +122,7 @@ func initServiceManagerV1(internalServiceManagerChan chan birpc.ClientConnector,
 		return err
 	}
 	if !cfg.DispatcherSCfg().Enabled {
-		for _, s := range srv {
-			server.RpcRegister(s)
-		}
+		server.RpcRegister(srv)
 	}
 	internalServiceManagerChan <- anz.GetInternalCodec(srv, utils.ServiceManager)
 	return nil
@@ -141,9 +135,7 @@ func initConfigSv1(internalConfigChan chan birpc.ClientConnector,
 		return err
 	}
 	if !cfg.DispatcherSCfg().Enabled {
-		for _, s := range srv {
-			server.RpcRegister(s)
-		}
+		server.RpcRegister(srv)
 	}
 	internalConfigChan <- anz.GetInternalCodec(srv, utils.ConfigSv1)
 	return nil

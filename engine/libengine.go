@@ -24,7 +24,6 @@ import (
 	"reflect"
 	"strings"
 	"time"
-	"unicode"
 
 	"github.com/cgrates/birpc"
 	"github.com/cgrates/birpc/context"
@@ -165,41 +164,17 @@ func (s RPCClientSet) Call(ctx *context.Context, method string, args any, reply 
 // 	}
 // }
 
-func NewService(val any) (_ IntService, err error) {
-	return NewServiceWithName(val, utils.EmptyString, false)
+func NewService(rcvr any) (*birpc.Service, error) {
+	return NewServiceWithName(rcvr, utils.EmptyString, false)
 }
 
-func NewServiceWithName(val any, name string, useName bool) (_ IntService, err error) {
-	var srv *birpc.Service
-	if srv, err = birpc.NewService(val, name, useName); err != nil {
-		return
+func NewServiceWithName(rcvr any, name string, useName bool) (*birpc.Service, error) {
+	srv, err := birpc.NewService(rcvr, name, useName)
+	if err != nil {
+		return nil, err
 	}
 	srv.Methods["Ping"] = pingM
-	s := IntService{srv.Name: srv}
-	for m, v := range srv.Methods {
-		m = strings.TrimPrefix(m, "BiRPC")
-		if len(m) < 2 || unicode.ToLower(rune(m[0])) != 'v' {
-			continue
-		}
-
-		key := srv.Name
-		if unicode.IsLower(rune(key[len(key)-1])) {
-			key += "V"
-		} else {
-			key += "v"
-		}
-		key += string(m[1])
-		srv2, has := s[key]
-		if !has {
-			srv2 = new(birpc.Service)
-			*srv2 = *srv
-			srv2.Name = key
-			RegisterPingMethod(srv2.Methods)
-			s[key] = srv2
-		}
-		srv2.Methods[m[2:]] = v
-	}
-	return s, nil
+	return srv, nil
 }
 
 // func NewDispatcherService(val any) (_ IntService, err error) {
