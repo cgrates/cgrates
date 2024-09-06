@@ -19,8 +19,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"encoding/csv"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	"github.com/cgrates/cgrates/utils"
@@ -207,5 +209,94 @@ func TestOpen(t *testing.T) {
 	}
 	if err := csvFile.fp.Close(); err != nil {
 		t.Errorf("Failed to close file: %v", err)
+	}
+}
+
+func TestCsvFileRead(t *testing.T) {
+	input := "subject,duration,destination\n101,60,1001\n102,45,1002\n"
+	reader := strings.NewReader(input)
+	csvReader := csv.NewReader(reader)
+	csvFileInstance := &csvFile{
+		csvReader: csvReader,
+	}
+	expectedRecord1 := []string{"subject", "duration", "destination"}
+	record1, err := csvFileInstance.Read()
+	if err != nil {
+		t.Fatalf("expected no error, got %v", err)
+	}
+	if len(record1) != len(expectedRecord1) {
+		t.Fatalf("expected %d fields, got %d", len(expectedRecord1), len(record1))
+	}
+	for i, field := range record1 {
+		if field != expectedRecord1[i] {
+			t.Errorf("expected field %d to be %s, got %s", i, expectedRecord1[i], field)
+		}
+	}
+	expectedRecord2 := []string{"101", "60", "1001"}
+	record2, err := csvFileInstance.Read()
+	if err != nil {
+		t.Fatalf("expected no error, got %v", err)
+	}
+	if len(record2) != len(expectedRecord2) {
+		t.Fatalf("expected %d fields, got %d", len(expectedRecord2), len(record2))
+	}
+	for i, field := range record2 {
+		if field != expectedRecord2[i] {
+			t.Errorf("expected field %d to be %s, got %s", i, expectedRecord2[i], field)
+		}
+	}
+	expectedRecord3 := []string{"102", "45", "1002"}
+	record3, err := csvFileInstance.Read()
+
+	if err != nil {
+		t.Fatalf("expected no error, got %v", err)
+	}
+
+	if len(record3) != len(expectedRecord3) {
+		t.Fatalf("expected %d fields, got %d", len(expectedRecord3), len(record3))
+	}
+	for i, field := range record3 {
+		if field != expectedRecord3[i] {
+			t.Errorf("expected field %d to be %s, got %s", i, expectedRecord3[i], field)
+		}
+	}
+	_, err = csvFileInstance.Read()
+	if err == nil {
+		t.Fatalf("expected EOF error, got nil")
+	}
+}
+
+func TestCsvURLRead(t *testing.T) {
+	input := "field1,field2,field3\nvalue1,value2,value3\n"
+	reader := strings.NewReader(input)
+	csvReader := csv.NewReader(reader)
+	csvURLInstance := &csvURL{
+		csvReader: csvReader,
+	}
+	expectedRecord := []string{"field1", "field2", "field3"}
+	record, err := csvURLInstance.Read()
+	if err != nil {
+		t.Fatalf("expected no error, got %v", err)
+	}
+	if len(record) != len(expectedRecord) {
+		t.Fatalf("expected %d fields, got %d", len(expectedRecord), len(record))
+	}
+	for i, field := range record {
+		if field != expectedRecord[i] {
+			t.Errorf("expected field %d to be %s, got %s", i, expectedRecord[i], field)
+		}
+	}
+	expectedRecord2 := []string{"value1", "value2", "value3"}
+	record2, err := csvURLInstance.Read()
+	if err != nil {
+		t.Fatalf("expected no error, got %v", err)
+	}
+	if len(record2) != len(expectedRecord2) {
+		t.Fatalf("expected %d fields, got %d", len(expectedRecord2), len(record2))
+	}
+	for i, field := range record2 {
+		if field != expectedRecord2[i] {
+			t.Errorf("expected field %d to be %s, got %s", i, expectedRecord2[i], field)
+		}
 	}
 }

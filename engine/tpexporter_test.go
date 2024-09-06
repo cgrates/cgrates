@@ -164,3 +164,52 @@ func TestNewTPExporter(t *testing.T) {
 		}
 	})
 }
+
+func TestTPExporterWriteOut(t *testing.T) {
+	type Data struct {
+		Field1 string
+		Field2 string
+	}
+	tpExp := &TPExporter{
+		compress:   false,
+		exportPath: "",
+		fileFormat: utils.CSV,
+		sep:        ',',
+	}
+	t.Run("empty tpData", func(t *testing.T) {
+		err := tpExp.writeOut("testfile.csv", []any{})
+		if err != nil {
+			t.Errorf("Expected no error, got %v", err)
+		}
+	})
+
+	t.Run("exportPath is set", func(t *testing.T) {
+		tmpDir := t.TempDir()
+		tpExp.exportPath = tmpDir
+		tpData := []any{
+			Data{"ID1", "ID2"},
+			Data{"ID3", "ID4"},
+		}
+		err := tpExp.writeOut("testfile.csv", tpData)
+		if err != nil {
+			t.Errorf("Expected no error, got %v", err)
+		}
+		expectedFilePath := path.Join(tmpDir, "testfile.csv")
+		if _, err := os.Stat(expectedFilePath); err != nil {
+			t.Errorf("Expected file to be created at %v, but got error: %v", expectedFilePath, err)
+		}
+		defer os.Remove(expectedFilePath)
+	})
+	t.Run("write to buffer", func(t *testing.T) {
+		tpExp.exportPath = ""
+		tpData := []any{
+			Data{"ID1", "ID2"},
+			Data{"ID3", "ID4"},
+		}
+		err := tpExp.writeOut("testfile.csv", tpData)
+		if err != nil {
+			t.Errorf("Expected no error, got %v", err)
+		}
+
+	})
+}
