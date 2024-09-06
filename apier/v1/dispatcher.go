@@ -797,7 +797,7 @@ func (dSv1 DispatcherSv1) GetProfilesForEvent(ctx *context.Context, ev *utils.CG
 	return dSv1.dS.DispatcherSv1GetProfilesForEvent(ctx, ev, dPrfl)
 }
 
-func (dS *DispatcherSv1) RemoteStatus(ctx *context.Context, args *utils.TenantWithAPIOpts, reply *map[string]any) (err error) {
+func (dS *DispatcherSv1) RemoteStatus(ctx *context.Context, args *cores.V1StatusParams, reply *map[string]any) (err error) {
 	return dS.dS.DispatcherSv1RemoteStatus(ctx, args, reply)
 }
 
@@ -940,8 +940,8 @@ func NewDispatcherCoreSv1(dps *dispatchers.DispatcherService) *DispatcherCoreSv1
 	return &DispatcherCoreSv1{dS: dps}
 }
 
-func (dS *DispatcherCoreSv1) Status(ctx *context.Context, args *utils.TenantWithAPIOpts, reply *map[string]any) error {
-	return dS.dS.CoreSv1Status(ctx, args, reply)
+func (dS *DispatcherCoreSv1) Status(ctx *context.Context, params *cores.V1StatusParams, reply *map[string]any) error {
+	return dS.dS.CoreSv1Status(ctx, params, reply)
 }
 
 func (dS *DispatcherCoreSv1) Ping(ctx *context.Context, args *utils.CGREvent, reply *string) error {
