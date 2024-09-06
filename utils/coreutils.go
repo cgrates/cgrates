@@ -46,8 +46,7 @@ import (
 )
 
 var (
-	startCGRateSTime time.Time
-	boolGenerator    *boolGen
+	boolGenerator *boolGen
 
 	rfc3339Rule                  = regexp.MustCompile(`^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.+$`)
 	sqlRule                      = regexp.MustCompile(`^\d{4}-\d{2}-\d{2}\s\d{2}:\d{2}:\d{2}$`)
@@ -66,13 +65,7 @@ var (
 )
 
 func init() {
-	startCGRateSTime = time.Now()
 	boolGenerator = newBoolGen()
-}
-
-// GetStartTime return the Start time of engine (in UNIX format)
-func GetStartTime() string {
-	return startCGRateSTime.Format(time.UnixDate)
 }
 
 // BoolGenerator return the boolean generator

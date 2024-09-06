@@ -33,8 +33,8 @@ type CoreSv1 struct {
 	cS *cores.CoreService
 }
 
-func (cS *CoreSv1) Status(ctx *context.Context, arg *utils.TenantWithAPIOpts, reply *map[string]any) error {
-	return cS.cS.V1Status(ctx, arg, reply)
+func (cS *CoreSv1) Status(ctx *context.Context, params *cores.V1StatusParams, reply *map[string]any) error {
+	return cS.cS.V1Status(ctx, params, reply)
 }
 
 // Sleep is used to test the concurrent requests mechanism

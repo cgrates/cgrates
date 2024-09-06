@@ -23,6 +23,7 @@ import (
 
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/cores"
 	"github.com/cgrates/cgrates/dispatchers"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/sessions"
@@ -167,8 +168,13 @@ type ConfigSv1Interface interface {
 }
 
 type CoreSv1Interface interface {
-	Status(ctx *context.Context, arg *utils.TenantWithAPIOpts, reply *map[string]any) error
-	Sleep(ctx *context.Context, arg *utils.DurationArgs, reply *string) error
+	Status(_ *context.Context, _ *cores.V1StatusParams, _ *map[string]any) error
+	Panic(_ *context.Context, _ *utils.PanicMessageArgs, _ *string) error
+	Sleep(_ *context.Context, _ *utils.DurationArgs, _ *string) error
+	StartCPUProfiling(_ *context.Context, _ *utils.DirectoryArgs, _ *string) error
+	StartMemoryProfiling(_ *context.Context, _ cores.MemoryProfilingParams, _ *string) error
+	StopCPUProfiling(_ *context.Context, _ *utils.TenantWithAPIOpts, _ *string) error
+	StopMemoryProfiling(_ *context.Context, _ utils.TenantWithAPIOpts, _ *string) error
 }
 
 type ReplicatorSv1Interface interface {

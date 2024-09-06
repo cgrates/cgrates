@@ -127,23 +127,28 @@ func (dS *DispatcherService) CoreSv1StartMemoryProfiling(ctx *context.Context, p
 		utils.CoreSv1StartMemoryProfiling, params, reply,
 	)
 }
-func (dS *DispatcherService) CoreSv1Status(ctx *context.Context, args *utils.TenantWithAPIOpts, reply *map[string]any) (err error) {
+func (dS *DispatcherService) CoreSv1Status(ctx *context.Context, params *cores.V1StatusParams, reply *map[string]any) error {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
-	if args != nil && len(args.Tenant) != 0 {
-		tnt = args.Tenant
+	if params != nil && params.Tenant != utils.EmptyString {
+		tnt = params.Tenant
 	}
 	ev := make(map[string]any)
 	opts := make(map[string]any)
-	if args != nil {
-		opts = args.APIOpts
+	if params != nil && params.APIOpts != nil {
+		opts = params.APIOpts
 	}
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(utils.CoreSv1Status, tnt,
+		if err := dS.authorize(utils.CoreSv1Status, tnt,
 			utils.IfaceAsString(opts[utils.OptsAPIKey]), utils.TimePointer(time.Now())); err != nil {
-			return
+			return err
 		}
 	}
-	return dS.Dispatch(&utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaCore, utils.CoreSv1Status, args, reply)
+	return dS.Dispatch(
+		&utils.CGREvent{
+			Tenant:  tnt,
+			Event:   ev,
+			APIOpts: opts,
+		}, utils.MetaCore, utils.CoreSv1Status, params, reply)
 }
 func (dS *DispatcherService) CoreSv1StopCPUProfiling(ctx *context.Context, args *utils.TenantWithAPIOpts, reply *string) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant

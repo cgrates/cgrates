@@ -43,6 +43,7 @@ require (
 	github.com/nats-io/nats.go v1.37.0
 	github.com/nyaruka/phonenumbers v1.4.0
 	github.com/peterh/liner v1.2.2
+	github.com/prometheus/procfs v0.12.0
 	github.com/rabbitmq/amqp091-go v1.10.0
 	github.com/segmentio/kafka-go v0.4.47
 	github.com/ugorji/go/codec v1.2.12
@@ -68,7 +69,6 @@ require (
 	github.com/modern-go/reflect2 v1.0.2 // indirect
 	github.com/prometheus/client_model v0.5.0 // indirect
 	github.com/prometheus/common v0.48.0 // indirect
-	github.com/prometheus/procfs v0.12.0 // indirect
 	go.opentelemetry.io/otel/sdk v1.24.0 // indirect
 	google.golang.org/genproto/googleapis/api v0.0.0-20240730163845-b1a4ccb954bf // indirect
 )

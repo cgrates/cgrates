@@ -27,6 +27,7 @@ import (
 
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/cores"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/guardian"
 	"github.com/cgrates/cgrates/utils"
@@ -454,7 +455,7 @@ func (dS *DispatcherService) Call(ctx *context.Context, serviceMethod string, //
 	return err
 }
 
-func (dS *DispatcherService) DispatcherSv1RemoteStatus(ctx *context.Context, args *utils.TenantWithAPIOpts,
+func (dS *DispatcherService) DispatcherSv1RemoteStatus(ctx *context.Context, args *cores.V1StatusParams,
 	reply *map[string]any) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
 	if args.Tenant != utils.EmptyString {

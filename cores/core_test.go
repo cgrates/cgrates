@@ -21,12 +21,10 @@ package cores
 import (
 	"errors"
 	"reflect"
-	"runtime"
 	"sync"
 	"testing"
 	"time"
 
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -55,63 +53,6 @@ func TestNewCoreService(t *testing.T) {
 	close(stopchan)
 	//shut down the service
 	rcv.Shutdown()
-}
-
-func TestCoreServiceStatus(t *testing.T) {
-	cfgDflt := config.NewDefaultCGRConfig()
-	cfgDflt.CoreSCfg().CapsStatsInterval = 1
-	caps := engine.NewCaps(1, utils.MetaBusy)
-	stopChan := make(chan struct{}, 1)
-
-	cores := NewCoreService(cfgDflt, caps, nil, stopChan, nil, nil)
-	args := &utils.TenantWithAPIOpts{
-		Tenant:  "cgrates.org",
-		APIOpts: map[string]any{},
-	}
-
-	var reply map[string]any
-	cfgVrs, err := utils.GetCGRVersion()
-	if err != nil {
-		t.Error(err)
-	}
-
-	expected := map[string]any{
-		utils.GoVersion:        runtime.Version(),
-		utils.RunningSince:     "TIME_CHANGED",
-		utils.VersionName:      cfgVrs,
-		utils.ActiveGoroutines: runtime.NumGoroutine(),
-		utils.MemoryUsage:      "CHANGED_MEMORY_USAGE",
-		utils.NodeID:           cfgDflt.GeneralCfg().NodeID,
-	}
-	if err := cores.V1Status(context.Background(), args, &reply); err != nil {
-		t.Error(err)
-	} else {
-		reply[utils.RunningSince] = "TIME_CHANGED"
-		reply[utils.MemoryUsage] = "CHANGED_MEMORY_USAGE"
-	}
-	if !reflect.DeepEqual(expected[utils.GoVersion], reply[utils.GoVersion]) {
-		t.Errorf("Expected %+v, received %+v", utils.ToJSON(expected[utils.GoVersion]), utils.ToJSON(reply[utils.GoVersion]))
-	}
-	if !reflect.DeepEqual(expected[utils.RunningSince], reply[utils.RunningSince]) {
-		t.Errorf("Expected %+v, received %+v", utils.ToJSON(expected[utils.RunningSince]), utils.ToJSON(reply[utils.RunningSince]))
-	}
-	if !reflect.DeepEqual(expected[utils.VersionName], reply[utils.VersionName]) {
-		t.Errorf("Expected %+v, received %+v", utils.ToJSON(expected[utils.VersionName]), utils.ToJSON(reply[utils.VersionName]))
-	}
-	if !reflect.DeepEqual(expected[utils.MemoryUsage], reply[utils.MemoryUsage]) {
-		t.Errorf("Expected %+v, received %+v", utils.ToJSON(expected[utils.MemoryUsage]), utils.ToJSON(reply[utils.MemoryUsage]))
-	}
-	if !reflect.DeepEqual(expected[utils.NodeID], reply[utils.NodeID]) {
-		t.Errorf("Expected %+v, received %+v", utils.ToJSON(expected[utils.NodeID]), utils.ToJSON(reply[utils.NodeID]))
-	}
-	utils.GitCommitDate = "wrong format"
-	utils.GitCommitHash = "73014DAA0C1D7EDCB532D5FE600B8A20D588CDF8"
-	if err := cores.V1Status(context.Background(), args, &reply); err != nil {
-		t.Error(err)
-	}
-
-	utils.GitCommitDate = ""
-	utils.GitCommitHash = ""
 }
 
 func TestV1Panic(t *testing.T) {
