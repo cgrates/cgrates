@@ -159,7 +159,7 @@ HALF2,*any,*any,*any,*any,12:00:00;23:59:59`,
 		args := &engine.ExternalCDRWithAPIOpts{
 			ExternalCDR: &engine.ExternalCDR{
 				OriginID:    "TestBalanceTimings",
-				ToR:         utils.MetaMonetary,
+				ToR:         utils.MetaVoice,
 				RequestType: utils.MetaPrepaid,
 				AnswerTime:  "2024-08-04T15:00:07Z",
 				SetupTime:   "2024-08-04T15:00:00Z",
@@ -196,7 +196,7 @@ HALF2,*any,*any,*any,*any,12:00:00;23:59:59`,
 			t.Fatalf("expected TimingIDs %v, received: %v", "HALF1", monetaryBalance.Timings)
 		}
 		monetaryBalance = acnt.BalanceMap[utils.MetaMonetary][0]
-		if monetaryBalance.ID != "bal2" || monetaryBalance.Value != 9 {
+		if monetaryBalance.ID != "bal2" || monetaryBalance.Value != 9.4 {
 			t.Fatalf("received account with unexpected *monetary balance: %v", monetaryBalance)
 		} else if monetaryBalance.ID == "bal2" && monetaryBalance.Timings[0].ID != "HALF2" {
 			t.Fatalf("expected TimingIDs %v, received: %v", "HALF2", monetaryBalance.Timings)
@@ -208,7 +208,7 @@ HALF2,*any,*any,*any,*any,12:00:00;23:59:59`,
 		args := &engine.ExternalCDRWithAPIOpts{
 			ExternalCDR: &engine.ExternalCDR{
 				OriginID:    "TestBalanceTimings2",
-				ToR:         utils.MetaMonetary,
+				ToR:         utils.MetaVoice,
 				RequestType: utils.MetaPrepaid,
 				AnswerTime:  "2024-08-04T11:00:07Z",
 				SetupTime:   "2024-08-04T11:00:00Z",
@@ -239,13 +239,13 @@ HALF2,*any,*any,*any,*any,12:00:00;23:59:59`,
 		}
 
 		monetaryBalance := acnt.BalanceMap[utils.MetaMonetary][1]
-		if monetaryBalance.ID != "bal1" || monetaryBalance.Value != 9 {
+		if monetaryBalance.ID != "bal1" || monetaryBalance.Value != 9.4 {
 			t.Fatalf("received account with unexpected *monetary balance: %v", monetaryBalance)
 		} else if monetaryBalance.ID == "bal1" && monetaryBalance.Timings[0].ID != "HALF1" {
 			t.Fatalf("expected TimingIDs %v, received: %v", "HALF1", monetaryBalance.Timings)
 		}
 		monetaryBalance = acnt.BalanceMap[utils.MetaMonetary][0]
-		if monetaryBalance.ID != "bal2" || monetaryBalance.Value != 9 {
+		if monetaryBalance.ID != "bal2" || monetaryBalance.Value != 9.4 {
 			t.Fatalf("received account with unexpected *monetary balance: %v", monetaryBalance)
 		} else if monetaryBalance.ID == "bal2" && monetaryBalance.Timings[0].ID != "HALF2" {
 			t.Fatalf("expected TimingIDs %v, received: %v", "HALF2", monetaryBalance.Timings)
