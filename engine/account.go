@@ -861,6 +861,9 @@ func (acc *Account) DebitConnectionFee(cc *CallCost, usefulMoneyBalances Balance
 		//log.Print("CONNECT FEE: %f", connectFee)
 		connectFeePaid := false
 		for _, b := range usefulMoneyBalances {
+			if !b.IsActiveAt(cc.GetStartTime()) {
+				continue
+			}
 			if b.GetValue() >= connectFee {
 				b.SubstractValue(connectFee)
 				// the conect fee is not refundable!
