@@ -422,6 +422,9 @@ func (acc *Account) debitCreditBalance(cd *CallDescriptor, count bool, dryRun bo
 				// check for blocker
 				if balance.Blocker {
 					if cd.GetDuration() != 0 {
+						if !dryRun {
+							return nil, utils.ErrInsufficientCreditBalanceBlocker
+						}
 						return
 					}
 					goto COMMIT // don't go to next balances
@@ -458,6 +461,9 @@ func (acc *Account) debitCreditBalance(cd *CallDescriptor, count bool, dryRun bo
 				// check for blocker
 				if balance.Blocker {
 					if cd.GetDuration() != 0 {
+						if !dryRun {
+							return nil, utils.ErrInsufficientCreditBalanceBlocker
+						}
 						return
 					}
 					goto COMMIT // don't go to next balances
