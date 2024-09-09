@@ -123,7 +123,7 @@ cgrates.org,call,1001,,RP_ANY,`,
 		}
 	})
 
-	// Attempt to debit 0.7, but due to the blocker and the empty balance, the final cost should be 0.
+	// Attempt to debit 0.7, but due to the blocker and the empty balance, the final cost should be -1.
 	t.Run("ProcessCDR2", func(t *testing.T) {
 		var reply string
 		if err := client.Call(utils.CDRsV1ProcessEvent,
@@ -163,28 +163,17 @@ cgrates.org,call,1001,,RP_ANY,`,
 		if len(cdrs) != 2 {
 			t.Fatalf("expected to receive 2 CDRs: %v", utils.ToJSON(cdrs))
 		}
+		if cdrs[0].Cost != -1 {
+			t.Fatalf("expected cost to be -1, received <%v>", utils.ToJSON(cdrs[0]))
+		}
 		cost := 0.0
-		if cdrs[0].CostDetails.Cost != nil {
-			cost = *cdrs[0].CostDetails.Cost
-		}
-		if cost != 1 {
-			t.Fatalf("cdrs[0].CostDetails.Cost = %v, want %v", cost, 1)
-		}
-		balanceSummaries := cdrs[0].CostDetails.AccountSummary.BalanceSummaries
-		if len(balanceSummaries) != 1 {
-			t.Fatalf("expected only 1 balance summary inside first CDR, got %s", utils.ToJSON(balanceSummaries))
-		}
-		if balanceSummaries[0].Value != 0 {
-			t.Errorf("expected balance to be empty, got %v", balanceSummaries[0].Value)
-		}
-
 		if cdrs[1].CostDetails.Cost != nil {
 			cost = *cdrs[1].CostDetails.Cost
 		}
-		if cost != 0 {
-			t.Errorf("cdrs[1].CostDetails.Cost = %v, want %v", cost, 0)
+		if cost != 0.7 {
+			t.Errorf("cdrs[1].CostDetails.Cost = %v, want %v", cost, 0.7)
 		}
-		balanceSummaries = cdrs[1].CostDetails.AccountSummary.BalanceSummaries
+		balanceSummaries := cdrs[1].CostDetails.AccountSummary.BalanceSummaries
 		if len(balanceSummaries) != 1 {
 			t.Errorf("expected only 1 balance summary inside second CDR, got %s", utils.ToJSON(balanceSummaries))
 		}
