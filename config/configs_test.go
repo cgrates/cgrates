@@ -19,6 +19,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package config
 
 import (
+	"net/http"
+	"net/http/httptest"
+	"os"
 	"reflect"
 	"strings"
 	"testing"
@@ -111,4 +114,45 @@ func TestConfigSCfgClone(t *testing.T) {
 	if rcv.URL = ""; cS.URL != "/randomURL/" {
 		t.Errorf("Expected clone to not modify the cloned")
 	}
+}
+
+func TestHandleConfigSFile(t *testing.T) {
+
+	tmpFile, err := os.CreateTemp("", "testfile-*.txt")
+	if err != nil {
+		t.Fatalf("Failed to create temp file: %v", err)
+	}
+	defer os.Remove(tmpFile.Name())
+
+	content := "content"
+	if _, err := tmpFile.WriteString(content); err != nil {
+		t.Fatalf("Failed to write to temp file: %v", err)
+	}
+	tmpFile.Close()
+
+	rr := httptest.NewRecorder()
+
+	handleConfigSFile(tmpFile.Name(), rr)
+
+	if rr.Code != http.StatusOK {
+		t.Errorf("Expected status code %d, got %d", http.StatusOK, rr.Code)
+	}
+
+	if rr.Body.String() != content {
+		t.Errorf("Expected response body %q, got %q", content, rr.Body.String())
+	}
+}
+
+func TestHandleConfigSFileFileReadError(t *testing.T) {
+
+	nonExistentFilePath := "non-existent-file.txt"
+
+	rr := httptest.NewRecorder()
+
+	handleConfigSFile(nonExistentFilePath, rr)
+
+	if rr.Code != http.StatusInternalServerError {
+		t.Errorf("Expected status code %d, got %d", http.StatusInternalServerError, rr.Code)
+	}
+
 }

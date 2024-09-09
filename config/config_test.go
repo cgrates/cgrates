@@ -21,6 +21,7 @@ import (
 	"encoding/json"
 	"os"
 	"path"
+	"path/filepath"
 	"reflect"
 	"strings"
 	"testing"
@@ -5842,5 +5843,48 @@ func TestV1GetConfigRANKINGS_JSON(t *testing.T) {
 		t.Error(err)
 	} else if !reflect.DeepEqual(reply, expected) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(reply))
+	}
+}
+
+func TestV1ReloadConfig(t *testing.T) {
+	cfg := &CGRConfig{}
+	ctx := context.TODO()
+	missingPathArgs := &ReloadArgs{
+		APIOpts: map[string]any{},
+		Tenant:  "cgrates.org",
+		Section: "section",
+		DryRun:  false,
+	}
+	var reply string
+	err := cfg.V1ReloadConfig(ctx, missingPathArgs, &reply)
+	if err == nil {
+		t.Errorf("Expected an error for missing 'Path' field, but got none")
+	}
+
+}
+
+func TestLoadConfigFromFolder(t *testing.T) {
+	cfg := &CGRConfig{}
+	tmpDir, err := os.MkdirTemp("", "configtest")
+	if err != nil {
+		t.Fatalf("Failed to create temp directory: %v", err)
+	}
+	defer os.RemoveAll(tmpDir)
+	err = cfg.loadConfigFromFolder(tmpDir, nil, false)
+	if err == nil || err.Error() != "No config file found on path "+tmpDir {
+		t.Errorf("Expected error for no config files, but got: %v", err)
+	}
+	validJson := `{"Subject": "1001"}`
+	filePath := filepath.Join(tmpDir, "config.json")
+	err = os.WriteFile(filePath, []byte(validJson), 0644)
+	if err != nil {
+		t.Fatalf("Failed to write test JSON file: %v", err)
+	}
+	loadFunc := func(jsnCfg *CgrJsonCfg) error {
+		return nil
+	}
+	err = cfg.loadConfigFromFolder(tmpDir, []func(jsnCfg *CgrJsonCfg) error{loadFunc}, false)
+	if err != nil {
+		t.Errorf("Expected no error, but got: %v", err)
 	}
 }

@@ -20,7 +20,11 @@ package ers
 
 import (
 	"os"
+	"path/filepath"
+	"strings"
+	"sync"
 	"testing"
+	"time"
 )
 
 func testCreateDirs(t *testing.T) {
@@ -58,6 +62,61 @@ func testCleanupFiles(t *testing.T) {
 		"/tmp/xmlErs2"} {
 		if err := os.RemoveAll(dir); err != nil {
 			t.Fatal("Error removing folder: ", dir, err)
+		}
+	}
+}
+
+func TestProcessReaderDir(t *testing.T) {
+	dir, err := os.MkdirTemp("", "testProcessReaderDir")
+	if err != nil {
+		t.Fatalf("Failed to create temp directory: %v", err)
+	}
+	defer os.RemoveAll(dir)
+
+	file1 := filepath.Join(dir, "file1.csv")
+	file2 := filepath.Join(dir, "file2.csv")
+	file3 := filepath.Join(dir, "file3.txt")
+
+	if err := os.WriteFile(file1, []byte("data"), 0644); err != nil {
+		t.Fatalf("Failed to create file1: %v", err)
+	}
+	if err := os.WriteFile(file2, []byte("data"), 0644); err != nil {
+		t.Fatalf("Failed to create file2: %v", err)
+	}
+	if err := os.WriteFile(file3, []byte("data"), 0644); err != nil {
+		t.Fatalf("Failed to create file3: %v", err)
+	}
+
+	var processedFiles []string
+	var mu sync.Mutex
+	mockFunc := func(fn string) error {
+		mu.Lock()
+		defer mu.Unlock()
+		processedFiles = append(processedFiles, fn)
+		return nil
+	}
+
+	processReaderDir(dir, ".csv", mockFunc)
+
+	time.Sleep(500 * time.Millisecond)
+
+	mu.Lock()
+	defer mu.Unlock()
+	if len(processedFiles) != 2 {
+		t.Errorf("Expected 2 files to be processed, got %d", len(processedFiles))
+	}
+
+	expectedFiles := []string{"file1.csv", "file2.csv"}
+	for _, expected := range expectedFiles {
+		found := false
+		for _, processed := range processedFiles {
+			if strings.HasSuffix(processed, expected) {
+				found = true
+				break
+			}
+		}
+		if !found {
+			t.Errorf("Expected file %s to be processed, but it was not", expected)
 		}
 	}
 }
