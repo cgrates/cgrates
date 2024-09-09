@@ -59,7 +59,7 @@ type TrendService struct {
 	server      *cores.Server
 	connMgr     *engine.ConnManager
 
-	trs      *engine.TrendService
+	trs      *engine.TrendS
 	connChan chan birpc.ClientConnector
 	anz      *AnalyzerService
 	srvDep   map[string]*sync.WaitGroup
@@ -76,14 +76,14 @@ func (trs *TrendService) Start() error {
 	filterS := <-trs.filterSChan
 	trs.filterSChan <- filterS
 	dbchan := trs.dm.GetDMChan()
-	datadb := <-dbchan
-	dbchan <- datadb
+	dm := <-dbchan
+	dbchan <- dm
 
 	utils.Logger.Info(fmt.Sprintf("<%s> starting <%s> subsystem",
 		utils.CoreS, utils.TrendS))
 	trs.Lock()
 	defer trs.Unlock()
-	trs.trs = engine.NewTrendService(datadb, trs.cfg, filterS)
+	trs.trs = engine.NewTrendS(dm, trs.connMgr, filterS, trs.cfg)
 	srv, err := engine.NewService(v1.NewTrendSv1(trs.trs))
 	if err != nil {
 		return err
@@ -91,7 +91,7 @@ func (trs *TrendService) Start() error {
 	if !trs.cfg.DispatcherSCfg().Enabled {
 		trs.server.RpcRegister(srv)
 	}
-	trs.connChan <- trs.anz.GetInternalCodec(srv, utils.StatS)
+	trs.connChan <- trs.anz.GetInternalCodec(srv, utils.TrendS)
 	return nil
 }
 

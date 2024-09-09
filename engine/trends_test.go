@@ -20,8 +20,6 @@ package engine
 
 import (
 	"testing"
-
-	"github.com/cgrates/cgrates/config"
 )
 
 func TestTrendProfileTenantID(t *testing.T) {
@@ -45,21 +43,5 @@ func TestTrendTenantID(t *testing.T) {
 	expected := "cgrates.org:1"
 	if result != expected {
 		t.Errorf("TenantID() = %v; want %v", result, expected)
-	}
-}
-
-func TestNewTrendService(t *testing.T) {
-	dm := &DataManager{}
-	cgrcfg := &config.CGRConfig{}
-	filterS := &FilterS{}
-	result := NewTrendService(dm, cgrcfg, filterS)
-	if result.dm != dm {
-		t.Errorf("Expected dm to be %v, got %v", dm, result.dm)
-	}
-	if result.cgrcfg != cgrcfg {
-		t.Errorf("Expected cgrcfg to be %v, got %v", cgrcfg, result.cgrcfg)
-	}
-	if result.filterS != filterS {
-		t.Errorf("Expected filterS to be %v, got %v", filterS, result.filterS)
 	}
 }

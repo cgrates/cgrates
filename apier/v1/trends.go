@@ -105,10 +105,10 @@ func (apierSv1 *APIerSv1) RemoveTrendProfile(ctx *context.Context, args *utils.T
 }
 
 // NewTrendSv1 initializes TrendSV1
-func NewTrendSv1(trs *engine.TrendService) *TrendSv1 {
+func NewTrendSv1(trs *engine.TrendS) *TrendSv1 {
 	return &TrendSv1{}
 }
 
 type TrendSv1 struct {
-	trS *engine.TrendService
+	trS *engine.TrendS
 }

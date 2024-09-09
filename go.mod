@@ -20,6 +20,7 @@ require (
 	github.com/cgrates/aringo v0.0.0-20220525160735-b5990313d99e
 	github.com/cgrates/baningo v0.0.0-20210413080722-004ffd5e429f
 	github.com/cgrates/birpc v1.3.1-0.20211117095917-5b0ff29f3084
+	github.com/cgrates/cron v0.0.0-20201129173550-63ea3d835706
 	github.com/cgrates/fsock v0.0.0-20240522220429-b6cc1d96fd2b
 	github.com/cgrates/janusgo v0.0.0-20240503152118-188a408d7e73
 	github.com/cgrates/kamevapi v0.0.0-20240307160311-26273f03eedf

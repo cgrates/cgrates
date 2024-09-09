@@ -19,80 +19,80 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
-	"time"
+	"fmt"
+	"sync"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
+	"github.com/cgrates/cron"
 )
 
-type TrendProfile struct {
-	Tenant       string
-	ID           string
-	Schedule     string // Cron expression scheduling gathering of the metrics
-	StatID       string
-	Metrics      []MetricWithSettings
-	QueueLength  int
-	TTL          time.Duration
-	TrendType    string // *last, *average
-	ThresholdIDs []string
-}
-
-// MetricWithSettings adds specific settings to the Metric
-type MetricWithSettings struct {
-	MetricID         string
-	TrendSwingMargin float64 // allow this margin for *neutral trend
-}
-
-type TrendProfileWithAPIOpts struct {
-	*TrendProfile
-	APIOpts map[string]any
-}
-
-type TrendProfilesAPI struct {
-	Tenant string
-	TpIDs  []string
-}
-
-func (srp *TrendProfile) TenantID() string {
-	return utils.ConcatenatedKey(srp.Tenant, srp.ID)
-}
-
-type TrendWithAPIOpts struct {
-	*Trend
-	APIOpts map[string]any
-}
-
-// Trend is the unit matched by filters
-type Trend struct {
-	Tenant   string
-	ID       string
-	RunTimes []time.Time
-	Metrics  map[time.Time]map[string]MetricWithTrend
-	totals   map[string]float64 // cached sum, used for average calculations
-}
-
-// MetricWithTrend represents one read from StatS
-type MetricWithTrend struct {
-	ID    string  // Metric ID
-	Value float64 // Metric Value
-	Trend string  // *positive, *negative, *neutral
-}
-
-func (tr *Trend) TenantID() string {
-	return utils.ConcatenatedKey(tr.Tenant, tr.ID)
-}
-
-// NewTrendService the constructor for TrendS service
-func NewTrendService(dm *DataManager, cgrcfg *config.CGRConfig, filterS *FilterS) *TrendService {
-	return &TrendService{
-		dm:      dm,
-		cgrcfg:  cgrcfg,
-		filterS: filterS,
+// NewTrendS is the constructor for TrendS
+func NewTrendS(dm *DataManager,
+	connMgr *ConnManager,
+	filterS *FilterS,
+	cgrcfg *config.CGRConfig) *TrendS {
+	return &TrendS{
+		dm:          dm,
+		connMgr:     connMgr,
+		filterS:     filterS,
+		cgrcfg:      cgrcfg,
+		loopStopped: make(chan struct{}),
+		crnTQsMux:   new(sync.RWMutex),
+		crnTQs:      make(map[string]map[string]cron.EntryID),
 	}
 }
 
-type TrendService struct {
+// TrendS is responsible of implementing the logic of TrendService
+type TrendS struct {
 	dm      *DataManager
-	cgrcfg  *config.CGRConfig
+	connMgr *ConnManager
 	filterS *FilterS
+	cgrcfg  *config.CGRConfig
+
+	crn *cron.Cron // cron reference
+
+	crnTQsMux *sync.RWMutex                      // protects the crnTQs
+	crnTQs    map[string]map[string]cron.EntryID // save the EntryIDs for TrendQueries so we can reschedule them when needed
+
+	loopStopped chan struct{}
+}
+
+// computeTrend will query a stat and build the Trend for it
+//
+//	it is be called by Cron service
+func (tS *TrendS) computeTrend(tP *TrendProfile) (err error) {
+	return
+}
+
+// scheduleTrendQueries will schedule/re-schedule specific trend queries
+func (tS *TrendS) scheduleTrendQueries(ctx *context.Context, tnt string, tIDs []string) (complete bool) {
+	complete = true
+	for _, tID := range tIDs {
+		tS.crnTQsMux.RLock()
+		if entryID, has := tS.crnTQs[tnt][tID]; has {
+			tS.crn.Remove(entryID) // deschedule the query
+		}
+		tS.crnTQsMux.RUnlock()
+		if tP, err := tS.dm.GetTrendProfile(tnt, tID, true, true, utils.NonTransactional); err != nil {
+			utils.Logger.Warning(
+				fmt.Sprintf(
+					"<%s> failed retrieving TrendProfile with id: <%s:%s> for scheduling, error: <%s>",
+					utils.TrendS, tnt, tID, err.Error()))
+			complete = false
+		} else if entryID, err := tS.crn.AddFunc(tP.Schedule,
+			func() { tS.computeTrend(tP) }); err != nil {
+			utils.Logger.Warning(
+				fmt.Sprintf(
+					"<%s> scheduling TrendProfile <%s:%s>, error: <%s>",
+					utils.TrendS, tnt, tID, err.Error()))
+
+		} else {
+			tS.crnTQsMux.Lock()
+			tS.crnTQs[tP.Tenant][tP.ID] = entryID
+		}
+
+	}
+	return
 }
