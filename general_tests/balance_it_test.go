@@ -220,21 +220,8 @@ cgrates.org,sms,1001,2014-01-14T00:00:00Z,RP_ANY,`,
 		if len(cdrs) != 1 {
 			t.Fatalf("expected to receive only one CDR: %v", utils.ToJSON(cdrs))
 		}
-		for _, cdr := range cdrs {
-			if cdr.Usage != 3 {
-				t.Errorf("expected <%+v>, \nreceived <%+v>", 3, cdr.Usage)
-			} else if *cdr.CostDetails.Usage != 2*time.Nanosecond {
-				t.Errorf("expected <%+v>, \nreceived <%+v>", 2*time.Nanosecond, cdr.CostDetails.Usage)
-			} else if cdr.CostDetails.Charges[0].Increments[0].Usage != 1*time.Nanosecond {
-				t.Errorf("expected <%+v>, \nreceived <%+v>", 1*time.Nanosecond, cdr.CostDetails.Charges[0].Increments[0].Usage)
-			} else if cdr.CostDetails.AccountSummary.BalanceSummaries[0].ID != "balance_sms" {
-				t.Errorf("expected <%+v>, \nreceived <%+v>", "balance_sms", cdr.CostDetails.AccountSummary.BalanceSummaries[0].ID)
-			} else if cdr.CostDetails.AccountSummary.BalanceSummaries[0].Initial != 2 {
-				t.Errorf("expected <%+v>, \nreceived <%+v>", 2, cdr.CostDetails.AccountSummary.BalanceSummaries[0].Initial)
-			} else if cdr.CostDetails.AccountSummary.BalanceSummaries[0].Value != 0 {
-				t.Errorf("expected <%+v>, \nreceived <%+v>", 0, cdr.CostDetails.AccountSummary.BalanceSummaries[0].Value)
-			}
-
+		if cdrs[0].ExtraInfo != utils.ErrInsufficientCreditBalanceBlocker.Error() {
+			t.Errorf("Unexpected ExtraInfo field value: %v", cdrs[0].ExtraInfo)
 		}
 	})
 
@@ -251,7 +238,7 @@ cgrates.org,sms,1001,2014-01-14T00:00:00Z,RP_ANY,`,
 			t.Fatalf("expected account to have one balance of type *monetary and one of type *sms, received %v", acnt)
 		}
 		smsBalance := acnt.BalanceMap[utils.MetaSMS][0]
-		if smsBalance.ID != "balance_sms" || smsBalance.Value != 0 || !smsBalance.Blocker {
+		if smsBalance.ID != "balance_sms" || smsBalance.Value != 2 || !smsBalance.Blocker {
 			t.Fatalf("received account with unexpected *sms balance: %v", smsBalance)
 		}
 		monetaryBalance := acnt.BalanceMap[utils.MetaMonetary][0]
@@ -1456,21 +1443,8 @@ RP_MONETARY,DR_MONETARY,*any,10`,
 			}}, &cdrs); err != nil {
 			t.Fatal(err)
 		}
-		for _, cdr := range cdrs {
-			if cdr.Usage != 3 {
-				t.Errorf("expected <%+v>, \nreceived <%+v>", 3, cdr.Usage)
-			} else if *cdr.CostDetails.Usage != 1*time.Nanosecond {
-				t.Errorf("expected <%+v>, \nreceived <%+v>", 1*time.Nanosecond, cdr.CostDetails.Usage)
-			} else if cdr.CostDetails.Charges[0].Increments[0].Usage != 1*time.Nanosecond {
-				t.Errorf("expected <%+v>, \nreceived <%+v>", 1*time.Nanosecond, cdr.CostDetails.Charges[0].Increments[0].Usage)
-			} else if cdr.CostDetails.AccountSummary.BalanceSummaries[0].ID != "10_unit_bal" {
-				t.Errorf("expected <%+v>, \nreceived <%+v>", "10_unit_bal", cdr.CostDetails.AccountSummary.BalanceSummaries[0].ID)
-			} else if cdr.CostDetails.AccountSummary.BalanceSummaries[0].Initial != 1 {
-				t.Errorf("expected <%+v>, \nreceived <%+v>", 1, cdr.CostDetails.AccountSummary.BalanceSummaries[0].Initial)
-			} else if cdr.CostDetails.AccountSummary.BalanceSummaries[0].Value != 0 {
-				t.Errorf("expected <%+v>, \nreceived <%+v>", 0, cdr.CostDetails.AccountSummary.BalanceSummaries[0].Value)
-			}
-
+		if cdrs[0].ExtraInfo != utils.ErrInsufficientCreditBalanceBlocker.Error() {
+			t.Errorf("Unexpected ExtraInfo field value: %v", cdrs[0].ExtraInfo)
 		}
 		if err := client.Call(context.Background(), utils.APIerSv2GetAccount, attrs, &acnt); err != nil {
 			t.Error(err)
@@ -1482,7 +1456,7 @@ RP_MONETARY,DR_MONETARY,*any,10`,
 					{
 						Uuid:    acnt.BalanceMap[utils.MetaMonetary][0].Uuid,
 						ID:      "10_unit_bal",
-						Value:   0,
+						Value:   1,
 						Blocker: true,
 					},
 					{
