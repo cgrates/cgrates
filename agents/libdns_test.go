@@ -1880,3 +1880,24 @@ func TestLibDnsUpdateDnsOptionCase1(t *testing.T) {
 	}
 
 }
+
+func TestNewDnsDP(t *testing.T) {
+
+	req := &dns.Msg{}
+
+	dp := newDnsDP(req)
+
+	dnsDP, ok := dp.(*dnsDP)
+	if !ok {
+		t.Fatalf("Expected type *dnsDP, got %T", dp)
+	}
+
+	if dnsDP.req == nil {
+		t.Error("Expected non-nil req field")
+	}
+
+	if dnsDP.opts == nil {
+		t.Error("Expected non-nil opts field")
+	}
+
+}

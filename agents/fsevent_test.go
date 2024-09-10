@@ -1587,3 +1587,47 @@ func TestFseventV1TerminateSessionArgs(t *testing.T) {
 		t.Errorf("Expected TerminateSession to be true, got false")
 	}
 }
+
+func TestFsEventGetSubject(t *testing.T) {
+	tests := []struct {
+		name           string
+		fsev           FSEvent
+		fieldName      string
+		expectedOutput string
+	}{
+		{
+			name:           "Static Value Prefix",
+			fsev:           FSEvent{},
+			fieldName:      utils.StaticValuePrefix + "StaticValue",
+			expectedOutput: "StaticValue",
+		},
+		{
+			name:           "Field Name Present in FSEvent Map",
+			fsev:           FSEvent{"subjectField": "SubjectValue"},
+			fieldName:      "subjectField",
+			expectedOutput: "SubjectValue",
+		},
+		{
+			name:           "Field Name Not Present, Fallback to SUBJECT",
+			fsev:           FSEvent{SUBJECT: "SubjectFallback"},
+			fieldName:      "nonExistentField",
+			expectedOutput: "SubjectFallback",
+		},
+
+		{
+			name:           "Field Name Not Present, SUBJECT Empty, GetAccount Empty",
+			fsev:           FSEvent{SUBJECT: "", "accountField": ""},
+			fieldName:      "nonExistentField",
+			expectedOutput: "",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := tt.fsev.GetSubject(tt.fieldName)
+			if got != tt.expectedOutput {
+				t.Errorf("GetSubject() got = %v, expected %v", got, tt.expectedOutput)
+			}
+		})
+	}
+}
