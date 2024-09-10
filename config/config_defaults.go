@@ -841,6 +841,8 @@ const CGRATES_CFG_JSON = `
 	"store_interval": "",		// dump cache regularly to dataDB, 0 - dump at start/shutdown: <""|$dur>
 	"store_uncompressed_limit": 0,	// used to compress data
 	"thresholds_conns": [],		// connections to ThresholdS for StatUpdates, empty to disable thresholds functionality: <""|*internal|$rpc_conns_id>
+	"ees_conns": [],			// connections to EEs for StatUpdates, empty to disable export functionality: <""|*internal|$rpc_conns_id>
+	"ees_exporter_ids": [],		// list of EventExporter profiles to use for real-time StatUpdate exports
 	"indexed_selects": true,	// enable profile matching exclusively on indexes
 	//"string_indexed_fields": [],	// query indexes based on these fields for faster processing
 	"prefix_indexed_fields": [],	// query indexes based on these fields for faster processing
