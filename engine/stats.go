@@ -317,7 +317,7 @@ func (sS *StatService) processThresholds(sQs StatQueues, opts map[string]any) (e
 	return
 }
 
-// processThresholds will pass the event for statQueue to EEs
+// processEEs will pass the event for statQueue to EEs
 func (sS *StatService) processEEs(sQs StatQueues, opts map[string]any) (err error) {
 	if len(sS.cgrcfg.StatSCfg().EEsConns) == 0 {
 		return
@@ -327,26 +327,28 @@ func (sS *StatService) processEEs(sQs StatQueues, opts map[string]any) (err erro
 		opts = make(map[string]any)
 	}
 	for _, sq := range sQs {
+		metrics := make(map[string]any)
+		for metricID, metric := range sq.SQMetrics {
+			metrics[metricID] = metric.GetValue(sS.cgrcfg.GeneralCfg().RoundingDecimals)
+		}
 		cgrEv := &utils.CGREvent{
 			Tenant: sq.Tenant,
 			ID:     utils.GenUUID(),
 			Event: map[string]any{
 				utils.EventType: utils.StatUpdate,
 				utils.StatID:    sq.ID,
+				utils.Metrics:   metrics,
 			},
 			APIOpts: opts,
 		}
-		for metricID, metric := range sq.SQMetrics {
-			cgrEv.Event[metricID] = metric.GetValue(sS.cgrcfg.GeneralCfg().RoundingDecimals)
-		}
-		cgrEventId := &CGREventWithEeIDs{
+		cgrEventWithID := &CGREventWithEeIDs{
 			CGREvent: cgrEv,
 			EeIDs:    sS.cgrcfg.StatSCfg().EEsExporterIDs,
 		}
 		var reply map[string]map[string]any
 		if err := sS.connMgr.Call(context.TODO(), sS.cgrcfg.StatSCfg().EEsConns,
 			utils.EeSv1ProcessEvent,
-			cgrEventId, &reply); err != nil &&
+			cgrEventWithID, &reply); err != nil &&
 			err.Error() != utils.ErrNotFound.Error() {
 			utils.Logger.Warning(
 				fmt.Sprintf("<StatS> error: %s processing event %+v with EEs.", err.Error(), cgrEv))
