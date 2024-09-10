@@ -1032,3 +1032,68 @@ func TestKamEventMissingParameterUnsupportedEvent(t *testing.T) {
 		t.Errorf("Expected true for unsupported event, got false")
 	}
 }
+
+func TestKamReplyString(t *testing.T) {
+	tests := []struct {
+		name     string
+		reply    KamReply
+		expected string
+	}{
+		{
+			name: "Complete data",
+			reply: KamReply{
+				Event:              "event1",
+				TransactionIndex:   "index1",
+				TransactionLabel:   "label1",
+				Attributes:         "attr1",
+				ResourceAllocation: "resource1",
+				MaxUsage:           100,
+				Routes:             "route1,route2",
+				Thresholds:         "threshold1",
+				StatQueues:         "queue1",
+				Error:              "none",
+			},
+			expected: `{"Event":"event1","TransactionIndex":"index1","TransactionLabel":"label1","Attributes":"attr1","ResourceAllocation":"resource1","MaxUsage":100,"Routes":"route1,route2","Thresholds":"threshold1","StatQueues":"queue1","Error":"none"}`,
+		},
+		{
+			name: "Empty fields",
+			reply: KamReply{
+				Event:              "",
+				TransactionIndex:   "",
+				TransactionLabel:   "",
+				Attributes:         "",
+				ResourceAllocation: "",
+				MaxUsage:           0,
+				Routes:             "",
+				Thresholds:         "",
+				StatQueues:         "",
+				Error:              "",
+			},
+			expected: `{"Event":"","TransactionIndex":"","TransactionLabel":"","Attributes":"","ResourceAllocation":"","MaxUsage":0,"Routes":"","Thresholds":"","StatQueues":"","Error":""}`,
+		},
+		{
+			name: "Zero MaxUsage",
+			reply: KamReply{
+				Event:              "event2",
+				TransactionIndex:   "index2",
+				TransactionLabel:   "label2",
+				Attributes:         "attr2",
+				ResourceAllocation: "resource2",
+				MaxUsage:           0,
+				Routes:             "route3",
+				Thresholds:         "threshold2",
+				StatQueues:         "queue2",
+				Error:              "error2",
+			},
+			expected: `{"Event":"event2","TransactionIndex":"index2","TransactionLabel":"label2","Attributes":"attr2","ResourceAllocation":"resource2","MaxUsage":0,"Routes":"route3","Thresholds":"threshold2","StatQueues":"queue2","Error":"error2"}`,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			actual := tt.reply.String()
+			if actual != tt.expected {
+				t.Errorf("Test %s failed: expected %s, got %s", tt.name, tt.expected, actual)
+			}
+		})
+	}
+}

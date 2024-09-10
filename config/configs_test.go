@@ -22,6 +22,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"os"
+	"path"
 	"reflect"
 	"strings"
 	"testing"
@@ -155,4 +156,95 @@ func TestHandleConfigSFileFileReadError(t *testing.T) {
 		t.Errorf("Expected status code %d, got %d", http.StatusInternalServerError, rr.Code)
 	}
 
+}
+
+func TestHandleConfigSFolder(t *testing.T) {
+	tmpDir, err := os.MkdirTemp("", "configtest")
+
+	if err != nil {
+		t.Fatalf("Failed to create temp directory: %v", err)
+	}
+
+	defer os.RemoveAll(tmpDir)
+	w := httptest.NewRecorder()
+	handleConfigSFolder("/invalid/path", w)
+	resp := w.Result()
+
+	if resp.StatusCode != http.StatusInternalServerError {
+		t.Errorf("Expected status 500, but got %d", resp.StatusCode)
+	}
+
+	jsonConfig := `{"Subject": "1001"}`
+	configFilePath := tmpDir + "/config.json"
+	err = os.WriteFile(configFilePath, []byte(jsonConfig), 0644)
+
+	if err != nil {
+		t.Fatalf("Failed to write config file: %v", err)
+	}
+
+	w = httptest.NewRecorder()
+	handleConfigSFolder(tmpDir, w)
+	resp = w.Result()
+	if resp.StatusCode != http.StatusOK {
+		t.Errorf("Expected status 200, but got %d", resp.StatusCode)
+	}
+}
+
+func TestHandlerConfigS(t *testing.T) {
+	tmpRootDir, err := os.MkdirTemp("", "test_config_root")
+	if err != nil {
+		t.Fatalf("Failed to create temporary root directory: %v", err)
+	}
+
+	defer os.RemoveAll(tmpRootDir)
+	originalRootDir := CgrConfig().ConfigSCfg().RootDir
+	CgrConfig().ConfigSCfg().RootDir = tmpRootDir
+	defer func() {
+		CgrConfig().ConfigSCfg().RootDir = originalRootDir
+	}()
+	filePath := path.Join(tmpRootDir, "test_file.txt")
+	file, err := os.Create(filePath)
+	if err != nil {
+		t.Fatalf("Failed to create test file: %v", err)
+	}
+
+	file.Close()
+	dirPath := path.Join(tmpRootDir, "test_folder")
+	err = os.Mkdir(dirPath, 0755)
+	if err != nil {
+		t.Fatalf("Failed to create test directory: %v", err)
+	}
+
+	tests := []struct {
+		name         string
+		requestPath  string
+		expectedCode int
+		expectedBody string
+	}{
+		{
+			name:         "File exists",
+			requestPath:  "/configs/test_file.txt",
+			expectedCode: 200,
+			expectedBody: "Handled file",
+		},
+		{
+			name:         "Directory exists",
+			requestPath:  "/configs/test_folder",
+			expectedCode: 200,
+			expectedBody: "Handled directory",
+		},
+		{
+			name:         "File does not exist",
+			requestPath:  "/configs/nonexistent_file.txt",
+			expectedCode: 404,
+			expectedBody: "no such file or directory",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			req := httptest.NewRequest("GET", tt.requestPath, nil)
+			w := httptest.NewRecorder()
+			HandlerConfigS(w, req)
+		})
+	}
 }
