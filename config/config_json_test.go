@@ -1214,6 +1214,8 @@ func TestDfStatServiceJsonCfg(t *testing.T) {
 		Prefix_indexed_fields:    &[]string{},
 		Suffix_indexed_fields:    &[]string{},
 		Nested_fields:            utils.BoolPointer(false),
+		Ees_conns:                &[]string{},
+		Ees_exporter_ids:         &[]string{},
 		Opts: &StatsOptsJson{
 			ProfileIDs:           &[]string{},
 			ProfileIgnoreFilters: utils.BoolPointer(false),

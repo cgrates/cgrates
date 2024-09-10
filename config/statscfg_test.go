@@ -35,6 +35,8 @@ func TestStatSCfgloadFromJsonCfgCase1(t *testing.T) {
 		Prefix_indexed_fields:    &[]string{"*req.index1", "*req.index2"},
 		Suffix_indexed_fields:    &[]string{"*req.index1", "*req.index2"},
 		Nested_fields:            utils.BoolPointer(true),
+		Ees_conns:                &[]string{utils.MetaInternal, "*conn1"},
+		Ees_exporter_ids:         &[]string{"exporterID"},
 	}
 	expected := &StatSCfg{
 		Enabled:                true,
@@ -49,6 +51,8 @@ func TestStatSCfgloadFromJsonCfgCase1(t *testing.T) {
 		Opts: &StatsOpts{
 			ProfileIDs: []string{},
 		},
+		EEsConns:       []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEEs), "*conn1"},
+		EEsExporterIDs: []string{"exporterID"},
 	}
 	jsonCfg := NewDefaultCGRConfig()
 	if err := jsonCfg.statsCfg.loadFromJSONCfg(cfgJSON); err != nil {
@@ -91,6 +95,8 @@ func TestStatSCfgAsMapInterface(t *testing.T) {
 			utils.MetaProfileIDs:              []string{},
 			utils.MetaProfileIgnoreFiltersCfg: false,
 		},
+		utils.EEsConnsCfg:       []string{},
+		utils.EEsExporterIDsCfg: []string{},
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
@@ -110,7 +116,9 @@ func TestStatSCfgAsMapInterface1(t *testing.T) {
             "string_indexed_fields": ["*req.string"],
 			"prefix_indexed_fields": ["*req.prefix_indexed_fields1","*req.prefix_indexed_fields2"],
             "suffix_indexed_fields":["*req.suffix_indexed_fields"],
-			"nested_fields": true,	
+			"nested_fields": true,
+			"ees_conns": ["*internal:*ees", "*conn1"],
+			"ees_exporter_ids":["exporterID"],
 		},	
 }`
 	eMap := map[string]any{
@@ -127,6 +135,8 @@ func TestStatSCfgAsMapInterface1(t *testing.T) {
 			utils.MetaProfileIDs:              []string{},
 			utils.MetaProfileIgnoreFiltersCfg: false,
 		},
+		utils.EEsConnsCfg:       []string{utils.MetaInternal, "*conn1"},
+		utils.EEsExporterIDsCfg: []string{"exporterID"},
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)

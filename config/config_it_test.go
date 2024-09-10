@@ -273,6 +273,7 @@ func testCGRConfigReloadStatS(t *testing.T) {
 		Opts: &StatsOpts{
 			ProfileIDs: []string{},
 		},
+		EEsConns: []string{},
 	}
 	if !reflect.DeepEqual(expAttr, cfg.StatSCfg()) {
 		t.Errorf("Expected %s , received: %s ", utils.ToJSON(expAttr), utils.ToJSON(cfg.StatSCfg()))
