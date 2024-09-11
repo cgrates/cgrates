@@ -5944,3 +5944,119 @@ func TestModelHelpersCSVLoadErrorBool(t *testing.T) {
 		t.Errorf("\nExpecting <invalid value \"TEST_DEST\" for field testStruct.Tag>,\n Received <%+v>", err)
 	}
 }
+
+func TestCSVHeaders(t *testing.T) {
+	expected := []string{
+		"#" + utils.Tenant,
+		utils.ID,
+		utils.StatIDs,
+		utils.MetricIDs,
+		utils.Sorting,
+		utils.SortingParameters,
+		utils.ThresholdIDs,
+	}
+	var tps RankingsMdls
+	result := tps.CSVHeader()
+	if len(result) != len(expected) {
+		t.Errorf("Expected %d elements, got %d", len(expected), len(result))
+		return
+	}
+	for i, v := range expected {
+		if result[i] != v {
+			t.Errorf("Expected value at index %d to be %s, got %s", i, v, result[i])
+		}
+	}
+}
+
+func TestTrendsMdlCSVHeader(t *testing.T) {
+	expected := []string{
+		"#" + utils.Tenant,
+		utils.ID,
+		utils.Schedule,
+		utils.StatID,
+		utils.Metrics,
+		utils.QueueLength,
+		utils.TTL,
+		utils.TrendType,
+		utils.ThresholdIDs,
+	}
+	var tps TrendsMdls
+	result := tps.CSVHeader()
+	if len(result) != len(expected) {
+		t.Errorf("Expected %d elements, got %d", len(expected), len(result))
+		return
+	}
+	for i, v := range expected {
+		if result[i] != v {
+			t.Errorf("Expected value at index %d to be %s, got %s", i, v, result[i])
+		}
+	}
+}
+
+func TestRankingProfileToAPI(t *testing.T) {
+	sg := &RankingProfile{
+		Tenant:            "cgrates.org",
+		ID:                "1001",
+		StatIDs:           []string{"stat1", "stat2"},
+		MetricIDs:         []string{"metric1", "metric2"},
+		SortingParameters: []string{"sort1", "sort2"},
+		ThresholdIDs:      []string{"threshold1", "threshold2"},
+		QueryInterval:     30 * time.Minute,
+	}
+
+	expected := &utils.TPRankingProfile{
+		Tenant:            "cgrates.org",
+		ID:                "1001",
+		StatIDs:           []string{"stat1", "stat2"},
+		MetricIDs:         []string{"metric1", "metric2"},
+		SortingParameters: []string{"sort1", "sort2"},
+		ThresholdIDs:      []string{"threshold1", "threshold2"},
+		QueryInterval:     "30m0s",
+	}
+	result := RankingProfileToAPI(sg)
+	if result.Tenant != expected.Tenant {
+		t.Errorf("Expected Tenant %s, got %s", expected.Tenant, result.Tenant)
+	}
+	if result.ID != expected.ID {
+		t.Errorf("Expected ID %s, got %s", expected.ID, result.ID)
+	}
+	if len(result.StatIDs) != len(expected.StatIDs) {
+		t.Errorf("Expected %d StatIDs, got %d", len(expected.StatIDs), len(result.StatIDs))
+	} else {
+		for i, v := range expected.StatIDs {
+			if result.StatIDs[i] != v {
+				t.Errorf("Expected StatID at index %d to be %s, got %s", i, v, result.StatIDs[i])
+			}
+		}
+	}
+	if len(result.MetricIDs) != len(expected.MetricIDs) {
+		t.Errorf("Expected %d MetricIDs, got %d", len(expected.MetricIDs), len(result.MetricIDs))
+	} else {
+		for i, v := range expected.MetricIDs {
+			if result.MetricIDs[i] != v {
+				t.Errorf("Expected MetricID at index %d to be %s, got %s", i, v, result.MetricIDs[i])
+			}
+		}
+	}
+	if len(result.SortingParameters) != len(expected.SortingParameters) {
+		t.Errorf("Expected %d SortingParameters, got %d", len(expected.SortingParameters), len(result.SortingParameters))
+	} else {
+		for i, v := range expected.SortingParameters {
+			if result.SortingParameters[i] != v {
+				t.Errorf("Expected SortingParameter at index %d to be %s, got %s", i, v, result.SortingParameters[i])
+			}
+		}
+	}
+	if len(result.ThresholdIDs) != len(expected.ThresholdIDs) {
+		t.Errorf("Expected %d ThresholdIDs, got %d", len(expected.ThresholdIDs), len(result.ThresholdIDs))
+	} else {
+		for i, v := range expected.ThresholdIDs {
+			if result.ThresholdIDs[i] != v {
+				t.Errorf("Expected ThresholdID at index %d to be %s, got %s", i, v, result.ThresholdIDs[i])
+			}
+		}
+	}
+	if result.QueryInterval != expected.QueryInterval {
+		t.Errorf("Expected QueryInterval %s, got %s", expected.QueryInterval, result.QueryInterval)
+	}
+}
