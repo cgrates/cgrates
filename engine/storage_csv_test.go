@@ -20,6 +20,8 @@ package engine
 
 import (
 	"encoding/csv"
+	"net/http"
+	"net/http/httptest"
 	"os"
 	"path/filepath"
 	"strings"
@@ -299,4 +301,75 @@ func TestCsvURLRead(t *testing.T) {
 			t.Errorf("expected field %d to be %s, got %s", i, expectedRecord2[i], field)
 		}
 	}
+}
+
+func TestCsvURLOpenSuccess(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte("field1,field2,field3\nvalue1,value2,value3\n"))
+	}))
+	defer server.Close()
+	c := &csvURL{}
+	err := c.Open(server.URL, ',', 3)
+	if err != nil {
+		t.Fatalf("expected no error, got: %v", err)
+	}
+	if c.csvReader == nil {
+		t.Fatalf("expected csvReader to be initialized")
+	}
+
+	record, err := c.csvReader.Read()
+	if err != nil {
+		t.Fatalf("expected no error while reading CSV, got: %v", err)
+	}
+
+	expectedRecord := []string{"field1", "field2", "field3"}
+	for i, field := range expectedRecord {
+		if record[i] != field {
+			t.Errorf("expected field %s, got: %s", field, record[i])
+		}
+	}
+}
+
+func TestCsvURLOpenInvalidURL(t *testing.T) {
+	c := &csvURL{}
+	err := c.Open("invalid-url", ',', 3)
+	if err == nil {
+		t.Fatalf("expected an error for invalid URL, got none")
+	}
+}
+
+func TestCsvURLOpenNotFound(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusNotFound)
+	}))
+	defer server.Close()
+	c := &csvURL{}
+	err := c.Open(server.URL, ',', 3)
+	if err == nil {
+		t.Fatalf("expected ErrNotFound, got none")
+	}
+}
+
+func TestCsvURLOpenPathNotReachable(t *testing.T) {
+	c := &csvURL{}
+	err := c.Open("http://invalid.localhost", ',', 3)
+	if err == nil {
+		t.Fatalf("expected path not reachable error, got none")
+	}
+}
+
+func TestCsvURLClosePageNotNil(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte("CsvUrlClose"))
+	}))
+	defer server.Close()
+	c := &csvURL{}
+	resp, err := http.Get(server.URL)
+	if err != nil {
+		t.Fatalf("expected no error while getting mock URL, got: %v", err)
+	}
+	c.page = resp.Body
+	c.Close()
 }

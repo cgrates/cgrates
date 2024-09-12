@@ -22,7 +22,9 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
+	"gorm.io/gorm"
 )
 
 func TestGetStorageTypes(t *testing.T) {
@@ -113,5 +115,79 @@ func TestAppendToMysqlDSNOptsBasic(t *testing.T) {
 	result = AppendToMysqlDSNOpts(nil)
 	if result != utils.EmptyString {
 		t.Errorf("AppendToMysqlDSNOpts(nil) = %s; want %s", result, utils.EmptyString)
+	}
+}
+
+func TestMongoGetContext(t *testing.T) {
+	testCtx := context.Background()
+	ms := &MongoStorage{
+		ctx: testCtx,
+	}
+	gotCtx := ms.GetContext()
+	if gotCtx != testCtx {
+		t.Errorf("GetContext() = %v; want %v", gotCtx, testCtx)
+	}
+}
+func TestMongoSelectDatabase(t *testing.T) {
+	initialDB := "mongo"
+	ms := &MongoStorage{
+		db: initialDB,
+	}
+	newDB := "db"
+	if err := ms.SelectDatabase(newDB); err != nil {
+		t.Errorf("SelectDatabase() returned an error: %v", err)
+	}
+	if got := ms.db; got != newDB {
+		t.Errorf("SelectDatabase() updated db to %v, want %v", got, newDB)
+	}
+}
+
+func TestMongoGetStorageType(t *testing.T) {
+	ms := &MongoStorage{}
+	storageType := ms.GetStorageType()
+	expectedStorageType := utils.MetaMongo
+	if storageType != expectedStorageType {
+		t.Errorf("Expected storage type: %s, got: %s", expectedStorageType, storageType)
+	}
+}
+
+func TestRemoveKeysForPrefix(t *testing.T) {
+	sqlStorage := SQLStorage{}
+	testPrefix := "644"
+	err := sqlStorage.RemoveKeysForPrefix(testPrefix)
+	if err != utils.ErrNotImplemented {
+		t.Errorf("Expected error: %v, got: %v", utils.ErrNotImplemented, err)
+	}
+}
+
+func TestGetKeysForPrefix(t *testing.T) {
+	sqlStorage := SQLStorage{}
+	testPrefix := "390"
+	keys, err := sqlStorage.GetKeysForPrefix(testPrefix)
+	if err != utils.ErrNotImplemented {
+		t.Errorf("Expected error: %v, got: %v", utils.ErrNotImplemented, err)
+	}
+	if keys != nil {
+		t.Errorf("Expected keys to be nil, got: %v", keys)
+	}
+}
+
+func TestMysqlSelectDatabase(t *testing.T) {
+	sqlStorage := SQLStorage{}
+	testDBName := "mysql"
+	err := sqlStorage.SelectDatabase(testDBName)
+	if err != nil {
+		t.Errorf("Expected nil error, got: %v", err)
+	}
+}
+
+func TestExportGormDB(t *testing.T) {
+	mockDB := &gorm.DB{}
+	sqlStorage := &SQLStorage{
+		db: mockDB,
+	}
+	resultDB := sqlStorage.ExportGormDB()
+	if resultDB != mockDB {
+		t.Errorf("ExportGormDB() = %v; want %v", resultDB, mockDB)
 	}
 }
