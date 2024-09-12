@@ -51,6 +51,8 @@ type StatSCfg struct {
 	NotExistsIndexedFields *[]string
 	NestedFields           bool
 	Opts                   *StatsOpts
+	EEsConns               []string
+	EEsExporterIDs         []string
 }
 
 // loadStatSCfg loads the StatS section of the configuration
@@ -101,6 +103,12 @@ func (st *StatSCfg) loadFromJSONCfg(jsnCfg *StatServJsonCfg) (err error) {
 	if jsnCfg.Thresholds_conns != nil {
 		st.ThresholdSConns = updateInternalConns(*jsnCfg.Thresholds_conns, utils.MetaThresholds)
 	}
+	if jsnCfg.Ees_conns != nil {
+		st.EEsConns = updateInternalConns(*jsnCfg.Ees_conns, utils.MetaEEs)
+	}
+	if jsnCfg.Ees_exporter_ids != nil {
+		st.EEsExporterIDs = append(st.EEsExporterIDs, *jsnCfg.Ees_exporter_ids...)
+	}
 	if jsnCfg.String_indexed_fields != nil {
 		st.StringIndexedFields = utils.SliceStringPointer(slices.Clone(*jsnCfg.String_indexed_fields))
 	}
@@ -139,6 +147,7 @@ func (st StatSCfg) AsMapInterface(string) any {
 		utils.StoreUncompressedLimitCfg: st.StoreUncompressedLimit,
 		utils.NestedFieldsCfg:           st.NestedFields,
 		utils.StoreIntervalCfg:          utils.EmptyString,
+		utils.EEsExporterIDsCfg:         slices.Clone(st.EEsExporterIDs),
 		utils.OptsCfg:                   opts,
 	}
 	if st.StoreInterval != 0 {
@@ -161,6 +170,9 @@ func (st StatSCfg) AsMapInterface(string) any {
 	}
 	if st.ThresholdSConns != nil {
 		mp[utils.ThresholdSConnsCfg] = getInternalJSONConns(st.ThresholdSConns)
+	}
+	if st.EEsConns != nil {
+		mp[utils.EEsConnsCfg] = getInternalJSONConns(st.EEsConns)
 	}
 	return mp
 }
@@ -206,6 +218,12 @@ func (st StatSCfg) Clone() (cln *StatSCfg) {
 	if st.ThresholdSConns != nil {
 		cln.ThresholdSConns = slices.Clone(st.ThresholdSConns)
 	}
+	if st.EEsConns != nil {
+		cln.EEsConns = slices.Clone(st.EEsConns)
+	}
+	if st.EEsExporterIDs != nil {
+		cln.EEsExporterIDs = slices.Clone(st.EEsExporterIDs)
+	}
 	if st.StringIndexedFields != nil {
 		cln.StringIndexedFields = utils.SliceStringPointer(slices.Clone(*st.StringIndexedFields))
 	}
@@ -245,6 +263,8 @@ type StatServJsonCfg struct {
 	Notexists_indexed_fields *[]string
 	Nested_fields            *bool // applies when indexed fields is not defined
 	Opts                     *StatsOptsJson
+	Ees_conns                *[]string
+	Ees_exporter_ids         *[]string
 }
 
 func diffStatsOptsJsonCfg(d *StatsOptsJson, v1, v2 *StatsOpts) *StatsOptsJson {
@@ -284,6 +304,12 @@ func diffStatServJsonCfg(d *StatServJsonCfg, v1, v2 *StatSCfg) *StatServJsonCfg 
 	}
 	if !slices.Equal(v1.ThresholdSConns, v2.ThresholdSConns) {
 		d.Thresholds_conns = utils.SliceStringPointer(getInternalJSONConns(v2.ThresholdSConns))
+	}
+	if !slices.Equal(v1.EEsConns, v2.EEsConns) {
+		d.Ees_conns = utils.SliceStringPointer(getInternalJSONConns(v2.EEsConns))
+	}
+	if !slices.Equal(v1.EEsExporterIDs, v2.EEsExporterIDs) {
+		d.Ees_exporter_ids = &v2.EEsExporterIDs
 	}
 	d.String_indexed_fields = diffIndexSlice(d.String_indexed_fields, v1.StringIndexedFields, v2.StringIndexedFields)
 	d.Prefix_indexed_fields = diffIndexSlice(d.Prefix_indexed_fields, v1.PrefixIndexedFields, v2.PrefixIndexedFields)

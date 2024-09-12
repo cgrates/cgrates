@@ -2121,6 +2121,7 @@ const (
 
 	// StatSCfg
 	StoreUncompressedLimitCfg = "store_uncompressed_limit"
+	EEsExporterIDsCfg         = "ees_exporter_ids"
 
 	// Cache
 	PartitionsCfg = "partitions"

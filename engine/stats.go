@@ -325,6 +325,51 @@ func (sS *StatS) processThresholds(ctx *context.Context, sQs StatQueues, opts ma
 	return
 }
 
+// processThresholds will pass the event for statQueue to EEs
+func (sS *StatS) processEEs(ctx *context.Context, sQs StatQueues, opts map[string]any) (err error) {
+	if len(sS.cfg.StatSCfg().EEsConns) == 0 {
+		return
+	}
+	var withErrs bool
+	if opts == nil {
+		opts = make(map[string]any)
+	}
+	for _, sq := range sQs {
+		metrics := make(map[string]any)
+		for metricID, metric := range sq.SQMetrics {
+			metrics[metricID] = metric.GetValue()
+		}
+		cgrEv := &utils.CGREvent{
+			Tenant: sq.Tenant,
+			ID:     utils.GenUUID(),
+			Event: map[string]any{
+				utils.EventType: utils.StatUpdate,
+				utils.StatID:    sq.ID,
+				utils.Metrics:   metrics,
+			},
+			APIOpts: opts,
+		}
+
+		cgrEventWithID := &utils.CGREventWithEeIDs{
+			CGREvent: cgrEv,
+			EeIDs:    sS.cfg.StatSCfg().EEsExporterIDs,
+		}
+		var reply map[string]map[string]any
+		if err := sS.connMgr.Call(ctx, sS.cfg.StatSCfg().EEsConns,
+			utils.EeSv1ProcessEvent,
+			&cgrEventWithID, &reply); err != nil &&
+			err.Error() != utils.ErrNotFound.Error() {
+			utils.Logger.Warning(
+				fmt.Sprintf("<StatS> error: %s processing event %+v with EEs.", err.Error(), cgrEv))
+			withErrs = true
+		}
+	}
+	if withErrs {
+		err = utils.ErrPartiallyExecuted
+	}
+	return
+}
+
 // processEvent processes a new event, dispatching to matching queues.
 // Queues matching are also cached to speed up
 func (sS *StatS) processEvent(ctx *context.Context, tnt string, args *utils.CGREvent) (statQueueIDs []string, err error) {
@@ -367,8 +412,7 @@ func (sS *StatS) processEvent(ctx *context.Context, tnt string, args *utils.CGRE
 
 	}
 
-	err = sS.processThresholds(ctx, matchSQs, args.APIOpts)
-	if withErrors {
+	if sS.processThresholds(ctx, matchSQs, args.APIOpts) != nil || sS.processEEs(ctx, matchSQs, args.APIOpts) != nil || withErrors {
 		err = utils.ErrPartiallyExecuted
 	}
 

@@ -349,7 +349,7 @@ func testConfigSReload(t *testing.T) {
 		}
 	}
 	if testCfgDir == "tutmysql" || testCfgDir == "tutmongo" {
-		cfgStr = `{"stats":{"enabled":true,"exists_indexed_fields":[],"indexed_selects":true,"nested_fields":false,"notexists_indexed_fields":[],"opts":{"*profileIDs":[],"*profileIgnoreFilters":[],"*prometheusStatIDs":[],"*roundingDecimals":[]},"prefix_indexed_fields":[],"store_interval":"1s","store_uncompressed_limit":0,"suffix_indexed_fields":[],"thresholds_conns":["*internal"]}}`
+		cfgStr = `{"stats":{"ees_conns":[],"ees_exporter_ids":null,"enabled":true,"exists_indexed_fields":[],"indexed_selects":true,"nested_fields":false,"notexists_indexed_fields":[],"opts":{"*profileIDs":[],"*profileIgnoreFilters":[],"*prometheusStatIDs":[],"*roundingDecimals":[]},"prefix_indexed_fields":[],"store_interval":"1s","store_uncompressed_limit":0,"suffix_indexed_fields":[],"thresholds_conns":["*internal"]}}`
 		var rpl23 string
 		if err := testRPC.Call(context.Background(), utils.ConfigSv1GetConfigAsJSON, &config.SectionWithAPIOpts{
 			Tenant:   "cgrates.org",
@@ -360,7 +360,7 @@ func testConfigSReload(t *testing.T) {
 			t.Errorf("\nExpected %+v ,\n received: %+v", cfgStr, rpl23)
 		}
 	} else if testCfgDir == "tutinternal" {
-		cfgStr = `{"stats":{"enabled":true,"exists_indexed_fields":[],"indexed_selects":true,"nested_fields":false,"notexists_indexed_fields":[],"opts":{"*profileIDs":[],"*profileIgnoreFilters":[],"*prometheusStatIDs":[],"*roundingDecimals":[]},"prefix_indexed_fields":[],"store_interval":"-1ns","store_uncompressed_limit":0,"suffix_indexed_fields":[],"thresholds_conns":["*internal"]}}`
+		cfgStr = `{"stats":{"ees_conns":[],"ees_exporter_ids":null,"enabled":true,"exists_indexed_fields":[],"indexed_selects":true,"nested_fields":false,"notexists_indexed_fields":[],"opts":{"*profileIDs":[],"*profileIgnoreFilters":[],"*prometheusStatIDs":[],"*roundingDecimals":[]},"prefix_indexed_fields":[],"store_interval":"-1ns","store_uncompressed_limit":0,"suffix_indexed_fields":[],"thresholds_conns":["*internal"]}}`
 		var rpl23 string
 		if err := testRPC.Call(context.Background(), utils.ConfigSv1GetConfigAsJSON, &config.SectionWithAPIOpts{
 			Tenant:   "cgrates.org",

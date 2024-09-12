@@ -57,6 +57,7 @@ func TestStatSCfgloadFromJsonCfgCase1(t *testing.T) {
 			RoundingDecimals:     []*utils.DynamicIntOpt{},
 			PrometheusStatIDs:    []*utils.DynamicStringSliceOpt{},
 		},
+		EEsConns: []string{},
 	}
 	jsonCfg := NewDefaultCGRConfig()
 	if err = jsonCfg.statsCfg.loadFromJSONCfg(cfgJSON); err != nil {
@@ -135,6 +136,8 @@ func TestStatSCfgAsMapInterface(t *testing.T) {
 			utils.OptsRoundingDecimals:     []*utils.DynamicIntOpt{},
 			utils.OptsPrometheusStatIDs:    []*utils.DynamicStringSliceOpt{},
 		},
+		utils.EEsConnsCfg:       []string{},
+		utils.EEsExporterIDsCfg: []string(nil),
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
@@ -177,6 +180,8 @@ func TestStatSCfgAsMapInterface1(t *testing.T) {
 			utils.OptsRoundingDecimals:     []*utils.DynamicIntOpt{},
 			utils.OptsPrometheusStatIDs:    []*utils.DynamicStringSliceOpt{},
 		},
+		utils.EEsConnsCfg:       []string{},
+		utils.EEsExporterIDsCfg: []string(nil),
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
