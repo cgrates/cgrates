@@ -153,7 +153,7 @@ func TestMongoGetStorageType(t *testing.T) {
 
 func TestRemoveKeysForPrefix(t *testing.T) {
 	sqlStorage := SQLStorage{}
-	testPrefix := "644"
+	testPrefix := "1"
 	err := sqlStorage.RemoveKeysForPrefix(testPrefix)
 	if err != utils.ErrNotImplemented {
 		t.Errorf("Expected error: %v, got: %v", utils.ErrNotImplemented, err)
@@ -162,7 +162,7 @@ func TestRemoveKeysForPrefix(t *testing.T) {
 
 func TestGetKeysForPrefix(t *testing.T) {
 	sqlStorage := SQLStorage{}
-	testPrefix := "390"
+	testPrefix := "1"
 	keys, err := sqlStorage.GetKeysForPrefix(testPrefix)
 	if err != utils.ErrNotImplemented {
 		t.Errorf("Expected error: %v, got: %v", utils.ErrNotImplemented, err)
@@ -174,7 +174,7 @@ func TestGetKeysForPrefix(t *testing.T) {
 
 func TestMysqlSelectDatabase(t *testing.T) {
 	sqlStorage := SQLStorage{}
-	testDBName := "mysql"
+	testDBName := "mySql"
 	err := sqlStorage.SelectDatabase(testDBName)
 	if err != nil {
 		t.Errorf("Expected nil error, got: %v", err)
