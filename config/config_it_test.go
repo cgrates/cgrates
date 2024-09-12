@@ -312,6 +312,7 @@ func testCGRConfigReloadStatS(t *testing.T) {
 			RoundingDecimals:     []*utils.DynamicIntOpt{},
 			PrometheusStatIDs:    []*utils.DynamicStringSliceOpt{},
 		},
+		EEsConns: []string{},
 	}
 	if !reflect.DeepEqual(expAttr, cfg.StatSCfg()) {
 		t.Errorf("Expected %s , received: %s ", utils.ToJSON(expAttr), utils.ToJSON(cfg.StatSCfg()))
