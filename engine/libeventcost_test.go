@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"errors"
 	"fmt"
 	"reflect"
 	"testing"
@@ -1196,5 +1197,260 @@ func TestIfaceAsEventCostDefault(t *testing.T) {
 	expectedErrMsg := fmt.Sprintf("cannot convert type %v to *EventCost", reflect.TypeOf(input).String())
 	if err.Error() == expectedErrMsg {
 		t.Errorf("Expected error message %v, got %v", expectedErrMsg, err.Error())
+	}
+}
+
+func TestFieldAsInterface(t *testing.T) {
+
+	cts := ChargedTimings{}
+	tests := []struct {
+		name     string
+		cts      ChargedTimings
+		fldPath  []string
+		expected any
+		err      error
+	}{
+		{
+			name:     "nil ChargedTimings",
+			cts:      nil,
+			fldPath:  []string{"field1"},
+			expected: nil,
+			err:      utils.ErrNotFound,
+		},
+		{
+			name:     "empty field path",
+			cts:      cts,
+			fldPath:  []string{},
+			expected: nil,
+			err:      utils.ErrNotFound,
+		},
+		{
+			name:     "field not found",
+			cts:      cts,
+			fldPath:  []string{"nonexistentField"},
+			expected: nil,
+			err:      utils.ErrNotFound,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			val, err := tt.cts.FieldAsInterface(tt.fldPath)
+			if err != tt.err {
+				t.Errorf("Expected error: %v, got: %v", tt.err, err)
+			}
+			if val != tt.expected {
+				t.Errorf("Expected value: %v, got: %v", tt.expected, val)
+			}
+		})
+	}
+}
+
+func TestChargedRatesFieldAsInterface(t *testing.T) {
+	rateGroup := []*RGRate{
+		{
+			GroupIntervalStart: 10 * time.Second,
+			Value:              1.5,
+			RateIncrement:      5 * time.Second,
+			RateUnit:           60 * time.Second,
+		},
+		{
+			GroupIntervalStart: 20 * time.Second,
+			Value:              2.0,
+			RateIncrement:      10 * time.Second,
+			RateUnit:           60 * time.Second,
+		},
+	}
+
+	crs := ChargedRates{
+		"rateGroup[0]": rateGroup,
+		"rateGroup":    rateGroup,
+	}
+
+	tests := []struct {
+		name     string
+		crs      ChargedRates
+		fldPath  []string
+		expected any
+		err      error
+	}{
+		{
+			name:     "nil ChargedRates",
+			crs:      nil,
+			fldPath:  []string{"rateGroup[0]"},
+			expected: nil,
+			err:      utils.ErrNotFound,
+		},
+		{
+			name:     "empty field path",
+			crs:      crs,
+			fldPath:  []string{},
+			expected: nil,
+			err:      utils.ErrNotFound,
+		},
+		{
+			name:     "rate group with valid index",
+			crs:      crs,
+			fldPath:  []string{"rateGroup[0]"},
+			expected: rateGroup[0],
+			err:      nil,
+		},
+		{
+			name:     "rate group with invalid index",
+			crs:      crs,
+			fldPath:  []string{"rateGroup[2]"},
+			expected: nil,
+			err:      utils.ErrNotFound,
+		},
+		{
+			name:     "non-existent rate group",
+			crs:      crs,
+			fldPath:  []string{"nonExistentGroup"},
+			expected: nil,
+			err:      utils.ErrNotFound,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			val, err := tt.crs.FieldAsInterface(tt.fldPath)
+			if err != nil && err.Error() != tt.err.Error() {
+				t.Errorf("Expected error: %v, got: %v", tt.err, err)
+			}
+			if val != tt.expected {
+				t.Errorf("Expected value: %v, got: %v", tt.expected, val)
+			}
+		})
+	}
+}
+
+func TestRatingFiltersFieldAsInterface(t *testing.T) {
+	ratingFilters := RatingFilters{
+		"filterA": RatingMatchedFilters{
+			"subField1": "ValueA",
+			"subField2": 100,
+		},
+		"filterB": RatingMatchedFilters{
+			"subField1": "ValueB",
+		},
+	}
+
+	tests := []struct {
+		name     string
+		rfs      RatingFilters
+		fldPath  []string
+		expected any
+		err      error
+	}{
+		{
+			name:     "nil RatingFilters",
+			rfs:      nil,
+			fldPath:  []string{"filterA"},
+			expected: nil,
+			err:      utils.ErrNotFound,
+		},
+		{
+			name:     "empty field path",
+			rfs:      ratingFilters,
+			fldPath:  []string{},
+			expected: nil,
+			err:      utils.ErrNotFound,
+		},
+
+		{
+			name:     "field found with nested path",
+			rfs:      ratingFilters,
+			fldPath:  []string{"filterA", "subField1"},
+			expected: "ValueA",
+			err:      nil,
+		},
+		{
+			name:     "field not found",
+			rfs:      ratingFilters,
+			fldPath:  []string{"nonExistent"},
+			expected: nil,
+			err:      utils.ErrNotFound,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			val, err := tt.rfs.FieldAsInterface(tt.fldPath)
+			if !errors.Is(err, tt.err) {
+				t.Errorf("Expected error: %v, got: %v", tt.err, err)
+			}
+			if val != tt.expected {
+				t.Errorf("Expected value: %v, got: %v", tt.expected, val)
+			}
+		})
+	}
+}
+
+func TestRatingMatchedFiltersFieldAsInterface(t *testing.T) {
+	rmf := RatingMatchedFilters{
+		"field1": "value1",
+		"field2": 42,
+		"field3": true,
+	}
+
+	tests := []struct {
+		name     string
+		rmf      RatingMatchedFilters
+		fldPath  []string
+		expected any
+		err      error
+	}{
+		{
+			name:     "Field exists",
+			rmf:      rmf,
+			fldPath:  []string{"field1"},
+			expected: "value1",
+			err:      nil,
+		},
+		{
+			name:     "Field exists with integer value",
+			rmf:      rmf,
+			fldPath:  []string{"field2"},
+			expected: 42,
+			err:      nil,
+		},
+		{
+			name:     "Field exists with boolean value",
+			rmf:      rmf,
+			fldPath:  []string{"field3"},
+			expected: true,
+			err:      nil,
+		},
+		{
+			name:     "Field does not exist",
+			rmf:      rmf,
+			fldPath:  []string{"fieldNotFound"},
+			expected: nil,
+			err:      utils.ErrNotFound,
+		},
+		{
+			name:     "Invalid field path length",
+			rmf:      rmf,
+			fldPath:  []string{"field1", "extra"},
+			expected: nil,
+			err:      utils.ErrNotFound,
+		},
+		{
+			name:     "Nil RatingMatchedFilters",
+			rmf:      nil,
+			fldPath:  []string{"field1"},
+			expected: nil,
+			err:      utils.ErrNotFound,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			_, err := tt.rmf.FieldAsInterface(tt.fldPath)
+			if !errors.Is(err, tt.err) && (err == nil || tt.err == nil || err.Error() != tt.err.Error()) {
+				t.Errorf("Expected error: %v, got: %v", tt.err, err)
+			}
+
+		})
 	}
 }
