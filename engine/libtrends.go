@@ -19,6 +19,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"math"
+	"sync"
 	"time"
 
 	"github.com/cgrates/cgrates/utils"
@@ -29,11 +31,38 @@ type TrendProfile struct {
 	ID           string
 	Schedule     string // Cron expression scheduling gathering of the metrics
 	StatID       string
-	Metrics      []MetricWithSettings
+	Metrics      []*MetricWithSettings
 	QueueLength  int
 	TTL          time.Duration
 	TrendType    string // *last, *average
 	ThresholdIDs []string
+}
+
+// Clone will clone the TrendProfile so it can be used by scheduler safely
+func (tP *TrendProfile) Clone() (clnTp *TrendProfile) {
+	clnTp = &TrendProfile{
+		Tenant:      tP.Tenant,
+		ID:          tP.ID,
+		Schedule:    tP.Schedule,
+		StatID:      tP.StatID,
+		QueueLength: tP.QueueLength,
+		TTL:         tP.TTL,
+		TrendType:   tP.TrendType,
+	}
+	if tP.Metrics != nil {
+		clnTp.Metrics = make([]*MetricWithSettings, len(tP.Metrics))
+		for i, m := range tP.Metrics {
+			clnTp.Metrics[i] = &MetricWithSettings{MetricID: m.MetricID,
+				TrendSwingMargin: m.TrendSwingMargin}
+		}
+	}
+	if tP.ThresholdIDs != nil {
+		clnTp.ThresholdIDs = make([]string, len(tP.ThresholdIDs))
+		for i, tID := range tP.ThresholdIDs {
+			clnTp.ThresholdIDs[i] = tID
+		}
+	}
+	return
 }
 
 // MetricWithSettings adds specific settings to the Metric
@@ -63,18 +92,66 @@ type TrendWithAPIOpts struct {
 
 // Trend is the unit matched by filters
 type Trend struct {
+	sync.RWMutex
+
 	Tenant   string
 	ID       string
 	RunTimes []time.Time
-	Metrics  map[time.Time]map[string]MetricWithTrend
-	totals   map[string]float64 // cached sum, used for average calculations
+	Metrics  map[time.Time]map[string]*MetricWithTrend
+
+	// indexes help faster processing
+	mLast   map[string]time.Time // last time a metric was present
+	mCounts map[string]int       // number of times a metric is present in Metrics
+	mTotals map[string]float64   // cached sum, used for average calculations
+}
+
+// computeIndexes should be called after each retrieval from DB
+func (t *Trend) computeIndexes() {
+	for _, runTime := range t.RunTimes {
+		for _, mWt := range t.Metrics[runTime] {
+			t.indexesAppendMetric(mWt, runTime)
+		}
+	}
+}
+
+// indexesAppendMetric appends a single metric to indexes
+func (t *Trend) indexesAppendMetric(mWt *MetricWithTrend, rTime time.Time) {
+	t.mLast[mWt.ID] = rTime
+	t.mCounts[mWt.ID] += 1
+	t.mTotals[mWt.ID] += mWt.Value
+}
+
+// getTrendLabel identifies the trend label for the instant value of the metric
+//
+//	*positive, *negative, *constant, N/A
+func (t *Trend) getTrendLabel(mID string, mVal float64, swingMargin float64) (lbl string) {
+	var prevVal *float64
+	if _, has := t.mLast[mID]; has {
+		prevVal = &t.Metrics[t.mLast[mID]][mID].Value
+	}
+	if prevVal == nil {
+		return utils.NotAvailable
+	}
+	diffVal := mVal - *prevVal
+	switch {
+	case diffVal > 0:
+		lbl = utils.MetaPositive
+	case diffVal < 0:
+		lbl = utils.MetaNegative
+	default:
+		lbl = utils.MetaConstant
+	}
+	if math.Abs(diffVal*100/(*prevVal)) <= swingMargin { // percentage value of diff is lower than threshold
+		lbl = utils.MetaConstant
+	}
+	return
 }
 
 // MetricWithTrend represents one read from StatS
 type MetricWithTrend struct {
 	ID    string  // Metric ID
 	Value float64 // Metric Value
-	Trend string  // *positive, *negative, *neutral
+	Trend string  // *positive, *negative, *constant, N/A
 }
 
 func (tr *Trend) TenantID() string {

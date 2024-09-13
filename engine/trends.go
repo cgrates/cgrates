@@ -21,6 +21,7 @@ package engine
 import (
 	"fmt"
 	"sync"
+	"time"
 
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
@@ -62,7 +63,59 @@ type TrendS struct {
 // computeTrend will query a stat and build the Trend for it
 //
 //	it is be called by Cron service
-func (tS *TrendS) computeTrend(tP *TrendProfile) (err error) {
+func (tS *TrendS) computeTrend(tP *TrendProfile) {
+	var floatMetrics map[string]float64
+	if err := tS.connMgr.Call(context.Background(), tS.cgrcfg.TrendSCfg().StatSConns,
+		utils.StatSv1GetQueueFloatMetrics,
+		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: tP.Tenant, ID: tP.StatID}},
+		floatMetrics); err != nil {
+		utils.Logger.Warning(
+			fmt.Sprintf(
+				"<%s> computing trend for with id: <%s:%s> stats <%s> error: <%s>",
+				utils.TrendS, tP.Tenant, tP.ID, tP.StatID, err.Error()))
+		return
+	}
+	trend, err := tS.dm.GetTrend(tP.Tenant, tP.ID, true, true, utils.NonTransactional)
+	if err == utils.ErrNotFound {
+		trend = &Trend{
+			Tenant:   tP.Tenant,
+			ID:       tP.ID,
+			RunTimes: make([]time.Time, 0),
+			Metrics:  make(map[time.Time]map[string]*MetricWithTrend),
+		}
+	} else if err != nil {
+		utils.Logger.Warning(
+			fmt.Sprintf(
+				"<%s> querying trend for with id: <%s:%s> dm error: <%s>",
+				utils.TrendS, tP.Tenant, tP.ID, err.Error()))
+		return
+	}
+
+	trend.Lock()
+	defer trend.Unlock()
+
+	now := time.Now()
+	var metricWithSettings []*MetricWithSettings
+	if len(tP.Metrics) != 0 {
+		metricWithSettings = tP.Metrics // read only
+	}
+	if len(metricWithSettings) == 0 { // unlimited metrics in trend
+		for mID := range floatMetrics {
+			metricWithSettings = append(metricWithSettings, &MetricWithSettings{MetricID: mID})
+		}
+	}
+	trend.RunTimes = append(trend.RunTimes, now)
+	for _, mWS := range metricWithSettings {
+		mWt := &MetricWithTrend{ID: mWS.MetricID}
+		var has bool
+		if mWt.Value, has = floatMetrics[mWS.MetricID]; !has { // no stats computed for metric
+			mWt.Value = -1.0
+			mWt.Trend = utils.NotAvailable
+			continue
+		}
+		mWt.Trend = trend.getTrendLabel(mWt.ID, mWt.Value, mWS.TrendSwingMargin)
+	}
+
 	return
 }
 
@@ -82,7 +135,7 @@ func (tS *TrendS) scheduleTrendQueries(ctx *context.Context, tnt string, tIDs []
 					utils.TrendS, tnt, tID, err.Error()))
 			complete = false
 		} else if entryID, err := tS.crn.AddFunc(tP.Schedule,
-			func() { tS.computeTrend(tP) }); err != nil {
+			func() { tS.computeTrend(tP.Clone()) }); err != nil {
 			utils.Logger.Warning(
 				fmt.Sprintf(
 					"<%s> scheduling TrendProfile <%s:%s>, error: <%s>",
@@ -91,6 +144,7 @@ func (tS *TrendS) scheduleTrendQueries(ctx *context.Context, tnt string, tIDs []
 		} else {
 			tS.crnTQsMux.Lock()
 			tS.crnTQs[tP.Tenant][tP.ID] = entryID
+			tS.crnTQsMux.Unlock()
 		}
 
 	}

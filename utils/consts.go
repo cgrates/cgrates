@@ -317,6 +317,8 @@ const (
 	CreateTariffPlanTablesSQL = "create_tariffplan_tables.sql"
 	TestSQL                   = "TEST_SQL"
 	MetaConstant              = "*constant"
+	MetaPositive              = "*positive"
+	MetaNegative              = "*negative"
 	MetaFiller                = "*filler"
 	MetaHTTPPost              = "*http_post"
 	MetaHTTPjsonMap           = "*http_json_map"

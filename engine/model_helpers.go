@@ -1761,7 +1761,7 @@ func APItoTrends(tr *utils.TPTrendsProfile) (sr *TrendProfile, err error) {
 		StatID:       tr.StatID,
 		Schedule:     tr.Schedule,
 		QueueLength:  tr.QueueLength,
-		Metrics:      make([]MetricWithSettings, len(tr.Metrics)),
+		Metrics:      make([]*MetricWithSettings, len(tr.Metrics)),
 		TrendType:    tr.TrendType,
 		ThresholdIDs: make([]string, len(tr.ThresholdIDs)),
 	}
