@@ -68,7 +68,7 @@ func (tS *TrendS) computeTrend(tP *TrendProfile) {
 	if err := tS.connMgr.Call(context.Background(), tS.cgrcfg.TrendSCfg().StatSConns,
 		utils.StatSv1GetQueueFloatMetrics,
 		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: tP.Tenant, ID: tP.StatID}},
-		floatMetrics); err != nil {
+		&floatMetrics); err != nil {
 		utils.Logger.Warning(
 			fmt.Sprintf(
 				"<%s> computing trend for with id: <%s:%s> stats <%s> error: <%s>",
@@ -86,7 +86,7 @@ func (tS *TrendS) computeTrend(tP *TrendProfile) {
 	} else if err != nil {
 		utils.Logger.Warning(
 			fmt.Sprintf(
-				"<%s> querying trend for with id: <%s:%s> dm error: <%s>",
+				"<%s> querying trend with id: <%s:%s> dm error: <%s>",
 				utils.TrendS, tP.Tenant, tP.ID, err.Error()))
 		return
 	}
@@ -104,7 +104,11 @@ func (tS *TrendS) computeTrend(tP *TrendProfile) {
 			metricWithSettings = append(metricWithSettings, &MetricWithSettings{MetricID: mID})
 		}
 	}
+	if len(metricWithSettings) == 0 {
+		return // nothing to compute
+	}
 	trend.RunTimes = append(trend.RunTimes, now)
+	trend.Metrics[now] = make(map[string]*MetricWithTrend)
 	for _, mWS := range metricWithSettings {
 		mWt := &MetricWithTrend{ID: mWS.MetricID}
 		var has bool
@@ -114,9 +118,16 @@ func (tS *TrendS) computeTrend(tP *TrendProfile) {
 			continue
 		}
 		mWt.Trend = trend.getTrendLabel(mWt.ID, mWt.Value, mWS.TrendSwingMargin)
+		trend.Metrics[now][mWt.ID] = mWt
+	}
+	if err := tS.dm.SetTrend(trend); err != nil {
+		utils.Logger.Warning(
+			fmt.Sprintf(
+				"<%s> setting trend with id: <%s:%s> dm error: <%s>",
+				utils.TrendS, tP.Tenant, tP.ID, err.Error()))
+		return
 	}
 
-	return
 }
 
 // scheduleTrendQueries will schedule/re-schedule specific trend queries

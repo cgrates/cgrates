@@ -107,6 +107,9 @@ type Trend struct {
 
 // computeIndexes should be called after each retrieval from DB
 func (t *Trend) computeIndexes() {
+	t.mLast = make(map[string]time.Time)
+	t.mCounts = make(map[string]int)
+	t.mTotals = make(map[string]float64)
 	for _, runTime := range t.RunTimes {
 		for _, mWt := range t.Metrics[runTime] {
 			t.indexesAppendMetric(mWt, runTime)
