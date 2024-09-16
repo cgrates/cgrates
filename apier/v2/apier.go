@@ -362,6 +362,27 @@ func (apiv2 *APIerSv2) SetActions(ctx *context.Context, attrs *utils.AttrSetActi
 				Disabled:       disabled,
 			}
 		}
+		// load action timings from tags
+		if apiAct.TimingTags != "" {
+			timingIds := strings.Split(apiAct.TimingTags, utils.InfieldSep)
+			for _, timingID := range timingIds {
+				timing, err := apiv2.DataManager.GetTiming(timingID, false,
+					utils.NonTransactional)
+				if err != nil {
+					return fmt.Errorf("error: %v querying timing with id: %q",
+						err.Error(), timingID)
+				}
+				a.Balance.Timings = append(a.Balance.Timings, &engine.RITiming{
+					ID:        timingID,
+					Years:     timing.Years,
+					Months:    timing.Months,
+					MonthDays: timing.MonthDays,
+					WeekDays:  timing.WeekDays,
+					StartTime: timing.StartTime,
+					EndTime:   timing.EndTime,
+				})
+			}
+		}
 		storeActions[idx] = a
 	}
 	if err := apiv2.DataManager.SetActions(attrs.ActionsId, storeActions); err != nil {

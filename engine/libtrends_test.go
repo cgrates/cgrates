@@ -31,7 +31,7 @@ func TestTrendGetTrendLabel(t *testing.T) {
 	t1 := now.Add(-2 * time.Second)
 	t2 := now.Add(-time.Second)
 	trnd1 := &Trend{
-		RWMutex:  sync.RWMutex{},
+		RWMutex:  &sync.RWMutex{},
 		Tenant:   "cgrates.org",
 		ID:       "TestTrendGetTrendLabel",
 		RunTimes: []time.Time{t1, t2, now},
