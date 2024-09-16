@@ -319,6 +319,8 @@ const (
 	MetaConstant              = "*constant"
 	MetaPositive              = "*positive"
 	MetaNegative              = "*negative"
+	MetaLast                  = "*last"
+
 	MetaFiller                = "*filler"
 	MetaHTTPPost              = "*http_post"
 	MetaHTTPjsonMap           = "*http_json_map"

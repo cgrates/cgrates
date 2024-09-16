@@ -26,34 +26,40 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
+// A TrendProfile represents the settings of a Trend
 type TrendProfile struct {
-	Tenant       string
-	ID           string
-	Schedule     string // Cron expression scheduling gathering of the metrics
-	StatID       string
-	Metrics      []*MetricWithSettings
-	QueueLength  int
-	TTL          time.Duration
-	TrendType    string // *last, *average
-	ThresholdIDs []string
+	Tenant          string
+	ID              string
+	Schedule        string // Cron expression scheduling gathering of the metrics
+	StatID          string
+	Metrics         []string
+	QueueLength     int
+	TTL             time.Duration
+	MinItems        int     // minimum number of items for building Trends
+	CorrelationType string  // *last, *average
+	Tolerance       float64 // allow this deviation margin for *constant trend
+	Stored          bool    // store the Trend in dataDB
+	ThresholdIDs    []string
 }
 
 // Clone will clone the TrendProfile so it can be used by scheduler safely
 func (tP *TrendProfile) Clone() (clnTp *TrendProfile) {
 	clnTp = &TrendProfile{
-		Tenant:      tP.Tenant,
-		ID:          tP.ID,
-		Schedule:    tP.Schedule,
-		StatID:      tP.StatID,
-		QueueLength: tP.QueueLength,
-		TTL:         tP.TTL,
-		TrendType:   tP.TrendType,
+		Tenant:          tP.Tenant,
+		ID:              tP.ID,
+		Schedule:        tP.Schedule,
+		StatID:          tP.StatID,
+		QueueLength:     tP.QueueLength,
+		TTL:             tP.TTL,
+		MinItems:        tP.MinItems,
+		CorrelationType: tP.CorrelationType,
+		Tolerance:       tP.Tolerance,
+		Stored:          tP.Stored,
 	}
 	if tP.Metrics != nil {
-		clnTp.Metrics = make([]*MetricWithSettings, len(tP.Metrics))
-		for i, m := range tP.Metrics {
-			clnTp.Metrics[i] = &MetricWithSettings{MetricID: m.MetricID,
-				TrendSwingMargin: m.TrendSwingMargin}
+		clnTp.Metrics = make([]string, len(tP.Metrics))
+		for i, mID := range tP.Metrics {
+			clnTp.Metrics[i] = mID
 		}
 	}
 	if tP.ThresholdIDs != nil {
@@ -63,12 +69,6 @@ func (tP *TrendProfile) Clone() (clnTp *TrendProfile) {
 		}
 	}
 	return
-}
-
-// MetricWithSettings adds specific settings to the Metric
-type MetricWithSettings struct {
-	MetricID         string
-	TrendSwingMargin float64 // allow this margin for *neutral trend
 }
 
 type TrendProfileWithAPIOpts struct {
@@ -94,15 +94,18 @@ type TrendWithAPIOpts struct {
 type Trend struct {
 	*sync.RWMutex
 
-	Tenant   string
-	ID       string
-	RunTimes []time.Time
-	Metrics  map[time.Time]map[string]*MetricWithTrend
+	Tenant            string
+	ID                string
+	RunTimes          []time.Time
+	Metrics           map[time.Time]map[string]*MetricWithTrend
+	CompressedMetrics []byte // if populated, Metrics will be emty
 
 	// indexes help faster processing
 	mLast   map[string]time.Time // last time a metric was present
 	mCounts map[string]int       // number of times a metric is present in Metrics
 	mTotals map[string]float64   // cached sum, used for average calculations
+
+	tP *TrendProfile // cache here the settings
 }
 
 // computeIndexes should be called after each retrieval from DB
@@ -113,6 +116,7 @@ func (t *Trend) computeIndexes() {
 	for _, runTime := range t.RunTimes {
 		for _, mWt := range t.Metrics[runTime] {
 			t.indexesAppendMetric(mWt, runTime)
+
 		}
 	}
 }
@@ -124,27 +128,45 @@ func (t *Trend) indexesAppendMetric(mWt *MetricWithTrend, rTime time.Time) {
 	t.mTotals[mWt.ID] += mWt.Value
 }
 
+// getTrendGrowth returns the percentage growth for a specific metric
+//
+// @correlation parameter will define whether the comparison is against last or average value
+// errors in case of previous
+func (t *Trend) getTrendGrowth(mID string, mVal float64, correlation string, roundDec int) (tG float64, err error) {
+	var prevVal float64
+	if _, has := t.mLast[mID]; !has {
+		return -1.0, utils.ErrNotFound
+	}
+	if _, has := t.Metrics[t.mLast[mID]][mID]; !has {
+		return -1.0, utils.ErrNotFound
+	}
+
+	switch correlation {
+	case utils.MetaLast:
+		prevVal = t.Metrics[t.mLast[mID]][mID].Value
+	case utils.MetaAverage:
+		prevVal = t.mTotals[mID] / float64(t.mCounts[mID])
+	default:
+		return -1.0, utils.ErrCorrelationUndefined
+	}
+
+	diffVal := mVal - prevVal
+	return utils.Round(diffVal*100/prevVal, roundDec, utils.MetaRoundingMiddle), nil
+}
+
 // getTrendLabel identifies the trend label for the instant value of the metric
 //
 //	*positive, *negative, *constant, N/A
-func (t *Trend) getTrendLabel(mID string, mVal float64, swingMargin float64) (lbl string) {
-	var prevVal *float64
-	if _, has := t.mLast[mID]; has {
-		prevVal = &t.Metrics[t.mLast[mID]][mID].Value
-	}
-	if prevVal == nil {
-		return utils.NotAvailable
-	}
-	diffVal := mVal - *prevVal
+func (t *Trend) getTrendLabel(tGrowth float64, tolerance float64) (lbl string) {
 	switch {
-	case diffVal > 0:
+	case tGrowth > 0:
 		lbl = utils.MetaPositive
-	case diffVal < 0:
+	case tGrowth < 0:
 		lbl = utils.MetaNegative
 	default:
 		lbl = utils.MetaConstant
 	}
-	if math.Abs(diffVal*100/(*prevVal)) <= swingMargin { // percentage value of diff is lower than threshold
+	if math.Abs(tGrowth) <= tolerance { // percentage value of diff is lower than threshold
 		lbl = utils.MetaConstant
 	}
 	return
@@ -152,9 +174,10 @@ func (t *Trend) getTrendLabel(mID string, mVal float64, swingMargin float64) (lb
 
 // MetricWithTrend represents one read from StatS
 type MetricWithTrend struct {
-	ID    string  // Metric ID
-	Value float64 // Metric Value
-	Trend string  // *positive, *negative, *constant, N/A
+	ID          string  // Metric ID
+	Value       float64 // Metric Value
+	TrendGrowth float64 // Difference between last and previous
+	TrendLabel  string  // *positive, *negative, *constant, N/A
 }
 
 func (tr *Trend) TenantID() string {

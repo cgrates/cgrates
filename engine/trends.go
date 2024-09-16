@@ -95,29 +95,33 @@ func (tS *TrendS) computeTrend(tP *TrendProfile) {
 	defer trend.Unlock()
 
 	now := time.Now()
-	var metricWithSettings []*MetricWithSettings
+	var metrics []string
 	if len(tP.Metrics) != 0 {
-		metricWithSettings = tP.Metrics // read only
+		metrics = tP.Metrics // read only
 	}
-	if len(metricWithSettings) == 0 { // unlimited metrics in trend
+	if len(metrics) == 0 { // unlimited metrics in trend
 		for mID := range floatMetrics {
-			metricWithSettings = append(metricWithSettings, &MetricWithSettings{MetricID: mID})
+			metrics = append(metrics, mID)
 		}
 	}
-	if len(metricWithSettings) == 0 {
+	if len(metrics) == 0 {
 		return // nothing to compute
 	}
 	trend.RunTimes = append(trend.RunTimes, now)
 	trend.Metrics[now] = make(map[string]*MetricWithTrend)
-	for _, mWS := range metricWithSettings {
-		mWt := &MetricWithTrend{ID: mWS.MetricID}
+	for _, mID := range metrics {
+		mWt := &MetricWithTrend{ID: mID}
 		var has bool
-		if mWt.Value, has = floatMetrics[mWS.MetricID]; !has { // no stats computed for metric
+		if mWt.Value, has = floatMetrics[mID]; !has { // no stats computed for metric
 			mWt.Value = -1.0
-			mWt.Trend = utils.NotAvailable
+			mWt.TrendLabel = utils.NotAvailable
 			continue
 		}
-		mWt.Trend = trend.getTrendLabel(mWt.ID, mWt.Value, mWS.TrendSwingMargin)
+		if mWt.TrendGrowth, err = trend.getTrendGrowth(mID, mWt.Value, tP.CorrelationType, tS.cgrcfg.GeneralCfg().RoundingDecimals); err != nil {
+			mWt.TrendLabel = utils.NotAvailable
+		} else {
+			mWt.TrendLabel = trend.getTrendLabel(mWt.TrendGrowth, tP.Tolerance)
+		}
 		trend.Metrics[now][mWt.ID] = mWt
 	}
 	if err := tS.dm.SetTrend(trend); err != nil {

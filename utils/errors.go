@@ -82,6 +82,7 @@ var (
 	ErrNegative                         = errors.New("NEGATIVE")
 	ErrCastFailed                       = errors.New("CAST_FAILED")
 	ErrNoBackupFound                    = errors.New("NO_BACKUP_FOUND")
+	ErrCorrelationUndefined             = errors.New("CORRELATION_UNDEFINED")
 
 	ErrMap = map[string]error{
 		ErrNoMoreData.Error():                       ErrNoMoreData,

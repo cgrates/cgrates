@@ -1756,13 +1756,13 @@ func APItoModelTrends(tr *utils.TPTrendsProfile) (mdls TrendsMdls) {
 
 func APItoTrends(tr *utils.TPTrendsProfile) (sr *TrendProfile, err error) {
 	sr = &TrendProfile{
-		Tenant:       tr.Tenant,
-		ID:           tr.ID,
-		StatID:       tr.StatID,
-		Schedule:     tr.Schedule,
-		QueueLength:  tr.QueueLength,
-		Metrics:      make([]*MetricWithSettings, len(tr.Metrics)),
-		TrendType:    tr.TrendType,
+		Tenant:      tr.Tenant,
+		ID:          tr.ID,
+		StatID:      tr.StatID,
+		Schedule:    tr.Schedule,
+		QueueLength: tr.QueueLength,
+		//Metrics:      make([]*MetricWithSettings, len(tr.Metrics)),
+		//TrendType:    tr.TrendType,
 		ThresholdIDs: make([]string, len(tr.ThresholdIDs)),
 	}
 	if tr.TTL != utils.EmptyString {
@@ -1771,12 +1771,13 @@ func APItoTrends(tr *utils.TPTrendsProfile) (sr *TrendProfile, err error) {
 		}
 	}
 	copy(sr.ThresholdIDs, tr.ThresholdIDs)
-	for i, metric := range sr.Metrics {
+	/*for i, metric := range sr.Metrics {
 		tr.Metrics[i] = utils.MetricWithSettings{
 			MetricID:         metric.MetricID,
 			TrendSwingMargin: metric.TrendSwingMargin,
 		}
 	}
+	*/
 	return
 }
 
@@ -1789,18 +1790,19 @@ func TrendProfileToAPI(tr *TrendProfile) (tpSR *utils.TPTrendsProfile) {
 		ThresholdIDs: make([]string, len(tr.ThresholdIDs)),
 		Metrics:      make([]utils.MetricWithSettings, len(tr.Metrics)),
 		QueueLength:  tr.QueueLength,
-		TrendType:    tr.TrendType,
+		//		TrendType:    tr.TrendType,
 	}
 	if tr.TTL != time.Duration(0) {
 		tpSR.TTL = tr.TTL.String()
 	}
 	copy(tpSR.ThresholdIDs, tr.ThresholdIDs)
-	for i, metric := range tr.Metrics {
+	/*for i, metric := range tr.Metrics {
 		tpSR.Metrics[i] = utils.MetricWithSettings{
 			MetricID:         metric.MetricID,
 			TrendSwingMargin: metric.TrendSwingMargin,
 		}
 	}
+	*/
 	return
 }
 
