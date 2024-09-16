@@ -92,7 +92,7 @@ type TrendWithAPIOpts struct {
 
 // Trend is the unit matched by filters
 type Trend struct {
-	sync.RWMutex
+	*sync.RWMutex
 
 	Tenant   string
 	ID       string
