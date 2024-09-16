@@ -91,8 +91,8 @@ func (tS *TrendS) computeTrend(tP *TrendProfile) {
 		return
 	}
 
-	trend.Lock()
-	defer trend.Unlock()
+	trend.tMux.Lock()
+	defer trend.tMux.Unlock()
 
 	now := time.Now()
 	var metrics []string
