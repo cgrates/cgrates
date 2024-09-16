@@ -1644,27 +1644,29 @@ type TrendsMdls []*TrendsMdl
 
 func (tps TrendsMdls) CSVHeader() (result []string) {
 	return []string{"#" + utils.Tenant, utils.ID, utils.Schedule, utils.StatID,
-		utils.Metrics, utils.QueueLength, utils.TTL, utils.TrendType, utils.ThresholdIDs}
+		utils.Metrics, utils.QueueLength, utils.TTL, utils.MinItems, utils.CorrelationType, utils.Tolerance, utils.Stored, utils.ThresholdIDs}
 }
 
 func (models TrendsMdls) AsTPTrends() (result []*utils.TPTrendsProfile) {
 	thresholdsMap := make(map[string]utils.StringSet)
-	trendMetricsMap := make(map[string]map[string]*utils.MetricWithSettings)
+	trendMetricsMap := make(map[string]utils.StringSet)
 	mtr := make(map[string]*utils.TPTrendsProfile)
 	for _, model := range models {
 		key := &utils.TenantID{Tenant: model.Tenant, ID: model.ID}
 		tr, found := mtr[key.TenantID()]
 		if !found {
 			tr = &utils.TPTrendsProfile{
-				Tenant:      model.Tenant,
-				TPid:        model.Tpid,
-				ID:          model.ID,
-				Schedule:    model.Schedule,
-				StatID:      model.StatID,
-				TTL:         model.TTL,
-				Trend:       model.Trend,
-				TrendType:   model.TrendType,
-				QueueLength: model.QueueLength,
+				Tenant:          model.Tenant,
+				TPid:            model.Tpid,
+				ID:              model.ID,
+				Schedule:        model.Schedule,
+				StatID:          model.StatID,
+				TTL:             model.TTL,
+				QueueLength:     model.QueueLength,
+				MinItems:        model.MinItems,
+				Tolerance:       model.Tolerance,
+				Stored:          model.Stored,
+				CorrelationType: model.CorrelationType,
 			}
 		}
 		if model.Schedule != utils.EmptyString {
@@ -1676,14 +1678,20 @@ func (models TrendsMdls) AsTPTrends() (result []*utils.TPTrendsProfile) {
 		if model.TTL != utils.EmptyString {
 			tr.TTL = model.TTL
 		}
-		if model.Trend != utils.EmptyString {
-			tr.Trend = model.Trend
-		}
-		if model.TrendType != utils.EmptyString {
-			tr.TrendType = model.TrendType
-		}
 		if model.QueueLength != 0 {
 			tr.QueueLength = model.QueueLength
+		}
+		if model.MinItems != 0 {
+			tr.MinItems = model.MinItems
+		}
+		if model.CorrelationType != utils.EmptyString {
+			tr.CorrelationType = model.CorrelationType
+		}
+		if model.Tolerance != 0 {
+			tr.Tolerance = model.Tolerance
+		}
+		if model.Stored {
+			tr.Stored = true
 		}
 		if model.ThresholdIDs != utils.EmptyString {
 			if _, has := thresholdsMap[key.TenantID()]; !has {
@@ -1693,21 +1701,9 @@ func (models TrendsMdls) AsTPTrends() (result []*utils.TPTrendsProfile) {
 		}
 		if model.Metrics != utils.EmptyString {
 			if _, has := trendMetricsMap[key.TenantID()]; !has {
-				trendMetricsMap[key.TenantID()] = make(map[string]*utils.MetricWithSettings)
+				trendMetricsMap[key.TenantID()] = make(utils.StringSet)
 			}
-			metricsSplit := strings.Split(model.Metrics, utils.InfieldSep)
-			for _, metricID := range metricsSplit {
-				trMetric, found := trendMetricsMap[key.TenantID()][metricID]
-				if !found {
-					trMetric = &utils.MetricWithSettings{
-						MetricID: metricID,
-					}
-				}
-				if model.TrendSwingMargin != 0 {
-					trMetric.TrendSwingMargin = model.TrendSwingMargin
-				}
-				trendMetricsMap[key.TenantID()][metricID] = trMetric
-			}
+			trendMetricsMap[key.TenantID()].AddSlice(strings.Split(model.Metrics, utils.InfieldSep))
 		}
 		mtr[key.TenantID()] = tr
 	}
@@ -1716,93 +1712,87 @@ func (models TrendsMdls) AsTPTrends() (result []*utils.TPTrendsProfile) {
 	for tntId, sr := range mtr {
 		result[i] = sr
 		result[i].ThresholdIDs = thresholdsMap[tntId].AsSlice()
-		for _, metric := range trendMetricsMap[tntId] {
-			result[i].Metrics = append(result[i].Metrics, *metric)
-		}
+		result[i].Metrics = trendMetricsMap[tntId].AsSlice()
 		i++
 	}
 	return
 }
 
 func APItoModelTrends(tr *utils.TPTrendsProfile) (mdls TrendsMdls) {
-	if tr != nil && len(tr.Metrics) != 0 {
-		for i, metric := range tr.Metrics {
-			mdl := &TrendsMdl{
-				Tpid:   tr.TPid,
-				Tenant: tr.Tenant,
-				ID:     tr.ID,
-			}
-			if i == 0 {
-				for i, threshold := range tr.ThresholdIDs {
-					if i != 0 {
-						mdl.ThresholdIDs += utils.InfieldSep
-					}
-					mdl.ThresholdIDs += threshold
-				}
-				mdl.Schedule = tr.Schedule
-				mdl.QueueLength = tr.QueueLength
-				mdl.StatID = tr.StatID
-				mdl.Trend = tr.Trend
-				mdl.TrendType = tr.TrendType
-				mdl.TTL = tr.TTL
-			}
-			mdl.TrendSwingMargin = metric.TrendSwingMargin
-			mdl.Metrics = metric.MetricID
-			mdls = append(mdls, mdl)
+	if tr != nil {
+		mdl := &TrendsMdl{
+			Tpid:   tr.TPid,
+			Tenant: tr.Tenant,
+			ID:     tr.ID,
 		}
+		mdl.Schedule = tr.Schedule
+		mdl.QueueLength = tr.QueueLength
+		mdl.StatID = tr.StatID
+		mdl.TTL = tr.TTL
+		mdl.MinItems = tr.MinItems
+		mdl.CorrelationType = tr.CorrelationType
+		mdl.Tolerance = tr.Tolerance
+		mdl.Stored = tr.Stored
+		for i, val := range tr.ThresholdIDs {
+			if i != 0 {
+				mdl.ThresholdIDs += utils.InfieldSep
+			}
+			mdl.ThresholdIDs += val
+		}
+		for i, val := range tr.Metrics {
+			if i != 0 {
+				mdl.Metrics += utils.InfieldSep
+			}
+			mdl.Metrics += val
+		}
+		mdls = append(mdls, mdl)
 	}
 	return
 }
 
-func APItoTrends(tr *utils.TPTrendsProfile) (sr *TrendProfile, err error) {
-	sr = &TrendProfile{
-		Tenant:      tr.Tenant,
-		ID:          tr.ID,
-		StatID:      tr.StatID,
-		Schedule:    tr.Schedule,
-		QueueLength: tr.QueueLength,
-		//Metrics:      make([]*MetricWithSettings, len(tr.Metrics)),
-		//TrendType:    tr.TrendType,
-		ThresholdIDs: make([]string, len(tr.ThresholdIDs)),
+func APItoTrends(tpTR *utils.TPTrendsProfile) (tr *TrendProfile, err error) {
+	tr = &TrendProfile{
+		Tenant:          tpTR.Tenant,
+		ID:              tpTR.ID,
+		StatID:          tpTR.StatID,
+		Schedule:        tpTR.Schedule,
+		QueueLength:     tpTR.QueueLength,
+		ThresholdIDs:    make([]string, len(tpTR.ThresholdIDs)),
+		Metrics:         make([]string, len(tpTR.Metrics)),
+		MinItems:        tpTR.MinItems,
+		CorrelationType: tpTR.CorrelationType,
+		Tolerance:       tpTR.Tolerance,
 	}
-	if tr.TTL != utils.EmptyString {
-		if sr.TTL, err = utils.ParseDurationWithNanosecs(tr.TTL); err != nil {
+	if tpTR.TTL != utils.EmptyString {
+		if tr.TTL, err = utils.ParseDurationWithNanosecs(tpTR.TTL); err != nil {
 			return
 		}
 	}
-	copy(sr.ThresholdIDs, tr.ThresholdIDs)
-	/*for i, metric := range sr.Metrics {
-		tr.Metrics[i] = utils.MetricWithSettings{
-			MetricID:         metric.MetricID,
-			TrendSwingMargin: metric.TrendSwingMargin,
-		}
-	}
-	*/
+	copy(tr.ThresholdIDs, tpTR.ThresholdIDs)
+	copy(tr.Metrics, tpTR.Metrics)
+
 	return
 }
 
-func TrendProfileToAPI(tr *TrendProfile) (tpSR *utils.TPTrendsProfile) {
-	tpSR = &utils.TPTrendsProfile{
-		Tenant:       tr.Tenant,
-		ID:           tr.ID,
-		Schedule:     tr.Schedule,
-		StatID:       tr.StatID,
-		ThresholdIDs: make([]string, len(tr.ThresholdIDs)),
-		Metrics:      make([]utils.MetricWithSettings, len(tr.Metrics)),
-		QueueLength:  tr.QueueLength,
-		//		TrendType:    tr.TrendType,
+func TrendProfileToAPI(tr *TrendProfile) (tpTR *utils.TPTrendsProfile) {
+	tpTR = &utils.TPTrendsProfile{
+		Tenant:          tr.Tenant,
+		ID:              tr.ID,
+		Schedule:        tr.Schedule,
+		StatID:          tr.StatID,
+		ThresholdIDs:    make([]string, len(tr.ThresholdIDs)),
+		Metrics:         make([]string, len(tr.Metrics)),
+		QueueLength:     tr.QueueLength,
+		MinItems:        tr.MinItems,
+		CorrelationType: tr.CorrelationType,
+		Tolerance:       tr.Tolerance,
+		Stored:          tr.Stored,
 	}
 	if tr.TTL != time.Duration(0) {
-		tpSR.TTL = tr.TTL.String()
+		tpTR.TTL = tr.TTL.String()
 	}
-	copy(tpSR.ThresholdIDs, tr.ThresholdIDs)
-	/*for i, metric := range tr.Metrics {
-		tpSR.Metrics[i] = utils.MetricWithSettings{
-			MetricID:         metric.MetricID,
-			TrendSwingMargin: metric.TrendSwingMargin,
-		}
-	}
-	*/
+	copy(tpTR.ThresholdIDs, tr.ThresholdIDs)
+	copy(tpTR.Metrics, tr.Metrics)
 	return
 }
 

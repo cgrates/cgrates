@@ -93,6 +93,9 @@ func init() {
 	if err := csvr.LoadRankings(); err != nil {
 		log.Print("error in LoadRankings:", err)
 	}
+	if err := csvr.LoadTrends(); err != nil {
+		log.Print("error in LoadTrends:", err)
+	}
 	if err := csvr.LoadThresholds(); err != nil {
 		log.Print("error in LoadThresholds:", err)
 	}
@@ -1099,6 +1102,34 @@ func TestLoadRankingProfiles(t *testing.T) {
 		return a < b
 	})); diff != "" {
 		t.Errorf("Wrong TPRankingProfiles (-expected +got):\n%s", diff)
+	}
+}
+
+func TestTrendProfiles(t *testing.T) {
+	eTrends := map[utils.TenantID]*utils.TPTrendsProfile{
+		{Tenant: "cgrates.org", ID: "TREND1"}: {
+			TPid:            testTPID,
+			Tenant:          "cgrates.org",
+			ID:              "TREND1",
+			Schedule:        "0 12 * * *",
+			StatID:          "Stats2",
+			Metrics:         []string{"*acc", "*tcc"},
+			QueueLength:     -1,
+			TTL:             "-1",
+			MinItems:        1,
+			CorrelationType: "*average",
+			Tolerance:       2.1,
+			Stored:          true,
+			ThresholdIDs:    []string{"TD1", "TD2"},
+		},
+	}
+	rgkey := utils.TenantID{Tenant: "cgrates.org", ID: "TREND1"}
+	if len(eTrends) != len(csvr.trProfiles) {
+		t.Errorf("Failed to load TrendProfiles: %+v", csvr.trProfiles)
+	} else if diff := cmp.Diff(eTrends[rgkey], csvr.trProfiles[rgkey], cmpopts.SortSlices(func(a, b string) bool {
+		return a < b
+	})); diff != "" {
+		t.Errorf("Wrong TrendProfiles (-expected +got):\n%s", diff)
 	}
 }
 

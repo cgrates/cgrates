@@ -1001,17 +1001,19 @@ type MetricWithSettings struct {
 
 // TPTrendProfile is used in APIs to manage remotely offline TrendProfile
 type TPTrendsProfile struct {
-	TPid         string
-	Tenant       string
-	ID           string
-	Schedule     string
-	StatID       string
-	Metrics      []MetricWithSettings
-	QueueLength  int
-	TTL          string
-	Trend        string
-	TrendType    string
-	ThresholdIDs []string
+	TPid            string
+	Tenant          string
+	ID              string
+	Schedule        string
+	StatID          string
+	Metrics         []string
+	QueueLength     int
+	TTL             string
+	MinItems        int
+	CorrelationType string
+	Tolerance       float64
+	Stored          bool
+	ThresholdIDs    []string
 }
 
 // TPThresholdProfile is used in APIs to manage remotely offline ThresholdProfile

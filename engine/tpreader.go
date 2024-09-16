@@ -1142,11 +1142,11 @@ func (tpr *TpReader) LoadTrendsFiltered(tag string) error {
 	if err != nil {
 		return err
 	}
-	mapSrs := make(map[utils.TenantID]*utils.TPTrendsProfile)
-	for _, sr := range tps {
-		mapSrs[utils.TenantID{Tenant: sr.Tenant, ID: sr.ID}] = sr
+	mapTrs := make(map[utils.TenantID]*utils.TPTrendsProfile)
+	for _, tr := range tps {
+		mapTrs[utils.TenantID{Tenant: tr.Tenant, ID: tr.ID}] = tr
 	}
-	tpr.trProfiles = mapSrs
+	tpr.trProfiles = mapTrs
 	return nil
 }
 

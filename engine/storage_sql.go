@@ -598,17 +598,17 @@ func (sqls *SQLStorage) SetTPRankings(rgs []*utils.TPRankingProfile) error {
 	return nil
 }
 
-func (sqls *SQLStorage) SetTPTrends(srs []*utils.TPTrendsProfile) error {
-	if len(srs) == 0 {
+func (sqls *SQLStorage) SetTPTrends(trs []*utils.TPTrendsProfile) error {
+	if len(trs) == 0 {
 		return nil
 	}
 	tx := sqls.db.Begin()
-	for _, sg := range srs {
-		if err := tx.Where(&TrendsMdl{Tpid: sg.TPid, ID: sg.ID}).Delete(TrendsMdl{}).Error; err != nil {
+	for _, t := range trs {
+		if err := tx.Where(&TrendsMdl{Tpid: t.TPid, ID: t.ID}).Delete(TrendsMdl{}).Error; err != nil {
 			tx.Rollback()
 			return err
 		}
-		for _, msg := range APItoModelTrends(sg) {
+		for _, msg := range APItoModelTrends(t) {
 			if err := tx.Create(&msg).Error; err != nil {
 				tx.Rollback()
 				return err

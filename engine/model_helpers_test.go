@@ -5977,7 +5977,10 @@ func TestTrendsMdlCSVHeader(t *testing.T) {
 		utils.Metrics,
 		utils.QueueLength,
 		utils.TTL,
-		utils.TrendType,
+		utils.MinItems,
+		utils.CorrelationType,
+		utils.Tolerance,
+		utils.Stored,
 		utils.ThresholdIDs,
 	}
 	var tps TrendsMdls
