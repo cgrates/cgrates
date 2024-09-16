@@ -373,3 +373,24 @@ func TestCsvURLClosePageNotNil(t *testing.T) {
 	c.page = resp.Body
 	c.Close()
 }
+
+func TestGetTPTrends(t *testing.T) {
+	csvStorage := &CSVStorage{}
+	tpid := "tpid"
+	tenant := "cgrates.org"
+	id := "1002"
+	result, err := csvStorage.GetTPTrends(tpid, tenant, id)
+	if err != nil {
+		t.Fatalf("Expected no error but got: %v", err)
+	}
+	expectedResults := []*utils.TPTrendsProfile{
+		{ID: "tpid"},
+		{ID: "tpid"},
+	}
+
+	for i, res := range result {
+		if res.ID != expectedResults[i].ID {
+			t.Errorf("Expected result ID %s but got %s", expectedResults[i].ID, res.ID)
+		}
+	}
+}

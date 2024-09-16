@@ -19,7 +19,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"os/exec"
+	"reflect"
 	"testing"
+	"time"
 
 	"github.com/cgrates/cgrates/utils"
 )
@@ -126,4 +129,93 @@ func TestStopStartEngine(t *testing.T) {
 	if cmd != nil {
 		t.Errorf("expected no command, got %v", cmd)
 	}
+}
+
+func TestCallScript(t *testing.T) {
+	err := CallScript("/path/to/nonexistent/script.sh", "arg", 100)
+	if err == nil {
+		t.Errorf("Expected an error when calling a non-existent script, got nil")
+	}
+	err = CallScript("/bin/echo", "script", 100)
+	if err != nil {
+		t.Errorf("Expected no error when calling a valid command, got: %v", err)
+	}
+	start := time.Now()
+	err = CallScript("/bin/echo", "script", 100)
+	duration := time.Since(start)
+	if duration < 100*time.Millisecond {
+		t.Errorf("Expected the delay to be at least 100ms, got %v", duration)
+	}
+}
+
+func TestForceKillProc(t *testing.T) {
+
+	cmd := exec.Command("sleep", "5")
+	if err := cmd.Start(); err != nil {
+		t.Fatalf("Failed to start the sleep process: %v", err)
+	}
+	defer cmd.Process.Kill()
+	err := ForceKillProcName("sleep", 100)
+	if err != nil {
+		t.Errorf("Expected no error when trying to kill an existing process, got: %v", err)
+	}
+	start := time.Now()
+	err = ForceKillProcName("sleep", 100)
+	if err != nil {
+		t.Errorf("Expected no error when trying to kill an existing process, got: %v", err)
+	}
+	duration := time.Since(start)
+	if duration < 100*time.Millisecond {
+		t.Errorf("Expected the delay to be at least 100ms, got %v", duration)
+	}
+}
+
+func TestRoutesIDs(t *testing.T) {
+	t.Run("returns empty slice when SortedRoutesList is empty", func(t *testing.T) {
+		var sRs SortedRoutesList
+		routeIDs := sRs.RouteIDs()
+
+		if len(routeIDs) != 0 {
+			t.Errorf("expected empty slice, got %v", routeIDs)
+		}
+	})
+
+	t.Run("returns single RouteID when there is one route", func(t *testing.T) {
+		sRs := SortedRoutesList{
+			{
+				Routes: []*SortedRoute{
+					{RouteID: "route1"},
+				},
+			},
+		}
+		routeIDs := sRs.RouteIDs()
+
+		expected := []string{"route1"}
+		if !reflect.DeepEqual(routeIDs, expected) {
+			t.Errorf("expected %v, got %v", expected, routeIDs)
+		}
+	})
+
+	t.Run("returns multiple RouteIDs for multiple routes", func(t *testing.T) {
+		sRs := SortedRoutesList{
+			{
+				Routes: []*SortedRoute{
+					{RouteID: "1001"},
+					{RouteID: "1002"},
+				},
+			},
+			{
+				Routes: []*SortedRoute{
+					{RouteID: "1003"},
+					{RouteID: "1004"},
+				},
+			},
+		}
+		routeIDs := sRs.RouteIDs()
+
+		expected := []string{"1001", "1002", "1003", "1004"}
+		if !reflect.DeepEqual(routeIDs, expected) {
+			t.Errorf("expected %v, got %v", expected, routeIDs)
+		}
+	})
 }
