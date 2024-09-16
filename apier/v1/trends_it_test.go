@@ -23,6 +23,7 @@ package v1
 import (
 	"path"
 	"testing"
+	"time"
 
 	"github.com/cgrates/birpc"
 	"github.com/cgrates/birpc/context"
@@ -37,7 +38,6 @@ var (
 	trendCfgPath   string
 	trendCfg       *config.CGRConfig
 	trendRPC       *birpc.Client
-	trendProfile   *engine.TrendProfileWithAPIOpts
 	trendProfile2  *engine.TrendProfileWithAPIOpts
 	trendConfigDIR string
 
@@ -47,7 +47,7 @@ var (
 		testTrendSResetStorDb,
 		testTrendSStartEngine,
 		testTrendSRPCConn,
-		testTrendSLoadAdd,
+		testTrendSFromFolder,
 		testTrendSetTrendProfile,
 		testTrendSGetTrendProfileIDs,
 		testTrendSGetTrendProfiles,
@@ -112,22 +112,13 @@ func testTrendSRPCConn(t *testing.T) {
 		t.Fatal(err)
 	}
 }
-func testTrendSLoadAdd(t *testing.T) {
-	trendProfile = &engine.TrendProfileWithAPIOpts{
-		TrendProfile: &engine.TrendProfile{
-			Tenant: "cgrates.org",
-			ID:     "TR_AVG",
-			StatID: "Stat1",
-		},
-	}
-
-	var result string
-	if err := trendRPC.Call(context.Background(), utils.APIerSv1SetTrendProfile, trendProfile, &result); err != nil {
+func testTrendSFromFolder(t *testing.T) {
+	var reply string
+	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*utils.DataDir, "tariffplans", "oldtutorial")}
+	if err := trendRPC.Call(context.Background(), utils.APIerSv1LoadTariffPlanFromFolder, attrs, &reply); err != nil {
 		t.Error(err)
-	} else if result != utils.OK {
-		t.Error("Unexpected reply returned", result)
 	}
-
+	time.Sleep(100 * time.Millisecond)
 }
 
 func testTrendSetTrendProfile(t *testing.T) {
@@ -158,7 +149,7 @@ func testTrendSetTrendProfile(t *testing.T) {
 	}
 }
 func testTrendSGetTrendProfileIDs(t *testing.T) {
-	expected := []string{"Trend1", "TR_AVG"}
+	expected := []string{"Trend1", "TR_1"}
 	var result []string
 	if err := trendRPC.Call(context.Background(), utils.APIerSv1GetTrendProfileIDs, utils.PaginatorWithTenant{}, &result); err != nil {
 		t.Error(err)
@@ -181,9 +172,22 @@ func testTrendSGetTrendProfiles(t *testing.T) {
 	} else if result != utils.OK {
 		t.Errorf("Expected: %v,Received: %v", utils.OK, result)
 	}
+	tpTr := &engine.TrendProfile{
+		Tenant:          "cgrates.org",
+		ID:              "TR_1",
+		StatID:          "Stats1",
+		Schedule:        "0 1 * * *",
+		Metrics:         []string{"*acc"},
+		QueueLength:     -1,
+		MinItems:        1,
+		CorrelationType: "*last",
+		Tolerance:       5,
+		Stored:          false,
+		ThresholdIDs:    []string{"TD1"},
+	}
 	expRes := []*engine.TrendProfile{
 		trendPrf.TrendProfile,
-		trendProfile.TrendProfile,
+		tpTr,
 		trendProfile2.TrendProfile,
 	}
 	var tResult []*engine.TrendProfile
@@ -196,7 +200,7 @@ func testTrendSGetTrendProfiles(t *testing.T) {
 	}
 
 	expRes = []*engine.TrendProfile{
-		trendProfile.TrendProfile,
+		tpTr,
 		trendProfile2.TrendProfile,
 	}
 
@@ -224,7 +228,7 @@ func testTrendSUpdateTrendProfile(t *testing.T) {
 		reply  *engine.TrendProfileWithAPIOpts
 		result string
 	)
-	if err := trendRPC.Call(context.Background(), utils.APIerSv1SetTrendProfile, trendProfile, &result); err != nil {
+	if err := trendRPC.Call(context.Background(), utils.APIerSv1SetTrendProfile, trendProfile2, &result); err != nil {
 		t.Error(err)
 	}
 	if err := trendRPC.Call(context.Background(), utils.APIerSv1GetTrendProfile, &utils.TenantID{Tenant: "cgrates.org", ID: "Trend1"}, &reply); err != nil {

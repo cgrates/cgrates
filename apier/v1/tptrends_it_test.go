@@ -125,11 +125,8 @@ func testTPTrendsSetTPTrend(t *testing.T) {
 		Tenant:       "cgrates.org",
 		TPid:         "TPS1",
 		ID:           "Trend1",
+		StatID:       "STS1",
 		ThresholdIDs: []string{"ThreshValue", "ThreshValueTwo"},
-		Metrics: []utils.MetricWithSettings{
-			{MetricID: "Metric"},
-		},
-		Trend: "*average",
 	}
 	sort.Strings(tpTrend.ThresholdIDs)
 	var result string
@@ -154,6 +151,7 @@ func testTPTrendsGetTPTrendAfterSet(t *testing.T) {
 
 func testTPTrendsUpdateTPTrend(t *testing.T) {
 	var result string
+	tpTrend.StatID = "Stats2"
 	if err := tpTrendRPC.Call(context.Background(), utils.APIerSv1SetTPTrend, tpTrend, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {

@@ -323,11 +323,12 @@ CREATE TABLE tp_trends(
  "schedule" varchar(64) NOT NULL,
  "stat_id" varchar(64) NOT NULL,
  "metrics" varchar(128) NOT NULL,
- "trend_swing_margin" decimal(8,2) NOT NULL,
  "queue_length" INTEGER NOT NULL,
  "ttl" varchar(32) NOT NULL,
- "trend" varchar(32) NOT NULL,
- "trend_type" varchar(64) NOT NULL,
+ "min_items" INTEGER NOT NULL,
+ "correlation_type" varchar(64) NOT NULL,
+ "tolerance" decimal(8,2) NOT NULL,
+ "stored" BOOLEAN NOT NULL,
  "threshold_ids" varchar(64) NOT NULL,
  "created_at" TIMESTAMP
 );

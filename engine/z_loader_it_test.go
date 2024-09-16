@@ -195,6 +195,9 @@ func testLoaderITRemoveLoad(t *testing.T) {
 	if err = loader.LoadThresholds(); err != nil {
 		t.Error("Failed loading thresholds: ", err.Error())
 	}
+	if err = loader.LoadTrends(); err != nil {
+		t.Error("Failed loading trends: ", err.Error())
+	}
 	if err = loader.LoadRouteProfiles(); err != nil {
 		t.Error("Failed loading Route profiles: ", err.Error())
 	}
@@ -273,6 +276,9 @@ func testLoaderITLoadFromCSV(t *testing.T) {
 	}
 	if err = loader.LoadStats(); err != nil {
 		t.Error("Failed loading stats: ", err.Error())
+	}
+	if err = loader.LoadTrends(); err != nil {
+		t.Error("Failed loading trends: ", err.Error())
 	}
 	if err = loader.LoadThresholds(); err != nil {
 		t.Error("Failed loading thresholds: ", err.Error())
@@ -438,6 +444,21 @@ func testLoaderITWriteToDatabase(t *testing.T) {
 			t.Errorf("Expecting: %v, received: %v", sgs, rcv)
 		}
 	}
+
+	for tenatid, tr := range loader.trProfiles {
+		rcv, err := loader.dm.GetTrendProfile(tenatid.Tenant, tenatid.ID, false, false, utils.NonTransactional)
+		if err != nil {
+			t.Errorf("Failed GetTrendProfile, tenant: %s, id: %s,  error: %s ", tr.Tenant, tr.ID, err.Error())
+		}
+		trs, err := APItoTrends(tr)
+		if err != nil {
+			t.Error(err)
+		}
+		if !reflect.DeepEqual(trs, rcv) {
+			t.Errorf("Expecting: %v, received: %v", utils.ToJSON(trs), utils.ToJSON(rcv))
+		}
+	}
+
 	for tenatid, th := range loader.thProfiles {
 		rcv, err := loader.dm.GetThresholdProfile(tenatid.Tenant, tenatid.ID, false, false, utils.NonTransactional)
 		if err != nil {
@@ -574,6 +595,9 @@ func testLoaderITLoadFromStorDb(t *testing.T) {
 	if err := loader.LoadAccountActions(); err != nil && err.Error() != utils.NotFoundCaps {
 		t.Error("Failed loading account actions: ", err.Error())
 	}
+	if err := loader.LoadTrends(); err != nil && err.Error() != utils.NotFoundCaps {
+		t.Error("Failed loading trends: ", err.Error())
+	}
 }
 
 func testLoaderITLoadIndividualProfiles(t *testing.T) {
@@ -614,6 +638,17 @@ func testLoaderITLoadIndividualProfiles(t *testing.T) {
 		for _, a := range aas {
 			if err := loader.LoadAccountActionsFiltered(a); err != nil {
 				t.Fatalf("Could not load account actions with id: %s, error: %s", a.GetId(), err.Error())
+			}
+		}
+	}
+
+	// Load trend profiles
+	if trp, err := storDb.GetTPTrends(utils.TestSQL, "cgrates.org", ""); err != nil {
+		t.Fatal("Could not retrieve trends")
+	} else {
+		for _, r := range trp {
+			if _, err := loader.lr.GetTPTrends(utils.TestSQL, "cgrates.org", r.ID); err != nil {
+				t.Fatalf("Could not load trendProfile for id: %s, error: %s", r.ID, err.Error())
 			}
 		}
 	}

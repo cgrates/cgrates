@@ -247,8 +247,8 @@ cgrates.org,TestStats2,,,,,2,*sum#~*req.Cost;*average#~*req.Cost,,true,true,20,
 cgrates.org,Ranking1,15m,Stats2;Stats3;Stats4,Metric1;Metric3,*asc,,THD1;THD2
 `
 	TrendsCSVContent = `
-#Tenant[0],Id[1],QueryInterval[2],StatID[3],QueueLength[4],TTL[5],PurgeFilterIDs[6],Trend[7],ThresholdIDs[7]
-cgrates.org,TREND1,5m,Stats2,-1,-1,,*average,TD1;THD2
+#Tenant[0],Id[1],Schedule[2],StatID[3],Metrics[4],QueueLength[5],TTL[6],MinItems[7],CorrelationType[8],Tolerance[9],Stored[10],ThresholdIDs[11]
+cgrates.org,TREND1,0 12 * * *,Stats2,*acc;*tcc,-1,-1,1,*average,2.1,true,TD1;TD2
 `
 	ThresholdsCSVContent = `
 #Tenant[0],Id[1],FilterIDs[2],ActivationInterval[3],MaxHits[4],MinHits[5],MinSleep[6],Blocker[7],Weight[8],ActionIDs[9],Async[10]
