@@ -129,6 +129,37 @@ HALF2,*any,*any,*any,*any,12:00:00;23:59:59`,
 	client, _ := testEnv.Setup(t, *utils.WaitRater)
 	time.Sleep(50 * time.Millisecond)
 
+	t.Run("TimingIsActiveAt", func(t *testing.T) {
+		var reply *bool
+		params := &v1.TimeParams{
+			TimingID: "HALF1",
+			Time:     "2024-09-17T10:00:00Z",
+		}
+		if err := client.Call(context.Background(), utils.APIerSV1TimingIsActiveAt, params, &reply); err != nil {
+			t.Fatal(err)
+		} else if !*reply {
+			t.Errorf("expected TimingID to be Active")
+		}
+		params = &v1.TimeParams{
+			TimingID: "HALF2",
+			Time:     "2024-09-17T10:00:00Z",
+		}
+		if err := client.Call(context.Background(), utils.APIerSV1TimingIsActiveAt, params, &reply); err != nil {
+			t.Fatal(err)
+		} else if *reply {
+			t.Errorf("expected TimingID to be inactive")
+		}
+		params = &v1.TimeParams{
+			TimingID: "HALF2",
+			Time:     "2024-09-17T12:00:00Z",
+		}
+		if err := client.Call(context.Background(), utils.APIerSV1TimingIsActiveAt, params, &reply); err != nil {
+			t.Fatal(err)
+		} else if !*reply {
+			t.Errorf("expected TimingID to be Active")
+		}
+	})
+
 	t.Run("GetAccount", func(t *testing.T) {
 		var acnt engine.Account
 		attrs := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1001"}

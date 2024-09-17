@@ -22,6 +22,7 @@ import (
 	"fmt"
 	"slices"
 	"sort"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -189,6 +190,64 @@ type TPTiming struct {
 	WeekDays  WeekDays
 	StartTime string
 	EndTime   string
+}
+
+// Returns wheter the Timing is active at the specified time
+func (t *TPTiming) IsActiveAt(tm time.Time) bool {
+	// check for years
+	if len(t.Years) > 0 && !t.Years.Contains(tm.Year()) {
+		return false
+	}
+	// check for months
+	if len(t.Months) > 0 && !t.Months.Contains(tm.Month()) {
+		return false
+	}
+	// check for month days
+	if len(t.MonthDays) > 0 && !t.MonthDays.Contains(tm.Day()) {
+		return false
+	}
+	// check for weekdays
+	if len(t.WeekDays) > 0 && !t.WeekDays.Contains(tm.Weekday()) {
+		return false
+	}
+	// check for start hour
+	if tm.Before(t.getLeftMargin(tm)) {
+		return false
+	}
+	// check for end hour
+	if tm.After(t.getRightMargin(tm)) {
+		return false
+	}
+	return true
+}
+
+// Returns a time object that represents the end of the interval realtive to the received time
+func (t *TPTiming) getRightMargin(tm time.Time) (rigthtTime time.Time) {
+	year, month, day := tm.Year(), tm.Month(), tm.Day()
+	hour, min, sec, nsec := 23, 59, 59, 0
+	loc := tm.Location()
+	if t.EndTime != "" {
+		split := strings.Split(t.EndTime, ":")
+		hour, _ = strconv.Atoi(split[0])
+		min, _ = strconv.Atoi(split[1])
+		sec, _ = strconv.Atoi(split[2])
+		return time.Date(year, month, day, hour, min, sec, nsec, loc)
+	}
+	return time.Date(year, month, day, hour, min, sec, nsec, loc).Add(time.Second)
+}
+
+// Returns a time object that represents the start of the interval realtive to the received time
+func (t *TPTiming) getLeftMargin(tm time.Time) (rigthtTime time.Time) {
+	year, month, day := tm.Year(), tm.Month(), tm.Day()
+	hour, min, sec, nsec := 0, 0, 0, 0
+	loc := tm.Location()
+	if t.StartTime != "" {
+		split := strings.Split(t.StartTime, ":")
+		hour, _ = strconv.Atoi(split[0])
+		min, _ = strconv.Atoi(split[1])
+		sec, _ = strconv.Atoi(split[2])
+	}
+	return time.Date(year, month, day, hour, min, sec, nsec, loc)
 }
 
 // TPTimingWithAPIOpts is used in replicatorV1 for dispatcher
