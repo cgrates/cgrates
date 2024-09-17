@@ -1664,16 +1664,28 @@ func (sS *SessionS) updateSession(s *Session, updtEv, opts engine.MapEvent, isMs
 	maxUsage = make(map[string]time.Duration)
 	for i, sr := range s.SRuns {
 		reqType := sr.Event.GetStringIgnoreErrors(utils.RequestType)
-		if reqType == utils.MetaNone {
-			maxUsage[sr.CD.RunID] = reqMaxUsage
-			continue
-		}
 		var rplyMaxUsage time.Duration
-		if reqType != utils.MetaPrepaid || s.debitStop != nil {
+		switch reqType {
+		case utils.MetaPrepaid:
+			if s.debitStop == nil {
+				if rplyMaxUsage, err = sS.debitSession(s, i, reqMaxUsage,
+					updtEv.GetDurationPtrIgnoreErrors(utils.LastUsed)); err != nil {
+					return
+				}
+				break
+			}
 			rplyMaxUsage = reqMaxUsage
-		} else if rplyMaxUsage, err = sS.debitSession(s, i, reqMaxUsage,
-			updtEv.GetDurationPtrIgnoreErrors(utils.LastUsed)); err != nil {
-			return
+		case utils.MetaPseudoPrepaid:
+			if err = sS.connMgr.Call(context.TODO(), sS.cgrCfg.SessionSCfg().RALsConns,
+				utils.ResponderGetMaxSessionTime,
+				&engine.CallDescriptorWithAPIOpts{
+					CallDescriptor: sr.CD,
+					APIOpts:        s.OptsStart,
+				}, &rplyMaxUsage); err != nil {
+				return
+			}
+		default:
+			rplyMaxUsage = reqMaxUsage
 		}
 		maxUsage[sr.CD.RunID] = rplyMaxUsage
 	}
