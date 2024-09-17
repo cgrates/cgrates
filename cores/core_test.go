@@ -20,7 +20,10 @@ package cores
 
 import (
 	"errors"
+	"fmt"
+	"os"
 	"reflect"
+	"strings"
 	"sync"
 	"testing"
 	"time"
@@ -171,4 +174,52 @@ func TestV1StopCPUProfiling(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestWriteHeapProfile(t *testing.T) {
+	tmpFilePath := "test_heap_profile.pprof"
+	defer os.Remove(tmpFilePath)
+	t.Run("Success", func(t *testing.T) {
+		err := writeHeapProfile(tmpFilePath)
+		if err != nil {
+			t.Fatalf("expected no error, got %v", err)
+		}
+		if _, err := os.Stat(tmpFilePath); os.IsNotExist(err) {
+			t.Fatal("expected file to be created")
+		}
+	})
+
+	t.Run("FileCreationError", func(t *testing.T) {
+		invalidPath := "/invalid/path/to/file.pprof"
+		err := writeHeapProfile(invalidPath)
+		if err == nil {
+			t.Fatal("expected an error but got none")
+		}
+		if !strings.Contains(err.Error(), "could not create memory profile") {
+			t.Fatalf("unexpected error message: %v", err)
+		}
+	})
+}
+
+func TestNewMemProfNameFunc(t *testing.T) {
+	t.Run("NoTimestamp", func(t *testing.T) {
+		gen := newMemProfNameFunc(0, false)
+		for i := 1; i <= 3; i++ {
+			expected := fmt.Sprintf("mem_%d.prof", i)
+			result := gen()
+			if result != expected {
+				t.Errorf("expected %s, got %s", expected, result)
+			}
+		}
+	})
+
+	t.Run("Timestamp1SecondOrMore", func(t *testing.T) {
+		gen := newMemProfNameFunc(1*time.Second, true)
+		now := time.Now()
+		result := gen()
+		expected := fmt.Sprintf("mem_%s.prof", now.Format("20060102150405"))
+		if result != expected {
+			t.Errorf("expected %s, got %s", expected, result)
+		}
+	})
 }
