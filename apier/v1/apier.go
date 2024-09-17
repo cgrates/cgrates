@@ -2057,3 +2057,22 @@ func (apierSv1 *APIerSv1) ExportCDRs(ctx *context.Context, args *utils.ArgExport
 	}
 	return
 }
+
+type TimeParams struct {
+	TimingID string // Holds the TimingID to get from the DataDB
+	Time     string // Time to compare with TimingID
+}
+
+// Replies true if the TimingID is active at the specified time, false if not
+func (apierSv1 *APIerSv1) TimingIsActiveAt(ctx *context.Context, params TimeParams, reply *bool) (err error) {
+	timing, err := apierSv1.DataManager.GetTiming(params.TimingID, false, utils.NonTransactional)
+	if err != nil {
+		return err
+	}
+	if tm, err := utils.ParseTimeDetectLayout(params.Time, apierSv1.Config.GeneralCfg().DefaultTimezone); err != nil {
+		return err
+	} else {
+		*reply = timing.IsActiveAt(tm)
+	}
+	return
+}
