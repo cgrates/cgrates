@@ -64,6 +64,7 @@ const (
 	ColTps  = "threshold_profiles"
 	ColThs  = "thresholds"
 	ColTrs  = "trend_profiles"
+	ColTrd  = "trends"
 	ColRgp  = "ranking_profiles"
 	ColFlt  = "filters"
 	ColRts  = "route_profiles"
@@ -299,7 +300,7 @@ func (ms *MongoStorage) ensureIndexesForCol(col string) error { // exported for 
 	switch col {
 	case ColAct, ColApl, ColAAp, ColAtr, ColRpl, ColDst, ColRds, ColLht, ColIndx:
 		err = ms.ensureIndex(col, true, "key")
-	case ColRsP, ColRes, ColSqs, ColRgp, ColTrs, ColSqp, ColTps, ColThs, ColRts, ColAttr, ColFlt, ColCpp, ColDpp, ColDph, ColRpp, ColApp, ColAnp:
+	case ColRsP, ColRes, ColSqs, ColRgp, ColTrs, ColTrd, ColSqp, ColTps, ColThs, ColRts, ColAttr, ColFlt, ColCpp, ColDpp, ColDph, ColRpp, ColApp, ColAnp:
 		err = ms.ensureIndex(col, true, "tenant", "id")
 	case ColRpf, ColShg, ColAcc:
 		err = ms.ensureIndex(col, true, "id")
@@ -324,7 +325,7 @@ func (ms *MongoStorage) EnsureIndexes(cols ...string) error {
 			cols = []string{
 				ColAct, ColApl, ColAAp, ColAtr, ColRpl, ColDst, ColRds, ColLht, ColIndx,
 				ColRsP, ColRes, ColSqs, ColSqp, ColTps, ColThs, ColRts, ColAttr, ColFlt,
-				ColCpp, ColDpp, ColRpp, ColApp, ColRpf, ColShg, ColAcc, ColAnp,
+				ColCpp, ColDpp, ColRpp, ColApp, ColRpf, ColShg, ColAcc, ColAnp, ColTrd, ColTrs,
 			}
 		} else {
 			cols = []string{utils.CDRsTBL}
@@ -474,6 +475,8 @@ func (ms *MongoStorage) GetKeysForPrefix(ctx *context.Context, prefix string) (k
 			keys, qryErr = ms.getAllKeysMatchingTenantID(sctx, ColRgp, utils.RankingProfilePrefix, tntID)
 		case utils.TrendProfilePrefix:
 			keys, qryErr = ms.getAllKeysMatchingTenantID(sctx, ColTrs, utils.TrendProfilePrefix, tntID)
+		case utils.TrendPrefix:
+			keys, qryErr = ms.getAllKeysMatchingTenantID(sctx, ColTrd, utils.TrendPrefix, tntID)
 		case utils.RouteProfilePrefix:
 			keys, qryErr = ms.getAllKeysMatchingTenantID(sctx, ColRts, utils.RouteProfilePrefix, tntID)
 		case utils.AttributeProfilePrefix:
@@ -548,6 +551,10 @@ func (ms *MongoStorage) HasDataDrv(ctx *context.Context, category, subject, tena
 			count, err = ms.getCol(ColAttr).CountDocuments(sctx, bson.M{"tenant": tenant, "id": subject})
 		case utils.ChargerProfilePrefix:
 			count, err = ms.getCol(ColCpp).CountDocuments(sctx, bson.M{"tenant": tenant, "id": subject})
+		case utils.TrendPrefix:
+			count, err = ms.getCol(ColTrd).CountDocuments(sctx, bson.M{"tenant": tenant, "id": subject})
+		case utils.TrendProfilePrefix:
+			count, err = ms.getCol(ColTrs).CountDocuments(sctx, bson.M{"tenant": tenant, "id": subject})
 		case utils.DispatcherProfilePrefix:
 			count, err = ms.getCol(ColDpp).CountDocuments(sctx, bson.M{"tenant": tenant, "id": subject})
 		case utils.DispatcherHostPrefix:
@@ -804,7 +811,39 @@ func (ms *MongoStorage) RemTrendProfileDrv(ctx *context.Context, tenant, id stri
 		}
 		return err
 	})
+}
 
+func (ms *MongoStorage) GetTrendDrv(tenant, id string) (*Trend, error) {
+	tr := new(Trend)
+	err := ms.query(context.Background(), func(sctx mongo.SessionContext) error {
+		sr := ms.getCol(ColTrd).FindOne(sctx, bson.M{"tenant": tenant, "id": id})
+		decodeErr := sr.Decode(tr)
+		if errors.Is(decodeErr, mongo.ErrNoDocuments) {
+			return utils.ErrNotFound
+		}
+		return decodeErr
+	})
+	return tr, err
+}
+
+func (ms *MongoStorage) SetTrendDrv(tr *Trend) error {
+	return ms.query(context.Background(), func(sctx mongo.SessionContext) error {
+		_, err := ms.getCol(ColTrd).UpdateOne(sctx, bson.M{"tenant": tr.Tenant, "id": tr.ID},
+			bson.M{"$set": tr},
+			options.Update().SetUpsert(true),
+		)
+		return err
+	})
+}
+
+func (ms *MongoStorage) RemoveTrendDrv(tenant, id string) error {
+	return ms.query(context.Background(), func(sctx mongo.SessionContext) error {
+		dr, err := ms.getCol(ColTrd).DeleteOne(sctx, bson.M{"tenant": tenant, "id": id})
+		if dr.DeletedCount == 0 {
+			return utils.ErrNotFound
+		}
+		return err
+	})
 }
 
 // GetStatQueueProfileDrv retrieves a StatQueueProfile from dataDB

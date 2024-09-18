@@ -118,6 +118,8 @@ func TestNewAttrReloadCacheWithOpts(t *testing.T) {
 		StatsQueueProfileIDs:         []string{MetaAny},
 		ThresholdIDs:                 []string{MetaAny},
 		ThresholdProfileIDs:          []string{MetaAny},
+		TrendIDs:                     []string{MetaAny},
+		TrendProfileIDs:              []string{MetaAny},
 		FilterIDs:                    []string{MetaAny},
 		RouteProfileIDs:              []string{MetaAny},
 		AttributeProfileIDs:          []string{MetaAny},
@@ -246,7 +248,7 @@ func TestActivationIntervalEquals(t *testing.T) {
 }
 
 func TestNewAttrReloadCacheWithOptsFromMap(t *testing.T) {
-	excluded := NewStringSet([]string{MetaAPIBan, MetaLoadIDs, MetaTrendProfiles})
+	excluded := NewStringSet([]string{MetaAPIBan, MetaLoadIDs})
 	mp := make(map[string][]string)
 	for k := range CacheInstanceToPrefix {
 		if !excluded.Has(k) {

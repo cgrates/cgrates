@@ -53,7 +53,7 @@ func (tpSts TPTrends) exportItems(ctx *context.Context, wrtr io.Writer, tnt stri
 		trendPrf, err = tpSts.dm.GetTrendProfile(ctx, tnt, trendsID)
 		if err != nil {
 			if err.Error() == utils.ErrNotFound.Error() {
-				return fmt.Errorf("<%s> cannot find StatQueueProfile with id: <%v>", err, trendsID)
+				return fmt.Errorf("<%s> cannot find TrendProfile with id: <%v>", err, trendsID)
 			}
 			return err
 		}

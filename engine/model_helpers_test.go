@@ -3701,6 +3701,23 @@ func TestThresholdMdlsCSVHeader(t *testing.T) {
 		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.ToJSON(expStruct), utils.ToJSON(result))
 	}
 }
+
+func TestTrendMdlsCSVHeader(t *testing.T) {
+	testStruct := TrendMdls{
+		{
+			Tpid:   "tpid",
+			Tenant: "cgrates.org",
+		},
+	}
+
+	expStruct := []string{"#" + utils.Tenant, utils.ID, utils.Schedule, utils.StatID,
+		utils.Metrics, utils.TTL, utils.QueueLength,
+		utils.MinItems, utils.CorrelationType, utils.Tolerance, utils.Stored, utils.ThresholdIDs}
+	result := testStruct.CSVHeader()
+	if !reflect.DeepEqual(result, expStruct) {
+		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.ToJSON(expStruct), utils.ToJSON(result))
+	}
+}
 func TestActionProfileMdlsCSVHeader(t *testing.T) {
 	testStruct := ActionProfileMdls{
 		{

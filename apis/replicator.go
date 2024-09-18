@@ -108,6 +108,28 @@ func (rplSv1 *ReplicatorSv1) GetStatQueueProfile(ctx *context.Context, tntID *ut
 	return nil
 }
 
+// GetTrend is the remote method coresponding to the dataDb driver method
+func (rplSv1 *ReplicatorSv1) GetTrend(ctx *context.Context, tntID *utils.TenantIDWithAPIOpts, reply *engine.Trend) error {
+	engine.UpdateReplicationFilters(utils.TrendPrefix, tntID.TenantID.TenantID(), utils.IfaceAsString(tntID.APIOpts[utils.RemoteHostOpt]))
+	rcv, err := rplSv1.dm.DataDB().GetTrendDrv(tntID.Tenant, tntID.ID)
+	if err != nil {
+		return err
+	}
+	*reply = *rcv
+	return nil
+}
+
+// GetTrendProfile is the remote method coresponding to the dataDb driver method
+func (rplSv1 *ReplicatorSv1) GetTrendProfile(ctx *context.Context, tntID *utils.TenantIDWithAPIOpts, reply *engine.TrendProfile) error {
+	engine.UpdateReplicationFilters(utils.TrendProfilePrefix, tntID.TenantID.TenantID(), utils.IfaceAsString(tntID.APIOpts[utils.RemoteHostOpt]))
+	rcv, err := rplSv1.dm.DataDB().GetTrendProfileDrv(ctx, tntID.Tenant, tntID.ID)
+	if err != nil {
+		return err
+	}
+	*reply = *rcv
+	return nil
+}
+
 // GetResource is the remote method coresponding to the dataDb driver method
 func (rplSv1 *ReplicatorSv1) GetResource(ctx *context.Context, tntID *utils.TenantIDWithAPIOpts, reply *engine.Resource) error {
 	engine.UpdateReplicationFilters(utils.ResourcesPrefix, tntID.TenantID.TenantID(), utils.IfaceAsString(tntID.APIOpts[utils.RemoteHostOpt]))
@@ -247,6 +269,42 @@ func (rplSv1 *ReplicatorSv1) SetThreshold(ctx *context.Context, th *engine.Thres
 	}
 	if err = rplSv1.v1.CallCache(ctx, utils.IfaceAsString(th.APIOpts[utils.MetaCache]),
 		th.Tenant, utils.CacheThresholds, th.TenantID(), utils.EmptyString, nil, th.APIOpts); err != nil {
+		return
+	}
+	*reply = utils.OK
+	return
+}
+
+// SetTrendProfile is the replication method coresponding to the dataDb driver method
+func (rplSv1 *ReplicatorSv1) SetTrendProfile(ctx *context.Context, trp *engine.TrendProfileWithAPIOpts, reply *string) (err error) {
+	if err = rplSv1.dm.DataDB().SetTrendProfileDrv(ctx, trp.TrendProfile); err != nil {
+		return
+	}
+	// delay if needed before cache call
+	if rplSv1.v1.cfg.GeneralCfg().CachingDelay != 0 {
+		utils.Logger.Info(fmt.Sprintf("<ReplicatorSv1.SetTrendProfile> Delaying cache call for %v", rplSv1.v1.cfg.GeneralCfg().CachingDelay))
+		time.Sleep(rplSv1.v1.cfg.GeneralCfg().CachingDelay)
+	}
+	if err = rplSv1.v1.CallCache(ctx, utils.IfaceAsString(trp.APIOpts[utils.MetaCache]),
+		trp.Tenant, utils.CacheTrendProfiles, trp.TenantID(), utils.EmptyString, nil, trp.APIOpts); err != nil {
+		return
+	}
+	*reply = utils.OK
+	return
+}
+
+// SetTrend is the replication method coresponding to the dataDb driver method
+func (rplSv1 *ReplicatorSv1) SetTrend(ctx *context.Context, tr *engine.TrendWithAPIOpts, reply *string) (err error) {
+	if err = rplSv1.dm.DataDB().SetTrendDrv(tr.Trend); err != nil {
+		return
+	}
+	// delay if needed before cache call
+	if rplSv1.v1.cfg.GeneralCfg().CachingDelay != 0 {
+		utils.Logger.Info(fmt.Sprintf("<ReplicatorSv1.SetTrend> Delaying cache call for %v", rplSv1.v1.cfg.GeneralCfg().CachingDelay))
+		time.Sleep(rplSv1.v1.cfg.GeneralCfg().CachingDelay)
+	}
+	if err = rplSv1.v1.CallCache(ctx, utils.IfaceAsString(tr.APIOpts[utils.MetaCache]),
+		tr.Tenant, utils.CacheTrends, tr.TenantID(), utils.EmptyString, nil, tr.APIOpts); err != nil {
 		return
 	}
 	*reply = utils.OK
@@ -461,6 +519,42 @@ func (rplSv1 *ReplicatorSv1) SetIndexes(ctx *context.Context, args *utils.SetInd
 	}
 	if err = rplSv1.v1.callCacheMultiple(ctx, utils.IfaceAsString(args.APIOpts[utils.MetaCache]),
 		args.Tenant, args.IdxItmType, cIDs, args.APIOpts); err != nil {
+		return
+	}
+	*reply = utils.OK
+	return
+}
+
+// RemoveTrend is the replication method coresponding to the dataDb driver method
+func (rplSv1 *ReplicatorSv1) RemoveTrend(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *string) (err error) {
+	if err = rplSv1.dm.DataDB().RemoveTrendDrv(args.Tenant, args.ID); err != nil {
+		return
+	}
+	// delay if needed before cache call
+	if rplSv1.v1.cfg.GeneralCfg().CachingDelay != 0 {
+		utils.Logger.Info(fmt.Sprintf("<ReplicatorSv1.RemoveTrend> Delaying cache call for %v", rplSv1.v1.cfg.GeneralCfg().CachingDelay))
+		time.Sleep(rplSv1.v1.cfg.GeneralCfg().CachingDelay)
+	}
+	if err = rplSv1.v1.CallCache(ctx, utils.IfaceAsString(args.APIOpts[utils.MetaCache]),
+		args.Tenant, utils.CacheTrends, args.TenantID.TenantID(), utils.EmptyString, nil, args.APIOpts); err != nil {
+		return
+	}
+	*reply = utils.OK
+	return
+}
+
+// RemoveTrendProfile is the replication method coresponding to the dataDb driver method
+func (rplSv1 *ReplicatorSv1) RemoveTrendProfile(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *string) (err error) {
+	if err = rplSv1.dm.DataDB().RemTrendProfileDrv(ctx, args.Tenant, args.ID); err != nil {
+		return
+	}
+	// delay if needed before cache call
+	if rplSv1.v1.cfg.GeneralCfg().CachingDelay != 0 {
+		utils.Logger.Info(fmt.Sprintf("<ReplicatorSv1.RemoveTrendProfile> Delaying cache call for %v", rplSv1.v1.cfg.GeneralCfg().CachingDelay))
+		time.Sleep(rplSv1.v1.cfg.GeneralCfg().CachingDelay)
+	}
+	if err = rplSv1.v1.CallCache(ctx, utils.IfaceAsString(args.APIOpts[utils.MetaCache]),
+		args.Tenant, utils.CacheTrendProfiles, args.TenantID.TenantID(), utils.EmptyString, nil, args.APIOpts); err != nil {
 		return
 	}
 	*reply = utils.OK

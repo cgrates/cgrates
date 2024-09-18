@@ -27,6 +27,7 @@ import (
 	"slices"
 	"sort"
 	"testing"
+	"time"
 
 	"github.com/cgrates/birpc"
 	"github.com/cgrates/birpc/context"
@@ -36,10 +37,11 @@ import (
 )
 
 var (
-	trCfgPath   string
-	trCfg       *config.CGRConfig
-	trRPC       *birpc.Client
-	trConfigDIR string //run tests for specific configuration
+	trCfgPath     string
+	trCfg         *config.CGRConfig
+	trRPC         *birpc.Client
+	trConfigDIR   string //run tests for specific configuration
+	trendProfiles []*engine.TrendProfileWithAPIOpts
 
 	sTestsTr = []func(t *testing.T){
 		testTrendSInitCfg,
@@ -128,7 +130,7 @@ func testTrendsGetTrendProfileBeforeSet(t *testing.T) {
 		&utils.TenantIDWithAPIOpts{
 			TenantID: &utils.TenantID{
 				Tenant: "cgrates.org",
-				ID:     "Test_RNK1",
+				ID:     "Trend1",
 			}}, &replyTrendProfile); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ErrNotFound, err)
 	}
@@ -167,43 +169,54 @@ func testTrendsGetTrendProfileCountBeforeSet(t *testing.T) {
 }
 
 func testTrendsSetTrendProfiles(t *testing.T) {
-	TrendProfiles := []*engine.TrendProfileWithAPIOpts{
+	trendProfiles = []*engine.TrendProfileWithAPIOpts{
 		{
 			TrendProfile: &engine.TrendProfile{
-				ID:     "TestA_Trend1",
-				Tenant: "cgrates.org",
+				ID:              "Trend1",
+				StatID:          "Stats1",
+				Tenant:          "cgrates.org",
+				Schedule:        "0 0 * * *",
+				MinItems:        3,
+				CorrelationType: "*last",
+				QueueLength:     -1,
+				TTL:             0,
+				Tolerance:       0.5,
+				Stored:          true,
+				ThresholdIDs:    []string{"Th1"},
+				Metrics:         []string{"*acc"},
 			},
 		},
 		{
 			TrendProfile: &engine.TrendProfile{
-				ID:     "TestA_Trend2",
-				Tenant: "cgrates.org",
+				ID:              "Trend2",
+				StatID:          "Stats2",
+				Tenant:          "cgrates.org",
+				Schedule:        "12 30 * * *",
+				MinItems:        1,
+				TTL:             10 * time.Second,
+				CorrelationType: "*average",
+				Tolerance:       1.5,
+				Stored:          false,
 			},
 		},
 		{
 			TrendProfile: &engine.TrendProfile{
-				ID:     "TestA_Trend3",
-				Tenant: "cgrates.org",
-			},
-		},
-		{
-			TrendProfile: &engine.TrendProfile{
-				ID:     "TestB_Trend1",
-				Tenant: "cgrates.org",
-			},
-		},
-		{
-			TrendProfile: &engine.TrendProfile{
-				ID:     "TestB_Trend2",
-				Tenant: "cgrates.org",
+				ID:              "Trend3",
+				StatID:          "Stats3",
+				Tenant:          "cgrates.org",
+				Schedule:        "04 10 * * *",
+				MinItems:        0,
+				CorrelationType: "*last",
+				Tolerance:       3,
+				Stored:          true,
 			},
 		},
 	}
 
 	var reply string
-	for _, TrendProfile := range TrendProfiles {
+	for _, trendProfile := range trendProfiles {
 		if err := trRPC.Call(context.Background(), utils.AdminSv1SetTrendProfile,
-			TrendProfile, &reply); err != nil {
+			trendProfile, &reply); err != nil {
 			t.Error(err)
 		} else if reply != utils.OK {
 			t.Error(err)
@@ -212,26 +225,22 @@ func testTrendsSetTrendProfiles(t *testing.T) {
 }
 
 func testTrendsGetTrendProfileAfterSet(t *testing.T) {
-	expectedTrendProfile := engine.TrendProfile{
-		ID:     "TestA_Trend1",
-		Tenant: "cgrates.org",
-	}
-	var replyTrendProfile engine.TrendProfile
+	var replyTrendProfile *engine.TrendProfile
 	if err := trRPC.Call(context.Background(), utils.AdminSv1GetTrendProfile,
 		&utils.TenantIDWithAPIOpts{
 			TenantID: &utils.TenantID{
 				Tenant: "cgrates.org",
-				ID:     "TestA_Trend1",
+				ID:     "Trend1",
 			}}, &replyTrendProfile); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(replyTrendProfile, expectedTrendProfile) {
+	} else if !reflect.DeepEqual(replyTrendProfile, trendProfiles[0].TrendProfile) {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>",
-			utils.ToJSON(expectedTrendProfile), utils.ToJSON(replyTrendProfile))
+			utils.ToJSON(trendProfiles[0].TrendProfile), utils.ToJSON(replyTrendProfile))
 	}
 }
 
 func testTrendsGetTrendProfileIDsAfterSet(t *testing.T) {
-	expectedIDs := []string{"TestA_Trend1", "TestA_Trend2", "TestA_Trend3", "TestB_Trend1", "TestB_Trend2"}
+	expectedIDs := []string{"Trend1", "Trend2", "Trend3"}
 	var replyTrendProfileIDs []string
 	if err := trRPC.Call(context.Background(), utils.AdminSv1GetTrendProfileIDs,
 		&utils.ArgsItemIDs{
@@ -245,11 +254,10 @@ func testTrendsGetTrendProfileIDsAfterSet(t *testing.T) {
 		}
 	}
 
-	expectedIDs = []string{"TestA_Trend1", "TestA_Trend2", "TestA_Trend3"}
 	if err := trRPC.Call(context.Background(), utils.AdminSv1GetTrendProfileIDs,
 		&utils.ArgsItemIDs{
 			Tenant:      "cgrates.org",
-			ItemsPrefix: "TestA",
+			ItemsPrefix: "Trend",
 		}, &replyTrendProfileIDs); err != nil {
 		t.Error(err)
 	} else {
@@ -259,19 +267,6 @@ func testTrendsGetTrendProfileIDsAfterSet(t *testing.T) {
 		}
 	}
 
-	expectedIDs = []string{"TestB_Trend1", "TestB_Trend2"}
-	if err := trRPC.Call(context.Background(), utils.AdminSv1GetTrendProfileIDs,
-		&utils.ArgsItemIDs{
-			Tenant:      "cgrates.org",
-			ItemsPrefix: "TestB",
-		}, &replyTrendProfileIDs); err != nil {
-		t.Error(err)
-	} else {
-		sort.Strings(replyTrendProfileIDs)
-		if !slices.Equal(replyTrendProfileIDs, expectedIDs) {
-			t.Errorf("expected: <%+v>, \nreceived: <%+v>", expectedIDs, replyTrendProfileIDs)
-		}
-	}
 }
 
 func testTrendsGetTrendProfileCountAfterSet(t *testing.T) {
@@ -281,14 +276,14 @@ func testTrendsGetTrendProfileCountAfterSet(t *testing.T) {
 			Tenant: "cgrates.org",
 		}, &replyCount); err != nil {
 		t.Error(err)
-	} else if replyCount != 5 {
+	} else if replyCount != 3 {
 		t.Errorf("expected <%+v>, \nreceived: <%+v>", 0, replyCount)
 	}
 
 	if err := trRPC.Call(context.Background(), utils.AdminSv1GetTrendProfilesCount,
 		&utils.ArgsItemIDs{
 			Tenant:      "cgrates.org",
-			ItemsPrefix: "TestA",
+			ItemsPrefix: "Trend",
 		}, &replyCount); err != nil {
 		t.Error(err)
 	} else if replyCount != 3 {
@@ -298,37 +293,16 @@ func testTrendsGetTrendProfileCountAfterSet(t *testing.T) {
 	if err := trRPC.Call(context.Background(), utils.AdminSv1GetTrendProfilesCount,
 		&utils.ArgsItemIDs{
 			Tenant:      "cgrates.org",
-			ItemsPrefix: "TestB",
+			ItemsPrefix: "Trend1",
 		}, &replyCount); err != nil {
 		t.Error(err)
-	} else if replyCount != 2 {
+	} else if replyCount != 1 {
 		t.Errorf("expected <%+v>, \nreceived: <%+v>", 0, replyCount)
 	}
 }
 
 func testTrendsGetTrendProfilesAfterSet(t *testing.T) {
-	expectedTrendProfiles := []*engine.TrendProfile{
-		{
-			ID:     "TestA_Trend1",
-			Tenant: "cgrates.org",
-		},
-		{
-			ID:     "TestA_Trend2",
-			Tenant: "cgrates.org",
-		},
-		{
-			ID:     "TestA_Trend3",
-			Tenant: "cgrates.org",
-		},
-		{
-			ID:     "TestB_Trend1",
-			Tenant: "cgrates.org",
-		},
-		{
-			ID:     "TestB_Trend2",
-			Tenant: "cgrates.org",
-		},
-	}
+
 	var replyTrendProfiles []*engine.TrendProfile
 	if err := trRPC.Call(context.Background(), utils.AdminSv1GetTrendProfiles,
 		&utils.ArgsItemIDs{
@@ -339,10 +313,13 @@ func testTrendsGetTrendProfilesAfterSet(t *testing.T) {
 		sort.Slice(replyTrendProfiles, func(i, j int) bool {
 			return replyTrendProfiles[i].ID < replyTrendProfiles[j].ID
 		})
-		if !reflect.DeepEqual(replyTrendProfiles, expectedTrendProfiles) {
-			t.Errorf("expected: <%+v>, \nreceived: <%+v>",
-				utils.ToJSON(expectedTrendProfiles), utils.ToJSON(replyTrendProfiles))
+		for i := range replyTrendProfiles {
+			if !reflect.DeepEqual(replyTrendProfiles[i], trendProfiles[i].TrendProfile) {
+				t.Errorf("expected: <%+v>, \nreceived: <%+v>",
+					utils.ToJSON(trendProfiles), utils.ToJSON(replyTrendProfiles))
+			}
 		}
+
 	}
 }
 
@@ -352,7 +329,7 @@ func testTrendsRemoveTrendProfile(t *testing.T) {
 		&utils.TenantIDWithAPIOpts{
 			TenantID: &utils.TenantID{
 				Tenant: "cgrates.org",
-				ID:     "TestA_Trend2",
+				ID:     "Trend2",
 			}}, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
@@ -366,14 +343,14 @@ func testTrendsGetTrendProfileAfterRemove(t *testing.T) {
 		&utils.TenantIDWithAPIOpts{
 			TenantID: &utils.TenantID{
 				Tenant: "cgrates.org",
-				ID:     "TestA_Trend2",
+				ID:     "Trend2",
 			}}, &replyTrendProfile); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ErrNotFound, err)
 	}
 }
 
 func testTrendsGetTrendProfileIDsAfterRemove(t *testing.T) {
-	expectedIDs := []string{"TestA_Trend1", "TestA_Trend3", "TestB_Trend1", "TestB_Trend2"}
+	expectedIDs := []string{"Trend1", "Trend3"}
 	var replyTrendProfileIDs []string
 	if err := trRPC.Call(context.Background(), utils.AdminSv1GetTrendProfileIDs,
 		&utils.ArgsItemIDs{
@@ -387,11 +364,10 @@ func testTrendsGetTrendProfileIDsAfterRemove(t *testing.T) {
 		}
 	}
 
-	expectedIDs = []string{"TestA_Trend1", "TestA_Trend3"}
 	if err := trRPC.Call(context.Background(), utils.AdminSv1GetTrendProfileIDs,
 		&utils.ArgsItemIDs{
 			Tenant:      "cgrates.org",
-			ItemsPrefix: "TestA",
+			ItemsPrefix: "Trend",
 		}, &replyTrendProfileIDs); err != nil {
 		t.Error(err)
 	} else {
@@ -401,11 +377,11 @@ func testTrendsGetTrendProfileIDsAfterRemove(t *testing.T) {
 		}
 	}
 
-	expectedIDs = []string{"TestB_Trend1", "TestB_Trend2"}
+	expectedIDs = []string{"Trend1"}
 	if err := trRPC.Call(context.Background(), utils.AdminSv1GetTrendProfileIDs,
 		&utils.ArgsItemIDs{
 			Tenant:      "cgrates.org",
-			ItemsPrefix: "TestB",
+			ItemsPrefix: "Trend1",
 		}, &replyTrendProfileIDs); err != nil {
 		t.Error(err)
 	} else {
@@ -423,50 +399,24 @@ func testTrendsGetTrendProfileCountAfterRemove(t *testing.T) {
 			Tenant: "cgrates.org",
 		}, &replyCount); err != nil {
 		t.Error(err)
-	} else if replyCount != 4 {
-		t.Errorf("expected <%+v>, \nreceived: <%+v>", 0, replyCount)
+	} else if replyCount != 2 {
+		t.Errorf("expected <%+v>, \nreceived: <%+v>", 2, replyCount)
 	}
 
 	if err := trRPC.Call(context.Background(), utils.AdminSv1GetTrendProfilesCount,
 		&utils.ArgsItemIDs{
 			Tenant:      "cgrates.org",
-			ItemsPrefix: "TestA",
+			ItemsPrefix: "Trend",
 		}, &replyCount); err != nil {
 		t.Error(err)
 	} else if replyCount != 2 {
-		t.Errorf("expected <%+v>, \nreceived: <%+v>", 0, replyCount)
+		t.Errorf("expected <%+v>, \nreceived: <%+v>", 2, replyCount)
 	}
 
-	if err := trRPC.Call(context.Background(), utils.AdminSv1GetTrendProfilesCount,
-		&utils.ArgsItemIDs{
-			Tenant:      "cgrates.org",
-			ItemsPrefix: "TestB",
-		}, &replyCount); err != nil {
-		t.Error(err)
-	} else if replyCount != 2 {
-		t.Errorf("expected <%+v>, \nreceived: <%+v>", 0, replyCount)
-	}
 }
 
 func testTrendsGetTrendProfilesAfterRemove(t *testing.T) {
-	expectedTrendProfiles := []*engine.TrendProfile{
-		{
-			ID:     "TestA_Trend1",
-			Tenant: "cgrates.org",
-		},
-		{
-			ID:     "TestA_Trend3",
-			Tenant: "cgrates.org",
-		},
-		{
-			ID:     "TestB_Trend1",
-			Tenant: "cgrates.org",
-		},
-		{
-			ID:     "TestB_Trend2",
-			Tenant: "cgrates.org",
-		},
-	}
+	expectedTrendProfiles := append(trendProfiles[:1], trendProfiles[2:]...)
 	var replyTrendProfiles []*engine.TrendProfile
 	if err := trRPC.Call(context.Background(), utils.AdminSv1GetTrendProfiles,
 		&utils.ArgsItemIDs{
@@ -477,10 +427,13 @@ func testTrendsGetTrendProfilesAfterRemove(t *testing.T) {
 		sort.Slice(replyTrendProfiles, func(i, j int) bool {
 			return replyTrendProfiles[i].ID < replyTrendProfiles[j].ID
 		})
-		if !reflect.DeepEqual(replyTrendProfiles, expectedTrendProfiles) {
-			t.Errorf("expected: <%+v>, \nreceived: <%+v>",
-				utils.ToJSON(expectedTrendProfiles), utils.ToJSON(replyTrendProfiles))
+		for i := range expectedTrendProfiles {
+			if !reflect.DeepEqual(replyTrendProfiles[i], expectedTrendProfiles[i].TrendProfile) {
+				t.Errorf("expected: <%+v>, \nreceived: <%+v>",
+					utils.ToJSON(expectedTrendProfiles), utils.ToJSON(replyTrendProfiles))
+			}
 		}
+
 	}
 }
 

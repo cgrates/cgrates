@@ -39,7 +39,7 @@ var (
 	DataDBPartitions = NewStringSet([]string{
 		CacheResourceProfiles, CacheResources, CacheEventResources, CacheStatQueueProfiles, CacheStatQueues,
 		CacheThresholdProfiles, CacheThresholds, CacheFilters, CacheRouteProfiles, CacheAttributeProfiles, CacheTrendProfiles,
-		CacheChargerProfiles, CacheActionProfiles, CacheDispatcherProfiles, CacheDispatcherHosts, CacheRankingProfiles,
+		CacheChargerProfiles, CacheActionProfiles, CacheDispatcherProfiles, CacheDispatcherHosts, CacheRankingProfiles, CacheTrends,
 		CacheResourceFilterIndexes, CacheStatFilterIndexes, CacheThresholdFilterIndexes, CacheRouteFilterIndexes,
 		CacheAttributeFilterIndexes, CacheChargerFilterIndexes, CacheDispatcherFilterIndexes, CacheLoadIDs,
 		CacheRateProfiles, CacheRateProfilesFilterIndexes, CacheRateFilterIndexes,
@@ -54,12 +54,13 @@ var (
 		CacheResources:                   ResourcesPrefix,
 		CacheStatQueueProfiles:           StatQueueProfilePrefix,
 		CacheStatQueues:                  StatQueuePrefix,
+		CacheTrendProfiles:               TrendProfilePrefix,
+		CacheTrends:                      TrendPrefix,
 		CacheThresholdProfiles:           ThresholdProfilePrefix,
 		CacheThresholds:                  ThresholdPrefix,
 		CacheFilters:                     FilterPrefix,
 		CacheRouteProfiles:               RouteProfilePrefix,
 		CacheRankingProfiles:             RankingProfilePrefix,
-		CacheTrendProfiles:               TrendProfilePrefix,
 		CacheAttributeProfiles:           AttributeProfilePrefix,
 		CacheChargerProfiles:             ChargerProfilePrefix,
 		CacheDispatcherProfiles:          DispatcherProfilePrefix,
@@ -267,12 +268,16 @@ const (
 	StatQueuePrefix           = "stq_"
 	RankingProfilePrefix      = "rgp_"
 	TrendProfilePrefix        = "trp_"
+	TrendPrefix               = "trd_"
 	LoadIDPrefix              = "lid_"
 	LoadInstKey               = "load_history"
 	CreateCDRsTablesSQL       = "create_cdrs_tables.sql"
 	CreateTariffPlanTablesSQL = "create_tariffplan_tables.sql"
 	TestSQL                   = "TEST_SQL"
 	MetaConstant              = "*constant"
+	MetaPositive              = "*positive"
+	MetaNegative              = "*negative"
+	MetaLast                  = "*last"
 	MetaPassword              = "*password"
 	MetaFiller                = "*filler"
 	MetaHTTPPost              = "*httpPost"
@@ -590,6 +595,8 @@ const (
 	AttributeBlockers        = "AttributeBlockers"
 	QueueLength              = "QueueLength"
 	QueryInterval            = "QueryInterval"
+	CorrelationType          = "CorrelationType"
+	Tolerance                = "Tolerance"
 	TTL                      = "TTL"
 	PurgeFilterIDs           = "PurgeFilterIDs"
 	Trend                    = "Trend"
@@ -1145,6 +1152,7 @@ const (
 	ReplicatorSv1GetStatQueueProfile  = "ReplicatorSv1.GetStatQueueProfile"
 	ReplicatorSv1GetRankingProfile    = "ReplicatorSv1.GetRankingProfile"
 	ReplicatorSv1GetTrendProfile      = "ReplicatorSv1.GetTrendProfile"
+	ReplicatorSv1GetTrend             = "ReplicatorSv1.GetTrend"
 	ReplicatorSv1GetResource          = "ReplicatorSv1.GetResource"
 	ReplicatorSv1GetResourceProfile   = "ReplicatorSv1.GetResourceProfile"
 	ReplicatorSv1GetRouteProfile      = "ReplicatorSv1.GetRouteProfile"
@@ -1163,6 +1171,7 @@ const (
 	ReplicatorSv1SetStatQueueProfile  = "ReplicatorSv1.SetStatQueueProfile"
 	ReplicatorSv1SetRankingProfile    = "ReplicatorSv1.SetRankingProfile"
 	ReplicatorSv1SetTrendProfile      = "ReplicatorSv1.SetTrendProfile"
+	ReplicatorSv1SetTrend
 	ReplicatorSv1SetResource          = "ReplicatorSv1.SetResource"
 	ReplicatorSv1SetResourceProfile   = "ReplicatorSv1.SetResourceProfile"
 	ReplicatorSv1SetRouteProfile      = "ReplicatorSv1.SetRouteProfile"
@@ -1182,6 +1191,7 @@ const (
 	ReplicatorSv1RemoveStatQueueProfile  = "ReplicatorSv1.RemoveStatQueueProfile"
 	ReplicatorSv1RemoveRankingProfile    = "ReplicatorSv1.RemoveRankingProfile"
 	ReplicatorSv1RemoveTrendProfile      = "ReplicatorSv1.RemoveTrendProfile"
+	ReplicatorSv1RemoveTrend             = "ReplicatorSv1.RemoveTrend"
 	ReplicatorSv1RemoveResource          = "ReplicatorSv1.RemoveResource"
 	ReplicatorSv1RemoveResourceProfile   = "ReplicatorSv1.RemoveResourceProfile"
 	ReplicatorSv1RemoveRouteProfile      = "ReplicatorSv1.RemoveRouteProfile"
@@ -1728,6 +1738,7 @@ const (
 	CacheStatQueues                  = "*statqueues"
 	CacheRankingProfiles             = "*ranking_profiles"
 	CacheTrendProfiles               = "*trend_profiles"
+	CacheTrends                      = "*trends"
 	CacheThresholdProfiles           = "*threshold_profiles"
 	CacheThresholds                  = "*thresholds"
 	CacheFilters                     = "*filters"
