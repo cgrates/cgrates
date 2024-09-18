@@ -2479,3 +2479,110 @@ func TestDfTemplateSJsonCfg(t *testing.T) {
 		t.Errorf("Expected: %+v \n,received: %+v", utils.ToJSON(eCfg), utils.ToJSON(cfg))
 	}
 }
+
+func TestSentryPeerJson(t *testing.T) {
+	clientID := "1001"
+	clientSecret := "2014"
+	tokenUrl := "https://cgrates.org/token"
+	ipsUrl := "https://cgrates.org/ips"
+	numbersUrl := "https://cgrates.org/numbers"
+	audience := "audience"
+	grantType := "code"
+
+	validJSON := `{
+        "client_id": "1001",
+        "client_secret": "2014",
+        "token_url": "https://cgrates.org/token",
+        "ips_url": "https://cgrates.org/ips",
+        "numbers_url": "https://cgrates.org/numbers",
+        "audience": "audience",
+        "grant_type": "code"
+    }`
+	validRaw := json.RawMessage(validJSON)
+
+	invalidJSON := `{
+        "client_id": "1001",
+        "client_secret": 123,
+        "token_url": "https://cgrates.org/token",
+        "ips_url": "https://cgrates.org/ips"
+    }`
+	invalidRaw := json.RawMessage(invalidJSON)
+
+	expectedValid := &SentryPeerJsonCfg{
+		ClientID:     &clientID,
+		ClientSecret: &clientSecret,
+		TokenUrl:     &tokenUrl,
+		IpsUrl:       &ipsUrl,
+		NumbersUrl:   &numbersUrl,
+		Audience:     &audience,
+		GrantType:    &grantType,
+	}
+
+	tests := []struct {
+		name        string
+		input       CgrJsonCfg
+		expected    *SentryPeerJsonCfg
+		expectError bool
+	}{
+		{
+			name: "Valid JSON",
+			input: CgrJsonCfg{
+				SentryPeerCfgJson: &validRaw,
+			},
+			expected:    expectedValid,
+			expectError: false,
+		},
+		{
+			name: "Invalid JSON",
+			input: CgrJsonCfg{
+				SentryPeerCfgJson: &invalidRaw,
+			},
+			expected:    nil,
+			expectError: true,
+		},
+		{
+			name:        "Missing JSON",
+			input:       CgrJsonCfg{},
+			expected:    nil,
+			expectError: false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := tt.input.SentryPeerJson()
+			if (err != nil) != tt.expectError {
+				t.Fatalf("expected error: %v, got: %v", tt.expectError, err)
+			}
+			if err == nil {
+				if tt.expected == nil {
+					if got != nil {
+						t.Errorf("expected nil, got: %v", got)
+					}
+				} else {
+					if got.ClientID == nil || tt.expected.ClientID == nil || *got.ClientID != *tt.expected.ClientID {
+						t.Errorf("expected ClientID: %v, got: %v", *tt.expected.ClientID, got.ClientID)
+					}
+					if got.ClientSecret == nil || tt.expected.ClientSecret == nil || *got.ClientSecret != *tt.expected.ClientSecret {
+						t.Errorf("expected ClientSecret: %v, got: %v", *tt.expected.ClientSecret, got.ClientSecret)
+					}
+					if got.TokenUrl == nil || tt.expected.TokenUrl == nil || *got.TokenUrl != *tt.expected.TokenUrl {
+						t.Errorf("expected TokenUrl: %v, got: %v", *tt.expected.TokenUrl, got.TokenUrl)
+					}
+					if got.IpsUrl == nil || tt.expected.IpsUrl == nil || *got.IpsUrl != *tt.expected.IpsUrl {
+						t.Errorf("expected IpsUrl: %v, got: %v", *tt.expected.IpsUrl, got.IpsUrl)
+					}
+					if got.NumbersUrl == nil || tt.expected.NumbersUrl == nil || *got.NumbersUrl != *tt.expected.NumbersUrl {
+						t.Errorf("expected NumbersUrl: %v, got: %v", *tt.expected.NumbersUrl, got.NumbersUrl)
+					}
+					if got.Audience == nil || tt.expected.Audience == nil || *got.Audience != *tt.expected.Audience {
+						t.Errorf("expected Audience: %v, got: %v", *tt.expected.Audience, got.Audience)
+					}
+					if got.GrantType == nil || tt.expected.GrantType == nil || *got.GrantType != *tt.expected.GrantType {
+						t.Errorf("expected GrantType: %v, got: %v", *tt.expected.GrantType, got.GrantType)
+					}
+				}
+			}
+		})
+	}
+}
