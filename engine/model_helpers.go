@@ -1644,7 +1644,7 @@ type TrendsMdls []*TrendsMdl
 
 func (tps TrendsMdls) CSVHeader() (result []string) {
 	return []string{"#" + utils.Tenant, utils.ID, utils.Schedule, utils.StatID,
-		utils.Metrics, utils.QueueLength, utils.TTL, utils.MinItems, utils.CorrelationType, utils.Tolerance, utils.Stored, utils.ThresholdIDs}
+		utils.Metrics, utils.TTL, utils.QueueLength, utils.MinItems, utils.CorrelationType, utils.Tolerance, utils.Stored, utils.ThresholdIDs}
 }
 
 func (models TrendsMdls) AsTPTrends() (result []*utils.TPTrendsProfile) {

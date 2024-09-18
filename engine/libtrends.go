@@ -33,8 +33,8 @@ type TrendProfile struct {
 	Schedule        string // Cron expression scheduling gathering of the metrics
 	StatID          string
 	Metrics         []string
-	QueueLength     int
 	TTL             time.Duration
+	QueueLength     int
 	MinItems        int     // minimum number of items for building Trends
 	CorrelationType string  // *last, *average
 	Tolerance       float64 // allow this deviation margin for *constant trend

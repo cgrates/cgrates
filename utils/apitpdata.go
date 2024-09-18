@@ -1066,8 +1066,8 @@ type TPTrendsProfile struct {
 	Schedule        string
 	StatID          string
 	Metrics         []string
-	QueueLength     int
 	TTL             string
+	QueueLength     int
 	MinItems        int
 	CorrelationType string
 	Tolerance       float64
