@@ -486,6 +486,18 @@ func (dbM *DataDBMock) RemoveRateProfileDrv(ctx *context.Context, str1 string, s
 	return utils.ErrNotImplemented
 }
 
+func (dbM *DataDBMock) GetTrendDrv(tenant, id string) (*Trend, error) {
+	return nil, utils.ErrNotImplemented
+}
+
+func (dbM *DataDBMock) SetTrendDrv(*Trend) error {
+	return utils.ErrNotImplemented
+}
+
+func (dbM *DataDBMock) RemoveTrendDrv(string, string) error {
+	return utils.ErrNotImplemented
+}
+
 func (dbM *DataDBMock) GetActionProfileDrv(ctx *context.Context, tenant string, ID string) (*ActionProfile, error) {
 	if dbM.GetActionProfileDrvF != nil {
 		return dbM.GetActionProfileDrvF(ctx, tenant, ID)

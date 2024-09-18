@@ -80,6 +80,7 @@ var (
 	ErrNegative                      = errors.New("NEGATIVE")
 	ErrUnsupportedTPExporterType     = errors.New("UNSUPPORTED_TPEXPORTER_TYPE")
 	ErrCastFailed                    = errors.New("CAST_FAILED")
+	ErrCorrelationUndefined          = errors.New("CORRELATION_UNDEFINED")
 	ErrUnsupportedServiceID          = errors.New(UnsupportedServiceIDCaps)
 
 	ErrMap = map[string]error{

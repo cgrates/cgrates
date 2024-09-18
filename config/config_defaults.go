@@ -147,6 +147,7 @@ const CGRATES_CFG_JSON = `
 		"*threshold_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false},
 		"*ranking_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
 		"*trend_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
+		"*trends": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
 		"*route_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false},
 		"*attribute_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false},
 		"*charger_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false},
@@ -260,6 +261,8 @@ const CGRATES_CFG_JSON = `
 		"*statqueues": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "remote":false, "replicate": false},			// statqueues with metrics
 		"*threshold_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "remote":false, "replicate": false},	// control threshold profiles caching
 		"*thresholds": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "remote":false, "replicate": false},			// control thresholds caching
+		"*trend_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "remote":false, "replicate": false},	// control threshold profiles caching
+		"*trends": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "remote":false, "replicate": false},			// control thresholds caching
 		"*filters": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "remote":false, "replicate": false},				// control filters caching
 		"*route_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "remote":false, "replicate": false},		// control route profile caching
 		"*attribute_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "remote":false, "replicate": false},	// control attribute profile caching

@@ -70,6 +70,9 @@ type DataDB interface {
 	SetTrendProfileDrv(ctx *context.Context, sq *TrendProfile) (err error)
 	GetTrendProfileDrv(ctx *context.Context, tenant string, id string) (sq *TrendProfile, err error)
 	RemTrendProfileDrv(ctx *context.Context, tenant string, id string) (err error)
+	GetTrendDrv(string, string) (*Trend, error)
+	SetTrendDrv(*Trend) error
+	RemoveTrendDrv(string, string) error
 	GetFilterDrv(ctx *context.Context, tnt string, id string) (*Filter, error)
 	SetFilterDrv(ctx *context.Context, f *Filter) error
 	RemoveFilterDrv(ctx *context.Context, tnt string, id string) error

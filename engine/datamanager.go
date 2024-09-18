@@ -54,6 +54,8 @@ var (
 		utils.StatQueueProfilePrefix:        {},
 		utils.ThresholdPrefix:               {},
 		utils.ThresholdProfilePrefix:        {},
+		utils.TrendPrefix:                   {},
+		utils.TrendProfilePrefix:            {},
 		utils.RankingProfilePrefix:          {},
 		utils.FilterPrefix:                  {},
 		utils.RouteProfilePrefix:            {},
@@ -983,6 +985,9 @@ func (dm *DataManager) GetTrendProfile(ctx *context.Context, tenant, id string) 
 }
 
 func (dm *DataManager) SetTrendProfile(ctx *context.Context, trp *TrendProfile) (err error) {
+	if dm == nil {
+		return utils.ErrNoDatabaseConn
+	}
 	if err = dm.DataDB().SetTrendProfileDrv(ctx, trp); err != nil {
 		return
 	}
@@ -1015,6 +1020,97 @@ func (dm *DataManager) RemoveTrendProfile(ctx *context.Context, tenant, id strin
 			config.CgrConfig().DataDbCfg().RplFiltered,
 			utils.TrendProfilePrefix, utils.ConcatenatedKey(tenant, id), // this are used to get the host IDs from cache
 			utils.ReplicatorSv1RemoveTrendProfile,
+			&utils.TenantIDWithAPIOpts{
+				TenantID: &utils.TenantID{Tenant: tenant, ID: id},
+				APIOpts: utils.GenerateDBItemOpts(itm.APIKey, itm.RouteID,
+					config.CgrConfig().DataDbCfg().RplCache, utils.EmptyString)})
+	}
+	return
+}
+
+// GetTrend retrieves a Trend from dataDB
+func (dm *DataManager) GetTrend(tenant, id string,
+	cacheRead, cacheWrite bool, transactionID string) (tr *Trend, err error) {
+	tntID := utils.ConcatenatedKey(tenant, id)
+	if cacheRead {
+		if x, ok := Cache.Get(utils.CacheTrends, tntID); ok {
+			if x == nil {
+				return nil, utils.ErrNotFound
+			}
+			return x.(*Trend), nil
+		}
+	}
+	if dm == nil {
+		err = utils.ErrNoDatabaseConn
+		return
+	}
+	tr, err = dm.dataDB.GetTrendDrv(tenant, id)
+	if err != nil {
+		if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaTrends]; err == utils.ErrNotFound && itm.Remote {
+			if err = dm.connMgr.Call(context.TODO(), config.CgrConfig().DataDbCfg().RmtConns,
+				utils.ReplicatorSv1GetTrend, &utils.TenantIDWithAPIOpts{
+					TenantID: &utils.TenantID{Tenant: tenant, ID: id},
+					APIOpts: utils.GenerateDBItemOpts(itm.APIKey, itm.RouteID, utils.EmptyString,
+						utils.FirstNonEmpty(config.CgrConfig().DataDbCfg().RmtConnID,
+							config.CgrConfig().GeneralCfg().NodeID)),
+				}, &tr); err == nil {
+				err = dm.dataDB.SetTrendDrv(tr)
+			}
+		}
+		if err != nil {
+			err = utils.CastRPCErr(err)
+			if err == utils.ErrNotFound && cacheWrite {
+				if errCh := Cache.Set(context.Background(), utils.CacheTrends, tntID, nil, nil,
+					cacheCommit(transactionID), transactionID); errCh != nil {
+					return nil, errCh
+				}
+			}
+			return nil, err
+		}
+	}
+	if cacheWrite {
+		if errCh := Cache.Set(context.Background(), utils.CacheTrends, tntID, tr, nil,
+			cacheCommit(transactionID), transactionID); errCh != nil {
+			return nil, errCh
+		}
+	}
+	return
+}
+
+// SetTrend stores Trend in dataDB
+func (dm *DataManager) SetTrend(tr *Trend) (err error) {
+	if dm == nil {
+		return utils.ErrNoDatabaseConn
+	}
+	if err = dm.DataDB().SetTrendDrv(tr); err != nil {
+		return
+	}
+	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaTrends]; itm.Replicate {
+		err = replicate(context.Background(), dm.connMgr, config.CgrConfig().DataDbCfg().RplConns,
+			config.CgrConfig().DataDbCfg().RplFiltered,
+			utils.TrendPrefix, tr.TenantID(), // this are used to get the host IDs from cache
+			utils.ReplicatorSv1SetTrend,
+			&TrendWithAPIOpts{
+				Trend: tr,
+				APIOpts: utils.GenerateDBItemOpts(itm.APIKey, itm.RouteID,
+					config.CgrConfig().DataDbCfg().RplCache, utils.EmptyString)})
+	}
+	return
+}
+
+// RemoveTrend removes the stored Trend
+func (dm *DataManager) RemoveTrend(tenant, id string) (err error) {
+	if dm == nil {
+		return utils.ErrNoDatabaseConn
+	}
+	if err = dm.DataDB().RemoveTrendDrv(tenant, id); err != nil {
+		return
+	}
+	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaTrends]; itm.Replicate {
+		replicate(context.Background(), dm.connMgr, config.CgrConfig().DataDbCfg().RplConns,
+			config.CgrConfig().DataDbCfg().RplFiltered,
+			utils.TrendPrefix, utils.ConcatenatedKey(tenant, id), // this are used to get the host IDs from cache
+			utils.ReplicatorSv1RemoveTrend,
 			&utils.TenantIDWithAPIOpts{
 				TenantID: &utils.TenantID{Tenant: tenant, ID: id},
 				APIOpts: utils.GenerateDBItemOpts(itm.APIKey, itm.RouteID,

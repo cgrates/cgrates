@@ -265,16 +265,19 @@ type TPRankingProfile struct {
 
 // TPTrendProfile is used in APIs to manage remotely offline TrendProfile
 type TPTrendsProfile struct {
-	TPid           string
-	Tenant         string
-	ID             string
-	QueryInterval  string
-	StatID         string
-	QueueLength    int
-	TTL            string
-	PurgeFilterIDs []string
-	Trend          string
-	ThresholdIDs   []string
+	TPid            string
+	Tenant          string
+	ID              string
+	Schedule        string
+	StatID          string
+	Metrics         []string
+	TTL             string
+	QueueLength     int
+	MinItems        int
+	CorrelationType string
+	Tolerance       float64
+	Stored          bool
+	ThresholdIDs    []string
 }
 
 // TPThresholdProfile is used in APIs to manage remotely offline ThresholdProfile
@@ -448,6 +451,8 @@ func NewAttrReloadCacheWithOpts() *AttrReloadCacheWithAPIOpts {
 		StatsQueueProfileIDs: []string{MetaAny},
 		ThresholdIDs:         []string{MetaAny},
 		ThresholdProfileIDs:  []string{MetaAny},
+		TrendIDs:             []string{MetaAny},
+		TrendProfileIDs:      []string{MetaAny},
 		FilterIDs:            []string{MetaAny},
 		RouteProfileIDs:      []string{MetaAny},
 		AttributeProfileIDs:  []string{MetaAny},
@@ -509,6 +514,8 @@ func NewAttrReloadCacheWithOptsFromMap(arg map[string][]string, tnt string, opts
 		AccountsFilterIndexIDs:       arg[CacheAccountsFilterIndexes],
 		RateFilterIndexIDs:           arg[CacheRateFilterIndexes],
 		FilterIndexIDs:               arg[CacheReverseFilterIndexes],
+		TrendProfileIDs:              arg[CacheTrendProfiles],
+		TrendIDs:                     arg[CacheTrends],
 	}
 }
 
@@ -522,6 +529,8 @@ type AttrReloadCacheWithAPIOpts struct {
 	StatsQueueProfileIDs []string `json:",omitempty"`
 	ThresholdIDs         []string `json:",omitempty"`
 	ThresholdProfileIDs  []string `json:",omitempty"`
+	TrendIDs             []string `json:",omitempty"`
+	TrendProfileIDs      []string `json:",omitempty"`
 	RankingProfileIDs    []string `json:",omitempty"`
 	FilterIDs            []string `json:",omitempty"`
 	RouteProfileIDs      []string `json:",omitempty"`
@@ -556,6 +565,8 @@ func (a *AttrReloadCacheWithAPIOpts) Map() map[string][]string {
 		CacheStatQueues:                  a.StatsQueueIDs,
 		CacheThresholdProfiles:           a.ThresholdProfileIDs,
 		CacheThresholds:                  a.ThresholdIDs,
+		CacheTrendProfiles:               a.TrendProfileIDs,
+		CacheTrends:                      a.TrendIDs,
 		CacheFilters:                     a.FilterIDs,
 		CacheRouteProfiles:               a.RouteProfileIDs,
 		CacheAttributeProfiles:           a.AttributeProfileIDs,

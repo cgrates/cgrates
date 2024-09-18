@@ -83,7 +83,10 @@ func (tr *TrendService) Start(ctx *context.Context, _ context.CancelFunc) (err e
 	}
 	tr.trs = engine.NewTrendService(datadb, tr.cfg, filterS, tr.connMgr)
 	utils.Logger.Info(fmt.Sprintf("<%s> starting <%s> subsystem", utils.CoreS, utils.TrendS))
-	srv, _ := engine.NewService(tr.trs)
+	srv, err := engine.NewService(tr.trs)
+	if err != nil {
+		return err
+	}
 	if !tr.cfg.DispatcherSCfg().Enabled {
 		for _, s := range srv {
 			tr.server.RpcRegister(s)

@@ -89,18 +89,21 @@ func (RankingMdl) TableName() string {
 }
 
 type TrendMdl struct {
-	PK             uint `gorm:"primary_key"`
-	Tpid           string
-	Tenant         string `index:"0" re:".*"`
-	ID             string `index:"1" re:".*"`
-	QueryInterval  string `index:"2" re:".*"`
-	StatID         string `index:"3" re:".*"`
-	QueueLength    int    `index:"4" re:".*"`
-	TTL            string `index:"5" re:".*"`
-	PurgeFilterIDs string `index:"6" re:".*"`
-	Trend          string `index:"7" re:".*"`
-	ThresholdIDs   string `index:"8" re:".*"`
-	CreatedAt      time.Time
+	PK              uint `gorm:"primary_key"`
+	Tpid            string
+	Tenant          string  `index:"0" re:".*"`
+	ID              string  `index:"1" re:".*"`
+	Schedule        string  `index:"2" re:".*"`
+	StatID          string  `index:"3" re:".*"`
+	Metrics         string  `index:"4" re:".*"`
+	TTL             string  `index:"5" re:".*"`
+	QueueLength     int     `index:"6" re:".*"`
+	MinItems        int     `index:"7" re:".*"`
+	CorrelationType string  `index:"8" re:".*"`
+	Tolerance       float64 `index:"9"  re:".*"`
+	Stored          bool    `index:"10" re:".*"`
+	ThresholdIDs    string  `index:"11" re:".*"`
+	CreatedAt       time.Time
 }
 
 func (TrendMdl) TableName() string {
