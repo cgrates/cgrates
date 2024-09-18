@@ -1127,6 +1127,37 @@ func (cdrS *CDRServer) V1RateCDRs(ctx *context.Context, arg *ArgRateCDRs, reply 
 	return
 }
 
+// ReprocessCDRs is used to reprocess CDRs which are already stored within StorDB
+func (cdrS *CDRServer) ReprocessCDRs(ctx *context.Context, arg *ArgRateCDRs, reply *string) (err error) {
+	var cdrFltr *utils.CDRsFilter
+	if cdrFltr, err = arg.RPCCDRsFilter.AsCDRsFilter(cdrS.cgrCfg.GeneralCfg().DefaultTimezone); err != nil {
+		return utils.NewErrServerError(err)
+	}
+	var cdrs []*CDR
+	if cdrs, _, err = cdrS.cdrDb.GetCDRs(cdrFltr, false); err != nil {
+		return
+	}
+
+	// Compute processing arguments based on flags and configuration.
+	flgs := utils.FlagsWithParamsFromSlice(arg.Flags)
+	procArgs, err := newCDRProcessingArgs(cdrS.cgrCfg.CdrsCfg(), flgs, arg.APIOpts)
+	if err != nil {
+		return fmt.Errorf("failed to configure processing args: %v", err)
+	}
+
+	cgrEvs := make([]*utils.CGREvent, len(cdrs))
+	for i, cdr := range cdrs {
+		cgrEvs[i] = cdr.AsCGREvent()
+		cgrEvs[i].APIOpts = arg.APIOpts
+	}
+	if _, err = cdrS.processEvents(cgrEvs, procArgs); err != nil {
+		return utils.NewErrServerError(err)
+	}
+
+	*reply = utils.OK
+	return
+}
+
 // V1ProcessExternalCDR is used to process external CDRs
 func (cdrS *CDRServer) V1ProcessExternalCDR(ctx *context.Context, eCDR *ExternalCDRWithAPIOpts, reply *string) error {
 	cdr, err := NewCDRFromExternalCDR(eCDR.ExternalCDR,

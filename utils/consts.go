@@ -1858,6 +1858,7 @@ const (
 	CDRsV1                   = "CDRsV1"
 	CDRsV1GetCDRsCount       = "CDRsV1.GetCDRsCount"
 	CDRsV1RateCDRs           = "CDRsV1.RateCDRs"
+	CDRsV1ReprocessCDRs      = "CDRsV1.ReprocessCDRs"
 	CDRsV1GetCDRs            = "CDRsV1.GetCDRs"
 	CDRsV1ProcessCDR         = "CDRsV1.ProcessCDR"
 	CDRsV1ProcessExternalCDR = "CDRsV1.ProcessExternalCDR"

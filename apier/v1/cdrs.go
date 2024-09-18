@@ -115,6 +115,11 @@ func (cdrSv1 *CDRsV1) RateCDRs(ctx *context.Context, arg *engine.ArgRateCDRs, re
 	return cdrSv1.CDRs.V1RateCDRs(ctx, arg, reply)
 }
 
+// ReprocessCDRs can reprocess remotely CDRs
+func (cdrSv1 *CDRsV1) ReprocessCDRs(ctx *context.Context, arg *engine.ArgRateCDRs, reply *string) error {
+	return cdrSv1.CDRs.ReprocessCDRs(ctx, arg, reply)
+}
+
 // StoreSMCost will store
 func (cdrSv1 *CDRsV1) StoreSessionCost(ctx *context.Context, attr *engine.AttrCDRSStoreSMCost, reply *string) error {
 	return cdrSv1.CDRs.V1StoreSessionCost(ctx, attr, reply)
