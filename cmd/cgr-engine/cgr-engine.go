@@ -41,7 +41,7 @@ import (
 )
 
 var (
-	cgrEngineFlags    = flag.NewFlagSet("cgr-engine", flag.ContinueOnError)
+	cgrEngineFlags    = flag.NewFlagSet("cgr-engine", flag.ExitOnError)
 	cfgPath           = cgrEngineFlags.String("config_path", utils.CONFIG_PATH, "Configuration directory path.")
 	version           = cgrEngineFlags.Bool("version", false, "Prints the application version.")
 	checkConfig       = cgrEngineFlags.Bool("check_config", false, "Verify the config without starting the engine")
@@ -319,10 +319,7 @@ func singnalHandler(exitChan chan bool) {
 }
 
 func main() {
-	if err := cgrEngineFlags.Parse(os.Args[1:]); err != nil {
-		log.Fatalf("<%s> error received: <%s>, exiting!", utils.InitS, err.Error())
-		return
-	}
+	cgrEngineFlags.Parse(os.Args[1:])
 	vers, err := utils.GetCGRVersion()
 	if err != nil {
 		log.Fatalf("<%s> error received: <%s>, exiting!", utils.InitS, err.Error())
