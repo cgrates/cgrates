@@ -1,2 +1,2 @@
-#Tenant[0],Id[1],Schedule[2],StatID[3],Metrics[4],QueueLength[5],TTL[6],MinItems[7],CorrelationType[8],Tolerance[9],Stored[10],ThresholdIDs[11]
-cgrates.org,TR_1,0 1 * * *,Stats1,*acc,-1,0,1,*last,5,false,TD1
+#Tenant[0],Id[1],Schedule[2],StatID[3],Metrics[4],TTL[5],QueueLength[6],MinItems[7],CorrelationType[8],Tolerance[9],Stored[10],ThresholdIDs[11]
+cgrates.org,TR_1,0 1 * * *,Stats1,*acc,0,-1,1,*last,5,false,TD1

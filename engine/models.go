@@ -309,8 +309,8 @@ type TrendsMdl struct {
 	Schedule        string  `index:"2" re:".*"`
 	StatID          string  `index:"3" re:".*"`
 	Metrics         string  `index:"4" re:".*"`
-	QueueLength     int     `index:"5" re:".*"`
-	TTL             string  `index:"6" re:".*"`
+	TTL             string  `index:"5" re:".*"`
+	QueueLength     int     `index:"6" re:".*"`
 	MinItems        int     `index:"7" re:".*"`
 	CorrelationType string  `index:"8" re:".*"`
 	Tolerance       float64 `index:"9"  re:".*"`
