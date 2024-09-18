@@ -322,8 +322,7 @@ func main() {
 	cgrEngineFlags.Parse(os.Args[1:])
 	vers, err := utils.GetCGRVersion()
 	if err != nil {
-		log.Fatalf("<%s> error received: <%s>, exiting!", utils.InitS, err.Error())
-		return
+		log.Fatal(err)
 	}
 	goVers := runtime.Version()
 	if *version {
@@ -364,7 +363,6 @@ func main() {
 	cfg, err = config.NewCGRConfigFromPath(*cfgPath)
 	if err != nil {
 		log.Fatalf("Could not parse config: <%s>", err.Error())
-		return
 	}
 	if *nodeID != utils.EmptyString {
 		cfg.GeneralCfg().NodeID = *nodeID
@@ -377,7 +375,6 @@ func main() {
 	// init syslog
 	if err = initLogger(cfg); err != nil {
 		log.Fatalf("Could not initialize syslog connection, err: <%s>", err.Error())
-		return
 	}
 	lgLevel := cfg.GeneralCfg().LogLevel
 	if *logLevel != -1 { // Modify the log level if provided by command arguments
@@ -442,7 +439,6 @@ func main() {
 	if dmService.ShouldRun() { // Some services can run without db, ie:  ERs
 		if err = dmService.Start(); err != nil {
 			log.Fatalf("<%s> error received: <%s>, exiting!", utils.InitS, err.Error())
-			return
 		}
 	}
 	// Done initing DBs
