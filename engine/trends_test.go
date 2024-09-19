@@ -20,6 +20,8 @@ package engine
 
 import (
 	"testing"
+
+	"github.com/cgrates/cgrates/config"
 )
 
 func TestTrendProfileTenantID(t *testing.T) {
@@ -43,5 +45,46 @@ func TestTrendTenantID(t *testing.T) {
 	expected := "cgrates.org:1"
 	if result != expected {
 		t.Errorf("TenantID() = %v; want %v", result, expected)
+	}
+}
+
+func TestNewTrendS(t *testing.T) {
+	dm := &DataManager{}
+	connMgr := &ConnManager{}
+	filterS := &FilterS{}
+	cgrcfg := &config.CGRConfig{}
+
+	trendS := NewTrendS(dm, connMgr, filterS, cgrcfg)
+
+	if trendS == nil {
+		t.Errorf("Expected NewTrendS to return a non-nil instance")
+	}
+	if trendS.dm != dm {
+		t.Errorf("Expected DataManager to be set correctly, got %v, want %v", trendS.dm, dm)
+	}
+	if trendS.connMgr != connMgr {
+		t.Errorf("Expected ConnManager to be set correctly, got %v, want %v", trendS.connMgr, connMgr)
+	}
+	if trendS.filterS != filterS {
+		t.Errorf("Expected FilterS to be set correctly, got %v, want %v", trendS.filterS, filterS)
+	}
+	if trendS.cgrcfg != cgrcfg {
+		t.Errorf("Expected CGRConfig to be set correctly, got %v, want %v", trendS.cgrcfg, cgrcfg)
+	}
+
+	if trendS.loopStopped == nil {
+		t.Errorf("Expected loopStopped to be initialized, but got nil")
+	}
+	if trendS.crnTQsMux == nil {
+		t.Errorf("Expected crnTQsMux to be initialized, but got nil")
+	}
+	if trendS.crnTQs == nil {
+		t.Errorf("Expected crnTQs to be initialized, but got nil")
+	} else if len(trendS.crnTQs) != 0 {
+		t.Errorf("Expected crnTQs to be empty, but got length %d", len(trendS.crnTQs))
+	}
+
+	if trendS.crn != nil {
+		t.Errorf("Expected crn to be nil, but got %v", trendS.crn)
 	}
 }

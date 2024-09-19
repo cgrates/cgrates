@@ -2586,3 +2586,33 @@ func TestSentryPeerJson(t *testing.T) {
 		})
 	}
 }
+
+func TestRankingsJsonCfgKeyNotPresent(t *testing.T) {
+	jsnCfg := CgrJsonCfg{}
+	rankingsCfg, err := jsnCfg.RankingsJsonCfg()
+	if rankingsCfg != nil {
+		t.Errorf("Expected rankingsCfg to be nil, got %v", rankingsCfg)
+	}
+	if err != nil {
+		t.Errorf("Expected no error, but got %v", err)
+	}
+}
+
+func TestRankingsJsonCfgValidJson(t *testing.T) {
+	rankingsJson := RankingsJsonCfg{}
+	rawJson, err := json.Marshal(rankingsJson)
+	if err != nil {
+		t.Fatalf("Failed to marshal valid JSON: %v", err)
+	}
+	jsnCfg := CgrJsonCfg{
+		RANKINGS_JSON: (*json.RawMessage)(&rawJson),
+	}
+	rankingsCfg, err := jsnCfg.RankingsJsonCfg()
+	if rankingsCfg == nil {
+		t.Errorf("Expected rankingsCfg not to be nil")
+	}
+	if err != nil {
+		t.Errorf("Expected no error, but got %v", err)
+	}
+
+}

@@ -262,3 +262,28 @@ func TestGeneralCfgClone(t *testing.T) {
 		t.Errorf("Expected clone to not modify the cloned")
 	}
 }
+
+func TestCachingDelay(t *testing.T) {
+
+	gencfg := &GeneralCfg{
+		CachingDelay: 5 * time.Second,
+	}
+
+	expectedMap := map[string]any{
+		utils.CachingDlayCfg: "5s",
+	}
+	resultMap := gencfg.AsMapInterface()
+	if resultMap[utils.CachingDlayCfg] != expectedMap[utils.CachingDlayCfg] {
+		t.Errorf("Non-zero CachingDelay test failed. Expected %v, but got %v", expectedMap[utils.CachingDlayCfg], resultMap[utils.CachingDlayCfg])
+	}
+	gencfg = &GeneralCfg{
+		CachingDelay: 0,
+	}
+	expectedMap = map[string]any{
+		utils.CachingDlayCfg: "0",
+	}
+	resultMap = gencfg.AsMapInterface()
+	if resultMap[utils.CachingDlayCfg] != expectedMap[utils.CachingDlayCfg] {
+		t.Errorf("Zero CachingDelay test failed. Expected %v, but got %v", expectedMap[utils.CachingDlayCfg], resultMap[utils.CachingDlayCfg])
+	}
+}

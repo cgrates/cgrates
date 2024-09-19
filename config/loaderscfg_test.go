@@ -18,6 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package config
 
 import (
+	"os"
 	"path"
 	"reflect"
 	"testing"
@@ -551,5 +552,35 @@ func TestLoadersCfgGetLockFilePath(t *testing.T) {
 
 	if rcv != "test/test" {
 		t.Error(rcv)
+	}
+}
+
+func TestGetLockFilePath(t *testing.T) {
+	loader := LoaderSCfg{
+		LockFilePath: "/cgrates/cgrates/lockfile.lck",
+	}
+	if loader.GetLockFilePath() != "/cgrates/cgrates/lockfile.lck" {
+		t.Error("Expected /cgrates/cgrates/lockfile.lck")
+	}
+
+	loader = LoaderSCfg{
+		LockFilePath: "relative.lck",
+		TpInDir:      "/base/dir",
+	}
+	if loader.GetLockFilePath() != "/base/dir/relative.lck" {
+		t.Error("Expected /base/dir/relative.lck")
+	}
+
+	tmpDir := "/tmp/cgrates_cgrates"
+	_ = os.Mkdir(tmpDir, 0755)
+	defer os.Remove(tmpDir)
+
+	loader = LoaderSCfg{
+		LockFilePath: tmpDir,
+		ID:           "loader123",
+	}
+	expected := "/tmp/cgrates_cgrates/loader123.lck"
+	if loader.GetLockFilePath() != expected {
+		t.Errorf("Expected %v, but got %v", expected, loader.GetLockFilePath())
 	}
 }
