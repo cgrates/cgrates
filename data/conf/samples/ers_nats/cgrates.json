@@ -28,53 +28,53 @@
 	]
 },
 
-"ers": {														
-    "enabled": true,											
+"ers": {
+    "enabled": true,
     "sessions_conns":[],
-    "ees_conns": ["*internal"],								
+    "ees_conns": ["*internal"],
     "readers": [
         {
-            "id": "nats_reader1",									
-            "type": "*nats_json_map",									
-            "source_path": "nats://127.0.0.1:4222",			
+            "id": "nats_reader1",
+            "type": "*nats_json_map",
+            "source_path": "nats://127.0.0.1:4222",
             "processed_path": "nats://127.0.0.1:4222",
-            "ees_success_ids": ["nats_processed"],	
+            "ees_success_ids": ["nats_processed"],
             "opts": {
-                "natsJetStream": true,						
-                "natsConsumerName": "cgrates",				
-                "natsStreamName": "stream",				
-                "natsSubject": "cgrates_cdrs",					
-                "natsQueueID": "queue",							
-                "natsJetStreamMaxWait": "5s"			
+                "natsJetStream": true,
+                "natsConsumerName": "cgrates",
+                "natsStreamName": "stream",
+                "natsSubject": "cgrates_cdrs",
+                "natsQueueID": "queue",
+                "natsJetStreamMaxWait": "5s"
             },
-            "flags": ["*dryrun"],										
-            "fields":[											
+            "flags": ["*dryrun"],
+            "fields":[
                 {"tag": "cdr_template", "type": "*template", "value": "cdr_template"}
             ]
         },
         {
-            "id": "nats_reader2",									
-            "type": "*nats_json_map",									
-            "source_path": "nats://127.0.0.1:4222",			
-            "processed_path": "nats://127.0.0.1:4222",		
-            "ees_success_ids": ["nats_processed"],	
+            "id": "nats_reader2",
+            "type": "*nats_json_map",
+            "source_path": "nats://127.0.0.1:4222",
+            "processed_path": "nats://127.0.0.1:4222",
+            "ees_success_ids": ["nats_processed"],
             "opts": {
-                "natsJetStream": true,						
-                "natsConsumerName": "cgrates",				
-                "natsStreamName": "stream",				
-                "natsSubject": "cgrates_cdrs",					
-                "natsQueueID": "queue",							
-                "natsJetStreamMaxWait": "5s"			
+                "natsJetStream": true,
+                "natsConsumerName": "cgrates",
+                "natsStreamName": "stream",
+                "natsSubject": "cgrates_cdrs",
+                "natsQueueID": "queue",
+                "natsJetStreamMaxWait": "5s"
             },
-            "flags": ["*dryrun"],										
-            "fields":[											
+            "flags": ["*dryrun"],
+            "fields":[
                 {"tag": "cdr_template", "type": "*template", "value": "cdr_template"}
             ]
         }
     ]
 },
-    
-    
+
+
 "templates": {
     "cdr_template": [
         {"tag": "Account", "path": "*cgreq.Account", "type": "*variable", "value": "~*req.Account", "mandatory": true},
@@ -82,5 +82,5 @@
         {"tag": "Destination", "path": "*cgreq.Destination", "type": "*variable", "value": "~*req.Destination", "mandatory": true}
     ]
 }
-    
+
 }
