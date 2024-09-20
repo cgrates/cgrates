@@ -25,6 +25,7 @@ import (
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
+	"github.com/cgrates/ltcache"
 )
 
 func TestCacheLoadCache(t *testing.T) {
@@ -398,4 +399,50 @@ func TestCacheSv1ReplicateRemove(t *testing.T) {
 	if err != nil {
 		t.Errorf("expected no error with nil context, got %v", err)
 	}
+}
+
+func TestCacheSv1GetCacheStats(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	data := engine.NewInternalDB(nil, nil, true, nil)
+	cfg.ApierCfg().CachesConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)}
+	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
+	ch := engine.NewCacheS(cfg, dm, nil)
+	cache := NewCacheSv1(ch)
+
+	ctx := context.Background()
+	args := &utils.AttrCacheIDsWithAPIOpts{}
+	var reply map[string]*ltcache.CacheStats
+
+	err := cache.GetCacheStats(ctx, args, &reply)
+
+	if err != nil {
+		t.Errorf("expected no error, got %v", err)
+	}
+	if reply == nil {
+		t.Errorf("expected reply to be non-nil, got nil")
+	}
+
+}
+
+func TestCacheSv1GetGroupItemIDs(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	data := engine.NewInternalDB(nil, nil, true, nil)
+	cfg.ApierCfg().CachesConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)}
+	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
+	ch := engine.NewCacheS(cfg, dm, nil)
+	cache := NewCacheSv1(ch)
+
+	ctx := context.Background()
+	args := &utils.ArgsGetGroupWithAPIOpts{}
+	var reply []string
+
+	err := cache.GetGroupItemIDs(ctx, args, &reply)
+
+	if err == nil {
+		t.Errorf("NOT_FOUND")
+	}
+	if reply != nil {
+		t.Errorf("expected reply to be non-nil, got nil")
+	}
+
 }
