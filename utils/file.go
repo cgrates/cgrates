@@ -26,11 +26,11 @@ import (
 
 // WatchDir sets up a watcher via inotify to be triggered on new files
 // sysID is the subsystem ID, f will be triggered on match
-func WatchDir(dirPath string, f func(itmPath, itmID string) error, sysID string, stopWatching chan struct{}) (err error) {
+func WatchDir(dirPath string, f func(itmID string) error, sysID string, stopWatching chan struct{}) (err error) {
 	return watchDir(dirPath, f, sysID, stopWatching, fsnotify.NewWatcher)
 }
 
-func watchDir(dirPath string, f func(itmPath, itmID string) error, sysID string,
+func watchDir(dirPath string, f func(itmID string) error, sysID string,
 	stopWatching chan struct{}, newWatcher func() (*fsnotify.Watcher, error)) (err error) {
 	var watcher *fsnotify.Watcher
 	if watcher, err = newWatcher(); err != nil {
@@ -45,7 +45,7 @@ func watchDir(dirPath string, f func(itmPath, itmID string) error, sysID string,
 	return
 }
 
-func watch(dirPath, sysID string, f func(itmPath, itmID string) error,
+func watch(dirPath, sysID string, f func(itmID string) error,
 	watcher *fsnotify.Watcher, stopWatching chan struct{}) (err error) {
 	defer watcher.Close()
 	for {
@@ -56,7 +56,7 @@ func watch(dirPath, sysID string, f func(itmPath, itmID string) error,
 		case ev := <-watcher.Events:
 			if ev.Op&fsnotify.Create == fsnotify.Create {
 				go func() { //Enable async processing here so we can simultaneously process files
-					if err = f(filepath.Dir(ev.Name), filepath.Base(ev.Name)); err != nil {
+					if err = f(filepath.Base(ev.Name)); err != nil {
 						Logger.Warning(fmt.Sprintf("<%s> processing path <%s>, error: <%s>",
 							sysID, ev.Name, err.Error()))
 					}

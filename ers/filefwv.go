@@ -114,12 +114,12 @@ func (rdr *FWVFileER) Serve() (err error) {
 }
 
 // processFile is called for each file in a directory and dispatches erEvents from it
-func (rdr *FWVFileER) processFile(fPath, fName string) (err error) {
+func (rdr *FWVFileER) processFile(fName string) (err error) {
 	if cap(rdr.conReqs) != 0 { // 0 goes for no limit
 		processFile := <-rdr.conReqs // Queue here for maxOpenFiles
 		defer func() { rdr.conReqs <- processFile }()
 	}
-	absPath := path.Join(fPath, fName)
+	absPath := path.Join(rdr.sourceDir, fName)
 	utils.Logger.Info(
 		fmt.Sprintf("<%s> parsing <%s>", utils.ERs, absPath))
 	var file *os.File

@@ -977,7 +977,7 @@ func TestLoaderProcessIFile(t *testing.T) {
 		},
 	}, dm, cache, fS, cM, nil)
 	expErrMsg := fmt.Sprintf(`rename %s/Chargers.csv %s/Chargers.csv: no such file or directory`, tmpIn, tmpOut)
-	if err := ld.processIFile(utils.EmptyString, utils.ChargersCsv); err == nil || err.Error() != expErrMsg {
+	if err := ld.processIFile(utils.ChargersCsv); err == nil || err.Error() != expErrMsg {
 		t.Errorf("Expected: %v, received: %v", expErrMsg, err)
 	}
 
@@ -994,7 +994,7 @@ func TestLoaderProcessIFile(t *testing.T) {
 	if err := f.Close(); err != nil {
 		t.Fatal(err)
 	}
-	if err := ld.processIFile(utils.EmptyString, utils.AttributesCsv); err != nil {
+	if err := ld.processIFile(utils.AttributesCsv); err != nil {
 		t.Fatal(err)
 	}
 	if prf, err := dm.GetAttributeProfile(context.Background(), "cgrates.org", "ID", false, true, utils.NonTransactional); err != nil {
@@ -1016,7 +1016,7 @@ func TestLoaderProcessIFile(t *testing.T) {
 	}
 
 	ld.Locker = mockLock{}
-	if err := ld.processIFile(utils.EmptyString, utils.AttributesCsv); err != utils.ErrExists {
+	if err := ld.processIFile(utils.AttributesCsv); err != utils.ErrExists {
 		t.Fatal(err)
 	}
 }
