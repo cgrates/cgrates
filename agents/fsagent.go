@@ -301,7 +301,7 @@ func (fsa *FSsessions) Connect() error {
 		fSock, err := fsock.NewFSock(
 			connCfg.Address, connCfg.Password,
 			connCfg.Reconnects, 0,
-			0, utils.FibDuration,
+			connCfg.ReplyTimeout, utils.FibDuration,
 			fsa.createHandlers(), eventFilters,
 			utils.Logger, connIdx, true, connErr)
 
@@ -311,7 +311,7 @@ func (fsa *FSsessions) Connect() error {
 		fsa.conns[connIdx] = fSock
 		utils.Logger.Info(fmt.Sprintf("<%s> successfully connected to FreeSWITCH at: <%s>", utils.FreeSWITCHAgent, connCfg.Address))
 		fsSenderPool := fsock.NewFSockPool(5, connCfg.Address, connCfg.Password, 1, fsa.cfg.MaxWaitConnection,
-			0, 0, utils.FibDuration,
+			0, connCfg.ReplyTimeout, utils.FibDuration,
 			make(map[string][]func(string, int)), make(map[string][]string),
 			utils.Logger, connIdx, true, nil)
 		if err != nil {

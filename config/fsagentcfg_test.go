@@ -30,7 +30,7 @@ func TestFsConnCfgLoadFromJSONCfg(t *testing.T) {
 		MaxReconnectInterval: time.Duration(4),
 	}
 	jsnCfg := &FsConnJsonCfg{
-		Max_reconnect_interval: utils.StringPointer("invalid time"),
+		MaxReconnectInterval: utils.StringPointer("invalid time"),
 	}
 	expErr := `time: invalid duration "invalid time"`
 	if err := fs.loadFromJSONCfg(jsnCfg); err.Error() != expErr {
@@ -44,7 +44,7 @@ func TestDiffFsConnJsonCfgMaxReconnInterval(t *testing.T) {
 
 	v2 := &FsConnCfg{MaxReconnectInterval: time.Duration(2)}
 
-	expected := &FsConnJsonCfg{Max_reconnect_interval: utils.StringPointer("2ns")}
+	expected := &FsConnJsonCfg{MaxReconnectInterval: utils.StringPointer("2ns")}
 
 	rcv := diffFsConnJsonCfg(v1, v2)
 	if !reflect.DeepEqual(rcv, expected) {

@@ -50,8 +50,8 @@ func TestFsAgentCfgloadFromJsonCfg1(t *testing.T) {
 		CreateCDR:     true,
 		SubscribePark: true,
 		EventSocketConns: []*FsConnCfg{
-			{Address: "1.2.3.4:8021", Password: "ClueCon", Reconnects: 5, Alias: "1.2.3.4:8021"},
-			{Address: "2.3.4.5:8021", Password: "ClueCon", Reconnects: 5, Alias: "2.3.4.5:8021"},
+			{Address: "1.2.3.4:8021", Password: "ClueCon", Reconnects: 5, ReplyTimeout: time.Minute, Alias: "1.2.3.4:8021"},
+			{Address: "2.3.4.5:8021", Password: "ClueCon", Reconnects: 5, ReplyTimeout: time.Minute, Alias: "2.3.4.5:8021"},
 		},
 	}
 	fsAgentCfg := new(FsAgentCfg)
@@ -725,10 +725,11 @@ func TestFsAgentCfgloadFromJsonCfgCase1(t *testing.T) {
 		ExtraFields:            &[]string{},
 		EventSocketConns: &[]*FsConnJsonCfg{
 			{
-				Address:    utils.StringPointer("1.2.3.4:8021"),
-				Password:   utils.StringPointer("ClueCon"),
-				Reconnects: utils.IntPointer(5),
-				Alias:      utils.StringPointer("127.0.0.1:8021"),
+				Address:      utils.StringPointer("1.2.3.4:8021"),
+				Password:     utils.StringPointer("ClueCon"),
+				Reconnects:   utils.IntPointer(5),
+				Alias:        utils.StringPointer("127.0.0.1:8021"),
+				ReplyTimeout: utils.StringPointer("2m"),
 			},
 		},
 	}
@@ -745,10 +746,11 @@ func TestFsAgentCfgloadFromJsonCfgCase1(t *testing.T) {
 		ExtraFields:            RSRParsers{},
 		EventSocketConns: []*FsConnCfg{
 			{
-				Address:    "1.2.3.4:8021",
-				Password:   "ClueCon",
-				Reconnects: 5,
-				Alias:      "127.0.0.1:8021",
+				Address:      "1.2.3.4:8021",
+				Password:     "ClueCon",
+				Reconnects:   5,
+				Alias:        "127.0.0.1:8021",
+				ReplyTimeout: 2 * time.Minute,
 			},
 		},
 	}
@@ -803,6 +805,7 @@ func TestFsAgentCfgAsMapInterfaceCase1(t *testing.T) {
 				utils.Password:                "ClueCon",
 				utils.ReconnectsCfg:           5,
 				utils.MaxReconnectIntervalCfg: "0s",
+				utils.ReplyTimeoutCfg:         "1m0s",
 				utils.AliasCfg:                "127.0.0.1:8021",
 			},
 		},
@@ -824,7 +827,7 @@ func TestFsAgentCfgAsMapInterfaceCase2(t *testing.T) {
 	"max_wait_connection": "7s",
 	"active_session_delimiter": "//",
 	"event_socket_conns": [
-	      {"address": "127.0.0.1:8000", "password": "ClueCon123", "reconnects": 8, "max_reconnect_interval": "5m", "alias": "127.0.0.1:8000"}
+	{"address": "127.0.0.1:8000", "password": "ClueCon123", "reconnects": 8, "max_reconnect_interval": "5m", "reply_timeout": "2m", "alias": "127.0.0.1:8000"}
 ],}
 }`
 	eMap := map[string]any{
@@ -844,6 +847,7 @@ func TestFsAgentCfgAsMapInterfaceCase2(t *testing.T) {
 				utils.Password:                "ClueCon123",
 				utils.ReconnectsCfg:           8,
 				utils.MaxReconnectIntervalCfg: "5m0s",
+				utils.ReplyTimeoutCfg:         "2m0s",
 				utils.AliasCfg:                "127.0.0.1:8000",
 			},
 		},
@@ -881,6 +885,7 @@ func TestFsAgentCfgAsMapInterfaceCase3(t *testing.T) {
 				utils.ReconnectsCfg:           5,
 				utils.MaxReconnectIntervalCfg: "0s",
 				utils.AliasCfg:                "127.0.0.1:8021",
+				utils.ReplyTimeoutCfg:         "1m0s",
 			},
 		},
 	}
@@ -1411,10 +1416,11 @@ func TestDiffFreeswitchAgentJsonCfg(t *testing.T) {
 		MaxWaitConnection:   3 * time.Second,
 		EventSocketConns: []*FsConnCfg{
 			{
-				Address:    "localhost:8080",
-				Password:   "FsPassword",
-				Reconnects: 3,
-				Alias:      "FS",
+				Address:      "localhost:8080",
+				Password:     "FsPassword",
+				Reconnects:   3,
+				Alias:        "FS",
+				ReplyTimeout: 30 * time.Second,
 			},
 		},
 	}
@@ -1431,10 +1437,11 @@ func TestDiffFreeswitchAgentJsonCfg(t *testing.T) {
 		MaxWaitConnection:   utils.StringPointer("3s"),
 		EventSocketConns: &[]*FsConnJsonCfg{
 			{
-				Address:    utils.StringPointer("localhost:8080"),
-				Password:   utils.StringPointer("FsPassword"),
-				Reconnects: utils.IntPointer(3),
-				Alias:      utils.StringPointer("FS"),
+				Address:      utils.StringPointer("localhost:8080"),
+				Password:     utils.StringPointer("FsPassword"),
+				Reconnects:   utils.IntPointer(3),
+				Alias:        utils.StringPointer("FS"),
+				ReplyTimeout: utils.StringPointer("30s"),
 			},
 		},
 	}
