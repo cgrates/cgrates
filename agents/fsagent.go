@@ -300,7 +300,7 @@ func (fsa *FSsessions) Connect() error {
 	for connIdx, connCfg := range fsa.cfg.EventSocketConns {
 		fSock, err := fsock.NewFSock(
 			connCfg.Address, connCfg.Password,
-			connCfg.Reconnects, 0,
+			connCfg.Reconnects, connCfg.MaxReconnectInterval,
 			connCfg.ReplyTimeout, utils.FibDuration,
 			fsa.createHandlers(), eventFilters,
 			utils.Logger, connIdx, true, connErr)
