@@ -38,7 +38,6 @@
 
 	"stats": {
 		"enabled": true,
-		"store_interval": "1s",
 		"ees_conns": ["*localhost"],
 		"ees_exporter_ids": ["exporter1"]
 	},
@@ -56,6 +55,7 @@
 			"id": "exporter1",
 			"type": "*file_csv",
 			"export_path": "/tmp/testCSV",
+			"filters": ["*gt:~*eventTimestamp:2024-09-19T14:00:58+02:00"],
 			"attempts": 1,
 			"synchronous": true,
 			"field_separator": ",",

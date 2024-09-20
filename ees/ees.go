@@ -159,6 +159,9 @@ func (eeS *EventExporterS) V1ProcessEvent(ctx *context.Context, cgrEv *engine.CG
 		utils.MetaReq:  cgrEv.Event,
 		utils.MetaOpts: cgrEv.APIOpts,
 	}
+	if cgrEv.CGREvent.Time != nil {
+		cgrDp[utils.MetaEventTimestamp] = *cgrEv.CGREvent.Time
+	}
 
 	var wg sync.WaitGroup
 	var withErr bool

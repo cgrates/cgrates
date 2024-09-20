@@ -680,6 +680,7 @@ const (
 	MetaCfg                  = "*cfg"
 	MetaDynReq               = "~*req"
 	MetaScPrefix             = "~*sc." // used for SMCostFilter
+	MetaEventTimestamp       = "*eventTimestamp"
 	CGROriginHost            = "cgr_originhost"
 	MetaInitiate             = "*initiate"
 	MetaUpdate               = "*update"

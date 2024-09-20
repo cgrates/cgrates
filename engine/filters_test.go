@@ -24,6 +24,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"reflect"
+	"strings"
 	"testing"
 	"time"
 
@@ -2383,12 +2384,12 @@ func TestCheckFilterErr(t *testing.T) {
 		Rules: []*FilterRule{
 			{
 				Type:    utils.MetaString,
-				Element: "~*reqCharger",
+				Element: "~.",
 				Values:  []string{"ChargerProfile2"},
 			},
 		},
 	}
-	if err := CheckFilter(fltr); err == nil {
+	if err := CheckFilter(fltr); err == nil || !strings.Contains(err.Error(), "Empty field path  for filter <&{cgrates.org FLTR_CP_2 ") {
 		t.Error(err)
 	}
 	fltr = &Filter{
@@ -2397,11 +2398,11 @@ func TestCheckFilterErr(t *testing.T) {
 		Rules: []*FilterRule{{
 			Element: "~*req.Account",
 			Type:    utils.MetaString,
-			Values:  []string{"~1001"},
+			Values:  []string{"~."},
 		},
 		},
 	}
-	if err := CheckFilter(fltr); err == nil {
+	if err := CheckFilter(fltr); err == nil || !strings.Contains(err.Error(), "Empty field path  for filter <&{cgrates.org TestFilter ") {
 		t.Error(err)
 	}
 }

@@ -79,9 +79,6 @@ func IsPathValid(path string) (err error) {
 		return nil
 	}
 	paths := SplitPath(path, NestingSep[0], -1)
-	if len(paths) <= 1 {
-		return errors.New("Path is missing ")
-	}
 	for _, path := range paths {
 		if strings.TrimSpace(path) == EmptyString {
 			return errors.New("Empty field path ")

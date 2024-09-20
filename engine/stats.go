@@ -334,6 +334,7 @@ func (sS *StatService) processEEs(sQs StatQueues, opts map[string]any) (err erro
 		cgrEv := &utils.CGREvent{
 			Tenant: sq.Tenant,
 			ID:     utils.GenUUID(),
+			Time:   utils.TimePointer(time.Now()),
 			Event: map[string]any{
 				utils.EventType: utils.StatUpdate,
 				utils.StatID:    sq.ID,
