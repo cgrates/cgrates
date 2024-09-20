@@ -581,10 +581,11 @@ func testCGRConfigReloadFreeswitchAgent(t *testing.T) {
 		ActiveSessionDelimiter: ",",
 		EventSocketConns: []*FsConnCfg{
 			{
-				Address:    "1.2.3.4:8021",
-				Password:   "ClueCon",
-				Reconnects: 5,
-				Alias:      "1.2.3.4:8021",
+				Address:      "1.2.3.4:8021",
+				Password:     "ClueCon",
+				Reconnects:   5,
+				Alias:        "1.2.3.4:8021",
+				ReplyTimeout: time.Minute,
 			},
 		},
 	}

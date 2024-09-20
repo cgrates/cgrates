@@ -641,11 +641,12 @@ func TestFsAgentJsonCfg(t *testing.T) {
 		ActiveSessionDelimiter: utils.StringPointer(","),
 		EventSocketConns: &[]*FsConnJsonCfg{
 			{
-				Address:                utils.StringPointer("127.0.0.1:8021"),
-				Password:               utils.StringPointer("ClueCon"),
-				Reconnects:             utils.IntPointer(5),
-				Max_reconnect_interval: utils.StringPointer(utils.EmptyString),
-				Alias:                  utils.StringPointer(""),
+				Address:              utils.StringPointer("127.0.0.1:8021"),
+				Password:             utils.StringPointer("ClueCon"),
+				Reconnects:           utils.IntPointer(5),
+				MaxReconnectInterval: utils.StringPointer(utils.EmptyString),
+				ReplyTimeout:         utils.StringPointer("1m"),
+				Alias:                utils.StringPointer(""),
 			}},
 	}
 	dfCgrJSONCfg, err := NewCgrJsonCfgFromBytes([]byte(CGRATES_CFG_JSON))

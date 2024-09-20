@@ -32,6 +32,7 @@ type FsConnCfg struct {
 	Password             string
 	Reconnects           int
 	MaxReconnectInterval time.Duration
+	ReplyTimeout         time.Duration
 	Alias                string
 }
 
@@ -48,8 +49,13 @@ func (fs *FsConnCfg) loadFromJSONCfg(jsnCfg *FsConnJsonCfg) (err error) {
 	if jsnCfg.Reconnects != nil {
 		fs.Reconnects = *jsnCfg.Reconnects
 	}
-	if jsnCfg.Max_reconnect_interval != nil {
-		if fs.MaxReconnectInterval, err = utils.ParseDurationWithNanosecs(*jsnCfg.Max_reconnect_interval); err != nil {
+	if jsnCfg.MaxReconnectInterval != nil {
+		if fs.MaxReconnectInterval, err = utils.ParseDurationWithNanosecs(*jsnCfg.MaxReconnectInterval); err != nil {
+			return
+		}
+	}
+	if jsnCfg.ReplyTimeout != nil {
+		if fs.ReplyTimeout, err = utils.ParseDurationWithNanosecs(*jsnCfg.ReplyTimeout); err != nil {
 			return
 		}
 	}
@@ -68,6 +74,7 @@ func (fs FsConnCfg) AsMapInterface() map[string]any {
 		utils.Password:                fs.Password,
 		utils.ReconnectsCfg:           fs.Reconnects,
 		utils.MaxReconnectIntervalCfg: fs.MaxReconnectInterval.String(),
+		utils.ReplyTimeoutCfg:         fs.ReplyTimeout.String(),
 		utils.AliasCfg:                fs.Alias,
 	}
 }
@@ -79,6 +86,7 @@ func (fs FsConnCfg) Clone() *FsConnCfg {
 		Password:             fs.Password,
 		Reconnects:           fs.Reconnects,
 		MaxReconnectInterval: fs.MaxReconnectInterval,
+		ReplyTimeout:         fs.ReplyTimeout,
 		Alias:                fs.Alias,
 	}
 }
@@ -232,11 +240,12 @@ type FreeswitchAgentJsonCfg struct {
 
 // Represents one connection instance towards FreeSWITCH
 type FsConnJsonCfg struct {
-	Address                *string
-	Password               *string
-	Reconnects             *int
-	Max_reconnect_interval *string
-	Alias                  *string
+	Address              *string `json:"address"`
+	Password             *string `json:"password"`
+	Reconnects           *int    `json:"reconnects"`
+	MaxReconnectInterval *string `json:"max_reconnect_interval"`
+	ReplyTimeout         *string `json:"reply_timeout"`
+	Alias                *string `json:"alias"`
 }
 
 func diffFsConnJsonCfg(v1, v2 *FsConnCfg) (d *FsConnJsonCfg) {
@@ -251,7 +260,10 @@ func diffFsConnJsonCfg(v1, v2 *FsConnCfg) (d *FsConnJsonCfg) {
 		d.Reconnects = utils.IntPointer(v2.Reconnects)
 	}
 	if v1.MaxReconnectInterval != v2.MaxReconnectInterval {
-		d.Max_reconnect_interval = utils.StringPointer(v2.MaxReconnectInterval.String())
+		d.MaxReconnectInterval = utils.StringPointer(v2.MaxReconnectInterval.String())
+	}
+	if v1.ReplyTimeout != v2.ReplyTimeout {
+		d.ReplyTimeout = utils.StringPointer(v2.ReplyTimeout.String())
 	}
 	if v1.Alias != v2.Alias {
 		d.Alias = utils.StringPointer(v2.Alias)
@@ -268,6 +280,7 @@ func equalsFsConnsJsonCfg(v1, v2 []*FsConnCfg) bool {
 			v1[i].Password != v2[i].Password ||
 			v1[i].Reconnects != v2[i].Reconnects ||
 			v1[i].MaxReconnectInterval != v2[i].MaxReconnectInterval ||
+			v1[i].ReplyTimeout != v2[i].ReplyTimeout ||
 			v1[i].Alias != v2[i].Alias {
 			return false
 		}
