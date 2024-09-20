@@ -145,42 +145,6 @@ func TestFreeSwitchAgentReload4(t *testing.T) {
 	if srv.IsRunning() {
 		t.Fatalf("Expected service to be down")
 	}
-	agentCfg := &config.FsAgentCfg{
-		Enabled:             true,
-		SessionSConns:       nil,
-		SubscribePark:       true,
-		CreateCDR:           true,
-		ExtraFields:         nil,
-		LowBalanceAnnFile:   "",
-		EmptyBalanceContext: "",
-		EmptyBalanceAnnFile: "",
-		MaxWaitConnection:   0,
-		EventSocketConns: []*config.FsConnCfg{
-			{
-				Address:    "",
-				Password:   "",
-				Reconnects: 0,
-				Alias:      "",
-			},
-		},
-	}
-	srv.(*FreeswitchAgent).fS = agents.NewFSsessions(agentCfg, "", nil)
-	err := srv.(*FreeswitchAgent).connect(srv.(*FreeswitchAgent).fS, func() {})
-	if err != nil {
-		t.Fatalf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
-	}
-}
-
-func TestFreeSwitchAgentReload5(t *testing.T) {
-	cfg := config.NewDefaultCGRConfig()
-	cfg.SessionSCfg().Enabled = true
-	filterSChan := make(chan *engine.FilterS, 1)
-	filterSChan <- nil
-	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
-	srv := NewFreeswitchAgent(cfg, nil, srvDep)
-	if srv.IsRunning() {
-		t.Fatalf("Expected service to be down")
-	}
 
 	srv.(*FreeswitchAgent).fS = nil
 	ctx, cancel := context.WithCancel(context.TODO())
