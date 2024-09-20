@@ -573,11 +573,12 @@ func testCGRConfigReloadFreeswitchAgent(t *testing.T) {
 		t.Errorf("Expected OK received: %s", reply)
 	}
 	expAttr := &FsAgentCfg{
-		Enabled:           true,
-		SessionSConns:     []string{utils.ConcatenatedKey(rpcclient.BiRPCInternal, utils.MetaSessionS)},
-		SubscribePark:     true,
-		ExtraFields:       RSRParsers{},
-		MaxWaitConnection: 2 * time.Second,
+		Enabled:                true,
+		SessionSConns:          []string{utils.ConcatenatedKey(rpcclient.BiRPCInternal, utils.MetaSessionS)},
+		SubscribePark:          true,
+		ExtraFields:            RSRParsers{},
+		MaxWaitConnection:      2 * time.Second,
+		ActiveSessionDelimiter: ",",
 		EventSocketConns: []*FsConnCfg{
 			{
 				Address:    "1.2.3.4:8021",

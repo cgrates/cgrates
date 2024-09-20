@@ -85,16 +85,17 @@ func (fs FsConnCfg) Clone() *FsConnCfg {
 
 // FsAgentCfg the config section that describes the FreeSWITCH Agent
 type FsAgentCfg struct {
-	Enabled             bool
-	SessionSConns       []string
-	SubscribePark       bool
-	CreateCdr           bool
-	ExtraFields         RSRParsers
-	LowBalanceAnnFile   string
-	EmptyBalanceContext string
-	EmptyBalanceAnnFile string
-	MaxWaitConnection   time.Duration
-	EventSocketConns    []*FsConnCfg
+	Enabled                bool
+	SessionSConns          []string
+	SubscribePark          bool
+	CreateCDR              bool
+	ExtraFields            RSRParsers
+	LowBalanceAnnFile      string
+	EmptyBalanceContext    string
+	EmptyBalanceAnnFile    string
+	MaxWaitConnection      time.Duration
+	ActiveSessionDelimiter string
+	EventSocketConns       []*FsConnCfg
 }
 
 // loadFreeswitchAgentCfg loads the FreeswitchAgent section of the configuration
@@ -114,38 +115,41 @@ func (fscfg *FsAgentCfg) loadFromJSONCfg(jsnCfg *FreeswitchAgentJsonCfg) error {
 	if jsnCfg.Enabled != nil {
 		fscfg.Enabled = *jsnCfg.Enabled
 	}
-	if jsnCfg.Sessions_conns != nil {
-		fscfg.SessionSConns = updateBiRPCInternalConns(*jsnCfg.Sessions_conns, utils.MetaSessionS)
+	if jsnCfg.SessionSConns != nil {
+		fscfg.SessionSConns = updateBiRPCInternalConns(*jsnCfg.SessionSConns, utils.MetaSessionS)
 	}
-	if jsnCfg.Subscribe_park != nil {
-		fscfg.SubscribePark = *jsnCfg.Subscribe_park
+	if jsnCfg.SubscribePark != nil {
+		fscfg.SubscribePark = *jsnCfg.SubscribePark
 	}
-	if jsnCfg.Create_cdr != nil {
-		fscfg.CreateCdr = *jsnCfg.Create_cdr
+	if jsnCfg.CreateCDR != nil {
+		fscfg.CreateCDR = *jsnCfg.CreateCDR
 	}
-	if jsnCfg.Extra_fields != nil {
-		if fscfg.ExtraFields, err = NewRSRParsersFromSlice(*jsnCfg.Extra_fields); err != nil {
+	if jsnCfg.ExtraFields != nil {
+		if fscfg.ExtraFields, err = NewRSRParsersFromSlice(*jsnCfg.ExtraFields); err != nil {
 			return err
 		}
 	}
-	if jsnCfg.Low_balance_ann_file != nil {
-		fscfg.LowBalanceAnnFile = *jsnCfg.Low_balance_ann_file
+	if jsnCfg.LowBalanceAnnFile != nil {
+		fscfg.LowBalanceAnnFile = *jsnCfg.LowBalanceAnnFile
 	}
-	if jsnCfg.Empty_balance_context != nil {
-		fscfg.EmptyBalanceContext = *jsnCfg.Empty_balance_context
+	if jsnCfg.EmptyBalanceContext != nil {
+		fscfg.EmptyBalanceContext = *jsnCfg.EmptyBalanceContext
 	}
 
-	if jsnCfg.Empty_balance_ann_file != nil {
-		fscfg.EmptyBalanceAnnFile = *jsnCfg.Empty_balance_ann_file
+	if jsnCfg.EmptyBalanceAnnFile != nil {
+		fscfg.EmptyBalanceAnnFile = *jsnCfg.EmptyBalanceAnnFile
 	}
-	if jsnCfg.Max_wait_connection != nil {
-		if fscfg.MaxWaitConnection, err = utils.ParseDurationWithNanosecs(*jsnCfg.Max_wait_connection); err != nil {
+	if jsnCfg.MaxWaitConnection != nil {
+		if fscfg.MaxWaitConnection, err = utils.ParseDurationWithNanosecs(*jsnCfg.MaxWaitConnection); err != nil {
 			return err
 		}
 	}
-	if jsnCfg.Event_socket_conns != nil {
-		fscfg.EventSocketConns = make([]*FsConnCfg, len(*jsnCfg.Event_socket_conns))
-		for idx, jsnConnCfg := range *jsnCfg.Event_socket_conns {
+	if jsnCfg.ActiveSessionDelimiter != nil {
+		fscfg.ActiveSessionDelimiter = *jsnCfg.ActiveSessionDelimiter
+	}
+	if jsnCfg.EventSocketConns != nil {
+		fscfg.EventSocketConns = make([]*FsConnCfg, len(*jsnCfg.EventSocketConns))
+		for idx, jsnConnCfg := range *jsnCfg.EventSocketConns {
 			fscfg.EventSocketConns[idx] = getDftFsConnCfg()
 			fscfg.EventSocketConns[idx].loadFromJSONCfg(jsnConnCfg)
 		}
@@ -156,13 +160,14 @@ func (fscfg *FsAgentCfg) loadFromJSONCfg(jsnCfg *FreeswitchAgentJsonCfg) error {
 // AsMapInterface returns the config as a map[string]any
 func (fscfg FsAgentCfg) AsMapInterface(separator string) any {
 	mp := map[string]any{
-		utils.EnabledCfg:             fscfg.Enabled,
-		utils.SubscribeParkCfg:       fscfg.SubscribePark,
-		utils.CreateCdrCfg:           fscfg.CreateCdr,
-		utils.LowBalanceAnnFileCfg:   fscfg.LowBalanceAnnFile,
-		utils.EmptyBalanceContextCfg: fscfg.EmptyBalanceContext,
-		utils.EmptyBalanceAnnFileCfg: fscfg.EmptyBalanceAnnFile,
-		utils.MaxWaitConnectionCfg:   utils.EmptyString,
+		utils.EnabledCfg:                fscfg.Enabled,
+		utils.SubscribeParkCfg:          fscfg.SubscribePark,
+		utils.CreateCdrCfg:              fscfg.CreateCDR,
+		utils.LowBalanceAnnFileCfg:      fscfg.LowBalanceAnnFile,
+		utils.EmptyBalanceContextCfg:    fscfg.EmptyBalanceContext,
+		utils.EmptyBalanceAnnFileCfg:    fscfg.EmptyBalanceAnnFile,
+		utils.MaxWaitConnectionCfg:      utils.EmptyString,
+		utils.ActiveSessionDelimiterCfg: fscfg.ActiveSessionDelimiter,
 	}
 	if fscfg.SessionSConns != nil {
 		mp[utils.SessionSConnsCfg] = getBiRPCInternalJSONConns(fscfg.SessionSConns)
@@ -190,15 +195,16 @@ func (fscfg FsAgentCfg) CloneSection() Section { return fscfg.Clone() }
 // Clone returns a deep copy of FsAgentCfg
 func (fscfg FsAgentCfg) Clone() (cln *FsAgentCfg) {
 	cln = &FsAgentCfg{
-		Enabled:             fscfg.Enabled,
-		SubscribePark:       fscfg.SubscribePark,
-		CreateCdr:           fscfg.CreateCdr,
-		ExtraFields:         fscfg.ExtraFields.Clone(),
-		LowBalanceAnnFile:   fscfg.LowBalanceAnnFile,
-		EmptyBalanceContext: fscfg.EmptyBalanceContext,
-		EmptyBalanceAnnFile: fscfg.EmptyBalanceAnnFile,
-		MaxWaitConnection:   fscfg.MaxWaitConnection,
-		SessionSConns:       slices.Clone(fscfg.SessionSConns),
+		Enabled:                fscfg.Enabled,
+		SubscribePark:          fscfg.SubscribePark,
+		CreateCDR:              fscfg.CreateCDR,
+		ExtraFields:            fscfg.ExtraFields.Clone(),
+		LowBalanceAnnFile:      fscfg.LowBalanceAnnFile,
+		EmptyBalanceContext:    fscfg.EmptyBalanceContext,
+		EmptyBalanceAnnFile:    fscfg.EmptyBalanceAnnFile,
+		MaxWaitConnection:      fscfg.MaxWaitConnection,
+		ActiveSessionDelimiter: fscfg.ActiveSessionDelimiter,
+		SessionSConns:          slices.Clone(fscfg.SessionSConns),
 	}
 	if fscfg.EventSocketConns != nil {
 		cln.EventSocketConns = make([]*FsConnCfg, len(fscfg.EventSocketConns))
@@ -211,16 +217,17 @@ func (fscfg FsAgentCfg) Clone() (cln *FsAgentCfg) {
 
 // FreeSWITCHAgent config section
 type FreeswitchAgentJsonCfg struct {
-	Enabled                *bool
-	Sessions_conns         *[]string
-	Subscribe_park         *bool
-	Create_cdr             *bool
-	Extra_fields           *[]string
-	Low_balance_ann_file   *string
-	Empty_balance_context  *string
-	Empty_balance_ann_file *string
-	Max_wait_connection    *string
-	Event_socket_conns     *[]*FsConnJsonCfg
+	Enabled                *bool             `json:"enabled"`
+	SessionSConns          *[]string         `json:"sessions_conns"`
+	SubscribePark          *bool             `json:"subscribe_park"`
+	CreateCDR              *bool             `json:"create_cdr"`
+	ExtraFields            *[]string         `json:"extra_fields"`
+	LowBalanceAnnFile      *string           `json:"low_balance_ann_file"`
+	EmptyBalanceContext    *string           `json:"empty_balance_context"`
+	EmptyBalanceAnnFile    *string           `json:"empty_balance_ann_file"`
+	MaxWaitConnection      *string           `json:"max_wait_connection"`
+	ActiveSessionDelimiter *string           `json:"active_session_delimiter"`
+	EventSocketConns       *[]*FsConnJsonCfg `json:"event_socket_conns"`
 }
 
 // Represents one connection instance towards FreeSWITCH
@@ -276,30 +283,33 @@ func diffFreeswitchAgentJsonCfg(d *FreeswitchAgentJsonCfg, v1, v2 *FsAgentCfg) *
 		d.Enabled = utils.BoolPointer(v2.Enabled)
 	}
 	if !slices.Equal(v1.SessionSConns, v2.SessionSConns) {
-		d.Sessions_conns = utils.SliceStringPointer(getBiRPCInternalJSONConns(v2.SessionSConns))
+		d.SessionSConns = utils.SliceStringPointer(getBiRPCInternalJSONConns(v2.SessionSConns))
 	}
 	if v1.SubscribePark != v2.SubscribePark {
-		d.Subscribe_park = utils.BoolPointer(v2.SubscribePark)
+		d.SubscribePark = utils.BoolPointer(v2.SubscribePark)
 	}
-	if v1.CreateCdr != v2.CreateCdr {
-		d.Create_cdr = utils.BoolPointer(v2.CreateCdr)
+	if v1.CreateCDR != v2.CreateCDR {
+		d.CreateCDR = utils.BoolPointer(v2.CreateCDR)
 	}
 	extra1 := v1.ExtraFields.AsStringSlice()
 	extra2 := v2.ExtraFields.AsStringSlice()
 	if !slices.Equal(extra1, extra2) {
-		d.Extra_fields = &extra2
+		d.ExtraFields = &extra2
 	}
 	if v1.LowBalanceAnnFile != v2.LowBalanceAnnFile {
-		d.Low_balance_ann_file = utils.StringPointer(v2.LowBalanceAnnFile)
+		d.LowBalanceAnnFile = utils.StringPointer(v2.LowBalanceAnnFile)
 	}
 	if v1.EmptyBalanceContext != v2.EmptyBalanceContext {
-		d.Empty_balance_context = utils.StringPointer(v2.EmptyBalanceContext)
+		d.EmptyBalanceContext = utils.StringPointer(v2.EmptyBalanceContext)
 	}
 	if v1.EmptyBalanceAnnFile != v2.EmptyBalanceAnnFile {
-		d.Empty_balance_ann_file = utils.StringPointer(v2.EmptyBalanceAnnFile)
+		d.EmptyBalanceAnnFile = utils.StringPointer(v2.EmptyBalanceAnnFile)
 	}
 	if v1.MaxWaitConnection != v2.MaxWaitConnection {
-		d.Max_wait_connection = utils.StringPointer(v2.MaxWaitConnection.String())
+		d.MaxWaitConnection = utils.StringPointer(v2.MaxWaitConnection.String())
+	}
+	if v1.ActiveSessionDelimiter != v2.ActiveSessionDelimiter {
+		d.ActiveSessionDelimiter = utils.StringPointer(v2.ActiveSessionDelimiter)
 	}
 
 	if !equalsFsConnsJsonCfg(v1.EventSocketConns, v2.EventSocketConns) {
@@ -308,7 +318,7 @@ func diffFreeswitchAgentJsonCfg(d *FreeswitchAgentJsonCfg, v1, v2 *FsAgentCfg) *
 		for i, val := range v2.EventSocketConns {
 			v[i] = diffFsConnJsonCfg(dflt, val)
 		}
-		d.Event_socket_conns = &v
+		d.EventSocketConns = &v
 	}
 	return d
 }

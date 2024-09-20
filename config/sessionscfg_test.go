@@ -29,10 +29,10 @@ import (
 
 func TestFsAgentCfgloadFromJsonCfg1(t *testing.T) {
 	fsAgentJsnCfg := &FreeswitchAgentJsonCfg{
-		Enabled:        utils.BoolPointer(true),
-		Create_cdr:     utils.BoolPointer(true),
-		Subscribe_park: utils.BoolPointer(true),
-		Event_socket_conns: &[]*FsConnJsonCfg{
+		Enabled:       utils.BoolPointer(true),
+		CreateCDR:     utils.BoolPointer(true),
+		SubscribePark: utils.BoolPointer(true),
+		EventSocketConns: &[]*FsConnJsonCfg{
 			{
 				Address:    utils.StringPointer("1.2.3.4:8021"),
 				Password:   utils.StringPointer("ClueCon"),
@@ -47,7 +47,7 @@ func TestFsAgentCfgloadFromJsonCfg1(t *testing.T) {
 	}
 	eFsAgentConfig := &FsAgentCfg{
 		Enabled:       true,
-		CreateCdr:     true,
+		CreateCDR:     true,
 		SubscribePark: true,
 		EventSocketConns: []*FsConnCfg{
 			{Address: "1.2.3.4:8021", Password: "ClueCon", Reconnects: 5, Alias: "1.2.3.4:8021"},
@@ -714,15 +714,16 @@ func TestSessionSCfgAsMapInterfaceCase3(t *testing.T) {
 func TestFsAgentCfgloadFromJsonCfgCase1(t *testing.T) {
 	fsAgentJsnCfg := &FreeswitchAgentJsonCfg{
 		Enabled:                utils.BoolPointer(true),
-		Sessions_conns:         &[]string{utils.MetaInternal},
-		Create_cdr:             utils.BoolPointer(true),
-		Subscribe_park:         utils.BoolPointer(true),
-		Low_balance_ann_file:   utils.StringPointer("randomFile"),
-		Empty_balance_ann_file: utils.StringPointer("randomEmptyFile"),
-		Empty_balance_context:  utils.StringPointer("randomEmptyContext"),
-		Max_wait_connection:    utils.StringPointer("2"),
-		Extra_fields:           &[]string{},
-		Event_socket_conns: &[]*FsConnJsonCfg{
+		SessionSConns:          &[]string{utils.MetaInternal},
+		CreateCDR:              utils.BoolPointer(true),
+		SubscribePark:          utils.BoolPointer(true),
+		LowBalanceAnnFile:      utils.StringPointer("randomFile"),
+		EmptyBalanceAnnFile:    utils.StringPointer("randomEmptyFile"),
+		EmptyBalanceContext:    utils.StringPointer("randomEmptyContext"),
+		ActiveSessionDelimiter: utils.StringPointer("/"),
+		MaxWaitConnection:      utils.StringPointer("2"),
+		ExtraFields:            &[]string{},
+		EventSocketConns: &[]*FsConnJsonCfg{
 			{
 				Address:    utils.StringPointer("1.2.3.4:8021"),
 				Password:   utils.StringPointer("ClueCon"),
@@ -732,15 +733,16 @@ func TestFsAgentCfgloadFromJsonCfgCase1(t *testing.T) {
 		},
 	}
 	expected := &FsAgentCfg{
-		Enabled:             true,
-		SessionSConns:       []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS)},
-		SubscribePark:       true,
-		CreateCdr:           true,
-		LowBalanceAnnFile:   "randomFile",
-		EmptyBalanceAnnFile: "randomEmptyFile",
-		EmptyBalanceContext: "randomEmptyContext",
-		MaxWaitConnection:   2,
-		ExtraFields:         RSRParsers{},
+		Enabled:                true,
+		SessionSConns:          []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS)},
+		SubscribePark:          true,
+		CreateCDR:              true,
+		LowBalanceAnnFile:      "randomFile",
+		EmptyBalanceAnnFile:    "randomEmptyFile",
+		EmptyBalanceContext:    "randomEmptyContext",
+		ActiveSessionDelimiter: "/",
+		MaxWaitConnection:      2,
+		ExtraFields:            RSRParsers{},
 		EventSocketConns: []*FsConnCfg{
 			{
 				Address:    "1.2.3.4:8021",
@@ -760,7 +762,7 @@ func TestFsAgentCfgloadFromJsonCfgCase1(t *testing.T) {
 
 func TestFsAgentCfgloadFromJsonCfgCase2(t *testing.T) {
 	fsAgentJsnCfg := &FreeswitchAgentJsonCfg{
-		Max_wait_connection: utils.StringPointer("1ss"),
+		MaxWaitConnection: utils.StringPointer("1ss"),
 	}
 	expected := "time: unknown unit \"ss\" in duration \"1ss\""
 	jsonCfg := NewDefaultCGRConfig()
@@ -771,7 +773,7 @@ func TestFsAgentCfgloadFromJsonCfgCase2(t *testing.T) {
 
 func TestFsAgentCfgloadFromJsonCfgCase3(t *testing.T) {
 	fsAgentJsnCfg := &FreeswitchAgentJsonCfg{
-		Extra_fields: &[]string{"a{*"},
+		ExtraFields: &[]string{"a{*"},
 	}
 	expected := "invalid converter terminator in rule: <a{*>"
 	jsonCfg := NewDefaultCGRConfig()
@@ -785,15 +787,16 @@ func TestFsAgentCfgAsMapInterfaceCase1(t *testing.T) {
 	"freeswitch_agent": {},
 }`
 	eMap := map[string]any{
-		utils.EnabledCfg:             false,
-		utils.SessionSConnsCfg:       []string{rpcclient.BiRPCInternal},
-		utils.SubscribeParkCfg:       true,
-		utils.CreateCdrCfg:           false,
-		utils.ExtraFieldsCfg:         []string{},
-		utils.LowBalanceAnnFileCfg:   "",
-		utils.EmptyBalanceContextCfg: "",
-		utils.EmptyBalanceAnnFileCfg: "",
-		utils.MaxWaitConnectionCfg:   "2s",
+		utils.EnabledCfg:                false,
+		utils.SessionSConnsCfg:          []string{rpcclient.BiRPCInternal},
+		utils.SubscribeParkCfg:          true,
+		utils.CreateCdrCfg:              false,
+		utils.ExtraFieldsCfg:            []string{},
+		utils.LowBalanceAnnFileCfg:      "",
+		utils.EmptyBalanceContextCfg:    "",
+		utils.EmptyBalanceAnnFileCfg:    "",
+		utils.MaxWaitConnectionCfg:      "2s",
+		utils.ActiveSessionDelimiterCfg: ",",
 		utils.EventSocketConnsCfg: []map[string]any{
 			{
 				utils.AddressCfg:              "127.0.0.1:8021",
@@ -813,26 +816,28 @@ func TestFsAgentCfgAsMapInterfaceCase1(t *testing.T) {
 
 func TestFsAgentCfgAsMapInterfaceCase2(t *testing.T) {
 	cfgJSONStr := `{
-	"freeswitch_agent": {
-          "enabled": true,						
-          "sessions_conns": ["*birpc_internal", "*conn1","*conn2"],
-	      "subscribe_park": false,					
-	      "create_cdr": true,
-	      "max_wait_connection": "7s",			
-	      "event_socket_conns":[					
-		      {"address": "127.0.0.1:8000", "password": "ClueCon123", "reconnects": 8, "max_reconnect_interval": "5m", "alias": "127.0.0.1:8000"}
-	],},
+"freeswitch_agent": {
+	"enabled": true,
+	"sessions_conns": ["*birpc_internal", "*conn1","*conn2"],
+	"subscribe_park": false,
+	"create_cdr": true,
+	"max_wait_connection": "7s",
+	"active_session_delimiter": "//",
+	"event_socket_conns": [
+	      {"address": "127.0.0.1:8000", "password": "ClueCon123", "reconnects": 8, "max_reconnect_interval": "5m", "alias": "127.0.0.1:8000"}
+],}
 }`
 	eMap := map[string]any{
-		utils.EnabledCfg:             true,
-		utils.SessionSConnsCfg:       []string{rpcclient.BiRPCInternal, "*conn1", "*conn2"},
-		utils.SubscribeParkCfg:       false,
-		utils.CreateCdrCfg:           true,
-		utils.ExtraFieldsCfg:         []string{},
-		utils.LowBalanceAnnFileCfg:   "",
-		utils.EmptyBalanceContextCfg: "",
-		utils.EmptyBalanceAnnFileCfg: "",
-		utils.MaxWaitConnectionCfg:   "7s",
+		utils.EnabledCfg:                true,
+		utils.SessionSConnsCfg:          []string{rpcclient.BiRPCInternal, "*conn1", "*conn2"},
+		utils.SubscribeParkCfg:          false,
+		utils.CreateCdrCfg:              true,
+		utils.ExtraFieldsCfg:            []string{},
+		utils.LowBalanceAnnFileCfg:      "",
+		utils.EmptyBalanceContextCfg:    "",
+		utils.EmptyBalanceAnnFileCfg:    "",
+		utils.MaxWaitConnectionCfg:      "7s",
+		utils.ActiveSessionDelimiterCfg: "//",
 		utils.EventSocketConnsCfg: []map[string]any{
 			{
 				utils.AddressCfg:              "127.0.0.1:8000",
@@ -859,15 +864,16 @@ func TestFsAgentCfgAsMapInterfaceCase3(t *testing.T) {
     }
 }`
 	eMap := map[string]any{
-		utils.EnabledCfg:             false,
-		utils.SessionSConnsCfg:       []string{utils.MetaInternal},
-		utils.SubscribeParkCfg:       true,
-		utils.CreateCdrCfg:           false,
-		utils.ExtraFieldsCfg:         []string{"randomFields"},
-		utils.LowBalanceAnnFileCfg:   "",
-		utils.EmptyBalanceContextCfg: "",
-		utils.EmptyBalanceAnnFileCfg: "",
-		utils.MaxWaitConnectionCfg:   "",
+		utils.EnabledCfg:                false,
+		utils.SessionSConnsCfg:          []string{utils.MetaInternal},
+		utils.SubscribeParkCfg:          true,
+		utils.CreateCdrCfg:              false,
+		utils.ExtraFieldsCfg:            []string{"randomFields"},
+		utils.LowBalanceAnnFileCfg:      "",
+		utils.EmptyBalanceContextCfg:    "",
+		utils.EmptyBalanceAnnFileCfg:    "",
+		utils.MaxWaitConnectionCfg:      "",
+		utils.ActiveSessionDelimiterCfg: ",",
 		utils.EventSocketConnsCfg: []map[string]any{
 			{
 				utils.AddressCfg:              "127.0.0.1:8021",
@@ -1271,7 +1277,7 @@ func TestDiffAsteriskAgentJsonCfg(t *testing.T) {
 func TestFsAgentCfgClone(t *testing.T) {
 	ban := &FsAgentCfg{
 		Enabled:             true,
-		CreateCdr:           true,
+		CreateCDR:           true,
 		SubscribePark:       true,
 		EmptyBalanceAnnFile: "file",
 		EmptyBalanceContext: "context",
@@ -1376,7 +1382,7 @@ func TestDiffFreeswitchAgentJsonCfg(t *testing.T) {
 		Enabled:       false,
 		SessionSConns: []string{},
 		SubscribePark: false,
-		CreateCdr:     false,
+		CreateCDR:     false,
 		ExtraFields: RSRParsers{
 			{
 				Rules: "ExtraField",
@@ -1393,7 +1399,7 @@ func TestDiffFreeswitchAgentJsonCfg(t *testing.T) {
 		Enabled:       true,
 		SessionSConns: []string{"*localhost"},
 		SubscribePark: true,
-		CreateCdr:     true,
+		CreateCDR:     true,
 		ExtraFields: RSRParsers{
 			{
 				Rules: "ExtraField2",
@@ -1414,16 +1420,16 @@ func TestDiffFreeswitchAgentJsonCfg(t *testing.T) {
 	}
 
 	expected := &FreeswitchAgentJsonCfg{
-		Enabled:                utils.BoolPointer(true),
-		Sessions_conns:         &[]string{"*localhost"},
-		Subscribe_park:         utils.BoolPointer(true),
-		Create_cdr:             utils.BoolPointer(true),
-		Extra_fields:           &[]string{"ExtraField2"},
-		Low_balance_ann_file:   utils.StringPointer("LBAF2"),
-		Empty_balance_context:  utils.StringPointer("EBC2"),
-		Empty_balance_ann_file: utils.StringPointer("EBAF2"),
-		Max_wait_connection:    utils.StringPointer("3s"),
-		Event_socket_conns: &[]*FsConnJsonCfg{
+		Enabled:             utils.BoolPointer(true),
+		SessionSConns:       &[]string{"*localhost"},
+		SubscribePark:       utils.BoolPointer(true),
+		CreateCDR:           utils.BoolPointer(true),
+		ExtraFields:         &[]string{"ExtraField2"},
+		LowBalanceAnnFile:   utils.StringPointer("LBAF2"),
+		EmptyBalanceContext: utils.StringPointer("EBC2"),
+		EmptyBalanceAnnFile: utils.StringPointer("EBAF2"),
+		MaxWaitConnection:   utils.StringPointer("3s"),
+		EventSocketConns: &[]*FsConnJsonCfg{
 			{
 				Address:    utils.StringPointer("localhost:8080"),
 				Password:   utils.StringPointer("FsPassword"),
