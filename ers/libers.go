@@ -20,7 +20,9 @@ package ers
 
 import (
 	"fmt"
+	"os"
 	"sort"
+	"strings"
 
 	"github.com/cgrates/cgrates/agents"
 	"github.com/cgrates/cgrates/config"
@@ -100,4 +102,29 @@ func mergePartialEvents(cgrEvs []*utils.CGREvent, cfg *config.EventReaderCfg, fl
 		}
 	}
 	return
+}
+
+// processReaderDir finds all entries within dirPath, filters only the ones whose name
+// ends with the specified suffix and executes function f on them.
+func processReaderDir(dirPath, suffix string, f func(dir, fn string) error) {
+	filesInDir, err := os.ReadDir(dirPath)
+	if err != nil {
+		utils.Logger.Notice(fmt.Sprintf(
+			"<%s> encountered error while reading entries from directory %s: %v",
+			utils.ERs, dirPath, err))
+		// There is no need to return, as os.ReadDir can still return entries
+		// even if an error was encountered. Logging it should suffice
+	}
+	for _, file := range filesInDir {
+		if !strings.HasSuffix(file.Name(), suffix) { // hardcoded file extension for csv event reader
+			continue // used in order to filter the files from directory
+		}
+		go func(fileName string) {
+			if err := f(dirPath, fileName); err != nil {
+				utils.Logger.Warning(fmt.Sprintf(
+					"<%s> processing file %s, error: %v",
+					utils.ERs, fileName, err))
+			}
+		}(file.Name())
+	}
 }

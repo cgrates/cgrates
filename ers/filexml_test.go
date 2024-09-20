@@ -32,7 +32,7 @@ func TestERSNewXMLFileER(t *testing.T) {
 		cgrCfg:    cfg,
 		cfgIdx:    0,
 		fltrS:     nil,
-		rdrDir:    "/var/spool/cgrates/ers/in",
+		sourceDir: "/var/spool/cgrates/ers/in",
 		rdrEvents: nil,
 		rdrError:  nil,
 		rdrExit:   nil,
