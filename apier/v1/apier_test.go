@@ -21,6 +21,8 @@ package v1
 import (
 	"testing"
 
+	"github.com/cgrates/cgrates/ers"
+	"github.com/cgrates/cgrates/sessions"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -118,5 +120,31 @@ func TestGetId(t *testing.T) {
 				t.Errorf("expected %v, but got %v", tt.expectedID, result)
 			}
 		})
+	}
+}
+
+func TestNewSMGenericV1(t *testing.T) {
+	Session := &sessions.SessionS{}
+	result := NewSMGenericV1(Session)
+
+	if result.Ss != Session {
+		t.Error("Expected the SessionS to be the same as the input, but got a different value")
+	}
+
+	if result == nil {
+		t.Error("Expected result to be a valid SMGenericV1 instance, but got nil")
+	}
+}
+
+func TestNewErSv1(t *testing.T) {
+	erService := &ers.ERService{}
+	erSv1 := NewErSv1(erService)
+
+	if erSv1 == nil {
+		t.Fatalf("Expected non-nil ErSv1, got nil")
+	}
+
+	if erSv1.erS != erService {
+		t.Fatalf("Expected erS to be %v, got %v", erService, erSv1.erS)
 	}
 }
