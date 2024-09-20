@@ -46,7 +46,7 @@ func NewJSONFileER(cfg *config.CGRConfig, cfgIdx int,
 		cgrCfg:        cfg,
 		cfgIdx:        cfgIdx,
 		fltrS:         fltrS,
-		rdrDir:        srcPath,
+		sourceDir:     srcPath,
 		rdrEvents:     rdrEvents,
 		partialEvents: partialEvents,
 		rdrError:      rdrErr,
@@ -65,7 +65,7 @@ type JSONFileER struct {
 	cgrCfg        *config.CGRConfig
 	cfgIdx        int // index of config instance within ERsCfg.Readers
 	fltrS         *engine.FilterS
-	rdrDir        string
+	sourceDir     string
 	rdrEvents     chan *erEvent // channel to dispatch the events created to
 	partialEvents chan *erEvent // channel to dispatch the partial events created to
 	rdrError      chan error
@@ -82,7 +82,7 @@ func (rdr *JSONFileER) Serve() (err error) {
 	case time.Duration(0): // 0 disables the automatic read, maybe done per API
 		return
 	case time.Duration(-1):
-		return utils.WatchDir(rdr.rdrDir, rdr.processFile,
+		return utils.WatchDir(rdr.sourceDir, rdr.processFile,
 			utils.ERs, rdr.rdrExit)
 	default:
 		go func() {
@@ -94,23 +94,11 @@ func (rdr *JSONFileER) Serve() (err error) {
 					tm.Stop()
 					utils.Logger.Info(
 						fmt.Sprintf("<%s> stop monitoring path <%s>",
-							utils.ERs, rdr.rdrDir))
+							utils.ERs, rdr.sourceDir))
 					return
 				case <-tm.C:
 				}
-				filesInDir, _ := os.ReadDir(rdr.rdrDir)
-				for _, file := range filesInDir {
-					if !strings.HasSuffix(file.Name(), utils.JSONSuffix) { // hardcoded file extension for json event reader
-						continue // used in order to filter the files from directory
-					}
-					go func(fileName string) {
-						if err := rdr.processFile(rdr.rdrDir, fileName); err != nil {
-							utils.Logger.Warning(
-								fmt.Sprintf("<%s> processing file %s, error: %s",
-									utils.ERs, fileName, err.Error()))
-						}
-					}(file.Name())
-				}
+				processReaderDir(rdr.sourceDir, utils.JSONSuffix, rdr.processFile)
 				tm.Reset(rdr.Config().RunDelay)
 			}
 		}()

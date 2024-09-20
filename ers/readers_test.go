@@ -55,7 +55,7 @@ func TestNewCsvReader(t *testing.T) {
 		cgrCfg:    cfg,
 		cfgIdx:    1,
 		fltrS:     fltr,
-		rdrDir:    cfg.ERsCfg().Readers[1].SourcePath,
+		sourceDir: cfg.ERsCfg().Readers[1].SourcePath,
 		rdrEvents: nil,
 		rdrError:  nil,
 		rdrExit:   nil,

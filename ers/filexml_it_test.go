@@ -366,7 +366,7 @@ func TestNewXMLFileER(t *testing.T) {
 		cgrCfg:    cfg,
 		cfgIdx:    0,
 		fltrS:     fltrs,
-		rdrDir:    "/tmp/xmlErs/out",
+		sourceDir: "/tmp/xmlErs/out",
 		rdrEvents: nil,
 		rdrError:  nil,
 		rdrExit:   nil,
@@ -419,7 +419,7 @@ func TestFileXMLProcessEvent(t *testing.T) {
 		cgrCfg:    cfg,
 		cfgIdx:    0,
 		fltrS:     fltrs,
-		rdrDir:    "/tmp/xmlErs/out",
+		sourceDir: "/tmp/xmlErs/out",
 		rdrEvents: make(chan *erEvent, 1),
 		rdrError:  make(chan error, 1),
 		rdrExit:   make(chan struct{}),
@@ -474,7 +474,7 @@ func TestFileXMLProcessEventError1(t *testing.T) {
 		cgrCfg:    cfg,
 		cfgIdx:    0,
 		fltrS:     fltrs,
-		rdrDir:    "/tmp/xmlErs/out/",
+		sourceDir: "/tmp/xmlErs/out/",
 		rdrEvents: make(chan *erEvent, 1),
 		rdrError:  make(chan error, 1),
 		rdrExit:   make(chan struct{}),
@@ -520,7 +520,7 @@ func TestFileXMLProcessEVentError2(t *testing.T) {
 		cgrCfg:    cfg,
 		cfgIdx:    0,
 		fltrS:     fltrs,
-		rdrDir:    "/tmp/xmlErs/out/",
+		sourceDir: "/tmp/xmlErs/out/",
 		rdrEvents: make(chan *erEvent, 1),
 		rdrError:  make(chan error, 1),
 		rdrExit:   make(chan struct{}),
@@ -583,7 +583,7 @@ func TestFileXMLProcessEVentError3(t *testing.T) {
 		cgrCfg:    cfg,
 		cfgIdx:    0,
 		fltrS:     fltrs,
-		rdrDir:    "/tmp/xmlErs/out/",
+		sourceDir: "/tmp/xmlErs/out/",
 		rdrEvents: make(chan *erEvent, 1),
 		rdrError:  make(chan error, 1),
 		rdrExit:   make(chan struct{}),
@@ -637,7 +637,7 @@ func TestFileXMLProcessEventParseError(t *testing.T) {
 		cgrCfg:    cfg,
 		cfgIdx:    0,
 		fltrS:     fltrs,
-		rdrDir:    "/tmp/xmlErs/out",
+		sourceDir: "/tmp/xmlErs/out",
 		rdrEvents: make(chan *erEvent, 1),
 		rdrError:  make(chan error, 1),
 		rdrExit:   make(chan struct{}),
@@ -662,14 +662,14 @@ func TestFileXML(t *testing.T) {
 		cgrCfg:    cfg,
 		cfgIdx:    0,
 		fltrS:     fltrs,
-		rdrDir:    "/tmp/xmlErs/out",
+		sourceDir: "/tmp/xmlErs/out",
 		rdrEvents: make(chan *erEvent, 1),
 		rdrError:  make(chan error, 1),
 		rdrExit:   make(chan struct{}),
 		conReqs:   make(chan struct{}, 1),
 	}
 	eR.conReqs <- struct{}{}
-	err := os.MkdirAll(eR.rdrDir, 0777)
+	err := os.MkdirAll(eR.sourceDir, 0777)
 	if err != nil {
 		t.Error(err)
 	}
@@ -687,7 +687,7 @@ func TestFileXML(t *testing.T) {
 	eR.Config().Fields[0].ComputePath()
 
 	for i := 1; i < 4; i++ {
-		if _, err := os.Create(path.Join(eR.rdrDir, fmt.Sprintf("file%d.xml", i))); err != nil {
+		if _, err := os.Create(path.Join(eR.sourceDir, fmt.Sprintf("file%d.xml", i))); err != nil {
 			t.Error(err)
 		}
 	}
@@ -701,7 +701,7 @@ func TestFileXML(t *testing.T) {
 	if err := eR.Serve(); err != nil {
 		t.Error(err)
 	}
-	os.Create(path.Join(eR.rdrDir, "file1.txt"))
+	os.Create(path.Join(eR.sourceDir, "file1.txt"))
 	eR.Config().RunDelay = 1 * time.Millisecond
 	if err := eR.Serve(); err != nil {
 		t.Error(err)
@@ -715,14 +715,14 @@ func TestFileXMLError(t *testing.T) {
 		cgrCfg:    cfg,
 		cfgIdx:    0,
 		fltrS:     fltrs,
-		rdrDir:    "/tmp/xmlErsError/out",
+		sourceDir: "/tmp/xmlErsError/out",
 		rdrEvents: make(chan *erEvent, 1),
 		rdrError:  make(chan error, 1),
 		rdrExit:   make(chan struct{}),
 		conReqs:   make(chan struct{}, 1),
 	}
 	eR.conReqs <- struct{}{}
-	err := os.MkdirAll(eR.rdrDir, 0777)
+	err := os.MkdirAll(eR.sourceDir, 0777)
 	if err != nil {
 		t.Error(err)
 	}
@@ -740,11 +740,11 @@ func TestFileXMLError(t *testing.T) {
 	eR.Config().Fields[0].ComputePath()
 
 	for i := 1; i < 4; i++ {
-		if _, err := os.Create(path.Join(eR.rdrDir, fmt.Sprintf("file%d.xml", i))); err != nil {
+		if _, err := os.Create(path.Join(eR.sourceDir, fmt.Sprintf("file%d.xml", i))); err != nil {
 			t.Error(err)
 		}
 	}
-	os.Create(path.Join(eR.rdrDir, "file1.txt"))
+	os.Create(path.Join(eR.sourceDir, "file1.txt"))
 	eR.Config().RunDelay = 1 * time.Millisecond
 	if err := eR.Serve(); err != nil {
 		t.Error(err)
@@ -758,7 +758,7 @@ func TestFileXMLExit(t *testing.T) {
 		cgrCfg:    cfg,
 		cfgIdx:    0,
 		fltrS:     fltrs,
-		rdrDir:    "/tmp/xmlErs/out",
+		sourceDir: "/tmp/xmlErs/out",
 		rdrEvents: make(chan *erEvent, 1),
 		rdrError:  make(chan error, 1),
 		rdrExit:   make(chan struct{}),
