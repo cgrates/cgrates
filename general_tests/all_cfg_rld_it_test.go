@@ -250,7 +250,7 @@ func testConfigSReload(t *testing.T) {
 	} else if cfgStr != rpl14 {
 		t.Errorf("\nExpected %+v ,\n received: %+v", cfgStr, rpl14)
 	}
-	cfgStr = `{"freeswitch_agent":{"create_cdr":false,"empty_balance_ann_file":"","empty_balance_context":"","enabled":false,"event_socket_conns":[{"address":"127.0.0.1:8021","alias":"127.0.0.1:8021","max_reconnect_interval":"0s","password":"ClueCon","reconnects":5}],"extra_fields":[],"low_balance_ann_file":"","max_wait_connection":"2s","sessions_conns":["*birpc_internal"],"subscribe_park":true}}`
+	cfgStr = `{"freeswitch_agent":{"active_session_delimiter":",","create_cdr":false,"empty_balance_ann_file":"","empty_balance_context":"","enabled":false,"event_socket_conns":[{"address":"127.0.0.1:8021","alias":"127.0.0.1:8021","max_reconnect_interval":"0s","password":"ClueCon","reconnects":5}],"extra_fields":[],"low_balance_ann_file":"","max_wait_connection":"2s","sessions_conns":["*birpc_internal"],"subscribe_park":true}}`
 	var rpl15 string
 	if err := testRPC.Call(context.Background(), utils.ConfigSv1GetConfigAsJSON, &config.SectionWithAPIOpts{
 		Tenant:   "cgrates.org",

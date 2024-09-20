@@ -912,18 +912,26 @@ const CGRATES_CFG_JSON = `
 
 
 "freeswitch_agent": {
-	"enabled": false,						// starts the FreeSWITCH agent: <true|false>
+	"enabled": false,				// starts the FreeSWITCH agent: <true|false>
 	"sessions_conns": ["*birpc_internal"],
-	"subscribe_park": true,					// subscribe via fsock to receive park events
-	"create_cdr": false,					// creates CDR out of events and sends them to CDRS component
-	"extra_fields": [],						// extra fields to store in auth/CDRs when creating them
-	"low_balance_ann_file": "",				// file to be played when low balance is reached for prepaid calls
+	"subscribe_park": true,				// subscribe via fsock to receive park events
+	"create_cdr": false,				// creates CDR out of events and sends them to CDRS component
+	"extra_fields": [],				// extra fields to store in auth/CDRs when creating them
+	"low_balance_ann_file": "",			// file to be played when low balance is reached for prepaid calls
 	"empty_balance_context": "",			// if defined, prepaid calls will be transferred to this context on empty balance
 	"empty_balance_ann_file": "",			// file to be played before disconnecting prepaid calls on empty balance (applies only if no context defined)
 	"max_wait_connection": "2s",			// maximum duration to wait for a connection to be retrieved from the pool
-	"event_socket_conns":[					// instantiate connections to multiple FreeSWITCH servers
-		{"address": "127.0.0.1:8021", "password": "ClueCon", "reconnects": 5, "max_reconnect_interval": "", "alias":""}
-	],
+	"active_session_delimiter": ",",		// delimiter for 'show channels' responses and requests
+	"event_socket_conns":[				// instantiate connections to multiple FreeSWITCH servers
+		{
+			"address": "127.0.0.1:8021", 	// FreeSWITCH server address and port
+			"password": "ClueCon",  	// authentication password for FreeSWITCH
+			"reconnects": 5, 		// max reconnect attempts before giving up ("-1" for no limit)
+			"max_reconnect_interval": "",	// max time between reconnects ("0" for no limit)
+			"reply_timeout": "1m",		// max wait time for FreeSWITCH replies
+			"alias": ""
+		}
+	]
 },
 
 
