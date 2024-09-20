@@ -66,6 +66,7 @@ var (
 		testRpcdrsCheckAccountBalancesAfterSecondProcessCDR,
 		testRpcdrsGetQueueStringMetrics,
 		testRpcdrsStopEngine,
+		testCsvVerifyExports,
 		testRpcdrsRemoveDirectory,
 	}
 )
@@ -177,6 +178,7 @@ func testRpcdrsProcessFirstCDR(t *testing.T) {
 			CGREvent: utils.CGREvent{
 				Tenant: "cgrates.org",
 				ID:     "event1",
+				Time:   utils.TimePointer(time.Now()),
 				Event: map[string]any{
 					utils.RunID:        "run_1",
 					utils.CGRID:        CGRID,
@@ -254,6 +256,7 @@ func testRpcdrsProcessSecondCDR(t *testing.T) {
 			CGREvent: utils.CGREvent{
 				Tenant: "cgrates.org",
 				ID:     "event2",
+				Time:   utils.TimePointer(time.Now()),
 				Event: map[string]any{
 					utils.RunID:        "run_2",
 					utils.CGRID:        CGRID,
@@ -334,7 +337,6 @@ func testRpcdrsGetCDRs(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	// t.Log(utils.ToJSON(cdrs))
 }
 
 func testRpcdrsStopEngine(t *testing.T) {
@@ -434,7 +436,7 @@ func testCsvVerifyExports(t *testing.T) {
 	if len(files) != 1 {
 		t.Fatalf("Expected %+v, received: %+v", 1, len(files))
 	}
-	eCnt := "STAT_AGG,120000000000,1.2,1" + "\n" + "STAT_AGG,240000000000,1.8,2"
+	eCnt := "STAT_AGG,120000000000,1.2,1\nSTAT_AGG,240000000000,1.8,2\n"
 	if outContent1, err := os.ReadFile(files[0]); err != nil {
 		t.Error(err)
 	} else if len(eCnt) != len(string(outContent1)) {

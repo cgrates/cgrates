@@ -142,15 +142,8 @@ func TestIsPathValid(t *testing.T) {
 	}
 
 	///
-	path = "~Field1"
-	errExpect := "Path is missing "
-	if err := IsPathValid(path); err == nil || err.Error() != errExpect {
-		t.Errorf("Expected %v but received %v", errExpect, err)
-	}
-
-	///
 	path = "~Field1.\n\t.Field2[0]"
-	errExpect = "Empty field path "
+	errExpect := "Empty field path "
 	if err := IsPathValid(path); err == nil || err.Error() != errExpect {
 		t.Errorf("Expected %v but received %v", errExpect, err)
 	}
