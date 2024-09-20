@@ -35,6 +35,18 @@ type ERsCfg struct {
 	PartialCacheTTL time.Duration
 }
 
+// ReaderCfg iterates over the Readers slice and returns if it finds any
+// reader configuration where the ID is equal to the "ID" parameter. If
+// none were found, the method will return nil.
+func (erS *ERsCfg) ReaderCfg(ID string) *EventReaderCfg {
+	for _, rdr := range erS.Readers {
+		if rdr.ID == ID {
+			return rdr
+		}
+	}
+	return nil
+}
+
 // loadErsCfg loads the Ers section of the configuration
 func (erS *ERsCfg) Load(ctx *context.Context, jsnCfg ConfigDB, cfg *CGRConfig) (err error) {
 	jsnERsCfg := new(ERsJsonCfg)
