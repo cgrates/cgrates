@@ -106,7 +106,7 @@ func mergePartialEvents(cgrEvs []*utils.CGREvent, cfg *config.EventReaderCfg, fl
 
 // processReaderDir finds all entries within dirPath, filters only the ones whose name
 // ends with the specified suffix and executes function f on them.
-func processReaderDir(dirPath, suffix string, f func(dir, fn string) error) {
+func processReaderDir(dirPath, suffix string, f func(fn string) error) {
 	filesInDir, err := os.ReadDir(dirPath)
 	if err != nil {
 		utils.Logger.Notice(fmt.Sprintf(
@@ -120,7 +120,7 @@ func processReaderDir(dirPath, suffix string, f func(dir, fn string) error) {
 			continue // used in order to filter the files from directory
 		}
 		go func(fileName string) {
-			if err := f(dirPath, fileName); err != nil {
+			if err := f(fileName); err != nil {
 				utils.Logger.Warning(fmt.Sprintf(
 					"<%s> processing file %s, error: %v",
 					utils.ERs, fileName, err))

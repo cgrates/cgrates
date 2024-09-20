@@ -317,7 +317,7 @@ func (l *loader) getCfg(fileName string) (cfg *config.LoaderDataType) {
 	return nil
 }
 
-func (l *loader) processIFile(_, fileName string) (err error) {
+func (l *loader) processIFile(fileName string) (err error) {
 	cfg := l.getCfg(fileName)
 	if cfg == nil {
 		if pathIn := path.Join(l.ldrCfg.TpInDir, fileName); !l.IsLockFile(pathIn) && len(l.ldrCfg.TpOutDir) != 0 {
