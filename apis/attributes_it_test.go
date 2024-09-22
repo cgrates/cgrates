@@ -2258,7 +2258,7 @@ cgrates.org,ATTR_ARITH,,,,,,*req.MultiplyBetweenVariables,*multiply,~*req.Elem1;
 		TpFiles:    tpFiles,
 		Encoding:   *utils.Encoding,
 	}
-	client, _ := testEnv.Setup(t, context.Background(), 0)
+	client, _ := testEnv.Setup(t, context.Background())
 
 	t.Run("SetAttributesThroughAPI", func(t *testing.T) {
 		var reply string
