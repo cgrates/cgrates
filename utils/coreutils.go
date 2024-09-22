@@ -444,20 +444,20 @@ func Fib() func() int {
 func FibDuration(durationUnit, maxDuration time.Duration) func() time.Duration {
 	fib := Fib()
 	return func() time.Duration {
-		fibNrAsDuration := time.Duration(fib())
+		fibNr := time.Duration(fib())
 
 		// Handle potential overflow when multiplying by durationUnit.
-		if fibNrAsDuration > (math.MaxInt / durationUnit) {
-			fibNrAsDuration = math.MaxInt
+		if fibNr > (math.MaxInt / durationUnit) {
+			fibNr = math.MaxInt
 		} else {
-			fibNrAsDuration *= durationUnit
+			fibNr *= durationUnit
 		}
 
 		// Cap the duration to maxDuration if specified.
-		if maxDuration > 0 && maxDuration < fibNrAsDuration {
+		if maxDuration > 0 && maxDuration < fibNr {
 			return maxDuration
 		}
-		return fibNrAsDuration
+		return fibNr
 	}
 }
 
