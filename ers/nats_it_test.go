@@ -30,8 +30,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc"
 	"github.com/cgrates/birpc/context"
-	"github.com/cgrates/birpc/jsonrpc"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -48,45 +48,40 @@ func TestNatsConcurrentReaders(t *testing.T) {
 		t.Fatal("unsupported dbtype value")
 	}
 
-	exec.Command("pkill", "nats-server")
 	cmd := exec.Command("nats-server", "-js")
 	if err := cmd.Start(); err != nil {
 		t.Fatal(err) // most probably not installed
 	}
-	time.Sleep(50 * time.Millisecond)
-	defer cmd.Process.Kill()
+	t.Cleanup(func() { cmd.Process.Kill() })
 
-	cfgPath := path.Join(*utils.DataDir, "conf", "samples", "ers_nats")
-	cfg, err := config.NewCGRConfigFromPath(context.Background(), cfgPath)
-	if err != nil {
-		t.Fatal("could not init cfg", err.Error())
-	}
+	var js jetstream.JetStream // to reuse jetstream instance
 
-	// Establish a connection to nats.
-	nc, err := nats.Connect(cfg.ERsCfg().Readers[1].SourcePath)
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer nc.Close()
+	testEnv := engine.TestEnvironment{
+		ConfigPath: filepath.Join(*utils.DataDir, "conf/samples/ers_nats"),
+		Encoding:   *utils.Encoding,
+		PreStartHook: func(t *testing.T, c *config.CGRConfig) {
+			nc := connectToNATSServer(t, "nats://127.0.0.1:4222")
 
-	// Initialize a stream manager and create a stream.
-	js, err := jetstream.New(nc)
-	if err != nil {
-		t.Fatal(err)
+			// Initialize a stream manager and create a stream.
+			var err error
+			js, err = jetstream.New(nc)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if _, err := js.CreateStream(context.Background(), jetstream.StreamConfig{
+				Name:     "stream",
+				Subjects: []string{"cgrates_cdrs", "cgrates_cdrs_processed"},
+			}); err != nil {
+				t.Fatal(err)
+			}
+			t.Cleanup(func() {
+				if err := js.DeleteStream(context.Background(), "stream"); err != nil {
+					t.Errorf("failed to clean up stream: %v", err)
+				}
+			})
+		},
 	}
-	if _, err = js.CreateStream(context.Background(), jetstream.StreamConfig{
-		Name:     "stream",
-		Subjects: []string{"cgrates_cdrs", "cgrates_cdrs_processed"},
-	}); err != nil {
-		t.Fatal(err)
-	}
-	defer js.DeleteStream(context.Background(), "stream")
-
-	// Start the engine.
-	if _, err := engine.StopStartEngine(cfgPath, 20); err != nil {
-		t.Fatal(err)
-	}
-	defer engine.KillEngine(20)
+	testEnv.Setup(t, context.Background())
 
 	// Publish CDRs asynchronously to the nats subject.
 	cdr := make(map[string]any)
@@ -104,8 +99,7 @@ func TestNatsConcurrentReaders(t *testing.T) {
 	}
 
 	// Define a consumer for the subject where all the processed cdrs were published.
-	var cons jetstream.Consumer
-	cons, err = js.CreateOrUpdateConsumer(context.Background(), "stream", jetstream.ConsumerConfig{
+	cons, err := js.CreateOrUpdateConsumer(context.Background(), "stream", jetstream.ConsumerConfig{
 		FilterSubject: "cgrates_cdrs_processed",
 		Durable:       "cgrates_processed",
 		AckPolicy:     jetstream.AckAllPolicy,
@@ -115,7 +109,7 @@ func TestNatsConcurrentReaders(t *testing.T) {
 	}
 
 	// Wait for the messages to be consumed and processed.
-	time.Sleep(100 * time.Millisecond)
+	time.Sleep(20 * time.Millisecond)
 
 	// Retrieve info about the consumer.
 	info, err := cons.Info(context.Background())
@@ -143,7 +137,7 @@ var natsCfg string = `{
 			"id": "nats_processed",
 			"type": "*virt",
 			"fields": [
-				{"tag": "CGRID", "type": "*variable", "value": "~*req.CGRID", "path": "*uch.CGRID"}
+				{"tag": "Key", "type": "*variable", "value": "~*req.Key", "path": "*uch.Key"}
 			]
 		}
 	]
@@ -154,7 +148,7 @@ var natsCfg string = `{
 	"ees_conns": ["*internal"],
 	"readers": [
 		{
-			"id": "nats_reader1",
+			"id": "nats_reader",
 			"type": "*natsJSONMap",
 			"source_path": "%s",
 			"ees_success_ids": ["nats_processed"],
@@ -163,7 +157,7 @@ var natsCfg string = `{
 				%s
 			},
 			"fields":[
-				{"tag": "CGRID", "type": "*variable", "value": "~*req.CGRID", "path": "*cgreq.CGRID"},
+				{"tag": "Key", "type": "*variable", "value": "~*req.Key", "path": "*cgreq.Key"},
 				{"tag": "readerId", "type": "*variable", "value": "~*vars.*readerID", "path": "*cgreq.ReaderID"},
 			]
 		}
@@ -274,73 +268,38 @@ resolver_preload: {
 
 	for _, tc := range testcases {
 		t.Run(tc.name, func(t *testing.T) {
-			exec.Command("pkill", "nats-server")
 			cmd := exec.Command("nats-server", tc.serverFlags...)
 			if err := cmd.Start(); err != nil {
 				t.Fatal(err) // most probably not installed
 			}
-			time.Sleep(50 * time.Millisecond)
-			defer cmd.Process.Kill()
+			t.Cleanup(func() { cmd.Process.Kill() })
+			var nc *nats.Conn // to reuse nats conn
 
-			configJSON := fmt.Sprintf(natsCfg, tc.sourcePath, tc.readerOpts)
-			cfgPath := t.TempDir()
-			filePath := filepath.Join(cfgPath, "cgrates.json")
-			err := os.WriteFile(filePath, []byte(configJSON), 0644)
-			if err != nil {
-				t.Fatal(err)
+			testEnv := engine.TestEnvironment{
+				ConfigJSON: fmt.Sprintf(natsCfg, tc.sourcePath, tc.readerOpts),
+				Encoding:   utils.MetaJSON,
+				PreStartHook: func(t *testing.T, c *config.CGRConfig) {
+					rdrOpts := c.ERsCfg().ReaderCfg("nats_reader").Opts
+					nop, err := GetNatsOpts(rdrOpts, c.GeneralCfg().NodeID, time.Second)
+					if err != nil {
+						t.Fatal(err)
+					}
+					nc = connectToNATSServer(t, tc.sourcePath, nop...)
+				},
 			}
-			cfg, err := config.NewCGRConfigFromPath(context.Background(), cfgPath)
-			if err != nil {
-				t.Fatal(err)
-			}
+			client, _ := testEnv.Setup(t, context.Background())
 
-			rdrCfgOpts := cfg.ERsCfg().Readers[1].Opts
-			nop, err := GetNatsOpts(rdrCfgOpts, cfg.GeneralCfg().NodeID, time.Second)
-			if err != nil {
-				t.Fatal(err)
-			}
-
-			// Establish a connection to nats.
-			nc, err := nats.Connect(tc.sourcePath, nop...)
-			if err != nil {
-				t.Fatal(err)
-			}
-
-			if _, err = engine.StartEngine(cfgPath, 0); err != nil {
-				t.Fatal(err)
-			}
-
-			t.Cleanup(func() {
-				engine.KillEngine(0)
-				nc.Close()
-			})
-
-			client, err := jsonrpc.Dial(utils.TCP, cfg.ListenCfg().RPCJSONListen)
-			if err != nil {
-				t.Fatal(err)
-			}
+			// For non-jetstream connections, we need to make sure the
+			// engine is ready to read published messages right away.
+			time.Sleep(2 * time.Millisecond)
 
 			for i := 0; i < 3; i++ {
-				randomCGRID := utils.UUIDSha1Prefix()
-				expData := fmt.Sprintf(`{"CGRID": "%s"}`, randomCGRID)
-				if err = nc.Publish("cgrates_cdrs", []byte(expData)); err != nil {
+				key := fmt.Sprintf("key%d", i+1)
+				expData := fmt.Sprintf(`{"Key": "%s"}`, key)
+				if err := nc.Publish("cgrates_cdrs", []byte(expData)); err != nil {
 					t.Error(err)
 				}
-
-				time.Sleep(20 * time.Millisecond) // wait for exports
-
-				var cgrID any
-				if err = client.Call(context.Background(), utils.CacheSv1GetItem, &utils.ArgsGetCacheItemWithAPIOpts{
-					Tenant: "cgrates.org",
-					ArgsGetCacheItem: utils.ArgsGetCacheItem{
-						CacheID: utils.CacheUCH,
-						ItemID:  "CGRID",
-					},
-				}, &cgrID); err != nil {
-					t.Error(err)
-				} else if cgrID != randomCGRID {
-					t.Errorf("expected %v, received %v", randomCGRID, cgrID)
-				}
+				checkNATSExports(t, client, key)
 			}
 		})
 	}
@@ -455,85 +414,107 @@ resolver_preload: {
 
 	for _, tc := range testcases {
 		t.Run(tc.name, func(t *testing.T) {
-			exec.Command("pkill", "nats-server")
 			cmd := exec.Command("nats-server", tc.serverFlags...)
 			if err := cmd.Start(); err != nil {
 				t.Fatal(err) // most probably not installed
 			}
-			time.Sleep(50 * time.Millisecond)
-			defer cmd.Process.Kill()
+			t.Cleanup(func() { cmd.Process.Kill() })
+			var js jetstream.JetStream // to reuse jetstream instance
 
-			configJSON := fmt.Sprintf(natsCfg, tc.sourcePath, tc.readerOpts)
-			cfgPath := t.TempDir()
-			filePath := filepath.Join(cfgPath, "cgrates.json")
-			err := os.WriteFile(filePath, []byte(configJSON), 0644)
-			if err != nil {
-				t.Fatal(err)
-			}
-			cfg, err := config.NewCGRConfigFromPath(context.Background(), cfgPath)
-			if err != nil {
-				t.Fatal(err)
-			}
+			testEnv := engine.TestEnvironment{
+				ConfigJSON: fmt.Sprintf(natsCfg, tc.sourcePath, tc.readerOpts),
+				Encoding:   utils.MetaJSON,
+				PreStartHook: func(t *testing.T, c *config.CGRConfig) {
+					rdrOpts := c.ERsCfg().ReaderCfg("nats_reader").Opts
+					nop, err := GetNatsOpts(rdrOpts, c.GeneralCfg().NodeID, time.Second)
+					if err != nil {
+						t.Fatal(err)
+					}
+					nc := connectToNATSServer(t, tc.sourcePath, nop...)
 
-			rdrCfgOpts := cfg.ERsCfg().Readers[1].Opts
-			nop, err := GetNatsOpts(rdrCfgOpts, cfg.GeneralCfg().NodeID, 2*time.Second)
-			if err != nil {
-				t.Fatal(err)
+					// Initialize a stream manager and create a stream.
+					js, err = jetstream.New(nc)
+					if err != nil {
+						t.Fatal(err)
+					}
+					if _, err = js.CreateStream(context.Background(), jetstream.StreamConfig{
+						Name:     "stream",
+						Subjects: []string{"cgrates_cdrs", "cgrates_cdrs_processed"},
+					}); err != nil {
+						t.Fatal(err)
+					}
+					t.Cleanup(func() {
+						if err := js.DeleteStream(context.Background(), "stream"); err != nil {
+							t.Error(err)
+						}
+					})
+				},
 			}
-
-			// Establish a connection to nats.
-			nc, err := nats.Connect(tc.sourcePath, nop...)
-			if err != nil {
-				t.Fatal(err)
-			}
-			defer nc.Close()
-
-			// Initialize a stream manager and create a stream.
-			js, err := jetstream.New(nc)
-			if err != nil {
-				t.Fatal(err)
-			}
-			if _, err = js.CreateStream(context.Background(), jetstream.StreamConfig{
-				Name:     "stream",
-				Subjects: []string{"cgrates_cdrs", "cgrates_cdrs_processed"},
-			}); err != nil {
-				t.Fatal(err)
-			}
-			defer js.DeleteStream(context.Background(), "stream")
-
-			if _, err = engine.StartEngine(cfgPath, 0); err != nil {
-				t.Fatal(err)
-			}
-			defer engine.KillEngine(0)
-
-			client, err := jsonrpc.Dial(utils.TCP, cfg.ListenCfg().RPCJSONListen)
-			if err != nil {
-				t.Fatal(err)
-			}
+			client, _ := testEnv.Setup(t, context.Background())
 
 			for i := 0; i < 3; i++ {
-				randomCGRID := utils.UUIDSha1Prefix()
-				expData := fmt.Sprintf(`{"CGRID": "%s"}`, randomCGRID)
+				key := fmt.Sprintf("key%d", i+1)
+				expData := fmt.Sprintf(`{"Key": "%s"}`, key)
 				if _, err := js.Publish(context.Background(), "cgrates_cdrs", []byte(expData)); err != nil {
 					t.Error(err)
 				}
-
-				time.Sleep(20 * time.Millisecond) // wait for exports
-
-				var cgrID any
-				if err = client.Call(context.Background(), utils.CacheSv1GetItem, &utils.ArgsGetCacheItemWithAPIOpts{
-					Tenant: "cgrates.org",
-					ArgsGetCacheItem: utils.ArgsGetCacheItem{
-						CacheID: utils.CacheUCH,
-						ItemID:  "CGRID",
-					},
-				}, &cgrID); err != nil {
-					t.Error(err)
-				} else if cgrID != randomCGRID {
-					t.Errorf("expected %v, received %v", randomCGRID, cgrID)
-				}
+				checkNATSExports(t, client, key)
 			}
 		})
+	}
+}
+
+func connectToNATSServer(t *testing.T, url string, opts ...nats.Option) *nats.Conn {
+	t.Helper()
+	deadline := time.Now().Add(500 * time.Millisecond)
+	time.Sleep(5 * time.Millisecond) // takes around 5ms for the server to be available
+	fib := utils.FibDuration(time.Millisecond, 0)
+	for time.Now().Before(deadline) {
+		nc, err := nats.Connect(url, opts...)
+		if err == nil { // successfully connected
+			t.Cleanup(func() {
+				nc.Close()
+			})
+			return nc
+		}
+		time.Sleep(fib())
+	}
+
+	t.Fatalf("NATS server did not become available within %s", time.Second)
+	return nil
+}
+
+func checkNATSExports(t *testing.T, client *birpc.Client, wantKey any) {
+	t.Helper()
+	deadline := time.Now().Add(500 * time.Millisecond)
+	time.Sleep(2 * time.Millisecond) // takes around 1-2ms for the export to happen
+	fib := utils.FibDuration(time.Millisecond, 0)
+
+	itemID := "Key"
+	var err error
+	var key any
+	for time.Now().Before(deadline) {
+		err = client.Call(context.Background(), utils.CacheSv1GetItem,
+			&utils.ArgsGetCacheItemWithAPIOpts{
+				Tenant: "cgrates.org",
+				ArgsGetCacheItem: utils.ArgsGetCacheItem{
+					CacheID: utils.CacheUCH,
+					ItemID:  itemID,
+				},
+			}, &key)
+
+		if err == nil && key == wantKey {
+			return
+		}
+		time.Sleep(fib())
+	}
+
+	if err != nil {
+		t.Errorf("CacheSv1.GetItem(%q) unexpected err: %q", itemID, err)
+		return
+	}
+	if key != wantKey {
+		t.Errorf("CacheSv1.GetItem(%q)=%q, want %q", itemID, key, wantKey)
 	}
 }
 

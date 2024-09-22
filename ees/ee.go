@@ -59,7 +59,7 @@ func NewEventExporter(cfg *config.EventExporterCfg, cgrCfg *config.CGRConfig,
 		return NewHTTPPostEE(cfg, cgrCfg, filterS, dc)
 	case utils.MetaHTTPjsonMap:
 		return NewHTTPjsonMapEE(cfg, cgrCfg, filterS, dc)
-	case utils.MetaNatsjsonMap:
+	case utils.MetaNATSJSONMap:
 		return NewNatsEE(cfg, cgrCfg.GeneralCfg().NodeID,
 			cgrCfg.GeneralCfg().ConnectTimeout, dc)
 	case utils.MetaAMQPjsonMap:

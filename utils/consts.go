@@ -289,7 +289,7 @@ const (
 	MetaAMQPV1jsonMap         = "*amqpv1JSONMap"
 	MetaSQSjsonMap            = "*sqsJSONMap"
 	MetaKafkajsonMap          = "*kafkaJSONMap"
-	MetaNatsjsonMap           = "*natsJSONMap"
+	MetaNATSJSONMap           = "*natsJSONMap"
 	MetaSQL                   = "*sql"
 	MetaMySQL                 = "*mysql"
 	MetaS3jsonMap             = "*s3JSONMap"
