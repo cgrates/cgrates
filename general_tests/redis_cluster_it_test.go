@@ -225,7 +225,7 @@ func testClsrSetGetAttribute(t *testing.T) {
 
 func testClsrStopMaster(t *testing.T) {
 	path := fmt.Sprintf(clsrNodeCfgPath, 3)
-	if err = clsrNodes[path].Process.Kill(); err != nil {
+	if err := clsrNodes[path].Process.Kill(); err != nil {
 		t.Fatal(err)
 	}
 	time.Sleep(time.Second)

@@ -78,7 +78,7 @@ func TestLdro2nRtChange(t *testing.T) {
 
 func testCreateDirs(t *testing.T) {
 	for _, dir := range testLdro2nDirs {
-		if err = os.MkdirAll(dir, 0755); err != nil {
+		if err := os.MkdirAll(dir, 0755); err != nil {
 			t.Fatal(err)
 		}
 	}
@@ -86,7 +86,7 @@ func testCreateDirs(t *testing.T) {
 
 func testRemoveDirs(t *testing.T) {
 	for _, dir := range testLdro2nDirs {
-		if err = os.RemoveAll(dir); err != nil {
+		if err := os.RemoveAll(dir); err != nil {
 			t.Fatal(err)
 		}
 	}
@@ -128,12 +128,12 @@ func testLdro2nRtLoadTP(t *testing.T) {
 		"DestinationRates.csv",
 		"RatingPlans.csv",
 	} {
-		if err = copyFile(filepath.Join(*utils.DataDir, "tariffplans", "oldtutorial2", file), filepath.Join("/tmp/In", file)); err != nil {
+		if err := copyFile(filepath.Join(*utils.DataDir, "tariffplans", "oldtutorial2", file), filepath.Join("/tmp/In", file)); err != nil {
 			t.Fatal(err)
 		}
 	}
 	time.Sleep(time.Second)
-	if err = copyFile(filepath.Join(*utils.DataDir, "tariffplans", "oldtutorial2", "RatingProfiles.csv"), filepath.Join("/tmp/In", "RatingProfiles.csv")); err != nil {
+	if err := copyFile(filepath.Join(*utils.DataDir, "tariffplans", "oldtutorial2", "RatingProfiles.csv"), filepath.Join("/tmp/In", "RatingProfiles.csv")); err != nil {
 		t.Fatal(err)
 	}
 	time.Sleep(time.Second)

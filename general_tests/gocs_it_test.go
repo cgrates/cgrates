@@ -70,6 +70,7 @@ func TestGOCSIT(t *testing.T) {
 
 // Init Config
 func testGOCSInitCfg(t *testing.T) {
+	var err error
 	auCfgPath = path.Join(*utils.DataDir, "conf", "samples", "gocs", "au_site")
 	if auCfg, err = config.NewCGRConfigFromPath(context.Background(), auCfgPath); err != nil {
 		t.Fatal(err)
@@ -108,6 +109,7 @@ func testGOCSFlushDBs(t *testing.T) {
 
 // Start CGR Engine
 func testGOCSStartEngine(t *testing.T) {
+	var err error
 	if usEngine, err = engine.StopStartEngine(usCfgPath, *utils.WaitRater); err != nil {
 		t.Fatal(err)
 	}
@@ -123,6 +125,7 @@ func testGOCSStartEngine(t *testing.T) {
 
 // Connect rpc client to rater
 func testGOCSApierRpcConn(t *testing.T) {
+	var err error
 	if auRPC, err = engine.NewRPCClient(auCfg.ListenCfg(), *utils.Encoding); err != nil {
 		t.Fatal(err)
 	}
@@ -616,13 +619,13 @@ func testGOCSStopCgrEngine(t *testing.T) {
 	if err := engine.KillEngine(100); err != nil {
 		t.Error(err)
 	}
-	if err = auEngine.Process.Kill(); err != nil {
+	if err := auEngine.Process.Kill(); err != nil {
 		t.Error(err)
 	}
-	if err = usEngine.Process.Kill(); err != nil {
+	if err := usEngine.Process.Kill(); err != nil {
 		t.Error(err)
 	}
-	if err = dspEngine.Process.Kill(); err != nil {
+	if err := dspEngine.Process.Kill(); err != nil {
 		t.Error(err)
 	}
 }

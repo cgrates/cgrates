@@ -68,6 +68,7 @@ func TestRldCfg(t *testing.T) {
 
 func testCfgLoadConfig(t *testing.T) {
 	testCfgPath = path.Join(*utils.DataDir, "conf", "samples", testCfgDir)
+	var err error
 	if testCfg, err = config.NewCGRConfigFromPath(context.Background(), testCfgPath); err != nil {
 		t.Error(err)
 	}

@@ -107,6 +107,7 @@ func testExpCreateFiles(t *testing.T) {
 
 func testExpLoadConfig(t *testing.T) {
 	expCfgPath = path.Join(*utils.DataDir, "conf", "samples", expCfgDir)
+	var err error
 	if expCfg, err = config.NewCGRConfigFromPath(context.Background(), expCfgPath); err != nil {
 		t.Error(err)
 	}

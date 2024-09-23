@@ -196,7 +196,7 @@ func testSharedClientLockCDRsProcessEvent(t *testing.T) {
 		},
 	}
 	var reply string
-	err = clntLockRPC.Call(context.Background(), utils.CDRsV1ProcessEvent, argsEv, &reply)
+	err := clntLockRPC.Call(context.Background(), utils.CDRsV1ProcessEvent, argsEv, &reply)
 	if err == nil || !strings.Contains(err.Error(), "use of closed network connection") {
 		t.Error("Unexpected error returned", err)
 	}

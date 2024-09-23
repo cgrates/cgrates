@@ -75,6 +75,7 @@ func TestLoadersIDBIdxIt(t *testing.T) {
 
 func testLoadersIDBIdxItLoadConfig(t *testing.T) {
 	loadersIDBIdxCfgPath = path.Join(*utils.DataDir, "conf", "samples", loadersIDBIdxCfgDir)
+	var err error
 	if loadersIDBIdxCfg, err = config.NewCGRConfigFromPath(context.Background(), loadersIDBIdxCfgPath); err != nil {
 		t.Error(err)
 	}
