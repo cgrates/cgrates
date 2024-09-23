@@ -83,6 +83,11 @@ func (rdr *XMLFileER) Serve() (err error) {
 	case time.Duration(0): // 0 disables the automatic read, maybe done per API
 		return
 	case time.Duration(-1):
+
+		// Ensure that files already existing in the source path are processed
+		// before the reader starts listening for filesystem change events.
+		processReaderDir(rdr.sourceDir, utils.XMLSuffix, rdr.processFile)
+
 		return utils.WatchDir(rdr.sourceDir, rdr.processFile,
 			utils.ERs, rdr.rdrExit)
 	default:
