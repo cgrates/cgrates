@@ -382,8 +382,7 @@ cgrates.org,STAT_AGG,,2014-07-29T15:00:00Z,0,-1,0,*tcd;*tcc;*sum#1,,false,false,
 func testRpcdrsReprocessCDRs(t *testing.T) {
 	var reply string
 	if err := rpcdrsRpc.Call(context.Background(), utils.CDRsV1ReprocessCDRs, &engine.ArgRateCDRs{
-		Flags: []string{"*rals:false", "*export:false", "*rerate", "*refund:false", "*chargers:false",
-			"*store:false"}, // *export is false since we dont want to export before triggering StatS
+		Flags: []string{"*stats"},
 		RPCCDRsFilter: utils.RPCCDRsFilter{
 			OrderBy: utils.AnswerTime,
 		}}, &reply); err != nil {
