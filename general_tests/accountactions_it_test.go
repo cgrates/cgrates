@@ -40,7 +40,6 @@ var (
 	accPrfCfg       *config.CGRConfig
 	accSRPC         *birpc.Client
 	accPrfConfigDIR string //run tests for specific configuration
-	err             error
 
 	sTestsAccPrf = []func(t *testing.T){
 		testAccActionsInitCfg,

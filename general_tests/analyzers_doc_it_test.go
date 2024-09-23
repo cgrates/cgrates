@@ -129,7 +129,7 @@ func testAnzDocKillEngine(t *testing.T) {
 
 func testAnzDocCoreSStatus(t *testing.T) {
 	var status map[string]any
-	if err = anzDocRPC.Call(context.Background(), utils.CoreSv1Status, utils.TenantWithAPIOpts{}, &status); err != nil {
+	if err := anzDocRPC.Call(context.Background(), utils.CoreSv1Status, utils.TenantWithAPIOpts{}, &status); err != nil {
 		return
 	}
 }

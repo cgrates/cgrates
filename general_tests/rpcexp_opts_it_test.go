@@ -112,7 +112,7 @@ func testRPCExpStartEngine(t *testing.T) {
 	if _, err := engine.StopStartEngine(ng1CfgPath, rrDelay); err != nil {
 		t.Fatal(err)
 	}
-	if _, err = engine.StartEngine(ng2CfgPath, rrDelay); err != nil {
+	if _, err := engine.StartEngine(ng2CfgPath, rrDelay); err != nil {
 		t.Fatal(err)
 	}
 }
