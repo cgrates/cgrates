@@ -229,6 +229,30 @@ func (dS *DispatcherService) ReplicatorSv1GetThresholdProfile(ctx *context.Conte
 	}
 	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaReplicator, utils.ReplicatorSv1GetThresholdProfile, args, reply)
 }
+func (dS *DispatcherService) ReplicatorSv1GetTrend(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *engine.Trend) (err error) {
+	tnt := dS.cfg.GeneralCfg().DefaultTenant
+	if args != nil && (args.TenantID != nil && len(args.TenantID.Tenant) != 0) {
+		tnt = args.TenantID.Tenant
+	}
+	ev := make(map[string]any)
+	opts := make(map[string]any)
+	if args != nil {
+		opts = args.APIOpts
+	}
+	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaReplicator, utils.ReplicatorSv1GetTrend, args, reply)
+}
+func (dS *DispatcherService) ReplicatorSv1GetTrendProfile(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *engine.TrendProfile) (err error) {
+	tnt := dS.cfg.GeneralCfg().DefaultTenant
+	if args != nil && (args.TenantID != nil && len(args.TenantID.Tenant) != 0) {
+		tnt = args.TenantID.Tenant
+	}
+	ev := make(map[string]any)
+	opts := make(map[string]any)
+	if args != nil {
+		opts = args.APIOpts
+	}
+	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaReplicator, utils.ReplicatorSv1GetTrendProfile, args, reply)
+}
 func (dS *DispatcherService) ReplicatorSv1Ping(ctx *context.Context, args *utils.CGREvent, reply *string) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
 	if args != nil && len(args.Tenant) != 0 {
@@ -436,6 +460,30 @@ func (dS *DispatcherService) ReplicatorSv1RemoveThresholdProfile(ctx *context.Co
 	}
 	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaReplicator, utils.ReplicatorSv1RemoveThresholdProfile, args, reply)
 }
+func (dS *DispatcherService) ReplicatorSv1RemoveTrend(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *string) (err error) {
+	tnt := dS.cfg.GeneralCfg().DefaultTenant
+	if args != nil && (args.TenantID != nil && len(args.TenantID.Tenant) != 0) {
+		tnt = args.TenantID.Tenant
+	}
+	ev := make(map[string]any)
+	opts := make(map[string]any)
+	if args != nil {
+		opts = args.APIOpts
+	}
+	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaReplicator, utils.ReplicatorSv1RemoveTrend, args, reply)
+}
+func (dS *DispatcherService) ReplicatorSv1RemoveTrendProfile(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *string) (err error) {
+	tnt := dS.cfg.GeneralCfg().DefaultTenant
+	if args != nil && (args.TenantID != nil && len(args.TenantID.Tenant) != 0) {
+		tnt = args.TenantID.Tenant
+	}
+	ev := make(map[string]any)
+	opts := make(map[string]any)
+	if args != nil {
+		opts = args.APIOpts
+	}
+	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaReplicator, utils.ReplicatorSv1RemoveTrendProfile, args, reply)
+}
 func (dS *DispatcherService) ReplicatorSv1SetAccount(ctx *context.Context, args *utils.AccountWithAPIOpts, reply *string) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
 	if args != nil && (args.Account != nil && len(args.Account.Tenant) != 0) {
@@ -636,4 +684,28 @@ func (dS *DispatcherService) ReplicatorSv1SetThresholdProfile(ctx *context.Conte
 		opts = args.APIOpts
 	}
 	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaReplicator, utils.ReplicatorSv1SetThresholdProfile, args, reply)
+}
+func (dS *DispatcherService) ReplicatorSv1SetTrend(ctx *context.Context, args *engine.TrendWithAPIOpts, reply *string) (err error) {
+	tnt := dS.cfg.GeneralCfg().DefaultTenant
+	if args != nil && (args.Trend != nil && len(args.Trend.Tenant) != 0) {
+		tnt = args.Trend.Tenant
+	}
+	ev := make(map[string]any)
+	opts := make(map[string]any)
+	if args != nil {
+		opts = args.APIOpts
+	}
+	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaReplicator, utils.ReplicatorSv1SetTrend, args, reply)
+}
+func (dS *DispatcherService) ReplicatorSv1SetTrendProfile(ctx *context.Context, args *engine.TrendProfileWithAPIOpts, reply *string) (err error) {
+	tnt := dS.cfg.GeneralCfg().DefaultTenant
+	if args != nil && (args.TrendProfile != nil && len(args.TrendProfile.Tenant) != 0) {
+		tnt = args.TrendProfile.Tenant
+	}
+	ev := make(map[string]any)
+	opts := make(map[string]any)
+	if args != nil {
+		opts = args.APIOpts
+	}
+	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaReplicator, utils.ReplicatorSv1SetTrendProfile, args, reply)
 }
